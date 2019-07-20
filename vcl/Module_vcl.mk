@@ -207,8 +207,8 @@ $(eval $(call gb_Module_add_check_targets,vcl,\
     CppunitTest_vcl_backend_test \
     CppunitTest_vcl_blocklistparser_test \
     CppunitTest_vcl_type_serializer_test \
-    CppunitTest_vcl_implanimview \
     CppunitTest_vcl_animation \
+    CppunitTest_vcl_animationrenderer \
 ))
 
 ifeq ($(USING_X11),TRUE)
