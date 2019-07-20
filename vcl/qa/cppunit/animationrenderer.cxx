@@ -40,12 +40,12 @@ public:
 
     void testMatching();
     void testMatchingWindow();
-    void testDrawToPos();
+    void testDrawToIndex();
     void testGetPosSizeWindow();
 
     CPPUNIT_TEST_SUITE(VclAnimationRendererTest);
     CPPUNIT_TEST(testMatching);
-    CPPUNIT_TEST(testDrawToPos);
+    CPPUNIT_TEST(testDrawToIndex);
     CPPUNIT_TEST(testGetPosSizeWindow);
     CPPUNIT_TEST_SUITE_END();
 
@@ -67,7 +67,7 @@ void VclAnimationRendererTest::testMatching()
     CPPUNIT_ASSERT(pAnimationRenderer->matches(pTestRC, 0));
 }
 
-void VclAnimationRendererTest::testDrawToPos()
+void VclAnimationRendererTest::testDrawToIndex()
 {
     Animation aTestAnim = createAnimation();
     OutputDevice* pTestRC = new vcl::Window(nullptr, WB_APP | WB_STDWORK);
@@ -76,10 +76,10 @@ void VclAnimationRendererTest::testDrawToPos()
 
     AnimationRenderer* pAnimationRenderer
         = new AnimationRenderer(&aTestAnim, pTestRC, Point(0, 0), Size(10, 10), 5);
-    pAnimationRenderer->drawToPos(0);
-    pAnimationRenderer->drawToPos(1);
-    pAnimationRenderer->drawToPos(2);
-    pAnimationRenderer->drawToPos(10);
+    pAnimationRenderer->drawToIndex(0);
+    pAnimationRenderer->drawToIndex(1);
+    pAnimationRenderer->drawToIndex(2);
+    pAnimationRenderer->drawToIndex(10);
 }
 
 void VclAnimationRendererTest::testGetPosSizeWindow()
