@@ -29,6 +29,7 @@
 #include <vcl/dibtools.hxx>
 #include <vcl/BitmapColorQuantizationFilter.hxx>
 
+#include <AnimationData.hxx>
 #include <impanmvw.hxx>
 
 sal_uLong Animation::mnAnimCount = 0;
@@ -285,28 +286,29 @@ IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
 
         if (maNotifyLink.IsSet())
         {
-            std::vector<std::unique_ptr<AInfo>> aAInfoList;
-            // create AInfo-List
+            std::vector<std::unique_ptr<AnimationData>> aAnimationDataList;
+            // create AnimationData-List
             for (auto const& i : maAnimationRenderers)
-                aAInfoList.emplace_back(i->createAInfo());
+                aAnimationDataList.emplace_back(i->createAnimationData());
 
             maNotifyLink.Call(this);
 
-            // set view state from AInfo structure
-            for (auto& pAInfo : aAInfoList)
+            // set view state from AnimationData structure
+            for (auto& pAnimationData : aAnimationDataList)
             {
                 AnimationRenderer* pRenderer = nullptr;
-                if (!pAInfo->pViewData)
+                if (!pAnimationData->pAnimationRenderer)
                 {
-                    pRenderer = new AnimationRenderer(this, pAInfo->pOutDev, pAInfo->aStartOrg,
-                                                      pAInfo->aStartSize, pAInfo->nCallerId);
+                    pRenderer = new AnimationRenderer(
+                        this, pAnimationData->pOutDev, pAnimationData->aStartOrg,
+                        pAnimationData->aStartSize, pAnimationData->nCallerId);
 
                     maAnimationRenderers.push_back(std::unique_ptr<AnimationRenderer>(pRenderer));
                 }
                 else
-                    pRenderer = static_cast<AnimationRenderer*>(pAInfo->pViewData);
+                    pRenderer = static_cast<AnimationRenderer*>(pAnimationData->pAnimationRenderer);
 
-                pRenderer->pause(pAInfo->bPause);
+                pRenderer->pause(pAnimationData->bPause);
                 pRenderer->setMarked(true);
             }
 
@@ -622,8 +624,9 @@ SvStream& ReadAnimation(SvStream& rIStm, Animation& rAnimation)
     // If the BitmapEx at the beginning have already been read (by Graphic)
     // we can start reading the AnimationBitmaps right away
     if ((nAnimMagic1 == 0x5344414e) && (nAnimMagic2 == 0x494d4931) && !rIStm.GetError())
+    {
         bReadAnimations = true;
-    // Else, we try reading the Bitmap(-Ex)
+    } // Else, we try reading the Bitmap(-Ex)
     else
     {
         rIStm.Seek(nStmPos);
@@ -676,9 +679,9 @@ SvStream& ReadAnimation(SvStream& rIStm, Animation& rAnimation)
     return rIStm;
 }
 
-AInfo::AInfo()
+AnimationData::AnimationData()
     : pOutDev(nullptr)
-    , pViewData(nullptr)
+    , pAnimationRenderer(nullptr)
     , nCallerId(0)
     , bPause(false)
 {

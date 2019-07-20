@@ -27,18 +27,7 @@ class Animation;
 class OutputDevice;
 class VirtualDevice;
 struct AnimationBitmap;
-
-struct AInfo
-{
-    Point aStartOrg;
-    Size aStartSize;
-    VclPtr<OutputDevice> pOutDev;
-    void* pViewData;
-    long nCallerId;
-    bool bPause;
-
-    AInfo();
-};
+struct AnimationData;
 
 class VCL_DLLPUBLIC AnimationRenderer
 {
@@ -51,7 +40,7 @@ public:
     void drawToIndex(sal_uLong nIndex);
     void draw(sal_uLong nIndex, VirtualDevice* pVDev = nullptr);
     void repaint();
-    AInfo* createAInfo() const;
+    AnimationData* createAnimationData() const;
 
     void getPosSize(const AnimationBitmap& rAnm, Point& rPosPix, Size& rSizePix);
 
