@@ -119,9 +119,10 @@ private:
     SAL_DLLPRIVATE bool ResetMarkedRenderers();
     SAL_DLLPRIVATE bool IsTimeoutSetup();
     SAL_DLLPRIVATE bool SendTimeout();
-    SAL_DLLPRIVATE void PaintRenderers(sal_uInt32 nFrameIndex);
+    SAL_DLLPRIVATE void PaintRenderers(size_t nFrameIndex);
     SAL_DLLPRIVATE void EraseMarkedRenderers();
     SAL_DLLPRIVATE AnimationBitmap* GetNextFrameBitmap();
+    SAL_DLLPRIVATE void RenderNextFrame(size_t nFrameIndex);
 
     SAL_DLLPRIVATE void ImplRestartTimer(sal_uLong nTimeout);
     DECL_DLLPRIVATE_LINK(ImplTimeoutHdl, Timer*, void);

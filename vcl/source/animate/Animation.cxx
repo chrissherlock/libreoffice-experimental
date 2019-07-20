@@ -335,7 +335,7 @@ bool Animation::ResetMarkedRenderers()
     return bGlobalPause;
 }
 
-void Animation::PaintRenderers(sal_uInt32 nFrameIndex)
+void Animation::PaintRenderers(size_t nFrameIndex)
 {
     std::for_each(maAnimationRenderers.cbegin(), maAnimationRenderers.cend(),
                   [nFrameIndex](const auto& pRenderer) { pRenderer->draw(nFrameIndex); });
@@ -397,6 +397,22 @@ AnimationBitmap* Animation::GetNextFrameBitmap()
     return pCurrentFrameBmp;
 }
 
+void Animation::RenderNextFrame(size_t nFrameIndex)
+{
+    AnimationBitmap* pCurrentFrameBmp = GetNextFrameBitmap();
+    if (pCurrentFrameBmp)
+    {
+        PaintRenderers(nFrameIndex);
+        EraseMarkedRenderers();
+
+        // stop or restart timer
+        if (maAnimationRenderers.empty())
+            Stop();
+        else
+            ImplRestartTimer(pCurrentFrameBmp->mnWait);
+    }
+}
+
 IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
 {
     if (!maAnimationFrames.empty())
@@ -404,28 +420,11 @@ IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
         bool bGlobalPause = SendTimeout();
 
         if (maAnimationRenderers.empty())
-        {
             Stop();
-        }
         else if (bGlobalPause)
-        {
             ImplRestartTimer(10);
-        }
         else
-        {
-            AnimationBitmap* pCurrentFrameBmp = GetNextFrameBitmap();
-            if (!pCurrentFrameBmp)
-                return;
-
-            PaintRenderers(mnFrameIndex);
-            EraseMarkedRenderers();
-
-            // stop or restart timer
-            if (maAnimationRenderers.empty())
-                Stop();
-            else
-                ImplRestartTimer(pCurrentFrameBmp->mnWait);
-        }
+            RenderNextFrame(mnFrameIndex);
     }
     else
     {
