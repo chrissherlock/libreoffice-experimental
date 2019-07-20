@@ -124,7 +124,7 @@ private:
     SAL_DLLPRIVATE AnimationBitmap* GetNextFrameBitmap();
     SAL_DLLPRIVATE void RenderNextFrame(size_t nFrameIndex);
 
-    SAL_DLLPRIVATE void ImplRestartTimer(sal_uLong nTimeout);
+    SAL_DLLPRIVATE void RestartTimer(sal_uLong nTimeout);
     DECL_DLLPRIVATE_LINK(ImplTimeoutHdl, Timer*, void);
 };
 
