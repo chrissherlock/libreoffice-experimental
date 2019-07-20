@@ -160,8 +160,8 @@ BitmapChecksum Animation::GetChecksum() const
     return nCrc;
 }
 
-bool Animation::Start(OutputDevice* pOut, const Point& rDestPt, const Size& rDestSz,
-                      long nExtraData, OutputDevice* pFirstFrameOutDev)
+bool Animation::Start(OutputDevice* pOut, const Point& rDestPt, const Size& rDestSz, long nCallerId,
+                      OutputDevice* pFirstFrameOutDev)
 {
     bool bRet = false;
 
@@ -174,8 +174,8 @@ bool Animation::Start(OutputDevice* pOut, const Point& rDestPt, const Size& rDes
 
             auto itAnimRenderer = std::find_if(
                 maAnimationRenderers.begin(), maAnimationRenderers.end(),
-                [pOut, nExtraData](const std::unique_ptr<AnimationRenderer>& pAnimView) -> bool {
-                    return pAnimView->matches(pOut, nExtraData);
+                [pOut, nCallerId](const std::unique_ptr<AnimationRenderer>& pAnimView) -> bool {
+                    return pAnimView->matches(pOut, nCallerId);
                 });
 
             if (itAnimRenderer != maAnimationRenderers.end())
@@ -199,7 +199,7 @@ bool Animation::Start(OutputDevice* pOut, const Point& rDestPt, const Size& rDes
 
             if (differs)
                 maAnimationRenderers.emplace_back(new AnimationRenderer(
-                    this, pOut, rDestPt, rDestSz, nExtraData, pFirstFrameOutDev));
+                    this, pOut, rDestPt, rDestSz, nCallerId, pFirstFrameOutDev));
 
             if (!mbIsInAnimation)
             {
@@ -216,12 +216,12 @@ bool Animation::Start(OutputDevice* pOut, const Point& rDestPt, const Size& rDes
     return bRet;
 }
 
-void Animation::Stop(OutputDevice* pOut, long nExtraData)
+void Animation::Stop(OutputDevice* pOut, long nCallerId)
 {
     maAnimationRenderers.erase(
         std::remove_if(maAnimationRenderers.begin(), maAnimationRenderers.end(),
                        [=](const std::unique_ptr<AnimationRenderer>& pAnimView) -> bool {
-                           return pAnimView->matches(pOut, nExtraData);
+                           return pAnimView->matches(pOut, nCallerId);
                        }),
         maAnimationRenderers.end());
 
@@ -281,7 +281,7 @@ IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
 
     if (nAnimCount)
     {
-        bool bGlobalPause = false;
+        bool bGlobalPause = true;
 
         if (maNotifyLink.IsSet())
         {
@@ -299,7 +299,7 @@ IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
                 if (!pAInfo->pViewData)
                 {
                     pRenderer = new AnimationRenderer(this, pAInfo->pOutDev, pAInfo->aStartOrg,
-                                                      pAInfo->aStartSize, pAInfo->nExtraData);
+                                                      pAInfo->aStartSize, pAInfo->nCallerId);
 
                     maAnimationRenderers.push_back(std::unique_ptr<AnimationRenderer>(pRenderer));
                 }
@@ -679,7 +679,7 @@ SvStream& ReadAnimation(SvStream& rIStm, Animation& rAnimation)
 AInfo::AInfo()
     : pOutDev(nullptr)
     , pViewData(nullptr)
-    , nExtraData(0)
+    , nCallerId(0)
     , bPause(false)
 {
 }

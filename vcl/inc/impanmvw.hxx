@@ -34,7 +34,7 @@ struct AInfo
     Size aStartSize;
     VclPtr<OutputDevice> pOutDev;
     void* pViewData;
-    long nExtraData;
+    long nCallerId;
     bool bPause;
 
     AInfo();
@@ -45,13 +45,13 @@ class VCL_DLLPUBLIC AnimationRenderer
 private:
     friend class Animation;
 
-    Animation* mpParent;
+    Animation* const mpParent;
     VclPtr<OutputDevice> mpRenderContext;
-    long mnExtraData;
-    Point maPt;
+    long const mnCallerId;
+    Point const maPt;
     Point maDispPt;
     Point maRestPt;
-    Size maSz;
+    Size const maSz;
     Size maSzPix;
     Size maDispSz;
     Size maRestSz;
@@ -62,15 +62,15 @@ private:
     Disposal meLastDisposal;
     bool mbIsPaused;
     bool mbIsMarked;
-    bool mbIsMirroredHorizontally;
-    bool mbIsMirroredVertically;
+    bool const mbIsMirroredHorizontally;
+    bool const mbIsMirroredVertically;
 
 public:
     AnimationRenderer(Animation* pParent, OutputDevice* pOut, const Point& rPt, const Size& rSz,
-                      sal_uLong nExtraData, OutputDevice* pFirstFrameOutDev = nullptr);
+                      sal_uLong nCallerId, OutputDevice* pFirstFrameOutDev = nullptr);
     ~AnimationRenderer();
 
-    bool matches(const OutputDevice* pOut, long nExtraData) const;
+    bool matches(const OutputDevice* pOut, long nCallerId) const;
     void drawToPos(sal_uLong nPos);
     void draw(sal_uLong nPos, VirtualDevice* pVDev = nullptr);
     void repaint();

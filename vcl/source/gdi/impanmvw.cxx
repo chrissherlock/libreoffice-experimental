@@ -28,11 +28,11 @@
 
 AnimationRenderer::AnimationRenderer( Animation* pParent, OutputDevice* pOut,
                             const Point& rPt, const Size& rSz,
-                            sal_uLong nExtraData,
+                            sal_uLong nCallerId,
                             OutputDevice* pFirstFrameOutDev ) :
         mpParent        ( pParent ),
         mpRenderContext ( pFirstFrameOutDev ? pFirstFrameOutDev : pOut ),
-        mnExtraData     ( nExtraData ),
+        mnCallerId     ( nCallerId ),
         maPt            ( rPt ),
         maSz            ( rSz ),
         maSzPix         ( mpRenderContext->LogicToPixel( maSz ) ),
@@ -96,9 +96,9 @@ AnimationRenderer::~AnimationRenderer()
     Animation::ImplDecAnimCount();
 }
 
-bool AnimationRenderer::matches(const OutputDevice* pOut, long nExtraData) const
+bool AnimationRenderer::matches(const OutputDevice* pOut, long nCallerId) const
 {
-    return (!pOut || pOut == mpRenderContext) && (nExtraData == 0 || nExtraData == mnExtraData);
+    return (!pOut || pOut == mpRenderContext) && (nCallerId == 0 || nCallerId == mnCallerId);
 }
 
 void AnimationRenderer::getPosSize( const AnimationBitmap& rAnimationBitmap, Point& rPosPix, Size& rSizePix )
@@ -312,7 +312,7 @@ AInfo* AnimationRenderer::createAInfo() const
     pAInfo->aStartSize = maSz;
     pAInfo->pOutDev = mpRenderContext;
     pAInfo->pViewData = const_cast<AnimationRenderer *>(this);
-    pAInfo->nExtraData = mnExtraData;
+    pAInfo->nCallerId = mnCallerId;
     pAInfo->bPause = mbIsPaused;
 
     return pAInfo;
