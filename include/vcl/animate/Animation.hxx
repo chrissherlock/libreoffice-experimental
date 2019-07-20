@@ -88,8 +88,8 @@ public:
                 short nChannelGPercent, short nChannelBPercent, double fGamma = 1.0,
                 bool bInvert = false);
 
-    friend SvStream& ReadAnimation(SvStream& rIStream, Animation& rAnimation);
-    friend SvStream& WriteAnimation(SvStream& rOStream, const Animation& rAnimation);
+    friend VCL_DLLPUBLIC SvStream& ReadAnimation(SvStream& rIStream, Animation& rAnimation);
+    friend VCL_DLLPUBLIC SvStream& WriteAnimation(SvStream& rOStream, const Animation& rAnimation);
 
 public:
     SAL_DLLPRIVATE static void ImplIncAnimCount() { mnAnimCount++; }
@@ -114,6 +114,8 @@ private:
 
     SAL_DLLPRIVATE std::vector<std::unique_ptr<AnimationData>>
     CreateAnimationDataItems(Animation* pAnim);
+    SAL_DLLPRIVATE void PopulateRenderers(Animation* pAnim);
+
     SAL_DLLPRIVATE void ImplRestartTimer(sal_uLong nTimeout);
     DECL_DLLPRIVATE_LINK(ImplTimeoutHdl, Timer*, void);
 };

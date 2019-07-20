@@ -292,6 +292,27 @@ std::vector<std::unique_ptr<AnimationData>> Animation::CreateAnimationDataItems(
     return aAnimationDataItems;
 }
 
+void Animation::PopulateRenderers(Animation* pAnim)
+{
+    for (auto& pAnimationData : CreateAnimationDataItems(pAnim))
+    {
+        AnimationRenderer* pRenderer = nullptr;
+        if (!pAnimationData->pAnimationRenderer)
+        {
+            pRenderer
+                = new AnimationRenderer(this, pAnimationData->pOutDev, pAnimationData->aStartOrg,
+                                        pAnimationData->aStartSize, pAnimationData->nCallerId);
+
+            maAnimationRenderers.push_back(std::unique_ptr<AnimationRenderer>(pRenderer));
+        }
+        else
+            pRenderer = static_cast<AnimationRenderer*>(pAnimationData->pAnimationRenderer);
+
+        pRenderer->pause(pAnimationData->bPause);
+        pRenderer->setMarked(true);
+    }
+}
+
 IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
 {
     const size_t nAnimCount = maAnimationFrames.size();
@@ -302,24 +323,7 @@ IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
 
         if (maNotifyLink.IsSet())
         {
-            // set view state from AnimationData structure
-            for (auto& pAnimationData : CreateAnimationDataItems(this))
-            {
-                AnimationRenderer* pRenderer = nullptr;
-                if (!pAnimationData->pAnimationRenderer)
-                {
-                    pRenderer = new AnimationRenderer(
-                        this, pAnimationData->pOutDev, pAnimationData->aStartOrg,
-                        pAnimationData->aStartSize, pAnimationData->nCallerId);
-
-                    maAnimationRenderers.push_back(std::unique_ptr<AnimationRenderer>(pRenderer));
-                }
-                else
-                    pRenderer = static_cast<AnimationRenderer*>(pAnimationData->pAnimationRenderer);
-
-                pRenderer->pause(pAnimationData->bPause);
-                pRenderer->setMarked(true);
-            }
+            PopulateRenderers(this);
 
             // delete all unmarked views
             auto removeStart
