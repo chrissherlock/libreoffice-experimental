@@ -306,11 +306,33 @@ void Animation::PopulateRenderers(Animation* pAnim)
             maAnimationRenderers.push_back(std::unique_ptr<AnimationRenderer>(pRenderer));
         }
         else
+        {
             pRenderer = static_cast<AnimationRenderer*>(pAnimationData->pAnimationRenderer);
+        }
 
         pRenderer->pause(pAnimationData->bPause);
         pRenderer->setMarked(true);
     }
+}
+
+void Animation::DeleteUnmarkedRenderers()
+{
+    // delete all unmarked views
+    auto removeStart = std::remove_if(maAnimationRenderers.begin(), maAnimationRenderers.end(),
+                                      [](const auto& pRenderer) { return !pRenderer->isMarked(); });
+    maAnimationRenderers.erase(removeStart, maAnimationRenderers.cend());
+}
+
+bool Animation::ResetMarkedRenderers()
+{
+    bool bGlobalPause = std::all_of(maAnimationRenderers.cbegin(), maAnimationRenderers.cend(),
+                                    [](const auto& pRenderer) { return pRenderer->isPause(); });
+
+    // reset marked state
+    std::for_each(maAnimationRenderers.cbegin(), maAnimationRenderers.cend(),
+                  [](const auto& pRenderer) { pRenderer->setMarked(false); });
+
+    return bGlobalPause;
 }
 
 IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
@@ -324,20 +346,8 @@ IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
         if (maNotifyLink.IsSet())
         {
             PopulateRenderers(this);
-
-            // delete all unmarked views
-            auto removeStart
-                = std::remove_if(maAnimationRenderers.begin(), maAnimationRenderers.end(),
-                                 [](const auto& pRenderer) { return !pRenderer->isMarked(); });
-            maAnimationRenderers.erase(removeStart, maAnimationRenderers.cend());
-
-            // check if every remaining view is paused
-            bGlobalPause = std::all_of(maAnimationRenderers.cbegin(), maAnimationRenderers.cend(),
-                                       [](const auto& pRenderer) { return pRenderer->isPause(); });
-
-            // reset marked state
-            std::for_each(maAnimationRenderers.cbegin(), maAnimationRenderers.cend(),
-                          [](const auto& pRenderer) { pRenderer->setMarked(false); });
+            DeleteUnmarkedRenderers();
+            bGlobalPause = ResetMarkedRenderers();
         }
         else
         {

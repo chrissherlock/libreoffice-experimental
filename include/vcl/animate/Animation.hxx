@@ -115,6 +115,8 @@ private:
     SAL_DLLPRIVATE std::vector<std::unique_ptr<AnimationData>>
     CreateAnimationDataItems(Animation* pAnim);
     SAL_DLLPRIVATE void PopulateRenderers(Animation* pAnim);
+    SAL_DLLPRIVATE void DeleteUnmarkedRenderers();
+    SAL_DLLPRIVATE bool ResetMarkedRenderers();
 
     SAL_DLLPRIVATE void ImplRestartTimer(sal_uLong nTimeout);
     DECL_DLLPRIVATE_LINK(ImplTimeoutHdl, Timer*, void);
