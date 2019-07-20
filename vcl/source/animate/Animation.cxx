@@ -335,6 +335,8 @@ bool Animation::ResetMarkedRenderers()
     return bGlobalPause;
 }
 
+bool Animation::IsTimeoutSetup() { return maTimeoutNotifier.IsSet(); }
+
 IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
 {
     const size_t nAnimCount = maAnimationFrames.size();
