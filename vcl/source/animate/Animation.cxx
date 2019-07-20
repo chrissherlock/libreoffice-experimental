@@ -287,7 +287,7 @@ std::vector<std::unique_ptr<AnimationData>> Animation::CreateAnimationDataItems(
         aAnimationDataItems.emplace_back(rItem->createAnimationData());
     }
 
-    maNotifyLink.Call(pAnim);
+    maTimeoutNotifier.Call(pAnim);
 
     return aAnimationDataItems;
 }
@@ -337,24 +337,25 @@ bool Animation::ResetMarkedRenderers()
 
 bool Animation::IsTimeoutSetup() { return maTimeoutNotifier.IsSet(); }
 
+bool Animation::SendTimeout()
+{
+    if (IsTimeoutSetup())
+    {
+        PopulateRenderers(this);
+        DeleteUnmarkedRenderers();
+        return ResetMarkedRenderers();
+    }
+
+    return false;
+}
+
 IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
 {
     const size_t nAnimCount = maAnimationFrames.size();
 
     if (nAnimCount)
     {
-        bool bGlobalPause = true;
-
-        if (maNotifyLink.IsSet())
-        {
-            PopulateRenderers(this);
-            DeleteUnmarkedRenderers();
-            bGlobalPause = ResetMarkedRenderers();
-        }
-        else
-        {
-            bGlobalPause = false;
-        }
+        bool bGlobalPause = SendTimeout();
 
         if (maAnimationRenderers.empty())
             Stop();
