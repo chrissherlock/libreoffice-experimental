@@ -48,7 +48,7 @@ public:
 
     const Size& getOutSizePix() const { return maSzPix; }
 
-    void pause(bool bPause) { mbIsPaused = bPause; }
+    void pause(bool bIsPaused) { mbIsPaused = bIsPaused; }
     bool isPause() const { return mbIsPaused; }
 
     void setMarked(bool bMarked) { mbIsMarked = bMarked; }
