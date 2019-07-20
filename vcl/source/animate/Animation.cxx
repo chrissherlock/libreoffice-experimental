@@ -188,7 +188,9 @@ bool Animation::Start(OutputDevice* pOut, const Point& rDestPt, const Size& rDes
                     differs = false;
                 }
                 else
+                {
                     maAnimationRenderers.erase(itAnimRenderer);
+                }
             }
 
             if (maAnimationRenderers.empty())
@@ -276,6 +278,20 @@ void Animation::ImplRestartTimer(sal_uLong nTimeout)
     maTimer.Start();
 }
 
+std::vector<std::unique_ptr<AnimationData>> Animation::CreateAnimationDataItems(Animation* pAnim)
+{
+    std::vector<std::unique_ptr<AnimationData>> aAnimationDataItems;
+
+    for (auto const& rItem : maAnimationRenderers)
+    {
+        aAnimationDataItems.emplace_back(rItem->createAnimationData());
+    }
+
+    maNotifyLink.Call(pAnim);
+
+    return aAnimationDataItems;
+}
+
 IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
 {
     const size_t nAnimCount = maAnimationFrames.size();
@@ -286,15 +302,8 @@ IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
 
         if (maNotifyLink.IsSet())
         {
-            std::vector<std::unique_ptr<AnimationData>> aAnimationDataList;
-            // create AnimationData-List
-            for (auto const& i : maAnimationRenderers)
-                aAnimationDataList.emplace_back(i->createAnimationData());
-
-            maNotifyLink.Call(this);
-
             // set view state from AnimationData structure
-            for (auto& pAnimationData : aAnimationDataList)
+            for (auto& pAnimationData : CreateAnimationDataItems(this))
             {
                 AnimationRenderer* pRenderer = nullptr;
                 if (!pAnimationData->pAnimationRenderer)

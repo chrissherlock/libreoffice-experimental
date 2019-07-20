@@ -27,7 +27,6 @@ class Animation;
 class OutputDevice;
 class VirtualDevice;
 struct AnimationBitmap;
-struct AnimationData;
 
 class VCL_DLLPUBLIC AnimationRenderer
 {
@@ -55,8 +54,6 @@ public:
     bool isMarked() const { return mbIsMarked; }
 
 private:
-    friend class Animation;
-
     Animation* const mpParent;
     VclPtr<OutputDevice> mpRenderContext;
     long const mnCallerId;
