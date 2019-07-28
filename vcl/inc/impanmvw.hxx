@@ -40,7 +40,7 @@ struct AInfo
     AInfo();
 };
 
-class ImplAnimView
+class VCL_DLLPUBLIC ImplAnimView
 {
 private:
     friend class Animation;
@@ -66,11 +66,9 @@ private:
     bool mbIsMirroredVertically;
 
 public:
-    ~ImplAnimView();
-
-private:
     ImplAnimView(Animation* pParent, OutputDevice* pOut, const Point& rPt, const Size& rSz,
                  sal_uLong nExtraData, OutputDevice* pFirstFrameOutDev = nullptr);
+    ~ImplAnimView();
 
     bool matches(const OutputDevice* pOut, long nExtraData) const;
     void drawToPos(sal_uLong nPos);
