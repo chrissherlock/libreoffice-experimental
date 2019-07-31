@@ -1,3 +1,2 @@
-PaintRenderers
 EraseMarkedRenderers
 GetNextFrameBitmap

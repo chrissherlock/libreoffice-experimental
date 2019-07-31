@@ -343,6 +343,16 @@ void Animation::PaintRenderers(sal_uInt32 nFrameIndex)
                   [nFrameIndex](const auto& pRenderer) { pRenderer->draw(nFrameIndex); });
 }
 
+void Animation::EraseMarkedRenderers()
+{
+    // if view is marked; in this case remove view, because area
+    // of output lies out of display area of window; mark state is
+    // set from view itself
+    auto removeStart = std::remove_if(maAnimationRenderers.begin(), maAnimationRenderers.end(),
+                                      [](const auto& pRenderer) { return pRenderer->isMarked(); });
+    maAnimationRenderers.erase(removeStart, maAnimationRenderers.cend());
+}
+
 bool Animation::SendTimeout()
 {
     if (IsTimeoutSetup())
@@ -393,15 +403,7 @@ IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
             }
 
             PaintRenderers(mnPos);
-            /*
-             * If a view is marked, remove the view, because
-             * area of output lies out of display area of window.
-             * Mark state is set from view itself.
-             */
-            auto removeStart
-                = std::remove_if(maAnimationRenderers.begin(), maAnimationRenderers.end(),
-                                 [](const auto& pRenderer) { return pRenderer->isMarked(); });
-            maAnimationRenderers.erase(removeStart, maAnimationRenderers.cend());
+            EraseMarkedRenderers();
 
             // stop or restart timer
             if (maAnimationRenderers.empty())
