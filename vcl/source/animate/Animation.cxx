@@ -335,8 +335,6 @@ bool Animation::ResetMarkedRenderers()
     return bGlobalPause;
 }
 
-bool Animation::IsTimeoutSetup() { return maTimeoutNotifier.IsSet(); }
-
 void Animation::PaintRenderers(sal_uInt32 nFrameIndex)
 {
     std::for_each(maAnimationRenderers.cbegin(), maAnimationRenderers.cend(),
@@ -353,6 +351,8 @@ void Animation::EraseMarkedRenderers()
     maAnimationRenderers.erase(removeStart, maAnimationRenderers.cend());
 }
 
+bool Animation::IsTimeoutSetup() { return maTimeoutNotifier.IsSet(); }
+
 bool Animation::SendTimeout()
 {
     if (IsTimeoutSetup())
@@ -365,43 +365,57 @@ bool Animation::SendTimeout()
     return false;
 }
 
-IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
+AnimationBitmap* Animation::GetNextFrameBitmap()
 {
     const size_t nAnimCount = maAnimationFrames.size();
 
-    if (nAnimCount)
+    bool bIsFrameAtEnd = mnFrameIndex >= maAnimationFrames.size();
+    mnFrameIndex++;
+
+    AnimationBitmap* pCurrentFrameBmp
+        = bIsFrameAtEnd ? nullptr : maAnimationFrames[mnFrameIndex].get();
+
+    if (!pCurrentFrameBmp)
+    {
+        if (mnLoops == 1)
+        {
+            Stop();
+            mbLoopTerminated = true;
+            mnFrameIndex = nAnimCount - 1;
+            maBitmapEx = maAnimationFrames[mnFrameIndex]->maBitmapEx;
+        }
+        else
+        {
+            if (mnLoops)
+                mnLoops--;
+
+            mnFrameIndex = 0;
+            pCurrentFrameBmp = maAnimationFrames[mnFrameIndex].get();
+        }
+    }
+
+    return pCurrentFrameBmp;
+}
+
+IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
+{
+    if (!maAnimationFrames.empty())
     {
         bool bGlobalPause = SendTimeout();
 
         if (maAnimationRenderers.empty())
+        {
             Stop();
+        }
         else if (bGlobalPause)
+        {
             ImplRestartTimer(10);
+        }
         else
         {
-            AnimationBitmap* pStepBmp = (++mnFrameIndex < maAnimationFrames.size())
-                                            ? maAnimationFrames[mnFrameIndex].get()
-                                            : nullptr;
-
-            if (!pStepBmp)
-            {
-                if (mnLoops == 1)
-                {
-                    Stop();
-                    mbLoopTerminated = true;
-                    mnFrameIndex = nAnimCount - 1;
-                    maBitmapEx = maAnimationFrames[mnFrameIndex]->maBitmapEx;
-                    return;
-                }
-                else
-                {
-                    if (mnLoops)
-                        mnLoops--;
-
-                    mnFrameIndex = 0;
-                    pStepBmp = maAnimationFrames[mnFrameIndex].get();
-                }
-            }
+            AnimationBitmap* pCurrentFrameBmp = GetNextFrameBitmap();
+            if (!pCurrentFrameBmp)
+                return;
 
             PaintRenderers(mnFrameIndex);
             EraseMarkedRenderers();
@@ -410,11 +424,13 @@ IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
             if (maAnimationRenderers.empty())
                 Stop();
             else
-                ImplRestartTimer(pStepBmp->mnWait);
+                ImplRestartTimer(pCurrentFrameBmp->mnWait);
         }
     }
     else
+    {
         Stop();
+    }
 }
 
 bool Animation::Insert(const AnimationBitmap& rStepBmp)
