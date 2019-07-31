@@ -337,6 +337,12 @@ bool Animation::ResetMarkedRenderers()
 
 bool Animation::IsTimeoutSetup() { return maTimeoutNotifier.IsSet(); }
 
+void Animation::PaintRenderers(sal_uInt32 nFrameIndex)
+{
+    std::for_each(maAnimationRenderers.cbegin(), maAnimationRenderers.cend(),
+                  [nFrameIndex](const auto& pRenderer) { pRenderer->draw(nFrameIndex); });
+}
+
 bool Animation::SendTimeout()
 {
     if (IsTimeoutSetup())
@@ -386,9 +392,7 @@ IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
                 }
             }
 
-            // Paint all views.
-            std::for_each(maAnimationRenderers.cbegin(), maAnimationRenderers.cend(),
-                          [this](const auto& pRenderer) { pRenderer->draw(mnPos); });
+            PaintRenderers(mnPos);
             /*
              * If a view is marked, remove the view, because
              * area of output lies out of display area of window.

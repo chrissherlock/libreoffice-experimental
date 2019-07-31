@@ -1,0 +1,3 @@
+PaintRenderers
+EraseMarkedRenderers
+GetNextFrameBitmap
