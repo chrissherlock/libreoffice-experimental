@@ -37,7 +37,7 @@ sal_uLong Animation::mnAnimCount = 0;
 Animation::Animation()
     : mnLoopCount(0)
     , mnLoops(0)
-    , mnPos(0)
+    , mnFrameIndex(0)
     , mbIsInAnimation(false)
     , mbLoopTerminated(false)
 {
@@ -48,7 +48,7 @@ Animation::Animation(const Animation& rAnimation)
     : maBitmapEx(rAnimation.maBitmapEx)
     , maGlobalSize(rAnimation.maGlobalSize)
     , mnLoopCount(rAnimation.mnLoopCount)
-    , mnPos(rAnimation.mnPos)
+    , mnFrameIndex(rAnimation.mnFrameIndex)
     , mbIsInAnimation(false)
     , mbLoopTerminated(rAnimation.mbLoopTerminated)
 {
@@ -77,7 +77,7 @@ Animation& Animation::operator=(const Animation& rAnimation)
         maGlobalSize = rAnimation.maGlobalSize;
         maBitmapEx = rAnimation.maBitmapEx;
         mnLoopCount = rAnimation.mnLoopCount;
-        mnPos = rAnimation.mnPos;
+        mnFrameIndex = rAnimation.mnFrameIndex;
         mbLoopTerminated = rAnimation.mbLoopTerminated;
         mnLoops = mbLoopTerminated ? 0 : mnLoopCount;
     }
@@ -169,7 +169,7 @@ bool Animation::Start(OutputDevice* pOut, const Point& rDestPt, const Size& rDes
     if (!maAnimationFrames.empty())
     {
         if ((pOut->GetOutDevType() == OUTDEV_WINDOW) && !mbLoopTerminated
-            && (ANIMATION_TIMEOUT_ON_CLICK != maAnimationFrames[mnPos]->mnWait))
+            && (ANIMATION_TIMEOUT_ON_CLICK != maAnimationFrames[mnFrameIndex]->mnWait))
         {
             bool differs = true;
 
@@ -197,7 +197,7 @@ bool Animation::Start(OutputDevice* pOut, const Point& rDestPt, const Size& rDes
             {
                 maTimer.Stop();
                 mbIsInAnimation = false;
-                mnPos = 0;
+                mnFrameIndex = 0;
             }
 
             if (differs)
@@ -206,7 +206,7 @@ bool Animation::Start(OutputDevice* pOut, const Point& rDestPt, const Size& rDes
 
             if (!mbIsInAnimation)
             {
-                ImplRestartTimer(maAnimationFrames[mnPos]->mnWait);
+                ImplRestartTimer(maAnimationFrames[mnFrameIndex]->mnWait);
                 mbIsInAnimation = true;
             }
         }
@@ -246,7 +246,7 @@ void Animation::Draw(OutputDevice* pOut, const Point& rDestPt, const Size& rDest
 
     if (nCount)
     {
-        AnimationBitmap* pObj = maAnimationFrames[std::min(mnPos, nCount - 1)].get();
+        AnimationBitmap* pObj = maAnimationFrames[std::min(mnFrameIndex, nCount - 1)].get();
 
         if (pOut->GetConnectMetaFile() || (pOut->GetOutDevType() == OUTDEV_PRINTER))
             maAnimationFrames[0]->maBitmapEx.Draw(pOut, rDestPt, rDestSz);
@@ -254,15 +254,15 @@ void Animation::Draw(OutputDevice* pOut, const Point& rDestPt, const Size& rDest
             pObj->maBitmapEx.Draw(pOut, rDestPt, rDestSz);
         else
         {
-            const size_t nOldPos = mnPos;
+            const size_t nOldPos = mnFrameIndex;
             if (mbLoopTerminated)
-                const_cast<Animation*>(this)->mnPos = nCount - 1;
+                const_cast<Animation*>(this)->mnFrameIndex = nCount - 1;
 
             {
                 AnimationRenderer{ const_cast<Animation*>(this), pOut, rDestPt, rDestSz, 0 };
             }
 
-            const_cast<Animation*>(this)->mnPos = nOldPos;
+            const_cast<Animation*>(this)->mnFrameIndex = nOldPos;
         }
     }
 }
@@ -379,8 +379,9 @@ IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
             ImplRestartTimer(10);
         else
         {
-            AnimationBitmap* pStepBmp
-                = (++mnPos < maAnimationFrames.size()) ? maAnimationFrames[mnPos].get() : nullptr;
+            AnimationBitmap* pStepBmp = (++mnFrameIndex < maAnimationFrames.size())
+                                            ? maAnimationFrames[mnFrameIndex].get()
+                                            : nullptr;
 
             if (!pStepBmp)
             {
@@ -388,8 +389,8 @@ IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
                 {
                     Stop();
                     mbLoopTerminated = true;
-                    mnPos = nAnimCount - 1;
-                    maBitmapEx = maAnimationFrames[mnPos]->maBitmapEx;
+                    mnFrameIndex = nAnimCount - 1;
+                    maBitmapEx = maAnimationFrames[mnFrameIndex]->maBitmapEx;
                     return;
                 }
                 else
@@ -397,12 +398,12 @@ IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
                     if (mnLoops)
                         mnLoops--;
 
-                    mnPos = 0;
-                    pStepBmp = maAnimationFrames[mnPos].get();
+                    mnFrameIndex = 0;
+                    pStepBmp = maAnimationFrames[mnFrameIndex].get();
                 }
             }
 
-            PaintRenderers(mnPos);
+            PaintRenderers(mnFrameIndex);
             EraseMarkedRenderers();
 
             // stop or restart timer
