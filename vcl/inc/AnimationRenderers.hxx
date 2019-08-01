@@ -50,7 +50,7 @@ public:
     bool NoRenderersAreAvailable();
     void CreateDefaultRenderer(Animation* pAnim, OutputDevice* pOut, const Point& rDestPt,
                                const Size& rDestSz, sal_uLong nCallerId,
-                               OutputDevice* pFirstFrameOutDev);
+                               OutputDevice* pFirstFrameOutDev = nullptr);
     void RemoveRenderers(OutputDevice* pOut, long nCallerId);
     size_t GetSize();
 
