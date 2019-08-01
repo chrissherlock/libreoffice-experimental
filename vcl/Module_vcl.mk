@@ -209,6 +209,7 @@ $(eval $(call gb_Module_add_check_targets,vcl,\
     CppunitTest_vcl_type_serializer_test \
     CppunitTest_vcl_animation \
     CppunitTest_vcl_animationrenderer \
+    CppunitTest_vcl_animationrenderers \
 ))
 
 ifeq ($(USING_X11),TRUE)
