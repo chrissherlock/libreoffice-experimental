@@ -52,6 +52,7 @@ public:
                                const Size& rDestSz, sal_uLong nCallerId,
                                OutputDevice* pFirstFrameOutDev);
     void RemoveRenderers(OutputDevice* pOut, long nCallerId);
+    size_t GetSize();
 
     std::vector<std::unique_ptr<AnimationRenderer>>& GetRenderers();
 

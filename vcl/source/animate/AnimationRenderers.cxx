@@ -29,6 +29,8 @@ std::vector<std::unique_ptr<AnimationRenderer>>& AnimationRenderers::GetRenderer
     return maAnimationRenderers;
 }
 
+size_t AnimationRenderers::GetSize() { return maAnimationRenderers.size(); }
+
 void AnimationRenderers::RemoveRenderers(OutputDevice* pOut, long nCallerId)
 {
     GetRenderers().erase(
