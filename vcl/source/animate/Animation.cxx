@@ -295,34 +295,38 @@ IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
             // set view state from AInfo structure
             for (auto& pAInfo : aAInfoList)
             {
-                AnimationRenderer* pView = nullptr;
+                AnimationRenderer* pRenderer = nullptr;
                 if (!pAInfo->pViewData)
                 {
-                    pView = new AnimationRenderer(this, pAInfo->pOutDev, pAInfo->aStartOrg,
-                                                  pAInfo->aStartSize, pAInfo->nExtraData);
+                    pRenderer = new AnimationRenderer(this, pAInfo->pOutDev, pAInfo->aStartOrg,
+                                                      pAInfo->aStartSize, pAInfo->nExtraData);
 
-                    maAnimationRenderers.push_back(std::unique_ptr<AnimationRenderer>(pView));
+                    maAnimationRenderers.push_back(std::unique_ptr<AnimationRenderer>(pRenderer));
                 }
                 else
-                    pView = static_cast<AnimationRenderer*>(pAInfo->pViewData);
+                    pRenderer = static_cast<AnimationRenderer*>(pAInfo->pViewData);
 
-                pView->pause(pAInfo->bPause);
-                pView->setMarked(true);
+                pRenderer->pause(pAInfo->bPause);
+                pRenderer->setMarked(true);
             }
 
             // delete all unmarked views
             auto removeStart
                 = std::remove_if(maAnimationRenderers.begin(), maAnimationRenderers.end(),
-                                 [](const auto& pView) { return !pView->isMarked(); });
+                                 [](const auto& pRenderer) { return !pRenderer->isMarked(); });
             maAnimationRenderers.erase(removeStart, maAnimationRenderers.cend());
 
             // check if every remaining view is paused
             bGlobalPause = std::all_of(maAnimationRenderers.cbegin(), maAnimationRenderers.cend(),
-                                       [](const auto& pView) { return pView->isPause(); });
+                                       [](const auto& pRenderer) { return pRenderer->isPause(); });
 
             // reset marked state
             std::for_each(maAnimationRenderers.cbegin(), maAnimationRenderers.cend(),
-                          [](const auto& pView) { pView->setMarked(false); });
+                          [](const auto& pRenderer) { pRenderer->setMarked(false); });
+        }
+        else
+        {
+            bGlobalPause = false;
         }
 
         if (maAnimationRenderers.empty())
@@ -356,7 +360,7 @@ IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
 
             // Paint all views.
             std::for_each(maAnimationRenderers.cbegin(), maAnimationRenderers.cend(),
-                          [this](const auto& pView) { pView->draw(mnPos); });
+                          [this](const auto& pRenderer) { pRenderer->draw(mnPos); });
             /*
              * If a view is marked, remove the view, because
              * area of output lies out of display area of window.
@@ -364,7 +368,7 @@ IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
              */
             auto removeStart
                 = std::remove_if(maAnimationRenderers.begin(), maAnimationRenderers.end(),
-                                 [](const auto& pView) { return pView->isMarked(); });
+                                 [](const auto& pRenderer) { return pRenderer->isMarked(); });
             maAnimationRenderers.erase(removeStart, maAnimationRenderers.cend());
 
             // stop or restart timer
