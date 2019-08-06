@@ -17,15 +17,15 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <tools/diagnose_ex.h>
+
 #include <sal/main.h>
 #include <sal/log.hxx>
-#include <tools/diagnose_ex.h>
-#include <tools/extendapplicationenvironment.hxx>
-
+#include <osl/time.h>
+#include <rtl/bootstrap.hxx>
 #include <cppuhelper/bootstrap.hxx>
 #include <comphelper/processfactory.hxx>
-#include <com/sun/star/lang/XMultiServiceFactory.hpp>
-#include <com/sun/star/uno/XComponentContext.hpp>
+#include <tools/extendapplicationenvironment.hxx>
 
 #include <vcl/svapp.hxx>
 #include <vcl/window.hxx>
@@ -42,10 +42,10 @@
 #include <vcl/bitmapex.hxx>
 #include <vcl/gradient.hxx>
 #include <vcl/lineinfo.hxx>
+#include <vcl/drawables/PixelDrawable.hxx>
 
-#include <rtl/bootstrap.hxx>
-
-#include <osl/time.h>
+#include <com/sun/star/lang/XMultiServiceFactory.hpp>
+#include <com/sun/star/uno/XComponentContext.hpp>
 
 #include <functional>
 
@@ -169,10 +169,10 @@ void setupMethodStubs( functor_vector_type& res )
         });
 #endif
 
-    /* void DrawPixel( const Point& rPt, const Color& rColor ); */
+    /* bool PixelDrawable(const Point& rPt, const Color& rColor); */
     add(res,
         "DrawPixel",
-        [aPt1, aBlackColor](OutputDevice *pOutDev) { return pOutDev->DrawPixel(aPt1, aBlackColor); });
+        [aPt1, aBlackColor](OutputDevice *pOutDev) { return Drawable::Draw(pOutDev, PixelDrawable(aPt1, aBlackColor)); });
 
     /* void DrawLine( const Point& rStartPt, const Point& rEndPt ); */
     add(res,

@@ -34,6 +34,7 @@
 #include <vcl/image.hxx>
 #include <vcl/window.hxx>
 #include <vcl/BitmapMonochromeFilter.hxx>
+#include <vcl/drawables/PixelDrawable.hxx>
 
 #include <bmpfast.hxx>
 #include <salgdi.hxx>
@@ -1320,7 +1321,7 @@ void OutputDevice::DrawShadowBitmapEx(
                 static_cast<sal_uInt8>((nLuminance * static_cast<sal_uInt16>(aShadowColor.GetRed())) >> 8),
                 static_cast<sal_uInt8>((nLuminance * static_cast<sal_uInt16>(aShadowColor.GetGreen())) >> 8),
                 static_cast<sal_uInt8>((nLuminance * static_cast<sal_uInt16>(aShadowColor.GetBlue())) >> 8));
-            DrawPixel(Point(x,y), aDestColor);
+            Drawable::Draw(this, PixelDrawable(Point(x, y), aDestColor));
         }
     }
 }

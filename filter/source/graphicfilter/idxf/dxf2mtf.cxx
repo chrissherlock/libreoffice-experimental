@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/PixelDrawable.hxx>
 
 #include <string.h>
 #include <vcl/gdimtf.hxx>
@@ -247,7 +248,9 @@ void DXF2GDIMetaFile::DrawPointEntity(const DXFPointEntity & rE, const DXFTransf
     if (SetLineAttribute(rE)) {
         Point aP0;
         rTransform.Transform(rE.aP0,aP0);
-        if (rE.fThickness==0) pVirDev->DrawPixel(aP0);
+        if (rE.fThickness==0) {
+            Drawable::Draw(pVirDev, PixelDrawable(aP0));
+        }
         else {
             Point aP1;
             rTransform.Transform(rE.aP0+DXFVector(0,0,rE.fThickness),aP1);

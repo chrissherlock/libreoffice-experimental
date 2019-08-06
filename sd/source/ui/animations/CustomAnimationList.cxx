@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/PixelDrawable.hxx>
+
 #include <com/sun/star/drawing/XShapes.hpp>
 #include <com/sun/star/presentation/ShapeAnimationSubType.hpp>
 #include <com/sun/star/presentation/EffectNodeType.hpp>
@@ -424,10 +426,10 @@ void CustomAnimationTriggerEntryItem::Paint(const Point& rPos, SvTreeListBox& rD
 
     // Erase the four corner pixels to make the rectangle appear rounded.
     rRenderContext.SetLineColor(rRenderContext.GetSettings().GetStyleSettings().GetWindowColor());
-    rRenderContext.DrawPixel(aOutRect.TopLeft());
-    rRenderContext.DrawPixel(Point(aOutRect.Right(), aOutRect.Top()));
-    rRenderContext.DrawPixel(Point(aOutRect.Left(), aOutRect.Bottom()));
-    rRenderContext.DrawPixel(Point(aOutRect.Right(), aOutRect.Bottom()));
+    Drawable::Draw(&rRenderContext, PixelDrawable(aOutRect.TopLeft()));
+    Drawable::Draw(&rRenderContext, PixelDrawable(Point(aOutRect.Right(), aOutRect.Top())));
+    Drawable::Draw(&rRenderContext, PixelDrawable(Point(aOutRect.Left(), aOutRect.Bottom())));
+    Drawable::Draw(&rRenderContext, PixelDrawable(Point(aOutRect.Right(), aOutRect.Bottom())));
 
     // draw the category title
 

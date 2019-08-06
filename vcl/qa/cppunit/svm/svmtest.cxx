@@ -8,21 +8,23 @@
  *
  */
 
+#include <config_features.h>
+
 #include <test/bootstrapfixture.hxx>
 #include <test/xmltesttools.hxx>
+
 #include <vcl/gdimtf.hxx>
 #include <vcl/gradient.hxx>
 #include <vcl/hatch.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/virdev.hxx>
-#include <bitmapwriteaccess.hxx>
+#include <vcl/drawables/PixelDrawable.hxx>
 #include <vcl/pngwrite.hxx>
-
-#include <config_features.h>
 #if HAVE_FEATURE_OPENGL
 #include <vcl/opengl/OpenGLHelper.hxx>
 #endif
 
+#include <bitmapwriteaccess.hxx>
 using namespace css;
 
 class SvmTest : public test::BootstrapFixture, public XmlTestTools
@@ -370,8 +372,8 @@ void SvmTest::testPixel()
     ScopedVclPtrInstance<VirtualDevice> pVirtualDev;
     setupBaseVirtualDevice(*pVirtualDev, aGDIMetaFile);
 
-    pVirtualDev->DrawPixel(Point(8, 1), COL_GREEN);
-    pVirtualDev->DrawPixel(Point(1, 8), COL_BLUE);
+    Drawable::Draw(pVirtualDev, PixelDrawable(Point(8, 1), COL_GREEN));
+    Drawable::Draw(pVirtualDev, PixelDrawable(Point(1, 8), COL_BLUE));
 
     checkPixel(writeAndRead(aGDIMetaFile, "pixel.svm"));
 }
@@ -391,7 +393,7 @@ void SvmTest::testPoint()
     ScopedVclPtrInstance<VirtualDevice> pVirtualDev;
     setupBaseVirtualDevice(*pVirtualDev, aGDIMetaFile);
 
-    pVirtualDev->DrawPixel(Point(4, 4));
+    Drawable::Draw(pVirtualDev, PixelDrawable(Point(4, 4)));
 
     checkPoint(writeAndRead(aGDIMetaFile, "point.svm"));
 }

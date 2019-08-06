@@ -49,6 +49,7 @@
 #include <vcl/menu.hxx>
 #include <vcl/ImageTree.hxx>
 #include <vcl/BitmapEmbossGreyFilter.hxx>
+#include <vcl/drawables/PixelDrawable.hxx>
 #include <bitmapwriteaccess.hxx>
 
 #include <basegfx/numeric/ftools.hxx>
@@ -328,7 +329,7 @@ public:
                               (r.Top() + r.Bottom())/2 - 4);
                 for(int i=0; i<8; i++)
                 {
-                    rDev.DrawPixel(aCenter, aLastPixel);
+                    Drawable::Draw(&rDev, PixelDrawable(aCenter, aLastPixel));
                     aLastPixel = rDev.GetPixel(aCenter);
                     aCenter.Move(1,1);
                 }
@@ -2173,7 +2174,7 @@ public:
         VclPtrInstance<WorkWindow> xTempWin(nullptr, WB_STDWORK);
         xTempWin->Show();
         // forcibly make this context current by rendering
-        xTempWin->DrawPixel(Point(0, 0), COL_RED);
+        Drawable::Draw(xTempWin, PixelDrawable(Point(0, 0), COL_RED));
 
         // get some other guys to leach off this context
         VclPtrInstance<VirtualDevice> xVDev;
@@ -2196,15 +2197,15 @@ public:
 
         // This appears to continue working; fun.
         Point aPt(0, 0);
-        xVDev->DrawPixel(aPt, COL_GREEN);
+        Drawable::Draw(xVDev, PixelDrawable(aPt, COL_GREEN));
         assert(xVDev->GetPixel(aPt) == COL_GREEN);
         xVDev.disposeAndClear();
 
         // Switch context to see if we can switch back.
-        mxWinA->DrawPixel(aPt, COL_WHITE);
+        Drawable::Draw(mxWinA, PixelDrawable(aPt, COL_WHITE));
 
         // Now try switching back to this guy ...
-        xVDev2->DrawPixel(aPt, COL_BLUE);
+        Drawable::Draw(xVDev2, PixelDrawable(aPt, COL_BLUE));
         assert(xVDev2->GetPixel(aPt) == COL_BLUE);
         xVDev2.disposeAndClear();
     }

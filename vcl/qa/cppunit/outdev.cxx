@@ -13,6 +13,7 @@
 #include <vcl/print.hxx>
 #include <vcl/window.hxx>
 #include <vcl/bitmapaccess.hxx>
+#include <vcl/drawables/PixelDrawable.hxx>
 
 #include <basegfx/matrix/b2dhommatrix.hxx>
 
@@ -56,8 +57,8 @@ void VclOutdevTest::testVirtualDevice()
     CPPUNIT_ASSERT_EQUAL(pVDev->GetBackgroundColor(), COL_WHITE);
 
     pVDev->Erase();
-    pVDev->DrawPixel(Point(1,2),COL_BLUE);
-    pVDev->DrawPixel(Point(31,30),COL_RED);
+    Drawable::Draw(pVDev, PixelDrawable(Point(1, 2), COL_BLUE));
+    Drawable::Draw(pVDev, PixelDrawable(Point(31, 30), COL_RED));
 
     Size aSize = pVDev->GetOutputSizePixel();
     CPPUNIT_ASSERT_EQUAL(Size(32,32), aSize);

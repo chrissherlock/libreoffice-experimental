@@ -20,6 +20,7 @@
 #include <sal/config.h>
 #include <sal/log.hxx>
 
+#include <vcl/drawables/PixelDrawable.hxx>
 #include <vcl/notebookbar.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/help.hxx>
@@ -900,7 +901,8 @@ void TabControl::ImplDrawItem(vcl::RenderContext& rRenderContext, ImplTabItem co
         if (!(rStyleSettings.GetOptions() & StyleSettingsOptions::Mono))
         {
             rRenderContext.SetLineColor(rStyleSettings.GetLightColor());
-            rRenderContext.DrawPixel(Point(aRect.Left() + 1 - nOff2, aRect.Top() + 1 - nOff2)); // diagonally indented top-left pixel
+            // diagonally indented top-left pixel
+            Drawable::Draw(&rRenderContext, PixelDrawable(Point(aRect.Left() + 1 - nOff2, aRect.Top() + 1 - nOff2)));
             if (bLeftBorder)
             {
                 rRenderContext.DrawLine(Point(aRect.Left() - nOff2, aRect.Top() + 2 - nOff2),
@@ -923,8 +925,8 @@ void TabControl::ImplDrawItem(vcl::RenderContext& rRenderContext, ImplTabItem co
         else
         {
             rRenderContext.SetLineColor(COL_BLACK);
-            rRenderContext.DrawPixel(Point(aRect.Left() + 1 - nOff2, aRect.Top() + 1 - nOff2));
-            rRenderContext.DrawPixel(Point(aRect.Right() + nOff2 - 2, aRect.Top() + 1 - nOff2));
+            Drawable::Draw(&rRenderContext, PixelDrawable(Point(aRect.Left() + 1 - nOff2, aRect.Top() + 1 - nOff2)));
+            Drawable::Draw(&rRenderContext, PixelDrawable(Point(aRect.Right() + nOff2 - 2, aRect.Top() + 1 - nOff2)));
             if (bLeftBorder)
             {
                 rRenderContext.DrawLine(Point(aRect.Left() - nOff2, aRect.Top() + 2 - nOff2),

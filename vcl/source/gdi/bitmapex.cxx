@@ -32,6 +32,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/BitmapMonochromeFilter.hxx>
+#include <vcl/drawables/PixelDrawable.hxx>
 
 // BitmapEx::Create
 #include <salbmp.hxx>
@@ -1380,9 +1381,9 @@ static Bitmap DetectEdges( const Bitmap& rBmp )
                         nSum2 -= lGray;
 
                         if( ( nSum1 * nSum1 + nSum2 * nSum2 ) < lThres2 )
-                            pVirDev->DrawPixel( Point(nXDst, nY), COL_WHITE );
+                            Drawable::Draw(pVirDev, PixelDrawable(Point(nXDst, nY), COL_WHITE));
                         else
-                            pVirDev->DrawPixel( Point(nXDst, nY), COL_BLACK );
+                            Drawable::Draw(pVirDev, PixelDrawable(Point(nXDst, nY), COL_BLACK));
                     }
                 }
 

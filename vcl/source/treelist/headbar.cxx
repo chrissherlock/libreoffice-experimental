@@ -20,6 +20,7 @@
 #include <vcl/headbar.hxx>
 #include <tools/debug.hxx>
 
+#include <vcl/drawables/PixelDrawable.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/help.hxx>
 #include <vcl/image.hxx>
@@ -250,7 +251,7 @@ void HeaderBar::ImplInvertDrag( sal_uInt16 nStartPos, sal_uInt16 nEndPos )
                   Point( aEndPos.X()+2, aEndPos.Y()+2 ) );
         DrawLine( Point( aEndPos.X()+3, aEndPos.Y()-1 ),
                   Point( aEndPos.X()+3, aEndPos.Y()+1 ) );
-        DrawPixel( Point( aEndPos.X()+4, aEndPos.Y() ) );
+        Drawable::Draw(this, PixelDrawable(Point(aEndPos.X()+4, aEndPos.Y())));
     }
     else
     {
@@ -260,7 +261,7 @@ void HeaderBar::ImplInvertDrag( sal_uInt16 nStartPos, sal_uInt16 nEndPos )
                   Point( aEndPos.X()-2, aEndPos.Y()+2 ) );
         DrawLine( Point( aEndPos.X()-3, aEndPos.Y()-1 ),
                   Point( aEndPos.X()-3, aEndPos.Y()+1 ) );
-        DrawPixel( Point( aEndPos.X()-4, aEndPos.Y() ) );
+        Drawable::Draw(this, PixelDrawable(Point(aEndPos.X()-4, aEndPos.Y())));
     }
     SetRasterOp( RasterOp::OverPaint );
 }

@@ -32,6 +32,7 @@ $(eval $(call gb_Library_use_libraries,vclcanvas,\
 	basegfx \
 	canvastools \
 	comphelper \
+	salhelper \
 	cppu \
 	cppuhelper \
 	i18nlangtag \

@@ -8,6 +8,8 @@
  *
  */
 
+#include <vcl/drawables/PixelDrawable.hxx>
+
 #include <test/outputdevice.hxx>
 
 namespace vcl {
@@ -23,8 +25,8 @@ void drawPixelOffset(OutputDevice& rDevice, tools::Rectangle const & rRect, int 
         long y1 = nOffset;
         long y2 = rRect.GetHeight() - nOffset - 1;
 
-        rDevice.DrawPixel(Point(x, y1));
-        rDevice.DrawPixel(Point(x, y2));
+        Drawable::Draw(&rDevice, PixelDrawable(Point(x, y1)));
+        Drawable::Draw(&rDevice, PixelDrawable(Point(x, y2)));
     }
 
     for (long y = 0 + nOffset; y < (rRect.GetHeight() - nOffset); ++y)
@@ -32,8 +34,8 @@ void drawPixelOffset(OutputDevice& rDevice, tools::Rectangle const & rRect, int 
         long x1 = nOffset;
         long x2 = rRect.GetWidth() - nOffset - 1;
 
-        rDevice.DrawPixel(Point(x1, y));
-        rDevice.DrawPixel(Point(x2, y));
+        Drawable::Draw(&rDevice, PixelDrawable(Point(x1, y)));
+        Drawable::Draw(&rDevice, PixelDrawable(Point(x2, y)));
     }
 }
 

@@ -17,10 +17,11 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include "CategoryListBox.hxx"
 #include <vcl/builderfactory.hxx>
-
 #include <vcl/event.hxx>
+#include <vcl/drawables/PixelDrawable.hxx>
+
+#include "CategoryListBox.hxx"
 
 namespace sd {
 
@@ -62,10 +63,10 @@ void CategoryListBox::UserDraw( const UserDrawEvent& rUDEvt )
 
         // Erase the four corner pixels to make the rectangle appear rounded.
         pDev->SetLineColor( GetSettings().GetStyleSettings().GetWindowColor());
-        pDev->DrawPixel( aOutRect.TopLeft());
-        pDev->DrawPixel( Point(aOutRect.Right(), aOutRect.Top()));
-        pDev->DrawPixel( Point(aOutRect.Left(), aOutRect.Bottom()));
-        pDev->DrawPixel( Point(aOutRect.Right(), aOutRect.Bottom()));
+        Drawable::Draw(pDev, PixelDrawable(aOutRect.TopLeft()));
+        Drawable::Draw(pDev, PixelDrawable(Point(aOutRect.Right(), aOutRect.Top())));
+        Drawable::Draw(pDev, PixelDrawable(Point(aOutRect.Left(), aOutRect.Bottom())));
+        Drawable::Draw(pDev, PixelDrawable(Point(aOutRect.Right(), aOutRect.Bottom())));
 
         // draw the category title
         pDev->DrawText (aOutRect, GetEntry(nItem), DrawTextFlags::Center );

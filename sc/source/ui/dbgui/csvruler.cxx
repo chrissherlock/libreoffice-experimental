@@ -17,16 +17,18 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <csvruler.hxx>
-#include <AccessibleCsvControl.hxx>
-
-#include <optutil.hxx>
-#include <com/sun/star/uno/Any.hxx>
-#include <com/sun/star/uno/Sequence.hxx>
 #include <vcl/event.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/ptrstyle.hxx>
+#include <vcl/drawables/PixelDrawable.hxx>
+
+#include <csvruler.hxx>
+#include <AccessibleCsvControl.hxx>
+#include <optutil.hxx>
+
+#include <com/sun/star/uno/Any.hxx>
+#include <com/sun/star/uno/Sequence.hxx>
 
 using namespace com::sun::star::uno;
 
@@ -580,7 +582,7 @@ void ScCsvRuler::ImplDrawBackgrDev()
     {
         sal_Int32 nX = GetX( nPos );
         if( nPos % 5 )
-            maBackgrDev->DrawPixel( Point( nX, nY ) );
+            Drawable::Draw(maBackgrDev, PixelDrawable(Point(nX, nY)));
         else
             maBackgrDev->DrawLine( Point( nX, nY - 1 ), Point( nX, nY + 1 ) );
     }
@@ -607,7 +609,7 @@ void ScCsvRuler::ImplDrawSplit( sal_Int32 nPos )
         maRulerDev->SetLineColor( maTextColor );
         maRulerDev->SetFillColor( maSplitColor );
         maRulerDev->DrawEllipse( tools::Rectangle( aPos, aSize ) );
-        maRulerDev->DrawPixel( Point( GetX( nPos ), GetHeight() - 2 ) );
+        Drawable::Draw(maRulerDev, PixelDrawable(Point(GetX(nPos), GetHeight() - 2)));
     }
 }
 

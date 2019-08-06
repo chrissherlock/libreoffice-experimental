@@ -17,29 +17,28 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-
-#include <memory>
-#include <toolkit/awt/vclxgraphics.hxx>
-#include <toolkit/awt/vclxdevice.hxx>
-#include <toolkit/awt/vclxfont.hxx>
-#include <toolkit/helper/macros.hxx>
-#include <toolkit/helper/vclunohelper.hxx>
+#include <rtl/uuid.h>
 #include <cppuhelper/typeprovider.hxx>
 #include <cppuhelper/queryinterface.hxx>
-#include <rtl/uuid.h>
-
+#include <tools/debug.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/image.hxx>
 #include <vcl/gradient.hxx>
 #include <vcl/metric.hxx>
-#include <tools/debug.hxx>
+#include <vcl/drawables/PixelDrawable.hxx>
+
+#include <toolkit/awt/vclxgraphics.hxx>
+#include <toolkit/awt/vclxdevice.hxx>
+#include <toolkit/awt/vclxfont.hxx>
+#include <toolkit/helper/macros.hxx>
+#include <toolkit/helper/vclunohelper.hxx>
+
+#include <memory>
 
 using namespace com::sun::star;
 
-
 //  class VCLXGraphics
-
 
 // uno::XInterface
 uno::Any VCLXGraphics::queryInterface( const uno::Type & rType )
@@ -336,7 +335,7 @@ void VCLXGraphics::drawPixel( sal_Int32 x, sal_Int32 y )
     if( mpOutputDevice )
     {
         InitOutputDevice( InitOutDevFlags::COLORS );
-        mpOutputDevice->DrawPixel( Point( x, y ) );
+        Drawable::Draw(mpOutputDevice, PixelDrawable(Point(x, y)));
     }
 }
 

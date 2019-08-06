@@ -7,14 +7,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include <tools/stream.hxx>
 #include <test/bootstrapfixture.hxx>
 
 #include <vcl/virdev.hxx>
 #include <vcl/bitmapaccess.hxx>
 #include <vcl/svapp.hxx>
-
-#include <tools/stream.hxx>
-
+#include <vcl/drawables/PixelDrawable.hxx>
 #include <vcl/graphicfilter.hxx>
 #include <vcl/filter/PngImageReader.hxx>
 
@@ -184,7 +183,7 @@ void BitmapRenderTest::testAlphaVirtualDevice()
     CPPUNIT_ASSERT_EQUAL(Color(0xffffffff), aColor);
 
     // Draw an opaque pixel to the VirDev
-    pAlphaVirtualDevice->DrawPixel(Point(1, 1), Color(0x0022ff55));
+    Drawable::Draw(pAlphaVirtualDevice, PixelDrawable(Point(1, 1), Color(0x0022ff55)));
 
     aColor = pAlphaVirtualDevice->GetPixel(Point(1, 1));
     // Read back the opaque pixel
@@ -213,7 +212,7 @@ void BitmapRenderTest::testAlphaVirtualDevice()
 #endif
 
     // Draw an semi-transparent pixel
-    pAlphaVirtualDevice->DrawPixel(Point(0, 0), Color(0x44, 0x22, 0xff, 0x55));
+    Drawable::Draw(pAlphaVirtualDevice, PixelDrawable(Point(0, 0), Color(0x44, 0x22, 0xff, 0x55)));
 
     aColor = pAlphaVirtualDevice->GetPixel(Point(0, 0));
     // Read back the semi-transparent pixel

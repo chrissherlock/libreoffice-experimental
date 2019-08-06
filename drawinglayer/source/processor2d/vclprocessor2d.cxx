@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/PixelDrawable.hxx>
+
 #include <cmath>
 #include <comphelper/string.hxx>
 #include "vclprocessor2d.hxx"
@@ -952,7 +954,7 @@ namespace drawinglayer
                 const basegfx::B2DPoint aViewPosition(maCurrentTransformation * pos);
                 const Point aPos(basegfx::fround(aViewPosition.getX()), basegfx::fround(aViewPosition.getY()));
 
-                mpOutputDevice->DrawPixel(aPos, aVCLColor);
+                Drawable::Draw(mpOutputDevice, PixelDrawable(aPos, aVCLColor));
             }
         }
 

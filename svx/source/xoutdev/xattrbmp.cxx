@@ -40,6 +40,7 @@
 #include <vcl/BitmapTools.hxx>
 #include <vcl/GraphicLoader.hxx>
 #include <vcl/dibtools.hxx>
+#include <vcl/drawables/PixelDrawable.hxx>
 
 #include <libxml/xmlwriter.h>
 
@@ -119,9 +120,9 @@ void XOBitmap::Array2Bitmap()
         for (sal_Int32 j = 0; j < nLines; ++j)
         {
             if( pPixelArray[ j + i * nLines ] == 0 )
-                pVDev->DrawPixel( Point( j, i ), aBckgrColor );
+                Drawable::Draw(pVDev, PixelDrawable(Point(j, i), aBckgrColor));
             else
-                pVDev->DrawPixel( Point( j, i ), aPixelColor );
+                Drawable::Draw(pVDev, PixelDrawable(Point(j, i), aPixelColor));
         }
     }
 

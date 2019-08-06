@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/PixelDrawable.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/decoview.hxx>
@@ -60,7 +61,7 @@ void ImplDrawSymbol( OutputDevice* pDev, tools::Rectangle nRect, const SymbolTyp
     if ( !nSide ) return;
     if ( nSide==1 )
     {
-        pDev->DrawPixel( Point( nRect.Left(), nRect.Top() ) );
+        Drawable::Draw(pDev, PixelDrawable(Point(nRect.Left(), nRect.Top())));
         return;
     }
 
@@ -74,56 +75,56 @@ void ImplDrawSymbol( OutputDevice* pDev, tools::Rectangle nRect, const SymbolTyp
     switch ( eType )
     {
         case SymbolType::ARROW_UP:
-            pDev->DrawPixel( Point( aCenter.X(), nRect.Top() ) );
+            Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X(), nRect.Top())));
             for ( long i=1; i <= n2; ++i )
             {
                 nRect.AdjustTop( 1 );
                 pDev->DrawLine( Point( aCenter.X()-i, nRect.Top() ),
                                 Point( aCenter.X()+i, nRect.Top() ) );
-                pDev->DrawPixel( Point( aCenter.X()-i, nRect.Top() ) );
-                pDev->DrawPixel( Point( aCenter.X()+i, nRect.Top() ) );
+                Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()-i, nRect.Top())));
+                Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()+i, nRect.Top())));
             }
             pDev->DrawRect( tools::Rectangle( aCenter.X()-n8, nRect.Top()+1,
                                        aCenter.X()+n8, nRect.Bottom() ) );
             break;
 
         case SymbolType::ARROW_DOWN:
-            pDev->DrawPixel( Point( aCenter.X(), nRect.Bottom() ) );
+            Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X(), nRect.Bottom())));
             for ( long i=1; i <= n2; ++i )
             {
                 nRect.AdjustBottom( -1 );
                 pDev->DrawLine( Point( aCenter.X()-i, nRect.Bottom() ),
                                 Point( aCenter.X()+i, nRect.Bottom() ) );
-                pDev->DrawPixel( Point( aCenter.X()-i, nRect.Bottom() ) );
-                pDev->DrawPixel( Point( aCenter.X()+i, nRect.Bottom() ) );
+                Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()-i, nRect.Bottom())));
+                Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()+i, nRect.Bottom())));
             }
             pDev->DrawRect( tools::Rectangle( aCenter.X()-n8, nRect.Top(),
                                        aCenter.X()+n8, nRect.Bottom()-1 ) );
             break;
 
         case SymbolType::ARROW_LEFT:
-            pDev->DrawPixel( Point( nRect.Left(), aCenter.Y() ) );
+            Drawable::Draw(pDev, PixelDrawable(Point(nRect.Left(), aCenter.Y())));
             for ( long i=1; i <= n2; ++i )
             {
                 nRect.AdjustLeft( 1 );
                 pDev->DrawLine( Point( nRect.Left(), aCenter.Y()-i ),
                                 Point( nRect.Left(), aCenter.Y()+i ) );
-                pDev->DrawPixel( Point( nRect.Left(), aCenter.Y()-i ) );
-                pDev->DrawPixel( Point( nRect.Left(), aCenter.Y()+i ) );
+                Drawable::Draw(pDev, PixelDrawable(Point(nRect.Left(), aCenter.Y()-i)));
+                Drawable::Draw(pDev, PixelDrawable(Point(nRect.Left(), aCenter.Y()+i)));
             }
             pDev->DrawRect( tools::Rectangle( nRect.Left()+1, aCenter.Y()-n8,
                                        nRect.Right(), aCenter.Y()+n8 ) );
             break;
 
         case SymbolType::ARROW_RIGHT:
-            pDev->DrawPixel( Point( nRect.Right(), aCenter.Y() ) );
+            Drawable::Draw(pDev, PixelDrawable(Point(nRect.Right(), aCenter.Y())));
             for ( long i=1; i <= n2; ++i )
             {
                 nRect.AdjustRight( -1 );
                 pDev->DrawLine( Point( nRect.Right(), aCenter.Y()-i ),
                                 Point( nRect.Right(), aCenter.Y()+i ) );
-                pDev->DrawPixel( Point( nRect.Right(), aCenter.Y()-i ) );
-                pDev->DrawPixel( Point( nRect.Right(), aCenter.Y()+i ) );
+                Drawable::Draw(pDev, PixelDrawable(Point(nRect.Right(), aCenter.Y()-i)));
+                Drawable::Draw(pDev, PixelDrawable(Point(nRect.Right(), aCenter.Y()+i)));
             }
             pDev->DrawRect( tools::Rectangle( nRect.Left(), aCenter.Y()-n8,
                                        nRect.Right()-1, aCenter.Y()+n8 ) );
@@ -131,27 +132,27 @@ void ImplDrawSymbol( OutputDevice* pDev, tools::Rectangle nRect, const SymbolTyp
 
         case SymbolType::SPIN_UP:
             nRect.AdjustTop(n4 );
-            pDev->DrawPixel( Point( aCenter.X(), nRect.Top() ) );
+            Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X(), nRect.Top())));
             for ( long i=1; i <= n2; ++i )
             {
                 nRect.AdjustTop( 1 );
                 pDev->DrawLine( Point( aCenter.X()-i, nRect.Top() ),
                                 Point( aCenter.X()+i, nRect.Top() ) );
-                pDev->DrawPixel( Point( aCenter.X()-i, nRect.Top() ) );
-                pDev->DrawPixel( Point( aCenter.X()+i, nRect.Top() ) );
+                Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()-i, nRect.Top())));
+                Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()+i, nRect.Top())));
             }
             break;
 
         case SymbolType::SPIN_DOWN:
             nRect.AdjustBottom( -n4 );
-            pDev->DrawPixel( Point( aCenter.X(), nRect.Bottom() ) );
+            Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X(), nRect.Bottom())));
             for ( long i=1; i <= n2; ++i )
             {
                 nRect.AdjustBottom( -1 );
                 pDev->DrawLine( Point( aCenter.X()-i, nRect.Bottom() ),
                                 Point( aCenter.X()+i, nRect.Bottom() ) );
-                pDev->DrawPixel( Point( aCenter.X()-i, nRect.Bottom() ) );
-                pDev->DrawPixel( Point( aCenter.X()+i, nRect.Bottom() ) );
+                Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()-i, nRect.Bottom())));
+                Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()+i, nRect.Bottom())));
             }
             break;
 
@@ -206,36 +207,36 @@ void ImplDrawSymbol( OutputDevice* pDev, tools::Rectangle nRect, const SymbolTyp
         }
 
         case SymbolType::PAGEUP:
-            pDev->DrawPixel( Point( aCenter.X(), nRect.Top() ) );
-            pDev->DrawPixel( Point( aCenter.X(), nRect.Top()+n2 ) );
+            Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X(), nRect.Top())));
+            Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X(), nRect.Top()+n2)));
             for ( long i=1; i < n2; ++i )
             {
                 nRect.AdjustTop( 1 );
                 pDev->DrawLine( Point( aCenter.X()-i, nRect.Top() ),
                                 Point( aCenter.X()+i, nRect.Top() ) );
-                pDev->DrawPixel( Point( aCenter.X()-i, nRect.Top() ) );
-                pDev->DrawPixel( Point( aCenter.X()+i, nRect.Top() ) );
+                Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()-i, nRect.Top())));
+                Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()+i, nRect.Top())));
                 pDev->DrawLine( Point( aCenter.X()-i, nRect.Top()+n2 ),
                                 Point( aCenter.X()+i, nRect.Top()+n2 ) );
-                pDev->DrawPixel( Point( aCenter.X()-i, nRect.Top()+n2 ) );
-                pDev->DrawPixel( Point( aCenter.X()+i, nRect.Top()+n2 ) );
+                Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()-i, nRect.Top()+n2)));
+                Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()+i, nRect.Top()+n2)));
             }
             break;
 
         case SymbolType::PAGEDOWN:
-            pDev->DrawPixel( Point( aCenter.X(), nRect.Bottom() ) );
-            pDev->DrawPixel( Point( aCenter.X(), nRect.Bottom()-n2 ) );
+            Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X(), nRect.Bottom())));
+            Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X(), nRect.Bottom()-n2)));
             for ( long i=1; i < n2; ++i )
             {
                 nRect.AdjustBottom( -1 );
                 pDev->DrawLine( Point( aCenter.X()-i, nRect.Bottom() ),
                                 Point( aCenter.X()+i, nRect.Bottom() ) );
-                pDev->DrawPixel( Point( aCenter.X()-i, nRect.Bottom() ) );
-                pDev->DrawPixel( Point( aCenter.X()+i, nRect.Bottom() ) );
+                Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()-i, nRect.Bottom())));
+                Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()+i, nRect.Bottom())));
                 pDev->DrawLine( Point( aCenter.X()-i, nRect.Bottom()-n2 ),
                                 Point( aCenter.X()+i, nRect.Bottom()-n2 ) );
-                pDev->DrawPixel( Point( aCenter.X()-i, nRect.Bottom()-n2 ) );
-                pDev->DrawPixel( Point( aCenter.X()+i, nRect.Bottom()-n2 ) );
+                Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()-i, nRect.Bottom()-n2)));
+                Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()+i, nRect.Bottom()-n2)));
             }
             break;
 

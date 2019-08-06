@@ -24,11 +24,13 @@
 #include <tools/stream.hxx>
 #include <tools/vcompat.hxx>
 #include <tools/helpers.hxx>
+#include <unotools/fontdefs.hxx>
+
+#include <vcl/drawables/PixelDrawable.hxx>
 #include <vcl/dibtools.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/graphictools.hxx>
-#include <unotools/fontdefs.hxx>
 
 namespace
 {
@@ -285,7 +287,7 @@ MetaPixelAction::MetaPixelAction( const Point& rPt, const Color& rColor ) :
 
 void MetaPixelAction::Execute( OutputDevice* pOut )
 {
-    pOut->DrawPixel( maPt, maColor );
+    Drawable::Draw(pOut, PixelDrawable(maPt, maColor));
 }
 
 rtl::Reference<MetaAction> MetaPixelAction::Clone()
@@ -332,7 +334,7 @@ MetaPointAction::MetaPointAction( const Point& rPt ) :
 
 void MetaPointAction::Execute( OutputDevice* pOut )
 {
-    pOut->DrawPixel( maPt );
+    Drawable::Draw(pOut, PixelDrawable(maPt));
 }
 
 rtl::Reference<MetaAction> MetaPointAction::Clone()
