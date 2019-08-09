@@ -19,15 +19,14 @@
 
 #include <sal/types.h>
 #include <sal/log.hxx>
-
+#include <comphelper/processfactory.hxx>
 #include <tools/helpers.hxx>
 #include <tools/debug.hxx>
 
 #include <vcl/event.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/print.hxx>
-
-#include <comphelper/processfactory.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <salinst.hxx>
 #include <salvd.hxx>
@@ -270,21 +269,21 @@ void Printer::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
         tools::Rectangle aRect( aPolyRect.TopLeft(), Size( aPolyRect.GetWidth(), nBaseExtent ) );
         while( aRect.Top() <= aPolyRect.Bottom() )
         {
-            DrawRect( aRect );
+            Drawable::Draw(this, RectangleDrawable(aRect));
             aRect.Move( 0, nMove );
         }
 
         aRect = tools::Rectangle( aPolyRect.TopLeft(), Size( nBaseExtent, aPolyRect.GetHeight() ) );
         while( aRect.Left() <= aPolyRect.Right() )
         {
-            DrawRect( aRect );
+            Drawable::Draw(this, RectangleDrawable(aRect));
             aRect.Move( nMove, 0 );
         }
     }
     else
     {
         // #i112959# if not transparent, draw full rectangle in clip region
-        DrawRect( aPolyRect );
+        Drawable::Draw(this, RectangleDrawable(aPolyRect));
     }
 
     EnableMapMode( bOldMap );
@@ -759,7 +758,7 @@ void Printer::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
             pMapX[rectangle.Right() + 1] - aMapPt.X(),      // pMapX[L + W] -> L + ((R - L) + 1) -> R + 1
             pMapY[rectangle.Bottom() + 1] - aMapPt.Y());    // same for Y
 
-        DrawRect(tools::Rectangle(aMapPt, aMapSz));
+        Drawable::Draw(this, RectangleDrawable(tools::Rectangle(aMapPt, aMapSz)));
     }
 
     Pop();

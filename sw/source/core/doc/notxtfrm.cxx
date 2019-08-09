@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <hintids.hxx>
 #include <tools/urlobj.hxx>
 #include <vcl/print.hxx>
@@ -210,7 +212,7 @@ static void lcl_ClearArea( const SwFrame &rFrame,
             rOut.SetFillColor( rFrame.getRootFrame()->GetCurrShell()->Imp()->GetRetoucheColor());
             rOut.SetLineColor();
             for( const auto &rRegion : aRegion )
-                rOut.DrawRect( rRegion.SVRect() );
+                Drawable::Draw(&rOut, RectangleDrawable(rRegion.SVRect()));
             rOut.Pop();
         }
     }

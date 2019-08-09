@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <scitems.hxx>
 #include <editeng/eeitem.hxx>
 
@@ -362,9 +364,9 @@ void ScPreview::DoPrint( ScPreviewLocationData* pFillLocation )
 
         Size aWinSize = GetOutputSize();
         if ( aOffset.X() < 0 )
-            DrawRect(tools::Rectangle( 0, 0, -aOffset.X(), aWinSize.Height() ));
+            Drawable::Draw(this, RectangleDrawable(tools::Rectangle(0, 0, -aOffset.X(), aWinSize.Height())));
         if ( aOffset.Y() < 0 )
-            DrawRect(tools::Rectangle( 0, 0, aWinSize.Width(), -aOffset.Y() ));
+            Drawable::Draw(this, RectangleDrawable(tools::Rectangle(0, 0, aWinSize.Width(), -aOffset.Y())));
     }
 
     long   nLeftMargin = 0;
@@ -494,7 +496,7 @@ void ScPreview::DoPrint( ScPreviewLocationData* pFillLocation )
             // Draw background first.
             SetLineColor();
             SetFillColor(aBackColor);
-            DrawRect(tools::Rectangle(0, 0, aWinEnd.X(), aWinEnd.Y()));
+            Drawable::Draw(this, RectangleDrawable(tools::Rectangle(0, 0, aWinEnd.X(), aWinEnd.Y())));
 
             const ScPatternAttr& rDefPattern =
                     rDoc.GetPool()->GetDefaultItem(ATTR_PATTERN);
@@ -553,7 +555,8 @@ void ScPreview::DoPrint( ScPreviewLocationData* pFillLocation )
                 Point aColumnTop = LogicToPixel( Point( 0, -aOffset.Y() ) ,aMMMode );
                 SetLineColor( COL_BLACK );
                 SetFillColor( COL_BLACK );
-                DrawRect( tools::Rectangle( Point( mvRight[i] - 2, aColumnTop.Y() ),Point( mvRight[i] + 2 , 4 + aColumnTop.Y()) ));
+                Drawable::Draw(this,
+                    RectangleDrawable(tools::Rectangle(Point(mvRight[i] - 2, aColumnTop.Y()),Point(mvRight[i] + 2, 4 + aColumnTop.Y()))));
                 DrawLine( Point( mvRight[i], aColumnTop.Y() ), Point( mvRight[i],  10 + aColumnTop.Y()) );
             }
             SetMapMode( aMMMode );
@@ -565,13 +568,13 @@ void ScPreview::DoPrint( ScPreviewLocationData* pFillLocation )
             SetLineColor();
             SetFillColor(aBackColor);
             if (bRight)
-                DrawRect(tools::Rectangle(nPageEndX,0, aWinEnd.X(),aWinEnd.Y()));
+                Drawable::Draw(this, RectangleDrawable(tools::Rectangle(nPageEndX,0, aWinEnd.X(),aWinEnd.Y())));
             if (bBottom)
             {
                 if (bRight)
-                    DrawRect(tools::Rectangle(0,nPageEndY, nPageEndX,aWinEnd.Y()));    // Corner not duplicated
+                    Drawable::Draw(this, RectangleDrawable(tools::Rectangle(0,nPageEndY, nPageEndX,aWinEnd.Y())));    // Corner not duplicated
                 else
-                    DrawRect(tools::Rectangle(0,nPageEndY, aWinEnd.X(),aWinEnd.Y()));
+                    Drawable::Draw(this, RectangleDrawable(tools::Rectangle(0,nPageEndY, aWinEnd.X(),aWinEnd.Y())));
             }
         }
 
@@ -589,7 +592,7 @@ void ScPreview::DoPrint( ScPreviewLocationData* pFillLocation )
                 tools::Rectangle aPixel( LogicToPixel( tools::Rectangle( -aOffset.X(), -aOffset.Y(), nPageEndX, nPageEndY ) ) );
                 aPixel.AdjustRight( -1 );
                 aPixel.AdjustBottom( -1 );
-                DrawRect( PixelToLogic( aPixel ) );
+                Drawable::Draw(this, RectangleDrawable(PixelToLogic(aPixel)));
             }
 
             //  draw shadow
@@ -603,13 +606,13 @@ void ScPreview::DoPrint( ScPreviewLocationData* pFillLocation )
             aPixel.AdjustTop(SC_PREVIEW_SHADOWSIZE );
             aPixel.AdjustRight(SC_PREVIEW_SHADOWSIZE - 1 );
             aPixel.AdjustBottom(SC_PREVIEW_SHADOWSIZE - 1 );
-            DrawRect( PixelToLogic( aPixel ) );
+            Drawable::Draw(this, RectangleDrawable(PixelToLogic(aPixel)));
 
             aPixel = LogicToPixel( tools::Rectangle( -aOffset.X(), nPageEndY, nPageEndX, nPageEndY ) );
             aPixel.AdjustLeft(SC_PREVIEW_SHADOWSIZE );
             aPixel.AdjustRight(SC_PREVIEW_SHADOWSIZE - 1 );
             aPixel.AdjustBottom(SC_PREVIEW_SHADOWSIZE - 1 );
-            DrawRect( PixelToLogic( aPixel ) );
+            Drawable::Draw(this, RectangleDrawable(PixelToLogic(aPixel)));
         }
     }
 }

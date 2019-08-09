@@ -19,6 +19,8 @@
 
 #include <rtl/tencinfo.h>
 #include <osl/diagnose.h>
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <hintids.hxx>
 #include <com/sun/star/ui/dialogs/TemplateDescription.hpp>
 #include <unotools/tempfile.hxx>
@@ -147,9 +149,9 @@ static void lcl_PrintHeader( vcl::RenderContext &rOutDev, sal_Int32 nPages, sal_
     long nXLeft = nLeftMargin-nBorder;
     long nXRight = aSz.Width()-RMARGPRN+nBorder;
 
-    rOutDev.DrawRect( tools::Rectangle(
-        Point( nXLeft, nYTop ),
-        Size( nXRight-nXLeft, aSz.Height() - nYTop - BMARGPRN + nBorder ) ) );
+    Drawable::Draw(&rOutDev, RectangleDrawable(tools::Rectangle(
+        Point(nXLeft, nYTop),
+        Size(nXRight-nXLeft, aSz.Height() - nYTop - BMARGPRN + nBorder))));
 
     long nY = TMARGPRN-2*nBorder;
     Point aPos( nLeftMargin, nY );

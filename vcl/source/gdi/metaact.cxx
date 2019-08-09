@@ -27,6 +27,7 @@
 #include <unotools/fontdefs.hxx>
 
 #include <vcl/drawables/PixelDrawable.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/dibtools.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/metaact.hxx>
@@ -451,7 +452,7 @@ MetaRectAction::MetaRectAction( const tools::Rectangle& rRect ) :
 
 void MetaRectAction::Execute( OutputDevice* pOut )
 {
-    pOut->DrawRect( maRect );
+    Drawable::Draw(pOut, RectangleDrawable(maRect));
 }
 
 rtl::Reference<MetaAction> MetaRectAction::Clone()

@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include "CellLineStyleValueSet.hxx"
 #include <i18nlangtag/mslangid.hxx>
 #include <vcl/event.hxx>
@@ -90,12 +92,12 @@ void CellLineStyleValueSet::UserDraw( const UserDrawEvent& rUDEvt )
         aBackRect.AdjustTop(3 );
         aBackRect.AdjustBottom( -2 );
         pDev->SetFillColor(Color(50,107,197));
-        pDev->DrawRect(aBackRect);
+        Drawable::Draw(pDev, RectangleDrawable(aBackRect));
     }
     else
     {
         pDev->SetFillColor( COL_TRANSPARENT );
-        pDev->DrawRect(aRect);
+        Drawable::Draw(pDev, RectangleDrawable(aRect));
     }
 
     //draw text
@@ -129,27 +131,27 @@ void CellLineStyleValueSet::UserDraw( const UserDrawEvent& rUDEvt )
         case 2:
         case 3:
         case 4:
-            pDev->DrawRect(tools::Rectangle(nTLX, nTLY , nTRX, nTRY + nItemId * 2 - 1 ));
+            Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(nTLX, nTLY , nTRX, nTRY + nItemId * 2 - 1)));
             break;
         case 5:
-            pDev->DrawRect(tools::Rectangle(nTLX, nTLY , nTRX, nTRY + 1 ));
-            pDev->DrawRect(tools::Rectangle(nTLX, nTLY + 3 , nTRX, nTRY + 4 ));
+            Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(nTLX, nTLY , nTRX, nTRY + 1)));
+            Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(nTLX, nTLY + 3 , nTRX, nTRY + 4)));
             break;
         case 6:
-            pDev->DrawRect(tools::Rectangle(nTLX, nTLY , nTRX, nTRY + 1 ));
-            pDev->DrawRect(tools::Rectangle(nTLX, nTLY + 5 , nTRX, nTRY + 6 ));
+            Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(nTLX, nTLY , nTRX, nTRY + 1)));
+            Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(nTLX, nTLY + 5 , nTRX, nTRY + 6)));
             break;
         case 7:
-            pDev->DrawRect(tools::Rectangle(nTLX, nTLY , nTRX, nTRY + 1 ));
-            pDev->DrawRect(tools::Rectangle(nTLX, nTLY + 3 , nTRX, nTRY + 6 ));
+            Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(nTLX, nTLY , nTRX, nTRY + 1)));
+            Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(nTLX, nTLY + 3 , nTRX, nTRY + 6)));
             break;
         case 8:
-            pDev->DrawRect(tools::Rectangle(nTLX, nTLY , nTRX, nTRY + 3 ));
-            pDev->DrawRect(tools::Rectangle(nTLX, nTLY + 5 , nTRX, nTRY + 6 ));
+            Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(nTLX, nTLY , nTRX, nTRY + 3)));
+            Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(nTLX, nTLY + 5 , nTRX, nTRY + 6)));
             break;
         case 9:
-            pDev->DrawRect(tools::Rectangle(nTLX, nTLY , nTRX, nTRY + 3 ));
-            pDev->DrawRect(tools::Rectangle(nTLX, nTLY + 5 , nTRX, nTRY + 8 ));
+            Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(nTLX, nTLY , nTRX, nTRY + 3)));
+            Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(nTLX, nTLY + 5 , nTRX, nTRY + 8)));
             break;
     }
 

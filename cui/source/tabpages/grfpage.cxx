@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <memory>
 #include <svl/eitem.hxx>
 #include <svl/stritem.hxx>
@@ -710,7 +712,7 @@ void SvxCropExample::Paint(vcl::RenderContext& rRenderContext, const ::tools::Re
     Size aWinSize(rRenderContext.PixelToLogic(GetOutputSizePixel()));
     rRenderContext.SetLineColor();
     rRenderContext.SetFillColor(rRenderContext.GetSettings().GetStyleSettings().GetWindowColor());
-    rRenderContext.DrawRect(::tools::Rectangle(Point(), aWinSize));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(::tools::Rectangle(Point(), aWinSize)));
 
     rRenderContext.SetLineColor(COL_WHITE);
     ::tools::Rectangle aRect(Point((aWinSize.Width() - m_aFrameSize.Width())/2,
@@ -724,7 +726,7 @@ void SvxCropExample::Paint(vcl::RenderContext& rRenderContext, const ::tools::Re
     aRect.AdjustTop(m_aTopLeft.X() );
     aRect.AdjustRight(-m_aBottomRight.Y());
     aRect.AdjustBottom(-m_aBottomRight.X());
-    rRenderContext.DrawRect(aRect);
+    Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
 
     rRenderContext.Pop();
 }

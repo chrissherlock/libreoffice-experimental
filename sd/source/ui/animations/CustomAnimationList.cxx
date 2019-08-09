@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/PixelDrawable.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <com/sun/star/drawing/XShapes.hpp>
 #include <com/sun/star/presentation/ShapeAnimationSubType.hpp>
@@ -422,7 +423,7 @@ void CustomAnimationTriggerEntryItem::Paint(const Point& rPos, SvTreeListBox& rD
     rRenderContext.Push();
     rRenderContext.SetFillColor(aColor);
     rRenderContext.SetLineColor();
-    rRenderContext.DrawRect(aOutRect);
+    Drawable::Draw(&rRenderContext, RectangleDrawable(aOutRect));
 
     // Erase the four corner pixels to make the rectangle appear rounded.
     rRenderContext.SetLineColor(rRenderContext.GetSettings().GetStyleSettings().GetWindowColor());

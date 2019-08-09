@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <view/SlsInsertionIndicatorOverlay.hxx>
 
 #include <SlideSorter.hxx>
@@ -224,7 +226,7 @@ Point InsertionIndicatorOverlay::PaintRepresentatives (
         ::tools::Rectangle aBorderBox (GrowRectangle(aBox, 1));
         rContent.SetLineColor(COL_GRAY);
         rContent.SetFillColor();
-        rContent.DrawRect(aBorderBox);
+        Drawable::Draw(&rContent, RectangleDrawable(aBorderBox));
 
         // Draw shadow around preview.
         mpShadowPainter->PaintFrame(rContent, aBorderBox);
@@ -266,11 +268,11 @@ void InsertionIndicatorOverlay::PaintPageCount (
     static const sal_Int32 nBorder = 5;
     rDevice.SetFillColor(pTheme->GetColor(Theme::Color_Selection));
     rDevice.SetLineColor(pTheme->GetColor(Theme::Color_Selection));
-    rDevice.DrawRect(GrowRectangle(aTextBox, nBorder));
+    Drawable::Draw(&rDevice, RectangleDrawable(GrowRectangle(aTextBox, nBorder)));
 
     rDevice.SetFillColor();
     rDevice.SetLineColor(pTheme->GetColor(Theme::Color_PageCountFontColor));
-    rDevice.DrawRect(GrowRectangle(aTextBox, nBorder-1));
+    Drawable::Draw(&rDevice, RectangleDrawable(GrowRectangle(aTextBox, nBorder-1)));
 
     rDevice.SetTextColor(pTheme->GetColor(Theme::Color_PageCountFontColor));
     rDevice.DrawText(aTextBox.TopLeft()-aTextOffset, sNumber);

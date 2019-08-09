@@ -43,6 +43,7 @@
 #include <vcl/gradient.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/drawables/PixelDrawable.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <com/sun/star/lang/XMultiServiceFactory.hpp>
 #include <com/sun/star/uno/XComponentContext.hpp>
@@ -208,10 +209,10 @@ void setupMethodStubs( functor_vector_type& res )
         "DrawPolyPolygon",
         [aPolyPoly] (OutputDevice *pOutDev) { return pOutDev->DrawPolyPolygon(aPolyPoly); });
 
-    /* void DrawRect( const Rectangle& rRect ); */
+    /* void RectangleDrawable(const Rectangle& rRect) */
     add(res,
         "DrawRect",
-        [aRect] (OutputDevice *pOutDev) { return pOutDev->DrawRect(aRect); });
+        [aRect] (OutputDevice *pOutDev) { return Drawable::Draw(pOutDev, RectangleDrawable(aRect)); });
 
     /* void DrawRect( const Rectangle& rRect,
                                   sal_uLong nHorzRount, sal_uLong nVertRound );

@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <memory>
 #include <i18nlangtag/languagetag.hxx>
 #include <vcl/commandevent.hxx>
@@ -1297,7 +1299,7 @@ void VclMultiLineEdit::Draw( OutputDevice* pDev, const Point& rPos, const Size& 
         if ( bBackground )
         {
             pDev->SetFillColor( GetControlBackground() );
-            pDev->DrawRect( aRect );
+            Drawable::Draw(pDev, RectangleDrawable(aRect));
         }
     }
 

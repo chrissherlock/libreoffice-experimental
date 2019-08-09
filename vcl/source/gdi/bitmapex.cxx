@@ -33,6 +33,7 @@
 #include <vcl/settings.hxx>
 #include <vcl/BitmapMonochromeFilter.hxx>
 #include <vcl/drawables/PixelDrawable.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 // BitmapEx::Create
 #include <salbmp.hxx>
@@ -674,7 +675,7 @@ BitmapEx BitmapEx:: AutoScaleBitmap(BitmapEx const & aBitmap, const long aStanda
     aVirDevice->SetLineColor( COL_TRANSPARENT );
 
     // Draw a rect into virDevice
-    aVirDevice->DrawRect( aRect );
+    Drawable::Draw(aVirDevice, RectangleDrawable(aRect));
     Point aPointPixel( static_cast<long>(imgposX), static_cast<long>(imgposY) );
     aVirDevice->DrawBitmapEx( aPointPixel, aRet );
     aRet = aVirDevice->GetBitmapEx( aEmptyPoint, aStdSize );

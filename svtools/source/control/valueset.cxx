@@ -18,6 +18,7 @@
  */
 
 #include <tools/debug.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/builderfactory.hxx>
 #include <vcl/decoview.hxx>
 #include <vcl/event.hxx>
@@ -241,7 +242,7 @@ void ValueSet::ImplFormatItem(vcl::RenderContext& rRenderContext, ValueSetItem* 
         rRenderContext.SetFillColor((nStyle & WB_MENUSTYLEVALUESET)
                                         ? rStyleSettings.GetMenuColor()
                                         : rStyleSettings.GetWindowColor());
-        rRenderContext.DrawRect(aRect);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
         Point aTxtPos(aRect.Left() + 2, aRect.Top());
         long nTxtWidth = rRenderContext.GetTextWidth(pItem->maText);
         if ((aTxtPos.X() + nTxtWidth) > aRect.Right())
@@ -256,7 +257,7 @@ void ValueSet::ImplFormatItem(vcl::RenderContext& rRenderContext, ValueSetItem* 
     else if (pItem->meType == VALUESETITEM_COLOR)
     {
         rRenderContext.SetFillColor(pItem->maColor);
-        rRenderContext.DrawRect(aRect);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
     }
     else
     {
@@ -268,7 +269,7 @@ void ValueSet::ImplFormatItem(vcl::RenderContext& rRenderContext, ValueSetItem* 
             rRenderContext.SetFillColor(rStyleSettings.GetWindowColor());
         else
             rRenderContext.SetFillColor(rStyleSettings.GetFaceColor());
-        rRenderContext.DrawRect(aRect);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
 
         if (pItem->meType == VALUESETITEM_USERDRAW)
         {
@@ -685,7 +686,7 @@ void ValueSet::ImplDrawItemText(vcl::RenderContext& rRenderContext, const OUStri
         const StyleSettings& rStyleSettings = rRenderContext.GetSettings().GetStyleSettings();
         rRenderContext.SetLineColor();
         rRenderContext.SetFillColor(rStyleSettings.GetFaceColor());
-        rRenderContext.DrawRect(tools::Rectangle(Point(0, nTxtOffset), Point(aWinSize.Width(), aWinSize.Height())));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(0, nTxtOffset), Point(aWinSize.Width(), aWinSize.Height()))));
         rRenderContext.SetTextColor(rStyleSettings.GetButtonTextColor());
     }
     else
@@ -782,7 +783,7 @@ void ValueSet::ImplDrawSelect(vcl::RenderContext& rRenderContext, sal_uInt16 nIt
         if (bDrawSel)
         {
             rRenderContext.SetLineColor(mbBlackSel ? COL_BLACK : aDoubleColor);
-            rRenderContext.DrawRect(aRect);
+            Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
         }
     }
     else
@@ -790,7 +791,7 @@ void ValueSet::ImplDrawSelect(vcl::RenderContext& rRenderContext, sal_uInt16 nIt
         if (bDrawSel)
         {
             rRenderContext.SetLineColor(mbBlackSel ? COL_BLACK : aDoubleColor);
-            rRenderContext.DrawRect(aRect);
+            Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
         }
         if (mbDoubleSel)
         {
@@ -799,7 +800,7 @@ void ValueSet::ImplDrawSelect(vcl::RenderContext& rRenderContext, sal_uInt16 nIt
             aRect.AdjustRight( -1 );
             aRect.AdjustBottom( -1 );
             if (bDrawSel)
-                rRenderContext.DrawRect(aRect);
+                Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
         }
         aRect.AdjustLeft( 1 );
         aRect.AdjustTop( 1 );
@@ -811,7 +812,7 @@ void ValueSet::ImplDrawSelect(vcl::RenderContext& rRenderContext, sal_uInt16 nIt
         aRect.AdjustRight( -1 );
         aRect.AdjustBottom( -1 );
         if (bDrawSel)
-            rRenderContext.DrawRect(aRect);
+            Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
         if (mbDoubleSel)
         {
             aRect.AdjustLeft( 1 );
@@ -819,7 +820,7 @@ void ValueSet::ImplDrawSelect(vcl::RenderContext& rRenderContext, sal_uInt16 nIt
             aRect.AdjustRight( -1 );
             aRect.AdjustBottom( -1 );
             if (bDrawSel)
-                rRenderContext.DrawRect(aRect);
+                Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
         }
 
         if (bDrawSel)
@@ -830,7 +831,7 @@ void ValueSet::ImplDrawSelect(vcl::RenderContext& rRenderContext, sal_uInt16 nIt
         {
             rRenderContext.SetLineColor(COL_LIGHTGRAY);
         }
-        rRenderContext.DrawRect(aRect2);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aRect2));
 
         if (bFocus)
             ShowFocus(aRect2);
@@ -2374,7 +2375,7 @@ void SvtValueSet::Paint(vcl::RenderContext& rRenderContext, const tools::Rectang
         rRenderContext.SetFillColor(rStyleSettings.GetFaceColor());
         long nOffY = maVirDev->GetOutputSizePixel().Height();
         Size aWinSize(GetOutputSizePixel());
-        rRenderContext.DrawRect(tools::Rectangle(Point(0, nOffY ), Point( aWinSize.Width(), aWinSize.Height())));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(0, nOffY ), Point( aWinSize.Width(), aWinSize.Height()))));
     }
 
     ImplDraw(rRenderContext);
@@ -3270,7 +3271,7 @@ void SvtValueSet::ImplDrawSelect(vcl::RenderContext& rRenderContext, sal_uInt16 
         if (bDrawSel)
         {
             rRenderContext.SetLineColor(mbBlackSel ? COL_BLACK : aDoubleColor);
-            rRenderContext.DrawRect(aRect);
+            Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
         }
     }
     else
@@ -3278,7 +3279,7 @@ void SvtValueSet::ImplDrawSelect(vcl::RenderContext& rRenderContext, sal_uInt16 
         if (bDrawSel)
         {
             rRenderContext.SetLineColor(mbBlackSel ? COL_BLACK : aDoubleColor);
-            rRenderContext.DrawRect(aRect);
+            Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
         }
         if (mbDoubleSel)
         {
@@ -3287,7 +3288,7 @@ void SvtValueSet::ImplDrawSelect(vcl::RenderContext& rRenderContext, sal_uInt16 
             aRect.AdjustRight( -1 );
             aRect.AdjustBottom( -1 );
             if (bDrawSel)
-                rRenderContext.DrawRect(aRect);
+                Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
         }
         aRect.AdjustLeft( 1 );
         aRect.AdjustTop( 1 );
@@ -3299,7 +3300,7 @@ void SvtValueSet::ImplDrawSelect(vcl::RenderContext& rRenderContext, sal_uInt16 
         aRect.AdjustRight( -1 );
         aRect.AdjustBottom( -1 );
         if (bDrawSel)
-            rRenderContext.DrawRect(aRect);
+            Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
         if (mbDoubleSel)
         {
             aRect.AdjustLeft( 1 );
@@ -3307,7 +3308,7 @@ void SvtValueSet::ImplDrawSelect(vcl::RenderContext& rRenderContext, sal_uInt16 
             aRect.AdjustRight( -1 );
             aRect.AdjustBottom( -1 );
             if (bDrawSel)
-                rRenderContext.DrawRect(aRect);
+                Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
         }
 
         if (bDrawSel)
@@ -3318,7 +3319,7 @@ void SvtValueSet::ImplDrawSelect(vcl::RenderContext& rRenderContext, sal_uInt16 
         {
             rRenderContext.SetLineColor(COL_LIGHTGRAY);
         }
-        rRenderContext.DrawRect(aRect2);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aRect2));
         if (bFocus)
             DrawFocusRect(rRenderContext, aRect2);
     }
@@ -3366,7 +3367,7 @@ void SvtValueSet::ImplFormatItem(vcl::RenderContext const & rRenderContext, SvtV
         maVirDev->SetTextColor((nStyle & WB_MENUSTYLEVALUESET) ? rStyleSettings.GetMenuTextColor() : rStyleSettings.GetWindowTextColor());
         maVirDev->SetTextFillColor();
         maVirDev->SetFillColor((nStyle & WB_MENUSTYLEVALUESET) ? rStyleSettings.GetMenuColor() : rStyleSettings.GetWindowColor());
-        maVirDev->DrawRect(aRect);
+        Drawable::Draw(maVirDev, RectangleDrawable(aRect));
         Point aTxtPos(aRect.Left() + 2, aRect.Top());
         long nTxtWidth = rRenderContext.GetTextWidth(pItem->maText);
         if ((aTxtPos.X() + nTxtWidth) > aRect.Right())
@@ -3381,7 +3382,7 @@ void SvtValueSet::ImplFormatItem(vcl::RenderContext const & rRenderContext, SvtV
     else if (pItem->meType == VALUESETITEM_COLOR)
     {
         maVirDev->SetFillColor(pItem->maColor);
-        maVirDev->DrawRect(aRect);
+        Drawable::Draw(maVirDev, RectangleDrawable(aRect));
     }
     else
     {
@@ -3393,7 +3394,7 @@ void SvtValueSet::ImplFormatItem(vcl::RenderContext const & rRenderContext, SvtV
             maVirDev->SetFillColor(rStyleSettings.GetWindowColor());
         else
             maVirDev->SetFillColor(rStyleSettings.GetFaceColor());
-        maVirDev->DrawRect(aRect);
+        Drawable::Draw(maVirDev, RectangleDrawable(aRect));
 
         if (pItem->meType == VALUESETITEM_USERDRAW)
         {
@@ -3477,7 +3478,7 @@ void SvtValueSet::ImplDrawItemText(vcl::RenderContext& rRenderContext, const OUS
         const StyleSettings& rStyleSettings = rRenderContext.GetSettings().GetStyleSettings();
         rRenderContext.SetLineColor();
         rRenderContext.SetFillColor(rStyleSettings.GetFaceColor());
-        rRenderContext.DrawRect(tools::Rectangle(Point(0, nTxtOffset), Point(aWinSize.Width(), aWinSize.Height())));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(0, nTxtOffset), Point(aWinSize.Width(), aWinSize.Height()))));
         rRenderContext.SetTextColor(rStyleSettings.GetButtonTextColor());
     }
     else

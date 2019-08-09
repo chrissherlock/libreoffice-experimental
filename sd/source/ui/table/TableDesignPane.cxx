@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <sddll.hxx>
 
 #include <com/sun/star/beans/XMultiPropertyStates.hpp>
@@ -618,7 +620,7 @@ static const BitmapEx CreateDesignPreview( const Reference< XIndexAccess >& xTab
                 if( xCellInfo->maCellColor != COL_TRANSPARENT )
                 {
                     pVirDev->SetFillColor( xCellInfo->maCellColor );
-                    pVirDev->DrawRect( aRect );
+                    Drawable::Draw(pVirDev, RectangleDrawable(aRect));
                 }
 
                 aTextColor = xCellInfo->maTextColor;

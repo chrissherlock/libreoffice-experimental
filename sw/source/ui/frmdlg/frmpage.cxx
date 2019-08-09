@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <com/sun/star/embed/Aspects.hpp>
 #include <com/sun/star/embed/EmbedMisc.hpp>
 #include <com/sun/star/embed/XEmbeddedObject.hpp>
@@ -2623,7 +2625,7 @@ void BmpWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle
     }
 
     // #i119307# clear window background, the graphic might have transparency
-    rRenderContext.DrawRect(tools::Rectangle(aPntPos, aPntSz));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(aPntPos, aPntSz)));
 
     if (bHorz || bVert)
     {

@@ -21,6 +21,7 @@
 #include <tools/debug.hxx>
 
 #include <vcl/drawables/PixelDrawable.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/help.hxx>
 #include <vcl/image.hxx>
@@ -241,7 +242,7 @@ void HeaderBar::ImplInvertDrag( sal_uInt16 nStartPos, sal_uInt16 nEndPos )
     }
 
     SetRasterOp( RasterOp::Invert );
-    DrawRect( aStartRect );
+    Drawable::Draw(this, RectangleDrawable(aStartRect));
     DrawLine( aStartPos, aEndPos );
     if ( nEndPos > nStartPos )
     {

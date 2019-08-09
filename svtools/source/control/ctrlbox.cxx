@@ -21,6 +21,7 @@
 
 #include <i18nutil/unicode.hxx>
 #include <tools/stream.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/builderfactory.hxx>
 #include <vcl/customweld.hxx>
 #include <vcl/event.hxx>
@@ -1479,7 +1480,7 @@ void SvtLineListBox::ImpGetLine( long nLine1, long nLine2, long nDistance,
     if ( aVirDev->GetOutputSizePixel() != aVirSize )
         aVirDev->SetOutputSizePixel( aVirSize );
     aVirDev->SetFillColor( aColorDist );
-    aVirDev->DrawRect( tools::Rectangle( Point(), aSize ) );
+    Drawable::Draw(aVirDev, RectangleDrawable(tools::Rectangle(Point(), aSize)));
 
     aVirDev->SetFillColor( aColor1 );
 

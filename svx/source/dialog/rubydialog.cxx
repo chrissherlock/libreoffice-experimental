@@ -16,6 +16,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <memory>
 #include <sal/config.h>
 #include <tools/debug.hxx>
@@ -731,7 +733,7 @@ void RubyPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Rectang
     tools::Rectangle aRect(Point(0, 0), aWinSize);
     rRenderContext.SetLineColor();
     rRenderContext.SetFillColor(aFont.GetFillColor());
-    rRenderContext.DrawRect(aRect);
+    Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
 
     OUString sBaseText, sRubyText;
     m_pParentDlg->GetCurrentText(sBaseText, sRubyText);

@@ -18,6 +18,9 @@
  */
 
 #include <unotools/pathoptions.hxx>
+
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include "optchart.hxx"
 #include <svx/SvxColorValueSet.hxx>
 #include <vcl/virdev.hxx>
@@ -41,7 +44,7 @@ void SvxDefaultColorOptPage::InsertColorEntry(const XColorEntry& rEntry, sal_Int
     const ::tools::Rectangle aRect(Point(0, 0), aImageSize);
     xDevice->SetFillColor(rColor);
     xDevice->SetLineColor(rStyleSettings.GetDisableColor());
-    xDevice->DrawRect(aRect);
+    Drawable::Draw(xDevice, RectangleDrawable(aRect));
 
     m_xLbChartColors->insert(nullptr, nPos, &rStr, nullptr,
                              nullptr, xDevice.get(), nullptr, false, nullptr);

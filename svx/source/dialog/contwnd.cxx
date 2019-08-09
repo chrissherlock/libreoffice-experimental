@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <svx/xoutbmp.hxx>
 #include <svx/svxids.hrc>
 #include "contwnd.hxx"
@@ -239,7 +241,7 @@ void ContourWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Recta
     rTarget.Push(PushFlags::LINECOLOR |PushFlags::FILLCOLOR);
     rTarget.SetLineColor(COL_BLACK);
     rTarget.SetFillColor(COL_WHITE);
-    rTarget.DrawRect( tools::Rectangle( Point(), GetGraphicSize() ) );
+    Drawable::Draw(&rTarget, RectangleDrawable(tools::Rectangle(Point(), GetGraphicSize())));
     rTarget.Pop();
 
     if (rGraphic.GetType() != GraphicType::NONE)

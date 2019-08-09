@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <stdlib.h>
 #include <limits>
 
@@ -350,7 +352,7 @@ void SdrItemBrowserControl::PaintField(vcl::RenderContext& rDev, const tools::Re
             rDev.SetFillColor( COL_LIGHTGRAY );
             aR.SetLeft(0 );
             aR.SetRight(rDev.GetOutputSize().Width() );
-            rDev.DrawRect(aR);
+            Drawable::Draw(&rDev, RectangleDrawable(aR));
             rDev.DrawText(rRect.TopLeft(),pEntry->aName);
         }
     } else {

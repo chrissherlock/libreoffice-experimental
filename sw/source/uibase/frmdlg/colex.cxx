@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <cmdid.h>
 #include <hintids.hxx>
 #include <algorithm>
@@ -215,7 +217,7 @@ void SwColExample::DrawPage(vcl::RenderContext& rRenderContext, const Point& rOr
     aRect.SetLeft( rOrg.X() + nL );
     aRect.SetTop( rOrg.Y() + GetTop() + GetHdHeight() + GetHdDist() );
     aRect.SetBottom( rOrg.Y() + GetSize().Height() - GetBottom() - GetFtHeight() - GetFtDist() );
-    rRenderContext.DrawRect(aRect);
+    Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
 
     const tools::Rectangle aDefineRect(aRect);
     const drawinglayer::attribute::SdrAllFillAttributesHelperPtr& rFillAttributes = getPageFillAttributes();
@@ -353,7 +355,7 @@ void SwColumnOnlyExample::Paint(vcl::RenderContext& rRenderContext, const tools:
     tools::Rectangle aCompleteRect(Point(0,0), aLogSize);
     rRenderContext.SetLineColor(rDlgColor);
     rRenderContext.SetFillColor(rDlgColor);
-    rRenderContext.DrawRect(aCompleteRect);
+    Drawable::Draw(&rRenderContext, RectangleDrawable(aCompleteRect));
 
     rRenderContext.SetLineColor(rFieldTextColor);
     Point aTL((aLogSize.Width() - m_aFrameSize.Width()) / 2,
@@ -364,10 +366,10 @@ void SwColumnOnlyExample::Paint(vcl::RenderContext& rRenderContext, const tools:
     rRenderContext.SetFillColor(COL_GRAY);
     tools::Rectangle aShadowRect(aRect);
     aShadowRect.Move(aTL.Y(), aTL.Y());
-    rRenderContext.DrawRect(aShadowRect);
+    Drawable::Draw(&rRenderContext, RectangleDrawable(aShadowRect));
 
     rRenderContext.SetFillColor(rFieldColor);
-    rRenderContext.DrawRect(aRect);
+    Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
 
     rRenderContext.SetFillColor(aGrayColor);
 
@@ -402,7 +404,7 @@ void SwColumnOnlyExample::Paint(vcl::RenderContext& rRenderContext, const tools:
     sal_uInt16 nColCount = rCols.size();
     if (nColCount)
     {
-        rRenderContext.DrawRect(aRect);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
         rRenderContext.SetFillColor(rFieldColor);
         tools::Rectangle aFrameRect(aTL, m_aFrameSize);
         long nSum = aTL.X();
@@ -412,7 +414,7 @@ void SwColumnOnlyExample::Paint(vcl::RenderContext& rRenderContext, const tools:
             aFrameRect.SetLeft( nSum + pCol->GetLeft() ); //nSum + pCol->GetLeft() + aTL.X();
             nSum += pCol->GetWishWidth();
             aFrameRect.SetRight( nSum - pCol->GetRight() );
-            rRenderContext.DrawRect(aFrameRect);
+            Drawable::Draw(&rRenderContext, RectangleDrawable(aFrameRect));
         }
         if (bLines)
         {
@@ -577,8 +579,8 @@ void SwPageGridExample::DrawPage(vcl::RenderContext& rRenderContext, const Point
     sal_Int32 nYMove = m_bVertical ? 0 : nLineHeight;
     for (sal_Int32 nLine = 0; nLine < nLines; nLine++)
     {
-        rRenderContext.DrawRect(aRubyRect);
-        rRenderContext.DrawRect(aCharRect);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aRubyRect));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aCharRect));
         if (bBothLines)
         {
             Point aStart = aCharRect.TopLeft();

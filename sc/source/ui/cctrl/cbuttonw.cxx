@@ -18,10 +18,13 @@
  */
 
 #include <comphelper/lok.hxx>
+
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/decoview.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/settings.hxx>
+
 #include <cbutton.hxx>
 
 //  class ScDDComboBoxButton
@@ -122,7 +125,7 @@ void ScDDComboBoxButton::ImpDrawArrow( const tools::Rectangle& rRect )
     aTempRect.SetTop( aCenter.Y() - aSize3.Height() );
     aTempRect.SetBottom( aCenter.Y() - 1 );
 
-    pOut->DrawRect( aTempRect );
+    Drawable::Draw(pOut, RectangleDrawable(aTempRect));
 
     Point aPos1( aCenter.X()-aSize3.Width(), aCenter.Y() );
     Point aPos2( aCenter.X()+aSize3.Width(), aCenter.Y() );

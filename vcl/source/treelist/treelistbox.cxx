@@ -23,6 +23,7 @@
         - SelectAll( false ) => only repaint the deselected entries
 */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/treelistbox.hxx>
 #include <vcl/accessiblefactory.hxx>
 #include <com/sun/star/accessibility/AccessibleStateType.hpp>
@@ -2770,7 +2771,7 @@ void SvTreeListBox::PaintEntry1(SvTreeListEntry& rEntry, long nLine, vcl::Render
                 rRenderContext.SetFillColor(aBackgroundColor);
                 // this case may occur for smaller horizontal resizes
                 if (aRect.Left() < aRect.Right())
-                    rRenderContext.DrawRect(aRect);
+                    Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
             }
         }
         // draw item
@@ -2786,7 +2787,7 @@ void SvTreeListBox::PaintEntry1(SvTreeListEntry& rEntry, long nLine, vcl::Render
             aRect.Right() < nMaxRight)
         {
             aRect.SetLeft( aRect.Right() - SV_TAB_BORDER );
-            rRenderContext.DrawRect(aRect);
+            Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
         }
 
         rRenderContext.SetFillColor(aBackupColor);
@@ -2800,7 +2801,7 @@ void SvTreeListBox::PaintEntry1(SvTreeListEntry& rEntry, long nLine, vcl::Render
         rRenderContext.Push();
         rRenderContext.SetLineColor(rSettings.GetDeactiveColor());
         rRenderContext.SetFillColor(rSettings.GetDeactiveColor());
-        rRenderContext.DrawRect(tools::Rectangle(Point(0, nLine + nTempEntryHeight - 2), Size(nWidth, 2)));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(0, nLine + nTempEntryHeight - 2), Size(nWidth, 2))));
         rRenderContext.Pop();
     }
 

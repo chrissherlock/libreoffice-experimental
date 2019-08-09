@@ -18,6 +18,7 @@
  */
 
 #include <sal/config.h>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <cstddef>
 #include <cstdlib>
@@ -190,7 +191,7 @@ void SwAnnotationWin::Paint(vcl::RenderContext& rRenderContext, const tools::Rec
             aRectangle = rRect;
         else
             aRectangle = PixelToLogic(aRectangle);
-        rRenderContext.DrawRect(aRectangle);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aRectangle));
     }
 }
 
@@ -278,7 +279,7 @@ void SwAnnotationWin::Draw(OutputDevice* pDev, const Point& rPt, const Size& rSz
     {
         pDev->SetFillColor(mColorDark);
         pDev->SetLineColor();
-        pDev->DrawRect( tools::Rectangle( rPt, rSz ) );
+        Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(rPt, rSz)));
     }
 
     if (mpMetadataAuthor->IsVisible())

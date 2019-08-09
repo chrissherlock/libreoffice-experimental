@@ -19,6 +19,7 @@
 
 #include <sal/config.h>
 #include <sal/log.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <cassert>
 
@@ -1389,7 +1390,7 @@ void SmShowChar::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangl
     rRenderContext.SetFillColor(aWindowColor);
 
     Size aSize(GetOutputSizePixel());
-    rRenderContext.DrawRect(tools::Rectangle(Point(0, 0), aSize));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(0, 0), aSize)));
 
     OUString aText(GetText());
     if (!aText.isEmpty())

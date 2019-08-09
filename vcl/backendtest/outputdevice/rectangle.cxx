@@ -10,6 +10,8 @@
 
 #include <test/outputdevice.hxx>
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 namespace vcl {
 namespace test {
 
@@ -17,8 +19,8 @@ namespace
 {
     void drawRectOffset(OutputDevice& rDevice, tools::Rectangle const & rRect, int nOffset)
     {
-        rDevice.DrawRect(tools::Rectangle(rRect.Left()  + nOffset, rRect.Top()    + nOffset,
-                                   rRect.Right() - nOffset, rRect.Bottom() - nOffset));
+        Drawable::Draw(&rDevice, RectangleDrawable(tools::Rectangle(rRect.Left() + nOffset, rRect.Top() + nOffset,
+                                   rRect.Right() - nOffset, rRect.Bottom() - nOffset)));
 
     }
 } // end anonymous namespace

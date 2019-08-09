@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <string>
 #include <vcl/toolbox.hxx>
 #include <vcl/button.hxx>
@@ -259,15 +261,15 @@ void TableWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Rectang
     // the non-selected parts of the table
     rRenderContext.SetLineColor(aLineColor);
     rRenderContext.SetFillColor(aFillColor);
-    rRenderContext.DrawRect(tools::Rectangle(nSelectionWidth, nTablePosY, mnTableWidth, nSelectionHeight));
-    rRenderContext.DrawRect(tools::Rectangle(nTablePosX, nSelectionHeight, nSelectionWidth, mnTableHeight));
-    rRenderContext.DrawRect(tools::Rectangle(nSelectionWidth, nSelectionHeight, mnTableWidth, mnTableHeight));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(nSelectionWidth, nTablePosY, mnTableWidth, nSelectionHeight)));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(nTablePosX, nSelectionHeight, nSelectionWidth, mnTableHeight)));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(nSelectionWidth, nSelectionHeight, mnTableWidth, mnTableHeight)));
 
     // the selection
     if (nCol > 0 && nLine > 0)
     {
         rRenderContext.SetFillColor(aHighlightFillColor);
-        rRenderContext.DrawRect(tools::Rectangle(nTablePosX, nTablePosY, nSelectionWidth, nSelectionHeight));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(nTablePosX, nTablePosY, nSelectionWidth, nSelectionHeight)));
     }
 
     // lines inside of the table
@@ -312,10 +314,10 @@ void TableWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Rectang
 
     rRenderContext.SetLineColor(aLineColor);
     rRenderContext.SetFillColor(aBackgroundColor);
-    rRenderContext.DrawRect(tools::Rectangle(nTextX - 2 * nTipBorder,
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(nTextX - 2 * nTipBorder,
                                       nTextY - 2 * nTipBorder,
                                       nTextX + aTextSize.Width() + nTipBorder,
-                                      nTextY + aTextSize.Height() + nTipBorder));
+                                      nTextY + aTextSize.Height() + nTipBorder)));
 
     // #i95350# force RTL output
     if (IsRTLEnabled())
@@ -636,7 +638,7 @@ void ColumnsWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Recta
             rRenderContext.SetFillColor(aFillColor);
         }
 
-        rRenderContext.DrawRect(tools::Rectangle(i * nMX - 1, -1, i * nMX + nMX, aSize.Height() - nTextHeight + 1));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(i * nMX - 1, -1, i * nMX + nMX, aSize.Height() - nTextHeight + 1)));
 
         long j = 4;
         while (j < aSize.Height() - nTextHeight - 4)
@@ -661,19 +663,19 @@ void ColumnsWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Recta
     Size aTextSize(rRenderContext.GetTextWidth(aText), rRenderContext.GetTextHeight());
     rRenderContext.DrawText(Point((aSize.Width() - aTextSize.Width()) / 2, aSize.Height() - nTextHeight + 2), aText);
 
-    rRenderContext.DrawRect(tools::Rectangle(0,
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(0,
                                       aSize.Height() - nTextHeight + 2,
                                       (aSize.Width() - aTextSize.Width()) / 2 - 1,
-                                      aSize.Height()));
+                                      aSize.Height())));
 
-    rRenderContext.DrawRect(tools::Rectangle((aSize.Width() - aTextSize.Width()) / 2 + aTextSize.Width(),
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle((aSize.Width() - aTextSize.Width()) / 2 + aTextSize.Width(),
                                       aSize.Height() - nTextHeight + 2,
                                       aSize.Width(),
-                                      aSize.Height()));
+                                      aSize.Height())));
 
     rRenderContext.SetLineColor(aLineColor);
     rRenderContext.SetFillColor();
-    rRenderContext.DrawRect(tools::Rectangle( 0, 0, aSize.Width() - 1, aSize.Height() - nTextHeight + 1));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle( 0, 0, aSize.Width() - 1, aSize.Height() - nTextHeight + 1)));
 }
 
 

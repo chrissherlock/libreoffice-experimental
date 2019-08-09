@@ -19,6 +19,7 @@
 
 #include <tools/stream.hxx>
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/texteng.hxx>
 #include <vcl/textview.hxx>
 #include <vcl/commandevent.hxx>
@@ -2015,7 +2016,7 @@ void TextEngine::ImpPaint( OutputDevice* pOutDev, const Point& rStartPos, tools:
                                             const Color aOldColor = pOutDev->GetFillColor();
                                             pOutDev->SetFillColor(
                                                 rStyleSettings.GetHighlightColor());
-                                            pOutDev->DrawRect(aTabArea);
+                                            Drawable::Draw(pOutDev, RectangleDrawable(aTabArea));
                                             pOutDev->SetFillColor(aOldColor);
                                         }
                                         else

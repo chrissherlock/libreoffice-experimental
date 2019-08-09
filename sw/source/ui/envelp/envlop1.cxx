@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <dbmgr.hxx>
 #include <sfx2/app.hxx>
 #include <tools/lineend.hxx>
@@ -87,7 +89,7 @@ void SwEnvPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
     const long nX = (aSize.Width () - nW) / 2;
     const long nY = (aSize.Height() - nH) / 2;
     rRenderContext.SetFillColor(aBack);
-    rRenderContext.DrawRect(tools::Rectangle(Point(nX, nY), Size(nW, nH)));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(nX, nY), Size(nW, nH))));
 
     // Sender
     if (rItem.m_bSend)
@@ -98,7 +100,7 @@ void SwEnvPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
         const long nSendH = static_cast<long>(f * (rItem.m_nAddrFromTop  - rItem.m_nSendFromTop  - 566));
         rRenderContext.SetFillColor(aMedium);
 
-        rRenderContext.DrawRect(tools::Rectangle(Point(nSendX, nSendY), Size(nSendW, nSendH)));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(nSendX, nSendY), Size(nSendW, nSendH))));
     }
 
     // Addressee
@@ -107,7 +109,7 @@ void SwEnvPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
     const long nAddrW = static_cast<long>(f * (nPageW - rItem.m_nAddrFromLeft - 566));
     const long nAddrH = static_cast<long>(f * (nPageH - rItem.m_nAddrFromTop  - 566));
     rRenderContext.SetFillColor(aMedium);
-    rRenderContext.DrawRect(tools::Rectangle(Point(nAddrX, nAddrY), Size(nAddrW, nAddrH)));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(nAddrX, nAddrY), Size(nAddrW, nAddrH))));
 
     // Stamp
     const long nStmpW = static_cast<long>(f * 1417 /* 2,5 cm */);
@@ -116,7 +118,7 @@ void SwEnvPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
     const long nStmpY = nY + static_cast<long>(f * 566);
 
     rRenderContext.SetFillColor(aBack);
-    rRenderContext.DrawRect(tools::Rectangle(Point(nStmpX, nStmpY), Size(nStmpW, nStmpH)));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(nStmpX, nStmpY), Size(nStmpW, nStmpH))));
 }
 
 SwEnvDlg::SwEnvDlg(weld::Window* pParent, const SfxItemSet& rSet,

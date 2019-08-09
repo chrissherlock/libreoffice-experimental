@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include "richtextimplcontrol.hxx"
 #include "textattributelistener.hxx"
 #include "richtextengine.hxx"
@@ -599,7 +601,7 @@ namespace frm
 
         // background
         _pDev->SetLineColor();
-        _pDev->DrawRect( aPlayground );
+        Drawable::Draw(_pDev, RectangleDrawable(aPlayground));
 
         // do we need to draw a border?
         bool bBorder = ( m_pAntiImpl->GetStyle() & WB_BORDER );
@@ -608,7 +610,7 @@ namespace frm
         else
             _pDev->SetLineColor();
         _pDev->SetFillColor( m_pAntiImpl->GetBackground().GetColor() );
-        _pDev->DrawRect( aPlayground );
+        Drawable::Draw(_pDev, RectangleDrawable(aPlayground));
 
         if ( bBorder )
             // don't draw the text over the border

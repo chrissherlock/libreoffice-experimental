@@ -17,8 +17,9 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-
 #include <sal/log.hxx>
+
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/event.hxx>
 #include <vcl/decoview.hxx>
 #include <vcl/svapp.hxx>
@@ -554,7 +555,7 @@ void DrawProgress(vcl::Window* pWindow, vcl::RenderContext& rRenderContext, cons
 
         do
         {
-            rRenderContext.DrawRect(aRect);
+            Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
             aRect.AdjustLeft(nDX );
             aRect.AdjustRight(nDX );
             nPerc1++;

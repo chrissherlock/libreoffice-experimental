@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include "menufloatingwindow.hxx"
 #include "menuitemlist.hxx"
 #include "menubarwindow.hxx"
@@ -901,7 +903,7 @@ void MenuFloatingWindow::RenderHighlightItem(vcl::RenderContext& rRenderContext,
                         bRestoreLineColor = true;
                     }
 
-                    rRenderContext.DrawRect(aItemRect);
+                    Drawable::Draw(&rRenderContext, RectangleDrawable(aItemRect));
                 }
                 pMenu->ImplPaint(rRenderContext, GetOutputSizePixel(), nScrollerHeight, nStartY, pData, true/*bHighlight*/);
                 if (bRestoreLineColor)

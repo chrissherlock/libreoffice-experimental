@@ -20,6 +20,7 @@
 #include <com/sun/star/accessibility/AccessibleRole.hpp>
 
 #include <osl/diagnose.h>
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/event.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/settings.hxx>
@@ -128,12 +129,12 @@ void SvResizeHelper::Draw(vcl::RenderContext& rRenderContext)
     std::array<tools::Rectangle,4> aMoveRects = FillMoveRectsPixel();
     sal_uInt16 i;
     for (i = 0; i < 4; i++)
-        rRenderContext.DrawRect(aMoveRects[i]);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aMoveRects[i]));
     // draw handles
     rRenderContext.SetFillColor(Color()); // black
     std::array<tools::Rectangle,8> aRects = FillHandleRectsPixel();
     for (i = 0; i < 8; i++)
-        rRenderContext.DrawRect( aRects[ i ] );
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aRects[i]));
     rRenderContext.Pop();
 }
 

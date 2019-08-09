@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <checklistmenu.hxx>
 #include <globstr.hrc>
 #include <scresid.hxx>
@@ -264,7 +266,7 @@ void ScMenuFloatingWindow::Paint(vcl::RenderContext& rRenderContext, const tools
     {
         rRenderContext.SetFillColor(aBackColor);
         rRenderContext.SetLineColor(aBorderColor);
-        rRenderContext.DrawRect(aCtrlRect);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aCtrlRect));
     }
 
     // Menu items
@@ -710,7 +712,7 @@ void ScMenuFloatingWindow::highlightMenuItem(vcl::RenderContext& rRenderContext,
             rRenderContext.SetFillColor(aBackColor);
             rRenderContext.SetLineColor(aBackColor);
         }
-        rRenderContext.DrawRect(tools::Rectangle(aPos,aSize));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(aPos,aSize)));
     }
 
     Color aTextColor = bSelected ? rStyle.GetMenuHighlightTextColor() : rStyle.GetMenuTextColor();
@@ -1373,12 +1375,12 @@ void ScCheckListMenuWindow::Paint(vcl::RenderContext& rRenderContext, const tool
     // Member list box background
     rRenderContext.SetFillColor(aMemberBackColor);
     rRenderContext.SetLineColor(aBorderColor);
-    rRenderContext.DrawRect(tools::Rectangle(aPos,aSize));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(aPos,aSize)));
 
     // Single-action button box
     getSectionPosSize(aPos, aSize, SINGLE_BTN_AREA);
     rRenderContext.SetFillColor(rStyle.GetMenuColor());
-    rRenderContext.DrawRect(tools::Rectangle(aPos,aSize));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(aPos,aSize)));
 }
 
 void ScCheckListMenuWindow::updateMemberParents( const SvTreeListEntry* pLeaf, size_t nIdx )

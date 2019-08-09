@@ -19,6 +19,8 @@
 
 #include <config_features.h>
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <iostream>
 #include "mediawindow_impl.hxx"
 #include "mediaevent_impl.hxx"
@@ -592,7 +594,7 @@ void MediaWindowImpl::Paint(vcl::RenderContext& rRenderContext, const tools::Rec
 
         rRenderContext.SetLineColor(aBackgroundColor);
         rRenderContext.SetFillColor(aBackgroundColor);
-        rRenderContext.DrawRect(aVideoRect);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aVideoRect));
 
         if ((aLogoSize.Width() > aVideoRect.GetWidth() || aLogoSize.Height() > aVideoRect.GetHeight() ) &&
             (aLogoSize.Height() > 0))

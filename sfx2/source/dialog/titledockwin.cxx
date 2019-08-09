@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <sfx2/titledockwin.hxx>
 #include <sfx2/bindings.hxx>
@@ -176,14 +177,14 @@ namespace sfx2
 
         // Paint title bar background.
         tools::Rectangle aTitleBarBox(tools::Rectangle(nOuterLeft, 0, nOuterRight, nInnerTop - 1));
-        rRenderContext.DrawRect(aTitleBarBox);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aTitleBarBox));
 
         if (nInnerLeft > nOuterLeft)
-            rRenderContext.DrawRect(tools::Rectangle(nOuterLeft, nInnerTop, nInnerLeft, nInnerBottom));
+            Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(nOuterLeft, nInnerTop, nInnerLeft, nInnerBottom)));
         if (nOuterRight > nInnerRight)
-            rRenderContext.DrawRect(tools::Rectangle(nInnerRight, nInnerTop, nOuterRight, nInnerBottom));
+            Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(nInnerRight, nInnerTop, nOuterRight, nInnerBottom)));
         if (nInnerBottom < nOuterBottom)
-            rRenderContext.DrawRect(tools::Rectangle(nOuterLeft, nInnerBottom, nOuterRight, nOuterBottom));
+            Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(nOuterLeft, nInnerBottom, nOuterRight, nOuterBottom)));
 
         // Paint bevel border.
         rRenderContext.SetFillColor();

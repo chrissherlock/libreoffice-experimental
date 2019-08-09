@@ -22,6 +22,7 @@
 #include <tools/debug.hxx>
 #include <sal/log.hxx>
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/event.hxx>
 #include <vcl/wall.hxx>
 #include <vcl/bitmap.hxx>
@@ -1554,7 +1555,7 @@ void SplitWindow::ImplDrawGrip(vcl::RenderContext& rRenderContext, const tools::
         rRenderContext.SetLineColor(rStyleSettings.GetDarkShadowColor());
         rRenderContext.SetFillColor(rStyleSettings.GetDarkShadowColor());
 
-        rRenderContext.DrawRect(rRect);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(rRect));
 
         aColor = rStyleSettings.GetFaceColor();
     }

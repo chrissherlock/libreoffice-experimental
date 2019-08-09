@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include "datwin.hxx"
 #include <o3tl/numeric.hxx>
@@ -43,7 +44,7 @@ void ButtonFrame::Draw( OutputDevice& rDev )
 
     rDev.SetLineColor( aColFace );
     rDev.SetFillColor( aColFace );
-    rDev.DrawRect( aRect );
+    Drawable::Draw(&rDev, RectangleDrawable(aRect));
 
     if( rDev.GetOutDevType() != OUTDEV_WINDOW )
     {

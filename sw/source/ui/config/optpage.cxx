@@ -18,6 +18,7 @@
  */
 
 #include <sal/config.h>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <utility>
 
@@ -87,7 +88,7 @@ void drawRect(vcl::RenderContext& rRenderContext, const tools::Rectangle &rRect,
 {
     rRenderContext.SetFillColor(rFillColor);
     rRenderContext.SetLineColor(rLineColor);
-    rRenderContext.DrawRect(rRect);
+    Drawable::Draw(&rRenderContext, RectangleDrawable(rRect));
 }
 
 }

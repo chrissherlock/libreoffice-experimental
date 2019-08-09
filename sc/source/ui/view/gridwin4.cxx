@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <memory>
 #include <scitems.hxx>
 #include <editeng/eeitem.hxx>
@@ -128,10 +129,10 @@ static void lcl_DrawOneFrame( vcl::RenderContext* pDev, const tools::Rectangle& 
     pDev->SetLineColor();
     pDev->SetFillColor( rColor );
     //  left, top, right, bottom
-    pDev->DrawRect( tools::Rectangle( aOuter.Left(),  aOuter.Top(),    aInner.Left(),  aOuter.Bottom() ) );
-    pDev->DrawRect( tools::Rectangle( aOuter.Left(),  aOuter.Top(),    aOuter.Right(), aInner.Top()    ) );
-    pDev->DrawRect( tools::Rectangle( aInner.Right(), aOuter.Top(),    aOuter.Right(), aOuter.Bottom() ) );
-    pDev->DrawRect( tools::Rectangle( aOuter.Left(),  aInner.Bottom(), aOuter.Right(), aOuter.Bottom() ) );
+    Drawable::Draw(pDev, RectangleDrawable( tools::Rectangle( aOuter.Left(), aOuter.Top(), aInner.Left(), aOuter.Bottom())));
+    Drawable::Draw(pDev, RectangleDrawable( tools::Rectangle( aOuter.Left(), aOuter.Top(), aOuter.Right(), aInner.Top())));
+    Drawable::Draw(pDev, RectangleDrawable( tools::Rectangle( aInner.Right(), aOuter.Top(), aOuter.Right(), aOuter.Bottom())));
+    Drawable::Draw(pDev, RectangleDrawable( tools::Rectangle( aOuter.Left(), aInner.Bottom(), aOuter.Right(), aOuter.Bottom())));
 
     long nButtonY = bTextBelow ? aInner.Bottom() : aOuter.Top();
 
@@ -175,8 +176,8 @@ static void lcl_DrawOneFrame( vcl::RenderContext* pDev, const tools::Rectangle& 
 
     pDev->SetFillColor();
     pDev->SetLineColor( COL_BLACK );
-    pDev->DrawRect( aInner );
-    pDev->DrawRect( aOuter );
+    Drawable::Draw(pDev, RectangleDrawable(aInner));
+    Drawable::Draw(pDev, RectangleDrawable(aOuter));
 }
 
 static void lcl_DrawScenarioFrames( OutputDevice* pDev, ScViewData* pViewData, ScSplitPos eWhich,
@@ -678,7 +679,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
             else
                 aDrawRect.SetLeft( nScrX + aOutputData.GetScrW() );
             if (aDrawRect.Right() >= aDrawRect.Left())
-                pContentDev->DrawRect( aDrawRect );
+                Drawable::Draw(pContentDev, RectangleDrawable(aDrawRect));
         }
         if ( nY2==MAXROW )
         {
@@ -693,7 +694,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
                     aDrawRect.SetRight( nScrX + aOutputData.GetScrW() - 1 );
             }
             if (aDrawRect.Bottom() >= aDrawRect.Top())
-                pContentDev->DrawRect( aDrawRect );
+                Drawable::Draw(pContentDev, RectangleDrawable(aDrawRect));
         }
 
         // restore MapMode
@@ -952,7 +953,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
                             rDevice.SetMapMode(aNew);
 
                             // paint the background
-                            rDevice.DrawRect(rDevice.PixelToLogic(aBackground));
+                            Drawable::Draw(&rDevice, RectangleDrawable(rDevice.PixelToLogic(aBackground)));
 
                             tools::Rectangle aEditRect(Point(nScreenX, nScreenY), Size(nScreenW, nScreenH));
                             pOtherEditView->Paint(rDevice.PixelToLogic(aEditRect), &rDevice);
@@ -1030,7 +1031,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
         //X11CairoTextRender::getCairoContext called, so that the forced read
         //from the underlying X Drawable gets it to sync.
         rDevice.DrawText(aLogicRect.BottomLeft(), " ");
-        rDevice.DrawRect(aLogicRect);
+        Drawable::Draw(&rDevice, RectangleDrawable(aLogicRect));
 
         // paint the editeng text
         tools::Rectangle aEditRect(Point(nScrX, nScrY), Size(aOutputData.GetScrW(), aOutputData.GetScrH()));
@@ -1424,10 +1425,10 @@ void ScGridWindow::DrawPagePreview( SCCOL nX1, SCROW nY1, SCCOL nX2, SCROW nY2, 
                 if ( aEnd.Y() > aWinSize.Height() + 10 )
                     aEnd.setY( aWinSize.Height() + 10 );
 
-                rRenderContext.DrawRect( tools::Rectangle( aStart, Point(aEnd.X(),aStart.Y()+2) ) );
-                rRenderContext.DrawRect( tools::Rectangle( aStart, Point(aStart.X()+2,aEnd.Y()) ) );
-                rRenderContext.DrawRect( tools::Rectangle( Point(aStart.X(),aEnd.Y()-2), aEnd ) );
-                rRenderContext.DrawRect( tools::Rectangle( Point(aEnd.X()-2,aStart.Y()), aEnd ) );
+                Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(aStart, Point(aEnd.X(),aStart.Y()+2))));
+                Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(aStart, Point(aStart.X()+2,aEnd.Y()))));
+                Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(aStart.X(),aEnd.Y()-2), aEnd)));
+                Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(aEnd.X()-2,aStart.Y()), aEnd)));
 
                 // Page breaks
                 //! Display differently (dashed ????)
@@ -1447,7 +1448,7 @@ void ScGridWindow::DrawPagePreview( SCCOL nX1, SCROW nY1, SCCOL nX2, SCROW nY2, 
                             rRenderContext.SetFillColor( aAutomatic );
                         Point aBreak = pViewData->GetScrPos(
                                         nBreak, aRange.aStart.Row(), eWhich, true );
-                        rRenderContext.DrawRect( tools::Rectangle( aBreak.X()-1, aStart.Y(), aBreak.X(), aEnd.Y() ) );
+                        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(aBreak.X()-1, aStart.Y(), aBreak.X(), aEnd.Y())));
                     }
                 }
 
@@ -1466,7 +1467,7 @@ void ScGridWindow::DrawPagePreview( SCCOL nX1, SCROW nY1, SCCOL nX2, SCROW nY2, 
                             rRenderContext.SetFillColor( aAutomatic );
                         Point aBreak = pViewData->GetScrPos(
                                         aRange.aStart.Col(), nBreak, eWhich, true );
-                        rRenderContext.DrawRect( tools::Rectangle( aStart.X(), aBreak.Y()-1, aEnd.X(), aBreak.Y() ) );
+                        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(aStart.X(), aBreak.Y()-1, aEnd.X(), aBreak.Y())));
                     }
                 }
 

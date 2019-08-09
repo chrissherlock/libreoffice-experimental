@@ -19,8 +19,9 @@
 
 #include <sal/config.h>
 #include <sal/log.hxx>
-
 #include <tools/debug.hxx>
+
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/graph.hxx>
 #include <vcl/metaact.hxx>
@@ -354,7 +355,7 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
 
     if ( RasterOp::Invert == meRasterOp )
     {
-        DrawRect( tools::Rectangle( rDestPt, rDestSize ) );
+        Drawable::Draw(this, RectangleDrawable(tools::Rectangle(rDestPt, rDestSize)));
         return;
     }
 
@@ -410,7 +411,7 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
 
     if ( RasterOp::Invert == meRasterOp )
     {
-        DrawRect( tools::Rectangle( rDestPt, rDestSize ) );
+        Drawable::Draw(this, RectangleDrawable(tools::Rectangle(rDestPt, rDestSize)));
         return;
     }
 

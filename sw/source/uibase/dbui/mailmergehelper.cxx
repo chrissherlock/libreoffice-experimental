@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <swtypes.hxx>
 #include <mailmergehelper.hxx>
 #include <mmconfigitem.hxx>
@@ -287,7 +289,7 @@ void SwAddressPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Re
     const StyleSettings& rSettings = rRenderContext.GetSettings().GetStyleSettings();
     rRenderContext.SetFillColor(rSettings.GetWindowColor());
     rRenderContext.SetLineColor(COL_TRANSPARENT);
-    rRenderContext.DrawRect(tools::Rectangle(Point(0, 0), GetOutputSizePixel()));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(0, 0), GetOutputSizePixel())));
     Color aPaintColor(IsEnabled() ? rSettings.GetWindowTextColor() : rSettings.GetDisableColor());
     rRenderContext.SetLineColor(aPaintColor);
     vcl::Font aFont(rRenderContext.GetFont());
@@ -415,7 +417,7 @@ void SwAddressPreview::DrawText_Impl(vcl::RenderContext& rRenderContext, const O
     {
         //selection rectangle
         rRenderContext.SetFillColor(COL_TRANSPARENT);
-        rRenderContext.DrawRect(tools::Rectangle(rTopLeft, rSize));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(rTopLeft, rSize)));
     }
     sal_Int32 nHeight = GetTextHeight();
     Point aStart = rTopLeft;
@@ -619,7 +621,7 @@ void AddressPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Rect
     const StyleSettings& rSettings = rRenderContext.GetSettings().GetStyleSettings();
     rRenderContext.SetFillColor(rSettings.GetWindowColor());
     rRenderContext.SetLineColor(COL_TRANSPARENT);
-    rRenderContext.DrawRect(tools::Rectangle(Point(0, 0), GetOutputSizePixel()));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(0, 0), GetOutputSizePixel())));
     Color aPaintColor(IsEnabled() ? rSettings.GetWindowTextColor() : rSettings.GetDisableColor());
     rRenderContext.SetLineColor(aPaintColor);
 
@@ -740,7 +742,7 @@ void AddressPreview::DrawText_Impl(vcl::RenderContext& rRenderContext, const OUS
     {
         //selection rectangle
         rRenderContext.SetFillColor(COL_TRANSPARENT);
-        rRenderContext.DrawRect(tools::Rectangle(rTopLeft, rSize));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(rTopLeft, rSize)));
     }
     sal_Int32 nHeight = GetTextHeight();
     Point aStart = rTopLeft;

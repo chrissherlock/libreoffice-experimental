@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <view/SlideSorterView.hxx>
 
 #include <ViewShellBase.hxx>
@@ -113,7 +115,7 @@ public:
     {
         rDevice.SetFillColor(maBackgroundColor);
         rDevice.SetLineColor();
-        rDevice.DrawRect(rRepaintArea);
+        Drawable::Draw(&rDevice, RectangleDrawable(rRepaintArea));
     }
 
     virtual void SetLayerInvalidator (const SharedILayerInvalidator&) override {}
@@ -624,7 +626,7 @@ void SlideSorterView::CompleteRedraw (
     gFrameTimeIndex = (gFrameTimeIndex+1) % gFrameTimeCount;
 
     mrSlideSorter.GetContentWindow()->SetFillCOL_BLUE);
-    mrSlideSorter.GetContentWindow()->DrawRect(gFrameTimeBox);
+    Drawable::Draw(mrSlideSorter.GetContentWindow(), RectangleDrawable(gFrameTimeBox));
     mrSlideSorter.GetContentWindow()->SetTextCOL_WHITE);
     mrSlideSorter.GetContentWindow()->DrawText(
         gFrameTimeBox,

@@ -19,6 +19,7 @@
 #include <vcl/lineinfo.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/drawables/PixelDrawable.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/pngwrite.hxx>
 #if HAVE_FEATURE_OPENGL
 #include <vcl/opengl/OpenGLHelper.hxx>
@@ -472,7 +473,7 @@ void SvmTest::testRect()
     pVirtualDev->SetLineColor(Color(0x123456));
     pVirtualDev->SetFillColor(Color(0x654321));
 
-    pVirtualDev->DrawRect(tools::Rectangle(Point(1, 2), Size(4, 4)));
+    Drawable::Draw(pVirtualDev, RectangleDrawable(tools::Rectangle(Point(1, 2), Size(4, 4))));
 
     checkRect(writeAndRead(aGDIMetaFile, "rect.svm"));
 }

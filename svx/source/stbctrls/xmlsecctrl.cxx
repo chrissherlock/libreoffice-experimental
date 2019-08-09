@@ -17,7 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/status.hxx>
 #include <vcl/builder.hxx>
 #include <vcl/menu.hxx>
@@ -157,7 +157,7 @@ void XmlSecStatusBarControl::Paint( const UserDrawEvent& rUsrEvt )
         pDev->DrawImage( aRect.TopLeft(), mpImpl->maImageNotValidated );
     }
     else
-        pDev->DrawRect( aRect );
+        Drawable::Draw(pDev, RectangleDrawable(aRect));
 
     pDev->SetLineColor( aOldLineColor );
     pDev->SetFillColor( aOldFillColor );

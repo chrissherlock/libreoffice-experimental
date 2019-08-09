@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <sfx2/dispatch.hxx>
 #include <vcl/commandevent.hxx>
 #include <vcl/help.hxx>
@@ -222,19 +223,19 @@ void ScHeaderControl::DrawShadedRect( long nStart, long nEnd, const Color& rBase
     SetLineColor();
     SetFillColor( aOuter );
     if (bVertical)
-        DrawRect( tools::Rectangle( 0, nStart, nCenterPos-1, nEnd ) );
+        Drawable::Draw(this, RectangleDrawable(tools::Rectangle(0, nStart, nCenterPos-1, nEnd)));
     else
-        DrawRect( tools::Rectangle( nStart, 0, nEnd, nCenterPos-1 ) );
+        Drawable::Draw(this, RectangleDrawable(tools::Rectangle( nStart, 0, nEnd, nCenterPos-1)));
     SetFillColor( aCenter );
     if (bVertical)
-        DrawRect( tools::Rectangle( nCenterPos, nStart, nCenterPos, nEnd ) );
+        Drawable::Draw(this, RectangleDrawable(tools::Rectangle( nCenterPos, nStart, nCenterPos, nEnd)));
     else
-        DrawRect( tools::Rectangle( nStart, nCenterPos, nEnd, nCenterPos ) );
+        Drawable::Draw(this, RectangleDrawable(tools::Rectangle( nStart, nCenterPos, nEnd, nCenterPos)));
     SetFillColor( aInner );
     if (bVertical)
-        DrawRect( tools::Rectangle( nCenterPos+1, nStart, nBarSize-1, nEnd ) );
+        Drawable::Draw(this, RectangleDrawable(tools::Rectangle( nCenterPos+1, nStart, nBarSize-1, nEnd)));
     else
-        DrawRect( tools::Rectangle( nStart, nCenterPos+1, nEnd, nBarSize-1 ) );
+        Drawable::Draw(this, RectangleDrawable(tools::Rectangle( nStart, nCenterPos+1, nEnd, nBarSize-1)));
 }
 
 void ScHeaderControl::Paint( vcl::RenderContext& /*rRenderContext*/, const tools::Rectangle& rRect )
@@ -346,7 +347,7 @@ void ScHeaderControl::Paint( vcl::RenderContext& /*rRenderContext*/, const tools
                 aFillRect = tools::Rectangle( 0, nInitScrPos, nBarSize-1, nLineEnd );
             else
                 aFillRect = tools::Rectangle( nInitScrPos, 0, nLineEnd, nBarSize-1 );
-            DrawRect( aFillRect );
+            Drawable::Draw(this, RectangleDrawable(aFillRect));
         }
         else
         {
@@ -362,7 +363,7 @@ void ScHeaderControl::Paint( vcl::RenderContext& /*rRenderContext*/, const tools
             aFillRect = tools::Rectangle( 0, nLineEnd+nLayoutSign, nBarSize-1, nPEnd );
         else
             aFillRect = tools::Rectangle( nLineEnd+nLayoutSign, 0, nPEnd, nBarSize-1 );
-        DrawRect( aFillRect );
+        Drawable::Draw(this, RectangleDrawable(aFillRect));
     }
 
     if ( nLineEnd * nLayoutSign >= nPStart * nLayoutSign )
@@ -378,9 +379,9 @@ void ScHeaderControl::Paint( vcl::RenderContext& /*rRenderContext*/, const tools
                     SetLineColor();
                     SetFillColor( COL_LIGHTGRAY );
                     if (bVertical)
-                        DrawRect( tools::Rectangle( 0, nTransStart, nBarSize-1, nTransEnd ) );
+                        Drawable::Draw(this, RectangleDrawable(tools::Rectangle(0, nTransStart, nBarSize-1, nTransEnd)));
                     else
-                        DrawRect( tools::Rectangle( nTransStart, 0, nTransEnd, nBarSize-1 ) );
+                        Drawable::Draw(this, RectangleDrawable(tools::Rectangle(nTransStart, 0, nTransEnd, nBarSize-1)));
                 }
             }
             else

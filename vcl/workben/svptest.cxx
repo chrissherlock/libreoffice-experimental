@@ -21,9 +21,10 @@
 #include <sal/log.hxx>
 #include <tools/diagnose_ex.h>
 #include <tools/extendapplicationenvironment.hxx>
-
 #include <cppuhelper/bootstrap.hxx>
 #include <comphelper/processfactory.hxx>
+
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <com/sun/star/lang/XMultiServiceFactory.hpp>
 #include <com/sun/star/uno/XComponentContext.hpp>
@@ -212,16 +213,16 @@ void MyWin::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle& rR
     Point aP1(aPaperSize.Width() / 48, 0), aP2(aPaperSize.Width() / 40, 0);
     Point aPoint;
 
-    rRenderContext.DrawRect(tools::Rectangle(Point(0, 0), aPaperSize));
-    rRenderContext.DrawRect(tools::Rectangle(Point(100, 100),
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(0, 0), aPaperSize)));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(100, 100),
                          Size(aPaperSize.Width() - 200,
-                              aPaperSize.Height() - 200)));
-    rRenderContext.DrawRect(tools::Rectangle(Point(200, 200),
+                              aPaperSize.Height() - 200))));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(200, 200),
                          Size(aPaperSize.Width() - 400,
-                              aPaperSize.Height() - 400)));
-    rRenderContext.DrawRect(tools::Rectangle(Point(300, 300),
+                              aPaperSize.Height() - 400))));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(300, 300),
                          Size(aPaperSize.Width() - 600,
-                              aPaperSize.Height() - 600)));
+                              aPaperSize.Height() - 600))));
 
     const int nFontCount = rRenderContext.GetDevFontCount();
     const int nFontSamples = (nFontCount < 15) ? nFontCount : 15;
@@ -249,8 +250,8 @@ void MyWin::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle& rR
     }
 
     rRenderContext.SetFillColor();
-    DrawRect(tools::Rectangle(Point(aPaperSize.Width() - 4000, 1000),
-                       Size(3000, 3000)));
+    Drawable::Draw(this, RectangleDrawable(tools::Rectangle(Point(aPaperSize.Width() - 4000, 1000),
+                       Size(3000, 3000))));
     rRenderContext.DrawBitmap(Point(aPaperSize.Width() - 4000, 1000),
                               Size( 3000,3000 ),
                               m_aBitmap);

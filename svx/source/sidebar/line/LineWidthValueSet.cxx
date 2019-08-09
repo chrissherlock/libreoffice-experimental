@@ -16,6 +16,9 @@
  *   except in compliance with the License. You may obtain a copy of
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
+
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include "LineWidthValueSet.hxx"
 
 #include <i18nlangtag/mslangid.hxx>
@@ -122,12 +125,12 @@ void  LineWidthValueSet::UserDraw( const UserDrawEvent& rUDEvt )
             aBackRect.AdjustTop(3 );
             aBackRect.AdjustBottom( -2 );
             pDev->SetFillColor(Color(50,107,197));
-            pDev->DrawRect(aBackRect);
+            Drawable::Draw(pDev, RectangleDrawable(aBackRect));
         }
         else
         {
             pDev->SetFillColor( COL_TRANSPARENT );
-            pDev->DrawRect(aRect);
+            Drawable::Draw(pDev, RectangleDrawable(aRect));
         }
 
         //draw text

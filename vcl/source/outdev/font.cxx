@@ -19,8 +19,9 @@
 
 #include <i18nlangtag/mslangid.hxx>
 #include <i18nlangtag/lang.h>
-
 #include <unotools/configmgr.hxx>
+
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/metric.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/print.hxx>
@@ -1178,7 +1179,7 @@ void OutputDevice::ImplDrawEmphasisMark( long nBaseX, long nX, long nY,
     {
         tools::Rectangle aRect( Point( nX+rRect1.Left(),
                                 nY+rRect1.Top() ), rRect1.GetSize() );
-        DrawRect( aRect );
+        Drawable::Draw(this, RectangleDrawable(aRect));
     }
 
     if ( !rRect2.IsEmpty() )
@@ -1186,7 +1187,7 @@ void OutputDevice::ImplDrawEmphasisMark( long nBaseX, long nX, long nY,
         tools::Rectangle aRect( Point( nX+rRect2.Left(),
                                 nY+rRect2.Top() ), rRect2.GetSize() );
 
-        DrawRect( aRect );
+        Drawable::Draw(this, RectangleDrawable(aRect));
     }
 }
 

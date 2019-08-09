@@ -18,6 +18,8 @@
  */
 
 #include <config_features.h>
+
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/window.hxx>
 #include <vcl/dialog.hxx>
@@ -444,7 +446,7 @@ void RenderTools::DrawSelectionBackground(vcl::RenderContext& rRenderContext, vc
 
     if (bDark)
     {
-        rRenderContext.DrawRect(aRect);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
     }
     else
     {

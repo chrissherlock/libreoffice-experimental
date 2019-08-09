@@ -24,6 +24,7 @@
 #include <config_global.h>
 #include <vcl/weld.hxx>
 #include <vcl/svapp.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <svtools/ctrltool.hxx>
 #include <tools/stream.hxx>
@@ -1039,7 +1040,7 @@ bool EditEngine::PostKeyEvent( const KeyEvent& rKeyEvent, EditView* pEditView, v
                         P2.AdjustY(nH );
                         pEditView->GetWindow()->SetLineColor();
                         pEditView->GetWindow()->SetFillColor( (n%2) ? COL_YELLOW : COL_LIGHTGREEN );
-                        pEditView->GetWindow()->DrawRect( tools::Rectangle( P1, P2 ) );
+                        Drawable::Draw(pEditView->GetWindow(), RectangleDrawable(tools::Rectangle(P1, P2)));
                         aPos.AdjustY(nH );
                     }
                 }

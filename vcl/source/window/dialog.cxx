@@ -25,6 +25,8 @@
 #include <postmac.h>
 #endif
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <com/sun/star/beans/XPropertySet.hpp>
 #include <com/sun/star/util/thePathSettings.hpp>
 #include <com/sun/star/frame/theGlobalEventBroadcaster.hpp>
@@ -1346,7 +1348,7 @@ void Dialog::Draw( OutputDevice* pDev, const Point& rPos, const Size& rSize, Dra
     else
     {
         pDev->SetFillColor( aWallpaper.GetColor() );
-        pDev->DrawRect( tools::Rectangle( aPos, aSize ) );
+        Drawable::Draw(pDev, RectangleDrawable( tools::Rectangle(aPos, aSize)));
     }
 
     if (!( GetStyle() & WB_NOBORDER ))

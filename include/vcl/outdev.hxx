@@ -618,12 +618,15 @@ public:
     void                        SetLineColor();
     void                        SetLineColor( const Color& rColor );
     const Color&                GetLineColor() const { return maLineColor; }
+    bool                        IsLineColorInitialized() const { return mbInitLineColor; }
     bool                        IsLineColor() const { return mbLineColor; }
 
     void                        SetFillColor();
     void                        SetFillColor( const Color& rColor );
     const Color&                GetFillColor() const { return maFillColor; }
+    bool                        IsFillColorInitialized() const { return mbInitFillColor; }
     bool                        IsFillColor() const { return mbFillColor; }
+    void                        InitFillColor();
 
     void                        SetBackground();
     void                        SetBackground( const Wallpaper& rBackground );
@@ -642,11 +645,6 @@ public:
 protected:
 
     virtual void                ImplReleaseFonts();
-
-private:
-
-
-    SAL_DLLPRIVATE void         InitFillColor();
 
     ///@}
 
@@ -706,7 +704,7 @@ public:
 
 public:
 
-    void                        DrawRect( const tools::Rectangle& rRect );
+//    void                        DrawRect( const tools::Rectangle& rRect );
     void                        DrawRect( const tools::Rectangle& rRect,
                                           sal_uLong nHorzRount, sal_uLong nVertRound );
 

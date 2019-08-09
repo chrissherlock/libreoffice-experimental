@@ -18,6 +18,7 @@
  */
 
 #include <sal/config.h>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <utility>
 
@@ -169,8 +170,8 @@ namespace vclcanvas
             rOutDev.SetLineColor( COL_WHITE );
             rOutDev.SetFillColor( COL_WHITE );
             rOutDev.SetClipRegion();
-            rOutDev.DrawRect( ::tools::Rectangle( Point(),
-                                         rOutDev.GetOutputSizePixel()) );
+            Drawable::Draw(&rOutDev, RectangleDrawable(::tools::Rectangle( Point(),
+                                         rOutDev.GetOutputSizePixel())));
 
             if( mp2ndOutDevProvider )
             {
@@ -182,8 +183,8 @@ namespace vclcanvas
                 rOutDev2.SetLineColor( COL_WHITE );
                 rOutDev2.SetFillColor( COL_WHITE );
                 rOutDev2.SetClipRegion();
-                rOutDev2.DrawRect( ::tools::Rectangle( Point(),
-                                              rOutDev2.GetOutputSizePixel()) );
+                Drawable::Draw(&rOutDev2, RectangleDrawable(::tools::Rectangle(Point(),
+                                              rOutDev2.GetOutputSizePixel())));
                 rOutDev2.SetDrawMode( DrawModeFlags::BlackLine | DrawModeFlags::BlackFill | DrawModeFlags::BlackText |
                                       DrawModeFlags::BlackGradient | DrawModeFlags::BlackBitmap );
             }

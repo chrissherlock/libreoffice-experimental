@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <com/sun/star/accessibility/AccessibleEventId.hpp>
 #include <com/sun/star/accessibility/AccessibleStateType.hpp>
 #include <com/sun/star/frame/Desktop.hpp>
@@ -1120,8 +1122,8 @@ void SmViewShell::Impl_Print(OutputDevice &rOutDev, const SmPrintUIOptions &rPri
         Size aDescSize (GetTextSize(rOutDev, GetDoc()->GetComment(), aOutRect.GetWidth() - 200));
 
         if (bIsPrintFrame)
-            rOutDev.DrawRect(tools::Rectangle(aOutRect.TopLeft(),
-                               Size(aOutRect.GetWidth(), 100 + aTitleSize.Height() + 200 + aDescSize.Height() + 100)));
+            Drawable::Draw(&rOutDev, RectangleDrawable(tools::Rectangle(aOutRect.TopLeft(),
+                               Size(aOutRect.GetWidth(), 100 + aTitleSize.Height() + 200 + aDescSize.Height() + 100))));
         aOutRect.AdjustTop(200 );
 
         // output title
@@ -1160,8 +1162,8 @@ void SmViewShell::Impl_Print(OutputDevice &rOutDev, const SmPrintUIOptions &rPri
         aOutRect.AdjustBottom( -(aSize.Height() + 600) );
 
         if (bIsPrintFrame)
-            rOutDev.DrawRect(tools::Rectangle(aOutRect.BottomLeft(),
-                               Size(aOutRect.GetWidth(), 200 + aSize.Height() + 200)));
+            Drawable::Draw(&rOutDev, RectangleDrawable(tools::Rectangle(aOutRect.BottomLeft(),
+                               Size(aOutRect.GetWidth(), 200 + aSize.Height() + 200))));
 
         Point aPoint (aOutRect.Left() + (aOutRect.GetWidth()  - aSize.Width())  / 2,
                       aOutRect.Bottom() + 300);
@@ -1171,7 +1173,7 @@ void SmViewShell::Impl_Print(OutputDevice &rOutDev, const SmPrintUIOptions &rPri
     }
 
     if (bIsPrintFrame)
-        rOutDev.DrawRect(aOutRect);
+        Drawable::Draw(&rOutDev, RectangleDrawable(aOutRect));
 
     aOutRect.AdjustTop(100 );
     aOutRect.AdjustLeft(100 );

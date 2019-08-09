@@ -17,13 +17,14 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-
 #include <rtl/ustrbuf.hxx>
+
 #include <vcl/svapp.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/metric.hxx>
 #include <vcl/settings.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <cppcanvas/vclfactory.hxx>
 #include <cppcanvas/basegfxfactory.hxx>
@@ -456,7 +457,7 @@ void RehearseTimingsActivity::paint( cppcanvas::CanvasSharedPtr const & canvas )
         blackHole->SetFillColor( COL_WHITE );
         blackHole->SetLineColor( COL_GRAY );
     }
-    blackHole->DrawRect( rect );
+    Drawable::Draw(blackHole, RectangleDrawable(rect));
     blackHole->GetTextBoundRect( rect, time );
     blackHole->DrawText(
         Point( (maSpriteSizePixel.getX() - rect.getWidth()) / 2,

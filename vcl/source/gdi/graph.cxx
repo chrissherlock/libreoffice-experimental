@@ -18,10 +18,14 @@
  */
 
 #include <tools/fract.hxx>
+
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/graph.hxx>
+
 #include <impgraph.hxx>
+
 #include <com/sun/star/lang/XUnoTunnel.hpp>
 #include <com/sun/star/graphic/XGraphic.hpp>
 #include <cppuhelper/typeprovider.hxx>
@@ -58,7 +62,7 @@ void ImplDrawDefault( OutputDevice* pOutDev, const OUString* pText,
         aBorderRect.AdjustTop(nPixel );
 
         pOutDev->SetLineColor( COL_LIGHTGRAY );
-        pOutDev->DrawRect( aBorderRect );
+        Drawable::Draw(pOutDev, RectangleDrawable(aBorderRect));
 
         aBorderRect.AdjustLeft( -nPixel );
         aBorderRect.AdjustTop( -nPixel );
@@ -67,7 +71,7 @@ void ImplDrawDefault( OutputDevice* pOutDev, const OUString* pText,
         pOutDev->SetLineColor( COL_GRAY );
     }
 
-    pOutDev->DrawRect( aBorderRect );
+    Drawable::Draw(pOutDev, RectangleDrawable(aBorderRect));
 
     aPoint.AdjustX(nPixelWidth + 2*nPixel );
     aPoint.AdjustY(nPixelWidth + 2*nPixel );

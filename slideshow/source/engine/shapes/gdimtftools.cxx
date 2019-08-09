@@ -17,9 +17,11 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-
 #include <tools/diagnose_ex.h>
+
 #include <sal/log.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include "gdimtftools.hxx"
 
 #include <com/sun/star/document/XExporter.hpp>
@@ -333,7 +335,7 @@ bool getAnimationFromGraphic( VectorOfMtfAnimationFrames&   o_rFrames,
                     const tools::Rectangle aRect(rAnimationBitmap.maPositionPixel, aContent.GetSizePixel());
                     pVDevMask->SetFillColor( COL_BLACK);
                     pVDevMask->SetLineColor();
-                    pVDevMask->DrawRect(aRect);
+                    Drawable::Draw(pVDevMask, RectangleDrawable(aRect));
                 }
                 else
                 {

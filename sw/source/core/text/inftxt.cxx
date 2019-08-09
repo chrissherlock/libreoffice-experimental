@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <com/sun/star/linguistic2/XHyphenator.hpp>
 
 #include <unotools/linguprops.hxx>
@@ -938,7 +940,7 @@ void SwTextPaintInfo::DrawRect( const SwRect &rRect, bool bRetouche ) const
             const_cast<SwTextPaintInfo*>(this)->GetTextFly().
                 DrawFlyRect( m_pOut, rRect );
         else
-            m_pOut->DrawRect( rRect.SVRect() );
+            Drawable::Draw(m_pOut, RectangleDrawable(rRect.SVRect()));
     }
 }
 
@@ -1075,7 +1077,7 @@ void SwTextPaintInfo::DrawCheckBox(const SwFieldFormCheckboxPortion &rPor, bool 
             pOut->Push( PushFlags::LINECOLOR | PushFlags::FILLCOLOR );
             pOut->SetFillColor( SwViewOption::GetFieldShadingsColor() );
             pOut->SetLineColor();
-            pOut->DrawRect( aIntersect.SVRect() );
+            Drawable::Draw(pOut, RectangleDrawable(aIntersect.SVRect()));
             pOut->Pop();
         }
         const int delta=10;
@@ -1083,7 +1085,7 @@ void SwTextPaintInfo::DrawCheckBox(const SwFieldFormCheckboxPortion &rPor, bool 
         m_pOut->Push( PushFlags::LINECOLOR | PushFlags::FILLCOLOR );
         m_pOut->SetLineColor( Color(0, 0, 0));
         m_pOut->SetFillColor();
-        m_pOut->DrawRect( r );
+        Drawable::Draw(m_pOut, RectangleDrawable(r));
         if (bChecked)
         {
             m_pOut->DrawLine(r.TopLeft(), r.BottomRight());
@@ -1146,7 +1148,7 @@ void SwTextPaintInfo::DrawBackBrush( const SwLinePortion &rPor ) const
                 pOutDev->Push( PushFlags::LINECOLOR | PushFlags::FILLCOLOR );
                 pOutDev->SetFillColor( SwViewOption::GetFieldShadingsColor() );
                 pOutDev->SetLineColor( );
-                pOutDev->DrawRect( aIntersect.SVRect() );
+                Drawable::Draw(pOutDev, RectangleDrawable(aIntersect.SVRect()));
                 pOutDev->Pop();
             }
         }

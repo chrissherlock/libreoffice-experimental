@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include "baside2.hxx"
 #include <baside3.hxx>
 #include "brkdlg.hxx"
@@ -125,10 +127,10 @@ void lcl_PrintHeader( Printer* pPrinter, sal_uInt16 nPages, sal_uInt16 nCurPage,
     long nXRight = aSz.Width() - Print::nRightMargin + Print::nBorder;
 
     if( bOutput )
-        pPrinter->DrawRect(tools::Rectangle(
+        Drawable::Draw(pPrinter, RectangleDrawable(tools::Rectangle(
             Point(nXLeft, nYTop),
             Size(nXRight - nXLeft, aSz.Height() - nYTop - Print::nBottomMargin + Print::nBorder)
-        ));
+        )));
 
 
     long nY = Print::nTopMargin - 2*Print::nBorder;

@@ -20,6 +20,7 @@
 #include <vcl/builderfactory.hxx>
 #include <vcl/event.hxx>
 #include <vcl/drawables/PixelDrawable.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include "CategoryListBox.hxx"
 
@@ -59,7 +60,7 @@ void CategoryListBox::UserDraw( const UserDrawEvent& rUDEvt )
 
         pDev->SetFillColor (aColor);
         pDev->SetLineColor ();
-        pDev->DrawRect(aOutRect);
+        Drawable::Draw(pDev, RectangleDrawable(aOutRect));
 
         // Erase the four corner pixels to make the rectangle appear rounded.
         pDev->SetLineColor( GetSettings().GetStyleSettings().GetWindowColor());

@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <hintids.hxx>
 
 #include <cmdid.h>
@@ -275,7 +277,7 @@ void SwDropCapsPict::Paint(vcl::RenderContext& rRenderContext, const tools::Rect
 
     Size aOutputSizePixel(GetOutputSizePixel());
 
-    rRenderContext.DrawRect(tools::Rectangle(Point(0, 0), aOutputSizePixel));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(0, 0), aOutputSizePixel)));
     rRenderContext.SetClipRegion(vcl::Region(tools::Rectangle(Point(BORDER, BORDER),
                                                        Size(aOutputSizePixel.Width () - 2 * BORDER,
                                                             aOutputSizePixel.Height() - 2 * BORDER))));
@@ -287,8 +289,8 @@ void SwDropCapsPict::Paint(vcl::RenderContext& rRenderContext, const tools::Rect
 
     for (int i = 0; i < LINES; ++i)
     {
-        rRenderContext.DrawRect(tools::Rectangle(Point(BORDER, nY0 + i * mnTotLineH),
-                                Size(aOutputSizePixel.Width() - 2 * BORDER, mnLineH)));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(BORDER, nY0 + i * mnTotLineH),
+                                Size(aOutputSizePixel.Width() - 2 * BORDER, mnLineH))));
     }
 
     // Text background with gap (240 twips ~ 1 line height)
@@ -297,7 +299,7 @@ void SwDropCapsPict::Paint(vcl::RenderContext& rRenderContext, const tools::Rect
     if (mpPage && mpPage->m_xDropCapsBox->get_active())
     {
         const Size aTextSize(maTextSize.Width() + nDistW, maTextSize.Height());
-        rRenderContext.DrawRect(tools::Rectangle(Point(BORDER, nY0), aTextSize));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(BORDER, nY0), aTextSize)));
 
         // draw Text
         DrawPrev(rRenderContext, Point(BORDER, nY0));

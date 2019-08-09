@@ -21,6 +21,7 @@
 #include <vcl/svapp.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <svtools/colorcfg.hxx>
 
 #include <rtl/textenc.h>
@@ -250,7 +251,7 @@ void SvxSearchCharSet::DrawChars_Impl(vcl::RenderContext& rRenderContext, int n1
             if (HasFocus())
             {
                 rRenderContext.SetFillColor(aHighlightColor);
-                rRenderContext.DrawRect(getGridRectangle(aPointUL, aOutputSize));
+                Drawable::Draw(&rRenderContext, RectangleDrawable(getGridRectangle(aPointUL, aOutputSize)));
 
                 rRenderContext.SetTextColor(aHighlightTextColor);
                 rRenderContext.DrawText(aPointTxTy, aCharStr);
@@ -258,7 +259,7 @@ void SvxSearchCharSet::DrawChars_Impl(vcl::RenderContext& rRenderContext, int n1
             else
             {
                 rRenderContext.SetFillColor(aFaceColor);
-                rRenderContext.DrawRect(getGridRectangle(aPointUL, aOutputSize));
+                Drawable::Draw(&rRenderContext, RectangleDrawable(getGridRectangle(aPointUL, aOutputSize)));
 
                 rRenderContext.SetLineColor(aLightColor);
                 rRenderContext.DrawLine(aPointUL, Point(x + nX - 1, y + 1));

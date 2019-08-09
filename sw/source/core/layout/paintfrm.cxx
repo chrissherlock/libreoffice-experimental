@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <vcl/lazydelete.hxx>
 #include <sfx2/docfile.hxx>
 #include <sfx2/progress.hxx>
@@ -1078,7 +1080,7 @@ void SwSubsRects::PaintSubsidiary( OutputDevice *pOut,
 
                     if (pCol && pOut->GetFillColor() != *pCol)
                         pOut->SetFillColor( *pCol );
-                    pOut->DrawRect( rLRect.SVRect() );
+                    Drawable::Draw(pOut, RectangleDrawable(rLRect.SVRect()));
 
                     rLRect.SetPainted();
                 }
@@ -1573,7 +1575,7 @@ static void lcl_implDrawGraphicBackgrd( const SvxBrushItem& _rBackgrdBrush,
         /// draw background opaque
         if ( _pOut->GetFillColor() != aColor )
             _pOut->SetFillColor( aColor );
-        _pOut->DrawRect( _rAlignedPaintRect.SVRect() );
+        Drawable::Draw(_pOut, RectangleDrawable(_rAlignedPaintRect.SVRect()));
     }
 }
 
@@ -2106,7 +2108,7 @@ void DrawGraphic(
                 // loop rectangles of background region, which has to be drawn
                 for( size_t i = 0; i < aRegion.size(); ++i )
                 {
-                    pOutDev->DrawRect( aRegion[i].SVRect() );
+                    Drawable::Draw(pOutDev, RectangleDrawable(aRegion[i].SVRect()));
                 }
             }
         }
@@ -3222,7 +3224,7 @@ void SwRootFrame::PaintSwFrame(vcl::RenderContext& rRenderContext, SwRect const&
                     aEmptyPageRect = aTmpPageRect;
                 }
 
-                pSh->GetOut()->DrawRect( aEmptyPageRect.SVRect() );
+                Drawable::Draw(pSh->GetOut(), RectangleDrawable(aEmptyPageRect.SVRect()));
 
                 // paint empty page text
                 const vcl::Font& rEmptyPageFont = SwPageFrame::GetEmptyPageFont();
@@ -4386,7 +4388,7 @@ static void lcl_PaintShadow( const SwRect& rRect, SwRect& rOutRect,
         if ( rRect.IsOver( aOut ) && aOut.Height() > 0 && aOut.Width() > 0 )
         {
             aOut.Intersection_( rRect );
-            pOut->DrawRect( aOut.SVRect() );
+            Drawable::Draw(pOut, RectangleDrawable(aOut.SVRect()));
         }
     }
 }
@@ -5632,7 +5634,7 @@ void SwPageFrame::PaintMarginArea( const SwRect& _rOutputRect,
                 pOut->SetFillColor(aGlobalRetoucheColor);
             }
 
-            pOut->DrawRect(aPgRect.SVRect());
+            Drawable::Draw(pOut, RectangleDrawable(aPgRect.SVRect()));
         }
     }
 }
@@ -5723,7 +5725,7 @@ static void lcl_paintBitmapExToRect(vcl::RenderContext *pOut, const Point& aPoin
 
     pOut->SetFillColor(SwViewOption::GetAppBackgroundColor());
     pOut->SetLineColor();
-    pOut->DrawRect(pOut->PixelToLogic(aRect));
+    Drawable::Draw(pOut, RectangleDrawable(pOut->PixelToLogic(aRect)));
 
     // Tiled render if necessary
     tools::Rectangle aComplete(aPoint, aSize);
@@ -5929,24 +5931,24 @@ static void lcl_paintBitmapExToRect(vcl::RenderContext *pOut, const Point& aPoin
         if (!bRight)
         {
             _pViewShell->GetOut()->SetFillColor(COL_NOTES_SIDEPANE_BORDER);
-            _pViewShell->GetOut()->DrawRect(tools::Rectangle(Point(aPageRect.Left()-pMgr->GetSidebarBorderWidth(),aPageRect.Top()),Size(pMgr->GetSidebarBorderWidth(),aPageRect.Height())))    ;
+            Drawable::Draw(_pViewShell->GetOut(), RectangleDrawable(tools::Rectangle(Point(aPageRect.Left()-pMgr->GetSidebarBorderWidth(),aPageRect.Top()),Size(pMgr->GetSidebarBorderWidth(),aPageRect.Height()))));
             if (Application::GetSettings().GetStyleSettings().GetHighContrastMode() )
                 _pViewShell->GetOut()->SetFillColor(COL_BLACK);
             else
                 _pViewShell->GetOut()->SetFillColor(COL_NOTES_SIDEPANE);
-            _pViewShell->GetOut()->DrawRect(tools::Rectangle(Point(aPageRect.Left()-pMgr->GetSidebarWidth()-pMgr->GetSidebarBorderWidth(),aPageRect.Top()),Size(pMgr->GetSidebarWidth(),aPageRect.Height())))  ;
+            Drawable::Draw(_pViewShell->GetOut(), RectangleDrawable(tools::Rectangle(Point(aPageRect.Left()-pMgr->GetSidebarWidth()-pMgr->GetSidebarBorderWidth(),aPageRect.Top()),Size(pMgr->GetSidebarWidth(),aPageRect.Height()))));
         }
         else
         {
             _pViewShell->GetOut()->SetFillColor(COL_NOTES_SIDEPANE_BORDER);
             SwRect aSidebarBorder(aPageRect.TopRight(),Size(pMgr->GetSidebarBorderWidth(),aPageRect.Height()));
-            _pViewShell->GetOut()->DrawRect(aSidebarBorder.SVRect());
+            Drawable::Draw(_pViewShell->GetOut(), RectangleDrawable(aSidebarBorder.SVRect()));
             if (Application::GetSettings().GetStyleSettings().GetHighContrastMode() )
                 _pViewShell->GetOut()->SetFillColor(COL_BLACK);
             else
                 _pViewShell->GetOut()->SetFillColor(COL_NOTES_SIDEPANE);
             SwRect aSidebar(Point(aPageRect.Right()+pMgr->GetSidebarBorderWidth(),aPageRect.Top()),Size(pMgr->GetSidebarWidth(),aPageRect.Height()));
-            _pViewShell->GetOut()->DrawRect(aSidebar.SVRect());
+            Drawable::Draw(_pViewShell->GetOut(), RectangleDrawable(aSidebar.SVRect()));
         }
         if (pMgr->ShowScrollbar(nPageNum))
         {
@@ -5974,7 +5976,7 @@ static void lcl_paintBitmapExToRect(vcl::RenderContext *pOut, const Point& aPoin
                     _pViewShell->GetOut()->SetLineColor(COL_BLACK);
                     _pViewShell->GetOut()->SetFillColor(COL_NOTES_SIDEPANE_SCROLLAREA);
                 }
-                _pViewShell->GetOut()->DrawRect(aRectBottom);
+                Drawable::Draw(_pViewShell->GetOut(), RectangleDrawable(aRectBottom));
                 _pViewShell->GetOut()->DrawLine(aPointBottom + Point(pMgr->GetSidebarWidth()/3,0), aPointBottom + Point(pMgr->GetSidebarWidth()/3 , _pViewShell->GetOut()->PixelToLogic(Size(0,nScrollerHeight)).Height()));
 
                 _pViewShell->GetOut()->SetLineColor();
@@ -5994,7 +5996,7 @@ static void lcl_paintBitmapExToRect(vcl::RenderContext *pOut, const Point& aPoin
                     _pViewShell->GetOut()->SetLineColor(COL_BLACK);
                     _pViewShell->GetOut()->SetFillColor(COL_NOTES_SIDEPANE_SCROLLAREA);
                 }
-                _pViewShell->GetOut()->DrawRect(aRectTop);
+                Drawable::Draw(_pViewShell->GetOut(), RectangleDrawable(aRectTop));
                 _pViewShell->GetOut()->DrawLine(aPointTop + Point(pMgr->GetSidebarWidth()/3*2,0), aPointTop + Point(pMgr->GetSidebarWidth()/3*2 , _pViewShell->GetOut()->PixelToLogic(Size(0,nScrollerHeight)).Height()));
 
                 _pViewShell->GetOut()->SetLineColor();

@@ -7,6 +7,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <com/sun/star/frame/Desktop.hpp>
 
 #include <comphelper/processfactory.hxx>
@@ -89,7 +91,7 @@ CPPUNIT_TEST_FIXTURE(GenTest, testTdf107966)
     pVirtualDevice->SetMapMode(aMapMode);
     pVirtualDevice->SetOutputSizePixel(Size(90, 15));
     pVirtualDevice->SetFillColor(Color(255, 255, 255));
-    pVirtualDevice->DrawRect(tools::Rectangle(Point(), Size(1350, 225)));
+    Drawable::Draw(pVirtualDevice, RectangleDrawable(tools::Rectangle(Point(), Size(1350, 225))));
     pVirtualDevice->SetFillColor(Color(0, 0, 0));
     AntialiasingFlags nOldAA = pVirtualDevice->GetAntialiasing();
     pVirtualDevice->SetAntialiasing(nOldAA & ~AntialiasingFlags::EnableB2dDraw);

@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <hintids.hxx>
 #include <sfx2/printer.hxx>
 #include <editeng/lspcitem.hxx>
@@ -469,7 +471,7 @@ void SwHiddenTextPortion::Paint( const SwTextPaintInfo & rInf) const
     aPos.AdjustY( -150 );
     aPos.AdjustX( -25 );
     SwRect aRect( aPos, Size( 100, 200 ) );
-    pOut->DrawRect( aRect.SVRect() );
+    Drawable::Draw(pOut, RectangleDrawable(aRect.SVRect()));
     pOut->SetFillColor( aOldColor );
 #else
     (void)rInf;

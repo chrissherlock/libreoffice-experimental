@@ -18,6 +18,7 @@
  */
 
 #include <vcl/svapp.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <pagepreviewlayout.hxx>
 #include <prevwpage.hxx>
@@ -1072,7 +1073,7 @@ bool SwPagePreviewLayout::Paint(vcl::RenderContext& rRenderContext, const tools:
                     ::SwAlignRect( aTmpPageRect, &mrParentViewShell, &rRenderContext );
                     aPageRect = aTmpPageRect.SVRect();
                 }
-                pOutputDev->DrawRect( aPageRect );
+                Drawable::Draw(pOutputDev, RectangleDrawable(aPageRect));
 
                 // paint empty page text
                 vcl::Font aOldFont( pOutputDev->GetFont() );
@@ -1233,12 +1234,12 @@ void SwPagePreviewLayout::PaintSelectMarkAtPage(vcl::RenderContext& rRenderConte
     aRect = pOutputDev->PixelToLogic( aRect );
     pOutputDev->SetFillColor(); // OD 20.02.2003 #107369# - no fill color
     pOutputDev->SetLineColor( aSelPgLineColor );
-    pOutputDev->DrawRect( aRect );
+    Drawable::Draw(pOutputDev, RectangleDrawable(aRect));
     // OD 19.02.2003 #107369# - adjust position of select mark rectangle
     aRect = tools::Rectangle( aPxPageRect.Left()+1, aPxPageRect.Top()+1,
                        aPxPageRect.Right()-1, aPxPageRect.Bottom()-1 );
     aRect = pOutputDev->PixelToLogic( aRect );
-    pOutputDev->DrawRect( aRect );
+    Drawable::Draw(pOutputDev, RectangleDrawable(aRect));
 
     // reset fill and line color of output device
     pOutputDev->SetFillColor( aFill );

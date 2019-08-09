@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
@@ -299,7 +300,7 @@ void SvxRectCtl::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangl
 
     rRenderContext.SetLineColor(rStyles.GetDialogColor());
     rRenderContext.SetFillColor(rStyles.GetDialogColor());
-    rRenderContext.DrawRect(tools::Rectangle(Point(0,0), rRenderContext.GetOutputSize()));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(0,0), rRenderContext.GetOutputSize())));
 
     if (IsEnabled())
         rRenderContext.SetLineColor(rStyles.GetLabelTextColor());
@@ -312,10 +313,10 @@ void SvxRectCtl::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangl
     {
         Color aOldCol = rRenderContext.GetLineColor();
         rRenderContext.SetLineColor(rStyles.GetLightColor());
-        rRenderContext.DrawRect(tools::Rectangle(aPtLT + aPtDiff, aPtRB + aPtDiff));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(aPtLT + aPtDiff, aPtRB + aPtDiff)));
         rRenderContext.SetLineColor(aOldCol);
     }
-    rRenderContext.DrawRect(tools::Rectangle(aPtLT, aPtRB));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(aPtLT, aPtRB)));
 
     rRenderContext.SetFillColor(rRenderContext.GetBackground().GetColor());
 
@@ -744,7 +745,7 @@ void SvxPixelCtl::Paint( vcl::RenderContext& rRenderContext, const tools::Rectan
                     // Change color: 0 -> Background color
                     rRenderContext.SetFillColor(nLastPixel ? aPixelColor : aBackgroundColor);
                 }
-                rRenderContext.DrawRect(tools::Rectangle(aPtTl, aPtBr));
+                Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(aPtTl, aPtBr)));
             }
         }
     }

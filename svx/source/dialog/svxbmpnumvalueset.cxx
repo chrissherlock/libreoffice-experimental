@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <osl/diagnose.h>
 #include <svx/dialmgr.hxx>
 #include <svx/strings.hrc>
@@ -240,7 +242,7 @@ void  SvxNumValueSet::UserDraw( const UserDrawEvent& rUDEvt )
         // to get correct lines
         // has to be made again
         pVDev->SetLineColor(aBackColor);
-        pVDev->DrawRect(aOrgRect);
+        Drawable::Draw(pVDev, RectangleDrawable(aOrgRect));
         long nStartX = aOrgRect.TopLeft().X();
         long nStartY = aOrgRect.TopLeft().Y();
 
@@ -615,7 +617,7 @@ void NumValueSet::UserDraw( const UserDrawEvent& rUDEvt )
         // to get correct lines
         // has to be made again
         pVDev->SetLineColor(aBackColor);
-        pVDev->DrawRect(aOrgRect);
+        Drawable::Draw(pVDev, RectangleDrawable(aOrgRect));
         long nStartX = aOrgRect.TopLeft().X();
         long nStartY = aOrgRect.TopLeft().Y();
 

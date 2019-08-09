@@ -17,8 +17,6 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <cassert>
-
 #include <sal/types.h>
 
 #include <tools/poly.hxx>
@@ -27,46 +25,11 @@
 #include <vcl/outdev.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/window.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <salgdi.hxx>
 
-void OutputDevice::DrawRect( const tools::Rectangle& rRect )
-{
-    assert(!is_double_buffered_window());
-
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaRectAction( rRect ) );
-
-    if ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
-        return;
-
-    tools::Rectangle aRect( ImplLogicToDevicePixel( rRect ) );
-
-    if ( aRect.IsEmpty() )
-        return;
-
-    aRect.Justify();
-
-    if ( !mpGraphics && !AcquireGraphics() )
-        return;
-
-    if ( mbInitClipRegion )
-        InitClipRegion();
-
-    if ( mbOutputClipped )
-        return;
-
-    if ( mbInitLineColor )
-        InitLineColor();
-
-    if ( mbInitFillColor )
-        InitFillColor();
-
-    mpGraphics->DrawRect( aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(), this );
-
-    if( mpAlphaVDev )
-        mpAlphaVDev->DrawRect( rRect );
-}
+#include <cassert>
 
 void OutputDevice::DrawRect( const tools::Rectangle& rRect,
                              sal_uLong nHorzRound, sal_uLong nVertRound )
@@ -207,7 +170,7 @@ void OutputDevice::DrawCheckered(const Point& rPos, const Size& rSize, sal_uInt3
             const sal_uInt32 nBottom(std::min(nMaxY, nY + nLen));
 
             SetFillColor(((x & 0x0001) ^ (y & 0x0001)) ? aStart : aEnd);
-            DrawRect(tools::Rectangle(nX, nY, nRight, nBottom));
+            Drawable::Draw(this, RectangleDrawable(tools::Rectangle(nX, nY, nRight, nBottom)));
         }
     }
 

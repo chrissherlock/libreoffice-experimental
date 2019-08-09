@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <com/sun/star/geometry/RealPoint2D.hpp>
 #include <com/sun/star/office/XAnnotation.hpp>
 
@@ -545,7 +547,7 @@ BitmapEx AnnotationTag::CreateAnnotationBitmap( bool bSelected )
     ::tools::Rectangle aBorderRect( aPos, maSize );
     pVDev->SetLineColor(aBorderColor);
     pVDev->SetFillColor(maColor);
-    pVDev->DrawRect( aBorderRect );
+    Drawable::Draw(pVDev, RectangleDrawable(aBorderRect));
 
     pVDev->SetTextColor( maColor.IsDark() ? COL_WHITE : COL_BLACK );
     pVDev->DrawText( Point( BORDER_X, BORDER_Y ), sAuthor );

@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include "cellvalueconversion.hxx"
 #include <table/gridtablerenderer.hxx>
@@ -223,7 +224,7 @@ namespace svt { namespace table
         rRenderContext.SetFillColor(background);
 
         rRenderContext.SetLineColor();
-        rRenderContext.DrawRect(_rArea);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(_rArea));
 
         // delimiter lines at bottom/right
         boost::optional<Color> aLineColor(m_pImpl->rModel.getLineColor());
@@ -357,7 +358,7 @@ namespace svt { namespace table
 
         rRenderContext.SetLineColor();
         rRenderContext.SetFillColor(backgroundColor);
-        rRenderContext.DrawRect(_rRowArea);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(_rRowArea));
 
         rRenderContext.Pop();
     }

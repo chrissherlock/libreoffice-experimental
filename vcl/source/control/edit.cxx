@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/event.hxx>
 #include <vcl/cursor.hxx>
 #include <vcl/menu.hxx>
@@ -505,7 +506,8 @@ void Edit::ImplRepaint(vcl::RenderContext& rRenderContext, const tools::Rectangl
         rRenderContext.Push(PushFlags::FILLCOLOR | PushFlags::LINECOLOR);
         rRenderContext.SetLineColor();
         rRenderContext.SetFillColor(GetControlBackground());
-        rRenderContext.DrawRect(tools::Rectangle(aPos, Size(GetOutputSizePixel().Width() - 2 * mnXOffset, GetOutputSizePixel().Height())));
+        Drawable::Draw(&rRenderContext,
+            RectangleDrawable(tools::Rectangle(aPos, Size(GetOutputSizePixel().Width() - 2 * mnXOffset, GetOutputSizePixel().Height()))));
         rRenderContext.Pop();
 
         rRenderContext.SetTextFillColor(GetControlBackground());
@@ -1762,7 +1764,7 @@ void Edit::Draw( OutputDevice* pDev, const Point& rPos, const Size& rSize, DrawF
         if ( bBackground )
         {
             pDev->SetFillColor( GetControlBackground() );
-            pDev->DrawRect( aRect );
+            Drawable::Draw(pDev, RectangleDrawable(aRect));
         }
     }
 

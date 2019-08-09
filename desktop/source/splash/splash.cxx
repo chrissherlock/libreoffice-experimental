@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include "splash.hxx"
 #include <stdio.h>
@@ -614,10 +615,10 @@ void SplashScreenWindow::Paint(vcl::RenderContext& rRenderContext, const tools::
         // border
         _vdev->SetFillColor();
         _vdev->SetLineColor( pSpl->_cProgressFrameColor );
-        _vdev->DrawRect(tools::Rectangle(pSpl->_tlx, pSpl->_tly, pSpl->_tlx+pSpl->_barwidth, pSpl->_tly+pSpl->_barheight));
+        Drawable::Draw(_vdev, RectangleDrawable(tools::Rectangle(pSpl->_tlx, pSpl->_tly, pSpl->_tlx+pSpl->_barwidth, pSpl->_tly+pSpl->_barheight)));
         _vdev->SetFillColor( pSpl->_cProgressBarColor );
         _vdev->SetLineColor();
-        _vdev->DrawRect(tools::Rectangle(pSpl->_tlx+pSpl->_barspace, pSpl->_tly+pSpl->_barspace, pSpl->_tlx+pSpl->_barspace+length, pSpl->_tly+pSpl->_barheight-pSpl->_barspace));
+        Drawable::Draw(_vdev, RectangleDrawable(tools::Rectangle(pSpl->_tlx+pSpl->_barspace, pSpl->_tly+pSpl->_barspace, pSpl->_tlx+pSpl->_barspace+length, pSpl->_tly+pSpl->_barheight-pSpl->_barspace)));
         vcl::Font aFont;
         aFont.SetFontSize(Size(0, 12));
         aFont.SetAlignment(ALIGN_BASELINE);

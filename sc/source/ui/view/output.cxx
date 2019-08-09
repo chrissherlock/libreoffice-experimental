@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <scitems.hxx>
 #include <editeng/brushitem.hxx>
 #include <svtools/colorcfg.hxx>
@@ -812,7 +814,7 @@ void ScOutputData::DrawDocumentBackground()
     Point aScreenPos  = mpDev->PixelToLogic(Point(nScrX, nScrY));
     Size  aScreenSize = mpDev->PixelToLogic(Size(nScrW - 1,nScrH - 1));
 
-    mpDev->DrawRect(tools::Rectangle(aScreenPos, aScreenSize));
+    Drawable::Draw(mpDev, RectangleDrawable(tools::Rectangle(aScreenPos, aScreenSize)));
 }
 
 namespace {
@@ -871,7 +873,7 @@ void drawDataBars(vcl::RenderContext& rRenderContext, const ScDataBarInfo* pOldD
     else
     {
         rRenderContext.SetFillColor(pOldDataBarInfo->maColor);
-        rRenderContext.DrawRect(aPaintRect);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aPaintRect));
     }
 
     //draw axis
@@ -922,7 +924,7 @@ void drawCells(vcl::RenderContext& rRenderContext, boost::optional<Color> const 
         if( !pOldColor->GetTransparency() )
         {
             rRenderContext.SetFillColor( *pOldColor );
-            rRenderContext.DrawRect( rRect );
+            Drawable::Draw(&rRenderContext, RectangleDrawable(rRect));
         }
         if( pOldDataBarInfo )
             drawDataBars(rRenderContext, pOldDataBarInfo, rRect, nOneX, nOneY);
@@ -941,7 +943,7 @@ void drawCells(vcl::RenderContext& rRenderContext, boost::optional<Color> const 
             if ( !aBackCol.GetTransparency() )      //! partial transparency?
             {
                 rRenderContext.SetFillColor( aBackCol );
-                rRenderContext.DrawRect( rRect );
+                Drawable::Draw(&rRenderContext, RectangleDrawable(rRect));
             }
         }
         if( pOldDataBarInfo )
@@ -1277,7 +1279,7 @@ void ScOutputData::DrawExtraShadow(bool bLeft, bool bTop, bool bRight, bool bBot
 
                             //! merge rectangles?
                             mpDev->SetFillColor( bCellContrast ? aAutoTextColor : pAttr->GetColor() );
-                            mpDev->DrawRect( aRect );
+                            Drawable::Draw(mpDev, RectangleDrawable(aRect));
                         }
                     }
                 }
@@ -1960,7 +1962,7 @@ void ScOutputData::DrawRefMark( SCCOL nRefStartX, SCROW nRefStartY,
             if (bTop && bBottom && bLeft && bRight)
             {
                 mpDev->SetFillColor();
-                mpDev->DrawRect( tools::Rectangle( nMinX, nMinY, nMaxX, nMaxY ) );
+                Drawable::Draw(mpDev, RectangleDrawable(tools::Rectangle(nMinX, nMinY, nMaxX, nMaxY)));
             }
             else
             {
@@ -2093,7 +2095,7 @@ void ScOutputData::DrawOneChange( SCCOL nRefStartX, SCROW nRefStartY,
             if (bTop && bBottom && bLeft && bRight)
             {
                 mpDev->SetFillColor();
-                mpDev->DrawRect( tools::Rectangle( nMinX, nMinY, nMaxX, nMaxY ) );
+                Drawable::Draw(mpDev, RectangleDrawable(tools::Rectangle(nMinX, nMinY, nMaxX, nMaxY)));
             }
             else
             {
@@ -2118,7 +2120,7 @@ void ScOutputData::DrawOneChange( SCCOL nRefStartX, SCROW nRefStartY,
             {
                 mpDev->SetLineColor();
                 mpDev->SetFillColor( rColor );
-                mpDev->DrawRect( tools::Rectangle( nMinX+nLayoutSign, nMinY+1, nMinX+3*nLayoutSign, nMinY+3 ) );
+                Drawable::Draw(mpDev, RectangleDrawable(tools::Rectangle(nMinX+nLayoutSign, nMinY+1, nMinX+3*nLayoutSign, nMinY+3)));
             }
         }
     }
@@ -2251,7 +2253,7 @@ void ScOutputData::DrawNoteMarks(vcl::RenderContext& rRenderContext)
                         }
                     }
                     if ( bLayoutRTL ? ( nMarkX >= 0 ) : ( nMarkX < nScrX+nScrW ) )
-                        rRenderContext.DrawRect( tools::Rectangle( nMarkX-5*nLayoutSign,nPosY,nMarkX+1*nLayoutSign,nPosY+6 ) );
+                        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(nMarkX-5*nLayoutSign, nPosY, nMarkX+1*nLayoutSign, nPosY+6)));
                 }
 
                 nPosX += pRowInfo[0].pCellInfo[nX+1].nWidth * nLayoutSign;

@@ -17,10 +17,10 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <tools/diagnose_ex.h>
+
 #include <comphelper/string.hxx>
 #include <sal/log.hxx>
-
-#include <tools/diagnose_ex.h>
 #include <tools/time.hxx>
 
 #include <vcl/window.hxx>
@@ -29,6 +29,7 @@
 #include <vcl/wrkwin.hxx>
 #include <vcl/help.hxx>
 #include <vcl/settings.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <helpwin.hxx>
 #include <salframe.hxx>
@@ -404,14 +405,14 @@ void HelpTextWindow::Paint( vcl::RenderContext& rRenderContext, const tools::Rec
     if (!bNativeOK)
     {
         Size aSz = GetOutputSizePixel();
-        rRenderContext.DrawRect(tools::Rectangle(Point(), aSz));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(), aSz)));
         if (mnHelpWinStyle == HELPWINSTYLE_BALLOON)
         {
             aSz.AdjustWidth( -2 );
             aSz.AdjustHeight( -2 );
             Color aColor(rRenderContext.GetLineColor());
             rRenderContext.SetLineColor(COL_GRAY);
-            rRenderContext.DrawRect(tools::Rectangle(Point(1, 1), aSz));
+            Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(1, 1), aSz)));
             rRenderContext.SetLineColor(aColor);
         }
     }

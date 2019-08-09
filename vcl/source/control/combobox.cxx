@@ -18,6 +18,7 @@
  */
 
 #include <vcl/combobox.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <set>
 
@@ -1193,7 +1194,7 @@ void ComboBox::Draw( OutputDevice* pDev, const Point& rPos, const Size& rSize, D
         if ( bBackground )
         {
             pDev->SetFillColor( GetControlBackground() );
-            pDev->DrawRect( aRect );
+            Drawable::Draw(pDev, RectangleDrawable(aRect));
         }
     }
 

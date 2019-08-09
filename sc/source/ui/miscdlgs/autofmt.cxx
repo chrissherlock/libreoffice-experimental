@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <scitems.hxx>
 #include <editeng/boxitem.hxx>
 #include <editeng/brushitem.hxx>
@@ -369,10 +371,10 @@ void ScAutoFmtPreview::DrawBackground(vcl::RenderContext& rRenderContext)
                 rRenderContext.SetFillColor( pItem->GetColor() );
 
                 const basegfx::B2DRange aCellRange(maArray.GetCellRange( nCol, nRow, true ));
-                rRenderContext.DrawRect(
+                Drawable::Draw(&rRenderContext, RectangleDrawable(
                     tools::Rectangle(
                         basegfx::fround(aCellRange.getMinX()), basegfx::fround(aCellRange.getMinY()),
-                        basegfx::fround(aCellRange.getMaxX()), basegfx::fround(aCellRange.getMaxY())));
+                        basegfx::fround(aCellRange.getMaxX()), basegfx::fround(aCellRange.getMaxY()))));
 
                 rRenderContext.Pop();
             }
@@ -507,13 +509,13 @@ void ScAutoFmtPreview::DoPaint(vcl::RenderContext& rRenderContext)
     aVD->SetLineColor();
     aVD->SetFillColor(aBackCol);
     aVD->SetOutputSize(aWndSize);
-    aVD->DrawRect(aRect);
+    Drawable::Draw(aVD, RectangleDrawable(aRect));
 
     PaintCells(*aVD);
 
     rRenderContext.SetLineColor();
     rRenderContext.SetFillColor(aBackCol);
-    rRenderContext.DrawRect(aRect);
+    Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
 
     Point aPos((aWndSize.Width() - aPrvSize.Width()) / 2, (aWndSize.Height() - aPrvSize.Height()) / 2);
     if (AllSettings::GetLayoutRTL())

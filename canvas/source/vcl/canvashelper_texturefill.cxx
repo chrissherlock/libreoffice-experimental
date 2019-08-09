@@ -18,6 +18,7 @@
  */
 
 #include <sal/config.h>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <tuple>
 
@@ -356,7 +357,7 @@ namespace vclcanvas
 
             // fill background
             rOutDev.SetFillColor( rColors.front() );
-            rOutDev.DrawRect( rBounds );
+            Drawable::Draw(&rOutDev, RectangleDrawable(rBounds));
 
             // render polygon
             // ==============
@@ -507,7 +508,7 @@ namespace vclcanvas
                     // assume a 1bpp target - everything beyond 97%
                     // transparency is fully transparent
                     p2ndOutDev->SetFillColor( COL_BLACK );
-                    p2ndOutDev->DrawRect( aPolygonDeviceRectOrig );
+                    Drawable::Draw(p2ndOutDev, RectangleDrawable(aPolygonDeviceRectOrig));
                 }
             }
             else
@@ -547,7 +548,8 @@ namespace vclcanvas
                                                             aTextureTransform );
                 rOutDev.SetLineColor( COL_RED );
                 rOutDev.SetFillColor();
-                rOutDev.DrawRect( vcl::unotools::rectangleFromB2DRectangle( aTextureDeviceRect ) );
+                Drawable::Draw(&rOutDev,
+                    RectangleDrawable(vcl::unotools::rectangleFromB2DRectangle(aTextureDeviceRect)));
 
                 rOutDev.SetLineColor( COL_BLUE );
                 ::tools::Polygon aPoly1(

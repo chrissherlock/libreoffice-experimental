@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <memory>
 
 #include <vcl/svapp.hxx>
@@ -1723,7 +1725,7 @@ void ImplListBoxWindow::ImplPaint(vcl::RenderContext& rRenderContext, sal_Int32 
         rRenderContext.SetTextColor(!IsEnabled() ? rStyleSettings.GetDisableColor() : rStyleSettings.GetHighlightTextColor());
         rRenderContext.SetFillColor(rStyleSettings.GetHighlightColor());
         rRenderContext.SetLineColor();
-        rRenderContext.DrawRect(aRect);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
     }
     else
     {
@@ -2723,7 +2725,7 @@ void ImplWin::ImplDraw(vcl::RenderContext& rRenderContext, bool bLayout)
                     rRenderContext.SetFillColor();
                     rRenderContext.SetTextColor( rStyleSettings.GetFieldTextColor() );
                 }
-                rRenderContext.DrawRect( maFocusRect );
+                Drawable::Draw(&rRenderContext, RectangleDrawable(maFocusRect));
             }
             else
             {

@@ -117,6 +117,7 @@ endif
 $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/outdev/Drawable \
     vcl/source/outdev/PixelDrawable \
+    vcl/source/outdev/RectangleDrawable \
     vcl/source/animate/Animation \
     vcl/source/animate/AnimationBitmap \
     vcl/source/window/aboutdialog \

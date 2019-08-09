@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <tools/config.hxx>
@@ -58,14 +60,14 @@ void DrawRectangles(vcl::RenderContext& rRenderContext, Point const & rUL, Point
     rRenderContext.DrawLine(aBL, rBR);
     rRenderContext.DrawLine(rBR, aUR);
     rRenderContext.DrawLine(aUR, rUL);
-    rRenderContext.DrawRect(tools::Rectangle(rUL, Size(RECT_SIZE_PIX,RECT_SIZE_PIX)));
-    rRenderContext.DrawRect(tools::Rectangle(aBL, Size(RECT_SIZE_PIX, -RECT_SIZE_PIX)));
-    rRenderContext.DrawRect(tools::Rectangle(rBR, Size(-RECT_SIZE_PIX, -RECT_SIZE_PIX)));
-    rRenderContext.DrawRect(tools::Rectangle(aUR, Size(-RECT_SIZE_PIX, RECT_SIZE_PIX )));
-    rRenderContext.DrawRect(tools::Rectangle(Point(nMiddleX - RECT_SIZE_PIX / 2, rUL.Y()), Size(RECT_SIZE_PIX, RECT_SIZE_PIX)));
-    rRenderContext.DrawRect(tools::Rectangle(Point(nMiddleX - RECT_SIZE_PIX / 2, rBR.Y()), Size(RECT_SIZE_PIX, -RECT_SIZE_PIX)));
-    rRenderContext.DrawRect(tools::Rectangle(Point(rUL.X(), nMiddleY - RECT_SIZE_PIX / 2), Size(RECT_SIZE_PIX, RECT_SIZE_PIX)));
-    rRenderContext.DrawRect(tools::Rectangle(Point(rBR.X(), nMiddleY - RECT_SIZE_PIX / 2), Size(-RECT_SIZE_PIX, RECT_SIZE_PIX)));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(rUL, Size(RECT_SIZE_PIX,RECT_SIZE_PIX))));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(aBL, Size(RECT_SIZE_PIX, -RECT_SIZE_PIX))));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(rBR, Size(-RECT_SIZE_PIX, -RECT_SIZE_PIX))));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(aUR, Size(-RECT_SIZE_PIX, RECT_SIZE_PIX ))));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(nMiddleX - RECT_SIZE_PIX / 2, rUL.Y()), Size(RECT_SIZE_PIX, RECT_SIZE_PIX))));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(nMiddleX - RECT_SIZE_PIX / 2, rBR.Y()), Size(RECT_SIZE_PIX, -RECT_SIZE_PIX))));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(rUL.X(), nMiddleY - RECT_SIZE_PIX / 2), Size(RECT_SIZE_PIX, RECT_SIZE_PIX))));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(rBR.X(), nMiddleY - RECT_SIZE_PIX / 2), Size(-RECT_SIZE_PIX, RECT_SIZE_PIX))));
 }
 
 }
@@ -913,8 +915,8 @@ void ScanPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Rectang
     rRenderContext.SetMapMode(MapMode(MapUnit::MapAppFont));
     rRenderContext.SetFillColor(COL_WHITE);
     rRenderContext.SetLineColor(COL_WHITE);
-    rRenderContext.DrawRect(tools::Rectangle(Point(0, 0),
-                                      Size(PREVIEW_WIDTH, PREVIEW_HEIGHT)));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(0, 0),
+                                      Size(PREVIEW_WIDTH, PREVIEW_HEIGHT))));
     rRenderContext.SetMapMode(MapMode(MapUnit::MapPixel));
     // check for sane values
     rRenderContext.DrawBitmapEx(maPreviewRect.TopLeft(), maPreviewRect.GetSize(), maPreviewBitmapEx);

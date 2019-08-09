@@ -9,6 +9,7 @@
  */
 
 #include <sal/config.h>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include "StylePresetsPanel.hxx"
 
@@ -91,7 +92,7 @@ BitmapEx GenerateStylePreview(SfxObjectShell& rSource, OUString const & aName)
     {
         pVirtualDev->SetFillColor(COL_LIGHTGRAY);
         tools::Rectangle aNameRect(0, y, nPreviewWidth, nNameHeight);
-        pVirtualDev->DrawRect(aNameRect);
+        Drawable::Draw(pVirtualDev, RectangleDrawable(aNameRect));
 
         vcl::Font aFont;
         aFont.SetFontSize(Size(0, nNameFontSize));

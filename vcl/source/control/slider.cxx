@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/event.hxx>
 #include <vcl/decoview.hxx>
 #include <vcl/slider.hxx>
@@ -419,7 +420,7 @@ void Slider::ImplDraw(vcl::RenderContext& rRenderContext)
                 rRenderContext.SetFillColor(rStyleSettings.GetShadowColor());
             else
                 rRenderContext.SetFillColor(rStyleSettings.GetCheckedColor());
-            rRenderContext.DrawRect(aRect);
+            Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
         }
     }
 
@@ -460,7 +461,7 @@ void Slider::ImplDraw(vcl::RenderContext& rRenderContext)
                 rRenderContext.SetFillColor(rStyleSettings.GetShadowColor());
             else
                 rRenderContext.SetFillColor(rStyleSettings.GetCheckedColor());
-            rRenderContext.DrawRect(aRect);
+            Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
         }
     }
 
@@ -477,7 +478,7 @@ void Slider::ImplDraw(vcl::RenderContext& rRenderContext)
         {
             rRenderContext.SetLineColor(rStyleSettings.GetShadowColor());
             rRenderContext.SetFillColor(rStyleSettings.GetCheckedColor());
-            rRenderContext.DrawRect(maThumbRect);
+            Drawable::Draw(&rRenderContext, RectangleDrawable(maThumbRect));
         }
     }
 }

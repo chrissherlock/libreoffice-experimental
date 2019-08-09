@@ -17,15 +17,16 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <cassert>
-
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/window.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <wall2.hxx>
+
+#include <cassert>
 
 Color OutputDevice::GetBackgroundColor() const
 {
@@ -87,7 +88,7 @@ void OutputDevice::DrawColorWallpaper( long nX, long nY,
 
     bool bMap = mbMap;
     EnableMapMode( false );
-    DrawRect( tools::Rectangle( Point( nX, nY ), Size( nWidth, nHeight ) ) );
+    Drawable::Draw(this, RectangleDrawable(tools::Rectangle(Point(nX, nY), Size(nWidth, nHeight))));
     SetLineColor( aOldLineColor );
     SetFillColor( aOldFillColor );
     EnableMapMode( bMap );

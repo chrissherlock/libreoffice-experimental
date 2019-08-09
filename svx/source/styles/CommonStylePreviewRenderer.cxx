@@ -8,6 +8,8 @@
  *
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <memory>
 #include <svx/CommonStylePreviewRenderer.hxx>
 
@@ -196,7 +198,7 @@ bool CommonStylePreviewRenderer::render(const tools::Rectangle& aRectangle, Rend
     if (maBackgroundColor != COL_AUTO)
     {
         mrOutputDev.SetFillColor(maBackgroundColor);
-        mrOutputDev.DrawRect(aRectangle);
+        Drawable::Draw(&mrOutputDev, RectangleDrawable(aRectangle));
     }
 
     if (m_pFont)

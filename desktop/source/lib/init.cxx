@@ -38,6 +38,7 @@
 #include <LibreOfficeKit/LibreOfficeKitEnums.h>
 
 #include <sal/log.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/errinf.hxx>
 #include <vcl/lok.hxx>
 #include <osl/file.hxx>
@@ -2711,7 +2712,7 @@ static void doc_paintTile(LibreOfficeKitDocument* pThis,
         pDevice->Push(PushFlags::FILLCOLOR | PushFlags::LINECOLOR);
         pDevice->SetFillColor(COL_LIGHTRED);
         pDevice->SetLineColor();
-        pDevice->DrawRect(aRect);
+        Drawable::Draw(pDevice, RectangleDrawable(aRect));
         pDevice->Pop();
     }
 #endif

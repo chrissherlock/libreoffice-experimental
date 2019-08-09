@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <limits.h>
 #include <osl/diagnose.h>
@@ -1426,7 +1427,7 @@ void SvxIconChoiceCtrl_Impl::PaintEmphasis(const tools::Rectangle& rTextRect, bo
     // draw text rectangle
     if (bSolidTextRect)
     {
-        rRenderContext.DrawRect(rTextRect);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(rTextRect));
     }
 
     rRenderContext.SetFillColor(aOldFillColor);
@@ -1499,7 +1500,7 @@ void SvxIconChoiceCtrl_Impl::PaintEntry(SvxIconChoiceCtrlEntry* pEntry, const Po
         rRenderContext.SetFont(aNewFont);
 
         rRenderContext.SetFillColor(rRenderContext.GetBackground().GetColor());
-        rRenderContext.DrawRect(CalcFocusRect(pEntry));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(CalcFocusRect(pEntry)));
         rRenderContext.SetFillColor();
     }
 

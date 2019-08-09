@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/PixelDrawable.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <com/sun/star/uno/XComponentContext.hpp>
 #include <com/sun/star/ui/dialogs/XExecutableDialog.hpp>
@@ -170,7 +171,7 @@ void ColorPreviewControl::Paint(vcl::RenderContext& rRenderContext, const tools:
 {
     rRenderContext.SetFillColor(m_aColor);
     rRenderContext.SetLineColor(m_aColor);
-    rRenderContext.DrawRect(tools::Rectangle(Point(0, 0), GetOutputSizePixel()));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(0, 0), GetOutputSizePixel())));
 }
 
 enum ColorMode { HUE, SATURATION, BRIGHTNESS, RED, GREEN, BLUE };

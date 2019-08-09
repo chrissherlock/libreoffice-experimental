@@ -18,10 +18,12 @@
  */
 
 #include <tools/diagnose_ex.h>
+
 #include <tools/stream.hxx>
 #include <sal/log.hxx>
-
 #include <comphelper/lok.hxx>
+
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/mnemonic.hxx>
 #include <vcl/image.hxx>
@@ -155,9 +157,9 @@ void lclDrawMoreIndicator(vcl::RenderContext& rRenderContext, const tools::Recta
     long y = rRect.Top() + (rRect.getHeight() - height)/2 + 1;
     while( height >= 1)
     {
-        rRenderContext.DrawRect( tools::Rectangle( x, y, x + linewidth, y ) );
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(x, y, x + linewidth, y)));
         x += space;
-        rRenderContext.DrawRect( tools::Rectangle( x, y, x + linewidth, y ) );
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(x, y, x + linewidth, y)));
         x -= space;
         y++;
         if( height <= heightOrig / 2 + 1) x--;
@@ -1710,7 +1712,7 @@ void Menu::ImplPaintMenuTitle(vcl::RenderContext& rRenderContext, const tools::R
     aBgRect.setWidth(aBgRect.getWidth() - 2 * SPACE_AROUND_TITLE - 2 * nOuterSpaceX);
     aBgRect.setY(aBgRect.getY() + SPACE_AROUND_TITLE);
     aBgRect.setHeight(nTitleHeight - 2 * SPACE_AROUND_TITLE);
-    rRenderContext.DrawRect(aBgRect);
+    Drawable::Draw(&rRenderContext, RectangleDrawable(aBgRect));
 
     // Draw the text centered
     Point aTextTopLeft(aBgRect.TopLeft());

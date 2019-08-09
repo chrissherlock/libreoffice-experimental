@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <salinst.hxx>
 #include <salgdi.hxx>
 #include <salvd.hxx>
@@ -345,7 +347,7 @@ void VirtualDevice::ImplFillOpaqueRectangle( const tools::Rectangle& rRect )
     Push( PushFlags::LINECOLOR | PushFlags::FILLCOLOR );
     SetLineColor( COL_BLACK );
     SetFillColor( COL_BLACK );
-    DrawRect( rRect );
+    Drawable::Draw(this, RectangleDrawable(rRect));
     Pop();
 }
 

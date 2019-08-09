@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <memory>
 #include <vcl/canvastools.hxx>
 #include <vcl/outdev.hxx>
@@ -142,7 +144,7 @@ void SvxPageWindow::DrawPage(vcl::RenderContext& rRenderContext, const Point& rO
         rRenderContext.SetLineColor(COL_TRANSPARENT);
         rRenderContext.SetFillColor(rDlgColor);
         Size winSize(rRenderContext.GetOutputSize());
-        rRenderContext.DrawRect(tools::Rectangle(Point(0,0), winSize));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(0,0), winSize)));
 
         if (bResetBackground)
             bResetBackground = false;
@@ -156,11 +158,11 @@ void SvxPageWindow::DrawPage(vcl::RenderContext& rRenderContext, const Point& rO
     if (!bEnabled)
     {
         rRenderContext.SetFillColor(rDisableColor);
-        rRenderContext.DrawRect(tools::Rectangle(rOrg, aTempSize));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(rOrg, aTempSize)));
         return;
     }
     rRenderContext.SetFillColor(rFieldColor);
-    rRenderContext.DrawRect(tools::Rectangle(rOrg, aTempSize));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(rOrg, aTempSize)));
 
     long nL = nLeft;
     long nR = nRight;
@@ -315,7 +317,7 @@ void SvxPageWindow::DrawPage(vcl::RenderContext& rRenderContext, const Point& rO
             {
                 if (j > 0)
                     aCellRect.Move(CELL_WIDTH,0);
-                rRenderContext.DrawRect(aCellRect);
+                Drawable::Draw(&rRenderContext, RectangleDrawable(aCellRect));
             }
         }
     }

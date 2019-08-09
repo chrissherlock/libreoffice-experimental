@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <scitems.hxx>
 #include <editeng/eeitem.hxx>
 
@@ -1312,7 +1314,7 @@ void ScPrintFunc::DrawBorder( long nScrX, long nScrY, long nScrW, long nScrH,
         {
             pDev->SetFillColor(pBackground->GetColor());
             pDev->SetLineColor();
-            pDev->DrawRect(aFrameRect);
+            Drawable::Draw(pDev, RectangleDrawable(aFrameRect));
         }
     }
 
@@ -1325,36 +1327,36 @@ void ScPrintFunc::DrawBorder( long nScrX, long nScrY, long nScrW, long nScrH,
         switch (pShadow->GetLocation())
         {
             case SvxShadowLocation::TopLeft:
-                pDev->DrawRect( tools::Rectangle(
+                Drawable::Draw(pDev, RectangleDrawable( tools::Rectangle(
                         aFrameRect.Left()-nShadowX, aFrameRect.Top()-nShadowY,
-                        aFrameRect.Right()-nShadowX, aFrameRect.Top() ) );
-                pDev->DrawRect( tools::Rectangle(
+                        aFrameRect.Right()-nShadowX, aFrameRect.Top())));
+                Drawable::Draw(pDev, RectangleDrawable( tools::Rectangle(
                         aFrameRect.Left()-nShadowX, aFrameRect.Top()-nShadowY,
-                        aFrameRect.Left(), aFrameRect.Bottom()-nShadowY ) );
+                        aFrameRect.Left(), aFrameRect.Bottom()-nShadowY)));
                 break;
             case SvxShadowLocation::TopRight:
-                pDev->DrawRect( tools::Rectangle(
+                Drawable::Draw(pDev, RectangleDrawable( tools::Rectangle(
                         aFrameRect.Left()+nShadowX, aFrameRect.Top()-nShadowY,
-                        aFrameRect.Right()+nShadowX, aFrameRect.Top() ) );
-                pDev->DrawRect( tools::Rectangle(
+                        aFrameRect.Right()+nShadowX, aFrameRect.Top())));
+                Drawable::Draw(pDev, RectangleDrawable( tools::Rectangle(
                         aFrameRect.Right(), aFrameRect.Top()-nShadowY,
-                        aFrameRect.Right()+nShadowX, aFrameRect.Bottom()-nShadowY ) );
+                        aFrameRect.Right()+nShadowX, aFrameRect.Bottom()-nShadowY)));
                 break;
             case SvxShadowLocation::BottomLeft:
-                pDev->DrawRect( tools::Rectangle(
+                Drawable::Draw(pDev, RectangleDrawable( tools::Rectangle(
                         aFrameRect.Left()-nShadowX, aFrameRect.Bottom(),
-                        aFrameRect.Right()-nShadowX, aFrameRect.Bottom()+nShadowY ) );
-                pDev->DrawRect( tools::Rectangle(
+                        aFrameRect.Right()-nShadowX, aFrameRect.Bottom()+nShadowY)));
+                Drawable::Draw(pDev, RectangleDrawable( tools::Rectangle(
                         aFrameRect.Left()-nShadowX, aFrameRect.Top()+nShadowY,
-                        aFrameRect.Left(), aFrameRect.Bottom()+nShadowY ) );
+                        aFrameRect.Left(), aFrameRect.Bottom()+nShadowY)));
                 break;
             case SvxShadowLocation::BottomRight:
-                pDev->DrawRect( tools::Rectangle(
+                Drawable::Draw(pDev, RectangleDrawable( tools::Rectangle(
                         aFrameRect.Left()+nShadowX, aFrameRect.Bottom(),
-                        aFrameRect.Right()+nShadowX, aFrameRect.Bottom()+nShadowY ) );
-                pDev->DrawRect( tools::Rectangle(
+                        aFrameRect.Right()+nShadowX, aFrameRect.Bottom()+nShadowY)));
+                Drawable::Draw(pDev, RectangleDrawable( tools::Rectangle(
                         aFrameRect.Right(), aFrameRect.Top()+nShadowY,
-                        aFrameRect.Right()+nShadowX, aFrameRect.Bottom()+nShadowY ) );
+                        aFrameRect.Right()+nShadowX, aFrameRect.Bottom()+nShadowY)));
                 break;
             default:
             {
@@ -1418,7 +1420,7 @@ void ScPrintFunc::PrintColHdr( SCCOL nX1, SCCOL nX2, long nScrX, long nScrY )
             long nWidth = static_cast<long>(nDocW * nScaleX);
             long nEndX = nPosX + nWidth * nLayoutSign;
 
-            pDev->DrawRect( tools::Rectangle( nPosX,nPosY,nEndX,nEndY ) );
+            Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(nPosX, nPosY, nEndX, nEndY)));
 
             aText = ::ScColToAlpha( nCol);
             long nTextWidth = pDev->GetTextWidth(aText);
@@ -1462,7 +1464,7 @@ void ScPrintFunc::PrintRowHdr( SCROW nY1, SCROW nY2, long nScrX, long nScrY )
             long nHeight = static_cast<long>(nDocH * nScaleY);
             long nEndY = nPosY + nHeight;
 
-            pDev->DrawRect( tools::Rectangle( nPosX,nPosY,nEndX,nEndY ) );
+            Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(nPosX, nPosY, nEndX, nEndY)));
 
             aText = OUString::number( nRow+1 );
             long nTextWidth = pDev->GetTextWidth(aText);
@@ -1959,9 +1961,9 @@ long ScPrintFunc::PrintNotes( long nPageNo, long nNoteStart, bool bDoPrint, ScPr
         pDev->SetMapMode(aOffsetMode);
         pDev->SetLineColor();
         pDev->SetFillColor(aBackgroundColor);
-        pDev->DrawRect(tools::Rectangle(Point(),
+        Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(Point(),
                 Size(static_cast<long>(aPageSize.Width() * nScaleX * 100 / nZoom),
-                     static_cast<long>(aPageSize.Height() * nScaleY * 100 / nZoom))));
+                     static_cast<long>(aPageSize.Height() * nScaleY * 100 / nZoom)))));
     }
 
     //      adjust aPageRect for left/right page
@@ -2028,9 +2030,9 @@ void ScPrintFunc::PrintPage( long nPageNo, SCCOL nX1, SCROW nY1, SCCOL nX2, SCRO
         pDev->SetMapMode(aOffsetMode);
         pDev->SetLineColor();
         pDev->SetFillColor(aBackgroundColor);
-        pDev->DrawRect(tools::Rectangle(Point(),
+        Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(Point(),
                 Size(static_cast<long>(aPageSize.Width() * nScaleX * 100 / nZoom),
-                     static_cast<long>(aPageSize.Height() * nScaleY * 100 / nZoom))));
+                     static_cast<long>(aPageSize.Height() * nScaleY * 100 / nZoom)))));
     }
 
     //      adjust aPageRect for left/right page
@@ -2342,8 +2344,8 @@ void ScPrintFunc::PrintPage( long nPageNo, SCCOL nX1, SCROW nY1, SCCOL nX2, SCRO
         pDev->SetMapMode(aOffsetMode);
         pDev->SetLineColor( aGridColor );
         pDev->SetFillColor();
-        pDev->DrawRect( tools::Rectangle( nLeftX, nTopY, nRightX, nBottomY ) );
-        //  nEndX/Y without frame-adaptation
+        Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(nLeftX, nTopY, nRightX, nBottomY)));
+        //  nEndX/Y without frame-adaption
     }
 
     if ( pPrinter && bDoPrint )

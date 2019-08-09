@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <view/SlsPageObjectPainter.hxx>
 
 #include <model/SlsPageDescriptor.hxx>
@@ -123,7 +125,7 @@ void PageObjectPainter::PaintBackground (
             rpDescriptor,
             PageObjectLayouter::Part::Preview,
             PageObjectLayouter::ModelCoordinateSystem));
-        rDevice.DrawRect(aPreviewBox);
+        Drawable::Draw(&rDevice, RectangleDrawable(aPreviewBox));
     }
 }
 
@@ -378,7 +380,7 @@ void PageObjectPainter::PaintBackgroundDetail (
     const Color aBackgroundColor (mpTheme->GetColor(Theme::Color_Background));
     rDevice.SetFillColor(aBackgroundColor);
     rDevice.SetLineColor(aBackgroundColor);
-    rDevice.DrawRect(aFocusSize);
+    Drawable::Draw(&rDevice, RectangleDrawable(aFocusSize));
 
     // Paint the slide area with a linear gradient that starts some pixels
     // below the top and ends some pixels above the bottom.
@@ -417,7 +419,7 @@ void PageObjectPainter::PaintBackgroundDetail (
     else
     {
         rDevice.SetFillColor(aTopColor);
-        rDevice.DrawRect(aPageObjectBox);
+        Drawable::Draw(&rDevice, RectangleDrawable(aPageObjectBox));
     }
 
     // Paint the simple border and, for some backgrounds, the focus border.

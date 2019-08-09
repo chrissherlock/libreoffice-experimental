@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <sfx2/htmlmode.hxx>
 #include <svtools/htmlcfg.hxx>
 
@@ -106,11 +107,13 @@ void SwViewOption::DrawRect( OutputDevice *pOut,
         const Color aCol( nCol );
         const Color aOldColor( pOut->GetFillColor() );
         pOut->SetFillColor( aCol );
-        pOut->DrawRect( rRect.SVRect() );
+        Drawable::Draw(pOut, RectangleDrawable(rRect.SVRect()));
         pOut->SetFillColor( aOldColor );
     }
     else
+    {
         DrawRectPrinter( pOut, rRect );
+    }
 }
 
 void SwViewOption::DrawRectPrinter( OutputDevice *pOut,
@@ -120,7 +123,7 @@ void SwViewOption::DrawRectPrinter( OutputDevice *pOut,
     Color aOldFillColor( pOut->GetFillColor() );
     pOut->SetLineColor( COL_BLACK );
     pOut->SetFillColor( COL_TRANSPARENT);
-    pOut->DrawRect( rRect.SVRect() );
+    Drawable::Draw(pOut, RectangleDrawable(rRect.SVRect()));
     pOut->SetFillColor( aOldFillColor );
     pOut->SetLineColor( aOldColor );
 }

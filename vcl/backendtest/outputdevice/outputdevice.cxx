@@ -10,6 +10,8 @@
 
 #include <test/outputdevice.hxx>
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 namespace vcl {
 namespace test {
 
@@ -40,15 +42,15 @@ Bitmap OutputDeviceTestAnotherOutDev::setupXOR()
 
     mpVirtualDevice->SetRasterOp(RasterOp::Xor);
     mpVirtualDevice->SetFillColor(constFillColor);
-    mpVirtualDevice->DrawRect(aDrawRectangle);
+    Drawable::Draw(mpVirtualDevice, RectangleDrawable(aDrawRectangle));
 
     mpVirtualDevice->SetRasterOp(RasterOp::N0);
     mpVirtualDevice->SetFillColor(COL_BLACK);
-    mpVirtualDevice->DrawRect(aScissorRectangle);
+    Drawable::Draw(mpVirtualDevice, RectangleDrawable(aScissorRectangle));
 
     mpVirtualDevice->SetRasterOp(RasterOp::Xor);
     mpVirtualDevice->SetFillColor(constFillColor);
-    mpVirtualDevice->DrawRect(aDrawRectangle);
+    Drawable::Draw(mpVirtualDevice, RectangleDrawable(aDrawRectangle));
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
 }

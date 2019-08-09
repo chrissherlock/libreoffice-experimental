@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/accel.hxx>
 #include <vcl/event.hxx>
 #include <vcl/layout.hxx>
@@ -168,7 +169,7 @@ void TabPage::Draw( OutputDevice* pDev, const Point& rPos, const Size& rSize, Dr
             pDev->SetFillColor( GetSettings().GetStyleSettings().GetDialogColor() );
         else
             pDev->SetFillColor( aWallpaper.GetColor() );
-        pDev->DrawRect( tools::Rectangle( aPos, aSize ) );
+        Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(aPos, aSize)));
     }
 
     pDev->Pop();

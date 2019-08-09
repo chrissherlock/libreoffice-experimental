@@ -29,6 +29,7 @@ $(eval $(call gb_Executable_use_libraries,svptest,\
     cppu \
     cppuhelper \
     comphelper \
+    salhelper \
 ))
 
 $(eval $(call gb_Executable_add_exception_objects,svptest,\

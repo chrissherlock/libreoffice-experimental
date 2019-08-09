@@ -21,10 +21,11 @@
 
 #include <sal/types.h>
 #include <tools/helpers.hxx>
-
 #include <basegfx/matrix/b2dhommatrixtools.hxx>
+
 #include <memory>
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/bitmapaccess.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
@@ -820,7 +821,7 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos,
                     // create mask bitmap
                     xVDev->SetLineColor( COL_BLACK );
                     xVDev->SetFillColor( COL_BLACK );
-                    xVDev->DrawRect( tools::Rectangle( xVDev->PixelToLogic( Point() ), xVDev->GetOutputSize() ) );
+                    Drawable::Draw(xVDev, RectangleDrawable(tools::Rectangle(xVDev->PixelToLogic(Point()), xVDev->GetOutputSize())));
                     xVDev->SetDrawMode( DrawModeFlags::WhiteLine | DrawModeFlags::WhiteFill | DrawModeFlags::WhiteText |
                                         DrawModeFlags::WhiteBitmap | DrawModeFlags::WhiteGradient );
                     const_cast<GDIMetaFile&>(rMtf).WindStart();

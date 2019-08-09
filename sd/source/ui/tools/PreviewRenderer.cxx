@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <PreviewRenderer.hxx>
 
 #include <DrawDocShell.hxx>
@@ -174,7 +176,7 @@ Image PreviewRenderer::RenderSubstitution (
         mpPreviewDevice->SetLineColor();
         svtools::ColorConfig aColorConfig;
         mpPreviewDevice->SetFillColor(aColorConfig.GetColorValue(svtools::DOCCOLOR).nColor);
-        mpPreviewDevice->DrawRect (aPaintRectangle);
+        Drawable::Draw(mpPreviewDevice, RectangleDrawable (aPaintRectangle));
         mpPreviewDevice->EnableMapMode();
 
         // Paint substitution text and a frame around it.
@@ -342,7 +344,7 @@ void PreviewRenderer::PaintFrame()
         mpPreviewDevice->EnableMapMode(false);
         mpPreviewDevice->SetLineColor(maFrameColor);
         mpPreviewDevice->SetFillColor();
-        mpPreviewDevice->DrawRect(aPaintRectangle);
+        Drawable::Draw(mpPreviewDevice, RectangleDrawable(aPaintRectangle));
         mpPreviewDevice->EnableMapMode();
      }
 }
@@ -448,7 +450,7 @@ Image PreviewRenderer::ScaleBitmap (
         // Paint a frame around the preview.
         mpPreviewDevice->SetLineColor (maFrameColor);
         mpPreviewDevice->SetFillColor ();
-        mpPreviewDevice->DrawRect (::tools::Rectangle(Point(0,0), aFrameSize));
+        Drawable::Draw(mpPreviewDevice, RectangleDrawable(::tools::Rectangle(Point(0,0), aFrameSize)));
 
         // Paint the bitmap scaled to the desired width.
         BitmapEx aScaledBitmap(rBitmapEx);

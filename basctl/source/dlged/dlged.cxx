@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <basidesh.hxx>
 #include <dlged.hxx>
@@ -1119,10 +1120,10 @@ static void lcl_PrintHeader( Printer* pPrinter, const OUString& rTitle ) // not 
     long const nXLeft = Print::nLeftMargin - Print::nBorder;
     long const nXRight = aSz.Width() - Print::nRightMargin + Print::nBorder;
 
-    pPrinter->DrawRect(tools::Rectangle(
+    Drawable::Draw(pPrinter, RectangleDrawable(tools::Rectangle(
         Point(nXLeft, nYTop),
         Size(nXRight - nXLeft, aSz.Height() - nYTop - Print::nBottomMargin + Print::nBorder)
-    ));
+    )));
 
     long nY = Print::nTopMargin - 2*Print::nBorder;
     Point aPos(Print::nLeftMargin, nY);

@@ -17,11 +17,11 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-
 #include <vcl/svapp.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/settings.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <editeng/adjustitem.hxx>
 #include <editeng/tstpitem.hxx>
@@ -3236,7 +3236,7 @@ void ImpEditEngine::Paint( OutputDevice* pOutDev, tools::Rectangle aClipRect, Po
                                                 pOutDev->SetLineColor( COL_LIGHTGRAY );
 
                                                 const tools::Rectangle aBackRect( aTopLeftRectPos, aBottomRightRectPos );
-                                                pOutDev->DrawRect( aBackRect );
+                                                Drawable::Draw(pOutDev, RectangleDrawable(aBackRect));
 
                                                 pOutDev->Pop();
                                                 pOutDev->Pop();
@@ -3591,7 +3591,7 @@ void ImpEditEngine::Paint( OutputDevice* pOutDev, tools::Rectangle aClipRect, Po
                                             if ( nOrientation )
                                                 aTopLeft = lcl_ImplCalcRotatedPos( aTopLeft, aOrigin, nSin, nCos );
                                             tools::Rectangle aRect( aTopLeft, rTextPortion.GetSize() );
-                                            pOutDev->DrawRect( aRect );
+                                            Drawable::Draw(pOutDev, RectangleDrawable(aRect));
                                         }
 
                                         // PDF export:

@@ -23,6 +23,7 @@
 #include <vcl/field.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/toolbox.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <svtools/valueset.hxx>
 #include <svl/eitem.hxx>
 #include <sfx2/dispatch.hxx>
@@ -315,7 +316,7 @@ void BmpColorWindow::Paint( vcl::RenderContext& rRenderContext, const tools::Rec
     rRenderContext.Push(PushFlags::LINECOLOR | PushFlags::FILLCOLOR);
     rRenderContext.SetLineColor(aColor);
     rRenderContext.SetFillColor(aColor);
-    rRenderContext.DrawRect(tools::Rectangle(Point(), GetSizePixel()));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(), GetSizePixel())));
     rRenderContext.Pop();
 }
 
@@ -931,7 +932,7 @@ GDIMetaFile SvxBmpMask::ImpReplaceTransparency( const GDIMetaFile& rMtf, const C
 
     // retrieve one action at the time; first
     // set the whole area to the replacement color.
-    pVDev->DrawRect( tools::Rectangle( rPrefMap.GetOrigin(), rPrefSize ) );
+    Drawable::Draw(pVDev, RectangleDrawable(tools::Rectangle(rPrefMap.GetOrigin(), rPrefSize)));
     for ( size_t i = 0; i < nActionCount; i++ )
     {
         MetaAction* pAct = rMtf.GetAction( i );

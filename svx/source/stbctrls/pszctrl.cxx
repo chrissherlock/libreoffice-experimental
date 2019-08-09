@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <limits.h>
 #include <vcl/builder.hxx>
 #include <vcl/commandevent.hxx>
@@ -411,7 +413,7 @@ void SvxPosSizeStatusBarControl::Paint( const UserDrawEvent& rUsrEvt )
         aStr += " / ";
         aStr += GetMetricStr_Impl( pImpl->aPos.Y());
         tools::Rectangle aRect(aPnt, Point(nSizePosX, rRect.Bottom()));
-        pDev->DrawRect(aRect);
+        Drawable::Draw(pDev, RectangleDrawable(aRect));
         vcl::Region aOrigRegion(pDev->GetClipRegion());
         pDev->SetClipRegion(vcl::Region(aRect));
         pDev->DrawText(aPnt, aStr);
@@ -430,18 +432,20 @@ void SvxPosSizeStatusBarControl::Paint( const UserDrawEvent& rUsrEvt )
             aStr += " x ";
             aStr += GetMetricStr_Impl( pImpl->aSize.Height() );
             aRect = tools::Rectangle(aDrwPnt, rRect.BottomRight());
-            pDev->DrawRect(aRect);
+            Drawable::Draw(pDev, RectangleDrawable(aRect));
             aOrigRegion = pDev->GetClipRegion();
             pDev->SetClipRegion(vcl::Region(aRect));
             pDev->DrawText(aPnt, aStr);
             pDev->SetClipRegion(aOrigRegion);
         }
         else
-            pDev->DrawRect( tools::Rectangle( aPnt, rRect.BottomRight() ) );
+        {
+            Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(aPnt, rRect.BottomRight())));
+        }
     }
     else if ( pImpl->bTable )
     {
-        pDev->DrawRect( rRect );
+        Drawable::Draw(pDev, RectangleDrawable(rRect));
         pDev->DrawText( Point(
             rRect.Left() + rRect.GetWidth() / 2 - pDev->GetTextWidth( pImpl->aStr ) / 2,
             aItemPos.Y() ), pImpl->aStr );
@@ -450,7 +454,7 @@ void SvxPosSizeStatusBarControl::Paint( const UserDrawEvent& rUsrEvt )
     {
         // Empty display if neither size nor table position are available.
         // Date/Time are no longer used (#65302#).
-        pDev->DrawRect( rRect );
+        Drawable::Draw(pDev, RectangleDrawable(rRect));
     }
 
     pDev->SetLineColor( aOldLineColor );

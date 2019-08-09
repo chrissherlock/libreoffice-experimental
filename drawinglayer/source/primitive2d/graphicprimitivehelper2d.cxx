@@ -18,6 +18,7 @@
  */
 
 #include <sal/config.h>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <algorithm>
 
@@ -108,7 +109,7 @@ namespace drawinglayer
                     const ::tools::Rectangle aRect(Point(0, 0), aTarget);
                     maVirtualDeviceMask->SetFillColor(COL_BLACK);
                     maVirtualDeviceMask->SetLineColor();
-                    maVirtualDeviceMask->DrawRect(aRect);
+                    Drawable::Draw(maVirtualDeviceMask, RectangleDrawable(aRect));
                 }
             }
 
@@ -271,7 +272,7 @@ namespace drawinglayer
                                     const ::tools::Rectangle aRect(rAnimationBitmap.maPositionPixel, aContent.GetSizePixel());
                                     maVirtualDeviceMask->SetFillColor(COL_BLACK);
                                     maVirtualDeviceMask->SetLineColor();
-                                    maVirtualDeviceMask->DrawRect(aRect);
+                                    Drawable::Draw(maVirtualDeviceMask, RectangleDrawable(aRect));
                                 }
                                 else
                                 {

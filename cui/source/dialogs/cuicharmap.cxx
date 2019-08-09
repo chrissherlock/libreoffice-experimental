@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/svapp.hxx>
 #include <svl/eitem.hxx>
 #include <svl/intitem.hxx>
@@ -1208,7 +1209,7 @@ void SvxShowText::Paint(vcl::RenderContext& rRenderContext, const tools::Rectang
         }
     }
 
-    rRenderContext.DrawRect(tools::Rectangle(Point(0, 0), aSize));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(0, 0), aSize)));
     rRenderContext.DrawText(aPoint, aText);
     rRenderContext.SetTextColor(aTextCol);
     rRenderContext.SetFillColor(aFillCol);

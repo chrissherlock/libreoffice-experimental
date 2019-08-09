@@ -20,6 +20,7 @@
 #include <sal/log.hxx>
 #include <osl/diagnose.h>
 #include <tools/debug.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <svtools/brwbox.hxx>
 #include "datwin.hxx"
 #include <svtools/colorcfg.hxx>
@@ -356,7 +357,7 @@ void BrowseBox::DrawCursor()
         Color aOldLineColor = pDataWin->GetLineColor();
         pDataWin->SetFillColor();
         pDataWin->SetLineColor( rCol );
-        pDataWin->DrawRect( aCursor );
+        Drawable::Draw(pDataWin, RectangleDrawable(aCursor));
         pDataWin->SetLineColor( aOldLineColor );
         pDataWin->SetFillColor( aOldFillColor );
     }
@@ -607,7 +608,7 @@ void BrowseBox::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle
         {
             rRenderContext.Push(PushFlags::FILLCOLOR);
             rRenderContext.SetFillColor(COL_BLACK);
-            rRenderContext.DrawRect(tools::Rectangle(Point(nX, 0), Size(pCol->Width(), GetTitleHeight() - 1)));
+            Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(nX, 0), Size(pCol->Width(), GetTitleHeight() - 1))));
             rRenderContext.Pop();
         }
 
@@ -623,8 +624,8 @@ void BrowseBox::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle
         rRenderContext.Push(PushFlags::FILLCOLOR | PushFlags::LINECOLOR);
         rRenderContext.SetFillColor(aColFace);
         rRenderContext.SetLineColor(aColFace);
-        rRenderContext.DrawRect(tools::Rectangle(Point(nX, 0),
-                                          Point(rRect.Right(), GetTitleHeight() - 2 )));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(nX, 0),
+                                          Point(rRect.Right(), GetTitleHeight() - 2))));
         rRenderContext.Pop();
     }
 }
@@ -747,7 +748,7 @@ void BrowseBox::Draw( OutputDevice* pDev, const Point& rPos, const Size& rSize, 
     {
         tools::Rectangle aRect( aRealPos, aRealSize );
         pDev->SetFillColor( pDataWin->GetControlBackground() );
-        pDev->DrawRect( aRect );
+        Drawable::Draw(pDev, RectangleDrawable(aRect));
     }
 
     ImplPaintData( *pDev, tools::Rectangle( aRealPos, aRealSize ), true );
@@ -834,7 +835,7 @@ void BrowseBox::ImplPaintData(OutputDevice& _rOut, const tools::Rectangle& _rRec
             _rOut.SetTextColor( rHighlightTextColor );
             _rOut.SetFillColor( rHighlightFillColor );
             _rOut.SetLineColor();
-            _rOut.DrawRect( aRowRect );
+            Drawable::Draw(&_rOut, RectangleDrawable(aRowRect));
         }
 
         // iterate through columns to redraw
@@ -873,7 +874,7 @@ void BrowseBox::ImplPaintData(OutputDevice& _rOut, const tools::Rectangle& _rRec
                 _rOut.SetLineColor();
                 tools::Rectangle aFieldRect( aPos,
                         Size( pCol->Width(), nDataRowHeigt ) );
-                _rOut.DrawRect( aFieldRect );
+                Drawable::Draw(&_rOut, RectangleDrawable(aFieldRect));
             }
 
             if (!m_bFocusOnlyCursor && (pCol->GetId() == GetCurColumnId()) && (nRow == static_cast<sal_uLong>(GetCurRow())))
@@ -958,10 +959,10 @@ void BrowseBox::ImplPaintData(OutputDevice& _rOut, const tools::Rectangle& _rRec
         // fill rectangle gray below handle column
         // DG: fill it only until the end of the drawing rect and not to the end, as this may overpaint handle columns
         _rOut.SetLineColor( COL_BLACK );
-        _rOut.DrawRect( tools::Rectangle(
-            Point( aOverallAreaPos.X() - 1, aPos.Y() - 1 ),
-            Point( aOverallAreaPos.X() + mvCols[ 0 ]->Width() - 1,
-                   _rRect.Bottom() + 1) ) );
+        Drawable::Draw(&_rOut, RectangleDrawable( tools::Rectangle(
+            Point(aOverallAreaPos.X() - 1, aPos.Y() - 1),
+            Point(aOverallAreaPos.X() + mvCols[0]->Width() - 1,
+                   _rRect.Bottom() + 1))));
     }
     _rOut.SetFillColor( aOldFillColor );
 

@@ -20,6 +20,7 @@
 #include <sal/config.h>
 
 #include <vcl/wrkwin.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <tools/helpers.hxx>
 #include <svl/eitem.hxx>
 #include <sfx2/ctrlitem.hxx>
@@ -619,7 +620,7 @@ void StatusColor::Paint(vcl::RenderContext& rDevice, const tools::Rectangle&)
     aRect.AdjustRight( -4 );
     aRect.AdjustBottom( -4 );
 
-    rDevice.DrawRect( aRect );
+    Drawable::Draw(&rDevice, RectangleDrawable(aRect));
 
     rDevice.SetLineColor(rOldLineColor);
     rDevice.SetFillColor(rOldFillColor);

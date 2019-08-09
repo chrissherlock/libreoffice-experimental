@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <editeng/eeitem.hxx>
 #include <editeng/udlnitem.hxx>
 #include <editeng/langitem.hxx>
@@ -614,7 +616,7 @@ void AnnotationWindow::Paint(vcl::RenderContext& rRenderContext, const ::tools::
     else
         SetFillColor(maColor);
     SetLineColor();
-    DrawRect(PixelToLogic(::tools::Rectangle(Point(mpMeta->GetPosPixel().X()+mpMeta->GetSizePixel().Width(),mpMeta->GetPosPixel().Y()),Size(METABUTTON_AREA_WIDTH,mpMeta->GetSizePixel().Height()))));
+    RectangleDrawable(PixelToLogic(::tools::Rectangle(Point(mpMeta->GetPosPixel().X()+mpMeta->GetSizePixel().Width(),mpMeta->GetPosPixel().Y()),Size(METABUTTON_AREA_WIDTH,mpMeta->GetSizePixel().Height()))));
 
     if ( bHighContrast )
     {
@@ -635,7 +637,7 @@ void AnnotationWindow::Paint(vcl::RenderContext& rRenderContext, const ::tools::
         SetFillColor();
         SetLineColor(ColorFromAlphaColor(90,maColorDark,maColor));
     }
-    DrawRect(maRectMetaButton);
+    Drawable::Draw(this, RectangleDrawable(maRectMetaButton));
 
     //draw arrow
     if( bHighContrast )

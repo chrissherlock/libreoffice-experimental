@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include "PresenterTextView.hxx"
 #include <facreg.hxx>
 
@@ -412,7 +414,7 @@ Reference<rendering::XBitmap> const & PresenterTextView::Implementation::GetBitm
         aMapMode.SetOrigin(Point(0,0));
         mpOutputDevice->SetMapMode(aMapMode);
         const ::tools::Rectangle aWindowBox (Point(0,0), maSize);
-        mpOutputDevice->DrawRect(aWindowBox);
+        Drawable::Draw(mpOutputDevice, RectangleDrawable(aWindowBox));
 
         mpEditEngine->Clear();
         mpEditEngine->SetText(msText);

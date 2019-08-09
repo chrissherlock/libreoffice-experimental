@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <sfx2/dialoghelper.hxx>
 #include <sfx2/viewsh.hxx>
 #include <sfx2/printer.hxx>
@@ -629,7 +630,7 @@ void SvxFontPrevWindow::Paint(vcl::RenderContext& rRenderContext, const tools::R
         tools::Rectangle aRect(Point(0, 0), aLogSize);
         rRenderContext.SetLineColor();
         rRenderContext.SetFillColor(rStyleSettings.GetWindowColor());
-        rRenderContext.DrawRect(aRect);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
     }
     else
     {
@@ -716,7 +717,7 @@ void SvxFontPrevWindow::Paint(vcl::RenderContext& rRenderContext, const tools::R
             Color aFillCol = rRenderContext.GetFillColor();
             rRenderContext.SetLineColor();
             rRenderContext.SetFillColor(*pImpl->mpBackColor);
-            rRenderContext.DrawRect(aRect);
+            Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
             rRenderContext.SetLineColor(aLineCol);
             rRenderContext.SetFillColor(aFillCol);
         }
@@ -727,7 +728,7 @@ void SvxFontPrevWindow::Paint(vcl::RenderContext& rRenderContext, const tools::R
             Color aFillCol = rRenderContext.GetFillColor();
             rRenderContext.SetLineColor();
             rRenderContext.SetFillColor(*pImpl->mpColor);
-            rRenderContext.DrawRect(aRect);
+            Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
             rRenderContext.SetLineColor(aLineCol);
             rRenderContext.SetFillColor(aFillCol);
         }
@@ -992,7 +993,7 @@ void FontPrevWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Rect
         tools::Rectangle aRect(Point(0, 0), aLogSize);
         rRenderContext.SetLineColor();
         rRenderContext.SetFillColor(rStyleSettings.GetWindowColor());
-        rRenderContext.DrawRect(aRect);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
     }
     else
     {
@@ -1076,7 +1077,7 @@ void FontPrevWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Rect
             Color aFillCol = rRenderContext.GetFillColor();
             rRenderContext.SetLineColor();
             rRenderContext.SetFillColor(*pImpl->mpBackColor);
-            rRenderContext.DrawRect(aRect);
+            Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
             rRenderContext.SetLineColor(aLineCol);
             rRenderContext.SetFillColor(aFillCol);
         }
@@ -1087,7 +1088,7 @@ void FontPrevWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Rect
             Color aFillCol = rRenderContext.GetFillColor();
             rRenderContext.SetLineColor();
             rRenderContext.SetFillColor(*pImpl->mpColor);
-            rRenderContext.DrawRect(aRect);
+            Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
             rRenderContext.SetLineColor(aLineCol);
             rRenderContext.SetFillColor(aFillCol);
         }

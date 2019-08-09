@@ -10,9 +10,13 @@
 #include <sal/log.hxx>
 #include <tools/gen.hxx>
 #include <vcl/lineinfo.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <visitors.hxx>
-#include "tmpdevice.hxx"
 #include <cursor.hxx>
+
+#include "tmpdevice.hxx"
+
 #include <cassert>
 
 // SmDefaultingVisitor
@@ -419,7 +423,7 @@ void SmDrawingVisitor::Visit( SmRootSymbolNode* pNode )
     Point  aDrawPos( mrDev.PixelToLogic( mrDev.LogicToPixel( aBar.TopLeft( ) ) ) );
     aBar.SetPos( aDrawPos );
 
-    mrDev.DrawRect( aBar );
+    Drawable::Draw(&mrDev, RectangleDrawable(aBar));
 }
 
 void SmDrawingVisitor::Visit( SmPolyLineNode* pNode )
@@ -472,7 +476,7 @@ void SmDrawingVisitor::Visit( SmRectangleNode* pNode )
     Point  aPos ( mrDev.PixelToLogic( mrDev.LogicToPixel( aTmp.TopLeft( ) ) ) );
     aTmp.SetPos( aPos );
 
-    mrDev.DrawRect( aTmp );
+    Drawable::Draw(&mrDev, RectangleDrawable(aTmp));
 }
 
 void SmDrawingVisitor::DrawTextNode( SmTextNode* pNode )
@@ -1859,7 +1863,7 @@ SmSelectionDrawingVisitor::SmSelectionDrawingVisitor( OutputDevice& rDevice, SmN
     mrDev.SetFillColor( COL_LIGHTGRAY );
 
     //Draw rectangle
-    mrDev.DrawRect( maSelectionArea );
+    Drawable::Draw(&mrDev, RectangleDrawable(maSelectionArea));
 
     //Restore device state
     mrDev.Pop( );

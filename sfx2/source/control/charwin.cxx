@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/builderfactory.hxx>
 #include <vcl/virdev.hxx>
@@ -207,7 +208,7 @@ void SvxCharView::Paint(vcl::RenderContext& rRenderContext, const tools::Rectang
     if (HasFocus())
     {
         rRenderContext.SetFillColor(aHighlightColor);
-        rRenderContext.DrawRect(tools::Rectangle(Point(0, 0), aSize));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(0, 0), aSize)));
 
         rRenderContext.SetTextColor(aHighlightTextColor);
         rRenderContext.DrawText(aPoint, aText);
@@ -215,7 +216,7 @@ void SvxCharView::Paint(vcl::RenderContext& rRenderContext, const tools::Rectang
     else
     {
         rRenderContext.SetFillColor(aFillColor);
-        rRenderContext.DrawRect(tools::Rectangle(Point(0, 0), aSize));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(0, 0), aSize)));
 
         rRenderContext.SetTextColor(aWindowTextColor);
         rRenderContext.DrawText(aPoint, aText);
@@ -417,7 +418,8 @@ void SvxCharViewControl::Paint(vcl::RenderContext& rRenderContext, const ::tools
     if (HasFocus())
     {
         rRenderContext.SetFillColor(aHighlightColor);
-        rRenderContext.DrawRect(tools::Rectangle(Point(0, 0), Size(GetOutputSizePixel().Width(), GetOutputSizePixel().Height())));
+        Drawable::Draw(&rRenderContext,
+            RectangleDrawable(tools::Rectangle(Point(0, 0), Size(GetOutputSizePixel().Width(), GetOutputSizePixel().Height()))));
 
         rRenderContext.SetTextColor(aHighlightTextColor);
         rRenderContext.DrawText(aPoint, aText);
@@ -425,7 +427,8 @@ void SvxCharViewControl::Paint(vcl::RenderContext& rRenderContext, const ::tools
     else
     {
         rRenderContext.SetFillColor(aFillColor);
-        rRenderContext.DrawRect(tools::Rectangle(Point(0, 0), Size(GetOutputSizePixel().Width(), GetOutputSizePixel().Height())));
+        Drawable::Draw(&rRenderContext,
+            RectangleDrawable(tools::Rectangle(Point(0, 0), Size(GetOutputSizePixel().Width(), GetOutputSizePixel().Height()))));
 
         rRenderContext.SetTextColor(aWindowTextColor);
         rRenderContext.DrawText(aPoint, aText);

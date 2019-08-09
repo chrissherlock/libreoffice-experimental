@@ -19,6 +19,7 @@
 
 #include <vcl/taskpanelist.hxx>
 #include <vcl/settings.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <olinewin.hxx>
 #include <olinetab.hxx>
@@ -522,7 +523,7 @@ void ScOutlineWindow::DrawLineRel(
 void ScOutlineWindow::DrawRectRel(
         long nLevelStart, long nEntryStart, long nLevelEnd, long nEntryEnd )
 {
-    DrawRect( GetRectangle( nLevelStart, nEntryStart, nLevelEnd, nEntryEnd ) );
+    Drawable::Draw(this, RectangleDrawable(GetRectangle(nLevelStart, nEntryStart, nLevelEnd, nEntryEnd)));
 }
 
 namespace
@@ -539,7 +540,7 @@ void ScOutlineWindow::DrawImageRel(long nLevelPos, long nEntryPos, const OUStrin
     SetLineColor();
     SetFillColor( GetBackground().GetColor() );
     Point aPos( GetPoint( nLevelPos, nEntryPos ) );
-    DrawRect( tools::Rectangle( aPos, rImage.GetSizePixel() ) );
+    Drawable::Draw(this, RectangleDrawable(tools::Rectangle(aPos, rImage.GetSizePixel())));
     DrawImage( aPos, rImage );
 }
 

@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <ViewTabBar.hxx>
 
 #include <ViewShell.hxx>
@@ -558,7 +560,7 @@ void TabBarControl::Paint (vcl::RenderContext& rRenderContext, const ::tools::Re
     // the actual control is not painted over its whole bounding box.
     rRenderContext.SetFillColor(rRenderContext.GetSettings().GetStyleSettings().GetDialogColor());
     rRenderContext.SetLineColor();
-    rRenderContext.DrawRect(rRect);
+    Drawable::Draw(&rRenderContext, RectangleDrawable(rRect));
 
     ::TabControl::Paint(rRenderContext, rRect);
 

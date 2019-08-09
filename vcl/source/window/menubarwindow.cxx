@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include "menubarwindow.hxx"
 #include "menuitemlist.hxx"
 #include "menufloatingwindow.hxx"
@@ -678,7 +680,7 @@ void MenuBarWindow::HighlightItem(vcl::RenderContext& rRenderContext, sal_uInt16
                     else
                         rRenderContext.SetFillColor(rRenderContext.GetSettings().GetStyleSettings().GetMenuHighlightColor());
                     rRenderContext.SetLineColor();
-                    rRenderContext.DrawRect(aRect);
+                    Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
                 }
                 rRenderContext.Pop();
 

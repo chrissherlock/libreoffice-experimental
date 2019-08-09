@@ -18,10 +18,12 @@
  */
 
 #include <config_features.h>
+
 #include <rtl/strbuf.hxx>
 #include <sal/log.hxx>
-
 #include <sal/types.h>
+
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/salgtype.hxx>
 #include <vcl/event.hxx>
 #include <vcl/help.hxx>
@@ -3406,7 +3408,7 @@ void Window::DrawSelectionBackground( const tools::Rectangle& rRect,
 
     if( bDark )
     {
-        DrawRect( aRect );
+        Drawable::Draw(this, RectangleDrawable(aRect));
     }
     else
     {

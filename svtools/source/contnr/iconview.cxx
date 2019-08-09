@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <svtools/iconview.hxx>
 #include <vcl/treelistentry.hxx>
 #include <vcl/viewdataentry.hxx>
@@ -184,7 +185,7 @@ void IconView::PaintEntry(SvTreeListEntry& rEntry, long nX, long nY,
                 rRenderContext.SetFillColor(aBackgroundColor);
                 // this case may occur for smaller horizontal resizes
                 if (aRect.Left() < aRect.Right())
-                    rRenderContext.DrawRect(aRect);
+                    Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
             }
         }
 

@@ -19,6 +19,7 @@
 
 #include <vcl/outdev.hxx>
 #include <vcl/virdev.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <dcontact.hxx>
 #include <pagefrm.hxx>
@@ -624,7 +625,7 @@ void SwTextFly::DrawFlyRect( OutputDevice* pOut, const SwRect &rRect )
 
     for( size_t i = 0; i < aRegion.size(); ++i )
     {
-        pOut->DrawRect( aRegion[i].SVRect() );
+        Drawable::Draw(pOut, RectangleDrawable(aRegion[i].SVRect()));
     }
 }
 

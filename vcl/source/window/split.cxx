@@ -17,8 +17,10 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <rtl/instance.hxx>
 #include <tools/poly.hxx>
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/event.hxx>
 #include <vcl/split.hxx>
 #include <vcl/svapp.hxx>
@@ -28,8 +30,6 @@
 #include <vcl/lineinfo.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/ptrstyle.hxx>
-
-#include <rtl/instance.hxx>
 
 #include <window.h>
 
@@ -671,7 +671,7 @@ void Splitter::DataChanged( const DataChangedEvent& rDCEvt )
 
 void Splitter::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle& rPaintRect)
 {
-    rRenderContext.DrawRect(rPaintRect);
+    Drawable::Draw(&rRenderContext, RectangleDrawable(rPaintRect));
 
     tools::Polygon aPoly(rPaintRect);
     tools::PolyPolygon aPolyPoly(aPoly);
@@ -690,7 +690,7 @@ void Splitter::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle&
     }
     else
     {
-        rRenderContext.DrawRect(rPaintRect);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(rPaintRect));
     }
 }
 

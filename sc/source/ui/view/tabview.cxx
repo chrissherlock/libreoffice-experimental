@@ -17,6 +17,9 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/svapp.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <scitems.hxx>
 #include <sfx2/viewfrm.hxx>
 #include <sfx2/bindings.hxx>
@@ -110,14 +113,14 @@ void ScCornerButton::Paint(vcl::RenderContext& rRenderContext, const tools::Rect
 
         rRenderContext.SetLineColor();
         rRenderContext.SetFillColor(aCenter);
-        rRenderContext.DrawRect(tools::Rectangle(nCenterX, nCenterY, nCenterX, nPosY));
-        rRenderContext.DrawRect(tools::Rectangle(nCenterX, nCenterY, nDarkX, nCenterY));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(nCenterX, nCenterY, nCenterX, nPosY)));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(nCenterX, nCenterY, nDarkX, nCenterY)));
         rRenderContext.SetFillColor(aOuter);
-        rRenderContext.DrawRect(tools::Rectangle(0, 0, nPosX, nCenterY - 1));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(0, 0, nPosX, nCenterY - 1)));
         if (bLayoutRTL)
-            rRenderContext.DrawRect(tools::Rectangle(nCenterX + 1, nCenterY, nPosX, nPosY));
+            Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(nCenterX + 1, nCenterY, nPosX, nPosY)));
         else
-            rRenderContext.DrawRect(tools::Rectangle(0, nCenterY, nCenterX - 1, nPosY));
+            Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(0, nCenterY, nCenterX - 1, nPosY)));
     }
 
     //  both buttons have the same look now - only dark right/bottom lines

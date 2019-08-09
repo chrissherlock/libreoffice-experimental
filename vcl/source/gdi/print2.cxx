@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <utility>
 #include <list>
 #include <vector>
@@ -1362,7 +1364,7 @@ void Printer::DrawGradientEx( OutputDevice* pOut, const tools::Rectangle& rRect,
             pOut->Push( PushFlags::LINECOLOR | PushFlags::FILLCOLOR );
             pOut->SetLineColor( aColor );
             pOut->SetFillColor( aColor );
-            pOut->DrawRect( rRect );
+            Drawable::Draw(pOut, RectangleDrawable(rRect));
             pOut->Pop();
         }
     }

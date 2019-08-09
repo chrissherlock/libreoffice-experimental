@@ -25,6 +25,7 @@
 #include <vcl/metaact.hxx>
 #include <vcl/bitmapaccess.hxx>
 #include <vcl/graph.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <unotools/streamwrap.hxx>
 
@@ -302,7 +303,7 @@ void PDFWriterImpl::playMetafile( const GDIMetaFile& i_rMtf, vcl::PDFExtOutDevDa
                 case MetaActionType::RECT:
                 {
                     const MetaRectAction* pA = static_cast<const MetaRectAction*>(pAction);
-                    m_rOuterFace.DrawRect( pA->GetRect() );
+                    m_rOuterFace.DrawRect(pA->GetRect());
                 }
                 break;
 
@@ -476,7 +477,7 @@ void PDFWriterImpl::playMetafile( const GDIMetaFile& i_rMtf, vcl::PDFExtOutDevDa
                                 // create mask bitmap
                                 xVDev->SetLineColor( COL_BLACK );
                                 xVDev->SetFillColor( COL_BLACK );
-                                xVDev->DrawRect( tools::Rectangle( aPoint, aDstSize ) );
+                                Drawable::Draw(xVDev, RectangleDrawable(tools::Rectangle(aPoint, aDstSize)));
                                 xVDev->SetDrawMode( DrawModeFlags::WhiteLine | DrawModeFlags::WhiteFill | DrawModeFlags::WhiteText |
                                                     DrawModeFlags::WhiteBitmap | DrawModeFlags::WhiteGradient );
                                 aTmpMtf.WindStart();

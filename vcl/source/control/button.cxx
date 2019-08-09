@@ -20,6 +20,7 @@
 #include <tools/poly.hxx>
 
 #include <vcl/image.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/bitmapex.hxx>
 #include <vcl/decoview.hxx>
 #include <vcl/event.hxx>
@@ -760,15 +761,15 @@ static void ImplDrawBtnDropDownArrow( OutputDevice* pDev,
         pDev->SetFillColor( COL_BLACK );
     else
         pDev->SetFillColor( rColor );
-    pDev->DrawRect( tools::Rectangle( nX+0, nY+0, nX+6, nY+0 ) );
-    pDev->DrawRect( tools::Rectangle( nX+1, nY+1, nX+5, nY+1 ) );
-    pDev->DrawRect( tools::Rectangle( nX+2, nY+2, nX+4, nY+2 ) );
-    pDev->DrawRect( tools::Rectangle( nX+3, nY+3, nX+3, nY+3 ) );
+    Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(nX+0, nY+0, nX+6, nY+0)));
+    Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(nX+1, nY+1, nX+5, nY+1)));
+    Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(nX+2, nY+2, nX+4, nY+2)));
+    Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(nX+3, nY+3, nX+3, nY+3)));
     if ( bBlack )
     {
         pDev->SetFillColor( rColor );
-        pDev->DrawRect( tools::Rectangle( nX+2, nY+1, nX+4, nY+1 ) );
-        pDev->DrawRect( tools::Rectangle( nX+3, nY+2, nX+3, nY+2 ) );
+        Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(nX+2, nY+1, nX+4, nY+1)));
+        Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(nX+3, nY+2, nX+3, nY+2)));
     }
     pDev->SetLineColor( aOldLineColor );
     pDev->SetFillColor( aOldFillColor );
@@ -1948,7 +1949,7 @@ void RadioButton::ImplDrawRadioButtonState(vcl::RenderContext& rRenderContext)
             else
                 rRenderContext.SetFillColor(rStyleSettings.GetFieldColor());
             rRenderContext.SetLineColor();
-            rRenderContext.DrawRect(aImageRect);
+            Drawable::Draw(&rRenderContext, RectangleDrawable(aImageRect));
 
             // display image
             DrawImageFlags nImageStyle = DrawImageFlags::NONE;
@@ -1983,12 +1984,12 @@ void RadioButton::ImplDrawRadioButtonState(vcl::RenderContext& rRenderContext)
                     aImageRect.AdjustRight( -1 );
                     aImageRect.AdjustBottom( -1 );
                 }
-                rRenderContext.DrawRect(aImageRect);
+                Drawable::Draw(&rRenderContext, RectangleDrawable(aImageRect));
                 aImageRect.AdjustLeft( 1 );
                 aImageRect.AdjustTop( 1 );
                 aImageRect.AdjustRight( -1 );
                 aImageRect.AdjustBottom( -1 );
-                rRenderContext.DrawRect(aImageRect);
+                Drawable::Draw(&rRenderContext, RectangleDrawable(aImageRect));
             }
 
             if (HasFocus())
@@ -3293,7 +3294,7 @@ void CheckBox::Draw( OutputDevice* pDev, const Point& rPos, const Size& rSize,
 
     pDev->SetLineColor();
     pDev->SetFillColor( COL_BLACK );
-    pDev->DrawRect( aStateRect );
+    Drawable::Draw(pDev, RectangleDrawable(aStateRect));
     aStateRect.AdjustLeft(aBrd1Size.Width() );
     aStateRect.AdjustTop(aBrd1Size.Height() );
     aStateRect.AdjustRight( -(aBrd1Size.Width()) );
@@ -3302,7 +3303,7 @@ void CheckBox::Draw( OutputDevice* pDev, const Point& rPos, const Size& rSize,
         pDev->SetFillColor( COL_LIGHTGRAY );
     else
         pDev->SetFillColor( COL_WHITE );
-    pDev->DrawRect( aStateRect );
+    Drawable::Draw(pDev, RectangleDrawable(aStateRect));
 
     if ( meState == TRISTATE_TRUE )
     {

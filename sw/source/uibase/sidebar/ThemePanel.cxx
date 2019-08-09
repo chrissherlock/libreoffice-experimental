@@ -9,6 +9,7 @@
  */
 
 #include <sal/config.h>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include "ThemePanel.hxx"
 
@@ -398,10 +399,10 @@ BitmapEx GenerateColorPreview(const svx::ColorSet& rColorSet)
     for (sal_uInt32 i = 0; i < 12; i += 2)
     {
         pVirtualDev->SetFillColor(rColorSet.getColor(i));
-        pVirtualDev->DrawRect(tools::Rectangle(x, y1, x + SIZE, y1 + SIZE));
+        Drawable::Draw(pVirtualDev, RectangleDrawable(tools::Rectangle(x, y1, x + SIZE, y1 + SIZE)));
 
         pVirtualDev->SetFillColor(rColorSet.getColor(i + 1));
-        pVirtualDev->DrawRect(tools::Rectangle(x, y2, x + SIZE, y2 + SIZE));
+        Drawable::Draw(pVirtualDev, RectangleDrawable(tools::Rectangle(x, y2, x + SIZE, y2 + SIZE)));
 
         x += SIZE + BORDER;
     }

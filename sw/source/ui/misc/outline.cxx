@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <hintids.hxx>
 #include <vcl/menu.hxx>
 #include <vcl/settings.hxx>
@@ -881,7 +883,7 @@ void NumberingPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Re
     // #101524# OJ
     pVDev->SetFillColor(rRenderContext.GetSettings().GetStyleSettings().GetWindowColor());
     pVDev->SetLineColor(rRenderContext.GetSettings().GetStyleSettings().GetButtonTextColor());
-    pVDev->DrawRect(tools::Rectangle(Point(0,0), aSize));
+    Drawable::Draw(pVDev, RectangleDrawable(tools::Rectangle(Point(0,0), aSize)));
 
     if (pActNum)
     {
@@ -1014,10 +1016,10 @@ void NumberingPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Re
 
                 tools::Rectangle aRect1(Point(nTextXPos, nYStart + nFontHeight / 2), Size(aSize.Width() / 2, 2));
                 pVDev->SetFillColor(rRenderContext.GetSettings().GetStyleSettings().GetWindowColor()); // COL_BLACK );
-                pVDev->DrawRect(aRect1);
+                Drawable::Draw(pVDev, RectangleDrawable(aRect1));
 
                 tools::Rectangle aRect2(Point(nXStart, nYStart + nLineHeight + nFontHeight / 2), Size(aSize.Width() / 2, 2));
-                pVDev->DrawRect(aRect2);
+                Drawable::Draw(pVDev, RectangleDrawable(aRect2));
                 nYStart += 2 * nLineHeight;
             }
         }

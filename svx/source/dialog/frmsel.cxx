@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <svx/frmsel.hxx>
 #include <vcl/event.hxx>
 #include <sal/log.hxx>
@@ -538,13 +539,13 @@ void FrameSelectorImpl::DrawBackground()
     // clear the area
     mpVirDev->SetLineColor();
     mpVirDev->SetFillColor( maBackCol );
-    mpVirDev->DrawRect( tools::Rectangle( Point( 0, 0 ), mpVirDev->GetOutputSizePixel() ) );
+    Drawable::Draw(mpVirDev, RectangleDrawable(tools::Rectangle(Point(0, 0), mpVirDev->GetOutputSizePixel())));
 
     // draw the inner gray (or whatever color) rectangle
     mpVirDev->SetLineColor();
     mpVirDev->SetFillColor( maMarkCol );
-    mpVirDev->DrawRect( tools::Rectangle(
-        mnLine1 - mnFocusOffs, mnLine1 - mnFocusOffs, mnLine3 + mnFocusOffs, mnLine3 + mnFocusOffs ) );
+    Drawable::Draw(mpVirDev, RectangleDrawable(tools::Rectangle(
+        mnLine1 - mnFocusOffs, mnLine1 - mnFocusOffs, mnLine3 + mnFocusOffs, mnLine3 + mnFocusOffs)));
 
     // draw the white space for enabled frame borders
     tools::PolyPolygon aPPoly;

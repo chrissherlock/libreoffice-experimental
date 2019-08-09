@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <svx/zoomsliderctrl.hxx>
 #include <vcl/status.hxx>
 #include <vcl/menu.hxx>
@@ -246,7 +248,7 @@ void SvxZoomSliderControl::Paint( const UserDrawEvent& rUsrEvt )
     pDev->SetFillColor( rStyleSettings.GetDarkShadowColor() );
 
     // draw slider
-    pDev->DrawRect( aSlider );
+    Drawable::Draw(pDev, RectangleDrawable(aSlider));
     // shadow
     pDev->SetLineColor( rStyleSettings.GetShadowColor() );
     pDev->DrawLine(Point(aSlider.Left()+1,aSlider.Bottom()+1), Point(aSlider.Right()+1,aSlider.Bottom()+1));
@@ -257,8 +259,8 @@ void SvxZoomSliderControl::Paint( const UserDrawEvent& rUsrEvt )
     {
         long nSnapPosX = aRect.Left() + rSnappingPoint;
 
-        pDev->DrawRect( tools::Rectangle( nSnapPosX - 1, aSlider.Top() - nSnappingHeight,
-                    nSnapPosX, aSlider.Bottom() + nSnappingHeight ) );
+        Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(nSnapPosX - 1, aSlider.Top() - nSnappingHeight,
+                    nSnapPosX, aSlider.Bottom() + nSnappingHeight)));
     }
 
     // draw slider button

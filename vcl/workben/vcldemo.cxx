@@ -13,6 +13,8 @@
 #include <rtl/math.hxx>
 #include <sal/log.hxx>
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <comphelper/processfactory.hxx>
 #include <comphelper/random.hxx>
 #include <cppuhelper/bootstrap.hxx>
@@ -236,7 +238,9 @@ public:
                 rDev.DrawRect(rRects[i], nBorderSize, nBorderSize);
             }
             else
-                rDev.DrawRect(rRects[i]);
+            {
+                Drawable::Draw(&rDev, RectangleDrawable(rRects[i]));
+            }
         }
     }
 
@@ -316,7 +320,7 @@ public:
             {
                 rDev.SetFillColor(COL_LIGHTRED);
                 rDev.SetLineColor(COL_BLACK);
-                rDev.DrawRect(r);
+                Drawable::Draw(&rDev, RectangleDrawable(r));
 
                 for(long i=0; i<r.GetHeight(); i+=15)
                     rDev.DrawLine(Point(r.Left(), r.Top()+i), Point(r.Right(), r.Bottom()-i));
@@ -625,7 +629,7 @@ public:
                     aTextRect.Move(aPos.X(), aPos.Y());
                     rDev.SetFillColor();
                     rDev.SetLineColor(COL_BLACK);
-                    rDev.DrawRect(aTextRect);
+                    Drawable::Draw(&rDev, RectangleDrawable(aTextRect));
                     if (aTextRect.GetHeight() > nMaxTextHeight)
                         nMaxTextHeight = aTextRect.GetHeight();
                     // This should intersect with the text
@@ -634,7 +638,7 @@ public:
                         aTextRect.Right()-1, aTextRect.Bottom()-1);
                     rDev.SetLineColor(COL_WHITE);
                     rDev.SetRasterOp(RasterOp::Xor);
-                    rDev.DrawRect(aInnerRect);
+                    Drawable::Draw(&rDev, RectangleDrawable(aInnerRect));
                     rDev.SetRasterOp(RasterOp::OverPaint);
                 }
 
@@ -893,7 +897,7 @@ public:
             // An offset background for alpha rendering
             rDev.SetFillColor(COL_BLUE);
             tools::Rectangle aSurround(r.Center(), aPageShadowMask.GetSizePixel());
-            rDev.DrawRect(aSurround);
+            Drawable::Draw(&rDev, RectangleDrawable(aSurround));
             rDev.DrawBitmapEx(aRenderPt, aWhole);
         }
 
@@ -997,7 +1001,7 @@ public:
                     rDev.SetClipRegion(vcl::Region(aInner));
                     rDev.SetFillColor(Color::HSBtoRGB(nHue, 75, 100));
                     nHue = (nHue + 97) % 360;
-                    rDev.DrawRect(aOuter);
+                    Drawable::Draw(&rDev, RectangleDrawable(aOuter));
                 }
                 rDev.Pop();
             }
@@ -1021,7 +1025,7 @@ public:
                     rDev.SetClipRegion(aClipRegion);
                     rDev.SetFillColor(Color::HSBtoRGB(nHue, 75, 75));
                     nHue = (nHue + 97) % 360;
-                    rDev.DrawRect(aOuter);
+                    Drawable::Draw(&rDev, RectangleDrawable(aOuter));
 
                     rDev.Pop();
                 }
@@ -1072,7 +1076,7 @@ public:
                             rDev.SetClipRegion(aClipRegion);
                             rDev.SetFillColor(Color::HSBtoRGB(nHue, 50, 75));
                             nHue = (nHue + 97) % 360;
-                            rDev.DrawRect(aOuter);
+                            Drawable::Draw(&rDev, RectangleDrawable(aOuter));
                         }
                     }
 
@@ -2098,12 +2102,12 @@ class DemoPopup : public FloatingWindow
 
         SetLineColor(COL_BLACK);
         SetFillColor();
-        DrawRect( tools::Rectangle( Point(), aSize ) );
+        Drawable::Draw(this, RectangleDrawable(tools::Rectangle(Point(), aSize)));
         aSize.AdjustWidth( -2 );
         aSize.AdjustHeight( -2 );
         Color aColor( GetLineColor() );
         SetLineColor( COL_GRAY );
-        DrawRect( tools::Rectangle( Point( 1, 1 ), aSize ) );
+        Drawable::Draw(this, RectangleDrawable(tools::Rectangle(Point(1, 1), aSize)));
         SetLineColor( aColor );
     }
 

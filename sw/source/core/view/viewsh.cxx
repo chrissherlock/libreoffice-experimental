@@ -19,6 +19,8 @@
 
 #include <config_features.h>
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <com/sun/star/accessibility/XAccessible.hpp>
 #include <sfx2/viewfrm.hxx>
 #include <sfx2/progress.hxx>
@@ -1606,7 +1608,7 @@ void SwViewShell::PaintDesktop_(const SwRegionRects &rRegion)
         // may exchange GetOut(), that's it's purpose. This happens e.g. at print preview.
         GetOut()->SetFillColor( SwViewOption::GetAppBackgroundColor());
         GetOut()->SetLineColor();
-        GetOut()->DrawRect(aRectangle);
+        Drawable::Draw(GetOut(), RectangleDrawable(aRectangle));
 
         DLPostPaint2(false);
     }
@@ -1883,7 +1885,7 @@ void SwViewShell::Paint(vcl::RenderContext& rRenderContext, const tools::Rectang
             rRenderContext.Push( PushFlags::FILLCOLOR|PushFlags::LINECOLOR );
             rRenderContext.SetFillColor( Imp()->GetRetoucheColor() );
             rRenderContext.SetLineColor();
-            rRenderContext.DrawRect( rRect );
+            Drawable::Draw(&rRenderContext, RectangleDrawable(rRect));
             rRenderContext.Pop();
             // #i68597#
             DLPostPaint2(true);

@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <memory>
 #include <com/sun/star/drawing/FillStyle.hpp>
 #include <unotools/pathoptions.hxx>
@@ -244,7 +246,7 @@ void BackgroundPreviewImpl::Paint(vcl::RenderContext& rRenderContext, const ::to
     else
         rRenderContext.SetFillColor(aColor);
 
-    rRenderContext.DrawRect(aDrawRect);
+    Drawable::Draw(&rRenderContext, RectangleDrawable(aDrawRect));
 
     if (bIsBmp)
     {

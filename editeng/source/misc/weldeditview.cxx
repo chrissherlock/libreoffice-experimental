@@ -8,6 +8,8 @@
  *
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <editeng/weldeditview.hxx>
 #include <vcl/cursor.hxx>
 #include <vcl/event.hxx>
@@ -111,7 +113,7 @@ void WeldEditView::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
     rRenderContext.SetRasterOp(RasterOp::Invert);
 
     for (const auto& rSelectionRect : aLogicRects)
-        rRenderContext.DrawRect(rSelectionRect);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(rSelectionRect));
 
     rRenderContext.Pop();
 }

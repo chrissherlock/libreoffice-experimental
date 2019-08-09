@@ -19,6 +19,8 @@
 
 #include <config_features.h>
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <ctime>
 #include <rootfrm.hxx>
 #include <pagefrm.hxx>
@@ -222,7 +224,7 @@ void SwLayAction::PaintContent( const SwContentFrame *pCnt,
             if( nOldHeight > nNewHeight )
                 nOldBottom = aRectFnSet.GetPrtBottom(*pCnt);
             aRectFnSet.SetTop( aDrawRect, nOldBottom );
-            PaintContent_( pCnt, pPage, aDrawRect );
+            PaintContent_( pCnt, pPage, aDrawRect);
         }
         // paint content area
         SwRect aPaintRect = static_cast<SwTextFrame*>(const_cast<SwContentFrame*>(pCnt))->GetPaintSwRect();
@@ -2112,7 +2114,7 @@ void SwLayIdle::ShowIdle( Color eColor )
             pWin->Push( PushFlags::FILLCOLOR|PushFlags::LINECOLOR );
             pWin->SetFillColor( eColor );
             pWin->SetLineColor();
-            pWin->DrawRect( aRect );
+            Drawable::Draw(pWin, RectangleDrawable(aRect));
             pWin->Pop();
         }
     }

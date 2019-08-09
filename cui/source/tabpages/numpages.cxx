@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <com/sun/star/text/HoriOrientation.hpp>
 #include <com/sun/star/text/VertOrientation.hpp>
 #include <com/sun/star/text/RelOrientation.hpp>
@@ -2376,10 +2378,10 @@ void SvxNumberingPreview::Paint(vcl::RenderContext& rRenderContext, const ::tool
 
                 ::tools::Rectangle aRect1(Point(nTextXPos, nYStart + nFontHeight / 2), Size(aSize.Width() / 2, 2));
                 pVDev->SetFillColor(aBackColor);
-                pVDev->DrawRect(aRect1);
+                Drawable::Draw(pVDev, RectangleDrawable(aRect1));
 
                 ::tools::Rectangle aRect2(Point(nXStart, nYStart + nLineHeight + nFontHeight / 2 ), Size(aSize.Width() / 2, 2));
-                pVDev->DrawRect(aRect2);
+                Drawable::Draw(pVDev, RectangleDrawable(aRect2));
                 nYStart += 2 * nLineHeight;
             }
         }
@@ -2483,7 +2485,7 @@ void SvxNumberingPreview::Paint(vcl::RenderContext& rRenderContext, const ::tool
                     pVDev->SetLineColor( aLineColor );
                 }
                 ::tools::Rectangle aRect1(Point(nXStart + nTextOffset, nYStart + nTopOffset), Size(nWidth, nRectHeight));
-                pVDev->DrawRect(aRect1);
+                Drawable::Draw(pVDev, RectangleDrawable(aRect1));
             }
         }
     }

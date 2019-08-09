@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/toolbox.hxx>
 #include <vcl/commandinfoprovider.hxx>
 #include <vcl/event.hxx>
@@ -536,7 +537,7 @@ void ToolBox::ImplErase(vcl::RenderContext& rRenderContext, const tools::Rectang
             else
                 rRenderContext.SetFillColor(COL_WHITE);
 
-            rRenderContext.DrawRect(rRect);
+            Drawable::Draw(&rRenderContext, RectangleDrawable(rRect));
             rRenderContext.Pop();
         }
         else
@@ -2389,9 +2390,9 @@ static void ImplDrawMoreIndicator(vcl::RenderContext& rRenderContext, const tool
         long y = rRect.Top() + (rRect.getHeight() - height)/2 + 1;
         while( height >= 1)
         {
-            rRenderContext.DrawRect( tools::Rectangle( x, y, x + linewidth, y ) );
+            Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(x, y, x + linewidth, y)));
             x += space;
-            rRenderContext.DrawRect( tools::Rectangle( x, y, x + linewidth, y ) );
+            Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(x, y, x + linewidth, y)));
             x -= space;
             y++;
             if( height <= heightOrig / 2 + 1) x--;
@@ -2414,9 +2415,9 @@ static void ImplDrawMoreIndicator(vcl::RenderContext& rRenderContext, const tool
         long y = rRect.Top() + (rRect.getHeight() - height)/2 + 1;
         while( width >= 1)
         {
-            rRenderContext.DrawRect( tools::Rectangle( x, y, x, y + linewidth ) );
+            Drawable::Draw(&rRenderContext, RectangleDrawable( tools::Rectangle( x, y, x, y + linewidth)));
             y += space;
-            rRenderContext.DrawRect( tools::Rectangle( x, y, x, y + linewidth ) );
+            Drawable::Draw(&rRenderContext, RectangleDrawable( tools::Rectangle( x, y, x, y + linewidth)));
             y -= space;
             x++;
             if( width <= widthOrig / 2 + 1) y--;

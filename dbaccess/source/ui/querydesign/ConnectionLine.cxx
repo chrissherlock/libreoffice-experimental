@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <ConnectionLine.hxx>
 #include <ConnectionLineData.hxx>
 #include <TableWindow.hxx>
@@ -283,8 +285,8 @@ void OConnectionLine::Draw( OutputDevice* pOutDev )
     pOutDev->SetFillColor(Application::GetSettings().GetStyleSettings().GetWindowColor());
 
     Point aVector(nRectSize,nRectSize);
-    pOutDev->DrawRect( calcRect(m_aSourceDescrLinePos,aVector) );
-    pOutDev->DrawRect( calcRect( m_aDestDescrLinePos,aVector) );
+    Drawable::Draw(pOutDev, RectangleDrawable(calcRect(m_aSourceDescrLinePos, aVector)));
+    Drawable::Draw(pOutDev, RectangleDrawable(calcRect(m_aDestDescrLinePos, aVector)));
 }
 
 bool OConnectionLine::IsValid() const

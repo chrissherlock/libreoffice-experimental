@@ -11,6 +11,8 @@
 // Design proposal: https://wiki.documentfoundation.org/Design/Whiteboards/Comments_Ruler_Control
 // TODO Alpha blend border when it doesn't fit in window
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <swruler.hxx>
 
 #include <viewsh.hxx>
@@ -54,17 +56,17 @@ void ImplDrawArrow(vcl::RenderContext& rRenderContext, long nX, long nY, const C
     rRenderContext.SetFillColor(rColor);
     if (bPointRight)
     {
-        rRenderContext.DrawRect(tools::Rectangle(nX + 0, nY + 0, nX + 0, nY + 6) );
-        rRenderContext.DrawRect(tools::Rectangle(nX + 1, nY + 1, nX + 1, nY + 5) );
-        rRenderContext.DrawRect(tools::Rectangle(nX + 2, nY + 2, nX + 2, nY + 4) );
-        rRenderContext.DrawRect(tools::Rectangle(nX + 3, nY + 3, nX + 3, nY + 3) );
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(nX + 0, nY + 0, nX + 0, nY + 6)));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(nX + 1, nY + 1, nX + 1, nY + 5)));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(nX + 2, nY + 2, nX + 2, nY + 4)));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(nX + 3, nY + 3, nX + 3, nY + 3)));
     }
     else
     {
-        rRenderContext.DrawRect(tools::Rectangle(nX + 0, nY + 3, nX + 0, nY + 3));
-        rRenderContext.DrawRect(tools::Rectangle(nX + 1, nY + 2, nX + 1, nY + 4));
-        rRenderContext.DrawRect(tools::Rectangle(nX + 2, nY + 1, nX + 2, nY + 5));
-        rRenderContext.DrawRect(tools::Rectangle(nX + 3, nY + 0, nX + 3, nY + 6));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(nX + 0, nY + 3, nX + 0, nY + 3)));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(nX + 1, nY + 2, nX + 1, nY + 4)));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(nX + 2, nY + 1, nX + 2, nY + 5)));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(nX + 3, nY + 0, nX + 3, nY + 6)));
     }
 }
 
@@ -133,7 +135,7 @@ void SwCommentRuler::DrawCommentControl(vcl::RenderContext& rRenderContext)
         maVirDev->SetLineColor();
     }
 
-    maVirDev->DrawRect( tools::Rectangle( Point(), aControlRect.GetSize() ) );
+    Drawable::Draw(maVirDev, RectangleDrawable(tools::Rectangle(Point(), aControlRect.GetSize())));
 
     // Label and arrow tip
     OUString aLabel( SwResId ( STR_COMMENTS_LABEL ) );

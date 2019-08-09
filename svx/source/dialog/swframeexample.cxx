@@ -18,6 +18,7 @@
  */
 
 #include <tools/poly.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/metric.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/svapp.hxx>
@@ -41,7 +42,7 @@ void DrawRect_Impl(vcl::RenderContext& rRenderContext, const tools::Rectangle &r
 {
     rRenderContext.SetFillColor(rFillColor);
     rRenderContext.SetLineColor(rLineColor);
-    rRenderContext.DrawRect(rRect);
+    Drawable::Draw(&rRenderContext, RectangleDrawable(rRect));
 }
 
 }

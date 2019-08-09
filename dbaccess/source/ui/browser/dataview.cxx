@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <com/sun/star/frame/XController.hpp>
 #include <com/sun/star/frame/XModel.hpp>
 #include <dbaccess/dataview.hxx>
@@ -80,7 +82,7 @@ namespace dbaui
             rRenderContext.Push(PushFlags::LINECOLOR | PushFlags::FILLCOLOR);
             rRenderContext.SetLineColor(COL_TRANSPARENT);
             rRenderContext.SetFillColor(GetSettings().GetStyleSettings().GetFaceColor());
-            rRenderContext.DrawRect(_rRect);
+            Drawable::Draw(&rRenderContext, RectangleDrawable(_rRect));
             rRenderContext.Pop();
         }
 

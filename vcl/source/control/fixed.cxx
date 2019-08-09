@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/decoview.hxx>
 #include <vcl/event.hxx>
 #include <vcl/fixed.hxx>
@@ -229,7 +230,7 @@ void FixedText::Draw( OutputDevice* pDev, const Point& rPos, const Size& rSize,
         if ( bBackground )
         {
             pDev->SetFillColor( GetControlBackground() );
-            pDev->DrawRect( aRect );
+            Drawable::Draw(pDev, RectangleDrawable(aRect));
         }
     }
 

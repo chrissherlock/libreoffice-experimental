@@ -17,11 +17,11 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-
 #include <tools/solar.h>
 #include <vcl/svapp.hxx>
 #include <vcl/bitmapex.hxx>
 #include <vcl/animate/Animation.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/window.hxx>
 #include <vcl/graph.hxx>
@@ -466,7 +466,7 @@ static void MakePreview(sal_uInt8* pBuf, sal_uInt32 nBytesRead,
     pVDev->SetFont( aFont );
 
     tools::Rectangle aRect( Point( 1, 1 ), Size( nWidth - 2, nHeight - 2 ) );
-    pVDev->DrawRect( aRect );
+    Drawable::Draw(pVDev, RectangleDrawable(aRect));
 
     OUString aString;
     int nLen;

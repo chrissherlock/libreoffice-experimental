@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <string.h>
 #include <tools/debug.hxx>
 #include <vcl/svapp.hxx>
@@ -336,9 +338,9 @@ void Ruler::ImplVDrawRect(vcl::RenderContext& rRenderContext, long nX1, long nY1
     }
 
     if ( mnWinStyle & WB_HORZ )
-        rRenderContext.DrawRect(tools::Rectangle(nX1, nY1, nX2, nY2));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(nX1, nY1, nX2, nY2)));
     else
-        rRenderContext.DrawRect(tools::Rectangle(nY1, nX1, nY2, nX2));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(nY1, nX1, nY2, nX2)));
 }
 
 void Ruler::ImplVDrawText(vcl::RenderContext& rRenderContext, long nX, long nY, const OUString& rText, long nMin, long nMax)
@@ -932,11 +934,11 @@ static void ImplDrawRulerTab(vcl::RenderContext& rRenderContext, const Point& rP
         lcl_RotateRect_Impl(aRect2, rPos.Y(), bRightAligned);
         lcl_RotateRect_Impl(aRect3, rPos.Y(), bRightAligned);
     }
-    rRenderContext.DrawRect(aRect1);
-    rRenderContext.DrawRect(aRect2);
+    Drawable::Draw(&rRenderContext, RectangleDrawable(aRect1));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(aRect2));
 
     if (!aRect3.IsEmpty())
-        rRenderContext.DrawRect(aRect3);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aRect3));
 }
 
 void Ruler::ImplDrawTab(vcl::RenderContext& rRenderContext, const Point& rPos, sal_uInt16 nStyle)
@@ -1355,7 +1357,7 @@ void Ruler::ImplDrawExtra(vcl::RenderContext& rRenderContext)
     if (bEraseRect)
     {
         rRenderContext.SetLineColor();
-        rRenderContext.DrawRect(aRect);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
     }
 
     // output content

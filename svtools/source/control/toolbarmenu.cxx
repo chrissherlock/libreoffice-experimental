@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <memory>
 #include <com/sun/star/accessibility/AccessibleEventId.hpp>
 #include <com/sun/star/accessibility/AccessibleStateType.hpp>
@@ -819,7 +821,7 @@ void ToolbarMenu::implHighlightEntry(vcl::RenderContext& rRenderContext, int nHi
                     rRenderContext.SetLineColor(rRenderContext.GetSettings().GetStyleSettings().GetMenuHighlightColor());
                     bRestoreLineColor = true;
                 }
-                rRenderContext.DrawRect(aItemRect);
+                Drawable::Draw(&rRenderContext, RectangleDrawable(aItemRect));
             }
             implPaint(rRenderContext, pEntry, true/*bHighlight*/);
             if (bRestoreLineColor)
@@ -1224,7 +1226,7 @@ void ToolbarMenu::implPaint(vcl::RenderContext& rRenderContext, ToolbarMenuEntry
                     tools::Rectangle aRect(aTopLeft, Size(aOutSz.Width(), pEntry->maSize.Height()));
                     rRenderContext.SetFillColor(rSettings.GetDialogColor());
                     rRenderContext.SetLineColor();
-                    rRenderContext.DrawRect(aRect);
+                    Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
                     rRenderContext.SetLineColor(rSettings.GetLightColor());
                     rRenderContext.DrawLine(aRect.TopLeft(), aRect.TopRight());
                     rRenderContext.SetLineColor(rSettings.GetShadowColor());

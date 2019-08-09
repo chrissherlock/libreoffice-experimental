@@ -27,6 +27,7 @@
 #include <vcl/gradient.hxx>
 #include <vcl/metric.hxx>
 #include <vcl/drawables/PixelDrawable.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <toolkit/awt/vclxgraphics.hxx>
 #include <toolkit/awt/vclxdevice.hxx>
@@ -357,7 +358,7 @@ void VCLXGraphics::drawRect( sal_Int32 x, sal_Int32 y, sal_Int32 width, sal_Int3
     if( mpOutputDevice )
     {
         InitOutputDevice( InitOutDevFlags::COLORS );
-        mpOutputDevice->DrawRect( tools::Rectangle( Point( x, y ), Size( width, height ) ) );
+        Drawable::Draw(mpOutputDevice, RectangleDrawable(tools::Rectangle(Point(x, y), Size(width, height))));
     }
 }
 
@@ -368,7 +369,7 @@ void VCLXGraphics::drawRoundedRect( sal_Int32 x, sal_Int32 y, sal_Int32 width, s
     if( mpOutputDevice )
     {
         InitOutputDevice( InitOutDevFlags::COLORS );
-        mpOutputDevice->DrawRect( tools::Rectangle( Point( x, y ), Size( width, height ) ), nHorzRound, nVertRound );
+        mpOutputDevice->DrawRect(tools::Rectangle(Point(x, y), Size(width, height)), nHorzRound, nVertRound);
     }
 }
 

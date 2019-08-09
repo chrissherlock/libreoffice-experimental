@@ -16,8 +16,11 @@
  *   except in compliance with the License. You may obtain a copy of
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
+
 #ifndef INCLUDED_SW_SOURCE_CORE_TEXT_TXTPAINT_HXX
 #define INCLUDED_SW_SOURCE_CORE_TEXT_TXTPAINT_HXX
+
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/outdev.hxx>
 
 class SwRect;               // SwSaveClip
@@ -109,7 +112,7 @@ inline DbgRect::DbgRect( OutputDevice* pOutDev, const tools::Rectangle &rRect,
         pOut->SetLineColor( aColor );
         Color aFillColor = pOut->GetFillColor();
         pOut->SetFillColor( COL_TRANSPARENT );
-        pOut->DrawRect( rRect );
+        Drawable::Draw(pOut, RectangleDrawable(rRect));
         pOut->SetLineColor( aLineColor );
         pOut->SetFillColor( aFillColor );
     }

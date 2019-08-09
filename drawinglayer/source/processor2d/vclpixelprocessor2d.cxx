@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include "vclpixelprocessor2d.hxx"
 #include <vcl/outdev.hxx>
 #include <drawinglayer/primitive2d/drawinglayer_primitivetypes2d.hxx>
@@ -812,7 +814,7 @@ namespace drawinglayer
             const ::tools::Rectangle aRectangle(
                 static_cast<sal_Int32>(floor(aViewport.getMinX())), static_cast<sal_Int32>(floor(aViewport.getMinY())),
                 static_cast<sal_Int32>(ceil(aViewport.getMaxX())), static_cast<sal_Int32>(ceil(aViewport.getMaxY())));
-            mpOutputDevice->DrawRect(aRectangle);
+            Drawable::Draw(mpOutputDevice, RectangleDrawable(aRectangle));
 
             // restore AA setting
             mpOutputDevice->SetAntialiasing(nOriginalAA);

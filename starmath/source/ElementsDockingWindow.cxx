@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <memory>
 #include <ElementsDockingWindow.hxx>
 
@@ -380,7 +382,7 @@ void SmElementsControl::LayoutOrPaintContents(vcl::RenderContext *pContext)
                                               x + 5 + 1, nControlHeight - 5);
 
                 if (pContext)
-                    pContext->DrawRect(PixelToLogic(aSelectionRectangle));
+                    Drawable::Draw(pContext, RectangleDrawable(PixelToLogic(aSelectionRectangle)));
                 x += 10;
             }
             else
@@ -395,7 +397,7 @@ void SmElementsControl::LayoutOrPaintContents(vcl::RenderContext *pContext)
                                               nControlWidth - 5, y + 5 + 1);
 
                 if (pContext)
-                    pContext->DrawRect(PixelToLogic(aSelectionRectangle));
+                    Drawable::Draw(pContext, RectangleDrawable(PixelToLogic(aSelectionRectangle)));
                 y += 10;
             }
         }
@@ -429,8 +431,8 @@ void SmElementsControl::LayoutOrPaintContents(vcl::RenderContext *pContext)
                     const StyleSettings& rStyleSettings = pContext->GetSettings().GetStyleSettings();
                     pContext->SetLineColor(rStyleSettings.GetHighlightColor());
                     pContext->SetFillColor(COL_TRANSPARENT);
-                    pContext->DrawRect(PixelToLogic(tools::Rectangle(x + 1, y + 1, x + boxX - 1, y + boxY - 1)));
-                    pContext->DrawRect(PixelToLogic(tools::Rectangle(x + 2, y + 2, x + boxX - 2, y + boxY - 2)));
+                    Drawable::Draw(pContext, RectangleDrawable(PixelToLogic(tools::Rectangle(x + 1, y + 1, x + boxX - 1, y + boxY - 1))));
+                    Drawable::Draw(pContext, RectangleDrawable(PixelToLogic(tools::Rectangle(x + 2, y + 2, x + boxX - 2, y + boxY - 2))));
                     pContext->Pop();
                 }
 

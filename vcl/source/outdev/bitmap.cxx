@@ -17,8 +17,6 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <cassert>
-
 #include <vcl/bitmap.hxx>
 #include <vcl/bitmapex.hxx>
 #include <vcl/bitmapaccess.hxx>
@@ -35,6 +33,7 @@
 #include <vcl/window.hxx>
 #include <vcl/BitmapMonochromeFilter.hxx>
 #include <vcl/drawables/PixelDrawable.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <bmpfast.hxx>
 #include <salgdi.hxx>
@@ -49,6 +48,8 @@
 #include <osl/diagnose.h>
 #include <tools/helpers.hxx>
 #include <tools/debug.hxx>
+
+#include <cassert>
 
 void OutputDevice::DrawBitmap( const Point& rDestPt, const Bitmap& rBitmap )
 {
@@ -77,7 +78,7 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
 
     if ( RasterOp::Invert == meRasterOp )
     {
-        DrawRect( tools::Rectangle( rDestPt, rDestSize ) );
+        Drawable::Draw(this, RectangleDrawable(tools::Rectangle(rDestPt, rDestSize)));
         return;
     }
 
@@ -99,7 +100,7 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
             Push( PushFlags::LINECOLOR | PushFlags::FILLCOLOR );
             SetLineColor( aCol );
             SetFillColor( aCol );
-            DrawRect( tools::Rectangle( rDestPt, rDestSize ) );
+            Drawable::Draw(this, RectangleDrawable(tools::Rectangle(rDestPt, rDestSize)));
             Pop();
             return;
         }
@@ -295,7 +296,7 @@ void OutputDevice::DrawBitmapEx( const Point& rDestPt, const Size& rDestSize,
     {
         if ( RasterOp::Invert == meRasterOp )
         {
-            DrawRect( tools::Rectangle( rDestPt, rDestSize ) );
+            Drawable::Draw(this, RectangleDrawable(tools::Rectangle(rDestPt, rDestSize)));
             return;
         }
 

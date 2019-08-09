@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <sfx2/dialoghelper.hxx>
 #include <svx/paraprev.hxx>
 #include <vcl/outdev.hxx>
@@ -67,7 +68,7 @@ void SvxParaPrevWindow::DrawParagraph(vcl::RenderContext& rRenderContext)
     Color aGrayColor(COL_LIGHTGRAY);
 
     rRenderContext.SetFillColor(rWinColor);
-    rRenderContext.DrawRect(tools::Rectangle(Point(), aWinSize));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(), aWinSize)));
 
     rRenderContext.SetLineColor();
 
@@ -193,7 +194,7 @@ void SvxParaPrevWindow::DrawParagraph(vcl::RenderContext& rRenderContext)
 
         tools::Rectangle aRect(aPnt, aSiz);
 
-        rRenderContext.DrawRect( aRect );
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
 
         if (5 == i)
         {

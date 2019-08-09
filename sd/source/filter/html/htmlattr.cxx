@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include "htmlattr.hxx"
 #include <sdresid.hxx>
 #include <strings.hrc>
@@ -40,7 +42,7 @@ void SdHtmlAttrPreview::Paint(vcl::RenderContext& rRenderContext, const ::tools:
 
     rRenderContext.SetLineColor(m_aBackColor);
     rRenderContext.SetFillColor(m_aBackColor);
-    rRenderContext.DrawRect(rRect);
+    Drawable::Draw(&rRenderContext, RectangleDrawable(rRect));
     rRenderContext.SetFillColor();
 
     int nHeight = (aTextRect.Bottom() - aTextRect.Top()) >> 2;

@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <slideshow.hxx>
 #include <vcl/ctrl.hxx>
 #include <vcl/settings.hxx>
@@ -75,7 +77,7 @@ void SdDocPreviewWin::ImpPaint( OutputDevice* pVDev )
 
     pVDev->SetLineColor();
     pVDev->SetFillColor( aColorConfig.GetColorValue( svtools::APPBACKGROUND ).nColor );
-    pVDev->DrawRect(::tools::Rectangle( Point(0,0 ), pVDev->GetOutputSize()));
+    Drawable::Draw(pVDev, RectangleDrawable(::tools::Rectangle( Point(0,0 ), pVDev->GetOutputSize())));
 }
 
 void SdDocPreviewWin::Paint( vcl::RenderContext& /*rRenderContext*/, const ::tools::Rectangle& /*rRect*/ )

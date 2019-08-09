@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include "eschesdo.hxx"
 #include <o3tl/any.hxx>
 #include <svx/svdxcgv.hxx>
@@ -1405,7 +1407,7 @@ Graphic lclDrawHatch( const drawing::Hatch& rHatch, const Color& rBackColor, boo
     aMtf.Record(pVDev);
     pVDev->SetLineColor();
     pVDev->SetFillColor(bFillBackground ? rBackColor : COL_TRANSPARENT);
-    pVDev->DrawRect(rRect);
+    Drawable::Draw(pVDev, RectangleDrawable(rRect));
     pVDev->DrawHatch(tools::PolyPolygon(rRect), Hatch(static_cast<HatchStyle>(rHatch.Style), Color(rHatch.Color), rHatch.Distance, static_cast<sal_uInt16>(rHatch.Angle)));
     aMtf.Stop();
     aMtf.WindStart();

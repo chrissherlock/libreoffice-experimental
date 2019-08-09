@@ -32,6 +32,7 @@
 #include <vcl/bitmapaccess.hxx>
 #include <vcl/menubtn.hxx>
 #include <vcl/vclptr.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <svtools/valueset.hxx>
 #include <svtools/ctrlbox.hxx>
 #include <svl/style.hxx>
@@ -426,7 +427,7 @@ namespace
         if ( aVirDev->GetOutputSizePixel() != aVirSize )
             aVirDev->SetOutputSizePixel( aVirSize );
         aVirDev->SetFillColor( aColorDist );
-        aVirDev->DrawRect( tools::Rectangle( Point(), aSize ) );
+        Drawable::Draw(aVirDev, RectangleDrawable(tools::Rectangle(Point(), aSize)));
 
         aVirDev->SetFillColor( aColor1 );
 
@@ -1097,7 +1098,7 @@ void SvxStyleBox_Impl::SetupEntry(vcl::RenderContext& rRenderContext, vcl::Windo
                         if ( aBackCol != COL_AUTO )
                         {
                             rRenderContext.SetFillColor(aBackCol);
-                            rRenderContext.DrawRect(rRect);
+                            Drawable::Draw(&rRenderContext, RectangleDrawable(rRect));
                         }
                     }
                     break;
@@ -3938,7 +3939,7 @@ void SvxColorListBox::ShowPreview(const NamedColor &rColor)
     }
 
     xDevice->SetLineColor(rStyleSettings.GetDisableColor());
-    xDevice->DrawRect(aRect);
+    Drawable::Draw(xDevice, RectangleDrawable(aRect));
 
     BitmapEx aBitmap(xDevice->GetBitmapEx(Point(0, 0), xDevice->GetOutputSize()));
     SetImageAlign(ImageAlign::Left);
@@ -4162,7 +4163,7 @@ void ColorListBox::ShowPreview(const NamedColor &rColor)
     }
 
     xDevice->SetLineColor(rStyleSettings.GetDisableColor());
-    xDevice->DrawRect(aRect);
+    Drawable::Draw(xDevice, RectangleDrawable(aRect));
 
     m_xButton->set_image(xDevice.get());
     m_xButton->set_label(rColor.second);

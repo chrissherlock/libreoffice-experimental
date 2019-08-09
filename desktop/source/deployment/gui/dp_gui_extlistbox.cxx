@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <svtools/controldims.hxx>
 
 #include <dp_shared.hxx>
@@ -398,7 +399,7 @@ void ExtensionBox_Impl::DrawRow(vcl::RenderContext& rRenderContext, const tools:
     {
         rRenderContext.SetLineColor();
         rRenderContext.SetFillColor(rStyleSettings.GetHighlightColor());
-        rRenderContext.DrawRect(rRect);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(rRect));
     }
     else
     {

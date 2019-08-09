@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <dpcontrol.hxx>
 
 #include <vcl/outdev.hxx>
@@ -95,7 +97,7 @@ void ScDPFieldButton::draw()
         tools::Rectangle aRect(maPos, maSize);
         mpOutDev->SetLineColor(mpStyle->GetFaceColor());
         mpOutDev->SetFillColor(mpStyle->GetFaceColor());
-        mpOutDev->DrawRect(aRect);
+        Drawable::Draw(mpOutDev, RectangleDrawable(aRect));
 
         // Border lines
         mpOutDev->SetLineColor(mpStyle->GetLightColor());
@@ -170,7 +172,7 @@ void ScDPFieldButton::drawPopupButton()
     mpOutDev->SetLineColor(COL_BLACK);
     Color aBackgroundColor = mbPopupPressed ? mpStyle->GetShadowColor() : mpStyle->GetFaceColor();
     mpOutDev->SetFillColor(aBackgroundColor);
-    mpOutDev->DrawRect(tools::Rectangle(aPos, aSize));
+    Drawable::Draw(mpOutDev, RectangleDrawable(tools::Rectangle(aPos, aSize)));
 
     // the arrowhead
     Color aArrowColor = mbHasHiddenMember ? mpStyle->GetHighlightLinkColor() : mpStyle->GetButtonTextColor();
@@ -192,7 +194,7 @@ void ScDPFieldButton::drawPopupButton()
         // tiny little box to display in presence of hidden member(s).
         Point aBoxPos(aPos.X() + aSize.Width() - 5 * fScaleFactor, aPos.Y() + aSize.Height() - 5 * fScaleFactor);
         Size aBoxSize(3 * fScaleFactor, 3 * fScaleFactor);
-        mpOutDev->DrawRect(tools::Rectangle(aBoxPos, aBoxSize));
+        Drawable::Draw(mpOutDev, RectangleDrawable(tools::Rectangle(aBoxPos, aBoxSize)));
     }
 }
 

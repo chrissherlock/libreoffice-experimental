@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <editeng/eeitem.hxx>
 #include <editeng/flditem.hxx>
 #include <editeng/langitem.hxx>
@@ -721,7 +723,7 @@ void PresLayoutPreview::Paint(vcl::RenderContext& rRenderContext, const ::tools:
 
     // draw page background
     rRenderContext.SetFillColor(COL_WHITE);
-    rRenderContext.DrawRect(maOutRect);
+    Drawable::Draw(&rRenderContext, RectangleDrawable(maOutRect));
 
     // paint presentation objects from masterpage
     if (nullptr != mpMaster)

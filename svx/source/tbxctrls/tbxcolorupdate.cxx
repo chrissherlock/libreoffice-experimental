@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <svx/tbxcolorupdate.hxx>
 #include <svx/svxids.hrc>
@@ -137,7 +138,7 @@ namespace svx
         else
             maUpdRect = tools::Rectangle(Point( maBmpSize.Height() + 2, 2), Point(maBmpSize.Width() - 3, maBmpSize.Height() - 3));
 
-        pVirDev->DrawRect(maUpdRect);
+        Drawable::Draw(pVirDev, RectangleDrawable(maUpdRect));
 
         mpTbx->SetItemOverlayImage(mnBtnId, Image(pVirDev->GetBitmapEx(Point(0,0), aItemSize)));
     }

@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <csvgrid.hxx>
 
 #include <algorithm>
@@ -1063,7 +1065,7 @@ void ScCsvGrid::ImplDrawColumnHeader( OutputDevice& rOutDev, sal_uInt32 nColInde
 
     rOutDev.SetLineColor();
     rOutDev.SetFillColor( aFillColor );
-    rOutDev.DrawRect( tools::Rectangle( nX1, 0, nX2, nHdrHt ) );
+    Drawable::Draw(&rOutDev, RectangleDrawable(tools::Rectangle(nX1, 0, nX2, nHdrHt)));
 
     rOutDev.SetFont( maHeaderFont );
     rOutDev.SetTextColor( maHeaderTextColor );
@@ -1152,7 +1154,7 @@ void ScCsvGrid::ImplDrawColumnBackgr( sal_uInt32 nColIndex )
     sal_Int32 nY2 = GetY( GetLastVisLine() + 1 );
     sal_Int32 nHdrHt = GetHdrHeight();
     tools::Rectangle aRect( nX1, nHdrHt, nX2, nY2 );
-    mpBackgrDev->DrawRect( aRect );
+    Drawable::Draw(mpBackgrDev, RectangleDrawable(aRect));
     mpBackgrDev->SetLineColor( maGridColor );
     mpBackgrDev->DrawGrid( aRect, Size( 1, GetLineHeight() ), DrawGridFlags::HorzLines );
     mpBackgrDev->DrawLine( Point( nX2, nHdrHt ), Point( nX2, nY2 ) );
@@ -1190,11 +1192,11 @@ void ScCsvGrid::ImplDrawRowHeaders()
     mpBackgrDev->SetFillColor( maAppBackColor );
     Point aPoint( GetHdrX(), 0 );
     tools::Rectangle aRect( aPoint, Size( GetHdrWidth() + 1, GetHeight() ) );
-    mpBackgrDev->DrawRect( aRect );
+    Drawable::Draw(mpBackgrDev, RectangleDrawable(aRect));
 
     mpBackgrDev->SetFillColor( maHeaderBackColor );
     aRect.SetBottom( GetY( GetLastVisLine() + 1 ) );
-    mpBackgrDev->DrawRect( aRect );
+    Drawable::Draw(mpBackgrDev, RectangleDrawable(aRect));
 
     // line numbers
     mpBackgrDev->SetFont( maHeaderFont );
@@ -1225,8 +1227,8 @@ void ScCsvGrid::ImplDrawBackgrDev()
 {
     mpBackgrDev->SetLineColor();
     mpBackgrDev->SetFillColor( maAppBackColor );
-    mpBackgrDev->DrawRect( tools::Rectangle(
-        Point( GetFirstX() + 1, 0 ), Size( GetWidth() - GetHdrWidth(), GetHeight() ) ) );
+    Drawable::Draw(mpBackgrDev, RectangleDrawable(tools::Rectangle(
+        Point(GetFirstX() + 1, 0), Size(GetWidth() - GetHdrWidth(), GetHeight()))));
 
     sal_uInt32 nLastCol = GetLastVisColumn();
     if (nLastCol == CSV_COLUMN_INVALID)
@@ -1335,10 +1337,10 @@ void ScCsvGrid::ImplDrawHorzScrolled( sal_Int32 nOldPos )
         tools::Rectangle aRect( nLastX, 0, GetLastX(), GetHeight() - 1 );
         mpBackgrDev->SetLineColor();
         mpBackgrDev->SetFillColor( maAppBackColor );
-        mpBackgrDev->DrawRect( aRect );
+        Drawable::Draw(mpBackgrDev, RectangleDrawable(aRect));
         mpGridDev->SetLineColor();
         mpGridDev->SetFillColor( maAppBackColor );
-        mpGridDev->DrawRect( aRect );
+        Drawable::Draw(mpGridDev, RectangleDrawable(aRect));
     }
 }
 

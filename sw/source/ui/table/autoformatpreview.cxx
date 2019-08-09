@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <editeng/adjustitem.hxx>
 #include <editeng/boxitem.hxx>
 #include <editeng/brushitem.hxx>
@@ -325,9 +327,11 @@ void AutoFormatPreview::DrawBackground(vcl::RenderContext& rRenderContext)
             rRenderContext.SetLineColor();
             rRenderContext.SetFillColor(aBrushItem.GetColor());
             const basegfx::B2DRange aCellRange(maArray.GetCellRange(nCol, nRow, true));
-            rRenderContext.DrawRect(tools::Rectangle(
-                basegfx::fround(aCellRange.getMinX()), basegfx::fround(aCellRange.getMinY()),
-                basegfx::fround(aCellRange.getMaxX()), basegfx::fround(aCellRange.getMaxY())));
+            Drawable::Draw(
+                &rRenderContext,
+                RectangleDrawable(tools::Rectangle(
+                    basegfx::fround(aCellRange.getMinX()), basegfx::fround(aCellRange.getMinY()),
+                    basegfx::fround(aCellRange.getMaxX()), basegfx::fround(aCellRange.getMaxY()))));
             rRenderContext.Pop();
         }
     }
@@ -449,7 +453,7 @@ void AutoFormatPreview::Paint(vcl::RenderContext& rRenderContext, const tools::R
     // Draw the Frame
     Color oldColor = rRenderContext.GetLineColor();
     rRenderContext.SetLineColor();
-    rRenderContext.DrawRect(tools::Rectangle(Point(0, 0), theWndSize));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(0, 0), theWndSize)));
     rRenderContext.SetLineColor(oldColor);
 
     // Center the preview

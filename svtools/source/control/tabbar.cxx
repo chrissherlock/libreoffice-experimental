@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <svtools/tabbar.hxx>
 #include <tools/time.hxx>
@@ -89,14 +90,14 @@ public:
             // Currently selected Tab
             mrRenderContext.SetFillColor(maSelectedColor);
             mrRenderContext.SetLineColor(maSelectedColor);
-            mrRenderContext.DrawRect(maRect);
+            Drawable::Draw(&mrRenderContext, RectangleDrawable(maRect));
             mrRenderContext.SetLineColor(mrStyleSettings.GetDarkShadowColor());
         }
         else if (mbCustomColored)
         {
             mrRenderContext.SetFillColor(maCustomColor);
             mrRenderContext.SetLineColor(maCustomColor);
-            mrRenderContext.DrawRect(maRect);
+            Drawable::Draw(&mrRenderContext, RectangleDrawable(maRect));
             mrRenderContext.SetLineColor(mrStyleSettings.GetDarkShadowColor());
         }
     }
@@ -122,7 +123,7 @@ public:
         Point aTopRight = maRect.TopRight() + Point(-1, 0);
 
         tools::Rectangle aDelRect(aTopLeft, aTopRight);
-        mrRenderContext.DrawRect(aDelRect);
+        Drawable::Draw(&mrRenderContext, RectangleDrawable(aDelRect));
     }
 
     void drawColorLine()
@@ -131,13 +132,13 @@ public:
         {
             mrRenderContext.SetFillColor(maCustomColor);
             mrRenderContext.SetLineColor(maCustomColor);
-            mrRenderContext.DrawRect(maLineRect);
+            Drawable::Draw(&mrRenderContext, RectangleDrawable(maLineRect));
         }
         else if (mbSelected)
         {
             mrRenderContext.SetFillColor(mrStyleSettings.GetDarkShadowColor());
             mrRenderContext.SetLineColor(mrStyleSettings.GetDarkShadowColor());
-            mrRenderContext.DrawRect(maLineRect);
+            Drawable::Draw(&mrRenderContext, RectangleDrawable(maLineRect));
         }
     }
 
@@ -2348,7 +2349,7 @@ sal_uInt16 TabBar::ShowDropPos(const Point& rPos)
         {
             tools::Rectangle aRect(mnOffX, 0, mnLastOffX, maWinSize.Height());
             SetFillColor(GetBackground().GetColor());
-            DrawRect(aRect);
+            Drawable::Draw(this, RectangleDrawable(aRect));
             Invalidate(aRect);
         }
     }

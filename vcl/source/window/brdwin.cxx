@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <strings.hrc>
 #include <svdata.hxx>
 #include <brdwin.hxx>
@@ -93,7 +95,7 @@ static void ImplDrawBrdWinSymbolButton( vcl::RenderContext* pDev,
             // provide a bright background for selection effect
             pDev->SetFillColor( pDev->GetSettings().GetStyleSettings().GetWindowColor() );
             pDev->SetLineColor();
-            pDev->DrawRect( rRect );
+            Drawable::Draw(pDev, RectangleDrawable(rRect));
             pWin->DrawSelectionBackground( rRect, 2, bool(nState & DrawButtonFlags::Pressed),
                                             true );
         }
@@ -1433,7 +1435,7 @@ void ImplStdBorderWindowView::DrawWindow(vcl::RenderContext& rRenderContext, con
     // single line frame
     rRenderContext.SetLineColor(aFrameColor);
     rRenderContext.SetFillColor();
-    rRenderContext.DrawRect(aInRect);
+    Drawable::Draw(&rRenderContext, RectangleDrawable(aInRect));
     aInRect.AdjustLeft( 1 );
     aInRect.AdjustRight( -1 );
     aInRect.AdjustTop( 1 );
@@ -1449,14 +1451,14 @@ void ImplStdBorderWindowView::DrawWindow(vcl::RenderContext& rRenderContext, con
     if (nBorderSize)
     {
         rRenderContext.SetFillColor(rStyleSettings.GetFaceColor());
-        rRenderContext.DrawRect(tools::Rectangle(Point(aInRect.Left(), aInRect.Top()),
-                                 Size(aInRect.GetWidth(), nBorderSize)));
-        rRenderContext.DrawRect(tools::Rectangle(Point(aInRect.Left(), aInRect.Top() + nBorderSize),
-                                 Size(nBorderSize, aInRect.GetHeight() - nBorderSize)));
-        rRenderContext.DrawRect(tools::Rectangle(Point(aInRect.Left(), aInRect.Bottom() - nBorderSize + 1),
-                                 Size(aInRect.GetWidth(), nBorderSize)));
-        rRenderContext.DrawRect(tools::Rectangle(Point(aInRect.Right()-nBorderSize + 1, aInRect.Top() + nBorderSize),
-                                 Size(nBorderSize, aInRect.GetHeight() - nBorderSize)));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(aInRect.Left(), aInRect.Top()),
+                                 Size(aInRect.GetWidth(), nBorderSize))));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(aInRect.Left(), aInRect.Top() + nBorderSize),
+                                 Size(nBorderSize, aInRect.GetHeight() - nBorderSize))));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(aInRect.Left(), aInRect.Bottom() - nBorderSize + 1),
+                                 Size(aInRect.GetWidth(), nBorderSize))));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(aInRect.Right()-nBorderSize + 1, aInRect.Top() + nBorderSize),
+                                 Size(nBorderSize, aInRect.GetHeight() - nBorderSize))));
     }
 
     // Draw Title
@@ -1476,7 +1478,7 @@ void ImplStdBorderWindowView::DrawWindow(vcl::RenderContext& rRenderContext, con
         tools::Rectangle aTitleRect(pData->maTitleRect);
         if(pOffset)
             aTitleRect.Move(pOffset->X(), pOffset->Y());
-        rRenderContext.DrawRect(aTitleRect);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aTitleRect));
 
         if (pData->mnTitleType != BorderWindowTitleType::Tearoff)
         {

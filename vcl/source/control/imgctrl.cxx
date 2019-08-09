@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/imgctrl.hxx>
 
 #include <com/sun/star/awt/ImageScaleMode.hpp>
@@ -137,13 +138,13 @@ void ImageControl::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
     Color oldFillCol = pBorderWindow->GetFillColor();
     pBorderWindow->SetFillColor();
     pBorderWindow->SetLineColor(bFlat ? COL_WHITE : COL_BLACK);
-    pBorderWindow->DrawRect(aRect);
+    Drawable::Draw(pBorderWindow, RectangleDrawable(aRect));
     aRect.AdjustLeft( 1 );
     aRect.AdjustRight( -1 );
     aRect.AdjustTop( 1 );
     aRect.AdjustBottom( -1 );
     pBorderWindow->SetLineColor(bFlat ? COL_BLACK : COL_WHITE);
-    pBorderWindow->DrawRect(aRect);
+    Drawable::Draw(pBorderWindow, RectangleDrawable(aRect));
     pBorderWindow->SetLineColor(oldLineCol);
     pBorderWindow->SetFillColor(oldFillCol);
 

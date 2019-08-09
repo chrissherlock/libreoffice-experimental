@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <officecfg/Office/Writer.hxx>
 #include <comphelper/string.hxx>
 #include <swtypes.hxx>
@@ -422,7 +424,7 @@ void SwCaptionPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Re
 {
     ApplySettings(rRenderContext);
 
-    rRenderContext.DrawRect(tools::Rectangle(Point(0, 0), GetOutputSizePixel()));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(0, 0), GetOutputSizePixel())));
     rRenderContext.DrawText(Point(4, 6), maText);
 }
 

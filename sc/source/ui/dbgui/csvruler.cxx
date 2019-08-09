@@ -22,6 +22,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/ptrstyle.hxx>
 #include <vcl/drawables/PixelDrawable.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <csvruler.hxx>
 #include <AccessibleCsvControl.hxx>
@@ -550,7 +551,7 @@ void ScCsvRuler::ImplDrawArea( sal_Int32 nPosX, sal_Int32 nWidth )
     maBackgrDev->SetLineColor();
     tools::Rectangle aRect( Point( nPosX, 0 ), Size( nWidth, GetHeight() ) );
     maBackgrDev->SetFillColor( maBackColor );
-    maBackgrDev->DrawRect( aRect );
+    Drawable::Draw(maBackgrDev, RectangleDrawable(aRect));
 
     aRect = maActiveRect;
     aRect.SetLeft( std::max( GetFirstX(), nPosX ) );
@@ -558,7 +559,7 @@ void ScCsvRuler::ImplDrawArea( sal_Int32 nPosX, sal_Int32 nWidth )
     if( aRect.Left() <= aRect.Right() )
     {
         maBackgrDev->SetFillColor( maActiveColor );
-        maBackgrDev->DrawRect( aRect );
+        Drawable::Draw(maBackgrDev, RectangleDrawable(aRect));
     }
 
     maBackgrDev->SetLineColor( maTextColor );

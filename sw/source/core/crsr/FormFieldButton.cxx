@@ -7,6 +7,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <DropDownFormFieldButton.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/settings.hxx>
@@ -110,7 +112,7 @@ void FormFieldButton::Paint(vcl::RenderContext& rRenderContext, const tools::Rec
     const tools::Rectangle aFrameRect(tools::Rectangle(aPos, aSize));
     rRenderContext.SetLineColor(aLineColor);
     rRenderContext.SetFillColor(COL_TRANSPARENT);
-    rRenderContext.DrawRect(aFrameRect);
+    Drawable::Draw(&rRenderContext, RectangleDrawable(aFrameRect));
 
     // Draw the button next to the frame
     Point aButtonPos(aFrameRect.TopLeft());
@@ -122,7 +124,7 @@ void FormFieldButton::Paint(vcl::RenderContext& rRenderContext, const tools::Rec
     // Background & border
     rRenderContext.SetLineColor(aLineColor);
     rRenderContext.SetFillColor(aFillColor);
-    rRenderContext.DrawRect(aButtonRect);
+    Drawable::Draw(&rRenderContext, RectangleDrawable(aButtonRect));
 
     // the arrowhead
     rRenderContext.SetLineColor(aLineColor);

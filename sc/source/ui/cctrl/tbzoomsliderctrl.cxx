@@ -16,6 +16,9 @@
  *   except in compliance with the License. You may obtain a copy of
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
+
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <tbzoomsliderctrl.hxx>
 #include <vcl/event.hxx>
 #include <vcl/image.hxx>
@@ -415,12 +418,12 @@ void ScZoomSliderWnd::DoPaint(vcl::RenderContext& rRenderContext)
 
     // draw slider
     pVDev->SetLineColor(COL_WHITE);
-    pVDev->DrawRect(aSecondLine);
-    pVDev->DrawRect(aRight);
+    Drawable::Draw(pVDev, RectangleDrawable(aSecondLine));
+    Drawable::Draw(pVDev, RectangleDrawable(aRight));
 
     pVDev->SetLineColor(COL_GRAY);
-    pVDev->DrawRect(aFirstLine);
-    pVDev->DrawRect(aLeft);
+    Drawable::Draw(pVDev, RectangleDrawable(aFirstLine));
+    Drawable::Draw(pVDev, RectangleDrawable(aLeft));
 
     // draw snapping points:
     for (const auto& rSnappingPointOffset : mpImpl->maSnappingPointOffsets)
@@ -431,11 +434,11 @@ void ScZoomSliderWnd::DoPaint(vcl::RenderContext& rRenderContext)
         aSnapping.SetTop( aSnapping.Bottom() - nSnappingHeight );
         aSnapping.AdjustLeft(rSnappingPointOffset );
         aSnapping.SetRight( aSnapping.Left() );
-        pVDev->DrawRect(aSnapping);
+        Drawable::Draw(pVDev, RectangleDrawable(aSnapping));
 
         aSnapping.AdjustTop(nSnappingHeight + nSliderHeight );
         aSnapping.AdjustBottom(nSnappingHeight + nSliderHeight );
-        pVDev->DrawRect(aSnapping);
+        Drawable::Draw(pVDev, RectangleDrawable(aSnapping));
     }
 
     // draw slider button

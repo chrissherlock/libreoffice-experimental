@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <svtools/unitconv.hxx>
 #include <tools/poly.hxx>
 #include <vcl/weld.hxx>
@@ -195,7 +197,7 @@ void SwLabPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
     const long lY3 = lY0 + ROUND(f * (m_aItem.m_lUpper + m_aItem.m_lVDist ));
 
     // draw outline (area)
-    rRenderContext.DrawRect(tools::Rectangle(Point(lX0, lY0), Size(lOutlineW, lOutlineH)));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(lX0, lY0), Size(lOutlineW, lOutlineH))));
 
     // draw outline (border)
     rRenderContext.SetLineColor(rFieldTextColor);
@@ -213,10 +215,10 @@ void SwLabPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
     const sal_Int32 nCols = std::min<sal_Int32>(2, m_aItem.m_nCols);
     for (sal_Int32 nRow = 0; nRow < nRows; ++nRow)
         for (sal_Int32 nCol = 0; nCol < nCols; ++nCol)
-            rRenderContext.DrawRect(tools::Rectangle(Point(lX0 + ROUND(f * (m_aItem.m_lLeft  + nCol * m_aItem.m_lHDist)),
-                                                    lY0 + ROUND(f * (m_aItem.m_lUpper + nRow * m_aItem.m_lVDist))),
-                                              Size(ROUND(f * m_aItem.m_lWidth),
-                                                   ROUND(f * m_aItem.m_lHeight))));
+            Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(lX0 + ROUND(f * (m_aItem.m_lLeft  + nCol * m_aItem.m_lHDist)),
+                                                  lY0 + ROUND(f * (m_aItem.m_lUpper + nRow * m_aItem.m_lVDist))),
+                                                  Size(ROUND(f * m_aItem.m_lWidth),
+                                                       ROUND(f * m_aItem.m_lHeight)))));
     rRenderContext.SetClipRegion();
 
     // annotation: left border

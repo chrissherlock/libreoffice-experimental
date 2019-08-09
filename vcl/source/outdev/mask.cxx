@@ -17,8 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <cassert>
-
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/outdev.hxx>
@@ -28,6 +27,8 @@
 #include <salgdi.hxx>
 #include <salbmp.hxx>
 #include <outdata.hxx>
+
+#include <cassert>
 
 void OutputDevice::DrawMask( const Point& rDestPt,
                              const Bitmap& rBitmap, const Color& rMaskColor )
@@ -58,7 +59,7 @@ void OutputDevice::DrawMask( const Point& rDestPt, const Size& rDestSize,
 
     if( RasterOp::Invert == meRasterOp )
     {
-        DrawRect( tools::Rectangle( rDestPt, rDestSize ) );
+        Drawable::Draw(this, RectangleDrawable(tools::Rectangle(rDestPt, rDestSize)));
         return;
     }
 

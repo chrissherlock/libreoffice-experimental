@@ -19,6 +19,7 @@
 
 #include <osl/file.hxx>
 #include <sfx2/new.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/layout.hxx>
 #include <vcl/idle.hxx>
 #include <vcl/gdimtf.hxx>
@@ -57,7 +58,7 @@ void SfxPreviewWin_Impl::ImpPaint(vcl::RenderContext& rRenderContext, GDIMetaFil
 {
     rRenderContext.SetLineColor();
     rRenderContext.SetFillColor(COL_LIGHTGRAY);
-    rRenderContext.DrawRect(tools::Rectangle(Point(0,0), rRenderContext.GetOutputSize()));
+    Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(Point(0,0), rRenderContext.GetOutputSize())));
 
     Size aTmpSize = pFile ? pFile->GetPrefSize() : Size(1, 1);
     DBG_ASSERT(aTmpSize.Height() != 0 && aTmpSize.Width() != 0, "size of first page is 0, override GetFirstPageSize or set visible-area!");
@@ -89,7 +90,8 @@ void SfxPreviewWin_Impl::ImpPaint(vcl::RenderContext& rRenderContext, GDIMetaFil
     {
         rRenderContext.SetLineColor(COL_BLACK);
         rRenderContext.SetFillColor(COL_WHITE);
-        rRenderContext.DrawRect(tools::Rectangle(aPoint + Point(FRAME, FRAME), bPoint + Point(FRAME, FRAME)));
+        Drawable::Draw(&rRenderContext,
+            RectangleDrawable(tools::Rectangle(aPoint + Point(FRAME, FRAME), bPoint + Point(FRAME, FRAME))));
         pFile->WindStart();
         pFile->Play(&rRenderContext, aPoint + Point(FRAME, FRAME), aSize);
     }

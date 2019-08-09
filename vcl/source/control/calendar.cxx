@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/help.hxx>
 #include <vcl/menu.hxx>
@@ -484,7 +485,7 @@ void ImplDrawSpinArrow(vcl::RenderContext& rRenderContext, const tools::Rectangl
         aRect.AdjustRight(nLines );
     }
 
-    rRenderContext.DrawRect(aRect);
+    Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
     for (i = 0; i < nLines; i++)
     {
         if (bPrev)
@@ -499,7 +500,7 @@ void ImplDrawSpinArrow(vcl::RenderContext& rRenderContext, const tools::Rectangl
         }
         aRect.AdjustTop( -1 );
         aRect.AdjustBottom( 1 );
-        rRenderContext.DrawRect(aRect);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
     }
 }
 
@@ -562,7 +563,7 @@ void Calendar::ImplDrawDate(vcl::RenderContext& rRenderContext,
     {
         rRenderContext.SetLineColor();
         rRenderContext.SetFillColor(rStyleSettings.GetHighlightColor());
-        rRenderContext.DrawRect(aDateRect);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aDateRect));
     }
 
     // display text
@@ -590,7 +591,7 @@ void Calendar::ImplDrawDate(vcl::RenderContext& rRenderContext,
     {
         rRenderContext.SetLineColor(rStyleSettings.GetWindowTextColor());
         rRenderContext.SetFillColor();
-        rRenderContext.DrawRect(aDateRect);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aDateRect));
     }
 
     // if needed do FocusRect
@@ -627,7 +628,7 @@ void Calendar::ImplDraw(vcl::RenderContext& rRenderContext)
         rRenderContext.SetLineColor();
         rRenderContext.SetFillColor(rStyleSettings.GetFaceColor());
         tools::Rectangle aTitleRect(0, nY, aOutSize.Width() - 1, nY + mnDayHeight - DAY_OFFY + TITLE_BORDERY * 2);
-        rRenderContext.DrawRect(aTitleRect);
+        Drawable::Draw(&rRenderContext, RectangleDrawable(aTitleRect));
         Point aTopLeft1(aTitleRect.Left(), aTitleRect.Top());
         Point aTopLeft2(aTitleRect.Left(), aTitleRect.Top() + 1);
         Point aBottomRight1(aTitleRect.Right(), aTitleRect.Bottom());

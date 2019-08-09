@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include "impedit.hxx"
 #include <sal/log.hxx>
 #include <editeng/editeng.hxx>
@@ -540,7 +542,7 @@ void ImpEditView::ImplDrawHighlightRect( OutputDevice* _pTarget, const Point& rD
                 _pTarget->SetLineColor();
                 _pTarget->SetFillColor(COL_BLACK);
                 _pTarget->SetRasterOp(RasterOp::Invert);
-                _pTarget->DrawRect(aRect);
+                Drawable::Draw(_pTarget, RectangleDrawable(aRect));
                 _pTarget->Pop();
             }
         }
@@ -1826,7 +1828,7 @@ void ImpEditView::ShowDDCursor( const tools::Rectangle& rRect )
         pDragAndDropInfo->aCurSavedCursor = aSaveRect;
 
         // Draw Cursor...
-        rOutDev.DrawRect( rRect );
+        Drawable::Draw(&rOutDev, RectangleDrawable(rRect));
 
         pDragAndDropInfo->bVisCursor = true;
         pDragAndDropInfo->aCurCursor = rRect;

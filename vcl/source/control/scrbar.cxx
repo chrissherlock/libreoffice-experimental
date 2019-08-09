@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/event.hxx>
 #include <vcl/decoview.hxx>
 #include <vcl/scrbar.hxx>
@@ -472,7 +473,7 @@ bool ScrollBar::ImplDrawNative(vcl::RenderContext& rRenderContext, sal_uInt16 nD
             Color aFaceColor = rRenderContext.GetSettings().GetStyleSettings().GetFaceColor();
             rRenderContext.SetFillColor(aFaceColor);
             rRenderContext.SetLineColor(aFaceColor);
-            rRenderContext.DrawRect(aRequestedRegion);
+            Drawable::Draw(&rRenderContext, RectangleDrawable(aRequestedRegion));
         }
 
         bNativeOK = rRenderContext.DrawNativeControl(ControlType::Scrollbar, (bHorz ? ControlPart::DrawBackgroundHorz : ControlPart::DrawBackgroundVert),
@@ -648,7 +649,7 @@ void ScrollBar::ImplDraw(vcl::RenderContext& rRenderContext)
             else
             {
                 rRenderContext.SetFillColor(rStyleSettings.GetCheckedColor());
-                rRenderContext.DrawRect(PixelToLogic(maThumbRect));
+                Drawable::Draw(&rRenderContext, RectangleDrawable(PixelToLogic(maThumbRect)));
             }
         }
     }
@@ -659,7 +660,7 @@ void ScrollBar::ImplDraw(vcl::RenderContext& rRenderContext)
             rRenderContext.SetFillColor(rStyleSettings.GetShadowColor());
         else
             rRenderContext.SetFillColor(rStyleSettings.GetCheckedColor());
-        rRenderContext.DrawRect(PixelToLogic(maPage1Rect));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(PixelToLogic(maPage1Rect)));
     }
     if (!ImplDrawNative(rRenderContext, SCRBAR_DRAW_PAGE2))
     {
@@ -667,7 +668,7 @@ void ScrollBar::ImplDraw(vcl::RenderContext& rRenderContext)
             rRenderContext.SetFillColor(rStyleSettings.GetShadowColor());
         else
             rRenderContext.SetFillColor(rStyleSettings.GetCheckedColor());
-        rRenderContext.DrawRect(PixelToLogic(maPage2Rect));
+        Drawable::Draw(&rRenderContext, RectangleDrawable(PixelToLogic(maPage2Rect)));
     }
 }
 

@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <csvcontrol.hxx>
 #include <vcl/settings.hxx>
 #include <AccessibleCsvControl.hxx>
@@ -259,7 +261,7 @@ void ScCsvControl::ImplInvertRect( OutputDevice& rOutDev, const tools::Rectangle
     rOutDev.SetLineColor( COL_BLACK );
     rOutDev.SetFillColor( COL_BLACK );
     rOutDev.SetRasterOp( RasterOp::Invert );
-    rOutDev.DrawRect( rRect );
+    Drawable::Draw(&rOutDev, RectangleDrawable(rRect));
     rOutDev.Pop();
 }
 

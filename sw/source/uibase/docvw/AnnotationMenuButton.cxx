@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include "AnnotationMenuButton.hxx"
 
 #include <app.hrc>
@@ -145,7 +147,7 @@ void AnnotationMenuButton::Paint(vcl::RenderContext& rRenderContext, const tools
         rRenderContext.SetFillColor(mrSidebarWin.ColorDark());
     rRenderContext.SetLineColor();
     const tools::Rectangle aRect(tools::Rectangle(Point(0, 0), rRenderContext.PixelToLogic(GetSizePixel())));
-    rRenderContext.DrawRect(aRect);
+    Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
 
     if (bHighContrast)
     {
@@ -171,7 +173,7 @@ void AnnotationMenuButton::Paint(vcl::RenderContext& rRenderContext, const tools
         rRenderContext.SetFillColor();
         rRenderContext.SetLineColor(ColorFromAlphaColor(90, mrSidebarWin.ColorAnchor(), mrSidebarWin.ColorDark()));
     }
-    rRenderContext.DrawRect(aRect);
+    Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
 
     tools::Rectangle aSymbolRect(aRect);
     // 25% distance to the left and right button border
