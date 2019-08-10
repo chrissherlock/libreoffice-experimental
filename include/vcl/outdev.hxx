@@ -183,19 +183,6 @@ namespace o3tl
     template<> struct typed_flags<DrawImageFlags> : is_typed_flags<DrawImageFlags, 0x001f> {};
 }
 
-// Flags for DrawGrid()
-enum class DrawGridFlags
-{
-    NONE                 = 0x0000,
-    Dots                 = 0x0001,
-    HorzLines            = 0x0002,
-    VertLines            = 0x0004
-};
-namespace o3tl
-{
-    template<> struct typed_flags<DrawGridFlags> : is_typed_flags<DrawGridFlags, 0x0007> {};
-}
-
 // DrawModes
 enum class DrawModeFlags : sal_uInt32
 {
@@ -697,15 +684,6 @@ public:
     Color                       GetPixel( const Point& rPt ) const;
     ///@}
 
-
-    /** @name Rectangle functions
-     */
-    ///@{
-
-public:
-    void                        DrawGrid( const tools::Rectangle& rRect, const Size& rDist, DrawGridFlags nFlags );
-
-    ///@}
 
     /** @name Invert functions
      */

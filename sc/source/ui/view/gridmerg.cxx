@@ -19,6 +19,7 @@
 
 #include <sal/config.h>
 
+#include <vcl/drawables/GridRectDrawable.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/outdev.hxx>
 
@@ -203,9 +204,10 @@ void ScGridMerger::Flush()
                     nVarStart = nVarEnd;
                     nVarEnd = nTemp;
                 }
-                pDev->DrawGrid( tools::Rectangle( nVarStart, nFixStart, nVarEnd, nFixEnd ),
-                                Size( nVarDiff, nFixEnd - nFixStart ),
-                                DrawGridFlags::VertLines );
+
+                Drawable::Draw(pDev, GridRectDrawable(tools::Rectangle(nVarStart, nFixStart, nVarEnd, nFixEnd),
+                                Size(nVarDiff, nFixEnd - nFixStart),
+                                DrawGridFlags::VertLines));
             }
         }
         else
@@ -215,9 +217,9 @@ void ScGridMerger::Flush()
             else
             {
                 long nVarEnd = nVarStart + ( nCount - 1 ) * nVarDiff;
-                pDev->DrawGrid( tools::Rectangle( nFixStart, nVarStart, nFixEnd, nVarEnd ),
-                                Size( nFixEnd - nFixStart, nVarDiff ),
-                                DrawGridFlags::HorzLines );
+                Drawable::Draw(pDev, GridRectDrawable(tools::Rectangle(nFixStart, nVarStart, nFixEnd, nVarEnd),
+                                Size(nFixEnd - nFixStart, nVarDiff),
+                                DrawGridFlags::HorzLines));
             }
         }
         nCount = 0;

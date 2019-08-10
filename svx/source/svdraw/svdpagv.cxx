@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/GridRectDrawable.hxx>
+
 #include <svx/svdpagv.hxx>
 #include <com/sun/star/awt/XWindow.hpp>
 #include <com/sun/star/awt/PosSize.hpp>
@@ -512,9 +514,9 @@ void SdrPageView::DrawPageViewGrid(OutputDevice& rOut, const tools::Rectangle& r
                 for(sal_uInt16 a=0;a<nSteps;a++)
                 {
                     // draw
-                    rOut.DrawGrid(
+                    Drawable::Draw(&rOut, GridRectDrawable(
                         tools::Rectangle( xFinOrg + (a * nx2) + nPointOffset, yBigOrg, x2, y2 ),
-                        Size( nx1, ny1 ), nGridFlags );
+                        Size( nx1, ny1 ), nGridFlags ));
 
                     // do a step
                     nStepOffset += nRestPerStepMul1000;
@@ -537,9 +539,9 @@ void SdrPageView::DrawPageViewGrid(OutputDevice& rOut, const tools::Rectangle& r
                 for(sal_uInt16 a=0;a<nSteps;a++)
                 {
                     // draw
-                    rOut.DrawGrid(
-                        tools::Rectangle( xBigOrg, yFinOrg + (a * ny2) + nPointOffset, x2, y2 ),
-                        Size( nx1, ny1 ), nGridFlags );
+                    Drawable::Draw(&rOut, GridRectDrawable(
+                        tools::Rectangle(xBigOrg, yFinOrg + (a * ny2) + nPointOffset, x2, y2),
+                        Size(nx1, ny1), nGridFlags));
 
                     // do a step
                     nStepOffset += nRestPerStepMul1000;

@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/GridRectDrawable.hxx>
 
 #include <csvgrid.hxx>
 
@@ -1156,7 +1157,7 @@ void ScCsvGrid::ImplDrawColumnBackgr( sal_uInt32 nColIndex )
     tools::Rectangle aRect( nX1, nHdrHt, nX2, nY2 );
     Drawable::Draw(mpBackgrDev, RectangleDrawable(aRect));
     mpBackgrDev->SetLineColor( maGridColor );
-    mpBackgrDev->DrawGrid( aRect, Size( 1, GetLineHeight() ), DrawGridFlags::HorzLines );
+    Drawable::Draw(mpBackgrDev, GridRectDrawable(aRect, Size( 1, GetLineHeight() ), DrawGridFlags::HorzLines));
     mpBackgrDev->DrawLine( Point( nX2, nHdrHt ), Point( nX2, nY2 ) );
     ImplDrawFirstLineSep( true );
 
@@ -1220,7 +1221,7 @@ void ScCsvGrid::ImplDrawRowHeaders()
     else
         mpBackgrDev->DrawLine( aRect.TopRight(), aRect.BottomRight() );
     aRect.SetTop( GetHdrHeight() );
-    mpBackgrDev->DrawGrid( aRect, Size( 1, GetLineHeight() ), DrawGridFlags::HorzLines );
+    Drawable::Draw(mpBackgrDev, GridRectDrawable(aRect, Size(1, GetLineHeight()), DrawGridFlags::HorzLines));
 }
 
 void ScCsvGrid::ImplDrawBackgrDev()

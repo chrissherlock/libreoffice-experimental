@@ -13,6 +13,8 @@
 #include <rtl/math.hxx>
 #include <sal/log.hxx>
 
+#include <vcl/drawables/PixelDrawable.hxx>
+#include <vcl/drawables/RoundRectDrawable.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/drawables/CheckeredRectDrawable.hxx>
 
@@ -52,8 +54,6 @@
 #include <vcl/menu.hxx>
 #include <vcl/ImageTree.hxx>
 #include <vcl/BitmapEmbossGreyFilter.hxx>
-#include <vcl/drawables/PixelDrawable.hxx>
-#include <vcl/drawables/RoundRectDrawable.hxx>
 #include <bitmapwriteaccess.hxx>
 
 #include <basegfx/numeric/ftools.hxx>
@@ -722,7 +722,7 @@ public:
             }
             else
             {
-                rDev.DrawCheckered(r.TopLeft(), r.GetSize());
+                Drawable::Draw(&rDev, CheckeredRectDrawable(r.TopLeft(), r.GetSize()));
             }
         }
     };

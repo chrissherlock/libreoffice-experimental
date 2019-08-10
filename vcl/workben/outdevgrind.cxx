@@ -45,6 +45,7 @@
 #include <vcl/drawables/PixelDrawable.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/drawables/RoundRectDrawable.hxx>
+#include <vcl/drawables/GridRectDrawable.hxx>
 
 #include <com/sun/star/lang/XMultiServiceFactory.hpp>
 #include <com/sun/star/uno/XComponentContext.hpp>
@@ -557,7 +558,7 @@ void setupMethodStubs( functor_vector_type& res )
     add(res,
         "DrawGrid",
         [&] (OutputDevice * pDev) {
-            return pDev->DrawGrid(aRect, Size(10,20), DrawGridFlags::HorzLines|DrawGridFlags::VertLines);
+            return Drawable::Draw(pDev, GridRectDrawable(aRect, Size(10,20), DrawGridFlags::HorzLines|DrawGridFlags::VertLines));
         });
 
     /* void DrawTransparent( const tools::PolyPolygon& rPolyPoly,
