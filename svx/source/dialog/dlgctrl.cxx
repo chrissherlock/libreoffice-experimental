@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/CheckeredRectDrawable.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
@@ -1352,7 +1353,7 @@ void SvxPreviewBase::LocalPrePaint(vcl::RenderContext const & rRenderContext)
         const bool bWasEnabled(mpBufferDevice->IsMapModeEnabled());
 
         mpBufferDevice->EnableMapMode(false);
-        mpBufferDevice->DrawCheckered(aNull, mpBufferDevice->GetOutputSizePixel(), nLen, aW, aG);
+        Drawable::Draw(mpBufferDevice, CheckeredRectDrawable(aNull, mpBufferDevice->GetOutputSizePixel(), nLen, aW, aG));
         mpBufferDevice->EnableMapMode(bWasEnabled);
     }
     else

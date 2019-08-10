@@ -7,6 +7,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include <vcl/drawables/CheckeredRectDrawable.hxx>
+
 #include <cppunit/TestAssert.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -468,7 +470,8 @@ void BitmapTest::testCRC()
 #endif
 
     // a 1x1 black & white checkerboard
-    aVDev->DrawCheckered(Point(), aVDev->GetOutputSizePixel(), 1, Color(0, 0, 1));
+    Drawable::Draw(aVDev,
+                   CheckeredRectDrawable(Point(), aVDev->GetOutputSizePixel(), 1, Color(0, 0, 1)));
     Bitmap aChecker = getAsBitmap(aVDev);
     checkAndInsert(aCRCs, aChecker, "checkerboard");
     aChecker.Invert();

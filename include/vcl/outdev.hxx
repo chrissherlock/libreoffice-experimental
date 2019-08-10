@@ -703,14 +703,6 @@ public:
     ///@{
 
 public:
-    /// Fill the given rectangle with checkered rectangles of size nLen x nLen using the colors aStart and aEnd
-    void                        DrawCheckered(
-                                    const Point& rPos,
-                                    const Size& rSize,
-                                    sal_uInt32 nLen = 8,
-                                    Color aStart = COL_WHITE,
-                                    Color aEnd = COL_BLACK);
-
     void                        DrawGrid( const tools::Rectangle& rRect, const Size& rDist, DrawGridFlags nFlags );
 
     ///@}

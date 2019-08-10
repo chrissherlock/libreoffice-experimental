@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/CheckeredRectDrawable.hxx>
+
 #include <string>
 #include <typeinfo>
 #include <utility>
@@ -3927,7 +3929,7 @@ void SvxColorListBox::ShowPreview(const NamedColor &rColor)
     {
         const Color aW(COL_WHITE);
         const Color aG(0xef, 0xef, 0xef);
-        xDevice->DrawCheckered(aRect.TopLeft(), aRect.GetSize(), 8, aW, aG);
+        Drawable::Draw(xDevice, CheckeredRectDrawable(aRect.TopLeft(), aRect.GetSize(), 8, aW, aG));
         xDevice->SetFillColor();
     }
     else
@@ -4151,7 +4153,7 @@ void ColorListBox::ShowPreview(const NamedColor &rColor)
     {
         const Color aW(COL_WHITE);
         const Color aG(0xef, 0xef, 0xef);
-        xDevice->DrawCheckered(aRect.TopLeft(), aRect.GetSize(), 8, aW, aG);
+        Drawable::Draw(xDevice, CheckeredRectDrawable(aRect.TopLeft(), aRect.GetSize(), 8, aW, aG));
         xDevice->SetFillColor();
     }
     else

@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/CheckeredRectDrawable.hxx>
 
 #include <com/sun/star/text/WritingMode.hpp>
 
@@ -125,7 +126,7 @@ void FontWorkGalleryDialog::initFavorites(sal_uInt16 nThemeId)
             static const Color aW(COL_WHITE);
             static const Color aG(0xef, 0xef, 0xef);
 
-            pVDev->DrawCheckered(aNull, aSize, nLen, aW, aG);
+            Drawable::Draw(pVDev, CheckeredRectDrawable(aNull, aSize, nLen, aW, aG));
 
             pVDev->DrawBitmapEx(aNull, aThumb);
             maFavoritesHorizontal.emplace_back(pVDev->GetBitmapEx(aNull, aSize));

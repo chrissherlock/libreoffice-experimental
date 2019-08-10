@@ -14,6 +14,7 @@
 #include <sal/log.hxx>
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/CheckeredRectDrawable.hxx>
 
 #include <comphelper/processfactory.hxx>
 #include <comphelper/random.hxx>
@@ -715,7 +716,7 @@ public:
                     }
                     } // switch
                     rDev.SetClipRegion(aRegion);
-                    rDev.DrawCheckered(aSub.TopLeft(), aSub.GetSize());
+                    Drawable::Draw(&rDev, CheckeredRectDrawable(aSub.TopLeft(), aSub.GetSize()));
                     rDev.SetClipRegion();
                 }
             }

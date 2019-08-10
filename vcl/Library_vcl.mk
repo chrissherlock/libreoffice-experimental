@@ -119,6 +119,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/outdev/PixelDrawable \
     vcl/source/outdev/RectangleDrawable \
     vcl/source/outdev/RoundRectDrawable \
+    vcl/source/outdev/CheckeredRectDrawable \
     vcl/source/animate/Animation \
     vcl/source/animate/AnimationBitmap \
     vcl/source/window/aboutdialog \

@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/CheckeredRectDrawable.hxx>
+
 #include <svx/XPropertyTable.hxx>
 
 #include <vcl/svapp.hxx>
@@ -146,7 +148,7 @@ BitmapEx XDashList::ImpCreateBitmapForXDash(const XDash* pDash)
         static const Color aW(COL_WHITE);
         static const Color aG(0xef, 0xef, 0xef);
 
-        pVirtualDevice->DrawCheckered(aNull, aSize, nLen, aW, aG);
+        Drawable::Draw(pVirtualDevice, CheckeredRectDrawable(aNull, aSize, nLen, aW, aG));
     }
     else
     {

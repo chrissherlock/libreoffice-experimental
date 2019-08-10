@@ -19,6 +19,7 @@
 
 #include <config_features.h>
 
+#include <vcl/drawables/CheckeredRectDrawable.hxx>
 #include <vcl/svapp.hxx>
 #include <sfx2/viewfrm.hxx>
 #include <sfx2/dispatch.hxx>
@@ -326,7 +327,7 @@ static void drawTransparenceBackground(vcl::RenderContext& rOut, const Point& rP
     static const Color aW(COL_WHITE);
     static const Color aG(0xef, 0xef, 0xef);
 
-    rOut.DrawCheckered(rPos, rSize, nLen, aW, aG);
+    Drawable::Draw(&rOut, CheckeredRectDrawable(rPos, rSize, nLen, aW, aG));
 }
 
 GalleryIconView::GalleryIconView( GalleryBrowser2* pParent, GalleryTheme* pTheme ) :

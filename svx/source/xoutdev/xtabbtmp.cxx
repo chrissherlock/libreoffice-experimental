@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/CheckeredRectDrawable.hxx>
+
 #include <svx/XPropertyTable.hxx>
 
 #include <osl/diagnose.h>
@@ -69,7 +71,7 @@ BitmapEx XBitmapList::CreateBitmap( long nIndex, const Size& rSize ) const
                 static const Color aW(COL_WHITE);
                 static const Color aG(0xef, 0xef, 0xef);
 
-                pVirtualDevice->DrawCheckered(aNull, rSize, nLen, aW, aG);
+                Drawable::Draw(pVirtualDevice, CheckeredRectDrawable(aNull, rSize, nLen, aW, aG));
             }
             else
             {
