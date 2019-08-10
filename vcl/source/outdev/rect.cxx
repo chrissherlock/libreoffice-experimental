@@ -31,64 +31,6 @@
 
 #include <cassert>
 
-void OutputDevice::DrawRect( const tools::Rectangle& rRect,
-                             sal_uLong nHorzRound, sal_uLong nVertRound )
-{
-    assert(!is_double_buffered_window());
-
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaRoundRectAction( rRect, nHorzRound, nVertRound ) );
-
-    if ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
-        return;
-
-    const tools::Rectangle aRect( ImplLogicToDevicePixel( rRect ) );
-
-    if ( aRect.IsEmpty() )
-        return;
-
-    nHorzRound = ImplLogicWidthToDevicePixel( nHorzRound );
-    nVertRound = ImplLogicHeightToDevicePixel( nVertRound );
-
-    // we need a graphics
-    if ( !mpGraphics && !AcquireGraphics() )
-        return;
-
-    if ( mbInitClipRegion )
-        InitClipRegion();
-
-    if ( mbOutputClipped )
-        return;
-
-    if ( mbInitLineColor )
-        InitLineColor();
-
-    if ( mbInitFillColor )
-        InitFillColor();
-
-    if ( !nHorzRound && !nVertRound )
-    {
-        mpGraphics->DrawRect( aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(), this );
-    }
-    else
-    {
-        tools::Polygon aRoundRectPoly( aRect, nHorzRound, nVertRound );
-
-        if ( aRoundRectPoly.GetSize() >= 2 )
-        {
-            SalPoint* pPtAry = reinterpret_cast<SalPoint*>(aRoundRectPoly.GetPointAry());
-
-            if ( !mbFillColor )
-                mpGraphics->DrawPolyLine( aRoundRectPoly.GetSize(), pPtAry, this );
-            else
-                mpGraphics->DrawPolygon( aRoundRectPoly.GetSize(), pPtAry, this );
-        }
-    }
-
-    if( mpAlphaVDev )
-        mpAlphaVDev->DrawRect( rRect, nHorzRound, nVertRound );
-}
-
 void OutputDevice::Invert( const tools::Rectangle& rRect, InvertFlags nFlags )
 {
     assert(!is_double_buffered_window());

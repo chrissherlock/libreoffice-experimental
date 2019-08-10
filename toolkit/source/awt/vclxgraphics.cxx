@@ -28,6 +28,7 @@
 #include <vcl/metric.hxx>
 #include <vcl/drawables/PixelDrawable.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/RoundRectDrawable.hxx>
 
 #include <toolkit/awt/vclxgraphics.hxx>
 #include <toolkit/awt/vclxdevice.hxx>
@@ -369,7 +370,7 @@ void VCLXGraphics::drawRoundedRect( sal_Int32 x, sal_Int32 y, sal_Int32 width, s
     if( mpOutputDevice )
     {
         InitOutputDevice( InitOutDevFlags::COLORS );
-        mpOutputDevice->DrawRect(tools::Rectangle(Point(x, y), Size(width, height)), nHorzRound, nVertRound);
+        Drawable::Draw(mpOutputDevice, RoundRectDrawable(tools::Rectangle(Point(x, y), Size(width, height)), nHorzRound, nVertRound));
     }
 }
 

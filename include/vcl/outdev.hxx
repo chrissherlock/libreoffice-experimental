@@ -703,11 +703,6 @@ public:
     ///@{
 
 public:
-
-//    void                        DrawRect( const tools::Rectangle& rRect );
-    void                        DrawRect( const tools::Rectangle& rRect,
-                                          sal_uLong nHorzRount, sal_uLong nVertRound );
-
     /// Fill the given rectangle with checkered rectangles of size nLen x nLen using the colors aStart and aEnd
     void                        DrawCheckered(
                                     const Point& rPos,

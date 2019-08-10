@@ -19,6 +19,8 @@
 #include <vcl/bitmapaccess.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/virdev.hxx>
+#include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/RoundRectDrawable.hxx>
 
 using namespace com::sun::star;
 

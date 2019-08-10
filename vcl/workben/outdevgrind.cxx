@@ -44,6 +44,7 @@
 #include <vcl/lineinfo.hxx>
 #include <vcl/drawables/PixelDrawable.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/RoundRectDrawable.hxx>
 
 #include <com/sun/star/lang/XMultiServiceFactory.hpp>
 #include <com/sun/star/uno/XComponentContext.hpp>
@@ -214,12 +215,12 @@ void setupMethodStubs( functor_vector_type& res )
         "DrawRect",
         [aRect] (OutputDevice *pOutDev) { return Drawable::Draw(pOutDev, RectangleDrawable(aRect)); });
 
-    /* void DrawRect( const Rectangle& rRect,
-                                  sal_uLong nHorzRount, sal_uLong nVertRound );
+    /* void RectangleDrawable( const Rectangle& rRect,
+                               sal_uLong nHorzRadius, sal_uLong nVertRadius );
     */
     add(res,
         "DrawRect(round corners)",
-        [aRect2] (OutputDevice *pOutDev) { return pOutDev->DrawRect(aRect2,4,4); });
+        [aRect2] (OutputDevice *pOutDev) { return Drawable::Draw(pOutDev, RoundRectDrawable(aRect2,4,4)); });
 
     /* void DrawEllipse( const Rectangle& rRect ); */
     add(res,

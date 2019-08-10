@@ -28,6 +28,7 @@
 
 #include <vcl/drawables/PixelDrawable.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/RoundRectDrawable.hxx>
 #include <vcl/dibtools.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/metaact.hxx>
@@ -502,7 +503,7 @@ MetaRoundRectAction::MetaRoundRectAction( const tools::Rectangle& rRect,
 
 void MetaRoundRectAction::Execute( OutputDevice* pOut )
 {
-    pOut->DrawRect( maRect, mnHorzRound, mnVertRound );
+    Drawable::Draw(pOut, RoundRectDrawable(maRect, mnHorzRound, mnVertRound));
 }
 
 rtl::Reference<MetaAction> MetaRoundRectAction::Clone()

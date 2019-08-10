@@ -20,6 +20,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/drawables/PixelDrawable.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/RoundRectDrawable.hxx>
 #include <vcl/pngwrite.hxx>
 #if HAVE_FEATURE_OPENGL
 #include <vcl/opengl/OpenGLHelper.hxx>
@@ -501,7 +502,7 @@ void SvmTest::testRoundRect()
     pVirtualDev->SetLineColor(Color(0x123456));
     pVirtualDev->SetFillColor(Color(0x654321));
 
-    pVirtualDev->DrawRect(tools::Rectangle(Point(1, 2), Size(4, 4)), 1, 2);
+    Drawable::Draw(pVirtualDev, RoundRectDrawable(tools::Rectangle(Point(1, 2), Size(4, 4)), 1, 2));
 
     checkRoundRect(writeAndRead(aGDIMetaFile, "roundrect.svm"));
 }

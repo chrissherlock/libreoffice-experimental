@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RoundRectDrawable.hxx>
+
 #include <sfx2/sidebar/DrawHelper.hxx>
 #include <sfx2/sidebar/Paint.hxx>
 
@@ -106,19 +108,19 @@ void DrawHelper::DrawRoundedRectangle(vcl::RenderContext& rRenderContext, const 
     {
         case Paint::ColorPaint:
             rRenderContext.SetFillColor(rFillPaint.GetColor());
-            rRenderContext.DrawRect(rBox, nCornerRadius, nCornerRadius);
+            Drawable::Draw(&rRenderContext, RoundRectDrawable(rBox, nCornerRadius, nCornerRadius));
             break;
 
         case Paint::GradientPaint:
             rRenderContext.DrawGradient(rBox, rFillPaint.GetGradient());
             rRenderContext.SetFillColor();
-            rRenderContext.DrawRect(rBox, nCornerRadius, nCornerRadius);
+            Drawable::Draw(&rRenderContext, RoundRectDrawable(rBox, nCornerRadius, nCornerRadius));
             break;
 
         case Paint::NoPaint:
         default:
             rRenderContext.SetFillColor();
-            rRenderContext.DrawRect(rBox, nCornerRadius, nCornerRadius);
+            Drawable::Draw(&rRenderContext, RoundRectDrawable(rBox, nCornerRadius, nCornerRadius));
             break;
     }
 }

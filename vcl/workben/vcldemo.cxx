@@ -52,6 +52,7 @@
 #include <vcl/ImageTree.hxx>
 #include <vcl/BitmapEmbossGreyFilter.hxx>
 #include <vcl/drawables/PixelDrawable.hxx>
+#include <vcl/drawables/RoundRectDrawable.hxx>
 #include <bitmapwriteaccess.hxx>
 
 #include <basegfx/numeric/ftools.hxx>
@@ -235,7 +236,7 @@ public:
             if (i % 2)
             {
                 int nBorderSize = rRects[i].GetWidth() / 5;
-                rDev.DrawRect(rRects[i], nBorderSize, nBorderSize);
+                Drawable::Draw(&rDev, RoundRectDrawable(rRects[i], nBorderSize, nBorderSize));
             }
             else
             {

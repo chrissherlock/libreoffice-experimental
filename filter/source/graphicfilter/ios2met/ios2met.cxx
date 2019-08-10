@@ -28,6 +28,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/gdimtf.hxx>
+#include <vcl/drawables/RoundRectDrawable.hxx>
 
 #include <math.h>
 #include <algorithm>
@@ -961,13 +962,15 @@ void OS2METReader::ReadBox(bool bGivenPos)
             {
                 pVirDev->Push( PushFlags::LINECOLOR );
                 pVirDev->SetLineColor( COL_TRANSPARENT );
-                pVirDev->DrawRect( aBoxRect, nHRound, nVRound );
+                Drawable::Draw(pVirDev, RoundRectDrawable(aBoxRect, nHRound, nVRound));
                 pVirDev->Pop();
             }
             pVirDev->DrawPolyLine( aPolygon, aLineInfo );
         }
         else
-            pVirDev->DrawRect( aBoxRect, nHRound, nVRound );
+        {
+            Drawable::Draw(pVirDev, RoundRectDrawable(aBoxRect, nHRound, nVRound));
+        }
     }
 }
 
