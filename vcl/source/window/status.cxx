@@ -20,6 +20,7 @@
 #include <sal/log.hxx>
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/event.hxx>
 #include <vcl/decoview.hxx>
 #include <vcl/svapp.hxx>
@@ -736,7 +737,7 @@ void StatusBar::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle
     // shell / docking area)
     const StyleSettings& rStyleSettings = rRenderContext.GetSettings().GetStyleSettings();
     rRenderContext.SetLineColor(rStyleSettings.GetShadowColor());
-    rRenderContext.DrawLine(Point(0, 0), Point(mnDX-1, 0));
+    Drawable::Draw(&rRenderContext, LineDrawable(Point(0, 0), Point(mnDX-1, 0)));
 }
 
 void StatusBar::Resize()

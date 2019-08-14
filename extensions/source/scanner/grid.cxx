@@ -19,6 +19,8 @@
 
 #include <sal/config.h>
 #include <osl/thread.h>
+#include <vcl/drawables/LineDrawable.hxx>
+
 #include <cstdio>
 #include <math.h>
 #include <boost/math/special_functions/expm1.hpp>
@@ -323,7 +325,7 @@ void GridWindow::transform( const Point& rOriginal, double& x, double& y )
 
 void GridWindow::drawLine(vcl::RenderContext& rRenderContext, double x1, double y1, double x2, double y2 )
 {
-    rRenderContext.DrawLine(transform(x1, y1), transform(x2, y2));
+    Drawable::Draw(&rRenderContext, LineDrawable(transform(x1, y1), transform(x2, y2)));
 }
 
 void GridWindow::computeChunk( double fMin, double fMax, double& fChunkOut, double& fMinChunkOut )

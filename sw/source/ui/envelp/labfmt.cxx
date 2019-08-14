@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <svtools/unitconv.hxx>
 #include <tools/poly.hxx>
@@ -50,7 +51,7 @@ namespace {
 // Arrow or interval character
 void DrawArrow(vcl::RenderContext& rRenderContext, const Point &rP1, const Point &rP2, bool bArrow)
 {
-    rRenderContext.DrawLine(rP1, rP2);
+    Drawable::Draw(&rRenderContext, LineDrawable(rP1, rP2));
     if (bArrow)
     {
         Point aArr[3];
@@ -87,14 +88,14 @@ void DrawArrow(vcl::RenderContext& rRenderContext, const Point &rP1, const Point
         if (rP1.Y() == rP2.Y())
         {
             // Horizontal
-            rRenderContext.DrawLine(Point(rP1.X(), rP1.Y() - 2), Point(rP1.X(), rP1.Y() + 2));
-            rRenderContext.DrawLine(Point(rP2.X(), rP2.Y() - 2), Point(rP2.X(), rP2.Y() + 2));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(rP1.X(), rP1.Y() - 2), Point(rP1.X(), rP1.Y() + 2)));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(rP2.X(), rP2.Y() - 2), Point(rP2.X(), rP2.Y() + 2)));
         }
         else
         {
             // Vertical
-            rRenderContext.DrawLine(Point(rP1.X() - 2, rP1.Y()), Point(rP1.X() + 2, rP1.Y()));
-            rRenderContext.DrawLine(Point(rP2.X() - 2, rP2.Y()), Point(rP2.X() + 2, rP2.Y()));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(rP1.X() - 2, rP1.Y()), Point(rP1.X() + 2, rP1.Y()));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(rP2.X() - 2, rP2.Y()), Point(rP2.X() + 2, rP2.Y()));
         }
     }
 }
@@ -201,12 +202,12 @@ void SwLabPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
 
     // draw outline (border)
     rRenderContext.SetLineColor(rFieldTextColor);
-    rRenderContext.DrawLine(Point(lX0, lY0), Point(lX0 + lOutlineW - 1, lY0)); // Up
-    rRenderContext.DrawLine(Point(lX0, lY0), Point(lX0, lY0 + lOutlineH - 1)); // Left
+    Drawable::Draw(&rRenderContext, LineDrawable(Point(lX0, lY0), Point(lX0 + lOutlineW - 1, lY0))); // Up
+    Drawable::Draw(&rRenderContext, LineDrawable(Point(lX0, lY0), Point(lX0, lY0 + lOutlineH - 1))); // Left
     if (m_aItem.m_nCols == 1)
-        rRenderContext.DrawLine(Point(lX0 + lOutlineW - 1, lY0), Point(lX0 + lOutlineW - 1, lY0 + lOutlineH - 1)); // Right
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(lX0 + lOutlineW - 1, lY0), Point(lX0 + lOutlineW - 1, lY0 + lOutlineH - 1))); // Right
     if (m_aItem.m_nRows == 1)
-        rRenderContext.DrawLine(Point(lX0, lY0 + lOutlineH - 1), Point(lX0 + lOutlineW - 1, lY0 + lOutlineH - 1)); // Down
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(lX0, lY0 + lOutlineH - 1), Point(lX0 + lOutlineW - 1, lY0 + lOutlineH - 1))); // Down
 
     // Labels
     rRenderContext.SetClipRegion(vcl::Region(tools::Rectangle(Point(lX0, lY0), Size(lOutlineW, lOutlineH))));
@@ -242,8 +243,8 @@ void SwLabPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
         long lX = lX2 - m_lXWidth / 2 - m_lHeightWidth / 2;
         long lY = lY1 + m_lXHeight;
 
-        rRenderContext.DrawLine(Point(lX1, lY), Point(lX2 - 1, lY));
-        rRenderContext.DrawLine(Point(lX, lY1), Point(lX, lY2 - 1));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(lX1, lY), Point(lX2 - 1, lY)));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(lX, lY1), Point(lX, lY2 - 1)));
 
         rRenderContext.DrawText(Point(lX1 + m_lXWidth / 2, lY - m_lXHeight / 2), m_aWidthStr);
         rRenderContext.DrawText(Point(lX - m_lHeightWidth / 2, lY2 - m_lXHeight - m_lXHeight / 2), m_aHeightStr);

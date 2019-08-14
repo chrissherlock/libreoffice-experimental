@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/LineDrawable.hxx>
+
 #include <svx/dialcontrol.hxx>
 #include <cmath>
 #include <vcl/virdev.hxx>
@@ -96,7 +98,7 @@ void DialControlBmp::DrawElements( const OUString& rText, sal_Int32 nAngle )
         Point pt2( pt1.X() + nDx, pt1.Y() + nDy);
 
         SetLineColor( GetTextColor() );
-        DrawLine( pt1, pt2 );
+        Drawable::Draw(this, LineDrawable(pt1, pt2));
     }
 
     // *** drag button ***
@@ -204,7 +206,7 @@ void DialControlBmp::DrawBackground()
         double fAngle = basegfx::deg2rad(nAngle);
         long nX = static_cast< long >( -mnCenterX * cos( fAngle ) );
         long nY = static_cast< long >( mnCenterY * sin( fAngle ) );
-        DrawLine( aStartPos, Point( mnCenterX - nX, mnCenterY - nY ) );
+        Drawable::Draw(this, LineDrawable(aStartPos, Point(mnCenterX - nX, mnCenterY - nY)));
     }
 
     // *** clear inner area ***

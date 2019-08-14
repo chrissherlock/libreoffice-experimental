@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <scitems.hxx>
 #include <editeng/eeitem.hxx>
@@ -620,11 +621,11 @@ void ScPrintFunc::DrawToDev( ScDocument* pDoc, OutputDevice* pDev, double /* nPr
 
         // extra line at the left edge for left-to-right, right for right-to-left
         if ( bLayoutRTL )
-            pDev->DrawLine( Point(nRight,nScrY), Point(nRight,nBottom) );
+            Drawable::Draw(pDev, LineDrawable(Point(nRight, nScrY), Point(nRight,nBottom)));
         else
-            pDev->DrawLine( Point(nScrX,nScrY), Point(nScrX,nBottom) );
+            Drawable::Draw(pDev, LineDrawable(Point(nScrX, nScrY), Point(nScrX,nBottom)));
         // extra line at the top in both cases
-        pDev->DrawLine( Point(nScrX,nScrY), Point(nRight,nScrY) );
+        Drawable::Draw(pDev, LineDrawable(Point(nScrX, nScrY), Point(nRight,nScrY)));
     }
 
     // #i72502#

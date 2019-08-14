@@ -18,6 +18,7 @@
  */
 
 #include <sal/config.h>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <cassert>
 
@@ -138,11 +139,11 @@ void lcl_DrawIDEWindowFrame(DockingWindow const * pWin, vcl::RenderContext& rRen
     const Color aOldLineColor(rRenderContext.GetLineColor());
     rRenderContext.SetLineColor(COL_WHITE);
     // White line on top
-    rRenderContext.DrawLine(Point(0, 0), Point(aSz.Width(), 0));
+    Drawable::Draw(&rRenderContext, LineDrawable(Point(0, 0), Point(aSz.Width(), 0)));
     // Black line at bottom
     rRenderContext.SetLineColor(COL_BLACK);
-    rRenderContext.DrawLine(Point(0, aSz.Height() - 1),
-                            Point(aSz.Width(), aSz.Height() - 1));
+    Drawable::Draw(&rRenderContext, LineDrawable(Point(0, aSz.Height() - 1),
+                            Point(aSz.Width(), aSz.Height() - 1)));
     rRenderContext.SetLineColor(aOldLineColor);
 }
 

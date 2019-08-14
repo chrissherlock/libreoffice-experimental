@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/help.hxx>
 #include <vcl/menu.hxx>
@@ -634,15 +635,15 @@ void Calendar::ImplDraw(vcl::RenderContext& rRenderContext)
         Point aBottomRight1(aTitleRect.Right(), aTitleRect.Bottom());
         Point aBottomRight2(aTitleRect.Right(), aTitleRect.Bottom() - 1);
         rRenderContext.SetLineColor(rStyleSettings.GetDarkShadowColor());
-        rRenderContext.DrawLine(aTopLeft1, Point(aBottomRight1.X(), aTopLeft1.Y()));
+        Drawable::Draw(&rRenderContext, LineDrawable(aTopLeft1, Point(aBottomRight1.X(), aTopLeft1.Y())));
         rRenderContext.SetLineColor(rStyleSettings.GetLightColor() );
-        rRenderContext.DrawLine(aTopLeft2, Point(aBottomRight2.X(), aTopLeft2.Y()));
-        rRenderContext.DrawLine(aTopLeft2, Point(aTopLeft2.X(), aBottomRight2.Y()));
+        Drawable::Draw(&rRenderContext, LineDrawable(aTopLeft2, Point(aBottomRight2.X(), aTopLeft2.Y())));
+        Drawable::Draw(&rRenderContext, LineDrawable(aTopLeft2, Point(aTopLeft2.X(), aBottomRight2.Y())));
         rRenderContext.SetLineColor(rStyleSettings.GetShadowColor() );
-        rRenderContext.DrawLine(Point(aTopLeft2.X(), aBottomRight2.Y()), aBottomRight2);
-        rRenderContext.DrawLine(Point(aBottomRight2.X(), aTopLeft2.Y()), aBottomRight2);
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(aTopLeft2.X(), aBottomRight2.Y()), aBottomRight2));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(aBottomRight2.X(), aTopLeft2.Y()), aBottomRight2));
         rRenderContext.SetLineColor(rStyleSettings.GetDarkShadowColor());
-        rRenderContext.DrawLine(Point(aTopLeft1.X(), aBottomRight1.Y()), aBottomRight1);
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(aTopLeft1.X(), aBottomRight1.Y()), aBottomRight1));
         Point aSepPos1(0, aTitleRect.Top() + TITLE_BORDERY);
         Point aSepPos2(0, aTitleRect.Bottom() - TITLE_BORDERY);
         for (j = 0; j < mnMonthPerLine-1; j++)
@@ -650,11 +651,11 @@ void Calendar::ImplDraw(vcl::RenderContext& rRenderContext)
             aSepPos1.AdjustX(mnMonthWidth-1 );
             aSepPos2.setX( aSepPos1.X() );
             rRenderContext.SetLineColor(rStyleSettings.GetShadowColor());
-            rRenderContext.DrawLine(aSepPos1, aSepPos2);
+            Drawable::Draw(&rRenderContext, LineDrawable(aSepPos1, aSepPos2));
             aSepPos1.AdjustX( 1 );
             aSepPos2.setX( aSepPos1.X() );
             rRenderContext.SetLineColor(rStyleSettings.GetLightColor());
-            rRenderContext.DrawLine(aSepPos1, aSepPos2);
+            Drawable::Draw(&rRenderContext, LineDrawable(aSepPos1, aSepPos2));
         }
 
         long nX = 0;
@@ -708,7 +709,7 @@ void Calendar::ImplDraw(vcl::RenderContext& rRenderContext)
             nDeltaY = nDayY + mnDayHeight;
             rRenderContext.SetLineColor(rStyleSettings.GetWindowTextColor());
             Point aStartPos(nDayX, nDeltaY);
-            rRenderContext.DrawLine(aStartPos, Point(nDayX + (7 * mnDayWidth), nDeltaY));
+            Drawable::Draw(&rRenderContext, LineDrawable(aStartPos, Point(nDayX + (7 * mnDayWidth), nDeltaY)));
             rRenderContext.DrawTextArray(Point(nDayX + mnDayOfWeekAry[0], nDayY), maDayOfWeekText, &(mnDayOfWeekAry[1]));
 
             // display days

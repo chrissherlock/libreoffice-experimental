@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <string.h>
 #include <tools/debug.hxx>
@@ -316,9 +317,9 @@ void Ruler::ImplVDrawLine(vcl::RenderContext& rRenderContext, long nX1, long nY1
     }
 
     if ( mnWinStyle & WB_HORZ )
-        rRenderContext.DrawLine( Point( nX1, nY1 ), Point( nX2, nY2 ) );
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(nX1, nY1), Point(nX2, nY2)));
     else
-        rRenderContext.DrawLine( Point( nY1, nX1 ), Point( nY2, nX2 ) );
+        Drawable::Draw(&rRenderContext, LineDrawable( Point(nY1, nX1), Point( nY2, nX2)));
 }
 
 void Ruler::ImplVDrawRect(vcl::RenderContext& rRenderContext, long nX1, long nY1, long nX2, long nY2)
@@ -1364,10 +1365,10 @@ void Ruler::ImplDrawExtra(vcl::RenderContext& rRenderContext)
     if (meExtraType == RulerExtra::NullOffset)
     {
         rRenderContext.SetLineColor(rStyleSettings.GetButtonTextColor());
-        rRenderContext.DrawLine(Point(aRect.Left() + 1, aRect.Top() + 4),
-                                Point(aRect.Right() - 1, aRect.Top() + 4));
-        rRenderContext.DrawLine(Point(aRect.Left() + 4, aRect.Top() + 1),
-                                Point(aRect.Left() + 4, aRect.Bottom() - 1));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(aRect.Left() + 1, aRect.Top() + 4),
+                                Point(aRect.Right() - 1, aRect.Top() + 4)));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(aRect.Left() + 4, aRect.Top() + 1),
+                                Point(aRect.Left() + 4, aRect.Bottom() - 1)));
     }
     else if (meExtraType == RulerExtra::Tab)
     {

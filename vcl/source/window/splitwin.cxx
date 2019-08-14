@@ -23,6 +23,7 @@
 #include <sal/log.hxx>
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/event.hxx>
 #include <vcl/wall.hxx>
 #include <vcl/bitmap.hxx>
@@ -192,43 +193,43 @@ void SplitWindow::ImplDrawBorder(vcl::RenderContext& rRenderContext)
     {
     case WindowAlign::Bottom:
         rRenderContext.SetLineColor(rStyleSettings.GetShadowColor());
-        rRenderContext.DrawLine(Point(0, 0), Point(nDX - 1, 0));
-        rRenderContext.DrawLine(Point(0, nDY - 2), Point(nDX - 1, nDY - 2));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(0, 0), Point(nDX - 1, 0)));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(0, nDY - 2), Point(nDX - 1, nDY - 2)));
 
         rRenderContext.SetLineColor(rStyleSettings.GetLightColor());
-        rRenderContext.DrawLine(Point(0, 1), Point(nDX - 1, 1));
-        rRenderContext.DrawLine(Point(0, nDY - 1), Point(nDX - 1, nDY - 1));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(0, 1), Point(nDX - 1, 1)));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(0, nDY - 1), Point(nDX - 1, nDY - 1)));
         break;
     case WindowAlign::Top:
         rRenderContext.SetLineColor(rStyleSettings.GetShadowColor());
-        rRenderContext.DrawLine(Point(0, nDY - 2), Point(nDX - 1, nDY - 2));
-        rRenderContext.DrawLine(Point(0, 0), Point(nDX - 1, 0));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(0, nDY - 2), Point(nDX - 1, nDY - 2)));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(0, 0), Point(nDX - 1, 0)));
 
         rRenderContext.SetLineColor(rStyleSettings.GetLightColor());
-        rRenderContext.DrawLine(Point(0, nDY - 1), Point(nDX - 1, nDY - 1));
-        rRenderContext.DrawLine(Point(0, 1), Point(nDX - 1, 1));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(0, nDY - 1), Point(nDX - 1, nDY - 1)));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(0, 1), Point(nDX - 1, 1)));
         break;
     case WindowAlign::Left:
         rRenderContext.SetLineColor(rStyleSettings.GetShadowColor());
-        rRenderContext.DrawLine(Point(nDX - 2, 0), Point(nDX - 2, nDY - 2));
-        rRenderContext.DrawLine(Point(0, 0), Point(nDX - 1, 0));
-        rRenderContext.DrawLine(Point(0, nDY - 2), Point(nDX - 2, nDY - 2));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(nDX - 2, 0), Point(nDX - 2, nDY - 2)));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(0, 0), Point(nDX - 1, 0)));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(0, nDY - 2), Point(nDX - 2, nDY - 2)));
 
         rRenderContext.SetLineColor(rStyleSettings.GetLightColor());
-        rRenderContext.DrawLine(Point(nDX - 1, 0), Point(nDX - 1, nDY - 1));
-        rRenderContext.DrawLine(Point(0, 1), Point(nDX - 3, 1));
-        rRenderContext.DrawLine(Point(0, nDY - 1), Point(nDX - 2, nDY - 1));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(nDX - 1, 0), Point(nDX - 1, nDY - 1)));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(0, 1), Point(nDX - 3, 1)));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(0, nDY - 1), Point(nDX - 2, nDY - 1)));
         break;
     default:
         rRenderContext.SetLineColor(rStyleSettings.GetShadowColor());
-        rRenderContext.DrawLine(Point(0, 0), Point( 0, nDY - 2));
-        rRenderContext.DrawLine(Point(0, 0), Point( nDX - 1, 0));
-        rRenderContext.DrawLine(Point(0, nDY - 2), Point(nDX - 1, nDY - 2));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(0, 0), Point( 0, nDY - 2)));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(0, 0), Point( nDX - 1, 0)));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(0, nDY - 2), Point(nDX - 1, nDY - 2)));
 
         rRenderContext.SetLineColor( rStyleSettings.GetLightColor());
-        rRenderContext.DrawLine(Point(1, 1), Point(1, nDY - 3));
-        rRenderContext.DrawLine(Point(1, 1), Point(nDX - 1, 1));
-        rRenderContext.DrawLine(Point(0, nDY - 1), Point(nDX - 1, nDY - 1));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(1, 1), Point(1, nDY - 3)));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(1, 1), Point(nDX - 1, 1)));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(0, nDY - 1), Point(nDX - 1, nDY - 1)));
     }
 }
 
@@ -244,31 +245,31 @@ void SplitWindow::ImplDrawBorderLine(vcl::RenderContext& rRenderContext)
         {
         case WindowAlign::Left:
             rRenderContext.SetLineColor( rStyleSettings.GetShadowColor() );
-            rRenderContext.DrawLine( Point( nDX-SPLITWIN_SPLITSIZEEXLN-1, 1 ), Point( nDX-SPLITWIN_SPLITSIZEEXLN-1, nDY-2 ) );
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(nDX-SPLITWIN_SPLITSIZEEXLN-1, 1), Point(nDX-SPLITWIN_SPLITSIZEEXLN-1, nDY-2)));
 
             rRenderContext.SetLineColor( rStyleSettings.GetLightColor() );
-            rRenderContext.DrawLine( Point( nDX-SPLITWIN_SPLITSIZEEXLN, 1 ), Point( nDX-SPLITWIN_SPLITSIZEEXLN, nDY-3 ) );
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(nDX-SPLITWIN_SPLITSIZEEXLN, 1), Point(nDX-SPLITWIN_SPLITSIZEEXLN, nDY-3)));
             break;
         case WindowAlign::Right:
             rRenderContext.SetLineColor( rStyleSettings.GetShadowColor() );
-            rRenderContext.DrawLine( Point( SPLITWIN_SPLITSIZEEXLN-1, 0 ), Point( SPLITWIN_SPLITSIZEEXLN-1, nDY-2 ) );
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(SPLITWIN_SPLITSIZEEXLN-1, 0), Point(SPLITWIN_SPLITSIZEEXLN-1, nDY-2)));
 
             rRenderContext.SetLineColor( rStyleSettings.GetLightColor() );
-            rRenderContext.DrawLine( Point( SPLITWIN_SPLITSIZEEXLN, 1 ), Point( SPLITWIN_SPLITSIZEEXLN, nDY-3 ) );
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(SPLITWIN_SPLITSIZEEXLN, 1), Point(SPLITWIN_SPLITSIZEEXLN, nDY-3)));
             break;
         case WindowAlign::Top:
             rRenderContext.SetLineColor( rStyleSettings.GetShadowColor() );
-            rRenderContext.DrawLine( Point( 0, nDY-SPLITWIN_SPLITSIZEEXLN-1 ), Point( nDX-1, nDY-SPLITWIN_SPLITSIZEEXLN-1 ) );
+            Drawable::Draw(&rRenderContext, LineDrawable( Point( 0, nDY-SPLITWIN_SPLITSIZEEXLN-1 ), Point( nDX-1, nDY-SPLITWIN_SPLITSIZEEXLN-1 ) ));
 
             rRenderContext.SetLineColor( rStyleSettings.GetLightColor() );
-            rRenderContext.DrawLine( Point( 0, nDY-SPLITWIN_SPLITSIZEEXLN ), Point( nDX-1, nDY-SPLITWIN_SPLITSIZEEXLN ) );
+            Drawable::Draw(&rRenderContext, LineDrawable( Point( 0, nDY-SPLITWIN_SPLITSIZEEXLN ), Point( nDX-1, nDY-SPLITWIN_SPLITSIZEEXLN ) ));
             break;
         case WindowAlign::Bottom:
             rRenderContext.SetLineColor( rStyleSettings.GetShadowColor() );
-            rRenderContext.DrawLine( Point( 0, 5 ), Point( nDX-1, 5 ) );
+            Drawable::Draw(&rRenderContext, LineDrawable( Point( 0, 5 ), Point( nDX-1, 5 ) ));
 
             rRenderContext.SetLineColor( rStyleSettings.GetLightColor() );
-            rRenderContext.DrawLine( Point( 0, SPLITWIN_SPLITSIZEEXLN ), Point( nDX-1, SPLITWIN_SPLITSIZEEXLN ) );
+            Drawable::Draw(&rRenderContext, LineDrawable( Point( 0, SPLITWIN_SPLITSIZEEXLN ), Point( nDX-1, SPLITWIN_SPLITSIZEEXLN ) ));
             break;
         }
     }
@@ -906,20 +907,20 @@ static void ImplDrawSplit(vcl::RenderContext& rRenderContext, ImplSplitSet* pSet
                 if (bDown || (nItemSplitSize >= nSplitSize))
                 {
                     rRenderContext.SetLineColor(rStyleSettings.GetLightColor());
-                    rRenderContext.DrawLine(Point(nTop, nPos + 1), Point(nBottom, nPos + 1));
+                    Drawable::Draw(&rRenderContext, LineDrawable(Point(nTop, nPos + 1), Point(nBottom, nPos + 1)));
                 }
                 nPos += nSplitSize-2;
                 if ((!bDown && (nItemSplitSize >= 2)) ||
                     (bDown  && (nItemSplitSize >= nSplitSize - 1)))
                 {
                     rRenderContext.SetLineColor(rStyleSettings.GetShadowColor());
-                    rRenderContext.DrawLine(Point(nTop, nPos), Point(nBottom, nPos));
+                    Drawable::Draw(&rRenderContext, LineDrawable(Point(nTop, nPos), Point(nBottom, nPos)));
                 }
                 nPos++;
                 if (!bDown || (nItemSplitSize >= nSplitSize))
                 {
                     rRenderContext.SetLineColor(rStyleSettings.GetDarkShadowColor());
-                    rRenderContext.DrawLine(Point(nTop, nPos), Point(nBottom, nPos));
+                    Drawable::Draw(&rRenderContext, LineDrawable(Point(nTop, nPos), Point(nBottom, nPos)));
                 }
             }
             else
@@ -930,20 +931,20 @@ static void ImplDrawSplit(vcl::RenderContext& rRenderContext, ImplSplitSet* pSet
                 if (bDown || (nItemSplitSize >= nSplitSize))
                 {
                     rRenderContext.SetLineColor(rStyleSettings.GetLightColor());
-                    rRenderContext.DrawLine(Point(nPos + 1, nTop), Point(nPos+1, nBottom));
+                    Drawable::Draw(&rRenderContext, LineDrawable(Point(nPos + 1, nTop), Point(nPos+1, nBottom)));
                 }
                 nPos += pSet->mnSplitSize - 2;
                 if ((!bDown && (nItemSplitSize >= 2)) ||
                     (bDown  && (nItemSplitSize >= nSplitSize - 1)))
                 {
                     rRenderContext.SetLineColor(rStyleSettings.GetShadowColor());
-                    rRenderContext.DrawLine(Point(nPos, nTop), Point(nPos, nBottom));
+                    Drawable::Draw(&rRenderContext, LineDrawable(Point(nPos, nTop), Point(nPos, nBottom)));
                 }
                 nPos++;
                 if (!bDown || (nItemSplitSize >= nSplitSize))
                 {
                     rRenderContext.SetLineColor(rStyleSettings.GetDarkShadowColor());
-                    rRenderContext.DrawLine(Point(nPos, nTop), Point(nPos, nBottom));
+                    Drawable::Draw(&rRenderContext, LineDrawable(Point(nPos, nTop), Point(nPos, nBottom)));
                 }
             }
         }

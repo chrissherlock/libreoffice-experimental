@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <memory>
 #include <com/sun/star/accessibility/AccessibleEventId.hpp>
@@ -1185,10 +1186,10 @@ void ToolbarMenu::implPaint(vcl::RenderContext& rRenderContext, ToolbarMenuEntry
             aTmpPos.setY( aPos.Y() + ((SEPARATOR_HEIGHT - 2) / 2) );
             aTmpPos.setX( aPos.X() + 2 + nOuterSpace );
             rRenderContext.SetLineColor(rSettings.GetShadowColor());
-            rRenderContext.DrawLine(aTmpPos, Point(aOutSz.Width() - 3 - 2 * nOuterSpace, aTmpPos.Y()));
+            Drawable::Draw(&rRenderContext, LineDrawable(aTmpPos, Point(aOutSz.Width() - 3 - 2 * nOuterSpace, aTmpPos.Y())));
             aTmpPos.AdjustY( 1 );
             rRenderContext.SetLineColor(rSettings.GetLightColor());
-            rRenderContext.DrawLine(aTmpPos, Point( aOutSz.Width() - 3 - 2 * nOuterSpace, aTmpPos.Y()));
+            Drawable::Draw(&rRenderContext, LineDrawable(aTmpPos, Point(aOutSz.Width() - 3 - 2 * nOuterSpace, aTmpPos.Y())));
             rRenderContext.SetLineColor();
         }
         else if (!pThisOnly || (pEntry.get() == pThisOnly))
@@ -1228,9 +1229,9 @@ void ToolbarMenu::implPaint(vcl::RenderContext& rRenderContext, ToolbarMenuEntry
                     rRenderContext.SetLineColor();
                     Drawable::Draw(&rRenderContext, RectangleDrawable(aRect));
                     rRenderContext.SetLineColor(rSettings.GetLightColor());
-                    rRenderContext.DrawLine(aRect.TopLeft(), aRect.TopRight());
+                    Drawable::Draw(&rRenderContext, LineDrawable(aRect.TopLeft(), aRect.TopRight()));
                     rRenderContext.SetLineColor(rSettings.GetShadowColor());
-                    rRenderContext.DrawLine(aRect.BottomLeft(), aRect.BottomRight());
+                    Drawable::Draw(&rRenderContext, LineDrawable(aRect.BottomLeft(), aRect.BottomRight()));
                 }
 
                 // CheckMark

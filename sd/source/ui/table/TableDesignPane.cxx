@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <sddll.hxx>
 
@@ -632,7 +633,7 @@ static const BitmapEx CreateDesignPreview( const Reference< XIndexAccess >& xTab
             pVirDev->SetLineColor( aTextColor );
             const Point aPnt1( nX + 2, nY + ((nCellHeight - 1 ) >> 1) );
             const Point aPnt2( nX + nCellWidth - 3, aPnt1.Y() );
-            pVirDev->DrawLine( aPnt1, aPnt2 );
+            Drawable::Draw(pVirDev, LineDrawable(aPnt1, aPnt2));
         }
     }
 
@@ -679,10 +680,10 @@ static const BitmapEx CreateDesignPreview( const Reference< XIndexAccess >& xTab
                     pVirDev->SetLineColor( pBorderLine->GetColor() );
                     switch( nLine )
                     {
-                    case SvxBoxItemLine::TOP: pVirDev->DrawLine( aPntTL, aPntTR ); break;
-                    case SvxBoxItemLine::BOTTOM: pVirDev->DrawLine( aPntBL, aPntBR ); break;
-                    case SvxBoxItemLine::LEFT: pVirDev->DrawLine( aPntTL, aPntBL ); break;
-                    case SvxBoxItemLine::RIGHT: pVirDev->DrawLine( aPntTR, aPntBR ); break;
+                    case SvxBoxItemLine::TOP: Drawable::Draw(pVirDev, LineDrawable(aPntTL, aPntTR)); break;
+                    case SvxBoxItemLine::BOTTOM: Drawable::Draw(pVirDev, LineDrawable(aPntBL, aPntBR)); break;
+                    case SvxBoxItemLine::LEFT: Drawable::Draw(pVirDev, LineDrawable(aPntTL, aPntBL)); break;
+                    case SvxBoxItemLine::RIGHT: Drawable::Draw(pVirDev, LineDrawable(aPntTR, aPntBR)); break;
                     }
                 }
             }

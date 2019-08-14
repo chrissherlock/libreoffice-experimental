@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/LineDrawable.hxx>
+
 #include <memory>
 #include <com/sun/star/text/HoriOrientation.hpp>
 #include <hintids.hxx>
@@ -274,7 +276,7 @@ void SwExtraPainter::PaintRedline( SwTwips nY, long nMax )
         m_pTextFrame->SwitchHorizontalToVertical( aEnd );
     }
 
-    m_pSh->GetOut()->DrawLine( aStart, aEnd );
+    Drawable::Draw(m_pSh->GetOut(), LineDrawable(aStart, aEnd));
     m_pSh->GetOut()->SetLineColor( aOldCol );
 }
 

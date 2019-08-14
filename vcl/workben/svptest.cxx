@@ -25,6 +25,7 @@
 #include <comphelper/processfactory.hxx>
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <com/sun/star/lang/XMultiServiceFactory.hpp>
 #include <com/sun/star/uno/XComponentContext.hpp>
@@ -311,9 +312,9 @@ void MyWin::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle& rR
                 aApproachColor = Color(0, 200, 0);
         }
 
-        rRenderContext.DrawLine(project(aP1) + aCenter,
+        Drawable::Draw(&rRenderContext, LineDrawable(project(aP1) + aCenter,
                                 project(aP2) + aCenter,
-                                aLineInfo);
+                                aLineInfo));
         aPoint.setX( static_cast<int>((static_cast<double>(aP1.X())*cosd - static_cast<double>(aP1.Y())*sind)*factor) );
         aPoint.setY( static_cast<int>((static_cast<double>(aP1.Y())*cosd + static_cast<double>(aP1.X())*sind)*factor) );
         aP1 = aPoint;

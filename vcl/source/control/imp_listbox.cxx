@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <memory>
 
@@ -1863,7 +1864,7 @@ void ImplListBoxWindow::DrawEntry(vcl::RenderContext& rRenderContext, sal_Int32 
             aStartPos.AdjustY(pEntry->getHeightWithMargin() - 1 );
         Point aEndPos(aStartPos);
         aEndPos.setX( GetOutputSizePixel().Width() );
-        rRenderContext.DrawLine(aStartPos, aEndPos);
+        Drawable::Draw(&rRenderContext, LineDrawable(aStartPos, aEndPos));
         rRenderContext.SetLineColor(aOldLineColor);
     }
 }

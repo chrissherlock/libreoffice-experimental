@@ -19,6 +19,7 @@
 
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/drawables/CheckeredRectDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
@@ -720,10 +721,10 @@ void SvxPixelCtl::Paint( vcl::RenderContext& rRenderContext, const tools::Rectan
         {
             // horizontal
             nTmp = static_cast<sal_uInt16>(aRectSize.Height() * i / nLines);
-            rRenderContext.DrawLine(Point(0, nTmp), Point(aRectSize.Width(), nTmp));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(0, nTmp), Point(aRectSize.Width(), nTmp)));
             // vertically
             nTmp = static_cast<sal_uInt16>( aRectSize.Width() * i / nLines );
-            rRenderContext.DrawLine(Point(nTmp, 0), Point(nTmp, aRectSize.Height()));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(nTmp, 0), Point(nTmp, aRectSize.Height())));
         }
 
         //Draw Rectangles (squares)
@@ -754,8 +755,8 @@ void SvxPixelCtl::Paint( vcl::RenderContext& rRenderContext, const tools::Rectan
     {
         rRenderContext.SetBackground(Wallpaper(COL_LIGHTGRAY));
         rRenderContext.SetLineColor(COL_LIGHTRED);
-        rRenderContext.DrawLine(Point(0, 0), Point(aRectSize.Width(), aRectSize.Height()));
-        rRenderContext.DrawLine(Point(0, aRectSize.Height()), Point(aRectSize.Width(), 0));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(0, 0), Point(aRectSize.Width(), aRectSize.Height())));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(0, aRectSize.Height()), Point(aRectSize.Width(), 0)));
     }
 }
 

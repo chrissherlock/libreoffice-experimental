@@ -29,6 +29,7 @@
 #include <vcl/lineinfo.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/drawables/RoundRectDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <math.h>
 #include <algorithm>
@@ -1090,8 +1091,8 @@ void OS2METReader::ReadArc(bool bGivenPos)
     ncx=2*q*q*(x2-x1);
     if ( (ncx<0.001 && ncx>-0.001) || (ncy<0.001 && ncy>-0.001) ) {
         // Calculation impossible, points are all on the same straight line
-        pVirDev->DrawLine(aP1,aP2);
-        pVirDev->DrawLine(aP2,aP3);
+        Drawable::Draw(pVirDev, LineDrawable(aP1,aP2));
+        Drawable::Draw(pVirDev, LineDrawable(aP2,aP3));
         return;
     }
     cy=( q*q*((x3*x3-x1*x1)*(x2-x1)+(x2*x2-x1*x1)*(x1-x3)) +
@@ -1202,7 +1203,7 @@ void OS2METReader::ReadPartialArc(bool bGivenPos, sal_uInt16 nOrderSize)
     SetPen( aAttr.aLinCol, aAttr.nStrLinWidth, aAttr.eLinStyle );
     SetRasterOp(aAttr.eLinMix);
 
-    pVirDev->DrawLine(aP0,aPStart);
+    Drawable::Draw(pVirDev, LineDrawable(aP0, aPStart));
     pVirDev->DrawArc(aRect,aPStart,aPEnd);
     aAttr.aCurPos=aPEnd;
 }
@@ -1386,8 +1387,8 @@ void OS2METReader::ReadMarker(bool bGivenPos, sal_uInt16 nOrderLen)
         aCalcBndRect.Union(tools::Rectangle(x-5,y-5,x+5,y+5));
         switch (aAttr.nMrkSymbol) {
             case  2:   // PLUS
-                pVirDev->DrawLine(Point(x-4,y),Point(x+4,y));
-                pVirDev->DrawLine(Point(x,y-4),Point(x,y+4));
+                Drawable::Draw(pVirDev, LineDrawable(Point(x-4, y),Point(x+4, y)));
+                Drawable::Draw(pVirDev, LineDrawable(Point(x, y-4),Point(x, y+4)));
                 break;
             case  3:   // DIAMOND
             case  7: { // SOLIDDIAMOND
@@ -1456,8 +1457,8 @@ void OS2METReader::ReadMarker(bool bGivenPos, sal_uInt16 nOrderLen)
             case 64:   // BLANK
                 break;
             default:   // (=1) CROSS
-                pVirDev->DrawLine(Point(x-4,y-4),Point(x+4,y+4));
-                pVirDev->DrawLine(Point(x-4,y+4),Point(x+4,y-4));
+                Drawable::Draw(pVirDev, LineDrawable(Point(x-4, y-4),Point(x+4, y+4)));
+                Drawable::Draw(pVirDev, LineDrawable(Point(x-4, y+4),Point(x+4,y-4)));
                 break;
         }
     }

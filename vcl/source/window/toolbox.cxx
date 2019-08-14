@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/toolbox.hxx>
 #include <vcl/commandinfoprovider.hxx>
 #include <vcl/event.hxx>
@@ -563,17 +564,17 @@ void ToolBox::ImplDrawBorder(vcl::RenderContext& rRenderContext)
     {
         // draw bottom border
         rRenderContext.SetLineColor( rStyleSettings.GetShadowColor() );
-        rRenderContext.DrawLine( Point( 0, nDY-2 ), Point( nDX-1, nDY-2 ) );
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(0, nDY-2), Point(nDX-1, nDY-2)));
         rRenderContext.SetLineColor( rStyleSettings.GetLightColor() );
-        rRenderContext.DrawLine( Point( 0, nDY-1 ), Point( nDX-1, nDY-1 ) );
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(0, nDY-1), Point(nDX-1, nDY-1)));
     }
     else
     {
         // draw top border
         rRenderContext.SetLineColor( rStyleSettings.GetShadowColor() );
-        rRenderContext.DrawLine( Point( 0, 0 ), Point( nDX-1, 0 ) );
+        Drawable::Draw(&rRenderContext, LineDrawable( Point( 0, 0 ), Point( nDX-1, 0 ) ));
         rRenderContext.SetLineColor( rStyleSettings.GetLightColor() );
-        rRenderContext.DrawLine( Point( 0, 1 ), Point( nDX-1, 1 ) );
+        Drawable::Draw(&rRenderContext, LineDrawable( Point( 0, 1 ), Point( nDX-1, 1 ) ));
 
         if (meAlign == WindowAlign::Left || meAlign == WindowAlign::Right)
         {
@@ -581,21 +582,21 @@ void ToolBox::ImplDrawBorder(vcl::RenderContext& rRenderContext)
             {
                 // draw left-bottom border
                 rRenderContext.SetLineColor( rStyleSettings.GetShadowColor() );
-                rRenderContext.DrawLine( Point( 0, 0 ), Point( 0, nDY-1 ) );
-                rRenderContext.DrawLine( Point( 0, nDY-2 ), Point( nDX-1, nDY-2 ) );
+                Drawable::Draw(&rRenderContext, LineDrawable(Point(0, 0), Point(0, nDY-1)));
+                Drawable::Draw(&rRenderContext, LineDrawable(Point(0, nDY-2), Point(nDX-1, nDY-2)));
                 rRenderContext.SetLineColor( rStyleSettings.GetLightColor() );
-                rRenderContext.DrawLine( Point( 1, 1 ), Point( 1, nDY-3 ) );
-                rRenderContext.DrawLine( Point( 0, nDY-1 ), Point( nDX-1, nDY-1 ) );
+                Drawable::Draw(&rRenderContext, LineDrawable(Point(1, 1), Point(1, nDY-3)));
+                Drawable::Draw(&rRenderContext, LineDrawable(Point(0, nDY-1), Point( nDX-1, nDY-1)));
             }
             else
             {
                 // draw right-bottom border
                 rRenderContext.SetLineColor( rStyleSettings.GetShadowColor() );
-                rRenderContext.DrawLine( Point( nDX-2, 0 ), Point( nDX-2, nDY-3 ) );
-                rRenderContext.DrawLine( Point( 0, nDY-2 ), Point( nDX-2, nDY-2 ) );
+                Drawable::Draw(&rRenderContext, LineDrawable(Point(nDX-2, 0), Point( nDX-2, nDY-3)));
+                Drawable::Draw(&rRenderContext, LineDrawable(Point(0, nDY-2), Point( nDX-2, nDY-2)));
                 rRenderContext.SetLineColor( rStyleSettings.GetLightColor() );
-                rRenderContext.DrawLine( Point( nDX-1, 0 ), Point( nDX-1, nDY-1 ) );
-                rRenderContext.DrawLine( Point( 0, nDY-1 ), Point( nDX-1, nDY-1 ) );
+                Drawable::Draw(&rRenderContext, LineDrawable(Point(nDX-1, 0), Point( nDX-1, nDY-1)));
+                Drawable::Draw(&rRenderContext, LineDrawable(Point(0, nDY-1), Point( nDX-1, nDY-1)));
             }
         }
     }
@@ -604,9 +605,9 @@ void ToolBox::ImplDrawBorder(vcl::RenderContext& rRenderContext)
     {
         // draw right border
         rRenderContext.SetLineColor( rStyleSettings.GetShadowColor() );
-        rRenderContext.DrawLine( Point( nDX-2, 0 ), Point( nDX-2, nDY-1 ) );
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(nDX-2, 0), Point(nDX-2, nDY-1)));
         rRenderContext.SetLineColor( rStyleSettings.GetLightColor() );
-        rRenderContext.DrawLine( Point( nDX-1, 0 ), Point( nDX-1, nDY-1 ) );
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(nDX-1, 0), Point(nDX-1, nDY-1)));
     }
 }
 
@@ -2565,15 +2566,15 @@ void ToolBox::ImplDrawSeparator(vcl::RenderContext& rRenderContext, ImplToolItem
         {
             nSlim = (pItem->maRect.Bottom() - pItem->maRect.Top ()) / 4;
             nCenterPos = pItem->maRect.Center().X();
-            rRenderContext.DrawLine(Point(nCenterPos, pItem->maRect.Top() + nSlim),
-                                    Point(nCenterPos, pItem->maRect.Bottom() - nSlim));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(nCenterPos, pItem->maRect.Top() + nSlim),
+                                    Point(nCenterPos, pItem->maRect.Bottom() - nSlim)));
         }
         else
         {
             nSlim = (pItem->maRect.Right() - pItem->maRect.Left ()) / 4;
             nCenterPos = pItem->maRect.Center().Y();
-            rRenderContext.DrawLine(Point(pItem->maRect.Left() + nSlim, nCenterPos),
-                                    Point(pItem->maRect.Right() - nSlim, nCenterPos));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(pItem->maRect.Left() + nSlim, nCenterPos),
+                                    Point(pItem->maRect.Right() - nSlim, nCenterPos)));
         }
     }
 }
@@ -2883,23 +2884,23 @@ void ToolBox::ImplDrawFloatwinBorder(vcl::RenderContext& rRenderContext, ImplToo
     p1.AdjustX( 1 );
     p2 = pItem->maRect.TopRight();
     p2.AdjustX( -1 );
-    rRenderContext.DrawLine( p1, p2);
+    Drawable::Draw(&rRenderContext, LineDrawable( p1, p2));
     p1 = pItem->maRect.BottomLeft();
     p1.AdjustX( 1 );
     p2 = pItem->maRect.BottomRight();
     p2.AdjustX( -1 );
-    rRenderContext.DrawLine( p1, p2);
+    Drawable::Draw(&rRenderContext, LineDrawable( p1, p2));
 
     p1 = pItem->maRect.TopLeft();
     p1.AdjustY( 1 );
     p2 = pItem->maRect.BottomLeft();
     p2.AdjustY( -1 );
-    rRenderContext.DrawLine( p1, p2);
+    Drawable::Draw(&rRenderContext, LineDrawable( p1, p2));
     p1 = pItem->maRect.TopRight();
     p1.AdjustY( 1 );
     p2 = pItem->maRect.BottomRight();
     p2.AdjustY( -1 );
-    rRenderContext.DrawLine( p1, p2);
+    Drawable::Draw(&rRenderContext, LineDrawable( p1, p2));
 
 }
 

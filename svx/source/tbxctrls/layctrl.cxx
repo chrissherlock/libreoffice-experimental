@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <string>
 #include <vcl/toolbox.hxx>
@@ -276,14 +277,14 @@ void TableWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Rectang
     rRenderContext.SetLineColor(aLineColor);
     for (long i = 1; i < TABLE_CELLS_VERT; ++i)
     {
-        rRenderContext.DrawLine(Point(nTablePosX, nTablePosY + i*mnTableCellHeight),
-                                Point(mnTableWidth, nTablePosY + i*mnTableCellHeight));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(nTablePosX, nTablePosY + i*mnTableCellHeight),
+                                Point(mnTableWidth, nTablePosY + i*mnTableCellHeight)));
     }
 
     for (long i = 1; i < TABLE_CELLS_HORIZ; ++i)
     {
-        rRenderContext.DrawLine(Point( nTablePosX + i*mnTableCellWidth, nTablePosY),
-                                Point( nTablePosX + i*mnTableCellWidth, mnTableHeight));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point( nTablePosX + i*mnTableCellWidth, nTablePosY),
+                                Point( nTablePosX + i*mnTableCellWidth, mnTableHeight)));
     }
 
     // the text near the mouse cursor telling the table dimensions
@@ -647,7 +648,7 @@ void ColumnsWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Recta
                 nLineWidth = 10;
             else
                 nLineWidth = 4;
-            rRenderContext.DrawLine(Point(i * nMX + 4, j), Point(i * nMX + nMX - nLineWidth - 4, j));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(i * nMX + 4, j), Point(i * nMX + nMX - nLineWidth - 4, j)));
             j += 4;
         }
     }

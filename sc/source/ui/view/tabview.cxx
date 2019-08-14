@@ -19,6 +19,7 @@
 
 #include <vcl/svapp.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <scitems.hxx>
 #include <sfx2/viewfrm.hxx>
@@ -125,8 +126,8 @@ void ScCornerButton::Paint(vcl::RenderContext& rRenderContext, const tools::Rect
 
     //  both buttons have the same look now - only dark right/bottom lines
     rRenderContext.SetLineColor(rStyleSettings.GetDarkShadowColor());
-    rRenderContext.DrawLine(Point(0, nPosY), Point(nPosX, nPosY));
-    rRenderContext.DrawLine(Point(nDarkX, 0), Point(nDarkX, nPosY));
+    Drawable::Draw(&rRenderContext, LineDrawable(Point(0, nPosY), Point(nPosX, nPosY)));
+    Drawable::Draw(&rRenderContext, LineDrawable(Point(nDarkX, 0), Point(nDarkX, nPosY)));
 }
 
 void ScCornerButton::StateChanged( StateChangedType nType )

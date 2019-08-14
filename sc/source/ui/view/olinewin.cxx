@@ -20,6 +20,7 @@
 #include <vcl/taskpanelist.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <olinewin.hxx>
 #include <olinetab.hxx>
@@ -517,7 +518,7 @@ void ScOutlineWindow::SetEntryAreaClipRegion()
 void ScOutlineWindow::DrawLineRel(
         long nLevelStart, long nEntryStart, long nLevelEnd, long nEntryEnd )
 {
-    DrawLine( GetPoint( nLevelStart, nEntryStart ), GetPoint( nLevelEnd, nEntryEnd ) );
+    Drawable::Draw(this, LineDrawable(GetPoint(nLevelStart, nEntryStart), GetPoint(nLevelEnd, nEntryEnd)));
 }
 
 void ScOutlineWindow::DrawRectRel(

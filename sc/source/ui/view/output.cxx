@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <scitems.hxx>
 #include <editeng/brushitem.hxx>
@@ -887,7 +888,7 @@ void drawDataBars(vcl::RenderContext& rRenderContext, const ScDataBarInfo* pOldD
         aLineInfo.SetDashLen( 3 );
         rRenderContext.SetFillColor(pOldDataBarInfo->maAxisColor);
         rRenderContext.SetLineColor(pOldDataBarInfo->maAxisColor);
-        rRenderContext.DrawLine(aPoint1, aPoint2, aLineInfo);
+        Drawable::Draw(&rRenderContext, LineDrawable(aPoint1, aPoint2, aLineInfo));
         rRenderContext.SetLineColor();
         rRenderContext.SetFillColor();
     }
@@ -1967,13 +1968,13 @@ void ScOutputData::DrawRefMark( SCCOL nRefStartX, SCROW nRefStartY,
             else
             {
                 if (bTop)
-                    mpDev->DrawLine( Point( nMinX, nMinY ), Point( nMaxX, nMinY ) );
+                    Drawable::Draw(mpDev, LineDrawable( Point( nMinX, nMinY ), Point( nMaxX, nMinY ) ) );
                 if (bBottom)
-                    mpDev->DrawLine( Point( nMinX, nMaxY ), Point( nMaxX, nMaxY ) );
+                    Drawable::Draw(mpDev, LineDrawable( Point( nMinX, nMaxY ), Point( nMaxX, nMaxY ) ) );
                 if (bLeft)
-                    mpDev->DrawLine( Point( nMinX, nMinY ), Point( nMinX, nMaxY ) );
+                    Drawable::Draw(mpDev, LineDrawable( Point( nMinX, nMinY ), Point( nMinX, nMaxY ) ) );
                 if (bRight)
-                    mpDev->DrawLine( Point( nMaxX, nMinY ), Point( nMaxX, nMaxY ) );
+                    Drawable::Draw(mpDev, LineDrawable( Point( nMaxX, nMinY ), Point( nMaxX, nMaxY ) ) );
             }
             if ( bHandle && bRight && bBottom )
             {
@@ -2101,20 +2102,20 @@ void ScOutputData::DrawOneChange( SCCOL nRefStartX, SCROW nRefStartY,
             {
                 if (bTop)
                 {
-                    mpDev->DrawLine( Point( nMinX,nMinY ), Point( nMaxX,nMinY ) );
+                    Drawable::Draw(mpDev, LineDrawable( Point( nMinX,nMinY ), Point( nMaxX,nMinY ) ) );
                     if ( nType == SC_CAT_DELETE_ROWS )
-                        mpDev->DrawLine( Point( nMinX,nMinY+1 ), Point( nMaxX,nMinY+1 ) );
+                        Drawable::Draw(mpDev, LineDrawable( Point( nMinX,nMinY+1 ), Point( nMaxX,nMinY+1 ) ) );
                 }
                 if (bBottom)
-                    mpDev->DrawLine( Point( nMinX,nMaxY ), Point( nMaxX,nMaxY ) );
+                    Drawable::Draw(mpDev, LineDrawable( Point( nMinX,nMaxY ), Point( nMaxX,nMaxY ) ) );
                 if (bLeft)
                 {
-                    mpDev->DrawLine( Point( nMinX,nMinY ), Point( nMinX,nMaxY ) );
+                    Drawable::Draw(mpDev, LineDrawable( Point( nMinX,nMinY ), Point( nMinX,nMaxY ) ) );
                     if ( nType == SC_CAT_DELETE_COLS )
-                        mpDev->DrawLine( Point( nMinX+nLayoutSign,nMinY ), Point( nMinX+nLayoutSign,nMaxY ) );
+                        Drawable::Draw(mpDev, LineDrawable( Point( nMinX+nLayoutSign,nMinY ), Point( nMinX+nLayoutSign,nMaxY ) ) );
                 }
                 if (bRight)
-                    mpDev->DrawLine( Point( nMaxX,nMinY ), Point( nMaxX,nMaxY ) );
+                    Drawable::Draw(mpDev, LineDrawable( Point( nMaxX,nMinY ), Point( nMaxX,nMaxY ) ) );
             }
             if ( bLeft && bTop )
             {

@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/LineDrawable.hxx>
+
 #include "SidebarTxtControl.hxx"
 
 #include "SidebarTxtControlAcc.hxx"
@@ -146,14 +148,14 @@ void SidebarTextControl::Draw(OutputDevice* pDev, const Point& rPt, const Size& 
     if ( mrSidebarWin.GetLayoutStatus()==SwPostItHelper::DELETED )
     {
         SetLineColor(mrSidebarWin.GetChangeColor());
-        pDev->DrawLine( PixelToLogic( GetPosPixel(), pDev->GetMapMode() ),
+        Drawable::Draw(pDev, LineDrawable( PixelToLogic( GetPosPixel(), pDev->GetMapMode() ),
                   PixelToLogic( GetPosPixel() +
                                 Point( GetSizePixel().Width(),
-                                       GetSizePixel().Height() ), pDev->GetMapMode() ) );
-        pDev->DrawLine( PixelToLogic( GetPosPixel() +
+                                       GetSizePixel().Height() ), pDev->GetMapMode() ) ) );
+        Drawable::Draw(pDev, LineDrawable( PixelToLogic( GetPosPixel() +
                                 Point( GetSizePixel().Width(),0), pDev->GetMapMode() ),
                   PixelToLogic( GetPosPixel() +
-                                Point( 0, GetSizePixel().Height() ), pDev->GetMapMode() ) );
+                                Point( 0, GetSizePixel().Height() ), pDev->GetMapMode() ) ) );
     }
 }
 
@@ -181,13 +183,11 @@ void SidebarTextControl::Paint(vcl::RenderContext& rRenderContext, const tools::
     if (mrSidebarWin.GetLayoutStatus() == SwPostItHelper::DELETED)
     {
         rRenderContext.SetLineColor(mrSidebarWin.GetChangeColor());
-        rRenderContext.DrawLine(rRenderContext.PixelToLogic(GetPosPixel()),
+        Drawable::Draw(&rRenderContext, LineDrawable(rRenderContext.PixelToLogic(GetPosPixel()),
                                 rRenderContext.PixelToLogic(GetPosPixel() + Point(GetSizePixel().Width(),
-                                                                                  GetSizePixel().Height())));
-        rRenderContext.DrawLine(rRenderContext.PixelToLogic(GetPosPixel() + Point(GetSizePixel().Width(),
-                                                                                  0)),
-                                rRenderContext.PixelToLogic(GetPosPixel() + Point(0,
-                                                                                  GetSizePixel().Height())));
+                                                                                  GetSizePixel().Height()))));
+        Drawable::Draw(&rRenderContext, LineDrawable(rRenderContext.PixelToLogic(GetPosPixel() + Point(GetSizePixel().Width(), 0)),
+                                rRenderContext.PixelToLogic(GetPosPixel() + Point(0, GetSizePixel().Height()))));
     }
 }
 

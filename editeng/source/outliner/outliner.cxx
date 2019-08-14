@@ -20,6 +20,8 @@
 #include <comphelper/string.hxx>
 #include <svl/eitem.hxx>
 #include <svl/intitem.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
+
 #include <editeng/editeng.hxx>
 #include <editeng/editview.hxx>
 #include <editeng/editdata.hxx>
@@ -1081,7 +1083,7 @@ void Outliner::PaintBullet( sal_Int32 nPara, const Point& rStartPos,
 
             const Color& rOldLineColor = pOutDev->GetLineColor();
             pOutDev->SetLineColor( COL_BLACK );
-            pOutDev->DrawLine( aStartPos, aEndPos );
+            Drawable::Draw(pOutDev, LineDrawable(aStartPos, aEndPos));
             pOutDev->SetLineColor( rOldLineColor );
         }
     }

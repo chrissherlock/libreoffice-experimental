@@ -34,6 +34,7 @@
 #include <vcl/BitmapMonochromeFilter.hxx>
 #include <vcl/drawables/PixelDrawable.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 // BitmapEx::Create
 #include <salbmp.hxx>
@@ -1348,10 +1349,10 @@ static Bitmap DetectEdges( const Bitmap& rBmp )
 
                 // initialize border with white pixels
                 pVirDev->SetLineColor( COL_WHITE );
-                pVirDev->DrawLine( Point(), Point( nWidth - 1, 0L ) );
-                pVirDev->DrawLine( Point( nWidth - 1, 0L ), Point( nWidth - 1, nHeight - 1 ) );
-                pVirDev->DrawLine( Point( nWidth - 1, nHeight - 1 ), Point( 0L, nHeight - 1 ) );
-                pVirDev->DrawLine( Point( 0, nHeight - 1 ), Point() );
+                Drawable::Draw(pVirDev, LineDrawable(Point(), Point(nWidth - 1, 0L)));
+                Drawable::Draw(pVirDev, LineDrawable(Point(nWidth - 1, 0L), Point(nWidth - 1, nHeight - 1 )));
+                Drawable::Draw(pVirDev, LineDrawable(Point(nWidth - 1, nHeight - 1), Point(0L, nHeight - 1 )));
+                Drawable::Draw(pVirDev, LineDrawable(Point(0, nHeight - 1), Point()));
 
                 for( long nY = 0, nY1 = 1, nY2 = 2; nY < nHeight2; nY++, nY1++, nY2++ )
                 {

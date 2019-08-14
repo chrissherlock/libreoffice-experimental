@@ -30,6 +30,7 @@
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/window.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <salgdi.hxx>
 
@@ -279,9 +280,11 @@ void OutputDevice::drawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
     const bool bDashUsed(LineStyle::Dash == aInfo.GetStyle());
     const bool bLineWidthUsed(aInfo.GetWidth() > 1);
 
-    if(bDashUsed || bLineWidthUsed)
+    if (bDashUsed || bLineWidthUsed)
     {
-        drawLine ( basegfx::B2DPolyPolygon(aPoly.getB2DPolygon()), aInfo );
+        basegfx::B2DPolygon aPolygon = aPoly.getB2DPolygon();
+        basegfx::B2DPolyPolygon* pPolyPolygon = new basegfx::B2DPolyPolygon(aPolygon);
+        Drawable::Draw(this, LineDrawable(pPolyPolygon, aInfo));
     }
     else
     {

@@ -51,6 +51,7 @@ $(eval $(call gb_Library_add_cxxflags,swui,\
 endif
 
 $(eval $(call gb_Library_use_libraries,swui,\
+    basegfx \
     comphelper \
     cppu \
     cppuhelper \

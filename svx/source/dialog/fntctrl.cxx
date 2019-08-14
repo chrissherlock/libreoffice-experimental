@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 #include <sfx2/dialoghelper.hxx>
 #include <sfx2/viewsh.hxx>
 #include <sfx2/printer.hxx>
@@ -762,8 +763,8 @@ void SvxFontPrevWindow::Paint(vcl::RenderContext& rRenderContext, const tools::R
             nResultWidth += nTextWidth;
 
             long _nX = (aLogSize.Width() - nResultWidth) / 2;
-            rRenderContext.DrawLine(Point(0,  nY), Point(_nX, nY));
-            rRenderContext.DrawLine(Point(_nX + nResultWidth, nY), Point(aLogSize.Width(), nY));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(0,  nY), Point(_nX, nY)));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(_nX + nResultWidth, nY), Point(aLogSize.Width(), nY)));
 
             long nSmallAscent = pImpl->mnAscent;
             long nOffset = (nStdAscent - nSmallAscent) / 2;
@@ -795,8 +796,8 @@ void SvxFontPrevWindow::Paint(vcl::RenderContext& rRenderContext, const tools::R
             Color aLineCol = rRenderContext.GetLineColor();
 
             rRenderContext.SetLineColor(rFont.GetColor());
-            rRenderContext.DrawLine(Point(0,  nY), Point(nX, nY));
-            rRenderContext.DrawLine(Point(nX + aTxtSize.Width(), nY), Point(aLogSize.Width(), nY));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(0,  nY), Point(nX, nY)));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(nX + aTxtSize.Width(), nY), Point(aLogSize.Width(), nY)));
             rRenderContext.SetLineColor(aLineCol);
 
             Point aTmpPoint(nX, nY);
@@ -1132,8 +1133,8 @@ void FontPrevWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Rect
             nResultWidth += nTextWidth;
 
             long _nX = (aLogSize.Width() - nResultWidth) / 2;
-            rRenderContext.DrawLine(Point(0,  nY), Point(_nX, nY));
-            rRenderContext.DrawLine(Point(_nX + nResultWidth, nY), Point(aLogSize.Width(), nY));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(0,  nY), Point(_nX, nY)));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(_nX + nResultWidth, nY), Point(aLogSize.Width(), nY)));
 
             long nSmallAscent = pImpl->mnAscent;
             long nOffset = (nStdAscent - nSmallAscent) / 2;
@@ -1165,8 +1166,8 @@ void FontPrevWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Rect
             Color aLineCol = rRenderContext.GetLineColor();
 
             rRenderContext.SetLineColor(rFont.GetColor());
-            rRenderContext.DrawLine(Point(0,  nY), Point(nX, nY));
-            rRenderContext.DrawLine(Point(nX + aTxtSize.Width(), nY), Point(aLogSize.Width(), nY));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(0,  nY), Point(nX, nY)));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(nX + aTxtSize.Width(), nY), Point(aLogSize.Width(), nY)));
             rRenderContext.SetLineColor(aLineCol);
 
             Point aTmpPoint(nX, nY);

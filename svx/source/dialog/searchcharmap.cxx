@@ -22,6 +22,7 @@
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 #include <svtools/colorcfg.hxx>
 
 #include <rtl/textenc.h>
@@ -168,13 +169,13 @@ void SvxSearchCharSet::DrawChars_Impl(vcl::RenderContext& rRenderContext, int n1
     int i;
     for (i = 1; i < COLUMN_COUNT; ++i)
     {
-        rRenderContext.DrawLine(Point(nX * i + m_nXGap, 0),
-                          Point(nX * i + m_nXGap, aOutputSize.Height()));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(nX * i + m_nXGap, 0),
+                          Point(nX * i + m_nXGap, aOutputSize.Height())));
     }
     for (i = 1; i < ROW_COUNT; ++i)
     {
-        rRenderContext.DrawLine(Point(0, nY * i + m_nYGap),
-                                Point(aOutputSize.Width(), nY * i + m_nYGap));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(0, nY * i + m_nYGap),
+                                Point(aOutputSize.Width(), nY * i + m_nYGap)));
     }
     const StyleSettings& rStyleSettings = Application::GetSettings().GetStyleSettings();
     const Color aWindowTextColor(rStyleSettings.GetFieldTextColor());
@@ -262,12 +263,12 @@ void SvxSearchCharSet::DrawChars_Impl(vcl::RenderContext& rRenderContext, int n1
                 Drawable::Draw(&rRenderContext, RectangleDrawable(getGridRectangle(aPointUL, aOutputSize)));
 
                 rRenderContext.SetLineColor(aLightColor);
-                rRenderContext.DrawLine(aPointUL, Point(x + nX - 1, y + 1));
-                rRenderContext.DrawLine(aPointUL, Point(x + 1, y + nY - 1));
+                Drawable::Draw(&rRenderContext, LineDrawable(aPointUL, Point(x + nX - 1, y + 1)));
+                Drawable::Draw(&rRenderContext, LineDrawable(aPointUL, Point(x + 1, y + nY - 1)));
 
                 rRenderContext.SetLineColor(aShadowColor);
-                rRenderContext.DrawLine(Point(x + 1, y + nY - 1), Point(x + nX - 1, y + nY - 1));
-                rRenderContext.DrawLine(Point(x + nX - 1, y + nY - 1), Point(x + nX - 1, y + 1));
+                Drawable::Draw(&rRenderContext, LineDrawable(Point(x + 1, y + nY - 1), Point(x + nX - 1, y + nY - 1)));
+                Drawable::Draw(&rRenderContext, LineDrawable(Point(x + nX - 1, y + nY - 1), Point(x + nX - 1, y + 1)));
 
                 rRenderContext.DrawText(aPointTxTy, aCharStr);
             }

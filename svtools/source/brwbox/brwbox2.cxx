@@ -21,6 +21,8 @@
 #include <osl/diagnose.h>
 #include <tools/debug.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
+
 #include <svtools/brwbox.hxx>
 #include "datwin.hxx"
 #include <svtools/colorcfg.hxx>
@@ -555,21 +557,21 @@ void BrowseBox::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle
 
     // draw delimitational lines
     if (!pDataWin->bNoHScroll)
-        rRenderContext.DrawLine(Point(0, aHScroll->GetPosPixel().Y()),
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(0, aHScroll->GetPosPixel().Y()),
                                 Point(GetOutputSizePixel().Width(),
-                                      aHScroll->GetPosPixel().Y()));
+                                      aHScroll->GetPosPixel().Y())));
 
     if (nTitleLines)
     {
         if (!bHeaderBar)
         {
-            rRenderContext.DrawLine(Point(0, GetTitleHeight() - 1),
-                                    Point(GetOutputSizePixel().Width(), GetTitleHeight() - 1));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(0, GetTitleHeight() - 1),
+                                    Point(GetOutputSizePixel().Width(), GetTitleHeight() - 1)));
         }
         else if (bHandleCol)
         {
-            rRenderContext.DrawLine(Point(0, GetTitleHeight() - 1),
-                                    Point(pFirstCol->Width(), GetTitleHeight() - 1));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(0, GetTitleHeight() - 1),
+                                    Point(pFirstCol->Width(), GetTitleHeight() - 1)));
         }
     }
 
@@ -601,8 +603,8 @@ void BrowseBox::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle
                 Size( pCol->Width()-1, GetTitleHeight()-1 ),
                 pCol->Title(), !IsEnabled());
             aButtonFrame.Draw(rRenderContext);
-            rRenderContext.DrawLine(Point(nX + pCol->Width() - 1, 0),
-                                    Point(nX + pCol->Width() - 1, GetTitleHeight() - 1));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(nX + pCol->Width() - 1, 0),
+                                    Point(nX + pCol->Width() - 1, GetTitleHeight() - 1)));
         }
         else
         {
@@ -652,15 +654,15 @@ void BrowseBox::Draw( OutputDevice* pDev, const Point& rPos, const Size& rSize, 
     // draw a frame
     const StyleSettings& rStyleSettings = GetSettings().GetStyleSettings();
     pDev->SetLineColor(rStyleSettings.GetDarkShadowColor());
-    pDev->DrawLine(Point(aRealPos.X(), aRealPos.Y()),
-                   Point(aRealPos.X(), aRealPos.Y() + aRealSize.Height() - 1));
-    pDev->DrawLine(Point(aRealPos.X(), aRealPos.Y()),
-                   Point(aRealPos.X() + aRealSize.Width() - 1, aRealPos.Y()));
+    Drawable::Draw(pDev, LineDrawable(Point(aRealPos.X(), aRealPos.Y()),
+                   Point(aRealPos.X(), aRealPos.Y() + aRealSize.Height() - 1)));
+    Drawable::Draw(pDev, LineDrawable(Point(aRealPos.X(), aRealPos.Y()),
+                   Point(aRealPos.X() + aRealSize.Width() - 1, aRealPos.Y())));
     pDev->SetLineColor(rStyleSettings.GetShadowColor());
-    pDev->DrawLine(Point(aRealPos.X() + aRealSize.Width() - 1, aRealPos.Y() + 1),
-                   Point(aRealPos.X() + aRealSize.Width() - 1, aRealPos.Y() + aRealSize.Height() - 1));
-    pDev->DrawLine(Point(aRealPos.X() + aRealSize.Width() - 1, aRealPos.Y() + aRealSize.Height() - 1),
-                   Point(aRealPos.X() + 1, aRealPos.Y() + aRealSize.Height() - 1));
+    Drawable::Draw(pDev, LineDrawable(Point(aRealPos.X() + aRealSize.Width() - 1, aRealPos.Y() + 1),
+                   Point(aRealPos.X() + aRealSize.Width() - 1, aRealPos.Y() + aRealSize.Height() - 1)));
+    Drawable::Draw(pDev, LineDrawable(Point(aRealPos.X() + aRealSize.Width() - 1, aRealPos.Y() + aRealSize.Height() - 1),
+                   Point(aRealPos.X() + 1, aRealPos.Y() + aRealSize.Height() - 1)));
 
     HeaderBar* pBar = pDataWin->pHeaderBar;
 
@@ -726,10 +728,10 @@ void BrowseBox::Draw( OutputDevice* pDev, const Point& rPos, const Size& rSize, 
             pDev->Push( PushFlags::LINECOLOR );
             pDev->SetLineColor( COL_BLACK );
 
-            pDev->DrawLine( Point( aRealPos.X(), aRealPos.Y() + nTitleHeight-1 ),
-               Point( aRealPos.X() + pFirstCol->Width() - 1, aRealPos.Y() + nTitleHeight-1 ) );
-            pDev->DrawLine( Point( aRealPos.X() + pFirstCol->Width() - 1, aRealPos.Y() ),
-               Point( aRealPos.X() + pFirstCol->Width() - 1, aRealPos.Y() + nTitleHeight-1 ) );
+            Drawable::Draw(pDev, LineDrawable(Point( aRealPos.X(), aRealPos.Y() + nTitleHeight-1),
+               Point(aRealPos.X() + pFirstCol->Width() - 1, aRealPos.Y() + nTitleHeight-1)));
+            Drawable::Draw(pDev, LineDrawable(Point( aRealPos.X() + pFirstCol->Width() - 1, aRealPos.Y()),
+               Point(aRealPos.X() + pFirstCol->Width() - 1, aRealPos.Y() + nTitleHeight-1 )));
 
             pDev->Pop();
         }
@@ -936,11 +938,11 @@ void BrowseBox::ImplPaintData(OutputDevice& _rOut, const tools::Rectangle& _rRec
             _rOut.SetLineColor( aDelimiterLineColor );
             long nY = aPos.Y() + nDataRowHeigt - 1;
             if (nY <= aOverallAreaBRPos.Y())
-                _rOut.DrawLine( Point( nHLineX, nY ),
-                                Point( bVLines
+                Drawable::Draw(&_rOut, LineDrawable(Point(nHLineX, nY),
+                                Point(bVLines
                                         ? std::min(long(aPos.X() - 1), aOverallAreaBRPos.X())
                                         : aOverallAreaBRPos.X(),
-                                      nY ) );
+                                      nY)));
             _rOut.Pop();
         }
     }
@@ -969,10 +971,10 @@ void BrowseBox::ImplPaintData(OutputDevice& _rOut, const tools::Rectangle& _rRec
     // draw vertical delimitational line between frozen and scrollable cols
     _rOut.SetLineColor( COL_BLACK );
     long nFrozenWidth = GetFrozenWidth()-1;
-    _rOut.DrawLine( Point( aOverallAreaPos.X() + nFrozenWidth, aPos.Y() ),
+    Drawable::Draw(&_rOut, LineDrawable(Point(aOverallAreaPos.X() + nFrozenWidth, aPos.Y()),
                    Point( aOverallAreaPos.X() + nFrozenWidth, bHLines
                             ? aPos.Y() - 1
-                            : aOverallAreaBRPos.Y() ) );
+                            : aOverallAreaBRPos.Y())));
 
     // draw vertical delimitational lines?
     if ( bVLines )
@@ -1003,10 +1005,10 @@ void BrowseBox::ImplPaintData(OutputDevice& _rOut, const tools::Rectangle& _rRec
 
             // draw a single line
             if ( pCol->GetId() != 0 )
-                _rOut.DrawLine( aVertPos, Point( aVertPos.X(),
+                Drawable::Draw(&_rOut, LineDrawable(aVertPos, Point(aVertPos.X(),
                                bHLines
                                 ? aPos.Y() - 1
-                                : aPos.Y() + nDeltaY ) );
+                                : aPos.Y() + nDeltaY)));
         }
     }
 
@@ -1328,8 +1330,8 @@ void BrowseBox::MouseButtonDown( const MouseEvent& rEvt )
                 nDragX = nResizeX = rEvtPos.X();
                 SetPointer( PointerStyle::HSplit );
                 CaptureMouse();
-                pDataWin->DrawLine( Point( nDragX, 0 ),
-                    Point( nDragX, pDataWin->GetSizePixel().Height() ) );
+                Drawable::Draw(pDataWin, LineDrawable(Point(nDragX, 0),
+                    Point(nDragX, pDataWin->GetSizePixel().Height())));
                 nMinResizeX = nX + MIN_COLUMNWIDTH;
                 return;
             }

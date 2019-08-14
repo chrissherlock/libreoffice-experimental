@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include "datwin.hxx"
 #include <o3tl/numeric.hxx>
@@ -49,11 +50,11 @@ void ButtonFrame::Draw( OutputDevice& rDev )
     if( rDev.GetOutDevType() != OUTDEV_WINDOW )
     {
         rDev.SetLineColor( aColLight );
-        rDev.DrawLine( aRect.TopLeft(), Point( aRect.Right(), aRect.Top() ) );
-        rDev.DrawLine( aRect.TopLeft(), Point( aRect.Left(), aRect.Bottom() - 1 ) );
+        Drawable::Draw(&rDev, LineDrawable(aRect.TopLeft(), Point(aRect.Right(), aRect.Top())));
+        Drawable::Draw(&rDev, LineDrawable(aRect.TopLeft(), Point(aRect.Left(), aRect.Bottom() - 1)));
         rDev.SetLineColor( aColShadow );
-        rDev.DrawLine( aRect.BottomRight(), Point( aRect.Right(), aRect.Top() ) );
-        rDev.DrawLine( aRect.BottomRight(), Point( aRect.Left(), aRect.Bottom() ) );
+        Drawable::Draw(&rDev, LineDrawable(aRect.BottomRight(), Point(aRect.Right(), aRect.Top())));
+        Drawable::Draw(&rDev, LineDrawable(aRect.BottomRight(), Point(aRect.Left(), aRect.Bottom())));
     }
 
     if ( !aText.isEmpty() )
@@ -138,12 +139,12 @@ void BrowserColumn::Draw( BrowseBox const & rBox, OutputDevice& rDev, const Poin
                      "", false ).Draw( rDev );
         Color aOldLineColor = rDev.GetLineColor();
         rDev.SetLineColor( COL_BLACK );
-        rDev.DrawLine(
-            Point( rPos.X(), rPos.Y()+rBox.GetDataRowHeight()-1 ),
-            Point( rPos.X() + Width() - 1, rPos.Y()+rBox.GetDataRowHeight()-1 ) );
-        rDev.DrawLine(
-            Point( rPos.X() + Width() - 1, rPos.Y() ),
-            Point( rPos.X() + Width() - 1, rPos.Y()+rBox.GetDataRowHeight()-1 ) );
+        Drawable::Draw(&rDev, LineDrawable(
+            Point(rPos.X(), rPos.Y()+rBox.GetDataRowHeight()-1),
+            Point(rPos.X() + Width() - 1, rPos.Y()+rBox.GetDataRowHeight()-1)));
+        Drawable::Draw(&rDev, LineDrawable(
+            Point(rPos.X() + Width() - 1, rPos.Y()),
+            Point(rPos.X() + Width() - 1, rPos.Y()+rBox.GetDataRowHeight()-1)));
         rDev.SetLineColor( aOldLineColor );
 
         rBox.DoPaintField( rDev,

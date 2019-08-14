@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <cmdid.h>
 #include <hintids.hxx>
@@ -322,7 +323,7 @@ void SwColExample::DrawPage(vcl::RenderContext& rRenderContext, const Point& rOr
                 aDown.AdjustY(nDist );
             }
 
-            rRenderContext.DrawLine(aUp, aDown);
+            Drawable::Draw(&rRenderContext, LineDrawable(aUp, aDown));
         }
     }
 }
@@ -424,7 +425,7 @@ void SwColumnOnlyExample::Paint(vcl::RenderContext& rRenderContext, const tools:
                 nSum += rCols[i].GetWishWidth();
                 aUp.setX( nSum );
                 aDown.setX( nSum );
-                rRenderContext.DrawLine(aUp, aDown);
+                Drawable::Draw(&rRenderContext, LineDrawable(aUp, aDown));
             }
         }
     }
@@ -587,7 +588,7 @@ void SwPageGridExample::DrawPage(vcl::RenderContext& rRenderContext, const Point
             Point aEnd = m_bVertical ? aCharRect.TopRight() : aCharRect.BottomLeft();
             while (m_bVertical ? aStart.Y() < aRect.Bottom(): aStart.X() < aRect.Right())
             {
-                rRenderContext.DrawLine(aStart, aEnd);
+                Drawable::Draw(&rRenderContext, LineDrawable(aStart, aEnd));
                 if (m_bVertical)
                     aStart.setY( aEnd.AdjustY(nBaseHeight ) );
                 else

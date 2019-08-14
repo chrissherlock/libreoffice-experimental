@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/PixelDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <string.h>
 #include <vcl/gdimtf.hxx>
@@ -229,7 +230,7 @@ void DXF2GDIMetaFile::DrawLineEntity(const DXFLineEntity & rE, const DXFTransfor
         LineInfo aLineInfo;
         aLineInfo = rTransform.Transform(aDXFLineInfo);
 
-        pVirDev->DrawLine(aP0,aP1,aLineInfo);
+        Drawable::Draw(pVirDev, LineDrawable(aP0,aP1,aLineInfo));
         if (rE.fThickness!=0) {
             Point aP2,aP3;
             rTransform.Transform(rE.aP0+DXFVector(0,0,rE.fThickness),aP2);

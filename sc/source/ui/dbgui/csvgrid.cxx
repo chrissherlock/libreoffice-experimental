@@ -19,6 +19,7 @@
 
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/drawables/GridRectDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <csvgrid.hxx>
 
@@ -1074,8 +1075,8 @@ void ScCsvGrid::ImplDrawColumnHeader( OutputDevice& rOutDev, sal_uInt32 nColInde
     rOutDev.DrawText( Point( nX1 + 1, 0 ), GetColumnTypeName( nColIndex ) );
 
     rOutDev.SetLineColor( maHeaderGridColor );
-    rOutDev.DrawLine( Point( nX1, nHdrHt ), Point( nX2, nHdrHt ) );
-    rOutDev.DrawLine( Point( nX2, 0 ), Point( nX2, nHdrHt ) );
+    Drawable::Draw(&rOutDev, LineDrawable(Point(nX1, nHdrHt), Point( nX2, nHdrHt)));
+    Drawable::Draw(&rOutDev, LineDrawable(Point(nX2, 0), Point( nX2, nHdrHt)));
 }
 
 void ScCsvGrid::ImplDrawCellText( const Point& rPos, const OUString& rText )
@@ -1108,9 +1109,9 @@ void ScCsvGrid::ImplDrawCellText( const Point& rPos, const OUString& rText )
         sal_Int32 nY = rPos.Y() + GetLineHeight() / 2;
         Color aColor( maTextColor );
         mpBackgrDev->SetLineColor( aColor );
-        mpBackgrDev->DrawLine( Point( nX1, nY ), Point( nX2, nY ) );
-        mpBackgrDev->DrawLine( Point( nX2 - 2, nY - 2 ), Point( nX2, nY ) );
-        mpBackgrDev->DrawLine( Point( nX2 - 2, nY + 2 ), Point( nX2, nY ) );
+        Drawable::Draw(mpBackgrDev, LineDrawable(Point(nX1, nY), Point(nX2, nY)));
+        Drawable::Draw(mpBackgrDev, LineDrawable(Point(nX2 - 2, nY - 2), Point(nX2, nY)));
+        Drawable::Draw(mpBackgrDev, LineDrawable(Point(nX2 - 2, nY + 2), Point(nX2, nY)));
         ++nCharIx;
     }
     nCharIx = 0;
@@ -1121,10 +1122,10 @@ void ScCsvGrid::ImplDrawCellText( const Point& rPos, const OUString& rText )
         sal_Int32 nY = rPos.Y() + GetLineHeight() / 2;
         Color aColor( maTextColor );
         mpBackgrDev->SetLineColor( aColor );
-        mpBackgrDev->DrawLine( Point( nX1, nY ), Point( nX2, nY ) );
-        mpBackgrDev->DrawLine( Point( nX1 + 2, nY - 2 ), Point( nX1, nY ) );
-        mpBackgrDev->DrawLine( Point( nX1 + 2, nY + 2 ), Point( nX1, nY ) );
-        mpBackgrDev->DrawLine( Point( nX2, nY - 2 ), Point( nX2, nY ) );
+        Drawable::Draw(mpBackgrDev, LineDrawable(Point(nX1, nY), Point(nX2, nY)));
+        Drawable::Draw(mpBackgrDev, LineDrawable(Point(nX1 + 2, nY - 2), Point(nX1, nY)));
+        Drawable::Draw(mpBackgrDev, LineDrawable(Point(nX1 + 2, nY + 2), Point(nX1, nY)));
+        Drawable::Draw(mpBackgrDev, LineDrawable(Point(nX2, nY - 2), Point(nX2, nY)));
         ++nCharIx;
     }
 }
@@ -1136,7 +1137,7 @@ void ScCsvGrid::ImplDrawFirstLineSep( bool bSet )
         sal_Int32 nY = GetY( mnFirstImpLine );
         sal_Int32 nX = std::min( GetColumnX( GetLastVisColumn() + 1 ), GetLastX() );
         mpBackgrDev->SetLineColor( bSet ? maGridPBColor : maGridColor );
-        mpBackgrDev->DrawLine( Point( GetFirstX() + 1, nY ), Point( nX, nY ) );
+        Drawable::Draw(mpBackgrDev, LineDrawable(Point(GetFirstX() + 1, nY), Point(nX, nY)));
     }
 }
 
@@ -1158,7 +1159,7 @@ void ScCsvGrid::ImplDrawColumnBackgr( sal_uInt32 nColIndex )
     Drawable::Draw(mpBackgrDev, RectangleDrawable(aRect));
     mpBackgrDev->SetLineColor( maGridColor );
     Drawable::Draw(mpBackgrDev, GridRectDrawable(aRect, Size( 1, GetLineHeight() ), DrawGridFlags::HorzLines));
-    mpBackgrDev->DrawLine( Point( nX2, nHdrHt ), Point( nX2, nY2 ) );
+    Drawable::Draw(mpBackgrDev, LineDrawable(Point(nX2, nHdrHt), Point(nX2, nY2)));
     ImplDrawFirstLineSep( true );
 
     // cell texts
@@ -1215,11 +1216,14 @@ void ScCsvGrid::ImplDrawRowHeaders()
     mpBackgrDev->SetLineColor( maHeaderGridColor );
     if( IsRTL() )
     {
-        mpBackgrDev->DrawLine( Point( 0, 0 ), Point( 0, GetHeight() - 1 ) );
-        mpBackgrDev->DrawLine( aRect.TopLeft(), aRect.BottomLeft() );
+        Drawable::Draw(mpBackgrDev, LineDrawable(Point(0, 0), Point(0, GetHeight() - 1)));
+        Drawable::Draw(mpBackgrDev, LineDrawable(aRect.TopLeft(), aRect.BottomLeft()));
     }
     else
-        mpBackgrDev->DrawLine( aRect.TopRight(), aRect.BottomRight() );
+    {
+        Drawable::Draw(mpBackgrDev, LineDrawable(aRect.TopRight(), aRect.BottomRight()));
+    }
+
     aRect.SetTop( GetHdrHeight() );
     Drawable::Draw(mpBackgrDev, GridRectDrawable(aRect, Size(1, GetLineHeight()), DrawGridFlags::HorzLines));
 }

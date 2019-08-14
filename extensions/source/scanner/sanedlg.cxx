@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
 
 #include <stdio.h>
@@ -56,10 +57,10 @@ void DrawRectangles(vcl::RenderContext& rRenderContext, Point const & rUL, Point
     nMiddleX = (rBR.X() - rUL.X()) / 2 + rUL.X();
     nMiddleY = (rBR.Y() - rUL.Y()) / 2 + rUL.Y();
 
-    rRenderContext.DrawLine(rUL, aBL);
-    rRenderContext.DrawLine(aBL, rBR);
-    rRenderContext.DrawLine(rBR, aUR);
-    rRenderContext.DrawLine(aUR, rUL);
+    Drawable::Draw(&rRenderContext, LineDrawable(rUL, aBL));
+    Drawable::Draw(&rRenderContext, LineDrawable(aBL, rBR));
+    Drawable::Draw(&rRenderContext, LineDrawable(rBR, aUR));
+    Drawable::Draw(&rRenderContext, LineDrawable(aUR, rUL));
     Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(rUL, Size(RECT_SIZE_PIX,RECT_SIZE_PIX))));
     Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(aBL, Size(RECT_SIZE_PIX, -RECT_SIZE_PIX))));
     Drawable::Draw(&rRenderContext, RectangleDrawable(tools::Rectangle(rBR, Size(-RECT_SIZE_PIX, -RECT_SIZE_PIX))));

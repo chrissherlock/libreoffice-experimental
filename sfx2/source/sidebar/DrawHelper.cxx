@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RoundRectDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <sfx2/sidebar/DrawHelper.hxx>
 #include <sfx2/sidebar/Paint.hxx>
@@ -57,8 +58,8 @@ void DrawHelper::DrawHorizontalLine(vcl::RenderContext& rRenderContext, const sa
             rRenderContext.SetLineColor(aColor);
             for (sal_Int32 nYOffset = 0; nYOffset < nHeight; ++nYOffset)
             {
-                rRenderContext.DrawLine(Point(nLeft, nY + nYOffset),
-                                        Point(nRight, nY + nYOffset));
+                Drawable::Draw(&rRenderContext, LineDrawable(Point(nLeft, nY + nYOffset),
+                                        Point(nRight, nY + nYOffset)));
             }
             break;
         }
@@ -84,8 +85,8 @@ void DrawHelper::DrawVerticalLine(vcl::RenderContext& rRenderContext, const sal_
             rRenderContext.SetLineColor(aColor);
             for (sal_Int32 nXOffset = 0; nXOffset < nWidth; ++nXOffset)
             {
-                rRenderContext.DrawLine(Point(nX + nXOffset, nTop),
-                                        Point(nX + nXOffset, nBottom));
+                Drawable::Draw(&rRenderContext, LineDrawable(Point(nX + nXOffset, nTop),
+                                        Point(nX + nXOffset, nBottom)));
             }
             break;
         }

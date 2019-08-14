@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <algorithm>
 #include <cassert>
@@ -1186,11 +1187,11 @@ BitmapEx SdrHdlColor::CreateColorDropper(Color aCol)
     sal_Int32 nHeight = aMarkerSize.Height();
 
     pWrite->SetLineColor(COL_LIGHTGRAY);
-    pWrite->DrawLine(Point(0, 0), Point(0, nHeight - 1));
-    pWrite->DrawLine(Point(1, 0), Point(nWidth - 1, 0));
+    Drawable::Draw(pWrite, LineDrawable(Point(0, 0), Point(0, nHeight - 1)));
+    Drawable::Draw(pWrite, LineDrawable(Point(1, 0), Point(nWidth - 1, 0)));
     pWrite->SetLineColor(COL_GRAY);
-    pWrite->DrawLine(Point(1, nHeight - 1), Point(nWidth - 1, nHeight - 1));
-    pWrite->DrawLine(Point(nWidth - 1, 1), Point(nWidth - 1, nHeight - 2));
+    Drawable::Draw(pWrite, LineDrawable(Point(1, nHeight - 1), Point(nWidth - 1, nHeight - 1)));
+    Drawable::Draw(pWrite, LineDrawable(Point(nWidth - 1, 1), Point(nWidth - 1, nHeight - 2)));
 
     // draw lighter UpperLeft
     const Color aLightColor(
@@ -1198,8 +1199,8 @@ BitmapEx SdrHdlColor::CreateColorDropper(Color aCol)
         static_cast<sal_uInt8>(::std::min(static_cast<sal_Int16>(static_cast<sal_Int16>(aCol.GetGreen()) + sal_Int16(0x0040)), sal_Int16(0x00ff))),
         static_cast<sal_uInt8>(::std::min(static_cast<sal_Int16>(static_cast<sal_Int16>(aCol.GetBlue()) + sal_Int16(0x0040)), sal_Int16(0x00ff))));
     pWrite->SetLineColor(aLightColor);
-    pWrite->DrawLine(Point(1, 1), Point(1, nHeight - 2));
-    pWrite->DrawLine(Point(2, 1), Point(nWidth - 2, 1));
+    Drawable::Draw(pWrite, LineDrawable(Point(1, 1), Point(1, nHeight - 2)));
+    Drawable::Draw(pWrite, LineDrawable(Point(2, 1), Point(nWidth - 2, 1)));
 
     // draw darker LowerRight
     const Color aDarkColor(
@@ -1207,8 +1208,8 @@ BitmapEx SdrHdlColor::CreateColorDropper(Color aCol)
         static_cast<sal_uInt8>(::std::max(static_cast<sal_Int16>(static_cast<sal_Int16>(aCol.GetGreen()) - sal_Int16(0x0040)), sal_Int16(0x0000))),
         static_cast<sal_uInt8>(::std::max(static_cast<sal_Int16>(static_cast<sal_Int16>(aCol.GetBlue()) - sal_Int16(0x0040)), sal_Int16(0x0000))));
     pWrite->SetLineColor(aDarkColor);
-    pWrite->DrawLine(Point(2, nHeight - 2), Point(nWidth - 2, nHeight - 2));
-    pWrite->DrawLine(Point(nWidth - 2, 2), Point(nWidth - 2, nHeight - 3));
+    Drawable::Draw(pWrite, LineDrawable(Point(2, nHeight - 2), Point(nWidth - 2, nHeight - 2)));
+    Drawable::Draw(pWrite, LineDrawable(Point(nWidth - 2, 2), Point(nWidth - 2, nHeight - 3)));
 
     return pWrite->GetBitmapEx(Point(0,0), aMarkerSize);
 }

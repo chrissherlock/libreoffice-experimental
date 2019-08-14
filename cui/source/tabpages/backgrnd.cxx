@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <memory>
 #include <com/sun/star/drawing/FillStyle.hpp>
@@ -255,8 +256,8 @@ void BackgroundPreviewImpl::Paint(vcl::RenderContext& rRenderContext, const ::to
         else
         {
             Size aSize(GetOutputSizePixel());
-            rRenderContext.DrawLine(Point(0, 0), Point(aSize.Width(), aSize.Height()));
-            rRenderContext.DrawLine(Point(0, aSize.Height()), Point(aSize.Width(), 0));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(0, 0), Point(aSize.Width(), aSize.Height())));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(0, aSize.Height()), Point(aSize.Width(), 0)));
         }
     }
 }

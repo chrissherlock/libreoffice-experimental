@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <scitems.hxx>
 #include <editeng/eeitem.hxx>
@@ -557,7 +558,7 @@ void ScPreview::DoPrint( ScPreviewLocationData* pFillLocation )
                 SetFillColor( COL_BLACK );
                 Drawable::Draw(this,
                     RectangleDrawable(tools::Rectangle(Point(mvRight[i] - 2, aColumnTop.Y()),Point(mvRight[i] + 2, 4 + aColumnTop.Y()))));
-                DrawLine( Point( mvRight[i], aColumnTop.Y() ), Point( mvRight[i],  10 + aColumnTop.Y()) );
+                Drawable::Draw(this, LineDrawable(Point(mvRight[i], aColumnTop.Y()), Point( mvRight[i],  10 + aColumnTop.Y())));
             }
             SetMapMode( aMMMode );
         }

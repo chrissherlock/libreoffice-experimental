@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <svx/zoomsliderctrl.hxx>
 #include <vcl/status.hxx>
@@ -251,7 +252,7 @@ void SvxZoomSliderControl::Paint( const UserDrawEvent& rUsrEvt )
     Drawable::Draw(pDev, RectangleDrawable(aSlider));
     // shadow
     pDev->SetLineColor( rStyleSettings.GetShadowColor() );
-    pDev->DrawLine(Point(aSlider.Left()+1,aSlider.Bottom()+1), Point(aSlider.Right()+1,aSlider.Bottom()+1));
+    Drawable::Draw(pDev, LineDrawable(Point(aSlider.Left()+1,aSlider.Bottom()+1), Point(aSlider.Right()+1,aSlider.Bottom()+1)));
     pDev->SetLineColor( rStyleSettings.GetDarkShadowColor() );
 
     // draw snapping points:

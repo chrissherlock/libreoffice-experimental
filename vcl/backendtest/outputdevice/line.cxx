@@ -8,6 +8,8 @@
  *
  */
 
+#include <vcl/drawables/LineDrawable.hxx>
+
 #include <test/outputdevice.hxx>
 
 namespace vcl {
@@ -23,10 +25,10 @@ void drawLineOffset(OutputDevice& rDevice, tools::Rectangle const & rRect, int n
     Point aLeftBottom  (rRect.Left()  + nOffset, rRect.Bottom() - nOffset);
     Point aRightBottom (rRect.Right() - nOffset, rRect.Bottom() - nOffset);
 
-    rDevice.DrawLine(aLeftTop,     aRightTop);
-    rDevice.DrawLine(aRightTop,    aRightBottom);
-    rDevice.DrawLine(aRightBottom, aLeftBottom);
-    rDevice.DrawLine(aLeftBottom,  aLeftTop);
+    Drawable::Draw(&rDevice, LineDrawable(aLeftTop,     aRightTop));
+    Drawable::Draw(&rDevice, LineDrawable(aRightTop,    aRightBottom));
+    Drawable::Draw(&rDevice, LineDrawable(aRightBottom, aLeftBottom));
+    Drawable::Draw(&rDevice, LineDrawable(aLeftBottom,  aLeftTop));
 }
 
 } // end anonymous namespace
@@ -54,10 +56,10 @@ Bitmap OutputDeviceTestLine::setupDiamond()
     Point aPoint1, aPoint2, aPoint3, aPoint4;
     OutputDeviceTestCommon::createDiamondPoints(maVDRectangle, 4, aPoint1, aPoint2, aPoint3, aPoint4);
 
-    mpVirtualDevice->DrawLine(aPoint1, aPoint2);
-    mpVirtualDevice->DrawLine(aPoint2, aPoint3);
-    mpVirtualDevice->DrawLine(aPoint3, aPoint4);
-    mpVirtualDevice->DrawLine(aPoint4, aPoint1);
+    Drawable::Draw(mpVirtualDevice, LineDrawable(aPoint1, aPoint2));
+    Drawable::Draw(mpVirtualDevice, LineDrawable(aPoint2, aPoint3));
+    Drawable::Draw(mpVirtualDevice, LineDrawable(aPoint3, aPoint4));
+    Drawable::Draw(mpVirtualDevice, LineDrawable(aPoint4, aPoint1));
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
 }
@@ -78,9 +80,9 @@ Bitmap OutputDeviceTestLine::setupLines()
                                          aVerticalLinePoint1,   aVerticalLinePoint2,
                                          aDiagonalLinePoint1,   aDiagonalLinePoint2);
 
-    mpVirtualDevice->DrawLine(aHorizontalLinePoint1, aHorizontalLinePoint2);
-    mpVirtualDevice->DrawLine(aVerticalLinePoint1,   aVerticalLinePoint2);
-    mpVirtualDevice->DrawLine(aDiagonalLinePoint1,   aDiagonalLinePoint2);
+    Drawable::Draw(mpVirtualDevice, LineDrawable(aHorizontalLinePoint1, aHorizontalLinePoint2));
+    Drawable::Draw(mpVirtualDevice, LineDrawable(aVerticalLinePoint1,   aVerticalLinePoint2));
+    Drawable::Draw(mpVirtualDevice, LineDrawable(aDiagonalLinePoint1,   aDiagonalLinePoint2));
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
 }
@@ -102,9 +104,9 @@ Bitmap OutputDeviceTestLine::setupAALines()
                                          aVerticalLinePoint1,   aVerticalLinePoint2,
                                          aDiagonalLinePoint1,   aDiagonalLinePoint2);
 
-    mpVirtualDevice->DrawLine(aHorizontalLinePoint1, aHorizontalLinePoint2);
-    mpVirtualDevice->DrawLine(aVerticalLinePoint1,   aVerticalLinePoint2);
-    mpVirtualDevice->DrawLine(aDiagonalLinePoint1,   aDiagonalLinePoint2);
+    Drawable::Draw(mpVirtualDevice, LineDrawable(aHorizontalLinePoint1, aHorizontalLinePoint2));
+    Drawable::Draw(mpVirtualDevice, LineDrawable(aVerticalLinePoint1,   aVerticalLinePoint2));
+    Drawable::Draw(mpVirtualDevice, LineDrawable(aDiagonalLinePoint1,   aDiagonalLinePoint2));
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
 }

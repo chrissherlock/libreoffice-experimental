@@ -19,6 +19,7 @@
 
 #include <sal/config.h>
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <utility>
 
@@ -209,10 +210,10 @@ namespace vclcanvas
             const Point aEndPoint( tools::mapRealPoint2D( aEndRealPoint2D,
                                                           viewState, renderState ) );
             // TODO(F2): alpha
-            mpOutDevProvider->getOutDev().DrawLine( aStartPoint, aEndPoint );
+            Drawable::Draw(&mpOutDevProvider->getOutDev(), LineDrawable(aStartPoint, aEndPoint));
 
             if( mp2ndOutDevProvider )
-                mp2ndOutDevProvider->getOutDev().DrawLine( aStartPoint, aEndPoint );
+                Drawable::Draw(&mp2ndOutDevProvider->getOutDev(), LineDrawable(aStartPoint, aEndPoint));
         }
     }
 
@@ -431,9 +432,9 @@ namespace vclcanvas
 
                         for( sal_uInt16 j=1; j<nPolySize; j++ ) {
                             rPoint = aVCLPolyPoly[i].GetPoint( j );
-                            mpOutDevProvider->getOutDev().DrawLine( rPrevPoint, rPoint );
+                            Drawable::Draw(&mpOutDevProvider->getOutDev(), LineDrawable( rPrevPoint, rPoint));
                             if( mp2ndOutDevProvider )
-                                mp2ndOutDevProvider->getOutDev().DrawLine( rPrevPoint, rPoint );
+                                Drawable::Draw(&mp2ndOutDevProvider->getOutDev(), LineDrawable(rPrevPoint, rPoint));
                             rPrevPoint = rPoint;
                         }
                     }

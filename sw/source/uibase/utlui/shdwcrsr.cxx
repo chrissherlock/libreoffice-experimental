@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/RectangleDrawable.hxx>
+
 #include <com/sun/star/text/HoriOrientation.hpp>
 #include <vcl/window.hxx>
 #include <swtypes.hxx>
@@ -59,7 +61,7 @@ void SwShadowCursor::DrawTri( const Point& rPt, long nHeight, bool bLeft )
     long nDiff = bLeft ? -1 : 1;
     while( aPt1.Y() <= aPt2.Y() )
     {
-        pWin->DrawLine( aPt1, aPt2 );
+        Drawable::Draw(pWin, LineDrawable(aPt1, aPt2));
         aPt1.AdjustY( 1 );
         aPt2.AdjustY( -1 );
         aPt2.setX( aPt1.AdjustX(nDiff ) );
@@ -78,8 +80,8 @@ void SwShadowCursor::DrawCursor( const Point& rPt, long nHeight, sal_uInt16 nMod
     pWin->SetLineColor( Color( sal_uInt32(aCol) ^ sal_uInt32(COL_WHITE) ) );
 
     // 1. The Line:
-    pWin->DrawLine( Point( rPt.X(), rPt.Y() + 1),
-              Point( rPt.X(), rPt.Y() - 2 + nHeight ));
+    Drawable::Draw(pWin, LineDrawable(Point(rPt.X(), rPt.Y() + 1),
+              Point(rPt.X(), rPt.Y() - 2 + nHeight)));
 
     // 2. The Triangle
     if( text::HoriOrientation::LEFT == nMode || text::HoriOrientation::CENTER == nMode )    // Arrow to the right

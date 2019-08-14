@@ -21,6 +21,7 @@
 #include <vcl/drawables/PixelDrawable.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/drawables/RoundRectDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/pngwrite.hxx>
 #if HAVE_FEATURE_OPENGL
 #include <vcl/opengl/OpenGLHelper.hxx>
@@ -437,7 +438,7 @@ void SvmTest::testLine()
     ScopedVclPtrInstance<VirtualDevice> pVirtualDev;
     setupBaseVirtualDevice(*pVirtualDev, aGDIMetaFile);
 
-    pVirtualDev->DrawLine(Point(1, 1), Point(8, 8));
+    Drawable::Draw(pVirtualDev, LineDrawable(Point(1, 1), Point(8, 8)));
     LineInfo aLineInfo(LineStyle::Dash, 7);
     aLineInfo.SetDashLen(5);
     aLineInfo.SetDashCount(4);
@@ -446,7 +447,7 @@ void SvmTest::testLine()
     aLineInfo.SetDistance(1);
     aLineInfo.SetLineJoin(basegfx::B2DLineJoin::Miter);
     aLineInfo.SetLineCap(css::drawing::LineCap_ROUND);
-    pVirtualDev->DrawLine(Point(1, 8), Point(8, 1), aLineInfo);
+    Drawable::Draw(pVirtualDev, LineDrawable(Point(1, 8), Point(8, 1), aLineInfo));
 
     checkLine(writeAndRead(aGDIMetaFile, "line.svm"));
 }
@@ -1492,13 +1493,13 @@ void SvmTest::testPushPop()
     pVirtualDev->SetLineColor(COL_YELLOW);
     pVirtualDev->Push();
     pVirtualDev->SetLineColor(COL_RED);
-    pVirtualDev->DrawLine(Point(4,4), Point(6,6));
+    Drawable::Draw(pVirtualDev, LineDrawable(Point(4,4), Point(6,6)));
     pVirtualDev->Push(PushFlags::FILLCOLOR | PushFlags::LINECOLOR);
     pVirtualDev->SetLineColor(COL_LIGHTRED);
-    pVirtualDev->DrawLine(Point(5,5), Point(7,7));
+    Drawable::Draw(pVirtualDev, LineDrawable(Point(5,5), Point(7,7)));
     pVirtualDev->Pop();
     pVirtualDev->Pop();
-    pVirtualDev->DrawLine(Point(1,1), Point(8,8));
+    Drawable::Draw(pVirtualDev, LineDrawable(Point(1,1), Point(8,8)));
 
     checkPushPop(writeAndRead(aGDIMetaFile, "pushpop.svm"));
 }

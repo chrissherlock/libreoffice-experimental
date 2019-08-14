@@ -20,6 +20,7 @@
 #include <comphelper/lok.hxx>
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/decoview.hxx>
 #include <vcl/svapp.hxx>
@@ -131,13 +132,13 @@ void ScDDComboBoxButton::ImpDrawArrow( const tools::Rectangle& rRect )
     Point aPos2( aCenter.X()+aSize3.Width(), aCenter.Y() );
     while( aPos1.X() <= aPos2.X() )
     {
-        pOut->DrawLine( aPos1, aPos2 );
+        Drawable::Draw(pOut, LineDrawable(aPos1, aPos2));
         aPos1.AdjustX( 1 ); aPos2.AdjustX( -1 );
         aPos1.AdjustY( 1 ); aPos2.AdjustY( 1 );
     }
 
-    pOut->DrawLine( Point( aCenter.X() - aSize3.Width(), aPos1.Y()+1 ),
-                    Point( aCenter.X() + aSize3.Width(), aPos1.Y()+1 ) );
+    Drawable::Draw(pOut, LineDrawable(Point(aCenter.X() - aSize3.Width(), aPos1.Y()+1),
+                    Point(aCenter.X() + aSize3.Width(), aPos1.Y()+1)));
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

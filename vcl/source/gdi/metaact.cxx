@@ -29,6 +29,7 @@
 #include <vcl/drawables/PixelDrawable.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/drawables/RoundRectDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/dibtools.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/metaact.hxx>
@@ -391,9 +392,9 @@ MetaLineAction::MetaLineAction( const Point& rStart, const Point& rEnd,
 void MetaLineAction::Execute( OutputDevice* pOut )
 {
     if( maLineInfo.IsDefault() )
-        pOut->DrawLine( maStartPt, maEndPt );
+        Drawable::Draw(pOut, LineDrawable(maStartPt, maEndPt));
     else
-        pOut->DrawLine( maStartPt, maEndPt, maLineInfo );
+        Drawable::Draw(pOut, LineDrawable(maStartPt, maEndPt, maLineInfo));
 }
 
 rtl::Reference<MetaAction> MetaLineAction::Clone()

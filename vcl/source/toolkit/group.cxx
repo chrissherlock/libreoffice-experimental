@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/event.hxx>
 #include <vcl/toolkit/group.hxx>
 #include <vcl/settings.hxx>
@@ -133,15 +134,15 @@ void GroupBox::ImplDraw( OutputDevice* pDev, DrawFlags nDrawFlags,
             pDev->SetLineColor( rStyleSettings.GetShadowColor() );
 
         if (aText.isEmpty())
-            pDev->DrawLine( Point( rPos.X(), nTop ), Point( rPos.X()+rSize.Width()-2, nTop ) );
+            Drawable::Draw(pDev, LineDrawable(Point(rPos.X(), nTop), Point(rPos.X()+rSize.Width()-2, nTop)));
         else
         {
-            pDev->DrawLine( Point( rPos.X(), nTop ), Point( aRect.Left()-nTextOff, nTop ) );
-            pDev->DrawLine( Point( aRect.Right()+nTextOff, nTop ), Point( rPos.X()+rSize.Width()-2, nTop ) );
+            Drawable::Draw(pDev, LineDrawable(Point(rPos.X(), nTop), Point(aRect.Left()-nTextOff, nTop)));
+            Drawable::Draw(pDev, LineDrawable(Point(aRect.Right()+nTextOff, nTop), Point(rPos.X()+rSize.Width()-2, nTop)));
         }
-        pDev->DrawLine( Point( rPos.X(), nTop ), Point( rPos.X(), rPos.Y()+rSize.Height()-2 ) );
-        pDev->DrawLine( Point( rPos.X(), rPos.Y()+rSize.Height()-2 ), Point( rPos.X()+rSize.Width()-2, rPos.Y()+rSize.Height()-2 ) );
-        pDev->DrawLine( Point( rPos.X()+rSize.Width()-2, rPos.Y()+rSize.Height()-2 ), Point( rPos.X()+rSize.Width()-2, nTop ) );
+        Drawable::Draw(pDev, LineDrawable(Point(rPos.X(), nTop ), Point( rPos.X(), rPos.Y()+rSize.Height()-2 ) ));
+        Drawable::Draw(pDev, LineDrawable(Point(rPos.X(), rPos.Y()+rSize.Height()-2 ), Point( rPos.X()+rSize.Width()-2, rPos.Y()+rSize.Height()-2 ) ));
+        Drawable::Draw(pDev, LineDrawable(Point(rPos.X()+rSize.Width()-2, rPos.Y()+rSize.Height()-2 ), Point( rPos.X()+rSize.Width()-2, nTop ) ));
 
         bool bIsPrinter = OUTDEV_PRINTER == pDev->GetOutDevType();
         // if we're drawing onto a printer, spare the 3D effect #i46986#
@@ -150,15 +151,15 @@ void GroupBox::ImplDraw( OutputDevice* pDev, DrawFlags nDrawFlags,
         {
             pDev->SetLineColor( rStyleSettings.GetLightColor() );
             if (aText.isEmpty())
-                pDev->DrawLine( Point( rPos.X()+1, nTop+1 ), Point( rPos.X()+rSize.Width()-3, nTop+1 ) );
+                Drawable::Draw(pDev, LineDrawable(Point( rPos.X()+1, nTop+1), Point( rPos.X()+rSize.Width()-3, nTop+1)));
             else
             {
-                pDev->DrawLine( Point( rPos.X()+1, nTop+1 ), Point( aRect.Left()-nTextOff, nTop+1 ) );
-                pDev->DrawLine( Point( aRect.Right()+nTextOff, nTop+1 ), Point( rPos.X()+rSize.Width()-3, nTop+1 ) );
+                Drawable::Draw(pDev, LineDrawable(Point( rPos.X()+1, nTop+1), Point( aRect.Left()-nTextOff, nTop+1)));
+                Drawable::Draw(pDev, LineDrawable(Point( aRect.Right()+nTextOff, nTop+1), Point( rPos.X()+rSize.Width()-3, nTop+1)));
             }
-            pDev->DrawLine( Point( rPos.X()+1, nTop+1 ), Point( rPos.X()+1, rPos.Y()+rSize.Height()-3 ) );
-            pDev->DrawLine( Point( rPos.X(), rPos.Y()+rSize.Height()-1 ), Point( rPos.X()+rSize.Width()-1, rPos.Y()+rSize.Height()-1 ) );
-            pDev->DrawLine( Point( rPos.X()+rSize.Width()-1, rPos.Y()+rSize.Height()-1 ), Point( rPos.X()+rSize.Width()-1, nTop ) );
+            Drawable::Draw(pDev, LineDrawable(Point(rPos.X()+1, nTop+1), Point(rPos.X()+1, rPos.Y()+rSize.Height()-3)));
+            Drawable::Draw(pDev, LineDrawable(Point(rPos.X(), rPos.Y()+rSize.Height()-1), Point(rPos.X()+rSize.Width()-1, rPos.Y()+rSize.Height()-1)));
+            Drawable::Draw(pDev, LineDrawable(Point(rPos.X()+rSize.Width()-1, rPos.Y()+rSize.Height()-1), Point(rPos.X()+rSize.Width()-1, nTop)));
         }
     }
 

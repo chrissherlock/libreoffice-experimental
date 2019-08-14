@@ -22,6 +22,7 @@
 #include <vcl/menu.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/event.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <svdata.hxx>
 
@@ -194,12 +195,12 @@ void DockingAreaWindow::Paint(vcl::RenderContext& rRenderContext, const tools::R
                         tools::Rectangle aRect(aPos, aSize);
 
                         rRenderContext.SetLineColor(rRenderContext.GetSettings().GetStyleSettings().GetLightColor());
-                        rRenderContext.DrawLine(aRect.TopLeft(), aRect.TopRight());
-                        rRenderContext.DrawLine(aRect.TopLeft(), aRect.BottomLeft());
+                        Drawable::Draw(&rRenderContext, LineDrawable(aRect.TopLeft(), aRect.TopRight()));
+                        Drawable::Draw(&rRenderContext, LineDrawable(aRect.TopLeft(), aRect.BottomLeft()));
 
                         rRenderContext.SetLineColor(rRenderContext.GetSettings().GetStyleSettings().GetSeparatorColor());
-                        rRenderContext.DrawLine(aRect.BottomLeft(), aRect.BottomRight());
-                        rRenderContext.DrawLine(aRect.TopRight(), aRect.BottomRight());
+                        Drawable::Draw(&rRenderContext, LineDrawable(aRect.BottomLeft(), aRect.BottomRight()));
+                        Drawable::Draw(&rRenderContext, LineDrawable(aRect.TopRight(), aRect.BottomRight()));
                     }
                 }
             }

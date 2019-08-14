@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <view/SlsPageObjectPainter.hxx>
 
@@ -411,9 +412,9 @@ void PageObjectPainter::PaintBackgroundDetail (
                 aColor.Merge(aBottomColor, 255 * (nY2-nY) / (nY2-nY1));
                 rDevice.SetLineColor(aColor);
             }
-            rDevice.DrawLine(
+            Drawable::Draw(&rDevice, LineDrawable(
                 Point(aPageObjectBox.Left(), nY+nTop),
-                Point(aPageObjectBox.Right(), nY+nTop));
+                Point(aPageObjectBox.Right(), nY+nTop)));
         }
     }
     else
@@ -449,20 +450,20 @@ void PageObjectPainter::PaintBorder (
     {
         const int nDelta (nIndex);
         rDevice.SetLineColor(mpTheme->GetGradientColor(eColorType, Theme::GradientColorClass::Border2));
-        rDevice.DrawLine(
+        Drawable::Draw(&rDevice, LineDrawable(
             Point(rBox.Left()-nDelta, rBox.Top()-nDelta),
-            Point(rBox.Left()-nDelta, rBox.Bottom()+nDelta));
-        rDevice.DrawLine(
+            Point(rBox.Left()-nDelta, rBox.Bottom()+nDelta)));
+        Drawable::Draw(&rDevice, LineDrawable(
             Point(rBox.Left()-nDelta, rBox.Bottom()+nDelta),
-            Point(rBox.Right()+nDelta, rBox.Bottom()+nDelta));
-        rDevice.DrawLine(
+            Point(rBox.Right()+nDelta, rBox.Bottom()+nDelta)));
+        Drawable::Draw(&rDevice, LineDrawable(
             Point(rBox.Right()+nDelta, rBox.Bottom()+nDelta),
-            Point(rBox.Right()+nDelta, rBox.Top()-nDelta));
+            Point(rBox.Right()+nDelta, rBox.Top()-nDelta)));
 
         rDevice.SetLineColor(mpTheme->GetGradientColor(eColorType, Theme::GradientColorClass::Border1));
-        rDevice.DrawLine(
+        Drawable::Draw(&rDevice, LineDrawable(
             Point(rBox.Left()-nDelta, rBox.Top()-nDelta),
-            Point(rBox.Right()+nDelta, rBox.Top()-nDelta));
+            Point(rBox.Right()+nDelta, rBox.Top()-nDelta)));
     }
 }
 

@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <osl/diagnose.h>
 #include <svx/dialmgr.hxx>
@@ -184,10 +185,10 @@ void  SvxNumValueSet::UserDraw( const UserDrawEvent& rUDEvt )
             {
                 aStart.setY( aBLPos.Y() + nRectHeight  * i / 100 );
                 aEnd.setY( aStart.Y() );
-                pVDev->DrawLine(aStart, aEnd);
+                Drawable::Draw(pVDev, LineDrawable(aStart, aEnd));
                 aStart.setY( aBLPos.Y() + nRectHeight  * (i + 11) / 100 );
                 aEnd.setY( aStart.Y() );
-                pVDev->DrawLine(aStart, aEnd);
+                Drawable::Draw(pVDev, LineDrawable(aStart, aEnd));
             }
         }
     }
@@ -349,7 +350,7 @@ void  SvxNumValueSet::UserDraw( const UserDrawEvent& rUDEvt )
                     Point aLineLeft(aLeft.X(), nLineTop );
                     Point aLineRight(nStartX + nRectWidth * 90 /100, nLineTop );
                     pVDev->SetLineColor(COL_LIGHTGRAY);
-                    pVDev->DrawLine(aLineLeft,  aLineRight);
+                    Drawable::Draw(pVDev, LineDrawable(aLineLeft,  aLineRight));
                 }
 
             }
@@ -559,10 +560,10 @@ void NumValueSet::UserDraw( const UserDrawEvent& rUDEvt )
             {
                 aStart.setY( aBLPos.Y() + nRectHeight  * i / 100 );
                 aEnd.setY( aStart.Y() );
-                pVDev->DrawLine(aStart, aEnd);
+                Drawable::Draw(pVDev, LineDrawable(aStart, aEnd));
                 aStart.setY( aBLPos.Y() + nRectHeight  * (i + 11) / 100 );
                 aEnd.setY( aStart.Y() );
-                pVDev->DrawLine(aStart, aEnd);
+                Drawable::Draw(pVDev, LineDrawable(aStart, aEnd));
             }
         }
     }
@@ -724,7 +725,7 @@ void NumValueSet::UserDraw( const UserDrawEvent& rUDEvt )
                     Point aLineLeft(aLeft.X(), nLineTop );
                     Point aLineRight(nStartX + nRectWidth * 90 /100, nLineTop );
                     pVDev->SetLineColor(COL_LIGHTGRAY);
-                    pVDev->DrawLine(aLineLeft,  aLineRight);
+                    Drawable::Draw(pVDev, LineDrawable(aLineLeft,  aLineRight));
                 }
 
             }

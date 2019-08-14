@@ -20,6 +20,7 @@
 #include <sal/config.h>
 
 #include <vcl/drawables/GridRectDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/outdev.hxx>
 
@@ -123,7 +124,7 @@ void ScGridMerger::AddHorLine(bool bWorksInPixels, long nX1, long nX2, long nY, 
         aLineInfo.SetDistance( aDashDistanceLen.Width() );
         aLineInfo.SetDashLen( aDashDistanceLen.Height() );
 
-        pDev->DrawLine( Point( nX1, nY ), Point( nX2, nY ), aLineInfo );
+        Drawable::Draw(pDev, LineDrawable( Point( nX1, nY ), Point( nX2, nY ), aLineInfo ));
     }
     else if ( bOptimize )
     {
@@ -135,7 +136,9 @@ void ScGridMerger::AddHorLine(bool bWorksInPixels, long nX1, long nX2, long nY, 
         AddLine( nX1, nX2, nY );
     }
     else
-        pDev->DrawLine( Point( nX1, nY ), Point( nX2, nY ) );
+    {
+        Drawable::Draw(pDev, LineDrawable( Point( nX1, nY ), Point( nX2, nY ) ));
+    }
 }
 
 void ScGridMerger::AddVerLine(bool bWorksInPixels, long nX, long nY1, long nY2, bool bDashed)
@@ -167,7 +170,7 @@ void ScGridMerger::AddVerLine(bool bWorksInPixels, long nX, long nY1, long nY2, 
         aLineInfo.SetDistance( aDashDistanceLen.Width() );
         aLineInfo.SetDashLen( aDashDistanceLen.Height() );
 
-        pDev->DrawLine( Point( nX, nY1 ), Point( nX, nY2 ), aLineInfo);
+        Drawable::Draw(pDev, LineDrawable( Point( nX, nY1 ), Point( nX, nY2 ), aLineInfo));
     }
     else if ( bOptimize )
     {
@@ -179,7 +182,7 @@ void ScGridMerger::AddVerLine(bool bWorksInPixels, long nX, long nY1, long nY2, 
         AddLine( nY1, nY2, nX );
     }
     else
-        pDev->DrawLine( Point( nX, nY1 ), Point( nX, nY2 ) );
+        Drawable::Draw(pDev, LineDrawable( Point( nX, nY1 ), Point( nX, nY2 ) ));
 }
 
 void ScGridMerger::Flush()
@@ -189,7 +192,7 @@ void ScGridMerger::Flush()
         if (bVertical)
         {
             if ( nCount == 1 )
-                pDev->DrawLine( Point( nVarStart, nFixStart ), Point( nVarStart, nFixEnd ) );
+                Drawable::Draw(pDev, LineDrawable( Point( nVarStart, nFixStart ), Point( nVarStart, nFixEnd ) ));
             else
             {
                 long nVarEnd = nVarStart + ( nCount - 1 ) * nVarDiff;
@@ -213,7 +216,7 @@ void ScGridMerger::Flush()
         else
         {
             if ( nCount == 1 )
-                pDev->DrawLine( Point( nFixStart, nVarStart ), Point( nFixEnd, nVarStart ) );
+                Drawable::Draw(pDev, LineDrawable( Point( nFixStart, nVarStart ), Point( nFixEnd, nVarStart ) ));
             else
             {
                 long nVarEnd = nVarStart + ( nCount - 1 ) * nVarDiff;

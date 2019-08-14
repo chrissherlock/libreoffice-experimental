@@ -22,6 +22,7 @@
 
 #include <vcl/drawables/PixelDrawable.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/help.hxx>
 #include <vcl/image.hxx>
@@ -243,25 +244,25 @@ void HeaderBar::ImplInvertDrag( sal_uInt16 nStartPos, sal_uInt16 nEndPos )
 
     SetRasterOp( RasterOp::Invert );
     Drawable::Draw(this, RectangleDrawable(aStartRect));
-    DrawLine( aStartPos, aEndPos );
+    Drawable::Draw(this, LineDrawable(aStartPos, aEndPos));
     if ( nEndPos > nStartPos )
     {
-        DrawLine( Point( aEndPos.X()+1, aEndPos.Y()-3 ),
-                  Point( aEndPos.X()+1, aEndPos.Y()+3 ) );
-        DrawLine( Point( aEndPos.X()+2, aEndPos.Y()-2 ),
-                  Point( aEndPos.X()+2, aEndPos.Y()+2 ) );
-        DrawLine( Point( aEndPos.X()+3, aEndPos.Y()-1 ),
-                  Point( aEndPos.X()+3, aEndPos.Y()+1 ) );
+        Drawable::Draw(this, LineDrawable(Point(aEndPos.X()+1, aEndPos.Y()-3),
+                  Point(aEndPos.X()+1, aEndPos.Y()+3)));
+        Drawable::Draw(this, LineDrawable( Point(aEndPos.X()+2, aEndPos.Y()-2),
+                  Point(aEndPos.X()+2, aEndPos.Y()+2)));
+        Drawable::Draw(this, LineDrawable( Point(aEndPos.X()+3, aEndPos.Y()-1),
+                  Point(aEndPos.X()+3, aEndPos.Y()+1)));
         Drawable::Draw(this, PixelDrawable(Point(aEndPos.X()+4, aEndPos.Y())));
     }
     else
     {
-        DrawLine( Point( aEndPos.X()-1, aEndPos.Y()-3 ),
-                  Point( aEndPos.X()-1, aEndPos.Y()+3 ) );
-        DrawLine( Point( aEndPos.X()-2, aEndPos.Y()-2 ),
-                  Point( aEndPos.X()-2, aEndPos.Y()+2 ) );
-        DrawLine( Point( aEndPos.X()-3, aEndPos.Y()-1 ),
-                  Point( aEndPos.X()-3, aEndPos.Y()+1 ) );
+        Drawable::Draw(this, LineDrawable(Point(aEndPos.X()-1, aEndPos.Y()-3),
+                  Point(aEndPos.X()-1, aEndPos.Y()+3)));
+        Drawable::Draw(this, LineDrawable(Point(aEndPos.X()-2, aEndPos.Y()-2),
+                  Point(aEndPos.X()-2, aEndPos.Y()+2)));
+        Drawable::Draw(this, LineDrawable(Point(aEndPos.X()-3, aEndPos.Y()-1),
+                  Point(aEndPos.X()-3, aEndPos.Y()+1)));
         Drawable::Draw(this, PixelDrawable(Point(aEndPos.X()-4, aEndPos.Y())));
     }
     SetRasterOp( RasterOp::OverPaint );
@@ -336,7 +337,7 @@ void HeaderBar::ImplDrawItem(vcl::RenderContext& rRenderContext, sal_uInt16 nPos
     {
         // draw separation line
         rRenderContext.SetLineColor(rStyleSettings.GetDarkShadowColor());
-        rRenderContext.DrawLine(Point(aRect.Right(), aRect.Top()), Point(aRect.Right(), aRect.Bottom()));
+        Drawable::Draw(&rRenderContext, LineDrawable(Point(aRect.Right(), aRect.Top()), Point(aRect.Right(), aRect.Bottom())));
 
         // draw ButtonStyle
         // avoid 3D borders
@@ -548,24 +549,24 @@ void HeaderBar::ImplDrawItem(vcl::RenderContext& rRenderContext, sal_uInt16 nPos
         if (nBits & HeaderBarItemBits::DOWNARROW)
         {
             rRenderContext.SetLineColor(rStyleSettings.GetLightColor());
-            rRenderContext.DrawLine(Point(nArrowX, nArrowY),
-                                    Point(nArrowX + HEAD_ARROWSIZE2, nArrowY));
-            rRenderContext.DrawLine(Point(nArrowX, nArrowY),
-                                    Point(nArrowX + HEAD_ARROWSIZE1, nArrowY + HEAD_ARROWSIZE2));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(nArrowX, nArrowY),
+                                    Point(nArrowX + HEAD_ARROWSIZE2, nArrowY)));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(nArrowX, nArrowY),
+                                    Point(nArrowX + HEAD_ARROWSIZE1, nArrowY + HEAD_ARROWSIZE2)));
             rRenderContext.SetLineColor(rStyleSettings.GetShadowColor());
-            rRenderContext.DrawLine(Point(nArrowX + HEAD_ARROWSIZE1, nArrowY + HEAD_ARROWSIZE2),
-                                    Point(nArrowX + HEAD_ARROWSIZE2, nArrowY));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(nArrowX + HEAD_ARROWSIZE1, nArrowY + HEAD_ARROWSIZE2),
+                                    Point(nArrowX + HEAD_ARROWSIZE2, nArrowY)));
         }
         else
         {
             rRenderContext.SetLineColor(rStyleSettings.GetLightColor());
-            rRenderContext.DrawLine(Point(nArrowX, nArrowY + HEAD_ARROWSIZE2),
-                                    Point(nArrowX + HEAD_ARROWSIZE1, nArrowY));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(nArrowX, nArrowY + HEAD_ARROWSIZE2),
+                                    Point(nArrowX + HEAD_ARROWSIZE1, nArrowY)));
             rRenderContext.SetLineColor(rStyleSettings.GetShadowColor());
-            rRenderContext.DrawLine(Point(nArrowX, nArrowY + HEAD_ARROWSIZE2),
-                                    Point(nArrowX + HEAD_ARROWSIZE2, nArrowY + HEAD_ARROWSIZE2));
-            rRenderContext.DrawLine(Point(nArrowX + HEAD_ARROWSIZE2, nArrowY + HEAD_ARROWSIZE2),
-                                    Point(nArrowX + HEAD_ARROWSIZE1, nArrowY));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(nArrowX, nArrowY + HEAD_ARROWSIZE2),
+                                    Point(nArrowX + HEAD_ARROWSIZE2, nArrowY + HEAD_ARROWSIZE2)));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(nArrowX + HEAD_ARROWSIZE2, nArrowY + HEAD_ARROWSIZE2),
+                                    Point(nArrowX + HEAD_ARROWSIZE1, nArrowY)));
         }
     }
 }
@@ -872,14 +873,14 @@ void HeaderBar::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle
     {
         rRenderContext.SetLineColor(rRenderContext.GetSettings().GetStyleSettings().GetDarkShadowColor());
         if (mnBorderOff1)
-            rRenderContext.DrawLine(Point(0, 0), Point(mnDX - 1, 0));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(0, 0), Point(mnDX - 1, 0)));
         if (mnBorderOff2)
-            rRenderContext.DrawLine(Point(0, mnDY - 1), Point(mnDX - 1, mnDY - 1));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(0, mnDY - 1), Point(mnDX - 1, mnDY - 1)));
         // #i40393# draw left and right border, if WB_BORDER was set in ImplInit()
         if (mnBorderOff1 && mnBorderOff2)
         {
-            rRenderContext.DrawLine(Point(0, 0), Point(0, mnDY - 1));
-            rRenderContext.DrawLine(Point(mnDX - 1, 0), Point(mnDX - 1, mnDY - 1));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(0, 0), Point(0, mnDY - 1)));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(mnDX - 1, 0), Point(mnDX - 1, mnDY - 1)));
         }
     }
 
@@ -917,14 +918,16 @@ void HeaderBar::Draw( OutputDevice* pDev, const Point& rPos, const Size& rSize,
         {
             pDev->SetLineColor( GetSettings().GetStyleSettings().GetDarkShadowColor() );
             if ( mnBorderOff1 )
-                pDev->DrawLine( aRect.TopLeft(), Point( aRect.Right(), aRect.Top() ) );
+                Drawable::Draw(pDev, LineDrawable(aRect.TopLeft(), Point(aRect.Right(), aRect.Top())));
+
             if ( mnBorderOff2 )
-                pDev->DrawLine( Point( aRect.Left(), aRect.Bottom() ), Point( aRect.Right(), aRect.Bottom() ) );
+                Drawable::Draw(pDev, LineDrawable(Point(aRect.Left(), aRect.Bottom()), Point(aRect.Right(), aRect.Bottom())));
+
             // #i40393# draw left and right border, if WB_BORDER was set in ImplInit()
             if ( mnBorderOff1 && mnBorderOff2 )
             {
-                pDev->DrawLine( aRect.TopLeft(), Point( aRect.Left(), aRect.Bottom() ) );
-                pDev->DrawLine( Point( aRect.Right(), aRect.Top() ), Point( aRect.Right(), aRect.Bottom() ) );
+                Drawable::Draw(pDev, LineDrawable(aRect.TopLeft(), Point(aRect.Left(), aRect.Bottom())));
+                Drawable::Draw(pDev, LineDrawable(Point(aRect.Right(), aRect.Top()), Point(aRect.Right(), aRect.Bottom())));
             }
         }
     }

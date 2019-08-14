@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/LineDrawable.hxx>
+
 #include "CellAppearancePropertyPanel.hxx"
 #include <sc.hrc>
 #include <bitmaps.hlst>
@@ -478,17 +480,17 @@ void CellAppearancePropertyPanel::UpdateCellBorder(bool bTop, bool bBot, bool bL
     {
         Point aTL(2, 1), aTR(42,1), aBL(2, 41), aBR(42, 41), aHL(2,21), aHR(42, 21), aVT(22,1), aVB(22, 41);
         if(bLeft)
-            pVirDev->DrawLine( aTL,aBL );
+            Drawable::Draw(pVirDev, LineDrawable(aTL, aBL));
         if(bRight)
-            pVirDev->DrawLine( aTR,aBR );
+            Drawable::Draw(pVirDev, LineDrawable(aTR, aBR));
         if(bTop)
-            pVirDev->DrawLine( aTL,aTR );
+            Drawable::Draw(pVirDev, LineDrawable(aTL, aTR));
         if(bBot)
-            pVirDev->DrawLine( aBL,aBR );
+            Drawable::Draw(pVirDev, LineDrawable(aBL, aBR));
         if(bVer)
-            pVirDev->DrawLine( aVT,aVB );
+            Drawable::Draw(pVirDev, LineDrawable(aVT, aVB));
         if(bHor)
-            pVirDev->DrawLine( aHL,aHR );
+            Drawable::Draw(pVirDev, LineDrawable(aHL, aHR));
         mpTBCellBorder->SetItemOverlayImage( btnId, Image( pVirDev->GetBitmapEx(Point(0,0), aBmpSize) ) );
     }
 

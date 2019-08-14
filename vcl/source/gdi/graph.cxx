@@ -19,6 +19,7 @@
 
 #include <tools/fract.hxx>
 
+#include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/svapp.hxx>
@@ -173,8 +174,8 @@ void ImplDrawDefault( OutputDevice* pOutDev, const OUString* pText,
         aBorderRect.AdjustBottom( -1 );
 
         pOutDev->SetLineColor( COL_LIGHTRED );
-        pOutDev->DrawLine( aBorderRect.TopLeft(), aBorderRect.BottomRight() );
-        pOutDev->DrawLine( aBorderRect.TopRight(), aBorderRect.BottomLeft() );
+        Drawable::Draw(pOutDev, LineDrawable(aBorderRect.TopLeft(), aBorderRect.BottomRight()));
+        Drawable::Draw(pOutDev, LineDrawable(aBorderRect.TopRight(), aBorderRect.BottomLeft()));
     }
 
     pOutDev->Pop();

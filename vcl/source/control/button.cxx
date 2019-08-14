@@ -21,6 +21,7 @@
 
 #include <vcl/image.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/bitmapex.hxx>
 #include <vcl/decoview.hxx>
 #include <vcl/event.hxx>
@@ -3338,8 +3339,8 @@ void CheckBox::Draw( OutputDevice* pDev, const Point& rPos, const Size& rSize,
                 aTempPos21.setX( aPos21.X()-nDX );
                 aTempPos22.setX( aPos22.X()-nDX );
             }
-            pDev->DrawLine( aTempPos11, aTempPos12 );
-            pDev->DrawLine( aTempPos21, aTempPos22 );
+            Drawable::Draw(pDev, LineDrawable(aTempPos11, aTempPos12));
+            Drawable::Draw(pDev, LineDrawable(aTempPos21, aTempPos22));
         }
     }
 

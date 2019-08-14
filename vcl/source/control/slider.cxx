@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/event.hxx>
 #include <vcl/decoview.hxx>
 #include <vcl/slider.hxx>
@@ -387,23 +388,23 @@ void Slider::ImplDraw(vcl::RenderContext& rRenderContext)
         rRenderContext.SetLineColor(rStyleSettings.GetShadowColor());
         if (GetStyle() & WB_HORZ)
         {
-            rRenderContext.DrawLine(aRect.TopLeft(), Point(aRect.Left(), aRect.Bottom() - 1));
-            rRenderContext.DrawLine(aRect.TopLeft(), aRect.TopRight());
+            Drawable::Draw(&rRenderContext, LineDrawable(aRect.TopLeft(), Point(aRect.Left(), aRect.Bottom() - 1)));
+            Drawable::Draw(&rRenderContext, LineDrawable(aRect.TopLeft(), aRect.TopRight()));
         }
         else
         {
-            rRenderContext.DrawLine(aRect.TopLeft(), Point(aRect.Right() - 1, aRect.Top()));
-            rRenderContext.DrawLine(aRect.TopLeft(), aRect.BottomLeft());
+            Drawable::Draw(&rRenderContext, LineDrawable(aRect.TopLeft(), Point(aRect.Right() - 1, aRect.Top())));
+            Drawable::Draw(&rRenderContext, LineDrawable(aRect.TopLeft(), aRect.BottomLeft()));
         }
         rRenderContext.SetLineColor(rStyleSettings.GetLightColor());
         if (GetStyle() & WB_HORZ)
         {
-            rRenderContext.DrawLine(aRect.BottomLeft(), aRect.BottomRight());
+            Drawable::Draw(&rRenderContext, LineDrawable(aRect.BottomLeft(), aRect.BottomRight()));
             nRectSize = aRect.GetWidth();
         }
         else
         {
-            rRenderContext.DrawLine(aRect.TopRight(), aRect.BottomRight());
+            Drawable::Draw(&rRenderContext, LineDrawable(aRect.TopRight(), aRect.BottomRight()));
             nRectSize = aRect.GetHeight();
         }
 
@@ -431,14 +432,14 @@ void Slider::ImplDraw(vcl::RenderContext& rRenderContext)
         rRenderContext.SetLineColor(rStyleSettings.GetLightColor());
         if (GetStyle() & WB_HORZ)
         {
-            rRenderContext.DrawLine(aRect.TopRight(), aRect.BottomRight());
-            rRenderContext.DrawLine(aRect.BottomLeft(), aRect.BottomRight());
+            Drawable::Draw(&rRenderContext, LineDrawable(aRect.TopRight(), aRect.BottomRight()));
+            Drawable::Draw(&rRenderContext, LineDrawable(aRect.BottomLeft(), aRect.BottomRight()));
             nRectSize = aRect.GetWidth();
         }
         else
         {
-            rRenderContext.DrawLine(aRect.BottomLeft(), aRect.BottomRight());
-            rRenderContext.DrawLine(aRect.TopRight(), aRect.BottomRight());
+            Drawable::Draw(&rRenderContext, LineDrawable(aRect.BottomLeft(), aRect.BottomRight()));
+            Drawable::Draw(&rRenderContext, LineDrawable(aRect.TopRight(), aRect.BottomRight()));
             nRectSize = aRect.GetHeight();
         }
 
@@ -446,9 +447,9 @@ void Slider::ImplDraw(vcl::RenderContext& rRenderContext)
         {
             rRenderContext.SetLineColor(rStyleSettings.GetShadowColor());
             if (GetStyle() & WB_HORZ)
-                rRenderContext.DrawLine(aRect.TopLeft(), Point(aRect.Right() - 1, aRect.Top()));
+                Drawable::Draw(&rRenderContext, LineDrawable(aRect.TopLeft(), Point(aRect.Right() - 1, aRect.Top())));
             else
-                rRenderContext.DrawLine(aRect.TopLeft(), Point(aRect.Left(), aRect.Bottom() - 1));
+                Drawable::Draw(&rRenderContext, LineDrawable(aRect.TopLeft(), Point(aRect.Left(), aRect.Bottom() - 1)));
 
             aRect.AdjustRight( -1 );
             aRect.AdjustBottom( -1 );

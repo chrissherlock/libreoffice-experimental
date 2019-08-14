@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include "cellvalueconversion.hxx"
 #include <table/gridtablerenderer.hxx>
@@ -230,8 +231,8 @@ namespace svt { namespace table
         boost::optional<Color> aLineColor(m_pImpl->rModel.getLineColor());
         Color const lineColor = !aLineColor ? _rStyle.GetSeparatorColor() : *aLineColor;
         rRenderContext.SetLineColor(lineColor);
-        rRenderContext.DrawLine(_rArea.BottomLeft(), _rArea.BottomRight());
-        rRenderContext.DrawLine(_rArea.BottomRight(), _rArea.TopRight());
+        Drawable::Draw(&rRenderContext, LineDrawable(_rArea.BottomLeft(), _rArea.BottomRight()));
+        Drawable::Draw(&rRenderContext, LineDrawable(_rArea.BottomRight(), _rArea.TopRight()));
 
         rRenderContext.Pop();
     }
@@ -263,8 +264,8 @@ namespace svt { namespace table
         boost::optional<Color> const aLineColor( m_pImpl->rModel.getLineColor() );
         Color const lineColor = !aLineColor ? _rStyle.GetSeparatorColor() : *aLineColor;
         rRenderContext.SetLineColor( lineColor );
-        rRenderContext.DrawLine( _rArea.BottomRight(), _rArea.TopRight());
-        rRenderContext.DrawLine( _rArea.BottomLeft(), _rArea.BottomRight() );
+        Drawable::Draw(&rRenderContext, LineDrawable( _rArea.BottomRight(), _rArea.TopRight()));
+        Drawable::Draw(&rRenderContext, LineDrawable( _rArea.BottomLeft(), _rArea.BottomRight()));
 
         // draw sort indicator if the model data is sorted by the given column
         ITableDataSort const * pSortAdapter = m_pImpl->rModel.getSortAdapter();
@@ -372,7 +373,7 @@ namespace svt { namespace table
         boost::optional<Color> const aLineColor( m_pImpl->rModel.getLineColor() );
         Color const lineColor = !aLineColor ? _rStyle.GetSeparatorColor() : *aLineColor;
         rRenderContext.SetLineColor(lineColor);
-        rRenderContext.DrawLine(_rArea.BottomLeft(), _rArea.BottomRight());
+        Drawable::Draw(&rRenderContext, LineDrawable(_rArea.BottomLeft(), _rArea.BottomRight()));
 
         Any const rowHeading( m_pImpl->rModel.getRowHeading( m_pImpl->nCurrentRow ) );
         OUString const rowTitle( m_pImpl->aStringConverter.convertToString( rowHeading ) );
@@ -439,8 +440,8 @@ namespace svt { namespace table
             }
 
             rRenderContext.SetLineColor( lineColor );
-            rRenderContext.DrawLine( _rArea.BottomLeft(), _rArea.BottomRight() );
-            rRenderContext.DrawLine( _rArea.BottomRight(), _rArea.TopRight() );
+            Drawable::Draw(&rRenderContext, LineDrawable( _rArea.BottomLeft(), _rArea.BottomRight()));
+            Drawable::Draw(&rRenderContext, LineDrawable( _rArea.BottomRight(), _rArea.TopRight()));
         }
 
         rRenderContext.Pop();

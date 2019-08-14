@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include "menubarwindow.hxx"
 #include "menuitemlist.hxx"
@@ -609,7 +610,7 @@ static void ImplAddNWFSeparator(vcl::RenderContext& rRenderContext, const Size& 
 
         rRenderContext.SetLineColor(rRenderContext.GetSettings().GetStyleSettings().GetSeparatorColor());
         tools::Rectangle aRect(Point(), rSize);
-        rRenderContext.DrawLine(aRect.BottomLeft(), aRect.BottomRight());
+        Drawable::Draw(&rRenderContext, LineDrawable(aRect.BottomLeft(), aRect.BottomRight()));
     }
 }
 
@@ -956,8 +957,8 @@ void MenuBarWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Recta
         pBuffer->SetLineColor(COL_WHITE);
         pBuffer->SetMapMode(MapMode(MapUnit::MapPixel));
         Size aSize = GetSizePixel();
-        pBuffer->DrawLine(Point(0, aSize.Height() - 1),
-                          Point(aSize.Width() - 1, aSize.Height() - 1));
+        Drawable::Draw(&(*pBuffer), LineDrawable(Point(0, aSize.Height() - 1),
+                          Point(aSize.Width() - 1, aSize.Height() - 1)));
         pBuffer->Pop();
     }
 }

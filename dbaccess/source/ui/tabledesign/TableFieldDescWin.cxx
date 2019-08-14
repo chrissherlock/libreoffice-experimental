@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/LineDrawable.hxx>
+
 #include "TableFieldDescWin.hxx"
 #include <osl/diagnose.h>
 #include <FieldDescriptions.hxx>
@@ -109,12 +111,12 @@ void OTableFieldDescWin::Paint(vcl::RenderContext& rRenderContext, const tools::
     const StyleSettings& rStyleSettings = rRenderContext.GetSettings().GetStyleSettings();
 
     rRenderContext.SetLineColor(rStyleSettings.GetLightColor());
-    rRenderContext.DrawLine(Point(0,0), Point(GetSizePixel().Width(), 0));
+    Drawable::Draw(&rRenderContext, LineDrawable(Point(0,0), Point(GetSizePixel().Width(), 0)));
 
     // 3D-line for the separation of the header
-    rRenderContext.DrawLine(Point(3, DETAILS_HEADER_HEIGHT), Point(GetSizePixel().Width() - 6, DETAILS_HEADER_HEIGHT));
+    Drawable::Draw(&rRenderContext, LineDrawable(Point(3, DETAILS_HEADER_HEIGHT), Point(GetSizePixel().Width() - 6, DETAILS_HEADER_HEIGHT)));
     rRenderContext.SetLineColor(rStyleSettings.GetShadowColor());
-    rRenderContext.DrawLine(Point(3, DETAILS_HEADER_HEIGHT - 1), Point(GetSizePixel().Width() - 6, DETAILS_HEADER_HEIGHT - 1));
+    Drawable::Draw(&rRenderContext, LineDrawable(Point(3, DETAILS_HEADER_HEIGHT - 1), Point(GetSizePixel().Width() - 6, DETAILS_HEADER_HEIGHT - 1)));
 }
 
 void OTableFieldDescWin::Resize()

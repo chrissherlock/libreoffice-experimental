@@ -20,6 +20,7 @@
 #include <rtl/tencinfo.h>
 #include <osl/diagnose.h>
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <hintids.hxx>
 #include <com/sun/star/ui/dialogs/TemplateDescription.hpp>
@@ -171,7 +172,7 @@ static void lcl_PrintHeader( vcl::RenderContext &rOutDev, sal_Int32 nPages, sal_
 
     nY = TMARGPRN-nBorder;
 
-    rOutDev.DrawLine( Point( nXLeft, nY ), Point( nXRight, nY ) );
+    Drawable::Draw(&rOutDev, LineDrawable(Point(nXLeft, nY), Point(nXRight, nY)));
 
     rOutDev.SetFont( aOldFont );
     rOutDev.SetFillColor( aOldFillColor );

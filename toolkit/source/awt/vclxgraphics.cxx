@@ -29,6 +29,7 @@
 #include <vcl/drawables/PixelDrawable.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/drawables/RoundRectDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <toolkit/awt/vclxgraphics.hxx>
 #include <toolkit/awt/vclxdevice.hxx>
@@ -348,7 +349,7 @@ void VCLXGraphics::drawLine( sal_Int32 x1, sal_Int32 y1, sal_Int32 x2, sal_Int32
     if( mpOutputDevice )
     {
         InitOutputDevice( InitOutDevFlags::COLORS );
-        mpOutputDevice->DrawLine( Point( x1, y1 ), Point( x2, y2 ) );
+        Drawable::Draw(mpOutputDevice, LineDrawable(Point(x1, y1), Point(x2, y2)));
     }
 }
 

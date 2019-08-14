@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/LineDrawable.hxx>
+
 #include <memory>
 #include <filtnav.hxx>
 #include <fmexch.hxx>
@@ -969,14 +971,14 @@ void FmFilterItemsString::Paint(const Point& rPos, SvTreeListBox& rDev, vcl::Ren
         Point aFirst(rPos.X(), aRect.Bottom() - 6);
         Point aSecond(aFirst .X() + 2, aFirst.Y() + 3);
 
-        rRenderContext.DrawLine(aFirst, aSecond);
+        Drawable::Draw(&rRenderContext, LineDrawable(aFirst, aSecond));
 
         aFirst = aSecond;
         aFirst.AdjustX(1 );
         aSecond.AdjustX(6 );
         aSecond.AdjustY( -5 );
 
-        rRenderContext.DrawLine(aFirst, aSecond);
+        Drawable::Draw(&rRenderContext, LineDrawable(aFirst, aSecond));
         rRenderContext.Pop();
     }
 

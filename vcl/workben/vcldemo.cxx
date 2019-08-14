@@ -17,6 +17,7 @@
 #include <vcl/drawables/RoundRectDrawable.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/drawables/CheckeredRectDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <comphelper/processfactory.hxx>
 #include <comphelper/random.hxx>
@@ -325,9 +326,9 @@ public:
                 Drawable::Draw(&rDev, RectangleDrawable(r));
 
                 for(long i=0; i<r.GetHeight(); i+=15)
-                    rDev.DrawLine(Point(r.Left(), r.Top()+i), Point(r.Right(), r.Bottom()-i));
+                    Drawable::Draw(&rDev, LineDrawable(Point(r.Left(), r.Top()+i), Point(r.Right(), r.Bottom()-i)));
                 for(long i=0; i<r.GetWidth(); i+=15)
-                    rDev.DrawLine(Point(r.Left()+i, r.Bottom()), Point(r.Right()-i, r.Top()));
+                    Drawable::Draw(&rDev, LineDrawable(Point(r.Left()+i, r.Bottom()), Point(r.Right()-i, r.Top())));
 
                 // Should draw a white-line across the middle
                 Color aLastPixel(COL_WHITE);
@@ -655,7 +656,7 @@ public:
                     aBottom.Move(pItems[j], aTextRect.GetHeight());
                     rDev.SetLineColor(COL_RED);
                     rDev.SetRasterOp(RasterOp::Xor);
-                    rDev.DrawLine(aTop,aBottom);
+                    Drawable::Draw(&rDev, LineDrawable(aTop,aBottom));
                     rDev.SetRasterOp(RasterOp::OverPaint);
                 }
 

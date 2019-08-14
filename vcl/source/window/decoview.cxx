@@ -19,6 +19,7 @@
 
 #include <vcl/drawables/PixelDrawable.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/decoview.hxx>
@@ -80,8 +81,8 @@ void ImplDrawSymbol( OutputDevice* pDev, tools::Rectangle nRect, const SymbolTyp
             for ( long i=1; i <= n2; ++i )
             {
                 nRect.AdjustTop( 1 );
-                pDev->DrawLine( Point( aCenter.X()-i, nRect.Top() ),
-                                Point( aCenter.X()+i, nRect.Top() ) );
+                Drawable::Draw(pDev, LineDrawable(Point(aCenter.X()-i, nRect.Top()),
+                                Point(aCenter.X()+i, nRect.Top())));
                 Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()-i, nRect.Top())));
                 Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()+i, nRect.Top())));
             }
@@ -94,8 +95,8 @@ void ImplDrawSymbol( OutputDevice* pDev, tools::Rectangle nRect, const SymbolTyp
             for ( long i=1; i <= n2; ++i )
             {
                 nRect.AdjustBottom( -1 );
-                pDev->DrawLine( Point( aCenter.X()-i, nRect.Bottom() ),
-                                Point( aCenter.X()+i, nRect.Bottom() ) );
+                Drawable::Draw(pDev, LineDrawable( Point( aCenter.X()-i, nRect.Bottom() ),
+                                Point( aCenter.X()+i, nRect.Bottom() ) ));
                 Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()-i, nRect.Bottom())));
                 Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()+i, nRect.Bottom())));
             }
@@ -108,8 +109,8 @@ void ImplDrawSymbol( OutputDevice* pDev, tools::Rectangle nRect, const SymbolTyp
             for ( long i=1; i <= n2; ++i )
             {
                 nRect.AdjustLeft( 1 );
-                pDev->DrawLine( Point( nRect.Left(), aCenter.Y()-i ),
-                                Point( nRect.Left(), aCenter.Y()+i ) );
+                Drawable::Draw(pDev, LineDrawable( Point( nRect.Left(), aCenter.Y()-i ),
+                                Point( nRect.Left(), aCenter.Y()+i ) ));
                 Drawable::Draw(pDev, PixelDrawable(Point(nRect.Left(), aCenter.Y()-i)));
                 Drawable::Draw(pDev, PixelDrawable(Point(nRect.Left(), aCenter.Y()+i)));
             }
@@ -122,8 +123,8 @@ void ImplDrawSymbol( OutputDevice* pDev, tools::Rectangle nRect, const SymbolTyp
             for ( long i=1; i <= n2; ++i )
             {
                 nRect.AdjustRight( -1 );
-                pDev->DrawLine( Point( nRect.Right(), aCenter.Y()-i ),
-                                Point( nRect.Right(), aCenter.Y()+i ) );
+                Drawable::Draw(pDev, LineDrawable( Point( nRect.Right(), aCenter.Y()-i ),
+                                Point( nRect.Right(), aCenter.Y()+i ) ));
                 Drawable::Draw(pDev, PixelDrawable(Point(nRect.Right(), aCenter.Y()-i)));
                 Drawable::Draw(pDev, PixelDrawable(Point(nRect.Right(), aCenter.Y()+i)));
             }
@@ -137,8 +138,8 @@ void ImplDrawSymbol( OutputDevice* pDev, tools::Rectangle nRect, const SymbolTyp
             for ( long i=1; i <= n2; ++i )
             {
                 nRect.AdjustTop( 1 );
-                pDev->DrawLine( Point( aCenter.X()-i, nRect.Top() ),
-                                Point( aCenter.X()+i, nRect.Top() ) );
+                Drawable::Draw(pDev, LineDrawable( Point( aCenter.X()-i, nRect.Top() ),
+                                Point( aCenter.X()+i, nRect.Top() ) ));
                 Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()-i, nRect.Top())));
                 Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()+i, nRect.Top())));
             }
@@ -150,8 +151,8 @@ void ImplDrawSymbol( OutputDevice* pDev, tools::Rectangle nRect, const SymbolTyp
             for ( long i=1; i <= n2; ++i )
             {
                 nRect.AdjustBottom( -1 );
-                pDev->DrawLine( Point( aCenter.X()-i, nRect.Bottom() ),
-                                Point( aCenter.X()+i, nRect.Bottom() ) );
+                Drawable::Draw(pDev, LineDrawable( Point( aCenter.X()-i, nRect.Bottom() ),
+                                Point( aCenter.X()+i, nRect.Bottom() ) ));
                 Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()-i, nRect.Bottom())));
                 Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()+i, nRect.Bottom())));
             }
@@ -164,8 +165,8 @@ void ImplDrawSymbol( OutputDevice* pDev, tools::Rectangle nRect, const SymbolTyp
             nRect.AdjustLeft(n4 );
             if ( eType==SymbolType::FIRST )
             {
-                pDev->DrawLine( Point( nRect.Left(), nRect.Top() ),
-                                Point( nRect.Left(), nRect.Bottom() ) );
+                Drawable::Draw(pDev, LineDrawable( Point( nRect.Left(), nRect.Top() ),
+                                Point( nRect.Left(), nRect.Bottom() ) ));
                 nRect.AdjustLeft( 1 );
             }
 
@@ -190,8 +191,8 @@ void ImplDrawSymbol( OutputDevice* pDev, tools::Rectangle nRect, const SymbolTyp
             nRect.AdjustRight( -n4 );
             if ( eType==SymbolType::LAST )
             {
-                pDev->DrawLine( Point( nRect.Right(), nRect.Top() ),
-                                Point( nRect.Right(), nRect.Bottom() ) );
+                Drawable::Draw(pDev, LineDrawable( Point( nRect.Right(), nRect.Top() ),
+                                Point( nRect.Right(), nRect.Bottom() ) ));
                 nRect.AdjustRight( -1 );
             }
 
@@ -213,12 +214,12 @@ void ImplDrawSymbol( OutputDevice* pDev, tools::Rectangle nRect, const SymbolTyp
             for ( long i=1; i < n2; ++i )
             {
                 nRect.AdjustTop( 1 );
-                pDev->DrawLine( Point( aCenter.X()-i, nRect.Top() ),
-                                Point( aCenter.X()+i, nRect.Top() ) );
+                Drawable::Draw(pDev, LineDrawable( Point( aCenter.X()-i, nRect.Top() ),
+                                Point( aCenter.X()+i, nRect.Top() ) ));
                 Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()-i, nRect.Top())));
                 Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()+i, nRect.Top())));
-                pDev->DrawLine( Point( aCenter.X()-i, nRect.Top()+n2 ),
-                                Point( aCenter.X()+i, nRect.Top()+n2 ) );
+                Drawable::Draw(pDev, LineDrawable( Point( aCenter.X()-i, nRect.Top()+n2 ),
+                                Point( aCenter.X()+i, nRect.Top()+n2 ) ));
                 Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()-i, nRect.Top()+n2)));
                 Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()+i, nRect.Top()+n2)));
             }
@@ -230,12 +231,12 @@ void ImplDrawSymbol( OutputDevice* pDev, tools::Rectangle nRect, const SymbolTyp
             for ( long i=1; i < n2; ++i )
             {
                 nRect.AdjustBottom( -1 );
-                pDev->DrawLine( Point( aCenter.X()-i, nRect.Bottom() ),
-                                Point( aCenter.X()+i, nRect.Bottom() ) );
+                Drawable::Draw(pDev, LineDrawable( Point( aCenter.X()-i, nRect.Bottom() ),
+                                Point( aCenter.X()+i, nRect.Bottom() ) ));
                 Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()-i, nRect.Bottom())));
                 Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()+i, nRect.Bottom())));
-                pDev->DrawLine( Point( aCenter.X()-i, nRect.Bottom()-n2 ),
-                                Point( aCenter.X()+i, nRect.Bottom()-n2 ) );
+                Drawable::Draw(pDev, LineDrawable( Point( aCenter.X()-i, nRect.Bottom()-n2 ),
+                                Point( aCenter.X()+i, nRect.Bottom()-n2 ) ));
                 Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()-i, nRect.Bottom()-n2)));
                 Drawable::Draw(pDev, PixelDrawable(Point(aCenter.X()+i, nRect.Bottom()-n2)));
             }
@@ -248,27 +249,27 @@ void ImplDrawSymbol( OutputDevice* pDev, tools::Rectangle nRect, const SymbolTyp
                 long y = n2;
                 long p = 1 - n2;
                 // Draw central line
-                pDev->DrawLine( Point( aCenter.X(), aCenter.Y()-y ),
-                                Point( aCenter.X(), aCenter.Y()+y ) );
+                Drawable::Draw(pDev, LineDrawable( Point( aCenter.X(), aCenter.Y()-y ),
+                                Point( aCenter.X(), aCenter.Y()+y ) ));
                 while ( x<y )
                 {
                     if ( p>=0 )
                     {
                         // Draw vertical lines close to sides
-                        pDev->DrawLine( Point( aCenter.X()+y, aCenter.Y()-x ),
-                                        Point( aCenter.X()+y, aCenter.Y()+x ) );
-                        pDev->DrawLine( Point( aCenter.X()-y, aCenter.Y()-x ),
-                                        Point( aCenter.X()-y, aCenter.Y()+x ) );
+                        Drawable::Draw(pDev, LineDrawable( Point( aCenter.X()+y, aCenter.Y()-x ),
+                                        Point( aCenter.X()+y, aCenter.Y()+x ) ));
+                        Drawable::Draw(pDev, LineDrawable( Point( aCenter.X()-y, aCenter.Y()-x ),
+                                        Point( aCenter.X()-y, aCenter.Y()+x ) ));
                         --y;
                         p -= 2*y;
                     }
                     ++x;
                     p += 2*x+1;
                     // Draw vertical lines close to center
-                    pDev->DrawLine( Point( aCenter.X()-x, aCenter.Y()-y ),
-                                    Point( aCenter.X()-x, aCenter.Y()+y ) );
-                    pDev->DrawLine( Point( aCenter.X()+x, aCenter.Y()-y ),
-                                    Point( aCenter.X()+x, aCenter.Y()+y ) );
+                    Drawable::Draw(pDev, LineDrawable( Point( aCenter.X()-x, aCenter.Y()-y ),
+                                    Point( aCenter.X()-x, aCenter.Y()+y ) ));
+                    Drawable::Draw(pDev, LineDrawable( Point( aCenter.X()+x, aCenter.Y()-y ),
+                                    Point( aCenter.X()+x, aCenter.Y()+y ) ));
                 }
             }
             break;
@@ -278,30 +279,30 @@ void ImplDrawSymbol( OutputDevice* pDev, tools::Rectangle nRect, const SymbolTyp
             break;
 
         case SymbolType::CLOSE:
-            pDev->DrawLine( Point( nRect.Left(), nRect.Top() ),
-                            Point( nRect.Right(), nRect.Bottom() ) );
-            pDev->DrawLine( Point( nRect.Left(), nRect.Bottom() ),
-                            Point( nRect.Right(), nRect.Top() ) );
+            Drawable::Draw(pDev, LineDrawable( Point( nRect.Left(), nRect.Top() ),
+                            Point( nRect.Right(), nRect.Bottom() ) ));
+            Drawable::Draw(pDev, LineDrawable( Point( nRect.Left(), nRect.Bottom() ),
+                            Point( nRect.Right(), nRect.Top() ) ));
             for ( long i=1; i<n8; ++i )
             {
-                pDev->DrawLine( Point( nRect.Left()+i, nRect.Top() ),
-                                Point( nRect.Right(), nRect.Bottom()-i ) );
-                pDev->DrawLine( Point( nRect.Left(), nRect.Top()+i ),
-                                Point( nRect.Right()-i, nRect.Bottom() ) );
-                pDev->DrawLine( Point( nRect.Left()+i, nRect.Bottom() ),
-                                Point( nRect.Right(), nRect.Top()+i ) );
-                pDev->DrawLine( Point( nRect.Left(), nRect.Bottom()-i ),
-                                Point( nRect.Right()-i, nRect.Top() ) );
+                Drawable::Draw(pDev, LineDrawable( Point( nRect.Left()+i, nRect.Top() ),
+                                Point( nRect.Right(), nRect.Bottom()-i ) ));
+                Drawable::Draw(pDev, LineDrawable( Point( nRect.Left(), nRect.Top()+i ),
+                                Point( nRect.Right()-i, nRect.Bottom() ) ));
+                Drawable::Draw(pDev, LineDrawable( Point( nRect.Left()+i, nRect.Bottom() ),
+                                Point( nRect.Right(), nRect.Top()+i ) ));
+                Drawable::Draw(pDev, LineDrawable( Point( nRect.Left(), nRect.Bottom()-i ),
+                                Point( nRect.Right()-i, nRect.Top() ) ));
             }
             break;
 
         case SymbolType::ROLLDOWN:
-            pDev->DrawLine( Point( nRect.Left(), nRect.Top() ),
-                            Point( nRect.Left(), nRect.Bottom() ) );
-            pDev->DrawLine( Point( nRect.Right(), nRect.Top() ),
-                            Point( nRect.Right(), nRect.Bottom() ) );
-            pDev->DrawLine( Point( nRect.Left(), nRect.Bottom() ),
-                            Point( nRect.Right(), nRect.Bottom() ) );
+            Drawable::Draw(pDev, LineDrawable( Point( nRect.Left(), nRect.Top() ),
+                            Point( nRect.Left(), nRect.Bottom() ) ));
+            Drawable::Draw(pDev, LineDrawable( Point( nRect.Right(), nRect.Top() ),
+                            Point( nRect.Right(), nRect.Bottom() ) ));
+            Drawable::Draw(pDev, LineDrawable( Point( nRect.Left(), nRect.Bottom() ),
+                            Point( nRect.Right(), nRect.Bottom() ) ));
             [[fallthrough]];
         case SymbolType::ROLLUP:
             Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle( nRect.Left(), nRect.Top(),
@@ -318,29 +319,29 @@ void ImplDrawSymbol( OutputDevice* pDev, tools::Rectangle nRect, const SymbolTyp
                 {
                     // Draw a mirrored checkmark so that it looks "normal" in a
                     // mirrored graphics device (double mirroring!)
-                    pDev->DrawLine( Point( nRect.Right(), nRect.Bottom()-n3 ),
-                                    Point( nRect.Right()-n3, nRect.Bottom() ) );
-                    pDev->DrawLine( Point( nRect.Right()-n3, nRect.Bottom() ),
-                                    Point( nRect.Left(), nRect.Top()+n3 ) );
+                    Drawable::Draw(pDev, LineDrawable( Point( nRect.Right(), nRect.Bottom()-n3 ),
+                                    Point( nRect.Right()-n3, nRect.Bottom() ) ));
+                    Drawable::Draw(pDev, LineDrawable( Point( nRect.Right()-n3, nRect.Bottom() ),
+                                    Point( nRect.Left(), nRect.Top()+n3 ) ));
                     nRect.AdjustTop( 1 );
                     nRect.AdjustBottom( 1 );
-                    pDev->DrawLine( Point( nRect.Right(), nRect.Bottom()-n3 ),
-                                    Point( nRect.Right()-n3, nRect.Bottom() ) );
-                    pDev->DrawLine( Point( nRect.Right()-n3, nRect.Bottom() ),
-                                    Point( nRect.Left(), nRect.Top()+n3 ) );
+                    Drawable::Draw(pDev, LineDrawable( Point( nRect.Right(), nRect.Bottom()-n3 ),
+                                    Point( nRect.Right()-n3, nRect.Bottom() ) ));
+                    Drawable::Draw(pDev, LineDrawable( Point( nRect.Right()-n3, nRect.Bottom() ),
+                                    Point( nRect.Left(), nRect.Top()+n3 ) ));
                 }
                 else
                 {
-                    pDev->DrawLine( Point( nRect.Left(), nRect.Bottom()-n3 ),
-                                    Point( nRect.Left()+n3, nRect.Bottom() ) );
-                    pDev->DrawLine( Point( nRect.Left()+n3, nRect.Bottom() ),
-                                    Point( nRect.Right(), nRect.Top()+n3 ) );
+                    Drawable::Draw(pDev, LineDrawable( Point( nRect.Left(), nRect.Bottom()-n3 ),
+                                    Point( nRect.Left()+n3, nRect.Bottom() ) ));
+                    Drawable::Draw(pDev, LineDrawable( Point( nRect.Left()+n3, nRect.Bottom() ),
+                                    Point( nRect.Right(), nRect.Top()+n3 ) ));
                     nRect.AdjustTop( 1 );
                     nRect.AdjustBottom( 1 );
-                    pDev->DrawLine( Point( nRect.Left(), nRect.Bottom()-n3 ),
-                                    Point( nRect.Left()+n3, nRect.Bottom() ) );
-                    pDev->DrawLine( Point( nRect.Left()+n3, nRect.Bottom() ),
-                                    Point( nRect.Right(), nRect.Top()+n3 ) );
+                    Drawable::Draw(pDev, LineDrawable( Point( nRect.Left(), nRect.Bottom()-n3 ),
+                                    Point( nRect.Left()+n3, nRect.Bottom() ) ));
+                    Drawable::Draw(pDev, LineDrawable( Point( nRect.Left()+n3, nRect.Bottom() ),
+                                    Point( nRect.Right(), nRect.Top()+n3 ) ));
                 }
             }
             break;
@@ -350,35 +351,35 @@ void ImplDrawSymbol( OutputDevice* pDev, tools::Rectangle nRect, const SymbolTyp
             nRect.AdjustTop(n4+1 );
             Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle(nRect.Left(), nRect.Top(),
                                        nRect.Right(), nRect.Top()+n8)));
-            pDev->DrawLine( Point( nRect.Left(), nRect.Top()+n8 ),
-                            Point( nRect.Left(), nRect.Bottom() ) );
-            pDev->DrawLine( Point( nRect.Left(), nRect.Bottom() ),
-                            Point( nRect.Right(), nRect.Bottom() ) );
-            pDev->DrawLine( Point( nRect.Right(), nRect.Top()+n8 ),
-                            Point( nRect.Right(), nRect.Bottom() ) );
+            Drawable::Draw(pDev, LineDrawable( Point( nRect.Left(), nRect.Top()+n8 ),
+                            Point( nRect.Left(), nRect.Bottom() ) ));
+            Drawable::Draw(pDev, LineDrawable( Point( nRect.Left(), nRect.Bottom() ),
+                            Point( nRect.Right(), nRect.Bottom() ) ));
+            Drawable::Draw(pDev, LineDrawable( Point( nRect.Right(), nRect.Top()+n8 ),
+                            Point( nRect.Right(), nRect.Bottom() ) ));
             nRect.AdjustRight(n4 );
             nRect.AdjustTop( -(n4+1) );
             nRect.AdjustLeft(n4 );
             nRect.AdjustBottom( -(n4+1) );
             Drawable::Draw(pDev, RectangleDrawable(tools::Rectangle( nRect.Left(), nRect.Top(),
                                        nRect.Right(), nRect.Top()+n8)));
-            pDev->DrawLine( Point( nRect.Left(), nRect.Top()+n8 ),
-                            Point( nRect.Left(), nRect.Bottom() ) );
-            pDev->DrawLine( Point( nRect.Left(), nRect.Bottom() ),
-                            Point( nRect.Right(), nRect.Bottom() ) );
-            pDev->DrawLine( Point( nRect.Right(), nRect.Top()+n8 ),
-                            Point( nRect.Right(), nRect.Bottom() ) );
+            Drawable::Draw(pDev, LineDrawable( Point( nRect.Left(), nRect.Top()+n8 ),
+                            Point( nRect.Left(), nRect.Bottom() ) ));
+            Drawable::Draw(pDev, LineDrawable( Point( nRect.Left(), nRect.Bottom() ),
+                            Point( nRect.Right(), nRect.Bottom() ) ));
+            Drawable::Draw(pDev, LineDrawable( Point( nRect.Right(), nRect.Top()+n8 ),
+                            Point( nRect.Right(), nRect.Bottom() ) ));
             break;
 
         case SymbolType::DOCK:
-            pDev->DrawLine( Point( nRect.Left(), nRect.Top() ),
-                            Point( nRect.Right(), nRect.Top() ) );
-            pDev->DrawLine( Point( nRect.Left(), nRect.Top() ),
-                            Point( nRect.Left(), nRect.Bottom() ) );
-            pDev->DrawLine( Point( nRect.Left(), nRect.Bottom() ),
-                            Point( nRect.Right(), nRect.Bottom() ) );
-            pDev->DrawLine( Point( nRect.Right(), nRect.Top() ),
-                            Point( nRect.Right(), nRect.Bottom() ) );
+            Drawable::Draw(pDev, LineDrawable( Point( nRect.Left(), nRect.Top() ),
+                            Point( nRect.Right(), nRect.Top() ) ));
+            Drawable::Draw(pDev, LineDrawable( Point( nRect.Left(), nRect.Top() ),
+                            Point( nRect.Left(), nRect.Bottom() ) ));
+            Drawable::Draw(pDev, LineDrawable( Point( nRect.Left(), nRect.Bottom() ),
+                            Point( nRect.Right(), nRect.Bottom() ) ));
+            Drawable::Draw(pDev, LineDrawable( Point( nRect.Right(), nRect.Top() ),
+                            Point( nRect.Right(), nRect.Bottom() ) ));
             break;
 
         case SymbolType::HIDE:
@@ -415,10 +416,10 @@ void ImplDrawDPILineRect( OutputDevice *const pDev, tools::Rectangle& rRect,
             pDev->SetLineColor( *pColor );
             if( bRound )
             {
-                pDev->DrawLine( Point( rRect.Left()+1, rRect.Top()), Point( rRect.Right()-1, rRect.Top()) );
-                pDev->DrawLine( Point( rRect.Left()+1, rRect.Bottom()), Point( rRect.Right()-1, rRect.Bottom()) );
-                pDev->DrawLine( Point( rRect.Left(), rRect.Top()+1), Point( rRect.Left(), rRect.Bottom()-1) );
-                pDev->DrawLine( Point( rRect.Right(), rRect.Top()+1), Point( rRect.Right(), rRect.Bottom()-1) );
+                Drawable::Draw(pDev, LineDrawable( Point( rRect.Left()+1, rRect.Top()), Point( rRect.Right()-1, rRect.Top()) ));
+                Drawable::Draw(pDev, LineDrawable( Point( rRect.Left()+1, rRect.Bottom()), Point( rRect.Right()-1, rRect.Bottom()) ));
+                Drawable::Draw(pDev, LineDrawable( Point( rRect.Left(), rRect.Top()+1), Point( rRect.Left(), rRect.Bottom()-1) ));
+                Drawable::Draw(pDev, LineDrawable( Point( rRect.Right(), rRect.Top()+1), Point( rRect.Right(), rRect.Bottom()-1) ));
             }
             else
             {
@@ -451,11 +452,11 @@ void ImplDraw2ColorFrame( OutputDevice *const pDev, tools::Rectangle& rRect,
                           const Color& rLeftTopColor, const Color& rRightBottomColor )
 {
     pDev->SetLineColor( rLeftTopColor );
-    pDev->DrawLine( rRect.TopLeft(), rRect.BottomLeft() );
-    pDev->DrawLine( rRect.TopLeft(), rRect.TopRight() );
+    Drawable::Draw(pDev, LineDrawable( rRect.TopLeft(), rRect.BottomLeft() ));
+    Drawable::Draw(pDev, LineDrawable( rRect.TopLeft(), rRect.TopRight() ));
     pDev->SetLineColor( rRightBottomColor );
-    pDev->DrawLine( rRect.BottomLeft(), rRect.BottomRight() );
-    pDev->DrawLine( rRect.TopRight(), rRect.BottomRight() );
+    Drawable::Draw(pDev, LineDrawable( rRect.BottomLeft(), rRect.BottomRight() ));
+    Drawable::Draw(pDev, LineDrawable( rRect.TopRight(), rRect.BottomRight() ));
 
     // reduce drawing area
     rRect.AdjustLeft( 1 );
@@ -536,8 +537,8 @@ void ImplDrawButton( OutputDevice *const pDev, tools::Rectangle aFillRect,
         if ( nStyle & DrawButtonFlags::NoLeftLightBorder )
         {
             pDev->SetLineColor( rStyleSettings.GetLightBorderColor() );
-            pDev->DrawLine( Point( aFillRect.Left(), aFillRect.Top() ),
-                            Point( aFillRect.Left(), aFillRect.Bottom() ) );
+            Drawable::Draw(pDev, LineDrawable( Point( aFillRect.Left(), aFillRect.Top() ),
+                            Point( aFillRect.Left(), aFillRect.Bottom() ) ));
             aFillRect.AdjustLeft( 1 );
         }
 
@@ -1041,7 +1042,7 @@ void DecorationView::DrawSeparator( const Point& rStart, const Point& rStop, boo
     else
         mpOutDev->SetLineColor( rStyleSettings.GetShadowColor() );
 
-    mpOutDev->DrawLine( aStart, aStop );
+    Drawable::Draw(mpOutDev, LineDrawable( aStart, aStop ));
     if ( !(rStyleSettings.GetOptions() & StyleSettingsOptions::Mono) )
     {
         mpOutDev->SetLineColor( rStyleSettings.GetLightColor() );
@@ -1055,7 +1056,7 @@ void DecorationView::DrawSeparator( const Point& rStart, const Point& rStop, boo
             aStart.AdjustY( 1 );
             aStop.AdjustY( 1 );
         }
-        mpOutDev->DrawLine( aStart, aStop );
+        Drawable::Draw(mpOutDev, LineDrawable(aStart, aStop));
     }
     mpOutDev->Pop();
 }

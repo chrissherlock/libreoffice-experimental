@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <checklistmenu.hxx>
 #include <globstr.hrc>
@@ -418,10 +419,10 @@ void ScMenuFloatingWindow::drawSeparator(vcl::RenderContext& rRenderContext, siz
         Point aTmpPos = aPos;
         aTmpPos.AdjustY(aSize.Height() / 2 );
         rRenderContext.SetLineColor(rStyle.GetShadowColor());
-        rRenderContext.DrawLine(aTmpPos, Point(aSize.Width() + aTmpPos.X(), aTmpPos.Y()));
+        Drawable::Draw(&rRenderContext, LineDrawable(aTmpPos, Point(aSize.Width() + aTmpPos.X(), aTmpPos.Y())));
         aTmpPos.AdjustY( 1 );
         rRenderContext.SetLineColor(rStyle.GetLightColor());
-        rRenderContext.DrawLine(aTmpPos, Point(aSize.Width() + aTmpPos.X(), aTmpPos.Y()));
+        Drawable::Draw(&rRenderContext, LineDrawable(aTmpPos, Point(aSize.Width() + aTmpPos.X(), aTmpPos.Y())));
         rRenderContext.SetLineColor();
     }
 }

@@ -693,28 +693,6 @@ public:
     void Invert( const tools::Polygon& rPoly, InvertFlags nFlags = InvertFlags::NONE );
     ///@}
 
-    /** @name Line functions
-     */
-    ///@{
-
-public:
-
-    void                        DrawLine( const Point& rStartPt, const Point& rEndPt );
-
-    void                        DrawLine( const Point& rStartPt, const Point& rEndPt,
-                                          const LineInfo& rLineInfo );
-
-protected:
-    virtual void DrawHatchLine_DrawLine(const Point& rStartPoint, const Point& rEndPoint);
-
-private:
-
-    /** Helper for line geometry paint with support for graphic expansion (pattern and fat_to_area)
-     */
-    SAL_DLLPRIVATE void         drawLine( basegfx::B2DPolyPolygon aLinePolyPolygon, const LineInfo& rInfo );
-    ///@}
-
-
     /** @name Polyline functions
      */
     ///@{
@@ -894,6 +872,10 @@ public:
 #endif
 
     void                        DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch, bool bMtf );
+
+protected:
+
+    virtual void DrawHatchLine_DrawLine(const Point& rStartPoint, const Point& rEndPoint);
 
 private:
 

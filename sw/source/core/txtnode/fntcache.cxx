@@ -19,6 +19,7 @@
 
 #include <memory>
 #include <sal/config.h>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <cstdlib>
 
@@ -806,7 +807,7 @@ static void lcl_DrawLineForWrongListData(
 
                     LineInfo aLineInfo( LineStyle::Solid, 26 );
 
-                    rInf.GetOut().DrawLine( aStart, aEnd, aLineInfo );
+                    Drawable::Draw(&rInf.GetOut(), LineDrawable(aStart, aEnd, aLineInfo));
                 }
                 else if (WRONGAREA_DASHED == wrongArea->mLineType)
                 {
@@ -820,7 +821,7 @@ static void lcl_DrawLineForWrongListData(
                     aLineInfo.SetDashLen( 1 );
                     aLineInfo.SetDashCount(1);
 
-                    rInf.GetOut().DrawLine( aStart, aEnd, aLineInfo );
+                    Drawable::Draw(&rInf.GetOut(), LineDrawable(aStart, aEnd, aLineInfo));
                 }
             }
         }

@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/LineDrawable.hxx>
+
 #include <memory>
 #include <algorithm>
 
@@ -400,8 +402,8 @@ void ScInputWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Recta
     const StyleSettings& rStyleSettings = rRenderContext.GetSettings().GetStyleSettings();
     rRenderContext.SetLineColor(rStyleSettings.GetShadowColor());
     Size aSize = GetSizePixel();
-    rRenderContext.DrawLine(Point(0, aSize.Height() - 1),
-                            Point(aSize.Width() - 1, aSize.Height() - 1));
+    Drawable::Draw(&rRenderContext, LineDrawable(Point(0, aSize.Height() - 1),
+                            Point(aSize.Width() - 1, aSize.Height() - 1)));
 }
 
 void ScInputWindow::Resize()
@@ -1084,14 +1086,14 @@ void ScTextWndGroup::Paint(vcl::RenderContext& rRenderContext, const tools::Rect
     const StyleSettings& rStyleSettings = rRenderContext.GetSettings().GetStyleSettings();
     rRenderContext.SetLineColor(rStyleSettings.GetShadowColor());
     Size aSize = GetSizePixel();
-    rRenderContext.DrawLine(Point(0, 0),
-                            Point(aSize.Width() - 1, 0));
-    rRenderContext.DrawLine(Point(aSize.Width() - 1, 0),
-                            Point(aSize.Width() - 1, aSize.Height() - 1));
-    rRenderContext.DrawLine(Point(aSize.Width() - 1, aSize.Height() - 1),
-                            Point(0, aSize.Height() - 1));
-    rRenderContext.DrawLine(Point(0, aSize.Height() - 1),
-                            Point(0, 0));
+    Drawable::Draw(&rRenderContext, LineDrawable(Point(0, 0),
+                            Point(aSize.Width() - 1, 0)));
+    Drawable::Draw(&rRenderContext, LineDrawable(Point(aSize.Width() - 1, 0),
+                            Point(aSize.Width() - 1, aSize.Height() - 1)));
+    Drawable::Draw(&rRenderContext, LineDrawable(Point(aSize.Width() - 1, aSize.Height() - 1),
+                            Point(0, aSize.Height() - 1)));
+    Drawable::Draw(&rRenderContext, LineDrawable(Point(0, aSize.Height() - 1),
+                            Point(0, 0)));
 }
 
 void ScTextWndGroup::RemoveAccessibleTextData(ScAccessibleEditLineTextData& rTextData)

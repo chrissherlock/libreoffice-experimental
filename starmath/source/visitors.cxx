@@ -11,6 +11,7 @@
 #include <tools/gen.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <visitors.hxx>
 #include <cursor.hxx>
@@ -202,13 +203,13 @@ void SmCaretDrawingVisitor::Visit( SmTextNode* pNode )
         //Draw vertical line
         Point p1( left, top );
         Point p2( left, top + height );
-        mrDev.DrawLine( p1, p2 );
+        Drawable::Draw(&mrDev, LineDrawable(p1, p2));
     }
 
     //Underline the line
     Point aLeft( left_line, top + height );
     Point aRight( right_line, top + height );
-    mrDev.DrawLine( aLeft, aRight );
+    Drawable::Draw(&mrDev, LineDrawable(aLeft, aRight));
 }
 
 void SmCaretDrawingVisitor::DefaultVisit( SmNode* pNode )
@@ -230,13 +231,13 @@ void SmCaretDrawingVisitor::DefaultVisit( SmNode* pNode )
         //Draw vertical line
         Point p1( left, top );
         Point p2( left, top + height );
-        mrDev.DrawLine( p1, p2 );
+        Drawable::Draw(&mrDev, LineDrawable(p1, p2));
     }
 
     //Underline the line
     Point aLeft( left_line, top + height );
     Point aRight( right_line, top + height );
-    mrDev.DrawLine( aLeft, aRight );
+    Drawable::Draw(&mrDev, LineDrawable(aLeft, aRight));
 }
 
 // SmCaretPos2LineVisitor

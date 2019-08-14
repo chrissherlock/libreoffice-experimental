@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 #include <svtools/controldims.hxx>
 
 #include <dp_shared.hxx>
@@ -536,7 +537,7 @@ void ExtensionBox_Impl::DrawRow(vcl::RenderContext& rRenderContext, const tools:
     }
 
     rRenderContext.SetLineColor(COL_LIGHTGRAY);
-    rRenderContext.DrawLine(rRect.BottomLeft(), rRect.BottomRight());
+    Drawable::Draw(&rRenderContext, LineDrawable(rRect.BottomLeft(), rRect.BottomRight()));
 }
 
 

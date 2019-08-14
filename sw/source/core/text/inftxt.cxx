@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <com/sun/star/linguistic2/XHyphenator.hpp>
 
@@ -1088,8 +1089,8 @@ void SwTextPaintInfo::DrawCheckBox(const SwFieldFormCheckboxPortion &rPor, bool 
         Drawable::Draw(m_pOut, RectangleDrawable(r));
         if (bChecked)
         {
-            m_pOut->DrawLine(r.TopLeft(), r.BottomRight());
-            m_pOut->DrawLine(r.TopRight(), r.BottomLeft());
+            Drawable::Draw(m_pOut, LineDrawable(r.TopLeft(), r.BottomRight()));
+            Drawable::Draw(m_pOut, LineDrawable(r.TopRight(), r.BottomLeft()));
         }
         m_pOut->Pop();
     }

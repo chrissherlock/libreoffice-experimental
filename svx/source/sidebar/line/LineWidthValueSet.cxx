@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include "LineWidthValueSet.hxx"
 
@@ -150,7 +151,7 @@ void  LineWidthValueSet::UserDraw( const UserDrawEvent& rUDEvt )
 
         for(sal_uInt16 i = 1; i <= nItemId; i++)
         {
-            pDev->DrawLine(aLineStart,aLineEnd );
+            Drawable::Draw(pDev, LineDrawable(aLineStart,aLineEnd));
             aLineStart.setY(aLineStart.getY() + 1);
             aLineEnd.setY  (aLineEnd.getY() + 1);
         }

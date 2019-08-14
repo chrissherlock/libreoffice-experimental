@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <basidesh.hxx>
 #include <dlged.hxx>
@@ -1130,7 +1131,7 @@ static void lcl_PrintHeader( Printer* pPrinter, const OUString& rTitle ) // not 
     pPrinter->DrawText( aPos, rTitle );
 
     nY = Print::nTopMargin - Print::nBorder;
-    pPrinter->DrawLine( Point( nXLeft, nY ), Point( nXRight, nY ) );
+    Drawable::Draw(pPrinter, LineDrawable(Point(nXLeft, nY), Point(nXRight, nY)));
 
     pPrinter->Pop();
 }

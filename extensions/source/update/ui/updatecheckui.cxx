@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <list>
 
@@ -771,9 +772,9 @@ void BubbleWindow::Paint(vcl::RenderContext& /*rRenderContext*/, const tools::Re
     long nTipOffset = aSize.Width() - TIP_RIGHT_OFFSET + mnTipOffset;
 
     SetLineColor( GetSettings().GetStyleSettings().GetHelpColor() );
-    DrawLine( Point( nTipOffset+2, TIP_HEIGHT ),
-              Point( nTipOffset + TIP_WIDTH -1 , TIP_HEIGHT ),
-              aThickLine );
+    Drawable::Draw(this, LineDrawable(Point( nTipOffset+2, TIP_HEIGHT),
+              Point(nTipOffset + TIP_WIDTH -1 , TIP_HEIGHT),
+              aThickLine));
     SetLineColor( aOldLine );
 
     Size aImgSize = maBubbleImage.GetSizePixel();

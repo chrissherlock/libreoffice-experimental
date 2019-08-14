@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 #include <sfx2/dispatch.hxx>
 #include <vcl/commandevent.hxx>
 #include <vcl/help.hxx>
@@ -396,10 +397,10 @@ void ScHeaderControl::Paint( vcl::RenderContext& /*rRenderContext*/, const tools
         if (bVertical)
         {
             long nDarkPos = bMirrored ? 0 : nBarSize-1;
-            DrawLine( Point( nDarkPos, nPStart ), Point( nDarkPos, nLineEnd ) );
+            Drawable::Draw(this, LineDrawable( Point( nDarkPos, nPStart ), Point( nDarkPos, nLineEnd ) ));
         }
         else
-            DrawLine( Point( nPStart, nBarSize-1 ), Point( nLineEnd, nBarSize-1 ) );
+            Drawable::Draw(this, LineDrawable( Point( nPStart, nBarSize-1 ), Point( nLineEnd, nBarSize-1 ) ));
 
         // line in different color for selection
         if ( nTransEnd * nLayoutSign >= nTransStart * nLayoutSign && !bHighContrast )
@@ -408,10 +409,10 @@ void ScHeaderControl::Paint( vcl::RenderContext& /*rRenderContext*/, const tools
             if (bVertical)
             {
                 long nDarkPos = bMirrored ? 0 : nBarSize-1;
-                DrawLine( Point( nDarkPos, nTransStart ), Point( nDarkPos, nTransEnd ) );
+                Drawable::Draw(this, LineDrawable( Point( nDarkPos, nTransStart ), Point( nDarkPos, nTransEnd ) ));
             }
             else
-                DrawLine( Point( nTransStart, nBarSize-1 ), Point( nTransEnd, nBarSize-1 ) );
+                Drawable::Draw(this, LineDrawable( Point( nTransStart, nBarSize-1 ), Point( nTransEnd, nBarSize-1 ) ));
         }
     }
 
@@ -510,11 +511,11 @@ void ScHeaderControl::Paint( vcl::RenderContext& /*rRenderContext*/, const tools
                                     if ( GetEntrySize(nEntryNo+1)==0 )
                                     {
                                         if (bVertical)
-                                            DrawLine( Point(aScrPos.X(),aEndPos.Y()-nLayoutSign),
-                                                      Point(aEndPos.X(),aEndPos.Y()-nLayoutSign) );
+                                            Drawable::Draw(this, LineDrawable( Point(aScrPos.X(),aEndPos.Y()-nLayoutSign),
+                                                      Point(aEndPos.X(),aEndPos.Y()-nLayoutSign) ));
                                         else
-                                            DrawLine( Point(aEndPos.X()-nLayoutSign,aScrPos.Y()),
-                                                      Point(aEndPos.X()-nLayoutSign,aEndPos.Y()) );
+                                            Drawable::Draw(this, LineDrawable( Point(aEndPos.X()-nLayoutSign,aScrPos.Y()),
+                                                      Point(aEndPos.X()-nLayoutSign,aEndPos.Y()) ));
                                     }
                             }
                             break;

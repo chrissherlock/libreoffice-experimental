@@ -19,6 +19,8 @@
 
 #include <sal/macros.h>
 #include <sal/log.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
+
 #include <helpids.h>
 #include <svx/gridctrl.hxx>
 #include <gridcell.hxx>
@@ -775,11 +777,11 @@ void DbGridControl::NavigationBar::Paint(vcl::RenderContext& rRenderContext, con
     Point aAbsolutePos = m_aAbsolute->GetPosPixel();
     Size  aAbsoluteSize = m_aAbsolute->GetSizePixel();
 
-    rRenderContext.DrawLine(Point(aAbsolutePos.X() - 1, 0 ),
-                            Point(aAbsolutePos.X() - 1, aAbsolutePos.Y() + aAbsoluteSize.Height()));
+    Drawable::Draw(&rRenderContext, LineDrawable(Point(aAbsolutePos.X() - 1, 0),
+                            Point(aAbsolutePos.X() - 1, aAbsolutePos.Y() + aAbsoluteSize.Height())));
 
-    rRenderContext.DrawLine(Point(aAbsolutePos.X() + aAbsoluteSize.Width() + 1, 0 ),
-                            Point(aAbsolutePos.X() + aAbsoluteSize.Width() + 1, aAbsolutePos.Y() + aAbsoluteSize.Height()));
+    Drawable::Draw(&rRenderContext, LineDrawable(Point(aAbsolutePos.X() + aAbsoluteSize.Width() + 1, 0),
+                            Point(aAbsolutePos.X() + aAbsoluteSize.Width() + 1, aAbsolutePos.Y() + aAbsoluteSize.Height())));
 }
 
 void DbGridControl::NavigationBar::StateChanged(StateChangedType nType)

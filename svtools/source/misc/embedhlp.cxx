@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <svtools/embedhlp.hxx>
 #include <vcl/graphicfilter.hxx>
@@ -736,7 +737,7 @@ void EmbeddedObjectRef::DrawShading( const tools::Rectangle &rRect, OutputDevice
         else
             a2 += Point( 0, i );
 
-        pOut->DrawLine( pOut->PixelToLogic( a1 ), pOut->PixelToLogic( a2 ) );
+        Drawable::Draw(pOut, LineDrawable(pOut->PixelToLogic(a1), pOut->PixelToLogic(a2)));
     }
 
     pOut->Pop();

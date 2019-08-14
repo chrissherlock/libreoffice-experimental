@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <sfx2/titledockwin.hxx>
 #include <sfx2/bindings.hxx>
@@ -190,15 +191,15 @@ namespace sfx2
         rRenderContext.SetFillColor();
         rRenderContext.SetLineColor(rStyleSettings.GetShadowColor());
         if (m_aBorder.Top() > 0)
-            rRenderContext.DrawLine(Point(nInnerLeft, nInnerTop), Point(nInnerLeft, nInnerBottom));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(nInnerLeft, nInnerTop), Point(nInnerLeft, nInnerBottom)));
         if (m_aBorder.Left() > 0)
-            rRenderContext.DrawLine(Point(nInnerLeft, nInnerTop), Point(nInnerRight, nInnerTop));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(nInnerLeft, nInnerTop), Point(nInnerRight, nInnerTop)));
 
         rRenderContext.SetLineColor(rStyleSettings.GetLightColor());
         if (m_aBorder.Bottom() > 0)
-            rRenderContext.DrawLine(Point(nInnerRight, nInnerBottom), Point(nInnerLeft, nInnerBottom));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(nInnerRight, nInnerBottom), Point(nInnerLeft, nInnerBottom)));
         if (m_aBorder.Right() > 0)
-            rRenderContext.DrawLine(Point(nInnerRight, nInnerBottom), Point(nInnerRight, nInnerTop));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(nInnerRight, nInnerBottom), Point(nInnerRight, nInnerTop)));
 
         // Paint title bar text.
         rRenderContext.SetLineColor(rStyleSettings.GetActiveTextColor());

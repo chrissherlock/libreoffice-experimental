@@ -23,6 +23,7 @@
 #include <vcl/ptrstyle.hxx>
 #include <vcl/drawables/PixelDrawable.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <csvruler.hxx>
 #include <AccessibleCsvControl.hxx>
@@ -564,7 +565,7 @@ void ScCsvRuler::ImplDrawArea( sal_Int32 nPosX, sal_Int32 nWidth )
 
     maBackgrDev->SetLineColor( maTextColor );
     sal_Int32 nY = GetHeight() - 1;
-    maBackgrDev->DrawLine( Point( nPosX, nY ), Point( nPosX + nWidth - 1, nY ) );
+    Drawable::Draw(maBackgrDev, LineDrawable(Point(nPosX, nY), Point(nPosX + nWidth - 1, nY)));
 }
 
 void ScCsvRuler::ImplDrawBackgrDev()
@@ -585,7 +586,7 @@ void ScCsvRuler::ImplDrawBackgrDev()
         if( nPos % 5 )
             Drawable::Draw(maBackgrDev, PixelDrawable(Point(nX, nY)));
         else
-            maBackgrDev->DrawLine( Point( nX, nY - 1 ), Point( nX, nY + 1 ) );
+            Drawable::Draw(maBackgrDev, LineDrawable(Point(nX, nY - 1), Point(nX, nY + 1)));
     }
 
     // texts

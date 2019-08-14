@@ -21,6 +21,8 @@
 
 #include <sot/exchange.hxx>
 #include <sot/storage.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
+
 #include <svx/strings.hrc>
 #include <svx/svxids.hrc>
 
@@ -282,8 +284,8 @@ void SvxColorDockingWindow::FillValueSet()
     pVD->SetOutputSizePixel( aColorSize );
     pVD->SetLineColor( COL_BLACK );
     pVD->SetBackground( Wallpaper( COL_WHITE ) );
-    pVD->DrawLine( Point(), Point( nPtX, nPtY ) );
-    pVD->DrawLine( Point( 0, nPtY ), Point( nPtX, 0 ) );
+    Drawable::Draw(pVD, LineDrawable(Point(), Point(nPtX, nPtY)));
+    Drawable::Draw(pVD, LineDrawable(Point(0, nPtY), Point(nPtX, 0)));
 
     BitmapEx aBmp( pVD->GetBitmapEx( Point(), aColorSize ) );
 

@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include "baside2.hxx"
 #include <baside3.hxx>
@@ -153,7 +154,7 @@ void lcl_PrintHeader( Printer* pPrinter, sal_uInt16 nPages, sal_uInt16 nCurPage,
     nY = Print::nTopMargin - Print::nBorder;
 
     if( bOutput )
-        pPrinter->DrawLine( Point( nXLeft, nY ), Point( nXRight, nY ) );
+        Drawable::Draw(pPrinter, LineDrawable(Point(nXLeft, nY), Point(nXRight, nY)));
 
     pPrinter->SetFont( aOldFont );
     pPrinter->SetFillColor( aOldFillColor );

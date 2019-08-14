@@ -19,6 +19,7 @@
 
 #include <tools/debug.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/builderfactory.hxx>
 #include <vcl/decoview.hxx>
 #include <vcl/event.hxx>
@@ -873,14 +874,14 @@ void ValueSet::ImplDraw(vcl::RenderContext& rRenderContext)
             if (!(rStyleSettings.GetOptions() & StyleSettingsOptions::Mono))
             {
                 rRenderContext.SetLineColor(rStyleSettings.GetShadowColor());
-                rRenderContext.DrawLine(aPos1, aPos2);
+                Drawable::Draw(&rRenderContext, LineDrawable(aPos1, aPos2));
                 aPos1.AdjustY( 1 );
                 aPos2.AdjustY( 1 );
                 rRenderContext.SetLineColor(rStyleSettings.GetLightColor());
             }
             else
                 rRenderContext.SetLineColor(rStyleSettings.GetWindowTextColor());
-            rRenderContext.DrawLine(aPos1, aPos2);
+            Drawable::Draw(&rRenderContext, LineDrawable(aPos1, aPos2));
         }
     }
 
@@ -2755,14 +2756,14 @@ void SvtValueSet::ImplDraw(vcl::RenderContext& rRenderContext)
             if (!(rStyleSettings.GetOptions() & StyleSettingsOptions::Mono))
             {
                 rRenderContext.SetLineColor(rStyleSettings.GetShadowColor());
-                rRenderContext.DrawLine(aPos1, aPos2);
+                Drawable::Draw(&rRenderContext, LineDrawable(aPos1, aPos2));
                 aPos1.AdjustY( 1 );
                 aPos2.AdjustY( 1 );
                 rRenderContext.SetLineColor(rStyleSettings.GetLightColor());
             }
             else
                 rRenderContext.SetLineColor(rStyleSettings.GetWindowTextColor());
-            rRenderContext.DrawLine(aPos1, aPos2);
+            Drawable::Draw(&rRenderContext, LineDrawable(aPos1, aPos2));
         }
     }
 

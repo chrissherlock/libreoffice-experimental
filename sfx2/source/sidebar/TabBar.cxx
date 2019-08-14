@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/LineDrawable.hxx>
+
 #include <sfx2/sidebar/TabBar.hxx>
 #include <sfx2/sidebar/TabItem.hxx>
 #include <sfx2/sidebar/ControlFactory.hxx>
@@ -96,8 +98,8 @@ void TabBar::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle& r
 
     const sal_Int32 nHorizontalPadding(Theme::GetInteger(Theme::Int_TabMenuSeparatorPadding));
     rRenderContext.SetLineColor(Theme::GetColor(Theme::Color_TabMenuSeparator));
-    rRenderContext.DrawLine(Point(nHorizontalPadding, mnMenuSeparatorY),
-                            Point(GetSizePixel().Width() - nHorizontalPadding, mnMenuSeparatorY));
+    Drawable::Draw(&rRenderContext, LineDrawable(Point(nHorizontalPadding, mnMenuSeparatorY),
+                            Point(GetSizePixel().Width() - nHorizontalPadding, mnMenuSeparatorY)));
 }
 
 sal_Int32 TabBar::GetDefaultWidth()

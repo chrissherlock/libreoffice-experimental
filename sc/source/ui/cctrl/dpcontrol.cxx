@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <dpcontrol.hxx>
 
@@ -101,14 +102,14 @@ void ScDPFieldButton::draw()
 
         // Border lines
         mpOutDev->SetLineColor(mpStyle->GetLightColor());
-        mpOutDev->DrawLine(maPos, Point(maPos.X(), maPos.Y()+maSize.Height()-1));
-        mpOutDev->DrawLine(maPos, Point(maPos.X()+maSize.Width()-1, maPos.Y()));
+        Drawable::Draw(mpOutDev, LineDrawable(maPos, Point(maPos.X(), maPos.Y()+maSize.Height()-1)));
+        Drawable::Draw(mpOutDev, LineDrawable(maPos, Point(maPos.X()+maSize.Width()-1, maPos.Y())));
 
         mpOutDev->SetLineColor(mpStyle->GetShadowColor());
-        mpOutDev->DrawLine(Point(maPos.X(), maPos.Y()+maSize.Height()-1),
-                           Point(maPos.X()+maSize.Width()-1, maPos.Y()+maSize.Height()-1));
-        mpOutDev->DrawLine(Point(maPos.X()+maSize.Width()-1, maPos.Y()),
-                           Point(maPos.X()+maSize.Width()-1, maPos.Y()+maSize.Height()-1));
+        Drawable::Draw(mpOutDev, LineDrawable(Point(maPos.X(), maPos.Y()+maSize.Height()-1),
+                           Point(maPos.X()+maSize.Width()-1, maPos.Y()+maSize.Height()-1)));
+        Drawable::Draw(mpOutDev, LineDrawable(Point(maPos.X()+maSize.Width()-1, maPos.Y()),
+                           Point(maPos.X()+maSize.Width()-1, maPos.Y()+maSize.Height()-1)));
 
         // Field name.
         // Get the font and size the same way as in scenario selection (lcl_DrawOneFrame in gridwin4.cxx)

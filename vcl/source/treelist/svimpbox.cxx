@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/salnativewidgets.hxx>
 #include <vcl/help.hxx>
@@ -1085,7 +1086,7 @@ void SvImpLBox::DrawNet(vcl::RenderContext& rRenderContext)
             nDistance = static_cast<sal_uInt16>(m_pView->GetVisiblePos(pChild) - m_pView->GetVisiblePos(pEntry));
             aPos2 = aPos1;
             aPos2.AdjustY(nDistance * nEntryHeight );
-            rRenderContext.DrawLine(aPos1, aPos2);
+            Drawable::Draw(&rRenderContext, LineDrawable(aPos1, aPos2));
         }
         // visible in control?
         if (n >= nOffs && ((m_nStyle & WB_HASLINESATROOT) || !m_pTree->IsAtRootDepth(pEntry)))
@@ -1105,7 +1106,7 @@ void SvImpLBox::DrawNet(vcl::RenderContext& rRenderContext)
             }
             aPos2.setY( aPos1.Y() );
             aPos2.AdjustX( -(m_pView->GetIndent()) );
-            rRenderContext.DrawLine(aPos1, aPos2);
+            Drawable::Draw(&rRenderContext, LineDrawable(aPos1, aPos2));
         }
         nY += nEntryHeight;
         pEntry = m_pView->NextVisible(pEntry);
@@ -1125,7 +1126,7 @@ void SvImpLBox::DrawNet(vcl::RenderContext& rRenderContext)
         aPos2.setX( aPos1.X() );
         aPos2.setY( GetEntryLine( pChild ) );
         aPos2.AdjustY(nEntryHeightDIV2 );
-        rRenderContext.DrawLine(aPos1, aPos2);
+        Drawable::Draw(&rRenderContext, LineDrawable(aPos1, aPos2));
     }
     rRenderContext.Pop();
 }

@@ -24,6 +24,7 @@
 #include <comphelper/lok.hxx>
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/mnemonic.hxx>
 #include <vcl/image.hxx>
@@ -1845,10 +1846,10 @@ void Menu::ImplPaint(vcl::RenderContext& rRenderContext, Size const & rSize,
                         aTmpPos.setY( aPos.Y() + ((pData->aSz.Height() - 2) / 2) );
                         aTmpPos.setX( aPos.X() + 2 + nOuterSpaceX );
                         rRenderContext.SetLineColor(rSettings.GetShadowColor());
-                        rRenderContext.DrawLine(aTmpPos, Point(aOutSz.Width() - 3 - 2 * nOuterSpaceX, aTmpPos.Y()));
+                        Drawable::Draw(&rRenderContext, LineDrawable(aTmpPos, Point(aOutSz.Width() - 3 - 2 * nOuterSpaceX, aTmpPos.Y())));
                         aTmpPos.AdjustY( 1 );
                         rRenderContext.SetLineColor(rSettings.GetLightColor());
-                        rRenderContext.DrawLine(aTmpPos, Point(aOutSz.Width() - 3 - 2 * nOuterSpaceX, aTmpPos.Y()));
+                        Drawable::Draw(&rRenderContext, LineDrawable(aTmpPos, Point(aOutSz.Width() - 3 - 2 * nOuterSpaceX, aTmpPos.Y())));
                         rRenderContext.SetLineColor();
                     }
                 }

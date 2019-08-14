@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/LineDrawable.hxx>
+
 #include <TableWindow.hxx>
 #include <TableWindowListBox.hxx>
 #include <QueryTableView.hxx>
@@ -73,19 +75,19 @@ void Draw3DBorder(vcl::RenderContext& rRenderContext, const tools::Rectangle& rR
 
     // Black lines for bottom and right
     rRenderContext.SetLineColor(aSystemStyle.GetDarkShadowColor());
-    rRenderContext.DrawLine(rRect.BottomLeft(), rRect.BottomRight());
-    rRenderContext.DrawLine(rRect.BottomRight(), rRect.TopRight());
+    Drawable::Draw(&rRenderContext, LineDrawable(rRect.BottomLeft(), rRect.BottomRight()));
+    Drawable::Draw(&rRenderContext, LineDrawable(rRect.BottomRight(), rRect.TopRight()));
 
     // Dark grey lines over the black lines
     rRenderContext.SetLineColor(aSystemStyle.GetShadowColor());
     Point aEHvector(1, 1);
-    rRenderContext.DrawLine(rRect.BottomLeft() + Point(1, -1), rRect.BottomRight() - aEHvector);
-    rRenderContext.DrawLine(rRect.BottomRight() - aEHvector, rRect.TopRight() + Point(-1, 1));
+    Drawable::Draw(&rRenderContext, LineDrawable(rRect.BottomLeft() + Point(1, -1), rRect.BottomRight() - aEHvector));
+    Drawable::Draw(&rRenderContext, LineDrawable(rRect.BottomRight() - aEHvector, rRect.TopRight() + Point(-1, 1)));
 
     // Light grey lines for top and left
     rRenderContext.SetLineColor(aSystemStyle.GetLightColor());
-    rRenderContext.DrawLine(rRect.BottomLeft() + Point(1, -2), rRect.TopLeft() + aEHvector);
-    rRenderContext.DrawLine(rRect.TopLeft() + aEHvector, rRect.TopRight() + Point(-2, 1));
+    Drawable::Draw(&rRenderContext, LineDrawable(rRect.BottomLeft() + Point(1, -2), rRect.TopLeft() + aEHvector));
+    Drawable::Draw(&rRenderContext, LineDrawable(rRect.TopLeft() + aEHvector, rRect.TopRight() + Point(-2, 1)));
 }
 
 }

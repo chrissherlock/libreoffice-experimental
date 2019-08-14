@@ -21,6 +21,7 @@
 #include <sal/log.hxx>
 
 #include <vcl/drawables/PixelDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/notebookbar.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/help.hxx>
@@ -905,21 +906,21 @@ void TabControl::ImplDrawItem(vcl::RenderContext& rRenderContext, ImplTabItem co
             Drawable::Draw(&rRenderContext, PixelDrawable(Point(aRect.Left() + 1 - nOff2, aRect.Top() + 1 - nOff2)));
             if (bLeftBorder)
             {
-                rRenderContext.DrawLine(Point(aRect.Left() - nOff2, aRect.Top() + 2 - nOff2),
-                                        Point(aRect.Left() - nOff2, nLeftBottom - 1));
+                Drawable::Draw(&rRenderContext, LineDrawable(Point(aRect.Left() - nOff2, aRect.Top() + 2 - nOff2),
+                                        Point(aRect.Left() - nOff2, nLeftBottom - 1)));
             }
-            rRenderContext.DrawLine(Point(aRect.Left() + 2 - nOff2, aRect.Top() - nOff2),   // top line starting 2px from left border
-                                    Point(aRect.Right() + nOff2 - 3, aRect.Top() - nOff2)); // ending 3px from right border
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(aRect.Left() + 2 - nOff2, aRect.Top() - nOff2),   // top line starting 2px from left border
+                                    Point(aRect.Right() + nOff2 - 3, aRect.Top() - nOff2))); // ending 3px from right border
 
             if (bRightBorder)
             {
                 rRenderContext.SetLineColor(rStyleSettings.GetShadowColor());
-                rRenderContext.DrawLine(Point(aRect.Right() + nOff2 - 2, aRect.Top() + 1 - nOff2),
-                                        Point(aRect.Right() + nOff2 - 2, nRightBottom - 1));
+                Drawable::Draw(&rRenderContext, LineDrawable(Point(aRect.Right() + nOff2 - 2, aRect.Top() + 1 - nOff2),
+                                        Point(aRect.Right() + nOff2 - 2, nRightBottom - 1)));
 
                 rRenderContext.SetLineColor(rStyleSettings.GetDarkShadowColor());
-                rRenderContext.DrawLine(Point(aRect.Right() + nOff2 - 1, aRect.Top() + 3 - nOff2),
-                                        Point(aRect.Right() + nOff2 - 1, nRightBottom - 1));
+                Drawable::Draw(&rRenderContext, LineDrawable(Point(aRect.Right() + nOff2 - 1, aRect.Top() + 3 - nOff2),
+                                        Point(aRect.Right() + nOff2 - 1, nRightBottom - 1)));
             }
         }
         else
@@ -929,15 +930,15 @@ void TabControl::ImplDrawItem(vcl::RenderContext& rRenderContext, ImplTabItem co
             Drawable::Draw(&rRenderContext, PixelDrawable(Point(aRect.Right() + nOff2 - 2, aRect.Top() + 1 - nOff2)));
             if (bLeftBorder)
             {
-                rRenderContext.DrawLine(Point(aRect.Left() - nOff2, aRect.Top() + 2 - nOff2),
-                                        Point(aRect.Left() - nOff2, nLeftBottom - 1));
+                Drawable::Draw(&rRenderContext, LineDrawable(Point(aRect.Left() - nOff2, aRect.Top() + 2 - nOff2),
+                                        Point(aRect.Left() - nOff2, nLeftBottom - 1)));
             }
-            rRenderContext.DrawLine(Point(aRect.Left() + 2 - nOff2, aRect.Top() - nOff2),
-                                    Point(aRect.Right() - 3, aRect.Top() - nOff2));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(aRect.Left() + 2 - nOff2, aRect.Top() - nOff2),
+                                    Point(aRect.Right() - 3, aRect.Top() - nOff2)));
             if (bRightBorder)
             {
-                rRenderContext.DrawLine(Point(aRect.Right() + nOff2 - 1, aRect.Top() + 2 - nOff2),
-                                        Point(aRect.Right() + nOff2 - 1, nRightBottom - 1));
+                Drawable::Draw(&rRenderContext, LineDrawable(Point(aRect.Right() + nOff2 - 1, aRect.Top() + 2 - nOff2),
+                                        Point(aRect.Right() + nOff2 - 1, nRightBottom - 1)));
             }
         }
     }
@@ -1170,10 +1171,10 @@ void TabControl::Paint( vcl::RenderContext& rRenderContext, const tools::Rectang
         if (pCurItem && !pCurItem->maRect.IsEmpty())
         {
             aCurRect = pCurItem->maRect;
-            rRenderContext.DrawLine(aRect.TopLeft(), Point(aCurRect.Left() - 2, aRect.Top()));
+            Drawable::Draw(&rRenderContext, LineDrawable(aRect.TopLeft(), Point(aCurRect.Left() - 2, aRect.Top())));
             if (aCurRect.Right() + 1 < aRect.Right())
             {
-                rRenderContext.DrawLine(Point(aCurRect.Right(), aRect.Top()), aRect.TopRight());
+                Drawable::Draw(&rRenderContext, LineDrawable(Point(aCurRect.Right(), aRect.Top()), aRect.TopRight()));
             }
             else
             {
@@ -1181,9 +1182,9 @@ void TabControl::Paint( vcl::RenderContext& rRenderContext, const tools::Rectang
             }
         }
         else
-            rRenderContext.DrawLine(aRect.TopLeft(), aRect.TopRight());
+            Drawable::Draw(&rRenderContext, LineDrawable(aRect.TopLeft(), aRect.TopRight()));
 
-        rRenderContext.DrawLine(aRect.TopLeft(), aRect.BottomLeft());
+        Drawable::Draw(&rRenderContext, LineDrawable(aRect.TopLeft(), aRect.BottomLeft()));
 
         if (!(rStyleSettings.GetOptions() & StyleSettingsOptions::Mono))
         {
@@ -1193,19 +1194,19 @@ void TabControl::Paint( vcl::RenderContext& rRenderContext, const tools::Rectang
                 rRenderContext.SetLineColor(rStyleSettings.GetDialogColor());
             else
                 rRenderContext.SetLineColor(rStyleSettings.GetShadowColor());
-            rRenderContext.DrawLine(Point(1, aRect.Bottom() - 1), Point(aRect.Right() - 1, aRect.Bottom() - 1));
-            rRenderContext.DrawLine(Point(aRect.Right() - 1, aRect.Top() + nTopOff), Point(aRect.Right() - 1, aRect.Bottom() - 1));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(1, aRect.Bottom() - 1), Point(aRect.Right() - 1, aRect.Bottom() - 1)));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(aRect.Right() - 1, aRect.Top() + nTopOff), Point(aRect.Right() - 1, aRect.Bottom() - 1)));
             if (bNoTabPage)
                 rRenderContext.SetLineColor(rStyleSettings.GetDialogColor());
             else
                 rRenderContext.SetLineColor(rStyleSettings.GetDarkShadowColor());
-            rRenderContext.DrawLine(Point(0, aRect.Bottom()), Point(aRect.Right(), aRect.Bottom()));
-            rRenderContext.DrawLine(Point(aRect.Right(), aRect.Top() + nTopOff), Point(aRect.Right(), aRect.Bottom()));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(0, aRect.Bottom()), Point(aRect.Right(), aRect.Bottom())));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(aRect.Right(), aRect.Top() + nTopOff), Point(aRect.Right(), aRect.Bottom())));
         }
         else
         {
-            rRenderContext.DrawLine(aRect.TopRight(), aRect.BottomRight());
-            rRenderContext.DrawLine(aRect.BottomLeft(), aRect.BottomRight());
+            Drawable::Draw(&rRenderContext, LineDrawable(aRect.TopRight(), aRect.BottomRight()));
+            Drawable::Draw(&rRenderContext, LineDrawable(aRect.BottomLeft(), aRect.BottomRight()));
         }
     }
 
