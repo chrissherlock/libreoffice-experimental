@@ -22,6 +22,7 @@
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/drawables/RoundRectDrawable.hxx>
 #include <vcl/drawables/LineDrawable.hxx>
+#include <vcl/drawables/PolyLineDrawable.hxx>
 #include <vcl/pngwrite.hxx>
 #if HAVE_FEATURE_OPENGL
 #include <vcl/opengl/OpenGLHelper.hxx>
@@ -665,7 +666,7 @@ void SvmTest::testPolyLine()
     aPolygon.SetPoint(Point(2, 7), 1);
     aPolygon.SetPoint(Point(3, 6), 2);
 
-    pVirtualDev->DrawPolyLine(aPolygon);
+    Drawable::Draw(pVirtualDev, PolyLineDrawable(aPolygon));
 
     tools::Polygon aPolygonWithControl(4);
     aPolygonWithControl.SetPoint(Point(8, 1), 0);
@@ -687,7 +688,7 @@ void SvmTest::testPolyLine()
     aLineInfo.SetLineJoin(basegfx::B2DLineJoin::Miter);
     aLineInfo.SetLineCap(css::drawing::LineCap_ROUND);
 
-    pVirtualDev->DrawPolyLine(aPolygonWithControl, aLineInfo);
+    Drawable::Draw(pVirtualDev, PolyLineDrawable(aPolygonWithControl, aLineInfo));
 
     checkPolyLine(writeAndRead(aGDIMetaFile, "polyline.svm"));
 }

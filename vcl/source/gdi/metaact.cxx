@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/PolyLineDrawable.hxx>
+
 #include <stdio.h>
 #include <string.h>
 #include <osl/thread.h>
@@ -772,7 +774,7 @@ MetaPolyLineAction::MetaPolyLineAction( const tools::Polygon& rPoly, const LineI
 void MetaPolyLineAction::Execute( OutputDevice* pOut )
 {
     if( maLineInfo.IsDefault() )
-        pOut->DrawPolyLine( maPoly );
+        Drawable::Draw(pOut, PolyLineDrawable(maPoly));
     else
         pOut->DrawPolyLine( maPoly, maLineInfo );
 }

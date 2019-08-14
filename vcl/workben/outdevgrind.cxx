@@ -47,6 +47,7 @@
 #include <vcl/drawables/RoundRectDrawable.hxx>
 #include <vcl/drawables/GridRectDrawable.hxx>
 #include <vcl/drawables/LineDrawable.hxx>
+#include <vcl/drawables/PolyLineDrawable.hxx>
 
 #include <com/sun/star/lang/XMultiServiceFactory.hpp>
 #include <com/sun/star/uno/XComponentContext.hpp>
@@ -193,7 +194,7 @@ void setupMethodStubs( functor_vector_type& res )
     /* void DrawPolyLine( const Polygon& rPoly ); */
     add(res,
         "DrawPolyLine",
-        [aPoly] (OutputDevice *pOutDev) {return pOutDev->DrawPolyLine(aPoly); });
+        [aPoly] (OutputDevice *pOutDev) {return Drawable::Draw(pOutDev, PolyLineDrawable(aPoly)); });
 
     /* void DrawPolyLine( const Polygon& rPoly,
                                       const LineInfo& rLineInfo );

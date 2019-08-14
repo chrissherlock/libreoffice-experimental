@@ -22,6 +22,7 @@
 #include <unotools/configmgr.hxx>
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/PolyLineDrawable.hxx>
 #include <vcl/metric.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/print.hxx>
@@ -1165,7 +1166,7 @@ void OutputDevice::ImplDrawEmphasisMark( long nBaseX, long nX, long nY,
         {
             tools::Polygon aPoly = rPolyPoly.GetObject( 0 );
             aPoly.Move( nX, nY );
-            DrawPolyLine( aPoly );
+            Drawable::Draw(this, PolyLineDrawable(aPoly));
         }
         else
         {

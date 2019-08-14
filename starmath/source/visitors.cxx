@@ -12,6 +12,7 @@
 #include <vcl/lineinfo.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/drawables/LineDrawable.hxx>
+#include <vcl/drawables/PolyLineDrawable.hxx>
 
 #include <visitors.hxx>
 #include <cursor.hxx>
@@ -445,7 +446,7 @@ void SmDrawingVisitor::Visit( SmPolyLineNode* pNode )
     SmTmpDevice aTmpDev ( mrDev, false );
     aTmpDev.SetLineColor( pNode->GetFont( ).GetColor( ) );
 
-    mrDev.DrawPolyLine( pNode->GetPolygon( ), aInfo );
+    mrDev.DrawPolyLine(pNode->GetPolygon(), aInfo);
 }
 
 void SmDrawingVisitor::Visit( SmRectangleNode* pNode )

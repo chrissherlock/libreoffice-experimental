@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/PolyLineDrawable.hxx>
 
 #include <editeng/eeitem.hxx>
 #include <editeng/flditem.hxx>

@@ -699,16 +699,6 @@ public:
 
 public:
 
-    /** Render the given polygon as a line stroke
-
-        The given polygon is stroked with the current LineColor, start
-        and end point are not automatically connected
-
-        @see DrawPolygon
-        @see DrawPolyPolygon
-     */
-    void                        DrawPolyLine( const tools::Polygon& rPoly );
-
     void                        DrawPolyLine(
                                     const basegfx::B2DPolygon&,
                                     double fLineWidth = 0.0,

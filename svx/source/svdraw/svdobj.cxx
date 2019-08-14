@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/PolyLineDrawable.hxx>
+
 #include <svx/svdobj.hxx>
 #include <config_features.h>
 

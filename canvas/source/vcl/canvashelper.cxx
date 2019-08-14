@@ -20,6 +20,7 @@
 #include <sal/config.h>
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/drawables/LineDrawable.hxx>
+#include <vcl/drawables/PolyLineDrawable.hxx>
 
 #include <utility>
 
@@ -294,10 +295,10 @@ namespace vclcanvas
 
                 for( sal_uInt16 i=0; i<nSize; ++i )
                 {
-                    mpOutDevProvider->getOutDev().DrawPolyLine( aPolyPoly[i] );
+                    Drawable::Draw(&mpOutDevProvider->getOutDev(), PolyLineDrawable(aPolyPoly[i]));
 
                     if( mp2ndOutDevProvider )
-                        mp2ndOutDevProvider->getOutDev().DrawPolyLine( aPolyPoly[i] );
+                        Drawable::Draw(&mp2ndOutDevProvider->getOutDev(), PolyLineDrawable(aPolyPoly[i]));
                 }
             }
         }

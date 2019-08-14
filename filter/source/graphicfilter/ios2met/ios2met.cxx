@@ -30,6 +30,7 @@
 #include <vcl/gdimtf.hxx>
 #include <vcl/drawables/RoundRectDrawable.hxx>
 #include <vcl/drawables/LineDrawable.hxx>
+#include <vcl/drawables/PolyLineDrawable.hxx>
 
 #include <math.h>
 #include <algorithm>
@@ -503,7 +504,7 @@ void OS2METReader::DrawPolyLine( const tools::Polygon& rPolygon )
     if ( aLineInfo.GetStyle() == LineStyle::Dash || ( aLineInfo.GetWidth() > 1 ) )
         pVirDev->DrawPolyLine( rPolygon, aLineInfo );
     else
-        pVirDev->DrawPolyLine( rPolygon );
+        Drawable::Draw(pVirDev, PolyLineDrawable(rPolygon));
 }
 
 void OS2METReader::DrawPolygon( const tools::Polygon& rPolygon )

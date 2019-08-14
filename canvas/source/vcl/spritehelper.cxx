@@ -37,6 +37,7 @@
 #include <vcl/canvastools.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/BitmapMonochromeFilter.hxx>
+#include <vcl/drawables/PolyLineDrawable.hxx>
 #include <vcl/opengl/OpenGLHelper.hxx>
 
 #include <canvas/canvastools.hxx>
@@ -312,7 +313,7 @@ namespace vclcanvas
 
                     for( int i=0; i<aMarkerPoly.Count(); ++i )
                     {
-                        rTargetSurface.DrawPolyLine( aMarkerPoly.GetObject(static_cast<sal_uInt16>(i)) );
+                        Drawable::Draw(&rTargetSurface, PolyLineDrawable(aMarkerPoly.GetObject(static_cast<sal_uInt16>(i))));
                     }
 
                     // paint sprite prio

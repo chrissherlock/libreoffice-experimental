@@ -19,6 +19,7 @@
 
 #include <vcl/drawables/PixelDrawable.hxx>
 #include <vcl/drawables/LineDrawable.hxx>
+#include <vcl/drawables/PolyLineDrawable.hxx>
 
 #include <string.h>
 #include <vcl/gdimtf.hxx>
@@ -285,7 +286,7 @@ void DXF2GDIMetaFile::DrawCircleEntity(const DXFCircleEntity & rE, const DXFTran
                 aPoly[i]
             );
         }
-        pVirDev->DrawPolyLine(aPoly);
+        Drawable::Draw(pVirDev, PolyLineDrawable(aPoly));
         if (rE.fThickness!=0) {
             tools::Polygon aPoly2(nPoints);
             for (i=0; i<nPoints; i++) {
@@ -296,7 +297,7 @@ void DXF2GDIMetaFile::DrawCircleEntity(const DXFCircleEntity & rE, const DXFTran
                 );
 
             }
-            pVirDev->DrawPolyLine(aPoly2);
+            Drawable::Draw(pVirDev, PolyLineDrawable(aPoly2));
             for (i=0; i<nPoints-1; i++) DrawLine(aPoly[i],aPoly2[i]);
         }
     }
@@ -357,7 +358,7 @@ void DXF2GDIMetaFile::DrawArcEntity(const DXFArcEntity & rE, const DXFTransform 
                 aPoly[i]
             );
         }
-        pVirDev->DrawPolyLine(aPoly);
+        Drawable::Draw(pVirDev, PolyLineDrawable(aPoly));
         if (rE.fThickness!=0) {
             tools::Polygon aPoly2(nPoints);
             for (i=0; i<nPoints; i++) {
@@ -367,7 +368,7 @@ void DXF2GDIMetaFile::DrawArcEntity(const DXFArcEntity & rE, const DXFTransform 
                     aPoly2[i]
                 );
             }
-            pVirDev->DrawPolyLine(aPoly2);
+            Drawable::Draw(pVirDev, PolyLineDrawable(aPoly2));
             for (i=0; i<nPoints; i++)
                 DrawLine(aPoly[i], aPoly2[i]);
         }
@@ -528,7 +529,7 @@ void DXF2GDIMetaFile::DrawPolyLineEntity(const DXFPolyLineEntity & rE, const DXF
 
     if (SetLineAttribute(rE)) {
         if ((rE.nFlags&1)!=0) pVirDev->DrawPolygon(aPoly);
-        else pVirDev->DrawPolyLine(aPoly);
+        else Drawable::Draw(pVirDev, PolyLineDrawable(aPoly));
         if (rE.fThickness!=0) {
             tools::Polygon aPoly2(nPolySize);
             pBE=rE.pSucc;
@@ -540,7 +541,7 @@ void DXF2GDIMetaFile::DrawPolyLineEntity(const DXFPolyLineEntity & rE, const DXF
                 pBE=pBE->pSucc;
             }
             if ((rE.nFlags&1)!=0) pVirDev->DrawPolygon(aPoly2);
-            else pVirDev->DrawPolyLine(aPoly2);
+            else Drawable::Draw(pVirDev, PolyLineDrawable(aPoly2));
             for (i=0; i<nPolySize; i++) DrawLine(aPoly[i],aPoly2[i]);
         }
     }
@@ -561,7 +562,7 @@ void DXF2GDIMetaFile::DrawLWPolyLineEntity(const DXFLWPolyLineEntity & rE, const
             if ( ( rE.nFlags & 1 ) != 0 )
                 pVirDev->DrawPolygon( aPoly );
             else
-                pVirDev->DrawPolyLine( aPoly );
+                Drawable::Draw(pVirDev, PolyLineDrawable(aPoly));
         }
     }
 }
