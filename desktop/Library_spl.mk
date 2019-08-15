@@ -23,6 +23,7 @@ $(eval $(call gb_Library_use_libraries,spl,\
     cppu \
     cppuhelper \
     sal \
+    salhelper \
     tl \
     ucbhelper \
     utl \

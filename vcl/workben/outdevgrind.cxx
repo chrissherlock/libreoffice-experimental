@@ -201,7 +201,7 @@ void setupMethodStubs( functor_vector_type& res )
     */
     add(res,
         "DrawPolyLine(LineInfo)",
-        [aPoly, aLineInfo] (OutputDevice *pOutDev) { return pOutDev->DrawPolyLine(aPoly, aLineInfo); });
+        [aPoly, aLineInfo] (OutputDevice *pOutDev) { return Drawable::Draw(pOutDev, PolyLineDrawable(aPoly, aLineInfo)); });
 
     /* void DrawPolygon( const Polygon& rPoly ); */
     add(res,

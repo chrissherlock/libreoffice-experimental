@@ -8,8 +8,10 @@
  *
  */
 
-#include <test/outputdevice.hxx>
+#include <vcl/drawables/PolyLineDrawable.hxx>
 #include <vcl/bitmapex.hxx>
+
+#include <test/outputdevice.hxx>
 
 namespace vcl
 {
@@ -27,7 +29,7 @@ void drawPolyLineOffset(OutputDevice& rDevice, tools::Rectangle const& rRect, in
     };
     aPolygon.setClosed(true);
 
-    rDevice.DrawPolyLine(aPolygon, 0.0); // draw hairline
+    Drawable::Draw(&rDevice, PolyLineDrawable(basegfx::B2DPolygon(aPolygon))); // draw hairline
 }
 
 } // end anonymous namespace

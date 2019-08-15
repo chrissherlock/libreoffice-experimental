@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/LineDrawable.hxx>
 
 #include <com/sun/star/text/HoriOrientation.hpp>
 #include <vcl/window.hxx>

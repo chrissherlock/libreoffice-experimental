@@ -94,8 +94,8 @@ void DrawArrow(vcl::RenderContext& rRenderContext, const Point &rP1, const Point
         else
         {
             // Vertical
-            Drawable::Draw(&rRenderContext, LineDrawable(Point(rP1.X() - 2, rP1.Y()), Point(rP1.X() + 2, rP1.Y()));
-            Drawable::Draw(&rRenderContext, LineDrawable(Point(rP2.X() - 2, rP2.Y()), Point(rP2.X() + 2, rP2.Y()));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(rP1.X() - 2, rP1.Y()), Point(rP1.X() + 2, rP1.Y())));
+            Drawable::Draw(&rRenderContext, LineDrawable(Point(rP2.X() - 2, rP2.Y()), Point(rP2.X() + 2, rP2.Y())));
         }
     }
 }

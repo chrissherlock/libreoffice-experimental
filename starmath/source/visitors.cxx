@@ -446,7 +446,7 @@ void SmDrawingVisitor::Visit( SmPolyLineNode* pNode )
     SmTmpDevice aTmpDev ( mrDev, false );
     aTmpDev.SetLineColor( pNode->GetFont( ).GetColor( ) );
 
-    mrDev.DrawPolyLine(pNode->GetPolygon(), aInfo);
+    Drawable::Draw(&mrDev, PolyLineDrawable(pNode->GetPolygon(), aInfo));
 }
 
 void SmDrawingVisitor::Visit( SmRectangleNode* pNode )

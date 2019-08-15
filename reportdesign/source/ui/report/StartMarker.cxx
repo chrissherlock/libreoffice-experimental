@@ -16,6 +16,9 @@
  *   except in compliance with the License. You may obtain a copy of
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
+
+#include <vcl/drawables/PolyLineDrawable.hxx>
+
 #include <StartMarker.hxx>
 #include <vcl/image.hxx>
 #include <vcl/svapp.hxx>
@@ -145,8 +148,8 @@ void OStartMarker::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
                         Size(aSize.Width() - nCornerWidth - nCornerWidth,
                              aSize.Height() - nCornerHeight - nCornerHeight));
         ColorChanger aColors(&rRenderContext, COL_WHITE, COL_WHITE);
-        rRenderContext.DrawPolyLine( tools::Polygon(rRenderContext.PixelToLogic(aRect)),
-                                    LineInfo(LineStyle::Solid, 2));
+        Drawable::Draw(&rRenderContext, PolyLineDrawable(tools::Polygon(rRenderContext.PixelToLogic(aRect)),
+                                    LineInfo(LineStyle::Solid, 2)));
     }
 }
 

@@ -776,7 +776,7 @@ void MetaPolyLineAction::Execute( OutputDevice* pOut )
     if( maLineInfo.IsDefault() )
         Drawable::Draw(pOut, PolyLineDrawable(maPoly));
     else
-        pOut->DrawPolyLine( maPoly, maLineInfo );
+        Drawable::Draw(pOut, PolyLineDrawable(maPoly, maLineInfo));
 }
 
 rtl::Reference<MetaAction> MetaPolyLineAction::Clone()

@@ -26,6 +26,7 @@ $(eval $(call gb_Library_use_libraries,rptui,\
     comphelper \
     cppu \
     cppuhelper \
+    basegfx \
     dbtools \
     dbu \
     editeng \

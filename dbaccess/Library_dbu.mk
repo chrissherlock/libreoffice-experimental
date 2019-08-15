@@ -38,6 +38,7 @@ $(eval $(call gb_Library_use_libraries,dbu,\
     comphelper \
     cppu \
     cppuhelper \
+    basegfx \
     dba \
     dbtools \
     editeng \

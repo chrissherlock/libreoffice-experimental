@@ -33,6 +33,8 @@ Here, we choose:
 
 #include <basegfx/polygon/b2dpolygon.hxx>
 #include <basegfx/polygon/b2dpolygontools.hxx>
+#include <vcl/drawables/PolyLineDrawable.hxx>
+
 #include "shape.hxx"
 
 namespace PictReaderShapePrivate {
@@ -118,7 +120,12 @@ namespace PictReaderShape {
     B2DPolygon poly;
     poly.append(B2DPoint(double(orig.X()+decal[0]), double(orig.Y()+decal[1])));
     poly.append(B2DPoint(double(dest.X()+decal[0]), double(dest.Y()+decal[1])));
-    dev->DrawPolyLine(poly, double(penSize), basegfx::B2DLineJoin::NONE);
+
+    LineInfo aLineInfo;
+    aLineInfo.SetWidth(penSize);
+    aLineInfo.SetLineJoin(basegfx::B2DLineJoin::NONE);
+
+    Drawable::Draw(dev, PolyLineDrawable(poly, aLineInfo));
   }
 
   //--------------------  draws a rectangle --------------------
@@ -137,8 +144,12 @@ namespace PictReaderShape {
     poly.append(B2DPoint(X[1], Y[1])); poly.append(B2DPoint(X[0], Y[1]));
     poly.append(B2DPoint(X[0], Y[0]));
 
+    LineInfo aLineInfo;
+    aLineInfo.SetWidth(penSize);
+    aLineInfo.SetLineJoin(basegfx::B2DLineJoin::NONE);
+
     if (drawFrame)
-      dev->DrawPolyLine(poly, double(penSize), basegfx::B2DLineJoin::NONE);
+      Drawable::Draw(dev, PolyLineDrawable(poly, aLineInfo));
     else
       dev->DrawPolygon(poly);
   }
@@ -152,8 +163,13 @@ namespace PictReaderShape {
     long const Y[2] = { oval.Top(), oval.Bottom() };
     B2DPoint center(0.5*(X[1]+X[0]), 0.5*(Y[1]+Y[0]));
     B2DPolygon poly = basegfx::utils::createPolygonFromEllipse(center, 0.5*(X[1]-X[0]), 0.5*(Y[1]-Y[0]));
+
+    LineInfo aLineInfo;
+    aLineInfo.SetWidth(penSize);
+    aLineInfo.SetLineJoin(basegfx::B2DLineJoin::NONE);
+
     if (drawFrame)
-      dev->DrawPolyLine(poly, double(penSize), basegfx::B2DLineJoin::NONE);
+      Drawable::Draw(dev, PolyLineDrawable(poly, aLineInfo));
     else
       dev->DrawPolygon(poly);
   }
@@ -184,8 +200,13 @@ namespace PictReaderShape {
     while (angl2 >= F_2PI) angl2 -= F_2PI;
 
     B2DPolygon poly = basegfx::utils::createPolygonFromEllipseSegment(center, 0.5*(X[1]-X[0]), 0.5*(Y[1]-Y[0]), angl1, angl2);
+
+    LineInfo aLineInfo;
+    aLineInfo.SetWidth(penSize);
+    aLineInfo.SetLineJoin(basegfx::B2DLineJoin::NONE);
+
     if (drawFrame)
-      dev->DrawPolyLine(poly, double(penSize), basegfx::B2DLineJoin::NONE);
+      Drawable::Draw(dev, PolyLineDrawable(poly, aLineInfo));
     else {
       // adds circle's center
       poly.append(center);
@@ -208,8 +229,12 @@ namespace PictReaderShape {
     B2DRectangle rect(B2DPoint(X[0],Y[0]), B2DPoint(X[1],Y[1]));
     B2DPolygon poly = basegfx::utils::createPolygonFromRect(rect, (width != 0.0) ? ovalW/width : 0.0, (height != 0.0) ? ovalH/height : 0.0);
 
+    LineInfo aLineInfo;
+    aLineInfo.SetWidth(penSize);
+    aLineInfo.SetLineJoin(basegfx::B2DLineJoin::NONE);
+
     if (drawFrame)
-      dev->DrawPolyLine(poly, double(penSize), basegfx::B2DLineJoin::NONE);
+      Drawable::Draw(dev, PolyLineDrawable(poly, aLineInfo));
     else
       dev->DrawPolygon(poly);
   }
@@ -247,8 +272,13 @@ void drawPolygon(VirtualDevice *dev, bool drawFrame, tools::Polygon const &orig,
       double y = (double(pt.Y()) < bary[1]) ? pt.Y()+decalTL[1] : pt.Y()+decalBR[1];
       poly.append(B2DPoint(x, y));
     }
+
+    LineInfo aLineInfo;
+    aLineInfo.SetWidth(penSize);
+    aLineInfo.SetLineJoin(basegfx::B2DLineJoin::NONE);
+
     if (drawFrame)
-      dev->DrawPolyLine(poly, double(penSize), basegfx::B2DLineJoin::NONE);
+      Drawable::Draw(dev, PolyLineDrawable(poly, aLineInfo));
     else
       dev->DrawPolygon(poly);
   }

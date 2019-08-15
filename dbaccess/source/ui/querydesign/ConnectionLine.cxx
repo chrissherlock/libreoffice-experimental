@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/PolyLineDrawable.hxx>
 
 #include <ConnectionLine.hxx>
 #include <ConnectionLineData.hxx>
@@ -279,7 +280,7 @@ void OConnectionLine::Draw( OutputDevice* pOutDev )
     aPoly.Insert(1,m_aSourceConnPos);
     aPoly.Insert(2,m_aDestConnPos);
     aPoly.Insert(3,m_aDestDescrLinePos);
-    pOutDev->DrawPolyLine(aPoly,aLineInfo);
+    Drawable::Draw(pOutDev, PolyLineDrawable(aPoly, aLineInfo));
 
     // draw the connection rectangles
     pOutDev->SetFillColor(Application::GetSettings().GetStyleSettings().GetWindowColor());

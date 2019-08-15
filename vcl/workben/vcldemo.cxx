@@ -18,6 +18,7 @@
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/drawables/CheckeredRectDrawable.hxx>
 #include <vcl/drawables/LineDrawable.hxx>
+#include <vcl/drawables/PolyLineDrawable.hxx>
 
 #include <comphelper/processfactory.hxx>
 #include <comphelper/random.hxx>
@@ -316,7 +317,13 @@ public:
                         aPoly.append(basegfx::B2DPoint(aSub.Left() + aSub.GetWidth() * aPoints[j].nX,
                                                        aSub.Top()  + aSub.GetHeight() * aPoints[j].nY));
                     }
-                    rDev.DrawPolyLine(aPoly, aLineWidths[i], eJoins[i], eLineCaps[i]);
+
+                    LineInfo aLineInfo;
+                    aLineInfo.SetWidth(aLineWidths[i]);
+                    aLineInfo.SetLineJoin(eJoins[i]);
+                    aLineInfo.SetLineCap(eLineCaps[i]);
+
+                    Drawable::Draw(&rDev, PolyLineDrawable(aPoly, aLineInfo));
                 }
             }
             else

@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/PolyLineDrawable.hxx>
 
 #include <limits.h>
 #include <osl/diagnose.h>
@@ -2566,7 +2567,7 @@ void SvxIconChoiceCtrl_Impl::DrawFocusRect(vcl::RenderContext& rRenderContext)
     aLineInfo.SetDistance(1);
     aLineInfo.SetDotCount(1);
 
-    rRenderContext.DrawPolyLine(aPolygon, aLineInfo);
+    Drawable::Draw(&rRenderContext, PolyLineDrawable(aPolygon, aLineInfo));
 }
 
 bool SvxIconChoiceCtrl_Impl::IsMnemonicChar( sal_Unicode cChar, sal_uLong& rPos ) const

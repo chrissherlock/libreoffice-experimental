@@ -21,6 +21,7 @@
 #include <tools/poly.hxx>
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/PolyLineDrawable.hxx>
 #include <vcl/event.hxx>
 #include <vcl/split.hxx>
 #include <vcl/svapp.hxx>
@@ -686,7 +687,7 @@ void Splitter::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle&
         aInfo.SetDotLen( 2 );
         aInfo.SetDotCount( 3 );
 
-        rRenderContext.DrawPolyLine( aPoly, aInfo );
+        Drawable::Draw(&rRenderContext, PolyLineDrawable(aPoly, aInfo));
     }
     else
     {

@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/PolyLineDrawable.hxx>
+
 #include <screenshotannotationdlg.hxx>
 
 #include <strings.hrc>
@@ -463,10 +465,11 @@ void ScreenshotAnnotationDlg_Impl::PaintControlDataEntry(
             fTransparency,
             basegfx::B2DLineJoin::Round))
         {
+            LineInfo aLineInfo;
+            aLineInfo.SetWidth(fLineWidth);
+
             // no transparency, draw without
-            mpVirtualBufferDevice->DrawPolyLine(
-                aPolygon,
-                fLineWidth);
+            Drawable::Draw(mpVirtualBufferDevice, PolyLineDrawable(aPolygon, aLineInfo));
         }
     }
 }

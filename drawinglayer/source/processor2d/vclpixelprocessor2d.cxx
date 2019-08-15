@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/PolyLineDrawable.hxx>
 
 #include "vclpixelprocessor2d.hxx"
 #include <vcl/outdev.hxx>
@@ -564,7 +565,7 @@ namespace drawinglayer
 
                 for(sal_uInt32 a(0); a < nCount; a++)
                 {
-                    mpOutputDevice->DrawPolyLine(aLocalPolyPolygon.getB2DPolygon(a), 0.0);
+                    Drawable::Draw(mpOutputDevice, PolyLineDrawable(aLocalPolyPolygon.getB2DPolygon(a)));
                 }
             }
         }

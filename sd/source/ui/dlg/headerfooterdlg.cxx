@@ -690,7 +690,7 @@ void PresLayoutPreview::Paint(vcl::RenderContext& rRenderContext, SdrTextObj con
 
     for (sal_uInt32 a(0); a < aGeometry.count(); a++)
     {
-        rRenderContext.DrawPolyLine(aGeometry.getB2DPolygon(a));
+        Drawable::Draw(&rRenderContext, PolyLineDrawable(aGeometry.getB2DPolygon(a)));
     }
 }
 

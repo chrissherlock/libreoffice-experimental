@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/LineDrawable.hxx>
+#include <vcl/drawables/PolyLineDrawable.hxx>
 
 #include "SidebarTxtControl.hxx"
 

@@ -38,9 +38,11 @@ $(eval $(call gb_Library_use_custom_headers,sm,\
 $(eval $(call gb_Library_use_sdk_api,sm))
 
 $(eval $(call gb_Library_use_libraries,sm,\
+        salhelper \
         comphelper \
         cppu \
         cppuhelper \
+        basegfx \
         editeng \
         i18nutil \
 		i18nlangtag \

@@ -699,28 +699,6 @@ public:
 
 public:
 
-    void                        DrawPolyLine(
-                                    const basegfx::B2DPolygon&,
-                                    double fLineWidth = 0.0,
-                                    basegfx::B2DLineJoin eLineJoin = basegfx::B2DLineJoin::Round,
-                                    css::drawing::LineCap eLineCap = css::drawing::LineCap_BUTT,
-                                    double fMiterMinimumAngle = basegfx::deg2rad(15.0));
-
-    /** Render the given polygon as a line stroke
-
-        The given polygon is stroked with the current LineColor, start
-        and end point are not automatically connected. The line is
-        rendered according to the specified LineInfo, e.g. supplying a
-        dash pattern, or a line thickness.
-
-        @see DrawPolygon
-        @see DrawPolyPolygon
-     */
-    void                        DrawPolyLine( const tools::Polygon& rPoly,
-                                              const LineInfo& rLineInfo );
-
-    // #i101491#
-    // Helper who tries to use SalGDI's DrawPolyLine direct and returns it's bool.
     bool                        DrawPolyLineDirect(
                                     const basegfx::B2DHomMatrix& rObjectTransform,
                                     const basegfx::B2DPolygon& rB2DPolygon,
@@ -732,12 +710,6 @@ public:
                                     bool bBypassAACheck = false);
 
 private:
-
-    // #i101491#
-    // Helper which holds the old line geometry creation and is extended to use AA when
-    // switched on. Advantage is that line geometry is only temporarily used for paint
-    SAL_DLLPRIVATE void         drawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLineInfo);
-
     ///@}
 
 
@@ -773,15 +745,16 @@ public:
     void                        DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly );
     void                        DrawPolyPolygon( const basegfx::B2DPolyPolygon& );
 
+    // #i101491#
+    // Helper who implements the DrawPolyPolygon functionality for basegfx::B2DPolyPolygon
+    // without MetaFile processing
+    SAL_DLLPRIVATE void         ImplDrawPolyPolygonWithB2DPolyPolygon(const basegfx::B2DPolyPolygon& rB2DPolyPoly);
+
 private:
 
     SAL_DLLPRIVATE void         ImplDrawPolygon( const tools::Polygon& rPoly, const tools::PolyPolygon* pClipPolyPoly = nullptr );
     SAL_DLLPRIVATE void         ImplDrawPolyPolygon( const tools::PolyPolygon& rPolyPoly, const tools::PolyPolygon* pClipPolyPoly );
     SAL_DLLPRIVATE void         ImplDrawPolyPolygon( sal_uInt16 nPoly, const tools::PolyPolygon& rPolyPoly );
-    // #i101491#
-    // Helper who implements the DrawPolyPolygon functionality for basegfx::B2DPolyPolygon
-    // without MetaFile processing
-    SAL_DLLPRIVATE void         ImplDrawPolyPolygonWithB2DPolyPolygon(const basegfx::B2DPolyPolygon& rB2DPolyPoly);
     ///@}
 
 

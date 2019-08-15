@@ -1811,7 +1811,7 @@ void SdrObject::PaintMacro(OutputDevice& rOut, const tools::Rectangle& , const S
 
     for(auto const& rPolygon : aPolyPolygon)
     {
-        rOut.DrawPolyLine(rPolygon);
+        Drawable::Draw(&rOut, PolyLineDrawable(rPolygon));
     }
 
     rOut.SetRasterOp(eRop);

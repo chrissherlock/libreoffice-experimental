@@ -58,6 +58,7 @@ $(eval $(call gb_Library_use_libraries,avmedia,\
 	tl \
 	utl \
 	vcl \
+    salhelper \
 ))
 
 $(eval $(call gb_Library_add_exception_objects,avmedia,\

@@ -16,6 +16,9 @@
  *   except in compliance with the License. You may obtain a copy of
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
+
+#include <vcl/drawables/PolyLineDrawable.hxx>
+
 #include <EndMarker.hxx>
 #include <ColorChanger.hxx>
 #include <SectionWindow.hxx>
@@ -72,7 +75,7 @@ void OEndMarker::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangl
                          Size(aSize.Width() - nCornerSpace,
                               aSize.Height() - nCornerSpace - nCornerSpace));
         ColorChanger aColors(this, COL_WHITE, COL_WHITE);
-        rRenderContext.DrawPolyLine( tools::Polygon(PixelToLogic(aRect)), LineInfo(LineStyle::Solid, 2));
+        Drawable::Draw(&rRenderContext, PolyLineDrawable(tools::Polygon(PixelToLogic(aRect)), LineInfo(LineStyle::Solid, 2)));
     }
 }
 

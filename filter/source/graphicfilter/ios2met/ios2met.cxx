@@ -502,7 +502,7 @@ bool OS2METReader::IsLineInfo()
 void OS2METReader::DrawPolyLine( const tools::Polygon& rPolygon )
 {
     if ( aLineInfo.GetStyle() == LineStyle::Dash || ( aLineInfo.GetWidth() > 1 ) )
-        pVirDev->DrawPolyLine( rPolygon, aLineInfo );
+        Drawable::Draw(pVirDev, PolyLineDrawable(rPolygon, aLineInfo));
     else
         Drawable::Draw(pVirDev, PolyLineDrawable(rPolygon));
 }
@@ -515,7 +515,7 @@ void OS2METReader::DrawPolygon( const tools::Polygon& rPolygon )
         pVirDev->SetLineColor( COL_TRANSPARENT );
         pVirDev->DrawPolygon( rPolygon );
         pVirDev->Pop();
-        pVirDev->DrawPolyLine( rPolygon, aLineInfo );
+        Drawable::Draw(pVirDev, PolyLineDrawable(rPolygon, aLineInfo));
     }
     else
         pVirDev->DrawPolygon( rPolygon );
@@ -530,7 +530,7 @@ void OS2METReader::DrawPolyPolygon( const tools::PolyPolygon& rPolyPolygon )
         pVirDev->DrawPolyPolygon( rPolyPolygon );
         pVirDev->Pop();
         for ( sal_uInt16 i = 0; i < rPolyPolygon.Count(); i++ )
-            pVirDev->DrawPolyLine( rPolyPolygon.GetObject( i ), aLineInfo );
+            Drawable::Draw(pVirDev, PolyLineDrawable(rPolyPolygon.GetObject(i), aLineInfo));
     }
     else
         pVirDev->DrawPolyPolygon( rPolyPolygon );
@@ -967,7 +967,7 @@ void OS2METReader::ReadBox(bool bGivenPos)
                 Drawable::Draw(pVirDev, RoundRectDrawable(aBoxRect, nHRound, nVRound));
                 pVirDev->Pop();
             }
-            pVirDev->DrawPolyLine( aPolygon, aLineInfo );
+            Drawable::Draw(pVirDev, PolyLineDrawable(aPolygon, aLineInfo));
         }
         else
         {
@@ -1613,7 +1613,7 @@ void OS2METReader::ReadOrder(sal_uInt16 nOrderID, sal_uInt16 nOrderLen)
                         if ( IsLineInfo() )
                         {
                             for ( sal_uInt16 i = 0; i < p->aPPoly.Count(); i++ )
-                                pVirDev->DrawPolyLine( p->aPPoly.GetObject( i ), aLineInfo );
+                                Drawable::Draw(pVirDev, PolyLineDrawable(p->aPPoly.GetObject(i), aLineInfo));
                         }
                         else
                             pVirDev->DrawPolyPolygon( p->aPPoly );

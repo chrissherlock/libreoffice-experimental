@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/LineDrawable.hxx>
+
 #include <cstdint>
 
 #include <column.hxx>
@@ -1387,7 +1389,7 @@ void ColumnValueSet::UserDraw(const UserDrawEvent& rUDEvt)
         {
             aStart.setY( aBLPos.Y() + nTop + i * nStep);
             aEnd.setY( aStart.Y() );
-            pDev->DrawLine(aStart, aEnd);
+            Drawable::Draw(pDev, LineDrawable(aStart, aEnd));
         }
     }
     pDev->SetFillColor(aFillColor);

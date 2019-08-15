@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/PixelDrawable.hxx>
+#include <vcl/drawables/PolyLineDrawable.hxx>
 
 #include <cmath>
 #include <comphelper/string.hxx>
@@ -343,7 +344,7 @@ namespace drawinglayer
                 aLocalPolygon = basegfx::utils::snapPointsOfHorizontalOrVerticalEdges(aLocalPolygon);
             }
 
-            mpOutputDevice->DrawPolyLine(aLocalPolygon, 0.0);
+            Drawable::Draw(mpOutputDevice, PolyLineDrawable(aLocalPolygon));
         }
 
         // direct draw of transformed BitmapEx primitive
@@ -1005,7 +1006,7 @@ namespace drawinglayer
                             // paint as simple hairline
                             for(sal_uInt32 a(0); a < nCount; a++)
                             {
-                                mpOutputDevice->DrawPolyLine(aHairlinePolyPolygon.getB2DPolygon(a), 0.0);
+                                Drawable::Draw(mpOutputDevice, PolyLineDrawable(aHairlinePolyPolygon.getB2DPolygon(a)));
                             }
 
                             bDone = true;
@@ -1025,22 +1026,22 @@ namespace drawinglayer
                                 aMat.set(0, 2, -fHalfDistance);
                                 aMat.set(1, 2, -fHalfDistance);
                                 aCandidate.transform(aMat);
-                                mpOutputDevice->DrawPolyLine(aCandidate, 0.0);
+                                Drawable::Draw(mpOutputDevice, PolyLineDrawable(aCandidate));
 
                                 aMat.set(0, 2, fDistance);
                                 aMat.set(1, 2, 0.0);
                                 aCandidate.transform(aMat);
-                                mpOutputDevice->DrawPolyLine(aCandidate, 0.0);
+                                Drawable::Draw(mpOutputDevice, PolyLineDrawable(aCandidate));
 
                                 aMat.set(0, 2, 0.0);
                                 aMat.set(1, 2, fDistance);
                                 aCandidate.transform(aMat);
-                                mpOutputDevice->DrawPolyLine(aCandidate, 0.0);
+                                Drawable::Draw(mpOutputDevice, PolyLineDrawable(aCandidate));
 
                                 aMat.set(0, 2, -fDistance);
                                 aMat.set(1, 2, 0.0);
                                 aCandidate.transform(aMat);
-                                mpOutputDevice->DrawPolyLine(aCandidate, 0.0);
+                                Drawable::Draw(mpOutputDevice, PolyLineDrawable(aCandidate));
                             }
 
                             bDone = true;
@@ -1056,27 +1057,27 @@ namespace drawinglayer
                             {
                                 basegfx::B2DPolygon aCandidate(aHairlinePolyPolygon.getB2DPolygon(a));
 
-                                mpOutputDevice->DrawPolyLine(aCandidate, 0.0);
+                                Drawable::Draw(mpOutputDevice, PolyLineDrawable(aCandidate));
 
                                 aMat.set(0, 2, -fDistance);
                                 aMat.set(1, 2, 0.0);
                                 aCandidate.transform(aMat);
-                                mpOutputDevice->DrawPolyLine(aCandidate, 0.0);
+                                Drawable::Draw(mpOutputDevice, PolyLineDrawable(aCandidate));
 
                                 aMat.set(0, 2, fDistance);
                                 aMat.set(1, 2, -fDistance);
                                 aCandidate.transform(aMat);
-                                mpOutputDevice->DrawPolyLine(aCandidate, 0.0);
+                                Drawable::Draw(mpOutputDevice, PolyLineDrawable(aCandidate));
 
                                 aMat.set(0, 2, fDistance);
                                 aMat.set(1, 2, fDistance);
                                 aCandidate.transform(aMat);
-                                mpOutputDevice->DrawPolyLine(aCandidate, 0.0);
+                                Drawable::Draw(mpOutputDevice, PolyLineDrawable(aCandidate));
 
                                 aMat.set(0, 2, -fDistance);
                                 aMat.set(1, 2, fDistance);
                                 aCandidate.transform(aMat);
-                                mpOutputDevice->DrawPolyLine(aCandidate, 0.0);
+                                Drawable::Draw(mpOutputDevice, PolyLineDrawable(aCandidate));
                             }
 
                             bDone = true;
@@ -1093,7 +1094,7 @@ namespace drawinglayer
                             // line width below 1.5, draw the basic hairline polygon
                             for(sal_uInt32 a(0); a < nCount; a++)
                             {
-                                mpOutputDevice->DrawPolyLine(aHairlinePolyPolygon.getB2DPolygon(a), 0.0);
+                                Drawable::Draw(mpOutputDevice, PolyLineDrawable(aHairlinePolyPolygon.getB2DPolygon(a)));
                             }
 
                             bDone = true;
@@ -1107,25 +1108,25 @@ namespace drawinglayer
                                 basegfx::B2DPolygon aCandidate(aHairlinePolyPolygon.getB2DPolygon(a));
                                 basegfx::B2DHomMatrix aMat;
 
-                                mpOutputDevice->DrawPolyLine(aCandidate, 0.0);
+                                Drawable::Draw(mpOutputDevice, PolyLineDrawable(aCandidate));
 
                                 aMat.set(0, 2, 1.0);
                                 aMat.set(1, 2, 0.0);
                                 aCandidate.transform(aMat);
 
-                                mpOutputDevice->DrawPolyLine(aCandidate, 0.0);
+                                Drawable::Draw(mpOutputDevice, PolyLineDrawable(aCandidate));
 
                                 aMat.set(0, 2, 0.0);
                                 aMat.set(1, 2, 1.0);
                                 aCandidate.transform(aMat);
 
-                                mpOutputDevice->DrawPolyLine(aCandidate, 0.0);
+                                Drawable::Draw(mpOutputDevice, PolyLineDrawable(aCandidate));
 
                                 aMat.set(0, 2, -1.0);
                                 aMat.set(1, 2, 0.0);
                                 aCandidate.transform(aMat);
 
-                                mpOutputDevice->DrawPolyLine(aCandidate, 0.0);
+                                Drawable::Draw(mpOutputDevice, PolyLineDrawable(aCandidate));
                             }
 
                             bDone = true;
@@ -1144,12 +1145,15 @@ namespace drawinglayer
                         // for very complex polygons, too
                         for(sal_uInt32 a(0); a < nCount; a++)
                         {
-                            mpOutputDevice->DrawPolyLine(
+                            LineInfo aLineInfo;
+                            aLineInfo.SetWidth(fDiscreteLineWidth);
+                            aLineInfo.SetLineJoin(rLineAttribute.getLineJoin());
+                            aLineInfo.SetLineCap(rLineAttribute.getLineCap());
+
+                            Drawable::Draw(mpOutputDevice, PolyLineDrawable(
                                 aHairlinePolyPolygon.getB2DPolygon(a),
-                                fDiscreteLineWidth,
-                                rLineAttribute.getLineJoin(),
-                                rLineAttribute.getLineCap(),
-                                rLineAttribute.getMiterMinimumAngle());
+                                aLineInfo,
+                                rLineAttribute.getMiterMinimumAngle()));
                         }
 
                         bDone = true;
