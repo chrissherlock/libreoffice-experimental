@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/PolyLineDrawable.hxx>
+#include <vcl/drawables/PolyHairlineDrawable.hxx>
 
 #include <screenshotannotationdlg.hxx>
 
@@ -457,16 +458,19 @@ void ScreenshotAnnotationDlg_Impl::PaintControlDataEntry(
 
         mpVirtualBufferDevice->SetLineColor(rColor);
 
+        LineInfo aLineInfo;
+        aLineInfo.SetWidth(fLineWidth);
+        aLineInfo.SetLineJoin(basegfx::B2DLineJoin::Round);
+        aLineInfo.SetLineCap(css::drawing::LineCap_BUTT);
+
         // try to use transparency
-        if (!mpVirtualBufferDevice->DrawPolyLineDirect(
+        if (!Drawable::Draw(mpVirtualBufferDevice, PolyHairlineDrawable(
             basegfx::B2DHomMatrix(),
             aPolygon,
-            fLineWidth,
-            fTransparency,
-            basegfx::B2DLineJoin::Round))
+            aLineInfo,
+            fTransparency)))
         {
-            LineInfo aLineInfo;
-            aLineInfo.SetWidth(fLineWidth);
+            aLineInfo.SetLineJoin(basegfx::B2DLineJoin::NONE);
 
             // no transparency, draw without
             Drawable::Draw(mpVirtualBufferDevice, PolyLineDrawable(aPolygon, aLineInfo));

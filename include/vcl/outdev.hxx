@@ -693,26 +693,6 @@ public:
     void Invert( const tools::Polygon& rPoly, InvertFlags nFlags = InvertFlags::NONE );
     ///@}
 
-    /** @name Polyline functions
-     */
-    ///@{
-
-public:
-
-    bool                        DrawPolyLineDirect(
-                                    const basegfx::B2DHomMatrix& rObjectTransform,
-                                    const basegfx::B2DPolygon& rB2DPolygon,
-                                    double fLineWidth = 0.0,
-                                    double fTransparency = 0.0,
-                                    basegfx::B2DLineJoin eLineJoin = basegfx::B2DLineJoin::NONE,
-                                    css::drawing::LineCap eLineCap = css::drawing::LineCap_BUTT,
-                                    double fMiterMinimumAngle = basegfx::deg2rad(15.0),
-                                    bool bBypassAACheck = false);
-
-private:
-    ///@}
-
-
     /** @name Polygon functions
      */
     ///@{

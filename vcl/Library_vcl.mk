@@ -119,6 +119,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/outdev/PixelDrawable \
     vcl/source/outdev/LineDrawable \
     vcl/source/outdev/PolyLineDrawable \
+    vcl/source/outdev/PolyHairlineDrawable \
     vcl/source/outdev/RectangleDrawable \
     vcl/source/outdev/RoundRectDrawable \
     vcl/source/outdev/CheckeredRectDrawable \
@@ -243,7 +244,6 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/outdev/textline \
     vcl/source/outdev/pixel \
     vcl/source/outdev/rect \
-    vcl/source/outdev/polyline \
     vcl/source/outdev/hatch \
     vcl/source/outdev/gradient \
     vcl/source/outdev/curvedshapes \

@@ -98,14 +98,6 @@ private:
     bool Draw(OutputDevice* pRenderContext, const basegfx::B2DPolygon& rB2DPolygon,
               LineInfo aLineInfo, double fMiterMinimumAngle) const;
 
-    /** Helper who tries to use SalGDI's DrawPolyLine direct and returns it's bool. See #i101491#
-    */
-    bool DrawPolyLineDirect(OutputDevice* pRenderContext,
-                            basegfx::B2DHomMatrix const& rObjectTransform,
-                            basegfx::B2DPolygon const& rB2DPolygon, LineInfo aLineInfo,
-                            double fTransparency = 0.0,
-                            double fMiterMinimumAngle = basegfx::deg2rad(15.0)) const;
-
     tools::Polygon maPolygon;
     LineInfo maLineInfo;
     basegfx::B2DPolygon maB2DPolygon;
