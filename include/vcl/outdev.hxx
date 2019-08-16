@@ -699,18 +699,6 @@ public:
 
 public:
 
-    /** Render the given polygon
-
-        The given polygon is stroked with the current LineColor, and
-        filled with the current FillColor. If one of these colors are
-        transparent, the corresponding stroke or fill stays
-        invisible. Start and end point of the polygon are
-        automatically connected.
-
-        @see DrawPolyLine
-     */
-    void                        DrawPolygon( const basegfx::B2DPolygon& );
-
     /** Render the given poly-polygon
 
         The given poly-polygon is stroked with the current LineColor,

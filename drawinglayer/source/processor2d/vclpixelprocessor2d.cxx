@@ -20,6 +20,7 @@
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/drawables/PolyLineDrawable.hxx>
 #include <vcl/drawables/PolyHairlineDrawable.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 
 #include "vclpixelprocessor2d.hxx"
 #include <vcl/outdev.hxx>
@@ -759,7 +760,7 @@ namespace drawinglayer
 
                     mpOutputDevice->SetFillColor(Color(aPolygonColor));
                     mpOutputDevice->SetLineColor();
-                    mpOutputDevice->DrawPolygon(aHatchPolygon);
+                    Drawable::Draw(mpOutputDevice, PolygonDrawable(aHatchPolygon));
                 }
 
                 // set hatch line color

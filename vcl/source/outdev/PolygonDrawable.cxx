@@ -29,6 +29,14 @@
 
 bool PolygonDrawable::execute(OutputDevice* pRenderContext) const
 {
+    if (!mbUsesB2DPolygon)
+        return Draw(pRenderContext, maPolygon);
+
+    return Draw(pRenderContext, maB2DPolygon);
+}
+
+bool PolygonDrawable::Draw(OutputDevice* pRenderContext, tools::Polygon aPolygon) const
+{
     assert(!pRenderContext->is_double_buffered_window());
 
     GDIMetaFile* pMetaFile = pRenderContext->GetConnectMetaFile();
@@ -56,7 +64,7 @@ bool PolygonDrawable::execute(OutputDevice* pRenderContext) const
     if (pRenderContext->IsFillColorInitialized())
         pRenderContext->InitFillColor();
 
-    sal_uInt16 nPoints = maPolygon.GetSize();
+    sal_uInt16 nPoints = aPolygon.GetSize();
     if (nPoints < 2)
         return false;
 
@@ -69,7 +77,7 @@ bool PolygonDrawable::execute(OutputDevice* pRenderContext) const
     if (bTryAA)
     {
         const basegfx::B2DHomMatrix aTransform(pRenderContext->ImplGetDeviceTransformation());
-        basegfx::B2DPolygon aB2DPolygon(maPolygon.getB2DPolygon());
+        basegfx::B2DPolygon aB2DPolygon(aPolygon.getB2DPolygon());
         bool bSuccess(true);
 
         // ensure closed - maybe assert, hinders buffering
@@ -99,13 +107,13 @@ bool PolygonDrawable::execute(OutputDevice* pRenderContext) const
         {
             VirtualDevice* pAlphaVDev = pRenderContext->GetAlphaVirtDev();
             if (pAlphaVDev)
-                Drawable::Draw(pAlphaVDev, PolygonDrawable(maPolygon));
+                Drawable::Draw(pAlphaVDev, PolygonDrawable(aPolygon));
 
             return true;
         }
     }
 
-    tools::Polygon aPoly = pRenderContext->ImplLogicToDevicePixel(maPolygon);
+    tools::Polygon aPoly = pRenderContext->ImplLogicToDevicePixel(aPolygon);
     const SalPoint* pPtAry = reinterpret_cast<const SalPoint*>(aPoly.GetConstPointAry());
 
     // #100127# Forward beziers to sal, if any
@@ -126,7 +134,22 @@ bool PolygonDrawable::execute(OutputDevice* pRenderContext) const
 
     VirtualDevice* pAlphaVDev = pRenderContext->GetAlphaVirtDev();
     if (pAlphaVDev)
-        Drawable::Draw(pAlphaVDev, PolygonDrawable(maPolygon));
+        Drawable::Draw(pAlphaVDev, PolygonDrawable(aPolygon));
+
+    return true;
+}
+
+bool PolygonDrawable::Draw(OutputDevice* pRenderContext,
+                           basegfx::B2DPolygon const aB2DPolygon) const
+{
+    assert(!pRenderContext->is_double_buffered_window());
+
+    // do not paint empty polygons
+    if (aB2DPolygon.count())
+    {
+        basegfx::B2DPolyPolygon aPP(aB2DPolygon);
+        pRenderContext->DrawPolyPolygon(aPP);
+    }
 
     return true;
 }

@@ -146,18 +146,6 @@ void OutputDevice::DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly )
         mpAlphaVDev->DrawPolyPolygon( rPolyPoly );
 }
 
-void OutputDevice::DrawPolygon( const basegfx::B2DPolygon& rB2DPolygon)
-{
-    assert(!is_double_buffered_window());
-
-    // AW: Do NOT paint empty polygons
-    if(rB2DPolygon.count())
-    {
-        basegfx::B2DPolyPolygon aPP( rB2DPolygon );
-        DrawPolyPolygon( aPP );
-    }
-}
-
 // Caution: This method is nearly the same as
 // OutputDevice::DrawTransparent( const basegfx::B2DPolyPolygon& rB2DPolyPoly, double fTransparency),
 // so when changes are made here do not forget to make changes there, too

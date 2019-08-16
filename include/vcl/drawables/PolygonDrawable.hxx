@@ -25,14 +25,35 @@ class VCL_DLLPUBLIC PolygonDrawable : public Drawable
 public:
     PolygonDrawable(tools::Polygon const aPolygon)
         : maPolygon(aPolygon)
+        , mbUsesB2DPolygon(false)
     {
         mpMetaAction = new MetaPolygonAction(aPolygon);
+    }
+
+    PolygonDrawable(basegfx::B2DPolygon aPolygon)
+        : maB2DPolygon(aPolygon)
+        , mbUsesB2DPolygon(true)
+    {
     }
 
     virtual bool execute(OutputDevice* pRenderContext) const override;
 
 private:
+    bool Draw(OutputDevice* pRenderContext, tools::Polygon const aPolygon) const;
+
+    /** Render the given polygon
+
+        The given polygon is stroked with the current LineColor, and
+        filled with the current FillColor. If one of these colors are
+        transparent, the corresponding stroke or fill stays
+        invisible. Start and end point of the polygon are
+        automatically connected.
+     */
+    bool Draw(OutputDevice* pRenderContext, basegfx::B2DPolygon const aPolygon) const;
+
     tools::Polygon maPolygon;
+    basegfx::B2DPolygon maB2DPolygon;
+    bool mbUsesB2DPolygon;
 };
 
 #endif

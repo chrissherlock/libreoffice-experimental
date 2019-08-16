@@ -19,6 +19,7 @@
 
 #include <vcl/drawables/PixelDrawable.hxx>
 #include <vcl/drawables/PolyLineDrawable.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 
 #include <cmath>
 #include <comphelper/string.hxx>
@@ -366,7 +367,7 @@ namespace drawinglayer
 
                     mpOutputDevice->SetFillColor(Color(aModifiedColor));
                     mpOutputDevice->SetLineColor();
-                    mpOutputDevice->DrawPolygon(aPolygon);
+                    Drawable::Draw(mpOutputDevice, PolygonDrawable(aPolygon));
 
                     return;
                 }
@@ -475,7 +476,7 @@ namespace drawinglayer
 
                                         mpOutputDevice->SetFillColor(Color(aModifiedColor));
                                         mpOutputDevice->SetLineColor();
-                                        mpOutputDevice->DrawPolygon(aPolygon);
+                                        Drawable::Draw(mpOutputDevice, PolygonDrawable(aPolygon));
 
                                         bPainted = true;
                                     }

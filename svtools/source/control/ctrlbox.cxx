@@ -22,6 +22,7 @@
 #include <i18nutil/unicode.hxx>
 #include <tools/stream.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 #include <vcl/builderfactory.hxx>
 #include <vcl/customweld.hxx>
 #include <vcl/event.hxx>
@@ -228,7 +229,7 @@ static void lclDrawPolygon( OutputDevice& rDev, const basegfx::B2DPolygon& rPoly
         aDashPolygon.append( aStart - aWidthOffset );
         aDashPolygon.setClosed( true );
 
-        rDev.DrawPolygon( aDashPolygon );
+        Drawable::Draw(&rDev, PolygonDrawable(aDashPolygon));
     }
 
     rDev.SetAntialiasing( nOldAA );

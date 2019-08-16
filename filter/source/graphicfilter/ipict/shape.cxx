@@ -152,7 +152,7 @@ namespace PictReaderShape {
     if (drawFrame)
       Drawable::Draw(dev, PolyLineDrawable(poly, aLineInfo));
     else
-      Drawable::Draw(dev, DrawPolygon(poly));
+      Drawable::Draw(dev, PolygonDrawable(poly));
   }
 
   //--------------------  draws an ellipse --------------------
