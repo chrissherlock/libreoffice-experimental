@@ -24,6 +24,7 @@
 
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/drawables/LineDrawable.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 #include <vcl/event.hxx>
 #include <vcl/wall.hxx>
 #include <vcl/bitmap.hxx>
@@ -1596,7 +1597,7 @@ void SplitWindow::ImplDrawGrip(vcl::RenderContext& rRenderContext, const tools::
             aPoly.SetPoint(Point(nCenter - nHeightHalf, nTop    + nMargin), 1);
             aPoly.SetPoint(Point(nCenter + nHeightHalf, nTop    + nMargin), 2);
         }
-        rRenderContext.DrawPolygon(aPoly);
+        Drawable::Draw(&rRenderContext, PolygonDrawable(aPoly));
     }
     else
     {
@@ -1614,7 +1615,7 @@ void SplitWindow::ImplDrawGrip(vcl::RenderContext& rRenderContext, const tools::
             aPoly.SetPoint(Point(nLeft  + nMargin, nCenter - nWidthHalf), 1);
             aPoly.SetPoint(Point(nLeft  + nMargin, nCenter + nWidthHalf), 2);
         }
-        rRenderContext.DrawPolygon(aPoly);
+        Drawable::Draw(&rRenderContext, PolygonDrawable(aPoly));
     }
 
     rRenderContext.SetAntialiasing(nAA);

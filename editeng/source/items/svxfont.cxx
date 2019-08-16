@@ -20,6 +20,7 @@
 #include <vcl/outdev.hxx>
 #include <vcl/print.hxx>
 #include <vcl/drawables/LineDrawable.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 #include <tools/debug.hxx>
 #include <tools/gen.hxx>
 #include <tools/poly.hxx>
@@ -87,7 +88,7 @@ void SvxFont::DrawArrow( OutputDevice &rOut, const tools::Rectangle& rRect,
     Color aOldFillColor = rOut.GetFillColor();
     rOut.SetFillColor( rCol );
     rOut.SetLineColor( COL_BLACK );
-    rOut.DrawPolygon( aPoly );
+    Drawable::Draw(&rOut, PolygonDrawable(aPoly));
     Drawable::Draw(&rOut, LineDrawable(aTmp, aNxt));
     rOut.SetLineColor( aOldLineColor );
     rOut.SetFillColor( aOldFillColor );

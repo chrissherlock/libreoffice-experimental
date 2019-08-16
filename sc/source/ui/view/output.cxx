@@ -19,6 +19,7 @@
 
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/drawables/LineDrawable.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 
 #include <scitems.hxx>
 #include <editeng/brushitem.hxx>
@@ -1644,7 +1645,7 @@ void ScOutputData::DrawRotatedFrame(vcl::RenderContext& rRenderContext)
                                     else
                                         rRenderContext.SetLineColor();
                                     rRenderContext.SetFillColor(rColor);
-                                    rRenderContext.DrawPolygon(aPoly);
+                                    Drawable::Draw(&rRenderContext, PolygonDrawable(aPoly));
                                 }
                             }
                         }
@@ -1660,7 +1661,7 @@ void ScOutputData::DrawRotatedFrame(vcl::RenderContext& rRenderContext)
                             else
                                 rRenderContext.SetLineColor();
                             rRenderContext.SetFillColor(*pColor);
-                            rRenderContext.DrawPolygon(aPoly);
+                            Drawable::Draw(&rRenderContext, PolygonDrawable(aPoly));
 
                         }
                     }

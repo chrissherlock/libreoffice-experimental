@@ -8,6 +8,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 
 #include <DropDownFormFieldButton.hxx>
 #include <vcl/svapp.hxx>
@@ -138,7 +139,7 @@ void FormFieldButton::Paint(vcl::RenderContext& rRenderContext, const tools::Rec
     aPoly.SetPoint(Point(aCenter.X() - aArrowSize.Width(), aCenter.Y() - aArrowSize.Height()), 0);
     aPoly.SetPoint(Point(aCenter.X() + aArrowSize.Width(), aCenter.Y() - aArrowSize.Height()), 1);
     aPoly.SetPoint(Point(aCenter.X(), aCenter.Y() + aArrowSize.Height()), 2);
-    rRenderContext.DrawPolygon(aPoly);
+    Drawable::Draw(&rRenderContext, PolygonDrawable(aPoly));
 }
 
 WindowHitTest FormFieldButton::ImplHitTest(const Point& rFramePos)

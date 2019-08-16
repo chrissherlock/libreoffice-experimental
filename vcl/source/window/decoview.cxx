@@ -20,6 +20,7 @@
 #include <vcl/drawables/PixelDrawable.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/drawables/LineDrawable.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/decoview.hxx>
@@ -177,7 +178,7 @@ void ImplDrawSymbol( OutputDevice* pDev, tools::Rectangle nRect, const SymbolTyp
 
             pDev->Push(PushFlags::LINECOLOR);
             pDev->SetLineColor();
-            pDev->DrawPolygon(aTriangle);
+            Drawable::Draw(pDev, PolygonDrawable(aTriangle));
             pDev->Pop();
 
             break;
@@ -203,7 +204,7 @@ void ImplDrawSymbol( OutputDevice* pDev, tools::Rectangle nRect, const SymbolTyp
 
             pDev->Push(PushFlags::LINECOLOR);
             pDev->SetLineColor();
-            pDev->DrawPolygon(aTriangle);
+            Drawable::Draw(pDev, PolygonDrawable(aTriangle));
             pDev->Pop();
             break;
         }

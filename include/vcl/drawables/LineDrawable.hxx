@@ -44,7 +44,7 @@ public:
         , mbUsesLineInfo(true)
         , mbUsesPolyPolygon(false)
     {
-        mpMetaAction = new MetaLineAction(maStartPt, maEndPt, maLineInfo);
+        mpMetaAction = new MetaLineAction(maStartPt, maEndPt, aInfo);
     }
 
     LineDrawable(basegfx::B2DPolyPolygon* pLinePolyPolygon, const LineInfo aInfo)

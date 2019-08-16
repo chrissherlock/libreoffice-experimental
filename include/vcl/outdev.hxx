@@ -709,7 +709,6 @@ public:
 
         @see DrawPolyLine
      */
-    void                        DrawPolygon( const tools::Polygon& rPoly );
     void                        DrawPolygon( const basegfx::B2DPolygon& );
 
     /** Render the given poly-polygon

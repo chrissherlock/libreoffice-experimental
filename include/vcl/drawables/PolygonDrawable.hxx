@@ -8,28 +8,31 @@
  *
  */
 
-#ifndef INCLUDED_INCLUDE_VCL_DRAWABLES_RECTANGLEDRAWABLE_HXX
-#define INCLUDED_INCLUDE_VCL_DRAWABLES_RECTANGLEDRAWABLE_HXX
+#ifndef INCLUDED_INCLUDE_VCL_DRAWABLE_POLYGONDRAWABLE_HXX
+#define INCLUDED_INCLUDE_VCL_DRAWABLE_POLYGONDRAWABLE_HXX
 
-#include <tools/gen.hxx>
+#include <tools/poly.hxx>
 
+#include <vcl/metaact.hxx>
 #include <vcl/drawables/Drawable.hxx>
+
+#include <memory>
 
 class OutputDevice;
 
-class VCL_DLLPUBLIC RectangleDrawable : public Drawable
+class VCL_DLLPUBLIC PolygonDrawable : public Drawable
 {
 public:
-    RectangleDrawable(tools::Rectangle aRect)
-        : maRect(aRect)
+    PolygonDrawable(tools::Polygon const aPolygon)
+        : maPolygon(aPolygon)
     {
-        mpMetaAction = new MetaRectAction(aRect);
+        mpMetaAction = new MetaPolygonAction(aPolygon);
     }
 
     virtual bool execute(OutputDevice* pRenderContext) const override;
 
 private:
-    tools::Rectangle maRect;
+    tools::Polygon maPolygon;
 };
 
 #endif

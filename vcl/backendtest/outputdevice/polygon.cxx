@@ -8,6 +8,8 @@
  *
  */
 
+#include <vcl/drawables/PolygonDrawable.hxx>
+
 #include <test/outputdevice.hxx>
 
 namespace vcl {
@@ -25,7 +27,7 @@ void drawPolygonOffset(OutputDevice& rDevice, tools::Rectangle const & rRect, in
     aPolygon.SetPoint(Point(rRect.Left()  + nOffset, rRect.Bottom() - nOffset), 3);
     aPolygon.Optimize(PolyOptimizeFlags::CLOSE);
 
-    rDevice.DrawPolygon(aPolygon);
+    Drawable::Draw(&rDevice, PolygonDrawable(aPolygon));
 }
 
 } // end anonymous namespace
@@ -72,7 +74,7 @@ Bitmap OutputDeviceTestPolygon::setupDiamond()
     aPolygon.SetPoint(aPoint4, 3);
     aPolygon.Optimize(PolyOptimizeFlags::CLOSE);
 
-    mpVirtualDevice->DrawPolygon(aPolygon);
+    Drawable::Draw(mpVirtualDevice, PolygonDrawable(aPolygon));
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
 }
@@ -96,17 +98,17 @@ Bitmap OutputDeviceTestPolygon::setupLines()
     tools::Polygon aHorizontalPolygon(2);
     aHorizontalPolygon.SetPoint(aHorizontalLinePoint1, 0);
     aHorizontalPolygon.SetPoint(aHorizontalLinePoint2, 1);
-    mpVirtualDevice->DrawPolygon(aHorizontalPolygon);
+    Drawable::Draw(mpVirtualDevice, PolygonDrawable(aHorizontalPolygon));
 
     tools::Polygon aVerticalPolygon(2);
     aVerticalPolygon.SetPoint(aVerticalLinePoint1, 0);
     aVerticalPolygon.SetPoint(aVerticalLinePoint2, 1);
-    mpVirtualDevice->DrawPolygon(aVerticalPolygon);
+    Drawable::Draw(mpVirtualDevice, PolygonDrawable(aVerticalPolygon));
 
     tools::Polygon aDiagonalPolygon(2);
     aDiagonalPolygon.SetPoint(aDiagonalLinePoint1, 0);
     aDiagonalPolygon.SetPoint(aDiagonalLinePoint2, 1);
-    mpVirtualDevice->DrawPolygon(aDiagonalPolygon);
+    Drawable::Draw(mpVirtualDevice, PolygonDrawable(aDiagonalPolygon));
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
 }
@@ -131,17 +133,17 @@ Bitmap OutputDeviceTestPolygon::setupAALines()
     tools::Polygon aHorizontalPolygon(2);
     aHorizontalPolygon.SetPoint(aHorizontalLinePoint1, 0);
     aHorizontalPolygon.SetPoint(aHorizontalLinePoint2, 1);
-    mpVirtualDevice->DrawPolygon(aHorizontalPolygon);
+    Drawable::Draw(mpVirtualDevice, PolygonDrawable(aHorizontalPolygon));
 
     tools::Polygon aVerticalPolygon(2);
     aVerticalPolygon.SetPoint(aVerticalLinePoint1, 0);
     aVerticalPolygon.SetPoint(aVerticalLinePoint2, 1);
-    mpVirtualDevice->DrawPolygon(aVerticalPolygon);
+    Drawable::Draw(mpVirtualDevice, PolygonDrawable(aVerticalPolygon));
 
     tools::Polygon aDiagonalPolygon(2);
     aDiagonalPolygon.SetPoint(aDiagonalLinePoint1, 0);
     aDiagonalPolygon.SetPoint(aDiagonalLinePoint2, 1);
-    mpVirtualDevice->DrawPolygon(aDiagonalPolygon);
+    Drawable::Draw(mpVirtualDevice, PolygonDrawable(aDiagonalPolygon));
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
 }

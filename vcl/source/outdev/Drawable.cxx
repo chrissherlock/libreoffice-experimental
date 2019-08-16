@@ -13,10 +13,6 @@
 
 #include <sal/log.hxx>
 
-Drawable::Drawable() {}
-
-Drawable::~Drawable() {}
-
 bool Drawable::Draw(OutputDevice* pRenderContext, Drawable const& rDrawable)
 {
     return rDrawable.execute(pRenderContext);

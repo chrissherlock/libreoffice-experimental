@@ -19,6 +19,7 @@
 
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/drawables/LineDrawable.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 
 #include <dpcontrol.hxx>
 
@@ -188,7 +189,7 @@ void ScDPFieldButton::drawPopupButton()
     aPoly.SetPoint(Point(aCenter.X() - aArrowSize.Width(), aCenter.Y() - aArrowSize.Height()), 0);
     aPoly.SetPoint(Point(aCenter.X() + aArrowSize.Width(), aCenter.Y() - aArrowSize.Height()), 1);
     aPoly.SetPoint(Point(aCenter.X(),                      aCenter.Y() + aArrowSize.Height()), 2);
-    mpOutDev->DrawPolygon(aPoly);
+    Drawable::Draw(mpOutDev, PolygonDrawable(aPoly));
 
     if (mbHasHiddenMember)
     {

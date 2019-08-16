@@ -19,6 +19,7 @@
 
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/drawables/LineDrawable.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 #include <vcl/toolbox.hxx>
 #include <vcl/commandinfoprovider.hxx>
 #include <vcl/event.hxx>
@@ -2469,7 +2470,7 @@ static void ImplDrawDropdownArrow(vcl::RenderContext& rRenderContext, const tool
 
     auto aaflags = rRenderContext.GetAntialiasing();
     rRenderContext.SetAntialiasing(AntialiasingFlags::EnableB2dDraw);
-    rRenderContext.DrawPolygon( aPoly );
+    Drawable::Draw(&rRenderContext, PolygonDrawable(aPoly));
     rRenderContext.SetAntialiasing(aaflags);
 
     if( bFillColor )

@@ -31,6 +31,7 @@
 #include <vcl/drawables/RoundRectDrawable.hxx>
 #include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/drawables/PolyLineDrawable.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 
 #include <toolkit/awt/vclxgraphics.hxx>
 #include <toolkit/awt/vclxdevice.hxx>
@@ -394,7 +395,7 @@ void VCLXGraphics::drawPolygon( const uno::Sequence< sal_Int32 >& DataX, const u
     if( mpOutputDevice )
     {
         InitOutputDevice( InitOutDevFlags::COLORS );
-        mpOutputDevice->DrawPolygon( VCLUnoHelper::CreatePolygon( DataX, DataY ) );
+        Drawable::Draw(mpOutputDevice, PolygonDrawable(VCLUnoHelper::CreatePolygon(DataX, DataY)));
     }
 }
 

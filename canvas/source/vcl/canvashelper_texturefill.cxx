@@ -19,6 +19,7 @@
 
 #include <sal/config.h>
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 
 #include <tuple>
 
@@ -234,7 +235,7 @@ namespace vclcanvas
                 aTempPoly[2] = ::Point( ::basegfx::fround( rPoint4.getX() ),
                                         ::basegfx::fround( rPoint4.getY() ) );
 
-                rOutDev.DrawPolygon( aTempPoly );
+                Drawable::Draw(&rOutDev, PolygonDrawable(aTempPoly));
             }
 
             // fill final strip (extending two times the bound rect's
@@ -259,7 +260,7 @@ namespace vclcanvas
 
             rOutDev.SetFillColor( rColors.back() );
 
-            rOutDev.DrawPolygon( aTempPoly );
+            Drawable::Draw(&rOutDev, PolygonDrawable(aTempPoly));
         }
 
         void fillPolygonalGradient( OutputDevice&                                  rOutDev,
@@ -396,7 +397,7 @@ namespace vclcanvas
                 // OutputDevice::ImplDrawComplexGradient(), there's a note
                 // that on some VDev's, rendering disjunct poly-polygons
                 // is faster!
-                rOutDev.DrawPolygon( aTempPoly );
+                Drawable::Draw(&rOutDev, PolygonDrawable(aTempPoly));
             }
         }
 
@@ -557,7 +558,7 @@ namespace vclcanvas
                 ::basegfx::B2DPolygon aPoly2( aPoly1.getB2DPolygon() );
                 aPoly2.transform( aTextureTransform );
                 ::tools::Polygon aPoly3( aPoly2 );
-                rOutDev.DrawPolygon( aPoly3 );
+                Drawable::Draw(&rOutDev, PolygonDrawable(aPoly3));
             }
 #endif
 

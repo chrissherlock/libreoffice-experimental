@@ -21,6 +21,7 @@
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/drawables/PolyLineDrawable.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 
 #include <utility>
 
@@ -252,9 +253,9 @@ namespace vclcanvas
             aPoly.SetFlags( 3, PolyFlags::Normal );
 
             // TODO(F2): alpha
-            mpOutDevProvider->getOutDev().DrawPolygon( aPoly );
+            Drawable::Draw(&mpOutDevProvider->getOutDev(), PolygonDrawable(aPoly));
             if( mp2ndOutDevProvider )
-                mp2ndOutDevProvider->getOutDev().DrawPolygon( aPoly );
+                Drawable::Draw(&mp2ndOutDevProvider->getOutDev(), PolygonDrawable(aPoly));
         }
     }
 
@@ -422,9 +423,9 @@ namespace vclcanvas
             for( sal_uInt16 i=0; i<nSize; ++i )
             {
                 if( aStrokedPolyPoly.getB2DPolygon( i ).isClosed() ) {
-                    mpOutDevProvider->getOutDev().DrawPolygon( aVCLPolyPoly[i] );
+                    Drawable::Draw(&mpOutDevProvider->getOutDev(), PolygonDrawable(aVCLPolyPoly[i]));
                     if( mp2ndOutDevProvider )
-                        mp2ndOutDevProvider->getOutDev().DrawPolygon( aVCLPolyPoly[i] );
+                        Drawable::Draw(&mp2ndOutDevProvider->getOutDev(), PolygonDrawable(aVCLPolyPoly[i]));
                 } else {
                     const sal_uInt16 nPolySize = aVCLPolyPoly[i].GetSize();
                     if( nPolySize ) {

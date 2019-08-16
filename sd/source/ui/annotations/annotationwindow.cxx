@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 
 #include <editeng/eeitem.hxx>
 #include <editeng/udlnitem.hxx>
@@ -645,7 +646,7 @@ void AnnotationWindow::Paint(vcl::RenderContext& rRenderContext, const ::tools::
     else
         SetFillColor(COL_BLACK);
     SetLineColor();
-    DrawPolygon( ::tools::Polygon(maPopupTriangle));
+    Drawable::Draw(this, PolygonDrawable(::tools::Polygon(maPopupTriangle)));
 }
 
 void AnnotationWindow::MouseMove( const MouseEvent& rMEvt )

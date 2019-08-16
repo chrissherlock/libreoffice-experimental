@@ -15,6 +15,7 @@
 #include <basegfx/polygon/b2dpolygon.hxx>
 #include <tools/poly.hxx>
 
+#include <vcl/metaact.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/drawables/Drawable.hxx>

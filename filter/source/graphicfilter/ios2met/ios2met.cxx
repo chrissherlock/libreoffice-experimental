@@ -31,6 +31,7 @@
 #include <vcl/drawables/RoundRectDrawable.hxx>
 #include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/drawables/PolyLineDrawable.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 
 #include <math.h>
 #include <algorithm>
@@ -513,12 +514,14 @@ void OS2METReader::DrawPolygon( const tools::Polygon& rPolygon )
     {
         pVirDev->Push( PushFlags::LINECOLOR );
         pVirDev->SetLineColor( COL_TRANSPARENT );
-        pVirDev->DrawPolygon( rPolygon );
+        Drawable::Draw(pVirDev, PolygonDrawable(rPolygon));
         pVirDev->Pop();
         Drawable::Draw(pVirDev, PolyLineDrawable(rPolygon, aLineInfo));
     }
     else
-        pVirDev->DrawPolygon( rPolygon );
+    {
+        Drawable::Draw(pVirDev, PolygonDrawable(rPolygon));
+    }
 }
 
 void OS2METReader::DrawPolyPolygon( const tools::PolyPolygon& rPolyPolygon )
@@ -1398,7 +1401,7 @@ void OS2METReader::ReadMarker(bool bGivenPos, sal_uInt16 nOrderLen)
                 aPoly.SetPoint(Point(x+4,y),1);
                 aPoly.SetPoint(Point(x,y-4),2);
                 aPoly.SetPoint(Point(x-4,y),3);
-                pVirDev->DrawPolygon(aPoly);
+                Drawable::Draw(pVirDev, PolygonDrawable(aPoly));
                 break;
             }
             case  4:   // SQUARE
@@ -1408,7 +1411,7 @@ void OS2METReader::ReadMarker(bool bGivenPos, sal_uInt16 nOrderLen)
                 aPoly.SetPoint(Point(x+4,y-4),1);
                 aPoly.SetPoint(Point(x-4,y-4),2);
                 aPoly.SetPoint(Point(x-4,y+4),3);
-                pVirDev->DrawPolygon(aPoly);
+                Drawable::Draw(pVirDev, PolygonDrawable(aPoly));
                 break;
             }
             case  5: { // SIXPOINTSTAR
@@ -1425,7 +1428,7 @@ void OS2METReader::ReadMarker(bool bGivenPos, sal_uInt16 nOrderLen)
                 aPoly.SetPoint(Point(x-2,y  ),9);
                 aPoly.SetPoint(Point(x-4,y-2),10);
                 aPoly.SetPoint(Point(x-2,y-2),11);
-                pVirDev->DrawPolygon(aPoly);
+                Drawable::Draw(pVirDev, PolygonDrawable(aPoly));
                 break;
             }
             case  6: { // EIGHTPOINTSTAR
@@ -1446,7 +1449,7 @@ void OS2METReader::ReadMarker(bool bGivenPos, sal_uInt16 nOrderLen)
                 aPoly.SetPoint(Point(x-2,y-1),13);
                 aPoly.SetPoint(Point(x-3,y-3),14);
                 aPoly.SetPoint(Point(x-1,y-2),15);
-                pVirDev->DrawPolygon(aPoly);
+                Drawable::Draw(pVirDev, PolygonDrawable(aPoly));
                 break;
             }
             case  9:   // DOT

@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 
 #include <svtools/tabbar.hxx>
 #include <tools/time.hxx>
@@ -2384,7 +2385,7 @@ sal_uInt16 TabBar::ShowDropPos(const Point& rPos)
         aPoly.SetPoint(Point(nX, nY), 0);
         aPoly.SetPoint(Point(nX + nTriangleWidth, nY - nTriangleWidth), 1);
         aPoly.SetPoint(Point(nX + nTriangleWidth, nY + nTriangleWidth), 2);
-        DrawPolygon(aPoly);
+        Drawable::Draw(this, PolygonDrawable(aPoly));
     }
     if (mnDropPos > 0 && mnDropPos < nItemCount + 1)
     {
@@ -2404,7 +2405,7 @@ sal_uInt16 TabBar::ShowDropPos(const Point& rPos)
         aPoly.SetPoint(Point(nX, nY), 0);
         aPoly.SetPoint(Point(nX - nTriangleWidth, nY - nTriangleWidth), 1);
         aPoly.SetPoint(Point(nX - nTriangleWidth, nY + nTriangleWidth), 2);
-        DrawPolygon(aPoly);
+        Drawable::Draw(this, PolygonDrawable(aPoly));
     }
 
     return mnDropPos;

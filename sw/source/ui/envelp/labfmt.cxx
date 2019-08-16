@@ -19,6 +19,7 @@
 
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/drawables/LineDrawable.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 
 #include <svtools/unitconv.hxx>
 #include <tools/poly.hxx>
@@ -80,7 +81,7 @@ void DrawArrow(vcl::RenderContext& rRenderContext, const Point &rP1, const Point
 
         const Color& rFieldTextColor = SwViewOption::GetFontColor();
         rRenderContext.SetFillColor(rFieldTextColor);
-        rRenderContext.DrawPolygon( tools::Polygon(3, aArr));
+        Drawable::Draw(&rRenderContext, PolygonDrawable(tools::Polygon(3, aArr)));
     }
     else
     {
@@ -202,12 +203,12 @@ void SwLabPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
 
     // draw outline (border)
     rRenderContext.SetLineColor(rFieldTextColor);
-    Drawable::Draw(&rRenderContext, LineDrawable(Point(lX0, lY0), Point(lX0 + lOutlineW - 1, lY0))); // Up
-    Drawable::Draw(&rRenderContext, LineDrawable(Point(lX0, lY0), Point(lX0, lY0 + lOutlineH - 1))); // Left
+    rRenderContext.DrawLine(Point(lX0, lY0), Point(lX0 + lOutlineW - 1, lY0)); // Up
+    rRenderContext.DrawLine(Point(lX0, lY0), Point(lX0, lY0 + lOutlineH - 1)); // Left
     if (m_aItem.m_nCols == 1)
-        Drawable::Draw(&rRenderContext, LineDrawable(Point(lX0 + lOutlineW - 1, lY0), Point(lX0 + lOutlineW - 1, lY0 + lOutlineH - 1))); // Right
+        rRenderContext.DrawLine(Point(lX0 + lOutlineW - 1, lY0), Point(lX0 + lOutlineW - 1, lY0 + lOutlineH - 1)); // Right
     if (m_aItem.m_nRows == 1)
-        Drawable::Draw(&rRenderContext, LineDrawable(Point(lX0, lY0 + lOutlineH - 1), Point(lX0 + lOutlineW - 1, lY0 + lOutlineH - 1))); // Down
+        rRenderContext.DrawLine(Point(lX0, lY0 + lOutlineH - 1), Point(lX0 + lOutlineW - 1, lY0 + lOutlineH - 1)); // Down
 
     // Labels
     rRenderContext.SetClipRegion(vcl::Region(tools::Rectangle(Point(lX0, lY0), Size(lOutlineW, lOutlineH))));
@@ -243,8 +244,8 @@ void SwLabPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
         long lX = lX2 - m_lXWidth / 2 - m_lHeightWidth / 2;
         long lY = lY1 + m_lXHeight;
 
-        Drawable::Draw(&rRenderContext, LineDrawable(Point(lX1, lY), Point(lX2 - 1, lY)));
-        Drawable::Draw(&rRenderContext, LineDrawable(Point(lX, lY1), Point(lX, lY2 - 1)));
+        rRenderContext.DrawLine(Point(lX1, lY), Point(lX2 - 1, lY));
+        rRenderContext.DrawLine(Point(lX, lY1), Point(lX, lY2 - 1));
 
         rRenderContext.DrawText(Point(lX1 + m_lXWidth / 2, lY - m_lXHeight / 2), m_aWidthStr);
         rRenderContext.DrawText(Point(lX - m_lHeightWidth / 2, lY2 - m_lXHeight - m_lXHeight / 2), m_aHeightStr);

@@ -20,6 +20,7 @@
 #include <vcl/drawables/PixelDrawable.hxx>
 #include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/drawables/PolyLineDrawable.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 
 #include <string.h>
 #include <vcl/gdimtf.hxx>
@@ -383,7 +384,7 @@ void DXF2GDIMetaFile::DrawTraceEntity(const DXFTraceEntity & rE, const DXFTransf
         rTransform.Transform(rE.aP1,aPoly[1]);
         rTransform.Transform(rE.aP3,aPoly[2]);
         rTransform.Transform(rE.aP2,aPoly[3]);
-        pVirDev->DrawPolygon(aPoly);
+        Drawable::Draw(pVirDev, PolygonDrawable(aPoly));
         if (rE.fThickness!=0) {
             sal_uInt16 i;
             tools::Polygon aPoly2(4);
@@ -392,7 +393,7 @@ void DXF2GDIMetaFile::DrawTraceEntity(const DXFTraceEntity & rE, const DXFTransf
             rTransform.Transform(rE.aP1+aVAdd,aPoly2[1]);
             rTransform.Transform(rE.aP3+aVAdd,aPoly2[2]);
             rTransform.Transform(rE.aP2+aVAdd,aPoly2[3]);
-            pVirDev->DrawPolygon(aPoly2);
+            Drawable::Draw(pVirDev, PolygonDrawable(aPoly2));
             for (i=0; i<4; i++) DrawLine(aPoly[i],aPoly2[i]);
         }
     }
@@ -409,7 +410,7 @@ void DXF2GDIMetaFile::DrawSolidEntity(const DXFSolidEntity & rE, const DXFTransf
         rTransform.Transform(rE.aP1,aPoly[1]);
         rTransform.Transform(rE.aP3,aPoly[2]);
         if (nN>3) rTransform.Transform(rE.aP2,aPoly[3]);
-        pVirDev->DrawPolygon(aPoly);
+        Drawable::Draw(pVirDev, PolygonDrawable(aPoly));
         if (rE.fThickness!=0) {
             tools::Polygon aPoly2(nN);
             DXFVector aVAdd(0,0,rE.fThickness);
@@ -417,7 +418,7 @@ void DXF2GDIMetaFile::DrawSolidEntity(const DXFSolidEntity & rE, const DXFTransf
             rTransform.Transform(rE.aP1+aVAdd,aPoly2[1]);
             rTransform.Transform(rE.aP3+aVAdd,aPoly2[2]);
             if (nN>3) rTransform.Transform(rE.aP2+aVAdd,aPoly2[3]);
-            pVirDev->DrawPolygon(aPoly2);
+            Drawable::Draw(pVirDev, PolygonDrawable(aPoly2));
             if (SetLineAttribute(rE)) {
                 sal_uInt16 i;
                 for (i=0; i<nN; i++) DrawLine(aPoly[i],aPoly2[i]);
@@ -528,7 +529,7 @@ void DXF2GDIMetaFile::DrawPolyLineEntity(const DXFPolyLineEntity & rE, const DXF
     }
 
     if (SetLineAttribute(rE)) {
-        if ((rE.nFlags&1)!=0) pVirDev->DrawPolygon(aPoly);
+        if ((rE.nFlags&1)!=0) Drawable::Draw(pVirDev, PolygonDrawable(aPoly));
         else Drawable::Draw(pVirDev, PolyLineDrawable(aPoly));
         if (rE.fThickness!=0) {
             tools::Polygon aPoly2(nPolySize);
@@ -540,7 +541,7 @@ void DXF2GDIMetaFile::DrawPolyLineEntity(const DXFPolyLineEntity & rE, const DXF
                 );
                 pBE=pBE->pSucc;
             }
-            if ((rE.nFlags&1)!=0) pVirDev->DrawPolygon(aPoly2);
+            if ((rE.nFlags&1)!=0) Drawable::Draw(pVirDev, PolygonDrawable(aPoly2));
             else Drawable::Draw(pVirDev, PolyLineDrawable(aPoly2));
             for (i=0; i<nPolySize; i++) DrawLine(aPoly[i],aPoly2[i]);
         }
@@ -560,7 +561,7 @@ void DXF2GDIMetaFile::DrawLWPolyLineEntity(const DXFLWPolyLineEntity & rE, const
         if ( SetLineAttribute( rE ) )
         {
             if ( ( rE.nFlags & 1 ) != 0 )
-                pVirDev->DrawPolygon( aPoly );
+                Drawable::Draw(pVirDev, PolygonDrawable(aPoly));
             else
                 Drawable::Draw(pVirDev, PolyLineDrawable(aPoly));
         }
@@ -634,7 +635,7 @@ void DXF2GDIMetaFile::Draw3DFaceEntity(const DXF3DFaceEntity & rE, const DXFTran
         rTransform.Transform(rE.aP1,aPoly[1]);
         rTransform.Transform(rE.aP2,aPoly[2]);
         if (nN>3) rTransform.Transform(rE.aP3,aPoly[3]);
-        if ((rE.nIEFlags&0x0f)==0) pVirDev->DrawPolygon(aPoly);
+        if ((rE.nIEFlags&0x0f)==0) Drawable::Draw(pVirDev, PolygonDrawable(aPoly));
         else {
             for (i=0; i<nN; i++) {
                 if ( (rE.nIEFlags & (1<<i)) == 0 ) {

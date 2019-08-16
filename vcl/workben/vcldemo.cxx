@@ -19,6 +19,7 @@
 #include <vcl/drawables/CheckeredRectDrawable.hxx>
 #include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/drawables/PolyLineDrawable.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 
 #include <comphelper/processfactory.hxx>
 #include <comphelper/random.hxx>
@@ -978,7 +979,7 @@ public:
                     }
                     rDev.SetLineColor(COL_YELLOW);
                     rDev.SetFillColor(COL_BLACK);
-                    rDev.DrawPolygon(aPoly);
+                    Drawable::Draw(&rDev, PolygonDrawable(aPoly));
 
                     // now move and add to the polypolygon
                     aPoly.Move(0, r.GetHeight()/2);

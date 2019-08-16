@@ -23,6 +23,7 @@
 #include <vcl/drawables/RoundRectDrawable.hxx>
 #include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/drawables/PolyLineDrawable.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 #include <vcl/pngwrite.hxx>
 #if HAVE_FEATURE_OPENGL
 #include <vcl/opengl/OpenGLHelper.hxx>
@@ -718,7 +719,7 @@ void SvmTest::testPolygon()
     aPolygon.SetPoint(Point(2, 7), 1);
     aPolygon.SetPoint(Point(3, 6), 2);
 
-    pVirtualDev->DrawPolygon(aPolygon);
+    Drawable::Draw(pVirtualDev, PolygonDrawable(aPolygon));
 
     tools::Polygon aPolygonWithControl(4);
     aPolygonWithControl.SetPoint(Point(8, 1), 0);
@@ -731,7 +732,7 @@ void SvmTest::testPolygon()
     aPolygonWithControl.SetFlags(2, PolyFlags::Smooth);
     aPolygonWithControl.SetFlags(3, PolyFlags::Symmetric);
 
-    pVirtualDev->DrawPolygon(aPolygonWithControl);
+    Drawable::Draw(pVirtualDev, PolygonDrawable(aPolygonWithControl));
 
     checkPolygon(writeAndRead(aGDIMetaFile, "polygon.svm"));
 }

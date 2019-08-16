@@ -12,6 +12,7 @@
 #define INCLUDED_VCL_DRAWABLE_HXX
 
 #include <vcl/dllapi.h>
+#include <vcl/metaact.hxx>
 
 class OutputDevice;
 class MetaAction;
@@ -19,8 +20,8 @@ class MetaAction;
 class VCL_DLLPUBLIC Drawable
 {
 public:
-    Drawable();
-    virtual ~Drawable();
+    Drawable() {}
+    virtual ~Drawable() {}
 
     virtual bool execute(OutputDevice* pRenderContext) const = 0;
 

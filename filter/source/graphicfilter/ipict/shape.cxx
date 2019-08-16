@@ -34,6 +34,7 @@ Here, we choose:
 #include <basegfx/polygon/b2dpolygon.hxx>
 #include <basegfx/polygon/b2dpolygontools.hxx>
 #include <vcl/drawables/PolyLineDrawable.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 
 #include "shape.hxx"
 
@@ -102,7 +103,7 @@ namespace PictReaderShape {
     //       a line/fill shape
     Color oldFColor = dev->GetFillColor(), oldLColor = dev->GetLineColor();
     dev->SetFillColor(oldLColor); dev->SetLineColor(COL_TRANSPARENT);
-    dev->DrawPolygon(poly);
+    Drawable::Draw(dev, PolygonDrawable(poly));
     dev->SetLineColor(oldLColor); dev->SetFillColor(oldFColor);
     return true;
   }
@@ -151,7 +152,7 @@ namespace PictReaderShape {
     if (drawFrame)
       Drawable::Draw(dev, PolyLineDrawable(poly, aLineInfo));
     else
-      dev->DrawPolygon(poly);
+      Drawable::Draw(dev, DrawPolygon(poly));
   }
 
   //--------------------  draws an ellipse --------------------
@@ -171,7 +172,7 @@ namespace PictReaderShape {
     if (drawFrame)
       Drawable::Draw(dev, PolyLineDrawable(poly, aLineInfo));
     else
-      dev->DrawPolygon(poly);
+      Drawable::Draw(dev, PolygonDrawable(poly));
   }
 
   //--------------------  draws an arc/pie --------------------
@@ -210,7 +211,7 @@ namespace PictReaderShape {
     else {
       // adds circle's center
       poly.append(center);
-      dev->DrawPolygon(poly);
+      Drawable::Draw(dev, PolygonDrawable(poly));
     }
   }
   //--------------------  draws a rectangle with round corner --------------------
@@ -236,7 +237,7 @@ namespace PictReaderShape {
     if (drawFrame)
       Drawable::Draw(dev, PolyLineDrawable(poly, aLineInfo));
     else
-      dev->DrawPolygon(poly);
+      Drawable::Draw(dev, PolygonDrawable(poly));
   }
 
   //--------------------  draws a polygon --------------------
@@ -280,7 +281,7 @@ void drawPolygon(VirtualDevice *dev, bool drawFrame, tools::Polygon const &orig,
     if (drawFrame)
       Drawable::Draw(dev, PolyLineDrawable(poly, aLineInfo));
     else
-      dev->DrawPolygon(poly);
+      Drawable::Draw(dev, PolygonDrawable(poly));
   }
 
 

@@ -19,6 +19,7 @@
 
 #include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 
 #include <vcl/lazydelete.hxx>
 #include <sfx2/docfile.hxx>
@@ -6023,9 +6024,9 @@ static void lcl_paintBitmapExToRect(vcl::RenderContext *pOut, const Point& aPoin
     aTriangleDown.SetPoint(aMiddleSecond + Point(0,_pViewShell->GetOut()->PixelToLogic(Size(0,3)).Height()),2);
 
     _pViewShell->GetOut()->SetFillColor(rColorUp);
-    _pViewShell->GetOut()->DrawPolygon(aTriangleUp);
+    Drawable::Draw(_pViewShell->GetOut(), PolygonDrawable(aTriangleUp));
     _pViewShell->GetOut()->SetFillColor(rColorDown);
-    _pViewShell->GetOut()->DrawPolygon(aTriangleDown);
+    Drawable::Draw(_pViewShell->GetOut(), PolygonDrawable(aTriangleDown));
 }
 
 /**

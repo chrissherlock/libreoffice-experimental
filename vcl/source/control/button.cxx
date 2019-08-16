@@ -22,6 +22,7 @@
 #include <vcl/image.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/drawables/LineDrawable.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 #include <vcl/bitmapex.hxx>
 #include <vcl/decoview.hxx>
 #include <vcl/event.hxx>
@@ -2448,11 +2449,11 @@ void RadioButton::Draw( OutputDevice* pDev, const Point& rPos, const Size& rSize
 
         pDev->SetLineColor();
         pDev->SetFillColor( COL_BLACK );
-        pDev->DrawPolygon( tools::Polygon( aCenterPos, nRadX, nRadY ) );
+        Drawable::Draw(pDev, PolygonDrawable(tools::Polygon(aCenterPos, nRadX, nRadY)));
         nRadX -= aBrd1Size.Width();
         nRadY -= aBrd1Size.Height();
         pDev->SetFillColor( COL_WHITE );
-        pDev->DrawPolygon( tools::Polygon( aCenterPos, nRadX, nRadY ) );
+        Drawable::Draw(pDev, PolygonDrawable(tools::Polygon(aCenterPos, nRadX, nRadY)));
         if ( mbChecked )
         {
             nRadX -= aBrd1Size.Width();
@@ -2462,7 +2463,7 @@ void RadioButton::Draw( OutputDevice* pDev, const Point& rPos, const Size& rSize
             if ( !nRadY )
                 nRadY = 1;
             pDev->SetFillColor( COL_BLACK );
-            pDev->DrawPolygon( tools::Polygon( aCenterPos, nRadX, nRadY ) );
+            Drawable::Draw(pDev, PolygonDrawable(tools::Polygon(aCenterPos, nRadX, nRadY)));
         }
 
         pDev->Pop();

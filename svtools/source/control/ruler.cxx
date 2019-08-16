@@ -19,6 +19,7 @@
 
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/drawables/LineDrawable.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 
 #include <string.h>
 #include <tools/debug.hxx>
@@ -751,7 +752,7 @@ void Ruler::ImplDrawIndent(vcl::RenderContext& rRenderContext, const tools::Poly
     rRenderContext.SetFillColor(bIsHit ? rStyleSettings.GetDarkShadowColor() : rStyleSettings.GetWorkspaceColor());
     tools::Polygon aPolygon(rPoly);
     aPolygon.Optimize(PolyOptimizeFlags::CLOSE);
-    rRenderContext.DrawPolygon(aPolygon);
+    Drawable::Draw(&rRenderContext, PolygonDrawable(aPolygon));
 }
 
 void Ruler::ImplDrawIndents(vcl::RenderContext& rRenderContext, long nMin, long nMax, long nVirTop, long nVirBottom)
