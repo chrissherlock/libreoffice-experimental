@@ -17,43 +17,36 @@
 
 #include <cassert>
 
-bool PixelDrawable::execute(OutputDevice* pRenderContext) const
+bool PixelDrawable::CanDraw(OutputDevice* pRenderContext) const
 {
-    assert(!pRenderContext->is_double_buffered_window());
-
-    Color aColor;
-    if (mbUsesColor)
-        aColor = pRenderContext->ImplDrawModeToColor(maColor);
-
-    GDIMetaFile* pMetaFile = pRenderContext->GetConnectMetaFile();
-    if (pMetaFile)
-    {
-        pMetaFile->AddAction(mpMetaAction);
-    }
-
     if (!pRenderContext->IsDeviceOutputNecessary() || !pRenderContext->IsLineColor()
         || pRenderContext->ImplIsRecordLayout())
         return false;
 
+    return true;
+}
+
+bool PixelDrawable::DrawCommand(OutputDevice* pRenderContext) const
+{
+    Color aColor;
+    if (mbUsesColor)
+        aColor = pRenderContext->ImplDrawModeToColor(maColor);
+
     Point aPt = pRenderContext->ImplLogicToDevicePixel(maPt);
 
-    SalGraphics* pGraphics = pRenderContext->GetGraphics();
-    if (!pGraphics)
-        return false;
-
-    if (pRenderContext->IsClipRegionInitialized())
-        pRenderContext->InitClipRegion();
-
-    if (pRenderContext->IsOutputClipped())
-        return false;
-
-    if (pRenderContext->IsLineColor())
-        pRenderContext->InitLineColor();
-
     if (mbUsesColor)
-        pGraphics->DrawPixel(aPt.X(), aPt.Y(), aColor, pRenderContext);
+        mpGraphics->DrawPixel(aPt.X(), aPt.Y(), aColor, pRenderContext);
     else
-        pGraphics->DrawPixel(aPt.X(), aPt.Y(), pRenderContext);
+        mpGraphics->DrawPixel(aPt.X(), aPt.Y(), pRenderContext);
+
+    return true;
+}
+
+bool PixelDrawable::DrawAlphaVirtDev(OutputDevice* pRenderContext) const
+{
+    Color aColor;
+    if (mbUsesColor)
+        aColor = pRenderContext->ImplDrawModeToColor(maColor);
 
     VirtualDevice* pAlphaVDev = pRenderContext->GetAlphaVirtDev();
     if (pAlphaVDev)
@@ -62,11 +55,11 @@ bool PixelDrawable::execute(OutputDevice* pRenderContext) const
         {
             Color aAlphaColor(aColor.GetTransparency(), aColor.GetTransparency(),
                               aColor.GetTransparency());
-            Drawable::Draw(pAlphaVDev, PixelDrawable(aPt, aAlphaColor));
+            Drawable::Draw(pAlphaVDev, PixelDrawable(maPt, aAlphaColor));
         }
         else
         {
-            Drawable::Draw(pAlphaVDev, PixelDrawable(aPt));
+            Drawable::Draw(pAlphaVDev, PixelDrawable(maPt));
         }
     }
 

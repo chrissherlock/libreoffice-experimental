@@ -34,7 +34,7 @@
 
 #include <cassert>
 
-bool PolyLineDrawable::execute(OutputDevice* pRenderContext) const
+bool PolyLineDrawable::DrawCommand(OutputDevice* pRenderContext) const
 {
     if (mbUsesToolsPolygon && !mbUsesLineInfo)
         return Draw(pRenderContext, maPolygon);
@@ -48,25 +48,17 @@ bool PolyLineDrawable::execute(OutputDevice* pRenderContext) const
     return false;
 }
 
-bool PolyLineDrawable::Draw(OutputDevice* pRenderContext, tools::Polygon const& rPolygon) const
+bool PolyLineDrawable::CanDraw(OutputDevice* pRenderContext) const
 {
-    assert(!pRenderContext->is_double_buffered_window());
-
-    GDIMetaFile* pMetaFile = pRenderContext->GetConnectMetaFile();
-    if (pMetaFile)
-        pMetaFile->AddAction(mpMetaAction);
-
     if (!pRenderContext->IsDeviceOutputNecessary()
         || (!pRenderContext->IsLineColor() || pRenderContext->ImplIsRecordLayout()))
         return false;
 
-    SalGraphics* pGraphics = pRenderContext->GetGraphics();
-    if (!pGraphics)
-        return false;
+    return true;
+}
 
-    if (pRenderContext->IsLineColorInitialized())
-        pRenderContext->InitLineColor();
-
+bool PolyLineDrawable::Draw(OutputDevice* pRenderContext, tools::Polygon const& rPolygon) const
+{
     sal_uInt16 nPoints = rPolygon.GetSize();
 
     if (nPoints < 2)
@@ -82,9 +74,9 @@ bool PolyLineDrawable::Draw(OutputDevice* pRenderContext, tools::Polygon const& 
     const bool bPixelSnapHairline(pRenderContext->GetAntialiasing()
                                   & AntialiasingFlags::PixelSnapHairline);
 
-    if (pGraphics->DrawPolyLine(aTransform, aB2DPolyLine, 0.0, aB2DLineWidth,
-                                basegfx::B2DLineJoin::NONE, css::drawing::LineCap_BUTT,
-                                basegfx::deg2rad(15.0), bPixelSnapHairline, pRenderContext))
+    if (mpGraphics->DrawPolyLine(aTransform, aB2DPolyLine, 0.0, aB2DLineWidth,
+                                 basegfx::B2DLineJoin::NONE, css::drawing::LineCap_BUTT,
+                                 basegfx::deg2rad(15.0), bPixelSnapHairline, pRenderContext))
     {
         return true;
     }
@@ -96,22 +88,18 @@ bool PolyLineDrawable::Draw(OutputDevice* pRenderContext, tools::Polygon const& 
     if (rPolygon.HasFlags())
     {
         const PolyFlags* pFlgAry = aPoly.GetConstFlagAry();
-        if (!pGraphics->DrawPolyLineBezier(nPoints, pPtAry, pFlgAry, pRenderContext))
+        if (!mpGraphics->DrawPolyLineBezier(nPoints, pPtAry, pFlgAry, pRenderContext))
         {
             aPoly = tools::Polygon::SubdivideBezier(rPolygon);
             tools::Polygon aPolygon(rPolygon);
             pPtAry = reinterpret_cast<SalPoint*>(aPolygon.GetPointAry());
-            pGraphics->DrawPolyLine(rPolygon.GetSize(), pPtAry, pRenderContext);
+            mpGraphics->DrawPolyLine(rPolygon.GetSize(), pPtAry, pRenderContext);
         }
     }
     else
     {
-        pGraphics->DrawPolyLine(nPoints, pPtAry, pRenderContext);
+        mpGraphics->DrawPolyLine(nPoints, pPtAry, pRenderContext);
     }
-
-    VirtualDevice* pAlphaVDev = pRenderContext->GetAlphaVirtDev();
-    if (pAlphaVDev)
-        Drawable::Draw(pAlphaVDev, PolyLineDrawable(rPolygon));
 
     return true;
 }
@@ -119,8 +107,6 @@ bool PolyLineDrawable::Draw(OutputDevice* pRenderContext, tools::Polygon const& 
 bool PolyLineDrawable::Draw(OutputDevice* pRenderContext, tools::Polygon const& rPolygon,
                             LineInfo const aLineInfo) const
 {
-    assert(!pRenderContext->is_double_buffered_window());
-
     if (aLineInfo.IsDefault())
         return Draw(pRenderContext, rPolygon);
 
@@ -131,23 +117,6 @@ bool PolyLineDrawable::Draw(OutputDevice* pRenderContext, tools::Polygon const& 
     {
         return Draw(pRenderContext, rPolygon.getB2DPolygon(), aLineInfo, basegfx::deg2rad(15.0));
     }
-
-    GDIMetaFile* pMetaFile = pRenderContext->GetConnectMetaFile();
-    if (pMetaFile)
-        pMetaFile->AddAction(mpMetaAction);
-
-    SalGraphics* pGraphics = pRenderContext->GetGraphics();
-    if (!pGraphics)
-        return false;
-
-    if (pRenderContext->IsClipRegionInitialized())
-        pRenderContext->InitClipRegion();
-
-    if (pRenderContext->IsOutputClipped())
-        return false;
-
-    if (pRenderContext->IsLineColorInitialized())
-        pRenderContext->InitLineColor();
 
     const LineInfo aInfo(pRenderContext->ImplLogicToDevicePixel(aLineInfo));
     const bool bDashUsed(aInfo.GetStyle() == LineStyle::Dash);
@@ -177,13 +146,9 @@ bool PolyLineDrawable::Draw(OutputDevice* pRenderContext, tools::Polygon const& 
         }
 
         tools::Polygon aTmpPoly(aPoly);
-        pGraphics->DrawPolyLine(nPoints, reinterpret_cast<SalPoint*>(aTmpPoly.GetPointAry()),
-                                pRenderContext);
+        mpGraphics->DrawPolyLine(nPoints, reinterpret_cast<SalPoint*>(aTmpPoly.GetPointAry()),
+                                 pRenderContext);
     }
-
-    VirtualDevice* pAlphaVDev = pRenderContext->GetAlphaVirtDev();
-    if (pAlphaVDev)
-        Drawable::Draw(pAlphaVDev, PolyLineDrawable(rPolygon, aLineInfo));
 
     return true;
 }
@@ -191,31 +156,9 @@ bool PolyLineDrawable::Draw(OutputDevice* pRenderContext, tools::Polygon const& 
 bool PolyLineDrawable::Draw(OutputDevice* pRenderContext, basegfx::B2DPolygon const& rB2DPolygon,
                             LineInfo aLineInfo, double fMiterMinimumAngle) const
 {
-    assert(!pRenderContext->is_double_buffered_window());
-
-    GDIMetaFile* pMetaFile = pRenderContext->GetConnectMetaFile();
-    if (pMetaFile)
-        pMetaFile->AddAction(mpMetaAction);
-
-    if (!pRenderContext->IsDeviceOutputNecessary() || pRenderContext->ImplIsRecordLayout())
-        return false;
-
-    SalGraphics* pGraphics = pRenderContext->GetGraphics();
-    if (!pGraphics)
-        return false;
-
     // Do not paint empty PolyPolygons
     if (!rB2DPolygon.count())
         return false;
-
-    if (pRenderContext->IsClipRegionInitialized())
-        pRenderContext->InitClipRegion();
-
-    if (pRenderContext->IsOutputClipped())
-        return false;
-
-    if (pRenderContext->IsLineColorInitialized())
-        pRenderContext->InitLineColor();
 
     // use b2dpolygon drawing if possible
     if (Drawable::Draw(pRenderContext, PolyHairlineDrawable(basegfx::B2DHomMatrix(), rB2DPolygon,
@@ -225,6 +168,8 @@ bool PolyLineDrawable::Draw(OutputDevice* pRenderContext, basegfx::B2DPolygon co
     }
 
     double fLineWidth = aLineInfo.GetWidth();
+
+    mbEnableAlphaVDev = false;
 
     // #i101491#
     // no output yet; fallback to geometry decomposition and use filled polygon paint
@@ -300,8 +245,8 @@ bool PolyLineDrawable::Draw(OutputDevice* pRenderContext, basegfx::B2DPolygon co
             }
 
             tools::Polygon aTmpPoly(aPoly);
-            pGraphics->DrawPolyLine(nPoints, reinterpret_cast<SalPoint*>(aTmpPoly.GetPointAry()),
-                                    pRenderContext);
+            mpGraphics->DrawPolyLine(nPoints, reinterpret_cast<SalPoint*>(aTmpPoly.GetPointAry()),
+                                     pRenderContext);
         }
 
         VirtualDevice* pAlphaVDev = pRenderContext->GetAlphaVirtDev();

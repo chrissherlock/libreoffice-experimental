@@ -44,7 +44,11 @@ public:
         mpMetaAction = nullptr;
     }
 
-    virtual bool execute(OutputDevice* pRenderContext) const override;
+protected:
+    bool CanDraw(OutputDevice*) const override;
+    bool ShouldInitClipRegion() const override { return false; }
+
+    bool DrawCommand(OutputDevice* pRenderContext) const override;
 
 private:
     tools::Rectangle maRect;

@@ -30,7 +30,10 @@ public:
         mpMetaAction = new MetaRoundRectAction(maRect, mnHorzRadius, mnVertRadius);
     }
 
-    virtual bool execute(OutputDevice* pRenderContext) const override;
+protected:
+    bool CanDraw(OutputDevice* pRenderContext) const override;
+
+    bool DrawCommand(OutputDevice* pRenderContext) const override;
 
 private:
     tools::Rectangle maRect;

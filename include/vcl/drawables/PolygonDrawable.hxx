@@ -31,12 +31,16 @@ public:
     }
 
     PolygonDrawable(basegfx::B2DPolygon aPolygon)
-        : maB2DPolygon(aPolygon)
+        : Drawable(false)
+        , maB2DPolygon(aPolygon)
         , mbUsesB2DPolygon(true)
     {
     }
 
-    virtual bool execute(OutputDevice* pRenderContext) const override;
+protected:
+    virtual bool CanDraw(OutputDevice* pRenderContext) const override;
+
+    virtual bool DrawCommand(OutputDevice* pRenderContext) const override;
 
 private:
     bool Draw(OutputDevice* pRenderContext, tools::Polygon const aPolygon) const;

@@ -16,18 +16,48 @@
 
 class OutputDevice;
 class MetaAction;
+class SalGraphics;
 
 class VCL_DLLPUBLIC Drawable
 {
 public:
-    Drawable() {}
+    Drawable()
+        : mbUsesScaffolding(true)
+    {
+    }
+
+    Drawable(bool bUseScaffolding)
+        : mbUsesScaffolding(bUseScaffolding)
+    {
+    }
+
     virtual ~Drawable() {}
 
-    virtual bool execute(OutputDevice* pRenderContext) const = 0;
+    bool execute(OutputDevice* pRenderContext) const;
 
     static bool Draw(OutputDevice* pRenderContext, Drawable const& rDrawable);
 
 protected:
+    virtual bool ShouldAddAction() const;
+    virtual bool CanDraw(OutputDevice*) const { return true; }
+    virtual bool ShouldInitClipRegion() const { return true; }
+    virtual bool ShouldInitColor() const { return true; }
+    virtual bool ShouldInitFillColor() const { return true; }
+    virtual bool UseAlphaVirtDev() const { return true; }
+    bool UseScaffolding() const { return mbUsesScaffolding; }
+
+    virtual bool DrawCommand(OutputDevice* pRenderContext) const = 0;
+
+    virtual bool InitClipRegion(OutputDevice* pRenderContext) const;
+    virtual bool DrawAlphaVirtDev(OutputDevice* pRenderContext) const;
+    virtual void AddAction(OutputDevice* pRenderContext) const;
+
+    void InitColor(OutputDevice* pRenderContext) const;
+    void InitFillColor(OutputDevice* pRenderContext) const;
+
+    mutable SalGraphics* mpGraphics;
+    bool mbUsesScaffolding;
+
     MetaAction* mpMetaAction;
 };
 

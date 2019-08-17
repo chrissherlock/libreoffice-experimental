@@ -14,7 +14,7 @@
 
 #include <cassert>
 
-bool CheckeredRectDrawable::execute(OutputDevice* pRenderContext) const
+bool CheckeredRectDrawable::DrawCommand(OutputDevice* pRenderContext) const
 {
     assert(!pRenderContext->is_double_buffered_window());
 

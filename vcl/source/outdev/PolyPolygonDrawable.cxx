@@ -28,46 +28,39 @@
 
 #include <cassert>
 
-bool PolyPolygonDrawable::execute(OutputDevice* pRenderContext) const
+bool PolyPolygonDrawable::CanDraw(OutputDevice* pRenderContext) const
 {
-    return Draw(pRenderContext, maPolyPolygon);
-}
-
-bool PolyPolygonDrawable::Draw(OutputDevice* pRenderContext, tools::PolyPolygon aPolyPolygon) const
-{
-    assert(!pRenderContext->is_double_buffered_window());
-
-    GDIMetaFile* pMetaFile = pRenderContext->GetConnectMetaFile();
-    if (pMetaFile)
-        pMetaFile->AddAction(mpMetaAction);
-
     if (!pRenderContext->IsDeviceOutputNecessary()
         || (!pRenderContext->IsLineColor() && !pRenderContext->IsFillColor())
         || pRenderContext->ImplIsRecordLayout())
         return false;
 
-    SalGraphics* pGraphics = pRenderContext->GetGraphics();
-    if (!pGraphics)
-        return false;
+    return true;
+}
 
-    if (pRenderContext->IsClipRegionInitialized())
-        pRenderContext->InitClipRegion();
+void PolyPolygonDrawable::AddAction(OutputDevice* pRenderContext) const
+{
+    // #100127# Map to DrawPolygon
+    const tools::Polygon& aPoly = maPolyPolygon.GetObject(0);
+    if (aPoly.GetSize() >= 2)
+    {
+        GDIMetaFile* pOldMF = pRenderContext->GetConnectMetaFile();
+        pRenderContext->SetConnectMetaFile(nullptr);
 
-    if (pRenderContext->IsOutputClipped())
-        return false;
+        Drawable::Draw(pRenderContext, PolygonDrawable(aPoly));
 
-    if (pRenderContext->IsLineColorInitialized())
-        pRenderContext->InitLineColor();
+        pRenderContext->SetConnectMetaFile(pOldMF);
+    }
+}
 
-    if (pRenderContext->IsFillColorInitialized())
-        pRenderContext->InitFillColor();
-
-    sal_uInt16 nPoly = aPolyPolygon.Count();
+bool PolyPolygonDrawable::DrawCommand(OutputDevice* pRenderContext) const
+{
+    sal_uInt16 nPoly = maPolyPolygon.Count();
     if (!nPoly)
         return false;
 
     const bool bTryAA((pRenderContext->GetAntialiasing() & AntialiasingFlags::EnableB2dDraw)
-                      && pGraphics->supportsOperation(OutDevSupportType::B2DDraw)
+                      && mpGraphics->supportsOperation(OutDevSupportType::B2DDraw)
                       && pRenderContext->GetRasterOp() == RasterOp::OverPaint
                       && (pRenderContext->IsLineColor() || pRenderContext->IsFillColor()));
 
@@ -75,7 +68,7 @@ bool PolyPolygonDrawable::Draw(OutputDevice* pRenderContext, tools::PolyPolygon 
     if (bTryAA)
     {
         const basegfx::B2DHomMatrix aTransform(pRenderContext->ImplGetDeviceTransformation());
-        basegfx::B2DPolyPolygon aB2DPolyPolygon(aPolyPolygon.getB2DPolyPolygon());
+        basegfx::B2DPolyPolygon aB2DPolyPolygon(maPolyPolygon.getB2DPolyPolygon());
         bool bSuccess = true;
 
         // ensure closed - may be asserted, will prevent buffering
@@ -83,9 +76,8 @@ bool PolyPolygonDrawable::Draw(OutputDevice* pRenderContext, tools::PolyPolygon 
             aB2DPolyPolygon.setClosed(true);
 
         if (pRenderContext->IsFillColor())
-        {
-            bSuccess = pGraphics->DrawPolyPolygon(aTransform, aB2DPolyPolygon, 0.0, pRenderContext);
-        }
+            bSuccess
+                = mpGraphics->DrawPolyPolygon(aTransform, aB2DPolyPolygon, 0.0, pRenderContext);
 
         if (bSuccess && pRenderContext->IsLineColor())
         {
@@ -95,7 +87,7 @@ bool PolyPolygonDrawable::Draw(OutputDevice* pRenderContext, tools::PolyPolygon 
 
             for (auto const& rPolygon : aB2DPolyPolygon)
             {
-                bSuccess = pGraphics->DrawPolyLine(
+                bSuccess = mpGraphics->DrawPolyLine(
                     aTransform, rPolygon, 0.0, aB2DLineWidth, basegfx::B2DLineJoin::NONE,
                     css::drawing::LineCap_BUTT,
                     basegfx::deg2rad(
@@ -111,7 +103,7 @@ bool PolyPolygonDrawable::Draw(OutputDevice* pRenderContext, tools::PolyPolygon 
         {
             VirtualDevice* pAlphaVDev = pRenderContext->GetAlphaVirtDev();
             if (pAlphaVDev)
-                Drawable::Draw(pAlphaVDev, PolyPolygonDrawable(aPolyPolygon));
+                Drawable::Draw(pAlphaVDev, PolyPolygonDrawable(maPolyPolygon));
 
             return true;
         }
@@ -119,17 +111,7 @@ bool PolyPolygonDrawable::Draw(OutputDevice* pRenderContext, tools::PolyPolygon 
 
     if (nPoly == 1)
     {
-        // #100127# Map to DrawPolygon
-        const tools::Polygon& aPoly = aPolyPolygon.GetObject(0);
-        if (aPoly.GetSize() >= 2)
-        {
-            GDIMetaFile* pOldMF = pRenderContext->GetConnectMetaFile();
-            pRenderContext->SetConnectMetaFile(nullptr);
-
-            Drawable::Draw(pRenderContext, PolygonDrawable(aPoly));
-
-            pRenderContext->SetConnectMetaFile(pOldMF);
-        }
+        AddAction(pRenderContext);
     }
     else
     {
@@ -137,12 +119,12 @@ bool PolyPolygonDrawable::Draw(OutputDevice* pRenderContext, tools::PolyPolygon 
         // have to call recursively, avoiding duplicate
         // ImplLogicToDevicePixel calls
         pRenderContext->ImplDrawPolyPolygon(nPoly,
-                                            pRenderContext->ImplLogicToDevicePixel(aPolyPolygon));
+                                            pRenderContext->ImplLogicToDevicePixel(maPolyPolygon));
     }
 
     VirtualDevice* pAlphaVDev = pRenderContext->GetAlphaVirtDev();
     if (pAlphaVDev)
-        Drawable::Draw(pAlphaVDev, PolyPolygonDrawable(aPolyPolygon));
+        Drawable::Draw(pAlphaVDev, PolyPolygonDrawable(maPolyPolygon));
 
     return true;
 }

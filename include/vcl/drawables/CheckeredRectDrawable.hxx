@@ -24,7 +24,8 @@ class VCL_DLLPUBLIC CheckeredRectDrawable : public Drawable
 public:
     CheckeredRectDrawable(Point aPos, Size aSize, sal_uInt32 nLen = 8,
                           Color aStartColor = COL_WHITE, Color aEndColor = COL_BLACK)
-        : maPos(aPos)
+        : Drawable(false)
+        , maPos(aPos)
         , maSize(aSize)
         , mnLen(nLen)
         , maStartColor(aStartColor)
@@ -33,7 +34,8 @@ public:
         mpMetaAction = nullptr;
     }
 
-    virtual bool execute(OutputDevice* pRenderContext) const override;
+protected:
+    virtual bool DrawCommand(OutputDevice* pRenderContext) const override;
 
 private:
     Point maPos;

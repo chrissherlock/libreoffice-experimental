@@ -27,49 +27,30 @@
 
 #include <cassert>
 
-bool PolygonDrawable::execute(OutputDevice* pRenderContext) const
+bool PolygonDrawable::DrawCommand(OutputDevice* pRenderContext) const
 {
-    if (!mbUsesB2DPolygon)
-        return Draw(pRenderContext, maPolygon);
-
-    return Draw(pRenderContext, maB2DPolygon);
+    return (!mbUsesB2DPolygon) ? Draw(pRenderContext, maPolygon)
+                               : Draw(pRenderContext, maB2DPolygon);
 }
 
-bool PolygonDrawable::Draw(OutputDevice* pRenderContext, tools::Polygon aPolygon) const
+bool PolygonDrawable::CanDraw(OutputDevice* pRenderContext) const
 {
-    assert(!pRenderContext->is_double_buffered_window());
-
-    GDIMetaFile* pMetaFile = pRenderContext->GetConnectMetaFile();
-    if (pMetaFile)
-        pMetaFile->AddAction(mpMetaAction);
-
     if (!pRenderContext->IsDeviceOutputNecessary()
         || (!pRenderContext->IsLineColor() && !pRenderContext->IsFillColor())
         || pRenderContext->ImplIsRecordLayout())
         return false;
 
-    SalGraphics* pGraphics = pRenderContext->GetGraphics();
-    if (!pGraphics)
-        return false;
+    return true;
+}
 
-    if (pRenderContext->IsClipRegionInitialized())
-        pRenderContext->InitClipRegion();
-
-    if (pRenderContext->IsOutputClipped())
-        return false;
-
-    if (pRenderContext->IsLineColorInitialized())
-        pRenderContext->InitLineColor();
-
-    if (pRenderContext->IsFillColorInitialized())
-        pRenderContext->InitFillColor();
-
+bool PolygonDrawable::Draw(OutputDevice* pRenderContext, tools::Polygon aPolygon) const
+{
     sal_uInt16 nPoints = aPolygon.GetSize();
     if (nPoints < 2)
         return false;
 
     const bool bTryAA((pRenderContext->GetAntialiasing() & AntialiasingFlags::EnableB2dDraw)
-                      && pGraphics->supportsOperation(OutDevSupportType::B2DDraw)
+                      && mpGraphics->supportsOperation(OutDevSupportType::B2DDraw)
                       && pRenderContext->GetRasterOp() == RasterOp::OverPaint
                       && pRenderContext->IsLineColor());
 
@@ -86,8 +67,8 @@ bool PolygonDrawable::Draw(OutputDevice* pRenderContext, tools::Polygon aPolygon
 
         if (pRenderContext->IsFillColor())
         {
-            bSuccess = pGraphics->DrawPolyPolygon(aTransform, basegfx::B2DPolyPolygon(aB2DPolygon),
-                                                  0.0, pRenderContext);
+            bSuccess = mpGraphics->DrawPolyPolygon(aTransform, basegfx::B2DPolyPolygon(aB2DPolygon),
+                                                   0.0, pRenderContext);
         }
 
         if (bSuccess && pRenderContext->IsLineColor())
@@ -96,7 +77,7 @@ bool PolygonDrawable::Draw(OutputDevice* pRenderContext, tools::Polygon aPolygon
             const bool bPixelSnapHairline(pRenderContext->GetAntialiasing()
                                           & AntialiasingFlags::PixelSnapHairline);
 
-            bSuccess = pGraphics->DrawPolyLine(
+            bSuccess = mpGraphics->DrawPolyLine(
                 aTransform, aB2DPolygon, 0.0, aB2DLineWidth, basegfx::B2DLineJoin::NONE,
                 css::drawing::LineCap_BUTT,
                 basegfx::deg2rad(15.0), // not used with B2DLineJoin::NONE, but the correct default
@@ -120,21 +101,17 @@ bool PolygonDrawable::Draw(OutputDevice* pRenderContext, tools::Polygon aPolygon
     if (aPoly.HasFlags())
     {
         const PolyFlags* pFlgAry = aPoly.GetConstFlagAry();
-        if (!pGraphics->DrawPolygonBezier(nPoints, pPtAry, pFlgAry, pRenderContext))
+        if (!mpGraphics->DrawPolygonBezier(nPoints, pPtAry, pFlgAry, pRenderContext))
         {
             aPoly = tools::Polygon::SubdivideBezier(aPoly);
             pPtAry = reinterpret_cast<const SalPoint*>(aPoly.GetConstPointAry());
-            pGraphics->DrawPolygon(aPoly.GetSize(), pPtAry, pRenderContext);
+            mpGraphics->DrawPolygon(aPoly.GetSize(), pPtAry, pRenderContext);
         }
     }
     else
     {
-        pGraphics->DrawPolygon(nPoints, pPtAry, pRenderContext);
+        mpGraphics->DrawPolygon(nPoints, pPtAry, pRenderContext);
     }
-
-    VirtualDevice* pAlphaVDev = pRenderContext->GetAlphaVirtDev();
-    if (pAlphaVDev)
-        Drawable::Draw(pAlphaVDev, PolygonDrawable(aPolygon));
 
     return true;
 }

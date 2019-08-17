@@ -29,7 +29,12 @@ public:
         mpMetaAction = new MetaPolyPolygonAction(aPolyPolygon);
     }
 
-    virtual bool execute(OutputDevice* pRenderContext) const override;
+protected:
+    bool CanDraw(OutputDevice* pRenderContext) const override;
+    bool UseAlphaVirtDev() const override { return false; }
+    void AddAction(OutputDevice* pRenderContext) const override;
+
+    bool DrawCommand(OutputDevice* pRenderContext) const override;
 
 private:
     /** Render the given poly-polygon

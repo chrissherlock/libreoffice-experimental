@@ -35,7 +35,7 @@
 #include <cassert>
 #include <numeric>
 
-bool LineDrawable::execute(OutputDevice* pRenderContext) const
+bool LineDrawable::DrawCommand(OutputDevice* pRenderContext) const
 {
     if (mbUsesPolyPolygon)
         return Draw(pRenderContext, mpLinePolyPolygon, maLineInfo);
@@ -45,35 +45,22 @@ bool LineDrawable::execute(OutputDevice* pRenderContext) const
         return Draw(pRenderContext);
 }
 
+bool LineDrawable::CanDraw(OutputDevice* pRenderContext) const
+{
+    if (UsesScaffolding()
+        && (!pRenderContext->IsDeviceOutputNecessary()
+            || (!pRenderContext->IsLineColor() && !pRenderContext->IsFillColor())
+            || pRenderContext->ImplIsRecordLayout()))
+        return false;
+
+    return true;
+}
+
 bool LineDrawable::Draw(OutputDevice* pRenderContext) const
 {
-    assert(!pRenderContext->is_double_buffered_window());
-
-    GDIMetaFile* pMetaFile = pRenderContext->GetConnectMetaFile();
-    if (pMetaFile)
-        pMetaFile->AddAction(mpMetaAction);
-
-    if (!pRenderContext->IsDeviceOutputNecessary()
-        || (!pRenderContext->IsLineColor() && !pRenderContext->IsFillColor())
-        || pRenderContext->ImplIsRecordLayout())
-        return false;
-
-    if (pRenderContext->IsClipRegionInitialized())
-        pRenderContext->InitClipRegion();
-
-    if (pRenderContext->IsOutputClipped())
-        return false;
-
-    if (pRenderContext->IsLineColorInitialized())
-        pRenderContext->InitLineColor();
-
-    SalGraphics* pGraphics = pRenderContext->GetGraphics();
-    if (!pGraphics)
-        return false;
-
     // #i101598# support AA and snap for lines, too
     if ((pRenderContext->GetAntialiasing() & AntialiasingFlags::EnableB2dDraw)
-        && pGraphics->supportsOperation(OutDevSupportType::B2DDraw)
+        && mpGraphics->supportsOperation(OutDevSupportType::B2DDraw)
         && pRenderContext->GetRasterOp() == RasterOp::OverPaint && pRenderContext->IsLineColor())
     {
         // at least transform with double precision to device coordinates; pRenderContext will
@@ -89,7 +76,7 @@ bool LineDrawable::Draw(OutputDevice* pRenderContext) const
         const bool bPixelSnapHairline(pRenderContext->GetAntialiasing()
                                       & AntialiasingFlags::PixelSnapHairline);
 
-        return pGraphics->DrawPolyLine(
+        return mpGraphics->DrawPolyLine(
             basegfx::B2DHomMatrix(), aB2DPolyLine, 0.0, aB2DLineWidth, basegfx::B2DLineJoin::NONE,
             css::drawing::LineCap_BUTT,
             basegfx::deg2rad(15.0), // not used with B2DLineJoin::NONE, but the correct default
@@ -99,49 +86,21 @@ bool LineDrawable::Draw(OutputDevice* pRenderContext) const
     const Point aStartPt(pRenderContext->ImplLogicToDevicePixel(maStartPt));
     const Point aEndPt(pRenderContext->ImplLogicToDevicePixel(maEndPt));
 
-    pGraphics->DrawLine(aStartPt.X(), aStartPt.Y(), aEndPt.X(), aEndPt.Y(), pRenderContext);
-
-    VirtualDevice* pAlphaVDev = pRenderContext->GetAlphaVirtDev();
-    if (pAlphaVDev)
-        Drawable::Draw(pAlphaVDev, LineDrawable(maStartPt, maEndPt));
+    mpGraphics->DrawLine(aStartPt.X(), aStartPt.Y(), aEndPt.X(), aEndPt.Y(), pRenderContext);
 
     return true;
 }
 
 bool LineDrawable::Draw(OutputDevice* pRenderContext, LineInfo const aLineInfo) const
 {
-    assert(!pRenderContext->is_double_buffered_window());
-
     if (aLineInfo.IsDefault())
         return Draw(pRenderContext);
-
-    GDIMetaFile* pMetaFile = pRenderContext->GetConnectMetaFile();
-    if (pMetaFile)
-        pMetaFile->AddAction(mpMetaAction);
-
-    if (!pRenderContext->IsDeviceOutputNecessary()
-        || (!pRenderContext->IsLineColor() && !pRenderContext->IsFillColor())
-        || pRenderContext->ImplIsRecordLayout())
-        return false;
-
-    SalGraphics* pGraphics = pRenderContext->GetGraphics();
-    if (!pGraphics)
-        return false;
-
-    if (pRenderContext->IsClipRegionInitialized())
-        pRenderContext->InitClipRegion();
-
-    if (pRenderContext->IsOutputClipped())
-        return false;
 
     const Point aStartPt(pRenderContext->ImplLogicToDevicePixel(maStartPt));
     const Point aEndPt(pRenderContext->ImplLogicToDevicePixel(maEndPt));
     const LineInfo aInfo(pRenderContext->ImplLogicToDevicePixel(aLineInfo));
     const bool bDashUsed(aInfo.GetStyle() == LineStyle::Dash);
     const bool bLineWidthUsed(aInfo.GetWidth() > 1);
-
-    if (pRenderContext->IsLineColorInitialized())
-        pRenderContext->InitLineColor();
 
     if (bDashUsed || bLineWidthUsed)
     {
@@ -154,7 +113,7 @@ bool LineDrawable::Draw(OutputDevice* pRenderContext, LineInfo const aLineInfo) 
     }
     else
     {
-        pGraphics->DrawLine(aStartPt.X(), aStartPt.Y(), aEndPt.X(), aEndPt.Y(), pRenderContext);
+        mpGraphics->DrawLine(aStartPt.X(), aStartPt.Y(), aEndPt.X(), aEndPt.Y(), pRenderContext);
     }
 
     VirtualDevice* pAlphaVDev = pRenderContext->GetAlphaVirtDev();
@@ -167,14 +126,6 @@ bool LineDrawable::Draw(OutputDevice* pRenderContext, LineInfo const aLineInfo) 
 bool LineDrawable::Draw(OutputDevice* pRenderContext, basegfx::B2DPolyPolygon* pLinePolyPolygon,
                         const LineInfo& rInfo) const
 {
-    SalGraphics* pGraphics = pRenderContext->GetGraphics();
-    if (!pGraphics)
-        return false;
-
-    const bool bTryAA((pRenderContext->GetAntialiasing() & AntialiasingFlags::EnableB2dDraw)
-                      && pGraphics->supportsOperation(OutDevSupportType::B2DDraw)
-                      && pRenderContext->GetRasterOp() == RasterOp::OverPaint
-                      && pRenderContext->IsLineColor());
     basegfx::B2DPolyPolygon aFillPolyPolygon;
     const bool bDashUsed(LineStyle::Dash == rInfo.GetStyle());
     const bool bLineWidthUsed(rInfo.GetWidth() > 1);
@@ -244,6 +195,11 @@ bool LineDrawable::Draw(OutputDevice* pRenderContext, basegfx::B2DPolyPolygon* p
     GDIMetaFile* pOldMetaFile = pRenderContext->GetConnectMetaFile();
     pRenderContext->SetConnectMetaFile(nullptr);
 
+    const bool bTryAA((pRenderContext->GetAntialiasing() & AntialiasingFlags::EnableB2dDraw)
+                      && mpGraphics->supportsOperation(OutDevSupportType::B2DDraw)
+                      && pRenderContext->GetRasterOp() == RasterOp::OverPaint
+                      && pRenderContext->IsLineColor());
+
     if (aLinePolyPolygon.count())
     {
         for (auto const& rB2DPolygon : aLinePolyPolygon)
@@ -254,7 +210,7 @@ bool LineDrawable::Draw(OutputDevice* pRenderContext, basegfx::B2DPolyPolygon* p
 
             if (bTryAA)
             {
-                bDone = pGraphics->DrawPolyLine(
+                bDone = mpGraphics->DrawPolyLine(
                     basegfx::B2DHomMatrix(), rB2DPolygon, 0.0, basegfx::B2DVector(1.0, 1.0),
                     basegfx::B2DLineJoin::NONE, css::drawing::LineCap_BUTT,
                     basegfx::deg2rad(
@@ -265,9 +221,9 @@ bool LineDrawable::Draw(OutputDevice* pRenderContext, basegfx::B2DPolyPolygon* p
             if (!bDone)
             {
                 tools::Polygon aPolygon(rB2DPolygon);
-                pGraphics->DrawPolyLine(aPolygon.GetSize(),
-                                        reinterpret_cast<SalPoint*>(aPolygon.GetPointAry()),
-                                        pRenderContext);
+                mpGraphics->DrawPolyLine(aPolygon.GetSize(),
+                                         reinterpret_cast<SalPoint*>(aPolygon.GetPointAry()),
+                                         pRenderContext);
             }
         }
     }
@@ -286,8 +242,8 @@ bool LineDrawable::Draw(OutputDevice* pRenderContext, basegfx::B2DPolyPolygon* p
 
         if (bTryAA)
         {
-            bDone = pGraphics->DrawPolyPolygon(basegfx::B2DHomMatrix(), aFillPolyPolygon, 0.0,
-                                               pRenderContext);
+            bDone = mpGraphics->DrawPolyPolygon(basegfx::B2DHomMatrix(), aFillPolyPolygon, 0.0,
+                                                pRenderContext);
         }
 
         if (!bDone)
@@ -298,7 +254,7 @@ bool LineDrawable::Draw(OutputDevice* pRenderContext, basegfx::B2DPolyPolygon* p
 
                 // need to subdivide, mpGraphics->DrawPolygon ignores curves
                 aPolygon.AdaptiveSubdivide(aPolygon);
-                pGraphics->DrawPolygon(
+                mpGraphics->DrawPolygon(
                     aPolygon.GetSize(),
                     reinterpret_cast<const SalPoint*>(aPolygon.GetConstPointAry()), pRenderContext);
             }

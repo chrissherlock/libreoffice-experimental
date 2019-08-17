@@ -32,6 +32,7 @@ public:
         , mbUsesLineInfo(false)
         , mbUsesToolsPolygon(true)
         , mbUsesB2DPolygon(false)
+        , mbEnableAlphaVDev(true)
     {
         mpMetaAction = new MetaPolyLineAction(aPolygon);
     }
@@ -49,6 +50,7 @@ public:
         , mbUsesLineInfo(true)
         , mbUsesToolsPolygon(true)
         , mbUsesB2DPolygon(false)
+        , mbEnableAlphaVDev(true)
     {
         mpMetaAction = new MetaPolyLineAction(aPolygon, aLineInfo);
     }
@@ -61,6 +63,7 @@ public:
         , mbUsesLineInfo(true)
         , mbUsesToolsPolygon(false)
         , mbUsesB2DPolygon(true)
+        , mbEnableAlphaVDev(true)
     {
         if (aLineInfo.GetWidth() != 0.0)
             aLineInfo.SetWidth(static_cast<long>(aLineInfo.GetWidth() + 0.5));
@@ -69,7 +72,12 @@ public:
         mpMetaAction = new MetaPolyLineAction(aToolsPolygon, aLineInfo);
     }
 
-    virtual bool execute(OutputDevice* pRenderContext) const override;
+protected:
+    bool CanDraw(OutputDevice* pRenderContext) const override;
+    bool ShouldInitFillColor() const override { return false; }
+    bool UseAlphaVirtDev() const override { return mbEnableAlphaVDev; }
+
+    bool DrawCommand(OutputDevice* pRenderContext) const override;
 
 private:
     /** Render the given polygon as a line stroke
@@ -106,6 +114,7 @@ private:
     bool mbUsesLineInfo;
     bool mbUsesToolsPolygon;
     bool mbUsesB2DPolygon;
+    mutable bool mbEnableAlphaVDev; // side-effect!
 };
 
 #endif

@@ -17,19 +17,8 @@
 
 #include <cassert>
 
-bool RoundRectDrawable::execute(OutputDevice* pRenderContext) const
+bool RoundRectDrawable::DrawCommand(OutputDevice* pRenderContext) const
 {
-    assert(!pRenderContext->is_double_buffered_window());
-
-    GDIMetaFile* pMetaFile = pRenderContext->GetConnectMetaFile();
-    if (pMetaFile)
-        pMetaFile->AddAction(mpMetaAction);
-
-    if (!pRenderContext->IsDeviceOutputNecessary()
-        || (!pRenderContext->IsLineColor() && !pRenderContext->IsFillColor())
-        || pRenderContext->ImplIsRecordLayout())
-        return false;
-
     tools::Rectangle aRect(pRenderContext->ImplLogicToDevicePixel(maRect));
 
     if (aRect.IsEmpty())
@@ -37,29 +26,13 @@ bool RoundRectDrawable::execute(OutputDevice* pRenderContext) const
 
     aRect.Justify();
 
-    SalGraphics* pGraphics = pRenderContext->GetGraphics();
-    if (!pGraphics)
-        return false;
-
-    if (pRenderContext->IsClipRegionInitialized())
-        pRenderContext->InitClipRegion();
-
-    if (pRenderContext->IsOutputClipped())
-        return false;
-
-    if (pRenderContext->IsLineColorInitialized())
-        pRenderContext->InitLineColor();
-
-    if (pRenderContext->IsFillColorInitialized())
-        pRenderContext->InitFillColor();
-
     sal_uLong nHorzRadius = pRenderContext->ImplLogicWidthToDevicePixel(mnHorzRadius);
     sal_uLong nVertRadius = pRenderContext->ImplLogicWidthToDevicePixel(mnVertRadius);
 
     if (!nHorzRadius && !nVertRadius)
     {
-        pGraphics->DrawRect(aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(),
-                            pRenderContext);
+        mpGraphics->DrawRect(aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(),
+                             pRenderContext);
     }
     else
     {
@@ -70,17 +43,22 @@ bool RoundRectDrawable::execute(OutputDevice* pRenderContext) const
             SalPoint* pPtAry = reinterpret_cast<SalPoint*>(aRoundRectPoly.GetPointAry());
 
             if (!pRenderContext->IsFillColor())
-                pGraphics->DrawPolyLine(aRoundRectPoly.GetSize(), pPtAry, pRenderContext);
+                mpGraphics->DrawPolyLine(aRoundRectPoly.GetSize(), pPtAry, pRenderContext);
             else
-                pGraphics->DrawPolygon(aRoundRectPoly.GetSize(), pPtAry, pRenderContext);
+                mpGraphics->DrawPolygon(aRoundRectPoly.GetSize(), pPtAry, pRenderContext);
         }
     }
-
-    VirtualDevice* pAlphaVDev = pRenderContext->GetAlphaVirtDev();
-    if (pAlphaVDev)
-        Drawable::Draw(pAlphaVDev, RoundRectDrawable(maRect, mnHorzRadius, mnVertRadius));
 
     return true;
 }
 
+bool RoundRectDrawable::CanDraw(OutputDevice* pRenderContext) const
+{
+    if (!pRenderContext->IsDeviceOutputNecessary()
+        || (!pRenderContext->IsLineColor() && !pRenderContext->IsFillColor())
+        || pRenderContext->ImplIsRecordLayout())
+        return false;
+
+    return true;
+}
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

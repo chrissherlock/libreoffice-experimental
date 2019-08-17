@@ -8,8 +8,8 @@
  *
  */
 
-#ifndef INCLUDED_INCLUDE_VCL_PIXELDRAWABLE_HXX
-#define INCLUDED_INCLUDE_VCL_PIXELDRAWABLE_HXX
+#ifndef INCLUDED_INCLUDE_VCL_DRAWABLE_PIXELDRAWABLE_HXX
+#define INCLUDED_INCLUDE_VCL_DRAWABLE_PIXELDRAWABLE_HXX
 
 #include <tools/gen.hxx>
 #include <tools/color.hxx>
@@ -37,7 +37,12 @@ public:
         mpMetaAction = new MetaPixelAction(aPt, aColor);
     }
 
-    virtual bool execute(OutputDevice* pRenderContext) const override;
+protected:
+    bool CanDraw(OutputDevice* pRenderContext) const override;
+    bool ShouldInitFillColor() const override { return false; }
+    bool DrawAlphaVirtDev(OutputDevice* pRenderContext) const override;
+
+    bool DrawCommand(OutputDevice* pRenderContext) const override;
 
 private:
     Point const maPt;

@@ -55,9 +55,17 @@ public:
         mpMetaAction = new MetaPolyLineAction(aToolsPolygon, aTmpLineInfo);
     }
 
+protected:
+    bool CanDraw(OutputDevice* pRenderContext) const override;
+    bool ShouldAddAction() const override { return false; }
+    bool ShouldInitClipRegion() const override { return true; }
+    bool ShouldInitColor() const override { return true; }
+    bool ShouldInitFillColor() const override { return false; }
+    bool UseAlphaVirtDev() const override { return false; }
+
     /** Tries to use SalGDI's DrawPolyLine directly and returns its bool. See #i101491#.
     */
-    virtual bool execute(OutputDevice* pRenderContext) const override;
+    virtual bool DrawCommand(OutputDevice* pRenderContext) const override;
 
 private:
     basegfx::B2DHomMatrix maObjectTransform;

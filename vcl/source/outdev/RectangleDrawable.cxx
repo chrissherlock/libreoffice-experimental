@@ -18,19 +18,8 @@
 
 #include <cassert>
 
-bool RectangleDrawable::execute(OutputDevice* pRenderContext) const
+bool RectangleDrawable::DrawCommand(OutputDevice* pRenderContext) const
 {
-    assert(!pRenderContext->is_double_buffered_window());
-
-    GDIMetaFile* pMetaFile = pRenderContext->GetConnectMetaFile();
-    if (pMetaFile)
-        pMetaFile->AddAction(mpMetaAction);
-
-    if (!pRenderContext->IsDeviceOutputNecessary()
-        || (!pRenderContext->IsLineColor() && !pRenderContext->IsFillColor())
-        || pRenderContext->ImplIsRecordLayout())
-        return false;
-
     tools::Rectangle aRect(pRenderContext->ImplLogicToDevicePixel(maRect));
 
     if (aRect.IsEmpty())
@@ -38,28 +27,18 @@ bool RectangleDrawable::execute(OutputDevice* pRenderContext) const
 
     aRect.Justify();
 
-    SalGraphics* pGraphics = pRenderContext->GetGraphics();
-    if (!pGraphics)
+    mpGraphics->DrawRect(aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(),
+                         pRenderContext);
+
+    return true;
+}
+
+bool RectangleDrawable::CanDraw(OutputDevice* pRenderContext) const
+{
+    if (!pRenderContext->IsDeviceOutputNecessary()
+        || (!pRenderContext->IsLineColor() && !pRenderContext->IsFillColor())
+        || pRenderContext->ImplIsRecordLayout())
         return false;
-
-    if (pRenderContext->IsClipRegionInitialized())
-        pRenderContext->InitClipRegion();
-
-    if (pRenderContext->IsOutputClipped())
-        return false;
-
-    if (pRenderContext->IsLineColorInitialized())
-        pRenderContext->InitLineColor();
-
-    if (pRenderContext->IsFillColorInitialized())
-        pRenderContext->InitFillColor();
-
-    pGraphics->DrawRect(aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(),
-                        pRenderContext);
-
-    VirtualDevice* pAlphaVDev = pRenderContext->GetAlphaVirtDev();
-    if (pAlphaVDev)
-        Drawable::Draw(pAlphaVDev, RectangleDrawable(maRect));
 
     return true;
 }

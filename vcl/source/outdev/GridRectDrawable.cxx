@@ -17,13 +17,16 @@
 
 #include <cassert>
 
-bool GridRectDrawable::execute(OutputDevice* pRenderContext) const
+bool GridRectDrawable::CanDraw(OutputDevice* pRenderContext) const
 {
-    assert(!pRenderContext->is_double_buffered_window());
-
     if (!pRenderContext->IsDeviceOutputNecessary() || pRenderContext->ImplIsRecordLayout())
         return false;
 
+    return true;
+}
+
+bool GridRectDrawable::DrawCommand(OutputDevice* pRenderContext) const
+{
     const long nDistX = std::max(maDistance.Width(), 1L);
     const long nDistY = std::max(maDistance.Height(), 1L);
 
@@ -69,12 +72,6 @@ bool GridRectDrawable::execute(OutputDevice* pRenderContext) const
         }
     }
 
-    if (pRenderContext->IsLineColorInitialized())
-        pRenderContext->InitLineColor();
-
-    if (pRenderContext->IsFillColorInitialized())
-        pRenderContext->InitFillColor();
-
     const bool bOldMap = pRenderContext->IsMapModeEnabled();
     pRenderContext->EnableMapMode(false);
 
@@ -114,10 +111,6 @@ bool GridRectDrawable::execute(OutputDevice* pRenderContext) const
     }
 
     pRenderContext->EnableMapMode(bOldMap);
-
-    VirtualDevice* pAlphaVDev = pRenderContext->GetAlphaVirtDev();
-    if (pAlphaVDev)
-        Drawable::Draw(pAlphaVDev, GridRectDrawable(maRect, maDistance, meFlags));
 
     return true;
 }

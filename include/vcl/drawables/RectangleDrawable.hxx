@@ -26,7 +26,9 @@ public:
         mpMetaAction = new MetaRectAction(aRect);
     }
 
-    virtual bool execute(OutputDevice* pRenderContext) const override;
+protected:
+    bool CanDraw(OutputDevice* pRenderContext) const override;
+    bool DrawCommand(OutputDevice* pRenderContext) const override;
 
 private:
     tools::Rectangle maRect;

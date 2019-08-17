@@ -27,36 +27,18 @@
 
 #include <cassert>
 
-bool PolyHairlineDrawable::execute(OutputDevice* pRenderContext) const
+bool PolyHairlineDrawable::DrawCommand(OutputDevice* pRenderContext) const
 {
-    assert(!pRenderContext->is_double_buffered_window());
-
     double fLineWidth = maLineInfo.GetWidth();
     basegfx::B2DLineJoin eLineJoin = maLineInfo.GetLineJoin();
     css::drawing::LineCap eLineCap = maLineInfo.GetLineCap();
-
-    if (!pRenderContext->IsDeviceOutputNecessary() || pRenderContext->ImplIsRecordLayout())
-        return false;
-
-    SalGraphics* pGraphics = pRenderContext->GetGraphics();
-    if (!pGraphics)
-        return false;
 
     // Do not paint empty PolyPolygons
     if (!maB2DPolygon.count())
         return false;
 
-    if (pRenderContext->IsClipRegionInitialized())
-        pRenderContext->InitClipRegion();
-
-    if (pRenderContext->IsOutputClipped())
-        return false;
-
-    if (pRenderContext->IsLineColorInitialized())
-        pRenderContext->InitLineColor();
-
     const bool bTryAA((pRenderContext->GetAntialiasing() & AntialiasingFlags::EnableB2dDraw)
-                      && pGraphics->supportsOperation(OutDevSupportType::B2DDraw)
+                      && mpGraphics->supportsOperation(OutDevSupportType::B2DDraw)
                       && pRenderContext->GetRasterOp() == RasterOp::OverPaint
                       && pRenderContext->IsLineColor());
 
@@ -73,7 +55,7 @@ bool PolyHairlineDrawable::execute(OutputDevice* pRenderContext) const
             && maB2DPolygon.count() < 1000);
 
         // draw the polyline
-        bool bDrawSuccess = pGraphics->DrawPolyLine(
+        bool bDrawSuccess = mpGraphics->DrawPolyLine(
             aTransform, maB2DPolygon, mfTransparency, aB2DLineWidth, eLineJoin, eLineCap,
             mfMiterMinimumAngle, bPixelSnapHairline, pRenderContext);
 
@@ -87,6 +69,14 @@ bool PolyHairlineDrawable::execute(OutputDevice* pRenderContext) const
         }
     }
     return false;
+}
+
+bool PolyHairlineDrawable::CanDraw(OutputDevice* pRenderContext) const
+{
+    if (!pRenderContext->IsDeviceOutputNecessary() || pRenderContext->ImplIsRecordLayout())
+        return false;
+
+    return true;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

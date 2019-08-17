@@ -48,16 +48,26 @@ public:
     }
 
     LineDrawable(basegfx::B2DPolyPolygon* pLinePolyPolygon, const LineInfo aInfo)
-        : maLineInfo(aInfo)
+        : Drawable(false)
+        , maLineInfo(aInfo)
         , mbUsesLineInfo(true)
         , mbUsesPolyPolygon(true)
     {
         mpLinePolyPolygon = pLinePolyPolygon;
     }
 
-    virtual bool execute(OutputDevice* pRenderContext) const override;
+protected:
+    bool CanDraw(OutputDevice* pRenderContext) const override;
+    bool ShouldInitClipRegion() const override { return UseScaffolding(); };
+    bool ShouldInitColor() const override { return UseScaffolding(); };
+    bool ShouldInitFillColor() const override { return UseScaffolding(); };
+    bool UseAlphaVirtDev() const override { return UseScaffolding(); };
+
+    bool DrawCommand(OutputDevice* pRenderContext) const override;
 
 private:
+    bool UsesScaffolding() const { return mbUsesScaffolding; }
+
     bool Draw(OutputDevice* pRenderContext) const;
     bool Draw(OutputDevice* pRenderContext, LineInfo aLineInfo) const;
 
