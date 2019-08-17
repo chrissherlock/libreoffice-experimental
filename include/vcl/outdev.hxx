@@ -718,7 +718,6 @@ public:
 
     SAL_DLLPRIVATE void         ImplDrawPolygon( const tools::Polygon& rPoly, const tools::PolyPolygon* pClipPolyPoly = nullptr );
     SAL_DLLPRIVATE void         ImplDrawPolyPolygon( const tools::PolyPolygon& rPolyPoly, const tools::PolyPolygon* pClipPolyPoly );
-    SAL_DLLPRIVATE void         ImplDrawPolyPolygon( sal_uInt16 nPoly, const tools::PolyPolygon& rPolyPoly );
     ///@}
 
 

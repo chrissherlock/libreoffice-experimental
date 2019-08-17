@@ -18,6 +18,8 @@
 
 #include <memory>
 
+#define OUTDEV_POLYPOLY_STACKBUF 32
+
 class OutputDevice;
 
 class VCL_DLLPUBLIC PolyPolygonDrawable : public Drawable
@@ -25,8 +27,17 @@ class VCL_DLLPUBLIC PolyPolygonDrawable : public Drawable
 public:
     PolyPolygonDrawable(tools::PolyPolygon const aPolyPolygon)
         : maPolyPolygon(aPolyPolygon)
+        , mbRecursiveDraw(false)
     {
         mpMetaAction = new MetaPolyPolygonAction(aPolyPolygon);
+    }
+
+    PolyPolygonDrawable(sal_uInt16 nPolygonCount, tools::PolyPolygon aPolyPolygon)
+        : Drawable(false)
+        , maPolyPolygon(aPolyPolygon)
+        , mnPolygonCount(nPolygonCount)
+        , mbRecursiveDraw(true)
+    {
     }
 
 protected:
@@ -48,8 +59,12 @@ private:
         @see DrawPolyLine
      */
     bool Draw(OutputDevice* pRenderContext, tools::PolyPolygon const aPolyPolygon) const;
+    bool Draw(OutputDevice* pRenderContext, sal_uInt16 nPolygonCount,
+              tools::PolyPolygon aPolyPolygon) const;
 
     tools::PolyPolygon maPolyPolygon;
+    sal_uInt16 mnPolygonCount;
+    bool mbRecursiveDraw;
 };
 
 #endif
