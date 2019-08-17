@@ -21,6 +21,7 @@
 #include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/drawables/PolyLineDrawable.hxx>
 #include <vcl/drawables/PolygonDrawable.hxx>
+#include <vcl/drawables/PolyPolygonDrawable.hxx>
 
 #include <string.h>
 #include <vcl/gdimtf.hxx>
@@ -621,7 +622,7 @@ void DXF2GDIMetaFile::DrawHatchEntity(const DXFHatchEntity & rE, const DXFTransf
             }
         }
         if ( aPolyPoly.Count() )
-            pVirDev->DrawPolyPolygon( aPolyPoly );
+            Drawable::Draw(pVirDev, PolyPolygonDrawable(aPolyPoly));
     }
 }
 

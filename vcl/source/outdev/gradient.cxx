@@ -28,6 +28,7 @@
 #include <vcl/outdev.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/window.hxx>
+#include <vcl/drawables/PolyPolygonDrawable.hxx>
 
 #include <salgdi.hxx>
 
@@ -59,7 +60,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
             Push( PushFlags::LINECOLOR | PushFlags::FILLCOLOR );
             SetLineColor( aColor );
             SetFillColor( aColor );
-            DrawPolyPolygon( rPolyPoly );
+            Drawable::Draw(this, PolyPolygonDrawable(rPolyPoly));
             Pop();
             return;
         }
@@ -146,7 +147,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
     }
 
     if( mpAlphaVDev )
-        mpAlphaVDev->DrawPolyPolygon( rPolyPoly );
+        Drawable::Draw(mpAlphaVDev, PolyPolygonDrawable(rPolyPoly));
 }
 
 void OutputDevice::ClipAndDrawGradientMetafile ( const Gradient &rGradient, const tools::PolyPolygon &rPolyPoly )
@@ -160,7 +161,7 @@ void OutputDevice::ClipAndDrawGradientMetafile ( const Gradient &rGradient, cons
     DrawGradient( aBoundRect, rGradient );
     SetFillColor( COL_BLACK );
     SetRasterOp( RasterOp::N0 );
-    DrawPolyPolygon( rPolyPoly );
+    Drawable::Draw(this, PolyPolygonDrawable(rPolyPoly));
     SetRasterOp( RasterOp::Xor );
     DrawGradient( aBoundRect, rGradient );
     Pop();

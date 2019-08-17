@@ -20,6 +20,7 @@
 #include <sal/config.h>
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/drawables/PolygonDrawable.hxx>
+#include <vcl/drawables/PolyPolygonDrawable.hxx>
 
 #include <tuple>
 
@@ -534,7 +535,7 @@ namespace vclcanvas
                     // assume a 1bpp target - everything beyond 97%
                     // transparency is fully transparent
                     p2ndOutDev->SetFillColor( COL_BLACK );
-                    p2ndOutDev->DrawPolyPolygon( rPoly );
+                    Drawable::Draw(p2ndOutDev, PolyPolygonDrawable(rPoly));
                 }
             }
 

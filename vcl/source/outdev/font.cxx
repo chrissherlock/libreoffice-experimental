@@ -23,6 +23,7 @@
 
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/drawables/PolyLineDrawable.hxx>
+#include <vcl/drawables/PolyPolygonDrawable.hxx>
 #include <vcl/metric.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/print.hxx>
@@ -1172,7 +1173,7 @@ void OutputDevice::ImplDrawEmphasisMark( long nBaseX, long nX, long nY,
         {
             tools::PolyPolygon aPolyPoly = rPolyPoly;
             aPolyPoly.Move( nX, nY );
-            DrawPolyPolygon( aPolyPoly );
+            Drawable::Draw(this, PolyPolygonDrawable(aPolyPoly));
         }
     }
 

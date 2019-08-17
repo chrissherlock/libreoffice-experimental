@@ -21,6 +21,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
 #include <vcl/drawables/RoundRectDrawable.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 
 using namespace com::sun::star;
 
@@ -104,7 +105,7 @@ CPPUNIT_TEST_FIXTURE(GenTest, testTdf107966)
     aPolygon.append(basegfx::B2DPoint(1350, 15));
     aPolygon.append(basegfx::B2DPoint(1350, 0));
     aPolygon.append(basegfx::B2DPoint(0, 0));
-    pVirtualDevice->DrawPolygon(aPolygon);
+    Drawable::Draw(pVirtualDevice, PolygonDrawable(aPolygon));
 
     // Make sure that the polygon is visible.
     Bitmap aBitmap = pVirtualDevice->GetBitmap(Point(), Size(1350, 15));

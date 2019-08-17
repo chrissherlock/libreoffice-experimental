@@ -8,8 +8,9 @@
  *
  */
 
-#include <test/outputdevice.hxx>
+#include <vcl/drawables/PolyPolygonDrawable.hxx>
 
+#include <test/outputdevice.hxx>
 
 namespace vcl {
 namespace test {
@@ -41,7 +42,7 @@ Bitmap OutputDeviceTestPolyPolygon::setupRectangle(bool bEnableAA)
     aPolyPolygon.Insert(createPolygonOffset(maVDRectangle, 2));
     aPolyPolygon.Insert(createPolygonOffset(maVDRectangle, 5));
 
-    mpVirtualDevice->DrawPolyPolygon(aPolyPolygon);
+    Drawable::Draw(mpVirtualDevice, PolyPolygonDrawable(aPolyPolygon));
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
 }
@@ -56,7 +57,7 @@ Bitmap OutputDeviceTestPolyPolygon::setupFilledRectangle()
     tools::PolyPolygon aPolyPolygon(1);
     aPolyPolygon.Insert(createPolygonOffset(maVDRectangle, 2));
 
-    mpVirtualDevice->DrawPolyPolygon(aPolyPolygon);
+    Drawable::Draw(mpVirtualDevice, PolyPolygonDrawable(aPolyPolygon));
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
 }

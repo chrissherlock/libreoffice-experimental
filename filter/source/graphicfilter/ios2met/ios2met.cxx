@@ -32,6 +32,7 @@
 #include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/drawables/PolyLineDrawable.hxx>
 #include <vcl/drawables/PolygonDrawable.hxx>
+#include <vcl/drawables/PolyPolygonDrawable.hxx>
 
 #include <math.h>
 #include <algorithm>
@@ -530,13 +531,13 @@ void OS2METReader::DrawPolyPolygon( const tools::PolyPolygon& rPolyPolygon )
     {
         pVirDev->Push( PushFlags::LINECOLOR );
         pVirDev->SetLineColor( COL_TRANSPARENT );
-        pVirDev->DrawPolyPolygon( rPolyPolygon );
+        Drawable::Draw(pVirDev, PolyPolygonDrawable(rPolyPolygon));
         pVirDev->Pop();
         for ( sal_uInt16 i = 0; i < rPolyPolygon.Count(); i++ )
             Drawable::Draw(pVirDev, PolyLineDrawable(rPolyPolygon.GetObject(i), aLineInfo));
     }
     else
-        pVirDev->DrawPolyPolygon( rPolyPolygon );
+        Drawable::Draw(pVirDev, PolyPolygonDrawable(rPolyPolygon));
 }
 
 void OS2METReader::AddPointsToArea(const tools::Polygon & rPoly)
@@ -1619,14 +1620,16 @@ void OS2METReader::ReadOrder(sal_uInt16 nOrderID, sal_uInt16 nOrderLen)
                                 Drawable::Draw(pVirDev, PolyLineDrawable(p->aPPoly.GetObject(i), aLineInfo));
                         }
                         else
-                            pVirDev->DrawPolyPolygon( p->aPPoly );
+                        {
+                            Drawable::Draw(pVirDev, PolyPolygonDrawable(p->aPPoly));
+                        }
                     }
                     else
                     {
                         SetPen( COL_TRANSPARENT, 0, PEN_NULL );
                         ChangeBrush( aAttr.aPatCol, aAttr.bFill );
                         SetRasterOp( aAttr.ePatMix );
-                        pVirDev->DrawPolyPolygon( p->aPPoly );
+                        Drawable::Draw(pVirDev, PolyPolygonDrawable(p->aPPoly));
                     }
                 }
             }

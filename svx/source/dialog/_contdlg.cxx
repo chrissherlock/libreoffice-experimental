@@ -21,6 +21,7 @@
 
 #include <vcl/wrkwin.hxx>
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/PolyPolygonDrawable.hxx>
 #include <tools/helpers.hxx>
 #include <svl/eitem.hxx>
 #include <sfx2/ctrlitem.hxx>
@@ -112,7 +113,7 @@ tools::PolyPolygon SvxContourDlg::CreateAutoContour( const Graphic& rGraphic,
                     // offset of the sub-image within the total animation
                     aTransMap.SetOrigin( Point( rStepBmp.maPositionPixel.X(), rStepBmp.maPositionPixel.Y() ) );
                     pVDev->SetMapMode( aTransMap );
-                    pVDev->DrawPolyPolygon( CreateAutoContour( rStepBmp.maBitmapEx, pRect ) );
+                    Drawable::Draw(pVDev, PolyPolygonDrawable(CreateAutoContour(rStepBmp.maBitmapEx, pRect)));
                 }
 
                 aTransMap.SetOrigin( Point() );

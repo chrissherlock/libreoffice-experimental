@@ -24,6 +24,7 @@
 #include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/drawables/PolyLineDrawable.hxx>
 #include <vcl/drawables/PolygonDrawable.hxx>
+#include <vcl/drawables/PolyPolygonDrawable.hxx>
 #include <vcl/pngwrite.hxx>
 #if HAVE_FEATURE_OPENGL
 #include <vcl/opengl/OpenGLHelper.hxx>
@@ -777,7 +778,7 @@ void SvmTest::testPolyPolygon()
     aPolyPolygon.Insert(aPolygon);
     aPolyPolygon.Insert(aPolygonWithControl);
 
-    pVirtualDev->DrawPolyPolygon(aPolyPolygon);
+    Drawable::Draw(pVirtualDev, PolyPolygonDrawable(aPolyPolygon));
 
     checkPolyPolygon(writeAndRead(aGDIMetaFile, "polypolygon.svm"));
 }

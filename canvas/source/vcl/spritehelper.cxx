@@ -38,6 +38,7 @@
 #include <vcl/outdev.hxx>
 #include <vcl/BitmapMonochromeFilter.hxx>
 #include <vcl/drawables/PolyLineDrawable.hxx>
+#include <vcl/drawables/PolyPolygonDrawable.hxx>
 #include <vcl/opengl/OpenGLHelper.hxx>
 
 #include <canvas/canvastools.hxx>
@@ -260,7 +261,7 @@ namespace vclcanvas
                             rTargetSurface.SetLineColor( Color( 0,255,0 ) );
                             rTargetSurface.SetFillColor();
 
-                            rTargetSurface.DrawPolyPolygon(::tools::PolyPolygon(aClipPoly)); // #i76339#
+                            Drawable::Draw(&rTargetSurface, PolyPolygonDrawable(::tools::PolyPolygon(aClipPoly))); // #i76339#
                         }
 
                         vcl::Region aClipRegion( aClipPoly );

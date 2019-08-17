@@ -22,6 +22,7 @@
 #include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/drawables/PolyLineDrawable.hxx>
 #include <vcl/drawables/PolygonDrawable.hxx>
+#include <vcl/drawables/PolyPolygonDrawable.hxx>
 
 #include <utility>
 
@@ -278,10 +279,10 @@ namespace vclcanvas
 
             if( rPolyPoly.isClosed() )
             {
-                mpOutDevProvider->getOutDev().DrawPolyPolygon( aPolyPoly );
+                Drawable::Draw(&mpOutDevProvider->getOutDev(), PolyPolygonDrawable(aPolyPoly));
 
                 if( mp2ndOutDevProvider )
-                    mp2ndOutDevProvider->getOutDev().DrawPolyPolygon( aPolyPoly );
+                    Drawable::Draw(&mp2ndOutDevProvider->getOutDev(), PolyPolygonDrawable(aPolyPoly));
             }
             else
             {
@@ -500,7 +501,7 @@ namespace vclcanvas
             const bool bSourceAlpha( renderState.CompositeOperation == rendering::CompositeOperation::SOURCE );
             if( !nTransparency || bSourceAlpha )
             {
-                mpOutDevProvider->getOutDev().DrawPolyPolygon( aPolyPoly );
+                Drawable::Draw(&mpOutDevProvider->getOutDev(), PolyPolygonDrawable(aPolyPoly));
             }
             else
             {
@@ -517,7 +518,7 @@ namespace vclcanvas
                 if( nTransparency < 253 )
                 {
                     mp2ndOutDevProvider->getOutDev().SetFillColor( COL_BLACK );
-                    mp2ndOutDevProvider->getOutDev().DrawPolyPolygon( aPolyPoly );
+                    Drawable::Draw(&mp2ndOutDevProvider->getOutDev(), PolyPolygonDrawable(aPolyPoly));
                 }
             }
         }

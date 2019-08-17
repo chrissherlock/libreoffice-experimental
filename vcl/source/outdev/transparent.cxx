@@ -26,6 +26,7 @@
 #include <memory>
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/PolyPolygonDrawable.hxx>
 #include <vcl/bitmapaccess.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
@@ -318,7 +319,7 @@ void OutputDevice::DrawInvisiblePolygon( const tools::PolyPolygon& rPolyPoly )
     // we assume that the border is NOT to be drawn transparently???
     Push( PushFlags::FILLCOLOR );
     SetFillColor();
-    DrawPolyPolygon( rPolyPoly );
+    Drawable::Draw(this, PolyPolygonDrawable(rPolyPoly));
     Pop();
 }
 
@@ -492,7 +493,7 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
 
                 aVDev->SetLineColor( COL_BLACK );
                 aVDev->SetFillColor( COL_BLACK );
-                aVDev->DrawPolyPolygon( aPolyPoly );
+                Drawable::Draw(aVDev, PolyPolygonDrawable(aPolyPoly));
 
                 Bitmap aPaint( GetBitmap( aDstRect.TopLeft(), aDstSz ) );
                 Bitmap aPolyMask( aVDev->GetBitmap( Point(), aDstSz ) );
@@ -630,14 +631,14 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
                     {
                         Push( PushFlags::FILLCOLOR );
                         SetFillColor();
-                        DrawPolyPolygon( rPolyPoly );
+                        Drawable::Draw(this, PolyPolygonDrawable(rPolyPoly));
                         Pop();
                     }
                 }
             }
             else
             {
-                DrawPolyPolygon( rPolyPoly );
+                Drawable::Draw(this, PolyPolygonDrawable(rPolyPoly));
             }
         }
     }
@@ -656,7 +657,7 @@ void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
     // short circuit for drawing an opaque polygon
     if( (nTransparencePercent < 1) || (mnDrawMode & DrawModeFlags::NoTransparency) )
     {
-        DrawPolyPolygon( rPolyPoly );
+        Drawable::Draw(this, PolyPolygonDrawable(rPolyPoly));
         return;
     }
 

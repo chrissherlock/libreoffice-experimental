@@ -119,6 +119,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/outdev/PixelDrawable \
     vcl/source/outdev/LineDrawable \
     vcl/source/outdev/PolygonDrawable \
+    vcl/source/outdev/PolyPolygonDrawable \
     vcl/source/outdev/PolyLineDrawable \
     vcl/source/outdev/PolyHairlineDrawable \
     vcl/source/outdev/RectangleDrawable \

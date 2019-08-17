@@ -19,6 +19,7 @@
 
 #include <vcl/drawables/PolyLineDrawable.hxx>
 #include <vcl/drawables/PolygonDrawable.hxx>
+#include <vcl/drawables/PolyPolygonDrawable.hxx>
 
 #include <stdio.h>
 #include <string.h>
@@ -908,7 +909,7 @@ MetaPolyPolygonAction::MetaPolyPolygonAction( const tools::PolyPolygon& rPolyPol
 
 void MetaPolyPolygonAction::Execute( OutputDevice* pOut )
 {
-    pOut->DrawPolyPolygon( maPolyPoly );
+    Drawable::Draw(pOut, PolyPolygonDrawable(maPolyPoly));
 }
 
 rtl::Reference<MetaAction> MetaPolyPolygonAction::Clone()

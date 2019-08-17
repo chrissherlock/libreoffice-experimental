@@ -9,6 +9,7 @@
  */
 
 #include <vcl/BitmapTools.hxx>
+#include <vcl/drawables/PolyPolygonDrawable.hxx>
 
 #include <sal/log.hxx>
 #include <comphelper/processfactory.hxx>
@@ -555,7 +556,7 @@ void DrawAndClipBitmap(const Point& rPos, const Size& rSize, const BitmapEx& rBi
     pVDev->SetOutputSizePixel( aSizePixel );
     pVDev->SetFillColor( COL_BLACK );
     const tools::PolyPolygon aClip( rClipPath );
-    pVDev->DrawPolyPolygon( aClip );
+    Drawable::Draw(pVDev, PolyPolygonDrawable(aClip));
 
     // #i50672# Extract whole VDev content (to match size of rBitmap)
     pVDev->EnableMapMode( false );

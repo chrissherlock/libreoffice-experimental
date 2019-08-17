@@ -32,6 +32,7 @@
 #include <vcl/drawables/LineDrawable.hxx>
 #include <vcl/drawables/PolyLineDrawable.hxx>
 #include <vcl/drawables/PolygonDrawable.hxx>
+#include <vcl/drawables/PolyPolygonDrawable.hxx>
 
 #include <toolkit/awt/vclxgraphics.hxx>
 #include <toolkit/awt/vclxdevice.hxx>
@@ -411,7 +412,7 @@ void VCLXGraphics::drawPolyPolygon( const uno::Sequence< uno::Sequence< sal_Int3
         for ( sal_uInt16 n = 0; n < nPolys; n++ )
             aPolyPoly[n] = VCLUnoHelper::CreatePolygon( DataX.getConstArray()[n], DataY.getConstArray()[n] );
 
-        mpOutputDevice->DrawPolyPolygon( aPolyPoly );
+        Drawable::Draw(mpOutputDevice, PolyPolygonDrawable(aPolyPoly));
     }
 }
 

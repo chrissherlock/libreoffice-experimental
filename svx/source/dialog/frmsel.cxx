@@ -18,6 +18,7 @@
  */
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/PolyPolygonDrawable.hxx>
 #include <svx/frmsel.hxx>
 #include <vcl/event.hxx>
 #include <sal/log.hxx>
@@ -554,7 +555,7 @@ void FrameSelectorImpl::DrawBackground()
     aPPoly.Optimize( PolyOptimizeFlags::CLOSE );
     mpVirDev->SetLineColor( maBackCol );
     mpVirDev->SetFillColor( maBackCol );
-    mpVirDev->DrawPolyPolygon( aPPoly );
+    Drawable::Draw(mpVirDev, PolyPolygonDrawable(aPPoly));
 }
 
 void FrameSelectorImpl::DrawArrows( const FrameBorder& rBorder )
