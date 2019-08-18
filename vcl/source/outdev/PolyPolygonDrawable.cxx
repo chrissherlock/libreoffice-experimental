@@ -30,8 +30,11 @@
 
 bool PolyPolygonDrawable::DrawCommand(OutputDevice* pRenderContext) const
 {
-    return mbRecursiveDraw ? Draw(pRenderContext, mnPolygonCount, maPolyPolygon)
-                           : Draw(pRenderContext, maPolyPolygon);
+    if (!mbUsesB2DPolyPolygon)
+        return mbRecursiveDraw ? Draw(pRenderContext, mnPolygonCount, maPolyPolygon)
+                               : Draw(pRenderContext, maPolyPolygon);
+    else
+        return Draw(pRenderContext, maB2DPolyPolygon);
 }
 
 bool PolyPolygonDrawable::Draw(OutputDevice* pRenderContext, tools::PolyPolygon aPolyPolygon) const
@@ -207,6 +210,68 @@ bool PolyPolygonDrawable::Draw(OutputDevice* pRenderContext, sal_uInt16 nPoly,
     }
 
     return true;
+}
+
+bool PolyPolygonDrawable::Draw(OutputDevice* pRenderContext,
+                               basegfx::B2DPolyPolygon const aPolyPolygon) const
+{
+    // Do not paint empty PolyPolygons
+    if (!aPolyPolygon.count())
+        return false;
+
+    if ((pRenderContext->GetAntialiasing() & AntialiasingFlags::EnableB2dDraw)
+        && mpGraphics->supportsOperation(OutDevSupportType::B2DDraw)
+        && pRenderContext->GetRasterOp() == RasterOp::OverPaint
+        && (pRenderContext->IsLineColor() || pRenderContext->IsFillColor()))
+    {
+        const basegfx::B2DHomMatrix aTransform(pRenderContext->ImplGetDeviceTransformation());
+        basegfx::B2DPolyPolygon aB2DPolyPolygon(aPolyPolygon);
+        bool bSuccess = true;
+
+        // ensure closed - maybe assert, hinders buffering
+        if (!aB2DPolyPolygon.isClosed())
+        {
+            aB2DPolyPolygon.setClosed(true);
+        }
+
+        if (pRenderContext->IsFillColor())
+        {
+            bSuccess
+                = mpGraphics->DrawPolyPolygon(aTransform, aB2DPolyPolygon, 0.0, pRenderContext);
+        }
+
+        if (bSuccess && pRenderContext->IsLineColor())
+        {
+            const basegfx::B2DVector aB2DLineWidth(1.0, 1.0);
+            const bool bPixelSnapHairline(pRenderContext->GetAntialiasing()
+                                          & AntialiasingFlags::PixelSnapHairline);
+
+            for (auto const& rPolygon : aB2DPolyPolygon)
+            {
+                bSuccess = mpGraphics->DrawPolyLine(
+                    aTransform, rPolygon, 0.0, aB2DLineWidth, basegfx::B2DLineJoin::NONE,
+                    css::drawing::LineCap_BUTT,
+                    basegfx::deg2rad(
+                        15.0), // not used with B2DLineJoin::NONE, but the correct default
+                    bPixelSnapHairline, pRenderContext);
+
+                if (!bSuccess)
+                    break;
+            }
+        }
+
+        if (bSuccess)
+        {
+            return true;
+        }
+    }
+
+    // fallback to old polygon drawing if needed
+    const tools::PolyPolygon aToolsPolyPolygon(aPolyPolygon);
+    const tools::PolyPolygon aPixelPolyPolygon
+        = pRenderContext->ImplLogicToDevicePixel(aToolsPolyPolygon);
+    return Drawable::Draw(pRenderContext,
+                          PolyPolygonDrawable(aPixelPolyPolygon.Count(), aPixelPolyPolygon));
 }
 
 bool PolyPolygonDrawable::CanDraw(OutputDevice* pRenderContext) const

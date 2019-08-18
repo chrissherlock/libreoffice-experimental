@@ -23,6 +23,7 @@ $(eval $(call gb_CppunitTest_use_externals,vcl_outdev,boost_headers))
 $(eval $(call gb_CppunitTest_use_libraries,vcl_outdev, \
 	basegfx \
 	comphelper \
+	salhelper \
 	cppu \
 	cppuhelper \
 	sal \

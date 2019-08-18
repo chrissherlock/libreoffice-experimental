@@ -20,6 +20,7 @@
 #include <vcl/drawables/PixelDrawable.hxx>
 #include <vcl/drawables/PolyLineDrawable.hxx>
 #include <vcl/drawables/PolygonDrawable.hxx>
+#include <vcl/drawables/PolyPolygonDrawable.hxx>
 
 #include <cmath>
 #include <comphelper/string.hxx>
@@ -649,7 +650,7 @@ namespace drawinglayer
                                         aLocalPolyPolygon.transform(maCurrentTransformation);
                                         mpOutputDevice->SetLineColor();
                                         mpOutputDevice->SetFillColor(Color(pReplacer->getBColor()));
-                                        mpOutputDevice->DrawPolyPolygon(aLocalPolyPolygon);
+                                        Drawable::Draw(mpOutputDevice, PolyPolygonDrawable(aLocalPolyPolygon));
                                     }
                                     else
                                     {
@@ -681,7 +682,7 @@ namespace drawinglayer
                                             aTarget.transform(maCurrentTransformation);
                                             mpOutputDevice->SetLineColor();
                                             mpOutputDevice->SetFillColor(Color(pReplacer->getBColor()));
-                                            mpOutputDevice->DrawPolyPolygon(aTarget);
+                                            Drawable::Draw(mpOutputDevice, PolyPolygonDrawable(aTarget));
                                         }
                                     }
 
@@ -744,7 +745,7 @@ namespace drawinglayer
                                 VirtualDevice& rTransparence = aBufferDevice.getTransparence();
                                 rTransparence.SetLineColor();
                                 rTransparence.SetFillColor(COL_BLACK);
-                                rTransparence.DrawPolyPolygon(aMask);
+                                Drawable::Draw(&rTransparence, PolyPolygonDrawable(aMask));
                             }
                             else
                             {
@@ -752,7 +753,7 @@ namespace drawinglayer
                                 VirtualDevice& rMask = aBufferDevice.getMask();
                                 rMask.SetLineColor();
                                 rMask.SetFillColor(COL_BLACK);
-                                rMask.DrawPolyPolygon(aMask);
+                                Drawable::Draw(&rMask, PolyPolygonDrawable(aMask));
                             }
                         }
 
@@ -1267,7 +1268,7 @@ namespace drawinglayer
 
                     aNew.transform(maCurrentTransformation * basegfx::utils::createTranslateB2DHomMatrix(fDelta * fUnitScale, 0.0));
                     mpOutputDevice->SetFillColor(Color(basegfx::interpolate(aColorA, aColorB, fUnitScale)));
-                    mpOutputDevice->DrawPolyPolygon(basegfx::B2DPolyPolygon(aNew));
+                    Drawable::Draw(mpOutputDevice, PolyPolygonDrawable(basegfx::B2DPolyPolygon(aNew)));
                 }
             }
         }
@@ -1325,7 +1326,7 @@ namespace drawinglayer
 
                     aNew.transform(maCurrentTransformation * aTransform);
                     mpOutputDevice->SetFillColor(Color(basegfx::interpolate(aColorB, aColorA, fUnitScale)));
-                    mpOutputDevice->DrawPolyPolygon(basegfx::B2DPolyPolygon(aNew));
+                    Drawable::Draw(mpOutputDevice, PolyPolygonDrawable(basegfx::B2DPolyPolygon(aNew)));
                 }
             }
         }

@@ -17,6 +17,7 @@
 #include <com/sun/star/lang/XMultiServiceFactory.hpp>
 
 #include <vcl/drawables/RectangleDrawable.hxx>
+#include <vcl/drawables/PolyPolygonDrawable.hxx>
 #include <vcl/event.hxx>
 #include <vcl/gradient.hxx>
 #include <vcl/vclmain.hxx>
@@ -409,7 +410,7 @@ public:
                 polyPolygon.append(polygon);
             }
 
-            mpVDev->DrawPolyPolygon(polyPolygon);
+            Drawable::Draw(mpVDev, PolyPolygonDrawable(polyPolygon));
 
             tools::Rectangle aGradientRect(Point(200, 200), Size(200 + fTime * 300, 200 + fTime * 300));
             mpVDev->DrawGradient(aGradientRect, Gradient(GradientStyle::Linear, COL_YELLOW, COL_BLUE));

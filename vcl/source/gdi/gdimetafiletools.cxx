@@ -20,6 +20,7 @@
 #include <vcl/gdimetafiletools.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/canvastools.hxx>
+#include <vcl/drawables/PolyPolygonDrawable.hxx>
 #include <basegfx/polygon/b2dpolygonclipper.hxx>
 #include <basegfx/matrix/b2dhommatrixtools.hxx>
 #include <basegfx/polygon/b2dpolypolygontools.hxx>
@@ -206,7 +207,7 @@ namespace
         aInvertPixelPoly.append(aPixelPoly);
 
         // paint as alpha
-        aVDev->DrawPolyPolygon(aInvertPixelPoly);
+        Drawable::Draw(aVDev, PolyPolygonDrawable(aInvertPixelPoly));
 
         // get created alpha mask and set defaults
         AlphaMask aAlpha(

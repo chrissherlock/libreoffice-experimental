@@ -21,6 +21,7 @@
 #include <vcl/drawables/PolyLineDrawable.hxx>
 #include <vcl/drawables/PolyHairlineDrawable.hxx>
 #include <vcl/drawables/PolygonDrawable.hxx>
+#include <vcl/drawables/PolyPolygonDrawable.hxx>
 
 #include "vclpixelprocessor2d.hxx"
 #include <vcl/outdev.hxx>
@@ -530,7 +531,7 @@ namespace drawinglayer
                     // no gradient at all, draw as polygon in AA and non-AA case
                     mpOutputDevice->SetLineColor();
                     mpOutputDevice->SetFillColor(Color(aStartColor));
-                    mpOutputDevice->DrawPolyPolygon(aLocalPolyPolygon);
+                    Drawable::Draw(mpOutputDevice, PolyPolygonDrawable(aLocalPolyPolygon));
                 }
                 else
                 {

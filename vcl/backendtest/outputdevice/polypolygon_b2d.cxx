@@ -8,6 +8,8 @@
  *
  */
 
+#include <vcl/drawables/PolyPolygonDrawable.hxx>
+
 #include <test/outputdevice.hxx>
 
 namespace vcl
@@ -41,7 +43,7 @@ Bitmap OutputDeviceTestPolyPolygonB2D::setupRectangle(bool bEnableAA)
     aPolyPolygon.append(createPolygonOffset(maVDRectangle, 2));
     aPolyPolygon.append(createPolygonOffset(maVDRectangle, 5));
 
-    mpVirtualDevice->DrawPolyPolygon(aPolyPolygon);
+    Drawable::Draw(mpVirtualDevice, PolyPolygonDrawable(aPolyPolygon));
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
 }
@@ -55,7 +57,7 @@ Bitmap OutputDeviceTestPolyPolygonB2D::setupFilledRectangle()
 
     basegfx::B2DPolyPolygon aPolyPolygon(createPolygonOffset(maVDRectangle, 2));
 
-    mpVirtualDevice->DrawPolyPolygon(aPolyPolygon);
+    Drawable::Draw(mpVirtualDevice, PolyPolygonDrawable(aPolyPolygon));
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
 }

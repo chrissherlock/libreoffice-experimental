@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/drawables/PolyPolygonDrawable.hxx>
+
 #include <memory>
 #include "vclmetafileprocessor2d.hxx"
 #include <tools/gen.hxx>
@@ -1960,7 +1962,7 @@ namespace drawinglayer
             mpOutputDevice->SetFillColor(Color(aPolygonColor));
             mpOutputDevice->SetLineColor();
 
-            mpOutputDevice->DrawPolyPolygon(aLocalPolyPolygon);
+            Drawable::Draw(mpOutputDevice, PolyPolygonDrawable(aLocalPolyPolygon));
 
             mpOutputDevice->Pop();
         }

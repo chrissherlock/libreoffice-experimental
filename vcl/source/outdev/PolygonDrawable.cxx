@@ -22,6 +22,7 @@
 #include <vcl/outdev.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/drawables/PolygonDrawable.hxx>
+#include <vcl/drawables/PolyPolygonDrawable.hxx>
 
 #include <salgdi.hxx>
 
@@ -125,7 +126,7 @@ bool PolygonDrawable::Draw(OutputDevice* pRenderContext,
     if (aB2DPolygon.count())
     {
         basegfx::B2DPolyPolygon aPP(aB2DPolygon);
-        pRenderContext->DrawPolyPolygon(aPP);
+        Drawable::Draw(pRenderContext, PolyPolygonDrawable(aPP));
     }
 
     return true;

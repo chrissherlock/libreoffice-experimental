@@ -699,23 +699,6 @@ public:
 
 public:
 
-    /** Render the given poly-polygon
-
-        The given poly-polygon is stroked with the current LineColor,
-        and filled with the current FillColor. If one of these colors
-        are transparent, the corresponding stroke or fill stays
-        invisible. Start and end points of the contained polygons are
-        automatically connected.
-
-        @see DrawPolyLine
-     */
-    void                        DrawPolyPolygon( const basegfx::B2DPolyPolygon& );
-
-    // #i101491#
-    // Helper who implements the DrawPolyPolygon functionality for basegfx::B2DPolyPolygon
-    // without MetaFile processing
-    SAL_DLLPRIVATE void         ImplDrawPolyPolygonWithB2DPolyPolygon(const basegfx::B2DPolyPolygon& rB2DPolyPoly);
-
     SAL_DLLPRIVATE void         ImplDrawPolygon( const tools::Polygon& rPoly, const tools::PolyPolygon* pClipPolyPoly = nullptr );
     SAL_DLLPRIVATE void         ImplDrawPolyPolygon( const tools::PolyPolygon& rPolyPoly, const tools::PolyPolygon* pClipPolyPoly );
     ///@}

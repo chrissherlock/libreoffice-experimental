@@ -29,6 +29,7 @@
 #include <vcl/drawables/PolyLineDrawable.hxx>
 #include <vcl/drawables/PolyHairlineDrawable.hxx>
 #include <vcl/drawables/LineDrawable.hxx>
+#include <vcl/drawables/PolyPolygonDrawable.hxx>
 
 #include <salgdi.hxx>
 
@@ -192,8 +193,8 @@ bool PolyLineDrawable::Draw(OutputDevice* pRenderContext, basegfx::B2DPolygon co
         // draw using a loop; else the topology will paint a PolyPolygon
         for (auto const& rPolygon : aAreaPolyPolygon)
         {
-            pRenderContext->ImplDrawPolyPolygonWithB2DPolyPolygon(
-                basegfx::B2DPolyPolygon(rPolygon));
+            Drawable::Draw(pRenderContext,
+                           PolyPolygonDrawable(basegfx::B2DPolyPolygon(rPolygon), false));
         }
 
         pRenderContext->SetLineColor(aOldLineColor);
