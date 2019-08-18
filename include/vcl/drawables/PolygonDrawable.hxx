@@ -23,9 +23,11 @@ class OutputDevice;
 class VCL_DLLPUBLIC PolygonDrawable : public Drawable
 {
 public:
-    PolygonDrawable(tools::Polygon const aPolygon)
-        : maPolygon(aPolygon)
+    PolygonDrawable(tools::Polygon const aPolygon, bool bUseScaffolding = true)
+        : Drawable(bUseScaffolding)
+        , maPolygon(aPolygon)
         , mbUsesB2DPolygon(false)
+        , mbClipped(false)
     {
         mpMetaAction = new MetaPolygonAction(aPolygon);
     }
@@ -34,6 +36,16 @@ public:
         : Drawable(false)
         , maB2DPolygon(aPolygon)
         , mbUsesB2DPolygon(true)
+        , mbClipped(false)
+    {
+    }
+
+    PolygonDrawable(tools::Polygon aPolygon, tools::PolyPolygon aClipPolyPolygon)
+        : Drawable(false)
+        , maPolygon(aPolygon)
+        , maClipPolyPolygon(aClipPolyPolygon)
+        , mbUsesB2DPolygon(false)
+        , mbClipped(true)
     {
     }
 
@@ -54,10 +66,14 @@ private:
         automatically connected.
      */
     bool Draw(OutputDevice* pRenderContext, basegfx::B2DPolygon const aPolygon) const;
+    bool Draw(OutputDevice* pRenderContext, tools::Polygon aPolygon,
+              tools::PolyPolygon pClipPolyPolygon) const;
 
     tools::Polygon maPolygon;
     basegfx::B2DPolygon maB2DPolygon;
+    tools::PolyPolygon maClipPolyPolygon;
     bool mbUsesB2DPolygon;
+    bool mbClipped;
 };
 
 #endif

@@ -33,8 +33,10 @@ bool PolyPolygonDrawable::DrawCommand(OutputDevice* pRenderContext) const
     if (!mbUsesB2DPolyPolygon)
         return mbRecursiveDraw ? Draw(pRenderContext, mnPolygonCount, maPolyPolygon)
                                : Draw(pRenderContext, maPolyPolygon);
-    else
+    else if (mbUsesB2DPolyPolygon && !mbClipping)
         return Draw(pRenderContext, maB2DPolyPolygon);
+    else
+        return Draw(pRenderContext, maPolyPolygon, maClipPolyPolygon);
 }
 
 bool PolyPolygonDrawable::Draw(OutputDevice* pRenderContext, tools::PolyPolygon aPolyPolygon) const
@@ -272,6 +274,59 @@ bool PolyPolygonDrawable::Draw(OutputDevice* pRenderContext,
         = pRenderContext->ImplLogicToDevicePixel(aToolsPolyPolygon);
     return Drawable::Draw(pRenderContext,
                           PolyPolygonDrawable(aPixelPolyPolygon.Count(), aPixelPolyPolygon));
+}
+
+bool PolyPolygonDrawable::Draw(OutputDevice* pRenderContext, tools::PolyPolygon aPolyPolygon,
+                               tools::PolyPolygon aClipPolyPolygon) const
+{
+    tools::PolyPolygon* pPolyPoly = new tools::PolyPolygon;
+    aPolyPolygon.GetIntersection(aClipPolyPolygon, *pPolyPoly);
+
+    if (pPolyPoly->Count() == 1)
+    {
+        const tools::Polygon& rPoly = pPolyPoly->GetObject(0);
+        sal_uInt16 nSize = rPoly.GetSize();
+
+        if (nSize >= 2)
+        {
+            const SalPoint* pPtAry = reinterpret_cast<const SalPoint*>(rPoly.GetConstPointAry());
+            mpGraphics->DrawPolygon(nSize, pPtAry, pRenderContext);
+        }
+    }
+    else if (pPolyPoly->Count())
+    {
+        sal_uInt16 nCount = pPolyPoly->Count();
+        std::unique_ptr<sal_uInt32[]> pPointAry(new sal_uInt32[nCount]);
+        std::unique_ptr<PCONSTSALPOINT[]> pPointAryAry(new PCONSTSALPOINT[nCount]);
+
+        sal_uInt16 i = 0;
+
+        do
+        {
+            const tools::Polygon& rPoly = pPolyPoly->GetObject(i);
+            sal_uInt16 nSize = rPoly.GetSize();
+            if (nSize)
+            {
+                pPointAry[i] = nSize;
+                pPointAryAry[i] = reinterpret_cast<PCONSTSALPOINT>(rPoly.GetConstPointAry());
+                i++;
+            }
+            else
+            {
+                nCount--;
+            }
+        } while (i < nCount);
+
+        if (nCount == 1)
+            mpGraphics->DrawPolygon(pPointAry[0], pPointAryAry[0], pRenderContext);
+        else
+            mpGraphics->DrawPolyPolygon(nCount, pPointAry.get(), pPointAryAry.get(),
+                                        pRenderContext);
+    }
+
+    delete pPolyPoly;
+
+    return true;
 }
 
 bool PolyPolygonDrawable::CanDraw(OutputDevice* pRenderContext) const

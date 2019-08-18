@@ -38,6 +38,7 @@ public:
         , mbProcessMtf(true)
         , mbRecursiveDraw(false)
         , mbUsesB2DPolyPolygon(false)
+        , mbClipping(false)
     {
         mpMetaAction = new MetaPolyPolygonAction(aPolyPolygon);
     }
@@ -49,6 +50,7 @@ public:
         , mbProcessMtf(false)
         , mbRecursiveDraw(true)
         , mbUsesB2DPolyPolygon(false)
+        , mbClipping(false)
     {
     }
 
@@ -57,9 +59,20 @@ public:
         , mbProcessMtf(bProcessMtf)
         , mbRecursiveDraw(false)
         , mbUsesB2DPolyPolygon(true)
+        , mbClipping(false)
     {
         if (mbProcessMtf)
             mpMetaAction = new MetaPolyPolygonAction(tools::PolyPolygon(aPolyPolygon));
+    }
+
+    PolyPolygonDrawable(tools::PolyPolygon const aPolyPolygon, tools::PolyPolygon aClipPolyPolygon)
+        : maPolyPolygon(aPolyPolygon)
+        , maClipPolyPolygon(aClipPolyPolygon)
+        , mbProcessMtf(false)
+        , mbRecursiveDraw(false)
+        , mbUsesB2DPolyPolygon(false)
+        , mbClipping(true)
+    {
     }
 
 protected:
@@ -78,20 +91,22 @@ private:
         are transparent, the corresponding stroke or fill stays
         invisible. Start and end points of the contained polygons are
         automatically connected.
-
-        @see DrawPolyLine
      */
     bool Draw(OutputDevice* pRenderContext, tools::PolyPolygon const aPolyPolygon) const;
     bool Draw(OutputDevice* pRenderContext, sal_uInt16 nPolygonCount,
               tools::PolyPolygon aPolyPolygon) const;
     bool Draw(OutputDevice* pRenderContext, basegfx::B2DPolyPolygon const aPolyPolygon) const;
+    bool Draw(OutputDevice* pRenderContext, tools::PolyPolygon aPolyPolygon,
+              tools::PolyPolygon aClipPolyPolygon) const;
 
     tools::PolyPolygon maPolyPolygon;
     basegfx::B2DPolyPolygon maB2DPolyPolygon;
+    tools::PolyPolygon maClipPolyPolygon;
     sal_uInt16 mnPolygonCount;
     bool mbProcessMtf;
     bool mbRecursiveDraw;
     bool mbUsesB2DPolyPolygon;
+    bool mbClipping;
 };
 
 #endif

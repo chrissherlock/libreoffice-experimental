@@ -38,6 +38,7 @@
 #include <vcl/sysdata.hxx>
 #include <vcl/unohelp.hxx>
 #include <vcl/controllayout.hxx>
+#include <vcl/drawables/PolygonDrawable.hxx>
 #ifdef MACOSX
 # include <vcl/opengl/OpenGLHelper.hxx>
 #endif
@@ -129,7 +130,7 @@ void OutputDevice::ImplDrawTextRect( long nBaseX, long nBaseY,
             tools::Rectangle aRect( Point( nX, nY ), Size( nWidth+1, nHeight+1 ) );
             tools::Polygon   aPoly( aRect );
             aPoly.Rotate( Point( nBaseX, nBaseY ), mpFontInstance->mnOrientation );
-            ImplDrawPolygon( aPoly );
+            Drawable::Draw(this, PolygonDrawable(aPoly, false));
             return;
         }
     }

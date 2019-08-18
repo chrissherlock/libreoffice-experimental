@@ -30,18 +30,12 @@
 
 bool PolygonDrawable::DrawCommand(OutputDevice* pRenderContext) const
 {
-    return (!mbUsesB2DPolygon) ? Draw(pRenderContext, maPolygon)
-                               : Draw(pRenderContext, maB2DPolygon);
-}
-
-bool PolygonDrawable::CanDraw(OutputDevice* pRenderContext) const
-{
-    if (!pRenderContext->IsDeviceOutputNecessary()
-        || (!pRenderContext->IsLineColor() && !pRenderContext->IsFillColor())
-        || pRenderContext->ImplIsRecordLayout())
-        return false;
-
-    return true;
+    if (mbUsesB2DPolygon && !mbClipped)
+        return Draw(pRenderContext, maB2DPolygon);
+    else if (!mbUsesB2DPolygon && mbClipped)
+        return Draw(pRenderContext, maPolygon, maClipPolyPolygon);
+    else
+        return Draw(pRenderContext, maPolygon);
 }
 
 bool PolygonDrawable::Draw(OutputDevice* pRenderContext, tools::Polygon aPolygon) const
@@ -128,6 +122,22 @@ bool PolygonDrawable::Draw(OutputDevice* pRenderContext,
         basegfx::B2DPolyPolygon aPP(aB2DPolygon);
         Drawable::Draw(pRenderContext, PolyPolygonDrawable(aPP));
     }
+
+    return true;
+}
+
+bool PolygonDrawable::Draw(OutputDevice* pRenderContext, tools::Polygon aPolygon,
+                           tools::PolyPolygon aClipPolyPolygon) const
+{
+    return Drawable::Draw(pRenderContext, PolyPolygonDrawable(aPolygon, aClipPolyPolygon));
+}
+
+bool PolygonDrawable::CanDraw(OutputDevice* pRenderContext) const
+{
+    if (!pRenderContext->IsDeviceOutputNecessary()
+        || (!pRenderContext->IsLineColor() && !pRenderContext->IsFillColor())
+        || pRenderContext->ImplIsRecordLayout())
+        return false;
 
     return true;
 }
