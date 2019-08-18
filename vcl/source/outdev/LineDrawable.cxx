@@ -116,10 +116,6 @@ bool LineDrawable::Draw(OutputDevice* pRenderContext, LineInfo const aLineInfo) 
         mpGraphics->DrawLine(aStartPt.X(), aStartPt.Y(), aEndPt.X(), aEndPt.Y(), pRenderContext);
     }
 
-    VirtualDevice* pAlphaVDev = pRenderContext->GetAlphaVirtDev();
-    if (pAlphaVDev)
-        Drawable::Draw(pAlphaVDev, LineDrawable(maStartPt, maEndPt, aLineInfo));
-
     return true;
 }
 
