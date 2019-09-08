@@ -426,6 +426,12 @@ struct PointArray
     {
     }
 
+    ~PointArray()
+    {
+        if (mnCountPoints > 1)
+            delete[] mpPoints;
+    }
+
     long mnCountPoints;
     Point* mpPoints;
 };
@@ -492,7 +498,9 @@ static PointArray GetHatchLinePoints(tools::Line const& rLine,
                         }
                     }
                     else
+                    {
                         nAdd = 1;
+                    }
 
                     if (nAdd)
                         pPtBuffer[nPCounter++] = Point(FRound(fX), FRound(fY));
