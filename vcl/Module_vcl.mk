@@ -36,6 +36,7 @@ $(eval $(call gb_Module_add_targets,vcl,\
 			Executable_outdevgrind \
 			$(if $(DISABLE_GUI),, \
 				Executable_vcldemo \
+				Executable_vcltester \
 				Executable_icontest \
 				Executable_visualbackendtest \
 				Executable_mtfdemo ))) \

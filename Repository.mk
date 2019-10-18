@@ -72,6 +72,7 @@ $(eval $(call gb_Helper_register_executables,NONE, \
 	$(if $(filter LINUX MACOSX SOLARIS WNT %BSD,$(OS)),icontest \
 	    outdevgrind) \
 	vcldemo \
+	vcltester \
 	tiledrendering \
     mtfdemo \
     visualbackendtest \
