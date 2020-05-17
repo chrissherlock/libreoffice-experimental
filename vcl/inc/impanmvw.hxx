@@ -30,67 +30,65 @@ struct AnimationBitmap;
 
 struct AInfo
 {
-    Point           aStartOrg;
-    Size            aStartSize;
-    VclPtr<OutputDevice>   pOutDev;
-    void*           pViewData;
-    long            nExtraData;
-    bool            bPause;
+    Point aStartOrg;
+    Size aStartSize;
+    VclPtr<OutputDevice> pOutDev;
+    void* pViewData;
+    long nExtraData;
+    bool bPause;
 
     AInfo();
 };
 
-
 class ImplAnimView
 {
 private:
-
     friend class Animation;
 
-    Animation*      mpParent;
-    VclPtr<OutputDevice>  mpRenderContext;
-    long            mnExtraData;
-    Point           maPt;
-    Point           maDispPt;
-    Point           maRestPt;
-    Size            maSz;
-    Size            maSzPix;
-    Size            maDispSz;
-    Size            maRestSz;
-    vcl::Region     maClip;
-    VclPtr<VirtualDevice>  mpBackground;
-    VclPtr<VirtualDevice>  mpRestore;
-    sal_uLong       mnActPos;
-    Disposal        meLastDisposal;
-    bool            mbIsPaused;
-    bool            mbIsMarked;
-    bool            mbIsMirroredHorizontally;
-    bool            mbIsMirroredVertically;
+    Animation* mpParent;
+    VclPtr<OutputDevice> mpRenderContext;
+    long mnExtraData;
+    Point maPt;
+    Point maDispPt;
+    Point maRestPt;
+    Size maSz;
+    Size maSzPix;
+    Size maDispSz;
+    Size maRestSz;
+    vcl::Region maClip;
+    VclPtr<VirtualDevice> mpBackground;
+    VclPtr<VirtualDevice> mpRestore;
+    sal_uLong mnActPos;
+    Disposal meLastDisposal;
+    bool mbIsPaused;
+    bool mbIsMarked;
+    bool mbIsMirroredHorizontally;
+    bool mbIsMirroredVertically;
 
 public:
-                    ~ImplAnimView();
+    ~ImplAnimView();
+
 private:
-                    ImplAnimView( Animation* pParent, OutputDevice* pOut,
-                                  const Point& rPt, const Size& rSz, sal_uLong nExtraData,
-                                  OutputDevice* pFirstFrameOutDev = nullptr );
+    ImplAnimView(Animation* pParent, OutputDevice* pOut, const Point& rPt, const Size& rSz,
+                 sal_uLong nExtraData, OutputDevice* pFirstFrameOutDev = nullptr);
 
-    bool            matches(const OutputDevice* pOut, long nExtraData) const;
-    void            drawToPos( sal_uLong nPos );
-    void            draw( sal_uLong nPos, VirtualDevice* pVDev=nullptr );
-    void            repaint();
-    AInfo*          createAInfo() const;
+    bool matches(const OutputDevice* pOut, long nExtraData) const;
+    void drawToPos(sal_uLong nPos);
+    void draw(sal_uLong nPos, VirtualDevice* pVDev = nullptr);
+    void repaint();
+    AInfo* createAInfo() const;
 
-    void            getPosSize( const AnimationBitmap& rAnm, Point& rPosPix, Size& rSizePix );
+    void getPosSize(const AnimationBitmap& rAnm, Point& rPosPix, Size& rSizePix);
 
-    const Point&    getOutPos() const { return maPt; }
+    const Point& getOutPos() const { return maPt; }
 
-    const Size&     getOutSizePix() const { return maSzPix; }
+    const Size& getOutSizePix() const { return maSzPix; }
 
-    void            pause( bool bIsPaused ) { mbIsPaused = bIsPaused; }
-    bool            isPause() const { return mbIsPaused; }
+    void pause(bool bIsPaused) { mbIsPaused = bIsPaused; }
+    bool isPause() const { return mbIsPaused; }
 
-    void            setMarked( bool bIsMarked ) { mbIsMarked = bIsMarked; }
-    bool            isMarked() const { return mbIsMarked; }
+    void setMarked(bool bIsMarked) { mbIsMarked = bIsMarked; }
+    bool isMarked() const { return mbIsMarked; }
 };
 
 #endif
