@@ -163,6 +163,14 @@ BitmapChecksum Animation::GetChecksum() const
 
 bool Animation::NoRenderersAreAvailable() { return maAnimationRenderers.empty(); }
 
+void Animation::CreateDefaultRenderer(Animation* pAnim, OutputDevice* pOut, const Point& rDestPt,
+                                      const Size& rDestSz, sal_uLong nCallerId,
+                                      OutputDevice* pFirstFrameOutDev)
+{
+    maAnimationRenderers.emplace_back(
+        new AnimationRenderer(pAnim, pOut, rDestPt, rDestSz, nCallerId, pFirstFrameOutDev));
+}
+
 bool Animation::Start(OutputDevice* pOut, const Point& rDestPt, const Size& rDestSz, long nCallerId,
                       OutputDevice* pFirstFrameOutDev)
 {
@@ -203,8 +211,7 @@ bool Animation::Start(OutputDevice* pOut, const Point& rDestPt, const Size& rDes
             }
 
             if (differs)
-                maAnimationRenderers.emplace_back(new AnimationRenderer(
-                    this, pOut, rDestPt, rDestSz, nCallerId, pFirstFrameOutDev));
+                CreateDefaultRenderer(this, pOut, rDestPt, rDestSz, nCallerId, pFirstFrameOutDev);
 
             if (!mbIsInAnimation)
             {

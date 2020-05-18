@@ -124,6 +124,9 @@ private:
     SAL_DLLPRIVATE AnimationBitmap* GetNextFrameBitmap();
     SAL_DLLPRIVATE void RenderNextFrame(size_t nFrameIndex);
     SAL_DLLPRIVATE bool NoRenderersAreAvailable();
+    SAL_DLLPRIVATE void CreateDefaultRenderer(Animation* pAnim, OutputDevice* pOut,
+                                              const Point& rDestPt, const Size& rDestSz,
+                                              sal_uLong nCallerId, OutputDevice* pFirstFrameOutDev);
 
     SAL_DLLPRIVATE void RestartTimer(sal_uLong nTimeout);
     DECL_DLLPRIVATE_LINK(ImplTimeoutHdl, Timer*, void);
