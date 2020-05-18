@@ -123,6 +123,8 @@ private:
     SAL_DLLPRIVATE void EraseMarkedRenderers();
     SAL_DLLPRIVATE AnimationBitmap* GetNextFrameBitmap();
     SAL_DLLPRIVATE void RenderNextFrame(size_t nFrameIndex);
+    SAL_DLLPRIVATE bool RepaintRenderers(OutputDevice* pOut, sal_uLong nCallerId,
+                                         const Point& rDestPt, const Size& rDestSz);
     SAL_DLLPRIVATE bool NoRenderersAreAvailable();
     SAL_DLLPRIVATE void CreateDefaultRenderer(Animation* pAnim, OutputDevice* pOut,
                                               const Point& rDestPt, const Size& rDestSz,

@@ -161,6 +161,37 @@ BitmapChecksum Animation::GetChecksum() const
     return nCrc;
 }
 
+bool Animation::RepaintRenderers(OutputDevice* pOut, sal_uLong nCallerId, const Point& rDestPt,
+                                 const Size& rDestSz)
+{
+    bool bRepainted = false;
+
+    // find first matching renderer that holds same rendercontext and caller id
+    auto itAnimRenderer = std::find_if(
+        maAnimationRenderers.begin(), maAnimationRenderers.end(),
+        [pOut, nCallerId](const std::unique_ptr<AnimationRenderer>& pRenderer) -> bool {
+            return pRenderer->matches(pOut, nCallerId);
+        });
+
+    // matching renderer was found
+    if (itAnimRenderer != maAnimationRenderers.end())
+    {
+        // same position and size? repaint otherwise remove it from the renderers list
+        if ((*itAnimRenderer)->getOutPos() == rDestPt
+            && (*itAnimRenderer)->getOutSizePix() == pOut->LogicToPixel(rDestSz))
+        {
+            (*itAnimRenderer)->repaint();
+            bRepainted = true;
+        }
+        else
+        {
+            maAnimationRenderers.erase(itAnimRenderer);
+        }
+    }
+
+    return bRepainted;
+}
+
 bool Animation::NoRenderersAreAvailable() { return maAnimationRenderers.empty(); }
 
 void Animation::CreateDefaultRenderer(Animation* pAnim, OutputDevice* pOut, const Point& rDestPt,
@@ -181,27 +212,7 @@ bool Animation::Start(OutputDevice* pOut, const Point& rDestPt, const Size& rDes
         if ((pOut->GetOutDevType() == OUTDEV_WINDOW) && !mbLoopTerminated
             && (ANIMATION_TIMEOUT_ON_CLICK != maAnimationFrames[mnFrameIndex]->mnWait))
         {
-            bool differs = true;
-
-            auto itAnimRenderer = std::find_if(
-                maAnimationRenderers.begin(), maAnimationRenderers.end(),
-                [pOut, nCallerId](const std::unique_ptr<AnimationRenderer>& pAnimView) -> bool {
-                    return pAnimView->matches(pOut, nCallerId);
-                });
-
-            if (itAnimRenderer != maAnimationRenderers.end())
-            {
-                if ((*itAnimRenderer)->getOutPos() == rDestPt
-                    && (*itAnimRenderer)->getOutSizePix() == pOut->LogicToPixel(rDestSz))
-                {
-                    (*itAnimRenderer)->repaint();
-                    differs = false;
-                }
-                else
-                {
-                    maAnimationRenderers.erase(itAnimRenderer);
-                }
-            }
+            bool bRepainted = RepaintRenderers(pOut, nCallerId, rDestPt, rDestSz);
 
             if (NoRenderersAreAvailable())
             {
@@ -210,7 +221,7 @@ bool Animation::Start(OutputDevice* pOut, const Point& rDestPt, const Size& rDes
                 mnFrameIndex = 0;
             }
 
-            if (differs)
+            if (!bRepainted)
                 CreateDefaultRenderer(this, pOut, rDestPt, rDestSz, nCallerId, pFirstFrameOutDev);
 
             if (!mbIsInAnimation)
@@ -220,7 +231,9 @@ bool Animation::Start(OutputDevice* pOut, const Point& rDestPt, const Size& rDes
             }
         }
         else
+        {
             Draw(pOut, rDestPt, rDestSz);
+        }
 
         bRet = true;
     }
