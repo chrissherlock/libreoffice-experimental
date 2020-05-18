@@ -161,6 +161,8 @@ BitmapChecksum Animation::GetChecksum() const
     return nCrc;
 }
 
+bool Animation::NoRenderersAreAvailable() { return maAnimationRenderers.empty(); }
+
 bool Animation::Start(OutputDevice* pOut, const Point& rDestPt, const Size& rDestSz, long nCallerId,
                       OutputDevice* pFirstFrameOutDev)
 {
@@ -193,7 +195,7 @@ bool Animation::Start(OutputDevice* pOut, const Point& rDestPt, const Size& rDes
                 }
             }
 
-            if (maAnimationRenderers.empty())
+            if (NoRenderersAreAvailable())
             {
                 maTimer.Stop();
                 mbIsInAnimation = false;
@@ -228,7 +230,7 @@ void Animation::Stop(OutputDevice* pOut, long nCallerId)
                        }),
         maAnimationRenderers.end());
 
-    if (maAnimationRenderers.empty())
+    if (NoRenderersAreAvailable())
     {
         maTimer.Stop();
         mbIsInAnimation = false;
@@ -419,7 +421,7 @@ IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
     {
         bool bIsGloballyPaused = SendTimeout();
 
-        if (maAnimationRenderers.empty())
+        if (NoRenderersAreAvailable())
             Stop();
         else if (bIsGloballyPaused)
             RestartTimer(10);

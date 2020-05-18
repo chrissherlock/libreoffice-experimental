@@ -123,6 +123,7 @@ private:
     SAL_DLLPRIVATE void EraseMarkedRenderers();
     SAL_DLLPRIVATE AnimationBitmap* GetNextFrameBitmap();
     SAL_DLLPRIVATE void RenderNextFrame(size_t nFrameIndex);
+    SAL_DLLPRIVATE bool NoRenderersAreAvailable();
 
     SAL_DLLPRIVATE void RestartTimer(sal_uLong nTimeout);
     DECL_DLLPRIVATE_LINK(ImplTimeoutHdl, Timer*, void);
