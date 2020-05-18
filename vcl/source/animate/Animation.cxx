@@ -161,6 +161,16 @@ BitmapChecksum Animation::GetChecksum() const
     return nCrc;
 }
 
+void Animation::RemoveRenderers(OutputDevice* pOut, long nCallerId)
+{
+    maAnimationRenderers.erase(
+        std::remove_if(maAnimationRenderers.begin(), maAnimationRenderers.end(),
+                       [=](const std::unique_ptr<AnimationRenderer>& pAnimView) -> bool {
+                           return pAnimView->matches(pOut, nCallerId);
+                       }),
+        maAnimationRenderers.end());
+}
+
 void Animation::ClearAnimationRenderers() { maAnimationRenderers.clear(); }
 
 bool Animation::RepaintRenderers(OutputDevice* pOut, sal_uLong nCallerId, const Point& rDestPt,
@@ -245,12 +255,7 @@ bool Animation::Start(OutputDevice* pOut, const Point& rDestPt, const Size& rDes
 
 void Animation::Stop(OutputDevice* pOut, long nCallerId)
 {
-    maAnimationRenderers.erase(
-        std::remove_if(maAnimationRenderers.begin(), maAnimationRenderers.end(),
-                       [=](const std::unique_ptr<AnimationRenderer>& pAnimView) -> bool {
-                           return pAnimView->matches(pOut, nCallerId);
-                       }),
-        maAnimationRenderers.end());
+    RemoveRenderers(pOut, nCallerId);
 
     if (NoRenderersAreAvailable())
     {
