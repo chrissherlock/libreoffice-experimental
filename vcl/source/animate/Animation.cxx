@@ -103,7 +103,7 @@ void Animation::Clear()
     maGlobalSize = Size();
     maBitmapEx.SetEmpty();
     maAnimationFrames.clear();
-    maAnimationRenderers.clear();
+    ClearAnimationRenderers();
 }
 
 bool Animation::IsTransparent() const
@@ -160,6 +160,8 @@ BitmapChecksum Animation::GetChecksum() const
 
     return nCrc;
 }
+
+void Animation::ClearAnimationRenderers() { maAnimationRenderers.clear(); }
 
 bool Animation::RepaintRenderers(OutputDevice* pOut, sal_uLong nCallerId, const Point& rDestPt,
                                  const Size& rDestSz)
