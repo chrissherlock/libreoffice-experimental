@@ -30,7 +30,7 @@
 #include <vcl/BitmapColorQuantizationFilter.hxx>
 
 #include <AnimationData.hxx>
-#include <impanmvw.hxx>
+#include <AnimationRenderer.hxx>
 
 sal_uLong Animation::mnAnimCount = 0;
 

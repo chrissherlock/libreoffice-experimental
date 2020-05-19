@@ -23,7 +23,7 @@
 #include <vcl/window.hxx>
 
 #include <AnimationData.hxx>
-#include <impanmvw.hxx>
+#include <AnimationRenderer.hxx>
 #include <window.h>
 
 AnimationRenderer::AnimationRenderer(Animation* pParent, OutputDevice* pOut, const Point& rPt,
