@@ -98,21 +98,6 @@ public:
     SAL_DLLPRIVATE sal_uLong ImplGetCurPos() const { return mnFrameIndex; }
 
 private:
-    SAL_DLLPRIVATE static sal_uLong mnAnimCount;
-
-    std::vector<std::unique_ptr<AnimationBitmap>> maAnimationFrames;
-    std::vector<std::unique_ptr<AnimationRenderer>> maAnimationRenderers;
-
-    Link<Animation*, void> maTimeoutNotifier;
-    BitmapEx maBitmapEx;
-    Timer maTimer;
-    Size maGlobalSize;
-    sal_uInt32 mnLoopCount;
-    sal_uInt32 mnLoops;
-    size_t mnFrameIndex;
-    bool mbIsInAnimation;
-    bool mbLoopTerminated;
-
     SAL_DLLPRIVATE std::vector<std::unique_ptr<AnimationData>>
     CreateAnimationDataItems(Animation* pAnim);
     SAL_DLLPRIVATE void PopulateRenderers(Animation* pAnim);
@@ -135,6 +120,20 @@ private:
 
     SAL_DLLPRIVATE void RestartTimer(sal_uLong nTimeout);
     DECL_DLLPRIVATE_LINK(ImplTimeoutHdl, Timer*, void);
+    SAL_DLLPRIVATE static sal_uLong mnAnimCount;
+
+    std::vector<std::unique_ptr<AnimationBitmap>> maAnimationFrames;
+    std::vector<std::unique_ptr<AnimationRenderer>> maAnimationRenderers;
+
+    Link<Animation*, void> maTimeoutNotifier;
+    BitmapEx maBitmapEx;
+    Timer maTimer;
+    Size maGlobalSize;
+    sal_uInt32 mnLoopCount;
+    sal_uInt32 mnLoops;
+    size_t mnFrameIndex;
+    bool mbIsInAnimation;
+    bool mbLoopTerminated;
 };
 
 #endif // INCLUDED_VCL_ANIMATE_ANIMATION_HXX
