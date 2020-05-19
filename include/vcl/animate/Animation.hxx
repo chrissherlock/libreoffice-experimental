@@ -27,6 +27,7 @@
 #define ANIMATION_TIMEOUT_ON_CLICK 2147483647L
 
 class AnimationRenderer;
+class AnimationRenderers;
 struct AnimationData;
 
 class VCL_DLLPUBLIC Animation
@@ -79,6 +80,8 @@ public:
     sal_uLong GetSizeBytes() const;
     BitmapChecksum GetChecksum() const;
 
+    AnimationRenderers* GetAnimationRenderers() const { return mpAnimationRenderers; };
+
 public:
     void Convert(BmpConversion eConversion);
     bool ReduceColors(sal_uInt16 nNewColorCount);
@@ -123,7 +126,7 @@ private:
     SAL_DLLPRIVATE static sal_uLong mnAnimCount;
 
     std::vector<std::unique_ptr<AnimationBitmap>> maAnimationFrames;
-    std::vector<std::unique_ptr<AnimationRenderer>> maAnimationRenderers;
+    AnimationRenderers* mpAnimationRenderers;
 
     Link<Animation*, void> maTimeoutNotifier;
     BitmapEx maBitmapEx;

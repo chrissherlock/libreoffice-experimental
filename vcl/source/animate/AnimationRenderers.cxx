@@ -21,28 +21,34 @@
 #include <vcl/outdev.hxx>
 
 #include <AnimationData.hxx>
+#include <AnimationRenderers.hxx>
 #include <AnimationRenderer.hxx>
 
-void Animation::RemoveRenderers(OutputDevice* pOut, long nCallerId)
+std::vector<std::unique_ptr<AnimationRenderer>>& AnimationRenderers::GetRenderers()
 {
-    maAnimationRenderers.erase(
-        std::remove_if(maAnimationRenderers.begin(), maAnimationRenderers.end(),
+    return maAnimationRenderers;
+}
+
+void AnimationRenderers::RemoveRenderers(OutputDevice* pOut, long nCallerId)
+{
+    GetRenderers().erase(
+        std::remove_if(GetRenderers().begin(), GetRenderers().end(),
                        [=](const std::unique_ptr<AnimationRenderer>& pAnimView) -> bool {
                            return pAnimView->matches(pOut, nCallerId);
                        }),
-        maAnimationRenderers.end());
+        GetRenderers().end());
 }
 
-void Animation::ClearAnimationRenderers() { maAnimationRenderers.clear(); }
+void AnimationRenderers::ClearAnimationRenderers() { GetRenderers().clear(); }
 
-bool Animation::RepaintRenderers(OutputDevice* pOut, sal_uLong nCallerId, const Point& rDestPt,
-                                 const Size& rDestSz)
+bool AnimationRenderers::RepaintRenderers(OutputDevice* pOut, sal_uLong nCallerId, const Point& rDestPt,
+                                          const Size& rDestSz)
 {
-    bool bRepainted = false;
+    bool bRepainted = true;
 
     // find first matching renderer that holds same rendercontext and caller id
     auto itAnimRenderer = std::find_if(
-        maAnimationRenderers.begin(), maAnimationRenderers.end(),
+        GetRenderers().begin(), GetRenderers().end(),
         [pOut, nCallerId](const std::unique_ptr<AnimationRenderer>& pRenderer) -> bool {
             return pRenderer->matches(pOut, nCallerId);
         });
@@ -59,38 +65,39 @@ bool Animation::RepaintRenderers(OutputDevice* pOut, sal_uLong nCallerId, const 
         }
         else
         {
-            maAnimationRenderers.erase(itAnimRenderer);
+            GetRenderers().erase(itAnimRenderer);
         }
     }
 
     return bRepainted;
 }
 
-bool Animation::NoRenderersAreAvailable() { return maAnimationRenderers.empty(); }
+bool AnimationRenderers::NoRenderersAreAvailable() { return GetRenderers().empty(); }
 
-std::vector<std::unique_ptr<AnimationData>> Animation::CreateAnimationDataItems(Animation* pAnim)
+std::vector<std::unique_ptr<AnimationData>>
+AnimationRenderers::CreateAnimationDataItems(Animation* pAnim)
 {
     std::vector<std::unique_ptr<AnimationData>> aAnimationDataItems;
 
-    for (auto const& rItem : maAnimationRenderers)
+    for (auto const& rItem : GetRenderers())
     {
         aAnimationDataItems.emplace_back(rItem->createAnimationData());
     }
 
-    maTimeoutNotifier.Call(pAnim);
+    pAnim->NotifyTimeout();
 
     return aAnimationDataItems;
 }
 
-void Animation::CreateDefaultRenderer(Animation* pAnim, OutputDevice* pOut, const Point& rDestPt,
-                                      const Size& rDestSz, sal_uLong nCallerId,
-                                      OutputDevice* pFirstFrameOutDev)
+void AnimationRenderers::CreateDefaultRenderer(Animation* pAnim, OutputDevice* pOut,
+                                               const Point& rDestPt, const Size& rDestSz,
+                                               sal_uLong nCallerId, OutputDevice* pFirstFrameOutDev)
 {
-    maAnimationRenderers.emplace_back(
+    GetRenderers().emplace_back(
         new AnimationRenderer(pAnim, pOut, rDestPt, rDestSz, nCallerId, pFirstFrameOutDev));
 }
 
-void Animation::PopulateRenderers(Animation* pAnim)
+void AnimationRenderers::PopulateRenderers(Animation* pAnim)
 {
     for (auto& pAnimationData : CreateAnimationDataItems(pAnim))
     {
@@ -98,10 +105,10 @@ void Animation::PopulateRenderers(Animation* pAnim)
         if (!pAnimationData->pAnimationRenderer)
         {
             pRenderer
-                = new AnimationRenderer(this, pAnimationData->pOutDev, pAnimationData->aStartOrg,
+                = new AnimationRenderer(pAnim, pAnimationData->pOutDev, pAnimationData->aStartOrg,
                                         pAnimationData->aStartSize, pAnimationData->nCallerId);
 
-            maAnimationRenderers.push_back(std::unique_ptr<AnimationRenderer>(pRenderer));
+            GetRenderers().push_back(std::unique_ptr<AnimationRenderer>(pRenderer));
         }
         else
         {
@@ -113,38 +120,38 @@ void Animation::PopulateRenderers(Animation* pAnim)
     }
 }
 
-void Animation::DeleteUnmarkedRenderers()
+void AnimationRenderers::DeleteUnmarkedRenderers()
 {
     // delete all unmarked views
-    auto removeStart = std::remove_if(maAnimationRenderers.begin(), maAnimationRenderers.end(),
+    auto removeStart = std::remove_if(GetRenderers().begin(), GetRenderers().end(),
                                       [](const auto& pRenderer) { return !pRenderer->isMarked(); });
-    maAnimationRenderers.erase(removeStart, maAnimationRenderers.cend());
+    GetRenderers().erase(removeStart, GetRenderers().cend());
 }
 
-bool Animation::ResetMarkedRenderers()
+bool AnimationRenderers::ResetMarkedRenderers()
 {
-    bool bGlobalPause = std::all_of(maAnimationRenderers.cbegin(), maAnimationRenderers.cend(),
+    bool bGlobalPause = std::all_of(GetRenderers().cbegin(), GetRenderers().cend(),
                                     [](const auto& pRenderer) { return pRenderer->isPause(); });
 
     // reset marked state
-    std::for_each(maAnimationRenderers.cbegin(), maAnimationRenderers.cend(),
+    std::for_each(GetRenderers().cbegin(), GetRenderers().cend(),
                   [](const auto& pRenderer) { pRenderer->setMarked(false); });
 
     return bGlobalPause;
 }
 
-void Animation::PaintRenderers(size_t nFrameIndex)
+void AnimationRenderers::PaintRenderers(size_t nFrameIndex)
 {
-    std::for_each(maAnimationRenderers.cbegin(), maAnimationRenderers.cend(),
+    std::for_each(GetRenderers().cbegin(), GetRenderers().cend(),
                   [nFrameIndex](const auto& pRenderer) { pRenderer->draw(nFrameIndex); });
 }
 
-void Animation::EraseMarkedRenderers()
+void AnimationRenderers::EraseMarkedRenderers()
 {
     // if view is marked; in this case remove view, because area
     // of output lies out of display area of window; mark state is
     // set from view itself
-    auto removeStart = std::remove_if(maAnimationRenderers.begin(), maAnimationRenderers.end(),
+    auto removeStart = std::remove_if(GetRenderers().begin(), GetRenderers().end(),
                                       [](const auto& pRenderer) { return pRenderer->isMarked(); });
-    maAnimationRenderers.erase(removeStart, maAnimationRenderers.cend());
+    GetRenderers().erase(removeStart, GetRenderers().cend());
 }

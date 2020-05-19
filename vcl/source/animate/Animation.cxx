@@ -30,6 +30,7 @@
 #include <vcl/BitmapColorQuantizationFilter.hxx>
 
 #include <AnimationData.hxx>
+#include <AnimationRenderers.hxx>
 #include <AnimationRenderer.hxx>
 
 sal_uLong Animation::mnAnimCount = 0;
@@ -42,6 +43,7 @@ Animation::Animation()
     , mbLoopTerminated(false)
 {
     maTimer.SetInvokeHandler(LINK(this, Animation, ImplTimeoutHdl));
+    mpAnimationRenderers = new AnimationRenderers();
 }
 
 Animation::Animation(const Animation& rAnimation)
@@ -57,12 +59,16 @@ Animation::Animation(const Animation& rAnimation)
 
     maTimer.SetInvokeHandler(LINK(this, Animation, ImplTimeoutHdl));
     mnLoops = mbLoopTerminated ? 0 : mnLoopCount;
+
+    mpAnimationRenderers = new AnimationRenderers();
 }
 
 Animation::~Animation()
 {
     if (mbIsInAnimation)
         Stop();
+
+    delete mpAnimationRenderers;
 }
 
 Animation& Animation::operator=(const Animation& rAnimation)
@@ -103,7 +109,7 @@ void Animation::Clear()
     maGlobalSize = Size();
     maBitmapEx.SetEmpty();
     maAnimationFrames.clear();
-    ClearAnimationRenderers();
+    mpAnimationRenderers->ClearAnimationRenderers();
 }
 
 bool Animation::IsTransparent() const
@@ -173,9 +179,10 @@ bool Animation::Start(OutputDevice* pOut, const Point& rDestPt, const Size& rDes
         if ((pOut->GetOutDevType() == OUTDEV_WINDOW) && !mbLoopTerminated
             && (ANIMATION_TIMEOUT_ON_CLICK != maAnimationFrames[mnFrameIndex]->mnWait))
         {
-            bool bRepainted = RepaintRenderers(pOut, nCallerId, rDestPt, rDestSz);
+            bool bRepainted
+                = mpAnimationRenderers->RepaintRenderers(pOut, nCallerId, rDestPt, rDestSz);
 
-            if (NoRenderersAreAvailable())
+            if (mpAnimationRenderers->NoRenderersAreAvailable())
             {
                 maTimer.Stop();
                 mbIsInAnimation = false;
@@ -183,7 +190,8 @@ bool Animation::Start(OutputDevice* pOut, const Point& rDestPt, const Size& rDes
             }
 
             if (!bRepainted)
-                CreateDefaultRenderer(this, pOut, rDestPt, rDestSz, nCallerId, pFirstFrameOutDev);
+                mpAnimationRenderers->CreateDefaultRenderer(this, pOut, rDestPt, rDestSz, nCallerId,
+                                                            pFirstFrameOutDev);
 
             if (!mbIsInAnimation)
             {
@@ -204,9 +212,9 @@ bool Animation::Start(OutputDevice* pOut, const Point& rDestPt, const Size& rDes
 
 void Animation::Stop(OutputDevice* pOut, long nCallerId)
 {
-    RemoveRenderers(pOut, nCallerId);
+    mpAnimationRenderers->RemoveRenderers(pOut, nCallerId);
 
-    if (NoRenderersAreAvailable())
+    if (mpAnimationRenderers->NoRenderersAreAvailable())
     {
         maTimer.Stop();
         mbIsInAnimation = false;
@@ -262,9 +270,9 @@ bool Animation::SendTimeout()
 {
     if (IsTimeoutSetup())
     {
-        PopulateRenderers(this);
-        DeleteUnmarkedRenderers();
-        return ResetMarkedRenderers();
+        mpAnimationRenderers->PopulateRenderers(this);
+        mpAnimationRenderers->DeleteUnmarkedRenderers();
+        return mpAnimationRenderers->ResetMarkedRenderers();
     }
 
     return false;
@@ -307,11 +315,11 @@ void Animation::RenderNextFrame(size_t nFrameIndex)
     AnimationBitmap* pCurrentFrameBmp = GetNextFrameBitmap();
     if (pCurrentFrameBmp)
     {
-        PaintRenderers(nFrameIndex);
-        EraseMarkedRenderers();
+        mpAnimationRenderers->PaintRenderers(nFrameIndex);
+        mpAnimationRenderers->EraseMarkedRenderers();
 
         // stop or restart timer
-        if (maAnimationRenderers.empty())
+        if (mpAnimationRenderers->NoRenderersAreAvailable())
             Stop();
         else
             RestartTimer(pCurrentFrameBmp->mnWait);
@@ -324,7 +332,7 @@ IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
     {
         bool bIsGloballyPaused = SendTimeout();
 
-        if (NoRenderersAreAvailable())
+        if (mpAnimationRenderers->NoRenderersAreAvailable())
             Stop();
         else if (bIsGloballyPaused)
             RestartTimer(10);
