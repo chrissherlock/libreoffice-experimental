@@ -161,6 +161,8 @@ BitmapChecksum Animation::GetChecksum() const
     return nCrc;
 }
 
+void Animation::NotifyTimeout() { maTimeoutNotifier.Call(this); }
+
 void Animation::RemoveRenderers(OutputDevice* pOut, long nCallerId)
 {
     maAnimationRenderers.erase(

@@ -65,6 +65,7 @@ public:
 
     void SetNotifyHdl(const Link<Animation*, void>& rLink) { maTimeoutNotifier = rLink; }
     const Link<Animation*, void>& GetNotifyHdl() const { return maTimeoutNotifier; }
+    void NotifyTimeout();
 
     std::vector<std::unique_ptr<AnimationBitmap>>& GetAnimationFrames()
     {
