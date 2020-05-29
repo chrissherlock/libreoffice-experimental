@@ -20,6 +20,8 @@
 #ifndef VCL_INC_IMPLPAGECACHE_HXX
 #define VCL_INC_IMPLPAGECACHE_HXX
 
+#include <vcl/PrinterController.hxx>
+
 using namespace vcl;
 
 class ImplPageCache

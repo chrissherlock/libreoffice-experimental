@@ -20,6 +20,7 @@
 #ifndef VCL_INC_NEWPRINTDLG_HXX
 #define VCL_INC_NEWPRINTDLG_HXX
 
+#include <vcl/PrinterController.hxx>
 #include <vcl/bitmapex.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/print.hxx>
