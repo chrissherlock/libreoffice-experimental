@@ -24,6 +24,7 @@
 #include <rtl/ustring.hxx>
 #include <i18nutil/paper.hxx>
 
+#include <vcl/NupOrderType.hxx>
 #include <vcl/PrinterSupport.hxx>
 #include <vcl/errcode.hxx>
 #include <vcl/dllapi.h>
@@ -281,11 +282,6 @@ public:
 namespace vcl
 {
 class ImplPrinterControllerData;
-
-enum class NupOrderType
-{
-    LRTB, TBLR, TBRL, RLTB
-};
 
 class VCL_DLLPUBLIC PrinterController
 {
