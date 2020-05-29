@@ -19,6 +19,7 @@
 
 #include <hintids.hxx>
 
+#include <vcl/Printer.hxx>
 #include <sfx2/viewfrm.hxx>
 #include <svx/hdft.hxx>
 #include <editeng/flstitem.hxx>

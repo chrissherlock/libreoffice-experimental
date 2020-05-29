@@ -21,10 +21,10 @@
 
 #include <vcl/wizardmachine.hxx>
 #include <vcl/weld.hxx>
-#include <vcl/print.hxx>
 #include <sfx2/basedlgs.hxx>
 #include <mailmergehelper.hxx>
 
+class Printer;
 class SwMailMergeWizard;
 class SfxPrinter;
 class SwSendMailDialog;

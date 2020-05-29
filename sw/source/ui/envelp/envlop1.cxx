@@ -19,7 +19,7 @@
 
 #include <dbmgr.hxx>
 #include <tools/lineend.hxx>
-#include <vcl/print.hxx>
+#include <vcl/Printer.hxx>
 #include <vcl/settings.hxx>
 
 #include <swwait.hxx>

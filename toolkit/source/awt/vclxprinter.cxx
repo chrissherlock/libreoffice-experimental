@@ -21,8 +21,7 @@
 #include <awt/vclxprinter.hxx>
 #include <cppuhelper/supportsservice.hxx>
 
-
-#include <vcl/print.hxx>
+#include <vcl/Printer.hxx>
 #include <vcl/jobset.hxx>
 #include <vcl/oldprintadaptor.hxx>
 #include <vcl/svapp.hxx>

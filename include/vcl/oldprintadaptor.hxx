@@ -21,9 +21,11 @@
 #define INCLUDED_VCL_OLDPRINTADAPTOR_HXX
 
 #include <config_options.h>
-#include <memory>
-#include <vcl/print.hxx>
+
+#include <vcl/Printer.hxx>
 #include <vcl/PrinterController.hxx>
+
+#include <memory>
 
 namespace weld
 {

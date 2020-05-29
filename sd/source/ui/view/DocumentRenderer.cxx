@@ -54,7 +54,7 @@
 #include <svx/xlnclit.hxx>
 #include <toolkit/awt/vclxdevice.hxx>
 #include <unotools/localedatawrapper.hxx>
-#include <vcl/print.hxx>
+#include <vcl/Printer.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/weld.hxx>
 #include <unotools/moduleoptions.hxx>

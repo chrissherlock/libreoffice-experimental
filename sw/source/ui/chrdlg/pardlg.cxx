@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/Printer.hxx>
 #include <sfx2/htmlmode.hxx>
 #include <sfx2/tabdlg.hxx>
 #include <svl/style.hxx>

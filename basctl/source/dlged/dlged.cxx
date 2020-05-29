@@ -42,7 +42,7 @@
 #include <svx/sdrpaintwindow.hxx>
 #include <svx/svdpagv.hxx>
 #include <toolkit/helper/vclunohelper.hxx>
-#include <vcl/print.hxx>
+#include <vcl/Printer.hxx>
 #include <vcl/scrbar.hxx>
 #include <vcl/svapp.hxx>
 #include <xmlscript/xml_helper.hxx>

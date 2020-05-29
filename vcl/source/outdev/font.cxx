@@ -23,7 +23,7 @@
 #include <unotools/configmgr.hxx>
 #include <vcl/metric.hxx>
 #include <vcl/virdev.hxx>
-#include <vcl/print.hxx>
+#include <vcl/Printer.hxx>
 #include <vcl/sysdata.hxx>
 #include <vcl/fontcharmap.hxx>
 #include <vcl/event.hxx>

@@ -20,7 +20,6 @@
 #include <osl/diagnose.h>
 #include <svtools/prnsetup.hxx>
 #include <unotools/cmdoptions.hxx>
-#include <vcl/print.hxx>
 #include <label.hxx>
 #include "labprt.hxx"
 #include <labimg.hxx>

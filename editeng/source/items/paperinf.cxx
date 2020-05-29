@@ -17,7 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <vcl/print.hxx>
+#include <vcl/Printer.hxx>
 #include <editeng/paperinf.hxx>
 
 /*--------------------------------------------------------------------

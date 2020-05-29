@@ -18,8 +18,8 @@
  */
 
 #include <vcl/PrinterOptions.hxx>
+#include <vcl/Printer.hxx>
 #include <vcl/weld.hxx>
-#include <vcl/print.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/metaact.hxx>
 #include <configsettings.hxx>

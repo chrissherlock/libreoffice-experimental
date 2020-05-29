@@ -25,7 +25,6 @@
 #include <sfx2/sfxbasemodel.hxx>
 #include <comphelper/propertysethelper.hxx>
 #include <vcl/PrinterOptionsHelper.hxx>
-#include <vcl/print.hxx>
 #include <oox/mathml/export.hxx>
 #include <oox/mathml/import.hxx>
 #include <memory>

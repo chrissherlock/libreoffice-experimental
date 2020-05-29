@@ -30,7 +30,7 @@
 #include <vcl/menu.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/i18nhelp.hxx>
-#include <vcl/print.hxx>
+#include <vcl/Printer.hxx>
 #include <vcl/settings.hxx>
 #include <svtools/ctrltool.hxx>
 #include <osl/mutex.hxx>

@@ -41,8 +41,8 @@
 #include <com/sun/star/ui/dialogs/TemplateDescription.hpp>
 #include <com/sun/star/ui/dialogs/XFilePicker3.hpp>
 #include <com/sun/star/beans/XPropertySet.hpp>
+#include <vcl/Printer.hxx>
 #include <vcl/errinf.hxx>
-#include <vcl/print.hxx>
 #include <vcl/scheduler.hxx>
 #include <sfx2/fcontnr.hxx>
 #include <sfx2/filedlghelper.hxx>

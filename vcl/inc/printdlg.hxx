@@ -21,9 +21,9 @@
 #define VCL_INC_NEWPRINTDLG_HXX
 
 #include <vcl/PrinterController.hxx>
+#include <vcl/Printer.hxx>
 #include <vcl/bitmapex.hxx>
 #include <vcl/gdimtf.hxx>
-#include <vcl/print.hxx>
 #include <vcl/customweld.hxx>
 #include <vcl/weld.hxx>
 #include <map>

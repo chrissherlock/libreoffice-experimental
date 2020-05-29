@@ -47,7 +47,7 @@
 #include <vcl/toolkit/dialog.hxx>
 #include <vcl/menu.hxx>
 #include <vcl/virdev.hxx>
-#include <vcl/print.hxx>
+#include <vcl/Printer.hxx>
 #include <debugevent.hxx>
 #include <scrwnd.hxx>
 

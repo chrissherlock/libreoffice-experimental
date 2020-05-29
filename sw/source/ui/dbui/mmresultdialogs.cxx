@@ -50,7 +50,6 @@
 #include <sfx2/docfilt.hxx>
 #include <tools/urlobj.hxx>
 #include <svl/urihelper.hxx>
-#include <vcl/print.hxx>
 #include <rtl/tencinfo.h>
 #include <sal/log.hxx>
 

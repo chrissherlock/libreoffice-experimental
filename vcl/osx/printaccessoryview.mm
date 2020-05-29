@@ -22,8 +22,8 @@
 
 #include <i18nlangtag/languagetag.hxx>
 #include <rtl/ustrbuf.hxx>
+#include <vcl/Printer.hxx>
 #include <vcl/PrinterController.hxx>
-#include <vcl/print.hxx>
 #include <vcl/image.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/svapp.hxx>

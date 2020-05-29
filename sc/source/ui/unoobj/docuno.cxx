@@ -47,7 +47,7 @@
 #include <sfx2/viewfrm.hxx>
 #include <svx/unopage.hxx>
 #include <vcl/pdfextoutdevdata.hxx>
-#include <vcl/print.hxx>
+#include <vcl/Printer.hxx>
 #include <vcl/svapp.hxx>
 #include <tools/multisel.hxx>
 #include <toolkit/awt/vclxdevice.hxx>

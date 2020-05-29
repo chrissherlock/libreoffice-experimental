@@ -17,8 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/Printer.hxx>
 #include <vcl/PrinterController.hxx>
-#include <vcl/print.hxx>
 
 #include <osx/printview.h>
 #include <osx/salprn.h>

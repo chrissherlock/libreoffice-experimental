@@ -22,11 +22,11 @@
 #include <strings.hrc>
 #include <bitmaps.hlst>
 
+#include <vcl/Printer.hxx>
 #include <vcl/PrinterOptions.hxx>
 #include <vcl/QueueInfo.hxx>
 #include <vcl/commandevent.hxx>
 #include <vcl/naturalsort.hxx>
-#include <vcl/print.hxx>
 #include <vcl/wall.hxx>
 #include <vcl/decoview.hxx>
 #include <configsettings.hxx>

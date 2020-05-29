@@ -19,9 +19,9 @@
 
 #include <officecfg/Office/Common.hxx>
 
+#include <vcl/Printer.hxx>
 #include <vcl/PrinterController.hxx>
 #include <vcl/gdimtf.hxx>
-#include <vcl/print.hxx>
 #include <sal/macros.h>
 #include <osl/diagnose.h>
 

@@ -25,11 +25,11 @@
 #include <sal/log.hxx>
 #include <officecfg/Office/Common.hxx>
 
+#include <vcl/Printer.hxx>
 #include <vcl/PrinterOptions.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/gdimtf.hxx>
-#include <vcl/print.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/bitmapaccess.hxx>
 

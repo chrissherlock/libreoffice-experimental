@@ -21,8 +21,9 @@
 #define INCLUDED_VCL_INC_PRINT_H
 
 #include <rtl/ustring.hxx>
+
 #include <vcl/dllapi.h>
-#include <vcl/print.hxx>
+
 #include "salprn.hxx"
 
 #include <vector>

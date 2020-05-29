@@ -29,7 +29,7 @@
 #include <vcl/QueueInfo.hxx>
 #include <vcl/dockwin.hxx>
 #include <vcl/menu.hxx>
-#include <vcl/print.hxx>
+#include <vcl/Printer.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/virdev.hxx>

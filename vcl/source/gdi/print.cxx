@@ -23,11 +23,11 @@
 #include <tools/helpers.hxx>
 #include <tools/debug.hxx>
 
+#include <vcl/Printer.hxx>
 #include <vcl/PrinterOptions.hxx>
 #include <vcl/QueueInfo.hxx>
 #include <vcl/event.hxx>
 #include <vcl/virdev.hxx>
-#include <vcl/print.hxx>
 
 #include <comphelper/processfactory.hxx>
 

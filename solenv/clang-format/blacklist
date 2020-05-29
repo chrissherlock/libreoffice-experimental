@@ -7412,7 +7412,6 @@ include/vcl/pdfextoutdevdata.hxx
 include/vcl/pdfwriter.hxx
 include/vcl/pngread.hxx
 include/vcl/pngwrite.hxx
-include/vcl/print.hxx
 include/vcl/prntypes.hxx
 include/vcl/ptrstyle.hxx
 include/vcl/quickselectionengine.hxx
@@ -9152,7 +9151,6 @@ sax/test/sax/factory.hxx
 sax/test/sax/testsax.cxx
 sax/test/sax/testwriter.cxx
 sax/test/saxdemo.cxx
-sax/test/testcomponent.cxx
 sc/inc/AccessibleGlobal.hxx
 sc/inc/ChartTools.hxx
 sc/inc/NumberFormatControl.hxx
@@ -17172,7 +17170,6 @@ vcl/source/gdi/pdfwriter_impl.cxx
 vcl/source/gdi/pdfwriter_impl.hxx
 vcl/source/gdi/pdfwriter_impl2.cxx
 vcl/source/gdi/print.cxx
-vcl/source/gdi/print2.cxx
 vcl/source/gdi/print3.cxx
 vcl/source/gdi/regband.cxx
 vcl/source/gdi/region.cxx
@@ -17783,6 +17780,7 @@ xmloff/inc/XMLTextColumnsPropertyHandler.hxx
 xmloff/inc/XMLTextHeaderFooterContext.hxx
 xmloff/inc/animationimport.hxx
 xmloff/inc/animimp.hxx
+xmloff/inc/facreg.hxx
 xmloff/inc/fasttokenhandler.hxx
 xmloff/inc/forms/form_handler_factory.hxx
 xmloff/inc/forms/property_handler.hxx
@@ -17874,6 +17872,7 @@ xmloff/source/core/XMLBasicExportFilter.cxx
 xmloff/source/core/XMLEmbeddedObjectExportFilter.cxx
 xmloff/source/core/XMLEmbeddedObjectImportContext.cxx
 xmloff/source/core/attrlist.cxx
+xmloff/source/core/facreg.cxx
 xmloff/source/core/fasttokenhandler.cxx
 xmloff/source/core/i18nmap.cxx
 xmloff/source/core/nmspmap.cxx

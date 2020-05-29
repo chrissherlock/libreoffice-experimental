@@ -32,7 +32,7 @@
 #include <vcl/svapp.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/window.hxx>
-#include <vcl/print.hxx>
+#include <vcl/Printer.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/bitmapex.hxx>
 #include <vcl/metric.hxx>

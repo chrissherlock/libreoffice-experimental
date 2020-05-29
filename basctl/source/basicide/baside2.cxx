@@ -58,7 +58,7 @@
 #include <vcl/waitobj.hxx>
 #include <vcl/errinf.hxx>
 #include <vcl/event.hxx>
-#include <vcl/print.hxx>
+#include <vcl/Printer.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/textview.hxx>
 #include <vcl/weld.hxx>

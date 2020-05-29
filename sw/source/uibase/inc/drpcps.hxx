@@ -24,7 +24,6 @@
 #include <sfx2/basedlgs.hxx>
 #include <sfx2/tabdlg.hxx>
 #include <vcl/customweld.hxx>
-#include <vcl/print.hxx>
 
 class SwWrtShell;
 

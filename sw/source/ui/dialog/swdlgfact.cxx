@@ -23,6 +23,7 @@
 #include <svl/style.hxx>
 #include <globals.hrc>
 
+#include <vcl/Printer.hxx>
 #include <wordcountdialog.hxx>
 #include <abstract.hxx>
 #include <addrdlg.hxx>

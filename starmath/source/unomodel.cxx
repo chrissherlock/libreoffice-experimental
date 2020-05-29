@@ -29,7 +29,6 @@
 #include <vcl/svapp.hxx>
 #include <unotools/localedatawrapper.hxx>
 #include <vcl/settings.hxx>
-#include <vcl/print.hxx>
 #include <toolkit/awt/vclxdevice.hxx>
 #include <com/sun/star/beans/PropertyAttribute.hpp>
 #include <com/sun/star/formula/SymbolDescriptor.hpp>

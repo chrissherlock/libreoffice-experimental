@@ -26,7 +26,6 @@
 #include <comphelper/interfacecontainer2.hxx>
 #include <svtools/acceleratorexecute.hxx>
 #include <rtl/ref.hxx>
-#include <vcl/print.hxx>
 #include <vector>
 
 class SfxBaseController;

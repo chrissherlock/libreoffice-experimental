@@ -21,8 +21,8 @@
 
 #include <memory>
 #include <sal/config.h>
+#include <vcl/Printer.hxx>
 #include <sfx2/dllapi.h>
-#include <vcl/print.hxx>
 
 class SfxItemSet;
 

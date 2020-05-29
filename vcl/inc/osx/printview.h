@@ -24,7 +24,7 @@
 #include <Cocoa/Cocoa.h>
 #include <postmac.h>
 
-#include <vcl/print.hxx>
+#include <vcl/Printer.hxx>
 
 class AquaSalInfoPrinter;
 

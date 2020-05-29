@@ -18,6 +18,8 @@
  */
 
 #include <tools/fract.hxx>
+#include <vcl/Printer.hxx>
+
 #include <viewsh.hxx>
 #include <pagefrm.hxx>
 #include <viewimp.hxx>
