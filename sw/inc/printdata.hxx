@@ -21,6 +21,7 @@
 
 #include <sal/types.h>
 #include <rtl/ustring.hxx>
+#include <vcl/PrinterOptionsHelper.hxx>
 #include <vcl/print.hxx>
 #include <sfx2/objsh.hxx>
 

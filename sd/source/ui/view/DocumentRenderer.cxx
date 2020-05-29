@@ -19,6 +19,8 @@
 
 #include <com/sun/star/beans/XPropertySet.hpp>
 
+#include <vcl/PrinterOptionsHelper.hxx>
+
 #include <DocumentRenderer.hxx>
 #include <DocumentRenderer.hrc>
 #include <ViewShellBase.hxx>

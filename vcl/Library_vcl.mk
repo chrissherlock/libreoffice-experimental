@@ -119,6 +119,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/animate/AnimationBitmap \
     vcl/source/printer/PrinterController \
     vcl/source/printer/PrinterOptions \
+    vcl/source/printer/PrinterOptionsHelper \
     vcl/source/printer/QueueInfo \
     vcl/source/window/errinf \
     vcl/source/window/settings \

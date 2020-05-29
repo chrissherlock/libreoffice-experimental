@@ -22,6 +22,7 @@
 #include <cppuhelper/compbase.hxx>
 
 #include <vcl/PrinterOptions.hxx>
+#include <vcl/PrinterOptionsHelper.hxx>
 #include <vcl/print.hxx>
 
 namespace basctl

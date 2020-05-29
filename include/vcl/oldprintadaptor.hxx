@@ -23,6 +23,7 @@
 #include <config_options.h>
 #include <memory>
 #include <vcl/print.hxx>
+#include <vcl/PrinterController.hxx>
 
 namespace weld
 {

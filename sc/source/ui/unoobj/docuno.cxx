@@ -21,6 +21,8 @@
 
 #include <boost/property_tree/json_parser.hpp>
 
+#include <vcl/PrinterOptionsHelper.hxx>
+
 #include <scitems.hxx>
 #include <comphelper/sequence.hxx>
 #include <editeng/editview.hxx>
