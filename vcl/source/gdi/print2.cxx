@@ -606,6 +606,40 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
 
 } // end anon namespace
 
+template <typename T>
+bool IsValidShape(T)
+{
+    SAL_WARN("vcl.gdi", "Should never call on this!");
+    assert(false);
+    return false;
+}
+
+template<>
+bool IsValidShape<MetaRectAction*>(MetaRectAction*)
+{
+    return true;
+}
+
+template<>
+bool IsValidShape<MetaPolygonAction*>(MetaPolygonAction* pAction)
+{
+    const tools::Polygon aPoly(pAction->GetPolygon());
+    return !basegfx::utils::isRectangle(aPoly.getB2DPolygon());
+}
+
+template<>
+bool IsValidShape<MetaPolyPolygonAction*>(MetaPolyPolygonAction* pAction)
+{
+    const tools::PolyPolygon aPoly(pAction->GetPolyPolygon());
+    return aPoly.Count() != 1 || !basegfx::utils::isRectangle(aPoly[0].getB2DPolygon());
+}
+
+template<>
+bool IsValidShape<MetaWallpaperAction*>(MetaWallpaperAction*)
+{
+    return true;
+}
+
 bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, GDIMetaFile& rOutMtf,
                                                      long nMaxBmpDPIX, long nMaxBmpDPIY,
                                                      bool bReduceTransparency, bool bTransparencyAutoMode,
@@ -696,9 +730,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                 case MetaActionType::RECT:
                 {
                     const tools::Rectangle& rCurrRect = static_cast<const MetaRectAction*>(pCurrAct)->GetRect();
-                    bool bRet = doesRectCoverWithUniformColor(aBackgroundComponent.aBounds, rCurrRect, *aMapModeVDev);
 
-                    if (!bRet)
+                    if (IsValidShape(pCurrAct) || !doesRectCoverWithUniformColor(aBackgroundComponent.aBounds, rCurrRect, *aMapModeVDev))
                     {
                         aBackgroundComponent.aBounds = rCurrRect;
                         aBackgroundComponent.aBgColor = aMapModeVDev->GetFillColor();
@@ -715,9 +748,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                 {
                     const tools::Polygon aPoly(static_cast<const MetaPolygonAction*>(pCurrAct)->GetPolygon());
                     const tools::Rectangle& rCurrRect = aPoly.GetBoundRect();
-                    bool bRet = doesRectCoverWithUniformColor(aBackgroundComponent.aBounds, rCurrRect, *aMapModeVDev);
 
-                    if (!basegfx::utils::isRectangle(aPoly.getB2DPolygon()) || !bRet)
+                    if (IsValidShape(pCurrAct) || !doesRectCoverWithUniformColor(aBackgroundComponent.aBounds, rCurrRect, *aMapModeVDev))
                     {
                         aBackgroundComponent.aBounds = rCurrRect;
                         aBackgroundComponent.aBgColor = aMapModeVDev->GetFillColor();
@@ -734,9 +766,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                 {
                     const tools::PolyPolygon aPoly(static_cast<const MetaPolyPolygonAction*>(pCurrAct)->GetPolyPolygon());
                     const tools::Rectangle& rCurrRect = aPoly.GetBoundRect();
-                    bool bRet = doesRectCoverWithUniformColor(aBackgroundComponent.aBounds, rCurrRect, *aMapModeVDev);
 
-                    if (aPoly.Count() != 1 || !basegfx::utils::isRectangle(aPoly[0].getB2DPolygon()) || !bRet)
+                    if (IsValidShape(pCurrAct) || !doesRectCoverWithUniformColor(aBackgroundComponent.aBounds, rCurrRect, *aMapModeVDev))
                     {
                         aBackgroundComponent.aBounds = rCurrRect;
                         aBackgroundComponent.aBgColor = aMapModeVDev->GetFillColor();
@@ -752,9 +783,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                 case MetaActionType::WALLPAPER:
                 {
                     const tools::Rectangle& rCurrRect = static_cast<const MetaWallpaperAction*>(pCurrAct)->GetRect();
-                    bool bRet = doesRectCoverWithUniformColor(aBackgroundComponent.aBounds, rCurrRect, *aMapModeVDev);
 
-                    if (!bRet)
+                    if (IsValidShape(pCurrAct) || !doesRectCoverWithUniformColor(aBackgroundComponent.aBounds, rCurrRect, *aMapModeVDev))
                     {
                         aBackgroundComponent.aBounds = rCurrRect;
                         aBackgroundComponent.aBgColor = aMapModeVDev->GetFillColor();
