@@ -53,12 +53,23 @@ struct ConnectedComponents
         bIsFullyTransparent(false)
     {}
 
+    bool IsBackgroundCovered(tools::Rectangle const & rCurrRect, OutputDevice const & rMapModeVDev);
+
     ::std::list< Component > aComponentList;
     tools::Rectangle       aBounds;
     Color           aBgColor;
     bool            bIsSpecial;
     bool            bIsFullyTransparent;
 };
+
+bool ConnectedComponents::IsBackgroundCovered(
+        tools::Rectangle const & rCurrRect,
+        OutputDevice const & rMapModeVDev)
+{
+    // shape needs to fully cover previous content, and have uniform
+    // color
+    return (rMapModeVDev.LogicToPixel(rCurrRect).IsInside(aBounds) && rMapModeVDev.IsFillColor());
+}
 
 }
 
@@ -88,17 +99,6 @@ bool DoesActionHandleTransparency( const MetaAction& rAct )
         default:
             return false;
     }
-}
-
-bool doesRectCoverWithUniformColor(
-        tools::Rectangle const & rPrevRect,
-        tools::Rectangle const & rCurrRect,
-        OutputDevice const & rMapModeVDev)
-{
-    // shape needs to fully cover previous content, and have uniform
-    // color
-    return (rMapModeVDev.LogicToPixel(rCurrRect).IsInside(rPrevRect) &&
-        rMapModeVDev.IsFillColor());
 }
 
 /** #107169# Convert BitmapEx to Bitmap with appropriately blended
@@ -731,7 +731,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                 {
                     const tools::Rectangle& rCurrRect = static_cast<const MetaRectAction*>(pCurrAct)->GetRect();
 
-                    if (IsValidShape(pCurrAct) || !doesRectCoverWithUniformColor(aBackgroundComponent.aBounds, rCurrRect, *aMapModeVDev))
+                    if (IsValidShape(pCurrAct) || !aBackgroundComponent.IsBackgroundCovered(rCurrRect, *aMapModeVDev))
                     {
                         aBackgroundComponent.aBounds = rCurrRect;
                         aBackgroundComponent.aBgColor = aMapModeVDev->GetFillColor();
@@ -749,7 +749,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                     const tools::Polygon aPoly(static_cast<const MetaPolygonAction*>(pCurrAct)->GetPolygon());
                     const tools::Rectangle& rCurrRect = aPoly.GetBoundRect();
 
-                    if (IsValidShape(pCurrAct) || !doesRectCoverWithUniformColor(aBackgroundComponent.aBounds, rCurrRect, *aMapModeVDev))
+                    if (IsValidShape(pCurrAct) || !aBackgroundComponent.IsBackgroundCovered(rCurrRect, *aMapModeVDev))
                     {
                         aBackgroundComponent.aBounds = rCurrRect;
                         aBackgroundComponent.aBgColor = aMapModeVDev->GetFillColor();
@@ -767,7 +767,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                     const tools::PolyPolygon aPoly(static_cast<const MetaPolyPolygonAction*>(pCurrAct)->GetPolyPolygon());
                     const tools::Rectangle& rCurrRect = aPoly.GetBoundRect();
 
-                    if (IsValidShape(pCurrAct) || !doesRectCoverWithUniformColor(aBackgroundComponent.aBounds, rCurrRect, *aMapModeVDev))
+                    if (IsValidShape(pCurrAct) || !aBackgroundComponent.IsBackgroundCovered(rCurrRect, *aMapModeVDev))
                     {
                         aBackgroundComponent.aBounds = rCurrRect;
                         aBackgroundComponent.aBgColor = aMapModeVDev->GetFillColor();
@@ -784,7 +784,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                 {
                     const tools::Rectangle& rCurrRect = static_cast<const MetaWallpaperAction*>(pCurrAct)->GetRect();
 
-                    if (IsValidShape(pCurrAct) || !doesRectCoverWithUniformColor(aBackgroundComponent.aBounds, rCurrRect, *aMapModeVDev))
+                    if (IsValidShape(pCurrAct) || !aBackgroundComponent.IsBackgroundCovered(rCurrRect, *aMapModeVDev))
                     {
                         aBackgroundComponent.aBounds = rCurrRect;
                         aBackgroundComponent.aBgColor = aMapModeVDev->GetFillColor();
