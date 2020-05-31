@@ -725,6 +725,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
         }
         while( pCurrAct && bStillBackground )
         {
+            bool bIsTransparentAction = true;
+
             switch( pCurrAct->GetType() )
             {
                 case MetaActionType::RECT:
@@ -735,7 +737,6 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                     {
                         aBackgroundComponent.aBounds = rCurrRect;
                         aBackgroundComponent.aBgColor = aMapModeVDev->GetFillColor();
-                        bStillBackground=false; // incomplete occlusion of background
                     }
                     else
                     {
@@ -753,7 +754,6 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                     {
                         aBackgroundComponent.aBounds = rCurrRect;
                         aBackgroundComponent.aBgColor = aMapModeVDev->GetFillColor();
-                        bStillBackground=false; // incomplete occlusion of background
                     }
                     else
                     {
@@ -771,7 +771,6 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                     {
                         aBackgroundComponent.aBounds = rCurrRect;
                         aBackgroundComponent.aBgColor = aMapModeVDev->GetFillColor();
-                        bStillBackground=false; // incomplete occlusion of background
                     }
                     else
                     {
@@ -788,7 +787,6 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                     {
                         aBackgroundComponent.aBounds = rCurrRect;
                         aBackgroundComponent.aBgColor = aMapModeVDev->GetFillColor();
-                        bStillBackground=false; // incomplete occlusion of background
                     }
                     else
                     {
@@ -799,24 +797,23 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                 }
                 default:
                 {
-                    if( ImplIsNotTransparent( *pCurrAct,
-                                              *aMapModeVDev ) )
-                        bStillBackground=false; // non-transparent action, possibly
-                                                // not uniform
+                    if (!ImplIsNotTransparent(*pCurrAct, *aMapModeVDev))
+                        // extend current bounds (next uniform action needs to fully cover this area)
+                        aBackgroundComponent.aBounds.Union(ImplCalcActionBounds(*pCurrAct, *aMapModeVDev));
                     else
-                        // extend current bounds (next uniform action
-                        // needs to fully cover this area)
-                        aBackgroundComponent.aBounds.Union(
-                            ImplCalcActionBounds(*pCurrAct, *aMapModeVDev) );
+                        bIsTransparentAction=false; // non-transparent action, possibly not uniform
                     break;
                 }
             }
+
+            bStillBackground = bIsTransparentAction && (nLastBgAction != nActionNum); // incomplete occlusion of background
 
             // execute action to get correct MapModes etc.
             pCurrAct->Execute( aMapModeVDev.get() );
 
             pCurrAct=const_cast<GDIMetaFile&>(rInMtf).NextAction();
             ++nActionNum;
+
         }
 
         aMapModeVDev->ClearStack(); // clean up aMapModeVDev
