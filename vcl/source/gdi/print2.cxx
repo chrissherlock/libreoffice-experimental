@@ -40,231 +40,6 @@
 
 typedef ::std::pair< MetaAction*, int > Component; // MetaAction plus index in metafile
 
-// List of (intersecting) actions, plus overall bounds
-struct ConnectedComponents
-{
-    ConnectedComponents() :
-        aComponentList(),
-        aBounds(),
-        aBgColor(COL_WHITE),
-        bIsSpecial(false),
-        bIsFullyTransparent(false)
-    {}
-
-    template <typename T>
-    bool IsValidShape(T)
-    {
-        SAL_WARN("vcl.gdi", "Should never call on this!");
-        assert(false);
-        return false;
-    }
-
-    template<>
-    bool IsValidShape<MetaRectAction*>(MetaRectAction*)
-    {
-        return true;
-    }
-
-    template<>
-    bool IsValidShape<MetaPolygonAction*>(MetaPolygonAction* pAction)
-    {
-        const tools::Polygon aPoly(pAction->GetPolygon());
-        return !basegfx::utils::isRectangle(aPoly.getB2DPolygon());
-    }
-
-    template<>
-    bool IsValidShape<MetaPolyPolygonAction*>(MetaPolyPolygonAction* pAction)
-    {
-        const tools::PolyPolygon aPoly(pAction->GetPolyPolygon());
-        return aPoly.Count() != 1 || !basegfx::utils::isRectangle(aPoly[0].getB2DPolygon());
-    }
-
-    template<>
-    bool IsValidShape<MetaWallpaperAction*>(MetaWallpaperAction*)
-    {
-        return true;
-    }
-
-    bool IsBackgroundNotCovered(MetaAction* pAction, tools::Rectangle const & rCurrRect, OutputDevice const & rMapModeVDev);
-
-    ::std::list< Component > aComponentList;
-    tools::Rectangle       aBounds;
-    Color           aBgColor;
-    bool            bIsSpecial;
-    bool            bIsFullyTransparent;
-};
-
-bool ConnectedComponents::IsBackgroundNotCovered(
-        MetaAction* pAction,
-        tools::Rectangle const & rCurrRect,
-        OutputDevice const & rMapModeVDev)
-{
-    // shape needs to fully cover previous content, and have uniform
-    // color
-    return IsValidShape(pAction) || !(rMapModeVDev.LogicToPixel(rCurrRect).IsInside(aBounds) && rMapModeVDev.IsFillColor());
-}
-
-namespace {
-
-/** Determines whether the action can handle transparency correctly
-  (i.e. when painted on white background, does the action still look
-  correct)?
- */
-bool DoesActionHandleTransparency( const MetaAction& rAct )
-{
-    // MetaActionType::FLOATTRANSPARENT can contain a whole metafile,
-    // which is to be rendered with the given transparent gradient. We
-    // currently cannot emulate transparent painting on a white
-    // background reliably.
-
-    // the remainder can handle printing itself correctly on a uniform
-    // white background.
-    switch( rAct.GetType() )
-    {
-        case MetaActionType::Transparent:
-        case MetaActionType::BMPEX:
-        case MetaActionType::BMPEXSCALE:
-        case MetaActionType::BMPEXSCALEPART:
-            return true;
-
-        default:
-            return false;
-    }
-}
-
-/** #107169# Convert BitmapEx to Bitmap with appropriately blended
-    color. Convert MetaTransparentAction to plain polygon,
-    appropriately colored
-
-    @param o_rMtf
-    Add converted actions to this metafile
-*/
-void ImplConvertTransparentAction( GDIMetaFile&        o_rMtf,
-                                   const MetaAction&   rAct,
-                                   const OutputDevice& rStateOutDev,
-                                   Color               aBgColor )
-{
-    if (rAct.GetType() == MetaActionType::Transparent)
-    {
-        const MetaTransparentAction* pTransAct = static_cast<const MetaTransparentAction*>(&rAct);
-        sal_uInt16 nTransparency( pTransAct->GetTransparence() );
-
-        // #i10613# Respect transparency for draw color
-        if (nTransparency)
-        {
-            o_rMtf.AddAction(new MetaPushAction(PushFlags::LINECOLOR|PushFlags::FILLCOLOR));
-
-            // assume white background for alpha blending
-            Color aLineColor(rStateOutDev.GetLineColor());
-            aLineColor.SetRed(static_cast<sal_uInt8>((255*nTransparency + (100 - nTransparency) * aLineColor.GetRed()) / 100));
-            aLineColor.SetGreen(static_cast<sal_uInt8>((255*nTransparency + (100 - nTransparency) * aLineColor.GetGreen()) / 100));
-            aLineColor.SetBlue(static_cast<sal_uInt8>((255*nTransparency + (100 - nTransparency) * aLineColor.GetBlue()) / 100));
-            o_rMtf.AddAction(new MetaLineColorAction(aLineColor, true));
-
-            Color aFillColor(rStateOutDev.GetFillColor());
-            aFillColor.SetRed(static_cast<sal_uInt8>((255*nTransparency + (100 - nTransparency)*aFillColor.GetRed()) / 100));
-            aFillColor.SetGreen(static_cast<sal_uInt8>((255*nTransparency + (100 - nTransparency)*aFillColor.GetGreen()) / 100));
-            aFillColor.SetBlue(static_cast<sal_uInt8>((255*nTransparency + (100 - nTransparency)*aFillColor.GetBlue()) / 100));
-            o_rMtf.AddAction(new MetaFillColorAction(aFillColor, true));
-        }
-
-        o_rMtf.AddAction(new MetaPolyPolygonAction(pTransAct->GetPolyPolygon()));
-
-        if(nTransparency)
-            o_rMtf.AddAction(new MetaPopAction());
-    }
-    else
-    {
-        BitmapEx aBmpEx;
-
-        switch (rAct.GetType())
-        {
-            case MetaActionType::BMPEX:
-                aBmpEx = static_cast<const MetaBmpExAction&>(rAct).GetBitmapEx();
-                break;
-
-            case MetaActionType::BMPEXSCALE:
-                aBmpEx = static_cast<const MetaBmpExScaleAction&>(rAct).GetBitmapEx();
-                break;
-
-            case MetaActionType::BMPEXSCALEPART:
-                aBmpEx = static_cast<const MetaBmpExScaleAction&>(rAct).GetBitmapEx();
-                break;
-
-            case MetaActionType::Transparent:
-
-            default:
-                OSL_FAIL("Printer::GetPreparedMetafile impossible state reached");
-                break;
-        }
-
-        Bitmap aBmp(aBmpEx.GetBitmap());
-        if (!aBmpEx.IsAlpha())
-        {
-            // blend with mask
-            Bitmap::ScopedReadAccess pRA(aBmp);
-
-            if (!pRA)
-                return; // what else should I do?
-
-            Color aActualColor(aBgColor);
-
-            if (pRA->HasPalette())
-                aActualColor = pRA->GetBestPaletteColor(aBgColor);
-
-            pRA.reset();
-
-            // did we get true white?
-            if (aActualColor.GetColorError(aBgColor))
-            {
-                // no, create truecolor bitmap, then
-                aBmp.Convert(BmpConversion::N24Bit);
-
-                // fill masked out areas white
-                aBmp.Replace(aBmpEx.GetMask(), aBgColor);
-            }
-            else
-            {
-                // fill masked out areas white
-                aBmp.Replace(aBmpEx.GetMask(), aActualColor);
-            }
-        }
-        else
-        {
-            // blend with alpha channel
-            aBmp.Convert(BmpConversion::N24Bit);
-            aBmp.Blend(aBmpEx.GetAlpha(), aBgColor);
-        }
-
-        // add corresponding action
-        switch (rAct.GetType())
-        {
-            case MetaActionType::BMPEX:
-                o_rMtf.AddAction(new MetaBmpAction(
-                                       static_cast<const MetaBmpExAction&>(rAct).GetPoint(),
-                                       aBmp));
-                break;
-            case MetaActionType::BMPEXSCALE:
-                o_rMtf.AddAction(new MetaBmpScaleAction(
-                                       static_cast<const MetaBmpExScaleAction&>(rAct).GetPoint(),
-                                       static_cast<const MetaBmpExScaleAction&>(rAct).GetSize(),
-                                       aBmp));
-                break;
-            case MetaActionType::BMPEXSCALEPART:
-                o_rMtf.AddAction(new MetaBmpScalePartAction(
-                                       static_cast<const MetaBmpExScalePartAction&>(rAct).GetDestPoint(),
-                                       static_cast<const MetaBmpExScalePartAction&>(rAct).GetDestSize(),
-                                       static_cast<const MetaBmpExScalePartAction&>(rAct).GetSrcPoint(),
-                                       static_cast<const MetaBmpExScalePartAction&>(rAct).GetSrcSize(),
-                                       aBmp));
-                break;
-            default:
-                OSL_FAIL("Unexpected case");
-                break;
-        }
-    }
-}
-
 // #i10613# Extracted from ImplCheckRect::ImplCreate
 // Returns true, if given action creates visible (i.e. non-transparent) output
 bool ImplIsNotTransparent( const MetaAction& rAct, const OutputDevice& rOut )
@@ -635,8 +410,6 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
         return tools::Rectangle();
 }
 
-} // end anon namespace
-
 template<typename T>
 tools::Rectangle GetBoundsRect(T)
 {
@@ -667,67 +440,293 @@ tools::Rectangle GetBoundsRect<MetaWallpaperAction*>(MetaWallpaperAction* pActio
     return pAction->GetRect();
 }
 
-template<typename T>
-struct is_valid_background_region
+// List of (intersecting) actions, plus overall bounds
+struct ConnectedComponents
 {
-    static const bool value = false;
-};
+    ConnectedComponents() :
+        aComponentList(),
+        aBounds(),
+        aBgColor(COL_WHITE),
+        bIsSpecial(false),
+        bIsFullyTransparent(false)
+    {}
 
-template<>
-struct is_valid_background_region<MetaRectAction*>
-{
-    static const bool value = true;
-};
-
-template<>
-struct is_valid_background_region<MetaPolygonAction*>
-{
-    static const bool value = true;
-};
-
-template<>
-struct is_valid_background_region<MetaPolyPolygonAction*>
-{
-    static const bool value = true;
-};
-
-template<>
-struct is_valid_background_region<MetaWallpaperAction*>
-{
-    static const bool value = true;
-};
-
-template<bool b>
-struct set_component_selector
-{
-    static void implementation(ConnectedComponents& rBackgroundComponent, MetaAction* const pAction, VirtualDevice& rMapModeVDev)
+    template <typename T>
+    bool IsValidShape(T)
     {
-        const tools::Rectangle& rCurrRect = GetBoundsRect(pAction);
+        SAL_WARN("vcl.gdi", "Should never call on this!");
+        assert(false);
+        return false;
+    }
 
-        if (rBackgroundComponent.IsBackgroundNotCovered(pAction, rCurrRect, rMapModeVDev))
+    template<>
+    bool IsValidShape<MetaRectAction*>(MetaRectAction*)
+    {
+        return true;
+    }
+
+    template<>
+    bool IsValidShape<MetaPolygonAction*>(MetaPolygonAction* pAction)
+    {
+        const tools::Polygon aPoly(pAction->GetPolygon());
+        return !basegfx::utils::isRectangle(aPoly.getB2DPolygon());
+    }
+
+    template<>
+    bool IsValidShape<MetaPolyPolygonAction*>(MetaPolyPolygonAction* pAction)
+    {
+        const tools::PolyPolygon aPoly(pAction->GetPolyPolygon());
+        return aPoly.Count() != 1 || !basegfx::utils::isRectangle(aPoly[0].getB2DPolygon());
+    }
+
+    template<>
+    bool IsValidShape<MetaWallpaperAction*>(MetaWallpaperAction*)
+    {
+        return true;
+    }
+
+    bool IsBackgroundNotCovered(MetaAction* pAction, OutputDevice const & rMapModeVDev);
+
+    template<typename T>
+    struct is_valid_background_region
+    {
+        static const bool value = false;
+    };
+
+    template<>
+    struct is_valid_background_region<MetaRectAction*>
+    {
+        static const bool value = true;
+    };
+
+    template<>
+    struct is_valid_background_region<MetaPolygonAction*>
+    {
+        static const bool value = true;
+    };
+
+    template<>
+    struct is_valid_background_region<MetaPolyPolygonAction*>
+    {
+        static const bool value = true;
+    };
+
+    template<>
+    struct is_valid_background_region<MetaWallpaperAction*>
+    {
+        static const bool value = true;
+    };
+
+    template<bool b>
+    struct set_component_selector
+    {
+        static void implementation(ConnectedComponents* pBackgroundComponent, MetaAction* const pAction, VirtualDevice& rMapModeVDev)
         {
-            rBackgroundComponent.aBounds = rCurrRect;
-            rBackgroundComponent.aBgColor = rMapModeVDev.GetFillColor();
+            const tools::Rectangle& rCurrRect = GetBoundsRect(pAction);
+
+            if (pBackgroundComponent->IsBackgroundNotCovered(pAction, rMapModeVDev))
+            {
+                pBackgroundComponent->aBounds = rCurrRect;
+                pBackgroundComponent->aBgColor = rMapModeVDev.GetFillColor();
+            }
+        }
+    };
+
+    template<>
+    struct set_component_selector<true>
+    {
+        static void implementation(ConnectedComponents* pBackgroundComponent, MetaAction* const pAction, VirtualDevice* pMapModeVDev)
+        {
+            if (!ImplIsNotTransparent(*pAction, *pMapModeVDev))
+                // extend current bounds (next uniform action needs to fully cover this area)
+                pBackgroundComponent->aBounds.Union(ImplCalcActionBounds(*pAction, *pMapModeVDev));
+        }
+    };
+
+    template<typename T>
+    void SetBackgroundComponent(T* const action, VirtualDevice* pMapModeVDev)
+    {
+        set_component_selector<is_valid_background_region<T>::value>::implementation(this, action, *pMapModeVDev);
+    }
+
+    ::std::list< Component > aComponentList;
+    tools::Rectangle aBounds;
+    Color aBgColor;
+    bool bIsSpecial;
+    bool bIsFullyTransparent;
+};
+
+bool ConnectedComponents::IsBackgroundNotCovered( MetaAction* pAction, OutputDevice const & rMapModeVDev)
+{
+    const tools::Rectangle& rCurrRect = GetBoundsRect(pAction);
+
+    // shape needs to fully cover previous content, and have uniform
+    // color
+    return IsValidShape(pAction) || !(rMapModeVDev.LogicToPixel(rCurrRect).IsInside(aBounds) && rMapModeVDev.IsFillColor());
+}
+
+namespace {
+
+/** Determines whether the action can handle transparency correctly
+  (i.e. when painted on white background, does the action still look
+  correct)?
+ */
+bool DoesActionHandleTransparency( const MetaAction& rAct )
+{
+    // MetaActionType::FLOATTRANSPARENT can contain a whole metafile,
+    // which is to be rendered with the given transparent gradient. We
+    // currently cannot emulate transparent painting on a white
+    // background reliably.
+
+    // the remainder can handle printing itself correctly on a uniform
+    // white background.
+    switch( rAct.GetType() )
+    {
+        case MetaActionType::Transparent:
+        case MetaActionType::BMPEX:
+        case MetaActionType::BMPEXSCALE:
+        case MetaActionType::BMPEXSCALEPART:
+            return true;
+
+        default:
+            return false;
+    }
+}
+
+/** #107169# Convert BitmapEx to Bitmap with appropriately blended
+    color. Convert MetaTransparentAction to plain polygon,
+    appropriately colored
+
+    @param o_rMtf
+    Add converted actions to this metafile
+*/
+void ImplConvertTransparentAction( GDIMetaFile&        o_rMtf,
+                                   const MetaAction&   rAct,
+                                   const OutputDevice& rStateOutDev,
+                                   Color               aBgColor )
+{
+    if (rAct.GetType() == MetaActionType::Transparent)
+    {
+        const MetaTransparentAction* pTransAct = static_cast<const MetaTransparentAction*>(&rAct);
+        sal_uInt16 nTransparency( pTransAct->GetTransparence() );
+
+        // #i10613# Respect transparency for draw color
+        if (nTransparency)
+        {
+            o_rMtf.AddAction(new MetaPushAction(PushFlags::LINECOLOR|PushFlags::FILLCOLOR));
+
+            // assume white background for alpha blending
+            Color aLineColor(rStateOutDev.GetLineColor());
+            aLineColor.SetRed(static_cast<sal_uInt8>((255*nTransparency + (100 - nTransparency) * aLineColor.GetRed()) / 100));
+            aLineColor.SetGreen(static_cast<sal_uInt8>((255*nTransparency + (100 - nTransparency) * aLineColor.GetGreen()) / 100));
+            aLineColor.SetBlue(static_cast<sal_uInt8>((255*nTransparency + (100 - nTransparency) * aLineColor.GetBlue()) / 100));
+            o_rMtf.AddAction(new MetaLineColorAction(aLineColor, true));
+
+            Color aFillColor(rStateOutDev.GetFillColor());
+            aFillColor.SetRed(static_cast<sal_uInt8>((255*nTransparency + (100 - nTransparency)*aFillColor.GetRed()) / 100));
+            aFillColor.SetGreen(static_cast<sal_uInt8>((255*nTransparency + (100 - nTransparency)*aFillColor.GetGreen()) / 100));
+            aFillColor.SetBlue(static_cast<sal_uInt8>((255*nTransparency + (100 - nTransparency)*aFillColor.GetBlue()) / 100));
+            o_rMtf.AddAction(new MetaFillColorAction(aFillColor, true));
+        }
+
+        o_rMtf.AddAction(new MetaPolyPolygonAction(pTransAct->GetPolyPolygon()));
+
+        if(nTransparency)
+            o_rMtf.AddAction(new MetaPopAction());
+    }
+    else
+    {
+        BitmapEx aBmpEx;
+
+        switch (rAct.GetType())
+        {
+            case MetaActionType::BMPEX:
+                aBmpEx = static_cast<const MetaBmpExAction&>(rAct).GetBitmapEx();
+                break;
+
+            case MetaActionType::BMPEXSCALE:
+                aBmpEx = static_cast<const MetaBmpExScaleAction&>(rAct).GetBitmapEx();
+                break;
+
+            case MetaActionType::BMPEXSCALEPART:
+                aBmpEx = static_cast<const MetaBmpExScaleAction&>(rAct).GetBitmapEx();
+                break;
+
+            case MetaActionType::Transparent:
+
+            default:
+                OSL_FAIL("Printer::GetPreparedMetafile impossible state reached");
+                break;
+        }
+
+        Bitmap aBmp(aBmpEx.GetBitmap());
+        if (!aBmpEx.IsAlpha())
+        {
+            // blend with mask
+            Bitmap::ScopedReadAccess pRA(aBmp);
+
+            if (!pRA)
+                return; // what else should I do?
+
+            Color aActualColor(aBgColor);
+
+            if (pRA->HasPalette())
+                aActualColor = pRA->GetBestPaletteColor(aBgColor);
+
+            pRA.reset();
+
+            // did we get true white?
+            if (aActualColor.GetColorError(aBgColor))
+            {
+                // no, create truecolor bitmap, then
+                aBmp.Convert(BmpConversion::N24Bit);
+
+                // fill masked out areas white
+                aBmp.Replace(aBmpEx.GetMask(), aBgColor);
+            }
+            else
+            {
+                // fill masked out areas white
+                aBmp.Replace(aBmpEx.GetMask(), aActualColor);
+            }
+        }
+        else
+        {
+            // blend with alpha channel
+            aBmp.Convert(BmpConversion::N24Bit);
+            aBmp.Blend(aBmpEx.GetAlpha(), aBgColor);
+        }
+
+        // add corresponding action
+        switch (rAct.GetType())
+        {
+            case MetaActionType::BMPEX:
+                o_rMtf.AddAction(new MetaBmpAction(
+                                       static_cast<const MetaBmpExAction&>(rAct).GetPoint(),
+                                       aBmp));
+                break;
+            case MetaActionType::BMPEXSCALE:
+                o_rMtf.AddAction(new MetaBmpScaleAction(
+                                       static_cast<const MetaBmpExScaleAction&>(rAct).GetPoint(),
+                                       static_cast<const MetaBmpExScaleAction&>(rAct).GetSize(),
+                                       aBmp));
+                break;
+            case MetaActionType::BMPEXSCALEPART:
+                o_rMtf.AddAction(new MetaBmpScalePartAction(
+                                       static_cast<const MetaBmpExScalePartAction&>(rAct).GetDestPoint(),
+                                       static_cast<const MetaBmpExScalePartAction&>(rAct).GetDestSize(),
+                                       static_cast<const MetaBmpExScalePartAction&>(rAct).GetSrcPoint(),
+                                       static_cast<const MetaBmpExScalePartAction&>(rAct).GetSrcSize(),
+                                       aBmp));
+                break;
+            default:
+                OSL_FAIL("Unexpected case");
+                break;
         }
     }
-};
-
-template<>
-struct set_component_selector<true>
-{
-    static void implementation(ConnectedComponents& rBackgroundComponent, MetaAction* const pAction, VirtualDevice* pMapModeVDev)
-    {
-        if (!ImplIsNotTransparent(*pAction, *pMapModeVDev))
-            // extend current bounds (next uniform action needs to fully cover this area)
-            rBackgroundComponent.aBounds.Union(ImplCalcActionBounds(*pAction, *pMapModeVDev));
-    }
-};
-
-template<typename T>
-void SetBackgroundComponent(ConnectedComponents& rBackgroundComponent, T* const action, VirtualDevice* pMapModeVDev)
-{
-    set_component_selector<is_valid_background_region<T>::value>::implementation(rBackgroundComponent, action, *pMapModeVDev);
 }
+
+} // end anon namespace
 
 bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, GDIMetaFile& rOutMtf,
                                                      long nMaxBmpDPIX, long nMaxBmpDPIY,
@@ -823,10 +822,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                 case MetaActionType::POLYPOLYGON:
                 case MetaActionType::WALLPAPER:
                 {
-                    const tools::Rectangle& rCurrRect = GetBoundsRect(pCurrAct);
-
-                    if (aBackgroundComponent.IsBackgroundNotCovered(pCurrAct, rCurrRect, *aMapModeVDev))
-                        SetBackgroundComponent(aBackgroundComponent, pCurrAct, aMapModeVDev.get());
+                    if (aBackgroundComponent.IsBackgroundNotCovered(pCurrAct, *aMapModeVDev))
+                        aBackgroundComponent.SetBackgroundComponent(pCurrAct, aMapModeVDev.get());
                     else
                         nLastBgAction=nActionNum; // this _is_ background
 
@@ -836,7 +833,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                 {
                     if (!ImplIsNotTransparent(*pCurrAct, *aMapModeVDev))
                         // extend current bounds (next uniform action needs to fully cover this area)
-                        SetBackgroundComponent(aBackgroundComponent, pCurrAct, aMapModeVDev.get());
+                        aBackgroundComponent.SetBackgroundComponent(pCurrAct, aMapModeVDev.get());
                     else
                         bIsTransparentAction=false; // non-transparent action, possibly not uniform
                     break;
