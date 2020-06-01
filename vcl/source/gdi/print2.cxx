@@ -51,7 +51,41 @@ struct ConnectedComponents
         bIsFullyTransparent(false)
     {}
 
-    bool IsBackgroundCovered(tools::Rectangle const & rCurrRect, OutputDevice const & rMapModeVDev);
+    template <typename T>
+    bool IsValidShape(T)
+    {
+        SAL_WARN("vcl.gdi", "Should never call on this!");
+        assert(false);
+        return false;
+    }
+
+    template<>
+    bool IsValidShape<MetaRectAction*>(MetaRectAction*)
+    {
+        return true;
+    }
+
+    template<>
+    bool IsValidShape<MetaPolygonAction*>(MetaPolygonAction* pAction)
+    {
+        const tools::Polygon aPoly(pAction->GetPolygon());
+        return !basegfx::utils::isRectangle(aPoly.getB2DPolygon());
+    }
+
+    template<>
+    bool IsValidShape<MetaPolyPolygonAction*>(MetaPolyPolygonAction* pAction)
+    {
+        const tools::PolyPolygon aPoly(pAction->GetPolyPolygon());
+        return aPoly.Count() != 1 || !basegfx::utils::isRectangle(aPoly[0].getB2DPolygon());
+    }
+
+    template<>
+    bool IsValidShape<MetaWallpaperAction*>(MetaWallpaperAction*)
+    {
+        return true;
+    }
+
+    bool IsBackgroundNotCovered(MetaAction* pAction, tools::Rectangle const & rCurrRect, OutputDevice const & rMapModeVDev);
 
     ::std::list< Component > aComponentList;
     tools::Rectangle       aBounds;
@@ -60,13 +94,14 @@ struct ConnectedComponents
     bool            bIsFullyTransparent;
 };
 
-bool ConnectedComponents::IsBackgroundCovered(
+bool ConnectedComponents::IsBackgroundNotCovered(
+        MetaAction* pAction,
         tools::Rectangle const & rCurrRect,
         OutputDevice const & rMapModeVDev)
 {
     // shape needs to fully cover previous content, and have uniform
     // color
-    return (rMapModeVDev.LogicToPixel(rCurrRect).IsInside(aBounds) && rMapModeVDev.IsFillColor());
+    return IsValidShape(pAction) || !(rMapModeVDev.LogicToPixel(rCurrRect).IsInside(aBounds) && rMapModeVDev.IsFillColor());
 }
 
 namespace {
@@ -602,40 +637,6 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
 
 } // end anon namespace
 
-template <typename T>
-bool IsValidShape(T)
-{
-    SAL_WARN("vcl.gdi", "Should never call on this!");
-    assert(false);
-    return false;
-}
-
-template<>
-bool IsValidShape<MetaRectAction*>(MetaRectAction*)
-{
-    return true;
-}
-
-template<>
-bool IsValidShape<MetaPolygonAction*>(MetaPolygonAction* pAction)
-{
-    const tools::Polygon aPoly(pAction->GetPolygon());
-    return !basegfx::utils::isRectangle(aPoly.getB2DPolygon());
-}
-
-template<>
-bool IsValidShape<MetaPolyPolygonAction*>(MetaPolyPolygonAction* pAction)
-{
-    const tools::PolyPolygon aPoly(pAction->GetPolyPolygon());
-    return aPoly.Count() != 1 || !basegfx::utils::isRectangle(aPoly[0].getB2DPolygon());
-}
-
-template<>
-bool IsValidShape<MetaWallpaperAction*>(MetaWallpaperAction*)
-{
-    return true;
-}
-
 template<typename T>
 tools::Rectangle GetBoundsRect(T)
 {
@@ -703,7 +704,7 @@ struct set_component_selector
     {
         const tools::Rectangle& rCurrRect = GetBoundsRect(pAction);
 
-        if (IsValidShape(pAction) || !rBackgroundComponent.IsBackgroundCovered(rCurrRect, rMapModeVDev))
+        if (rBackgroundComponent.IsBackgroundNotCovered(pAction, rCurrRect, rMapModeVDev))
         {
             rBackgroundComponent.aBounds = rCurrRect;
             rBackgroundComponent.aBgColor = rMapModeVDev.GetFillColor();
@@ -824,7 +825,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                 {
                     const tools::Rectangle& rCurrRect = GetBoundsRect(pCurrAct);
 
-                    if (IsValidShape(pCurrAct) || !aBackgroundComponent.IsBackgroundCovered(rCurrRect, *aMapModeVDev))
+                    if (aBackgroundComponent.IsBackgroundNotCovered(pCurrAct, rCurrRect, *aMapModeVDev))
                         SetBackgroundComponent(aBackgroundComponent, pCurrAct, aMapModeVDev.get());
                     else
                         nLastBgAction=nActionNum; // this _is_ background
