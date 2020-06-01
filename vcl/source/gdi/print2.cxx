@@ -40,8 +40,6 @@
 
 typedef ::std::pair< MetaAction*, int > Component; // MetaAction plus index in metafile
 
-namespace {
-
 // List of (intersecting) actions, plus overall bounds
 struct ConnectedComponents
 {
@@ -69,8 +67,6 @@ bool ConnectedComponents::IsBackgroundCovered(
     // shape needs to fully cover previous content, and have uniform
     // color
     return (rMapModeVDev.LogicToPixel(rCurrRect).IsInside(aBounds) && rMapModeVDev.IsFillColor());
-}
-
 }
 
 namespace {
@@ -640,6 +636,36 @@ bool IsValidShape<MetaWallpaperAction*>(MetaWallpaperAction*)
     return true;
 }
 
+template<typename T>
+tools::Rectangle GetBoundsRect(T)
+{
+    return tools::Rectangle();
+}
+
+template<>
+tools::Rectangle GetBoundsRect<MetaRectAction*>(MetaRectAction* pAction)
+{
+    return pAction->GetRect();
+}
+
+template<>
+tools::Rectangle GetBoundsRect<MetaPolygonAction*>(MetaPolygonAction* pAction)
+{
+    return pAction->GetPolygon().GetBoundRect();
+}
+
+template<>
+tools::Rectangle GetBoundsRect<MetaPolyPolygonAction*>(MetaPolyPolygonAction* pAction)
+{
+    return pAction->GetPolyPolygon().GetBoundRect();
+}
+
+template<>
+tools::Rectangle GetBoundsRect<MetaWallpaperAction*>(MetaWallpaperAction* pAction)
+{
+    return pAction->GetRect();
+}
+
 bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, GDIMetaFile& rOutMtf,
                                                      long nMaxBmpDPIX, long nMaxBmpDPIY,
                                                      bool bReduceTransparency, bool bTransparencyAutoMode,
@@ -730,58 +756,11 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
             switch( pCurrAct->GetType() )
             {
                 case MetaActionType::RECT:
-                {
-                    const tools::Rectangle& rCurrRect = static_cast<const MetaRectAction*>(pCurrAct)->GetRect();
-
-                    if (IsValidShape(pCurrAct) || !aBackgroundComponent.IsBackgroundCovered(rCurrRect, *aMapModeVDev))
-                    {
-                        aBackgroundComponent.aBounds = rCurrRect;
-                        aBackgroundComponent.aBgColor = aMapModeVDev->GetFillColor();
-                    }
-                    else
-                    {
-                        nLastBgAction=nActionNum; // this _is_ background
-                    }
-
-                    break;
-                }
                 case MetaActionType::POLYGON:
-                {
-                    const tools::Polygon aPoly(static_cast<const MetaPolygonAction*>(pCurrAct)->GetPolygon());
-                    const tools::Rectangle& rCurrRect = aPoly.GetBoundRect();
-
-                    if (IsValidShape(pCurrAct) || !aBackgroundComponent.IsBackgroundCovered(rCurrRect, *aMapModeVDev))
-                    {
-                        aBackgroundComponent.aBounds = rCurrRect;
-                        aBackgroundComponent.aBgColor = aMapModeVDev->GetFillColor();
-                    }
-                    else
-                    {
-                        nLastBgAction=nActionNum; // this _is_ background
-                    }
-
-                    break;
-                }
                 case MetaActionType::POLYPOLYGON:
-                {
-                    const tools::PolyPolygon aPoly(static_cast<const MetaPolyPolygonAction*>(pCurrAct)->GetPolyPolygon());
-                    const tools::Rectangle& rCurrRect = aPoly.GetBoundRect();
-
-                    if (IsValidShape(pCurrAct) || !aBackgroundComponent.IsBackgroundCovered(rCurrRect, *aMapModeVDev))
-                    {
-                        aBackgroundComponent.aBounds = rCurrRect;
-                        aBackgroundComponent.aBgColor = aMapModeVDev->GetFillColor();
-                    }
-                    else
-                    {
-                        nLastBgAction=nActionNum; // this _is_ background
-                    }
-
-                    break;
-                }
                 case MetaActionType::WALLPAPER:
                 {
-                    const tools::Rectangle& rCurrRect = static_cast<const MetaWallpaperAction*>(pCurrAct)->GetRect();
+                    const tools::Rectangle& rCurrRect = GetBoundsRect(pCurrAct);
 
                     if (IsValidShape(pCurrAct) || !aBackgroundComponent.IsBackgroundCovered(rCurrRect, *aMapModeVDev))
                     {
