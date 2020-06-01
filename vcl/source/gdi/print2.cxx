@@ -666,6 +666,68 @@ tools::Rectangle GetBoundsRect<MetaWallpaperAction*>(MetaWallpaperAction* pActio
     return pAction->GetRect();
 }
 
+template<typename T>
+struct is_valid_background_region
+{
+    static const bool value = false;
+};
+
+template<>
+struct is_valid_background_region<MetaRectAction*>
+{
+    static const bool value = true;
+};
+
+template<>
+struct is_valid_background_region<MetaPolygonAction*>
+{
+    static const bool value = true;
+};
+
+template<>
+struct is_valid_background_region<MetaPolyPolygonAction*>
+{
+    static const bool value = true;
+};
+
+template<>
+struct is_valid_background_region<MetaWallpaperAction*>
+{
+    static const bool value = true;
+};
+
+template<bool b>
+struct set_component_selector
+{
+    static void implementation(ConnectedComponents& rBackgroundComponent, MetaAction* const pAction, VirtualDevice& rMapModeVDev)
+    {
+        const tools::Rectangle& rCurrRect = GetBoundsRect(pAction);
+
+        if (IsValidShape(pAction) || !rBackgroundComponent.IsBackgroundCovered(rCurrRect, rMapModeVDev))
+        {
+            rBackgroundComponent.aBounds = rCurrRect;
+            rBackgroundComponent.aBgColor = rMapModeVDev.GetFillColor();
+        }
+    }
+};
+
+template<>
+struct set_component_selector<true>
+{
+    static void implementation(ConnectedComponents& rBackgroundComponent, MetaAction* const pAction, VirtualDevice* pMapModeVDev)
+    {
+        if (!ImplIsNotTransparent(*pAction, *pMapModeVDev))
+            // extend current bounds (next uniform action needs to fully cover this area)
+            rBackgroundComponent.aBounds.Union(ImplCalcActionBounds(*pAction, *pMapModeVDev));
+    }
+};
+
+template<typename T>
+void SetBackgroundComponent(ConnectedComponents& rBackgroundComponent, T* const action, VirtualDevice* pMapModeVDev)
+{
+    set_component_selector<is_valid_background_region<T>::value>::implementation(rBackgroundComponent, action, *pMapModeVDev);
+}
+
 bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, GDIMetaFile& rOutMtf,
                                                      long nMaxBmpDPIX, long nMaxBmpDPIY,
                                                      bool bReduceTransparency, bool bTransparencyAutoMode,
@@ -763,14 +825,9 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                     const tools::Rectangle& rCurrRect = GetBoundsRect(pCurrAct);
 
                     if (IsValidShape(pCurrAct) || !aBackgroundComponent.IsBackgroundCovered(rCurrRect, *aMapModeVDev))
-                    {
-                        aBackgroundComponent.aBounds = rCurrRect;
-                        aBackgroundComponent.aBgColor = aMapModeVDev->GetFillColor();
-                    }
+                        SetBackgroundComponent(aBackgroundComponent, pCurrAct, aMapModeVDev.get());
                     else
-                    {
                         nLastBgAction=nActionNum; // this _is_ background
-                    }
 
                     break;
                 }
@@ -778,7 +835,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                 {
                     if (!ImplIsNotTransparent(*pCurrAct, *aMapModeVDev))
                         // extend current bounds (next uniform action needs to fully cover this area)
-                        aBackgroundComponent.aBounds.Union(ImplCalcActionBounds(*pCurrAct, *aMapModeVDev));
+                        SetBackgroundComponent(aBackgroundComponent, pCurrAct, aMapModeVDev.get());
                     else
                         bIsTransparentAction=false; // non-transparent action, possibly not uniform
                     break;
