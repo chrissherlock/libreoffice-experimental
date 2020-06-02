@@ -1658,31 +1658,6 @@ public:
     const sal_uInt8* GetData() const { return mpData.get(); }
 };
 
-class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaLayoutModeAction final : public MetaAction
-{
-private:
-    ComplexTextLayoutFlags mnLayoutMode;
-
-public:
-    MetaLayoutModeAction();
-    MetaLayoutModeAction(MetaLayoutModeAction const&) = default;
-    MetaLayoutModeAction(MetaLayoutModeAction&&) = default;
-    MetaLayoutModeAction& operator=(MetaLayoutModeAction const&) = delete; // due to MetaAction
-    MetaLayoutModeAction& operator=(MetaLayoutModeAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaLayoutModeAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    explicit MetaLayoutModeAction(ComplexTextLayoutFlags nLayoutMode);
-
-    ComplexTextLayoutFlags GetLayoutMode() const { return mnLayoutMode; }
-};
-
 
 #endif // INCLUDED_VCL_METAACT_HXX
 

@@ -23,6 +23,7 @@
 #include <tools/debug.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/MetaTextLanguageAction.hxx>
+#include <vcl/MetaLayoutModeAction.hxx>
 #include <vcl/outdevstate.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/settings.hxx>

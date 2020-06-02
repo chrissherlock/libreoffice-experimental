@@ -28,6 +28,7 @@
 #include <vcl/outdev.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/MetaTextLanguageAction.hxx>
+#include <vcl/MetaLayoutModeAction.hxx>
 #include <vcl/graphictools.hxx>
 #include <unotools/fontdefs.hxx>
 #include <TypeSerializer.hxx>

@@ -48,6 +48,7 @@
 #include <vcl/canvastools.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaLayoutModeAction.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/metric.hxx>
 #include <vcl/graphictools.hxx>
