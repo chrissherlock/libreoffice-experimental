@@ -48,6 +48,7 @@
 #include <vcl/canvastools.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaFontAction.hxx>
 #include <vcl/MetaPushAction.hxx>
 #include <vcl/MetaTransparentAction.hxx>
 #include <vcl/MetaFloatTransparentAction.hxx>

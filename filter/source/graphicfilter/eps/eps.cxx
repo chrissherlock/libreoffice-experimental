@@ -25,6 +25,7 @@
 #include <unotools/resmgr.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaFontAction.hxx>
 #include <vcl/MetaPushAction.hxx>
 #include <vcl/MetaFloatTransparentAction.hxx>
 #include <vcl/MetaEPSAction.hxx>

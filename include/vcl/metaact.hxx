@@ -1398,33 +1398,6 @@ public:
     const MapMode& GetMapMode() const { return maMapMode; }
 };
 
-class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaFontAction final : public MetaAction
-{
-private:
-    vcl::Font maFont;
-
-public:
-    MetaFontAction();
-    MetaFontAction(MetaFontAction const&) = default;
-    MetaFontAction(MetaFontAction&&) = default;
-    MetaFontAction& operator=(MetaFontAction const&) = delete; // due to MetaAction
-    MetaFontAction& operator=(MetaFontAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaFontAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    explicit MetaFontAction(const vcl::Font&);
-
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const vcl::Font& GetFont() const { return maFont; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

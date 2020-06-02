@@ -27,6 +27,7 @@
 #include <svl/itemset.hxx>
 #include <tools/fract.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaFontAction.hxx>
 #include <vcl/MetaPushAction.hxx>
 #include <vcl/MetaPopAction.hxx>
 #include <vcl/MetaRasterOpAction.hxx>
