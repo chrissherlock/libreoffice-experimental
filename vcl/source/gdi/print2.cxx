@@ -29,6 +29,7 @@
 #include <vcl/PrinterOptions.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaEPSAction.hxx>
 #include <vcl/MetaCommentAction.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/svapp.hxx>

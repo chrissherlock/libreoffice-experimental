@@ -1563,41 +1563,6 @@ public:
     bool IsTransparent() const override { return true; }
 };
 
-class VCL_DLLPUBLIC MetaEPSAction final : public MetaAction
-{
-private:
-    GfxLink maGfxLink;
-    GDIMetaFile maSubst;
-    Point maPoint;
-    Size maSize;
-
-public:
-    MetaEPSAction();
-    MetaEPSAction(MetaEPSAction const&) = default;
-    MetaEPSAction(MetaEPSAction&&) = default;
-    MetaEPSAction& operator=(MetaEPSAction const&) = delete; // due to MetaAction
-    MetaEPSAction& operator=(MetaEPSAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaEPSAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaEPSAction(const Point& rPoint, const Size& rSize, const GfxLink& rGfxLink,
-                  const GDIMetaFile& rSubst);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const GfxLink& GetLink() const { return maGfxLink; }
-    const GDIMetaFile& GetSubstitute() const { return maSubst; }
-    const Point& GetPoint() const { return maPoint; }
-    const Size& GetSize() const { return maSize; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
