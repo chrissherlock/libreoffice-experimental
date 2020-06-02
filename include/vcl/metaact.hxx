@@ -1371,33 +1371,6 @@ public:
     TextAlign GetTextAlign() const { return maAlign; }
 };
 
-class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaMapModeAction final : public MetaAction
-{
-private:
-    MapMode maMapMode;
-
-public:
-    MetaMapModeAction();
-    MetaMapModeAction(MetaMapModeAction const&) = default;
-    MetaMapModeAction(MetaMapModeAction&&) = default;
-    MetaMapModeAction& operator=(MetaMapModeAction const&) = delete; // due to MetaAction
-    MetaMapModeAction& operator=(MetaMapModeAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaMapModeAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    explicit MetaMapModeAction(const MapMode&);
-
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const MapMode& GetMapMode() const { return maMapMode; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

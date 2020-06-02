@@ -23,6 +23,7 @@
 #include <vcl/gdimtf.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaMapModeAction.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/wrkwin.hxx>
 #include <sal/log.hxx>
