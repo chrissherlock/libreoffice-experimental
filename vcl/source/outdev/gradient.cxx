@@ -24,6 +24,7 @@
 #include <vcl/gdimtf.hxx>
 #include <vcl/gradient.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaPopAction.hxx>
 #include <vcl/MetaCommentAction.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/outdev.hxx>

@@ -28,6 +28,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaPopAction.hxx>
 #include <vcl/MetaRasterOpAction.hxx>
 #include <vcl/MetaTransparentAction.hxx>
 #include <vcl/MetaFloatTransparentAction.hxx>

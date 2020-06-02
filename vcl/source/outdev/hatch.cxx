@@ -25,6 +25,7 @@
 
 #include <vcl/hatch.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaPopAction.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/virdev.hxx>

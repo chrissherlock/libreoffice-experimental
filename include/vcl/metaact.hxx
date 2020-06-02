@@ -1450,24 +1450,6 @@ public:
     PushFlags GetFlags() const { return mnFlags; }
 };
 
-class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaPopAction final : public MetaAction
-{
-public:
-    MetaPopAction();
-    MetaPopAction(MetaPopAction const&) = default;
-    MetaPopAction(MetaPopAction&&) = default;
-    MetaPopAction& operator=(MetaPopAction const&) = delete; // due to MetaAction
-    MetaPopAction& operator=(MetaPopAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaPopAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
