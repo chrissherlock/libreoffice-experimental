@@ -7394,7 +7394,6 @@ include/vcl/lstbox.hxx
 include/vcl/mapmod.hxx
 include/vcl/menu.hxx
 include/vcl/menubtn.hxx
-include/vcl/metaact.hxx
 include/vcl/metaactiontypes.hxx
 include/vcl/metric.hxx
 include/vcl/mnemonic.hxx
