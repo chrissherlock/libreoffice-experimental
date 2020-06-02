@@ -22,6 +22,7 @@
 
 #include <tools/debug.hxx>
 #include <vcl/gdimtf.hxx>
+#include <vcl/MetaRasterOpAction.hxx>
 #include <vcl/MetaTextLanguageAction.hxx>
 #include <vcl/MetaLayoutModeAction.hxx>
 #include <vcl/outdevstate.hxx>

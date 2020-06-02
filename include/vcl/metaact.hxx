@@ -1468,31 +1468,6 @@ public:
     virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
 };
 
-class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaRasterOpAction final : public MetaAction
-{
-private:
-    RasterOp meRasterOp;
-
-public:
-    MetaRasterOpAction();
-    MetaRasterOpAction(MetaRasterOpAction const&) = default;
-    MetaRasterOpAction(MetaRasterOpAction&&) = default;
-    MetaRasterOpAction& operator=(MetaRasterOpAction const&) = delete; // due to MetaAction
-    MetaRasterOpAction& operator=(MetaRasterOpAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaRasterOpAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    explicit MetaRasterOpAction(RasterOp eRasterOp);
-
-    RasterOp GetRasterOp() const { return meRasterOp; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

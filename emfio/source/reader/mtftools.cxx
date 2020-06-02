@@ -26,6 +26,7 @@
 #include <vcl/graphictools.hxx>
 #include <vcl/BitmapTools.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaRasterOpAction.hxx>
 #include <vcl/MetaCommentAction.hxx>
 #include <vcl/MetaLayoutModeAction.hxx>
 #include <vcl/canvastools.hxx>
