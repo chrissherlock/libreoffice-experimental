@@ -25,6 +25,7 @@
 #include <unotools/resmgr.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaCommentAction.hxx>
 #include <vcl/graph.hxx>
 #include <vcl/bitmapaccess.hxx>
 #include <vcl/region.hxx>

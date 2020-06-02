@@ -1625,40 +1625,6 @@ public:
     bool IsSetting() const { return mbSet; }
 };
 
-class VCL_DLLPUBLIC MetaCommentAction final : public MetaAction
-{
-private:
-    OString maComment;
-    sal_Int32 mnValue;
-    sal_uInt32 mnDataSize;
-    std::unique_ptr<sal_uInt8[]> mpData;
-
-    SAL_DLLPRIVATE void ImplInitDynamicData(const sal_uInt8* pData, sal_uInt32 nDataSize);
-
-private:
-    virtual ~MetaCommentAction() override;
-
-public:
-    explicit MetaCommentAction();
-    explicit MetaCommentAction(const MetaCommentAction& rAct);
-    explicit MetaCommentAction(const OString& rComment, sal_Int32 nValue = 0,
-                               const sal_uInt8* pData = nullptr, sal_uInt32 nDataSize = 0);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    const OString& GetComment() const { return maComment; }
-    sal_Int32 GetValue() const { return mnValue; }
-    sal_uInt32 GetDataSize() const { return mnDataSize; }
-    const sal_uInt8* GetData() const { return mpData.get(); }
-};
-
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -35,7 +35,7 @@
 
 // Forward Declarations
 
-
+class MetaCommentAction;
 class SfxItemSet;
 class SdrObjList;
 class SdrModel;

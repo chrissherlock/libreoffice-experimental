@@ -43,6 +43,7 @@
 #include <cppuhelper/supportsservice.hxx>
 #include <osl/diagnose.h>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaCommentAction.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/virdev.hxx>
 #include <svl/outstrm.hxx>

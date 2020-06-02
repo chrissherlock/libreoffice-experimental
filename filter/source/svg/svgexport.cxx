@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/MetaCommentAction.hxx>
+
 #include "svgwriter.hxx"
 #include "svgfontexport.hxx"
 #include "svgfilter.hxx"

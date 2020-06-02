@@ -28,6 +28,7 @@
 #include <vcl/metric.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/settings.hxx>
+#include <vcl/MetaCommentAction.hxx>
 #include <tools/fract.hxx>
 #include <tools/helpers.hxx>
 #include <tools/stream.hxx>

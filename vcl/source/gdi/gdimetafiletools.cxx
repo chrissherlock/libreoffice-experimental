@@ -19,6 +19,7 @@
 
 #include <vcl/gdimetafiletools.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaCommentAction.hxx>
 #include <vcl/canvastools.hxx>
 #include <basegfx/polygon/b2dpolygonclipper.hxx>
 #include <basegfx/matrix/b2dhommatrixtools.hxx>

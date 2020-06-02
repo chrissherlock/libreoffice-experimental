@@ -27,6 +27,7 @@
 #include <vcl/dibtools.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaCommentAction.hxx>
 #include <vcl/MetaTextLanguageAction.hxx>
 #include <vcl/MetaLayoutModeAction.hxx>
 #include <vcl/graphictools.hxx>

@@ -28,6 +28,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaCommentAction.hxx>
 #include <sal/log.hxx>
 #include <osl/diagnose.h>
 

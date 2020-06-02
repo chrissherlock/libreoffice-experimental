@@ -23,6 +23,7 @@
 #include <com/sun/star/beans/XPropertySet.hpp>
 
 #include <vcl/metaact.hxx>
+#include <vcl/MetaCommentAction.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/graph.hxx>
 
