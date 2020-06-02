@@ -1683,30 +1683,6 @@ public:
     ComplexTextLayoutFlags GetLayoutMode() const { return mnLayoutMode; }
 };
 
-class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaTextLanguageAction final : public MetaAction
-{
-private:
-    LanguageType meTextLanguage;
-
-public:
-    MetaTextLanguageAction();
-    MetaTextLanguageAction(MetaTextLanguageAction const&) = default;
-    MetaTextLanguageAction(MetaTextLanguageAction&&) = default;
-    MetaTextLanguageAction& operator=(MetaTextLanguageAction const&) = delete; // due to MetaAction
-    MetaTextLanguageAction& operator=(MetaTextLanguageAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaTextLanguageAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    explicit MetaTextLanguageAction(LanguageType);
-
-    LanguageType GetTextLanguage() const { return meTextLanguage; }
-};
 
 #endif // INCLUDED_VCL_METAACT_HXX
 

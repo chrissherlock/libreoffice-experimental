@@ -22,7 +22,7 @@
 
 #include <tools/debug.hxx>
 #include <vcl/gdimtf.hxx>
-#include <vcl/metaact.hxx>
+#include <vcl/MetaTextLanguageAction.hxx>
 #include <vcl/outdevstate.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/settings.hxx>

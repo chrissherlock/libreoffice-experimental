@@ -27,6 +27,7 @@
 #include <svl/itemset.hxx>
 #include <tools/fract.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaTextLanguageAction.hxx>
 #include <vcl/virdev.hxx>
 #include <svx/svdobj.hxx>
 #include <svx/xdash.hxx>
