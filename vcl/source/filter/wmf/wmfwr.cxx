@@ -33,6 +33,7 @@
 #include <tools/stream.hxx>
 #include <vcl/dibtools.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaFloatTransparentAction.hxx>
 #include <vcl/MetaEPSAction.hxx>
 #include <vcl/MetaLayoutModeAction.hxx>
 #include <vcl/FilterConfigItem.hxx>

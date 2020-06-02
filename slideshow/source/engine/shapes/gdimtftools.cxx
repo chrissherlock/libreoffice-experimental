@@ -32,6 +32,7 @@
 
 #include <vcl/canvastools.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaFloatTransparentAction.hxx>
 #include <vcl/MetaCommentAction.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/gdimtf.hxx>

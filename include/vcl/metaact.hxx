@@ -1525,44 +1525,6 @@ public:
     bool IsTransparent() const override { return true; }
 };
 
-class SAL_DLLPUBLIC_RTTI MetaFloatTransparentAction final : public MetaAction
-{
-private:
-    GDIMetaFile maMtf;
-    Point maPoint;
-    Size maSize;
-    Gradient maGradient;
-
-public:
-    MetaFloatTransparentAction();
-    MetaFloatTransparentAction(MetaFloatTransparentAction const&) = default;
-    MetaFloatTransparentAction(MetaFloatTransparentAction&&) = default;
-    MetaFloatTransparentAction& operator=(MetaFloatTransparentAction const&)
-        = delete; // due to MetaAction
-    MetaFloatTransparentAction& operator=(MetaFloatTransparentAction&&)
-        = delete; // due to MetaAction
-private:
-    virtual ~MetaFloatTransparentAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaFloatTransparentAction(const GDIMetaFile& rMtf, const Point& rPos, const Size& rSize,
-                               const Gradient& rGradient);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const GDIMetaFile& GetGDIMetaFile() const { return maMtf; }
-    const Point& GetPoint() const { return maPoint; }
-    const Size& GetSize() const { return maSize; }
-    const Gradient& GetGradient() const { return maGradient; }
-    bool IsTransparent() const override { return true; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

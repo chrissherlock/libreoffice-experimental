@@ -28,6 +28,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaFloatTransparentAction.hxx>
 #include <vcl/MetaRefPointAction.hxx>
 #include <vcl/MetaCommentAction.hxx>
 #include <sal/log.hxx>

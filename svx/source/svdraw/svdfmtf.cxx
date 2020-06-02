@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/MetaFloatTransparentAction.hxx>
 #include <vcl/MetaCommentAction.hxx>
 #include "svdfmtf.hxx"
 #include <math.h>

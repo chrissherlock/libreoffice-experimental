@@ -36,6 +36,7 @@
 
 // Forward Declarations
 
+class MetaFloatTransparentAction;
 class MetaCommentAction;
 class SfxItemSet;
 class SdrObjList;
