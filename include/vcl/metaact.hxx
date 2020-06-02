@@ -1493,38 +1493,6 @@ public:
     RasterOp GetRasterOp() const { return meRasterOp; }
 };
 
-class SAL_DLLPUBLIC_RTTI MetaTransparentAction final : public MetaAction
-{
-private:
-    tools::PolyPolygon maPolyPoly;
-    sal_uInt16 mnTransPercent;
-
-public:
-    MetaTransparentAction();
-    MetaTransparentAction(MetaTransparentAction const&) = default;
-    MetaTransparentAction(MetaTransparentAction&&) = default;
-    MetaTransparentAction& operator=(MetaTransparentAction const&) = delete; // due to MetaAction
-    MetaTransparentAction& operator=(MetaTransparentAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaTransparentAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaTransparentAction(const tools::PolyPolygon& rPolyPoly, sal_uInt16 nTransPercent);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const tools::PolyPolygon& GetPolyPolygon() const { return maPolyPoly; }
-    sal_uInt16 GetTransparence() const { return mnTransPercent; }
-
-    bool IsTransparent() const override { return true; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
