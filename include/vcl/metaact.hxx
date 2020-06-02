@@ -1346,31 +1346,6 @@ public:
     bool IsSetting() const { return mbSet; }
 };
 
-class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaTextAlignAction final : public MetaAction
-{
-private:
-    TextAlign maAlign;
-
-public:
-    MetaTextAlignAction();
-    MetaTextAlignAction(MetaTextAlignAction const&) = default;
-    MetaTextAlignAction(MetaTextAlignAction&&) = default;
-    MetaTextAlignAction& operator=(MetaTextAlignAction const&) = delete; // due to MetaAction
-    MetaTextAlignAction& operator=(MetaTextAlignAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaTextAlignAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    explicit MetaTextAlignAction(TextAlign eAlign);
-
-    TextAlign GetTextAlign() const { return maAlign; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
