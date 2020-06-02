@@ -27,6 +27,7 @@
 #include <vcl/dibtools.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaPushAction.hxx>
 #include <vcl/MetaPopAction.hxx>
 #include <vcl/MetaRasterOpAction.hxx>
 #include <vcl/MetaTransparentAction.hxx>

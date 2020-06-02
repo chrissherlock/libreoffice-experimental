@@ -29,6 +29,7 @@
 #include <vcl/PrinterOptions.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaPushAction.hxx>
 #include <vcl/MetaPopAction.hxx>
 #include <vcl/MetaTransparentAction.hxx>
 #include <vcl/MetaFloatTransparentAction.hxx>

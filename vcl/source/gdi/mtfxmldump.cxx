@@ -12,6 +12,7 @@
 #include <tools/fract.hxx>
 
 #include <vcl/metaact.hxx>
+#include <vcl/MetaPushAction.hxx>
 #include <vcl/MetaRasterOpAction.hxx>
 #include <vcl/MetaTransparentAction.hxx>
 #include <vcl/MetaCommentAction.hxx>

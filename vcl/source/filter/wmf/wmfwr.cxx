@@ -33,6 +33,7 @@
 #include <tools/stream.hxx>
 #include <vcl/dibtools.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaPushAction.hxx>
 #include <vcl/MetaRasterOpAction.hxx>
 #include <vcl/MetaTransparentAction.hxx>
 #include <vcl/MetaFloatTransparentAction.hxx>

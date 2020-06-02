@@ -1425,31 +1425,6 @@ public:
     const vcl::Font& GetFont() const { return maFont; }
 };
 
-class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaPushAction final : public MetaAction
-{
-private:
-    PushFlags mnFlags;
-
-public:
-    MetaPushAction();
-    MetaPushAction(MetaPushAction const&) = default;
-    MetaPushAction(MetaPushAction&&) = default;
-    MetaPushAction& operator=(MetaPushAction const&) = delete; // due to MetaAction
-    MetaPushAction& operator=(MetaPushAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaPushAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    explicit MetaPushAction(PushFlags nFlags);
-
-    PushFlags GetFlags() const { return mnFlags; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
