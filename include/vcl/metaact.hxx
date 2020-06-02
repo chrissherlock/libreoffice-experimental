@@ -1598,33 +1598,6 @@ public:
     const Size& GetSize() const { return maSize; }
 };
 
-class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaRefPointAction final : public MetaAction
-{
-private:
-    Point maRefPoint;
-    bool mbSet;
-
-public:
-    MetaRefPointAction();
-    MetaRefPointAction(MetaRefPointAction const&) = default;
-    MetaRefPointAction(MetaRefPointAction&&) = default;
-    MetaRefPointAction& operator=(MetaRefPointAction const&) = delete; // due to MetaAction
-    MetaRefPointAction& operator=(MetaRefPointAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaRefPointAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaRefPointAction(const Point& rRefPoint, bool bSet);
-
-    const Point& GetRefPoint() const { return maRefPoint; }
-    bool IsSetting() const { return mbSet; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

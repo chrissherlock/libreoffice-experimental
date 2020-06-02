@@ -24,6 +24,7 @@
 #include <vcl/gdimtf.hxx>
 #include <vcl/graph.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaRefPointAction.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/toolkit/unowrap.hxx>
