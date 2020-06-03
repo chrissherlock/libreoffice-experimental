@@ -1153,36 +1153,6 @@ public:
     const vcl::Region& GetRegion() const { return maRegion; }
 };
 
-class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaMoveClipRegionAction final : public MetaAction
-{
-private:
-    long mnHorzMove;
-    long mnVertMove;
-
-public:
-    MetaMoveClipRegionAction();
-    MetaMoveClipRegionAction(MetaMoveClipRegionAction const&) = default;
-    MetaMoveClipRegionAction(MetaMoveClipRegionAction&&) = default;
-    MetaMoveClipRegionAction& operator=(MetaMoveClipRegionAction const&)
-        = delete; // due to MetaAction
-    MetaMoveClipRegionAction& operator=(MetaMoveClipRegionAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaMoveClipRegionAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaMoveClipRegionAction(long nHorzMove, long nVertMove);
-
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    long GetHorzMove() const { return mnHorzMove; }
-    long GetVertMove() const { return mnVertMove; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
