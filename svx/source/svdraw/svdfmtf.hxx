@@ -27,6 +27,7 @@
 #include <svl/itemset.hxx>
 #include <tools/fract.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaTextFillColorAction.hxx>
 #include <vcl/MetaTextLineColorAction.hxx>
 #include <vcl/MetaOverlineColorAction.hxx>
 #include <vcl/MetaTextAlignAction.hxx>

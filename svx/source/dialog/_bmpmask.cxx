@@ -19,6 +19,7 @@
 
 #include <vcl/event.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaTextFillColorAction.hxx>
 #include <vcl/MetaFontAction.hxx>
 #include <vcl/virdev.hxx>
 #include <svtools/valueset.hxx>

@@ -33,6 +33,7 @@
 #include <tools/stream.hxx>
 #include <vcl/dibtools.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaTextFillColorAction.hxx>
 #include <vcl/MetaTextAlignAction.hxx>
 #include <vcl/MetaMapModeAction.hxx>
 #include <vcl/MetaFontAction.hxx>

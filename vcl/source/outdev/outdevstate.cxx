@@ -22,6 +22,7 @@
 
 #include <tools/debug.hxx>
 #include <vcl/gdimtf.hxx>
+#include <vcl/MetaTextFillColorAction.hxx>
 #include <vcl/MetaTextAlignAction.hxx>
 #include <vcl/MetaFontAction.hxx>
 #include <vcl/MetaPushAction.hxx>
