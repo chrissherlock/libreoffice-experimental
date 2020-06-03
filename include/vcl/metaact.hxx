@@ -1318,34 +1318,6 @@ public:
     bool IsSetting() const { return mbSet; }
 };
 
-class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaOverlineColorAction final : public MetaAction
-{
-private:
-    Color maColor;
-    bool mbSet;
-
-public:
-    MetaOverlineColorAction();
-    MetaOverlineColorAction(MetaOverlineColorAction const&) = default;
-    MetaOverlineColorAction(MetaOverlineColorAction&&) = default;
-    MetaOverlineColorAction& operator=(MetaOverlineColorAction const&)
-        = delete; // due to MetaAction
-    MetaOverlineColorAction& operator=(MetaOverlineColorAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaOverlineColorAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaOverlineColorAction(const Color& rColor, bool bSet);
-
-    const Color& GetColor() const { return maColor; }
-    bool IsSetting() const { return mbSet; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

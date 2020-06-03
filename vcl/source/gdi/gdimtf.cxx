@@ -28,6 +28,7 @@
 #include <tools/fract.hxx>
 #include <vcl/BitmapPalette.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaOverlineColorAction.hxx>
 #include <vcl/MetaFontAction.hxx>
 #include <vcl/MetaPushAction.hxx>
 #include <vcl/MetaTransparentAction.hxx>
