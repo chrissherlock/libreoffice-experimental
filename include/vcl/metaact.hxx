@@ -1183,33 +1183,6 @@ public:
     long GetVertMove() const { return mnVertMove; }
 };
 
-class VCL_DLLPUBLIC MetaLineColorAction final : public MetaAction
-{
-private:
-    Color maColor;
-    bool mbSet;
-
-public:
-    MetaLineColorAction();
-    MetaLineColorAction(MetaLineColorAction const&) = default;
-    MetaLineColorAction(MetaLineColorAction&&) = default;
-    MetaLineColorAction& operator=(MetaLineColorAction const&) = delete; // due to MetaAction
-    MetaLineColorAction& operator=(MetaLineColorAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaLineColorAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaLineColorAction(const Color& rColor, bool bSet);
-
-    const Color& GetColor() const { return maColor; }
-    bool IsSetting() const { return mbSet; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
