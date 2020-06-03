@@ -19,6 +19,7 @@
 
 #include <vcl/gdimetafiletools.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaClipRegionAction.hxx>
 #include <vcl/MetaISectRectClipRegionAction.hxx>
 #include <vcl/MetaISectRegionClipRegionAction.hxx>
 #include <vcl/MetaMoveClipRegionAction.hxx>

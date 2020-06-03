@@ -24,6 +24,7 @@
 #include <vcl/weld.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaClipRegionAction.hxx>
 #include <vcl/MetaLineColorAction.hxx>
 #include <vcl/MetaFillColorAction.hxx>
 #include <vcl/MetaMapModeAction.hxx>

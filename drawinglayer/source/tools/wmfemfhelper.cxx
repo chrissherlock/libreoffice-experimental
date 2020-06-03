@@ -21,6 +21,7 @@
 #include <drawinglayer/primitive2d/pointarrayprimitive2d.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaClipRegionAction.hxx>
 #include <vcl/MetaISectRectClipRegionAction.hxx>
 #include <vcl/MetaISectRegionClipRegionAction.hxx>
 #include <vcl/MetaMoveClipRegionAction.hxx>

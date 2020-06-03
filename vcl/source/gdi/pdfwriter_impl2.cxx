@@ -23,6 +23,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaClipRegionAction.hxx>
 #include <vcl/MetaISectRectClipRegionAction.hxx>
 #include <vcl/MetaISectRegionClipRegionAction.hxx>
 #include <vcl/MetaMoveClipRegionAction.hxx>

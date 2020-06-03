@@ -1063,36 +1063,6 @@ public:
     const Wallpaper& GetWallpaper() const { return maWallpaper; }
 };
 
-class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaClipRegionAction final : public MetaAction
-{
-private:
-    vcl::Region maRegion;
-    bool mbClip;
-
-public:
-    MetaClipRegionAction();
-    MetaClipRegionAction(MetaClipRegionAction const&) = default;
-    MetaClipRegionAction(MetaClipRegionAction&&) = default;
-    MetaClipRegionAction& operator=(MetaClipRegionAction const&) = delete; // due to MetaAction
-    MetaClipRegionAction& operator=(MetaClipRegionAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaClipRegionAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaClipRegionAction(const vcl::Region& rRegion, bool bClip);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const vcl::Region& GetRegion() const { return maRegion; }
-    bool IsClipping() const { return mbClip; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
