@@ -20,6 +20,7 @@
 #include <vcl/vclenum.hxx>
 #include <vcl/bitmapaccess.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaFillColorAction.hxx>
 #include <vcl/BitmapSimpleColorQuantizationFilter.hxx>
 #include <vcl/svapp.hxx>
 

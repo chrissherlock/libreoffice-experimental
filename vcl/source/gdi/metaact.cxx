@@ -27,6 +27,7 @@
 #include <vcl/dibtools.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaFillColorAction.hxx>
 #include <vcl/MetaTextColorAction.hxx>
 #include <vcl/MetaTextFillColorAction.hxx>
 #include <vcl/MetaTextLineColorAction.hxx>
