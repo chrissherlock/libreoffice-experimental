@@ -23,6 +23,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaTextColorAction.hxx>
 #include <vcl/MetaTextFillColorAction.hxx>
 #include <vcl/MetaTextLineColorAction.hxx>
 #include <vcl/MetaOverlineColorAction.hxx>

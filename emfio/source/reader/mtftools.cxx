@@ -26,6 +26,7 @@
 #include <vcl/graphictools.hxx>
 #include <vcl/BitmapTools.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaTextColorAction.hxx>
 #include <vcl/MetaTextFillColorAction.hxx>
 #include <vcl/MetaTextAlignAction.hxx>
 #include <vcl/MetaFontAction.hxx>
