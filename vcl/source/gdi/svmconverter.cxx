@@ -28,6 +28,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaTextLineColorAction.hxx>
 #include <vcl/MetaTextAlignAction.hxx>
 #include <vcl/MetaMapModeAction.hxx>
 #include <vcl/MetaFontAction.hxx>

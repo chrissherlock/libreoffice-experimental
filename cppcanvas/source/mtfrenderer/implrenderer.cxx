@@ -48,6 +48,7 @@
 #include <vcl/canvastools.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaTextLineColorAction.hxx>
 #include <vcl/MetaOverlineColorAction.hxx>
 #include <vcl/MetaTextAlignAction.hxx>
 #include <vcl/MetaFontAction.hxx>
