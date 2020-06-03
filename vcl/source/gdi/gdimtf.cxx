@@ -28,6 +28,7 @@
 #include <tools/fract.hxx>
 #include <vcl/BitmapPalette.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaISectRegionClipRegionAction.hxx>
 #include <vcl/MetaMoveClipRegionAction.hxx>
 #include <vcl/MetaLineColorAction.hxx>
 #include <vcl/MetaFillColorAction.hxx>

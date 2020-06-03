@@ -26,6 +26,7 @@
 #include <vcl/graphictools.hxx>
 #include <vcl/BitmapTools.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaISectRegionClipRegionAction.hxx>
 #include <vcl/MetaLineColorAction.hxx>
 #include <vcl/MetaFillColorAction.hxx>
 #include <vcl/MetaTextColorAction.hxx>

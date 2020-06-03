@@ -48,6 +48,7 @@
 #include <vcl/canvastools.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaISectRegionClipRegionAction.hxx>
 #include <vcl/MetaLineColorAction.hxx>
 #include <vcl/MetaFillColorAction.hxx>
 #include <vcl/MetaTextColorAction.hxx>

@@ -22,6 +22,7 @@
 
 #include <tools/debug.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaISectRegionClipRegionAction.hxx>
 #include <vcl/MetaMoveClipRegionAction.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/gdimtf.hxx>
