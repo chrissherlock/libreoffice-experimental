@@ -26,6 +26,7 @@
 #include <tools/helpers.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaISectRectClipRegionAction.hxx>
 #include <vcl/GraphicObject.hxx>
 #include <vcl/GraphicLoader.hxx>
 #include <vcl/outdev.hxx>

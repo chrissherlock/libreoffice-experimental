@@ -1093,36 +1093,6 @@ public:
     bool IsClipping() const { return mbClip; }
 };
 
-class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaISectRectClipRegionAction final : public MetaAction
-{
-private:
-    tools::Rectangle maRect;
-
-public:
-    MetaISectRectClipRegionAction();
-    MetaISectRectClipRegionAction(MetaISectRectClipRegionAction const&) = default;
-    MetaISectRectClipRegionAction(MetaISectRectClipRegionAction&&) = default;
-    MetaISectRectClipRegionAction& operator=(MetaISectRectClipRegionAction const&)
-        = delete; // due to MetaAction
-    MetaISectRectClipRegionAction& operator=(MetaISectRectClipRegionAction&&)
-        = delete; // due to MetaAction
-private:
-    virtual ~MetaISectRectClipRegionAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    explicit MetaISectRectClipRegionAction(const tools::Rectangle&);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const tools::Rectangle& GetRect() const { return maRect; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
