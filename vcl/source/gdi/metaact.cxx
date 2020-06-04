@@ -27,6 +27,7 @@
 #include <vcl/dibtools.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaBmpExScalePartAction.hxx>
 #include <vcl/MetaMaskAction.hxx>
 #include <vcl/MetaMaskScaleAction.hxx>
 #include <vcl/MetaMaskScalePartAction.hxx>

@@ -798,45 +798,6 @@ public:
     bool IsTransparent() const override { return GetBitmapEx().IsTransparent(); }
 };
 
-class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaBmpExScalePartAction final : public MetaAction
-{
-private:
-    BitmapEx maBmpEx;
-    Point maDstPt;
-    Size maDstSz;
-    Point maSrcPt;
-    Size maSrcSz;
-
-public:
-    MetaBmpExScalePartAction();
-    MetaBmpExScalePartAction(MetaBmpExScalePartAction const&) = default;
-    MetaBmpExScalePartAction(MetaBmpExScalePartAction&&) = default;
-    MetaBmpExScalePartAction& operator=(MetaBmpExScalePartAction const&)
-        = delete; // due to MetaAction
-    MetaBmpExScalePartAction& operator=(MetaBmpExScalePartAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaBmpExScalePartAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaBmpExScalePartAction(const Point& rDstPt, const Size& rDstSz, const Point& rSrcPt,
-                             const Size& rSrcSz, const BitmapEx& rBmpEx);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const BitmapEx& GetBitmapEx() const { return maBmpEx; }
-    const Point& GetDestPoint() const { return maDstPt; }
-    const Size& GetDestSize() const { return maDstSz; }
-    const Point& GetSrcPoint() const { return maSrcPt; }
-    const Size& GetSrcSize() const { return maSrcSz; }
-    bool IsTransparent() const override { return GetBitmapEx().IsTransparent(); }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

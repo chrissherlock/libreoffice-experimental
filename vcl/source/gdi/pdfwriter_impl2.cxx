@@ -23,6 +23,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaBmpExScalePartAction.hxx>
 #include <vcl/MetaGradientAction.hxx>
 #include <vcl/MetaGradientExAction.hxx>
 #include <vcl/MetaHatchAction.hxx>

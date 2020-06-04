@@ -29,6 +29,7 @@
 #include <vcl/PrinterOptions.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaBmpExScalePartAction.hxx>
 #include <vcl/MetaMaskAction.hxx>
 #include <vcl/MetaMaskScaleAction.hxx>
 #include <vcl/MetaMaskScalePartAction.hxx>
