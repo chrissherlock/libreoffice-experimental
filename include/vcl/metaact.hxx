@@ -1003,36 +1003,6 @@ public:
     const Gradient& GetGradient() const { return maGradient; }
 };
 
-class SAL_DLLPUBLIC_RTTI MetaHatchAction final : public MetaAction
-{
-private:
-    tools::PolyPolygon maPolyPoly;
-    Hatch maHatch;
-
-public:
-    MetaHatchAction();
-    MetaHatchAction(MetaHatchAction const&) = default;
-    MetaHatchAction(MetaHatchAction&&) = default;
-    MetaHatchAction& operator=(MetaHatchAction const&) = delete; // due to MetaAction
-    MetaHatchAction& operator=(MetaHatchAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaHatchAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaHatchAction(const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const tools::PolyPolygon& GetPolyPolygon() const { return maPolyPoly; }
-    const Hatch& GetHatch() const { return maHatch; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

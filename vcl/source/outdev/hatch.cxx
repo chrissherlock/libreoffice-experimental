@@ -25,6 +25,7 @@
 
 #include <vcl/hatch.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaHatchAction.hxx>
 #include <vcl/MetaLineColorAction.hxx>
 #include <vcl/MetaPushAction.hxx>
 #include <vcl/MetaPopAction.hxx>

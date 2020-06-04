@@ -27,6 +27,7 @@
 #include <svl/itemset.hxx>
 #include <tools/fract.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaHatchAction.hxx>
 #include <vcl/MetaWallpaperAction.hxx>
 #include <vcl/MetaClipRegionAction.hxx>
 #include <vcl/MetaISectRegionClipRegionAction.hxx>
