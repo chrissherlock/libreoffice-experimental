@@ -635,36 +635,6 @@ public:
     FontLineStyle GetOverline() const { return meOverline; }
 };
 
-class VCL_DLLPUBLIC MetaBmpAction final : public MetaAction
-{
-private:
-    Bitmap maBmp;
-    Point maPt;
-
-public:
-    MetaBmpAction();
-    MetaBmpAction(MetaBmpAction const&) = default;
-    MetaBmpAction(MetaBmpAction&&) = default;
-    MetaBmpAction& operator=(MetaBmpAction const&) = delete; // due to MetaAction
-    MetaBmpAction& operator=(MetaBmpAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaBmpAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaBmpAction(const Point& rPt, const Bitmap& rBmp);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const Bitmap& GetBitmap() const { return maBmp; }
-    const Point& GetPoint() const { return maPt; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
