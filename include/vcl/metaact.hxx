@@ -903,46 +903,6 @@ public:
     const Size& GetSize() const { return maSz; }
 };
 
-class SAL_DLLPUBLIC_RTTI MetaMaskScalePartAction final : public MetaAction
-{
-private:
-    Bitmap maBmp;
-    Color maColor;
-    Point maDstPt;
-    Size maDstSz;
-    Point maSrcPt;
-    Size maSrcSz;
-
-public:
-    MetaMaskScalePartAction();
-    MetaMaskScalePartAction(MetaMaskScalePartAction const&) = default;
-    MetaMaskScalePartAction(MetaMaskScalePartAction&&) = default;
-    MetaMaskScalePartAction& operator=(MetaMaskScalePartAction const&)
-        = delete; // due to MetaAction
-    MetaMaskScalePartAction& operator=(MetaMaskScalePartAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaMaskScalePartAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaMaskScalePartAction(const Point& rDstPt, const Size& rDstSz, const Point& rSrcPt,
-                            const Size& rSrcSz, const Bitmap& rBmp, const Color& rColor);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const Bitmap& GetBitmap() const { return maBmp; }
-    const Color& GetColor() const { return maColor; }
-    const Point& GetDestPoint() const { return maDstPt; }
-    const Size& GetDestSize() const { return maDstSz; }
-    const Point& GetSrcPoint() const { return maSrcPt; }
-    const Size& GetSrcSize() const { return maSrcSz; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

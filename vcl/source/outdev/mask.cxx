@@ -21,6 +21,7 @@
 
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaMaskScalePartAction.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/virdev.hxx>
 

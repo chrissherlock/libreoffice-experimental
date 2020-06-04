@@ -27,6 +27,7 @@
 #include <svl/itemset.hxx>
 #include <tools/fract.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaMaskScalePartAction.hxx>
 #include <vcl/MetaGradientAction.hxx>
 #include <vcl/MetaGradientExAction.hxx>
 #include <vcl/MetaHatchAction.hxx>
