@@ -44,6 +44,7 @@
 #include <svx/ImageMapInfo.hxx>
 #include <unotools/streamwrap.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaBmpScaleAction.hxx>
 #include <svx/svxids.hrc>
 #include <toolkit/helper/vclunohelper.hxx>
 #include <svtools/embedhlp.hxx>
