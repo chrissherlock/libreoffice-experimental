@@ -24,6 +24,7 @@
 #include <vcl/gdimtf.hxx>
 #include <vcl/gradient.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaGradientAction.hxx>
 #include <vcl/MetaGradientExAction.hxx>
 #include <vcl/MetaISectRectClipRegionAction.hxx>
 #include <vcl/MetaLineColorAction.hxx>

@@ -12,6 +12,7 @@
 #include <tools/fract.hxx>
 
 #include <vcl/metaact.hxx>
+#include <vcl/MetaGradientAction.hxx>
 #include <vcl/MetaHatchAction.hxx>
 #include <vcl/MetaWallpaperAction.hxx>
 #include <vcl/MetaClipRegionAction.hxx>

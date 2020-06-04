@@ -27,6 +27,7 @@
 #include <vcl/dibtools.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaGradientAction.hxx>
 #include <vcl/MetaGradientExAction.hxx>
 #include <vcl/MetaHatchAction.hxx>
 #include <vcl/MetaWallpaperAction.hxx>

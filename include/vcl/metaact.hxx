@@ -943,36 +943,6 @@ public:
     const Size& GetSrcSize() const { return maSrcSz; }
 };
 
-class SAL_DLLPUBLIC_RTTI MetaGradientAction final : public MetaAction
-{
-private:
-    tools::Rectangle maRect;
-    Gradient maGradient;
-
-public:
-    MetaGradientAction();
-    MetaGradientAction(MetaGradientAction const&) = default;
-    MetaGradientAction(MetaGradientAction&&) = default;
-    MetaGradientAction& operator=(MetaGradientAction const&) = delete; // due to MetaAction
-    MetaGradientAction& operator=(MetaGradientAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaGradientAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaGradientAction(const tools::Rectangle& rRect, const Gradient& rGradient);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const tools::Rectangle& GetRect() const { return maRect; }
-    const Gradient& GetGradient() const { return maGradient; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

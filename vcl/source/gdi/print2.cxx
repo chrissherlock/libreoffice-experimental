@@ -29,6 +29,7 @@
 #include <vcl/PrinterOptions.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaGradientAction.hxx>
 #include <vcl/MetaGradientExAction.hxx>
 #include <vcl/MetaHatchAction.hxx>
 #include <vcl/MetaWallpaperAction.hxx>
