@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/MetaGradientExAction.hxx>
 #include <vcl/MetaHatchAction.hxx>
 #include <vcl/MetaPushAction.hxx>
 #include <vcl/MetaTransparentAction.hxx>

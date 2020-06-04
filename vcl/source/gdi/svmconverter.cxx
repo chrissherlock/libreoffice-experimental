@@ -28,6 +28,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaGradientExAction.hxx>
 #include <vcl/MetaHatchAction.hxx>
 #include <vcl/MetaClipRegionAction.hxx>
 #include <vcl/MetaISectRectClipRegionAction.hxx>

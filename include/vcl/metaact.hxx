@@ -973,36 +973,6 @@ public:
     const Gradient& GetGradient() const { return maGradient; }
 };
 
-class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaGradientExAction final : public MetaAction
-{
-private:
-    tools::PolyPolygon maPolyPoly;
-    Gradient maGradient;
-
-public:
-    MetaGradientExAction();
-    MetaGradientExAction(MetaGradientExAction const&) = default;
-    MetaGradientExAction(MetaGradientExAction&&) = default;
-    MetaGradientExAction& operator=(MetaGradientExAction const&) = delete; // due to MetaAction
-    MetaGradientExAction& operator=(MetaGradientExAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaGradientExAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaGradientExAction(const tools::PolyPolygon& rPolyPoly, const Gradient& rGradient);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const tools::PolyPolygon& GetPolyPolygon() const { return maPolyPoly; }
-    const Gradient& GetGradient() const { return maGradient; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
