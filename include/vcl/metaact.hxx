@@ -869,40 +869,6 @@ public:
     const Point& GetPoint() const { return maPt; }
 };
 
-class SAL_DLLPUBLIC_RTTI MetaMaskScaleAction final : public MetaAction
-{
-private:
-    Bitmap maBmp;
-    Color maColor;
-    Point maPt;
-    Size maSz;
-
-public:
-    MetaMaskScaleAction();
-    MetaMaskScaleAction(MetaMaskScaleAction const&) = default;
-    MetaMaskScaleAction(MetaMaskScaleAction&&) = default;
-    MetaMaskScaleAction& operator=(MetaMaskScaleAction const&) = delete; // due to MetaAction
-    MetaMaskScaleAction& operator=(MetaMaskScaleAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaMaskScaleAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaMaskScaleAction(const Point& rPt, const Size& rSz, const Bitmap& rBmp, const Color& rColor);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const Bitmap& GetBitmap() const { return maBmp; }
-    const Color& GetColor() const { return maColor; }
-    const Point& GetPoint() const { return maPt; }
-    const Size& GetSize() const { return maSz; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

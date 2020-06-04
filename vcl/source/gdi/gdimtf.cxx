@@ -28,6 +28,7 @@
 #include <tools/fract.hxx>
 #include <vcl/BitmapPalette.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaMaskScaleAction.hxx>
 #include <vcl/MetaMaskScalePartAction.hxx>
 #include <vcl/MetaGradientAction.hxx>
 #include <vcl/MetaGradientExAction.hxx>
