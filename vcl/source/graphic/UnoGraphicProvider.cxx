@@ -20,6 +20,7 @@
 #include <vcl/svapp.hxx>
 #include <vcl/image.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaBmpExScaleAction.hxx>
 #include <vcl/MetaPushAction.hxx>
 #include <imagerepository.hxx>
 #include <tools/fract.hxx>

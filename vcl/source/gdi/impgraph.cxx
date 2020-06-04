@@ -36,6 +36,7 @@
 #include <vcl/cvtgrf.hxx>
 #include <vcl/graph.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaBmpExScaleAction.hxx>
 #include <impgraph.hxx>
 #include <com/sun/star/graphic/XPrimitive2D.hpp>
 #include <vcl/dibtools.hxx>

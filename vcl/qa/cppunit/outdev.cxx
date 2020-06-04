@@ -15,6 +15,7 @@
 #include <vcl/bitmapaccess.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaBmpExScaleAction.hxx>
 #include <bitmapwriteaccess.hxx>
 #include <bufferdevice.hxx>
 #include <window.h>
