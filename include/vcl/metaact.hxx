@@ -697,37 +697,6 @@ public:
     const Size& GetSize() const { return maSz; }
 };
 
-class VCL_DLLPUBLIC MetaBmpExAction final : public MetaAction
-{
-private:
-    BitmapEx maBmpEx;
-    Point maPt;
-
-public:
-    MetaBmpExAction();
-    MetaBmpExAction(MetaBmpExAction const&) = default;
-    MetaBmpExAction(MetaBmpExAction&&) = default;
-    MetaBmpExAction& operator=(MetaBmpExAction const&) = delete; // due to MetaAction
-    MetaBmpExAction& operator=(MetaBmpExAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaBmpExAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaBmpExAction(const Point& rPt, const BitmapEx& rBmpEx);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const BitmapEx& GetBitmapEx() const { return maBmpEx; }
-    const Point& GetPoint() const { return maPt; }
-    bool IsTransparent() const override { return GetBitmapEx().IsTransparent(); }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -18,6 +18,7 @@
  */
 
 #include <vcl/MetaBmpScalePartAction.hxx>
+#include <vcl/MetaBmpExAction.hxx>
 #include <vcl/MetaBmpExScaleAction.hxx>
 #include <vcl/MetaBmpExScalePartAction.hxx>
 #include <vcl/MetaGradientAction.hxx>

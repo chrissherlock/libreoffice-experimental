@@ -19,6 +19,7 @@
 
 #include <vcl/gdimetafiletools.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaBmpExAction.hxx>
 #include <vcl/MetaBmpScalePartAction.hxx>
 #include <vcl/MetaBmpExScaleAction.hxx>
 #include <vcl/MetaBmpExScalePartAction.hxx>

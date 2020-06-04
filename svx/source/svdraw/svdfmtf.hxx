@@ -28,6 +28,7 @@
 #include <tools/fract.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/MetaBmpScalePartAction.hxx>
+#include <vcl/MetaBmpExAction.hxx>
 #include <vcl/MetaBmpExScaleAction.hxx>
 #include <vcl/MetaBmpExScalePartAction.hxx>
 #include <vcl/MetaMaskAction.hxx>

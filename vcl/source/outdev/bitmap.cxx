@@ -21,6 +21,7 @@
 
 #include <vcl/bitmap.hxx>
 #include <vcl/bitmapex.hxx>
+#include <vcl/MetaBmpExAction.hxx>
 #include <vcl/BitmapFilterStackBlur.hxx>
 #include <vcl/bitmapaccess.hxx>
 #include <vcl/canvastools.hxx>
