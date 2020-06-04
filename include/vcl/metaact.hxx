@@ -599,42 +599,6 @@ public:
     DrawTextFlags GetStyle() const { return mnStyle; }
 };
 
-class SAL_DLLPUBLIC_RTTI MetaTextLineAction final : public MetaAction
-{
-private:
-    Point maPos;
-    long mnWidth;
-    FontStrikeout meStrikeout;
-    FontLineStyle meUnderline;
-    FontLineStyle meOverline;
-
-public:
-    MetaTextLineAction();
-    MetaTextLineAction(MetaTextLineAction const&) = default;
-    MetaTextLineAction(MetaTextLineAction&&) = default;
-    MetaTextLineAction& operator=(MetaTextLineAction const&) = delete; // due to MetaAction
-    MetaTextLineAction& operator=(MetaTextLineAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaTextLineAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaTextLineAction(const Point& rPos, long nWidth, FontStrikeout eStrikeout,
-                       FontLineStyle eUnderline, FontLineStyle eOverline);
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const Point& GetStartPoint() const { return maPos; }
-    long GetWidth() const { return mnWidth; }
-    FontStrikeout GetStrikeout() const { return meStrikeout; }
-    FontLineStyle GetUnderline() const { return meUnderline; }
-    FontLineStyle GetOverline() const { return meOverline; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

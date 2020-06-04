@@ -12,6 +12,7 @@
 #include <tools/fract.hxx>
 
 #include <vcl/metaact.hxx>
+#include <vcl/MetaTextLineAction.hxx>
 #include <vcl/MetaBmpAction.hxx>
 #include <vcl/MetaBmpScaleAction.hxx>
 #include <vcl/MetaBmpScalePartAction.hxx>
