@@ -33,6 +33,7 @@
 #include <tools/stream.hxx>
 #include <vcl/dibtools.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaBmpScaleAction.hxx>
 #include <vcl/MetaBmpScalePartAction.hxx>
 #include <vcl/MetaBmpExAction.hxx>
 #include <vcl/MetaBmpExScaleAction.hxx>

@@ -25,6 +25,7 @@
 #include <unotools/resmgr.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaBmpScaleAction.hxx>
 #include <vcl/MetaBmpScalePartAction.hxx>
 #include <vcl/MetaBmpExAction.hxx>
 #include <vcl/MetaBmpExScaleAction.hxx>

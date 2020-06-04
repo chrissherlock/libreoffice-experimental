@@ -23,6 +23,7 @@
 #include <vcl/outdev.hxx>
 #include <vcl/gfxlink.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaBmpScaleAction.hxx>
 #include <vcl/graphicfilter.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
 #include <basegfx/polygon/b2dpolygontools.hxx>

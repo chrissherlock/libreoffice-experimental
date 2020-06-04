@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/MetaBmpScaleAction.hxx>
 #include <vcl/MetaBmpExScaleAction.hxx>
 #include <vcl/MetaCommentAction.hxx>
 

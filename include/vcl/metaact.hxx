@@ -665,38 +665,6 @@ public:
     const Point& GetPoint() const { return maPt; }
 };
 
-class VCL_DLLPUBLIC MetaBmpScaleAction final : public MetaAction
-{
-private:
-    Bitmap maBmp;
-    Point maPt;
-    Size maSz;
-
-public:
-    MetaBmpScaleAction();
-    MetaBmpScaleAction(MetaBmpScaleAction const&) = default;
-    MetaBmpScaleAction(MetaBmpScaleAction&&) = default;
-    MetaBmpScaleAction& operator=(MetaBmpScaleAction const&) = delete; // due to MetaAction
-    MetaBmpScaleAction& operator=(MetaBmpScaleAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaBmpScaleAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaBmpScaleAction(const Point& rPt, const Size& rSz, const Bitmap& rBmp);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const Bitmap& GetBitmap() const { return maBmp; }
-    const Point& GetPoint() const { return maPt; }
-    const Size& GetSize() const { return maSz; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -21,6 +21,7 @@
 #include <drawinglayer/primitive2d/pointarrayprimitive2d.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaBmpScaleAction.hxx>
 #include <vcl/MetaBmpScalePartAction.hxx>
 #include <vcl/MetaBmpExAction.hxx>
 #include <vcl/MetaBmpExScaleAction.hxx>
