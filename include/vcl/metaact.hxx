@@ -837,38 +837,6 @@ public:
     bool IsTransparent() const override { return GetBitmapEx().IsTransparent(); }
 };
 
-class SAL_DLLPUBLIC_RTTI MetaMaskAction final : public MetaAction
-{
-private:
-    Bitmap maBmp;
-    Color maColor;
-    Point maPt;
-
-public:
-    MetaMaskAction();
-    MetaMaskAction(MetaMaskAction const&) = default;
-    MetaMaskAction(MetaMaskAction&&) = default;
-    MetaMaskAction& operator=(MetaMaskAction const&) = delete; // due to MetaAction
-    MetaMaskAction& operator=(MetaMaskAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaMaskAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaMaskAction(const Point& rPt, const Bitmap& rBmp, const Color& rColor);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const Bitmap& GetBitmap() const { return maBmp; }
-    const Color& GetColor() const { return maColor; }
-    const Point& GetPoint() const { return maPt; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
