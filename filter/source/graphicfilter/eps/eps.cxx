@@ -25,6 +25,7 @@
 #include <unotools/resmgr.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaWallpaperAction.hxx>
 #include <vcl/MetaClipRegionAction.hxx>
 #include <vcl/MetaISectRectClipRegionAction.hxx>
 #include <vcl/MetaISectRegionClipRegionAction.hxx>

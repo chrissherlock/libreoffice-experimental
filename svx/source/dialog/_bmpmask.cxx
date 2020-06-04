@@ -19,6 +19,7 @@
 
 #include <vcl/event.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaWallpaperAction.hxx>
 #include <vcl/MetaLineColorAction.hxx>
 #include <vcl/MetaFillColorAction.hxx>
 #include <vcl/MetaTextColorAction.hxx>

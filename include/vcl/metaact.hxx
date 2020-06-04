@@ -1033,36 +1033,6 @@ public:
     const Hatch& GetHatch() const { return maHatch; }
 };
 
-class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaWallpaperAction final : public MetaAction
-{
-private:
-    tools::Rectangle maRect;
-    Wallpaper maWallpaper;
-
-public:
-    MetaWallpaperAction();
-    MetaWallpaperAction(MetaWallpaperAction const&) = default;
-    MetaWallpaperAction(MetaWallpaperAction&&) = default;
-    MetaWallpaperAction& operator=(MetaWallpaperAction const&) = delete; // due to MetaAction
-    MetaWallpaperAction& operator=(MetaWallpaperAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaWallpaperAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaWallpaperAction(const tools::Rectangle& rRect, const Wallpaper& rPaper);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const tools::Rectangle& GetRect() const { return maRect; }
-    const Wallpaper& GetWallpaper() const { return maWallpaper; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
