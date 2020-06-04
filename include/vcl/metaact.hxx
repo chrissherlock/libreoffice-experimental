@@ -697,43 +697,6 @@ public:
     const Size& GetSize() const { return maSz; }
 };
 
-class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaBmpScalePartAction final : public MetaAction
-{
-private:
-    Bitmap maBmp;
-    Point maDstPt;
-    Size maDstSz;
-    Point maSrcPt;
-    Size maSrcSz;
-
-public:
-    MetaBmpScalePartAction();
-    MetaBmpScalePartAction(MetaBmpScalePartAction const&) = default;
-    MetaBmpScalePartAction(MetaBmpScalePartAction&&) = default;
-    MetaBmpScalePartAction& operator=(MetaBmpScalePartAction const&) = delete; // due to MetaAction
-    MetaBmpScalePartAction& operator=(MetaBmpScalePartAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaBmpScalePartAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaBmpScalePartAction(const Point& rDstPt, const Size& rDstSz, const Point& rSrcPt,
-                           const Size& rSrcSz, const Bitmap& rBmp);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const Bitmap& GetBitmap() const { return maBmp; }
-    const Point& GetDestPoint() const { return maDstPt; }
-    const Size& GetDestSize() const { return maDstSz; }
-    const Point& GetSrcPoint() const { return maSrcPt; }
-    const Size& GetSrcSize() const { return maSrcSz; }
-};
-
 class VCL_DLLPUBLIC MetaBmpExAction final : public MetaAction
 {
 private:
