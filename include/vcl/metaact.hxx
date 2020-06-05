@@ -530,43 +530,6 @@ public:
     long* GetDXArray() const { return mpDXAry.get(); }
 };
 
-class SAL_DLLPUBLIC_RTTI MetaStretchTextAction final : public MetaAction
-{
-private:
-    Point maPt;
-    OUString maStr;
-    sal_uInt32 mnWidth;
-    sal_Int32 mnIndex;
-    sal_Int32 mnLen;
-
-public:
-    MetaStretchTextAction();
-    MetaStretchTextAction(MetaStretchTextAction const&) = default;
-    MetaStretchTextAction(MetaStretchTextAction&&) = default;
-    MetaStretchTextAction& operator=(MetaStretchTextAction const&) = delete; // due to MetaAction
-    MetaStretchTextAction& operator=(MetaStretchTextAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaStretchTextAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaStretchTextAction(const Point& rPt, sal_uInt32 nWidth, const OUString& rStr,
-                          sal_Int32 nIndex, sal_Int32 nLen);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const Point& GetPoint() const { return maPt; }
-    const OUString& GetText() const { return maStr; }
-    sal_uInt32 GetWidth() const { return mnWidth; }
-    sal_Int32 GetIndex() const { return mnIndex; }
-    sal_Int32 GetLen() const { return mnLen; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
