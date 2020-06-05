@@ -31,6 +31,7 @@
 #include <vcl/MetaBmpExScaleAction.hxx>
 #include <vcl/MetaBmpScaleAction.hxx>
 #include <vcl/MetaTextArrayAction.hxx>
+#include <vcl/MetaPolyLineAction.hxx>
 #include <vcl/MetaISectRectClipRegionAction.hxx>
 #include <vcl/MetaISectRegionClipRegionAction.hxx>
 #include <vcl/MetaLineColorAction.hxx>

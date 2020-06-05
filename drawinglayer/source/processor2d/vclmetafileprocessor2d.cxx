@@ -35,6 +35,7 @@
 #include <vcl/gradient.hxx>
 #include <vcl/graphictools.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaPolyLineAction.hxx>
 #include <vcl/MetaCommentAction.hxx>
 #include <vcl/graph.hxx> // for PDFExtOutDevData Graphic support
 #include <toolkit/helper/formpdfexport.hxx> // for PDFExtOutDevData Graphic support

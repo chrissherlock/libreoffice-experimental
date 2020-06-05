@@ -375,37 +375,6 @@ public:
     const Point& GetEndPoint() const { return maEndPt; }
 };
 
-class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaPolyLineAction final : public MetaAction
-{
-private:
-    LineInfo maLineInfo;
-    tools::Polygon maPoly;
-
-public:
-    MetaPolyLineAction();
-    MetaPolyLineAction(MetaPolyLineAction const&) = default;
-    MetaPolyLineAction(MetaPolyLineAction&&) = default;
-    MetaPolyLineAction& operator=(MetaPolyLineAction const&) = delete; // due to MetaAction
-    MetaPolyLineAction& operator=(MetaPolyLineAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaPolyLineAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    explicit MetaPolyLineAction(const tools::Polygon&);
-    explicit MetaPolyLineAction(const tools::Polygon&, const LineInfo&);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const tools::Polygon& GetPolygon() const { return maPoly; }
-    const LineInfo& GetLineInfo() const { return maLineInfo; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
