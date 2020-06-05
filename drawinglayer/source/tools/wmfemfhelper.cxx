@@ -21,6 +21,7 @@
 #include <drawinglayer/primitive2d/pointarrayprimitive2d.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaTextArrayAction.hxx>
 #include <vcl/MetaStretchTextAction.hxx>
 #include <vcl/MetaTextRectAction.hxx>
 #include <vcl/MetaTextLineAction.hxx>

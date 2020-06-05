@@ -51,7 +51,7 @@
 #include <sal/log.hxx>
 
 #include <vcl/wmf.hxx>
-#include <vcl/metaact.hxx>
+#include <vcl/MetaTextArrayAction.hxx>
 #include <vcl/MetaFontAction.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/vcllayout.hxx>

@@ -496,40 +496,6 @@ public:
     sal_Int32 GetLen() const { return mnLen; }
 };
 
-class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaTextArrayAction final : public MetaAction
-{
-private:
-    Point maStartPt;
-    OUString maStr;
-    std::unique_ptr<long[]> mpDXAry;
-    sal_Int32 mnIndex;
-    sal_Int32 mnLen;
-
-    virtual ~MetaTextArrayAction() override;
-
-public:
-    MetaTextArrayAction();
-    MetaTextArrayAction(const MetaTextArrayAction& rAction);
-    MetaTextArrayAction(const Point& rStartPt, const OUString& rStr, const long* pDXAry,
-                        sal_Int32 nIndex, sal_Int32 nLen);
-
-    virtual void Execute(OutputDevice* pOut) override;
-
-    virtual rtl::Reference<MetaAction> Clone() override;
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    const Point& GetPoint() const { return maStartPt; }
-    const OUString& GetText() const { return maStr; }
-    sal_Int32 GetIndex() const { return mnIndex; }
-    sal_Int32 GetLen() const { return mnLen; }
-    long* GetDXArray() const { return mpDXAry.get(); }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -31,6 +31,7 @@
 #include <comphelper/fileformat.h>
 
 #include <vcl/canvastools.hxx>
+#include <vcl/MetaTextArrayAction.hxx>
 #include <vcl/MetaBmpExAction.hxx>
 #include <vcl/MetaStretchTextAction.hxx>
 #include <vcl/MetaRasterOpAction.hxx>
