@@ -27,9 +27,11 @@
 #include <vcl/BitmapTools.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/MetaPolygonAction.hxx>
+#include <vcl/MetaChordAction.hxx>
 #include <vcl/MetaPolyPolygonAction.hxx>
 #include <vcl/MetaBmpExScaleAction.hxx>
 #include <vcl/MetaBmpScaleAction.hxx>
+#include <vcl/MetaTextAlignAction.hxx>
 #include <vcl/MetaTextArrayAction.hxx>
 #include <vcl/MetaPolyLineAction.hxx>
 #include <vcl/MetaISectRectClipRegionAction.hxx>
