@@ -406,34 +406,6 @@ public:
     const LineInfo& GetLineInfo() const { return maLineInfo; }
 };
 
-class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaPolygonAction final : public MetaAction
-{
-private:
-    tools::Polygon maPoly;
-
-public:
-    MetaPolygonAction();
-    MetaPolygonAction(MetaPolygonAction const&) = default;
-    MetaPolygonAction(MetaPolygonAction&&) = default;
-    MetaPolygonAction& operator=(MetaPolygonAction const&) = delete; // due to MetaAction
-    MetaPolygonAction& operator=(MetaPolygonAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaPolygonAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    explicit MetaPolygonAction(const tools::Polygon&);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const tools::Polygon& GetPolygon() const { return maPoly; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

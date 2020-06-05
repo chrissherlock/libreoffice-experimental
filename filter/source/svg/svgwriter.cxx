@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/MetaPolygonAction.hxx>
 #include <vcl/MetaPolyPolygonAction.hxx>
 #include <vcl/MetaTextAction.hxx>
 #include <vcl/MetaTextArrayAction.hxx>

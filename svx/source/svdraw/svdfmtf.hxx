@@ -65,6 +65,7 @@
 
 // Forward Declarations
 
+class MetaPolygonAction;
 class MetaPolyPolygonAction;
 class MetaTextAction;
 class MetaTextArrayAction;

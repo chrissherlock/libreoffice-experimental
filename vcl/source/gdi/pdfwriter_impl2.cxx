@@ -23,6 +23,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaPolygonAction.hxx>
 #include <vcl/MetaPolyPolygonAction.hxx>
 #include <vcl/MetaTextAction.hxx>
 #include <vcl/MetaTextArrayAction.hxx>
