@@ -65,6 +65,7 @@
 
 // Forward Declarations
 
+class MetaTextRectAction;
 class MetaTransparentAction;
 class MetaFloatTransparentAction;
 class MetaCommentAction;

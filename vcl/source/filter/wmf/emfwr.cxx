@@ -31,6 +31,7 @@
 #include <vcl/lineinfo.hxx>
 #include <vcl/dibtools.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaTextRectAction.hxx>
 #include <vcl/MetaBmpAction.hxx>
 #include <vcl/MetaBmpScaleAction.hxx>
 #include <vcl/MetaBmpScalePartAction.hxx>

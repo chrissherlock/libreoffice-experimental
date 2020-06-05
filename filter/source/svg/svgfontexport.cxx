@@ -22,6 +22,7 @@
 #include "svgfilter.hxx"
 #include "svgwriter.hxx"
 
+#include <vcl/MetaTextRectAction.hxx>
 #include <vcl/unohelp.hxx>
 #include <vcl/font.hxx>
 #include <vcl/metric.hxx>

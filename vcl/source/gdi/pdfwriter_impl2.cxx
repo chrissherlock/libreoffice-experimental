@@ -23,6 +23,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaTextRectAction.hxx>
 #include <vcl/MetaTextLineAction.hxx>
 #include <vcl/MetaBmpAction.hxx>
 #include <vcl/MetaBmpScaleAction.hxx>

@@ -32,6 +32,7 @@
 #include <tools/debug.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaTextRectAction.hxx>
 #include <vcl/MetaTextColorAction.hxx>
 #include <vcl/MetaTextFillColorAction.hxx>
 #include <vcl/MetaTextAlignAction.hxx>
