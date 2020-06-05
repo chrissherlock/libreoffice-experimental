@@ -65,6 +65,7 @@
 
 // Forward Declarations
 
+class MetaTextAction;
 class MetaTextArrayAction;
 class MetaStretchTextAction;
 class MetaTextRectAction;

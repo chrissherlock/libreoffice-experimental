@@ -34,6 +34,7 @@
 #include <vcl/MetaTextArrayAction.hxx>
 #include <vcl/MetaBmpExAction.hxx>
 #include <vcl/MetaStretchTextAction.hxx>
+#include <vcl/MetaTextAction.hxx>
 #include <vcl/MetaRasterOpAction.hxx>
 #include <vcl/MetaFloatTransparentAction.hxx>
 #include <vcl/MetaCommentAction.hxx>
