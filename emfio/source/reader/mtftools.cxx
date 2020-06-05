@@ -26,6 +26,7 @@
 #include <vcl/graphictools.hxx>
 #include <vcl/BitmapTools.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaPolyPolygonAction.hxx>
 #include <vcl/MetaBmpExScaleAction.hxx>
 #include <vcl/MetaBmpScaleAction.hxx>
 #include <vcl/MetaTextArrayAction.hxx>
