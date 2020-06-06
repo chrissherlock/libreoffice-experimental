@@ -85,6 +85,7 @@
 #include <vcl/canvastools.hxx>
 #include <vcl/mtfxmldump.hxx>
 
+#include <ImplMetaReadData.hxx>
 #include <svmconverter.hxx>
 #include <TypeSerializer.hxx>
 

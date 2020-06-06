@@ -84,6 +84,8 @@
 #include <unotools/fontdefs.hxx>
 #include <TypeSerializer.hxx>
 
+#include <ImplMetaReadData.hxx>
+
 namespace
 {
 

@@ -42,18 +42,6 @@ class OutputDevice;
 class SvStream;
 enum class DrawTextFlags;
 
-struct ImplMetaReadData
-{
-    rtl_TextEncoding meActualCharSet;
-    int mnParseDepth;
-
-    ImplMetaReadData()
-        : meActualCharSet(RTL_TEXTENCODING_ASCII_US)
-        , mnParseDepth(0)
-    {
-    }
-};
-
 struct ImplMetaWriteData
 {
     rtl_TextEncoding meActualCharSet;
