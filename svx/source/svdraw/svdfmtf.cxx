@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/MetaRoundRectAction.hxx>
 #include <vcl/MetaEllipseAction.hxx>
 #include <vcl/MetaArcAction.hxx>
 #include <vcl/MetaPieAction.hxx>

@@ -218,39 +218,6 @@ public:
     const tools::Rectangle& GetRect() const { return maRect; }
 };
 
-class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaRoundRectAction final : public MetaAction
-{
-private:
-    tools::Rectangle maRect;
-    sal_uInt32 mnHorzRound;
-    sal_uInt32 mnVertRound;
-
-public:
-    MetaRoundRectAction();
-    MetaRoundRectAction(MetaRoundRectAction const&) = default;
-    MetaRoundRectAction(MetaRoundRectAction&&) = default;
-    MetaRoundRectAction& operator=(MetaRoundRectAction const&) = delete; // due to MetaAction
-    MetaRoundRectAction& operator=(MetaRoundRectAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaRoundRectAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaRoundRectAction(const tools::Rectangle& rRect, sal_uInt32 nHorzRound,
-                        sal_uInt32 nVertRound);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const tools::Rectangle& GetRect() const { return maRect; }
-    sal_uInt32 GetHorzRound() const { return mnHorzRound; }
-    sal_uInt32 GetVertRound() const { return mnVertRound; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

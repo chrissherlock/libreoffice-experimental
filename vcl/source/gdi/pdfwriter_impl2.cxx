@@ -23,6 +23,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaRoundRectAction.hxx>
 #include <vcl/MetaEllipseAction.hxx>
 #include <vcl/MetaArcAction.hxx>
 #include <vcl/MetaChordAction.hxx>
