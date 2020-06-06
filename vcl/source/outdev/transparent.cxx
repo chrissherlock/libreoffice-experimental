@@ -25,6 +25,7 @@
 
 #include <memory>
 
+#include <vcl/bitmapex.hxx>
 #include <vcl/bitmapaccess.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/MetaTransparentAction.hxx>

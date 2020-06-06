@@ -20,6 +20,8 @@
 #ifndef INCLUDED_VCL_METATRANSPARENTACTION_HXX
 #define INCLUDED_VCL_METATRANSPARENTACTION_HXX
 
+#include <tools/poly.hxx>
+
 #include <vcl/MetaAction.hxx>
 
 class SAL_DLLPUBLIC_RTTI MetaTransparentAction final : public MetaAction

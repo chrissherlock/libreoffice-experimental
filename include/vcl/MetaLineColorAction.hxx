@@ -20,6 +20,8 @@
 #ifndef INCLUDED_VCL_METALINECOLORACTION_HXX
 #define INCLUDED_VCL_METALINECOLORACTION_HXX
 
+#include <tools/color.hxx>
+
 #include <vcl/MetaAction.hxx>
 
 class VCL_DLLPUBLIC MetaLineColorAction final : public MetaAction

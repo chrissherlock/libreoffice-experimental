@@ -20,6 +20,7 @@
 #ifndef INCLUDED_VCL_METABMPSCALEACTION_HXX
 #define INCLUDED_VCL_METABMPSCALEACTION_HXX
 
+#include <vcl/bitmap.hxx>
 #include <vcl/MetaAction.hxx>
 
 class VCL_DLLPUBLIC MetaBmpScaleAction final : public MetaAction

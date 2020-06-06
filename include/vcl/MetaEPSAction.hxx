@@ -20,6 +20,8 @@
 #ifndef INCLUDED_VCL_METAEPSACTION_HXX
 #define INCLUDED_VCL_METAEPSACTION_HXX
 
+#include <vcl/gfxlink.hxx>
+#include <vcl/gdimtf.hxx>
 #include <vcl/MetaAction.hxx>
 
 class VCL_DLLPUBLIC MetaEPSAction final : public MetaAction

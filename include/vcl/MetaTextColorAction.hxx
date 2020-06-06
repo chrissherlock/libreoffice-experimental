@@ -20,6 +20,8 @@
 #ifndef INCLUDED_VCL_METATEXTCOLORACTION_HXX
 #define INCLUDED_VCL_METATEXTCOLORACTION_HXX
 
+#include <tools/color.hxx>
+
 #include <vcl/MetaAction.hxx>
 
 class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaTextColorAction final : public MetaAction

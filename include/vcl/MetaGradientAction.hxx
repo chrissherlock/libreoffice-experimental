@@ -20,6 +20,7 @@
 #ifndef INCLUDED_VCL_METAGRADIENTACTION_HXX
 #define INCLUDED_VCL_METAGRADIENTACTION_HXX
 
+#include <vcl/gradient.hxx>
 #include <vcl/MetaAction.hxx>
 
 class SAL_DLLPUBLIC_RTTI MetaGradientAction final : public MetaAction

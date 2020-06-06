@@ -20,9 +20,10 @@
 #include <cassert>
 
 #include <sal/types.h>
-
 #include <tools/poly.hxx>
 #include <tools/helpers.hxx>
+
+#include <vcl/gdimtf.hxx>
 #include <vcl/MetaRectAction.hxx>
 #include <vcl/MetaRoundRectAction.hxx>
 #include <vcl/outdev.hxx>

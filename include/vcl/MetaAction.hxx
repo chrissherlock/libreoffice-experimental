@@ -20,27 +20,16 @@
 #ifndef INCLUDED_VCL_METAACT_HXX
 #define INCLUDED_VCL_METAACT_HXX
 
-#include <config_options.h>
-#include <memory>
-#include <vcl/dllapi.h>
-#include <vcl/gradient.hxx>
-#include <vcl/hatch.hxx>
-#include <vcl/wall.hxx>
-#include <vcl/font.hxx>
-#include <tools/poly.hxx>
-#include <vcl/bitmapex.hxx>
-#include <vcl/region.hxx>
-#include <vcl/outdevstate.hxx>
-#include <vcl/gdimtf.hxx>
-#include <vcl/gfxlink.hxx>
-#include <vcl/lineinfo.hxx>
-#include <vcl/metaactiontypes.hxx>
-#include <salhelper/simplereferenceobject.hxx>
 #include <rtl/ref.hxx>
+#include <salhelper/simplereferenceobject.hxx>
+
+#include <vcl/dllapi.h>
+#include <vcl/metaactiontypes.hxx>
 
 class OutputDevice;
 class SvStream;
 enum class DrawTextFlags;
+struct ImplMetaReadData;
 struct ImplMetaWriteData;
 
 class VCL_DLLPUBLIC MetaAction : public salhelper::SimpleReferenceObject

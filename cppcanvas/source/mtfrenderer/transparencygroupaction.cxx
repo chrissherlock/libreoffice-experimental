@@ -29,6 +29,7 @@
 #include <com/sun/star/rendering/XBitmap.hpp>
 #include <com/sun/star/rendering/XCanvas.hpp>
 
+#include <vcl/gradient.hxx>
 #include <vcl/bitmapex.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/virdev.hxx>

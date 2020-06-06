@@ -19,6 +19,8 @@
 
 #include <cassert>
 
+#include <vcl/bitmapex.hxx>
+#include <vcl/gradient.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/MetaWallpaperAction.hxx>
 #include <vcl/outdev.hxx>

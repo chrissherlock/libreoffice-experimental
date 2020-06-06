@@ -20,6 +20,7 @@
 #ifndef INCLUDED_VCL_METABMPEXACTION_HXX
 #define INCLUDED_VCL_METABMPEXACTION_HXX
 
+#include <vcl/bitmapex.hxx>
 #include <vcl/MetaAction.hxx>
 
 class VCL_DLLPUBLIC MetaBmpExAction final : public MetaAction

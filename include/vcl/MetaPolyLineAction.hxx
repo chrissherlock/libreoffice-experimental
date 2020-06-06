@@ -20,6 +20,9 @@
 #ifndef INCLUDED_VCL_METAPOLYLINEACTION_HXX
 #define INCLUDED_VCL_METAPOLYLINEACTION_HXX
 
+#include <tools/poly.hxx>
+
+#include <vcl/lineinfo.hxx>
 #include <vcl/MetaAction.hxx>
 
 class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaPolyLineAction final : public MetaAction

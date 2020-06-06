@@ -21,6 +21,8 @@
 #define INCLUDED_VCL_METAFLOATTRANSPARENTACTION_HXX
 
 #include <vcl/MetaAction.hxx>
+#include <vcl/gradient.hxx>
+#include <vcl/gdimtf.hxx>
 
 class SAL_DLLPUBLIC_RTTI MetaFloatTransparentAction final : public MetaAction
 {

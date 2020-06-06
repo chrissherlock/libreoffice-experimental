@@ -20,6 +20,9 @@
 #ifndef INCLUDED_VCL_METAHATCHACTION_HXX
 #define INCLUDED_VCL_METAHATCHACTION_HXX
 
+#include <tools/poly.hxx>
+
+#include <vcl/hatch.hxx>
 #include <vcl/MetaAction.hxx>
 
 class SAL_DLLPUBLIC_RTTI MetaHatchAction final : public MetaAction

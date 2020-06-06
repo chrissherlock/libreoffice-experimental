@@ -20,6 +20,8 @@
 #ifndef INCLUDED_VCL_METATEXTLINEACTION_HXX
 #define INCLUDED_VCL_METATEXTLINEACTION_HXX
 
+#include <tools/fontenum.hxx>
+
 #include <vcl/MetaAction.hxx>
 
 class SAL_DLLPUBLIC_RTTI MetaTextLineAction final : public MetaAction

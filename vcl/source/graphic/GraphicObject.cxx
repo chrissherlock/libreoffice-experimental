@@ -24,6 +24,7 @@
 #include <osl/diagnose.h>
 #include <tools/fract.hxx>
 #include <tools/helpers.hxx>
+#include <vcl/gdimtf.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/MetaISectRectClipRegionAction.hxx>
 #include <vcl/GraphicObject.hxx>

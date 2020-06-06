@@ -27,6 +27,7 @@
 #include <sot/formats.hxx>
 #include <vcl/GraphicObject.hxx>
 #include <vcl/svapp.hxx>
+#include <vcl/gdimtf.hxx>
 
 #include <sfx2/linkmgr.hxx>
 #include <svx/dialmgr.hxx>

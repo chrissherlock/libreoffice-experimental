@@ -20,6 +20,9 @@
 #ifndef INCLUDED_VCL_METALINEACTION_HXX
 #define INCLUDED_VCL_METALINEACTION_HXX
 
+#include <tools/gen.hxx>
+
+#include <vcl/lineinfo.hxx>
 #include <vcl/MetaAction.hxx>
 
 class VCL_DLLPUBLIC MetaLineAction final : public MetaAction

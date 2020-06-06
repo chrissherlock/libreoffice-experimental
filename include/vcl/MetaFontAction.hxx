@@ -20,6 +20,7 @@
 #ifndef INCLUDED_VCL_METAFONTACTION_HXX
 #define INCLUDED_VCL_METAFONTACTION_HXX
 
+#include <vcl/font.hxx>
 #include <vcl/MetaAction.hxx>
 
 class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaFontAction final : public MetaAction

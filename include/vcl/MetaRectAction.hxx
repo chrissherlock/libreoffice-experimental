@@ -20,6 +20,8 @@
 #ifndef INCLUDED_VCL_METARECTACTION_HXX
 #define INCLUDED_VCL_METARECTACTION_HXX
 
+#include <tools/gen.hxx>
+
 #include <vcl/MetaAction.hxx>
 
 class VCL_DLLPUBLIC MetaRectAction final : public MetaAction

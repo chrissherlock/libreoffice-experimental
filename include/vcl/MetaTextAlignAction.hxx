@@ -20,6 +20,8 @@
 #ifndef INCLUDED_VCL_METATEXTALIGNACTION_HXX
 #define INCLUDED_VCL_METATEXTALIGNACTION_HXX
 
+#include <tools/fontenum.hxx>
+
 #include <vcl/MetaAction.hxx>
 
 class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaTextAlignAction final : public MetaAction

@@ -23,6 +23,7 @@
 #include <tools/line.hxx>
 #include <tools/helpers.hxx>
 
+#include <vcl/gdimtf.hxx>
 #include <vcl/hatch.hxx>
 #include <vcl/MetaLineAction.hxx>
 #include <vcl/MetaHatchAction.hxx>

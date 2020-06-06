@@ -19,6 +19,7 @@
 
 #include <cassert>
 
+#include <vcl/bitmapex.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/MetaMaskAction.hxx>
 #include <vcl/MetaMaskScaleAction.hxx>

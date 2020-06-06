@@ -11,6 +11,8 @@
 #include <tools/XmlWriter.hxx>
 #include <tools/fract.hxx>
 
+#include <vcl/gdimtf.hxx>
+#include <vcl/gradient.hxx>
 #include <vcl/MetaPixelAction.hxx>
 #include <vcl/MetaPointAction.hxx>
 #include <vcl/MetaLineAction.hxx>

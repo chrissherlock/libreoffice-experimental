@@ -20,6 +20,7 @@
 #ifndef INCLUDED_VCL_METAPUSHACTION_HXX
 #define INCLUDED_VCL_METAPUSHACTION_HXX
 
+#include <vcl/outdevstate.hxx>
 #include <vcl/MetaAction.hxx>
 
 class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaPushAction final : public MetaAction
