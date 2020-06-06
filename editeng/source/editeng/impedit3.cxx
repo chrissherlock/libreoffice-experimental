@@ -17,9 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-
+#include <vcl/MetaAction.hxx>
 #include <vcl/svapp.hxx>
-#include <vcl/metaact.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/settings.hxx>
 

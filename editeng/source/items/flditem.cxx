@@ -18,7 +18,6 @@
  */
 
 #include <osl/file.hxx>
-#include <vcl/metaact.hxx>
 #include <vcl/MetaCommentAction.hxx>
 #include <svl/zforlist.hxx>
 #include <tools/urlobj.hxx>
