@@ -25,6 +25,7 @@
 #include <unotools/resmgr.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaPointAction.hxx>
 #include <vcl/MetaLineAction.hxx>
 #include <vcl/MetaRectAction.hxx>
 #include <vcl/MetaRoundRectAction.hxx>

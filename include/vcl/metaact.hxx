@@ -129,34 +129,6 @@ public:
     const Color& GetColor() const { return maColor; }
 };
 
-class SAL_DLLPUBLIC_RTTI MetaPointAction final : public MetaAction
-{
-private:
-    Point maPt;
-
-public:
-    MetaPointAction();
-    MetaPointAction(MetaPointAction const&) = default;
-    MetaPointAction(MetaPointAction&&) = default;
-    MetaPointAction& operator=(MetaPointAction const&) = delete; // due to MetaAction
-    MetaPointAction& operator=(MetaPointAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaPointAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    explicit MetaPointAction(const Point&);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const Point& GetPoint() const { return maPt; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
