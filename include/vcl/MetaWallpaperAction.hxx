@@ -51,6 +51,8 @@ public:
 
     const tools::Rectangle& GetRect() const { return maRect; }
     const Wallpaper& GetWallpaper() const { return maWallpaper; }
+
+    tools::Rectangle GetBoundsRect(const OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METAWALLPAPERACTION_HXX

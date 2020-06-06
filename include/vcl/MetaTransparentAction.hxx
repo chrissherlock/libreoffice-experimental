@@ -54,6 +54,8 @@ public:
     sal_uInt16 GetTransparence() const { return mnTransPercent; }
 
     bool IsTransparent(OutputDevice*) const override { return true; }
+
+    tools::Rectangle GetBoundsRect(const OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METATRANSPARENTACTION_HXX

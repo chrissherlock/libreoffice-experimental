@@ -54,6 +54,8 @@ public:
     const tools::Rectangle& GetRect() const { return maRect; }
 
     bool IsTransparent(OutputDevice*) const override;
+
+    tools::Rectangle GetBoundsRect(const OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METAELLIPSEACTION_HXX

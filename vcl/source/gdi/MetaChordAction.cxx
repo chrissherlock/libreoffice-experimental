@@ -33,4 +33,11 @@ bool MetaChordAction::IsTransparent(OutputDevice* pOutDev) const
     return !(!bLineTransparency || !bFillTransparency);
 }
 
+tools::Rectangle MetaChordAction::GetBoundsRect(const OutputDevice* pOutDev) const
+{
+    tools::Rectangle aBoundsRect(
+        tools::Polygon(GetRect(), GetStartPoint(), GetEndPoint(), PolyStyle::Chord).GetBoundRect());
+    return ClipBounds(aBoundsRect, pOutDev);
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

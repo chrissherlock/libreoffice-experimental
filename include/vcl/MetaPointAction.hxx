@@ -53,6 +53,8 @@ public:
     const Point& GetPoint() const { return maPt; }
 
     bool IsTransparent(OutputDevice* pOutDev) const override;
+
+    tools::Rectangle GetBoundsRect(const OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METAPOINTACTION_HXX

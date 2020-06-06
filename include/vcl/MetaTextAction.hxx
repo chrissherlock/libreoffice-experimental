@@ -54,6 +54,8 @@ public:
     const OUString& GetText() const { return maStr; }
     sal_Int32 GetIndex() const { return mnIndex; }
     sal_Int32 GetLen() const { return mnLen; }
+
+    tools::Rectangle GetBoundsRect(const OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METATEXTACTION_HXX

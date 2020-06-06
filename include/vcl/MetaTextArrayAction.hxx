@@ -20,6 +20,8 @@
 #ifndef INCLUDED_VCL_METATEXTARRAYACTION_HXX
 #define INCLUDED_VCL_METATEXTARRAYACTION_HXX
 
+#include <rtl/ustring.hxx>
+
 #include <vcl/MetaAction.hxx>
 
 class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaTextArrayAction final : public MetaAction
@@ -54,6 +56,10 @@ public:
     sal_Int32 GetIndex() const { return mnIndex; }
     sal_Int32 GetLen() const { return mnLen; }
     long* GetDXArray() const { return mpDXAry.get(); }
+
+    bool IsTransparent(OutputDevice* pOutDev) const override;
+
+    tools::Rectangle GetBoundsRect(const OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METATEXTARRAYACTION_HXX

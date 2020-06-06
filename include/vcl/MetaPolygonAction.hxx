@@ -54,6 +54,8 @@ public:
     const tools::Polygon& GetPolygon() const { return maPoly; }
 
     bool IsTransparent(OutputDevice*) const override;
+
+    tools::Rectangle GetBoundsRect(const OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METAPOLYGONACTION_HXX

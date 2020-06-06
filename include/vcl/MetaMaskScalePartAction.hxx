@@ -60,6 +60,8 @@ public:
     const Size& GetDestSize() const { return maDstSz; }
     const Point& GetSrcPoint() const { return maSrcPt; }
     const Size& GetSrcSize() const { return maSrcSz; }
+
+    tools::Rectangle GetBoundsRect(const OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METAMASKSCALEPARTACTION_HXX

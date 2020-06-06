@@ -51,6 +51,8 @@ public:
 
     const tools::Rectangle& GetRect() const { return maRect; }
     const Gradient& GetGradient() const { return maGradient; }
+
+    tools::Rectangle GetBoundsRect(const OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METAGRADIENTACTION_HXX

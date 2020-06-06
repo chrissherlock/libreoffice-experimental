@@ -57,6 +57,8 @@ public:
     const GDIMetaFile& GetSubstitute() const { return maSubst; }
     const Point& GetPoint() const { return maPoint; }
     const Size& GetSize() const { return maSize; }
+
+    tools::Rectangle GetBoundsRect(const OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METAEPSACTION_HXX

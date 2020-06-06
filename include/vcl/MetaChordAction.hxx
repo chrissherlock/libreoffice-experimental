@@ -58,6 +58,8 @@ public:
     const Point& GetEndPoint() const { return maEndPt; }
 
     bool IsTransparent(OutputDevice*) const override;
+
+    tools::Rectangle GetBoundsRect(const OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METACHORDACTION_HXX

@@ -17,13 +17,25 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <vcl/MetaAction.hxx>
+#include <vcl/outdev.hxx>
+#include <vcl/MetaTextAction.hxx>
 
-bool MetaTextAction::IsTransparent(OutputDevice*)
+tools::Rectangle MetaTextAction::GetBoundsRect(const OutputDevice* pOutDev) const
 {
+    tools::Rectangle aBoundsRect;
     const OUString aString(GetText().copy(GetIndex(), GetLen()));
-    if (aString.isEmpty())
-        bRet = false;
+
+    if (!aString.isEmpty())
+    {
+        const Point aPtLog(GetPoint());
+
+        // #105987# Use API method instead of Impl* methods
+        // #107490# Set base parameter equal to index parameter
+        pOutDev->GetTextBoundRect(aBoundsRect, GetText(), GetIndex(), GetIndex(), GetLen());
+        aBoundsRect.Move(aPtLog.X(), aPtLog.Y());
+    }
+
+    return ClipBounds(aBoundsRect, pOutDev);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

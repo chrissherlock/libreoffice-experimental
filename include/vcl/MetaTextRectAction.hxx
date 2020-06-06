@@ -52,6 +52,8 @@ public:
     const tools::Rectangle& GetRect() const { return maRect; }
     const OUString& GetText() const { return maStr; }
     DrawTextFlags GetStyle() const { return mnStyle; }
+
+    tools::Rectangle GetBoundsRect(const OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METATEXTRECTACTION_HXX

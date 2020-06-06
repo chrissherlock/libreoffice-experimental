@@ -58,6 +58,8 @@ public:
     FontStrikeout GetStrikeout() const { return meStrikeout; }
     FontLineStyle GetUnderline() const { return meUnderline; }
     FontLineStyle GetOverline() const { return meOverline; }
+
+    tools::Rectangle GetBoundsRect(const OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METATEXTLINEACTION_HXX

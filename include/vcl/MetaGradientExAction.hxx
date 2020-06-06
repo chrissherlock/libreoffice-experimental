@@ -20,6 +20,7 @@
 #ifndef INCLUDED_VCL_METAGRADIENTEXACTION_HXX
 #define INCLUDED_VCL_METAGRADIENTEXACTION_HXX
 
+#include <vcl/gradient.hxx>
 #include <vcl/MetaAction.hxx>
 
 class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaGradientExAction final : public MetaAction
@@ -50,6 +51,8 @@ public:
 
     const tools::PolyPolygon& GetPolyPolygon() const { return maPolyPoly; }
     const Gradient& GetGradient() const { return maGradient; }
+
+    tools::Rectangle GetBoundsRect(const OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METAGRADIENTEXACTION_HXX

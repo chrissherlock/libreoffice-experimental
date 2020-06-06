@@ -22,6 +22,7 @@
 
 #include <rtl/ref.hxx>
 #include <salhelper/simplereferenceobject.hxx>
+#include <tools/gen.hxx>
 
 #include <vcl/dllapi.h>
 #include <vcl/metaactiontypes.hxx>
@@ -39,6 +40,9 @@ private:
 
 protected:
     virtual ~MetaAction() override;
+
+    tools::Rectangle ClipBounds(tools::Rectangle const& rActionBounds,
+                                const OutputDevice* pOutDev) const;
 
 public:
     MetaAction();
@@ -61,11 +65,8 @@ public:
     /** \#i10613# Extracted from Printer::GetPreparedMetaFile. Returns true
         if given action requires special transparency handling
     */
-    virtual bool IsTransparent(OutputDevice* pOutDev = nullptr) const
-    {
-        (void)pOutDev;
-        return false;
-    }
+    virtual bool IsTransparent(OutputDevice* pOutDev = nullptr) const;
+    virtual tools::Rectangle GetBoundsRect(const OutputDevice* pOutDev) const;
 
 public:
     static MetaAction* ReadMetaAction(SvStream& rIStm, ImplMetaReadData* pData);

@@ -52,6 +52,8 @@ public:
     const Bitmap& GetBitmap() const { return maBmp; }
     const Color& GetColor() const { return maColor; }
     const Point& GetPoint() const { return maPt; }
+
+    tools::Rectangle GetBoundsRect(const OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METAMASKACTION_HXX

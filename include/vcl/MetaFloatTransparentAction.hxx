@@ -60,6 +60,8 @@ public:
     const Size& GetSize() const { return maSize; }
     const Gradient& GetGradient() const { return maGradient; }
     bool IsTransparent(OutputDevice*) const override { return true; }
+
+    tools::Rectangle GetBoundsRect(const OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METAFLOATTRANSPARENTACTION_HXX

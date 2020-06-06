@@ -33,4 +33,11 @@ bool MetaArcAction::IsTransparent(OutputDevice* pOutDev) const
     return !bLineTransparency || !bFillTransparency;
 }
 
+tools::Rectangle MetaArcAction::GetBoundsRect(const OutputDevice* pOutDev) const
+{
+    tools::Rectangle aBoundsRect(
+        tools::Polygon(GetRect(), GetStartPoint(), GetEndPoint(), PolyStyle::Arc).GetBoundRect());
+    return ClipBounds(aBoundsRect, pOutDev);
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

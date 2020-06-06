@@ -53,6 +53,8 @@ public:
 
     const tools::PolyPolygon& GetPolyPolygon() const { return maPolyPoly; }
     const Hatch& GetHatch() const { return maHatch; }
+
+    tools::Rectangle GetBoundsRect(const OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METAHATCHACTION_HXX

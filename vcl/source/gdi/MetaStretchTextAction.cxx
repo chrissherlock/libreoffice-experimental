@@ -17,32 +17,26 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <vcl/outdev.hxx>
 #include <vcl/vcllayout.hxx>
-#include <vcl/MetaTextArrayAction.hxx>
+#include <vcl/outdev.hxx>
+#include <vcl/MetaStretchTextAction.hxx>
 
-#include <memory>
-
-bool MetaTextArrayAction::IsTransparent(OutputDevice*) const
-{
-    const OUString aString(GetText().copy(GetIndex(), GetLen()));
-    if (aString.isEmpty())
-        return false;
-
-    return true;
-}
-
-tools::Rectangle MetaTextArrayAction::GetBoundsRect(const OutputDevice* pOutDev) const
+tools::Rectangle MetaStretchTextAction::GetBoundsRect(const OutputDevice* pOutDev) const
 {
     const OUString aString(GetText().copy(GetIndex(), GetLen()));
 
     tools::Rectangle aActionBounds;
 
+    // #i16195# Literate copy from TextArray action, the
+    // semantics for the ImplLayout call are copied from the
+    // OutDev::DrawStretchText() code. Unfortunately, also in
+    // this case, public outdev methods such as GetTextWidth()
+    // don't provide enough info.
     if (!aString.isEmpty())
     {
         // #105987# ImplLayout takes everything in logical coordinates
         std::unique_ptr<SalLayout> pSalLayout
-            = pOutDev->ImplLayout(GetText(), GetIndex(), GetLen(), GetPoint(), 0, GetDXArray());
+            = pOutDev->ImplLayout(GetText(), GetIndex(), GetLen(), GetPoint(), GetWidth());
         if (pSalLayout)
         {
             tools::Rectangle aBoundRect(
@@ -53,4 +47,5 @@ tools::Rectangle MetaTextArrayAction::GetBoundsRect(const OutputDevice* pOutDev)
 
     return ClipBounds(aActionBounds, pOutDev);
 }
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

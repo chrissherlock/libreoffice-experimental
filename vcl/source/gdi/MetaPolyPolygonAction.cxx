@@ -33,4 +33,9 @@ bool MetaPolyPolygonAction::IsTransparent(OutputDevice* pOutDev) const
     return !(!bLineTransparency || !bFillTransparency);
 }
 
+tools::Rectangle MetaPolyPolygonAction::GetBoundsRect(const OutputDevice* pOutDev) const
+{
+    return ClipBounds(GetPolyPolygon().GetBoundRect(), pOutDev);
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

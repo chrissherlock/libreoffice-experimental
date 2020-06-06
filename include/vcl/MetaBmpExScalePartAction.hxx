@@ -20,6 +20,7 @@
 #ifndef INCLUDED_VCL_METABMPEXSCALEPARTACTION_HXX
 #define INCLUDED_VCL_METABMPEXSCALEPARTACTION_HXX
 
+#include <vcl/bitmapex.hxx>
 #include <vcl/MetaAction.hxx>
 
 class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaBmpExScalePartAction final : public MetaAction
@@ -59,6 +60,8 @@ public:
     const Point& GetSrcPoint() const { return maSrcPt; }
     const Size& GetSrcSize() const { return maSrcSz; }
     bool IsTransparent(OutputDevice*) const override { return GetBitmapEx().IsTransparent(); }
+
+    tools::Rectangle GetBoundsRect(const OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METABMPEXSCALEPARTACTION_HXX

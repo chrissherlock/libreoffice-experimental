@@ -54,6 +54,8 @@ public:
     const Point& GetPoint() const { return maPt; }
     const Size& GetSize() const { return maSz; }
     bool IsTransparent(OutputDevice*) const override { return GetBitmapEx().IsTransparent(); }
+
+    tools::Rectangle GetBoundsRect(const OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METABMPEXSCALEACTION_HXX

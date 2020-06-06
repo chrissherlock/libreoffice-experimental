@@ -262,7 +262,18 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/treelist/svimpbox \
     vcl/source/treelist/svlbitm \
     vcl/source/treelist/uiobject \
+    vcl/source/gdi/MetaAction \
+    vcl/source/gdi/MetaBmpAction \
+    vcl/source/gdi/MetaBmpScaleAction \
+    vcl/source/gdi/MetaBmpScalePartAction \
+    vcl/source/gdi/MetaBmpExAction \
+    vcl/source/gdi/MetaBmpExScaleAction \
+    vcl/source/gdi/MetaBmpExScalePartAction \
+    vcl/source/gdi/MetaMaskAction \
+    vcl/source/gdi/MetaMaskScaleAction \
+    vcl/source/gdi/MetaMaskScalePartAction \
     vcl/source/gdi/MetaPointAction \
+    vcl/source/gdi/MetaPixelAction \
     vcl/source/gdi/MetaLineAction \
     vcl/source/gdi/MetaArcAction \
     vcl/source/gdi/MetaPieAction \
@@ -273,6 +284,18 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/gdi/MetaRectAction \
     vcl/source/gdi/MetaRoundRectAction \
     vcl/source/gdi/MetaEllipseAction \
+    vcl/source/gdi/MetaGradientAction \
+    vcl/source/gdi/MetaGradientExAction \
+    vcl/source/gdi/MetaHatchAction \
+    vcl/source/gdi/MetaWallpaperAction \
+    vcl/source/gdi/MetaTransparentAction \
+    vcl/source/gdi/MetaFloatTransparentAction \
+    vcl/source/gdi/MetaEPSAction \
+    vcl/source/gdi/MetaTextAction \
+    vcl/source/gdi/MetaTextArrayAction \
+    vcl/source/gdi/MetaTextRectAction \
+    vcl/source/gdi/MetaStretchTextAction \
+    vcl/source/gdi/MetaTextLineAction \
     vcl/source/gdi/alpha \
     vcl/source/gdi/bitmap3 \
     vcl/source/gdi/bitmapex \

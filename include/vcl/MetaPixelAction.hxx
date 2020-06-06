@@ -37,6 +37,7 @@ public:
     MetaPixelAction(MetaPixelAction&&) = default;
     MetaPixelAction& operator=(MetaPixelAction const&) = delete; // due to MetaAction
     MetaPixelAction& operator=(MetaPixelAction&&) = delete; // due to MetaAction
+
 private:
     virtual ~MetaPixelAction() override;
 
@@ -53,6 +54,8 @@ public:
 
     const Point& GetPoint() const { return maPt; }
     const Color& GetColor() const { return maColor; }
+
+    tools::Rectangle GetBoundsRect(const OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METAPIXELACTION_HXX

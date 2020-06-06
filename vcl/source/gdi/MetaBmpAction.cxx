@@ -18,25 +18,12 @@
  */
 
 #include <vcl/outdev.hxx>
-#include <vcl/MetaRoundRectAction.hxx>
+#include <vcl/MetaBmpAction.hxx>
 
-bool MetaRoundRectAction::IsTransparent(OutputDevice* pOutDev) const
+tools::Rectangle MetaBmpAction::GetBoundsRect(const OutputDevice* pOutDev) const
 {
-    if (!pOutDev)
-        return false;
-
-    const bool bLineTransparency(!pOutDev->IsLineColor()
-                                 || pOutDev->GetLineColor().GetTransparency() == 255);
-    const bool bFillTransparency(!pOutDev->IsFillColor()
-                                 || pOutDev->GetFillColor().GetTransparency() == 255);
-
-    return !bLineTransparency || !bFillTransparency;
-}
-
-tools::Rectangle MetaRoundRectAction::GetBoundsRect(const OutputDevice* pOutDev) const
-{
-    tools::Polygon aBoundsRect(GetRect(), GetHorzRound(), GetVertRound());
-    return ClipBounds(aBoundsRect.GetBoundRect(), pOutDev);
+    tools::Rectangle aBoundsRect(GetPoint(), pOutDev->PixelToLogic(GetBitmap().GetSizePixel()));
+    return ClipBounds(aBoundsRect, pOutDev);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

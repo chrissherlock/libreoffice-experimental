@@ -54,6 +54,8 @@ public:
     const Color& GetColor() const { return maColor; }
     const Point& GetPoint() const { return maPt; }
     const Size& GetSize() const { return maSz; }
+
+    tools::Rectangle GetBoundsRect(const OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METAMASKSCALEACTION_HXX

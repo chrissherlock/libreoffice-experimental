@@ -57,6 +57,8 @@ public:
     sal_uInt32 GetWidth() const { return mnWidth; }
     sal_Int32 GetIndex() const { return mnIndex; }
     sal_Int32 GetLen() const { return mnLen; }
+
+    tools::Rectangle GetBoundsRect(const OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METASTRETCHTEXTACTION_HXX

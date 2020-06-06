@@ -56,6 +56,8 @@ public:
     const LineInfo& GetLineInfo() const { return maLineInfo; }
 
     bool IsTransparent(OutputDevice*) const override;
+
+    tools::Rectangle GetBoundsRect(const OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METAPOLYLINEACTION_HXX

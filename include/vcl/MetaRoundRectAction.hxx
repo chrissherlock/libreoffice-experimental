@@ -58,6 +58,8 @@ public:
     sal_uInt32 GetVertRound() const { return mnVertRound; }
 
     bool IsTransparent(OutputDevice*) const override;
+
+    tools::Rectangle GetBoundsRect(const OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METAROUNDRECTACTION_HXX

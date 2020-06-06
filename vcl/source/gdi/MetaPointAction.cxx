@@ -28,4 +28,10 @@ bool MetaPointAction::IsTransparent(OutputDevice* pOutDev) const
     return !pOutDev->IsLineColor() || pOutDev->GetLineColor().GetTransparency() == 255;
 }
 
+tools::Rectangle MetaPointAction::GetBoundsRect(const OutputDevice* pOutDev) const
+{
+    tools::Rectangle aBounds(tools::Rectangle(GetPoint(), Size(1, 1)));
+    return ClipBounds(aBounds, pOutDev);
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

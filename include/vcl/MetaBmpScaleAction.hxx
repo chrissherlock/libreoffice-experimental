@@ -53,6 +53,8 @@ public:
     const Bitmap& GetBitmap() const { return maBmp; }
     const Point& GetPoint() const { return maPt; }
     const Size& GetSize() const { return maSz; }
+
+    tools::Rectangle GetBoundsRect(const OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METABMPSCALEACTION_HXX

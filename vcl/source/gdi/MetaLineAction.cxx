@@ -28,4 +28,23 @@ bool MetaLineAction::IsTransparent(OutputDevice* pOutDev) const
     return !pOutDev->IsLineColor() || pOutDev->GetLineColor().GetTransparency() == 255;
 }
 
+tools::Rectangle MetaLineAction::GetBoundsRect(const OutputDevice* pOutDev) const
+{
+    tools::Rectangle aActionBounds(tools::Rectangle(GetStartPoint(), GetEndPoint()));
+    aActionBounds.Justify();
+
+    const long nLineWidth = GetLineInfo().GetWidth();
+
+    if (nLineWidth)
+    {
+        const long nHalfLineWidth((nLineWidth + 1) / 2);
+        aActionBounds.AdjustLeft(-nHalfLineWidth);
+        aActionBounds.AdjustTop(-nHalfLineWidth);
+        aActionBounds.AdjustRight(nHalfLineWidth);
+        aActionBounds.AdjustBottom(nHalfLineWidth);
+    }
+
+    return ClipBounds(aActionBounds, pOutDev);
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
