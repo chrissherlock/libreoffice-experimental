@@ -53,7 +53,7 @@ public:
     const tools::PolyPolygon& GetPolyPolygon() const { return maPolyPoly; }
     sal_uInt16 GetTransparence() const { return mnTransPercent; }
 
-    bool IsTransparent() const override { return true; }
+    bool IsTransparent(OutputDevice*) const override { return true; }
 };
 
 #endif // INCLUDED_VCL_METATRANSPARENTACTION_HXX

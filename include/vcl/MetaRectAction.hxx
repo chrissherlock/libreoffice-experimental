@@ -50,6 +50,8 @@ public:
     virtual void Scale(double fScaleX, double fScaleY) override;
 
     const tools::Rectangle& GetRect() const { return maRect; }
+
+    bool IsTransparent(OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METARECTACTION_HXX

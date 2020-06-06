@@ -61,7 +61,11 @@ public:
     /** \#i10613# Extracted from Printer::GetPreparedMetaFile. Returns true
         if given action requires special transparency handling
     */
-    virtual bool IsTransparent() const { return false; }
+    virtual bool IsTransparent(OutputDevice* pOutDev = nullptr) const
+    {
+        (void)pOutDev;
+        return false;
+    }
 
 public:
     static MetaAction* ReadMetaAction(SvStream& rIStm, ImplMetaReadData* pData);

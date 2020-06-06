@@ -58,7 +58,7 @@ public:
     const Size& GetDestSize() const { return maDstSz; }
     const Point& GetSrcPoint() const { return maSrcPt; }
     const Size& GetSrcSize() const { return maSrcSz; }
-    bool IsTransparent() const override { return GetBitmapEx().IsTransparent(); }
+    bool IsTransparent(OutputDevice*) const override { return GetBitmapEx().IsTransparent(); }
 };
 
 #endif // INCLUDED_VCL_METABMPEXSCALEPARTACTION_HXX

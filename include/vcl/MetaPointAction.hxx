@@ -20,6 +20,8 @@
 #ifndef INCLUDED_VCL_METAPOINTACTION_HXX
 #define INCLUDED_VCL_METAPOINTACTION_HXX
 
+#include <tools/gen.hxx>
+
 #include <vcl/MetaAction.hxx>
 
 class SAL_DLLPUBLIC_RTTI MetaPointAction final : public MetaAction
@@ -33,6 +35,7 @@ public:
     MetaPointAction(MetaPointAction&&) = default;
     MetaPointAction& operator=(MetaPointAction const&) = delete; // due to MetaAction
     MetaPointAction& operator=(MetaPointAction&&) = delete; // due to MetaAction
+
 private:
     virtual ~MetaPointAction() override;
 
@@ -48,6 +51,8 @@ public:
     virtual void Scale(double fScaleX, double fScaleY) override;
 
     const Point& GetPoint() const { return maPt; }
+
+    bool IsTransparent(OutputDevice* pOutDev) const override;
 };
 
 #endif // INCLUDED_VCL_METAPOINTACTION_HXX

@@ -20,6 +20,10 @@
 #ifndef INCLUDED_VCL_METAPOLYPOLYGONACTION_HXX
 #define INCLUDED_VCL_METAPOLYPOLYGONACTION_HXX
 
+#include <config_options.h>
+
+#include <tools/poly.hxx>
+
 #include <vcl/MetaAction.hxx>
 
 class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaPolyPolygonAction final : public MetaAction
@@ -48,6 +52,8 @@ public:
     virtual void Scale(double fScaleX, double fScaleY) override;
 
     const tools::PolyPolygon& GetPolyPolygon() const { return maPolyPoly; }
+
+    bool IsTransparent(OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METAPOLYPOLYGONACTION_HXX

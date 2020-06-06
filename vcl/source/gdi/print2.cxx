@@ -78,120 +78,6 @@
 typedef ::std::pair< MetaAction*, int > Component; // MetaAction plus index in metafile
 
 // #i10613# Extracted from ImplCheckRect::ImplCreate
-// Returns true, if given action creates visible (i.e. non-transparent) output
-bool ImplIsNotTransparent( const MetaAction& rAct, const OutputDevice& rOut )
-{
-    const bool  bLineTransparency( !rOut.IsLineColor() || rOut.GetLineColor().GetTransparency() == 255 );
-    const bool  bFillTransparency( !rOut.IsFillColor() || rOut.GetFillColor().GetTransparency() == 255 );
-    bool        bRet( false );
-
-    switch( rAct.GetType() )
-    {
-        case MetaActionType::POINT:
-            if( !bLineTransparency )
-                bRet = true;
-            break;
-
-        case MetaActionType::LINE:
-            if( !bLineTransparency )
-                bRet = true;
-            break;
-
-        case MetaActionType::RECT:
-            if( !bLineTransparency || !bFillTransparency )
-                bRet = true;
-            break;
-
-        case MetaActionType::ROUNDRECT:
-            if( !bLineTransparency || !bFillTransparency )
-                bRet = true;
-            break;
-
-        case MetaActionType::ELLIPSE:
-            if( !bLineTransparency || !bFillTransparency )
-                bRet = true;
-            break;
-
-        case MetaActionType::ARC:
-            if( !bLineTransparency || !bFillTransparency )
-                bRet = true;
-            break;
-
-        case MetaActionType::PIE:
-            if( !bLineTransparency || !bFillTransparency )
-                bRet = true;
-            break;
-
-        case MetaActionType::CHORD:
-            if( !bLineTransparency || !bFillTransparency )
-                bRet = true;
-            break;
-
-        case MetaActionType::POLYLINE:
-            if( !bLineTransparency )
-                bRet = true;
-            break;
-
-        case MetaActionType::POLYGON:
-            if( !bLineTransparency || !bFillTransparency )
-                bRet = true;
-            break;
-
-        case MetaActionType::POLYPOLYGON:
-            if( !bLineTransparency || !bFillTransparency )
-                bRet = true;
-            break;
-
-        case MetaActionType::TEXT:
-        {
-            const MetaTextAction& rTextAct = static_cast<const MetaTextAction&>(rAct);
-            const OUString aString( rTextAct.GetText().copy(rTextAct.GetIndex(), rTextAct.GetLen()) );
-            if (!aString.isEmpty())
-                bRet = true;
-        }
-        break;
-
-        case MetaActionType::TEXTARRAY:
-        {
-            const MetaTextArrayAction& rTextAct = static_cast<const MetaTextArrayAction&>(rAct);
-            const OUString aString( rTextAct.GetText().copy(rTextAct.GetIndex(), rTextAct.GetLen()) );
-            if (!aString.isEmpty())
-                bRet = true;
-        }
-        break;
-
-        case MetaActionType::PIXEL:
-        case MetaActionType::BMP:
-        case MetaActionType::BMPSCALE:
-        case MetaActionType::BMPSCALEPART:
-        case MetaActionType::BMPEX:
-        case MetaActionType::BMPEXSCALE:
-        case MetaActionType::BMPEXSCALEPART:
-        case MetaActionType::MASK:
-        case MetaActionType::MASKSCALE:
-        case MetaActionType::MASKSCALEPART:
-        case MetaActionType::GRADIENT:
-        case MetaActionType::GRADIENTEX:
-        case MetaActionType::HATCH:
-        case MetaActionType::WALLPAPER:
-        case MetaActionType::Transparent:
-        case MetaActionType::FLOATTRANSPARENT:
-        case MetaActionType::EPS:
-        case MetaActionType::TEXTRECT:
-        case MetaActionType::STRETCHTEXT:
-        case MetaActionType::TEXTLINE:
-            // all other actions: generate non-transparent output
-            bRet = true;
-            break;
-
-        default:
-            break;
-    }
-
-    return bRet;
-}
-
-// #i10613# Extracted from ImplCheckRect::ImplCreate
 tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevice& rOut )
 {
     tools::Rectangle aActionBounds;
@@ -574,9 +460,11 @@ struct ConnectedComponents
     {
         static void implementation(ConnectedComponents* pBackgroundComponent, MetaAction* const pAction, VirtualDevice* pMapModeVDev)
         {
-            if (!ImplIsNotTransparent(*pAction, *pMapModeVDev))
+            if (pAction->IsTransparent(pMapModeVDev))
+            {
                 // extend current bounds (next uniform action needs to fully cover this area)
                 pBackgroundComponent->aBounds.Union(ImplCalcActionBounds(*pAction, *pMapModeVDev));
+            }
         }
     };
 
@@ -868,7 +756,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                 }
                 default:
                 {
-                    if (!ImplIsNotTransparent(*pCurrAct, *aMapModeVDev))
+                    if (pCurrAct->IsTransparent(aMapModeVDev.get()))
                         // extend current bounds (next uniform action needs to fully cover this area)
                         aBackgroundComponent.SetBackgroundComponent(pCurrAct, aMapModeVDev.get());
                     else
@@ -941,7 +829,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
             // not be considered for connected components,
             // too. Just put each of them into a separate
             // component.
-            aTotalComponents.bIsFullyTransparent = !ImplIsNotTransparent(*pCurrAct, *aMapModeVDev);
+            aTotalComponents.bIsFullyTransparent = pCurrAct->IsTransparent(aMapModeVDev.get());
 
             if( !aBBCurrAct.IsEmpty() &&
                 !aTotalComponents.bIsFullyTransparent )

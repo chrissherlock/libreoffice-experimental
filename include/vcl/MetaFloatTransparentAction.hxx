@@ -59,7 +59,7 @@ public:
     const Point& GetPoint() const { return maPoint; }
     const Size& GetSize() const { return maSize; }
     const Gradient& GetGradient() const { return maGradient; }
-    bool IsTransparent() const override { return true; }
+    bool IsTransparent(OutputDevice*) const override { return true; }
 };
 
 #endif // INCLUDED_VCL_METAFLOATTRANSPARENTACTION_HXX

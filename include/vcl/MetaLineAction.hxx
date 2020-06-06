@@ -56,6 +56,8 @@ public:
     const Point& GetStartPoint() const { return maStartPt; }
     const Point& GetEndPoint() const { return maEndPt; }
     const LineInfo& GetLineInfo() const { return maLineInfo; }
+
+    bool IsTransparent(OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METALINEACTION_HXX

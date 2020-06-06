@@ -262,6 +262,17 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/treelist/svimpbox \
     vcl/source/treelist/svlbitm \
     vcl/source/treelist/uiobject \
+    vcl/source/gdi/MetaPointAction \
+    vcl/source/gdi/MetaLineAction \
+    vcl/source/gdi/MetaArcAction \
+    vcl/source/gdi/MetaPieAction \
+    vcl/source/gdi/MetaChordAction \
+    vcl/source/gdi/MetaPolylineAction \
+    vcl/source/gdi/MetaPolygonAction \
+    vcl/source/gdi/MetaPolyPolygonAction \
+    vcl/source/gdi/MetaRectAction \
+    vcl/source/gdi/MetaRoundRectAction \
+    vcl/source/gdi/MetaEllipseAction \
     vcl/source/gdi/alpha \
     vcl/source/gdi/bitmap3 \
     vcl/source/gdi/bitmapex \

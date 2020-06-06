@@ -51,7 +51,7 @@ public:
 
     const BitmapEx& GetBitmapEx() const { return maBmpEx; }
     const Point& GetPoint() const { return maPt; }
-    bool IsTransparent() const override { return GetBitmapEx().IsTransparent(); }
+    bool IsTransparent(OutputDevice*) const override { return GetBitmapEx().IsTransparent(); }
 };
 
 #endif // INCLUDED_VCL_METABMPEXACTION_HXX

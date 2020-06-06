@@ -20,6 +20,10 @@
 #ifndef INCLUDED_VCL_METACHORDACTION_HXX
 #define INCLUDED_VCL_METACHORDACTION_HXX
 
+#include <config_options.h>
+
+#include <tools/gen.hxx>
+
 #include <vcl/MetaAction.hxx>
 
 class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaChordAction final : public MetaAction
@@ -52,6 +56,8 @@ public:
     const tools::Rectangle& GetRect() const { return maRect; }
     const Point& GetStartPoint() const { return maStartPt; }
     const Point& GetEndPoint() const { return maEndPt; }
+
+    bool IsTransparent(OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METACHORDACTION_HXX

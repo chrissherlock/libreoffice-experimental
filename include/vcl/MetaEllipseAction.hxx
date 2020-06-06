@@ -20,6 +20,10 @@
 #ifndef INCLUDED_VCL_METAELLIPSEACTION_HXX
 #define INCLUDED_VCL_METAELLIPSEACTION_HXX
 
+#include <config_options.h>
+
+#include <tools/gen.hxx>
+
 #include <vcl/MetaAction.hxx>
 
 class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaEllipseAction final : public MetaAction
@@ -48,6 +52,8 @@ public:
     virtual void Scale(double fScaleX, double fScaleY) override;
 
     const tools::Rectangle& GetRect() const { return maRect; }
+
+    bool IsTransparent(OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METAELLIPSEACTION_HXX

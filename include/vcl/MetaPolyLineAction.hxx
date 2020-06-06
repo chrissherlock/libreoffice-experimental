@@ -54,6 +54,8 @@ public:
 
     const tools::Polygon& GetPolygon() const { return maPoly; }
     const LineInfo& GetLineInfo() const { return maLineInfo; }
+
+    bool IsTransparent(OutputDevice*) const override;
 };
 
 #endif // INCLUDED_VCL_METAPOLYLINEACTION_HXX
