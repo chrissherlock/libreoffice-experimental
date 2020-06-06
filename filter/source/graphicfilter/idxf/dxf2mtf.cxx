@@ -21,6 +21,7 @@
 #include <unotools/configmgr.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaLineAction.hxx>
 #include <vcl/virdev.hxx>
 #include <tools/poly.hxx>
 #include "dxf2mtf.hxx"

@@ -157,39 +157,6 @@ public:
     const Point& GetPoint() const { return maPt; }
 };
 
-class VCL_DLLPUBLIC MetaLineAction final : public MetaAction
-{
-private:
-    LineInfo maLineInfo;
-    Point maStartPt;
-    Point maEndPt;
-
-public:
-    MetaLineAction();
-    MetaLineAction(MetaLineAction const&) = default;
-    MetaLineAction(MetaLineAction&&) = default;
-    MetaLineAction& operator=(MetaLineAction const&) = delete; // due to MetaAction
-    MetaLineAction& operator=(MetaLineAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaLineAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaLineAction(const Point& rStart, const Point& rEnd);
-    MetaLineAction(const Point& rStart, const Point& rEnd, const LineInfo& rLineInfo);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const Point& GetStartPoint() const { return maStartPt; }
-    const Point& GetEndPoint() const { return maEndPt; }
-    const LineInfo& GetLineInfo() const { return maLineInfo; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

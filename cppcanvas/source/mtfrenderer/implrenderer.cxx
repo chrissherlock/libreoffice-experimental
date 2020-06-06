@@ -48,6 +48,7 @@
 #include <vcl/canvastools.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaLineAction.hxx>
 #include <vcl/MetaRectAction.hxx>
 #include <vcl/MetaRoundRectAction.hxx>
 #include <vcl/MetaEllipseAction.hxx>
