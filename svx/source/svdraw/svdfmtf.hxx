@@ -65,6 +65,7 @@
 
 // Forward Declarations
 
+class MetaRectAction;
 class MetaRoundRectAction;
 class MetaEllipseAction;
 class MetaArcAction;

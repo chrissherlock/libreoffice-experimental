@@ -190,34 +190,6 @@ public:
     const LineInfo& GetLineInfo() const { return maLineInfo; }
 };
 
-class VCL_DLLPUBLIC MetaRectAction final : public MetaAction
-{
-private:
-    tools::Rectangle maRect;
-
-public:
-    MetaRectAction();
-    MetaRectAction(MetaRectAction const&) = default;
-    MetaRectAction(MetaRectAction&&) = default;
-    MetaRectAction& operator=(MetaRectAction const&) = delete; // due to MetaAction
-    MetaRectAction& operator=(MetaRectAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaRectAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    explicit MetaRectAction(const tools::Rectangle&);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const tools::Rectangle& GetRect() const { return maRect; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

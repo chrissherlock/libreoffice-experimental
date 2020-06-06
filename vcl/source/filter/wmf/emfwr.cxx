@@ -31,6 +31,7 @@
 #include <vcl/lineinfo.hxx>
 #include <vcl/dibtools.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaRectAction.hxx>
 #include <vcl/MetaRoundRectAction.hxx>
 #include <vcl/MetaEllipseAction.hxx>
 #include <vcl/MetaArcAction.hxx>
