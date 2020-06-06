@@ -20,7 +20,7 @@
 #ifndef INCLUDED_VCL_METAMASKSCALEPARTACTION_HXX
 #define INCLUDED_VCL_METAMASKSCALEPARTACTION_HXX
 
-#include <vcl/metaact.hxx>
+#include <vcl/MetaAction.hxx>
 
 class SAL_DLLPUBLIC_RTTI MetaMaskScalePartAction final : public MetaAction
 {

@@ -30,7 +30,6 @@
 #include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/dibtools.hxx>
-#include <vcl/metaact.hxx>
 #include <vcl/MetaPixelAction.hxx>
 #include <vcl/MetaPointAction.hxx>
 #include <vcl/MetaLineAction.hxx>

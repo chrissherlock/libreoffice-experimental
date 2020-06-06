@@ -20,7 +20,7 @@
 #ifndef INCLUDED_VCL_METAFILLCOLORACTION_HXX
 #define INCLUDED_VCL_METAFILLCOLORACTION_HXX
 
-#include <vcl/metaact.hxx>
+#include <vcl/MetaAction.hxx>
 
 class VCL_DLLPUBLIC MetaFillColorAction final : public MetaAction
 {

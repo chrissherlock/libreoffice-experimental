@@ -20,7 +20,7 @@
 #ifndef INCLUDED_VCL_METASTRETCHTEXTACTION_HXX
 #define INCLUDED_VCL_METASTRETCHTEXTACTION_HXX
 
-#include <vcl/metaact.hxx>
+#include <vcl/MetaAction.hxx>
 
 class SAL_DLLPUBLIC_RTTI MetaStretchTextAction final : public MetaAction
 {

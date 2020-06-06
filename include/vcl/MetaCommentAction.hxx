@@ -20,7 +20,7 @@
 #ifndef INCLUDED_VCL_METACOMMENTACTION_HXX
 #define INCLUDED_VCL_METACOMMENTACTION_HXX
 
-#include <vcl/metaact.hxx>
+#include <vcl/MetaAction.hxx>
 
 class VCL_DLLPUBLIC MetaCommentAction final : public MetaAction
 {

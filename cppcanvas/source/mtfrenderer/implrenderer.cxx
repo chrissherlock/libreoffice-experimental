@@ -47,7 +47,6 @@
 #include <rtl/ustrbuf.hxx>
 #include <vcl/canvastools.hxx>
 #include <vcl/gdimtf.hxx>
-#include <vcl/metaact.hxx>
 #include <vcl/MetaPixelAction.hxx>
 #include <vcl/MetaPointAction.hxx>
 #include <vcl/MetaLineAction.hxx>

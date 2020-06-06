@@ -18,7 +18,6 @@
  */
 
 #include <vcl/event.hxx>
-#include <vcl/metaact.hxx>
 #include <vcl/MetaPixelAction.hxx>
 #include <vcl/MetaBmpAction.hxx>
 #include <vcl/MetaBmpScaleAction.hxx>

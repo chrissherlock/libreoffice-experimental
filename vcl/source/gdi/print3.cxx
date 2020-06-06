@@ -21,7 +21,6 @@
 #include <vcl/PrinterOptions.hxx>
 #include <vcl/weld.hxx>
 #include <vcl/svapp.hxx>
-#include <vcl/metaact.hxx>
 #include <configsettings.hxx>
 #include <tools/urlobj.hxx>
 #include <comphelper/processfactory.hxx>

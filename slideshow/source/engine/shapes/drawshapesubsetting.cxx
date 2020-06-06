@@ -24,7 +24,6 @@
 
 #include <sal/log.hxx>
 #include <utility>
-#include <vcl/metaact.hxx>
 #include <vcl/MetaTextAction.hxx>
 #include <vcl/MetaCommentAction.hxx>
 #include <vcl/gdimtf.hxx>

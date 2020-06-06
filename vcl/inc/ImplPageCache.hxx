@@ -20,6 +20,7 @@
 #ifndef VCL_INC_IMPLPAGECACHE_HXX
 #define VCL_INC_IMPLPAGECACHE_HXX
 
+#include <vcl/gdimtf.hxx>
 #include <vcl/PrinterController.hxx>
 
 using namespace vcl;

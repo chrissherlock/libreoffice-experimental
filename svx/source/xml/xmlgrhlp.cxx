@@ -38,7 +38,6 @@
 #include <unotools/tempfile.hxx>
 #include <unotools/saveopt.hxx>
 #include <vcl/gfxlink.hxx>
-#include <vcl/metaact.hxx>
 #include <vcl/MetaEPSAction.hxx>
 #include <vcl/MetaCommentAction.hxx>
 #include <tools/zcodec.hxx>

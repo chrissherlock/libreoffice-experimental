@@ -32,7 +32,6 @@
 #include <tools/fract.hxx>
 #include <tools/stream.hxx>
 #include <vcl/dibtools.hxx>
-#include <vcl/metaact.hxx>
 #include <vcl/MetaPixelAction.hxx>
 #include <vcl/MetaPointAction.hxx>
 #include <vcl/MetaLineAction.hxx>

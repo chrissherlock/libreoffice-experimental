@@ -35,7 +35,6 @@
 #include <vcl/gfxlink.hxx>
 #include <vcl/cvtgrf.hxx>
 #include <vcl/graph.hxx>
-#include <vcl/metaact.hxx>
 #include <vcl/MetaBmpScaleAction.hxx>
 #include <vcl/MetaBmpExScaleAction.hxx>
 #include <impgraph.hxx>

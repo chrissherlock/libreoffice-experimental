@@ -20,7 +20,7 @@
 #ifndef INCLUDED_VCL_METABMPSCALEPARTACTION_HXX
 #define INCLUDED_VCL_METABMPSCALEPARTACTION_HXX
 
-#include <vcl/metaact.hxx>
+#include <vcl/MetaAction.hxx>
 
 class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaBmpScalePartAction final : public MetaAction
 {

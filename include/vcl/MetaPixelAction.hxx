@@ -20,7 +20,7 @@
 #ifndef INCLUDED_VCL_METAPIXELACTION_HXX
 #define INCLUDED_VCL_METAPIXELACTION_HXX
 
-#include <vcl/metaact.hxx>
+#include <vcl/MetaAction.hxx>
 
 class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaPixelAction final : public MetaAction
 {

@@ -20,7 +20,7 @@
 #ifndef INCLUDED_VCL_METAISECTRECTCLIPREGIONACTION_HXX
 #define INCLUDED_VCL_METAISECTRECTCLIPREGIONACTION_HXX
 
-#include <vcl/metaact.hxx>
+#include <vcl/MetaAction.hxx>
 
 class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaISectRectClipRegionAction final : public MetaAction
 {

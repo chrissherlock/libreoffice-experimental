@@ -22,7 +22,7 @@
 
 #include <config_options.h>
 
-#include <vcl/metaact.hxx>
+#include <vcl/MetaAction.hxx>
 
 class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaTextLanguageAction final : public MetaAction
 {

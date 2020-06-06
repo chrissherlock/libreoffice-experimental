@@ -51,6 +51,7 @@
 #include "svgwriter.hxx"
 
 #include <svx/unopage.hxx>
+#include <vcl/gradient.hxx>
 #include <vcl/graphicfilter.hxx>
 #include <vcl/window.hxx>
 #include <svx/svdmodel.hxx>

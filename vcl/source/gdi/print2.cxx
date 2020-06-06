@@ -28,7 +28,6 @@
 #include <vcl/Printer.hxx>
 #include <vcl/PrinterOptions.hxx>
 #include <vcl/virdev.hxx>
-#include <vcl/metaact.hxx>
 #include <vcl/MetaPixelAction.hxx>
 #include <vcl/MetaPointAction.hxx>
 #include <vcl/MetaLineAction.hxx>

@@ -22,7 +22,6 @@
 #include <vcl/svapp.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/graph.hxx>
-#include <vcl/metaact.hxx>
 #include <vcl/MetaEPSAction.hxx>
 #include <vcl/MetaCommentAction.hxx>
 #include <vcl/virdev.hxx>

@@ -24,7 +24,6 @@
 #include <tools/helpers.hxx>
 
 #include <vcl/hatch.hxx>
-#include <vcl/metaact.hxx>
 #include <vcl/MetaLineAction.hxx>
 #include <vcl/MetaHatchAction.hxx>
 #include <vcl/MetaLineColorAction.hxx>

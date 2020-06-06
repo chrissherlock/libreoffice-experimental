@@ -20,7 +20,7 @@
 #ifndef INCLUDED_VCL_METAFLOATTRANSPARENTACTION_HXX
 #define INCLUDED_VCL_METAFLOATTRANSPARENTACTION_HXX
 
-#include <vcl/metaact.hxx>
+#include <vcl/MetaAction.hxx>
 
 class SAL_DLLPUBLIC_RTTI MetaFloatTransparentAction final : public MetaAction
 {

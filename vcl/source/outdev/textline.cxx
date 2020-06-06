@@ -21,7 +21,6 @@
 
 #include <sal/types.h>
 #include <vcl/gdimtf.hxx>
-#include <vcl/metaact.hxx>
 #include <vcl/MetaTextLineAction.hxx>
 #include <vcl/MetaTextLineColorAction.hxx>
 #include <vcl/MetaOverlineColorAction.hxx>

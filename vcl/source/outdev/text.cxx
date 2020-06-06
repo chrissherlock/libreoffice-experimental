@@ -31,7 +31,6 @@
 #include <tools/lineend.hxx>
 #include <tools/debug.hxx>
 #include <vcl/gdimtf.hxx>
-#include <vcl/metaact.hxx>
 #include <vcl/MetaTextAction.hxx>
 #include <vcl/MetaTextArrayAction.hxx>
 #include <vcl/MetaStretchTextAction.hxx>

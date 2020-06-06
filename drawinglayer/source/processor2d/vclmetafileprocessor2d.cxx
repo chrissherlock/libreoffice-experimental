@@ -34,7 +34,6 @@
 #include <vcl/gdimtf.hxx>
 #include <vcl/gradient.hxx>
 #include <vcl/graphictools.hxx>
-#include <vcl/metaact.hxx>
 #include <vcl/MetaPolyLineAction.hxx>
 #include <vcl/MetaCommentAction.hxx>
 #include <vcl/graph.hxx> // for PDFExtOutDevData Graphic support

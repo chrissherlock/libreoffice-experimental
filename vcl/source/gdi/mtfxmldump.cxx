@@ -11,7 +11,6 @@
 #include <tools/XmlWriter.hxx>
 #include <tools/fract.hxx>
 
-#include <vcl/metaact.hxx>
 #include <vcl/MetaPixelAction.hxx>
 #include <vcl/MetaPointAction.hxx>
 #include <vcl/MetaLineAction.hxx>

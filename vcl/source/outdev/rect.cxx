@@ -23,7 +23,6 @@
 
 #include <tools/poly.hxx>
 #include <tools/helpers.hxx>
-#include <vcl/metaact.hxx>
 #include <vcl/MetaRectAction.hxx>
 #include <vcl/MetaRoundRectAction.hxx>
 #include <vcl/outdev.hxx>

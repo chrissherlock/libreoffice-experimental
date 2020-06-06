@@ -19,7 +19,6 @@
 
 #include <vcl/vclenum.hxx>
 #include <vcl/bitmapaccess.hxx>
-#include <vcl/metaact.hxx>
 #include <vcl/MetaRectAction.hxx>
 #include <vcl/MetaLineColorAction.hxx>
 #include <vcl/MetaFillColorAction.hxx>

@@ -20,7 +20,7 @@
 #ifndef INCLUDED_VCL_METABMPACTION_HXX
 #define INCLUDED_VCL_METABMPACTION_HXX
 
-#include <vcl/metaact.hxx>
+#include <vcl/MetaAction.hxx>
 
 class VCL_DLLPUBLIC MetaBmpAction final : public MetaAction
 {

@@ -27,7 +27,6 @@
 #include <vcl/dibtools.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/lineinfo.hxx>
-#include <vcl/metaact.hxx>
 #include <vcl/MetaPixelAction.hxx>
 #include <vcl/MetaPointAction.hxx>
 #include <vcl/MetaLineAction.hxx>

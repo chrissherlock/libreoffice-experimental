@@ -20,7 +20,7 @@
 #ifndef INCLUDED_VCL_METAMAPMODEACTION_HXX
 #define INCLUDED_VCL_METAMAPMODEACTION_HXX
 
-#include <vcl/metaact.hxx>
+#include <vcl/MetaAction.hxx>
 
 class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaMapModeAction final : public MetaAction
 {

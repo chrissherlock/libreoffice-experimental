@@ -20,7 +20,6 @@
 #include <cassert>
 
 #include <vcl/gdimtf.hxx>
-#include <vcl/metaact.hxx>
 #include <vcl/MetaMaskAction.hxx>
 #include <vcl/MetaMaskScaleAction.hxx>
 #include <vcl/MetaMaskScalePartAction.hxx>

@@ -21,7 +21,7 @@
 #define INCLUDED_VCL_METARASTEROPACTION_HXX
 
 #include <vcl/vclenum.hxx>
-#include <vcl/metaact.hxx>
+#include <vcl/MetaAction.hxx>
 
 class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaRasterOpAction final : public MetaAction
 {

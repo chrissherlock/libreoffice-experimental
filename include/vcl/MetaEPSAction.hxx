@@ -20,7 +20,7 @@
 #ifndef INCLUDED_VCL_METAEPSACTION_HXX
 #define INCLUDED_VCL_METAEPSACTION_HXX
 
-#include <vcl/metaact.hxx>
+#include <vcl/MetaAction.hxx>
 
 class VCL_DLLPUBLIC MetaEPSAction final : public MetaAction
 {

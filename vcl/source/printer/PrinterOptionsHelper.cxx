@@ -18,7 +18,6 @@
  */
 
 #include <vcl/PrinterOptionsHelper.hxx>
-#include <vcl/metaact.hxx>
 #include <comphelper/sequence.hxx>
 #include <sal/log.hxx>
 
