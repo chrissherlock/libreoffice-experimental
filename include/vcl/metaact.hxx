@@ -99,36 +99,6 @@ public:
     static MetaAction* ReadMetaAction(SvStream& rIStm, ImplMetaReadData* pData);
 };
 
-class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaPixelAction final : public MetaAction
-{
-private:
-    Point maPt;
-    Color maColor;
-
-public:
-    MetaPixelAction();
-    MetaPixelAction(MetaPixelAction const&) = default;
-    MetaPixelAction(MetaPixelAction&&) = default;
-    MetaPixelAction& operator=(MetaPixelAction const&) = delete; // due to MetaAction
-    MetaPixelAction& operator=(MetaPixelAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaPixelAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaPixelAction(const Point& rPt, const Color& rColor);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const Point& GetPoint() const { return maPt; }
-    const Color& GetColor() const { return maColor; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
