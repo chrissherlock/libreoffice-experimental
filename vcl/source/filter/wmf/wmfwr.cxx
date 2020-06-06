@@ -33,6 +33,7 @@
 #include <tools/stream.hxx>
 #include <vcl/dibtools.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaPieAction.hxx>
 #include <vcl/MetaChordAction.hxx>
 #include <vcl/MetaPolyLineAction.hxx>
 #include <vcl/MetaPolygonAction.hxx>

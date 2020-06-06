@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/MetaPieAction.hxx>
 #include <vcl/MetaChordAction.hxx>
 #include <vcl/MetaPolyLineAction.hxx>
 #include <vcl/MetaPolygonAction.hxx>
