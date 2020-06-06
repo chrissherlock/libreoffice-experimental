@@ -251,34 +251,6 @@ public:
     sal_uInt32 GetVertRound() const { return mnVertRound; }
 };
 
-class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaEllipseAction final : public MetaAction
-{
-private:
-    tools::Rectangle maRect;
-
-public:
-    MetaEllipseAction();
-    MetaEllipseAction(MetaEllipseAction const&) = default;
-    MetaEllipseAction(MetaEllipseAction&&) = default;
-    MetaEllipseAction& operator=(MetaEllipseAction const&) = delete; // due to MetaAction
-    MetaEllipseAction& operator=(MetaEllipseAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaEllipseAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    explicit MetaEllipseAction(const tools::Rectangle&);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const tools::Rectangle& GetRect() const { return maRect; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

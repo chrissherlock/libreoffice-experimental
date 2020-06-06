@@ -28,6 +28,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaEllipseAction.hxx>
 #include <vcl/MetaArcAction.hxx>
 #include <vcl/MetaPieAction.hxx>
 #include <vcl/MetaPolyLineAction.hxx>
