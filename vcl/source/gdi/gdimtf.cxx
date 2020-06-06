@@ -86,6 +86,7 @@
 #include <vcl/mtfxmldump.hxx>
 
 #include <ImplMetaReadData.hxx>
+#include <ImplMetaWriteData.hxx>
 #include <svmconverter.hxx>
 #include <TypeSerializer.hxx>
 

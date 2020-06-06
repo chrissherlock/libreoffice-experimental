@@ -41,16 +41,7 @@
 class OutputDevice;
 class SvStream;
 enum class DrawTextFlags;
-
-struct ImplMetaWriteData
-{
-    rtl_TextEncoding meActualCharSet;
-
-    ImplMetaWriteData()
-        : meActualCharSet(RTL_TEXTENCODING_ASCII_US)
-    {
-    }
-};
+struct ImplMetaWriteData;
 
 class VCL_DLLPUBLIC MetaAction : public salhelper::SimpleReferenceObject
 {

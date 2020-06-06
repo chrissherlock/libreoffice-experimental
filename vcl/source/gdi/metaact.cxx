@@ -85,6 +85,7 @@
 #include <TypeSerializer.hxx>
 
 #include <ImplMetaReadData.hxx>
+#include <ImplMetaWriteData.hxx>
 
 namespace
 {
