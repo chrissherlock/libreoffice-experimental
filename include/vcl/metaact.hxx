@@ -279,38 +279,6 @@ public:
     const tools::Rectangle& GetRect() const { return maRect; }
 };
 
-class UNLESS_MERGELIBS(VCL_DLLPUBLIC) MetaArcAction final : public MetaAction
-{
-private:
-    tools::Rectangle maRect;
-    Point maStartPt;
-    Point maEndPt;
-
-public:
-    MetaArcAction();
-    MetaArcAction(MetaArcAction const&) = default;
-    MetaArcAction(MetaArcAction&&) = default;
-    MetaArcAction& operator=(MetaArcAction const&) = delete; // due to MetaAction
-    MetaArcAction& operator=(MetaArcAction&&) = delete; // due to MetaAction
-private:
-    virtual ~MetaArcAction() override;
-
-public:
-    virtual void Execute(OutputDevice* pOut) override;
-    virtual rtl::Reference<MetaAction> Clone() override;
-    virtual void Write(SvStream& rOStm, ImplMetaWriteData* pData) override;
-    virtual void Read(SvStream& rIStm, ImplMetaReadData* pData) override;
-
-    MetaArcAction(const tools::Rectangle& rRect, const Point& rStart, const Point& rEnd);
-
-    virtual void Move(long nHorzMove, long nVertMove) override;
-    virtual void Scale(double fScaleX, double fScaleY) override;
-
-    const tools::Rectangle& GetRect() const { return maRect; }
-    const Point& GetStartPoint() const { return maStartPt; }
-    const Point& GetEndPoint() const { return maEndPt; }
-};
-
 #endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -26,6 +26,7 @@
 #include <vcl/graphictools.hxx>
 #include <vcl/BitmapTools.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaArcAction.hxx>
 #include <vcl/MetaPieAction.hxx>
 #include <vcl/MetaPolygonAction.hxx>
 #include <vcl/MetaChordAction.hxx>

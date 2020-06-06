@@ -27,6 +27,7 @@
 #include <vcl/dibtools.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/metaact.hxx>
+#include <vcl/MetaArcAction.hxx>
 #include <vcl/MetaPieAction.hxx>
 #include <vcl/MetaChordAction.hxx>
 #include <vcl/MetaPolyLineAction.hxx>

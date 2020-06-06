@@ -65,6 +65,7 @@
 
 // Forward Declarations
 
+class MetaArcAction;
 class MetaPieAction;
 class MetaChordAction;
 class MetaPolyLineAction;
