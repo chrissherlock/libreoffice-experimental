@@ -118,6 +118,12 @@ struct ConnectedComponents
         bIsFullyTransparent(false)
     {}
 
+    void SetBackground(Color const& rBgColor, tools::Rectangle const& rBounds)
+    {
+        aBgColor = rBgColor;
+        aBounds = rBounds;
+    }
+
     template <typename T>
     bool IsValidShape(T)
     {
@@ -192,10 +198,7 @@ struct ConnectedComponents
             const tools::Rectangle& rCurrRect = GetBoundsRect(pAction);
 
             if (pBackgroundComponent->IsBackgroundNotCovered(pAction, rMapModeVDev))
-            {
-                pBackgroundComponent->aBounds = rCurrRect;
-                pBackgroundComponent->aBgColor = rMapModeVDev.GetFillColor();
-            }
+                pBackgroundComponent->SetBackground(rMapModeVDev.GetFillColor(), rCurrRect);
         }
     };
 
@@ -373,6 +376,18 @@ void ConvertTransparentAction(GDIMetaFile& o_rMtf, const MetaBmpExScalePartActio
     o_rMtf.AddAction(new MetaBmpScalePartAction(pAct->GetDestPoint(), pAct->GetDestSize(), pAct->GetSrcPoint(), pAct->GetSrcSize(), aBmp));
 }
 
+static double GetReduceTransparencyMinArea()
+{
+    double fReduceTransparencyMinArea = officecfg::Office::Common::VCL::ReduceTransparencyMinArea::get() / 100.0;
+    SAL_WARN_IF(fReduceTransparencyMinArea > 1.0, "vcl",
+        "Value of ReduceTransparencyMinArea config option is too high");
+    SAL_WARN_IF(fReduceTransparencyMinArea < 0.0, "vcl",
+        "Value of ReduceTransparencyMinArea config option is too low");
+    fReduceTransparencyMinArea = std::clamp(fReduceTransparencyMinArea, 0.0, 1.0);
+
+    return fReduceTransparencyMinArea;
+}
+
 bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, GDIMetaFile& rOutMtf,
                                                      long nMaxBmpDPIX, long nMaxBmpDPIY,
                                                      bool bReduceTransparency, bool bTransparencyAutoMode,
@@ -429,12 +444,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
         ConnectedComponents aBackgroundComponent;
 
         // Read the configuration value of minimal object area where transparency will be removed
-        double fReduceTransparencyMinArea = officecfg::Office::Common::VCL::ReduceTransparencyMinArea::get() / 100.0;
-        SAL_WARN_IF(fReduceTransparencyMinArea > 1.0, "vcl",
-            "Value of ReduceTransparencyMinArea config option is too high");
-        SAL_WARN_IF(fReduceTransparencyMinArea < 0.0, "vcl",
-            "Value of ReduceTransparencyMinArea config option is too low");
-        fReduceTransparencyMinArea = std::clamp(fReduceTransparencyMinArea, 0.0, 1.0);
+        double fReduceTransparencyMinArea = GetReduceTransparencyMinArea();
 
         // create an OutputDevice to record mapmode changes and the like
         ScopedVclPtrInstance< VirtualDevice > aMapModeVDev;
@@ -453,8 +463,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
         pCurrAct=const_cast<GDIMetaFile&>(rInMtf).FirstAction();
         if( rBackground != COL_TRANSPARENT )
         {
-            aBackgroundComponent.aBgColor = rBackground;
-            aBackgroundComponent.aBounds = GetBackgroundComponentBounds();
+            aBackgroundComponent.SetBackground(rBackground, GetBackgroundComponentBounds());
         }
         while( pCurrAct && bStillBackground )
         {
