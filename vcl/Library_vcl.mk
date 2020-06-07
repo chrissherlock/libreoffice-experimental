@@ -262,6 +262,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/treelist/svimpbox \
     vcl/source/treelist/svlbitm \
     vcl/source/treelist/uiobject \
+    vcl/source/gdi/ConnectedComponents \
     vcl/source/gdi/MetaAction \
     vcl/source/gdi/MetaBmpAction \
     vcl/source/gdi/MetaBmpScaleAction \
