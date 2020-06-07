@@ -234,13 +234,11 @@ bool ConnectedComponents::IsBackgroundNotCovered( MetaAction* pAction, OutputDev
     return IsValidShape(pAction) || !(rMapModeVDev.LogicToPixel(rCurrRect).IsInside(aBounds) && rMapModeVDev.IsFillColor());
 }
 
-namespace {
-
 /** Determines whether the action can handle transparency correctly
   (i.e. when painted on white background, does the action still look
   correct)?
  */
-bool DoesActionHandleTransparency( const MetaAction& rAct )
+static bool DoesActionHandleTransparency( const MetaAction& rAct )
 {
     // MetaActionType::FLOATTRANSPARENT can contain a whole metafile,
     // which is to be rendered with the given transparent gradient. We
@@ -269,133 +267,181 @@ bool DoesActionHandleTransparency( const MetaAction& rAct )
     @param o_rMtf
     Add converted actions to this metafile
 */
-void ImplConvertTransparentAction( GDIMetaFile&        o_rMtf,
-                                   const MetaAction&   rAct,
-                                   const OutputDevice& rStateOutDev,
-                                   Color               aBgColor )
+
+template <typename T>
+void ConvertTransparentAction(GDIMetaFile&, const T*, const OutputDevice&, Color)
 {
-    if (rAct.GetType() == MetaActionType::Transparent)
+    SAL_WARN("vcl.gdi", "Not a valid MetaAction type - needs a bitmap based action");
+    assert(false);
+}
+
+template <>
+void ConvertTransparentAction(GDIMetaFile& o_rMtf, const MetaTransparentAction* pTransAct, const OutputDevice& rStateOutDev, Color)
+{
+    sal_uInt16 nTransparency(pTransAct->GetTransparence());
+
+    // #i10613# Respect transparency for draw color
+    if (nTransparency)
     {
-        const MetaTransparentAction* pTransAct = static_cast<const MetaTransparentAction*>(&rAct);
-        sal_uInt16 nTransparency( pTransAct->GetTransparence() );
+        o_rMtf.AddAction(new MetaPushAction(PushFlags::LINECOLOR|PushFlags::FILLCOLOR));
 
-        // #i10613# Respect transparency for draw color
-        if (nTransparency)
-        {
-            o_rMtf.AddAction(new MetaPushAction(PushFlags::LINECOLOR|PushFlags::FILLCOLOR));
+        // assume white background for alpha blending
+        Color aLineColor(rStateOutDev.GetLineColor());
+        aLineColor.SetRed(static_cast<sal_uInt8>((255*nTransparency + (100 - nTransparency) * aLineColor.GetRed()) / 100));
+        aLineColor.SetGreen(static_cast<sal_uInt8>((255*nTransparency + (100 - nTransparency) * aLineColor.GetGreen()) / 100));
+        aLineColor.SetBlue(static_cast<sal_uInt8>((255*nTransparency + (100 - nTransparency) * aLineColor.GetBlue()) / 100));
+        o_rMtf.AddAction(new MetaLineColorAction(aLineColor, true));
 
-            // assume white background for alpha blending
-            Color aLineColor(rStateOutDev.GetLineColor());
-            aLineColor.SetRed(static_cast<sal_uInt8>((255*nTransparency + (100 - nTransparency) * aLineColor.GetRed()) / 100));
-            aLineColor.SetGreen(static_cast<sal_uInt8>((255*nTransparency + (100 - nTransparency) * aLineColor.GetGreen()) / 100));
-            aLineColor.SetBlue(static_cast<sal_uInt8>((255*nTransparency + (100 - nTransparency) * aLineColor.GetBlue()) / 100));
-            o_rMtf.AddAction(new MetaLineColorAction(aLineColor, true));
-
-            Color aFillColor(rStateOutDev.GetFillColor());
-            aFillColor.SetRed(static_cast<sal_uInt8>((255*nTransparency + (100 - nTransparency)*aFillColor.GetRed()) / 100));
-            aFillColor.SetGreen(static_cast<sal_uInt8>((255*nTransparency + (100 - nTransparency)*aFillColor.GetGreen()) / 100));
-            aFillColor.SetBlue(static_cast<sal_uInt8>((255*nTransparency + (100 - nTransparency)*aFillColor.GetBlue()) / 100));
-            o_rMtf.AddAction(new MetaFillColorAction(aFillColor, true));
-        }
-
-        o_rMtf.AddAction(new MetaPolyPolygonAction(pTransAct->GetPolyPolygon()));
-
-        if(nTransparency)
-            o_rMtf.AddAction(new MetaPopAction());
+        Color aFillColor(rStateOutDev.GetFillColor());
+        aFillColor.SetRed(static_cast<sal_uInt8>((255*nTransparency + (100 - nTransparency)*aFillColor.GetRed()) / 100));
+        aFillColor.SetGreen(static_cast<sal_uInt8>((255*nTransparency + (100 - nTransparency)*aFillColor.GetGreen()) / 100));
+        aFillColor.SetBlue(static_cast<sal_uInt8>((255*nTransparency + (100 - nTransparency)*aFillColor.GetBlue()) / 100));
+        o_rMtf.AddAction(new MetaFillColorAction(aFillColor, true));
     }
-    else
+
+    o_rMtf.AddAction(new MetaPolyPolygonAction(pTransAct->GetPolyPolygon()));
+
+    if(nTransparency)
+        o_rMtf.AddAction(new MetaPopAction());
+}
+
+template <>
+void ConvertTransparentAction(GDIMetaFile& o_rMtf, const MetaBmpExAction* pAct, const OutputDevice&, Color aBgColor)
+{
+    BitmapEx aBmpEx(pAct->GetBitmapEx());
+    Bitmap aBmp(aBmpEx.GetBitmap());
+
+    if (!aBmpEx.IsAlpha())
     {
-        BitmapEx aBmpEx;
+        // blend with mask
+        Bitmap::ScopedReadAccess pRA(aBmp);
 
-        switch (rAct.GetType())
+        if (!pRA)
+            return; // what else should I do?
+
+        Color aActualColor(aBgColor);
+
+        if (pRA->HasPalette())
+            aActualColor = pRA->GetBestPaletteColor(aBgColor);
+
+        pRA.reset();
+
+        // did we get true white?
+        if (aActualColor.GetColorError(aBgColor))
         {
-            case MetaActionType::BMPEX:
-                aBmpEx = static_cast<const MetaBmpExAction&>(rAct).GetBitmapEx();
-                break;
+            // no, create truecolor bitmap, then
+            aBmp.Convert(BmpConversion::N24Bit);
 
-            case MetaActionType::BMPEXSCALE:
-                aBmpEx = static_cast<const MetaBmpExScaleAction&>(rAct).GetBitmapEx();
-                break;
-
-            case MetaActionType::BMPEXSCALEPART:
-                aBmpEx = static_cast<const MetaBmpExScaleAction&>(rAct).GetBitmapEx();
-                break;
-
-            case MetaActionType::Transparent:
-
-            default:
-                OSL_FAIL("Printer::GetPreparedMetafile impossible state reached");
-                break;
-        }
-
-        Bitmap aBmp(aBmpEx.GetBitmap());
-        if (!aBmpEx.IsAlpha())
-        {
-            // blend with mask
-            Bitmap::ScopedReadAccess pRA(aBmp);
-
-            if (!pRA)
-                return; // what else should I do?
-
-            Color aActualColor(aBgColor);
-
-            if (pRA->HasPalette())
-                aActualColor = pRA->GetBestPaletteColor(aBgColor);
-
-            pRA.reset();
-
-            // did we get true white?
-            if (aActualColor.GetColorError(aBgColor))
-            {
-                // no, create truecolor bitmap, then
-                aBmp.Convert(BmpConversion::N24Bit);
-
-                // fill masked out areas white
-                aBmp.Replace(aBmpEx.GetMask(), aBgColor);
-            }
-            else
-            {
-                // fill masked out areas white
-                aBmp.Replace(aBmpEx.GetMask(), aActualColor);
-            }
+            // fill masked out areas white
+            aBmp.Replace(aBmpEx.GetMask(), aBgColor);
         }
         else
         {
-            // blend with alpha channel
-            aBmp.Convert(BmpConversion::N24Bit);
-            aBmp.Blend(aBmpEx.GetAlpha(), aBgColor);
-        }
-
-        // add corresponding action
-        switch (rAct.GetType())
-        {
-            case MetaActionType::BMPEX:
-                o_rMtf.AddAction(new MetaBmpAction(
-                                       static_cast<const MetaBmpExAction&>(rAct).GetPoint(),
-                                       aBmp));
-                break;
-            case MetaActionType::BMPEXSCALE:
-                o_rMtf.AddAction(new MetaBmpScaleAction(
-                                       static_cast<const MetaBmpExScaleAction&>(rAct).GetPoint(),
-                                       static_cast<const MetaBmpExScaleAction&>(rAct).GetSize(),
-                                       aBmp));
-                break;
-            case MetaActionType::BMPEXSCALEPART:
-                o_rMtf.AddAction(new MetaBmpScalePartAction(
-                                       static_cast<const MetaBmpExScalePartAction&>(rAct).GetDestPoint(),
-                                       static_cast<const MetaBmpExScalePartAction&>(rAct).GetDestSize(),
-                                       static_cast<const MetaBmpExScalePartAction&>(rAct).GetSrcPoint(),
-                                       static_cast<const MetaBmpExScalePartAction&>(rAct).GetSrcSize(),
-                                       aBmp));
-                break;
-            default:
-                OSL_FAIL("Unexpected case");
-                break;
+            // fill masked out areas white
+            aBmp.Replace(aBmpEx.GetMask(), aActualColor);
         }
     }
+    else
+    {
+        // blend with alpha channel
+        aBmp.Convert(BmpConversion::N24Bit);
+        aBmp.Blend(aBmpEx.GetAlpha(), aBgColor);
+    }
+
+    o_rMtf.AddAction(new MetaBmpAction(pAct->GetPoint(), aBmp));
 }
 
-} // end anon namespace
+template <>
+void ConvertTransparentAction(GDIMetaFile& o_rMtf, const MetaBmpExScaleAction* pAct, const OutputDevice&, Color aBgColor)
+{
+    BitmapEx aBmpEx(pAct->GetBitmapEx());
+    Bitmap aBmp(aBmpEx.GetBitmap());
+
+    if (!aBmpEx.IsAlpha())
+    {
+        // blend with mask
+        Bitmap::ScopedReadAccess pRA(aBmp);
+
+        if (!pRA)
+            return; // what else should I do?
+
+        Color aActualColor(aBgColor);
+
+        if (pRA->HasPalette())
+            aActualColor = pRA->GetBestPaletteColor(aBgColor);
+
+        pRA.reset();
+
+        // did we get true white?
+        if (aActualColor.GetColorError(aBgColor))
+        {
+            // no, create truecolor bitmap, then
+            aBmp.Convert(BmpConversion::N24Bit);
+
+            // fill masked out areas white
+            aBmp.Replace(aBmpEx.GetMask(), aBgColor);
+        }
+        else
+        {
+            // fill masked out areas white
+            aBmp.Replace(aBmpEx.GetMask(), aActualColor);
+        }
+    }
+    else
+    {
+        // blend with alpha channel
+        aBmp.Convert(BmpConversion::N24Bit);
+        aBmp.Blend(aBmpEx.GetAlpha(), aBgColor);
+    }
+
+    o_rMtf.AddAction(new MetaBmpScaleAction(pAct->GetPoint(), pAct->GetSize(), aBmp));
+}
+
+template <>
+void ConvertTransparentAction(GDIMetaFile& o_rMtf, const MetaBmpExScalePartAction* pAct, const OutputDevice&, Color aBgColor)
+{
+    BitmapEx aBmpEx(pAct->GetBitmapEx());
+    Bitmap aBmp(aBmpEx.GetBitmap());
+
+    if (!aBmpEx.IsAlpha())
+    {
+        // blend with mask
+        Bitmap::ScopedReadAccess pRA(aBmp);
+
+        if (!pRA)
+            return; // what else should I do?
+
+        Color aActualColor(aBgColor);
+
+        if (pRA->HasPalette())
+            aActualColor = pRA->GetBestPaletteColor(aBgColor);
+
+        pRA.reset();
+
+        // did we get true white?
+        if (aActualColor.GetColorError(aBgColor))
+        {
+            // no, create truecolor bitmap, then
+            aBmp.Convert(BmpConversion::N24Bit);
+
+            // fill masked out areas white
+            aBmp.Replace(aBmpEx.GetMask(), aBgColor);
+        }
+        else
+        {
+            // fill masked out areas white
+            aBmp.Replace(aBmpEx.GetMask(), aActualColor);
+        }
+    }
+    else
+    {
+        // blend with alpha channel
+        aBmp.Convert(BmpConversion::N24Bit);
+        aBmp.Blend(aBmpEx.GetAlpha(), aBgColor);
+    }
+
+    o_rMtf.AddAction(new MetaBmpScalePartAction(pAct->GetDestPoint(), pAct->GetDestSize(), pAct->GetSrcPoint(), pAct->GetSrcSize(), aBmp));
+}
 
 bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, GDIMetaFile& rOutMtf,
                                                      long nMaxBmpDPIX, long nMaxBmpDPIY,
@@ -964,10 +1010,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                 {
                     // convert actions, where masked-out parts are of
                     // given background color
-                    ImplConvertTransparentAction(rOutMtf,
-                                                 *pCurrAct,
-                                                 *aMapModeVDev,
-                                                 aBackgroundComponent.aBgColor);
+                    ConvertTransparentAction(rOutMtf, pCurrAct, *aMapModeVDev, aBackgroundComponent.aBgColor);
                 }
                 else
                 {
