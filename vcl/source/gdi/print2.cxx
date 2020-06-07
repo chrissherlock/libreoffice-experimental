@@ -305,19 +305,20 @@ void ConvertTransparentAction(GDIMetaFile& o_rMtf, const MetaTransparentAction* 
         o_rMtf.AddAction(new MetaPopAction());
 }
 
-template <>
-void ConvertTransparentAction(GDIMetaFile& o_rMtf, const MetaBmpExAction* pAct, const OutputDevice&, Color aBgColor)
+static Bitmap Convert(BitmapEx const& rBmpEx, Color aBgColor)
 {
-    BitmapEx aBmpEx(pAct->GetBitmapEx());
-    Bitmap aBmp(aBmpEx.GetBitmap());
+    Bitmap aBmp(rBmpEx.GetBitmap());
 
-    if (!aBmpEx.IsAlpha())
+    if (!rBmpEx.IsAlpha())
     {
         // blend with mask
         Bitmap::ScopedReadAccess pRA(aBmp);
 
         if (!pRA)
-            return; // what else should I do?
+        {
+            SAL_WARN("vcl.gdi", "Cannot get access to bitmap"); // what else should I do?
+            assert(false);
+        }
 
         Color aActualColor(aBgColor);
 
@@ -333,113 +334,42 @@ void ConvertTransparentAction(GDIMetaFile& o_rMtf, const MetaBmpExAction* pAct, 
             aBmp.Convert(BmpConversion::N24Bit);
 
             // fill masked out areas white
-            aBmp.Replace(aBmpEx.GetMask(), aBgColor);
+            aBmp.Replace(rBmpEx.GetMask(), aBgColor);
         }
         else
         {
             // fill masked out areas white
-            aBmp.Replace(aBmpEx.GetMask(), aActualColor);
+            aBmp.Replace(rBmpEx.GetMask(), aActualColor);
         }
     }
     else
     {
         // blend with alpha channel
         aBmp.Convert(BmpConversion::N24Bit);
-        aBmp.Blend(aBmpEx.GetAlpha(), aBgColor);
+        aBmp.Blend(rBmpEx.GetAlpha(), aBgColor);
     }
 
+    return aBmp;
+}
+
+template <>
+void ConvertTransparentAction(GDIMetaFile& o_rMtf, const MetaBmpExAction* pAct, const OutputDevice&, Color aBgColor)
+{
+    Bitmap aBmp(Convert(pAct->GetBitmapEx(), aBgColor));
     o_rMtf.AddAction(new MetaBmpAction(pAct->GetPoint(), aBmp));
 }
 
 template <>
 void ConvertTransparentAction(GDIMetaFile& o_rMtf, const MetaBmpExScaleAction* pAct, const OutputDevice&, Color aBgColor)
 {
-    BitmapEx aBmpEx(pAct->GetBitmapEx());
-    Bitmap aBmp(aBmpEx.GetBitmap());
-
-    if (!aBmpEx.IsAlpha())
-    {
-        // blend with mask
-        Bitmap::ScopedReadAccess pRA(aBmp);
-
-        if (!pRA)
-            return; // what else should I do?
-
-        Color aActualColor(aBgColor);
-
-        if (pRA->HasPalette())
-            aActualColor = pRA->GetBestPaletteColor(aBgColor);
-
-        pRA.reset();
-
-        // did we get true white?
-        if (aActualColor.GetColorError(aBgColor))
-        {
-            // no, create truecolor bitmap, then
-            aBmp.Convert(BmpConversion::N24Bit);
-
-            // fill masked out areas white
-            aBmp.Replace(aBmpEx.GetMask(), aBgColor);
-        }
-        else
-        {
-            // fill masked out areas white
-            aBmp.Replace(aBmpEx.GetMask(), aActualColor);
-        }
-    }
-    else
-    {
-        // blend with alpha channel
-        aBmp.Convert(BmpConversion::N24Bit);
-        aBmp.Blend(aBmpEx.GetAlpha(), aBgColor);
-    }
-
+    Bitmap aBmp(Convert(pAct->GetBitmapEx(), aBgColor));
     o_rMtf.AddAction(new MetaBmpScaleAction(pAct->GetPoint(), pAct->GetSize(), aBmp));
 }
 
 template <>
 void ConvertTransparentAction(GDIMetaFile& o_rMtf, const MetaBmpExScalePartAction* pAct, const OutputDevice&, Color aBgColor)
 {
-    BitmapEx aBmpEx(pAct->GetBitmapEx());
-    Bitmap aBmp(aBmpEx.GetBitmap());
-
-    if (!aBmpEx.IsAlpha())
-    {
-        // blend with mask
-        Bitmap::ScopedReadAccess pRA(aBmp);
-
-        if (!pRA)
-            return; // what else should I do?
-
-        Color aActualColor(aBgColor);
-
-        if (pRA->HasPalette())
-            aActualColor = pRA->GetBestPaletteColor(aBgColor);
-
-        pRA.reset();
-
-        // did we get true white?
-        if (aActualColor.GetColorError(aBgColor))
-        {
-            // no, create truecolor bitmap, then
-            aBmp.Convert(BmpConversion::N24Bit);
-
-            // fill masked out areas white
-            aBmp.Replace(aBmpEx.GetMask(), aBgColor);
-        }
-        else
-        {
-            // fill masked out areas white
-            aBmp.Replace(aBmpEx.GetMask(), aActualColor);
-        }
-    }
-    else
-    {
-        // blend with alpha channel
-        aBmp.Convert(BmpConversion::N24Bit);
-        aBmp.Blend(aBmpEx.GetAlpha(), aBgColor);
-    }
-
+    Bitmap aBmp(Convert(pAct->GetBitmapEx(), aBgColor));
     o_rMtf.AddAction(new MetaBmpScalePartAction(pAct->GetDestPoint(), pAct->GetDestSize(), pAct->GetSrcPoint(), pAct->GetSrcSize(), aBmp));
 }
 
