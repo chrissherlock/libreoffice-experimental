@@ -375,6 +375,9 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
 
         int nLastBgAction, nActionNum;
 
+        if (rBackground != COL_TRANSPARENT)
+            aBackgroundComponent.SetBackground(rBackground, GetBackgroundComponentBounds());
+
         // weed out page-filling background objects (if they are
         // uniformly coloured). Keeping them outside the other
         // connected components often prevents whole-page bitmap
@@ -383,10 +386,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
         nActionNum = 0;
         nLastBgAction = -1;
         pCurrAct = const_cast<GDIMetaFile&>(rInMtf).FirstAction();
-        if (rBackground != COL_TRANSPARENT)
-        {
-            aBackgroundComponent.SetBackground(rBackground, GetBackgroundComponentBounds());
-        }
+
         while (pCurrAct && bStillBackground)
         {
             std::tie(nLastBgAction, bStillBackground) = ExtendCurrentBounds(
