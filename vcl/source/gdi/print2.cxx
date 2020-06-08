@@ -294,18 +294,18 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
 
         //  STAGE 1: Detect background
 
+        // create an OutputDevice to record mapmode changes and the like
+        ScopedVclPtrInstance<VirtualDevice> aMapModeVDev;
+        aMapModeVDev->mnDPIX = mnDPIX;
+        aMapModeVDev->mnDPIY = mnDPIY;
+        aMapModeVDev->EnableOutput(false);
+
         // Receives uniform background content, and is _not_ merged
         // nor checked for intersection against other aCCList elements
         ConnectedComponents aBackgroundComponent;
 
         // Read the configuration value of minimal object area where transparency will be removed
         double fReduceTransparencyMinArea = GetReduceTransparencyMinArea();
-
-        // create an OutputDevice to record mapmode changes and the like
-        ScopedVclPtrInstance<VirtualDevice> aMapModeVDev;
-        aMapModeVDev->mnDPIX = mnDPIX;
-        aMapModeVDev->mnDPIY = mnDPIY;
-        aMapModeVDev->EnableOutput(false);
 
         if (rBackground != COL_TRANSPARENT)
             aBackgroundComponent.SetBackground(rBackground, GetBackgroundComponentBounds());
