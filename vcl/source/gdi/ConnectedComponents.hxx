@@ -123,7 +123,8 @@ struct ConnectedComponents
                                                                                      *pMapModeVDev);
     }
 
-    std::tuple<int, MetaAction*> ExtendAllBounds(GDIMetaFile const& rMtf, VirtualDevice* pMapModeVDev);
+    std::tuple<int, MetaAction*> ExtendAllBounds(GDIMetaFile const& rMtf,
+                                                 VirtualDevice* pMapModeVDev);
 
     template <typename T>
     std::tuple<int, bool> ExtendCurrentBounds(T* pCurrAct, VirtualDevice* pMapModeVDev, int,
@@ -167,6 +168,15 @@ struct ConnectedComponents
 
     int ReconstructVirtualDeviceMapMode(GDIMetaFile const& rMtf, VirtualDevice* pMapModeVDev,
                                         int nLastBgAction);
+
+    /** Prune page-filling background objects
+
+        Weed out page-filling background objects (if they are uniformly coloured). Keeping them
+        outside the other connected components often prevents whole-page bitmap
+        generation.
+    */
+    std::tuple<int, MetaAction*> PruneBackgroundObjects(GDIMetaFile const& rMtf,
+                                                        VirtualDevice* pMapModeVDev);
 
     ::std::list<Component> aComponentList;
     tools::Rectangle aBounds;

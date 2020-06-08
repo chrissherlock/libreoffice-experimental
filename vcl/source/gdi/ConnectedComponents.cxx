@@ -109,7 +109,8 @@ bool ConnectedComponents::IsBackgroundNotCovered(MetaAction* pAction,
                 && rMapModeVDev.IsFillColor());
 }
 
-std::tuple<int, MetaAction*> ConnectedComponents::ExtendAllBounds(GDIMetaFile const& rMtf, VirtualDevice* pMapModeVDev)
+std::tuple<int, MetaAction*> ConnectedComponents::ExtendAllBounds(GDIMetaFile const& rMtf,
+                                                                  VirtualDevice* pMapModeVDev)
 {
     MetaAction* pCurrAct = const_cast<GDIMetaFile&>(rMtf).FirstAction();
 
@@ -236,4 +237,17 @@ int ConnectedComponents::ReconstructVirtualDeviceMapMode(GDIMetaFile const& rMtf
     return nActionNum;
 }
 
+std::tuple<int, MetaAction*>
+ConnectedComponents::PruneBackgroundObjects(GDIMetaFile const& rMtf, VirtualDevice* pMapModeVDev)
+{
+    MetaAction* pCurrAct = nullptr;
+    int nLastBgAction = 0;
+    std::tie(nLastBgAction, pCurrAct) = ExtendAllBounds(rMtf, pMapModeVDev);
+
+    // fast-forward until one after the last background action
+    // (need to reconstruct map mode vdev state)
+    int nActionNum = ReconstructVirtualDeviceMapMode(rMtf, pMapModeVDev, nLastBgAction);
+
+    return std::make_tuple(nActionNum, pCurrAct);
+}
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

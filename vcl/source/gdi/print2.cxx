@@ -310,16 +310,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
         if (rBackground != COL_TRANSPARENT)
             aBackgroundComponent.SetBackground(rBackground, GetBackgroundComponentBounds());
 
-        // weed out page-filling background objects (if they are
-        // uniformly coloured). Keeping them outside the other
-        // connected components often prevents whole-page bitmap
-        // generation.
-        int nLastBgAction = 0;
-        std::tie(nLastBgAction, pCurrAct) = aBackgroundComponent.ExtendAllBounds(rInMtf, aMapModeVDev.get());
-
-        // fast-forward until one after the last background action
-        // (need to reconstruct map mode vdev state)
-        int nActionNum = aBackgroundComponent.ReconstructVirtualDeviceMapMode(rInMtf, aMapModeVDev.get(), nLastBgAction);
+        int nActionNum = 0;
+        std::tie(nActionNum, pCurrAct) = aBackgroundComponent.PruneBackgroundObjects(rInMtf, aMapModeVDev.get());
 
         //  STAGE 2: Generate connected components list
 
