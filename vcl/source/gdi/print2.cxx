@@ -249,13 +249,14 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                                                     bool bDownsampleBitmaps,
                                                     const Color& rBackground)
 {
-    MetaAction* pCurrAct;
     bool bTransparent(false);
 
     rOutMtf.Clear();
 
     if (!bReduceTransparency || bTransparencyAutoMode)
         bTransparent = rInMtf.HasTransparentActions();
+
+    MetaAction* pCurrAct = nullptr;
 
     // #i10613# Determine set of connected components containing transparent objects. These are
     // then processed as bitmaps, the original actions are removed from the metafile.
@@ -316,23 +317,9 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
         int nLastBgAction = 0;
         std::tie(nLastBgAction, pCurrAct) = aBackgroundComponent.ExtendAllBounds(rInMtf, aMapModeVDev.get());
 
-        aMapModeVDev->ClearStack(); // clean up aMapModeVDev
-
         // fast-forward until one after the last background action
         // (need to reconstruct map mode vdev state)
-        int nActionNum = 0;
-        pCurrAct = const_cast<GDIMetaFile&>(rInMtf).FirstAction();
-        while (pCurrAct && nActionNum <= nLastBgAction)
-        {
-            // up to and including last ink-generating background
-            // action go to background component
-            aBackgroundComponent.aComponentList.emplace_back(pCurrAct, nActionNum);
-
-            // execute action to get correct MapModes etc.
-            pCurrAct->Execute(aMapModeVDev.get());
-            pCurrAct = const_cast<GDIMetaFile&>(rInMtf).NextAction();
-            ++nActionNum;
-        }
+        int nActionNum = aBackgroundComponent.ReconstructVirtualDeviceMapMode(rInMtf, aMapModeVDev.get(), nLastBgAction);
 
         //  STAGE 2: Generate connected components list
 

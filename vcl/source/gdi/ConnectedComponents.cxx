@@ -212,4 +212,28 @@ std::tuple<int, bool> ConnectedComponents::ExtendCurrentBounds(MetaWallpaperActi
     return ExtendCurrentBounds_implementation(pCurrAct, pMapModeVDev, nActionNum, nLastBgAction);
 }
 
+int ConnectedComponents::ReconstructVirtualDeviceMapMode(GDIMetaFile const& rMtf,
+                                                         VirtualDevice* pMapModeVDev,
+                                                         int nLastBgAction)
+{
+    int nActionNum = 0;
+
+    pMapModeVDev->ClearStack(); // clean up pMapModeVDev
+
+    MetaAction* pCurrAct = const_cast<GDIMetaFile&>(rMtf).FirstAction();
+    while (pCurrAct && nActionNum <= nLastBgAction)
+    {
+        // up to and including last ink-generating background
+        // action go to background component
+        aComponentList.emplace_back(pCurrAct, nActionNum);
+
+        // execute action to get correct MapModes etc.
+        pCurrAct->Execute(pMapModeVDev);
+        pCurrAct = const_cast<GDIMetaFile&>(rMtf).NextAction();
+        ++nActionNum;
+    }
+
+    return nActionNum;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

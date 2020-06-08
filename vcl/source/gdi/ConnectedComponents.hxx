@@ -165,6 +165,9 @@ struct ConnectedComponents
                                               VirtualDevice* pMapModeVDev, int nActionNum,
                                               int nLastBgAction);
 
+    int ReconstructVirtualDeviceMapMode(GDIMetaFile const& rMtf, VirtualDevice* pMapModeVDev,
+                                        int nLastBgAction);
+
     ::std::list<Component> aComponentList;
     tools::Rectangle aBounds;
     Color aBgColor;
