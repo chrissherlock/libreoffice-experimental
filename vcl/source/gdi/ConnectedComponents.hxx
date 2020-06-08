@@ -23,6 +23,7 @@
 #include <utility>
 #include <list>
 #include <vector>
+#include <tuple>
 
 #include <basegfx/polygon/b2dpolygontools.hxx>
 #include <sal/log.hxx>
@@ -33,6 +34,8 @@
 #include <vcl/bitmapaccess.hxx>
 
 #include "pdfwriter_impl.hxx"
+
+class MetaTransparentAction;
 
 template <typename T> tools::Rectangle GetBoundsRect(T);
 
@@ -119,6 +122,46 @@ struct ConnectedComponents
         set_component_selector<is_valid_background_region<T>::value>::implementation(this, action,
                                                                                      *pMapModeVDev);
     }
+
+    template <typename T>
+    std::tuple<int, bool> ExtendCurrentBounds(T* pCurrAct, VirtualDevice* pMapModeVDev, int,
+                                              int nLastBgAction);
+
+    std::tuple<int, bool> ExtendCurrentBounds_implementation(MetaAction* pCurrAct,
+                                                             VirtualDevice* pMapModeVDev,
+                                                             int nActionNum, int nLastBgAction);
+
+    template <>
+    std::tuple<int, bool> ExtendCurrentBounds(MetaAction* pCurrAct, VirtualDevice* pMapModeVDev,
+                                              int nActionNum, int nLastBgAction);
+
+    template <>
+    std::tuple<int, bool> ExtendCurrentBounds(MetaTransparentAction* pCurrAct,
+                                              VirtualDevice* pMapModeVDev, int nActionNum,
+                                              int nLastBgAction);
+
+    template <>
+    std::tuple<int, bool> ExtendCurrentBounds(MetaRectAction* pCurrAct, VirtualDevice* pMapModeVDev,
+                                              int nActionNum, int nLastBgAction);
+
+    template <>
+    std::tuple<int, bool> ExtendCurrentBounds(MetaRectAction* pCurrAct, VirtualDevice* pMapModeVDev,
+                                              int nActionNum, int nLastBgAction);
+
+    template <>
+    std::tuple<int, bool> ExtendCurrentBounds(MetaPolygonAction* pCurrAct,
+                                              VirtualDevice* pMapModeVDev, int nActionNum,
+                                              int nLastBgAction);
+
+    template <>
+    std::tuple<int, bool> ExtendCurrentBounds(MetaPolyPolygonAction* pCurrAct,
+                                              VirtualDevice* pMapModeVDev, int nActionNum,
+                                              int nLastBgAction);
+
+    template <>
+    std::tuple<int, bool> ExtendCurrentBounds(MetaWallpaperAction* pCurrAct,
+                                              VirtualDevice* pMapModeVDev, int nActionNum,
+                                              int nLastBgAction);
 
     ::std::list<Component> aComponentList;
     tools::Rectangle aBounds;

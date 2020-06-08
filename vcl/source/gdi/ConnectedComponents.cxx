@@ -30,6 +30,7 @@
 #include <vcl/MetaPolygonAction.hxx>
 #include <vcl/MetaPolyPolygonAction.hxx>
 #include <vcl/MetaWallpaperAction.hxx>
+#include <vcl/MetaTransparentAction.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/bitmapaccess.hxx>
 
@@ -106,6 +107,86 @@ bool ConnectedComponents::IsBackgroundNotCovered(MetaAction* pAction,
     return IsValidShape(pAction)
            || !(rMapModeVDev.LogicToPixel(rCurrRect).IsInside(aBounds)
                 && rMapModeVDev.IsFillColor());
+}
+
+template <typename T>
+std::tuple<int, bool> ConnectedComponents::ExtendCurrentBounds(T*, VirtualDevice*, int, int)
+{
+    SAL_WARN("vcl.gdi", "Should never match");
+    assert(false);
+    return std::make_tuple(-1, false);
+}
+
+template <>
+std::tuple<int, bool> ConnectedComponents::ExtendCurrentBounds(MetaAction*, VirtualDevice*, int,
+                                                               int)
+{
+    SAL_WARN("vcl.gdi", "Should never match");
+    assert(false);
+    return std::make_tuple(-1, false);
+}
+
+template <>
+std::tuple<int, bool> ConnectedComponents::ExtendCurrentBounds(MetaTransparentAction* pCurrAct,
+                                                               VirtualDevice* pMapModeVDev, int,
+                                                               int nLastBgAction)
+{
+    if (pCurrAct->IsTransparent(pMapModeVDev))
+    {
+        // extend current bounds (next uniform action needs to fully cover this area)
+        SetBackgroundComponent(pCurrAct, pMapModeVDev);
+        return std::make_tuple(nLastBgAction, true);
+    }
+    else
+    {
+        return std::make_tuple(nLastBgAction, false);
+    }
+}
+
+std::tuple<int, bool> ConnectedComponents::ExtendCurrentBounds_implementation(
+    MetaAction* pCurrAct, VirtualDevice* pMapModeVDev, int nActionNum, int nLastBgAction)
+{
+    if (IsBackgroundNotCovered(pCurrAct, *pMapModeVDev))
+    {
+        SetBackgroundComponent(pCurrAct, pMapModeVDev);
+        return std::make_tuple(nLastBgAction, true);
+    }
+    else
+    {
+        return std::make_tuple(nActionNum, false);
+    }
+}
+
+template <>
+std::tuple<int, bool> ConnectedComponents::ExtendCurrentBounds(MetaRectAction* pCurrAct,
+                                                               VirtualDevice* pMapModeVDev,
+                                                               int nActionNum, int nLastBgAction)
+{
+    return ExtendCurrentBounds_implementation(pCurrAct, pMapModeVDev, nActionNum, nLastBgAction);
+}
+
+template <>
+std::tuple<int, bool> ConnectedComponents::ExtendCurrentBounds(MetaPolygonAction* pCurrAct,
+                                                               VirtualDevice* pMapModeVDev,
+                                                               int nActionNum, int nLastBgAction)
+{
+    return ExtendCurrentBounds_implementation(pCurrAct, pMapModeVDev, nActionNum, nLastBgAction);
+}
+
+template <>
+std::tuple<int, bool> ConnectedComponents::ExtendCurrentBounds(MetaPolyPolygonAction* pCurrAct,
+                                                               VirtualDevice* pMapModeVDev,
+                                                               int nActionNum, int nLastBgAction)
+{
+    return ExtendCurrentBounds_implementation(pCurrAct, pMapModeVDev, nActionNum, nLastBgAction);
+}
+
+template <>
+std::tuple<int, bool> ConnectedComponents::ExtendCurrentBounds(MetaWallpaperAction* pCurrAct,
+                                                               VirtualDevice* pMapModeVDev,
+                                                               int nActionNum, int nLastBgAction)
+{
+    return ExtendCurrentBounds_implementation(pCurrAct, pMapModeVDev, nActionNum, nLastBgAction);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

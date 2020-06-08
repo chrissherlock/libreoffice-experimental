@@ -242,73 +242,6 @@ static double GetReduceTransparencyMinArea()
     return fReduceTransparencyMinArea;
 }
 
-template <typename T>
-std::tuple<int, bool> ExtendCurrentBounds(ConnectedComponents& rBackgroundComponent, T* pCurrAct,
-                                           VirtualDevice* pMapModeVDev, int, int nLastBgAction)
-{
-    if (pCurrAct->IsTransparent(pMapModeVDev))
-    {
-        // extend current bounds (next uniform action needs to fully cover this area)
-        rBackgroundComponent.SetBackgroundComponent(pCurrAct, pMapModeVDev);
-        return std::make_tuple(nLastBgAction, true);
-    }
-    else
-    {
-        return std::make_tuple(nLastBgAction, false);
-    }
-}
-
-static std::tuple<int, bool>
-ExtendCurrentBounds_implementation(ConnectedComponents& rBackgroundComponent, MetaAction* pCurrAct,
-                                    VirtualDevice* pMapModeVDev, int nActionNum, int nLastBgAction)
-{
-    if (rBackgroundComponent.IsBackgroundNotCovered(pCurrAct, *pMapModeVDev))
-    {
-        rBackgroundComponent.SetBackgroundComponent(pCurrAct, pMapModeVDev);
-        return std::make_tuple(nLastBgAction, true);
-    }
-    else
-    {
-        return std::make_tuple(nActionNum, false);
-    }
-}
-
-template <>
-std::tuple<int, bool> ExtendCurrentBounds(ConnectedComponents& rBackgroundComponent,
-                                           MetaRectAction* pCurrAct, VirtualDevice* pMapModeVDev,
-                                           int nActionNum, int nLastBgAction)
-{
-    return ExtendCurrentBounds_implementation(rBackgroundComponent, pCurrAct, pMapModeVDev,
-                                               nActionNum, nLastBgAction);
-}
-
-template <>
-std::tuple<int, bool> ExtendCurrentBounds(ConnectedComponents& rBackgroundComponent,
-                                           MetaPolygonAction* pCurrAct, VirtualDevice* pMapModeVDev,
-                                           int nActionNum, int nLastBgAction)
-{
-    return ExtendCurrentBounds_implementation(rBackgroundComponent, pCurrAct, pMapModeVDev,
-                                               nActionNum, nLastBgAction);
-}
-
-template <>
-std::tuple<int, bool>
-ExtendCurrentBounds(ConnectedComponents& rBackgroundComponent, MetaPolyPolygonAction* pCurrAct,
-                     VirtualDevice* pMapModeVDev, int nActionNum, int nLastBgAction)
-{
-    return ExtendCurrentBounds_implementation(rBackgroundComponent, pCurrAct, pMapModeVDev,
-                                               nActionNum, nLastBgAction);
-}
-
-template <>
-std::tuple<int, bool>
-ExtendCurrentBounds(ConnectedComponents& rBackgroundComponent, MetaWallpaperAction* pCurrAct,
-                     VirtualDevice* pMapModeVDev, int nActionNum, int nLastBgAction)
-{
-    return ExtendCurrentBounds_implementation(rBackgroundComponent, pCurrAct, pMapModeVDev,
-                                               nActionNum, nLastBgAction);
-}
-
 bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, GDIMetaFile& rOutMtf,
                                                     long nMaxBmpDPIX, long nMaxBmpDPIY,
                                                     bool bReduceTransparency,
@@ -389,8 +322,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
 
         while (pCurrAct && bStillBackground)
         {
-            std::tie(nLastBgAction, bStillBackground) = ExtendCurrentBounds(
-                aBackgroundComponent, pCurrAct, aMapModeVDev.get(), nActionNum, nLastBgAction);
+            std::tie(nLastBgAction, bStillBackground) = aBackgroundComponent.ExtendCurrentBounds(
+                pCurrAct, aMapModeVDev.get(), nActionNum, nLastBgAction);
 
             // execute action to get correct MapModes etc.
             pCurrAct->Execute(aMapModeVDev.get());
