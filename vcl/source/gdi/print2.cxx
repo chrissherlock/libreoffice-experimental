@@ -306,8 +306,6 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
         aMapModeVDev->mnDPIY = mnDPIY;
         aMapModeVDev->EnableOutput(false);
 
-        int nLastBgAction, nActionNum;
-
         if (rBackground != COL_TRANSPARENT)
             aBackgroundComponent.SetBackground(rBackground, GetBackgroundComponentBounds());
 
@@ -315,28 +313,14 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
         // uniformly coloured). Keeping them outside the other
         // connected components often prevents whole-page bitmap
         // generation.
-        bool bStillBackground = true; // true until first non-bg action
-        nActionNum = 0;
-        nLastBgAction = -1;
-        pCurrAct = const_cast<GDIMetaFile&>(rInMtf).FirstAction();
-
-        while (pCurrAct && bStillBackground)
-        {
-            std::tie(nLastBgAction, bStillBackground) = aBackgroundComponent.ExtendCurrentBounds(
-                pCurrAct, aMapModeVDev.get(), nActionNum, nLastBgAction);
-
-            // execute action to get correct MapModes etc.
-            pCurrAct->Execute(aMapModeVDev.get());
-
-            pCurrAct = const_cast<GDIMetaFile&>(rInMtf).NextAction();
-            ++nActionNum;
-        }
+        int nLastBgAction = 0;
+        std::tie(nLastBgAction, pCurrAct) = aBackgroundComponent.ExtendAllBounds(rInMtf, aMapModeVDev.get());
 
         aMapModeVDev->ClearStack(); // clean up aMapModeVDev
 
         // fast-forward until one after the last background action
         // (need to reconstruct map mode vdev state)
-        nActionNum = 0;
+        int nActionNum = 0;
         pCurrAct = const_cast<GDIMetaFile&>(rInMtf).FirstAction();
         while (pCurrAct && nActionNum <= nLastBgAction)
         {

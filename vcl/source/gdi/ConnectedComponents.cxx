@@ -109,6 +109,29 @@ bool ConnectedComponents::IsBackgroundNotCovered(MetaAction* pAction,
                 && rMapModeVDev.IsFillColor());
 }
 
+std::tuple<int, MetaAction*> ConnectedComponents::ExtendAllBounds(GDIMetaFile const& rMtf, VirtualDevice* pMapModeVDev)
+{
+    MetaAction* pCurrAct = const_cast<GDIMetaFile&>(rMtf).FirstAction();
+
+    bool bStillBackground = true; // true until first non-bg action
+    int nActionNum = 0;
+    int nLastBgAction = -1;
+
+    while (pCurrAct && bStillBackground)
+    {
+        std::tie(nLastBgAction, bStillBackground)
+            = ExtendCurrentBounds(pCurrAct, pMapModeVDev, nActionNum, nLastBgAction);
+
+        // execute action to get correct MapModes etc.
+        pCurrAct->Execute(pMapModeVDev);
+
+        pCurrAct = const_cast<GDIMetaFile&>(rMtf).NextAction();
+        ++nActionNum;
+    }
+
+    return std::make_tuple(nLastBgAction, pCurrAct);
+}
+
 template <typename T>
 std::tuple<int, bool> ConnectedComponents::ExtendCurrentBounds(T*, VirtualDevice*, int, int)
 {

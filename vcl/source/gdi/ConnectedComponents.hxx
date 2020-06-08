@@ -123,6 +123,8 @@ struct ConnectedComponents
                                                                                      *pMapModeVDev);
     }
 
+    std::tuple<int, MetaAction*> ExtendAllBounds(GDIMetaFile const& rMtf, VirtualDevice* pMapModeVDev);
+
     template <typename T>
     std::tuple<int, bool> ExtendCurrentBounds(T* pCurrAct, VirtualDevice* pMapModeVDev, int,
                                               int nLastBgAction);
