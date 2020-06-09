@@ -242,6 +242,12 @@ static double GetReduceTransparencyMinArea()
     return fReduceTransparencyMinArea;
 }
 
+static bool ComponentBoundsAreOver(ConnectedComponents const& rComponent, tools::Rectangle rBounds)
+{
+    return (!rComponent.aBounds.IsEmpty() && !rComponent.bIsFullyTransparent
+        && rComponent.aBounds.IsOver(rBounds));
+}
+
 bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, GDIMetaFile& rOutMtf,
                                                     long nMaxBmpDPIX, long nMaxBmpDPIY,
                                                     bool bReduceTransparency,
@@ -392,8 +398,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                         // not be considered for connected components,
                         // too. Just put each of them into a separate
                         // component.
-                        if (!aCurrCC->aBounds.IsEmpty() && !aCurrCC->bIsFullyTransparent
-                            && aCurrCC->aBounds.IsOver(aTotalBounds))
+                        if (ComponentBoundsAreOver(*aCurrCC, aTotalBounds))
                         {
                             // union the intersecting aCCList element into aTotalComponents
 
