@@ -284,15 +284,15 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
         // number of intersecting metafile actions, plus any action
         // that would otherwise be cut in two). Therefore, we
         // iteratively add metafile actions from the original metafile
-        // to this connected components list (aCCList), by checking
+        // to this connected components list (aConnectedComponents), by checking
         // each element's bounding box against intersection with the
         // metaaction at hand.
-        // All those intersecting elements are removed from aCCList
+        // All those intersecting elements are removed from aConnectedComponents
         // and collected in a temporary list (aCCMergeList). After all
         // elements have been checked, the aCCMergeList elements are
         // merged with the metaaction at hand into one resulting
         // connected component, with one big bounding box, and
-        // inserted into aCCList again.
+        // inserted into aConnectedComponents again.
         // The time complexity of this algorithm is O(n^3), where n is
         // the number of metafile actions, and it finds all distinct
         // regions of rectangle-bounded connected components. This
@@ -307,7 +307,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
         aMapModeVDev->EnableOutput(false);
 
         // Receives uniform background content, and is _not_ merged
-        // nor checked for intersection against other aCCList elements
+        // nor checked for intersection against other aConnectedComponents elements
         ConnectedComponents aBackgroundComponent;
 
         // Read the configuration value of minimal object area where transparency will be removed
@@ -322,7 +322,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
         //  STAGE 2: Generate connected components list
 
         ::std::vector<ConnectedComponents>
-            aCCList; // contains distinct sets of connected components as elements.
+            aConnectedComponents; // contains distinct sets of connected components as elements.
 
         // iterate over all actions (start where background action
         // search left off)
@@ -343,9 +343,9 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
             //  STAGE 2.1: Search for intersecting cc entries
 
             // if aBBCurrAct is empty, it will intersect with no
-            // aCCList member. Thus, we can save the check.
+            // aConnectedComponents member. Thus, we can save the check.
             // Furthermore, this ensures that non-output-generating
-            // actions get their own aCCList entry, which is necessary
+            // actions get their own aConnectedComponents entry, which is necessary
             // when copying them to the output metafile (see stage 4
             // below).
 
@@ -375,9 +375,9 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                 bool bSomeComponentsChanged;
 
                 // now, this is unfortunate: since changing anyone of
-                // the aCCList elements (e.g. by merging or addition
+                // the aConnectedComponents elements (e.g. by merging or addition
                 // of an action) might generate new intersection with
-                // other aCCList elements, have to repeat the whole
+                // other aConnectedComponents elements, have to repeat the whole
                 // element scanning, until nothing changes anymore.
                 // Thus, this loop here makes us O(n^3) in the worst
                 // case.
@@ -386,8 +386,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                     // only loop here if 'intersects' branch below was hit
                     bSomeComponentsChanged = false;
 
-                    // iterate over all current members of aCCList
-                    for (auto aCurrCC = aCCList.begin(); aCurrCC != aCCList.end();)
+                    // iterate over all current members of aConnectedComponents
+                    for (auto aCurrCC = aConnectedComponents.begin(); aCurrCC != aConnectedComponents.end();)
                     {
                         // first check if current element's bounds are
                         // empty. This ensures that empty actions are not
@@ -400,7 +400,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                         // component.
                         if (ComponentBoundsAreOver(*aCurrCC, aTotalBounds))
                         {
-                            // union the intersecting aCCList element into aTotalComponents
+                            // union the intersecting aConnectedComponents element into aTotalComponents
 
                             // calc union bounding box
                             aTotalBounds.Union(aCurrCC->aBounds);
@@ -413,7 +413,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                                 bTreatSpecial = true;
 
                             // remove and delete aCurrCC element from list (we've now merged its content)
-                            aCurrCC = aCCList.erase(aCurrCC);
+                            aCurrCC = aConnectedComponents.erase(aCurrCC);
 
                             // at least one component changed, need to rescan everything
                             bSomeComponentsChanged = true;
@@ -499,8 +499,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
             aTotalComponents.aBounds = aTotalBounds;
             aTotalComponents.aComponentList.emplace_back(pCurrAct, nActionNum);
 
-            // add aTotalComponents as a new entry to aCCList
-            aCCList.push_back(aTotalComponents);
+            // add aTotalComponents as a new entry to aConnectedComponents
+            aConnectedComponents.push_back(aTotalComponents);
 
             SAL_WARN_IF(aTotalComponents.aComponentList.empty(), "vcl",
                         "Printer::GetPreparedMetaFile empty component");
@@ -516,23 +516,23 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
 
         // well now, we've got the list of disjunct connected
         // components. Now we've got to create a map, which contains
-        // the corresponding aCCList element for every
+        // the corresponding aConnectedComponents element for every
         // metaaction. Later on, we always process the complete
         // metafile for each bitmap to be generated, but switch on
         // output only for actions contained in the then current
-        // aCCList element. This ensures correct mapmode and attribute
+        // aConnectedComponents element. This ensures correct mapmode and attribute
         // settings for all cases.
 
         // maps mtf actions to CC list entries
-        ::std::vector<const ConnectedComponents*> aCCList_MemberMap(rInMtf.GetActionSize());
+        ::std::vector<const ConnectedComponents*> aConnectedComponents_MemberMap(rInMtf.GetActionSize());
 
-        // iterate over all aCCList members and their contained metaactions
-        for (auto const& currentItem : aCCList)
+        // iterate over all aConnectedComponents members and their contained metaactions
+        for (auto const& currentItem : aConnectedComponents)
         {
             for (auto const& currentAction : currentItem.aComponentList)
             {
-                // set pointer to aCCList element for corresponding index
-                aCCList_MemberMap[currentAction.second] = &currentItem;
+                // set pointer to aConnectedComponents element for corresponding index
+                aConnectedComponents_MemberMap[currentAction.second] = &currentItem;
             }
         }
 
@@ -568,8 +568,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
         const tools::Rectangle aOutputRect(aPageOffset, aTmpSize);
         bool bTiling = dynamic_cast<Printer*>(this) != nullptr;
 
-        // iterate over all aCCList members and generate bitmaps for the special ones
-        for (auto& currentItem : aCCList)
+        // iterate over all aConnectedComponents members and generate bitmaps for the special ones
+        for (auto& currentItem : aConnectedComponents)
         {
             if (currentItem.bIsSpecial)
             {
@@ -646,9 +646,9 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                                     {
                                         // enable output only for
                                         // actions that are members of
-                                        // the current aCCList element
+                                        // the current aConnectedComponents element
                                         // (currentItem)
-                                        if (aCCList_MemberMap[nActionNum] == &currentItem)
+                                        if (aConnectedComponents_MemberMap[nActionNum] == &currentItem)
                                             aPaintVDev->EnableOutput();
 
                                         // but process every action
@@ -736,14 +736,14 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
         //  STAGE 4: Copy actions to output metafile
 
         // iterate over all actions and duplicate the ones not in a
-        // special aCCList member into rOutMtf
+        // special aConnectedComponents member into rOutMtf
         for (pCurrAct = const_cast<GDIMetaFile&>(rInMtf).FirstAction(), nActionNum = 0; pCurrAct;
              pCurrAct = const_cast<GDIMetaFile&>(rInMtf).NextAction(), ++nActionNum)
         {
-            const ConnectedComponents* pCurrAssociatedComponent = aCCList_MemberMap[nActionNum];
+            const ConnectedComponents* pCurrAssociatedComponent = aConnectedComponents_MemberMap[nActionNum];
 
             // NOTE: This relies on the fact that map-mode or draw
-            // mode changing actions are solitary aCCList elements and
+            // mode changing actions are solitary aConnectedComponents elements and
             // have empty bounding boxes, see comment on stage 2.1
             // above
             if (pCurrAssociatedComponent
@@ -776,9 +776,9 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
         rOutMtf.SetPrefSize(rInMtf.GetPrefSize());
 
 #if OSL_DEBUG_LEVEL > 1
-        // iterate over all aCCList members and generate rectangles for the bounding boxes
+        // iterate over all aConnectedComponents members and generate rectangles for the bounding boxes
         rOutMtf.AddAction(new MetaFillColorAction(COL_WHITE, false));
-        for (auto const& aCurr : aCCList)
+        for (auto const& aCurr : aConnectedComponents)
         {
             if (aCurr.bIsSpecial)
                 rOutMtf.AddAction(new MetaLineColorAction(COL_RED, true));
