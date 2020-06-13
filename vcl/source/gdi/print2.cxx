@@ -496,6 +496,59 @@ template <typename T> bool UsesTiling(T*) { return false; }
 
 template <> bool UsesTiling(Printer*) { return true; }
 
+template <typename T>
+void DrawAction(T* pCurrAct, VirtualDevice* pPaintVDev, VirtualDevice*, Point, OutputDevice*)
+{
+    pCurrAct->Execute(pPaintVDev);
+}
+
+template <>
+void DrawAction(MetaMapModeAction* pCurrAct, VirtualDevice* pPaintVDev, VirtualDevice* pMapVDev,
+                Point aDstPtPix, OutputDevice*)
+{
+    pCurrAct->Execute(pMapVDev);
+
+    MapMode aMtfMap(pMapVDev->GetMapMode());
+    const Point aNewOrg(pMapVDev->PixelToLogic(aDstPtPix));
+
+    aMtfMap.SetOrigin(Point(-aNewOrg.X(), -aNewOrg.Y()));
+    pPaintVDev->SetMapMode(aMtfMap);
+}
+
+template <>
+void DrawAction(MetaPushAction* pCurrAct, VirtualDevice* pPaintVDev, VirtualDevice* pMapVDev, Point,
+                OutputDevice*)
+{
+    pCurrAct->Execute(pMapVDev);
+    pCurrAct->Execute(pPaintVDev);
+}
+
+template <>
+void DrawAction(MetaPopAction* pCurrAct, VirtualDevice* pPaintVDev, VirtualDevice* pMapVDev, Point,
+                OutputDevice*)
+{
+    pCurrAct->Execute(pMapVDev);
+    pCurrAct->Execute(pPaintVDev);
+}
+
+template <typename T> void DrawGradient(MetaGradientAction* pCurrAct, VirtualDevice*, T* pOutDev)
+{
+    pOutDev->DrawGradient(pCurrAct->GetRect(), pCurrAct->GetGradient());
+}
+
+template <>
+void DrawGradient(MetaGradientAction* pCurrAct, VirtualDevice* pPaintVDev, Printer* pPrinter)
+{
+    pPrinter->DrawGradientEx(pPaintVDev, pCurrAct->GetRect(), pCurrAct->GetGradient());
+}
+
+template <>
+void DrawAction(MetaGradientAction* pCurrAct, VirtualDevice* pPaintVDev, VirtualDevice*, Point,
+                OutputDevice* pOutDev)
+{
+    DrawGradient(pCurrAct, pPaintVDev, pOutDev);
+}
+
 bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, GDIMetaFile& rOutMtf,
                                                     long nMaxBmpDPIX, long nMaxBmpDPIY,
                                                     bool bReduceTransparency,
@@ -691,42 +744,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                                     if (aConnectedActions_MemberMap[nActionNum] == &currentItem)
                                         aPaintVDev->EnableOutput();
 
-                                    // but process every action
-                                    const MetaActionType nType(pCurrAct->GetType());
-
-                                    if (MetaActionType::MAPMODE == nType)
-                                    {
-                                        pCurrAct->Execute(aMapVDev.get());
-
-                                        MapMode aMtfMap(aMapVDev->GetMapMode());
-                                        const Point aNewOrg(aMapVDev->PixelToLogic(aDstPtPix));
-
-                                        aMtfMap.SetOrigin(Point(-aNewOrg.X(), -aNewOrg.Y()));
-                                        aPaintVDev->SetMapMode(aMtfMap);
-                                    }
-                                    else if ((MetaActionType::PUSH == nType)
-                                             || MetaActionType::POP == nType)
-                                    {
-                                        pCurrAct->Execute(aMapVDev.get());
-                                        pCurrAct->Execute(aPaintVDev.get());
-                                    }
-                                    else if (MetaActionType::GRADIENT == nType)
-                                    {
-                                        MetaGradientAction* pGradientAction
-                                            = static_cast<MetaGradientAction*>(pCurrAct);
-                                        Printer* pPrinter = dynamic_cast<Printer*>(this);
-                                        if (pPrinter)
-                                            pPrinter->DrawGradientEx(
-                                                aPaintVDev.get(), pGradientAction->GetRect(),
-                                                pGradientAction->GetGradient());
-                                        else
-                                            DrawGradient(pGradientAction->GetRect(),
-                                                         pGradientAction->GetGradient());
-                                    }
-                                    else
-                                    {
-                                        pCurrAct->Execute(aPaintVDev.get());
-                                    }
+                                    DrawAction(pCurrAct, aPaintVDev.get(), aMapVDev.get(),
+                                               aDstPtPix, this);
 
                                     Application::Reschedule(true);
                                 }
