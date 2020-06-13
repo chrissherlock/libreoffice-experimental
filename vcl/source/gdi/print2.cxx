@@ -315,495 +315,493 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                                                     bool bDownsampleBitmaps,
                                                     const Color& rBackground)
 {
-    bool bTransparent(false);
-
     rOutMtf.Clear();
-
-    if (!bReduceTransparency || bTransparencyAutoMode)
-        bTransparent = rInMtf.HasTransparentActions();
 
     MetaAction* pCurrAct = nullptr;
 
     // #i10613# Determine set of connected components containing transparent objects. These are
     // then processed as bitmaps, the original actions are removed from the metafile.
-    if (!bTransparent)
+    if (!bReduceTransparency || bTransparencyAutoMode)
     {
-        // nothing transparent -> just copy
-        rOutMtf = rInMtf;
-    }
-    else
-    {
-        // #i10613#
-        // This works as follows: we want a number of distinct sets of
-        // connected components, where each set contains metafile
-        // actions that are intersecting (note: there are possibly
-        // more actions contained as are directly intersecting,
-        // because we can only produce rectangular bitmaps later
-        // on. Thus, each set of connected components is the smallest
-        // enclosing, axis-aligned rectangle that completely bounds a
-        // number of intersecting metafile actions, plus any action
-        // that would otherwise be cut in two). Therefore, we
-        // iteratively add metafile actions from the original metafile
-        // to this connected components list (aConnectedComponents), by checking
-        // each element's bounding box against intersection with the
-        // metaaction at hand.
-        // All those intersecting elements are removed from aConnectedComponents
-        // and collected in a temporary list (aCCMergeList). After all
-        // elements have been checked, the aCCMergeList elements are
-        // merged with the metaaction at hand into one resulting
-        // connected component, with one big bounding box, and
-        // inserted into aConnectedComponents again.
-        // The time complexity of this algorithm is O(n^3), where n is
-        // the number of metafile actions, and it finds all distinct
-        // regions of rectangle-bounded connected components. This
-        // algorithm was designed by AF.
-
-        //  STAGE 1: Detect background
-
-        // create an OutputDevice to record mapmode changes and the like
-        ScopedVclPtrInstance<VirtualDevice> aMapModeVDev;
-        aMapModeVDev->mnDPIX = mnDPIX;
-        aMapModeVDev->mnDPIY = mnDPIY;
-        aMapModeVDev->EnableOutput(false);
-
-        // Receives uniform background content, and is _not_ merged
-        // nor checked for intersection against other aConnectedComponents elements
-        ConnectedComponents aBackgroundComponent;
-
-        if (rBackground != COL_TRANSPARENT)
-            aBackgroundComponent.SetBackground(rBackground, GetBackgroundComponentBounds());
-
-        int nActionNum = 0;
-        std::tie(nActionNum, pCurrAct)
-            = aBackgroundComponent.PruneBackgroundObjects(rInMtf, aMapModeVDev.get());
-
-        //  STAGE 2: Generate connected components list
-
-        ::std::vector<ConnectedComponents>
-            aConnectedComponents; // contains distinct sets of connected components as elements.
-
-        // iterate over all actions (start where background action
-        // search left off)
-        for (; pCurrAct; pCurrAct = const_cast<GDIMetaFile&>(rInMtf).NextAction(), ++nActionNum)
+        if (rInMtf.HasTransparentActions())
         {
-            // execute action to get correct MapModes etc.
-            pCurrAct->Execute(aMapModeVDev.get());
+            // nothing transparent -> just copy
+            rOutMtf = rInMtf;
+            return true;
+        }
+    }
 
-            // cache bounds of current action
-            const tools::Rectangle aBBCurrAct(pCurrAct->GetBoundsRect(aMapModeVDev.get()));
+    // #i10613#
+    // This works as follows: we want a number of distinct sets of
+    // connected components, where each set contains metafile
+    // actions that are intersecting (note: there are possibly
+    // more actions contained as are directly intersecting,
+    // because we can only produce rectangular bitmaps later
+    // on. Thus, each set of connected components is the smallest
+    // enclosing, axis-aligned rectangle that completely bounds a
+    // number of intersecting metafile actions, plus any action
+    // that would otherwise be cut in two). Therefore, we
+    // iteratively add metafile actions from the original metafile
+    // to this connected components list (aConnectedComponents), by checking
+    // each element's bounding box against intersection with the
+    // metaaction at hand.
+    // All those intersecting elements are removed from aConnectedComponents
+    // and collected in a temporary list (aCCMergeList). After all
+    // elements have been checked, the aCCMergeList elements are
+    // merged with the metaaction at hand into one resulting
+    // connected component, with one big bounding box, and
+    // inserted into aConnectedComponents again.
+    // The time complexity of this algorithm is O(n^3), where n is
+    // the number of metafile actions, and it finds all distinct
+    // regions of rectangle-bounded connected components. This
+    // algorithm was designed by AF.
 
-            // accumulate collected bounds here, initialize with current action
-            tools::Rectangle aTotalBounds(aBBCurrAct); // thus, aTotalComponents.aBounds is empty
-                // for non-output-generating actions
-            bool bTreatSpecial(false);
-            ConnectedComponents aTotalComponents;
+    //  STAGE 1: Detect background
 
-            //  STAGE 2.1: Search for intersecting cc entries
+    // create an OutputDevice to record mapmode changes and the like
+    ScopedVclPtrInstance<VirtualDevice> aMapModeVDev;
+    aMapModeVDev->mnDPIX = mnDPIX;
+    aMapModeVDev->mnDPIY = mnDPIY;
+    aMapModeVDev->EnableOutput(false);
 
-            // if aBBCurrAct is empty, it will intersect with no
-            // aConnectedComponents member. Thus, we can save the check.
-            // Furthermore, this ensures that non-output-generating
-            // actions get their own aConnectedComponents entry, which is necessary
-            // when copying them to the output metafile (see stage 4
-            // below).
+    // Receives uniform background content, and is _not_ merged
+    // nor checked for intersection against other aConnectedComponents elements
+    ConnectedComponents aBackgroundComponent;
 
-            // #107169# Wholly transparent objects need
-            // not be considered for connected components,
-            // too. Just put each of them into a separate
-            // component.
-            aTotalComponents.bIsFullyTransparent = pCurrAct->IsTransparent(aMapModeVDev.get());
+    if (rBackground != COL_TRANSPARENT)
+        aBackgroundComponent.SetBackground(rBackground, GetBackgroundComponentBounds());
 
-            if (!aBBCurrAct.IsEmpty() && !aTotalComponents.bIsFullyTransparent)
+    int nActionNum = 0;
+    std::tie(nActionNum, pCurrAct)
+        = aBackgroundComponent.PruneBackgroundObjects(rInMtf, aMapModeVDev.get());
+
+    //  STAGE 2: Generate connected components list
+
+    ::std::vector<ConnectedComponents>
+        aConnectedComponents; // contains distinct sets of connected components as elements.
+
+    // iterate over all actions (start where background action
+    // search left off)
+    for (; pCurrAct; pCurrAct = const_cast<GDIMetaFile&>(rInMtf).NextAction(), ++nActionNum)
+    {
+        // execute action to get correct MapModes etc.
+        pCurrAct->Execute(aMapModeVDev.get());
+
+        // cache bounds of current action
+        const tools::Rectangle aBBCurrAct(pCurrAct->GetBoundsRect(aMapModeVDev.get()));
+
+        // accumulate collected bounds here, initialize with current action
+        tools::Rectangle aTotalBounds(aBBCurrAct); // thus, aTotalComponents.aBounds is empty
+            // for non-output-generating actions
+        bool bTreatSpecial(false);
+        ConnectedComponents aTotalComponents;
+
+        //  STAGE 2.1: Search for intersecting cc entries
+
+        // if aBBCurrAct is empty, it will intersect with no
+        // aConnectedComponents member. Thus, we can save the check.
+        // Furthermore, this ensures that non-output-generating
+        // actions get their own aConnectedComponents entry, which is necessary
+        // when copying them to the output metafile (see stage 4
+        // below).
+
+        // #107169# Wholly transparent objects need
+        // not be considered for connected components,
+        // too. Just put each of them into a separate
+        // component.
+        aTotalComponents.bIsFullyTransparent = pCurrAct->IsTransparent(aMapModeVDev.get());
+
+        if (!aBBCurrAct.IsEmpty() && !aTotalComponents.bIsFullyTransparent)
+        {
+            if (!aBackgroundComponent.aComponentList.empty()
+                && !aBackgroundComponent.aBounds.IsInside(aTotalBounds))
             {
-                if (!aBackgroundComponent.aComponentList.empty()
-                    && !aBackgroundComponent.aBounds.IsInside(aTotalBounds))
-                {
-                    // it seems the background is not large enough. to
-                    // be on the safe side, combine with this component.
-                    aTotalBounds.Union(aBackgroundComponent.aBounds);
+                // it seems the background is not large enough. to
+                // be on the safe side, combine with this component.
+                aTotalBounds.Union(aBackgroundComponent.aBounds);
 
-                    // extract all aCurr actions to aTotalComponents
-                    aTotalComponents.aComponentList.splice(aTotalComponents.aComponentList.end(),
-                                                           aBackgroundComponent.aComponentList);
+                // extract all aCurr actions to aTotalComponents
+                aTotalComponents.aComponentList.splice(aTotalComponents.aComponentList.end(),
+                                                       aBackgroundComponent.aComponentList);
 
-                    if (aBackgroundComponent.bIsSpecial)
-                        bTreatSpecial = true;
-                }
-
-                bTreatSpecial = ProcessIntersections(aConnectedComponents, aTotalComponents,
-                                                     aTotalBounds, bTreatSpecial);
+                if (aBackgroundComponent.bIsSpecial)
+                    bTreatSpecial = true;
             }
 
-            //  STAGE 2.2: Determine special state for cc element
+            bTreatSpecial = ProcessIntersections(aConnectedComponents, aTotalComponents,
+                                                 aTotalBounds, bTreatSpecial);
+        }
 
-            // now test whether the whole connected component must be
-            // treated specially (i.e. rendered as a bitmap): if the
-            // added action is the very first action, or all actions
-            // before it are completely transparent, the connected
-            // component need not be treated specially, not even if
-            // the added action contains transparency. This is because
-            // painting of transparent objects on _white background_
-            // works without alpha compositing (you just calculate the
-            // color). Note that for the test "all objects before me
-            // are transparent" no sorting is necessary, since the
-            // added metaaction pCurrAct is always in the order the
-            // metafile is painted. Generally, the order of the
-            // metaactions in the ConnectedComponents are not
-            // guaranteed to be the same as in the metafile.
-            if (bTreatSpecial)
+        //  STAGE 2.2: Determine special state for cc element
+
+        // now test whether the whole connected component must be
+        // treated specially (i.e. rendered as a bitmap): if the
+        // added action is the very first action, or all actions
+        // before it are completely transparent, the connected
+        // component need not be treated specially, not even if
+        // the added action contains transparency. This is because
+        // painting of transparent objects on _white background_
+        // works without alpha compositing (you just calculate the
+        // color). Note that for the test "all objects before me
+        // are transparent" no sorting is necessary, since the
+        // added metaaction pCurrAct is always in the order the
+        // metafile is painted. Generally, the order of the
+        // metaactions in the ConnectedComponents are not
+        // guaranteed to be the same as in the metafile.
+        if (bTreatSpecial)
+        {
+            // prev component(s) special -> this one, too
+            aTotalComponents.bIsSpecial = true;
+        }
+        else if (!pCurrAct->IsTransparent())
+        {
+            // added action and none of prev components special ->
+            // this one normal, too
+            aTotalComponents.bIsSpecial = false;
+        }
+        else
+        {
+            // added action is special and none of prev components
+            // special -> do the detailed tests
+
+            // can the action handle transparency correctly
+            // (i.e. when painted on white background, does the
+            // action still look correct)?
+            if (!DoesActionHandleTransparency(*pCurrAct))
             {
-                // prev component(s) special -> this one, too
+                // no, action cannot handle its transparency on
+                // a printer device, render to bitmap
                 aTotalComponents.bIsSpecial = true;
-            }
-            else if (!pCurrAct->IsTransparent())
-            {
-                // added action and none of prev components special ->
-                // this one normal, too
-                aTotalComponents.bIsSpecial = false;
             }
             else
             {
-                // added action is special and none of prev components
-                // special -> do the detailed tests
-
-                // can the action handle transparency correctly
-                // (i.e. when painted on white background, does the
-                // action still look correct)?
-                if (!DoesActionHandleTransparency(*pCurrAct))
+                // yes, action can handle its transparency, so
+                // check whether we're on white background
+                if (aTotalComponents.aComponentList.empty())
                 {
-                    // no, action cannot handle its transparency on
-                    // a printer device, render to bitmap
+                    // nothing between pCurrAct and page
+                    // background -> don't be special
+                    aTotalComponents.bIsSpecial = false;
+                }
+                else
+                {
+                    // #107169# Fixes above now ensure that _no_
+                    // object in the list is fully transparent. Thus,
+                    // if the component list is not empty above, we
+                    // must assume that we have to treat this
+                    // component special.
+
+                    // there are non-transparent objects between
+                    // pCurrAct and the empty sheet of paper -> be
+                    // special, then
                     aTotalComponents.bIsSpecial = true;
                 }
-                else
-                {
-                    // yes, action can handle its transparency, so
-                    // check whether we're on white background
-                    if (aTotalComponents.aComponentList.empty())
-                    {
-                        // nothing between pCurrAct and page
-                        // background -> don't be special
-                        aTotalComponents.bIsSpecial = false;
-                    }
-                    else
-                    {
-                        // #107169# Fixes above now ensure that _no_
-                        // object in the list is fully transparent. Thus,
-                        // if the component list is not empty above, we
-                        // must assume that we have to treat this
-                        // component special.
-
-                        // there are non-transparent objects between
-                        // pCurrAct and the empty sheet of paper -> be
-                        // special, then
-                        aTotalComponents.bIsSpecial = true;
-                    }
-                }
-            }
-
-            //  STAGE 2.3: Add newly generated CC list element
-
-            // set new bounds and add action to list
-            aTotalComponents.aBounds = aTotalBounds;
-            aTotalComponents.aComponentList.emplace_back(pCurrAct, nActionNum);
-
-            // add aTotalComponents as a new entry to aConnectedComponents
-            aConnectedComponents.push_back(aTotalComponents);
-
-            SAL_WARN_IF(aTotalComponents.aComponentList.empty(), "vcl",
-                        "Printer::GetPreparedMetaFile empty component");
-            SAL_WARN_IF(
-                aTotalComponents.aBounds.IsEmpty() && (aTotalComponents.aComponentList.size() != 1),
-                "vcl",
-                "Printer::GetPreparedMetaFile non-output generating actions must be solitary");
-            SAL_WARN_IF(aTotalComponents.bIsFullyTransparent
-                            && (aTotalComponents.aComponentList.size() != 1),
-                        "vcl",
-                        "Printer::GetPreparedMetaFile fully transparent actions must be solitary");
-        }
-
-        // well now, we've got the list of disjunct connected
-        // components. Now we've got to create a map, which contains
-        // the corresponding aConnectedComponents element for every
-        // metaaction. Later on, we always process the complete
-        // metafile for each bitmap to be generated, but switch on
-        // output only for actions contained in the then current
-        // aConnectedComponents element. This ensures correct mapmode and attribute
-        // settings for all cases.
-
-        // maps mtf actions to CC list entries
-        ::std::vector<const ConnectedComponents*> aConnectedComponents_MemberMap(
-            rInMtf.GetActionSize());
-
-        // iterate over all aConnectedComponents members and their contained metaactions
-        for (auto const& currentItem : aConnectedComponents)
-        {
-            for (auto const& currentAction : currentItem.aComponentList)
-            {
-                // set pointer to aConnectedComponents element for corresponding index
-                aConnectedComponents_MemberMap[currentAction.second] = &currentItem;
             }
         }
 
-        //  STAGE 3.1: Output background mtf actions (if there are any)
+        //  STAGE 2.3: Add newly generated CC list element
 
-        for (auto& component : aBackgroundComponent.aComponentList)
+        // set new bounds and add action to list
+        aTotalComponents.aBounds = aTotalBounds;
+        aTotalComponents.aComponentList.emplace_back(pCurrAct, nActionNum);
+
+        // add aTotalComponents as a new entry to aConnectedComponents
+        aConnectedComponents.push_back(aTotalComponents);
+
+        SAL_WARN_IF(aTotalComponents.aComponentList.empty(), "vcl",
+                    "Printer::GetPreparedMetaFile empty component");
+        SAL_WARN_IF(
+            aTotalComponents.aBounds.IsEmpty() && (aTotalComponents.aComponentList.size() != 1),
+            "vcl",
+            "Printer::GetPreparedMetaFile non-output generating actions must be solitary");
+        SAL_WARN_IF(aTotalComponents.bIsFullyTransparent
+                        && (aTotalComponents.aComponentList.size() != 1),
+                    "vcl",
+                    "Printer::GetPreparedMetaFile fully transparent actions must be solitary");
+    }
+
+    // well now, we've got the list of disjunct connected
+    // components. Now we've got to create a map, which contains
+    // the corresponding aConnectedComponents element for every
+    // metaaction. Later on, we always process the complete
+    // metafile for each bitmap to be generated, but switch on
+    // output only for actions contained in the then current
+    // aConnectedComponents element. This ensures correct mapmode and attribute
+    // settings for all cases.
+
+    // maps mtf actions to CC list entries
+    ::std::vector<const ConnectedComponents*> aConnectedComponents_MemberMap(
+        rInMtf.GetActionSize());
+
+    // iterate over all aConnectedComponents members and their contained metaactions
+    for (auto const& currentItem : aConnectedComponents)
+    {
+        for (auto const& currentAction : currentItem.aComponentList)
         {
-            // simply add this action (above, we inserted the actions
-            // starting at index 0 up to and including nLastBgAction)
-            rOutMtf.AddAction(component.first);
+            // set pointer to aConnectedComponents element for corresponding index
+            aConnectedComponents_MemberMap[currentAction.second] = &currentItem;
         }
+    }
 
-        //  STAGE 3.2: Generate banded bitmaps for special regions
+    //  STAGE 3.1: Output background mtf actions (if there are any)
 
-        Point aPageOffset;
-        Size aTmpSize(GetOutputSizePixel());
-        if (meOutDevType == OUTDEV_PDF)
+    for (auto& component : aBackgroundComponent.aComponentList)
+    {
+        // simply add this action (above, we inserted the actions
+        // starting at index 0 up to and including nLastBgAction)
+        rOutMtf.AddAction(component.first);
+    }
+
+    //  STAGE 3.2: Generate banded bitmaps for special regions
+
+    Point aPageOffset;
+    Size aTmpSize(GetOutputSizePixel());
+    if (meOutDevType == OUTDEV_PDF)
+    {
+        auto pPdfWriter = static_cast<vcl::PDFWriterImpl*>(this);
+        aTmpSize = LogicToPixel(pPdfWriter->getCurPageSize(), MapMode(MapUnit::MapPoint));
+
+        // also add error code to PDFWriter
+        pPdfWriter->insertError(vcl::PDFWriter::Warning_Transparency_Converted);
+    }
+    else if (meOutDevType == OUTDEV_PRINTER)
+    {
+        Printer* pThis = dynamic_cast<Printer*>(this);
+        assert(pThis);
+        aPageOffset = pThis->GetPageOffsetPixel();
+        aPageOffset = Point(0, 0) - aPageOffset;
+        aTmpSize = pThis->GetPaperSizePixel();
+    }
+    const tools::Rectangle aOutputRect(aPageOffset, aTmpSize);
+    bool bTiling = dynamic_cast<Printer*>(this) != nullptr;
+
+    // Read the configuration value of minimal object area where transparency will be removed
+    double fReduceTransparencyMinArea = GetReduceTransparencyMinArea();
+
+    // iterate over all aConnectedComponents members and generate bitmaps for the special ones
+    for (auto& currentItem : aConnectedComponents)
+    {
+        if (currentItem.bIsSpecial)
         {
-            auto pPdfWriter = static_cast<vcl::PDFWriterImpl*>(this);
-            aTmpSize = LogicToPixel(pPdfWriter->getCurPageSize(), MapMode(MapUnit::MapPoint));
+            tools::Rectangle aBoundRect(currentItem.aBounds);
+            aBoundRect.Intersection(aOutputRect);
 
-            // also add error code to PDFWriter
-            pPdfWriter->insertError(vcl::PDFWriter::Warning_Transparency_Converted);
-        }
-        else if (meOutDevType == OUTDEV_PRINTER)
-        {
-            Printer* pThis = dynamic_cast<Printer*>(this);
-            assert(pThis);
-            aPageOffset = pThis->GetPageOffsetPixel();
-            aPageOffset = Point(0, 0) - aPageOffset;
-            aTmpSize = pThis->GetPaperSizePixel();
-        }
-        const tools::Rectangle aOutputRect(aPageOffset, aTmpSize);
-        bool bTiling = dynamic_cast<Printer*>(this) != nullptr;
+            const double fBmpArea(static_cast<double>(aBoundRect.GetWidth())
+                                  * aBoundRect.GetHeight());
+            const double fOutArea(static_cast<double>(aOutputRect.GetWidth())
+                                  * aOutputRect.GetHeight());
 
-        // Read the configuration value of minimal object area where transparency will be removed
-        double fReduceTransparencyMinArea = GetReduceTransparencyMinArea();
-
-        // iterate over all aConnectedComponents members and generate bitmaps for the special ones
-        for (auto& currentItem : aConnectedComponents)
-        {
-            if (currentItem.bIsSpecial)
+            // check if output doesn't exceed given size
+            if (bReduceTransparency && bTransparencyAutoMode
+                && (fBmpArea > (fReduceTransparencyMinArea * fOutArea)))
             {
-                tools::Rectangle aBoundRect(currentItem.aBounds);
-                aBoundRect.Intersection(aOutputRect);
-
-                const double fBmpArea(static_cast<double>(aBoundRect.GetWidth())
-                                      * aBoundRect.GetHeight());
-                const double fOutArea(static_cast<double>(aOutputRect.GetWidth())
-                                      * aOutputRect.GetHeight());
-
-                // check if output doesn't exceed given size
-                if (bReduceTransparency && bTransparencyAutoMode
-                    && (fBmpArea > (fReduceTransparencyMinArea * fOutArea)))
+                // output normally. Therefore, we simply clear the
+                // special attribute, as everything non-special is
+                // copied to rOutMtf further below.
+                currentItem.bIsSpecial = false;
+            }
+            else
+            {
+                // create new bitmap action first
+                if (aBoundRect.GetWidth() && aBoundRect.GetHeight())
                 {
-                    // output normally. Therefore, we simply clear the
-                    // special attribute, as everything non-special is
-                    // copied to rOutMtf further below.
-                    currentItem.bIsSpecial = false;
-                }
-                else
-                {
-                    // create new bitmap action first
-                    if (aBoundRect.GetWidth() && aBoundRect.GetHeight())
+                    Point aDstPtPix(aBoundRect.TopLeft());
+                    Size aDstSzPix;
+
+                    ScopedVclPtrInstance<VirtualDevice>
+                        aMapVDev; // here, we record only mapmode information
+                    aMapVDev->EnableOutput(false);
+
+                    ScopedVclPtrInstance<VirtualDevice> aPaintVDev; // into this one, we render.
+                    aPaintVDev->SetBackground(aBackgroundComponent.aBgColor);
+
+                    rOutMtf.AddAction(new MetaPushAction(PushFlags::MAPMODE));
+                    rOutMtf.AddAction(new MetaMapModeAction());
+
+                    aPaintVDev->SetDrawMode(GetDrawMode());
+
+                    while (aDstPtPix.Y() <= aBoundRect.Bottom())
                     {
-                        Point aDstPtPix(aBoundRect.TopLeft());
-                        Size aDstSzPix;
+                        aDstPtPix.setX(aBoundRect.Left());
+                        aDstSzPix = bTiling ? Size(MAX_TILE_WIDTH, MAX_TILE_HEIGHT)
+                                            : aBoundRect.GetSize();
 
-                        ScopedVclPtrInstance<VirtualDevice>
-                            aMapVDev; // here, we record only mapmode information
-                        aMapVDev->EnableOutput(false);
+                        if ((aDstPtPix.Y() + aDstSzPix.Height() - 1) > aBoundRect.Bottom())
+                            aDstSzPix.setHeight(aBoundRect.Bottom() - aDstPtPix.Y() + 1);
 
-                        ScopedVclPtrInstance<VirtualDevice> aPaintVDev; // into this one, we render.
-                        aPaintVDev->SetBackground(aBackgroundComponent.aBgColor);
-
-                        rOutMtf.AddAction(new MetaPushAction(PushFlags::MAPMODE));
-                        rOutMtf.AddAction(new MetaMapModeAction());
-
-                        aPaintVDev->SetDrawMode(GetDrawMode());
-
-                        while (aDstPtPix.Y() <= aBoundRect.Bottom())
+                        while (aDstPtPix.X() <= aBoundRect.Right())
                         {
-                            aDstPtPix.setX(aBoundRect.Left());
-                            aDstSzPix = bTiling ? Size(MAX_TILE_WIDTH, MAX_TILE_HEIGHT)
-                                                : aBoundRect.GetSize();
+                            if ((aDstPtPix.X() + aDstSzPix.Width() - 1) > aBoundRect.Right())
+                                aDstSzPix.setWidth(aBoundRect.Right() - aDstPtPix.X() + 1);
 
-                            if ((aDstPtPix.Y() + aDstSzPix.Height() - 1) > aBoundRect.Bottom())
-                                aDstSzPix.setHeight(aBoundRect.Bottom() - aDstPtPix.Y() + 1);
-
-                            while (aDstPtPix.X() <= aBoundRect.Right())
+                            if (!tools::Rectangle(aDstPtPix, aDstSzPix)
+                                     .Intersection(aBoundRect)
+                                     .IsEmpty()
+                                && aPaintVDev->SetOutputSizePixel(aDstSzPix))
                             {
-                                if ((aDstPtPix.X() + aDstSzPix.Width() - 1) > aBoundRect.Right())
-                                    aDstSzPix.setWidth(aBoundRect.Right() - aDstPtPix.X() + 1);
+                                aPaintVDev->Push();
+                                aMapVDev->Push();
 
-                                if (!tools::Rectangle(aDstPtPix, aDstSzPix)
-                                         .Intersection(aBoundRect)
-                                         .IsEmpty()
-                                    && aPaintVDev->SetOutputSizePixel(aDstSzPix))
+                                aMapVDev->mnDPIX = aPaintVDev->mnDPIX = mnDPIX;
+                                aMapVDev->mnDPIY = aPaintVDev->mnDPIY = mnDPIY;
+
+                                aPaintVDev->EnableOutput(false);
+
+                                // iterate over all actions
+                                for (pCurrAct = const_cast<GDIMetaFile&>(rInMtf).FirstAction(),
+                                    nActionNum = 0;
+                                     pCurrAct;
+                                     pCurrAct = const_cast<GDIMetaFile&>(rInMtf).NextAction(),
+                                    ++nActionNum)
                                 {
-                                    aPaintVDev->Push();
-                                    aMapVDev->Push();
+                                    // enable output only for
+                                    // actions that are members of
+                                    // the current aConnectedComponents element
+                                    // (currentItem)
+                                    if (aConnectedComponents_MemberMap[nActionNum]
+                                        == &currentItem)
+                                        aPaintVDev->EnableOutput();
 
-                                    aMapVDev->mnDPIX = aPaintVDev->mnDPIX = mnDPIX;
-                                    aMapVDev->mnDPIY = aPaintVDev->mnDPIY = mnDPIY;
+                                    // but process every action
+                                    const MetaActionType nType(pCurrAct->GetType());
 
-                                    aPaintVDev->EnableOutput(false);
-
-                                    // iterate over all actions
-                                    for (pCurrAct = const_cast<GDIMetaFile&>(rInMtf).FirstAction(),
-                                        nActionNum = 0;
-                                         pCurrAct;
-                                         pCurrAct = const_cast<GDIMetaFile&>(rInMtf).NextAction(),
-                                        ++nActionNum)
+                                    if (MetaActionType::MAPMODE == nType)
                                     {
-                                        // enable output only for
-                                        // actions that are members of
-                                        // the current aConnectedComponents element
-                                        // (currentItem)
-                                        if (aConnectedComponents_MemberMap[nActionNum]
-                                            == &currentItem)
-                                            aPaintVDev->EnableOutput();
+                                        pCurrAct->Execute(aMapVDev.get());
 
-                                        // but process every action
-                                        const MetaActionType nType(pCurrAct->GetType());
+                                        MapMode aMtfMap(aMapVDev->GetMapMode());
+                                        const Point aNewOrg(aMapVDev->PixelToLogic(aDstPtPix));
 
-                                        if (MetaActionType::MAPMODE == nType)
-                                        {
-                                            pCurrAct->Execute(aMapVDev.get());
-
-                                            MapMode aMtfMap(aMapVDev->GetMapMode());
-                                            const Point aNewOrg(aMapVDev->PixelToLogic(aDstPtPix));
-
-                                            aMtfMap.SetOrigin(Point(-aNewOrg.X(), -aNewOrg.Y()));
-                                            aPaintVDev->SetMapMode(aMtfMap);
-                                        }
-                                        else if ((MetaActionType::PUSH == nType)
-                                                 || MetaActionType::POP == nType)
-                                        {
-                                            pCurrAct->Execute(aMapVDev.get());
-                                            pCurrAct->Execute(aPaintVDev.get());
-                                        }
-                                        else if (MetaActionType::GRADIENT == nType)
-                                        {
-                                            MetaGradientAction* pGradientAction
-                                                = static_cast<MetaGradientAction*>(pCurrAct);
-                                            Printer* pPrinter = dynamic_cast<Printer*>(this);
-                                            if (pPrinter)
-                                                pPrinter->DrawGradientEx(
-                                                    aPaintVDev.get(), pGradientAction->GetRect(),
-                                                    pGradientAction->GetGradient());
-                                            else
-                                                DrawGradient(pGradientAction->GetRect(),
-                                                             pGradientAction->GetGradient());
-                                        }
+                                        aMtfMap.SetOrigin(Point(-aNewOrg.X(), -aNewOrg.Y()));
+                                        aPaintVDev->SetMapMode(aMtfMap);
+                                    }
+                                    else if ((MetaActionType::PUSH == nType)
+                                             || MetaActionType::POP == nType)
+                                    {
+                                        pCurrAct->Execute(aMapVDev.get());
+                                        pCurrAct->Execute(aPaintVDev.get());
+                                    }
+                                    else if (MetaActionType::GRADIENT == nType)
+                                    {
+                                        MetaGradientAction* pGradientAction
+                                            = static_cast<MetaGradientAction*>(pCurrAct);
+                                        Printer* pPrinter = dynamic_cast<Printer*>(this);
+                                        if (pPrinter)
+                                            pPrinter->DrawGradientEx(
+                                                aPaintVDev.get(), pGradientAction->GetRect(),
+                                                pGradientAction->GetGradient());
                                         else
-                                        {
-                                            pCurrAct->Execute(aPaintVDev.get());
-                                        }
-
-                                        Application::Reschedule(true);
+                                            DrawGradient(pGradientAction->GetRect(),
+                                                         pGradientAction->GetGradient());
                                     }
-
-                                    const bool bOldMap = mbMap;
-                                    mbMap = aPaintVDev->mbMap = false;
-
-                                    Bitmap aBandBmp(aPaintVDev->GetBitmap(Point(), aDstSzPix));
-
-                                    // scale down bitmap, if requested
-                                    if (bDownsampleBitmaps)
+                                    else
                                     {
-                                        aBandBmp = GetDownsampledBitmap(
-                                            aDstSzPix, Point(), aBandBmp.GetSizePixel(), aBandBmp,
-                                            nMaxBmpDPIX, nMaxBmpDPIY);
+                                        pCurrAct->Execute(aPaintVDev.get());
                                     }
 
-                                    rOutMtf.AddAction(
-                                        new MetaCommentAction("PRNSPOOL_TRANSPARENTBITMAP_BEGIN"));
-                                    rOutMtf.AddAction(
-                                        new MetaBmpScaleAction(aDstPtPix, aDstSzPix, aBandBmp));
-                                    rOutMtf.AddAction(
-                                        new MetaCommentAction("PRNSPOOL_TRANSPARENTBITMAP_END"));
-
-                                    aPaintVDev->mbMap = true;
-                                    mbMap = bOldMap;
-                                    aMapVDev->Pop();
-                                    aPaintVDev->Pop();
+                                    Application::Reschedule(true);
                                 }
 
-                                // overlapping bands to avoid missing lines (e.g. PostScript)
-                                aDstPtPix.AdjustX(aDstSzPix.Width());
+                                const bool bOldMap = mbMap;
+                                mbMap = aPaintVDev->mbMap = false;
+
+                                Bitmap aBandBmp(aPaintVDev->GetBitmap(Point(), aDstSzPix));
+
+                                // scale down bitmap, if requested
+                                if (bDownsampleBitmaps)
+                                {
+                                    aBandBmp = GetDownsampledBitmap(
+                                        aDstSzPix, Point(), aBandBmp.GetSizePixel(), aBandBmp,
+                                        nMaxBmpDPIX, nMaxBmpDPIY);
+                                }
+
+                                rOutMtf.AddAction(
+                                    new MetaCommentAction("PRNSPOOL_TRANSPARENTBITMAP_BEGIN"));
+                                rOutMtf.AddAction(
+                                    new MetaBmpScaleAction(aDstPtPix, aDstSzPix, aBandBmp));
+                                rOutMtf.AddAction(
+                                    new MetaCommentAction("PRNSPOOL_TRANSPARENTBITMAP_END"));
+
+                                aPaintVDev->mbMap = true;
+                                mbMap = bOldMap;
+                                aMapVDev->Pop();
+                                aPaintVDev->Pop();
                             }
 
                             // overlapping bands to avoid missing lines (e.g. PostScript)
-                            aDstPtPix.AdjustY(aDstSzPix.Height());
+                            aDstPtPix.AdjustX(aDstSzPix.Width());
                         }
 
-                        rOutMtf.AddAction(new MetaPopAction());
+                        // overlapping bands to avoid missing lines (e.g. PostScript)
+                        aDstPtPix.AdjustY(aDstSzPix.Height());
                     }
+
+                    rOutMtf.AddAction(new MetaPopAction());
                 }
             }
         }
+    }
 
-        aMapModeVDev->ClearStack(); // clean up aMapModeVDev
+    aMapModeVDev->ClearStack(); // clean up aMapModeVDev
 
-        //  STAGE 4: Copy actions to output metafile
+    //  STAGE 4: Copy actions to output metafile
 
-        // iterate over all actions and duplicate the ones not in a
-        // special aConnectedComponents member into rOutMtf
-        for (pCurrAct = const_cast<GDIMetaFile&>(rInMtf).FirstAction(), nActionNum = 0; pCurrAct;
-             pCurrAct = const_cast<GDIMetaFile&>(rInMtf).NextAction(), ++nActionNum)
+    // iterate over all actions and duplicate the ones not in a
+    // special aConnectedComponents member into rOutMtf
+    for (pCurrAct = const_cast<GDIMetaFile&>(rInMtf).FirstAction(), nActionNum = 0; pCurrAct;
+         pCurrAct = const_cast<GDIMetaFile&>(rInMtf).NextAction(), ++nActionNum)
+    {
+        const ConnectedComponents* pCurrAssociatedComponent
+            = aConnectedComponents_MemberMap[nActionNum];
+
+        // NOTE: This relies on the fact that map-mode or draw
+        // mode changing actions are solitary aConnectedComponents elements and
+        // have empty bounding boxes, see comment on stage 2.1
+        // above
+        if (pCurrAssociatedComponent
+            && (pCurrAssociatedComponent->aBounds.IsEmpty()
+                || !pCurrAssociatedComponent->bIsSpecial))
         {
-            const ConnectedComponents* pCurrAssociatedComponent
-                = aConnectedComponents_MemberMap[nActionNum];
-
-            // NOTE: This relies on the fact that map-mode or draw
-            // mode changing actions are solitary aConnectedComponents elements and
-            // have empty bounding boxes, see comment on stage 2.1
-            // above
-            if (pCurrAssociatedComponent
-                && (pCurrAssociatedComponent->aBounds.IsEmpty()
-                    || !pCurrAssociatedComponent->bIsSpecial))
+            // #107169# Treat transparent bitmaps special, if they
+            // are the first (or sole) action in their bounds
+            // list. Note that we previously ensured that no
+            // fully-transparent objects are before us here.
+            if (DoesActionHandleTransparency(*pCurrAct)
+                && pCurrAssociatedComponent->aComponentList.begin()->first == pCurrAct)
             {
-                // #107169# Treat transparent bitmaps special, if they
-                // are the first (or sole) action in their bounds
-                // list. Note that we previously ensured that no
-                // fully-transparent objects are before us here.
-                if (DoesActionHandleTransparency(*pCurrAct)
-                    && pCurrAssociatedComponent->aComponentList.begin()->first == pCurrAct)
-                {
-                    // convert actions, where masked-out parts are of
-                    // given background color
-                    ConvertTransparentAction(rOutMtf, pCurrAct, *aMapModeVDev,
-                                             aBackgroundComponent.aBgColor);
-                }
-                else
-                {
-                    // simply add this action
-                    rOutMtf.AddAction(pCurrAct);
-                }
-
-                pCurrAct->Execute(aMapModeVDev.get());
+                // convert actions, where masked-out parts are of
+                // given background color
+                ConvertTransparentAction(rOutMtf, pCurrAct, *aMapModeVDev,
+                                         aBackgroundComponent.aBgColor);
             }
-        }
+            else
+            {
+                // simply add this action
+                rOutMtf.AddAction(pCurrAct);
+            }
 
-        rOutMtf.SetPrefMapMode(rInMtf.GetPrefMapMode());
-        rOutMtf.SetPrefSize(rInMtf.GetPrefSize());
+            pCurrAct->Execute(aMapModeVDev.get());
+        }
+    }
+
+    rOutMtf.SetPrefMapMode(rInMtf.GetPrefMapMode());
+    rOutMtf.SetPrefSize(rInMtf.GetPrefSize());
 
 #if OSL_DEBUG_LEVEL > 1
-        // iterate over all aConnectedComponents members and generate rectangles for the bounding boxes
-        rOutMtf.AddAction(new MetaFillColorAction(COL_WHITE, false));
-        for (auto const& aCurr : aConnectedComponents)
-        {
-            if (aCurr.bIsSpecial)
-                rOutMtf.AddAction(new MetaLineColorAction(COL_RED, true));
-            else
-                rOutMtf.AddAction(new MetaLineColorAction(COL_BLUE, true));
+    // iterate over all aConnectedComponents members and generate rectangles for the bounding boxes
+    rOutMtf.AddAction(new MetaFillColorAction(COL_WHITE, false));
+    for (auto const& aCurr : aConnectedComponents)
+    {
+        if (aCurr.bIsSpecial)
+            rOutMtf.AddAction(new MetaLineColorAction(COL_RED, true));
+        else
+            rOutMtf.AddAction(new MetaLineColorAction(COL_BLUE, true));
 
-            rOutMtf.AddAction(new MetaRectAction(aMapModeVDev->PixelToLogic(aCurr.aBounds)));
-        }
-#endif
+        rOutMtf.AddAction(new MetaRectAction(aMapModeVDev->PixelToLogic(aCurr.aBounds)));
     }
-    return bTransparent;
+#endif
+
+    return false;
 }
 
 void Printer::DrawGradientEx(OutputDevice* pOut, const tools::Rectangle& rRect,
