@@ -361,6 +361,74 @@ SearchForIntersectingEntries(::std::vector<ConnectedComponents>& rConnectedCompo
     return std::make_tuple(bTreatSpecial, aTotalComponents, aTotalBounds);
 }
 
+static void MarkWhetherConnectedComponentIsSpecial(ConnectedComponents& rTotalComponents, bool bTreatSpecial, MetaAction* pCurrAct)
+{
+    // now test whether the whole connected component must be
+    // treated specially (i.e. rendered as a bitmap): if the
+    // added action is the very first action, or all actions
+    // before it are completely transparent, the connected
+    // component need not be treated specially, not even if
+    // the added action contains transparency. This is because
+    // painting of transparent objects on _white background_
+    // works without alpha compositing (you just calculate the
+    // color). Note that for the test "all objects before me
+    // are transparent" no sorting is necessary, since the
+    // added metaaction pCurrAct is always in the order the
+    // metafile is painted. Generally, the order of the
+    // metaactions in the ConnectedComponents are not
+    // guaranteed to be the same as in the metafile.
+    if (bTreatSpecial)
+    {
+        // prev component(s) special -> this one, too
+        rTotalComponents.bIsSpecial = true;
+    }
+    else if (!pCurrAct->IsTransparent())
+    {
+        // added action and none of prev components special ->
+        // this one normal, too
+        rTotalComponents.bIsSpecial = false;
+    }
+    else
+    {
+        // added action is special and none of prev components
+        // special -> do the detailed tests
+
+        // can the action handle transparency correctly
+        // (i.e. when painted on white background, does the
+        // action still look correct)?
+        if (!DoesActionHandleTransparency(*pCurrAct))
+        {
+            // no, action cannot handle its transparency on
+            // a printer device, render to bitmap
+            rTotalComponents.bIsSpecial = true;
+        }
+        else
+        {
+            // yes, action can handle its transparency, so
+            // check whether we're on white background
+            if (rTotalComponents.aComponentList.empty())
+            {
+                // nothing between pCurrAct and page
+                // background -> don't be special
+                rTotalComponents.bIsSpecial = false;
+            }
+            else
+            {
+                // #107169# Fixes above now ensure that _no_
+                // object in the list is fully transparent. Thus,
+                // if the component list is not empty above, we
+                // must assume that we have to treat this
+                // component special.
+
+                // there are non-transparent objects between
+                // pCurrAct and the empty sheet of paper -> be
+                // special, then
+                rTotalComponents.bIsSpecial = true;
+            }
+        }
+    }
+}
+
 bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, GDIMetaFile& rOutMtf,
                                                     long nMaxBmpDPIX, long nMaxBmpDPIY,
                                                     bool bReduceTransparency,
@@ -448,71 +516,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
             aConnectedComponents, pCurrAct, aMapModeVDev.get(), aBackgroundComponent);
 
         //  STAGE 2.2: Determine special state for cc element
-
-        // now test whether the whole connected component must be
-        // treated specially (i.e. rendered as a bitmap): if the
-        // added action is the very first action, or all actions
-        // before it are completely transparent, the connected
-        // component need not be treated specially, not even if
-        // the added action contains transparency. This is because
-        // painting of transparent objects on _white background_
-        // works without alpha compositing (you just calculate the
-        // color). Note that for the test "all objects before me
-        // are transparent" no sorting is necessary, since the
-        // added metaaction pCurrAct is always in the order the
-        // metafile is painted. Generally, the order of the
-        // metaactions in the ConnectedComponents are not
-        // guaranteed to be the same as in the metafile.
-        if (bTreatSpecial)
-        {
-            // prev component(s) special -> this one, too
-            aTotalComponents.bIsSpecial = true;
-        }
-        else if (!pCurrAct->IsTransparent())
-        {
-            // added action and none of prev components special ->
-            // this one normal, too
-            aTotalComponents.bIsSpecial = false;
-        }
-        else
-        {
-            // added action is special and none of prev components
-            // special -> do the detailed tests
-
-            // can the action handle transparency correctly
-            // (i.e. when painted on white background, does the
-            // action still look correct)?
-            if (!DoesActionHandleTransparency(*pCurrAct))
-            {
-                // no, action cannot handle its transparency on
-                // a printer device, render to bitmap
-                aTotalComponents.bIsSpecial = true;
-            }
-            else
-            {
-                // yes, action can handle its transparency, so
-                // check whether we're on white background
-                if (aTotalComponents.aComponentList.empty())
-                {
-                    // nothing between pCurrAct and page
-                    // background -> don't be special
-                    aTotalComponents.bIsSpecial = false;
-                }
-                else
-                {
-                    // #107169# Fixes above now ensure that _no_
-                    // object in the list is fully transparent. Thus,
-                    // if the component list is not empty above, we
-                    // must assume that we have to treat this
-                    // component special.
-
-                    // there are non-transparent objects between
-                    // pCurrAct and the empty sheet of paper -> be
-                    // special, then
-                    aTotalComponents.bIsSpecial = true;
-                }
-            }
-        }
+        MarkWhetherConnectedComponentIsSpecial(aTotalComponents, bTreatSpecial, pCurrAct);
 
         //  STAGE 2.3: Add newly generated CC list element
 
