@@ -361,7 +361,8 @@ SearchForIntersectingEntries(::std::vector<ConnectedComponents>& rConnectedCompo
     return std::make_tuple(bTreatSpecial, aTotalComponents, aTotalBounds);
 }
 
-static void MarkWhetherConnectedComponentIsSpecial(ConnectedComponents& rTotalComponents, bool bTreatSpecial, MetaAction* pCurrAct)
+static void MarkWhetherConnectedComponentIsSpecial(ConnectedComponents& rTotalComponents,
+                                                   bool bTreatSpecial, MetaAction* pCurrAct)
 {
     // now test whether the whole connected component must be
     // treated specially (i.e. rendered as a bitmap): if the
@@ -426,6 +427,49 @@ static void MarkWhetherConnectedComponentIsSpecial(ConnectedComponents& rTotalCo
                 rTotalComponents.bIsSpecial = true;
             }
         }
+    }
+}
+
+static void GenerateConnectedComponents(::std::vector<ConnectedComponents>& rConnectedComponents,
+                                        ConnectedComponents& rBackgroundComponent,
+                                        MetaAction* pInitialAction, int nActionNum,
+                                        GDIMetaFile const& rInMtf, VirtualDevice* pMapModeVDev)
+{
+    // iterate over all actions (start where background action
+    // search left off)
+    for (MetaAction *pCurrAct = pInitialAction; pCurrAct;
+         pCurrAct = const_cast<GDIMetaFile&>(rInMtf).NextAction(), ++nActionNum)
+    {
+        // execute action to get correct MapModes etc.
+        pCurrAct->Execute(pMapModeVDev);
+
+        bool bTreatSpecial;
+        tools::Rectangle aTotalBounds;
+        ConnectedComponents aTotalComponents;
+
+        std::tie(bTreatSpecial, aTotalComponents, aTotalBounds) = SearchForIntersectingEntries(
+            rConnectedComponents, pCurrAct, pMapModeVDev, rBackgroundComponent);
+
+        //  STAGE 2.2: Determine special state for cc element
+        MarkWhetherConnectedComponentIsSpecial(aTotalComponents, bTreatSpecial, pCurrAct);
+
+        //  STAGE 2.3: Add newly generated CC list element
+
+        // set new bounds and add action to list
+        aTotalComponents.aBounds = aTotalBounds;
+        aTotalComponents.aComponentList.emplace_back(pCurrAct, nActionNum);
+
+        // add aTotalComponents as a new entry to rConnectedComponents
+        rConnectedComponents.push_back(aTotalComponents);
+
+        SAL_WARN_IF(aTotalComponents.aComponentList.empty(), "vcl",
+                    "Printer::GetPreparedMetaFile empty component");
+        SAL_WARN_IF(
+            aTotalComponents.aBounds.IsEmpty() && (aTotalComponents.aComponentList.size() != 1),
+            "vcl", "Printer::GetPreparedMetaFile non-output generating actions must be solitary");
+        SAL_WARN_IF(
+            aTotalComponents.bIsFullyTransparent && (aTotalComponents.aComponentList.size() != 1),
+            "vcl", "Printer::GetPreparedMetaFile fully transparent actions must be solitary");
     }
 }
 
@@ -501,41 +545,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
     ::std::vector<ConnectedComponents>
         aConnectedComponents; // contains distinct sets of connected components as elements.
 
-    // iterate over all actions (start where background action
-    // search left off)
-    for (; pCurrAct; pCurrAct = const_cast<GDIMetaFile&>(rInMtf).NextAction(), ++nActionNum)
-    {
-        // execute action to get correct MapModes etc.
-        pCurrAct->Execute(aMapModeVDev.get());
-
-        bool bTreatSpecial;
-        tools::Rectangle aTotalBounds;
-        ConnectedComponents aTotalComponents;
-
-        std::tie(bTreatSpecial, aTotalComponents, aTotalBounds) = SearchForIntersectingEntries(
-            aConnectedComponents, pCurrAct, aMapModeVDev.get(), aBackgroundComponent);
-
-        //  STAGE 2.2: Determine special state for cc element
-        MarkWhetherConnectedComponentIsSpecial(aTotalComponents, bTreatSpecial, pCurrAct);
-
-        //  STAGE 2.3: Add newly generated CC list element
-
-        // set new bounds and add action to list
-        aTotalComponents.aBounds = aTotalBounds;
-        aTotalComponents.aComponentList.emplace_back(pCurrAct, nActionNum);
-
-        // add aTotalComponents as a new entry to aConnectedComponents
-        aConnectedComponents.push_back(aTotalComponents);
-
-        SAL_WARN_IF(aTotalComponents.aComponentList.empty(), "vcl",
-                    "Printer::GetPreparedMetaFile empty component");
-        SAL_WARN_IF(
-            aTotalComponents.aBounds.IsEmpty() && (aTotalComponents.aComponentList.size() != 1),
-            "vcl", "Printer::GetPreparedMetaFile non-output generating actions must be solitary");
-        SAL_WARN_IF(
-            aTotalComponents.bIsFullyTransparent && (aTotalComponents.aComponentList.size() != 1),
-            "vcl", "Printer::GetPreparedMetaFile fully transparent actions must be solitary");
-    }
+    GenerateConnectedComponents(aConnectedComponents, aBackgroundComponent, pCurrAct, nActionNum,
+                                rInMtf, aMapModeVDev.get());
 
     // well now, we've got the list of disjunct connected
     // components. Now we've got to create a map, which contains
