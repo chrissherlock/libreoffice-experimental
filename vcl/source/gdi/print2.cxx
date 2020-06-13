@@ -387,7 +387,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                     bSomeComponentsChanged = false;
 
                     // iterate over all current members of aConnectedComponents
-                    for (auto aCurrCC = aConnectedComponents.begin(); aCurrCC != aConnectedComponents.end();)
+                    for (auto currCC = aConnectedComponents.begin(); currCC != aConnectedComponents.end();)
                     {
                         // first check if current element's bounds are
                         // empty. This ensures that empty actions are not
@@ -398,29 +398,29 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                         // not be considered for connected components,
                         // too. Just put each of them into a separate
                         // component.
-                        if (ComponentBoundsAreOver(*aCurrCC, aTotalBounds))
+                        if (ComponentBoundsAreOver(*currCC, aTotalBounds))
                         {
                             // union the intersecting aConnectedComponents element into aTotalComponents
 
                             // calc union bounding box
-                            aTotalBounds.Union(aCurrCC->aBounds);
+                            aTotalBounds.Union(currCC->aBounds);
 
                             // extract all aCurr actions to aTotalComponents
                             aTotalComponents.aComponentList.splice(
-                                aTotalComponents.aComponentList.end(), aCurrCC->aComponentList);
+                                aTotalComponents.aComponentList.end(), currCC->aComponentList);
 
-                            if (aCurrCC->bIsSpecial)
+                            if (currCC->bIsSpecial)
                                 bTreatSpecial = true;
 
-                            // remove and delete aCurrCC element from list (we've now merged its content)
-                            aCurrCC = aConnectedComponents.erase(aCurrCC);
+                            // remove and delete currCC element from list (we've now merged its content)
+                            currCC = aConnectedComponents.erase(currCC);
 
                             // at least one component changed, need to rescan everything
                             bSomeComponentsChanged = true;
                         }
                         else
                         {
-                            ++aCurrCC;
+                            ++currCC;
                         }
                     }
                 } while (bSomeComponentsChanged);
