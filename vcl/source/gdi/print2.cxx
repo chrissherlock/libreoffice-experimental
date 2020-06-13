@@ -77,8 +77,6 @@
 #define MAX_TILE_WIDTH 1024
 #define MAX_TILE_HEIGHT 1024
 
-typedef ::std::pair<MetaAction*, int> Component; // MetaAction plus index in metafile
-
 /** Determines whether the action can handle transparency correctly
   (i.e. when painted on white background, does the action still look
   correct)?
