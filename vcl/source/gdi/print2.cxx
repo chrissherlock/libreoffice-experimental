@@ -317,8 +317,6 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
 {
     rOutMtf.Clear();
 
-    MetaAction* pCurrAct = nullptr;
-
     // #i10613# Determine set of connected components containing transparent objects. These are
     // then processed as bitmaps, the original actions are removed from the metafile.
     if (!bReduceTransparency || bTransparencyAutoMode)
@@ -371,7 +369,9 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
     if (rBackground != COL_TRANSPARENT)
         aBackgroundComponent.SetBackground(rBackground, GetBackgroundComponentBounds());
 
+    MetaAction* pCurrAct = nullptr;
     int nActionNum = 0;
+
     std::tie(nActionNum, pCurrAct)
         = aBackgroundComponent.PruneBackgroundObjects(rInMtf, aMapModeVDev.get());
 
@@ -388,17 +388,17 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
         pCurrAct->Execute(aMapModeVDev.get());
 
         // cache bounds of current action
-        const tools::Rectangle aBBCurrAct(pCurrAct->GetBoundsRect(aMapModeVDev.get()));
+        const tools::Rectangle aCurrComponentBounds(pCurrAct->GetBoundsRect(aMapModeVDev.get()));
 
         // accumulate collected bounds here, initialize with current action
-        tools::Rectangle aTotalBounds(aBBCurrAct); // thus, aTotalComponents.aBounds is empty
+        tools::Rectangle aTotalBounds(aCurrComponentBounds); // thus, aTotalComponents.aBounds is empty
             // for non-output-generating actions
         bool bTreatSpecial(false);
         ConnectedComponents aTotalComponents;
 
         //  STAGE 2.1: Search for intersecting cc entries
 
-        // if aBBCurrAct is empty, it will intersect with no
+        // if aCurrComponentBounds is empty, it will intersect with no
         // aConnectedComponents member. Thus, we can save the check.
         // Furthermore, this ensures that non-output-generating
         // actions get their own aConnectedComponents entry, which is necessary
@@ -411,7 +411,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
         // component.
         aTotalComponents.bIsFullyTransparent = pCurrAct->IsTransparent(aMapModeVDev.get());
 
-        if (!aBBCurrAct.IsEmpty() && !aTotalComponents.bIsFullyTransparent)
+        if (!aCurrComponentBounds.IsEmpty() && !aTotalComponents.bIsFullyTransparent)
         {
             if (!aBackgroundComponent.aComponentList.empty()
                 && !aBackgroundComponent.aBounds.IsInside(aTotalBounds))
