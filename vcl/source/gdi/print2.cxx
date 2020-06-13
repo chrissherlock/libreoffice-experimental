@@ -370,9 +370,6 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
         // nor checked for intersection against other aConnectedComponents elements
         ConnectedComponents aBackgroundComponent;
 
-        // Read the configuration value of minimal object area where transparency will be removed
-        double fReduceTransparencyMinArea = GetReduceTransparencyMinArea();
-
         if (rBackground != COL_TRANSPARENT)
             aBackgroundComponent.SetBackground(rBackground, GetBackgroundComponentBounds());
 
@@ -579,6 +576,9 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
         }
         const tools::Rectangle aOutputRect(aPageOffset, aTmpSize);
         bool bTiling = dynamic_cast<Printer*>(this) != nullptr;
+
+        // Read the configuration value of minimal object area where transparency will be removed
+        double fReduceTransparencyMinArea = GetReduceTransparencyMinArea();
 
         // iterate over all aConnectedComponents members and generate bitmaps for the special ones
         for (auto& currentItem : aConnectedComponents)
