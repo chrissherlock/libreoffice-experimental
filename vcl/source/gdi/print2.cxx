@@ -245,7 +245,67 @@ static double GetReduceTransparencyMinArea()
 static bool ComponentBoundsAreOver(ConnectedComponents const& rComponent, tools::Rectangle rBounds)
 {
     return (!rComponent.aBounds.IsEmpty() && !rComponent.bIsFullyTransparent
-        && rComponent.aBounds.IsOver(rBounds));
+            && rComponent.aBounds.IsOver(rBounds));
+}
+
+static bool ProcessIntersections(::std::vector<ConnectedComponents>& rConnectedComponents,
+                                 ConnectedComponents& rTotalComponents,
+                                 tools::Rectangle& rTotalBounds, bool bTreatSpecial)
+{
+    bool bSomeComponentsChanged;
+
+    // now, this is unfortunate: since changing anyone of
+    // the aConnectedComponents elements (e.g. by merging or addition
+    // of an action) might generate new intersection with
+    // other aConnectedComponents elements, have to repeat the whole
+    // element scanning, until nothing changes anymore.
+    // Thus, this loop here makes us O(n^3) in the worst
+    // case.
+    do
+    {
+        // only loop here if 'intersects' branch below was hit
+        bSomeComponentsChanged = false;
+
+        // iterate over all current members of aConnectedComponents
+        for (auto currCC = rConnectedComponents.begin(); currCC != rConnectedComponents.end();)
+        {
+            // first check if current element's bounds are
+            // empty. This ensures that empty actions are not
+            // merged into one component, as a matter of fact,
+            // they have no position.
+
+            // #107169# Wholly transparent objects need
+            // not be considered for connected components,
+            // too. Just put each of them into a separate
+            // component.
+            if (ComponentBoundsAreOver(*currCC, rTotalBounds))
+            {
+                // union the intersecting aConnectedComponents element into aTotalComponents
+
+                // calc union bounding box
+                rTotalBounds.Union(currCC->aBounds);
+
+                // extract all aCurr actions to aTotalComponents
+                rTotalComponents.aComponentList.splice(rTotalComponents.aComponentList.end(),
+                                                       currCC->aComponentList);
+
+                if (currCC->bIsSpecial)
+                    bTreatSpecial = true;
+
+                // remove and delete currCC element from list (we've now merged its content)
+                currCC = rConnectedComponents.erase(currCC);
+
+                // at least one component changed, need to rescan everything
+                bSomeComponentsChanged = true;
+            }
+            else
+            {
+                ++currCC;
+            }
+        }
+    } while (bSomeComponentsChanged);
+
+    return bTreatSpecial;
 }
 
 bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, GDIMetaFile& rOutMtf,
@@ -317,7 +377,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
             aBackgroundComponent.SetBackground(rBackground, GetBackgroundComponentBounds());
 
         int nActionNum = 0;
-        std::tie(nActionNum, pCurrAct) = aBackgroundComponent.PruneBackgroundObjects(rInMtf, aMapModeVDev.get());
+        std::tie(nActionNum, pCurrAct)
+            = aBackgroundComponent.PruneBackgroundObjects(rInMtf, aMapModeVDev.get());
 
         //  STAGE 2: Generate connected components list
 
@@ -372,58 +433,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                         bTreatSpecial = true;
                 }
 
-                bool bSomeComponentsChanged;
-
-                // now, this is unfortunate: since changing anyone of
-                // the aConnectedComponents elements (e.g. by merging or addition
-                // of an action) might generate new intersection with
-                // other aConnectedComponents elements, have to repeat the whole
-                // element scanning, until nothing changes anymore.
-                // Thus, this loop here makes us O(n^3) in the worst
-                // case.
-                do
-                {
-                    // only loop here if 'intersects' branch below was hit
-                    bSomeComponentsChanged = false;
-
-                    // iterate over all current members of aConnectedComponents
-                    for (auto currCC = aConnectedComponents.begin(); currCC != aConnectedComponents.end();)
-                    {
-                        // first check if current element's bounds are
-                        // empty. This ensures that empty actions are not
-                        // merged into one component, as a matter of fact,
-                        // they have no position.
-
-                        // #107169# Wholly transparent objects need
-                        // not be considered for connected components,
-                        // too. Just put each of them into a separate
-                        // component.
-                        if (ComponentBoundsAreOver(*currCC, aTotalBounds))
-                        {
-                            // union the intersecting aConnectedComponents element into aTotalComponents
-
-                            // calc union bounding box
-                            aTotalBounds.Union(currCC->aBounds);
-
-                            // extract all aCurr actions to aTotalComponents
-                            aTotalComponents.aComponentList.splice(
-                                aTotalComponents.aComponentList.end(), currCC->aComponentList);
-
-                            if (currCC->bIsSpecial)
-                                bTreatSpecial = true;
-
-                            // remove and delete currCC element from list (we've now merged its content)
-                            currCC = aConnectedComponents.erase(currCC);
-
-                            // at least one component changed, need to rescan everything
-                            bSomeComponentsChanged = true;
-                        }
-                        else
-                        {
-                            ++currCC;
-                        }
-                    }
-                } while (bSomeComponentsChanged);
+                bTreatSpecial = ProcessIntersections(aConnectedComponents, aTotalComponents,
+                                                     aTotalBounds, bTreatSpecial);
             }
 
             //  STAGE 2.2: Determine special state for cc element
@@ -524,7 +535,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
         // settings for all cases.
 
         // maps mtf actions to CC list entries
-        ::std::vector<const ConnectedComponents*> aConnectedComponents_MemberMap(rInMtf.GetActionSize());
+        ::std::vector<const ConnectedComponents*> aConnectedComponents_MemberMap(
+            rInMtf.GetActionSize());
 
         // iterate over all aConnectedComponents members and their contained metaactions
         for (auto const& currentItem : aConnectedComponents)
@@ -648,7 +660,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                                         // actions that are members of
                                         // the current aConnectedComponents element
                                         // (currentItem)
-                                        if (aConnectedComponents_MemberMap[nActionNum] == &currentItem)
+                                        if (aConnectedComponents_MemberMap[nActionNum]
+                                            == &currentItem)
                                             aPaintVDev->EnableOutput();
 
                                         // but process every action
@@ -740,7 +753,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
         for (pCurrAct = const_cast<GDIMetaFile&>(rInMtf).FirstAction(), nActionNum = 0; pCurrAct;
              pCurrAct = const_cast<GDIMetaFile&>(rInMtf).NextAction(), ++nActionNum)
         {
-            const ConnectedComponents* pCurrAssociatedComponent = aConnectedComponents_MemberMap[nActionNum];
+            const ConnectedComponents* pCurrAssociatedComponent
+                = aConnectedComponents_MemberMap[nActionNum];
 
             // NOTE: This relies on the fact that map-mode or draw
             // mode changing actions are solitary aConnectedComponents elements and
