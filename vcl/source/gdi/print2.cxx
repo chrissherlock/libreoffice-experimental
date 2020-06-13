@@ -308,6 +308,59 @@ static bool ProcessIntersections(::std::vector<ConnectedComponents>& rConnectedC
     return bTreatSpecial;
 }
 
+std::tuple<bool, ConnectedComponents, tools::Rectangle>
+SearchForIntersectingEntries(::std::vector<ConnectedComponents>& rConnectedComponents,
+                             MetaAction* pCurrAct, VirtualDevice* pMapModeVDev,
+                             ConnectedComponents rBackgroundComponent)
+{
+    // cache bounds of current action
+    const tools::Rectangle aCurrComponentBounds(pCurrAct->GetBoundsRect(pMapModeVDev));
+
+    // accumulate collected bounds here, initialize with current action
+    tools::Rectangle aTotalBounds(aCurrComponentBounds); // thus, aTotalComponents.aBounds is empty
+        // for non-output-generating actions
+    bool bTreatSpecial = false;
+    ConnectedComponents aTotalComponents;
+
+    //  STAGE 2.1: Search for intersecting cc entries
+
+    // if aCurrComponentBounds is empty, it will intersect with no
+    // aConnectedComponents member. Thus, we can save the check.
+    // Furthermore, this ensures that non-output-generating
+    // actions get their own aConnectedComponents entry, which is necessary
+    // when copying them to the output metafile (see stage 4
+    // below).
+
+    // #107169# Wholly transparent objects need
+    // not be considered for connected components,
+    // too. Just put each of them into a separate
+    // component.
+    aTotalComponents.bIsFullyTransparent = pCurrAct->IsTransparent(pMapModeVDev);
+
+    if (!aCurrComponentBounds.IsEmpty() && !aTotalComponents.bIsFullyTransparent)
+    {
+        if (!rBackgroundComponent.aComponentList.empty()
+            && !rBackgroundComponent.aBounds.IsInside(aTotalBounds))
+        {
+            // it seems the background is not large enough. to
+            // be on the safe side, combine with this component.
+            aTotalBounds.Union(rBackgroundComponent.aBounds);
+
+            // extract all aCurr actions to aTotalComponents
+            aTotalComponents.aComponentList.splice(aTotalComponents.aComponentList.end(),
+                                                   rBackgroundComponent.aComponentList);
+
+            if (rBackgroundComponent.bIsSpecial)
+                bTreatSpecial = true;
+        }
+
+        bTreatSpecial = ProcessIntersections(rConnectedComponents, aTotalComponents, aTotalBounds,
+                                             bTreatSpecial);
+    }
+
+    return std::make_tuple(bTreatSpecial, aTotalComponents, aTotalBounds);
+}
+
 bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, GDIMetaFile& rOutMtf,
                                                     long nMaxBmpDPIX, long nMaxBmpDPIY,
                                                     bool bReduceTransparency,
@@ -387,50 +440,12 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
         // execute action to get correct MapModes etc.
         pCurrAct->Execute(aMapModeVDev.get());
 
-        // cache bounds of current action
-        const tools::Rectangle aCurrComponentBounds(pCurrAct->GetBoundsRect(aMapModeVDev.get()));
-
-        // accumulate collected bounds here, initialize with current action
-        tools::Rectangle aTotalBounds(aCurrComponentBounds); // thus, aTotalComponents.aBounds is empty
-            // for non-output-generating actions
-        bool bTreatSpecial = false;
+        bool bTreatSpecial;
+        tools::Rectangle aTotalBounds;
         ConnectedComponents aTotalComponents;
 
-        //  STAGE 2.1: Search for intersecting cc entries
-
-        // if aCurrComponentBounds is empty, it will intersect with no
-        // aConnectedComponents member. Thus, we can save the check.
-        // Furthermore, this ensures that non-output-generating
-        // actions get their own aConnectedComponents entry, which is necessary
-        // when copying them to the output metafile (see stage 4
-        // below).
-
-        // #107169# Wholly transparent objects need
-        // not be considered for connected components,
-        // too. Just put each of them into a separate
-        // component.
-        aTotalComponents.bIsFullyTransparent = pCurrAct->IsTransparent(aMapModeVDev.get());
-
-        if (!aCurrComponentBounds.IsEmpty() && !aTotalComponents.bIsFullyTransparent)
-        {
-            if (!aBackgroundComponent.aComponentList.empty()
-                && !aBackgroundComponent.aBounds.IsInside(aTotalBounds))
-            {
-                // it seems the background is not large enough. to
-                // be on the safe side, combine with this component.
-                aTotalBounds.Union(aBackgroundComponent.aBounds);
-
-                // extract all aCurr actions to aTotalComponents
-                aTotalComponents.aComponentList.splice(aTotalComponents.aComponentList.end(),
-                                                       aBackgroundComponent.aComponentList);
-
-                if (aBackgroundComponent.bIsSpecial)
-                    bTreatSpecial = true;
-            }
-
-            bTreatSpecial = ProcessIntersections(aConnectedComponents, aTotalComponents,
-                                                 aTotalBounds, bTreatSpecial);
-        }
+        std::tie(bTreatSpecial, aTotalComponents, aTotalBounds) = SearchForIntersectingEntries(
+            aConnectedComponents, pCurrAct, aMapModeVDev.get(), aBackgroundComponent);
 
         //  STAGE 2.2: Determine special state for cc element
 
@@ -512,12 +527,10 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                     "Printer::GetPreparedMetaFile empty component");
         SAL_WARN_IF(
             aTotalComponents.aBounds.IsEmpty() && (aTotalComponents.aComponentList.size() != 1),
-            "vcl",
-            "Printer::GetPreparedMetaFile non-output generating actions must be solitary");
-        SAL_WARN_IF(aTotalComponents.bIsFullyTransparent
-                        && (aTotalComponents.aComponentList.size() != 1),
-                    "vcl",
-                    "Printer::GetPreparedMetaFile fully transparent actions must be solitary");
+            "vcl", "Printer::GetPreparedMetaFile non-output generating actions must be solitary");
+        SAL_WARN_IF(
+            aTotalComponents.bIsFullyTransparent && (aTotalComponents.aComponentList.size() != 1),
+            "vcl", "Printer::GetPreparedMetaFile fully transparent actions must be solitary");
     }
 
     // well now, we've got the list of disjunct connected
@@ -658,8 +671,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                                     // actions that are members of
                                     // the current aConnectedComponents element
                                     // (currentItem)
-                                    if (aConnectedComponents_MemberMap[nActionNum]
-                                        == &currentItem)
+                                    if (aConnectedComponents_MemberMap[nActionNum] == &currentItem)
                                         aPaintVDev->EnableOutput();
 
                                     // but process every action
