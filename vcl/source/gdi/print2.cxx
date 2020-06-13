@@ -492,6 +492,10 @@ template <> tools::Rectangle GetOutputRect(vcl::PDFWriterImpl* pPdfWriter)
                                                               MapMode(MapUnit::MapPoint)));
 }
 
+template <typename T> bool UsesTiling(T*) { return false; }
+
+template <> bool UsesTiling(Printer*) { return true; }
+
 bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, GDIMetaFile& rOutMtf,
                                                     long nMaxBmpDPIX, long nMaxBmpDPIY,
                                                     bool bReduceTransparency,
@@ -600,7 +604,6 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
 
     //  STAGE 3.2: Generate banded bitmaps for special regions
     const tools::Rectangle aOutputRect(GetOutputRect(this));
-    bool bTiling = dynamic_cast<Printer*>(this) != nullptr;
 
     // Read the configuration value of minimal object area where transparency will be removed
     double fReduceTransparencyMinArea = GetReduceTransparencyMinArea();
@@ -650,8 +653,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                     while (aDstPtPix.Y() <= aBoundRect.Bottom())
                     {
                         aDstPtPix.setX(aBoundRect.Left());
-                        aDstSzPix = bTiling ? Size(MAX_TILE_WIDTH, MAX_TILE_HEIGHT)
-                                            : aBoundRect.GetSize();
+                        aDstSzPix = UsesTiling(this) ? Size(MAX_TILE_WIDTH, MAX_TILE_HEIGHT)
+                                                    : aBoundRect.GetSize();
 
                         if ((aDstPtPix.Y() + aDstSzPix.Height() - 1) > aBoundRect.Bottom())
                             aDstSzPix.setHeight(aBoundRect.Bottom() - aDstPtPix.Y() + 1);
