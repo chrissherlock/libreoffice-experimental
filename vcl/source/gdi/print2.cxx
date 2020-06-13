@@ -72,7 +72,7 @@
 #include <vcl/bitmapaccess.hxx>
 
 #include "pdfwriter_impl.hxx"
-#include "ConnectedComponents.hxx"
+#include "ConnectedActions.hxx"
 
 #define MAX_TILE_WIDTH 1024
 #define MAX_TILE_HEIGHT 1024
@@ -240,32 +240,32 @@ static double GetReduceTransparencyMinArea()
     return fReduceTransparencyMinArea;
 }
 
-static bool ComponentBoundsAreOver(ConnectedComponents const& rComponent, tools::Rectangle rBounds)
+static bool ActionBoundsAreOver(ConnectedActions const& rAction, tools::Rectangle rBounds)
 {
-    return (!rComponent.aBounds.IsEmpty() && !rComponent.bIsFullyTransparent
-            && rComponent.aBounds.IsOver(rBounds));
+    return (!rAction.aBounds.IsEmpty() && !rAction.bIsFullyTransparent
+            && rAction.aBounds.IsOver(rBounds));
 }
 
-static bool ProcessIntersections(::std::vector<ConnectedComponents>& rConnectedComponents,
-                                 ConnectedComponents& rTotalComponents,
+static bool ProcessIntersections(::std::vector<ConnectedActions>& rConnectedActions,
+                                 ConnectedActions& rTotalActions,
                                  tools::Rectangle& rTotalBounds, bool bTreatSpecial)
 {
-    bool bSomeComponentsChanged;
+    bool bSomeActionsChanged;
 
     // now, this is unfortunate: since changing anyone of
-    // the aConnectedComponents elements (e.g. by merging or addition
+    // the aConnectedActions elements (e.g. by merging or addition
     // of an action) might generate new intersection with
-    // other aConnectedComponents elements, have to repeat the whole
+    // other aConnectedActions elements, have to repeat the whole
     // element scanning, until nothing changes anymore.
     // Thus, this loop here makes us O(n^3) in the worst
     // case.
     do
     {
         // only loop here if 'intersects' branch below was hit
-        bSomeComponentsChanged = false;
+        bSomeActionsChanged = false;
 
-        // iterate over all current members of aConnectedComponents
-        for (auto currCC = rConnectedComponents.begin(); currCC != rConnectedComponents.end();)
+        // iterate over all current members of aConnectedActions
+        for (auto currCC = rConnectedActions.begin(); currCC != rConnectedActions.end();)
         {
             // first check if current element's bounds are
             // empty. This ensures that empty actions are not
@@ -276,56 +276,56 @@ static bool ProcessIntersections(::std::vector<ConnectedComponents>& rConnectedC
             // not be considered for connected components,
             // too. Just put each of them into a separate
             // component.
-            if (ComponentBoundsAreOver(*currCC, rTotalBounds))
+            if (ActionBoundsAreOver(*currCC, rTotalBounds))
             {
-                // union the intersecting aConnectedComponents element into aTotalComponents
+                // union the intersecting aConnectedActions element into aTotalActions
 
                 // calc union bounding box
                 rTotalBounds.Union(currCC->aBounds);
 
-                // extract all aCurr actions to aTotalComponents
-                rTotalComponents.aComponentList.splice(rTotalComponents.aComponentList.end(),
-                                                       currCC->aComponentList);
+                // extract all aCurr actions to aTotalActions
+                rTotalActions.aActionList.splice(rTotalActions.aActionList.end(),
+                                                       currCC->aActionList);
 
                 if (currCC->bIsSpecial)
                     bTreatSpecial = true;
 
                 // remove and delete currCC element from list (we've now merged its content)
-                currCC = rConnectedComponents.erase(currCC);
+                currCC = rConnectedActions.erase(currCC);
 
                 // at least one component changed, need to rescan everything
-                bSomeComponentsChanged = true;
+                bSomeActionsChanged = true;
             }
             else
             {
                 ++currCC;
             }
         }
-    } while (bSomeComponentsChanged);
+    } while (bSomeActionsChanged);
 
     return bTreatSpecial;
 }
 
-std::tuple<bool, ConnectedComponents, tools::Rectangle>
-SearchForIntersectingEntries(::std::vector<ConnectedComponents>& rConnectedComponents,
+std::tuple<bool, ConnectedActions, tools::Rectangle>
+SearchForIntersectingEntries(::std::vector<ConnectedActions>& rConnectedActions,
                              MetaAction* pCurrAct, VirtualDevice* pMapModeVDev,
-                             ConnectedComponents rBackgroundComponent)
+                             ConnectedActions rBackgroundAction)
 {
     // cache bounds of current action
-    const tools::Rectangle aCurrComponentBounds(pCurrAct->GetBoundsRect(pMapModeVDev));
+    const tools::Rectangle aCurrActionBounds(pCurrAct->GetBoundsRect(pMapModeVDev));
 
     // accumulate collected bounds here, initialize with current action
-    tools::Rectangle aTotalBounds(aCurrComponentBounds); // thus, aTotalComponents.aBounds is empty
+    tools::Rectangle aTotalBounds(aCurrActionBounds); // thus, aTotalActions.aBounds is empty
         // for non-output-generating actions
     bool bTreatSpecial = false;
-    ConnectedComponents aTotalComponents;
+    ConnectedActions aTotalActions;
 
     //  STAGE 2.1: Search for intersecting cc entries
 
-    // if aCurrComponentBounds is empty, it will intersect with no
-    // aConnectedComponents member. Thus, we can save the check.
+    // if aCurrActionBounds is empty, it will intersect with no
+    // aConnectedActions member. Thus, we can save the check.
     // Furthermore, this ensures that non-output-generating
-    // actions get their own aConnectedComponents entry, which is necessary
+    // actions get their own aConnectedActions entry, which is necessary
     // when copying them to the output metafile (see stage 4
     // below).
 
@@ -333,33 +333,33 @@ SearchForIntersectingEntries(::std::vector<ConnectedComponents>& rConnectedCompo
     // not be considered for connected components,
     // too. Just put each of them into a separate
     // component.
-    aTotalComponents.bIsFullyTransparent = pCurrAct->IsTransparent(pMapModeVDev);
+    aTotalActions.bIsFullyTransparent = pCurrAct->IsTransparent(pMapModeVDev);
 
-    if (!aCurrComponentBounds.IsEmpty() && !aTotalComponents.bIsFullyTransparent)
+    if (!aCurrActionBounds.IsEmpty() && !aTotalActions.bIsFullyTransparent)
     {
-        if (!rBackgroundComponent.aComponentList.empty()
-            && !rBackgroundComponent.aBounds.IsInside(aTotalBounds))
+        if (!rBackgroundAction.aActionList.empty()
+            && !rBackgroundAction.aBounds.IsInside(aTotalBounds))
         {
             // it seems the background is not large enough. to
             // be on the safe side, combine with this component.
-            aTotalBounds.Union(rBackgroundComponent.aBounds);
+            aTotalBounds.Union(rBackgroundAction.aBounds);
 
-            // extract all aCurr actions to aTotalComponents
-            aTotalComponents.aComponentList.splice(aTotalComponents.aComponentList.end(),
-                                                   rBackgroundComponent.aComponentList);
+            // extract all aCurr actions to aTotalActions
+            aTotalActions.aActionList.splice(aTotalActions.aActionList.end(),
+                                                   rBackgroundAction.aActionList);
 
-            if (rBackgroundComponent.bIsSpecial)
+            if (rBackgroundAction.bIsSpecial)
                 bTreatSpecial = true;
         }
 
-        bTreatSpecial = ProcessIntersections(rConnectedComponents, aTotalComponents, aTotalBounds,
+        bTreatSpecial = ProcessIntersections(rConnectedActions, aTotalActions, aTotalBounds,
                                              bTreatSpecial);
     }
 
-    return std::make_tuple(bTreatSpecial, aTotalComponents, aTotalBounds);
+    return std::make_tuple(bTreatSpecial, aTotalActions, aTotalBounds);
 }
 
-static void MarkWhetherConnectedComponentIsSpecial(ConnectedComponents& rTotalComponents,
+static void MarkWhetherConnectedActionIsSpecial(ConnectedActions& rTotalActions,
                                                    bool bTreatSpecial, MetaAction* pCurrAct)
 {
     // now test whether the whole connected component must be
@@ -374,18 +374,18 @@ static void MarkWhetherConnectedComponentIsSpecial(ConnectedComponents& rTotalCo
     // are transparent" no sorting is necessary, since the
     // added metaaction pCurrAct is always in the order the
     // metafile is painted. Generally, the order of the
-    // metaactions in the ConnectedComponents are not
+    // metaactions in the ConnectedActions are not
     // guaranteed to be the same as in the metafile.
     if (bTreatSpecial)
     {
         // prev component(s) special -> this one, too
-        rTotalComponents.bIsSpecial = true;
+        rTotalActions.bIsSpecial = true;
     }
     else if (!pCurrAct->IsTransparent())
     {
         // added action and none of prev components special ->
         // this one normal, too
-        rTotalComponents.bIsSpecial = false;
+        rTotalActions.bIsSpecial = false;
     }
     else
     {
@@ -399,17 +399,17 @@ static void MarkWhetherConnectedComponentIsSpecial(ConnectedComponents& rTotalCo
         {
             // no, action cannot handle its transparency on
             // a printer device, render to bitmap
-            rTotalComponents.bIsSpecial = true;
+            rTotalActions.bIsSpecial = true;
         }
         else
         {
             // yes, action can handle its transparency, so
             // check whether we're on white background
-            if (rTotalComponents.aComponentList.empty())
+            if (rTotalActions.aActionList.empty())
             {
                 // nothing between pCurrAct and page
                 // background -> don't be special
-                rTotalComponents.bIsSpecial = false;
+                rTotalActions.bIsSpecial = false;
             }
             else
             {
@@ -422,14 +422,14 @@ static void MarkWhetherConnectedComponentIsSpecial(ConnectedComponents& rTotalCo
                 // there are non-transparent objects between
                 // pCurrAct and the empty sheet of paper -> be
                 // special, then
-                rTotalComponents.bIsSpecial = true;
+                rTotalActions.bIsSpecial = true;
             }
         }
     }
 }
 
-static void GenerateConnectedComponents(::std::vector<ConnectedComponents>& rConnectedComponents,
-                                        ConnectedComponents& rBackgroundComponent,
+static void GenerateConnectedActions(::std::vector<ConnectedActions>& rConnectedActions,
+                                        ConnectedActions& rBackgroundAction,
                                         MetaAction* pInitialAction, int nActionNum,
                                         GDIMetaFile const& rInMtf, VirtualDevice* pMapModeVDev)
 {
@@ -443,30 +443,30 @@ static void GenerateConnectedComponents(::std::vector<ConnectedComponents>& rCon
 
         bool bTreatSpecial;
         tools::Rectangle aTotalBounds;
-        ConnectedComponents aTotalComponents;
+        ConnectedActions aTotalActions;
 
-        std::tie(bTreatSpecial, aTotalComponents, aTotalBounds) = SearchForIntersectingEntries(
-            rConnectedComponents, pCurrAct, pMapModeVDev, rBackgroundComponent);
+        std::tie(bTreatSpecial, aTotalActions, aTotalBounds) = SearchForIntersectingEntries(
+            rConnectedActions, pCurrAct, pMapModeVDev, rBackgroundAction);
 
         //  STAGE 2.2: Determine special state for cc element
-        MarkWhetherConnectedComponentIsSpecial(aTotalComponents, bTreatSpecial, pCurrAct);
+        MarkWhetherConnectedActionIsSpecial(aTotalActions, bTreatSpecial, pCurrAct);
 
         //  STAGE 2.3: Add newly generated CC list element
 
         // set new bounds and add action to list
-        aTotalComponents.aBounds = aTotalBounds;
-        aTotalComponents.aComponentList.emplace_back(pCurrAct, nActionNum);
+        aTotalActions.aBounds = aTotalBounds;
+        aTotalActions.aActionList.emplace_back(pCurrAct, nActionNum);
 
-        // add aTotalComponents as a new entry to rConnectedComponents
-        rConnectedComponents.push_back(aTotalComponents);
+        // add aTotalActions as a new entry to rConnectedActions
+        rConnectedActions.push_back(aTotalActions);
 
-        SAL_WARN_IF(aTotalComponents.aComponentList.empty(), "vcl",
+        SAL_WARN_IF(aTotalActions.aActionList.empty(), "vcl",
                     "Printer::GetPreparedMetaFile empty component");
         SAL_WARN_IF(
-            aTotalComponents.aBounds.IsEmpty() && (aTotalComponents.aComponentList.size() != 1),
+            aTotalActions.aBounds.IsEmpty() && (aTotalActions.aActionList.size() != 1),
             "vcl", "Printer::GetPreparedMetaFile non-output generating actions must be solitary");
         SAL_WARN_IF(
-            aTotalComponents.bIsFullyTransparent && (aTotalComponents.aComponentList.size() != 1),
+            aTotalActions.bIsFullyTransparent && (aTotalActions.aActionList.size() != 1),
             "vcl", "Printer::GetPreparedMetaFile fully transparent actions must be solitary");
     }
 }
@@ -503,15 +503,15 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
     // number of intersecting metafile actions, plus any action
     // that would otherwise be cut in two). Therefore, we
     // iteratively add metafile actions from the original metafile
-    // to this connected components list (aConnectedComponents), by checking
+    // to this connected components list (aConnectedActions), by checking
     // each element's bounding box against intersection with the
     // metaaction at hand.
-    // All those intersecting elements are removed from aConnectedComponents
+    // All those intersecting elements are removed from aConnectedActions
     // and collected in a temporary list (aCCMergeList). After all
     // elements have been checked, the aCCMergeList elements are
     // merged with the metaaction at hand into one resulting
     // connected component, with one big bounding box, and
-    // inserted into aConnectedComponents again.
+    // inserted into aConnectedActions again.
     // The time complexity of this algorithm is O(n^3), where n is
     // the number of metafile actions, and it finds all distinct
     // regions of rectangle-bounded connected components. This
@@ -526,52 +526,52 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
     aMapModeVDev->EnableOutput(false);
 
     // Receives uniform background content, and is _not_ merged
-    // nor checked for intersection against other aConnectedComponents elements
-    ConnectedComponents aBackgroundComponent;
+    // nor checked for intersection against other aConnectedActions elements
+    ConnectedActions aBackgroundAction;
 
     if (rBackground != COL_TRANSPARENT)
-        aBackgroundComponent.SetBackground(rBackground, GetBackgroundComponentBounds());
+        aBackgroundAction.SetBackground(rBackground, GetBackgroundComponentBounds());
 
     MetaAction* pCurrAct = nullptr;
     int nActionNum = 0;
 
     std::tie(nActionNum, pCurrAct)
-        = aBackgroundComponent.PruneBackgroundObjects(rInMtf, aMapModeVDev.get());
+        = aBackgroundAction.PruneBackgroundObjects(rInMtf, aMapModeVDev.get());
 
     //  STAGE 2: Generate connected components list
 
-    ::std::vector<ConnectedComponents>
-        aConnectedComponents; // contains distinct sets of connected components as elements.
+    ::std::vector<ConnectedActions>
+        aConnectedActions; // contains distinct sets of connected components as elements.
 
-    GenerateConnectedComponents(aConnectedComponents, aBackgroundComponent, pCurrAct, nActionNum,
+    GenerateConnectedActions(aConnectedActions, aBackgroundAction, pCurrAct, nActionNum,
                                 rInMtf, aMapModeVDev.get());
 
     // well now, we've got the list of disjunct connected
     // components. Now we've got to create a map, which contains
-    // the corresponding aConnectedComponents element for every
+    // the corresponding aConnectedActions element for every
     // metaaction. Later on, we always process the complete
     // metafile for each bitmap to be generated, but switch on
     // output only for actions contained in the then current
-    // aConnectedComponents element. This ensures correct mapmode and attribute
+    // aConnectedActions element. This ensures correct mapmode and attribute
     // settings for all cases.
 
     // maps mtf actions to CC list entries
-    ::std::vector<const ConnectedComponents*> aConnectedComponents_MemberMap(
+    ::std::vector<const ConnectedActions*> aConnectedActions_MemberMap(
         rInMtf.GetActionSize());
 
-    // iterate over all aConnectedComponents members and their contained metaactions
-    for (auto const& currentItem : aConnectedComponents)
+    // iterate over all aConnectedActions members and their contained metaactions
+    for (auto const& currentItem : aConnectedActions)
     {
-        for (auto const& currentAction : currentItem.aComponentList)
+        for (auto const& currentAction : currentItem.aActionList)
         {
-            // set pointer to aConnectedComponents element for corresponding index
-            aConnectedComponents_MemberMap[currentAction.second] = &currentItem;
+            // set pointer to aConnectedActions element for corresponding index
+            aConnectedActions_MemberMap[currentAction.second] = &currentItem;
         }
     }
 
     //  STAGE 3.1: Output background mtf actions (if there are any)
 
-    for (auto& component : aBackgroundComponent.aComponentList)
+    for (auto& component : aBackgroundAction.aActionList)
     {
         // simply add this action (above, we inserted the actions
         // starting at index 0 up to and including nLastBgAction)
@@ -604,8 +604,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
     // Read the configuration value of minimal object area where transparency will be removed
     double fReduceTransparencyMinArea = GetReduceTransparencyMinArea();
 
-    // iterate over all aConnectedComponents members and generate bitmaps for the special ones
-    for (auto& currentItem : aConnectedComponents)
+    // iterate over all aConnectedActions members and generate bitmaps for the special ones
+    for (auto& currentItem : aConnectedActions)
     {
         if (currentItem.bIsSpecial)
         {
@@ -639,7 +639,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                     aMapVDev->EnableOutput(false);
 
                     ScopedVclPtrInstance<VirtualDevice> aPaintVDev; // into this one, we render.
-                    aPaintVDev->SetBackground(aBackgroundComponent.aBgColor);
+                    aPaintVDev->SetBackground(aBackgroundAction.aBgColor);
 
                     rOutMtf.AddAction(new MetaPushAction(PushFlags::MAPMODE));
                     rOutMtf.AddAction(new MetaMapModeAction());
@@ -682,9 +682,9 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                                 {
                                     // enable output only for
                                     // actions that are members of
-                                    // the current aConnectedComponents element
+                                    // the current aConnectedActions element
                                     // (currentItem)
-                                    if (aConnectedComponents_MemberMap[nActionNum] == &currentItem)
+                                    if (aConnectedActions_MemberMap[nActionNum] == &currentItem)
                                         aPaintVDev->EnableOutput();
 
                                     // but process every action
@@ -772,32 +772,32 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
     //  STAGE 4: Copy actions to output metafile
 
     // iterate over all actions and duplicate the ones not in a
-    // special aConnectedComponents member into rOutMtf
+    // special aConnectedActions member into rOutMtf
     for (pCurrAct = const_cast<GDIMetaFile&>(rInMtf).FirstAction(), nActionNum = 0; pCurrAct;
          pCurrAct = const_cast<GDIMetaFile&>(rInMtf).NextAction(), ++nActionNum)
     {
-        const ConnectedComponents* pCurrAssociatedComponent
-            = aConnectedComponents_MemberMap[nActionNum];
+        const ConnectedActions* pCurrAssociatedAction
+            = aConnectedActions_MemberMap[nActionNum];
 
         // NOTE: This relies on the fact that map-mode or draw
-        // mode changing actions are solitary aConnectedComponents elements and
+        // mode changing actions are solitary aConnectedActions elements and
         // have empty bounding boxes, see comment on stage 2.1
         // above
-        if (pCurrAssociatedComponent
-            && (pCurrAssociatedComponent->aBounds.IsEmpty()
-                || !pCurrAssociatedComponent->bIsSpecial))
+        if (pCurrAssociatedAction
+            && (pCurrAssociatedAction->aBounds.IsEmpty()
+                || !pCurrAssociatedAction->bIsSpecial))
         {
             // #107169# Treat transparent bitmaps special, if they
             // are the first (or sole) action in their bounds
             // list. Note that we previously ensured that no
             // fully-transparent objects are before us here.
             if (DoesActionHandleTransparency(*pCurrAct)
-                && pCurrAssociatedComponent->aComponentList.begin()->first == pCurrAct)
+                && pCurrAssociatedAction->aActionList.begin()->first == pCurrAct)
             {
                 // convert actions, where masked-out parts are of
                 // given background color
                 ConvertTransparentAction(rOutMtf, pCurrAct, *aMapModeVDev,
-                                         aBackgroundComponent.aBgColor);
+                                         aBackgroundAction.aBgColor);
             }
             else
             {
@@ -813,9 +813,9 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
     rOutMtf.SetPrefSize(rInMtf.GetPrefSize());
 
 #if OSL_DEBUG_LEVEL > 1
-    // iterate over all aConnectedComponents members and generate rectangles for the bounding boxes
+    // iterate over all aConnectedActions members and generate rectangles for the bounding boxes
     rOutMtf.AddAction(new MetaFillColorAction(COL_WHITE, false));
-    for (auto const& aCurr : aConnectedComponents)
+    for (auto const& aCurr : aConnectedActions)
     {
         if (aCurr.bIsSpecial)
             rOutMtf.AddAction(new MetaLineColorAction(COL_RED, true));

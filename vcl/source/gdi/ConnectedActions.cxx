@@ -35,9 +35,7 @@
 #include <vcl/bitmapaccess.hxx>
 
 #include "pdfwriter_impl.hxx"
-#include "ConnectedComponents.hxx"
-
-typedef ::std::pair<MetaAction*, int> Component; // MetaAction plus index in metafile
+#include "ConnectedActions.hxx"
 
 template <typename T> tools::Rectangle GetBoundsRect(T) { return tools::Rectangle(); }
 
@@ -61,44 +59,40 @@ template <> tools::Rectangle GetBoundsRect<MetaWallpaperAction*>(MetaWallpaperAc
     return pAction->GetRect();
 }
 
-void ConnectedComponents::SetBackground(Color const& rBgColor, tools::Rectangle const& rBounds)
+void ConnectedActions::SetBackground(Color const& rBgColor, tools::Rectangle const& rBounds)
 {
     aBgColor = rBgColor;
     aBounds = rBounds;
 }
 
-template <typename T> bool ConnectedComponents::IsValidShape(T)
+template <typename T> bool ConnectedActions::IsValidShape(T)
 {
     SAL_WARN("vcl.gdi", "Should never call on this!");
     assert(false);
     return false;
 }
 
-template <> bool ConnectedComponents::IsValidShape<MetaRectAction*>(MetaRectAction*)
-{
-    return true;
-}
+template <> bool ConnectedActions::IsValidShape<MetaRectAction*>(MetaRectAction*) { return true; }
 
-template <> bool ConnectedComponents::IsValidShape<MetaPolygonAction*>(MetaPolygonAction* pAction)
+template <> bool ConnectedActions::IsValidShape<MetaPolygonAction*>(MetaPolygonAction* pAction)
 {
     const tools::Polygon aPoly(pAction->GetPolygon());
     return !basegfx::utils::isRectangle(aPoly.getB2DPolygon());
 }
 
 template <>
-bool ConnectedComponents::IsValidShape<MetaPolyPolygonAction*>(MetaPolyPolygonAction* pAction)
+bool ConnectedActions::IsValidShape<MetaPolyPolygonAction*>(MetaPolyPolygonAction* pAction)
 {
     const tools::PolyPolygon aPoly(pAction->GetPolyPolygon());
     return aPoly.Count() != 1 || !basegfx::utils::isRectangle(aPoly[0].getB2DPolygon());
 }
 
-template <> bool ConnectedComponents::IsValidShape<MetaWallpaperAction*>(MetaWallpaperAction*)
+template <> bool ConnectedActions::IsValidShape<MetaWallpaperAction*>(MetaWallpaperAction*)
 {
     return true;
 }
 
-bool ConnectedComponents::IsBackgroundNotCovered(MetaAction* pAction,
-                                                 OutputDevice const& rMapModeVDev)
+bool ConnectedActions::IsBackgroundNotCovered(MetaAction* pAction, OutputDevice const& rMapModeVDev)
 {
     const tools::Rectangle& rCurrRect = GetBoundsRect(pAction);
 
@@ -109,8 +103,8 @@ bool ConnectedComponents::IsBackgroundNotCovered(MetaAction* pAction,
                 && rMapModeVDev.IsFillColor());
 }
 
-std::tuple<int, MetaAction*> ConnectedComponents::ExtendAllBounds(GDIMetaFile const& rMtf,
-                                                                  VirtualDevice* pMapModeVDev)
+std::tuple<int, MetaAction*> ConnectedActions::ExtendAllBounds(GDIMetaFile const& rMtf,
+                                                               VirtualDevice* pMapModeVDev)
 {
     MetaAction* pCurrAct = const_cast<GDIMetaFile&>(rMtf).FirstAction();
 
@@ -134,7 +128,7 @@ std::tuple<int, MetaAction*> ConnectedComponents::ExtendAllBounds(GDIMetaFile co
 }
 
 template <typename T>
-std::tuple<int, bool> ConnectedComponents::ExtendCurrentBounds(T*, VirtualDevice*, int, int)
+std::tuple<int, bool> ConnectedActions::ExtendCurrentBounds(T*, VirtualDevice*, int, int)
 {
     SAL_WARN("vcl.gdi", "Should never match");
     assert(false);
@@ -142,8 +136,7 @@ std::tuple<int, bool> ConnectedComponents::ExtendCurrentBounds(T*, VirtualDevice
 }
 
 template <>
-std::tuple<int, bool> ConnectedComponents::ExtendCurrentBounds(MetaAction*, VirtualDevice*, int,
-                                                               int)
+std::tuple<int, bool> ConnectedActions::ExtendCurrentBounds(MetaAction*, VirtualDevice*, int, int)
 {
     SAL_WARN("vcl.gdi", "Should never match");
     assert(false);
@@ -151,14 +144,14 @@ std::tuple<int, bool> ConnectedComponents::ExtendCurrentBounds(MetaAction*, Virt
 }
 
 template <>
-std::tuple<int, bool> ConnectedComponents::ExtendCurrentBounds(MetaTransparentAction* pCurrAct,
-                                                               VirtualDevice* pMapModeVDev, int,
-                                                               int nLastBgAction)
+std::tuple<int, bool> ConnectedActions::ExtendCurrentBounds(MetaTransparentAction* pCurrAct,
+                                                            VirtualDevice* pMapModeVDev, int,
+                                                            int nLastBgAction)
 {
     if (pCurrAct->IsTransparent(pMapModeVDev))
     {
         // extend current bounds (next uniform action needs to fully cover this area)
-        SetBackgroundComponent(pCurrAct, pMapModeVDev);
+        SetBackgroundAction(pCurrAct, pMapModeVDev);
         return std::make_tuple(nLastBgAction, true);
     }
     else
@@ -167,12 +160,12 @@ std::tuple<int, bool> ConnectedComponents::ExtendCurrentBounds(MetaTransparentAc
     }
 }
 
-std::tuple<int, bool> ConnectedComponents::ExtendCurrentBounds_implementation(
+std::tuple<int, bool> ConnectedActions::ExtendCurrentBounds_implementation(
     MetaAction* pCurrAct, VirtualDevice* pMapModeVDev, int nActionNum, int nLastBgAction)
 {
     if (IsBackgroundNotCovered(pCurrAct, *pMapModeVDev))
     {
-        SetBackgroundComponent(pCurrAct, pMapModeVDev);
+        SetBackgroundAction(pCurrAct, pMapModeVDev);
         return std::make_tuple(nLastBgAction, true);
     }
     else
@@ -182,40 +175,40 @@ std::tuple<int, bool> ConnectedComponents::ExtendCurrentBounds_implementation(
 }
 
 template <>
-std::tuple<int, bool> ConnectedComponents::ExtendCurrentBounds(MetaRectAction* pCurrAct,
-                                                               VirtualDevice* pMapModeVDev,
-                                                               int nActionNum, int nLastBgAction)
+std::tuple<int, bool> ConnectedActions::ExtendCurrentBounds(MetaRectAction* pCurrAct,
+                                                            VirtualDevice* pMapModeVDev,
+                                                            int nActionNum, int nLastBgAction)
 {
     return ExtendCurrentBounds_implementation(pCurrAct, pMapModeVDev, nActionNum, nLastBgAction);
 }
 
 template <>
-std::tuple<int, bool> ConnectedComponents::ExtendCurrentBounds(MetaPolygonAction* pCurrAct,
-                                                               VirtualDevice* pMapModeVDev,
-                                                               int nActionNum, int nLastBgAction)
+std::tuple<int, bool> ConnectedActions::ExtendCurrentBounds(MetaPolygonAction* pCurrAct,
+                                                            VirtualDevice* pMapModeVDev,
+                                                            int nActionNum, int nLastBgAction)
 {
     return ExtendCurrentBounds_implementation(pCurrAct, pMapModeVDev, nActionNum, nLastBgAction);
 }
 
 template <>
-std::tuple<int, bool> ConnectedComponents::ExtendCurrentBounds(MetaPolyPolygonAction* pCurrAct,
-                                                               VirtualDevice* pMapModeVDev,
-                                                               int nActionNum, int nLastBgAction)
+std::tuple<int, bool> ConnectedActions::ExtendCurrentBounds(MetaPolyPolygonAction* pCurrAct,
+                                                            VirtualDevice* pMapModeVDev,
+                                                            int nActionNum, int nLastBgAction)
 {
     return ExtendCurrentBounds_implementation(pCurrAct, pMapModeVDev, nActionNum, nLastBgAction);
 }
 
 template <>
-std::tuple<int, bool> ConnectedComponents::ExtendCurrentBounds(MetaWallpaperAction* pCurrAct,
-                                                               VirtualDevice* pMapModeVDev,
-                                                               int nActionNum, int nLastBgAction)
+std::tuple<int, bool> ConnectedActions::ExtendCurrentBounds(MetaWallpaperAction* pCurrAct,
+                                                            VirtualDevice* pMapModeVDev,
+                                                            int nActionNum, int nLastBgAction)
 {
     return ExtendCurrentBounds_implementation(pCurrAct, pMapModeVDev, nActionNum, nLastBgAction);
 }
 
-int ConnectedComponents::ReconstructVirtualDeviceMapMode(GDIMetaFile const& rMtf,
-                                                         VirtualDevice* pMapModeVDev,
-                                                         int nLastBgAction)
+int ConnectedActions::ReconstructVirtualDeviceMapMode(GDIMetaFile const& rMtf,
+                                                      VirtualDevice* pMapModeVDev,
+                                                      int nLastBgAction)
 {
     int nActionNum = 0;
 
@@ -226,7 +219,7 @@ int ConnectedComponents::ReconstructVirtualDeviceMapMode(GDIMetaFile const& rMtf
     {
         // up to and including last ink-generating background
         // action go to background component
-        aComponentList.emplace_back(pCurrAct, nActionNum);
+        aActionList.emplace_back(pCurrAct, nActionNum);
 
         // execute action to get correct MapModes etc.
         pCurrAct->Execute(pMapModeVDev);
@@ -237,8 +230,8 @@ int ConnectedComponents::ReconstructVirtualDeviceMapMode(GDIMetaFile const& rMtf
     return nActionNum;
 }
 
-std::tuple<int, MetaAction*>
-ConnectedComponents::PruneBackgroundObjects(GDIMetaFile const& rMtf, VirtualDevice* pMapModeVDev)
+std::tuple<int, MetaAction*> ConnectedActions::PruneBackgroundObjects(GDIMetaFile const& rMtf,
+                                                                      VirtualDevice* pMapModeVDev)
 {
     MetaAction* pCurrAct = nullptr;
     int nLastBgAction = 0;

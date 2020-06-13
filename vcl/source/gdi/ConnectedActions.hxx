@@ -42,10 +42,10 @@ template <typename T> tools::Rectangle GetBoundsRect(T);
 typedef ::std::pair<MetaAction*, int> Component; // MetaAction plus index in metafile
 
 // List of (intersecting) actions, plus overall bounds
-struct ConnectedComponents
+struct ConnectedActions
 {
-    ConnectedComponents()
-        : aComponentList()
+    ConnectedActions()
+        : aActionList()
         , aBounds()
         , aBgColor(COL_WHITE)
         , bIsSpecial(false)
@@ -94,30 +94,30 @@ struct ConnectedComponents
 
     template <bool b> struct set_component_selector
     {
-        static void implementation(ConnectedComponents* pBackgroundComponent,
-                                   MetaAction* const pAction, VirtualDevice& rMapModeVDev)
+        static void implementation(ConnectedActions* pBackgroundAction, MetaAction* const pAction,
+                                   VirtualDevice& rMapModeVDev)
         {
             const tools::Rectangle& rCurrRect = GetBoundsRect(pAction);
 
-            if (pBackgroundComponent->IsBackgroundNotCovered(pAction, rMapModeVDev))
-                pBackgroundComponent->SetBackground(rMapModeVDev.GetFillColor(), rCurrRect);
+            if (pBackgroundAction->IsBackgroundNotCovered(pAction, rMapModeVDev))
+                pBackgroundAction->SetBackground(rMapModeVDev.GetFillColor(), rCurrRect);
         }
     };
 
     template <> struct set_component_selector<true>
     {
-        static void implementation(ConnectedComponents* pBackgroundComponent,
-                                   MetaAction* const pAction, VirtualDevice* pMapModeVDev)
+        static void implementation(ConnectedActions* pBackgroundAction, MetaAction* const pAction,
+                                   VirtualDevice* pMapModeVDev)
         {
             if (pAction->IsTransparent(pMapModeVDev))
             {
                 // extend current bounds (next uniform action needs to fully cover this area)
-                pBackgroundComponent->aBounds.Union(pAction->GetBoundsRect(pMapModeVDev));
+                pBackgroundAction->aBounds.Union(pAction->GetBoundsRect(pMapModeVDev));
             }
         }
     };
 
-    template <typename T> void SetBackgroundComponent(T* const action, VirtualDevice* pMapModeVDev)
+    template <typename T> void SetBackgroundAction(T* const action, VirtualDevice* pMapModeVDev)
     {
         set_component_selector<is_valid_background_region<T>::value>::implementation(this, action,
                                                                                      *pMapModeVDev);
@@ -178,7 +178,7 @@ struct ConnectedComponents
     std::tuple<int, MetaAction*> PruneBackgroundObjects(GDIMetaFile const& rMtf,
                                                         VirtualDevice* pMapModeVDev);
 
-    ::std::list<Component> aComponentList;
+    ::std::list<Component> aActionList;
     tools::Rectangle aBounds;
     Color aBgColor;
     bool bIsSpecial;
