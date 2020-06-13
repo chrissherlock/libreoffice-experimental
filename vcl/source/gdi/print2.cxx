@@ -247,8 +247,8 @@ static bool ActionBoundsAreOver(ConnectedActions const& rAction, tools::Rectangl
 }
 
 static bool ProcessIntersections(::std::vector<ConnectedActions>& rConnectedActions,
-                                 ConnectedActions& rTotalActions,
-                                 tools::Rectangle& rTotalBounds, bool bTreatSpecial)
+                                 ConnectedActions& rTotalActions, tools::Rectangle& rTotalBounds,
+                                 bool bTreatSpecial)
 {
     bool bSomeActionsChanged;
 
@@ -285,7 +285,7 @@ static bool ProcessIntersections(::std::vector<ConnectedActions>& rConnectedActi
 
                 // extract all aCurr actions to aTotalActions
                 rTotalActions.aActionList.splice(rTotalActions.aActionList.end(),
-                                                       currCC->aActionList);
+                                                 currCC->aActionList);
 
                 if (currCC->bIsSpecial)
                     bTreatSpecial = true;
@@ -346,21 +346,21 @@ SearchForIntersectingEntries(::std::vector<ConnectedActions>& rConnectedActions,
 
             // extract all aCurr actions to aTotalActions
             aTotalActions.aActionList.splice(aTotalActions.aActionList.end(),
-                                                   rBackgroundAction.aActionList);
+                                             rBackgroundAction.aActionList);
 
             if (rBackgroundAction.bIsSpecial)
                 bTreatSpecial = true;
         }
 
-        bTreatSpecial = ProcessIntersections(rConnectedActions, aTotalActions, aTotalBounds,
-                                             bTreatSpecial);
+        bTreatSpecial
+            = ProcessIntersections(rConnectedActions, aTotalActions, aTotalBounds, bTreatSpecial);
     }
 
     return std::make_tuple(bTreatSpecial, aTotalActions, aTotalBounds);
 }
 
-static void MarkWhetherConnectedActionIsSpecial(ConnectedActions& rTotalActions,
-                                                   bool bTreatSpecial, MetaAction* pCurrAct)
+static void MarkWhetherConnectedActionIsSpecial(ConnectedActions& rTotalActions, bool bTreatSpecial,
+                                                MetaAction* pCurrAct)
 {
     // now test whether the whole connected component must be
     // treated specially (i.e. rendered as a bitmap): if the
@@ -429,9 +429,9 @@ static void MarkWhetherConnectedActionIsSpecial(ConnectedActions& rTotalActions,
 }
 
 static void GenerateConnectedActions(::std::vector<ConnectedActions>& rConnectedActions,
-                                        ConnectedActions& rBackgroundAction,
-                                        MetaAction* pInitialAction, int nActionNum,
-                                        GDIMetaFile const& rInMtf, VirtualDevice* pMapModeVDev)
+                                     ConnectedActions& rBackgroundAction,
+                                     MetaAction* pInitialAction, int nActionNum,
+                                     GDIMetaFile const& rInMtf, VirtualDevice* pMapModeVDev)
 {
     // iterate over all actions (start where background action
     // search left off)
@@ -462,13 +462,34 @@ static void GenerateConnectedActions(::std::vector<ConnectedActions>& rConnected
 
         SAL_WARN_IF(aTotalActions.aActionList.empty(), "vcl",
                     "Printer::GetPreparedMetaFile empty component");
-        SAL_WARN_IF(
-            aTotalActions.aBounds.IsEmpty() && (aTotalActions.aActionList.size() != 1),
-            "vcl", "Printer::GetPreparedMetaFile non-output generating actions must be solitary");
-        SAL_WARN_IF(
-            aTotalActions.bIsFullyTransparent && (aTotalActions.aActionList.size() != 1),
-            "vcl", "Printer::GetPreparedMetaFile fully transparent actions must be solitary");
+        SAL_WARN_IF(aTotalActions.aBounds.IsEmpty() && (aTotalActions.aActionList.size() != 1),
+                    "vcl",
+                    "Printer::GetPreparedMetaFile non-output generating actions must be solitary");
+        SAL_WARN_IF(aTotalActions.bIsFullyTransparent && (aTotalActions.aActionList.size() != 1),
+                    "vcl",
+                    "Printer::GetPreparedMetaFile fully transparent actions must be solitary");
     }
+}
+
+template <typename T> tools::Rectangle GetOutputRect(T* pOutDev)
+{
+    return tools::Rectangle(Point(), pOutDev->GetOutputSizePixel());
+}
+
+template <> tools::Rectangle GetOutputRect(Printer* pPrinter)
+{
+    Point aPageOffset(pPrinter->GetPageOffsetPixel());
+    aPageOffset = Point(0, 0) - aPageOffset;
+
+    return tools::Rectangle(aPageOffset, pPrinter->GetPaperSizePixel());
+}
+
+template <> tools::Rectangle GetOutputRect(vcl::PDFWriterImpl* pPdfWriter)
+{
+    // also add error code to PDFWriter
+    pPdfWriter->insertError(vcl::PDFWriter::Warning_Transparency_Converted);
+    return tools::Rectangle(Point(), pPdfWriter->LogicToPixel(pPdfWriter->getCurPageSize(),
+                                                              MapMode(MapUnit::MapPoint)));
 }
 
 bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, GDIMetaFile& rOutMtf,
@@ -543,8 +564,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
     ::std::vector<ConnectedActions>
         aConnectedActions; // contains distinct sets of connected components as elements.
 
-    GenerateConnectedActions(aConnectedActions, aBackgroundAction, pCurrAct, nActionNum,
-                                rInMtf, aMapModeVDev.get());
+    GenerateConnectedActions(aConnectedActions, aBackgroundAction, pCurrAct, nActionNum, rInMtf,
+                             aMapModeVDev.get());
 
     // well now, we've got the list of disjunct connected
     // components. Now we've got to create a map, which contains
@@ -556,8 +577,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
     // settings for all cases.
 
     // maps mtf actions to CC list entries
-    ::std::vector<const ConnectedActions*> aConnectedActions_MemberMap(
-        rInMtf.GetActionSize());
+    ::std::vector<const ConnectedActions*> aConnectedActions_MemberMap(rInMtf.GetActionSize());
 
     // iterate over all aConnectedActions members and their contained metaactions
     for (auto const& currentItem : aConnectedActions)
@@ -579,26 +599,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
     }
 
     //  STAGE 3.2: Generate banded bitmaps for special regions
-
-    Point aPageOffset;
-    Size aTmpSize(GetOutputSizePixel());
-    if (meOutDevType == OUTDEV_PDF)
-    {
-        auto pPdfWriter = static_cast<vcl::PDFWriterImpl*>(this);
-        aTmpSize = LogicToPixel(pPdfWriter->getCurPageSize(), MapMode(MapUnit::MapPoint));
-
-        // also add error code to PDFWriter
-        pPdfWriter->insertError(vcl::PDFWriter::Warning_Transparency_Converted);
-    }
-    else if (meOutDevType == OUTDEV_PRINTER)
-    {
-        Printer* pThis = dynamic_cast<Printer*>(this);
-        assert(pThis);
-        aPageOffset = pThis->GetPageOffsetPixel();
-        aPageOffset = Point(0, 0) - aPageOffset;
-        aTmpSize = pThis->GetPaperSizePixel();
-    }
-    const tools::Rectangle aOutputRect(aPageOffset, aTmpSize);
+    const tools::Rectangle aOutputRect(GetOutputRect(this));
     bool bTiling = dynamic_cast<Printer*>(this) != nullptr;
 
     // Read the configuration value of minimal object area where transparency will be removed
@@ -776,16 +777,14 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
     for (pCurrAct = const_cast<GDIMetaFile&>(rInMtf).FirstAction(), nActionNum = 0; pCurrAct;
          pCurrAct = const_cast<GDIMetaFile&>(rInMtf).NextAction(), ++nActionNum)
     {
-        const ConnectedActions* pCurrAssociatedAction
-            = aConnectedActions_MemberMap[nActionNum];
+        const ConnectedActions* pCurrAssociatedAction = aConnectedActions_MemberMap[nActionNum];
 
         // NOTE: This relies on the fact that map-mode or draw
         // mode changing actions are solitary aConnectedActions elements and
         // have empty bounding boxes, see comment on stage 2.1
         // above
         if (pCurrAssociatedAction
-            && (pCurrAssociatedAction->aBounds.IsEmpty()
-                || !pCurrAssociatedAction->bIsSpecial))
+            && (pCurrAssociatedAction->aBounds.IsEmpty() || !pCurrAssociatedAction->bIsSpecial))
         {
             // #107169# Treat transparent bitmaps special, if they
             // are the first (or sole) action in their bounds
