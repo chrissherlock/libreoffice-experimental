@@ -707,7 +707,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                     {
                         aDstPtPix.setX(aBoundRect.Left());
                         aDstSzPix = UsesTiling(this) ? Size(MAX_TILE_WIDTH, MAX_TILE_HEIGHT)
-                                                    : aBoundRect.GetSize();
+                                                     : aBoundRect.GetSize();
 
                         if ((aDstPtPix.Y() + aDstSzPix.Height() - 1) > aBoundRect.Bottom())
                             aDstSzPix.setHeight(aBoundRect.Bottom() - aDstPtPix.Y() + 1);
@@ -728,8 +728,6 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                                 aMapVDev->mnDPIX = aPaintVDev->mnDPIX = mnDPIX;
                                 aMapVDev->mnDPIY = aPaintVDev->mnDPIY = mnDPIY;
 
-                                aPaintVDev->EnableOutput(false);
-
                                 // iterate over all actions
                                 for (pCurrAct = const_cast<GDIMetaFile&>(rInMtf).FirstAction(),
                                     nActionNum = 0;
@@ -741,6 +739,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                                     // actions that are members of
                                     // the current aConnectedActions element
                                     // (currentItem)
+                                    aPaintVDev->EnableOutput(false);
+
                                     if (aConnectedActions_MemberMap[nActionNum] == &currentItem)
                                         aPaintVDev->EnableOutput();
 
@@ -749,6 +749,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
 
                                     Application::Reschedule(true);
                                 }
+
+                                aPaintVDev->EnableOutput();
 
                                 const bool bOldMap = mbMap;
                                 mbMap = aPaintVDev->mbMap = false;
