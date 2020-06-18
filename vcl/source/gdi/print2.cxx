@@ -595,6 +595,41 @@ static Size GetDestSizeWidth(tools::Rectangle aBoundRect, Size aDstSzPix, Point 
     return aDstSzPix;
 }
 
+class SavePaintStateGuard
+{
+public:
+    SavePaintStateGuard(OutputDevice* pOutDev, VirtualDevice* pPaintVDev, VirtualDevice* pMapVDev)
+        : mpOutDev(pOutDev)
+        , mpPaintVDev(pPaintVDev)
+        , mpMapVDev(pMapVDev)
+        , mbMapState(pOutDev->IsMapModeEnabled())
+    {
+        pPaintVDev->Push();
+        pMapVDev->Push();
+    }
+
+    ~SavePaintStateGuard()
+    {
+        mpPaintVDev->EnableMapMode();
+        mpOutDev->EnableMapMode(mbMapState);
+        mpMapVDev->Pop();
+        mpPaintVDev->Pop();
+    }
+
+    void SaveAndDisableMapState()
+    {
+        mbMapState = mpOutDev->IsMapModeEnabled();
+        mpOutDev->EnableMapMode(false);
+        mpPaintVDev->EnableMapMode(false);
+    }
+
+private:
+    OutputDevice* mpOutDev;
+    VirtualDevice* mpPaintVDev;
+    VirtualDevice* mpMapVDev;
+    bool mbMapState;
+};
+
 bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, GDIMetaFile& rOutMtf,
                                                     long nMaxBmpDPIX, long nMaxBmpDPIY,
                                                     bool bReduceTransparency,
@@ -757,13 +792,13 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                         {
                             Size aDstBandSzPix(GetDestSizeWidth(aBoundRect, aDstSzPix, aDstPtPix));
 
-                            if (!tools::Rectangle(aDstPtPix, aDstBandSzPix)
+                            if (!tools::Rectangle(aDstPtPix, aDstSzPix)
                                      .Intersection(aBoundRect)
                                      .IsEmpty()
-                                && aPaintVDev->SetOutputSizePixel(aDstBandSzPix))
+                                && aPaintVDev->SetOutputSizePixel(aDstSzPix))
                             {
-                                aPaintVDev->Push();
-                                aMapVDev->Push();
+                                SavePaintStateGuard aPaintState(this, aPaintVDev.get(),
+                                                                aMapVDev.get());
 
                                 aMapVDev->mnDPIX = aPaintVDev->mnDPIX = mnDPIX;
                                 aMapVDev->mnDPIY = aPaintVDev->mnDPIY = mnDPIY;
@@ -772,10 +807,9 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                                                aConnectedActions_MemberMap, &currentItem,
                                                aDstPtPix);
 
-                                const bool bOldMap = mbMap;
-                                mbMap = aPaintVDev->mbMap = false;
+                                aPaintState.SaveAndDisableMapState();
 
-                                Bitmap aBandBmp(aPaintVDev->GetBitmap(Point(), aDstBandSzPix));
+                                Bitmap aBandBmp(aPaintVDev->GetBitmap(Point(), aDstSzPix));
 
                                 // scale down bitmap, if requested
                                 if (bDownsampleBitmaps)
@@ -791,11 +825,6 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                                     new MetaBmpScaleAction(aDstPtPix, aDstBandSzPix, aBandBmp));
                                 rOutMtf.AddAction(
                                     new MetaCommentAction("PRNSPOOL_TRANSPARENTBITMAP_END"));
-
-                                aPaintVDev->mbMap = true;
-                                mbMap = bOldMap;
-                                aMapVDev->Pop();
-                                aPaintVDev->Pop();
                             }
 
                             // overlapping bands to avoid missing lines (e.g. PostScript)
