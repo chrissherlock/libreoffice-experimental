@@ -1482,6 +1482,20 @@ public:
     void                        DrawShadowBitmapEx(
                                     const BitmapEx& rBitmapEx,
                                     ::Color aShadowColor);
+
+    /** Retrieve downsampled and cropped bitmap
+
+        @attention This method ignores negative rDstSz values, thus
+        mirroring must happen outside this method (e.g. in DrawBitmap)
+     */
+    SAL_DLLPRIVATE Bitmap       GetDownsampledBitmap(
+                                    const Size& rDstSz,
+                                    const Point& rSrcPt,
+                                    const Size& rSrcSz,
+                                    const Bitmap& rBmp,
+                                    long nMaxBmpDPIX,
+                                    long nMaxBmpDPIY );
+
 protected:
 
     virtual void                DrawDeviceBitmap(
@@ -1564,19 +1578,6 @@ private:
                                     const sal_Int32     nDstWidth,
                                     const long*         pMapX,
                                     const long*         pMapY );
-
-    /** Retrieve downsampled and cropped bitmap
-
-        @attention This method ignores negative rDstSz values, thus
-        mirroring must happen outside this method (e.g. in DrawBitmap)
-     */
-    SAL_DLLPRIVATE Bitmap       GetDownsampledBitmap(
-                                    const Size& rDstSz,
-                                    const Point& rSrcPt,
-                                    const Size& rSrcSz,
-                                    const Bitmap& rBmp,
-                                    long nMaxBmpDPIX,
-                                    long nMaxBmpDPIY );
 
     ///@}
 

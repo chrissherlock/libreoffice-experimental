@@ -647,6 +647,82 @@ PopulateConnectedActionsMap(::std::vector<const ConnectedActions*>& rConnectedAc
     }
 }
 
+static void CreateBitmapAction(GDIMetaFile& rOutMtf, OutputDevice* pOutDev,
+                               GDIMetaFile const& rInMtf,
+                               ::std::vector<const ConnectedActions*>& rConnectedActions_MemberMap,
+                               ConnectedActions* pCurrentItem,
+                               ConnectedActions const& rBackgroundAction,
+                               tools::Rectangle aBoundRect, long nMaxBmpDPIX, long nMaxBmpDPIY,
+                               bool bDownsampleBitmaps)
+{
+    // create new bitmap action first
+    if (aBoundRect.GetWidth() && aBoundRect.GetHeight())
+    {
+        Point aDstPtPix(aBoundRect.TopLeft());
+
+        // record only mapmode information
+        ScopedVclPtrInstance<VirtualDevice> aMapVDev;
+        aMapVDev->EnableOutput(false);
+
+        ScopedVclPtrInstance<VirtualDevice> aPaintVDev; // into this one, we render.
+        aPaintVDev->SetBackground(rBackgroundAction.aBgColor);
+
+        rOutMtf.AddAction(new MetaPushAction(PushFlags::MAPMODE));
+        rOutMtf.AddAction(new MetaMapModeAction());
+
+        aPaintVDev->SetDrawMode(pOutDev->GetDrawMode());
+
+        while (aDstPtPix.Y() <= aBoundRect.Bottom())
+        {
+            aDstPtPix.setX(aBoundRect.Left());
+            Size aDstSzPix(GetDestSizeHeight(pOutDev, aBoundRect, aDstPtPix));
+
+            while (aDstPtPix.X() <= aBoundRect.Right())
+            {
+                Size aDstBandSzPix(GetDestSizeWidth(aBoundRect, aDstSzPix, aDstPtPix));
+
+                if (!tools::Rectangle(aDstPtPix, aDstSzPix).Intersection(aBoundRect).IsEmpty()
+                    && aPaintVDev->SetOutputSizePixel(aDstSzPix))
+                {
+                    SavePaintStateGuard aPaintState(pOutDev, aPaintVDev.get(), aMapVDev.get());
+
+                    aMapVDev->SetDPIX(pOutDev->GetDPIX());
+                    aPaintVDev->SetDPIX(pOutDev->GetDPIX());
+                    aMapVDev->SetDPIY(pOutDev->GetDPIY());
+                    aPaintVDev->SetDPIY(pOutDev->GetDPIY());
+
+                    DrawAllActions(pOutDev, rInMtf, aPaintVDev.get(), aMapVDev.get(),
+                                   rConnectedActions_MemberMap, pCurrentItem, aDstPtPix);
+
+                    aPaintState.SaveAndDisableMapState();
+
+                    Bitmap aBandBmp(aPaintVDev->GetBitmap(Point(), aDstSzPix));
+
+                    // scale down bitmap, if requested
+                    if (bDownsampleBitmaps)
+                    {
+                        aBandBmp = pOutDev->GetDownsampledBitmap(aDstBandSzPix, Point(),
+                                                                 aBandBmp.GetSizePixel(), aBandBmp,
+                                                                 nMaxBmpDPIX, nMaxBmpDPIY);
+                    }
+
+                    rOutMtf.AddAction(new MetaCommentAction("PRNSPOOL_TRANSPARENTBITMAP_BEGIN"));
+                    rOutMtf.AddAction(new MetaBmpScaleAction(aDstPtPix, aDstBandSzPix, aBandBmp));
+                    rOutMtf.AddAction(new MetaCommentAction("PRNSPOOL_TRANSPARENTBITMAP_END"));
+                }
+
+                // overlapping bands to avoid missing lines (e.g. PostScript)
+                aDstPtPix.AdjustX(aDstSzPix.Width());
+            }
+
+            // overlapping bands to avoid missing lines (e.g. PostScript)
+            aDstPtPix.AdjustY(aDstSzPix.Height());
+        }
+
+        rOutMtf.AddAction(new MetaPopAction());
+    }
+}
+
 bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, GDIMetaFile& rOutMtf,
                                                     long nMaxBmpDPIX, long nMaxBmpDPIY,
                                                     bool bReduceTransparency,
@@ -775,77 +851,9 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
             }
             else
             {
-                // create new bitmap action first
-                if (aBoundRect.GetWidth() && aBoundRect.GetHeight())
-                {
-                    Point aDstPtPix(aBoundRect.TopLeft());
-
-                    // record only mapmode information
-                    ScopedVclPtrInstance<VirtualDevice> aMapVDev;
-                    aMapVDev->EnableOutput(false);
-
-                    ScopedVclPtrInstance<VirtualDevice> aPaintVDev; // into this one, we render.
-                    aPaintVDev->SetBackground(aBackgroundAction.aBgColor);
-
-                    rOutMtf.AddAction(new MetaPushAction(PushFlags::MAPMODE));
-                    rOutMtf.AddAction(new MetaMapModeAction());
-
-                    aPaintVDev->SetDrawMode(GetDrawMode());
-
-                    while (aDstPtPix.Y() <= aBoundRect.Bottom())
-                    {
-                        aDstPtPix.setX(aBoundRect.Left());
-                        Size aDstSzPix(GetDestSizeHeight(this, aBoundRect, aDstPtPix));
-
-                        while (aDstPtPix.X() <= aBoundRect.Right())
-                        {
-                            Size aDstBandSzPix(GetDestSizeWidth(aBoundRect, aDstSzPix, aDstPtPix));
-
-                            if (!tools::Rectangle(aDstPtPix, aDstSzPix)
-                                     .Intersection(aBoundRect)
-                                     .IsEmpty()
-                                && aPaintVDev->SetOutputSizePixel(aDstSzPix))
-                            {
-                                SavePaintStateGuard aPaintState(this, aPaintVDev.get(),
-                                                                aMapVDev.get());
-
-                                aMapVDev->mnDPIX = aPaintVDev->mnDPIX = mnDPIX;
-                                aMapVDev->mnDPIY = aPaintVDev->mnDPIY = mnDPIY;
-
-                                DrawAllActions(this, rInMtf, aPaintVDev.get(), aMapVDev.get(),
-                                               aConnectedActions_MemberMap, &currentItem,
-                                               aDstPtPix);
-
-                                aPaintState.SaveAndDisableMapState();
-
-                                Bitmap aBandBmp(aPaintVDev->GetBitmap(Point(), aDstSzPix));
-
-                                // scale down bitmap, if requested
-                                if (bDownsampleBitmaps)
-                                {
-                                    aBandBmp = GetDownsampledBitmap(
-                                        aDstBandSzPix, Point(), aBandBmp.GetSizePixel(), aBandBmp,
-                                        nMaxBmpDPIX, nMaxBmpDPIY);
-                                }
-
-                                rOutMtf.AddAction(
-                                    new MetaCommentAction("PRNSPOOL_TRANSPARENTBITMAP_BEGIN"));
-                                rOutMtf.AddAction(
-                                    new MetaBmpScaleAction(aDstPtPix, aDstBandSzPix, aBandBmp));
-                                rOutMtf.AddAction(
-                                    new MetaCommentAction("PRNSPOOL_TRANSPARENTBITMAP_END"));
-                            }
-
-                            // overlapping bands to avoid missing lines (e.g. PostScript)
-                            aDstPtPix.AdjustX(aDstSzPix.Width());
-                        }
-
-                        // overlapping bands to avoid missing lines (e.g. PostScript)
-                        aDstPtPix.AdjustY(aDstSzPix.Height());
-                    }
-
-                    rOutMtf.AddAction(new MetaPopAction());
-                }
+                CreateBitmapAction(rOutMtf, this, rInMtf, aConnectedActions_MemberMap, &currentItem,
+                                   aBackgroundAction, aBoundRect, nMaxBmpDPIX, nMaxBmpDPIY,
+                                   bDownsampleBitmaps);
             }
         }
     }
