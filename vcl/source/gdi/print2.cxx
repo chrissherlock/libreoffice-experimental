@@ -587,6 +587,14 @@ static Size GetDestSizeHeight(OutputDevice* pOutDev, tools::Rectangle aBoundRect
     return aDstSzPix;
 }
 
+static Size GetDestSizeWidth(tools::Rectangle aBoundRect, Size aDstSzPix, Point aDstPtPix)
+{
+    if ((aDstPtPix.X() + aDstSzPix.Width() - 1) > aBoundRect.Right())
+        aDstSzPix.setWidth(aBoundRect.Right() - aDstPtPix.X() + 1);
+
+    return aDstSzPix;
+}
+
 bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, GDIMetaFile& rOutMtf,
                                                     long nMaxBmpDPIX, long nMaxBmpDPIY,
                                                     bool bReduceTransparency,
@@ -747,13 +755,12 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
 
                         while (aDstPtPix.X() <= aBoundRect.Right())
                         {
-                            if ((aDstPtPix.X() + aDstSzPix.Width() - 1) > aBoundRect.Right())
-                                aDstSzPix.setWidth(aBoundRect.Right() - aDstPtPix.X() + 1);
+                            Size aDstBandSzPix(GetDestSizeWidth(aBoundRect, aDstSzPix, aDstPtPix));
 
-                            if (!tools::Rectangle(aDstPtPix, aDstSzPix)
+                            if (!tools::Rectangle(aDstPtPix, aDstBandSzPix)
                                      .Intersection(aBoundRect)
                                      .IsEmpty()
-                                && aPaintVDev->SetOutputSizePixel(aDstSzPix))
+                                && aPaintVDev->SetOutputSizePixel(aDstBandSzPix))
                             {
                                 aPaintVDev->Push();
                                 aMapVDev->Push();
@@ -768,20 +775,20 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                                 const bool bOldMap = mbMap;
                                 mbMap = aPaintVDev->mbMap = false;
 
-                                Bitmap aBandBmp(aPaintVDev->GetBitmap(Point(), aDstSzPix));
+                                Bitmap aBandBmp(aPaintVDev->GetBitmap(Point(), aDstBandSzPix));
 
                                 // scale down bitmap, if requested
                                 if (bDownsampleBitmaps)
                                 {
                                     aBandBmp = GetDownsampledBitmap(
-                                        aDstSzPix, Point(), aBandBmp.GetSizePixel(), aBandBmp,
+                                        aDstBandSzPix, Point(), aBandBmp.GetSizePixel(), aBandBmp,
                                         nMaxBmpDPIX, nMaxBmpDPIY);
                                 }
 
                                 rOutMtf.AddAction(
                                     new MetaCommentAction("PRNSPOOL_TRANSPARENTBITMAP_BEGIN"));
                                 rOutMtf.AddAction(
-                                    new MetaBmpScaleAction(aDstPtPix, aDstSzPix, aBandBmp));
+                                    new MetaBmpScaleAction(aDstPtPix, aDstBandSzPix, aBandBmp));
                                 rOutMtf.AddAction(
                                     new MetaCommentAction("PRNSPOOL_TRANSPARENTBITMAP_END"));
 
