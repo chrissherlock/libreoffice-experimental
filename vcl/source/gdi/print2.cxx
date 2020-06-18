@@ -723,6 +723,15 @@ static void CreateBitmapAction(GDIMetaFile& rOutMtf, OutputDevice* pOutDev,
     }
 }
 
+static bool DoesOutputExceedBitmapArea(tools::Rectangle aBoundRect, tools::Rectangle aOutputRect)
+{
+    const double fBmpArea(static_cast<double>(aBoundRect.GetWidth()) * aBoundRect.GetHeight());
+    const double fOutArea(static_cast<double>(aOutputRect.GetWidth()) * aOutputRect.GetHeight());
+
+    // Read the configuration value of minimal object area where transparency will be removed
+    return fBmpArea > (GetReduceTransparencyMinArea() * fOutArea);
+}
+
 bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, GDIMetaFile& rOutMtf,
                                                     long nMaxBmpDPIX, long nMaxBmpDPIY,
                                                     bool bReduceTransparency,
@@ -824,9 +833,6 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
     //  STAGE 3.2: Generate banded bitmaps for special regions
     const tools::Rectangle aOutputRect(GetOutputRect(this));
 
-    // Read the configuration value of minimal object area where transparency will be removed
-    double fReduceTransparencyMinArea = GetReduceTransparencyMinArea();
-
     // iterate over all aConnectedActions members and generate bitmaps for the special ones
     for (auto& currentItem : aConnectedActions)
     {
@@ -835,14 +841,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
             tools::Rectangle aBoundRect(currentItem.aBounds);
             aBoundRect.Intersection(aOutputRect);
 
-            const double fBmpArea(static_cast<double>(aBoundRect.GetWidth())
-                                  * aBoundRect.GetHeight());
-            const double fOutArea(static_cast<double>(aOutputRect.GetWidth())
-                                  * aOutputRect.GetHeight());
-
-            // check if output doesn't exceed given size
             if (bReduceTransparency && bTransparencyAutoMode
-                && (fBmpArea > (fReduceTransparencyMinArea * fOutArea)))
+                && DoesOutputExceedBitmapArea(aBoundRect, aOutputRect))
             {
                 // output normally. Therefore, we simply clear the
                 // special attribute, as everything non-special is
