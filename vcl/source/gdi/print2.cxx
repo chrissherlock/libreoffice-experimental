@@ -549,6 +549,33 @@ void DrawAction(MetaGradientAction* pCurrAct, VirtualDevice* pPaintVDev, Virtual
     DrawGradient(pCurrAct, pPaintVDev, pOutDev);
 }
 
+static void DrawAllActions(OutputDevice* pOutDev, GDIMetaFile const& rInMtf,
+                           VirtualDevice* pPaintVDev, VirtualDevice* pMapVDev,
+                           ::std::vector<const ConnectedActions*>& rConnectedActions_MemberMap,
+                           ConnectedActions* pCurrentItem, Point aDstPtPix)
+{
+    int nActionNum = 0;
+
+    for (MetaAction *pCurrAct = const_cast<GDIMetaFile&>(rInMtf).FirstAction(); pCurrAct;
+         pCurrAct = const_cast<GDIMetaFile&>(rInMtf).NextAction(), ++nActionNum)
+    {
+        // enable output only for
+        // actions that are members of
+        // the current aConnectedActions element
+        // (currentItem)
+        pPaintVDev->EnableOutput(false);
+
+        if (rConnectedActions_MemberMap[nActionNum] == pCurrentItem)
+            pPaintVDev->EnableOutput();
+
+        DrawAction(pCurrAct, pPaintVDev, pMapVDev, aDstPtPix, pOutDev);
+
+        Application::Reschedule(true);
+    }
+
+    pPaintVDev->EnableOutput();
+}
+
 bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, GDIMetaFile& rOutMtf,
                                                     long nMaxBmpDPIX, long nMaxBmpDPIY,
                                                     bool bReduceTransparency,
@@ -728,29 +755,9 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                                 aMapVDev->mnDPIX = aPaintVDev->mnDPIX = mnDPIX;
                                 aMapVDev->mnDPIY = aPaintVDev->mnDPIY = mnDPIY;
 
-                                // iterate over all actions
-                                for (pCurrAct = const_cast<GDIMetaFile&>(rInMtf).FirstAction(),
-                                    nActionNum = 0;
-                                     pCurrAct;
-                                     pCurrAct = const_cast<GDIMetaFile&>(rInMtf).NextAction(),
-                                    ++nActionNum)
-                                {
-                                    // enable output only for
-                                    // actions that are members of
-                                    // the current aConnectedActions element
-                                    // (currentItem)
-                                    aPaintVDev->EnableOutput(false);
-
-                                    if (aConnectedActions_MemberMap[nActionNum] == &currentItem)
-                                        aPaintVDev->EnableOutput();
-
-                                    DrawAction(pCurrAct, aPaintVDev.get(), aMapVDev.get(),
-                                               aDstPtPix, this);
-
-                                    Application::Reschedule(true);
-                                }
-
-                                aPaintVDev->EnableOutput();
+                                DrawAllActions(this, rInMtf, aPaintVDev.get(), aMapVDev.get(),
+                                               aConnectedActions_MemberMap, &currentItem,
+                                               aDstPtPix);
 
                                 const bool bOldMap = mbMap;
                                 mbMap = aPaintVDev->mbMap = false;
