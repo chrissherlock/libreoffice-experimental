@@ -576,6 +576,17 @@ static void DrawAllActions(OutputDevice* pOutDev, GDIMetaFile const& rInMtf,
     pPaintVDev->EnableOutput();
 }
 
+static Size GetDestSizeHeight(OutputDevice* pOutDev, tools::Rectangle aBoundRect, Point aDstPtPix)
+{
+    Size aDstSzPix;
+    aDstSzPix = UsesTiling(pOutDev) ? Size(MAX_TILE_WIDTH, MAX_TILE_HEIGHT) : aBoundRect.GetSize();
+
+    if ((aDstPtPix.Y() + aDstSzPix.Height() - 1) > aBoundRect.Bottom())
+        aDstSzPix.setHeight(aBoundRect.Bottom() - aDstPtPix.Y() + 1);
+
+    return aDstSzPix;
+}
+
 bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, GDIMetaFile& rOutMtf,
                                                     long nMaxBmpDPIX, long nMaxBmpDPIY,
                                                     bool bReduceTransparency,
@@ -717,8 +728,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                 {
                     Point aDstPtPix(aBoundRect.TopLeft());
 
-                    ScopedVclPtrInstance<VirtualDevice>
-                        aMapVDev; // here, we record only mapmode information
+                    // record only mapmode information
+                    ScopedVclPtrInstance<VirtualDevice> aMapVDev;
                     aMapVDev->EnableOutput(false);
 
                     ScopedVclPtrInstance<VirtualDevice> aPaintVDev; // into this one, we render.
@@ -732,13 +743,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                     while (aDstPtPix.Y() <= aBoundRect.Bottom())
                     {
                         aDstPtPix.setX(aBoundRect.Left());
-
-                        Size aDstSzPix;
-                        aDstSzPix = UsesTiling(this) ? Size(MAX_TILE_WIDTH, MAX_TILE_HEIGHT)
-                                                     : aBoundRect.GetSize();
-
-                        if ((aDstPtPix.Y() + aDstSzPix.Height() - 1) > aBoundRect.Bottom())
-                            aDstSzPix.setHeight(aBoundRect.Bottom() - aDstPtPix.Y() + 1);
+                        Size aDstSzPix(GetDestSizeHeight(this, aBoundRect, aDstPtPix));
 
                         while (aDstPtPix.X() <= aBoundRect.Right())
                         {
