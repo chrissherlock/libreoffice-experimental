@@ -849,7 +849,18 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                 // copied to rOutMtf further below.
                 currentItem.bIsSpecial = false;
             }
-            else
+        }
+    }
+
+    for (auto& currentItem : aConnectedActions)
+    {
+        if (currentItem.bIsSpecial)
+        {
+            tools::Rectangle aBoundRect(currentItem.aBounds);
+            aBoundRect.Intersection(aOutputRect);
+
+            if (!(bReduceTransparency && bTransparencyAutoMode
+                  && DoesOutputExceedBitmapArea(aBoundRect, aOutputRect)))
             {
                 CreateBitmapAction(rOutMtf, this, rInMtf, aConnectedActions_MemberMap, &currentItem,
                                    aBackgroundAction, aBoundRect, nMaxBmpDPIX, nMaxBmpDPIY,
