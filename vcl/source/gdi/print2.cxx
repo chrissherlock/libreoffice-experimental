@@ -732,6 +732,56 @@ static bool DoesOutputExceedBitmapArea(tools::Rectangle aBoundRect, tools::Recta
     return fBmpArea > (GetReduceTransparencyMinArea() * fOutArea);
 }
 
+void UnmarkConnectedActions(::std::vector<ConnectedActions>& rConnectedActions,
+                            tools::Rectangle aOutputRect, bool bReduceTransparency,
+                            bool bTransparencyAutoMode)
+{
+    for (auto& currentItem : rConnectedActions)
+    {
+        if (currentItem.bIsSpecial)
+        {
+            tools::Rectangle aBoundRect(currentItem.aBounds);
+            aBoundRect.Intersection(aOutputRect);
+
+            if (bReduceTransparency && bTransparencyAutoMode
+                && DoesOutputExceedBitmapArea(aBoundRect, aOutputRect))
+            {
+                // output normally. Therefore, we simply clear the
+                // special attribute, as everything non-special is
+                // copied to rOutMtf further below.
+                currentItem.bIsSpecial = false;
+            }
+        }
+    }
+}
+
+static void CreateBitmapActions(GDIMetaFile& rOutMtf, OutputDevice* pOutDev,
+                                GDIMetaFile const& rInMtf,
+                                ::std::vector<const ConnectedActions*>& rConnectedActions_MemberMap,
+                                ::std::vector<ConnectedActions>& rConnectedActions,
+                                tools::Rectangle aOutputRect,
+                                ConnectedActions const& rBackgroundAction, long nMaxBmpDPIX,
+                                long nMaxBmpDPIY, bool bDownsampleBitmaps, bool bReduceTransparency,
+                                bool bTransparencyAutoMode)
+{
+    for (auto& currentItem : rConnectedActions)
+    {
+        if (currentItem.bIsSpecial)
+        {
+            tools::Rectangle aBoundRect(currentItem.aBounds);
+            aBoundRect.Intersection(aOutputRect);
+
+            if (!(bReduceTransparency && bTransparencyAutoMode
+                  && DoesOutputExceedBitmapArea(aBoundRect, aOutputRect)))
+            {
+                CreateBitmapAction(rOutMtf, pOutDev, rInMtf, rConnectedActions_MemberMap,
+                                   &currentItem, rBackgroundAction, aBoundRect, nMaxBmpDPIX,
+                                   nMaxBmpDPIY, bDownsampleBitmaps);
+            }
+        }
+    }
+}
+
 bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, GDIMetaFile& rOutMtf,
                                                     long nMaxBmpDPIX, long nMaxBmpDPIY,
                                                     bool bReduceTransparency,
@@ -834,40 +884,12 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
     const tools::Rectangle aOutputRect(GetOutputRect(this));
 
     // iterate over all aConnectedActions members and generate bitmaps for the special ones
-    for (auto& currentItem : aConnectedActions)
-    {
-        if (currentItem.bIsSpecial)
-        {
-            tools::Rectangle aBoundRect(currentItem.aBounds);
-            aBoundRect.Intersection(aOutputRect);
+    UnmarkConnectedActions(aConnectedActions, aOutputRect, bReduceTransparency,
+                           bTransparencyAutoMode);
 
-            if (bReduceTransparency && bTransparencyAutoMode
-                && DoesOutputExceedBitmapArea(aBoundRect, aOutputRect))
-            {
-                // output normally. Therefore, we simply clear the
-                // special attribute, as everything non-special is
-                // copied to rOutMtf further below.
-                currentItem.bIsSpecial = false;
-            }
-        }
-    }
-
-    for (auto& currentItem : aConnectedActions)
-    {
-        if (currentItem.bIsSpecial)
-        {
-            tools::Rectangle aBoundRect(currentItem.aBounds);
-            aBoundRect.Intersection(aOutputRect);
-
-            if (!(bReduceTransparency && bTransparencyAutoMode
-                  && DoesOutputExceedBitmapArea(aBoundRect, aOutputRect)))
-            {
-                CreateBitmapAction(rOutMtf, this, rInMtf, aConnectedActions_MemberMap, &currentItem,
-                                   aBackgroundAction, aBoundRect, nMaxBmpDPIX, nMaxBmpDPIY,
-                                   bDownsampleBitmaps);
-            }
-        }
-    }
+    CreateBitmapActions(rOutMtf, this, rInMtf, aConnectedActions_MemberMap, aConnectedActions,
+                        aOutputRect, aBackgroundAction, nMaxBmpDPIX, nMaxBmpDPIY,
+                        bDownsampleBitmaps, bReduceTransparency, bTransparencyAutoMode);
 
     aMapModeVDev->ClearStack(); // clean up aMapModeVDev
 
