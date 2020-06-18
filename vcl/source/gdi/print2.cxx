@@ -716,7 +716,6 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                 if (aBoundRect.GetWidth() && aBoundRect.GetHeight())
                 {
                     Point aDstPtPix(aBoundRect.TopLeft());
-                    Size aDstSzPix;
 
                     ScopedVclPtrInstance<VirtualDevice>
                         aMapVDev; // here, we record only mapmode information
@@ -733,6 +732,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
                     while (aDstPtPix.Y() <= aBoundRect.Bottom())
                     {
                         aDstPtPix.setX(aBoundRect.Left());
+
+                        Size aDstSzPix;
                         aDstSzPix = UsesTiling(this) ? Size(MAX_TILE_WIDTH, MAX_TILE_HEIGHT)
                                                      : aBoundRect.GetSize();
 
