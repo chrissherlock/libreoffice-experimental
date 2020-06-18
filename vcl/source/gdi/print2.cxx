@@ -630,6 +630,23 @@ private:
     bool mbMapState;
 };
 
+static void
+PopulateConnectedActionsMap(::std::vector<const ConnectedActions*>& rConnectedActions_MemberMap,
+                            ::std::vector<ConnectedActions>& rConnectedActions, size_t nSize)
+{
+    rConnectedActions_MemberMap.reserve(nSize);
+
+    // iterate over all aConnectedActions members and their contained metaactions
+    for (auto const& currentItem : rConnectedActions)
+    {
+        for (auto const& currentAction : currentItem.aActionList)
+        {
+            // set pointer to aConnectedActions element for corresponding index
+            rConnectedActions_MemberMap[currentAction.second] = &currentItem;
+        }
+    }
+}
+
 bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, GDIMetaFile& rOutMtf,
                                                     long nMaxBmpDPIX, long nMaxBmpDPIY,
                                                     bool bReduceTransparency,
@@ -715,17 +732,9 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
     // settings for all cases.
 
     // maps mtf actions to CC list entries
-    ::std::vector<const ConnectedActions*> aConnectedActions_MemberMap(rInMtf.GetActionSize());
-
-    // iterate over all aConnectedActions members and their contained metaactions
-    for (auto const& currentItem : aConnectedActions)
-    {
-        for (auto const& currentAction : currentItem.aActionList)
-        {
-            // set pointer to aConnectedActions element for corresponding index
-            aConnectedActions_MemberMap[currentAction.second] = &currentItem;
-        }
-    }
+    ::std::vector<const ConnectedActions*> aConnectedActions_MemberMap;
+    PopulateConnectedActionsMap(aConnectedActions_MemberMap, aConnectedActions,
+                                rInMtf.GetActionSize());
 
     //  STAGE 3.1: Output background mtf actions (if there are any)
 
