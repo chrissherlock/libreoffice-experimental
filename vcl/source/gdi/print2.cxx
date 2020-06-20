@@ -164,15 +164,12 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
         = aBackgroundAction.PruneBackgroundObjects(rInMtf, aMapModeVDev.get());
 
     //  STAGE 2: Generate connected components list
+    IntersectingActionsSet aIntersectingActionsSet;
 
-    //::std::vector<IntersectingActions>
-    //    aIntersectingActions; // contains distinct sets of connected components as elements.
+    aIntersectingActionsSet.GenerateIntersectingActions(aBackgroundAction, pCurrAct, nActionNum,
+                                                        rInMtf, aMapModeVDev.get());
 
-    IntersectingActionsSet
-        aIntersectingActions; // contains distinct sets of connected components as elements.
-
-    aIntersectingActions.GenerateIntersectingActions(aBackgroundAction, pCurrAct, nActionNum,
-                                                     rInMtf, aMapModeVDev.get());
+    // STAGE 3: Generate actions for both "special" regions (bitmaps) and regular actions
 
     // well now, we've got the list of disjunct connected
     // components. Now we've got to create a map, which contains
@@ -185,8 +182,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
 
     // maps mtf actions to CC list entries
     ::std::vector<const IntersectingActions*> aIntersectingActions_MemberMap;
-    aIntersectingActions.PopulateIntersectingActionsMap(aIntersectingActions_MemberMap,
-                                                        rInMtf.GetActionSize());
+    aIntersectingActionsSet.PopulateIntersectingActionsMap(aIntersectingActions_MemberMap,
+                                                           rInMtf.GetActionSize());
 
     //  STAGE 3.1: Output background mtf actions (if there are any)
 
@@ -201,10 +198,10 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
     const tools::Rectangle aOutputRect(GetOutputRect(this));
 
     // iterate over all aIntersectingActions members and generate bitmaps for the special ones
-    aIntersectingActions.UnmarkIntersectingActions(aOutputRect, bReduceTransparency,
-                                                   bTransparencyAutoMode);
+    aIntersectingActionsSet.UnmarkIntersectingActions(aOutputRect, bReduceTransparency,
+                                                      bTransparencyAutoMode);
 
-    aIntersectingActions.CreateBitmapActions(
+    aIntersectingActionsSet.CreateBitmapActions(
         rOutMtf, this, rInMtf, aIntersectingActions_MemberMap, aOutputRect, aBackgroundAction,
         nMaxBmpDPIX, nMaxBmpDPIY, bDownsampleBitmaps, bReduceTransparency, bTransparencyAutoMode);
 
