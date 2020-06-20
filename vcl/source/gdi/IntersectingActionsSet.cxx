@@ -169,13 +169,13 @@ bool IntersectingActionsSet::ProcessIntersections(IntersectingActions& rTotalAct
                 // union the intersecting aIntersectingActions element into aTotalActions
 
                 // calc union bounding box
-                rTotalBounds.Union(currCC->aBounds);
+                rTotalBounds.Union(currCC->GetBoundingRect());
 
                 // extract all aCurr actions to aTotalActions
-                rTotalActions.aActionList.splice(rTotalActions.aActionList.end(),
-                                                 currCC->aActionList);
+                rTotalActions.GetActionList().splice(rTotalActions.GetActionList().end(),
+                                                     currCC->GetActionList());
 
-                if (currCC->bIsSpecial)
+                if (currCC->IsSpecial())
                     bTreatSpecial = true;
 
                 // remove and delete currCC element from list (we've now merged its content)
@@ -221,22 +221,22 @@ IntersectingActionsSet::SearchForIntersectingEntries(MetaAction* pCurrAct,
     // not be considered for connected components,
     // too. Just put each of them into a separate
     // component.
-    aTotalActions.bIsFullyTransparent = pCurrAct->IsTransparent(pMapModeVDev);
+    aTotalActions.SetFullyTransparentFlag(pCurrAct->IsTransparent(pMapModeVDev));
 
-    if (!aCurrActionBounds.IsEmpty() && !aTotalActions.bIsFullyTransparent)
+    if (!aCurrActionBounds.IsEmpty() && !aTotalActions.IsFullyTransparent())
     {
-        if (!rBackgroundAction.aActionList.empty()
-            && !rBackgroundAction.aBounds.IsInside(aTotalBounds))
+        if (!rBackgroundAction.GetActionList().empty()
+            && !rBackgroundAction.GetBoundingRect().IsInside(aTotalBounds))
         {
             // it seems the background is not large enough. to
             // be on the safe side, combine with this component.
-            aTotalBounds.Union(rBackgroundAction.aBounds);
+            aTotalBounds.Union(rBackgroundAction.GetBoundingRect());
 
             // extract all aCurr actions to aTotalActions
-            aTotalActions.aActionList.splice(aTotalActions.aActionList.end(),
-                                             rBackgroundAction.aActionList);
+            aTotalActions.GetActionList().splice(aTotalActions.GetActionList().end(),
+                                                 rBackgroundAction.GetActionList());
 
-            if (rBackgroundAction.bIsSpecial)
+            if (rBackgroundAction.IsSpecial())
                 bTreatSpecial = true;
         }
 
@@ -272,20 +272,21 @@ void IntersectingActionsSet::GenerateIntersectingActions(IntersectingActions& rB
         //  STAGE 2.3: Add newly generated CC list element
 
         // set new bounds and add action to list
-        aTotalActions.aBounds = aTotalBounds;
-        aTotalActions.aActionList.emplace_back(pCurrAct, nActionNum);
+        aTotalActions.SetBoundingRect(aTotalBounds);
+        aTotalActions.GetActionList().emplace_back(pCurrAct, nActionNum);
 
         // add aTotalActions as a new entry to rIntersectingActions
         maIntersectingActions.push_back(aTotalActions);
 
-        SAL_WARN_IF(aTotalActions.aActionList.empty(), "vcl",
+        SAL_WARN_IF(aTotalActions.GetActionList().empty(), "vcl",
                     "Printer::GetPreparedMetaFile empty component");
-        SAL_WARN_IF(aTotalActions.aBounds.IsEmpty() && (aTotalActions.aActionList.size() != 1),
+        SAL_WARN_IF(aTotalActions.GetBoundingRect().IsEmpty()
+                        && (aTotalActions.GetActionList().size() != 1),
                     "vcl",
                     "Printer::GetPreparedMetaFile non-output generating actions must be solitary");
-        SAL_WARN_IF(aTotalActions.bIsFullyTransparent && (aTotalActions.aActionList.size() != 1),
-                    "vcl",
-                    "Printer::GetPreparedMetaFile fully transparent actions must be solitary");
+        SAL_WARN_IF(
+            aTotalActions.IsFullyTransparent() && (aTotalActions.GetActionList().size() != 1),
+            "vcl", "Printer::GetPreparedMetaFile fully transparent actions must be solitary");
     }
 }
 
@@ -317,9 +318,9 @@ void IntersectingActionsSet::UnmarkIntersectingActions(tools::Rectangle aOutputR
 {
     for (auto& currentItem : maIntersectingActions)
     {
-        if (currentItem.bIsSpecial)
+        if (currentItem.IsSpecial())
         {
-            tools::Rectangle aBoundRect(currentItem.aBounds);
+            tools::Rectangle aBoundRect(currentItem.GetBoundingRect());
             aBoundRect.Intersection(aOutputRect);
 
             if (bReduceTransparency && bTransparencyAutoMode
@@ -328,7 +329,7 @@ void IntersectingActionsSet::UnmarkIntersectingActions(tools::Rectangle aOutputR
                 // output normally. Therefore, we simply clear the
                 // special attribute, as everything non-special is
                 // copied to rOutMtf further below.
-                currentItem.bIsSpecial = false;
+                currentItem.SetSpecialFlag(false);
             }
         }
     }
@@ -424,7 +425,7 @@ void IntersectingActionsSet::PopulateIntersectingActionsMap(
     // iterate over all aIntersectingActions members and their contained metaactions
     for (auto const& currentItem : maIntersectingActions)
     {
-        for (auto const& currentAction : currentItem.aActionList)
+        for (auto const& currentAction : currentItem.GetActionList())
         {
             // set pointer to aIntersectingActions element for corresponding index
             rIntersectingActions_MemberMap[currentAction.second] = &currentItem;
@@ -449,7 +450,7 @@ CreateBitmapAction(GDIMetaFile& rOutMtf, OutputDevice* pOutDev, GDIMetaFile cons
         aMapVDev->EnableOutput(false);
 
         ScopedVclPtrInstance<VirtualDevice> aPaintVDev; // into this one, we render.
-        aPaintVDev->SetBackground(rBackgroundAction.aBgColor);
+        aPaintVDev->SetBackground(rBackgroundAction.GetBackgroundColor());
 
         rOutMtf.AddAction(new MetaPushAction(PushFlags::MAPMODE));
         rOutMtf.AddAction(new MetaMapModeAction());
@@ -515,9 +516,9 @@ void IntersectingActionsSet::CreateBitmapActions(
 {
     for (auto& currentItem : maIntersectingActions)
     {
-        if (currentItem.bIsSpecial)
+        if (currentItem.IsSpecial())
         {
-            tools::Rectangle aBoundRect(currentItem.aBounds);
+            tools::Rectangle aBoundRect(currentItem.GetBoundingRect());
             aBoundRect.Intersection(aOutputRect);
 
             if (!(bReduceTransparency && bTransparencyAutoMode

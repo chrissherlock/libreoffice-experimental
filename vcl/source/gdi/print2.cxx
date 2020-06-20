@@ -190,7 +190,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
 
     //  STAGE 3.1: Output background mtf actions (if there are any)
 
-    for (auto& component : aBackgroundAction.aActionList)
+    for (auto& component : aBackgroundAction.GetActionList())
     {
         // simply add this action (above, we inserted the actions
         // starting at index 0 up to and including nLastBgAction)
@@ -220,7 +220,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
         const IntersectingActions* pCurrAssociatedAction
             = aIntersectingActions_MemberMap[nActionNum];
 
-        pCurrAssociatedAction->AddAction(rOutMtf, aBackgroundAction.aBgColor, pCurrAct,
+        pCurrAssociatedAction->AddAction(rOutMtf, aBackgroundAction.GetBackgroundColor(), pCurrAct,
                                          aMapModeVDev.get());
     }
 

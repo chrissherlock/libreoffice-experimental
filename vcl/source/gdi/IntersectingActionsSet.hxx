@@ -24,7 +24,7 @@
 
 #include <vector>
 
-struct IntersectingActions;
+class IntersectingActions;
 class GDIMetaFile;
 class MetaAction;
 class VirtualDevice;

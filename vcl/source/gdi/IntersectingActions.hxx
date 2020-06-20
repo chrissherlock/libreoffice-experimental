@@ -42,14 +42,15 @@ template <typename T> tools::Rectangle GetBoundsRect(T);
 typedef ::std::pair<MetaAction*, int> Component; // MetaAction plus index in metafile
 
 // List of (intersecting) actions, plus overall bounds
-struct IntersectingActions
+class IntersectingActions
 {
+public:
     IntersectingActions()
-        : aActionList()
-        , aBounds()
-        , aBgColor(COL_WHITE)
-        , bIsSpecial(false)
-        , bIsFullyTransparent(false)
+        : maActionList()
+        , maBounds()
+        , maBgColor(COL_WHITE)
+        , mbIsSpecial(false)
+        , mbIsFullyTransparent(false)
     {
     }
 
@@ -114,7 +115,7 @@ struct IntersectingActions
             if (pAction->IsTransparent(pMapModeVDev))
             {
                 // extend current bounds (next uniform action needs to fully cover this area)
-                pBackgroundAction->aBounds.Union(pAction->GetBoundsRect(pMapModeVDev));
+                pBackgroundAction->maBounds.Union(pAction->GetBoundsRect(pMapModeVDev));
             }
         }
     };
@@ -183,11 +184,27 @@ struct IntersectingActions
     void AddAction(GDIMetaFile& rOutMtf, Color const& rBgColor, MetaAction* pCurrAct,
                    VirtualDevice* pMapModeVDev) const;
 
-    ::std::list<Component> aActionList;
-    tools::Rectangle aBounds;
-    Color aBgColor;
-    bool bIsSpecial;
-    bool bIsFullyTransparent;
+    tools::Rectangle GetBoundingRect() const;
+    void SetBoundingRect(tools::Rectangle aBounds);
+
+    ::std::list<Component>& GetActionList();
+    ::std::list<Component> const& GetActionList() const;
+
+    bool IsSpecial() const;
+    void SetSpecialFlag(bool bIsSpecial);
+
+    bool IsFullyTransparent() const;
+    void SetFullyTransparentFlag(bool bIsFullyTransparent);
+
+    Color GetBackgroundColor() const;
+    void SetBackgroundColor(Color aBgColor);
+
+private:
+    ::std::list<Component> maActionList;
+    tools::Rectangle maBounds;
+    Color maBgColor;
+    bool mbIsSpecial;
+    bool mbIsFullyTransparent;
 };
 
 #endif

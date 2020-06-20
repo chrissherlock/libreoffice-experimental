@@ -70,9 +70,27 @@
 #include "pdfwriter_impl.hxx"
 #include "IntersectingActions.hxx"
 
+tools::Rectangle IntersectingActions::GetBoundingRect() const { return maBounds; }
+void IntersectingActions::SetBoundingRect(tools::Rectangle aBounds) { maBounds = aBounds; }
+
+::std::list<Component>& IntersectingActions::GetActionList() { return maActionList; }
+::std::list<Component> const& IntersectingActions::GetActionList() const { return maActionList; }
+
+bool IntersectingActions::IsSpecial() const { return mbIsSpecial; }
+void IntersectingActions::SetSpecialFlag(bool bIsSpecial) { mbIsSpecial = bIsSpecial; }
+
+bool IntersectingActions::IsFullyTransparent() const { return mbIsFullyTransparent; }
+void IntersectingActions::SetFullyTransparentFlag(bool bIsFullyTransparent)
+{
+    mbIsFullyTransparent = bIsFullyTransparent;
+}
+
+Color IntersectingActions::GetBackgroundColor() const { return maBgColor; }
+void IntersectingActions::SetBackgroundColor(Color aBgColor) { maBgColor = aBgColor; }
+
 bool IntersectingActions::AreBoundsOver(tools::Rectangle const& rBounds)
 {
-    return (!aBounds.IsEmpty() && !bIsFullyTransparent && aBounds.IsOver(rBounds));
+    return (!maBounds.IsEmpty() && !mbIsFullyTransparent && maBounds.IsOver(rBounds));
 }
 
 /** Determines whether the action can handle transparency correctly
@@ -120,13 +138,13 @@ void IntersectingActions::MarkSpecial(bool bTreatSpecial, MetaAction* pCurrAct)
     if (bTreatSpecial)
     {
         // prev component(s) special -> this one, too
-        bIsSpecial = true;
+        mbIsSpecial = true;
     }
     else if (!pCurrAct->IsTransparent())
     {
         // added action and none of prev components special ->
         // this one normal, too
-        bIsSpecial = false;
+        mbIsSpecial = false;
     }
     else
     {
@@ -140,17 +158,17 @@ void IntersectingActions::MarkSpecial(bool bTreatSpecial, MetaAction* pCurrAct)
         {
             // no, action cannot handle its transparency on
             // a printer device, render to bitmap
-            bIsSpecial = true;
+            mbIsSpecial = true;
         }
         else
         {
             // yes, action can handle its transparency, so
             // check whether we're on white background
-            if (aActionList.empty())
+            if (maActionList.empty())
             {
                 // nothing between pCurrAct and page
                 // background -> don't be special
-                bIsSpecial = false;
+                mbIsSpecial = false;
             }
             else
             {
@@ -163,7 +181,7 @@ void IntersectingActions::MarkSpecial(bool bTreatSpecial, MetaAction* pCurrAct)
                 // there are non-transparent objects between
                 // pCurrAct and the empty sheet of paper -> be
                 // special, then
-                bIsSpecial = true;
+                mbIsSpecial = true;
             }
         }
     }
@@ -192,8 +210,8 @@ template <> tools::Rectangle GetBoundsRect<MetaWallpaperAction*>(MetaWallpaperAc
 
 void IntersectingActions::SetBackground(Color const& rBgColor, tools::Rectangle const& rBounds)
 {
-    aBgColor = rBgColor;
-    aBounds = rBounds;
+    maBgColor = rBgColor;
+    maBounds = rBounds;
 }
 
 template <typename T> bool IntersectingActions::IsValidShape(T)
@@ -234,7 +252,7 @@ bool IntersectingActions::IsBackgroundNotCovered(MetaAction* pAction,
     // shape needs to fully cover previous content, and have uniform
     // color
     return IsValidShape(pAction)
-           || !(rMapModeVDev.LogicToPixel(rCurrRect).IsInside(aBounds)
+           || !(rMapModeVDev.LogicToPixel(rCurrRect).IsInside(maBounds)
                 && rMapModeVDev.IsFillColor());
 }
 
@@ -355,7 +373,7 @@ int IntersectingActions::ReconstructVirtualDeviceMapMode(GDIMetaFile const& rMtf
     {
         // up to and including last ink-generating background
         // action go to background component
-        aActionList.emplace_back(pCurrAct, nActionNum);
+        maActionList.emplace_back(pCurrAct, nActionNum);
 
         // execute action to get correct MapModes etc.
         pCurrAct->Execute(pMapModeVDev);
@@ -511,13 +529,13 @@ void IntersectingActions::AddAction(GDIMetaFile& rOutMtf, Color const& rBgColor,
     // mode changing actions are solitary aIntersectingActions elements and
     // have empty bounding boxes, see comment on stage 2.1
     // above
-    if (aBounds.IsEmpty() || !bIsSpecial)
+    if (maBounds.IsEmpty() || !mbIsSpecial)
     {
         // #107169# Treat transparent bitmaps special, if they
         // are the first (or sole) action in their bounds
         // list. Note that we previously ensured that no
         // fully-transparent objects are before us here.
-        if (DoesActionHandleTransparency(*pCurrAct) && aActionList.begin()->first == pCurrAct)
+        if (DoesActionHandleTransparency(*pCurrAct) && maActionList.begin()->first == pCurrAct)
         {
             // convert actions, where masked-out parts are of
             // given background color
