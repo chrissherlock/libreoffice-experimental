@@ -160,12 +160,6 @@ bool DoesActionHandleTransparency(const MetaAction& rAct)
     }
 }
 
-static bool ActionBoundsAreOver(ConnectedActions const& rAction, tools::Rectangle rBounds)
-{
-    return (!rAction.aBounds.IsEmpty() && !rAction.bIsFullyTransparent
-            && rAction.aBounds.IsOver(rBounds));
-}
-
 static void MarkWhetherConnectedActionIsSpecial(ConnectedActions& rTotalActions, bool bTreatSpecial,
                                                 MetaAction* pCurrAct)
 {
@@ -264,7 +258,7 @@ bool ConnectedActionsSet::ProcessIntersections(ConnectedActions& rTotalActions,
             // not be considered for connected components,
             // too. Just put each of them into a separate
             // component.
-            if (ActionBoundsAreOver(*currCC, rTotalBounds))
+            if (currCC->AreBoundsOver(rTotalBounds))
             {
                 // union the intersecting aConnectedActions element into aTotalActions
 

@@ -37,6 +37,11 @@
 #include "pdfwriter_impl.hxx"
 #include "ConnectedActions.hxx"
 
+bool ConnectedActions::AreBoundsOver(tools::Rectangle const& rBounds)
+{
+    return (!aBounds.IsEmpty() && !bIsFullyTransparent && aBounds.IsOver(rBounds));
+}
+
 template <typename T> tools::Rectangle GetBoundsRect(T) { return tools::Rectangle(); }
 
 template <> tools::Rectangle GetBoundsRect<MetaRectAction*>(MetaRectAction* pAction)
