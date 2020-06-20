@@ -96,41 +96,6 @@ template <> tools::Rectangle GetOutputRect(vcl::PDFWriterImpl* pPdfWriter)
                                                               MapMode(MapUnit::MapPoint)));
 }
 
-class SavePaintStateGuard
-{
-public:
-    SavePaintStateGuard(OutputDevice* pOutDev, VirtualDevice* pPaintVDev, VirtualDevice* pMapVDev)
-        : mpOutDev(pOutDev)
-        , mpPaintVDev(pPaintVDev)
-        , mpMapVDev(pMapVDev)
-        , mbMapState(pOutDev->IsMapModeEnabled())
-    {
-        pPaintVDev->Push();
-        pMapVDev->Push();
-    }
-
-    ~SavePaintStateGuard()
-    {
-        mpPaintVDev->EnableMapMode();
-        mpOutDev->EnableMapMode(mbMapState);
-        mpMapVDev->Pop();
-        mpPaintVDev->Pop();
-    }
-
-    void SaveAndDisableMapState()
-    {
-        mbMapState = mpOutDev->IsMapModeEnabled();
-        mpOutDev->EnableMapMode(false);
-        mpPaintVDev->EnableMapMode(false);
-    }
-
-private:
-    OutputDevice* mpOutDev;
-    VirtualDevice* mpPaintVDev;
-    VirtualDevice* mpMapVDev;
-    bool mbMapState;
-};
-
 bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, GDIMetaFile& rOutMtf,
                                                     long nMaxBmpDPIX, long nMaxBmpDPIY,
                                                     bool bReduceTransparency,
