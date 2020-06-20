@@ -26,11 +26,44 @@
 #include <officecfg/Office/Common.hxx>
 
 #include <vcl/gdimtf.hxx>
+#include <vcl/MetaPixelAction.hxx>
+#include <vcl/MetaPointAction.hxx>
+#include <vcl/MetaLineAction.hxx>
 #include <vcl/MetaRectAction.hxx>
+#include <vcl/MetaRoundRectAction.hxx>
+#include <vcl/MetaEllipseAction.hxx>
+#include <vcl/MetaArcAction.hxx>
+#include <vcl/MetaPieAction.hxx>
+#include <vcl/MetaChordAction.hxx>
+#include <vcl/MetaPolyLineAction.hxx>
 #include <vcl/MetaPolygonAction.hxx>
 #include <vcl/MetaPolyPolygonAction.hxx>
+#include <vcl/MetaTextAction.hxx>
+#include <vcl/MetaTextArrayAction.hxx>
+#include <vcl/MetaStretchTextAction.hxx>
+#include <vcl/MetaTextRectAction.hxx>
+#include <vcl/MetaBmpAction.hxx>
+#include <vcl/MetaBmpScaleAction.hxx>
+#include <vcl/MetaBmpExAction.hxx>
+#include <vcl/MetaBmpScalePartAction.hxx>
+#include <vcl/MetaBmpExScaleAction.hxx>
+#include <vcl/MetaBmpExScalePartAction.hxx>
+#include <vcl/MetaMaskAction.hxx>
+#include <vcl/MetaMaskScaleAction.hxx>
+#include <vcl/MetaMaskScalePartAction.hxx>
+#include <vcl/MetaGradientAction.hxx>
+#include <vcl/MetaGradientExAction.hxx>
+#include <vcl/MetaHatchAction.hxx>
 #include <vcl/MetaWallpaperAction.hxx>
+#include <vcl/MetaLineColorAction.hxx>
+#include <vcl/MetaFillColorAction.hxx>
+#include <vcl/MetaMapModeAction.hxx>
+#include <vcl/MetaPushAction.hxx>
+#include <vcl/MetaPopAction.hxx>
 #include <vcl/MetaTransparentAction.hxx>
+#include <vcl/MetaFloatTransparentAction.hxx>
+#include <vcl/MetaEPSAction.hxx>
+#include <vcl/MetaCommentAction.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/bitmapaccess.hxx>
 
@@ -345,5 +378,158 @@ IntersectingActions::PruneBackgroundObjects(GDIMetaFile const& rMtf, VirtualDevi
     int nActionNum = ReconstructVirtualDeviceMapMode(rMtf, pMapModeVDev, nLastBgAction);
 
     return std::make_tuple(nActionNum, pCurrAct);
+}
+
+/** #107169# Convert BitmapEx to Bitmap with appropriately blended
+    color. Convert MetaTransparentAction to plain polygon,
+    appropriately colored
+
+    @param o_rMtf
+    Add converted actions to this metafile
+*/
+
+template <typename T>
+void ConvertTransparentAction(GDIMetaFile&, const T*, const OutputDevice*, Color)
+{
+    SAL_WARN("vcl.gdi", "Not a valid MetaAction type - needs a bitmap based action");
+    assert(false);
+}
+
+template <>
+void ConvertTransparentAction(GDIMetaFile& o_rMtf, const MetaTransparentAction* pTransAct,
+                              const OutputDevice* rStateOutDev, Color)
+{
+    sal_uInt16 nTransparency(pTransAct->GetTransparence());
+
+    // #i10613# Respect transparency for draw color
+    if (nTransparency)
+    {
+        o_rMtf.AddAction(new MetaPushAction(PushFlags::LINECOLOR | PushFlags::FILLCOLOR));
+
+        // assume white background for alpha blending
+        Color aLineColor(rStateOutDev->GetLineColor());
+        aLineColor.SetRed(static_cast<sal_uInt8>(
+            (255 * nTransparency + (100 - nTransparency) * aLineColor.GetRed()) / 100));
+        aLineColor.SetGreen(static_cast<sal_uInt8>(
+            (255 * nTransparency + (100 - nTransparency) * aLineColor.GetGreen()) / 100));
+        aLineColor.SetBlue(static_cast<sal_uInt8>(
+            (255 * nTransparency + (100 - nTransparency) * aLineColor.GetBlue()) / 100));
+        o_rMtf.AddAction(new MetaLineColorAction(aLineColor, true));
+
+        Color aFillColor(rStateOutDev->GetFillColor());
+        aFillColor.SetRed(static_cast<sal_uInt8>(
+            (255 * nTransparency + (100 - nTransparency) * aFillColor.GetRed()) / 100));
+        aFillColor.SetGreen(static_cast<sal_uInt8>(
+            (255 * nTransparency + (100 - nTransparency) * aFillColor.GetGreen()) / 100));
+        aFillColor.SetBlue(static_cast<sal_uInt8>(
+            (255 * nTransparency + (100 - nTransparency) * aFillColor.GetBlue()) / 100));
+        o_rMtf.AddAction(new MetaFillColorAction(aFillColor, true));
+    }
+
+    o_rMtf.AddAction(new MetaPolyPolygonAction(pTransAct->GetPolyPolygon()));
+
+    if (nTransparency)
+        o_rMtf.AddAction(new MetaPopAction());
+}
+
+static Bitmap Convert(BitmapEx const& rBmpEx, Color aBgColor)
+{
+    Bitmap aBmp(rBmpEx.GetBitmap());
+
+    if (!rBmpEx.IsAlpha())
+    {
+        // blend with mask
+        Bitmap::ScopedReadAccess pRA(aBmp);
+
+        if (!pRA)
+        {
+            SAL_WARN("vcl.gdi", "Cannot get access to bitmap"); // what else should I do?
+            assert(false);
+        }
+
+        Color aActualColor(aBgColor);
+
+        if (pRA->HasPalette())
+            aActualColor = pRA->GetBestPaletteColor(aBgColor);
+
+        pRA.reset();
+
+        // did we get true white?
+        if (aActualColor.GetColorError(aBgColor))
+        {
+            // no, create truecolor bitmap, then
+            aBmp.Convert(BmpConversion::N24Bit);
+
+            // fill masked out areas white
+            aBmp.Replace(rBmpEx.GetMask(), aBgColor);
+        }
+        else
+        {
+            // fill masked out areas white
+            aBmp.Replace(rBmpEx.GetMask(), aActualColor);
+        }
+    }
+    else
+    {
+        // blend with alpha channel
+        aBmp.Convert(BmpConversion::N24Bit);
+        aBmp.Blend(rBmpEx.GetAlpha(), aBgColor);
+    }
+
+    return aBmp;
+}
+
+template <>
+void ConvertTransparentAction(GDIMetaFile& o_rMtf, const MetaBmpExAction* pAct, const OutputDevice*,
+                              Color aBgColor)
+{
+    Bitmap aBmp(Convert(pAct->GetBitmapEx(), aBgColor));
+    o_rMtf.AddAction(new MetaBmpAction(pAct->GetPoint(), aBmp));
+}
+
+template <>
+void ConvertTransparentAction(GDIMetaFile& o_rMtf, const MetaBmpExScaleAction* pAct,
+                              const OutputDevice*, Color aBgColor)
+{
+    Bitmap aBmp(Convert(pAct->GetBitmapEx(), aBgColor));
+    o_rMtf.AddAction(new MetaBmpScaleAction(pAct->GetPoint(), pAct->GetSize(), aBmp));
+}
+
+template <>
+void ConvertTransparentAction(GDIMetaFile& o_rMtf, const MetaBmpExScalePartAction* pAct,
+                              const OutputDevice*, Color aBgColor)
+{
+    Bitmap aBmp(Convert(pAct->GetBitmapEx(), aBgColor));
+    o_rMtf.AddAction(new MetaBmpScalePartAction(pAct->GetDestPoint(), pAct->GetDestSize(),
+                                                pAct->GetSrcPoint(), pAct->GetSrcSize(), aBmp));
+}
+
+void IntersectingActions::AddAction(GDIMetaFile& rOutMtf, Color const& rBgColor,
+                                    MetaAction* pCurrAct, VirtualDevice* pMapModeVDev) const
+{
+    // NOTE: This relies on the fact that map-mode or draw
+    // mode changing actions are solitary aIntersectingActions elements and
+    // have empty bounding boxes, see comment on stage 2.1
+    // above
+    if (aBounds.IsEmpty() || !bIsSpecial)
+    {
+        // #107169# Treat transparent bitmaps special, if they
+        // are the first (or sole) action in their bounds
+        // list. Note that we previously ensured that no
+        // fully-transparent objects are before us here.
+        if (DoesActionHandleTransparency(*pCurrAct) && aActionList.begin()->first == pCurrAct)
+        {
+            // convert actions, where masked-out parts are of
+            // given background color
+            ConvertTransparentAction(rOutMtf, pCurrAct, pMapModeVDev, rBgColor);
+        }
+        else
+        {
+            // simply add this action
+            rOutMtf.AddAction(pCurrAct);
+        }
+
+        pCurrAct->Execute(pMapModeVDev);
+    }
 }
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

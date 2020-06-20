@@ -180,6 +180,9 @@ struct IntersectingActions
     std::tuple<int, MetaAction*> PruneBackgroundObjects(GDIMetaFile const& rMtf,
                                                         VirtualDevice* pMapModeVDev);
 
+    void AddAction(GDIMetaFile& rOutMtf, Color const& rBgColor, MetaAction* pCurrAct,
+                   VirtualDevice* pMapModeVDev) const;
+
     ::std::list<Component> aActionList;
     tools::Rectangle aBounds;
     Color aBgColor;
