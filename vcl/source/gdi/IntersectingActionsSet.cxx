@@ -83,14 +83,14 @@ template <typename T> bool UsesTiling(T*) { return false; }
 template <> bool UsesTiling(Printer*) { return true; }
 
 template <typename T>
-void DrawAction(T* pCurrAct, VirtualDevice* pPaintVDev, VirtualDevice*, Point, OutputDevice*)
+void RenderAction(T* pCurrAct, VirtualDevice* pPaintVDev, VirtualDevice*, Point, OutputDevice*)
 {
     pCurrAct->Execute(pPaintVDev);
 }
 
 template <>
-void DrawAction(MetaMapModeAction* pCurrAct, VirtualDevice* pPaintVDev, VirtualDevice* pMapVDev,
-                Point aDstPtPix, OutputDevice*)
+void RenderAction(MetaMapModeAction* pCurrAct, VirtualDevice* pPaintVDev, VirtualDevice* pMapVDev,
+                  Point aDstPtPix, OutputDevice*)
 {
     pCurrAct->Execute(pMapVDev);
 
@@ -102,16 +102,16 @@ void DrawAction(MetaMapModeAction* pCurrAct, VirtualDevice* pPaintVDev, VirtualD
 }
 
 template <>
-void DrawAction(MetaPushAction* pCurrAct, VirtualDevice* pPaintVDev, VirtualDevice* pMapVDev, Point,
-                OutputDevice*)
+void RenderAction(MetaPushAction* pCurrAct, VirtualDevice* pPaintVDev, VirtualDevice* pMapVDev,
+                  Point, OutputDevice*)
 {
     pCurrAct->Execute(pMapVDev);
     pCurrAct->Execute(pPaintVDev);
 }
 
 template <>
-void DrawAction(MetaPopAction* pCurrAct, VirtualDevice* pPaintVDev, VirtualDevice* pMapVDev, Point,
-                OutputDevice*)
+void RenderAction(MetaPopAction* pCurrAct, VirtualDevice* pPaintVDev, VirtualDevice* pMapVDev,
+                  Point, OutputDevice*)
 {
     pCurrAct->Execute(pMapVDev);
     pCurrAct->Execute(pPaintVDev);
@@ -128,8 +128,8 @@ void DrawGradient(MetaGradientAction* pCurrAct, VirtualDevice* pPaintVDev, Print
 }
 
 template <>
-void DrawAction(MetaGradientAction* pCurrAct, VirtualDevice* pPaintVDev, VirtualDevice*, Point,
-                OutputDevice* pOutDev)
+void RenderAction(MetaGradientAction* pCurrAct, VirtualDevice* pPaintVDev, VirtualDevice*, Point,
+                  OutputDevice* pOutDev)
 {
     DrawGradient(pCurrAct, pPaintVDev, pOutDev);
 }
@@ -355,7 +355,7 @@ DrawAllActions(OutputDevice* pOutDev, GDIMetaFile const& rInMtf, VirtualDevice* 
         if (rIntersectingActions_MemberMap[nActionNum] == pCurrentItem)
             pPaintVDev->EnableOutput();
 
-        DrawAction(pCurrAct, pPaintVDev, pMapVDev, aDstPtPix, pOutDev);
+        RenderAction(pCurrAct, pPaintVDev, pMapVDev, aDstPtPix, pOutDev);
 
         Application::Reschedule(true);
     }
