@@ -336,10 +336,10 @@ void IntersectingActionsSet::UnmarkIntersectingActions(tools::Rectangle aOutputR
 }
 
 static void
-DrawAllActions(OutputDevice* pOutDev, GDIMetaFile const& rInMtf, VirtualDevice* pPaintVDev,
-               VirtualDevice* pMapVDev,
-               ::std::vector<const IntersectingActions*>& rIntersectingActions_MemberMap,
-               IntersectingActions* pCurrentItem, Point aDstPtPix)
+RenderAllActions(OutputDevice* pOutDev, GDIMetaFile const& rInMtf, VirtualDevice* pPaintVDev,
+                 VirtualDevice* pMapVDev,
+                 ::std::vector<const IntersectingActions*>& rIntersectingActions_MemberMap,
+                 IntersectingActions* pCurrentItem, Point aDstPtPix)
 {
     int nActionNum = 0;
 
@@ -476,8 +476,8 @@ CreateBitmapAction(GDIMetaFile& rOutMtf, OutputDevice* pOutDev, GDIMetaFile cons
                     aMapVDev->SetDPIY(pOutDev->GetDPIY());
                     aPaintVDev->SetDPIY(pOutDev->GetDPIY());
 
-                    DrawAllActions(pOutDev, rInMtf, aPaintVDev.get(), aMapVDev.get(),
-                                   rIntersectingActions_MemberMap, pCurrentItem, aDstPtPix);
+                    RenderAllActions(pOutDev, rInMtf, aPaintVDev.get(), aMapVDev.get(),
+                                     rIntersectingActions_MemberMap, pCurrentItem, aDstPtPix);
 
                     aPaintState.SaveAndDisableMapState();
 
