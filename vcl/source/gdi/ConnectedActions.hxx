@@ -54,7 +54,7 @@ struct ConnectedActions
     }
 
     bool AreBoundsOver(tools::Rectangle const& rBounds);
-
+    void MarkSpecial(bool bTreatSpecial, MetaAction* pCurrAct);
     void SetBackground(Color const& rBgColor, tools::Rectangle const& rBounds);
 
     template <typename T> bool IsValidShape(T);

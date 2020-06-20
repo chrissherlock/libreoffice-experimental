@@ -134,101 +134,6 @@ void DrawAction(MetaGradientAction* pCurrAct, VirtualDevice* pPaintVDev, Virtual
     DrawGradient(pCurrAct, pPaintVDev, pOutDev);
 }
 
-/** Determines whether the action can handle transparency correctly
-  (i.e. when painted on white background, does the action still look
-  correct)?
- */
-bool DoesActionHandleTransparency(const MetaAction& rAct)
-{
-    // MetaActionType::FLOATTRANSPARENT can contain a whole metafile,
-    // which is to be rendered with the given transparent gradient. We
-    // currently cannot emulate transparent painting on a white
-    // background reliably.
-
-    // the remainder can handle printing itself correctly on a uniform
-    // white background.
-    switch (rAct.GetType())
-    {
-        case MetaActionType::Transparent:
-        case MetaActionType::BMPEX:
-        case MetaActionType::BMPEXSCALE:
-        case MetaActionType::BMPEXSCALEPART:
-            return true;
-
-        default:
-            return false;
-    }
-}
-
-static void MarkWhetherConnectedActionIsSpecial(ConnectedActions& rTotalActions, bool bTreatSpecial,
-                                                MetaAction* pCurrAct)
-{
-    // now test whether the whole connected component must be
-    // treated specially (i.e. rendered as a bitmap): if the
-    // added action is the very first action, or all actions
-    // before it are completely transparent, the connected
-    // component need not be treated specially, not even if
-    // the added action contains transparency. This is because
-    // painting of transparent objects on _white background_
-    // works without alpha compositing (you just calculate the
-    // color). Note that for the test "all objects before me
-    // are transparent" no sorting is necessary, since the
-    // added metaaction pCurrAct is always in the order the
-    // metafile is painted. Generally, the order of the
-    // metaactions in the ConnectedActions are not
-    // guaranteed to be the same as in the metafile.
-    if (bTreatSpecial)
-    {
-        // prev component(s) special -> this one, too
-        rTotalActions.bIsSpecial = true;
-    }
-    else if (!pCurrAct->IsTransparent())
-    {
-        // added action and none of prev components special ->
-        // this one normal, too
-        rTotalActions.bIsSpecial = false;
-    }
-    else
-    {
-        // added action is special and none of prev components
-        // special -> do the detailed tests
-
-        // can the action handle transparency correctly
-        // (i.e. when painted on white background, does the
-        // action still look correct)?
-        if (!DoesActionHandleTransparency(*pCurrAct))
-        {
-            // no, action cannot handle its transparency on
-            // a printer device, render to bitmap
-            rTotalActions.bIsSpecial = true;
-        }
-        else
-        {
-            // yes, action can handle its transparency, so
-            // check whether we're on white background
-            if (rTotalActions.aActionList.empty())
-            {
-                // nothing between pCurrAct and page
-                // background -> don't be special
-                rTotalActions.bIsSpecial = false;
-            }
-            else
-            {
-                // #107169# Fixes above now ensure that _no_
-                // object in the list is fully transparent. Thus,
-                // if the component list is not empty above, we
-                // must assume that we have to treat this
-                // component special.
-
-                // there are non-transparent objects between
-                // pCurrAct and the empty sheet of paper -> be
-                // special, then
-                rTotalActions.bIsSpecial = true;
-            }
-        }
-    }
-}
-
 bool ConnectedActionsSet::ProcessIntersections(ConnectedActions& rTotalActions,
                                                tools::Rectangle& rTotalBounds, bool bTreatSpecial)
 {
@@ -360,7 +265,7 @@ void ConnectedActionsSet::GenerateConnectedActions(ConnectedActions& rBackground
             = SearchForIntersectingEntries(pCurrAct, pMapModeVDev, rBackgroundAction);
 
         //  STAGE 2.2: Determine special state for cc element
-        MarkWhetherConnectedActionIsSpecial(aTotalActions, bTreatSpecial, pCurrAct);
+        aTotalActions.MarkSpecial(bTreatSpecial, pCurrAct);
 
         //  STAGE 2.3: Add newly generated CC list element
 
