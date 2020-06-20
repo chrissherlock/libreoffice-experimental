@@ -27,6 +27,7 @@
 #include <vcl/PrinterOptions.hxx>
 #include <vcl/QueueInfo.hxx>
 #include <vcl/event.hxx>
+#include <vcl/gradient.hxx>
 #include <vcl/virdev.hxx>
 
 #include <comphelper/processfactory.hxx>
@@ -1598,6 +1599,56 @@ Bitmap Printer::GetBitmap( const Point& rSrcPt, const Size& rSize ) const
     SAL_WARN("vcl.gdi", "GetBitmap(): This should never be called on by a Printer instance");
 
     return OutputDevice::GetBitmap( rSrcPt, rSize );
+}
+
+void Printer::DrawGradientEx(OutputDevice* pOut, const tools::Rectangle& rRect,
+                             const Gradient& rGradient)
+{
+    const PrinterOptions& rPrinterOptions = GetPrinterOptions();
+
+    if (rPrinterOptions.IsReduceGradients())
+    {
+        if (PrinterGradientMode::Stripes == rPrinterOptions.GetReducedGradientMode())
+        {
+            if (!rGradient.GetSteps()
+                || (rGradient.GetSteps() > rPrinterOptions.GetReducedGradientStepCount()))
+            {
+                Gradient aNewGradient(rGradient);
+
+                aNewGradient.SetSteps(rPrinterOptions.GetReducedGradientStepCount());
+                pOut->DrawGradient(rRect, aNewGradient);
+            }
+            else
+                pOut->DrawGradient(rRect, rGradient);
+        }
+        else
+        {
+            const Color& rStartColor = rGradient.GetStartColor();
+            const Color& rEndColor = rGradient.GetEndColor();
+            const long nR
+                = ((static_cast<long>(rStartColor.GetRed()) * rGradient.GetStartIntensity()) / 100
+                   + (static_cast<long>(rEndColor.GetRed()) * rGradient.GetEndIntensity()) / 100)
+                  >> 1;
+            const long nG
+                = ((static_cast<long>(rStartColor.GetGreen()) * rGradient.GetStartIntensity()) / 100
+                   + (static_cast<long>(rEndColor.GetGreen()) * rGradient.GetEndIntensity()) / 100)
+                  >> 1;
+            const long nB
+                = ((static_cast<long>(rStartColor.GetBlue()) * rGradient.GetStartIntensity()) / 100
+                   + (static_cast<long>(rEndColor.GetBlue()) * rGradient.GetEndIntensity()) / 100)
+                  >> 1;
+            const Color aColor(static_cast<sal_uInt8>(nR), static_cast<sal_uInt8>(nG),
+                               static_cast<sal_uInt8>(nB));
+
+            pOut->Push(PushFlags::LINECOLOR | PushFlags::FILLCOLOR);
+            pOut->SetLineColor(aColor);
+            pOut->SetFillColor(aColor);
+            pOut->DrawRect(rRect);
+            pOut->Pop();
+        }
+    }
+    else
+        pOut->DrawGradient(rRect, rGradient);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
