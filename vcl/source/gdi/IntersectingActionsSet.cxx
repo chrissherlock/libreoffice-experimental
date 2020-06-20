@@ -72,8 +72,8 @@
 #include <vcl/bitmapaccess.hxx>
 
 #include "pdfwriter_impl.hxx"
-#include "ConnectedActions.hxx"
-#include "ConnectedActionsSet.hxx"
+#include "IntersectingActions.hxx"
+#include "IntersectingActionsSet.hxx"
 
 #define MAX_TILE_WIDTH 1024
 #define MAX_TILE_HEIGHT 1024
@@ -134,15 +134,16 @@ void DrawAction(MetaGradientAction* pCurrAct, VirtualDevice* pPaintVDev, Virtual
     DrawGradient(pCurrAct, pPaintVDev, pOutDev);
 }
 
-bool ConnectedActionsSet::ProcessIntersections(ConnectedActions& rTotalActions,
-                                               tools::Rectangle& rTotalBounds, bool bTreatSpecial)
+bool IntersectingActionsSet::ProcessIntersections(IntersectingActions& rTotalActions,
+                                                  tools::Rectangle& rTotalBounds,
+                                                  bool bTreatSpecial)
 {
     bool bSomeActionsChanged;
 
     // now, this is unfortunate: since changing anyone of
-    // the aConnectedActions elements (e.g. by merging or addition
+    // the aIntersectingActions elements (e.g. by merging or addition
     // of an action) might generate new intersection with
-    // other aConnectedActions elements, have to repeat the whole
+    // other aIntersectingActions elements, have to repeat the whole
     // element scanning, until nothing changes anymore.
     // Thus, this loop here makes us O(n^3) in the worst
     // case.
@@ -151,8 +152,8 @@ bool ConnectedActionsSet::ProcessIntersections(ConnectedActions& rTotalActions,
         // only loop here if 'intersects' branch below was hit
         bSomeActionsChanged = false;
 
-        // iterate over all current members of aConnectedActions
-        for (auto currCC = maConnectedActions.begin(); currCC != maConnectedActions.end();)
+        // iterate over all current members of aIntersectingActions
+        for (auto currCC = maIntersectingActions.begin(); currCC != maIntersectingActions.end();)
         {
             // first check if current element's bounds are
             // empty. This ensures that empty actions are not
@@ -165,7 +166,7 @@ bool ConnectedActionsSet::ProcessIntersections(ConnectedActions& rTotalActions,
             // component.
             if (currCC->AreBoundsOver(rTotalBounds))
             {
-                // union the intersecting aConnectedActions element into aTotalActions
+                // union the intersecting aIntersectingActions element into aTotalActions
 
                 // calc union bounding box
                 rTotalBounds.Union(currCC->aBounds);
@@ -178,7 +179,7 @@ bool ConnectedActionsSet::ProcessIntersections(ConnectedActions& rTotalActions,
                     bTreatSpecial = true;
 
                 // remove and delete currCC element from list (we've now merged its content)
-                currCC = maConnectedActions.erase(currCC);
+                currCC = maIntersectingActions.erase(currCC);
 
                 // at least one component changed, need to rescan everything
                 bSomeActionsChanged = true;
@@ -193,9 +194,10 @@ bool ConnectedActionsSet::ProcessIntersections(ConnectedActions& rTotalActions,
     return bTreatSpecial;
 }
 
-std::tuple<bool, ConnectedActions, tools::Rectangle>
-ConnectedActionsSet::SearchForIntersectingEntries(MetaAction* pCurrAct, VirtualDevice* pMapModeVDev,
-                                                  ConnectedActions rBackgroundAction)
+std::tuple<bool, IntersectingActions, tools::Rectangle>
+IntersectingActionsSet::SearchForIntersectingEntries(MetaAction* pCurrAct,
+                                                     VirtualDevice* pMapModeVDev,
+                                                     IntersectingActions rBackgroundAction)
 {
     // cache bounds of current action
     const tools::Rectangle aCurrActionBounds(pCurrAct->GetBoundsRect(pMapModeVDev));
@@ -204,14 +206,14 @@ ConnectedActionsSet::SearchForIntersectingEntries(MetaAction* pCurrAct, VirtualD
     tools::Rectangle aTotalBounds(aCurrActionBounds); // thus, aTotalActions.aBounds is empty
         // for non-output-generating actions
     bool bTreatSpecial = false;
-    ConnectedActions aTotalActions;
+    IntersectingActions aTotalActions;
 
     //  STAGE 2.1: Search for intersecting cc entries
 
     // if aCurrActionBounds is empty, it will intersect with no
-    // aConnectedActions member. Thus, we can save the check.
+    // aIntersectingActions member. Thus, we can save the check.
     // Furthermore, this ensures that non-output-generating
-    // actions get their own aConnectedActions entry, which is necessary
+    // actions get their own aIntersectingActions entry, which is necessary
     // when copying them to the output metafile (see stage 4
     // below).
 
@@ -244,10 +246,10 @@ ConnectedActionsSet::SearchForIntersectingEntries(MetaAction* pCurrAct, VirtualD
     return std::make_tuple(bTreatSpecial, aTotalActions, aTotalBounds);
 }
 
-void ConnectedActionsSet::GenerateConnectedActions(ConnectedActions& rBackgroundAction,
-                                                   MetaAction* pInitialAction, int nActionNum,
-                                                   GDIMetaFile const& rInMtf,
-                                                   VirtualDevice* pMapModeVDev)
+void IntersectingActionsSet::GenerateIntersectingActions(IntersectingActions& rBackgroundAction,
+                                                         MetaAction* pInitialAction, int nActionNum,
+                                                         GDIMetaFile const& rInMtf,
+                                                         VirtualDevice* pMapModeVDev)
 {
     // iterate over all actions (start where background action
     // search left off)
@@ -259,7 +261,7 @@ void ConnectedActionsSet::GenerateConnectedActions(ConnectedActions& rBackground
 
         bool bTreatSpecial;
         tools::Rectangle aTotalBounds;
-        ConnectedActions aTotalActions;
+        IntersectingActions aTotalActions;
 
         std::tie(bTreatSpecial, aTotalActions, aTotalBounds)
             = SearchForIntersectingEntries(pCurrAct, pMapModeVDev, rBackgroundAction);
@@ -273,8 +275,8 @@ void ConnectedActionsSet::GenerateConnectedActions(ConnectedActions& rBackground
         aTotalActions.aBounds = aTotalBounds;
         aTotalActions.aActionList.emplace_back(pCurrAct, nActionNum);
 
-        // add aTotalActions as a new entry to rConnectedActions
-        maConnectedActions.push_back(aTotalActions);
+        // add aTotalActions as a new entry to rIntersectingActions
+        maIntersectingActions.push_back(aTotalActions);
 
         SAL_WARN_IF(aTotalActions.aActionList.empty(), "vcl",
                     "Printer::GetPreparedMetaFile empty component");
@@ -309,11 +311,11 @@ static bool DoesOutputExceedBitmapArea(tools::Rectangle aBoundRect, tools::Recta
     return fBmpArea > (GetReduceTransparencyMinArea() * fOutArea);
 }
 
-void ConnectedActionsSet::UnmarkConnectedActions(tools::Rectangle aOutputRect,
-                                                 bool bReduceTransparency,
-                                                 bool bTransparencyAutoMode)
+void IntersectingActionsSet::UnmarkIntersectingActions(tools::Rectangle aOutputRect,
+                                                       bool bReduceTransparency,
+                                                       bool bTransparencyAutoMode)
 {
-    for (auto& currentItem : maConnectedActions)
+    for (auto& currentItem : maIntersectingActions)
     {
         if (currentItem.bIsSpecial)
         {
@@ -332,10 +334,11 @@ void ConnectedActionsSet::UnmarkConnectedActions(tools::Rectangle aOutputRect,
     }
 }
 
-static void DrawAllActions(OutputDevice* pOutDev, GDIMetaFile const& rInMtf,
-                           VirtualDevice* pPaintVDev, VirtualDevice* pMapVDev,
-                           ::std::vector<const ConnectedActions*>& rConnectedActions_MemberMap,
-                           ConnectedActions* pCurrentItem, Point aDstPtPix)
+static void
+DrawAllActions(OutputDevice* pOutDev, GDIMetaFile const& rInMtf, VirtualDevice* pPaintVDev,
+               VirtualDevice* pMapVDev,
+               ::std::vector<const IntersectingActions*>& rIntersectingActions_MemberMap,
+               IntersectingActions* pCurrentItem, Point aDstPtPix)
 {
     int nActionNum = 0;
 
@@ -344,11 +347,11 @@ static void DrawAllActions(OutputDevice* pOutDev, GDIMetaFile const& rInMtf,
     {
         // enable output only for
         // actions that are members of
-        // the current aConnectedActions element
+        // the current aIntersectingActions element
         // (currentItem)
         pPaintVDev->EnableOutput(false);
 
-        if (rConnectedActions_MemberMap[nActionNum] == pCurrentItem)
+        if (rIntersectingActions_MemberMap[nActionNum] == pCurrentItem)
             pPaintVDev->EnableOutput();
 
         DrawAction(pCurrAct, pPaintVDev, pMapVDev, aDstPtPix, pOutDev);
@@ -413,29 +416,28 @@ private:
     bool mbMapState;
 };
 
-void ConnectedActionsSet::PopulateConnectedActionsMap(
-    ::std::vector<const ConnectedActions*>& rConnectedActions_MemberMap, size_t nSize)
+void IntersectingActionsSet::PopulateIntersectingActionsMap(
+    ::std::vector<const IntersectingActions*>& rIntersectingActions_MemberMap, size_t nSize)
 {
-    rConnectedActions_MemberMap.reserve(nSize);
+    rIntersectingActions_MemberMap.reserve(nSize);
 
-    // iterate over all aConnectedActions members and their contained metaactions
-    for (auto const& currentItem : maConnectedActions)
+    // iterate over all aIntersectingActions members and their contained metaactions
+    for (auto const& currentItem : maIntersectingActions)
     {
         for (auto const& currentAction : currentItem.aActionList)
         {
-            // set pointer to aConnectedActions element for corresponding index
-            rConnectedActions_MemberMap[currentAction.second] = &currentItem;
+            // set pointer to aIntersectingActions element for corresponding index
+            rIntersectingActions_MemberMap[currentAction.second] = &currentItem;
         }
     }
 }
 
-static void CreateBitmapAction(GDIMetaFile& rOutMtf, OutputDevice* pOutDev,
-                               GDIMetaFile const& rInMtf,
-                               ::std::vector<const ConnectedActions*>& rConnectedActions_MemberMap,
-                               ConnectedActions* pCurrentItem,
-                               ConnectedActions const& rBackgroundAction,
-                               tools::Rectangle aBoundRect, long nMaxBmpDPIX, long nMaxBmpDPIY,
-                               bool bDownsampleBitmaps)
+static void
+CreateBitmapAction(GDIMetaFile& rOutMtf, OutputDevice* pOutDev, GDIMetaFile const& rInMtf,
+                   ::std::vector<const IntersectingActions*>& rIntersectingActions_MemberMap,
+                   IntersectingActions* pCurrentItem, IntersectingActions const& rBackgroundAction,
+                   tools::Rectangle aBoundRect, long nMaxBmpDPIX, long nMaxBmpDPIY,
+                   bool bDownsampleBitmaps)
 {
     // create new bitmap action first
     if (aBoundRect.GetWidth() && aBoundRect.GetHeight())
@@ -474,7 +476,7 @@ static void CreateBitmapAction(GDIMetaFile& rOutMtf, OutputDevice* pOutDev,
                     aPaintVDev->SetDPIY(pOutDev->GetDPIY());
 
                     DrawAllActions(pOutDev, rInMtf, aPaintVDev.get(), aMapVDev.get(),
-                                   rConnectedActions_MemberMap, pCurrentItem, aDstPtPix);
+                                   rIntersectingActions_MemberMap, pCurrentItem, aDstPtPix);
 
                     aPaintState.SaveAndDisableMapState();
 
@@ -505,13 +507,13 @@ static void CreateBitmapAction(GDIMetaFile& rOutMtf, OutputDevice* pOutDev,
     }
 }
 
-void ConnectedActionsSet::CreateBitmapActions(
+void IntersectingActionsSet::CreateBitmapActions(
     GDIMetaFile& rOutMtf, OutputDevice* pOutDev, GDIMetaFile const& rInMtf,
-    ::std::vector<const ConnectedActions*>& rConnectedActions_MemberMap,
-    tools::Rectangle aOutputRect, ConnectedActions const& rBackgroundAction, long nMaxBmpDPIX,
+    ::std::vector<const IntersectingActions*>& rIntersectingActions_MemberMap,
+    tools::Rectangle aOutputRect, IntersectingActions const& rBackgroundAction, long nMaxBmpDPIX,
     long nMaxBmpDPIY, bool bDownsampleBitmaps, bool bReduceTransparency, bool bTransparencyAutoMode)
 {
-    for (auto& currentItem : maConnectedActions)
+    for (auto& currentItem : maIntersectingActions)
     {
         if (currentItem.bIsSpecial)
         {
@@ -521,7 +523,7 @@ void ConnectedActionsSet::CreateBitmapActions(
             if (!(bReduceTransparency && bTransparencyAutoMode
                   && DoesOutputExceedBitmapArea(aBoundRect, aOutputRect)))
             {
-                CreateBitmapAction(rOutMtf, pOutDev, rInMtf, rConnectedActions_MemberMap,
+                CreateBitmapAction(rOutMtf, pOutDev, rInMtf, rIntersectingActions_MemberMap,
                                    &currentItem, rBackgroundAction, aBoundRect, nMaxBmpDPIX,
                                    nMaxBmpDPIY, bDownsampleBitmaps);
             }

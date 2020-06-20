@@ -42,9 +42,9 @@ template <typename T> tools::Rectangle GetBoundsRect(T);
 typedef ::std::pair<MetaAction*, int> Component; // MetaAction plus index in metafile
 
 // List of (intersecting) actions, plus overall bounds
-struct ConnectedActions
+struct IntersectingActions
 {
-    ConnectedActions()
+    IntersectingActions()
         : aActionList()
         , aBounds()
         , aBgColor(COL_WHITE)
@@ -96,8 +96,8 @@ struct ConnectedActions
 
     template <bool b> struct set_component_selector
     {
-        static void implementation(ConnectedActions* pBackgroundAction, MetaAction* const pAction,
-                                   VirtualDevice& rMapModeVDev)
+        static void implementation(IntersectingActions* pBackgroundAction,
+                                   MetaAction* const pAction, VirtualDevice& rMapModeVDev)
         {
             const tools::Rectangle& rCurrRect = GetBoundsRect(pAction);
 
@@ -108,8 +108,8 @@ struct ConnectedActions
 
     template <> struct set_component_selector<true>
     {
-        static void implementation(ConnectedActions* pBackgroundAction, MetaAction* const pAction,
-                                   VirtualDevice* pMapModeVDev)
+        static void implementation(IntersectingActions* pBackgroundAction,
+                                   MetaAction* const pAction, VirtualDevice* pMapModeVDev)
         {
             if (pAction->IsTransparent(pMapModeVDev))
             {

@@ -24,41 +24,40 @@
 
 #include <vector>
 
-struct ConnectedActions;
+struct IntersectingActions;
 class GDIMetaFile;
 class MetaAction;
 class VirtualDevice;
 
-class ConnectedActionsSet
+class IntersectingActionsSet
 {
 public:
-    bool ProcessIntersections(ConnectedActions& rTotalActions, tools::Rectangle& rTotalBounds,
+    bool ProcessIntersections(IntersectingActions& rTotalActions, tools::Rectangle& rTotalBounds,
                               bool bTreatSpecial);
 
-    std::tuple<bool, ConnectedActions, tools::Rectangle>
+    std::tuple<bool, IntersectingActions, tools::Rectangle>
     SearchForIntersectingEntries(MetaAction* pCurrAct, VirtualDevice* pMapModeVDev,
-                                 ConnectedActions rBackgroundAction);
+                                 IntersectingActions rBackgroundAction);
 
-    void GenerateConnectedActions(ConnectedActions& rBackgroundAction, MetaAction* pInitialAction,
-                                  int nActionNum, GDIMetaFile const& rInMtf,
-                                  VirtualDevice* pMapModeVDev);
+    void GenerateIntersectingActions(IntersectingActions& rBackgroundAction,
+                                     MetaAction* pInitialAction, int nActionNum,
+                                     GDIMetaFile const& rInMtf, VirtualDevice* pMapModeVDev);
 
-    void UnmarkConnectedActions(tools::Rectangle aOutputRect, bool bReduceTransparency,
-                                bool bTransparencyAutoMode);
+    void UnmarkIntersectingActions(tools::Rectangle aOutputRect, bool bReduceTransparency,
+                                   bool bTransparencyAutoMode);
+
+    void PopulateIntersectingActionsMap(
+        ::std::vector<const IntersectingActions*>& rIntersectingActions_MemberMap, size_t nSize);
 
     void
-    PopulateConnectedActionsMap(::std::vector<const ConnectedActions*>& rConnectedActions_MemberMap,
-                                size_t nSize);
-
-    void CreateBitmapActions(GDIMetaFile& rOutMtf, OutputDevice* pOutDev, GDIMetaFile const& rInMtf,
-                             ::std::vector<const ConnectedActions*>& rConnectedActions_MemberMap,
-                             tools::Rectangle aOutputRect,
-                             ConnectedActions const& rBackgroundAction, long nMaxBmpDPIX,
-                             long nMaxBmpDPIY, bool bDownsampleBitmaps, bool bReduceTransparency,
-                             bool bTransparencyAutoMode);
+    CreateBitmapActions(GDIMetaFile& rOutMtf, OutputDevice* pOutDev, GDIMetaFile const& rInMtf,
+                        ::std::vector<const IntersectingActions*>& rIntersectingActions_MemberMap,
+                        tools::Rectangle aOutputRect, IntersectingActions const& rBackgroundAction,
+                        long nMaxBmpDPIX, long nMaxBmpDPIY, bool bDownsampleBitmaps,
+                        bool bReduceTransparency, bool bTransparencyAutoMode);
 
 private:
-    ::std::vector<ConnectedActions> maConnectedActions;
+    ::std::vector<IntersectingActions> maIntersectingActions;
 };
 
 bool DoesActionHandleTransparency(const MetaAction& rAct);

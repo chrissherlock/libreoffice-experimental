@@ -72,8 +72,8 @@
 #include <vcl/bitmapaccess.hxx>
 
 #include "pdfwriter_impl.hxx"
-#include "ConnectedActions.hxx"
-#include "ConnectedActionsSet.hxx"
+#include "IntersectingActions.hxx"
+#include "IntersectingActionsSet.hxx"
 
 /** #107169# Convert BitmapEx to Bitmap with appropriately blended
     color. Convert MetaTransparentAction to plain polygon,
@@ -287,15 +287,15 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
     // number of intersecting metafile actions, plus any action
     // that would otherwise be cut in two). Therefore, we
     // iteratively add metafile actions from the original metafile
-    // to this connected components list (aConnectedActions), by checking
+    // to this connected components list (aIntersectingActions), by checking
     // each element's bounding box against intersection with the
     // metaaction at hand.
-    // All those intersecting elements are removed from aConnectedActions
+    // All those intersecting elements are removed from aIntersectingActions
     // and collected in a temporary list (aCCMergeList). After all
     // elements have been checked, the aCCMergeList elements are
     // merged with the metaaction at hand into one resulting
     // connected component, with one big bounding box, and
-    // inserted into aConnectedActions again.
+    // inserted into aIntersectingActions again.
     // The time complexity of this algorithm is O(n^3), where n is
     // the number of metafile actions, and it finds all distinct
     // regions of rectangle-bounded connected components. This
@@ -310,8 +310,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
     aMapModeVDev->EnableOutput(false);
 
     // Receives uniform background content, and is _not_ merged
-    // nor checked for intersection against other aConnectedActions elements
-    ConnectedActions aBackgroundAction;
+    // nor checked for intersection against other aIntersectingActions elements
+    IntersectingActions aBackgroundAction;
 
     if (rBackground != COL_TRANSPARENT)
         aBackgroundAction.SetBackground(rBackground, GetBackgroundComponentBounds());
@@ -324,28 +324,28 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
 
     //  STAGE 2: Generate connected components list
 
-    //::std::vector<ConnectedActions>
-    //    aConnectedActions; // contains distinct sets of connected components as elements.
+    //::std::vector<IntersectingActions>
+    //    aIntersectingActions; // contains distinct sets of connected components as elements.
 
-    ConnectedActionsSet
-        aConnectedActions; // contains distinct sets of connected components as elements.
+    IntersectingActionsSet
+        aIntersectingActions; // contains distinct sets of connected components as elements.
 
-    aConnectedActions.GenerateConnectedActions(aBackgroundAction, pCurrAct, nActionNum, rInMtf,
-                                               aMapModeVDev.get());
+    aIntersectingActions.GenerateIntersectingActions(aBackgroundAction, pCurrAct, nActionNum,
+                                                     rInMtf, aMapModeVDev.get());
 
     // well now, we've got the list of disjunct connected
     // components. Now we've got to create a map, which contains
-    // the corresponding aConnectedActions element for every
+    // the corresponding aIntersectingActions element for every
     // metaaction. Later on, we always process the complete
     // metafile for each bitmap to be generated, but switch on
     // output only for actions contained in the then current
-    // aConnectedActions element. This ensures correct mapmode and attribute
+    // aIntersectingActions element. This ensures correct mapmode and attribute
     // settings for all cases.
 
     // maps mtf actions to CC list entries
-    ::std::vector<const ConnectedActions*> aConnectedActions_MemberMap;
-    aConnectedActions.PopulateConnectedActionsMap(aConnectedActions_MemberMap,
-                                                  rInMtf.GetActionSize());
+    ::std::vector<const IntersectingActions*> aIntersectingActions_MemberMap;
+    aIntersectingActions.PopulateIntersectingActionsMap(aIntersectingActions_MemberMap,
+                                                        rInMtf.GetActionSize());
 
     //  STAGE 3.1: Output background mtf actions (if there are any)
 
@@ -359,12 +359,12 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
     //  STAGE 3.2: Generate banded bitmaps for special regions
     const tools::Rectangle aOutputRect(GetOutputRect(this));
 
-    // iterate over all aConnectedActions members and generate bitmaps for the special ones
-    aConnectedActions.UnmarkConnectedActions(aOutputRect, bReduceTransparency,
-                                             bTransparencyAutoMode);
+    // iterate over all aIntersectingActions members and generate bitmaps for the special ones
+    aIntersectingActions.UnmarkIntersectingActions(aOutputRect, bReduceTransparency,
+                                                   bTransparencyAutoMode);
 
-    aConnectedActions.CreateBitmapActions(
-        rOutMtf, this, rInMtf, aConnectedActions_MemberMap, aOutputRect, aBackgroundAction,
+    aIntersectingActions.CreateBitmapActions(
+        rOutMtf, this, rInMtf, aIntersectingActions_MemberMap, aOutputRect, aBackgroundAction,
         nMaxBmpDPIX, nMaxBmpDPIY, bDownsampleBitmaps, bReduceTransparency, bTransparencyAutoMode);
 
     aMapModeVDev->ClearStack(); // clean up aMapModeVDev
@@ -372,14 +372,15 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
     //  STAGE 4: Copy actions to output metafile
 
     // iterate over all actions and duplicate the ones not in a
-    // special aConnectedActions member into rOutMtf
+    // special aIntersectingActions member into rOutMtf
     for (pCurrAct = const_cast<GDIMetaFile&>(rInMtf).FirstAction(), nActionNum = 0; pCurrAct;
          pCurrAct = const_cast<GDIMetaFile&>(rInMtf).NextAction(), ++nActionNum)
     {
-        const ConnectedActions* pCurrAssociatedAction = aConnectedActions_MemberMap[nActionNum];
+        const IntersectingActions* pCurrAssociatedAction
+            = aIntersectingActions_MemberMap[nActionNum];
 
         // NOTE: This relies on the fact that map-mode or draw
-        // mode changing actions are solitary aConnectedActions elements and
+        // mode changing actions are solitary aIntersectingActions elements and
         // have empty bounding boxes, see comment on stage 2.1
         // above
         if (pCurrAssociatedAction
@@ -411,9 +412,9 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile(const GDIMetaFile& rInMtf, G
     rOutMtf.SetPrefSize(rInMtf.GetPrefSize());
 
 #if OSL_DEBUG_LEVEL > 1
-    // iterate over all aConnectedActions members and generate rectangles for the bounding boxes
+    // iterate over all aIntersectingActions members and generate rectangles for the bounding boxes
     rOutMtf.AddAction(new MetaFillColorAction(COL_WHITE, false));
-    for (auto const& aCurr : aConnectedActions)
+    for (auto const& aCurr : aIntersectingActions)
     {
         if (aCurr.bIsSpecial)
             rOutMtf.AddAction(new MetaLineColorAction(COL_RED, true));

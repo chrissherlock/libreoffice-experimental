@@ -35,9 +35,9 @@
 #include <vcl/bitmapaccess.hxx>
 
 #include "pdfwriter_impl.hxx"
-#include "ConnectedActions.hxx"
+#include "IntersectingActions.hxx"
 
-bool ConnectedActions::AreBoundsOver(tools::Rectangle const& rBounds)
+bool IntersectingActions::AreBoundsOver(tools::Rectangle const& rBounds)
 {
     return (!aBounds.IsEmpty() && !bIsFullyTransparent && aBounds.IsOver(rBounds));
 }
@@ -68,7 +68,7 @@ bool DoesActionHandleTransparency(const MetaAction& rAct)
     }
 }
 
-void ConnectedActions::MarkSpecial(bool bTreatSpecial, MetaAction* pCurrAct)
+void IntersectingActions::MarkSpecial(bool bTreatSpecial, MetaAction* pCurrAct)
 {
     // now test whether the whole connected component must be
     // treated specially (i.e. rendered as a bitmap): if the
@@ -82,7 +82,7 @@ void ConnectedActions::MarkSpecial(bool bTreatSpecial, MetaAction* pCurrAct)
     // are transparent" no sorting is necessary, since the
     // added metaaction pCurrAct is always in the order the
     // metafile is painted. Generally, the order of the
-    // metaactions in the ConnectedActions are not
+    // metaactions in the IntersectingActions are not
     // guaranteed to be the same as in the metafile.
     if (bTreatSpecial)
     {
@@ -157,40 +157,44 @@ template <> tools::Rectangle GetBoundsRect<MetaWallpaperAction*>(MetaWallpaperAc
     return pAction->GetRect();
 }
 
-void ConnectedActions::SetBackground(Color const& rBgColor, tools::Rectangle const& rBounds)
+void IntersectingActions::SetBackground(Color const& rBgColor, tools::Rectangle const& rBounds)
 {
     aBgColor = rBgColor;
     aBounds = rBounds;
 }
 
-template <typename T> bool ConnectedActions::IsValidShape(T)
+template <typename T> bool IntersectingActions::IsValidShape(T)
 {
     SAL_WARN("vcl.gdi", "Should never call on this!");
     assert(false);
     return false;
 }
 
-template <> bool ConnectedActions::IsValidShape<MetaRectAction*>(MetaRectAction*) { return true; }
+template <> bool IntersectingActions::IsValidShape<MetaRectAction*>(MetaRectAction*)
+{
+    return true;
+}
 
-template <> bool ConnectedActions::IsValidShape<MetaPolygonAction*>(MetaPolygonAction* pAction)
+template <> bool IntersectingActions::IsValidShape<MetaPolygonAction*>(MetaPolygonAction* pAction)
 {
     const tools::Polygon aPoly(pAction->GetPolygon());
     return !basegfx::utils::isRectangle(aPoly.getB2DPolygon());
 }
 
 template <>
-bool ConnectedActions::IsValidShape<MetaPolyPolygonAction*>(MetaPolyPolygonAction* pAction)
+bool IntersectingActions::IsValidShape<MetaPolyPolygonAction*>(MetaPolyPolygonAction* pAction)
 {
     const tools::PolyPolygon aPoly(pAction->GetPolyPolygon());
     return aPoly.Count() != 1 || !basegfx::utils::isRectangle(aPoly[0].getB2DPolygon());
 }
 
-template <> bool ConnectedActions::IsValidShape<MetaWallpaperAction*>(MetaWallpaperAction*)
+template <> bool IntersectingActions::IsValidShape<MetaWallpaperAction*>(MetaWallpaperAction*)
 {
     return true;
 }
 
-bool ConnectedActions::IsBackgroundNotCovered(MetaAction* pAction, OutputDevice const& rMapModeVDev)
+bool IntersectingActions::IsBackgroundNotCovered(MetaAction* pAction,
+                                                 OutputDevice const& rMapModeVDev)
 {
     const tools::Rectangle& rCurrRect = GetBoundsRect(pAction);
 
@@ -201,8 +205,8 @@ bool ConnectedActions::IsBackgroundNotCovered(MetaAction* pAction, OutputDevice 
                 && rMapModeVDev.IsFillColor());
 }
 
-std::tuple<int, MetaAction*> ConnectedActions::ExtendAllBounds(GDIMetaFile const& rMtf,
-                                                               VirtualDevice* pMapModeVDev)
+std::tuple<int, MetaAction*> IntersectingActions::ExtendAllBounds(GDIMetaFile const& rMtf,
+                                                                  VirtualDevice* pMapModeVDev)
 {
     MetaAction* pCurrAct = const_cast<GDIMetaFile&>(rMtf).FirstAction();
 
@@ -226,7 +230,7 @@ std::tuple<int, MetaAction*> ConnectedActions::ExtendAllBounds(GDIMetaFile const
 }
 
 template <typename T>
-std::tuple<int, bool> ConnectedActions::ExtendCurrentBounds(T*, VirtualDevice*, int, int)
+std::tuple<int, bool> IntersectingActions::ExtendCurrentBounds(T*, VirtualDevice*, int, int)
 {
     SAL_WARN("vcl.gdi", "Should never match");
     assert(false);
@@ -234,7 +238,8 @@ std::tuple<int, bool> ConnectedActions::ExtendCurrentBounds(T*, VirtualDevice*, 
 }
 
 template <>
-std::tuple<int, bool> ConnectedActions::ExtendCurrentBounds(MetaAction*, VirtualDevice*, int, int)
+std::tuple<int, bool> IntersectingActions::ExtendCurrentBounds(MetaAction*, VirtualDevice*, int,
+                                                               int)
 {
     SAL_WARN("vcl.gdi", "Should never match");
     assert(false);
@@ -242,9 +247,9 @@ std::tuple<int, bool> ConnectedActions::ExtendCurrentBounds(MetaAction*, Virtual
 }
 
 template <>
-std::tuple<int, bool> ConnectedActions::ExtendCurrentBounds(MetaTransparentAction* pCurrAct,
-                                                            VirtualDevice* pMapModeVDev, int,
-                                                            int nLastBgAction)
+std::tuple<int, bool> IntersectingActions::ExtendCurrentBounds(MetaTransparentAction* pCurrAct,
+                                                               VirtualDevice* pMapModeVDev, int,
+                                                               int nLastBgAction)
 {
     if (pCurrAct->IsTransparent(pMapModeVDev))
     {
@@ -258,7 +263,7 @@ std::tuple<int, bool> ConnectedActions::ExtendCurrentBounds(MetaTransparentActio
     }
 }
 
-std::tuple<int, bool> ConnectedActions::ExtendCurrentBounds_implementation(
+std::tuple<int, bool> IntersectingActions::ExtendCurrentBounds_implementation(
     MetaAction* pCurrAct, VirtualDevice* pMapModeVDev, int nActionNum, int nLastBgAction)
 {
     if (IsBackgroundNotCovered(pCurrAct, *pMapModeVDev))
@@ -273,40 +278,40 @@ std::tuple<int, bool> ConnectedActions::ExtendCurrentBounds_implementation(
 }
 
 template <>
-std::tuple<int, bool> ConnectedActions::ExtendCurrentBounds(MetaRectAction* pCurrAct,
-                                                            VirtualDevice* pMapModeVDev,
-                                                            int nActionNum, int nLastBgAction)
+std::tuple<int, bool> IntersectingActions::ExtendCurrentBounds(MetaRectAction* pCurrAct,
+                                                               VirtualDevice* pMapModeVDev,
+                                                               int nActionNum, int nLastBgAction)
 {
     return ExtendCurrentBounds_implementation(pCurrAct, pMapModeVDev, nActionNum, nLastBgAction);
 }
 
 template <>
-std::tuple<int, bool> ConnectedActions::ExtendCurrentBounds(MetaPolygonAction* pCurrAct,
-                                                            VirtualDevice* pMapModeVDev,
-                                                            int nActionNum, int nLastBgAction)
+std::tuple<int, bool> IntersectingActions::ExtendCurrentBounds(MetaPolygonAction* pCurrAct,
+                                                               VirtualDevice* pMapModeVDev,
+                                                               int nActionNum, int nLastBgAction)
 {
     return ExtendCurrentBounds_implementation(pCurrAct, pMapModeVDev, nActionNum, nLastBgAction);
 }
 
 template <>
-std::tuple<int, bool> ConnectedActions::ExtendCurrentBounds(MetaPolyPolygonAction* pCurrAct,
-                                                            VirtualDevice* pMapModeVDev,
-                                                            int nActionNum, int nLastBgAction)
+std::tuple<int, bool> IntersectingActions::ExtendCurrentBounds(MetaPolyPolygonAction* pCurrAct,
+                                                               VirtualDevice* pMapModeVDev,
+                                                               int nActionNum, int nLastBgAction)
 {
     return ExtendCurrentBounds_implementation(pCurrAct, pMapModeVDev, nActionNum, nLastBgAction);
 }
 
 template <>
-std::tuple<int, bool> ConnectedActions::ExtendCurrentBounds(MetaWallpaperAction* pCurrAct,
-                                                            VirtualDevice* pMapModeVDev,
-                                                            int nActionNum, int nLastBgAction)
+std::tuple<int, bool> IntersectingActions::ExtendCurrentBounds(MetaWallpaperAction* pCurrAct,
+                                                               VirtualDevice* pMapModeVDev,
+                                                               int nActionNum, int nLastBgAction)
 {
     return ExtendCurrentBounds_implementation(pCurrAct, pMapModeVDev, nActionNum, nLastBgAction);
 }
 
-int ConnectedActions::ReconstructVirtualDeviceMapMode(GDIMetaFile const& rMtf,
-                                                      VirtualDevice* pMapModeVDev,
-                                                      int nLastBgAction)
+int IntersectingActions::ReconstructVirtualDeviceMapMode(GDIMetaFile const& rMtf,
+                                                         VirtualDevice* pMapModeVDev,
+                                                         int nLastBgAction)
 {
     int nActionNum = 0;
 
@@ -328,8 +333,8 @@ int ConnectedActions::ReconstructVirtualDeviceMapMode(GDIMetaFile const& rMtf,
     return nActionNum;
 }
 
-std::tuple<int, MetaAction*> ConnectedActions::PruneBackgroundObjects(GDIMetaFile const& rMtf,
-                                                                      VirtualDevice* pMapModeVDev)
+std::tuple<int, MetaAction*>
+IntersectingActions::PruneBackgroundObjects(GDIMetaFile const& rMtf, VirtualDevice* pMapModeVDev)
 {
     MetaAction* pCurrAct = nullptr;
     int nLastBgAction = 0;
