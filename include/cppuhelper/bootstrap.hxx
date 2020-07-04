@@ -30,6 +30,8 @@ namespace com { namespace sun { namespace star {
     namespace uno { class XComponentContext; }
 } } }
 
+namespace rtl { class Bootstrap; }
+
 namespace cppu
 {
 
@@ -56,7 +58,6 @@ CPPUHELPER_DLLPUBLIC sal_Bool SAL_CALL installTypeDescriptionManager(
 */
 CPPUHELPER_DLLPUBLIC css::uno::Reference< css::uno::XComponentContext > SAL_CALL
 defaultBootstrap_InitialComponentContext();
-
 
 /** Bootstraps an initial component context with service manager upon
     information from an ini file.
