@@ -21,6 +21,7 @@ $(eval $(call gb_Module_add_check_targets,cppuhelper,\
 	CppunitTest_cppuhelper_cppu_unourl \
 	CppunitTest_cppuhelper_qa_type \
 	CppunitTest_cppuhelper_qa_typelib \
+	CppunitTest_cppuhelper_qa_xinterface \
 	CppunitTest_cppuhelper_qa_componentcontext \
 	CppunitTest_cppuhelper_qa_misc \
 	CppunitTest_cppuhelper_qa_weak \
