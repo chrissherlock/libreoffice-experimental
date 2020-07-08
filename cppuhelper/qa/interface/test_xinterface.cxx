@@ -31,6 +31,10 @@ class TestInterface : public css::uno::XInterface
 {
 public:
     virtual ~TestInterface() {}
+    static css::uno::Type const& static_type(void* = nullptr) // loplugin:refcounting
+    {
+        return cppu::UnoType<TestInterface>::get();
+    }
 
     virtual css::uno::Any queryInterface(css::uno::Type const& rType) override
     {
