@@ -63,11 +63,7 @@ template<typename Impl, typename... Ifc> struct ImplClassData {
         static class_dataN<sizeof... (Ifc)> s_cd = {
             sizeof... (Ifc) + 1, false, false, {},
             {
-                { { Ifc::static_type },
-                  (reinterpret_cast<sal_IntPtr>(
-                      static_cast<Ifc *>(reinterpret_cast<Impl *>(16)))
-                   - 16)
-                }...,
+                CPPUHELPER_DETAIL_TYPEENTRY(Ifc)...,
                 CPPUHELPER_DETAIL_TYPEENTRY(css::lang::XTypeProvider)
             }
         };
