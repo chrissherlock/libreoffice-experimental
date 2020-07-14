@@ -21,37 +21,73 @@ class Test : public ::CppUnit::TestFixture
 {
 public:
     void testStructType();
+    void testDerivedStructType();
 
     CPPUNIT_TEST_SUITE(Test);
     CPPUNIT_TEST(testStructType);
+    CPPUNIT_TEST(testDerivedStructType);
     CPPUNIT_TEST_SUITE_END();
+
+private:
+    typelib_TypeDescriptionReference* createStruct(typelib_TypeDescriptionReference* pBase,
+                                                   rtl_uString* pTypeName,
+                                                   typelib_TypeClass eMemberTypeClass,
+                                                   rtl_uString* pMemberTypeName,
+                                                   rtl_uString* pMemberName);
 };
 
 void Test::testStructType()
 {
-    typelib_TypeDescription* pType = nullptr;
-    rtl_uString* sType = nullptr;
-    rtl_uString_newFromAscii(&sType, "TestStruct\0");
+    typelib_TypeDescriptionReference* pType
+        = createStruct(nullptr, OUString("TestStruct").pData, typelib_TypeClass_SHORT,
+                       OUString("short").pData, OUString("mnParam1").pData);
+
+    (void)pType;
+}
+
+void Test::testDerivedStructType()
+{
+    typelib_TypeDescriptionReference* pBaseType
+        = createStruct(nullptr, OUString("TestStruct").pData, typelib_TypeClass_SHORT,
+                       OUString("short").pData, OUString("mnParam1").pData);
+
+    typelib_TypeDescriptionReference* pType
+        = createStruct(pBaseType, OUString("TestDerivedStruct").pData, typelib_TypeClass_SHORT,
+                       OUString("short").pData, OUString("mnParam2").pData);
+
+    (void)pType;
+}
+
+typelib_TypeDescriptionReference* Test::createStruct(typelib_TypeDescriptionReference* pBase,
+                                                     rtl_uString* pTypeName,
+                                                     typelib_TypeClass eMemberTypeClass,
+                                                     rtl_uString* pMemberTypeName,
+                                                     rtl_uString* pMemberName)
+{
     const sal_uInt32 nMembers = 1;
 
     typelib_StructMember_Init pMemberInits[nMembers];
 
     typelib_StructMember_Init* pMemberInit
-        = static_cast<typelib_StructMember_Init*>(alloca(sizeof(typelib_StructMember_Init)));
-    pMemberInit->aBase.eTypeClass = typelib_TypeClass_SHORT;
-    pMemberInit->aBase.pTypeName = nullptr;
-    rtl_uString_newFromAscii(&pMemberInit->aBase.pTypeName, "short\0");
+        = static_cast<typelib_StructMember_Init*>(malloc(sizeof(typelib_StructMember_Init)));
+    pMemberInit->aBase.eTypeClass = eMemberTypeClass;
+    pMemberInit->aBase.pTypeName = pMemberTypeName;
     rtl_uString_acquire(pMemberInit->aBase.pTypeName);
-    rtl_uString_newFromAscii(&pMemberInit->aBase.pMemberName, "mnParam1\0");
+    pMemberInit->aBase.pMemberName = pMemberName;
     rtl_uString_acquire(pMemberInit->aBase.pMemberName);
     pMemberInit->bParameterizedType = sal_False;
 
     pMemberInits[0] = *pMemberInit;
 
-    typelib_typedescription_newStruct(&pType, sType, nullptr, 1, pMemberInits);
+    typelib_TypeDescription* pType = nullptr;
+    typelib_typedescription_newStruct(&pType, pTypeName, pBase, 1, pMemberInits);
 
     rtl_uString_release(pMemberInit->aBase.pTypeName);
     rtl_uString_release(pMemberInit->aBase.pMemberName);
+
+    typelib_typedescription_register(&pType);
+
+    return reinterpret_cast<typelib_TypeDescriptionReference*>(pType);
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(Test);
