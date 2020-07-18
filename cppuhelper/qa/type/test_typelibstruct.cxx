@@ -84,6 +84,7 @@ typelib_TypeDescriptionReference* Test::createStruct(typelib_TypeDescriptionRefe
 
     rtl_uString_release(pMemberInit->aBase.pTypeName);
     rtl_uString_release(pMemberInit->aBase.pMemberName);
+    free(pMemberInit);
 
     typelib_typedescription_register(&pType);
 

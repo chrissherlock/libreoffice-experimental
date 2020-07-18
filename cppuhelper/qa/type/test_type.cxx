@@ -273,9 +273,9 @@ void Test::testUnsignedShortType()
 
 void Test::testLongType()
 {
-    css::uno::Type aType(css::uno::TypeClass_SHORT, "short");
-    CPPUNIT_ASSERT_EQUAL(css::uno::TypeClass::TypeClass_SHORT, aType.getTypeClass());
-    CPPUNIT_ASSERT_EQUAL(OUString("short"), aType.getTypeName());
+    css::uno::Type aType(css::uno::TypeClass_LONG, "long");
+    CPPUNIT_ASSERT_EQUAL(css::uno::TypeClass::TypeClass_LONG, aType.getTypeClass());
+    CPPUNIT_ASSERT_EQUAL(OUString("long"), aType.getTypeName());
     CPPUNIT_ASSERT(!aType.isAssignableFrom(css::uno::Type()));
     CPPUNIT_ASSERT(
         !aType.isAssignableFrom(css::uno::Type(css::uno::TypeClass::TypeClass_CHAR, "char")));
