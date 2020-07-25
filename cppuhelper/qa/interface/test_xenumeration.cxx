@@ -18,6 +18,7 @@
 
 #include <com/sun/star/uno/Any.hxx>
 #include <com/sun/star/container/XEnumeration.hpp>
+#include <com/sun/star/container/XEnumerationAccess.hpp>
 
 class TestEnumeration : public css::container::XEnumeration
 {
@@ -73,15 +74,58 @@ css::uno::Any TestEnumeration::nextElement()
     return aElement;
 }
 
+class TestEnumerationAccess : public css::container::XElementAccess
+{
+public:
+    virtual ~TestEnumerationAccess() {}
+    static css::uno::Type const& static_type(void* = nullptr);
+
+    // XInterface
+    virtual css::uno::Any queryInterface(css::uno::Type const& rType);
+    virtual void acquire() {}
+    virtual void release() {}
+
+    // XElementAccess
+    virtual css::uno::Type getElementType();
+    virtual sal_Bool hasElements();
+
+    // XEnumerationAccess
+    virtual css::uno::Reference<css::container::XEnumeration> createEnumeration();
+};
+
+css::uno::Type const& TestEnumerationAccess::static_type(void*)
+{
+    return cppu::UnoType<TestEnumerationAccess>::get();
+}
+
+css::uno::Any TestEnumerationAccess::queryInterface(css::uno::Type const& rType)
+{
+    return cppu::queryInterface(rType, this);
+}
+
+css::uno::Type TestEnumerationAccess::getElementType()
+{
+    return css::uno::Type(css::uno::TypeClass_UNSIGNED_LONG, "unsigned long");
+}
+
+sal_Bool TestEnumerationAccess::hasElements() { return sal_True; }
+
+css::uno::Reference<css::container::XEnumeration> TestEnumerationAccess::createEnumeration()
+{
+    return css::uno::Reference<css::container::XEnumeration>(new TestEnumeration());
+}
+
 namespace
 {
 class Test : public ::CppUnit::TestFixture
 {
 public:
     void testTestEnumerationType();
+    void testTestEnumerationAccessType();
 
     CPPUNIT_TEST_SUITE(Test);
     CPPUNIT_TEST(testTestEnumerationType);
+    CPPUNIT_TEST(testTestEnumerationAccessType);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -110,6 +154,18 @@ void Test::testTestEnumerationType()
 
     CPPUNIT_ASSERT_THROW(aTestEnumeration.nextElement(), css::container::NoSuchElementException);
     CPPUNIT_ASSERT(!aTestEnumeration.hasMoreElements());
+}
+
+void Test::testTestEnumerationAccessType()
+{
+    TestEnumerationAccess aTestEnumAccess;
+
+    CPPUNIT_ASSERT(aTestEnumAccess.hasElements());
+    CPPUNIT_ASSERT_EQUAL(css::uno::Type(css::uno::TypeClass_UNSIGNED_LONG, "unsigned long"),
+                         aTestEnumAccess.getElementType());
+
+    css::uno::Reference<css::container::XEnumeration> xEnumAccess
+        = aTestEnumAccess.createEnumeration();
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(Test);
