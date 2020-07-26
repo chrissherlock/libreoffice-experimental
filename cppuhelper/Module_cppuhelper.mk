@@ -26,6 +26,7 @@ $(eval $(call gb_Module_add_check_targets,cppuhelper,\
 	CppunitTest_cppuhelper_qa_xinterface \
 	CppunitTest_cppuhelper_qa_xserviceinfo \
 	CppunitTest_cppuhelper_qa_xenumeration \
+	CppunitTest_cppuhelper_qa_xset \
 	CppunitTest_cppuhelper_qa_xhierarchicalnameaccess \
 	CppunitTest_cppuhelper_qa_componentcontext \
 	CppunitTest_cppuhelper_qa_misc \
