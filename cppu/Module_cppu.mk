@@ -25,6 +25,7 @@ $(eval $(call gb_Module_add_check_targets,cppu,\
 	CppunitTest_cppu_qa_any \
 	CppunitTest_cppu_qa_recursion \
 	CppunitTest_cppu_qa_reference \
+	CppunitTest_cppu_qa_unoenvironment \
 	CppunitTest_cppu_qa_unotype \
 	CppunitTest_cppu_test_cppumaker \
 	CppunitTest_cppu_typelib \
