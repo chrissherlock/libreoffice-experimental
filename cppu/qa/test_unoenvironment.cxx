@@ -31,10 +31,13 @@ namespace
 class Test : public CppUnit::TestFixture
 {
 public:
-    void testUnoEnvironment();
+    void testUnoCurrentEnvironment();
+    void testUnoGetEnvironment();
+    void testUnoInvoke();
 
     CPPUNIT_TEST_SUITE(Test);
-    CPPUNIT_TEST(testUnoEnvironment);
+    CPPUNIT_TEST(testUnoCurrentEnvironment);
+    CPPUNIT_TEST(testUnoGetEnvironment);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -44,7 +47,7 @@ static void testFunc(va_list* pParam)
     *pnTestNum = 5;
 }
 
-void Test::testUnoEnvironment()
+void Test::testUnoCurrentEnvironment()
 {
     uno_Environment* pEnv = nullptr;
     uno_getCurrentEnvironment(&pEnv, OUString(CPPU_CURRENT_LANGUAGE_BINDING_NAME).pData);
@@ -61,6 +64,38 @@ void Test::testUnoEnvironment()
     *pnTest = 0;
     uno_Environment_invoke(pEnv, testFunc, pnTest);
     CPPUNIT_ASSERT_EQUAL(*pnTest, nExpected);
+
+    *pnTest = 0;
+    aEnv.invoke(testFunc, pnTest);
+    CPPUNIT_ASSERT_EQUAL(*pnTest, nExpected);
+}
+
+void Test::testUnoGetEnvironment()
+{
+    uno_Environment* pEnv = nullptr;
+    uno_getEnvironment(&pEnv, OUString(UNO_LB_UNO).pData, nullptr);
+    uno_dumpEnvironment(stderr, pEnv, nullptr);
+
+    css::uno::Environment aEnv(pEnv);
+    CPPUNIT_ASSERT_EQUAL(OUString(UNO_LB_UNO), aEnv.getTypeName());
+
+    uno_Environment_enter(pEnv);
+    CPPUNIT_ASSERT(uno_Environment_isValid(pEnv, nullptr));
+}
+
+void Test::testUnoInvoke()
+{
+    uno_Environment* pEnv = nullptr;
+    uno_getCurrentEnvironment(&pEnv, OUString(CPPU_CURRENT_LANGUAGE_BINDING_NAME).pData);
+    uno_Environment_enter(pEnv);
+
+    const sal_uInt32 nExpected = 5;
+    sal_uInt32* pnTest = static_cast<sal_uInt32*>(malloc(sizeof(sal_uInt32)));
+    *pnTest = 0;
+    uno_Environment_invoke(pEnv, testFunc, pnTest);
+    CPPUNIT_ASSERT_EQUAL(*pnTest, nExpected);
+
+    css::uno::Environment aEnv(pEnv);
 
     *pnTest = 0;
     aEnv.invoke(testFunc, pnTest);
