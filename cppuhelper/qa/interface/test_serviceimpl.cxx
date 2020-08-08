@@ -28,8 +28,6 @@ public:
 
     virtual ~CoreComponentInterfaces() {}
 
-    static css::uno::Type const& static_type(void* = nullptr);
-
     // XInterface
     virtual css::uno::Any queryInterface(css::uno::Type const& rType);
     virtual void acquire();
@@ -48,14 +46,23 @@ private:
     oslInterlockedCount mnRefCount;
 };
 
-css::uno::Type const& CoreComponentInterfaces::static_type(void*)
-{
-    return cppu::UnoType<XInterface>::get();
-}
-
 css::uno::Any CoreComponentInterfaces::queryInterface(css::uno::Type const& rType)
 {
-    return cppu::queryInterface(rType, this);
+    if (rType.equals(cppu::UnoType<css::lang::XTypeProvider>::get())
+        || rType.equals(cppu::UnoType<css::uno::XInterface>::get()))
+    {
+        css::uno::Reference<css::uno::XInterface> ref(static_cast<css::lang::XTypeProvider*>(this));
+        return makeAny(ref);
+    }
+
+    if (rType.equals(cppu::UnoType<css::lang::XServiceInfo>::get()))
+    {
+        css::uno::Reference<css::lang::XServiceInfo> ref(
+            static_cast<css::lang::XServiceInfo*>(this));
+        return makeAny(ref);
+    }
+
+    return css::uno::Any();
 }
 
 void CoreComponentInterfaces::acquire() { osl_atomic_increment(&mnRefCount); }
