@@ -8,17 +8,17 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
 
-$(eval $(call gb_CppunitTest_CppunitTest,cppuhelper_qa_xserviceinfo))
+$(eval $(call gb_CppunitTest_CppunitTest,cppuhelper_qa_serviceimpl))
 
-$(eval $(call gb_CppunitTest_add_exception_objects,cppuhelper_qa_xserviceinfo,\
-    cppuhelper/qa/interface/test_xserviceinfo \
+$(eval $(call gb_CppunitTest_add_exception_objects,cppuhelper_qa_serviceimpl,\
+    cppuhelper/qa/interface/test_serviceimpl \
 ))
 
-$(eval $(call gb_CppunitTest_use_api,cppuhelper_qa_xserviceinfo,\
+$(eval $(call gb_CppunitTest_use_api,cppuhelper_qa_serviceimpl,\
 	udkapi \
 ))
 
-$(eval $(call gb_CppunitTest_use_libraries,cppuhelper_qa_xserviceinfo,\
+$(eval $(call gb_CppunitTest_use_libraries,cppuhelper_qa_serviceimpl,\
 	cppu \
     cppuhelper \
 	sal \
