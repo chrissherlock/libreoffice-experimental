@@ -294,7 +294,7 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
 
             for(auto const& rPolygon : aB2DPolyPolygon)
             {
-                bDrawn = mpGraphics->DrawPolyLine(
+                mpGraphics->DrawPolyLine(
                     aTransform,
                     rPolygon,
                     fTransparency,
@@ -304,8 +304,10 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
                     css::drawing::LineCap_BUTT,
                     basegfx::deg2rad(15.0), // not used with B2DLineJoin::NONE, but the correct default
                     bPixelSnapHairline,
-                    *this );
+                    *this);
             }
+
+            bDrawn = true;
 
             // prepare to restore the fill color
             mbInitFillColor = mbFillColor;
