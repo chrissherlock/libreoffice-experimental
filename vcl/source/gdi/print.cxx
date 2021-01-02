@@ -500,7 +500,7 @@ bool Printer::AcquireGraphics() const
     pWin->SetInitLineColorFlag(true);
     pWin->SetInitFillColorFlag(true);
     mbInitFont          = true;
-    mbInitTextColor     = true;
+    pWin->SetInitTextColorFlag(true);
     mbInitClipRegion    = true;
 
     ImplSVData* pSVData = ImplGetSVData();

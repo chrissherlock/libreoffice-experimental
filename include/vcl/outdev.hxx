@@ -324,10 +324,7 @@ private:
     const OutDevType                meOutDevType;
     OutDevViewType                  meOutDevViewType;
     vcl::Region                     maRegion;           // contains the clip region, see SetClipRegion(...)
-    vcl::Font                       maFont;
     Color                           maTextColor;
-    Color                           maTextLineColor;
-    Color                           maOverlineColor;
     RasterOp                        meRasterOp;
     Wallpaper                       maBackground;
     MapMode                         maMapMode;
@@ -342,7 +339,6 @@ private:
     mutable bool                    mbDevOutput : 1;
     mutable bool                    mbOutputClipped : 1;
     mutable bool                    mbInitFont : 1;
-    mutable bool                    mbInitTextColor : 1;
     mutable bool                    mbInitClipRegion : 1;
     mutable bool                    mbClipRegionSet : 1;
     mutable bool                    mbNewFont : 1;
@@ -1041,23 +1037,10 @@ public:
                                                     DrawTextFlags    nStyle,
                                                     GDIMetaFile&     rMtf );
 
-    void                        SetTextColor( const Color& rColor );
-    const Color&                GetTextColor() const { return maTextColor; }
-
-    void                        SetTextFillColor();
-    void                        SetTextFillColor( const Color& rColor );
-    Color                       GetTextFillColor() const;
-    bool                        IsTextFillColor() const { return !maFont.IsTransparent(); }
-
-    void                        SetTextLineColor();
-    void                        SetTextLineColor( const Color& rColor );
-    const Color&                GetTextLineColor() const { return maTextLineColor; }
-    bool                        IsTextLineColor() const { return !maTextLineColor.IsTransparent(); }
-
-    void                        SetOverlineColor();
-    void                        SetOverlineColor( const Color& rColor );
-    const Color&                GetOverlineColor() const { return maOverlineColor; }
-    bool                        IsOverlineColor() const { return !maOverlineColor.IsTransparent(); }
+    void                        SetTextColor(Color const& rColor) override;
+    void                        SetTextLineColor(Color const& rColor = COL_TRANSPARENT) override;
+    void                        SetTextFillColor(Color const& rColor = COL_TRANSPARENT) override;
+    void                        SetOverlineColor(Color const& rColor = COL_TRANSPARENT) override;
 
     void                        SetTextAlign( TextAlign eAlign );
     TextAlign                   GetTextAlign() const { return maFont.GetAlignment(); }
@@ -1113,8 +1096,6 @@ protected:
     SAL_DLLPRIVATE tools::Long         ImplGetTextLines( ImplMultiTextLineInfo& rLineInfo, tools::Long nWidth, const OUString& rStr, DrawTextFlags nStyle, const vcl::ITextLayout& _rLayout );
     SAL_DLLPRIVATE float        approximate_char_width() const;
 private:
-    SAL_DLLPRIVATE void         ImplInitTextColor();
-
     SAL_DLLPRIVATE void         ImplDrawTextDirect( SalLayout&, bool bTextLines);
     SAL_DLLPRIVATE void         ImplDrawSpecialText( SalLayout& );
     SAL_DLLPRIVATE void         ImplDrawTextRect( tools::Long nBaseX, tools::Long nBaseY, tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight );
