@@ -97,7 +97,7 @@ bool doesRectCoverWithUniformColor(
     // shape needs to fully cover previous content, and have uniform
     // color
     return (rMapModeVDev.LogicToPixel(rCurrRect).IsInside(rPrevRect) &&
-        rMapModeVDev.IsFillColor());
+        rMapModeVDev.IsOpaqueFillColor());
 }
 
 /** Check whether rCurrRect rectangle fully covers io_rPrevRect - if
@@ -256,8 +256,8 @@ void ImplConvertTransparentAction( GDIMetaFile&        o_rMtf,
 // Returns true, if given action creates visible (i.e. non-transparent) output
 bool ImplIsNotTransparent( const MetaAction& rAct, const OutputDevice& rOut )
 {
-    const bool  bLineTransparency( !rOut.IsLineColor() || rOut.GetLineColor().IsFullyTransparent() );
-    const bool  bFillTransparency( !rOut.IsFillColor() || rOut.GetFillColor().IsFullyTransparent() );
+    const bool  bLineTransparency( !rOut.IsOpaqueLineColor() || rOut.GetLineColor().IsFullyTransparent() );
+    const bool  bFillTransparency( !rOut.IsOpaqueFillColor() || rOut.GetFillColor().IsFullyTransparent() );
     bool        bRet( false );
 
     switch( rAct.GetType() )

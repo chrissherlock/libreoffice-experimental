@@ -56,7 +56,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
 
     if ( rPolyPoly.Count() && rPolyPoly[ 0 ].GetSize() )
     {
-        if ( mnDrawMode & ( DrawModeFlags::BlackGradient | DrawModeFlags::WhiteGradient | DrawModeFlags::SettingsGradient) )
+        if ( GetDrawMode() & ( DrawModeFlags::BlackGradient | DrawModeFlags::WhiteGradient | DrawModeFlags::SettingsGradient) )
         {
             Color aColor = GetSingleColorGradientFill();
 
@@ -70,7 +70,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
 
         Gradient aGradient( rGradient );
 
-        if ( mnDrawMode & DrawModeFlags::GrayGradient )
+        if ( GetDrawMode() & DrawModeFlags::GrayGradient )
             aGradient.MakeGrayscale();
 
         DrawGradientToMetafile( rPolyPoly, rGradient );
@@ -110,13 +110,13 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
                 if (!bDrawn && !mbOutputClipped)
                 {
                     // draw gradients without border
-                    if( mbLineColor || mbInitLineColor )
+                    if( IsOpaqueLineColor() || IsInitLineColor() )
                     {
                         mpGraphics->SetLineColor();
-                        mbInitLineColor = true;
+                        SetInitLineColorFlag(true);
                     }
 
-                    mbInitFillColor = true;
+                    SetInitFillColorFlag(true);
 
                     // calculate step count if necessary
                     if ( !aGradient.GetSteps() )
@@ -185,7 +185,7 @@ void OutputDevice::DrawGradientToMetafile ( const tools::PolyPolygon& rPolyPoly,
 
     Gradient aGradient( rGradient );
 
-    if (mnDrawMode & DrawModeFlags::GrayGradient)
+    if (GetDrawMode() & DrawModeFlags::GrayGradient)
         aGradient.MakeGrayscale();
 
     const tools::Rectangle aBoundRect( rPolyPoly.GetBoundRect() );
@@ -972,13 +972,13 @@ Color OutputDevice::GetSingleColorGradientFill()
     Color aColor;
 
     // we should never call on this function if any of these aren't set!
-    assert( mnDrawMode & ( DrawModeFlags::BlackGradient | DrawModeFlags::WhiteGradient | DrawModeFlags::SettingsGradient) );
+    assert( GetDrawMode() & ( DrawModeFlags::BlackGradient | DrawModeFlags::WhiteGradient | DrawModeFlags::SettingsGradient) );
 
-    if ( mnDrawMode & DrawModeFlags::BlackGradient )
+    if ( GetDrawMode() & DrawModeFlags::BlackGradient )
         aColor = COL_BLACK;
-    else if ( mnDrawMode & DrawModeFlags::WhiteGradient )
+    else if ( GetDrawMode() & DrawModeFlags::WhiteGradient )
         aColor = COL_WHITE;
-    else if ( mnDrawMode & DrawModeFlags::SettingsGradient )
+    else if ( GetDrawMode() & DrawModeFlags::SettingsGradient )
         aColor = GetSettings().GetStyleSettings().GetWindowColor();
 
     return aColor;

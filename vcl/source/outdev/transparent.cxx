@@ -132,10 +132,10 @@ void OutputDevice::DrawTransparent(
     if (mbOutputClipped)
         return;
 
-    if (mbInitLineColor)
+    if (IsInitLineColor())
         InitLineColor();
 
-    if (mbInitFillColor)
+    if (IsInitFillColor())
         InitFillColor();
 
     if (mpGraphics->supportsOperation(OutDevSupportType::B2DDraw) && RasterOp::OverPaint == GetRasterOp())
@@ -153,10 +153,10 @@ void OutputDevice::DrawTransparent(
         // alpha... but that requires using premultiplied alpha also for already drawn data
         const double fAdjustedTransparency = mpAlphaVDev ? 0 : fTransparency;
 
-        if (IsFillColor())
+        if (IsOpaqueFillColor())
             mpGraphics->DrawPolyPolygon(aFullTransform, aB2DPolyPolygon, fAdjustedTransparency, *this);
 
-        if (IsLineColor())
+        if (IsOpaqueLineColor())
         {
             const bool bPixelSnapHairline(mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
 
@@ -205,7 +205,7 @@ void OutputDevice::DrawInvisiblePolygon( const tools::PolyPolygon& rPolyPoly )
     assert(!is_double_buffered_window());
 
     // short circuit if the polygon border is invisible too
-    if( !mbLineColor )
+    if( !IsOpaqueLineColor() )
         return;
 
     // we assume that the border is NOT to be drawn transparently???
@@ -221,14 +221,14 @@ void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
     assert(!is_double_buffered_window());
 
     // short circuit for drawing an opaque polygon
-    if( (nTransparencePercent < 1) || (mnDrawMode & DrawModeFlags::NoTransparency) )
+    if( (nTransparencePercent < 1) || (GetDrawMode() & DrawModeFlags::NoTransparency) )
     {
         DrawPolyPolygon( rPolyPoly );
         return;
     }
 
     // short circuit for drawing an invisible polygon
-    if( !mbFillColor || (nTransparencePercent >= 100) )
+    if( !IsOpaqueFillColor() || (nTransparencePercent >= 100) )
     {
         DrawInvisiblePolygon( rPolyPoly );
         return; // tdf#84294: do not record it in metafile
@@ -263,10 +263,10 @@ void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
         if( mbOutputClipped )
             return;
 
-        if( mbInitLineColor )
+        if( IsInitLineColor() )
             InitLineColor();
 
-        if( mbInitFillColor )
+        if( IsInitFillColor() )
             InitFillColor();
 
         // get the polygon in device coordinates
@@ -274,7 +274,7 @@ void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
         const basegfx::B2DHomMatrix aTransform(ImplGetDeviceTransformation());
 
         const double fTransparency = 0.01 * nTransparencePercent;
-        if( mbFillColor )
+        if( IsOpaqueFillColor() )
         {
             // #i121591#
             // CAUTION: Only non printing (pixel-renderer) VCL commands from OutputDevices
@@ -288,7 +288,7 @@ void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
             mpGraphics->DrawPolyPolygon(aTransform, aB2DPolyPolygon, fTransparency, *this);
         }
 
-        if( mbLineColor )
+        if( IsOpaqueLineColor() )
         {
             // disable the fill color for now
             mpGraphics->SetFillColor();
@@ -312,7 +312,7 @@ void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
             }
 
             // prepare to restore the fill color
-            mbInitFillColor = mbFillColor;
+            SetInitFillColorFlag(IsOpaqueFillColor());
         }
     }
 
@@ -347,7 +347,7 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos,
         return;
 
     if( ( rTransparenceGradient.GetStartColor() == aBlack && rTransparenceGradient.GetEndColor() == aBlack ) ||
-        ( mnDrawMode & DrawModeFlags::NoTransparency ) )
+        ( GetDrawMode() & DrawModeFlags::NoTransparency ) )
     {
         const_cast<GDIMetaFile&>(rMtf).WindStart();
         const_cast<GDIMetaFile&>(rMtf).Play( this, rPos, rSize );
