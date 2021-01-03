@@ -231,14 +231,6 @@ void OutputDevice::ClearStack()
         Pop();
 }
 
-void OutputDevice::SetDrawMode(DrawModeFlags nDrawMode)
-{
-    RenderContext2::SetDrawMode(nDrawMode);
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->SetDrawMode(nDrawMode);
-}
-
 void OutputDevice::SetLayoutMode( ComplexTextLayoutFlags nTextLayoutMode )
 {
     if( mpMetaFile )
