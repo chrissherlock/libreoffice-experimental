@@ -465,6 +465,7 @@ namespace o3tl {
 
 typedef void (OutputDevice::* FontUpdateHandler_t)(bool);
 void UpdateFontDataForAllFrames(FontUpdateHandler_t, bool);
+void ImplClearAllFontData(bool bNewFontLists);
 
 namespace vcl {
 
@@ -512,6 +513,7 @@ class VCL_DLLPUBLIC Window : public ::OutputDevice
     friend class ::svt::PopupWindowControllerImpl;
 
     friend void ::UpdateFontDataForAllFrames(FontUpdateHandler_t, bool);
+    friend void ::ImplClearAllFontData(bool bNewFontLists);
 
 private:
     // NOTE: to remove many dependencies of other modules
