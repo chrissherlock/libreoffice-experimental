@@ -171,6 +171,14 @@ bool OutputDevice::IsVirtual() const
     return false;
 }
 
+void OutputDevice::EnableOutput( bool bEnable )
+{
+    mbOutput = bEnable;
+
+    if( mpAlphaVDev )
+        mpAlphaVDev->EnableOutput( bEnable );
+}
+
 SalGraphics* OutputDevice::GetGraphics()
 {
     DBG_TESTSOLARMUTEX();
