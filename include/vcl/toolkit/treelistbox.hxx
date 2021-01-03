@@ -628,7 +628,7 @@ public:
     void            SetExpandedNodeBmp( const Image& );
     Image const &   GetExpandedNodeBmp( ) const;
 
-    void            SetFont( const vcl::Font& rFont );
+    void            SetFont( const vcl::Font& rFont ) override;
 
     SvTreeListEntry*    GetEntry( const Point& rPos, bool bHit = false ) const;
 

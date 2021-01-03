@@ -244,7 +244,7 @@ void OutputDevice::SetAntialiasing( AntialiasingFlags nMode )
     if ( mnAntialiasing != nMode )
     {
         mnAntialiasing = nMode;
-        mbInitFont = true;
+        SetInitFontFlag(true);
 
         if(mpGraphics)
         {
@@ -431,21 +431,7 @@ void OutputDevice::SetFont(vcl::Font const& rNewFont)
         }
     }
 
-    if (GetFont().IsSameInstance(aFont))
-        return;
-
-    // Optimization MT/HDU: COL_TRANSPARENT means SetFont should ignore the font color,
-    // because SetTextColor() is used for this.
-    // #i28759# maTextColor might have been changed behind our back, commit then, too.
-    if (aFont.GetColor() != COL_TRANSPARENT
-        && (aFont.GetColor() != GetFont().GetColor() || aFont.GetColor() != GetTextColor()))
-    {
-        maTextColor = aFont.GetColor();
-        SetInitTextColorFlag(true);
-    }
-
-    maFont = aFont;
-    mbNewFont = true;
+    RenderContext2::SetFont(rNewFont);
 
     if (mpAlphaVDev)
     {
@@ -468,7 +454,7 @@ void OutputDevice::ImplReleaseFonts()
     mpGraphics->ReleaseFonts();
 
     mbNewFont = true;
-    mbInitFont = true;
+    SetInitFontFlag(true);
 
     mpFontInstance.clear();
     mpDeviceFontList.reset();

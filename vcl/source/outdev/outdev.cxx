@@ -92,10 +92,8 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     maTextColor                     = COL_BLACK;
     mnAntialiasing                  = AntialiasingFlags::NONE;
     meTextLanguage                  = LANGUAGE_SYSTEM;  // TODO: get default from configuration?
-    mbInitFont                      = true;
     mbInitClipRegion                = true;
     mbClipRegionSet                 = false;
-    mbNewFont                       = true;
     mbTextLines                     = false;
     mbTextSpecial                   = false;
     mbRefPoint                      = false;
