@@ -463,6 +463,9 @@ namespace o3tl {
     template<> struct typed_flags<WindowExtendedStyle> : is_typed_flags<WindowExtendedStyle, 0x0007> {};
 };
 
+typedef void (OutputDevice::* FontUpdateHandler_t)(bool);
+void UpdateFontDataForAllFrames(FontUpdateHandler_t, bool);
+
 namespace vcl {
 
 class RenderTools
@@ -507,6 +510,8 @@ class VCL_DLLPUBLIC Window : public ::OutputDevice
     friend class ::MenuFloatingWindow;
 
     friend class ::svt::PopupWindowControllerImpl;
+
+    friend void ::UpdateFontDataForAllFrames(FontUpdateHandler_t, bool);
 
 private:
     // NOTE: to remove many dependencies of other modules
