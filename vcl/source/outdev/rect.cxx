@@ -17,17 +17,18 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <cassert>
-
 #include <sal/types.h>
-
 #include <tools/poly.hxx>
 #include <tools/helpers.hxx>
+
 #include <vcl/metaact.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/virdev.hxx>
 
 #include <salgdi.hxx>
+#include <SaveAndDisableMapMode.hxx>
+
+#include <cassert>
 
 void OutputDevice::DrawBorder(tools::Rectangle aBorderRect)
 {
@@ -293,41 +294,40 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
     if( IsInitFillColor() )
         InitFillColor();
 
-    const bool bOldMap = mbMap;
-    EnableMapMode( false );
+    {
+        SaveAndDisableMapMode aSave(this);
 
-    if( nFlags & DrawGridFlags::Dots )
-    {
-        for( tools::Long i = 0; i < nVertCount; i++ )
-        {
-            for( tools::Long j = 0, Y = aVertBuf[ i ]; j < nHorzCount; j++ )
-            {
-                mpGraphics->DrawPixel( aHorzBuf[ j ], Y, *this );
-            }
-        }
-    }
-    else
-    {
-        if( nFlags & DrawGridFlags::HorzLines )
+        if( nFlags & DrawGridFlags::Dots )
         {
             for( tools::Long i = 0; i < nVertCount; i++ )
             {
-                nY = aVertBuf[ i ];
-                mpGraphics->DrawLine( nStartX, nY, nEndX, nY, *this );
+                for( tools::Long j = 0, Y = aVertBuf[ i ]; j < nHorzCount; j++ )
+                {
+                    mpGraphics->DrawPixel( aHorzBuf[ j ], Y, *this );
+                }
             }
         }
-
-        if( nFlags & DrawGridFlags::VertLines )
+        else
         {
-            for( tools::Long i = 0; i < nHorzCount; i++ )
+            if( nFlags & DrawGridFlags::HorzLines )
             {
-                nX = aHorzBuf[ i ];
-                mpGraphics->DrawLine( nX, nStartY, nX, nEndY, *this );
+                for( tools::Long i = 0; i < nVertCount; i++ )
+                {
+                    nY = aVertBuf[ i ];
+                    mpGraphics->DrawLine( nStartX, nY, nEndX, nY, *this );
+                }
+            }
+
+            if( nFlags & DrawGridFlags::VertLines )
+            {
+                for( tools::Long i = 0; i < nHorzCount; i++ )
+                {
+                    nX = aHorzBuf[ i ];
+                    mpGraphics->DrawLine( nX, nStartY, nX, nEndY, *this );
+                }
             }
         }
     }
-
-    EnableMapMode( bOldMap );
 
     if( mpAlphaVDev )
         mpAlphaVDev->DrawGrid( rRect, rDist, nFlags );

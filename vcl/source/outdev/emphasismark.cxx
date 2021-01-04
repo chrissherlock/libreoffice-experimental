@@ -22,6 +22,7 @@
 
 #include <font/emphasismark.hxx>
 #include <salgdi.hxx>
+#include <SaveAndDisableMapMode.hxx>
 
 void OutputDevice::DrawEmphasisMark( tools::Long nBaseX, tools::Long nX, tools::Long nY,
                                          const tools::PolyPolygon& rPolyPoly, bool bPolyLine,
@@ -69,10 +70,9 @@ void OutputDevice::DrawEmphasisMarks( SalLayout& rSalLayout )
 {
     Color aOldLineColor = GetLineColor();
     Color aOldFillColor = GetFillColor();
-    bool bOldMap = mbMap;
     GDIMetaFile* pOldMetaFile = mpMetaFile;
     mpMetaFile = nullptr;
-    EnableMapMode(false);
+    SaveAndDisableMapMode aSave(this);
 
     FontEmphasisMark nEmphasisMark = GetEmphasisMarkStyle(maFont);
     tools::Long nEmphasisHeight;
@@ -143,7 +143,6 @@ void OutputDevice::DrawEmphasisMarks( SalLayout& rSalLayout )
 
     SetLineColor( aOldLineColor );
     SetFillColor( aOldFillColor );
-    EnableMapMode( bOldMap );
     mpMetaFile = pOldMetaFile;
 }
 

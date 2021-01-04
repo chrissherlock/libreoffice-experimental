@@ -42,6 +42,7 @@
 #include <textlayout.hxx>
 #include <textlineinfo.hxx>
 #include <ImplOutDevData.hxx>
+#include <SaveAndDisableMapMode.hxx>
 
 #include <com/sun/star/i18n/WordType.hpp>
 #include <com/sun/star/i18n/XBreakIterator.hpp>
@@ -264,16 +265,15 @@ bool OutputDevice::ImplDrawRotateText( SalLayout& rSalLayout )
     GDIMetaFile* pOldMetaFile = mpMetaFile;
     tools::Long nOldOffX = mnOutOffX;
     tools::Long nOldOffY = mnOutOffY;
-    bool bOldMap = mbMap;
-
     mnOutOffX   = 0;
     mnOutOffY   = 0;
     mpMetaFile  = nullptr;
-    EnableMapMode( false );
 
-    DrawMask( aPoint, aBmp, GetTextColor() );
+    {
+        SaveAndDisableMapMode aSave(this);
+        DrawMask(aPoint, aBmp, GetTextColor());
+    }
 
-    EnableMapMode( bOldMap );
     mnOutOffX   = nOldOffX;
     mnOutOffY   = nOldOffY;
     mpMetaFile  = pOldMetaFile;

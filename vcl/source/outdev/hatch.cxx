@@ -17,9 +17,6 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <cassert>
-#include <cstdlib>
-
 #include <osl/diagnose.h>
 #include <tools/line.hxx>
 #include <tools/helpers.hxx>
@@ -31,7 +28,10 @@
 #include <vcl/virdev.hxx>
 
 #include <salgdi.hxx>
+#include <SaveAndDisableMapMode.hxx>
 
+#include <cassert>
+#include <cstdlib>
 #include <memory>
 
 #define HATCH_MAXPOINTS             1024
@@ -94,23 +94,23 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
     if( mbOutputClipped )
         return;
 
-    if( rPolyPoly.Count() )
+    if (rPolyPoly.Count())
     {
-        tools::PolyPolygon     aPolyPoly( LogicToPixel( rPolyPoly ) );
-        GDIMetaFile*    pOldMetaFile = mpMetaFile;
-        bool            bOldMap = mbMap;
+        tools::PolyPolygon aPolyPoly( LogicToPixel(rPolyPoly));
+        GDIMetaFile* pOldMetaFile = mpMetaFile;
 
-        aPolyPoly.Optimize( PolyOptimizeFlags::NO_SAME );
-        aHatch.SetDistance( ImplLogicWidthToDevicePixel( aHatch.GetDistance() ) );
+        aPolyPoly.Optimize(PolyOptimizeFlags::NO_SAME);
+        aHatch.SetDistance(ImplLogicWidthToDevicePixel(aHatch.GetDistance()));
 
         mpMetaFile = nullptr;
-        EnableMapMode( false );
-        Push( PushFlags::LINECOLOR );
-        SetLineColor( aHatch.GetColor() );
+        SaveAndDisableMapMode(this);
+        Push(PushFlags::LINECOLOR);
+
+        SetLineColor(aHatch.GetColor());
         InitLineColor();
-        DrawHatch( aPolyPoly, aHatch, false );
+        DrawHatch(aPolyPoly, aHatch, false);
+
         Pop();
-        EnableMapMode( bOldMap );
         mpMetaFile = pOldMetaFile;
     }
 

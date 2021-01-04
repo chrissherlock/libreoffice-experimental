@@ -17,13 +17,9 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <cassert>
-
 #include <sal/types.h>
 #include <tools/helpers.hxx>
 #include <rtl/math.hxx>
-
-#include <memory>
 
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
@@ -33,6 +29,10 @@
 
 #include <salgdi.hxx>
 #include <bitmap/BitmapWriteAccess.hxx>
+#include <SaveAndDisableMapMode.hxx>
+
+#include <cassert>
+#include <memory>
 
 namespace
 {
@@ -433,7 +433,6 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos,
                 {
                     MapMode aMap( GetMapMode() );
                     Point aOutPos( PixelToLogic( aDstRect.TopLeft() ) );
-                    const bool bOldMap = mbMap;
 
                     aMap.SetOrigin( Point( -aOutPos.X(), -aOutPos.Y() ) );
                     xVDev->SetMapMode( aMap );
@@ -458,9 +457,10 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos,
 
                     xVDev.disposeAndClear();
 
-                    EnableMapMode( false );
-                    DrawBitmapEx(aDstRect.TopLeft(), BitmapEx(aPaint.GetBitmap(), aAlpha));
-                    EnableMapMode( bOldMap );
+                    {
+                        SaveAndDisableMapMode aSave(this);
+                        DrawBitmapEx(aDstRect.TopLeft(), BitmapEx(aPaint.GetBitmap(), aAlpha));
+                    }
                 }
             }
         }
