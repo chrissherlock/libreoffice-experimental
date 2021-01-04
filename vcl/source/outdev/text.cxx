@@ -713,20 +713,15 @@ void OutputDevice::SetTextFillColor(Color const& rColor)
     }
 }
 
-void OutputDevice::SetTextAlign( TextAlign eAlign )
+void OutputDevice::SetTextAlign(TextAlign eAlign)
 {
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaTextAlignAction(eAlign));
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaTextAlignAction( eAlign ) );
+    RenderContext2::SetTextAlign(eAlign);
 
-    if ( maFont.GetAlignment() != eAlign )
-    {
-        maFont.SetAlignment( eAlign );
-        mbNewFont = true;
-    }
-
-    if( mpAlphaVDev )
-        mpAlphaVDev->SetTextAlign( eAlign );
+    if (mpAlphaVDev)
+        mpAlphaVDev->SetTextAlign(eAlign);
 }
 
 vcl::Region OutputDevice::GetOutputBoundsClipRegion() const

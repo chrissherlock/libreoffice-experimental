@@ -1018,9 +1018,7 @@ public:
     void                        SetTextLineColor(Color const& rColor = COL_TRANSPARENT) override;
     void                        SetTextFillColor(Color const& rColor = COL_TRANSPARENT) override;
     void                        SetOverlineColor(Color const& rColor = COL_TRANSPARENT) override;
-
-    void                        SetTextAlign( TextAlign eAlign );
-    TextAlign                   GetTextAlign() const { return maFont.GetAlignment(); }
+    void                        SetTextAlign(TextAlign eAlign) override;
 
     /** Width of the text.
 

@@ -127,4 +127,15 @@ void RenderContext2::SetDigitLanguage(LanguageType eTextLanguage)
     meTextLanguage = eTextLanguage;
 }
 
+TextAlign RenderContext2::GetTextAlign() const { return maFont.GetAlignment(); }
+
+void RenderContext2::SetTextAlign(TextAlign eAlign)
+{
+    if (maFont.GetAlignment() != eAlign)
+    {
+        maFont.SetAlignment(eAlign);
+        mbNewFont = true;
+    }
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

@@ -10,6 +10,7 @@
 #pragma once
 
 #include <tools/color.hxx>
+#include <tools/fontenum.hxx>
 #include <i18nlangtag/lang.h>
 
 #include <vcl/dllapi.h>
@@ -74,6 +75,9 @@ public:
 
     LanguageType GetDigitLanguage() const;
     virtual void SetDigitLanguage(LanguageType eTextLanguage);
+
+    TextAlign GetTextAlign() const;
+    virtual void SetTextAlign(TextAlign eAlign);
 
 protected:
     /** Acquire a graphics device that the output device uses to draw on.
