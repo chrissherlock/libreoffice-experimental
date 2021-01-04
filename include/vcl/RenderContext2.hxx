@@ -10,6 +10,7 @@
 #pragma once
 
 #include <tools/color.hxx>
+#include <i18nlangtag/lang.h>
 
 #include <vcl/dllapi.h>
 #include <vcl/font.hxx>
@@ -59,8 +60,8 @@ public:
     Color GetOverlineColor() const;
     virtual void SetOverlineColor(Color const& rColor = COL_TRANSPARENT);
 
-    virtual void SetFont(vcl::Font const& rNewFont);
     vcl::Font const& GetFont() const;
+    virtual void SetFont(vcl::Font const& rNewFont);
 
     DrawModeFlags GetDrawMode() const;
     virtual void SetDrawMode(DrawModeFlags nDrawMode);
@@ -70,6 +71,9 @@ public:
 
     ComplexTextLayoutFlags GetLayoutMode() const;
     virtual void SetLayoutMode(ComplexTextLayoutFlags nTextLayoutMode);
+
+    LanguageType GetDigitLanguage() const;
+    virtual void SetDigitLanguage(LanguageType eTextLanguage);
 
 protected:
     /** Acquire a graphics device that the output device uses to draw on.
@@ -125,6 +129,7 @@ protected:
     Color maTextLineColor;
     vcl::Font maFont;
     ComplexTextLayoutFlags mnTextLayoutMode;
+    LanguageType meTextLanguage;
 
 private:
     Color maTextColor;

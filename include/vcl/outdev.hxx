@@ -321,7 +321,6 @@ private:
     MapMode                         maMapMode;
     Point                           maRefPoint;
     AntialiasingFlags               mnAntialiasing;
-    LanguageType                    meTextLanguage;
 
     mutable bool                    mbMap : 1;
     mutable bool                    mbClipRegion : 1;
@@ -515,14 +514,9 @@ public:
 
     void                        SetAntialiasing( AntialiasingFlags nMode );
     AntialiasingFlags           GetAntialiasing() const { return mnAntialiasing; }
-
     void                        SetDrawMode(DrawModeFlags nDrawMode) override;
-
     void                        SetLayoutMode(ComplexTextLayoutFlags nTextLayoutMode) override;
-
-    void                        SetDigitLanguage( LanguageType );
-    LanguageType                GetDigitLanguage() const { return meTextLanguage; }
-
+    void                        SetDigitLanguage(LanguageType) override;
     void                        SetRasterOp(RasterOp eRasterOp) override;
 
     /**

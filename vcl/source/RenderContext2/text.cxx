@@ -120,4 +120,11 @@ void RenderContext2::SetLayoutMode(ComplexTextLayoutFlags nTextLayoutMode)
     mnTextLayoutMode = nTextLayoutMode;
 }
 
+LanguageType RenderContext2::GetDigitLanguage() const { return meTextLanguage; }
+
+void RenderContext2::SetDigitLanguage(LanguageType eTextLanguage)
+{
+    meTextLanguage = eTextLanguage;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

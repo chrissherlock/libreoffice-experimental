@@ -92,7 +92,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mbOutputClipped                 = false;
     maTextColor                     = COL_BLACK;
     mnAntialiasing                  = AntialiasingFlags::NONE;
-    meTextLanguage                  = LANGUAGE_SYSTEM;  // TODO: get default from configuration?
     mbInitClipRegion                = true;
     mbClipRegionSet                 = false;
     mbTextLines                     = false;

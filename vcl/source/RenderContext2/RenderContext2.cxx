@@ -15,6 +15,7 @@ RenderContext2::RenderContext2()
     : mxSettings(new AllSettings(Application::GetSettings()))
     , maTextLineColor(COL_TRANSPARENT)
     , mnTextLayoutMode(ComplexTextLayoutFlags::Default)
+    , meTextLanguage(LANGUAGE_SYSTEM) // TODO: get default from configuration?
     , maFillColor(COL_WHITE)
     , maOverlineColor(COL_TRANSPARENT)
     , mnDrawMode(DrawModeFlags::Default)
