@@ -17,19 +17,20 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#ifndef INCLUDED_VCL_OUTDEVMAP_HXX
-#define INCLUDED_VCL_OUTDEVMAP_HXX
+#pragma once
 
-struct ImplMapRes
+#include <tools/long.hxx>
+
+struct MappingMetrics
 {
-    tools::Long                mnMapOfsX;          // Offset in X direction
-    tools::Long                mnMapOfsY;          // Offset in Y direction
-    tools::Long                mnMapScNumX;        // Scaling factor - numerator in X direction
-    tools::Long                mnMapScNumY;        // Scaling factor - numerator in Y direction
-    tools::Long                mnMapScDenomX;      // Scaling factor - denominator in X direction
-    tools::Long                mnMapScDenomY;      // Scaling factor - denominator in Y direction
+    tools::Long mnMapOfsX; ///< Offset in X direction
+    tools::Long mnMapOfsY; ///< Offset in Y direction
+    tools::Long mnMapScNumX; ///< Scaling factor - numerator in X direction
+    tools::Long mnMapScNumY; ///< Scaling factor - numerator in Y direction
+    tools::Long mnMapScDenomX; ///< Scaling factor - denominator in X direction
+    tools::Long mnMapScDenomY; ///< Scaling factor - denominator in Y direction
 
-    ImplMapRes()
+    MappingMetrics()
         : mnMapOfsX(0)
         , mnMapOfsY(0)
         , mnMapScNumX(1)
@@ -39,7 +40,5 @@ struct ImplMapRes
     {
     }
 };
-
-#endif // INCLUDED_VCL_OUTDEVMAP_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -767,8 +767,8 @@ bool OutputDevice::ImplNewFont() const
     if( mbMap && !aSize.Width() )
     {
         int nOrigWidth = pFontInstance->mxFontMetric->GetWidth();
-        float fStretch = static_cast<float>(maMapRes.mnMapScNumX) * maMapRes.mnMapScDenomY;
-        fStretch /= static_cast<float>(maMapRes.mnMapScNumY) * maMapRes.mnMapScDenomX;
+        float fStretch = static_cast<float>(maMappingMetric.mnMapScNumX) * maMappingMetric.mnMapScDenomY;
+        fStretch /= static_cast<float>(maMappingMetric.mnMapScNumY) * maMappingMetric.mnMapScDenomX;
         int nNewWidth = static_cast<int>(nOrigWidth * fStretch + 0.5);
         if( (nNewWidth != nOrigWidth) && (nNewWidth != 0) )
         {

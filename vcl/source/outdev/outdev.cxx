@@ -99,14 +99,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mbRefPoint                      = false;
     mbEnableRTL                     = false;    // mirroring must be explicitly allowed (typically for windows only)
 
-    // struct ImplMapRes
-    maMapRes.mnMapOfsX              = 0;
-    maMapRes.mnMapOfsY              = 0;
-    maMapRes.mnMapScNumX            = 1;
-    maMapRes.mnMapScNumY            = 1;
-    maMapRes.mnMapScDenomX          = 1;
-    maMapRes.mnMapScDenomY          = 1;
-
     // struct ImplOutDevData- see #i82615#
     mpOutDevData.reset(new ImplOutDevData);
     mpOutDevData->mpRotateDev       = nullptr;

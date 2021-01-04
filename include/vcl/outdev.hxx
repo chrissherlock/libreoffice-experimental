@@ -40,7 +40,7 @@
 #include <vcl/metaactiontypes.hxx>
 #include <vcl/region.hxx>
 #include <vcl/salnativewidgets.hxx>
-#include <vcl/outdevmap.hxx>
+#include <vcl/MappingMetrics.hxx>
 #include <vcl/outdevstate.hxx>
 #include <vcl/vclreferencebase.hxx>
 #include <vcl/wall.hxx>
@@ -311,7 +311,7 @@ private:
     mutable tools::Long                    mnTextOffY;
     mutable tools::Long                    mnEmphasisAscent;
     mutable tools::Long                    mnEmphasisDescent;
-    ImplMapRes                      maMapRes;
+    MappingMetrics                 maMappingMetric;
     const OutDevType                meOutDevType;
     OutDevViewType                  meOutDevViewType;
     vcl::Region                     maRegion;           // contains the clip region, see SetClipRegion(...)

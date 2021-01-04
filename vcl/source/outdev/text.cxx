@@ -2258,7 +2258,7 @@ bool OutputDevice::GetTextBoundRect( tools::Rectangle& rRect,
             aPixelRect += aRotatedOfs;
             rRect = PixelToLogic( aPixelRect );
             if( mbMap )
-                rRect += Point( maMapRes.mnMapOfsX, maMapRes.mnMapOfsY );
+                rRect += Point( maMappingMetric.mnMapOfsX, maMappingMetric.mnMapOfsY );
         }
     }
 
