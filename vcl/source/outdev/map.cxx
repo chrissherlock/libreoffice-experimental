@@ -250,25 +250,6 @@ static void ImplCalcMapResolution( const MapMode& rMapMode,
     rMapRes.mnMapScDenomY = aTempY.GetDenominator();
 }
 
-// #i75163#
-void OutputDevice::ImplInvalidateViewTransform()
-{
-    if(!mpOutDevData)
-        return;
-
-    if(mpOutDevData->mpViewTransform)
-    {
-        delete mpOutDevData->mpViewTransform;
-        mpOutDevData->mpViewTransform = nullptr;
-    }
-
-    if(mpOutDevData->mpInverseViewTransform)
-    {
-        delete mpOutDevData->mpInverseViewTransform;
-        mpOutDevData->mpInverseViewTransform = nullptr;
-    }
-}
-
 static tools::Long ImplLogicToPixel(tools::Long n, tools::Long nDPI, tools::Long nMapNum,
                                     tools::Long nMapDenom)
 {
@@ -564,7 +545,8 @@ void OutputDevice::SetMapMode()
         mnOutOffLogicY = mnOutOffOrigY;
 
         // #i75163#
-        ImplInvalidateViewTransform();
+        if (mpOutDevData)
+            mpOutDevData->InvalidateViewTransform();
     }
 
     if( mpAlphaVDev )
@@ -606,7 +588,8 @@ void OutputDevice::SetMapMode( const MapMode& rNewMapMode )
             maMapMode = rNewMapMode;
 
             // #i75163#
-            ImplInvalidateViewTransform();
+            if (mpOutDevData)
+                mpOutDevData->InvalidateViewTransform();
 
             return;
         }
@@ -656,7 +639,8 @@ void OutputDevice::SetMapMode( const MapMode& rNewMapMode )
                                        maMappingMetric.mnMapScNumY, maMappingMetric.mnMapScDenomY );
 
     // #i75163#
-    ImplInvalidateViewTransform();
+    if (mpOutDevData)
+        mpOutDevData->InvalidateViewTransform();
 }
 
 void OutputDevice::SetMetafileMapMode(const MapMode& rNewMapMode, bool bIsRecord)

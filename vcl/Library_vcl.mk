@@ -157,6 +157,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/outdev/wallpaper \
     vcl/source/outdev/vclreferencebase \
     vcl/source/outdev/nativecontrols \
+    vcl/source/outdev/ImplOutDevData \
     vcl/source/outdev/map \
     vcl/source/printer/QueueInfo \
     vcl/source/window/errinf \

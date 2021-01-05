@@ -1,4 +1,4 @@
-/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; fill-column: 100 -*- */
 /*
  * This file is part of the LibreOffice project.
  *
@@ -15,41 +15,23 @@
  *   License, Version 2.0 (the "License"); you may not use this file
  *   except in compliance with the License. You may obtain a copy of
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
- */
+*/
 
-#pragma once
+#include <ImplOutDevData.hxx>
 
-#include <tools/gen.hxx>
-#include <basegfx/matrix/b2dhommatrix.hxx>
-
-#include <vcl/vclptr.hxx>
-
-class VirtualDevice;
-
-namespace vcl
+void ImplOutDevData::InvalidateViewTransform()
 {
-struct ControlLayoutData;
+    if (mpViewTransform)
+    {
+        delete mpViewTransform;
+        mpViewTransform = nullptr;
+    }
+
+    if (mpInverseViewTransform)
+    {
+        delete mpInverseViewTransform;
+        mpInverseViewTransform = nullptr;
+    }
 }
-namespace basegfx
-{
-class B2DHomMatrix;
-} // #i75163#
 
-struct ImplOutDevData
-{
-    VclPtr<VirtualDevice> mpRotateDev;
-    vcl::ControlLayoutData* mpRecordLayout;
-    tools::Rectangle maRecordRect;
-
-    // #i75163#
-    basegfx::B2DHomMatrix* mpViewTransform;
-    basegfx::B2DHomMatrix* mpInverseViewTransform;
-
-    /** Invalidate the view transformation.
-
-     @since AOO bug 75163 (OpenOffice.org 2.4.3 - OOH 680 milestone 212)
-     */
-    void InvalidateViewTransform();
-};
-
-/* vim:set shiftwidth=4 softtabstop=4 expandtab: */
+/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

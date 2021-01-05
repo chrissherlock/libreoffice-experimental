@@ -128,7 +128,8 @@ void OutputDevice::dispose()
     mpOutDevData->mpRotateDev.disposeAndClear();
 
     // #i75163#
-    ImplInvalidateViewTransform();
+    if (mpOutDevData)
+        mpOutDevData->InvalidateViewTransform();
 
     mpOutDevData.reset();
 

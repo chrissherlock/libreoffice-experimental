@@ -1757,12 +1757,6 @@ public:
      */
     SAL_DLLPRIVATE vcl::Region       ImplPixelToDevicePixel( const vcl::Region& rRegion ) const;
 
-    /** Invalidate the view transformation.
-
-     @since AOO bug 75163 (OpenOffice.org 2.4.3 - OOH 680 milestone 212)
-     */
-    SAL_DLLPRIVATE void         ImplInvalidateViewTransform();
-
     /** Get device transformation.
 
      @since AOO bug 75163 (OpenOffice.org 2.4.3 - OOH 680 milestone 212)
