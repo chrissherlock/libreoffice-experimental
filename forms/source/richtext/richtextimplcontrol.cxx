@@ -77,7 +77,7 @@ namespace frm
         }
 
         // ensure that it's initially scrolled to the upper left
-        m_pView->SetVisArea( tools::Rectangle( Point( ), m_pViewport->GetOutputSize() ) );
+        m_pView->SetVisArea( tools::Rectangle( Point( ), m_pViewport->GetSizeInLogicalUnits() ) );
 
         ensureScrollbars();
 

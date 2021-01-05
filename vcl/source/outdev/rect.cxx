@@ -237,7 +237,7 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
 {
     assert(!is_double_buffered_window());
 
-    tools::Rectangle aDstRect( PixelToLogic( Point() ), GetOutputSize() );
+    tools::Rectangle aDstRect( PixelToLogic( Point() ), GetSizeInLogicalUnits() );
     aDstRect.Intersection( rRect );
 
     if( aDstRect.IsEmpty() || ImplIsRecordLayout() )

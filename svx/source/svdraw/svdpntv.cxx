@@ -835,7 +835,7 @@ void SdrPaintView::InvalidateAllWin(const tools::Rectangle& rRect)
 
             Point aOrg(rOutDev.GetMapMode().GetOrigin());
             aOrg.setX(-aOrg.X() ); aOrg.setY(-aOrg.Y() );
-            tools::Rectangle aOutRect(aOrg, rOutDev.GetOutputSize());
+            tools::Rectangle aOutRect(aOrg, rOutDev.GetSizeInLogicalUnits());
 
             // In case of tiled rendering we want to get all invalidations, so visual area is not interesting.
             if (aRect.IsOver(aOutRect) || comphelper::LibreOfficeKit::isActive())
@@ -1006,7 +1006,7 @@ void SdrPaintView::MakeVisible(const tools::Rectangle& rRect, vcl::Window& rWin)
     }
 
     MapMode aMap(rWin.GetMapMode());
-    Size aActualSize(rWin.GetOutputSize());
+    Size aActualSize(rWin.GetSizeInLogicalUnits());
 
     if( aActualSize.IsEmpty() )
         return;
@@ -1027,7 +1027,7 @@ void SdrPaintView::MakeVisible(const tools::Rectangle& rRect, vcl::Window& rWin)
         aMap.SetScaleX(aXFact);
         aMap.SetScaleY(aYFact);
         rWin.SetMapMode(aMap);
-        aActualSize=rWin.GetOutputSize();
+        aActualSize=rWin.GetSizeInLogicalUnits();
     }
     Point aOrg(aMap.GetOrigin());
     tools::Long dx=0,dy=0;

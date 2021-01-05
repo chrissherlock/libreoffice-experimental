@@ -273,7 +273,7 @@ void DlgEditor::InitScrollBars()
     if ( !pHScroll || !pVScroll )
         return;
 
-    Size aOutSize = rWindow.GetOutputSize();
+    Size aOutSize = rWindow.GetSizeInLogicalUnits();
     Size aPgSize  = pDlgEdPage->GetSize();
 
     pHScroll->SetRange( Range( 0, aPgSize.Width()  ));
@@ -474,7 +474,7 @@ void DlgEditor::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle
     aPaintRect = rRect;
     mnPaintGuard++;
 
-    if (bFirstDraw && rWindow.IsVisible() && (rRenderContext.GetOutputSize() != Size()))
+    if (bFirstDraw && rWindow.IsVisible() && (rRenderContext.GetSizeInLogicalUnits() != Size()))
     {
         bFirstDraw = false;
 
@@ -498,7 +498,7 @@ void DlgEditor::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle
                 aSize.AdjustHeight( -(aSize.Height() % aGridSize_.Height()) );
 
                 Point  aPos;
-                Size   aOutSize = rRenderContext.GetOutputSize();
+                Size   aOutSize = rRenderContext.GetSizeInLogicalUnits();
                 aPos.setX( (aOutSize.Width()>>1)  -  (aSize.Width()>>1) );
                 aPos.setY( (aOutSize.Height()>>1) -  (aSize.Height()>>1) );
 
@@ -1098,7 +1098,7 @@ static void lcl_PrintHeader( Printer* pPrinter, const OUString& rTitle ) // not 
 
     pPrinter->Push();
 
-    Size const aSz = pPrinter->GetOutputSize();
+    Size const aSz = pPrinter->GetSizeInLogicalUnits();
 
     pPrinter->SetLineColor( COL_BLACK );
     pPrinter->SetFillColor();
@@ -1151,7 +1151,7 @@ void DlgEditor::Print( Printer* pPrinter, const OUString& rTitle )    // not wor
     aFont.SetFontSize( Size( 0, 360 ));
     pPrinter->SetFont( aFont );
 
-    Size aPaperSz = pPrinter->GetOutputSize();
+    Size aPaperSz = pPrinter->GetSizeInLogicalUnits();
     aPaperSz.AdjustWidth( -(Print::nLeftMargin + Print::nRightMargin) );
     aPaperSz.AdjustHeight( -(Print::nTopMargin + Print::nBottomMargin) );
 

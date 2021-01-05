@@ -274,7 +274,7 @@ IMPL_LINK(SfxCommonTemplateDialog_Impl, CustomRenderHdl, weld::TreeView::render_
 {
     vcl::RenderContext& rRenderContext = std::get<0>(aPayload);
     const ::tools::Rectangle& rRect = std::get<1>(aPayload);
-    ::tools::Rectangle aRect(rRect.TopLeft(), Size(rRenderContext.GetOutputSize().Width() - rRect.Left(), rRect.GetHeight()));
+    ::tools::Rectangle aRect(rRect.TopLeft(), Size(rRenderContext.GetSizeInLogicalUnits().Width() - rRect.Left(), rRect.GetHeight()));
     bool bSelected = std::get<2>(aPayload);
     const OUString& rId = std::get<3>(aPayload);
 

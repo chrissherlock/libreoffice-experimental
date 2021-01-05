@@ -256,7 +256,7 @@ SvxPageDescPage::SvxPageDescPage(weld::Container* pPage, weld::DialogController*
 
     // set first- and last-values for the margins
     Size aPaperSize = mpDefPrinter->GetPaperSize();
-    Size aPrintSize = mpDefPrinter->GetOutputSize();
+    Size aPrintSize = mpDefPrinter->GetSizeInLogicalUnits();
 
     /*
      * To convert a point ( 0,0 ) into logic coordinates
@@ -1017,7 +1017,7 @@ void SvxPageDescPage::SwapFirstValues_Impl( bool bSet )
 
     // set first- and last-values for margins
     Size aPaperSize = mpDefPrinter->GetPaperSize();
-    Size aPrintSize = mpDefPrinter->GetOutputSize();
+    Size aPrintSize = mpDefPrinter->GetSizeInLogicalUnits();
     /*
      * To convert a point ( 0,0 ) into logic coordinates
      * looks like nonsense; but it makes sense if the

@@ -288,7 +288,7 @@ void SvxRectCtl::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangl
 
     rRenderContext.SetLineColor(rStyles.GetDialogColor());
     rRenderContext.SetFillColor(rStyles.GetDialogColor());
-    rRenderContext.DrawRect(tools::Rectangle(Point(0,0), rRenderContext.GetOutputSize()));
+    rRenderContext.DrawRect(tools::Rectangle(Point(0,0), rRenderContext.GetSizeInLogicalUnits()));
 
     if (IsEnabled())
         rRenderContext.SetLineColor(rStyles.GetLabelTextColor());
@@ -1060,7 +1060,7 @@ void SvxXLinePreview::Resize()
 {
     SvxPreviewBase::Resize();
 
-    const Size aOutputSize(GetOutputSize());
+    const Size aOutputSize(GetSizeInLogicalUnits());
     const sal_Int32 nDistance(500);
     const sal_Int32 nAvailableLength(aOutputSize.Width() - (4 * nDistance));
 
@@ -1174,7 +1174,7 @@ void SvxXLinePreview::Paint(vcl::RenderContext& rRenderContext, const tools::Rec
 
     if ( mbWithSymbol && mpGraphic )
     {
-        const Size aOutputSize(GetOutputSize());
+        const Size aOutputSize(GetSizeInLogicalUnits());
         Point aPos( aOutputSize.Width() / 3, aOutputSize.Height() / 2 );
         aPos.AdjustX( -(maSymbolSize.Width() / 2) );
         aPos.AdjustY( -(maSymbolSize.Height() / 2) );
@@ -1244,7 +1244,7 @@ void SvxXShadowPreview::Paint(vcl::RenderContext& rRenderContext, const tools::R
     LocalPrePaint(rRenderContext);
 
     // prepare size
-    Size aSize = rRenderContext.GetOutputSize();
+    Size aSize = rRenderContext.GetSizeInLogicalUnits();
     aSize.setWidth( aSize.Width() / 3 );
     aSize.setHeight( aSize.Height() / 3 );
 

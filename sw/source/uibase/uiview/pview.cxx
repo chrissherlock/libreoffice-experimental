@@ -610,7 +610,7 @@ void SwPagePreview::ExecPgUpAndPgDown( const bool  _bPgUp,
                         nNewSelectedPageNum = 1;
                 }
                 else
-                    nScrollAmount = - std::min( m_pViewWin->GetOutputSize().Height(),
+                    nScrollAmount = - std::min( m_pViewWin->GetSizeInLogicalUnits().Height(),
                                            m_pViewWin->GetPaintedPreviewDocRect().Top() );
             }
             else
@@ -624,7 +624,7 @@ void SwPagePreview::ExecPgUpAndPgDown( const bool  _bPgUp,
                         nNewSelectedPageNum = mnPageCount;
                 }
                 else
-                    nScrollAmount = std::min( m_pViewWin->GetOutputSize().Height(),
+                    nScrollAmount = std::min( m_pViewWin->GetSizeInLogicalUnits().Height(),
                                          ( pPagePreviewLay->GetPreviewDocSize().Height() -
                                            m_pViewWin->GetPaintedPreviewDocRect().Bottom() ) );
             }

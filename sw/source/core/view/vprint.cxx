@@ -462,7 +462,7 @@ bool SwViewShell::PrintOrPDFExport(
         // just record the rendering commands to the metafile
         // instead
         pMetaFile.reset(new GDIMetaFile);
-        pMetaFile->SetPrefSize(pOutDev->GetOutputSize());
+        pMetaFile->SetPrefSize(pOutDev->GetSizeInLogicalUnits());
         pMetaFile->SetPrefMapMode(pOutDev->GetMapMode());
         pMetaFile->Record(pOutDev);
     }

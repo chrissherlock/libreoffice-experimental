@@ -552,7 +552,7 @@ void ScModelObj::paintTile( VirtualDevice& rDevice,
     // following; but for the moment there is too many problems with that and
     // interaction with editeng used for the cell editing
     //Size aTileSize(nOutputWidth, nOutputHeight);
-    //if (pGridWindow->GetOutputSizePixel() != aTileSize)
+    //if (pGridWindow->GetSizeInLogicalUnitsPixel() != aTileSize)
     //    pGridWindow->SetOutputSizePixel(Size(nOutputWidth, nOutputHeight));
     // so instead for now, set the viewport size to document size
     Size aDocSize = getDocumentSize();
@@ -2076,7 +2076,7 @@ void SAL_CALL ScModelObj::render( sal_Int32 nSelRenderer, const uno::Any& aSelec
     {
         // Similar to as in and when calling ScTransferObj::PaintToDev()
 
-        tools::Rectangle aBound( Point(), pDev->GetOutputSize());
+        tools::Rectangle aBound( Point(), pDev->GetSizeInLogicalUnits());
 
         ScViewData aViewData(rDoc);
 

@@ -246,8 +246,8 @@ void SmShowFont::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangl
     OUString sText(rRenderContext.GetFont().GetFamilyName());
     Size aTextSize(rRenderContext.GetTextWidth(sText), rRenderContext.GetTextHeight());
 
-    rRenderContext.DrawText(Point((rRenderContext.GetOutputSize().Width()  - aTextSize.Width())  / 2,
-                                  (rRenderContext.GetOutputSize().Height() - aTextSize.Height()) / 2), sText);
+    rRenderContext.DrawText(Point((rRenderContext.GetSizeInLogicalUnits().Width()  - aTextSize.Width())  / 2,
+                                  (rRenderContext.GetSizeInLogicalUnits().Height() - aTextSize.Height()) / 2), sText);
 }
 
 void SmShowFont::SetDrawingArea(weld::DrawingArea* pDrawingArea)
@@ -1171,8 +1171,8 @@ void SmShowSymbol::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
     const OUString &rText = GetText();
     Size aTextSize(rRenderContext.GetTextWidth(rText), rRenderContext.GetTextHeight());
 
-    rRenderContext.DrawText(Point((rRenderContext.GetOutputSize().Width()  - aTextSize.Width())  / 2,
-                                  (rRenderContext.GetOutputSize().Height() * 7 / 10)), rText);
+    rRenderContext.DrawText(Point((rRenderContext.GetSizeInLogicalUnits().Width()  - aTextSize.Width())  / 2,
+                                  (rRenderContext.GetSizeInLogicalUnits().Height() * 7 / 10)), rText);
 }
 
 bool SmShowSymbol::MouseButtonDown(const MouseEvent& rMEvt)

@@ -300,7 +300,7 @@ bool GraphicObject::ImplDrawTiled( OutputDevice* pOut, const tools::Rectangle& r
         if( ImplRenderTempTile( *aVDev, nNumTilesInCacheX,
                                 nNumTilesInCacheY, rSizePixel, pAttr ) )
         {
-            BitmapEx aTileBitmap( aVDev->GetBitmap( Point(0,0), aVDev->GetOutputSize() ) );
+            BitmapEx aTileBitmap( aVDev->GetBitmap( Point(0,0), aVDev->GetSizeInLogicalUnits() ) );
 
             // draw alpha content, if any
             if( IsTransparent() )
@@ -318,10 +318,10 @@ bool GraphicObject::ImplDrawTiled( OutputDevice* pOut, const tools::Rectangle& r
                     // Combine bitmap and alpha/mask
                     if( GetGraphic().IsAlpha() )
                         aTileBitmap = BitmapEx( aTileBitmap.GetBitmap(),
-                                                AlphaMask( aVDev->GetBitmap( Point(0,0), aVDev->GetOutputSize() ) ) );
+                                                AlphaMask( aVDev->GetBitmap( Point(0,0), aVDev->GetSizeInLogicalUnits() ) ) );
                     else
                         aTileBitmap = BitmapEx( aTileBitmap.GetBitmap(),
-                                                aVDev->GetBitmap( Point(0,0), aVDev->GetOutputSize() ).CreateMask( COL_WHITE ) );
+                                                aVDev->GetBitmap( Point(0,0), aVDev->GetSizeInLogicalUnits() ).CreateMask( COL_WHITE ) );
                 }
             }
 

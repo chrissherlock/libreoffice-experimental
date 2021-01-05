@@ -58,7 +58,7 @@ void DlgEdView::MakeVisible( const tools::Rectangle& rRect, vcl::Window& rWin )
     // visible area
     MapMode aMap( rWin.GetMapMode() );
     Point aOrg( aMap.GetOrigin() );
-    Size aVisSize( rWin.GetOutputSize() );
+    Size aVisSize( rWin.GetSizeInLogicalUnits() );
     tools::Rectangle RectTmp( Point(-aOrg.X(),-aOrg.Y()), aVisSize );
     tools::Rectangle aVisRect( RectTmp );
 

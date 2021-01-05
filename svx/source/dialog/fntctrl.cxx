@@ -618,7 +618,7 @@ void SvxFontPrevWindow::Paint(vcl::RenderContext& rRenderContext, const tools::R
     if (!IsEnabled())
     {
         const StyleSettings& rStyleSettings = Application::GetSettings().GetStyleSettings();
-        const Size aLogSize(rRenderContext.GetOutputSize());
+        const Size aLogSize(rRenderContext.GetSizeInLogicalUnits());
 
         tools::Rectangle aRect(Point(0, 0), aLogSize);
         rRenderContext.SetLineColor();
@@ -690,7 +690,7 @@ void SvxFontPrevWindow::Paint(vcl::RenderContext& rRenderContext, const tools::R
         pImpl->CheckScript();
         Size aTxtSize = pImpl->CalcTextSize(rRenderContext, pPrinter, rFont);
 
-        const Size aLogSize(rRenderContext.GetOutputSize());
+        const Size aLogSize(rRenderContext.GetSizeInLogicalUnits());
 
         tools::Long nX = aLogSize.Width()  / 2 - aTxtSize.Width() / 2;
         tools::Long nY = aLogSize.Height() / 2 - aTxtSize.Height() / 2;

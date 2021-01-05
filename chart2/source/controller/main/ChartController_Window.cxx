@@ -280,7 +280,7 @@ void SAL_CALL ChartController::setPosSize(
     //a correct work area is at least necessary for correct values in the position and  size dialog and for dragging area
     if(m_pDrawViewWrapper)
     {
-        tools::Rectangle aRect(Point(0,0), pChartWindow->GetOutputSize());
+        tools::Rectangle aRect(Point(0,0), pChartWindow->GetSizeInLogicalUnits());
         m_pDrawViewWrapper->SetWorkArea( aRect );
     }
     pChartWindow->Invalidate();

@@ -363,7 +363,7 @@ public:
 
     virtual sal_uInt16          GetBitCount() const;
 
-    Size                        GetOutputSize() const
+    Size                        GetSizeInLogicalUnits() const
                                     { return PixelToLogic( GetSizeInPixels() ); }
     Point                       GetOutputOffPixel() const
                                     { return Point( mnOutOffX, mnOutOffY ); }

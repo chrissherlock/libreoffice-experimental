@@ -109,7 +109,7 @@ void SwSrcView::InitInterface_Impl()
 static void lcl_PrintHeader( vcl::RenderContext &rOutDev, sal_Int32 nPages, sal_Int32 nCurPage, const OUString& rTitle )
 {
     short nLeftMargin   = LMARGPRN;
-    Size aSz = rOutDev.GetOutputSize();
+    Size aSz = rOutDev.GetSizeInLogicalUnits();
     short nBorder = BORDERPRN;
 
     Color aOldFillColor( rOutDev.GetFillColor() );
@@ -686,7 +686,7 @@ sal_Int32 SwSrcView::PrintSource(
     const tools::Long nLineHeight = pOutDev->GetTextHeight(); // slightly more
     const tools::Long nParaSpace = 10;
 
-    Size aPaperSz = pOutDev->GetOutputSize();
+    Size aPaperSz = pOutDev->GetSizeInLogicalUnits();
     aPaperSz.AdjustWidth( -(LMARGPRN + RMARGPRN) );
     aPaperSz.AdjustHeight( -(TMARGPRN + BMARGPRN) );
 

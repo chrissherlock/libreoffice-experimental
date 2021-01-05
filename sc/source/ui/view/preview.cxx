@@ -359,7 +359,7 @@ void ScPreview::DoPrint( ScPreviewLocationData* pFillLocation )
         SetLineColor();
         SetFillColor(aBackColor);
 
-        Size aWinSize = GetOutputSize();
+        Size aWinSize = GetSizeInLogicalUnits();
         if ( aOffset.X() < 0 )
             DrawRect(tools::Rectangle( 0, 0, -aOffset.X(), aWinSize.Height() ));
         if ( aOffset.Y() < 0 )
@@ -479,7 +479,7 @@ void ScPreview::DoPrint( ScPreviewLocationData* pFillLocation )
     if ( !bValidPage )
         nPageEndX = nPageEndY = 0;
 
-    Size aWinSize = GetOutputSize();
+    Size aWinSize = GetSizeInLogicalUnits();
     Point aWinEnd( aWinSize.Width(), aWinSize.Height() );
     bool bRight  = nPageEndX <= aWinEnd.X();
     bool bBottom = nPageEndY <= aWinEnd.Y();

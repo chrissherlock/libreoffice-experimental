@@ -363,7 +363,7 @@ void GDIMetaFile::Play( OutputDevice* pOut, size_t nPos )
 
     SAL_INFO( "vcl.gdi", "GDIMetaFile::Play on device of size: " << pOut->GetSizeInPixels().Width() << " " << pOut->GetSizeInPixels().Height());
 
-    if( !ImplPlayWithRenderer( pOut, Point(0,0), pOut->GetOutputSize() ) ) {
+    if( !ImplPlayWithRenderer( pOut, Point(0,0), pOut->GetSizeInLogicalUnits() ) ) {
         size_t  i  = 0;
         for( size_t nCurPos = m_nCurrentActionElement; nCurPos < nPos; nCurPos++ )
         {

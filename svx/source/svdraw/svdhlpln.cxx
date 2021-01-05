@@ -56,7 +56,7 @@ tools::Rectangle SdrHelpLine::GetBoundRect(const OutputDevice& rOut) const
 {
     tools::Rectangle aRet(aPos,aPos);
     Point aOfs(rOut.GetMapMode().GetOrigin());
-    Size aSiz(rOut.GetOutputSize());
+    Size aSiz(rOut.GetSizeInLogicalUnits());
     switch (eKind) {
         case SdrHelpLineKind::Vertical  : aRet.SetTop(-aOfs.Y() ); aRet.SetBottom(-aOfs.Y()+aSiz.Height() ); break;
         case SdrHelpLineKind::Horizontal: aRet.SetLeft(-aOfs.X() ); aRet.SetRight(-aOfs.X()+aSiz.Width() );  break;

@@ -209,7 +209,7 @@ void MyWin::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle& rR
 
     rRenderContext.SetMapMode(aMapMode);
 
-    Size aPaperSize = rRenderContext.GetOutputSize();
+    Size aPaperSize = rRenderContext.GetSizeInLogicalUnits();
     Point aCenter(aPaperSize.Width() / 2 - 300,
                   (aPaperSize.Height() - 8400) / 2 + 8400);
     Point aP1(aPaperSize.Width() / 48, 0), aP2(aPaperSize.Width() / 40, 0);

@@ -73,8 +73,8 @@ SvxLineEndDefTabPage::SvxLineEndDefTabPage(weld::Container* pPage, weld::DialogC
     rXLSet.Put( XLineStyleItem(css::drawing::LineStyle_SOLID) );
     rXLSet.Put( XLineWidthItem(XOUT_WIDTH) );
     rXLSet.Put( XLineColorItem( OUString(), COL_BLACK ) );
-    rXLSet.Put( XLineStartWidthItem( m_aCtlPreview.GetOutputSize().Height()  / 2 ) );
-    rXLSet.Put( XLineEndWidthItem( m_aCtlPreview.GetOutputSize().Height() / 2 ) );
+    rXLSet.Put( XLineStartWidthItem( m_aCtlPreview.GetSizeInLogicalUnits().Height()  / 2 ) );
+    rXLSet.Put( XLineEndWidthItem( m_aCtlPreview.GetSizeInLogicalUnits().Height() / 2 ) );
 
     // #i34740#
     m_aCtlPreview.SetLineAttributes(aXLineAttr.GetItemSet());

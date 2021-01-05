@@ -307,7 +307,7 @@ public:
         mpBufferDevice->SetDrawMode(nDrawMode);
     }
 
-    Size GetOutputSize() const
+    Size GetSizeInLogicalUnits() const
     {
         return mpBufferDevice->PixelToLogic(GetSizeInPixels());
     }

@@ -71,7 +71,7 @@ void OSectionView::MakeVisible( const tools::Rectangle& rRect, vcl::Window& rWin
     // visible area
     MapMode aMap( rWin.GetMapMode() );
     const Point aOrg( aMap.GetOrigin() );
-    const Size aVisSize( rWin.GetOutputSize() );
+    const Size aVisSize( rWin.GetSizeInLogicalUnits() );
     const tools::Rectangle aVisRect( Point(-aOrg.X(),-aOrg.Y()), aVisSize );
 
     // check, if rectangle is inside visible area

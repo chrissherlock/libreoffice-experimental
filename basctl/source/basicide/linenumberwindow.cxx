@@ -49,7 +49,7 @@ void LineNumberWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Re
 
     GetParent()->Resize();
 
-    int windowHeight = rRenderContext.GetOutputSize().Height();
+    int windowHeight = rRenderContext.GetSizeInLogicalUnits().Height();
     int nLineHeight = rRenderContext.GetTextHeight();
     if (!nLineHeight)
     {

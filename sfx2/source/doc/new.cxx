@@ -55,15 +55,15 @@ void SfxPreviewWin_Impl::ImpPaint(vcl::RenderContext& rRenderContext, GDIMetaFil
 {
     rRenderContext.SetLineColor();
     rRenderContext.SetFillColor(COL_LIGHTGRAY);
-    rRenderContext.DrawRect(tools::Rectangle(Point(0,0), rRenderContext.GetOutputSize()));
+    rRenderContext.DrawRect(tools::Rectangle(Point(0,0), rRenderContext.GetSizeInLogicalUnits()));
 
     Size aTmpSize = pFile ? pFile->GetPrefSize() : Size(1, 1);
     DBG_ASSERT(!aTmpSize.IsEmpty(), "size of first page is 0, override GetFirstPageSize or set visible-area!");
 
 #define FRAME 4
 
-    tools::Long nWidth = rRenderContext.GetOutputSize().Width() - 2 * FRAME;
-    tools::Long nHeight = rRenderContext.GetOutputSize().Height() - 2 * FRAME;
+    tools::Long nWidth = rRenderContext.GetSizeInLogicalUnits().Width() - 2 * FRAME;
+    tools::Long nHeight = rRenderContext.GetSizeInLogicalUnits().Height() - 2 * FRAME;
     if (nWidth <= 0 || nHeight <= 0)
         return;
 

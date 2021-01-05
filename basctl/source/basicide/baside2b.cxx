@@ -1329,7 +1329,7 @@ void EditorWindow::ParagraphInsertedDeleted( sal_uLong nPara, bool bInserted )
         rModulWindow.GetBreakPoints().AdjustBreakPoints( static_cast<sal_uInt16>(nPara)+1, bInserted );
 
         tools::Long nLineHeight = GetTextHeight();
-        Size aSz = rModulWindow.GetBreakPointWindow().GetOutputSize();
+        Size aSz = rModulWindow.GetBreakPointWindow().GetSizeInLogicalUnits();
         tools::Rectangle aInvRect( Point( 0, 0 ), aSz );
         tools::Long nY = nPara*nLineHeight - rModulWindow.GetBreakPointWindow().GetCurYOffset();
         aInvRect.SetTop( nY );
@@ -1387,7 +1387,7 @@ void BreakPointWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Re
     if (SyncYOffset())
         return;
 
-    Size const aOutSz = rRenderContext.GetOutputSize();
+    Size const aOutSz = rRenderContext.GetSizeInLogicalUnits();
     tools::Long const nLineHeight = rRenderContext.GetTextHeight();
 
     Image const aBrk[2] =
@@ -1416,7 +1416,7 @@ void BreakPointWindow::ShowMarker(vcl::RenderContext& rRenderContext)
     if (nMarkerPos == NoMarker)
         return;
 
-    Size const aOutSz = GetOutputSize();
+    Size const aOutSz = GetSizeInLogicalUnits();
     tools::Long const nLineHeight = GetTextHeight();
 
     Image aMarker = GetImage(OUString(bErrorMarker ? std::u16string_view(u"" RID_BMP_ERRORMARKER) : std::u16string_view(u"" RID_BMP_STEPMARKER)));

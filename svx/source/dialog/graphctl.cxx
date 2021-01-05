@@ -244,7 +244,7 @@ void GraphCtrl::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle
             rTarget.SetBackground(rDevice.GetBackground());
             rTarget.Erase();
 
-            rTarget.DrawOutDev(Point(), xVD->GetOutputSize(), Point(), xVD->GetOutputSize(), *xVD);
+            rTarget.DrawOutDev(Point(), xVD->GetSizeInLogicalUnits(), Point(), xVD->GetSizeInLogicalUnits(), *xVD);
         }
 
         const vcl::Region aRepaintRegion(rRect);
