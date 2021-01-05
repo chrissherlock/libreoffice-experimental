@@ -631,7 +631,7 @@ bool OutputDevice::ImplNewFont() const
             const_cast<OutputDevice&>(*this).ImplUpdateFontData();
     }
 
-    if ( !mbNewFont )
+    if (!IsNewFont())
         return true;
 
     // we need a graphics
@@ -687,7 +687,7 @@ bool OutputDevice::ImplNewFont() const
     OutputDevice *pOutDev = const_cast<OutputDevice*>(this);
 
     // mark when lower layers need to get involved
-    mbNewFont = false;
+    pOutDev->SetNewFontFlag(false);
     if( bNewFontInstance )
         pOutDev->SetInitFontFlag(true);
 
@@ -775,7 +775,7 @@ bool OutputDevice::ImplNewFont() const
             Size aOrigSize = maFont.GetFontSize();
             const_cast<vcl::Font&>(maFont).SetFontSize( Size( nNewWidth, aSize.Height() ) );
             const_cast<OutputDevice*>(this)->EnableMapMode(false);
-            mbNewFont = true;
+            const_cast<OutputDevice*>(this)->SetNewFontFlag(true);
             bRet = ImplNewFont();  // recurse once using stretched width
             const_cast<OutputDevice*>(this)->EnableMapMode();
             const_cast<vcl::Font&>(maFont).SetFontSize( aOrigSize );
@@ -1018,7 +1018,7 @@ void OutputDevice::ImplReleaseFonts()
 {
     mpGraphics->ReleaseFonts();
 
-    mbNewFont = true;
+    SetNewFontFlag(true);
     SetInitFontFlag(true);
 
     mpFontInstance.clear();

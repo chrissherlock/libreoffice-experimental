@@ -61,6 +61,9 @@ public:
     Color GetOverlineColor() const;
     virtual void SetOverlineColor(Color const& rColor = COL_TRANSPARENT);
 
+    bool IsNewFont() const;
+    void SetNewFontFlag(bool bFlag);
+
     vcl::Font const& GetFont() const;
     virtual void SetFont(vcl::Font const& rNewFont);
 
@@ -120,7 +123,6 @@ protected:
     void SetInitTextColorFlag(bool bFlag);
     bool IsInitFont() const;
     void SetInitFontFlag(bool bFlag);
-    void SetNewFontFlag(bool bFlag);
 
     // TODO these two init functions will need to become private once all related
     // functions are moved out of OutputDevice

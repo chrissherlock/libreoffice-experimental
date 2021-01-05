@@ -329,7 +329,6 @@ private:
     mutable bool                    mbOutputClipped : 1;
     mutable bool                    mbInitClipRegion : 1;
     mutable bool                    mbClipRegionSet : 1;
-    mutable bool                    mbNewFont : 1;
     mutable bool                    mbTextLines : 1;
     mutable bool                    mbTextSpecial : 1;
     mutable bool                    mbRefPoint : 1;
@@ -1485,7 +1484,7 @@ protected:
     ///@{
 
 public:
-    virtual void                EnableMapMode(bool bEnable = true) override;
+    void                        EnableMapMode(bool bEnable = true) override;
     void                        SetMapMode();
     virtual void                SetMapMode( const MapMode& rNewMapMode );
     void                        SetRelativeMapMode( const MapMode& rNewMapMode );

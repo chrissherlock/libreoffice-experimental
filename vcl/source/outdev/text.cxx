@@ -2288,7 +2288,7 @@ bool OutputDevice::GetTextOutlines( basegfx::B2DPolyPolygonVector& rVector,
     if( bOldMap )
     {
         const_cast<OutputDevice&>(*this).EnableMapMode(false);
-        const_cast<OutputDevice&>(*this).mbNewFont = true;
+        const_cast<OutputDevice&>(*this).SetNewFontFlag(true);
     }
 
     std::unique_ptr<SalLayout> pSalLayout;
@@ -2347,7 +2347,7 @@ bool OutputDevice::GetTextOutlines( basegfx::B2DPolyPolygonVector& rVector,
     {
         // restore original font size and map mode
         const_cast<OutputDevice&>(*this).EnableMapMode(bOldMap);
-        const_cast<OutputDevice&>(*this).mbNewFont = true;
+        const_cast<OutputDevice&>(*this).SetNewFontFlag(true);
     }
 
     return bRet;

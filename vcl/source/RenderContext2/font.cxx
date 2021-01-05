@@ -23,6 +23,7 @@
 
 bool RenderContext2::IsInitFont() const { return mbInitFont; }
 void RenderContext2::SetInitFontFlag(bool bFlag) { mbInitFont = bFlag; }
+bool RenderContext2::IsNewFont() const { return mbNewFont; }
 void RenderContext2::SetNewFontFlag(bool bFlag) { mbNewFont = bFlag; }
 
 const vcl::Font& RenderContext2::GetFont() const { return maFont; }
