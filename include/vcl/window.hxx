@@ -764,7 +764,7 @@ protected:
 
     void ImplClearFontData(bool bNewFontLists) override;
     void RefreshFontData(bool bNewFontLists) override;
-    void ImplInitMapModeObjects() override;
+    void InitMapModeObjects() override;
 
     // FIXME: this is a hack to workaround missing layout functionality
     virtual void                        ImplAdjustNWFSizes();

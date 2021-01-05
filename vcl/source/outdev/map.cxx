@@ -538,7 +538,7 @@ void OutputDevice::SetMapMode()
         // create new objects (clip region are not re-scaled)
         SetNewFontFlag(true);
         SetInitFontFlag(true);
-        ImplInitMapModeObjects();
+        InitMapModeObjects();
 
         // #106426# Adapt logical offset when changing mapmode
         mnOutOffLogicX = mnOutOffOrigX; // no mapping -> equal offsets
@@ -630,7 +630,7 @@ void OutputDevice::SetMapMode( const MapMode& rNewMapMode )
     // create new objects (clip region are not re-scaled)
     SetNewFontFlag(true);
     SetInitFontFlag(true);
-    ImplInitMapModeObjects();
+    InitMapModeObjects();
 
     // #106426# Adapt logical offset when changing mapmode
     mnOutOffLogicX = ImplPixelToLogic( mnOutOffOrigX, mnDPIX,
@@ -650,8 +650,6 @@ void OutputDevice::SetMetafileMapMode(const MapMode& rNewMapMode, bool bIsRecord
     else
         SetMapMode(rNewMapMode);
 }
-
-void OutputDevice::ImplInitMapModeObjects() {}
 
 void OutputDevice::SetRelativeMapMode( const MapMode& rNewMapMode )
 {

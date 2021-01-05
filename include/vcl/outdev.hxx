@@ -1496,9 +1496,6 @@ public:
     virtual void                SetMetafileMapMode(const MapMode& rNewMapMode, bool bIsRecord);
     const MapMode&              GetMapMode() const { return maMapMode; }
 
-protected:
-    virtual void ImplInitMapModeObjects();
-
 public:
      // #i75163#
     basegfx::B2DHomMatrix       GetViewTransformation() const;

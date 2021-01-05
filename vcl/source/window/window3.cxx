@@ -53,9 +53,9 @@ void Window::RefreshFontData(bool bNewFontLists)
         pChild->RefreshFontData(bNewFontLists);
 }
 
-void Window::ImplInitMapModeObjects()
+void Window::InitMapModeObjects()
 {
-    OutputDevice::ImplInitMapModeObjects();
+    RenderContext2::InitMapModeObjects();
     if (mpWindowImpl->mpCursor)
         mpWindowImpl->mpCursor->ImplNew();
 }

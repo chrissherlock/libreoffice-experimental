@@ -125,6 +125,8 @@ protected:
     void InitFillColor();
     void InitTextColor();
 
+    virtual void InitMapModeObjects();
+
     mutable SalGraphics* mpGraphics;
     std::unique_ptr<AllSettings> mxSettings;
 
