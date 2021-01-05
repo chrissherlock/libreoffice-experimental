@@ -672,7 +672,7 @@ bool Window::HandleScrollCommand( const CommandEvent& rCmd,
 
                         double deltaXInPixels = double(deltaPoint.X());
                         double deltaYInPixels = double(deltaPoint.Y());
-                        Size winSize = GetOutputSizePixel();
+                        Size winSize = GetSizeInPixels();
 
                         if(pHScrl)
                         {

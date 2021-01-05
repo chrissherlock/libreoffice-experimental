@@ -283,7 +283,7 @@ ui::LayoutSize LayoutMenu::GetHeightForWidth (const sal_Int32 nWidth)
 
 void LayoutMenu::Resize()
 {
-    Size aWindowSize = GetOutputSizePixel();
+    Size aWindowSize = GetSizeInPixels();
     if (IsVisible() && aWindowSize.Width() > 0)
     {
         // Calculate the number of rows and columns.
@@ -372,7 +372,7 @@ int LayoutMenu::CalculateRowCount (const Size&, int nColumnCount)
     if (mxLayoutValueSet->GetItemCount() > 0 && nColumnCount > 0)
     {
         nRowCount = (mxLayoutValueSet->GetItemCount() + nColumnCount - 1) / nColumnCount;
-        //        nRowCount = GetOutputSizePixel().Height() / rItemSize.Height();
+        //        nRowCount = GetSizeInPixels().Height() / rItemSize.Height();
         if (nRowCount < 1)
             nRowCount = 1;
     }

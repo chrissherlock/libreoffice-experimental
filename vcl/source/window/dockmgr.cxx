@@ -519,7 +519,7 @@ void ImplDockingWindowWrapper::ImplStartDocking( const Point& rPos )
         pWin.disposeAndClear();
 
     Point   aPos    = GetWindow()->ImplOutputToFrame( Point() );
-    Size    aSize   = GetWindow()->GetOutputSizePixel();
+    Size    aSize   = GetWindow()->GetSizeInPixels();
     mnTrackX        = aPos.X();
     mnTrackY        = aPos.Y();
     mnTrackWidth    = aSize.Width();
@@ -574,7 +574,7 @@ void ImplDockingWindowWrapper::Tracking( const TrackingEvent& rTEvt )
     {
         Point   aMousePos = rTEvt.GetMouseEvent().GetPosPixel();
         Point   aFrameMousePos = GetWindow()->ImplOutputToFrame( aMousePos );
-        Size    aFrameSize = GetWindow()->ImplGetFrameWindow()->GetOutputSizePixel();
+        Size    aFrameSize = GetWindow()->ImplGetFrameWindow()->GetSizeInPixels();
         if ( aFrameMousePos.X() < 0 )
             aFrameMousePos.setX( 0 );
         if ( aFrameMousePos.Y() < 0 )

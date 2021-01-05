@@ -264,7 +264,7 @@ Bitmap OutputDevice::GetBitmap(const Point& rSrcPt, const Size& rSize) const
                             OSL_ENSURE(false, "CopyBits with zero or negative width or height");
                         }
 
-                        aBmp = aVDev->GetBitmap(Point(), aVDev->GetOutputSizePixel());
+                        aBmp = aVDev->GetBitmap(Point(), aVDev->GetSizeInPixels());
                     }
                     else
                         bClipped = false;
@@ -297,7 +297,7 @@ void OutputDevice::DrawTransparentAlphaBitmap(const Bitmap& rBmp, const AlphaMas
 
     Point aOutPt(LogicToPixel(rDestPt));
     Size aOutSz(LogicToPixel(rDestSize));
-    tools::Rectangle aDstRect(Point(), GetOutputSizePixel());
+    tools::Rectangle aDstRect(Point(), GetSizeInPixels());
 
     const bool bHMirr = aOutSz.Width() < 0;
     const bool bVMirr = aOutSz.Height() < 0;

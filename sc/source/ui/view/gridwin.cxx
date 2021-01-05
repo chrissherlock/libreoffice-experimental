@@ -1632,7 +1632,7 @@ void ScGridWindow::HandleMouseButtonDown( const MouseEvent& rMEvt, MouseEventSta
         ScViewSelectionEngine* pSelEng = mrViewData.GetView()->GetSelEngine();
         pSelEng->SetWindow(this);
         pSelEng->SetWhich(eWhich);
-        pSelEng->SetVisibleArea( tools::Rectangle(Point(), GetOutputSizePixel()) );
+        pSelEng->SetVisibleArea( tools::Rectangle(Point(), GetSizeInPixels()) );
     }
 
     if (bEditMode && (mrViewData.GetRefTabNo() == mrViewData.GetTabNo()))
@@ -1843,7 +1843,7 @@ void ScGridWindow::HandleMouseButtonDown( const MouseEvent& rMEvt, MouseEventSta
     ScViewSelectionEngine* pSelEng = mrViewData.GetView()->GetSelEngine();
     pSelEng->SetWindow(this);
     pSelEng->SetWhich(eWhich);
-    pSelEng->SetVisibleArea( tools::Rectangle(Point(), GetOutputSizePixel()) );
+    pSelEng->SetVisibleArea( tools::Rectangle(Point(), GetSizeInPixels()) );
 
     //  SelMouseButtonDown on the View is still setting the bMoveIsShift flag
     if ( mrViewData.GetView()->SelMouseButtonDown( rMEvt ) )
@@ -2415,7 +2415,7 @@ void ScGridWindow::MouseMove( const MouseEvent& rMEvt )
     if (nMouseStatus == SC_GM_FILTER && mpFilterBox)
     {
         Point aRelPos = mpFilterBox->ScreenToOutputPixel( OutputToScreenPixel( rMEvt.GetPosPixel() ) );
-        if ( tools::Rectangle(Point(), mpFilterBox->GetOutputSizePixel()).IsInside(aRelPos) )
+        if ( tools::Rectangle(Point(), mpFilterBox->GetSizeInPixels()).IsInside(aRelPos) )
         {
             nButtonDown = 0;
             nMouseStatus = SC_GM_NONE;
@@ -3458,7 +3458,7 @@ void ScGridWindow::DropScroll( const Point& rMousePos )
     ScDocument& rDoc = mrViewData.GetDocument();
     SCCOL nDx = 0;
     SCROW nDy = 0;
-    Size aSize = GetOutputSizePixel();
+    Size aSize = GetSizeInPixels();
 
     if (aSize.Width() > SCROLL_SENSITIVE * 3)
     {
@@ -4606,7 +4606,7 @@ void ScGridWindow::UpdateEditViewPos()
     {
         tools::Rectangle aRect = pView->GetOutputArea();
         tools::Long nHeight = aRect.Bottom() - aRect.Top();
-        aRect.SetTop( PixelToLogic(GetOutputSizePixel(), mrViewData.GetLogicMode()).
+        aRect.SetTop( PixelToLogic(GetSizeInPixels(), mrViewData.GetLogicMode()).
                         Height() * 2 );
         aRect.SetBottom( aRect.Top() + nHeight );
         pView->SetOutputArea( aRect );
@@ -5126,7 +5126,7 @@ void ScGridWindow::RFMouseMove( const MouseEvent& rMEvt, bool bUp )
     SCROW nDy = 0;
     if ( aPos.X() < 0 ) nDx = -1;
     if ( aPos.Y() < 0 ) nDy = -1;
-    Size aSize = GetOutputSizePixel();
+    Size aSize = GetSizeInPixels();
     if ( aPos.X() >= aSize.Width() )
         nDx = 1;
     if ( aPos.Y() >= aSize.Height() )
@@ -6098,7 +6098,7 @@ void ScGridWindow::UpdateCursorOverlay()
             bMaybeVisible = ( aScrPos.X() >= -2 && aScrPos.Y() >= -2 );
         else
         {
-            Size aOutSize = GetOutputSizePixel();
+            Size aOutSize = GetSizeInPixels();
             bMaybeVisible = ( aScrPos.X() <= aOutSize.Width() + 2 && aScrPos.Y() <= aOutSize.Height() + 2 );
         }
 

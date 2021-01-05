@@ -437,7 +437,7 @@ void ScrollBarManager::CalcAutoScrollOffset (const Point& rMouseWindowPosition)
     int nDx = 0;
     int nDy = 0;
 
-    Size aWindowSize = pWindow->GetOutputSizePixel();
+    Size aWindowSize = pWindow->GetSizeInPixels();
     ::tools::Rectangle aWindowArea (pWindow->GetPosPixel(), aWindowSize);
     ::tools::Rectangle aViewPixelArea (
         pWindow->LogicToPixel(mrSlideSorter.GetView().GetModelArea()));

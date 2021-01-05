@@ -146,7 +146,7 @@ Size VclContainer::getLayoutRequisition(const vcl::Window &rWindow)
 
 void VclContainer::SetPosSizePixel(const Point& rAllocPos, const Size& rAllocation)
 {
-    bool bSizeChanged = rAllocation != GetOutputSizePixel();
+    bool bSizeChanged = rAllocation != GetSizeInPixels();
     Window::SetPosSizePixel(rAllocPos, rAllocation);
     if (m_bLayoutDirty || bSizeChanged)
     {

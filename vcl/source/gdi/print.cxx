@@ -271,6 +271,7 @@ void Printer::ImplPrintTransparent( const Bitmap& rBmp, const Bitmap& rMask,
     }
 
     EnableMapMode(bOldMap);
+
 }
 
 bool Printer::DrawTransformBitmapExDirect(
@@ -1664,7 +1665,7 @@ css::awt::DeviceInfo Printer::GetDeviceInfo() const
 {
     Size aDevSz = GetPaperSizePixel();
     css::awt::DeviceInfo aInfo = GetCommonDeviceInfo(aDevSz);
-    Size aOutSz = GetOutputSizePixel();
+    Size aOutSz = GetSizeInPixels();
     Point aOffset = GetPageOffset();
     aInfo.LeftInset = aOffset.X();
     aInfo.TopInset = aOffset.Y();

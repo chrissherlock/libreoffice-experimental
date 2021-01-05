@@ -1441,7 +1441,7 @@ void SwMarkPreview::InitColors()
 
 void SwMarkPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle &/*rRect*/)
 {
-    const Size aSz(GetOutputSizePixel());
+    const Size aSz(GetSizeInPixels());
 
     // Page
     aPage.SetSize(Size(aSz.Width() - 3, aSz.Height() - 3));
@@ -1995,7 +1995,7 @@ void SwRedlineOptionsTabPage::InitFontStyle(SvxFontPrevWindow& rExampleWin, cons
     rCJKFont = aCJKFont;
     rCTLFont = aCTLFont;
 
-    const Size aNewSize( 0, rExampleWin.GetOutputSizePixel().Height() * 2 / 3 );
+    const Size aNewSize( 0, rExampleWin.GetSizeInPixels().Height() * 2 / 3 );
     rFont.SetFontSize( aNewSize );
     rCJKFont.SetFontSize( aNewSize );
 

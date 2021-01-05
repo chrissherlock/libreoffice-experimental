@@ -1040,7 +1040,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
         //  STAGE 3.2: Generate banded bitmaps for special regions
 
         Point aPageOffset;
-        Size aTmpSize( GetOutputSizePixel() );
+        Size aTmpSize( GetSizeInPixels() );
         if( meOutDevType == OUTDEV_PDF )
         {
             auto pPdfWriter = static_cast<vcl::PDFWriterImpl*>(this);

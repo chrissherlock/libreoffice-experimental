@@ -190,7 +190,7 @@ namespace bib
     {
         if ( m_pGeneralPage )
         {
-            ::Size aSz( GetOutputSizePixel() );
+            ::Size aSz( GetSizeInPixels() );
             m_pGeneralPage->SetSizePixel( aSz );
         }
         Window::Resize();

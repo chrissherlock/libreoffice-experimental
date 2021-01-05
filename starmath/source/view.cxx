@@ -698,7 +698,7 @@ SmViewShell * SmCmdBoxWindow::GetView()
 
 void SmCmdBoxWindow::Resize()
 {
-    tools::Rectangle aRect(Point(0, 0), GetOutputSizePixel());
+    tools::Rectangle aRect(Point(0, 0), GetSizeInPixels());
     aRect.AdjustLeft(CMD_BOX_PADDING );
     aRect.AdjustTop(CMD_BOX_PADDING_TOP );
     aRect.AdjustRight( -(CMD_BOX_PADDING) );
@@ -714,7 +714,7 @@ void SmCmdBoxWindow::Resize()
 
 void SmCmdBoxWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle& /*rRect*/)
 {
-    tools::Rectangle aRect(Point(0, 0), GetOutputSizePixel());
+    tools::Rectangle aRect(Point(0, 0), GetSizeInPixels());
     aRect.AdjustLeft(CMD_BOX_PADDING );
     aRect.AdjustTop(CMD_BOX_PADDING_TOP );
     aRect.AdjustRight( -(CMD_BOX_PADDING) );
@@ -815,7 +815,7 @@ IMPL_LINK_NOARG( SmCmdBoxWindow, InitialFocusTimerHdl, Timer *, void )
 
 void SmCmdBoxWindow::AdjustPosition()
 {
-    const tools::Rectangle aRect( Point(), GetParent()->GetOutputSizePixel() );
+    const tools::Rectangle aRect( Point(), GetParent()->GetSizeInPixels() );
     Point aTopLeft( Point( aRect.Left(),
                            aRect.Bottom() - GetSizePixel().Height() ) );
     Point aPos( GetParent()->OutputToScreenPixel( aTopLeft ) );

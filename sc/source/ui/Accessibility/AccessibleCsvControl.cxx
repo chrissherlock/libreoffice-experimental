@@ -148,7 +148,7 @@ css::awt::Rectangle ScAccessibleCsvControl::implGetBounds()
 {
     SolarMutexGuard aGuard;
     ensureAlive();
-    Size aOutSize(implGetControl().GetOutputSizePixel());
+    Size aOutSize(implGetControl().GetSizeInPixels());
     return css::awt::Rectangle(0, 0, aOutSize.Width(), aOutSize.Height());
 }
 
@@ -368,9 +368,9 @@ css::awt::Rectangle SAL_CALL ScAccessibleCsvRuler::getCharacterBounds( sal_Int32
     ensureValidIndexWithEnd( nIndex );
     ScCsvRuler& rRuler = implGetRuler();
     Point aPos( rRuler.GetX( lcl_GetRulerPos( nIndex ) ) - rRuler.GetCharWidth() / 2, 0 );
-    css::awt::Rectangle aRect( aPos.X(), aPos.Y(), rRuler.GetCharWidth(), rRuler.GetOutputSizePixel().Height() );
+    css::awt::Rectangle aRect( aPos.X(), aPos.Y(), rRuler.GetCharWidth(), rRuler.GetSizeInPixels().Height() );
     // do not return rectangle out of window
-    sal_Int32 nWidth = rRuler.GetOutputSizePixel().Width();
+    sal_Int32 nWidth = rRuler.GetSizeInPixels().Width();
     if( aRect.X >= nWidth )
         throw IndexOutOfBoundsException();
     if( aRect.X + aRect.Width > nWidth )
@@ -1423,7 +1423,7 @@ Size ScAccessibleCsvCell::implGetRealSize() const
 css::awt::Rectangle ScAccessibleCsvCell::implGetBounds()
 {
     ScCsvGrid& rGrid = implGetGrid();
-    tools::Rectangle aClipRect( Point( 0, 0 ), rGrid.GetOutputSizePixel() );
+    tools::Rectangle aClipRect( Point( 0, 0 ), rGrid.GetSizeInPixels() );
     if( mnColumn != CSV_COLUMN_HEADER )
     {
         aClipRect.SetLeft( rGrid.GetFirstX() );

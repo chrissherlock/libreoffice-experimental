@@ -221,7 +221,7 @@ void StyleItemController::DrawEntry(vcl::RenderContext& rRenderContext)
     if (!pStyle)
         return;
 
-    Size aSize(rRenderContext.GetOutputSizePixel());
+    Size aSize(rRenderContext.GetSizeInPixels());
     tools::Rectangle aFullRect(Point(0, 0), aSize);
     tools::Rectangle aContentRect(aFullRect);
 
@@ -292,7 +292,7 @@ void StyleItemController::DrawContentBackground(vcl::RenderContext& rRenderConte
 
 void StyleItemController::DrawSelection(vcl::RenderContext& rRenderContext)
 {
-    Size aSize(rRenderContext.GetOutputSizePixel());
+    Size aSize(rRenderContext.GetSizeInPixels());
     tools::Rectangle aFullRect(Point(0, 0), aSize);
 
     const StyleSettings& rStyleSettings = Application::GetSettings().GetStyleSettings();

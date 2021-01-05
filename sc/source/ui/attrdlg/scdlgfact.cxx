@@ -146,7 +146,7 @@ short AbstractScDataFormDlg_Impl::Execute()
 BitmapEx AbstractScDataFormDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSizeInPixels());
 }
 
 OString AbstractScDataFormDlg_Impl::GetScreenshotId() const
@@ -202,7 +202,7 @@ short AbstractScMoveTableDlg_Impl::Execute()
 BitmapEx AbstractScMoveTableDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSizeInPixels());
 }
 
 OString AbstractScMoveTableDlg_Impl::GetScreenshotId() const
@@ -307,7 +307,7 @@ void AbstractScImportAsciiDlg_Impl::SaveParameters()
 BitmapEx AbstractScImportAsciiDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSizeInPixels());
 }
 
 OString AbstractScImportAsciiDlg_Impl::GetScreenshotId() const
@@ -338,7 +338,7 @@ bool AbstractScColRowLabelDlg_Impl::IsRow()
 BitmapEx AbstractScColRowLabelDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSizeInPixels());
 }
 
 OString AbstractScColRowLabelDlg_Impl::GetScreenshotId() const
@@ -354,7 +354,7 @@ void AbstractScDataPilotDatabaseDlg_Impl::GetValues( ScImportSourceDesc& rDesc )
 BitmapEx AbstractScDataPilotDatabaseDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSizeInPixels());
 }
 
 OString AbstractScDataPilotDatabaseDlg_Impl::GetScreenshotId() const
@@ -390,7 +390,7 @@ void AbstractScDataPilotSourceTypeDlg_Impl::AppendNamedRange(const OUString& rNa
 BitmapEx AbstractScDataPilotSourceTypeDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSizeInPixels());
 }
 
 OString AbstractScDataPilotSourceTypeDlg_Impl::GetScreenshotId() const
@@ -431,7 +431,7 @@ DelCellCmd AbstractScDeleteCellDlg_Impl::GetDelCellCmd() const
 BitmapEx AbstractScDeleteCellDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSizeInPixels());
 }
 
 OString AbstractScDeleteCellDlg_Impl::GetScreenshotId() const
@@ -452,7 +452,7 @@ InsertDeleteFlags AbstractScDeleteContentsDlg_Impl::GetDelContentsCmdBits() cons
 BitmapEx AbstractScDeleteContentsDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSizeInPixels());
 }
 
 OString AbstractScDeleteContentsDlg_Impl::GetScreenshotId() const
@@ -568,7 +568,7 @@ InsCellCmd  AbstractScInsertContentsDlg_Impl::GetMoveMode()
 BitmapEx AbstractScInsertContentsDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSizeInPixels());
 }
 
 OString AbstractScInsertContentsDlg_Impl::GetScreenshotId() const
@@ -614,7 +614,7 @@ const OUString* AbstractScInsertTableDlg_Impl::GetNextTable( sal_uInt16* pN )
 BitmapEx AbstractScInsertTableDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSizeInPixels());
 }
 
 OString AbstractScInsertTableDlg_Impl::GetScreenshotId() const
@@ -727,7 +727,7 @@ CreateNameFlags AbstractScNameCreateDlg_Impl::GetFlags() const
 BitmapEx AbstractScNameCreateDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSizeInPixels());
 }
 
 OString AbstractScNameCreateDlg_Impl::GetScreenshotId() const
@@ -832,7 +832,7 @@ OUString AbstractScStringInputDlg_Impl::GetInputString() const
 BitmapEx AbstractScStringInputDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSizeInPixels());
 }
 
 OString AbstractScStringInputDlg_Impl::GetScreenshotId() const
@@ -848,7 +848,7 @@ void AbstractScTabBgColorDlg_Impl::GetSelectedColor( Color& rColor ) const
 BitmapEx AbstractScTabBgColorDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSizeInPixels());
 }
 
 OString AbstractScTabBgColorDlg_Impl::GetScreenshotId() const
@@ -879,7 +879,7 @@ bool AbstractScTextImportOptionsDlg_Impl::IsDateConversionSet() const
 BitmapEx AbstractScTextImportOptionsDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSizeInPixels());
 }
 
 OString AbstractScTextImportOptionsDlg_Impl::GetScreenshotId() const

@@ -170,12 +170,12 @@ void GroupBox::ImplDraw( OutputDevice* pDev, DrawFlags nDrawFlags,
 void GroupBox::FillLayoutData() const
 {
     mpControlData->mpLayoutData.reset( new vcl::ControlLayoutData );
-    const_cast<GroupBox*>(this)->ImplDraw( const_cast<GroupBox*>(this), DrawFlags::NONE, Point(), GetOutputSizePixel(), true );
+    const_cast<GroupBox*>(this)->ImplDraw( const_cast<GroupBox*>(this), DrawFlags::NONE, Point(), GetSizeInPixels(), true );
 }
 
 void GroupBox::Paint( vcl::RenderContext& rRenderContext, const tools::Rectangle& )
 {
-    ImplDraw(&rRenderContext, DrawFlags::NONE, Point(), GetOutputSizePixel());
+    ImplDraw(&rRenderContext, DrawFlags::NONE, Point(), GetSizeInPixels());
 }
 
 void GroupBox::Draw( OutputDevice* pDev, const Point& rPos,

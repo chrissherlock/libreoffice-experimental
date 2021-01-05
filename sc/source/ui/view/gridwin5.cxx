@@ -184,7 +184,7 @@ bool ScGridWindow::ShowNoteMarker( SCCOL nPosX, SCROW nPosY, bool bKeyboard )
             /*  If caption is shown from right or bottom windows, adjust
                 mapmode to include size of top-left window. */
             MapMode aMapMode = GetDrawMapMode( true );
-            Size aLeftSize = pLeft->PixelToLogic( pLeft->GetOutputSizePixel(), aMapMode );
+            Size aLeftSize = pLeft->PixelToLogic( pLeft->GetSizeInPixels(), aMapMode );
             Point aOrigin = aMapMode.GetOrigin();
             if( (this == pRight) || (this == pDiagonal) )
                 aOrigin.AdjustX(aLeftSize.Width() );

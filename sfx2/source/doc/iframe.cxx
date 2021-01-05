@@ -160,7 +160,7 @@ sal_Bool SAL_CALL IFrameObject::load(
         DBG_ASSERT( !mxFrame.is(), "Frame already existing!" );
         VclPtr<vcl::Window> pParent = VCLUnoHelper::GetWindow( xFrame->getContainerWindow() );
         VclPtr<IFrameWindow_Impl> pWin = VclPtr<IFrameWindow_Impl>::Create( pParent, maFrmDescr.IsFrameBorderOn() );
-        pWin->SetSizePixel( pParent->GetOutputSizePixel() );
+        pWin->SetSizePixel( pParent->GetSizeInPixels() );
         pWin->SetBackground();
         pWin->Show();
 

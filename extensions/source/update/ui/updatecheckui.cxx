@@ -65,7 +65,7 @@ Image GetMenuBarIcon( MenuBar const * pMBar )
     sal_uInt32 nMBarHeight = 20;
 
     if ( pMBarWin )
-        nMBarHeight = pMBarWin->GetOutputSizePixel().getHeight();
+        nMBarHeight = pMBarWin->GetSizeInPixels().getHeight();
 
     if (nMBarHeight >= 35)
         sResID = RID_UPDATE_AVAILABLE_26;

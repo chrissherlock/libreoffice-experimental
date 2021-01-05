@@ -322,7 +322,7 @@ void DrawViewShell::MouseMove(const MouseEvent& rMEvt, ::sd::Window* pWin)
 
     if ( mpDrawView->IsAction() )
     {
-        ::tools::Rectangle aOutputArea(Point(0,0), GetActiveWindow()->GetOutputSizePixel());
+        ::tools::Rectangle aOutputArea(Point(0,0), GetActiveWindow()->GetSizeInPixels());
 
         if ( !aOutputArea.IsInside(rMEvt.GetPosPixel()) )
         {
@@ -331,7 +331,7 @@ void DrawViewShell::MouseMove(const MouseEvent& rMEvt, ::sd::Window* pWin)
             if (mpContentWindow)
             {
                 aOutputArea = ::tools::Rectangle(Point(0,0),
-                    mpContentWindow->GetOutputSizePixel());
+                    mpContentWindow->GetSizeInPixels());
 
                 Point aPos = mpContentWindow->GetPointerPosPixel();
                 if ( aOutputArea.IsInside(aPos) )
@@ -433,7 +433,7 @@ void DrawViewShell::MouseButtonUp(const MouseEvent& rMEvt, ::sd::Window* pWin)
 
         if (mbIsRulerDrag)
         {
-            ::tools::Rectangle aOutputArea(Point(0,0), GetActiveWindow()->GetOutputSizePixel());
+            ::tools::Rectangle aOutputArea(Point(0,0), GetActiveWindow()->GetSizeInPixels());
 
             if (aOutputArea.IsInside(rMEvt.GetPosPixel()))
             {

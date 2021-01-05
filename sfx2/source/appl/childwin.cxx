@@ -515,7 +515,7 @@ void SfxChildWindow::CreateContext( sal_uInt16 nContextId, SfxBindings& rBinding
     }
 
     pContext = std::move(pCon);
-    pContext->GetWindow()->SetSizePixel( pWindow->GetOutputSizePixel() );
+    pContext->GetWindow()->SetSizePixel( pWindow->GetSizeInPixels() );
     pContext->GetWindow()->Show();
 }
 

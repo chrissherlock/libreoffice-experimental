@@ -88,7 +88,7 @@ void Layout::ArrangeWindows ()
         return;
     bInArrangeWindows = true;
 
-    Size const aSize = GetOutputSizePixel();
+    Size const aSize = GetSizeInPixels();
     tools::Long const nWidth = aSize.Width(), nHeight = aSize.Height();
     if (nWidth && nHeight) // non-empty size
     {

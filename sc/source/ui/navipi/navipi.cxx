@@ -793,7 +793,7 @@ void ScNavigatorDlg::SetListMode(NavListMode eMode)
         if (pNav)
         {
             Size aOptimalSize(GetOptimalSize());
-            Size aNewSize(pNav->GetOutputSizePixel());
+            Size aNewSize(pNav->GetSizeInPixels());
             aNewSize.setHeight( eMode == NAV_LMODE_NONE ? aOptimalSize.Height() : aExpandedSize.Height() );
             pNav->SetMinOutputSizePixel(aOptimalSize);
             pNav->SetOutputSizePixel(aNewSize);

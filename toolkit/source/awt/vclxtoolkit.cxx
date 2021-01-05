@@ -1930,7 +1930,7 @@ css::uno::Reference< css::awt::XWindowPeer > VCLXToolkit::ImplCreateWindow(
         else if ( rDescriptor.WindowAttributes & css::awt::WindowAttribute::FULLSIZE )
         {
             if ( pParent )
-                pNewWindow->SetSizePixel( pParent->GetOutputSizePixel() );
+                pNewWindow->SetSizePixel( pParent->GetSizeInPixels() );
         }
         else if ( !VCLUnoHelper::IsZero( rDescriptor.Bounds ) )
         {

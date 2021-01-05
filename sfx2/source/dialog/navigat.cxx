@@ -62,7 +62,7 @@ void SfxNavigator::Resize()
 {
     SfxDockingWindow::Resize();
     if ( pWrapper->GetContextWindow() )
-        pWrapper->GetContextWindow()->SetSizePixel( GetOutputSizePixel() );
+        pWrapper->GetContextWindow()->SetSizePixel( GetSizeInPixels() );
 }
 
 bool SfxNavigator::Close()

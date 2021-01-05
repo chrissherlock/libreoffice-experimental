@@ -142,7 +142,7 @@ void Svx3DPreviewControl::Construct()
 void Svx3DPreviewControl::Resize()
 {
     // size of page
-    Size aSize(GetOutputSizePixel());
+    Size aSize(GetSizeInPixels());
     aSize = GetDrawingArea()->get_ref_device().PixelToLogic(aSize);
     mpFmPage->SetSize(aSize);
 
@@ -534,7 +534,7 @@ tools::Rectangle Svx3DLightControl::GetFocusRect()
 {
     if (!HasFocus())
         return tools::Rectangle();
-    Size aFocusSize = GetOutputSizePixel();
+    Size aFocusSize = GetSizeInPixels();
     aFocusSize.AdjustWidth( -4 );
     aFocusSize.AdjustHeight( -4 );
     return tools::Rectangle(Point(2, 2), aFocusSize);
@@ -684,7 +684,7 @@ bool Svx3DLightControl::MouseButtonUp(const MouseEvent& rMEvt)
 void Svx3DLightControl::Resize()
 {
     // set size of page
-    const Size aSize(GetDrawingArea()->get_ref_device().PixelToLogic(GetOutputSizePixel()));
+    const Size aSize(GetDrawingArea()->get_ref_device().PixelToLogic(GetSizeInPixels()));
     mpFmPage->SetSize(aSize);
 
     // set position and size of scene

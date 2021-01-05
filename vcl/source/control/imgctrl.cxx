@@ -124,7 +124,7 @@ void ImageControl::ImplDraw(OutputDevice& rDev, const Point& rPos, const Size& r
 
 void ImageControl::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle& /*rRect*/)
 {
-    ImplDraw(rRenderContext, Point(), GetOutputSizePixel());
+    ImplDraw(rRenderContext, Point(), GetSizeInPixels());
 
     if (!HasFocus())
         return;
@@ -132,7 +132,7 @@ void ImageControl::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
     vcl::Window* pBorderWindow = GetWindow(GetWindowType::Border);
 
     bool bFlat = (GetBorderStyle() == WindowBorderStyle::MONO);
-    tools::Rectangle aRect(Point(0,0), pBorderWindow->GetOutputSizePixel());
+    tools::Rectangle aRect(Point(0,0), pBorderWindow->GetSizeInPixels());
     Color oldLineCol = pBorderWindow->GetLineColor();
     Color oldFillCol = pBorderWindow->GetFillColor();
     pBorderWindow->SetFillColor();

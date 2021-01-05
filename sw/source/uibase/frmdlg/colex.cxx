@@ -346,7 +346,7 @@ void SwColumnOnlyExample::Paint(vcl::RenderContext& rRenderContext, const tools:
     if (rFieldColor == aGrayColor)
         aGrayColor.Invert();
 
-    Size aLogSize(rRenderContext.PixelToLogic(GetOutputSizePixel()));
+    Size aLogSize(rRenderContext.PixelToLogic(GetSizeInPixels()));
     tools::Rectangle aCompleteRect(Point(0,0), aLogSize);
     rRenderContext.SetLineColor(rDlgColor);
     rRenderContext.SetFillColor(rDlgColor);
@@ -483,7 +483,7 @@ void SwColumnOnlyExample::Resize()
     OutputDevice& rRefDevice = GetDrawingArea()->get_ref_device();
     rRefDevice.Push(PushFlags::MAPMODE);
     rRefDevice.SetMapMode(MapMode(MapUnit::MapTwip));
-    m_aWinSize = GetOutputSizePixel();
+    m_aWinSize = GetSizeInPixels();
     m_aWinSize.AdjustHeight( -4 );
     m_aWinSize.AdjustWidth( -4 );
     m_aWinSize = rRefDevice.PixelToLogic(m_aWinSize);

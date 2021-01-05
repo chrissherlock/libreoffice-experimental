@@ -173,7 +173,7 @@ void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
                 aVDev->SetBackground( rWallpaper.GetColor() );
                 aVDev->SetOutputSizePixel( Size( nBmpWidth, nBmpHeight ) );
                 aVDev->DrawBitmapEx( Point(), aBmpEx );
-                aBmpEx = aVDev->GetBitmapEx( Point(), aVDev->GetOutputSizePixel() );
+                aBmpEx = aVDev->GetBitmapEx( Point(), aVDev->GetSizeInPixels() );
             }
 
             bDrawColorBackground = true;
@@ -318,7 +318,7 @@ void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
             {
                 const Size aBmpSize( aBmpEx.GetSizePixel() );
                 const Point aTmpPoint;
-                const tools::Rectangle aOutRect( aTmpPoint, GetOutputSizePixel() );
+                const tools::Rectangle aOutRect( aTmpPoint, GetSizeInPixels() );
                 const tools::Rectangle aColRect( Point( nX, nY ), Size( nWidth, nHeight ) );
 
                 tools::Rectangle aWorkRect( 0, 0, aOutRect.Right(), aPos.Y() - 1 );

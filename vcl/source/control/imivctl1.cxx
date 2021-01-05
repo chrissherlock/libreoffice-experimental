@@ -133,7 +133,7 @@ void SvxIconChoiceCtrl_Impl::Clear( bool bInCtor )
         pGridMap->Clear();
         aVirtOutputSize.setWidth( 0 );
         aVirtOutputSize.setHeight( 0 );
-        Size aSize( pView->GetOutputSizePixel() );
+        Size aSize( pView->GetSizeInPixels() );
         nMaxVirtWidth = aSize.Width() - nVerSBarWidth;
         if( nMaxVirtWidth <= 0 )
             nMaxVirtWidth = DEFAULT_MAX_VIRT_WIDTH;
@@ -343,7 +343,7 @@ void SvxIconChoiceCtrl_Impl::ResetVirtSize()
 
     if( !(nWinBits & (WB_NOVSCROLL | WB_NOHSCROLL)) )
     {
-        Size aRealOutputSize( pView->GetOutputSizePixel() );
+        Size aRealOutputSize( pView->GetSizeInPixels() );
         if( aVirtOutputSize.Width() < aRealOutputSize.Width() ||
             aVirtOutputSize.Height() < aRealOutputSize.Height() )
         {
@@ -486,7 +486,7 @@ void SvxIconChoiceCtrl_Impl::Paint(vcl::RenderContext& rRenderContext, const too
     Color aCOL_BLACK);
     rRenderContext.SetLineColor( aColor );
     Point aOffs(rRenderContext.GetMapMode().GetOrigin());
-    Size aXSize(GetOutputSizePixel());
+    Size aXSize(GetSizeInPixels());
     {
         Point aStart(LROFFS_WINBORDER, 0);
         Point aEnd(LROFFS_WINBORDER, aXSize.Height());
@@ -596,7 +596,7 @@ void SvxIconChoiceCtrl_Impl::RepaintSelectedEntries()
 void SvxIconChoiceCtrl_Impl::InitScrollBarBox()
 {
     aScrBarBox->SetSizePixel( Size(nVerSBarWidth-1, nHorSBarHeight-1) );
-    Size aSize( pView->GetOutputSizePixel() );
+    Size aSize( pView->GetSizeInPixels() );
     aScrBarBox->SetPosPixel( Point(aSize.Width()-nVerSBarWidth+1, aSize.Height()-nHorSBarHeight+1));
 }
 
@@ -1067,7 +1067,7 @@ void SvxIconChoiceCtrl_Impl::AdjustScrollBars()
     tools::Long nVirtHeight = aVirtOutputSize.Height();
     tools::Long nVirtWidth = aVirtOutputSize.Width();
 
-    Size aOSize( pView->Control::GetOutputSizePixel() );
+    Size aOSize( pView->Control::GetSizeInPixels() );
     tools::Long nRealHeight = aOSize.Height();
     tools::Long nRealWidth = aOSize.Width();
 
@@ -1192,11 +1192,11 @@ void SvxIconChoiceCtrl_Impl::AdjustScrollBars()
 void SvxIconChoiceCtrl_Impl::Resize()
 {
     InitScrollBarBox();
-    aOutputSize = pView->GetOutputSizePixel();
+    aOutputSize = pView->GetSizeInPixels();
     pImpCursor->Clear();
     pGridMap->OutputSizeChanged();
 
-    const Size& rSize = pView->Control::GetOutputSizePixel();
+    const Size& rSize = pView->Control::GetSizeInPixels();
     PositionScrollBars( rSize.Width(), rSize.Height() );
     // The scrollbars are shown/hidden asynchronously, so derived classes can
     // do an Arrange during Resize, without the scrollbars suddenly turning
@@ -2637,7 +2637,7 @@ void SvxIconChoiceCtrl_Impl::InitSettings()
     aVerSBar->Hide();
     aVerSBar->SetSizePixel( aSize );
 
-    Size aOSize( pView->Control::GetOutputSizePixel() );
+    Size aOSize( pView->Control::GetSizeInPixels() );
     PositionScrollBars( aOSize.Width(), aOSize.Height() );
     AdjustScrollBars();
 }

@@ -2367,9 +2367,9 @@ void Window::Show(bool bVisible, ShowFlags nFlags)
                 ImplHandleResize( this, nOutWidth, nOutHeight );
             }
 
-            if (mpWindowImpl->mpFrameData->mpBuffer && mpWindowImpl->mpFrameData->mpBuffer->GetOutputSizePixel() != GetOutputSizePixel())
+            if (mpWindowImpl->mpFrameData->mpBuffer && mpWindowImpl->mpFrameData->mpBuffer->GetSizeInPixels() != GetSizeInPixels())
                 // Make sure that the buffer size matches the window size, even if no resize was needed.
-                mpWindowImpl->mpFrameData->mpBuffer->SetOutputSizePixel(GetOutputSizePixel());
+                mpWindowImpl->mpFrameData->mpBuffer->SetOutputSizePixel(GetSizeInPixels());
         }
 
         if( xWindow->IsDisposed() )
@@ -3869,7 +3869,7 @@ void Window::RequestDoubleBuffering(bool bRequest)
     {
         mpWindowImpl->mpFrameData->mpBuffer = VclPtrInstance<VirtualDevice>();
         // Make sure that the buffer size matches the frame size.
-        mpWindowImpl->mpFrameData->mpBuffer->SetOutputSizePixel(mpWindowImpl->mpFrameWindow->GetOutputSizePixel());
+        mpWindowImpl->mpFrameData->mpBuffer->SetOutputSizePixel(mpWindowImpl->mpFrameWindow->GetSizeInPixels());
     }
     else
         mpWindowImpl->mpFrameData->mpBuffer.reset();

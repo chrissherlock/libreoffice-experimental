@@ -99,7 +99,7 @@ SdVectorizeDlg::~SdVectorizeDlg()
 
 void SdVectorizeDlg::InitPreviewBmp()
 {
-    const ::tools::Rectangle aRect( GetRect( m_aBmpWin.GetOutputSizePixel(), aBmp.GetSizePixel() ) );
+    const ::tools::Rectangle aRect( GetRect( m_aBmpWin.GetSizeInPixels(), aBmp.GetSizePixel() ) );
 
     aPreviewBmp = aBmp;
     aPreviewBmp.Scale( aRect.GetSize() );

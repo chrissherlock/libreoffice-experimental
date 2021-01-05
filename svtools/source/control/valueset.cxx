@@ -260,8 +260,8 @@ void ValueSet::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle&
         const StyleSettings& rStyleSettings = rRenderContext.GetSettings().GetStyleSettings();
         rRenderContext.SetLineColor();
         rRenderContext.SetFillColor(rStyleSettings.GetFaceColor());
-        tools::Long nOffY = maVirDev->GetOutputSizePixel().Height();
-        Size aWinSize(GetOutputSizePixel());
+        tools::Long nOffY = maVirDev->GetSizeInPixels().Height();
+        Size aWinSize(GetSizeInPixels());
         rRenderContext.DrawRect(tools::Rectangle(Point(0, nOffY ), Point( aWinSize.Width(), aWinSize.Height())));
     }
 
@@ -678,7 +678,7 @@ void ValueSet::ImplDraw(vcl::RenderContext& rRenderContext)
         Format(rRenderContext);
 
     Point aDefPos;
-    Size aSize = maVirDev->GetOutputSizePixel();
+    Size aSize = maVirDev->GetSizeInPixels();
 
     rRenderContext.DrawOutDev(aDefPos, aSize, aDefPos, aSize, *maVirDev);
 
@@ -688,7 +688,7 @@ void ValueSet::ImplDraw(vcl::RenderContext& rRenderContext)
         if (!(GetStyle() & WB_FLATVALUESET))
         {
             const StyleSettings& rStyleSettings = rRenderContext.GetSettings().GetStyleSettings();
-            Size aWinSize(GetOutputSizePixel());
+            Size aWinSize(GetSizeInPixels());
             Point aPos1(NAME_LINE_OFF_X, mnTextOffset + NAME_LINE_OFF_Y);
             Point aPos2(aWinSize.Width() - (NAME_LINE_OFF_X * 2), mnTextOffset + NAME_LINE_OFF_Y);
             if (!(rStyleSettings.GetOptions() & StyleSettingsOptions::Mono))
@@ -862,7 +862,7 @@ void ValueSet::SetStyle(WinBits nStyle)
 
 void ValueSet::Format(vcl::RenderContext const & rRenderContext)
 {
-    Size aWinSize(GetOutputSizePixel());
+    Size aWinSize(GetSizeInPixels());
     size_t nItemCount = mItemList.size();
     WinBits nStyle = GetStyle();
     tools::Long nTxtHeight = rRenderContext.GetTextHeight();
@@ -1463,7 +1463,7 @@ void ValueSet::ImplDrawItemText(vcl::RenderContext& rRenderContext, const OUStri
     if (!(GetStyle() & WB_NAMEFIELD))
         return;
 
-    Size aWinSize(GetOutputSizePixel());
+    Size aWinSize(GetSizeInPixels());
     tools::Long nTxtWidth = rRenderContext.GetTextWidth(rText);
     tools::Long nTxtOffset = mnTextOffset;
 

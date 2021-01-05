@@ -152,7 +152,7 @@ void FileControl::Resize()
         return;
     mnInternalFlags |= FileControlMode_Internal::INRESIZE;//InResize = sal_True
 
-    Size aOutSz = GetOutputSizePixel();
+    Size aOutSz = GetSizeInPixels();
     tools::Long nButtonTextWidth = maButton->GetTextWidth( maButtonText );
     if ( !(mnInternalFlags & FileControlMode_Internal::ORIGINALBUTTONTEXT) ||
          ( nButtonTextWidth < aOutSz.Width()/3 ) )

@@ -527,7 +527,7 @@ void OutputDevice::DrawOutDevDirectProcess(const OutputDevice& rSrcDev, SalTwoRe
 
 tools::Rectangle OutputDevice::GetBackgroundComponentBounds() const
 {
-    return tools::Rectangle( Point( 0, 0 ), GetOutputSizePixel() );
+    return tools::Rectangle( Point( 0, 0 ), GetSizeInPixels() );
 }
 
 // Layout public functions
@@ -679,7 +679,7 @@ css::awt::DeviceInfo OutputDevice::GetCommonDeviceInfo(Size const& rDevSz) const
 
 css::awt::DeviceInfo OutputDevice::GetDeviceInfo() const
 {
-    css::awt::DeviceInfo aInfo = GetCommonDeviceInfo(GetOutputSizePixel());
+    css::awt::DeviceInfo aInfo = GetCommonDeviceInfo(GetSizeInPixels());
 
     aInfo.LeftInset = 0;
     aInfo.TopInset = 0;

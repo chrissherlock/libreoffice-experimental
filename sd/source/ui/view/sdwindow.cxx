@@ -149,7 +149,7 @@ void Window::CalcMinZoom()
     // and calculate the scaling factors that would lead to the view
     // area (also called application area) to completely fill the
     // window.
-    Size aWinSize = PixelToLogic(GetOutputSizePixel());
+    Size aWinSize = PixelToLogic(GetSizeInPixels());
     sal_uLong nX = static_cast<sal_uLong>(static_cast<double>(aWinSize.Width())
         * double(ZOOM_MULTIPLICATOR) / static_cast<double>(maViewSize.Width()));
     sal_uLong nY = static_cast<sal_uLong>(static_cast<double>(aWinSize.Height())
@@ -368,7 +368,7 @@ void Window::SetZoomIntegral(::tools::Long nZoom)
         nZoom = mnMinZoom;
 
     // Calculate the window's new origin.
-    Size aSize = PixelToLogic(GetOutputSizePixel());
+    Size aSize = PixelToLogic(GetSizeInPixels());
     ::tools::Long nW = aSize.Width()  * GetZoom() / nZoom;
     ::tools::Long nH = aSize.Height() * GetZoom() / nZoom;
     maWinPos.AdjustX((aSize.Width()  - nW) / 2 );
@@ -394,7 +394,7 @@ void Window::SetZoomIntegral(::tools::Long nZoom)
         sal_uLong nX(0);
         sal_uLong nY(0);
 
-        const Size aWinSize( PixelToLogic(GetOutputSizePixel()) );
+        const Size aWinSize( PixelToLogic(GetSizeInPixels()) );
         if(rZoomRect.GetHeight())
         {
             nX = static_cast<sal_uLong>(static_cast<double>(aWinSize.Height())
@@ -455,7 +455,7 @@ void Window::SetZoomIntegral(::tools::Long nZoom)
         Point aPos = rZoomRect.TopLeft();
         // Transform the output area from pixel coordinates into logical
         // coordinates.
-        Size aWinSize = PixelToLogic(GetOutputSizePixel());
+        Size aWinSize = PixelToLogic(GetSizeInPixels());
         // Paranoia!  The degenerate case of zero width or height has been
         // taken care of above.
         DBG_ASSERT(rZoomRect.GetWidth(), "ZoomRect-Width = 0!");
@@ -532,7 +532,7 @@ void Window::SetMinZoomAutoCalc (bool bAuto)
 void Window::UpdateMapOrigin(bool bInvalidate)
 {
     bool       bChanged = false;
-    const Size aWinSize = PixelToLogic(GetOutputSizePixel());
+    const Size aWinSize = PixelToLogic(GetSizeInPixels());
 
     if ( mbCenterAllowed )
     {
@@ -662,7 +662,7 @@ void Window::SetVisibleXY(double fX, double fY)
  */
 double Window::GetVisibleWidth() const
 {
-    Size aWinSize = PixelToLogic(GetOutputSizePixel());
+    Size aWinSize = PixelToLogic(GetSizeInPixels());
     if ( aWinSize.Width() > maViewSize.Width() )
         aWinSize.setWidth( maViewSize.Width() );
     return (static_cast<double>(aWinSize.Width()) / maViewSize.Width());
@@ -674,7 +674,7 @@ double Window::GetVisibleWidth() const
  */
 double Window::GetVisibleHeight() const
 {
-    Size aWinSize = PixelToLogic(GetOutputSizePixel());
+    Size aWinSize = PixelToLogic(GetSizeInPixels());
     if ( aWinSize.Height() > maViewSize.Height() )
         aWinSize.setHeight( maViewSize.Height() );
     return (static_cast<double>(aWinSize.Height()) / maViewSize.Height());
@@ -682,7 +682,7 @@ double Window::GetVisibleHeight() const
 
 Point Window::GetVisibleCenter()
 {
-    Point aPos = ::tools::Rectangle(Point(), GetOutputSizePixel()).Center();
+    Point aPos = ::tools::Rectangle(Point(), GetSizeInPixels()).Center();
 
     // For LOK
     bool bMapModeWasEnabled(IsMapModeEnabled());
@@ -911,7 +911,7 @@ void Window::DropScroll(const Point& rMousePos)
     short nDx = 0;
     short nDy = 0;
 
-    Size aSize = GetOutputSizePixel();
+    Size aSize = GetSizeInPixels();
 
     if (aSize.Width() > SCROLL_SENSITIVE * 3)
     {

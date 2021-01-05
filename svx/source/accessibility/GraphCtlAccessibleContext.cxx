@@ -199,7 +199,7 @@ awt::Rectangle SAL_CALL SvxGraphCtrlAccessibleContext::getBounds()
         throw DisposedException();
 
     const Point         aOutPos;
-    const Size          aOutSize( mpControl->GetOutputSizePixel() );
+    const Size          aOutSize( mpControl->GetSizeInPixels() );
     awt::Rectangle      aRet;
 
     aRet.X = aOutPos.X();

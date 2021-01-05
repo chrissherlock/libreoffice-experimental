@@ -1617,7 +1617,7 @@ void SplitWindow::ImplStartSplit( const MouseEvent& rMEvt )
         nCurMaxSize = mnMaxSize;
     else
     {
-        Size aSize = GetParent()->GetOutputSizePixel();
+        Size aSize = GetParent()->GetSizeInPixels();
         if ( mbHorz )
             nCurMaxSize = aSize.Height();
         else
@@ -2071,7 +2071,7 @@ void SplitWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Rectang
 
 void SplitWindow::Resize()
 {
-    Size aSize = GetOutputSizePixel();
+    Size aSize = GetSizeInPixels();
     mnDX = aSize.Width();
     mnDY = aSize.Height();
 

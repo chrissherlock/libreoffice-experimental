@@ -1374,7 +1374,7 @@ void DialogWindowLayout::OnFirstSize (tools::Long const nWidth, tools::Long cons
 }
 
 void DialogWindowLayout::AddPropertyBrowser () {
-    Size const aSize = GetOutputSizePixel();
+    Size const aSize = GetSizeInPixels();
     AddToLeft(pPropertyBrowser, Size(aSize.Width() * 0.25, aSize.Height() * 0.65));
 }
 

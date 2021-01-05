@@ -124,9 +124,9 @@ SdrPreRenderDevice::~SdrPreRenderDevice()
 void SdrPreRenderDevice::PreparePreRenderDevice()
 {
     // compare size of mpPreRenderDevice with size of visible area
-    if(mpPreRenderDevice->GetOutputSizePixel() != mpOutputDevice->GetOutputSizePixel())
+    if(mpPreRenderDevice->GetSizeInPixels() != mpOutputDevice->GetSizeInPixels())
     {
-        mpPreRenderDevice->SetOutputSizePixel(mpOutputDevice->GetOutputSizePixel());
+        mpPreRenderDevice->SetOutputSizePixel(mpOutputDevice->GetSizeInPixels());
     }
 
     // Also compare the MapModes for zoom/scroll changes
@@ -266,7 +266,7 @@ rtl::Reference< sdr::overlay::OverlayManager > const & SdrPaintWindow::GetOverla
 
 tools::Rectangle SdrPaintWindow::GetVisibleArea() const
 {
-    Size aVisSizePixel(GetOutputDevice().GetOutputSizePixel());
+    Size aVisSizePixel(GetOutputDevice().GetSizeInPixels());
     return GetOutputDevice().PixelToLogic(tools::Rectangle(Point(0,0), aVisSizePixel));
 }
 

@@ -2485,7 +2485,7 @@ void DrawViewShell::FuTemporary(SfxRequest& rReq)
                 pOutl->SetUpdateMode( false );
 
                 Point aPos;
-                ::tools::Rectangle aRect( aPos, GetActiveWindow()->GetOutputSizePixel() );
+                ::tools::Rectangle aRect( aPos, GetActiveWindow()->GetSizeInPixels() );
                 aPos = aRect.Center();
                 aPos = GetActiveWindow()->PixelToLogic(aPos);
                 aPos.AdjustX( -(aSize.Width() / 2) );

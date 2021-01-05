@@ -1237,7 +1237,7 @@ sal_uInt16 ScTabView::CalcZoom( SvxZoomType eType, sal_uInt16 nOldZoom )
                         //  Because scale is rounded to pixels, the only reliable way to find
                         //  the right scale is to check if a zoom fits
 
-                        Size aWinSize = pGridWin[eUsedPart]->GetOutputSizePixel();
+                        Size aWinSize = pGridWin[eUsedPart]->GetSizeInPixels();
 
                         //  for frozen panes, use sum of both parts for calculation
 
@@ -1310,12 +1310,12 @@ sal_uInt16 ScTabView::CalcZoom( SvxZoomType eType, sal_uInt16 nOldZoom )
                         if (!pGridWin[SC_SPLIT_BOTTOMLEFT])
                             return nZoom;
 
-                        Size aWinSize = pGridWin[SC_SPLIT_BOTTOMLEFT]->GetOutputSizePixel();
+                        Size aWinSize = pGridWin[SC_SPLIT_BOTTOMLEFT]->GetSizeInPixels();
                         ScSplitMode eHMode = aViewData.GetHSplitMode();
                         if ( eHMode != SC_SPLIT_NONE && pGridWin[SC_SPLIT_BOTTOMRIGHT] )
                         {
                             tools::Long nOtherWidth = pGridWin[SC_SPLIT_BOTTOMRIGHT]->
-                                                        GetOutputSizePixel().Width();
+                                                        GetSizeInPixels().Width();
                             if ( eHMode == SC_SPLIT_FIX )
                             {
                                 aWinSize.AdjustWidth(nOtherWidth );
@@ -1330,7 +1330,7 @@ sal_uInt16 ScTabView::CalcZoom( SvxZoomType eType, sal_uInt16 nOldZoom )
                         if ( eVMode != SC_SPLIT_NONE && pGridWin[SC_SPLIT_TOPLEFT] )
                         {
                             tools::Long nOtherHeight = pGridWin[SC_SPLIT_TOPLEFT]->
-                                                        GetOutputSizePixel().Height();
+                                                        GetSizeInPixels().Height();
                             if ( eVMode == SC_SPLIT_FIX )
                             {
                                 aWinSize.AdjustHeight(nOtherHeight );

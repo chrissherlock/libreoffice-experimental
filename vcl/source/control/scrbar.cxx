@@ -231,7 +231,7 @@ tools::Long ScrollBar::ImplCalcThumbPosPix( tools::Long nPos )
 
 void ScrollBar::ImplCalc( bool bUpdate )
 {
-    const Size aSize = GetOutputSizePixel();
+    const Size aSize = GetSizeInPixels();
     const tools::Long nMinThumbSize = GetSettings().GetStyleSettings().GetMinThumbSize();
 
     if ( mbCalcSize )
@@ -462,7 +462,7 @@ bool ScrollBar::ImplDrawNative(vcl::RenderContext& rRenderContext, sal_uInt16 nD
         aCtrlRegion.Union(maPage2Rect);
         aCtrlRegion.Union(maThumbRect);
 
-        tools::Rectangle aRequestedRegion(Point(0,0), GetOutputSizePixel());
+        tools::Rectangle aRequestedRegion(Point(0,0), GetSizeInPixels());
         // if the actual native control region is smaller then the region that
         // we requested the control to draw in, then draw a background rectangle
         // to avoid drawing artifacts in the uncovered region
@@ -723,7 +723,7 @@ void ScrollBar::ImplDoMouseAction( const Point& rMousePos, bool bCallAction )
     bool        bIsInside = false;
 
     Point aPoint( 0, 0 );
-    tools::Rectangle aControlRegion( aPoint, GetOutputSizePixel() );
+    tools::Rectangle aControlRegion( aPoint, GetSizeInPixels() );
 
     switch ( meScrollType )
     {
@@ -858,7 +858,7 @@ void ScrollBar::MouseButtonDown( const MouseEvent& rMEvt )
     bool                bDragToMouse = false;
 
     Point aPoint( 0, 0 );
-    tools::Rectangle aControlRegion( aPoint, GetOutputSizePixel() );
+    tools::Rectangle aControlRegion( aPoint, GetSizeInPixels() );
 
     if ( HitTestNativeScrollbar( bHorizontal? (IsRTLEnabled()? ControlPart::ButtonRight: ControlPart::ButtonLeft): ControlPart::ButtonUp,
                 aControlRegion, rMousePos, bIsInside )?
@@ -1215,7 +1215,7 @@ tools::Rectangle* ScrollBar::ImplFindPartRect( const Point& rPt )
     bool    bIsInside = false;
 
     Point aPoint( 0, 0 );
-    tools::Rectangle aControlRegion( aPoint, GetOutputSizePixel() );
+    tools::Rectangle aControlRegion( aPoint, GetSizeInPixels() );
 
     if( HitTestNativeScrollbar( bHorizontal? (IsRTLEnabled()? ControlPart::ButtonRight: ControlPart::ButtonLeft): ControlPart::ButtonUp,
                 aControlRegion, rPt, bIsInside )?

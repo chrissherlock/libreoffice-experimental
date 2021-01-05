@@ -131,7 +131,7 @@ void VisibleAreaManager::MakeVisible()
     const ::tools::Rectangle aVisibleArea (pWindow->PixelToLogic(
         ::tools::Rectangle(
             Point(0,0),
-            pWindow->GetOutputSizePixel())));
+            pWindow->GetSizeInPixels())));
     const ::tools::Rectangle aModelArea (mrSlideSorter.GetView().GetModelArea());
 
     sal_Int32 nVisibleTop (aVisibleArea.Top());

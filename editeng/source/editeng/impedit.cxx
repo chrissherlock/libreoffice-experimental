@@ -2147,7 +2147,7 @@ void ImpEditView::ShowDDCursor( const tools::Rectangle& rRect )
     }
 
 #ifdef DBG_UTIL
-    Size aCurSzPx( pDragAndDropInfo->pBackground->GetOutputSizePixel() );
+    Size aCurSzPx( pDragAndDropInfo->pBackground->GetSizeInPixels() );
     if ( ( aCurSzPx.Width() < aNewSzPx.Width() ) ||( aCurSzPx.Height() < aNewSzPx.Height() ) )
     {
         bool bDone = pDragAndDropInfo->pBackground->SetOutputSizePixel( aNewSzPx );

@@ -125,7 +125,7 @@ Size SvxColorValueSet::layoutAllVisible(sal_uInt32 nEntryCount)
 
 void SvxColorValueSet::Resize()
 {
-    layoutToGivenHeight(GetOutputSizePixel().Height(), GetItemCount());
+    layoutToGivenHeight(GetSizeInPixels().Height(), GetItemCount());
     ValueSet::Resize();
 }
 

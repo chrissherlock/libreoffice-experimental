@@ -143,7 +143,7 @@ void ScTabView::StopRefMode()
             pSelEngine->SetWindow( pGridWin[ eNew ] );
             pSelEngine->SetWhich( eNew );
             pSelEngine->SetVisibleArea( tools::Rectangle(Point(),
-                                        pGridWin[eNew]->GetOutputSizePixel()) );
+                                        pGridWin[eNew]->GetSizeInPixels()) );
             pGridWin[eOld]->MoveMouseStatus(*pGridWin[eNew]);
         }
     }
@@ -474,7 +474,7 @@ void ScTabView::InvertHorizontal( ScVSplitPos eWhich, tools::Long nDragPos )
             ScGridWindow* pWin = pGridWin[i].get();
             if (pWin)
             {
-                tools::Rectangle aRect( 0,nDragPos, pWin->GetOutputSizePixel().Width()-1,nDragPos+HDR_SLIDERSIZE-1 );
+                tools::Rectangle aRect( 0,nDragPos, pWin->GetSizeInPixels().Width()-1,nDragPos+HDR_SLIDERSIZE-1 );
                 pWin->PaintImmediately();
                 pWin->DoInvertRect( aRect );    // Pixel
             }
@@ -489,7 +489,7 @@ void ScTabView::InvertVertical( ScHSplitPos eWhich, tools::Long nDragPos )
             ScGridWindow* pWin = pGridWin[i].get();
             if (pWin)
             {
-                tools::Rectangle aRect( nDragPos,0, nDragPos+HDR_SLIDERSIZE-1,pWin->GetOutputSizePixel().Height()-1 );
+                tools::Rectangle aRect( nDragPos,0, nDragPos+HDR_SLIDERSIZE-1,pWin->GetSizeInPixels().Height()-1 );
                 pWin->PaintImmediately();
                 pWin->DoInvertRect( aRect );    // Pixel
             }

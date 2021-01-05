@@ -305,7 +305,7 @@ void ScViewFunctionSet::SetCursorAtPoint( const Point& rPointPixel, bool /* bDon
         aEffPos.setY( -1 );
 
     //  Scrolling
-    Size aWinSize = pEngine->GetWindow()->GetOutputSizePixel();
+    Size aWinSize = pEngine->GetWindow()->GetSizeInPixels();
     bool bLeftScroll  = ( aEffPos.X() < 0 );
     bool bTopScroll = ( aEffPos.Y() < 0 );
 
@@ -847,7 +847,7 @@ void ScHeaderFunctionSet::SetCursorAtPoint( const Point& rPointPixel, bool /* bD
     }
 
     //  Scrolling
-    Size aWinSize = pViewData->GetActiveWin()->GetOutputSizePixel();
+    Size aWinSize = pViewData->GetActiveWin()->GetSizeInPixels();
     bool bScroll;
     if (bColumn)
         bScroll = ( rPointPixel.X() < 0 || rPointPixel.X() >= aWinSize.Width() );

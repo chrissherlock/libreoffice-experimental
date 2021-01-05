@@ -683,7 +683,7 @@ void  SlideSorterController::Rearrange (bool bForce)
     // order to determine whether the window and the view have to be resized.
     if ( ! bForce)
     {
-        ::tools::Rectangle aCurrentContentArea (pWindow->GetPosPixel(), pWindow->GetOutputSizePixel());
+        ::tools::Rectangle aCurrentContentArea (pWindow->GetPosPixel(), pWindow->GetSizeInPixels());
         bSizeHasChanged = (aNewContentArea != aCurrentContentArea);
     }
     if (bForce || bSizeHasChanged)

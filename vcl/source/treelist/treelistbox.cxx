@@ -3187,7 +3187,7 @@ void SvTreeListBox::ClearTabList()
 }
 
 
-Size SvTreeListBox::GetOutputSizePixel() const
+Size SvTreeListBox::GetSizeInPixels() const
 {
     Size aSize = pImpl->GetOutputSize();
     return aSize;

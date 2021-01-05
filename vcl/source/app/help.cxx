@@ -378,7 +378,7 @@ void HelpTextWindow::Paint( vcl::RenderContext& rRenderContext, const tools::Rec
     bool bNativeOK = false;
     if (rRenderContext.IsNativeControlSupported(ControlType::Tooltip, ControlPart::Entire))
     {
-        tools::Rectangle aCtrlRegion(Point(0, 0), GetOutputSizePixel());
+        tools::Rectangle aCtrlRegion(Point(0, 0), GetSizeInPixels());
         ImplControlValue aControlValue;
         bNativeOK = rRenderContext.DrawNativeControl(ControlType::Tooltip, ControlPart::Entire, aCtrlRegion,
                                                      ControlState::NONE, aControlValue, OUString());
@@ -405,7 +405,7 @@ void HelpTextWindow::Paint( vcl::RenderContext& rRenderContext, const tools::Rec
     if (bNativeOK)
         return;
 
-    Size aSz = GetOutputSizePixel();
+    Size aSz = GetSizeInPixels();
     rRenderContext.DrawRect(tools::Rectangle(Point(), aSz));
     if (mnHelpWinStyle == HELPWINSTYLE_BALLOON)
     {

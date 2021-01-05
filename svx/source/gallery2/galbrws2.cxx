@@ -933,7 +933,7 @@ sal_uInt32 GalleryBrowser2::ImplGetSelectedItemId( const Point* pSelPos, Point& 
             rSelPos = *pSelPos;
         else
         {
-            Size aOutputSizePixel(mxPreview->GetOutputSizePixel());
+            Size aOutputSizePixel(mxPreview->GetSizeInPixels());
             rSelPos = Point( aOutputSizePixel.Width() >> 1, aOutputSizePixel.Height() >> 1 );
         }
     }

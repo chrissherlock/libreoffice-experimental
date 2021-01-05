@@ -338,7 +338,7 @@ sal_Int8 SwEditWin::AcceptDrop( const AcceptDropEvent& rEvt )
 
     // If the cursor is near the inner boundary
     // we attempt to scroll towards the desired direction.
-    tools::Rectangle aWin(Point(), GetOutputSizePixel());
+    tools::Rectangle aWin(Point(), GetSizeInPixels());
     const int nMargin = 10;
     aWin.AdjustLeft(nMargin );
     aWin.AdjustTop(nMargin );

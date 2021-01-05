@@ -799,7 +799,7 @@ void ScTabView::TestHintWindow()
             SCCOL nCol = aViewData.GetCurX();
             SCROW nRow = aViewData.GetCurY();
             Point aPos = aViewData.GetScrPos( nCol, nRow, eWhich );
-            Size aWinSize = pWin->GetOutputSizePixel();
+            Size aWinSize = pWin->GetSizeInPixels();
             // cursor visible?
             if ( nCol >= aViewData.GetPosX(WhichH(eWhich)) &&
                  nRow >= aViewData.GetPosY(WhichV(eWhich)) &&
@@ -980,7 +980,7 @@ void ScTabView::AlignToCursor( SCCOL nCurX, SCROW nCurY, ScFollowMode eMode,
                 if (pFrame && pCare->get_extents_relative_to(*pFrame, x, y, width, height))
                 {
                     aDlgPixel = tools::Rectangle(Point(x, y), Size(width, height));
-                    aWinSize = pWin->GetOutputSizePixel();
+                    aWinSize = pWin->GetSizeInPixels();
                     // dos the dialog cover the GridWin?
                     if ( aDlgPixel.Right() >= 0 && aDlgPixel.Left() < aWinSize.Width() )
                     {
@@ -2390,7 +2390,7 @@ void ScTabView::PaintArea( SCCOL nStartCol, SCROW nStartRow, SCCOL nEndCol, SCRO
             }
             else
             {
-                aEnd.setX( bLayoutRTL ? 0 : pGridWin[i]->GetOutputSizePixel().Width() );
+                aEnd.setX( bLayoutRTL ? 0 : pGridWin[i]->GetSizeInPixels().Width() );
             }
         }
         aEnd.AdjustX( -nLayoutSign );
@@ -2398,7 +2398,7 @@ void ScTabView::PaintArea( SCCOL nStartCol, SCROW nStartRow, SCCOL nEndCol, SCRO
 
         // #i85232# include area below cells (could be done in GetScrPos?)
         if ( eMode == ScUpdateMode::All && nRow2 >= rDoc.MaxRow() && !bIsTiledRendering )
-            aEnd.setY( pGridWin[i]->GetOutputSizePixel().Height() );
+            aEnd.setY( pGridWin[i]->GetSizeInPixels().Height() );
 
         aStart.AdjustX( -nLayoutSign );      // include change marks
         aStart.AdjustY( -1 );
@@ -2903,7 +2903,7 @@ void ScTabView::ActivatePart( ScSplitPos eWhich )
 
     pSelEngine->SetWindow(pGridWin[eWhich]);
     pSelEngine->SetWhich(eWhich);
-    pSelEngine->SetVisibleArea( tools::Rectangle(Point(), pGridWin[eWhich]->GetOutputSizePixel()) );
+    pSelEngine->SetVisibleArea( tools::Rectangle(Point(), pGridWin[eWhich]->GetSizeInPixels()) );
 
     pGridWin[eOld]->MoveMouseStatus(*pGridWin[eWhich]);
 
@@ -2921,7 +2921,7 @@ void ScTabView::ActivatePart( ScSplitPos eWhich )
         pColBar[eOldH]->SetIgnoreMove(true);
         pColBar[eNewH]->SetIgnoreMove(false);
         pHdrSelEng->SetWindow( pColBar[eNewH] );
-        tools::Long nWidth = pColBar[eNewH]->GetOutputSizePixel().Width();
+        tools::Long nWidth = pColBar[eNewH]->GetSizeInPixels().Width();
         pHdrSelEng->SetVisibleArea( tools::Rectangle( 0, LONG_MIN, nWidth-1, LONG_MAX ) );
         pColBar[eNewH]->CaptureMouse();
     }
@@ -2930,7 +2930,7 @@ void ScTabView::ActivatePart( ScSplitPos eWhich )
         pRowBar[eOldV]->SetIgnoreMove(true);
         pRowBar[eNewV]->SetIgnoreMove(false);
         pHdrSelEng->SetWindow( pRowBar[eNewV] );
-        tools::Long nHeight = pRowBar[eNewV]->GetOutputSizePixel().Height();
+        tools::Long nHeight = pRowBar[eNewV]->GetSizeInPixels().Height();
         pHdrSelEng->SetVisibleArea( tools::Rectangle( LONG_MIN, 0, LONG_MAX, nHeight-1 ) );
         pRowBar[eNewV]->CaptureMouse();
     }

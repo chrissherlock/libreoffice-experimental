@@ -85,7 +85,7 @@ public:
     bool IsMapModeEnabled() const;
     virtual void EnableMapMode(bool bEnable = true);
 
-    Size GetOutputSizePixel() const;
+    Size GetSizeInPixels() const;
     tools::Long GetOutputWidthPixel() const;
     tools::Long GetOutputHeightPixel() const;
     tools::Long GetOutOffXPixel() const;

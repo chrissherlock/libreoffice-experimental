@@ -172,7 +172,7 @@ void Window::ImplClipBoundaries( vcl::Region& rRegion, bool bThis, bool bOverlap
     {
         // clip to frame if required
         if ( !mpWindowImpl->mbFrame )
-            rRegion.Intersect( tools::Rectangle( Point( 0, 0 ), mpWindowImpl->mpFrameWindow->GetOutputSizePixel() ) );
+            rRegion.Intersect( tools::Rectangle( Point( 0, 0 ), mpWindowImpl->mpFrameWindow->GetSizeInPixels() ) );
 
         if ( bOverlaps && !rRegion.IsEmpty() )
         {
@@ -630,7 +630,7 @@ void Window::ImplCalcOverlapRegion( const tools::Rectangle& rSourceRect, vcl::Re
     if ( pWindow && !pWindow->mpWindowImpl->mbFrame )
     {
         aTempRegion = aRegion;
-        aTempRegion.Exclude( tools::Rectangle( Point( 0, 0 ), mpWindowImpl->mpFrameWindow->GetOutputSizePixel() ) );
+        aTempRegion.Exclude( tools::Rectangle( Point( 0, 0 ), mpWindowImpl->mpFrameWindow->GetSizeInPixels() ) );
         rRegion.Union( aTempRegion );
     }
 

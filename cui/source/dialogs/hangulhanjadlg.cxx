@@ -233,7 +233,7 @@ namespace svx
 
     void RubyRadioButton::Paint(vcl::RenderContext& rRenderContext)
     {
-        ::tools::Rectangle aOverallRect(Point(0, 0), rRenderContext.GetOutputSizePixel());
+        ::tools::Rectangle aOverallRect(Point(0, 0), rRenderContext.GetSizeInPixels());
         // inflate the rect a little bit (because the VCL radio button does the same)
         ::tools::Rectangle aTextRect( aOverallRect );
         aTextRect.AdjustLeft( 1 ); aTextRect.AdjustRight( -1 );

@@ -1384,7 +1384,7 @@ void SvtLineListBox::ImpGetLine( tools::Long nLine1, tools::Long nLine2, tools::
         return;
 
     Size aVirSize = aVirDev->LogicToPixel( aSize );
-    if ( aVirDev->GetOutputSizePixel() != aVirSize )
+    if ( aVirDev->GetSizeInPixels() != aVirSize )
         aVirDev->SetOutputSizePixel( aVirSize );
     aVirDev->SetFillColor( aColorDist );
     aVirDev->DrawRect( tools::Rectangle( Point(), aSize ) );
@@ -1626,7 +1626,7 @@ void SvtLineListBox::UpdatePreview()
     {
         Image aImage(m_xLineSet->GetItemImage(m_xLineSet->GetSelectedItemId()));
         m_xControl->set_label("");
-        const auto nPos = (aVirDev->GetOutputSizePixel().Height() - aImage.GetSizePixel().Height()) / 2;
+        const auto nPos = (aVirDev->GetSizeInPixels().Height() - aImage.GetSizePixel().Height()) / 2;
         aVirDev->Push(PushFlags::MAPMODE);
         aVirDev->SetMapMode(MapMode(MapUnit::MapPixel));
         aVirDev->Erase();

@@ -688,7 +688,7 @@ Image createImage(const OUString& rImage)
 
 Image createImage(const VirtualDevice& rDevice)
 {
-    return Image(rDevice.GetBitmapEx(Point(), rDevice.GetOutputSizePixel()));
+    return Image(rDevice.GetBitmapEx(Point(), rDevice.GetSizeInPixels()));
 }
 
 sal_uInt16 insert_to_menu(sal_uInt16 nLastId, PopupMenu* pMenu, int pos, std::u16string_view rId,
@@ -4869,7 +4869,7 @@ IMPL_LINK(SalInstanceTreeView, TooltipHdl, const HelpEvent&, rHEvt, bool)
         OUString aTooltip = signal_query_tooltip(aIter);
         if (aTooltip.isEmpty())
             return false;
-        Size aSize(m_xTreeView->GetOutputSizePixel().Width(), m_xTreeView->GetEntryHeight());
+        Size aSize(m_xTreeView->GetSizeInPixels().Width(), m_xTreeView->GetEntryHeight());
         tools::Rectangle aScreenRect(
             m_xTreeView->OutputToScreenPixel(m_xTreeView->GetEntryPosition(pEntry)), aSize);
         Help::ShowQuickHelp(m_xTreeView, aScreenRect, aTooltip);
@@ -5176,7 +5176,7 @@ void SalInstanceIconView::insert(int pos, const OUString* pStr, const OUString* 
     if (pIcon)
     {
         const Point aNull(0, 0);
-        const Size aSize = pIcon->GetOutputSizePixel();
+        const Size aSize = pIcon->GetSizeInPixels();
         Image aImage(pIcon->GetBitmapEx(aNull, aSize));
         pEntry->AddItem(std::make_unique<SvLBoxContextBmp>(aImage, aImage, false));
     }

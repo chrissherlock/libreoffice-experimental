@@ -550,7 +550,7 @@ bool TabControl::ImplPlaceTabs( tools::Long nWidth )
 
 tools::Rectangle TabControl::ImplGetTabRect( sal_uInt16 nItemPos, tools::Long nWidth, tools::Long nHeight )
 {
-    Size aWinSize = Control::GetOutputSizePixel();
+    Size aWinSize = Control::GetSizeInPixels();
     if ( nWidth < 0 )
         nWidth = aWinSize.Width();
     if ( nHeight < 0 )
@@ -633,7 +633,7 @@ void TabControl::ImplChangeTabPage( sal_uInt16 nId, sal_uInt16 nOldId )
         {
             aRect.SetLeft( 0 );
             aRect.SetTop( 0 );
-            aRect.SetRight( Control::GetOutputSizePixel().Width() );
+            aRect.SetRight( Control::GetSizeInPixels().Width() );
         }
         else
         {
@@ -1333,12 +1333,12 @@ void TabControl::SetPosPixel(const Point& rPos)
 {
     Window::SetPosPixel(rPos);
     if (mbLayoutDirty)
-        setAllocation(GetOutputSizePixel());
+        setAllocation(GetSizeInPixels());
 }
 
 void TabControl::Resize()
 {
-    setAllocation(Control::GetOutputSizePixel());
+    setAllocation(Control::GetSizeInPixels());
 }
 
 void TabControl::GetFocus()
@@ -1786,7 +1786,7 @@ sal_uInt16 TabControl::GetPagePos( sal_uInt16 nPageId ) const
 
 sal_uInt16 TabControl::GetPageId( const Point& rPos ) const
 {
-    Size winSize = Control::GetOutputSizePixel();
+    Size winSize = Control::GetSizeInPixels();
     const auto &rList = mpTabCtrlData->maItemList;
     const auto it = std::find_if(rList.begin(), rList.end(), [&rPos, &winSize, this](const auto &item) {
         return const_cast<TabControl*>(this)->ImplGetTabRect(&item, winSize.Width(), winSize.Height()).IsInside(rPos); });

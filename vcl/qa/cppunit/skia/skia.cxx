@@ -61,7 +61,7 @@ private:
     {
         SvFileStream aStream(sWhere, StreamMode::WRITE | StreamMode::TRUNC);
         GraphicFilter& rFilter = GraphicFilter::GetGraphicFilter();
-        rFilter.compressAsPNG(device->GetBitmapEx(Point(), device->GetOutputSizePixel()), aStream);
+        rFilter.compressAsPNG(device->GetBitmapEx(Point(), device->GetSizeInPixels()), aStream);
     }
 #endif
 };

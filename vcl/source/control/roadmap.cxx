@@ -192,7 +192,7 @@ public:
 
 void RoadmapImpl::initItemSize()
 {
-    Size aLabelSize( m_rAntiImpl.GetOutputSizePixel() );
+    Size aLabelSize( m_rAntiImpl.GetSizeInPixels() );
     aLabelSize.setHeight( m_rAntiImpl.LogicToPixel(Size(0, LABELBASEMAPHEIGHT), MapMode(MapUnit::MapAppFont)).Height() );
     aLabelSize.AdjustWidth( -(m_rAntiImpl.LogicToPixel(Size(2 * ROADMAP_INDENT_X, 0), MapMode(MapUnit::MapAppFont)).Width()) );
     m_aItemSizePixel = aLabelSize;
@@ -555,7 +555,7 @@ void ORoadmap::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle&
     if (!!m_pImpl->getPicture())
     {
         Size aBitmapSize = m_pImpl->getPicture().GetSizePixel();
-        Size aMySize(GetOutputSizePixel());
+        Size aMySize(GetSizeInPixels());
 
         Point aBitmapPos(aMySize.Width() - aBitmapSize.Width(),  aMySize.Height() - aBitmapSize.Height());
 
@@ -571,7 +571,7 @@ void ORoadmap::DrawHeadline(vcl::RenderContext& rRenderContext)
 {
     Point aTextPos = LogicToPixel(Point(ROADMAP_INDENT_X, 8), MapMode(MapUnit::MapAppFont));
 
-    Size aOutputSize(GetOutputSizePixel());
+    Size aOutputSize(GetSizeInPixels());
 
     // draw it
     rRenderContext.DrawText(tools::Rectangle(aTextPos, aOutputSize), GetText(),

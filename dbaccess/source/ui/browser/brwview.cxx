@@ -198,7 +198,7 @@ void UnoDataBrowserView::resizeDocumentView(tools::Rectangle& _rPlayground)
         // calculate the splitter pos and size
         aSplitPos   = m_pSplitter->GetPosPixel();
         aSplitPos.setY( aPlaygroundPos.Y() );
-        aSplitSize  = m_pSplitter->GetOutputSizePixel();
+        aSplitSize  = m_pSplitter->GetSizeInPixels();
         aSplitSize.setHeight( aPlaygroundSize.Height() );
 
         if( ( aSplitPos.X() + aSplitSize.Width() ) > ( aPlaygroundSize.Width() ))

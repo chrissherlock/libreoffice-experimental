@@ -676,7 +676,7 @@ void SwView::ExecViewOptions(SfxRequest &rReq)
     rSh.LockView( true );    //lock visible section
     GetWrtShell().EndAction();
     if( bBrowseModeChanged && !bFlag )
-        CalcVisArea( GetEditWin().GetOutputSizePixel() );
+        CalcVisArea( GetEditWin().GetSizeInPixels() );
     rSh.LockView( bLockedView );
 
     pOpt.reset();

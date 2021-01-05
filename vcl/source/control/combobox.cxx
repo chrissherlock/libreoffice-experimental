@@ -577,11 +577,11 @@ void ComboBox::Resize()
 
     if (m_pImpl->m_pSubEdit)
     {
-        Size aOutSz = GetOutputSizePixel();
+        Size aOutSz = GetSizeInPixels();
         if( IsDropDownBox() )
         {
             ComboBoxBounds aBounds(m_pImpl->calcComboBoxDropDownComponentBounds(aOutSz,
-                GetWindow(GetWindowType::Border)->GetOutputSizePixel()));
+                GetWindow(GetWindowType::Border)->GetSizeInPixels()));
             m_pImpl->m_pSubEdit->SetPosSizePixel(aBounds.aSubEditPos, aBounds.aSubEditSize);
             m_pImpl->m_pBtn->SetPosSizePixel(aBounds.aButtonPos, aBounds.aButtonSize);
         }
@@ -1005,7 +1005,7 @@ tools::Long ComboBox::getMaxWidthScrollBarAndDownButton() const
     tools::Rectangle aContent, aBound;
 
     // use the full extent of the control
-    tools::Rectangle aArea( Point(), pBorder->GetOutputSizePixel() );
+    tools::Rectangle aArea( Point(), pBorder->GetSizeInPixels() );
 
     if ( GetNativeControlRegion(ControlType::Combobox, ControlPart::ButtonDown,
         aArea, ControlState::NONE, aControlValue, aBound, aContent) )
@@ -1134,13 +1134,13 @@ void ComboBox::GetMaxVisColumnsAndLines( sal_uInt16& rnCols, sal_uInt16& rnLines
     tools::Long nCharWidth = GetTextWidth(OUString(u'x'));
     if ( !IsDropDownBox() )
     {
-        Size aOutSz = m_pImpl->m_pImplLB->GetMainWindow()->GetOutputSizePixel();
+        Size aOutSz = m_pImpl->m_pImplLB->GetMainWindow()->GetSizeInPixels();
         rnCols = (nCharWidth > 0) ? static_cast<sal_uInt16>(aOutSz.Width()/nCharWidth) : 1;
         rnLines = static_cast<sal_uInt16>(aOutSz.Height()/GetDropDownEntryHeight());
     }
     else
     {
-        Size aOutSz = m_pImpl->m_pSubEdit->GetOutputSizePixel();
+        Size aOutSz = m_pImpl->m_pSubEdit->GetSizeInPixels();
         rnCols = (nCharWidth > 0) ? static_cast<sal_uInt16>(aOutSz.Width()/nCharWidth) : 1;
         rnLines = 1;
     }

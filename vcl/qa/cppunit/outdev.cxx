@@ -93,7 +93,7 @@ void VclOutdevTest::testVirtualDevice()
     pVDev->DrawPixel(Point(1, 2), COL_BLUE);
     pVDev->DrawPixel(Point(31, 30), COL_RED);
 
-    Size aSize = pVDev->GetOutputSizePixel();
+    Size aSize = pVDev->GetSizeInPixels();
     CPPUNIT_ASSERT_EQUAL(Size(32, 32), aSize);
 
     Bitmap aBmp = pVDev->GetBitmap(Point(), aSize);

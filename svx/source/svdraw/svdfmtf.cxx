@@ -1597,9 +1597,9 @@ void ImpSdrGDIMetaFileImport::DoAction(MetaFloatTransparentAction const & rAct)
         ScopedVclPtrInstance< VirtualDevice > pVDev;
 
         pVDev->SetOutputSizePixel(aBitmapEx.GetBitmap().GetSizePixel());
-        pVDev->DrawGradient(tools::Rectangle(Point(0, 0), pVDev->GetOutputSizePixel()), rGradient);
+        pVDev->DrawGradient(tools::Rectangle(Point(0, 0), pVDev->GetSizeInPixels()), rGradient);
 
-        aNewMask = AlphaMask(pVDev->GetBitmap(Point(0, 0), pVDev->GetOutputSizePixel()));
+        aNewMask = AlphaMask(pVDev->GetBitmap(Point(0, 0), pVDev->GetSizeInPixels()));
         bHasNewMask = true;
     }
 

@@ -832,7 +832,7 @@ SvxTextForwarder* ScAccessibleEditLineTextData::GetTextForwarder()
                 mpEditEngine->SetPaperSize(aSize);
 #else
                 OutputDevice& rDevice = mpTxtWnd->GetDrawingArea()->get_ref_device();
-                Size aSize(rDevice.GetOutputSizePixel());
+                Size aSize(rDevice.GetSizeInPixels());
                 aSize = rDevice.PixelToLogic(aSize, mpEditEngine->GetRefMapMode());
                 mpEditEngine->SetPaperSize(aSize);
 #endif
@@ -1042,7 +1042,7 @@ SvxTextForwarder* ScAccessiblePreviewHeaderCellTextData::GetTextForwarder()
             Size aOutputSize;
             vcl::Window* pWindow = mpViewShell->GetWindow();
             if ( pWindow )
-                aOutputSize = pWindow->GetOutputSizePixel();
+                aOutputSize = pWindow->GetSizeInPixels();
             tools::Rectangle aVisRect( Point(), aOutputSize );
             Size aSize(mpViewShell->GetLocationData().GetHeaderCellOutputRect(aVisRect, aCellPos, mbColHeader).GetSize());
             if (pWindow)
@@ -1260,7 +1260,7 @@ SvxTextForwarder* ScAccessibleNoteTextData::GetTextForwarder()
             Size aOutputSize;
             vcl::Window* pWindow = mpViewShell->GetWindow();
             if ( pWindow )
-                aOutputSize = pWindow->GetOutputSizePixel();
+                aOutputSize = pWindow->GetSizeInPixels();
             tools::Rectangle aVisRect( Point(), aOutputSize );
             Size aSize(mpViewShell->GetLocationData().GetNoteInRangeOutputRect(aVisRect, mbMarkNote, maCellPos).GetSize());
             if (pWindow)

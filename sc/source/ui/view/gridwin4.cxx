@@ -99,7 +99,7 @@ static void lcl_DrawOneFrame( vcl::RenderContext* pDev, const tools::Rectangle& 
         aInner.SetRight( rInnerPixel.Left() );
     }
 
-    tools::Rectangle aVisible( Point(0,0), pDev->GetOutputSizePixel() );
+    tools::Rectangle aVisible( Point(0,0), pDev->GetSizeInPixels() );
     lcl_LimitRect( aInner, aVisible );
 
     tools::Rectangle aOuter = aInner;
@@ -714,14 +714,14 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
             }
             else
             {
-                aDrawingRectPixel.SetRight( GetOutputSizePixel().getWidth() );
+                aDrawingRectPixel.SetRight( GetSizeInPixels().getWidth() );
             }
         }
 
         // correct for border (bottom)
         if(rDoc.MaxRow() == nY2)
         {
-            aDrawingRectPixel.SetBottom( GetOutputSizePixel().getHeight() );
+            aDrawingRectPixel.SetBottom( GetSizeInPixels().getHeight() );
         }
 
         // get logic positions
@@ -782,7 +782,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
         MapMode aCurrentMapMode(pContentDev->GetMapMode());
         pContentDev->SetMapMode(MapMode(MapUnit::MapPixel));
 
-        tools::Rectangle aPixRect( Point(), GetOutputSizePixel() );
+        tools::Rectangle aPixRect( Point(), GetSizeInPixels() );
         pContentDev->SetFillColor( rColorCfg.GetColorValue(svtools::APPBACKGROUND).nColor );
         pContentDev->SetLineColor();
         if ( nX2==rDoc.MaxCol() )
@@ -1616,7 +1616,7 @@ void ScGridWindow::DrawPagePreview( SCCOL nX1, SCROW nY1, SCCOL nX2, SCROW nY2, 
 
     ScDocument& rDoc = mrViewData.GetDocument();
     SCTAB nTab = mrViewData.GetTabNo();
-    Size aWinSize = GetOutputSizePixel();
+    Size aWinSize = GetSizeInPixels();
     const svtools::ColorConfig& rColorCfg = SC_MOD()->GetColorConfig();
     Color aManual( rColorCfg.GetColorValue(svtools::CALCPAGEBREAKMANUAL).nColor );
     Color aAutomatic( rColorCfg.GetColorValue(svtools::CALCPAGEBREAK).nColor );

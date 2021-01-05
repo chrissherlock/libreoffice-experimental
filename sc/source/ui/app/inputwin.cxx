@@ -741,7 +741,7 @@ void ScInputWindow::DataChanged( const DataChangedEvent& rDCEvt )
 
 bool ScInputWindow::IsPointerAtResizePos()
 {
-    return GetOutputSizePixel().Height() - GetPointerPosPixel().Y() <= 4;
+    return GetSizeInPixels().Height() - GetPointerPosPixel().Y() <= 4;
 }
 
 void ScInputWindow::MouseMove( const MouseEvent& rMEvt )
@@ -767,12 +767,12 @@ void ScInputWindow::MouseMove( const MouseEvent& rMEvt )
             bResetPointerPos = true;
             aPosPixel.setY( mnMaxY );
         } // or expanding down
-        else if (GetOutputSizePixel().Height() - aPosPixel.Y() < -nResizeThreshold)
+        else if (GetSizeInPixels().Height() - aPosPixel.Y() < -nResizeThreshold)
         {
             pGroupBar->IncrementVerticalSize();
             bResetPointerPos = true;
         } // or shrinking up
-        else if ((GetOutputSizePixel().Height() - aPosPixel.Y()) > nResizeThreshold)
+        else if ((GetSizeInPixels().Height() - aPosPixel.Y()) > nResizeThreshold)
         {
             bResetPointerPos = true;
             pGroupBar->DecrementVerticalSize();
@@ -780,7 +780,7 @@ void ScInputWindow::MouseMove( const MouseEvent& rMEvt )
 
         if (bResetPointerPos)
         {
-            aPosPixel.setY(  GetOutputSizePixel().Height() );
+            aPosPixel.setY(  GetSizeInPixels().Height() );
             SetPointerPosPixel(aPosPixel);
         }
     }
@@ -805,7 +805,7 @@ void ScInputWindow::MouseButtonDown( const MouseEvent& rMEvt )
             // row but I don't know how to get that value in pixels.
             // Use TOOLBOX_WINDOW_HEIGHT for the moment
             ScTabViewShell* pViewSh = ScTabViewShell::GetActiveViewShell();
-            mnMaxY = GetOutputSizePixel().Height() + (pViewSh->GetGridHeight(SC_SPLIT_TOP)
+            mnMaxY = GetSizeInPixels().Height() + (pViewSh->GetGridHeight(SC_SPLIT_TOP)
                    + pViewSh->GetGridHeight(SC_SPLIT_BOTTOM)) - TOOLBOX_WINDOW_HEIGHT;
         }
     }
@@ -1139,7 +1139,7 @@ Point ScTextWndGroup::GetCursorScreenPixelPos(bool bBelow)
     aPos = GetEditViewDevice().LogicToPixel(aLogicPos);
     bool bRTL = mrParent.IsRTLEnabled();
     if (bRTL)
-        aPos.setX(mxTextWnd->GetOutputSizePixel().Width() - aPos.X() + gnBorderWidth);
+        aPos.setX(mxTextWnd->GetSizeInPixels().Width() - aPos.X() + gnBorderWidth);
     else
         aPos.AdjustX(gnBorderWidth + 1);
 
@@ -1311,7 +1311,7 @@ void ScTextWnd::Resize()
 {
     if (m_xEditView)
     {
-        Size aOutputSize = GetOutputSizePixel();
+        Size aOutputSize = GetSizeInPixels();
         OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
         tools::Rectangle aOutputArea = rDevice.PixelToLogic( tools::Rectangle( Point(), aOutputSize ));
         m_xEditView->SetOutputArea( aOutputArea );
@@ -1474,7 +1474,7 @@ void ScTextWnd::InitEditEngine()
     pNew->SetExecuteURL( false );
     m_xEditEngine = std::move(pNew);
 
-    Size barSize = GetOutputSizePixel();
+    Size barSize = GetSizeInPixels();
     m_xEditEngine->SetUpdateMode( false );
     m_xEditEngine->SetPaperSize( GetDrawingArea()->get_ref_device().PixelToLogic(Size(barSize.Width(),10000)) );
     m_xEditEngine->SetWordDelimiters(
@@ -1694,7 +1694,7 @@ bool ScTextWnd::Command( const CommandEvent& rCEvt )
                 Point aPos = rCEvt.GetMousePosPixel();
                 if (!rCEvt.IsMouseEvent())
                 {
-                    Size aSize = GetOutputSizePixel();
+                    Size aSize = GetSizeInPixels();
                     aPos = Point(aSize.Width() / 2, aSize.Height() / 2);
                 }
                 if (IsMouseCaptured())
@@ -1919,7 +1919,7 @@ void ScTextWnd::SetTextString( const OUString& rNewString )
                 if ( nSize1>0 && nSize2>0 )
                     nTextSize = std::max( nSize1, nSize2 );
                 else
-                    nTextSize = GetOutputSizePixel().Width(); // Overflow
+                    nTextSize = GetSizeInPixels().Width(); // Overflow
 
                 Point aLogicStart = GetDrawingArea()->get_ref_device().PixelToLogic(Point(0,0));
                 tools::Long nStartPos = aLogicStart.X();
@@ -1927,7 +1927,7 @@ void ScTextWnd::SetTextString( const OUString& rNewString )
                 if (nDifPos)
                     nInvPos += GetTextWidth(aString.copy(0,nDifPos));
 
-                Invalidate(tools::Rectangle(nInvPos, 0, nStartPos+nTextSize, GetOutputSizePixel().Height() - 1));
+                Invalidate(tools::Rectangle(nInvPos, 0, nStartPos+nTextSize, GetSizeInPixels().Height() - 1));
             }
         }
         else

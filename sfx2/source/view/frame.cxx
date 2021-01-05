@@ -573,7 +573,7 @@ void SfxFrame::SetToolSpaceBorderPixel_Impl( const SvBorder& rBorder )
         return;
 
     Point aPos ( rBorder.Left(), rBorder.Top() );
-    Size aSize( GetWindow().GetOutputSizePixel() );
+    Size aSize( GetWindow().GetSizeInPixels() );
     tools::Long nDeltaX = rBorder.Left() + rBorder.Right();
     if ( aSize.Width() > nDeltaX )
         aSize.AdjustWidth( -nDeltaX );
@@ -591,7 +591,7 @@ void SfxFrame::SetToolSpaceBorderPixel_Impl( const SvBorder& rBorder )
 
 tools::Rectangle SfxFrame::GetTopOuterRectPixel_Impl() const
 {
-    Size aSize( GetWindow().GetOutputSizePixel() );
+    Size aSize( GetWindow().GetSizeInPixels() );
     return tools::Rectangle( Point(), aSize );
 }
 
@@ -711,7 +711,7 @@ void SfxFrame::Resize()
     }
     else if ( pImpl->pCurrentViewFrame )
     {
-        pImpl->pCurrentViewFrame->GetWindow().SetSizePixel( GetWindow().GetOutputSizePixel() );
+        pImpl->pCurrentViewFrame->GetWindow().SetSizePixel( GetWindow().GetSizeInPixels() );
     }
 
 }

@@ -106,7 +106,7 @@ sal_Int32 OStartMarker::getMinHeight() const
 
 void OStartMarker::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle& /*rRect*/)
 {
-    Size aSize(GetOutputSizePixel());
+    Size aSize(GetSizeInPixels());
     const tools::Long nCornerWidth = tools::Long(CORNER_SPACE * double(GetMapMode().GetScaleX()));
 
     if (isCollapsed())
@@ -170,7 +170,7 @@ void OStartMarker::MouseButtonUp( const MouseEvent& rMEvt )
 
     Point aPos( rMEvt.GetPosPixel());
 
-    const Size aOutputSize = GetOutputSizePixel();
+    const Size aOutputSize = GetSizeInPixels();
     if( aPos.X() > aOutputSize.Width() || aPos.Y() > aOutputSize.Height() )
         return;
     tools::Rectangle aRect(m_aImage->GetPosPixel(),m_aImage->GetSizePixel());
@@ -223,7 +223,7 @@ void OStartMarker::ImplInitSettings()
 
 void OStartMarker::Resize()
 {
-    const Size aOutputSize( GetOutputSizePixel() );
+    const Size aOutputSize( GetSizeInPixels() );
     const tools::Long nOutputWidth  = aOutputSize.Width();
     const tools::Long nOutputHeight = aOutputSize.Height();
 

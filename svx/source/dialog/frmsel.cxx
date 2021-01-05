@@ -354,7 +354,7 @@ void FrameSelectorImpl::InitArrowImageList()
 
 void FrameSelectorImpl::InitGlobalGeometry()
 {
-    Size aCtrlSize(mrFrameSel.GetOutputSizePixel());
+    Size aCtrlSize(mrFrameSel.GetSizeInPixels());
     /*  nMinSize is the lower of width and height (control will always be squarish).
         FRAMESEL_GEOM_OUTER is the minimal distance between inner control border
         and any element. */
@@ -545,7 +545,7 @@ void FrameSelectorImpl::DrawBackground()
     // clear the area
     mpVirDev->SetLineColor();
     mpVirDev->SetFillColor( maBackCol );
-    mpVirDev->DrawRect( tools::Rectangle( Point( 0, 0 ), mpVirDev->GetOutputSizePixel() ) );
+    mpVirDev->DrawRect( tools::Rectangle( Point( 0, 0 ), mpVirDev->GetSizeInPixels() ) );
 
     // draw the inner gray (or whatever color) rectangle
     mpVirDev->SetLineColor();
@@ -712,7 +712,7 @@ void FrameSelectorImpl::CopyVirDevToControl(vcl::RenderContext& rRenderContext)
 {
     if (mbFullRepaint)
         DrawVirtualDevice();
-    rRenderContext.DrawBitmapEx(maVirDevPos, mpVirDev->GetBitmapEx(Point(0, 0), mpVirDev->GetOutputSizePixel()));
+    rRenderContext.DrawBitmapEx(maVirDevPos, mpVirDev->GetBitmapEx(Point(0, 0), mpVirDev->GetSizeInPixels()));
 }
 
 void FrameSelectorImpl::DrawAllTrackingRects(vcl::RenderContext& rRenderContext)
@@ -726,7 +726,7 @@ void FrameSelectorImpl::DrawAllTrackingRects(vcl::RenderContext& rRenderContext)
     }
     else
         // no frame border selected -> draw tracking rectangle around entire control
-        aPPoly.Insert( tools::Polygon(tools::Rectangle(maVirDevPos, mpVirDev->GetOutputSizePixel())));
+        aPPoly.Insert( tools::Polygon(tools::Rectangle(maVirDevPos, mpVirDev->GetSizeInPixels())));
 
     aPPoly.Optimize(PolyOptimizeFlags::CLOSE);
 

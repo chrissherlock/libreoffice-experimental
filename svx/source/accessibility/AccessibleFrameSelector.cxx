@@ -190,7 +190,7 @@ css::awt::Rectangle AccFrameSelector::implGetBounds()
     css::awt::Rectangle aRet;
 
     const Point   aOutPos;
-    Size          aOutSize(mpFrameSel->GetOutputSizePixel());
+    Size          aOutSize(mpFrameSel->GetSizeInPixels());
 
     aRet.X = aOutPos.X();
     aRet.Y = aOutPos.Y();

@@ -219,13 +219,13 @@ tools::Rectangle ScOutlineWindow::GetRectangle(
 
 tools::Long ScOutlineWindow::GetOutputSizeLevel() const
 {
-    Size aSize( GetOutputSizePixel() );
+    Size aSize( GetSizeInPixels() );
     return mbHoriz ? aSize.Height() : aSize.Width();
 }
 
 tools::Long ScOutlineWindow::GetOutputSizeEntry() const
 {
-    Size aSize( GetOutputSizePixel() );
+    Size aSize( GetSizeInPixels() );
     return mbHoriz ? aSize.Width() : aSize.Height();
 }
 
@@ -618,7 +618,7 @@ void ScOutlineWindow::Paint( vcl::RenderContext& /*rRenderContext*/, const tools
     tools::Long nEntriesSign = mbMirrorEntries ? -1 : 1;
     tools::Long nLevelsSign  = mbMirrorLevels  ? -1 : 1;
 
-    Size aSize = GetOutputSizePixel();
+    Size aSize = GetSizeInPixels();
     tools::Long nLevelEnd = (mbHoriz ? aSize.Height() : aSize.Width()) - 1;
     tools::Long nEntryEnd = (mbHoriz ? aSize.Width() : aSize.Height()) - 1;
 

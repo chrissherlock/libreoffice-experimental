@@ -508,7 +508,7 @@ void MediaWindowImpl::setPointer(PointerStyle aPointer)
 
 void MediaWindowImpl::Resize()
 {
-    const Size aCurSize(GetOutputSizePixel());
+    const Size aCurSize(GetSizeInPixels());
     const sal_Int32 nOffset(mpMediaWindowControl ? AVMEDIA_CONTROLOFFSET : 0);
 
     Size aPlayerWindowSize(aCurSize.Width() - (nOffset << 1),

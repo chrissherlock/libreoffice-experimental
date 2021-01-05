@@ -364,11 +364,11 @@ public:
     virtual sal_uInt16          GetBitCount() const;
 
     Size                        GetOutputSize() const
-                                    { return PixelToLogic( GetOutputSizePixel() ); }
+                                    { return PixelToLogic( GetSizeInPixels() ); }
     Point                       GetOutputOffPixel() const
                                     { return Point( mnOutOffX, mnOutOffY ); }
     tools::Rectangle            GetOutputRectPixel() const
-                                    { return tools::Rectangle(GetOutputOffPixel(), GetOutputSizePixel() ); }
+                                    { return tools::Rectangle(GetOutputOffPixel(), GetSizeInPixels() ); }
 
 
     css::uno::Reference< css::awt::XGraphics >

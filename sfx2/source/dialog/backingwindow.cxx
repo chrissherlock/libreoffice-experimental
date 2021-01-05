@@ -77,7 +77,7 @@ public:
 
     virtual void Resize() override
     {
-        auto nWidth = GetOutputSizePixel().Width();
+        auto nWidth = GetSizeInPixels().Width();
         if (maBrandImage.GetSizePixel().Width() != nWidth)
             LoadImageForWidth(nWidth);
         weld::CustomWidgetController::Resize();
@@ -103,7 +103,7 @@ public:
     {
         const bool bIsDark = Application::GetSettings().GetStyleSettings().GetDialogColor().IsDark();
         if (bIsDark != mbIsDark)
-            LoadImageForWidth(GetOutputSizePixel().Width());
+            LoadImageForWidth(GetSizeInPixels().Width());
         weld::CustomWidgetController::StyleUpdated();
     }
 
@@ -354,7 +354,7 @@ void BackingWindow::ApplyStyleSettings()
     {
         MenuBar* pMenuBar = pSystemWindow->GetMenuBar();
         if (pMenuBar)
-            nMenuHeight = pMenuBar->ImplGetWindow()->GetOutputSizePixel().Height();
+            nMenuHeight = pMenuBar->ImplGetWindow()->GetSizeInPixels().Height();
     }
 
     // fdo#34392: we do the layout dynamically, the layout depends on the font,

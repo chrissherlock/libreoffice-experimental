@@ -282,7 +282,7 @@ awt::Rectangle SAL_CALL ThumbnailViewAcc::getBounds()
     ThrowIfDisposed();
     const SolarMutexGuard aSolarGuard;
     const Point         aOutPos;
-    const Size          aOutSize( mpParent->GetOutputSizePixel() );
+    const Size          aOutSize( mpParent->GetSizeInPixels() );
     awt::Rectangle      aRet;
 
     aRet.X = aOutPos.X();

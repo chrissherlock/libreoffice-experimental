@@ -3378,7 +3378,7 @@ namespace
 
     GdkPixbuf* getPixbuf(const VirtualDevice& rDevice)
     {
-        Size aSize(rDevice.GetOutputSizePixel());
+        Size aSize(rDevice.GetSizeInPixels());
         cairo_surface_t* orig_surface = get_underlying_cairo_surface(rDevice);
         double m_fXScale, m_fYScale;
         dl_cairo_surface_get_device_scale(orig_surface, &m_fXScale, &m_fYScale);
@@ -3439,7 +3439,7 @@ namespace
         GtkWidget* pImage = nullptr;
         cairo_surface_t* surface = get_underlying_cairo_surface(rImageSurface);
 
-        Size aSize(rImageSurface.GetOutputSizePixel());
+        Size aSize(rImageSurface.GetSizeInPixels());
         cairo_surface_t* target = cairo_surface_create_similar(surface,
                                                                cairo_surface_get_content(surface),
                                                                aSize.Width(),
@@ -6971,7 +6971,7 @@ private:
         m_xCustomImage->EnableKillingFile(true);
 
         cairo_surface_t* surface = get_underlying_cairo_surface(*pDevice);
-        Size aSize = pDevice->GetOutputSizePixel();
+        Size aSize = pDevice->GetSizeInPixels();
         cairo_surface_write_to_png(surface, OUStringToOString(m_xCustomImage->GetFileName(), osl_getThreadTextEncoding()).getStr());
 
         m_pCustomCssProvider = gtk_css_provider_new();
@@ -9606,7 +9606,7 @@ public:
             {
                 cairo_surface_t* surface = get_underlying_cairo_surface(*pDevice);
 
-                Size aSize(pDevice->GetOutputSizePixel());
+                Size aSize(pDevice->GetSizeInPixels());
                 cairo_surface_t* target = cairo_surface_create_similar(surface,
                                                                         cairo_surface_get_content(surface),
                                                                         aSize.Width(),
@@ -10022,7 +10022,7 @@ private:
         {
             cairo_surface_t* surface = get_underlying_cairo_surface(*pDevice);
 
-            Size aSize(pDevice->GetOutputSizePixel());
+            Size aSize(pDevice->GetSizeInPixels());
             cairo_surface_t* target = cairo_surface_create_similar(surface,
                                                                     cairo_surface_get_content(surface),
                                                                     aSize.Width(),
@@ -13749,7 +13749,7 @@ private:
     virtual void signal_size_allocate(guint nWidth, guint nHeight) override
     {
         Size aNewSize(nWidth, nHeight);
-        if (m_pSurface && aNewSize == m_xDevice->GetOutputSizePixel())
+        if (m_pSurface && aNewSize == m_xDevice->GetSizeInPixels())
         {
             // unchanged
             return;

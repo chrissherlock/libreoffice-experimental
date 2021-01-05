@@ -1078,7 +1078,7 @@ namespace svt
 
         // if the window is smaller than "title line height" + "control area",
         // do nothing
-        if (GetOutputSizePixel().Height() <
+        if (GetSizeInPixels().Height() <
            (GetControlArea().GetHeight() + GetDataWindow().GetPosPixel().Y()))
             return;
 
@@ -1180,7 +1180,7 @@ namespace svt
     void EditBrowseBox::InvalidateHandleColumn()
     {
         tools::Rectangle aHdlFieldRect( GetFieldRectPixel( 0, 0 ));
-        tools::Rectangle aInvalidRect( Point(0,0), GetOutputSizePixel() );
+        tools::Rectangle aInvalidRect( Point(0,0), GetSizeInPixels() );
         aInvalidRect.SetRight( aHdlFieldRect.Right() );
         Invalidate( aInvalidRect );
     }

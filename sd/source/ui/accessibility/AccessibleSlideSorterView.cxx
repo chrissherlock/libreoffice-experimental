@@ -403,7 +403,7 @@ awt::Rectangle SAL_CALL AccessibleSlideSorterView::getBounds()
     if (mpContentWindow != nullptr)
     {
         const Point aPosition (mpContentWindow->GetPosPixel());
-        const Size aSize (mpContentWindow->GetOutputSizePixel());
+        const Size aSize (mpContentWindow->GetSizeInPixels());
 
         aBBox.X = aPosition.X();
         aBBox.Y = aPosition.Y();
@@ -461,7 +461,7 @@ awt::Size SAL_CALL AccessibleSlideSorterView::getSize()
 
     if (mpContentWindow != nullptr)
     {
-        const Size aOutputSize (mpContentWindow->GetOutputSizePixel());
+        const Size aOutputSize (mpContentWindow->GetSizeInPixels());
         aSize.Width = aOutputSize.Width();
         aSize.Height = aOutputSize.Height();
     }

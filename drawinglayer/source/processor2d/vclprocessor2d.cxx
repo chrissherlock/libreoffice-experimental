@@ -547,7 +547,7 @@ void VclProcessor2D::RenderFillGraphicPrimitive2D(
                             // prepare OutDev
                             const Point aEmptyPoint(0, 0);
                             const ::tools::Rectangle aVisiblePixel(
-                                aEmptyPoint, mpOutputDevice->GetOutputSizePixel());
+                                aEmptyPoint, mpOutputDevice->GetSizeInPixels());
                             const bool bWasEnabled(mpOutputDevice->IsMapModeEnabled());
                             mpOutputDevice->EnableMapMode(false);
 

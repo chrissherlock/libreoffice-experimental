@@ -245,7 +245,7 @@ void DockingWindow::ImplStartDocking( const Point& rPos )
         pWin.disposeAndClear();
 
     Point   aPos    = ImplOutputToFrame( Point() );
-    Size    aSize   = Window::GetOutputSizePixel();
+    Size    aSize   = Window::GetSizeInPixels();
     mnTrackX        = aPos.X();
     mnTrackY        = aPos.Y();
     mnTrackWidth    = aSize.Width();
@@ -441,7 +441,7 @@ void DockingWindow::Tracking( const TrackingEvent& rTEvt )
     {
         Point   aMousePos = rTEvt.GetMouseEvent().GetPosPixel();
         Point   aFrameMousePos = ImplOutputToFrame( aMousePos );
-        Size    aFrameSize = mpWindowImpl->mpFrameWindow->GetOutputSizePixel();
+        Size    aFrameSize = mpWindowImpl->mpFrameWindow->GetSizeInPixels();
         if ( aFrameMousePos.X() < 0 )
             aFrameMousePos.setX( 0 );
         if ( aFrameMousePos.Y() < 0 )
@@ -898,21 +898,21 @@ void DockingWindow::SetOutputSizePixel( const Size& rNewSize )
         Window::SetOutputSizePixel( rNewSize );
 }
 
-Size DockingWindow::GetOutputSizePixel() const
+Size DockingWindow::GetSizeInPixels() const
 {
     ImplDockingWindowWrapper *pWrapper = ImplGetDockingManager()->GetDockingWindowWrapper( this );
     if( pWrapper )
     {
         if ( pWrapper->mpFloatWin )
-            return pWrapper->mpFloatWin->GetOutputSizePixel();
+            return pWrapper->mpFloatWin->GetSizeInPixels();
         else
-            return Window::GetOutputSizePixel();
+            return Window::GetSizeInPixels();
     }
 
     if ( mpFloatWin )
-        return mpFloatWin->GetOutputSizePixel();
+        return mpFloatWin->GetSizeInPixels();
     else
-        return Window::GetOutputSizePixel();
+        return Window::GetSizeInPixels();
 }
 
 Point DockingWindow::GetFloatingPos() const
@@ -998,7 +998,7 @@ void DockingWindow::setOptimalLayoutSize()
 
 void DockingWindow::setPosSizeOnContainee()
 {
-    Size aSize = GetOutputSizePixel();
+    Size aSize = GetSizeInPixels();
 
     // Don't make the border width accessible via get_border_width(),
     // otherwise the floating window will handle the border as well.

@@ -397,8 +397,7 @@ bool OutputDevice::TransformAndReduceBitmapExToTargetRange(
 
     // now get discrete target pixels; start with OutDev pixel size and evtl.
     // intersect with active clipping area
-    basegfx::B2DRange aOutPixel(0.0, 0.0, GetOutputSizePixel().Width(),
-                                GetOutputSizePixel().Height());
+    basegfx::B2DRange aOutPixel(0.0, 0.0, GetSizeInPixels().Width(), GetSizeInPixels().Height());
 
     if (IsClipRegion())
     {

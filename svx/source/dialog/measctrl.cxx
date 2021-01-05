@@ -67,7 +67,7 @@ void SvxXMeasurePreview::ResizeImpl(const Size& rSize)
 void SvxXMeasurePreview::Resize()
 {
     CustomWidgetController::Resize();
-    ResizeImpl(GetOutputSizePixel());
+    ResizeImpl(GetSizeInPixels());
     Invalidate();
 }
 
@@ -134,7 +134,7 @@ bool SvxXMeasurePreview::MouseButtonDown(const MouseEvent& rMEvt)
             OutputDevice& rRefDevice = GetDrawingArea()->get_ref_device();
             rRefDevice.Push(PushFlags::MAPMODE);
             rRefDevice.SetMapMode(m_aMapMode);
-            Size aOutSize(rRefDevice.PixelToLogic(GetOutputSizePixel()));
+            Size aOutSize(rRefDevice.PixelToLogic(GetSizeInPixels()));
             rRefDevice.Pop();
 
             Point aPt(m_aMapMode.GetOrigin());

@@ -303,7 +303,7 @@ Svx3DWin::Svx3DWin(SfxBindings* pInBindings, SfxChildWindow *pCW, vcl::Window* p
     // Preview callback
     m_xCtlLightPreview->SetUserSelectionChangeCallback(LINK( this, Svx3DWin, ChangeSelectionCallbackHdl ));
 
-    aSize = GetOutputSizePixel();
+    aSize = GetSizeInPixels();
     SetMinOutputSizePixel( aSize );
 
     Construct();
@@ -2151,7 +2151,7 @@ void Svx3DWin::Resize()
     if ( !IsFloatingMode() ||
          !GetFloatingWindow()->IsRollUp() )
     {
-        Size aWinSize( GetOutputSizePixel() ); // why rSize in Resizing()?
+        Size aWinSize( GetSizeInPixels() ); // why rSize in Resizing()?
 
         if( aWinSize.Height() >= GetMinOutputSizePixel().Height() &&
             aWinSize.Width() >= GetMinOutputSizePixel().Width() )

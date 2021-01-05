@@ -2254,7 +2254,7 @@ void ToolbarLayoutManager::implts_findNextDockingPos( ui::DockingArea DockingAre
     // Retrieve output size from container Window
     vcl::Window* pDockingWindow  = VCLUnoHelper::GetWindow( xDockingWindow );
     if ( pDockingWindow )
-        aDockingWinSize = pDockingWindow->GetOutputSizePixel();
+        aDockingWinSize = pDockingWindow->GetSizeInPixels();
     aReadLock.clear();
 
     sal_Int32 nFreeRowColPixelPos( 0 );
@@ -2602,7 +2602,7 @@ void ToolbarLayoutManager::implts_calcDockingPosSize(
         // Retrieve output size from container Window
         SolarMutexGuard aGuard;
         pContainerWindow  = VCLUnoHelper::GetWindow( xContainerWindow );
-        aContainerWinSize = pContainerWindow->GetOutputSizePixel();
+        aContainerWinSize = pContainerWindow->GetSizeInPixels();
     }
 
     vcl::Window*                        pDockingAreaWindow( nullptr );
@@ -3575,7 +3575,7 @@ sal_Bool SAL_CALL ToolbarLayoutManager::prepareToggleFloatingMode( const lang::E
                     {
                         ToolBox* pToolBox = static_cast< ToolBox *>( pWindow.get() );
                         aUIDockingElement.m_aFloatingData.m_aPos = AWTPoint(pToolBox->GetPosPixel());
-                        aUIDockingElement.m_aFloatingData.m_aSize = AWTSize(pToolBox->GetOutputSizePixel());
+                        aUIDockingElement.m_aFloatingData.m_aSize = AWTSize(pToolBox->GetSizeInPixels());
                         aUIDockingElement.m_aFloatingData.m_nLines        = pToolBox->GetFloatingLines();
                         aUIDockingElement.m_aFloatingData.m_bIsHorizontal = isToolboxHorizontalAligned( pToolBox );
                     }
@@ -3648,7 +3648,7 @@ void SAL_CALL ToolbarLayoutManager::toggleFloatingMode( const lang::EventObject&
                     if ( pToolBox )
                         aUIDockingElement.m_aFloatingData.m_aSize = AWTSize(pToolBox->CalcFloatingWindowSizePixel());
                     else if ( pWindow )
-                        aUIDockingElement.m_aFloatingData.m_aSize = AWTSize(pWindow->GetOutputSizePixel());
+                        aUIDockingElement.m_aFloatingData.m_aSize = AWTSize(pWindow->GetSizeInPixels());
                 }
 
                 xWindow->setPosSize( aUIDockingElement.m_aFloatingData.m_aPos.X,

@@ -268,7 +268,7 @@ void DialControl::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 
 void DialControl::Resize()
 {
-    mpImpl->SetSize(GetOutputSizePixel());
+    mpImpl->SetSize(GetSizeInPixels());
     InvalidateControl();
 }
 

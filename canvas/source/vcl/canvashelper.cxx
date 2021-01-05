@@ -165,7 +165,7 @@ namespace vclcanvas
         rOutDev.SetFillColor( COL_WHITE );
         rOutDev.SetClipRegion();
         rOutDev.DrawRect( ::tools::Rectangle( Point(),
-                                     rOutDev.GetOutputSizePixel()) );
+                                     rOutDev.GetSizeInPixels()) );
 
         if( !mp2ndOutDevProvider )
             return;
@@ -179,7 +179,7 @@ namespace vclcanvas
         rOutDev2.SetFillColor( COL_WHITE );
         rOutDev2.SetClipRegion();
         rOutDev2.DrawRect( ::tools::Rectangle( Point(),
-                                      rOutDev2.GetOutputSizePixel()) );
+                                      rOutDev2.GetSizeInPixels()) );
         rOutDev2.SetDrawMode( DrawModeFlags::BlackLine | DrawModeFlags::BlackFill | DrawModeFlags::BlackText |
                               DrawModeFlags::BlackGradient | DrawModeFlags::BlackBitmap );
     }
@@ -874,7 +874,7 @@ namespace vclcanvas
         if( !mpOutDevProvider )
             return geometry::IntegerSize2D(); // we're disposed
 
-        return vcl::unotools::integerSize2DFromSize( mpOutDevProvider->getOutDev().GetOutputSizePixel() );
+        return vcl::unotools::integerSize2DFromSize( mpOutDevProvider->getOutDev().GetSizeInPixels() );
     }
 
     uno::Reference< rendering::XBitmap > CanvasHelper::getScaledBitmap( const geometry::RealSize2D& newSize,
@@ -891,7 +891,7 @@ namespace vclcanvas
 
         // TODO(F2): Support alpha vdev canvas here
         const Point aEmptyPoint(0,0);
-        const Size  aBmpSize( rOutDev.GetOutputSizePixel() );
+        const Size  aBmpSize( rOutDev.GetSizeInPixels() );
 
         BitmapEx aBitmap( rOutDev.GetBitmapEx(aEmptyPoint, aBmpSize) );
 
@@ -969,7 +969,7 @@ namespace vclcanvas
         rOutDev.EnableMapMode( false );
         rOutDev.SetAntialiasing( AntialiasingFlags::Enable );
 
-        const Size aBmpSize( rOutDev.GetOutputSizePixel() );
+        const Size aBmpSize( rOutDev.GetSizeInPixels() );
 
         ENSURE_ARG_OR_THROW( pos.X >= 0 && pos.X < aBmpSize.Width(),
                              "X coordinate out of bounds" );

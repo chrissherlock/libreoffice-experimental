@@ -436,7 +436,7 @@ void SwNavigationPI::ZoomOut()
     }
 
     Size aOptimalSize(GetOptimalSize());
-    Size aNewSize(pNav->GetOutputSizePixel());
+    Size aNewSize(pNav->GetSizeInPixels());
     aNewSize.setHeight( m_aExpandedSize.Height() );
     pNav->SetMinOutputSizePixel(aOptimalSize);
     pNav->SetOutputSizePixel(aNewSize);
@@ -464,7 +464,7 @@ void SwNavigationPI::ZoomIn()
     m_bIsZoomedIn = true;
 
     Size aOptimalSize(GetOptimalSize());
-    Size aNewSize(pNav->GetOutputSizePixel());
+    Size aNewSize(pNav->GetSizeInPixels());
     aNewSize.setHeight( aOptimalSize.Height() );
     pNav->SetMinOutputSizePixel(aOptimalSize);
     pNav->SetOutputSizePixel(aNewSize);

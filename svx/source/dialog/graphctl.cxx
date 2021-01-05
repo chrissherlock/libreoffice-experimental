@@ -171,7 +171,7 @@ void GraphCtrl::SetGraphic( const Graphic& rGraphic, bool bNewModel )
 void GraphCtrl::GraphicToVD()
 {
     OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
-    xVD->SetOutputSizePixel(GetOutputSizePixel());
+    xVD->SetOutputSizePixel(GetSizeInPixels());
     xVD->SetBackground(rDevice.GetBackground());
     xVD->Erase();
     const bool bGraphicValid(GraphicType::NONE != aGraphic.GetType());
@@ -189,7 +189,7 @@ void GraphCtrl::Resize()
         Point           aNewPos;
         Size            aNewSize;
         OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
-        const Size      aWinSize = rDevice.PixelToLogic( GetOutputSizePixel(), aDisplayMap );
+        const Size      aWinSize = rDevice.PixelToLogic( GetSizeInPixels(), aDisplayMap );
         const tools::Long      nWidth = aWinSize.Width();
         const tools::Long      nHeight = aWinSize.Height();
         double          fGrfWH = static_cast<double>(aGraphSize.Width()) / aGraphSize.Height();
@@ -228,7 +228,7 @@ void GraphCtrl::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle
     // even to the buffered view
     const bool bGraphicValid(GraphicType::NONE != aGraphic.GetType());
 
-    if (GetOutputSizePixel() != xVD->GetOutputSizePixel())
+    if (GetSizeInPixels() != xVD->GetSizeInPixels())
         GraphicToVD();
 
     if (mbSdrMode)

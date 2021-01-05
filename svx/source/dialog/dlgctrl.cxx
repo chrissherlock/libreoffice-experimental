@@ -94,7 +94,7 @@ SvxRectCtl::~SvxRectCtl()
 
 void SvxRectCtl::Resize()
 {
-    Resize_Impl(GetOutputSizePixel());
+    Resize_Impl(GetSizeInPixels());
 }
 
 void SvxRectCtl::Resize_Impl(const Size &rSize)
@@ -433,7 +433,7 @@ Point SvxRectCtl::GetApproxLogPtFromPixPt( const Point& rPt ) const
     tools::Long    x;
     tools::Long    y;
 
-    Size aSize(GetOutputSizePixel());
+    Size aSize(GetSizeInPixels());
 
     if( !( m_nState & CTL_STATE::NOHORZ ) )
     {
@@ -634,7 +634,7 @@ SvxPixelCtl::SvxPixelCtl(SvxTabPage* pPage)
 void SvxPixelCtl::Resize()
 {
     CustomWidgetController::Resize();
-    aRectSize = GetOutputSizePixel();
+    aRectSize = GetSizeInPixels();
 }
 
 void SvxPixelCtl::SetDrawingArea(weld::DrawingArea* pDrawingArea)
@@ -1310,8 +1310,8 @@ SvxPreviewBase::~SvxPreviewBase()
 void SvxPreviewBase::LocalPrePaint(vcl::RenderContext const & rRenderContext)
 {
     // init BufferDevice
-    if (mpBufferDevice->GetOutputSizePixel() != GetOutputSizePixel())
-        mpBufferDevice->SetOutputSizePixel(GetOutputSizePixel());
+    if (mpBufferDevice->GetSizeInPixels() != GetSizeInPixels())
+        mpBufferDevice->SetOutputSizePixel(GetSizeInPixels());
     mpBufferDevice->SetAntialiasing(rRenderContext.GetAntialiasing());
 
     const StyleSettings& rStyleSettings = Application::GetSettings().GetStyleSettings();
@@ -1325,7 +1325,7 @@ void SvxPreviewBase::LocalPrePaint(vcl::RenderContext const & rRenderContext)
         const bool bWasEnabled(mpBufferDevice->IsMapModeEnabled());
 
         mpBufferDevice->EnableMapMode(false);
-        mpBufferDevice->DrawCheckered(aNull, mpBufferDevice->GetOutputSizePixel(), nLen, aW, aG);
+        mpBufferDevice->DrawCheckered(aNull, mpBufferDevice->GetSizeInPixels(), nLen, aW, aG);
         mpBufferDevice->EnableMapMode(bWasEnabled);
     }
     else
@@ -1344,8 +1344,8 @@ void SvxPreviewBase::LocalPostPaint(vcl::RenderContext& rRenderContext)
     mpBufferDevice->EnableMapMode(false);
     rRenderContext.EnableMapMode(false);
 
-    rRenderContext.DrawOutDev(aEmptyPoint, GetOutputSizePixel(),
-                              aEmptyPoint, GetOutputSizePixel(),
+    rRenderContext.DrawOutDev(aEmptyPoint, GetSizeInPixels(),
+                              aEmptyPoint, GetSizeInPixels(),
                               *mpBufferDevice);
 
     mpBufferDevice->EnableMapMode(bWasEnabledSrc);
@@ -1365,7 +1365,7 @@ SvxXRectPreview::SvxXRectPreview()
 
 tools::Rectangle SvxPreviewBase::GetPreviewSize() const
 {
-    tools::Rectangle aObjectSize(Point(), getBufferDevice().PixelToLogic(GetOutputSizePixel()));
+    tools::Rectangle aObjectSize(Point(), getBufferDevice().PixelToLogic(GetSizeInPixels()));
     return aObjectSize;
 }
 

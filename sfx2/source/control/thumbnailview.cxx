@@ -344,7 +344,7 @@ void ThumbnailView::CalculateItemPositions(bool bScrollBarUsed)
     if (!mnItemHeight || !mnItemWidth)
         return;
 
-    Size        aWinSize = GetOutputSizePixel();
+    Size        aWinSize = GetSizeInPixels();
     size_t      nItemCount = mFilteredItemList.size();
 
     // calculate window scroll ratio
@@ -913,7 +913,7 @@ void ThumbnailView::Paint(vcl::RenderContext& rRenderContext, const ::tools::Rec
     drawinglayer::primitive2d::Primitive2DContainer aSeq(1);
     aSeq[0] = drawinglayer::primitive2d::Primitive2DReference(
             new PolyPolygonColorPrimitive2D(
-                    B2DPolyPolygon( ::tools::Polygon(::tools::Rectangle(Point(), GetOutputSizePixel()), 0, 0).getB2DPolygon()),
+                    B2DPolyPolygon( ::tools::Polygon(::tools::Rectangle(Point(), GetSizeInPixels()), 0, 0).getB2DPolygon()),
                     maFillColor.getBColor()));
 
     // Create the processor and process the primitives
