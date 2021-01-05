@@ -64,19 +64,8 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mpDeviceFontSizeList            = nullptr;
     mpAlphaVDev                     = nullptr;
     mpExtOutDevData                 = nullptr;
-    mnOutOffX                       = 0;
-    mnOutOffY                       = 0;
-    mnOutWidth                      = 0;
-    mnOutHeight                     = 0;
-    mnDPIX                          = 0;
-    mnDPIY                          = 0;
-    mnDPIScalePercentage            = 100;
     mnTextOffX                      = 0;
     mnTextOffY                      = 0;
-    mnOutOffOrigX                   = 0;
-    mnOutOffLogicX                  = 0;
-    mnOutOffOrigY                   = 0;
-    mnOutOffLogicY                  = 0;
     mnEmphasisAscent                = 0;
     mnEmphasisDescent               = 0;
 

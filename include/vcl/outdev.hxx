@@ -289,23 +289,6 @@ private:
     // TEMP TEMP TEMP
     VclPtr<VirtualDevice>           mpAlphaVDev;
 
-    /// Additional output pixel offset, applied in LogicToPixel (used by SetPixelOffset/GetPixelOffset)
-    tools::Long                            mnOutOffOrigX;
-    /// Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
-    tools::Long                            mnOutOffLogicX;
-    /// Additional output pixel offset, applied in LogicToPixel (used by SetPixelOffset/GetPixelOffset)
-    tools::Long                            mnOutOffOrigY;
-    /// Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
-    tools::Long                            mnOutOffLogicY;
-    /// Output offset for device output in pixel (pseudo window offset within window system's frames)
-    tools::Long                            mnOutOffX;
-    /// Output offset for device output in pixel (pseudo window offset within window system's frames)
-    tools::Long                            mnOutOffY;
-    tools::Long                            mnOutWidth;
-    tools::Long                            mnOutHeight;
-    sal_Int32                       mnDPIX;
-    sal_Int32                       mnDPIY;
-    sal_Int32                       mnDPIScalePercentage; ///< For HiDPI displays, we want to draw elements for a percentage larger
     /// font specific text alignment offsets in pixel units
     mutable tools::Long                    mnTextOffX;
     mutable tools::Long                    mnTextOffY;
