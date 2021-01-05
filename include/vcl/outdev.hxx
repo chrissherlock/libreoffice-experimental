@@ -363,21 +363,13 @@ public:
 
     virtual sal_uInt16          GetBitCount() const;
 
-    Size                        GetOutputSizePixel() const
-                                    { return Size( mnOutWidth, mnOutHeight ); }
-    tools::Long                        GetOutputWidthPixel() const { return mnOutWidth; }
-    tools::Long                        GetOutputHeightPixel() const { return mnOutHeight; }
-    tools::Long                        GetOutOffXPixel() const { return mnOutOffX; }
-    tools::Long                        GetOutOffYPixel() const { return mnOutOffY; }
-    void                        SetOutOffXPixel(tools::Long nOutOffX);
-    void                        SetOutOffYPixel(tools::Long nOutOffY);
+    Size                        GetOutputSize() const
+                                    { return PixelToLogic( GetOutputSizePixel() ); }
     Point                       GetOutputOffPixel() const
                                     { return Point( mnOutOffX, mnOutOffY ); }
     tools::Rectangle            GetOutputRectPixel() const
                                     { return tools::Rectangle(GetOutputOffPixel(), GetOutputSizePixel() ); }
 
-    Size                        GetOutputSize() const
-                                    { return PixelToLogic( GetOutputSizePixel() ); }
 
     css::uno::Reference< css::awt::XGraphics >
                                 CreateUnoGraphics();

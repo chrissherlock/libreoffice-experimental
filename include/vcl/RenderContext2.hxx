@@ -85,6 +85,14 @@ public:
     bool IsMapModeEnabled() const;
     virtual void EnableMapMode(bool bEnable = true);
 
+    Size GetOutputSizePixel() const;
+    tools::Long GetOutputWidthPixel() const;
+    tools::Long GetOutputHeightPixel() const;
+    tools::Long GetOutOffXPixel() const;
+    tools::Long GetOutOffYPixel() const;
+    void SetOutOffXPixel(tools::Long nOutOffX);
+    void SetOutOffYPixel(tools::Long nOutOffY);
+
 protected:
     /** Acquire a graphics device that the output device uses to draw on.
 
@@ -156,9 +164,11 @@ protected:
     tools::Long mnOutOffY;
     tools::Long mnOutWidth;
     tools::Long mnOutHeight;
+
     sal_Int32 mnDPIX;
     sal_Int32 mnDPIY;
-    sal_Int32 mnDPIScalePercentage; ///< For HiDPI displays, we want to draw elements for a percentage larger
+    sal_Int32
+        mnDPIScalePercentage; ///< For HiDPI displays, we want to draw elements for a percentage larger
 
 private:
     Color maTextColor;

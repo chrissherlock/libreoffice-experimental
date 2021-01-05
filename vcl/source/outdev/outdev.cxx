@@ -282,16 +282,6 @@ sal_uInt16 OutputDevice::GetBitCount() const
     return mpGraphics->GetBitCount();
 }
 
-void OutputDevice::SetOutOffXPixel(tools::Long nOutOffX)
-{
-    mnOutOffX = nOutOffX;
-}
-
-void OutputDevice::SetOutOffYPixel(tools::Long nOutOffY)
-{
-    mnOutOffY = nOutOffY;
-}
-
 css::uno::Reference< css::awt::XGraphics > OutputDevice::CreateUnoGraphics()
 {
     UnoWrapperBase* pWrapper = UnoWrapperBase::GetUnoWrapper();
