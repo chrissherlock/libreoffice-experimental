@@ -11,4 +11,8 @@
 
 void RenderContext2::InitMapModeObjects() {}
 
+bool RenderContext2::IsMapModeEnabled() const { return mbMap; }
+
+void RenderContext2::EnableMapMode(bool bEnable) { mbMap = bEnable; }
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

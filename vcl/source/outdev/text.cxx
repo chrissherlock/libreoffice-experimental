@@ -844,7 +844,7 @@ tools::Long OutputDevice::GetTextHeight() const
 
     tools::Long nHeight = mpFontInstance->mnLineHeight + mnEmphasisAscent + mnEmphasisDescent;
 
-    if ( mbMap )
+    if (IsMapModeEnabled())
         nHeight = ImplDevicePixelToLogicHeight( nHeight );
 
     return nHeight;
@@ -944,7 +944,7 @@ tools::Long OutputDevice::GetTextArray( const OUString& rStr, tools::Long* pDXAr
             pDXPixelArray[ i ] += pDXPixelArray[ i-1 ];
         }
     }
-    if( mbMap )
+    if (IsMapModeEnabled())
     {
         if( pDXPixelArray )
         {
@@ -986,7 +986,7 @@ tools::Long OutputDevice::GetTextArray( const OUString& rStr, tools::Long* pDXAr
             pDXAry[ i ] += pDXAry[ i-1 ];
 
     // convert from font units to logical units
-    if( mbMap )
+    if (IsMapModeEnabled())
     {
         if( pDXAry )
             for( int i = 0; i < nLen; ++i )
@@ -1047,7 +1047,7 @@ void OutputDevice::GetCaretPositions( const OUString& rStr, tools::Long* pCaretX
     }
 
     // convert from font units to logical units
-    if( mbMap )
+    if (IsMapModeEnabled())
     {
         for( i = 0; i < 2*nLen; ++i )
             pCaretXArray[i] = ImplDevicePixelToLogicWidth( pCaretXArray[i] );
@@ -1224,7 +1224,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(const OUString& rOrigStr,
     }
 
     DeviceCoordinate nPixelWidth = static_cast<DeviceCoordinate>(nLogicalWidth);
-    if( nLogicalWidth && mbMap )
+    if (nLogicalWidth && IsMapModeEnabled())
     {
         nPixelWidth = LogicWidthToDeviceCoordinate( nLogicalWidth );
     }
@@ -1233,7 +1233,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(const OUString& rOrigStr,
     DeviceCoordinate* pDXPixelArray(nullptr);
     if( pDXArray)
     {
-        if(mbMap)
+        if (IsMapModeEnabled())
         {
             // convert from logical units to font units using a temporary array
             xDXPixelArray.reset(new DeviceCoordinate[nLen]);
@@ -2257,7 +2257,7 @@ bool OutputDevice::GetTextBoundRect( tools::Rectangle& rRect,
             aRotatedOfs -= pSalLayout->GetDrawPosition( Point( nXOffset, 0 ) );
             aPixelRect += aRotatedOfs;
             rRect = PixelToLogic( aPixelRect );
-            if( mbMap )
+            if (IsMapModeEnabled())
                 rRect += Point( maMappingMetric.mnMapOfsX, maMappingMetric.mnMapOfsY );
         }
     }
@@ -2284,10 +2284,10 @@ bool OutputDevice::GetTextOutlines( basegfx::B2DPolyPolygonVector& rVector,
 
     // we want to get the Rectangle in logical units, so to
     // avoid rounding errors we just size the font in logical units
-    bool bOldMap = mbMap;
+    bool bOldMap = IsMapModeEnabled();
     if( bOldMap )
     {
-        const_cast<OutputDevice&>(*this).mbMap = false;
+        const_cast<OutputDevice&>(*this).EnableMapMode(false);
         const_cast<OutputDevice&>(*this).mbNewFont = true;
     }
 
@@ -2346,7 +2346,7 @@ bool OutputDevice::GetTextOutlines( basegfx::B2DPolyPolygonVector& rVector,
     if( bOldMap )
     {
         // restore original font size and map mode
-        const_cast<OutputDevice&>(*this).mbMap = bOldMap;
+        const_cast<OutputDevice&>(*this).EnableMapMode(bOldMap);
         const_cast<OutputDevice&>(*this).mbNewFont = true;
     }
 

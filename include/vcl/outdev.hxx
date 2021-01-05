@@ -322,7 +322,6 @@ private:
     Point                           maRefPoint;
     AntialiasingFlags               mnAntialiasing;
 
-    mutable bool                    mbMap : 1;
     mutable bool                    mbClipRegion : 1;
     mutable bool                    mbBackground : 1;
     mutable bool                    mbOutput : 1;
@@ -1486,10 +1485,7 @@ protected:
     ///@{
 
 public:
-
-    void                        EnableMapMode( bool bEnable = true );
-    bool                        IsMapModeEnabled() const { return mbMap; }
-
+    virtual void                EnableMapMode(bool bEnable = true) override;
     void                        SetMapMode();
     virtual void                SetMapMode( const MapMode& rNewMapMode );
     void                        SetRelativeMapMode( const MapMode& rNewMapMode );

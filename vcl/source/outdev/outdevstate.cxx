@@ -105,7 +105,7 @@ void OutputDevice::Push( PushFlags nFlags )
     if ( nFlags & PushFlags::MAPMODE )
     {
         rState.mpMapMode = maMapMode;
-        rState.mbMapActive = mbMap;
+        rState.mbMapActive = IsMapModeEnabled();
     }
 
     if (nFlags & PushFlags::CLIPREGION && mbClipRegion)
@@ -201,7 +201,8 @@ void OutputDevice::Pop()
             SetMapMode( *rState.mpMapMode );
         else
             SetMapMode();
-        mbMap = rState.mbMapActive;
+
+        EnableMapMode(rState.mbMapActive);
     }
 
     if ( rState.mnFlags & PushFlags::CLIPREGION )

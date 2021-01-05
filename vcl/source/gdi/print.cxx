@@ -243,9 +243,9 @@ void Printer::ImplPrintTransparent( const Bitmap& rBmp, const Bitmap& rMask,
     tools::Long nX, nY; // , nWorkX, nWorkY, nWorkWidth, nWorkHeight;
     std::unique_ptr<tools::Long[]> pMapX(new tools::Long[ nSrcWidth + 1 ]);
     std::unique_ptr<tools::Long[]> pMapY(new tools::Long[ nSrcHeight + 1 ]);
-    const bool bOldMap = mbMap;
+    const bool bOldMap = IsMapModeEnabled();
 
-    mbMap = false;
+    EnableMapMode(false);
 
     // create forward mapping tables
     for( nX = 0; nX <= nSrcWidth; nX++ )
@@ -270,8 +270,7 @@ void Printer::ImplPrintTransparent( const Bitmap& rBmp, const Bitmap& rMask,
         DrawBitmap(aMapPt, aMapSz, Point(), aBandBmp.GetSizePixel(), aBandBmp);
     }
 
-    mbMap = bOldMap;
-
+    EnableMapMode(bOldMap);
 }
 
 bool Printer::DrawTransformBitmapExDirect(
@@ -749,10 +748,10 @@ void Printer::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
     std::unique_ptr<tools::Long[]> pMapX( new tools::Long[ nSrcWidth + 1 ] );
     std::unique_ptr<tools::Long[]> pMapY( new tools::Long[ nSrcHeight + 1 ] );
     GDIMetaFile*    pOldMetaFile = mpMetaFile;
-    const bool      bOldMap = mbMap;
+    const bool      bOldMap = IsMapModeEnabled();
 
     mpMetaFile = nullptr;
-    mbMap = false;
+    EnableMapMode(false);
     Push( PushFlags::FILLCOLOR | PushFlags::LINECOLOR );
     SetLineColor( rMaskColor );
     SetFillColor( rMaskColor );
@@ -782,7 +781,7 @@ void Printer::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
     }
 
     Pop();
-    mbMap = bOldMap;
+    EnableMapMode(bOldMap);
     mpMetaFile = pOldMetaFile;
 }
 

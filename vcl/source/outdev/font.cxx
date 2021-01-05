@@ -155,7 +155,7 @@ Size OutputDevice::GetDevFontSize( const vcl::Font& rFont, int nSizeIndex ) cons
 
     // when mapping is enabled round to .5 points
     Size aSize( 0, mpDeviceFontSizeList->Get( nSizeIndex ) );
-    if ( mbMap )
+    if (IsMapModeEnabled())
     {
         aSize.setHeight( aSize.Height() * 10 );
         MapMode aMap( MapUnit::Map10thInch, Point(), Fraction( 1, 72 ), Fraction( 1, 72 ) );
@@ -764,7 +764,7 @@ bool OutputDevice::ImplNewFont() const
     bool bRet = true;
 
     // #95414# fix for OLE objects which use scale factors very creatively
-    if( mbMap && !aSize.Width() )
+    if (IsMapModeEnabled() && !aSize.Width())
     {
         int nOrigWidth = pFontInstance->mxFontMetric->GetWidth();
         float fStretch = static_cast<float>(maMappingMetric.mnMapScNumX) * maMappingMetric.mnMapScDenomY;
@@ -774,10 +774,10 @@ bool OutputDevice::ImplNewFont() const
         {
             Size aOrigSize = maFont.GetFontSize();
             const_cast<vcl::Font&>(maFont).SetFontSize( Size( nNewWidth, aSize.Height() ) );
-            mbMap = false;
+            const_cast<OutputDevice*>(this)->EnableMapMode(false);
             mbNewFont = true;
             bRet = ImplNewFont();  // recurse once using stretched width
-            mbMap = true;
+            const_cast<OutputDevice*>(this)->EnableMapMode();
             const_cast<vcl::Font&>(maFont).SetFontSize( aOrigSize );
         }
     }

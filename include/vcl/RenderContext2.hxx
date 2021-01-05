@@ -79,6 +79,9 @@ public:
     TextAlign GetTextAlign() const;
     virtual void SetTextAlign(TextAlign eAlign);
 
+    bool IsMapModeEnabled() const;
+    virtual void EnableMapMode(bool bEnable = true);
+
 protected:
     /** Acquire a graphics device that the output device uses to draw on.
 
@@ -145,6 +148,7 @@ private:
     DrawModeFlags mnDrawMode;
     RasterOp meRasterOp;
 
+    mutable bool mbMap : 1;
     mutable bool mbOpaqueLineColor : 1;
     mutable bool mbOpaqueFillColor : 1;
     mutable bool mbInitLineColor : 1;
