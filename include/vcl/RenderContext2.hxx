@@ -93,6 +93,7 @@ public:
     Size GetOffsetFromOriginInPixels() const;
     void SetOffsetXInPixels(tools::Long nOffsetXpx);
     void SetOffsetYInPixels(tools::Long nOffsetYpx);
+    void ResetLogicalUnitsOffsetFromOrigin();
 
 protected:
     /** Acquire a graphics device that the output device uses to draw on.

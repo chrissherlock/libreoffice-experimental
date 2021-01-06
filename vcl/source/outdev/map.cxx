@@ -542,8 +542,7 @@ void OutputDevice::SetMapMode()
         InitMapModeObjects();
 
         // #106426# Adapt logical offset when changing mapmode
-        mnOffsetFromOriginXInLogicalUnits = mnOffsetFromOriginXpx; // no mapping -> equal offsets
-        mnOffsetFromOriginYInLogicalUnits = mnOffsetFromOriginYpx;
+        ResetLogicalUnitsOffsetFromOrigin(); // no mapping -> equal offsets
 
         // #i75163#
         if (mpOutDevData)

@@ -34,4 +34,10 @@ Size RenderContext2::GetOffsetFromOriginInPixels() const
     return Size(mnOffsetFromOriginXpx, mnOffsetFromOriginYpx);
 }
 
+void RenderContext2::ResetLogicalUnitsOffsetFromOrigin()
+{
+    mnOffsetFromOriginXInLogicalUnits = mnOffsetFromOriginXpx;
+    mnOffsetFromOriginYInLogicalUnits = mnOffsetFromOriginYpx;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
