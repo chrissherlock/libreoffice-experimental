@@ -157,11 +157,11 @@ protected:
     tools::Long mnWidthPx;
     tools::Long mnHeightPx;
     /// Additional output pixel offset, applied in LogicToPixel (used by SetPixelOffset/GetPixelOffset)
-    tools::Long mnOutOffOrigX;
+    tools::Long mnOffsetFromOriginXpx;
     /// Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
     tools::Long mnOutOffLogicX;
     /// Additional output pixel offset, applied in LogicToPixel (used by SetPixelOffset/GetPixelOffset)
-    tools::Long mnOutOffOrigY;
+    tools::Long mnOffsetFromOriginYpx;
     /// Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
     tools::Long mnOutOffLogicY;
     /// Output offset for device output in pixel (pseudo window offset within window system's frames)

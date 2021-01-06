@@ -1505,7 +1505,7 @@ public:
 
         @return the current offset in pixel
      */
-    Size                        GetPixelOffset() const { return Size(mnOutOffOrigX, mnOutOffOrigY);}
+    Size                        GetPixelOffset() const { return Size(mnOffsetFromOriginXpx, mnOffsetFromOriginYpx);}
 
     Point                       LogicToPixel( const Point& rLogicPt ) const;
     Size                        LogicToPixel( const Size& rLogicSize ) const;
