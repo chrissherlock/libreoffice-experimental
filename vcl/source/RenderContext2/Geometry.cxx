@@ -40,4 +40,10 @@ void RenderContext2::ResetLogicalUnitsOffsetFromOrigin()
     mnOffsetFromOriginYInLogicalUnits = mnOffsetFromOriginYpx;
 }
 
+sal_Int32 RenderContext2::GetDPIX() const { return mnDPIX; }
+sal_Int32 RenderContext2::GetDPIY() const { return mnDPIY; }
+void RenderContext2::SetDPIX(sal_Int32 nDPIX) { mnDPIX = nDPIX; }
+void RenderContext2::SetDPIY(sal_Int32 nDPIY) { mnDPIY = nDPIY; }
+float RenderContext2::GetDPIScaleFactor() const { return mnDPIScalePercentage / 100.0f; }
+sal_Int32 RenderContext2::GetDPIScalePercentage() const { return mnDPIScalePercentage; }
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

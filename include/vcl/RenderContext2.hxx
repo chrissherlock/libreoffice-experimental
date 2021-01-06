@@ -94,6 +94,12 @@ public:
     void SetOffsetXInPixels(tools::Long nOffsetXpx);
     void SetOffsetYInPixels(tools::Long nOffsetYpx);
     void ResetLogicalUnitsOffsetFromOrigin();
+    sal_Int32 GetDPIX() const;
+    sal_Int32 GetDPIY() const;
+    void SetDPIX(sal_Int32 nDPIX);
+    void SetDPIY(sal_Int32 nDPIY);
+    float GetDPIScaleFactor() const;
+    sal_Int32 GetDPIScalePercentage() const;
 
 protected:
     /** Acquire a graphics device that the output device uses to draw on.

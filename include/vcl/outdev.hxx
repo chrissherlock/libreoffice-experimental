@@ -385,32 +385,6 @@ public:
     ///@{
 
 public:
-
-    /** Get the output device's DPI x-axis value.
-
-     @returns x-axis DPI value
-     */
-    SAL_DLLPRIVATE sal_Int32    GetDPIX() const { return mnDPIX; }
-
-    /** Get the output device's DPI y-axis value.
-
-     @returns y-axis DPI value
-     */
-    SAL_DLLPRIVATE sal_Int32    GetDPIY() const { return mnDPIY; }
-
-    SAL_DLLPRIVATE void         SetDPIX( sal_Int32 nDPIX ) { mnDPIX = nDPIX; }
-    SAL_DLLPRIVATE void         SetDPIY( sal_Int32 nDPIY ) { mnDPIY = nDPIY; }
-
-    float GetDPIScaleFactor() const
-    {
-        return mnDPIScalePercentage / 100.0f;
-    }
-
-    sal_Int32 GetDPIScalePercentage() const
-    {
-        return mnDPIScalePercentage;
-    }
-
     OutDevType                  GetOutDevType() const { return meOutDevType; }
     virtual bool IsVirtual() const;
 
