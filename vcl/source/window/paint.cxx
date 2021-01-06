@@ -100,8 +100,8 @@ PaintBufferGuard::PaintBufferGuard(ImplFrameData* pFrameData, vcl::Window* pWind
 
     mnOffsetXpx = pFrameData->mpBuffer->GetOffsetXInPixels();
     mnOffsetYpx = pFrameData->mpBuffer->GetOffsetYInPixels();
-    pFrameData->mpBuffer->SetOutOffXPixel(pWindow->GetOffsetXInPixels());
-    pFrameData->mpBuffer->SetOutOffYPixel(pWindow->GetOffsetYInPixels());
+    pFrameData->mpBuffer->SetOffsetXInPixels(pWindow->GetOffsetXInPixels());
+    pFrameData->mpBuffer->SetOffsetYInPixels(pWindow->GetOffsetYInPixels());
     pFrameData->mpBuffer->EnableRTL(pWindow->IsRTLEnabled());
 }
 
@@ -136,8 +136,8 @@ PaintBufferGuard::~PaintBufferGuard()
     }
 
     // Restore buffer state.
-    mpFrameData->mpBuffer->SetOutOffXPixel(mnOffsetXpx);
-    mpFrameData->mpBuffer->SetOutOffYPixel(mnOffsetYpx);
+    mpFrameData->mpBuffer->SetOffsetXInPixels(mnOffsetXpx);
+    mpFrameData->mpBuffer->SetOffsetYInPixels(mnOffsetYpx);
 
     mpFrameData->mpBuffer->Pop();
     mpFrameData->mpBuffer->SetSettings(maSettings);

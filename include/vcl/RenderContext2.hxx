@@ -90,8 +90,8 @@ public:
     tools::Long GetOutputHeightPixel() const;
     tools::Long GetOffsetXInPixels() const;
     tools::Long GetOffsetYInPixels() const;
-    void SetOutOffXPixel(tools::Long nOffsetXpx);
-    void SetOutOffYPixel(tools::Long nOffsetYpx);
+    void SetOffsetXInPixels(tools::Long nOffsetXpx);
+    void SetOffsetYInPixels(tools::Long nOffsetYpx);
 
 protected:
     /** Acquire a graphics device that the output device uses to draw on.
