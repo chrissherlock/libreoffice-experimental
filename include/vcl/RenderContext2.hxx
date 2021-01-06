@@ -90,6 +90,7 @@ public:
     tools::Long GetOutputHeightPixel() const;
     tools::Long GetOffsetXInPixels() const;
     tools::Long GetOffsetYInPixels() const;
+    Size GetOffsetFromOriginInPixels() const;
     void SetOffsetXInPixels(tools::Long nOffsetXpx);
     void SetOffsetYInPixels(tools::Long nOffsetYpx);
 

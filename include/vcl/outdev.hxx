@@ -1499,14 +1499,6 @@ public:
      */
     void                        SetPixelOffset( const Size& rOffset );
 
-    /** Get the offset in pixel
-
-        @see OutputDevice::SetPixelOffset for details
-
-        @return the current offset in pixel
-     */
-    Size                        GetPixelOffset() const { return Size(mnOffsetFromOriginXpx, mnOffsetFromOriginYpx);}
-
     Point                       LogicToPixel( const Point& rLogicPt ) const;
     Size                        LogicToPixel( const Size& rLogicSize ) const;
     tools::Rectangle                   LogicToPixel( const tools::Rectangle& rLogicRect ) const;

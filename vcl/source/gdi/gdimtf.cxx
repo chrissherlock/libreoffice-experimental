@@ -492,7 +492,7 @@ void GDIMetaFile::Play( OutputDevice* pOut, const Point& rPos,
     // because one would still get round-off errors (the
     // round-trip error for LogicToPixel( PixelToLogic() ) was the
     // reason for having pixel offset in the first place).
-    const Size& rOldOffset( pOut->GetPixelOffset() );
+    const Size& rOldOffset( pOut->GetOffsetFromOriginInPixels() );
     const Size  aEmptySize;
     pOut->SetPixelOffset( aEmptySize );
     aDrawMap.SetOrigin( pOut->PixelToLogic( pOut->LogicToPixel( rPos ), aDrawMap ) );
