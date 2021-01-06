@@ -169,8 +169,8 @@ void VirtualDevice::ImplInitVirDev( const OutputDevice* pOutDev,
             mnBitCount = pOutDev->GetBitCount();
             break;
     }
-    mnOutWidth      = nDX;
-    mnOutHeight     = nDY;
+    mnWidthPx      = nDX;
+    mnHeightPx     = nDY;
 
     if (meFormat == DeviceFormat::BITMASK)
         SetAntialiasing( AntialiasingFlags::DisableText );
@@ -293,8 +293,8 @@ bool VirtualDevice::InnerImplSetOutputSizePixel( const Size& rNewSize, bool bEra
 
         if ( bRet )
         {
-            mnOutWidth  = rNewSize.Width();
-            mnOutHeight = rNewSize.Height();
+            mnWidthPx  = rNewSize.Width();
+            mnHeightPx = rNewSize.Height();
             Erase();
         }
     }
@@ -317,12 +317,12 @@ bool VirtualDevice::InnerImplSetOutputSizePixel( const Size& rNewSize, bool bEra
             {
                 tools::Long nWidth;
                 tools::Long nHeight;
-                if ( mnOutWidth < nNewWidth )
-                    nWidth = mnOutWidth;
+                if ( mnWidthPx < nNewWidth )
+                    nWidth = mnWidthPx;
                 else
                     nWidth = nNewWidth;
-                if ( mnOutHeight < nNewHeight )
-                    nHeight = mnOutHeight;
+                if ( mnHeightPx < nNewHeight )
+                    nHeight = mnHeightPx;
                 else
                     nHeight = nNewHeight;
                 SalTwoRect aPosAry(0, 0, nWidth, nHeight, 0, 0, nWidth, nHeight);
@@ -330,8 +330,8 @@ bool VirtualDevice::InnerImplSetOutputSizePixel( const Size& rNewSize, bool bEra
                 pNewVirDev->ReleaseGraphics( pGraphics );
                 ReleaseGraphics();
                 mpVirDev = std::move(pNewVirDev);
-                mnOutWidth  = rNewSize.Width();
-                mnOutHeight = rNewSize.Height();
+                mnWidthPx  = rNewSize.Width();
+                mnHeightPx = rNewSize.Height();
                 bRet = true;
             }
             else

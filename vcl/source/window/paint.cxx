@@ -1157,7 +1157,7 @@ vcl::Region Window::GetPaintRegion() const
 
 void Window::Invalidate( InvalidateFlags nFlags )
 {
-    if ( !comphelper::LibreOfficeKit::isActive() && (!IsDeviceOutputNecessary() || !mnOutWidth || !mnOutHeight) )
+    if ( !comphelper::LibreOfficeKit::isActive() && (!IsDeviceOutputNecessary() || !mnWidthPx || !mnHeightPx) )
         return;
 
     ImplInvalidate( nullptr, nFlags );
@@ -1166,7 +1166,7 @@ void Window::Invalidate( InvalidateFlags nFlags )
 
 void Window::Invalidate( const tools::Rectangle& rRect, InvalidateFlags nFlags )
 {
-    if ( !comphelper::LibreOfficeKit::isActive() && (!IsDeviceOutputNecessary() || !mnOutWidth || !mnOutHeight) )
+    if ( !comphelper::LibreOfficeKit::isActive() && (!IsDeviceOutputNecessary() || !mnWidthPx || !mnHeightPx) )
         return;
 
     OutputDevice *pOutDev = GetOutDev();
@@ -1182,7 +1182,7 @@ void Window::Invalidate( const tools::Rectangle& rRect, InvalidateFlags nFlags )
 
 void Window::Invalidate( const vcl::Region& rRegion, InvalidateFlags nFlags )
 {
-    if ( !comphelper::LibreOfficeKit::isActive() && (!IsDeviceOutputNecessary() || !mnOutWidth || !mnOutHeight) )
+    if ( !comphelper::LibreOfficeKit::isActive() && (!IsDeviceOutputNecessary() || !mnWidthPx || !mnHeightPx) )
         return;
 
     if ( rRegion.IsNull() )
@@ -1246,7 +1246,7 @@ void Window::PixelInvalidate(const tools::Rectangle* pRectangle)
 
 void Window::Validate()
 {
-    if ( !comphelper::LibreOfficeKit::isActive() && (!IsDeviceOutputNecessary() || !mnOutWidth || !mnOutHeight) )
+    if ( !comphelper::LibreOfficeKit::isActive() && (!IsDeviceOutputNecessary() || !mnWidthPx || !mnHeightPx) )
         return;
 
     ImplValidate();
@@ -1541,7 +1541,7 @@ void Window::ImplPaintToDevice( OutputDevice* i_pTargetOutDev, const Point& i_rP
             tools::Long nDeltaX = pChild->mnOffsetXpx - mnOffsetXpx;
 
             if( pOutDev->HasMirroredGraphics() )
-                nDeltaX = mnOutWidth - nDeltaX - pChild->mnOutWidth;
+                nDeltaX = mnWidthPx - nDeltaX - pChild->mnWidthPx;
             tools::Long nDeltaY = pChild->GetOutOffYPixel() - GetOutOffYPixel();
             Point aPos( i_rPos );
             Point aDelta( nDeltaX, nDeltaY );
