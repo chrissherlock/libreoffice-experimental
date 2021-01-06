@@ -1636,7 +1636,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
         }
 
         // invalidate window content ?
-        if ( bNewPos || (mnOutWidth > nOldOutWidth) || (mnOutHeight > nOldOutHeight) )
+        if ( bNewPos || (mnWidthPx > nOldOutWidth) || (mnHeightPx > nOldOutHeight) )
         {
             if ( bNewPos )
             {
@@ -2412,8 +2412,8 @@ Size Window::GetSizePixel() const
             return Size(0,0);
     }
 
-    return Size( mnOutWidth+mpWindowImpl->mnLeftBorder+mpWindowImpl->mnRightBorder,
-                 mnOutHeight+mpWindowImpl->mnTopBorder+mpWindowImpl->mnBottomBorder );
+    return Size( mnWidthPx+mpWindowImpl->mnLeftBorder+mpWindowImpl->mnRightBorder,
+                 mnHeightPx+mpWindowImpl->mnTopBorder+mpWindowImpl->mnBottomBorder );
 }
 
 void Window::GetBorder( sal_Int32& rLeftBorder, sal_Int32& rTopBorder,
@@ -2678,12 +2678,12 @@ void Window::setPosSizePixel( tools::Long nX, tools::Long nY,
         // Note: if we're positioning a frame, the coordinates are interpreted
         // as being the top-left corner of the window's client area and NOT
         // as the position of the border ! (due to limitations of several UNIX window managers)
-        tools::Long nOldWidth  = pWindow->mnOutWidth;
+        tools::Long nOldWidth  = pWindow->mnWidthPx;
 
         if ( !(nFlags & PosSizeFlags::Width) )
-            nWidth = pWindow->mnOutWidth;
+            nWidth = pWindow->mnWidthPx;
         if ( !(nFlags & PosSizeFlags::Height) )
-            nHeight = pWindow->mnOutHeight;
+            nHeight = pWindow->mnHeightPx;
 
         sal_uInt16 nSysFlags=0;
         VclPtr<vcl::Window> pParent = GetParent();
@@ -2819,7 +2819,7 @@ tools::Long Window::ImplGetUnmirroredOutOffX()
             if ( !ImplIsOverlapWindow() )
                 offx -= mpWindowImpl->mpParent->mnOffsetXpx;
 
-            offx = mpWindowImpl->mpParent->mnOutWidth - mnOutWidth - offx;
+            offx = mpWindowImpl->mpParent->mnWidthPx - mnWidthPx - offx;
 
             if ( !ImplIsOverlapWindow() )
                 offx += mpWindowImpl->mpParent->mnOffsetXpx;
@@ -2940,7 +2940,7 @@ void Window::Scroll( tools::Long nHorzScroll, tools::Long nVertScroll, ScrollFla
 {
 
     ImplScroll( tools::Rectangle( Point( mnOffsetXpx, mnOffsetYpx ),
-                           Size( mnOutWidth, mnOutHeight ) ),
+                           Size( mnWidthPx, mnHeightPx ) ),
                 nHorzScroll, nVertScroll, nFlags & ~ScrollFlags::Clip );
 }
 
@@ -2949,7 +2949,7 @@ void Window::Scroll( tools::Long nHorzScroll, tools::Long nVertScroll,
 {
     OutputDevice *pOutDev = GetOutDev();
     tools::Rectangle aRect = pOutDev->ImplLogicToDevicePixel( rRect );
-    aRect.Intersection( tools::Rectangle( Point( mnOffsetXpx, mnOffsetYpx ), Size( mnOutWidth, mnOutHeight ) ) );
+    aRect.Intersection( tools::Rectangle( Point( mnOffsetXpx, mnOffsetYpx ), Size( mnWidthPx, mnHeightPx ) ) );
     if ( !aRect.IsEmpty() )
         ImplScroll( aRect, nHorzScroll, nVertScroll, nFlags );
 }
@@ -2958,7 +2958,7 @@ void Window::Flush()
 {
     if (mpWindowImpl)
     {
-        const tools::Rectangle aWinRect( Point( mnOffsetXpx, mnOffsetYpx ), Size( mnOutWidth, mnOutHeight ) );
+        const tools::Rectangle aWinRect( Point( mnOffsetXpx, mnOffsetYpx ), Size( mnWidthPx, mnHeightPx ) );
         mpWindowImpl->mpFrame->Flush( aWinRect );
     }
 }
@@ -3714,7 +3714,7 @@ Reference< css::rendering::XCanvas > Window::ImplGetCanvas( bool bSpriteCanvas )
 
     // common: first any is VCL pointer to window (for VCL canvas)
     aArg[ 0 ] <<= reinterpret_cast<sal_Int64>(this);
-    aArg[ 1 ] <<= css::awt::Rectangle( mnOffsetXpx, mnOffsetYpx, mnOutWidth, mnOutHeight );
+    aArg[ 1 ] <<= css::awt::Rectangle( mnOffsetXpx, mnOffsetYpx, mnWidthPx, mnHeightPx );
     aArg[ 2 ] <<= mpWindowImpl->mbAlwaysOnTop;
     aArg[ 3 ] <<= Reference< css::awt::XWindow >(
                              const_cast<vcl::Window*>(this)->GetComponentInterface(),

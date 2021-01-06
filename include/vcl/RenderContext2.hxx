@@ -150,26 +150,20 @@ protected:
     ComplexTextLayoutFlags mnTextLayoutMode;
     LanguageType meTextLanguage;
 
-    /// Output offset for device output in pixel (pseudo window offset within window system's frames)
-    tools::Long mnOffsetXpx;
-    /// Output offset for device output in pixel (pseudo window offset within window system's frames)
-    tools::Long mnOffsetYpx;
+    tools::Long
+        mnOffsetXpx; ///< Output X offset for device output in pixel (pseudo window offset within window system's frames)
+    tools::Long
+        mnOffsetYpx; ///< Output Y offset for device output in pixel (pseudo window offset within window system's frames)
     tools::Long mnWidthPx;
     tools::Long mnHeightPx;
-    /// Additional output pixel offset, applied in LogicToPixel (used by SetPixelOffset/GetPixelOffset)
-    tools::Long mnOffsetFromOriginXpx;
-    /// Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
-    tools::Long mnOutOffLogicX;
-    /// Additional output pixel offset, applied in LogicToPixel (used by SetPixelOffset/GetPixelOffset)
-    tools::Long mnOffsetFromOriginYpx;
-    /// Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
-    tools::Long mnOutOffLogicY;
-    /// Output offset for device output in pixel (pseudo window offset within window system's frames)
-    tools::Long mnOutOffX;
-    /// Output offset for device output in pixel (pseudo window offset within window system's frames)
-    tools::Long mnOutOffY;
-    tools::Long mnOutWidth;
-    tools::Long mnOutHeight;
+    tools::Long
+        mnOffsetFromOriginXpx; ///< Additional output pixel offset, applied in LogicToPixel (used by SetPixelOffset/GetPixelOffset)
+    tools::Long
+        mnOffsetFromOriginXInLogicalUnits; ///< Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
+    tools::Long
+        mnOffsetFromOriginYpx; ///< Additional output pixel offset, applied in LogicToPixel (used by SetPixelOffset/GetPixelOffset)
+    tools::Long
+        mnOffsetFromOriginYInLogicalUnits; ///< Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
 
     sal_Int32 mnDPIX;
     sal_Int32 mnDPIY;
