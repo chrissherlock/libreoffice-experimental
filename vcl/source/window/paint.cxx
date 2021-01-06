@@ -46,8 +46,8 @@ PaintBufferGuard::PaintBufferGuard(ImplFrameData* pFrameData, vcl::Window* pWind
     : mpFrameData(pFrameData),
     m_pWindow(pWindow),
     mbBackground(false),
-    mnOutOffX(0),
-    mnOutOffY(0)
+    mnOffsetXpx(0),
+    mnOffsetYpx(0)
 {
     if (!pFrameData->mpBuffer)
         return;
@@ -98,8 +98,8 @@ PaintBufferGuard::PaintBufferGuard(ImplFrameData* pFrameData, vcl::Window* pWind
     pFrameData->mpBuffer->SetLayoutMode(pWindow->GetLayoutMode());
     pFrameData->mpBuffer->SetDigitLanguage(pWindow->GetDigitLanguage());
 
-    mnOutOffX = pFrameData->mpBuffer->GetOutOffXPixel();
-    mnOutOffY = pFrameData->mpBuffer->GetOutOffYPixel();
+    mnOffsetXpx = pFrameData->mpBuffer->GetOutOffXPixel();
+    mnOffsetYpx = pFrameData->mpBuffer->GetOutOffYPixel();
     pFrameData->mpBuffer->SetOutOffXPixel(pWindow->GetOutOffXPixel());
     pFrameData->mpBuffer->SetOutOffYPixel(pWindow->GetOutOffYPixel());
     pFrameData->mpBuffer->EnableRTL(pWindow->IsRTLEnabled());
@@ -136,8 +136,8 @@ PaintBufferGuard::~PaintBufferGuard()
     }
 
     // Restore buffer state.
-    mpFrameData->mpBuffer->SetOutOffXPixel(mnOutOffX);
-    mpFrameData->mpBuffer->SetOutOffYPixel(mnOutOffY);
+    mpFrameData->mpBuffer->SetOutOffXPixel(mnOffsetXpx);
+    mpFrameData->mpBuffer->SetOutOffYPixel(mnOffsetYpx);
 
     mpFrameData->mpBuffer->Pop();
     mpFrameData->mpBuffer->SetSettings(maSettings);
@@ -1052,7 +1052,7 @@ void Window::SetWindowRegionPixel()
 
             if ( IsReallyVisible() )
             {
-                vcl::Region      aRegion( GetOutputRectPixel() );
+                vcl::Region aRegion( GetOutputRectPixel() );
                 ImplInvalidateParentFrameRegion( aRegion );
             }
         }
@@ -1133,7 +1133,7 @@ void Window::SetWindowRegionPixel( const vcl::Region& rRegion )
 
         if ( IsReallyVisible() )
         {
-            vcl::Region      aRegion( GetOutputRectPixel() );
+            vcl::Region aRegion( GetOutputRectPixel() );
             ImplInvalidateParentFrameRegion( aRegion );
         }
     }
@@ -1145,7 +1145,7 @@ vcl::Region Window::GetPaintRegion() const
     if ( mpWindowImpl->mpPaintRegion )
     {
         vcl::Region aRegion = *mpWindowImpl->mpPaintRegion;
-        aRegion.Move( -mnOutOffX, -mnOutOffY );
+        aRegion.Move( -mnOffsetXpx, -mnOffsetYpx );
         return PixelToLogic( aRegion );
     }
     else
@@ -1421,8 +1421,8 @@ void Window::ImplPaintToDevice( OutputDevice* i_pTargetOutDev, const Point& i_rP
         {
             if( pChild->mpWindowImpl->mpFrame == mpWindowImpl->mpFrame && pChild->IsVisible() )
             {
-                tools::Long nDeltaX = pChild->mnOutOffX - mnOutOffX;
-                tools::Long nDeltaY = pChild->mnOutOffY - mnOutOffY;
+                tools::Long nDeltaX = pChild->mnOffsetXpx - mnOffsetXpx;
+                tools::Long nDeltaY = pChild->mnOffsetYpx - mnOffsetYpx;
 
                 Point aPos( i_rPos );
                 aPos += Point(nDeltaX, nDeltaY);
@@ -1538,7 +1538,7 @@ void Window::ImplPaintToDevice( OutputDevice* i_pTargetOutDev, const Point& i_rP
     {
         if( pChild->mpWindowImpl->mpFrame == mpWindowImpl->mpFrame && pChild->IsVisible() )
         {
-            tools::Long nDeltaX = pChild->mnOutOffX - mnOutOffX;
+            tools::Long nDeltaX = pChild->mnOffsetXpx - mnOffsetXpx;
 
             if( pOutDev->HasMirroredGraphics() )
                 nDeltaX = mnOutWidth - nDeltaX - pChild->mnOutWidth;

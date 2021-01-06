@@ -24,9 +24,9 @@
 Size RenderContext2::GetSizeInPixels() const { return Size(mnOutWidth, mnOutHeight); }
 tools::Long RenderContext2::GetOutputWidthPixel() const { return mnOutWidth; }
 tools::Long RenderContext2::GetOutputHeightPixel() const { return mnOutHeight; }
-tools::Long RenderContext2::GetOutOffXPixel() const { return mnOutOffX; }
-tools::Long RenderContext2::GetOutOffYPixel() const { return mnOutOffY; }
-void RenderContext2::SetOutOffXPixel(tools::Long nOutOffX) { mnOutOffX = nOutOffX; }
-void RenderContext2::SetOutOffYPixel(tools::Long nOutOffY) { mnOutOffY = nOutOffY; }
+tools::Long RenderContext2::GetOutOffXPixel() const { return mnOffsetXpx; }
+tools::Long RenderContext2::GetOutOffYPixel() const { return mnOffsetYpx; }
+void RenderContext2::SetOutOffXPixel(tools::Long nOffsetXpx) { mnOffsetXpx = nOffsetXpx; }
+void RenderContext2::SetOutOffYPixel(tools::Long nOffsetYpx) { mnOffsetYpx = nOffsetYpx; }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

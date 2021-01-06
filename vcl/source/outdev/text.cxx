@@ -263,10 +263,10 @@ bool OutputDevice::ImplDrawRotateText( SalLayout& rSalLayout )
 
     // mask output with text colored bitmap
     GDIMetaFile* pOldMetaFile = mpMetaFile;
-    tools::Long nOldOffX = mnOutOffX;
-    tools::Long nOldOffY = mnOutOffY;
-    mnOutOffX   = 0;
-    mnOutOffY   = 0;
+    tools::Long nOldOffX = mnOffsetXpx;
+    tools::Long nOldOffY = mnOffsetYpx;
+    mnOffsetXpx   = 0;
+    mnOffsetYpx   = 0;
     mpMetaFile  = nullptr;
 
     {
@@ -274,8 +274,8 @@ bool OutputDevice::ImplDrawRotateText( SalLayout& rSalLayout )
         DrawMask(aPoint, aBmp, GetTextColor());
     }
 
-    mnOutOffX   = nOldOffX;
-    mnOutOffY   = nOldOffY;
+    mnOffsetXpx   = nOldOffX;
+    mnOffsetYpx   = nOldOffY;
     mpMetaFile  = pOldMetaFile;
 
     return true;
@@ -298,7 +298,7 @@ void OutputDevice::ImplDrawTextDirect( SalLayout& rSalLayout,
         {
             OutputDevice *pOutDevRef = this;
             // mirror this window back
-            tools::Long devX = w-pOutDevRef->mnOutWidth-pOutDevRef->mnOutOffX;   // re-mirrored mnOutOffX
+            tools::Long devX = w-pOutDevRef->mnOutWidth-pOutDevRef->mnOffsetXpx;   // re-mirrored mnOffsetXpx
             rSalLayout.DrawBase().setX( devX + ( pOutDevRef->mnOutWidth - 1 - (rSalLayout.DrawBase().X() - devX) ) ) ;
         }
     }
@@ -307,7 +307,7 @@ void OutputDevice::ImplDrawTextDirect( SalLayout& rSalLayout,
         OutputDevice *pOutDevRef = this;
 
         // mirror this window back
-        tools::Long devX = pOutDevRef->mnOutOffX;   // re-mirrored mnOutOffX
+        tools::Long devX = pOutDevRef->mnOffsetXpx;   // re-mirrored mnOffsetXpx
         rSalLayout.DrawBase().setX( pOutDevRef->mnOutWidth - 1 - (rSalLayout.DrawBase().X() - devX) + devX );
     }
 
@@ -2079,8 +2079,8 @@ void OutputDevice::DrawCtrlText( const Point& rPos, const OUString& rStr,
 
             aTempPos += rPos;
             aTempPos = LogicToPixel( aTempPos );
-            nMnemonicX = mnOutOffX + aTempPos.X();
-            nMnemonicY = mnOutOffY + aTempPos.Y();
+            nMnemonicX = mnOffsetXpx + aTempPos.X();
+            nMnemonicY = mnOffsetYpx + aTempPos.Y();
         }
     }
 

@@ -1407,15 +1407,15 @@ bool Window::ImplUpdatePos()
 
     if ( ImplIsOverlapWindow() )
     {
-        mnOutOffX  = mpWindowImpl->mnX;
-        mnOutOffY  = mpWindowImpl->mnY;
+        mnOffsetXpx  = mpWindowImpl->mnX;
+        mnOffsetYpx  = mpWindowImpl->mnY;
     }
     else
     {
         vcl::Window* pParent = ImplGetParent();
 
-        mnOutOffX  = mpWindowImpl->mnX + pParent->mnOutOffX;
-        mnOutOffY  = mpWindowImpl->mnY + pParent->mnOutOffY;
+        mnOffsetXpx  = mpWindowImpl->mnX + pParent->mnOffsetXpx;
+        mnOffsetYpx  = mpWindowImpl->mnY + pParent->mnOffsetYpx;
     }
 
     VclPtr< vcl::Window > pChild = mpWindowImpl->mpFirstChild;
@@ -1435,7 +1435,7 @@ bool Window::ImplUpdatePos()
 void Window::ImplUpdateSysObjPos()
 {
     if ( mpWindowImpl->mpSysObj )
-        mpWindowImpl->mpSysObj->SetPosSize( mnOutOffX, mnOutOffY, mnOutWidth, mnOutHeight );
+        mpWindowImpl->mpSysObj->SetPosSize( mnOffsetXpx, mnOffsetYpx, mnOutWidth, mnOutHeight );
 
     VclPtr< vcl::Window > pChild = mpWindowImpl->mpFirstChild;
     while ( pChild )
@@ -1451,8 +1451,8 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
     bool    bNewPos         = false;
     bool    bNewSize        = false;
     bool    bCopyBits       = false;
-    tools::Long    nOldOutOffX     = mnOutOffX;
-    tools::Long    nOldOutOffY     = mnOutOffY;
+    tools::Long    nOldOutOffX     = mnOffsetXpx;
+    tools::Long    nOldOutOffY     = mnOffsetYpx;
     tools::Long    nOldOutWidth    = mnOutWidth;
     tools::Long    nOldOutHeight   = mnOutHeight;
     std::unique_ptr<vcl::Region> pOverlapRegion;
@@ -1506,7 +1506,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
     if ( nFlags & PosSizeFlags::X )
     {
         tools::Long nOrgX = nX;
-        Point aPtDev( Point( nX+mnOutOffX, 0 ) );
+        Point aPtDev( Point( nX+mnOffsetXpx, 0 ) );
         OutputDevice *pOutDev = GetOutDev();
         if( pOutDev->HasMirroredGraphics() )
         {
@@ -1651,7 +1651,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
                     ImplClipBoundaries( aRegion, false, true );
                     if ( !pOverlapRegion->IsEmpty() )
                     {
-                        pOverlapRegion->Move( mnOutOffX-nOldOutOffX, mnOutOffY-nOldOutOffY );
+                        pOverlapRegion->Move( mnOffsetXpx-nOldOutOffX, mnOffsetYpx-nOldOutOffY );
                         aRegion.Exclude( *pOverlapRegion );
                     }
                     if ( !aRegion.IsEmpty() )
@@ -1659,7 +1659,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
                         // adapt Paint areas
                         ImplMoveAllInvalidateRegions( tools::Rectangle( Point( nOldOutOffX, nOldOutOffY ),
                                                                  Size( nOldOutWidth, nOldOutHeight ) ),
-                                                      mnOutOffX-nOldOutOffX, mnOutOffY-nOldOutOffY,
+                                                      mnOffsetXpx-nOldOutOffX, mnOffsetYpx-nOldOutOffY,
                                                       true );
                         SalGraphics* pGraphics = ImplGetFrameGraphics();
                         if ( pGraphics )
@@ -1669,7 +1669,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
                             const bool bSelectClipRegion = pOutDev->SelectClipRegion( aRegion, pGraphics );
                             if ( bSelectClipRegion )
                             {
-                                pGraphics->CopyArea( mnOutOffX, mnOutOffY,
+                                pGraphics->CopyArea( mnOffsetXpx, mnOffsetYpx,
                                                      nOldOutOffX, nOldOutOffY,
                                                      nOldOutWidth, nOldOutHeight,
                                                      *this );
@@ -1724,7 +1724,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
     if ( bUpdateSysObjPos )
         ImplUpdateSysObjPos();
     if ( bNewSize && mpWindowImpl->mpSysObj )
-        mpWindowImpl->mpSysObj->SetPosSize( mnOutOffX, mnOutOffY, mnOutWidth, mnOutHeight );
+        mpWindowImpl->mpSysObj->SetPosSize( mnOffsetXpx, mnOffsetYpx, mnOutWidth, mnOutHeight );
 }
 
 void Window::ImplNewInputContext()
@@ -2736,7 +2736,7 @@ void Window::setPosSizePixel( tools::Long nX, tools::Long nY,
             nSysFlags |= SAL_FRAME_POSSIZE_Y;
             if( pWinParent && (pWindow->GetStyle() & WB_SYSTEMCHILDWINDOW) )
             {
-                nY += pWinParent->mnOutOffY;
+                nY += pWinParent->mnOffsetYpx;
             }
         }
 
@@ -2797,31 +2797,31 @@ tools::Rectangle Window::GetDesktopRectPixel() const
 Point Window::OutputToScreenPixel( const Point& rPos ) const
 {
     // relative to top level parent
-    return Point( rPos.X()+mnOutOffX, rPos.Y()+mnOutOffY );
+    return Point( rPos.X()+mnOffsetXpx, rPos.Y()+mnOffsetYpx );
 }
 
 Point Window::ScreenToOutputPixel( const Point& rPos ) const
 {
     // relative to top level parent
-    return Point( rPos.X()-mnOutOffX, rPos.Y()-mnOutOffY );
+    return Point( rPos.X()-mnOffsetXpx, rPos.Y()-mnOffsetYpx );
 }
 
 tools::Long Window::ImplGetUnmirroredOutOffX()
 {
-    // revert mnOutOffX changes that were potentially made in ImplPosSizeWindow
-    tools::Long offx = mnOutOffX;
+    // revert mnOffsetXpx changes that were potentially made in ImplPosSizeWindow
+    tools::Long offx = mnOffsetXpx;
     OutputDevice *pOutDev = GetOutDev();
     if( pOutDev->HasMirroredGraphics() )
     {
         if( mpWindowImpl->mpParent && !mpWindowImpl->mpParent->mpWindowImpl->mbFrame && mpWindowImpl->mpParent->ImplIsAntiparallel() )
         {
             if ( !ImplIsOverlapWindow() )
-                offx -= mpWindowImpl->mpParent->mnOutOffX;
+                offx -= mpWindowImpl->mpParent->mnOffsetXpx;
 
             offx = mpWindowImpl->mpParent->mnOutWidth - mnOutWidth - offx;
 
             if ( !ImplIsOverlapWindow() )
-                offx += mpWindowImpl->mpParent->mnOutOffX;
+                offx += mpWindowImpl->mpParent->mnOffsetXpx;
 
         }
     }
@@ -2833,14 +2833,14 @@ Point Window::OutputToNormalizedScreenPixel( const Point& rPos ) const
 {
     // relative to top level parent
     tools::Long offx = const_cast<vcl::Window*>(this)->ImplGetUnmirroredOutOffX();
-    return Point( rPos.X()+offx, rPos.Y()+mnOutOffY );
+    return Point( rPos.X()+offx, rPos.Y()+mnOffsetYpx );
 }
 
 Point Window::NormalizedScreenToOutputPixel( const Point& rPos ) const
 {
     // relative to top level parent
     tools::Long offx = const_cast<vcl::Window*>(this)->ImplGetUnmirroredOutOffX();
-    return Point( rPos.X()-offx, rPos.Y()-mnOutOffY );
+    return Point( rPos.X()-offx, rPos.Y()-mnOffsetYpx );
 }
 
 Point Window::OutputToAbsoluteScreenPixel( const Point& rPos ) const

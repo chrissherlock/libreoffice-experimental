@@ -934,12 +934,12 @@ void Window::ImplSetMouseTransparent( bool bTransparent )
 
 Point Window::ImplOutputToFrame( const Point& rPos )
 {
-    return Point( rPos.X()+mnOutOffX, rPos.Y()+mnOutOffY );
+    return Point( rPos.X()+mnOffsetXpx, rPos.Y()+mnOffsetYpx );
 }
 
 Point Window::ImplFrameToOutput( const Point& rPos )
 {
-    return Point( rPos.X()-mnOutOffX, rPos.Y()-mnOutOffY );
+    return Point( rPos.X()-mnOffsetXpx, rPos.Y()-mnOffsetYpx );
 }
 
 void Window::SetCompoundControl( bool bCompound )

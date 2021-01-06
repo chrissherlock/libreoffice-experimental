@@ -406,8 +406,8 @@ class VCL_DLLPUBLIC PaintBufferGuard
     bool mbBackground;
     Wallpaper maBackground;
     AllSettings maSettings;
-    tools::Long mnOutOffX;
-    tools::Long mnOutOffY;
+    tools::Long mnOffsetXpx;
+    tools::Long mnOffsetYpx;
     tools::Rectangle m_aPaintRect;
 public:
     PaintBufferGuard(ImplFrameData* pFrameData, vcl::Window* pWindow);

@@ -90,8 +90,8 @@ public:
     tools::Long GetOutputHeightPixel() const;
     tools::Long GetOutOffXPixel() const;
     tools::Long GetOutOffYPixel() const;
-    void SetOutOffXPixel(tools::Long nOutOffX);
-    void SetOutOffYPixel(tools::Long nOutOffY);
+    void SetOutOffXPixel(tools::Long nOffsetXpx);
+    void SetOutOffYPixel(tools::Long nOffsetYpx);
 
 protected:
     /** Acquire a graphics device that the output device uses to draw on.
@@ -150,6 +150,10 @@ protected:
     ComplexTextLayoutFlags mnTextLayoutMode;
     LanguageType meTextLanguage;
 
+    /// Output offset for device output in pixel (pseudo window offset within window system's frames)
+    tools::Long mnOffsetXpx;
+    /// Output offset for device output in pixel (pseudo window offset within window system's frames)
+    tools::Long mnOffsetYpx;
     /// Additional output pixel offset, applied in LogicToPixel (used by SetPixelOffset/GetPixelOffset)
     tools::Long mnOutOffOrigX;
     /// Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
