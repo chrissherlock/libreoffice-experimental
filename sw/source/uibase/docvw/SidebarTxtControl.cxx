@@ -199,7 +199,7 @@ void SidebarTextControl::DrawForPage(OutputDevice* pDev, const Point& rPt)
 {
     //Take the control's height, but overwrite the scrollbar area if there was one
     OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
-    Size aSize(rDevice.PixelToLogic(GetOutputSizePixel()));
+    Size aSize(rDevice.PixelToLogic(GetSizeInPixels()));
 
     if (OutlinerView* pOutlinerView = mrSidebarWin.GetOutlinerView())
     {
@@ -229,7 +229,7 @@ void SidebarTextControl::DrawForPage(OutputDevice* pDev, const Point& rPt)
 
 void SidebarTextControl::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle& rRect)
 {
-    Size aSize = GetOutputSizePixel();
+    Size aSize = GetSizeInPixels();
     Point aPos;
 
     if (!rRenderContext.GetSettings().GetStyleSettings().GetHighContrastMode())
@@ -418,7 +418,7 @@ bool SidebarTextControl::Command( const CommandEvent& rCEvt )
                 aPos = rCEvt.GetMousePosPixel();
             else
             {
-                const Size aSize = GetOutputSizePixel();
+                const Size aSize = GetSizeInPixels();
                 aPos = Point( aSize.getWidth()/2, aSize.getHeight()/2 );
             }
             SfxDispatcher::ExecutePopup(&mrSidebarWin, &aPos);

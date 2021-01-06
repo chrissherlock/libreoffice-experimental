@@ -122,13 +122,13 @@ void SalGraphics::mirror(tools::Long& x, const OutputDevice& rOutDev) const
         if (m_nLayout & SalLayoutFlags::BiDiRtl)
         {
             tools::Long devX = w - rOutDev.GetOutputWidthPixel()
-                               - rOutDev.GetOutOffXPixel(); // re-mirrored mnOutOffX
-            x = devX + (x - rOutDev.GetOutOffXPixel());
+                               - rOutDev.GetOffsetXInPixels(); // re-mirrored mnOutOffX
+            x = devX + (x - rOutDev.GetOffsetXInPixels());
         }
         else
         {
-            tools::Long devX = rOutDev.GetOutOffXPixel(); // re-mirrored mnOutOffX
-            x = rOutDev.GetOutputWidthPixel() - (x - devX) + rOutDev.GetOutOffXPixel() - 1;
+            tools::Long devX = rOutDev.GetOffsetXInPixels(); // re-mirrored mnOutOffX
+            x = rOutDev.GetOutputWidthPixel() - (x - devX) + rOutDev.GetOffsetXInPixels() - 1;
         }
     }
     else if (m_nLayout & SalLayoutFlags::BiDiRtl)
@@ -148,19 +148,19 @@ void SalGraphics::mirror(tools::Long& x, tools::Long nWidth, const OutputDevice&
         if (m_nLayout & SalLayoutFlags::BiDiRtl)
         {
             tools::Long devX = w - rOutDev.GetOutputWidthPixel()
-                               - rOutDev.GetOutOffXPixel(); // re-mirrored mnOutOffX
+                               - rOutDev.GetOffsetXInPixels(); // re-mirrored mnOutOffX
             if (bBack)
-                x = x - devX + rOutDev.GetOutOffXPixel();
+                x = x - devX + rOutDev.GetOffsetXInPixels();
             else
-                x = devX + (x - rOutDev.GetOutOffXPixel());
+                x = devX + (x - rOutDev.GetOffsetXInPixels());
         }
         else
         {
-            tools::Long devX = rOutDev.GetOutOffXPixel(); // re-mirrored mnOutOffX
+            tools::Long devX = rOutDev.GetOffsetXInPixels(); // re-mirrored mnOutOffX
             if (bBack)
                 x = devX + (rOutDev.GetOutputWidthPixel() + devX) - (x + nWidth);
             else
-                x = rOutDev.GetOutputWidthPixel() - (x - devX) + rOutDev.GetOutOffXPixel() - nWidth;
+                x = rOutDev.GetOutputWidthPixel() - (x - devX) + rOutDev.GetOffsetXInPixels() - nWidth;
         }
     }
     else if (m_nLayout & SalLayoutFlags::BiDiRtl)
@@ -181,20 +181,20 @@ bool SalGraphics::mirror(sal_uInt32 nPoints, const Point* pPtAry, Point* pPtAry2
             if (m_nLayout & SalLayoutFlags::BiDiRtl)
             {
                 tools::Long devX = w - rOutDev.GetOutputWidthPixel()
-                                   - rOutDev.GetOutOffXPixel(); // re-mirrored mnOutOffX
+                                   - rOutDev.GetOffsetXInPixels(); // re-mirrored mnOutOffX
                 for (i = 0, j = nPoints - 1; i < nPoints; i++, j--)
                 {
-                    pPtAry2[j].setX(devX + (pPtAry[i].getX() - rOutDev.GetOutOffXPixel()));
+                    pPtAry2[j].setX(devX + (pPtAry[i].getX() - rOutDev.GetOffsetXInPixels()));
                     pPtAry2[j].setY(pPtAry[i].getY());
                 }
             }
             else
             {
-                tools::Long devX = rOutDev.GetOutOffXPixel(); // re-mirrored mnOutOffX
+                tools::Long devX = rOutDev.GetOffsetXInPixels(); // re-mirrored mnOutOffX
                 for (i = 0, j = nPoints - 1; i < nPoints; i++, j--)
                 {
                     pPtAry2[j].setX(rOutDev.GetOutputWidthPixel() - (pPtAry[i].getX() - devX)
-                                    + rOutDev.GetOutOffXPixel() - 1);
+                                    + rOutDev.GetOffsetXInPixels() - 1);
                     pPtAry2[j].setY(pPtAry[i].getY());
                 }
             }
@@ -288,7 +288,7 @@ const basegfx::B2DHomMatrix& SalGraphics::getMirror(const OutputDevice& i_rOutDe
     tools::Long nMirrorDeviceLTRButBiDiRtlTranslate(0);
     if (bMirrorDeviceLTRButBiDiRtlSet)
         nMirrorDeviceLTRButBiDiRtlTranslate
-            = w - i_rOutDev.GetOutputWidthPixel() - (2 * i_rOutDev.GetOutOffXPixel());
+            = w - i_rOutDev.GetOutputWidthPixel() - (2 * i_rOutDev.GetOffsetXInPixels());
 
     // if the device width, or mirror state of the device changed, then m_aLastMirror is invalid
     bool bLastMirrorValid = w == m_aLastMirrorW
@@ -318,8 +318,8 @@ const basegfx::B2DHomMatrix& SalGraphics::getMirror(const OutputDevice& i_rOutDe
 
                 // Original code was:
                 //      // mirror this window back
-                //      double devX = w-i_rOutDev.GetOutputWidthPixel()-i_rOutDev.GetOutOffXPixel();   // re-mirrored mnOutOffX
-                //      aRet.setX( devX + (i_rPoint.getX() - i_rOutDev.GetOutOffXPixel()) );
+                //      double devX = w-i_rOutDev.GetOutputWidthPixel()-i_rOutDev.GetOffsetXInPixels();   // re-mirrored mnOutOffX
+                //      aRet.setX( devX + (i_rPoint.getX() - i_rOutDev.GetOffsetXInPixels()) );
                 // I do not really understand the comment 'mirror this window back', so cannot guarantee
                 // that this works as before, but I have reduced this (by re-placing and re-formatting) to
                 // a simple translation:

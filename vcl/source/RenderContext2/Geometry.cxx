@@ -24,8 +24,8 @@
 Size RenderContext2::GetSizeInPixels() const { return Size(mnWidthPx, mnHeightPx); }
 tools::Long RenderContext2::GetOutputWidthPixel() const { return mnWidthPx; }
 tools::Long RenderContext2::GetOutputHeightPixel() const { return mnHeightPx; }
-tools::Long RenderContext2::GetOutOffXPixel() const { return mnOffsetXpx; }
-tools::Long RenderContext2::GetOutOffYPixel() const { return mnOffsetYpx; }
+tools::Long RenderContext2::GetOffsetXInPixels() const { return mnOffsetXpx; }
+tools::Long RenderContext2::GetOffsetYInPixels() const { return mnOffsetYpx; }
 void RenderContext2::SetOutOffXPixel(tools::Long nOffsetXpx) { mnOffsetXpx = nOffsetXpx; }
 void RenderContext2::SetOutOffYPixel(tools::Long nOffsetYpx) { mnOffsetYpx = nOffsetYpx; }
 

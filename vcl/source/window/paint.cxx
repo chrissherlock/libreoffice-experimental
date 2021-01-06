@@ -98,10 +98,10 @@ PaintBufferGuard::PaintBufferGuard(ImplFrameData* pFrameData, vcl::Window* pWind
     pFrameData->mpBuffer->SetLayoutMode(pWindow->GetLayoutMode());
     pFrameData->mpBuffer->SetDigitLanguage(pWindow->GetDigitLanguage());
 
-    mnOffsetXpx = pFrameData->mpBuffer->GetOutOffXPixel();
-    mnOffsetYpx = pFrameData->mpBuffer->GetOutOffYPixel();
-    pFrameData->mpBuffer->SetOutOffXPixel(pWindow->GetOutOffXPixel());
-    pFrameData->mpBuffer->SetOutOffYPixel(pWindow->GetOutOffYPixel());
+    mnOffsetXpx = pFrameData->mpBuffer->GetOffsetXInPixels();
+    mnOffsetYpx = pFrameData->mpBuffer->GetOffsetYInPixels();
+    pFrameData->mpBuffer->SetOutOffXPixel(pWindow->GetOffsetXInPixels());
+    pFrameData->mpBuffer->SetOutOffYPixel(pWindow->GetOffsetYInPixels());
     pFrameData->mpBuffer->EnableRTL(pWindow->IsRTLEnabled());
 }
 
@@ -1239,7 +1239,7 @@ void Window::PixelInvalidate(const tools::Rectangle* pRectangle)
     // Added for dialog items. Pass invalidation to the parent window.
     else if (VclPtr<vcl::Window> pParent = GetParentWithLOKNotifier())
     {
-        const tools::Rectangle aRect(Point(GetOutOffXPixel(), GetOutOffYPixel()), GetSizePixel());
+        const tools::Rectangle aRect(Point(GetOffsetXInPixels(), GetOffsetYInPixels()), GetSizePixel());
         pParent->PixelInvalidate(&aRect);
     }
 }
@@ -1542,7 +1542,7 @@ void Window::ImplPaintToDevice( OutputDevice* i_pTargetOutDev, const Point& i_rP
 
             if( pOutDev->HasMirroredGraphics() )
                 nDeltaX = mnWidthPx - nDeltaX - pChild->mnWidthPx;
-            tools::Long nDeltaY = pChild->GetOutOffYPixel() - GetOutOffYPixel();
+            tools::Long nDeltaY = pChild->GetOffsetYInPixels() - GetOffsetYInPixels();
             Point aPos( i_rPos );
             Point aDelta( nDeltaX, nDeltaY );
             aPos += aDelta;

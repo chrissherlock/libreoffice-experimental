@@ -83,8 +83,8 @@ public:
 
             // Notify the sidebar is created, and its LOKWindowId, which
             // is needed on mobile phones, tablets, and desktop.
-            const Point pos(m_rSidebarDockingWin.GetOutOffXPixel(),
-                            m_rSidebarDockingWin.GetOutOffYPixel());
+            const Point pos(m_rSidebarDockingWin.GetOffsetXInPixels(),
+                            m_rSidebarDockingWin.GetOffsetYInPixels());
             const OString posMessage = pos.toString();
             const OString sizeMessage = m_rSidebarDockingWin.GetSizePixel().toString();
 
