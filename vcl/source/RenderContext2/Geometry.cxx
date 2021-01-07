@@ -46,5 +46,9 @@ void RenderContext2::SetDPIX(sal_Int32 nDPIX) { mnDPIX = nDPIX; }
 void RenderContext2::SetDPIY(sal_Int32 nDPIY) { mnDPIY = nDPIY; }
 float RenderContext2::GetDPIScaleFactor() const { return mnDPIScalePercentage / 100.0f; }
 sal_Int32 RenderContext2::GetDPIScalePercentage() const { return mnDPIScalePercentage; }
+void RenderContext2::SetDPIScalePercentage(sal_Int32 nPercentage)
+{
+    mnDPIScalePercentage = nPercentage;
+}
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

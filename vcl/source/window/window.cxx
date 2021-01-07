@@ -1134,7 +1134,7 @@ void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* p
     }
 
     // setup the scale factor for HiDPI displays
-    mnDPIScalePercentage = CountDPIScaleFactor(mpWindowImpl->mpFrameData->mnDPIY);
+    SetDPIScalePercentage(CountDPIScaleFactor(mpWindowImpl->mpFrameData->mnDPIY));
     mnDPIX = mpWindowImpl->mpFrameData->mnDPIX;
     mnDPIY = mpWindowImpl->mpFrameData->mnDPIY;
 
@@ -1340,7 +1340,7 @@ void Window::ImplInitResolutionSettings()
         mnDPIY = mpWindowImpl->mpFrameData->mnDPIY;
 
         // setup the scale factor for HiDPI displays
-        mnDPIScalePercentage = CountDPIScaleFactor(mpWindowImpl->mpFrameData->mnDPIY);
+        SetDPIScalePercentage(CountDPIScaleFactor(mpWindowImpl->mpFrameData->mnDPIY));
         const StyleSettings& rStyleSettings = mxSettings->GetStyleSettings();
         SetPointFont(*this, rStyleSettings.GetAppFont());
     }
@@ -1348,7 +1348,7 @@ void Window::ImplInitResolutionSettings()
     {
         mnDPIX  = mpWindowImpl->mpParent->mnDPIX;
         mnDPIY  = mpWindowImpl->mpParent->mnDPIY;
-        mnDPIScalePercentage = mpWindowImpl->mpParent->mnDPIScalePercentage;
+        SetDPIScalePercentage(mpWindowImpl->mpParent->GetDPIScalePercentage());
     }
 
     // update the recalculated values for logical units

@@ -130,6 +130,7 @@ public:
     void SetDPIY(sal_Int32 nDPIY);
     float GetDPIScaleFactor() const;
     sal_Int32 GetDPIScalePercentage() const;
+    void SetDPIScalePercentage(sal_Int32 nPercentage);
 
 protected:
     /** Acquire a graphics device that the output device uses to draw on.
