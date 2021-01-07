@@ -314,7 +314,7 @@ void StyleItemController::DrawHighlight(vcl::RenderContext& rRenderContext, Colo
 
     Point aPos(0, 0);
     aPos.AdjustX(LEFT_MARGIN);
-    aPos.AdjustY((rRenderContext.GetOutputHeightPixel() - aTextRect.Bottom()) / 2);
+    aPos.AdjustY((rRenderContext.GetHeightInPixels() - aTextRect.Bottom()) / 2);
     aTextRect.SetPos(aPos);
 
     rRenderContext.SetLineColor(aFontBack);
@@ -330,7 +330,7 @@ void StyleItemController::DrawText(vcl::RenderContext& rRenderContext)
 
     Point aPos(0, 0);
     aPos.AdjustX(LEFT_MARGIN);
-    aPos.AdjustY((rRenderContext.GetOutputHeightPixel() - aTextRect.Bottom()) / 2);
+    aPos.AdjustY((rRenderContext.GetHeightInPixels() - aTextRect.Bottom()) / 2);
 
     rRenderContext.DrawText(aPos, m_aStyleName.second);
 }

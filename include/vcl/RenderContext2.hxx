@@ -88,7 +88,7 @@ public:
 
     Size GetSizeInPixels() const;
     tools::Long GetWidthInPixels() const;
-    tools::Long GetOutputHeightPixel() const;
+    tools::Long GetHeightInPixels() const;
 
     tools::Long GetOffsetXInPixels() const;
     tools::Long GetOffsetYInPixels() const;

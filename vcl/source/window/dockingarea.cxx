@@ -136,7 +136,7 @@ void DockingAreaWindow::ApplySettings(vcl::RenderContext& rRenderContext)
         int nMenubarHeight = pMenuBar ? pMenuBar->GetMenuBarHeight() : 0;
         aWallpaper.SetRect(tools::Rectangle(Point(0, -nMenubarHeight),
                            Size(rRenderContext.GetWidthInPixels(),
-                                rRenderContext.GetOutputHeightPixel() + nMenubarHeight)));
+                                rRenderContext.GetHeightInPixels() + nMenubarHeight)));
 
         rRenderContext.SetBackground(aWallpaper);
     }

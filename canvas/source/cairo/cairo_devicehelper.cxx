@@ -62,7 +62,7 @@ namespace cairocanvas
         mpSurface = pOutDev->CreateSurface(pOutDev->GetOutOffXPixel(),
                                            pOutDev->GetOutOffYPixel(),
                                            pOutDev->GetWidthInPixels(),
-                                           pOutDev->GetOutputHeightPixel());
+                                           pOutDev->GetHeightInPixels());
     }
 
     void DeviceHelper::disposing()

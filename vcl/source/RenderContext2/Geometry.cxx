@@ -23,7 +23,7 @@
 
 Size RenderContext2::GetSizeInPixels() const { return Size(mnWidthPx, mnHeightPx); }
 tools::Long RenderContext2::GetWidthInPixels() const { return mnWidthPx; }
-tools::Long RenderContext2::GetOutputHeightPixel() const { return mnHeightPx; }
+tools::Long RenderContext2::GetHeightInPixels() const { return mnHeightPx; }
 tools::Long RenderContext2::GetOffsetXInPixels() const { return mnOffsetXpx; }
 tools::Long RenderContext2::GetOffsetYInPixels() const { return mnOffsetYpx; }
 void RenderContext2::SetOffsetXInPixels(tools::Long nOffsetXpx) { mnOffsetXpx = nOffsetXpx; }
@@ -46,4 +46,5 @@ void RenderContext2::SetDPIX(sal_Int32 nDPIX) { mnDPIX = nDPIX; }
 void RenderContext2::SetDPIY(sal_Int32 nDPIY) { mnDPIY = nDPIY; }
 float RenderContext2::GetDPIScaleFactor() const { return mnDPIScalePercentage / 100.0f; }
 sal_Int32 RenderContext2::GetDPIScalePercentage() const { return mnDPIScalePercentage; }
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
