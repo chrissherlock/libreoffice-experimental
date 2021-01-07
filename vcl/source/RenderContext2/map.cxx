@@ -48,15 +48,46 @@ static tools::Long ImplPixelToLogic(tools::Long n, tools::Long nDPI, tools::Long
     return n;
 }
 
+Size RenderContext2::GetOffsetFromOriginInPixels() const
+{
+    return Size(mnOffsetFromOriginXpx, mnOffsetFromOriginYpx);
+}
+
+tools::Long RenderContext2::GetXOffsetFromOriginInPixels() const { return mnOffsetFromOriginXpx; }
+
+tools::Long RenderContext2::GetYOffsetFromOriginInPixels() const { return mnOffsetFromOriginYpx; }
+
 void RenderContext2::SetOffsetFromOriginInPixels(Size const& rOffset)
 {
     mnOffsetFromOriginXpx = rOffset.Width();
     mnOffsetFromOriginYpx = rOffset.Height();
 
-    mnOffsetFromOriginXInLogicalUnits = ImplPixelToLogic(
-        mnOffsetFromOriginXpx, mnDPIX, maMappingMetric.mnMapScNumX, maMappingMetric.mnMapScDenomX);
-    mnOffsetFromOriginYInLogicalUnits = ImplPixelToLogic(
-        mnOffsetFromOriginYpx, mnDPIY, maMappingMetric.mnMapScNumY, maMappingMetric.mnMapScDenomY);
+    SetOffsetFromOriginXInLogicalUnits(ImplPixelToLogic(
+        mnOffsetFromOriginXpx, mnDPIX, maMappingMetric.mnMapScNumX, maMappingMetric.mnMapScDenomX));
+    SetOffsetFromOriginYInLogicalUnits(ImplPixelToLogic(
+        mnOffsetFromOriginYpx, mnDPIY, maMappingMetric.mnMapScNumY, maMappingMetric.mnMapScDenomY));
+}
+
+sal_uInt32 RenderContext2::GetOffsetFromOriginXInLogicalUnits() const
+{
+    return mnOffsetFromOriginXInLogicalUnits;
+}
+
+void RenderContext2::SetOffsetFromOriginXInLogicalUnits(
+    tools::Long nOffsetFromOriginXInLogicalUnits)
+{
+    mnOffsetFromOriginXInLogicalUnits = nOffsetFromOriginXInLogicalUnits;
+}
+
+sal_uInt32 RenderContext2::GetOffsetFromOriginYInLogicalUnits() const
+{
+    return mnOffsetFromOriginYInLogicalUnits;
+}
+
+void RenderContext2::SetOffsetFromOriginYInLogicalUnits(
+    tools::Long nOffsetFromOriginYInLogicalUnits)
+{
+    mnOffsetFromOriginYInLogicalUnits = nOffsetFromOriginYInLogicalUnits;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

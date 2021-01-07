@@ -29,11 +29,6 @@ tools::Long RenderContext2::GetOffsetYInPixels() const { return mnOffsetYpx; }
 void RenderContext2::SetOffsetXInPixels(tools::Long nOffsetXpx) { mnOffsetXpx = nOffsetXpx; }
 void RenderContext2::SetOffsetYInPixels(tools::Long nOffsetYpx) { mnOffsetYpx = nOffsetYpx; }
 
-Size RenderContext2::GetOffsetFromOriginInPixels() const
-{
-    return Size(mnOffsetFromOriginXpx, mnOffsetFromOriginYpx);
-}
-
 void RenderContext2::ResetLogicalUnitsOffsetFromOrigin()
 {
     mnOffsetFromOriginXInLogicalUnits = mnOffsetFromOriginXpx;

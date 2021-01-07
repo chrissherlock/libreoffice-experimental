@@ -96,6 +96,8 @@ public:
     void SetOffsetYInPixels(tools::Long nOffsetYpx);
 
     Size GetOffsetFromOriginInPixels() const;
+    tools::Long GetXOffsetFromOriginInPixels() const;
+    tools::Long GetYOffsetFromOriginInPixels() const;
 
     /** Set an offset in pixels
 
@@ -121,7 +123,9 @@ public:
     virtual void SetOffsetFromOriginInPixels(Size const& rOffset);
 
     void ResetLogicalUnitsOffsetFromOrigin();
+    sal_uInt32 GetOffsetFromOriginXInLogicalUnits() const;
     void SetOffsetFromOriginXInLogicalUnits(tools::Long nOffsetFromOriginXInLogicalUnits);
+    sal_uInt32 GetOffsetFromOriginYInLogicalUnits() const;
     void SetOffsetFromOriginYInLogicalUnits(tools::Long nOffsetFromOriginYInLogicalUnits);
 
     sal_Int32 GetDPIX() const;
@@ -193,20 +197,22 @@ protected:
         mnOffsetXpx; ///< Output X offset for device output in pixel (pseudo window offset within window system's frames)
     tools::Long
         mnOffsetYpx; ///< Output Y offset for device output in pixel (pseudo window offset within window system's frames)
-    tools::Long mnWidthPx;
-    tools::Long mnHeightPx;
     tools::Long
         mnOffsetFromOriginXpx; ///< Additional output pixel offset, applied in LogicToPixel (used by SetPixelOffset/GetPixelOffset)
     tools::Long
-        mnOffsetFromOriginXInLogicalUnits; ///< Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
-    tools::Long
         mnOffsetFromOriginYpx; ///< Additional output pixel offset, applied in LogicToPixel (used by SetPixelOffset/GetPixelOffset)
-    tools::Long
-        mnOffsetFromOriginYInLogicalUnits; ///< Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
+
+    tools::Long mnWidthPx;
+    tools::Long mnHeightPx;
 
     MappingMetrics maMappingMetric;
 
 private:
+    tools::Long
+        mnOffsetFromOriginXInLogicalUnits; ///< Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
+    tools::Long
+        mnOffsetFromOriginYInLogicalUnits; ///< Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
+
     sal_Int32 mnDPIX;
     sal_Int32 mnDPIY;
     sal_Int32
