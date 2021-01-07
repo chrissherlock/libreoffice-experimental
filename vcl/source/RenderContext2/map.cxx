@@ -50,44 +50,52 @@ static tools::Long ImplPixelToLogic(tools::Long n, tools::Long nDPI, tools::Long
 
 Size RenderContext2::GetOffsetFromOriginInPixels() const
 {
-    return Size(mnOffsetFromOriginXpx, mnOffsetFromOriginYpx);
+    return Size(maGeometry.mnOffsetFromOriginXpx, maGeometry.mnOffsetFromOriginYpx);
 }
 
-tools::Long RenderContext2::GetXOffsetFromOriginInPixels() const { return mnOffsetFromOriginXpx; }
+tools::Long RenderContext2::GetXOffsetFromOriginInPixels() const
+{
+    return maGeometry.mnOffsetFromOriginXpx;
+}
 
-tools::Long RenderContext2::GetYOffsetFromOriginInPixels() const { return mnOffsetFromOriginYpx; }
+tools::Long RenderContext2::GetYOffsetFromOriginInPixels() const
+{
+    return maGeometry.mnOffsetFromOriginYpx;
+}
 
 void RenderContext2::SetOffsetFromOriginInPixels(Size const& rOffset)
 {
-    mnOffsetFromOriginXpx = rOffset.Width();
-    mnOffsetFromOriginYpx = rOffset.Height();
+    maGeometry.mnOffsetFromOriginXpx = rOffset.Width();
+    maGeometry.mnOffsetFromOriginYpx = rOffset.Height();
 
-    SetOffsetFromOriginXInLogicalUnits(ImplPixelToLogic(
-        mnOffsetFromOriginXpx, mnDPIX, maMappingMetric.mnMapScNumX, maMappingMetric.mnMapScDenomX));
-    SetOffsetFromOriginYInLogicalUnits(ImplPixelToLogic(
-        mnOffsetFromOriginYpx, mnDPIY, maMappingMetric.mnMapScNumY, maMappingMetric.mnMapScDenomY));
+    SetOffsetFromOriginXInLogicalUnits(
+        ImplPixelToLogic(maGeometry.mnOffsetFromOriginXpx, maGeometry.mnDPIX,
+                         maMappingMetric.mnMapScNumX, maMappingMetric.mnMapScDenomX));
+    SetOffsetFromOriginYInLogicalUnits(
+        ImplPixelToLogic(maGeometry.mnOffsetFromOriginYpx, maGeometry.mnDPIY,
+                         maMappingMetric.mnMapScNumY, maMappingMetric.mnMapScDenomY));
 }
 
 sal_uInt32 RenderContext2::GetOffsetFromOriginXInLogicalUnits() const
 {
-    return mnOffsetFromOriginXInLogicalUnits;
+    return maGeometry.mnOffsetFromOriginXInLogicalUnits;
 }
 
 void RenderContext2::SetOffsetFromOriginXInLogicalUnits(
     tools::Long nOffsetFromOriginXInLogicalUnits)
 {
-    mnOffsetFromOriginXInLogicalUnits = nOffsetFromOriginXInLogicalUnits;
+    maGeometry.mnOffsetFromOriginXInLogicalUnits = nOffsetFromOriginXInLogicalUnits;
 }
 
 sal_uInt32 RenderContext2::GetOffsetFromOriginYInLogicalUnits() const
 {
-    return mnOffsetFromOriginYInLogicalUnits;
+    return maGeometry.mnOffsetFromOriginYInLogicalUnits;
 }
 
 void RenderContext2::SetOffsetFromOriginYInLogicalUnits(
     tools::Long nOffsetFromOriginYInLogicalUnits)
 {
-    mnOffsetFromOriginYInLogicalUnits = nOffsetFromOriginYInLogicalUnits;
+    maGeometry.mnOffsetFromOriginYInLogicalUnits = nOffsetFromOriginYInLogicalUnits;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

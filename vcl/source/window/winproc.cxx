@@ -1649,8 +1649,7 @@ void ImplHandleResize( vcl::Window* pWindow, tools::Long nNewWidth, tools::Long 
     {
         if (bChanged)
         {
-            pWindow->mnWidthPx  = nNewWidth;
-            pWindow->mnHeightPx = nNewHeight;
+            pWindow->SetSizeInPixels(Size(nNewWidth, nNewHeight));
             pWindow->ImplGetWindowImpl()->mbWaitSystemResize = false;
             if ( pWindow->IsReallyVisible() )
                 pWindow->ImplSetClipFlag();

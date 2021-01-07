@@ -18,6 +18,7 @@
 #include <vcl/settings.hxx>
 #include <vcl/ComplexTextLayoutFlags.hxx>
 #include <vcl/DrawModeFlags.hxx>
+#include <vcl/Geometry.hxx>
 #include <vcl/MappingMetrics.hxx>
 #include <vcl/RasterOp.hxx>
 
@@ -89,6 +90,9 @@ public:
     Size GetSizeInPixels() const;
     tools::Long GetWidthInPixels() const;
     tools::Long GetHeightInPixels() const;
+    void SetSizeInPixels(Size const& rSize);
+    void SetWidthInPixels(tools::Long nWidth);
+    void SetHeightInPixels(tools::Long nHeight);
 
     tools::Long GetOffsetXInPixels() const;
     tools::Long GetOffsetYInPixels() const;
@@ -193,30 +197,10 @@ protected:
     ComplexTextLayoutFlags mnTextLayoutMode;
     LanguageType meTextLanguage;
 
-    tools::Long mnWidthPx;
-    tools::Long mnHeightPx;
-
     MappingMetrics maMappingMetric;
 
 private:
-    tools::Long
-        mnOffsetXpx; ///< Output X offset for device output in pixel (pseudo window offset within window system's frames)
-    tools::Long
-        mnOffsetYpx; ///< Output Y offset for device output in pixel (pseudo window offset within window system's frames)
-    tools::Long
-        mnOffsetFromOriginXpx; ///< Additional output pixel offset, applied in LogicToPixel (used by SetPixelOffset/GetPixelOffset)
-    tools::Long
-        mnOffsetFromOriginYpx; ///< Additional output pixel offset, applied in LogicToPixel (used by SetPixelOffset/GetPixelOffset)
-    tools::Long
-        mnOffsetFromOriginXInLogicalUnits; ///< Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
-    tools::Long
-        mnOffsetFromOriginYInLogicalUnits; ///< Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
-
-    sal_Int32 mnDPIX;
-    sal_Int32 mnDPIY;
-    sal_Int32
-        mnDPIScalePercentage; ///< For HiDPI displays, we want to draw elements for a percentage larger
-
+    Geometry maGeometry;
     Color maTextColor;
     Color maLineColor;
     Color maFillColor;

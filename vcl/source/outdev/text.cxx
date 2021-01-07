@@ -291,15 +291,15 @@ void OutputDevice::ImplDrawTextDirect( SalLayout& rSalLayout,
     tools::Long nOldX = rSalLayout.DrawBase().X();
     if( HasMirroredGraphics() )
     {
-        tools::Long w = IsVirtual() ? mnWidthPx : mpGraphics->GetGraphicsWidth();
+        tools::Long w = IsVirtual() ? GetWidthInPixels() : mpGraphics->GetGraphicsWidth();
         tools::Long x = rSalLayout.DrawBase().X();
         rSalLayout.DrawBase().setX( w - 1 - x );
         if( !IsRTLEnabled() )
         {
             OutputDevice *pOutDevRef = this;
             // mirror this window back
-            tools::Long devX = w-pOutDevRef->mnWidthPx-pOutDevRef->GetOffsetXInPixels();   // re-mirrored GetOffsetXInPixels()
-            rSalLayout.DrawBase().setX( devX + ( pOutDevRef->mnWidthPx - 1 - (rSalLayout.DrawBase().X() - devX) ) ) ;
+            tools::Long devX = w-pOutDevRef->GetWidthInPixels()-pOutDevRef->GetOffsetXInPixels();   // re-mirrored GetOffsetXInPixels()
+            rSalLayout.DrawBase().setX( devX + ( pOutDevRef->GetWidthInPixels() - 1 - (rSalLayout.DrawBase().X() - devX) ) ) ;
         }
     }
     else if( IsRTLEnabled() )
@@ -308,7 +308,7 @@ void OutputDevice::ImplDrawTextDirect( SalLayout& rSalLayout,
 
         // mirror this window back
         tools::Long devX = pOutDevRef->GetOffsetXInPixels();   // re-mirrored GetOffsetXInPixels()
-        rSalLayout.DrawBase().setX( pOutDevRef->mnWidthPx - 1 - (rSalLayout.DrawBase().X() - devX) + devX );
+        rSalLayout.DrawBase().setX( pOutDevRef->GetWidthInPixels() - 1 - (rSalLayout.DrawBase().X() - devX) + devX );
     }
 
     rSalLayout.DrawText( *mpGraphics );

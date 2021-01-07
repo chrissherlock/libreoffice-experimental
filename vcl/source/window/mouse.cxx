@@ -144,8 +144,8 @@ void Window::ImplCallMouseMove( sal_uInt16 nMouseCode, bool bModChanged )
     bool    bLeave;
     // check for MouseLeave
     bLeave = ((nX < 0) || (nY < 0) ||
-              (nX >= mpWindowImpl->mpFrameWindow->mnWidthPx) ||
-              (nY >= mpWindowImpl->mpFrameWindow->mnHeightPx)) &&
+              (nX >= mpWindowImpl->mpFrameWindow->GetWidthInPixels()) ||
+              (nY >= mpWindowImpl->mpFrameWindow->GetHeightInPixels())) &&
              !ImplGetSVData()->mpWinData->mpCaptureWin;
     nMode |= MouseEventModifiers::SYNTHETIC;
     if ( bModChanged )

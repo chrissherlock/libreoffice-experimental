@@ -1157,7 +1157,7 @@ vcl::Region Window::GetPaintRegion() const
 
 void Window::Invalidate( InvalidateFlags nFlags )
 {
-    if ( !comphelper::LibreOfficeKit::isActive() && (!IsDeviceOutputNecessary() || !mnWidthPx || !mnHeightPx) )
+    if ( !comphelper::LibreOfficeKit::isActive() && (!IsDeviceOutputNecessary() || !GetWidthInPixels() || !GetHeightInPixels()) )
         return;
 
     ImplInvalidate( nullptr, nFlags );
@@ -1166,7 +1166,7 @@ void Window::Invalidate( InvalidateFlags nFlags )
 
 void Window::Invalidate( const tools::Rectangle& rRect, InvalidateFlags nFlags )
 {
-    if ( !comphelper::LibreOfficeKit::isActive() && (!IsDeviceOutputNecessary() || !mnWidthPx || !mnHeightPx) )
+    if ( !comphelper::LibreOfficeKit::isActive() && (!IsDeviceOutputNecessary() || !GetWidthInPixels() || !GetHeightInPixels()) )
         return;
 
     OutputDevice *pOutDev = GetOutDev();
@@ -1182,7 +1182,7 @@ void Window::Invalidate( const tools::Rectangle& rRect, InvalidateFlags nFlags )
 
 void Window::Invalidate( const vcl::Region& rRegion, InvalidateFlags nFlags )
 {
-    if ( !comphelper::LibreOfficeKit::isActive() && (!IsDeviceOutputNecessary() || !mnWidthPx || !mnHeightPx) )
+    if ( !comphelper::LibreOfficeKit::isActive() && (!IsDeviceOutputNecessary() || !GetWidthInPixels() || !GetHeightInPixels()) )
         return;
 
     if ( rRegion.IsNull() )
@@ -1246,7 +1246,7 @@ void Window::PixelInvalidate(const tools::Rectangle* pRectangle)
 
 void Window::Validate()
 {
-    if ( !comphelper::LibreOfficeKit::isActive() && (!IsDeviceOutputNecessary() || !mnWidthPx || !mnHeightPx) )
+    if ( !comphelper::LibreOfficeKit::isActive() && (!IsDeviceOutputNecessary() || !GetWidthInPixels() || !GetHeightInPixels()) )
         return;
 
     ImplValidate();
@@ -1541,7 +1541,7 @@ void Window::ImplPaintToDevice( OutputDevice* i_pTargetOutDev, const Point& i_rP
             tools::Long nDeltaX = pChild->GetOffsetXInPixels() - GetOffsetXInPixels();
 
             if( pOutDev->HasMirroredGraphics() )
-                nDeltaX = mnWidthPx - nDeltaX - pChild->mnWidthPx;
+                nDeltaX = GetWidthInPixels() - nDeltaX - pChild->GetWidthInPixels();
             tools::Long nDeltaY = pChild->GetOffsetYInPixels() - GetOffsetYInPixels();
             Point aPos( i_rPos );
             Point aDelta( nDeltaX, nDeltaY );
@@ -1622,7 +1622,7 @@ void Window::Erase(vcl::RenderContext& rRenderContext)
         RasterOp eRasterOp = GetRasterOp();
         if (eRasterOp != RasterOp::OverPaint)
             SetRasterOp(RasterOp::OverPaint);
-        rRenderContext.DrawWallpaper(0, 0, mnWidthPx, mnHeightPx, maBackground);
+        rRenderContext.DrawWallpaper(0, 0, GetWidthInPixels(), GetHeightInPixels(), maBackground);
         if (eRasterOp != RasterOp::OverPaint)
             rRenderContext.SetRasterOp(eRasterOp);
     }
