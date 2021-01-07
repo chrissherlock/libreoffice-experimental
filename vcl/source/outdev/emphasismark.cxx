@@ -91,7 +91,7 @@ void OutputDevice::DrawEmphasisMarks( SalLayout& rSalLayout )
 
     if (nEmphasisHeight)
         std::tie(aPolyPoly, bPolyLine, nEmphasisYOff, nEmphasisWidth, aRect1, aRect2) =
-            GetEmphasisMark(nEmphasisMark, nEmphasisHeight, mnDPIY);
+            GetEmphasisMark(nEmphasisMark, nEmphasisHeight, GetDPIY());
 
     if ( bPolyLine )
     {

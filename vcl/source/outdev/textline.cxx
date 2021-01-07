@@ -123,7 +123,7 @@ void OutputDevice::ImplDrawWaveLine( tools::Long nBaseX, tools::Long nBaseY,
             SetInitFillColorFlag(true);
             bDrawPixAsRect  = true;
             nPixWidth       = nLineWidth;
-            nPixHeight      = ((nLineWidth*mnDPIX)+(mnDPIY/2))/mnDPIY;
+            nPixHeight      = ((nLineWidth*GetDPIX())+(GetDPIY()/2))/GetDPIY();
         }
         else
         {
@@ -215,7 +215,7 @@ void OutputDevice::ImplDrawWaveTextLine( tools::Long nBaseX, tools::Long nBaseY,
     if ( (eTextLine == LINESTYLE_SMALLWAVE) && (nLineHeight > 3) )
         nLineHeight = 3;
 
-    tools::Long nLineWidth = mnDPIX / 300;
+    tools::Long nLineWidth = GetDPIX() / 300;
     if ( !nLineWidth )
         nLineWidth = 1;
 
@@ -224,7 +224,7 @@ void OutputDevice::ImplDrawWaveTextLine( tools::Long nBaseX, tools::Long nBaseY,
 
     nLinePos += nDistY - (nLineHeight / 2);
 
-    tools::Long nLineWidthHeight = ((nLineWidth * mnDPIX) + (mnDPIY / 2)) / mnDPIY;
+    tools::Long nLineWidthHeight = ((nLineWidth * GetDPIX()) + (GetDPIY() / 2)) / GetDPIY();
     if ( eTextLine == LINESTYLE_DOUBLEWAVE )
     {
         tools::Long nOrgLineHeight = nLineHeight;
@@ -356,9 +356,9 @@ void OutputDevice::ImplDrawStraightTextLine( tools::Long nBaseX, tools::Long nBa
     case LINESTYLE_DOTTED:
     case LINESTYLE_BOLDDOTTED:
         {
-            tools::Long nDotWidth = nLineHeight*mnDPIY;
-            nDotWidth += mnDPIY/2;
-            nDotWidth /= mnDPIY;
+            tools::Long nDotWidth = nLineHeight*GetDPIY();
+            nDotWidth += GetDPIY()/2;
+            nDotWidth /= GetDPIY();
 
             tools::Long nTempWidth = nDotWidth;
             tools::Long nEnd = nLeft+nWidth;
@@ -377,9 +377,9 @@ void OutputDevice::ImplDrawStraightTextLine( tools::Long nBaseX, tools::Long nBa
     case LINESTYLE_BOLDDASH:
     case LINESTYLE_BOLDLONGDASH:
         {
-            tools::Long nDotWidth = nLineHeight*mnDPIY;
-            nDotWidth += mnDPIY/2;
-            nDotWidth /= mnDPIY;
+            tools::Long nDotWidth = nLineHeight*GetDPIY();
+            nDotWidth += GetDPIY()/2;
+            nDotWidth /= GetDPIY();
 
             tools::Long nMinDashWidth;
             tools::Long nMinSpaceWidth;
@@ -400,8 +400,8 @@ void OutputDevice::ImplDrawStraightTextLine( tools::Long nBaseX, tools::Long nBa
                 nDashWidth = 100;
                 nSpaceWidth = 50;
             }
-            nDashWidth = ((nDashWidth*mnDPIX)+1270)/2540;
-            nSpaceWidth = ((nSpaceWidth*mnDPIX)+1270)/2540;
+            nDashWidth = ((nDashWidth*GetDPIX())+1270)/2540;
+            nSpaceWidth = ((nSpaceWidth*GetDPIX())+1270)/2540;
             // DashWidth will be increased if the line is getting too thick
             // in proportion to the line's length
             if ( nDashWidth < nMinDashWidth )
@@ -423,11 +423,11 @@ void OutputDevice::ImplDrawStraightTextLine( tools::Long nBaseX, tools::Long nBa
     case LINESTYLE_DASHDOT:
     case LINESTYLE_BOLDDASHDOT:
         {
-            tools::Long nDotWidth = nLineHeight*mnDPIY;
-            nDotWidth += mnDPIY/2;
-            nDotWidth /= mnDPIY;
+            tools::Long nDotWidth = nLineHeight*GetDPIY();
+            nDotWidth += GetDPIY()/2;
+            nDotWidth /= GetDPIY();
 
-            tools::Long nDashWidth = ((100*mnDPIX)+1270)/2540;
+            tools::Long nDashWidth = ((100*GetDPIX())+1270)/2540;
             tools::Long nMinDashWidth = nDotWidth*4;
             // DashWidth will be increased if the line is getting too thick
             // in proportion to the line's length
@@ -458,11 +458,11 @@ void OutputDevice::ImplDrawStraightTextLine( tools::Long nBaseX, tools::Long nBa
     case LINESTYLE_DASHDOTDOT:
     case LINESTYLE_BOLDDASHDOTDOT:
         {
-            tools::Long nDotWidth = nLineHeight*mnDPIY;
-            nDotWidth += mnDPIY/2;
-            nDotWidth /= mnDPIY;
+            tools::Long nDotWidth = nLineHeight*GetDPIY();
+            nDotWidth += GetDPIY()/2;
+            nDotWidth /= GetDPIY();
 
-            tools::Long nDashWidth = ((100*mnDPIX)+1270)/2540;
+            tools::Long nDashWidth = ((100*GetDPIX())+1270)/2540;
             tools::Long nMinDashWidth = nDotWidth*4;
             // DashWidth will be increased if the line is getting too thick
             // in proportion to the line's length

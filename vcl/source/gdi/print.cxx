@@ -696,8 +696,8 @@ void Printer::ImplInitDisplay()
     mpDisplayDev = VclPtr<VirtualDevice>::Create();
     mxFontCollection    = pSVData->maGDIData.mxScreenFontList;
     mxFontCache         = pSVData->maGDIData.mxScreenFontCache;
-    mnDPIX              = mpDisplayDev->mnDPIX;
-    mnDPIY              = mpDisplayDev->mnDPIY;
+    SetDPIX(mpDisplayDev->GetDPIX());
+    SetDPIY(mpDisplayDev->GetDPIY());
 }
 
 void Printer::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
@@ -833,14 +833,20 @@ SalPrinterQueueInfo* Printer::ImplGetQueueInfo( const OUString& rPrinterName,
 void Printer::ImplUpdatePageData()
 {
     // we need a graphics
-    if ( !AcquireGraphics() )
+    if (!AcquireGraphics())
         return;
 
-    mpGraphics->GetResolution( mnDPIX, mnDPIY );
-    mpInfoPrinter->GetPageInfo( &maJobSetup.ImplGetConstData(),
-                                mnWidthPx, mnHeightPx,
-                                maPageOffset,
-                                maPaperSize );
+    int nDPIX = GetDPIX();
+    int nDPIY = GetDPIY();
+
+    mpGraphics->GetResolution(nDPIX, nDPIY);
+    SetDPIX(nDPIX);
+    SetDPIY(nDPIY);
+
+    mpInfoPrinter->GetPageInfo(&maJobSetup.ImplGetConstData(),
+                               mnWidthPx, mnHeightPx,
+                               maPageOffset,
+                               maPaperSize);
 }
 
 void Printer::ImplUpdateFontList()

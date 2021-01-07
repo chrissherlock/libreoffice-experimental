@@ -499,7 +499,7 @@ vcl::Font OutputDevice::GetDefaultFont( DefaultFontType nType, LanguageType eLan
                         if ( aFont.GetFontHeight() )
                             aSize.setHeight( 1 );
                         else
-                            aSize.setHeight( (12*pOutDev->mnDPIY)/72 );
+                            aSize.setHeight( (12*pOutDev->GetDPIY())/72 );
                     }
 
                     // use default width only when logical width is zero
@@ -653,7 +653,7 @@ bool OutputDevice::ImplNewFont() const
         if ( maFont.GetFontSize().Height() )
             aSize.setHeight( 1 );
         else
-            aSize.setHeight( (12*mnDPIY)/72 );
+            aSize.setHeight( (12*GetDPIY())/72 );
         fExactHeight =  static_cast<float>(aSize.Height());
     }
 

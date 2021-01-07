@@ -204,14 +204,14 @@ protected:
     tools::Long
         mnOffsetFromOriginYInLogicalUnits; ///< Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
 
+    MappingMetrics maMappingMetric;
+
+private:
     sal_Int32 mnDPIX;
     sal_Int32 mnDPIY;
     sal_Int32
         mnDPIScalePercentage; ///< For HiDPI displays, we want to draw elements for a percentage larger
 
-    MappingMetrics maMappingMetric;
-
-private:
     Color maTextColor;
     Color maLineColor;
     Color maFillColor;

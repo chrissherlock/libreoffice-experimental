@@ -1442,8 +1442,8 @@ void Window::ImplPaintToDevice( OutputDevice* i_pTargetOutDev, const Point& i_rP
     const OutputDevice *pOutDev = GetOutDev();
     tools::Long nOldDPIX = pOutDev->GetDPIX();
     tools::Long nOldDPIY = pOutDev->GetDPIY();
-    mnDPIX = i_pTargetOutDev->GetDPIX();
-    mnDPIY = i_pTargetOutDev->GetDPIY();
+    SetDPIX(i_pTargetOutDev->GetDPIX());
+    SetDPIY(i_pTargetOutDev->GetDPIY());
     bool bOutput = IsOutputEnabled();
     EnableOutput();
 
@@ -1464,10 +1464,10 @@ void Window::ImplPaintToDevice( OutputDevice* i_pTargetOutDev, const Point& i_rP
     Push();
     // copy graphics state to metafile
     vcl::Font aCopyFont = GetFont();
-    if( nOldDPIX != mnDPIX || nOldDPIY != mnDPIY )
+    if( nOldDPIX != GetDPIX() || nOldDPIY != GetDPIY() )
     {
-        aCopyFont.SetFontHeight( aCopyFont.GetFontHeight() * mnDPIY / nOldDPIY );
-        aCopyFont.SetAverageFontWidth( aCopyFont.GetAverageFontWidth() * mnDPIX / nOldDPIX );
+        aCopyFont.SetFontHeight( aCopyFont.GetFontHeight() * GetDPIY() / nOldDPIY );
+        aCopyFont.SetAverageFontWidth( aCopyFont.GetAverageFontWidth() * GetDPIX() / nOldDPIX );
     }
     SetFont( aCopyFont );
     SetTextColor( GetTextColor() );
@@ -1556,8 +1556,8 @@ void Window::ImplPaintToDevice( OutputDevice* i_pTargetOutDev, const Point& i_rP
     EnableOutput( bOutput );
     mpWindowImpl->mbReallyVisible = bRVisible;
     mbDevOutput = bDevOutput;
-    mnDPIX = nOldDPIX;
-    mnDPIY = nOldDPIY;
+    SetDPIX(nOldDPIX);
+    SetDPIY(nOldDPIY);
 }
 
 void Window::PaintToDevice(OutputDevice* pDev, const Point& rPos)

@@ -1135,8 +1135,8 @@ void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* p
 
     // setup the scale factor for HiDPI displays
     SetDPIScalePercentage(CountDPIScaleFactor(mpWindowImpl->mpFrameData->mnDPIY));
-    mnDPIX = mpWindowImpl->mpFrameData->mnDPIX;
-    mnDPIY = mpWindowImpl->mpFrameData->mnDPIY;
+    SetDPIX(mpWindowImpl->mpFrameData->mnDPIX);
+    SetDPIY(mpWindowImpl->mpFrameData->mnDPIY);
 
     if (!utl::ConfigManager::IsFuzzing())
     {
@@ -1336,8 +1336,8 @@ void Window::ImplInitResolutionSettings()
     // recalculate AppFont-resolution and DPI-resolution
     if (mpWindowImpl->mbFrame)
     {
-        mnDPIX = mpWindowImpl->mpFrameData->mnDPIX;
-        mnDPIY = mpWindowImpl->mpFrameData->mnDPIY;
+        SetDPIX(mpWindowImpl->mpFrameData->mnDPIX);
+        SetDPIY(mpWindowImpl->mpFrameData->mnDPIY);
 
         // setup the scale factor for HiDPI displays
         SetDPIScalePercentage(CountDPIScaleFactor(mpWindowImpl->mpFrameData->mnDPIY));
@@ -1346,8 +1346,8 @@ void Window::ImplInitResolutionSettings()
     }
     else if ( mpWindowImpl->mpParent )
     {
-        mnDPIX  = mpWindowImpl->mpParent->mnDPIX;
-        mnDPIY  = mpWindowImpl->mpParent->mnDPIY;
+        SetDPIX(mpWindowImpl->mpParent->GetDPIX());
+        SetDPIY(mpWindowImpl->mpParent->GetDPIY());
         SetDPIScalePercentage(mpWindowImpl->mpParent->GetDPIScalePercentage());
     }
 
@@ -1758,7 +1758,7 @@ void Window::ImplNewInputContext()
             if ( rFont.GetFontSize().Height() )
                 aSize.setHeight( 1 );
             else
-                aSize.setHeight( (12*pFocusWin->mnDPIY)/72 );
+                aSize.setHeight( (12*pFocusWin->GetDPIY())/72 );
         }
         pFontInstance = pFocusWin->mxFontCache->GetFontInstance( pFocusWin->mxFontCollection.get(),
                          rFont, aSize, static_cast<float>(aSize.Height()) );
