@@ -22,7 +22,7 @@
 #include <vcl/RenderContext2.hxx>
 
 Size RenderContext2::GetSizeInPixels() const { return Size(mnWidthPx, mnHeightPx); }
-tools::Long RenderContext2::GetOutputWidthPixel() const { return mnWidthPx; }
+tools::Long RenderContext2::GetWidthInPixels() const { return mnWidthPx; }
 tools::Long RenderContext2::GetOutputHeightPixel() const { return mnHeightPx; }
 tools::Long RenderContext2::GetOffsetXInPixels() const { return mnOffsetXpx; }
 tools::Long RenderContext2::GetOffsetYInPixels() const { return mnOffsetYpx; }

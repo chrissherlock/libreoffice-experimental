@@ -61,7 +61,7 @@ namespace cairocanvas
         OutputDevice* pOutDev = getOutputDevice();
         mpSurface = pOutDev->CreateSurface(pOutDev->GetOutOffXPixel(),
                                            pOutDev->GetOutOffYPixel(),
-                                           pOutDev->GetOutputWidthPixel(),
+                                           pOutDev->GetWidthInPixels(),
                                            pOutDev->GetOutputHeightPixel());
     }
 

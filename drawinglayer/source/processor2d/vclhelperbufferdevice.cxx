@@ -129,15 +129,15 @@ VclPtr<VirtualDevice> VDevBuffer::alloc(OutputDevice& rOutDev, const Size& rSize
                     {
                         // found is valid
                         const bool bCandidateOkay(
-                            a->buf->GetOutputWidthPixel() >= rSizePixel.getWidth()
+                            a->buf->GetWidthInPixels() >= rSizePixel.getWidth()
                             && a->buf->GetOutputHeightPixel() >= rSizePixel.getHeight());
 
                         if (bCandidateOkay)
                         {
                             // found and candidate are valid
-                            const sal_uLong aSquare(aFound->buf->GetOutputWidthPixel()
+                            const sal_uLong aSquare(aFound->buf->GetWidthInPixels()
                                                     * aFound->buf->GetOutputHeightPixel());
-                            const sal_uLong aCandidateSquare(a->buf->GetOutputWidthPixel()
+                            const sal_uLong aCandidateSquare(a->buf->GetWidthInPixels()
                                                              * a->buf->GetOutputHeightPixel());
 
                             if (aCandidateSquare < aSquare)
@@ -155,7 +155,7 @@ VclPtr<VirtualDevice> VDevBuffer::alloc(OutputDevice& rOutDev, const Size& rSize
                     {
                         // found is invalid, use candidate
                         aFound = a;
-                        bOkay = aFound->buf->GetOutputWidthPixel() >= rSizePixel.getWidth()
+                        bOkay = aFound->buf->GetWidthInPixels() >= rSizePixel.getWidth()
                                 && aFound->buf->GetOutputHeightPixel() >= rSizePixel.getHeight();
                     }
                 }
@@ -163,7 +163,7 @@ VclPtr<VirtualDevice> VDevBuffer::alloc(OutputDevice& rOutDev, const Size& rSize
                 {
                     // none yet, use candidate
                     aFound = a;
-                    bOkay = aFound->buf->GetOutputWidthPixel() >= rSizePixel.getWidth()
+                    bOkay = aFound->buf->GetWidthInPixels() >= rSizePixel.getWidth()
                             && aFound->buf->GetOutputHeightPixel() >= rSizePixel.getHeight();
                 }
             }
