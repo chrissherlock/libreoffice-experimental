@@ -923,7 +923,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
     {
         Point aOrigin = aOriginalMode.GetOrigin();
         Size aPixelOffset(aOrigin.getX() / TWIPS_PER_PIXEL, aOrigin.getY() / TWIPS_PER_PIXEL);
-        pContentDev->SetPixelOffset(aPixelOffset);
+        pContentDev->SetOffsetInPixels(aPixelOffset);
         comphelper::LibreOfficeKit::setLocalRendering();
     }
 
@@ -933,7 +933,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
 
     if (bIsTiledRendering)
     {
-        pContentDev->SetPixelOffset(Size());
+        pContentDev->SetOffsetInPixels(Size());
         pContentDev->SetMapMode(aOrig);
     }
 

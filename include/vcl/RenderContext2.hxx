@@ -18,6 +18,7 @@
 #include <vcl/settings.hxx>
 #include <vcl/ComplexTextLayoutFlags.hxx>
 #include <vcl/DrawModeFlags.hxx>
+#include <vcl/MappingMetrics.hxx>
 #include <vcl/RasterOp.hxx>
 
 #include <memory>
@@ -88,12 +89,39 @@ public:
     Size GetSizeInPixels() const;
     tools::Long GetOutputWidthPixel() const;
     tools::Long GetOutputHeightPixel() const;
+
     tools::Long GetOffsetXInPixels() const;
     tools::Long GetOffsetYInPixels() const;
-    Size GetOffsetFromOriginInPixels() const;
     void SetOffsetXInPixels(tools::Long nOffsetXpx);
     void SetOffsetYInPixels(tools::Long nOffsetYpx);
+
+    Size GetOffsetFromOriginInPixels() const;
+
+    /** Set an offset in pixels
+
+        This method offsets every drawing operation that converts its
+        coordinates to pixel by the given value. Normally, the effect
+        can be achieved by setting a MapMode with a different origin.
+        Unfortunately, this origin is in logical coordinates and can
+        lead to rounding errors (see #102532# for details).
+
+        @attention This offset is only applied when converting to pixel,
+        i.e. some output modes such as metafile recordings might be
+        completely unaffected by this method! Use with care.
+        Furthermore, if the OutputDevice's MapMode is the default
+        (that's MapUnit::MapPixel), then any pixel offset set is ignored
+        also. This might be unintuitive for cases, but would have been
+        far more fragile to implement. What's more, the reason why the
+        pixel offset was introduced (avoiding rounding errors) does not
+        apply for MapUnit::MapPixel, because one can always use the
+        MapMode origin then.
+
+        @param rOffset The offset in pixels
+     */
+    virtual void SetOffsetFromOriginInPixels(Size const& rOffset);
+
     void ResetLogicalUnitsOffsetFromOrigin();
+
     sal_Int32 GetDPIX() const;
     sal_Int32 GetDPIY() const;
     void SetDPIX(sal_Int32 nDPIX);
@@ -177,6 +205,8 @@ protected:
     sal_Int32 mnDPIY;
     sal_Int32
         mnDPIScalePercentage; ///< For HiDPI displays, we want to draw elements for a percentage larger
+
+    MappingMetrics maMappingMetric;
 
 private:
     Color maTextColor;

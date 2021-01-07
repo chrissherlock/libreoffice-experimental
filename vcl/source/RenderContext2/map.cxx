@@ -15,4 +15,48 @@ bool RenderContext2::IsMapModeEnabled() const { return mbMap; }
 
 void RenderContext2::EnableMapMode(bool bEnable) { mbMap = bEnable; }
 
+static tools::Long ImplPixelToLogic(tools::Long n, tools::Long nDPI, tools::Long nMapNum,
+                                    tools::Long nMapDenom)
+{
+    assert(nDPI > 0);
+
+    if (nMapNum == 0)
+        return 0;
+
+    sal_Int64 nDenom = nDPI;
+    nDenom *= nMapNum;
+
+    sal_Int64 n64 = n;
+    n64 *= nMapDenom;
+
+    if (nDenom == 1)
+    {
+        n = static_cast<tools::Long>(n64);
+    }
+    else
+    {
+        n64 = 2 * n64 / nDenom;
+
+        if (n64 < 0)
+            --n64;
+        else
+            ++n64;
+
+        n = static_cast<tools::Long>(n64 / 2);
+    }
+
+    return n;
+}
+
+void RenderContext2::SetOffsetFromOriginInPixels(Size const& rOffset)
+{
+    mnOffsetFromOriginXpx = rOffset.Width();
+    mnOffsetFromOriginYpx = rOffset.Height();
+
+    mnOffsetFromOriginXInLogicalUnits = ImplPixelToLogic(
+        mnOffsetFromOriginXpx, mnDPIX, maMappingMetric.mnMapScNumX, maMappingMetric.mnMapScDenomX);
+    mnOffsetFromOriginYInLogicalUnits = ImplPixelToLogic(
+        mnOffsetFromOriginYpx, mnDPIY, maMappingMetric.mnMapScNumY, maMappingMetric.mnMapScDenomY);
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

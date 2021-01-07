@@ -1724,18 +1724,12 @@ tools::Long OutputDevice::LogicToLogic( tools::Long nLongSource,
     return fn3( nLongSource, nNumerator, nDenominator );
 }
 
-void OutputDevice::SetPixelOffset( const Size& rOffset )
+void OutputDevice::SetOffsetFromOriginInPixels(Size const& rOffset)
 {
-    mnOffsetFromOriginXpx  = rOffset.Width();
-    mnOffsetFromOriginYpx  = rOffset.Height();
+    RenderContext2::SetOffsetFromOriginInPixels(rOffset);
 
-    mnOffsetFromOriginXInLogicalUnits = ImplPixelToLogic( mnOffsetFromOriginXpx, mnDPIX,
-                                       maMappingMetric.mnMapScNumX, maMappingMetric.mnMapScDenomX );
-    mnOffsetFromOriginYInLogicalUnits = ImplPixelToLogic( mnOffsetFromOriginYpx, mnDPIY,
-                                       maMappingMetric.mnMapScNumY, maMappingMetric.mnMapScDenomY );
-
-    if( mpAlphaVDev )
-        mpAlphaVDev->SetPixelOffset( rOffset );
+    if (mpAlphaVDev)
+        mpAlphaVDev->SetOffsetFromOriginInPixels(rOffset);
 }
 
 

@@ -294,7 +294,6 @@ private:
     mutable tools::Long                    mnTextOffY;
     mutable tools::Long                    mnEmphasisAscent;
     mutable tools::Long                    mnEmphasisDescent;
-    MappingMetrics                 maMappingMetric;
     const OutDevType                meOutDevType;
     OutDevViewType                  meOutDevViewType;
     vcl::Region                     maRegion;           // contains the clip region, see SetClipRegion(...)
@@ -1448,30 +1447,7 @@ public:
     basegfx::B2DHomMatrix       GetViewTransformation( const MapMode& rMapMode ) const;
     basegfx::B2DHomMatrix       GetInverseViewTransformation( const MapMode& rMapMode ) const;
 
-
-    /** Set an offset in pixel
-
-        This method offsets every drawing operation that converts its
-        coordinates to pixel by the given value. Normally, the effect
-        can be achieved by setting a MapMode with a different
-        origin. Unfortunately, this origin is in logical coordinates
-        and can lead to rounding errors (see #102532# for details).
-
-        @attention This offset is only applied when converting to
-        pixel, i.e. some output modes such as metafile recordings
-        might be completely unaffected by this method! Use with
-        care. Furthermore, if the OutputDevice's MapMode is the
-        default (that's MapUnit::MapPixel), then any pixel offset set is
-        ignored also. This might be unintuitive for cases, but would
-        have been far more fragile to implement. What's more, the
-        reason why the pixel offset was introduced (avoiding rounding
-        errors) does not apply for MapUnit::MapPixel, because one can always
-        use the MapMode origin then.
-
-        @param rOffset
-        The offset in pixel
-     */
-    void                        SetPixelOffset( const Size& rOffset );
+    void SetOffsetFromOriginInPixels(Size const& rOffset) override;
 
     Point                       LogicToPixel( const Point& rLogicPt ) const;
     Size                        LogicToPixel( const Size& rLogicSize ) const;
