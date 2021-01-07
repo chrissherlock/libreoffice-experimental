@@ -558,17 +558,17 @@ bool OutputDevice::ImplIsAntiparallel() const
 
 void    OutputDevice::ReMirror( Point &rPoint ) const
 {
-    rPoint.setX( mnOffsetXpx + mnWidthPx - 1 - rPoint.X() + mnOffsetXpx );
+    rPoint.setX( GetOffsetXInPixels() + mnWidthPx - 1 - rPoint.X() + GetOffsetXInPixels() );
 }
 void    OutputDevice::ReMirror( tools::Rectangle &rRect ) const
 {
     tools::Long nWidth = rRect.Right() - rRect.Left();
 
-    //long lc_x = rRect.nLeft - mnOffsetXpx;    // normalize
+    //long lc_x = rRect.nLeft - GetOffsetXInPixels();    // normalize
     //lc_x = mnWidthPx - nWidth - 1 - lc_x;  // mirror
-    //rRect.nLeft = lc_x + mnOffsetXpx;         // re-normalize
+    //rRect.nLeft = lc_x + GetOffsetXInPixels();         // re-normalize
 
-    rRect.SetLeft( mnOffsetXpx + mnWidthPx - nWidth - 1 - rRect.Left() + mnOffsetXpx );
+    rRect.SetLeft( GetOffsetXInPixels() + mnWidthPx - nWidth - 1 - rRect.Left() + GetOffsetXInPixels() );
     rRect.SetRight( rRect.Left() + nWidth );
 }
 

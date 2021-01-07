@@ -365,7 +365,7 @@ public:
     Size                        GetSizeInLogicalUnits() const
                                     { return PixelToLogic( GetSizeInPixels() ); }
     Point                       GetOutputOffPixel() const
-                                    { return Point( mnOffsetXpx, mnOffsetYpx ); }
+                                    { return Point( GetOffsetXInPixels(), GetOffsetYInPixels() ); }
     tools::Rectangle            GetOutputRectPixel() const
                                     { return tools::Rectangle(GetOutputOffPixel(), GetSizeInPixels() ); }
 

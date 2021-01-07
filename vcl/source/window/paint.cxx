@@ -816,7 +816,7 @@ void Window::ImplInvalidate( const vcl::Region* pRegion, InvalidateFlags nFlags 
         ImplInvalidateFrameRegion( nullptr, nFlags );
     else
     {
-        vcl::Region      aRegion( GetOutputRectPixel() );
+        vcl::Region aRegion( GetOutputRectPixel() );
         if ( pRegion )
         {
             // RTL: remirror region before intersecting it
@@ -1145,7 +1145,7 @@ vcl::Region Window::GetPaintRegion() const
     if ( mpWindowImpl->mpPaintRegion )
     {
         vcl::Region aRegion = *mpWindowImpl->mpPaintRegion;
-        aRegion.Move( -mnOffsetXpx, -mnOffsetYpx );
+        aRegion.Move( -GetOffsetXInPixels(), -GetOffsetYInPixels() );
         return PixelToLogic( aRegion );
     }
     else
@@ -1421,8 +1421,8 @@ void Window::ImplPaintToDevice( OutputDevice* i_pTargetOutDev, const Point& i_rP
         {
             if( pChild->mpWindowImpl->mpFrame == mpWindowImpl->mpFrame && pChild->IsVisible() )
             {
-                tools::Long nDeltaX = pChild->mnOffsetXpx - mnOffsetXpx;
-                tools::Long nDeltaY = pChild->mnOffsetYpx - mnOffsetYpx;
+                tools::Long nDeltaX = pChild->GetOffsetXInPixels() - GetOffsetXInPixels();
+                tools::Long nDeltaY = pChild->GetOffsetYInPixels() - GetOffsetYInPixels();
 
                 Point aPos( i_rPos );
                 aPos += Point(nDeltaX, nDeltaY);
@@ -1538,7 +1538,7 @@ void Window::ImplPaintToDevice( OutputDevice* i_pTargetOutDev, const Point& i_rP
     {
         if( pChild->mpWindowImpl->mpFrame == mpWindowImpl->mpFrame && pChild->IsVisible() )
         {
-            tools::Long nDeltaX = pChild->mnOffsetXpx - mnOffsetXpx;
+            tools::Long nDeltaX = pChild->GetOffsetXInPixels() - GetOffsetXInPixels();
 
             if( pOutDev->HasMirroredGraphics() )
                 nDeltaX = mnWidthPx - nDeltaX - pChild->mnWidthPx;

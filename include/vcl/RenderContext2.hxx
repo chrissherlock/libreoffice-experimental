@@ -193,17 +193,16 @@ protected:
     ComplexTextLayoutFlags mnTextLayoutMode;
     LanguageType meTextLanguage;
 
-    tools::Long
-        mnOffsetXpx; ///< Output X offset for device output in pixel (pseudo window offset within window system's frames)
-    tools::Long
-        mnOffsetYpx; ///< Output Y offset for device output in pixel (pseudo window offset within window system's frames)
-
     tools::Long mnWidthPx;
     tools::Long mnHeightPx;
 
     MappingMetrics maMappingMetric;
 
 private:
+    tools::Long
+        mnOffsetXpx; ///< Output X offset for device output in pixel (pseudo window offset within window system's frames)
+    tools::Long
+        mnOffsetYpx; ///< Output Y offset for device output in pixel (pseudo window offset within window system's frames)
     tools::Long
         mnOffsetFromOriginXpx; ///< Additional output pixel offset, applied in LogicToPixel (used by SetPixelOffset/GetPixelOffset)
     tools::Long

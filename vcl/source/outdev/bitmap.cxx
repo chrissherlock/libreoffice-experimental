@@ -203,39 +203,39 @@ Bitmap OutputDevice::GetBitmap(const Point& rSrcPt, const Size& rSize) const
     {
         assert(mpGraphics);
 
-        if (nWidth > 0 && nHeight > 0 && nX <= (mnWidthPx + mnOffsetXpx)
-            && nY <= (mnHeightPx + mnOffsetYpx))
+        if (nWidth > 0 && nHeight > 0 && nX <= (mnWidthPx + GetOffsetXInPixels())
+            && nY <= (mnHeightPx + GetOffsetYInPixels()))
         {
             tools::Rectangle aRect(Point(nX, nY), Size(nWidth, nHeight));
             bool bClipped = false;
 
             // X-Coordinate outside of draw area?
-            if (nX < mnOffsetXpx)
+            if (nX < GetOffsetXInPixels())
             {
-                nWidth -= (mnOffsetXpx - nX);
-                nX = mnOffsetXpx;
+                nWidth -= (GetOffsetXInPixels() - nX);
+                nX = GetOffsetXInPixels();
                 bClipped = true;
             }
 
             // Y-Coordinate outside of draw area?
-            if (nY < mnOffsetYpx)
+            if (nY < GetOffsetYInPixels())
             {
-                nHeight -= (mnOffsetYpx - nY);
-                nY = mnOffsetYpx;
+                nHeight -= (GetOffsetYInPixels() - nY);
+                nY = GetOffsetYInPixels();
                 bClipped = true;
             }
 
             // Width outside of draw area?
-            if ((nWidth + nX) > (mnWidthPx + mnOffsetXpx))
+            if ((nWidth + nX) > (mnWidthPx + GetOffsetXInPixels()))
             {
-                nWidth = mnOffsetXpx + mnWidthPx - nX;
+                nWidth = GetOffsetXInPixels() + mnWidthPx - nX;
                 bClipped = true;
             }
 
             // Height outside of draw area?
-            if ((nHeight + nY) > (mnHeightPx + mnOffsetYpx))
+            if ((nHeight + nY) > (mnHeightPx + GetOffsetYInPixels()))
             {
-                nHeight = mnOffsetYpx + mnHeightPx - nY;
+                nHeight = GetOffsetYInPixels() + mnHeightPx - nY;
                 bClipped = true;
             }
 
@@ -254,8 +254,8 @@ Bitmap OutputDevice::GetBitmap(const Point& rSrcPt, const Size& rSize) const
                         {
                             SalTwoRect aPosAry(
                                 nX, nY, nWidth, nHeight,
-                                (aRect.Left() < mnOffsetXpx) ? (mnOffsetXpx - aRect.Left()) : 0L,
-                                (aRect.Top() < mnOffsetYpx) ? (mnOffsetYpx - aRect.Top()) : 0L, nWidth,
+                                (aRect.Left() < GetOffsetXInPixels()) ? (GetOffsetXInPixels() - aRect.Left()) : 0L,
+                                (aRect.Top() < GetOffsetYInPixels()) ? (GetOffsetYInPixels() - aRect.Top()) : 0L, nWidth,
                                 nHeight);
                             aVDev->mpGraphics->CopyBits(aPosAry, *mpGraphics, *this, *this);
                         }
@@ -323,7 +323,7 @@ void OutputDevice::DrawTransparentAlphaBitmap(const Bitmap& rBmp, const AlphaMas
         return;
 
     {
-        Point aRelPt = aOutPt + Point(mnOffsetXpx, mnOffsetYpx);
+        Point aRelPt = aOutPt + Point(GetOffsetXInPixels(), GetOffsetYInPixels());
         SalTwoRect aTR(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(),
                        rSrcSizePixel.Height(), aRelPt.X(), aRelPt.Y(), aOutSz.Width(),
                        aOutSz.Height());
