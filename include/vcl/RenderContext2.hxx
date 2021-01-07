@@ -121,6 +121,8 @@ public:
     virtual void SetOffsetFromOriginInPixels(Size const& rOffset);
 
     void ResetLogicalUnitsOffsetFromOrigin();
+    void SetOffsetFromOriginXInLogicalUnits(tools::Long nOffsetFromOriginXInLogicalUnits);
+    void SetOffsetFromOriginYInLogicalUnits(tools::Long nOffsetFromOriginYInLogicalUnits);
 
     sal_Int32 GetDPIX() const;
     sal_Int32 GetDPIY() const;
