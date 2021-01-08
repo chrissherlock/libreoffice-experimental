@@ -4133,7 +4133,7 @@ static void doc_setWindowTextSelection(LibreOfficeKitDocument* /*pThis*/, unsign
     }
 
 
-    Size aOffset(pWindow->GetOffsetXInPixels(), pWindow->GetOffsetYInPixels());
+    Size aOffset(pWindow->GetXOffsetInPixels(), pWindow->GetYOffsetInPixels());
     Point aCursorPos(nX, nY);
     aCursorPos.Move(aOffset);
     sal_uInt16 nModifier = swap ? KEY_MOD1 + KEY_MOD2 : KEY_SHIFT;

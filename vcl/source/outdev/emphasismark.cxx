@@ -31,8 +31,8 @@ void OutputDevice::DrawEmphasisMark( tools::Long nBaseX, tools::Long nX, tools::
     if( IsRTLEnabled() )
         nX = nBaseX - (nX - nBaseX - 1);
 
-    nX -= GetOffsetXInPixels();
-    nY -= GetOffsetYInPixels();
+    nX -= GetXOffsetInPixels();
+    nY -= GetYOffsetInPixels();
 
     if ( rPolyPoly.Count() )
     {

@@ -68,31 +68,31 @@ void RenderContext2::SetOffsetFromOriginInPixels(Size const& rOffset)
     maGeometry.mnOffsetFromOriginXpx = rOffset.Width();
     maGeometry.mnOffsetFromOriginYpx = rOffset.Height();
 
-    SetOffsetFromOriginXInLogicalUnits(
+    SetXOffsetFromOriginInLogicalUnits(
         ImplPixelToLogic(maGeometry.mnOffsetFromOriginXpx, maGeometry.mnDPIX,
                          maMappingMetric.mnMapScNumX, maMappingMetric.mnMapScDenomX));
-    SetOffsetFromOriginYInLogicalUnits(
+    SetYOffsetFromOriginInLogicalUnits(
         ImplPixelToLogic(maGeometry.mnOffsetFromOriginYpx, maGeometry.mnDPIY,
                          maMappingMetric.mnMapScNumY, maMappingMetric.mnMapScDenomY));
 }
 
-sal_uInt32 RenderContext2::GetOffsetFromOriginXInLogicalUnits() const
+sal_uInt32 RenderContext2::GetXOffsetFromOriginInLogicalUnits() const
 {
     return maGeometry.mnOffsetFromOriginXInLogicalUnits;
 }
 
-void RenderContext2::SetOffsetFromOriginXInLogicalUnits(
+void RenderContext2::SetXOffsetFromOriginInLogicalUnits(
     tools::Long nOffsetFromOriginXInLogicalUnits)
 {
     maGeometry.mnOffsetFromOriginXInLogicalUnits = nOffsetFromOriginXInLogicalUnits;
 }
 
-sal_uInt32 RenderContext2::GetOffsetFromOriginYInLogicalUnits() const
+sal_uInt32 RenderContext2::GetYOffsetFromOriginInLogicalUnits() const
 {
     return maGeometry.mnOffsetFromOriginYInLogicalUnits;
 }
 
-void RenderContext2::SetOffsetFromOriginYInLogicalUnits(
+void RenderContext2::SetYOffsetFromOriginInLogicalUnits(
     tools::Long nOffsetFromOriginYInLogicalUnits)
 {
     maGeometry.mnOffsetFromOriginYInLogicalUnits = nOffsetFromOriginYInLogicalUnits;

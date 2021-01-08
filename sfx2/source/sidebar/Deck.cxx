@@ -183,7 +183,7 @@ void Deck::Resize()
     {
         std::vector<vcl::LOKPayloadItem> aItems;
         aItems.emplace_back("type", "deck");
-        aItems.emplace_back(std::make_pair("position", Point(GetOffsetXInPixels(), GetOffsetYInPixels()).toString()));
+        aItems.emplace_back(std::make_pair("position", Point(GetXOffsetInPixels(), GetYOffsetInPixels()).toString()));
         aItems.emplace_back(std::make_pair("size", GetSizePixel().toString()));
         pNotifier->notifyWindow(GetLOKWindowId(), "size_changed", aItems);
     }

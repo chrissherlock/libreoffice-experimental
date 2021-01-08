@@ -98,10 +98,10 @@ PaintBufferGuard::PaintBufferGuard(ImplFrameData* pFrameData, vcl::Window* pWind
     pFrameData->mpBuffer->SetLayoutMode(pWindow->GetLayoutMode());
     pFrameData->mpBuffer->SetDigitLanguage(pWindow->GetDigitLanguage());
 
-    mnOffsetXpx = pFrameData->mpBuffer->GetOffsetXInPixels();
-    mnOffsetYpx = pFrameData->mpBuffer->GetOffsetYInPixels();
-    pFrameData->mpBuffer->SetOffsetXInPixels(pWindow->GetOffsetXInPixels());
-    pFrameData->mpBuffer->SetOffsetYInPixels(pWindow->GetOffsetYInPixels());
+    mnOffsetXpx = pFrameData->mpBuffer->GetXOffsetInPixels();
+    mnOffsetYpx = pFrameData->mpBuffer->GetYOffsetInPixels();
+    pFrameData->mpBuffer->SetXOffsetInPixels(pWindow->GetXOffsetInPixels());
+    pFrameData->mpBuffer->SetYOffsetInPixels(pWindow->GetYOffsetInPixels());
     pFrameData->mpBuffer->EnableRTL(pWindow->IsRTLEnabled());
 }
 
@@ -136,8 +136,8 @@ PaintBufferGuard::~PaintBufferGuard()
     }
 
     // Restore buffer state.
-    mpFrameData->mpBuffer->SetOffsetXInPixels(mnOffsetXpx);
-    mpFrameData->mpBuffer->SetOffsetYInPixels(mnOffsetYpx);
+    mpFrameData->mpBuffer->SetXOffsetInPixels(mnOffsetXpx);
+    mpFrameData->mpBuffer->SetYOffsetInPixels(mnOffsetYpx);
 
     mpFrameData->mpBuffer->Pop();
     mpFrameData->mpBuffer->SetSettings(maSettings);
@@ -1145,7 +1145,7 @@ vcl::Region Window::GetPaintRegion() const
     if ( mpWindowImpl->mpPaintRegion )
     {
         vcl::Region aRegion = *mpWindowImpl->mpPaintRegion;
-        aRegion.Move( -GetOffsetXInPixels(), -GetOffsetYInPixels() );
+        aRegion.Move( -GetXOffsetInPixels(), -GetYOffsetInPixels() );
         return PixelToLogic( aRegion );
     }
     else
@@ -1239,7 +1239,7 @@ void Window::PixelInvalidate(const tools::Rectangle* pRectangle)
     // Added for dialog items. Pass invalidation to the parent window.
     else if (VclPtr<vcl::Window> pParent = GetParentWithLOKNotifier())
     {
-        const tools::Rectangle aRect(Point(GetOffsetXInPixels(), GetOffsetYInPixels()), GetSizePixel());
+        const tools::Rectangle aRect(Point(GetXOffsetInPixels(), GetYOffsetInPixels()), GetSizePixel());
         pParent->PixelInvalidate(&aRect);
     }
 }
@@ -1421,8 +1421,8 @@ void Window::ImplPaintToDevice( OutputDevice* i_pTargetOutDev, const Point& i_rP
         {
             if( pChild->mpWindowImpl->mpFrame == mpWindowImpl->mpFrame && pChild->IsVisible() )
             {
-                tools::Long nDeltaX = pChild->GetOffsetXInPixels() - GetOffsetXInPixels();
-                tools::Long nDeltaY = pChild->GetOffsetYInPixels() - GetOffsetYInPixels();
+                tools::Long nDeltaX = pChild->GetXOffsetInPixels() - GetXOffsetInPixels();
+                tools::Long nDeltaY = pChild->GetYOffsetInPixels() - GetYOffsetInPixels();
 
                 Point aPos( i_rPos );
                 aPos += Point(nDeltaX, nDeltaY);
@@ -1538,11 +1538,11 @@ void Window::ImplPaintToDevice( OutputDevice* i_pTargetOutDev, const Point& i_rP
     {
         if( pChild->mpWindowImpl->mpFrame == mpWindowImpl->mpFrame && pChild->IsVisible() )
         {
-            tools::Long nDeltaX = pChild->GetOffsetXInPixels() - GetOffsetXInPixels();
+            tools::Long nDeltaX = pChild->GetXOffsetInPixels() - GetXOffsetInPixels();
 
             if( pOutDev->HasMirroredGraphics() )
                 nDeltaX = GetWidthInPixels() - nDeltaX - pChild->GetWidthInPixels();
-            tools::Long nDeltaY = pChild->GetOffsetYInPixels() - GetOffsetYInPixels();
+            tools::Long nDeltaY = pChild->GetYOffsetInPixels() - GetYOffsetInPixels();
             Point aPos( i_rPos );
             Point aDelta( nDeltaX, nDeltaY );
             aPos += aDelta;

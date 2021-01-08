@@ -125,7 +125,7 @@ vcl::Region Window::GetWindowClipRegionPixel() const
     if ( aWinRegion == aWinClipRegion )
         aWinClipRegion.SetNull();
 
-    aWinClipRegion.Move( -GetOffsetXInPixels(), -GetOffsetYInPixels() );
+    aWinClipRegion.Move( -GetXOffsetInPixels(), -GetYOffsetInPixels() );
 
     return aWinClipRegion;
 }
@@ -138,7 +138,7 @@ vcl::Region Window::GetActiveClipRegion() const
     if ( mpWindowImpl->mbInPaint )
     {
         aRegion = *(mpWindowImpl->mpPaintRegion);
-        aRegion.Move( -GetOffsetXInPixels(), -GetOffsetYInPixels() );
+        aRegion.Move( -GetXOffsetInPixels(), -GetYOffsetInPixels() );
     }
 
     if ( mbClipRegion )
@@ -327,7 +327,7 @@ bool Window::ImplSysObjClip( const vcl::Region* pOldRegion )
                     mpWindowImpl->mpSysObj->ResetClipRegion();
                 else
                 {
-                    aRegion.Move( -GetOffsetXInPixels(), -GetOffsetYInPixels() );
+                    aRegion.Move( -GetXOffsetInPixels(), -GetYOffsetInPixels() );
 
                     // set/update clip region
                     RectangleVector aRectangles;
@@ -678,7 +678,7 @@ void Window::SaveBackground(VirtualDevice& rSaveDevice, const Point& rPos, const
         vcl::Region      aClip( *mpWindowImpl->mpPaintRegion );
         const Point aPixPos( LogicToPixel( rPos ) );
 
-        aClip.Move( -GetOffsetXInPixels(), -GetOffsetYInPixels() );
+        aClip.Move( -GetXOffsetInPixels(), -GetYOffsetInPixels() );
         aClip.Intersect( tools::Rectangle( aPixPos, LogicToPixel( rSize ) ) );
 
         if ( !aClip.IsEmpty() )

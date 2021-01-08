@@ -263,10 +263,10 @@ bool OutputDevice::ImplDrawRotateText( SalLayout& rSalLayout )
 
     // mask output with text colored bitmap
     GDIMetaFile* pOldMetaFile = mpMetaFile;
-    tools::Long nOldOffX = GetOffsetXInPixels();
-    tools::Long nOldOffY = GetOffsetYInPixels();
-    SetOffsetXInPixels(0);
-    SetOffsetYInPixels(0);
+    tools::Long nOldOffX = GetXOffsetInPixels();
+    tools::Long nOldOffY = GetYOffsetInPixels();
+    SetXOffsetInPixels(0);
+    SetYOffsetInPixels(0);
     mpMetaFile  = nullptr;
 
     {
@@ -274,8 +274,8 @@ bool OutputDevice::ImplDrawRotateText( SalLayout& rSalLayout )
         DrawMask(aPoint, aBmp, GetTextColor());
     }
 
-    SetOffsetXInPixels(nOldOffX);
-    SetOffsetYInPixels(nOldOffY);
+    SetXOffsetInPixels(nOldOffX);
+    SetYOffsetInPixels(nOldOffY);
     mpMetaFile  = pOldMetaFile;
 
     return true;
@@ -298,7 +298,7 @@ void OutputDevice::ImplDrawTextDirect( SalLayout& rSalLayout,
         {
             OutputDevice *pOutDevRef = this;
             // mirror this window back
-            tools::Long devX = w-pOutDevRef->GetWidthInPixels()-pOutDevRef->GetOffsetXInPixels();   // re-mirrored GetOffsetXInPixels()
+            tools::Long devX = w-pOutDevRef->GetWidthInPixels()-pOutDevRef->GetXOffsetInPixels();   // re-mirrored GetXOffsetInPixels()
             rSalLayout.DrawBase().setX( devX + ( pOutDevRef->GetWidthInPixels() - 1 - (rSalLayout.DrawBase().X() - devX) ) ) ;
         }
     }
@@ -307,7 +307,7 @@ void OutputDevice::ImplDrawTextDirect( SalLayout& rSalLayout,
         OutputDevice *pOutDevRef = this;
 
         // mirror this window back
-        tools::Long devX = pOutDevRef->GetOffsetXInPixels();   // re-mirrored GetOffsetXInPixels()
+        tools::Long devX = pOutDevRef->GetXOffsetInPixels();   // re-mirrored GetXOffsetInPixels()
         rSalLayout.DrawBase().setX( pOutDevRef->GetWidthInPixels() - 1 - (rSalLayout.DrawBase().X() - devX) + devX );
     }
 
@@ -1568,8 +1568,8 @@ void OutputDevice::ImplDrawText( OutputDevice& rTargetDevice, const tools::Recta
                         nMnemonicWidth = rTargetDevice.LogicWidthToDeviceCoordinate( std::abs(lc_x1 - lc_x2) );
 
                         Point       aTempPos = rTargetDevice.LogicToPixel( aPos );
-                        nMnemonicX = rTargetDevice.GetOffsetXInPixels() + aTempPos.X() + rTargetDevice.ImplLogicWidthToDevicePixel( std::min( lc_x1, lc_x2 ) );
-                        nMnemonicY = rTargetDevice.GetOffsetYInPixels() + aTempPos.Y() + rTargetDevice.ImplLogicWidthToDevicePixel( rTargetDevice.GetFontMetric().GetAscent() );
+                        nMnemonicX = rTargetDevice.GetXOffsetInPixels() + aTempPos.X() + rTargetDevice.ImplLogicWidthToDevicePixel( std::min( lc_x1, lc_x2 ) );
+                        nMnemonicY = rTargetDevice.GetYOffsetInPixels() + aTempPos.Y() + rTargetDevice.ImplLogicWidthToDevicePixel( rTargetDevice.GetFontMetric().GetAscent() );
                         rTargetDevice.ImplDrawMnemonicLine( nMnemonicX, nMnemonicY, nMnemonicWidth );
                     }
                 }
@@ -1636,8 +1636,8 @@ void OutputDevice::ImplDrawText( OutputDevice& rTargetDevice, const tools::Recta
             nMnemonicWidth = rTargetDevice.LogicWidthToDeviceCoordinate( std::abs(lc_x1 - lc_x2) );
 
             Point aTempPos = rTargetDevice.LogicToPixel( aPos );
-            nMnemonicX = rTargetDevice.GetOffsetXInPixels() + aTempPos.X() + rTargetDevice.ImplLogicWidthToDevicePixel( std::min(lc_x1, lc_x2) );
-            nMnemonicY = rTargetDevice.GetOffsetYInPixels() + aTempPos.Y() + rTargetDevice.ImplLogicWidthToDevicePixel( rTargetDevice.GetFontMetric().GetAscent() );
+            nMnemonicX = rTargetDevice.GetXOffsetInPixels() + aTempPos.X() + rTargetDevice.ImplLogicWidthToDevicePixel( std::min(lc_x1, lc_x2) );
+            nMnemonicY = rTargetDevice.GetYOffsetInPixels() + aTempPos.Y() + rTargetDevice.ImplLogicWidthToDevicePixel( rTargetDevice.GetFontMetric().GetAscent() );
         }
 
         if ( nStyle & DrawTextFlags::Clip )
@@ -2079,8 +2079,8 @@ void OutputDevice::DrawCtrlText( const Point& rPos, const OUString& rStr,
 
             aTempPos += rPos;
             aTempPos = LogicToPixel( aTempPos );
-            nMnemonicX = GetOffsetXInPixels() + aTempPos.X();
-            nMnemonicY = GetOffsetYInPixels() + aTempPos.Y();
+            nMnemonicX = GetXOffsetInPixels() + aTempPos.X();
+            nMnemonicY = GetYOffsetInPixels() + aTempPos.Y();
         }
     }
 

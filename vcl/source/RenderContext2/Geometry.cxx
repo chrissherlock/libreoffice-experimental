@@ -38,15 +38,15 @@ void RenderContext2::SetHeightInPixels(tools::Long nHeight) { maGeometry.mnHeigh
 tools::Long RenderContext2::GetWidthInPixels() const { return maGeometry.mnWidthPx; }
 tools::Long RenderContext2::GetHeightInPixels() const { return maGeometry.mnHeightPx; }
 
-tools::Long RenderContext2::GetOffsetXInPixels() const { return maGeometry.mnOffsetXpx; }
-tools::Long RenderContext2::GetOffsetYInPixels() const { return maGeometry.mnOffsetYpx; }
+tools::Long RenderContext2::GetXOffsetInPixels() const { return maGeometry.mnOffsetXpx; }
+tools::Long RenderContext2::GetYOffsetInPixels() const { return maGeometry.mnOffsetYpx; }
 
-void RenderContext2::SetOffsetXInPixels(tools::Long nOffsetXpx)
+void RenderContext2::SetXOffsetInPixels(tools::Long nOffsetXpx)
 {
     maGeometry.mnOffsetXpx = nOffsetXpx;
 }
 
-void RenderContext2::SetOffsetYInPixels(tools::Long nOffsetYpx)
+void RenderContext2::SetYOffsetInPixels(tools::Long nOffsetYpx)
 {
     maGeometry.mnOffsetYpx = nOffsetYpx;
 }

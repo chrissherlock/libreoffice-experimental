@@ -934,12 +934,12 @@ void Window::ImplSetMouseTransparent( bool bTransparent )
 
 Point Window::ImplOutputToFrame( const Point& rPos )
 {
-    return Point( rPos.X()+GetOffsetXInPixels(), rPos.Y()+GetOffsetYInPixels() );
+    return Point( rPos.X()+GetXOffsetInPixels(), rPos.Y()+GetYOffsetInPixels() );
 }
 
 Point Window::ImplFrameToOutput( const Point& rPos )
 {
-    return Point( rPos.X()-GetOffsetXInPixels(), rPos.Y()-GetOffsetYInPixels() );
+    return Point( rPos.X()-GetXOffsetInPixels(), rPos.Y()-GetYOffsetInPixels() );
 }
 
 void Window::SetCompoundControl( bool bCompound )
@@ -1155,7 +1155,7 @@ bool Window::IsDefaultSize() const
 
 Point Window::GetOffsetPixelFrom(const vcl::Window& rWindow) const
 {
-    return Point(GetOffsetXInPixels() - rWindow.GetOffsetXInPixels(), GetOffsetYInPixels() - rWindow.GetOffsetYInPixels());
+    return Point(GetXOffsetInPixels() - rWindow.GetXOffsetInPixels(), GetYOffsetInPixels() - rWindow.GetYOffsetInPixels());
 }
 
 void Window::EnablePaint( bool bEnable )

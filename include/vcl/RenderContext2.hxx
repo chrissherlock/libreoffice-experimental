@@ -94,10 +94,10 @@ public:
     void SetWidthInPixels(tools::Long nWidth);
     void SetHeightInPixels(tools::Long nHeight);
 
-    tools::Long GetOffsetXInPixels() const;
-    tools::Long GetOffsetYInPixels() const;
-    void SetOffsetXInPixels(tools::Long nOffsetXpx);
-    void SetOffsetYInPixels(tools::Long nOffsetYpx);
+    tools::Long GetXOffsetInPixels() const;
+    tools::Long GetYOffsetInPixels() const;
+    void SetXOffsetInPixels(tools::Long nOffsetXpx);
+    void SetYOffsetInPixels(tools::Long nOffsetYpx);
 
     Size GetOffsetFromOriginInPixels() const;
     tools::Long GetXOffsetFromOriginInPixels() const;
@@ -127,10 +127,10 @@ public:
     virtual void SetOffsetFromOriginInPixels(Size const& rOffset);
 
     void ResetLogicalUnitsOffsetFromOrigin();
-    sal_uInt32 GetOffsetFromOriginXInLogicalUnits() const;
-    void SetOffsetFromOriginXInLogicalUnits(tools::Long nOffsetFromOriginXInLogicalUnits);
-    sal_uInt32 GetOffsetFromOriginYInLogicalUnits() const;
-    void SetOffsetFromOriginYInLogicalUnits(tools::Long nOffsetFromOriginYInLogicalUnits);
+    sal_uInt32 GetXOffsetFromOriginInLogicalUnits() const;
+    void SetXOffsetFromOriginInLogicalUnits(tools::Long nOffsetFromOriginXInLogicalUnits);
+    sal_uInt32 GetYOffsetFromOriginInLogicalUnits() const;
+    void SetYOffsetFromOriginInLogicalUnits(tools::Long nOffsetFromOriginYInLogicalUnits);
 
     sal_Int32 GetDPIX() const;
     sal_Int32 GetDPIY() const;
