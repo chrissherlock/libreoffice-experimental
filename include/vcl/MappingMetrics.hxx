@@ -21,24 +21,21 @@
 
 #include <tools/long.hxx>
 
+class MapMode;
+
 struct MappingMetrics
 {
+    MappingMetrics();
+    MappingMetrics(MapMode const& rMapMode, tools::Long nDPIX, tools::Long nDPIY);
+
+    void Calculate(MapMode const& rMapMode, tools::Long nDPIX, tools::Long nDPIY);
+
     tools::Long mnMapOfsX; ///< Offset in X direction
     tools::Long mnMapOfsY; ///< Offset in Y direction
     tools::Long mnMapScNumX; ///< Scaling factor - numerator in X direction
     tools::Long mnMapScNumY; ///< Scaling factor - numerator in Y direction
     tools::Long mnMapScDenomX; ///< Scaling factor - denominator in X direction
     tools::Long mnMapScDenomY; ///< Scaling factor - denominator in Y direction
-
-    MappingMetrics()
-        : mnMapOfsX(0)
-        , mnMapOfsY(0)
-        , mnMapScNumX(1)
-        , mnMapScNumY(1)
-        , mnMapScDenomX(1)
-        , mnMapScDenomY(1)
-    {
-    }
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

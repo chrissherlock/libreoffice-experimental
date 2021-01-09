@@ -120,6 +120,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/cnttype/mcnttfactory \
     vcl/source/cnttype/mcnttype \
     vcl/source/RenderContext2/Geometry \
+    vcl/source/RenderContext2/MappingMetrics \
     vcl/source/RenderContext2/RenderContext2 \
     vcl/source/RenderContext2/drawmode \
     vcl/source/RenderContext2/emphasismark \

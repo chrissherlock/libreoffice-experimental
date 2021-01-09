@@ -82,177 +82,6 @@ static Fraction ImplMakeFraction( tools::Long nN1, tools::Long nN2, tools::Long 
     return aF;
 }
 
-static MappingMetrics CalculateMappingMetrics(MapMode const& rMapMode, tools::Long nDPIX, tools::Long nDPIY)
-{
-    MappingMetrics aMappingMetrics;
-
-    switch ( rMapMode.GetMapUnit() )
-    {
-        case MapUnit::MapRelative:
-            break;
-        case MapUnit::Map100thMM:
-            aMappingMetrics.mnMapScNumX   = 1;
-            aMappingMetrics.mnMapScDenomX = 2540;
-            aMappingMetrics.mnMapScNumY   = 1;
-            aMappingMetrics.mnMapScDenomY = 2540;
-            break;
-        case MapUnit::Map10thMM:
-            aMappingMetrics.mnMapScNumX   = 1;
-            aMappingMetrics.mnMapScDenomX = 254;
-            aMappingMetrics.mnMapScNumY   = 1;
-            aMappingMetrics.mnMapScDenomY = 254;
-            break;
-        case MapUnit::MapMM:
-            aMappingMetrics.mnMapScNumX   = 5;      // 10
-            aMappingMetrics.mnMapScDenomX = 127;    // 254
-            aMappingMetrics.mnMapScNumY   = 5;      // 10
-            aMappingMetrics.mnMapScDenomY = 127;    // 254
-            break;
-        case MapUnit::MapCM:
-            aMappingMetrics.mnMapScNumX   = 50;     // 100
-            aMappingMetrics.mnMapScDenomX = 127;    // 254
-            aMappingMetrics.mnMapScNumY   = 50;     // 100
-            aMappingMetrics.mnMapScDenomY = 127;    // 254
-            break;
-        case MapUnit::Map1000thInch:
-            aMappingMetrics.mnMapScNumX   = 1;
-            aMappingMetrics.mnMapScDenomX = 1000;
-            aMappingMetrics.mnMapScNumY   = 1;
-            aMappingMetrics.mnMapScDenomY = 1000;
-            break;
-        case MapUnit::Map100thInch:
-            aMappingMetrics.mnMapScNumX   = 1;
-            aMappingMetrics.mnMapScDenomX = 100;
-            aMappingMetrics.mnMapScNumY   = 1;
-            aMappingMetrics.mnMapScDenomY = 100;
-            break;
-        case MapUnit::Map10thInch:
-            aMappingMetrics.mnMapScNumX   = 1;
-            aMappingMetrics.mnMapScDenomX = 10;
-            aMappingMetrics.mnMapScNumY   = 1;
-            aMappingMetrics.mnMapScDenomY = 10;
-            break;
-        case MapUnit::MapInch:
-            aMappingMetrics.mnMapScNumX   = 1;
-            aMappingMetrics.mnMapScDenomX = 1;
-            aMappingMetrics.mnMapScNumY   = 1;
-            aMappingMetrics.mnMapScDenomY = 1;
-            break;
-        case MapUnit::MapPoint:
-            aMappingMetrics.mnMapScNumX   = 1;
-            aMappingMetrics.mnMapScDenomX = 72;
-            aMappingMetrics.mnMapScNumY   = 1;
-            aMappingMetrics.mnMapScDenomY = 72;
-            break;
-        case MapUnit::MapTwip:
-            aMappingMetrics.mnMapScNumX   = 1;
-            aMappingMetrics.mnMapScDenomX = 1440;
-            aMappingMetrics.mnMapScNumY   = 1;
-            aMappingMetrics.mnMapScDenomY = 1440;
-            break;
-        case MapUnit::MapPixel:
-            aMappingMetrics.mnMapScNumX   = 1;
-            aMappingMetrics.mnMapScDenomX = nDPIX;
-            aMappingMetrics.mnMapScNumY   = 1;
-            aMappingMetrics.mnMapScDenomY = nDPIY;
-            break;
-        case MapUnit::MapSysFont:
-        case MapUnit::MapAppFont:
-            {
-            ImplSVData* pSVData = ImplGetSVData();
-            if ( !pSVData->maGDIData.mnAppFontX )
-            {
-                if (pSVData->maFrameData.mpFirstFrame)
-                    vcl::Window::ImplInitAppFontData(pSVData->maFrameData.mpFirstFrame);
-                else
-                {
-                    ScopedVclPtrInstance<WorkWindow> pWin( nullptr, 0 );
-                    vcl::Window::ImplInitAppFontData( pWin );
-                }
-            }
-            aMappingMetrics.mnMapScNumX   = pSVData->maGDIData.mnAppFontX;
-            aMappingMetrics.mnMapScDenomX = nDPIX * 40;
-            aMappingMetrics.mnMapScNumY   = pSVData->maGDIData.mnAppFontY;
-            aMappingMetrics.mnMapScDenomY = nDPIY * 80;
-            }
-            break;
-        default:
-            OSL_FAIL( "unhandled MapUnit" );
-            break;
-    }
-
-    const Fraction& aScaleX = rMapMode.GetScaleX();
-    const Fraction& aScaleY = rMapMode.GetScaleY();
-
-    // set offset according to MapMode
-    Point aOrigin = rMapMode.GetOrigin();
-    if ( rMapMode.GetMapUnit() != MapUnit::MapRelative )
-    {
-        aMappingMetrics.mnMapOfsX = aOrigin.X();
-        aMappingMetrics.mnMapOfsY = aOrigin.Y();
-    }
-    else
-    {
-        auto nXNumerator = aScaleX.GetNumerator();
-        auto nYNumerator = aScaleY.GetNumerator();
-        assert(nXNumerator != 0 && nYNumerator != 0);
-
-        BigInt aX( aMappingMetrics.mnMapOfsX );
-        aX *= BigInt( aScaleX.GetDenominator() );
-        if ( aMappingMetrics.mnMapOfsX >= 0 )
-        {
-            if (nXNumerator >= 0)
-                aX += BigInt(nXNumerator / 2);
-            else
-                aX -= BigInt((nXNumerator + 1) / 2);
-        }
-        else
-        {
-            if (nXNumerator >= 0 )
-                aX -= BigInt((nXNumerator - 1) / 2);
-            else
-                aX += BigInt(nXNumerator / 2);
-        }
-        aX /= BigInt(nXNumerator);
-        aMappingMetrics.mnMapOfsX = static_cast<tools::Long>(aX) + aOrigin.X();
-        BigInt aY( aMappingMetrics.mnMapOfsY );
-        aY *= BigInt( aScaleY.GetDenominator() );
-        if( aMappingMetrics.mnMapOfsY >= 0 )
-        {
-            if (nYNumerator >= 0)
-                aY += BigInt(nYNumerator / 2);
-            else
-                aY -= BigInt((nYNumerator + 1) / 2);
-        }
-        else
-        {
-            if (nYNumerator >= 0)
-                aY -= BigInt((nYNumerator - 1) / 2);
-            else
-                aY += BigInt(nYNumerator / 2);
-        }
-        aY /= BigInt(nYNumerator);
-        aMappingMetrics.mnMapOfsY = static_cast<tools::Long>(aY) + aOrigin.Y();
-    }
-
-    // calculate scaling factor according to MapMode
-    // aTemp? = aMappingMetrics.mnMapSc? * aScale?
-    Fraction aTempX = ImplMakeFraction( aMappingMetrics.mnMapScNumX,
-                                        aScaleX.GetNumerator(),
-                                        aMappingMetrics.mnMapScDenomX,
-                                        aScaleX.GetDenominator() );
-    Fraction aTempY = ImplMakeFraction( aMappingMetrics.mnMapScNumY,
-                                        aScaleY.GetNumerator(),
-                                        aMappingMetrics.mnMapScDenomY,
-                                        aScaleY.GetDenominator() );
-    aMappingMetrics.mnMapScNumX   = aTempX.GetNumerator();
-    aMappingMetrics.mnMapScDenomX = aTempX.GetDenominator();
-    aMappingMetrics.mnMapScNumY   = aTempY.GetNumerator();
-    aMappingMetrics.mnMapScDenomY = aTempY.GetDenominator();
-
-    return aMappingMetrics;
-}
-
 static tools::Long ImplLogicToPixel(tools::Long n, tools::Long nDPI, tools::Long nMapNum,
                                     tools::Long nMapDenom)
 {
@@ -394,7 +223,7 @@ void OutputDevice::SetMapMode( const MapMode& rNewMapMode )
         }
 
         // calculate new MapMode-resolution
-        maMappingMetric = CalculateMappingMetrics(rNewMapMode, GetDPIX(), GetDPIY());
+        maMappingMetric.Calculate(rNewMapMode, GetDPIX(), GetDPIY());
     }
 
     // set new MapMode
@@ -562,7 +391,7 @@ basegfx::B2DHomMatrix OutputDevice::GetInverseViewTransformation() const
 basegfx::B2DHomMatrix OutputDevice::GetViewTransformation( const MapMode& rMapMode ) const
 {
     // #i82615#
-    MappingMetrics aMappingMetric = CalculateMappingMetrics(rMapMode, GetDPIX(), GetDPIY());
+    MappingMetrics aMappingMetric(rMapMode, GetDPIX(), GetDPIY());
 
     basegfx::B2DHomMatrix aTransform;
 
@@ -729,7 +558,7 @@ Point OutputDevice::LogicToPixel( const Point& rLogicPt,
         return rLogicPt;
 
     // convert MapMode resolution and convert
-    MappingMetrics aMappingMetric = CalculateMappingMetrics(rMapMode, GetDPIX(), GetDPIY());
+    MappingMetrics aMappingMetric(rMapMode, GetDPIX(), GetDPIY());
 
     return Point( ImplLogicToPixel( rLogicPt.X() + aMappingMetric.mnMapOfsX, GetDPIX(),
                                     aMappingMetric.mnMapScNumX, aMappingMetric.mnMapScDenomX )+GetXOffsetFromOriginInPixels(),
@@ -745,7 +574,7 @@ Size OutputDevice::LogicToPixel( const Size& rLogicSize,
         return rLogicSize;
 
     // convert MapMode resolution and convert
-    MappingMetrics aMappingMetric = CalculateMappingMetrics(rMapMode, GetDPIX(), GetDPIY());
+    MappingMetrics aMappingMetric(rMapMode, GetDPIX(), GetDPIY());
 
     return Size( ImplLogicToPixel( rLogicSize.Width(), GetDPIX(),
                                    aMappingMetric.mnMapScNumX, aMappingMetric.mnMapScDenomX ),
@@ -761,7 +590,7 @@ tools::Rectangle OutputDevice::LogicToPixel( const tools::Rectangle& rLogicRect,
         return rLogicRect;
 
     // convert MapMode resolution and convert
-    MappingMetrics aMappingMetric = CalculateMappingMetrics(rMapMode, GetDPIX(), GetDPIY());
+    MappingMetrics aMappingMetric(rMapMode, GetDPIX(), GetDPIY());
 
     return tools::Rectangle( ImplLogicToPixel( rLogicRect.Left() + aMappingMetric.mnMapOfsX, GetDPIX(),
                                         aMappingMetric.mnMapScNumX, aMappingMetric.mnMapScDenomX )+GetXOffsetFromOriginInPixels(),
@@ -781,7 +610,7 @@ tools::Polygon OutputDevice::LogicToPixel( const tools::Polygon& rLogicPoly,
         return rLogicPoly;
 
     // convert MapMode resolution and convert
-    MappingMetrics aMappingMetric = CalculateMappingMetrics(rMapMode, GetDPIX(), GetDPIY());
+    MappingMetrics aMappingMetric(rMapMode, GetDPIX(), GetDPIY());
 
     sal_uInt16  i;
     sal_uInt16  nPoints = rLogicPoly.GetSize();
@@ -947,7 +776,7 @@ Point OutputDevice::PixelToLogic( const Point& rDevicePt,
         return rDevicePt;
 
     // calculate MapMode-resolution and convert
-    MappingMetrics aMappingMetric = CalculateMappingMetrics(rMapMode, GetDPIX(), GetDPIY());
+    MappingMetrics aMappingMetric(rMapMode, GetDPIX(), GetDPIY());
 
     return Point( ImplPixelToLogic( rDevicePt.X(), GetDPIX(),
                                     aMappingMetric.mnMapScNumX, aMappingMetric.mnMapScDenomX ) - aMappingMetric.mnMapOfsX - GetXOffsetFromOriginInLogicalUnits(),
@@ -964,7 +793,7 @@ Size OutputDevice::PixelToLogic( const Size& rDeviceSize,
         return rDeviceSize;
 
     // calculate MapMode-resolution and convert
-    MappingMetrics aMappingMetric = CalculateMappingMetrics(rMapMode, GetDPIX(), GetDPIY());
+    MappingMetrics aMappingMetric(rMapMode, GetDPIX(), GetDPIY());
 
     return Size( ImplPixelToLogic( rDeviceSize.Width(), GetDPIX(),
                                    aMappingMetric.mnMapScNumX, aMappingMetric.mnMapScDenomX ),
@@ -981,7 +810,7 @@ tools::Rectangle OutputDevice::PixelToLogic( const tools::Rectangle& rDeviceRect
         return rDeviceRect;
 
     // calculate MapMode-resolution and convert
-    MappingMetrics aMappingMetric = CalculateMappingMetrics(rMapMode, GetDPIX(), GetDPIY());
+    MappingMetrics aMappingMetric(rMapMode, GetDPIX(), GetDPIY());
 
     return tools::Rectangle( ImplPixelToLogic( rDeviceRect.Left(), GetDPIX(),
                                        aMappingMetric.mnMapScNumX, aMappingMetric.mnMapScDenomX ) - aMappingMetric.mnMapOfsX - GetXOffsetFromOriginInLogicalUnits(),
@@ -1002,7 +831,7 @@ tools::Polygon OutputDevice::PixelToLogic( const tools::Polygon& rDevicePoly,
         return rDevicePoly;
 
     // calculate MapMode-resolution and convert
-    MappingMetrics aMappingMetric = CalculateMappingMetrics(rMapMode, GetDPIX(), GetDPIY());
+    MappingMetrics aMappingMetric(rMapMode, GetDPIX(), GetDPIY());
 
     sal_uInt16  i;
     sal_uInt16  nPoints = rDevicePoly.GetSize();
@@ -1061,8 +890,7 @@ basegfx::B2DPolyPolygon OutputDevice::PixelToLogic( const basegfx::B2DPolyPolygo
         if (pMapModeSource->GetMapUnit() == MapUnit::MapRelative)                        \
             aMappingMetricSource = maMappingMetric;                                      \
                                                                                          \
-        aMappingMetricSource = CalculateMappingMetrics(*pMapModeSource,                  \
-                                GetDPIX(), GetDPIY());                                   \
+        aMappingMetricSource.Calculate(*pMapModeSource, GetDPIX(), GetDPIY());           \
     }                                                                                    \
     else                                                                                 \
     {                                                                                    \
@@ -1074,8 +902,7 @@ basegfx::B2DPolyPolygon OutputDevice::PixelToLogic( const basegfx::B2DPolyPolygo
         if (pMapModeDest->GetMapUnit() == MapUnit::MapRelative)                          \
             aMappingMetricDest = maMappingMetric;                                        \
                                                                                          \
-        aMappingMetricDest = CalculateMappingMetrics(*pMapModeDest,                      \
-                                GetDPIX(), GetDPIY());                                   \
+        aMappingMetricDest.Calculate(*pMapModeDest, GetDPIX(), GetDPIY());               \
     }                                                                                    \
     else                                                                                 \
     {                                                                                    \
@@ -1112,11 +939,8 @@ static void verifyUnitSourceDest( MapUnit eUnitSource, MapUnit eUnitDest )
         nNumerator *= 72
 
 #define ENTER4(rMapModeSource, rMapModeDest)                                             \
-    MappingMetrics aMappingMetricSource;                                                 \
-    MappingMetrics aMappingMetricDest;                                                   \
-                                                                                         \
-    aMappingMetricSource = CalculateMappingMetrics(rMapModeSource, 72, 72);              \
-    aMappingMetricDest = CalculateMappingMetrics(rMapModeDest, 72, 72)                   \
+    MappingMetrics aMappingMetricSource(rMapModeSource, 72, 72);                         \
+    MappingMetrics aMappingMetricDest(rMapModeDest, 72, 72)                              \
 
 // return (n1 * n2 * n3) / (n4 * n5)
 static tools::Long fn5( const tools::Long n1,
