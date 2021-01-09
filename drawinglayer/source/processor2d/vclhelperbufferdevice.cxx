@@ -339,8 +339,8 @@ void impBufferDevice::paint(double fTrans)
     static bool bDoSaveForVisualControl(false); // loplugin:constvars:ignore
 #endif
 
-    mrOutDev.EnableMapMode(false);
-    mpContent->EnableMapMode(false);
+    mrOutDev.DisableMapMode();
+    mpContent->DisableMapMode();
 
 #ifdef DBG_UTIL
     if (bDoSaveForVisualControl)
@@ -363,7 +363,7 @@ void impBufferDevice::paint(double fTrans)
 
     if (mpAlpha)
     {
-        mpAlpha->EnableMapMode(false);
+        mpAlpha->DisableMapMode();
         AlphaMask aAlphaMask(mpAlpha->GetBitmap(aEmptyPoint, aSizePixel));
 
 #ifdef DBG_UTIL
@@ -386,7 +386,7 @@ void impBufferDevice::paint(double fTrans)
     }
     else if (mpMask)
     {
-        mpMask->EnableMapMode(false);
+        mpMask->DisableMapMode();
         const Bitmap aMask(mpMask->GetBitmap(aEmptyPoint, aSizePixel));
 
 #ifdef DBG_UTIL
@@ -422,7 +422,11 @@ void impBufferDevice::paint(double fTrans)
     }
 
     mrOutDev.SetRasterOp(aOrigRasterOp);
-    mrOutDev.EnableMapMode(bWasEnabledDst);
+
+    if (bWasEnabledDst)
+        mrOutDev.EnableMapMode();
+    else
+        mrOutDev.DisableMapMode();
 }
 
 VirtualDevice& impBufferDevice::getContent()

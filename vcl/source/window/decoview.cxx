@@ -800,7 +800,7 @@ void DecorationView::DrawSymbol( const tools::Rectangle& rRect, SymbolType eType
     const Color             aOldFillColor   = mpOutDev->GetFillColor();
     const bool              bOldMapMode     = mpOutDev->IsMapModeEnabled();
     Color                   nColor(rColor);
-    mpOutDev->EnableMapMode( false );
+    mpOutDev->DisableMapMode();
 
     if ( (rStyleSettings.GetOptions() & StyleSettingsOptions::Mono) ||
          (mpOutDev->GetOutDevType() == OUTDEV_PRINTER) )
@@ -831,7 +831,11 @@ void DecorationView::DrawSymbol( const tools::Rectangle& rRect, SymbolType eType
     // Restore previous settings
     mpOutDev->SetLineColor( aOldLineColor );
     mpOutDev->SetFillColor( aOldFillColor );
-    mpOutDev->EnableMapMode( bOldMapMode );
+
+    if (bOldMapMode)
+        mpOutDev->EnableMapMode();
+    else
+        mpOutDev->DisableMapMode();
 }
 
 void DecorationView::DrawFrame( const tools::Rectangle& rRect,
@@ -841,10 +845,14 @@ void DecorationView::DrawFrame( const tools::Rectangle& rRect,
     tools::Rectangle   aRect         = mpOutDev->LogicToPixel( rRect );
     const Color aOldLineColor = mpOutDev->GetLineColor();
     const bool  bOldMapMode   = mpOutDev->IsMapModeEnabled();
-    mpOutDev->EnableMapMode( false );
+    mpOutDev->DisableMapMode();
     ImplDraw2ColorFrame( mpOutDev, aRect, rLeftTopColor, rRightBottomColor );
     mpOutDev->SetLineColor( aOldLineColor );
-    mpOutDev->EnableMapMode( bOldMapMode );
+
+    if (bOldMapMode)
+        mpOutDev->EnableMapMode();
+    else
+        mpOutDev->DisableMapMode();
 }
 
 void DecorationView::DrawHighlightFrame( const tools::Rectangle& rRect,
@@ -902,7 +910,7 @@ tools::Rectangle DecorationView::DrawFrame( const tools::Rectangle& rRect, DrawF
     if ( bOldMap )
     {
         aRect = mpOutDev->LogicToPixel( aRect );
-        mpOutDev->EnableMapMode( false );
+        mpOutDev->DisableMapMode();
     }
 
     if ( !rRect.IsEmpty() )
@@ -921,7 +929,11 @@ tools::Rectangle DecorationView::DrawFrame( const tools::Rectangle& rRect, DrawF
 
     if ( bOldMap )
     {
-        mpOutDev->EnableMapMode( bOldMap );
+        if (bOldMap)
+            mpOutDev->EnableMapMode();
+        else
+            mpOutDev->DisableMapMode();
+
         aRect = mpOutDev->PixelToLogic( aRect );
     }
 
@@ -941,7 +953,7 @@ tools::Rectangle DecorationView::DrawButton( const tools::Rectangle& rRect, Draw
     if ( bOldMap )
     {
         aRect = mpOutDev->LogicToPixel( aRect );
-        mpOutDev->EnableMapMode( false );
+        mpOutDev->DisableMapMode();
     }
 
     const Color aOldLineColor = mpOutDev->GetLineColor();
@@ -1000,7 +1012,11 @@ tools::Rectangle DecorationView::DrawButton( const tools::Rectangle& rRect, Draw
 
     if ( bOldMap )
     {
-        mpOutDev->EnableMapMode( bOldMap );
+        if (bOldMap)
+            mpOutDev->EnableMapMode();
+        else
+            mpOutDev->DisableMapMode();
+
         aRect = mpOutDev->PixelToLogic( aRect );
     }
 

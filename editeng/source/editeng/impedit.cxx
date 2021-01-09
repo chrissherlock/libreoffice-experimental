@@ -295,7 +295,7 @@ static void lcl_translateTwips(vcl::Window const & rParent, vcl::Window& rChild)
     aMapMode.SetOrigin(aOffset);
     aMapMode.SetMapUnit(rParent.GetMapMode().GetMapUnit());
     rChild.SetMapMode(aMapMode);
-    rChild.EnableMapMode(false);
+    rChild.DisableMapMode();
 }
 
 // EditView never had a central/secure place to react on SelectionChange since

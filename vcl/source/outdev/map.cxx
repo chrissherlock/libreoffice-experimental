@@ -136,12 +136,20 @@ static tools::Long ImplPixelToLogic(tools::Long n, tools::Long nDPI, tools::Long
     return n;
 }
 
-void OutputDevice::EnableMapMode( bool bEnable )
+void OutputDevice::EnableMapMode()
 {
-    RenderContext2::EnableMapMode(bEnable);
+    RenderContext2::EnableMapMode();
 
     if (mpAlphaVDev)
-        mpAlphaVDev->EnableMapMode(bEnable);
+        mpAlphaVDev->EnableMapMode();
+}
+
+void OutputDevice::DisableMapMode()
+{
+    RenderContext2::DisableMapMode();
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->DisableMapMode();
 }
 
 void OutputDevice::SetMapMode()
@@ -152,7 +160,7 @@ void OutputDevice::SetMapMode()
 
     if (IsMapModeEnabled() || !maMapMode.IsDefault())
     {
-        EnableMapMode(false);
+        DisableMapMode();
         maMapMode   = MapMode();
 
         // create new objects (clip region are not re-scaled)
@@ -191,7 +199,12 @@ void OutputDevice::SetMapMode( const MapMode& rNewMapMode )
 
      // if default MapMode calculate nothing
     bool bOldMap = IsMapModeEnabled();
-    EnableMapMode(!rNewMapMode.IsDefault());
+
+    if (!rNewMapMode.IsDefault())
+        EnableMapMode();
+    else
+        DisableMapMode();
+
     if (IsMapModeEnabled())
     {
         // if only the origin is converted, do not scale new

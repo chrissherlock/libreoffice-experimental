@@ -68,7 +68,7 @@ namespace vclcanvas
             OutputDevice& rOutDev( rOutDevProvider->getOutDev() );
 
             const bool bOldMapState( rOutDev.IsMapModeEnabled() );
-            rOutDev.EnableMapMode(false);
+            rOutDev.DisableMapMode();
 
             const Size aSize = rOutDev.GetFontMetric( *maFont ).GetFontSize();
 
@@ -82,7 +82,10 @@ namespace vclcanvas
 
             maFont->SetAverageFontWidth( nNewWidth );
 
-            rOutDev.EnableMapMode(bOldMapState);
+            if (bOldMapState)
+                rOutDev.EnableMapMode();
+            else
+                rOutDev.DisableMapMode();
         }
 
         sal_uInt32 nEmphasisMark = 0;

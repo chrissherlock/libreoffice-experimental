@@ -563,7 +563,7 @@ void DrawAndClipBitmap(const Point& rPos, const Size& rSize, const BitmapEx& rBi
     pVDev->DrawPolyPolygon( aClip );
 
     // #i50672# Extract whole VDev content (to match size of rBitmap)
-    pVDev->EnableMapMode( false );
+    pVDev->DisableMapMode();
     const Bitmap aVDevMask(pVDev->GetBitmap(Point(), aSizePixel));
 
     if(aBmpEx.IsTransparent())

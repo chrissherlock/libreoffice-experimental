@@ -392,11 +392,11 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos,
 
                     // copy MapMode state and disable for target
                     const bool bOrigMapModeEnabled(IsMapModeEnabled());
-                    EnableMapMode(false);
+                    DisableMapMode();
 
                     // copy MapMode state and disable for buffer
                     const bool bBufferMapModeEnabled(xVDev->IsMapModeEnabled());
-                    xVDev->EnableMapMode(false);
+                    xVDev->DisableMapMode();
 
                     // copy content from original to buffer
                     xVDev->DrawOutDev( aPoint, xVDev->GetSizeInPixels(), // dest
@@ -404,22 +404,30 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos,
                                        *this);
 
                     // draw MetaFile to buffer
-                    xVDev->EnableMapMode(bBufferMapModeEnabled);
+                    if (bBufferMapModeEnabled)
+                        xVDev->EnableMapMode();
+                    else
+                        xVDev->DisableMapMode();
+
                     const_cast<GDIMetaFile&>(rMtf).WindStart();
                     const_cast<GDIMetaFile&>(rMtf).Play(xVDev.get(), rPos, rSize);
                     const_cast<GDIMetaFile&>(rMtf).WindStart();
 
                     // get content bitmap from buffer
-                    xVDev->EnableMapMode(false);
+                    xVDev->DisableMapMode();
 
                     const Bitmap aPaint(xVDev->GetBitmap(aPoint, xVDev->GetSizeInPixels()));
 
                     // create alpha mask from gradient and get as Bitmap
-                    xVDev->EnableMapMode(bBufferMapModeEnabled);
+                    if (bBufferMapModeEnabled)
+                        xVDev->EnableMapMode();
+                    else
+                        xVDev->DisableMapMode();
+
                     xVDev->SetDrawMode(DrawModeFlags::GrayGradient);
                     xVDev->DrawGradient(tools::Rectangle(rPos, rSize), rTransparenceGradient);
                     xVDev->SetDrawMode(DrawModeFlags::Default);
-                    xVDev->EnableMapMode(false);
+                    xVDev->DisableMapMode();
 
                     const AlphaMask aAlpha(xVDev->GetBitmap(aPoint, xVDev->GetSizeInPixels()));
 
@@ -427,7 +435,11 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos,
 
                     // draw masked content to target and restore MapMode
                     DrawBitmapEx(aDstRect.TopLeft(), BitmapEx(aPaint, aAlpha));
-                    EnableMapMode(bOrigMapModeEnabled);
+
+                    if (bOrigMapModeEnabled)
+                        EnableMapMode();
+                    else
+                        DisableMapMode();
                 }
                 else
                 {
@@ -442,15 +454,19 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos,
                     const_cast<GDIMetaFile&>(rMtf).WindStart();
                     const_cast<GDIMetaFile&>(rMtf).Play( xVDev.get(), rPos, rSize );
                     const_cast<GDIMetaFile&>(rMtf).WindStart();
-                    xVDev->EnableMapMode( false );
+                    xVDev->DisableMapMode();
                     BitmapEx aPaint = xVDev->GetBitmapEx(Point(), xVDev->GetSizeInPixels());
-                    xVDev->EnableMapMode( bVDevOldMap ); // #i35331#: MUST NOT use EnableMapMode( sal_True ) here!
+
+                    if (bVDevOldMap)
+                        xVDev->EnableMapMode(); // #i35331#: MUST NOT use EnableMapMode( sal_True ) here!
+                    else
+                        xVDev->DisableMapMode();
 
                     // create alpha mask from gradient
                     xVDev->SetDrawMode( DrawModeFlags::GrayGradient );
                     xVDev->DrawGradient( tools::Rectangle( rPos, rSize ), rTransparenceGradient );
                     xVDev->SetDrawMode( DrawModeFlags::Default );
-                    xVDev->EnableMapMode( false );
+                    xVDev->DisableMapMode();
 
                     AlphaMask aAlpha(xVDev->GetBitmap(Point(), xVDev->GetSizeInPixels()));
                     aAlpha.BlendWith(aPaint.GetAlpha());

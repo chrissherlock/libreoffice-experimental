@@ -206,9 +206,13 @@ namespace vclcanvas
         const ::Point aEmptyPoint;
         OutputDevice& rOutDev = mpOutDev->getOutDev();
         bool bOldMap( rOutDev.IsMapModeEnabled() );
-        rOutDev.EnableMapMode( false );
+        rOutDev.DisableMapMode();
         WriteDIB(rOutDev.GetBitmapEx(aEmptyPoint, rOutDev.GetSizeInPixels()), aStream, false);
-        rOutDev.EnableMapMode( bOldMap );
+
+        if (bOldMap)
+            rOutDev.EnableMapMode();
+        else
+            rOutDev.DisableMapMode();
 
         ++nFilePostfixCount;
     }

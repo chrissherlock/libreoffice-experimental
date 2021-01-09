@@ -549,7 +549,7 @@ void VclProcessor2D::RenderFillGraphicPrimitive2D(
                             const ::tools::Rectangle aVisiblePixel(
                                 aEmptyPoint, mpOutputDevice->GetSizeInPixels());
                             const bool bWasEnabled(mpOutputDevice->IsMapModeEnabled());
-                            mpOutputDevice->EnableMapMode(false);
+                            mpOutputDevice->DisableMapMode();
 
                             // check if offset is used
                             const sal_Int32 nOffsetX(
@@ -621,7 +621,10 @@ void VclProcessor2D::RenderFillGraphicPrimitive2D(
                             }
 
                             // restore OutDev
-                            mpOutputDevice->EnableMapMode(bWasEnabled);
+                            if (bWasEnabled)
+                                mpOutputDevice->EnableMapMode();
+                            else
+                                mpOutputDevice->DisableMapMode();
                         }
                     }
                 }
@@ -965,7 +968,7 @@ void VclProcessor2D::RenderMarkerArrayPrimitive2D(
     // to work with switching off MapMode usage completely.
     const Point aOrigin(mpOutputDevice->GetMapMode().GetOrigin());
 
-    mpOutputDevice->EnableMapMode(false);
+    mpOutputDevice->DisableMapMode();
 
     for (auto const& pos : rPositions)
     {
@@ -977,7 +980,10 @@ void VclProcessor2D::RenderMarkerArrayPrimitive2D(
         mpOutputDevice->DrawBitmapEx(aDiscretePoint + aOrigin, rMarker);
     }
 
-    mpOutputDevice->EnableMapMode(bWasEnabled);
+    if (bWasEnabled)
+        mpOutputDevice->EnableMapMode();
+    else
+        mpOutputDevice->DisableMapMode();
 }
 
 // point

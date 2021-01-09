@@ -927,7 +927,7 @@ void SwPostItMgr::LayoutPostIts()
     }
 
     if (bEnableMapMode)
-        mpEditWin->EnableMapMode(false);
+        mpEditWin->DisableMapMode();
 }
 
 bool SwPostItMgr::BorderOverPageBorder(tools::ULong aPage) const
@@ -988,7 +988,7 @@ void SwPostItMgr::PaintTile(OutputDevice& rRenderContext)
 
         rRenderContext.Pop();
         if (bEnableMapMode)
-            mpEditWin->EnableMapMode(false);
+            mpEditWin->DisableMapMode();
     }
 }
 
@@ -1979,7 +1979,7 @@ vcl::Window* SwPostItMgr::IsHitSidebarWindow(const Point& rPointLogic)
         }
 
         if (bEnableMapMode)
-            mpEditWin->EnableMapMode(false);
+            mpEditWin->DisableMapMode();
     }
 
     return pRet;
@@ -2119,7 +2119,7 @@ tools::ULong SwPostItMgr::GetSidebarWidth(bool bPx) const
             mpWrtShell->GetOut()->EnableMapMode();
         tools::Long nRet = mpWrtShell->GetOut()->PixelToLogic(Size(aWidth, 0)).Width();
         if (bEnableMapMode)
-            mpWrtShell->GetOut()->EnableMapMode(false);
+            mpWrtShell->GetOut()->DisableMapMode();
         return nRet;
     }
 }

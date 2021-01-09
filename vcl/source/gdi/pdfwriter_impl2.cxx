@@ -491,7 +491,7 @@ void PDFWriterImpl::playMetafile( const GDIMetaFile& i_rMtf, vcl::PDFExtOutDevDa
                                 aTmpMtf.Play( xVDev.get(), aPoint, aDstSize );
                                 aTmpMtf.WindStart();
 
-                                xVDev->EnableMapMode( false );
+                                xVDev->DisableMapMode();
                                 aPaint = xVDev->GetBitmap( aPoint, aDstSizePixel );
                                 xVDev->EnableMapMode();
 
@@ -504,7 +504,7 @@ void PDFWriterImpl::playMetafile( const GDIMetaFile& i_rMtf, vcl::PDFExtOutDevDa
                                 aTmpMtf.WindStart();
                                 aTmpMtf.Play( xVDev.get(), aPoint, aDstSize );
                                 aTmpMtf.WindStart();
-                                xVDev->EnableMapMode( false );
+                                xVDev->DisableMapMode();
                                 aMask = xVDev->GetBitmap( aPoint, aDstSizePixel );
                                 xVDev->EnableMapMode();
 
@@ -512,7 +512,7 @@ void PDFWriterImpl::playMetafile( const GDIMetaFile& i_rMtf, vcl::PDFExtOutDevDa
                                 xVDev->SetDrawMode( DrawModeFlags::GrayGradient );
                                 xVDev->DrawGradient( tools::Rectangle( aPoint, aDstSize ), rTransparenceGradient );
                                 xVDev->SetDrawMode( DrawModeFlags::Default );
-                                xVDev->EnableMapMode( false );
+                                xVDev->DisableMapMode();
                                 xVDev->DrawMask( aPoint, aDstSizePixel, aMask, COL_WHITE );
                                 aAlpha = xVDev->GetBitmap( aPoint, aDstSizePixel );
 

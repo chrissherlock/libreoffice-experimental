@@ -18,10 +18,16 @@ public:
         : mpOutDev(pOutDev)
         , mbMapMode(pOutDev->IsMapModeEnabled())
     {
-        pOutDev->EnableMapMode(false);
+        pOutDev->DisableMapMode();
     }
 
-    ~SaveAndDisableMapMode() { mpOutDev->EnableMapMode(mbMapMode); }
+    ~SaveAndDisableMapMode()
+    {
+        if (mbMapMode)
+            mpOutDev->EnableMapMode();
+        else
+            mpOutDev->DisableMapMode();
+    }
 
 private:
     OutputDevice* mpOutDev;

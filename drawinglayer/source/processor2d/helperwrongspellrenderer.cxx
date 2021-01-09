@@ -62,11 +62,15 @@ bool renderWrongSpellPrimitive2D(const primitive2d::WrongSpellPrimitive2D& rWron
     const bool bMapModeEnabledState(rOutputDevice.IsMapModeEnabled());
 
     vcl::ScopedAntialiasing a(rOutputDevice, true);
-    rOutputDevice.EnableMapMode(false);
+    rOutputDevice.DisableMapMode();
     rOutputDevice.SetLineColor(Color(aProcessedColor));
     rOutputDevice.SetFillColor();
     rOutputDevice.DrawWaveLine(aOrigin + aVclStart, aOrigin + aVclStop);
-    rOutputDevice.EnableMapMode(bMapModeEnabledState);
+
+    if (bMapModeEnabledState)
+        rOutputDevice.EnableMapMode();
+    else
+        rOutputDevice.DisableMapMode();
 
     // cannot really go wrong
     return true;

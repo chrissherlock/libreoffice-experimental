@@ -637,7 +637,7 @@ void OutputDevice::DrawTransparentAlphaBitmapSlowPath(const Bitmap& rBitmap, con
     const bool bOldMap = IsMapModeEnabled();
 
     mpMetaFile = nullptr; // fdo#55044 reset before GetBitmap!
-    EnableMapMode(false);
+    DisableMapMode();
 
     Bitmap aBmp(GetBitmap(aDstRect.TopLeft(), aDstRect.GetSize()));
 
@@ -715,7 +715,11 @@ void OutputDevice::DrawTransparentAlphaBitmapSlowPath(const Bitmap& rBitmap, con
         mpAlphaVDev = pOldVDev;
     }
 
-    EnableMapMode(bOldMap);
+    if (bOldMap)
+        EnableMapMode();
+    else
+        DisableMapMode();
+
     mpMetaFile = pOldMetaFile;
 }
 

@@ -99,8 +99,8 @@ namespace drawinglayer::primitive2d
 
                 if (aCurrent != aTarget)
                 {
-                    maVirtualDevice->EnableMapMode(false);
-                    maVirtualDeviceMask->EnableMapMode(false);
+                    maVirtualDevice->DisableMapMode();
+                    maVirtualDeviceMask->DisableMapMode();
                     maVirtualDevice->SetOutputSizePixel(aTarget);
                     maVirtualDeviceMask->SetOutputSizePixel(aTarget);
                 }

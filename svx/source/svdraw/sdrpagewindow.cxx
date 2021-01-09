@@ -446,9 +446,13 @@ void SdrPageWindow::InvalidatePageWindow(const basegfx::B2DRange& rRange)
             static_cast<tools::Long>(ceil(aDiscreteRange.getMaxY())));
 
         const bool bWasMapModeEnabled(rWindow.IsMapModeEnabled());
-        rWindow.EnableMapMode(false);
+        rWindow.DisableMapMode();
         GetPageView().GetView().InvalidateOneWin(rWindow, aVCLDiscreteRectangle);
-        rWindow.EnableMapMode(bWasMapModeEnabled);
+
+        if (bWasMapModeEnabled)
+            rWindow.EnableMapMode();
+        else
+            rWindow.DisableMapMode();
     }
     else if (comphelper::LibreOfficeKit::isActive())
     {

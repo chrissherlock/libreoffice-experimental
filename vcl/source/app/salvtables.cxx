@@ -1220,7 +1220,10 @@ void SalInstanceWidget::DoRecursivePaint(vcl::Window* pWindow, const Point& rRen
 
     xOutput.disposeAndClear();
 
-    pWindow->EnableMapMode(bOldMapModeEnabled);
+    if (bOldMapModeEnabled)
+        pWindow->EnableMapMode();
+    else
+        pWindow->DisableMapMode();
     pWindow->Pop();
 
     for (vcl::Window* pChild = pWindow->GetWindow(GetWindowType::FirstChild); pChild;

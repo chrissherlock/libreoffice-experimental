@@ -227,9 +227,9 @@ void LokChartHelper::PaintTile(VirtualDevice& rRenderContext, const tools::Recta
     rRenderContext.Pop();
 
     if (bRenderContextEnableMapMode)
-        rRenderContext.EnableMapMode(false);
+        rRenderContext.DisableMapMode();
     if (bEnableMapMode)
-        pChartWindow->EnableMapMode(false);
+        pChartWindow->DisableMapMode();
 }
 
 void LokChartHelper::PaintAllChartsOnTile(VirtualDevice& rDevice,

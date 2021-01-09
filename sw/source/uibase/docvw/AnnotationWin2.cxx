@@ -507,7 +507,7 @@ void SwAnnotationWin::SetPosAndSize()
             aSize = EditWin().PixelToLogic(aSize);
             aLineEnd = aLineStart;
             aLineEnd.Move(aSize.getWidth(), aSize.getHeight());
-            EditWin().EnableMapMode(false);
+            EditWin().DisableMapMode();
         }
 
         if (mpAnchor)
@@ -628,7 +628,7 @@ void SwAnnotationWin::SetPosAndSize()
             // we need the map mode disabled
             bool bDisableMapMode = comphelper::LibreOfficeKit::isActive() && EditWin().IsMapModeEnabled();
             if (bDisableMapMode)
-                EditWin().EnableMapMode(false);
+                EditWin().DisableMapMode();
 
             if (mrSidebarItem.maLayoutInfo.mPositionFromCommentAnchor)
                 pTmpCursorForAnnotationTextRange->FillRects();
@@ -1366,3 +1366,4 @@ css::uno::Reference< css::accessibility::XAccessible > SwAnnotationWin::CreateAc
 } // eof of namespace sw::sidebarwindows
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
+

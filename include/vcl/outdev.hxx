@@ -300,7 +300,6 @@ private:
     Color                           maTextColor;
     RasterOp                        meRasterOp;
     Wallpaper                       maBackground;
-    MapMode                         maMapMode;
     Point                           maRefPoint;
     AntialiasingFlags               mnAntialiasing;
 
@@ -1433,7 +1432,8 @@ protected:
 
 public:
     bool                        IsMapModeEnabled() const { return maGeometry.mbMap; }
-    void                        EnableMapMode(bool bEnable = true) override;
+    void                        EnableMapMode() override;
+    void                        DisableMapMode() override;
     void                        SetMapMode();
     virtual void                SetMapMode( const MapMode& rNewMapMode );
     void                        SetRelativeMapMode( const MapMode& rNewMapMode );

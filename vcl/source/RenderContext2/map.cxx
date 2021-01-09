@@ -13,7 +13,9 @@ void RenderContext2::InitMapModeObjects() {}
 
 bool RenderContext2::IsMapModeEnabled() const { return maGeometry.mbMap; }
 
-void RenderContext2::EnableMapMode(bool bEnable) { maGeometry.mbMap = bEnable; }
+void RenderContext2::EnableMapMode() { maGeometry.mbMap = true; }
+
+void RenderContext2::DisableMapMode() { maGeometry.mbMap = false; }
 
 static tools::Long ImplPixelToLogic(tools::Long n, tools::Long nDPI, tools::Long nMapNum,
                                     tools::Long nMapDenom)

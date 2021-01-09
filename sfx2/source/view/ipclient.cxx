@@ -433,7 +433,7 @@ awt::Rectangle SAL_CALL SfxInPlaceClient_Impl::getPlacement()
             pEditWin->EnableMapMode();
         aRealObjArea = m_pClient->GetEditWin()->LogicToPixel( aRealObjArea );
         if (!bMapModeEnabled && pEditWin->IsMapModeEnabled())
-            pEditWin->EnableMapMode(false);
+            pEditWin->DisableMapMode();
     }
     else
     {
@@ -463,7 +463,7 @@ awt::Rectangle SAL_CALL SfxInPlaceClient_Impl::getClipRectangle()
             pEditWin->EnableMapMode();
         aRealObjArea = m_pClient->GetEditWin()->LogicToPixel( aRealObjArea );
         if (!bMapModeEnabled && pEditWin->IsMapModeEnabled())
-            pEditWin->EnableMapMode(false);
+            pEditWin->DisableMapMode();
     }
     else
     {
@@ -996,7 +996,7 @@ ErrCode SfxInPlaceClient::DoVerb(sal_Int32 nVerb)
                 if (comphelper::LibreOfficeKit::isActive() && !bMapModeEnabled
                         && pEditWin->IsMapModeEnabled())
                 {
-                    pEditWin->EnableMapMode(false);
+                    pEditWin->DisableMapMode();
                 }
                 SfxViewFrame* pFrame = m_pViewSh->GetViewFrame();
                 pFrame->GetFrame().LockResize_Impl(false);

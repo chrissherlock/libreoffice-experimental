@@ -686,9 +686,13 @@ Point Window::GetVisibleCenter()
 
     // For LOK
     bool bMapModeWasEnabled(IsMapModeEnabled());
-    EnableMapMode(/*true*/);
+    EnableMapMode();
     aPos = PixelToLogic(aPos);
-    EnableMapMode(bMapModeWasEnabled);
+
+    if (bMapModeWasEnabled)
+        EnableMapMode();
+    else
+        DisableMapMode();
 
     return aPos;
 }

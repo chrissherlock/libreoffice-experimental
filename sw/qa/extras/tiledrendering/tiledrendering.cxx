@@ -2427,7 +2427,7 @@ void SwTiledRenderingTest::testSemiTransparent()
                                                     Fraction(1.0), Point(), aPixmap.data());
     pXTextDocument->paintTile(*pDevice, nCanvasWidth, nCanvasHeight, /*nTilePosX=*/0,
                               /*nTilePosY=*/0, /*nTileWidth=*/15360, /*nTileHeight=*/7680);
-    pDevice->EnableMapMode(false);
+    pDevice->DisableMapMode();
     Bitmap aBitmap = pDevice->GetBitmap(Point(0, 0), Size(nTileSize, nTileSize));
     Bitmap::ScopedReadAccess pAccess(aBitmap);
     Color aColor(pAccess->GetPixel(255, 255));
@@ -2456,7 +2456,7 @@ void SwTiledRenderingTest::testHighlightNumbering()
                                                     Fraction(1.0), Point(), aPixmap.data());
     pXTextDocument->paintTile(*pDevice, nCanvasWidth, nCanvasHeight, /*nTilePosX=*/0,
                               /*nTilePosY=*/0, /*nTileWidth=*/15360, /*nTileHeight=*/7680);
-    pDevice->EnableMapMode(false);
+    pDevice->DisableMapMode();
     Bitmap aBitmap = pDevice->GetBitmap(Point(0, 0), Size(nTileSize, nTileSize));
     Bitmap::ScopedReadAccess pAccess(aBitmap);
 
@@ -2486,7 +2486,7 @@ void SwTiledRenderingTest::testPilcrowRedlining()
                                                     Fraction(1.0), Point(), aPixmap.data());
     pXTextDocument->paintTile(*pDevice, nCanvasWidth, nCanvasHeight, /*nTilePosX=*/0,
                               /*nTilePosY=*/0, /*nTileWidth=*/15360, /*nTileHeight=*/7680);
-    pDevice->EnableMapMode(false);
+    pDevice->DisableMapMode();
     Bitmap aBitmap = pDevice->GetBitmap(Point(100, 100), Size(nTileSize, nTileSize));
     Bitmap::ScopedReadAccess pAccess(aBitmap);
 
@@ -2550,7 +2550,7 @@ void SwTiledRenderingTest::testClipText()
                                                     Fraction(1.0), Point(), aPixmap.data());
     pXTextDocument->paintTile(*pDevice, nCanvasWidth, nCanvasHeight, /*nTilePosX=*/0,
                               /*nTilePosY=*/0, /*nTileWidth=*/15360, /*nTileHeight=*/7680);
-    pDevice->EnableMapMode(false);
+    pDevice->DisableMapMode();
     Bitmap aBitmap = pDevice->GetBitmap(Point(0, 0), Size(nTileSize, nTileSize));
     Bitmap::ScopedReadAccess pAccess(aBitmap);
 

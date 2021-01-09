@@ -228,7 +228,7 @@ void ORoadmap::implInit(vcl::RenderContext& rRenderContext)
 // on this with calculating a new bold font.
 // Unfortunately, the OutputDevice does not offer a notify mechanism for a changed font.
 // So settings the font from outside is simply a forbidden scenario at the moment
-    rRenderContext.EnableMapMode(false);
+    rRenderContext.DisableMapMode();
 }
 
 ORoadmap::~ORoadmap()

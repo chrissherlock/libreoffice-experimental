@@ -2453,7 +2453,7 @@ void SdXImpressDocument::initializeForTiledRendering(const css::uno::Sequence<cs
             Size aSize(pWindow->LogicToPixel(pDrawView->GetSdrPageView()->GetPage()->GetSize()));
             // Disable map mode, so that it's possible to send mouse event
             // coordinates in logic units
-            pWindow->EnableMapMode(false);
+            pWindow->DisableMapMode();
 
             // arrange UI elements again with new view size
             pViewShell->GetParentWindow()->SetSizePixel(aSize);

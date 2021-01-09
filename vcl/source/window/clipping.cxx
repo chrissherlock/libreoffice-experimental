@@ -691,9 +691,14 @@ void Window::SaveBackground(VirtualDevice& rSaveDevice, const Point& rPos, const
             aClip.Move( aPixOffset.X() - aPixPos.X(), aPixOffset.Y() - aPixPos.Y() );
 
             // set pixel clip region
-            rSaveDevice.EnableMapMode( false );
+            rSaveDevice.DisableMapMode();
             rSaveDevice.SetClipRegion( aClip );
-            rSaveDevice.EnableMapMode( bMap );
+
+            if (bMap)
+                rSaveDevice.EnableMapMode();
+            else
+                rSaveDevice.DisableMapMode();
+
             rSaveDevice.DrawOutDev( Point(), rSize, rPos, rSize, *this );
             rSaveDevice.SetClipRegion( aOldClip );
         }

@@ -774,7 +774,7 @@ bool OutputDevice::ImplNewFont() const
         {
             Size aOrigSize = maFont.GetFontSize();
             const_cast<vcl::Font&>(maFont).SetFontSize( Size( nNewWidth, aSize.Height() ) );
-            const_cast<OutputDevice*>(this)->EnableMapMode(false);
+            const_cast<OutputDevice*>(this)->DisableMapMode();
             const_cast<OutputDevice*>(this)->SetNewFontFlag(true);
             bRet = ImplNewFont();  // recurse once using stretched width
             const_cast<OutputDevice*>(this)->EnableMapMode();

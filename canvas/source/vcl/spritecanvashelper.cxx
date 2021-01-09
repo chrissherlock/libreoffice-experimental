@@ -86,7 +86,7 @@ namespace vclcanvas
             // clip output to actual update region (otherwise a)
             // wouldn't save much render time, and b) will clutter
             // scrolled sprite content outside this area)
-            rOutDev.EnableMapMode( false );
+            rOutDev.DisableMapMode();
             rOutDev.SetAntialiasing( AntialiasingFlags::Enable );
             rOutDev.SetClipRegion(vcl::Region(rRequestedArea));
 
@@ -259,7 +259,7 @@ namespace vclcanvas
             // but repaint everything (or caller requested that)
 
             maVDev->SetOutputSizePixel( aOutDevSize );
-            maVDev->EnableMapMode( false );
+            maVDev->DisableMapMode();
             maVDev->DrawOutDev( aEmptyPoint, aOutDevSize,
                                 aEmptyPoint, aOutDevSize,
                                 rBackOutDev );
@@ -273,7 +273,7 @@ namespace vclcanvas
                     );
 
             // flush to screen
-            rOutDev.EnableMapMode( false );
+            rOutDev.DisableMapMode();
             rOutDev.SetAntialiasing( AntialiasingFlags::Enable );
             rOutDev.SetClipRegion();
             rOutDev.DrawOutDev( aEmptyPoint, aOutDevSize,
@@ -515,7 +515,7 @@ namespace vclcanvas
         }
 
         // paint background
-        maVDev->EnableMapMode( false );
+        maVDev->DisableMapMode();
         maVDev->SetAntialiasing( AntialiasingFlags::Enable );
         maVDev->SetClipRegion();
         maVDev->DrawOutDev( aEmptyPoint, aOutputSize,
@@ -542,7 +542,7 @@ namespace vclcanvas
         }
 
         // flush to screen
-        rOutDev.EnableMapMode( false );
+        rOutDev.DisableMapMode();
         rOutDev.SetAntialiasing( AntialiasingFlags::Enable );
         rOutDev.DrawOutDev( aOutputPosition, aOutputSize,
                             aEmptyPoint, aOutputSize,

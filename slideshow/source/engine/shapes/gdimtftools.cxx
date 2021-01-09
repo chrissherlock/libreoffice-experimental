@@ -272,12 +272,12 @@ bool getAnimationFromGraphic( VectorOfMtfAnimationFrames&   o_rFrames,
     // update modes)
     ScopedVclPtrInstance< VirtualDevice > pVDev;
     pVDev->SetOutputSizePixel( aAnimSize );
-    pVDev->EnableMapMode( false );
+    pVDev->DisableMapMode();
 
     // setup mask VDev (alpha VDev is currently rather slow)
     ScopedVclPtrInstance<VirtualDevice> pVDevMask(DeviceFormat::BITMASK);
     pVDevMask->SetOutputSizePixel( aAnimSize );
-    pVDevMask->EnableMapMode( false );
+    pVDevMask->DisableMapMode();
 
     o_rLoopCount = aAnimation.GetLoopCount();
 

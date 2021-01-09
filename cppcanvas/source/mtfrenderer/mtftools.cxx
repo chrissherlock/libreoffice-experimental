@@ -226,7 +226,7 @@ namespace cppcanvas::tools
             rVDev.GetFontMetric();
 
             // will restore map mode below
-            const_cast< ::VirtualDevice& >(rVDev).EnableMapMode( false );
+            const_cast< ::VirtualDevice& >(rVDev).DisableMapMode();
 
             const ::FontMetric aMetric = rVDev.GetFontMetric();
 
@@ -240,7 +240,10 @@ namespace cppcanvas::tools
                 rState.textUnderlineStyle,
                 rState.textStrikeoutStyle );
 
-            const_cast< ::VirtualDevice& >(rVDev).EnableMapMode( bOldMode );
+            if (bOldMode)
+                const_cast< ::VirtualDevice& >(rVDev).EnableMapMode();
+            else
+                const_cast< ::VirtualDevice& >(rVDev).DisableMapMode();
 
             return aTextInfo;
         }

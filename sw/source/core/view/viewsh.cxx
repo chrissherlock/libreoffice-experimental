@@ -1429,8 +1429,8 @@ bool SwViewShell::SmoothScroll( tools::Long lXDiff, tools::Long lYDiff, const to
                             // switch off MapModes
                             const bool bMapModeWasEnabledDest(rTargetDevice.IsMapModeEnabled());
                             const bool bMapModeWasEnabledSource(pVout->IsMapModeEnabled());
-                            rTargetDevice.EnableMapMode(false);
-                            pVout->EnableMapMode(false);
+                            rTargetDevice.DisableMapMode();
+                            pVout->DisableMapMode();
 
                             rTargetDevice.DrawOutDev(
                                 aTargetPixel.TopLeft(), aTargetPixel.GetSize(), // dest
@@ -1919,7 +1919,7 @@ void SwViewShell::PaintTile(VirtualDevice &rDevice, int contextWidth, int contex
         aOption.SetZoom(fScale * 100);
         ApplyViewOptions(aOption);
         // Make sure the map mode (disabled in SwXTextDocument::initializeForTiledRendering()) is still disabled.
-        GetWin()->EnableMapMode(false);
+        GetWin()->DisableMapMode();
     }
 
     tools::Rectangle aOutRect(Point(tilePosX, tilePosY),
@@ -1968,7 +1968,7 @@ void SwViewShell::PaintTile(VirtualDevice &rDevice, int contextWidth, int contex
             pIPClient->VisAreaChanged();
         }
         // Make sure the map mode (disabled in SwXTextDocument::initializeForTiledRendering()) is still disabled.
-        GetWin()->EnableMapMode(false);
+        GetWin()->DisableMapMode();
     }
 
     mpOut = pSaveOut;

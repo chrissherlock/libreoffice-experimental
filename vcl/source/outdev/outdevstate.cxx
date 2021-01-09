@@ -202,7 +202,10 @@ void OutputDevice::Pop()
         else
             SetMapMode();
 
-        EnableMapMode(rState.mbMapActive);
+        if (rState.mbMapActive)
+            EnableMapMode();
+        else
+            DisableMapMode();
     }
 
     if ( rState.mnFlags & PushFlags::CLIPREGION )

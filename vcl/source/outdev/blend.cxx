@@ -118,7 +118,7 @@ Bitmap OutputDevice::BlendBitmapWithAlpha(Bitmap& aBmp, BitmapReadAccess const* 
                 "BlendBitmapWithAlpha(): call me only with valid alpha VirtualDevice!");
 
     bool bOldMapMode(mpAlphaVDev->IsMapModeEnabled());
-    mpAlphaVDev->EnableMapMode(false);
+    mpAlphaVDev->DisableMapMode();
 
     Bitmap aAlphaBitmap(mpAlphaVDev->GetBitmap(aDstRect.TopLeft(), aDstRect.GetSize()));
     BitmapScopedWriteAccess pAlphaW(aAlphaBitmap);
@@ -199,7 +199,11 @@ Bitmap OutputDevice::BlendBitmapWithAlpha(Bitmap& aBmp, BitmapReadAccess const* 
 
     pAlphaW.reset();
     mpAlphaVDev->DrawBitmap(aDstRect.TopLeft(), aAlphaBitmap);
-    mpAlphaVDev->EnableMapMode(bOldMapMode);
+
+    if (bOldMapMode)
+        mpAlphaVDev->EnableMapMode();
+    else
+        mpAlphaVDev->DisableMapMode();
 
     return res;
 }

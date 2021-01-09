@@ -62,7 +62,7 @@ void ScDDComboBoxButton::Draw( const Point& rAt,
     tools::Rectangle   aBtnRect( rAt, rSize );
 
     if (!comphelper::LibreOfficeKit::isActive())
-        pOut->EnableMapMode(false);
+        pOut->DisableMapMode();
 
     DecorationView aDecoView( pOut);
 
@@ -82,7 +82,11 @@ void ScDDComboBoxButton::Draw( const Point& rAt,
     ImpDrawArrow( aInnerRect );
 
     // restore old state
-    pOut->EnableMapMode( bOldEnable );
+    if (bOldEnable)
+        pOut->EnableMapMode();
+    else
+        pOut->DisableMapMode();
+
     if (bHadLine)
         pOut->SetLineColor(aOldLine);
     else

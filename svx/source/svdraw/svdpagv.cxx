@@ -547,7 +547,11 @@ void SdrPageView::DrawPageViewGrid(OutputDevice& rOut, const tools::Rectangle& r
         }
     }
 
-    rOut.EnableMapMode(bMap0);
+    if (bMap0)
+        rOut.EnableMapMode();
+    else
+        rOut.DisableMapMode();
+
     rOut.SetLineColor(aOriginalLineColor);
 }
 

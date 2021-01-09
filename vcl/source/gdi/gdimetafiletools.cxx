@@ -167,7 +167,7 @@ namespace
         ScopedVclPtrInstance< VirtualDevice > aVDev;
 
         aVDev->SetOutputSizePixel(aSizePixel);
-        aVDev->EnableMapMode(false);
+        aVDev->DisableMapMode();
         aVDev->SetFillColor( COL_WHITE);
         aVDev->SetLineColor();
 

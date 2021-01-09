@@ -170,7 +170,7 @@ Image PreviewRenderer::RenderSubstitution (
         const ::tools::Rectangle aPaintRectangle (
             Point(0,0),
             mpPreviewDevice->GetSizeInPixels());
-        mpPreviewDevice->EnableMapMode(false);
+        mpPreviewDevice->DisableMapMode();
         mpPreviewDevice->SetLineColor();
         svtools::ColorConfig aColorConfig;
         mpPreviewDevice->SetFillColor(aColorConfig.GetColorValue(svtools::DOCCOLOR).nColor);
@@ -339,7 +339,7 @@ void PreviewRenderer::PaintFrame()
         ::tools::Rectangle aPaintRectangle (
             Point(0,0),
             mpPreviewDevice->GetSizeInPixels());
-        mpPreviewDevice->EnableMapMode(false);
+        mpPreviewDevice->DisableMapMode();
         mpPreviewDevice->SetLineColor(maFrameColor);
         mpPreviewDevice->SetFillColor();
         mpPreviewDevice->DrawRect(aPaintRectangle);

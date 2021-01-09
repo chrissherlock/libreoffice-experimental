@@ -94,7 +94,7 @@ namespace drawinglayer
                 pContentProcessor->process(aSequence);
 
                 // get content
-                pContent->EnableMapMode(false);
+                pContent->DisableMapMode();
                 const Bitmap aContent(pContent->GetBitmap(aEmptyPoint, aSizePixel));
 
 #ifdef DBG_UTIL
@@ -131,7 +131,7 @@ namespace drawinglayer
                 pContentProcessor.reset();
 
                 // get alpha channel from vdev
-                pContent->EnableMapMode(false);
+                pContent->DisableMapMode();
                 const Bitmap aAlpha(pContent->GetBitmap(aEmptyPoint, aSizePixel));
 #ifdef DBG_UTIL
                 if(bDoSaveForVisualControl)

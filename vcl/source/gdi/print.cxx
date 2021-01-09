@@ -245,7 +245,7 @@ void Printer::ImplPrintTransparent( const Bitmap& rBmp, const Bitmap& rMask,
     std::unique_ptr<tools::Long[]> pMapY(new tools::Long[ nSrcHeight + 1 ]);
     const bool bOldMap = IsMapModeEnabled();
 
-    EnableMapMode(false);
+    DisableMapMode();
 
     // create forward mapping tables
     for( nX = 0; nX <= nSrcWidth; nX++ )
@@ -270,7 +270,10 @@ void Printer::ImplPrintTransparent( const Bitmap& rBmp, const Bitmap& rMask,
         DrawBitmap(aMapPt, aMapSz, Point(), aBandBmp.GetSizePixel(), aBandBmp);
     }
 
-    EnableMapMode(bOldMap);
+    if (bOldMap)
+        EnableMapMode();
+    else
+        DisableMapMode();
 
 }
 
@@ -752,7 +755,7 @@ void Printer::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
     const bool      bOldMap = IsMapModeEnabled();
 
     mpMetaFile = nullptr;
-    EnableMapMode(false);
+    DisableMapMode();
     Push( PushFlags::FILLCOLOR | PushFlags::LINECOLOR );
     SetLineColor( rMaskColor );
     SetFillColor( rMaskColor );
@@ -782,7 +785,12 @@ void Printer::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
     }
 
     Pop();
-    EnableMapMode(bOldMap);
+
+    if (bOldMap)
+        EnableMapMode();
+    else
+        DisableMapMode();
+
     mpMetaFile = pOldMetaFile;
 }
 

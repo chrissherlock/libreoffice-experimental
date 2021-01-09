@@ -15,6 +15,7 @@
 
 #include <vcl/dllapi.h>
 #include <vcl/font.hxx>
+#include <vcl/mapmod.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/ComplexTextLayoutFlags.hxx>
 #include <vcl/DrawModeFlags.hxx>
@@ -85,7 +86,8 @@ public:
     virtual void SetTextAlign(TextAlign eAlign);
 
     bool IsMapModeEnabled() const;
-    virtual void EnableMapMode(bool bEnable = true);
+    virtual void EnableMapMode();
+    virtual void DisableMapMode();
 
     Size GetSizeInPixels() const;
     tools::Long GetWidthInPixels() const;
@@ -214,6 +216,7 @@ protected:
     LanguageType meTextLanguage;
     Geometry maGeometry;
     MappingMetrics maMappingMetric;
+    MapMode maMapMode;
 
 private:
     Color maTextColor;

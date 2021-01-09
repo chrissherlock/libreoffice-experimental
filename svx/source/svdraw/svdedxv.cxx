@@ -778,9 +778,13 @@ void SdrObjEditView::ImpPaintOutlinerView(OutlinerView& rOutlView, const tools::
                     0.0));
             const drawinglayer::primitive2d::Primitive2DContainer aSequence{ xReference };
 
-            rTargetDevice.EnableMapMode(false);
+            rTargetDevice.DisableMapMode();
             xProcessor->process(aSequence);
-            rTargetDevice.EnableMapMode(bMapModeEnabled);
+
+            if (bMapModeEnabled)
+                rTargetDevice.EnableMapMode();
+            else
+                rTargetDevice.DisableMapMode();
         }
     }
 
@@ -835,9 +839,13 @@ void SdrObjEditView::ImpInvalidateOutlinerView(OutlinerView const& rOutlView) co
     aOuterPix.AdjustBottom(nPixSiz);
 
     bool bMapModeEnabled(pWin->IsMapModeEnabled());
-    pWin->EnableMapMode(false);
+    pWin->DisableMapMode();
     pWin->Invalidate(aOuterPix);
-    pWin->EnableMapMode(bMapModeEnabled);
+
+    if (bMapModeEnabled)
+        pWin->EnableMapMode();
+    else
+        pWin->DisableMapMode();
 }
 
 OutlinerView* SdrObjEditView::ImpMakeOutlinerView(vcl::Window* pWin, OutlinerView* pGivenView,

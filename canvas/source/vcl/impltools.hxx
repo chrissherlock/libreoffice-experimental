@@ -137,7 +137,11 @@ namespace vclcanvas
             {
                 if( mpOutDev )
                 {
-                    mpOutDev->EnableMapMode( mbMappingWasEnabled );
+                    if (mbMappingWasEnabled)
+                        mpOutDev->EnableMapMode();
+                    else
+                        mpOutDev->DisableMapMode();
+
                     mpOutDev->SetAntialiasing( mnAntiAliasing );
 
                     mpOutDev->Pop();
@@ -150,7 +154,7 @@ namespace vclcanvas
                 if( mpOutDev )
                 {
                     mpOutDev->Push();
-                    mpOutDev->EnableMapMode(false);
+                    mpOutDev->DisableMapMode();
                     mpOutDev->SetAntialiasing( AntialiasingFlags::Enable );
                 }
             }
