@@ -17,12 +17,19 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <tools/gen.hxx>
 #include <tools/long.hxx>
+#include <tools/poly.hxx>
+
+#include <vcl/lineinfo.hxx>
+#include <vcl/region.hxx>
+#include <vcl/MappingMetrics.hxx>
 
 struct Geometry
 {
     Geometry()
-        : mnWidthPx(0)
+        : mbMap(false)
+        , mnWidthPx(0)
         , mnHeightPx(0)
         , mnOffsetXpx(0)
         , mnOffsetYpx(0)
@@ -35,6 +42,34 @@ struct Geometry
         , mnDPIScalePercentage(100)
     {
     }
+
+    tools::Long ImplLogicXToDevicePixel(tools::Long nX, MappingMetrics aMappingMetric) const;
+    tools::Long ImplLogicYToDevicePixel(tools::Long nY, MappingMetrics aMappingMetric) const;
+    tools::Long ImplLogicWidthToDevicePixel(tools::Long nWidth,
+                                            MappingMetrics aMappingMetric) const;
+    tools::Long ImplLogicHeightToDevicePixel(tools::Long nHeight,
+                                             MappingMetrics aMappingMetric) const;
+    float ImplFloatLogicHeightToDevicePixel(float fLogicHeight,
+                                            MappingMetrics aMappingMetric) const;
+    Point ImplLogicToDevicePixel(const Point& rLogicPt, MappingMetrics aMappingMetrics) const;
+    Size ImplLogicToDevicePixel(const Size& rLogicSize, MappingMetrics aMappingMetrics) const;
+    tools::Rectangle ImplLogicToDevicePixel(const tools::Rectangle& rLogicRect,
+                                            MappingMetrics aMappingMetrics) const;
+    tools::Polygon ImplLogicToDevicePixel(const tools::Polygon& rLogicPoly,
+                                          MappingMetrics aMappingMetrics) const;
+    tools::PolyPolygon ImplLogicToDevicePixel(const tools::PolyPolygon& rLogicPolyPoly,
+                                              MappingMetrics aMappingMetrics) const;
+    LineInfo ImplLogicToDevicePixel(LineInfo const& rLineInfo,
+                                    MappingMetrics aMappingMetrics) const;
+    tools::Long ImplDevicePixelToLogicWidth(tools::Long nWidth,
+                                            MappingMetrics aMappingMetric) const;
+    tools::Long ImplDevicePixelToLogicHeight(tools::Long nHeight,
+                                             MappingMetrics aMappingMetrics) const;
+    tools::Rectangle ImplDevicePixelToLogic(const tools::Rectangle& rPixelRect,
+                                            MappingMetrics aMappingMetrics) const;
+    vcl::Region ImplPixelToDevicePixel(const vcl::Region& rRegion) const;
+
+    bool mbMap;
 
     tools::Long mnWidthPx;
     tools::Long mnHeightPx;

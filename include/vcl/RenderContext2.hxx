@@ -220,7 +220,6 @@ private:
     DrawModeFlags mnDrawMode;
     RasterOp meRasterOp;
 
-    mutable bool mbMap : 1;
     mutable bool mbOpaqueLineColor : 1;
     mutable bool mbOpaqueFillColor : 1;
     mutable bool mbInitLineColor : 1;
