@@ -624,7 +624,7 @@ bool OutputDevice::DrawEPS( const Point& rPoint, const Size& rSize,
     if( mbOutputClipped )
         return bDrawn;
 
-    tools::Rectangle aRect( ImplLogicToDevicePixel( tools::Rectangle( rPoint, rSize ) ) );
+    tools::Rectangle aRect( maGeometry.ImplLogicToDevicePixel( tools::Rectangle( rPoint, rSize ), maMappingMetric ) );
 
     if( !aRect.IsEmpty() )
     {

@@ -369,27 +369,6 @@ Size OutputDevice::ImplLogicToDevicePixel( const Size& rLogicSize ) const
                                    GetYMapNumerator(), GetYMapDenominator() ) );
 }
 
-tools::Rectangle OutputDevice::ImplLogicToDevicePixel( const tools::Rectangle& rLogicRect ) const
-{
-    if ( rLogicRect.IsEmpty() )
-        return rLogicRect;
-
-    if (!IsMapModeEnabled())
-    {
-        return tools::Rectangle( rLogicRect.Left()+GetXOffsetInPixels(), rLogicRect.Top()+GetYOffsetInPixels(),
-                          rLogicRect.Right()+GetXOffsetInPixels(), rLogicRect.Bottom()+GetYOffsetInPixels() );
-    }
-
-    return tools::Rectangle( ImplLogicToPixel( rLogicRect.Left()+GetXMapOffset(), GetDPIX(),
-                                        GetXMapNumerator(), GetXMapDenominator() )+GetXOffsetInPixels()+GetXOffsetFromOriginInPixels(),
-                      ImplLogicToPixel( rLogicRect.Top()+GetYMapOffset(), GetDPIY(),
-                                        GetYMapNumerator(), GetYMapDenominator() )+GetYOffsetInPixels()+GetYOffsetFromOriginInPixels(),
-                      ImplLogicToPixel( rLogicRect.Right()+GetXMapOffset(), GetDPIX(),
-                                        GetXMapNumerator(), GetXMapDenominator() )+GetXOffsetInPixels()+GetXOffsetFromOriginInPixels(),
-                      ImplLogicToPixel( rLogicRect.Bottom()+GetYMapOffset(), GetDPIY(),
-                                        GetYMapNumerator(), GetYMapDenominator() )+GetYOffsetInPixels()+GetYOffsetFromOriginInPixels() );
-}
-
 void OutputDevice::EnableMapMode( bool bEnable )
 {
     RenderContext2::EnableMapMode(bEnable);

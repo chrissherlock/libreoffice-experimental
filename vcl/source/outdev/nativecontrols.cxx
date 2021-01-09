@@ -171,7 +171,7 @@ static std::shared_ptr< ImplControlValue > TransformControlValue( const ImplCont
             const SliderValue* pSlVal = static_cast<const SliderValue*>(&rVal);
             SliderValue* pNew = new SliderValue( *pSlVal );
             aResult.reset( pNew );
-            pNew->maThumbRect = rDev.ImplLogicToDevicePixel( pSlVal->maThumbRect );
+            pNew->maThumbRect = rDev.GetGeometry().ImplLogicToDevicePixel( pSlVal->maThumbRect, rDev.GetMappingMetrics() );
         }
         break;
     case ControlType::Scrollbar:
@@ -179,9 +179,9 @@ static std::shared_ptr< ImplControlValue > TransformControlValue( const ImplCont
             const ScrollbarValue* pScVal = static_cast<const ScrollbarValue*>(&rVal);
             ScrollbarValue* pNew = new ScrollbarValue( *pScVal );
             aResult.reset( pNew );
-            pNew->maThumbRect = rDev.ImplLogicToDevicePixel( pScVal->maThumbRect );
-            pNew->maButton1Rect = rDev.ImplLogicToDevicePixel( pScVal->maButton1Rect );
-            pNew->maButton2Rect = rDev.ImplLogicToDevicePixel( pScVal->maButton2Rect );
+            pNew->maThumbRect = rDev.GetGeometry().ImplLogicToDevicePixel( pScVal->maThumbRect, rDev.GetMappingMetrics() );
+            pNew->maButton1Rect = rDev.GetGeometry().ImplLogicToDevicePixel( pScVal->maButton1Rect, rDev.GetMappingMetrics() );
+            pNew->maButton2Rect = rDev.GetGeometry().ImplLogicToDevicePixel( pScVal->maButton2Rect, rDev.GetMappingMetrics() );
         }
         break;
     case ControlType::SpinButtons:
@@ -189,8 +189,8 @@ static std::shared_ptr< ImplControlValue > TransformControlValue( const ImplCont
             const SpinbuttonValue* pSpVal = static_cast<const SpinbuttonValue*>(&rVal);
             SpinbuttonValue* pNew = new SpinbuttonValue( *pSpVal );
             aResult.reset( pNew );
-            pNew->maUpperRect = rDev.ImplLogicToDevicePixel( pSpVal->maUpperRect );
-            pNew->maLowerRect = rDev.ImplLogicToDevicePixel( pSpVal->maLowerRect );
+            pNew->maUpperRect = rDev.GetGeometry().ImplLogicToDevicePixel( pSpVal->maUpperRect, rDev.GetMappingMetrics() );
+            pNew->maLowerRect = rDev.GetGeometry().ImplLogicToDevicePixel( pSpVal->maLowerRect, rDev.GetMappingMetrics() );
         }
         break;
     case ControlType::Toolbar:
@@ -198,15 +198,15 @@ static std::shared_ptr< ImplControlValue > TransformControlValue( const ImplCont
             const ToolbarValue* pTVal = static_cast<const ToolbarValue*>(&rVal);
             ToolbarValue* pNew = new ToolbarValue( *pTVal );
             aResult.reset( pNew );
-            pNew->maGripRect = rDev.ImplLogicToDevicePixel( pTVal->maGripRect );
+            pNew->maGripRect = rDev.GetGeometry().ImplLogicToDevicePixel( pTVal->maGripRect, rDev.GetMappingMetrics() );
         }
         break;
     case ControlType::TabPane:
         {
             const TabPaneValue* pTIVal = static_cast<const TabPaneValue*>(&rVal);
             TabPaneValue* pNew = new TabPaneValue(*pTIVal);
-            pNew->m_aTabHeaderRect = rDev.ImplLogicToDevicePixel(pTIVal->m_aTabHeaderRect);
-            pNew->m_aSelectedTabRect = rDev.ImplLogicToDevicePixel(pTIVal->m_aSelectedTabRect);
+            pNew->m_aTabHeaderRect = rDev.GetGeometry().ImplLogicToDevicePixel(pTIVal->m_aTabHeaderRect, rDev.GetMappingMetrics());
+            pNew->m_aSelectedTabRect = rDev.GetGeometry().ImplLogicToDevicePixel(pTIVal->m_aSelectedTabRect, rDev.GetMappingMetrics());
             aResult.reset(pNew);
         }
         break;
@@ -214,7 +214,7 @@ static std::shared_ptr< ImplControlValue > TransformControlValue( const ImplCont
         {
             const TabitemValue* pTIVal = static_cast<const TabitemValue*>(&rVal);
             TabitemValue* pNew = new TabitemValue( *pTIVal );
-            pNew->maContentRect = rDev.ImplLogicToDevicePixel(pTIVal->maContentRect);
+            pNew->maContentRect = rDev.GetGeometry().ImplLogicToDevicePixel(pTIVal->maContentRect, rDev.GetMappingMetrics());
             aResult.reset( pNew );
         }
         break;
@@ -239,7 +239,7 @@ static std::shared_ptr< ImplControlValue > TransformControlValue( const ImplCont
         {
             const MenupopupValue* pMVal = static_cast<const MenupopupValue*>(&rVal);
             MenupopupValue* pNew = new MenupopupValue( *pMVal );
-            pNew->maItemRect = rDev.ImplLogicToDevicePixel( pMVal->maItemRect );
+            pNew->maItemRect = rDev.GetGeometry().ImplLogicToDevicePixel( pMVal->maItemRect, rDev.GetMappingMetrics() );
             aResult.reset( pNew );
         }
         break;
@@ -279,7 +279,7 @@ bool OutputDevice::DrawNativeControl( ControlType nType,
     // Convert the coordinates from relative to Window-absolute, so we draw
     // in the correct place in platform code
     std::shared_ptr< ImplControlValue > aScreenCtrlValue( TransformControlValue( aValue, *this ) );
-    tools::Rectangle screenRegion( ImplLogicToDevicePixel( rControlRegion ) );
+    tools::Rectangle screenRegion( maGeometry.ImplLogicToDevicePixel( rControlRegion, maMappingMetric ) );
 
     bool bRet = mpGraphics->DrawNativeControl(nType, nPart, screenRegion, nState, *aScreenCtrlValue, aCaption, *this, rBackgroundColor);
 
@@ -303,7 +303,7 @@ bool OutputDevice::GetNativeControlRegion(  ControlType nType,
     // Convert the coordinates from relative to Window-absolute, so we draw
     // in the correct place in platform code
     std::shared_ptr< ImplControlValue > aScreenCtrlValue( TransformControlValue( aValue, *this ) );
-    tools::Rectangle screenRegion( ImplLogicToDevicePixel( rControlRegion ) );
+    tools::Rectangle screenRegion( maGeometry.ImplLogicToDevicePixel( rControlRegion, maMappingMetric ) );
 
     bool bRet = mpGraphics->GetNativeControlRegion(nType, nPart, screenRegion, nState, *aScreenCtrlValue,
                                 rNativeBoundingRegion,

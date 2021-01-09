@@ -59,7 +59,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect )
     if ( !IsDeviceOutputNecessary() || (!IsOpaqueLineColor() && !IsOpaqueFillColor()) || ImplIsRecordLayout() )
         return;
 
-    tools::Rectangle aRect( ImplLogicToDevicePixel( rRect ) );
+    tools::Rectangle aRect( maGeometry.ImplLogicToDevicePixel( rRect, maMappingMetric ) );
 
     if ( aRect.IsEmpty() )
         return;
@@ -98,7 +98,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
     if ( !IsDeviceOutputNecessary() || (!IsOpaqueLineColor() && !IsOpaqueFillColor()) || ImplIsRecordLayout() )
         return;
 
-    const tools::Rectangle aRect( ImplLogicToDevicePixel( rRect ) );
+    const tools::Rectangle aRect( maGeometry.ImplLogicToDevicePixel( rRect, maMappingMetric ) );
 
     if ( aRect.IsEmpty() )
         return;
@@ -151,7 +151,7 @@ void OutputDevice::Invert( const tools::Rectangle& rRect, InvertFlags nFlags )
     if ( !IsDeviceOutputNecessary() )
         return;
 
-    tools::Rectangle aRect( ImplLogicToDevicePixel( rRect ) );
+    tools::Rectangle aRect( maGeometry.ImplLogicToDevicePixel( rRect, maMappingMetric ) );
 
     if ( aRect.IsEmpty() )
         return;

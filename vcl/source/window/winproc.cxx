@@ -1244,7 +1244,9 @@ static void ImplHandleExtTextInputPos( vcl::Window* pWindow,
         ImplCallCommand( pChild, CommandEventId::CursorPos );
         const tools::Rectangle* pRect = pChild->GetCursorRect();
         if ( pRect )
-            rRect = pChildOutDev->ImplLogicToDevicePixel( *pRect );
+        {
+            rRect = pChildOutDev->GetGeometry().ImplLogicToDevicePixel( *pRect, pChildOutDev->GetMappingMetrics() );
+        }
         else
         {
             vcl::Cursor* pCursor = pChild->GetCursor();
@@ -2342,7 +2344,7 @@ static void ImplHandleSalQueryCharPosition( vcl::Window *pWindow,
 
     const OutputDevice *pChildOutDev = pChild->GetOutDev();
     const tools::Rectangle& aRect = pWinData->mpCompositionCharRects[ pEvt->mnCharPos ];
-    tools::Rectangle aDeviceRect = pChildOutDev->ImplLogicToDevicePixel( aRect );
+    tools::Rectangle aDeviceRect = pChildOutDev->GetGeometry().ImplLogicToDevicePixel( aRect, pChildOutDev->GetMappingMetrics() );
     Point aAbsScreenPos = pChild->OutputToAbsoluteScreenPixel( pChild->ScreenToOutputPixel(aDeviceRect.TopLeft()) );
     pEvt->mnCursorBoundX = aAbsScreenPos.X();
     pEvt->mnCursorBoundY = aAbsScreenPos.Y();

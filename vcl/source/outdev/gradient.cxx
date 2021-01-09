@@ -84,7 +84,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
             const tools::Rectangle aBoundRect( rPolyPoly.GetBoundRect() );
 
             // convert rectangle to pixels
-            tools::Rectangle aRect( ImplLogicToDevicePixel( aBoundRect ) );
+            tools::Rectangle aRect( maGeometry.ImplLogicToDevicePixel( aBoundRect, maMappingMetric ) );
             aRect.Justify();
 
             // do nothing if the rectangle is empty
@@ -212,7 +212,7 @@ void OutputDevice::DrawGradientToMetafile ( const tools::PolyPolygon& rPolyPoly,
         return;
 
     // convert rectangle to pixels
-    tools::Rectangle aRect( ImplLogicToDevicePixel( aBoundRect ) );
+    tools::Rectangle aRect( maGeometry.ImplLogicToDevicePixel( aBoundRect, maMappingMetric ) );
     aRect.Justify();
 
     // do nothing if the rectangle is empty

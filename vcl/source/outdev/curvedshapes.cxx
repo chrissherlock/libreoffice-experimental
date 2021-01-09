@@ -36,7 +36,7 @@ void OutputDevice::DrawEllipse( const tools::Rectangle& rRect )
     if  ( !IsDeviceOutputNecessary() || (!IsOpaqueLineColor() && !IsOpaqueFillColor()) || ImplIsRecordLayout() )
         return;
 
-    tools::Rectangle aRect( ImplLogicToDevicePixel( rRect ) );
+    tools::Rectangle aRect( maGeometry.ImplLogicToDevicePixel( rRect, maMappingMetric ) );
     if ( aRect.IsEmpty() )
         return;
 
@@ -81,7 +81,7 @@ void OutputDevice::DrawArc( const tools::Rectangle& rRect,
     if ( !IsDeviceOutputNecessary() || !IsOpaqueLineColor() || ImplIsRecordLayout() )
         return;
 
-    tools::Rectangle aRect( ImplLogicToDevicePixel( rRect ) );
+    tools::Rectangle aRect( maGeometry.ImplLogicToDevicePixel( rRect, maMappingMetric ) );
     if ( aRect.IsEmpty() )
         return;
 
@@ -122,7 +122,7 @@ void OutputDevice::DrawPie( const tools::Rectangle& rRect,
     if ( !IsDeviceOutputNecessary() || (!IsOpaqueLineColor() && !IsOpaqueFillColor()) || ImplIsRecordLayout() )
         return;
 
-    tools::Rectangle aRect( ImplLogicToDevicePixel( rRect ) );
+    tools::Rectangle aRect( maGeometry.ImplLogicToDevicePixel( rRect, maMappingMetric ) );
     if ( aRect.IsEmpty() )
         return;
 
@@ -170,7 +170,7 @@ void OutputDevice::DrawChord( const tools::Rectangle& rRect,
     if ( !IsDeviceOutputNecessary() || (!IsOpaqueLineColor() && !IsOpaqueFillColor()) || ImplIsRecordLayout() )
         return;
 
-    tools::Rectangle aRect( ImplLogicToDevicePixel( rRect ) );
+    tools::Rectangle aRect( maGeometry.ImplLogicToDevicePixel( rRect, maMappingMetric ) );
     if ( aRect.IsEmpty() )
         return;
 
