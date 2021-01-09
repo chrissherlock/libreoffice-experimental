@@ -132,6 +132,19 @@ public:
     sal_uInt32 GetYOffsetFromOriginInLogicalUnits() const;
     void SetYOffsetFromOriginInLogicalUnits(tools::Long nOffsetFromOriginYInLogicalUnits);
 
+    tools::Long GetXMapOffset() const;
+    void SetXMapOffset(tools::Long);
+    tools::Long GetYMapOffset() const;
+    void SetYMapOffset(tools::Long);
+    tools::Long GetXMapNumerator() const;
+    void SetXMapNumerator(tools::Long nNumerator);
+    tools::Long GetYMapNumerator() const;
+    void SetYMapNumerator(tools::Long nNumerator);
+    tools::Long GetXMapDenominator() const;
+    void SetXMapDenominator(tools::Long nDenominator);
+    tools::Long GetYMapDenominator() const;
+    void SetYMapDenominator(tools::Long nDenominator);
+
     sal_Int32 GetDPIX() const;
     sal_Int32 GetDPIY() const;
     void SetDPIX(sal_Int32 nDPIX);
@@ -196,7 +209,6 @@ protected:
     vcl::Font maFont;
     ComplexTextLayoutFlags mnTextLayoutMode;
     LanguageType meTextLanguage;
-
     MappingMetrics maMappingMetric;
 
 private:

@@ -2258,7 +2258,7 @@ bool OutputDevice::GetTextBoundRect( tools::Rectangle& rRect,
             aPixelRect += aRotatedOfs;
             rRect = PixelToLogic( aPixelRect );
             if (IsMapModeEnabled())
-                rRect += Point( maMappingMetric.mnMapOfsX, maMappingMetric.mnMapOfsY );
+                rRect += Point( const_cast<OutputDevice*>(this)->GetXMapOffset(), const_cast<OutputDevice*>(this)->GetYMapOffset() );
         }
     }
 

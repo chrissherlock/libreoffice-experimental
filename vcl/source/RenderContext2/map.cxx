@@ -98,4 +98,34 @@ void RenderContext2::SetYOffsetFromOriginInLogicalUnits(
     maGeometry.mnOffsetFromOriginYInLogicalUnits = nOffsetFromOriginYInLogicalUnits;
 }
 
+tools::Long RenderContext2::GetXMapOffset() const { return maMappingMetric.mnMapOfsX; }
+void RenderContext2::SetXMapOffset(tools::Long nXOffset) { maMappingMetric.mnMapOfsX = nXOffset; }
+
+tools::Long RenderContext2::GetYMapOffset() const { return maMappingMetric.mnMapOfsY; }
+void RenderContext2::SetYMapOffset(tools::Long nYOffset) { maMappingMetric.mnMapOfsY = nYOffset; }
+
+tools::Long RenderContext2::GetXMapNumerator() const { return maMappingMetric.mnMapScNumX; }
+void RenderContext2::SetXMapNumerator(tools::Long nNumerator)
+{
+    maMappingMetric.mnMapScNumX = nNumerator;
+}
+
+tools::Long RenderContext2::GetYMapNumerator() const { return maMappingMetric.mnMapScNumY; }
+void RenderContext2::SetYMapNumerator(tools::Long nNumerator)
+{
+    maMappingMetric.mnMapScNumY = nNumerator;
+}
+
+tools::Long RenderContext2::GetXMapDenominator() const { return maMappingMetric.mnMapScDenomX; }
+void RenderContext2::SetXMapDenominator(tools::Long nDenomerator)
+{
+    maMappingMetric.mnMapScDenomX = nDenomerator;
+}
+
+tools::Long RenderContext2::GetYMapDenominator() const { return maMappingMetric.mnMapScDenomY; }
+void RenderContext2::SetYMapDenominator(tools::Long nDenomerator)
+{
+    maMappingMetric.mnMapScDenomY = nDenomerator;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
