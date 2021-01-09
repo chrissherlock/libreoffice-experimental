@@ -355,14 +355,6 @@ tools::Long OutputDevice::ImplDevicePixelToLogicWidth( tools::Long nWidth ) cons
     return ImplPixelToLogic(nWidth, GetDPIX(), GetXMapNumerator(), GetXMapDenominator());
 }
 
-tools::Long OutputDevice::ImplDevicePixelToLogicHeight( tools::Long nHeight ) const
-{
-    if (!IsMapModeEnabled())
-        return nHeight;
-
-    return ImplPixelToLogic(nHeight, GetDPIY(), GetYMapNumerator(), GetYMapDenominator());
-}
-
 Point OutputDevice::ImplLogicToDevicePixel( const Point& rLogicPt ) const
 {
     if (!IsMapModeEnabled())

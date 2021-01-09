@@ -249,13 +249,13 @@ FontMetric OutputDevice::GetFontMetric() const
     // set remaining metric fields
     aMetric.SetFullstopCenteredFlag( xFontMetric->IsFullstopCentered() );
     aMetric.SetBulletOffset( xFontMetric->GetBulletOffset() );
-    aMetric.SetAscent( ImplDevicePixelToLogicHeight( xFontMetric->GetAscent() + mnEmphasisAscent ) );
-    aMetric.SetDescent( ImplDevicePixelToLogicHeight( xFontMetric->GetDescent() + mnEmphasisDescent ) );
-    aMetric.SetInternalLeading( ImplDevicePixelToLogicHeight( xFontMetric->GetInternalLeading() + mnEmphasisAscent ) );
+    aMetric.SetAscent( maGeometry.ImplDevicePixelToLogicHeight( xFontMetric->GetAscent() + mnEmphasisAscent, maMappingMetric ) );
+    aMetric.SetDescent( maGeometry.ImplDevicePixelToLogicHeight( xFontMetric->GetDescent() + mnEmphasisDescent, maMappingMetric ) );
+    aMetric.SetInternalLeading( maGeometry.ImplDevicePixelToLogicHeight( xFontMetric->GetInternalLeading() + mnEmphasisAscent, maMappingMetric ) );
     // OutputDevice has its own external leading function due to #i60945#
-    aMetric.SetExternalLeading( ImplDevicePixelToLogicHeight( GetFontExtLeading() ) );
-    aMetric.SetLineHeight( ImplDevicePixelToLogicHeight( xFontMetric->GetAscent() + xFontMetric->GetDescent() + mnEmphasisAscent + mnEmphasisDescent ) );
-    aMetric.SetSlant( ImplDevicePixelToLogicHeight( xFontMetric->GetSlant() ) );
+    aMetric.SetExternalLeading( maGeometry.ImplDevicePixelToLogicHeight( GetFontExtLeading(), maMappingMetric ) );
+    aMetric.SetLineHeight( maGeometry.ImplDevicePixelToLogicHeight( xFontMetric->GetAscent() + xFontMetric->GetDescent() + mnEmphasisAscent + mnEmphasisDescent, maMappingMetric ) );
+    aMetric.SetSlant( maGeometry.ImplDevicePixelToLogicHeight( xFontMetric->GetSlant(), maMappingMetric ) );
 
     // get miscellaneous data
     aMetric.SetQuality( xFontMetric->GetQuality() );

@@ -6031,7 +6031,7 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
 
     // transform font height back to current units
     // note: the layout calculates in outdevs device pixel !!
-    sal_Int32 nFontHeight = ImplDevicePixelToLogicHeight( nPixelFontHeight );
+    sal_Int32 nFontHeight = maGeometry.ImplDevicePixelToLogicHeight( nPixelFontHeight, maMappingMetric );
     if( m_aCurrentPDFState.m_aFont.GetAverageFontWidth() )
     {
         Font aFont( m_aCurrentPDFState.m_aFont );
@@ -6730,7 +6730,7 @@ void PDFWriterImpl::drawLine( const Point& rStart, const Point& rStop, const Lin
     }
 }
 
-#define HCONV( x ) ImplDevicePixelToLogicHeight( x )
+#define HCONV( x ) maGeometry.ImplDevicePixelToLogicHeight( x, maMappingMetric )
 
 void PDFWriterImpl::drawWaveTextLine( OStringBuffer& aLine, tools::Long nWidth, FontLineStyle eTextLine, Color aColor, bool bIsAbove )
 {
