@@ -6031,7 +6031,7 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
 
     // transform font height back to current units
     // note: the layout calculates in outdevs device pixel !!
-    sal_Int32 nFontHeight = maGeometry.ImplDevicePixelToLogicHeight( nPixelFontHeight, maMappingMetric );
+    sal_Int32 nFontHeight = maGeometry.DevicePixelToLogicHeight( nPixelFontHeight, maMappingMetric );
     if( m_aCurrentPDFState.m_aFont.GetAverageFontWidth() )
     {
         Font aFont( m_aCurrentPDFState.m_aFont );
@@ -6357,7 +6357,7 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
                 else if( nWidth > 0 )
                 {
                     drawTextLine( PixelToLogic( aStartPt ),
-                                  maGeometry.ImplDevicePixelToLogicWidth( nWidth, maMappingMetric ),
+                                  maGeometry.DevicePixelToLogicWidth( nWidth, maMappingMetric ),
                                   eStrikeout, eUnderline, eOverline, bUnderlineAbove );
                     nWidth = 0;
                 }
@@ -6366,7 +6366,7 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
             if( nWidth > 0 )
             {
                 drawTextLine( PixelToLogic( aStartPt ),
-                              maGeometry.ImplDevicePixelToLogicWidth( nWidth, maMappingMetric ),
+                              maGeometry.DevicePixelToLogicWidth( nWidth, maMappingMetric ),
                               eStrikeout, eUnderline, eOverline, bUnderlineAbove );
             }
         }
@@ -6375,7 +6375,7 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
             Point aStartPt = rLayout.GetDrawPosition();
             int nWidth = rLayout.GetTextWidth() / rLayout.GetUnitsPerPixel();
             drawTextLine( PixelToLogic( aStartPt ),
-                          maGeometry.ImplDevicePixelToLogicWidth( nWidth, maMappingMetric ),
+                          maGeometry.DevicePixelToLogicWidth( nWidth, maMappingMetric ),
                           eStrikeout, eUnderline, eOverline, bUnderlineAbove );
         }
     }
@@ -6407,7 +6407,7 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
     bool bEmphPolyLine;
 
     std::tie(aEmphPoly, bEmphPolyLine, nEmphYOff, nEmphWidth, aEmphRect1, aEmphRect2) =
-        GetEmphasisMark( nEmphMark, maGeometry.ImplDevicePixelToLogicWidth(nEmphHeight, maMappingMetric), GetDPIY());
+        GetEmphasisMark( nEmphMark, maGeometry.DevicePixelToLogicWidth(nEmphHeight, maMappingMetric), GetDPIY());
 
     if ( bEmphPolyLine )
     {
@@ -6730,7 +6730,7 @@ void PDFWriterImpl::drawLine( const Point& rStart, const Point& rStop, const Lin
     }
 }
 
-#define HCONV( x ) maGeometry.ImplDevicePixelToLogicHeight( x, maMappingMetric )
+#define HCONV( x ) maGeometry.DevicePixelToLogicHeight( x, maMappingMetric )
 
 void PDFWriterImpl::drawWaveTextLine( OStringBuffer& aLine, tools::Long nWidth, FontLineStyle eTextLine, Color aColor, bool bIsAbove )
 {

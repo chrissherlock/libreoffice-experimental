@@ -43,31 +43,25 @@ struct Geometry
     {
     }
 
-    tools::Long ImplLogicXToDevicePixel(tools::Long nX, MappingMetrics aMappingMetric) const;
-    tools::Long ImplLogicYToDevicePixel(tools::Long nY, MappingMetrics aMappingMetric) const;
-    tools::Long ImplLogicWidthToDevicePixel(tools::Long nWidth,
-                                            MappingMetrics aMappingMetric) const;
-    tools::Long ImplLogicHeightToDevicePixel(tools::Long nHeight,
-                                             MappingMetrics aMappingMetric) const;
-    float ImplFloatLogicHeightToDevicePixel(float fLogicHeight,
-                                            MappingMetrics aMappingMetric) const;
-    Point ImplLogicToDevicePixel(const Point& rLogicPt, MappingMetrics aMappingMetrics) const;
-    Size ImplLogicToDevicePixel(const Size& rLogicSize, MappingMetrics aMappingMetrics) const;
-    tools::Rectangle ImplLogicToDevicePixel(const tools::Rectangle& rLogicRect,
-                                            MappingMetrics aMappingMetrics) const;
-    tools::Polygon ImplLogicToDevicePixel(const tools::Polygon& rLogicPoly,
+    tools::Long LogicXToDevicePixel(tools::Long nX, MappingMetrics aMappingMetric) const;
+    tools::Long LogicYToDevicePixel(tools::Long nY, MappingMetrics aMappingMetric) const;
+    tools::Long LogicWidthToDevicePixel(tools::Long nWidth, MappingMetrics aMappingMetric) const;
+    tools::Long LogicHeightToDevicePixel(tools::Long nHeight, MappingMetrics aMappingMetric) const;
+    float FloatLogicHeightToDevicePixel(float fLogicHeight, MappingMetrics aMappingMetric) const;
+    Point LogicToDevicePixel(const Point& rLogicPt, MappingMetrics aMappingMetrics) const;
+    Size LogicToDevicePixel(const Size& rLogicSize, MappingMetrics aMappingMetrics) const;
+    tools::Rectangle LogicToDevicePixel(const tools::Rectangle& rLogicRect,
+                                        MappingMetrics aMappingMetrics) const;
+    tools::Polygon LogicToDevicePixel(const tools::Polygon& rLogicPoly,
+                                      MappingMetrics aMappingMetrics) const;
+    tools::PolyPolygon LogicToDevicePixel(const tools::PolyPolygon& rLogicPolyPoly,
                                           MappingMetrics aMappingMetrics) const;
-    tools::PolyPolygon ImplLogicToDevicePixel(const tools::PolyPolygon& rLogicPolyPoly,
-                                              MappingMetrics aMappingMetrics) const;
-    LineInfo ImplLogicToDevicePixel(LineInfo const& rLineInfo,
-                                    MappingMetrics aMappingMetrics) const;
-    tools::Long ImplDevicePixelToLogicWidth(tools::Long nWidth,
-                                            MappingMetrics aMappingMetric) const;
-    tools::Long ImplDevicePixelToLogicHeight(tools::Long nHeight,
-                                             MappingMetrics aMappingMetrics) const;
-    tools::Rectangle ImplDevicePixelToLogic(const tools::Rectangle& rPixelRect,
-                                            MappingMetrics aMappingMetrics) const;
-    vcl::Region ImplPixelToDevicePixel(const vcl::Region& rRegion) const;
+    LineInfo LogicToDevicePixel(LineInfo const& rLineInfo, MappingMetrics aMappingMetrics) const;
+    tools::Long DevicePixelToLogicWidth(tools::Long nWidth, MappingMetrics aMappingMetric) const;
+    tools::Long DevicePixelToLogicHeight(tools::Long nHeight, MappingMetrics aMappingMetrics) const;
+    tools::Rectangle DevicePixelToLogic(const tools::Rectangle& rPixelRect,
+                                        MappingMetrics aMappingMetrics) const;
+    vcl::Region PixelToDevicePixel(const vcl::Region& rRegion) const;
 
     bool mbMap;
 

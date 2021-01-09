@@ -52,7 +52,7 @@ void Window::InitClipRegion()
             ReMirror ( aRegion );
     }
     if ( mbClipRegion )
-        aRegion.Intersect( maGeometry.ImplPixelToDevicePixel( maRegion ) );
+        aRegion.Intersect( maGeometry.PixelToDevicePixel( maRegion ) );
     if ( aRegion.IsEmpty() )
         mbOutputClipped = true;
     else
@@ -94,7 +94,7 @@ void Window::ExpandPaintClipRegion( const vcl::Region& rRegion )
         return;
 
     vcl::Region aPixRegion = LogicToPixel( rRegion );
-    vcl::Region aDevPixRegion = maGeometry.ImplPixelToDevicePixel( aPixRegion );
+    vcl::Region aDevPixRegion = maGeometry.PixelToDevicePixel( aPixRegion );
 
     vcl::Region aWinChildRegion = *ImplGetWinChildClipRegion();
     // only this region is in frame coordinates, so re-mirror it
@@ -251,7 +251,7 @@ void Window::ImplInitWinClipRegion()
     // Build Window Region
     mpWindowImpl->maWinClipRegion = GetOutputRectPixel();
     if ( mpWindowImpl->mbWinRegion )
-        mpWindowImpl->maWinClipRegion.Intersect( maGeometry.ImplPixelToDevicePixel( mpWindowImpl->maWinRegion ) );
+        mpWindowImpl->maWinClipRegion.Intersect( maGeometry.PixelToDevicePixel( mpWindowImpl->maWinRegion ) );
 
     // ClipSiblings
     if ( mpWindowImpl->mbClipSiblings && !ImplIsOverlapWindow() )
@@ -505,7 +505,7 @@ void Window::ImplIntersectWindowRegion( vcl::Region& rRegion )
 {
     rRegion.Intersect( GetOutputRectPixel() );
     if ( mpWindowImpl->mbWinRegion )
-        rRegion.Intersect( maGeometry.ImplPixelToDevicePixel( mpWindowImpl->maWinRegion ) );
+        rRegion.Intersect( maGeometry.PixelToDevicePixel( mpWindowImpl->maWinRegion ) );
 }
 
 void Window::ImplExcludeWindowRegion( vcl::Region& rRegion )
@@ -513,7 +513,7 @@ void Window::ImplExcludeWindowRegion( vcl::Region& rRegion )
     if ( mpWindowImpl->mbWinRegion )
     {
         vcl::Region aRegion( GetOutputRectPixel() );
-        aRegion.Intersect( maGeometry.ImplPixelToDevicePixel( mpWindowImpl->maWinRegion ) );
+        aRegion.Intersect( maGeometry.PixelToDevicePixel( mpWindowImpl->maWinRegion ) );
         rRegion.Exclude( aRegion );
     }
     else
@@ -605,7 +605,7 @@ void Window::ImplCalcOverlapRegion( const tools::Rectangle& rSourceRect, vcl::Re
 {
     vcl::Region  aRegion( rSourceRect );
     if ( mpWindowImpl->mbWinRegion )
-        rRegion.Intersect( maGeometry.ImplPixelToDevicePixel( mpWindowImpl->maWinRegion ) );
+        rRegion.Intersect( maGeometry.PixelToDevicePixel( mpWindowImpl->maWinRegion ) );
     vcl::Region  aTempRegion;
     vcl::Window* pWindow;
 

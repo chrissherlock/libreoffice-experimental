@@ -24,8 +24,8 @@
 #include <cassert>
 #include <cmath>
 
-static tools::Long ImplLogicToPixel(tools::Long n, tools::Long nDPI, tools::Long nMapNum,
-                                    tools::Long nMapDenom)
+static tools::Long LogicToPixel(tools::Long n, tools::Long nDPI, tools::Long nMapNum,
+                                tools::Long nMapDenom)
 {
     assert(nDPI > 0);
     assert(nMapDenom != 0);
@@ -53,8 +53,8 @@ static tools::Long ImplLogicToPixel(tools::Long n, tools::Long nDPI, tools::Long
     return n;
 }
 
-static tools::Long ImplPixelToLogic(tools::Long n, tools::Long nDPI, tools::Long nMapNum,
-                                    tools::Long nMapDenom)
+static tools::Long PixelToLogic(tools::Long n, tools::Long nDPI, tools::Long nMapNum,
+                                tools::Long nMapDenom)
 {
     assert(nDPI > 0);
     if (nMapNum == 0)
@@ -78,48 +78,47 @@ static tools::Long ImplPixelToLogic(tools::Long n, tools::Long nDPI, tools::Long
     return n;
 }
 
-tools::Long Geometry::ImplLogicXToDevicePixel(tools::Long nX, MappingMetrics aMappingMetrics) const
+tools::Long Geometry::LogicXToDevicePixel(tools::Long nX, MappingMetrics aMappingMetrics) const
 {
     if (!mbMap)
         return nX + mnOffsetXpx;
 
-    return ImplLogicToPixel(nX + aMappingMetrics.mnMapOfsX, mnDPIX, aMappingMetrics.mnMapScNumX,
-                            aMappingMetrics.mnMapScDenomX)
+    return LogicToPixel(nX + aMappingMetrics.mnMapOfsX, mnDPIX, aMappingMetrics.mnMapScNumX,
+                        aMappingMetrics.mnMapScDenomX)
            + mnOffsetXpx + mnOffsetFromOriginXpx;
 }
 
-tools::Long Geometry::ImplLogicYToDevicePixel(tools::Long nY, MappingMetrics aMappingMetrics) const
+tools::Long Geometry::LogicYToDevicePixel(tools::Long nY, MappingMetrics aMappingMetrics) const
 {
     if (!mbMap)
         return nY + mnOffsetYpx;
 
-    return ImplLogicToPixel(nY + aMappingMetrics.mnMapOfsY, mnDPIY, aMappingMetrics.mnMapScNumY,
-                            aMappingMetrics.mnMapScDenomY)
+    return LogicToPixel(nY + aMappingMetrics.mnMapOfsY, mnDPIY, aMappingMetrics.mnMapScNumY,
+                        aMappingMetrics.mnMapScDenomY)
            + mnOffsetYpx + mnOffsetFromOriginYpx;
 }
 
-tools::Long Geometry::ImplLogicWidthToDevicePixel(tools::Long nWidth,
-                                                  MappingMetrics aMappingMetrics) const
+tools::Long Geometry::LogicWidthToDevicePixel(tools::Long nWidth,
+                                              MappingMetrics aMappingMetrics) const
 {
     if (!mbMap)
         return nWidth;
 
-    return ImplLogicToPixel(nWidth, mnDPIX, aMappingMetrics.mnMapScNumX,
-                            aMappingMetrics.mnMapScDenomX);
+    return LogicToPixel(nWidth, mnDPIX, aMappingMetrics.mnMapScNumX, aMappingMetrics.mnMapScDenomX);
 }
 
-tools::Long Geometry::ImplLogicHeightToDevicePixel(tools::Long nHeight,
-                                                   MappingMetrics aMappingMetrics) const
+tools::Long Geometry::LogicHeightToDevicePixel(tools::Long nHeight,
+                                               MappingMetrics aMappingMetrics) const
 {
     if (!mbMap)
         return nHeight;
 
-    return ImplLogicToPixel(nHeight, mnDPIY, aMappingMetrics.mnMapScNumY,
-                            aMappingMetrics.mnMapScDenomY);
+    return LogicToPixel(nHeight, mnDPIY, aMappingMetrics.mnMapScNumY,
+                        aMappingMetrics.mnMapScDenomY);
 }
 
-float Geometry::ImplFloatLogicHeightToDevicePixel(float fLogicHeight,
-                                                  MappingMetrics aMappingMetrics) const
+float Geometry::FloatLogicHeightToDevicePixel(float fLogicHeight,
+                                              MappingMetrics aMappingMetrics) const
 {
     if (!mbMap)
         return fLogicHeight;
@@ -128,52 +127,51 @@ float Geometry::ImplFloatLogicHeightToDevicePixel(float fLogicHeight,
     return fPixelHeight;
 }
 
-tools::Long Geometry::ImplDevicePixelToLogicWidth(tools::Long nWidth,
-                                                  MappingMetrics aMappingMetrics) const
+tools::Long Geometry::DevicePixelToLogicWidth(tools::Long nWidth,
+                                              MappingMetrics aMappingMetrics) const
 {
     if (!mbMap)
         return nWidth;
 
-    return ImplPixelToLogic(nWidth, mnDPIX, aMappingMetrics.mnMapScNumX,
-                            aMappingMetrics.mnMapScDenomX);
+    return PixelToLogic(nWidth, mnDPIX, aMappingMetrics.mnMapScNumX, aMappingMetrics.mnMapScDenomX);
 }
 
-tools::Long Geometry::ImplDevicePixelToLogicHeight(tools::Long nHeight,
-                                                   MappingMetrics aMappingMetrics) const
+tools::Long Geometry::DevicePixelToLogicHeight(tools::Long nHeight,
+                                               MappingMetrics aMappingMetrics) const
 {
     if (!mbMap)
         return nHeight;
 
-    return ImplPixelToLogic(nHeight, mnDPIY, aMappingMetrics.mnMapScNumY,
-                            aMappingMetrics.mnMapScDenomY);
+    return PixelToLogic(nHeight, mnDPIY, aMappingMetrics.mnMapScNumY,
+                        aMappingMetrics.mnMapScDenomY);
 }
 
-Point Geometry::ImplLogicToDevicePixel(const Point& rLogicPt, MappingMetrics aMappingMetrics) const
+Point Geometry::LogicToDevicePixel(const Point& rLogicPt, MappingMetrics aMappingMetrics) const
 {
     if (!mbMap)
         return Point(rLogicPt.X() + mnOffsetXpx, rLogicPt.Y() + mnOffsetYpx);
 
-    return Point(ImplLogicToPixel(rLogicPt.X() + aMappingMetrics.mnMapOfsX, mnDPIX,
-                                  aMappingMetrics.mnMapScNumX, aMappingMetrics.mnMapScDenomX)
+    return Point(LogicToPixel(rLogicPt.X() + aMappingMetrics.mnMapOfsX, mnDPIX,
+                              aMappingMetrics.mnMapScNumX, aMappingMetrics.mnMapScDenomX)
                      + mnOffsetXpx + mnOffsetFromOriginXpx,
-                 ImplLogicToPixel(rLogicPt.Y() + aMappingMetrics.mnMapOfsY, mnDPIY,
-                                  aMappingMetrics.mnMapScNumY, aMappingMetrics.mnMapScDenomY)
+                 LogicToPixel(rLogicPt.Y() + aMappingMetrics.mnMapOfsY, mnDPIY,
+                              aMappingMetrics.mnMapScNumY, aMappingMetrics.mnMapScDenomY)
                      + mnOffsetYpx + mnOffsetFromOriginYpx);
 }
 
-Size Geometry::ImplLogicToDevicePixel(const Size& rLogicSize, MappingMetrics aMappingMetrics) const
+Size Geometry::LogicToDevicePixel(const Size& rLogicSize, MappingMetrics aMappingMetrics) const
 {
     if (!mbMap)
         return rLogicSize;
 
-    return Size(ImplLogicToPixel(rLogicSize.Width(), mnDPIX, aMappingMetrics.mnMapScNumX,
-                                 aMappingMetrics.mnMapScDenomX),
-                ImplLogicToPixel(rLogicSize.Height(), mnDPIY, aMappingMetrics.mnMapScNumY,
-                                 aMappingMetrics.mnMapScDenomY));
+    return Size(LogicToPixel(rLogicSize.Width(), mnDPIX, aMappingMetrics.mnMapScNumX,
+                             aMappingMetrics.mnMapScDenomX),
+                LogicToPixel(rLogicSize.Height(), mnDPIY, aMappingMetrics.mnMapScNumY,
+                             aMappingMetrics.mnMapScDenomY));
 }
 
-tools::Rectangle Geometry::ImplLogicToDevicePixel(const tools::Rectangle& rLogicRect,
-                                                  MappingMetrics aMappingMetrics) const
+tools::Rectangle Geometry::LogicToDevicePixel(const tools::Rectangle& rLogicRect,
+                                              MappingMetrics aMappingMetrics) const
 {
     if (rLogicRect.IsEmpty())
         return rLogicRect;
@@ -185,23 +183,22 @@ tools::Rectangle Geometry::ImplLogicToDevicePixel(const tools::Rectangle& rLogic
                                 rLogicRect.Bottom() + mnOffsetYpx);
     }
 
-    return tools::Rectangle(
-        ImplLogicToPixel(rLogicRect.Left() + aMappingMetrics.mnMapOfsX, mnDPIX,
-                         aMappingMetrics.mnMapScNumX, aMappingMetrics.mnMapScDenomX)
-            + mnOffsetXpx + mnOffsetFromOriginXpx,
-        ImplLogicToPixel(rLogicRect.Top() + aMappingMetrics.mnMapOfsY, mnDPIY,
-                         aMappingMetrics.mnMapScNumY, aMappingMetrics.mnMapScDenomY)
-            + mnOffsetYpx + mnOffsetFromOriginYpx,
-        ImplLogicToPixel(rLogicRect.Right() + aMappingMetrics.mnMapOfsX, mnDPIX,
-                         aMappingMetrics.mnMapScNumX, aMappingMetrics.mnMapScDenomX)
-            + mnOffsetXpx + mnOffsetFromOriginXpx,
-        ImplLogicToPixel(rLogicRect.Bottom() + aMappingMetrics.mnMapOfsY, mnDPIY,
-                         aMappingMetrics.mnMapScNumY, aMappingMetrics.mnMapScDenomY)
-            + mnOffsetYpx + mnOffsetFromOriginYpx);
+    return tools::Rectangle(LogicToPixel(rLogicRect.Left() + aMappingMetrics.mnMapOfsX, mnDPIX,
+                                         aMappingMetrics.mnMapScNumX, aMappingMetrics.mnMapScDenomX)
+                                + mnOffsetXpx + mnOffsetFromOriginXpx,
+                            LogicToPixel(rLogicRect.Top() + aMappingMetrics.mnMapOfsY, mnDPIY,
+                                         aMappingMetrics.mnMapScNumY, aMappingMetrics.mnMapScDenomY)
+                                + mnOffsetYpx + mnOffsetFromOriginYpx,
+                            LogicToPixel(rLogicRect.Right() + aMappingMetrics.mnMapOfsX, mnDPIX,
+                                         aMappingMetrics.mnMapScNumX, aMappingMetrics.mnMapScDenomX)
+                                + mnOffsetXpx + mnOffsetFromOriginXpx,
+                            LogicToPixel(rLogicRect.Bottom() + aMappingMetrics.mnMapOfsY, mnDPIY,
+                                         aMappingMetrics.mnMapScNumY, aMappingMetrics.mnMapScDenomY)
+                                + mnOffsetYpx + mnOffsetFromOriginYpx);
 }
 
-tools::Polygon Geometry::ImplLogicToDevicePixel(const tools::Polygon& rLogicPoly,
-                                                MappingMetrics aMappingMetrics) const
+tools::Polygon Geometry::LogicToDevicePixel(const tools::Polygon& rLogicPoly,
+                                            MappingMetrics aMappingMetrics) const
 {
     if (!mbMap && !mnOffsetXpx && !mnOffsetYpx)
         return rLogicPoly;
@@ -218,11 +215,11 @@ tools::Polygon Geometry::ImplLogicToDevicePixel(const tools::Polygon& rLogicPoly
         for (i = 0; i < nPoints; i++)
         {
             const Point& rPt = pPointAry[i];
-            Point aPt(ImplLogicToPixel(rPt.X() + aMappingMetrics.mnMapOfsX, mnDPIX,
-                                       aMappingMetrics.mnMapScNumX, aMappingMetrics.mnMapScDenomX)
+            Point aPt(LogicToPixel(rPt.X() + aMappingMetrics.mnMapOfsX, mnDPIX,
+                                   aMappingMetrics.mnMapScNumX, aMappingMetrics.mnMapScDenomX)
                           + mnOffsetXpx + mnOffsetFromOriginXpx,
-                      ImplLogicToPixel(rPt.Y() + aMappingMetrics.mnMapOfsY, mnDPIY,
-                                       aMappingMetrics.mnMapScNumY, aMappingMetrics.mnMapScDenomY)
+                      LogicToPixel(rPt.Y() + aMappingMetrics.mnMapOfsY, mnDPIY,
+                                   aMappingMetrics.mnMapScNumY, aMappingMetrics.mnMapScDenomY)
                           + mnOffsetYpx + mnOffsetFromOriginYpx);
             aPoly[i] = aPt;
         }
@@ -241,8 +238,8 @@ tools::Polygon Geometry::ImplLogicToDevicePixel(const tools::Polygon& rLogicPoly
     return aPoly;
 }
 
-tools::PolyPolygon Geometry::ImplLogicToDevicePixel(const tools::PolyPolygon& rLogicPolyPoly,
-                                                    MappingMetrics aMappingMetrics) const
+tools::PolyPolygon Geometry::LogicToDevicePixel(const tools::PolyPolygon& rLogicPolyPoly,
+                                                MappingMetrics aMappingMetrics) const
 {
     if (!mbMap && !mnOffsetXpx && !mnOffsetYpx)
         return rLogicPolyPoly;
@@ -252,43 +249,43 @@ tools::PolyPolygon Geometry::ImplLogicToDevicePixel(const tools::PolyPolygon& rL
     for (sal_uInt16 i = 0; i < nPoly; i++)
     {
         tools::Polygon& rPoly = aPolyPoly[i];
-        rPoly = ImplLogicToDevicePixel(rPoly, aMappingMetrics);
+        rPoly = LogicToDevicePixel(rPoly, aMappingMetrics);
     }
     return aPolyPoly;
 }
 
-LineInfo Geometry::ImplLogicToDevicePixel(const LineInfo& rLineInfo,
-                                          MappingMetrics aMappingMetrics) const
+LineInfo Geometry::LogicToDevicePixel(const LineInfo& rLineInfo,
+                                      MappingMetrics aMappingMetrics) const
 {
     LineInfo aInfo(rLineInfo);
 
     if (aInfo.GetStyle() == LineStyle::Dash)
     {
         if (aInfo.GetDotCount() && aInfo.GetDotLen())
-            aInfo.SetDotLen(std::max(
-                ImplLogicWidthToDevicePixel(aInfo.GetDotLen(), aMappingMetrics), tools::Long(1)));
+            aInfo.SetDotLen(std::max(LogicWidthToDevicePixel(aInfo.GetDotLen(), aMappingMetrics),
+                                     tools::Long(1)));
         else
             aInfo.SetDotCount(0);
 
         if (aInfo.GetDashCount() && aInfo.GetDashLen())
-            aInfo.SetDashLen(std::max(
-                ImplLogicWidthToDevicePixel(aInfo.GetDashLen(), aMappingMetrics), tools::Long(1)));
+            aInfo.SetDashLen(std::max(LogicWidthToDevicePixel(aInfo.GetDashLen(), aMappingMetrics),
+                                      tools::Long(1)));
         else
             aInfo.SetDashCount(0);
 
-        aInfo.SetDistance(ImplLogicWidthToDevicePixel(aInfo.GetDistance(), aMappingMetrics));
+        aInfo.SetDistance(LogicWidthToDevicePixel(aInfo.GetDistance(), aMappingMetrics));
 
         if ((!aInfo.GetDashCount() && !aInfo.GetDotCount()) || !aInfo.GetDistance())
             aInfo.SetStyle(LineStyle::Solid);
     }
 
-    aInfo.SetWidth(ImplLogicWidthToDevicePixel(aInfo.GetWidth(), aMappingMetrics));
+    aInfo.SetWidth(LogicWidthToDevicePixel(aInfo.GetWidth(), aMappingMetrics));
 
     return aInfo;
 }
 
-tools::Rectangle Geometry::ImplDevicePixelToLogic(const tools::Rectangle& rPixelRect,
-                                                  MappingMetrics aMappingMetrics) const
+tools::Rectangle Geometry::DevicePixelToLogic(const tools::Rectangle& rPixelRect,
+                                              MappingMetrics aMappingMetrics) const
 {
     if (rPixelRect.IsEmpty())
         return rPixelRect;
@@ -301,21 +298,21 @@ tools::Rectangle Geometry::ImplDevicePixelToLogic(const tools::Rectangle& rPixel
     }
 
     return tools::Rectangle(
-        ImplPixelToLogic(rPixelRect.Left() - mnOffsetXpx - mnOffsetFromOriginXpx, mnDPIX,
-                         aMappingMetrics.mnMapScNumX, aMappingMetrics.mnMapScDenomX)
+        PixelToLogic(rPixelRect.Left() - mnOffsetXpx - mnOffsetFromOriginXpx, mnDPIX,
+                     aMappingMetrics.mnMapScNumX, aMappingMetrics.mnMapScDenomX)
             - aMappingMetrics.mnMapOfsX,
-        ImplPixelToLogic(rPixelRect.Top() - mnOffsetYpx - mnOffsetFromOriginYpx, mnDPIY,
-                         aMappingMetrics.mnMapScNumY, aMappingMetrics.mnMapScDenomY)
+        PixelToLogic(rPixelRect.Top() - mnOffsetYpx - mnOffsetFromOriginYpx, mnDPIY,
+                     aMappingMetrics.mnMapScNumY, aMappingMetrics.mnMapScDenomY)
             - aMappingMetrics.mnMapOfsY,
-        ImplPixelToLogic(rPixelRect.Right() - mnOffsetXpx - mnOffsetFromOriginXpx, mnDPIX,
-                         aMappingMetrics.mnMapScNumX, aMappingMetrics.mnMapScDenomX)
+        PixelToLogic(rPixelRect.Right() - mnOffsetXpx - mnOffsetFromOriginXpx, mnDPIX,
+                     aMappingMetrics.mnMapScNumX, aMappingMetrics.mnMapScDenomX)
             - aMappingMetrics.mnMapOfsX,
-        ImplPixelToLogic(rPixelRect.Bottom() - mnOffsetYpx - mnOffsetFromOriginYpx, mnDPIY,
-                         aMappingMetrics.mnMapScNumY, aMappingMetrics.mnMapScDenomY)
+        PixelToLogic(rPixelRect.Bottom() - mnOffsetYpx - mnOffsetFromOriginYpx, mnDPIY,
+                     aMappingMetrics.mnMapScNumY, aMappingMetrics.mnMapScDenomY)
             - aMappingMetrics.mnMapOfsY);
 }
 
-vcl::Region Geometry::ImplPixelToDevicePixel(const vcl::Region& rRegion) const
+vcl::Region Geometry::PixelToDevicePixel(const vcl::Region& rRegion) const
 {
     if (!mnOffsetXpx && !mnOffsetYpx)
         return rRegion;

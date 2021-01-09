@@ -493,7 +493,7 @@ void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderCo
         rRenderContext.ReMirror(aPaintRect);
         rRenderContext.ReMirror(rPaintRegion);
     }
-    aPaintRect = maGeometry.ImplDevicePixelToLogic(aPaintRect, maMappingMetric);
+    aPaintRect = maGeometry.DevicePixelToLogic(aPaintRect, maMappingMetric);
     mpWindowImpl->mpPaintRegion = &rPaintRegion;
     mpWindowImpl->maInvalidateRegion.SetEmpty();
 
@@ -1170,7 +1170,7 @@ void Window::Invalidate( const tools::Rectangle& rRect, InvalidateFlags nFlags )
         return;
 
     OutputDevice *pOutDev = GetOutDev();
-    tools::Rectangle aRect = pOutDev->GetGeometry().ImplLogicToDevicePixel( rRect, pOutDev->GetMappingMetrics() );
+    tools::Rectangle aRect = pOutDev->GetGeometry().LogicToDevicePixel( rRect, pOutDev->GetMappingMetrics() );
     if ( !aRect.IsEmpty() )
     {
         vcl::Region aRegion( aRect );
@@ -1192,7 +1192,7 @@ void Window::Invalidate( const vcl::Region& rRegion, InvalidateFlags nFlags )
     }
     else
     {
-        vcl::Region aRegion = maGeometry.ImplPixelToDevicePixel( LogicToPixel( rRegion ) );
+        vcl::Region aRegion = maGeometry.PixelToDevicePixel( LogicToPixel( rRegion ) );
         if ( !aRegion.IsEmpty() )
         {
             ImplInvalidate( &aRegion, nFlags );
@@ -1206,7 +1206,7 @@ void Window::LogicInvalidate(const tools::Rectangle* pRectangle)
 {
     if(pRectangle)
     {
-        tools::Rectangle aRect = GetOutDev()->GetGeometry().ImplLogicToDevicePixel( *pRectangle, GetOutDev()->GetMappingMetrics() );
+        tools::Rectangle aRect = GetOutDev()->GetGeometry().LogicToDevicePixel( *pRectangle, GetOutDev()->GetMappingMetrics() );
         PixelInvalidate(&aRect);
     }
     else
@@ -1637,8 +1637,8 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
     if ( !IsDeviceOutputNecessary() )
         return;
 
-    nHorzScroll = maGeometry.ImplLogicWidthToDevicePixel( nHorzScroll, maMappingMetric );
-    nVertScroll = maGeometry.ImplLogicHeightToDevicePixel( nVertScroll, maMappingMetric );
+    nHorzScroll = maGeometry.LogicWidthToDevicePixel( nHorzScroll, maMappingMetric );
+    nVertScroll = maGeometry.LogicHeightToDevicePixel( nVertScroll, maMappingMetric );
 
     if ( !nHorzScroll && !nVertScroll )
         return;
@@ -1704,7 +1704,7 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
     if ( nFlags & ScrollFlags::Clip )
         aRegion.Intersect( rRect );
     if ( mpWindowImpl->mbWinRegion )
-        aRegion.Intersect( maGeometry.ImplPixelToDevicePixel( mpWindowImpl->maWinRegion ) );
+        aRegion.Intersect( maGeometry.PixelToDevicePixel( mpWindowImpl->maWinRegion ) );
 
     aRegion.Exclude( aInvalidateRegion );
 

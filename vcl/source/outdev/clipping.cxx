@@ -96,8 +96,8 @@ void OutputDevice::MoveClipRegion( tools::Long nHorzMove, tools::Long nVertMove 
         if( mpMetaFile )
             mpMetaFile->AddAction( new MetaMoveClipRegionAction( nHorzMove, nVertMove ) );
 
-        maRegion.Move( maGeometry.ImplLogicWidthToDevicePixel( nHorzMove, maMappingMetric ),
-                       maGeometry.ImplLogicHeightToDevicePixel( nVertMove, maMappingMetric ) );
+        maRegion.Move( maGeometry.LogicWidthToDevicePixel( nHorzMove, maMappingMetric ),
+                       maGeometry.LogicHeightToDevicePixel( nVertMove, maMappingMetric ) );
         mbInitClipRegion = true;
     }
 
@@ -151,7 +151,7 @@ void OutputDevice::InitClipRegion()
             mbOutputClipped = false;
 
             // #102532# Respect output offset also for clip region
-            vcl::Region aRegion = ClipToDeviceBounds(maGeometry.ImplPixelToDevicePixel(maRegion));
+            vcl::Region aRegion = ClipToDeviceBounds(maGeometry.PixelToDevicePixel(maRegion));
 
             if ( aRegion.IsEmpty() )
             {

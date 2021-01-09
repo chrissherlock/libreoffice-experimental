@@ -336,16 +336,16 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
     if ( mbOutputClipped )
         return;
 
-    tools::Long nSrcWidth   = maGeometry.ImplLogicWidthToDevicePixel( rSrcSize.Width(), maMappingMetric );
-    tools::Long nSrcHeight  = maGeometry.ImplLogicHeightToDevicePixel( rSrcSize.Height(), maMappingMetric );
-    tools::Long nDestWidth  = maGeometry.ImplLogicWidthToDevicePixel( rDestSize.Width(), maMappingMetric );
-    tools::Long nDestHeight = maGeometry.ImplLogicHeightToDevicePixel( rDestSize.Height(), maMappingMetric );
+    tools::Long nSrcWidth   = maGeometry.LogicWidthToDevicePixel( rSrcSize.Width(), maMappingMetric );
+    tools::Long nSrcHeight  = maGeometry.LogicHeightToDevicePixel( rSrcSize.Height(), maMappingMetric );
+    tools::Long nDestWidth  = maGeometry.LogicWidthToDevicePixel( rDestSize.Width(), maMappingMetric );
+    tools::Long nDestHeight = maGeometry.LogicHeightToDevicePixel( rDestSize.Height(), maMappingMetric );
 
     if (nSrcWidth && nSrcHeight && nDestWidth && nDestHeight)
     {
-        SalTwoRect aPosAry(maGeometry.ImplLogicXToDevicePixel(rSrcPt.X(), maMappingMetric), maGeometry.ImplLogicYToDevicePixel(rSrcPt.Y(), maMappingMetric),
+        SalTwoRect aPosAry(maGeometry.LogicXToDevicePixel(rSrcPt.X(), maMappingMetric), maGeometry.LogicYToDevicePixel(rSrcPt.Y(), maMappingMetric),
                            nSrcWidth, nSrcHeight,
-                           maGeometry.ImplLogicXToDevicePixel(rDestPt.X(), maMappingMetric), maGeometry.ImplLogicYToDevicePixel(rDestPt.Y(), maMappingMetric),
+                           maGeometry.LogicXToDevicePixel(rDestPt.X(), maMappingMetric), maGeometry.LogicYToDevicePixel(rDestPt.Y(), maMappingMetric),
                            nDestWidth, nDestHeight);
 
         AdjustTwoRect( aPosAry, GetOutputRectPixel() );
@@ -404,14 +404,14 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
     }
     else
     {
-        SalTwoRect aPosAry(rOutDev.GetGeometry().ImplLogicXToDevicePixel(rSrcPt.X(), rOutDev.GetMappingMetrics()),
-                           rOutDev.GetGeometry().ImplLogicYToDevicePixel(rSrcPt.Y(), rOutDev.GetMappingMetrics()),
-                           rOutDev.GetGeometry().ImplLogicWidthToDevicePixel(rSrcSize.Width(), rOutDev.GetMappingMetrics()),
-                           rOutDev.GetGeometry().ImplLogicHeightToDevicePixel(rSrcSize.Height(), rOutDev.GetMappingMetrics()),
-                           maGeometry.ImplLogicXToDevicePixel(rDestPt.X(), maMappingMetric),
-                           maGeometry.ImplLogicYToDevicePixel(rDestPt.Y(), maMappingMetric),
-                           maGeometry.ImplLogicWidthToDevicePixel(rDestSize.Width(), maMappingMetric),
-                           maGeometry.ImplLogicHeightToDevicePixel(rDestSize.Height(), maMappingMetric));
+        SalTwoRect aPosAry(rOutDev.GetGeometry().LogicXToDevicePixel(rSrcPt.X(), rOutDev.GetMappingMetrics()),
+                           rOutDev.GetGeometry().LogicYToDevicePixel(rSrcPt.Y(), rOutDev.GetMappingMetrics()),
+                           rOutDev.GetGeometry().LogicWidthToDevicePixel(rSrcSize.Width(), rOutDev.GetMappingMetrics()),
+                           rOutDev.GetGeometry().LogicHeightToDevicePixel(rSrcSize.Height(), rOutDev.GetMappingMetrics()),
+                           maGeometry.LogicXToDevicePixel(rDestPt.X(), maMappingMetric),
+                           maGeometry.LogicYToDevicePixel(rDestPt.Y(), maMappingMetric),
+                           maGeometry.LogicWidthToDevicePixel(rDestSize.Width(), maMappingMetric),
+                           maGeometry.LogicHeightToDevicePixel(rDestSize.Height(), maMappingMetric));
 
         drawOutDevDirect(rOutDev, aPosAry);
 
@@ -443,15 +443,15 @@ void OutputDevice::CopyArea( const Point& rDestPt,
     if ( mbOutputClipped )
         return;
 
-    tools::Long nSrcWidth = maGeometry.ImplLogicWidthToDevicePixel( rSrcSize.Width(), maMappingMetric );
-    tools::Long nSrcHeight  = maGeometry.ImplLogicHeightToDevicePixel( rSrcSize.Height(), maMappingMetric );
+    tools::Long nSrcWidth = maGeometry.LogicWidthToDevicePixel( rSrcSize.Width(), maMappingMetric );
+    tools::Long nSrcHeight  = maGeometry.LogicHeightToDevicePixel( rSrcSize.Height(), maMappingMetric );
     if (nSrcWidth && nSrcHeight)
     {
-        SalTwoRect aPosAry(maGeometry.ImplLogicXToDevicePixel(rSrcPt.X(), maMappingMetric),
-                           maGeometry.ImplLogicYToDevicePixel(rSrcPt.Y(), maMappingMetric),
+        SalTwoRect aPosAry(maGeometry.LogicXToDevicePixel(rSrcPt.X(), maMappingMetric),
+                           maGeometry.LogicYToDevicePixel(rSrcPt.Y(), maMappingMetric),
                            nSrcWidth, nSrcHeight,
-                           maGeometry.ImplLogicXToDevicePixel(rDestPt.X(), maMappingMetric),
-                           maGeometry.ImplLogicYToDevicePixel(rDestPt.Y(), maMappingMetric),
+                           maGeometry.LogicXToDevicePixel(rDestPt.X(), maMappingMetric),
+                           maGeometry.LogicYToDevicePixel(rDestPt.Y(), maMappingMetric),
                            nSrcWidth, nSrcHeight);
 
         AdjustTwoRect( aPosAry, GetOutputRectPixel() );
@@ -626,7 +626,7 @@ bool OutputDevice::DrawEPS( const Point& rPoint, const Size& rSize,
     if( mbOutputClipped )
         return bDrawn;
 
-    tools::Rectangle aRect( maGeometry.ImplLogicToDevicePixel( tools::Rectangle( rPoint, rSize ), maMappingMetric ) );
+    tools::Rectangle aRect( maGeometry.LogicToDevicePixel( tools::Rectangle( rPoint, rSize ), maMappingMetric ) );
 
     if( !aRect.IsEmpty() )
     {

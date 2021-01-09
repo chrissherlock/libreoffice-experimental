@@ -1432,6 +1432,7 @@ protected:
     ///@{
 
 public:
+    bool                        IsMapModeEnabled() const { return maGeometry.mbMap; }
     void                        EnableMapMode(bool bEnable = true) override;
     void                        SetMapMode();
     virtual void                SetMapMode( const MapMode& rNewMapMode );

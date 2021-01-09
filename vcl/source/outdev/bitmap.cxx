@@ -148,10 +148,10 @@ void OutputDevice::DrawBitmap(const Point& rDestPt, const Size& rDestSize, const
     {
         SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(),
                            rSrcSizePixel.Height(),
-                           maGeometry.ImplLogicXToDevicePixel(rDestPt.X(), maMappingMetric),
-                           maGeometry.ImplLogicYToDevicePixel(rDestPt.Y(), maMappingMetric),
-                           maGeometry.ImplLogicWidthToDevicePixel(rDestSize.Width(), maMappingMetric),
-                           maGeometry.ImplLogicHeightToDevicePixel(rDestSize.Height(), maMappingMetric));
+                           maGeometry.LogicXToDevicePixel(rDestPt.X(), maMappingMetric),
+                           maGeometry.LogicYToDevicePixel(rDestPt.Y(), maMappingMetric),
+                           maGeometry.LogicWidthToDevicePixel(rDestSize.Width(), maMappingMetric),
+                           maGeometry.LogicHeightToDevicePixel(rDestSize.Height(), maMappingMetric));
 
         if (aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth
             && aPosAry.mnDestHeight)
@@ -195,10 +195,10 @@ void OutputDevice::DrawBitmap(const Point& rDestPt, const Size& rDestSize, const
 Bitmap OutputDevice::GetBitmap(const Point& rSrcPt, const Size& rSize) const
 {
     Bitmap aBmp;
-    tools::Long nX = maGeometry.ImplLogicXToDevicePixel(rSrcPt.X(), maMappingMetric);
-    tools::Long nY = maGeometry.ImplLogicYToDevicePixel(rSrcPt.Y(), maMappingMetric);
-    tools::Long nWidth = maGeometry.ImplLogicWidthToDevicePixel(rSize.Width(), maMappingMetric);
-    tools::Long nHeight = maGeometry.ImplLogicHeightToDevicePixel(rSize.Height(), maMappingMetric);
+    tools::Long nX = maGeometry.LogicXToDevicePixel(rSrcPt.X(), maMappingMetric);
+    tools::Long nY = maGeometry.LogicYToDevicePixel(rSrcPt.Y(), maMappingMetric);
+    tools::Long nWidth = maGeometry.LogicWidthToDevicePixel(rSize.Width(), maMappingMetric);
+    tools::Long nHeight = maGeometry.LogicHeightToDevicePixel(rSize.Height(), maMappingMetric);
 
     if (mpGraphics || AcquireGraphics())
     {

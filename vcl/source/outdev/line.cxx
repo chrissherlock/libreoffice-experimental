@@ -82,9 +82,9 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
     if ( mbOutputClipped )
         return;
 
-    const Point aStartPt( maGeometry.ImplLogicToDevicePixel( rStartPt, maMappingMetric ) );
-    const Point aEndPt( maGeometry.ImplLogicToDevicePixel( rEndPt, maMappingMetric ) );
-    const LineInfo aInfo( maGeometry.ImplLogicToDevicePixel( rLineInfo, maMappingMetric ) );
+    const Point aStartPt( maGeometry.LogicToDevicePixel( rStartPt, maMappingMetric ) );
+    const Point aEndPt( maGeometry.LogicToDevicePixel( rEndPt, maMappingMetric ) );
+    const LineInfo aInfo( maGeometry.LogicToDevicePixel( rLineInfo, maMappingMetric ) );
     const bool bDashUsed(LineStyle::Dash == aInfo.GetStyle());
     const bool bLineWidthUsed(aInfo.GetWidth() > 1);
 

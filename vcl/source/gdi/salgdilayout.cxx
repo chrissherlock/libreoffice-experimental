@@ -616,7 +616,7 @@ void SalGraphics::DrawPolyPolygon(const basegfx::B2DHomMatrix& rObjectToDevice,
     {
         const tools::PolyPolygon aToolsPolyPolygon(i_rPolyPolygon);
         const tools::PolyPolygon aPixelPolyPolygon
-            = i_rOutDev.GetGeometry().ImplLogicToDevicePixel(aToolsPolyPolygon, i_rOutDev.GetMappingMetrics());
+            = i_rOutDev.GetGeometry().LogicToDevicePixel(aToolsPolyPolygon, i_rOutDev.GetMappingMetrics());
         DrawPolyPolygon(aPixelPolyPolygon.Count(), aPixelPolyPolygon, i_rOutDev);
     }
 }
@@ -737,7 +737,7 @@ void SalGraphics::DrawPolyLine(const basegfx::B2DHomMatrix& rObjectToDevice,
 
     if (bDrawn)
     {
-        tools::Polygon aPoly = i_rOutDev.GetGeometry().ImplLogicToDevicePixel(tools::Polygon(i_rPolygon), i_rOutDev.GetMappingMetrics());
+        tools::Polygon aPoly = i_rOutDev.GetGeometry().LogicToDevicePixel(tools::Polygon(i_rPolygon), i_rOutDev.GetMappingMetrics());
         Point* pPtAry = aPoly.GetPointAry();
 
         // Forward beziers to sal, if any

@@ -882,7 +882,7 @@ void OutputDevice::DrawTextLine( const Point& rPos, tools::Long nWidth,
     if (!InitFont())
         return;
 
-    Point aPos = maGeometry.ImplLogicToDevicePixel( rPos, maMappingMetric );
+    Point aPos = maGeometry.LogicToDevicePixel( rPos, maMappingMetric );
     DeviceCoordinate fWidth;
     fWidth = LogicWidthToDeviceCoordinate( nWidth );
     aPos += Point( mnTextOffX, mnTextOffY );
@@ -912,8 +912,8 @@ void OutputDevice::DrawWaveLine(const Point& rStartPos, const Point& rEndPos, to
     if (!InitFont())
         return;
 
-    Point aStartPt = maGeometry.ImplLogicToDevicePixel(rStartPos, maMappingMetric);
-    Point aEndPt = maGeometry.ImplLogicToDevicePixel(rEndPos, maMappingMetric);
+    Point aStartPt = maGeometry.LogicToDevicePixel(rStartPos, maMappingMetric);
+    Point aEndPt = maGeometry.LogicToDevicePixel(rEndPos, maMappingMetric);
 
     tools::Long nStartX = aStartPt.X();
     tools::Long nStartY = aStartPt.Y();

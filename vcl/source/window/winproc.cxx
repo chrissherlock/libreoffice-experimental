@@ -1245,14 +1245,14 @@ static void ImplHandleExtTextInputPos( vcl::Window* pWindow,
         const tools::Rectangle* pRect = pChild->GetCursorRect();
         if ( pRect )
         {
-            rRect = pChildOutDev->GetGeometry().ImplLogicToDevicePixel( *pRect, pChildOutDev->GetMappingMetrics() );
+            rRect = pChildOutDev->GetGeometry().LogicToDevicePixel( *pRect, pChildOutDev->GetMappingMetrics() );
         }
         else
         {
             vcl::Cursor* pCursor = pChild->GetCursor();
             if ( pCursor )
             {
-                Point aPos = pChildOutDev->GetGeometry().ImplLogicToDevicePixel( pCursor->GetPos(), pChildOutDev->GetMappingMetrics() );
+                Point aPos = pChildOutDev->GetGeometry().LogicToDevicePixel( pCursor->GetPos(), pChildOutDev->GetMappingMetrics() );
                 Size aSize = pChild->LogicToPixel( pCursor->GetSize() );
                 if ( !aSize.Width() )
                     aSize.setWidth( pChild->GetSettings().GetStyleSettings().GetCursorSize() );
@@ -1261,7 +1261,7 @@ static void ImplHandleExtTextInputPos( vcl::Window* pWindow,
             else
                 rRect = tools::Rectangle( Point( pChild->GetXOffsetInPixels(), pChild->GetYOffsetInPixels() ), Size() );
         }
-        rInputWidth = pChild->GetGeometry().ImplLogicWidthToDevicePixel( pChild->GetCursorExtTextInputWidth(), pChild->GetMappingMetrics() );
+        rInputWidth = pChild->GetGeometry().LogicWidthToDevicePixel( pChild->GetCursorExtTextInputWidth(), pChild->GetMappingMetrics() );
         if ( !rInputWidth )
             rInputWidth = rRect.GetWidth();
     }
@@ -2344,7 +2344,7 @@ static void ImplHandleSalQueryCharPosition( vcl::Window *pWindow,
 
     const OutputDevice *pChildOutDev = pChild->GetOutDev();
     const tools::Rectangle& aRect = pWinData->mpCompositionCharRects[ pEvt->mnCharPos ];
-    tools::Rectangle aDeviceRect = pChildOutDev->GetGeometry().ImplLogicToDevicePixel( aRect, pChildOutDev->GetMappingMetrics() );
+    tools::Rectangle aDeviceRect = pChildOutDev->GetGeometry().LogicToDevicePixel( aRect, pChildOutDev->GetMappingMetrics() );
     Point aAbsScreenPos = pChild->OutputToAbsoluteScreenPixel( pChild->ScreenToOutputPixel(aDeviceRect.TopLeft()) );
     pEvt->mnCursorBoundX = aAbsScreenPos.X();
     pEvt->mnCursorBoundY = aAbsScreenPos.Y();

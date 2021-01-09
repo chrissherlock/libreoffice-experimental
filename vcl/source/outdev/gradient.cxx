@@ -84,13 +84,13 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
             const tools::Rectangle aBoundRect( rPolyPoly.GetBoundRect() );
 
             // convert rectangle to pixels
-            tools::Rectangle aRect( maGeometry.ImplLogicToDevicePixel( aBoundRect, maMappingMetric ) );
+            tools::Rectangle aRect( maGeometry.LogicToDevicePixel( aBoundRect, maMappingMetric ) );
             aRect.Justify();
 
             // do nothing if the rectangle is empty
             if ( !aRect.IsEmpty() )
             {
-                tools::PolyPolygon aClixPolyPoly( maGeometry.ImplLogicToDevicePixel( rPolyPoly, maMappingMetric ) );
+                tools::PolyPolygon aClixPolyPoly( maGeometry.LogicToDevicePixel( rPolyPoly, maMappingMetric ) );
                 bool bDrawn = false;
 
                 if( !mpGraphics && !AcquireGraphics() )
@@ -212,7 +212,7 @@ void OutputDevice::DrawGradientToMetafile ( const tools::PolyPolygon& rPolyPoly,
         return;
 
     // convert rectangle to pixels
-    tools::Rectangle aRect( maGeometry.ImplLogicToDevicePixel( aBoundRect, maMappingMetric ) );
+    tools::Rectangle aRect( maGeometry.LogicToDevicePixel( aBoundRect, maMappingMetric ) );
     aRect.Justify();
 
     // do nothing if the rectangle is empty

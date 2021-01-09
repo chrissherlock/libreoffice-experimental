@@ -845,7 +845,7 @@ tools::Long OutputDevice::GetTextHeight() const
     tools::Long nHeight = mpFontInstance->mnLineHeight + mnEmphasisAscent + mnEmphasisDescent;
 
     if (IsMapModeEnabled())
-        nHeight = maGeometry.ImplDevicePixelToLogicHeight( nHeight, maMappingMetric );
+        nHeight = maGeometry.DevicePixelToLogicHeight( nHeight, maMappingMetric );
 
     return nHeight;
 }
@@ -990,8 +990,8 @@ tools::Long OutputDevice::GetTextArray( const OUString& rStr, tools::Long* pDXAr
     {
         if( pDXAry )
             for( int i = 0; i < nLen; ++i )
-                pDXAry[i] = maGeometry.ImplDevicePixelToLogicWidth( pDXAry[i], maMappingMetric );
-        nWidth = maGeometry.ImplDevicePixelToLogicWidth( nWidth, maMappingMetric );
+                pDXAry[i] = maGeometry.DevicePixelToLogicWidth( pDXAry[i], maMappingMetric );
+        nWidth = maGeometry.DevicePixelToLogicWidth( nWidth, maMappingMetric );
     }
 
     if( nWidthFactor > 1 )
@@ -1050,7 +1050,7 @@ void OutputDevice::GetCaretPositions( const OUString& rStr, tools::Long* pCaretX
     if (IsMapModeEnabled())
     {
         for( i = 0; i < 2*nLen; ++i )
-            pCaretXArray[i] = maGeometry.ImplDevicePixelToLogicWidth( pCaretXArray[i], maMappingMetric );
+            pCaretXArray[i] = maGeometry.DevicePixelToLogicWidth( pCaretXArray[i], maMappingMetric );
     }
 
     if( nWidthFactor != 1 )
@@ -1287,7 +1287,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(const OUString& rOrigStr,
 
     // position, justify, etc. the layout
     pSalLayout->AdjustLayout( aLayoutArgs );
-    pSalLayout->DrawBase() = maGeometry.ImplLogicToDevicePixel( rLogicalPos, maMappingMetric );
+    pSalLayout->DrawBase() = maGeometry.LogicToDevicePixel( rLogicalPos, maMappingMetric );
     // adjust to right alignment if necessary
     if( aLayoutArgs.mnFlags & SalLayoutFlags::RightAlign )
     {
@@ -1568,8 +1568,8 @@ void OutputDevice::ImplDrawText( OutputDevice& rTargetDevice, const tools::Recta
                         nMnemonicWidth = rTargetDevice.LogicWidthToDeviceCoordinate( std::abs(lc_x1 - lc_x2) );
 
                         Point       aTempPos = rTargetDevice.LogicToPixel( aPos );
-                        nMnemonicX = rTargetDevice.GetXOffsetInPixels() + aTempPos.X() + rTargetDevice.GetGeometry().ImplLogicWidthToDevicePixel( std::min( lc_x1, lc_x2 ), rTargetDevice.GetMappingMetrics() );
-                        nMnemonicY = rTargetDevice.GetYOffsetInPixels() + aTempPos.Y() + rTargetDevice.GetGeometry().ImplLogicWidthToDevicePixel( rTargetDevice.GetFontMetric().GetAscent(), rTargetDevice.GetMappingMetrics() );
+                        nMnemonicX = rTargetDevice.GetXOffsetInPixels() + aTempPos.X() + rTargetDevice.GetGeometry().LogicWidthToDevicePixel( std::min( lc_x1, lc_x2 ), rTargetDevice.GetMappingMetrics() );
+                        nMnemonicY = rTargetDevice.GetYOffsetInPixels() + aTempPos.Y() + rTargetDevice.GetGeometry().LogicWidthToDevicePixel( rTargetDevice.GetFontMetric().GetAscent(), rTargetDevice.GetMappingMetrics() );
                         rTargetDevice.ImplDrawMnemonicLine( nMnemonicX, nMnemonicY, nMnemonicWidth );
                     }
                 }
@@ -1636,8 +1636,8 @@ void OutputDevice::ImplDrawText( OutputDevice& rTargetDevice, const tools::Recta
             nMnemonicWidth = rTargetDevice.LogicWidthToDeviceCoordinate( std::abs(lc_x1 - lc_x2) );
 
             Point aTempPos = rTargetDevice.LogicToPixel( aPos );
-            nMnemonicX = rTargetDevice.GetXOffsetInPixels() + aTempPos.X() + rTargetDevice.GetGeometry().ImplLogicWidthToDevicePixel( std::min(lc_x1, lc_x2), rTargetDevice.GetMappingMetrics() );
-            nMnemonicY = rTargetDevice.GetYOffsetInPixels() + aTempPos.Y() + rTargetDevice.GetGeometry().ImplLogicWidthToDevicePixel( rTargetDevice.GetFontMetric().GetAscent(), rTargetDevice.GetMappingMetrics() );
+            nMnemonicX = rTargetDevice.GetXOffsetInPixels() + aTempPos.X() + rTargetDevice.GetGeometry().LogicWidthToDevicePixel( std::min(lc_x1, lc_x2), rTargetDevice.GetMappingMetrics() );
+            nMnemonicY = rTargetDevice.GetYOffsetInPixels() + aTempPos.Y() + rTargetDevice.GetGeometry().LogicWidthToDevicePixel( rTargetDevice.GetFontMetric().GetAscent(), rTargetDevice.GetMappingMetrics() );
         }
 
         if ( nStyle & DrawTextFlags::Clip )

@@ -118,7 +118,7 @@ void OutputDevice::DrawPolyPolygon(const tools::PolyPolygon& rPolyPoly)
         // have to call recursively, avoiding duplicate
         // ImplLogicToDevicePixel calls
         mpGraphics->DrawPolyPolygon(
-            nPoly, maGeometry.ImplLogicToDevicePixel(rPolyPoly, maMappingMetric), *this);
+            nPoly, maGeometry.LogicToDevicePixel(rPolyPoly, maMappingMetric), *this);
     }
 
     if (mpAlphaVDev)

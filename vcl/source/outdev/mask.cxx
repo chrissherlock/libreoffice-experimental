@@ -109,10 +109,10 @@ void OutputDevice::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
     if (xImpBmp)
     {
         SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(), rSrcSizePixel.Height(),
-                           maGeometry.ImplLogicXToDevicePixel(rDestPt.X(), maMappingMetric),
-                           maGeometry.ImplLogicYToDevicePixel(rDestPt.Y(), maMappingMetric),
-                           maGeometry.ImplLogicWidthToDevicePixel(rDestSize.Width(), maMappingMetric),
-                           maGeometry.ImplLogicHeightToDevicePixel(rDestSize.Height(), maMappingMetric));
+                           maGeometry.LogicXToDevicePixel(rDestPt.X(), maMappingMetric),
+                           maGeometry.LogicYToDevicePixel(rDestPt.Y(), maMappingMetric),
+                           maGeometry.LogicWidthToDevicePixel(rDestSize.Width(), maMappingMetric),
+                           maGeometry.LogicHeightToDevicePixel(rDestSize.Height(), maMappingMetric));
 
         // we don't want to mirror via coordinates
         const BmpMirrorFlags nMirrFlags = AdjustTwoRect( aPosAry, xImpBmp->GetSize() );
