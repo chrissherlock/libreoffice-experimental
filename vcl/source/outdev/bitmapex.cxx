@@ -264,7 +264,7 @@ void OutputDevice::DrawTransparentBitmapEx(const Point& rDestPt, const Size& rDe
                     // aPosAry already contains the mnOutOff-offsets, they
                     // also have to be applied to the region
                     tools::Rectangle aClipRegionBounds(
-                        ImplPixelToDevicePixel(maRegion).GetBoundRect());
+                        maGeometry.ImplPixelToDevicePixel(maRegion).GetBoundRect());
 
                     // TODO: Also respect scaling (that's a bit tricky,
                     // since the source points have to move fractional

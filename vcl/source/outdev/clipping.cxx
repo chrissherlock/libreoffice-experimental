@@ -151,7 +151,7 @@ void OutputDevice::InitClipRegion()
             mbOutputClipped = false;
 
             // #102532# Respect output offset also for clip region
-            vcl::Region aRegion = ClipToDeviceBounds(ImplPixelToDevicePixel(maRegion));
+            vcl::Region aRegion = ClipToDeviceBounds(maGeometry.ImplPixelToDevicePixel(maRegion));
 
             if ( aRegion.IsEmpty() )
             {

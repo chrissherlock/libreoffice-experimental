@@ -1470,7 +1470,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
                                Size( nOldOutWidth, nOldOutHeight ) );
         pOldRegion.reset( new vcl::Region( aOldWinRect ) );
         if ( mpWindowImpl->mbWinRegion )
-            pOldRegion->Intersect( ImplPixelToDevicePixel( mpWindowImpl->maWinRegion ) );
+            pOldRegion->Intersect( maGeometry.ImplPixelToDevicePixel( mpWindowImpl->maWinRegion ) );
 
         if ( GetWidthInPixels() && GetHeightInPixels() && !mpWindowImpl->mbPaintTransparent &&
              !mpWindowImpl->mbInitWinClipRegion && !mpWindowImpl->maWinClipRegion.IsEmpty() &&
@@ -1656,7 +1656,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
                     vcl::Region aRegion( tools::Rectangle( aPoint,
                                                Size( GetWidthInPixels(), GetHeightInPixels() ) ) );
                     if ( mpWindowImpl->mbWinRegion )
-                        aRegion.Intersect( ImplPixelToDevicePixel( mpWindowImpl->maWinRegion ) );
+                        aRegion.Intersect( maGeometry.ImplPixelToDevicePixel( mpWindowImpl->maWinRegion ) );
                     ImplClipBoundaries( aRegion, false, true );
                     if ( !pOverlapRegion->IsEmpty() )
                     {
@@ -1707,7 +1707,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
                 vcl::Region aRegion( GetOutputRectPixel() );
                 aRegion.Exclude( *pOldRegion );
                 if ( mpWindowImpl->mbWinRegion )
-                    aRegion.Intersect( ImplPixelToDevicePixel( mpWindowImpl->maWinRegion ) );
+                    aRegion.Intersect( maGeometry.ImplPixelToDevicePixel( mpWindowImpl->maWinRegion ) );
                 ImplClipBoundaries( aRegion, false, true );
                 if ( !aRegion.IsEmpty() )
                     ImplInvalidateFrameRegion( &aRegion, InvalidateFlags::Children );

@@ -1664,7 +1664,7 @@ public:
 
      @returns vcl::Region based on device pixel coordinates and units.
      */
-    SAL_DLLPRIVATE vcl::Region       ImplPixelToDevicePixel( const vcl::Region& rRegion ) const;
+    // SAL_DLLPRIVATE vcl::Region       ImplPixelToDevicePixel( const vcl::Region& rRegion ) const;
 
     /** Get device transformation.
 

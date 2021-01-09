@@ -1192,7 +1192,7 @@ void Window::Invalidate( const vcl::Region& rRegion, InvalidateFlags nFlags )
     }
     else
     {
-        vcl::Region aRegion = ImplPixelToDevicePixel( LogicToPixel( rRegion ) );
+        vcl::Region aRegion = maGeometry.ImplPixelToDevicePixel( LogicToPixel( rRegion ) );
         if ( !aRegion.IsEmpty() )
         {
             ImplInvalidate( &aRegion, nFlags );
@@ -1704,7 +1704,7 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
     if ( nFlags & ScrollFlags::Clip )
         aRegion.Intersect( rRect );
     if ( mpWindowImpl->mbWinRegion )
-        aRegion.Intersect( ImplPixelToDevicePixel( mpWindowImpl->maWinRegion ) );
+        aRegion.Intersect( maGeometry.ImplPixelToDevicePixel( mpWindowImpl->maWinRegion ) );
 
     aRegion.Exclude( aInvalidateRegion );
 

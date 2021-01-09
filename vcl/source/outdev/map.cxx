@@ -507,6 +507,7 @@ tools::Rectangle OutputDevice::ImplDevicePixelToLogic( const tools::Rectangle& r
                                         GetYMapNumerator(), GetYMapDenominator() )-GetYMapOffset() );
 }
 
+/*
 vcl::Region OutputDevice::ImplPixelToDevicePixel( const vcl::Region& rRegion ) const
 {
     if ( !GetXOffsetInPixels() && !GetYOffsetInPixels() )
@@ -516,6 +517,7 @@ vcl::Region OutputDevice::ImplPixelToDevicePixel( const vcl::Region& rRegion ) c
     aRegion.Move( GetXOffsetInPixels()+GetXOffsetFromOriginInPixels(), GetYOffsetInPixels()+GetYOffsetFromOriginInPixels() );
     return aRegion;
 }
+*/
 
 void OutputDevice::EnableMapMode( bool bEnable )
 {

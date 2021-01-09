@@ -209,10 +209,10 @@ protected:
     vcl::Font maFont;
     ComplexTextLayoutFlags mnTextLayoutMode;
     LanguageType meTextLanguage;
+    Geometry maGeometry;
     MappingMetrics maMappingMetric;
 
 private:
-    Geometry maGeometry;
     Color maTextColor;
     Color maLineColor;
     Color maFillColor;
