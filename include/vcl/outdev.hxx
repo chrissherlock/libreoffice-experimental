@@ -1517,18 +1517,6 @@ public:
     // for B2DPoly/Polygons use this internally anyway to transform the B2DPolygon)
     static basegfx::B2DHomMatrix LogicToLogic(const MapMode& rMapModeSource, const MapMode& rMapModeDest);
 
-    /** Convert a logical width to a width in units of device pixels.
-
-     To get the number of device pixels, it must calculate the X-DPI of the device and
-     the map scaling factor. If there is no mapping, then it just returns the
-     width as nothing more needs to be done.
-
-     @param         nWidth      Logical width
-
-     @returns Width in units of device pixels.
-     */
-    SAL_DLLPRIVATE tools::Long         ImplLogicWidthToDevicePixel( tools::Long nWidth ) const;
-
     SAL_DLLPRIVATE DeviceCoordinate LogicWidthToDeviceCoordinate( tools::Long nWidth ) const;
 
     /** Convert a logical X coordinate to a device pixel's X coordinate.
@@ -1556,14 +1544,6 @@ public:
      @returns Device's Y pixel coordinate
      */
     SAL_DLLPRIVATE tools::Long         ImplLogicYToDevicePixel( tools::Long nY ) const;
-
-    /** Convert a region in pixel units to a region in device pixel units and coords.
-
-     @param         rRegion  Const reference to region.
-
-     @returns vcl::Region based on device pixel coordinates and units.
-     */
-    // SAL_DLLPRIVATE vcl::Region       ImplPixelToDevicePixel( const vcl::Region& rRegion ) const;
 
     /** Get device transformation.
 

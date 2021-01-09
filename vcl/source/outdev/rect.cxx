@@ -103,7 +103,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
     if ( aRect.IsEmpty() )
         return;
 
-    nHorzRound = ImplLogicWidthToDevicePixel( nHorzRound );
+    nHorzRound = maGeometry.ImplLogicWidthToDevicePixel( nHorzRound, maMappingMetric );
     nVertRound = maGeometry.ImplLogicHeightToDevicePixel( nVertRound, maMappingMetric );
 
     // we need a graphics

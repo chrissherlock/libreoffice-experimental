@@ -336,9 +336,9 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
     if ( mbOutputClipped )
         return;
 
-    tools::Long nSrcWidth   = ImplLogicWidthToDevicePixel( rSrcSize.Width() );
+    tools::Long nSrcWidth   = maGeometry.ImplLogicWidthToDevicePixel( rSrcSize.Width(), maMappingMetric );
     tools::Long nSrcHeight  = maGeometry.ImplLogicHeightToDevicePixel( rSrcSize.Height(), maMappingMetric );
-    tools::Long nDestWidth  = ImplLogicWidthToDevicePixel( rDestSize.Width() );
+    tools::Long nDestWidth  = maGeometry.ImplLogicWidthToDevicePixel( rDestSize.Width(), maMappingMetric );
     tools::Long nDestHeight = maGeometry.ImplLogicHeightToDevicePixel( rDestSize.Height(), maMappingMetric );
 
     if (nSrcWidth && nSrcHeight && nDestWidth && nDestHeight)
@@ -406,11 +406,11 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
     {
         SalTwoRect aPosAry(rOutDev.ImplLogicXToDevicePixel(rSrcPt.X()),
                            rOutDev.ImplLogicYToDevicePixel(rSrcPt.Y()),
-                           rOutDev.ImplLogicWidthToDevicePixel(rSrcSize.Width()),
+                           rOutDev.GetGeometry().ImplLogicWidthToDevicePixel(rSrcSize.Width(), rOutDev.GetMappingMetrics()),
                            rOutDev.GetGeometry().ImplLogicHeightToDevicePixel(rSrcSize.Height(), rOutDev.GetMappingMetrics()),
                            ImplLogicXToDevicePixel(rDestPt.X()),
                            ImplLogicYToDevicePixel(rDestPt.Y()),
-                           ImplLogicWidthToDevicePixel(rDestSize.Width()),
+                           maGeometry.ImplLogicWidthToDevicePixel(rDestSize.Width(), maMappingMetric),
                            maGeometry.ImplLogicHeightToDevicePixel(rDestSize.Height(), maMappingMetric));
 
         drawOutDevDirect(rOutDev, aPosAry);
@@ -443,7 +443,7 @@ void OutputDevice::CopyArea( const Point& rDestPt,
     if ( mbOutputClipped )
         return;
 
-    tools::Long nSrcWidth   = ImplLogicWidthToDevicePixel( rSrcSize.Width() );
+    tools::Long nSrcWidth = maGeometry.ImplLogicWidthToDevicePixel( rSrcSize.Width(), maMappingMetric );
     tools::Long nSrcHeight  = maGeometry.ImplLogicHeightToDevicePixel( rSrcSize.Height(), maMappingMetric );
     if (nSrcWidth && nSrcHeight)
     {

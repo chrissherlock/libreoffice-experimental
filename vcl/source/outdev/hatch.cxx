@@ -100,7 +100,7 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
         GDIMetaFile* pOldMetaFile = mpMetaFile;
 
         aPolyPoly.Optimize(PolyOptimizeFlags::NO_SAME);
-        aHatch.SetDistance(ImplLogicWidthToDevicePixel(aHatch.GetDistance()));
+        aHatch.SetDistance(maGeometry.ImplLogicWidthToDevicePixel(aHatch.GetDistance(), maMappingMetric));
 
         mpMetaFile = nullptr;
         SaveAndDisableMapMode(this);
@@ -168,7 +168,7 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
     {
         tools::Rectangle   aRect( rPolyPoly.GetBoundRect() );
         const tools::Long  nLogPixelWidth = maGeometry.ImplDevicePixelToLogicWidth(1, maMappingMetric);
-        const tools::Long nWidth = maGeometry.ImplDevicePixelToLogicWidth( std::max( ImplLogicWidthToDevicePixel( rHatch.GetDistance() ), tools::Long(3) ), maMappingMetric );
+        const tools::Long nWidth = maGeometry.ImplDevicePixelToLogicWidth( std::max( maGeometry.ImplLogicWidthToDevicePixel( rHatch.GetDistance(), maMappingMetric ), tools::Long(3) ), maMappingMetric );
         std::unique_ptr<Point[]> pPtBuffer(new Point[ HATCH_MAXPOINTS ]);
         Point       aPt1, aPt2, aEndPt1;
         Size        aInc;

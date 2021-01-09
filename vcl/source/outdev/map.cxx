@@ -322,14 +322,6 @@ tools::Long OutputDevice::ImplLogicYToDevicePixel( tools::Long nY ) const
                              GetYMapNumerator(), GetYMapDenominator() )+GetYOffsetInPixels()+GetYOffsetFromOriginInPixels();
 }
 
-tools::Long OutputDevice::ImplLogicWidthToDevicePixel( tools::Long nWidth ) const
-{
-    if (!IsMapModeEnabled())
-        return nWidth;
-
-    return ImplLogicToPixel(nWidth, GetDPIX(), GetXMapNumerator(), GetXMapDenominator());
-}
-
 void OutputDevice::EnableMapMode( bool bEnable )
 {
     RenderContext2::EnableMapMode(bEnable);

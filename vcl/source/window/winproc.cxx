@@ -1261,7 +1261,7 @@ static void ImplHandleExtTextInputPos( vcl::Window* pWindow,
             else
                 rRect = tools::Rectangle( Point( pChild->GetXOffsetInPixels(), pChild->GetYOffsetInPixels() ), Size() );
         }
-        rInputWidth = pChild->ImplLogicWidthToDevicePixel( pChild->GetCursorExtTextInputWidth() );
+        rInputWidth = pChild->GetGeometry().ImplLogicWidthToDevicePixel( pChild->GetCursorExtTextInputWidth(), pChild->GetMappingMetrics() );
         if ( !rInputWidth )
             rInputWidth = rRect.GetWidth();
     }
