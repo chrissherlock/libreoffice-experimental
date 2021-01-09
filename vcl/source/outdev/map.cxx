@@ -304,24 +304,6 @@ static tools::Long ImplPixelToLogic(tools::Long n, tools::Long nDPI, tools::Long
     return n;
 }
 
-tools::Long OutputDevice::ImplLogicXToDevicePixel( tools::Long nX ) const
-{
-    if (!IsMapModeEnabled())
-        return nX+GetXOffsetInPixels();
-
-    return ImplLogicToPixel( nX + const_cast<OutputDevice*>(this)->GetXMapOffset(), GetDPIX(),
-                             GetXMapNumerator(), GetXMapDenominator() )+GetXOffsetInPixels()+GetXOffsetFromOriginInPixels();
-}
-
-tools::Long OutputDevice::ImplLogicYToDevicePixel( tools::Long nY ) const
-{
-    if (!IsMapModeEnabled())
-        return nY+GetYOffsetInPixels();
-
-    return ImplLogicToPixel( nY + GetYMapOffset(), GetDPIY(),
-                             GetYMapNumerator(), GetYMapDenominator() )+GetYOffsetInPixels()+GetYOffsetFromOriginInPixels();
-}
-
 void OutputDevice::EnableMapMode( bool bEnable )
 {
     RenderContext2::EnableMapMode(bEnable);

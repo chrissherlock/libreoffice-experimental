@@ -258,10 +258,10 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
     tools::Long nY = ( rRect.Top() >= aDstRect.Top() ) ? rRect.Top() : ( rRect.Top() + ( ( aDstRect.Top() - rRect.Top() ) / nDistY ) * nDistY );
     const tools::Long nRight = aDstRect.Right();
     const tools::Long nBottom = aDstRect.Bottom();
-    const tools::Long nStartX = ImplLogicXToDevicePixel( nX );
-    const tools::Long nEndX = ImplLogicXToDevicePixel( nRight );
-    const tools::Long nStartY = ImplLogicYToDevicePixel( nY );
-    const tools::Long nEndY = ImplLogicYToDevicePixel( nBottom );
+    const tools::Long nStartX = maGeometry.ImplLogicXToDevicePixel( nX, maMappingMetric );
+    const tools::Long nEndX = maGeometry.ImplLogicXToDevicePixel( nRight, maMappingMetric );
+    const tools::Long nStartY = maGeometry.ImplLogicYToDevicePixel( nY, maMappingMetric );
+    const tools::Long nEndY = maGeometry.ImplLogicYToDevicePixel( nBottom, maMappingMetric );
     tools::Long nHorzCount = 0;
     tools::Long nVertCount = 0;
 
@@ -274,7 +274,7 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
         aVertBuf[ nVertCount++ ] = nStartY;
         while( ( nY += nDistY ) <= nBottom )
         {
-            aVertBuf[ nVertCount++ ] = ImplLogicYToDevicePixel( nY );
+            aVertBuf[ nVertCount++ ] = maGeometry.ImplLogicYToDevicePixel( nY, maMappingMetric );
         }
     }
 
@@ -284,7 +284,7 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
         aHorzBuf[ nHorzCount++ ] = nStartX;
         while( ( nX += nDistX ) <= nRight )
         {
-            aHorzBuf[ nHorzCount++ ] = ImplLogicXToDevicePixel( nX );
+            aHorzBuf[ nHorzCount++ ] = maGeometry.ImplLogicXToDevicePixel( nX, maMappingMetric );
         }
     }
 

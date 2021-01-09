@@ -109,7 +109,8 @@ void OutputDevice::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
     if (xImpBmp)
     {
         SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(), rSrcSizePixel.Height(),
-                           ImplLogicXToDevicePixel(rDestPt.X()), ImplLogicYToDevicePixel(rDestPt.Y()),
+                           maGeometry.ImplLogicXToDevicePixel(rDestPt.X(), maMappingMetric),
+                           maGeometry.ImplLogicYToDevicePixel(rDestPt.Y(), maMappingMetric),
                            maGeometry.ImplLogicWidthToDevicePixel(rDestSize.Width(), maMappingMetric),
                            maGeometry.ImplLogicHeightToDevicePixel(rDestSize.Height(), maMappingMetric));
 

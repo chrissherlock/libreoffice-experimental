@@ -147,8 +147,9 @@ void OutputDevice::DrawBitmap(const Point& rDestPt, const Size& rDestSize, const
     if (!aBmp.IsEmpty())
     {
         SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(),
-                           rSrcSizePixel.Height(), ImplLogicXToDevicePixel(rDestPt.X()),
-                           ImplLogicYToDevicePixel(rDestPt.Y()),
+                           rSrcSizePixel.Height(),
+                           maGeometry.ImplLogicXToDevicePixel(rDestPt.X(), maMappingMetric),
+                           maGeometry.ImplLogicYToDevicePixel(rDestPt.Y(), maMappingMetric),
                            maGeometry.ImplLogicWidthToDevicePixel(rDestSize.Width(), maMappingMetric),
                            maGeometry.ImplLogicHeightToDevicePixel(rDestSize.Height(), maMappingMetric));
 
@@ -194,8 +195,8 @@ void OutputDevice::DrawBitmap(const Point& rDestPt, const Size& rDestSize, const
 Bitmap OutputDevice::GetBitmap(const Point& rSrcPt, const Size& rSize) const
 {
     Bitmap aBmp;
-    tools::Long nX = ImplLogicXToDevicePixel(rSrcPt.X());
-    tools::Long nY = ImplLogicYToDevicePixel(rSrcPt.Y());
+    tools::Long nX = maGeometry.ImplLogicXToDevicePixel(rSrcPt.X(), maMappingMetric);
+    tools::Long nY = maGeometry.ImplLogicYToDevicePixel(rSrcPt.Y(), maMappingMetric);
     tools::Long nWidth = maGeometry.ImplLogicWidthToDevicePixel(rSize.Width(), maMappingMetric);
     tools::Long nHeight = maGeometry.ImplLogicHeightToDevicePixel(rSize.Height(), maMappingMetric);
 

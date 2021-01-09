@@ -343,9 +343,9 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
 
     if (nSrcWidth && nSrcHeight && nDestWidth && nDestHeight)
     {
-        SalTwoRect aPosAry(ImplLogicXToDevicePixel(rSrcPt.X()), ImplLogicYToDevicePixel(rSrcPt.Y()),
+        SalTwoRect aPosAry(maGeometry.ImplLogicXToDevicePixel(rSrcPt.X(), maMappingMetric), maGeometry.ImplLogicYToDevicePixel(rSrcPt.Y(), maMappingMetric),
                            nSrcWidth, nSrcHeight,
-                           ImplLogicXToDevicePixel(rDestPt.X()), ImplLogicYToDevicePixel(rDestPt.Y()),
+                           maGeometry.ImplLogicXToDevicePixel(rDestPt.X(), maMappingMetric), maGeometry.ImplLogicYToDevicePixel(rDestPt.Y(), maMappingMetric),
                            nDestWidth, nDestHeight);
 
         AdjustTwoRect( aPosAry, GetOutputRectPixel() );
@@ -404,12 +404,12 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
     }
     else
     {
-        SalTwoRect aPosAry(rOutDev.ImplLogicXToDevicePixel(rSrcPt.X()),
-                           rOutDev.ImplLogicYToDevicePixel(rSrcPt.Y()),
+        SalTwoRect aPosAry(rOutDev.GetGeometry().ImplLogicXToDevicePixel(rSrcPt.X(), rOutDev.GetMappingMetrics()),
+                           rOutDev.GetGeometry().ImplLogicYToDevicePixel(rSrcPt.Y(), rOutDev.GetMappingMetrics()),
                            rOutDev.GetGeometry().ImplLogicWidthToDevicePixel(rSrcSize.Width(), rOutDev.GetMappingMetrics()),
                            rOutDev.GetGeometry().ImplLogicHeightToDevicePixel(rSrcSize.Height(), rOutDev.GetMappingMetrics()),
-                           ImplLogicXToDevicePixel(rDestPt.X()),
-                           ImplLogicYToDevicePixel(rDestPt.Y()),
+                           maGeometry.ImplLogicXToDevicePixel(rDestPt.X(), maMappingMetric),
+                           maGeometry.ImplLogicYToDevicePixel(rDestPt.Y(), maMappingMetric),
                            maGeometry.ImplLogicWidthToDevicePixel(rDestSize.Width(), maMappingMetric),
                            maGeometry.ImplLogicHeightToDevicePixel(rDestSize.Height(), maMappingMetric));
 
@@ -447,9 +447,11 @@ void OutputDevice::CopyArea( const Point& rDestPt,
     tools::Long nSrcHeight  = maGeometry.ImplLogicHeightToDevicePixel( rSrcSize.Height(), maMappingMetric );
     if (nSrcWidth && nSrcHeight)
     {
-        SalTwoRect aPosAry(ImplLogicXToDevicePixel(rSrcPt.X()), ImplLogicYToDevicePixel(rSrcPt.Y()),
+        SalTwoRect aPosAry(maGeometry.ImplLogicXToDevicePixel(rSrcPt.X(), maMappingMetric),
+                           maGeometry.ImplLogicYToDevicePixel(rSrcPt.Y(), maMappingMetric),
                            nSrcWidth, nSrcHeight,
-                           ImplLogicXToDevicePixel(rDestPt.X()), ImplLogicYToDevicePixel(rDestPt.Y()),
+                           maGeometry.ImplLogicXToDevicePixel(rDestPt.X(), maMappingMetric),
+                           maGeometry.ImplLogicYToDevicePixel(rDestPt.Y(), maMappingMetric),
                            nSrcWidth, nSrcHeight);
 
         AdjustTwoRect( aPosAry, GetOutputRectPixel() );
