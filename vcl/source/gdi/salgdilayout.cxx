@@ -616,7 +616,7 @@ void SalGraphics::DrawPolyPolygon(const basegfx::B2DHomMatrix& rObjectToDevice,
     {
         const tools::PolyPolygon aToolsPolyPolygon(i_rPolyPolygon);
         const tools::PolyPolygon aPixelPolyPolygon
-            = i_rOutDev.ImplLogicToDevicePixel(aToolsPolyPolygon);
+            = i_rOutDev.GetGeometry().ImplLogicToDevicePixel(aToolsPolyPolygon, i_rOutDev.GetMappingMetrics());
         DrawPolyPolygon(aPixelPolyPolygon.Count(), aPixelPolyPolygon, i_rOutDev);
     }
 }

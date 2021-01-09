@@ -53,6 +53,12 @@ Size RenderContext2::GetOffsetFromOriginInPixels() const
     return Size(maGeometry.mnOffsetFromOriginXpx, maGeometry.mnOffsetFromOriginYpx);
 }
 
+void RenderContext2::ResetLogicalUnitsOffsetFromOrigin()
+{
+    maGeometry.mnOffsetFromOriginXInLogicalUnits = maGeometry.mnOffsetFromOriginXpx;
+    maGeometry.mnOffsetFromOriginYInLogicalUnits = maGeometry.mnOffsetFromOriginYpx;
+}
+
 tools::Long RenderContext2::GetXOffsetFromOriginInPixels() const
 {
     return maGeometry.mnOffsetFromOriginXpx;
@@ -127,5 +133,7 @@ void RenderContext2::SetYMapDenominator(tools::Long nDenomerator)
 {
     maMappingMetric.mnMapScDenomY = nDenomerator;
 }
+
+MappingMetrics RenderContext2::GetMappingMetrics() const { return maMappingMetric; }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

@@ -153,6 +153,9 @@ public:
     sal_Int32 GetDPIScalePercentage() const;
     void SetDPIScalePercentage(sal_Int32 nPercentage);
 
+    Geometry GetGeometry() const;
+    MappingMetrics GetMappingMetrics() const;
+
 protected:
     /** Acquire a graphics device that the output device uses to draw on.
 

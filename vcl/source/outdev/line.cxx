@@ -84,7 +84,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
 
     const Point aStartPt( ImplLogicToDevicePixel( rStartPt ) );
     const Point aEndPt( ImplLogicToDevicePixel( rEndPt ) );
-    const LineInfo aInfo( ImplLogicToDevicePixel( rLineInfo ) );
+    const LineInfo aInfo( maGeometry.ImplLogicToDevicePixel( rLineInfo, maMappingMetric ) );
     const bool bDashUsed(LineStyle::Dash == aInfo.GetStyle());
     const bool bLineWidthUsed(aInfo.GetWidth() > 1);
 

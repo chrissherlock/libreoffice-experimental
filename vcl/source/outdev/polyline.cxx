@@ -239,7 +239,7 @@ void OutputDevice::drawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
     if ( IsInitLineColor() )
         InitLineColor();
 
-    const LineInfo aInfo( ImplLogicToDevicePixel( rLineInfo ) );
+    const LineInfo aInfo( maGeometry.ImplLogicToDevicePixel( rLineInfo, maMappingMetric ) );
     const bool bDashUsed(LineStyle::Dash == aInfo.GetStyle());
     const bool bLineWidthUsed(aInfo.GetWidth() > 1);
 

@@ -63,10 +63,6 @@ void RenderContext2::SetDPIScalePercentage(sal_Int32 nPercentage)
     maGeometry.mnDPIScalePercentage = nPercentage;
 }
 
-void RenderContext2::ResetLogicalUnitsOffsetFromOrigin()
-{
-    maGeometry.mnOffsetFromOriginXInLogicalUnits = maGeometry.mnOffsetFromOriginXpx;
-    maGeometry.mnOffsetFromOriginYInLogicalUnits = maGeometry.mnOffsetFromOriginYpx;
-}
+Geometry RenderContext2::GetGeometry() const { return maGeometry; }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

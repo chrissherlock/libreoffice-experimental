@@ -1612,22 +1612,6 @@ public:
      */
     SAL_DLLPRIVATE tools::Polygon ImplLogicToDevicePixel( const tools::Polygon& rLogicPoly ) const;
 
-    /** Convert a logical polypolygon to a polypolygon in physical device pixel units.
-
-     @param         rLogicPolyPoly  Const reference to a polypolygon in logical units
-
-     @returns Polypolygon based on physical device pixel coordinates and units.
-     */
-    SAL_DLLPRIVATE tools::PolyPolygon  ImplLogicToDevicePixel( const tools::PolyPolygon& rLogicPolyPoly ) const;
-
-    /** Convert a line in logical units to a line in physical device pixel units.
-
-     @param         rLineInfo   Const reference to a line in logical units
-
-     @returns Line based on physical device pixel coordinates and units.
-     */
-    SAL_DLLPRIVATE LineInfo     ImplLogicToDevicePixel( const LineInfo& rLineInfo ) const;
-
     /** Convert a region in pixel units to a region in device pixel units and coords.
 
      @param         rRegion  Const reference to region.

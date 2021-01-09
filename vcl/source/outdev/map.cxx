@@ -428,48 +428,6 @@ tools::Polygon OutputDevice::ImplLogicToDevicePixel( const tools::Polygon& rLogi
     return aPoly;
 }
 
-tools::PolyPolygon OutputDevice::ImplLogicToDevicePixel( const tools::PolyPolygon& rLogicPolyPoly ) const
-{
-    if (!IsMapModeEnabled() && !GetXOffsetInPixels() && !GetYOffsetInPixels())
-        return rLogicPolyPoly;
-
-    tools::PolyPolygon aPolyPoly( rLogicPolyPoly );
-    sal_uInt16      nPoly = aPolyPoly.Count();
-    for( sal_uInt16 i = 0; i < nPoly; i++ )
-    {
-        tools::Polygon& rPoly = aPolyPoly[i];
-        rPoly = ImplLogicToDevicePixel( rPoly );
-    }
-    return aPolyPoly;
-}
-
-LineInfo OutputDevice::ImplLogicToDevicePixel( const LineInfo& rLineInfo ) const
-{
-    LineInfo aInfo( rLineInfo );
-
-    if( aInfo.GetStyle() == LineStyle::Dash )
-    {
-        if( aInfo.GetDotCount() && aInfo.GetDotLen() )
-            aInfo.SetDotLen( std::max( ImplLogicWidthToDevicePixel( aInfo.GetDotLen() ), tools::Long(1) ) );
-        else
-            aInfo.SetDotCount( 0 );
-
-        if( aInfo.GetDashCount() && aInfo.GetDashLen() )
-            aInfo.SetDashLen( std::max( ImplLogicWidthToDevicePixel( aInfo.GetDashLen() ), tools::Long(1) ) );
-        else
-            aInfo.SetDashCount( 0 );
-
-        aInfo.SetDistance( ImplLogicWidthToDevicePixel( aInfo.GetDistance() ) );
-
-        if( ( !aInfo.GetDashCount() && !aInfo.GetDotCount() ) || !aInfo.GetDistance() )
-            aInfo.SetStyle( LineStyle::Solid );
-    }
-
-    aInfo.SetWidth( ImplLogicWidthToDevicePixel( aInfo.GetWidth() ) );
-
-    return aInfo;
-}
-
 void OutputDevice::EnableMapMode( bool bEnable )
 {
     RenderContext2::EnableMapMode(bEnable);

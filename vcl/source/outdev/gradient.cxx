@@ -90,7 +90,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
             // do nothing if the rectangle is empty
             if ( !aRect.IsEmpty() )
             {
-                tools::PolyPolygon aClixPolyPoly( ImplLogicToDevicePixel( rPolyPoly ) );
+                tools::PolyPolygon aClixPolyPoly( maGeometry.ImplLogicToDevicePixel( rPolyPoly, maMappingMetric ) );
                 bool bDrawn = false;
 
                 if( !mpGraphics && !AcquireGraphics() )
