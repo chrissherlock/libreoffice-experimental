@@ -493,7 +493,7 @@ void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderCo
         rRenderContext.ReMirror(aPaintRect);
         rRenderContext.ReMirror(rPaintRegion);
     }
-    aPaintRect = ImplDevicePixelToLogic(aPaintRect);
+    aPaintRect = maGeometry.ImplDevicePixelToLogic(aPaintRect, maMappingMetric);
     mpWindowImpl->mpPaintRegion = &rPaintRegion;
     mpWindowImpl->maInvalidateRegion.SetEmpty();
 

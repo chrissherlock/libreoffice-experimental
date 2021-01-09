@@ -311,8 +311,8 @@ bool OutputDevice::GetNativeControlRegion(  ControlType nType,
     if( bRet )
     {
         // transform back native regions
-        rNativeBoundingRegion = ImplDevicePixelToLogic( rNativeBoundingRegion );
-        rNativeContentRegion = ImplDevicePixelToLogic( rNativeContentRegion );
+        rNativeBoundingRegion = maGeometry.ImplDevicePixelToLogic( rNativeBoundingRegion, maMappingMetric );
+        rNativeContentRegion = maGeometry.ImplDevicePixelToLogic( rNativeContentRegion, maMappingMetric );
     }
 
     return bRet;

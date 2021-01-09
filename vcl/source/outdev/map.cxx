@@ -486,39 +486,6 @@ LineInfo OutputDevice::ImplLogicToDevicePixel( const LineInfo& rLineInfo ) const
     return aInfo;
 }
 
-tools::Rectangle OutputDevice::ImplDevicePixelToLogic( const tools::Rectangle& rPixelRect ) const
-{
-    if ( rPixelRect.IsEmpty() )
-        return rPixelRect;
-
-    if (!IsMapModeEnabled())
-    {
-        return tools::Rectangle( rPixelRect.Left()-GetXOffsetInPixels(), rPixelRect.Top()-GetYOffsetInPixels(),
-                          rPixelRect.Right()-GetXOffsetInPixels(), rPixelRect.Bottom()-GetYOffsetInPixels() );
-    }
-
-    return tools::Rectangle( ImplPixelToLogic( rPixelRect.Left()-GetXOffsetInPixels()-GetXOffsetFromOriginInPixels(), GetDPIX(),
-                                        GetXMapNumerator(), GetXMapDenominator() )-GetXMapOffset(),
-                      ImplPixelToLogic( rPixelRect.Top()-GetYOffsetInPixels()-GetYOffsetFromOriginInPixels(), GetDPIY(),
-                                        GetYMapNumerator(), GetYMapDenominator() )-GetYMapOffset(),
-                      ImplPixelToLogic( rPixelRect.Right()-GetXOffsetInPixels()-GetXOffsetFromOriginInPixels(), GetDPIX(),
-                                        GetXMapNumerator(), GetXMapDenominator() )-GetXMapOffset(),
-                      ImplPixelToLogic( rPixelRect.Bottom()-GetYOffsetInPixels()-GetYOffsetFromOriginInPixels(), GetDPIY(),
-                                        GetYMapNumerator(), GetYMapDenominator() )-GetYMapOffset() );
-}
-
-/*
-vcl::Region OutputDevice::ImplPixelToDevicePixel( const vcl::Region& rRegion ) const
-{
-    if ( !GetXOffsetInPixels() && !GetYOffsetInPixels() )
-        return rRegion;
-
-    vcl::Region aRegion( rRegion );
-    aRegion.Move( GetXOffsetInPixels()+GetXOffsetFromOriginInPixels(), GetYOffsetInPixels()+GetYOffsetFromOriginInPixels() );
-    return aRegion;
-}
-*/
-
 void OutputDevice::EnableMapMode( bool bEnable )
 {
     RenderContext2::EnableMapMode(bEnable);

@@ -1626,14 +1626,6 @@ public:
      */
     SAL_DLLPRIVATE Size         ImplLogicToDevicePixel( const Size& rLogicSize ) const;
 
-    /** Convert a rectangle in physical pixel units to a rectangle in physical pixel units and coords.
-
-     @param         rPixelRect  Const reference to rectangle in logical units and coords.
-
-     @returns Rectangle based on logical coordinates and units.
-     */
-    SAL_DLLPRIVATE tools::Rectangle    ImplDevicePixelToLogic( const tools::Rectangle& rPixelRect ) const;
-
     /** Convert a logical polygon to a polygon in physical device pixel units.
 
      @param         rLogicPoly  Const reference to a polygon in logical units
