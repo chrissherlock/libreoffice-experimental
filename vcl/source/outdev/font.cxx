@@ -645,7 +645,7 @@ bool OutputDevice::ImplNewFont() const
 
     // convert to pixel height
     // TODO: replace integer based aSize completely with subpixel accurate type
-    float fExactHeight = ImplFloatLogicHeightToDevicePixel( static_cast<float>(maFont.GetFontHeight()) );
+    float fExactHeight = maGeometry.ImplFloatLogicHeightToDevicePixel( static_cast<float>(maFont.GetFontHeight()), maMappingMetric );
     Size aSize = maGeometry.ImplLogicToDevicePixel( maFont.GetFontSize(), maMappingMetric );
     if ( !aSize.Height() )
     {

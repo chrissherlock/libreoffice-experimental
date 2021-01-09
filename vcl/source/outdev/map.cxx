@@ -338,15 +338,6 @@ tools::Long OutputDevice::ImplLogicHeightToDevicePixel( tools::Long nHeight ) co
     return ImplLogicToPixel(nHeight, GetDPIY(), GetYMapNumerator(), GetYMapDenominator());
 }
 
-float OutputDevice::ImplFloatLogicHeightToDevicePixel( float fLogicHeight) const
-{
-    if(!IsMapModeEnabled())
-        return fLogicHeight;
-
-    float fPixelHeight = (fLogicHeight * GetDPIY() * GetYMapNumerator()) / GetYMapDenominator();
-    return fPixelHeight;
-}
-
 void OutputDevice::EnableMapMode( bool bEnable )
 {
     RenderContext2::EnableMapMode(bEnable);
