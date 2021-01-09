@@ -337,9 +337,9 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
         return;
 
     tools::Long nSrcWidth   = ImplLogicWidthToDevicePixel( rSrcSize.Width() );
-    tools::Long nSrcHeight  = ImplLogicHeightToDevicePixel( rSrcSize.Height() );
+    tools::Long nSrcHeight  = maGeometry.ImplLogicHeightToDevicePixel( rSrcSize.Height(), maMappingMetric );
     tools::Long nDestWidth  = ImplLogicWidthToDevicePixel( rDestSize.Width() );
-    tools::Long nDestHeight = ImplLogicHeightToDevicePixel( rDestSize.Height() );
+    tools::Long nDestHeight = maGeometry.ImplLogicHeightToDevicePixel( rDestSize.Height(), maMappingMetric );
 
     if (nSrcWidth && nSrcHeight && nDestWidth && nDestHeight)
     {
@@ -407,11 +407,11 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
         SalTwoRect aPosAry(rOutDev.ImplLogicXToDevicePixel(rSrcPt.X()),
                            rOutDev.ImplLogicYToDevicePixel(rSrcPt.Y()),
                            rOutDev.ImplLogicWidthToDevicePixel(rSrcSize.Width()),
-                           rOutDev.ImplLogicHeightToDevicePixel(rSrcSize.Height()),
+                           rOutDev.GetGeometry().ImplLogicHeightToDevicePixel(rSrcSize.Height(), rOutDev.GetMappingMetrics()),
                            ImplLogicXToDevicePixel(rDestPt.X()),
                            ImplLogicYToDevicePixel(rDestPt.Y()),
                            ImplLogicWidthToDevicePixel(rDestSize.Width()),
-                           ImplLogicHeightToDevicePixel(rDestSize.Height()));
+                           maGeometry.ImplLogicHeightToDevicePixel(rDestSize.Height(), maMappingMetric));
 
         drawOutDevDirect(rOutDev, aPosAry);
 
@@ -444,7 +444,7 @@ void OutputDevice::CopyArea( const Point& rDestPt,
         return;
 
     tools::Long nSrcWidth   = ImplLogicWidthToDevicePixel( rSrcSize.Width() );
-    tools::Long nSrcHeight  = ImplLogicHeightToDevicePixel( rSrcSize.Height() );
+    tools::Long nSrcHeight  = maGeometry.ImplLogicHeightToDevicePixel( rSrcSize.Height(), maMappingMetric );
     if (nSrcWidth && nSrcHeight)
     {
         SalTwoRect aPosAry(ImplLogicXToDevicePixel(rSrcPt.X()), ImplLogicYToDevicePixel(rSrcPt.Y()),

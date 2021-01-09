@@ -1557,18 +1557,6 @@ public:
      */
     SAL_DLLPRIVATE tools::Long         ImplLogicYToDevicePixel( tools::Long nY ) const;
 
-    /** Convert a logical height to a height in units of device pixels.
-
-     To get the number of device pixels, it must calculate the Y-DPI of the device and
-     the map scaling factor. If there is no mapping, then it just returns the
-     height as nothing more needs to be done.
-
-     @param         nHeight     Logical height
-
-     @returns Height in units of device pixels.
-     */
-    SAL_DLLPRIVATE tools::Long         ImplLogicHeightToDevicePixel( tools::Long nHeight ) const;
-
     /** Convert a region in pixel units to a region in device pixel units and coords.
 
      @param         rRegion  Const reference to region.

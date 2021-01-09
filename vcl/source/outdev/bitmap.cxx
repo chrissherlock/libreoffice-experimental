@@ -150,7 +150,7 @@ void OutputDevice::DrawBitmap(const Point& rDestPt, const Size& rDestSize, const
                            rSrcSizePixel.Height(), ImplLogicXToDevicePixel(rDestPt.X()),
                            ImplLogicYToDevicePixel(rDestPt.Y()),
                            ImplLogicWidthToDevicePixel(rDestSize.Width()),
-                           ImplLogicHeightToDevicePixel(rDestSize.Height()));
+                           maGeometry.ImplLogicHeightToDevicePixel(rDestSize.Height(), maMappingMetric));
 
         if (aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth
             && aPosAry.mnDestHeight)
@@ -197,7 +197,7 @@ Bitmap OutputDevice::GetBitmap(const Point& rSrcPt, const Size& rSize) const
     tools::Long nX = ImplLogicXToDevicePixel(rSrcPt.X());
     tools::Long nY = ImplLogicYToDevicePixel(rSrcPt.Y());
     tools::Long nWidth = ImplLogicWidthToDevicePixel(rSize.Width());
-    tools::Long nHeight = ImplLogicHeightToDevicePixel(rSize.Height());
+    tools::Long nHeight = maGeometry.ImplLogicHeightToDevicePixel(rSize.Height(), maMappingMetric);
 
     if (mpGraphics || AcquireGraphics())
     {

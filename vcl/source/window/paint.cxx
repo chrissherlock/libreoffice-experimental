@@ -1638,7 +1638,7 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
         return;
 
     nHorzScroll = ImplLogicWidthToDevicePixel( nHorzScroll );
-    nVertScroll = ImplLogicHeightToDevicePixel( nVertScroll );
+    nVertScroll = maGeometry.ImplLogicHeightToDevicePixel( nVertScroll, maMappingMetric );
 
     if ( !nHorzScroll && !nVertScroll )
         return;

@@ -97,7 +97,7 @@ void OutputDevice::MoveClipRegion( tools::Long nHorzMove, tools::Long nVertMove 
             mpMetaFile->AddAction( new MetaMoveClipRegionAction( nHorzMove, nVertMove ) );
 
         maRegion.Move( ImplLogicWidthToDevicePixel( nHorzMove ),
-                       ImplLogicHeightToDevicePixel( nVertMove ) );
+                       maGeometry.ImplLogicHeightToDevicePixel( nVertMove, maMappingMetric ) );
         mbInitClipRegion = true;
     }
 
