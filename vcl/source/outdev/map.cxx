@@ -358,17 +358,6 @@ Point OutputDevice::ImplLogicToDevicePixel( const Point& rLogicPt ) const
                                     GetYMapNumerator(), GetYMapDenominator() )+GetYOffsetInPixels()+GetYOffsetFromOriginInPixels() );
 }
 
-Size OutputDevice::ImplLogicToDevicePixel( const Size& rLogicSize ) const
-{
-    if (!IsMapModeEnabled())
-        return rLogicSize;
-
-    return Size( ImplLogicToPixel( rLogicSize.Width(), GetDPIX(),
-                                   GetXMapNumerator(), GetXMapDenominator() ),
-                 ImplLogicToPixel( rLogicSize.Height(), GetDPIY(),
-                                   GetYMapNumerator(), GetYMapDenominator() ) );
-}
-
 void OutputDevice::EnableMapMode( bool bEnable )
 {
     RenderContext2::EnableMapMode(bEnable);

@@ -1588,14 +1588,6 @@ public:
      */
     SAL_DLLPRIVATE float        ImplFloatLogicHeightToDevicePixel( float fLogicHeight ) const;
 
-    /** Convert a logical size to the size on the physical device.
-
-     @param         rLogicSize  Const reference to a size in logical units
-
-     @returns Physical size on the device.
-     */
-    SAL_DLLPRIVATE Size         ImplLogicToDevicePixel( const Size& rLogicSize ) const;
-
     /** Convert a region in pixel units to a region in device pixel units and coords.
 
      @param         rRegion  Const reference to region.

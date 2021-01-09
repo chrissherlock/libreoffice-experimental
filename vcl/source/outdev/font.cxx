@@ -492,7 +492,7 @@ vcl::Font OutputDevice::GetDefaultFont( DefaultFontType nType, LanguageType eLan
                     aFont.SetFamilyName( aSearch );
 
                     // convert to pixel height
-                    Size aSize = pOutDev->ImplLogicToDevicePixel( aFont.GetFontSize() );
+                    Size aSize = pOutDev->GetGeometry().ImplLogicToDevicePixel( aFont.GetFontSize(), pOutDev->GetMappingMetrics() );
                     if ( !aSize.Height() )
                     {
                         // use default pixel height only when logical height is zero
@@ -646,7 +646,7 @@ bool OutputDevice::ImplNewFont() const
     // convert to pixel height
     // TODO: replace integer based aSize completely with subpixel accurate type
     float fExactHeight = ImplFloatLogicHeightToDevicePixel( static_cast<float>(maFont.GetFontHeight()) );
-    Size aSize = ImplLogicToDevicePixel( maFont.GetFontSize() );
+    Size aSize = maGeometry.ImplLogicToDevicePixel( maFont.GetFontSize(), maMappingMetric );
     if ( !aSize.Height() )
     {
         // use default pixel height only when logical height is zero

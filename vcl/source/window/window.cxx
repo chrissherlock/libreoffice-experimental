@@ -1758,7 +1758,7 @@ void Window::ImplNewInputContext()
     if (!rFontName.isEmpty())
     {
         OutputDevice *pFocusWinOutDev = pFocusWin->GetOutDev();
-        Size aSize = pFocusWinOutDev->ImplLogicToDevicePixel( rFont.GetFontSize() );
+        Size aSize = pFocusWinOutDev->GetGeometry().ImplLogicToDevicePixel( rFont.GetFontSize(), pFocusWinOutDev->GetMappingMetrics() );
         if ( !aSize.Height() )
         {
             // only set default sizes if the font height in logical
