@@ -62,7 +62,7 @@ void OutputDevice::DrawPixel( const Point& rPt )
     if ( !IsDeviceOutputNecessary() || !IsOpaqueLineColor() || ImplIsRecordLayout() )
         return;
 
-    Point aPt = ImplLogicToDevicePixel( rPt );
+    Point aPt = maGeometry.ImplLogicToDevicePixel( rPt, maMappingMetric );
 
     if ( !mpGraphics && !AcquireGraphics() )
         return;
@@ -94,7 +94,7 @@ void OutputDevice::DrawPixel( const Point& rPt, const Color& rColor )
     if ( !IsDeviceOutputNecessary() || ImplIsRecordLayout() )
         return;
 
-    Point aPt = ImplLogicToDevicePixel( rPt );
+    Point aPt = maGeometry.ImplLogicToDevicePixel( rPt, maMappingMetric );
 
     if ( !mpGraphics && !AcquireGraphics() )
         return;

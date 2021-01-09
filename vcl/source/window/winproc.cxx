@@ -1252,7 +1252,7 @@ static void ImplHandleExtTextInputPos( vcl::Window* pWindow,
             vcl::Cursor* pCursor = pChild->GetCursor();
             if ( pCursor )
             {
-                Point aPos = pChildOutDev->ImplLogicToDevicePixel( pCursor->GetPos() );
+                Point aPos = pChildOutDev->GetGeometry().ImplLogicToDevicePixel( pCursor->GetPos(), pChildOutDev->GetMappingMetrics() );
                 Size aSize = pChild->LogicToPixel( pCursor->GetSize() );
                 if ( !aSize.Width() )
                     aSize.setWidth( pChild->GetSettings().GetStyleSettings().GetCursorSize() );

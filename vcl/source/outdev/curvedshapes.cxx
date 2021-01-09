@@ -97,8 +97,8 @@ void OutputDevice::DrawArc( const tools::Rectangle& rRect,
     if ( IsInitLineColor() )
         InitLineColor();
 
-    const Point     aStart( ImplLogicToDevicePixel( rStartPt ) );
-    const Point     aEnd( ImplLogicToDevicePixel( rEndPt ) );
+    const Point     aStart( maGeometry.ImplLogicToDevicePixel( rStartPt, maMappingMetric ) );
+    const Point     aEnd( maGeometry.ImplLogicToDevicePixel( rEndPt, maMappingMetric ) );
     tools::Polygon aArcPoly( aRect, aStart, aEnd, PolyStyle::Arc );
 
     if ( aArcPoly.GetSize() >= 2 )
@@ -138,8 +138,8 @@ void OutputDevice::DrawPie( const tools::Rectangle& rRect,
     if ( IsInitLineColor() )
         InitLineColor();
 
-    const Point     aStart( ImplLogicToDevicePixel( rStartPt ) );
-    const Point     aEnd( ImplLogicToDevicePixel( rEndPt ) );
+    const Point     aStart( maGeometry.ImplLogicToDevicePixel( rStartPt, maMappingMetric ) );
+    const Point     aEnd( maGeometry.ImplLogicToDevicePixel( rEndPt, maMappingMetric ) );
     tools::Polygon aPiePoly( aRect, aStart, aEnd, PolyStyle::Pie );
 
     if ( aPiePoly.GetSize() >= 2 )
@@ -186,8 +186,8 @@ void OutputDevice::DrawChord( const tools::Rectangle& rRect,
     if ( IsInitLineColor() )
         InitLineColor();
 
-    const Point     aStart( ImplLogicToDevicePixel( rStartPt ) );
-    const Point     aEnd( ImplLogicToDevicePixel( rEndPt ) );
+    const Point     aStart( maGeometry.ImplLogicToDevicePixel( rStartPt, maMappingMetric ) );
+    const Point     aEnd( maGeometry.ImplLogicToDevicePixel( rEndPt, maMappingMetric ) );
     tools::Polygon aChordPoly( aRect, aStart, aEnd, PolyStyle::Chord );
 
     if ( aChordPoly.GetSize() >= 2 )

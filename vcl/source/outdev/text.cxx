@@ -1287,7 +1287,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(const OUString& rOrigStr,
 
     // position, justify, etc. the layout
     pSalLayout->AdjustLayout( aLayoutArgs );
-    pSalLayout->DrawBase() = ImplLogicToDevicePixel( rLogicalPos );
+    pSalLayout->DrawBase() = maGeometry.ImplLogicToDevicePixel( rLogicalPos, maMappingMetric );
     // adjust to right alignment if necessary
     if( aLayoutArgs.mnFlags & SalLayoutFlags::RightAlign )
     {

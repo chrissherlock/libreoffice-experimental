@@ -1517,14 +1517,6 @@ public:
     // for B2DPoly/Polygons use this internally anyway to transform the B2DPolygon)
     static basegfx::B2DHomMatrix LogicToLogic(const MapMode& rMapModeSource, const MapMode& rMapModeDest);
 
-    /** Convert a logical point to a physical point on the device.
-
-     @param         rLogicPt    Const reference to a point in logical units.
-
-     @returns Physical point on the device.
-     */
-    SAL_DLLPRIVATE Point        ImplLogicToDevicePixel( const Point& rLogicPt ) const;
-
     /** Convert a logical width to a width in units of device pixels.
 
      To get the number of device pixels, it must calculate the X-DPI of the device and

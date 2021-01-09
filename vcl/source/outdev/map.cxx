@@ -347,17 +347,6 @@ float OutputDevice::ImplFloatLogicHeightToDevicePixel( float fLogicHeight) const
     return fPixelHeight;
 }
 
-Point OutputDevice::ImplLogicToDevicePixel( const Point& rLogicPt ) const
-{
-    if (!IsMapModeEnabled())
-        return Point( rLogicPt.X()+GetXOffsetInPixels(), rLogicPt.Y()+GetYOffsetInPixels() );
-
-    return Point( ImplLogicToPixel( rLogicPt.X() + GetXMapOffset(), GetDPIX(),
-                                    GetXMapNumerator(), GetXMapDenominator() )+GetXOffsetInPixels()+GetXOffsetFromOriginInPixels(),
-                  ImplLogicToPixel( rLogicPt.Y() + GetYMapOffset(), GetDPIY(),
-                                    GetYMapNumerator(), GetYMapDenominator() )+GetYOffsetInPixels()+GetYOffsetFromOriginInPixels() );
-}
-
 void OutputDevice::EnableMapMode( bool bEnable )
 {
     RenderContext2::EnableMapMode(bEnable);
