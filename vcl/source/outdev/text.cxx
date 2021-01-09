@@ -990,8 +990,8 @@ tools::Long OutputDevice::GetTextArray( const OUString& rStr, tools::Long* pDXAr
     {
         if( pDXAry )
             for( int i = 0; i < nLen; ++i )
-                pDXAry[i] = ImplDevicePixelToLogicWidth( pDXAry[i] );
-        nWidth = ImplDevicePixelToLogicWidth( nWidth );
+                pDXAry[i] = maGeometry.ImplDevicePixelToLogicWidth( pDXAry[i], maMappingMetric );
+        nWidth = maGeometry.ImplDevicePixelToLogicWidth( nWidth, maMappingMetric );
     }
 
     if( nWidthFactor > 1 )
@@ -1050,7 +1050,7 @@ void OutputDevice::GetCaretPositions( const OUString& rStr, tools::Long* pCaretX
     if (IsMapModeEnabled())
     {
         for( i = 0; i < 2*nLen; ++i )
-            pCaretXArray[i] = ImplDevicePixelToLogicWidth( pCaretXArray[i] );
+            pCaretXArray[i] = maGeometry.ImplDevicePixelToLogicWidth( pCaretXArray[i], maMappingMetric );
     }
 
     if( nWidthFactor != 1 )

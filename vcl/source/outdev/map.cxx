@@ -347,14 +347,6 @@ float OutputDevice::ImplFloatLogicHeightToDevicePixel( float fLogicHeight) const
     return fPixelHeight;
 }
 
-tools::Long OutputDevice::ImplDevicePixelToLogicWidth( tools::Long nWidth ) const
-{
-    if (!IsMapModeEnabled())
-        return nWidth;
-
-    return ImplPixelToLogic(nWidth, GetDPIX(), GetXMapNumerator(), GetXMapDenominator());
-}
-
 Point OutputDevice::ImplLogicToDevicePixel( const Point& rLogicPt ) const
 {
     if (!IsMapModeEnabled())

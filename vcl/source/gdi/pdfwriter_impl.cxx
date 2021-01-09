@@ -6357,7 +6357,7 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
                 else if( nWidth > 0 )
                 {
                     drawTextLine( PixelToLogic( aStartPt ),
-                                  ImplDevicePixelToLogicWidth( nWidth ),
+                                  maGeometry.ImplDevicePixelToLogicWidth( nWidth, maMappingMetric ),
                                   eStrikeout, eUnderline, eOverline, bUnderlineAbove );
                     nWidth = 0;
                 }
@@ -6366,7 +6366,7 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
             if( nWidth > 0 )
             {
                 drawTextLine( PixelToLogic( aStartPt ),
-                              ImplDevicePixelToLogicWidth( nWidth ),
+                              maGeometry.ImplDevicePixelToLogicWidth( nWidth, maMappingMetric ),
                               eStrikeout, eUnderline, eOverline, bUnderlineAbove );
             }
         }
@@ -6375,7 +6375,7 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
             Point aStartPt = rLayout.GetDrawPosition();
             int nWidth = rLayout.GetTextWidth() / rLayout.GetUnitsPerPixel();
             drawTextLine( PixelToLogic( aStartPt ),
-                          ImplDevicePixelToLogicWidth( nWidth ),
+                          maGeometry.ImplDevicePixelToLogicWidth( nWidth, maMappingMetric ),
                           eStrikeout, eUnderline, eOverline, bUnderlineAbove );
         }
     }
@@ -6407,7 +6407,7 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
     bool bEmphPolyLine;
 
     std::tie(aEmphPoly, bEmphPolyLine, nEmphYOff, nEmphWidth, aEmphRect1, aEmphRect2) =
-        GetEmphasisMark( nEmphMark, ImplDevicePixelToLogicWidth(nEmphHeight), GetDPIY());
+        GetEmphasisMark( nEmphMark, maGeometry.ImplDevicePixelToLogicWidth(nEmphHeight, maMappingMetric), GetDPIY());
 
     if ( bEmphPolyLine )
     {

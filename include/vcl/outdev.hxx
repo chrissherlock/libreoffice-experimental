@@ -1585,17 +1585,6 @@ public:
      */
     SAL_DLLPRIVATE tools::Long         ImplLogicHeightToDevicePixel( tools::Long nHeight ) const;
 
-    /** Convert device pixels to a width in logical units.
-
-     To get the logical width, it must calculate the X-DPI of the device and the
-     map scaling factor.
-
-     @param         nWidth      Width in device pixels
-
-     @returns Width in logical units.
-     */
-    SAL_DLLPRIVATE tools::Long         ImplDevicePixelToLogicWidth( tools::Long nWidth ) const;
-
     /** Convert logical height to device pixels, with exact sub-pixel value.
 
      To get the \em exact pixel height, it must calculate the Y-DPI of the device and the

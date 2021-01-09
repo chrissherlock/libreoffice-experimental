@@ -918,7 +918,7 @@ tools::Long OutputDevice::GetMinKashida() const
     if (!ImplNewFont())
         return 0;
 
-    return ImplDevicePixelToLogicWidth( mpFontInstance->mxFontMetric->GetMinKashida() );
+    return maGeometry.ImplDevicePixelToLogicWidth( mpFontInstance->mxFontMetric->GetMinKashida(), maMappingMetric );
 }
 
 sal_Int32 OutputDevice::ValidateKashidas ( const OUString& rTxt,
