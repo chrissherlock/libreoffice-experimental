@@ -737,7 +737,7 @@ void SalGraphics::DrawPolyLine(const basegfx::B2DHomMatrix& rObjectToDevice,
 
     if (bDrawn)
     {
-        tools::Polygon aPoly = i_rOutDev.ImplLogicToDevicePixel(tools::Polygon(i_rPolygon));
+        tools::Polygon aPoly = i_rOutDev.GetGeometry().ImplLogicToDevicePixel(tools::Polygon(i_rPolygon), i_rOutDev.GetMappingMetrics());
         Point* pPtAry = aPoly.GetPointAry();
 
         // Forward beziers to sal, if any

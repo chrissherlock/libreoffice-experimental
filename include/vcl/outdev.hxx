@@ -1604,14 +1604,6 @@ public:
      */
     SAL_DLLPRIVATE Size         ImplLogicToDevicePixel( const Size& rLogicSize ) const;
 
-    /** Convert a logical polygon to a polygon in physical device pixel units.
-
-     @param         rLogicPoly  Const reference to a polygon in logical units
-
-     @returns Polygon based on physical device pixel coordinates and units.
-     */
-    SAL_DLLPRIVATE tools::Polygon ImplLogicToDevicePixel( const tools::Polygon& rLogicPoly ) const;
-
     /** Convert a region in pixel units to a region in device pixel units and coords.
 
      @param         rRegion  Const reference to region.

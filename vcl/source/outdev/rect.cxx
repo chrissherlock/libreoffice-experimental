@@ -186,7 +186,7 @@ void OutputDevice::Invert( const tools::Polygon& rPoly, InvertFlags nFlags )
     if ( nPoints < 2 )
         return;
 
-    tools::Polygon aPoly( ImplLogicToDevicePixel( rPoly ) );
+    tools::Polygon aPoly( maGeometry.ImplLogicToDevicePixel( rPoly, maMappingMetric ) );
 
     // we need a graphics
     if ( !mpGraphics && !AcquireGraphics() )

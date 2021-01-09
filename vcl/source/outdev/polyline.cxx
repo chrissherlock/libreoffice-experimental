@@ -224,7 +224,7 @@ void OutputDevice::drawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
     if ( !IsDeviceOutputNecessary() || !IsOpaqueLineColor() || ( nPoints < 2 ) || ( LineStyle::NONE == rLineInfo.GetStyle() ) || ImplIsRecordLayout() )
         return;
 
-    tools::Polygon aPoly = ImplLogicToDevicePixel( rPoly );
+    tools::Polygon aPoly = maGeometry.ImplLogicToDevicePixel( rPoly, maMappingMetric );
 
     // we need a graphics
     if ( !mpGraphics && !AcquireGraphics() )

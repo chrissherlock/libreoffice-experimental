@@ -390,44 +390,6 @@ tools::Rectangle OutputDevice::ImplLogicToDevicePixel( const tools::Rectangle& r
                                         GetYMapNumerator(), GetYMapDenominator() )+GetYOffsetInPixels()+GetYOffsetFromOriginInPixels() );
 }
 
-tools::Polygon OutputDevice::ImplLogicToDevicePixel( const tools::Polygon& rLogicPoly ) const
-{
-    if (!IsMapModeEnabled() && !GetXOffsetInPixels() && !GetYOffsetInPixels())
-        return rLogicPoly;
-
-    sal_uInt16  i;
-    sal_uInt16  nPoints = rLogicPoly.GetSize();
-    tools::Polygon aPoly( rLogicPoly );
-
-    // get pointer to Point-array (copy data)
-    const Point* pPointAry = aPoly.GetConstPointAry();
-
-    if (IsMapModeEnabled())
-    {
-        for ( i = 0; i < nPoints; i++ )
-        {
-            const Point& rPt = pPointAry[i];
-            Point aPt(ImplLogicToPixel( rPt.X()+GetXMapOffset(), GetDPIX(),
-                                        GetXMapNumerator(), GetXMapDenominator() )+GetXOffsetInPixels()+GetXOffsetFromOriginInPixels(),
-                      ImplLogicToPixel( rPt.Y()+GetYMapOffset(), GetDPIY(),
-                                        GetYMapNumerator(), GetYMapDenominator() )+GetYOffsetInPixels()+GetYOffsetFromOriginInPixels());
-            aPoly[i] = aPt;
-        }
-    }
-    else
-    {
-        for ( i = 0; i < nPoints; i++ )
-        {
-            Point aPt = pPointAry[i];
-            aPt.AdjustX(GetXOffsetInPixels() );
-            aPt.AdjustY(GetYOffsetInPixels() );
-            aPoly[i] = aPt;
-        }
-    }
-
-    return aPoly;
-}
-
 void OutputDevice::EnableMapMode( bool bEnable )
 {
     RenderContext2::EnableMapMode(bEnable);
