@@ -42,7 +42,6 @@
 #include <vcl/salnativewidgets.hxx>
 #include <vcl/MappingMetrics.hxx>
 #include <vcl/outdevstate.hxx>
-#include <vcl/vclreferencebase.hxx>
 #include <vcl/wall.hxx>
 #include <vcl/AddFontSubstituteFlags.hxx>
 #include <vcl/RenderContext2.hxx>
@@ -260,7 +259,7 @@ typedef struct _cairo_surface cairo_surface_t;
 * so we need to use virtual inheritance to keep the referencing counting
 * OK.
 */
-class SAL_WARN_UNUSED VCL_DLLPUBLIC OutputDevice : public virtual VclReferenceBase, public RenderContext2
+class SAL_WARN_UNUSED VCL_DLLPUBLIC OutputDevice : public RenderContext2
 {
     friend class Printer;
     friend class VirtualDevice;

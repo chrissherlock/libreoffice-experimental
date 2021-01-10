@@ -17,6 +17,7 @@
 #include <vcl/font.hxx>
 #include <vcl/mapmod.hxx>
 #include <vcl/settings.hxx>
+#include <vcl/vclreferencebase.hxx>
 #include <vcl/ComplexTextLayoutFlags.hxx>
 #include <vcl/DrawModeFlags.hxx>
 #include <vcl/Geometry.hxx>
@@ -28,7 +29,7 @@
 class AllSettings;
 class SalGraphics;
 
-class VCL_DLLPUBLIC RenderContext2
+class VCL_DLLPUBLIC RenderContext2 : public virtual VclReferenceBase
 {
 public:
     RenderContext2();
@@ -159,6 +160,8 @@ public:
     MappingMetrics GetMappingMetrics() const;
 
 protected:
+    void dispose() {}
+
     /** Acquire a graphics device that the output device uses to draw on.
 
      There is an LRU of OutputDevices that is used to get the graphics. The
