@@ -728,7 +728,7 @@ static void lcl_DrawLineForWrongListData(
         return;
     }
 
-    tools::Long nHght = rInf.GetOut().LogicToPixel( rPrtFontSize ).Height();
+    tools::Long nHght = rInf.GetOut().GetGeometry().LogicToPixel( rPrtFontSize ).Height();
 
     // Draw wavy lines for spell and grammar errors only if font is large enough.
     // Lines for smart tags will always be drawn.
@@ -1720,7 +1720,7 @@ void SwFntObj::DrawText( SwDrawTextInfo &rInf )
             {
                 if( rInf.GetLen() )
                 {
-                    tools::Long nHght = rInf.GetOut().LogicToPixel(
+                    tools::Long nHght = rInf.GetOut().GetGeometry().LogicToPixel(
                                     m_pPrtFont->GetFontSize() ).Height();
                     if( WRONG_SHOW_MIN < nHght )
                     {

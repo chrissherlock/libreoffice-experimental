@@ -1392,7 +1392,7 @@ void Window::ImplLogicToPoint(vcl::RenderContext const & rRenderContext, vcl::Fo
     Size aSize = rFont.GetFontSize();
 
     if (rRenderContext.IsMapModeEnabled())
-        aSize = rRenderContext.LogicToPixel(aSize);
+        aSize = rRenderContext.GetGeometry().LogicToPixel(aSize);
 
     if (aSize.Width())
     {

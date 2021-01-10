@@ -1294,7 +1294,7 @@ int ScTextWnd::GetPixelHeightForLines(tools::Long nLines)
 {
     // add padding (for the borders of the window)
     OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
-    return rDevice.LogicToPixel(Size(0, nLines * rDevice.GetTextHeight())).Height() + 1;
+    return rDevice.GetGeometry().LogicToPixel(Size(0, nLines * rDevice.GetTextHeight())).Height() + 1;
 }
 
 void ScTextWnd::SetNumLines(tools::Long nLines)

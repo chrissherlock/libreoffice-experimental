@@ -339,4 +339,15 @@ Point Geometry::LogicToPixel(const Point& rLogicPt) const
             + mnOffsetFromOriginYpx);
 }
 
+Size Geometry::LogicToPixel(Size const& rLogicSize) const
+{
+    if (!mbMap)
+        return rLogicSize;
+
+    return Size(Geometry::LogicToPixel(rLogicSize.Width(), mnDPIX, maMappingMetrics.mnMapScNumX,
+                                       maMappingMetrics.mnMapScDenomX),
+                Geometry::LogicToPixel(rLogicSize.Height(), mnDPIY, maMappingMetrics.mnMapScNumY,
+                                       maMappingMetrics.mnMapScDenomY));
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

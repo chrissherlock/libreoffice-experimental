@@ -162,7 +162,7 @@ static void lcl_DrawRedLines( OutputDevice* pOutDev,
                               bool bIsRightToLeft )
 {
     // But only if font is not too small...
-    tools::Long nHeight = pOutDev->LogicToPixel(Size(0, nFontHeight)).Height();
+    tools::Long nHeight = pOutDev->GetGeometry().LogicToPixel(Size(0, nFontHeight)).Height();
     if (WRONG_SHOW_MIN >= nHeight)
         return;
 

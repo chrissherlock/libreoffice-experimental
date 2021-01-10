@@ -342,22 +342,22 @@ tools::Long SvxRuler::MakePositionSticky(tools::Long aPosition, tools::Long aPoi
 
 tools::Long SvxRuler::ConvertHPosPixel(tools::Long nVal) const
 {
-    return pEditWin->LogicToPixel(Size(nVal, 0)).Width();
+    return pEditWin->GetGeometry().LogicToPixel(Size(nVal, 0)).Width();
 }
 
 tools::Long SvxRuler::ConvertVPosPixel(tools::Long nVal) const
 {
-    return pEditWin->LogicToPixel(Size(0, nVal)).Height();
+    return pEditWin->GetGeometry().LogicToPixel(Size(0, nVal)).Height();
 }
 
 tools::Long SvxRuler::ConvertHSizePixel(tools::Long nVal) const
 {
-    return pEditWin->LogicToPixel(Size(nVal, 0)).Width();
+    return pEditWin->GetGeometry().LogicToPixel(Size(nVal, 0)).Width();
 }
 
 tools::Long SvxRuler::ConvertVSizePixel(tools::Long nVal) const
 {
-    return pEditWin->LogicToPixel(Size(0, nVal)).Height();
+    return pEditWin->GetGeometry().LogicToPixel(Size(0, nVal)).Height();
 }
 
 tools::Long SvxRuler::ConvertPosPixel(tools::Long nVal) const
@@ -902,14 +902,14 @@ void SvxRuler::UpdatePage()
         {
             SetPagePos(
                 pEditWin->GetGeometry().LogicToPixel(mxPagePosItem->GetPos()).X(),
-                pEditWin->LogicToPixel(Size(mxPagePosItem->GetWidth(), 0)).
+                pEditWin->GetGeometry().LogicToPixel(Size(mxPagePosItem->GetWidth(), 0)).
                 Width());
         }
         else
         {
             SetPagePos(
                 pEditWin->GetGeometry().LogicToPixel(mxPagePosItem->GetPos()).Y(),
-                pEditWin->LogicToPixel(Size(0, mxPagePosItem->GetHeight())).
+                pEditWin->GetGeometry().LogicToPixel(Size(0, mxPagePosItem->GetHeight())).
                 Height());
         }
         if(bAppSetNullOffset)

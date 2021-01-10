@@ -1601,7 +1601,7 @@ namespace cppcanvas::internal
                         rVDev.SetMapMode( rSubstitute.GetPrefMapMode() );
 
                         const ::Point& rPos( rVDev.GetGeometry().LogicToPixel( pAct->GetPoint() ) );
-                        const ::Size&  rSize( rVDev.LogicToPixel( pAct->GetSize() ) );
+                        const ::Size&  rSize( rVDev.GetGeometry().LogicToPixel( pAct->GetSize() ) );
 
                         rStates.getState().transform.translate( rPos.X(),
                                                                  rPos.Y() );

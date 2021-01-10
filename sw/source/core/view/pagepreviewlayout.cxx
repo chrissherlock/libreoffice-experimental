@@ -697,7 +697,7 @@ bool SwPagePreviewLayout::SetBookPreviewMode( const bool _bEnableBookPreview,
                 aProposedStartPos.setY( maPreviewDocRect.Bottom() );
             }
             Prepare( 0, aProposedStartPos,
-                     mrParentViewShell.GetOut()->LogicToPixel( maWinSize ),
+                     mrParentViewShell.GetOut()->GetGeometry().LogicToPixel( maWinSize ),
                      _onStartPageNum, _orDocPreviewPaintRect );
             mbBookPreviewModeToggled = false;
         }

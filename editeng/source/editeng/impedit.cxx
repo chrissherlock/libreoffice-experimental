@@ -1533,7 +1533,7 @@ Pair ImpEditView::Scroll( tools::Long ndX, tools::Long ndY, ScrollRangeCheck nRa
     tools::Long nDiffY = !IsVertical() ? ( GetVisDocTop() - aNewVisArea.Top() ) : (IsTopToBottom() ? (GetVisDocLeft() - aNewVisArea.Left()) : -(GetVisDocTop() - aNewVisArea.Top()));
 
     Size aDiffs( nDiffX, nDiffY );
-    aDiffs = rOutDev.LogicToPixel( aDiffs );
+    aDiffs = rOutDev.GetGeometry().LogicToPixel( aDiffs );
     aDiffs = rOutDev.PixelToLogic( aDiffs );
 
     tools::Long nRealDiffX = aDiffs.Width();

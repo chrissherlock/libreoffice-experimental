@@ -140,7 +140,7 @@ bool vcl::Cursor::ImplPrepForDraw(const OutputDevice* pDevice, ImplCursorData& r
     if (pDevice && !rData.mbCurVisible)
     {
         rData.maPixPos        = pDevice->GetGeometry().LogicToPixel( maPos );
-        rData.maPixSize       = pDevice->LogicToPixel( maSize );
+        rData.maPixSize       = pDevice->GetGeometry().LogicToPixel( maSize );
         rData.mnOrientation   = mnOrientation;
         rData.mnDirection     = mnDirection;
 
@@ -258,7 +258,7 @@ void vcl::Cursor::LOKNotify( vcl::Window* pWindow, const OUString& rAction )
     {
         const tools::Long nX = pWindow->GetXOffsetInPixels() + pWindow->GetGeometry().LogicToPixel(GetPos()).X() - pParent->GetXOffsetInPixels();
         const tools::Long nY = pWindow->GetYOffsetInPixels() + pWindow->GetGeometry().LogicToPixel(GetPos()).Y() - pParent->GetYOffsetInPixels();
-        Size aSize = pWindow->LogicToPixel(GetSize());
+        Size aSize = pWindow->GetGeometry().LogicToPixel(GetSize());
         if (!aSize.Width())
             aSize.setWidth( pWindow->GetSettings().GetStyleSettings().GetCursorSize() );
 

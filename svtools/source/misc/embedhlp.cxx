@@ -723,7 +723,7 @@ void EmbeddedObjectRef::DrawShading( const tools::Rectangle &rRect, OutputDevice
     pOut->Push();
     pOut->SetLineColor( COL_BLACK );
 
-    Size aPixSize = pOut->LogicToPixel( rRect.GetSize() );
+    Size aPixSize = pOut->GetGeometry().LogicToPixel( rRect.GetSize() );
     aPixSize.AdjustWidth( -1 );
     aPixSize.AdjustHeight( -1 );
     Point aPixViewPos = pOut->GetGeometry().LogicToPixel( rRect.TopLeft() );

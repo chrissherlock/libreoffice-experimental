@@ -366,7 +366,7 @@ BitmapEx ChangePlaceholderTag::createOverlayImage( int nHighlight )
         if( pDev == nullptr )
             pDev = Application::GetDefaultDevice();
 
-        Size aShapeSizePix = pDev->LogicToPixel(rSnapRect.GetSize());
+        Size aShapeSizePix = pDev->GetGeometry().LogicToPixel(rSnapRect.GetSize());
         ::tools::Long nShapeSizePix = std::min(aShapeSizePix.Width(),aShapeSizePix.Height());
 
         bool bLarge = nShapeSizePix > 250;
@@ -402,7 +402,7 @@ void ChangePlaceholderTag::addCustomHandles( SdrHdlList& rHandlerList )
     if( pDev == nullptr )
         pDev = Application::GetDefaultDevice();
 
-    Size aShapeSizePix = pDev->LogicToPixel(rSnapRect.GetSize());
+    Size aShapeSizePix = pDev->GetGeometry().LogicToPixel(rSnapRect.GetSize());
     ::tools::Long nShapeSizePix = std::min(aShapeSizePix.Width(),aShapeSizePix.Height());
     if( 50 > nShapeSizePix )
         return;

@@ -745,7 +745,7 @@ void RoadmapItem::SetPosition(RoadmapItem const * _pOldItem)
 
         aIDPos = _pOldItem->mpID->GetPosPixel();
         aIDPos.AdjustY(aOldSize.Height() );
-        aIDPos.AdjustY(mpID->GetParent()->LogicToPixel( Size( 0, ROADMAP_ITEM_DISTANCE_Y ) ).Height() );
+        aIDPos.AdjustY(mpID->GetParent()->GetGeometry().LogicToPixel( Size( 0, ROADMAP_ITEM_DISTANCE_Y ) ).Height() );
     }
     mpID->SetPosPixel( aIDPos );
 

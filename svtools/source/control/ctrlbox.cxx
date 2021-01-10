@@ -1383,7 +1383,7 @@ void SvtLineListBox::ImpGetLine( tools::Long nLine1, tools::Long nLine2, tools::
     if ( aSize.Width() <= 0 )
         return;
 
-    Size aVirSize = aVirDev->LogicToPixel( aSize );
+    Size aVirSize = aVirDev->GetGeometry().LogicToPixel( aSize );
     if ( aVirDev->GetSizeInPixels() != aVirSize )
         aVirDev->SetOutputSizePixel( aVirSize );
     aVirDev->SetFillColor( aColorDist );

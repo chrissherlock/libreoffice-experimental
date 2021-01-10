@@ -1036,7 +1036,7 @@ void PushButton::ImplDrawPushButton(vcl::RenderContext& rRenderContext)
         // rectangular bevel button look)
         Size aFontSize(Application::GetSettings().GetStyleSettings().GetPushButtonFont().GetFontSize());
         aFontSize = rRenderContext.LogicToPixel(aFontSize, MapMode(MapUnit::MapPoint));
-        Size aInRectSize(rRenderContext.LogicToPixel(Size(aInRect.GetWidth(), aInRect.GetHeight())));
+        Size aInRectSize(rRenderContext.GetGeometry().LogicToPixel(Size(aInRect.GetWidth(), aInRect.GetHeight())));
         aControlValue.mbSingleLine = (aInRectSize.Height() < 2 * aFontSize.Height());
 
         if ((nState & ControlState::ROLLOVER) || !(GetStyle() & WB_FLATBUTTON)

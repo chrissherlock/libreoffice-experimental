@@ -113,7 +113,7 @@ void PDFWriterImpl::implWriteBitmapEx( const Point& i_rPoint, const Size& i_rSiz
         && aBmpSize.getHeight() > 50)
     {
         // do downsampling if necessary
-        const Size      aDstSizeTwip( i_pDummyVDev->PixelToLogic(i_pDummyVDev->LogicToPixel(aSize), MapMode(MapUnit::MapTwip)) );
+        const Size      aDstSizeTwip( i_pDummyVDev->PixelToLogic(i_pDummyVDev->GetGeometry().LogicToPixel(aSize), MapMode(MapUnit::MapTwip)) );
         const double    fBmpPixelX = aBmpSize.Width();
         const double    fBmpPixelY = aBmpSize.Height();
         const double    fMaxPixelX = aDstSizeTwip.Width() * i_rContext.m_nMaxImageResolution / 1440.0;
@@ -449,7 +449,7 @@ void PDFWriterImpl::playMetafile( const GDIMetaFile& i_rMtf, vcl::PDFExtOutDevDa
                     }
                     else
                     {
-                        const Size aDstSizeTwip( pDummyVDev->PixelToLogic(pDummyVDev->LogicToPixel(rSize), MapMode(MapUnit::MapTwip)) );
+                        const Size aDstSizeTwip( pDummyVDev->PixelToLogic(pDummyVDev->GetGeometry().LogicToPixel(rSize), MapMode(MapUnit::MapTwip)) );
 
                         // i#115962# Always use at least 300 DPI for bitmap conversion of transparence gradients,
                         // else the quality is not acceptable (see bugdoc as example)

@@ -172,7 +172,7 @@ public:
                                                                 sal_uInt8* pBuffer);
 
     bool                SetOutputSize( const Size& rNewSize )
-                            { return SetOutputSizePixel( LogicToPixel( rNewSize ) ); }
+                            { return SetOutputSizePixel( maGeometry.LogicToPixel( rNewSize ) ); }
 
     void                SetReferenceDevice( RefDevMode );
 

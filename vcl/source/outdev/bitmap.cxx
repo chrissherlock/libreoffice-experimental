@@ -297,7 +297,7 @@ void OutputDevice::DrawTransparentAlphaBitmap(const Bitmap& rBmp, const AlphaMas
     assert(!is_double_buffered_window());
 
     Point aOutPt(maGeometry.LogicToPixel(rDestPt));
-    Size aOutSz(LogicToPixel(rDestSize));
+    Size aOutSz(maGeometry.LogicToPixel(rDestSize));
     tools::Rectangle aDstRect(Point(), GetSizeInPixels());
 
     const bool bHMirr = aOutSz.Width() < 0;
@@ -370,7 +370,7 @@ void OutputDevice::DrawTransparentAlphaBitmap(const Bitmap& rBmp, const AlphaMas
     if (!aBmpRect.Intersection(tools::Rectangle(rSrcPtPixel, rSrcSizePixel)).IsEmpty())
     {
         Point auxOutPt(maGeometry.LogicToPixel(rDestPt));
-        Size auxOutSz(LogicToPixel(rDestSize));
+        Size auxOutSz(maGeometry.LogicToPixel(rDestSize));
 
         // HACK: The function is broken with alpha vdev and mirroring, mirror here.
         Bitmap bitmap(rBmp);

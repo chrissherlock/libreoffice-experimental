@@ -580,7 +580,7 @@ void Window::UpdateMapMode()
 {
     maWinPos -= maViewOrigin;
     Size aPix(maWinPos.X(), maWinPos.Y());
-    aPix = LogicToPixel(aPix);
+    aPix = maGeometry.LogicToPixel(aPix);
     // Size has to be a multiple of BRUSH_SIZE due to the correct depiction of
     // pattern
     // #i2237#

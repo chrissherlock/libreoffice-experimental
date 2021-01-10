@@ -57,7 +57,7 @@ OSectionWindow::OSectionWindow( OViewsWindow* _pParent,const uno::Reference< rep
     m_aSplitter->SetSplitHdl(LINK(this, OSectionWindow,SplitHdl));
     m_aSplitter->SetEndSplitHdl(LINK(this, OSectionWindow,EndSplitHdl));
     m_aSplitter->SetBackground( Wallpaper( Application::GetSettings().GetStyleSettings().GetFaceColor() ));
-    m_aSplitter->SetSplitPosPixel(m_aSplitter->LogicToPixel(Size(0,_xSection->getHeight())).Height());
+    m_aSplitter->SetSplitPosPixel(m_aSplitter->GetGeometry().LogicToPixel(Size(0,_xSection->getHeight())).Height());
 
 
     m_aStartMarker->setCollapsedHdl(LINK(this,OSectionWindow,Collapsed));
@@ -249,7 +249,7 @@ void OSectionWindow::Resize()
 
         // set report section
         const uno::Reference< report::XSection> xSection = m_aReportSection->getSection();
-        Size aSectionSize = LogicToPixel( Size( 0,xSection->getHeight() ) );
+        Size aSectionSize = maGeometry.LogicToPixel( Size( 0,xSection->getHeight() ) );
         Point aReportPos(nStartWidth,0);
         aSectionSize.setWidth( aOutputSize.Width() - nStartWidth );
         if ( bShowEndMarker )
@@ -348,7 +348,7 @@ IMPL_LINK( OSectionWindow, SplitHdl, Splitter*, _pSplitter, void )
         nSplitPos = 0;
 
     xSection->setHeight(nSplitPos);
-    m_aSplitter->SetSplitPosPixel(m_aSplitter->LogicToPixel(Size(0,nSplitPos)).Height());
+    m_aSplitter->SetSplitPosPixel(m_aSplitter->GetGeometry().LogicToPixel(Size(0,nSplitPos)).Height());
 }
 
 static void lcl_scroll(vcl::Window& _rWindow,const Point& _aDelta)

@@ -404,7 +404,7 @@ void SmGraphicWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Rec
 void SmGraphicWindow::SetTotalSize ()
 {
     SmDocShell &rDoc = *pViewShell->GetDoc();
-    const Size aTmp( PixelToLogic( LogicToPixel( rDoc.GetSize() )));
+    const Size aTmp( PixelToLogic( maGeometry.LogicToPixel( rDoc.GetSize() )));
     if ( aTmp != ScrollableWindow::GetTotalSize() )
         ScrollableWindow::SetTotalSize( aTmp );
 }
@@ -595,7 +595,7 @@ void SmGraphicWindow::ZoomToFitInWindow()
     // set defined mapmode before calling 'LogicToPixel' below
     SetMapMode(MapMode(MapUnit::Map100thMM));
 
-    Size       aSize (LogicToPixel(rDoc.GetSize()));
+    Size       aSize (maGeometry.LogicToPixel(rDoc.GetSize()));
     Size       aWindowSize (GetSizePixel());
 
     if (!aSize.IsEmpty())

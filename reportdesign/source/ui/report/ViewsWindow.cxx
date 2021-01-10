@@ -194,7 +194,7 @@ void OViewsWindow::impl_resizeSectionWindow(OSectionWindow& _rSectionWindow,Poin
 {
     const uno::Reference< report::XSection> xSection = _rSectionWindow.getReportSection().getSection();
 
-    Size aSectionSize = _rSectionWindow.LogicToPixel( Size( 0,xSection->getHeight() ) );
+    Size aSectionSize = _rSectionWindow.GetGeometry().LogicToPixel( Size( 0,xSection->getHeight() ) );
     aSectionSize.setWidth( getView()->GetTotalWidth() );
 
     const sal_Int32 nMinHeight = _rSectionWindow.getStartMarker().getMinHeight();

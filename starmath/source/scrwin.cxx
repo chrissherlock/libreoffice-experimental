@@ -265,7 +265,7 @@ MapMode ScrollableWindow::GetMapMode() const
 
 void ScrollableWindow::SetTotalSize( const Size& rNewSize )
 {
-    aTotPixSz = LogicToPixel( rNewSize );
+    aTotPixSz = maGeometry.LogicToPixel( rNewSize );
     ScrollableWindow::Resize();
 }
 
@@ -273,7 +273,7 @@ void ScrollableWindow::SetTotalSize( const Size& rNewSize )
 void ScrollableWindow::Scroll( tools::Long nDeltaX, tools::Long nDeltaY, ScrollFlags )
 {
     // get the delta in pixel
-    Size aDeltaPix( LogicToPixel( Size(nDeltaX, nDeltaY) ) );
+    Size aDeltaPix( maGeometry.LogicToPixel( Size(nDeltaX, nDeltaY) ) );
     Size aOutPixSz( GetSizeInPixels() );
     MapMode aMap( GetMapMode() );
     Point aNewPixOffset( aPixOffset );

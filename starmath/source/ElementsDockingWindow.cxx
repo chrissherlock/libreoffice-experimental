@@ -463,7 +463,7 @@ void SmElementsControl::LayoutOrPaintContents(vcl::RenderContext& rContext, bool
                     rContext.Pop();
                 }
 
-                Size aSizePixel = rContext.LogicToPixel(Size(element->getNode()->GetWidth(),
+                Size aSizePixel = rContext.GetGeometry().LogicToPixel(Size(element->getNode()->GetWidth(),
                                                     element->getNode()->GetHeight()));
                 Point location(x + ((boxX - aSizePixel.Width()) / 2),
                                y + ((boxY - aSizePixel.Height()) / 2));

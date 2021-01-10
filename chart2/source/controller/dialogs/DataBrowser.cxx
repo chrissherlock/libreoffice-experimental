@@ -618,7 +618,7 @@ void DataBrowser::RenewTable()
 
     // for row numbers
     InsertHandleColumn( static_cast< sal_uInt16 >(
-                            GetDataWindow().LogicToPixel( Size( 42, 0 )).getWidth() ));
+                            GetDataWindow().GetGeometry().LogicToPixel( Size( 42, 0 )).getWidth() ));
 
     OUString aDefaultSeriesName(SchResId(STR_COLUMN_LABEL));
     replaceParamterInString( aDefaultSeriesName, "%COLUMNNUMBER", OUString::number( 24 ) );

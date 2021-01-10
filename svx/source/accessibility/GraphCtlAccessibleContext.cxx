@@ -764,7 +764,7 @@ Point SvxGraphCtrlAccessibleContext::LogicToPixel (const Point& rPoint) const
 Size SvxGraphCtrlAccessibleContext::LogicToPixel (const Size& rSize) const
 {
     if( mpControl )
-        return mpControl->GetDrawingArea()->get_ref_device().LogicToPixel(rSize);
+        return mpControl->GetDrawingArea()->get_ref_device().GetGeometry().LogicToPixel(rSize);
     else
         return rSize;
 }

@@ -390,7 +390,7 @@ bool GDIMetaFile::ImplPlayWithRenderer( OutputDevice* pOut, const Point& rPos, S
     if (!m_bUseCanvas)
         return false;
 
-    Size rDestSize( pOut->LogicToPixel( rLogicDestSize ) );
+    Size rDestSize( pOut->GetGeometry().LogicToPixel( rLogicDestSize ) );
 
     const vcl::Window* win = dynamic_cast <vcl::Window*> ( pOut );
 
@@ -458,7 +458,7 @@ void GDIMetaFile::Play( OutputDevice* pOut, const Point& rPos,
                         const Size& rSize )
 {
     MapMode aDrawMap( GetPrefMapMode() );
-    Size    aDestSize( pOut->LogicToPixel( rSize ) );
+    Size    aDestSize( pOut->GetGeometry().LogicToPixel( rSize ) );
 
     if( !aDestSize.Width() || !aDestSize.Height() )
         return;

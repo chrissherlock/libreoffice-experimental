@@ -257,8 +257,8 @@ namespace vcl
         if (i_pDeviceSize)
         {
             //if i_pDeviceSize is passed in here, it was the original pre logic-to-pixel size of _rRect
-            SAL_WARN_IF(std::abs(_rRect.GetSize().Width() - m_rTargetDevice.LogicToPixel(*i_pDeviceSize).Width()) > 1, "vcl", "DeviceSize width was expected to match Pixel width");
-            SAL_WARN_IF(std::abs(_rRect.GetSize().Height() - m_rTargetDevice.LogicToPixel(*i_pDeviceSize).Height()) > 1, "vcl", "DeviceSize height was expected to match Pixel height");
+            SAL_WARN_IF(std::abs(_rRect.GetSize().Width() - m_rTargetDevice.GetGeometry().LogicToPixel(*i_pDeviceSize).Width()) > 1, "vcl", "DeviceSize width was expected to match Pixel width");
+            SAL_WARN_IF(std::abs(_rRect.GetSize().Height() - m_rTargetDevice.GetGeometry().LogicToPixel(*i_pDeviceSize).Height()) > 1, "vcl", "DeviceSize height was expected to match Pixel height");
             aRect.SetSize(*i_pDeviceSize);
         }
 

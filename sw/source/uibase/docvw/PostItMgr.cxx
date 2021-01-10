@@ -796,7 +796,7 @@ void SwPostItMgr::LayoutPostIts()
                     else if (sal_Int32 nScrollSize = GetScrollSize())
                     {
                         //when we changed our zoom level, the offset value can be too big, so lets check for the largest possible zoom value
-                        tools::Long aAvailableHeight = mpEditWin->LogicToPixel(Size(0,pPage->mPageRect.Height())).Height() - 2 * GetSidebarScrollerHeight();
+                        tools::Long aAvailableHeight = mpEditWin->GetGeometry().LogicToPixel(Size(0,pPage->mPageRect.Height())).Height() - 2 * GetSidebarScrollerHeight();
                         tools::Long lOffset = -1 * nScrollSize * (aVisiblePostItList.size() - aAvailableHeight / nScrollSize);
                         if (pPage->lOffset < lOffset)
                             pPage->lOffset = lOffset;

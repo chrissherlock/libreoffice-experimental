@@ -150,7 +150,7 @@ sal_Int32 OReportWindow::GetTotalWidth() const
         aStartWidth *= aZoom;
         sal_Int32 nPaperWidth = getStyleProperty<awt::Size>(m_pView->getController().getReportDefinition(),PROPERTY_PAPERSIZE).Width;
         nPaperWidth = tools::Long(nPaperWidth * aZoom);
-        const Size aPageSize = LogicToPixel(Size(nPaperWidth,0));
+        const Size aPageSize = maGeometry.LogicToPixel(Size(nPaperWidth,0));
         nWidth = aPageSize.Width() + tools::Long(aStartWidth);
     }
     return nWidth;
@@ -171,9 +171,9 @@ void OReportWindow::Resize()
     const sal_Int32 nPaperWidth = getStyleProperty<awt::Size>(xReportDefinition,PROPERTY_PAPERSIZE).Width;
     sal_Int32 nLeftMargin = getStyleProperty<sal_Int32>(xReportDefinition,PROPERTY_LEFTMARGIN);
     sal_Int32 nRightMargin = getStyleProperty<sal_Int32>(xReportDefinition,PROPERTY_RIGHTMARGIN);
-    Size aPageSize  = m_aViewsWindow->LogicToPixel(Size(nPaperWidth ,0));
-    nLeftMargin     = m_aViewsWindow->LogicToPixel(Size(nLeftMargin,0)).Width();
-    nRightMargin    = m_aViewsWindow->LogicToPixel(Size(nRightMargin,0)).Width();
+    Size aPageSize  = m_aViewsWindow->GetGeometry().LogicToPixel(Size(nPaperWidth ,0));
+    nLeftMargin     = m_aViewsWindow->GetGeometry().LogicToPixel(Size(nLeftMargin,0)).Width();
+    nRightMargin    = m_aViewsWindow->GetGeometry().LogicToPixel(Size(nRightMargin,0)).Width();
 
     aPageSize.setHeight( m_aHRuler->GetSizePixel().Height() );
 

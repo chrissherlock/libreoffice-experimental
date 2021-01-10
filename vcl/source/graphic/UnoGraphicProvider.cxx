@@ -674,7 +674,7 @@ void ImplApplyFilterData( ::Graphic& rGraphic, const uno::Sequence< beans::Prope
                             aSize = pScaleAction->GetSize();
                         }
                         ::Graphic aGraphic( aBmpEx );
-                        const Size aSize100thmm( aDummyVDev->LogicToPixel( aSize ) );
+                        const Size aSize100thmm( aDummyVDev->GetGeometry().LogicToPixel( aSize ) );
                         Size aSize100thmm2( aDummyVDev->PixelToLogic(aSize100thmm, MapMode(MapUnit::Map100thMM)) );
 
                         ImplApplyBitmapResolution( aGraphic, nImageResolution,

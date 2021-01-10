@@ -84,7 +84,7 @@ namespace cppcanvas::tools
             const ::Size aSizeLogic( 0x00010000L,
                                      0x00010000L );
 
-            const ::Size aSizePixel( rVDev.LogicToPixel( aSizeLogic ) );
+            const ::Size aSizePixel( rVDev.GetGeometry().LogicToPixel( aSizeLogic ) );
 
             o_rMatrix = basegfx::utils::createScaleB2DHomMatrix(
                 aSizePixel.Width() / static_cast<double>(aSizeLogic.Width()),

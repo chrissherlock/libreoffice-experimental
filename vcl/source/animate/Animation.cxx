@@ -180,7 +180,7 @@ bool Animation::Start(OutputDevice* pOut, const Point& rDestPt, const Size& rDes
             if (itAnimView != maViewList.end())
             {
                 if ((*itAnimView)->getOutPos() == rDestPt
-                    && (*itAnimView)->getOutSizePix() == pOut->LogicToPixel(rDestSz))
+                    && (*itAnimView)->getOutSizePix() == pOut->GetGeometry().LogicToPixel(rDestSz))
                 {
                     (*itAnimView)->repaint();
                     differs = false;

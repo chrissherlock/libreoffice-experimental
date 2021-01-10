@@ -679,7 +679,7 @@ void Window::SaveBackground(VirtualDevice& rSaveDevice, const Point& rPos, const
         const Point aPixPos( maGeometry.LogicToPixel( rPos ) );
 
         aClip.Move( -GetXOffsetInPixels(), -GetYOffsetInPixels() );
-        aClip.Intersect( tools::Rectangle( aPixPos, LogicToPixel( rSize ) ) );
+        aClip.Intersect( tools::Rectangle( aPixPos, maGeometry.LogicToPixel( rSize ) ) );
 
         if ( !aClip.IsEmpty() )
         {

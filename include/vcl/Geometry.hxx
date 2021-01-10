@@ -68,7 +68,8 @@ struct VCL_DLLPUBLIC Geometry
 
     DeviceCoordinate LogicWidthToDeviceCoordinate(tools::Long nWidth) const;
 
-    Point LogicToPixel(const Point& rLogicPt) const;
+    Point LogicToPixel(Point const& rLogicPt) const;
+    Size LogicToPixel(Size const& rLogicSize) const;
 
     bool mbMap;
 

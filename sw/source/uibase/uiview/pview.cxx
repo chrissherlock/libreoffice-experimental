@@ -366,7 +366,7 @@ bool SwPagePreviewWin::MovePage( int eMoveMode )
 void SwPagePreviewWin::SetWinSize( const Size& rNewSize )
 {
     // We always want the size as pixel units.
-    maPxWinSize = LogicToPixel( rNewSize );
+    maPxWinSize = maGeometry.LogicToPixel( rNewSize );
 
     if( USHRT_MAX == mnSttPage )
     {

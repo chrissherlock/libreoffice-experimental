@@ -299,7 +299,7 @@ void DlgEditor::DoScroll()
     Point aOrg = aMap.GetOrigin();
 
     Size  aScrollPos( pHScroll->GetThumbPos(), pVScroll->GetThumbPos() );
-    aScrollPos = rWindow.LogicToPixel( aScrollPos );
+    aScrollPos = rWindow.GetGeometry().LogicToPixel( aScrollPos );
     aScrollPos = rWindow.PixelToLogic( aScrollPos );
 
     tools::Long  nX   = aScrollPos.Width() + aOrg.X();

@@ -32,7 +32,7 @@ SwShadowCursor::~SwShadowCursor()
 void SwShadowCursor::SetPos( const Point& rPt, tools::Long nHeight, sal_uInt16 nMode )
 {
     Point aPt( pWin->GetGeometry().LogicToPixel( rPt ));
-    nHeight = pWin->LogicToPixel( Size( 0, nHeight )).Height();
+    nHeight = pWin->GetGeometry().LogicToPixel( Size( 0, nHeight )).Height();
     if( aOldPt != aPt || nOldHeight != nHeight || nOldMode != nMode )
     {
         if( USHRT_MAX != nOldMode )

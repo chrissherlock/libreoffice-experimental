@@ -680,7 +680,7 @@ void SwAnnotationWin::SetPosAndSize()
 
 void SwAnnotationWin::DoResize()
 {
-    tools::Long aTextHeight    =  LogicToPixel( mpOutliner->CalcTextSize()).Height();
+    tools::Long aTextHeight    =  maGeometry.LogicToPixel( mpOutliner->CalcTextSize()).Height();
     tools::Long aHeight        =  GetSizePixel().Height();
     tools::ULong aWidth    =  GetSizePixel().Width();
 
@@ -1074,7 +1074,7 @@ SwEditWin&  SwAnnotationWin::EditWin()
 
 tools::Long SwAnnotationWin::GetPostItTextHeight()
 {
-    return mpOutliner ? LogicToPixel(mpOutliner->CalcTextSize()).Height() : 0;
+    return mpOutliner ? maGeometry.LogicToPixel(mpOutliner->CalcTextSize()).Height() : 0;
 }
 
 void SwAnnotationWin::SwitchToPostIt(sal_uInt16 aDirection)

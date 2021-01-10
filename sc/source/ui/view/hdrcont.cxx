@@ -78,7 +78,7 @@ ScHeaderControl::ScHeaderControl( vcl::Window* pParent, SelectionEngine* pSelect
     SetFont(aBoldFont);
     bBoldSet = true;
 
-    Size aSize = LogicToPixel( Size(
+    Size aSize = maGeometry.LogicToPixel( Size(
         GetTextWidth("8888"),
         GetTextHeight() ) );
     aSize.AdjustWidth(4 );    // place for highlight border
@@ -86,7 +86,7 @@ ScHeaderControl::ScHeaderControl( vcl::Window* pParent, SelectionEngine* pSelect
     SetSizePixel( aSize );
 
     nWidth = nSmallWidth = aSize.Width();
-    nBigWidth = LogicToPixel( Size( GetTextWidth("8888888"), 0 ) ).Width() + 5;
+    nBigWidth = maGeometry.LogicToPixel( Size( GetTextWidth("8888888"), 0 ) ).Width() + 5;
 
     SetBackground();
 }

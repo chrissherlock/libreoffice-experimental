@@ -503,7 +503,7 @@ void FuInsertFile::InsTextOrRTFinDrMode(SfxMedium* pMedium)
             Size aMaxSize = mpDoc->GetMaxObjSize();
             aSize.setHeight( std::min(aSize.Height(), aMaxSize.Height()) );
             aSize.setWidth( std::min(aSize.Width(), aMaxSize.Width()) );
-            aSize = mpWindow->LogicToPixel(aSize);
+            aSize = mpWindow->GetGeometry().LogicToPixel(aSize);
 
             // put it at the center of the window
             Size aTemp(mpWindow->GetSizeInPixels());

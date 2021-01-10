@@ -360,7 +360,7 @@ void AnnotationWindow::DoResize()
     ::tools::Long aHeight            =   GetSizePixel().Height() - POSTIT_META_HEIGHT;
 
     mpOutliner->SetPaperSize( PixelToLogic( Size(aWidth,aHeight) ) ) ;
-    ::tools::Long aTextHeight        =   LogicToPixel( mpOutliner->CalcTextSize()).Height();
+    ::tools::Long aTextHeight        =   maGeometry.LogicToPixel( mpOutliner->CalcTextSize()).Height();
 
     if( aTextHeight > aHeight )
     {   // we need vertical scrollbars and have to reduce the width
@@ -456,7 +456,7 @@ void AnnotationWindow::ToggleInsMode()
 
 ::tools::Long AnnotationWindow::GetPostItTextHeight()
 {
-    return mpOutliner ? LogicToPixel(mpOutliner->CalcTextSize()).Height() : 0;
+    return mpOutliner ? maGeometry.LogicToPixel(mpOutliner->CalcTextSize()).Height() : 0;
 }
 
 IMPL_LINK(AnnotationWindow, ScrollHdl, ScrollBar*, pScroll, void)

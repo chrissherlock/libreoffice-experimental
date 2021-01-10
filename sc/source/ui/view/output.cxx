@@ -1339,12 +1339,12 @@ void ScOutputData::DrawClear()
 
 static tools::Long lclGetSnappedX( const OutputDevice& rDev, tools::Long nPosX, bool bSnapPixel )
 {
-    return (bSnapPixel && nPosX) ? rDev.PixelToLogic( rDev.LogicToPixel( Size( nPosX, 0 ) ) ).Width() : nPosX;
+    return (bSnapPixel && nPosX) ? rDev.PixelToLogic( rDev.GetGeometry().LogicToPixel( Size( nPosX, 0 ) ) ).Width() : nPosX;
 }
 
 static tools::Long lclGetSnappedY( const OutputDevice& rDev, tools::Long nPosY, bool bSnapPixel )
 {
-    return (bSnapPixel && nPosY) ? rDev.PixelToLogic( rDev.LogicToPixel( Size( 0, nPosY ) ) ).Height() : nPosY;
+    return (bSnapPixel && nPosY) ? rDev.PixelToLogic( rDev.GetGeometry().LogicToPixel( Size( 0, nPosY ) ) ).Height() : nPosY;
 }
 
 static size_t lclGetArrayColFromCellInfoX( sal_uInt16 nCellInfoX, sal_uInt16 nCellInfoFirstX, sal_uInt16 nCellInfoLastX, bool bRTL )
