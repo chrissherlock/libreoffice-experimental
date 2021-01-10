@@ -17,8 +17,6 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <tools/long.hxx>
-
 #include <vcl/Geometry.hxx>
 
 #include <cassert>
@@ -320,6 +318,21 @@ vcl::Region Geometry::PixelToDevicePixel(const vcl::Region& rRegion) const
     vcl::Region aRegion(rRegion);
     aRegion.Move(mnOffsetXpx + mnOffsetFromOriginXpx, mnOffsetYpx + mnOffsetFromOriginYpx);
     return aRegion;
+}
+
+DeviceCoordinate Geometry::LogicWidthToDeviceCoordinate(tools::Long nWidth,
+                                                        MappingMetrics aMappingMetrics) const
+{
+    if (!mbMap)
+        return static_cast<DeviceCoordinate>(nWidth);
+
+#if VCL_FLOAT_DEVICE_PIXEL
+    return (double)nWidth * maMappingMetric.mfScaleX * mnDPIX;
+#else
+
+    return Geometry::LogicToPixel(nWidth, mnDPIX, aMappingMetrics.mnMapScNumY,
+                                  aMappingMetrics.mnMapScDenomY);
+#endif
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

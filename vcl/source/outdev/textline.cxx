@@ -884,7 +884,7 @@ void OutputDevice::DrawTextLine( const Point& rPos, tools::Long nWidth,
 
     Point aPos = maGeometry.LogicToDevicePixel( rPos, maMappingMetric );
     DeviceCoordinate fWidth;
-    fWidth = LogicWidthToDeviceCoordinate( nWidth );
+    fWidth = maGeometry.LogicWidthToDeviceCoordinate(nWidth, maMappingMetric);
     aPos += Point( mnTextOffX, mnTextOffY );
     ImplDrawTextLine( aPos.X(), aPos.X(), 0, fWidth, eStrikeout, eUnderline, eOverline, bUnderlineAbove );
 

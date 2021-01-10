@@ -1508,8 +1508,6 @@ public:
     // for B2DPoly/Polygons use this internally anyway to transform the B2DPolygon)
     static basegfx::B2DHomMatrix LogicToLogic(const MapMode& rMapModeSource, const MapMode& rMapModeDest);
 
-    SAL_DLLPRIVATE DeviceCoordinate LogicWidthToDeviceCoordinate( tools::Long nWidth ) const;
-
     /** @name Native Widget Rendering functions
 
         These all just call through to the private mpGraphics functions of the same name.

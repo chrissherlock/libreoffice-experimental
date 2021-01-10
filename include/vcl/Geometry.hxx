@@ -21,6 +21,7 @@
 #include <tools/long.hxx>
 #include <tools/poly.hxx>
 
+#include <vcl/devicecoordinate.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/region.hxx>
 #include <vcl/MappingMetrics.hxx>
@@ -62,11 +63,15 @@ struct Geometry
     tools::PolyPolygon LogicToDevicePixel(const tools::PolyPolygon& rLogicPolyPoly,
                                           MappingMetrics aMappingMetrics) const;
     LineInfo LogicToDevicePixel(LineInfo const& rLineInfo, MappingMetrics aMappingMetrics) const;
+
     tools::Long DevicePixelToLogicWidth(tools::Long nWidth, MappingMetrics aMappingMetric) const;
     tools::Long DevicePixelToLogicHeight(tools::Long nHeight, MappingMetrics aMappingMetrics) const;
     tools::Rectangle DevicePixelToLogic(const tools::Rectangle& rPixelRect,
                                         MappingMetrics aMappingMetrics) const;
     vcl::Region PixelToDevicePixel(const vcl::Region& rRegion) const;
+
+    DeviceCoordinate LogicWidthToDeviceCoordinate(tools::Long nWidth,
+                                                  MappingMetrics aMappingMetrics) const;
 
     bool mbMap;
 

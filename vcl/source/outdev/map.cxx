@@ -1263,17 +1263,4 @@ void OutputDevice::SetOffsetFromOriginInPixels(Size const& rOffset)
         mpAlphaVDev->SetOffsetFromOriginInPixels(rOffset);
 }
 
-DeviceCoordinate OutputDevice::LogicWidthToDeviceCoordinate(tools::Long nWidth) const
-{
-    if (!IsMapModeEnabled())
-        return static_cast<DeviceCoordinate>(nWidth);
-
-#if VCL_FLOAT_DEVICE_PIXEL
-    return (double)nWidth * maMappingMetric.mfScaleX * GetDPIX();
-#else
-
-    return Geometry::LogicToPixel(nWidth, GetDPIX(), GetXMapNumerator(), GetXMapDenominator());
-#endif
-}
-
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
