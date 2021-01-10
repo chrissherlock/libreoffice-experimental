@@ -154,14 +154,13 @@ void OutputDevice::DisableMapMode()
 
 void OutputDevice::SetMapMode()
 {
-
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaMapModeAction( MapMode() ) );
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaMapModeAction(MapMode()));
 
     if (IsMapModeEnabled() || !maMapMode.IsDefault())
     {
         DisableMapMode();
-        maMapMode   = MapMode();
+        maMapMode = MapMode();
 
         // create new objects (clip region are not re-scaled)
         SetNewFontFlag(true);
@@ -172,30 +171,28 @@ void OutputDevice::SetMapMode()
         ResetLogicalUnitsOffsetFromOrigin(); // no mapping -> equal offsets
 
         // #i75163#
-        if (mpOutDevData)
+        if (mpViewTransformer)
             mpViewTransformer->InvalidateViewTransform();
     }
 
-    if( mpAlphaVDev )
+    if (mpAlphaVDev)
         mpAlphaVDev->SetMapMode();
 }
 
-void OutputDevice::SetMapMode( const MapMode& rNewMapMode )
+void OutputDevice::SetMapMode(MapMode const& rNewMapMode)
 {
 
     bool bRelMap = (rNewMapMode.GetMapUnit() == MapUnit::MapRelative);
 
-    if ( mpMetaFile )
-    {
-        mpMetaFile->AddAction( new MetaMapModeAction( rNewMapMode ) );
-    }
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaMapModeAction(rNewMapMode));
 
     // do nothing if MapMode was not changed
-    if ( maMapMode == rNewMapMode )
+    if (maMapMode == rNewMapMode)
         return;
 
-    if( mpAlphaVDev )
-        mpAlphaVDev->SetMapMode( rNewMapMode );
+    if (mpAlphaVDev)
+        mpAlphaVDev->SetMapMode(rNewMapMode);
 
      // if default MapMode calculate nothing
     bool bOldMap = IsMapModeEnabled();
@@ -211,7 +208,7 @@ void OutputDevice::SetMapMode( const MapMode& rNewMapMode )
         if ( (rNewMapMode.GetMapUnit() == maMapMode.GetMapUnit()) &&
              (rNewMapMode.GetScaleX()  == maMapMode.GetScaleX())  &&
              (rNewMapMode.GetScaleY()  == maMapMode.GetScaleY())  &&
-             (bOldMap                  == IsMapModeEnabled()) )
+             (bOldMap == IsMapModeEnabled()) )
         {
             // set offset
             Point aOrigin = rNewMapMode.GetOrigin();
@@ -240,9 +237,9 @@ void OutputDevice::SetMapMode( const MapMode& rNewMapMode )
     }
 
     // set new MapMode
-    if ( bRelMap )
+    if (bRelMap)
     {
-        Point aOrigin( GetXMapOffset(), GetYMapOffset() );
+        Point aOrigin(GetXMapOffset(), GetYMapOffset());
         // aScale? = maMapMode.GetScale?() * rNewMapMode.GetScale?()
         Fraction aScaleX = ImplMakeFraction( maMapMode.GetScaleX().GetNumerator(),
                                              rNewMapMode.GetScaleX().GetNumerator(),
@@ -257,7 +254,9 @@ void OutputDevice::SetMapMode( const MapMode& rNewMapMode )
         maMapMode.SetScaleY( aScaleY );
     }
     else
+    {
         maMapMode = rNewMapMode;
+    }
 
     // create new objects (clip region are not re-scaled)
     SetNewFontFlag(true);
@@ -265,9 +264,9 @@ void OutputDevice::SetMapMode( const MapMode& rNewMapMode )
     InitMapModeObjects();
 
     // #106426# Adapt logical offset when changing mapmode
-    SetXOffsetFromOriginInLogicalUnits(ImplPixelToLogic( GetXOffsetFromOriginInPixels(), GetDPIX(),
+    SetXOffsetFromOriginInLogicalUnits(ImplPixelToLogic(GetXOffsetFromOriginInPixels(), GetDPIX(),
                                        GetXMapNumerator(), GetXMapDenominator()));
-    SetYOffsetFromOriginInLogicalUnits(ImplPixelToLogic( GetYOffsetFromOriginInPixels(), GetDPIY(),
+    SetYOffsetFromOriginInLogicalUnits(ImplPixelToLogic(GetYOffsetFromOriginInPixels(), GetDPIY(),
                                        GetYMapNumerator(), GetYMapDenominator()));
 
     // #i75163#
@@ -350,92 +349,6 @@ void OutputDevice::SetRelativeMapMode( const MapMode& rNewMapMode )
 
     if( mpAlphaVDev )
         mpAlphaVDev->SetRelativeMapMode( rNewMapMode );
-}
-
-// #i75163#
-basegfx::B2DHomMatrix OutputDevice::GetViewTransformation() const
-{
-    if(IsMapModeEnabled() && mpOutDevData)
-    {
-        if(!mpViewTransformer->mpViewTransform)
-        {
-            mpViewTransformer->mpViewTransform = new basegfx::B2DHomMatrix;
-
-            const double fScaleFactorX(static_cast<double>(GetDPIX()) * static_cast<double>(GetXMapNumerator()) / static_cast<double>(GetXMapDenominator()));
-            const double fScaleFactorY(static_cast<double>(GetDPIY()) * static_cast<double>(GetYMapNumerator()) / static_cast<double>(GetYMapDenominator()));
-            const double fZeroPointX((static_cast<double>(GetXMapOffset()) * fScaleFactorX) + static_cast<double>(GetXOffsetFromOriginInPixels()));
-            const double fZeroPointY((static_cast<double>(GetYMapOffset()) * fScaleFactorY) + static_cast<double>(GetYOffsetFromOriginInPixels()));
-
-            mpViewTransformer->mpViewTransform->set(0, 0, fScaleFactorX);
-            mpViewTransformer->mpViewTransform->set(1, 1, fScaleFactorY);
-            mpViewTransformer->mpViewTransform->set(0, 2, fZeroPointX);
-            mpViewTransformer->mpViewTransform->set(1, 2, fZeroPointY);
-        }
-
-        return *mpViewTransformer->mpViewTransform;
-    }
-    else
-    {
-        return basegfx::B2DHomMatrix();
-    }
-}
-
-// #i75163#
-basegfx::B2DHomMatrix OutputDevice::GetInverseViewTransformation() const
-{
-    if(IsMapModeEnabled() && mpOutDevData)
-    {
-        if(!mpViewTransformer->mpInverseViewTransform)
-        {
-            GetViewTransformation();
-            mpViewTransformer->mpInverseViewTransform = new basegfx::B2DHomMatrix(*mpViewTransformer->mpViewTransform);
-            mpViewTransformer->mpInverseViewTransform->invert();
-        }
-
-        return *mpViewTransformer->mpInverseViewTransform;
-    }
-    else
-    {
-        return basegfx::B2DHomMatrix();
-    }
-}
-
-// #i75163#
-basegfx::B2DHomMatrix OutputDevice::GetViewTransformation( const MapMode& rMapMode ) const
-{
-    // #i82615#
-    MappingMetrics aMappingMetric(rMapMode, GetDPIX(), GetDPIY());
-
-    basegfx::B2DHomMatrix aTransform;
-
-    const double fScaleFactorX(static_cast<double>(GetDPIX()) * static_cast<double>(aMappingMetric.mnMapScNumX) / static_cast<double>(aMappingMetric.mnMapScDenomX));
-    const double fScaleFactorY(static_cast<double>(GetDPIY()) * static_cast<double>(aMappingMetric.mnMapScNumY) / static_cast<double>(aMappingMetric.mnMapScDenomY));
-    const double fZeroPointX((static_cast<double>(aMappingMetric.mnMapOfsX) * fScaleFactorX) + static_cast<double>(GetXOffsetFromOriginInPixels()));
-    const double fZeroPointY((static_cast<double>(aMappingMetric.mnMapOfsY) * fScaleFactorY) + static_cast<double>(GetYOffsetFromOriginInPixels()));
-
-    aTransform.set(0, 0, fScaleFactorX);
-    aTransform.set(1, 1, fScaleFactorY);
-    aTransform.set(0, 2, fZeroPointX);
-    aTransform.set(1, 2, fZeroPointY);
-
-    return aTransform;
-}
-
-// #i75163#
-basegfx::B2DHomMatrix OutputDevice::GetInverseViewTransformation( const MapMode& rMapMode ) const
-{
-    basegfx::B2DHomMatrix aMatrix( GetViewTransformation( rMapMode ) );
-    aMatrix.invert();
-    return aMatrix;
-}
-
-basegfx::B2DHomMatrix OutputDevice::ImplGetDeviceTransformation() const
-{
-    basegfx::B2DHomMatrix aTransformation = GetViewTransformation();
-    // TODO: is it worth to cache the transformed result?
-    if( GetXOffsetInPixels() || GetYOffsetInPixels() )
-        aTransformation.translate( GetXOffsetInPixels(), GetYOffsetInPixels() );
-    return aTransformation;
 }
 
 Point OutputDevice::LogicToPixel( const Point& rLogicPt ) const

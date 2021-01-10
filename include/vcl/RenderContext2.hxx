@@ -11,6 +11,7 @@
 
 #include <tools/color.hxx>
 #include <tools/fontenum.hxx>
+#include <basegfx/matrix/b2dhommatrix.hxx>
 #include <i18nlangtag/lang.h>
 
 #include <vcl/dllapi.h>
@@ -160,6 +161,12 @@ public:
     Geometry GetGeometry() const;
     MappingMetrics GetMappingMetrics() const;
 
+    // #i75163#
+    basegfx::B2DHomMatrix GetViewTransformation() const;
+    basegfx::B2DHomMatrix GetViewTransformation(MapMode const& rMapMode) const;
+    basegfx::B2DHomMatrix GetInverseViewTransformation() const;
+    basegfx::B2DHomMatrix GetInverseViewTransformation(MapMode const& rMapMode) const;
+
 protected:
     void dispose();
 
@@ -201,11 +208,17 @@ protected:
     bool IsInitFont() const;
     void SetInitFontFlag(bool bFlag);
 
-    // TODO these two init functions will need to become private once all related
+    // TODO these init functions will need to become private once all related
     // functions are moved out of OutputDevice
     void InitLineColor();
     void InitFillColor();
     void InitTextColor();
+
+    /** Get device transformation.
+
+        @since AOO bug 75163 (OpenOffice.org 2.4.3 - OOH 680 milestone 212)
+     */
+    basegfx::B2DHomMatrix GetDeviceTransformation() const; // TODO make private
 
     virtual void InitMapModeObjects();
 

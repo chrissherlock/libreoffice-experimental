@@ -65,7 +65,7 @@ void OutputDevice::DrawPolyPolygon(const tools::PolyPolygon& rPolyPoly)
     if (mpGraphics->supportsOperation(OutDevSupportType::B2DDraw)
         && RasterOp::OverPaint == GetRasterOp() && (IsOpaqueLineColor() || IsOpaqueFillColor()))
     {
-        const basegfx::B2DHomMatrix aTransform(ImplGetDeviceTransformation());
+        const basegfx::B2DHomMatrix aTransform(GetDeviceTransformation());
         basegfx::B2DPolyPolygon aB2DPolyPolygon(rPolyPoly.getB2DPolyPolygon());
 
         // ensure closed - may be asserted, will prevent buffering
@@ -168,7 +168,7 @@ void OutputDevice::ImplDrawPolyPolygonWithB2DPolyPolygon(
     if (mpGraphics->supportsOperation(OutDevSupportType::B2DDraw)
         && RasterOp::OverPaint == GetRasterOp() && (IsOpaqueLineColor() || IsOpaqueFillColor()))
     {
-        const basegfx::B2DHomMatrix aTransform(ImplGetDeviceTransformation());
+        const basegfx::B2DHomMatrix aTransform(GetDeviceTransformation());
         basegfx::B2DPolyPolygon aB2DPolyPolygon(rB2DPolyPoly);
 
         // ensure closed - maybe assert, hinders buffering

@@ -537,8 +537,8 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
     {
         // tdf#130768 CAUTION(!) using GetViewTransformation() is *not* enough here, it may
         // be that mnOutOffX/mnOutOffY is used - see AOO bug 75163, mentioned at
-        // ImplGetDeviceTransformation declaration
-        const basegfx::B2DHomMatrix aFullTransform(ImplGetDeviceTransformation() * rTransformation);
+        // GetDeviceTransformation declaration
+        const basegfx::B2DHomMatrix aFullTransform(GetDeviceTransformation() * rTransformation);
 
         if (DrawTransformBitmapExDirect(aFullTransform, rBitmapEx))
         {
@@ -588,8 +588,8 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
     {
         // tdf#130768 CAUTION(!) using GetViewTransformation() is *not* enough here, it may
         // be that mnOutOffX/mnOutOffY is used - see AOO bug 75163, mentioned at
-        // ImplGetDeviceTransformation declaration
-        const basegfx::B2DHomMatrix aFullTransform(ImplGetDeviceTransformation() * rTransformation);
+        // GetDeviceTransformation declaration
+        const basegfx::B2DHomMatrix aFullTransform(GetDeviceTransformation() * rTransformation);
 
         if (DrawTransformBitmapExDirect(aFullTransform, rBitmapEx))
         {
@@ -629,8 +629,8 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
     double fMaximumArea(std::clamp(fOrigAreaScaled, 1000000.0, 4500000.0));
     // tdf#130768 CAUTION(!) using GetViewTransformation() is *not* enough here, it may
     // be that mnOutOffX/mnOutOffY is used - see AOO bug 75163, mentioned at
-    // ImplGetDeviceTransformation declaration
-    basegfx::B2DHomMatrix aFullTransform(ImplGetDeviceTransformation() * rTransformation);
+    // GetDeviceTransformation declaration
+    basegfx::B2DHomMatrix aFullTransform(GetDeviceTransformation() * rTransformation);
 
     if (!bMetafile)
     {

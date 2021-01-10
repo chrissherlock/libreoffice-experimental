@@ -77,7 +77,7 @@ void OutputDevice::DrawPolygon(const tools::Polygon& rPoly)
     if (mpGraphics->supportsOperation(OutDevSupportType::B2DDraw)
         && RasterOp::OverPaint == GetRasterOp() && (IsOpaqueLineColor() || IsOpaqueFillColor()))
     {
-        const basegfx::B2DHomMatrix aTransform(ImplGetDeviceTransformation());
+        const basegfx::B2DHomMatrix aTransform(GetDeviceTransformation());
         basegfx::B2DPolygon aB2DPolygon(rPoly.getB2DPolygon());
 
         // ensure closed - maybe assert, hinders buffering

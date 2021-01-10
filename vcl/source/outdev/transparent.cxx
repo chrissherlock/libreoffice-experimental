@@ -148,7 +148,7 @@ void OutputDevice::DrawTransparent(
             aB2DPolyPolygon.setClosed(true); // maybe assert, prevents buffering due to making a copy
 
         // create ObjectToDevice transformation
-        const basegfx::B2DHomMatrix aFullTransform(ImplGetDeviceTransformation() * rObjectTransform);
+        const basegfx::B2DHomMatrix aFullTransform(GetDeviceTransformation() * rObjectTransform);
         // TODO: this must not drop transparency for mpAlphaVDev case, but instead use premultiplied
         // alpha... but that requires using premultiplied alpha also for already drawn data
         const double fAdjustedTransparency = mpAlphaVDev ? 0 : fTransparency;
@@ -271,7 +271,7 @@ void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
 
         // get the polygon in device coordinates
         basegfx::B2DPolyPolygon aB2DPolyPolygon(rPolyPoly.getB2DPolyPolygon());
-        const basegfx::B2DHomMatrix aTransform(ImplGetDeviceTransformation());
+        const basegfx::B2DHomMatrix aTransform(GetDeviceTransformation());
 
         const double fTransparency = 0.01 * nTransparencePercent;
         if( IsOpaqueFillColor() )

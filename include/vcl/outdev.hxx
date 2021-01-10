@@ -1440,13 +1440,6 @@ public:
     const MapMode&              GetMapMode() const { return maMapMode; }
 
 public:
-     // #i75163#
-    basegfx::B2DHomMatrix       GetViewTransformation() const;
-    basegfx::B2DHomMatrix       GetInverseViewTransformation() const;
-
-    basegfx::B2DHomMatrix       GetViewTransformation( const MapMode& rMapMode ) const;
-    basegfx::B2DHomMatrix       GetInverseViewTransformation( const MapMode& rMapMode ) const;
-
     void SetOffsetFromOriginInPixels(Size const& rOffset) override;
 
     Point                       LogicToPixel( const Point& rLogicPt ) const;
@@ -1518,14 +1511,6 @@ public:
     static basegfx::B2DHomMatrix LogicToLogic(const MapMode& rMapModeSource, const MapMode& rMapModeDest);
 
     SAL_DLLPRIVATE DeviceCoordinate LogicWidthToDeviceCoordinate( tools::Long nWidth ) const;
-
-    /** Get device transformation.
-
-     @since AOO bug 75163 (OpenOffice.org 2.4.3 - OOH 680 milestone 212)
-     */
-    SAL_DLLPRIVATE basegfx::B2DHomMatrix ImplGetDeviceTransformation() const;
-    ///@}
-
 
     /** @name Native Widget Rendering functions
 
