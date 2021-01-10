@@ -100,7 +100,7 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
         GDIMetaFile* pOldMetaFile = mpMetaFile;
 
         aPolyPoly.Optimize(PolyOptimizeFlags::NO_SAME);
-        aHatch.SetDistance(maGeometry.LogicWidthToDevicePixel(aHatch.GetDistance(), maMappingMetric));
+        aHatch.SetDistance(maGeometry.LogicWidthToDevicePixel(aHatch.GetDistance()));
 
         mpMetaFile = nullptr;
         SaveAndDisableMapMode(this);
@@ -167,8 +167,8 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
     else
     {
         tools::Rectangle   aRect( rPolyPoly.GetBoundRect() );
-        const tools::Long  nLogPixelWidth = maGeometry.DevicePixelToLogicWidth(1, maMappingMetric);
-        const tools::Long nWidth = maGeometry.DevicePixelToLogicWidth( std::max( maGeometry.LogicWidthToDevicePixel( rHatch.GetDistance(), maMappingMetric ), tools::Long(3) ), maMappingMetric );
+        const tools::Long  nLogPixelWidth = maGeometry.DevicePixelToLogicWidth(1);
+        const tools::Long nWidth = maGeometry.DevicePixelToLogicWidth( std::max( maGeometry.LogicWidthToDevicePixel( rHatch.GetDistance() ), tools::Long(3) ) );
         std::unique_ptr<Point[]> pPtBuffer(new Point[ HATCH_MAXPOINTS ]);
         Point       aPt1, aPt2, aEndPt1;
         Size        aInc;
@@ -403,7 +403,7 @@ void OutputDevice::DrawHatchLine( const tools::Line& rLine, const tools::PolyPol
 
 void OutputDevice::DrawHatchLine_DrawLine(const Point& rStartPoint, const Point& rEndPoint)
 {
-    Point aPt1 { maGeometry.LogicToDevicePixel(rStartPoint, maMappingMetric)}, aPt2 { maGeometry.LogicToDevicePixel(rEndPoint, maMappingMetric) };
+    Point aPt1 { maGeometry.LogicToDevicePixel(rStartPoint)}, aPt2 { maGeometry.LogicToDevicePixel(rEndPoint) };
     mpGraphics->DrawLine(aPt1.X(), aPt1.Y(), aPt2.X(), aPt2.Y(), *this);
 }
 

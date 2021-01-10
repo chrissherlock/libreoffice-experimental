@@ -855,25 +855,25 @@ Point OutputDevice::LogicToLogic(const Point& rPtSource, const MapMode* pMapMode
     if (!IsMapModeEnabled() || pMapModeSource != &maMapMode)
     {
         if (pMapModeSource->GetMapUnit() == MapUnit::MapRelative)
-            aMappingMetricSource = maMappingMetric;
+            aMappingMetricSource = maGeometry.maMappingMetrics;
 
         aMappingMetricSource.Calculate(*pMapModeSource, GetDPIX(), GetDPIY());
     }
     else
     {
-        aMappingMetricSource = maMappingMetric;
+        aMappingMetricSource = maGeometry.maMappingMetrics;
     }
 
     if (!IsMapModeEnabled() || pMapModeDest != &maMapMode)
     {
         if (pMapModeDest->GetMapUnit() == MapUnit::MapRelative)
-            aMappingMetricDest = maMappingMetric;
+            aMappingMetricDest = maGeometry.maMappingMetrics;
 
         aMappingMetricDest.Calculate(*pMapModeDest, GetDPIX(), GetDPIY());
     }
     else
     {
-        aMappingMetricDest = maMappingMetric;
+        aMappingMetricDest = maGeometry.maMappingMetrics;
     }
 
     return Point(fn5(rPtSource.X() + aMappingMetricSource.mnMapOfsX,
@@ -904,25 +904,25 @@ Size OutputDevice::LogicToLogic(const Size& rSzSource, const MapMode* pMapModeSo
     if (!IsMapModeEnabled() || pMapModeSource != &maMapMode)
     {
         if (pMapModeSource->GetMapUnit() == MapUnit::MapRelative)
-            aMappingMetricSource = maMappingMetric;
+            aMappingMetricSource = maGeometry.maMappingMetrics;
 
         aMappingMetricSource.Calculate(*pMapModeSource, GetDPIX(), GetDPIY());
     }
     else
     {
-        aMappingMetricSource = maMappingMetric;
+        aMappingMetricSource = maGeometry.maMappingMetrics;
     }
 
     if (!IsMapModeEnabled() || pMapModeDest != &maMapMode)
     {
         if (pMapModeDest->GetMapUnit() == MapUnit::MapRelative)
-            aMappingMetricDest = maMappingMetric;
+            aMappingMetricDest = maGeometry.maMappingMetrics;
 
         aMappingMetricDest.Calculate(*pMapModeDest, GetDPIX(), GetDPIY());
     }
     else
     {
-        aMappingMetricDest = maMappingMetric;
+        aMappingMetricDest = maGeometry.maMappingMetrics;
     }
 
     return Size(
@@ -951,25 +951,25 @@ tools::Rectangle OutputDevice::LogicToLogic(const tools::Rectangle& rRectSource,
     if (!IsMapModeEnabled() || pMapModeSource != &maMapMode)
     {
         if (pMapModeSource->GetMapUnit() == MapUnit::MapRelative)
-            aMappingMetricSource = maMappingMetric;
+            aMappingMetricSource = maGeometry.maMappingMetrics;
 
         aMappingMetricSource.Calculate(*pMapModeSource, GetDPIX(), GetDPIY());
     }
     else
     {
-        aMappingMetricSource = maMappingMetric;
+        aMappingMetricSource = maGeometry.maMappingMetrics;
     }
 
     if (!IsMapModeEnabled() || pMapModeDest != &maMapMode)
     {
         if (pMapModeDest->GetMapUnit() == MapUnit::MapRelative)
-            aMappingMetricDest = maMappingMetric;
+            aMappingMetricDest = maGeometry.maMappingMetrics;
 
         aMappingMetricDest.Calculate(*pMapModeDest, GetDPIX(), GetDPIY());
     }
     else
     {
-        aMappingMetricDest = maMappingMetric;
+        aMappingMetricDest = maGeometry.maMappingMetrics;
     }
 
     return tools::Rectangle(fn5(rRectSource.Left() + aMappingMetricSource.mnMapOfsX,

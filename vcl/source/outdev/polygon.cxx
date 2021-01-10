@@ -107,7 +107,7 @@ void OutputDevice::DrawPolygon(const tools::Polygon& rPoly)
         return;
     }
 
-    tools::Polygon aPoly = maGeometry.LogicToDevicePixel(rPoly, maMappingMetric);
+    tools::Polygon aPoly = maGeometry.LogicToDevicePixel(rPoly);
     const Point* pPtAry = aPoly.GetConstPointAry();
 
     // #100127# Forward beziers to sal, if any

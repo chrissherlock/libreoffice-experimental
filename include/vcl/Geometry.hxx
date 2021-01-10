@@ -49,29 +49,24 @@ struct Geometry
     static tools::Long PixelToLogic(tools::Long n, tools::Long nDPI, tools::Long nMapNum,
                                     tools::Long nMapDenom);
 
-    tools::Long LogicXToDevicePixel(tools::Long nX, MappingMetrics aMappingMetric) const;
-    tools::Long LogicYToDevicePixel(tools::Long nY, MappingMetrics aMappingMetric) const;
-    tools::Long LogicWidthToDevicePixel(tools::Long nWidth, MappingMetrics aMappingMetric) const;
-    tools::Long LogicHeightToDevicePixel(tools::Long nHeight, MappingMetrics aMappingMetric) const;
-    float FloatLogicHeightToDevicePixel(float fLogicHeight, MappingMetrics aMappingMetric) const;
-    Point LogicToDevicePixel(const Point& rLogicPt, MappingMetrics aMappingMetrics) const;
-    Size LogicToDevicePixel(const Size& rLogicSize, MappingMetrics aMappingMetrics) const;
-    tools::Rectangle LogicToDevicePixel(const tools::Rectangle& rLogicRect,
-                                        MappingMetrics aMappingMetrics) const;
-    tools::Polygon LogicToDevicePixel(const tools::Polygon& rLogicPoly,
-                                      MappingMetrics aMappingMetrics) const;
-    tools::PolyPolygon LogicToDevicePixel(const tools::PolyPolygon& rLogicPolyPoly,
-                                          MappingMetrics aMappingMetrics) const;
-    LineInfo LogicToDevicePixel(LineInfo const& rLineInfo, MappingMetrics aMappingMetrics) const;
+    tools::Long LogicXToDevicePixel(tools::Long nX) const;
+    tools::Long LogicYToDevicePixel(tools::Long nY) const;
+    tools::Long LogicWidthToDevicePixel(tools::Long nWidth) const;
+    tools::Long LogicHeightToDevicePixel(tools::Long nHeight) const;
+    float FloatLogicHeightToDevicePixel(float fLogicHeight) const;
+    Point LogicToDevicePixel(const Point& rLogicPt) const;
+    Size LogicToDevicePixel(const Size& rLogicSize) const;
+    tools::Rectangle LogicToDevicePixel(const tools::Rectangle& rLogicRect) const;
+    tools::Polygon LogicToDevicePixel(const tools::Polygon& rLogicPoly) const;
+    tools::PolyPolygon LogicToDevicePixel(const tools::PolyPolygon& rLogicPolyPoly) const;
+    LineInfo LogicToDevicePixel(LineInfo const& rLineInfos) const;
 
-    tools::Long DevicePixelToLogicWidth(tools::Long nWidth, MappingMetrics aMappingMetric) const;
-    tools::Long DevicePixelToLogicHeight(tools::Long nHeight, MappingMetrics aMappingMetrics) const;
-    tools::Rectangle DevicePixelToLogic(const tools::Rectangle& rPixelRect,
-                                        MappingMetrics aMappingMetrics) const;
+    tools::Long DevicePixelToLogicWidth(tools::Long nWidth) const;
+    tools::Long DevicePixelToLogicHeight(tools::Long nHeight) const;
+    tools::Rectangle DevicePixelToLogic(const tools::Rectangle& rPixelRect) const;
     vcl::Region PixelToDevicePixel(const vcl::Region& rRegion) const;
 
-    DeviceCoordinate LogicWidthToDeviceCoordinate(tools::Long nWidth,
-                                                  MappingMetrics aMappingMetrics) const;
+    DeviceCoordinate LogicWidthToDeviceCoordinate(tools::Long nWidth) const;
 
     bool mbMap;
 
@@ -95,6 +90,8 @@ struct Geometry
     sal_Int32 mnDPIY;
     sal_Int32
         mnDPIScalePercentage; ///< For HiDPI displays, we want to draw elements for a percentage larger
+
+    MappingMetrics maMappingMetrics;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

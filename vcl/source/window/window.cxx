@@ -1758,7 +1758,7 @@ void Window::ImplNewInputContext()
     if (!rFontName.isEmpty())
     {
         OutputDevice *pFocusWinOutDev = pFocusWin->GetOutDev();
-        Size aSize = pFocusWinOutDev->GetGeometry().LogicToDevicePixel( rFont.GetFontSize(), pFocusWinOutDev->GetMappingMetrics() );
+        Size aSize = pFocusWinOutDev->GetGeometry().LogicToDevicePixel( rFont.GetFontSize() );
         if ( !aSize.Height() )
         {
             // only set default sizes if the font height in logical
@@ -2956,7 +2956,7 @@ void Window::Scroll( tools::Long nHorzScroll, tools::Long nVertScroll,
                      const tools::Rectangle& rRect, ScrollFlags nFlags )
 {
     OutputDevice *pOutDev = GetOutDev();
-    tools::Rectangle aRect = pOutDev->GetGeometry().LogicToDevicePixel( rRect, pOutDev->GetMappingMetrics() );
+    tools::Rectangle aRect = pOutDev->GetGeometry().LogicToDevicePixel( rRect );
     aRect.Intersection( tools::Rectangle( Point( GetXOffsetInPixels(), GetYOffsetInPixels() ), Size( GetWidthInPixels(), GetHeightInPixels() ) ) );
     if ( !aRect.IsEmpty() )
         ImplScroll( aRect, nHorzScroll, nVertScroll, nFlags );

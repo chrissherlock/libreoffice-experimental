@@ -217,12 +217,11 @@ void OutputDevice::DrawTransparentBitmapEx(const Point& rDestPt, const Size& rDe
     }
     else if (!!rBitmapEx)
     {
-        SalTwoRect aPosAry(
-            rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(), rSrcSizePixel.Height(),
-            maGeometry.LogicXToDevicePixel(rDestPt.X(), maMappingMetric),
-            maGeometry.LogicYToDevicePixel(rDestPt.Y(), maMappingMetric),
-            maGeometry.LogicWidthToDevicePixel(rDestSize.Width(), maMappingMetric),
-            maGeometry.LogicHeightToDevicePixel(rDestSize.Height(), maMappingMetric));
+        SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(),
+                           rSrcSizePixel.Height(), maGeometry.LogicXToDevicePixel(rDestPt.X()),
+                           maGeometry.LogicYToDevicePixel(rDestPt.Y()),
+                           maGeometry.LogicWidthToDevicePixel(rDestSize.Width()),
+                           maGeometry.LogicHeightToDevicePixel(rDestSize.Height()));
 
         const BmpMirrorFlags nMirrFlags = AdjustTwoRect(aPosAry, rBitmapEx.GetSizePixel());
 

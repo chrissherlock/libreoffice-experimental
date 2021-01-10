@@ -59,7 +59,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect )
     if ( !IsDeviceOutputNecessary() || (!IsOpaqueLineColor() && !IsOpaqueFillColor()) || ImplIsRecordLayout() )
         return;
 
-    tools::Rectangle aRect( maGeometry.LogicToDevicePixel( rRect, maMappingMetric ) );
+    tools::Rectangle aRect( maGeometry.LogicToDevicePixel( rRect ) );
 
     if ( aRect.IsEmpty() )
         return;
@@ -98,13 +98,13 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
     if ( !IsDeviceOutputNecessary() || (!IsOpaqueLineColor() && !IsOpaqueFillColor()) || ImplIsRecordLayout() )
         return;
 
-    const tools::Rectangle aRect( maGeometry.LogicToDevicePixel( rRect, maMappingMetric ) );
+    const tools::Rectangle aRect( maGeometry.LogicToDevicePixel( rRect ) );
 
     if ( aRect.IsEmpty() )
         return;
 
-    nHorzRound = maGeometry.LogicWidthToDevicePixel( nHorzRound, maMappingMetric );
-    nVertRound = maGeometry.LogicHeightToDevicePixel( nVertRound, maMappingMetric );
+    nHorzRound = maGeometry.LogicWidthToDevicePixel( nHorzRound );
+    nVertRound = maGeometry.LogicHeightToDevicePixel( nVertRound );
 
     // we need a graphics
     if ( !mpGraphics && !AcquireGraphics() )
@@ -151,7 +151,7 @@ void OutputDevice::Invert( const tools::Rectangle& rRect, InvertFlags nFlags )
     if ( !IsDeviceOutputNecessary() )
         return;
 
-    tools::Rectangle aRect( maGeometry.LogicToDevicePixel( rRect, maMappingMetric ) );
+    tools::Rectangle aRect( maGeometry.LogicToDevicePixel( rRect ) );
 
     if ( aRect.IsEmpty() )
         return;
@@ -186,7 +186,7 @@ void OutputDevice::Invert( const tools::Polygon& rPoly, InvertFlags nFlags )
     if ( nPoints < 2 )
         return;
 
-    tools::Polygon aPoly( maGeometry.LogicToDevicePixel( rPoly, maMappingMetric ) );
+    tools::Polygon aPoly( maGeometry.LogicToDevicePixel( rPoly ) );
 
     // we need a graphics
     if ( !mpGraphics && !AcquireGraphics() )
@@ -258,10 +258,10 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
     tools::Long nY = ( rRect.Top() >= aDstRect.Top() ) ? rRect.Top() : ( rRect.Top() + ( ( aDstRect.Top() - rRect.Top() ) / nDistY ) * nDistY );
     const tools::Long nRight = aDstRect.Right();
     const tools::Long nBottom = aDstRect.Bottom();
-    const tools::Long nStartX = maGeometry.LogicXToDevicePixel( nX, maMappingMetric );
-    const tools::Long nEndX = maGeometry.LogicXToDevicePixel( nRight, maMappingMetric );
-    const tools::Long nStartY = maGeometry.LogicYToDevicePixel( nY, maMappingMetric );
-    const tools::Long nEndY = maGeometry.LogicYToDevicePixel( nBottom, maMappingMetric );
+    const tools::Long nStartX = maGeometry.LogicXToDevicePixel( nX );
+    const tools::Long nEndX = maGeometry.LogicXToDevicePixel( nRight );
+    const tools::Long nStartY = maGeometry.LogicYToDevicePixel( nY );
+    const tools::Long nEndY = maGeometry.LogicYToDevicePixel( nBottom );
     tools::Long nHorzCount = 0;
     tools::Long nVertCount = 0;
 
@@ -274,7 +274,7 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
         aVertBuf[ nVertCount++ ] = nStartY;
         while( ( nY += nDistY ) <= nBottom )
         {
-            aVertBuf[ nVertCount++ ] = maGeometry.LogicYToDevicePixel( nY, maMappingMetric );
+            aVertBuf[ nVertCount++ ] = maGeometry.LogicYToDevicePixel( nY );
         }
     }
 
@@ -284,7 +284,7 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
         aHorzBuf[ nHorzCount++ ] = nStartX;
         while( ( nX += nDistX ) <= nRight )
         {
-            aHorzBuf[ nHorzCount++ ] = maGeometry.LogicXToDevicePixel( nX, maMappingMetric );
+            aHorzBuf[ nHorzCount++ ] = maGeometry.LogicXToDevicePixel( nX );
         }
     }
 

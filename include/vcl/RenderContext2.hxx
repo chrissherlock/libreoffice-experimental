@@ -235,7 +235,6 @@ protected:
     ComplexTextLayoutFlags mnTextLayoutMode;
     LanguageType meTextLanguage;
     Geometry maGeometry;
-    MappingMetrics maMappingMetric;
     MapMode maMapMode;
     std::unique_ptr<ViewTransformer> mpViewTransformer;
 

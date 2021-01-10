@@ -845,7 +845,7 @@ tools::Long OutputDevice::GetTextHeight() const
     tools::Long nHeight = mpFontInstance->mnLineHeight + mnEmphasisAscent + mnEmphasisDescent;
 
     if (IsMapModeEnabled())
-        nHeight = maGeometry.DevicePixelToLogicHeight( nHeight, maMappingMetric );
+        nHeight = maGeometry.DevicePixelToLogicHeight( nHeight );
 
     return nHeight;
 }
@@ -990,8 +990,8 @@ tools::Long OutputDevice::GetTextArray( const OUString& rStr, tools::Long* pDXAr
     {
         if( pDXAry )
             for( int i = 0; i < nLen; ++i )
-                pDXAry[i] = maGeometry.DevicePixelToLogicWidth( pDXAry[i], maMappingMetric );
-        nWidth = maGeometry.DevicePixelToLogicWidth( nWidth, maMappingMetric );
+                pDXAry[i] = maGeometry.DevicePixelToLogicWidth( pDXAry[i] );
+        nWidth = maGeometry.DevicePixelToLogicWidth( nWidth );
     }
 
     if( nWidthFactor > 1 )
@@ -1050,7 +1050,7 @@ void OutputDevice::GetCaretPositions( const OUString& rStr, tools::Long* pCaretX
     if (IsMapModeEnabled())
     {
         for( i = 0; i < 2*nLen; ++i )
-            pCaretXArray[i] = maGeometry.DevicePixelToLogicWidth( pCaretXArray[i], maMappingMetric );
+            pCaretXArray[i] = maGeometry.DevicePixelToLogicWidth( pCaretXArray[i] );
     }
 
     if( nWidthFactor != 1 )
@@ -1225,7 +1225,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(const OUString& rOrigStr,
 
     DeviceCoordinate nPixelWidth = static_cast<DeviceCoordinate>(nLogicalWidth);
     if (nLogicalWidth && IsMapModeEnabled())
-        nPixelWidth = maGeometry.LogicWidthToDeviceCoordinate(nLogicalWidth, maMappingMetric);
+        nPixelWidth = maGeometry.LogicWidthToDeviceCoordinate(nLogicalWidth);
 
     std::unique_ptr<DeviceCoordinate[]> xDXPixelArray;
     DeviceCoordinate* pDXPixelArray(nullptr);
@@ -1237,10 +1237,10 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(const OUString& rOrigStr,
             xDXPixelArray.reset(new DeviceCoordinate[nLen]);
             pDXPixelArray = xDXPixelArray.get();
             // using base position for better rounding a.k.a. "dancing characters"
-            DeviceCoordinate nPixelXOfs = maGeometry.LogicWidthToDeviceCoordinate( rLogicalPos.X(), maMappingMetric );
+            DeviceCoordinate nPixelXOfs = maGeometry.LogicWidthToDeviceCoordinate( rLogicalPos.X() );
             for( int i = 0; i < nLen; ++i )
             {
-                pDXPixelArray[i] = maGeometry.LogicWidthToDeviceCoordinate( rLogicalPos.X() + pDXArray[i], maMappingMetric ) - nPixelXOfs;
+                pDXPixelArray[i] = maGeometry.LogicWidthToDeviceCoordinate( rLogicalPos.X() + pDXArray[i] ) - nPixelXOfs;
             }
         }
         else
@@ -1285,7 +1285,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(const OUString& rOrigStr,
 
     // position, justify, etc. the layout
     pSalLayout->AdjustLayout( aLayoutArgs );
-    pSalLayout->DrawBase() = maGeometry.LogicToDevicePixel( rLogicalPos, maMappingMetric );
+    pSalLayout->DrawBase() = maGeometry.LogicToDevicePixel( rLogicalPos );
     // adjust to right alignment if necessary
     if( aLayoutArgs.mnFlags & SalLayoutFlags::RightAlign )
     {
@@ -1337,12 +1337,12 @@ sal_Int32 OutputDevice::GetTextBreak( const OUString& rStr, tools::Long nTextWid
         tools::Long nWidthFactor = pSalLayout->GetUnitsPerPixel();
         tools::Long nSubPixelFactor = (nWidthFactor < 64 ) ? 64 : 1;
         nTextWidth *= nWidthFactor * nSubPixelFactor;
-        DeviceCoordinate nTextPixelWidth = maGeometry.LogicWidthToDeviceCoordinate( nTextWidth, maMappingMetric );
+        DeviceCoordinate nTextPixelWidth = maGeometry.LogicWidthToDeviceCoordinate( nTextWidth );
         DeviceCoordinate nExtraPixelWidth = 0;
         if( nCharExtra != 0 )
         {
             nCharExtra *= nWidthFactor * nSubPixelFactor;
-            nExtraPixelWidth = maGeometry.LogicWidthToDeviceCoordinate( nCharExtra, maMappingMetric );
+            nExtraPixelWidth = maGeometry.LogicWidthToDeviceCoordinate( nCharExtra );
         }
         nRetVal = pSalLayout->GetTextBreak( nTextPixelWidth, nExtraPixelWidth, nSubPixelFactor );
     }
@@ -1371,12 +1371,12 @@ sal_Int32 OutputDevice::GetTextBreak( const OUString& rStr, tools::Long nTextWid
         tools::Long nSubPixelFactor = (nWidthFactor < 64 ) ? 64 : 1;
 
         nTextWidth *= nWidthFactor * nSubPixelFactor;
-        DeviceCoordinate nTextPixelWidth = maGeometry.LogicWidthToDeviceCoordinate( nTextWidth, maMappingMetric );
+        DeviceCoordinate nTextPixelWidth = maGeometry.LogicWidthToDeviceCoordinate( nTextWidth );
         DeviceCoordinate nExtraPixelWidth = 0;
         if( nCharExtra != 0 )
         {
             nCharExtra *= nWidthFactor * nSubPixelFactor;
-            nExtraPixelWidth = maGeometry.LogicWidthToDeviceCoordinate( nCharExtra, maMappingMetric );
+            nExtraPixelWidth = maGeometry.LogicWidthToDeviceCoordinate( nCharExtra );
         }
 
         // calculate un-hyphenated break position
@@ -1563,11 +1563,11 @@ void OutputDevice::ImplDrawText( OutputDevice& rTargetDevice, const tools::Recta
                                                 nIndex, nLineLen );
                         tools::Long lc_x1 = pCaretXArray[2*(nMnemonicPos - nIndex)];
                         tools::Long lc_x2 = pCaretXArray[2*(nMnemonicPos - nIndex)+1];
-                        nMnemonicWidth = rTargetDevice.GetGeometry().LogicWidthToDeviceCoordinate( std::abs(lc_x1 - lc_x2), rTargetDevice.GetMappingMetrics() );
+                        nMnemonicWidth = rTargetDevice.GetGeometry().LogicWidthToDeviceCoordinate( std::abs(lc_x1 - lc_x2) );
 
                         Point       aTempPos = rTargetDevice.LogicToPixel( aPos );
-                        nMnemonicX = rTargetDevice.GetXOffsetInPixels() + aTempPos.X() + rTargetDevice.GetGeometry().LogicWidthToDevicePixel( std::min( lc_x1, lc_x2 ), rTargetDevice.GetMappingMetrics() );
-                        nMnemonicY = rTargetDevice.GetYOffsetInPixels() + aTempPos.Y() + rTargetDevice.GetGeometry().LogicWidthToDevicePixel( rTargetDevice.GetFontMetric().GetAscent(), rTargetDevice.GetMappingMetrics() );
+                        nMnemonicX = rTargetDevice.GetXOffsetInPixels() + aTempPos.X() + rTargetDevice.GetGeometry().LogicWidthToDevicePixel( std::min( lc_x1, lc_x2 ) );
+                        nMnemonicY = rTargetDevice.GetYOffsetInPixels() + aTempPos.Y() + rTargetDevice.GetGeometry().LogicWidthToDevicePixel( rTargetDevice.GetFontMetric().GetAscent() );
                         rTargetDevice.ImplDrawMnemonicLine( nMnemonicX, nMnemonicY, nMnemonicWidth );
                     }
                 }
@@ -1631,11 +1631,11 @@ void OutputDevice::ImplDrawText( OutputDevice& rTargetDevice, const tools::Recta
             /*sal_Bool bRet =*/ _rLayout.GetCaretPositions( aStr, pCaretXArray.get(), 0, aStr.getLength() );
             tools::Long lc_x1 = pCaretXArray[2*nMnemonicPos];
             tools::Long lc_x2 = pCaretXArray[2*nMnemonicPos+1];
-            nMnemonicWidth = rTargetDevice.GetGeometry().LogicWidthToDeviceCoordinate( std::abs(lc_x1 - lc_x2), rTargetDevice.GetMappingMetrics() );
+            nMnemonicWidth = rTargetDevice.GetGeometry().LogicWidthToDeviceCoordinate( std::abs(lc_x1 - lc_x2) );
 
             Point aTempPos = rTargetDevice.LogicToPixel( aPos );
-            nMnemonicX = rTargetDevice.GetXOffsetInPixels() + aTempPos.X() + rTargetDevice.GetGeometry().LogicWidthToDevicePixel( std::min(lc_x1, lc_x2), rTargetDevice.GetMappingMetrics() );
-            nMnemonicY = rTargetDevice.GetYOffsetInPixels() + aTempPos.Y() + rTargetDevice.GetGeometry().LogicWidthToDevicePixel( rTargetDevice.GetFontMetric().GetAscent(), rTargetDevice.GetMappingMetrics() );
+            nMnemonicX = rTargetDevice.GetXOffsetInPixels() + aTempPos.X() + rTargetDevice.GetGeometry().LogicWidthToDevicePixel( std::min(lc_x1, lc_x2) );
+            nMnemonicY = rTargetDevice.GetYOffsetInPixels() + aTempPos.Y() + rTargetDevice.GetGeometry().LogicWidthToDevicePixel( rTargetDevice.GetFontMetric().GetAscent() );
         }
 
         if ( nStyle & DrawTextFlags::Clip )

@@ -38,8 +38,8 @@ Color OutputDevice::GetPixel(const Point& rPoint) const
 
         if (!mbOutputClipped)
         {
-            const tools::Long nX = maGeometry.LogicXToDevicePixel(rPoint.X(), maMappingMetric);
-            const tools::Long nY = maGeometry.LogicYToDevicePixel(rPoint.Y(), maMappingMetric);
+            const tools::Long nX = maGeometry.LogicXToDevicePixel(rPoint.X());
+            const tools::Long nY = maGeometry.LogicYToDevicePixel(rPoint.Y());
             aColor = mpGraphics->GetPixel(nX, nY, *this);
 
             if (mpAlphaVDev)
@@ -62,7 +62,7 @@ void OutputDevice::DrawPixel( const Point& rPt )
     if ( !IsDeviceOutputNecessary() || !IsOpaqueLineColor() || ImplIsRecordLayout() )
         return;
 
-    Point aPt = maGeometry.LogicToDevicePixel( rPt, maMappingMetric );
+    Point aPt = maGeometry.LogicToDevicePixel( rPt );
 
     if ( !mpGraphics && !AcquireGraphics() )
         return;
@@ -94,7 +94,7 @@ void OutputDevice::DrawPixel( const Point& rPt, const Color& rColor )
     if ( !IsDeviceOutputNecessary() || ImplIsRecordLayout() )
         return;
 
-    Point aPt = maGeometry.LogicToDevicePixel( rPt, maMappingMetric );
+    Point aPt = maGeometry.LogicToDevicePixel( rPt );
 
     if ( !mpGraphics && !AcquireGraphics() )
         return;
