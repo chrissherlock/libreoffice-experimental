@@ -19,22 +19,22 @@
 
 #pragma once
 
-#include <tools/gen.hxx>
-
-#include <vcl/vclptr.hxx>
-
-class VirtualDevice;
-
-namespace vcl
+namespace basegfx
 {
-struct ControlLayoutData;
-}
+class B2DHomMatrix;
+} // #i75163#
 
-struct ImplOutDevData
+struct ViewTransformer
 {
-    VclPtr<VirtualDevice> mpRotateDev;
-    vcl::ControlLayoutData* mpRecordLayout;
-    tools::Rectangle maRecordRect;
+    // #i75163#
+    basegfx::B2DHomMatrix* mpViewTransform;
+    basegfx::B2DHomMatrix* mpInverseViewTransform;
+
+    /** Invalidate the view transformation.
+
+     @since AOO bug 75163 (OpenOffice.org 2.4.3 - OOH 680 milestone 212)
+     */
+    void InvalidateViewTransform();
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

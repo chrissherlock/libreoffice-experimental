@@ -91,10 +91,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mpOutDevData.reset(new ImplOutDevData);
     mpOutDevData->mpRotateDev       = nullptr;
     mpOutDevData->mpRecordLayout    = nullptr;
-
-    // #i75163#
-    mpOutDevData->mpViewTransform   = nullptr;
-    mpOutDevData->mpInverseViewTransform = nullptr;
 }
 
 OutputDevice::~OutputDevice()
@@ -114,11 +110,6 @@ void OutputDevice::dispose()
     }
 
     mpOutDevData->mpRotateDev.disposeAndClear();
-
-    // #i75163#
-    if (mpOutDevData)
-        mpOutDevData->InvalidateViewTransform();
-
     mpOutDevData.reset();
 
     // for some reason, we haven't removed state from the stack properly

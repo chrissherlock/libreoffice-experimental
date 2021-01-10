@@ -28,6 +28,19 @@ RenderContext2::RenderContext2()
     , mbInitFont(true)
     , mbNewFont(true)
 {
+    // #i75163#
+    mpViewTransformer.reset(new ViewTransformer);
+    mpViewTransformer->mpViewTransform = nullptr;
+    mpViewTransformer->mpInverseViewTransform = nullptr;
+}
+
+void RenderContext2::dispose()
+{
+    // #i75163#
+    if (mpViewTransformer)
+        mpViewTransformer->InvalidateViewTransform();
+
+    mpViewTransformer.reset();
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

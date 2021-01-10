@@ -173,7 +173,7 @@ void OutputDevice::SetMapMode()
 
         // #i75163#
         if (mpOutDevData)
-            mpOutDevData->InvalidateViewTransform();
+            mpViewTransformer->InvalidateViewTransform();
     }
 
     if( mpAlphaVDev )
@@ -221,7 +221,7 @@ void OutputDevice::SetMapMode( const MapMode& rNewMapMode )
 
             // #i75163#
             if (mpOutDevData)
-                mpOutDevData->InvalidateViewTransform();
+                mpViewTransformer->InvalidateViewTransform();
 
             return;
         }
@@ -272,7 +272,7 @@ void OutputDevice::SetMapMode( const MapMode& rNewMapMode )
 
     // #i75163#
     if (mpOutDevData)
-        mpOutDevData->InvalidateViewTransform();
+        mpViewTransformer->InvalidateViewTransform();
 }
 
 void OutputDevice::SetMetafileMapMode(const MapMode& rNewMapMode, bool bIsRecord)
@@ -357,22 +357,22 @@ basegfx::B2DHomMatrix OutputDevice::GetViewTransformation() const
 {
     if(IsMapModeEnabled() && mpOutDevData)
     {
-        if(!mpOutDevData->mpViewTransform)
+        if(!mpViewTransformer->mpViewTransform)
         {
-            mpOutDevData->mpViewTransform = new basegfx::B2DHomMatrix;
+            mpViewTransformer->mpViewTransform = new basegfx::B2DHomMatrix;
 
             const double fScaleFactorX(static_cast<double>(GetDPIX()) * static_cast<double>(GetXMapNumerator()) / static_cast<double>(GetXMapDenominator()));
             const double fScaleFactorY(static_cast<double>(GetDPIY()) * static_cast<double>(GetYMapNumerator()) / static_cast<double>(GetYMapDenominator()));
             const double fZeroPointX((static_cast<double>(GetXMapOffset()) * fScaleFactorX) + static_cast<double>(GetXOffsetFromOriginInPixels()));
             const double fZeroPointY((static_cast<double>(GetYMapOffset()) * fScaleFactorY) + static_cast<double>(GetYOffsetFromOriginInPixels()));
 
-            mpOutDevData->mpViewTransform->set(0, 0, fScaleFactorX);
-            mpOutDevData->mpViewTransform->set(1, 1, fScaleFactorY);
-            mpOutDevData->mpViewTransform->set(0, 2, fZeroPointX);
-            mpOutDevData->mpViewTransform->set(1, 2, fZeroPointY);
+            mpViewTransformer->mpViewTransform->set(0, 0, fScaleFactorX);
+            mpViewTransformer->mpViewTransform->set(1, 1, fScaleFactorY);
+            mpViewTransformer->mpViewTransform->set(0, 2, fZeroPointX);
+            mpViewTransformer->mpViewTransform->set(1, 2, fZeroPointY);
         }
 
-        return *mpOutDevData->mpViewTransform;
+        return *mpViewTransformer->mpViewTransform;
     }
     else
     {
@@ -385,14 +385,14 @@ basegfx::B2DHomMatrix OutputDevice::GetInverseViewTransformation() const
 {
     if(IsMapModeEnabled() && mpOutDevData)
     {
-        if(!mpOutDevData->mpInverseViewTransform)
+        if(!mpViewTransformer->mpInverseViewTransform)
         {
             GetViewTransformation();
-            mpOutDevData->mpInverseViewTransform = new basegfx::B2DHomMatrix(*mpOutDevData->mpViewTransform);
-            mpOutDevData->mpInverseViewTransform->invert();
+            mpViewTransformer->mpInverseViewTransform = new basegfx::B2DHomMatrix(*mpViewTransformer->mpViewTransform);
+            mpViewTransformer->mpInverseViewTransform->invert();
         }
 
-        return *mpOutDevData->mpInverseViewTransform;
+        return *mpViewTransformer->mpInverseViewTransform;
     }
     else
     {

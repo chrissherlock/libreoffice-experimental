@@ -122,6 +122,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/RenderContext2/Geometry \
     vcl/source/RenderContext2/MappingMetrics \
     vcl/source/RenderContext2/RenderContext2 \
+    vcl/source/RenderContext2/ViewTransformer \
     vcl/source/RenderContext2/drawmode \
     vcl/source/RenderContext2/emphasismark \
     vcl/source/RenderContext2/fill \
@@ -161,7 +162,6 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/outdev/wallpaper \
     vcl/source/outdev/vclreferencebase \
     vcl/source/outdev/nativecontrols \
-    vcl/source/outdev/ImplOutDevData \
     vcl/source/outdev/map \
     vcl/source/printer/QueueInfo \
     vcl/source/window/errinf \

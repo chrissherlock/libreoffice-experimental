@@ -23,6 +23,7 @@
 #include <vcl/Geometry.hxx>
 #include <vcl/MappingMetrics.hxx>
 #include <vcl/RasterOp.hxx>
+#include <vcl/ViewTransformer.hxx>
 
 #include <memory>
 
@@ -160,7 +161,7 @@ public:
     MappingMetrics GetMappingMetrics() const;
 
 protected:
-    void dispose() {}
+    void dispose();
 
     /** Acquire a graphics device that the output device uses to draw on.
 
@@ -220,6 +221,7 @@ protected:
     Geometry maGeometry;
     MappingMetrics maMappingMetric;
     MapMode maMapMode;
+    std::unique_ptr<ViewTransformer> mpViewTransformer;
 
 private:
     Color maTextColor;

@@ -17,9 +17,11 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
 */
 
-#include <ImplOutDevData.hxx>
+#include <basegfx/matrix/b2dhommatrix.hxx>
 
-void ImplOutDevData::InvalidateViewTransform()
+#include <vcl/ViewTransformer.hxx>
+
+void ViewTransformer::InvalidateViewTransform()
 {
     if (mpViewTransform)
     {
