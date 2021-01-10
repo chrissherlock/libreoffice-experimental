@@ -491,7 +491,7 @@ awt::Rectangle SAL_CALL SmGraphicAccessible::getCharacterBounds( sal_Int32 nInde
             aSize.setWidth( nNodeIndex > 0 ? pXAry[nNodeIndex] - pXAry[nNodeIndex - 1] : pXAry[nNodeIndex] );
             pXAry.reset();
 
-            aTLPos = pWin->LogicToPixel( aTLPos );
+            aTLPos = pWin->GetGeometry().LogicToPixel( aTLPos );
             aSize  = pWin->LogicToPixel( aSize );
             aRes.X = aTLPos.X();
             aRes.Y = aTLPos.Y();

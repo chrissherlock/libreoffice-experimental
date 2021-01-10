@@ -357,7 +357,7 @@ bool GraphicObject::ImplDrawTiled( OutputDevice* pOut, const tools::Rectangle& r
             nInvisibleTilesY = aOutOffset.Height() / rSizePixel.Height();
 
         // origin from where to 'virtually' start drawing in pixel
-        const Point aOutOrigin( pOut->LogicToPixel( Point( rArea.Left() - rOffset.Width(),
+        const Point aOutOrigin( pOut->GetGeometry().LogicToPixel( Point( rArea.Left() - rOffset.Width(),
                                                            rArea.Top() - rOffset.Height() ) ) );
         // position in pixel from where to really start output
         const Point aOutStart( aOutOrigin.X() + nInvisibleTilesX*rSizePixel.Width(),

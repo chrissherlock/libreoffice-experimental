@@ -181,7 +181,7 @@ void GroupBox::Paint( vcl::RenderContext& rRenderContext, const tools::Rectangle
 void GroupBox::Draw( OutputDevice* pDev, const Point& rPos,
                      DrawFlags nFlags )
 {
-    Point       aPos  = pDev->LogicToPixel( rPos );
+    Point       aPos  = pDev->GetGeometry().LogicToPixel( rPos );
     Size        aSize = GetSizePixel();
     vcl::Font   aFont = GetDrawPixelFont( pDev );
 

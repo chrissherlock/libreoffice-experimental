@@ -74,7 +74,7 @@ static void SetMappingForVirtDev(  const Point&    _rNewOrigin,
                             vcl::RenderContext*  _pVirDev )
 {
         // new solution: set pixel offset at virtual output device
-        Point aPixelOffset = _pOrgOutDev->LogicToPixel( _rNewOrigin );
+        Point aPixelOffset = _pOrgOutDev->GetGeometry().LogicToPixel( _rNewOrigin );
         _pVirDev->SetOffsetFromOriginInPixels( Size( -aPixelOffset.X(), -aPixelOffset.Y() ) );
 }
 

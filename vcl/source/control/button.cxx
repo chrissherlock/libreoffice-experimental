@@ -1322,7 +1322,7 @@ void PushButton::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangl
 void PushButton::Draw( OutputDevice* pDev, const Point& rPos,
                        DrawFlags nFlags )
 {
-    Point       aPos  = pDev->LogicToPixel( rPos );
+    Point       aPos  = pDev->GetGeometry().LogicToPixel( rPos );
     Size        aSize = GetSizePixel();
     tools::Rectangle   aRect( aPos, aSize );
     vcl::Font   aFont = GetDrawPixelFont( pDev );
@@ -2392,7 +2392,7 @@ void RadioButton::Draw( OutputDevice* pDev, const Point& rPos,
     if ( !maImage )
     {
         MapMode     aResMapMode( MapUnit::Map100thMM );
-        Point       aPos  = pDev->LogicToPixel( rPos );
+        Point       aPos  = pDev->GetGeometry().LogicToPixel( rPos );
         Size        aSize = GetSizePixel();
         Size        aImageSize = pDev->LogicToPixel( Size( 300, 300 ), aResMapMode );
         Size        aBrd1Size = pDev->LogicToPixel( Size( 20, 20 ), aResMapMode );
@@ -3204,7 +3204,7 @@ void CheckBox::Draw( OutputDevice* pDev, const Point& rPos,
                      DrawFlags nFlags )
 {
     MapMode     aResMapMode( MapUnit::Map100thMM );
-    Point       aPos  = pDev->LogicToPixel( rPos );
+    Point       aPos  = pDev->GetGeometry().LogicToPixel( rPos );
     Size        aSize = GetSizePixel();
     Size        aImageSize = pDev->LogicToPixel( Size( 300, 300 ), aResMapMode );
     Size        aBrd1Size = pDev->LogicToPixel( Size( 20, 20 ), aResMapMode );

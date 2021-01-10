@@ -1565,7 +1565,7 @@ void OutputDevice::ImplDrawText( OutputDevice& rTargetDevice, const tools::Recta
                         tools::Long lc_x2 = pCaretXArray[2*(nMnemonicPos - nIndex)+1];
                         nMnemonicWidth = rTargetDevice.GetGeometry().LogicWidthToDeviceCoordinate( std::abs(lc_x1 - lc_x2) );
 
-                        Point       aTempPos = rTargetDevice.LogicToPixel( aPos );
+                        Point       aTempPos = rTargetDevice.GetGeometry().LogicToPixel( aPos );
                         nMnemonicX = rTargetDevice.GetXOffsetInPixels() + aTempPos.X() + rTargetDevice.GetGeometry().LogicWidthToDevicePixel( std::min( lc_x1, lc_x2 ) );
                         nMnemonicY = rTargetDevice.GetYOffsetInPixels() + aTempPos.Y() + rTargetDevice.GetGeometry().LogicWidthToDevicePixel( rTargetDevice.GetFontMetric().GetAscent() );
                         rTargetDevice.ImplDrawMnemonicLine( nMnemonicX, nMnemonicY, nMnemonicWidth );
@@ -1633,7 +1633,7 @@ void OutputDevice::ImplDrawText( OutputDevice& rTargetDevice, const tools::Recta
             tools::Long lc_x2 = pCaretXArray[2*nMnemonicPos+1];
             nMnemonicWidth = rTargetDevice.GetGeometry().LogicWidthToDeviceCoordinate( std::abs(lc_x1 - lc_x2) );
 
-            Point aTempPos = rTargetDevice.LogicToPixel( aPos );
+            Point aTempPos = rTargetDevice.GetGeometry().LogicToPixel( aPos );
             nMnemonicX = rTargetDevice.GetXOffsetInPixels() + aTempPos.X() + rTargetDevice.GetGeometry().LogicWidthToDevicePixel( std::min(lc_x1, lc_x2) );
             nMnemonicY = rTargetDevice.GetYOffsetInPixels() + aTempPos.Y() + rTargetDevice.GetGeometry().LogicWidthToDevicePixel( rTargetDevice.GetFontMetric().GetAscent() );
         }
@@ -2076,7 +2076,7 @@ void OutputDevice::DrawCtrlText( const Point& rPos, const OUString& rStr,
                 aTempPos = Point( std::max(lc_x1,lc_x2), GetFontMetric().GetAscent() );
 
             aTempPos += rPos;
-            aTempPos = LogicToPixel( aTempPos );
+            aTempPos = maGeometry.LogicToPixel( aTempPos );
             nMnemonicX = GetXOffsetInPixels() + aTempPos.X();
             nMnemonicY = GetYOffsetInPixels() + aTempPos.Y();
         }

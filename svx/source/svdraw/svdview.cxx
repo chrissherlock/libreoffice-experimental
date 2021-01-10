@@ -810,7 +810,7 @@ bool SdrView::DoMouseEvent(const SdrViewEvent& rVEvt)
 
                         if(bRet2)
                         {
-                            MouseEvent aMEvt(mpActualOutDev->LogicToPixel(aLogicPos),
+                            MouseEvent aMEvt(mpActualOutDev->GetGeometry().LogicToPixel(aLogicPos),
                                              1,rVEvt.nMouseMode,rVEvt.nMouseCode,rVEvt.nMouseCode);
 
                             OutlinerView* pOLV=GetTextEditOutlinerView();
@@ -906,7 +906,7 @@ bool SdrView::DoMouseEvent(const SdrViewEvent& rVEvt)
 
             if(bRet)
             {
-                MouseEvent aMEvt(mpActualOutDev->LogicToPixel(aLogicPos),
+                MouseEvent aMEvt(mpActualOutDev->GetGeometry().LogicToPixel(aLogicPos),
                                  1,rVEvt.nMouseMode,rVEvt.nMouseCode,rVEvt.nMouseCode);
                 OutlinerView* pOLV=GetTextEditOutlinerView();
                 if (pOLV!=nullptr) pOLV->MouseButtonDown(aMEvt); // event for the Outliner, but without double-click
@@ -948,7 +948,7 @@ PointerStyle SdrView::GetPreferredPointer(const Point& rMousePos, const OutputDe
     if (IsDragHelpLine()) return GetDraggedHelpLinePointer();
     if (IsMacroObj()) {
         SdrObjMacroHitRec aHitRec;
-        aHitRec.aPos=pOut->LogicToPixel(rMousePos);
+        aHitRec.aPos=pOut->GetGeometry().LogicToPixel(rMousePos);
         aHitRec.nTol=nMacroTol;
         aHitRec.pVisiLayer=&pMacroPV->GetVisibleLayers();
         aHitRec.pPageView=pMacroPV;
@@ -966,7 +966,7 @@ PointerStyle SdrView::GetPreferredPointer(const Point& rMousePos, const OutputDe
                 return PointerStyle::Text;
         }
         // Outliner should return something here...
-        Point aPos(pOut->LogicToPixel(rMousePos));
+        Point aPos(pOut->GetGeometry().LogicToPixel(rMousePos));
         PointerStyle aPointer(pTextEditOutlinerView->GetPointer(aPos));
         if (aPointer==PointerStyle::Arrow)
         {

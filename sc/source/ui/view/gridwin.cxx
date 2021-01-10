@@ -2988,7 +2988,7 @@ void ScGridWindow::Command( const CommandEvent& rCEvt )
                 //  the cursor is before the word, but not if behind it)
                 aLogicPos.AdjustX(pCur->GetWidth() );
                 aLogicPos.AdjustY(pCur->GetHeight() / 2 );     // center vertically
-                aMenuPos = LogicToPixel( aLogicPos );
+                aMenuPos = maGeometry.LogicToPixel( aLogicPos );
             }
         }
 

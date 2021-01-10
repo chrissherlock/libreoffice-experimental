@@ -586,7 +586,7 @@ void AnnotationTag::OpenPopup( bool bEdit )
         if( pWindow )
         {
             RealPoint2D aPosition( mxAnnotation->getPosition() );
-            Point aPos( pWindow->OutputToScreenPixel( pWindow->LogicToPixel( Point( static_cast<::tools::Long>(aPosition.X * 100.0), static_cast<::tools::Long>(aPosition.Y * 100.0) ) ) ) );
+            Point aPos( pWindow->OutputToScreenPixel( pWindow->GetGeometry().LogicToPixel( Point( static_cast<::tools::Long>(aPosition.X * 100.0), static_cast<::tools::Long>(aPosition.Y * 100.0) ) ) ) );
 
             aPos.AdjustX(4 ); // magic!
             aPos.AdjustY(1 );

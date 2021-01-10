@@ -143,7 +143,7 @@ tools::Long SwView::SetVScrollMax( tools::Long lMax )
 
 Point SwView::AlignToPixel(const Point &rPt) const
 {
-    return GetEditWin().PixelToLogic( GetEditWin().LogicToPixel( rPt ) );
+    return GetEditWin().PixelToLogic( GetEditWin().GetGeometry().LogicToPixel( rPt ) );
 }
 
 // Document size has changed.
@@ -289,7 +289,7 @@ void SwView::SetVisArea( const Point &rPt, bool bUpdateScrollbar )
     // align is not possible (better idea?!?!)
     // (fix: Bild.de, 200%) It does not work completely without alignment
     // Let's see how far we get with half BrushSize.
-    Point aPt = GetEditWin().LogicToPixel( rPt );
+    Point aPt = GetEditWin().GetGeometry().LogicToPixel( rPt );
 #if HAVE_FEATURE_DESKTOP
     const tools::Long nTmp = GetWrtShell().IsFrameView() ? 4 : 8;
     aPt.AdjustX( -(aPt.X() % nTmp) );

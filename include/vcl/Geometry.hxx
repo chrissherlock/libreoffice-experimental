@@ -26,7 +26,7 @@
 #include <vcl/region.hxx>
 #include <vcl/MappingMetrics.hxx>
 
-struct Geometry
+struct VCL_DLLPUBLIC Geometry
 {
     Geometry()
         : mbMap(false)
@@ -67,6 +67,8 @@ struct Geometry
     vcl::Region PixelToDevicePixel(const vcl::Region& rRegion) const;
 
     DeviceCoordinate LogicWidthToDeviceCoordinate(tools::Long nWidth) const;
+
+    Point LogicToPixel(const Point& rLogicPt) const;
 
     bool mbMap;
 

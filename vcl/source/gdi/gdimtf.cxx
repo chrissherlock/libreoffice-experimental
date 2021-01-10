@@ -495,7 +495,7 @@ void GDIMetaFile::Play( OutputDevice* pOut, const Point& rPos,
     const Size& rOldOffset( pOut->GetOffsetFromOriginInPixels() );
     const Size  aEmptySize;
     pOut->SetOffsetFromOriginInPixels( aEmptySize );
-    aDrawMap.SetOrigin( pOut->PixelToLogic( pOut->LogicToPixel( rPos ), aDrawMap ) );
+    aDrawMap.SetOrigin( pOut->PixelToLogic( pOut->GetGeometry().LogicToPixel( rPos ), aDrawMap ) );
     pOut->SetOffsetFromOriginInPixels( rOldOffset );
 
     pOut->Push();

@@ -676,7 +676,7 @@ void Window::SaveBackground(VirtualDevice& rSaveDevice, const Point& rPos, const
     if ( mpWindowImpl->mpPaintRegion )
     {
         vcl::Region      aClip( *mpWindowImpl->mpPaintRegion );
-        const Point aPixPos( LogicToPixel( rPos ) );
+        const Point aPixPos( maGeometry.LogicToPixel( rPos ) );
 
         aClip.Move( -GetXOffsetInPixels(), -GetYOffsetInPixels() );
         aClip.Intersect( tools::Rectangle( aPixPos, LogicToPixel( rSize ) ) );
@@ -684,7 +684,7 @@ void Window::SaveBackground(VirtualDevice& rSaveDevice, const Point& rPos, const
         if ( !aClip.IsEmpty() )
         {
             const vcl::Region    aOldClip( rSaveDevice.GetClipRegion() );
-            const Point     aPixOffset( rSaveDevice.LogicToPixel( Point() ) );
+            const Point     aPixOffset( rSaveDevice.GetGeometry().LogicToPixel( Point() ) );
             const bool      bMap = rSaveDevice.IsMapModeEnabled();
 
             // move clip region to have the same distance to DestOffset

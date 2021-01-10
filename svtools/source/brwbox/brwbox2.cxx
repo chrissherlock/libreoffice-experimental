@@ -634,7 +634,7 @@ void BrowseBox::Draw( OutputDevice* pDev, const Point& rPos, DrawFlags nFlags )
 {
     // we need pixel coordinates
     Size aRealSize = GetSizePixel();
-    Point aRealPos = pDev->LogicToPixel(rPos);
+    Point aRealPos = pDev->GetGeometry().LogicToPixel(rPos);
 
     if ((aRealSize.Width() < 3) || (aRealSize.Height() < 3))
         // we want to have two pixels frame ...

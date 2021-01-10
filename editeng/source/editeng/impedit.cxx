@@ -52,7 +52,7 @@ using namespace ::com::sun::star::linguistic2;
 
 static void lcl_AllignToPixel( Point& rPoint, OutputDevice const * pOutDev, short nDiffX, short nDiffY )
 {
-    rPoint = pOutDev->LogicToPixel( rPoint );
+    rPoint = pOutDev->GetGeometry().LogicToPixel( rPoint );
 
     if ( nDiffX )
         rPoint.AdjustX(nDiffX );
@@ -1558,7 +1558,7 @@ Pair ImpEditView::Scroll( tools::Long ndX, tools::Long ndY, ScrollRangeCheck nRa
         }
         // Move by aligned value does not necessarily result in aligned
         // rectangle ...
-        aVisDocStartPos = rOutDev.LogicToPixel( aVisDocStartPos );
+        aVisDocStartPos = rOutDev.GetGeometry().LogicToPixel( aVisDocStartPos );
         aVisDocStartPos = rOutDev.PixelToLogic( aVisDocStartPos );
         tools::Rectangle aRect( aOutArea );
 

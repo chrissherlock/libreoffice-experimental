@@ -217,19 +217,6 @@ void OutputDevice::SetRelativeMapMode(const MapMode& rNewMapMode)
         mpAlphaVDev->SetRelativeMapMode(rNewMapMode);
 }
 
-Point OutputDevice::LogicToPixel(const Point& rLogicPt) const
-{
-    if (!IsMapModeEnabled())
-        return rLogicPt;
-
-    return Point(Geometry::LogicToPixel(rLogicPt.X() + GetXMapOffset(), GetDPIX(),
-                                        GetXMapNumerator(), GetXMapDenominator())
-                     + GetXOffsetFromOriginInPixels(),
-                 Geometry::LogicToPixel(rLogicPt.Y() + GetYMapOffset(), GetDPIY(),
-                                        GetYMapNumerator(), GetYMapDenominator())
-                     + GetYOffsetFromOriginInPixels());
-}
-
 Size OutputDevice::LogicToPixel(const Size& rLogicSize) const
 {
     if (!IsMapModeEnabled())

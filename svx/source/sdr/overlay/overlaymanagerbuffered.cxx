@@ -54,8 +54,8 @@ namespace sdr::overlay
                     if(bScrolled)
                     {
                         // get pixel bounds
-                        const Point aOriginOldPixel(mpBufferDevice->LogicToPixel(rOriginOld));
-                        const Point aOriginNewPixel(mpBufferDevice->LogicToPixel(rOriginNew));
+                        const Point aOriginOldPixel(mpBufferDevice->GetGeometry().LogicToPixel(rOriginOld));
+                        const Point aOriginNewPixel(mpBufferDevice->GetGeometry().LogicToPixel(rOriginNew));
                         const Size aOutputSizePixel(mpBufferDevice->GetSizeInPixels());
 
                         // remember and switch off MapMode

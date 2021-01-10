@@ -418,7 +418,7 @@ void SmDrawingVisitor::Visit( SmRootSymbolNode* pNode )
     //! increasing zoomfactor.
     //  This is done by shifting its output-position to a point that
     //  corresponds exactly to a pixel on the output device.
-    Point  aDrawPos( mrDev.PixelToLogic( mrDev.LogicToPixel( aBar.TopLeft( ) ) ) );
+    Point  aDrawPos( mrDev.PixelToLogic( mrDev.GetGeometry().LogicToPixel( aBar.TopLeft( ) ) ) );
     aBar.SetPos( aDrawPos );
 
     mrDev.DrawRect( aBar );
@@ -470,7 +470,7 @@ void SmDrawingVisitor::Visit( SmRectangleNode* pNode )
     //! increasing zoomfactor.
     //  This is done by shifting its output-position to a point that
     //  corresponds exactly to a pixel on the output device.
-    Point  aPos ( mrDev.PixelToLogic( mrDev.LogicToPixel( aTmp.TopLeft( ) ) ) );
+    Point  aPos ( mrDev.PixelToLogic( mrDev.GetGeometry().LogicToPixel( aTmp.TopLeft( ) ) ) );
     aTmp.SetPos( aPos );
 
     mrDev.DrawRect( aTmp );
@@ -487,7 +487,7 @@ void SmDrawingVisitor::DrawTextNode( SmTextNode* pNode )
     Point  aPos ( maPosition );
     aPos.AdjustY(pNode->GetBaselineOffset( ) );
     // round to pixel coordinate
-    aPos = mrDev.PixelToLogic( mrDev.LogicToPixel( aPos ) );
+    aPos = mrDev.PixelToLogic( mrDev.GetGeometry().LogicToPixel( aPos ) );
 
     mrDev.DrawStretchText( aPos, pNode->GetWidth( ), pNode->GetText( ) );
 }

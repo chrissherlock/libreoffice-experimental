@@ -962,7 +962,7 @@ void SpinField::Draw(OutputDevice* pDev, const Point& rPos, DrawFlags nFlags)
     if ( (nFlags & DrawFlags::NoControls ) || !( nFieldStyle & (WB_SPIN|WB_DROPDOWN) ) )
         return;
 
-    Point aPos = pDev->LogicToPixel( rPos );
+    Point aPos = pDev->GetGeometry().LogicToPixel( rPos );
     Size aSize = GetSizePixel();
     AllSettings aOldSettings = pDev->GetSettings();
 

@@ -703,7 +703,7 @@ bool SwView::ExecSpellPopup(const Point& rPt)
                     new SwSpellPopup(m_pWrtShell.get(), aGrammarCheckRes, nErrorInResult, aSuggestions, aParaText) :
                     new SwSpellPopup(m_pWrtShell.get(), xAlt, aParaText));
                 ui::ContextMenuExecuteEvent aEvent;
-                const Point aPixPos = GetEditWin().LogicToPixel( rPt );
+                const Point aPixPos = GetEditWin().GetGeometry().LogicToPixel( rPt );
 
                 aEvent.SourceWindow = VCLUnoHelper::GetInterface( m_pEditWin );
                 aEvent.ExecutePosition.X = aPixPos.X();

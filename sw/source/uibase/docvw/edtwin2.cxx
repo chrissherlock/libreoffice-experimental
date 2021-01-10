@@ -370,10 +370,10 @@ void SwEditWin::RequestHelp(const HelpEvent &rEvt)
             if (!sText.isEmpty())
             {
                 tools::Rectangle aRect( aFieldRect.SVRect() );
-                Point aPt( OutputToScreenPixel( LogicToPixel( aRect.TopLeft() )));
+                Point aPt( OutputToScreenPixel( maGeometry.LogicToPixel( aRect.TopLeft() )));
                 aRect.SetLeft( aPt.X() );
                 aRect.SetTop( aPt.Y() );
-                aPt = OutputToScreenPixel( LogicToPixel( aRect.BottomRight() ));
+                aPt = OutputToScreenPixel( maGeometry.LogicToPixel( aRect.BottomRight() ));
                 aRect.SetRight( aPt.X() );
                 aRect.SetBottom( aPt.Y() );
 

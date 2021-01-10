@@ -1511,7 +1511,7 @@ IMPL_LINK( SwPagePreview, EndScrollHdl, ScrollBar *, p, void )
 
 Point SwPagePreview::AlignToPixel(const Point &rPt) const
 {
-    return m_pViewWin->PixelToLogic( m_pViewWin->LogicToPixel( rPt ) );
+    return m_pViewWin->PixelToLogic( m_pViewWin->GetGeometry().LogicToPixel( rPt ) );
 }
 
 void SwPagePreview::DocSzChgd( const Size &rSz )

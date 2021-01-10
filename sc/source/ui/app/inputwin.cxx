@@ -1136,7 +1136,7 @@ Point ScTextWndGroup::GetCursorScreenPixelPos(bool bBelow)
     Point aLogicPos = pCur->GetPos();
     if (bBelow)
         aLogicPos.AdjustY(pCur->GetHeight());
-    aPos = GetEditViewDevice().LogicToPixel(aLogicPos);
+    aPos = GetEditViewDevice().GetGeometry().LogicToPixel(aLogicPos);
     bool bRTL = mrParent.IsRTLEnabled();
     if (bRTL)
         aPos.setX(mxTextWnd->GetSizeInPixels().Width() - aPos.X() + gnBorderWidth);
@@ -2401,7 +2401,7 @@ IMPL_LINK_NOARG(ScPosWnd, ModifyHdl, weld::ComboBox&, void)
     Point aPos;
     vcl::Cursor* pCur = GetCursor();
     if (pCur)
-        aPos = LogicToPixel( pCur->GetPos() );
+        aPos = maGeometry.LogicToPixel( pCur->GetPos() );
     aPos = OutputToScreenPixel( aPos );
     tools::Rectangle aRect( aPos, aPos );
 

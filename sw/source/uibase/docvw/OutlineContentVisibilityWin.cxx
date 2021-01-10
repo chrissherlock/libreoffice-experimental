@@ -153,7 +153,7 @@ void SwOutlineContentVisibilityWin::Set()
     SwRect aSwRect = GetFrame()->getFrameArea(); // not far in margin
     //SwRect aSwRect = GetFrame()->GetPaintArea(); // far in margin
     aSwRect.AddTop(GetFrame()->GetTopMargin());
-    Point aPxPt(GetEditWin()->GetOutDev()->LogicToPixel(
+    Point aPxPt(GetEditWin()->GetOutDev()->GetGeometry().LogicToPixel(
         aSwRect.TopLeft() - (aSwRect.TopLeft() - aSwRect.BottomLeft()) / 2));
     aPxPt.AdjustX(-GetSizePixel().getWidth() + 1);
     aPxPt.AdjustY(-GetSizePixel().getHeight() / 2);

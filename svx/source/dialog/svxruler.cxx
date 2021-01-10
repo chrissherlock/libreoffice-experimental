@@ -901,14 +901,14 @@ void SvxRuler::UpdatePage()
         if(bHorz)
         {
             SetPagePos(
-                pEditWin->LogicToPixel(mxPagePosItem->GetPos()).X(),
+                pEditWin->GetGeometry().LogicToPixel(mxPagePosItem->GetPos()).X(),
                 pEditWin->LogicToPixel(Size(mxPagePosItem->GetWidth(), 0)).
                 Width());
         }
         else
         {
             SetPagePos(
-                pEditWin->LogicToPixel(mxPagePosItem->GetPos()).Y(),
+                pEditWin->GetGeometry().LogicToPixel(mxPagePosItem->GetPos()).Y(),
                 pEditWin->LogicToPixel(Size(0, mxPagePosItem->GetHeight())).
                 Height());
         }

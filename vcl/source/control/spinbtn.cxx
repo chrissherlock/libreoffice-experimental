@@ -122,7 +122,7 @@ void SpinButton::Resize()
 
 void SpinButton::Draw(OutputDevice* pDev, const Point& rPos, DrawFlags nFlags)
 {
-    Point aPos  = pDev->LogicToPixel(rPos);
+    Point aPos  = pDev->GetGeometry().LogicToPixel(rPos);
     Size aSize = GetSizePixel();
 
     pDev->Push();

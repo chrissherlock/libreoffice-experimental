@@ -39,7 +39,7 @@ void FormFieldButton::CalcPosAndSize(const SwRect& rPortionPaintArea)
 {
     assert(GetParent());
 
-    Point aBoxPos = GetParent()->LogicToPixel(rPortionPaintArea.Pos());
+    Point aBoxPos = GetParent()->GetGeometry().LogicToPixel(rPortionPaintArea.Pos());
     Size aBoxSize = GetParent()->LogicToPixel(rPortionPaintArea.SSize());
 
     // First calculate the size of the frame around the field

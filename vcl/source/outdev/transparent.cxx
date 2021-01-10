@@ -356,7 +356,7 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos,
     else
     {
         GDIMetaFile* pOldMetaFile = mpMetaFile;
-        tools::Rectangle aOutRect( LogicToPixel( rPos ), LogicToPixel( rSize ) );
+        tools::Rectangle aOutRect( maGeometry.LogicToPixel( rPos ), LogicToPixel( rSize ) );
         Point aPoint;
         tools::Rectangle aDstRect( aPoint, GetSizeInPixels() );
 

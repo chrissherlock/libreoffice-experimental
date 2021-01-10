@@ -677,7 +677,7 @@ void AnnotationWindow::MouseButtonDown( const MouseEvent& rMEvt )
     if (!mbReadonly && maRectMetaButton.IsInside(PixelToLogic(rMEvt.GetPosPixel())) && rMEvt.IsLeft())
     {
         // context menu
-        ::tools::Rectangle aRect(LogicToPixel(maRectMetaButton.BottomLeft()),LogicToPixel(maRectMetaButton.BottomLeft()));
+        ::tools::Rectangle aRect(maGeometry.LogicToPixel(maRectMetaButton.BottomLeft()),maGeometry.LogicToPixel(maRectMetaButton.BottomLeft()));
         mrManager.ExecuteAnnotationContextMenu( mxAnnotation, static_cast<vcl::Window*>(this), aRect, true );
     }
 }

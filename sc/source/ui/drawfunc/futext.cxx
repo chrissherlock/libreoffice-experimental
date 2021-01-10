@@ -335,7 +335,7 @@ bool FuText::MouseMove(const MouseEvent& rMEvt)
 
     if (aDragTimer.IsActive() )
     {
-        Point aOldPixel = pWindow->LogicToPixel( aMDPos );
+        Point aOldPixel = pWindow->GetGeometry().LogicToPixel( aMDPos );
         Point aNewPixel = rMEvt.GetPosPixel();
         if ( std::abs( aOldPixel.X() - aNewPixel.X() ) > SC_MAXDRAGMOVE ||
              std::abs( aOldPixel.Y() - aNewPixel.Y() ) > SC_MAXDRAGMOVE )

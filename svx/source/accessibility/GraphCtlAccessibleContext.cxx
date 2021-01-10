@@ -753,7 +753,7 @@ Point SvxGraphCtrlAccessibleContext::LogicToPixel (const Point& rPoint) const
 {
     if( mpControl )
     {
-        return mpControl->GetDrawingArea()->get_ref_device().LogicToPixel (rPoint) + mpControl->GetPositionInDialog();
+        return mpControl->GetDrawingArea()->get_ref_device().GetGeometry().LogicToPixel (rPoint) + mpControl->GetPositionInDialog();
     }
     else
     {

@@ -212,7 +212,7 @@ Point ScPreviewViewForwarder::LogicToPixel( const Point& rPoint, const MapMode& 
         {
             MapMode aMapMode(pWindow->GetMapMode().GetMapUnit());
             Point aPoint2( OutputDevice::LogicToLogic( rPoint, rMapMode, aMapMode) );
-            return pWindow->LogicToPixel(aPoint2);
+            return pWindow->GetGeometry().LogicToPixel(aPoint2);
         }
     }
     else

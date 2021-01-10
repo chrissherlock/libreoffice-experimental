@@ -81,7 +81,7 @@ Point AccessibleViewForwarder::LogicToPixel(const Point& rPoint) const
         OutputDevice& rOutDev = pPaintWindow->GetOutputDevice();
         ::tools::Rectangle aBBox(
             static_cast<vcl::Window&>(rOutDev).GetWindowExtentsRelative(nullptr));
-        return rOutDev.LogicToPixel(rPoint) + aBBox.TopLeft();
+        return rOutDev.GetGeometry().LogicToPixel(rPoint) + aBBox.TopLeft();
     }
     else
         return Point();

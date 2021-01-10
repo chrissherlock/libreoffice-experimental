@@ -194,7 +194,7 @@ void ImageButtonHdl::ShowTip()
         pDev = Application::GetDefaultDevice();
 
     OUString aHelpText(SdResId(gButtonToolTips[mnHighlightId]));
-    Point aHelpPos(pDev->LogicToPixel(GetPos()));
+    Point aHelpPos(pDev->GetGeometry().LogicToPixel(GetPos()));
     if (mnHighlightId == 1)
         aHelpPos.Move(maImageSize.Width(), 0);
     else if (mnHighlightId == 2)
@@ -224,7 +224,7 @@ void ImageButtonHdl::onMouseEnter(const MouseEvent& rMEvt)
         pDev = Application::GetDefaultDevice();
 
     Point aMDPos( rMEvt.GetPosPixel() );
-    aMDPos -= pDev->LogicToPixel( GetPos() );
+    aMDPos -= pDev->GetGeometry().LogicToPixel( GetPos() );
 
     nHighlightId += aMDPos.X() > maImageSize.Width() ? 1 : 0;
     nHighlightId += aMDPos.Y() > maImageSize.Height() ? 2 : 0;

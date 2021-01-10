@@ -2613,7 +2613,7 @@ void ScTabView::DoDPFieldPopup(std::u16string_view rPivotTableName, sal_Int32 nD
 
     pDPObject->BuildAllDimensionMembers();
 
-    Point aScreenPoint = pWin->OutputToScreenPixel(pWin->LogicToPixel(aPoint));
+    Point aScreenPoint = pWin->OutputToScreenPixel(pWin->GetGeometry().LogicToPixel(aPoint));
     Size aScreenSize = pWin->LogicToPixel(aSize);
 
     pWin->DPLaunchFieldPopupMenu(aScreenPoint, aScreenSize, nDimensionIndex, pDPObject);

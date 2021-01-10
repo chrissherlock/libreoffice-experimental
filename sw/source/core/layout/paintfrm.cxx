@@ -2549,8 +2549,8 @@ void SwTabFramePainter::PaintLines(OutputDevice& rDev, const SwRect& rRect) cons
             // By making the line sizes a multiple of one pixel size, we can
             // assure that all lines having the same twip size have the same
             // pixel size, independent of their position on the screen.
-            Point aPaintStart = rDev.PixelToLogic( rDev.LogicToPixel(aStart) );
-            Point aPaintEnd = rDev.PixelToLogic( rDev.LogicToPixel(aEnd) );
+            Point aPaintStart = rDev.PixelToLogic( rDev.GetGeometry().LogicToPixel(aStart) );
+            Point aPaintEnd = rDev.PixelToLogic( rDev.GetGeometry().LogicToPixel(aEnd) );
 
             if (gProp.pSGlobalShell->GetWin())
             {
@@ -3744,7 +3744,7 @@ void SwPageFrame::PaintDecorators( ) const
             pHeaderFrame = nullptr;
 
         tools::Long nHeaderYOff = aBodyRect.Top();
-        Point nOutputOff = rEditWin.LogicToPixel( Point( nXOff, nHeaderYOff ) );
+        Point nOutputOff = rEditWin.GetGeometry().LogicToPixel( Point( nXOff, nHeaderYOff ) );
         rEditWin.GetFrameControlsManager().SetHeaderFooterControl( this, FrameControlType::Header, nOutputOff );
     }
 
@@ -3761,7 +3761,7 @@ void SwPageFrame::PaintDecorators( ) const
     }
 
     tools::Long nFooterYOff = aBodyRect.Bottom();
-    Point nOutputOff = rEditWin.LogicToPixel( Point( nXOff, nFooterYOff ) );
+    Point nOutputOff = rEditWin.GetGeometry().LogicToPixel( Point( nXOff, nFooterYOff ) );
     rEditWin.GetFrameControlsManager().SetHeaderFooterControl( this, FrameControlType::Footer, nOutputOff );
 }
 

@@ -227,7 +227,7 @@ public:
     Point GetPosForHitTest( const OutputDevice& rOut )
     {
         Point aHitTestPos( pHdl->GetPos() );
-        aHitTestPos = rOut.LogicToPixel( aHitTestPos );
+        aHitTestPos = rOut.GetGeometry().LogicToPixel( aHitTestPos );
         if ( bTopRightHandle )
         {
             aHitTestPos += Point( -1, 1 );
@@ -4055,7 +4055,7 @@ void SwEditWin::MouseMove(const MouseEvent& _rMEvt)
     if( g_bDDTimerStarted )
     {
         Point aDD( SwEditWin::m_nDDStartPosX, SwEditWin::m_nDDStartPosY );
-        aDD = LogicToPixel( aDD );
+        aDD = maGeometry.LogicToPixel( aDD );
         tools::Rectangle aRect( aDD.X()-3, aDD.Y()-3, aDD.X()+3, aDD.Y()+3 );
         if ( !aRect.IsInside( aPixPt ) )
             StopDDTimer( &rSh, aDocPt );
@@ -5427,7 +5427,7 @@ void SwEditWin::Command( const CommandEvent& rCEvt )
                         SelectMenuPosition(rSh, rCEvt.GetMousePosPixel());
                         m_rView.StopShellTimer();
                     }
-                    const Point aPixPos = LogicToPixel( aDocPos );
+                    const Point aPixPos = maGeometry.LogicToPixel( aDocPos );
 
                     if ( m_rView.GetDocShell()->IsReadOnly() )
                     {
@@ -6087,7 +6087,7 @@ void QuickHelpData::Start(SwWrtShell& rSh, const bool bRestart)
     vcl::Window& rWin = rSh.GetView().GetEditWin();
     if( m_bIsTip )
     {
-        Point aPt( rWin.OutputToScreenPixel( rWin.LogicToPixel(
+        Point aPt( rWin.OutputToScreenPixel( rWin.GetGeometry().LogicToPixel(
                     rSh.GetCharRect().Pos() )));
         aPt.AdjustY( -3 );
         nTipId = Help::ShowPopover(&rWin, tools::Rectangle( aPt, Size( 1, 1 )),
@@ -6380,7 +6380,7 @@ bool SwEditWin::IsInHeaderFooter( const Point &rDocPt, FrameControlType &rContro
     if ( rSh.IsShowHeaderFooterSeparator( FrameControlType::Header ) || rSh.IsShowHeaderFooterSeparator( FrameControlType::Footer ) )
     {
         SwFrameControlsManager &rMgr = rSh.GetView().GetEditWin().GetFrameControlsManager();
-        Point aPoint( LogicToPixel( rDocPt ) );
+        Point aPoint( maGeometry.LogicToPixel( rDocPt ) );
 
         if ( rSh.IsShowHeaderFooterSeparator( FrameControlType::Header ) )
         {

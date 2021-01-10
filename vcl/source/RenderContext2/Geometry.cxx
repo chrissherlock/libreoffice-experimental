@@ -325,4 +325,18 @@ DeviceCoordinate Geometry::LogicWidthToDeviceCoordinate(tools::Long nWidth) cons
 #endif
 }
 
+Point Geometry::LogicToPixel(const Point& rLogicPt) const
+{
+    if (!mbMap)
+        return rLogicPt;
+
+    return Point(
+        Geometry::LogicToPixel(rLogicPt.X() + maMappingMetrics.mnMapOfsX, mnDPIX,
+                               maMappingMetrics.mnMapScNumX, maMappingMetrics.mnMapScDenomX)
+            + mnOffsetFromOriginXpx,
+        Geometry::LogicToPixel(rLogicPt.Y() + maMappingMetrics.mnMapOfsY, mnDPIY,
+                               maMappingMetrics.mnMapScNumY, maMappingMetrics.mnMapScDenomY)
+            + mnOffsetFromOriginYpx);
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

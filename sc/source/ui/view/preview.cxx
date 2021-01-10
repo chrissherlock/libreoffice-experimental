@@ -833,7 +833,7 @@ void ScPreview::SetXOffset( tools::Long nX )
 
     if (bValid)
     {
-        tools::Long nDif = LogicToPixel(aOffset).X() - LogicToPixel(Point(nX,0)).X();
+        tools::Long nDif = maGeometry.LogicToPixel(aOffset).X() - maGeometry.LogicToPixel(Point(nX,0)).X();
         aOffset.setX( nX );
         if (nDif && !bInSetZoom)
         {
@@ -860,7 +860,7 @@ void ScPreview::SetYOffset( tools::Long nY )
 
     if (bValid)
     {
-        tools::Long nDif = LogicToPixel(aOffset).Y() - LogicToPixel(Point(0,nY)).Y();
+        tools::Long nDif = maGeometry.LogicToPixel(aOffset).Y() - maGeometry.LogicToPixel(Point(0,nY)).Y();
         aOffset.setY( nY );
         if (nDif && !bInSetZoom)
         {

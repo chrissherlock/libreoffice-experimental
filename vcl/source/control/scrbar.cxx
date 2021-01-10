@@ -372,7 +372,7 @@ void ScrollBar::ImplCalc( bool bUpdate )
 
 void ScrollBar::Draw( OutputDevice* pDev, const Point& rPos, DrawFlags nFlags )
 {
-    Point aPos  = pDev->LogicToPixel( rPos );
+    Point aPos  = pDev->GetGeometry().LogicToPixel( rPos );
 
     pDev->Push();
     pDev->SetMapMode();
@@ -848,7 +848,7 @@ void ScrollBar::MouseButtonDown( const MouseEvent& rMEvt )
         MapMode aMapMode = GetMapMode();
         aMapMode.SetOrigin(Point(0, 0));
         SetMapMode(aMapMode);
-        aPosPixel = LogicToPixel(rMEvt.GetPosPixel());
+        aPosPixel = maGeometry.LogicToPixel(rMEvt.GetPosPixel());
         Pop();
     }
     const Point&        rMousePos = (GetMapMode().GetMapUnit() != MapUnit::MapTwip ? rMEvt.GetPosPixel() : aPosPixel);
@@ -1021,7 +1021,7 @@ void ScrollBar::Tracking( const TrackingEvent& rTEvt )
             MapMode aMapMode = GetMapMode();
             aMapMode.SetOrigin(Point(0, 0));
             SetMapMode(aMapMode);
-            aPosPixel = LogicToPixel(rTEvt.GetMouseEvent().GetPosPixel());
+            aPosPixel = maGeometry.LogicToPixel(rTEvt.GetMouseEvent().GetPosPixel());
             Pop();
         }
         const Point rMousePos = (GetMapMode().GetMapUnit() != MapUnit::MapTwip ? rTEvt.GetMouseEvent().GetPosPixel() : aPosPixel);

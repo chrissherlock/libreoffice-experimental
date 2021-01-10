@@ -710,7 +710,7 @@ void SwPostItMgr::LayoutPostIts()
                     if (pPage->eSidebarPosition == sw::sidebarwindows::SidebarPosition::LEFT )
                     {
                         // x value for notes positioning
-                        mlPageBorder = mpEditWin->LogicToPixel( Point( pPage->mPageRect.Left(), 0)).X() - GetSidebarWidth(true);// - GetSidebarBorderWidth(true);
+                        mlPageBorder = mpEditWin->GetGeometry().LogicToPixel( Point( pPage->mPageRect.Left(), 0)).X() - GetSidebarWidth(true);// - GetSidebarBorderWidth(true);
                         //bending point
                         mlPageEnd =
                             mpWrtShell->getIDocumentSettingAccess().get(DocumentSettingId::BROWSE_MODE)
@@ -720,7 +720,7 @@ void SwPostItMgr::LayoutPostIts()
                     else if (pPage->eSidebarPosition == sw::sidebarwindows::SidebarPosition::RIGHT )
                     {
                         // x value for notes positioning
-                        mlPageBorder = mpEditWin->LogicToPixel( Point(pPage->mPageRect.Right(), 0)).X() + GetSidebarBorderWidth(true);
+                        mlPageBorder = mpEditWin->GetGeometry().LogicToPixel( Point(pPage->mPageRect.Right(), 0)).X() + GetSidebarBorderWidth(true);
                         //bending point
                         mlPageEnd =
                             mpWrtShell->getIDocumentSettingAccess().get(DocumentSettingId::BROWSE_MODE)
@@ -730,7 +730,7 @@ void SwPostItMgr::LayoutPostIts()
 
                     if (pItem->mbShow)
                     {
-                        tools::Long Y = mpEditWin->LogicToPixel( Point(0,pItem->maLayoutInfo.mPosition.Bottom())).Y();
+                        tools::Long Y = mpEditWin->GetGeometry().LogicToPixel( Point(0,pItem->maLayoutInfo.mPosition.Bottom())).Y();
                         tools::Long aPostItHeight = 0;
                         if (!pPostIt)
                         {
@@ -1055,8 +1055,8 @@ void SwPostItMgr::AutoScroll(const SwAnnotationWin* pPostIt,const tools::ULong a
     const bool bTop = mpEditWin->PixelToLogic(Point(0,pPostIt->GetPosPixel().Y())).Y() >= (mPages[aPage-1]->mPageRect.Top()+aSidebarheight);
     if ( !(bBottom && bTop))
     {
-        const tools::Long aDiff = bBottom ? mpEditWin->LogicToPixel(Point(0,mPages[aPage-1]->mPageRect.Top() + aSidebarheight)).Y() - pPostIt->GetPosPixel().Y() :
-                                        mpEditWin->LogicToPixel(Point(0,mPages[aPage-1]->mPageRect.Bottom() - aSidebarheight)).Y() - (pPostIt->GetPosPixel().Y()+pPostIt->GetSizePixel().Height());
+        const tools::Long aDiff = bBottom ? mpEditWin->GetGeometry().LogicToPixel(Point(0,mPages[aPage-1]->mPageRect.Top() + aSidebarheight)).Y() - pPostIt->GetPosPixel().Y() :
+                                        mpEditWin->GetGeometry().LogicToPixel(Point(0,mPages[aPage-1]->mPageRect.Bottom() - aSidebarheight)).Y() - (pPostIt->GetPosPixel().Y()+pPostIt->GetSizePixel().Height());
         // this just adds the missing value to get the next a* GetScrollSize() after aDiff
         // e.g aDiff= 61 POSTIT_SCROLL=50 --> lScroll = 100
         const auto nScrollSize = GetScrollSize();
@@ -1840,7 +1840,7 @@ tools::Long SwPostItMgr::GetNextBorder()
                 {
                     //if this is the last item, return the bottom border otherwise the next item
                     if (aNext == pPage->mvSidebarItems.end())
-                        return mpEditWin->LogicToPixel(Point(0,pPage->mPageRect.Bottom())).Y() - GetSpaceBetween();
+                        return mpEditWin->GetGeometry().LogicToPixel(Point(0,pPage->mPageRect.Bottom())).Y() - GetSpaceBetween();
                     else
                         return (*aNext)->mpPostIt->GetPosPixel().Y() - GetSpaceBetween();
                 }
@@ -2060,10 +2060,10 @@ void SwPostItMgr::CorrectPositions()
     // yeah, I know,    if this is a left page it could be wrong, but finding the page and the note is probably not even faster than just doing it
     // check, if anchor overlay object exists.
     const tools::Long aAnchorX = pFirstPostIt->Anchor()
-                          ? mpEditWin->LogicToPixel( Point(static_cast<tools::Long>(pFirstPostIt->Anchor()->GetSixthPosition().getX()),0)).X()
+                          ? mpEditWin->GetGeometry().LogicToPixel( Point(static_cast<tools::Long>(pFirstPostIt->Anchor()->GetSixthPosition().getX()),0)).X()
                           : 0;
     const tools::Long aAnchorY = pFirstPostIt->Anchor()
-                          ? mpEditWin->LogicToPixel( Point(0,static_cast<tools::Long>(pFirstPostIt->Anchor()->GetSixthPosition().getY()))).Y() + 1
+                          ? mpEditWin->GetGeometry().LogicToPixel( Point(0,static_cast<tools::Long>(pFirstPostIt->Anchor()->GetSixthPosition().getY()))).Y() + 1
                           : 0;
     if (Point(aAnchorX,aAnchorY) == pFirstPostIt->GetPosPixel())
         return;
@@ -2078,9 +2078,9 @@ void SwPostItMgr::CorrectPositions()
             if ( item->mbShow && item->mpPostIt && item->mpPostIt->Anchor() )
             {
                 aAnchorPosX = pPage->eSidebarPosition == sw::sidebarwindows::SidebarPosition::LEFT
-                    ? mpEditWin->LogicToPixel( Point(static_cast<tools::Long>(item->mpPostIt->Anchor()->GetSeventhPosition().getX()),0)).X()
-                    : mpEditWin->LogicToPixel( Point(static_cast<tools::Long>(item->mpPostIt->Anchor()->GetSixthPosition().getX()),0)).X();
-                aAnchorPosY = mpEditWin->LogicToPixel( Point(0,static_cast<tools::Long>(item->mpPostIt->Anchor()->GetSixthPosition().getY()))).Y() + 1;
+                    ? mpEditWin->GetGeometry().LogicToPixel( Point(static_cast<tools::Long>(item->mpPostIt->Anchor()->GetSeventhPosition().getX()),0)).X()
+                    : mpEditWin->GetGeometry().LogicToPixel( Point(static_cast<tools::Long>(item->mpPostIt->Anchor()->GetSixthPosition().getX()),0)).X();
+                aAnchorPosY = mpEditWin->GetGeometry().LogicToPixel( Point(0,static_cast<tools::Long>(item->mpPostIt->Anchor()->GetSixthPosition().getY()))).Y() + 1;
                 item->mpPostIt->SetPosPixel(Point(aAnchorPosX,aAnchorPosY));
             }
         }

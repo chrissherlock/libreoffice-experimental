@@ -186,7 +186,7 @@ void Printer::ImplPrintTransparent( const Bitmap& rBmp, const Bitmap& rMask,
                                          const Point& rDestPt, const Size& rDestSize,
                                          const Point& rSrcPtPixel, const Size& rSrcSizePixel )
 {
-    Point       aDestPt( LogicToPixel( rDestPt ) );
+    Point       aDestPt( maGeometry.LogicToPixel( rDestPt ) );
     Size        aDestSz( LogicToPixel( rDestSize ) );
     tools::Rectangle   aSrcRect( rSrcPtPixel, rSrcSizePixel );
 
@@ -707,7 +707,7 @@ void Printer::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
                          const Point& rDestPt, const Size& rDestSize,
                          const Point& rSrcPtPixel, const Size& rSrcSizePixel )
 {
-    Point       aDestPt( LogicToPixel( rDestPt ) );
+    Point       aDestPt( maGeometry.LogicToPixel( rDestPt ) );
     Size        aDestSz( LogicToPixel( rDestSize ) );
     tools::Rectangle   aSrcRect( rSrcPtPixel, rSrcSizePixel );
 

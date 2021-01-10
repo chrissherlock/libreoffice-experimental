@@ -255,7 +255,7 @@ void SdrGluePoint::Invalidate(vcl::Window& rWin, const SdrObject* pObj) const
 {
     bool bMapMode=rWin.IsMapModeEnabled();
     Point aPt(pObj!=nullptr ? GetAbsolutePos(*pObj) : GetPos());
-    aPt=rWin.LogicToPixel(aPt);
+    aPt=rWin.GetGeometry().LogicToPixel(aPt);
     rWin.DisableMapMode();
 
     Size aSiz( aGlueHalfSize );

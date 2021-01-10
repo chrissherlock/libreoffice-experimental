@@ -102,7 +102,7 @@ namespace cppcanvas::tools
             // translate according to curr map mode/pref map mode offset
             const ::Point  aEmptyPoint;
             const ::Point& rTranslatedPoint(
-                rVDev.LogicToPixel( aEmptyPoint ));
+                rVDev.GetGeometry().LogicToPixel( aEmptyPoint ));
 
             o_rMatrix.translate(rTranslatedPoint.X(),
                                 rTranslatedPoint.Y());

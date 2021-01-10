@@ -1363,7 +1363,7 @@ bool EditEngine::PostKeyEvent( const KeyEvent& rKeyEvent, EditView* pEditView, v
                                     pImpEditEngine->SetAutoCompleteText( aComplete, false );
                                     Point aPos = pImpEditEngine->PaMtoEditCursor( aCurSel.Max() ).TopLeft();
                                     aPos = pEditView->pImpEditView->GetWindowPos( aPos );
-                                    aPos = pEditView->pImpEditView->GetWindow()->LogicToPixel( aPos );
+                                    aPos = pEditView->pImpEditView->GetWindow()->GetGeometry().LogicToPixel( aPos );
                                     aPos = pEditView->GetWindow()->OutputToScreenPixel( aPos );
                                     aPos.AdjustY( -3 );
                                     Help::ShowQuickHelp( pEditView->GetWindow(), tools::Rectangle( aPos, Size( 1, 1 ) ), aComplete, QuickHelpFlags::Bottom|QuickHelpFlags::Left );

@@ -139,7 +139,7 @@ bool vcl::Cursor::ImplPrepForDraw(const OutputDevice* pDevice, ImplCursorData& r
 {
     if (pDevice && !rData.mbCurVisible)
     {
-        rData.maPixPos        = pDevice->LogicToPixel( maPos );
+        rData.maPixPos        = pDevice->GetGeometry().LogicToPixel( maPos );
         rData.maPixSize       = pDevice->LogicToPixel( maSize );
         rData.mnOrientation   = mnOrientation;
         rData.mnDirection     = mnDirection;
@@ -256,8 +256,8 @@ void vcl::Cursor::LOKNotify( vcl::Window* pWindow, const OUString& rAction )
         aItems.emplace_back("visible", mpData->mbCurVisible ? "true" : "false");
     else if (rAction == "cursor_invalidate")
     {
-        const tools::Long nX = pWindow->GetXOffsetInPixels() + pWindow->LogicToPixel(GetPos()).X() - pParent->GetXOffsetInPixels();
-        const tools::Long nY = pWindow->GetYOffsetInPixels() + pWindow->LogicToPixel(GetPos()).Y() - pParent->GetYOffsetInPixels();
+        const tools::Long nX = pWindow->GetXOffsetInPixels() + pWindow->GetGeometry().LogicToPixel(GetPos()).X() - pParent->GetXOffsetInPixels();
+        const tools::Long nY = pWindow->GetYOffsetInPixels() + pWindow->GetGeometry().LogicToPixel(GetPos()).Y() - pParent->GetYOffsetInPixels();
         Size aSize = pWindow->LogicToPixel(GetSize());
         if (!aSize.Width())
             aSize.setWidth( pWindow->GetSettings().GetStyleSettings().GetCursorSize() );

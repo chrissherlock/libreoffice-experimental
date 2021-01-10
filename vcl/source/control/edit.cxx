@@ -1743,7 +1743,7 @@ void Edit::Draw( OutputDevice* pDev, const Point& rPos, DrawFlags nFlags )
 {
     ApplySettings(*pDev);
 
-    Point aPos = pDev->LogicToPixel( rPos );
+    Point aPos = pDev->GetGeometry().LogicToPixel( rPos );
     Size aSize = GetSizePixel();
     vcl::Font aFont = GetDrawPixelFont( pDev );
 

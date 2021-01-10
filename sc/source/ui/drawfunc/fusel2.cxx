@@ -61,11 +61,11 @@ bool FuSelection::TestDetective( const SdrPageView* pPV, const Point& rPos )
                 ScSplitPos ePos = rViewShell.FindWindow( pWindow );
                 Point aLineStart = pObject->GetPoint(0);
                 Point aLineEnd   = pObject->GetPoint(1);
-                Point aPixel = pWindow->LogicToPixel( aLineStart );
+                Point aPixel = pWindow->GetGeometry().LogicToPixel( aLineStart );
                 SCCOL nStartCol;
                 SCROW nStartRow;
                 rViewData.GetPosFromPixel( aPixel.X(), aPixel.Y(), ePos, nStartCol, nStartRow );
-                aPixel = pWindow->LogicToPixel( aLineEnd );
+                aPixel = pWindow->GetGeometry().LogicToPixel( aLineEnd );
                 SCCOL nEndCol;
                 SCROW nEndRow;
                 rViewData.GetPosFromPixel( aPixel.X(), aPixel.Y(), ePos, nEndCol, nEndRow );
