@@ -1430,14 +1430,12 @@ protected:
     ///@{
 
 public:
-    bool                        IsMapModeEnabled() const { return maGeometry.mbMap; }
-    void                        EnableMapMode() override;
-    void                        DisableMapMode() override;
-    void                        SetMapMode();
-    virtual void                SetMapMode( const MapMode& rNewMapMode );
-    void                        SetRelativeMapMode( const MapMode& rNewMapMode );
-    virtual void                SetMetafileMapMode(const MapMode& rNewMapMode, bool bIsRecord);
-    const MapMode&              GetMapMode() const { return maMapMode; }
+    void EnableMapMode() override;
+    void DisableMapMode() override;
+    void SetMapMode() override;
+    void SetMapMode(MapMode const& rNewMapMode) override;
+    void SetRelativeMapMode( const MapMode& rNewMapMode );
+    virtual void SetMetafileMapMode(const MapMode& rNewMapMode, bool bIsRecord);
 
 public:
     void SetOffsetFromOriginInPixels(Size const& rOffset) override;

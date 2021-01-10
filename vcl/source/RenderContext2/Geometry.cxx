@@ -24,8 +24,8 @@
 #include <cassert>
 #include <cmath>
 
-static tools::Long LogicToPixel(tools::Long n, tools::Long nDPI, tools::Long nMapNum,
-                                tools::Long nMapDenom)
+tools::Long Geometry::LogicToPixel(tools::Long n, tools::Long nDPI, tools::Long nMapNum,
+                                   tools::Long nMapDenom)
 {
     assert(nDPI > 0);
     assert(nMapDenom != 0);
@@ -53,8 +53,8 @@ static tools::Long LogicToPixel(tools::Long n, tools::Long nDPI, tools::Long nMa
     return n;
 }
 
-static tools::Long PixelToLogic(tools::Long n, tools::Long nDPI, tools::Long nMapNum,
-                                tools::Long nMapDenom)
+tools::Long Geometry::PixelToLogic(tools::Long n, tools::Long nDPI, tools::Long nMapNum,
+                                   tools::Long nMapDenom)
 {
     assert(nDPI > 0);
     if (nMapNum == 0)

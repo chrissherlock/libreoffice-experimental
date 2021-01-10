@@ -91,6 +91,9 @@ public:
     bool IsMapModeEnabled() const;
     virtual void EnableMapMode();
     virtual void DisableMapMode();
+    MapMode const& GetMapMode() const;
+    virtual void SetMapMode();
+    virtual void SetMapMode(MapMode const& rNewMapMode);
 
     Size GetSizeInPixels() const;
     tools::Long GetWidthInPixels() const;

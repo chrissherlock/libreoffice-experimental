@@ -43,6 +43,11 @@ struct Geometry
     {
     }
 
+    static tools::Long LogicToPixel(tools::Long n, tools::Long nDPI, tools::Long nMapNum,
+                                    tools::Long nMapDenom);
+    static tools::Long PixelToLogic(tools::Long n, tools::Long nDPI, tools::Long nMapNum,
+                                    tools::Long nMapDenom);
+
     tools::Long LogicXToDevicePixel(tools::Long nX, MappingMetrics aMappingMetric) const;
     tools::Long LogicYToDevicePixel(tools::Long nY, MappingMetrics aMappingMetric) const;
     tools::Long LogicWidthToDevicePixel(tools::Long nWidth, MappingMetrics aMappingMetric) const;
