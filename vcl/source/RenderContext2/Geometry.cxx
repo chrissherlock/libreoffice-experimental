@@ -370,4 +370,34 @@ tools::Rectangle Geometry::LogicToPixel(tools::Rectangle const& rLogicRect) cons
             + mnOffsetFromOriginYpx);
 }
 
+tools::Polygon Geometry::LogicToPixel(tools::Polygon const& rLogicPoly) const
+{
+    if (!mbMap)
+        return rLogicPoly;
+
+    sal_uInt16 i;
+    sal_uInt16 nPoints = rLogicPoly.GetSize();
+    tools::Polygon aPoly(rLogicPoly);
+
+    // get pointer to Point-array (copy data)
+    const Point* pPointAry = aPoly.GetConstPointAry();
+
+    for (i = 0; i < nPoints; i++)
+    {
+        const Point* pPt = &(pPointAry[i]);
+        Point aPt;
+        aPt.setX(Geometry::LogicToPixel(pPt->X() + maMappingMetrics.mnMapOfsX, mnDPIX,
+                                        maMappingMetrics.mnMapScNumX,
+                                        maMappingMetrics.mnMapScDenomX)
+                 + mnOffsetFromOriginXpx);
+        aPt.setY(Geometry::LogicToPixel(pPt->Y() + maMappingMetrics.mnMapOfsY, mnDPIY,
+                                        maMappingMetrics.mnMapScNumY,
+                                        maMappingMetrics.mnMapScDenomY)
+                 + mnOffsetFromOriginYpx);
+        aPoly[i] = aPt;
+    }
+
+    return aPoly;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

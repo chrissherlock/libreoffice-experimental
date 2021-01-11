@@ -217,34 +217,6 @@ void OutputDevice::SetRelativeMapMode(const MapMode& rNewMapMode)
         mpAlphaVDev->SetRelativeMapMode(rNewMapMode);
 }
 
-tools::Polygon OutputDevice::LogicToPixel(const tools::Polygon& rLogicPoly) const
-{
-    if (!IsMapModeEnabled())
-        return rLogicPoly;
-
-    sal_uInt16 i;
-    sal_uInt16 nPoints = rLogicPoly.GetSize();
-    tools::Polygon aPoly(rLogicPoly);
-
-    // get pointer to Point-array (copy data)
-    const Point* pPointAry = aPoly.GetConstPointAry();
-
-    for (i = 0; i < nPoints; i++)
-    {
-        const Point* pPt = &(pPointAry[i]);
-        Point aPt;
-        aPt.setX(Geometry::LogicToPixel(pPt->X() + GetXMapOffset(), GetDPIX(), GetXMapNumerator(),
-                                        GetXMapDenominator())
-                 + GetXOffsetFromOriginInPixels());
-        aPt.setY(Geometry::LogicToPixel(pPt->Y() + GetYMapOffset(), GetDPIY(), GetYMapNumerator(),
-                                        GetYMapDenominator())
-                 + GetYOffsetFromOriginInPixels());
-        aPoly[i] = aPt;
-    }
-
-    return aPoly;
-}
-
 tools::PolyPolygon OutputDevice::LogicToPixel(const tools::PolyPolygon& rLogicPolyPoly) const
 {
     if (!IsMapModeEnabled())
@@ -255,7 +227,7 @@ tools::PolyPolygon OutputDevice::LogicToPixel(const tools::PolyPolygon& rLogicPo
     for (sal_uInt16 i = 0; i < nPoly; i++)
     {
         tools::Polygon& rPoly = aPolyPoly[i];
-        rPoly = LogicToPixel(rPoly);
+        rPoly = maGeometry.LogicToPixel(rPoly);
     }
     return aPolyPoly;
 }
