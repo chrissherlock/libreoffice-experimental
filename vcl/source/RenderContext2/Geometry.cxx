@@ -350,4 +350,24 @@ Size Geometry::LogicToPixel(Size const& rLogicSize) const
                                        maMappingMetrics.mnMapScDenomY));
 }
 
+tools::Rectangle Geometry::LogicToPixel(tools::Rectangle const& rLogicRect) const
+{
+    if (!mbMap || rLogicRect.IsEmpty())
+        return rLogicRect;
+
+    return tools::Rectangle(
+        Geometry::LogicToPixel(rLogicRect.Left() + maMappingMetrics.mnMapOfsX, mnDPIX,
+                               maMappingMetrics.mnMapScNumX, maMappingMetrics.mnMapScDenomX)
+            + mnOffsetFromOriginXpx,
+        Geometry::LogicToPixel(rLogicRect.Top() + maMappingMetrics.mnMapOfsY, mnDPIY,
+                               maMappingMetrics.mnMapScNumY, maMappingMetrics.mnMapScDenomY)
+            + mnOffsetFromOriginYpx,
+        Geometry::LogicToPixel(rLogicRect.Right() + maMappingMetrics.mnMapOfsX, mnDPIX,
+                               maMappingMetrics.mnMapScNumX, maMappingMetrics.mnMapScDenomX)
+            + mnOffsetFromOriginXpx,
+        Geometry::LogicToPixel(rLogicRect.Bottom() + maMappingMetrics.mnMapOfsY, mnDPIY,
+                               maMappingMetrics.mnMapScNumY, maMappingMetrics.mnMapScDenomY)
+            + mnOffsetFromOriginYpx);
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

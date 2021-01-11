@@ -3039,7 +3039,7 @@ void ScGridWindow::Command( const CommandEvent& rCEvt )
             if (pDrawView && pDrawView->AreObjectsMarked())
             {
                 // #100442#; the context menu should open in the middle of the selected objects
-                tools::Rectangle aSelectRect(LogicToPixel(pDrawView->GetAllMarkedBoundRect()));
+                tools::Rectangle aSelectRect(maGeometry.LogicToPixel(pDrawView->GetAllMarkedBoundRect()));
                 aMenuPos = aSelectRect.Center();
             }
         }

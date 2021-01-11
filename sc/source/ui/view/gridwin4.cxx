@@ -392,7 +392,7 @@ void ScGridWindow::Paint( vcl::RenderContext& /*rRenderContext*/, const tools::R
         else
         {
             bNeedsRepaint = true;
-            aRepaintPixel = LogicToPixel(rRect);    // only affected ranges
+            aRepaintPixel = maGeometry.LogicToPixel(rRect);    // only affected ranges
         }
         return;
     }
@@ -406,7 +406,7 @@ void ScGridWindow::Paint( vcl::RenderContext& /*rRenderContext*/, const tools::R
 
     bIsInPaint = true;
 
-    tools::Rectangle aPixRect = LogicToPixel( rRect );
+    tools::Rectangle aPixRect = maGeometry.LogicToPixel( rRect );
 
     SCCOL nX1 = mrViewData.GetPosX(eHWhich);
     SCROW nY1 = mrViewData.GetPosY(eVWhich);

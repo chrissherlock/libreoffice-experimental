@@ -642,7 +642,7 @@ awt::Rectangle SAL_CALL AccessibleBase::getBounds()
                              aLogicRect.X + aLogicRect.Width,
                              aLogicRect.Y + aLogicRect.Height );
             SolarMutexGuard aSolarGuard;
-            aRect = pWindow->LogicToPixel( aRect );
+            aRect = pWindow->GetGeometry().LogicToPixel( aRect );
 
             // aLogicRect is relative to the page, but we need a value relative
             // to the parent object

@@ -1292,7 +1292,7 @@ namespace cppcanvas::internal
 
                                 // #121806# explicitly kept integer
                                 ::tools::Rectangle aClipRect(
-                                    rVDev.LogicToPixel(
+                                    rVDev.GetGeometry().LogicToPixel(
                                         pClipAction->GetRegion().GetBoundRect() ) );
 
                                 // intersect current clip with given rect
@@ -1326,7 +1326,7 @@ namespace cppcanvas::internal
 
                         // #121806# explicitly kept integer
                         ::tools::Rectangle aClipRect(
-                            rVDev.LogicToPixel( pClipAction->GetRect() ) );
+                            rVDev.GetGeometry().LogicToPixel( pClipAction->GetRect() ) );
 
                         // intersect current clip with given rect
                         updateClipping(
@@ -1348,7 +1348,7 @@ namespace cppcanvas::internal
 
                             // #121806# explicitly kept integer
                             ::tools::Rectangle aClipRect(
-                                rVDev.LogicToPixel( pClipAction->GetRegion().GetBoundRect() ) );
+                                rVDev.GetGeometry().LogicToPixel( pClipAction->GetRegion().GetBoundRect() ) );
 
                             // intersect current clip with given rect
                             updateClipping(

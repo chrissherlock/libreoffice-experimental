@@ -153,7 +153,7 @@ bool FuZoom::MouseButtonUp(const MouseEvent& rMEvt)
     if(SID_ZOOM_PANNING != nSlotId && !rMEvt.IsShift())
     {
         // Zoom
-        Size aZoomSizePixel = mpWindow->LogicToPixel(aZoomRect).GetSize();
+        Size aZoomSizePixel = mpWindow->GetGeometry().LogicToPixel(aZoomRect).GetSize();
         sal_uLong nTol = DRGPIX + DRGPIX;
 
         if ( ( aZoomSizePixel.Width() < static_cast<::tools::Long>(nTol) && aZoomSizePixel.Height() < static_cast<::tools::Long>(nTol) ) || rMEvt.IsMod1() )

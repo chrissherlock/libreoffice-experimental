@@ -148,7 +148,7 @@ lcl_PaintTransparentFormControls(SwViewShell const & rShell, SwRect const& rRect
     if (rShell.GetWin())
     {
         vcl::Window& rWindow = *(rShell.GetWin());
-        const tools::Rectangle aRectanglePixel(rShell.GetOut()->LogicToPixel(rRect.SVRect()));
+        const tools::Rectangle aRectanglePixel(rShell.GetOut()->GetGeometry().LogicToPixel(rRect.SVRect()));
         PaintTransparentChildren(rWindow, aRectanglePixel);
     }
 }
@@ -349,7 +349,7 @@ void SwViewShell::ImplEndAction( const bool bIdleEnd )
                         bool bSizeOK = true;
 
                         tools::Rectangle aTmp1( aRect.SVRect() );
-                        aTmp1 = GetOut()->LogicToPixel( aTmp1 );
+                        aTmp1 = GetOut()->GetGeometry().LogicToPixel( aTmp1 );
                         tools::Rectangle aTmp2( GetOut()->PixelToLogic( aTmp1 ) );
                         if ( aTmp2.Left() > aRect.Left() )
                             aTmp1.SetLeft( std::max( tools::Long(0), aTmp1.Left() - 1 ) );

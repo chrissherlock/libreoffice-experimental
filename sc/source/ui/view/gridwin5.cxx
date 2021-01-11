@@ -267,7 +267,7 @@ void ScGridWindow::RequestHelp(const HelpEvent& rHEvt)
                         aHelpText = pIMapObj->GetAltText();
                         if (aHelpText.isEmpty())
                             aHelpText = SfxHelp::GetURLHelpText(pIMapObj->GetURL());
-                        aPixRect = LogicToPixel(aVEvt.pObj->GetLogicRect());
+                        aPixRect = maGeometry.LogicToPixel(aVEvt.pObj->GetLogicRect());
                     }
                 }
                 // URL in shape text or at shape itself (URL in text overrides object URL)
@@ -276,7 +276,7 @@ void ScGridWindow::RequestHelp(const HelpEvent& rHEvt)
                     if( aVEvt.eEvent == SdrEventKind::ExecuteUrl )
                     {
                         aHelpText = SfxHelp::GetURLHelpText(aVEvt.pURLField->GetURL());
-                        aPixRect = LogicToPixel(aVEvt.pObj->GetLogicRect());
+                        aPixRect = maGeometry.LogicToPixel(aVEvt.pObj->GetLogicRect());
                     }
                     else
                     {
@@ -294,7 +294,7 @@ void ScGridWindow::RequestHelp(const HelpEvent& rHEvt)
                             ScMacroInfo* pInfo = ScDrawLayer::GetMacroInfo( pObj );
                             if ( pInfo && (pInfo->GetHlink().getLength() > 0) )
                             {
-                                aPixRect = LogicToPixel(aVEvt.pObj->GetLogicRect());
+                                aPixRect = maGeometry.LogicToPixel(aVEvt.pObj->GetLogicRect());
                                 aHelpText = SfxHelp::GetURLHelpText(pInfo->GetHlink());
                             }
                         }

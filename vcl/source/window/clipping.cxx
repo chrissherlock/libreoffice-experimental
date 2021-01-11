@@ -152,7 +152,7 @@ void Window::ClipToPaintRegion(tools::Rectangle& rDstRect)
     const vcl::Region aPaintRgn(GetPaintRegion());
 
     if (!aPaintRgn.IsNull())
-        rDstRect.Intersection(LogicToPixel(aPaintRgn.GetBoundRect()));
+        rDstRect.Intersection(maGeometry.LogicToPixel(aPaintRgn.GetBoundRect()));
 }
 
 void Window::EnableClipSiblings( bool bClipSiblings )

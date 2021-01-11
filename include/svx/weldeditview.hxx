@@ -86,7 +86,7 @@ protected:
     virtual void EditViewCursorRect(const tools::Rectangle& rRect, int nExtTextInputWidth) override
     {
         OutputDevice& rRefDevice = EditViewOutputDevice();
-        SetCursorRect(rRefDevice.LogicToPixel(rRect),
+        SetCursorRect(rRefDevice.GetGeometry().LogicToPixel(rRect),
                       rRefDevice.GetGeometry().LogicToPixel(Size(nExtTextInputWidth, 0)).Width());
     }
 

@@ -848,27 +848,27 @@ static void lcl_correctlyAlignRect( SwRect& rAlignedGrfArea, const SwRect& rInAr
 
     if(!pOut)
         return;
-    tools::Rectangle aPxRect = pOut->LogicToPixel( rInArea.SVRect() );
+    tools::Rectangle aPxRect = pOut->GetGeometry().LogicToPixel( rInArea.SVRect() );
     tools::Rectangle aNewPxRect( aPxRect );
     while( aNewPxRect.Left() < aPxRect.Left() )
     {
         rAlignedGrfArea.AddLeft( 1 );
-        aNewPxRect = pOut->LogicToPixel( rAlignedGrfArea.SVRect() );
+        aNewPxRect = pOut->GetGeometry().LogicToPixel( rAlignedGrfArea.SVRect() );
     }
     while( aNewPxRect.Top() < aPxRect.Top() )
     {
         rAlignedGrfArea.AddTop(+1);
-        aNewPxRect = pOut->LogicToPixel( rAlignedGrfArea.SVRect() );
+        aNewPxRect = pOut->GetGeometry().LogicToPixel( rAlignedGrfArea.SVRect() );
     }
     while( aNewPxRect.Bottom() > aPxRect.Bottom() )
     {
         rAlignedGrfArea.AddBottom( -1 );
-        aNewPxRect = pOut->LogicToPixel( rAlignedGrfArea.SVRect() );
+        aNewPxRect = pOut->GetGeometry().LogicToPixel( rAlignedGrfArea.SVRect() );
     }
     while( aNewPxRect.Right() > aPxRect.Right() )
     {
         rAlignedGrfArea.AddRight(-1);
-        aNewPxRect = pOut->LogicToPixel( rAlignedGrfArea.SVRect() );
+        aNewPxRect = pOut->GetGeometry().LogicToPixel( rAlignedGrfArea.SVRect() );
     }
 }
 

@@ -111,7 +111,7 @@ void OutputDevice::IntersectClipRegion( const tools::Rectangle& rRect )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaISectRectClipRegionAction( rRect ) );
 
-    tools::Rectangle aRect = LogicToPixel( rRect );
+    tools::Rectangle aRect = maGeometry.LogicToPixel( rRect );
     maRegion.Intersect( aRect );
     mbClipRegion        = true;
     mbInitClipRegion    = true;

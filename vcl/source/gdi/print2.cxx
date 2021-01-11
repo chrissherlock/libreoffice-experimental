@@ -96,7 +96,7 @@ bool doesRectCoverWithUniformColor(
 {
     // shape needs to fully cover previous content, and have uniform
     // color
-    return (rMapModeVDev.LogicToPixel(rCurrRect).IsInside(rPrevRect) &&
+    return (rMapModeVDev.GetGeometry().LogicToPixel(rCurrRect).IsInside(rPrevRect) &&
         rMapModeVDev.IsOpaqueFillColor());
 }
 
@@ -613,13 +613,15 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
     {
         // fdo#40421 limit current action's output to clipped area
         if( rOut.IsClipRegion() )
-            return rOut.LogicToPixel(
+            return rOut.GetGeometry().LogicToPixel(
                 rOut.GetClipRegion().GetBoundRect().Intersection( aActionBounds ) );
         else
-            return rOut.LogicToPixel( aActionBounds );
+            return rOut.GetGeometry().LogicToPixel( aActionBounds );
     }
     else
+    {
         return tools::Rectangle();
+    }
 }
 
 } // end anon namespace

@@ -279,14 +279,14 @@ namespace vcl
 
         // similar to above, the text rect now contains TWIPs (or whatever unit the ref device has), but the caller
         // expects pixel coordinates
-        aTextRect = m_rTargetDevice.LogicToPixel( aTextRect );
+        aTextRect = m_rTargetDevice.GetGeometry().LogicToPixel( aTextRect );
 
         // convert the metric vector
         if ( _pVector )
         {
             for ( auto& rCharRect : *_pVector )
             {
-                rCharRect = m_rTargetDevice.LogicToPixel( rCharRect );
+                rCharRect = m_rTargetDevice.GetGeometry().LogicToPixel( rCharRect );
             }
         }
 
@@ -319,7 +319,7 @@ namespace vcl
 
         // similar to above, the text rect now contains TWIPs (or whatever unit the ref device has), but the caller
         // expects pixel coordinates
-        aTextRect = m_rTargetDevice.LogicToPixel( aTextRect );
+        aTextRect = m_rTargetDevice.GetGeometry().LogicToPixel( aTextRect );
 
         return aTextRect;
     }

@@ -163,7 +163,7 @@ bool SwDPage::RequestHelp( vcl::Window* pWindow, SdrView const * pView,
         {
             SwFlyFrame *pFly = pDrawObj->GetFlyFrame();
 
-            aPixRect = pWindow->LogicToPixel(pFly->getFrameArea().SVRect());
+            aPixRect = pWindow->GetGeometry().LogicToPixel(pFly->getFrameArea().SVRect());
 
             const SwFormatURL &rURL = pFly->GetFormat()->GetURL();
             if( rURL.GetMap() )
@@ -207,7 +207,7 @@ bool SwDPage::RequestHelp( vcl::Window* pWindow, SdrView const * pView,
             if (aVEvt.eEvent == SdrEventKind::ExecuteUrl)
             {
                 sText = aVEvt.pURLField->GetURL();
-                aPixRect = pWindow->LogicToPixel(aVEvt.pObj->GetLogicRect());
+                aPixRect = pWindow->GetGeometry().LogicToPixel(aVEvt.pObj->GetLogicRect());
             }
         }
 

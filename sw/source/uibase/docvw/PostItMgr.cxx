@@ -1130,7 +1130,7 @@ bool SwPostItMgr::LayoutByPage(std::vector<SwAnnotationWin*> &aVisiblePostItList
     //  - then the real layout starts
 
     //rBorder is the page rect
-    const tools::Rectangle aBorder         = mpEditWin->LogicToPixel(rBorder);
+    const tools::Rectangle aBorder         = mpEditWin->GetGeometry().LogicToPixel(rBorder);
     tools::Long            lTopBorder      = aBorder.Top() + 5;
     tools::Long            lBottomBorder   = aBorder.Bottom() - 5;
     const tools::Long      lVisibleHeight  = lBottomBorder - lTopBorder; //aBorder.GetHeight() ;

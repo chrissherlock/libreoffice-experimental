@@ -83,7 +83,7 @@ void OTableWindowTitle::RequestHelp( const HelpEvent& rHEvt )
 
     // show help
     tools::Rectangle aItemRect(Point(0,0),GetSizePixel());
-    aItemRect = LogicToPixel( aItemRect );
+    aItemRect = maGeometry.LogicToPixel( aItemRect );
     Point aPt = OutputToScreenPixel( aItemRect.TopLeft() );
     aItemRect.SetLeft( aPt.X() );
     aItemRect.SetTop( aPt.Y() );

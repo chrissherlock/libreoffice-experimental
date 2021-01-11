@@ -328,7 +328,7 @@ void ImpEditView::lokSelectionCallback(const std::unique_ptr<tools::PolyPolygon>
         std::vector<OString> v;
         for (tools::Rectangle & rRectangle : aRectangles)
         {
-            rRectangle = pOutWin->LogicToPixel(rRectangle);
+            rRectangle = pOutWin->GetGeometry().LogicToPixel(rRectangle);
             rRectangle.Move(nX, nY);
             v.emplace_back(rRectangle.toString().getStr());
         }
@@ -838,7 +838,7 @@ void ImpEditView::SetOutputArea( const tools::Rectangle& rRect )
 {
     const OutputDevice& rOutDev = GetOutputDevice();
     // should be better be aligned on pixels!
-    tools::Rectangle aNewRect(rOutDev.LogicToPixel(rRect));
+    tools::Rectangle aNewRect(rOutDev.GetGeometry().LogicToPixel(rRect));
     aNewRect = rOutDev.PixelToLogic(aNewRect);
     aOutArea = aNewRect;
     if ( !aOutArea.IsWidthEmpty() && aOutArea.Right() < aOutArea.Left() )
@@ -2129,7 +2129,7 @@ void ImpEditView::ShowDDCursor( const tools::Rectangle& rRect )
     rOutDev.SetFillColor( Color(4210752) );    // GRAY BRUSH_50, OLDSV, change to DDCursor!
 
     // Save background ...
-    tools::Rectangle aSaveRect( rOutDev.LogicToPixel( rRect ) );
+    tools::Rectangle aSaveRect( rOutDev.GetGeometry().LogicToPixel( rRect ) );
     // prefer to save some more ...
     aSaveRect.AdjustRight(1 );
     aSaveRect.AdjustBottom(1 );
@@ -2553,7 +2553,7 @@ void ImpEditView::dragOver(const css::datatransfer::dnd::DropTargetDragEvent& rD
                     aStartPos = GetWindowPos( aStartPos );
                     Point aEndPos( GetOutputArea().GetWidth(), nDDYPos );
                     aEndPos = GetWindowPos( aEndPos );
-                    aEditCursor = rOutDev.LogicToPixel( tools::Rectangle( aStartPos, aEndPos ) );
+                    aEditCursor = rOutDev.GetGeometry().LogicToPixel( tools::Rectangle( aStartPos, aEndPos ) );
                     if ( !pEditEngine->IsVertical() )
                     {
                         aEditCursor.AdjustTop( -1 );
@@ -2580,7 +2580,7 @@ void ImpEditView::dragOver(const css::datatransfer::dnd::DropTargetDragEvent& rD
                     Point aTopLeft( GetWindowPos( aEditCursor.TopLeft() ) );
                     aEditCursor.SetPos( aTopLeft );
                     aEditCursor.SetRight( aEditCursor.Left() + pDragAndDropInfo->nCursorWidth );
-                    aEditCursor = rOutDev.LogicToPixel( aEditCursor );
+                    aEditCursor = rOutDev.GetGeometry().LogicToPixel( aEditCursor );
                     aEditCursor = rOutDev.PixelToLogic( aEditCursor );
                 }
 

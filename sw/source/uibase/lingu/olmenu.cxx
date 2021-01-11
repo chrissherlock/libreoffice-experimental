@@ -666,7 +666,7 @@ void SwSpellPopup::checkRedline()
 
 void SwSpellPopup::Execute( const tools::Rectangle& rWordPos, vcl::Window* pWin )
 {
-    sal_uInt16 nRet = m_xPopupMenu->Execute(pWin, pWin->LogicToPixel(rWordPos));
+    sal_uInt16 nRet = m_xPopupMenu->Execute(pWin, pWin->GetGeometry().LogicToPixel(rWordPos));
     Execute( nRet );
 }
 

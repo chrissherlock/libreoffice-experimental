@@ -587,7 +587,7 @@ void ScPreview::DoPrint( ScPreviewLocationData* pFillLocation )
         SetLineColor( aBorderColor );
         SetFillColor();
 
-        tools::Rectangle aPixel( LogicToPixel( tools::Rectangle( -aOffset.X(), -aOffset.Y(), nPageEndX, nPageEndY ) ) );
+        tools::Rectangle aPixel( maGeometry.LogicToPixel( tools::Rectangle( -aOffset.X(), -aOffset.Y(), nPageEndX, nPageEndY ) ) );
         aPixel.AdjustRight( -1 );
         aPixel.AdjustBottom( -1 );
         DrawRect( PixelToLogic( aPixel ) );
@@ -600,13 +600,13 @@ void ScPreview::DoPrint( ScPreviewLocationData* pFillLocation )
 
     tools::Rectangle aPixel;
 
-    aPixel = LogicToPixel( tools::Rectangle( nPageEndX, -aOffset.Y(), nPageEndX, nPageEndY ) );
+    aPixel = maGeometry.LogicToPixel( tools::Rectangle( nPageEndX, -aOffset.Y(), nPageEndX, nPageEndY ) );
     aPixel.AdjustTop(SC_PREVIEW_SHADOWSIZE );
     aPixel.AdjustRight(SC_PREVIEW_SHADOWSIZE - 1 );
     aPixel.AdjustBottom(SC_PREVIEW_SHADOWSIZE - 1 );
     DrawRect( PixelToLogic( aPixel ) );
 
-    aPixel = LogicToPixel( tools::Rectangle( -aOffset.X(), nPageEndY, nPageEndX, nPageEndY ) );
+    aPixel = maGeometry.LogicToPixel( tools::Rectangle( -aOffset.X(), nPageEndY, nPageEndX, nPageEndY ) );
     aPixel.AdjustLeft(SC_PREVIEW_SHADOWSIZE );
     aPixel.AdjustRight(SC_PREVIEW_SHADOWSIZE - 1 );
     aPixel.AdjustBottom(SC_PREVIEW_SHADOWSIZE - 1 );

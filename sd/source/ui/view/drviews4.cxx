@@ -378,7 +378,7 @@ void DrawViewShell::MouseMove(const MouseEvent& rMEvt, ::sd::Window* pWin)
     if ( mpDrawView->IsAction() )
     {
         mpDrawView->TakeActionRect(aRect);
-        aRect = GetActiveWindow()->LogicToPixel(aRect);
+        aRect = GetActiveWindow()->GetGeometry().LogicToPixel(aRect);
     }
     else
     {

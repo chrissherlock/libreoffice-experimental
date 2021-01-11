@@ -70,6 +70,7 @@ struct VCL_DLLPUBLIC Geometry
 
     Point LogicToPixel(Point const& rLogicPt) const;
     Size LogicToPixel(Size const& rLogicSize) const;
+    tools::Rectangle LogicToPixel(tools::Rectangle const& rLogicRect) const;
 
     bool mbMap;
 

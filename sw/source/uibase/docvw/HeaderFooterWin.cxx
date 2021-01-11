@@ -237,7 +237,7 @@ void SwHeaderFooterWin::SetOffset(Point aOffset, tools::Long nXLineStart, tools:
     // Compute the text size and get the box position & size from it
     ::tools::Rectangle aTextRect;
     m_xVirDev->GetTextBoundRect(aTextRect, m_sLabel);
-    ::tools::Rectangle aTextPxRect = m_xVirDev->LogicToPixel(aTextRect);
+    ::tools::Rectangle aTextPxRect = m_xVirDev->GetGeometry().LogicToPixel(aTextRect);
     FontMetric aFontMetric = m_xVirDev->GetFontMetric(m_xVirDev->GetFont());
     Size aBoxSize (aTextPxRect.GetWidth() + BUTTON_WIDTH + TEXT_PADDING * 2,
                    aFontMetric.GetLineHeight() + TEXT_PADDING  * 2 );

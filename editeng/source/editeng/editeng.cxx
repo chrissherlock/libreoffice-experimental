@@ -232,7 +232,7 @@ void EditEngine::Draw( OutputDevice* pOutDev, const tools::Rectangle& rOutRect, 
 
     // Align to the pixel boundary, so that it becomes exactly the same
     // as Paint ()
-    tools::Rectangle aOutRect( pOutDev->LogicToPixel( rOutRect ) );
+    tools::Rectangle aOutRect( pOutDev->GetGeometry().LogicToPixel( rOutRect ) );
     aOutRect = pOutDev->PixelToLogic( aOutRect );
 
     Point aStartPos;

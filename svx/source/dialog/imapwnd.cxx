@@ -586,7 +586,7 @@ OUString IMapWindow::RequestHelp(tools::Rectangle& rHelpArea)
             OUString aStr = pIMapObj->GetURL();
             if ( !aStr.isEmpty() )
             {
-                rHelpArea = rDevice.LogicToPixel(tools::Rectangle( Point(), GetGraphicSize()));
+                rHelpArea = rDevice.GetGeometry().LogicToPixel(tools::Rectangle( Point(), GetGraphicSize()));
                 return aStr;
             }
         }

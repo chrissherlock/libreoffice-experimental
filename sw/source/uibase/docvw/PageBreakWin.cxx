@@ -364,13 +364,13 @@ void SwPageBreakWin::UpdatePosition(const std::optional<Point>& xEvtPt)
     while ( pPrevPage && ( ( pPrevPage->getFrameArea().Top( ) == pPageFrame->getFrameArea().Top( ) )
                 || static_cast< const SwPageFrame* >( pPrevPage )->IsEmptyPage( ) ) );
 
-    ::tools::Rectangle aBoundRect = GetEditWin()->LogicToPixel( pPageFrame->GetBoundRect(GetEditWin()).SVRect() );
-    ::tools::Rectangle aFrameRect = GetEditWin()->LogicToPixel( pPageFrame->getFrameArea().SVRect() );
+    ::tools::Rectangle aBoundRect = GetEditWin()->GetGeometry().LogicToPixel( pPageFrame->GetBoundRect(GetEditWin()).SVRect() );
+    ::tools::Rectangle aFrameRect = GetEditWin()->GetGeometry().LogicToPixel( pPageFrame->getFrameArea().SVRect() );
 
     tools::Long nYLineOffset = ( aBoundRect.Top() + aFrameRect.Top() ) / 2;
     if ( pPrevPage )
     {
-        ::tools::Rectangle aPrevFrameRect = GetEditWin()->LogicToPixel( pPrevPage->getFrameArea().SVRect() );
+        ::tools::Rectangle aPrevFrameRect = GetEditWin()->GetGeometry().LogicToPixel( pPrevPage->getFrameArea().SVRect() );
         nYLineOffset = ( aPrevFrameRect.Bottom() + aFrameRect.Top() ) / 2;
     }
 
@@ -391,7 +391,7 @@ void SwPageBreakWin::UpdatePosition(const std::optional<Point>& xEvtPt)
     Size aBtnSize( BUTTON_WIDTH + ARROW_WIDTH, BUTTON_HEIGHT );
 
     // Place the button on the left or right?
-    ::tools::Rectangle aVisArea = GetEditWin()->LogicToPixel( GetEditWin()->GetView().GetVisArea() );
+    ::tools::Rectangle aVisArea = GetEditWin()->GetGeometry().LogicToPixel( GetEditWin()->GetView().GetVisArea() );
 
     tools::Long nLineLeft = std::max( nPgLeft, aVisArea.Left() );
     tools::Long nLineRight = std::min( nPgRight, aVisArea.Right() );

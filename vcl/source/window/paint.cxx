@@ -127,7 +127,7 @@ PaintBufferGuard::~PaintBufferGuard()
             }
             else
             {
-                tools::Rectangle aRectanglePixel = m_pWindow->LogicToPixel(m_aPaintRect);
+                tools::Rectangle aRectanglePixel = m_pWindow->GetGeometry().LogicToPixel(m_aPaintRect);
                 aPaintRectSize = m_pWindow->PixelToLogic(aRectanglePixel.GetSize());
             }
 

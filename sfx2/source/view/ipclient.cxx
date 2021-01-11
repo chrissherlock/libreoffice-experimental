@@ -431,13 +431,13 @@ awt::Rectangle SAL_CALL SfxInPlaceClient_Impl::getPlacement()
         bool bMapModeEnabled = pEditWin->IsMapModeEnabled();
         if (!bMapModeEnabled)
             pEditWin->EnableMapMode();
-        aRealObjArea = m_pClient->GetEditWin()->LogicToPixel( aRealObjArea );
+        aRealObjArea = m_pClient->GetEditWin()->GetGeometry().LogicToPixel( aRealObjArea );
         if (!bMapModeEnabled && pEditWin->IsMapModeEnabled())
             pEditWin->DisableMapMode();
     }
     else
     {
-        aRealObjArea = m_pClient->GetEditWin()->LogicToPixel( aRealObjArea );
+        aRealObjArea = m_pClient->GetEditWin()->GetGeometry().LogicToPixel( aRealObjArea );
     }
 
     return AWTRectangle( aRealObjArea );
@@ -461,13 +461,13 @@ awt::Rectangle SAL_CALL SfxInPlaceClient_Impl::getClipRectangle()
         bool bMapModeEnabled = pEditWin->IsMapModeEnabled();
         if (!bMapModeEnabled)
             pEditWin->EnableMapMode();
-        aRealObjArea = m_pClient->GetEditWin()->LogicToPixel( aRealObjArea );
+        aRealObjArea = m_pClient->GetEditWin()->GetGeometry().LogicToPixel( aRealObjArea );
         if (!bMapModeEnabled && pEditWin->IsMapModeEnabled())
             pEditWin->DisableMapMode();
     }
     else
     {
-        aRealObjArea = m_pClient->GetEditWin()->LogicToPixel( aRealObjArea );
+        aRealObjArea = m_pClient->GetEditWin()->GetGeometry().LogicToPixel( aRealObjArea );
     }
 
     return AWTRectangle( aRealObjArea );

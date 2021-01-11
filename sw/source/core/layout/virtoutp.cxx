@@ -145,7 +145,7 @@ void SwLayVout::Enter(  SwViewShell *pShell, SwRect &rRect, bool bOn )
     SwRect aTmp( rRect );
     aTmp.AddWidth(aPixSz.Width()/2 + 1 );
     aTmp.AddHeight(aPixSz.Height()/2 + 1 );
-    tools::Rectangle aTmpRect( pO->LogicToPixel( aTmp.SVRect() ) );
+    tools::Rectangle aTmpRect( pO->GetGeometry().LogicToPixel( aTmp.SVRect() ) );
 
     OSL_ENSURE( !m_pShell->GetWin()->IsReallyVisible() ||
             aTmpRect.GetWidth() <= m_pShell->GetWin()->GetSizeInPixels().Width() + 2,

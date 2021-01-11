@@ -2200,7 +2200,7 @@ void VclMetafileProcessor2D::processTransparencePrimitive2D(
                                           static_cast<sal_Int32>(floor(aViewRange.getMinY())),
                                           static_cast<sal_Int32>(ceil(aViewRange.getMaxX())),
                                           static_cast<sal_Int32>(ceil(aViewRange.getMaxY())));
-        const tools::Rectangle aRectPixel(mpOutputDevice->LogicToPixel(aRectLogic));
+        const tools::Rectangle aRectPixel(mpOutputDevice->GetGeometry().LogicToPixel(aRectLogic));
         Size aSizePixel(aRectPixel.GetSize());
         ScopedVclPtrInstance<VirtualDevice> aBufferDevice;
         const sal_uInt32 nMaxSquarePixels(500000);
@@ -2321,7 +2321,7 @@ VclMetafileProcessor2D::CreateBufferDevice(const basegfx::B2DRange& rCandidateRa
                                   static_cast<tools::Long>(std::floor(aViewRange.getMinY())),
                                   static_cast<tools::Long>(std::ceil(aViewRange.getMaxX())),
                                   static_cast<tools::Long>(std::ceil(aViewRange.getMaxY())));
-    const tools::Rectangle aRectPixel(mpOutputDevice->LogicToPixel(rRectLogic));
+    const tools::Rectangle aRectPixel(mpOutputDevice->GetGeometry().LogicToPixel(rRectLogic));
     rSizePixel = aRectPixel.GetSize();
     const double fViewVisibleArea(rSizePixel.getWidth() * rSizePixel.getHeight());
     double fReduceFactor(1.0);

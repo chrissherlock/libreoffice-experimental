@@ -795,7 +795,7 @@ void DecorationView::DrawSymbol( const tools::Rectangle& rRect, SymbolType eType
                                  const Color& rColor, DrawSymbolFlags nStyle )
 {
     const StyleSettings&    rStyleSettings  = mpOutDev->GetSettings().GetStyleSettings();
-    const tools::Rectangle         aRect           = mpOutDev->LogicToPixel( rRect );
+    const tools::Rectangle  aRect           = mpOutDev->GetGeometry().LogicToPixel( rRect );
     const Color             aOldLineColor   = mpOutDev->GetLineColor();
     const Color             aOldFillColor   = mpOutDev->GetFillColor();
     const bool              bOldMapMode     = mpOutDev->IsMapModeEnabled();
@@ -842,7 +842,7 @@ void DecorationView::DrawFrame( const tools::Rectangle& rRect,
                                 const Color& rLeftTopColor,
                                 const Color& rRightBottomColor )
 {
-    tools::Rectangle   aRect         = mpOutDev->LogicToPixel( rRect );
+    tools::Rectangle   aRect  = mpOutDev->GetGeometry().LogicToPixel( rRect );
     const Color aOldLineColor = mpOutDev->GetLineColor();
     const bool  bOldMapMode   = mpOutDev->IsMapModeEnabled();
     mpOutDev->DisableMapMode();
@@ -909,7 +909,7 @@ tools::Rectangle DecorationView::DrawFrame( const tools::Rectangle& rRect, DrawF
     bool        bOldMap = mpOutDev->IsMapModeEnabled();
     if ( bOldMap )
     {
-        aRect = mpOutDev->LogicToPixel( aRect );
+        aRect = mpOutDev->GetGeometry().LogicToPixel( aRect );
         mpOutDev->DisableMapMode();
     }
 
@@ -952,7 +952,7 @@ tools::Rectangle DecorationView::DrawButton( const tools::Rectangle& rRect, Draw
 
     if ( bOldMap )
     {
-        aRect = mpOutDev->LogicToPixel( aRect );
+        aRect = mpOutDev->GetGeometry().LogicToPixel( aRect );
         mpOutDev->DisableMapMode();
     }
 
