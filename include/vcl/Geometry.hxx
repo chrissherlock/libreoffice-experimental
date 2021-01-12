@@ -74,6 +74,7 @@ struct VCL_DLLPUBLIC Geometry
     tools::Rectangle LogicToPixel(tools::Rectangle const& rLogicRect) const;
     tools::Polygon LogicToPixel(tools::Polygon const& rLogicPoly) const;
     tools::PolyPolygon LogicToPixel(tools::PolyPolygon const& rLogicPolyPoly) const;
+    basegfx::B2DPolyPolygon LogicToPixel(basegfx::B2DPolyPolygon const& rLogicPolyPoly) const;
 
     /** Get device transformation.
 

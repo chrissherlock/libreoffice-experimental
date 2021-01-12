@@ -553,4 +553,13 @@ tools::PolyPolygon Geometry::LogicToPixel(tools::PolyPolygon const& rLogicPolyPo
     return aPolyPoly;
 }
 
+basegfx::B2DPolyPolygon Geometry::LogicToPixel(basegfx::B2DPolyPolygon const& rLogicPolyPoly) const
+{
+    basegfx::B2DPolyPolygon aTransformedPoly = rLogicPolyPoly;
+    const basegfx::B2DHomMatrix& rTransformationMatrix = GetViewTransformation();
+    aTransformedPoly.transform(rTransformationMatrix);
+
+    return aTransformedPoly;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
