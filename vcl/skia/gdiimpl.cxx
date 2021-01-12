@@ -543,7 +543,7 @@ void SkiaSalGraphicsImpl::setCanvasClipRegion(SkCanvas* canvas, const vcl::Regio
     // Always use region rectangles, regardless of what the region uses internally.
     // That's what other VCL backends do, and trying to use addPolyPolygonToPath()
     // in case a polygon is used leads to off-by-one errors such as tdf#133208.
-    RectangleVector rectangles;
+    std::vector<tools::Rectangle> rectangles;
     region.GetRegionRectangles(rectangles);
     for (const tools::Rectangle& rectangle : rectangles)
         path.addRect(SkRect::MakeXYWH(rectangle.getX(), rectangle.getY(), rectangle.GetWidth(),

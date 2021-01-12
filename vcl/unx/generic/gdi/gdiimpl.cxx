@@ -946,7 +946,7 @@ bool X11SalGraphicsImpl::setClipRegion( const vcl::Region& i_rClip )
         XDestroyRegion( mrParent.mpClipRegion );
     mrParent.mpClipRegion = XCreateRegion();
 
-    RectangleVector aRectangles;
+    std::vector<tools::Rectangle> aRectangles;
     i_rClip.GetRegionRectangles(aRectangles);
 
     for (auto const& rectangle : aRectangles)

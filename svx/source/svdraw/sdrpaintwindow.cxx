@@ -153,7 +153,7 @@ void SdrPreRenderDevice::OutputPreRenderDevice(const vcl::Region& rExpandedRegio
     mpOutputDevice->DisableMapMode();
     mpPreRenderDevice->DisableMapMode();
 
-    RectangleVector aRectangles;
+    std::vector<tools::Rectangle> aRectangles;
     aRegionPixel.GetRegionRectangles(aRectangles);
 
     for(const auto& rRect : aRectangles)

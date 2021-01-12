@@ -1852,7 +1852,7 @@ void SwViewShell::Paint(vcl::RenderContext& rRenderContext, const tools::Rectang
         if ( mbInEndAction && GetWin() )
         {
             const vcl::Region aRegion(GetWin()->GetPaintRegion());
-            RectangleVector aRectangles;
+            std::vector<tools::Rectangle> aRectangles;
             aRegion.GetRegionRectangles(aRectangles);
 
             for(const auto& rRectangle : aRectangles)

@@ -76,7 +76,7 @@ void DeviceCopy (
 void ForAllRectangles (const vcl::Region& rRegion, const std::function<void (const ::tools::Rectangle&)>& aFunction)
 {
     OSL_ASSERT(aFunction);
-    RectangleVector aRectangles;
+    std::vector<tools::Rectangle> aRectangles;
     rRegion.GetRegionRectangles(aRectangles);
 
     if(aRectangles.empty())

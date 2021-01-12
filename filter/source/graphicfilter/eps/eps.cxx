@@ -1609,7 +1609,7 @@ void PSWriter::ImplSetClipRegion( vcl::Region const & rClipRegion )
     if ( rClipRegion.IsEmpty() )
         return;
 
-    RectangleVector aRectangles;
+    std::vector<tools::Rectangle> aRectangles;
     rClipRegion.GetRegionRectangles(aRectangles);
 
     for (auto const& rectangle : aRectangles)
@@ -1681,7 +1681,7 @@ void PSWriter::ImplBmp( Bitmap const * pBitmap, Bitmap const * pMaskBitmap, cons
 
                 if( mnLevel == 1 )
                 {
-                    RectangleVector aRectangleVector;
+                    std::vector<tools::Rectangle> aRectangleVector;
                     aRegion.GetRegionRectangles(aRectangleVector);
 
                     if ( aRectangleVector.size() * 5 > 1000 )
@@ -1706,7 +1706,7 @@ void PSWriter::ImplBmp( Bitmap const * pBitmap, Bitmap const * pMaskBitmap, cons
             ImplTranslate( aSourcePos.X(), aSourcePos.Y() );
             ImplScale( nXWidth / nWidth,  nYHeight / nHeight );
 
-            RectangleVector aRectangles;
+            std::vector<tools::Rectangle> aRectangles;
             aRegion.GetRegionRectangles(aRectangles);
             const tools::Long nMoveVertical(nHeightLeft - nHeightOrg);
 

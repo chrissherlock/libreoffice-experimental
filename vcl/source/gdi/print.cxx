@@ -256,7 +256,7 @@ void Printer::ImplPrintTransparent( const Bitmap& rBmp, const Bitmap& rMask,
 
     // walk through all rectangles of mask
     const vcl::Region aWorkRgn(aMask.CreateRegion(COL_BLACK, tools::Rectangle(Point(), aMask.GetSizePixel())));
-    RectangleVector aRectangles;
+    std::vector<tools::Rectangle> aRectangles;
     aWorkRgn.GetRegionRectangles(aRectangles);
 
     for (auto const& rectangle : aRectangles)
@@ -771,7 +771,7 @@ void Printer::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
 
     // walk through all rectangles of mask
     const vcl::Region aWorkRgn(aMask.CreateRegion(COL_BLACK, tools::Rectangle(Point(), aMask.GetSizePixel())));
-    RectangleVector aRectangles;
+    std::vector<tools::Rectangle> aRectangles;
     aWorkRgn.GetRegionRectangles(aRectangles);
 
     for (auto const& rectangle : aRectangles)

@@ -567,7 +567,7 @@ void    OutputDevice::ReMirror( tools::Rectangle &rRect ) const
 
 void OutputDevice::ReMirror( vcl::Region &rRegion ) const
 {
-    RectangleVector aRectangles;
+    std::vector<tools::Rectangle> aRectangles;
     rRegion.GetRegionRectangles(aRectangles);
     vcl::Region aMirroredRegion;
 

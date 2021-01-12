@@ -121,7 +121,7 @@ css::uno::Sequence< css::awt::Rectangle > VCLXRegion::getRectangles()
 {
     ::osl::Guard< ::osl::Mutex > aGuard( GetMutex() );
 
-    RectangleVector aRectangles;
+    std::vector<tools::Rectangle> aRectangles;
     maRegion.GetRegionRectangles(aRectangles);
 
 //    sal_uLong nRects = maRegion.GetRectCount();

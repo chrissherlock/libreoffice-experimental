@@ -284,7 +284,7 @@ tools::PolyPolygon vcl::Region::ImplCreatePolyPolygonFromRegionBand() const
 
     if(getRegionBand())
     {
-        RectangleVector aRectangles;
+        std::vector<tools::Rectangle> aRectangles;
         GetRegionRectangles(aRectangles);
 
         for (auto const& rectangle : aRectangles)
@@ -1656,7 +1656,7 @@ SvStream& WriteRegion( SvStream& rOStrm, const vcl::Region& rRegion )
     return rOStrm;
 }
 
-void vcl::Region::GetRegionRectangles(RectangleVector& rTarget) const
+void vcl::Region::GetRegionRectangles(std::vector<tools::Rectangle>& rTarget) const
 {
     // clear returnvalues
     rTarget.clear();

@@ -245,12 +245,12 @@ vcl::Region OutputDevice::LogicToPixel(const vcl::Region& rLogicRegion) const
     }
     else if (rLogicRegion.getRegionBand())
     {
-        RectangleVector aRectangles;
+        std::vector<tools::Rectangle> aRectangles;
         rLogicRegion.GetRegionRectangles(aRectangles);
-        const RectangleVector& rRectangles(aRectangles); // needed to make the '!=' work
+        const std::vector<tools::Rectangle>& rRectangles(aRectangles); // needed to make the '!=' work
 
         // make reverse run to fill new region bottom-up, this will speed it up due to the used data structuring
-        for (RectangleVector::const_reverse_iterator aRectIter(rRectangles.rbegin());
+        for (std::vector<tools::Rectangle>::const_reverse_iterator aRectIter(rRectangles.rbegin());
              aRectIter != rRectangles.rend(); ++aRectIter)
         {
             aRegion.Union(maGeometry.LogicToPixel(*aRectIter));
@@ -468,12 +468,12 @@ vcl::Region OutputDevice::PixelToLogic(const vcl::Region& rDeviceRegion) const
     }
     else if (rDeviceRegion.getRegionBand())
     {
-        RectangleVector aRectangles;
+        std::vector<tools::Rectangle> aRectangles;
         rDeviceRegion.GetRegionRectangles(aRectangles);
-        const RectangleVector& rRectangles(aRectangles); // needed to make the '!=' work
+        const std::vector<tools::Rectangle>& rRectangles(aRectangles); // needed to make the '!=' work
 
         // make reverse run to fill new region bottom-up, this will speed it up due to the used data structuring
-        for (RectangleVector::const_reverse_iterator aRectIter(rRectangles.rbegin());
+        for (std::vector<tools::Rectangle>::const_reverse_iterator aRectIter(rRectangles.rbegin());
              aRectIter != rRectangles.rend(); ++aRectIter)
         {
             aRegion.Union(PixelToLogic(*aRectIter));

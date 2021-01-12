@@ -1074,7 +1074,7 @@ void Window::SetWindowRegionPixel( const vcl::Region& rRegion )
             if( mpWindowImpl->mbWinRegion )
             {
                 // set/update ClipRegion
-                RectangleVector aRectangles;
+                std::vector<tools::Rectangle> aRectangles;
                 mpWindowImpl->maWinRegion.GetRegionRectangles(aRectangles);
                 mpWindowImpl->mpFrame->BeginSetClipRegion(aRectangles.size());
 

@@ -36,8 +36,6 @@ namespace vcl { class Window; }
 class OutputDevice;
 class Bitmap;
 
-typedef std::vector< tools::Rectangle > RectangleVector;
-
 namespace vcl {
 
 class SAL_WARN_UNUSED VCL_DLLPUBLIC Region
@@ -108,7 +106,7 @@ public:
 
     tools::Rectangle GetBoundRect() const;
     bool HasPolyPolygonOrB2DPolyPolygon() const { return (getB2DPolyPolygon() || getPolyPolygon()); }
-    void GetRegionRectangles(RectangleVector& rTarget) const;
+    void GetRegionRectangles(std::vector<tools::Rectangle>& rTarget) const;
 
     bool IsInside( const Point& rPoint ) const;
     bool IsOver( const tools::Rectangle& rRect ) const;
@@ -154,7 +152,7 @@ inline std::basic_ostream<charT, traits> & operator <<(
     if (rRegion.getRegionBand())
     {   // inlined because RegionBand is private to vcl
         stream << "RegionBand(";
-        RectangleVector rects;
+        std::vector<tools::Rectangle> rects;
         rRegion.GetRegionRectangles(rects);
         if (rects.empty())
             stream << "EMPTY";

@@ -127,7 +127,7 @@ bool Qt5Graphics::setClipRegion(const vcl::Region& rRegion)
     else if (!rRegion.HasPolyPolygonOrB2DPolyPolygon())
     {
         QRegion aQRegion;
-        RectangleVector aRectangles;
+        std::vector<tools::Rectangle> aRectangles;
         rRegion.GetRegionRectangles(aRectangles);
         for (const auto& rRect : aRectangles)
             aQRegion += toQRect(rRect);

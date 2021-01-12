@@ -223,7 +223,7 @@ void SalGraphics::mirror(vcl::Region& rRgn, const OutputDevice& rOutDev) const
     }
     else
     {
-        RectangleVector aRectangles;
+        std::vector<tools::Rectangle> aRectangles;
         rRgn.GetRegionRectangles(aRectangles);
         rRgn.SetEmpty();
 

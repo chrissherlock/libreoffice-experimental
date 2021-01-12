@@ -833,7 +833,7 @@ bool SvpSalGraphics::drawTransformedBitmap(
 
 void SvpSalGraphics::clipRegion(cairo_t* cr, const vcl::Region& rClipRegion)
 {
-    RectangleVector aRectangles;
+    std::vector<tools::Rectangle> aRectangles;
     if (!rClipRegion.IsEmpty())
     {
         rClipRegion.GetRegionRectangles(aRectangles);

@@ -1439,7 +1439,7 @@ bool AquaSalGraphics::setClipRegion( const vcl::Region& i_rClip )
     }
     else
     {
-        RectangleVector aRectangles;
+        std::vector<tools::Rectangle> aRectangles;
         i_rClip.GetRegionRectangles(aRectangles);
 
         for(const auto& rRect : aRectangles)

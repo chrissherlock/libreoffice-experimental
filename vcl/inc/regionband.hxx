@@ -75,7 +75,7 @@ public:
     bool IsInside(const Point& rPoint) const;
     sal_uInt32 getRectangleCount()
         const; // only users are Region::Intersect, Region::IsRectangle and PSWriter::ImplBmp
-    void GetRegionRectangles(RectangleVector& rTarget) const;
+    void GetRegionRectangles(std::vector<tools::Rectangle>& rTarget) const;
 };
 
 #endif // INCLUDED_VCL_INC_REGIONBAND_HXX

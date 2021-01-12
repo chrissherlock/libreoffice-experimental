@@ -114,7 +114,7 @@ namespace sdr::overlay
             const_cast<OverlayManagerBuffered*>(this)->mpBufferDevice->DisableMapMode();
 
             // local region
-            RectangleVector aRectangles;
+            std::vector<tools::Rectangle> aRectangles;
             rRegionPixel.GetRegionRectangles(aRectangles);
 
             for(const auto& rRect : aRectangles)
@@ -176,7 +176,7 @@ namespace sdr::overlay
             mpBufferDevice->DisableMapMode();
 
             // prepare to iterate over the rectangles from the region in pixels
-            RectangleVector aRectangles;
+            std::vector<tools::Rectangle> aRectangles;
             aRegion.GetRegionRectangles(aRectangles);
 
             for(const auto& rRect : aRectangles)

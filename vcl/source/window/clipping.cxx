@@ -330,7 +330,7 @@ bool Window::ImplSysObjClip( const vcl::Region* pOldRegion )
                     aRegion.Move( -GetXOffsetInPixels(), -GetYOffsetInPixels() );
 
                     // set/update clip region
-                    RectangleVector aRectangles;
+                    std::vector<tools::Rectangle> aRectangles;
                     aRegion.GetRegionRectangles(aRectangles);
                     mpWindowImpl->mpSysObj->BeginSetClipRegion(aRectangles.size());
 

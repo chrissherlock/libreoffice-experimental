@@ -1250,7 +1250,7 @@ bool RegionBand::IsInside(const Point& rPoint) const
     return false;
 }
 
-void RegionBand::GetRegionRectangles(RectangleVector& rTarget) const
+void RegionBand::GetRegionRectangles(std::vector<tools::Rectangle>& rTarget) const
 {
     // clear result vector
     rTarget.clear();
