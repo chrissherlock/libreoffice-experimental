@@ -217,21 +217,6 @@ void OutputDevice::SetRelativeMapMode(const MapMode& rNewMapMode)
         mpAlphaVDev->SetRelativeMapMode(rNewMapMode);
 }
 
-tools::PolyPolygon OutputDevice::LogicToPixel(const tools::PolyPolygon& rLogicPolyPoly) const
-{
-    if (!IsMapModeEnabled())
-        return rLogicPolyPoly;
-
-    tools::PolyPolygon aPolyPoly(rLogicPolyPoly);
-    sal_uInt16 nPoly = aPolyPoly.Count();
-    for (sal_uInt16 i = 0; i < nPoly; i++)
-    {
-        tools::Polygon& rPoly = aPolyPoly[i];
-        rPoly = maGeometry.LogicToPixel(rPoly);
-    }
-    return aPolyPoly;
-}
-
 basegfx::B2DPolyPolygon
 OutputDevice::LogicToPixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly) const
 {
@@ -256,7 +241,7 @@ vcl::Region OutputDevice::LogicToPixel(const vcl::Region& rLogicRegion) const
     }
     else if (rLogicRegion.getPolyPolygon())
     {
-        aRegion = vcl::Region(LogicToPixel(*rLogicRegion.getPolyPolygon()));
+        aRegion = vcl::Region(maGeometry.LogicToPixel(*rLogicRegion.getPolyPolygon()));
     }
     else if (rLogicRegion.getRegionBand())
     {

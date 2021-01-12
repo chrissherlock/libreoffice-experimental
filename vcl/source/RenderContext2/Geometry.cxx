@@ -400,4 +400,18 @@ tools::Polygon Geometry::LogicToPixel(tools::Polygon const& rLogicPoly) const
     return aPoly;
 }
 
+tools::PolyPolygon Geometry::LogicToPixel(tools::PolyPolygon const& rLogicPolyPoly) const
+{
+    if (!mbMap)
+        return rLogicPolyPoly;
+
+    tools::PolyPolygon aPolyPoly(rLogicPolyPoly);
+    sal_uInt16 nPoly = aPolyPoly.Count();
+    for (sal_uInt16 i = 0; i < nPoly; i++)
+    {
+        tools::Polygon& rPoly = aPolyPoly[i];
+        rPoly = LogicToPixel(rPoly);
+    }
+    return aPolyPoly;
+}
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

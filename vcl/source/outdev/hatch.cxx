@@ -96,7 +96,7 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
 
     if (rPolyPoly.Count())
     {
-        tools::PolyPolygon aPolyPoly( LogicToPixel(rPolyPoly));
+        tools::PolyPolygon aPolyPoly(maGeometry.LogicToPixel(rPolyPoly));
         GDIMetaFile* pOldMetaFile = mpMetaFile;
 
         aPolyPoly.Optimize(PolyOptimizeFlags::NO_SAME);
