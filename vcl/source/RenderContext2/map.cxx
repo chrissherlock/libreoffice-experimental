@@ -38,8 +38,7 @@ void RenderContext2::SetMapMode()
         ResetLogicalUnitsOffsetFromOrigin(); // no mapping -> equal offsets
 
         // #i75163#
-        if (mpViewTransformer)
-            mpViewTransformer->InvalidateViewTransform();
+        maGeometry.InvalidateViewTransform();
     }
 }
 
@@ -131,8 +130,7 @@ void RenderContext2::SetMapMode(MapMode const& rNewMapMode)
             maMapMode = rNewMapMode;
 
             // #i75163#
-            if (mpViewTransformer)
-                mpViewTransformer->InvalidateViewTransform();
+            maGeometry.InvalidateViewTransform();
 
             return;
         }
@@ -182,8 +180,7 @@ void RenderContext2::SetMapMode(MapMode const& rNewMapMode)
         GetYOffsetFromOriginInPixels(), GetDPIY(), GetYMapNumerator(), GetYMapDenominator()));
 
     // #i75163#
-    if (mpViewTransformer)
-        mpViewTransformer->InvalidateViewTransform();
+    maGeometry.InvalidateViewTransform();
 }
 static tools::Long ImplPixelToLogic(tools::Long n, tools::Long nDPI, tools::Long nMapNum,
                                     tools::Long nMapDenom)

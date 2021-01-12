@@ -20,29 +20,30 @@
 #include <tools/gen.hxx>
 #include <tools/long.hxx>
 #include <tools/poly.hxx>
+#include <basegfx/matrix/b2dhommatrix.hxx>
 
 #include <vcl/devicecoordinate.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/region.hxx>
 #include <vcl/MappingMetrics.hxx>
+#include <vcl/ViewTransformer.hxx>
+
+#include <memory>
+
+struct ViewTransformer;
+class MapMode;
 
 struct VCL_DLLPUBLIC Geometry
 {
-    Geometry()
-        : mbMap(false)
-        , mnWidthPx(0)
-        , mnHeightPx(0)
-        , mnOffsetXpx(0)
-        , mnOffsetYpx(0)
-        , mnOffsetFromOriginXpx(0)
-        , mnOffsetFromOriginYpx(0)
-        , mnOffsetFromOriginXInLogicalUnits(0)
-        , mnOffsetFromOriginYInLogicalUnits(0)
-        , mnDPIX(0)
-        , mnDPIY(0)
-        , mnDPIScalePercentage(100)
-    {
-    }
+    Geometry();
+    ~Geometry();
+
+    basegfx::B2DHomMatrix GetViewTransformation() const;
+    basegfx::B2DHomMatrix GetViewTransformation(MapMode const& rMapMode) const;
+    basegfx::B2DHomMatrix GetInverseViewTransformation() const;
+    basegfx::B2DHomMatrix GetInverseViewTransformation(MapMode const& rMapMode) const;
+
+    void InvalidateViewTransform();
 
     static tools::Long LogicToPixel(tools::Long n, tools::Long nDPI, tools::Long nMapNum,
                                     tools::Long nMapDenom);
@@ -74,6 +75,12 @@ struct VCL_DLLPUBLIC Geometry
     tools::Polygon LogicToPixel(tools::Polygon const& rLogicPoly) const;
     tools::PolyPolygon LogicToPixel(tools::PolyPolygon const& rLogicPolyPoly) const;
 
+    /** Get device transformation.
+
+        @since AOO bug 75163 (OpenOffice.org 2.4.3 - OOH 680 milestone 212)
+     */
+    basegfx::B2DHomMatrix GetDeviceTransformation() const; // TODO make private
+
     bool mbMap;
 
     tools::Long mnWidthPx;
@@ -98,6 +105,8 @@ struct VCL_DLLPUBLIC Geometry
         mnDPIScalePercentage; ///< For HiDPI displays, we want to draw elements for a percentage larger
 
     MappingMetrics maMappingMetrics;
+
+    std::unique_ptr<ViewTransformer> mpViewTransformer;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

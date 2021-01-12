@@ -161,7 +161,7 @@ public:
     sal_Int32 GetDPIScalePercentage() const;
     void SetDPIScalePercentage(sal_Int32 nPercentage);
 
-    Geometry GetGeometry() const;
+    Geometry const& GetGeometry() const;
     MappingMetrics GetMappingMetrics() const;
 
     // #i75163#
@@ -169,6 +169,7 @@ public:
     basegfx::B2DHomMatrix GetViewTransformation(MapMode const& rMapMode) const;
     basegfx::B2DHomMatrix GetInverseViewTransformation() const;
     basegfx::B2DHomMatrix GetInverseViewTransformation(MapMode const& rMapMode) const;
+    basegfx::B2DHomMatrix GetDeviceTransformation() const;
 
 protected:
     void dispose();
@@ -217,12 +218,6 @@ protected:
     void InitFillColor();
     void InitTextColor();
 
-    /** Get device transformation.
-
-        @since AOO bug 75163 (OpenOffice.org 2.4.3 - OOH 680 milestone 212)
-     */
-    basegfx::B2DHomMatrix GetDeviceTransformation() const; // TODO make private
-
     virtual void InitMapModeObjects();
 
     mutable SalGraphics* mpGraphics;
@@ -236,7 +231,6 @@ protected:
     LanguageType meTextLanguage;
     Geometry maGeometry;
     MapMode maMapMode;
-    std::unique_ptr<ViewTransformer> mpViewTransformer;
 
 private:
     Color maTextColor;

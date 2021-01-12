@@ -22,6 +22,144 @@
 #include <cassert>
 #include <cmath>
 
+Geometry::Geometry()
+    : mbMap(false)
+    , mnWidthPx(0)
+    , mnHeightPx(0)
+    , mnOffsetXpx(0)
+    , mnOffsetYpx(0)
+    , mnOffsetFromOriginXpx(0)
+    , mnOffsetFromOriginYpx(0)
+    , mnOffsetFromOriginXInLogicalUnits(0)
+    , mnOffsetFromOriginYInLogicalUnits(0)
+    , mnDPIX(0)
+    , mnDPIY(0)
+    , mnDPIScalePercentage(100)
+{
+    // #i75163#
+    mpViewTransformer.reset(new ViewTransformer);
+    mpViewTransformer->mpViewTransform = nullptr;
+    mpViewTransformer->mpInverseViewTransform = nullptr;
+}
+
+Geometry::~Geometry()
+{
+    // #i75163#
+    if (mpViewTransformer)
+        mpViewTransformer->InvalidateViewTransform();
+
+    mpViewTransformer.reset();
+}
+
+// #i75163#
+basegfx::B2DHomMatrix Geometry::GetInverseViewTransformation() const
+{
+    if (mbMap && mpViewTransformer)
+    {
+        if (!mpViewTransformer->mpInverseViewTransform)
+        {
+            GetViewTransformation();
+            mpViewTransformer->mpInverseViewTransform
+                = new basegfx::B2DHomMatrix(*mpViewTransformer->mpViewTransform);
+            mpViewTransformer->mpInverseViewTransform->invert();
+        }
+
+        return *mpViewTransformer->mpInverseViewTransform;
+    }
+    else
+    {
+        return basegfx::B2DHomMatrix();
+    }
+}
+
+// #i75163#
+basegfx::B2DHomMatrix Geometry::GetViewTransformation() const
+{
+    if (mbMap && mpViewTransformer)
+    {
+        if (!mpViewTransformer->mpViewTransform)
+        {
+            mpViewTransformer->mpViewTransform = new basegfx::B2DHomMatrix;
+
+            const double fScaleFactorX(static_cast<double>(mnDPIX)
+                                       * static_cast<double>(maMappingMetrics.mnMapScNumX)
+                                       / static_cast<double>(maMappingMetrics.mnMapScDenomX));
+            const double fScaleFactorY(static_cast<double>(mnDPIY)
+                                       * static_cast<double>(maMappingMetrics.mnMapScNumY)
+                                       / static_cast<double>(maMappingMetrics.mnMapScDenomY));
+            const double fZeroPointX(
+                (static_cast<double>(maMappingMetrics.mnMapOfsX) * fScaleFactorX)
+                + static_cast<double>(mnOffsetFromOriginXpx));
+            const double fZeroPointY(
+                (static_cast<double>(maMappingMetrics.mnMapOfsY) * fScaleFactorY)
+                + static_cast<double>(mnOffsetFromOriginYpx));
+
+            mpViewTransformer->mpViewTransform->set(0, 0, fScaleFactorX);
+            mpViewTransformer->mpViewTransform->set(1, 1, fScaleFactorY);
+            mpViewTransformer->mpViewTransform->set(0, 2, fZeroPointX);
+            mpViewTransformer->mpViewTransform->set(1, 2, fZeroPointY);
+        }
+
+        return *mpViewTransformer->mpViewTransform;
+    }
+    else
+    {
+        return basegfx::B2DHomMatrix();
+    }
+}
+
+// #i75163#
+basegfx::B2DHomMatrix Geometry::GetViewTransformation(MapMode const& rMapMode) const
+{
+    // #i82615#
+    MappingMetrics aMappingMetrics(rMapMode, mnDPIX, mnDPIY);
+
+    basegfx::B2DHomMatrix aTransform;
+
+    const double fScaleFactorX(static_cast<double>(mnDPIX)
+                               * static_cast<double>(aMappingMetrics.mnMapScNumX)
+                               / static_cast<double>(aMappingMetrics.mnMapScDenomX));
+    const double fScaleFactorY(static_cast<double>(mnDPIY)
+                               * static_cast<double>(aMappingMetrics.mnMapScNumY)
+                               / static_cast<double>(aMappingMetrics.mnMapScDenomY));
+    const double fZeroPointX((static_cast<double>(aMappingMetrics.mnMapOfsX) * fScaleFactorX)
+                             + static_cast<double>(mnOffsetFromOriginXpx));
+    const double fZeroPointY((static_cast<double>(aMappingMetrics.mnMapOfsY) * fScaleFactorY)
+                             + static_cast<double>(mnOffsetFromOriginYpx));
+
+    aTransform.set(0, 0, fScaleFactorX);
+    aTransform.set(1, 1, fScaleFactorY);
+    aTransform.set(0, 2, fZeroPointX);
+    aTransform.set(1, 2, fZeroPointY);
+
+    return aTransform;
+}
+
+// #i75163#
+basegfx::B2DHomMatrix Geometry::GetInverseViewTransformation(MapMode const& rMapMode) const
+{
+    basegfx::B2DHomMatrix aMatrix(GetViewTransformation(rMapMode));
+    aMatrix.invert();
+    return aMatrix;
+}
+
+basegfx::B2DHomMatrix Geometry::GetDeviceTransformation() const
+{
+    basegfx::B2DHomMatrix aTransformation = GetViewTransformation();
+
+    // TODO: is it worth to cache the transformed result?
+    if (mnOffsetXpx || mnOffsetYpx)
+        aTransformation.translate(mnOffsetXpx, mnOffsetYpx);
+
+    return aTransformation;
+}
+
+void Geometry::InvalidateViewTransform()
+{
+    if (mpViewTransformer)
+        mpViewTransformer->InvalidateViewTransform();
+}
+
 tools::Long Geometry::LogicToPixel(tools::Long n, tools::Long nDPI, tools::Long nMapNum,
                                    tools::Long nMapDenom)
 {
@@ -414,4 +552,5 @@ tools::PolyPolygon Geometry::LogicToPixel(tools::PolyPolygon const& rLogicPolyPo
     }
     return aPolyPoly;
 }
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

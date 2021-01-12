@@ -63,6 +63,6 @@ void RenderContext2::SetDPIScalePercentage(sal_Int32 nPercentage)
     maGeometry.mnDPIScalePercentage = nPercentage;
 }
 
-Geometry RenderContext2::GetGeometry() const { return maGeometry; }
+Geometry const& RenderContext2::GetGeometry() const { return maGeometry; }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

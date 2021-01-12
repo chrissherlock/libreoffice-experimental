@@ -18,107 +18,34 @@
  */
 
 #include <vcl/RenderContext2.hxx>
-#include <vcl/ViewTransformer.hxx>
 
 // #i75163#
 basegfx::B2DHomMatrix RenderContext2::GetInverseViewTransformation() const
 {
-    if (IsMapModeEnabled() && mpViewTransformer)
-    {
-        if (!mpViewTransformer->mpInverseViewTransform)
-        {
-            GetViewTransformation();
-            mpViewTransformer->mpInverseViewTransform
-                = new basegfx::B2DHomMatrix(*mpViewTransformer->mpViewTransform);
-            mpViewTransformer->mpInverseViewTransform->invert();
-        }
-
-        return *mpViewTransformer->mpInverseViewTransform;
-    }
-    else
-    {
-        return basegfx::B2DHomMatrix();
-    }
+    return maGeometry.GetInverseViewTransformation();
 }
 
 // #i75163#
 basegfx::B2DHomMatrix RenderContext2::GetViewTransformation() const
 {
-    if (IsMapModeEnabled() && mpViewTransformer)
-    {
-        if (!mpViewTransformer->mpViewTransform)
-        {
-            mpViewTransformer->mpViewTransform = new basegfx::B2DHomMatrix;
-
-            const double fScaleFactorX(static_cast<double>(GetDPIX())
-                                       * static_cast<double>(GetXMapNumerator())
-                                       / static_cast<double>(GetXMapDenominator()));
-            const double fScaleFactorY(static_cast<double>(GetDPIY())
-                                       * static_cast<double>(GetYMapNumerator())
-                                       / static_cast<double>(GetYMapDenominator()));
-            const double fZeroPointX((static_cast<double>(GetXMapOffset()) * fScaleFactorX)
-                                     + static_cast<double>(GetXOffsetFromOriginInPixels()));
-            const double fZeroPointY((static_cast<double>(GetYMapOffset()) * fScaleFactorY)
-                                     + static_cast<double>(GetYOffsetFromOriginInPixels()));
-
-            mpViewTransformer->mpViewTransform->set(0, 0, fScaleFactorX);
-            mpViewTransformer->mpViewTransform->set(1, 1, fScaleFactorY);
-            mpViewTransformer->mpViewTransform->set(0, 2, fZeroPointX);
-            mpViewTransformer->mpViewTransform->set(1, 2, fZeroPointY);
-        }
-
-        return *mpViewTransformer->mpViewTransform;
-    }
-    else
-    {
-        return basegfx::B2DHomMatrix();
-    }
+    return maGeometry.GetViewTransformation();
 }
 
 // #i75163#
 basegfx::B2DHomMatrix RenderContext2::GetViewTransformation(MapMode const& rMapMode) const
 {
-    // #i82615#
-    MappingMetrics aMappingMetric(rMapMode, GetDPIX(), GetDPIY());
-
-    basegfx::B2DHomMatrix aTransform;
-
-    const double fScaleFactorX(static_cast<double>(GetDPIX())
-                               * static_cast<double>(aMappingMetric.mnMapScNumX)
-                               / static_cast<double>(aMappingMetric.mnMapScDenomX));
-    const double fScaleFactorY(static_cast<double>(GetDPIY())
-                               * static_cast<double>(aMappingMetric.mnMapScNumY)
-                               / static_cast<double>(aMappingMetric.mnMapScDenomY));
-    const double fZeroPointX((static_cast<double>(aMappingMetric.mnMapOfsX) * fScaleFactorX)
-                             + static_cast<double>(GetXOffsetFromOriginInPixels()));
-    const double fZeroPointY((static_cast<double>(aMappingMetric.mnMapOfsY) * fScaleFactorY)
-                             + static_cast<double>(GetYOffsetFromOriginInPixels()));
-
-    aTransform.set(0, 0, fScaleFactorX);
-    aTransform.set(1, 1, fScaleFactorY);
-    aTransform.set(0, 2, fZeroPointX);
-    aTransform.set(1, 2, fZeroPointY);
-
-    return aTransform;
+    return maGeometry.GetViewTransformation(rMapMode);
 }
 
 // #i75163#
 basegfx::B2DHomMatrix RenderContext2::GetInverseViewTransformation(MapMode const& rMapMode) const
 {
-    basegfx::B2DHomMatrix aMatrix(GetViewTransformation(rMapMode));
-    aMatrix.invert();
-    return aMatrix;
+    return maGeometry.GetInverseViewTransformation(rMapMode);
 }
 
 basegfx::B2DHomMatrix RenderContext2::GetDeviceTransformation() const
 {
-    basegfx::B2DHomMatrix aTransformation = GetViewTransformation();
-
-    // TODO: is it worth to cache the transformed result?
-    if (GetXOffsetInPixels() || GetYOffsetInPixels())
-        aTransformation.translate(GetXOffsetInPixels(), GetYOffsetInPixels());
-
-    return aTransformation;
+    return maGeometry.GetDeviceTransformation();
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
