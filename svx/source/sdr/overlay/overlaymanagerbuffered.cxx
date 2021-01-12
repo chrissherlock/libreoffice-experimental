@@ -150,14 +150,14 @@ namespace sdr::overlay
             ImpPrepareBufferDevice();
 
             // build region which needs to be copied
-            vcl::Region aRegion(rSource.LogicToPixel(rRegion));
+            vcl::Region aRegion(rSource.GetGeometry().LogicToPixel(rRegion));
 
             // limit to PaintRegion if it's a window. This will be evtl. the expanded one,
             // but always the exact redraw area
             if(OUTDEV_WINDOW == rSource.GetOutDevType())
             {
                 vcl::Window& rWindow = static_cast<vcl::Window&>(rSource);
-                vcl::Region aPaintRegionPixel = rWindow.LogicToPixel(rWindow.GetPaintRegion());
+                vcl::Region aPaintRegionPixel = rWindow.GetGeometry().LogicToPixel(rWindow.GetPaintRegion());
                 aRegion.Intersect(aPaintRegionPixel);
 
                 // #i72754# Make sure content is completely rendered, the window

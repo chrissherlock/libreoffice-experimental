@@ -171,7 +171,7 @@ void SfxObjectShell::DoDraw_Impl( OutputDevice* pDev,
     if( pDev->IsClipRegion() && pDev->GetOutDevType() != OUTDEV_PRINTER )
     {
         aRegion = pDev->GetClipRegion();
-        aRegion = pDev->LogicToPixel( aRegion );
+        aRegion = pDev->GetGeometry().LogicToPixel( aRegion );
     }
     pDev->SetRelativeMapMode( aMapMode );
 

@@ -64,7 +64,7 @@ void OutputDevice::SetClipRegion( const vcl::Region& rRegion )
     }
     else
     {
-        vcl::Region aRegion = LogicToPixel( rRegion );
+        vcl::Region aRegion = maGeometry.LogicToPixel( rRegion );
         SetDeviceClipRegion( &aRegion );
     }
 
@@ -128,7 +128,7 @@ void OutputDevice::IntersectClipRegion( const vcl::Region& rRegion )
         if ( mpMetaFile )
             mpMetaFile->AddAction( new MetaISectRegionClipRegionAction( rRegion ) );
 
-        vcl::Region aRegion = LogicToPixel( rRegion );
+        vcl::Region aRegion = maGeometry.LogicToPixel( rRegion );
         maRegion.Intersect( aRegion );
         mbClipRegion        = true;
         mbInitClipRegion    = true;

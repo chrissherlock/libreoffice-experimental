@@ -93,7 +93,7 @@ void Window::ExpandPaintClipRegion( const vcl::Region& rRegion )
     if( !mpWindowImpl->mpPaintRegion )
         return;
 
-    vcl::Region aPixRegion = LogicToPixel( rRegion );
+    vcl::Region aPixRegion = maGeometry.LogicToPixel( rRegion );
     vcl::Region aDevPixRegion = maGeometry.PixelToDevicePixel( aPixRegion );
 
     vcl::Region aWinChildRegion = *ImplGetWinChildClipRegion();

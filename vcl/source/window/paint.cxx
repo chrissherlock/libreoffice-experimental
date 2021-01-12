@@ -1192,7 +1192,7 @@ void Window::Invalidate( const vcl::Region& rRegion, InvalidateFlags nFlags )
     }
     else
     {
-        vcl::Region aRegion = maGeometry.PixelToDevicePixel( LogicToPixel( rRegion ) );
+        vcl::Region aRegion = maGeometry.PixelToDevicePixel( maGeometry.LogicToPixel( rRegion ) );
         if ( !aRegion.IsEmpty() )
         {
             ImplInvalidate( &aRegion, nFlags );

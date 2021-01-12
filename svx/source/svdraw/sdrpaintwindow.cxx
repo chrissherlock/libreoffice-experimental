@@ -143,7 +143,7 @@ void SdrPreRenderDevice::PreparePreRenderDevice()
 void SdrPreRenderDevice::OutputPreRenderDevice(const vcl::Region& rExpandedRegion)
 {
     // region to pixels
-    const vcl::Region aRegionPixel(mpOutputDevice->LogicToPixel(rExpandedRegion));
+    const vcl::Region aRegionPixel(mpOutputDevice->GetGeometry().LogicToPixel(rExpandedRegion));
     //RegionHandle aRegionHandle(aRegionPixel.BeginEnumRects());
     //Rectangle aRegionRectanglePixel;
 
