@@ -21,46 +21,45 @@
 
 #include <vcl/RenderContext2.hxx>
 
-Size RenderContext2::GetSizeInPixels() const
+Size RenderContext2::GetSizeInPixels() const { return maGeometry.GetSizeInPixels(); }
+
+void RenderContext2::SetSizeInPixels(Size const& rSize) { maGeometry.SetSizeInPixels(rSize); }
+
+void RenderContext2::SetWidthInPixels(tools::Long nWidth) { maGeometry.SetWidthInPixels(nWidth); }
+void RenderContext2::SetHeightInPixels(tools::Long nHeight)
 {
-    return Size(maGeometry.mnWidthPx, maGeometry.mnHeightPx);
+    maGeometry.SetHeightInPixels(nHeight);
 }
 
-void RenderContext2::SetSizeInPixels(Size const& rSize)
-{
-    maGeometry.mnWidthPx = rSize.Width();
-    maGeometry.mnHeightPx = rSize.Height();
-}
+tools::Long RenderContext2::GetWidthInPixels() const { return maGeometry.GetWidthInPixels(); }
+tools::Long RenderContext2::GetHeightInPixels() const { return maGeometry.GetHeightInPixels(); }
 
-void RenderContext2::SetWidthInPixels(tools::Long nWidth) { maGeometry.mnWidthPx = nWidth; }
-void RenderContext2::SetHeightInPixels(tools::Long nHeight) { maGeometry.mnHeightPx = nHeight; }
-
-tools::Long RenderContext2::GetWidthInPixels() const { return maGeometry.mnWidthPx; }
-tools::Long RenderContext2::GetHeightInPixels() const { return maGeometry.mnHeightPx; }
-
-tools::Long RenderContext2::GetXOffsetInPixels() const { return maGeometry.mnOffsetXpx; }
-tools::Long RenderContext2::GetYOffsetInPixels() const { return maGeometry.mnOffsetYpx; }
+tools::Long RenderContext2::GetXOffsetInPixels() const { return maGeometry.GetXOffsetInPixels(); }
+tools::Long RenderContext2::GetYOffsetInPixels() const { return maGeometry.GetYOffsetInPixels(); }
 
 void RenderContext2::SetXOffsetInPixels(tools::Long nOffsetXpx)
 {
-    maGeometry.mnOffsetXpx = nOffsetXpx;
+    maGeometry.SetXOffsetInPixels(nOffsetXpx);
 }
 
 void RenderContext2::SetYOffsetInPixels(tools::Long nOffsetYpx)
 {
-    maGeometry.mnOffsetYpx = nOffsetYpx;
+    maGeometry.SetYOffsetInPixels(nOffsetYpx);
 }
 
-sal_Int32 RenderContext2::GetDPIX() const { return maGeometry.mnDPIX; }
-sal_Int32 RenderContext2::GetDPIY() const { return maGeometry.mnDPIY; }
-void RenderContext2::SetDPIX(sal_Int32 nDPIX) { maGeometry.mnDPIX = nDPIX; }
-void RenderContext2::SetDPIY(sal_Int32 nDPIY) { maGeometry.mnDPIY = nDPIY; }
-float RenderContext2::GetDPIScaleFactor() const { return maGeometry.mnDPIScalePercentage / 100.0f; }
-sal_Int32 RenderContext2::GetDPIScalePercentage() const { return maGeometry.mnDPIScalePercentage; }
+sal_Int32 RenderContext2::GetDPIX() const { return maGeometry.GetDPIX(); }
+sal_Int32 RenderContext2::GetDPIY() const { return maGeometry.GetDPIY(); }
+void RenderContext2::SetDPIX(sal_Int32 nDPIX) { maGeometry.SetDPIX(nDPIX); }
+void RenderContext2::SetDPIY(sal_Int32 nDPIY) { maGeometry.SetDPIY(nDPIY); }
+float RenderContext2::GetDPIScaleFactor() const { return maGeometry.GetDPIScaleFactor(); }
+sal_Int32 RenderContext2::GetDPIScalePercentage() const
+{
+    return maGeometry.GetDPIScalePercentage();
+}
 
 void RenderContext2::SetDPIScalePercentage(sal_Int32 nPercentage)
 {
-    maGeometry.mnDPIScalePercentage = nPercentage;
+    maGeometry.SetDPIScalePercentage(nPercentage);
 }
 
 Geometry const& RenderContext2::GetGeometry() const { return maGeometry; }

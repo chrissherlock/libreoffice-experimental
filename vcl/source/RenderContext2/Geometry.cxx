@@ -51,6 +51,90 @@ Geometry::~Geometry()
     mpViewTransformer.reset();
 }
 
+bool Geometry::IsMapModeEnabled() const { return mbMap; }
+
+void Geometry::EnableMapMode() { mbMap = true; }
+
+void Geometry::DisableMapMode() { mbMap = false; }
+
+Size Geometry::GetSizeInPixels() const { return Size(mnWidthPx, mnHeightPx); }
+
+void Geometry::SetSizeInPixels(Size const& rSize)
+{
+    mnWidthPx = rSize.Width();
+    mnHeightPx = rSize.Height();
+}
+
+void Geometry::SetWidthInPixels(tools::Long nWidth) { mnWidthPx = nWidth; }
+void Geometry::SetHeightInPixels(tools::Long nHeight) { mnHeightPx = nHeight; }
+
+tools::Long Geometry::GetWidthInPixels() const { return mnWidthPx; }
+tools::Long Geometry::GetHeightInPixels() const { return mnHeightPx; }
+
+tools::Long Geometry::GetXOffsetInPixels() const { return mnOffsetXpx; }
+tools::Long Geometry::GetYOffsetInPixels() const { return mnOffsetYpx; }
+
+void Geometry::SetXOffsetInPixels(tools::Long nOffsetXpx) { mnOffsetXpx = nOffsetXpx; }
+
+void Geometry::SetYOffsetInPixels(tools::Long nOffsetYpx) { mnOffsetYpx = nOffsetYpx; }
+
+sal_Int32 Geometry::GetDPIX() const { return mnDPIX; }
+sal_Int32 Geometry::GetDPIY() const { return mnDPIY; }
+void Geometry::SetDPIX(sal_Int32 nDPIX) { mnDPIX = nDPIX; }
+void Geometry::SetDPIY(sal_Int32 nDPIY) { mnDPIY = nDPIY; }
+float Geometry::GetDPIScaleFactor() const { return mnDPIScalePercentage / 100.0f; }
+sal_Int32 Geometry::GetDPIScalePercentage() const { return mnDPIScalePercentage; }
+
+void Geometry::SetDPIScalePercentage(sal_Int32 nPercentage) { mnDPIScalePercentage = nPercentage; }
+
+void Geometry::ResetLogicalUnitsOffsetFromOrigin()
+{
+    mnOffsetFromOriginXInLogicalUnits = mnOffsetFromOriginXpx;
+    mnOffsetFromOriginYInLogicalUnits = mnOffsetFromOriginYpx;
+}
+
+Size Geometry::GetOffsetFromOriginInPixels() const
+{
+    return Size(mnOffsetFromOriginXpx, mnOffsetFromOriginYpx);
+}
+
+tools::Long Geometry::GetXOffsetFromOriginInPixels() const { return mnOffsetFromOriginXpx; }
+
+tools::Long Geometry::GetYOffsetFromOriginInPixels() const { return mnOffsetFromOriginYpx; }
+
+void Geometry::SetOffsetFromOriginInPixels(Size const& rOffset)
+{
+    mnOffsetFromOriginXpx = rOffset.Width();
+    mnOffsetFromOriginYpx = rOffset.Height();
+
+    SetXOffsetFromOriginInLogicalUnits(Geometry::PixelToLogic(mnOffsetFromOriginXpx, mnDPIX,
+                                                              maMappingMetrics.mnMapScNumX,
+                                                              maMappingMetrics.mnMapScDenomX));
+    SetYOffsetFromOriginInLogicalUnits(Geometry::PixelToLogic(mnOffsetFromOriginYpx, mnDPIY,
+                                                              maMappingMetrics.mnMapScNumY,
+                                                              maMappingMetrics.mnMapScDenomY));
+}
+
+sal_uInt32 Geometry::GetXOffsetFromOriginInLogicalUnits() const
+{
+    return mnOffsetFromOriginXInLogicalUnits;
+}
+
+void Geometry::SetXOffsetFromOriginInLogicalUnits(tools::Long nOffsetFromOriginXInLogicalUnits)
+{
+    mnOffsetFromOriginXInLogicalUnits = nOffsetFromOriginXInLogicalUnits;
+}
+
+sal_uInt32 Geometry::GetYOffsetFromOriginInLogicalUnits() const
+{
+    return mnOffsetFromOriginYInLogicalUnits;
+}
+
+void Geometry::SetYOffsetFromOriginInLogicalUnits(tools::Long nOffsetFromOriginYInLogicalUnits)
+{
+    mnOffsetFromOriginYInLogicalUnits = nOffsetFromOriginYInLogicalUnits;
+}
+
 // #i75163#
 basegfx::B2DHomMatrix Geometry::GetInverseViewTransformation() const
 {
@@ -70,6 +154,48 @@ basegfx::B2DHomMatrix Geometry::GetInverseViewTransformation() const
     {
         return basegfx::B2DHomMatrix();
     }
+}
+
+tools::Long Geometry::GetXMapOffset() const { return maMappingMetrics.mnMapOfsX; }
+void Geometry::SetXMapOffset(tools::Long nXOffset) { maMappingMetrics.mnMapOfsX = nXOffset; }
+
+tools::Long Geometry::GetYMapOffset() const { return maMappingMetrics.mnMapOfsY; }
+void Geometry::SetYMapOffset(tools::Long nYOffset) { maMappingMetrics.mnMapOfsY = nYOffset; }
+
+tools::Long Geometry::GetXMapNumerator() const { return maMappingMetrics.mnMapScNumX; }
+
+void Geometry::SetXMapNumerator(tools::Long nNumerator)
+{
+    maMappingMetrics.mnMapScNumX = nNumerator;
+}
+
+tools::Long Geometry::GetYMapNumerator() const { return maMappingMetrics.mnMapScNumY; }
+
+void Geometry::SetYMapNumerator(tools::Long nNumerator)
+{
+    maMappingMetrics.mnMapScNumY = nNumerator;
+}
+
+tools::Long Geometry::GetXMapDenominator() const { return maMappingMetrics.mnMapScDenomX; }
+
+void Geometry::SetXMapDenominator(tools::Long nDenomerator)
+{
+    maMappingMetrics.mnMapScDenomX = nDenomerator;
+}
+
+tools::Long Geometry::GetYMapDenominator() const { return maMappingMetrics.mnMapScDenomY; }
+
+void Geometry::SetYMapDenominator(tools::Long nDenomerator)
+{
+    maMappingMetrics.mnMapScDenomY = nDenomerator;
+}
+
+MappingMetrics Geometry::GetMappingMetrics() const { return maMappingMetrics; }
+
+void Geometry::CalculateMappingMetrics(MapMode const& rMapMode, tools::Long nDPIX,
+                                       tools::Long nDPIY)
+{
+    maMappingMetrics.Calculate(rMapMode, nDPIX, nDPIY);
 }
 
 // #i75163#

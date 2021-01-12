@@ -33,10 +33,59 @@
 struct ViewTransformer;
 class MapMode;
 
-struct VCL_DLLPUBLIC Geometry
+class VCL_DLLPUBLIC Geometry
 {
+public:
     Geometry();
     ~Geometry();
+
+    bool IsMapModeEnabled() const;
+    void EnableMapMode();
+    void DisableMapMode();
+
+    Size GetSizeInPixels() const;
+    tools::Long GetWidthInPixels() const;
+    tools::Long GetHeightInPixels() const;
+    void SetSizeInPixels(Size const& rSize);
+    void SetWidthInPixels(tools::Long nWidth);
+    void SetHeightInPixels(tools::Long nHeight);
+
+    tools::Long GetXOffsetInPixels() const;
+    tools::Long GetYOffsetInPixels() const;
+    void SetXOffsetInPixels(tools::Long nOffsetXpx);
+    void SetYOffsetInPixels(tools::Long nOffsetYpx);
+
+    Size GetOffsetFromOriginInPixels() const;
+    tools::Long GetXOffsetFromOriginInPixels() const;
+    tools::Long GetYOffsetFromOriginInPixels() const;
+    void SetOffsetFromOriginInPixels(Size const& rOffset);
+
+    void ResetLogicalUnitsOffsetFromOrigin();
+    sal_uInt32 GetXOffsetFromOriginInLogicalUnits() const;
+    void SetXOffsetFromOriginInLogicalUnits(tools::Long nOffsetFromOriginXInLogicalUnits);
+    sal_uInt32 GetYOffsetFromOriginInLogicalUnits() const;
+    void SetYOffsetFromOriginInLogicalUnits(tools::Long nOffsetFromOriginYInLogicalUnits);
+
+    tools::Long GetXMapOffset() const;
+    void SetXMapOffset(tools::Long);
+    tools::Long GetYMapOffset() const;
+    void SetYMapOffset(tools::Long);
+    tools::Long GetXMapNumerator() const;
+    void SetXMapNumerator(tools::Long nNumerator);
+    tools::Long GetYMapNumerator() const;
+    void SetYMapNumerator(tools::Long nNumerator);
+    tools::Long GetXMapDenominator() const;
+    void SetXMapDenominator(tools::Long nDenominator);
+    tools::Long GetYMapDenominator() const;
+    void SetYMapDenominator(tools::Long nDenominator);
+
+    sal_Int32 GetDPIX() const;
+    sal_Int32 GetDPIY() const;
+    void SetDPIX(sal_Int32 nDPIX);
+    void SetDPIY(sal_Int32 nDPIY);
+    float GetDPIScaleFactor() const;
+    sal_Int32 GetDPIScalePercentage() const;
+    void SetDPIScalePercentage(sal_Int32 nPercentage);
 
     basegfx::B2DHomMatrix GetViewTransformation() const;
     basegfx::B2DHomMatrix GetViewTransformation(MapMode const& rMapMode) const;
@@ -83,6 +132,10 @@ struct VCL_DLLPUBLIC Geometry
      */
     basegfx::B2DHomMatrix GetDeviceTransformation() const; // TODO make private
 
+    MappingMetrics GetMappingMetrics() const;
+    void CalculateMappingMetrics(MapMode const& rMapMode, tools::Long nDPIX, tools::Long nDPIY);
+
+private:
     bool mbMap;
 
     tools::Long mnWidthPx;
@@ -106,9 +159,9 @@ struct VCL_DLLPUBLIC Geometry
     sal_Int32
         mnDPIScalePercentage; ///< For HiDPI displays, we want to draw elements for a percentage larger
 
-    MappingMetrics maMappingMetrics;
-
     std::unique_ptr<ViewTransformer> mpViewTransformer;
+
+    MappingMetrics maMappingMetrics;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

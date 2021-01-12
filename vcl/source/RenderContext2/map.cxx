@@ -14,11 +14,11 @@
 
 void RenderContext2::InitMapModeObjects() {}
 
-bool RenderContext2::IsMapModeEnabled() const { return maGeometry.mbMap; }
+bool RenderContext2::IsMapModeEnabled() const { return maGeometry.IsMapModeEnabled(); }
 
-void RenderContext2::EnableMapMode() { maGeometry.mbMap = true; }
+void RenderContext2::EnableMapMode() { maGeometry.EnableMapMode(); }
 
-void RenderContext2::DisableMapMode() { maGeometry.mbMap = false; }
+void RenderContext2::DisableMapMode() { maGeometry.DisableMapMode(); }
 
 MapMode const& RenderContext2::GetMapMode() const { return maMapMode; }
 
@@ -145,7 +145,7 @@ void RenderContext2::SetMapMode(MapMode const& rNewMapMode)
         }
 
         // calculate new MapMode-resolution
-        maGeometry.maMappingMetrics.Calculate(rNewMapMode, GetDPIX(), GetDPIY());
+        maGeometry.CalculateMappingMetrics(rNewMapMode, GetDPIX(), GetDPIY());
     }
 
     // set new MapMode
@@ -182,143 +182,85 @@ void RenderContext2::SetMapMode(MapMode const& rNewMapMode)
     // #i75163#
     maGeometry.InvalidateViewTransform();
 }
-static tools::Long ImplPixelToLogic(tools::Long n, tools::Long nDPI, tools::Long nMapNum,
-                                    tools::Long nMapDenom)
+
+void RenderContext2::ResetLogicalUnitsOffsetFromOrigin()
 {
-    assert(nDPI > 0);
-
-    if (nMapNum == 0)
-        return 0;
-
-    sal_Int64 nDenom = nDPI;
-    nDenom *= nMapNum;
-
-    sal_Int64 n64 = n;
-    n64 *= nMapDenom;
-
-    if (nDenom == 1)
-    {
-        n = static_cast<tools::Long>(n64);
-    }
-    else
-    {
-        n64 = 2 * n64 / nDenom;
-
-        if (n64 < 0)
-            --n64;
-        else
-            ++n64;
-
-        n = static_cast<tools::Long>(n64 / 2);
-    }
-
-    return n;
+    maGeometry.ResetLogicalUnitsOffsetFromOrigin();
 }
 
 Size RenderContext2::GetOffsetFromOriginInPixels() const
 {
-    return Size(maGeometry.mnOffsetFromOriginXpx, maGeometry.mnOffsetFromOriginYpx);
-}
-
-void RenderContext2::ResetLogicalUnitsOffsetFromOrigin()
-{
-    maGeometry.mnOffsetFromOriginXInLogicalUnits = maGeometry.mnOffsetFromOriginXpx;
-    maGeometry.mnOffsetFromOriginYInLogicalUnits = maGeometry.mnOffsetFromOriginYpx;
+    return maGeometry.GetOffsetFromOriginInPixels();
 }
 
 tools::Long RenderContext2::GetXOffsetFromOriginInPixels() const
 {
-    return maGeometry.mnOffsetFromOriginXpx;
+    return maGeometry.GetXOffsetFromOriginInPixels();
 }
 
 tools::Long RenderContext2::GetYOffsetFromOriginInPixels() const
 {
-    return maGeometry.mnOffsetFromOriginYpx;
+    return maGeometry.GetYOffsetFromOriginInPixels();
 }
 
 void RenderContext2::SetOffsetFromOriginInPixels(Size const& rOffset)
 {
-    maGeometry.mnOffsetFromOriginXpx = rOffset.Width();
-    maGeometry.mnOffsetFromOriginYpx = rOffset.Height();
-
-    SetXOffsetFromOriginInLogicalUnits(ImplPixelToLogic(
-        maGeometry.mnOffsetFromOriginXpx, maGeometry.mnDPIX,
-        maGeometry.maMappingMetrics.mnMapScNumX, maGeometry.maMappingMetrics.mnMapScDenomX));
-    SetYOffsetFromOriginInLogicalUnits(ImplPixelToLogic(
-        maGeometry.mnOffsetFromOriginYpx, maGeometry.mnDPIY,
-        maGeometry.maMappingMetrics.mnMapScNumY, maGeometry.maMappingMetrics.mnMapScDenomY));
+    maGeometry.SetOffsetFromOriginInPixels(rOffset);
 }
 
 sal_uInt32 RenderContext2::GetXOffsetFromOriginInLogicalUnits() const
 {
-    return maGeometry.mnOffsetFromOriginXInLogicalUnits;
+    return maGeometry.GetXOffsetFromOriginInLogicalUnits();
 }
 
 void RenderContext2::SetXOffsetFromOriginInLogicalUnits(
     tools::Long nOffsetFromOriginXInLogicalUnits)
 {
-    maGeometry.mnOffsetFromOriginXInLogicalUnits = nOffsetFromOriginXInLogicalUnits;
+    maGeometry.SetXOffsetFromOriginInLogicalUnits(nOffsetFromOriginXInLogicalUnits);
 }
 
 sal_uInt32 RenderContext2::GetYOffsetFromOriginInLogicalUnits() const
 {
-    return maGeometry.mnOffsetFromOriginYInLogicalUnits;
+    return maGeometry.GetYOffsetFromOriginInLogicalUnits();
 }
 
 void RenderContext2::SetYOffsetFromOriginInLogicalUnits(
     tools::Long nOffsetFromOriginYInLogicalUnits)
 {
-    maGeometry.mnOffsetFromOriginYInLogicalUnits = nOffsetFromOriginYInLogicalUnits;
+    maGeometry.SetYOffsetFromOriginInLogicalUnits(nOffsetFromOriginYInLogicalUnits);
 }
 
-tools::Long RenderContext2::GetXMapOffset() const { return maGeometry.maMappingMetrics.mnMapOfsX; }
-void RenderContext2::SetXMapOffset(tools::Long nXOffset)
-{
-    maGeometry.maMappingMetrics.mnMapOfsX = nXOffset;
-}
+tools::Long RenderContext2::GetXMapOffset() const { return maGeometry.GetXMapOffset(); }
+void RenderContext2::SetXMapOffset(tools::Long nXOffset) { maGeometry.SetXMapOffset(nXOffset); }
 
-tools::Long RenderContext2::GetYMapOffset() const { return maGeometry.maMappingMetrics.mnMapOfsY; }
-void RenderContext2::SetYMapOffset(tools::Long nYOffset)
-{
-    maGeometry.maMappingMetrics.mnMapOfsY = nYOffset;
-}
+tools::Long RenderContext2::GetYMapOffset() const { return maGeometry.GetYMapOffset(); }
+void RenderContext2::SetYMapOffset(tools::Long nYOffset) { maGeometry.SetYMapOffset(nYOffset); }
 
-tools::Long RenderContext2::GetXMapNumerator() const
-{
-    return maGeometry.maMappingMetrics.mnMapScNumX;
-}
+tools::Long RenderContext2::GetXMapNumerator() const { return maGeometry.GetXMapNumerator(); }
 void RenderContext2::SetXMapNumerator(tools::Long nNumerator)
 {
-    maGeometry.maMappingMetrics.mnMapScNumX = nNumerator;
+    maGeometry.SetXMapNumerator(nNumerator);
 }
 
-tools::Long RenderContext2::GetYMapNumerator() const
-{
-    return maGeometry.maMappingMetrics.mnMapScNumY;
-}
+tools::Long RenderContext2::GetYMapNumerator() const { return maGeometry.GetYMapNumerator(); }
 void RenderContext2::SetYMapNumerator(tools::Long nNumerator)
 {
-    maGeometry.maMappingMetrics.mnMapScNumY = nNumerator;
+    maGeometry.SetYMapNumerator(nNumerator);
 }
 
-tools::Long RenderContext2::GetXMapDenominator() const
-{
-    return maGeometry.maMappingMetrics.mnMapScDenomX;
-}
+tools::Long RenderContext2::GetXMapDenominator() const { return maGeometry.GetXMapDenominator(); }
 void RenderContext2::SetXMapDenominator(tools::Long nDenomerator)
 {
-    maGeometry.maMappingMetrics.mnMapScDenomX = nDenomerator;
+    maGeometry.SetXMapDenominator(nDenomerator);
 }
 
-tools::Long RenderContext2::GetYMapDenominator() const
-{
-    return maGeometry.maMappingMetrics.mnMapScDenomY;
-}
+tools::Long RenderContext2::GetYMapDenominator() const { return maGeometry.GetYMapDenominator(); }
+
 void RenderContext2::SetYMapDenominator(tools::Long nDenomerator)
 {
-    maGeometry.maMappingMetrics.mnMapScDenomY = nDenomerator;
+    maGeometry.SetYMapDenominator(nDenomerator);
 }
 
-MappingMetrics RenderContext2::GetMappingMetrics() const { return maGeometry.maMappingMetrics; }
+MappingMetrics RenderContext2::GetMappingMetrics() const { return maGeometry.GetMappingMetrics(); }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

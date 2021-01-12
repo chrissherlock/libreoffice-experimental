@@ -21,9 +21,11 @@
 
 #include <tools/long.hxx>
 
+#include <vcl/dllapi.h>
+
 class MapMode;
 
-struct MappingMetrics
+struct VCL_DLLPUBLIC MappingMetrics
 {
     MappingMetrics();
     MappingMetrics(MapMode const& rMapMode, tools::Long nDPIX, tools::Long nDPIY);
