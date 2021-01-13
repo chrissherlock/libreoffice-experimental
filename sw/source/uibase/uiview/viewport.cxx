@@ -948,7 +948,7 @@ void SwView::InnerResizePixel( const Point &rOfst, const Size &rSize, bool )
         Size aSize( rSize );
         aSize.AdjustWidth( -(aBorder.Left() + aBorder.Right()) );
         aSize.AdjustHeight( -(aBorder.Top() + aBorder.Bottom()) );
-        Size aObjSizePixel = GetWindow()->LogicToPixel(aObjSize, MapMode(MapUnit::MapTwip));
+        Size aObjSizePixel = GetWindow()->GetGeometry().LogicToPixel(aObjSize, MapMode(MapUnit::MapTwip));
         SfxViewShell::SetZoomFactor( Fraction( aSize.Width(), aObjSizePixel.Width() ),
                         Fraction( aSize.Height(), aObjSizePixel.Height() ) );
     }

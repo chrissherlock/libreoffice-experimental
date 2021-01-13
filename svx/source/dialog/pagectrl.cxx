@@ -393,7 +393,7 @@ void SvxPageWindow::SetDrawingArea(weld::DrawingArea* pDrawingArea)
     // Count in Twips by default
     rRefDevice.Push(PushFlags::MAPMODE);
     rRefDevice.SetMapMode(MapMode(MapUnit::MapTwip));
-    aWinSize = rRefDevice.LogicToPixel(Size(75, 46), MapMode(MapUnit::MapAppFont));
+    aWinSize = rRefDevice.GetGeometry().LogicToPixel(Size(75, 46), MapMode(MapUnit::MapAppFont));
     pDrawingArea->set_size_request(aWinSize.Width(), aWinSize.Height());
 
     aWinSize.AdjustHeight( -4 );

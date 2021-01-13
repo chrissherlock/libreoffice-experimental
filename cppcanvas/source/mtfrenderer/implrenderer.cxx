@@ -1581,7 +1581,7 @@ namespace cppcanvas::internal
 
                         // #121806# explicitly kept integer
                         const Size aMtfSize( rSubstitute.GetPrefSize() );
-                        const Size aMtfSizePixPre( rVDev.LogicToPixel( aMtfSize,
+                        const Size aMtfSizePixPre( rVDev.GetGeometry().LogicToPixel( aMtfSize,
                                                                        rSubstitute.GetPrefMapMode() ) );
 
                         // #i44110# correct null-sized output - there
@@ -2879,7 +2879,7 @@ namespace cppcanvas::internal
             aVDev->SetMapMode( rMtf.GetPrefMapMode() );
 
             const Size aMtfSize( rMtf.GetPrefSize() );
-            const Size aMtfSizePixPre( aVDev->LogicToPixel( aMtfSize,
+            const Size aMtfSizePixPre( aVDev->GetGeometry().LogicToPixel( aMtfSize,
                                                            rMtf.GetPrefMapMode() ) );
 
             // #i44110# correct null-sized output - there are shapes

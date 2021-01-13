@@ -251,7 +251,7 @@ bool EMFWriter::WriteEMF(const GDIMetaFile& rMtf)
     mnLineHandle = mnFillHandle = mnTextHandle = HANDLE_INVALID;
     mnHorTextAlign = 0;
 
-    const Size aMtfSizePix( maVDev->LogicToPixel( rMtf.GetPrefSize(), rMtf.GetPrefMapMode() ) );
+    const Size aMtfSizePix( maVDev->GetGeometry().LogicToPixel( rMtf.GetPrefSize(), rMtf.GetPrefMapMode() ) );
     const Size aMtfSizeLog( OutputDevice::LogicToLogic(rMtf.GetPrefSize(), rMtf.GetPrefMapMode(), MapMode(MapUnit::Map100thMM)) );
 
     // seek over header

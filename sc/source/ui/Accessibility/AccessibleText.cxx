@@ -566,9 +566,8 @@ SvxTextForwarder* ScAccessibleCellTextData::GetTextForwarder()
 
         Size aTextSize;
         if ( pWin )
-        {
-            aTextSize = pWin->LogicToPixel( Size( pEditEngine->CalcTextWidth(), pEditEngine->GetTextHeight() ), pEditEngine->GetRefMapMode() );
-        }
+            aTextSize = pWin->GetGeometry().LogicToPixel( Size( pEditEngine->CalcTextWidth(), pEditEngine->GetTextHeight() ), pEditEngine->GetRefMapMode() );
+
         tools::Long nTextWidth = aTextSize.Width();
         tools::Long nTextHeight = aTextSize.Height();
 

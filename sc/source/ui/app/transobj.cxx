@@ -392,7 +392,7 @@ bool ScTransferObj::GetData( const datatransfer::DataFlavor& rFlavor, const OUSt
                                                  aReducedBlock.aEnd.Col(), aReducedBlock.aEnd.Row(),
                                                  aReducedBlock.aStart.Tab() );
             ScopedVclPtrInstance< VirtualDevice > pVirtDev;
-            pVirtDev->SetOutputSizePixel(pVirtDev->LogicToPixel(aMMRect.GetSize(), MapMode(MapUnit::Map100thMM)));
+            pVirtDev->SetOutputSizePixel(pVirtDev->GetGeometry().LogicToPixel(aMMRect.GetSize(), MapMode(MapUnit::Map100thMM)));
 
             PaintToDev( pVirtDev, *m_pDoc, 1.0, aReducedBlock );
 

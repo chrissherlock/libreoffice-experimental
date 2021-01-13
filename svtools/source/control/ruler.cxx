@@ -438,7 +438,7 @@ void Ruler::ImplDrawTicks(vcl::RenderContext& rRenderContext, tools::Long nMin, 
     tools::Long nTickWidth;
     bool bNoTicks = false;
 
-    Size aPixSize = rRenderContext.LogicToPixel(Size(nTick4, nTick4), maMapMode);
+    Size aPixSize = rRenderContext.GetGeometry().LogicToPixel(Size(nTick4, nTick4), maMapMode);
 
     if (mnUnitIndex == RULER_UNIT_CHAR)
     {
@@ -518,7 +518,7 @@ void Ruler::ImplDrawTicks(vcl::RenderContext& rRenderContext, tools::Long nMin, 
             }
 
             nTick4 = nOrgTick4 * nMulti;
-            aPixSize = rRenderContext.LogicToPixel(Size(nTick4, nTick4), maMapMode);
+            aPixSize = rRenderContext.GetGeometry().LogicToPixel(Size(nTick4, nTick4), maMapMode);
             if (mnWinStyle & WB_HORZ)
                 nTickWidth = aPixSize.Width();
             else
@@ -546,11 +546,11 @@ void Ruler::ImplDrawTicks(vcl::RenderContext& rRenderContext, tools::Long nMin, 
 
     Size nTickGapSize;
 
-    nTickGapSize = rRenderContext.LogicToPixel(Size(nTickCount, nTickCount), maMapMode);
+    nTickGapSize = rRenderContext.GetGeometry().LogicToPixel(Size(nTickCount, nTickCount), maMapMode);
     tools::Long nTickGap1 = mnWinStyle & WB_HORZ ? nTickGapSize.Width() : nTickGapSize.Height();
-    nTickGapSize = rRenderContext.LogicToPixel(Size(nTick2, nTick2), maMapMode);
+    nTickGapSize = rRenderContext.GetGeometry().LogicToPixel(Size(nTick2, nTick2), maMapMode);
     tools::Long nTickGap2 = mnWinStyle & WB_HORZ ? nTickGapSize.Width() : nTickGapSize.Height();
-    nTickGapSize = rRenderContext.LogicToPixel(Size(nTick3, nTick3), maMapMode);
+    nTickGapSize = rRenderContext.GetGeometry().LogicToPixel(Size(nTick3, nTick3), maMapMode);
     tools::Long nTickGap3 = mnWinStyle & WB_HORZ ? nTickGapSize.Width() : nTickGapSize.Height();
 
     while (((nStart - n) >= nMin) || ((nStart + n) <= nMax))
@@ -570,7 +570,7 @@ void Ruler::ImplDrawTicks(vcl::RenderContext& rRenderContext, tools::Long nMin, 
         }
         else
         {
-            aPixSize = rRenderContext.LogicToPixel(Size(nTick, nTick), maMapMode);
+            aPixSize = rRenderContext.GetGeometry().LogicToPixel(Size(nTick, nTick), maMapMode);
 
             if (mnWinStyle & WB_HORZ)
                 n = aPixSize.Width();

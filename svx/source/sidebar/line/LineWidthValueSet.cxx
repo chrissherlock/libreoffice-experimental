@@ -162,7 +162,7 @@ void  LineWidthValueSet::UserDraw( const UserDrawEvent& rUDEvt )
 void LineWidthValueSet::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     ValueSet::SetDrawingArea(pDrawingArea);
-    Size aSize(pDrawingArea->get_ref_device().LogicToPixel(Size(80, 12 * 9), MapMode(MapUnit::MapAppFont)));
+    Size aSize(pDrawingArea->get_ref_device().GetGeometry().LogicToPixel(Size(80, 12 * 9), MapMode(MapUnit::MapAppFont)));
     pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
     SetOutputSizePixel(aSize);
 }

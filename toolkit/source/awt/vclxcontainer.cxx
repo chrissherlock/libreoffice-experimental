@@ -263,7 +263,7 @@ void SAL_CALL VCLXContainer::setProperty(
                 if ( !pDev )
                     break;
 
-                aSize = pDev->LogicToPixel( aSize, aMode );
+                aSize = pDev->GetGeometry().LogicToPixel( aSize, aMode );
                 switch ( nPropType )
                 {
                     case BASEPROPERTY_SCROLLHEIGHT:

@@ -1440,8 +1440,6 @@ public:
 public:
     void SetOffsetFromOriginInPixels(Size const& rOffset) override;
 
-    Size                        LogicToPixel( const Size& rLogicSize,
-                                              const MapMode& rMapMode ) const;
     tools::Rectangle                   LogicToPixel( const tools::Rectangle& rLogicRect,
                                               const MapMode& rMapMode ) const;
     tools::Polygon              LogicToPixel( const tools::Polygon& rLogicPoly,

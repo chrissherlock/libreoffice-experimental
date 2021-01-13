@@ -114,7 +114,7 @@ void SwHTMLWrtTable::Pixelize( sal_uInt16& rValue )
     if( rValue && Application::GetDefaultDevice() )
     {
         Size aSz( rValue, 0 );
-        aSz = Application::GetDefaultDevice()->LogicToPixel( aSz, MapMode(MapUnit::MapTwip) );
+        aSz = Application::GetDefaultDevice()->GetGeometry().LogicToPixel( aSz, MapMode(MapUnit::MapTwip) );
         if( !aSz.Width() )
             aSz.setWidth( 1 );
         aSz = Application::GetDefaultDevice()->PixelToLogic( aSz, MapMode(MapUnit::MapTwip) );
@@ -356,7 +356,7 @@ void SwHTMLWrtTable::OutTableCell( SwHTMLWriter& rWrt,
     if( (aPixelSz.Width() || aPixelSz.Height()) && Application::GetDefaultDevice() )
     {
         Size aOldSz( aPixelSz );
-        aPixelSz = Application::GetDefaultDevice()->LogicToPixel( aPixelSz,
+        aPixelSz = Application::GetDefaultDevice()->GetGeometry().LogicToPixel( aPixelSz,
                                                         MapMode(MapUnit::MapTwip) );
         if( aOldSz.Width() && !aPixelSz.Width() )
             aPixelSz.setWidth( 1 );
@@ -645,7 +645,7 @@ void SwHTMLWrtTable::Write( SwHTMLWriter& rWrt, sal_Int16 eAlign,
             sOut.append(static_cast<sal_Int32>(m_nTabWidth)).append('%');
         else if( Application::GetDefaultDevice() )
         {
-            sal_Int32 nPixWidth = Application::GetDefaultDevice()->LogicToPixel(
+            sal_Int32 nPixWidth = Application::GetDefaultDevice()->GetGeometry().LogicToPixel(
                         Size(m_nTabWidth,0), MapMode(MapUnit::MapTwip) ).Width();
             if( !nPixWidth )
                 nPixWidth = 1;
@@ -663,7 +663,7 @@ void SwHTMLWrtTable::Write( SwHTMLWriter& rWrt, sal_Int16 eAlign,
     if( (nHSpace || nVSpace) && Application::GetDefaultDevice())
     {
         Size aPixelSpc =
-            Application::GetDefaultDevice()->LogicToPixel( Size(nHSpace,nVSpace),
+            Application::GetDefaultDevice()->GetGeometry().LogicToPixel( Size(nHSpace,nVSpace),
                                                    MapMode(MapUnit::MapTwip) );
         if( !aPixelSpc.Width() && nHSpace )
             aPixelSpc.setWidth( 1 );

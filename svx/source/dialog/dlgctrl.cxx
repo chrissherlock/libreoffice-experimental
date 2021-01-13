@@ -62,7 +62,7 @@ BitmapEx& SvxRectCtl::GetRectBitmap()
 
 SvxRectCtl::SvxRectCtl(SvxTabPage* pPage)
     : m_pPage(pPage)
-    , nBorderWidth(Application::GetDefaultDevice()->LogicToPixel(Size(200, 0), MapMode(MapUnit::Map100thMM)).Width())
+    , nBorderWidth(Application::GetDefaultDevice()->GetGeometry().LogicToPixel(Size(200, 0), MapMode(MapUnit::Map100thMM)).Width())
     , eRP(RectPoint::MM)
     , eDefRP(RectPoint::MM)
     , m_nState(CTL_STATE::NONE)
@@ -81,7 +81,7 @@ void SvxRectCtl::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 
 void SvxRectCtl::SetControlSettings(RectPoint eRpt, sal_uInt16 nBorder)
 {
-    nBorderWidth = Application::GetDefaultDevice()->LogicToPixel(Size(nBorder, 0), MapMode(MapUnit::Map100thMM)).Width();
+    nBorderWidth = Application::GetDefaultDevice()->GetGeometry().LogicToPixel(Size(nBorder, 0), MapMode(MapUnit::Map100thMM)).Width();
     eDefRP = eRpt;
     Resize();
 }

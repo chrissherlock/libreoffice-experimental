@@ -81,8 +81,8 @@ XPdfDecomposer::getDecomposition(const uno::Reference<util::XBinaryDataContainer
     BitmapEx aReplacement(aBitmaps[0]);
 
     // short form for scale and translate transformation
-    const Size aDPI(
-        Application::GetDefaultDevice()->LogicToPixel(Size(1, 1), MapMode(MapUnit::MapInch)));
+    const Size aDPI(Application::GetDefaultDevice()->GetGeometry().LogicToPixel(
+        Size(1, 1), MapMode(MapUnit::MapInch)));
     const Size aBitmapSize(aReplacement.GetSizePixel());
     const basegfx::B2DHomMatrix aBitmapTransform(basegfx::utils::createScaleTranslateB2DHomMatrix(
         aBitmapSize.getWidth() * aDPI.getWidth(), aBitmapSize.getHeight() * aDPI.getHeight(), 0,

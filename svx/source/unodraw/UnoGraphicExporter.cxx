@@ -387,7 +387,7 @@ VclPtr<VirtualDevice> GraphicExporter::CreatePageVDev( SdrPage* pPage, tools::Lo
     // use scaling?
     if( nWidthPixel != 0 )
     {
-        const Fraction aFrac( nWidthPixel, pVDev->LogicToPixel( aPageSize, aMM ).Width() );
+        const Fraction aFrac( nWidthPixel, pVDev->GetGeometry().LogicToPixel( aPageSize, aMM ).Width() );
 
         aMM.SetScaleX( aFrac );
 
@@ -397,7 +397,7 @@ VclPtr<VirtualDevice> GraphicExporter::CreatePageVDev( SdrPage* pPage, tools::Lo
 
     if( nHeightPixel != 0 )
     {
-        const Fraction aFrac( nHeightPixel, pVDev->LogicToPixel( aPageSize, aMM ).Height() );
+        const Fraction aFrac( nHeightPixel, pVDev->GetGeometry().LogicToPixel( aPageSize, aMM ).Height() );
 
         if( nWidthPixel == 0 )
             aMM.SetScaleX( aFrac );
@@ -656,7 +656,7 @@ bool GraphicExporter::GetGraphic( ExportSettings const & rSettings, Graphic& aGr
                 }
                 else
                 {
-                    const Size aSizePix( Application::GetDefaultDevice()->LogicToPixel( aSize, aMap ) );
+                    const Size aSizePix( Application::GetDefaultDevice()->GetGeometry().LogicToPixel( aSize, aMap ) );
                     if (aSizePix.Width() > MAX_EXT_PIX || aSizePix.Height() > MAX_EXT_PIX)
                     {
                         if (aSizePix.Width() > MAX_EXT_PIX)

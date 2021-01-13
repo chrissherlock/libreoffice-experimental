@@ -431,7 +431,7 @@ namespace dbaui
 
     Size ORelationControl::GetOptimalSize() const
     {
-        return LogicToPixel(Size(140, 80), MapMode(MapUnit::MapAppFont));
+        return maGeometry.LogicToPixel(Size(140, 80), MapMode(MapUnit::MapAppFont));
     }
 
     OTableListBoxControl::OTableListBoxControl(weld::Builder* _pParent,

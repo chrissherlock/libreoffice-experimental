@@ -921,7 +921,7 @@ SwContentTree::SwContentTree(std::unique_ptr<weld::TreeView> xTreeView, SwNaviga
     , m_bIsOutlineMoveable(true)
     , m_bViewHasChanged(false)
 {
-    Size aSize(m_xDialog->LogicToPixel(Size(110, 112), MapMode(MapUnit::MapAppFont)));
+    Size aSize(m_xDialog->GetGeometry().LogicToPixel(Size(110, 112), MapMode(MapUnit::MapAppFont)));
     m_xTreeView->set_size_request(aSize.Width(), aSize.Height());
 
     m_xTreeView->set_help_id(HID_NAVIGATOR_TREELIST);

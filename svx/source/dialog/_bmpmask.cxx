@@ -73,7 +73,7 @@ public:
 
     virtual void SetDrawingArea(weld::DrawingArea* pArea) override
     {
-        Size aSize(pArea->get_ref_device().LogicToPixel(Size(43, 14), MapMode(MapUnit::MapAppFont)));
+        Size aSize(pArea->get_ref_device().GetGeometry().LogicToPixel(Size(43, 14), MapMode(MapUnit::MapAppFont)));
         CustomWidgetController::SetDrawingArea(pArea);
         pArea->set_size_request(aSize.Width(), aSize.Height());
         SetOutputSizePixel(aSize);
@@ -91,7 +91,7 @@ public:
     virtual void GetFocus() override;
     virtual void SetDrawingArea(weld::DrawingArea* pArea) override
     {
-        Size aSize(pArea->get_ref_device().LogicToPixel(Size(24, 12), MapMode(MapUnit::MapAppFont)));
+        Size aSize(pArea->get_ref_device().GetGeometry().LogicToPixel(Size(24, 12), MapMode(MapUnit::MapAppFont)));
         ValueSet::SetDrawingArea(pArea);
         pArea->set_size_request(aSize.Width(), aSize.Height());
         SetOutputSizePixel(aSize);

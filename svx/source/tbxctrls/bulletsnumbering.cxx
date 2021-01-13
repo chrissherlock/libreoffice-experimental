@@ -100,7 +100,7 @@ NumberingPopup::NumberingPopup(NumberingToolBoxControl& rController,
 
     weld::DrawingArea* pDrawingArea = mxValueSet->GetDrawingArea();
     OutputDevice& rRefDevice = pDrawingArea->get_ref_device();
-    Size aItemSize(rRefDevice.LogicToPixel(Size(30, 42), MapMode(MapUnit::MapAppFont)));
+    Size aItemSize(rRefDevice.GetGeometry().LogicToPixel(Size(30, 42), MapMode(MapUnit::MapAppFont)));
     mxValueSet->SetExtraSpacing( 2 );
     Size aSize(mxValueSet->CalcWindowSizePixel(aItemSize));
     pDrawingArea->set_size_request(aSize.Width(), aSize.Height());

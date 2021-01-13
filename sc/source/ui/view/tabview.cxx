@@ -329,7 +329,7 @@ void ScTabView::DoResize( const Point& rOffset, const Size& rSize, bool bInner )
 
     Size aFontSize = rStyleSettings.GetTabFont().GetFontSize();
     MapMode aPtMapMode(MapUnit::MapPoint);
-    aFontSize = pFrameWin->LogicToPixel(aFontSize, aPtMapMode);
+    aFontSize = pFrameWin->GetGeometry().LogicToPixel(aFontSize, aPtMapMode);
     sal_Int32 nTabHeight = aFontSize.Height() + TAB_HEIGHT_MARGIN;
 
     if ( aViewData.GetHSplitMode() != SC_SPLIT_NONE )
@@ -1822,7 +1822,7 @@ Point ScTabView::GetChartDialogPos( const Size& rDialogSize, const tools::Rectan
                            pWin->OutputToAbsoluteScreenPixel( aObjPixel.BottomRight() ) );
 
         tools::Rectangle aDesktop = pWin->GetDesktopRectPixel();
-        Size aSpace = pWin->LogicToPixel( Size(8, 12), MapMode(MapUnit::MapAppFont));
+        Size aSpace = pWin->GetGeometry().LogicToPixel( Size(8, 12), MapMode(MapUnit::MapAppFont));
 
         ScDocument& rDoc = aViewData.GetDocument();
         SCTAB nTab = aViewData.GetTabNo();

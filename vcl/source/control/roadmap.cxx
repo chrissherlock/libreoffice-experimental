@@ -193,8 +193,8 @@ public:
 void RoadmapImpl::initItemSize()
 {
     Size aLabelSize( m_rAntiImpl.GetSizeInPixels() );
-    aLabelSize.setHeight( m_rAntiImpl.LogicToPixel(Size(0, LABELBASEMAPHEIGHT), MapMode(MapUnit::MapAppFont)).Height() );
-    aLabelSize.AdjustWidth( -(m_rAntiImpl.LogicToPixel(Size(2 * ROADMAP_INDENT_X, 0), MapMode(MapUnit::MapAppFont)).Width()) );
+    aLabelSize.setHeight( m_rAntiImpl.GetGeometry().LogicToPixel(Size(0, LABELBASEMAPHEIGHT), MapMode(MapUnit::MapAppFont)).Height() );
+    aLabelSize.AdjustWidth( -(m_rAntiImpl.GetGeometry().LogicToPixel(Size(2 * ROADMAP_INDENT_X, 0), MapMode(MapUnit::MapAppFont)).Width()) );
     m_aItemSizePixel = aLabelSize;
 }
 

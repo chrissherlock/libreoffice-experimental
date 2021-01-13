@@ -1343,7 +1343,7 @@ void ScHTMLLayoutParser::Image( HtmlImportInfo* pInfo )
     if ( !(pImage->aSize.Width() && pImage->aSize.Height()) )
     {
         OutputDevice* pDefaultDev = Application::GetDefaultDevice();
-        pImage->aSize = pDefaultDev->LogicToPixel( pImage->pGraphic->GetPrefSize(),
+        pImage->aSize = pDefaultDev->GetGeometry().LogicToPixel( pImage->pGraphic->GetPrefSize(),
             pImage->pGraphic->GetPrefMapMode() );
     }
     if (mxActEntry->maImageList.empty())

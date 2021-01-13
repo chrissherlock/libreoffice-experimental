@@ -1713,7 +1713,7 @@ bool WMFWriter::WriteWMF( const GDIMetaFile& rMTF, SvStream& rTargetStream,
     {
         aTargetMapMode = MapMode( MapUnit::MapInch );
 
-        const tools::Long      nUnit = pVirDev->LogicToPixel( Size( 1, 1 ), aTargetMapMode ).Width();
+        const tools::Long      nUnit = pVirDev->GetGeometry().LogicToPixel( Size( 1, 1 ), aTargetMapMode ).Width();
         const Fraction  aFrac( 1, nUnit );
 
         aTargetMapMode.SetScaleX( aFrac );

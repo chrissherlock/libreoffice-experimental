@@ -1035,7 +1035,7 @@ void PushButton::ImplDrawPushButton(vcl::RenderContext& rRenderContext)
         // prepare single line hint (needed on mac to decide between normal push button and
         // rectangular bevel button look)
         Size aFontSize(Application::GetSettings().GetStyleSettings().GetPushButtonFont().GetFontSize());
-        aFontSize = rRenderContext.LogicToPixel(aFontSize, MapMode(MapUnit::MapPoint));
+        aFontSize = rRenderContext.GetGeometry().LogicToPixel(aFontSize, MapMode(MapUnit::MapPoint));
         Size aInRectSize(rRenderContext.GetGeometry().LogicToPixel(Size(aInRect.GetWidth(), aInRect.GetHeight())));
         aControlValue.mbSingleLine = (aInRectSize.Height() < 2 * aFontSize.Height());
 
@@ -2394,9 +2394,9 @@ void RadioButton::Draw( OutputDevice* pDev, const Point& rPos,
         MapMode     aResMapMode( MapUnit::Map100thMM );
         Point       aPos  = pDev->GetGeometry().LogicToPixel( rPos );
         Size        aSize = GetSizePixel();
-        Size        aImageSize = pDev->LogicToPixel( Size( 300, 300 ), aResMapMode );
-        Size        aBrd1Size = pDev->LogicToPixel( Size( 20, 20 ), aResMapMode );
-        Size        aBrd2Size = pDev->LogicToPixel( Size( 60, 60 ), aResMapMode );
+        Size        aImageSize = pDev->GetGeometry().LogicToPixel( Size( 300, 300 ), aResMapMode );
+        Size        aBrd1Size = pDev->GetGeometry().LogicToPixel( Size( 20, 20 ), aResMapMode );
+        Size        aBrd2Size = pDev->GetGeometry().LogicToPixel( Size( 60, 60 ), aResMapMode );
         vcl::Font   aFont = GetDrawPixelFont( pDev );
         tools::Rectangle   aStateRect;
         tools::Rectangle   aMouseRect;
@@ -3206,10 +3206,10 @@ void CheckBox::Draw( OutputDevice* pDev, const Point& rPos,
     MapMode     aResMapMode( MapUnit::Map100thMM );
     Point       aPos  = pDev->GetGeometry().LogicToPixel( rPos );
     Size        aSize = GetSizePixel();
-    Size        aImageSize = pDev->LogicToPixel( Size( 300, 300 ), aResMapMode );
-    Size        aBrd1Size = pDev->LogicToPixel( Size( 20, 20 ), aResMapMode );
-    Size        aBrd2Size = pDev->LogicToPixel( Size( 30, 30 ), aResMapMode );
-    tools::Long        nCheckWidth = pDev->LogicToPixel( Size( 20, 20 ), aResMapMode ).Width();
+    Size        aImageSize = pDev->GetGeometry().LogicToPixel( Size( 300, 300 ), aResMapMode );
+    Size        aBrd1Size = pDev->GetGeometry().LogicToPixel( Size( 20, 20 ), aResMapMode );
+    Size        aBrd2Size = pDev->GetGeometry().LogicToPixel( Size( 30, 30 ), aResMapMode );
+    tools::Long        nCheckWidth = pDev->GetGeometry().LogicToPixel( Size( 20, 20 ), aResMapMode ).Width();
     vcl::Font   aFont = GetDrawPixelFont( pDev );
     tools::Rectangle   aStateRect;
     tools::Rectangle   aMouseRect;

@@ -126,7 +126,7 @@ tools::PolyPolygon SvxContourDlg::CreateAutoContour( const Graphic& rGraphic,
     {
         const Graphic   aTmpGrf( rGraphic.GetGDIMetaFile().GetMonochromeMtf( COL_BLACK ) );
         ScopedVclPtrInstance< VirtualDevice > pVDev;
-        Size            aSizePix( pVDev->LogicToPixel( aTmpGrf.GetPrefSize(), aTmpGrf.GetPrefMapMode() ) );
+        Size            aSizePix( pVDev->GetGeometry().LogicToPixel( aTmpGrf.GetPrefSize(), aTmpGrf.GetPrefMapMode() ) );
 
         if( aSizePix.Width() && aSizePix.Height() && ( aSizePix.Width() > 512 || aSizePix.Height() > 512 ) )
         {

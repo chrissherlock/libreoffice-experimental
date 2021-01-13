@@ -2228,8 +2228,10 @@ void VclMetafileProcessor2D::processTransparencePrimitive2D(
             // between Printer and VDev (mpOutputDevice and aBufferDevice here).
             // To get the DPI, LogicToPixel from (1,1) from MapUnit::MapInch needs to be used.
             basegfx::B2DHomMatrix aViewTransform(aBufferDevice->GetViewTransformation());
-            const Size aDPIOld(mpOutputDevice->LogicToPixel(Size(1, 1), MapMode(MapUnit::MapInch)));
-            const Size aDPINew(aBufferDevice->LogicToPixel(Size(1, 1), MapMode(MapUnit::MapInch)));
+            const Size aDPIOld(
+                mpOutputDevice->GetGeometry().LogicToPixel(Size(1, 1), MapMode(MapUnit::MapInch)));
+            const Size aDPINew(
+                aBufferDevice->GetGeometry().LogicToPixel(Size(1, 1), MapMode(MapUnit::MapInch)));
             const double fDPIXChange(static_cast<double>(aDPIOld.getWidth())
                                      / static_cast<double>(aDPINew.getWidth()));
             const double fDPIYChange(static_cast<double>(aDPIOld.getHeight())
@@ -2347,8 +2349,10 @@ VclMetafileProcessor2D::CreateBufferDevice(const basegfx::B2DRange& rCandidateRa
         // between Printer and VDev (mpOutputDevice and pBufferDevice here).
         // To get the DPI, LogicToPixel from (1,1) from MapUnit::MapInch needs to be used.
         basegfx::B2DHomMatrix aViewTransform(pBufferDevice->GetViewTransformation());
-        const Size aDPIOld(mpOutputDevice->LogicToPixel(Size(1, 1), MapMode(MapUnit::MapInch)));
-        const Size aDPINew(pBufferDevice->LogicToPixel(Size(1, 1), MapMode(MapUnit::MapInch)));
+        const Size aDPIOld(
+            mpOutputDevice->GetGeometry().LogicToPixel(Size(1, 1), MapMode(MapUnit::MapInch)));
+        const Size aDPINew(
+            pBufferDevice->GetGeometry().LogicToPixel(Size(1, 1), MapMode(MapUnit::MapInch)));
         const double fDPIXChange(static_cast<double>(aDPIOld.getWidth())
                                  / static_cast<double>(aDPINew.getWidth()));
         const double fDPIYChange(static_cast<double>(aDPIOld.getHeight())

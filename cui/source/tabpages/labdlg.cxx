@@ -91,7 +91,7 @@ SvxCaptionTabPage::SvxCaptionTabPage(weld::Container* pPage, weld::DialogControl
     , m_xCT_CAPTTYPE(new ValueSet(m_xBuilder->weld_scrolled_window("valuesetwin", true)))
     , m_xCT_CAPTTYPEWin(new weld::CustomWeld(*m_xBuilder, "valueset", *m_xCT_CAPTTYPE))
 {
-    Size aSize(m_xCT_CAPTTYPE->GetDrawingArea()->get_ref_device().LogicToPixel(Size(187, 38), MapMode(MapUnit::MapAppFont)));
+    Size aSize(m_xCT_CAPTTYPE->GetDrawingArea()->get_ref_device().GetGeometry().LogicToPixel(Size(187, 38), MapMode(MapUnit::MapAppFont)));
     m_xCT_CAPTTYPEWin->set_size_request(aSize.Width(), aSize.Height());
 
     assert(m_xLB_POSITION->get_count() == 6);

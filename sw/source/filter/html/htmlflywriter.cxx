@@ -624,7 +624,7 @@ OString SwHTMLWriter::OutFrameFormatOptions( const SwFrameFormat &rFrameFormat,
         Application::GetDefaultDevice() )
     {
         Size aPixelSpc =
-            Application::GetDefaultDevice()->LogicToPixel( aTwipSpc,
+            Application::GetDefaultDevice()->GetGeometry().LogicToPixel( aTwipSpc,
                                                 MapMode(MapUnit::MapTwip) );
         if( !aPixelSpc.Width() && aTwipSpc.Width() )
             aPixelSpc.setWidth( 1 );
@@ -696,7 +696,7 @@ OString SwHTMLWriter::OutFrameFormatOptions( const SwFrameFormat &rFrameFormat,
             Application::GetDefaultDevice() )
         {
             aPixelSz =
-                Application::GetDefaultDevice()->LogicToPixel( aTwipSz,
+                Application::GetDefaultDevice()->GetGeometry().LogicToPixel( aTwipSz,
                                                     MapMode(MapUnit::MapTwip) );
             if( !aPixelSz.Width() && aTwipSz.Width() )
                 aPixelSz.setWidth( 1 );
@@ -891,7 +891,7 @@ void SwHTMLWriter::writeFrameFormatOptions(HtmlWriter& aHtml, const SwFrameForma
         Application::GetDefaultDevice() )
     {
         Size aPixelSpc =
-            Application::GetDefaultDevice()->LogicToPixel( aTwipSpc,
+            Application::GetDefaultDevice()->GetGeometry().LogicToPixel( aTwipSpc,
                                                 MapMode(MapUnit::MapTwip) );
         if( !aPixelSpc.Width() && aTwipSpc.Width() )
             aPixelSpc.setWidth( 1 );
@@ -961,7 +961,7 @@ void SwHTMLWriter::writeFrameFormatOptions(HtmlWriter& aHtml, const SwFrameForma
             Application::GetDefaultDevice() )
         {
             aPixelSz =
-                Application::GetDefaultDevice()->LogicToPixel( aTwipSz,
+                Application::GetDefaultDevice()->GetGeometry().LogicToPixel( aTwipSz,
                                                     MapMode(MapUnit::MapTwip) );
             if( !aPixelSz.Width() && aTwipSz.Width() )
                 aPixelSz.setWidth( 1 );
@@ -1336,7 +1336,7 @@ Writer& OutHTML_Image( Writer& rWrt, const SwFrameFormat &rFrameFormat,
             Application::GetDefaultDevice() )
         {
             Size aPixelBorder =
-                Application::GetDefaultDevice()->LogicToPixel( aTwipBorder,
+                Application::GetDefaultDevice()->GetGeometry().LogicToPixel( aTwipBorder,
                                                     MapMode(MapUnit::MapTwip) );
             if( !aPixelBorder.Width() && aTwipBorder.Width() )
                 aPixelBorder.setWidth( 1 );
@@ -1599,8 +1599,8 @@ static Writer & OutHTML_FrameFormatAsMulticol( Writer& rWrt,
     {
         if( nGutter && Application::GetDefaultDevice() )
         {
-            nGutter = static_cast<sal_uInt16>(Application::GetDefaultDevice()
-                            ->LogicToPixel( Size(nGutter,0),
+            nGutter = static_cast<sal_uInt16>(Application::GetDefaultDevice()->GetGeometry()
+                            .LogicToPixel( Size(nGutter,0),
                                             MapMode(MapUnit::MapTwip) ).Width());
         }
         sOut.append(' ').append(OOO_STRING_SVTOOLS_HTML_O_gutter).
@@ -1959,8 +1959,8 @@ Writer& OutHTML_HeaderFooter( Writer& rWrt, const SwFrameFormat& rFrameFormat,
         nSize > HTML_PARSPACE && Application::GetDefaultDevice() )
     {
         nSize -= HTML_PARSPACE;
-        nSize = static_cast<sal_Int16>(Application::GetDefaultDevice()
-            ->LogicToPixel( Size(nSize,0), MapMode(MapUnit::MapTwip) ).Width());
+        nSize = static_cast<sal_Int16>(Application::GetDefaultDevice()->GetGeometry()
+            .LogicToPixel( Size(nSize,0), MapMode(MapUnit::MapTwip) ).Width());
 
         aSpacer = OStringBuffer(OOO_STRING_SVTOOLS_HTML_spacer).
             append(' ').append(OOO_STRING_SVTOOLS_HTML_O_type).

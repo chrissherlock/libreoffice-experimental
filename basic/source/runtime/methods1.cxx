@@ -1228,8 +1228,8 @@ static double GetDialogZoomFactor( bool bX, tools::Long nValue )
         Fraction aFracX( 1, 26 );
         Fraction aFracY( 1, 24 );
         MapMode aMap( MapUnit::MapAppFont, Point(), aFracX, aFracY );
-        Size aScaledSize = pDevice->LogicToPixel( aRefSize, aMap );
-        aRefSize = pDevice->LogicToPixel( aRefSize, MapMode(MapUnit::MapTwip) );
+        Size aScaledSize = pDevice->GetGeometry().LogicToPixel( aRefSize, aMap );
+        aRefSize = pDevice->GetGeometry().LogicToPixel( aRefSize, MapMode(MapUnit::MapTwip) );
 
         double nRef, nScaled;
         if( bX )

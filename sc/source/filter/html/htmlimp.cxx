@@ -84,12 +84,12 @@ ScHTMLImport::ScHTMLImport( ScDocument* pDocP, const OUString& rBaseURL, const S
         }
         aPageSize.AdjustWidth( -(nLeftMargin + nRightMargin) );
         aPageSize.AdjustHeight( -(nTopMargin + nBottomMargin) );
-        aPageSize = pDefaultDev->LogicToPixel( aPageSize, MapMode( MapUnit::MapTwip ) );
+        aPageSize = pDefaultDev->GetGeometry().LogicToPixel( aPageSize, MapMode( MapUnit::MapTwip ) );
     }
     else
     {
         OSL_FAIL("no StyleSheet?!?");
-        aPageSize = pDefaultDev->LogicToPixel(
+        aPageSize = pDefaultDev->GetGeometry().LogicToPixel(
             SvxPaperInfo::GetPaperSize( PAPER_A4 ), MapMode( MapUnit::MapTwip ) );
     }
     if( bCalcWidthHeight )

@@ -855,7 +855,7 @@ void SmElementsControl::addElement(SmParser &rParser, const OUString& aElementVi
     pNode->SetSize(Fraction(10,8));
     pNode->Arrange(rDevice, maFormat);
 
-    Size aSizePixel = rDevice.LogicToPixel(Size(pNode->GetWidth(), pNode->GetHeight()), MapMode(MapUnit::Map100thMM));
+    Size aSizePixel = rDevice.GetGeometry().LogicToPixel(Size(pNode->GetWidth(), pNode->GetHeight()), MapMode(MapUnit::Map100thMM));
     if (aSizePixel.Width() > maMaxElementDimensions.Width()) {
         maMaxElementDimensions.setWidth( aSizePixel.Width() );
     }
@@ -1059,7 +1059,7 @@ void SmElementsControl::SetDrawingArea(weld::DrawingArea* pDrawingArea)
     CustomWidgetController::SetDrawingArea(pDrawingArea);
     OutputDevice& rDevice = pDrawingArea->get_ref_device();
     maFormat.SetBaseSize(rDevice.PixelToLogic(Size(0, SmPtsTo100th_mm(12))));
-    Size aSize(rDevice.LogicToPixel(Size(10, 100), MapMode(MapUnit::MapAppFont)));
+    Size aSize(rDevice.GetGeometry().LogicToPixel(Size(10, 100), MapMode(MapUnit::MapAppFont)));
     // give it an arbitrary small width request so it can shrink in the sidebar
     pDrawingArea->set_size_request(42, aSize.Height());
     SetOutputSizePixel(aSize);

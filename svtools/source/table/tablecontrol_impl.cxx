@@ -547,15 +547,15 @@ namespace svt::table
 
     void TableControl_Impl::impl_ni_updateCachedTableMetrics()
     {
-        m_nRowHeightPixel = m_rAntiImpl.LogicToPixel(Size(0, m_pModel->getRowHeight()), MapMode(MapUnit::MapAppFont)).Height();
+        m_nRowHeightPixel = m_rAntiImpl.GetGeometry().LogicToPixel(Size(0, m_pModel->getRowHeight()), MapMode(MapUnit::MapAppFont)).Height();
 
         m_nColHeaderHeightPixel = 0;
         if ( m_pModel->hasColumnHeaders() )
-           m_nColHeaderHeightPixel = m_rAntiImpl.LogicToPixel(Size(0, m_pModel->getColumnHeaderHeight()), MapMode(MapUnit::MapAppFont)).Height();
+           m_nColHeaderHeightPixel = m_rAntiImpl.GetGeometry().LogicToPixel(Size(0, m_pModel->getColumnHeaderHeight()), MapMode(MapUnit::MapAppFont)).Height();
 
         m_nRowHeaderWidthPixel = 0;
         if ( m_pModel->hasRowHeaders() )
-            m_nRowHeaderWidthPixel = m_rAntiImpl.LogicToPixel(Size(m_pModel->getRowHeaderWidth(), 0), MapMode(MapUnit::MapAppFont)).Width();
+            m_nRowHeaderWidthPixel = m_rAntiImpl.GetGeometry().LogicToPixel(Size(m_pModel->getRowHeaderWidth(), 0), MapMode(MapUnit::MapAppFont)).Width();
     }
 
 
@@ -1793,7 +1793,7 @@ namespace svt::table
 
     tools::Long TableControl_Impl::appFontWidthToPixel( tools::Long const i_appFontUnits ) const
     {
-        return m_pDataWindow->LogicToPixel(Size(i_appFontUnits, 0), MapMode(MapUnit::MapAppFont)).Width();
+        return m_pDataWindow->GetGeometry().LogicToPixel(Size(i_appFontUnits, 0), MapMode(MapUnit::MapAppFont)).Width();
     }
 
 

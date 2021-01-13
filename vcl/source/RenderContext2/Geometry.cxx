@@ -738,4 +738,18 @@ Point Geometry::LogicToPixel(Point const& rLogicPt, MapMode const& rMapMode) con
                      + GetYOffsetFromOriginInPixels());
 }
 
+Size Geometry::LogicToPixel(Size const& rLogicSize, MapMode const& rMapMode) const
+{
+    if (rMapMode.IsDefault())
+        return rLogicSize;
+
+    // convert MapMode resolution and convert
+    MappingMetrics aMappingMetric(rMapMode, GetDPIX(), GetDPIY());
+
+    return Size(Geometry::LogicToPixel(rLogicSize.Width(), GetDPIX(), aMappingMetric.mnMapScNumX,
+                                       aMappingMetric.mnMapScDenomX),
+                Geometry::LogicToPixel(rLogicSize.Height(), GetDPIY(), aMappingMetric.mnMapScNumY,
+                                       aMappingMetric.mnMapScDenomY));
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -125,7 +125,9 @@ public:
     tools::Polygon LogicToPixel(tools::Polygon const& rLogicPoly) const;
     tools::PolyPolygon LogicToPixel(tools::PolyPolygon const& rLogicPolyPoly) const;
     basegfx::B2DPolyPolygon LogicToPixel(basegfx::B2DPolyPolygon const& rLogicPolyPoly) const;
+
     Point LogicToPixel(Point const& rLogicPt, MapMode const& rMapMode) const;
+    Size LogicToPixel(Size const& rLogicSize, MapMode const& rMapMode) const;
 
     /** Get device transformation.
 

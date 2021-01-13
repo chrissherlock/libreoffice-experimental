@@ -666,7 +666,7 @@ SmCmdBoxWindow::SmCmdBoxWindow(SfxBindings *pBindings_, SfxChildWindow *pChildWi
     bExiting    (false)
 {
     SetHelpId( HID_SMA_COMMAND_WIN );
-    SetSizePixel(LogicToPixel(Size(292 , 94), MapMode(MapUnit::MapAppFont)));
+    SetSizePixel(maGeometry.LogicToPixel(Size(292 , 94), MapMode(MapUnit::MapAppFont)));
     SetText(SmResId(STR_CMDBOXWINDOW));
 
     Hide();
@@ -1186,9 +1186,9 @@ void SmViewShell::Impl_Print(OutputDevice &rOutDev, const SmPrintUIOptions &rPri
         case PRINT_SIZE_SCALED:
             if (!aSize.IsEmpty())
             {
-                Size     OutputSize (rOutDev.LogicToPixel(Size(aOutRect.GetWidth(),
+                Size     OutputSize (rOutDev.GetGeometry().LogicToPixel(Size(aOutRect.GetWidth(),
                                                             aOutRect.GetHeight()), MapMode(MapUnit::Map100thMM)));
-                Size     GraphicSize (rOutDev.LogicToPixel(aSize, MapMode(MapUnit::Map100thMM)));
+                Size     GraphicSize (rOutDev.GetGeometry().LogicToPixel(aSize, MapMode(MapUnit::Map100thMM)));
                 sal_uInt16 nZ = sal::static_int_cast<sal_uInt16>(std::min(tools::Long(Fraction(OutputSize.Width()  * 100, GraphicSize.Width())),
                                                                           tools::Long(Fraction(OutputSize.Height() * 100, GraphicSize.Height()))));
                 nZ -= 10;
@@ -1209,7 +1209,7 @@ void SmViewShell::Impl_Print(OutputDevice &rOutDev, const SmPrintUIOptions &rPri
         }
     }
 
-    aSize = rOutDev.PixelToLogic(rOutDev.LogicToPixel(aSize, OutputMapMode),
+    aSize = rOutDev.PixelToLogic(rOutDev.GetGeometry().LogicToPixel(aSize, OutputMapMode),
                                    MapMode(MapUnit::Map100thMM));
 
     Point aPos (aOutRect.Left() + (aOutRect.GetWidth()  - aSize.Width())  / 2,
@@ -2008,9 +2008,9 @@ void SmViewShell::ZoomByItemSet(const SfxItemSet *pSet)
             const MapMode aMap( MapUnit::Map100thMM );
             SfxPrinter *pPrinter = GetPrinter( true );
             tools::Rectangle  OutputRect(Point(), pPrinter->GetSizeInLogicalUnits());
-            Size       OutputSize(pPrinter->LogicToPixel(Size(OutputRect.GetWidth(),
+            Size       OutputSize(pPrinter->GetGeometry().LogicToPixel(Size(OutputRect.GetWidth(),
                                                               OutputRect.GetHeight()), aMap));
-            Size       GraphicSize(pPrinter->LogicToPixel(GetDoc()->GetSize(), aMap));
+            Size       GraphicSize(pPrinter->GetGeometry().LogicToPixel(GetDoc()->GetSize(), aMap));
             sal_uInt16 nZ = sal::static_int_cast<sal_uInt16>(std::min(tools::Long(Fraction(OutputSize.Width()  * 100, GraphicSize.Width())),
                                                                       tools::Long(Fraction(OutputSize.Height() * 100, GraphicSize.Height()))));
             mpGraphic->SetZoom (nZ);

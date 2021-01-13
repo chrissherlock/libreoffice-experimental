@@ -113,7 +113,7 @@ SwMailMergeLayoutPage::SwMailMergeLayoutPage(weld::Container* pPage, SwMailMerge
     m_xExampleFrame.reset(new SwOneExampleFrame(EX_SHOW_DEFAULT_PAGE, &aLink, &m_sExampleURL));
     m_xExampleContainerWIN.reset(new weld::CustomWeld(*m_xBuilder, "example", *m_xExampleFrame));
 
-    Size aSize = m_xExampleFrame->GetDrawingArea()->get_ref_device().LogicToPixel(
+    Size aSize = m_xExampleFrame->GetDrawingArea()->get_ref_device().GetGeometry().LogicToPixel(
             Size(124, 159), MapMode(MapUnit::MapAppFont));
     m_xExampleFrame->set_size_request(aSize.Width(), aSize.Height());
 

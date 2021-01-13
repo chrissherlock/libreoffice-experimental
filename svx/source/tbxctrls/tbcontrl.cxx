@@ -1106,7 +1106,7 @@ void SvxStyleBox_Impl::SetOptimalSize()
     // set width in chars low so the size request will not be overridden
     m_xWidget->set_entry_width_chars(1);
     // tdf#132338 purely using this calculation to keep things their traditional width
-    Size aSize(LogicToPixel(Size(COMBO_WIDTH_IN_CHARS * 4, 0), MapMode(MapUnit::MapAppFont)));
+    Size aSize(maGeometry.LogicToPixel(Size(COMBO_WIDTH_IN_CHARS * 4, 0), MapMode(MapUnit::MapAppFont)));
     m_xWidget->set_size_request(aSize.Width(), -1);
 
     SetSizePixel(get_preferred_size());
@@ -1180,7 +1180,7 @@ void SvxStyleBox_Base::SetupEntry(vcl::RenderContext& rRenderContext, sal_Int32 
         return;
 
     Size aFontSize( 0, pFontHeightItem->GetHeight() );
-    Size aPixelSize(rRenderContext.LogicToPixel(aFontSize, MapMode(pShell->GetMapUnit())));
+    Size aPixelSize(rRenderContext.GetGeometry().LogicToPixel(aFontSize, MapMode(pShell->GetMapUnit())));
 
     // setup the font properties
     SvxFont aFont;
@@ -1614,7 +1614,7 @@ void SvxFontNameBox_Impl::SetOptimalSize()
     // set width in chars low so the size request will not be overridden
     m_xWidget->set_entry_width_chars(1);
     // tdf#132338 purely using this calculation to keep things their traditional width
-    Size aSize(LogicToPixel(Size(COMBO_WIDTH_IN_CHARS * 4, 0), MapMode(MapUnit::MapAppFont)));
+    Size aSize(maGeometry.LogicToPixel(Size(COMBO_WIDTH_IN_CHARS * 4, 0), MapMode(MapUnit::MapAppFont)));
     m_xWidget->set_size_request(aSize.Width(), -1);
 
     SetSizePixel(get_preferred_size());

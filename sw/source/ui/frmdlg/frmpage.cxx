@@ -2588,7 +2588,7 @@ BmpWindow::BmpWindow()
 void BmpWindow::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     CustomWidgetController::SetDrawingArea(pDrawingArea);
-    Size aSize = pDrawingArea->get_ref_device().LogicToPixel(Size(127 , 66), MapMode(MapUnit::MapAppFont));
+    Size aSize = pDrawingArea->get_ref_device().GetGeometry().LogicToPixel(Size(127 , 66), MapMode(MapUnit::MapAppFont));
     set_size_request(aSize.Width(), aSize.Height());
     SetOutputSizePixel(aSize);
 }

@@ -320,7 +320,7 @@ void SmDocShell::UpdateEditEngineDefaultFonts(const Color& aTextColor)
 
     // set font heights
     SvxFontHeightItem aFontHeigt(
-                    Application::GetDefaultDevice()->LogicToPixel(
+                    Application::GetDefaultDevice()->GetGeometry().LogicToPixel(
                     Size( 0, 11 ), MapMode( MapUnit::MapPoint ) ).Height(), 100,
                     EE_CHAR_FONTHEIGHT );
     mpEditEngineItemPool->SetPoolDefaultItem( aFontHeigt );

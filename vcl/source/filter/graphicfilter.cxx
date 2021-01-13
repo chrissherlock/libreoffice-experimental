@@ -1917,7 +1917,7 @@ ErrCode GraphicFilter::ExportGraphic( const Graphic& rGraphic, const OUString& r
             nMaxMem *= 1024; // In Bytes
 
             // Calculate how big the image would normally be:
-            aSizePixel=aVirDev->LogicToPixel(aGraphic.GetPrefSize(),aGraphic.GetPrefMapMode());
+            aSizePixel=aVirDev->GetGeometry().LogicToPixel(aGraphic.GetPrefSize(),aGraphic.GetPrefMapMode());
 
             // Calculate how much memory the image will take up
             nBitsPerPixel=aVirDev->GetBitCount();

@@ -56,7 +56,7 @@ ChartTypeTabPage::ChartTypeTabPage(weld::Container* pPage, weld::DialogControlle
     , m_xSubTypeList(new ValueSet(m_xBuilder->weld_scrolled_window("subtypewin", true)))
     , m_xSubTypeListWin(new weld::CustomWeld(*m_xBuilder, "subtype", *m_xSubTypeList))
 {
-    Size aSize(m_xSubTypeList->GetDrawingArea()->get_ref_device().LogicToPixel(Size(150, 50), MapMode(MapUnit::MapAppFont)));
+    Size aSize(m_xSubTypeList->GetDrawingArea()->get_ref_device().GetGeometry().LogicToPixel(Size(150, 50), MapMode(MapUnit::MapAppFont)));
     m_xSubTypeListWin->set_size_request(aSize.Width(), aSize.Height());
 
     if (bShowDescription)

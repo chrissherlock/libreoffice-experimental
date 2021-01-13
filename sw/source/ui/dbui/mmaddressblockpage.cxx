@@ -1083,7 +1083,7 @@ AddressMultiLineEdit::~AddressMultiLineEdit()
 
 void AddressMultiLineEdit::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
-    Size aSize(pDrawingArea->get_ref_device().LogicToPixel(Size(160, 60), MapMode(MapUnit::MapAppFont)));
+    Size aSize(pDrawingArea->get_ref_device().GetGeometry().LogicToPixel(Size(160, 60), MapMode(MapUnit::MapAppFont)));
     pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
     WeldEditView::SetDrawingArea(pDrawingArea);
 }

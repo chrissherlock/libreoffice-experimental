@@ -553,7 +553,7 @@ vcl::Font Window::GetDrawPixelFont(OutputDevice const * pDev) const
     vcl::Font aFont = GetPointFont(*const_cast<Window*>(this));
     Size aFontSize = aFont.GetFontSize();
     MapMode aPtMapMode(MapUnit::MapPoint);
-    aFontSize = pDev->LogicToPixel( aFontSize, aPtMapMode );
+    aFontSize = pDev->GetGeometry().LogicToPixel( aFontSize, aPtMapMode );
     aFont.SetFontSize( aFontSize );
     return aFont;
 }
@@ -566,7 +566,7 @@ tools::Long Window::GetDrawPixel( OutputDevice const * pDev, tools::Long nPixels
         MapMode aMap( MapUnit::Map100thMM );
         Size aSz( nP, 0 );
         aSz = PixelToLogic( aSz, aMap );
-        aSz = pDev->LogicToPixel( aSz, aMap );
+        aSz = pDev->GetGeometry().LogicToPixel( aSz, aMap );
         nP = aSz.Width();
     }
     return nP;

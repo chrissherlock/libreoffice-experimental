@@ -282,7 +282,7 @@ ClassificationControl::ClassificationControl(vcl::Window* pParent)
 
     // Same as SvxColorDockingWindow.
     const Size aLogicalAttrSize(150, 0);
-    Size aSize(LogicToPixel(aLogicalAttrSize, MapMode(MapUnit::MapAppFont)));
+    Size aSize(maGeometry.LogicToPixel(aLogicalAttrSize, MapMode(MapUnit::MapAppFont)));
     m_xCategory->set_size_request(aSize.Width() - m_xLabel->get_preferred_size().Width(), -1);
 
     SetOptimalSize();

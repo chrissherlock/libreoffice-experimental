@@ -659,7 +659,7 @@ css::awt::DeviceInfo OutputDevice::GetCommonDeviceInfo(Size const& rDevSz) const
     aInfo.Width = rDevSz.Width();
     aInfo.Height = rDevSz.Height();
 
-    Size aTmpSz = LogicToPixel(Size(1000, 1000), MapMode(MapUnit::MapCM));
+    Size aTmpSz = maGeometry.LogicToPixel(Size(1000, 1000), MapMode(MapUnit::MapCM));
     aInfo.PixelPerMeterX = aTmpSz.Width() / 10;
     aInfo.PixelPerMeterY = aTmpSz.Height() / 10;
     aInfo.BitsPerPixel = GetBitCount();

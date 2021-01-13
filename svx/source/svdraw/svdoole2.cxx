@@ -265,7 +265,7 @@ void SAL_CALL SdrLightEmbeddedClient_Impl::notifyEvent( const document::EventObj
 
         // react to the change if the difference is bigger than one pixel
         Size aPixelDiff =
-            Application::GetDefaultDevice()->LogicToPixel(
+            Application::GetDefaultDevice()->GetGeometry().LogicToPixel(
                 Size( aLogicRect.GetWidth() - aScaledSize.Width(),
                       aLogicRect.GetHeight() - aScaledSize.Height() ),
                 MapMode(aContainerMapUnit));
@@ -507,7 +507,7 @@ void SAL_CALL SdrLightEmbeddedClient_Impl::changedPlacement( const awt::Rectangl
     aNewLogicRect.SetSize( aNewObjSize );
     // react to the change if the difference is bigger than one pixel
     Size aPixelDiff =
-        Application::GetDefaultDevice()->LogicToPixel(
+        Application::GetDefaultDevice()->GetGeometry().LogicToPixel(
             Size( aLogicRect.GetWidth() - aNewObjSize.Width(),
                   aLogicRect.GetHeight() - aNewObjSize.Height() ),
             MapMode(aContainerMapUnit));

@@ -311,7 +311,7 @@ tools::Long SvxRuler::MakePositionSticky(tools::Long aPosition, tools::Long aPoi
     if (mbCoarseSnapping)
         aTick = GetCurrentRulerUnit().nTick2;
 
-    tools::Long aTickPixel = pEditWin->LogicToPixel(Size(aTick, 0), GetCurrentMapMode()).Width();
+    tools::Long aTickPixel = pEditWin->GetGeometry().LogicToPixel(Size(aTick, 0), GetCurrentMapMode()).Width();
 
     double aHalfTick = aTick / 2.0;
     double aHalfTickPixel = aTickPixel / 2.0;
@@ -335,7 +335,7 @@ tools::Long SvxRuler::MakePositionSticky(tools::Long aPosition, tools::Long aPoi
     // Normalize -- snap to nearest tick
     aPositionLogic = rtl::math::round((aPositionLogic + aHalfTick) / aTick) * aTick;
     // Convert back to pixels
-    aPosition = pEditWin->LogicToPixel(Size(aPositionLogic, 0), GetCurrentMapMode()).Width();
+    aPosition = pEditWin->GetGeometry().LogicToPixel(Size(aPositionLogic, 0), GetCurrentMapMode()).Width();
     // Move "coordinate system" back to original position
     return aPosition + aPointOfReferencePixel;
 }

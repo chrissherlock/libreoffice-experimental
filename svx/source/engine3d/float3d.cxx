@@ -197,7 +197,7 @@ Svx3DWin::Svx3DWin(SfxBindings* pInBindings, SfxChildWindow *pCW, vcl::Window* p
     SetText(SvxResId(RID_SVXDLG_FLOAT3D_STR_TITLE));
 
     weld::DrawingArea* pDrawingArea = m_xCtlPreview->GetDrawingArea();
-    Size aSize(pDrawingArea->get_ref_device().LogicToPixel(Size(83, 76), MapMode(MapUnit::MapAppFont)));
+    Size aSize(pDrawingArea->get_ref_device().GetGeometry().LogicToPixel(Size(83, 76), MapMode(MapUnit::MapAppFont)));
     pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
     m_xCtlPreview->SetOutputSizePixel(aSize);
 

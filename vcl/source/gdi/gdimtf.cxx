@@ -468,7 +468,7 @@ void GDIMetaFile::Play( OutputDevice* pOut, const Point& rPos,
     if( ImplPlayWithRenderer( pOut, rPos, rSize ) )
         return;
 
-    Size aTmpPrefSize( pOut->LogicToPixel( GetPrefSize(), aDrawMap ) );
+    Size aTmpPrefSize( pOut->GetGeometry().LogicToPixel( GetPrefSize(), aDrawMap ) );
 
     if( !aTmpPrefSize.Width() )
         aTmpPrefSize.setWidth( aDestSize.Width() );
@@ -693,7 +693,7 @@ void GDIMetaFile::Move( tools::Long nX, tools::Long nY, tools::Long nDPIX, tools
             pModAct->Execute( aMapVDev.get() );
             if( aMapVDev->GetMapMode().GetMapUnit() == MapUnit::MapPixel )
             {
-                aOffset = aMapVDev->LogicToPixel( aBaseOffset, GetPrefMapMode() );
+                aOffset = aMapVDev->GetGeometry().LogicToPixel( aBaseOffset, GetPrefMapMode() );
                 MapMode aMap( aMapVDev->GetMapMode() );
                 aOffset.setWidth( static_cast<tools::Long>(aOffset.Width() * static_cast<double>(aMap.GetScaleX())) );
                 aOffset.setHeight( static_cast<tools::Long>(aOffset.Height() * static_cast<double>(aMap.GetScaleY())) );
@@ -2786,7 +2786,7 @@ bool GDIMetaFile::CreateThumbnail(BitmapEx& rBitmapEx, BmpConversion eColorConve
     const Point     aNullPt;
     const Point     aTLPix( aVDev->GetGeometry().LogicToPixel( aNullPt, GetPrefMapMode() ) );
     const Point     aBRPix( aVDev->GetGeometry().LogicToPixel( Point( GetPrefSize().Width() - 1, GetPrefSize().Height() - 1 ), GetPrefMapMode() ) );
-    Size            aDrawSize( aVDev->LogicToPixel( GetPrefSize(), GetPrefMapMode() ) );
+    Size            aDrawSize( aVDev->GetGeometry().LogicToPixel( GetPrefSize(), GetPrefMapMode() ) );
     Size            aSizePix( std::abs( aBRPix.X() - aTLPix.X() ) + 1, std::abs( aBRPix.Y() - aTLPix.Y() ) + 1 );
     sal_uInt32      nMaximumExtent = 256;
 

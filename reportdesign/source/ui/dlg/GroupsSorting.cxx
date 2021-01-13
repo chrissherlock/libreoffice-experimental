@@ -780,7 +780,7 @@ IMPL_LINK_NOARG( OFieldExpressionControl, DelayedDelete, void*, void )
 
 Size OFieldExpressionControl::GetOptimalSize() const
 {
-    return LogicToPixel(Size(106, 75), MapMode(MapUnit::MapAppFont));
+    return maGeometry.LogicToPixel(Size(106, 75), MapMode(MapUnit::MapAppFont));
 }
 
 OGroupsSortingDialog::OGroupsSortingDialog(weld::Window* pParent, bool bReadOnly,

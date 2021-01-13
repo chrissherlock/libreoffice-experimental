@@ -527,8 +527,8 @@ void GraphicObject::DrawTiled( OutputDevice* pOut, const tools::Rectangle& rArea
     const MapMode   aOutMapMode( pOut->GetMapMode() );
     // #106258# Clamp size to 1 for zero values. This is okay, since
     // logical size of zero is handled above already
-    const Size      aOutTileSize( ::std::max( tools::Long(1), pOut->LogicToPixel( rSize, aOutMapMode ).Width() ),
-                                  ::std::max( tools::Long(1), pOut->LogicToPixel( rSize, aOutMapMode ).Height() ) );
+    const Size      aOutTileSize( ::std::max( tools::Long(1), pOut->GetGeometry().LogicToPixel( rSize, aOutMapMode ).Width() ),
+                                  ::std::max( tools::Long(1), pOut->GetGeometry().LogicToPixel( rSize, aOutMapMode ).Height() ) );
 
     //#i69780 clip final tile size to a sane max size
     while ((static_cast<sal_Int64>(rSize.Width()) * nTileCacheSize1D) > SAL_MAX_UINT16)
@@ -628,10 +628,10 @@ Graphic GraphicObject::GetTransformedGraphic( const Size& rDestSize, const MapMo
         if (aMapGraph.GetMapUnit() == MapUnit::MapPixel)
         {
             // crops are in 1/100th mm -> to aMapGraph -> to MapUnit::MapPixel
-            aCropLeftTop = Application::GetDefaultDevice()->LogicToPixel(
+            aCropLeftTop = Application::GetDefaultDevice()->GetGeometry().LogicToPixel(
                 Size(rAttr.GetLeftCrop(), rAttr.GetTopCrop()),
                 aMap100);
-            aCropRightBottom = Application::GetDefaultDevice()->LogicToPixel(
+            aCropRightBottom = Application::GetDefaultDevice()->GetGeometry().LogicToPixel(
                 Size(rAttr.GetRightCrop(), rAttr.GetBottomCrop()),
                 aMap100);
         }
@@ -701,27 +701,27 @@ Graphic GraphicObject::GetTransformedGraphic( const Size& rDestSize, const MapMo
             if (aMapGraph.GetMapUnit() == MapUnit::MapPixel)
             {
                 // crops are in 1/100th mm -> to MapUnit::MapPixel
-                aCropLeftTop = Application::GetDefaultDevice()->LogicToPixel(
+                aCropLeftTop = Application::GetDefaultDevice()->GetGeometry().LogicToPixel(
                     Size(rAttr.GetLeftCrop(), rAttr.GetTopCrop()),
                     aMap100);
-                aCropRightBottom = Application::GetDefaultDevice()->LogicToPixel(
+                aCropRightBottom = Application::GetDefaultDevice()->GetGeometry().LogicToPixel(
                     Size(rAttr.GetRightCrop(), rAttr.GetBottomCrop()),
                     aMap100);
             }
             else
             {
                 // crops are in GraphicObject units -> to MapUnit::MapPixel
-                aCropLeftTop = Application::GetDefaultDevice()->LogicToPixel(
+                aCropLeftTop = Application::GetDefaultDevice()->GetGeometry().LogicToPixel(
                     Size(rAttr.GetLeftCrop(), rAttr.GetTopCrop()),
                     aMapGraph);
-                aCropRightBottom = Application::GetDefaultDevice()->LogicToPixel(
+                aCropRightBottom = Application::GetDefaultDevice()->GetGeometry().LogicToPixel(
                     Size(rAttr.GetRightCrop(), rAttr.GetBottomCrop()),
                     aMapGraph);
             }
 
             // convert from prefmapmode to pixel
             Size aSrcSizePixel(
-                Application::GetDefaultDevice()->LogicToPixel(
+                Application::GetDefaultDevice()->GetGeometry().LogicToPixel(
                     aSrcSize,
                     aMapGraph));
 

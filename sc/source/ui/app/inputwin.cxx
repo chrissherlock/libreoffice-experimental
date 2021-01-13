@@ -2121,7 +2121,7 @@ ScPosWnd::ScPosWnd(vcl::Window* pParent)
     // formatting toolbar is placed above formulabar when using multiple toolbars typically
 
     m_xWidget->set_entry_width_chars(1);
-    Size aSize(LogicToPixel(Size(POSITION_COMBOBOX_WIDTH * 4, 0), MapMode(MapUnit::MapAppFont)));
+    Size aSize(maGeometry.LogicToPixel(Size(POSITION_COMBOBOX_WIDTH * 4, 0), MapMode(MapUnit::MapAppFont)));
     m_xWidget->set_size_request(aSize.Width(), -1);
     SetSizePixel(m_xContainer->get_preferred_size());
 

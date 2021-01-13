@@ -168,7 +168,7 @@ Size OutputDevice::GetDevFontSize( const vcl::Font& rFont, int nSizeIndex ) cons
         else
             aSize.AdjustHeight( -nRound );
         aSize.setHeight( aSize.Height() * 10 );
-        aSize = LogicToPixel( aSize, aMap );
+        aSize = maGeometry.LogicToPixel( aSize, aMap );
         aSize = PixelToLogic( aSize );
         aSize.AdjustHeight(5 );
         aSize.setHeight( aSize.Height() / 10 );

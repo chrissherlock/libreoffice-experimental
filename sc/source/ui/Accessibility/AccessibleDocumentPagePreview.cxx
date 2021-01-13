@@ -569,7 +569,7 @@ Size ScIAccessibleViewForwarder::LogicToPixel (const Size& rSize) const
     Size aSize;
     vcl::Window* pWin = mpViewShell->GetWindow();
     if (pWin)
-        aSize = pWin->LogicToPixel(rSize, maMapMode);
+        aSize = pWin->GetGeometry().LogicToPixel(rSize, maMapMode);
     return aSize;
 }
 
@@ -1022,7 +1022,7 @@ void ScShapeChildren::FillShapes(const tools::Rectangle& aPixelPaintRect, const 
             uno::Reference< drawing::XShape > xShape(pObj->getUnoShape(), uno::UNO_QUERY);
             if (xShape.is())
             {
-                tools::Rectangle aRect(pWin->GetGeometry().LogicToPixel(VCLPoint(xShape->getPosition()), aMapMode), pWin->LogicToPixel(VCLSize(xShape->getSize()), aMapMode));
+                tools::Rectangle aRect(pWin->GetGeometry().LogicToPixel(VCLPoint(xShape->getPosition()), aMapMode), pWin->GetGeometry().LogicToPixel(VCLSize(xShape->getSize()), aMapMode));
                 if(!aClippedPixelPaintRect.GetIntersection(aRect).IsEmpty())
                 {
                     ScShapeChild aShape;

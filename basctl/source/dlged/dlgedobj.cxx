@@ -177,9 +177,9 @@ bool DlgEdObj::TransformSdrToControlCoordinates(
     DBG_ASSERT( pDevice, "DlgEdObj::TransformSdrToControlCoordinates: missing default device!" );
     if ( !pDevice )
         return false;
-    aPos = pDevice->LogicToPixel( aPos, MapMode( MapUnit::Map100thMM ) );
-    aSize = pDevice->LogicToPixel( aSize, MapMode( MapUnit::Map100thMM ) );
-    aFormPos = pDevice->LogicToPixel( aFormPos, MapMode( MapUnit::Map100thMM ) );
+    aPos = pDevice->GetGeometry().LogicToPixel( aPos, MapMode( MapUnit::Map100thMM ) );
+    aSize = pDevice->GetGeometry().LogicToPixel( aSize, MapMode( MapUnit::Map100thMM ) );
+    aFormPos = pDevice->GetGeometry().LogicToPixel( aFormPos, MapMode( MapUnit::Map100thMM ) );
 
     // subtract form position
     aPos.AdjustWidth( -(aFormPos.Width()) );
@@ -225,8 +225,8 @@ bool DlgEdObj::TransformSdrToFormCoordinates(
     DBG_ASSERT( pDevice, "DlgEdObj::TransformSdrToFormCoordinates: missing default device!" );
     if ( !pDevice )
         return false;
-    aPos = pDevice->LogicToPixel( aPos, MapMode( MapUnit::Map100thMM ) );
-    aSize = pDevice->LogicToPixel( aSize, MapMode( MapUnit::Map100thMM ) );
+    aPos = pDevice->GetGeometry().LogicToPixel( aPos, MapMode( MapUnit::Map100thMM ) );
+    aSize = pDevice->GetGeometry().LogicToPixel( aSize, MapMode( MapUnit::Map100thMM ) );
 
     // take window borders into account
     DlgEdForm* pForm = nullptr;
@@ -286,9 +286,9 @@ bool DlgEdObj::TransformControlToSdrCoordinates(
     DBG_ASSERT( pDevice, "DlgEdObj::TransformControlToSdrCoordinates: missing default device!" );
     if ( !pDevice )
         return false;
-    aPos = pDevice->LogicToPixel(aPos, MapMode(MapUnit::MapAppFont));
-    aSize = pDevice->LogicToPixel(aSize, MapMode(MapUnit::MapAppFont));
-    aFormPos = pDevice->LogicToPixel(aFormPos, MapMode(MapUnit::MapAppFont));
+    aPos = pDevice->GetGeometry().LogicToPixel(aPos, MapMode(MapUnit::MapAppFont));
+    aSize = pDevice->GetGeometry().LogicToPixel(aSize, MapMode(MapUnit::MapAppFont));
+    aFormPos = pDevice->GetGeometry().LogicToPixel(aFormPos, MapMode(MapUnit::MapAppFont));
 
     // add form position
     aPos.AdjustWidth(aFormPos.Width() );
@@ -336,8 +336,8 @@ bool DlgEdObj::TransformFormToSdrCoordinates(
     if ( !lcl_getDlgEdForm( this, pForm ) )
         return false;
 
-    aPos = pDevice->LogicToPixel(aPos, MapMode(MapUnit::MapAppFont));
-    aSize = pDevice->LogicToPixel(aSize, MapMode(MapUnit::MapAppFont));
+    aPos = pDevice->GetGeometry().LogicToPixel(aPos, MapMode(MapUnit::MapAppFont));
+    aSize = pDevice->GetGeometry().LogicToPixel(aSize, MapMode(MapUnit::MapAppFont));
 
     // take window borders into account
     Reference< beans::XPropertySet > xPSetForm( pForm->GetUnoControlModel(), UNO_QUERY );

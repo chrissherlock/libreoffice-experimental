@@ -217,20 +217,6 @@ void OutputDevice::SetRelativeMapMode(const MapMode& rNewMapMode)
         mpAlphaVDev->SetRelativeMapMode(rNewMapMode);
 }
 
-Size OutputDevice::LogicToPixel(const Size& rLogicSize, const MapMode& rMapMode) const
-{
-    if (rMapMode.IsDefault())
-        return rLogicSize;
-
-    // convert MapMode resolution and convert
-    MappingMetrics aMappingMetric(rMapMode, GetDPIX(), GetDPIY());
-
-    return Size(Geometry::LogicToPixel(rLogicSize.Width(), GetDPIX(), aMappingMetric.mnMapScNumX,
-                                       aMappingMetric.mnMapScDenomX),
-                Geometry::LogicToPixel(rLogicSize.Height(), GetDPIY(), aMappingMetric.mnMapScNumY,
-                                       aMappingMetric.mnMapScDenomY));
-}
-
 tools::Rectangle OutputDevice::LogicToPixel(const tools::Rectangle& rLogicRect,
                                             const MapMode& rMapMode) const
 {

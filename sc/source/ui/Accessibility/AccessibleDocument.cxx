@@ -2028,7 +2028,7 @@ Size ScAccessibleDocument::LogicToPixel (const Size& rSize) const
     Size aSize;
     ScGridWindow* pWin = static_cast<ScGridWindow*>(mpViewShell->GetWindowByPos(meSplitPos));
     if (pWin)
-        aSize = pWin->LogicToPixel(rSize, pWin->GetDrawMapMode());
+        aSize = pWin->GetGeometry().LogicToPixel(rSize, pWin->GetDrawMapMode());
     return aSize;
 }
 

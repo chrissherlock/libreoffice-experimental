@@ -68,9 +68,8 @@ Size AccessibleViewForwarder::LogicToPixel( const Size& rSize ) const
 {
     Size aSize;
     if ( m_pWindow )
-    {
-        aSize = m_pWindow->LogicToPixel( rSize, m_aMapMode );
-    }
+        aSize = m_pWindow->GetGeometry().LogicToPixel( rSize, m_aMapMode );
+
     return aSize;
 }
 

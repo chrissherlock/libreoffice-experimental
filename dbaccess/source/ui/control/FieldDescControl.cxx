@@ -602,7 +602,7 @@ void OFieldDescControl::InitializeControl(weld::Widget* pControl,const OString& 
 
     if (dynamic_cast<weld::Entry*>(pControl))
     {
-        int nWidthRequest = Application::GetDefaultDevice()->LogicToPixel(Size(m_nEditWidth, 0), MapMode(MapUnit::MapAppFont)).Width();
+        int nWidthRequest = Application::GetDefaultDevice()->GetGeometry().LogicToPixel(Size(m_nEditWidth, 0), MapMode(MapUnit::MapAppFont)).Width();
         pControl->set_size_request(nWidthRequest, -1);
     }
 }

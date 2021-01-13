@@ -187,7 +187,7 @@ SvxColorDockingWindow::SvxColorDockingWindow(SfxBindings* _pBindings, SfxChildWi
 {
     SetText(SvxResId(STR_COLORTABLE));
     SetQuickHelpText(SvxResId(RID_SVXSTR_COLORBAR));
-    SetSizePixel(LogicToPixel(Size(150, 22), MapMode(MapUnit::MapAppFont)));
+    SetSizePixel(maGeometry.LogicToPixel(Size(150, 22), MapMode(MapUnit::MapAppFont)));
     SetHelpId(HID_CTRL_COLOR);
 
     xColorSet->SetSelectHdl( LINK( this, SvxColorDockingWindow, SelectHdl ) );

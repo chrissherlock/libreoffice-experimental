@@ -1176,7 +1176,7 @@ OPreviewWindow::OPreviewWindow()
 bool OPreviewWindow::ImplGetGraphicCenterRect(const vcl::RenderContext& rRenderContext, const Graphic& rGraphic, tools::Rectangle& rResultRect) const
 {
     const Size aWinSize( GetSizeInPixels() );
-    Size       aNewSize(rRenderContext.LogicToPixel(rGraphic.GetPrefSize(), rGraphic.GetPrefMapMode()));
+    Size       aNewSize(rRenderContext.GetGeometry().LogicToPixel(rGraphic.GetPrefSize(), rGraphic.GetPrefMapMode()));
     bool       bRet = false;
 
     if( aNewSize.Width() && aNewSize.Height() )

@@ -384,7 +384,7 @@ ScNavigatorDlg::ScNavigatorDlg(SfxBindings* pB, vcl::Window* pParent)
     StartListening( rBindings );
 
     m_xLbEntries->set_selection_mode( SelectionMode::Single );
-    Size aSize(LogicToPixel(Size(110, 100), MapMode(MapUnit::MapAppFont)));
+    Size aSize(maGeometry.LogicToPixel(Size(110, 100), MapMode(MapUnit::MapAppFont)));
     m_xLbEntries->set_size_request(aSize.Width(), aSize.Height());
 
     //  was a category chosen as root?

@@ -691,7 +691,7 @@ void SvxCropExample::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     CustomWidgetController::SetDrawingArea(pDrawingArea);
     OutputDevice& rDevice = pDrawingArea->get_ref_device();
-    Size aSize(rDevice.LogicToPixel(Size(78, 78), MapMode(MapUnit::MapAppFont)));
+    Size aSize(rDevice.GetGeometry().LogicToPixel(Size(78, 78), MapMode(MapUnit::MapAppFont)));
     pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
 
     m_aMapMode = rDevice.GetMapMode();

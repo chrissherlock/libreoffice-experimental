@@ -209,7 +209,7 @@ SwMailMergeGreetingsPage::SwMailMergeGreetingsPage(weld::Container* pPage, SwMai
 {
     m_pWizard = pWizard;
 
-    Size aSize(m_xPreview->GetDrawingArea()->get_ref_device().LogicToPixel(Size(186, 21), MapMode(MapUnit::MapAppFont)));
+    Size aSize(m_xPreview->GetDrawingArea()->get_ref_device().GetGeometry().LogicToPixel(Size(186, 21), MapMode(MapUnit::MapAppFont)));
     m_xPreviewWIN->set_size_request(aSize.Width(), aSize.Height());
     m_sDocument = m_xDocumentIndexFI->get_label();
 

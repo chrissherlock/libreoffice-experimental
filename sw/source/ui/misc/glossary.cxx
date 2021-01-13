@@ -204,7 +204,7 @@ SwGlossaryDlg::SwGlossaryDlg(SfxViewFrame const * pViewFrame,
     Link<SwOneExampleFrame&,void> aLink(LINK(this, SwGlossaryDlg, PreviewLoadedHdl));
     m_xExampleFrame.reset(new SwOneExampleFrame(EX_SHOW_ONLINE_LAYOUT, &aLink));
     m_xExampleFrameWin.reset(new weld::CustomWeld(*m_xBuilder, "example", *m_xExampleFrame));
-    Size aSize = m_xExampleFrame->GetDrawingArea()->get_ref_device().LogicToPixel(
+    Size aSize = m_xExampleFrame->GetDrawingArea()->get_ref_device().GetGeometry().LogicToPixel(
             Size(82, 124), MapMode(MapUnit::MapAppFont));
     m_xExampleFrame->set_size_request(aSize.Width(), aSize.Height());
 

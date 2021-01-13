@@ -337,7 +337,7 @@ bool GraphicObject::ImplDrawTiled( OutputDevice* pOut, const tools::Rectangle& r
     }
     else
     {
-        const Size      aOutOffset( pOut->LogicToPixel( rOffset, aOutMapMode ) );
+        const Size      aOutOffset( pOut->GetGeometry().LogicToPixel( rOffset, aOutMapMode ) );
         const tools::Rectangle aOutArea( pOut->LogicToPixel( rArea, aOutMapMode ) );
 
         // number of invisible (because out-of-area) tiles

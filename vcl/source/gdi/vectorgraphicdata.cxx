@@ -70,7 +70,7 @@ BitmapEx convertPrimitive2DSequenceToBitmapEx(
             aRealRect.Y2 = rTargetRange.getMaxY();
 
             // get system DPI
-            const Size aDPI(Application::GetDefaultDevice()->LogicToPixel(Size(1, 1), MapMode(MapUnit::MapInch)));
+            const Size aDPI(Application::GetDefaultDevice()->GetGeometry().LogicToPixel(Size(1, 1), MapMode(MapUnit::MapInch)));
 
             const uno::Reference< rendering::XBitmap > xBitmap(
                 xPrimitive2DRenderer->rasterize(

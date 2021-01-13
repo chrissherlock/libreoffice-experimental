@@ -632,7 +632,7 @@ PresLayoutPreview::PresLayoutPreview()
 
 void PresLayoutPreview::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
-    Size aSize(pDrawingArea->get_ref_device().LogicToPixel(Size(80, 80), MapMode(MapUnit::MapAppFont)));
+    Size aSize(pDrawingArea->get_ref_device().GetGeometry().LogicToPixel(Size(80, 80), MapMode(MapUnit::MapAppFont)));
     pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
     CustomWidgetController::SetDrawingArea(pDrawingArea);
     SetOutputSizePixel(aSize);

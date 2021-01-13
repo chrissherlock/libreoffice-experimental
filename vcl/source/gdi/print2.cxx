@@ -1046,7 +1046,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
         if( meOutDevType == OUTDEV_PDF )
         {
             auto pPdfWriter = static_cast<vcl::PDFWriterImpl*>(this);
-            aTmpSize = LogicToPixel(pPdfWriter->getCurPageSize(), MapMode(MapUnit::MapPoint));
+            aTmpSize = maGeometry.LogicToPixel(pPdfWriter->getCurPageSize(), MapMode(MapUnit::MapPoint));
 
             // also add error code to PDFWriter
             pPdfWriter->insertError(vcl::PDFWriter::Warning_Transparency_Converted);

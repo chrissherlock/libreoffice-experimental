@@ -633,7 +633,7 @@ ExportDialog::ExportDialog(FltCallDialogParameter& rPara,
 
     mnFormat = GetFilterFormat( maExt );
 
-    Size aResolution( Application::GetDefaultDevice()->LogicToPixel(Size(100, 100), MapMode(MapUnit::MapCM)) );
+    Size aResolution( Application::GetDefaultDevice()->GetGeometry().LogicToPixel(Size(100, 100), MapMode(MapUnit::MapCM)) );
     maResolution.Width = aResolution.Width();
     maResolution.Height= aResolution.Height();
 

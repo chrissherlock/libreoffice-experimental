@@ -3116,7 +3116,7 @@ Size SwAccessibleMap::LogicToPixel( const Size& rSize ) const
     {
         MapMode aMapMode;
         GetMapMode( Point(0,0), aMapMode );
-        aSize = pWin->LogicToPixel( aSize, aMapMode );
+        aSize = pWin->GetGeometry().LogicToPixel( aSize, aMapMode );
     }
 
     return aSize;

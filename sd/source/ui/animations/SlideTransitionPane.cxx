@@ -378,7 +378,7 @@ public:
 
     virtual void SetDrawingArea(weld::DrawingArea* pDrawingArea) override
     {
-        Size aSize = pDrawingArea->get_ref_device().LogicToPixel(Size(70, 88), MapMode(MapUnit::MapAppFont));
+        Size aSize = pDrawingArea->get_ref_device().GetGeometry().LogicToPixel(Size(70, 88), MapMode(MapUnit::MapAppFont));
         pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
         ValueSet::SetDrawingArea(pDrawingArea);
         SetOutputSizePixel(aSize);

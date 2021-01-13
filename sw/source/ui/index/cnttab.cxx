@@ -3659,7 +3659,7 @@ std::vector<tools::Long> SwEntryBrowseBox::GetOptimalColWidths() const
 
 Size SwEntryBrowseBox::GetOptimalSize() const
 {
-    Size aSize = LogicToPixel(Size(276 , 175), MapMode(MapUnit::MapAppFont));
+    Size aSize = maGeometry.LogicToPixel(Size(276 , 175), MapMode(MapUnit::MapAppFont));
 
     std::vector<tools::Long> aWidths = GetOptimalColWidths();
 

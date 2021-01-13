@@ -2177,7 +2177,7 @@ const Size& StyleSettings::GetListBoxPreviewDefaultPixelSize() const
     if(0 == mxData->maListBoxPreviewDefaultPixelSize.Width() || 0 == mxData->maListBoxPreviewDefaultPixelSize.Height())
     {
         const_cast< StyleSettings* >(this)->mxData->maListBoxPreviewDefaultPixelSize =
-            Application::GetDefaultDevice()->LogicToPixel(mxData->maListBoxPreviewDefaultLogicSize, MapMode(MapUnit::MapAppFont));
+            Application::GetDefaultDevice()->GetGeometry().LogicToPixel(mxData->maListBoxPreviewDefaultLogicSize, MapMode(MapUnit::MapAppFont));
     }
 
     return mxData->maListBoxPreviewDefaultPixelSize;

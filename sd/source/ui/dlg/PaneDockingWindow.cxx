@@ -38,7 +38,7 @@ PaneDockingWindow::PaneDockingWindow(
         : TitledDockingWindow(_pBindings, pChildWindow, pParent)
 {
     SetTitle(rsTitle);
-    SetSizePixel(LogicToPixel(Size(80,200), MapMode(MapUnit::MapAppFont)));
+    SetSizePixel(maGeometry.LogicToPixel(Size(80,200), MapMode(MapUnit::MapAppFont)));
 }
 
 PaneDockingWindow::~PaneDockingWindow()

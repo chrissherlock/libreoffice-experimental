@@ -284,7 +284,7 @@ void SeriesHeader::SetPos()
 {
     // chart type symbol
     Size aSize( nSymbolHeight, nSymbolHeight );
-    aSize = m_xDevice->LogicToPixel(aSize, MapMode(MapUnit::MapAppFont));
+    aSize = m_xDevice->GetGeometry().LogicToPixel(aSize, MapMode(MapUnit::MapAppFont));
     m_spSymbol->set_size_request(aSize.Width(), aSize.Height());
 
     // series name edit field
@@ -292,13 +292,13 @@ void SeriesHeader::SetPos()
 
     aSize.setWidth(nSymbolHeight);
     aSize.setHeight(12);
-    aSize = m_xDevice->LogicToPixel(aSize, MapMode(MapUnit::MapAppFont));
+    aSize = m_xDevice->GetGeometry().LogicToPixel(aSize, MapMode(MapUnit::MapAppFont));
     aSize.setWidth(m_nWidth - aSize.Width() - 2);
     m_spSeriesName->set_size_request(aSize.Width(), aSize.Height());
 
     // color bar
     aSize.setHeight(3);
-    aSize = m_xDevice->LogicToPixel(aSize, MapMode(MapUnit::MapAppFont));
+    aSize = m_xDevice->GetGeometry().LogicToPixel(aSize, MapMode(MapUnit::MapAppFont));
     aSize.setWidth(m_nWidth);
     m_spColorBar->set_size_request(aSize.Width(), aSize.Height());
 

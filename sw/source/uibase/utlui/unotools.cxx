@@ -111,7 +111,7 @@ void SwOneExampleFrame::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     CustomWidgetController::SetDrawingArea(pDrawingArea);
     m_xVirDev = VclPtr<VirtualDevice>::Create();
-    Size aSize(m_xVirDev->LogicToPixel(Size(150, 188), MapMode(MapUnit::MapAppFont)));
+    Size aSize(m_xVirDev->GetGeometry().LogicToPixel(Size(150, 188), MapMode(MapUnit::MapAppFont)));
     pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
     SetOutputSizePixel(aSize);
     CreateControl();

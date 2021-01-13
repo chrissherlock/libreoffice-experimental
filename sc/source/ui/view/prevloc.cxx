@@ -299,8 +299,8 @@ tools::Rectangle ScPreviewLocationData::GetOffsetPixel( const ScAddress& rCellPo
 
     Size aOffsetLogic( nPosX, nPosY );
     Size aSizeLogic( nSizeX, nSizeY );
-    Size aOffsetPixel = pWindow->LogicToPixel( aOffsetLogic, aCellMapMode );
-    Size aSizePixel = pWindow->LogicToPixel( aSizeLogic, aCellMapMode );
+    Size aOffsetPixel = pWindow->GetGeometry().LogicToPixel( aOffsetLogic, aCellMapMode );
+    Size aSizePixel = pWindow->GetGeometry().LogicToPixel( aSizeLogic, aCellMapMode );
 
     return tools::Rectangle( Point( aOffsetPixel.Width(), aOffsetPixel.Height() ), aSizePixel );
 }
@@ -555,8 +555,8 @@ void ScPreviewLocationData::GetTableInfo( const tools::Rectangle& rVisiblePixel,
                     sal_uInt16 nDocW = pDoc->GetColWidth( nCol, nTab );
                     tools::Long nNextX = nPosX + static_cast<tools::Long>(nDocW * nScaleX);
 
-                    tools::Long nPixelStart = pWindow->LogicToPixel( Size( nPosX, 0 ), aCellMapMode ).Width();
-                    tools::Long nPixelEnd = pWindow->LogicToPixel( Size( nNextX, 0 ), aCellMapMode ).Width() - 1;
+                    tools::Long nPixelStart = pWindow->GetGeometry().LogicToPixel( Size( nPosX, 0 ), aCellMapMode ).Width();
+                    tools::Long nPixelEnd = pWindow->GetGeometry().LogicToPixel( Size( nNextX, 0 ), aCellMapMode ).Width() - 1;
                     pColInfo[nColPos].Set( false, nCol,
                                                 aRepeatRect.Left() + nPixelStart,
                                                 aRepeatRect.Left() + nPixelEnd );
@@ -574,8 +574,8 @@ void ScPreviewLocationData::GetTableInfo( const tools::Rectangle& rVisiblePixel,
                     sal_uInt16 nDocW = pDoc->GetColWidth( nCol, nTab );
                     tools::Long nNextX = nPosX + static_cast<tools::Long>(nDocW * nScaleX);
 
-                    tools::Long nPixelStart = pWindow->LogicToPixel( Size( nPosX, 0 ), aCellMapMode ).Width();
-                    tools::Long nPixelEnd = pWindow->LogicToPixel( Size( nNextX, 0 ), aCellMapMode ).Width() - 1;
+                    tools::Long nPixelStart = pWindow->GetGeometry().LogicToPixel( Size( nPosX, 0 ), aCellMapMode ).Width();
+                    tools::Long nPixelEnd = pWindow->GetGeometry().LogicToPixel( Size( nNextX, 0 ), aCellMapMode ).Width() - 1;
                     pColInfo[nColPos].Set( false, nCol,
                                                 aMainRect.Left() + nPixelStart,
                                                 aMainRect.Left() + nPixelEnd );
@@ -620,8 +620,8 @@ void ScPreviewLocationData::GetTableInfo( const tools::Rectangle& rVisiblePixel,
                 sal_uInt16 nDocH = pDoc->GetOriginalHeight( nRow, nTab );
                 tools::Long nNextY = nPosY + static_cast<tools::Long>(nDocH * nScaleY);
 
-                tools::Long nPixelStart = pWindow->LogicToPixel( Size( 0, nPosY ), aCellMapMode ).Height();
-                tools::Long nPixelEnd = pWindow->LogicToPixel( Size( 0, nNextY ), aCellMapMode ).Height() - 1;
+                tools::Long nPixelStart = pWindow->GetGeometry().LogicToPixel( Size( 0, nPosY ), aCellMapMode ).Height();
+                tools::Long nPixelEnd = pWindow->GetGeometry().LogicToPixel( Size( 0, nNextY ), aCellMapMode ).Height() - 1;
                 pRowInfo[nRowPos].Set( false, nRow,
                         aRepeatRect.Top() + nPixelStart,
                         aRepeatRect.Top() + nPixelEnd );
@@ -641,8 +641,8 @@ void ScPreviewLocationData::GetTableInfo( const tools::Rectangle& rVisiblePixel,
                 sal_uInt16 nDocH = pDoc->GetOriginalHeight( nRow, nTab );
                 tools::Long nNextY = nPosY + static_cast<tools::Long>(nDocH * nScaleY);
 
-                tools::Long nPixelStart = pWindow->LogicToPixel( Size( 0, nPosY ), aCellMapMode ).Height();
-                tools::Long nPixelEnd = pWindow->LogicToPixel( Size( 0, nNextY ), aCellMapMode ).Height() - 1;
+                tools::Long nPixelStart = pWindow->GetGeometry().LogicToPixel( Size( 0, nPosY ), aCellMapMode ).Height();
+                tools::Long nPixelEnd = pWindow->GetGeometry().LogicToPixel( Size( 0, nNextY ), aCellMapMode ).Height() - 1;
                 pRowInfo[nRowPos].Set( false, nRow,
                         aMainRect.Top() + nPixelStart,
                         aMainRect.Top() + nPixelEnd );

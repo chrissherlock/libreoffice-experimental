@@ -76,7 +76,7 @@ ScHeaderEditEngine* ScEditWindow::GetEditEngine() const
 void ScEditWindow::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     OutputDevice& rDevice = pDrawingArea->get_ref_device();
-    Size aSize = rDevice.LogicToPixel(Size(80, 120), MapMode(MapUnit::MapAppFont));
+    Size aSize = rDevice.GetGeometry().LogicToPixel(Size(80, 120), MapMode(MapUnit::MapAppFont));
     pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
 
     WeldEditView::SetDrawingArea(pDrawingArea);

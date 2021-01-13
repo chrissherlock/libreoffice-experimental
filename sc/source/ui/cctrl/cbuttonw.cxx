@@ -42,7 +42,7 @@ void ScDDComboBoxButton::SetOutputDevice( OutputDevice* pOutputDevice )
 
 void ScDDComboBoxButton::SetOptSizePixel()
 {
-    aBtnSize = pOut->LogicToPixel(Size(8, 11), MapMode(MapUnit::MapAppFont));
+    aBtnSize = pOut->GetGeometry().LogicToPixel(Size(8, 11), MapMode(MapUnit::MapAppFont));
     aBtnSize.setWidth( std::max(aBtnSize.Width(), pOut->GetSettings().GetStyleSettings().GetScrollBarSize()) );
 }
 

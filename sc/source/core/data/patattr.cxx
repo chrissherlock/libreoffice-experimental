@@ -347,7 +347,7 @@ void ScPatternAttr::GetFont(
         MapMode aDestMode = pOutDev->GetMapMode();
         MapMode aSrcMode( MapUnit::MapTwip, Point(), aFraction, aFraction );
         if (aDestMode.GetMapUnit() == MapUnit::MapPixel && pOutDev->GetDPIX() > 0)
-            aEffSize = pOutDev->LogicToPixel( aSize, aSrcMode );
+            aEffSize = pOutDev->GetGeometry().LogicToPixel( aSize, aSrcMode );
         else
         {
             Fraction aFractOne(1,1);

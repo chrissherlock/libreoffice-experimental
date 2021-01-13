@@ -64,7 +64,7 @@ SelectorListBox::SelectorListBox(vcl::Window* pParent)
     m_xWidget->connect_focus_out(LINK(this, SelectorListBox, FocusOutHdl));
 
     ::Size aLogicalSize(75, 0);
-    ::Size aPixelSize = LogicToPixel(aLogicalSize, MapMode(MapUnit::MapAppFont));
+    ::Size aPixelSize = maGeometry.LogicToPixel(aLogicalSize, MapMode(MapUnit::MapAppFont));
     m_xWidget->set_size_request(aPixelSize.Width(), -1);
     SetSizePixel(m_xContainer->get_preferred_size());
 }

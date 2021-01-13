@@ -154,7 +154,7 @@ namespace vcl
         m_xRoadmapImpl->pRoadmap->SetPosPixel( Point( 0, 0 ) );
         m_xRoadmapImpl->pRoadmap->SetItemSelectHdl( LINK( this, RoadmapWizard, OnRoadmapItemSelected ) );
 
-        Size aRoadmapSize = LogicToPixel(Size(85, 0), MapMode(MapUnit::MapAppFont));
+        Size aRoadmapSize = maGeometry.LogicToPixel(Size(85, 0), MapMode(MapUnit::MapAppFont));
         aRoadmapSize.setHeight( GetSizePixel().Height() );
         m_xRoadmapImpl->pRoadmap->SetSizePixel( aRoadmapSize );
 

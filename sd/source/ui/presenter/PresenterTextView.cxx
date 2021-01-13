@@ -328,7 +328,7 @@ void PresenterTextView::Implementation::SetFontDescriptor (
     const sal_Int32 nFontHeight = rFontDescriptor.Height;
 
     SvxFontHeightItem aFontHeight(
-        Application::GetDefaultDevice()->LogicToPixel(
+        Application::GetDefaultDevice()->GetGeometry().LogicToPixel(
             Size(0, nFontHeight), MapMode (MapUnit::MapPoint)).Height(),
         100,
         EE_CHAR_FONTHEIGHT);

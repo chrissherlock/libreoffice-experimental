@@ -41,7 +41,7 @@ void CuiGraphicPreviewWindow::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     CustomWidgetController::SetDrawingArea(pDrawingArea);
     OutputDevice &rDevice = pDrawingArea->get_ref_device();
-    maOutputSizePixel = rDevice.LogicToPixel(Size(81, 73), MapMode(MapUnit::MapAppFont));
+    maOutputSizePixel = rDevice.GetGeometry().LogicToPixel(Size(81, 73), MapMode(MapUnit::MapAppFont));
     pDrawingArea->set_size_request(maOutputSizePixel.Width(), maOutputSizePixel.Height());
 }
 
@@ -54,7 +54,7 @@ void CuiGraphicPreviewWindow::Paint(vcl::RenderContext& rRenderContext, const ::
 
     if (maPreview.IsAnimated())
     {
-        const Size aGraphicSize(rRenderContext.LogicToPixel(maPreview.GetPrefSize(), maPreview.GetPrefMapMode()));
+        const Size aGraphicSize(rRenderContext.GetGeometry().LogicToPixel(maPreview.GetPrefSize(), maPreview.GetPrefMapMode()));
         const Point aGraphicPosition((aOutputSize.Width()  - aGraphicSize.Width()  ) >> 1,
                                      (aOutputSize.Height() - aGraphicSize.Height() ) >> 1);
         maPreview.StartAnimation(&rRenderContext, aGraphicPosition, aGraphicSize);
@@ -409,7 +409,7 @@ bool EmbossControl::MouseButtonDown( const MouseEvent& rEvt )
 void EmbossControl::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     SvxRectCtl::SetDrawingArea(pDrawingArea);
-    Size aSize(pDrawingArea->get_ref_device().LogicToPixel(Size(77, 60), MapMode(MapUnit::MapAppFont)));
+    Size aSize(pDrawingArea->get_ref_device().GetGeometry().LogicToPixel(Size(77, 60), MapMode(MapUnit::MapAppFont)));
     pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
 }
 

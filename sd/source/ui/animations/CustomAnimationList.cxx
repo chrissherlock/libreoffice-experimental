@@ -318,7 +318,7 @@ void CustomAnimationListEntryItem::PaintTrigger(vcl::RenderContext& rRenderConte
     // draw the category title
 
     int nVertBorder = ((aSize.Height() - rRenderContext.GetTextHeight()) >> 1);
-    int nHorzBorder = rRenderContext.LogicToPixel(Size(3, 3), MapMode(MapUnit::MapAppFont)).Width();
+    int nHorzBorder = rRenderContext.GetGeometry().LogicToPixel(Size(3, 3), MapMode(MapUnit::MapAppFont)).Width();
 
     aOutRect.AdjustLeft(nHorzBorder );
     aOutRect.AdjustRight( -nHorzBorder );

@@ -62,7 +62,7 @@ ChartTypePanel::ChartTypePanel(vcl::Window* pParent,
     , m_xSubTypeList(new ValueSet(m_xBuilder->weld_scrolled_window("subtypewin", true)))
     , m_xSubTypeListWin(new weld::CustomWeld(*m_xBuilder, "subtype", *m_xSubTypeList))
 {
-    Size aSize(m_xSubTypeList->GetDrawingArea()->get_ref_device().LogicToPixel(
+    Size aSize(m_xSubTypeList->GetDrawingArea()->get_ref_device().GetGeometry().LogicToPixel(
         Size(120, 40), MapMode(MapUnit::MapAppFont)));
     m_xSubTypeListWin->set_size_request(aSize.Width(), aSize.Height());
 

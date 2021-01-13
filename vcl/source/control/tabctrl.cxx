@@ -1265,7 +1265,7 @@ void TabControl::setAllocation(const Size &rAllocation)
         tools::Long nPrefWidth = mpTabCtrlData->mpListBox->get_preferred_size().Width();
         if( nPrefWidth > aTabCtrlSize.Width() )
             nPrefWidth = aTabCtrlSize.Width();
-        Size aNewSize( nPrefWidth, LogicToPixel( Size( 12, 12 ), MapMode( MapUnit::MapAppFont ) ).Height() );
+        Size aNewSize( nPrefWidth, GetGeometry().LogicToPixel( Size( 12, 12 ), MapMode( MapUnit::MapAppFont ) ).Height() );
         Point aNewPos( (aTabCtrlSize.Width() - nPrefWidth) / 2, 0 );
         mpTabCtrlData->mpListBox->SetPosSizePixel( aNewPos, aNewSize );
     }

@@ -347,7 +347,7 @@ sal_uLong IMapCircleObject::GetRadius( bool bPixelCoords ) const
     sal_uLong nNewRadius;
 
     if ( bPixelCoords )
-        nNewRadius = Application::GetDefaultDevice()->LogicToPixel( Size( nRadius, 0 ), MapMode( MapUnit::Map100thMM ) ).Width();
+        nNewRadius = Application::GetDefaultDevice()->GetGeometry().LogicToPixel( Size( nRadius, 0 ), MapMode( MapUnit::Map100thMM ) ).Width();
     else
         nNewRadius = nRadius;
 

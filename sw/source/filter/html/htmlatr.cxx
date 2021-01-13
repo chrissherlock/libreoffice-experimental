@@ -2594,7 +2594,7 @@ sal_uInt32 SwHTMLWriter::ToPixel( sal_uInt32 nVal, const bool bVert )
     if( Application::GetDefaultDevice() && nVal )
     {
         Size aSz( bVert ? 0 : nVal, bVert ? nVal : 0 );
-        aSz = Application::GetDefaultDevice()->LogicToPixel(aSz, MapMode( MapUnit::MapTwip ));
+        aSz = Application::GetDefaultDevice()->GetGeometry().LogicToPixel(aSz, MapMode( MapUnit::MapTwip ));
         nVal = bVert ? aSz.Height() : aSz.Width();
         if( !nVal )     // if there is a Twip, there should be a pixel as well
             nVal = 1;

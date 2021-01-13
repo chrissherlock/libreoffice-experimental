@@ -247,7 +247,7 @@ css::awt::Size SAL_CALL VCLXDevice::convertSizeToPixel( const css::awt::Size& aS
     {
         MapMode aMode(VCLUnoHelper::ConvertToMapModeUnit(SourceUnit));
         ::Size aVCLSize = VCLUnoHelper::ConvertToVCLSize(aSize);
-        ::Size aDevSz = mpOutputDevice->LogicToPixel(aVCLSize, aMode );
+        ::Size aDevSz = mpOutputDevice->GetGeometry().LogicToPixel(aVCLSize, aMode );
         aAWTSize = VCLUnoHelper::ConvertToAWTSize(aDevSz);
     }
 

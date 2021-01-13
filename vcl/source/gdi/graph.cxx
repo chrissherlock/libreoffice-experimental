@@ -414,7 +414,7 @@ Size Graphic::GetSizePixel( const OutputDevice* pRefDevice ) const
     if( GraphicType::Bitmap == mxImpGraphic->getType() )
         aRet = mxImpGraphic->getSizePixel();
     else
-        aRet = ( pRefDevice ? pRefDevice : Application::GetDefaultDevice() )->LogicToPixel( GetPrefSize(), GetPrefMapMode() );
+        aRet = ( pRefDevice ? pRefDevice : Application::GetDefaultDevice() )->GetGeometry().LogicToPixel( GetPrefSize(), GetPrefMapMode() );
 
     return aRet;
 }

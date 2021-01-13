@@ -979,7 +979,7 @@ void Printer::dispose()
 
 Size Printer::GetButtonBorderSize()
 {
-    Size aBrdSize(LogicToPixel(Size(20, 20), MapMode(MapUnit::Map100thMM)));
+    Size aBrdSize(maGeometry.LogicToPixel(Size(20, 20), MapMode(MapUnit::Map100thMM)));
 
     if (!aBrdSize.Width())
         aBrdSize.setWidth(1);

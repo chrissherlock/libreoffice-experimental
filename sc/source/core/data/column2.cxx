@@ -503,7 +503,7 @@ tools::Long ScColumn::GetNeededSize(
 
             Size aTextSize = bInPrintTwips ?
                     OutputDevice::LogicToLogic(aSize, aHMMMode, aTwipMode) :
-                    pDev->LogicToPixel(aSize, aHMMMode);
+                    pDev->GetGeometry().LogicToPixel(aSize, aHMMMode);
 
             if ( bEdWidth )
                 nValue = aTextSize.Width();
@@ -529,7 +529,7 @@ tools::Long ScColumn::GetNeededSize(
                 Size aTextSize(pEngine->CalcTextWidth(), 0);
                 nValue = bInPrintTwips ?
                         OutputDevice::LogicToLogic(aTextSize, aHMMMode, aTwipMode).Width() :
-                        pDev->LogicToPixel(aTextSize, aHMMMode).Width();
+                        pDev->GetGeometry().LogicToPixel(aTextSize, aHMMMode).Width();
             }
         }
         else            // height
@@ -537,7 +537,7 @@ tools::Long ScColumn::GetNeededSize(
             Size aTextSize(0, pEngine->GetTextHeight());
             nValue = bInPrintTwips ?
                     OutputDevice::LogicToLogic(aTextSize, aHMMMode, aTwipMode).Height() :
-                    pDev->LogicToPixel(aTextSize, aHMMMode).Height();
+                    pDev->GetGeometry().LogicToPixel(aTextSize, aHMMMode).Height();
 
             // With non-100% zoom and several lines or paragraphs, don't shrink below the result with FORMAT100 set
             if ( !bTextWysiwyg && ( rZoomY.GetNumerator() != 1 || rZoomY.GetDenominator() != 1 ) &&
@@ -548,7 +548,7 @@ tools::Long ScColumn::GetNeededSize(
                 aTextSize = Size(0, pEngine->GetTextHeight());
                 tools::Long nSecondValue = bInPrintTwips ?
                         OutputDevice::LogicToLogic(aTextSize, aHMMMode, aTwipMode).Height() :
-                        pDev->LogicToPixel(aTextSize, aHMMMode).Height();
+                        pDev->GetGeometry().LogicToPixel(aTextSize, aHMMMode).Height();
                 if ( nSecondValue > nValue )
                     nValue = nSecondValue;
             }
