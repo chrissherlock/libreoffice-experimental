@@ -165,7 +165,7 @@ void OReportWindow::Resize()
     const Size aTotalOutputSize = GetSizeInPixels();
     Fraction aStartWidth(tools::Long(REPORT_STARTMARKER_WIDTH)*m_pView->getController().getZoomValue(),100);
 
-    const Point aOffset = LogicToPixel(Point(SECTION_OFFSET, 0), MapMode(MapUnit::MapAppFont));
+    const Point aOffset = maGeometry.LogicToPixel(Point(SECTION_OFFSET, 0), MapMode(MapUnit::MapAppFont));
     Point aStartPoint(static_cast<tools::Long>(aStartWidth) + aOffset.X(),0);
     uno::Reference<report::XReportDefinition> xReportDefinition = getReportView()->getController().getReportDefinition();
     const sal_Int32 nPaperWidth = getStyleProperty<awt::Size>(xReportDefinition,PROPERTY_PAPERSIZE).Width;

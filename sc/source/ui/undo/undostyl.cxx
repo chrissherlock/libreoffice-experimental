@@ -94,7 +94,7 @@ static void lcl_DocStyleChanged( ScDocument* pDoc, const SfxStyleSheetBase* pSty
     //! move to document or docshell
 
     ScopedVclPtrInstance< VirtualDevice > pVDev;
-    Point aLogic = pVDev->LogicToPixel(Point(1000,1000), MapMode(MapUnit::MapTwip));
+    Point aLogic = pVDev->GetGeometry().LogicToPixel(Point(1000,1000), MapMode(MapUnit::MapTwip));
     double nPPTX = aLogic.X() / 1000.0;
     double nPPTY = aLogic.Y() / 1000.0;
     Fraction aZoom(1,1);

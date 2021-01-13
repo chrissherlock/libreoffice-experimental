@@ -785,7 +785,7 @@ Point WeldViewForwarder::LogicToPixel(const Point& rPoint, const MapMode& rMapMo
         MapMode aMapMode(pOutDev->GetMapMode());
         Point aPoint(OutputDevice::LogicToLogic(rPoint, rMapMode, MapMode(aMapMode.GetMapUnit())));
         aMapMode.SetOrigin(Point());
-        return pOutDev->LogicToPixel(aPoint, aMapMode);
+        return pOutDev->GetGeometry().LogicToPixel(aPoint, aMapMode);
     }
 
     return Point();
@@ -1358,7 +1358,7 @@ Point WeldEditViewForwarder::LogicToPixel(const Point& rPoint, const MapMode& rM
         MapMode aMapMode(pOutDev->GetMapMode());
         Point aPoint(OutputDevice::LogicToLogic(rPoint, rMapMode, MapMode(aMapMode.GetMapUnit())));
         aMapMode.SetOrigin(Point());
-        return pOutDev->LogicToPixel(aPoint, aMapMode);
+        return pOutDev->GetGeometry().LogicToPixel(aPoint, aMapMode);
     }
 
     return Point();

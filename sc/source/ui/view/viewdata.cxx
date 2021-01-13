@@ -3502,7 +3502,7 @@ void ScViewData::ReadExtOptions( const ScExtDocOptions& rDocOpt )
             }
             else
             {
-                Point aPixel = Application::GetDefaultDevice()->LogicToPixel(
+                Point aPixel = Application::GetDefaultDevice()->GetGeometry().LogicToPixel(
                                 rTabSett.maSplitPos, MapMode( MapUnit::MapTwip ) );  //! Zoom?
                 // the test for use of printer metrics for text formatting here
                 // effectively results in the nFactor = 1.0 regardless of the Option setting.

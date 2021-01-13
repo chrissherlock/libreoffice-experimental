@@ -59,7 +59,7 @@ Point AccessibleViewForwarder::LogicToPixel( const Point& rPoint ) const
     {
         awt::Point aLocation = m_pAccChartView->getLocationOnScreen();
         Point aTopLeft( aLocation.X, aLocation.Y );
-        aPoint = m_pWindow->LogicToPixel( rPoint, m_aMapMode ) + aTopLeft;
+        aPoint = m_pWindow->GetGeometry().LogicToPixel( rPoint, m_aMapMode ) + aTopLeft;
     }
     return aPoint;
 }

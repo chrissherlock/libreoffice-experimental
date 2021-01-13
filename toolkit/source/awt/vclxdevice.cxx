@@ -200,7 +200,7 @@ css::awt::Point SAL_CALL VCLXDevice::convertPointToPixel( const css::awt::Point&
     {
         MapMode aMode(VCLUnoHelper::ConvertToMapModeUnit(SourceUnit));
         ::Point aVCLPoint = VCLUnoHelper::ConvertToVCLPoint(aPoint);
-        ::Point aDevPoint = mpOutputDevice->LogicToPixel(aVCLPoint, aMode );
+        ::Point aDevPoint = mpOutputDevice->GetGeometry().LogicToPixel(aVCLPoint, aMode );
         aAWTPoint = VCLUnoHelper::ConvertToAWTPoint(aDevPoint);
     }
 

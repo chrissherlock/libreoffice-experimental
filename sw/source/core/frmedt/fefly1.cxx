@@ -1538,7 +1538,7 @@ const SwFrameFormat* SwFEShell::IsURLGrfAtPos( const Point& rPt, OUString* pURL,
                         Point aPt( rPt );
                         aPt -= pFly->getFrameArea().Pos();
                         // without MapMode-Offset, without Offset, o ... !!!!!
-                        aPt = GetOut()->LogicToPixel(
+                        aPt = GetOut()->GetGeometry().LogicToPixel(
                                 aPt, MapMode( MapUnit::MapTwip ) );
                         *pURL = *pURL + "?" + OUString::number( aPt.getX() )
                                 + "," + OUString::number(aPt.getY() );

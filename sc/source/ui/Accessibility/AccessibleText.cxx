@@ -75,7 +75,7 @@ Point ScViewForwarder::LogicToPixel( const Point& rPoint, const MapMode& rMapMod
     {
         vcl::Window* pWindow = mpViewShell->GetWindowByPos(meSplitPos);
         if (pWindow)
-            return pWindow->LogicToPixel( rPoint, rMapMode );
+            return pWindow->GetGeometry().LogicToPixel( rPoint, rMapMode );
     }
     else
     {
@@ -144,7 +144,7 @@ Point ScEditObjectViewForwarder::LogicToPixel( const Point& rPoint, const MapMod
             tools::Rectangle aEditViewVisArea( mpEditView->GetVisArea() );
             aPoint += aEditViewVisArea.TopLeft();
         }
-        return mpWindow->LogicToPixel( aPoint, rMapMode );
+        return mpWindow->GetGeometry().LogicToPixel( aPoint, rMapMode );
     }
     else
     {
@@ -347,7 +347,9 @@ bool ScEditViewForwarder::IsValid() const
 Point ScEditViewForwarder::LogicToPixel( const Point& rPoint, const MapMode& rMapMode ) const
 {
     if (mpWindow)
-        return mpWindow->LogicToPixel( rPoint, rMapMode );
+    {
+        return mpWindow->GetGeometry().LogicToPixel( rPoint, rMapMode );
+    }
     else
     {
         OSL_FAIL("this ViewForwarder is not valid");
@@ -1313,7 +1315,7 @@ bool ScCsvViewForwarder::IsValid() const
 Point ScCsvViewForwarder::LogicToPixel( const Point& rPoint, const MapMode& rMapMode ) const
 {
     if( !mpWindow ) return Point();
-    return mpWindow->LogicToPixel( rPoint, rMapMode );
+    return mpWindow->GetGeometry().LogicToPixel( rPoint, rMapMode );
 }
 
 Point ScCsvViewForwarder::PixelToLogic( const Point& rPoint, const MapMode& rMapMode ) const

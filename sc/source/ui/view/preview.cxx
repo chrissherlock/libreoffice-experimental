@@ -550,7 +550,7 @@ void ScPreview::DoPrint( ScPreviewLocationData* pFillLocation )
         SetMapMode( MapMode( MapUnit::MapPixel ) );
         for( int i= aPageArea.aStart.Col(); i<= aPageArea.aEnd.Col(); i++ )
         {
-            Point aColumnTop = LogicToPixel( Point( 0, -aOffset.Y() ) ,aMMMode );
+            Point aColumnTop = maGeometry.LogicToPixel( Point( 0, -aOffset.Y() ) ,aMMMode );
             SetLineColor( COL_BLACK );
             SetFillColor( COL_BLACK );
             DrawRect( tools::Rectangle( Point( mvRight[i] - 2, aColumnTop.Y() ),Point( mvRight[i] + 2 , 4 + aColumnTop.Y()) ));
@@ -1327,21 +1327,21 @@ void ScPreview::MouseMove( const MouseEvent& rMEvt )
     }
 
     Point   aPixPt( rMEvt.GetPosPixel() );
-    Point   aLeftTop = LogicToPixel( Point( nLeftMargin, -aOffset.Y() ) , aMMMode );
-    Point   aLeftBottom = LogicToPixel( Point( nLeftMargin ,static_cast<tools::Long>(nHeight * HMM_PER_TWIPS - aOffset.Y()) ), aMMMode );
-    Point   aRightTop = LogicToPixel( Point( nRightMargin, -aOffset.Y() ), aMMMode );
-    Point   aTopLeft = LogicToPixel( Point( -aOffset.X(), nTopMargin ), aMMMode );
-    Point   aTopRight = LogicToPixel( Point( static_cast<tools::Long>(nWidth * HMM_PER_TWIPS - aOffset.X()), nTopMargin ), aMMMode );
-    Point   aBottomLeft = LogicToPixel( Point( -aOffset.X(), nBottomMargin ), aMMMode );
-    Point   aHeaderLeft = LogicToPixel( Point(  -aOffset.X(), nHeaderHeight ), aMMMode );
-    Point   aFooderLeft = LogicToPixel( Point( -aOffset.X(), nFooterHeight ), aMMMode );
+    Point   aLeftTop = maGeometry.LogicToPixel( Point( nLeftMargin, -aOffset.Y() ) , aMMMode );
+    Point   aLeftBottom = maGeometry.LogicToPixel( Point( nLeftMargin ,static_cast<tools::Long>(nHeight * HMM_PER_TWIPS - aOffset.Y()) ), aMMMode );
+    Point   aRightTop = maGeometry.LogicToPixel( Point( nRightMargin, -aOffset.Y() ), aMMMode );
+    Point   aTopLeft = maGeometry.LogicToPixel( Point( -aOffset.X(), nTopMargin ), aMMMode );
+    Point   aTopRight = maGeometry.LogicToPixel( Point( static_cast<tools::Long>(nWidth * HMM_PER_TWIPS - aOffset.X()), nTopMargin ), aMMMode );
+    Point   aBottomLeft = maGeometry.LogicToPixel( Point( -aOffset.X(), nBottomMargin ), aMMMode );
+    Point   aHeaderLeft = maGeometry.LogicToPixel( Point(  -aOffset.X(), nHeaderHeight ), aMMMode );
+    Point   aFooderLeft = maGeometry.LogicToPixel( Point( -aOffset.X(), nFooterHeight ), aMMMode );
 
     bool bOnColRulerChange = false;
 
     for( SCCOL i=aPageArea.aStart.Col(); i<= aPageArea.aEnd.Col(); i++ )
     {
-        Point   aColumnTop = LogicToPixel( Point( 0, -aOffset.Y() ) ,aMMMode );
-        Point   aColumnBottom = LogicToPixel( Point( 0, static_cast<tools::Long>( nHeight * HMM_PER_TWIPS - aOffset.Y()) ), aMMMode );
+        Point   aColumnTop = maGeometry.LogicToPixel( Point( 0, -aOffset.Y() ) ,aMMMode );
+        Point   aColumnBottom = maGeometry.LogicToPixel( Point( 0, static_cast<tools::Long>( nHeight * HMM_PER_TWIPS - aOffset.Y()) ), aMMMode );
         tools::Long nRight = i < static_cast<SCCOL>(mvRight.size()) ? mvRight[i] : 0;
         if( aPixPt.X() < ( nRight + 2 ) && ( aPixPt.X() > ( nRight - 2 ) ) && ( aPixPt.X() < aRightTop.X() ) && ( aPixPt.X() > aLeftTop.X() )
             && ( aPixPt.Y() > aColumnTop.Y() ) && ( aPixPt.Y() < aColumnBottom.Y() ) && !bLeftRulerMove && !bRightRulerMove

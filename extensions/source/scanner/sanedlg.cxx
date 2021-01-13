@@ -1205,7 +1205,7 @@ Point ScanPreview::GetPixelPos( const Point& rIn) const
           / ( maMaxBottomRight.Y() - maMinTopLeft.Y() ) )
         );
 
-    return GetDrawingArea()->get_ref_device().LogicToPixel(aConvert, MapMode(MapUnit::MapAppFont));
+    return GetDrawingArea()->get_ref_device().GetGeometry().LogicToPixel(aConvert, MapMode(MapUnit::MapAppFont));
 }
 
 Point ScanPreview::GetLogicPos(const Point& rIn) const

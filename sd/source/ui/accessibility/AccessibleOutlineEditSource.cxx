@@ -128,7 +128,7 @@ namespace accessibility
                                                       MapMode(mrView.GetModel()->GetScaleUnit()) ) );
             MapMode aMapMode(mrWindow.GetMapMode());
             aMapMode.SetOrigin(Point());
-            return mrWindow.LogicToPixel( aPoint, aMapMode );
+            return mrWindow.GetGeometry().LogicToPixel( aPoint, aMapMode );
         }
 
         return Point();

@@ -311,7 +311,7 @@ void ScDrawView::RecalcScale()
     }
     else
     {
-        Point aLogic = pDev->LogicToPixel(Point(1000,1000), MapMode(MapUnit::MapTwip));
+        Point aLogic = pDev->GetGeometry().LogicToPixel(Point(1000,1000), MapMode(MapUnit::MapTwip));
         nPPTX = aLogic.X() / 1000.0;
         nPPTY = aLogic.Y() / 1000.0;
                                             //! Zoom, handed over ???

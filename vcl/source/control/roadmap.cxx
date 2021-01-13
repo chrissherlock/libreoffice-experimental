@@ -569,7 +569,7 @@ void ORoadmap::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle&
 
 void ORoadmap::DrawHeadline(vcl::RenderContext& rRenderContext)
 {
-    Point aTextPos = LogicToPixel(Point(ROADMAP_INDENT_X, 8), MapMode(MapUnit::MapAppFont));
+    Point aTextPos = maGeometry.LogicToPixel(Point(ROADMAP_INDENT_X, 8), MapMode(MapUnit::MapAppFont));
 
     Size aOutputSize(GetSizeInPixels());
 
@@ -737,7 +737,7 @@ void RoadmapItem::SetPosition(RoadmapItem const * _pOldItem)
     Point aIDPos;
     if ( _pOldItem == nullptr )
     {
-        aIDPos = mpID->LogicToPixel(Point(ROADMAP_INDENT_X, ROADMAP_INDENT_Y), MapMode(MapUnit::MapAppFont));
+        aIDPos = mpID->GetGeometry().LogicToPixel(Point(ROADMAP_INDENT_X, ROADMAP_INDENT_Y), MapMode(MapUnit::MapAppFont));
     }
     else
     {

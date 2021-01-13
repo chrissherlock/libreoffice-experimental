@@ -44,7 +44,7 @@ ScSizeDeviceProvider::ScSizeDeviceProvider( ScDocShell* pDocSh )
         bOwner = true;
     }
 
-    Point aLogic = pDevice->LogicToPixel(Point(1000,1000), MapMode(MapUnit::MapTwip));
+    Point aLogic = pDevice->GetGeometry().LogicToPixel(Point(1000,1000), MapMode(MapUnit::MapTwip));
     nPPTX = aLogic.X() / 1000.0;
     nPPTY = aLogic.Y() / 1000.0;
 

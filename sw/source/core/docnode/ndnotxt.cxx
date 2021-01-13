@@ -135,7 +135,7 @@ const tools::PolyPolygon *SwNoTextNode::HasContour() const
                 for( sal_uInt16 i=0 ; i<nCount; i++ )
                 {
                     if( bPixelGrf )
-                        rPoly[i] = pOutDev->LogicToPixel( rPoly[i],
+                        rPoly[i] = pOutDev->GetGeometry().LogicToPixel( rPoly[i],
                                                           aContourMap );
                     else if( m_bPixelContour )
                     {

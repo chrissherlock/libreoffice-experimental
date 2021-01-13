@@ -864,7 +864,7 @@ Point SvxTextEditSourceImpl::LogicToPixel( const Point& rPoint, const MapMode& r
                                                    MapMode(mpModel->GetScaleUnit()) ) );
         MapMode aMapMode(mpWindow->GetMapMode());
         aMapMode.SetOrigin(Point());
-        return mpWindow->LogicToPixel( aPoint2, aMapMode );
+        return mpWindow->GetGeometry().LogicToPixel( aPoint2, aMapMode );
     }
 
     return Point();

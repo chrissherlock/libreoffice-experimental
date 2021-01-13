@@ -66,7 +66,7 @@ Point SvxDrawOutlinerViewForwarder::LogicToPixel( const Point& rPoint, const Map
         Point aPoint2( OutputDevice::LogicToLogic( aPoint1, rMapMode,
                                                MapMode(aMapMode.GetMapUnit())));
         aMapMode.SetOrigin(Point());
-        return pOutDev->LogicToPixel( aPoint2, aMapMode );
+        return pOutDev->GetGeometry().LogicToPixel( aPoint2, aMapMode );
     }
 
     return Point();

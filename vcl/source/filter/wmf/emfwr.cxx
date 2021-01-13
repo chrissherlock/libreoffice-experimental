@@ -217,7 +217,7 @@ void EMFWriter::ImplWritePlusColor( const Color& rColor, sal_uInt32 nTrans )
 void EMFWriter::ImplWritePlusPoint( const Point& rPoint )
 {
     // Convert to pixels
-    const Point aPoint(maVDev->LogicToPixel( rPoint, maDestMapMode ));
+    const Point aPoint(maVDev->GetGeometry().LogicToPixel( rPoint, maDestMapMode ));
     m_rStm.WriteUInt16( aPoint.X() ).WriteUInt16( aPoint.Y() );
 }
 

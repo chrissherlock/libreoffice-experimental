@@ -2015,7 +2015,7 @@ Point ScAccessibleDocument::LogicToPixel (const Point& rPoint) const
     ScGridWindow* pWin = static_cast<ScGridWindow*>(mpViewShell->GetWindowByPos(meSplitPos));
     if (pWin)
     {
-        aPoint = pWin->LogicToPixel(rPoint, pWin->GetDrawMapMode());
+        aPoint = pWin->GetGeometry().LogicToPixel(rPoint, pWin->GetDrawMapMode());
         aPoint += pWin->GetWindowExtentsRelative(nullptr).TopLeft();
     }
     return aPoint;

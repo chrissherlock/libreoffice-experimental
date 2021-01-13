@@ -18,6 +18,7 @@
  */
 
 #include <vcl/Geometry.hxx>
+#include <vcl/mapmod.hxx>
 
 #include <cassert>
 #include <cmath>
@@ -719,6 +720,22 @@ basegfx::B2DPolyPolygon Geometry::LogicToPixel(basegfx::B2DPolyPolygon const& rL
     aTransformedPoly.transform(rTransformationMatrix);
 
     return aTransformedPoly;
+}
+
+Point Geometry::LogicToPixel(Point const& rLogicPt, MapMode const& rMapMode) const
+{
+    if (rMapMode.IsDefault())
+        return rLogicPt;
+
+    // convert MapMode resolution and convert
+    MappingMetrics aMappingMetric(rMapMode, GetDPIX(), GetDPIY());
+
+    return Point(Geometry::LogicToPixel(rLogicPt.X() + aMappingMetric.mnMapOfsX, GetDPIX(),
+                                        aMappingMetric.mnMapScNumX, aMappingMetric.mnMapScDenomX)
+                     + GetXOffsetFromOriginInPixels(),
+                 Geometry::LogicToPixel(rLogicPt.Y() + aMappingMetric.mnMapOfsY, GetDPIY(),
+                                        aMappingMetric.mnMapScNumY, aMappingMetric.mnMapScDenomY)
+                     + GetYOffsetFromOriginInPixels());
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

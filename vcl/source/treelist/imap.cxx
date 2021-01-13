@@ -335,7 +335,7 @@ Point IMapCircleObject::GetCenter( bool bPixelCoords ) const
     Point aNewPoint;
 
     if ( bPixelCoords )
-        aNewPoint = Application::GetDefaultDevice()->LogicToPixel( aCenter, MapMode( MapUnit::Map100thMM ) );
+        aNewPoint = Application::GetDefaultDevice()->GetGeometry().LogicToPixel( aCenter, MapMode( MapUnit::Map100thMM ) );
     else
         aNewPoint = aCenter;
 

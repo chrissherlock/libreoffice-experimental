@@ -593,7 +593,7 @@ bool ScDocument::IdleCalcTextWidth()            // true = try next again
                     aScope.setOldMapMode(pDev->GetMapMode());
                     pDev->SetMapMode(MapMode(MapUnit::MapPixel)); // Important for GetNeededSize
 
-                    Point aPix1000 = pDev->LogicToPixel(Point(1000,1000), MapMode(MapUnit::MapTwip));
+                    Point aPix1000 = pDev->GetGeometry().LogicToPixel(Point(1000,1000), MapMode(MapUnit::MapTwip));
                     nPPTX = aPix1000.X() / 1000.0;
                     nPPTY = aPix1000.Y() / 1000.0;
                 }

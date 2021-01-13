@@ -191,7 +191,7 @@ bool SwDPage::RequestHelp( vcl::Window* pWindow, SdrView const * pView,
                     aPt -= pFly->getFrameArea().Pos();
                     // without MapMode-Offset !!!!!
                     // without MapMode-Offset, without Offset, w ... !!!!!
-                    aPt = pWindow->LogicToPixel(
+                    aPt = pWindow->GetGeometry().LogicToPixel(
                             aPt, MapMode( MapUnit::MapTwip ) );
                     sText += "?" + OUString::number( aPt.getX() )
                           + "," + OUString::number( aPt.getY() );

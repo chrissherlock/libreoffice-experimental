@@ -168,7 +168,7 @@ Size OScrollWindowHelper::ResizeScrollBars()
     else
         m_aCornerWin->Hide();
 
-    const Point aOffset = LogicToPixel(Point(SECTION_OFFSET, SECTION_OFFSET), MapMode(MapUnit::MapAppFont));
+    const Point aOffset = maGeometry.LogicToPixel(Point(SECTION_OFFSET, SECTION_OFFSET), MapMode(MapUnit::MapAppFont));
     // resize scrollbars and set their ranges
     {
         Fraction aStartWidth(tools::Long(REPORT_STARTMARKER_WIDTH*m_pParent->getController().getZoomValue()),100);

@@ -1457,7 +1457,7 @@ bool FmGridControl::isColumnMarked(sal_uInt16 nId) const
 tools::Long FmGridControl::QueryMinimumRowHeight()
 {
     tools::Long const nMinimalLogicHeight = 20; // 0.2 cm
-    tools::Long nMinimalPixelHeight = LogicToPixel(Point(0, nMinimalLogicHeight), MapMode(MapUnit::Map10thMM)).Y();
+    tools::Long nMinimalPixelHeight = maGeometry.LogicToPixel(Point(0, nMinimalLogicHeight), MapMode(MapUnit::Map10thMM)).Y();
     return CalcZoom( nMinimalPixelHeight );
 }
 
@@ -1588,7 +1588,7 @@ void FmGridControl::InitColumnsByModels(const Reference< css::container::XIndexC
         aWidth = xCol->getPropertyValue(FM_PROP_WIDTH);
         sal_Int32 nWidth = 0;
         if (aWidth >>= nWidth)
-            nWidth = LogicToPixel(Point(nWidth, 0), MapMode(MapUnit::Map10thMM)).X();
+            nWidth = maGeometry.LogicToPixel(Point(nWidth, 0), MapMode(MapUnit::Map10thMM)).X();
 
         AppendColumn(aName, static_cast<sal_uInt16>(nWidth));
         DbGridColumn* pCol = DbGridControl::GetColumns()[ i ].get();

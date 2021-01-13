@@ -557,7 +557,7 @@ Point ScIAccessibleViewForwarder::LogicToPixel (const Point& rPoint) const
     if (pWin && mpAccDoc)
     {
         tools::Rectangle aRect(mpAccDoc->GetBoundingBoxOnScreen());
-        aPoint = pWin->LogicToPixel(rPoint, maMapMode) + aRect.TopLeft();
+        aPoint = pWin->GetGeometry().LogicToPixel(rPoint, maMapMode) + aRect.TopLeft();
     }
 
     return aPoint;
@@ -1022,7 +1022,7 @@ void ScShapeChildren::FillShapes(const tools::Rectangle& aPixelPaintRect, const 
             uno::Reference< drawing::XShape > xShape(pObj->getUnoShape(), uno::UNO_QUERY);
             if (xShape.is())
             {
-                tools::Rectangle aRect(pWin->LogicToPixel(VCLPoint(xShape->getPosition()), aMapMode), pWin->LogicToPixel(VCLSize(xShape->getSize()), aMapMode));
+                tools::Rectangle aRect(pWin->GetGeometry().LogicToPixel(VCLPoint(xShape->getPosition()), aMapMode), pWin->LogicToPixel(VCLSize(xShape->getSize()), aMapMode));
                 if(!aClippedPixelPaintRect.GetIntersection(aRect).IsEmpty())
                 {
                     ScShapeChild aShape;
