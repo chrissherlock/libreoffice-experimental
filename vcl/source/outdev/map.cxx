@@ -217,15 +217,6 @@ void OutputDevice::SetRelativeMapMode(const MapMode& rNewMapMode)
         mpAlphaVDev->SetRelativeMapMode(rNewMapMode);
 }
 
-basegfx::B2DPolyPolygon OutputDevice::LogicToPixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
-                                                   const MapMode& rMapMode) const
-{
-    basegfx::B2DPolyPolygon aTransformedPoly = rLogicPolyPoly;
-    const basegfx::B2DHomMatrix& rTransformationMatrix = GetViewTransformation(rMapMode);
-    aTransformedPoly.transform(rTransformationMatrix);
-    return aTransformedPoly;
-}
-
 Point OutputDevice::PixelToLogic(const Point& rDevicePt) const
 {
     if (!IsMapModeEnabled())

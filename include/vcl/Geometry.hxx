@@ -131,6 +131,8 @@ public:
     tools::Rectangle LogicToPixel(tools::Rectangle const& rLogicRect,
                                   MapMode const& rMapMode) const;
     tools::Polygon LogicToPixel(tools::Polygon const& rLogicPoly, MapMode const& rMapMode) const;
+    basegfx::B2DPolyPolygon LogicToPixel(basegfx::B2DPolyPolygon const& rLogicPolyPoly,
+                                         MapMode const& rMapMode) const;
 
     /** Get device transformation.
 
