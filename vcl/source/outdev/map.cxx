@@ -217,37 +217,6 @@ void OutputDevice::SetRelativeMapMode(const MapMode& rNewMapMode)
         mpAlphaVDev->SetRelativeMapMode(rNewMapMode);
 }
 
-tools::Polygon OutputDevice::LogicToPixel(const tools::Polygon& rLogicPoly,
-                                          const MapMode& rMapMode) const
-{
-    if (rMapMode.IsDefault())
-        return rLogicPoly;
-
-    // convert MapMode resolution and convert
-    MappingMetrics aMappingMetric(rMapMode, GetDPIX(), GetDPIY());
-
-    sal_uInt16 nPoints = rLogicPoly.GetSize();
-    tools::Polygon aPoly(rLogicPoly);
-
-    // get pointer to Point-array (copy data)
-    const Point* pPointAry = aPoly.GetConstPointAry();
-
-    for (sal_uInt16 i = 0; i < nPoints; i++)
-    {
-        const Point* pPt = &(pPointAry[i]);
-        Point aPt;
-        aPt.setX(Geometry::LogicToPixel(pPt->X() + aMappingMetric.mnMapOfsX, GetDPIX(),
-                                        aMappingMetric.mnMapScNumX, aMappingMetric.mnMapScDenomX)
-                 + GetXOffsetFromOriginInPixels());
-        aPt.setY(Geometry::LogicToPixel(pPt->Y() + aMappingMetric.mnMapOfsY, GetDPIY(),
-                                        aMappingMetric.mnMapScNumY, aMappingMetric.mnMapScDenomY)
-                 + GetYOffsetFromOriginInPixels());
-        aPoly[i] = aPt;
-    }
-
-    return aPoly;
-}
-
 basegfx::B2DPolyPolygon OutputDevice::LogicToPixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
                                                    const MapMode& rMapMode) const
 {

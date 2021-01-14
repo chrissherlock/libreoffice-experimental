@@ -130,6 +130,7 @@ public:
     Size LogicToPixel(Size const& rLogicSize, MapMode const& rMapMode) const;
     tools::Rectangle LogicToPixel(tools::Rectangle const& rLogicRect,
                                   MapMode const& rMapMode) const;
+    tools::Polygon LogicToPixel(tools::Polygon const& rLogicPoly, MapMode const& rMapMode) const;
 
     /** Get device transformation.
 

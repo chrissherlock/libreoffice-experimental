@@ -774,4 +774,35 @@ tools::Rectangle Geometry::LogicToPixel(tools::Rectangle const& rLogicRect,
                                 + GetYOffsetFromOriginInPixels());
 }
 
+tools::Polygon Geometry::LogicToPixel(tools::Polygon const& rLogicPoly,
+                                      MapMode const& rMapMode) const
+{
+    if (rMapMode.IsDefault())
+        return rLogicPoly;
+
+    // convert MapMode resolution and convert
+    MappingMetrics aMappingMetric(rMapMode, GetDPIX(), GetDPIY());
+
+    sal_uInt16 nPoints = rLogicPoly.GetSize();
+    tools::Polygon aPoly(rLogicPoly);
+
+    // get pointer to Point-array (copy data)
+    const Point* pPointAry = aPoly.GetConstPointAry();
+
+    for (sal_uInt16 i = 0; i < nPoints; i++)
+    {
+        const Point* pPt = &(pPointAry[i]);
+        Point aPt;
+        aPt.setX(LogicToPixel(pPt->X() + aMappingMetric.mnMapOfsX, GetDPIX(),
+                              aMappingMetric.mnMapScNumX, aMappingMetric.mnMapScDenomX)
+                 + GetXOffsetFromOriginInPixels());
+        aPt.setY(LogicToPixel(pPt->Y() + aMappingMetric.mnMapOfsY, GetDPIY(),
+                              aMappingMetric.mnMapScNumY, aMappingMetric.mnMapScDenomY)
+                 + GetYOffsetFromOriginInPixels());
+        aPoly[i] = aPt;
+    }
+
+    return aPoly;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

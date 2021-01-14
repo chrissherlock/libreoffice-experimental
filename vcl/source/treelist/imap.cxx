@@ -466,7 +466,7 @@ tools::Polygon IMapPolygonObject::GetPolygon( bool bPixelCoords ) const
     tools::Polygon aNewPoly;
 
     if ( bPixelCoords )
-        aNewPoly = Application::GetDefaultDevice()->LogicToPixel( aPoly, MapMode( MapUnit::Map100thMM ) );
+        aNewPoly = Application::GetDefaultDevice()->GetGeometry().LogicToPixel( aPoly, MapMode( MapUnit::Map100thMM ) );
     else
         aNewPoly = aPoly;
 

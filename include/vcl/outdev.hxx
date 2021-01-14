@@ -1440,8 +1440,6 @@ public:
 public:
     void SetOffsetFromOriginInPixels(Size const& rOffset) override;
 
-    tools::Polygon              LogicToPixel( const tools::Polygon& rLogicPoly,
-                                              const MapMode& rMapMode ) const;
     basegfx::B2DPolyPolygon     LogicToPixel( const basegfx::B2DPolyPolygon& rLogicPolyPoly,
                                               const MapMode& rMapMode ) const;
 
