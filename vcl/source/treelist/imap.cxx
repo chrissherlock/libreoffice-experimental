@@ -209,7 +209,7 @@ tools::Rectangle IMapRectangleObject::GetRectangle( bool bPixelCoords ) const
     tools::Rectangle   aNewRect;
 
     if ( bPixelCoords )
-        aNewRect = Application::GetDefaultDevice()->LogicToPixel( aRect, MapMode( MapUnit::Map100thMM ) );
+        aNewRect = Application::GetDefaultDevice()->GetGeometry().LogicToPixel( aRect, MapMode( MapUnit::Map100thMM ) );
     else
         aNewRect = aRect;
 

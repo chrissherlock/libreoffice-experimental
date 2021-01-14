@@ -3280,7 +3280,7 @@ tools::Rectangle SwAccessibleMap::CoreToPixel( const tools::Rectangle& rRect ) c
     {
         MapMode aMapMode;
         GetMapMode( rRect.TopLeft(), aMapMode );
-        aRect = pWin->LogicToPixel( rRect, aMapMode );
+        aRect = pWin->GetGeometry().LogicToPixel( rRect, aMapMode );
 
         tools::Rectangle aTmpRect = pWin->PixelToLogic( aRect, aMapMode );
         lcl_CorrectRectangle(aRect, rRect, aTmpRect);

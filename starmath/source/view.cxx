@@ -1217,7 +1217,7 @@ void SmViewShell::Impl_Print(OutputDevice &rOutDev, const SmPrintUIOptions &rPri
 
     aPos     = rOutDev.PixelToLogic(rOutDev.GetGeometry().LogicToPixel(aPos, MapMode(MapUnit::Map100thMM)),
                                           OutputMapMode);
-    aOutRect   = rOutDev.PixelToLogic(rOutDev.LogicToPixel(aOutRect, MapMode(MapUnit::Map100thMM)),
+    aOutRect   = rOutDev.PixelToLogic(rOutDev.GetGeometry().LogicToPixel(aOutRect, MapMode(MapUnit::Map100thMM)),
                                           OutputMapMode);
 
     rOutDev.SetMapMode(OutputMapMode);

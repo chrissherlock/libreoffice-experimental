@@ -450,7 +450,7 @@ awt::Rectangle SAL_CALL SdrLightEmbeddedClient_Impl::getPlacement()
     if ( xParentVis.is() )
         aContainerMapUnit = VCLUnoHelper::UnoEmbed2VCLMapUnit( xParentVis->getMapUnit( mpObj->GetAspect() ) );
 
-    aLogicRect = Application::GetDefaultDevice()->LogicToPixel(aLogicRect, MapMode(aContainerMapUnit));
+    aLogicRect = Application::GetDefaultDevice()->GetGeometry().LogicToPixel(aLogicRect, MapMode(aContainerMapUnit));
     return AWTRectangle( aLogicRect );
 }
 

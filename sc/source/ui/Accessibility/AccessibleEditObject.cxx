@@ -196,7 +196,7 @@ tools::Rectangle ScAccessibleEditObject::GetBoundingBoxOnScreen() const
             if ( mpEditView && mpEditView->GetEditEngine() )
             {
                 MapMode aMapMode( mpEditView->GetEditEngine()->GetRefMapMode() );
-                aScreenBounds = mpWindow->LogicToPixel( mpEditView->GetOutputArea(), aMapMode );
+                aScreenBounds = mpWindow->GetGeometry().LogicToPixel( mpEditView->GetOutputArea(), aMapMode );
                 Point aCellLoc = aScreenBounds.TopLeft();
                 tools::Rectangle aWindowRect = mpWindow->GetWindowExtentsRelative( nullptr );
                 Point aWindowLoc = aWindowRect.TopLeft();

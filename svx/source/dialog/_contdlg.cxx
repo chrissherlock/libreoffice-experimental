@@ -529,7 +529,7 @@ IMPL_LINK_NOARG(SvxSuperContourDlg, CreateHdl, Timer *, void)
 {
     aCreateIdle.Stop();
 
-    const tools::Rectangle aWorkRect = m_xContourWnd->GetDrawingArea()->get_ref_device().LogicToPixel(
+    const tools::Rectangle aWorkRect = m_xContourWnd->GetDrawingArea()->get_ref_device().GetGeometry().LogicToPixel(
         m_xContourWnd->GetWorkRect(), MapMode( MapUnit::Map100thMM));
 
     const Graphic&  rGraphic = m_xContourWnd->GetGraphic();

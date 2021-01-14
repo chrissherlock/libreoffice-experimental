@@ -141,7 +141,7 @@ awt::Rectangle AccessibleDialogControlShape::GetBounds() const
             aRect.Move( aOrg.X(), aOrg.Y() );
 
             // convert logic units to pixel
-            aRect = m_pDialogWindow->LogicToPixel( aRect, MapMode(MapUnit::Map100thMM) );
+            aRect = m_pDialogWindow->GetGeometry().LogicToPixel( aRect, MapMode(MapUnit::Map100thMM) );
 
             // clip the shape's bounding box with the bounding box of its parent
             tools::Rectangle aParentRect( Point( 0, 0 ), m_pDialogWindow->GetSizePixel() );

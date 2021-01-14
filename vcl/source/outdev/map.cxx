@@ -217,30 +217,6 @@ void OutputDevice::SetRelativeMapMode(const MapMode& rNewMapMode)
         mpAlphaVDev->SetRelativeMapMode(rNewMapMode);
 }
 
-tools::Rectangle OutputDevice::LogicToPixel(const tools::Rectangle& rLogicRect,
-                                            const MapMode& rMapMode) const
-{
-    if (rMapMode.IsDefault() || rLogicRect.IsEmpty())
-        return rLogicRect;
-
-    // convert MapMode resolution and convert
-    MappingMetrics aMappingMetric(rMapMode, GetDPIX(), GetDPIY());
-
-    return tools::Rectangle(
-        Geometry::LogicToPixel(rLogicRect.Left() + aMappingMetric.mnMapOfsX, GetDPIX(),
-                               aMappingMetric.mnMapScNumX, aMappingMetric.mnMapScDenomX)
-            + GetXOffsetFromOriginInPixels(),
-        Geometry::LogicToPixel(rLogicRect.Top() + aMappingMetric.mnMapOfsY, GetDPIY(),
-                               aMappingMetric.mnMapScNumY, aMappingMetric.mnMapScDenomY)
-            + GetYOffsetFromOriginInPixels(),
-        Geometry::LogicToPixel(rLogicRect.Right() + aMappingMetric.mnMapOfsX, GetDPIX(),
-                               aMappingMetric.mnMapScNumX, aMappingMetric.mnMapScDenomX)
-            + GetXOffsetFromOriginInPixels(),
-        Geometry::LogicToPixel(rLogicRect.Bottom() + aMappingMetric.mnMapOfsY, GetDPIY(),
-                               aMappingMetric.mnMapScNumY, aMappingMetric.mnMapScDenomY)
-            + GetYOffsetFromOriginInPixels());
-}
-
 tools::Polygon OutputDevice::LogicToPixel(const tools::Polygon& rLogicPoly,
                                           const MapMode& rMapMode) const
 {

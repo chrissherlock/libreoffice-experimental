@@ -585,8 +585,8 @@ DeviceCoordinate Geometry::LogicWidthToDeviceCoordinate(tools::Long nWidth) cons
     return (double)nWidth * mmaMappingMetric.mfScaleX * mnDPIX;
 #else
 
-    return Geometry::LogicToPixel(nWidth, mnDPIX, maMappingMetrics.mnMapScNumY,
-                                  maMappingMetrics.mnMapScDenomY);
+    return LogicToPixel(nWidth, mnDPIX, maMappingMetrics.mnMapScNumY,
+                        maMappingMetrics.mnMapScDenomY);
 #endif
 }
 
@@ -595,13 +595,12 @@ Point Geometry::LogicToPixel(const Point& rLogicPt) const
     if (!mbMap)
         return rLogicPt;
 
-    return Point(
-        Geometry::LogicToPixel(rLogicPt.X() + maMappingMetrics.mnMapOfsX, mnDPIX,
-                               maMappingMetrics.mnMapScNumX, maMappingMetrics.mnMapScDenomX)
-            + mnOffsetFromOriginXpx,
-        Geometry::LogicToPixel(rLogicPt.Y() + maMappingMetrics.mnMapOfsY, mnDPIY,
-                               maMappingMetrics.mnMapScNumY, maMappingMetrics.mnMapScDenomY)
-            + mnOffsetFromOriginYpx);
+    return Point(LogicToPixel(rLogicPt.X() + maMappingMetrics.mnMapOfsX, mnDPIX,
+                              maMappingMetrics.mnMapScNumX, maMappingMetrics.mnMapScDenomX)
+                     + mnOffsetFromOriginXpx,
+                 LogicToPixel(rLogicPt.Y() + maMappingMetrics.mnMapOfsY, mnDPIY,
+                              maMappingMetrics.mnMapScNumY, maMappingMetrics.mnMapScDenomY)
+                     + mnOffsetFromOriginYpx);
 }
 
 Size Geometry::LogicToPixel(Size const& rLogicSize) const
@@ -609,10 +608,10 @@ Size Geometry::LogicToPixel(Size const& rLogicSize) const
     if (!mbMap)
         return rLogicSize;
 
-    return Size(Geometry::LogicToPixel(rLogicSize.Width(), mnDPIX, maMappingMetrics.mnMapScNumX,
-                                       maMappingMetrics.mnMapScDenomX),
-                Geometry::LogicToPixel(rLogicSize.Height(), mnDPIY, maMappingMetrics.mnMapScNumY,
-                                       maMappingMetrics.mnMapScDenomY));
+    return Size(LogicToPixel(rLogicSize.Width(), mnDPIX, maMappingMetrics.mnMapScNumX,
+                             maMappingMetrics.mnMapScDenomX),
+                LogicToPixel(rLogicSize.Height(), mnDPIY, maMappingMetrics.mnMapScNumY,
+                             maMappingMetrics.mnMapScDenomY));
 }
 
 vcl::Region Geometry::LogicToPixel(vcl::Region const& rLogicRegion) const
@@ -654,17 +653,17 @@ tools::Rectangle Geometry::LogicToPixel(tools::Rectangle const& rLogicRect) cons
         return rLogicRect;
 
     return tools::Rectangle(
-        Geometry::LogicToPixel(rLogicRect.Left() + maMappingMetrics.mnMapOfsX, mnDPIX,
-                               maMappingMetrics.mnMapScNumX, maMappingMetrics.mnMapScDenomX)
+        LogicToPixel(rLogicRect.Left() + maMappingMetrics.mnMapOfsX, mnDPIX,
+                     maMappingMetrics.mnMapScNumX, maMappingMetrics.mnMapScDenomX)
             + mnOffsetFromOriginXpx,
-        Geometry::LogicToPixel(rLogicRect.Top() + maMappingMetrics.mnMapOfsY, mnDPIY,
-                               maMappingMetrics.mnMapScNumY, maMappingMetrics.mnMapScDenomY)
+        LogicToPixel(rLogicRect.Top() + maMappingMetrics.mnMapOfsY, mnDPIY,
+                     maMappingMetrics.mnMapScNumY, maMappingMetrics.mnMapScDenomY)
             + mnOffsetFromOriginYpx,
-        Geometry::LogicToPixel(rLogicRect.Right() + maMappingMetrics.mnMapOfsX, mnDPIX,
-                               maMappingMetrics.mnMapScNumX, maMappingMetrics.mnMapScDenomX)
+        LogicToPixel(rLogicRect.Right() + maMappingMetrics.mnMapOfsX, mnDPIX,
+                     maMappingMetrics.mnMapScNumX, maMappingMetrics.mnMapScDenomX)
             + mnOffsetFromOriginXpx,
-        Geometry::LogicToPixel(rLogicRect.Bottom() + maMappingMetrics.mnMapOfsY, mnDPIY,
-                               maMappingMetrics.mnMapScNumY, maMappingMetrics.mnMapScDenomY)
+        LogicToPixel(rLogicRect.Bottom() + maMappingMetrics.mnMapOfsY, mnDPIY,
+                     maMappingMetrics.mnMapScNumY, maMappingMetrics.mnMapScDenomY)
             + mnOffsetFromOriginYpx);
 }
 
@@ -730,11 +729,11 @@ Point Geometry::LogicToPixel(Point const& rLogicPt, MapMode const& rMapMode) con
     // convert MapMode resolution and convert
     MappingMetrics aMappingMetric(rMapMode, GetDPIX(), GetDPIY());
 
-    return Point(Geometry::LogicToPixel(rLogicPt.X() + aMappingMetric.mnMapOfsX, GetDPIX(),
-                                        aMappingMetric.mnMapScNumX, aMappingMetric.mnMapScDenomX)
+    return Point(LogicToPixel(rLogicPt.X() + aMappingMetric.mnMapOfsX, GetDPIX(),
+                              aMappingMetric.mnMapScNumX, aMappingMetric.mnMapScDenomX)
                      + GetXOffsetFromOriginInPixels(),
-                 Geometry::LogicToPixel(rLogicPt.Y() + aMappingMetric.mnMapOfsY, GetDPIY(),
-                                        aMappingMetric.mnMapScNumY, aMappingMetric.mnMapScDenomY)
+                 LogicToPixel(rLogicPt.Y() + aMappingMetric.mnMapOfsY, GetDPIY(),
+                              aMappingMetric.mnMapScNumY, aMappingMetric.mnMapScDenomY)
                      + GetYOffsetFromOriginInPixels());
 }
 
@@ -746,10 +745,33 @@ Size Geometry::LogicToPixel(Size const& rLogicSize, MapMode const& rMapMode) con
     // convert MapMode resolution and convert
     MappingMetrics aMappingMetric(rMapMode, GetDPIX(), GetDPIY());
 
-    return Size(Geometry::LogicToPixel(rLogicSize.Width(), GetDPIX(), aMappingMetric.mnMapScNumX,
-                                       aMappingMetric.mnMapScDenomX),
-                Geometry::LogicToPixel(rLogicSize.Height(), GetDPIY(), aMappingMetric.mnMapScNumY,
-                                       aMappingMetric.mnMapScDenomY));
+    return Size(LogicToPixel(rLogicSize.Width(), GetDPIX(), aMappingMetric.mnMapScNumX,
+                             aMappingMetric.mnMapScDenomX),
+                LogicToPixel(rLogicSize.Height(), GetDPIY(), aMappingMetric.mnMapScNumY,
+                             aMappingMetric.mnMapScDenomY));
+}
+
+tools::Rectangle Geometry::LogicToPixel(tools::Rectangle const& rLogicRect,
+                                        MapMode const& rMapMode) const
+{
+    if (rMapMode.IsDefault() || rLogicRect.IsEmpty())
+        return rLogicRect;
+
+    // convert MapMode resolution and convert
+    MappingMetrics aMappingMetric(rMapMode, GetDPIX(), GetDPIY());
+
+    return tools::Rectangle(LogicToPixel(rLogicRect.Left() + aMappingMetric.mnMapOfsX, GetDPIX(),
+                                         aMappingMetric.mnMapScNumX, aMappingMetric.mnMapScDenomX)
+                                + GetXOffsetFromOriginInPixels(),
+                            LogicToPixel(rLogicRect.Top() + aMappingMetric.mnMapOfsY, GetDPIY(),
+                                         aMappingMetric.mnMapScNumY, aMappingMetric.mnMapScDenomY)
+                                + GetYOffsetFromOriginInPixels(),
+                            LogicToPixel(rLogicRect.Right() + aMappingMetric.mnMapOfsX, GetDPIX(),
+                                         aMappingMetric.mnMapScNumX, aMappingMetric.mnMapScDenomX)
+                                + GetXOffsetFromOriginInPixels(),
+                            LogicToPixel(rLogicRect.Bottom() + aMappingMetric.mnMapOfsY, GetDPIY(),
+                                         aMappingMetric.mnMapScNumY, aMappingMetric.mnMapScDenomY)
+                                + GetYOffsetFromOriginInPixels());
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
