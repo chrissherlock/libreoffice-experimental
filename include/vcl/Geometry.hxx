@@ -104,6 +104,14 @@ public:
     tools::Long LogicWidthToDevicePixel(tools::Long nWidth) const;
     tools::Long LogicHeightToDevicePixel(tools::Long nHeight) const;
     float FloatLogicHeightToDevicePixel(float fLogicHeight) const;
+
+    /* TODO migrate LogicToPixel and PixelToLogic into individual objects
+     *
+     * The general idea here is to create an interface with a function like ToLogicalUnits()
+     * and ToPixels(), which converts between pixels and logical units, and vice versa. Also
+     * have a protected function IsInLogicalUnits() that determines whether function is in
+     * in pixels or logical units.
+     */
     Point LogicToDevicePixel(const Point& rLogicPt) const;
     Size LogicToDevicePixel(const Size& rLogicSize) const;
     tools::Rectangle LogicToDevicePixel(const tools::Rectangle& rLogicRect) const;
