@@ -66,7 +66,7 @@ bool ConstFormControl::MouseButtonDown(const MouseEvent& rMEvt)
 
         m_pWin->SetPointer(PointerStyle::DrawRect);
 
-        m_aStartPos = m_pWin->PixelToLogic(rMEvt.GetPosPixel());
+        m_aStartPos = m_pWin->GetGeometry().PixelToLogic(rMEvt.GetPosPixel());
         bReturn = m_pSh->BeginCreate(m_pWin->GetSdrDrawMode(), SdrInventor::FmForm, m_aStartPos);
 
         if (bReturn)

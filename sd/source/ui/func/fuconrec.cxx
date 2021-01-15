@@ -245,7 +245,7 @@ bool FuConstructRectangle::MouseButtonDown(const MouseEvent& rMEvt)
 
     if ( rMEvt.IsLeft() && !mpView->IsAction() )
     {
-        Point aPnt( mpWindow->PixelToLogic( rMEvt.GetPosPixel() ) );
+        Point aPnt( mpWindow->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() ) );
 
         mpWindow->CaptureMouse();
         sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(DRGPIX,0)).Width() );

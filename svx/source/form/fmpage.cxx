@@ -101,7 +101,7 @@ bool FmFormPage::RequestHelp( vcl::Window* pWindow, SdrView const * pView,
 
     Point aPos = rEvt.GetMousePosPixel();
     aPos = pWindow->ScreenToOutputPixel( aPos );
-    aPos = pWindow->PixelToLogic( aPos );
+    aPos = pWindow->GetGeometry().PixelToLogic( aPos );
 
     SdrPageView* pPV = nullptr;
     SdrObject* pObj = pView->PickObj(aPos, 0, pPV, SdrSearchOptions::DEEP);

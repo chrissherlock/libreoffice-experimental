@@ -872,7 +872,7 @@ void AnimationWindow::CreateAnimObj (::sd::View& rView )
     Size                aMaxSizeLog;
     Size                aMaxSizePix;
     Size                aTemp( pOutWin->GetSizeInPixels() );
-    const Point         aWindowCenter( pOutWin->PixelToLogic( Point( aTemp.Width() >> 1, aTemp.Height() >> 1 ) ) );
+    const Point         aWindowCenter( pOutWin->GetGeometry().PixelToLogic( Point( aTemp.Width() >> 1, aTemp.Height() >> 1 ) ) );
     const OutputDevice* pDefDev = Application::GetDefaultDevice();
     const size_t nCount = m_FrameList.size();
     BitmapAdjustment    eBA = static_cast<BitmapAdjustment>(m_xLbAdjustment->get_active());

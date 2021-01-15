@@ -258,7 +258,7 @@ void ScrollableWindow::SetMapMode( const MapMode& rNewMapMode )
 MapMode ScrollableWindow::GetMapMode() const
 {
     MapMode aMap( Window::GetMapMode() );
-    aMap.SetOrigin( aMap.GetOrigin() - PixelToLogic( aPixOffset ) );
+    aMap.SetOrigin( aMap.GetOrigin() - maGeometry.PixelToLogic( aPixOffset ) );
     return aMap;
 }
 

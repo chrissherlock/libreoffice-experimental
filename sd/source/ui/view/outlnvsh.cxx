@@ -496,7 +496,7 @@ void OutlineViewShell::FuSupport(SfxRequest &rReq)
                 {
                     sal_Int8 nAction = DND_ACTION_COPY;
                     pOlView->InsertData( aDataHelper,
-                                         GetActiveWindow()->PixelToLogic( ::tools::Rectangle( Point(), GetActiveWindow()->GetSizeInPixels() ).Center() ),
+                                         GetActiveWindow()->GetGeometry().PixelToLogic( ::tools::Rectangle( Point(), GetActiveWindow()->GetSizeInPixels() ).Center() ),
                                          nAction, false, SotClipboardFormatId::STRING);
                 }
             }

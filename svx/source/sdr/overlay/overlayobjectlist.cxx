@@ -116,7 +116,7 @@ namespace sdr::overlay
 
                 if(pManager)
                 {
-                    const Point aPosLogic(pManager->getOutputDevice().PixelToLogic(rDiscretePosition));
+                    const Point aPosLogic(pManager->getOutputDevice().GetGeometry().PixelToLogic(rDiscretePosition));
                     const basegfx::B2DPoint aPosition(aPosLogic.X(), aPosLogic.Y());
 
                     const Size aSizeLogic(pManager->getOutputDevice().PixelToLogic(Size(nDiscreteTolerance, nDiscreteTolerance)));

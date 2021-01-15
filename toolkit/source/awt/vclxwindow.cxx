@@ -2206,7 +2206,7 @@ void VCLXWindow::draw( sal_Int32 nX, sal_Int32 nY )
     if ( pTabPage )
     {
         Point aPos( nX, nY );
-        aPos = pDev->PixelToLogic( aPos );
+        aPos = pDev->GetGeometry().PixelToLogic( aPos );
         pTabPage->Draw( pDev, aPos, DrawFlags::NONE );
         return;
     }
@@ -2254,7 +2254,7 @@ void VCLXWindow::draw( sal_Int32 nX, sal_Int32 nY )
     }
     else if ( pDev )
     {
-        Point aP = pDev->PixelToLogic( aPos );
+        Point aP = pDev->GetGeometry().PixelToLogic( aPos );
 
         vcl::PDFExtOutDevData* pPDFExport   = dynamic_cast<vcl::PDFExtOutDevData*>(pDev->GetExtOutDevData());
         bool bDrawSimple =    ( pDev->GetOutDevType() == OUTDEV_PRINTER )

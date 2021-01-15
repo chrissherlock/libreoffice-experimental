@@ -195,7 +195,7 @@ sal_Int32 SlideSorterView::GetPageIndexAtPoint (const Point& rWindowPosition) co
     sd::Window *pWindow (mrSlideSorter.GetContentWindow().get());
     if (pWindow)
     {
-        nIndex = mpLayouter->GetIndexAtPoint(pWindow->PixelToLogic(rWindowPosition), false, false);
+        nIndex = mpLayouter->GetIndexAtPoint(pWindow->GetGeometry().PixelToLogic(rWindowPosition), false, false);
 
         // Clip the page index against the page count.
         if (nIndex >= mrModel.GetPageCount())
@@ -518,7 +518,7 @@ void SlideSorterView::RequestRepaint()
     {
         mpLayeredDevice->InvalidateAllLayers(
             ::tools::Rectangle(
-                pWindow->PixelToLogic(Point(0,0)),
+                pWindow->GetGeometry().PixelToLogic(Point(0,0)),
                 pWindow->PixelToLogic(pWindow->GetSizePixel())));
         pWindow->Invalidate();
     }

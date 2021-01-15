@@ -5840,7 +5840,7 @@ void PDFWriterImpl::drawVerticalGlyphs(
 {
     tools::Long nXOffset = 0;
     Point aCurPos( rGlyphs[0].m_aPos );
-    aCurPos = PixelToLogic( aCurPos );
+    aCurPos = maGeometry.PixelToLogic( aCurPos );
     aCurPos += rAlignOffset;
     for( size_t i = 0; i < rGlyphs.size(); i++ )
     {
@@ -5862,7 +5862,7 @@ void PDFWriterImpl::drawVerticalGlyphs(
             fSkewA = -fSkewB;
             fSkewB = 0.0;
         }
-        aDeltaPos += PixelToLogic( Point( static_cast<int>(static_cast<double>(nXOffset)/fXScale), 0 ) ) - PixelToLogic( Point() );
+        aDeltaPos += maGeometry.PixelToLogic( Point( static_cast<int>(static_cast<double>(nXOffset)/fXScale), 0 ) ) - maGeometry.PixelToLogic( Point() );
         if( i < rGlyphs.size()-1 )
         // #i120627# the text on the Y axis is reversed when export ppt file to PDF format
         {
@@ -5934,7 +5934,7 @@ void PDFWriterImpl::drawHorizontalGlyphs(
         // setup text matrix
         Point aCurPos = rGlyphs[nBeginRun].m_aPos;
         // back transformation to current coordinate system
-        aCurPos = PixelToLogic( aCurPos );
+        aCurPos = maGeometry.PixelToLogic( aCurPos );
         aCurPos += rAlignOffset;
         // the first run can be set with "Td" operator
         // subsequent use of that operator would move
@@ -6242,7 +6242,7 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
         // ascent / descent to match the on-screen rendering.
         tools::Rectangle aRectangle;
         // This is the top left of the text without ascent / descent.
-        aRectangle.SetPos(PixelToLogic(rLayout.GetDrawPosition()));
+        aRectangle.SetPos(maGeometry.PixelToLogic(rLayout.GetDrawPosition()));
         aRectangle.setY(aRectangle.getY() - aRefDevFontMetric.GetAscent());
         aRectangle.SetSize(PixelToLogic(Size(rLayout.GetTextWidth(), 0)));
         // This includes ascent / descent.
@@ -6253,7 +6253,7 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
         {
             // Adapt rectangle for rotated text.
             tools::Polygon aPolygon(aRectangle);
-            aPolygon.Rotate(PixelToLogic(rLayout.GetDrawPosition()), pFontInstance->mnOrientation);
+            aPolygon.Rotate(maGeometry.PixelToLogic(rLayout.GetDrawPosition()), pFontInstance->mnOrientation);
             drawPolygon(aPolygon);
         }
         else
@@ -6356,7 +6356,7 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
                 }
                 else if( nWidth > 0 )
                 {
-                    drawTextLine( PixelToLogic( aStartPt ),
+                    drawTextLine( maGeometry.PixelToLogic( aStartPt ),
                                   maGeometry.DevicePixelToLogicWidth( nWidth ),
                                   eStrikeout, eUnderline, eOverline, bUnderlineAbove );
                     nWidth = 0;
@@ -6365,7 +6365,7 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
 
             if( nWidth > 0 )
             {
-                drawTextLine( PixelToLogic( aStartPt ),
+                drawTextLine( maGeometry.PixelToLogic( aStartPt ),
                               maGeometry.DevicePixelToLogicWidth( nWidth ),
                               eStrikeout, eUnderline, eOverline, bUnderlineAbove );
             }
@@ -6374,7 +6374,7 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
         {
             Point aStartPt = rLayout.GetDrawPosition();
             int nWidth = rLayout.GetTextWidth() / rLayout.GetUnitsPerPixel();
-            drawTextLine( PixelToLogic( aStartPt ),
+            drawTextLine( maGeometry.PixelToLogic( aStartPt ),
                           maGeometry.DevicePixelToLogicWidth( nWidth ),
                           eStrikeout, eUnderline, eOverline, bUnderlineAbove );
         }
@@ -6449,7 +6449,7 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
             aAdjOffset -= Point( nEmphWidth2, nEmphHeight2 );
 
             aPos += aAdjOffset;
-            aPos = PixelToLogic( aPos );
+            aPos = maGeometry.PixelToLogic( aPos );
             drawEmphasisMark( aPos.X(), aPos.Y(),
                               aEmphPoly, bEmphPolyLine,
                               aEmphRect1, aEmphRect2 );

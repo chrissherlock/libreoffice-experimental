@@ -446,7 +446,7 @@ bool MotionPathTag::MouseButtonDown( const MouseEvent& rMEvt, SmartHdl& rHdl )
         else if( rMEvt.IsLeft() )
         {
             OutputDevice* pOut = mrView.GetViewShell()->GetActiveWindow();
-            Point aMDPos( pOut->PixelToLogic( rMEvt.GetPosPixel() ) );
+            Point aMDPos( pOut->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() ) );
 
             if( !mrView.IsFrameDragSingles() && mrView.IsInsObjPointMode() && (rHdl.GetObjHdlNum() == SMART_TAG_HDL_NUM) )
             {

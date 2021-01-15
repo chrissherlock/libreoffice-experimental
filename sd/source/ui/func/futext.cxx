@@ -492,7 +492,7 @@ bool FuText::MouseMove(const MouseEvent& rMEvt)
     if (!bReturn && mpView->IsAction() && !mpDocSh->IsReadOnly())
     {
         Point aPix(rMEvt.GetPosPixel());
-        Point aPnt(mpWindow->PixelToLogic(aPix));
+        Point aPnt(mpWindow->GetGeometry().PixelToLogic(aPix));
 
         ForceScroll(aPix);
         mpView->MovAction(aPnt);
@@ -623,7 +623,7 @@ bool FuText::MouseButtonUp(const MouseEvent& rMEvt)
 
     mpViewShell->GetViewFrame()->GetBindings().Invalidate( SidArray );
 
-    Point aPnt( mpWindow->PixelToLogic( rMEvt.GetPosPixel() ) );
+    Point aPnt( mpWindow->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() ) );
 
     if( (mpView && mpView->MouseButtonUp(rMEvt, mpWindow)) || rMEvt.GetClicks() == 2 )
         return true; // handle event from SdrView
@@ -1091,7 +1091,7 @@ void FuText::SetInEditMode(const MouseEvent& rMEvt, bool bQuickDrag)
                     if( pTextObj->getTextCount() > 1 )
                     {
                         Point aPix(rMEvt.GetPosPixel());
-                        Point aPnt(mpWindow->PixelToLogic(aPix));
+                        Point aPnt(mpWindow->GetGeometry().PixelToLogic(aPix));
                         pTextObj->setActiveText( pTextObj->CheckTextHit(aPnt ) );
                     }
 

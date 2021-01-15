@@ -456,10 +456,8 @@ sal_Int8 View::AcceptDrop( const AcceptDropEvent& rEvt, DropTargetHelper& rTarge
                 aRect.Union( pObj->GetLogicRect() );
             }
 
-            if( aRect.IsInside( pOLV->GetWindow()->PixelToLogic( rEvt.maPosPixel ) ) )
-            {
+            if( aRect.IsInside( pOLV->GetWindow()->GetGeometry().PixelToLogic( rEvt.maPosPixel ) ) )
                 bIsInsideOutlinerView = true;
-            }
         }
 
         if( !bIsInsideOutlinerView )
@@ -528,7 +526,7 @@ sal_Int8 View::AcceptDrop( const AcceptDropEvent& rEvt, DropTargetHelper& rTarge
                 {
                     SdrPageView*    pPageView = nullptr;
                     ::sd::Window* pWindow = mpViewSh->GetActiveWindow();
-                    Point           aPos( pWindow->PixelToLogic( rEvt.maPosPixel ) );
+                    Point           aPos( pWindow->GetGeometry().PixelToLogic( rEvt.maPosPixel ) );
                     SdrObject* pPickObj = PickObj(aPos, getHitTolLog(), pPageView);
                     bool            bIsPresTarget = false;
 
@@ -635,7 +633,7 @@ sal_Int8 View::ExecuteDrop( const ExecuteDropEvent& rEvt,
                 aRect.Union( pObj->GetLogicRect() );
             }
 
-            Point aPos( pOLV->GetWindow()->PixelToLogic( rEvt.maPosPixel ) );
+            Point aPos( pOLV->GetWindow()->GetGeometry().PixelToLogic( rEvt.maPosPixel ) );
 
             if( aRect.IsInside( aPos ) )
             {
@@ -649,7 +647,7 @@ sal_Int8 View::ExecuteDrop( const ExecuteDropEvent& rEvt,
             TransferableDataHelper  aDataHelper( rEvt.maDropEvent.Transferable );
 
             if( pTargetWindow )
-                aPos = pTargetWindow->PixelToLogic( rEvt.maPosPixel );
+                aPos = pTargetWindow->GetGeometry().PixelToLogic( rEvt.maPosPixel );
 
             // handle insert?
             if ((SdrDragMode::Gradient == GetDragMode())
@@ -807,7 +805,7 @@ IMPL_LINK( View, ExecuteNavigatorDrop, void*, p, void )
         sal_uInt16  nPgPos = 0xFFFF;
 
         if( pSdNavigatorDropEvent->mpTargetWindow )
-            aPos = pSdNavigatorDropEvent->mpTargetWindow->PixelToLogic( pSdNavigatorDropEvent->maPosPixel );
+            aPos = pSdNavigatorDropEvent->mpTargetWindow->GetGeometry().PixelToLogic( pSdNavigatorDropEvent->maPosPixel );
 
         const OUString& aURL( aINetBookmark.GetURL() );
         sal_Int32 nIndex = aURL.indexOf( '#' );

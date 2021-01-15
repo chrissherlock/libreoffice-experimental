@@ -59,7 +59,7 @@ static void lcl_AllignToPixel( Point& rPoint, OutputDevice const * pOutDev, shor
     if ( nDiffY )
         rPoint.AdjustY(nDiffY );
 
-    rPoint = pOutDev->PixelToLogic( rPoint );
+    rPoint = pOutDev->GetGeometry().PixelToLogic( rPoint );
 }
 
 LOKSpecialPositioning::LOKSpecialPositioning(const ImpEditView& rImpEditView, MapUnit eUnit,
@@ -290,7 +290,7 @@ static void lcl_translateTwips(vcl::Window const & rParent, vcl::Window& rChild)
         rChild.SetMapMode(aMapMode);
         rChild.EnableMapMode();
     }
-    aOffset = rChild.PixelToLogic(aOffset);
+    aOffset = rChild.GetGeometry().PixelToLogic(aOffset);
     MapMode aMapMode(rChild.GetMapMode());
     aMapMode.SetOrigin(aOffset);
     aMapMode.SetMapUnit(rParent.GetMapMode().GetMapUnit());
@@ -386,7 +386,7 @@ void ImpEditView::lokSelectionCallback(const std::unique_ptr<tools::PolyPolygon>
                 if (pViewShellWindow && pViewShellWindow->IsAncestorOf(*pOutWin))
                 {
                     Point aOffsetPx = pOutWin->GetOffsetPixelFrom(*pViewShellWindow);
-                    Point aLogicOffset = pOutWin->PixelToLogic(aOffsetPx);
+                    Point aLogicOffset = pOutWin->GetGeometry().PixelToLogic(aOffsetPx);
                     for (tools::Rectangle& rRect : aRectangles)
                         rRect.Move(aLogicOffset.getX(), aLogicOffset.getY());
                 }
@@ -1331,7 +1331,7 @@ void ImpEditView::ShowCursor( bool bGotoCursor, bool bForceVisCursor )
                 if (pViewShellWindow && pViewShellWindow->IsAncestorOf(*pOutWin))
                 {
                     Point aOffsetPx = pOutWin->GetOffsetPixelFrom(*pViewShellWindow);
-                    Point aLogicOffset = pOutWin->PixelToLogic(aOffsetPx);
+                    Point aLogicOffset = pOutWin->GetGeometry().PixelToLogic(aOffsetPx);
                     aPos.Move(aLogicOffset.getX(), aLogicOffset.getY());
                 }
             }
@@ -1559,7 +1559,7 @@ Pair ImpEditView::Scroll( tools::Long ndX, tools::Long ndY, ScrollRangeCheck nRa
         // Move by aligned value does not necessarily result in aligned
         // rectangle ...
         aVisDocStartPos = rOutDev.GetGeometry().LogicToPixel( aVisDocStartPos );
-        aVisDocStartPos = rOutDev.PixelToLogic( aVisDocStartPos );
+        aVisDocStartPos = rOutDev.GetGeometry().PixelToLogic( aVisDocStartPos );
         tools::Rectangle aRect( aOutArea );
 
         if (pOutWin)
@@ -2040,7 +2040,7 @@ bool ImpEditView::IsSelectionAtPoint( const Point& rPosPixel )
 
     // Logical units ...
     const OutputDevice& rOutDev = GetOutputDevice();
-    Point aMousePos = rOutDev.PixelToLogic(rPosPixel);
+    Point aMousePos = rOutDev.GetGeometry().PixelToLogic(rPosPixel);
 
     if ( ( !GetOutputArea().IsInside( aMousePos ) ) && !pEditEngine->pImpEditEngine->IsInSelectionMode() )
     {
@@ -2060,7 +2060,7 @@ bool ImpEditView::SetCursorAtPoint( const Point& rPointPixel )
 
     // Logical units ...
     const OutputDevice& rOutDev = GetOutputDevice();
-    aMousePos = rOutDev.PixelToLogic( aMousePos );
+    aMousePos = rOutDev.GetGeometry().PixelToLogic( aMousePos );
 
     if ( ( !GetOutputArea().IsInside( aMousePos ) ) && !pEditEngine->pImpEditEngine->IsInSelectionMode() )
     {
@@ -2192,7 +2192,7 @@ void ImpEditView::dragGestureRecognized(const css::datatransfer::dnd::DragGestur
         // Field?!
         sal_Int32 nPara;
         sal_Int32 nPos;
-        Point aMousePos = GetWindow()->PixelToLogic( aMousePosPixel );
+        Point aMousePos = GetWindow()->GetGeometry().PixelToLogic( aMousePosPixel );
         const SvxFieldItem* pField = GetField( aMousePos, &nPara, &nPos );
         if ( pField )
         {
@@ -2461,7 +2461,7 @@ void ImpEditView::dragOver(const css::datatransfer::dnd::DropTargetDragEvent& rD
     const OutputDevice& rOutDev = GetOutputDevice();
 
     Point aMousePos( rDTDE.LocationX, rDTDE.LocationY );
-    aMousePos = rOutDev.PixelToLogic( aMousePos );
+    aMousePos = rOutDev.GetGeometry().PixelToLogic( aMousePos );
 
     bool bAccept = false;
 

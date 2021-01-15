@@ -616,7 +616,7 @@ bool FuSelection::MouseMove(const MouseEvent& rMEvt)
     if (mpView->IsAction())
     {
         Point aPix(rMEvt.GetPosPixel());
-        Point aPnt(mpWindow->PixelToLogic(aPix));
+        Point aPnt(mpWindow->GetGeometry().PixelToLogic(aPix));
 
         ForceScroll(aPix);
 
@@ -652,7 +652,7 @@ bool FuSelection::MouseButtonUp(const MouseEvent& rMEvt)
     if( !mpView )
         return false;
 
-    Point aPnt( mpWindow->PixelToLogic( rMEvt.GetPosPixel() ) );
+    Point aPnt( mpWindow->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() ) );
     sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(HITPIX,0)).Width() );
     sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(DRGPIX,0)).Width() );
 
@@ -883,7 +883,7 @@ bool FuSelection::MouseButtonUp(const MouseEvent& rMEvt)
                 mpView->EndAction();
 
                 sal_uInt16 nDrgLog2 = sal_uInt16 ( mpWindow->PixelToLogic(Size(DRGPIX,0)).Width() );
-                Point aPos = mpWindow->PixelToLogic( rMEvt.GetPosPixel() );
+                Point aPos = mpWindow->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() );
 
                 if (std::abs(aMDPos.X() - aPos.X()) < nDrgLog2 &&
                     std::abs(aMDPos.Y() - aPos.Y()) < nDrgLog2 &&

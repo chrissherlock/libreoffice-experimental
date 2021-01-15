@@ -583,7 +583,7 @@ bool GraphCtrl::MouseButtonDown( const MouseEvent& rMEvt )
     {
         OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
 
-        const Point aLogPt( rDevice.PixelToLogic( rMEvt.GetPosPixel() ) );
+        const Point aLogPt( rDevice.GetGeometry().PixelToLogic( rMEvt.GetPosPixel() ) );
 
         if ( !tools::Rectangle( Point(), aGraphSize ).IsInside( aLogPt ) && !pView->IsEditMode() )
             weld::CustomWidgetController::MouseButtonDown( rMEvt );
@@ -625,7 +625,7 @@ bool GraphCtrl::MouseButtonDown( const MouseEvent& rMEvt )
 bool GraphCtrl::MouseMove(const MouseEvent& rMEvt)
 {
     OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
-    const Point aLogPos( rDevice.PixelToLogic( rMEvt.GetPosPixel() ) );
+    const Point aLogPos( rDevice.GetGeometry().PixelToLogic( rMEvt.GetPosPixel() ) );
 
     if ( mbSdrMode )
     {
@@ -670,7 +670,7 @@ bool GraphCtrl::MouseButtonUp(const MouseEvent& rMEvt)
             pView->MouseButtonUp( rMEvt, &rDevice );
 
         ReleaseMouse();
-        SetPointer( pView->GetPreferredPointer( rDevice.PixelToLogic( rMEvt.GetPosPixel() ), &rDevice ) );
+        SetPointer( pView->GetPreferredPointer( rDevice.GetGeometry().PixelToLogic( rMEvt.GetPosPixel() ), &rDevice ) );
     }
     else
         weld::CustomWidgetController::MouseButtonUp( rMEvt );

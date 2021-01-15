@@ -709,7 +709,7 @@ void BrowseBox::Draw( OutputDevice* pDev, const Point& rPos, DrawFlags nFlags )
             // do this before converting to logics !
 
         // the header's draw expects logic coordinates, again
-        aHeaderPos = pDev->PixelToLogic(aHeaderPos);
+        aHeaderPos = pDev->GetGeometry().PixelToLogic(aHeaderPos);
 
         Size aOrigSize(pBar->GetSizePixel());
         pBar->SetSizePixel(aHeaderSize);

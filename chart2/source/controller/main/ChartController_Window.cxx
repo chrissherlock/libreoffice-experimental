@@ -574,7 +574,7 @@ void ChartController::execute_MouseButtonDown( const MouseEvent& rMEvt )
     if(!pChartWindow || !pDrawViewWrapper )
         return;
 
-    Point aMPos = pChartWindow->PixelToLogic(rMEvt.GetPosPixel());
+    Point aMPos = pChartWindow->GetGeometry().PixelToLogic(rMEvt.GetPosPixel());
 
     // Check if button was clicked
     SdrObject* pObject = pDrawViewWrapper->getHitObject(aMPos);
@@ -731,9 +731,7 @@ void ChartController::execute_MouseMove( const MouseEvent& rMEvt )
     }
 
     if(pDrawViewWrapper->IsAction())
-    {
-        pDrawViewWrapper->MovAction( pChartWindow->PixelToLogic( rMEvt.GetPosPixel() ) );
-    }
+        pDrawViewWrapper->MovAction( pChartWindow->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() ) );
 
     impl_SetMousePointer( rMEvt );
 }
@@ -752,7 +750,7 @@ void ChartController::execute_MouseButtonUp( const MouseEvent& rMEvt )
         if(!pChartWindow || !pDrawViewWrapper)
             return;
 
-        Point aMPos = pChartWindow->PixelToLogic(rMEvt.GetPosPixel());
+        Point aMPos = pChartWindow->GetGeometry().PixelToLogic(rMEvt.GetPosPixel());
 
         // Check if button was clicked
         if (m_bFieldButtonDown)
@@ -1908,7 +1906,7 @@ void ChartController::impl_SetMousePointer( const MouseEvent & rEvent )
     if (!m_pDrawViewWrapper || !pChartWindow)
         return;
 
-    Point aMousePos( pChartWindow->PixelToLogic( rEvent.GetPosPixel()));
+    Point aMousePos( pChartWindow->GetGeometry().PixelToLogic( rEvent.GetPosPixel()));
     sal_uInt16 nModifier = rEvent.GetModifier();
     bool bLeftDown = rEvent.IsLeft();
 

@@ -2028,7 +2028,7 @@ tools::Rectangle ScOutputData::LayoutStrings(bool bPixelToLogic, bool bPaint, co
                             if (bRightAdjusted)
                                 aDrawTextPos.AdjustX(aVars.GetTextSize().Width() );
 
-                            aDrawTextPos = mpRefDevice->PixelToLogic( aDrawTextPos );
+                            aDrawTextPos = mpRefDevice->GetGeometry().PixelToLogic( aDrawTextPos );
 
                             //  redo text width adjustment in logic units
                             if (bRightAdjusted)
@@ -2576,7 +2576,7 @@ void ScOutputData::DrawEditParam::calcStartPosForVertical(
     OSL_ENSURE(isVerticallyOriented(), "Use this only for vertically oriented cell!");
 
     if (mbPixelToLogic)
-        rLogicStart = pRefDevice->PixelToLogic(rLogicStart);
+        rLogicStart = pRefDevice->GetGeometry().PixelToLogic(rLogicStart);
 
     if (!mbBreak)
         return;
@@ -3119,7 +3119,7 @@ void ScOutputData::DrawEditStandard(DrawEditParam& rParam)
 
         Point aLogicStart;
         if (rParam.mbPixelToLogic)
-            aLogicStart = mpRefDevice->PixelToLogic( Point(nStartX,nStartY) );
+            aLogicStart = mpRefDevice->GetGeometry().PixelToLogic( Point(nStartX,nStartY) );
         else
             aLogicStart = Point(nStartX, nStartY);
 
@@ -3952,7 +3952,7 @@ void ScOutputData::DrawEditStacked(DrawEditParam& rParam)
 
         Point aLogicStart;
         if (rParam.mbPixelToLogic)
-            aLogicStart = mpRefDevice->PixelToLogic( Point(nStartX,nStartY) );
+            aLogicStart = mpRefDevice->GetGeometry().PixelToLogic( Point(nStartX,nStartY) );
         else
             aLogicStart = Point(nStartX, nStartY);
 
@@ -4239,7 +4239,7 @@ void ScOutputData::DrawEditAsianVertical(DrawEditParam& rParam)
 
         Point aLogicStart;
         if (rParam.mbPixelToLogic)
-            aLogicStart = mpRefDevice->PixelToLogic( Point(nStartX,nStartY) );
+            aLogicStart = mpRefDevice->GetGeometry().PixelToLogic( Point(nStartX,nStartY) );
         else
             aLogicStart = Point(nStartX, nStartY);
 
@@ -4939,7 +4939,7 @@ void ScOutputData::DrawRotated(bool bPixelToLogic)
 
                                 Point aLogicStart;
                                 if (bPixelToLogic)
-                                    aLogicStart = mpRefDevice->PixelToLogic( Point(nStartX,nStartY) );
+                                    aLogicStart = mpRefDevice->GetGeometry().PixelToLogic( Point(nStartX,nStartY) );
                                 else
                                     aLogicStart = Point(nStartX, nStartY);
                                 if ( eOrient!=SvxCellOrientation::Standard || !bBreak )

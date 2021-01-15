@@ -814,4 +814,15 @@ basegfx::B2DPolyPolygon Geometry::LogicToPixel(basegfx::B2DPolyPolygon const& rL
     return aTransformedPoly;
 }
 
+Point Geometry::PixelToLogic(Point const& rDevicePt) const
+{
+    if (!IsMapModeEnabled())
+        return rDevicePt;
+
+    return Point(PixelToLogic(rDevicePt.X(), GetDPIX(), GetXMapNumerator(), GetXMapDenominator())
+                     - GetXMapOffset() - GetXOffsetFromOriginInLogicalUnits(),
+                 PixelToLogic(rDevicePt.Y(), GetDPIY(), GetYMapNumerator(), GetYMapDenominator())
+                     - GetYMapOffset() - GetYOffsetFromOriginInLogicalUnits());
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

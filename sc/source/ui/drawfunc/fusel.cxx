@@ -83,7 +83,7 @@ bool FuSelection::MouseButtonDown(const MouseEvent& rMEvt)
     if (aLogicPosition)
         aMDPos = *aLogicPosition;
     else
-        aMDPos = pWindow->PixelToLogic(rMEvt.GetPosPixel());
+        aMDPos = pWindow->GetGeometry().PixelToLogic(rMEvt.GetPosPixel());
 
     if ( rMEvt.IsLeft() )
     {
@@ -312,7 +312,7 @@ bool FuSelection::MouseMove(const MouseEvent& rMEvt)
     if ( pView->IsAction() )
     {
         Point aPix(rMEvt.GetPosPixel());
-        Point aPnt(pWindow->PixelToLogic(aPix));
+        Point aPnt(pWindow->GetGeometry().PixelToLogic(aPix));
 
         ForceScroll(aPix);
         pView->MovAction(aPnt);
@@ -340,7 +340,7 @@ bool FuSelection::MouseButtonUp(const MouseEvent& rMEvt)
 
     sal_uInt16 nDrgLog = sal_uInt16 ( pWindow->PixelToLogic(Size(SC_MINDRAGMOVE,0)).Width() );
     auto aLogicPosition = rMEvt.getLogicPosition();
-    Point aPnt(aLogicPosition ? *aLogicPosition : pWindow->PixelToLogic(rMEvt.GetPosPixel()));
+    Point aPnt(aLogicPosition ? *aLogicPosition : pWindow->GetGeometry().PixelToLogic(rMEvt.GetPosPixel()));
 
     bool bCopy = false;
     ScViewData& rViewData = rViewShell.GetViewData();

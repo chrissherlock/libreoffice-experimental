@@ -153,7 +153,7 @@ void ViewShell::VirtHScrollHdl(ScrollBar* pHScroll)
     mpContentWindow->SetVisibleXY(fX, -1);
 
     ::tools::Rectangle aVisArea = GetDocSh()->GetVisArea(ASPECT_CONTENT);
-    Point aVisAreaPos = GetActiveWindow()->PixelToLogic( Point(0,0) );
+    Point aVisAreaPos = GetActiveWindow()->GetGeometry().PixelToLogic( Point(0,0) );
     aVisArea.SetPos(aVisAreaPos);
     GetDocSh()->SetVisArea(aVisArea);
 
@@ -210,7 +210,7 @@ void ViewShell::VirtVScrollHdl(ScrollBar* pVScroll)
         mpContentWindow->SetVisibleXY(-1, fY);
 
         ::tools::Rectangle aVisArea = GetDocSh()->GetVisArea(ASPECT_CONTENT);
-        Point aVisAreaPos = GetActiveWindow()->PixelToLogic( Point(0,0) );
+        Point aVisAreaPos = GetActiveWindow()->GetGeometry().PixelToLogic( Point(0,0) );
         aVisArea.SetPos(aVisAreaPos);
         GetDocSh()->SetVisArea(aVisArea);
 
@@ -288,7 +288,7 @@ void ViewShell::Scroll(::tools::Long nScrollX, ::tools::Long nScrollY)
     GetActiveWindow()->SetVisibleXY(fX, fY);
 
     ::tools::Rectangle aVisArea = GetDocSh()->GetVisArea(ASPECT_CONTENT);
-    Point aVisAreaPos = GetActiveWindow()->PixelToLogic( Point(0,0) );
+    Point aVisAreaPos = GetActiveWindow()->GetGeometry().PixelToLogic( Point(0,0) );
     aVisArea.SetPos(aVisAreaPos);
     GetDocSh()->SetVisArea(aVisArea);
 

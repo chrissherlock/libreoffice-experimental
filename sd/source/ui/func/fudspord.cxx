@@ -63,7 +63,7 @@ bool FuDisplayOrder::MouseButtonDown(const MouseEvent& rMEvt)
 bool FuDisplayOrder::MouseMove(const MouseEvent& rMEvt)
 {
     SdrPageView* pPV;
-    Point aPnt( mpWindow->PixelToLogic( rMEvt.GetPosPixel() ) );
+    Point aPnt( mpWindow->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() ) );
 
     SdrObject* pPickObj = mpView->PickObj(aPnt, mpView->getHitTolLog(), pPV);
     if (pPickObj)
@@ -95,7 +95,7 @@ bool FuDisplayOrder::MouseButtonUp(const MouseEvent& rMEvt)
     SetMouseButtonCode(rMEvt.GetButtons());
 
     SdrPageView* pPV = nullptr;
-    Point aPnt( mpWindow->PixelToLogic( rMEvt.GetPosPixel() ) );
+    Point aPnt( mpWindow->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() ) );
 
     mpRefObj = mpView->PickObj(aPnt, mpView->getHitTolLog(), pPV);
     if (mpRefObj)

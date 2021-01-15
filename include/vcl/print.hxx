@@ -320,7 +320,7 @@ public:
     Size                        GetPaperSize() const { return PixelToLogic( maPaperSize ); }
     Size                        GetPaperSize( int nPaper );
     const Point&                GetPageOffsetPixel() const { return maPageOffset; }
-    Point                       GetPageOffset() const { return PixelToLogic( maPageOffset ); }
+    Point                       GetPageOffset() const { return maGeometry.PixelToLogic( maPageOffset ); }
 
     void                        SetCopyCount( sal_uInt16 nCopy, bool bCollate );
     sal_uInt16                  GetCopyCount() const { return mnCopyCount; }

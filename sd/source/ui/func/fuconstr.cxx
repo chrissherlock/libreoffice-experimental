@@ -71,7 +71,7 @@ bool FuConstruct::MouseButtonDown(const MouseEvent& rMEvt)
     bFirstMouseMove = true;
     aDragTimer.Start();
 
-    aMDPos = mpWindow->PixelToLogic( rMEvt.GetPosPixel() );
+    aMDPos = mpWindow->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() );
     sal_uInt16 nHitLog = sal_uInt16 (mpWindow->PixelToLogic(Size(HITPIX,0)).Width());
 
     if (rMEvt.IsLeft() && mpView->IsExtendedMouseEventDispatcherEnabled())
@@ -109,7 +109,7 @@ bool FuConstruct::MouseMove(const MouseEvent& rMEvt)
     }
 
     Point aPix(rMEvt.GetPosPixel());
-    Point aPnt( mpWindow->PixelToLogic(aPix) );
+    Point aPnt( mpWindow->GetGeometry().PixelToLogic(aPix) );
 
     if ( mpView->IsAction() )
     {
@@ -132,7 +132,7 @@ bool FuConstruct::MouseButtonUp(const MouseEvent& rMEvt)
 
     FuDraw::MouseButtonUp(rMEvt);
 
-    Point aPnt( mpWindow->PixelToLogic( rMEvt.GetPosPixel() ) );
+    Point aPnt( mpWindow->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() ) );
 
     if ( mpView && mpView->IsDragObj() )
     {

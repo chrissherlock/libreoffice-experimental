@@ -240,7 +240,7 @@ void SvxPageWindow::DrawPage(vcl::RenderContext& rRenderContext, const Point& rO
         {
         case SvxFrameDirection::Horizontal_LR_TB:
             aPos = aRect.TopLeft();
-            aPos.AdjustX(rRenderContext.PixelToLogic(Point(1,1)).X() );
+            aPos.AdjustX(rRenderContext.GetGeometry().PixelToLogic(Point(1,1)).X() );
             aMove.setY( 0 );
             cArrow = 0x2192;
             break;
@@ -253,7 +253,7 @@ void SvxPageWindow::DrawPage(vcl::RenderContext& rRenderContext, const Point& rO
             break;
         case SvxFrameDirection::Vertical_LR_TB:
             aPos = aRect.TopLeft();
-            aPos.AdjustX(rRenderContext.PixelToLogic(Point(1,1)).X() );
+            aPos.AdjustX(rRenderContext.GetGeometry().PixelToLogic(Point(1,1)).X() );
             aMove.setX( 0 );
             break;
         case SvxFrameDirection::Vertical_RL_TB:

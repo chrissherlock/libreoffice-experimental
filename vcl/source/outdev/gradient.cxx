@@ -79,7 +79,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
             return;
 
         // Clip and then draw the gradient
-        if( !tools::Rectangle( PixelToLogic( Point() ), GetSizeInLogicalUnits() ).IsEmpty() )
+        if( !tools::Rectangle( maGeometry.PixelToLogic( Point() ), GetSizeInLogicalUnits() ).IsEmpty() )
         {
             const tools::Rectangle aBoundRect( rPolyPoly.GetBoundRect() );
 
@@ -208,7 +208,7 @@ void OutputDevice::DrawGradientToMetafile ( const tools::PolyPolygon& rPolyPoly,
         return;
 
     // Clip and then draw the gradient
-    if( tools::Rectangle( PixelToLogic( Point() ), GetSizeInLogicalUnits() ).IsEmpty() )
+    if( tools::Rectangle( maGeometry.PixelToLogic( Point() ), GetSizeInLogicalUnits() ).IsEmpty() )
         return;
 
     // convert rectangle to pixels

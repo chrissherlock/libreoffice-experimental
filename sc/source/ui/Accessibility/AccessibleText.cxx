@@ -231,7 +231,7 @@ Point ScPreviewViewForwarder::PixelToLogic( const Point& rPoint, const MapMode& 
         {
             MapMode aMapMode(pWindow->GetMapMode());
             aMapMode.SetOrigin(Point());
-            Point aPoint1( pWindow->PixelToLogic( rPoint ) );
+            Point aPoint1( pWindow->GetGeometry().PixelToLogic( rPoint ) );
             Point aPoint2( OutputDevice::LogicToLogic( aPoint1,
                                                        MapMode(aMapMode.GetMapUnit()),
                                                        rMapMode ) );

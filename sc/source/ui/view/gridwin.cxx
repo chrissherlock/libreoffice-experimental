@@ -2486,7 +2486,7 @@ void ScGridWindow::MouseMove( const MouseEvent& rMEvt )
             const SvxFieldItem* pFld;
             if ( comphelper::LibreOfficeKit::isActive() )
             {
-                Point aLogicClick = pEditView->GetWindow()->PixelToLogic( aPos );
+                Point aLogicClick = pEditView->GetWindow()->GetGeometry().PixelToLogic( aPos );
                 pFld = pEditView->GetField( aLogicClick );
             }
             else
@@ -3080,7 +3080,7 @@ void ScGridWindow::SelectForContextMenu( const Point& rPosPixel, SCCOL nCellX, S
             tools::Rectangle aOutputArea = pEditView->GetOutputArea();
             tools::Rectangle aVisArea = pEditView->GetVisArea();
 
-            Point aTextPos = PixelToLogic( rPosPixel );
+            Point aTextPos = maGeometry.PixelToLogic( rPosPixel );
             if ( pEditEngine->IsVertical() )            // have to manually transform position
             {
                 aTextPos -= aOutputArea.TopRight();
@@ -3116,7 +3116,7 @@ void ScGridWindow::SelectForContextMenu( const Point& rPosPixel, SCCOL nCellX, S
 
     //  check draw text edit mode
 
-    Point aLogicPos = PixelToLogic( rPosPixel );        // after cell edit mode is ended
+    Point aLogicPos = maGeometry.PixelToLogic( rPosPixel );        // after cell edit mode is ended
     if ( pDrawView && pDrawView->GetTextEditObject() && pDrawView->GetTextEditOutlinerView() )
     {
         OutlinerView* pOlView = pDrawView->GetTextEditOutlinerView();
@@ -3564,7 +3564,7 @@ sal_Int8 ScGridWindow::AcceptPrivateDrop( const AcceptDropEvent& rEvt )
         if (pSourceDoc == &rThisDoc)
         {
             OUString aName;
-            if ( rThisDoc.HasChartAtPoint(mrViewData.GetTabNo(), PixelToLogic(aPos), aName ))
+            if ( rThisDoc.HasChartAtPoint(mrViewData.GetTabNo(), maGeometry.PixelToLogic(aPos), aName ))
             {
                 if (bDragRect)          // Remove rectangle
                 {
@@ -3813,7 +3813,7 @@ sal_Int8 ScGridWindow::AcceptDrop( const AcceptDropEvent& rEvt )
                     nMyAction = DND_ACTION_COPY;
 
             SdrObject* pHitObj = rThisDoc.GetObjectAtPoint(
-                        mrViewData.GetTabNo(), PixelToLogic(rEvt.maPosPixel) );
+                        mrViewData.GetTabNo(), maGeometry.PixelToLogic(rEvt.maPosPixel) );
             if ( pHitObj && nMyAction == DND_ACTION_LINK )
             {
                 if ( IsDropFormatSupported(SotClipboardFormatId::SVXB)
@@ -4043,7 +4043,7 @@ sal_Int8 ScGridWindow::ExecutePrivateDrop( const ExecuteDropEvent& rEvt )
     const ScDragData& rData = pScMod->GetDragData();
 
     return DropTransferObj( rData.pCellTransfer, nDragStartX, nDragStartY,
-                                PixelToLogic(rEvt.maPosPixel), rEvt.mnAction );
+                                maGeometry.PixelToLogic(rEvt.maPosPixel), rEvt.mnAction );
 }
 
 sal_Int8 ScGridWindow::DropTransferObj( ScTransferObj* pTransObj, SCCOL nDestPosX, SCROW nDestPosY,
@@ -4452,7 +4452,7 @@ sal_Int8 ScGridWindow::ExecuteDrop( const ExecuteDropEvent& rEvt )
         return bOk ? rEvt.mnAction : DND_ACTION_NONE;           // don't try anything else
     }
 
-    Point aLogicPos = PixelToLogic(aPos);
+    Point aLogicPos = maGeometry.PixelToLogic(aPos);
     bool bIsLink = ( rEvt.mnAction == DND_ACTION_LINK );
 
     if (!bIsLink && rData.pDrawTransfer)
@@ -4492,7 +4492,7 @@ sal_Int8 ScGridWindow::ExecuteDrop( const ExecuteDropEvent& rEvt )
     }
 
     ScDocument& rThisDoc = mrViewData.GetDocument();
-    SdrObject* pHitObj = rThisDoc.GetObjectAtPoint( mrViewData.GetTabNo(), PixelToLogic(aPos) );
+    SdrObject* pHitObj = rThisDoc.GetObjectAtPoint( mrViewData.GetTabNo(), maGeometry.PixelToLogic(aPos) );
     if ( pHitObj && bIsLink )
     {
         //  dropped on drawing object
@@ -4520,7 +4520,7 @@ sal_Int8 ScGridWindow::ExecuteDrop( const ExecuteDropEvent& rEvt )
 
 void ScGridWindow::PasteSelection( const Point& rPosPixel )
 {
-    Point aLogicPos = PixelToLogic( rPosPixel );
+    Point aLogicPos = maGeometry.PixelToLogic( rPosPixel );
 
     SCCOL  nPosX;
     SCROW  nPosY;

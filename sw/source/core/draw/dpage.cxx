@@ -152,7 +152,7 @@ bool SwDPage::RequestHelp( vcl::Window* pWindow, SdrView const * pView,
     {
         Point aPos( rEvt.GetMousePosPixel() );
         aPos = pWindow->ScreenToOutputPixel( aPos );
-        aPos = pWindow->PixelToLogic( aPos );
+        aPos = pWindow->GetGeometry().PixelToLogic( aPos );
 
         SdrPageView* pPV;
         SdrObject* pObj = pView->PickObj(aPos, 0, pPV, SdrSearchOptions::PICKMACRO);

@@ -1146,7 +1146,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                                             pCurrAct->Execute( aMapVDev.get() );
 
                                             MapMode     aMtfMap( aMapVDev->GetMapMode() );
-                                            const Point aNewOrg( aMapVDev->PixelToLogic( aDstPtPix ) );
+                                            const Point aNewOrg( aMapVDev->GetGeometry().PixelToLogic( aDstPtPix ) );
 
                                             aMtfMap.SetOrigin( Point( -aNewOrg.X(), -aNewOrg.Y() ) );
                                             aPaintVDev->SetMapMode( aMtfMap );

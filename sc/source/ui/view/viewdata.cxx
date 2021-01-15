@@ -2060,7 +2060,7 @@ void ScViewData::EditGrowX()
     //  the whole text will move, and may not even obscure all of the original display.
     if ( bUnevenGrow )
     {
-        aArea.SetLeft( pWin->PixelToLogic( Point(0,0) ).X() );
+        aArea.SetLeft( pWin->GetGeometry().PixelToLogic( Point(0,0) ).X() );
         aArea.SetRight( pWin->PixelToLogic( aScrSize ).Width() );
     }
     else if ( !bAsianVertical && !bGrowToLeft && !bGrowCentered )

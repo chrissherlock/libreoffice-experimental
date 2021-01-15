@@ -239,7 +239,7 @@ void DrawViewShell::StartRulerDrag (
 {
     GetActiveWindow()->CaptureMouse();
 
-    Point aWPos = GetActiveWindow()->PixelToLogic(GetActiveWindow()->GetPointerPosPixel());
+    Point aWPos = GetActiveWindow()->GetGeometry().PixelToLogic(GetActiveWindow()->GetPointerPosPixel());
 
     if ( rRuler.GetExtraRect().IsInside(rMEvt.GetPosPixel()) )
     {
@@ -371,7 +371,7 @@ void DrawViewShell::MouseMove(const MouseEvent& rMEvt, ::sd::Window* pWin)
 
     if ( mbIsRulerDrag )
     {
-        Point aLogPos = GetActiveWindow()->PixelToLogic(maMousePos);
+        Point aLogPos = GetActiveWindow()->GetGeometry().PixelToLogic(maMousePos);
         mpDrawView->MovAction(aLogPos);
     }
 
@@ -410,7 +410,7 @@ void DrawViewShell::MouseMove(const MouseEvent& rMEvt, ::sd::Window* pWin)
     {
         for( ::tools::Long nX = nStartX; nX <= nEndX; nX++ )
         {
-            const Color aCol( pWin->GetPixel( pWin->PixelToLogic( Point( nX, nY ) ) ) );
+            const Color aCol( pWin->GetPixel( pWin->GetGeometry().PixelToLogic( Point( nX, nY ) ) ) );
 
             nRed += aCol.GetRed();
             nGreen += aCol.GetGreen();
@@ -501,7 +501,7 @@ void DrawViewShell::Command(const CommandEvent& rCEvt, ::sd::Window* pWin)
             sal_Int8    nDnDAction = DND_ACTION_COPY;
 
             if( GetActiveWindow() )
-                aPos = GetActiveWindow()->PixelToLogic( rCEvt.GetMousePosPixel() );
+                aPos = GetActiveWindow()->GetGeometry().PixelToLogic( rCEvt.GetMousePosPixel() );
 
             if( !mpDrawView->InsertData( aDataHelper, aPos, nDnDAction, false ) )
             {
@@ -526,7 +526,7 @@ void DrawViewShell::Command(const CommandEvent& rCEvt, ::sd::Window* pWin)
 
         // is there a snap object under the cursor?
         SdrPageView* pPV;
-        Point   aMPos = pWin->PixelToLogic( maMousePos );
+        Point   aMPos = pWin->GetGeometry().PixelToLogic( maMousePos );
         sal_uInt16  nHitLog = static_cast<sal_uInt16>(GetActiveWindow()->PixelToLogic(
             Size(FuPoor::HITPIX, 0 ) ).Width());
         sal_uInt16  nHelpLine;

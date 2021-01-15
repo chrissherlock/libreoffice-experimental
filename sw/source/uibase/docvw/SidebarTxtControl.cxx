@@ -124,7 +124,7 @@ void SidebarTextControl::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 
 void SidebarTextControl::SetCursorLogicPosition(const Point& rPosition, bool bPoint, bool bClearMark)
 {
-    Point aMousePos = EditViewOutputDevice().PixelToLogic(rPosition);
+    Point aMousePos = EditViewOutputDevice().GetGeometry().PixelToLogic(rPosition);
     m_xEditView->SetCursorLogicPosition(aMousePos, bPoint, bClearMark);
 }
 
@@ -155,7 +155,7 @@ OUString SidebarTextControl::RequestHelp(tools::Rectangle& rHelpRect)
         Point aPos = rHelpRect.TopLeft();
 
         const OutputDevice& rOutDev = pEditView->GetOutputDevice();
-        Point aLogicClick = rOutDev.PixelToLogic(aPos);
+        Point aLogicClick = rOutDev.GetGeometry().PixelToLogic(aPos);
         const SvxFieldItem* pItem = pEditView->GetField(aLogicClick);
         if (pItem)
         {
@@ -251,12 +251,12 @@ void SidebarTextControl::Paint(vcl::RenderContext& rRenderContext, const tools::
     if (mrSidebarWin.GetLayoutStatus() == SwPostItHelper::DELETED)
     {
         rRenderContext.SetLineColor(mrSidebarWin.GetChangeColor());
-        rRenderContext.DrawLine(rRenderContext.PixelToLogic(aPos),
-                                rRenderContext.PixelToLogic(aPos + Point(aSize.Width(),
+        rRenderContext.DrawLine(rRenderContext.GetGeometry().PixelToLogic(aPos),
+                                rRenderContext.GetGeometry().PixelToLogic(aPos + Point(aSize.Width(),
                                                                          aSize.Height())));
-        rRenderContext.DrawLine(rRenderContext.PixelToLogic(aPos + Point(aSize.Width(),
+        rRenderContext.DrawLine(rRenderContext.GetGeometry().PixelToLogic(aPos + Point(aSize.Width(),
                                                                          0)),
-                                rRenderContext.PixelToLogic(aPos + Point(0,
+                                rRenderContext.GetGeometry().PixelToLogic(aPos + Point(0,
                                                                          aSize.Height())));
     }
 }
@@ -349,7 +349,7 @@ bool SidebarTextControl::MouseButtonDown(const MouseEvent& rMEvt)
         if ( !bExecuteMod || (rMEvt.GetModifier() == KEY_MOD1))
         {
             const OutputDevice& rOutDev = pEditView->GetOutputDevice();
-            Point aLogicClick = rOutDev.PixelToLogic(rMEvt.GetPosPixel());
+            Point aLogicClick = rOutDev.GetGeometry().PixelToLogic(rMEvt.GetPosPixel());
             if (const SvxFieldItem* pItem = pEditView->GetField(aLogicClick))
             {
                 const SvxFieldData* pField = pItem->GetField();

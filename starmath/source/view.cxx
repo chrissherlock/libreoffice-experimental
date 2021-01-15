@@ -150,7 +150,7 @@ void SmGraphicWindow::MouseButtonDown(const MouseEvent& rMEvt)
         return;
 
     // get click position relative to formula
-    Point  aPos (PixelToLogic(rMEvt.GetPosPixel())
+    Point  aPos (maGeometry.PixelToLogic(rMEvt.GetPosPixel())
                  - GetFormulaDrawPos());
 
     const SmNode *pTree = pViewShell->GetDoc()->GetFormulaTree();
@@ -194,7 +194,7 @@ void SmGraphicWindow::MouseMove(const MouseEvent &rMEvt)
 
     if (rMEvt.IsLeft() && IsInlineEditEnabled())
     {
-        Point aPos(PixelToLogic(rMEvt.GetPosPixel()) - GetFormulaDrawPos());
+        Point aPos(maGeometry.PixelToLogic(rMEvt.GetPosPixel()) - GetFormulaDrawPos());
         pViewShell->GetDoc()->GetCursor().MoveTo(this, aPos, false);
 
         CaretBlinkStop();

@@ -58,7 +58,7 @@ using namespace ::com::sun::star;
 
 IMPL_LINK_NOARG( DlgEdFunc, ScrollTimeout, Timer *, void )
 {
-    ForceScroll( m_pParent->PixelToLogic( m_pParent->GetPointerPosPixel() ) );
+    ForceScroll( m_pParent->GetGeometry().PixelToLogic( m_pParent->GetPointerPosPixel() ) );
 }
 
 
@@ -157,7 +157,7 @@ DlgEdFunc::~DlgEdFunc()
 
 bool DlgEdFunc::MouseButtonDown( const MouseEvent& rMEvt )
 {
-    m_aMDPos = m_pParent->PixelToLogic( rMEvt.GetPosPixel() );
+    m_aMDPos = m_pParent->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() );
     m_pParent->GrabFocus();
     bool bHandled = false;
     if ( rMEvt.IsLeft() )
@@ -498,7 +498,7 @@ void DlgEdFunc::checkMovementAllowed(const MouseEvent& rMEvt)
             m_pParent->getSectionWindow()->getViewsWindow()->BrkAction();
         }
         // object was dragged
-        Point aPnt( m_pParent->PixelToLogic( rMEvt.GetPosPixel() ) );
+        Point aPnt( m_pParent->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() ) );
         if (m_bSelectionMode)
         {
             m_pParent->getSectionWindow()->getViewsWindow()->EndAction();
@@ -672,7 +672,7 @@ bool DlgEdFuncInsert::MouseButtonUp( const MouseEvent& rMEvt )
     if ( DlgEdFunc::MouseButtonUp( rMEvt ) )
         return true;
 
-    const Point aPos( m_pParent->PixelToLogic( rMEvt.GetPosPixel() ) );
+    const Point aPos( m_pParent->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() ) );
     const sal_uInt16 nHitLog = sal_uInt16 ( m_pParent->PixelToLogic(Size(3,0)).Width() );
 
     bool bReturn = true;
@@ -733,7 +733,7 @@ bool DlgEdFuncInsert::MouseMove( const MouseEvent& rMEvt )
 {
     if ( DlgEdFunc::MouseMove(rMEvt ) )
         return true;
-    Point   aPos( m_pParent->PixelToLogic( rMEvt.GetPosPixel() ) );
+    Point   aPos( m_pParent->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() ) );
 
     if ( m_rView.IsCreateObj() )
     {
@@ -826,7 +826,7 @@ bool DlgEdFuncSelect::MouseButtonUp( const MouseEvent& rMEvt )
         return true;
 
     // get view from parent
-    const Point aPnt( m_pParent->PixelToLogic( rMEvt.GetPosPixel() ) );
+    const Point aPnt( m_pParent->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() ) );
 
     if ( rMEvt.IsLeft() )                     // left mousebutton pressed
         checkMovementAllowed(rMEvt);
@@ -848,7 +848,7 @@ bool DlgEdFuncSelect::MouseMove( const MouseEvent& rMEvt )
     if ( DlgEdFunc::MouseMove(rMEvt ) )
         return true;
 
-    Point aPnt( m_pParent->PixelToLogic( rMEvt.GetPosPixel() ) );
+    Point aPnt( m_pParent->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() ) );
     bool bIsSetPoint = false;
 
     if ( m_rView.IsAction() ) // Drag Mode

@@ -105,7 +105,7 @@ void VisibleAreaManager::MakeVisible()
     sd::Window *pWindow (mrSlideSorter.GetContentWindow().get());
     if ( ! pWindow)
         return;
-    const Point aCurrentTopLeft (pWindow->PixelToLogic(Point(0,0)));
+    const Point aCurrentTopLeft (pWindow->GetGeometry().PixelToLogic(Point(0,0)));
 
     const ::std::optional<Point> aNewVisibleTopLeft (GetRequestedTopLeft());
     maVisibleRequests.clear();

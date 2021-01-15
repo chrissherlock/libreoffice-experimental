@@ -309,7 +309,7 @@ bool AnnotationTag::MouseButtonDown( const MouseEvent& rMEvt, SmartHdl& /*rHdl*/
         vcl::Window* pWindow = mrView.GetViewShell()->GetActiveWindow();
         if( pWindow )
         {
-            maMouseDownPos = pWindow->PixelToLogic( rMEvt.GetPosPixel() );
+            maMouseDownPos = pWindow->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() );
 
             if( mpListenWindow )
                 mpListenWindow->RemoveEventListener( LINK(this, AnnotationTag, WindowEventHandler));

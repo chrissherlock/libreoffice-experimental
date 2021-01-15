@@ -262,7 +262,7 @@ void OViewsWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
     aOut.AdjustWidth( -nStartWidth );
     aOut = rRenderContext.PixelToLogic(aOut);
 
-    tools::Rectangle aRect(rRenderContext.PixelToLogic(Point(nStartWidth,0)), aOut);
+    tools::Rectangle aRect(rRenderContext.GetGeometry().PixelToLogic(Point(nStartWidth,0)), aOut);
     Wallpaper aWall(m_aColorConfig.GetColorValue(::svtools::APPBACKGROUND).nColor);
     rRenderContext.DrawWallpaper(aRect, aWall);
 }
@@ -1635,13 +1635,13 @@ void OViewsWindow::zoom(const Fraction& _aZoom)
     aOut.setWidth( tools::Long(aStartWidth) );
     aOut = PixelToLogic(aOut);
 
-    tools::Rectangle aRect(PixelToLogic(Point(0,0)),aOut);
+    tools::Rectangle aRect(maGeometry.PixelToLogic(Point(0,0)),aOut);
     Invalidate(aRect, InvalidateFlags::NoChildren);
 }
 
 void OViewsWindow::scrollChildren(const Point& _aThumbPos)
 {
-    const Point aPos(PixelToLogic(_aThumbPos));
+    const Point aPos(maGeometry.PixelToLogic(_aThumbPos));
     {
         MapMode aMapMode = GetMapMode();
         const Point aOld = aMapMode.GetOrigin();

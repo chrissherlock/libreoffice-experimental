@@ -1406,7 +1406,7 @@ bool View::InsertData( const TransferableDataHelper& rDataHelper,
             if( pOLV )
             {
                 ::tools::Rectangle   aRect( pOLV->GetOutputArea() );
-                Point       aPos( pOLV->GetWindow()->PixelToLogic( maDropPos ) );
+                Point       aPos( pOLV->GetWindow()->GetGeometry().PixelToLogic( maDropPos ) );
 
                 if( aRect.IsInside( aPos ) || ( !bDrag && IsTextEdit() ) )
                 {
@@ -1444,7 +1444,7 @@ bool View::InsertData( const TransferableDataHelper& rDataHelper,
                     if( pOLV )
                     {
                         ::tools::Rectangle   aRect( pOLV->GetOutputArea() );
-                        Point       aPos( pOLV->GetWindow()->PixelToLogic( maDropPos ) );
+                        Point       aPos( pOLV->GetWindow()->GetGeometry().PixelToLogic( maDropPos ) );
 
                         if( aRect.IsInside( aPos ) || ( !bDrag && IsTextEdit() ) )
                         {

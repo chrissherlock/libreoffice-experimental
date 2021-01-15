@@ -64,7 +64,7 @@ void SAL_CALL VCLXTabPageContainer::draw( sal_Int32 nX, sal_Int32 nY )
         if (pTabPage && pDev)
         {
             ::Point aPos( nX, nY );
-            aPos  = pDev->PixelToLogic( aPos );
+            aPos  = pDev->GetGeometry().PixelToLogic( aPos );
             pTabPage->Draw( pDev, aPos, DrawFlags::NONE );
         }
     }

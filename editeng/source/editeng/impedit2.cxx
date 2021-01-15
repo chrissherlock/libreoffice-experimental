@@ -583,7 +583,7 @@ bool ImpEditEngine::MouseButtonUp( const MouseEvent& rMEvt, EditView* pView )
         if ( ( rMEvt.GetClicks() == 1 ) && rMEvt.IsLeft() && !rMEvt.IsMod2() )
         {
             const OutputDevice& rOutDev = pView->getEditViewCallbacks() ? pView->getEditViewCallbacks()->EditViewOutputDevice() : *pView->GetWindow();
-            Point aLogicClick = rOutDev.PixelToLogic(rMEvt.GetPosPixel());
+            Point aLogicClick = rOutDev.GetGeometry().PixelToLogic(rMEvt.GetPosPixel());
             if (const SvxFieldItem* pFld = pView->GetField(aLogicClick))
             {
                 // tdf#121039 When in edit mode, editeng is responsible for opening the URL on mouse click

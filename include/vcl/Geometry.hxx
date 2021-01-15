@@ -142,6 +142,8 @@ public:
     basegfx::B2DPolyPolygon LogicToPixel(basegfx::B2DPolyPolygon const& rLogicPolyPoly,
                                          MapMode const& rMapMode) const;
 
+    Point PixelToLogic(Point const& rDevicePt) const;
+
     /** Get device transformation.
 
         @since AOO bug 75163 (OpenOffice.org 2.4.3 - OOH 680 milestone 212)

@@ -439,7 +439,7 @@ SdrObject* IMapWindow::GetHitSdrObj( const Point& rPosPixel ) const
     OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
 
     SdrObject*  pObj = nullptr;
-    Point       aPt = rDevice.PixelToLogic( rPosPixel );
+    Point       aPt = rDevice.GetGeometry().PixelToLogic( rPosPixel );
 
     if ( tools::Rectangle( Point(), GetGraphicSize() ).IsInside( aPt ) )
     {
@@ -574,7 +574,7 @@ OUString IMapWindow::RequestHelp(tools::Rectangle& rHelpArea)
 {
     OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
 
-    Point aPos = rDevice.PixelToLogic(rHelpArea.TopLeft());
+    Point aPos = rDevice.GetGeometry().PixelToLogic(rHelpArea.TopLeft());
 
     SdrPageView* pPageView = nullptr;
     SdrObject* pSdrObj = pView->PickObj(aPos, pView->getHitTolLog(), pPageView);

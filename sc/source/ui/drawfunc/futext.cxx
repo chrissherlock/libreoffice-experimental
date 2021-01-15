@@ -137,7 +137,7 @@ bool FuText::MouseButtonDown(const MouseEvent& rMEvt)
         pView->SetCreateMode();
     }
 
-    aMDPos = pWindow->PixelToLogic( rMEvt.GetPosPixel() );
+    aMDPos = pWindow->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() );
 
     if ( rMEvt.IsLeft() )
     {
@@ -317,7 +317,7 @@ bool FuText::MouseButtonDown(const MouseEvent& rMEvt)
     }
 
     rViewShell.SetActivePointer(pView->GetPreferredPointer(
-                    pWindow->PixelToLogic(rMEvt.GetPosPixel()), pWindow ));
+                    pWindow->GetGeometry().PixelToLogic(rMEvt.GetPosPixel()), pWindow ));
     if (!bStraightEnter)
     {
             pView->UnmarkAll();
@@ -331,7 +331,7 @@ bool FuText::MouseButtonDown(const MouseEvent& rMEvt)
 bool FuText::MouseMove(const MouseEvent& rMEvt)
 {
     rViewShell.SetActivePointer(pView->GetPreferredPointer(
-                    pWindow->PixelToLogic(rMEvt.GetPosPixel()), pWindow ));
+                    pWindow->GetGeometry().PixelToLogic(rMEvt.GetPosPixel()), pWindow ));
 
     if (aDragTimer.IsActive() )
     {
@@ -343,7 +343,7 @@ bool FuText::MouseMove(const MouseEvent& rMEvt)
     }
 
     Point aPix(rMEvt.GetPosPixel());
-    Point aPnt(pWindow->PixelToLogic(aPix));
+    Point aPnt(pWindow->GetGeometry().PixelToLogic(aPix));
 
     if ( pView->MouseMove(rMEvt, pWindow) )
         return true; // event handled from SdrView
@@ -369,7 +369,7 @@ bool FuText::MouseButtonUp(const MouseEvent& rMEvt)
 
     lcl_InvalidateAttribs( rViewShell.GetViewFrame()->GetBindings() );
 
-    Point aPnt( pWindow->PixelToLogic( rMEvt.GetPosPixel() ) );
+    Point aPnt( pWindow->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() ) );
 
     if ( pView->MouseButtonUp(rMEvt, pWindow) )
         return true; // Event evaluated by SdrView

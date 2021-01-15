@@ -449,7 +449,7 @@ void SwView::SelectShell()
         rDispatcher.Flush();
 
         Point aPnt = GetEditWin().OutputToScreenPixel(GetEditWin().GetPointerPosPixel());
-        aPnt = GetEditWin().PixelToLogic(aPnt);
+        aPnt = GetEditWin().GetGeometry().PixelToLogic(aPnt);
         GetEditWin().UpdatePointer(aPnt);
 
         SdrView* pDView = GetWrtShell().GetDrawView();

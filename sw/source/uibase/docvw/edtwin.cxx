@@ -236,7 +236,7 @@ public:
         {
             aHitTestPos += Point( 1, 1 );
         }
-        aHitTestPos = rOut.PixelToLogic( aHitTestPos );
+        aHitTestPos = rOut.GetGeometry().PixelToLogic( aHitTestPos );
 
         return aHitTestPos;
     }
@@ -2845,7 +2845,7 @@ void SwEditWin::MouseButtonDown(const MouseEvent& _rMEvt)
     m_bWasShdwCursor = nullptr != m_pShadCursor;
     m_pShadCursor.reset();
 
-    const Point aDocPos( PixelToLogic( rMEvt.GetPosPixel() ) );
+    const Point aDocPos( maGeometry.PixelToLogic( rMEvt.GetPosPixel() ) );
 
     FrameControlType eControl;
     bool bOverFly = false;
@@ -3944,7 +3944,7 @@ void SwEditWin::MouseMove(const MouseEvent& _rMEvt)
     {
         // add/remove outline collapse button
         SwContentAtPos aSwContentAtPos(IsAttrAtPos::Outline);
-        if (rSh.GetContentAtPos(PixelToLogic(rMEvt.GetPosPixel()), aSwContentAtPos))
+        if (rSh.GetContentAtPos(maGeometry.PixelToLogic(rMEvt.GetPosPixel()), aSwContentAtPos))
         {
             if(aSwContentAtPos.aFnd.pNode && aSwContentAtPos.aFnd.pNode->IsTextNode())
             {
@@ -4000,7 +4000,7 @@ void SwEditWin::MouseMove(const MouseEvent& _rMEvt)
     //aPixPt == Point in Pixel, relative to ChildWin
     //aDocPt == Point in Twips, document coordinates
     const Point aPixPt( rMEvt.GetPosPixel() );
-    const Point aDocPt( PixelToLogic( aPixPt ) );
+    const Point aDocPt( maGeometry.PixelToLogic( aPixPt ) );
 
     if ( IsChainMode() )
     {
@@ -4183,7 +4183,7 @@ void SwEditWin::MouseMove(const MouseEvent& _rMEvt)
                     // event processing for resizing
                     if (pSdrView && pSdrView->AreObjectsMarked())
                     {
-                        const Point aSttPt( PixelToLogic( m_aStartPos ) );
+                        const Point aSttPt( maGeometry.PixelToLogic( m_aStartPos ) );
 
                         // can we start?
                         if( SdrHdlKind::User == g_eSdrMoveHdl )
@@ -4251,7 +4251,7 @@ void SwEditWin::MouseMove(const MouseEvent& _rMEvt)
                     if (pSdrView)
                     {
                         // Resize proportionally when media is selected and the user drags on a corner
-                        const Point aSttPt(PixelToLogic(m_aStartPos));
+                        const Point aSttPt(maGeometry.PixelToLogic(m_aStartPos));
                         SdrHdl* pHdl = pSdrView->PickHandle(aSttPt);
                         if (pHdl)
                             bResizeKeepRatio = bResizeKeepRatio && pHdl->IsCornerHdl();
@@ -4499,7 +4499,7 @@ void SwEditWin::MouseButtonUp(const MouseEvent& rMEvt)
         return;
     }
 
-    Point aDocPt( PixelToLogic( rMEvt.GetPosPixel() ) );
+    Point aDocPt( maGeometry.PixelToLogic( rMEvt.GetPosPixel() ) );
 
     if ( g_bDDTimerStarted )
     {
@@ -4511,8 +4511,8 @@ void SwEditWin::MouseButtonUp(const MouseEvent& rMEvt)
             g_bFrameDrag = false;
         }
         g_bNoInterrupt = false;
-        const Point aDocPos( PixelToLogic( rMEvt.GetPosPixel() ) );
-        if ((PixelToLogic(m_aStartPos).Y() == (aDocPos.Y())) && (PixelToLogic(m_aStartPos).X() == (aDocPos.X())))//To make sure it was not moved
+        const Point aDocPos( maGeometry.PixelToLogic( rMEvt.GetPosPixel() ) );
+        if ((maGeometry.PixelToLogic(m_aStartPos).Y() == (aDocPos.Y())) && (maGeometry.PixelToLogic(m_aStartPos).X() == (aDocPos.X())))//To make sure it was not moved
         {
             SdrPageView* pPV = nullptr;
             SdrObject* pObj = pSdrView ? pSdrView->PickObj(aDocPos, pSdrView->getHitTolLog(), pPV, SdrSearchOptions::ALSOONMASTER) : nullptr;
@@ -4581,7 +4581,7 @@ void SwEditWin::MouseButtonUp(const MouseEvent& rMEvt)
             }
             else
             {
-                const Point aDocPos( PixelToLogic( m_aStartPos ) );
+                const Point aDocPos( maGeometry.PixelToLogic( m_aStartPos ) );
                 g_bValidCursorPos = !(CRSR_POSCHG & rSh.CallSetCursor(&aDocPos, false));
                 rSh.Edit();
             }
@@ -4664,7 +4664,7 @@ void SwEditWin::MouseButtonUp(const MouseEvent& rMEvt)
                             pMacro = pFlyFormat->GetMacro().GetMacroTable().Get(nEvent);
                         if (nullptr != pMacro)
                         {
-                            const Point aSttPt( PixelToLogic( m_aStartPos ) );
+                            const Point aSttPt( maGeometry.PixelToLogic( m_aStartPos ) );
                             m_aRszMvHdlPt = aDocPt;
                             sal_uInt32 nPos = 0;
                             SbxArrayRef xArgs = new SbxArray;
@@ -4732,7 +4732,7 @@ void SwEditWin::MouseButtonUp(const MouseEvent& rMEvt)
                     {   // create only temporary move context because otherwise
                         // the query to the content form doesn't work!!!
                         SwMvContext aMvContext( &rSh );
-                        const Point aDocPos( PixelToLogic( m_aStartPos ) );
+                        const Point aDocPos( maGeometry.PixelToLogic( m_aStartPos ) );
                         g_bValidCursorPos = !(CRSR_POSCHG & rSh.CallSetCursor(&aDocPos, false));
                     }
                     g_bNoInterrupt = bTmpNoInterrupt;
@@ -4801,7 +4801,7 @@ void SwEditWin::MouseButtonUp(const MouseEvent& rMEvt)
                                         // create only temporary move context because otherwise
                                         // the query to the content form doesn't work!!!
                                         SwMvContext aMvContext( &rSh );
-                                        const Point aDocPos( PixelToLogic( m_aStartPos ) );
+                                        const Point aDocPos( maGeometry.PixelToLogic( m_aStartPos ) );
                                         g_bValidCursorPos = !(CRSR_POSCHG & rSh.CallSetCursor(&aDocPos, false));
                                     }
                                     else
@@ -5393,7 +5393,7 @@ void SwEditWin::Command( const CommandEvent& rCEvt )
             if (m_rView.GetPostItMgr()->IsHit(rCEvt.GetMousePosPixel()))
                 return;
 
-            Point aDocPos( PixelToLogic( rCEvt.GetMousePosPixel() ) );
+            Point aDocPos( maGeometry.PixelToLogic( rCEvt.GetMousePosPixel() ) );
             if ( !rCEvt.IsMouseEvent() )
                 aDocPos = rSh.GetCharRect().Center();
 
@@ -5626,7 +5626,7 @@ void SwEditWin::Command( const CommandEvent& rCEvt )
                                 &nActionFlags );
             if( EXCHG_INOUT_ACTION_NONE != nDropAction )
             {
-                const Point aDocPt( PixelToLogic( rCEvt.GetMousePosPixel() ) );
+                const Point aDocPt( maGeometry.PixelToLogic( rCEvt.GetMousePosPixel() ) );
                 SwTransferable::PasteData( aDataHelper, rSh, nDropAction, nActionFlags,
                                     nDropFormat, nDropDestination, false,
                                     false, &aDocPt, EXCHG_IN_ACTION_COPY,
@@ -5778,7 +5778,7 @@ void SwEditWin::Command( const CommandEvent& rCEvt )
     position of the context menu request */
 void SwEditWin::SelectMenuPosition(SwWrtShell& rSh, const Point& rMousePos )
 {
-    const Point aDocPos( PixelToLogic( rMousePos ) );
+    const Point aDocPos( maGeometry.PixelToLogic( rMousePos ) );
     const bool bIsInsideSelectedObj( rSh.IsInsideSelectedObj( aDocPos ) );
     //create a synthetic mouse event out of the coordinates
     MouseEvent aMEvt(rMousePos);

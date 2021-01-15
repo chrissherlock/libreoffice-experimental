@@ -394,9 +394,9 @@ void AnnotationWindow::DoResize()
 
     Point aPos( mpMeta->GetPosPixel());
     Point aBase( aPos.X() + aPos.X() + GetSizePixel().Width(), aPos.Y() );
-    Point aLeft = PixelToLogic( Point( aBase.X() - (METABUTTON_WIDTH+5), aBase.Y()+17 ) );
-    Point aRight = PixelToLogic( Point( aBase.X() - (METABUTTON_WIDTH-1), aBase.Y()+17 ) );
-    Point aBottom = PixelToLogic( Point( aBase.X() - (METABUTTON_WIDTH+2), aBase.Y()+20 ) );
+    Point aLeft = maGeometry.PixelToLogic( Point( aBase.X() - (METABUTTON_WIDTH+5), aBase.Y()+17 ) );
+    Point aRight = maGeometry.PixelToLogic( Point( aBase.X() - (METABUTTON_WIDTH-1), aBase.Y()+17 ) );
+    Point aBottom = maGeometry.PixelToLogic( Point( aBase.X() - (METABUTTON_WIDTH+2), aBase.Y()+20 ) );
 
     maPopupTriangle.clear();
     maPopupTriangle.append(basegfx::B2DPoint(aLeft.X(),aLeft.Y()));
@@ -654,7 +654,7 @@ void AnnotationWindow::MouseMove( const MouseEvent& rMEvt )
     if( mbReadonly )
         return;
 
-    if (maRectMetaButton.IsInside(PixelToLogic(rMEvt.GetPosPixel())))
+    if (maRectMetaButton.IsInside(maGeometry.PixelToLogic(rMEvt.GetPosPixel())))
     {
         if (!mbMouseOverButton)
         {
@@ -674,7 +674,7 @@ void AnnotationWindow::MouseMove( const MouseEvent& rMEvt )
 
 void AnnotationWindow::MouseButtonDown( const MouseEvent& rMEvt )
 {
-    if (!mbReadonly && maRectMetaButton.IsInside(PixelToLogic(rMEvt.GetPosPixel())) && rMEvt.IsLeft())
+    if (!mbReadonly && maRectMetaButton.IsInside(maGeometry.PixelToLogic(rMEvt.GetPosPixel())) && rMEvt.IsLeft())
     {
         // context menu
         ::tools::Rectangle aRect(maGeometry.LogicToPixel(maRectMetaButton.BottomLeft()),maGeometry.LogicToPixel(maRectMetaButton.BottomLeft()));

@@ -655,7 +655,7 @@ static bool lcl_UrlHit( const SdrView* pView, const Point& rPosPixel, const vcl:
     if ( eHit != SdrHitKind::NONE && aVEvt.pObj != nullptr )
     {
         if ( SvxIMapInfo::GetIMapInfo( aVEvt.pObj ) && SvxIMapInfo::GetHitIMapObject(
-                                aVEvt.pObj, pWindow->PixelToLogic(rPosPixel), pWindow ) )
+                                aVEvt.pObj, pWindow->GetGeometry().PixelToLogic(rPosPixel), pWindow ) )
             return true;
 
         if ( aVEvt.eEvent == SdrEventKind::ExecuteUrl )
@@ -672,7 +672,7 @@ void FuDraw::ForcePointer(const MouseEvent* pMEvt)
 
     Point aPosPixel = pWindow->GetPointerPosPixel();
     bool bAlt       = pMEvt && pMEvt->IsMod2();
-    Point aPnt      = pWindow->PixelToLogic( aPosPixel );
+    Point aPnt      = pWindow->GetGeometry().PixelToLogic( aPosPixel );
     SdrHdl* pHdl    = pView->PickHandle(aPnt);
     SdrPageView* pPV;
 
@@ -748,7 +748,7 @@ bool FuDraw::IsSizingOrMovingNote( const MouseEvent& rMEvt ) const
             SdrObject* pObj = rNoteMarkList.GetMark( 0 )->GetMarkedSdrObj();
             if ( ScDrawLayer::IsNoteCaption( pObj ) )
             {
-                Point aMPos = pWindow->PixelToLogic( rMEvt.GetPosPixel() );
+                Point aMPos = pWindow->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() );
                 bIsSizingOrMoving =
                     pView->PickHandle( aMPos ) ||      // handles to resize the note
                     pView->IsTextEditFrameHit( aMPos );         // frame for moving the note

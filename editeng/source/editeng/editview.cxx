@@ -873,7 +873,7 @@ bool EditView::IsCursorAtWrongSpelledWord()
 
 bool EditView::IsWrongSpelledWordAtPos( const Point& rPosPixel, bool bMarkIfWrong )
 {
-    Point aPos(pImpEditView->GetOutputDevice().PixelToLogic(rPosPixel));
+    Point aPos(pImpEditView->GetOutputDevice().GetGeometry().PixelToLogic(rPosPixel));
     aPos = pImpEditView->GetDocPos( aPos );
     EditPaM aPaM = pImpEditView->pEditEngine->GetPaM(aPos, false);
     return pImpEditView->IsWrongSpelledWord( aPaM , bMarkIfWrong );
@@ -955,7 +955,7 @@ static void LOKSendSpellPopupMenu(const weld::Menu& rMenu, LanguageType nGuessLa
 void EditView::ExecuteSpellPopup( const Point& rPosPixel, Link<SpellCallbackInfo&,void> const * pCallBack )
 {
     OutputDevice& rDevice = pImpEditView->GetOutputDevice();
-    Point aPos(rDevice.PixelToLogic(rPosPixel));
+    Point aPos(rDevice.GetGeometry().PixelToLogic(rPosPixel));
     aPos = pImpEditView->GetDocPos( aPos );
     EditPaM aPaM = pImpEditView->pEditEngine->GetPaM(aPos, false);
     Reference< linguistic2::XSpellChecker1 >  xSpeller( pImpEditView->pEditEngine->pImpEditEngine->GetSpeller() );
@@ -1323,7 +1323,7 @@ const SvxFieldItem* EditView::GetField( const Point& rPos, sal_Int32* pPara, sal
 const SvxFieldItem* EditView::GetFieldUnderMousePointer( sal_Int32& nPara, sal_Int32& nPos ) const
 {
     Point aPos = pImpEditView->GetWindow()->GetPointerPosPixel();
-    aPos = pImpEditView->GetWindow()->PixelToLogic( aPos );
+    aPos = pImpEditView->GetWindow()->GetGeometry().PixelToLogic( aPos );
     return GetField( aPos, &nPara, &nPos );
 }
 

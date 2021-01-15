@@ -143,7 +143,7 @@ tools::Long SwView::SetVScrollMax( tools::Long lMax )
 
 Point SwView::AlignToPixel(const Point &rPt) const
 {
-    return GetEditWin().PixelToLogic( GetEditWin().GetGeometry().LogicToPixel( rPt ) );
+    return GetEditWin().GetGeometry().PixelToLogic( GetEditWin().GetGeometry().LogicToPixel( rPt ) );
 }
 
 // Document size has changed.
@@ -295,7 +295,7 @@ void SwView::SetVisArea( const Point &rPt, bool bUpdateScrollbar )
     aPt.AdjustX( -(aPt.X() % nTmp) );
     aPt.AdjustY( -(aPt.Y() % nTmp) );
 #endif
-    aPt = GetEditWin().PixelToLogic( aPt );
+    aPt = GetEditWin().GetGeometry().PixelToLogic( aPt );
 
     if ( aPt == m_aVisArea.TopLeft() )
         return;
@@ -765,8 +765,8 @@ void SwView::CalcVisArea( const Size &rOutPixel )
 {
     Point aTopLeft;
     tools::Rectangle aRect( aTopLeft, rOutPixel );
-    aTopLeft = GetEditWin().PixelToLogic( aTopLeft );
-    Point aBottomRight( GetEditWin().PixelToLogic( aRect.BottomRight() ) );
+    aTopLeft = GetEditWin().GetGeometry().PixelToLogic( aTopLeft );
+    Point aBottomRight( GetEditWin().GetGeometry().PixelToLogic( aRect.BottomRight() ) );
 
     aRect.SetLeft( aTopLeft.X() );
     aRect.SetTop( aTopLeft.Y() );

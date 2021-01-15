@@ -718,7 +718,7 @@ bool ViewShell::HandleScrollCommand(const CommandEvent& rCEvt, ::sd::Window* pWi
                     {
                         const ::tools::Long  nOldZoom = GetActiveWindow()->GetZoom();
                         ::tools::Long        nNewZoom;
-                        Point aOldMousePos = GetActiveWindow()->PixelToLogic(rCEvt.GetMousePosPixel());
+                        Point aOldMousePos = GetActiveWindow()->GetGeometry().PixelToLogic(rCEvt.GetMousePosPixel());
 
                         if( pData->GetDelta() < 0 )
                             nNewZoom = std::max<::tools::Long>( pWin->GetMinZoom(), basegfx::zoomtools::zoomOut( nOldZoom ));
@@ -727,7 +727,7 @@ bool ViewShell::HandleScrollCommand(const CommandEvent& rCEvt, ::sd::Window* pWi
 
                         SetZoom( nNewZoom );
                         // Keep mouse at same doc point before zoom
-                        Point aNewMousePos = GetActiveWindow()->PixelToLogic(rCEvt.GetMousePosPixel());
+                        Point aNewMousePos = GetActiveWindow()->GetGeometry().PixelToLogic(rCEvt.GetMousePosPixel());
                         SetWinViewPos(GetWinViewPos() - (aNewMousePos - aOldMousePos));
 
                         Invalidate( SID_ATTR_ZOOM );

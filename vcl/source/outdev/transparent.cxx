@@ -386,7 +386,7 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos,
 
                     // create MapMode for buffer (offset needed) and set
                     MapMode aMap(GetMapMode());
-                    const Point aOutPos(PixelToLogic(aDstRect.TopLeft()));
+                    const Point aOutPos(maGeometry.PixelToLogic(aDstRect.TopLeft()));
                     aMap.SetOrigin(Point(-aOutPos.X(), -aOutPos.Y()));
                     xVDev->SetMapMode(aMap);
 
@@ -444,7 +444,7 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos,
                 else
                 {
                     MapMode aMap( GetMapMode() );
-                    Point aOutPos( PixelToLogic( aDstRect.TopLeft() ) );
+                    Point aOutPos( maGeometry.PixelToLogic( aDstRect.TopLeft() ) );
 
                     aMap.SetOrigin( Point( -aOutPos.X(), -aOutPos.Y() ) );
                     xVDev->SetMapMode( aMap );

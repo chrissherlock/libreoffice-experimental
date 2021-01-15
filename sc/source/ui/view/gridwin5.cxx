@@ -257,7 +257,7 @@ void ScGridWindow::RequestHelp(const HelpEvent& rHEvt)
                 // URL for IMapObject below Pointer is help text
                 if ( SvxIMapInfo::GetIMapInfo( aVEvt.pObj ) )
                 {
-                    Point aLogicPos = PixelToLogic( aPosPixel );
+                    Point aLogicPos = maGeometry.PixelToLogic( aPosPixel );
                     IMapObject* pIMapObj = SvxIMapInfo::GetHitIMapObject(
                                                     aVEvt.pObj, aLogicPos, this );
 
@@ -281,7 +281,7 @@ void ScGridWindow::RequestHelp(const HelpEvent& rHEvt)
                     else
                     {
                         SdrPageView* pPV = nullptr;
-                        Point aMDPos = PixelToLogic( aPosPixel );
+                        Point aMDPos = maGeometry.PixelToLogic( aPosPixel );
                         SdrObject* pObj = pDrView->PickObj(aMDPos, pDrView->getHitTolLog(), pPV, SdrSearchOptions::ALSOONMASTER);
                         if (pObj)
                         {

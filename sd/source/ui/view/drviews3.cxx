@@ -1090,7 +1090,7 @@ void  DrawViewShell::ExecStatusBar(SfxRequest& rReq)
 void  DrawViewShell::GetSnapItemState( SfxItemSet &rSet )
 {
     SdrPageView* pPV;
-    Point   aMPos = GetActiveWindow()->PixelToLogic(maMousePos);
+    Point   aMPos = GetActiveWindow()->GetGeometry().PixelToLogic(maMousePos);
     sal_uInt16  nHitLog = static_cast<sal_uInt16>(GetActiveWindow()->PixelToLogic(
         Size(FuPoor::HITPIX,0)).Width());
     sal_uInt16  nHelpLine;

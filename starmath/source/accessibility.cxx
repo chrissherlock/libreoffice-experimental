@@ -528,7 +528,7 @@ sal_Int32 SAL_CALL SmGraphicAccessible::getIndexAtPoint( const awt::Point& aPoin
 
         // get position relative to formula draw position
         Point  aPos( aPoint.X, aPoint.Y );
-        aPos = pWin->PixelToLogic( aPos );
+        aPos = pWin->GetGeometry().PixelToLogic( aPos );
         aPos -= pWin->GetFormulaDrawPos();
 
         // if it was inside the formula then get the appropriate node

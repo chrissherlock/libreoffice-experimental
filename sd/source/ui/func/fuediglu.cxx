@@ -203,7 +203,7 @@ bool FuEditGluePoints::MouseMove(const MouseEvent& rMEvt)
     if (mpView->IsAction())
     {
         Point aPix(rMEvt.GetPosPixel());
-        Point aPnt( mpWindow->PixelToLogic(aPix) );
+        Point aPnt( mpWindow->GetGeometry().PixelToLogic(aPix) );
         ForceScroll(aPix);
         mpView->MovAction(aPnt);
     }
@@ -228,7 +228,7 @@ bool FuEditGluePoints::MouseButtonUp(const MouseEvent& rMEvt)
     FuDraw::MouseButtonUp(rMEvt);
 
     sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(DRGPIX,0)).Width() );
-    Point aPos = mpWindow->PixelToLogic( rMEvt.GetPosPixel() );
+    Point aPos = mpWindow->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() );
 
     if (std::abs(aMDPos.X() - aPos.X()) < nDrgLog &&
         std::abs(aMDPos.Y() - aPos.Y()) < nDrgLog &&

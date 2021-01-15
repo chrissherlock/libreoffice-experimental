@@ -471,7 +471,7 @@ void SwPagePreviewWin::MouseButtonDown( const MouseEvent& rMEvt )
     if( MOUSE_LEFT != ( rMEvt.GetModifier() + rMEvt.GetButtons() ) )
         return;
 
-    Point aPreviewPos( PixelToLogic( rMEvt.GetPosPixel() ) );
+    Point aPreviewPos( maGeometry.PixelToLogic( rMEvt.GetPosPixel() ) );
     Point aDocPos;
     bool bPosInEmptyPage;
     sal_uInt16 nNewSelectedPage;
@@ -1320,7 +1320,7 @@ void SwPagePreview::OuterResizePixel( const Point &rOfst, const Size &rSize )
     // Never set EditWin !
 
     Size aTmpSize( m_pViewWin->GetSizeInPixels() );
-    Point aBottomRight( m_pViewWin->PixelToLogic( Point( aTmpSize.Width(), aTmpSize.Height() ) ) );
+    Point aBottomRight( m_pViewWin->GetGeometry().PixelToLogic( Point( aTmpSize.Width(), aTmpSize.Height() ) ) );
     SetVisArea( tools::Rectangle( Point(), aBottomRight ) );
 
     // Call of the DocSzChgd-Method of the scrollbars is necessary,
@@ -1511,7 +1511,7 @@ IMPL_LINK( SwPagePreview, EndScrollHdl, ScrollBar *, p, void )
 
 Point SwPagePreview::AlignToPixel(const Point &rPt) const
 {
-    return m_pViewWin->PixelToLogic( m_pViewWin->GetGeometry().LogicToPixel( rPt ) );
+    return m_pViewWin->GetGeometry().PixelToLogic( m_pViewWin->GetGeometry().LogicToPixel( rPt ) );
 }
 
 void SwPagePreview::DocSzChgd( const Size &rSz )

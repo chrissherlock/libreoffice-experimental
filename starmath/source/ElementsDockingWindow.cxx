@@ -467,7 +467,7 @@ void SmElementsControl::LayoutOrPaintContents(vcl::RenderContext& rContext, bool
                                                     element->getNode()->GetHeight()));
                 Point location(x + ((boxX - aSizePixel.Width()) / 2),
                                y + ((boxY - aSizePixel.Height()) / 2));
-                SmDrawingVisitor(rContext, rContext.PixelToLogic(location), element->getNode().get());
+                SmDrawingVisitor(rContext, rContext.GetGeometry().PixelToLogic(location), element->getNode().get());
             }
 
             if (mbVerticalMode)

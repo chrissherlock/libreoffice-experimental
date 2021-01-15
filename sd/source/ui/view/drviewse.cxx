@@ -930,7 +930,7 @@ void DrawViewShell::FuSupport(SfxRequest& rReq)
                 {
                     sal_Int8 nAction = DND_ACTION_COPY;
                     mpDrawView->InsertData( aDataHelper,
-                                            GetActiveWindow()->PixelToLogic( ::tools::Rectangle( Point(), GetActiveWindow()->GetSizeInPixels() ).Center() ),
+                                            GetActiveWindow()->GetGeometry().PixelToLogic( ::tools::Rectangle( Point(), GetActiveWindow()->GetSizeInPixels() ).Center() ),
                                             nAction, false, SotClipboardFormatId::STRING);
                 }
             }
@@ -957,7 +957,7 @@ void DrawViewShell::FuSupport(SfxRequest& rReq)
                 sal_Int8 nAction = DND_ACTION_COPY;
 
                 if( !mpDrawView->InsertData( aDataHelper,
-                                          GetActiveWindow()->PixelToLogic( ::tools::Rectangle( Point(), GetActiveWindow()->GetSizeInPixels() ).Center() ),
+                                          GetActiveWindow()->GetGeometry().PixelToLogic( ::tools::Rectangle( Point(), GetActiveWindow()->GetSizeInPixels() ).Center() ),
                                           nAction, false, nFormat ) )
                 {
                     INetBookmark    aINetBookmark( "", "" );
@@ -1143,7 +1143,7 @@ void DrawViewShell::FuSupport(SfxRequest& rReq)
                 }
                 else
                 {
-                    Point aPt = GetActiveWindow()->PixelToLogic( Point( 0, GetActiveWindow()->GetSizePixel().Height() / 2 ) );
+                    Point aPt = GetActiveWindow()->GetGeometry().PixelToLogic( Point( 0, GetActiveWindow()->GetSizePixel().Height() / 2 ) );
                     aPagePos.AdjustY(aPt.Y() );
                     aPageSize.setHeight( 2 );
                 }
@@ -1500,7 +1500,7 @@ void DrawViewShell::InsertURLField(const OUString& rURL, const OUString& rText,
         Point aPos;
         ::tools::Rectangle aRect(aPos, GetActiveWindow()->GetSizeInPixels() );
         aPos = aRect.Center();
-        aPos = GetActiveWindow()->PixelToLogic(aPos);
+        aPos = GetActiveWindow()->GetGeometry().PixelToLogic(aPos);
 
         if (aPos.getX() - (aSize.Width() / 2) >= 0)
             aPos.AdjustX( -(aSize.Width() / 2) );
@@ -1603,7 +1603,7 @@ void DrawViewShell::InsertURLButton(const OUString& rURL, const OUString& rText,
         else
         {
             aPos = ::tools::Rectangle(aPos, GetActiveWindow()->GetSizeInPixels()).Center();
-            aPos = GetActiveWindow()->PixelToLogic(aPos);
+            aPos = GetActiveWindow()->GetGeometry().PixelToLogic(aPos);
         }
 
         Size aSize(4000, 1000);

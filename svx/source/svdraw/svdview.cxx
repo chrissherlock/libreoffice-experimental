@@ -186,7 +186,7 @@ bool SdrView::KeyInput(const KeyEvent& rKEvt, vcl::Window* pWin)
         } // switch
         if (bRet && pWin!=nullptr) {
             pWin->SetPointer(GetPreferredPointer(
-                pWin->PixelToLogic(pWin->ScreenToOutputPixel( pWin->GetPointerPosPixel() ) ),
+                pWin->GetGeometry().PixelToLogic(pWin->ScreenToOutputPixel( pWin->GetPointerPosPixel() ) ),
                 pWin,
                 rKEvt.GetKeyCode().GetModifier()));
         }
@@ -260,7 +260,7 @@ SdrHitKind SdrView::PickAnything(const MouseEvent& rMEvt, SdrMouseEventKind nEve
         pOut = GetFirstOutputDevice();
     }
     Point aPnt(rMEvt.GetPosPixel());
-    if (pOut!=nullptr) aPnt=pOut->PixelToLogic(aPnt);
+    if (pOut!=nullptr) aPnt=pOut->GetGeometry().PixelToLogic(aPnt);
     rVEvt.aLogicPos=aPnt;
     return PickAnything(aPnt,rVEvt);
 }

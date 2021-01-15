@@ -464,7 +464,7 @@ void Svx3DLightControl::TrySelection(Point aPosPixel)
     if(!mpScene)
         return;
 
-    const Point aPosLogic(GetDrawingArea()->get_ref_device().PixelToLogic(aPosPixel));
+    const Point aPosLogic(GetDrawingArea()->get_ref_device().GetGeometry().PixelToLogic(aPosPixel));
     const basegfx::B2DPoint aPoint(aPosLogic.X(), aPosLogic.Y());
     std::vector< const E3dCompoundObject* > aResult;
     getAllHit3DObjectsSortedFrontToBack(aPoint, *mpScene, aResult);

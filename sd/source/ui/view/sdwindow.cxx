@@ -687,7 +687,7 @@ Point Window::GetVisibleCenter()
     // For LOK
     bool bMapModeWasEnabled(IsMapModeEnabled());
     EnableMapMode();
-    aPos = PixelToLogic(aPos);
+    aPos = maGeometry.PixelToLogic(aPos);
 
     if (bMapModeWasEnabled)
         EnableMapMode();

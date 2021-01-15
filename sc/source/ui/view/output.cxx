@@ -812,7 +812,7 @@ void ScOutputData::DrawDocumentBackground()
     mpDev->SetLineColor(aBgColor);
     mpDev->SetFillColor(aBgColor);
 
-    Point aScreenPos  = mpDev->PixelToLogic(Point(nScrX, nScrY));
+    Point aScreenPos  = mpDev->GetGeometry().PixelToLogic(Point(nScrX, nScrY));
     Size  aScreenSize = mpDev->PixelToLogic(Size(nScrW - 1,nScrH - 1));
 
     mpDev->DrawRect(tools::Rectangle(aScreenPos, aScreenSize));
@@ -1111,7 +1111,7 @@ void ScOutputData::DrawBackground(vcl::RenderContext& rRenderContext)
 
                     tools::Long nPosXLogic = nPosX;
                     if (bWorksInPixels)
-                        nPosXLogic = rRenderContext.PixelToLogic(Point(nPosX, 0)).X();
+                        nPosXLogic = rRenderContext.GetGeometry().PixelToLogic(Point(nPosX, 0)).X();
 
                     drawCells(rRenderContext, pColor, pBackground, pOldColor, pOldBackground, aRect, nPosXLogic, nLayoutSign, nOneXLogic, nOneYLogic, pDataBarInfo, pOldDataBarInfo, pIconSetInfo, pOldIconSetInfo, mpDoc->GetIconSetBitmapMap());
 
@@ -1135,7 +1135,7 @@ void ScOutputData::DrawBackground(vcl::RenderContext& rRenderContext)
 
                 tools::Long nPosXLogic = nPosX;
                 if (bWorksInPixels)
-                    nPosXLogic = rRenderContext.PixelToLogic(Point(nPosX, 0)).X();
+                    nPosXLogic = rRenderContext.GetGeometry().PixelToLogic(Point(nPosX, 0)).X();
 
                 drawCells(rRenderContext, std::optional<Color>(), nullptr, pOldColor, pOldBackground, aRect, nPosXLogic, nLayoutSign, nOneXLogic, nOneYLogic, nullptr, pOldDataBarInfo, nullptr, pOldIconSetInfo, mpDoc->GetIconSetBitmapMap());
 

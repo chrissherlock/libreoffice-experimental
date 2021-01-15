@@ -1232,7 +1232,7 @@ void SwAlignRect( SwRect &rRect, const SwViewShell *pSh, const vcl::RenderContex
 void SwAlignGrfRect( SwRect *pGrfRect, const vcl::RenderContext &rOut )
 {
     tools::Rectangle aPxRect = rOut.GetGeometry().LogicToPixel( pGrfRect->SVRect() );
-    pGrfRect->Pos( rOut.PixelToLogic( aPxRect.TopLeft() ) );
+    pGrfRect->Pos( rOut.GetGeometry().PixelToLogic( aPxRect.TopLeft() ) );
     pGrfRect->SSize( rOut.PixelToLogic( aPxRect.GetSize() ) );
 }
 
@@ -2549,8 +2549,8 @@ void SwTabFramePainter::PaintLines(OutputDevice& rDev, const SwRect& rRect) cons
             // By making the line sizes a multiple of one pixel size, we can
             // assure that all lines having the same twip size have the same
             // pixel size, independent of their position on the screen.
-            Point aPaintStart = rDev.PixelToLogic( rDev.GetGeometry().LogicToPixel(aStart) );
-            Point aPaintEnd = rDev.PixelToLogic( rDev.GetGeometry().LogicToPixel(aEnd) );
+            Point aPaintStart = rDev.GetGeometry().PixelToLogic( rDev.GetGeometry().LogicToPixel(aStart) );
+            Point aPaintEnd = rDev.GetGeometry().PixelToLogic( rDev.GetGeometry().LogicToPixel(aEnd) );
 
             if (gProp.pSGlobalShell->GetWin())
             {
@@ -5814,7 +5814,7 @@ static void lcl_paintBitmapExToRect(vcl::RenderContext *pOut, const Point& aPoin
         tools::Rectangle aRender = aComplete.GetIntersection(aTile);
         if (aRender.IsEmpty())
             break;
-        pOut->DrawBitmapEx(pOut->PixelToLogic(aRender.TopLeft()),
+        pOut->DrawBitmapEx(pOut->GetGeometry().PixelToLogic(aRender.TopLeft()),
                            pOut->PixelToLogic(aRender.GetSize()),
                            Point(0, 0), aRender.GetSize(),
                            rBitmapEx);
@@ -5922,9 +5922,9 @@ static void lcl_paintBitmapExToRect(vcl::RenderContext *pOut, const Point& aPoin
     // Right shadow & corners
     if ( bPaintRightShadow )
     {
-        pOut->DrawBitmapEx( pOut->PixelToLogic( Point( aPaintRect.Right(), aPagePxRect.Bottom() + 1 - (aPageBottomRightShadow.GetSizePixel().Height() - snShadowPxWidth) ) ),
+        pOut->DrawBitmapEx( pOut->GetGeometry().PixelToLogic( Point( aPaintRect.Right(), aPagePxRect.Bottom() + 1 - (aPageBottomRightShadow.GetSizePixel().Height() - snShadowPxWidth) ) ),
             aPageBottomRightShadow );
-        pOut->DrawBitmapEx( pOut->PixelToLogic( Point( aPaintRect.Right(), aPagePxRect.Top() - snShadowPxWidth ) ),
+        pOut->DrawBitmapEx( pOut->GetGeometry().PixelToLogic( Point( aPaintRect.Right(), aPagePxRect.Top() - snShadowPxWidth ) ),
             aPageTopRightShadow );
 
         if (aPagePxRect.Height() > 2 * snShadowPxWidth)
@@ -5945,9 +5945,9 @@ static void lcl_paintBitmapExToRect(vcl::RenderContext *pOut, const Point& aPoin
     if(bPaintLeftShadow)
     {
         const tools::Long lLeft = aPaintRect.Left() - aPageBottomLeftShadow.GetSizePixel().Width();
-        pOut->DrawBitmapEx( pOut->PixelToLogic( Point( lLeft,
+        pOut->DrawBitmapEx( pOut->GetGeometry().PixelToLogic( Point( lLeft,
             aPagePxRect.Bottom() + 1 + snShadowPxWidth - aPageBottomLeftShadow.GetSizePixel().Height() ) ), aPageBottomLeftShadow );
-        pOut->DrawBitmapEx( pOut->PixelToLogic( Point( lLeft, aPagePxRect.Top() - snShadowPxWidth ) ), aPageTopLeftShadow );
+        pOut->DrawBitmapEx( pOut->GetGeometry().PixelToLogic( Point( lLeft, aPagePxRect.Top() - snShadowPxWidth ) ), aPageTopLeftShadow );
         if (aPagePxRect.Height() > 2 * snShadowPxWidth)
         {
             const tools::Long nWidth = aPageLeftShadow.GetSizePixel().Width();

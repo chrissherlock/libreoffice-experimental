@@ -1921,7 +1921,7 @@ void ScTextWnd::SetTextString( const OUString& rNewString )
                 else
                     nTextSize = GetSizeInPixels().Width(); // Overflow
 
-                Point aLogicStart = GetDrawingArea()->get_ref_device().PixelToLogic(Point(0,0));
+                Point aLogicStart = GetDrawingArea()->get_ref_device().GetGeometry().PixelToLogic(Point(0,0));
                 tools::Long nStartPos = aLogicStart.X();
                 tools::Long nInvPos = nStartPos;
                 if (nDifPos)

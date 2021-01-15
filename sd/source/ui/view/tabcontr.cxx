@@ -93,7 +93,7 @@ void  TabControl::MouseButtonDown(const MouseEvent& rMEvt)
         && !rMEvt.IsMod2()
         && !rMEvt.IsShift())
     {
-        Point aPos = PixelToLogic( rMEvt.GetPosPixel() );
+        Point aPos = maGeometry.PixelToLogic( rMEvt.GetPosPixel() );
         sal_uInt16 aPageId = GetPageId(aPos);
 
         //initialize

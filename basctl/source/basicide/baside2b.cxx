@@ -1476,7 +1476,7 @@ void BreakPointWindow::MouseButtonDown( const MouseEvent& rMEvt )
 {
     if ( rMEvt.GetClicks() == 2 )
     {
-        Point aMousePos( PixelToLogic( rMEvt.GetPosPixel() ) );
+        Point aMousePos( maGeometry.PixelToLogic( rMEvt.GetPosPixel() ) );
         tools::Long nLineHeight = GetTextHeight();
         if(nLineHeight)
         {
@@ -1499,7 +1499,7 @@ void BreakPointWindow::Command( const CommandEvent& rCEvt )
 
     std::unique_ptr<weld::Builder> xUIBuilder(Application::CreateBuilder(pPopupParent, "modules/BasicIDE/ui/breakpointmenus.ui"));
 
-    Point aEventPos( PixelToLogic( aPos ) );
+    Point aEventPos( maGeometry.PixelToLogic( aPos ) );
     BreakPoint* pBrk = rCEvt.IsMouseEvent() ? FindBreakPoint( aEventPos ) : nullptr;
     if ( pBrk )
     {

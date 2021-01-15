@@ -664,7 +664,7 @@ tools::Long ListBox::GetIndexForPoint( const Point& rPoint, sal_Int32& rPos ) co
         Point aConvPoint = maGeometry.LogicToPixel( rPoint );
         aConvPoint = OutputToAbsoluteScreenPixel( aConvPoint );
         aConvPoint = rMain->AbsoluteScreenToOutputPixel( aConvPoint );
-        aConvPoint = rMain->PixelToLogic( aConvPoint );
+        aConvPoint = rMain->GetGeometry().PixelToLogic( aConvPoint );
 
         // Try to find entry
         sal_Int32 nEntry = rMain->GetEntryPosForPoint( aConvPoint );

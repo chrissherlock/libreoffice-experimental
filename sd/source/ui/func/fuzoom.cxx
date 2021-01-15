@@ -80,7 +80,7 @@ bool FuZoom::MouseButtonDown(const MouseEvent& rMEvt)
     bStartDrag = true;
 
     aBeginPosPix = rMEvt.GetPosPixel();
-    aBeginPos = mpWindow->PixelToLogic(aBeginPosPix);
+    aBeginPos = mpWindow->GetGeometry().PixelToLogic(aBeginPosPix);
     aZoomRect.SetSize( Size( 0, 0 ) );
     aZoomRect.SetPos( aBeginPos );
 
@@ -104,8 +104,8 @@ bool FuZoom::MouseMove(const MouseEvent& rMEvt)
         Point aPosPix = rMEvt.GetPosPixel();
         ForceScroll(aPosPix);
 
-        aEndPos = mpWindow->PixelToLogic(aPosPix);
-        aBeginPos = mpWindow->PixelToLogic(aBeginPosPix);
+        aEndPos = mpWindow->GetGeometry().PixelToLogic(aPosPix);
+        aBeginPos = mpWindow->GetGeometry().PixelToLogic(aBeginPosPix);
 
         if (nSlotId == SID_ZOOM_PANNING || (rMEvt.IsShift() && !bVisible) )
         {
@@ -159,7 +159,7 @@ bool FuZoom::MouseButtonUp(const MouseEvent& rMEvt)
         if ( ( aZoomSizePixel.Width() < static_cast<::tools::Long>(nTol) && aZoomSizePixel.Height() < static_cast<::tools::Long>(nTol) ) || rMEvt.IsMod1() )
         {
             // click at place: double zoom factor
-            Point aPos = mpWindow->PixelToLogic(aPosPix);
+            Point aPos = mpWindow->GetGeometry().PixelToLogic(aPosPix);
             Size aSize = mpWindow->PixelToLogic(mpWindow->GetSizeInPixels());
             if ( rMEvt.IsMod1() )
             {

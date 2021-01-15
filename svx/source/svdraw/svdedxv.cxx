@@ -1842,9 +1842,9 @@ bool SdrObjEditView::MouseButtonDown(const MouseEvent& rMEvt, OutputDevice* pWin
         {
             Point aPt(rMEvt.GetPosPixel());
             if (pWin != nullptr)
-                aPt = pWin->PixelToLogic(aPt);
+                aPt = pWin->GetGeometry().PixelToLogic(aPt);
             else if (pTextEditWin != nullptr)
-                aPt = pTextEditWin->PixelToLogic(aPt);
+                aPt = pTextEditWin->GetGeometry().PixelToLogic(aPt);
             bPostIt = IsTextEditHit(aPt);
         }
         if (bPostIt)
@@ -1887,9 +1887,9 @@ bool SdrObjEditView::MouseButtonUp(const MouseEvent& rMEvt, OutputDevice* pWin)
         {
             Point aPt(rMEvt.GetPosPixel());
             if (pWin != nullptr)
-                aPt = pWin->PixelToLogic(aPt);
+                aPt = pWin->GetGeometry().PixelToLogic(aPt);
             else if (pTextEditWin != nullptr)
-                aPt = pTextEditWin->PixelToLogic(aPt);
+                aPt = pTextEditWin->GetGeometry().PixelToLogic(aPt);
             bPostIt = IsTextEditHit(aPt);
         }
         if (bPostIt && pWin)
@@ -1927,9 +1927,9 @@ bool SdrObjEditView::MouseMove(const MouseEvent& rMEvt, OutputDevice* pWin)
         {
             Point aPt(rMEvt.GetPosPixel());
             if (pWin)
-                aPt = pWin->PixelToLogic(aPt);
+                aPt = pWin->GetGeometry().PixelToLogic(aPt);
             else if (pTextEditWin)
-                aPt = pTextEditWin->PixelToLogic(aPt);
+                aPt = pTextEditWin->GetGeometry().PixelToLogic(aPt);
             bPostIt = IsTextEditHit(aPt);
         }
         if (bPostIt)
@@ -1972,9 +1972,9 @@ bool SdrObjEditView::Command(const CommandEvent& rCEvt, vcl::Window* pWin)
             {
                 Point aPt(rCEvt.GetMousePosPixel());
                 if (pWin != nullptr)
-                    aPt = pWin->PixelToLogic(aPt);
+                    aPt = pWin->GetGeometry().PixelToLogic(aPt);
                 else if (pTextEditWin != nullptr)
-                    aPt = pTextEditWin->PixelToLogic(aPt);
+                    aPt = pTextEditWin->GetGeometry().PixelToLogic(aPt);
                 bPostIt = IsTextEditHit(aPt);
             }
             if (bPostIt)

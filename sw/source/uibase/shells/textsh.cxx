@@ -397,7 +397,7 @@ void SwTextShell::ExecInsert(SfxRequest &rReq)
             SwEditWin& rEdtWin = GetView().GetEditWin();
             Size aWinSize = rEdtWin.GetSizePixel();
             Point aStartPos(aWinSize.Width()/2, aWinSize.Height() / 2);
-            aStartPos = rEdtWin.PixelToLogic(aStartPos);
+            aStartPos = rEdtWin.GetGeometry().PixelToLogic(aStartPos);
             aStartPos.AdjustX( -(8 * MM50) );
             aStartPos.AdjustY( -(4 * MM50) );
             Size aSize(16 * MM50, 8 * MM50);

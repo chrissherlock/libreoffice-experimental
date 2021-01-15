@@ -332,7 +332,7 @@ bool SlideSorterController::Command (
                 mpInsertionIndicatorHandler->Start(false);
                 mpInsertionIndicatorHandler->UpdateIndicatorIcon(SD_MOD()->pTransferClip);
                 mpInsertionIndicatorHandler->UpdatePosition(
-                    pWindow->PixelToLogic(rEvent.GetMousePosPixel()),
+                    pWindow->GetGeometry().PixelToLogic(rEvent.GetMousePosPixel()),
                     InsertionIndicatorHandler::MoveMode);
                 xContext.reset(new InsertionIndicatorHandler::ForceShowContext(
                     mpInsertionIndicatorHandler));

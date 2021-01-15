@@ -328,7 +328,7 @@ namespace frm
         ::Point aPos( _nX, _nY );
         // the XView::draw API talks about pixels, always ...
         if ( eTargetUnit != MapUnit::MapPixel )
-            aPos = pTargetDevice->PixelToLogic( aPos );
+            aPos = pTargetDevice->GetGeometry().PixelToLogic( aPos );
 
         pControl->Draw( pTargetDevice, aPos, DrawFlags::NoControls );
     }

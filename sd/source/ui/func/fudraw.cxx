@@ -145,7 +145,7 @@ bool FuDraw::MouseButtonDown(const MouseEvent& rMEvt)
 
     bool bReturn = false;
     bDragHelpLine = false;
-    aMDPos = mpWindow->PixelToLogic( rMEvt.GetPosPixel() );
+    aMDPos = mpWindow->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() );
 
     if ( rMEvt.IsLeft() )
     {
@@ -214,7 +214,7 @@ bool FuDraw::MouseButtonDown(const MouseEvent& rMEvt)
 bool FuDraw::MouseMove(const MouseEvent& rMEvt)
 {
     FrameView* pFrameView = mpViewShell->GetFrameView();
-    Point aPos = mpWindow->PixelToLogic( rMEvt.GetPosPixel() );
+    Point aPos = mpWindow->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() );
 
     bool bOrtho = false;
     bool bRestricted = true;
@@ -456,13 +456,13 @@ void FuDraw::ForcePointer(const MouseEvent* pMEvt)
 
     if (pMEvt)
     {
-        aPnt = mpWindow->PixelToLogic(pMEvt->GetPosPixel());
+        aPnt = mpWindow->GetGeometry().PixelToLogic(pMEvt->GetPosPixel());
         nModifier = pMEvt->GetModifier();
         bLeftDown = pMEvt->IsLeft();
     }
     else
     {
-        aPnt = mpWindow->PixelToLogic(mpWindow->GetPointerPosPixel());
+        aPnt = mpWindow->GetGeometry().PixelToLogic(mpWindow->GetPointerPosPixel());
     }
 
     if (mpView->IsDragObj())
@@ -703,7 +703,7 @@ bool FuDraw::RequestHelp(const HelpEvent& rHEvt)
                 // take a glance into the group
                 SdrPageView* pPV = nullptr;
 
-                Point aPos(mpWindow->PixelToLogic(mpWindow->ScreenToOutputPixel(aPosPixel)));
+                Point aPos(mpWindow->GetGeometry().PixelToLogic(mpWindow->ScreenToOutputPixel(aPosPixel)));
 
                 pObj = mpView->PickObj(aPos, mpView->getHitTolLog(), pPV, SdrSearchOptions::ALSOONMASTER | SdrSearchOptions::DEEP);
                 if (pObj)
@@ -726,7 +726,7 @@ bool FuDraw::RequestHelp(const HelpEvent& rHEvt)
 bool FuDraw::SetHelpText(const SdrObject* pObj, const Point& rPosPixel, const SdrViewEvent& rVEvt)
 {
     OUString aHelpText;
-    Point aPos(mpWindow->PixelToLogic(mpWindow->ScreenToOutputPixel(rPosPixel)));
+    Point aPos(mpWindow->GetGeometry().PixelToLogic(mpWindow->ScreenToOutputPixel(rPosPixel)));
     IMapObject* pIMapObj = SvxIMapInfo::GetHitIMapObject(pObj, aPos);
 
     if (!rVEvt.pURLField && !pIMapObj)

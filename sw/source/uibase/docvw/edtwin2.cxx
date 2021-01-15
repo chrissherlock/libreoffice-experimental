@@ -106,7 +106,7 @@ void SwEditWin::RequestHelp(const HelpEvent &rEvt)
     bool bContinue = true;
     CurrShell aCurr(&rSh);
     OUString sText;
-    Point aPos( PixelToLogic( ScreenToOutputPixel( rEvt.GetMousePosPixel() ) ));
+    Point aPos( maGeometry.PixelToLogic( ScreenToOutputPixel( rEvt.GetMousePosPixel() ) ));
     bool bBalloon = bool(rEvt.GetMode() & HelpEventMode::BALLOON);
 
     SdrView *pSdrView = rSh.GetDrawView();

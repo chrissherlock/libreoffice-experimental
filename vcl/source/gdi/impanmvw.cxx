@@ -182,7 +182,7 @@ void ImplAnimView::draw( sal_uLong nPos, VirtualDevice* pVDev )
         pRenderContext = pGuard->GetRenderContext();
     }
 
-    tools::Rectangle aOutRect( pRenderContext->PixelToLogic( Point() ), pRenderContext->GetSizeInLogicalUnits() );
+    tools::Rectangle aOutRect( pRenderContext->GetGeometry().PixelToLogic( Point() ), pRenderContext->GetSizeInLogicalUnits() );
 
     // check, if output lies out of display
     if( aOutRect.Intersection( tools::Rectangle( maDispPt, maDispSz ) ).IsEmpty() )

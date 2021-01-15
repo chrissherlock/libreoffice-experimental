@@ -59,7 +59,7 @@ bool FuConstruct::MouseButtonDown(const MouseEvent& rMEvt)
 
     aDragTimer.Start();
 
-    aMDPos = pWindow->PixelToLogic( rMEvt.GetPosPixel() );
+    aMDPos = pWindow->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() );
 
     if ( rMEvt.IsLeft() )
     {
@@ -98,7 +98,7 @@ bool FuConstruct::MouseMove(const MouseEvent& rMEvt)
     }
 
     Point aPix(rMEvt.GetPosPixel());
-    Point aPnt( pWindow->PixelToLogic(aPix) );
+    Point aPnt( pWindow->GetGeometry().PixelToLogic(aPix) );
 
     if ( pView->IsAction() )
     {
@@ -185,7 +185,7 @@ bool FuConstruct::SimpleMouseButtonUp(const MouseEvent& rMEvt)
         aDragTimer.Stop();
     }
 
-    Point   aPnt( pWindow->PixelToLogic( rMEvt.GetPosPixel() ) );
+    Point   aPnt( pWindow->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() ) );
 
     if ( pView->IsDragObj() )
          pView->EndDragObj( rMEvt.IsMod1() );

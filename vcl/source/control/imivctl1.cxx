@@ -783,7 +783,7 @@ bool SvxIconChoiceCtrl_Impl::MouseButtonUp( const MouseEvent& rMEvt )
 
 bool SvxIconChoiceCtrl_Impl::MouseMove( const MouseEvent& rMEvt )
 {
-    const Point aDocPos( pView->PixelToLogic(rMEvt.GetPosPixel()) );
+    const Point aDocPos( pView->GetGeometry().PixelToLogic(rMEvt.GetPosPixel()) );
 
     if( pView->IsTracking() )
         return false;

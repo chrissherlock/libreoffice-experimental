@@ -82,7 +82,7 @@ void SwEditWin::StartDrag( sal_Int8 /*nAction*/, const Point& rPosPixel )
 
     bool bStart = false, bDelSelect = false;
     SdrObject *pObj = nullptr;
-    Point aDocPos( PixelToLogic( rPosPixel ) );
+    Point aDocPos( maGeometry.PixelToLogic( rPosPixel ) );
     if ( !rSh.IsInSelect() && rSh.TestCurrPam( aDocPos, true))
         //We are not selecting and aren't at a selection
         bStart = true;
@@ -195,7 +195,7 @@ sal_Int8 SwEditWin::ExecuteDrop( const ExecuteDropEvent& rEvt )
 
     //A Drop to an open OutlinerView doesn't concern us (also see QueryDrop)
     SwWrtShell &rSh = m_rView.GetWrtShell();
-    const Point aDocPt( PixelToLogic( rEvt.maPosPixel ));
+    const Point aDocPt( maGeometry.PixelToLogic( rEvt.maPosPixel ));
     SdrObject *pObj = nullptr;
     OutlinerView* pOLV;
     rSh.GetObjCntType( aDocPt, pObj );
@@ -204,7 +204,7 @@ sal_Int8 SwEditWin::ExecuteDrop( const ExecuteDropEvent& rEvt )
     {
         tools::Rectangle aRect( pOLV->GetOutputArea() );
         aRect.Union( pObj->GetLogicRect() );
-        const Point aPos = pOLV->GetWindow()->PixelToLogic(rEvt.maPosPixel);
+        const Point aPos = pOLV->GetWindow()->GetGeometry().PixelToLogic(rEvt.maPosPixel);
         if ( aRect.IsInside(aPos) )
         {
             rSh.StartAllAction();
@@ -247,7 +247,7 @@ sal_Int8 SwEditWin::ExecuteDrop( const ExecuteDropEvent& rEvt )
 SotExchangeDest SwEditWin::GetDropDestination( const Point& rPixPnt, SdrObject ** ppObj )
 {
     SwWrtShell &rSh = m_rView.GetWrtShell();
-    const Point aDocPt( PixelToLogic( rPixPnt ) );
+    const Point aDocPt( maGeometry.PixelToLogic( rPixPnt ) );
     if( rSh.TestCurrPam( aDocPt )
         || rSh.IsOverReadOnlyPos( aDocPt )
         || rSh.DocPtInsideInputField( aDocPt ) )
@@ -264,7 +264,7 @@ SotExchangeDest SwEditWin::GetDropDestination( const Point& rPixPnt, SdrObject *
         {
             tools::Rectangle aRect( pOLV->GetOutputArea() );
             aRect.Union( pObj->GetLogicRect() );
-            const Point aPos = pOLV->GetWindow()->PixelToLogic( rPixPnt );
+            const Point aPos = pOLV->GetWindow()->GetGeometry().PixelToLogic( rPixPnt );
             if( aRect.IsInside( aPos ) )
                 return SotExchangeDest::NONE;
         }
@@ -359,7 +359,7 @@ sal_Int8 SwEditWin::AcceptDrop( const AcceptDropEvent& rEvt )
             if(aPixPt.X() < aWin.Left()) aPixPt.AdjustX( -nMargin );
             if(aPixPt.Y() > aWin.Bottom()) aPixPt.AdjustY(nMargin );
             if(aPixPt.Y() < aWin.Top()) aPixPt.AdjustY( -nMargin );
-            Point aDocPt(PixelToLogic(aPixPt));
+            Point aDocPt(maGeometry.PixelToLogic(aPixPt));
             SwRect rect(aDocPt,Size(1,1));
             rSh.MakeVisible(rect);
         }
@@ -387,7 +387,7 @@ sal_Int8 SwEditWin::AcceptDrop( const AcceptDropEvent& rEvt )
 
     if( EXCHG_INOUT_ACTION_NONE != m_nDropAction )
     {
-        const Point aDocPt( PixelToLogic( aPixPt ) );
+        const Point aDocPt( maGeometry.PixelToLogic( aPixPt ) );
 
         //With the default action we still want to have a say.
         SwModule *pMod = SW_MOD();

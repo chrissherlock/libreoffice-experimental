@@ -412,7 +412,7 @@ bool GraphicObject::ImplDrawTiled( OutputDevice& rOut, const Point& rPosPixel,
             // update return value. This method should return true, if
             // at least one of the looped Draws succeeded.
             bRet |= Draw( &rOut,
-                          bDrawInPixel ? aCurrPos : rOut.PixelToLogic( aCurrPos ),
+                          bDrawInPixel ? aCurrPos : rOut.GetGeometry().PixelToLogic( aCurrPos ),
                           bDrawInPixel ? rTileSizePixel : aTileSizeLogic,
                           pAttr );
 

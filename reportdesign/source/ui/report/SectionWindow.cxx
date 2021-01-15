@@ -379,7 +379,7 @@ void OSectionWindow::scrollChildren(tools::Long _nX)
         lcl_scroll(*m_aReportSection, aDiff);
     }
 
-    lcl_scroll(*m_aEndMarker, m_aEndMarker->PixelToLogic(Point(_nX,0)));
+    lcl_scroll(*m_aEndMarker, m_aEndMarker->GetGeometry().PixelToLogic(Point(_nX,0)));
 
     lcl_setOrigin(*m_aSplitter,_nX, 0);
     lcl_scroll(*m_aSplitter,aDiff);

@@ -813,8 +813,8 @@ void SwPostItMgr::LayoutPostIts()
                         if (pPage->lOffset != 0)
                             visiblePostIt->TranslateTopPosition(pPage->lOffset);
 
-                        bool bBottom  = mpEditWin->PixelToLogic(Point(0,visiblePostIt->VirtualPos().Y()+visiblePostIt->VirtualSize().Height())).Y() <= (pPage->mPageRect.Bottom()-aSidebarheight);
-                        bool bTop = mpEditWin->PixelToLogic(Point(0,visiblePostIt->VirtualPos().Y())).Y() >= (pPage->mPageRect.Top()+aSidebarheight);
+                        bool bBottom  = mpEditWin->GetGeometry().PixelToLogic(Point(0,visiblePostIt->VirtualPos().Y()+visiblePostIt->VirtualSize().Height())).Y() <= (pPage->mPageRect.Bottom()-aSidebarheight);
+                        bool bTop = mpEditWin->GetGeometry().PixelToLogic(Point(0,visiblePostIt->VirtualPos().Y())).Y() >= (pPage->mPageRect.Top()+aSidebarheight);
                         if ( bBottom && bTop )
                         {
                             // When tiled rendering, make sure that only the
@@ -831,7 +831,7 @@ void SwPostItMgr::LayoutPostIts()
                         }
                         else
                         {
-                            if (mpEditWin->PixelToLogic(Point(0,visiblePostIt->VirtualPos().Y())).Y() < (pPage->mPageRect.Top()+aSidebarheight))
+                            if (mpEditWin->GetGeometry().PixelToLogic(Point(0,visiblePostIt->VirtualPos().Y())).Y() < (pPage->mPageRect.Top()+aSidebarheight))
                             {
                                 if ( pPage->eSidebarPosition == sw::sidebarwindows::SidebarPosition::LEFT )
                                     visiblePostIt->ShowAnchorOnly(Point( pPage->mPageRect.Left(),
@@ -944,7 +944,7 @@ bool SwPostItMgr::BorderOverPageBorder(tools::ULong aPage) const
     if ((*aItem)->mpPostIt)
     {
         const tools::Long aSidebarheight = mPages[aPage-1]->bScrollbar ? mpEditWin->PixelToLogic(Size(0,GetSidebarScrollerHeight())).Height() : 0;
-        const tools::Long aEndValue = mpEditWin->PixelToLogic(Point(0,(*aItem)->mpPostIt->GetPosPixel().Y()+(*aItem)->mpPostIt->GetSizePixel().Height())).Y();
+        const tools::Long aEndValue = mpEditWin->GetGeometry().PixelToLogic(Point(0,(*aItem)->mpPostIt->GetPosPixel().Y()+(*aItem)->mpPostIt->GetSizePixel().Height())).Y();
         return aEndValue <= mPages[aPage-1]->mPageRect.Bottom()-aSidebarheight;
     }
     else
@@ -961,7 +961,7 @@ void SwPostItMgr::DrawNotesForPage(OutputDevice *pOutDev, sal_uInt32 nPage)
         SwAnnotationWin* pPostIt = pItem->mpPostIt;
         if (!pPostIt)
             continue;
-        Point aPoint(mpEditWin->PixelToLogic(pPostIt->GetPosPixel()));
+        Point aPoint(mpEditWin->GetGeometry().PixelToLogic(pPostIt->GetPosPixel()));
         pPostIt->DrawForPage(pOutDev, aPoint);
     }
 }
@@ -977,7 +977,7 @@ void SwPostItMgr::PaintTile(OutputDevice& rRenderContext)
         bool bEnableMapMode = !mpEditWin->IsMapModeEnabled();
         mpEditWin->EnableMapMode();
         rRenderContext.Push(PushFlags::MAPMODE);
-        Point aOffset(mpEditWin->PixelToLogic(pPostIt->GetPosPixel()));
+        Point aOffset(mpEditWin->GetGeometry().PixelToLogic(pPostIt->GetPosPixel()));
         MapMode aMapMode(rRenderContext.GetMapMode());
         aMapMode.SetOrigin(aMapMode.GetOrigin() + aOffset);
         rRenderContext.SetMapMode(aMapMode);
@@ -1011,15 +1011,15 @@ void SwPostItMgr::Scroll(const tools::Long lScroll,const tools::ULong aPage)
 
         if (item->mbShow)
         {
-            bool bBottom  = mpEditWin->PixelToLogic(Point(0,pPostIt->VirtualPos().Y()+pPostIt->VirtualSize().Height())).Y() <= (mPages[aPage-1]->mPageRect.Bottom()-aSidebarheight);
-            bool bTop = mpEditWin->PixelToLogic(Point(0,pPostIt->VirtualPos().Y())).Y() >=   (mPages[aPage-1]->mPageRect.Top()+aSidebarheight);
+            bool bBottom  = mpEditWin->GetGeometry().PixelToLogic(Point(0,pPostIt->VirtualPos().Y()+pPostIt->VirtualSize().Height())).Y() <= (mPages[aPage-1]->mPageRect.Bottom()-aSidebarheight);
+            bool bTop = mpEditWin->GetGeometry().PixelToLogic(Point(0,pPostIt->VirtualPos().Y())).Y() >=   (mPages[aPage-1]->mPageRect.Top()+aSidebarheight);
             if ( bBottom && bTop)
             {
                     pPostIt->ShowNote();
             }
             else
             {
-                if ( mpEditWin->PixelToLogic(Point(0,pPostIt->VirtualPos().Y())).Y() < (mPages[aPage-1]->mPageRect.Top()+aSidebarheight))
+                if ( mpEditWin->GetGeometry().PixelToLogic(Point(0,pPostIt->VirtualPos().Y())).Y() < (mPages[aPage-1]->mPageRect.Top()+aSidebarheight))
                 {
                     if (mPages[aPage-1]->eSidebarPosition == sw::sidebarwindows::SidebarPosition::LEFT)
                         pPostIt->ShowAnchorOnly(Point(mPages[aPage-1]->mPageRect.Left(),mPages[aPage-1]->mPageRect.Top()));
@@ -1051,8 +1051,8 @@ void SwPostItMgr::AutoScroll(const SwAnnotationWin* pPostIt,const tools::ULong a
         return;
 
     const tools::Long aSidebarheight = mpEditWin->PixelToLogic(Size(0,GetSidebarScrollerHeight())).Height();
-    const bool bBottom  = mpEditWin->PixelToLogic(Point(0,pPostIt->GetPosPixel().Y()+pPostIt->GetSizePixel().Height())).Y() <= (mPages[aPage-1]->mPageRect.Bottom()-aSidebarheight);
-    const bool bTop = mpEditWin->PixelToLogic(Point(0,pPostIt->GetPosPixel().Y())).Y() >= (mPages[aPage-1]->mPageRect.Top()+aSidebarheight);
+    const bool bBottom  = mpEditWin->GetGeometry().PixelToLogic(Point(0,pPostIt->GetPosPixel().Y()+pPostIt->GetSizePixel().Height())).Y() <= (mPages[aPage-1]->mPageRect.Bottom()-aSidebarheight);
+    const bool bTop = mpEditWin->GetGeometry().PixelToLogic(Point(0,pPostIt->GetPosPixel().Y())).Y() >= (mPages[aPage-1]->mPageRect.Top()+aSidebarheight);
     if ( !(bBottom && bTop))
     {
         const tools::Long aDiff = bBottom ? mpEditWin->GetGeometry().LogicToPixel(Point(0,mPages[aPage-1]->mPageRect.Top() + aSidebarheight)).Y() - pPostIt->GetPosPixel().Y() :
@@ -1930,7 +1930,7 @@ bool SwPostItMgr::IsHit(const Point &aPointPixel)
 {
     if (HasNotes() && ShowNotes())
     {
-        const Point aPoint = mpEditWin->PixelToLogic(aPointPixel);
+        const Point aPoint = mpEditWin->GetGeometry().PixelToLogic(aPointPixel);
         const SwRootFrame* pLayout = mpWrtShell->GetLayout();
         SwRect aPageFrame;
         const tools::ULong nPageNum = SwPostItHelper::getPageInfo( aPageFrame, pLayout, aPoint );

@@ -245,7 +245,7 @@ void SdrMarkView::ModelHasChanged()
                 if (pViewShellWindow && pViewShellWindow->IsAncestorOf(*pWin))
                 {
                     Point aOffsetPx = pWin->GetOffsetPixelFrom(*pViewShellWindow);
-                    Point aLogicOffset = pWin->PixelToLogic(aOffsetPx);
+                    Point aLogicOffset = pWin->GetGeometry().PixelToLogic(aOffsetPx);
                     aSelection.Move(aLogicOffset.getX(), aLogicOffset.getY());
                 }
             }
@@ -701,7 +701,7 @@ void SdrMarkView::SetMarkHandlesForLOKit(tools::Rectangle const & rRect, const S
                 if (pViewShellWindow && pViewShellWindow->IsAncestorOf(*pWin))
                 {
                     Point aOffsetPx = pWin->GetOffsetPixelFrom(*pViewShellWindow);
-                    Point aLogicOffset = pWin->PixelToLogic(aOffsetPx);
+                    Point aLogicOffset = pWin->GetGeometry().PixelToLogic(aOffsetPx);
                     aSelection.Move(aLogicOffset.getX(), aLogicOffset.getY());
                 }
             }
@@ -841,7 +841,7 @@ void SdrMarkView::SetMarkHandlesForLOKit(tools::Rectangle const & rRect, const S
                                                 // are for making them understandable by the JSON parser
 
                                                 Point aOffsetPx = pWin->GetOffsetPixelFrom(*pViewShellWindow);
-                                                Point aLogicOffset = pWin->PixelToLogic(aOffsetPx);
+                                                Point aLogicOffset = pWin->GetGeometry().PixelToLogic(aOffsetPx);
                                                 OString sPolygonElem("<polygon points=\\\"");
                                                 for (sal_uInt32 nIndex = 0; nIndex < nPolySize; ++nIndex)
                                                 {
@@ -1423,7 +1423,7 @@ bool SdrMarkView::MouseMove(const MouseEvent& rMEvt, OutputDevice* pWin)
         SdrHdl* pMouseOverHdl = nullptr;
         if( !rMEvt.IsLeaveWindow() && pWin )
         {
-            Point aMDPos( pWin->PixelToLogic( rMEvt.GetPosPixel() ) );
+            Point aMDPos( pWin->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() ) );
             pMouseOverHdl = PickHandle(aMDPos);
         }
 

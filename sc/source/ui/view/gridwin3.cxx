@@ -47,7 +47,7 @@ bool ScGridWindow::DrawMouseButtonDown(const MouseEvent& rMEvt)
             SetMapMode( aDrawMode );
 
         pDraw->SetWindow( this );
-        Point aLogicPos = PixelToLogic(rMEvt.GetPosPixel());
+        Point aLogicPos = maGeometry.PixelToLogic(rMEvt.GetPosPixel());
         if ( pDraw->IsDetectiveHit( aLogicPos ) )
         {
             // nothing on detective arrows (double click is evaluated on ButtonUp)
@@ -318,7 +318,7 @@ void ScGridWindow::CreateAnchorHandle(SdrHdlList& rHdl, const ScAddress& rAddres
         {
             bool bNegativePage = mrViewData.GetDocument().IsNegativePage( mrViewData.GetTabNo() );
             Point aPos = mrViewData.GetScrPos( rAddress.Col(), rAddress.Row(), eWhich, true );
-            aPos = PixelToLogic(aPos);
+            aPos = maGeometry.PixelToLogic(aPos);
             rHdl.AddHdl(std::make_unique<SdrHdl>(aPos, bNegativePage ? SdrHdlKind::Anchor_TR : SdrHdlKind::Anchor));
         }
     }
@@ -367,7 +367,7 @@ void ScGridWindow::UpdateStatusPosSize()
         }
         else // mouse position
         {
-            Point aPos = PixelToLogic(aCurMousePos);
+            Point aPos = maGeometry.PixelToLogic(aCurMousePos);
             pPV->LogicToPagePos(aPos);
             aSet.Put( SfxPointItem( SID_ATTR_POSITION, aPos ) );
             aSet.Put( SvxSizeItem( SID_ATTR_SIZE, Size( 0, 0 ) ) );

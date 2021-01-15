@@ -312,7 +312,7 @@ void ScDrawShell::ExecDrawAttr( SfxRequest& rReq )
                 if ( pObj->IsGroupObject() )
                 {
                     SdrPageView* pPV = nullptr;
-                    SdrObject* pHit = pView->PickObj(pWin->PixelToLogic(rViewData.GetMousePosPixel()), pView->getHitTolLog(), pPV, SdrSearchOptions::DEEP);
+                    SdrObject* pHit = pView->PickObj(pWin->GetGeometry().PixelToLogic(rViewData.GetMousePosPixel()), pView->getHitTolLog(), pPV, SdrSearchOptions::DEEP);
                     if (pHit)
                         pObj = pHit;
                 }

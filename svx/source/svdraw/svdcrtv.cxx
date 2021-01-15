@@ -303,7 +303,7 @@ bool SdrCreateView::MouseMove(const MouseEvent& rMEvt, OutputDevice* pWin)
         if(pPV)
         {
             // TODO: Change default hit tolerance at IsMarkedHit() some time!
-            Point aPos(pWin->PixelToLogic(rMEvt.GetPosPixel()));
+            Point aPos(pWin->GetGeometry().PixelToLogic(rMEvt.GetPosPixel()));
             bool bMarkHit=PickHandle(aPos)!=nullptr || IsMarkedObjHit(aPos);
             SdrObjConnection aCon;
             if (!bMarkHit) SdrEdgeObj::ImpFindConnector(aPos,*pPV,aCon,nullptr,pWin);

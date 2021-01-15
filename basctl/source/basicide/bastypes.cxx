@@ -453,7 +453,7 @@ void TabBar::Command( const CommandEvent& rCEvt )
         Point aPos( rCEvt.IsMouseEvent() ? rCEvt.GetMousePosPixel() : Point(1,1) );
         if ( rCEvt.IsMouseEvent() )     // select right tab
         {
-            Point aP = PixelToLogic( aPos );
+            Point aP = maGeometry.PixelToLogic( aPos );
             MouseEvent aMouseEvent( aP, 1, MouseEventModifiers::SIMPLECLICK, MOUSE_LEFT );
             ::TabBar::MouseButtonDown( aMouseEvent ); // base class
         }

@@ -141,7 +141,7 @@ void SwAnnotationWin::PaintTile(vcl::RenderContext& rRenderContext, const tools:
 
 bool SwAnnotationWin::IsHitWindow(const Point& rPointLogic)
 {
-    tools::Rectangle aRectangleLogic(EditWin().PixelToLogic(GetPosPixel()), EditWin().PixelToLogic(GetSizePixel()));
+    tools::Rectangle aRectangleLogic(EditWin().GetGeometry().PixelToLogic(GetPosPixel()), EditWin().PixelToLogic(GetSizePixel()));
     return aRectangleLogic.IsInside(rPointLogic);
 }
 
@@ -169,7 +169,7 @@ void SwAnnotationWin::DrawForPage(OutputDevice* pDev, const Point& rPt)
     {
         int x, y, width, height;
         mxMetadataAuthor->get_extents_relative_to(*m_xContainer, x, y, width, height);
-        Point aPos(rPt + PixelToLogic(Point(x, y)));
+        Point aPos(rPt + maGeometry.PixelToLogic(Point(x, y)));
         Size aSize(PixelToLogic(Size(width, height)));
 
         pDev->Push(PushFlags::CLIPREGION);
@@ -184,7 +184,7 @@ void SwAnnotationWin::DrawForPage(OutputDevice* pDev, const Point& rPt)
     {
         int x, y, width, height;
         mxMetadataDate->get_extents_relative_to(*m_xContainer, x, y, width, height);
-        Point aPos(rPt + PixelToLogic(Point(x, y)));
+        Point aPos(rPt + maGeometry.PixelToLogic(Point(x, y)));
         Size aSize(PixelToLogic(Size(width, height)));
 
         pDev->Push(PushFlags::CLIPREGION);
@@ -197,7 +197,7 @@ void SwAnnotationWin::DrawForPage(OutputDevice* pDev, const Point& rPt)
     {
         int x, y, width, height;
         mxMetadataResolved->get_extents_relative_to(*m_xContainer, x, y, width, height);
-        Point aPos(rPt + PixelToLogic(Point(x, y)));
+        Point aPos(rPt + maGeometry.PixelToLogic(Point(x, y)));
         Size aSize(PixelToLogic(Size(width, height)));
 
         pDev->Push(PushFlags::CLIPREGION);
@@ -225,7 +225,7 @@ void SwAnnotationWin::DrawForPage(OutputDevice* pDev, const Point& rPt)
         // completely shown
         int x, y, width, height;
         mxMenuButton->get_extents_relative_to(*m_xContainer, x, y, width, height);
-        Point aPos(rPt + PixelToLogic(Point(x, y)));
+        Point aPos(rPt + maGeometry.PixelToLogic(Point(x, y)));
         pDev->DrawText(aPos, "...");
     }
 
@@ -483,14 +483,14 @@ void SwAnnotationWin::SetPosAndSize()
         {
             case sw::sidebarwindows::SidebarPosition::LEFT:
             {
-                aLineStart = EditWin().PixelToLogic( Point(GetPosPixel().X()+GetSizePixel().Width(),GetPosPixel().Y()-1) );
-                aLineEnd = EditWin().PixelToLogic( Point(GetPosPixel().X(),GetPosPixel().Y()-1) );
+                aLineStart = EditWin().GetGeometry().PixelToLogic( Point(GetPosPixel().X()+GetSizePixel().Width(),GetPosPixel().Y()-1) );
+                aLineEnd = EditWin().GetGeometry().PixelToLogic( Point(GetPosPixel().X(),GetPosPixel().Y()-1) );
             }
             break;
             case sw::sidebarwindows::SidebarPosition::RIGHT:
             {
-                aLineStart = EditWin().PixelToLogic( Point(GetPosPixel().X(),GetPosPixel().Y()-1) );
-                aLineEnd = EditWin().PixelToLogic( Point(GetPosPixel().X()+GetSizePixel().Width(),GetPosPixel().Y()-1) );
+                aLineStart = EditWin().GetGeometry().PixelToLogic( Point(GetPosPixel().X(),GetPosPixel().Y()-1) );
+                aLineEnd = EditWin().GetGeometry().PixelToLogic( Point(GetPosPixel().X()+GetSizePixel().Width(),GetPosPixel().Y()-1) );
             }
             break;
             default:
@@ -554,8 +554,8 @@ void SwAnnotationWin::SetPosAndSize()
 
     if (mpShadow && bChange)
     {
-        Point aStart = EditWin().PixelToLogic(GetPosPixel()+Point(0,GetSizePixel().Height()));
-        Point aEnd = EditWin().PixelToLogic(GetPosPixel()+Point(GetSizePixel().Width()-1,GetSizePixel().Height()));
+        Point aStart = EditWin().GetGeometry().PixelToLogic(GetPosPixel()+Point(0,GetSizePixel().Height()));
+        Point aEnd = EditWin().GetGeometry().PixelToLogic(GetPosPixel()+Point(GetSizePixel().Width()-1,GetSizePixel().Height()));
         mpShadow->SetPosition(basegfx::B2DPoint(aStart.X(),aStart.Y()), basegfx::B2DPoint(aEnd.X(),aEnd.Y()));
     }
 
@@ -743,8 +743,8 @@ void SwAnnotationWin::SetSizePixel( const Size& rNewSize )
 
     if (mpShadow)
     {
-        Point aStart = EditWin().PixelToLogic(GetPosPixel()+Point(0,GetSizePixel().Height()));
-        Point aEnd = EditWin().PixelToLogic(GetPosPixel()+Point(GetSizePixel().Width()-1,GetSizePixel().Height()));
+        Point aStart = EditWin().GetGeometry().PixelToLogic(GetPosPixel()+Point(0,GetSizePixel().Height()));
+        Point aEnd = EditWin().GetGeometry().PixelToLogic(GetPosPixel()+Point(GetSizePixel().Width()-1,GetSizePixel().Height()));
         mpShadow->SetPosition(basegfx::B2DPoint(aStart.X(),aStart.Y()), basegfx::B2DPoint(aEnd.X(),aEnd.Y()));
     }
 }

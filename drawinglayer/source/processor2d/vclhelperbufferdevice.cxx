@@ -297,7 +297,7 @@ impBufferDevice::impBufferDevice(OutputDevice& rOutDev, const basegfx::B2DRange&
 
     MapMode aNewMapMode(mrOutDev.GetMapMode());
 
-    const Point aLogicTopLeft(mrOutDev.PixelToLogic(maDestPixel.TopLeft()));
+    const Point aLogicTopLeft(mrOutDev.GetGeometry().PixelToLogic(maDestPixel.TopLeft()));
     aNewMapMode.SetOrigin(Point(-aLogicTopLeft.X(), -aLogicTopLeft.Y()));
 
     mpContent->SetMapMode(aNewMapMode);

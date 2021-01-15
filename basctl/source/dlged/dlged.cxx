@@ -507,7 +507,7 @@ void DlgEditor::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle
                 aPos.AdjustY( -(aPos.Y() % aGridSize_.Height()) );
 
                 // don't put in the corner
-                Point aMinPos = rRenderContext.PixelToLogic( Point( 30, 20 ) );
+                Point aMinPos = rRenderContext.GetGeometry().PixelToLogic( Point( 30, 20 ) );
                 if( (aPos.X() < aMinPos.X()) || (aPos.Y() < aMinPos.Y()) )
                 {
                     aPos = aMinPos;
