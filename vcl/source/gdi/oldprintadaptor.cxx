@@ -60,7 +60,7 @@ OldStylePrintAdaptor::~OldStylePrintAdaptor()
 
 void OldStylePrintAdaptor::StartPage()
 {
-    Size aPaperSize( getPrinter()->PixelToLogic( getPrinter()->GetPaperSizePixel(), MapMode( MapUnit::Map100thMM ) ) );
+    Size aPaperSize( getPrinter()->GetGeometry().PixelToLogic( getPrinter()->GetPaperSizePixel(), MapMode( MapUnit::Map100thMM ) ) );
     mpData->maPages.emplace_back( );
     mpData->maPages.back().maPageSize.Width = aPaperSize.getWidth();
     mpData->maPages.back().maPageSize.Height = aPaperSize.getHeight();

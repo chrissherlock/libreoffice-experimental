@@ -821,7 +821,7 @@ void ScTabView::TestHintWindow()
                 Point aHintPos = calcHintWindowPosition(
                     aPos, Size(nCellSizeX,nCellSizeY), aWinSize, aHintWndSize);
 
-                pOverlay->SetPos(pWin->PixelToLogic(aHintPos, pWin->GetDrawMapMode()), pWin->GetDrawMapMode());
+                pOverlay->SetPos(pWin->GetGeometry().PixelToLogic(aHintPos, pWin->GetDrawMapMode()), pWin->GetDrawMapMode());
                 for (VclPtr<ScGridWindow> & pWindow : pGridWin)
                 {
                     if (!pWindow)
@@ -844,7 +844,7 @@ void ScTabView::TestHintWindow()
                         //single tip, albeit "under" the split lines
                         Point aOtherPos(pWindow->ScreenToOutputPixel(pWin->OutputToScreenPixel(aHintPos)));
                         std::unique_ptr<ScOverlayHint> pOtherOverlay(new ScOverlayHint(aTitle, aMessage, aCommentColor, pFrameWin->GetFont()));
-                        Point aFooPos(pWindow->PixelToLogic(aOtherPos, pWindow->GetDrawMapMode()));
+                        Point aFooPos(pWindow->GetGeometry().PixelToLogic(aOtherPos, pWindow->GetDrawMapMode()));
                         pOtherOverlay->SetPos(aFooPos, pWindow->GetDrawMapMode());
                         xOverlayManager->add(*pOtherOverlay);
                         mxInputHintOO->append(std::move(pOtherOverlay));

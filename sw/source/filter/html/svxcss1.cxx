@@ -875,7 +875,7 @@ void SvxCSS1Parser::PixelToTwip( tools::Long &rWidth, tools::Long &rHeight )
     if( Application::GetDefaultDevice() )
     {
         Size aTwipSz( rWidth, rHeight );
-        aTwipSz = Application::GetDefaultDevice()->PixelToLogic( aTwipSz,
+        aTwipSz = Application::GetDefaultDevice()->GetGeometry().PixelToLogic( aTwipSz,
                                                           MapMode(MapUnit::MapTwip) );
 
         rWidth = aTwipSz.Width();

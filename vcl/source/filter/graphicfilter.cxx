@@ -514,14 +514,18 @@ static Graphic ImpGetScaledGraphic( const Graphic& rGraphic, FilterConfigItem& r
         Size aOriginalSize;
         Size aPrefSize( rGraphic.GetPrefSize() );
         MapMode aPrefMapMode( rGraphic.GetPrefMapMode() );
+
         if (aPrefMapMode.GetMapUnit() == MapUnit::MapPixel)
-            aOriginalSize = Application::GetDefaultDevice()->PixelToLogic(aPrefSize, MapMode(MapUnit::Map100thMM));
+            aOriginalSize = Application::GetDefaultDevice()->GetGeometry().PixelToLogic(aPrefSize, MapMode(MapUnit::Map100thMM));
         else
             aOriginalSize = OutputDevice::LogicToLogic(aPrefSize, aPrefMapMode, MapMode(MapUnit::Map100thMM));
+
         if ( !nLogicalWidth )
             nLogicalWidth = aOriginalSize.Width();
+
         if ( !nLogicalHeight )
             nLogicalHeight = aOriginalSize.Height();
+
         if( rGraphic.GetType() == GraphicType::Bitmap )
         {
 

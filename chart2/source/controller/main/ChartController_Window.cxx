@@ -247,7 +247,7 @@ void SAL_CALL ChartController::setPosSize(
     if(!(xWindow.is() && pChartWindow))
         return;
 
-    Size aLogicSize = pChartWindow->PixelToLogic( Size( Width, Height ), MapMode( MapUnit::Map100thMM )  );
+    Size aLogicSize = pChartWindow->GetGeometry().PixelToLogic( Size( Width, Height ), MapMode( MapUnit::Map100thMM )  );
 
     //todo: for standalone chart: detect whether we are standalone
     //change map mode to fit new size

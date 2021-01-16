@@ -2857,7 +2857,7 @@ uno::Sequence< beans::PropertyValue > SAL_CALL SwXTextDocument::getRenderer(
                 if ( pPrinter )
                 {
                     awt::Size aNewPageSize;
-                    const Size aPageSize = pPrinter->PixelToLogic( pPrinter->GetPaperSizePixel(), MapMode( MapUnit::Map100thMM ) );
+                    const Size aPageSize = pPrinter->GetGeometry().PixelToLogic( pPrinter->GetPaperSizePixel(), MapMode( MapUnit::Map100thMM ) );
                     aNewPageSize = awt::Size( aPageSize.Width(), aPageSize.Height() );
                     if ( ( pPagePrintSettings->GetLandscape() &&
                            aPageSize.Width() < aPageSize.Height() ) ||

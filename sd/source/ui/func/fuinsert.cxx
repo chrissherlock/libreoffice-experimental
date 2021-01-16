@@ -710,12 +710,14 @@ void FuInsertAVMedia::DoExecute( SfxRequest& rReq )
         if( aPrefSize.Width() && aPrefSize.Height() )
         {
             if( mpWindow )
-                aSize = mpWindow->PixelToLogic(aPrefSize, MapMode(MapUnit::Map100thMM));
+                aSize = mpWindow->GetGeometry().PixelToLogic(aPrefSize, MapMode(MapUnit::Map100thMM));
             else
-                aSize = Application::GetDefaultDevice()->PixelToLogic(aPrefSize, MapMode(MapUnit::Map100thMM));
+                aSize = Application::GetDefaultDevice()->GetGeometry().PixelToLogic(aPrefSize, MapMode(MapUnit::Map100thMM));
         }
         else
+        {
             aSize = Size( 5000, 5000 );
+        }
 
         if( mpWindow )
         {

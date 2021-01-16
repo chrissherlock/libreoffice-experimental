@@ -1629,7 +1629,7 @@ void DrawingML::WriteGraphicCropProperties(uno::Reference<beans::XPropertySet> c
 
         // GraphicCrop is in mm100, so in case the original size is in pixels, convert it over.
         if (rMapMode.GetMapUnit() == MapUnit::MapPixel)
-            aOriginalSize = Application::GetDefaultDevice()->PixelToLogic(aOriginalSize, MapMode(MapUnit::Map100thMM));
+            aOriginalSize = Application::GetDefaultDevice()->GetGeometry().PixelToLogic(aOriginalSize, MapMode(MapUnit::Map100thMM));
 
         if ( (0 != aGraphicCropStruct.Left) || (0 != aGraphicCropStruct.Top) || (0 != aGraphicCropStruct.Right) || (0 != aGraphicCropStruct.Bottom) )
         {

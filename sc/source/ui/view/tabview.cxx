@@ -1704,7 +1704,7 @@ Point ScTabView::GetChartInsertPos( const Size& rSize, const ScRange& rCellRange
         //  get the visible rectangle in logic units
 
         MapMode aDrawMode = pWin->GetDrawMapMode();
-        tools::Rectangle aVisible( pWin->PixelToLogic( tools::Rectangle( Point(0,0), pWin->GetSizeInPixels() ), aDrawMode ) );
+        tools::Rectangle aVisible( pWin->GetGeometry().PixelToLogic( tools::Rectangle( Point(0,0), pWin->GetSizeInPixels() ), aDrawMode ) );
 
         ScDocument& rDoc = aViewData.GetDocument();
         SCTAB nTab = aViewData.GetTabNo();

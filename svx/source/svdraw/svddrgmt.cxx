@@ -3803,14 +3803,10 @@ bool SdrDragCrop::EndSdrDrag(bool /*bCopy*/)
         const MapMode aMapModePool(pObj->getSdrModelFromSdrObject().GetItemPool().GetMetric(0));
         Size aGraphicSize(rGraphicObject.GetPrefSize());
 
-        if(MapUnit::MapPixel == rGraphicObject.GetPrefMapMode().GetMapUnit())
-        {
-            aGraphicSize = Application::GetDefaultDevice()->PixelToLogic(aGraphicSize, aMapModePool);
-        }
+        if (MapUnit::MapPixel == rGraphicObject.GetPrefMapMode().GetMapUnit())
+            aGraphicSize = Application::GetDefaultDevice()->GetGeometry().PixelToLogic(aGraphicSize, aMapModePool);
         else
-        {
             aGraphicSize = OutputDevice::LogicToLogic(aGraphicSize, rGraphicObject.GetPrefMapMode(), aMapModePool);
-        }
 
         if(0 == aGraphicSize.Width() || 0 == aGraphicSize.Height())
         {

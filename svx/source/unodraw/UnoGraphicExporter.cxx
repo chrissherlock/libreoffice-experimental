@@ -187,7 +187,7 @@ namespace {
         {
             // use 100th mm for primitive bitmap converter tool, input is pixel
             // use a real OutDev to get the correct DPI, the static LogicToLogic assumes 72dpi which is wrong (!)
-            const Size aSize100th(Application::GetDefaultDevice()->PixelToLogic(*pSize, MapMode(MapUnit::Map100thMM)));
+            const Size aSize100th(Application::GetDefaultDevice()->GetGeometry().PixelToLogic(*pSize, MapMode(MapUnit::Map100thMM)));
 
             aRange.expand(basegfx::B2DPoint(aSize100th.Width(), aSize100th.Height()));
 
@@ -217,7 +217,7 @@ namespace {
                 // tdf#105998 Correct the Metafile using information from it's real sizes measured
                 // using rMtf.GetBoundRect above and a copy
                 const Size aOnePixelInMtf(
-                    Application::GetDefaultDevice()->PixelToLogic(
+                    Application::GetDefaultDevice()->GetGeometry().PixelToLogic(
                         Size(1, 1),
                         rMtf.GetPrefMapMode()));
                 const Size aHalfPixelInMtf(

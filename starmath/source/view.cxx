@@ -878,7 +878,7 @@ void SmViewShell::InnerResizePixel(const Point &rOfs, const Size &rSize, bool)
     Size aObjSize = GetObjectShell()->GetVisArea().GetSize();
     if ( !aObjSize.IsEmpty() )
     {
-        Size aProvidedSize = GetWindow()->PixelToLogic(rSize, MapMode(MapUnit::Map100thMM));
+        Size aProvidedSize = GetWindow()->GetGeometry().PixelToLogic(rSize, MapMode(MapUnit::Map100thMM));
         SfxViewShell::SetZoomFactor( Fraction( aProvidedSize.Width(), aObjSize.Width() ),
                         Fraction( aProvidedSize.Height(), aObjSize.Height() ) );
     }
@@ -1209,15 +1209,15 @@ void SmViewShell::Impl_Print(OutputDevice &rOutDev, const SmPrintUIOptions &rPri
         }
     }
 
-    aSize = rOutDev.PixelToLogic(rOutDev.GetGeometry().LogicToPixel(aSize, OutputMapMode),
+    aSize = rOutDev.GetGeometry().PixelToLogic(rOutDev.GetGeometry().LogicToPixel(aSize, OutputMapMode),
                                    MapMode(MapUnit::Map100thMM));
 
     Point aPos (aOutRect.Left() + (aOutRect.GetWidth()  - aSize.Width())  / 2,
                 aOutRect.Top()  + (aOutRect.GetHeight() - aSize.Height()) / 2);
 
-    aPos     = rOutDev.PixelToLogic(rOutDev.GetGeometry().LogicToPixel(aPos, MapMode(MapUnit::Map100thMM)),
+    aPos     = rOutDev.GetGeometry().PixelToLogic(rOutDev.GetGeometry().LogicToPixel(aPos, MapMode(MapUnit::Map100thMM)),
                                           OutputMapMode);
-    aOutRect   = rOutDev.PixelToLogic(rOutDev.GetGeometry().LogicToPixel(aOutRect, MapMode(MapUnit::Map100thMM)),
+    aOutRect   = rOutDev.GetGeometry().PixelToLogic(rOutDev.GetGeometry().LogicToPixel(aOutRect, MapMode(MapUnit::Map100thMM)),
                                           OutputMapMode);
 
     rOutDev.SetMapMode(OutputMapMode);

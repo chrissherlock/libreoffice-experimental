@@ -1440,7 +1440,6 @@ public:
 public:
     void SetOffsetFromOriginInPixels(Size const& rOffset) override;
 
-    vcl::Region                 PixelToLogic( const vcl::Region& rDeviceRegion ) const;
     Point                       PixelToLogic( const Point& rDevicePt,
                                               const MapMode& rMapMode ) const;
     Size                        PixelToLogic( const Size& rDeviceSize,

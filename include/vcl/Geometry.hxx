@@ -149,6 +149,15 @@ public:
     tools::Polygon PixelToLogic(tools::Polygon const& rDevicePoly) const;
     tools::PolyPolygon PixelToLogic(tools::PolyPolygon const& rDevicePolyPoly) const;
     basegfx::B2DPolyPolygon PixelToLogic(basegfx::B2DPolyPolygon const& rDevicePolyPoly) const;
+    Point PixelToLogic(Point const& rDevicePt, MapMode const& rMapMode) const;
+    Size PixelToLogic(Size const& rDeviceSize, MapMode const& rMapMode) const;
+    tools::Rectangle PixelToLogic(tools::Rectangle const& rDeviceRect,
+                                  MapMode const& rMapMode) const;
+    tools::Polygon PixelToLogic(tools::Polygon const& rDevicePoly, MapMode const& rMapMode) const;
+    basegfx::B2DPolygon PixelToLogic(basegfx::B2DPolygon const& rDevicePoly,
+                                     MapMode const& rMapMode) const;
+    basegfx::B2DPolyPolygon PixelToLogic(basegfx::B2DPolyPolygon const& rDevicePolyPoly,
+                                         MapMode const& rMapMode) const;
 
     /** Get device transformation.
 

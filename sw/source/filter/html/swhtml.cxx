@@ -4947,7 +4947,7 @@ void SwHTMLParser::InsertSpacer()
             if (Application::GetDefaultDevice())
             {
                 nSize = Application::GetDefaultDevice()
-                            ->PixelToLogic( Size(0,nSize),
+                            ->GetGeometry().PixelToLogic( Size(0,nSize),
                                             MapMode(MapUnit::MapTwip) ).Height();
             }
 
@@ -4995,7 +4995,7 @@ void SwHTMLParser::InsertSpacer()
             if (Application::GetDefaultDevice())
             {
                 nSize = Application::GetDefaultDevice()
-                            ->PixelToLogic( Size(nSize,0),
+                            ->GetGeometry().PixelToLogic( Size(nSize,0),
                                             MapMode(MapUnit::MapTwip) ).Width();
             }
 
@@ -5029,7 +5029,7 @@ sal_uInt16 SwHTMLParser::ToTwips( sal_uInt16 nPixel )
 {
     if( nPixel && Application::GetDefaultDevice() )
     {
-        SwTwips nTwips = Application::GetDefaultDevice()->PixelToLogic(
+        SwTwips nTwips = Application::GetDefaultDevice()->GetGeometry().PixelToLogic(
                     Size( nPixel, nPixel ), MapMode( MapUnit::MapTwip ) ).Width();
         return static_cast<sal_uInt16>(std::min(nTwips, SwTwips(SAL_MAX_UINT16)));
     }

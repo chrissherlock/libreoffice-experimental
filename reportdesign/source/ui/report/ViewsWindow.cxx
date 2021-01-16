@@ -1647,7 +1647,7 @@ void OViewsWindow::scrollChildren(const Point& _aThumbPos)
         const Point aOld = aMapMode.GetOrigin();
         aMapMode.SetOrigin(m_pParent->GetMapMode().GetOrigin());
 
-        const Point aPosY(m_pParent->PixelToLogic(_aThumbPos,aMapMode));
+        const Point aPosY(m_pParent->GetGeometry().PixelToLogic(_aThumbPos,aMapMode));
 
         aMapMode.SetOrigin( Point(aOld.X() , - aPosY.Y()));
         SetMapMode( aMapMode );

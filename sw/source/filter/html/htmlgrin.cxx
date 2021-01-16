@@ -591,7 +591,7 @@ IMAGE_SETEVENT:
             aGraphic.GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel)
         {
             aTwipSz = Application::GetDefaultDevice()
-                    ->PixelToLogic( aTwipSz, MapMode( MapUnit::MapTwip ) );
+                    ->GetGeometry().PixelToLogic( aTwipSz, MapMode( MapUnit::MapTwip ) );
         }
         else
         {   // some bitmaps may have a size in metric units (e.g. PNG); use that
@@ -649,7 +649,7 @@ IMAGE_SETEVENT:
         {
             // Try to use size info from the image header before defaulting to
             // HTML_DFLT_IMG_WIDTH/HEIGHT.
-            aTwipSz = Application::GetDefaultDevice()->PixelToLogic(aDescriptor.GetSizePixel(),
+            aTwipSz = Application::GetDefaultDevice()->GetGeometry().PixelToLogic(aDescriptor.GetSizePixel(),
                                                                     MapMode(MapUnit::MapTwip));
             nWidth = aTwipSz.getWidth();
             nHeight = aTwipSz.getHeight();

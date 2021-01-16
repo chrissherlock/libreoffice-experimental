@@ -290,7 +290,7 @@ MapMode ScGridWindow::GetDrawMapMode( bool bForce )
         //  RTL uses negative positions for drawing objects
         aStartPos.setX( -aStartPos.X() + GetSizeInPixels().Width() - 1 );
     }
-    aDrawMode.SetOrigin( PixelToLogic( aStartPos, aDrawMode ) );
+    aDrawMode.SetOrigin( maGeometry.PixelToLogic( aStartPos, aDrawMode ) );
 
     return aDrawMode;
 }

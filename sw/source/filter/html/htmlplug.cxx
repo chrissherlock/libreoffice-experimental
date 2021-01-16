@@ -173,7 +173,7 @@ void SwHTMLParser::SetFixSize( const Size& rPixSize,
     if( (aTwipSz.Width() || aTwipSz.Height()) && Application::GetDefaultDevice() )
     {
         aTwipSz =
-            Application::GetDefaultDevice()->PixelToLogic( aTwipSz,
+            Application::GetDefaultDevice()->GetGeometry().PixelToLogic( aTwipSz,
                                                 MapMode(MapUnit::MapTwip) );
     }
 
@@ -249,7 +249,7 @@ void SwHTMLParser::SetSpace( const Size& rPixSpace,
     {
         Size aTwipSpc( rPixSpace.Width(), rPixSpace.Height() );
         aTwipSpc =
-            Application::GetDefaultDevice()->PixelToLogic( aTwipSpc,
+            Application::GetDefaultDevice()->GetGeometry().PixelToLogic( aTwipSpc,
                                                 MapMode(MapUnit::MapTwip) );
         nLeftSpace = nRightSpace = aTwipSpc.Width();
         nUpperSpace = nLowerSpace = static_cast<sal_uInt16>(aTwipSpc.Height());
@@ -511,7 +511,7 @@ bool SwHTMLParser::InsertEmbed()
 
         SwAttrSet aAttrSet(pFormat->GetAttrSet());
         aAttrSet.ClearItem(RES_CNTNT);
-        Size aTwipSize(pDevice->PixelToLogic(aSize, MapMode(MapUnit::MapTwip)));
+        Size aTwipSize(pDevice->GetGeometry().PixelToLogic(aSize, MapMode(MapUnit::MapTwip)));
         SwFormatFrameSize aFrameSize(SwFrameSize::Fixed, aTwipSize.Width(), aTwipSize.Height());
         aAttrSet.Put(aFrameSize);
         pOLENode->GetDoc().SetFlyFrameAttr(*pFormat, aAttrSet);

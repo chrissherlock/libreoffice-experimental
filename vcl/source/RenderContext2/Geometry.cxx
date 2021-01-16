@@ -927,10 +927,116 @@ tools::PolyPolygon Geometry::PixelToLogic(tools::PolyPolygon const& rDevicePolyP
     return aPolyPoly;
 }
 
-basegfx::B2DPolyPolygon Geometry::PixelToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly) const
+basegfx::B2DPolyPolygon Geometry::PixelToLogic(basegfx::B2DPolyPolygon const& rPixelPolyPoly) const
 {
     basegfx::B2DPolyPolygon aTransformedPoly = rPixelPolyPoly;
     const basegfx::B2DHomMatrix& rTransformationMatrix = GetInverseViewTransformation();
+    aTransformedPoly.transform(rTransformationMatrix);
+    return aTransformedPoly;
+}
+
+Point Geometry::PixelToLogic(Point const& rDevicePt, MapMode const& rMapMode) const
+{
+    // calculate nothing if default-MapMode
+    if (rMapMode.IsDefault())
+        return rDevicePt;
+
+    // calculate MapMode-resolution and convert
+    MappingMetrics aMappingMetric(rMapMode, GetDPIX(), GetDPIY());
+
+    return Point(PixelToLogic(rDevicePt.X(), GetDPIX(), aMappingMetric.mnMapScNumX,
+                              aMappingMetric.mnMapScDenomX)
+                     - aMappingMetric.mnMapOfsX - GetXOffsetFromOriginInLogicalUnits(),
+                 PixelToLogic(rDevicePt.Y(), GetDPIY(), aMappingMetric.mnMapScNumY,
+                              aMappingMetric.mnMapScDenomY)
+                     - aMappingMetric.mnMapOfsY - GetYOffsetFromOriginInLogicalUnits());
+}
+
+Size Geometry::PixelToLogic(Size const& rDeviceSize, MapMode const& rMapMode) const
+{
+    // calculate nothing if default-MapMode
+    if (rMapMode.IsDefault())
+        return rDeviceSize;
+
+    // calculate MapMode-resolution and convert
+    MappingMetrics aMappingMetric(rMapMode, GetDPIX(), GetDPIY());
+
+    return Size(PixelToLogic(rDeviceSize.Width(), GetDPIX(), aMappingMetric.mnMapScNumX,
+                             aMappingMetric.mnMapScDenomX),
+                PixelToLogic(rDeviceSize.Height(), GetDPIY(), aMappingMetric.mnMapScNumY,
+                             aMappingMetric.mnMapScDenomY));
+}
+
+tools::Rectangle Geometry::PixelToLogic(tools::Rectangle const& rDeviceRect,
+                                        MapMode const& rMapMode) const
+{
+    // calculate nothing if default-MapMode
+    if (rMapMode.IsDefault() || rDeviceRect.IsEmpty())
+        return rDeviceRect;
+
+    // calculate MapMode-resolution and convert
+    MappingMetrics aMappingMetric(rMapMode, GetDPIX(), GetDPIY());
+
+    return tools::Rectangle(PixelToLogic(rDeviceRect.Left(), GetDPIX(), aMappingMetric.mnMapScNumX,
+                                         aMappingMetric.mnMapScDenomX)
+                                - aMappingMetric.mnMapOfsX - GetXOffsetFromOriginInLogicalUnits(),
+                            PixelToLogic(rDeviceRect.Top(), GetDPIY(), aMappingMetric.mnMapScNumY,
+                                         aMappingMetric.mnMapScDenomY)
+                                - aMappingMetric.mnMapOfsY - GetYOffsetFromOriginInLogicalUnits(),
+                            PixelToLogic(rDeviceRect.Right(), GetDPIX(), aMappingMetric.mnMapScNumX,
+                                         aMappingMetric.mnMapScDenomX)
+                                - aMappingMetric.mnMapOfsX - GetXOffsetFromOriginInLogicalUnits(),
+                            PixelToLogic(rDeviceRect.Bottom(), GetDPIY(),
+                                         aMappingMetric.mnMapScNumY, aMappingMetric.mnMapScDenomY)
+                                - aMappingMetric.mnMapOfsY - GetYOffsetFromOriginInLogicalUnits());
+}
+
+tools::Polygon Geometry::PixelToLogic(tools::Polygon const& rDevicePoly,
+                                      MapMode const& rMapMode) const
+{
+    // calculate nothing if default-MapMode
+    if (rMapMode.IsDefault())
+        return rDevicePoly;
+
+    // calculate MapMode-resolution and convert
+    MappingMetrics aMappingMetric(rMapMode, GetDPIX(), GetDPIY());
+
+    sal_uInt16 nPoints = rDevicePoly.GetSize();
+    tools::Polygon aPoly(rDevicePoly);
+
+    // get pointer to Point-array (copy data)
+    const Point* pPointAry = aPoly.GetConstPointAry();
+
+    for (sal_uInt16 i = 0; i < nPoints; i++)
+    {
+        const Point* pPt = &(pPointAry[i]);
+        Point aPt;
+        aPt.setX(Geometry::PixelToLogic(pPt->X(), GetDPIX(), aMappingMetric.mnMapScNumX,
+                                        aMappingMetric.mnMapScDenomX)
+                 - aMappingMetric.mnMapOfsX - GetXOffsetFromOriginInLogicalUnits());
+        aPt.setY(Geometry::PixelToLogic(pPt->Y(), GetDPIY(), aMappingMetric.mnMapScNumY,
+                                        aMappingMetric.mnMapScDenomY)
+                 - aMappingMetric.mnMapOfsY - GetYOffsetFromOriginInLogicalUnits());
+        aPoly[i] = aPt;
+    }
+
+    return aPoly;
+}
+
+basegfx::B2DPolygon Geometry::PixelToLogic(basegfx::B2DPolygon const& rPixelPoly,
+                                           MapMode const& rMapMode) const
+{
+    basegfx::B2DPolygon aTransformedPoly = rPixelPoly;
+    const basegfx::B2DHomMatrix& rTransformationMatrix = GetInverseViewTransformation(rMapMode);
+    aTransformedPoly.transform(rTransformationMatrix);
+    return aTransformedPoly;
+}
+
+basegfx::B2DPolyPolygon Geometry::PixelToLogic(basegfx::B2DPolyPolygon const& rPixelPolyPoly,
+                                               MapMode const& rMapMode) const
+{
+    basegfx::B2DPolyPolygon aTransformedPoly = rPixelPolyPoly;
+    const basegfx::B2DHomMatrix& rTransformationMatrix = GetInverseViewTransformation(rMapMode);
     aTransformedPoly.transform(rTransformationMatrix);
     return aTransformedPoly;
 }

@@ -330,7 +330,7 @@ void SwAnnotationWin::InitControls()
     mxSidebarTextControl->SetPointer(PointerStyle::Text);
 
     mpOutlinerView->SetBackgroundColor(COL_TRANSPARENT);
-    mpOutlinerView->SetOutputArea( PixelToLogic( tools::Rectangle(0,0,1,1) ) );
+    mpOutlinerView->SetOutputArea( maGeometry.PixelToLogic( tools::Rectangle(0,0,1,1) ) );
 
     mpOutlinerView->SetAttribs(DefaultItem());
 
@@ -704,9 +704,9 @@ void SwAnnotationWin::DoResize()
 
     if (mxVScrollbar->get_vpolicy() == VclPolicyType::NEVER)
     {   // if we do not have a scrollbar anymore, we want to see the complete text
-        mpOutlinerView->SetVisArea( PixelToLogic( tools::Rectangle(0,0,aWidth,aHeight) ) );
+        mpOutlinerView->SetVisArea( maGeometry.PixelToLogic( tools::Rectangle(0,0,aWidth,aHeight) ) );
     }
-    tools::Rectangle aOutputArea = PixelToLogic(tools::Rectangle(0, 0, aWidth, aHeight));
+    tools::Rectangle aOutputArea = maGeometry.PixelToLogic(tools::Rectangle(0, 0, aWidth, aHeight));
     mpOutlinerView->SetOutputArea(aOutputArea);
     mpOutlinerView->ShowCursor(true, true);
 

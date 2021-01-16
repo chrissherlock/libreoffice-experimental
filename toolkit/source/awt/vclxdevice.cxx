@@ -176,7 +176,7 @@ css::awt::Point SAL_CALL VCLXDevice::convertPointToLogic( const css::awt::Point&
     {
         MapMode aMode(VCLUnoHelper::ConvertToMapModeUnit(TargetUnit));
         ::Point aVCLPoint = VCLUnoHelper::ConvertToVCLPoint(aPoint);
-        ::Point aDevPoint = mpOutputDevice->PixelToLogic(aVCLPoint, aMode );
+        ::Point aDevPoint = mpOutputDevice->GetGeometry().PixelToLogic(aVCLPoint, aMode );
         aAWTPoint = VCLUnoHelper::ConvertToAWTPoint(aDevPoint);
     }
 
@@ -224,7 +224,7 @@ css::awt::Size SAL_CALL VCLXDevice::convertSizeToLogic( const css::awt::Size& aS
     {
         MapMode aMode(VCLUnoHelper::ConvertToMapModeUnit(TargetUnit));
         ::Size aVCLSize = VCLUnoHelper::ConvertToVCLSize(aSize);
-        ::Size aDevSz = mpOutputDevice->PixelToLogic(aVCLSize, aMode );
+        ::Size aDevSz = mpOutputDevice->GetGeometry().PixelToLogic(aVCLSize, aMode );
         aAWTSize = VCLUnoHelper::ConvertToAWTSize(aDevSz);
     }
 

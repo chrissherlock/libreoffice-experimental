@@ -366,7 +366,7 @@ void PrintDialog::PrintPreviewWindow::preparePreviewBitmap()
     GDIMetaFile aMtf( maMtf );
 
     Size aVDevSize( pPrerenderVDev->GetSizeInPixels() );
-    const Size aLogicSize( pPrerenderVDev->PixelToLogic( aVDevSize, MapMode( MapUnit::Map100thMM ) ) );
+    const Size aLogicSize( pPrerenderVDev->GetGeometry().PixelToLogic( aVDevSize, MapMode( MapUnit::Map100thMM ) ) );
     Size aOrigSize( maOrigSize );
     if( aOrigSize.Width() < 1 )
         aOrigSize.setWidth( aLogicSize.Width() );
@@ -606,7 +606,7 @@ PrintDialog::PrintDialog(weld::Window* i_pWindow, const std::shared_ptr<PrinterC
     mxCopyCountField->select_region(0, -1);
 
     // setup sizes for N-Up
-    Size aNupSize( maPController->getPrinter()->PixelToLogic(
+    Size aNupSize( maPController->getPrinter()->GetGeometry().PixelToLogic(
                          maPController->getPrinter()->GetPaperSizePixel(), MapMode( MapUnit::Map100thMM ) ) );
     if( maPController->getPrinter()->GetOrientation() == Orientation::Landscape )
     {
@@ -889,7 +889,7 @@ IMPL_LINK_NOARG(PrintDialog, updatePreviewNoCacheIdle, Timer*, void)
 void PrintDialog::preparePreview( bool i_bMayUseCache )
 {
     VclPtr<Printer> aPrt( maPController->getPrinter() );
-    Size aCurPageSize = aPrt->PixelToLogic( aPrt->GetPaperSizePixel(), MapMode( MapUnit::Map100thMM ) );
+    Size aCurPageSize = aPrt->GetGeometry().PixelToLogic( aPrt->GetPaperSizePixel(), MapMode( MapUnit::Map100thMM ) );
     // tdf#123076 Get paper size for the preview top label
     mePaper = aPrt->GetPaper();
     GDIMetaFile aMtf;
@@ -932,7 +932,7 @@ void PrintDialog::preparePreview( bool i_bMayUseCache )
             maPController->getFilteredPageFile( mnCurPage, aMtf, i_bMayUseCache );
         if( ! aPageSize.bFullPaper )
         {
-            Point aOff( aPrt->PixelToLogic( aPrt->GetPageOffsetPixel(), aMapMode ) );
+            Point aOff( aPrt->GetGeometry().PixelToLogic( aPrt->GetPageOffsetPixel(), aMapMode ) );
             aMtf.Move( aOff.X(), aOff.Y() );
         }
     }

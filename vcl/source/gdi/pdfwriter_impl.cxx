@@ -294,13 +294,10 @@ GEOMETRY lcl_convert( const MapMode& _rSource, const MapMode& _rDest, OutputDevi
 {
     GEOMETRY aPoint;
     if ( MapUnit::MapPixel == _rSource.GetMapUnit() )
-    {
-        aPoint = _pPixelConversion->PixelToLogic( _rObject, _rDest );
-    }
+        aPoint = _pPixelConversion->GetGeometry().PixelToLogic( _rObject, _rDest );
     else
-    {
         aPoint = OutputDevice::LogicToLogic( _rObject, _rSource, _rDest );
-    }
+
     return aPoint;
 }
 
@@ -8444,7 +8441,7 @@ void PDFWriterImpl::writeReferenceXObject(ReferenceXObjectEmit& rEmit)
     SetDPIX(96);
     sal_Int32 nOldDPIY = GetDPIY();
     SetDPIY(96);
-    Size aSize = PixelToLogic(rEmit.m_aPixelSize, MapMode(m_aMapMode.GetMapUnit()));
+    Size aSize = maGeometry.PixelToLogic(rEmit.m_aPixelSize, MapMode(m_aMapMode.GetMapUnit()));
     SetDPIX(nOldDPIX);
     SetDPIY(nOldDPIY);
     double fScaleX = 1.0 / aSize.Width();

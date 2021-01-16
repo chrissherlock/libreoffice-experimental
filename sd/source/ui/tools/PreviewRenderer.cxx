@@ -162,7 +162,7 @@ Image PreviewRenderer::RenderSubstitution (
         aMapMode.SetScaleX(aFinalScale);
         aMapMode.SetScaleY(aFinalScale);
         const sal_Int32 nFrameWidth (mbHasFrame ? snFrameWidth : 0);
-        aMapMode.SetOrigin(mpPreviewDevice->PixelToLogic(
+        aMapMode.SetOrigin(mpPreviewDevice->GetGeometry().PixelToLogic(
             Point(nFrameWidth,nFrameWidth),aMapMode));
         mpPreviewDevice->SetMapMode (aMapMode);
 
@@ -365,7 +365,7 @@ void PreviewRenderer::SetupOutputSize (
             Fraction(rFramePixelSize.Width()-2*nFrameWidth-1, aPageModelSize.Width()));
         aMapMode.SetScaleY(
             Fraction(rFramePixelSize.Height()-2*nFrameWidth-1, aPageModelSize.Height()));
-        aMapMode.SetOrigin(mpPreviewDevice->PixelToLogic(Point(nFrameWidth,nFrameWidth),aMapMode));
+        aMapMode.SetOrigin(mpPreviewDevice->GetGeometry().PixelToLogic(Point(nFrameWidth,nFrameWidth),aMapMode));
     }
     else
     {

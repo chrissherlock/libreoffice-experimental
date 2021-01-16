@@ -378,7 +378,7 @@ void ScDocShell::CalcOutputFactor()
     pRefDev->SetMapMode(MapMode(MapUnit::MapPixel));
     pPattern->GetFont(aDefFont, SC_AUTOCOL_BLACK, pRefDev); // font color doesn't matter here
     pRefDev->SetFont(aDefFont);
-    nPrinterWidth = pRefDev->PixelToLogic(Size(pRefDev->GetTextWidth(aTestString), 0), MapMode(MapUnit::Map100thMM)).Width();
+    nPrinterWidth = pRefDev->GetGeometry().PixelToLogic(Size(pRefDev->GetTextWidth(aTestString), 0), MapMode(MapUnit::Map100thMM)).Width();
     pRefDev->SetFont(aOldFont);
     pRefDev->SetMapMode(aOldMode);
 

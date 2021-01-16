@@ -1208,13 +1208,13 @@ bool DlgEditor::AdjustPageSize()
         if ( pDlgEdForm && pDlgEdForm->TransformFormToSdrCoordinates( nFormXIn, nFormYIn, nFormWidthIn, nFormHeightIn, nFormX, nFormY, nFormWidth, nFormHeight ) )
         {
             Size aPageSizeDelta( 400, 300 );
-            aPageSizeDelta = rWindow.PixelToLogic( aPageSizeDelta, MapMode( MapUnit::Map100thMM ) );
+            aPageSizeDelta = rWindow.GetGeometry().PixelToLogic( aPageSizeDelta, MapMode( MapUnit::Map100thMM ) );
 
             sal_Int32 nNewPageWidth = nFormX + nFormWidth + aPageSizeDelta.Width();
             sal_Int32 nNewPageHeight = nFormY + nFormHeight + aPageSizeDelta.Height();
 
             Size aPageSizeMin( DLGED_PAGE_WIDTH_MIN, DLGED_PAGE_HEIGHT_MIN );
-            aPageSizeMin = rWindow.PixelToLogic( aPageSizeMin, MapMode( MapUnit::Map100thMM ) );
+            aPageSizeMin = rWindow.GetGeometry().PixelToLogic( aPageSizeMin, MapMode( MapUnit::Map100thMM ) );
             sal_Int32 nPageWidthMin = aPageSizeMin.Width();
             sal_Int32 nPageHeightMin = aPageSizeMin.Height();
 

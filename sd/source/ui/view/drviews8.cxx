@@ -61,7 +61,7 @@ void DrawViewShell::ScannerEvent()
                         aBmpSize = aScanBmp.GetSizePixel();
 
                     if( aScanBmp.GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel )
-                        aBmpSize = GetActiveWindow()->PixelToLogic( aBmpSize, aMap100 );
+                        aBmpSize = GetActiveWindow()->GetGeometry().PixelToLogic( aBmpSize, aMap100 );
                     else
                         aBmpSize = OutputDevice::LogicToLogic( aBmpSize, aScanBmp.GetPrefMapMode(), aMap100 );
 

@@ -543,7 +543,7 @@ tools::Rectangle ScIAccessibleViewForwarder::GetVisibleArea() const
         aVisRect.SetSize(pWin->GetSizeInPixels());
         aVisRect.SetPos(Point(0, 0));
 
-        aVisRect = pWin->PixelToLogic(aVisRect, maMapMode);
+        aVisRect = pWin->GetGeometry().PixelToLogic(aVisRect, maMapMode);
     }
 
     return aVisRect;

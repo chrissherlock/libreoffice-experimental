@@ -153,7 +153,7 @@ void GraphCtrl::SetGraphic( const Graphic& rGraphic, bool bNewModel )
     xVD->SetOutputSizePixel(Size(0, 0)); //force redraw
 
     if ( aGraphic.GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel )
-        aGraphSize = Application::GetDefaultDevice()->PixelToLogic( aGraphic.GetPrefSize(), aMap100 );
+        aGraphSize = Application::GetDefaultDevice()->GetGeometry().PixelToLogic( aGraphic.GetPrefSize(), aMap100 );
     else
         aGraphSize = OutputDevice::LogicToLogic( aGraphic.GetPrefSize(), aGraphic.GetPrefMapMode(), aMap100 );
 
@@ -189,7 +189,7 @@ void GraphCtrl::Resize()
         Point           aNewPos;
         Size            aNewSize;
         OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
-        const Size      aWinSize = rDevice.PixelToLogic( GetSizeInPixels(), aDisplayMap );
+        const Size      aWinSize = rDevice.GetGeometry().PixelToLogic( GetSizeInPixels(), aDisplayMap );
         const tools::Long      nWidth = aWinSize.Width();
         const tools::Long      nHeight = aWinSize.Height();
         double          fGrfWH = static_cast<double>(aGraphSize.Width()) / aGraphSize.Height();

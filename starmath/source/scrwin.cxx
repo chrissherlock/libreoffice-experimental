@@ -250,7 +250,7 @@ void ScrollableWindow::Resize()
 void ScrollableWindow::SetMapMode( const MapMode& rNewMapMode )
 {
     MapMode aMap( rNewMapMode );
-    aMap.SetOrigin( aMap.GetOrigin() + PixelToLogic( aPixOffset, aMap ) );
+    aMap.SetOrigin( aMap.GetOrigin() + maGeometry.PixelToLogic( aPixOffset, aMap ) );
     Window::SetMapMode( aMap );
 }
 

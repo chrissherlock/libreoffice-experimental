@@ -935,11 +935,11 @@ void adjustBrowseBoxColumnWidth( ::svt::EditBrowseBox* _pBox, sal_uInt16 _nColId
     sal_uInt32 nDefaultWidth = _pBox->GetDefaultColumnWidth( _pBox->GetColumnTitle( _nColId ) );
     if ( nDefaultWidth != _pBox->GetColumnWidth( _nColId ) )
     {
-        Size aSizeMM = _pBox->PixelToLogic( Size( _pBox->GetColumnWidth( _nColId ), 0 ), MapMode( MapUnit::MapMM ) );
+        Size aSizeMM = _pBox->GetGeometry().PixelToLogic( Size( _pBox->GetColumnWidth( _nColId ), 0 ), MapMode( MapUnit::MapMM ) );
         nColSize = aSizeMM.Width() * 10;
     }
 
-    Size aDefaultMM = _pBox->PixelToLogic( Size( nDefaultWidth, 0 ), MapMode( MapUnit::MapMM ) );
+    Size aDefaultMM = _pBox->GetGeometry().PixelToLogic( Size( nDefaultWidth, 0 ), MapMode( MapUnit::MapMM ) );
 
     DlgSize aColumnSizeDlg(_pBox->GetFrameWeld(), nColSize, false, aDefaultMM.Width() * 10);
     if (aColumnSizeDlg.run() != RET_OK)

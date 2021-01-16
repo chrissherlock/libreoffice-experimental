@@ -474,7 +474,7 @@ void Ruler::ImplDrawTicks(vcl::RenderContext& rRenderContext, tools::Long nMin, 
         nTickWidth = aPixSize.Height();
     }
 
-    tools::Long nMaxWidth = rRenderContext.PixelToLogic(Size(mpData->nPageWidth, 0), maMapMode).Width();
+    tools::Long nMaxWidth = rRenderContext.GetGeometry().PixelToLogic(Size(mpData->nPageWidth, 0), maMapMode).Width();
     if (nMaxWidth < 0)
         nMaxWidth = -nMaxWidth;
 

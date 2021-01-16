@@ -471,7 +471,7 @@ Point FloatingWindow::ImplCalcPos(vcl::Window* pWindow,
             // and anyway the following is what we already do in
             // ScGridWindow::LogicInvalidate when map mode is not enabled.
 
-            *pLOKTwipsPos = pW->PixelToLogic(aPos, MapMode(MapUnit::MapTwip));
+            *pLOKTwipsPos = pW->GetGeometry().PixelToLogic(aPos, MapMode(MapUnit::MapTwip));
         }
         else
         {

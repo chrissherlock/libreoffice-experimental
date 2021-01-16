@@ -298,7 +298,7 @@ void SvxSuperContourDlg::SetPolyPolygon( const tools::PolyPolygon& rPolyPoly )
             if ( !bPixelMap )
                 rPt = pOutDev->GetGeometry().LogicToPixel( rPt, aGrfMap );
 
-            rPt = pOutDev->PixelToLogic( rPt, aMap100 );
+            rPt = pOutDev->GetGeometry().PixelToLogic( rPt, aMap100 );
         }
     }
 
@@ -326,7 +326,7 @@ tools::PolyPolygon SvxSuperContourDlg::GetPolyPolygon()
             rPt = pOutDev->GetGeometry().LogicToPixel( rPt, aMap100  );
 
             if ( !bPixelMap )
-                rPt = pOutDev->PixelToLogic( rPt, aGrfMap  );
+                rPt = pOutDev->GetGeometry().PixelToLogic( rPt, aGrfMap  );
         }
     }
 

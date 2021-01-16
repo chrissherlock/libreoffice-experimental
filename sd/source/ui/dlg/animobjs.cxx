@@ -886,7 +886,7 @@ void AnimationWindow::CreateAnimObj (::sd::View& rView )
         const Size      aTmpSizePix( rBmpEx.GetSizePixel() );
 
         if ( aGraphic.GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel )
-            aTmpSizeLog = pDefDev->PixelToLogic( aGraphic.GetPrefSize(), aMap100 );
+            aTmpSizeLog = pDefDev->GetGeometry().PixelToLogic( aGraphic.GetPrefSize(), aMap100 );
         else
             aTmpSizeLog = OutputDevice::LogicToLogic( aGraphic.GetPrefSize(), aGraphic.GetPrefMapMode(), aMap100 );
 

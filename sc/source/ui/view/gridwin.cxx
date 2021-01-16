@@ -4606,7 +4606,7 @@ void ScGridWindow::UpdateEditViewPos()
     {
         tools::Rectangle aRect = pView->GetOutputArea();
         tools::Long nHeight = aRect.Bottom() - aRect.Top();
-        aRect.SetTop( PixelToLogic(GetSizeInPixels(), mrViewData.GetLogicMode()).
+        aRect.SetTop( maGeometry.PixelToLogic(GetSizeInPixels(), mrViewData.GetLogicMode()).
                         Height() * 2 );
         aRect.SetBottom( aRect.Top() + nHeight );
         pView->SetOutputArea( aRect );
@@ -4628,7 +4628,7 @@ void ScGridWindow::UpdateEditViewPos()
             pView->SetLOKSpecialOutputArea(aOutputAreaPTwips);
         }
 
-        Point aScrPos = PixelToLogic( aPixRect.TopLeft(), mrViewData.GetLogicMode() );
+        Point aScrPos = maGeometry.PixelToLogic( aPixRect.TopLeft(), mrViewData.GetLogicMode() );
 
         tools::Rectangle aRect = pView->GetOutputArea();
         aRect.SetPos( aScrPos );
@@ -5360,7 +5360,7 @@ bool ScGridWindow::GetEditUrl( const Point& rPos,
     std::shared_ptr<ScFieldEditEngine> pEngine = createEditEngine(pDocSh, *pPattern);
 
     MapMode aEditMode = mrViewData.GetLogicMode(eWhich);            // without draw scaling
-    tools::Rectangle aLogicEdit = PixelToLogic( aEditRect, aEditMode );
+    tools::Rectangle aLogicEdit = maGeometry.PixelToLogic( aEditRect, aEditMode );
     tools::Long nThisColLogic = aLogicEdit.Right() - aLogicEdit.Left() + 1;
     Size aPaperSize( 1000000, 1000000 );
     if (aCell.meType == CELLTYPE_FORMULA)
@@ -5431,7 +5431,7 @@ bool ScGridWindow::GetEditUrl( const Point& rPos,
     }
     aLogicEdit.SetBottom( aLogicEdit.Top() + nTextHeight );
 
-    Point aLogicClick = PixelToLogic(rPos,aEditMode);
+    Point aLogicClick = maGeometry.PixelToLogic(rPos,aEditMode);
     if ( aLogicEdit.IsInside(aLogicClick) )
     {
         EditView aTempView(pEngine.get(), this);
@@ -5491,8 +5491,8 @@ bool ScGridWindow::IsSpellErrorAtPos( const Point& rPos, SCCOL nCol1, SCROW nRow
     tools::Long nTextWidth = static_cast<tools::Long>(pEngine->CalcTextWidth());
 
     MapMode aEditMode = mrViewData.GetLogicMode(eWhich);
-    tools::Rectangle aLogicEdit = PixelToLogic(aEditRect, aEditMode);
-    Point aLogicClick = PixelToLogic(rPos, aEditMode);
+    tools::Rectangle aLogicEdit = maGeometry.PixelToLogic(aEditRect, aEditMode);
+    Point aLogicClick = maGeometry.PixelToLogic(rPos, aEditMode);
 
     aLogicEdit.setWidth(nTextWidth + 1);
 
@@ -5832,7 +5832,7 @@ void ScGridWindow::UpdateCopySourceOverlay()
 
         Color aHighlight = GetSettings().GetStyleSettings().GetHighlightColor();
 
-        tools::Rectangle aLogic = PixelToLogic(aRect, aDrawMode);
+        tools::Rectangle aLogic = maGeometry.PixelToLogic(aRect, aDrawMode);
         ::basegfx::B2DRange aRange = vcl::unotools::b2DRectangleFromRectangle(aLogic);
         std::unique_ptr<ScOverlayDashedBorder> pDashedBorder(new ScOverlayDashedBorder(aRange, aHighlight));
         xOverlayManager->add(*pDashedBorder);

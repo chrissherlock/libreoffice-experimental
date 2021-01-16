@@ -672,7 +672,7 @@ Size SvxGrfCropPage::GetGrfOrigSize(const Graphic& rGrf)
     const MapMode aMapTwip( MapUnit::MapTwip );
     Size aSize( rGrf.GetPrefSize() );
     if( MapUnit::MapPixel == rGrf.GetPrefMapMode().GetMapUnit() )
-        aSize = Application::GetDefaultDevice()->PixelToLogic(aSize, aMapTwip);
+        aSize = Application::GetDefaultDevice()->GetGeometry().PixelToLogic(aSize, aMapTwip);
     else
         aSize = OutputDevice::LogicToLogic( aSize,
                                         rGrf.GetPrefMapMode(), aMapTwip );

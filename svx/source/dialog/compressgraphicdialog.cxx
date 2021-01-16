@@ -135,7 +135,7 @@ void CompressGraphicsDialog::Update()
     pDummyVDev->SetMapMode( m_aGraphic.GetPrefMapMode() );
 
     Size aPixelSize = m_aGraphic.GetSizePixel();
-    Size aOriginalSize100mm(pDummyVDev->PixelToLogic(m_aGraphic.GetSizePixel(), MapMode(MapUnit::Map100thMM)));
+    Size aOriginalSize100mm(pDummyVDev->GetGeometry().PixelToLogic(m_aGraphic.GetSizePixel(), MapMode(MapUnit::Map100thMM)));
 
     OUString aBitmapSizeString = SvxResId(STR_IMAGE_ORIGINAL_SIZE);
     OUString aWidthString  = GetUnitString( aOriginalSize100mm.Width(),  eFieldUnit, cSeparator );

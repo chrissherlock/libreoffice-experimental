@@ -1787,7 +1787,7 @@ namespace svt::table
 
     tools::Long TableControl_Impl::pixelWidthToAppFont( tools::Long const i_pixels ) const
     {
-        return m_pDataWindow->PixelToLogic(Size(i_pixels, 0), MapMode(MapUnit::MapAppFont)).Width();
+        return m_pDataWindow->GetGeometry().PixelToLogic(Size(i_pixels, 0), MapMode(MapUnit::MapAppFont)).Width();
     }
 
 

@@ -330,7 +330,7 @@ bool LayeredDevice::HandleMapModeChange()
         const Point aDelta (rMapMode.GetOrigin() - maSavedMapMode.GetOrigin());
         mpBackBuffer->CopyArea(
             aLogicWindowBox.TopLeft(),
-            mpTargetWindow->PixelToLogic(Point(0,0), maSavedMapMode),
+            mpTargetWindow->GetGeometry().PixelToLogic(Point(0,0), maSavedMapMode),
             aLogicWindowBox.GetSize());
 
         // Invalidate the area(s) that have been exposed.

@@ -292,7 +292,7 @@ void SvxBitmapTabPage::Reset( const SfxItemSet* rAttrs )
 
     BitmapEx aBmpEx(pGraphicObject->GetGraphic().GetBitmapEx());
     Size aTempBitmapSize = aBmpEx.GetSizePixel();
-    rBitmapSize = Application::GetDefaultDevice()->PixelToLogic(aTempBitmapSize, MapMode(MapUnit::Map100thMM));
+    rBitmapSize = Application::GetDefaultDevice()->GetGeometry().PixelToLogic(aTempBitmapSize, MapMode(MapUnit::Map100thMM));
     CalculateBitmapPresetSize();
 
     bool bTiled = false; bool bStretched = false;

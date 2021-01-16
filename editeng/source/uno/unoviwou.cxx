@@ -80,7 +80,7 @@ Point SvxDrawOutlinerViewForwarder::PixelToLogic( const Point& rPoint, const Map
     {
         MapMode aMapMode(pOutDev->GetMapMode());
         aMapMode.SetOrigin(Point());
-        Point aPoint1( pOutDev->PixelToLogic( rPoint, aMapMode ) );
+        Point aPoint1( pOutDev->GetGeometry().PixelToLogic( rPoint, aMapMode ) );
         Point aPoint2( OutputDevice::LogicToLogic( aPoint1,
                                                MapMode(aMapMode.GetMapUnit()),
                                                    rMapMode ) );

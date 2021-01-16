@@ -495,7 +495,7 @@ void GDIMetaFile::Play( OutputDevice* pOut, const Point& rPos,
     const Size& rOldOffset( pOut->GetOffsetFromOriginInPixels() );
     const Size  aEmptySize;
     pOut->SetOffsetFromOriginInPixels( aEmptySize );
-    aDrawMap.SetOrigin( pOut->PixelToLogic( pOut->GetGeometry().LogicToPixel( rPos ), aDrawMap ) );
+    aDrawMap.SetOrigin( pOut->GetGeometry().PixelToLogic( pOut->GetGeometry().LogicToPixel( rPos ), aDrawMap ) );
     pOut->SetOffsetFromOriginInPixels( rOldOffset );
 
     pOut->Push();
@@ -1332,7 +1332,7 @@ tools::Rectangle GDIMetaFile::GetBoundRect( OutputDevice& i_rReference, tools::R
             MetaPixelAction* pAct = static_cast<MetaPixelAction*>(pAction);
             ImplActionBounds( aBound,
                               tools::Rectangle( OutputDevice::LogicToLogic( pAct->GetPoint(), aMapVDev->GetMapMode(), GetPrefMapMode() ),
-                                       aMapVDev->PixelToLogic( Size( 1, 1 ), GetPrefMapMode() ) ),
+                                       aMapVDev->GetGeometry().PixelToLogic( Size( 1, 1 ), GetPrefMapMode() ) ),
                              aClipStack, pUseHairline );
         }
         break;
@@ -1342,7 +1342,7 @@ tools::Rectangle GDIMetaFile::GetBoundRect( OutputDevice& i_rReference, tools::R
             MetaPointAction* pAct = static_cast<MetaPointAction*>(pAction);
             ImplActionBounds( aBound,
                               tools::Rectangle( OutputDevice::LogicToLogic( pAct->GetPoint(), aMapVDev->GetMapMode(), GetPrefMapMode() ),
-                                       aMapVDev->PixelToLogic( Size( 1, 1 ), GetPrefMapMode() ) ),
+                                       aMapVDev->GetGeometry().PixelToLogic( Size( 1, 1 ), GetPrefMapMode() ) ),
                              aClipStack, pUseHairline );
         }
         break;

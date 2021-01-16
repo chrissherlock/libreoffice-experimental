@@ -171,7 +171,7 @@ void SwView::ExecDraw(SfxRequest& rReq)
                         aPos.setY( aDocSize.Height() / 2 + rVisArea.Top() );
 
                     if( aPrefSize.Width() && aPrefSize.Height() )
-                        aSize = rWin2.PixelToLogic(aPrefSize, MapMode(MapUnit::MapTwip));
+                        aSize = rWin2.GetGeometry().PixelToLogic(aPrefSize, MapMode(MapUnit::MapTwip));
                     else
                         aSize = Size( 2835, 2835 );
 

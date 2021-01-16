@@ -117,7 +117,7 @@ void SwHTMLWrtTable::Pixelize( sal_uInt16& rValue )
         aSz = Application::GetDefaultDevice()->GetGeometry().LogicToPixel( aSz, MapMode(MapUnit::MapTwip) );
         if( !aSz.Width() )
             aSz.setWidth( 1 );
-        aSz = Application::GetDefaultDevice()->PixelToLogic( aSz, MapMode(MapUnit::MapTwip) );
+        aSz = Application::GetDefaultDevice()->GetGeometry().PixelToLogic( aSz, MapMode(MapUnit::MapTwip) );
         rValue = static_cast<sal_uInt16>(aSz.Width());
     }
 }

@@ -90,7 +90,7 @@ Point ScViewForwarder::PixelToLogic( const Point& rPoint, const MapMode& rMapMod
     {
         vcl::Window* pWindow = mpViewShell->GetWindowByPos(meSplitPos);
         if (pWindow)
-            return pWindow->PixelToLogic( rPoint, rMapMode );
+            return pWindow->GetGeometry().PixelToLogic( rPoint, rMapMode );
     }
     else
     {
@@ -159,7 +159,7 @@ Point ScEditObjectViewForwarder::PixelToLogic( const Point& rPoint, const MapMod
     {
         // #i49561# - consider offset of the visible area
         // of the EditView after converting point to logic.
-        Point aPoint( mpWindow->PixelToLogic( rPoint, rMapMode ) );
+        Point aPoint( mpWindow->GetGeometry().PixelToLogic( rPoint, rMapMode ) );
         if ( mpEditView )
         {
             tools::Rectangle aEditViewVisArea( mpEditView->GetVisArea() );
@@ -360,11 +360,10 @@ Point ScEditViewForwarder::LogicToPixel( const Point& rPoint, const MapMode& rMa
 Point ScEditViewForwarder::PixelToLogic( const Point& rPoint, const MapMode& rMapMode ) const
 {
     if (mpWindow)
-        return mpWindow->PixelToLogic( rPoint, rMapMode );
+        return mpWindow->GetGeometry().PixelToLogic( rPoint, rMapMode );
     else
-    {
         OSL_FAIL("this ViewForwarder is not valid");
-    }
+
     return Point();
 }
 
@@ -523,9 +522,7 @@ SvxTextForwarder* ScAccessibleCellTextData::GetTextForwarder()
 
         vcl::Window* pWin = mpViewShell->GetWindowByPos( meSplitPos );
         if ( pWin )
-        {
-            aSize = pWin->PixelToLogic( aSize, pEditEngine->GetRefMapMode() );
-        }
+            aSize = pWin->GetGeometry().PixelToLogic( aSize, pEditEngine->GetRefMapMode() );
 
         /*  #i19430# Gnopernicus reads text partly if it sticks out of the cell
             boundaries. This leads to wrong results in cases where the cell text
@@ -834,7 +831,7 @@ SvxTextForwarder* ScAccessibleEditLineTextData::GetTextForwarder()
 #else
                 OutputDevice& rDevice = mpTxtWnd->GetDrawingArea()->get_ref_device();
                 Size aSize(rDevice.GetSizeInPixels());
-                aSize = rDevice.PixelToLogic(aSize, mpEditEngine->GetRefMapMode());
+                aSize = rDevice.GetGeometry().PixelToLogic(aSize, mpEditEngine->GetRefMapMode());
                 mpEditEngine->SetPaperSize(aSize);
 #endif
 
@@ -950,7 +947,7 @@ SvxTextForwarder* ScAccessiblePreviewCellTextData::GetTextForwarder()
         Size aSize(mpViewShell->GetLocationData().GetCellOutputRect(aCellPos).GetSize());
         vcl::Window* pWin = mpViewShell->GetWindow();
         if (pWin)
-            aSize = pWin->PixelToLogic(aSize, pEditEngine->GetRefMapMode());
+            aSize = pWin->GetGeometry().PixelToLogic(aSize, pEditEngine->GetRefMapMode());
         pEditEngine->SetPaperSize(aSize);
     }
 
@@ -1047,7 +1044,7 @@ SvxTextForwarder* ScAccessiblePreviewHeaderCellTextData::GetTextForwarder()
             tools::Rectangle aVisRect( Point(), aOutputSize );
             Size aSize(mpViewShell->GetLocationData().GetHeaderCellOutputRect(aVisRect, aCellPos, mbColHeader).GetSize());
             if (pWindow)
-                aSize = pWindow->PixelToLogic(aSize, pEditEngine->GetRefMapMode());
+                aSize = pWindow->GetGeometry().PixelToLogic(aSize, pEditEngine->GetRefMapMode());
             pEditEngine->SetPaperSize(aSize);
         }
         pEditEngine->SetTextCurrentDefaults( maText );
@@ -1165,7 +1162,7 @@ SvxTextForwarder* ScAccessibleHeaderTextData::GetTextForwarder()
         Size aSize(aVisRect.GetSize());
         vcl::Window* pWin = mpViewShell->GetWindow();
         if (pWin)
-            aSize = pWin->PixelToLogic(aSize, mpEditEngine->GetRefMapMode());
+            aSize = pWin->GetGeometry().PixelToLogic(aSize, mpEditEngine->GetRefMapMode());
         mpEditEngine->SetPaperSize(aSize);
     }
     if (mpEditObj)
@@ -1265,7 +1262,7 @@ SvxTextForwarder* ScAccessibleNoteTextData::GetTextForwarder()
             tools::Rectangle aVisRect( Point(), aOutputSize );
             Size aSize(mpViewShell->GetLocationData().GetNoteInRangeOutputRect(aVisRect, mbMarkNote, maCellPos).GetSize());
             if (pWindow)
-                aSize = pWindow->PixelToLogic(aSize, mpEditEngine->GetRefMapMode());
+                aSize = pWindow->GetGeometry().PixelToLogic(aSize, mpEditEngine->GetRefMapMode());
             mpEditEngine->SetPaperSize(aSize);
         }
         mpEditEngine->SetTextCurrentDefaults( msText );
@@ -1320,7 +1317,7 @@ Point ScCsvViewForwarder::LogicToPixel( const Point& rPoint, const MapMode& rMap
 Point ScCsvViewForwarder::PixelToLogic( const Point& rPoint, const MapMode& rMapMode ) const
 {
     if( !mpWindow ) return Point();
-    return mpWindow->PixelToLogic( rPoint, rMapMode );
+    return mpWindow->GetGeometry().PixelToLogic( rPoint, rMapMode );
 }
 
 void ScCsvViewForwarder::SetInvalid()

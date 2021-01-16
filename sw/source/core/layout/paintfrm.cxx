@@ -1401,7 +1401,7 @@ static void lcl_ExtendLeftAndRight( SwRect&                _rRect,
 static basegfx::B2DRange lcl_ShrinkFly(const SwRect& rRect)
 {
     static MapMode aMapMode(MapUnit::MapTwip);
-    static const Size aSingleUnit = Application::GetDefaultDevice()->PixelToLogic(Size(1, 1), aMapMode);
+    static const Size aSingleUnit = Application::GetDefaultDevice()->GetGeometry().PixelToLogic(Size(1, 1), aMapMode);
 
     double x1 = rRect.Left() + aSingleUnit.getWidth();
     double y1 = rRect.Top() + aSingleUnit.getHeight();

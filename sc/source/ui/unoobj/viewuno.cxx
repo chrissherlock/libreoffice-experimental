@@ -387,7 +387,7 @@ awt::Rectangle ScViewPaneBase::GetVisArea() const
                 pViewShell->GetViewData().GetPosY(eWhichV),
                 pViewShell->GetViewData().GetTabNo());
             tools::Rectangle aCellRect( rDoc.GetMMRect( aCell.Col(), aCell.Row(), aCell.Col(), aCell.Row(), aCell.Tab() ) );
-            Size aVisSize( pWindow->PixelToLogic( pWindow->GetSizePixel(), pWindow->GetDrawMapMode( true ) ) );
+            Size aVisSize( pWindow->GetGeometry().PixelToLogic( pWindow->GetSizePixel(), pWindow->GetDrawMapMode( true ) ) );
             Point aVisPos( aCellRect.TopLeft() );
             if ( rDoc.IsLayoutRTL( aCell.Tab() ) )
             {

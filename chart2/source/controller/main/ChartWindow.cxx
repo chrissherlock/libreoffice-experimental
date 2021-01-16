@@ -208,7 +208,7 @@ void ChartWindow::RequestHelp( const HelpEvent& rHEvt )
     if( ( rHEvt.GetMode() & HelpEventMode::QUICK ) &&
         m_pWindowController )
     {
-        Point aLogicHitPos = GetGeometry().PixelToLogic( GetPointerPosPixel());
+        Point aLogicHitPos = maGeometry.PixelToLogic( GetPointerPosPixel());
         OUString aQuickHelpText;
         awt::Rectangle aHelpRect;
         bool bIsBalloonHelp( Help::IsBalloonHelpEnabled() );
@@ -299,7 +299,7 @@ void ChartWindow::LogicInvalidate(const tools::Rectangle* pRectangle)
         }
         else
         {
-            aRectangle = PixelToLogic(aRectangle, MapMode(MapUnit::MapTwip));
+            aRectangle = maGeometry.PixelToLogic(aRectangle, MapMode(MapUnit::MapTwip));
         }
 
         vcl::Window* pEditWin = GetParentEditWin();

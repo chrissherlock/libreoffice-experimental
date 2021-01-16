@@ -837,7 +837,7 @@ Point SmViewForwarder::PixelToLogic( const Point& rPoint, const MapMode& rMapMod
     {
         MapMode aMapMode(pOutDev->GetMapMode());
         aMapMode.SetOrigin(Point());
-        Point aPoint( pOutDev->PixelToLogic( rPoint, aMapMode ) );
+        Point aPoint( pOutDev->GetGeometry().PixelToLogic( rPoint, aMapMode ) );
         return OutputDevice::LogicToLogic( aPoint,
                                            MapMode(aMapMode.GetMapUnit()),
                                            rMapMode );
@@ -1417,7 +1417,7 @@ Point SmEditViewForwarder::PixelToLogic( const Point& rPoint, const MapMode& rMa
     {
         MapMode aMapMode(pOutDev->GetMapMode());
         aMapMode.SetOrigin(Point());
-        Point aPoint( pOutDev->PixelToLogic( rPoint, aMapMode ) );
+        Point aPoint( pOutDev->GetGeometry().PixelToLogic( rPoint, aMapMode ) );
         return OutputDevice::LogicToLogic( aPoint,
                                            MapMode(aMapMode.GetMapUnit()),
                                            rMapMode );

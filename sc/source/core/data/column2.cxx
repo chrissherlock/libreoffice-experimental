@@ -447,7 +447,7 @@ tools::Long ScColumn::GetNeededSize(
             {
                 aPaper = bInPrintTwips ?
                         OutputDevice::LogicToLogic(aPaper, aTwipMode, aHMMMode) :
-                        pDev->PixelToLogic(aPaper, aHMMMode);
+                        pDev->GetGeometry().PixelToLogic(aPaper, aHMMMode);
             }
         }
         pEngine->SetPaperSize(aPaper);

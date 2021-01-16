@@ -370,7 +370,9 @@ bool GraphicObject::ImplGetCropParams( OutputDevice const * pOut, Point& rPt, Si
         rClipPolyPoly = aClipPoly;
 
         if (maGraphic.GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel)
-            aSize100 = Application::GetDefaultDevice()->PixelToLogic( maGraphic.GetPrefSize(), aMap100 );
+        {
+            aSize100 = Application::GetDefaultDevice()->GetGeometry().PixelToLogic( maGraphic.GetPrefSize(), aMap100 );
+        }
         else
         {
             MapMode m(maGraphic.GetPrefMapMode());
@@ -904,9 +906,9 @@ basegfx::B2DVector GraphicObject::calculateCropScaling(
     double fFactorX(1.0);
     double fFactorY(1.0);
 
-    if(MapUnit::MapPixel == GetPrefMapMode().GetMapUnit())
+    if (MapUnit::MapPixel == GetPrefMapMode().GetMapUnit())
     {
-        aBitmapSize = Application::GetDefaultDevice()->PixelToLogic(aBitmapSize, aMapMode100thmm);
+        aBitmapSize = Application::GetDefaultDevice()->GetGeometry().PixelToLogic(aBitmapSize, aMapMode100thmm);
     }
     else
     {

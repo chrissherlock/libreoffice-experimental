@@ -1358,7 +1358,7 @@ bool Printer::SetPaperSizeUser( const Size& rSize )
         return false;
 
     const Size aPixSize = maGeometry.LogicToPixel( rSize );
-    const Size aPageSize = PixelToLogic(aPixSize, MapMode(MapUnit::Map100thMM));
+    const Size aPageSize = maGeometry.PixelToLogic(aPixSize, MapMode(MapUnit::Map100thMM));
     bool bNeedToChange(maJobSetup.ImplGetConstData().GetPaperWidth() != aPageSize.Width() ||
         maJobSetup.ImplGetConstData().GetPaperHeight() != aPageSize.Height());
 

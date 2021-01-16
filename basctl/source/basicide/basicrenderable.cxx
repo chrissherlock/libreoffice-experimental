@@ -165,7 +165,7 @@ Sequence<beans::PropertyValue> SAL_CALL Renderable::getRenderer (
     // no renderdevice is legal; the first call is to get our print ui options
     if( pPrinter )
     {
-        Size aPageSize( pPrinter->PixelToLogic( pPrinter->GetPaperSizePixel(), MapMode( MapUnit::Map100thMM ) ) );
+        Size aPageSize( pPrinter->GetGeometry().PixelToLogic( pPrinter->GetPaperSizePixel(), MapMode( MapUnit::Map100thMM ) ) );
 
         awt::Size aSize;
         aSize.Width  = aPageSize.Width();

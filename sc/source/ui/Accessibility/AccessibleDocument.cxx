@@ -1994,7 +1994,7 @@ tools::Rectangle ScAccessibleDocument::GetVisibleArea_Impl() const
 
         ScGridWindow* pWin = static_cast<ScGridWindow*>(mpViewShell->GetWindowByPos(meSplitPos));
         if (pWin)
-            aVisRect = pWin->PixelToLogic(aVisRect, pWin->GetDrawMapMode());
+            aVisRect = pWin->GetGeometry().PixelToLogic(aVisRect, pWin->GetDrawMapMode());
     }
 
     return aVisRect;

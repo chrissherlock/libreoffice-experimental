@@ -4828,7 +4828,7 @@ void DocxAttributeOutput::WriteSrcRect(
     const MapMode& rMapMode = aGraphic.GetPrefMapMode();
     if (rMapMode.GetMapUnit() == MapUnit::MapPixel)
     {
-        aOriginalSize = Application::GetDefaultDevice()->PixelToLogic(aOriginalSize, aMap100mm);
+        aOriginalSize = Application::GetDefaultDevice()->GetGeometry().PixelToLogic(aOriginalSize, aMap100mm);
     }
 
     css::text::GraphicCrop aGraphicCropStruct;

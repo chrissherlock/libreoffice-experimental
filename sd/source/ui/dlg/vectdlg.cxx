@@ -228,7 +228,7 @@ void SdVectorizeDlg::AddTile( BitmapReadAccess const * pRAcc, GDIMetaFile& rMtf,
     ::tools::Rectangle   aRect( Point( nPosX, nPosY ), Size( nWidth + 1, nHeight + 1 ) );
     const Size& rMaxSize = rMtf.GetPrefSize();
 
-    aRect = Application::GetDefaultDevice()->PixelToLogic(aRect, rMtf.GetPrefMapMode());
+    aRect = Application::GetDefaultDevice()->GetGeometry().PixelToLogic(aRect, rMtf.GetPrefMapMode());
 
     if( aRect.Right() > ( rMaxSize.Width() - 1 ) )
         aRect.SetRight( rMaxSize.Width() - 1 );

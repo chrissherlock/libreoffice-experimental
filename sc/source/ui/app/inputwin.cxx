@@ -2051,7 +2051,7 @@ void ScTextWnd::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 
     aTextFont = rDevice.GetFont();
     Size aFontSize = aTextFont.GetFontSize();
-    aTextFont.SetFontSize(rDevice.PixelToLogic(aFontSize, MapMode(MapUnit::MapTwip)));
+    aTextFont.SetFontSize(rDevice.GetGeometry().PixelToLogic(aFontSize, MapMode(MapUnit::MapTwip)));
 
     const StyleSettings& rStyleSettings = Application::GetSettings().GetStyleSettings();
 

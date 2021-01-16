@@ -225,7 +225,7 @@ void SwHTMLParser::NewNumberBulletList( HtmlTokenId nToken )
         if( nWidth!=USHRT_MAX && nHeight!=USHRT_MAX )
         {
             aTwipSz =
-                Application::GetDefaultDevice()->PixelToLogic( aTwipSz,
+                Application::GetDefaultDevice()->GetGeometry().PixelToLogic( aTwipSz,
                                                     MapMode(MapUnit::MapTwip) );
             pTwipSz = &aTwipSz;
         }

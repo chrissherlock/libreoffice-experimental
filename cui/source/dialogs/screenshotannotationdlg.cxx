@@ -255,7 +255,7 @@ ScreenshotAnnotationDlg_Impl::ScreenshotAnnotationDlg_Impl(
     {
         mxText->set_size_request(400, mxText->get_height_rows(10));
         OUString aHelpId = OStringToOUString( mrParentDialog.get_help_id(), RTL_TEXTENCODING_UTF8 );
-        Size aSizeCm = Application::GetDefaultDevice()->PixelToLogic(maParentDialogSize, MapMode(MapUnit::MapCM));
+        Size aSizeCm = Application::GetDefaultDevice()->GetGeometry().PixelToLogic(maParentDialogSize, MapMode(MapUnit::MapCM));
         maMainMarkupText = lcl_ParagraphWithImage( aHelpId, aSizeCm );
         mxText->set_text( maMainMarkupText );
         mxText->set_editable(false);

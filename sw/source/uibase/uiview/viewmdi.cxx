@@ -118,7 +118,7 @@ void SwView::SetZoom_( const Size &rEditSize, SvxZoomType eZoomType,
             aPageSize.AdjustWidth(pPostItMgr->GetSidebarWidth() + pPostItMgr->GetSidebarBorderWidth() );
 
         const MapMode aTmpMap( MapUnit::MapTwip );
-        const Size aWindowSize( GetEditWin().PixelToLogic( rEditSize, aTmpMap ) );
+        const Size aWindowSize( GetEditWin().GetGeometry().PixelToLogic( rEditSize, aTmpMap ) );
 
         if( UseOnPage::Mirror == rDesc.GetUseOn() )    // mirrored pages
         {

@@ -47,7 +47,7 @@ tools::Rectangle AccessibleViewForwarder::GetVisibleArea() const
     {
         aVisibleArea.SetPos( Point( 0, 0 ) );
         aVisibleArea.SetSize( m_pWindow->GetSizeInPixels() );
-        aVisibleArea = m_pWindow->PixelToLogic( aVisibleArea, m_aMapMode );
+        aVisibleArea = m_pWindow->GetGeometry().PixelToLogic( aVisibleArea, m_aMapMode );
     }
     return aVisibleArea;
 }

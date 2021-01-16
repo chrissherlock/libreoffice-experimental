@@ -676,7 +676,7 @@ sal_Int32 SwSrcView::PrintSource(
     pOutDev->SetMapMode(MapMode(MapUnit::Map100thMM));
     vcl::Font aFont( aEditWin->GetOutWin()->GetFont() );
     Size aSize( aFont.GetFontSize() );
-    aSize = aEditWin->GetOutWin()->PixelToLogic(aSize, MapMode(MapUnit::Map100thMM));
+    aSize = aEditWin->GetOutWin()->GetGeometry().PixelToLogic(aSize, MapMode(MapUnit::Map100thMM));
     aFont.SetFontSize( aSize );
     aFont.SetColor( COL_BLACK );
     pOutDev->SetFont( aFont );

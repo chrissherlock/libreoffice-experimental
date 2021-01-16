@@ -963,7 +963,7 @@ void ScDrawView::SyncForGrid( SdrObject* pObj )
     aOldPos.setY(convertTwipToMm100(aOldPos.Y()));
     // find position of same point on the screen ( e.g. grid )
     Point aCurPos =  pViewData->GetScrPos(  aOldStt.Col(), aOldStt.Row(), eWhich, true );
-    Point aCurPosHmm = pGridWin->PixelToLogic(aCurPos, aDrawMode );
+    Point aCurPosHmm = pGridWin->GetGeometry().PixelToLogic(aCurPos, aDrawMode );
     Point aGridOff = aCurPosHmm - aOldPos;
     // fdo#63878 Fix the X position for RTL Sheet
     if( rDoc.IsNegativePage( GetTab() ) )
@@ -1042,7 +1042,7 @@ bool ScDrawView::calculateGridOffsetForSdrObject(
     // find position of same point on the screen ( e.g. grid )
     ScSplitPos eWhich(pViewData->GetActivePart());
     Point aCurPos(pViewData->GetScrPos(aOldStt.Col(), aOldStt.Row(), eWhich, true));
-    Point aCurPosHmm(pGridWin->PixelToLogic(aCurPos, aDrawMode));
+    Point aCurPosHmm(pGridWin->GetGeometry().PixelToLogic(aCurPos, aDrawMode));
     Point aGridOff(aCurPosHmm - aOldPos);
 
     // fdo#63878 Fix the X position for RTL Sheet
@@ -1090,7 +1090,7 @@ bool ScDrawView::calculateGridOffsetForB2DRange(
     // find position of same point on the screen ( e.g. grid )
     ScSplitPos eWhich(pViewData->GetActivePart());
     Point aCurPos(pViewData->GetScrPos(aOldStt.Col(), aOldStt.Row(), eWhich, true));
-    Point aCurPosHmm(pGridWin->PixelToLogic(aCurPos, aDrawMode));
+    Point aCurPosHmm(pGridWin->GetGeometry().PixelToLogic(aCurPos, aDrawMode));
     Point aGridOff(aCurPosHmm - aOldPos);
 
     // fdo#63878 Fix the X position for RTL Sheet

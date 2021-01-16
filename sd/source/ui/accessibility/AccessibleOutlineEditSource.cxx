@@ -140,7 +140,7 @@ namespace accessibility
         {
             MapMode aMapMode(mrWindow.GetMapMode());
             aMapMode.SetOrigin(Point());
-            Point aPoint( mrWindow.PixelToLogic( rPoint, aMapMode ) );
+            Point aPoint( mrWindow.GetGeometry().PixelToLogic( rPoint, aMapMode ) );
             return OutputDevice::LogicToLogic( aPoint,
                                                MapMode(mrView.GetModel()->GetScaleUnit()),
                                                rMapMode );

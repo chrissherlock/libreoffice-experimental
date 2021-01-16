@@ -1564,7 +1564,7 @@ void ScViewData::SetEditEngine( ScSplitPos eWhich,
             pEditView[eWhich]->SetLOKSpecialOutputArea(aPTwipsRect);
     }
 
-    tools::Rectangle aOutputArea = pWin->PixelToLogic( aPixRect, GetLogicMode() );
+    tools::Rectangle aOutputArea = pWin->GetGeometry().PixelToLogic( aPixRect, GetLogicMode() );
     pEditView[eWhich]->SetOutputArea( aOutputArea );
 
     if ( bActive && eWhich == GetActivePart() )
@@ -1602,7 +1602,7 @@ void ScViewData::SetEditEngine( ScSplitPos eWhich,
             Size aGridSize(nGridWidthPx, nGridHeightPx);
             const MapMode& rWinMapMode = GetLogicMode();
             aGridSize = OutputDevice::LogicToLogic(
-                pWin->PixelToLogic(aGridSize, rWinMapMode),
+                pWin->GetGeometry().PixelToLogic(aGridSize, rWinMapMode),
                 rWinMapMode, MapMode(MapUnit::MapTwip));
             nGridWidthTwips = aGridSize.Width();
             nGridHeightTwips = aGridSize.Height();
@@ -1663,7 +1663,7 @@ void ScViewData::SetEditEngine( ScSplitPos eWhich,
                 nSizeYPTwips = aPTwipsRect.GetHeight();
         }
 
-        Size aPaperSize = pView->GetActiveWin()->PixelToLogic( Size( nSizeXPix, nSizeYPix ), GetLogicMode() );
+        Size aPaperSize = pView->GetActiveWin()->GetGeometry().PixelToLogic( Size( nSizeXPix, nSizeYPix ), GetLogicMode() );
         Size aPaperSizePTwips(nSizeXPTwips, nSizeYPTwips);
         if ( bBreak && !bAsianVertical && SC_MOD()->GetInputOptions().GetTextWysiwyg() )
         {
@@ -3370,7 +3370,7 @@ void ScViewData::WriteExtOptions( ScExtDocOptions& rDocOpt ) const
             {
                 Point& rSplitPos = rTabSett.maSplitPos;
                 rSplitPos = Point( bHSplit ? nExHSplitPos : 0, bVSplit ? nExVSplitPos : 0 );
-                rSplitPos = Application::GetDefaultDevice()->PixelToLogic( rSplitPos, MapMode( MapUnit::MapTwip ) );
+                rSplitPos = Application::GetDefaultDevice()->GetGeometry().PixelToLogic( rSplitPos, MapMode( MapUnit::MapTwip ) );
                 if( pDocShell )
                     rSplitPos.setX( static_cast<tools::Long>(static_cast<double>(rSplitPos.X()) / pDocShell->GetOutputFactor()) );
             }

@@ -40,7 +40,7 @@ Size GetGraphicSizeTwip(const Graphic& rGraphic, vcl::RenderContext* pOutDev)
     {
         if (!pOutDev)
             pOutDev = Application::GetDefaultDevice();
-        aSize = pOutDev->PixelToLogic(aSize, aMapTwip);
+        aSize = pOutDev->GetGeometry().PixelToLogic(aSize, aMapTwip);
     }
     else
     {

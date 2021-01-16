@@ -956,8 +956,8 @@ void ScPreview::MouseButtonDown( const MouseEvent& rMEvt )
     Fraction  aHorPrevZoom( static_cast<tools::Long>( 100 * nZoom / pDocShell->GetOutputFactor() ), 10000 );
     MapMode   aMMMode( MapUnit::Map100thMM, Point(), aHorPrevZoom, aPreviewZoom );
 
-    aButtonDownChangePoint = PixelToLogic( rMEvt.GetPosPixel(),aMMMode );
-    aButtonDownPt = PixelToLogic( rMEvt.GetPosPixel(),aMMMode );
+    aButtonDownChangePoint = maGeometry.PixelToLogic( rMEvt.GetPosPixel(),aMMMode );
+    aButtonDownPt = maGeometry.PixelToLogic( rMEvt.GetPosPixel(),aMMMode );
 
     CaptureMouse();
 
@@ -1025,9 +1025,9 @@ void ScPreview::MouseButtonDown( const MouseEvent& rMEvt )
 
     SetMapMode( aMMMode );
     if( nColNumberButtonDown == aPageArea.aStart.Col() )
-        DrawInvert( PixelToLogic( Point( nLeftPosition, 0 ),aMMMode ).X() ,PointerStyle::HSplit );
+        DrawInvert( maGeometry.PixelToLogic( Point( nLeftPosition, 0 ),aMMMode ).X() ,PointerStyle::HSplit );
     else
-        DrawInvert( PixelToLogic( Point( mvRight[ nColNumberButtonDown-1 ], 0 ),aMMMode ).X() ,PointerStyle::HSplit );
+        DrawInvert( maGeometry.PixelToLogic( Point( mvRight[ nColNumberButtonDown-1 ], 0 ),aMMMode ).X() ,PointerStyle::HSplit );
 
     DrawInvert( aButtonDownChangePoint.X(), PointerStyle::HSplit );
     bColRulerMove = true;
@@ -1039,7 +1039,7 @@ void ScPreview::MouseButtonUp( const MouseEvent& rMEvt )
         Fraction  aHorPrevZoom( static_cast<tools::Long>( 100 * nZoom / pDocShell->GetOutputFactor() ), 10000 );
         MapMode   aMMMode( MapUnit::Map100thMM, Point(), aHorPrevZoom, aPreviewZoom );
 
-        aButtonUpPt = PixelToLogic( rMEvt.GetPosPixel(),aMMMode );
+        aButtonUpPt = maGeometry.PixelToLogic( rMEvt.GetPosPixel(),aMMMode );
 
         tools::Long  nWidth = lcl_GetDocPageSize(&pDocShell->GetDocument(), nTab).Width();
         tools::Long  nHeight = lcl_GetDocPageSize(&pDocShell->GetDocument(), nTab).Height();
@@ -1242,9 +1242,9 @@ void ScPreview::MouseButtonUp( const MouseEvent& rMEvt )
             {
                 bMoveRulerAction = false;
                 if( nColNumberButtonDown == aPageArea.aStart.Col() )
-                    DrawInvert( PixelToLogic( Point( nLeftPosition, 0 ),aMMMode ).X() ,PointerStyle::HSplit );
+                    DrawInvert( maGeometry.PixelToLogic( Point( nLeftPosition, 0 ),aMMMode ).X() ,PointerStyle::HSplit );
                 else
-                    DrawInvert( PixelToLogic( Point( mvRight[ nColNumberButtonDown-1 ], 0 ),aMMMode ).X() ,PointerStyle::HSplit );
+                    DrawInvert( maGeometry.PixelToLogic( Point( mvRight[ nColNumberButtonDown-1 ], 0 ),aMMMode ).X() ,PointerStyle::HSplit );
                 DrawInvert( aButtonUpPt.X(), PointerStyle::HSplit );
             }
             if( bMoveRulerAction )
@@ -1254,13 +1254,13 @@ void ScPreview::MouseButtonUp( const MouseEvent& rMEvt )
 
                 if( !bLayoutRTL )
                 {
-                    nNewColWidth = static_cast<tools::Long>( PixelToLogic( Point( rMEvt.GetPosPixel().X() - mvRight[ nColNumberButtonDown ], 0), aMMMode ).X() / HMM_PER_TWIPS ) * 100 / mnScale;
+                    nNewColWidth = static_cast<tools::Long>( maGeometry.PixelToLogic( Point( rMEvt.GetPosPixel().X() - mvRight[ nColNumberButtonDown ], 0), aMMMode ).X() / HMM_PER_TWIPS ) * 100 / mnScale;
                     nNewColWidth += pDocShell->GetDocument().GetColWidth( nColNumberButtonDown, nTab );
                 }
                 else
                 {
 
-                    nNewColWidth = static_cast<tools::Long>( PixelToLogic( Point( mvRight[ nColNumberButtonDown ] - rMEvt.GetPosPixel().X(), 0), aMMMode ).X() / HMM_PER_TWIPS ) * 100 / mnScale;
+                    nNewColWidth = static_cast<tools::Long>( maGeometry.PixelToLogic( Point( mvRight[ nColNumberButtonDown ] - rMEvt.GetPosPixel().X(), 0), aMMMode ).X() / HMM_PER_TWIPS ) * 100 / mnScale;
                     nNewColWidth += pDocShell->GetDocument().GetColWidth( nColNumberButtonDown, nTab );
                 }
 
@@ -1288,7 +1288,7 @@ void ScPreview::MouseMove( const MouseEvent& rMEvt )
     Fraction aPreviewZoom( nZoom, 100 );
     Fraction aHorPrevZoom( static_cast<tools::Long>( 100 * nZoom / pDocShell->GetOutputFactor() ), 10000 );
     MapMode  aMMMode( MapUnit::Map100thMM, Point(), aHorPrevZoom, aPreviewZoom );
-    Point    aMouseMovePoint = PixelToLogic( rMEvt.GetPosPixel(), aMMMode );
+    Point    aMouseMovePoint = maGeometry.PixelToLogic( rMEvt.GetPosPixel(), aMMMode );
 
     tools::Long    nLeftMargin = 0;
     tools::Long    nRightMargin = 0;

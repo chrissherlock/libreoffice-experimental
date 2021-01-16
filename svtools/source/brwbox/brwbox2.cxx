@@ -667,7 +667,7 @@ void BrowseBox::Draw( OutputDevice* pDev, const Point& rPos, DrawFlags nFlags )
     // (as it is based on the settings of our data window, not the foreign device)
     if (!nDataRowHeight)
         ImpGetDataRowHeight();
-    tools::Long nHeightLogic = PixelToLogic(Size(0, nDataRowHeight), MapMode(MapUnit::Map10thMM)).Height();
+    tools::Long nHeightLogic = maGeometry.PixelToLogic(Size(0, nDataRowHeight), MapMode(MapUnit::Map10thMM)).Height();
     tools::Long nForeignHeightPixel = pDev->GetGeometry().LogicToPixel(Size(0, nHeightLogic), MapMode(MapUnit::Map10thMM)).Height();
 
     tools::Long nOriginalHeight = nDataRowHeight;
@@ -679,7 +679,7 @@ void BrowseBox::Draw( OutputDevice* pDev, const Point& rPos, DrawFlags nFlags )
     {
         BrowserColumn* pCurrent = mvCols[ nPos ].get();
 
-        tools::Long nWidthLogic = PixelToLogic(Size(pCurrent->Width(), 0), MapMode(MapUnit::Map10thMM)).Width();
+        tools::Long nWidthLogic = maGeometry.PixelToLogic(Size(pCurrent->Width(), 0), MapMode(MapUnit::Map10thMM)).Width();
         tools::Long nForeignWidthPixel = pDev->GetGeometry().LogicToPixel(Size(nWidthLogic, 0), MapMode(MapUnit::Map10thMM)).Width();
 
         pCurrent->SetWidth(nForeignWidthPixel, GetZoom());
@@ -697,7 +697,7 @@ void BrowseBox::Draw( OutputDevice* pDev, const Point& rPos, DrawFlags nFlags )
     if ( pBar )
     {
         // the title height with respect to the font set for the given device
-        tools::Long nTitleHeight = PixelToLogic(Size(0, GetTitleHeight()), MapMode(MapUnit::Map10thMM)).Height();
+        tools::Long nTitleHeight = maGeometry.PixelToLogic(Size(0, GetTitleHeight()), MapMode(MapUnit::Map10thMM)).Height();
         nTitleHeight = pDev->GetGeometry().LogicToPixel(Size(0, nTitleHeight), MapMode(MapUnit::Map10thMM)).Height();
 
         BrowserColumn* pFirstCol = !mvCols.empty() ? mvCols[ 0 ].get() : nullptr;
@@ -760,7 +760,7 @@ void BrowseBox::Draw( OutputDevice* pDev, const Point& rPos, DrawFlags nFlags )
     {
         BrowserColumn* pCurrent = mvCols[ nPos ].get();
 
-        tools::Long nForeignWidthLogic = pDev->PixelToLogic(Size(pCurrent->Width(), 0), MapMode(MapUnit::Map10thMM)).Width();
+        tools::Long nForeignWidthLogic = pDev->GetGeometry().PixelToLogic(Size(pCurrent->Width(), 0), MapMode(MapUnit::Map10thMM)).Width();
         tools::Long nWidthPixel = maGeometry.LogicToPixel(Size(nForeignWidthLogic, 0), MapMode(MapUnit::Map10thMM)).Width();
 
         pCurrent->SetWidth(nWidthPixel, GetZoom());

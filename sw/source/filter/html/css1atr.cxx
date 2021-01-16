@@ -3295,7 +3295,7 @@ static void OutCSS1_SvxBorderLine( SwHTMLWriter& rHTMLWrt,
 
     OStringBuffer sOut;
     if( Application::GetDefaultDevice() &&
-        nWidth <= Application::GetDefaultDevice()->PixelToLogic(
+        nWidth <= Application::GetDefaultDevice()->GetGeometry().PixelToLogic(
                     Size( 1, 1 ), MapMode( MapUnit::MapTwip) ).Width() )
     {
         // If the width is smaller than one pixel, then export as 1px

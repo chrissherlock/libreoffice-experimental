@@ -217,7 +217,7 @@ ScPrintFunc::ScPrintFunc( ScDocShell* pShell, SfxPrinter* pNewPrinter, SCTAB nTa
         pPageData           ( pData )
 {
     pDev = pPrinter.get();
-    aSrcOffset = pPrinter->PixelToLogic(pPrinter->GetPageOffsetPixel(), MapMode(MapUnit::Map100thMM));
+    aSrcOffset = pPrinter->GetGeometry().PixelToLogic(pPrinter->GetPageOffsetPixel(), MapMode(MapUnit::Map100thMM));
     Construct( pOptions );
 }
 
@@ -260,7 +260,7 @@ ScPrintFunc::ScPrintFunc(ScDocShell* pShell, SfxPrinter* pNewPrinter,
         m_aRanges.m_aInput = rState.aPrintPageRangesInput;
     }
 
-    aSrcOffset = pPrinter->PixelToLogic(pPrinter->GetPageOffsetPixel(), MapMode(MapUnit::Map100thMM));
+    aSrcOffset = pPrinter->GetGeometry().PixelToLogic(pPrinter->GetPageOffsetPixel(), MapMode(MapUnit::Map100thMM));
     Construct( pOptions );
 }
 
@@ -575,7 +575,7 @@ void ScPrintFunc::DrawToDev(ScDocument& rDoc, OutputDevice* pDev, double /* nPri
     if ( bMetaFile && pDev->IsVirtual() )
         aOutputData.SetSnapPixel();
 
-    Point aLogStart = pDev->PixelToLogic(Point(nScrX, nScrY), MapMode(MapUnit::Map100thMM));
+    Point aLogStart = pDev->GetGeometry().PixelToLogic(Point(nScrX, nScrY), MapMode(MapUnit::Map100thMM));
     tools::Long nLogStX = aLogStart.X();
     tools::Long nLogStY = aLogStart.Y();
 
@@ -1140,7 +1140,7 @@ static void lcl_DrawGraphic( const SvxBrushItem &rBrush, vcl::RenderContext *pOu
     {
         const MapMode aMapMM( MapUnit::Map100thMM );
         if ( pGraphic->GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel )
-            aGrfSize = pRefDev->PixelToLogic( pGraphic->GetPrefSize(), aMapMM );
+            aGrfSize = pRefDev->GetGeometry().PixelToLogic( pGraphic->GetPrefSize(), aMapMM );
         else
             aGrfSize = OutputDevice::LogicToLogic( pGraphic->GetPrefSize(),
                                     pGraphic->GetPrefMapMode(), aMapMM );
@@ -2184,7 +2184,7 @@ void ScPrintFunc::PrintPage( tools::Long nPageNo, SCCOL nX1, SCROW nY1, SCCOL nX
         nInnerStartX += nHeaderWidth + nRepeatWidth + nContentWidth;
 
         //  make rounding easier so the elements are really next to each other in preview
-        Size aOffsetOnePixel = pDev->PixelToLogic( Size(1,1), aOffsetMode );
+        Size aOffsetOnePixel = pDev->GetGeometry().PixelToLogic( Size(1,1), aOffsetMode );
         tools::Long nOffsetOneX = aOffsetOnePixel.Width();
         nInnerStartX += nOffsetOneX / 2;
     }

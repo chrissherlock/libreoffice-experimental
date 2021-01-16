@@ -793,34 +793,24 @@ void SwVirtFlyDrawObj::NbcCrop(const basegfx::B2DPoint& rRef, double fxFact, dou
     SwWrtShell *pSh = dynamic_cast<SwWrtShell*>( GetFlyFrame()->getRootFrame()->GetCurrShell() );
 
     if (!pSh)
-    {
         return;
-    }
 
     GraphicObject const *pGraphicObject = pSh->GetGraphicObj();
 
     if (!pGraphicObject)
-    {
         return;
-    }
 
     // Get graphic object size in 100th of mm
     const MapMode aMapMode100thmm(MapUnit::Map100thMM);
     Size aGraphicSize(pGraphicObject->GetPrefSize());
 
     if( MapUnit::MapPixel == pGraphicObject->GetPrefMapMode().GetMapUnit() )
-    {
-        aGraphicSize = Application::GetDefaultDevice()->PixelToLogic( aGraphicSize, aMapMode100thmm );
-    }
+        aGraphicSize = Application::GetDefaultDevice()->GetGeometry().PixelToLogic( aGraphicSize, aMapMode100thmm );
     else
-    {
         aGraphicSize = OutputDevice::LogicToLogic( aGraphicSize, pGraphicObject->GetPrefMapMode(), aMapMode100thmm);
-    }
 
     if( aGraphicSize.IsEmpty() )
-    {
         return ;
-    }
 
     const bool bIsTransformableSwFrame(
         GetFlyFrame()->IsFlyFreeFrame() &&

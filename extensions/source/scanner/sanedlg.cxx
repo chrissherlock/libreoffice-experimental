@@ -1210,7 +1210,7 @@ Point ScanPreview::GetPixelPos( const Point& rIn) const
 
 Point ScanPreview::GetLogicPos(const Point& rIn) const
 {
-    Point aConvert = GetDrawingArea()->get_ref_device().PixelToLogic(rIn, MapMode(MapUnit::MapAppFont));
+    Point aConvert = GetDrawingArea()->get_ref_device().GetGeometry().PixelToLogic(rIn, MapMode(MapUnit::MapAppFont));
     if( aConvert.X() < 0 )
         aConvert.setX( 0 );
     if( aConvert.X() >= PREVIEW_WIDTH )

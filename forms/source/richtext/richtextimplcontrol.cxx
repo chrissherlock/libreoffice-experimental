@@ -579,8 +579,8 @@ namespace frm
         Size aSize( _rSize );
         if ( aOriginalMapMode.GetMapUnit() == MapUnit::MapPixel )
         {
-            aPos = _pDev->PixelToLogic( _rPos, aNormalizedMapMode );
-            aSize = _pDev->PixelToLogic( _rSize, aNormalizedMapMode );
+            aPos = _pDev->GetGeometry().PixelToLogic( _rPos, aNormalizedMapMode );
+            aSize = _pDev->GetGeometry().PixelToLogic( _rSize, aNormalizedMapMode );
         }
         else
         {

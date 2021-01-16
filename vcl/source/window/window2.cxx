@@ -565,7 +565,7 @@ tools::Long Window::GetDrawPixel( OutputDevice const * pDev, tools::Long nPixels
     {
         MapMode aMap( MapUnit::Map100thMM );
         Size aSz( nP, 0 );
-        aSz = PixelToLogic( aSz, aMap );
+        aSz = maGeometry.PixelToLogic( aSz, aMap );
         aSz = pDev->GetGeometry().LogicToPixel( aSz, aMap );
         nP = aSz.Width();
     }

@@ -3235,7 +3235,7 @@ Point SwAccessibleMap::PixelToCore( const Point& rPoint ) const
     {
         MapMode aMapMode;
         GetMapMode( rPoint, aMapMode );
-        aPoint = pWin->PixelToLogic( rPoint, aMapMode );
+        aPoint = pWin->GetGeometry().PixelToLogic( rPoint, aMapMode );
     }
     return aPoint;
 }
@@ -3282,7 +3282,7 @@ tools::Rectangle SwAccessibleMap::CoreToPixel( const tools::Rectangle& rRect ) c
         GetMapMode( rRect.TopLeft(), aMapMode );
         aRect = pWin->GetGeometry().LogicToPixel( rRect, aMapMode );
 
-        tools::Rectangle aTmpRect = pWin->PixelToLogic( aRect, aMapMode );
+        tools::Rectangle aTmpRect = pWin->GetGeometry().PixelToLogic( aRect, aMapMode );
         lcl_CorrectRectangle(aRect, rRect, aTmpRect);
     }
 

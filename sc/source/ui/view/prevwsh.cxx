@@ -277,7 +277,7 @@ void ScPreviewShell::UpdateNeededScrollBars( bool bFromZoom )
     tools::Long nBarW = GetViewFrame()->GetWindow().GetSettings().GetStyleSettings().GetScrollBarSize();
     tools::Long nBarH = nBarW;
 
-    tools::Long aHeightOffSet = pDevice ? pDevice->PixelToLogic( Size( nBarW, nBarH ), pPreview->GetMapMode() ).Height() : 0;
+    tools::Long aHeightOffSet = pDevice ? pDevice->GetGeometry().PixelToLogic( Size( nBarW, nBarH ), pPreview->GetMapMode() ).Height() : 0;
     tools::Long aWidthOffSet = aHeightOffSet;
 
     if (!GetPageSize( aPageSize ))

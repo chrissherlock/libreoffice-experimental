@@ -200,8 +200,8 @@ bool DlgEdObj::TransformSdrToControlCoordinates(
     }
 
     // convert pixel to logic units
-    aPos = pDevice->PixelToLogic(aPos, MapMode(MapUnit::MapAppFont));
-    aSize = pDevice->PixelToLogic(aSize, MapMode(MapUnit::MapAppFont));
+    aPos = pDevice->GetGeometry().PixelToLogic(aPos, MapMode(MapUnit::MapAppFont));
+    aSize = pDevice->GetGeometry().PixelToLogic(aSize, MapMode(MapUnit::MapAppFont));
 
     // set out parameters
     nXOut = aPos.Width();
@@ -247,8 +247,8 @@ bool DlgEdObj::TransformSdrToFormCoordinates(
         aSize.AdjustHeight( -(aDeviceInfo.TopInset + aDeviceInfo.BottomInset) );
     }
     // convert pixel to logic units
-    aPos = pDevice->PixelToLogic(aPos, MapMode(MapUnit::MapAppFont));
-    aSize = pDevice->PixelToLogic(aSize, MapMode(MapUnit::MapAppFont));
+    aPos = pDevice->GetGeometry().PixelToLogic(aPos, MapMode(MapUnit::MapAppFont));
+    aSize = pDevice->GetGeometry().PixelToLogic(aSize, MapMode(MapUnit::MapAppFont));
 
     // set out parameters
     nXOut = aPos.Width();
@@ -305,8 +305,8 @@ bool DlgEdObj::TransformControlToSdrCoordinates(
     }
 
     // convert pixel to 100th_mm
-    aPos = pDevice->PixelToLogic( aPos, MapMode( MapUnit::Map100thMM ) );
-    aSize = pDevice->PixelToLogic( aSize, MapMode( MapUnit::Map100thMM ) );
+    aPos = pDevice->GetGeometry().PixelToLogic( aPos, MapMode( MapUnit::Map100thMM ) );
+    aSize = pDevice->GetGeometry().PixelToLogic( aSize, MapMode( MapUnit::Map100thMM ) );
 
     // set out parameters
     nXOut = aPos.Width();
@@ -354,8 +354,8 @@ bool DlgEdObj::TransformFormToSdrCoordinates(
     }
 
     // convert pixel to 100th_mm
-    aPos = pDevice->PixelToLogic( aPos, MapMode( MapUnit::Map100thMM ) );
-    aSize = pDevice->PixelToLogic( aSize, MapMode( MapUnit::Map100thMM ) );
+    aPos = pDevice->GetGeometry().PixelToLogic( aPos, MapMode( MapUnit::Map100thMM ) );
+    aSize = pDevice->GetGeometry().PixelToLogic( aSize, MapMode( MapUnit::Map100thMM ) );
 
     // set out parameters
     nXOut = aPos.Width();

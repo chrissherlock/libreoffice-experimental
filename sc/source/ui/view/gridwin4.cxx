@@ -696,7 +696,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
         // the same as editeng and drawinglayer), and get rid of all the
         // SetMapMode's and other unnecessary fun we have with pixels
         // See also ScGridWindow::GetDrawMapMode() for the rest of this hack
-        aDrawMode.SetOrigin(PixelToLogic(Point(nScrX, nScrY), aDrawMode));
+        aDrawMode.SetOrigin(maGeometry.PixelToLogic(Point(nScrX, nScrY), aDrawMode));
     }
     tools::Rectangle aDrawingRectLogic;
     bool bLayoutRTL = rDoc.IsLayoutRTL( nTab );
@@ -725,7 +725,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
         }
 
         // get logic positions
-        aDrawingRectLogic = PixelToLogic(aDrawingRectPixel, aDrawMode);
+        aDrawingRectLogic = maGeometry.PixelToLogic(aDrawingRectPixel, aDrawMode);
     }
 
     bool bInPlaceEditing = bEditMode && (mrViewData.GetRefTabNo() == mrViewData.GetTabNo());
@@ -1211,7 +1211,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
 
                 aBGAbs.AdjustLeft(1);
                 aBGAbs.AdjustTop(1);
-                aCursorRect = OutputDevice::PixelToLogic(aBGAbs, aMM);
+                aCursorRect = maGeometry.PixelToLogic(aBGAbs, aMM);
                 aCursorRect.setWidth(0);
                 aCursorRect.Move(aCursPos.getX(), 0);
                 // Sends view cursor position to views of all matching zooms if needed (avoids duplicates).
@@ -1510,7 +1510,7 @@ void ScGridWindow::LogicInvalidate(const tools::Rectangle* pRectangle)
                 aRectangle = OutputDevice::LogicToLogic(aRectangle, MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapTwip));
         }
         else
-            aRectangle = PixelToLogic(aRectangle, MapMode(MapUnit::MapTwip));
+            aRectangle = maGeometry.PixelToLogic(aRectangle, MapMode(MapUnit::MapTwip));
         sRectangle = aRectangle.toString();
     }
 

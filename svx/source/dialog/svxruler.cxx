@@ -331,7 +331,7 @@ tools::Long SvxRuler::MakePositionSticky(tools::Long aPosition, tools::Long aPoi
     // Move "coordinate system" to frame position so ticks are calculated correctly
     tools::Long aTranslatedPosition = aPosition - aPointOfReferencePixel;
     // Convert position to current selected map mode
-    tools::Long aPositionLogic = pEditWin->PixelToLogic(Size(aTranslatedPosition, 0), GetCurrentMapMode()).Width();
+    tools::Long aPositionLogic = pEditWin->GetGeometry().PixelToLogic(Size(aTranslatedPosition, 0), GetCurrentMapMode()).Width();
     // Normalize -- snap to nearest tick
     aPositionLogic = rtl::math::round((aPositionLogic + aHalfTick) / aTick) * aTick;
     // Convert back to pixels

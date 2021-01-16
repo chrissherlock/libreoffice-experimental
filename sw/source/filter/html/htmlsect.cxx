@@ -617,7 +617,7 @@ void SwHTMLParser::NewMultiCol( sal_uInt16 columnsFromCss )
     if( !bPercentWidth && nWidth && Application::GetDefaultDevice() )
     {
         nTwipWidth = Application::GetDefaultDevice()
-                             ->PixelToLogic( Size(nWidth, 0),
+                             ->GetGeometry().PixelToLogic( Size(nWidth, 0),
                                              MapMode(MapUnit::MapTwip) ).Width();
     }
 
@@ -708,7 +708,7 @@ void SwHTMLParser::NewMultiCol( sal_uInt16 columnsFromCss )
         if( nGutter && Application::GetDefaultDevice() )
         {
             nGutter = static_cast<sal_uInt16>(Application::GetDefaultDevice()
-                             ->PixelToLogic( Size(nGutter, 0),
+                             ->GetGeometry().PixelToLogic( Size(nGutter, 0),
                                              MapMode(MapUnit::MapTwip) ).Width());
         }
 

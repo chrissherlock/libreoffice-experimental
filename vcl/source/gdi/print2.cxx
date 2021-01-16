@@ -1182,7 +1182,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                                     // scale down bitmap, if requested
                                     if( bDownsampleBitmaps )
                                     {
-                                        Size aDstSizeTwip(PixelToLogic(maGeometry.LogicToPixel(aDstSzPix), MapMode(MapUnit::MapTwip)));
+                                        Size aDstSizeTwip(maGeometry.PixelToLogic(maGeometry.LogicToPixel(aDstSzPix), MapMode(MapUnit::MapTwip)));
                                         aBandBmp.Downsample(aDstSizeTwip,
                                                             Point(), aBandBmp.GetSizePixel(),
                                                             nMaxBmpDPIX, nMaxBmpDPIY);

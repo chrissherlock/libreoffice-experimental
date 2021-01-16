@@ -54,7 +54,7 @@ ScNoteMarker::ScNoteMarker( vcl::Window* pWin, vcl::Window* pRight, vcl::Window*
     if( m_pBottomWin )
         aSizePixel.AdjustHeight(m_pBottomWin->GetSizeInPixels().Height() );
     tools::Rectangle aVisPixel( Point( 0, 0 ), aSizePixel );
-    m_aVisRect = m_pWindow->PixelToLogic( aVisPixel, m_aMapMode );
+    m_aVisRect = m_pWindow->GetGeometry().PixelToLogic( aVisPixel, m_aMapMode );
 
     m_aTimer.SetInvokeHandler( LINK( this, ScNoteMarker, TimeHdl ) );
     m_aTimer.SetTimeout( bForce ? SC_NOTEMARK_SHORT : SC_NOTEMARK_TIME );
@@ -153,7 +153,7 @@ void ScNoteMarker::Draw()
 
     if ( m_pRightWin || m_pBottomWin )
     {
-        Size aWinSize = m_pWindow->PixelToLogic( m_pWindow->GetSizeInPixels(), m_aMapMode );
+        Size aWinSize = m_pWindow->GetGeometry().PixelToLogic( m_pWindow->GetSizeInPixels(), m_aMapMode );
         if ( m_pRightWin )
             lcl_DrawWin( m_xObject.get(), m_pRightWin,
                             lcl_MoveMapMode( m_aMapMode, Size( aWinSize.Width(), 0 ) ) );
@@ -184,7 +184,7 @@ void ScNoteMarker::InvalidateWin()
     if ( !(m_pRightWin || m_pBottomWin) )
         return;
 
-    Size aWinSize = m_pWindow->PixelToLogic( m_pWindow->GetSizeInPixels(), m_aMapMode );
+    Size aWinSize = m_pWindow->GetGeometry().PixelToLogic( m_pWindow->GetSizeInPixels(), m_aMapMode );
     if ( m_pRightWin )
         m_pRightWin->Invalidate( OutputDevice::LogicToLogic(aRect,
                                 lcl_MoveMapMode( m_aMapMode, Size( aWinSize.Width(), 0 ) ),

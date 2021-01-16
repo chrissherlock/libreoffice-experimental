@@ -489,7 +489,7 @@ void SAL_CALL SdrLightEmbeddedClient_Impl::changedPlacement( const awt::Rectangl
     if ( xParentVis.is() )
         aContainerMapUnit = VCLUnoHelper::UnoEmbed2VCLMapUnit( xParentVis->getMapUnit( mpObj->GetAspect() ) );
 
-    tools::Rectangle aNewLogicRect = Application::GetDefaultDevice()->PixelToLogic(aNewPixelRect, MapMode(aContainerMapUnit));
+    tools::Rectangle aNewLogicRect = Application::GetDefaultDevice()->GetGeometry().PixelToLogic(aNewPixelRect, MapMode(aContainerMapUnit));
     tools::Rectangle aLogicRect = impl_getScaledRect_nothrow();
 
     if ( aNewLogicRect == aLogicRect )

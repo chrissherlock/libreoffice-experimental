@@ -2030,7 +2030,7 @@ void HTMLTable::InsertCell( std::shared_ptr<HTMLTableCnts> const& rCnts,
     if( (aTwipSz.Width() || aTwipSz.Height()) && Application::GetDefaultDevice() )
     {
         aTwipSz = Application::GetDefaultDevice()
-                    ->PixelToLogic( aTwipSz, MapMode( MapUnit::MapTwip ) );
+                    ->GetGeometry().PixelToLogic( aTwipSz, MapMode( MapUnit::MapTwip ) );
     }
 
     // Only set width on the first cell!
@@ -2164,7 +2164,7 @@ void HTMLTable::InsertCol( sal_uInt16 nSpan, sal_uInt16 nColWidth, bool bRelWidt
     if( aTwipSz.Width() && Application::GetDefaultDevice() )
     {
         aTwipSz = Application::GetDefaultDevice()
-                    ->PixelToLogic( aTwipSz, MapMode( MapUnit::MapTwip ) );
+                    ->GetGeometry().PixelToLogic( aTwipSz, MapMode( MapUnit::MapTwip ) );
     }
 
     for( i=m_nCurrentColumn; i<nColsReq; i++ )

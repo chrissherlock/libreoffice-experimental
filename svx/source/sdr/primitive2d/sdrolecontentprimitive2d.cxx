@@ -73,7 +73,7 @@ namespace drawinglayer::primitive2d
 
                 if(MapUnit::MapPixel == aGraphic.GetPrefMapMode().GetMapUnit())
                 {
-                    aPrefSize = Application::GetDefaultDevice()->PixelToLogic(aPrefSize, MapMode(MapUnit::Map100thMM));
+                    aPrefSize = Application::GetDefaultDevice()->GetGeometry().PixelToLogic(aPrefSize, MapMode(MapUnit::Map100thMM));
                 }
                 else
                 {

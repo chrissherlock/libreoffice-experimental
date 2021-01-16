@@ -152,13 +152,9 @@ namespace emfio::emfreader
                     Size aSize(aMtf.GetPrefSize());
 
                     if (aMtf.GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel)
-                    {
-                        aSize = Application::GetDefaultDevice()->PixelToLogic(aSize, MapMode(MapUnit::Map100thMM));
-                    }
+                        aSize = Application::GetDefaultDevice()->GetGeometry().PixelToLogic(aSize, MapMode(MapUnit::Map100thMM));
                     else
-                    {
                         aSize = OutputDevice::LogicToLogic(aSize, aMtf.GetPrefMapMode(), MapMode(MapUnit::Map100thMM));
-                    }
 
                     // use size
                     const basegfx::B2DHomMatrix aMetafileTransform(

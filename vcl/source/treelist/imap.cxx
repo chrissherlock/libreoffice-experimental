@@ -149,7 +149,7 @@ IMapRectangleObject::IMapRectangleObject( const tools::Rectangle& rRect,
 void IMapRectangleObject::ImpConstruct( const tools::Rectangle& rRect, bool bPixel )
 {
     if ( bPixel )
-        aRect = Application::GetDefaultDevice()->PixelToLogic( rRect, MapMode( MapUnit::Map100thMM ) );
+        aRect = Application::GetDefaultDevice()->GetGeometry().PixelToLogic( rRect, MapMode( MapUnit::Map100thMM ) );
     else
         aRect = rRect;
 }
@@ -254,8 +254,8 @@ void IMapCircleObject::ImpConstruct( const Point& rCenter, sal_uLong nRad, bool 
     {
         MapMode aMap100( MapUnit::Map100thMM );
 
-        aCenter = Application::GetDefaultDevice()->PixelToLogic( rCenter, aMap100 );
-        nRadius = Application::GetDefaultDevice()->PixelToLogic( Size( nRad, 0 ), aMap100 ).Width();
+        aCenter = Application::GetDefaultDevice()->GetGeometry().PixelToLogic( rCenter, aMap100 );
+        nRadius = Application::GetDefaultDevice()->GetGeometry().PixelToLogic( Size( nRad, 0 ), aMap100 ).Width();
     }
     else
     {
@@ -396,7 +396,7 @@ IMapPolygonObject::IMapPolygonObject( const tools::Polygon& rPoly,
 void IMapPolygonObject::ImpConstruct( const tools::Polygon& rPoly, bool bPixel )
 {
     if ( bPixel )
-        aPoly = Application::GetDefaultDevice()->PixelToLogic( rPoly, MapMode( MapUnit::Map100thMM ) );
+        aPoly = Application::GetDefaultDevice()->GetGeometry().PixelToLogic( rPoly, MapMode( MapUnit::Map100thMM ) );
     else
         aPoly = rPoly;
 }
