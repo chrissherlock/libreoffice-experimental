@@ -1440,7 +1440,6 @@ public:
 public:
     void SetOffsetFromOriginInPixels(Size const& rOffset) override;
 
-    tools::Polygon              PixelToLogic( const tools::Polygon& rDevicePoly ) const;
     tools::PolyPolygon          PixelToLogic( const tools::PolyPolygon& rDevicePolyPoly ) const;
     basegfx::B2DPolyPolygon     PixelToLogic( const basegfx::B2DPolyPolygon& rDevicePolyPoly ) const;
     vcl::Region                 PixelToLogic( const vcl::Region& rDeviceRegion ) const;

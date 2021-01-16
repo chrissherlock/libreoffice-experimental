@@ -139,7 +139,7 @@ void OStartMarker::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
         Gradient aGradient(GradientStyle::Linear,aStartColor,aEndColor);
         aGradient.SetSteps(static_cast<sal_uInt16>(aSize.Height()));
 
-        rRenderContext.DrawGradient(PixelToLogic(aPoly) ,aGradient);
+        rRenderContext.DrawGradient(maGeometry.PixelToLogic(aPoly) ,aGradient);
     }
     if (m_bMarked)
     {

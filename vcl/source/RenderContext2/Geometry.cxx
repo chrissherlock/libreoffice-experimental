@@ -877,4 +877,21 @@ tools::Polygon Geometry::PixelToLogic(tools::Polygon const& rDevicePoly) const
     return aPoly;
 }
 
+tools::PolyPolygon Geometry::PixelToLogic(tools::PolyPolygon const& rDevicePolyPoly) const
+{
+    if (!IsMapModeEnabled())
+        return rDevicePolyPoly;
+
+    tools::PolyPolygon aPolyPoly(rDevicePolyPoly);
+    sal_uInt16 nPoly = aPolyPoly.Count();
+
+    for (sal_uInt16 i = 0; i < nPoly; i++)
+    {
+        tools::Polygon& rPoly = aPolyPoly[i];
+        rPoly = PixelToLogic(rPoly);
+    }
+
+    return aPolyPoly;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

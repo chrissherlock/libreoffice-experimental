@@ -65,7 +65,7 @@ void OEndMarker::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangl
     Gradient aGradient(GradientStyle::Linear, aStartColor, aEndColor);
     aGradient.SetSteps(static_cast<sal_uInt16>(aSize.Height()));
 
-    rRenderContext.DrawGradient(PixelToLogic(aPoly), aGradient);
+    rRenderContext.DrawGradient(maGeometry.PixelToLogic(aPoly), aGradient);
     if (m_bMarked)
     {
         tools::Rectangle aRect(Point(-nCornerSpace, nCornerSpace),
