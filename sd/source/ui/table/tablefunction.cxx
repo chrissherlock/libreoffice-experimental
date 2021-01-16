@@ -105,7 +105,7 @@ static void InsertTableImpl(const DrawViewShell* pShell,
 
         Point aPos;
         ::tools::Rectangle aWinRect(aPos, pShell->GetActiveWindow()->GetSizeInPixels());
-        aWinRect = pShell->GetActiveWindow()->PixelToLogic(aWinRect);
+        aWinRect = pShell->GetActiveWindow()->GetGeometry().PixelToLogic(aWinRect);
 
         // make sure that the default size of the table fits on the paper and is inside the viewing area.
         // if zoomed in close, don't make the table bigger than the viewing window.

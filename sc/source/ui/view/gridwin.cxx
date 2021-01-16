@@ -2768,7 +2768,7 @@ static void lcl_SetTextCursorPos( ScViewData& rViewData, ScSplitPos eWhich, vcl:
     SCROW nRow = rViewData.GetCurY();
     tools::Rectangle aEditArea = rViewData.GetEditArea( eWhich, nCol, nRow, pWin, nullptr, true );
     aEditArea.SetRight( aEditArea.Left() );
-    aEditArea = pWin->PixelToLogic( aEditArea );
+    aEditArea = pWin->GetGeometry().PixelToLogic( aEditArea );
     pWin->SetCursorRect( &aEditArea );
 }
 
@@ -4804,7 +4804,7 @@ void ScGridWindow::UpdateListValPos( bool bVisible, const ScAddress& rPos )
             }
             else
             {
-                Invalidate( PixelToLogic( GetListValButtonRect( aListValPos ) ) );
+                Invalidate( maGeometry.PixelToLogic( GetListValButtonRect( aListValPos ) ) );
             }
         }
     }
@@ -4820,7 +4820,7 @@ void ScGridWindow::UpdateListValPos( bool bVisible, const ScAddress& rPos )
         }
         else
         {
-            Invalidate( PixelToLogic( GetListValButtonRect( aOldPos ) ) );
+            Invalidate( maGeometry.PixelToLogic( GetListValButtonRect( aOldPos ) ) );
         }
     }
 }

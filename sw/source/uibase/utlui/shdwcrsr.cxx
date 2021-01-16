@@ -113,7 +113,7 @@ tools::Rectangle SwShadowCursor::GetRect() const
         aSz.setWidth( aSz.Width() * 2 );
     }
 
-    return pWin->PixelToLogic( tools::Rectangle( aPt, aSz ) );
+    return pWin->GetGeometry().PixelToLogic( tools::Rectangle( aPt, aSz ) );
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

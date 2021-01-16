@@ -158,7 +158,7 @@ void ViewShell::VirtHScrollHdl(ScrollBar* pHScroll)
     GetDocSh()->SetVisArea(aVisArea);
 
     Size aVisSizePixel = GetActiveWindow()->GetSizeInPixels();
-    ::tools::Rectangle aVisAreaWin = GetActiveWindow()->PixelToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
+    ::tools::Rectangle aVisAreaWin = GetActiveWindow()->GetGeometry().PixelToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
     VisAreaChanged(aVisAreaWin);
 
     if (pView)
@@ -215,7 +215,7 @@ void ViewShell::VirtVScrollHdl(ScrollBar* pVScroll)
         GetDocSh()->SetVisArea(aVisArea);
 
         Size aVisSizePixel = GetActiveWindow()->GetSizeInPixels();
-        ::tools::Rectangle aVisAreaWin = GetActiveWindow()->PixelToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
+        ::tools::Rectangle aVisAreaWin = GetActiveWindow()->GetGeometry().PixelToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
         VisAreaChanged(aVisAreaWin);
 
         if (pView)
@@ -293,7 +293,7 @@ void ViewShell::Scroll(::tools::Long nScrollX, ::tools::Long nScrollY)
     GetDocSh()->SetVisArea(aVisArea);
 
     Size aVisSizePixel = GetActiveWindow()->GetSizeInPixels();
-    ::tools::Rectangle aVisAreaWin = GetActiveWindow()->PixelToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
+    ::tools::Rectangle aVisAreaWin = GetActiveWindow()->GetGeometry().PixelToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
     VisAreaChanged(aVisAreaWin);
 
     ::sd::View* pView = GetView();
@@ -335,7 +335,7 @@ void ViewShell::SetZoom(::tools::Long nZoom)
     }
 
     Size aVisSizePixel = GetActiveWindow()->GetSizeInPixels();
-    ::tools::Rectangle aVisAreaWin = GetActiveWindow()->PixelToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
+    ::tools::Rectangle aVisAreaWin = GetActiveWindow()->GetGeometry().PixelToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
     VisAreaChanged(aVisAreaWin);
 
     ::sd::View* pView = GetView();
@@ -391,7 +391,7 @@ void ViewShell::SetZoomRect(const ::tools::Rectangle& rZoomRect)
     }
 
     Size aVisSizePixel = GetActiveWindow()->GetSizeInPixels();
-    ::tools::Rectangle aVisAreaWin = GetActiveWindow()->PixelToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
+    ::tools::Rectangle aVisAreaWin = GetActiveWindow()->GetGeometry().PixelToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
     VisAreaChanged(aVisAreaWin);
 
     ::sd::View* pView = GetView();
@@ -423,7 +423,7 @@ void ViewShell::InitWindows(const Point& rViewOrigin, const Size& rViewSize,
     }
 
     Size aVisSizePixel = GetActiveWindow()->GetSizeInPixels();
-    ::tools::Rectangle aVisAreaWin = GetActiveWindow()->PixelToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
+    ::tools::Rectangle aVisAreaWin = GetActiveWindow()->GetGeometry().PixelToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
     VisAreaChanged(aVisAreaWin);
 
     ::sd::View* pView = GetView();
@@ -932,7 +932,7 @@ void ViewShell::SetWinViewPos(const Point& rWinPos)
     UpdateScrollBars();
 
     Size aVisSizePixel = GetActiveWindow()->GetSizeInPixels();
-    ::tools::Rectangle aVisAreaWin = GetActiveWindow()->PixelToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
+    ::tools::Rectangle aVisAreaWin = GetActiveWindow()->GetGeometry().PixelToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
     VisAreaChanged(aVisAreaWin);
 
     ::sd::View* pView = GetView();

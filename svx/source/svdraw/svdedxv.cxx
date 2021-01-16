@@ -1629,7 +1629,7 @@ SdrEndTextEditKind SdrObjEditView::SdrEndTextEdit(bool bDontDeleteReally)
             aRect.AdjustTop(-nMorePix);
             aRect.AdjustRight(nMorePix);
             aRect.AdjustBottom(nMorePix);
-            aRect = pWin->PixelToLogic(aRect);
+            aRect = pWin->GetGeometry().PixelToLogic(aRect);
             InvalidateOneWin(*pWin, aRect);
             pWin->SetFillColor();
             pWin->SetLineColor(COL_BLACK);

@@ -1313,7 +1313,7 @@ void ScTextWnd::Resize()
     {
         Size aOutputSize = GetSizeInPixels();
         OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
-        tools::Rectangle aOutputArea = rDevice.PixelToLogic( tools::Rectangle( Point(), aOutputSize ));
+        tools::Rectangle aOutputArea = rDevice.GetGeometry().PixelToLogic( tools::Rectangle( Point(), aOutputSize ));
         m_xEditView->SetOutputArea( aOutputArea );
 
         // Don't leave an empty area at the bottom if we can move the text down.

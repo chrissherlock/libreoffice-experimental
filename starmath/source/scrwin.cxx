@@ -320,7 +320,7 @@ void ScrollableWindow::Scroll( tools::Long nDeltaX, tools::Long nDeltaY, ScrollF
 
             // never scroll the scrollbars itself!
             Window::Scroll(-nDeltaX, -nDeltaY,
-                PixelToLogic( tools::Rectangle( Point(0, 0), aOutPixSz ) ) );
+                maGeometry.PixelToLogic( tools::Rectangle( Point(0, 0), aOutPixSz ) ) );
         }
         else
         {

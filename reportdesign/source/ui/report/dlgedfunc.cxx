@@ -80,10 +80,10 @@ void DlgEdFunc::ForceScroll( const Point& rPos )
     aPos.setX( aPos.X() * 0.5 );
     aPos.setY( aPos.Y() * 0.5 );
     tools::Rectangle aOutRect( aPos, aOut );
-    aOutRect = m_pParent->PixelToLogic( aOutRect );
+    aOutRect = m_pParent->GetGeometry().PixelToLogic( aOutRect );
     tools::Rectangle aWorkArea(Point(), pScrollWindow->getTotalSize());
     aWorkArea.AdjustRight( -static_cast<tools::Long>(aStartWidth) );
-    aWorkArea = pScrollWindow->PixelToLogic( aWorkArea );
+    aWorkArea = pScrollWindow->GetGeometry().PixelToLogic( aWorkArea );
     if( !aOutRect.IsInside( rPos ) && aWorkArea.IsInside( rPos ) )
     {
         ScrollBar& rHScroll = pScrollWindow->GetHScroll();

@@ -1087,7 +1087,7 @@ void SwPostItMgr::MakeVisible(const SwAnnotationWin* pPostIt )
         AutoScroll(pPostIt,aPage);
     tools::Rectangle aNoteRect (Point(pPostIt->GetPosPixel().X(),pPostIt->GetPosPixel().Y()-5),pPostIt->GetSizePixel());
     if (!aNoteRect.IsEmpty())
-        mpWrtShell->MakeVisible(SwRect(mpEditWin->PixelToLogic(aNoteRect)));
+        mpWrtShell->MakeVisible(SwRect(mpEditWin->GetGeometry().PixelToLogic(aNoteRect)));
 }
 
 bool SwPostItMgr::ArrowEnabled(sal_uInt16 aDirection,tools::ULong aPage) const

@@ -693,7 +693,7 @@ void SAL_CALL SlideshowImpl::disposing()
             if (pActWin)
             {
                 Size aVisSizePixel = pActWin->GetSizeInPixels();
-                ::tools::Rectangle aVisAreaWin = pActWin->PixelToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
+                ::tools::Rectangle aVisAreaWin = pActWin->GetGeometry().PixelToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
                 mpViewShell->VisAreaChanged(aVisAreaWin);
                 if (mpView)
                     mpView->VisAreaChanged(pActWin);

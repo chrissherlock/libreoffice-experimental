@@ -326,9 +326,7 @@ SwViewOption::~SwViewOption()
 void SwViewOption::Init( vcl::Window const *pWin )
 {
     if( !s_nPixelTwips && pWin )
-    {
         s_nPixelTwips = static_cast<sal_uInt16>(pWin->GetGeometry().PixelToLogic( Size(1,1) ).Height());
-    }
 }
 
 bool SwViewOption::IsAutoCompleteWords()

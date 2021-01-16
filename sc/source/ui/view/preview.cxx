@@ -590,7 +590,7 @@ void ScPreview::DoPrint( ScPreviewLocationData* pFillLocation )
         tools::Rectangle aPixel( maGeometry.LogicToPixel( tools::Rectangle( -aOffset.X(), -aOffset.Y(), nPageEndX, nPageEndY ) ) );
         aPixel.AdjustRight( -1 );
         aPixel.AdjustBottom( -1 );
-        DrawRect( PixelToLogic( aPixel ) );
+        DrawRect( maGeometry.PixelToLogic( aPixel ) );
     }
 
     //  draw shadow
@@ -604,13 +604,13 @@ void ScPreview::DoPrint( ScPreviewLocationData* pFillLocation )
     aPixel.AdjustTop(SC_PREVIEW_SHADOWSIZE );
     aPixel.AdjustRight(SC_PREVIEW_SHADOWSIZE - 1 );
     aPixel.AdjustBottom(SC_PREVIEW_SHADOWSIZE - 1 );
-    DrawRect( PixelToLogic( aPixel ) );
+    DrawRect( maGeometry.PixelToLogic( aPixel ) );
 
     aPixel = maGeometry.LogicToPixel( tools::Rectangle( -aOffset.X(), nPageEndY, nPageEndX, nPageEndY ) );
     aPixel.AdjustLeft(SC_PREVIEW_SHADOWSIZE );
     aPixel.AdjustRight(SC_PREVIEW_SHADOWSIZE - 1 );
     aPixel.AdjustBottom(SC_PREVIEW_SHADOWSIZE - 1 );
-    DrawRect( PixelToLogic( aPixel ) );
+    DrawRect( maGeometry.PixelToLogic( aPixel ) );
 }
 
 void ScPreview::Paint( vcl::RenderContext& /*rRenderContext*/, const tools::Rectangle& /* rRect */ )

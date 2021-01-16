@@ -303,7 +303,7 @@ void AnnotationWindow::InitControls()
     mpOutlinerView.reset( new OutlinerView ( mpOutliner.get(), mpTextWindow ) );
     mpOutliner->InsertView(mpOutlinerView.get() );
     mpTextWindow->SetOutlinerView(mpOutlinerView.get());
-    mpOutlinerView->SetOutputArea( PixelToLogic( ::tools::Rectangle(0,0,1,1) ) );
+    mpOutlinerView->SetOutputArea( maGeometry.PixelToLogic( ::tools::Rectangle(0,0,1,1) ) );
 
     //create Scrollbars
     mpVScrollbar = VclPtr<ScrollBar>::Create(this, WB_3DLOOK |WB_VSCROLL|WB_DRAG);
@@ -380,10 +380,10 @@ void AnnotationWindow::DoResize()
         mpMeta->setPosSizePixel(0,aHeight,GetSizePixel().Width()-METABUTTON_AREA_WIDTH,POSTIT_META_HEIGHT);
 
     mpOutliner->SetPaperSize( maGeometry.PixelToLogic( Size(aWidth,aHeight) ) ) ;
-    mpOutlinerView->SetOutputArea( PixelToLogic( ::tools::Rectangle(0,0,aWidth,aHeight) ) );
+    mpOutlinerView->SetOutputArea( maGeometry.PixelToLogic( ::tools::Rectangle(0,0,aWidth,aHeight) ) );
     if (!mpVScrollbar->IsVisible())
     {   // if we do not have a scrollbar anymore, we want to see the complete text
-        mpOutlinerView->SetVisArea( PixelToLogic( ::tools::Rectangle(0,0,aWidth,aHeight) ) );
+        mpOutlinerView->SetVisArea( maGeometry.PixelToLogic( ::tools::Rectangle(0,0,aWidth,aHeight) ) );
     }
     mpVScrollbar->setPosSizePixel( 0 + aWidth, 0, GetScrollbarWidth(), aHeight );
     mpVScrollbar->SetVisibleSize( maGeometry.PixelToLogic(Size(0,aHeight)).Height() );
@@ -403,7 +403,7 @@ void AnnotationWindow::DoResize()
     maPopupTriangle.append(basegfx::B2DPoint(aRight.X(),aRight.Y()));
     maPopupTriangle.append(basegfx::B2DPoint(aBottom.X(),aBottom.Y()));
     maPopupTriangle.setClosed(true);
-    maRectMetaButton = PixelToLogic( ::tools::Rectangle( Point(
+    maRectMetaButton = maGeometry.PixelToLogic( ::tools::Rectangle( Point(
             aPos.X()+GetSizePixel().Width()-(METABUTTON_WIDTH+10),
             aPos.Y()+5 ),
             Size( METABUTTON_WIDTH, METABUTTON_HEIGHT ) ) );
@@ -617,7 +617,7 @@ void AnnotationWindow::Paint(vcl::RenderContext& rRenderContext, const ::tools::
     else
         SetFillColor(maColor);
     SetLineColor();
-    DrawRect(PixelToLogic(::tools::Rectangle(Point(mpMeta->GetPosPixel().X()+mpMeta->GetSizePixel().Width(),mpMeta->GetPosPixel().Y()),Size(METABUTTON_AREA_WIDTH,mpMeta->GetSizePixel().Height()))));
+    DrawRect(maGeometry.PixelToLogic(::tools::Rectangle(Point(mpMeta->GetPosPixel().X()+mpMeta->GetSizePixel().Width(),mpMeta->GetPosPixel().Y()),Size(METABUTTON_AREA_WIDTH,mpMeta->GetSizePixel().Height()))));
 
     if ( bHighContrast )
     {

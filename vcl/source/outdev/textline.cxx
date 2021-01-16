@@ -645,7 +645,7 @@ void OutputDevice::ImplDrawStrikeoutChar( tools::Long nBaseX, tools::Long nBaseY
     }
 
     Push( PushFlags::CLIPREGION );
-    IntersectClipRegion( PixelToLogic(aPixelRect) );
+    IntersectClipRegion( maGeometry.PixelToLogic(aPixelRect) );
     if( mbInitClipRegion )
         InitClipRegion();
 

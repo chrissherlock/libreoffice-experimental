@@ -1440,7 +1440,6 @@ public:
 public:
     void SetOffsetFromOriginInPixels(Size const& rOffset) override;
 
-    Size                        PixelToLogic( const Size& rDeviceSize ) const;
     tools::Rectangle                   PixelToLogic( const tools::Rectangle& rDeviceRect ) const;
     tools::Polygon              PixelToLogic( const tools::Polygon& rDevicePoly ) const;
     tools::PolyPolygon          PixelToLogic( const tools::PolyPolygon& rDevicePolyPoly ) const;

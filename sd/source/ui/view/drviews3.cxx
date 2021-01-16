@@ -333,7 +333,7 @@ void  DrawViewShell::ExecCtrl(SfxRequest& rReq)
             {
                 const SfxRectangleItem& rRect =
                     rReq.GetArgs()->Get(SID_OBJECTRESIZE);
-                ::tools::Rectangle aRect( GetActiveWindow()->PixelToLogic( rRect.GetValue() ) );
+                ::tools::Rectangle aRect( GetActiveWindow()->GetGeometry().PixelToLogic( rRect.GetValue() ) );
 
                 if ( mpDrawView->AreObjectsMarked() )
                 {

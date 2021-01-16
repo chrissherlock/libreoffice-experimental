@@ -350,14 +350,14 @@ void SwViewShell::ImplEndAction( const bool bIdleEnd )
 
                         tools::Rectangle aTmp1( aRect.SVRect() );
                         aTmp1 = GetOut()->GetGeometry().LogicToPixel( aTmp1 );
-                        tools::Rectangle aTmp2( GetOut()->PixelToLogic( aTmp1 ) );
+                        tools::Rectangle aTmp2( GetOut()->GetGeometry().PixelToLogic( aTmp1 ) );
                         if ( aTmp2.Left() > aRect.Left() )
                             aTmp1.SetLeft( std::max( tools::Long(0), aTmp1.Left() - 1 ) );
                         if ( aTmp2.Top() > aRect.Top() )
                             aTmp1.SetTop( std::max<tools::Long>( 0, aTmp1.Top() - 1 ) );
                         aTmp1.AdjustRight(1 );
                         aTmp1.AdjustBottom(1 );
-                        aTmp1 = GetOut()->PixelToLogic( aTmp1 );
+                        aTmp1 = GetOut()->GetGeometry().PixelToLogic( aTmp1 );
                         aRect = SwRect( aTmp1 );
 
                         const Size aTmp( pVout->GetSizeInLogicalUnits() );
@@ -1296,7 +1296,7 @@ bool SwViewShell::SmoothScroll( tools::Long lXDiff, tools::Long lYDiff, const to
             aRect.Pos().setY( lYDiff < 0 ? aOldVis.Bottom() - aPixSz.Height()
                                          : aRect.Top() - aSize.Height() + aPixSz.Height() );
             aRect.Pos().setX( std::max( tools::Long(0), aRect.Left()-aPixSz.Width() ) );
-            aRect.Pos()  = GetWin()->PixelToLogic( GetWin()->LogicToPixel( aRect.Pos()));
+            aRect.Pos()  = GetWin()->GetGeometry().PixelToLogic( GetWin()->LogicToPixel( aRect.Pos()));
             aRect.SSize( GetWin()->GetGeometry().PixelToLogic( GetWin()->LogicToPixel( aRect.SSize())) );
             maVisArea = aRect;
             const Point aPt( -aRect.Left(), -aRect.Top() );
@@ -1374,7 +1374,7 @@ bool SwViewShell::SmoothScroll( tools::Long lXDiff, tools::Long lYDiff, const to
 
                 const SwRect aTmpOldVis = VisArea();
                 maVisArea.Pos().AdjustY( -lScroll );
-                maVisArea.Pos() = GetWin()->PixelToLogic( GetWin()->LogicToPixel( VisArea().Pos()));
+                maVisArea.Pos() = GetWin()->GetGeometry().PixelToLogic( GetWin()->LogicToPixel( VisArea().Pos()));
                 lScroll = aTmpOldVis.Top() - VisArea().Top();
                 if ( pRect )
                 {

@@ -337,7 +337,7 @@ void DrawViewShell::WriteFrameViewData()
     mpFrameView->SetDesignMode( mpDrawView->IsDesignMode() );
 
     Size aVisSizePixel = GetActiveWindow()->GetSizeInPixels();
-    ::tools::Rectangle aVisArea = GetActiveWindow()->PixelToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
+    ::tools::Rectangle aVisArea = GetActiveWindow()->GetGeometry().PixelToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
     if (comphelper::LibreOfficeKit::isActive())
     {
         // aVisArea is nonsensical in the LOK case, use the slide size

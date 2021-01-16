@@ -1142,7 +1142,7 @@ void SwAlignRect( SwRect &rRect, const SwViewShell *pSh, const vcl::RenderContex
     // Hold original rectangle in pixel
     const tools::Rectangle aOrgPxRect = pOut->GetGeometry().LogicToPixel( rRect.SVRect() );
     // Determine pixel-center rectangle in twip
-    const SwRect aPxCenterRect( pOut->PixelToLogic( aOrgPxRect ) );
+    const SwRect aPxCenterRect( pOut->GetGeometry().PixelToLogic( aOrgPxRect ) );
 
     // Perform adjustments on pixel level.
     SwRect aAlignedPxRect( aOrgPxRect );
@@ -1200,7 +1200,7 @@ void SwAlignRect( SwRect &rRect, const SwViewShell *pSh, const vcl::RenderContex
         bZeroHeight = true;
     }
 
-    rRect = pOut->PixelToLogic( aAlignedPxRect.SVRect() );
+    rRect = pOut->GetGeometry().PixelToLogic( aAlignedPxRect.SVRect() );
 
     // Consider zero width/height and adjust calculated aligned twip rectangle.
     // Reset width/height to zero; previous negative width/height haven't to be considered.
@@ -2187,7 +2187,7 @@ static void lcl_AdjustRectToPixelSize( SwRect& io_aSwRect, const vcl::RenderCont
 
     // local object of class <Rectangle> in Twip coordinates
     // calculated from given rectangle aligned to pixel centers.
-    const tools::Rectangle aPxCenterRect = aOut.PixelToLogic(
+    const tools::Rectangle aPxCenterRect = aOut.GetGeometry().PixelToLogic(
             aOut.GetGeometry().LogicToPixel( io_aSwRect.SVRect() ) );
 
     // local constant object of class <Rectangle> representing given rectangle
@@ -5800,7 +5800,7 @@ static void lcl_paintBitmapExToRect(vcl::RenderContext *pOut, const Point& aPoin
 
     pOut->SetFillColor(SwViewOption::GetAppBackgroundColor());
     pOut->SetLineColor();
-    pOut->DrawRect(pOut->PixelToLogic(aRect));
+    pOut->DrawRect(pOut->GetGeometry().PixelToLogic(aRect));
 
     // Tiled render if necessary
     tools::Rectangle aComplete(aPoint, aSize);
@@ -6131,7 +6131,7 @@ static void lcl_paintBitmapExToRect(vcl::RenderContext *pOut, const Point& aPoin
     if(bLeftShadow) aPagePxRect.Left( aTmpRect.Left() - snShadowPxWidth - 1);
     if(bRightShadow) aPagePxRect.Right( aTmpRect.Right() + snShadowPxWidth + 1);
 
-    _orBorderAndShadowBoundRect = pRenderContext->PixelToLogic( aPagePxRect.SVRect() );
+    _orBorderAndShadowBoundRect = pRenderContext->GetGeometry().PixelToLogic( aPagePxRect.SVRect() );
 }
 
 SwRect SwPageFrame::GetBoundRect(OutputDevice const * pOutputDevice) const

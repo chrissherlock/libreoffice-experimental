@@ -1987,7 +1987,7 @@ tools::Rectangle ScOutputData::LayoutStrings(bool bPixelToLogic, bool bPaint, co
                             //  aClipRect is not used after SetClipRegion/IntersectClipRegion,
                             //  so it can be modified here
                             if (bPixelToLogic)
-                                aAreaParam.maClipRect = mpRefDevice->PixelToLogic( aAreaParam.maClipRect );
+                                aAreaParam.maClipRect = mpRefDevice->GetGeometry().PixelToLogic( aAreaParam.maClipRect );
 
                             if (bMetaFile)
                             {
@@ -3114,7 +3114,7 @@ void ScOutputData::DrawEditStandard(DrawEditParam& rParam)
     Point aURLStart;
 
     {   // Clip marks are already handled in GetOutputArea
-        ClearableClipRegion aClip(rParam.mbPixelToLogic ? mpRefDevice->PixelToLogic(aAreaParam.maClipRect)
+        ClearableClipRegion aClip(rParam.mbPixelToLogic ? mpRefDevice->GetGeometry().PixelToLogic(aAreaParam.maClipRect)
                                 : aAreaParam.maClipRect, bClip, bSimClip, mpDev, bMetaFile);
 
         Point aLogicStart;
@@ -3246,7 +3246,7 @@ ClearableClipRegionPtr ScOutputData::Clip( DrawEditParam& rParam, const Size& aC
 
         // Clip marks are already handled in GetOutputArea
     return ClearableClipRegionPtr(new ClearableClipRegion(rParam.mbPixelToLogic ?
-                                                mpRefDevice->PixelToLogic(aAreaParam.maClipRect)
+                                                mpRefDevice->GetGeometry().PixelToLogic(aAreaParam.maClipRect)
                                               : aAreaParam.maClipRect, bClip, bSimClip, mpDev, bMetaFile));
 }
 
@@ -3949,7 +3949,7 @@ void ScOutputData::DrawEditStacked(DrawEditParam& rParam)
     Point aURLStart;
 
     {   // Clip marks are already handled in GetOutputArea
-        ClearableClipRegion aClip(rParam.mbPixelToLogic ? mpRefDevice->PixelToLogic(aAreaParam.maClipRect)
+        ClearableClipRegion aClip(rParam.mbPixelToLogic ? mpRefDevice->GetGeometry().PixelToLogic(aAreaParam.maClipRect)
                                 : aAreaParam.maClipRect, bClip, bSimClip, mpDev, bMetaFile);
 
         Point aLogicStart;
@@ -4236,7 +4236,7 @@ void ScOutputData::DrawEditAsianVertical(DrawEditParam& rParam)
     Point aURLStart;
 
     {   // Clip marks are already handled in GetOutputArea
-        ClearableClipRegion aClip(rParam.mbPixelToLogic ? mpRefDevice->PixelToLogic(aAreaParam.maClipRect)
+        ClearableClipRegion aClip(rParam.mbPixelToLogic ? mpRefDevice->GetGeometry().PixelToLogic(aAreaParam.maClipRect)
                                 : aAreaParam.maClipRect, bClip, bSimClip, mpDev, bMetaFile);
 
         Point aLogicStart;
@@ -4925,7 +4925,7 @@ void ScOutputData::DrawRotated(bool bPixelToLogic)
                                 }
 
                                 if (bPixelToLogic)
-                                    aAreaParam.maClipRect = mpRefDevice->PixelToLogic( tools::Rectangle(
+                                    aAreaParam.maClipRect = mpRefDevice->GetGeometry().PixelToLogic( tools::Rectangle(
                                                     Point(nClipStartX,nClipStartY), aClipSize ) );
                                 else
                                     aAreaParam.maClipRect = tools::Rectangle(Point(nClipStartX, nClipStartY),

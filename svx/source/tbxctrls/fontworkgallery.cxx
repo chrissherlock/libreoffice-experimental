@@ -193,7 +193,7 @@ void FontWorkGalleryDialog::insertSelectedFontwork()
     // pNewObject->SetPage(nullptr);
 
     tools::Rectangle aObjRect( pNewObject->GetLogicRect() );
-    tools::Rectangle aVisArea = pOutDev->PixelToLogic(tools::Rectangle(Point(0,0), pOutDev->GetSizeInPixels()));
+    tools::Rectangle aVisArea = pOutDev->GetGeometry().PixelToLogic(tools::Rectangle(Point(0,0), pOutDev->GetSizeInPixels()));
     Point aPagePos = aVisArea.Center();
     aPagePos.AdjustX( -(aObjRect.GetWidth() / 2) );
     aPagePos.AdjustY( -(aObjRect.GetHeight() / 2) );

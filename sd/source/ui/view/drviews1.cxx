@@ -1156,7 +1156,7 @@ bool DrawViewShell::SwitchPage(sal_uInt16 nSelectedPage)
         }
 
         Size aVisSizePixel = GetActiveWindow()->GetSizeInPixels();
-        ::tools::Rectangle aVisAreaWin = GetActiveWindow()->PixelToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
+        ::tools::Rectangle aVisAreaWin = GetActiveWindow()->GetGeometry().PixelToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
         VisAreaChanged(aVisAreaWin);
         mpDrawView->VisAreaChanged(GetActiveWindow());
 

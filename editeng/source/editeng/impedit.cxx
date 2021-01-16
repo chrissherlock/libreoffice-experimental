@@ -839,7 +839,7 @@ void ImpEditView::SetOutputArea( const tools::Rectangle& rRect )
     const OutputDevice& rOutDev = GetOutputDevice();
     // should be better be aligned on pixels!
     tools::Rectangle aNewRect(rOutDev.GetGeometry().LogicToPixel(rRect));
-    aNewRect = rOutDev.PixelToLogic(aNewRect);
+    aNewRect = rOutDev.GetGeometry().PixelToLogic(aNewRect);
     aOutArea = aNewRect;
     if ( !aOutArea.IsWidthEmpty() && aOutArea.Right() < aOutArea.Left() )
         aOutArea.SetRight( aOutArea.Left() );
@@ -1467,7 +1467,7 @@ Pair ImpEditView::Scroll( tools::Long ndX, tools::Long ndY, ScrollRangeCheck nRa
 #ifdef DBG_UTIL
     tools::Rectangle aR( aOutArea );
     aR = rOutDev.LogicToPixel( aR );
-    aR = rOutDev.PixelToLogic( aR );
+    aR = rOutDev.GetGeometry().PixelToLogic( aR );
     SAL_WARN_IF( aR != aOutArea, "editeng", "OutArea before Scroll not aligned" );
 #endif
 
@@ -2155,7 +2155,7 @@ void ImpEditView::ShowDDCursor( const tools::Rectangle& rRect )
     }
 #endif
 
-    aSaveRect = rOutDev.PixelToLogic( aSaveRect );
+    aSaveRect = rOutDev.GetGeometry().PixelToLogic( aSaveRect );
 
     pDragAndDropInfo->pBackground->DrawOutDev( Point(0,0), aSaveRect.GetSize(),
                                 aSaveRect.TopLeft(), aSaveRect.GetSize(), rOutDev );
@@ -2572,7 +2572,7 @@ void ImpEditView::dragOver(const css::datatransfer::dnd::DropTargetDragEvent& rD
                             aEditCursor.AdjustRight( -1 );
                         }
                     }
-                    aEditCursor = rOutDev.PixelToLogic( aEditCursor );
+                    aEditCursor = rOutDev.GetGeometry().PixelToLogic( aEditCursor );
                 }
                 else
                 {
@@ -2581,7 +2581,7 @@ void ImpEditView::dragOver(const css::datatransfer::dnd::DropTargetDragEvent& rD
                     aEditCursor.SetPos( aTopLeft );
                     aEditCursor.SetRight( aEditCursor.Left() + pDragAndDropInfo->nCursorWidth );
                     aEditCursor = rOutDev.GetGeometry().LogicToPixel( aEditCursor );
-                    aEditCursor = rOutDev.PixelToLogic( aEditCursor );
+                    aEditCursor = rOutDev.GetGeometry().PixelToLogic( aEditCursor );
                 }
 
                 bool bCursorChanged = !pDragAndDropInfo->bVisCursor || ( pDragAndDropInfo->aCurCursor != aEditCursor );

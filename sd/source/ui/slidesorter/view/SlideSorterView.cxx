@@ -430,7 +430,7 @@ void SlideSorterView::DeterminePageObjectVisibilities()
     // visibility calculation can correctly invalidate it again.
     mbPageObjectVisibilitiesValid = true;
 
-    ::tools::Rectangle aViewArea (pWindow->PixelToLogic(::tools::Rectangle(Point(0,0),pWindow->GetSizePixel())));
+    ::tools::Rectangle aViewArea (pWindow->GetGeometry().PixelToLogic(::tools::Rectangle(Point(0,0),pWindow->GetSizePixel())));
     const Range aRange (mpLayouter->GetRangeOfVisiblePageObjects(aViewArea));
     const Range aUnion(
         ::std::min(maVisiblePageRange.Min(), aRange.Min()),

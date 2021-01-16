@@ -103,7 +103,7 @@ void SidebarTextControl::SetDrawingArea(weld::DrawingArea* pDrawingArea)
     rDevice.SetMapMode(MapMode(MapUnit::MapTwip));
     rDevice.SetBackground(aBgColor);
 
-    Size aOutputSize(rDevice.PixelToLogic(aSize));
+    Size aOutputSize(rDevice.GetGeometry().PixelToLogic(aSize));
     aSize = aOutputSize;
     aSize.setHeight(aSize.Height());
 
@@ -199,7 +199,7 @@ void SidebarTextControl::DrawForPage(OutputDevice* pDev, const Point& rPt)
 {
     //Take the control's height, but overwrite the scrollbar area if there was one
     OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
-    Size aSize(rDevice.PixelToLogic(GetSizeInPixels()));
+    Size aSize(rDevice.GetGeometry().PixelToLogic(GetSizeInPixels()));
 
     if (OutlinerView* pOutlinerView = mrSidebarWin.GetOutlinerView())
     {
@@ -236,12 +236,12 @@ void SidebarTextControl::Paint(vcl::RenderContext& rRenderContext, const tools::
     {
         if (mrSidebarWin.IsMouseOverSidebarWin() || HasFocus())
         {
-            rRenderContext.DrawGradient(tools::Rectangle(aPos, rRenderContext.PixelToLogic(aSize)),
+            rRenderContext.DrawGradient(tools::Rectangle(aPos, rRenderContext.GetGeometry().PixelToLogic(aSize)),
                                         Gradient(GradientStyle::Linear, mrSidebarWin.ColorDark(), mrSidebarWin.ColorDark()));
         }
         else
         {
-            rRenderContext.DrawGradient(tools::Rectangle(aPos, rRenderContext.PixelToLogic(aSize)),
+            rRenderContext.DrawGradient(tools::Rectangle(aPos, rRenderContext.GetGeometry().PixelToLogic(aSize)),
                            Gradient(GradientStyle::Linear, mrSidebarWin.ColorLight(), mrSidebarWin.ColorDark()));
         }
     }

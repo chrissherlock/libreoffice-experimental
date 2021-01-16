@@ -260,7 +260,7 @@ void OutlineViewShell::ArrangeGUIElements ()
 
     ::tools::Rectangle aWin(Point(0,0), pWindow->GetSizeInPixels());
 
-    aWin = pWindow->PixelToLogic(aWin);
+    aWin = pWindow->GetGeometry().PixelToLogic(aWin);
     pOutlinerView->SetOutputArea(aWin);
 
     ::tools::Rectangle aVis = pOutlinerView->GetVisArea();
@@ -1120,7 +1120,7 @@ void OutlineViewShell::SetZoom(::tools::Long nZoom)
         // change OutputArea of OutlinerView
         OutlinerView* pOutlinerView = pOlView->GetViewByWindow(pWindow);
         ::tools::Rectangle aWin(Point(0,0), pWindow->GetSizeInPixels());
-        aWin = pWindow->PixelToLogic(aWin);
+        aWin = pWindow->GetGeometry().PixelToLogic(aWin);
         pOutlinerView->SetOutputArea(aWin);
     }
 
@@ -1141,7 +1141,7 @@ void OutlineViewShell::SetZoomRect(const ::tools::Rectangle& rZoomRect)
         // change OutputArea of OutlinerView
         OutlinerView* pOutlinerView = pOlView->GetViewByWindow(pWindow);
         ::tools::Rectangle aWin(Point(0,0), pWindow->GetSizeInPixels());
-        aWin = pWindow->PixelToLogic(aWin);
+        aWin = pWindow->GetGeometry().PixelToLogic(aWin);
         pOutlinerView->SetOutputArea(aWin);
     }
 

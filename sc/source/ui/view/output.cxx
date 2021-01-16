@@ -1056,7 +1056,7 @@ void ScOutputData::DrawBackground(vcl::RenderContext& rRenderContext)
 
                 aRect = tools::Rectangle(nPosX, nPosY - nOneY, nPosX, nPosY - nOneY + nRowHeight);
                 if (bWorksInPixels)
-                    aRect = rRenderContext.PixelToLogic(aRect); // internal data in pixels, but we'll be drawing in logic units
+                    aRect = rRenderContext.GetGeometry().PixelToLogic(aRect); // internal data in pixels, but we'll be drawing in logic units
 
                 const SvxBrushItem* pOldBackground = nullptr;
                 const SvxBrushItem* pBackground = nullptr;
@@ -1729,7 +1729,7 @@ vcl::Region ScOutputData::GetChangedAreaRegion()
         }
         else if(bHad)
         {
-            aRegion.Union(mpDev->PixelToLogic(aDrawingRect));
+            aRegion.Union(mpDev->GetGeometry().PixelToLogic(aDrawingRect));
             bHad = false;
         }
 
@@ -1738,7 +1738,7 @@ vcl::Region ScOutputData::GetChangedAreaRegion()
 
     if(bHad)
     {
-        aRegion.Union(mpDev->PixelToLogic(aDrawingRect));
+        aRegion.Union(mpDev->GetGeometry().PixelToLogic(aDrawingRect));
     }
 
     return aRegion;
@@ -1770,14 +1770,14 @@ bool ScOutputData::SetChangedClip()
         }
         else if (bHad)
         {
-            aPoly.Insert( tools::Polygon( mpDev->PixelToLogic(aDrawingRect) ) );
+            aPoly.Insert( tools::Polygon( mpDev->GetGeometry().PixelToLogic(aDrawingRect) ) );
             bHad = false;
         }
         nPosY += pRowInfo[nArrY].nHeight;
     }
 
     if (bHad)
-        aPoly.Insert( tools::Polygon( mpDev->PixelToLogic(aDrawingRect) ) );
+        aPoly.Insert( tools::Polygon( mpDev->GetGeometry().PixelToLogic(aDrawingRect) ) );
 
     bool bRet = (aPoly.Count() != 0);
     if (bRet)

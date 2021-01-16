@@ -217,25 +217,6 @@ void OutputDevice::SetRelativeMapMode(const MapMode& rNewMapMode)
         mpAlphaVDev->SetRelativeMapMode(rNewMapMode);
 }
 
-tools::Rectangle OutputDevice::PixelToLogic(const tools::Rectangle& rDeviceRect) const
-{
-    if (!IsMapModeEnabled() || rDeviceRect.IsEmpty())
-        return rDeviceRect;
-
-    return tools::Rectangle(Geometry::PixelToLogic(rDeviceRect.Left(), GetDPIX(),
-                                                   GetXMapNumerator(), GetXMapDenominator())
-                                - GetXMapOffset() - GetXOffsetFromOriginInLogicalUnits(),
-                            Geometry::PixelToLogic(rDeviceRect.Top(), GetDPIY(), GetYMapNumerator(),
-                                                   GetYMapDenominator())
-                                - GetYMapOffset() - GetYOffsetFromOriginInLogicalUnits(),
-                            Geometry::PixelToLogic(rDeviceRect.Right(), GetDPIX(),
-                                                   GetXMapNumerator(), GetXMapDenominator())
-                                - GetXMapOffset() - GetXOffsetFromOriginInLogicalUnits(),
-                            Geometry::PixelToLogic(rDeviceRect.Bottom(), GetDPIY(),
-                                                   GetYMapNumerator(), GetYMapDenominator())
-                                - GetYMapOffset() - GetYOffsetFromOriginInLogicalUnits());
-}
-
 tools::Polygon OutputDevice::PixelToLogic(const tools::Polygon& rDevicePoly) const
 {
     if (!IsMapModeEnabled())
@@ -315,7 +296,7 @@ vcl::Region OutputDevice::PixelToLogic(const vcl::Region& rDeviceRegion) const
         for (std::vector<tools::Rectangle>::const_reverse_iterator aRectIter(rRectangles.rbegin());
              aRectIter != rRectangles.rend(); ++aRectIter)
         {
-            aRegion.Union(PixelToLogic(*aRectIter));
+            aRegion.Union(maGeometry.PixelToLogic(*aRectIter));
         }
     }
 

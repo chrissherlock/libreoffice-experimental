@@ -142,7 +142,7 @@ void DrawDocShell::Draw(OutputDevice* pOut, const JobSetup&, sal_uInt16 nAspect)
 
         if (pWin)
         {
-            aVisArea = pWin->PixelToLogic(::tools::Rectangle(Point(0,0), pWin->GetSizeInPixels()));
+            aVisArea = pWin->GetGeometry().PixelToLogic(::tools::Rectangle(Point(0,0), pWin->GetSizeInPixels()));
         }
     }
 

@@ -1787,7 +1787,7 @@ void SwRootFrame::ImplCalcBrowseWidth()
 
     mbBrowseWidthValid = true;
     SwViewShell *pSh = getRootFrame()->GetCurrShell();
-    mnBrowseWidth = (!comphelper::LibreOfficeKit::isActive() && pSh)? MINLAY + 2 * pSh->GetOut()-> GetGeometry().PixelToLogic( pSh->GetBrowseBorder() ).Width(): MIN_BROWSE_WIDTH;
+    mnBrowseWidth = (!comphelper::LibreOfficeKit::isActive() && pSh)? MINLAY + 2 * pSh->GetOut()->GetGeometry().PixelToLogic( pSh->GetBrowseBorder() ).Width(): MIN_BROWSE_WIDTH;
 
     do
     {

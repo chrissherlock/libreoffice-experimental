@@ -78,7 +78,7 @@ void DrawViewShell::MakeVisible(const ::tools::Rectangle& rRect, vcl::Window& rW
         rWin.Push(PushFlags::MAPMODE);
         rWin.EnableMapMode();
     }
-    ::tools::Rectangle aVisArea(rWin.PixelToLogic(::tools::Rectangle(Point(0,0), aVisSizePixel)));
+    ::tools::Rectangle aVisArea(rWin.GetGeometry().PixelToLogic(::tools::Rectangle(Point(0,0), aVisSizePixel)));
     if (bTiledRendering)
         rWin.Pop();
     Size aVisAreaSize(aVisArea.GetSize());

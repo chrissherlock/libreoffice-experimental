@@ -346,7 +346,7 @@ sal_Int32 PlacePanels (
             if (MoveResizePixel(&rPanel, aNewPos, aNewSize))
             {
                 tools::Rectangle aRect(aNewPos, aNewSize);
-                aInvalidRegions.Union(rPanel.PixelToLogic(aRect));
+                aInvalidRegions.Union(rPanel.GetGeometry().PixelToLogic(aRect));
             }
 
             nY += nPanelHeight;

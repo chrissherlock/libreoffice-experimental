@@ -128,7 +128,7 @@ void VisibleAreaManager::MakeVisible()
         return ::std::optional<Point>();
 
     // Get the currently visible area and the model area.
-    const ::tools::Rectangle aVisibleArea (pWindow->PixelToLogic(
+    const ::tools::Rectangle aVisibleArea (pWindow->GetGeometry().PixelToLogic(
         ::tools::Rectangle(
             Point(0,0),
             pWindow->GetSizeInPixels())));

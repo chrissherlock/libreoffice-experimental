@@ -605,7 +605,7 @@ void ScrollBar::ImplDraw(vcl::RenderContext& rRenderContext)
         nStyle = DrawButtonFlags::NoLightBorder;
         if (mnStateFlags & SCRBAR_STATE_BTN1_DOWN)
             nStyle |= DrawButtonFlags::Pressed;
-        aTempRect = aDecoView.DrawButton( PixelToLogic(maBtn1Rect), nStyle );
+        aTempRect = aDecoView.DrawButton( maGeometry.PixelToLogic(maBtn1Rect), nStyle );
         ImplCalcSymbolRect( aTempRect );
         DrawSymbolFlags nSymbolStyle = DrawSymbolFlags::NONE;
         if ((mnStateFlags & SCRBAR_STATE_BTN1_DISABLE) || !bEnabled)
@@ -622,7 +622,7 @@ void ScrollBar::ImplDraw(vcl::RenderContext& rRenderContext)
         nStyle = DrawButtonFlags::NoLightBorder;
         if (mnStateFlags & SCRBAR_STATE_BTN2_DOWN)
             nStyle |= DrawButtonFlags::Pressed;
-        aTempRect = aDecoView.DrawButton(PixelToLogic(maBtn2Rect), nStyle);
+        aTempRect = aDecoView.DrawButton(maGeometry.PixelToLogic(maBtn2Rect), nStyle);
         ImplCalcSymbolRect(aTempRect);
         DrawSymbolFlags nSymbolStyle = DrawSymbolFlags::NONE;
         if ((mnStateFlags & SCRBAR_STATE_BTN2_DISABLE) || !bEnabled)
@@ -643,12 +643,12 @@ void ScrollBar::ImplDraw(vcl::RenderContext& rRenderContext)
             if (bEnabled)
             {
                 nStyle = DrawButtonFlags::NoLightBorder;
-                aTempRect = aDecoView.DrawButton(PixelToLogic(maThumbRect), nStyle);
+                aTempRect = aDecoView.DrawButton(maGeometry.PixelToLogic(maThumbRect), nStyle);
             }
             else
             {
                 rRenderContext.SetFillColor(rStyleSettings.GetCheckedColor());
-                rRenderContext.DrawRect(PixelToLogic(maThumbRect));
+                rRenderContext.DrawRect(maGeometry.PixelToLogic(maThumbRect));
             }
         }
     }
@@ -659,7 +659,7 @@ void ScrollBar::ImplDraw(vcl::RenderContext& rRenderContext)
             rRenderContext.SetFillColor(rStyleSettings.GetShadowColor());
         else
             rRenderContext.SetFillColor(rStyleSettings.GetCheckedColor());
-        rRenderContext.DrawRect(PixelToLogic(maPage1Rect));
+        rRenderContext.DrawRect(maGeometry.PixelToLogic(maPage1Rect));
     }
     if (!ImplDrawNative(rRenderContext, SCRBAR_DRAW_PAGE2))
     {
@@ -667,7 +667,7 @@ void ScrollBar::ImplDraw(vcl::RenderContext& rRenderContext)
             rRenderContext.SetFillColor(rStyleSettings.GetShadowColor());
         else
             rRenderContext.SetFillColor(rStyleSettings.GetCheckedColor());
-        rRenderContext.DrawRect(PixelToLogic(maPage2Rect));
+        rRenderContext.DrawRect(maGeometry.PixelToLogic(maPage2Rect));
     }
 }
 

@@ -1067,7 +1067,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
                             rDevice.SetMapMode(aNew);
 
                             // paint the background
-                            rDevice.DrawRect(rDevice.PixelToLogic(aBackground));
+                            rDevice.DrawRect(rDevice.GetGeometry().PixelToLogic(aBackground));
 
                             tools::Rectangle aEditRect(aBackground);
                             tools::Long nOffsetX = 0, nOffsetY = 0;
@@ -1089,8 +1089,8 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
                             // to be tweaked temporarily to match the current view's zoom.
                             SuppressEditViewMessagesGuard aGuard(*pOtherEditView);
 
-                            pOtherEditView->SetOutputArea(rDevice.PixelToLogic(aEditRect));
-                            pOtherEditView->Paint(rDevice.PixelToLogic(aEditRect), &rDevice);
+                            pOtherEditView->SetOutputArea(rDevice.GetGeometry().PixelToLogic(aEditRect));
+                            pOtherEditView->Paint(rDevice.GetGeometry().PixelToLogic(aEditRect), &rDevice);
 
                             // Rollback the mapmode and 'output area'.
                             pOtherWin->SetMapMode(aOrigMapMode);
@@ -1159,7 +1159,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
         }
 
         // paint the background
-        tools::Rectangle aLogicRect(rDevice.PixelToLogic(aBackground));
+        tools::Rectangle aLogicRect(rDevice.GetGeometry().PixelToLogic(aBackground));
         //tdf#100925, rhbz#1283420, Draw some text here, to get
         //X11CairoTextRender::getCairoContext called, so that the forced read
         //from the underlying X Drawable gets it to sync.
@@ -1189,8 +1189,8 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
             // cursor-messaging done in the non print-twips mode)
             SuppressEditViewMessagesGuard aGuard(*pEditView);
 
-            pEditView->SetOutputArea(rDevice.PixelToLogic(aEditRect));
-            pEditView->Paint(rDevice.PixelToLogic(aEditRect), &rDevice);
+            pEditView->SetOutputArea(rDevice.GetGeometry().PixelToLogic(aEditRect));
+            pEditView->Paint(rDevice.GetGeometry().PixelToLogic(aEditRect), &rDevice);
 
             // EditView will do the cursor notifications correctly if we're in
             // print-twips messaging mode.
@@ -1225,7 +1225,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
         else
         {
             tools::Rectangle aEditRect(Point(nScrX, nScrY), Size(aOutputData.GetScrW(), aOutputData.GetScrH()));
-            pEditView->Paint(rDevice.PixelToLogic(aEditRect), &rDevice);
+            pEditView->Paint(rDevice.GetGeometry().PixelToLogic(aEditRect), &rDevice);
         }
 
         rDevice.SetMapMode(MapMode(MapUnit::MapPixel));
@@ -1598,7 +1598,7 @@ void ScGridWindow::CheckNeedsRepaint()
     if (aRepaintPixel.IsEmpty())
         Invalidate();
     else
-        Invalidate(PixelToLogic(aRepaintPixel));
+        Invalidate(maGeometry.PixelToLogic(aRepaintPixel));
     aRepaintPixel = tools::Rectangle();
 
     // selection function in status bar might also be invalid

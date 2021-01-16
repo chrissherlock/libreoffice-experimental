@@ -401,7 +401,7 @@ void SwView::Scroll( const tools::Rectangle &rRect, sal_uInt16 nRangeX, sal_uInt
         {
             Point aTopLeft(GetEditWin().GetSystemWindow()->OutputToAbsoluteScreenPixel(Point(x, y)));
             aTopLeft = GetEditWin().AbsoluteScreenToOutputPixel(aTopLeft);
-            aDlgRect = GetEditWin().PixelToLogic(tools::Rectangle(aTopLeft, Size(width, height)));
+            aDlgRect = GetEditWin().GetGeometry().PixelToLogic(tools::Rectangle(aTopLeft, Size(width, height)));
         }
 
         // Only if the dialogue is not the VisArea right or left:

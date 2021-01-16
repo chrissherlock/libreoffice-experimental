@@ -566,7 +566,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
                 if( pSalLayout )
                 {
                     tools::Rectangle aBoundRect( const_cast<OutputDevice&>(rOut).ImplGetTextBoundRect( *pSalLayout ) );
-                    aActionBounds = rOut.PixelToLogic( aBoundRect );
+                    aActionBounds = rOut.GetGeometry().PixelToLogic( aBoundRect );
                 }
             }
         }
@@ -595,7 +595,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
                 if( pSalLayout )
                 {
                     tools::Rectangle aBoundRect( const_cast<OutputDevice&>(rOut).ImplGetTextBoundRect( *pSalLayout ) );
-                    aActionBounds = rOut.PixelToLogic( aBoundRect );
+                    aActionBounds = rOut.GetGeometry().PixelToLogic( aBoundRect );
                 }
             }
         }

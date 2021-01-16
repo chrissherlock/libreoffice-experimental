@@ -132,7 +132,7 @@ static void ImplCursorInvert(vcl::Window* pWindow, ImplCursorData const * pData)
 
     tools::Rectangle aPaintRect = ImplCursorInvert(pRenderContext, pData);
     if (bDoubleBuffering)
-        pGuard->SetPaintRect(pRenderContext->PixelToLogic(aPaintRect));
+        pGuard->SetPaintRect(pRenderContext->GetGeometry().PixelToLogic(aPaintRect));
 }
 
 bool vcl::Cursor::ImplPrepForDraw(const OutputDevice* pDevice, ImplCursorData& rData)

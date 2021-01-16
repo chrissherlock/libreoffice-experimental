@@ -834,4 +834,21 @@ Size Geometry::PixelToLogic(Size const& rDeviceSize) const
         PixelToLogic(rDeviceSize.Width(), GetDPIX(), GetXMapNumerator(), GetXMapDenominator()),
         PixelToLogic(rDeviceSize.Height(), GetDPIY(), GetYMapNumerator(), GetYMapDenominator()));
 }
+
+tools::Rectangle Geometry::PixelToLogic(tools::Rectangle const& rDeviceRect) const
+{
+    if (!IsMapModeEnabled() || rDeviceRect.IsEmpty())
+        return rDeviceRect;
+
+    return tools::Rectangle(
+        PixelToLogic(rDeviceRect.Left(), GetDPIX(), GetXMapNumerator(), GetXMapDenominator())
+            - GetXMapOffset() - GetXOffsetFromOriginInLogicalUnits(),
+        PixelToLogic(rDeviceRect.Top(), GetDPIY(), GetYMapNumerator(), GetYMapDenominator())
+            - GetYMapOffset() - GetYOffsetFromOriginInLogicalUnits(),
+        PixelToLogic(rDeviceRect.Right(), GetDPIX(), GetXMapNumerator(), GetXMapDenominator())
+            - GetXMapOffset() - GetXOffsetFromOriginInLogicalUnits(),
+        PixelToLogic(rDeviceRect.Bottom(), GetDPIY(), GetYMapNumerator(), GetYMapDenominator())
+            - GetYMapOffset() - GetYOffsetFromOriginInLogicalUnits());
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

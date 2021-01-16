@@ -200,7 +200,7 @@ void  SwPagePreviewWin::Paint(vcl::RenderContext& rRenderContext, const tools::R
         mpPgPreviewLayout->Prepare(1, Point(0,0), maPxWinSize,
                                    mnSttPage, maPaintedPreviewDocRect);
         SetSelectedPage(1);
-        mpPgPreviewLayout->Paint(rRenderContext, rRenderContext.PixelToLogic(aRect));
+        mpPgPreviewLayout->Paint(rRenderContext, rRenderContext.GetGeometry().PixelToLogic(aRect));
         SetPagePreview(mnRow, mnCol);
     }
     else
@@ -1260,7 +1260,7 @@ bool SwPagePreview::ChgPage( int eMvMode, bool bUpdateScrollbar )
     bool bChg = m_pViewWin->MovePage( eMvMode ) ||
                eMvMode == SwPagePreviewWin::MV_CALC ||
                eMvMode == SwPagePreviewWin::MV_NEWWINSIZE;
-    m_aVisArea = m_pViewWin->PixelToLogic( aPixVisArea );
+    m_aVisArea = m_pViewWin->GetGeometry().PixelToLogic( aPixVisArea );
 
     if( bChg )
     {

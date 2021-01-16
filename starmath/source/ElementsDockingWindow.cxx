@@ -409,7 +409,7 @@ void SmElementsControl::LayoutOrPaintContents(vcl::RenderContext& rContext, bool
                                               x + 5 + 1, nControlHeight - 5);
 
                 if (bDraw)
-                    rContext.DrawRect(rContext.PixelToLogic(aSelectionRectangle));
+                    rContext.DrawRect(rContext.GetGeometry().PixelToLogic(aSelectionRectangle));
                 x += 10;
             }
             else
@@ -424,7 +424,7 @@ void SmElementsControl::LayoutOrPaintContents(vcl::RenderContext& rContext, bool
                                               nControlWidth - 5, y + 5 + 1);
 
                 if (bDraw)
-                    rContext.DrawRect(rContext.PixelToLogic(aSelectionRectangle));
+                    rContext.DrawRect(rContext.GetGeometry().PixelToLogic(aSelectionRectangle));
                 y += 10;
             }
         }
@@ -458,8 +458,8 @@ void SmElementsControl::LayoutOrPaintContents(vcl::RenderContext& rContext, bool
                     const StyleSettings& rStyleSettings = rContext.GetSettings().GetStyleSettings();
                     rContext.SetLineColor(rStyleSettings.GetHighlightColor());
                     rContext.SetFillColor(COL_TRANSPARENT);
-                    rContext.DrawRect(rContext.PixelToLogic(tools::Rectangle(x + 1, y + 1, x + boxX - 1, y + boxY - 1)));
-                    rContext.DrawRect(rContext.PixelToLogic(tools::Rectangle(x + 2, y + 2, x + boxX - 2, y + boxY - 2)));
+                    rContext.DrawRect(rContext.GetGeometry().PixelToLogic(tools::Rectangle(x + 1, y + 1, x + boxX - 1, y + boxY - 1)));
+                    rContext.DrawRect(rContext.GetGeometry().PixelToLogic(tools::Rectangle(x + 2, y + 2, x + boxX - 2, y + boxY - 2)));
                     rContext.Pop();
                 }
 

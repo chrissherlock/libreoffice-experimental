@@ -439,7 +439,7 @@ void ScTabViewShell::ExecDrawIns(SfxRequest& rReq)
                 if ( pClient && pClient->IsObjectInPlaceActive() )
                 {
                     const SfxRectangleItem& rRect = rReq.GetArgs()->Get(SID_OBJECTRESIZE);
-                    tools::Rectangle aRect( pWin->PixelToLogic( rRect.GetValue() ) );
+                    tools::Rectangle aRect( pWin->GetGeometry().PixelToLogic( rRect.GetValue() ) );
 
                     if ( pView->AreObjectsMarked() )
                     {
@@ -494,7 +494,7 @@ void ScTabViewShell::ExecDrawIns(SfxRequest& rReq)
 
                         if(pNewDBField)
                         {
-                            tools::Rectangle aVisArea = pWin->PixelToLogic(tools::Rectangle(Point(0,0), pWin->GetSizeInPixels()));
+                            tools::Rectangle aVisArea = pWin->GetGeometry().PixelToLogic(tools::Rectangle(Point(0,0), pWin->GetSizeInPixels()));
                             Point aObjPos(aVisArea.Center());
                             Size aObjSize(pNewDBField->GetLogicRect().GetSize());
                             aObjPos.AdjustX( -(aObjSize.Width() / 2) );

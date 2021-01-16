@@ -934,7 +934,7 @@ tools::Rectangle DecorationView::DrawFrame( const tools::Rectangle& rRect, DrawF
         else
             mpOutDev->DisableMapMode();
 
-        aRect = mpOutDev->PixelToLogic( aRect );
+        aRect = mpOutDev->GetGeometry().PixelToLogic( aRect );
     }
 
     return aRect;
@@ -1017,7 +1017,7 @@ tools::Rectangle DecorationView::DrawButton( const tools::Rectangle& rRect, Draw
         else
             mpOutDev->DisableMapMode();
 
-        aRect = mpOutDev->PixelToLogic( aRect );
+        aRect = mpOutDev->GetGeometry().PixelToLogic( aRect );
     }
 
     return aRect;

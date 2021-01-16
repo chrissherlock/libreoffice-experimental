@@ -144,6 +144,7 @@ public:
 
     Point PixelToLogic(Point const& rDevicePt) const;
     Size PixelToLogic(Size const& rDeviceSize) const;
+    tools::Rectangle PixelToLogic(tools::Rectangle const& rDeviceRect) const;
 
     /** Get device transformation.
 

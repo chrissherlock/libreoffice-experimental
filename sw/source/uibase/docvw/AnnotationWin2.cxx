@@ -141,7 +141,7 @@ void SwAnnotationWin::PaintTile(vcl::RenderContext& rRenderContext, const tools:
 
 bool SwAnnotationWin::IsHitWindow(const Point& rPointLogic)
 {
-    tools::Rectangle aRectangleLogic(EditWin().GetGeometry().PixelToLogic(GetPosPixel()), EditWin().PixelToLogic(GetSizePixel()));
+    tools::Rectangle aRectangleLogic(EditWin().GetGeometry().PixelToLogic(GetPosPixel()), EditWin().GetGeometry().PixelToLogic(GetSizePixel()));
     return aRectangleLogic.IsInside(rPointLogic);
 }
 
@@ -162,7 +162,7 @@ void SwAnnotationWin::DrawForPage(OutputDevice* pDev, const Point& rPt)
     aFont.SetFontHeight(aFont.GetFontHeight() * 20);
     pDev->SetFont(aFont);
 
-    Size aSz = PixelToLogic(GetSizePixel());
+    Size aSz = maGeometry.PixelToLogic(GetSizePixel());
     pDev->DrawRect(tools::Rectangle(rPt, aSz));
 
     if (mxMetadataAuthor->get_visible())
@@ -170,7 +170,7 @@ void SwAnnotationWin::DrawForPage(OutputDevice* pDev, const Point& rPt)
         int x, y, width, height;
         mxMetadataAuthor->get_extents_relative_to(*m_xContainer, x, y, width, height);
         Point aPos(rPt + maGeometry.PixelToLogic(Point(x, y)));
-        Size aSize(PixelToLogic(Size(width, height)));
+        Size aSize(maGeometry.PixelToLogic(Size(width, height)));
 
         pDev->Push(PushFlags::CLIPREGION);
         pDev->IntersectClipRegion(tools::Rectangle(aPos, aSize));
@@ -185,7 +185,7 @@ void SwAnnotationWin::DrawForPage(OutputDevice* pDev, const Point& rPt)
         int x, y, width, height;
         mxMetadataDate->get_extents_relative_to(*m_xContainer, x, y, width, height);
         Point aPos(rPt + maGeometry.PixelToLogic(Point(x, y)));
-        Size aSize(PixelToLogic(Size(width, height)));
+        Size aSize(maGeometry.PixelToLogic(Size(width, height)));
 
         pDev->Push(PushFlags::CLIPREGION);
         pDev->IntersectClipRegion(tools::Rectangle(aPos, aSize));
@@ -198,7 +198,7 @@ void SwAnnotationWin::DrawForPage(OutputDevice* pDev, const Point& rPt)
         int x, y, width, height;
         mxMetadataResolved->get_extents_relative_to(*m_xContainer, x, y, width, height);
         Point aPos(rPt + maGeometry.PixelToLogic(Point(x, y)));
-        Size aSize(PixelToLogic(Size(width, height)));
+        Size aSize(maGeometry.PixelToLogic(Size(width, height)));
 
         pDev->Push(PushFlags::CLIPREGION);
         pDev->IntersectClipRegion(tools::Rectangle(aPos, aSize));
@@ -504,7 +504,7 @@ void SwAnnotationWin::SetPosAndSize()
         {
             EditWin().EnableMapMode();
             Size aSize(aLineEnd.getX() - aLineStart.getX(), aLineEnd.getY() - aLineStart.getY());
-            aSize = EditWin().PixelToLogic(aSize);
+            aSize = EditWin().GetGeometry().PixelToLogic(aSize);
             aLineEnd = aLineStart;
             aLineEnd.Move(aSize.getWidth(), aSize.getHeight());
             EditWin().DisableMapMode();
@@ -700,7 +700,7 @@ void SwAnnotationWin::DoResize()
         mxVScrollbar->set_vpolicy(VclPolicyType::NEVER);
     }
 
-    mpOutliner->SetPaperSize( PixelToLogic( Size(aWidth,aHeight) ) ) ;
+    mpOutliner->SetPaperSize( maGeometry.PixelToLogic( Size(aWidth,aHeight) ) ) ;
 
     if (mxVScrollbar->get_vpolicy() == VclPolicyType::NEVER)
     {   // if we do not have a scrollbar anymore, we want to see the complete text
@@ -720,8 +720,8 @@ void SwAnnotationWin::DoResize()
     int nUpper = mpOutliner->GetTextHeight();
     int nCurrentDocPos = mpOutlinerView->GetVisArea().Top();
     int nStepIncrement = mpOutliner->GetTextHeight() / 10;
-    int nPageIncrement = PixelToLogic(Size(0,aHeight)).Height() * 8 / 10;
-    int nPageSize = PixelToLogic(Size(0,aHeight)).Height();
+    int nPageIncrement = maGeometry.PixelToLogic(Size(0,aHeight)).Height() * 8 / 10;
+    int nPageSize = maGeometry.PixelToLogic(Size(0,aHeight)).Height();
 
     /* limit the page size to below nUpper because gtk's gtk_scrolled_window_start_deceleration has
        effectively...

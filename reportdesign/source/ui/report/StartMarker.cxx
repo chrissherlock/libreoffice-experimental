@@ -118,7 +118,7 @@ void OStartMarker::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
         const tools::Long nVRulerWidth = m_aVRuler->GetSizePixel().Width();
         tools::Long nSize = aSize.Width() - nVRulerWidth;
         aSize.AdjustWidth(nCornerWidth );
-        rRenderContext.SetClipRegion(vcl::Region(rRenderContext.PixelToLogic(tools::Rectangle(Point(),
+        rRenderContext.SetClipRegion(vcl::Region(rRenderContext.GetGeometry().PixelToLogic(tools::Rectangle(Point(),
                                                                              Size(nSize, aSize.Height())))));
     }
 
@@ -148,7 +148,7 @@ void OStartMarker::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
                         Size(aSize.Width() - nCornerWidth - nCornerWidth,
                              aSize.Height() - nCornerHeight - nCornerHeight));
         ColorChanger aColors(&rRenderContext, COL_WHITE, COL_WHITE);
-        rRenderContext.DrawPolyLine( tools::Polygon(rRenderContext.PixelToLogic(aRect)),
+        rRenderContext.DrawPolyLine( tools::Polygon(rRenderContext.GetGeometry().PixelToLogic(aRect)),
                                     LineInfo(LineStyle::Solid, 2));
     }
 }

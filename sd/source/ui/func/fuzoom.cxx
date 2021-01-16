@@ -181,7 +181,7 @@ bool FuZoom::MouseButtonUp(const MouseEvent& rMEvt)
         mpViewShell->GetViewFrame()->GetBindings().Invalidate( SidArrayZoom );
     }
 
-    ::tools::Rectangle aVisAreaWin = mpWindow->PixelToLogic(::tools::Rectangle(Point(0,0),
+    ::tools::Rectangle aVisAreaWin = mpWindow->GetGeometry().PixelToLogic(::tools::Rectangle(Point(0,0),
                                            mpWindow->GetSizeInPixels()));
     mpViewShell->GetZoomList()->InsertZoomRect(aVisAreaWin);
 

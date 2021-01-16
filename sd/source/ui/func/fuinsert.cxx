@@ -632,7 +632,7 @@ void FuInsertOLE::DoExecute( SfxRequest& rReq )
                         }
 
                         Size aVisSizePixel = mpWindow->GetSizeInPixels();
-                        ::tools::Rectangle aVisAreaWin = mpWindow->PixelToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
+                        ::tools::Rectangle aVisAreaWin = mpWindow->GetGeometry().PixelToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
                         mpViewShell->VisAreaChanged(aVisAreaWin);
                         mpDocSh->SetVisArea(aVisAreaWin);
                     }

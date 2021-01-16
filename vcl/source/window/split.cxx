@@ -122,7 +122,7 @@ void Splitter::ImplDrawSplitter()
         aInvRect.SetBottom( maDragPos.Y() + 1 );
     }
 
-    mpRefWin->InvertTracking( mpRefWin->PixelToLogic(aInvRect), ShowTrackFlags::Split );
+    mpRefWin->InvertTracking( mpRefWin->GetGeometry().PixelToLogic(aInvRect), ShowTrackFlags::Split );
 }
 
 Splitter::Splitter( vcl::Window* pParent, WinBits nStyle ) :

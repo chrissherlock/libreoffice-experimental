@@ -2254,7 +2254,7 @@ bool OutputDevice::GetTextBoundRect( tools::Rectangle& rRect,
             Point aRotatedOfs( mnTextOffX, mnTextOffY );
             aRotatedOfs -= pSalLayout->GetDrawPosition( Point( nXOffset, 0 ) );
             aPixelRect += aRotatedOfs;
-            rRect = PixelToLogic( aPixelRect );
+            rRect = maGeometry.PixelToLogic( aPixelRect );
             if (IsMapModeEnabled())
                 rRect += Point( const_cast<OutputDevice*>(this)->GetXMapOffset(), const_cast<OutputDevice*>(this)->GetYMapOffset() );
         }

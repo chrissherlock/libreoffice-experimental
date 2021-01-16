@@ -157,7 +157,7 @@ void SwLayVout::Enter(  SwViewShell *pShell, SwRect &rRect, bool bOn )
         return;
     }
 
-    m_aRect = SwRect( pO->PixelToLogic( aTmpRect ) );
+    m_aRect = SwRect( pO->GetGeometry().PixelToLogic( aTmpRect ) );
 
     SetOutDev( m_pShell, m_pVirDev );
 

@@ -2415,7 +2415,7 @@ void ScTabView::PaintArea( SCCOL nStartCol, SCROW nStartRow, SCCOL nEndCol, SCRO
             aStart.AdjustX( -(nMarkPixel * nLayoutSign) );
         }
 
-        pGridWin[i]->Invalidate( pGridWin[i]->PixelToLogic( tools::Rectangle( aStart,aEnd ) ) );
+        pGridWin[i]->Invalidate( pGridWin[i]->GetGeometry().PixelToLogic( tools::Rectangle( aStart,aEnd ) ) );
     }
 
     // #i79909# Calling UpdateAllOverlays here isn't necessary and would lead to overlay calls from a timer,

@@ -5917,7 +5917,7 @@ void SalInstanceDrawingArea::set_input_context(const InputContext& rInputContext
 void SalInstanceDrawingArea::im_context_set_cursor_location(const tools::Rectangle& rCursorRect,
                                                             int nExtTextInputWidth)
 {
-    tools::Rectangle aCursorRect = m_xDrawingArea->PixelToLogic(rCursorRect);
+    tools::Rectangle aCursorRect = m_xDrawingArea->GetGeometry().PixelToLogic(rCursorRect);
     m_xDrawingArea->SetCursorRect(
         &aCursorRect,
         m_xDrawingArea->GetGeometry().PixelToLogic(Size(nExtTextInputWidth, 0)).Width());

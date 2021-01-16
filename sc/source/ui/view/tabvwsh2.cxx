@@ -325,7 +325,7 @@ void ScTabViewShell::ExecDraw(SfxRequest& rReq)
     Point aInsertPos;
     if(!bLOKIsActive)
     {
-        tools::Rectangle aVisArea = pWin->PixelToLogic(tools::Rectangle(Point(0,0), pWin->GetSizeInPixels()));
+        tools::Rectangle aVisArea = pWin->GetGeometry().PixelToLogic(tools::Rectangle(Point(0,0), pWin->GetSizeInPixels()));
         aInsertPos = aVisArea.Center();
         aInsertPos.AdjustX( -sal_Int32(nDefaultObjectSizeWidth / 2) );
         aInsertPos.AdjustY( -sal_Int32(nDefaultObjectSizeHeight / 2) );

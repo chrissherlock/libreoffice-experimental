@@ -43,7 +43,7 @@ void DlgEdFunc::ForceScroll( const Point& rPos )
 
     static Point aDefPoint;
     tools::Rectangle aOutRect( aDefPoint, rWindow.GetSizeInPixels() );
-    aOutRect = rWindow.PixelToLogic( aOutRect );
+    aOutRect = rWindow.GetGeometry().PixelToLogic( aOutRect );
 
     ScrollBar* pHScroll = rParent.GetHScroll();
     ScrollBar* pVScroll = rParent.GetVScroll();

@@ -191,7 +191,7 @@ VclPtr<VirtualDevice> VDevBuffer::alloc(OutputDevice& rOutDev, const Size& rSize
         {
             if (bOkay)
             {
-                pRetval->Erase(pRetval->PixelToLogic(
+                pRetval->Erase(pRetval->GetGeometry().PixelToLogic(
                     tools::Rectangle(0, 0, rSizePixel.getWidth(), rSizePixel.getHeight())));
             }
             else
