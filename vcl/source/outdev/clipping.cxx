@@ -36,8 +36,7 @@ void OutputDevice::SaveBackground(VirtualDevice& rSaveDevice,
 
 vcl::Region OutputDevice::GetClipRegion() const
 {
-
-    return PixelToLogic( maRegion );
+    return maGeometry.PixelToLogic( maRegion );
 }
 
 void OutputDevice::SetClipRegion()
@@ -145,7 +144,9 @@ void OutputDevice::InitClipRegion()
     if ( mbClipRegion )
     {
         if ( maRegion.IsEmpty() )
+        {
             mbOutputClipped = true;
+        }
         else
         {
             mbOutputClipped = false;

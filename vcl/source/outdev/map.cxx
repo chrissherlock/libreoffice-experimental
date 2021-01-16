@@ -217,40 +217,6 @@ void OutputDevice::SetRelativeMapMode(const MapMode& rNewMapMode)
         mpAlphaVDev->SetRelativeMapMode(rNewMapMode);
 }
 
-vcl::Region OutputDevice::PixelToLogic(const vcl::Region& rDeviceRegion) const
-{
-    if (!IsMapModeEnabled() || rDeviceRegion.IsNull() || rDeviceRegion.IsEmpty())
-    {
-        return rDeviceRegion;
-    }
-
-    vcl::Region aRegion;
-
-    if (rDeviceRegion.getB2DPolyPolygon())
-    {
-        aRegion = vcl::Region(maGeometry.PixelToLogic(*rDeviceRegion.getB2DPolyPolygon()));
-    }
-    else if (rDeviceRegion.getPolyPolygon())
-    {
-        aRegion = vcl::Region(maGeometry.PixelToLogic(*rDeviceRegion.getPolyPolygon()));
-    }
-    else if (rDeviceRegion.getRegionBand())
-    {
-        std::vector<tools::Rectangle> aRectangles;
-        rDeviceRegion.GetRegionRectangles(aRectangles);
-        const std::vector<tools::Rectangle>& rRectangles(aRectangles); // needed to make the '!=' work
-
-        // make reverse run to fill new region bottom-up, this will speed it up due to the used data structuring
-        for (std::vector<tools::Rectangle>::const_reverse_iterator aRectIter(rRectangles.rbegin());
-             aRectIter != rRectangles.rend(); ++aRectIter)
-        {
-            aRegion.Union(maGeometry.PixelToLogic(*aRectIter));
-        }
-    }
-
-    return aRegion;
-}
-
 Point OutputDevice::PixelToLogic(const Point& rDevicePt, const MapMode& rMapMode) const
 {
     // calculate nothing if default-MapMode

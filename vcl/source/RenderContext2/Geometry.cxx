@@ -825,6 +825,39 @@ Point Geometry::PixelToLogic(Point const& rDevicePt) const
                      - GetYMapOffset() - GetYOffsetFromOriginInLogicalUnits());
 }
 
+vcl::Region Geometry::PixelToLogic(vcl::Region const& rDeviceRegion) const
+{
+    if (!IsMapModeEnabled() || rDeviceRegion.IsNull() || rDeviceRegion.IsEmpty())
+        return rDeviceRegion;
+
+    vcl::Region aRegion;
+
+    if (rDeviceRegion.getB2DPolyPolygon())
+    {
+        aRegion = vcl::Region(PixelToLogic(*rDeviceRegion.getB2DPolyPolygon()));
+    }
+    else if (rDeviceRegion.getPolyPolygon())
+    {
+        aRegion = vcl::Region(PixelToLogic(*rDeviceRegion.getPolyPolygon()));
+    }
+    else if (rDeviceRegion.getRegionBand())
+    {
+        std::vector<tools::Rectangle> aRectangles;
+        rDeviceRegion.GetRegionRectangles(aRectangles);
+        const std::vector<tools::Rectangle>& rRectangles(
+            aRectangles); // needed to make the '!=' work
+
+        // make reverse run to fill new region bottom-up, this will speed it up due to the used data structuring
+        for (std::vector<tools::Rectangle>::const_reverse_iterator aRectIter(rRectangles.rbegin());
+             aRectIter != rRectangles.rend(); ++aRectIter)
+        {
+            aRegion.Union(PixelToLogic(*aRectIter));
+        }
+    }
+
+    return aRegion;
+}
+
 Size Geometry::PixelToLogic(Size const& rDeviceSize) const
 {
     if (!IsMapModeEnabled())

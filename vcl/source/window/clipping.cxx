@@ -144,7 +144,7 @@ vcl::Region Window::GetActiveClipRegion() const
     if ( mbClipRegion )
         aRegion.Intersect( maRegion );
 
-    return PixelToLogic( aRegion );
+    return maGeometry.PixelToLogic( aRegion );
 }
 
 void Window::ClipToPaintRegion(tools::Rectangle& rDstRect)

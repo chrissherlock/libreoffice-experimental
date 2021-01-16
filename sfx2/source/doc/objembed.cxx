@@ -185,7 +185,7 @@ void SfxObjectShell::DoDraw_Impl( OutputDevice* pDev,
     }
     if( pDev->IsClipRegion() && pDev->GetOutDevType() != OUTDEV_PRINTER )
     {
-        aRegion = pDev->PixelToLogic( aRegion );
+        aRegion = pDev->GetGeometry().PixelToLogic( aRegion );
         pDev->SetClipRegion( aRegion );
     }
     if( pMtf )

@@ -143,6 +143,7 @@ public:
                                          MapMode const& rMapMode) const;
 
     Point PixelToLogic(Point const& rDevicePt) const;
+    vcl::Region PixelToLogic(vcl::Region const& rDeviceRegion) const;
     Size PixelToLogic(Size const& rDeviceSize) const;
     tools::Rectangle PixelToLogic(tools::Rectangle const& rDeviceRect) const;
     tools::Polygon PixelToLogic(tools::Polygon const& rDevicePoly) const;

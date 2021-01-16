@@ -1146,7 +1146,7 @@ vcl::Region Window::GetPaintRegion() const
     {
         vcl::Region aRegion = *mpWindowImpl->mpPaintRegion;
         aRegion.Move( -GetXOffsetInPixels(), -GetYOffsetInPixels() );
-        return PixelToLogic( aRegion );
+        return maGeometry.PixelToLogic( aRegion );
     }
     else
     {
