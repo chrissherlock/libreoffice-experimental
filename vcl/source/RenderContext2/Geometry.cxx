@@ -894,4 +894,12 @@ tools::PolyPolygon Geometry::PixelToLogic(tools::PolyPolygon const& rDevicePolyP
     return aPolyPoly;
 }
 
+basegfx::B2DPolyPolygon Geometry::PixelToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly) const
+{
+    basegfx::B2DPolyPolygon aTransformedPoly = rPixelPolyPoly;
+    const basegfx::B2DHomMatrix& rTransformationMatrix = GetInverseViewTransformation();
+    aTransformedPoly.transform(rTransformationMatrix);
+    return aTransformedPoly;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

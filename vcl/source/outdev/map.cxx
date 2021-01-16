@@ -217,15 +217,6 @@ void OutputDevice::SetRelativeMapMode(const MapMode& rNewMapMode)
         mpAlphaVDev->SetRelativeMapMode(rNewMapMode);
 }
 
-basegfx::B2DPolyPolygon
-OutputDevice::PixelToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly) const
-{
-    basegfx::B2DPolyPolygon aTransformedPoly = rPixelPolyPoly;
-    const basegfx::B2DHomMatrix& rTransformationMatrix = GetInverseViewTransformation();
-    aTransformedPoly.transform(rTransformationMatrix);
-    return aTransformedPoly;
-}
-
 vcl::Region OutputDevice::PixelToLogic(const vcl::Region& rDeviceRegion) const
 {
     if (!IsMapModeEnabled() || rDeviceRegion.IsNull() || rDeviceRegion.IsEmpty())
@@ -237,7 +228,7 @@ vcl::Region OutputDevice::PixelToLogic(const vcl::Region& rDeviceRegion) const
 
     if (rDeviceRegion.getB2DPolyPolygon())
     {
-        aRegion = vcl::Region(PixelToLogic(*rDeviceRegion.getB2DPolyPolygon()));
+        aRegion = vcl::Region(maGeometry.PixelToLogic(*rDeviceRegion.getB2DPolyPolygon()));
     }
     else if (rDeviceRegion.getPolyPolygon())
     {

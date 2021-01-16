@@ -147,6 +147,7 @@ public:
     tools::Rectangle PixelToLogic(tools::Rectangle const& rDeviceRect) const;
     tools::Polygon PixelToLogic(tools::Polygon const& rDevicePoly) const;
     tools::PolyPolygon PixelToLogic(tools::PolyPolygon const& rDevicePolyPoly) const;
+    basegfx::B2DPolyPolygon PixelToLogic(basegfx::B2DPolyPolygon const& rDevicePolyPoly) const;
 
     /** Get device transformation.
 
