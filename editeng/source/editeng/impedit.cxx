@@ -879,7 +879,7 @@ void ImpEditView::ResetOutputArea( const tools::Rectangle& rRect )
         return;
 
     // #i119885# use grown area if needed; do when getting bigger OR smaller
-    const sal_Int32 nMore(DoInvalidateMore() ? GetWindow()->PixelToLogic(Size(nInvMore, 0)).Width() : 0);
+    const sal_Int32 nMore(DoInvalidateMore() ? GetWindow()->GetGeometry().PixelToLogic(Size(nInvMore, 0)).Width() : 0);
 
     if(aOldArea.Left() > aOutArea.Left())
     {
@@ -1265,7 +1265,7 @@ void ImpEditView::ShowCursor( bool bGotoCursor, bool bForceVisCursor )
 
     const OutputDevice& rOutDev = GetOutputDevice();
 
-    tools::Long nOnePixel = rOutDev.PixelToLogic( Size( 1, 0 ) ).Width();
+    tools::Long nOnePixel = rOutDev.GetGeometry().PixelToLogic( Size( 1, 0 ) ).Width();
 
     if ( ( aEditCursor.Top() + nOnePixel >= GetVisDocTop() ) &&
          ( aEditCursor.Bottom() - nOnePixel <= GetVisDocBottom() ) &&
@@ -1281,7 +1281,7 @@ void ImpEditView::ShowCursor( bool bGotoCursor, bool bForceVisCursor )
         if ( !aCursorSz.Width() || !aCursorSz.Height() )
         {
             tools::Long nCursorSz = rOutDev.GetSettings().GetStyleSettings().GetCursorSize();
-            nCursorSz = rOutDev.PixelToLogic( Size( nCursorSz, 0 ) ).Width();
+            nCursorSz = rOutDev.GetGeometry().PixelToLogic( Size( nCursorSz, 0 ) ).Width();
             if ( !aCursorSz.Width() )
                 aCursorSz.setWidth( nCursorSz );
             if ( !aCursorSz.Height() )
@@ -1534,7 +1534,7 @@ Pair ImpEditView::Scroll( tools::Long ndX, tools::Long ndY, ScrollRangeCheck nRa
 
     Size aDiffs( nDiffX, nDiffY );
     aDiffs = rOutDev.GetGeometry().LogicToPixel( aDiffs );
-    aDiffs = rOutDev.PixelToLogic( aDiffs );
+    aDiffs = rOutDev.GetGeometry().PixelToLogic( aDiffs );
 
     tools::Long nRealDiffX = aDiffs.Width();
     tools::Long nRealDiffY = aDiffs.Height();
@@ -2237,7 +2237,7 @@ void ImpEditView::dragGestureRecognized(const css::datatransfer::dnd::DragGestur
 
     // Sensitive area to be scrolled.
     Size aSz( 5, 0 );
-    aSz = GetWindow()->PixelToLogic( aSz );
+    aSz = GetWindow()->GetGeometry().PixelToLogic( aSz );
     pDragAndDropInfo->nSensibleRange = static_cast<sal_uInt16>(aSz.Width());
     pDragAndDropInfo->nCursorWidth = static_cast<sal_uInt16>(aSz.Width()) / 2;
     pDragAndDropInfo->aBeginDragSel = pEditEngine->pImpEditEngine->CreateESel( aCopySel );

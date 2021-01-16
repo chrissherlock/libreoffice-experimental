@@ -352,7 +352,7 @@ void SdrObjEditView::ModelHasChanged()
                     vcl::Window* pWin = pOLV->GetWindow();
                     tools::Rectangle aTmpRect(aOldArea);
                     sal_uInt16 nPixSiz = pOLV->GetInvalidateMore() + 1;
-                    Size aMore(pWin->PixelToLogic(Size(nPixSiz, nPixSiz)));
+                    Size aMore(pWin->GetGeometry().PixelToLogic(Size(nPixSiz, nPixSiz)));
                     aTmpRect.AdjustLeft(-(aMore.Width()));
                     aTmpRect.AdjustRight(aMore.Width());
                     aTmpRect.AdjustTop(-(aMore.Height()));
@@ -588,7 +588,8 @@ void TextEditOverlayObject::checkSelectionChange()
 
     std::vector<tools::Rectangle> aLogicRects;
     std::vector<basegfx::B2DRange> aLogicRanges;
-    const Size aLogicPixel(getOverlayManager()->getOutputDevice().PixelToLogic(Size(1, 1)));
+    const Size aLogicPixel(
+        getOverlayManager()->getOutputDevice().GetGeometry().PixelToLogic(Size(1, 1)));
 
     // get logic selection
     getOutlinerView().GetSelectionRectangles(aLogicRects);
@@ -1761,7 +1762,7 @@ bool SdrObjEditView::IsTextEditFrameHit(const Point& rHit) const
                 aEditArea.Union(pOLV->GetOutputArea());
                 if (!aEditArea.IsInside(rHit))
                 {
-                    Size aSiz(pWin->PixelToLogic(Size(nPixSiz, nPixSiz)));
+                    Size aSiz(pWin->GetGeometry().PixelToLogic(Size(nPixSiz, nPixSiz)));
                     aEditArea.AdjustLeft(-(aSiz.Width()));
                     aEditArea.AdjustTop(-(aSiz.Height()));
                     aEditArea.AdjustRight(aSiz.Width());

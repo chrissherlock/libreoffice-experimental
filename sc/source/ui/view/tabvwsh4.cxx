@@ -430,7 +430,7 @@ void ScTabViewShell::QueryObjAreaPixel( tools::Rectangle& rRect ) const
 
     Size aPixelSize = rRect.GetSize();
     vcl::Window* pWin = const_cast<ScTabViewShell*>(this)->GetActiveWin();
-    Size aLogicSize = pWin->PixelToLogic( aPixelSize );
+    Size aLogicSize = pWin->GetGeometry().PixelToLogic( aPixelSize );
 
     const ScViewData& rViewData = GetViewData();
     ScDocument& rDoc = rViewData.GetDocument();

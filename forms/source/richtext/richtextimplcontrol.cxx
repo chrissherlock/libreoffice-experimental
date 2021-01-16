@@ -407,11 +407,11 @@ namespace frm
         Size aViewportPlaygroundPixel( aPlaygroundSizePixel );
         aViewportPlaygroundPixel.setWidth( ::std::max( tools::Long( 10 ), tools::Long( aViewportPlaygroundPixel.Width() - nScrollBarWidth ) ) );
         aViewportPlaygroundPixel.setHeight( ::std::max( tools::Long( 10 ), tools::Long( aViewportPlaygroundPixel.Height() - nScrollBarHeight ) ) );
-        Size aViewportPlaygroundLogic( m_pViewport->PixelToLogic( aViewportPlaygroundPixel ) );
+        Size aViewportPlaygroundLogic( m_pViewport->GetGeometry().PixelToLogic( aViewportPlaygroundPixel ) );
 
         const tools::Long nOffset = 2;
         Size aViewportSizePixel( aViewportPlaygroundPixel.Width() - 2 * nOffset, aViewportPlaygroundPixel.Height() - 2 * nOffset );
-        Size aViewportSizeLogic( m_pViewport->PixelToLogic( aViewportSizePixel ) );
+        Size aViewportSizeLogic( m_pViewport->GetGeometry().PixelToLogic( aViewportSizePixel ) );
 
         // position the viewport
         m_pViewport->SetPosSizePixel( Point( nOffset, nOffset ), aViewportSizePixel );
@@ -589,7 +589,7 @@ namespace frm
         }
 
         tools::Rectangle aPlayground( aPos, aSize );
-        Size aOnePixel( _pDev->PixelToLogic( Size( 1, 1 ) ) );
+        Size aOnePixel( _pDev->GetGeometry().PixelToLogic( Size( 1, 1 ) ) );
         aPlayground.AdjustRight( -(aOnePixel.Width()) );
         aPlayground.AdjustBottom( -(aOnePixel.Height()) );
 

@@ -64,7 +64,7 @@ void OutputDevice::DrawBitmapEx(const Point& rDestPt, const BitmapEx& rBitmapEx)
     else
     {
         const Size aSizePix(rBitmapEx.GetSizePixel());
-        DrawBitmapEx(rDestPt, PixelToLogic(aSizePix), Point(), aSizePix, rBitmapEx,
+        DrawBitmapEx(rDestPt, maGeometry.PixelToLogic(aSizePix), Point(), aSizePix, rBitmapEx,
                      MetaActionType::BMPEX);
     }
 }

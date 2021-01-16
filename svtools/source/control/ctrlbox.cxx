@@ -197,7 +197,7 @@ static void lclDrawPolygon( OutputDevice& rDev, const basegfx::B2DPolygon& rPoly
     AntialiasingFlags nOldAA = rDev.GetAntialiasing();
     rDev.SetAntialiasing( nOldAA & ~AntialiasingFlags::Enable );
 
-    tools::Long nPix = rDev.PixelToLogic(Size(1, 1)).Width();
+    tools::Long nPix = rDev.GetGeometry().PixelToLogic(Size(1, 1)).Width();
     basegfx::B2DPolyPolygon aPolygons = svtools::ApplyLineDashing(rPolygon, nDashing, nPix);
 
     // Handle problems of width 1px in Pixel mode: 0.5px gives a 1px line
@@ -1362,8 +1362,8 @@ void SvtLineListBox::ImpGetLine( tools::Long nLine1, tools::Long nLine2, tools::
     }
 
     // Paint the lines
-    aSize = aVirDev->PixelToLogic( aSize );
-    tools::Long nPix = aVirDev->PixelToLogic( Size( 0, 1 ) ).Height();
+    aSize = aVirDev->GetGeometry().PixelToLogic( aSize );
+    tools::Long nPix = aVirDev->GetGeometry().PixelToLogic( Size( 0, 1 ) ).Height();
     sal_uInt32 n1 = nLine1;
     sal_uInt32 n2 = nLine2;
     tools::Long nDist  = nDistance;

@@ -510,7 +510,7 @@ void FuInsertFile::InsTextOrRTFinDrMode(SfxMedium* pMedium)
             Point aPos(aTemp.Width() / 2, aTemp.Height() / 2);
             aPos.AdjustX( -(aSize.Width() / 2) );
             aPos.AdjustY( -(aSize.Height() / 2) );
-            aSize = mpWindow->PixelToLogic(aSize);
+            aSize = mpWindow->GetGeometry().PixelToLogic(aSize);
             aPos = mpWindow->GetGeometry().PixelToLogic(aPos);
             pTO->SetLogicRect(::tools::Rectangle(aPos, aSize));
 

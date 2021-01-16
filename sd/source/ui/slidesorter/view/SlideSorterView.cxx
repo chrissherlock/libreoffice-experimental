@@ -519,7 +519,7 @@ void SlideSorterView::RequestRepaint()
         mpLayeredDevice->InvalidateAllLayers(
             ::tools::Rectangle(
                 pWindow->GetGeometry().PixelToLogic(Point(0,0)),
-                pWindow->PixelToLogic(pWindow->GetSizePixel())));
+                pWindow->GetGeometry().PixelToLogic(pWindow->GetSizePixel())));
         pWindow->Invalidate();
     }
 }

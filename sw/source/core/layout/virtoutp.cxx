@@ -141,7 +141,7 @@ void SwLayVout::Enter(  SwViewShell *pShell, SwRect &rRect, bool bOn )
         return;
 
     m_pOut = pO;
-    Size aPixSz( m_pOut->PixelToLogic( Size( 1,1 )) );
+    Size aPixSz( m_pOut->GetGeometry().PixelToLogic( Size( 1,1 )) );
     SwRect aTmp( rRect );
     aTmp.AddWidth(aPixSz.Width()/2 + 1 );
     aTmp.AddHeight(aPixSz.Height()/2 + 1 );

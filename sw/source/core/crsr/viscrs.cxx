@@ -177,7 +177,7 @@ void SwVisibleCursor::SetPosAndShow(SfxViewShell const * pViewShell)
                     {
                         tools::Long nSize = pOut->GetSettings().GetStyleSettings().GetCursorSize();
                         Size aSize( nSize, nSize );
-                        aSize = pOut->PixelToLogic( aSize );
+                        aSize = pOut->GetGeometry().PixelToLogic( aSize );
                         aRect.Left( aRect.Left() - aSize.Width() );
                     }
                 }
@@ -602,7 +602,7 @@ void SwSelPaintRects::Get1PixelInLogic( const SwViewShell& rSh,
     {
         *s_pMapMode = rMM;
         Size aTmp( 1, 1 );
-        aTmp = pOut->PixelToLogic( aTmp );
+        aTmp = pOut->GetGeometry().PixelToLogic( aTmp );
         s_nPixPtX = aTmp.Width();
         s_nPixPtY = aTmp.Height();
     }

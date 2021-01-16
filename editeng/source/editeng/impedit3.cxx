@@ -185,7 +185,7 @@ static void lcl_DrawRedLines( OutputDevice* pOutDev,
         {
             // VCL doesn't know that the text is vertical, and is manipulating
             // the positions a little bit in y direction...
-            tools::Long nOnePixel = pOutDev->PixelToLogic(Size(0, 1)).Height();
+            tools::Long nOnePixel = pOutDev->GetGeometry().PixelToLogic(Size(0, 1)).Height();
             tools::Long nCorrect = 2 * nOnePixel;
             aPoint1.AdjustY(-nCorrect);
             aPoint1.AdjustX(-nCorrect);

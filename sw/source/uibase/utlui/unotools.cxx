@@ -159,7 +159,7 @@ void SwOneExampleFrame::Paint(vcl::RenderContext& rRenderContext, const tools::R
         m_xVirDev->SetMapMode(MapMode(MapUnit::MapTwip));
         SwDoc *pDoc = pCursor->GetDoc();
         SwDocShell* pShell = pDoc->GetDocShell();
-        tools::Rectangle aRect(Point(), m_xVirDev->PixelToLogic(aSize));
+        tools::Rectangle aRect(Point(), m_xVirDev->GetGeometry().PixelToLogic(aSize));
         pShell->SetVisArea(tools::Rectangle(Point(), Size(aRect.GetWidth() * fZoom,
                                                           aRect.GetHeight() * fZoom)));
         pShell->DoDraw(m_xVirDev.get(), aRect.TopLeft(), aRect.GetSize(), JobSetup(), ASPECT_CONTENT);

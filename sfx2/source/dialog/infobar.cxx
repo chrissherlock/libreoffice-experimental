@@ -110,7 +110,7 @@ void SfxInfoBarWindow::SetCloseButtonImage()
     const unique_ptr<BaseProcessor2D> pProcessor(
         createBaseProcessor2DFromOutputDevice(*xDevice, aNewViewInfos));
 
-    const ::tools::Rectangle aRect(aBtnPos, xDevice->PixelToLogic(aSize));
+    const ::tools::Rectangle aRect(aBtnPos, xDevice->GetGeometry().PixelToLogic(aSize));
 
     drawinglayer::primitive2d::Primitive2DContainer aSeq(2);
 

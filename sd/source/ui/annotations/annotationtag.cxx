@@ -417,7 +417,7 @@ bool AnnotationTag::OnMove( const KeyEvent& rKEvt )
     if(rKEvt.GetKeyCode().IsMod2())
     {
         OutputDevice* pOut = mrView.GetViewShell()->GetActiveWindow();
-        Size aLogicSizeOnePixel = pOut ? pOut->PixelToLogic(Size(1,1)) : Size(100, 100);
+        Size aLogicSizeOnePixel = pOut ? pOut->GetGeometry().PixelToLogic(Size(1,1)) : Size(100, 100);
         nX *= aLogicSizeOnePixel.Width();
         nY *= aLogicSizeOnePixel.Height();
     }
@@ -513,7 +513,7 @@ void AnnotationTag::select()
         RealPoint2D aPosition( mxAnnotation->getPosition() );
         Point aPos( static_cast<::tools::Long>(aPosition.X * 100.0), static_cast<::tools::Long>(aPosition.Y * 100.0) );
 
-        ::tools::Rectangle aVisRect( aPos, pWindow->PixelToLogic(maSize) );
+        ::tools::Rectangle aVisRect( aPos, pWindow->GetGeometry().PixelToLogic(maSize) );
         mrView.MakeVisible(aVisRect, *pWindow);
     }
 }
@@ -670,7 +670,7 @@ IMPL_LINK(AnnotationTag, WindowEventHandler, VclWindowEvent&, rEvent, void)
                     if( pHdl )
                     {
                         mrView.BrkAction();
-                        const sal_uInt16 nDrgLog = static_cast<sal_uInt16>(pWindow->PixelToLogic(Size(DRGPIX,0)).Width());
+                        const sal_uInt16 nDrgLog = static_cast<sal_uInt16>(pWindow->GetGeometry().PixelToLogic(Size(DRGPIX,0)).Width());
 
                         rtl::Reference< AnnotationTag > xTag( this );
 

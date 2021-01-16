@@ -515,7 +515,7 @@ SdrHitKind SdrView::PickAnything(const Point& rLogicPos, SdrViewEvent& rVEvt) co
 
         if(pOut)
         {
-            nTolerance = pOut->PixelToLogic(Size(2, 0)).Width();
+            nTolerance = pOut->GetGeometry().PixelToLogic(Size(2, 0)).Width();
         }
 
         if( (aLocalLogicPosition.X() >= aBoundRect.Left() - nTolerance && aLocalLogicPosition.X() <= aBoundRect.Left() + nTolerance)

@@ -506,7 +506,7 @@ Size SvxNumberFormat::GetGraphicSizeMM100(const Graphic* pGraphic)
         OutputDevice* pOutDev = Application::GetDefaultDevice();
         MapMode aOldMap( pOutDev->GetMapMode() );
         pOutDev->SetMapMode( aMapMM100 );
-        aRetSize = pOutDev->PixelToLogic( rSize );
+        aRetSize = pOutDev->GetGeometry().PixelToLogic( rSize );
         pOutDev->SetMapMode( aOldMap );
     }
     else

@@ -188,7 +188,7 @@ bool FuDraw::MouseButtonDown(const MouseEvent& rMEvt)
         DoModifiers(rMEvt, bSnapModPressed);
 
         SdrPageView* pPV = nullptr;
-        sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(HITPIX,0)).Width() );
+        sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->GetGeometry().PixelToLogic(Size(HITPIX,0)).Width() );
 
         // look only for HelpLines when they are visible (!)
         bool bHelpLine(false);
@@ -588,7 +588,7 @@ bool FuDraw::SetPointer(const SdrObject* pObj, const Point& rPos)
         return false;
 
     const SdrLayerIDSet* pVisiLayer = &mpView->GetSdrPageView()->GetVisibleLayers();
-    sal_uInt16 nHitLog(sal_uInt16(mpWindow->PixelToLogic(Size(HITPIX, 0)).Width()));
+    sal_uInt16 nHitLog(sal_uInt16(mpWindow->GetGeometry().PixelToLogic(Size(HITPIX, 0)).Width()));
     ::tools::Long n2HitLog(nHitLog * 2);
     Point aHitPosR(rPos);
     Point aHitPosL(rPos);
@@ -626,7 +626,7 @@ bool FuDraw::SetPointer(const SdrObject* pObj, const Point& rPos)
  */
 void FuDraw::DoubleClick(const MouseEvent& rMEvt)
 {
-    sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(HITPIX,0)).Width() );
+    sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->GetGeometry().PixelToLogic(Size(HITPIX,0)).Width() );
 
     if ( mpView->AreObjectsMarked() )
     {

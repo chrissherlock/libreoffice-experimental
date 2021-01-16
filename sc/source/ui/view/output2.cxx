@@ -572,15 +572,15 @@ void ScDrawStringsVars::RepeatToFill( tools::Long nColWidth )
 
     tools::Long nCharWidth = GetFmtTextWidth(OUString(nRepeatChar));
 
-    if ( nCharWidth < 1 || (bPixelToLogic && nCharWidth < pOutput->mpRefDevice->PixelToLogic(Size(1,0)).Width()) )
+    if ( nCharWidth < 1 || (bPixelToLogic && nCharWidth < pOutput->mpRefDevice->GetGeometry().PixelToLogic(Size(1,0)).Width()) )
         return;
 
     // Are there restrictions on the cell type we should filter out here ?
     tools::Long nTextWidth = aTextSize.Width();
     if ( bPixelToLogic )
     {
-        nColWidth = pOutput->mpRefDevice->PixelToLogic(Size(nColWidth,0)).Width();
-        nTextWidth = pOutput->mpRefDevice->PixelToLogic(Size(nTextWidth,0)).Width();
+        nColWidth = pOutput->mpRefDevice->GetGeometry().PixelToLogic(Size(nColWidth,0)).Width();
+        nTextWidth = pOutput->mpRefDevice->GetGeometry().PixelToLogic(Size(nTextWidth,0)).Width();
     }
 
     tools::Long nSpaceToFill = nColWidth - nTextWidth;
@@ -598,7 +598,7 @@ void ScDrawStringsVars::SetTextToWidthOrHash( ScRefCellValue& rCell, tools::Long
 {
     // #i113045# do the single-character width calculations in logic units
     if (bPixelToLogic)
-        nWidth = pOutput->mpRefDevice->PixelToLogic(Size(nWidth,0)).Width();
+        nWidth = pOutput->mpRefDevice->GetGeometry().PixelToLogic(Size(nWidth,0)).Width();
 
     CellType eType = rCell.meType;
     if (eType != CELLTYPE_VALUE && eType != CELLTYPE_FORMULA)
@@ -2583,7 +2583,7 @@ void ScOutputData::DrawEditParam::calcStartPosForVertical(
 
     // vertical adjustment is within the EditEngine
     if (mbPixelToLogic)
-        rLogicStart.AdjustY(pRefDevice->PixelToLogic(Size(0,nTopM)).Height() );
+        rLogicStart.AdjustY(pRefDevice->GetGeometry().PixelToLogic(Size(0,nTopM)).Height() );
     else
         rLogicStart.AdjustY(nTopM );
 
@@ -2846,7 +2846,7 @@ void ScOutputData::DrawEditStandard(DrawEditParam& rParam)
     OSL_ASSERT(rParam.meOrient == SvxCellOrientation::Standard);
     OSL_ASSERT(!rParam.mbAsianVertical);
 
-    Size aRefOne = mpRefDevice->PixelToLogic(Size(1,1));
+    Size aRefOne = mpRefDevice->GetGeometry().PixelToLogic(Size(1,1));
 
     bool bRepeat = (rParam.meHorJustAttr == SvxCellHorJustify::Repeat && !rParam.mbBreak);
     bool bShrink = !rParam.mbBreak && !bRepeat && lcl_GetBoolValue(*rParam.mpPattern, ATTR_SHRINKTOFIT, rParam.mpCondSet);
@@ -2912,7 +2912,7 @@ void ScOutputData::DrawEditStandard(DrawEditParam& rParam)
     }
     if (rParam.mbPixelToLogic)
     {
-        Size aLogicSize = mpRefDevice->PixelToLogic(aPaperSize);
+        Size aLogicSize = mpRefDevice->GetGeometry().PixelToLogic(aPaperSize);
         if ( rParam.mbBreak && !rParam.mbAsianVertical && mpRefDevice != pFmtDevice )
         {
             // #i85342# screen display and formatting for printer,
@@ -3022,7 +3022,7 @@ void ScOutputData::DrawEditStandard(DrawEditParam& rParam)
         {
             aPaperSize.setWidth( nNeededPixel + 1 );
             if (rParam.mbPixelToLogic)
-                rParam.mpEngine->SetPaperSize(mpRefDevice->PixelToLogic(aPaperSize));
+                rParam.mpEngine->SetPaperSize(mpRefDevice->GetGeometry().PixelToLogic(aPaperSize));
             else
                 rParam.mpEngine->SetPaperSize(aPaperSize);
         }
@@ -3062,7 +3062,7 @@ void ScOutputData::DrawEditStandard(DrawEditParam& rParam)
 
     Size aCellSize;         // output area, excluding margins, in logical units
     if (rParam.mbPixelToLogic)
-        aCellSize = mpRefDevice->PixelToLogic( Size( nOutWidth, nOutHeight ) );
+        aCellSize = mpRefDevice->GetGeometry().PixelToLogic( Size( nOutWidth, nOutHeight ) );
     else
         aCellSize = Size( nOutWidth, nOutHeight );
 
@@ -3138,7 +3138,7 @@ void ScOutputData::DrawEditStandard(DrawEditParam& rParam)
             //! only converting margin?
 
             if (rParam.mbPixelToLogic)
-                aLogicStart.AdjustY(mpRefDevice->PixelToLogic( Size(0, nTopM +
+                aLogicStart.AdjustY(mpRefDevice->GetGeometry().PixelToLogic( Size(0, nTopM +
                                 mpRefDevice->GetGeometry().LogicToPixel(aCellSize).Height() -
                                 mpRefDevice->GetGeometry().LogicToPixel(Size(0,nEngineHeight)).Height()
                                 )).Height() );
@@ -3148,7 +3148,7 @@ void ScOutputData::DrawEditStandard(DrawEditParam& rParam)
         else if (rParam.meVerJust==SvxCellVerJustify::Center)
         {
             if (rParam.mbPixelToLogic)
-                aLogicStart.AdjustY(mpRefDevice->PixelToLogic( Size(0, nTopM + (
+                aLogicStart.AdjustY(mpRefDevice->GetGeometry().PixelToLogic( Size(0, nTopM + (
                                 mpRefDevice->GetGeometry().LogicToPixel(aCellSize).Height() -
                                 mpRefDevice->GetGeometry().LogicToPixel(Size(0,nEngineHeight)).Height() )
                                 / 2)).Height() );
@@ -3158,7 +3158,7 @@ void ScOutputData::DrawEditStandard(DrawEditParam& rParam)
         else        // top
         {
             if (rParam.mbPixelToLogic)
-                aLogicStart.AdjustY(mpRefDevice->PixelToLogic(Size(0,nTopM)).Height() );
+                aLogicStart.AdjustY(mpRefDevice->GetGeometry().PixelToLogic(Size(0,nTopM)).Height() );
             else
                 aLogicStart.AdjustY(nTopM );
         }
@@ -3224,7 +3224,7 @@ ClearableClipRegionPtr ScOutputData::Clip( DrawEditParam& rParam, const Size& aC
     bool bClip = AdjustAreaParamClipRect(aAreaParam) || aAreaParam.mbLeftClip || aAreaParam.mbRightClip || bWrapFields;
     bool bSimClip = false;
 
-    const Size& aRefOne = mpRefDevice->PixelToLogic(Size(1,1));
+    const Size& aRefOne = mpRefDevice->GetGeometry().PixelToLogic(Size(1,1));
     if ( nEngineHeight >= aCellSize.Height() + aRefOne.Height() )
     {
         const ScMergeAttr* pMerge = &rParam.mpPattern->GetItem(ATTR_MERGE);
@@ -3296,7 +3296,7 @@ void ScOutputData::DrawEditBottomTop(DrawEditParam& rParam)
     }
     if (rParam.mbPixelToLogic)
     {
-        Size aLogicSize = mpRefDevice->PixelToLogic(aPaperSize);
+        Size aLogicSize = mpRefDevice->GetGeometry().PixelToLogic(aPaperSize);
         rParam.mpEngine->SetPaperSize(aLogicSize);
     }
     else
@@ -3417,7 +3417,7 @@ void ScOutputData::DrawEditBottomTop(DrawEditParam& rParam)
 
     // output area, excluding margins, in logical units
     const Size& aCellSize = rParam.mbPixelToLogic
-        ? mpRefDevice->PixelToLogic( Size( nOutWidth, nOutHeight ) )
+        ? mpRefDevice->GetGeometry().PixelToLogic( Size( nOutWidth, nOutHeight ) )
         : Size( nOutWidth, nOutHeight );
 
     Point aURLStart;
@@ -3454,8 +3454,8 @@ void ScOutputData::DrawEditBottomTop(DrawEditParam& rParam)
             if (rParam.mbPixelToLogic)
             {
                 nGap = mpRefDevice->GetGeometry().LogicToPixel(aCellSize).Height() - mpRefDevice->GetGeometry().LogicToPixel(aPSize).Width();
-                nGap = mpRefDevice->PixelToLogic(Size(0, nGap)).Height();
-                nTopOffset = mpRefDevice->PixelToLogic(Size(0,nTopM)).Height();
+                nGap = mpRefDevice->GetGeometry().PixelToLogic(Size(0, nGap)).Height();
+                nTopOffset = mpRefDevice->GetGeometry().PixelToLogic(Size(0,nTopM)).Height();
             }
             else
             {
@@ -3539,11 +3539,13 @@ void ScOutputData::DrawEditTopBottom(DrawEditParam& rParam)
     }
     if (rParam.mbPixelToLogic)
     {
-        Size aLogicSize = mpRefDevice->PixelToLogic(aPaperSize);
+        Size aLogicSize = mpRefDevice->GetGeometry().PixelToLogic(aPaperSize);
         rParam.mpEngine->SetPaperSize(aLogicSize);
     }
     else
+    {
         rParam.mpEngine->SetPaperSize(aPaperSize);
+    }
 
     //  Fill the EditEngine (cell attributes and text)
 
@@ -3663,7 +3665,7 @@ void ScOutputData::DrawEditTopBottom(DrawEditParam& rParam)
 
     // output area, excluding margins, in logical units
     const Size& aCellSize = rParam.mbPixelToLogic
-        ? mpRefDevice->PixelToLogic( Size( nOutWidth, nOutHeight ) )
+        ? mpRefDevice->GetGeometry().PixelToLogic( Size( nOutWidth, nOutHeight ) )
         : Size( nOutWidth, nOutHeight );
 
     Point aURLStart;
@@ -3691,8 +3693,8 @@ void ScOutputData::DrawEditTopBottom(DrawEditParam& rParam)
                 if (rParam.mbPixelToLogic)
                 {
                     nGap = mpRefDevice->GetGeometry().LogicToPixel(aPSize).Width() - mpRefDevice->GetGeometry().LogicToPixel(aCellSize).Height();
-                    nGap = mpRefDevice->PixelToLogic(Size(0, nGap)).Height();
-                    nTopOffset = mpRefDevice->PixelToLogic(Size(0,nTopM)).Height();
+                    nGap = mpRefDevice->GetGeometry().PixelToLogic(Size(0, nGap)).Height();
+                    nTopOffset = mpRefDevice->GetGeometry().PixelToLogic(Size(0,nTopM)).Height();
                 }
                 else
                 {
@@ -3733,7 +3735,7 @@ void ScOutputData::DrawEditTopBottom(DrawEditParam& rParam)
 void ScOutputData::DrawEditStacked(DrawEditParam& rParam)
 {
     OSL_ASSERT(rParam.meHorJustAttr != SvxCellHorJustify::Repeat);
-    Size aRefOne = mpRefDevice->PixelToLogic(Size(1,1));
+    Size aRefOne = mpRefDevice->GetGeometry().PixelToLogic(Size(1,1));
 
     bool bRepeat = (rParam.meHorJustAttr == SvxCellHorJustify::Repeat && !rParam.mbBreak);
     bool bShrink = !rParam.mbBreak && !bRepeat && lcl_GetBoolValue(*rParam.mpPattern, ATTR_SHRINKTOFIT, rParam.mpCondSet);
@@ -3786,7 +3788,7 @@ void ScOutputData::DrawEditStacked(DrawEditParam& rParam)
 
     if (rParam.mbPixelToLogic)
     {
-        Size aLogicSize = mpRefDevice->PixelToLogic(aPaperSize);
+        Size aLogicSize = mpRefDevice->GetGeometry().PixelToLogic(aPaperSize);
         if ( rParam.mbBreak && mpRefDevice != pFmtDevice )
         {
             // #i85342# screen display and formatting for printer,
@@ -3855,7 +3857,7 @@ void ScOutputData::DrawEditStacked(DrawEditParam& rParam)
         {
             aPaperSize.setWidth( nNeededPixel + 1 );
             if (rParam.mbPixelToLogic)
-                rParam.mpEngine->SetPaperSize(mpRefDevice->PixelToLogic(aPaperSize));
+                rParam.mpEngine->SetPaperSize(mpRefDevice->GetGeometry().PixelToLogic(aPaperSize));
             else
                 rParam.mpEngine->SetPaperSize(aPaperSize);
         }
@@ -3895,7 +3897,7 @@ void ScOutputData::DrawEditStacked(DrawEditParam& rParam)
 
     Size aCellSize;         // output area, excluding margins, in logical units
     if (rParam.mbPixelToLogic)
-        aCellSize = mpRefDevice->PixelToLogic( Size( nOutWidth, nOutHeight ) );
+        aCellSize = mpRefDevice->GetGeometry().PixelToLogic( Size( nOutWidth, nOutHeight ) );
     else
         aCellSize = Size( nOutWidth, nOutHeight );
 
@@ -3963,7 +3965,7 @@ void ScOutputData::DrawEditStacked(DrawEditParam& rParam)
             //! only converting margin?
 
             if (rParam.mbPixelToLogic)
-                aLogicStart.AdjustY(mpRefDevice->PixelToLogic( Size(0, nTopM +
+                aLogicStart.AdjustY(mpRefDevice->GetGeometry().PixelToLogic( Size(0, nTopM +
                                 mpRefDevice->GetGeometry().LogicToPixel(aCellSize).Height() -
                                 mpRefDevice->GetGeometry().LogicToPixel(Size(0,nEngineHeight)).Height()
                                 )).Height() );
@@ -3973,7 +3975,7 @@ void ScOutputData::DrawEditStacked(DrawEditParam& rParam)
         else if (rParam.meVerJust==SvxCellVerJustify::Center)
         {
             if (rParam.mbPixelToLogic)
-                aLogicStart.AdjustY(mpRefDevice->PixelToLogic( Size(0, nTopM + (
+                aLogicStart.AdjustY(mpRefDevice->GetGeometry().PixelToLogic( Size(0, nTopM + (
                                 mpRefDevice->GetGeometry().LogicToPixel(aCellSize).Height() -
                                 mpRefDevice->GetGeometry().LogicToPixel(Size(0,nEngineHeight)).Height() )
                                 / 2)).Height() );
@@ -3983,7 +3985,7 @@ void ScOutputData::DrawEditStacked(DrawEditParam& rParam)
         else        // top
         {
             if (rParam.mbPixelToLogic)
-                aLogicStart.AdjustY(mpRefDevice->PixelToLogic(Size(0,nTopM)).Height() );
+                aLogicStart.AdjustY(mpRefDevice->GetGeometry().PixelToLogic(Size(0,nTopM)).Height() );
             else
                 aLogicStart.AdjustY(nTopM );
         }
@@ -4021,7 +4023,7 @@ void ScOutputData::DrawEditAsianVertical(DrawEditParam& rParam)
     OSL_ASSERT(rParam.mbAsianVertical);
     OSL_ASSERT(rParam.meHorJustAttr != SvxCellHorJustify::Repeat);
 
-    Size aRefOne = mpRefDevice->PixelToLogic(Size(1,1));
+    Size aRefOne = mpRefDevice->GetGeometry().PixelToLogic(Size(1,1));
 
     bool bHidden = false;
     bool bShrink = !rParam.mbBreak && lcl_GetBoolValue(*rParam.mpPattern, ATTR_SHRINKTOFIT, rParam.mpCondSet);
@@ -4081,7 +4083,7 @@ void ScOutputData::DrawEditAsianVertical(DrawEditParam& rParam)
 
     if (rParam.mbPixelToLogic)
     {
-        Size aLogicSize = mpRefDevice->PixelToLogic(aPaperSize);
+        Size aLogicSize = mpRefDevice->GetGeometry().PixelToLogic(aPaperSize);
         if ( rParam.mbBreak && !rParam.mbAsianVertical && mpRefDevice != pFmtDevice )
         {
             // #i85342# screen display and formatting for printer,
@@ -4154,7 +4156,7 @@ void ScOutputData::DrawEditAsianVertical(DrawEditParam& rParam)
     {
         aPaperSize.setWidth( nNeededPixel + 1 );
         if (rParam.mbPixelToLogic)
-            rParam.mpEngine->SetPaperSize(mpRefDevice->PixelToLogic(aPaperSize));
+            rParam.mpEngine->SetPaperSize(mpRefDevice->GetGeometry().PixelToLogic(aPaperSize));
         else
             rParam.mpEngine->SetPaperSize(aPaperSize);
     }
@@ -4181,7 +4183,7 @@ void ScOutputData::DrawEditAsianVertical(DrawEditParam& rParam)
 
     Size aCellSize;         // output area, excluding margins, in logical units
     if (rParam.mbPixelToLogic)
-        aCellSize = mpRefDevice->PixelToLogic( Size( nOutWidth, nOutHeight ) );
+        aCellSize = mpRefDevice->GetGeometry().PixelToLogic( Size( nOutWidth, nOutHeight ) );
     else
         aCellSize = Size( nOutWidth, nOutHeight );
 
@@ -4258,7 +4260,7 @@ void ScOutputData::DrawEditAsianVertical(DrawEditParam& rParam)
 
         // vertical adjustment is within the EditEngine
         if (rParam.mbPixelToLogic)
-            aLogicStart.AdjustY(mpRefDevice->PixelToLogic(Size(0,nTopM)).Height() );
+            aLogicStart.AdjustY(mpRefDevice->GetGeometry().PixelToLogic(Size(0,nTopM)).Height() );
         else
             aLogicStart.AdjustY(nTopM );
 
@@ -4656,7 +4658,7 @@ void ScOutputData::DrawRotated(bool bPixelToLogic)
 
                             tools::Long nTotalHeight = nOutHeight; // without subtracting the margin
                             if ( bPixelToLogic )
-                                nTotalHeight = mpRefDevice->PixelToLogic(Size(0,nTotalHeight)).Height();
+                                nTotalHeight = mpRefDevice->GetGeometry().PixelToLogic(Size(0,nTotalHeight)).Height();
 
                             tools::Long nLeftM = static_cast<tools::Long>( (pMargin->GetLeftMargin() + nIndent) * mnPPTX );
                             tools::Long nTopM  = static_cast<tools::Long>( pMargin->GetTopMargin() * mnPPTY );
@@ -4711,7 +4713,7 @@ void ScOutputData::DrawRotated(bool bPixelToLogic)
                                     aPaperSize.setWidth( nOutHeight - 1 );
                             }
                             if (bPixelToLogic)
-                                pEngine->SetPaperSize(mpRefDevice->PixelToLogic(aPaperSize));
+                                pEngine->SetPaperSize(mpRefDevice->GetGeometry().PixelToLogic(aPaperSize));
                             else
                                 pEngine->SetPaperSize(aPaperSize);  // scale is always 1
 
@@ -4788,7 +4790,7 @@ void ScOutputData::DrawRotated(bool bPixelToLogic)
                                         // set paper width and get new text height
                                         aPaperSize.setWidth( nNewWidth );
                                         if (bPixelToLogic)
-                                            pEngine->SetPaperSize(mpRefDevice->PixelToLogic(aPaperSize));
+                                            pEngine->SetPaperSize(mpRefDevice->GetGeometry().PixelToLogic(aPaperSize));
                                         else
                                             pEngine->SetPaperSize(aPaperSize);  // Scale is always 1
                                         //pEngine->QuickFormatDoc( sal_True );
@@ -4832,7 +4834,7 @@ void ScOutputData::DrawRotated(bool bPixelToLogic)
 
                                 Size aCellSize;
                                 if (bPixelToLogic)
-                                    aCellSize = mpRefDevice->PixelToLogic( Size( nOutWidth, nOutHeight ) );
+                                    aCellSize = mpRefDevice->GetGeometry().PixelToLogic( Size( nOutWidth, nOutHeight ) );
                                 else
                                     aCellSize = Size( nOutWidth, nOutHeight );  // scale is one
 
@@ -4951,7 +4953,7 @@ void ScOutputData::DrawRotated(bool bPixelToLogic)
                                     {
                                         // filter drop-down width is now independent from row height
                                         if (bPixelToLogic)
-                                            nAvailWidth -= mpRefDevice->PixelToLogic(Size(0,DROPDOWN_BITMAP_SIZE)).Height();
+                                            nAvailWidth -= mpRefDevice->GetGeometry().PixelToLogic(Size(0,DROPDOWN_BITMAP_SIZE)).Height();
                                         else
                                             nAvailWidth -= DROPDOWN_BITMAP_SIZE;
                                         tools::Long nComp = nEngineWidth;
@@ -4975,7 +4977,7 @@ void ScOutputData::DrawRotated(bool bPixelToLogic)
 
                                             aPaperSize.setWidth( nOutWidth );
                                             if (bPixelToLogic)
-                                                pEngine->SetPaperSize(mpRefDevice->PixelToLogic(aPaperSize));
+                                                pEngine->SetPaperSize(mpRefDevice->GetGeometry().PixelToLogic(aPaperSize));
                                             else
                                                 pEngine->SetPaperSize(aPaperSize);
 
@@ -4996,7 +4998,7 @@ void ScOutputData::DrawRotated(bool bPixelToLogic)
                                 if ( bLayoutRTL )
                                 {
                                     if (bPixelToLogic)
-                                        aLogicStart.AdjustX( -(mpRefDevice->PixelToLogic(
+                                        aLogicStart.AdjustX( -(mpRefDevice->GetGeometry().PixelToLogic(
                                                         Size( nCellWidth, 0 ) ).Width()) );
                                     else
                                         aLogicStart.AdjustX( -nCellWidth );
@@ -5009,7 +5011,7 @@ void ScOutputData::DrawRotated(bool bPixelToLogic)
                                         eVerJust==SvxCellVerJustify::Standard)
                                     {
                                         if (bPixelToLogic)
-                                            aLogicStart.AdjustY(mpRefDevice->PixelToLogic( Size(0,
+                                            aLogicStart.AdjustY(mpRefDevice->GetGeometry().PixelToLogic( Size(0,
                                                             mpRefDevice->GetGeometry().LogicToPixel(aCellSize).Height() -
                                                             mpRefDevice->GetGeometry().LogicToPixel(Size(0,nEngineHeight)).Height()
                                                             )).Height() );
@@ -5020,7 +5022,7 @@ void ScOutputData::DrawRotated(bool bPixelToLogic)
                                     else if (eVerJust==SvxCellVerJustify::Center)
                                     {
                                         if (bPixelToLogic)
-                                            aLogicStart.AdjustY(mpRefDevice->PixelToLogic( Size(0,(
+                                            aLogicStart.AdjustY(mpRefDevice->GetGeometry().PixelToLogic( Size(0,(
                                                             mpRefDevice->GetGeometry().LogicToPixel(aCellSize).Height() -
                                                             mpRefDevice->GetGeometry().LogicToPixel(Size(0,nEngineHeight)).Height())
                                                             / 2)).Height() );

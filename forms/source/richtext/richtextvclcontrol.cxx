@@ -290,7 +290,7 @@ namespace frm
 
     void RichTextControl::Draw( OutputDevice* _pDev, const Point& _rPos, DrawFlags /*_nFlags*/ )
     {
-        m_pImpl->Draw( _pDev, _rPos, _pDev->PixelToLogic(GetSizePixel()) );
+        m_pImpl->Draw( _pDev, _rPos, _pDev->GetGeometry().PixelToLogic(GetSizePixel()) );
     }
 
     EditView& RichTextControl::getView()

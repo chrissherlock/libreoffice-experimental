@@ -119,7 +119,7 @@ IMPL_LINK( ScrollableWindow, ScrollHdl, ScrollBar *, pScroll, void )
         bScrolling = true;
 
     // get the delta in logic coordinates
-    Size aDelta( PixelToLogic(
+    Size aDelta( maGeometry.PixelToLogic(
         Size( aHScroll->GetDelta(), aVScroll->GetDelta() ) ) );
     if ( pScroll == aHScroll.get() )
         Scroll( aDelta.Width(), 0 );
@@ -301,7 +301,7 @@ void ScrollableWindow::Scroll( tools::Long nDeltaX, tools::Long nDeltaY, ScrollF
     // recompute the logical scroll units
     aDeltaPix.setWidth( aPixOffset.X() - aNewPixOffset.X() );
     aDeltaPix.setHeight( aPixOffset.Y() - aNewPixOffset.Y() );
-    Size aDelta( PixelToLogic(aDeltaPix) );
+    Size aDelta( maGeometry.PixelToLogic(aDeltaPix) );
     nDeltaX = aDelta.Width();
     nDeltaY = aDelta.Height();
     aPixOffset = aNewPixOffset;

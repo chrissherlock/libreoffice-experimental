@@ -116,7 +116,7 @@ void WeldEditView::Resize()
     if (EditView* pEditView = GetEditView())
     {
         OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
-        Size aOutputSize(rDevice.PixelToLogic(GetSizeInPixels()));
+        Size aOutputSize(rDevice.GetGeometry().PixelToLogic(GetSizeInPixels()));
         Size aSize(aOutputSize);
         GetEditEngine()->SetPaperSize(aSize);
         pEditView->SetOutputArea(tools::Rectangle(Point(0, 0), aOutputSize));
@@ -1463,7 +1463,7 @@ void WeldEditView::SetDrawingArea(weld::DrawingArea* pDrawingArea)
     rDevice.SetMapMode(MapMode(MapUnit::MapTwip));
     rDevice.SetBackground(aBgColor);
 
-    Size aOutputSize(rDevice.PixelToLogic(aSize));
+    Size aOutputSize(rDevice.GetGeometry().PixelToLogic(aSize));
     aSize = aOutputSize;
     aSize.setHeight(aSize.Height());
 

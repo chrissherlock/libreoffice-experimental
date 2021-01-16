@@ -527,7 +527,7 @@ void DrawViewShell::Command(const CommandEvent& rCEvt, ::sd::Window* pWin)
         // is there a snap object under the cursor?
         SdrPageView* pPV;
         Point   aMPos = pWin->GetGeometry().PixelToLogic( maMousePos );
-        sal_uInt16  nHitLog = static_cast<sal_uInt16>(GetActiveWindow()->PixelToLogic(
+        sal_uInt16  nHitLog = static_cast<sal_uInt16>(GetActiveWindow()->GetGeometry().PixelToLogic(
             Size(FuPoor::HITPIX, 0 ) ).Width());
         sal_uInt16  nHelpLine;
         // for glue points

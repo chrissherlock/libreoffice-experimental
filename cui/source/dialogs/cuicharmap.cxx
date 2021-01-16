@@ -1220,7 +1220,7 @@ void SvxShowText::SetFont( const vcl::Font& rFont )
     m_aFont = rFont;
     m_aFont.SetWeight(WEIGHT_NORMAL);
     m_aFont.SetAlignment(ALIGN_TOP);
-    m_aFont.SetFontSize(m_xVirDev->PixelToLogic(Size(0, nWinHeight / 2)));
+    m_aFont.SetFontSize(m_xVirDev->GetGeometry().PixelToLogic(Size(0, nWinHeight / 2)));
     m_aFont.SetTransparent(true);
 
     m_xVirDev->Push(PUSH_ALLFONT);

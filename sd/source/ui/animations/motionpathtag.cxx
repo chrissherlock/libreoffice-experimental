@@ -517,7 +517,7 @@ bool MotionPathTag::MouseButtonDown( const MouseEvent& rMEvt, SmartHdl& rHdl )
                 if( pHdl && !rMEvt.IsRight() )
                 {
                     mrView.BrkAction();
-                    const sal_uInt16 nDrgLog = static_cast<sal_uInt16>(pOut->PixelToLogic(Size(DRGPIX,0)).Width());
+                    const sal_uInt16 nDrgLog = static_cast<sal_uInt16>(pOut->GetGeometry().PixelToLogic(Size(DRGPIX,0)).Width());
 
                     rtl::Reference< MotionPathTag > xTag( this );
                     SdrDragMethod* pDragMethod;
@@ -687,7 +687,7 @@ bool MotionPathTag::OnMove( const KeyEvent& rKEvt )
     if(rKEvt.GetKeyCode().IsMod2())
     {
         OutputDevice* pOut = mrView.GetViewShell()->GetActiveWindow();
-        Size aLogicSizeOnePixel = pOut ? pOut->PixelToLogic(Size(1,1)) : Size(100, 100);
+        Size aLogicSizeOnePixel = pOut ? pOut->GetGeometry().PixelToLogic(Size(1,1)) : Size(100, 100);
         nX *= aLogicSizeOnePixel.Width();
         nY *= aLogicSizeOnePixel.Height();
     }

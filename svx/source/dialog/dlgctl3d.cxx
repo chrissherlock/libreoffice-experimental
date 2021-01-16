@@ -143,7 +143,7 @@ void Svx3DPreviewControl::Resize()
 {
     // size of page
     Size aSize(GetSizeInPixels());
-    aSize = GetDrawingArea()->get_ref_device().PixelToLogic(aSize);
+    aSize = GetDrawingArea()->get_ref_device().GetGeometry().PixelToLogic(aSize);
     mpFmPage->SetSize(aSize);
 
     // set size
@@ -684,7 +684,7 @@ bool Svx3DLightControl::MouseButtonUp(const MouseEvent& rMEvt)
 void Svx3DLightControl::Resize()
 {
     // set size of page
-    const Size aSize(GetDrawingArea()->get_ref_device().PixelToLogic(GetSizeInPixels()));
+    const Size aSize(GetDrawingArea()->get_ref_device().GetGeometry().PixelToLogic(GetSizeInPixels()));
     mpFmPage->SetSize(aSize);
 
     // set position and size of scene

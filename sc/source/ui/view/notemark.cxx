@@ -173,7 +173,7 @@ void ScNoteMarker::InvalidateWin()
     // Extend the invalidated rectangle by 1 pixel in each direction in case AA would slightly
     // paint outside the nominal area.
     tools::Rectangle aRect(m_aRect);
-    const Size aPixelSize = m_pWindow->PixelToLogic(Size(1, 1));
+    const Size aPixelSize = m_pWindow->GetGeometry().PixelToLogic(Size(1, 1));
     aRect.AdjustLeft(-aPixelSize.getWidth());
     aRect.AdjustTop(-aPixelSize.getHeight());
     aRect.AdjustRight(aPixelSize.getWidth());

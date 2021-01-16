@@ -1382,7 +1382,7 @@ void Window::ImplPointToLogic(vcl::RenderContext const & rRenderContext, vcl::Fo
     aSize.setHeight( aSize.Height() / 72 );
 
     if (rRenderContext.IsMapModeEnabled())
-        aSize = rRenderContext.PixelToLogic(aSize);
+        aSize = rRenderContext.GetGeometry().PixelToLogic(aSize);
 
     rFont.SetFontSize(aSize);
 }

@@ -56,7 +56,7 @@ public:
     MapMode GetMapMode() const;
 
     void            SetTotalSize( const Size& rNewSize );
-    Size            GetTotalSize() const { return PixelToLogic( aTotPixSz ); }
+    Size            GetTotalSize() const { return maGeometry.PixelToLogic( aTotPixSz ); }
 
     using Window::Scroll;
     virtual void    Scroll( tools::Long nDeltaX, tools::Long nDeltaY, ScrollFlags nFlags = ScrollFlags::NONE ) override;

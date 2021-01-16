@@ -219,7 +219,7 @@ DlgEditor::DlgEditor (
     aMarkIdle.SetInvokeHandler( LINK( this, DlgEditor, MarkTimeout ) );
 
     rWindow.SetMapMode( MapMode( MapUnit::Map100thMM ) );
-    pDlgEdPage->SetSize( rWindow.PixelToLogic( Size(DLGED_PAGE_WIDTH_MIN, DLGED_PAGE_HEIGHT_MIN) ) );
+    pDlgEdPage->SetSize( rWindow.GetGeometry().PixelToLogic( Size(DLGED_PAGE_WIDTH_MIN, DLGED_PAGE_HEIGHT_MIN) ) );
 
     pDlgEdView->ShowSdrPage(pDlgEdView->GetModel()->GetPage(0));
     pDlgEdView->SetLayerVisible( "HiddenLayer", false );
@@ -300,7 +300,7 @@ void DlgEditor::DoScroll()
 
     Size  aScrollPos( pHScroll->GetThumbPos(), pVScroll->GetThumbPos() );
     aScrollPos = rWindow.GetGeometry().LogicToPixel( aScrollPos );
-    aScrollPos = rWindow.PixelToLogic( aScrollPos );
+    aScrollPos = rWindow.GetGeometry().PixelToLogic( aScrollPos );
 
     tools::Long  nX   = aScrollPos.Width() + aOrg.X();
     tools::Long  nY   = aScrollPos.Height() + aOrg.Y();
@@ -490,7 +490,7 @@ void DlgEditor::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle
 
             if (nWidth == 0 && nHeight == 0)
             {
-                Size   aSize = rRenderContext.PixelToLogic( Size( 400, 300 ) );
+                Size   aSize = rRenderContext.GetGeometry().PixelToLogic( Size( 400, 300 ) );
 
                 // align with grid
                 Size aGridSize_(tools::Long(pDlgEdView->GetSnapGridWidthX()), tools::Long(pDlgEdView->GetSnapGridWidthY()));
@@ -621,7 +621,7 @@ void DlgEditor::CreateDefaultObject()
         return;
 
     // set position and size
-    Size aSize = rWindow.PixelToLogic( Size( 96, 24 ) );
+    Size aSize = rWindow.GetGeometry().PixelToLogic( Size( 96, 24 ) );
     Point aPoint = pDlgEdForm->GetSnapRect().Center();
     aPoint.AdjustX( -(aSize.Width() / 2) );
     aPoint.AdjustY( -(aSize.Height() / 2) );
@@ -1158,7 +1158,7 @@ void DlgEditor::Print( Printer* pPrinter, const OUString& rTitle )    // not wor
     lcl_PrintHeader( pPrinter, rTitle );
 
     BitmapEx aDlgEx;
-    Size aBmpSz( pPrinter->PixelToLogic( aDlgEx.GetSizePixel() ) );
+    Size aBmpSz( pPrinter->GetGeometry().PixelToLogic( aDlgEx.GetSizePixel() ) );
     double nPaperSzWidth = aPaperSz.Width();
     double nPaperSzHeight = aPaperSz.Height();
     double nBmpSzWidth = aBmpSz.Width();

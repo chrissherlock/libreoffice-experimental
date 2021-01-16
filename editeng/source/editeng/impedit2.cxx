@@ -191,7 +191,7 @@ void ImpEditEngine::SetRefDevice( OutputDevice* pRef )
     else
         pRefDev = pSharedVCL->GetVirtualDevice();
 
-    nOnePixelInRef = static_cast<sal_uInt16>(pRefDev->PixelToLogic( Size( 1, 0 ) ).Width());
+    nOnePixelInRef = static_cast<sal_uInt16>(pRefDev->GetGeometry().PixelToLogic( Size( 1, 0 ) ).Width());
 
     if ( IsFormatted() )
     {
@@ -212,7 +212,7 @@ void ImpEditEngine::SetRefMapMode( const MapMode& rMapMode )
     SetRefDevice( pRefDev );
 
     pRefDev->SetMapMode( rMapMode );
-    nOnePixelInRef = static_cast<sal_uInt16>(pRefDev->PixelToLogic( Size( 1, 0 ) ).Width());
+    nOnePixelInRef = static_cast<sal_uInt16>(pRefDev->GetGeometry().PixelToLogic( Size( 1, 0 ) ).Width());
     if ( IsFormatted() )
     {
         FormatFullDoc();

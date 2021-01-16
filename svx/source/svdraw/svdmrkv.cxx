@@ -1496,12 +1496,12 @@ void SdrMarkView::ForceRefToMarked()
             OutputDevice* pOut=GetFirstOutputDevice();
             if (pOut!=nullptr) {
                 // minimum length: 50 pixels
-                nMinLen=pOut->PixelToLogic(Size(0,50)).Height();
+                nMinLen=pOut->GetGeometry().PixelToLogic(Size(0,50)).Height();
                 // 20 pixels distance to the Obj for the reference point
-                nObjDst=pOut->PixelToLogic(Size(0,20)).Height();
+                nObjDst=pOut->GetGeometry().PixelToLogic(Size(0,20)).Height();
                 // MinY/MaxY
                 // margin = minimum length = 10 pixels
-                tools::Long nDst=pOut->PixelToLogic(Size(0,10)).Height();
+                tools::Long nDst=pOut->GetGeometry().PixelToLogic(Size(0,10)).Height();
                 nOutMin=-pOut->GetMapMode().GetOrigin().Y();
                 nOutMax=pOut->GetSizeInLogicalUnits().Height()-1+nOutMin;
                 nOutMin+=nDst;

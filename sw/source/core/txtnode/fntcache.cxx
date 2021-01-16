@@ -975,8 +975,7 @@ void SwFntObj::DrawText( SwDrawTextInfo &rInf )
         {
             *pPixMap = rInf.GetOut().GetMapMode();
             (*s_pFntObjPixOut.get()) = rInf.GetpOut();
-            Size aTmp( 1, 1 );
-            nPixWidth = rInf.GetOut().PixelToLogic( aTmp ).Width();
+            nPixWidth = rInf.GetOut().GetGeometry().PixelToLogic( Size( 1, 1 ) ).Width();
         }
 
         aTextOriginPos.AdjustX(rInf.GetFrame()->IsRightToLeft() ? 0 : nPixWidth );

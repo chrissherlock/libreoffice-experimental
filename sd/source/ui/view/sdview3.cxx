@@ -1346,7 +1346,7 @@ bool View::InsertData( const TransferableDataHelper& rDataHelper,
                 SfxItemSet              aSet( mrDoc.GetPool() );
                 bool                    bClosed = pPickObj->IsClosedObj();
                 ::sd::Window* pWin = mpViewSh->GetActiveWindow();
-                sal_uInt16 nHitLog = static_cast<sal_uInt16>(pWin->PixelToLogic(
+                sal_uInt16 nHitLog = static_cast<sal_uInt16>(pWin->GetGeometry().PixelToLogic(
                     Size(FuPoor::HITPIX, 0 ) ).Width());
                 const ::tools::Long              n2HitLog = nHitLog << 1;
                 Point                   aHitPosR( rPos );

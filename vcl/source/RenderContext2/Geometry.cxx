@@ -825,4 +825,13 @@ Point Geometry::PixelToLogic(Point const& rDevicePt) const
                      - GetYMapOffset() - GetYOffsetFromOriginInLogicalUnits());
 }
 
+Size Geometry::PixelToLogic(Size const& rDeviceSize) const
+{
+    if (!IsMapModeEnabled())
+        return rDeviceSize;
+
+    return Size(
+        PixelToLogic(rDeviceSize.Width(), GetDPIX(), GetXMapNumerator(), GetXMapDenominator()),
+        PixelToLogic(rDeviceSize.Height(), GetDPIY(), GetYMapNumerator(), GetYMapDenominator()));
+}
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

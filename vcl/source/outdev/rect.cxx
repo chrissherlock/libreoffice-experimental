@@ -32,7 +32,7 @@
 
 void OutputDevice::DrawBorder(tools::Rectangle aBorderRect)
 {
-    sal_uInt16 nPixel = static_cast<sal_uInt16>(PixelToLogic(Size(1, 1)).Width());
+    sal_uInt16 nPixel = static_cast<sal_uInt16>(maGeometry.PixelToLogic(Size(1, 1)).Width());
 
     aBorderRect.AdjustLeft(nPixel);
     aBorderRect.AdjustTop(nPixel);

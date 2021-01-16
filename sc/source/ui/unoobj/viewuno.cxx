@@ -1095,7 +1095,7 @@ uno::Reference< uno::XInterface > ScTabViewObj::GetClickedObject(const Point& rP
                 vcl::Window* pActiveWin = rData.GetActiveWin();
                 Point aPos = pActiveWin->GetGeometry().PixelToLogic(rPoint);
 
-                sal_uInt16 nHitLog = static_cast<sal_uInt16>(pActiveWin->PixelToLogic(
+                sal_uInt16 nHitLog = static_cast<sal_uInt16>(pActiveWin->GetGeometry().PixelToLogic(
                                  Size(pDrawView->GetHitTolerancePixel(),0)).Width());
 
                 const size_t nCount(pDrawPage->GetObjCount());

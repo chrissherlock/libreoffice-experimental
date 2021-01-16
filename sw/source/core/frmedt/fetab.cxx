@@ -1608,7 +1608,7 @@ const SwFrame* SwFEShell::GetBox( const Point &rPt, bool* pbRow, bool* pbCol ) c
         // #i32329# Enhanced table selection
         SwTwips nSize = pbCol ? ENHANCED_TABLE_SELECTION_FUZZY : RULER_MOUSE_MARGINWIDTH;
         Size aTmp( nSize, nSize );
-        aTmp = pOutWin->PixelToLogic( aTmp );
+        aTmp = pOutWin->GetGeometry().PixelToLogic( aTmp );
         nFuzzy = aTmp.Width();
     }
 

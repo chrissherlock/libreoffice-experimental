@@ -372,22 +372,22 @@ tools::Long SvxRuler::ConvertSizePixel(tools::Long nVal) const
 
 inline tools::Long SvxRuler::ConvertHPosLogic(tools::Long nVal) const
 {
-    return pEditWin->PixelToLogic(Size(nVal, 0)).Width();
+    return pEditWin->GetGeometry().PixelToLogic(Size(nVal, 0)).Width();
 }
 
 inline tools::Long SvxRuler::ConvertVPosLogic(tools::Long nVal) const
 {
-    return pEditWin->PixelToLogic(Size(0, nVal)).Height();
+    return pEditWin->GetGeometry().PixelToLogic(Size(0, nVal)).Height();
 }
 
 inline tools::Long SvxRuler::ConvertHSizeLogic(tools::Long nVal) const
 {
-    return pEditWin->PixelToLogic(Size(nVal, 0)).Width();
+    return pEditWin->GetGeometry().PixelToLogic(Size(nVal, 0)).Width();
 }
 
 inline tools::Long SvxRuler::ConvertVSizeLogic(tools::Long nVal) const
 {
-    return pEditWin->PixelToLogic(Size(0, nVal)).Height();
+    return pEditWin->GetGeometry().PixelToLogic(Size(0, nVal)).Height();
 }
 
 inline tools::Long SvxRuler::ConvertPosLogic(tools::Long nVal) const

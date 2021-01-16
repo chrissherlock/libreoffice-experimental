@@ -385,7 +385,7 @@ bool GraphicObject::ImplDrawTiled( OutputDevice& rOut, const Point& rPosPixel,
                                    const Size& rTileSizePixel, const GraphicAttr* pAttr )
 {
     Point   aCurrPos( rPosPixel );
-    Size    aTileSizeLogic( rOut.PixelToLogic( rTileSizePixel ) );
+    Size    aTileSizeLogic( rOut.GetGeometry().PixelToLogic( rTileSizePixel ) );
     int     nX, nY;
 
     // #107607# Use logical coordinates for metafile playing, too

@@ -625,7 +625,7 @@ void SwView::Execute(SfxRequest &rReq)
                     const Point aPt(m_aVisArea.Left(), m_pWrtShell->GetPagePos(nPage).Y());
                     Point aAlPt(AlignToPixel(aPt));
                     if(aPt.Y() != aAlPt.Y())
-                        aAlPt.AdjustY(3 * GetEditWin().PixelToLogic(Size(0, 1)).Height());
+                        aAlPt.AdjustY(3 * GetEditWin().GetGeometry().PixelToLogic(Size(0, 1)).Height());
                     SetVisArea(aAlPt);
                     m_pWrtShell->UnlockPaint();
                 }

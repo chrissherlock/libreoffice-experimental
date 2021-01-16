@@ -342,7 +342,7 @@ void ScOutputData::DrawGrid(vcl::RenderContext& rRenderContext, bool bGrid, bool
     tools::Long nOneY = 1;
     if (!bWorksInPixels)
     {
-        Size aOnePixel = rRenderContext.PixelToLogic(Size(1,1));
+        Size aOnePixel = rRenderContext.GetGeometry().PixelToLogic(Size(1,1));
         nOneX = aOnePixel.Width();
         nOneY = aOnePixel.Height();
     }
@@ -813,7 +813,7 @@ void ScOutputData::DrawDocumentBackground()
     mpDev->SetFillColor(aBgColor);
 
     Point aScreenPos  = mpDev->GetGeometry().PixelToLogic(Point(nScrX, nScrY));
-    Size  aScreenSize = mpDev->PixelToLogic(Size(nScrW - 1,nScrH - 1));
+    Size  aScreenSize = mpDev->GetGeometry().PixelToLogic(Size(nScrW - 1,nScrH - 1));
 
     mpDev->DrawRect(tools::Rectangle(aScreenPos, aScreenSize));
 }
@@ -990,7 +990,7 @@ void drawCells(vcl::RenderContext& rRenderContext, std::optional<Color> const & 
 
 void ScOutputData::DrawBackground(vcl::RenderContext& rRenderContext)
 {
-    Size aOnePixel = rRenderContext.PixelToLogic(Size(1,1));
+    Size aOnePixel = rRenderContext.GetGeometry().PixelToLogic(Size(1,1));
     tools::Long nOneXLogic = aOnePixel.Width();
     tools::Long nOneYLogic = aOnePixel.Height();
 
@@ -1164,7 +1164,7 @@ void ScOutputData::DrawExtraShadow(bool bLeft, bool bTop, bool bRight, bool bBot
     tools::Long nInitPosX = nScrX;
     if ( bLayoutRTL )
     {
-        Size aOnePixel = mpDev->PixelToLogic(Size(1,1));
+        Size aOnePixel = mpDev->GetGeometry().PixelToLogic(Size(1,1));
         tools::Long nOneX = aOnePixel.Width();
         nInitPosX += nMirrorW - nOneX;
     }
@@ -1295,7 +1295,7 @@ void ScOutputData::DrawExtraShadow(bool bLeft, bool bTop, bool bRight, bool bBot
 void ScOutputData::DrawClear()
 {
     tools::Rectangle aRect;
-    Size aOnePixel = mpDev->PixelToLogic(Size(1,1));
+    Size aOnePixel = mpDev->GetGeometry().PixelToLogic(Size(1,1));
     tools::Long nOneX = aOnePixel.Width();
     tools::Long nOneY = aOnePixel.Height();
 
@@ -1339,12 +1339,12 @@ void ScOutputData::DrawClear()
 
 static tools::Long lclGetSnappedX( const OutputDevice& rDev, tools::Long nPosX, bool bSnapPixel )
 {
-    return (bSnapPixel && nPosX) ? rDev.PixelToLogic( rDev.GetGeometry().LogicToPixel( Size( nPosX, 0 ) ) ).Width() : nPosX;
+    return (bSnapPixel && nPosX) ? rDev.GetGeometry().PixelToLogic( rDev.GetGeometry().LogicToPixel( Size( nPosX, 0 ) ) ).Width() : nPosX;
 }
 
 static tools::Long lclGetSnappedY( const OutputDevice& rDev, tools::Long nPosY, bool bSnapPixel )
 {
-    return (bSnapPixel && nPosY) ? rDev.PixelToLogic( rDev.GetGeometry().LogicToPixel( Size( 0, nPosY ) ) ).Height() : nPosY;
+    return (bSnapPixel && nPosY) ? rDev.GetGeometry().PixelToLogic( rDev.GetGeometry().LogicToPixel( Size( 0, nPosY ) ) ).Height() : nPosY;
 }
 
 static size_t lclGetArrayColFromCellInfoX( sal_uInt16 nCellInfoX, sal_uInt16 nCellInfoFirstX, sal_uInt16 nCellInfoLastX, bool bRTL )
@@ -1394,7 +1394,7 @@ void ScOutputData::DrawFrame(vcl::RenderContext& rRenderContext)
     tools::Long nInitPosX = nScrX;
     if ( bLayoutRTL )
     {
-        Size aOnePixel = rRenderContext.PixelToLogic(Size(1,1));
+        Size aOnePixel = rRenderContext.GetGeometry().PixelToLogic(Size(1,1));
         tools::Long nOneX = aOnePixel.Width();
         nInitPosX += nMirrorW - nOneX;
     }
@@ -1495,7 +1495,7 @@ void ScOutputData::DrawRotatedFrame(vcl::RenderContext& rRenderContext)
     tools::Long nInitPosX = nScrX;
     if ( bLayoutRTL )
     {
-        Size aOnePixel = rRenderContext.PixelToLogic(Size(1,1));
+        Size aOnePixel = rRenderContext.GetGeometry().PixelToLogic(Size(1,1));
         tools::Long nOneX = aOnePixel.Width();
         nInitPosX += nMirrorW - nOneX;
     }
@@ -2371,7 +2371,7 @@ void ScOutputData::AddPDFNotes()
     tools::Long nInitPosX = nScrX;
     if ( bLayoutRTL )
     {
-        Size aOnePixel = mpDev->PixelToLogic(Size(1,1));
+        Size aOnePixel = mpDev->GetGeometry().PixelToLogic(Size(1,1));
         tools::Long nOneX = aOnePixel.Width();
         nInitPosX += nMirrorW - nOneX;
     }

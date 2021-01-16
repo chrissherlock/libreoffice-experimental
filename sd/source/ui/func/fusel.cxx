@@ -143,8 +143,8 @@ bool FuSelection::MouseButtonDown(const MouseEvent& rMEvt)
         return true;
     }
 
-    sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(DRGPIX,0)).Width() );
-    sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(HITPIX,0)).Width() );
+    sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->GetGeometry().PixelToLogic(Size(DRGPIX,0)).Width() );
+    sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->GetGeometry().PixelToLogic(Size(HITPIX,0)).Width() );
 
     if (comphelper::LibreOfficeKit::isActive())
     {
@@ -653,8 +653,8 @@ bool FuSelection::MouseButtonUp(const MouseEvent& rMEvt)
         return false;
 
     Point aPnt( mpWindow->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() ) );
-    sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(HITPIX,0)).Width() );
-    sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(DRGPIX,0)).Width() );
+    sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->GetGeometry().PixelToLogic(Size(HITPIX,0)).Width() );
+    sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->GetGeometry().PixelToLogic(Size(DRGPIX,0)).Width() );
 
     if (mpView->IsFrameDragSingles() || !mpView->HasMarkablePoints())
     {
@@ -882,7 +882,7 @@ bool FuSelection::MouseButtonUp(const MouseEvent& rMEvt)
             {
                 mpView->EndAction();
 
-                sal_uInt16 nDrgLog2 = sal_uInt16 ( mpWindow->PixelToLogic(Size(DRGPIX,0)).Width() );
+                sal_uInt16 nDrgLog2 = sal_uInt16 ( mpWindow->GetGeometry().PixelToLogic(Size(DRGPIX,0)).Width() );
                 Point aPos = mpWindow->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() );
 
                 if (std::abs(aMDPos.X() - aPos.X()) < nDrgLog2 &&
@@ -1216,7 +1216,7 @@ bool FuSelection::HandleImageMapClick(const SdrObject* pObj, const Point& rPos)
     }
 
     const SdrLayerIDSet* pVisiLayer = &mpView->GetSdrPageView()->GetVisibleLayers();
-    sal_uInt16 nHitLog = sal_uInt16(mpWindow->PixelToLogic(Size(HITPIX, 0)).Width());
+    sal_uInt16 nHitLog = sal_uInt16(mpWindow->GetGeometry().PixelToLogic(Size(HITPIX, 0)).Width());
     const ::tools::Long n2HitLog = nHitLog * 2;
     Point aHitPosR(rPos);
     Point aHitPosL(rPos);
@@ -1287,7 +1287,7 @@ bool FuSelection::cancel()
 SdrObject* FuSelection::pickObject (const Point& rTestPoint)
 {
     SdrPageView* pPageView;
-    sal_uInt16 nHitLog = sal_uInt16 (mpWindow->PixelToLogic(Size(HITPIX,0)).Width());
+    sal_uInt16 nHitLog = sal_uInt16 (mpWindow->GetGeometry().PixelToLogic(Size(HITPIX,0)).Width());
     return mpView->PickObj(rTestPoint, nHitLog, pPageView, SdrSearchOptions::PICKMARKABLE);
 }
 

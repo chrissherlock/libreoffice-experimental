@@ -473,7 +473,7 @@ void ShowWindow::DrawPauseScene( bool bTimeoutOnly )
         Size aGrfSize;
 
         if (maLogo.GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel)
-            aGrfSize = PixelToLogic( maLogo.GetPrefSize() );
+            aGrfSize = maGeometry.PixelToLogic( maLogo.GetPrefSize() );
         else
             aGrfSize = LogicToLogic( maLogo.GetPrefSize(), maLogo.GetPrefMapMode(), rMap );
 

@@ -89,7 +89,7 @@ void DrawViewShell::ExecGallery(SfxRequest const & rReq)
         aWindow->SetMapMode(aGraphic.GetPrefMapMode());
         Size aSizePix = aWindow->GetGeometry().LogicToPixel(aGraphic.GetPrefSize());
         aWindow->SetMapMode( MapMode(MapUnit::Map100thMM) );
-        Size aSize = aWindow->PixelToLogic(aSizePix);
+        Size aSize = aWindow->GetGeometry().PixelToLogic(aSizePix);
 
         // constrain size to page size if necessary
         SdrPage* pPage = mpDrawView->GetSdrPageView()->GetPage();

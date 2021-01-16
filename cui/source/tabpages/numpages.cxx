@@ -2134,7 +2134,7 @@ static tools::Long lcl_DrawGraphic(VirtualDevice* pVDev, const SvxNumberFormat &
             nRet = aGSize.Width();
             aGSize.setHeight( aGSize.Height() / nDivision );
             pGrf->Draw( pVDev, Point(nXStart,nYMiddle - ( aGSize.Height() / 2) ),
-                    pVDev->PixelToLogic( aGSize ) );
+                    pVDev->GetGeometry().PixelToLogic( aGSize ) );
         }
     }
     return nRet;
@@ -2187,7 +2187,7 @@ SvxNumberingPreview::SvxNumberingPreview()
 // paint preview of numeration
 void SvxNumberingPreview::Paint(vcl::RenderContext& rRenderContext, const ::tools::Rectangle& /*rRect*/)
 {
-    Size aSize(rRenderContext.PixelToLogic(GetSizeInPixels()));
+    Size aSize(rRenderContext.GetGeometry().PixelToLogic(GetSizeInPixels()));
 
     const StyleSettings& rStyleSettings = rRenderContext.GetSettings().GetStyleSettings();
     const Color aBackColor = rStyleSettings.GetFieldColor();

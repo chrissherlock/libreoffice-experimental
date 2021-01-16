@@ -475,7 +475,7 @@ void PDFWriterImpl::playMetafile( const GDIMetaFile& i_rMtf, vcl::PDFExtOutDevDa
                                 MapMode aMapMode( pDummyVDev->GetMapMode() );
                                 aMapMode.SetOrigin( aPoint );
                                 xVDev->SetMapMode( aMapMode );
-                                Size aDstSize( xVDev->PixelToLogic( aDstSizePixel ) );
+                                Size aDstSize( xVDev->GetGeometry().PixelToLogic( aDstSizePixel ) );
 
                                 Point   aMtfOrigin( aTmpMtf.GetPrefMapMode().GetOrigin() );
                                 if ( aMtfOrigin.X() || aMtfOrigin.Y() )
@@ -733,7 +733,7 @@ void PDFWriterImpl::playMetafile( const GDIMetaFile& i_rMtf, vcl::PDFExtOutDevDa
                     Size aSize( OutputDevice::LogicToLogic( aBitmapEx.GetPrefSize(),
                                                             aBitmapEx.GetPrefMapMode(), pDummyVDev->GetMapMode() ) );
                     if( ! ( aSize.Width() && aSize.Height() ) )
-                        aSize = pDummyVDev->PixelToLogic( aBitmapEx.GetSizePixel() );
+                        aSize = pDummyVDev->GetGeometry().PixelToLogic( aBitmapEx.GetSizePixel() );
 
                     Graphic aGraphic = i_pOutDevData ? i_pOutDevData->GetCurrentGraphic() : Graphic();
                     implWriteBitmapEx( pA->GetPoint(), aSize, aBitmapEx, aGraphic, pDummyVDev, i_rContext );

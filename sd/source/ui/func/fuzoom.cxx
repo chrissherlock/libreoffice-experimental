@@ -160,7 +160,7 @@ bool FuZoom::MouseButtonUp(const MouseEvent& rMEvt)
         {
             // click at place: double zoom factor
             Point aPos = mpWindow->GetGeometry().PixelToLogic(aPosPix);
-            Size aSize = mpWindow->PixelToLogic(mpWindow->GetSizeInPixels());
+            Size aSize = mpWindow->GetGeometry().PixelToLogic(mpWindow->GetSizeInPixels());
             if ( rMEvt.IsMod1() )
             {
                 aSize.setWidth( aSize.Width() * 2 );

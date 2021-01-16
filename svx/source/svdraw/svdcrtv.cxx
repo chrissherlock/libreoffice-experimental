@@ -73,7 +73,7 @@ ImplConnectMarkerOverlay::ImplConnectMarkerOverlay(const SdrCreateView& rView, S
         if(xTargetOverlay.is())
         {
             float fScalingFactor = xTargetOverlay->getOutputDevice().GetDPIScaleFactor();
-            Size aHalfLogicSize(xTargetOverlay->getOutputDevice().PixelToLogic(Size(4 * fScalingFactor, 4 * fScalingFactor)));
+            Size aHalfLogicSize(xTargetOverlay->getOutputDevice().GetGeometry().PixelToLogic(Size(4 * fScalingFactor, 4 * fScalingFactor)));
 
             // object
             std::unique_ptr<sdr::overlay::OverlayPolyPolygonStripedAndFilled> pNew(new sdr::overlay::OverlayPolyPolygonStripedAndFilled(

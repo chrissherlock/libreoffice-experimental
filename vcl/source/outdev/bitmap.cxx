@@ -55,7 +55,7 @@ void OutputDevice::DrawBitmap(const Point& rDestPt, const Bitmap& rBitmap)
     assert(!is_double_buffered_window());
 
     const Size aSizePix(rBitmap.GetSizePixel());
-    DrawBitmap(rDestPt, PixelToLogic(aSizePix), Point(), aSizePix, rBitmap, MetaActionType::BMP);
+    DrawBitmap(rDestPt, maGeometry.PixelToLogic(aSizePix), Point(), aSizePix, rBitmap, MetaActionType::BMP);
 }
 
 void OutputDevice::DrawBitmap(const Point& rDestPt, const Size& rDestSize, const Bitmap& rBitmap)

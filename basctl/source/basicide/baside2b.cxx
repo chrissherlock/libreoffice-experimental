@@ -1396,7 +1396,7 @@ void BreakPointWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Re
         GetImage(RID_BMP_BRKENABLED)
     };
 
-    Size const aBmpSz = rRenderContext.PixelToLogic(aBrk[1].GetSizePixel());
+    Size const aBmpSz = rRenderContext.GetGeometry().PixelToLogic(aBrk[1].GetSizePixel());
     Point const aBmpOff((aOutSz.Width() - aBmpSz.Width()) / 2,
                         (nLineHeight - aBmpSz.Height()) / 2);
 
@@ -1422,7 +1422,7 @@ void BreakPointWindow::ShowMarker(vcl::RenderContext& rRenderContext)
     Image aMarker = GetImage(OUString(bErrorMarker ? std::u16string_view(u"" RID_BMP_ERRORMARKER) : std::u16string_view(u"" RID_BMP_STEPMARKER)));
 
     Size aMarkerSz(aMarker.GetSizePixel());
-    aMarkerSz = rRenderContext.PixelToLogic(aMarkerSz);
+    aMarkerSz = rRenderContext.GetGeometry().PixelToLogic(aMarkerSz);
     Point aMarkerOff(0, 0);
     aMarkerOff.setX( (aOutSz.Width() - aMarkerSz.Width()) / 2 );
     aMarkerOff.setY( (nLineHeight - aMarkerSz.Height()) / 2 );

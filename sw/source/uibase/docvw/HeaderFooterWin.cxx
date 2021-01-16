@@ -302,7 +302,7 @@ void SwHeaderFooterWin::PaintButton()
     // Use pixels for the rest of the drawing
     SetMapMode(MapMode(MapUnit::MapPixel));
     drawinglayer::primitive2d::Primitive2DContainer aSeq;
-    const ::tools::Rectangle aRect(::tools::Rectangle(Point(0, 0), m_xVirDev->PixelToLogic(GetSizePixel())));
+    const ::tools::Rectangle aRect(::tools::Rectangle(Point(0, 0), m_xVirDev->GetGeometry().PixelToLogic(GetSizePixel())));
 
     SwFrameButtonPainter::PaintButton(aSeq, aRect, m_bIsHeader);
 

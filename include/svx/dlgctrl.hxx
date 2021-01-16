@@ -309,7 +309,7 @@ public:
 
     Size GetSizeInLogicalUnits() const
     {
-        return mpBufferDevice->PixelToLogic(GetSizeInPixels());
+        return mpBufferDevice->GetGeometry().PixelToLogic(GetSizeInPixels());
     }
 
     // dada read access

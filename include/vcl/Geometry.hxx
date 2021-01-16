@@ -143,6 +143,7 @@ public:
                                          MapMode const& rMapMode) const;
 
     Point PixelToLogic(Point const& rDevicePt) const;
+    Size PixelToLogic(Size const& rDeviceSize) const;
 
     /** Get device transformation.
 

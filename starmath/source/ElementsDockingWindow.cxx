@@ -1058,7 +1058,7 @@ void SmElementsControl::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     CustomWidgetController::SetDrawingArea(pDrawingArea);
     OutputDevice& rDevice = pDrawingArea->get_ref_device();
-    maFormat.SetBaseSize(rDevice.PixelToLogic(Size(0, SmPtsTo100th_mm(12))));
+    maFormat.SetBaseSize(rDevice.GetGeometry().PixelToLogic(Size(0, SmPtsTo100th_mm(12))));
     Size aSize(rDevice.GetGeometry().LogicToPixel(Size(10, 100), MapMode(MapUnit::MapAppFont)));
     // give it an arbitrary small width request so it can shrink in the sidebar
     pDrawingArea->set_size_request(42, aSize.Height());

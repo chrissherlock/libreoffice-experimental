@@ -1462,7 +1462,7 @@ const PaperInfo& Printer::GetPaperInfo( int nPaper ) const
 Size Printer::GetPaperSize( int nPaper )
 {
     PaperInfo aInfo = GetPaperInfo( nPaper );
-    return PixelToLogic( Size( aInfo.getWidth(), aInfo.getHeight() ) );
+    return maGeometry.PixelToLogic( Size( aInfo.getWidth(), aInfo.getHeight() ) );
 }
 
 void Printer::SetDuplexMode( DuplexMode eDuplex )

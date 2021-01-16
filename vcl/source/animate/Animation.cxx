@@ -232,7 +232,7 @@ void Animation::Stop(const OutputDevice* pOut, tools::Long nExtraData)
 
 void Animation::Draw(OutputDevice* pOut, const Point& rDestPt) const
 {
-    Draw(pOut, rDestPt, pOut->PixelToLogic(maGlobalSize));
+    Draw(pOut, rDestPt, pOut->GetGeometry().PixelToLogic(maGlobalSize));
 }
 
 void Animation::Draw(OutputDevice* pOut, const Point& rDestPt, const Size& rDestSz) const

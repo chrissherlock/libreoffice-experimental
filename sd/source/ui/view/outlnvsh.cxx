@@ -1059,7 +1059,7 @@ void OutlineViewShell::VirtHScrollHdl(ScrollBar* pHScroll)
 
     Window*       pWin          = mpContentWindow.get();
     OutlinerView* pOutlinerView = pOlView->GetViewByWindow(pWin);
-    ::tools::Long          nViewWidth    = pWin->PixelToLogic(
+    ::tools::Long          nViewWidth    = pWin->GetGeometry().PixelToLogic(
         pWin->GetSizePixel()).Width();
     ::tools::Long          nTextWidth    = pOlView->GetPaperWidth();
     nViewWidth                  = std::max(nViewWidth, nTextWidth);
@@ -1080,7 +1080,7 @@ void OutlineViewShell::VirtVScrollHdl(ScrollBar* pVScroll)
 
     Window*       pWin          = mpContentWindow.get();
     OutlinerView* pOutlinerView = pOlView->GetViewByWindow(pWin);
-    ::tools::Long          nViewHeight   = pWin->PixelToLogic(
+    ::tools::Long          nViewHeight   = pWin->GetGeometry().PixelToLogic(
         pWin->GetSizePixel()).Height();
     ::tools::Long          nTextHeight   = pOlView->GetOutliner().GetTextHeight();
     nViewHeight                += nTextHeight;

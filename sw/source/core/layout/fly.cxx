@@ -2497,7 +2497,7 @@ Size SwFlyFrame::CalcRel( const SwFormatFrameSize &rSz ) const
         {
             nRelWidth  = pSh->GetBrowseWidth();
             nRelHeight = pSh->VisArea().Height();
-            Size aBorder = pSh->GetOut()->PixelToLogic( pSh->GetBrowseBorder() );
+            Size aBorder = pSh->GetOut()->GetGeometry().PixelToLogic( pSh->GetBrowseBorder() );
             nRelWidth  = std::min( nRelWidth,  pRel->getFramePrintArea().Width() );
             nRelHeight -= 2*aBorder.Height();
             nRelHeight = std::min( nRelHeight, pRel->getFramePrintArea().Height() );

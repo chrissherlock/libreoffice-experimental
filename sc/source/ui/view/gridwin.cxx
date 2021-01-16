@@ -5369,7 +5369,7 @@ bool ScGridWindow::GetEditUrl( const Point& rPos,
         tools::Long nSizeY  = 0;
         mrViewData.GetMergeSizePixel( nPosX, nPosY, nSizeX, nSizeY );
         aPaperSize = Size(nSizeX, nSizeY );
-        aPaperSize = PixelToLogic(aPaperSize);
+        aPaperSize = maGeometry.PixelToLogic(aPaperSize);
     }
 
     if (bBreak)

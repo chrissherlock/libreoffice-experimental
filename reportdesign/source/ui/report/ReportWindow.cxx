@@ -406,7 +406,7 @@ sal_uInt16 OReportWindow::getZoomFactor(SvxZoomType _eType) const
             {
                 nZoom = static_cast<sal_uInt16>(static_cast<tools::Long>(Fraction(aSize.Width()*100,impl_getRealPixelWidth())));
                 MapMode aMap( MapUnit::Map100thMM );
-                const Size aHeight = m_aViewsWindow->GetGeometry().LogicToPixel(m_aViewsWindow->PixelToLogic(Size(0,GetTotalHeight() + m_aHRuler->GetSizePixel().Height())),aMap);
+                const Size aHeight = m_aViewsWindow->GetGeometry().LogicToPixel(m_aViewsWindow->GetGeometry().PixelToLogic(Size(0,GetTotalHeight() + m_aHRuler->GetSizePixel().Height())),aMap);
                 nZoom = ::std::min(nZoom,static_cast<sal_uInt16>(static_cast<tools::Long>(Fraction(aSize.Height()*100,aHeight.Height()))));
             }
             break;

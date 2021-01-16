@@ -1851,7 +1851,7 @@ void ScViewData::EditGrowX()
                 --nEditStartCol;
                 tools::Long nColWidth = rLocalDoc.GetColWidth( nEditStartCol, nTabNo );
                 tools::Long nLeftPix = ToPixel( nColWidth, nPPTX );
-                nLogicLeft = pWin->PixelToLogic(Size(nLeftPix,0)).Width();
+                nLogicLeft = pWin->GetGeometry().PixelToLogic(Size(nLeftPix,0)).Width();
                 if (bLOKPrintTwips)
                     nLogicLeftPTwips = nColWidth;
             }
@@ -1862,7 +1862,7 @@ void ScViewData::EditGrowX()
                 ++nEditEndCol;
                 tools::Long nColWidth = rLocalDoc.GetColWidth( nEditEndCol, nTabNo );
                 tools::Long nRightPix = ToPixel( nColWidth, nPPTX );
-                nLogicRight = pWin->PixelToLogic(Size(nRightPix,0)).Width();
+                nLogicRight = pWin->GetGeometry().PixelToLogic(Size(nRightPix,0)).Width();
                 if (bLOKPrintTwips)
                     nLogicRightPTwips = nColWidth;
             }
@@ -1903,7 +1903,7 @@ void ScViewData::EditGrowX()
             --nEditStartCol;
             tools::Long nColWidth = rLocalDoc.GetColWidth( nEditStartCol, nTabNo );
             tools::Long nPix = ToPixel( nColWidth, nPPTX );
-            tools::Long nLogicWidth = pWin->PixelToLogic(Size(nPix,0)).Width();
+            tools::Long nLogicWidth = pWin->GetGeometry().PixelToLogic(Size(nPix,0)).Width();
             tools::Long& nLogicWidthPTwips = nColWidth;
 
             if ( !bLayoutRTL )
@@ -1945,7 +1945,7 @@ void ScViewData::EditGrowX()
             ++nEditEndCol;
             tools::Long nColWidth = rLocalDoc.GetColWidth( nEditEndCol, nTabNo );
             tools::Long nPix = ToPixel( nColWidth, nPPTX );
-            tools::Long nLogicWidth = pWin->PixelToLogic(Size(nPix,0)).Width();
+            tools::Long nLogicWidth = pWin->GetGeometry().PixelToLogic(Size(nPix,0)).Width();
             tools::Long& nLogicWidthPTwips = nColWidth;
             if ( bLayoutRTL )
             {
@@ -2061,7 +2061,7 @@ void ScViewData::EditGrowX()
     if ( bUnevenGrow )
     {
         aArea.SetLeft( pWin->GetGeometry().PixelToLogic( Point(0,0) ).X() );
-        aArea.SetRight( pWin->PixelToLogic( aScrSize ).Width() );
+        aArea.SetRight( pWin->GetGeometry().PixelToLogic( aScrSize ).Width() );
     }
     else if ( !bAsianVertical && !bGrowToLeft && !bGrowCentered )
         aArea.SetLeft( nOldRight );
@@ -2143,7 +2143,7 @@ void ScViewData::EditGrowY( bool bInitial )
         ScDocument& rLocalDoc = GetDocument();
         tools::Long nRowHeight = rLocalDoc.GetRowHeight( nEditEndRow, nTabNo );
         tools::Long nPix = ToPixel( nRowHeight, nPPTY );
-        aArea.AdjustBottom(pWin->PixelToLogic(Size(0,nPix)).Height() );
+        aArea.AdjustBottom(pWin->GetGeometry().PixelToLogic(Size(0,nPix)).Height() );
         if (bLOKPrintTwips)
             aAreaPTwips.AdjustBottom(nRowHeight);
 

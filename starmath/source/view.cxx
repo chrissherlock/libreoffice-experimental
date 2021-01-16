@@ -404,7 +404,7 @@ void SmGraphicWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Rec
 void SmGraphicWindow::SetTotalSize ()
 {
     SmDocShell &rDoc = *pViewShell->GetDoc();
-    const Size aTmp( PixelToLogic( maGeometry.LogicToPixel( rDoc.GetSize() )));
+    const Size aTmp( maGeometry.PixelToLogic( maGeometry.LogicToPixel( rDoc.GetSize() )));
     if ( aTmp != ScrollableWindow::GetTotalSize() )
         ScrollableWindow::SetTotalSize( aTmp );
 }

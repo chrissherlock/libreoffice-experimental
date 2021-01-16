@@ -338,7 +338,7 @@ bool FuSelection::MouseButtonUp(const MouseEvent& rMEvt)
         aDragTimer.Stop();
     }
 
-    sal_uInt16 nDrgLog = sal_uInt16 ( pWindow->PixelToLogic(Size(SC_MINDRAGMOVE,0)).Width() );
+    sal_uInt16 nDrgLog = sal_uInt16 ( pWindow->GetGeometry().PixelToLogic(Size(SC_MINDRAGMOVE,0)).Width() );
     auto aLogicPosition = rMEvt.getLogicPosition();
     Point aPnt(aLogicPosition ? *aLogicPosition : pWindow->GetGeometry().PixelToLogic(rMEvt.GetPosPixel()));
 

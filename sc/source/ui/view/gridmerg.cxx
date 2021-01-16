@@ -116,7 +116,7 @@ void ScGridMerger::AddHorLine(bool bWorksInPixels, tools::Long nX1, tools::Long 
         aLineInfo.SetDashCount( PAGEBREAK_LINE_DASH_COUNT );
 
         // Calculating logic values of DashLen and Distance from fixed pixel values
-        Size aDashDistanceLen( pDev->PixelToLogic( Size( PAGEBREAK_LINE_DISTANCE_PIXEL,
+        Size aDashDistanceLen( pDev->GetGeometry().PixelToLogic( Size( PAGEBREAK_LINE_DISTANCE_PIXEL,
                                                          PAGEBREAK_LINE_DASH_LEN_PIXEL )));
 
         aLineInfo.SetDistance( aDashDistanceLen.Width() );
@@ -160,7 +160,7 @@ void ScGridMerger::AddVerLine(bool bWorksInPixels, tools::Long nX, tools::Long n
         aLineInfo.SetDashCount( PAGEBREAK_LINE_DASH_COUNT );
 
         // Calculating logic values of DashLen and Distance from fixed pixel values
-        Size aDashDistanceLen( pDev->PixelToLogic( Size( PAGEBREAK_LINE_DISTANCE_PIXEL,
+        Size aDashDistanceLen( pDev->GetGeometry().PixelToLogic( Size( PAGEBREAK_LINE_DISTANCE_PIXEL,
                                                          PAGEBREAK_LINE_DASH_LEN_PIXEL )));
 
         aLineInfo.SetDistance( aDashDistanceLen.Width() );

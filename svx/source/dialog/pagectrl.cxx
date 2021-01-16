@@ -90,7 +90,7 @@ void SvxPageWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Recta
         aMapMode.SetScaleY(aXScale);
     }
     rRenderContext.SetMapMode(aMapMode);
-    Size aSz(rRenderContext.PixelToLogic(GetSizeInPixels()));
+    Size aSz(rRenderContext.GetGeometry().PixelToLogic(GetSizeInPixels()));
     tools::Long nYPos = (aSz.Height() - aSize.Height()) / 2;
 
     if (eUsage == SvxPageUsage::All)
@@ -107,7 +107,7 @@ void SvxPageWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Recta
             aMapMode.SetScaleX(aX);
             aMapMode.SetScaleY(aY);
             rRenderContext.SetMapMode(aMapMode);
-            aSz = rRenderContext.PixelToLogic(GetSizeInPixels());
+            aSz = rRenderContext.GetGeometry().PixelToLogic(GetSizeInPixels());
             nYPos = (aSz.Height() - aSize.Height()) / 2;
             tools::Long nXPos = (aSz.Width() - aSize.Width()) / 2;
             DrawPage(rRenderContext, Point(nXPos,nYPos),true,true);
@@ -399,7 +399,7 @@ void SvxPageWindow::SetDrawingArea(weld::DrawingArea* pDrawingArea)
     aWinSize.AdjustHeight( -4 );
     aWinSize.AdjustWidth( -4 );
 
-    aWinSize = rRefDevice.PixelToLogic(aWinSize);
+    aWinSize = rRefDevice.GetGeometry().PixelToLogic(aWinSize);
     rRefDevice.Pop();
 }
 

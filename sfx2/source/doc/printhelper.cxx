@@ -421,7 +421,7 @@ void SfxPrintHelper::impl_setPrinter(const uno::Sequence< beans::PropertyValue >
         aSetPaperSize = pPrinter->GetGeometry().LogicToPixel(aSetPaperSize, MapMode(MapUnit::Map100thMM));
         if( aSetPaperSize != pPrinter->GetPaperSizePixel() )
         {
-            pPrinter->SetPaperSizeUser( pPrinter->PixelToLogic( aSetPaperSize ) );
+            pPrinter->SetPaperSizeUser( pPrinter->GetGeometry().PixelToLogic( aSetPaperSize ) );
             nChangeFlags |= SfxPrinterChangeFlags::CHG_SIZE;
         }
     }

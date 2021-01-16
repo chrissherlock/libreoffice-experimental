@@ -409,7 +409,7 @@ bool GraphCtrl::KeyInput( const KeyEvent& rKEvt )
                 if(aCode.IsMod2())
                 {
                     // move in 1 pixel distance
-                    Size aLogicSizeOnePixel = rDevice.PixelToLogic(Size(1,1));
+                    Size aLogicSizeOnePixel = rDevice.GetGeometry().PixelToLogic(Size(1,1));
                     nX *= aLogicSizeOnePixel.Width();
                     nY *= aLogicSizeOnePixel.Height();
                 }

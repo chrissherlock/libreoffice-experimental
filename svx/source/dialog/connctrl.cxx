@@ -289,7 +289,7 @@ bool SvxXConnectionPreview::MouseButtonDown( const MouseEvent& rMEvt )
             SetMapMode( aMapMode );
 
             Size aOutSize(GetSizeInPixels());
-            aOutSize = GetDrawingArea()->get_ref_device().PixelToLogic(aOutSize);
+            aOutSize = GetDrawingArea()->get_ref_device().GetGeometry().PixelToLogic(aOutSize);
 
             Point aPt( aMapMode.GetOrigin() );
             tools::Long nX = static_cast<tools::Long>( ( static_cast<double>(aOutSize.Width()) - ( static_cast<double>(aOutSize.Width()) * static_cast<double>(*pMultFrac)  ) ) / 2.0 + 0.5 );

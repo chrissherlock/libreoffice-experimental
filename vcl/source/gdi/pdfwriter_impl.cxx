@@ -6244,7 +6244,7 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
         // This is the top left of the text without ascent / descent.
         aRectangle.SetPos(maGeometry.PixelToLogic(rLayout.GetDrawPosition()));
         aRectangle.setY(aRectangle.getY() - aRefDevFontMetric.GetAscent());
-        aRectangle.SetSize(PixelToLogic(Size(rLayout.GetTextWidth(), 0)));
+        aRectangle.SetSize(maGeometry.PixelToLogic(Size(rLayout.GetTextWidth(), 0)));
         // This includes ascent / descent.
         aRectangle.setHeight(aRefDevFontMetric.GetLineHeight());
 

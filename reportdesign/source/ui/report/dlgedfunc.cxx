@@ -673,7 +673,7 @@ bool DlgEdFuncInsert::MouseButtonUp( const MouseEvent& rMEvt )
         return true;
 
     const Point aPos( m_pParent->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() ) );
-    const sal_uInt16 nHitLog = sal_uInt16 ( m_pParent->PixelToLogic(Size(3,0)).Width() );
+    const sal_uInt16 nHitLog = sal_uInt16 ( m_pParent->GetGeometry().PixelToLogic(Size(3,0)).Width() );
 
     bool bReturn = true;
     // object creation active?

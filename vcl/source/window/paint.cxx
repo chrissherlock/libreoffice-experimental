@@ -128,7 +128,7 @@ PaintBufferGuard::~PaintBufferGuard()
             else
             {
                 tools::Rectangle aRectanglePixel = m_pWindow->GetGeometry().LogicToPixel(m_aPaintRect);
-                aPaintRectSize = m_pWindow->PixelToLogic(aRectanglePixel.GetSize());
+                aPaintRectSize = m_pWindow->GetGeometry().PixelToLogic(aRectanglePixel.GetSize());
             }
 
             m_pWindow->DrawOutDev(m_aPaintRect.TopLeft(), aPaintRectSize, m_aPaintRect.TopLeft(), aPaintRectSize, *mpFrameData->mpBuffer);
@@ -1411,7 +1411,7 @@ void Window::ImplPaintToDevice( OutputDevice* i_pTargetOutDev, const Point& i_rP
 
         Paint(*pDevice, tools::Rectangle(Point(), GetSizeInPixels()));
 
-        i_pTargetOutDev->DrawOutDev(i_rPos, aSize, Point(), pDevice->PixelToLogic(aSize), *pDevice);
+        i_pTargetOutDev->DrawOutDev(i_rPos, aSize, Point(), pDevice->GetGeometry().PixelToLogic(aSize), *pDevice);
 
         // get rid of virtual device now so they don't pile up during recursive calls
         pDevice.disposeAndClear();

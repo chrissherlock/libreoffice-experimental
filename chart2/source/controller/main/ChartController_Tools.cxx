@@ -380,7 +380,7 @@ void ChartController::impl_PasteGraphic(
     if( ! ( xGraphicProp->getPropertyValue( "Size100thMM") >>= aGraphicSize ) &&
         ( ( xGraphicProp->getPropertyValue( "SizePixel") >>= aGraphicSize ) && pChartWindow ))
     {
-        ::Size aVCLSize( pChartWindow->PixelToLogic( Size( aGraphicSize.Width, aGraphicSize.Height )));
+        ::Size aVCLSize( pChartWindow->GetGeometry().PixelToLogic( Size( aGraphicSize.Width, aGraphicSize.Height )));
         aGraphicSize.Width = aVCLSize.getWidth();
         aGraphicSize.Height = aVCLSize.getHeight();
     }

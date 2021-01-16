@@ -51,7 +51,7 @@ namespace
         const short HITPIX=2; //hit-tolerance in pixel
         short nHitTolerance = 50;
         if(pOutDev)
-            nHitTolerance = static_cast<short>(pOutDev->PixelToLogic(Size(HITPIX,0)).Width());
+            nHitTolerance = static_cast<short>(pOutDev->GetGeometry().PixelToLogic(Size(HITPIX,0)).Width());
         return nHitTolerance;
     }
 

@@ -53,7 +53,7 @@ bool FuSelection::TestDetective( const SdrPageView* pPV, const Point& rPos )
     {
         if (ScDetectiveFunc::IsNonAlienArrow( pObject ))
         {
-            sal_uInt16 nHitLog = static_cast<sal_uInt16>(pWindow->PixelToLogic(
+            sal_uInt16 nHitLog = static_cast<sal_uInt16>(pWindow->GetGeometry().PixelToLogic(
                                 Size(pView->GetHitTolerancePixel(),0)).Width());
             if (SdrObjectPrimitiveHit(*pObject, rPos, nHitLog, *pPV, nullptr, false))
             {

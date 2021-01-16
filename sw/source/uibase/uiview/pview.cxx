@@ -1747,7 +1747,7 @@ void SwPagePreviewWin::AdjustPreviewToNewZoom( const sal_uInt16 _nZoomFactor,
         SetMapMode( aNewMapMode );
 
         // calculate new start position for preview paint
-        Size aNewWinSize = PixelToLogic( maPxWinSize );
+        Size aNewWinSize = maGeometry.PixelToLogic( maPxWinSize );
         Point aNewPaintStartPos =
                 mpPgPreviewLayout->GetPreviewStartPosForNewScale( aNewScale, maScale, aNewWinSize );
 

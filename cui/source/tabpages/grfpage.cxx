@@ -706,7 +706,7 @@ void SvxCropExample::Paint(vcl::RenderContext& rRenderContext, const ::tools::Re
     rRenderContext.SetMapMode(m_aMapMode);
 
     // Win BG
-    const Size aWinSize(rRenderContext.PixelToLogic(GetSizeInPixels()));
+    const Size aWinSize(rRenderContext.GetGeometry().PixelToLogic(GetSizeInPixels()));
     rRenderContext.SetLineColor();
     rRenderContext.SetFillColor(rRenderContext.GetSettings().GetStyleSettings().GetWindowColor());
     rRenderContext.DrawRect(::tools::Rectangle(Point(), aWinSize));

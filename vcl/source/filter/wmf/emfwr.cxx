@@ -1241,7 +1241,7 @@ void EMFWriter::ImplWrite( const GDIMetaFile& rMtf )
             case MetaActionType::BMP:
             {
                 const MetaBmpAction* pA = static_cast<const MetaBmpAction *>(pAction);
-                ImplWriteBmpRecord( pA->GetBitmap(), pA->GetPoint(), maVDev->PixelToLogic( pA->GetBitmap().GetSizePixel() ), WIN_SRCCOPY );
+                ImplWriteBmpRecord( pA->GetBitmap(), pA->GetPoint(), maVDev->GetGeometry().PixelToLogic( pA->GetBitmap().GetSizePixel() ), WIN_SRCCOPY );
             }
             break;
 
@@ -1272,8 +1272,8 @@ void EMFWriter::ImplWrite( const GDIMetaFile& rMtf )
                 {
                     aBmp.Replace( aMsk, COL_WHITE );
                     aMsk.Invert();
-                    ImplWriteBmpRecord( aMsk, pA->GetPoint(), maVDev->PixelToLogic( aMsk.GetSizePixel() ), WIN_SRCPAINT );
-                    ImplWriteBmpRecord( aBmp, pA->GetPoint(), maVDev->PixelToLogic( aBmp.GetSizePixel() ), WIN_SRCAND );
+                    ImplWriteBmpRecord( aMsk, pA->GetPoint(), maVDev->GetGeometry().PixelToLogic( aMsk.GetSizePixel() ), WIN_SRCPAINT );
+                    ImplWriteBmpRecord( aBmp, pA->GetPoint(), maVDev->GetGeometry().PixelToLogic( aBmp.GetSizePixel() ), WIN_SRCAND );
                 }
                 else
                     ImplWriteBmpRecord( aBmp, pA->GetPoint(), aBmp.GetSizePixel(), WIN_SRCCOPY );

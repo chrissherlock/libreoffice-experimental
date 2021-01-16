@@ -1201,8 +1201,8 @@ void SalInstanceWidget::DoRecursivePaint(vcl::Window* pWindow, const Point& rRen
     aMapMode.SetScaleY(rOutput.GetMapMode().GetScaleY());
     xOutput->SetMapMode(aMapMode);
 
-    Size aTempLogicSize(xOutput->PixelToLogic(aChildSizePixel));
-    Size aRenderLogicSize(rOutput.PixelToLogic(aChildSizePixel));
+    Size aTempLogicSize(xOutput->GetGeometry().PixelToLogic(aChildSizePixel));
+    Size aRenderLogicSize(rOutput.GetGeometry().PixelToLogic(aChildSizePixel));
 
     xOutput->DrawOutDev(Point(), aTempLogicSize, rRenderLogicPos, aRenderLogicSize, rOutput);
 
@@ -1212,7 +1212,7 @@ void SalInstanceWidget::DoRecursivePaint(vcl::Window* pWindow, const Point& rRen
     pImpl->mbReallyVisible = pWindow->IsVisible();
 
     pWindow->ApplySettings(*xOutput);
-    pWindow->Paint(*xOutput, tools::Rectangle(Point(), pWindow->PixelToLogic(aChildSizePixel)));
+    pWindow->Paint(*xOutput, tools::Rectangle(Point(), pWindow->GetGeometry().PixelToLogic(aChildSizePixel)));
 
     pImpl->mbReallyVisible = bRVisible;
 
@@ -1232,7 +1232,7 @@ void SalInstanceWidget::DoRecursivePaint(vcl::Window* pWindow, const Point& rRen
         if (!pChild->IsVisible())
             continue;
         Point aRelPos(pChild->GetPosPixel());
-        Size aRelLogicOffset(rOutput.PixelToLogic(Size(aRelPos.X(), aRelPos.Y())));
+        Size aRelLogicOffset(rOutput.GetGeometry().PixelToLogic(Size(aRelPos.X(), aRelPos.Y())));
         DoRecursivePaint(pChild,
                          rRenderLogicPos + Point(aRelLogicOffset.Width(), aRelLogicOffset.Height()),
                          rOutput);
@@ -5919,7 +5919,8 @@ void SalInstanceDrawingArea::im_context_set_cursor_location(const tools::Rectang
 {
     tools::Rectangle aCursorRect = m_xDrawingArea->PixelToLogic(rCursorRect);
     m_xDrawingArea->SetCursorRect(
-        &aCursorRect, m_xDrawingArea->PixelToLogic(Size(nExtTextInputWidth, 0)).Width());
+        &aCursorRect,
+        m_xDrawingArea->GetGeometry().PixelToLogic(Size(nExtTextInputWidth, 0)).Width());
 }
 
 a11yref SalInstanceDrawingArea::get_accessible_parent()

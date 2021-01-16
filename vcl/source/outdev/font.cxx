@@ -169,7 +169,7 @@ Size OutputDevice::GetDevFontSize( const vcl::Font& rFont, int nSizeIndex ) cons
             aSize.AdjustHeight( -nRound );
         aSize.setHeight( aSize.Height() * 10 );
         aSize = maGeometry.LogicToPixel( aSize, aMap );
-        aSize = PixelToLogic( aSize );
+        aSize = maGeometry.PixelToLogic( aSize );
         aSize.AdjustHeight(5 );
         aSize.setHeight( aSize.Height() / 10 );
     }
@@ -233,7 +233,7 @@ FontMetric OutputDevice::GetFontMetric() const
     // set aMetric with info from font
     aMetric.SetFamilyName( maFont.GetFamilyName() );
     aMetric.SetStyleName( xFontMetric->GetStyleName() );
-    aMetric.SetFontSize( PixelToLogic( Size( xFontMetric->GetWidth(), xFontMetric->GetAscent() + xFontMetric->GetDescent() - xFontMetric->GetInternalLeading() ) ) );
+    aMetric.SetFontSize( maGeometry.PixelToLogic( Size( xFontMetric->GetWidth(), xFontMetric->GetAscent() + xFontMetric->GetDescent() - xFontMetric->GetInternalLeading() ) ) );
     aMetric.SetCharSet( xFontMetric->IsSymbolFont() ? RTL_TEXTENCODING_SYMBOL : RTL_TEXTENCODING_UNICODE );
     aMetric.SetFamily( xFontMetric->GetFamilyType() );
     aMetric.SetPitch( xFontMetric->GetPitch() );

@@ -270,7 +270,7 @@ void EditEngine::Draw( OutputDevice* pOutDev, const tools::Rectangle& rOutRect, 
             if ( pOutDev->GetOutDevType() == OUTDEV_PRINTER )
             {
                 Size aPixSz( 1, 0 );
-                aPixSz = pOutDev->PixelToLogic( aPixSz );
+                aPixSz = pOutDev->GetGeometry().PixelToLogic( aPixSz );
                 aClipRect.AdjustRight(aPixSz.Width() );
                 aClipRect.AdjustBottom(aPixSz.Width() );
             }

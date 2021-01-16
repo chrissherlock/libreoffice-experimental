@@ -435,7 +435,7 @@ bool FuText::MouseButtonDown(const MouseEvent& rMEvt)
                             eHit = mpView->PickAnything(rMEvt, SdrMouseEventKind::BUTTONDOWN, aVEvt);
                             if( (eHit == SdrHitKind::Handle) || (eHit == SdrHitKind::MarkedObject) )
                             {
-                                sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(DRGPIX,0)).Width() );
+                                sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->GetGeometry().PixelToLogic(Size(DRGPIX,0)).Width() );
                                 mpView->BegDragObj(aMDPos, nullptr, aVEvt.pHdl, nDrgLog);
                             }
                         }
@@ -448,7 +448,7 @@ bool FuText::MouseButtonDown(const MouseEvent& rMEvt)
                     // create object
                     mpView->SetCurrentObj(OBJ_TEXT);
                     mpView->SetEditMode(SdrViewEditMode::Create);
-                    sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(DRGPIX,0)).Width() );
+                    sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->GetGeometry().PixelToLogic(Size(DRGPIX,0)).Width() );
                     mpView->BegCreateObj(aMDPos, nullptr, nDrgLog);
                 }
                 else
@@ -671,7 +671,7 @@ bool FuText::MouseButtonUp(const MouseEvent& rMEvt)
         mpView->ForceMarkedToAnotherPage();
         mpView->SetCurrentObj(OBJ_TEXT);
 
-        sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(DRGPIX,0)).Width() );
+        sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->GetGeometry().PixelToLogic(Size(DRGPIX,0)).Width() );
 
         if (bJustEndedEdit)
         {
@@ -768,7 +768,7 @@ bool FuText::MouseButtonUp(const MouseEvent& rMEvt)
 
     ForcePointer(&rMEvt);
     mpWindow->ReleaseMouse();
-    sal_uInt16 nDrgLog1 = sal_uInt16 ( mpWindow->PixelToLogic(Size(DRGPIX,0)).Width() );
+    sal_uInt16 nDrgLog1 = sal_uInt16 ( mpWindow->GetGeometry().PixelToLogic(Size(DRGPIX,0)).Width() );
 
     if ( mpView && !mpView->AreObjectsMarked() &&
          std::abs(aMDPos.X() - aPnt.X()) < nDrgLog1 &&
@@ -791,7 +791,7 @@ bool FuText::MouseButtonUp(const MouseEvent& rMEvt)
             // text body (left-justified AutoGrow)
             mpView->SetCurrentObj(OBJ_TEXT);
             mpView->SetEditMode(SdrViewEditMode::Create);
-            sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(DRGPIX,0)).Width() );
+            sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->GetGeometry().PixelToLogic(Size(DRGPIX,0)).Width() );
             mpView->BegCreateObj(aMDPos, nullptr, nDrgLog);
 
             bool bSnapEnabled = mpView->IsSnapEnabled();

@@ -253,7 +253,7 @@ bool SwFEShell::SelectObj( const Point& rPt, sal_uInt8 nFlag, SdrObject *pObj )
     {
         // tolerance limit of Drawing-SS
         const auto nHdlSizePixel = Imp()->GetDrawView()->GetMarkHdlSizePixel();
-        const short nMinMove = static_cast<short>(GetOut()->PixelToLogic(Size(nHdlSizePixel/2, 0)).Width());
+        const short nMinMove = static_cast<short>(GetOut()->GetGeometry().PixelToLogic(Size(nHdlSizePixel/2, 0)).Width());
         pDView->MarkObj( rPt, nMinMove, bAddSelect, bEnterGroup );
     }
 
@@ -3131,7 +3131,7 @@ void SwFEShell::CreateDefaultShape( SdrObjKind eSdrObjectKind, const tools::Rect
                 aSet.Put( SdrTextAniKindItem( SdrTextAniKind::Slide ) );
                 aSet.Put( SdrTextAniDirectionItem( SdrTextAniDirection::Left ) );
                 aSet.Put( SdrTextAniCountItem( 1 ) );
-                aSet.Put( SdrTextAniAmountItem( static_cast<sal_Int16>(GetWin()->PixelToLogic(Size(2,1)).Width())) );
+                aSet.Put( SdrTextAniAmountItem( static_cast<sal_Int16>(GetWin()->GetGeometry().PixelToLogic(Size(2,1)).Width())) );
                 pObj->SetMergedItemSetAndBroadcast(aSet);
             }
         }

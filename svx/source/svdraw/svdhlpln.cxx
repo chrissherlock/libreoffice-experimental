@@ -35,7 +35,7 @@ PointerStyle SdrHelpLine::GetPointer() const
 
 bool SdrHelpLine::IsHit(const Point& rPnt, sal_uInt16 nTolLog, const OutputDevice& rOut) const
 {
-    Size a1Pix(rOut.PixelToLogic(Size(1,1)));
+    Size a1Pix(rOut.GetGeometry().PixelToLogic(Size(1,1)));
     bool bXHit=rPnt.X()>=aPos.X()-nTolLog && rPnt.X()<=aPos.X()+nTolLog+a1Pix.Width();
     bool bYHit=rPnt.Y()>=aPos.Y()-nTolLog && rPnt.Y()<=aPos.Y()+nTolLog+a1Pix.Height();
     switch (eKind) {
@@ -43,7 +43,7 @@ bool SdrHelpLine::IsHit(const Point& rPnt, sal_uInt16 nTolLog, const OutputDevic
         case SdrHelpLineKind::Horizontal: return bYHit;
         case SdrHelpLineKind::Point: {
             if (bXHit || bYHit) {
-                Size aRad(rOut.PixelToLogic(Size(SDRHELPLINE_POINT_PIXELSIZE,SDRHELPLINE_POINT_PIXELSIZE)));
+                Size aRad(rOut.GetGeometry().PixelToLogic(Size(SDRHELPLINE_POINT_PIXELSIZE,SDRHELPLINE_POINT_PIXELSIZE)));
                 return rPnt.X()>=aPos.X()-aRad.Width() && rPnt.X()<=aPos.X()+aRad.Width()+a1Pix.Width() &&
                        rPnt.Y()>=aPos.Y()-aRad.Height() && rPnt.Y()<=aPos.Y()+aRad.Height()+a1Pix.Height();
             }
@@ -61,7 +61,7 @@ tools::Rectangle SdrHelpLine::GetBoundRect(const OutputDevice& rOut) const
         case SdrHelpLineKind::Vertical  : aRet.SetTop(-aOfs.Y() ); aRet.SetBottom(-aOfs.Y()+aSiz.Height() ); break;
         case SdrHelpLineKind::Horizontal: aRet.SetLeft(-aOfs.X() ); aRet.SetRight(-aOfs.X()+aSiz.Width() );  break;
         case SdrHelpLineKind::Point     : {
-            Size aRad(rOut.PixelToLogic(Size(SDRHELPLINE_POINT_PIXELSIZE,SDRHELPLINE_POINT_PIXELSIZE)));
+            Size aRad(rOut.GetGeometry().PixelToLogic(Size(SDRHELPLINE_POINT_PIXELSIZE,SDRHELPLINE_POINT_PIXELSIZE)));
             aRet.AdjustLeft( -(aRad.Width()) );
             aRet.AdjustRight(aRad.Width() );
             aRet.AdjustTop( -(aRad.Height()) );

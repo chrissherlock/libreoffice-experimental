@@ -361,11 +361,11 @@ public:
     virtual sal_uInt16          GetBitCount() const;
 
     Size                        GetSizeInLogicalUnits() const
-                                    { return PixelToLogic( GetSizeInPixels() ); }
+                                    { return maGeometry.PixelToLogic( maGeometry.GetSizeInPixels() ); }
     Point                       GetOutputOffPixel() const
-                                    { return Point( GetXOffsetInPixels(), GetYOffsetInPixels() ); }
+                                    { return Point( maGeometry.GetXOffsetInPixels(), maGeometry.GetYOffsetInPixels() ); }
     tools::Rectangle            GetOutputRectPixel() const
-                                    { return tools::Rectangle(GetOutputOffPixel(), GetSizeInPixels() ); }
+                                    { return tools::Rectangle(GetOutputOffPixel(), maGeometry.GetSizeInPixels() ); }
 
 
     css::uno::Reference< css::awt::XGraphics >

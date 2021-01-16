@@ -225,7 +225,7 @@ void SwPagePreviewLayout::Init( const sal_uInt16 _nCols,
     }
 
     // set window size in twips
-    maWinSize = mrParentViewShell.GetOut()->PixelToLogic( _rPxWinSize );
+    maWinSize = mrParentViewShell.GetOut()->GetGeometry().PixelToLogic( _rPxWinSize );
     // validate layout sizes
     mbLayoutSizesValid = true;
 }
@@ -315,7 +315,7 @@ bool SwPagePreviewLayout::Prepare( const sal_uInt16 _nProposedStartPageNum,
     // environment and parameter ok
 
     // update window size at preview setting data
-    maWinSize = mrParentViewShell.GetOut()->PixelToLogic( _rPxWinSize );
+    maWinSize = mrParentViewShell.GetOut()->GetGeometry().PixelToLogic( _rPxWinSize );
 
     mbNoPageVisible = false;
     if ( nProposedStartPageNum > 0 )

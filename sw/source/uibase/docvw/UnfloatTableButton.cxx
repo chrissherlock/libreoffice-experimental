@@ -199,7 +199,7 @@ void UnfloatTableButton::PaintButton()
     m_xVirDev->SetMapMode(MapMode(MapUnit::MapPixel));
     drawinglayer::primitive2d::Primitive2DContainer aSeq;
     const ::tools::Rectangle aRect(
-        ::tools::Rectangle(Point(0, 0), m_xVirDev->PixelToLogic(GetSizePixel())));
+        ::tools::Rectangle(Point(0, 0), m_xVirDev->GetGeometry().PixelToLogic(GetSizePixel())));
 
     // Create button
     SwFrameButtonPainter::PaintButton(aSeq, aRect, true);

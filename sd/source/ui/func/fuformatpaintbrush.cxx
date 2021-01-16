@@ -94,7 +94,7 @@ bool FuFormatPaintBrush::MouseButtonDown(const MouseEvent& rMEvt)
         if( (eHit == SdrHitKind::TextEdit) || (eHit == SdrHitKind::TextEditObj && ( mpViewShell->GetFrameView()->IsQuickEdit() || dynamic_cast< sdr::table::SdrTableObj* >( aVEvt.pObj ) != nullptr ) ))
         {
             SdrPageView* pPV=nullptr;
-            sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(HITPIX,0)).Width() );
+            sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->GetGeometry().PixelToLogic(Size(HITPIX,0)).Width() );
             SdrObject* pPickObj = mpView->PickObj(mpWindow->GetGeometry().PixelToLogic(rMEvt.GetPosPixel()),nHitLog, pPV, SdrSearchOptions::PICKMARKABLE);
             if( (pPickObj != nullptr) && !pPickObj->IsEmptyPresObj() )
             {
@@ -129,7 +129,7 @@ bool FuFormatPaintBrush::MouseButtonDown(const MouseEvent& rMEvt)
 
         if( aVEvt.pObj )
         {
-            sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(HITPIX,0)).Width() );
+            sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->GetGeometry().PixelToLogic(Size(HITPIX,0)).Width() );
             mpView->MarkObj(mpWindow->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() ), nHitLog, false/*bToggle*/);
             return true;
         }
@@ -149,7 +149,7 @@ bool FuFormatPaintBrush::MouseMove(const MouseEvent& rMEvt)
         }
         else
         {
-            sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(HITPIX,0)).Width() );
+            sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->GetGeometry().PixelToLogic(Size(HITPIX,0)).Width() );
             SdrPageView* pPV=nullptr;
             SdrObject* pObj = mpView->PickObj(mpWindow->GetGeometry().PixelToLogic( rMEvt.GetPosPixel() ),nHitLog, pPV, SdrSearchOptions::PICKMARKABLE);
             if (pObj && HasContentForThisType(pObj->GetObjInventor(),pObj->GetObjIdentifier()) )

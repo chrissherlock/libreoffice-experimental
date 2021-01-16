@@ -38,7 +38,7 @@ void ImplDrawDefault( OutputDevice* pOutDev, const OUString* pText,
                              vcl::Font* pFont, const BitmapEx* pBitmapEx,
                              const Point& rDestPt, const Size& rDestSize )
 {
-    sal_uInt16  nPixel = static_cast<sal_uInt16>(pOutDev->PixelToLogic( Size( 1, 1 ) ).Width());
+    sal_uInt16  nPixel = static_cast<sal_uInt16>(pOutDev->GetGeometry().PixelToLogic( Size( 1, 1 ) ).Width());
     sal_uInt16  nPixelWidth = nPixel;
     Point       aPoint( rDestPt.X() + nPixelWidth, rDestPt.Y() + nPixelWidth );
     Size        aSize( rDestSize.Width() - ( nPixelWidth << 1 ), rDestSize.Height() - ( nPixelWidth << 1 ) );
@@ -59,7 +59,7 @@ void ImplDrawDefault( OutputDevice* pOutDev, const OUString* pText,
 
     if( !aSize.IsEmpty() && pBitmapEx && !!*pBitmapEx )
     {
-        Size aBitmapSize( pOutDev->PixelToLogic( pBitmapEx->GetSizePixel() ) );
+        Size aBitmapSize( pOutDev->GetGeometry().PixelToLogic( pBitmapEx->GetSizePixel() ) );
 
         if( aSize.Height() > aBitmapSize.Height() && aSize.Width() > aBitmapSize.Width() )
         {

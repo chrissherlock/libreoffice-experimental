@@ -851,7 +851,7 @@ void SwPageFrame::MakeAll(vcl::RenderContext* pRenderContext)
                 if (pSh && pSh->GetViewOptions()->getBrowseMode())
                 {
                     // In BrowseView, we use fixed settings
-                    const Size aBorder = pRenderContext->PixelToLogic( pSh->GetBrowseBorder() );
+                    const Size aBorder = pRenderContext->GetGeometry().PixelToLogic( pSh->GetBrowseBorder() );
                     const tools::Long nTop    = pAttrs->CalcTopLine()   + aBorder.Height();
                     const tools::Long nBottom = pAttrs->CalcBottomLine()+ aBorder.Height();
 
@@ -1141,7 +1141,7 @@ void SwContentFrame::MakePrtArea( const SwBorderAttrs &rAttrs )
                 }
             }
 
-            const Size aBorder = pSh->GetOut()->PixelToLogic( pSh->GetBrowseBorder() );
+            const Size aBorder = pSh->GetOut()->GetGeometry().PixelToLogic( pSh->GetBrowseBorder() );
             tools::Long nWidth = nWidthArea - 2 * ( IsVertical() ? aBorder.Height() : aBorder.Width() );
             nWidth -= aRectFnSet.GetLeft(getFramePrintArea());
             nWidth -= rAttrs.CalcRightLine();

@@ -1048,7 +1048,7 @@ void SwEditWin::ChangeFly( sal_uInt8 nDir, bool bWeb )
         MOVE_RIGHT_SMALL == nDir ||
         MOVE_DOWN_SMALL == nDir )
     {
-        aSnap = PixelToLogic(Size(1,1));
+        aSnap = maGeometry.PixelToLogic(Size(1,1));
     }
     else
     {
@@ -1263,7 +1263,7 @@ void SwEditWin::ChangeDrawing( sal_uInt8 nDir )
 
         if(bOnePixel)
         {
-            aSnap = PixelToLogic(Size(1,1));
+            aSnap = maGeometry.PixelToLogic(Size(1,1));
         }
         else if(bHuge)
         {

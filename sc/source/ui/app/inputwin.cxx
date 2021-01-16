@@ -1323,7 +1323,7 @@ void ScTextWnd::Resize()
             m_xEditView->Scroll(0, m_xEditView->GetVisArea().Top() - nMaxVisAreaTop);
         }
 
-        m_xEditEngine->SetPaperSize( rDevice.PixelToLogic( Size( aOutputSize.Width(), 10000 ) ) );
+        m_xEditEngine->SetPaperSize( rDevice.GetGeometry().PixelToLogic( Size( aOutputSize.Width(), 10000 ) ) );
     }
 
     // skip WeldEditView's Resize();
@@ -1476,7 +1476,7 @@ void ScTextWnd::InitEditEngine()
 
     Size barSize = GetSizeInPixels();
     m_xEditEngine->SetUpdateMode( false );
-    m_xEditEngine->SetPaperSize( GetDrawingArea()->get_ref_device().PixelToLogic(Size(barSize.Width(),10000)) );
+    m_xEditEngine->SetPaperSize( GetDrawingArea()->get_ref_device().GetGeometry().PixelToLogic(Size(barSize.Width(),10000)) );
     m_xEditEngine->SetWordDelimiters(
                     ScEditUtil::ModifyDelimiters( m_xEditEngine->GetWordDelimiters() ) );
     m_xEditEngine->SetReplaceLeadingSingleQuotationMark( false );

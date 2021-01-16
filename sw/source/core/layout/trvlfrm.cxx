@@ -2399,7 +2399,7 @@ void SwRootFrame::CalcFrameRects(SwShellCursor &rCursor)
                 OutputDevice* pOut = pSh->GetOut();
                 tools::Long nCursorWidth = pOut->GetSettings().GetStyleSettings().
                     GetCursorSize();
-                aRectFnSet.SetWidth( aTmp, pOut->PixelToLogic(
+                aRectFnSet.SetWidth( aTmp, pOut->GetGeometry().PixelToLogic(
                     Size( nCursorWidth, 0 ) ).Width() );
             }
             aTmp.Intersection( aStFrame );

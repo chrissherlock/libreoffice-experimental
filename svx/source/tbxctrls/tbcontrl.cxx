@@ -590,8 +590,8 @@ private:
         }
 
         // Paint the lines
-        aSize = aVirDev->PixelToLogic( aSize );
-        tools::Long nPix = aVirDev->PixelToLogic( Size( 0, 1 ) ).Height();
+        aSize = aVirDev->GetGeometry().PixelToLogic( aSize );
+        tools::Long nPix = aVirDev->GetGeometry().PixelToLogic( Size( 0, 1 ) ).Height();
         sal_uInt32 n1 = nLine1;
         sal_uInt32 n2 = nLine2;
         tools::Long nDist  = nDistance;

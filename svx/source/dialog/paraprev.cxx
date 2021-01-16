@@ -56,9 +56,9 @@ void SvxParaPrevWindow::DrawParagraph(vcl::RenderContext& rRenderContext)
     rRenderContext.SetMapMode(MapMode(MapUnit::MapTwip));
 
     Size aWinSize(GetSizeInPixels());
-    aWinSize = rRenderContext.PixelToLogic(aWinSize);
+    aWinSize = rRenderContext.GetGeometry().PixelToLogic(aWinSize);
     Size aTmp(1, 1);
-    aTmp = rRenderContext.PixelToLogic(aTmp);
+    aTmp = rRenderContext.GetGeometry().PixelToLogic(aTmp);
     aWinSize.AdjustWidth( -(aTmp.Width() /2) );
     aWinSize.AdjustHeight( -(aTmp.Height() /2) );
 

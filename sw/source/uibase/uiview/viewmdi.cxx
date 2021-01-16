@@ -354,7 +354,7 @@ IMPL_LINK( SwView, MoveNavigationHdl, void*, p, void )
                 // If there is a difference, has been truncated --> then add one pixel,
                 // so that no residue of the previous page is visible.
                 if(aPt.Y() != aAlPt.Y())
-                    aAlPt.AdjustY(3 * GetEditWin().PixelToLogic(Size(0, 1)).Height());
+                    aAlPt.AdjustY(3 * GetEditWin().GetGeometry().PixelToLogic(Size(0, 1)).Height());
                 SetVisArea(aAlPt);
                 SvxSearchDialogWrapper::SetSearchLabel(bNext ? SearchLabel::EndWrapped :
                                                                SearchLabel::StartWrapped);

@@ -1065,7 +1065,7 @@ void SwVirtFlyDrawObj::NbcResize(const Point& rRef, const Fraction& xFact, const
             {
                 nRelWidth  = pSh->GetBrowseWidth();
                 nRelHeight = pSh->VisArea().Height();
-                const Size aBorder = pSh->GetOut()->PixelToLogic( pSh->GetBrowseBorder() );
+                const Size aBorder = pSh->GetOut()->GetGeometry().PixelToLogic( pSh->GetBrowseBorder() );
                 nRelHeight -= 2*aBorder.Height();
             }
             else

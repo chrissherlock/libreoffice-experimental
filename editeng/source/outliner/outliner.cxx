@@ -1053,7 +1053,7 @@ void Outliner::PaintBullet( sal_Int32 nPara, const Point& rStartPos,
             bStrippingPortions || nOrientation )
         return;
 
-    tools::Long nWidth = pOutDev->PixelToLogic( Size( 10, 0 ) ).Width();
+    tools::Long nWidth = pOutDev->GetGeometry().PixelToLogic( Size( 10, 0 ) ).Width();
 
     Point aStartPos, aEndPos;
     if ( !bVertical )

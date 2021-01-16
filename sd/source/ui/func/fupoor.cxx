@@ -632,7 +632,7 @@ bool FuPoor::KeyInput(const KeyEvent& rKEvt)
                     {
                         sal_uInt16 nMarkHdSiz(mpView->GetMarkHdlSizePixel());
                         Size aHalfConSiz(nMarkHdSiz + 1, nMarkHdSiz + 1);
-                        aHalfConSiz = mpWindow->PixelToLogic(aHalfConSiz);
+                        aHalfConSiz = mpWindow->GetGeometry().PixelToLogic(aHalfConSiz);
 
                         if(100 < aHalfConSiz.Width())
                             nX *= aHalfConSiz.Width();
@@ -647,7 +647,7 @@ bool FuPoor::KeyInput(const KeyEvent& rKEvt)
                     else if(rKEvt.GetKeyCode().IsMod2())
                     {
                         // move in 1 pixel distance
-                        Size aLogicSizeOnePixel = mpWindow->PixelToLogic(Size(1,1));
+                        Size aLogicSizeOnePixel = mpWindow->GetGeometry().PixelToLogic(Size(1,1));
                         nX *= aLogicSizeOnePixel.Width();
                         nY *= aLogicSizeOnePixel.Height();
                     }
@@ -930,7 +930,7 @@ IMPL_LINK_NOARG(FuPoor, DragHdl, Timer *, void)
     if( !mpView )
         return;
 
-    sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(HITPIX,0)).Width() );
+    sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->GetGeometry().PixelToLogic(Size(HITPIX,0)).Width() );
     SdrHdl* pHdl = mpView->PickHandle(aMDPos);
 
     if ( pHdl==nullptr && mpView->IsMarkedHit(aMDPos, nHitLog)
