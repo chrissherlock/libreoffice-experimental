@@ -30,6 +30,7 @@
 #include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/wrkwin.hxx>
+#include <vcl/Geometry.hxx>
 
 #include <window.h>
 #include <svdata.hxx>
@@ -227,156 +228,6 @@ static void verifyUnitSourceDest(MapUnit eUnitSource, MapUnit eUnitDest)
                "Destination MapUnit is not permitted");
 }
 
-// return (n1 * n2 * n3) / (n4 * n5)
-static tools::Long fn5(const tools::Long n1, const tools::Long n2, const tools::Long n3,
-                       const tools::Long n4, const tools::Long n5)
-{
-    if (n1 == 0 || n2 == 0 || n3 == 0 || n4 == 0 || n5 == 0)
-        return 0;
-    if (std::numeric_limits<tools::Long>::max() / std::abs(n2) < std::abs(n3))
-    {
-        // a6 is skipped
-        BigInt a7 = n2;
-        a7 *= n3;
-        a7 *= n1;
-
-        if (std::numeric_limits<tools::Long>::max() / std::abs(n4) < std::abs(n5))
-        {
-            BigInt a8 = n4;
-            a8 *= n5;
-
-            BigInt a9 = a8;
-            a9 /= 2;
-            if (a7.IsNeg())
-                a7 -= a9;
-            else
-                a7 += a9;
-
-            a7 /= a8;
-        } // of if
-        else
-        {
-            tools::Long n8 = n4 * n5;
-
-            if (a7.IsNeg())
-                a7 -= n8 / 2;
-            else
-                a7 += n8 / 2;
-
-            a7 /= n8;
-        } // of else
-        return static_cast<tools::Long>(a7);
-    } // of if
-    else
-    {
-        tools::Long n6 = n2 * n3;
-
-        if (std::numeric_limits<tools::Long>::max() / std::abs(n1) < std::abs(n6))
-        {
-            BigInt a7 = n1;
-            a7 *= n6;
-
-            if (std::numeric_limits<tools::Long>::max() / std::abs(n4) < std::abs(n5))
-            {
-                BigInt a8 = n4;
-                a8 *= n5;
-
-                BigInt a9 = a8;
-                a9 /= 2;
-                if (a7.IsNeg())
-                    a7 -= a9;
-                else
-                    a7 += a9;
-
-                a7 /= a8;
-            } // of if
-            else
-            {
-                tools::Long n8 = n4 * n5;
-
-                if (a7.IsNeg())
-                    a7 -= n8 / 2;
-                else
-                    a7 += n8 / 2;
-
-                a7 /= n8;
-            } // of else
-            return static_cast<tools::Long>(a7);
-        } // of if
-        else
-        {
-            tools::Long n7 = n1 * n6;
-
-            if (std::numeric_limits<tools::Long>::max() / std::abs(n4) < std::abs(n5))
-            {
-                BigInt a7 = n7;
-                BigInt a8 = n4;
-                a8 *= n5;
-
-                BigInt a9 = a8;
-                a9 /= 2;
-                if (a7.IsNeg())
-                    a7 -= a9;
-                else
-                    a7 += a9;
-
-                a7 /= a8;
-                return static_cast<tools::Long>(a7);
-            } // of if
-            else
-            {
-                const tools::Long n8 = n4 * n5;
-                const tools::Long n8_2 = n8 / 2;
-
-                if (n7 < 0)
-                {
-                    if ((n7 - std::numeric_limits<tools::Long>::min()) >= n8_2)
-                        n7 -= n8_2;
-                }
-                else if ((std::numeric_limits<tools::Long>::max() - n7) >= n8_2)
-                    n7 += n8_2;
-
-                return n7 / n8;
-            } // of else
-        } // of else
-    } // of else
-}
-
-// return (n1 * n2) / n3
-static tools::Long fn3(const tools::Long n1, const tools::Long n2, const tools::Long n3)
-{
-    if (n1 == 0 || n2 == 0 || n3 == 0)
-        return 0;
-    if (std::numeric_limits<tools::Long>::max() / std::abs(n1) < std::abs(n2))
-    {
-        BigInt a4 = n1;
-        a4 *= n2;
-
-        if (a4.IsNeg())
-            a4 -= n3 / 2;
-        else
-            a4 += n3 / 2;
-
-        a4 /= n3;
-        return static_cast<tools::Long>(a4);
-    } // of if
-    else
-    {
-        tools::Long n4 = n1 * n2;
-        const tools::Long n3_2 = n3 / 2;
-
-        if (n4 < 0)
-        {
-            if ((n4 - std::numeric_limits<tools::Long>::min()) >= n3_2)
-                n4 -= n3_2;
-        }
-        else if ((std::numeric_limits<tools::Long>::max() - n4) >= n3_2)
-            n4 += n3_2;
-
-        return n4 / n3;
-    } // of else
-}
-
 Point OutputDevice::LogicToLogic(const Point& rPtSource, const MapMode* pMapModeSource,
                                  const MapMode* pMapModeDest) const
 {
@@ -416,11 +267,11 @@ Point OutputDevice::LogicToLogic(const Point& rPtSource, const MapMode* pMapMode
         aMappingMetricDest = maGeometry.GetMappingMetrics();
     }
 
-    return Point(fn5(rPtSource.X() + aMappingMetricSource.mnMapOfsX,
+    return Point(Geometry::fn5(rPtSource.X() + aMappingMetricSource.mnMapOfsX,
                      aMappingMetricSource.mnMapScNumX, aMappingMetricDest.mnMapScDenomX,
                      aMappingMetricSource.mnMapScDenomX, aMappingMetricDest.mnMapScNumX)
                      - aMappingMetricDest.mnMapOfsX,
-                 fn5(rPtSource.Y() + aMappingMetricSource.mnMapOfsY,
+                 Geometry::fn5(rPtSource.Y() + aMappingMetricSource.mnMapOfsY,
                      aMappingMetricSource.mnMapScNumY, aMappingMetricDest.mnMapScDenomY,
                      aMappingMetricSource.mnMapScDenomY, aMappingMetricDest.mnMapScNumY)
                      - aMappingMetricDest.mnMapOfsY);
@@ -466,9 +317,9 @@ Size OutputDevice::LogicToLogic(const Size& rSzSource, const MapMode* pMapModeSo
     }
 
     return Size(
-        fn5(rSzSource.Width(), aMappingMetricSource.mnMapScNumX, aMappingMetricDest.mnMapScDenomX,
+        Geometry::fn5(rSzSource.Width(), aMappingMetricSource.mnMapScNumX, aMappingMetricDest.mnMapScDenomX,
             aMappingMetricSource.mnMapScDenomX, aMappingMetricDest.mnMapScNumX),
-        fn5(rSzSource.Height(), aMappingMetricSource.mnMapScNumY, aMappingMetricDest.mnMapScDenomY,
+        Geometry::fn5(rSzSource.Height(), aMappingMetricSource.mnMapScNumY, aMappingMetricDest.mnMapScDenomY,
             aMappingMetricSource.mnMapScDenomY, aMappingMetricDest.mnMapScNumY));
 }
 
@@ -512,19 +363,19 @@ tools::Rectangle OutputDevice::LogicToLogic(const tools::Rectangle& rRectSource,
         aMappingMetricDest = maGeometry.GetMappingMetrics();
     }
 
-    return tools::Rectangle(fn5(rRectSource.Left() + aMappingMetricSource.mnMapOfsX,
+    return tools::Rectangle(Geometry::fn5(rRectSource.Left() + aMappingMetricSource.mnMapOfsX,
                                 aMappingMetricSource.mnMapScNumX, aMappingMetricDest.mnMapScDenomX,
                                 aMappingMetricSource.mnMapScDenomX, aMappingMetricDest.mnMapScNumX)
                                 - aMappingMetricDest.mnMapOfsX,
-                            fn5(rRectSource.Top() + aMappingMetricSource.mnMapOfsY,
+                            Geometry::fn5(rRectSource.Top() + aMappingMetricSource.mnMapOfsY,
                                 aMappingMetricSource.mnMapScNumY, aMappingMetricDest.mnMapScDenomY,
                                 aMappingMetricSource.mnMapScDenomY, aMappingMetricDest.mnMapScNumY)
                                 - aMappingMetricDest.mnMapOfsY,
-                            fn5(rRectSource.Right() + aMappingMetricSource.mnMapOfsX,
+                            Geometry::fn5(rRectSource.Right() + aMappingMetricSource.mnMapOfsX,
                                 aMappingMetricSource.mnMapScNumX, aMappingMetricDest.mnMapScDenomX,
                                 aMappingMetricSource.mnMapScDenomX, aMappingMetricDest.mnMapScNumX)
                                 - aMappingMetricDest.mnMapOfsX,
-                            fn5(rRectSource.Bottom() + aMappingMetricSource.mnMapOfsY,
+                            Geometry::fn5(rRectSource.Bottom() + aMappingMetricSource.mnMapOfsY,
                                 aMappingMetricSource.mnMapScNumY, aMappingMetricDest.mnMapScDenomY,
                                 aMappingMetricSource.mnMapScDenomY, aMappingMetricDest.mnMapScNumY)
                                 - aMappingMetricDest.mnMapOfsY);
@@ -558,19 +409,19 @@ Point OutputDevice::LogicToLogic(const Point& rPtSource, const MapMode& rMapMode
         else if (eUnitDest == MapUnit::MapPixel)
             nNumerator *= 72;
 
-        return Point(fn3(rPtSource.X(), nNumerator, nDenominator),
-                     fn3(rPtSource.Y(), nNumerator, nDenominator));
+        return Point(Geometry::fn3(rPtSource.X(), nNumerator, nDenominator),
+                     Geometry::fn3(rPtSource.Y(), nNumerator, nDenominator));
     }
     else
     {
         MappingMetrics aMappingMetricSource(rMapModeSource, 72, 72);
         MappingMetrics aMappingMetricDest(rMapModeDest, 72, 72);
 
-        return Point(fn5(rPtSource.X() + aMappingMetricSource.mnMapOfsX,
+        return Point(Geometry::fn5(rPtSource.X() + aMappingMetricSource.mnMapOfsX,
                          aMappingMetricSource.mnMapScNumX, aMappingMetricDest.mnMapScDenomX,
                          aMappingMetricSource.mnMapScDenomX, aMappingMetricDest.mnMapScNumX)
                          - aMappingMetricDest.mnMapOfsX,
-                     fn5(rPtSource.Y() + aMappingMetricSource.mnMapOfsY,
+                     Geometry::fn5(rPtSource.Y() + aMappingMetricSource.mnMapOfsY,
                          aMappingMetricSource.mnMapScNumY, aMappingMetricDest.mnMapScDenomY,
                          aMappingMetricSource.mnMapScDenomY, aMappingMetricDest.mnMapScNumY)
                          - aMappingMetricDest.mnMapOfsY);
@@ -605,18 +456,18 @@ Size OutputDevice::LogicToLogic(const Size& rSzSource, const MapMode& rMapModeSo
         else if (eUnitDest == MapUnit::MapPixel)
             nNumerator *= 72;
 
-        return Size(fn3(rSzSource.Width(), nNumerator, nDenominator),
-                    fn3(rSzSource.Height(), nNumerator, nDenominator));
+        return Size(Geometry::fn3(rSzSource.Width(), nNumerator, nDenominator),
+                    Geometry::fn3(rSzSource.Height(), nNumerator, nDenominator));
     }
     else
     {
         MappingMetrics aMappingMetricSource(rMapModeSource, 72, 72);
         MappingMetrics aMappingMetricDest(rMapModeDest, 72, 72);
 
-        return Size(fn5(rSzSource.Width(), aMappingMetricSource.mnMapScNumX,
+        return Size(Geometry::fn5(rSzSource.Width(), aMappingMetricSource.mnMapScNumX,
                         aMappingMetricDest.mnMapScDenomX, aMappingMetricSource.mnMapScDenomX,
                         aMappingMetricDest.mnMapScNumX),
-                    fn5(rSzSource.Height(), aMappingMetricSource.mnMapScNumY,
+                    Geometry::fn5(rSzSource.Height(), aMappingMetricSource.mnMapScNumY,
                         aMappingMetricDest.mnMapScDenomY, aMappingMetricSource.mnMapScDenomY,
                         aMappingMetricDest.mnMapScNumY));
     }
@@ -731,13 +582,13 @@ tools::Rectangle OutputDevice::LogicToLogic(const tools::Rectangle& rRectSource,
         else if (eUnitDest == MapUnit::MapPixel)
             nNumerator *= 72;
 
-        auto left = fn3(rRectSource.Left(), nNumerator, nDenominator);
-        auto top = fn3(rRectSource.Top(), nNumerator, nDenominator);
+        auto left = Geometry::fn3(rRectSource.Left(), nNumerator, nDenominator);
+        auto top = Geometry::fn3(rRectSource.Top(), nNumerator, nDenominator);
         if (rRectSource.IsEmpty())
             return tools::Rectangle(left, top);
 
-        auto right = fn3(rRectSource.Right(), nNumerator, nDenominator);
-        auto bottom = fn3(rRectSource.Bottom(), nNumerator, nDenominator);
+        auto right = Geometry::fn3(rRectSource.Right(), nNumerator, nDenominator);
+        auto bottom = Geometry::fn3(rRectSource.Bottom(), nNumerator, nDenominator);
         return tools::Rectangle(left, top, right, bottom);
     }
     else
@@ -745,22 +596,22 @@ tools::Rectangle OutputDevice::LogicToLogic(const tools::Rectangle& rRectSource,
         MappingMetrics aMappingMetricSource(rMapModeSource, 72, 72);
         MappingMetrics aMappingMetricDest(rMapModeDest, 72, 72);
 
-        auto left = fn5(rRectSource.Left() + aMappingMetricSource.mnMapOfsX,
+        auto left = Geometry::fn5(rRectSource.Left() + aMappingMetricSource.mnMapOfsX,
                         aMappingMetricSource.mnMapScNumX, aMappingMetricDest.mnMapScDenomX,
                         aMappingMetricSource.mnMapScDenomX, aMappingMetricDest.mnMapScNumX)
                     - aMappingMetricDest.mnMapOfsX;
-        auto top = fn5(rRectSource.Top() + aMappingMetricSource.mnMapOfsY,
+        auto top = Geometry::fn5(rRectSource.Top() + aMappingMetricSource.mnMapOfsY,
                        aMappingMetricSource.mnMapScNumY, aMappingMetricDest.mnMapScDenomY,
                        aMappingMetricSource.mnMapScDenomY, aMappingMetricDest.mnMapScNumY)
                    - aMappingMetricDest.mnMapOfsY;
         if (rRectSource.IsEmpty())
             return tools::Rectangle(left, top);
 
-        auto right = fn5(rRectSource.Right() + aMappingMetricSource.mnMapOfsX,
+        auto right = Geometry::fn5(rRectSource.Right() + aMappingMetricSource.mnMapOfsX,
                          aMappingMetricSource.mnMapScNumX, aMappingMetricDest.mnMapScDenomX,
                          aMappingMetricSource.mnMapScDenomX, aMappingMetricDest.mnMapScNumX)
                      - aMappingMetricDest.mnMapOfsX;
-        auto bottom = fn5(rRectSource.Bottom() + aMappingMetricSource.mnMapOfsY,
+        auto bottom = Geometry::fn5(rRectSource.Bottom() + aMappingMetricSource.mnMapOfsY,
                           aMappingMetricSource.mnMapScNumY, aMappingMetricDest.mnMapScDenomY,
                           aMappingMetricSource.mnMapScDenomY, aMappingMetricDest.mnMapScNumY)
                       - aMappingMetricDest.mnMapOfsY;
@@ -792,7 +643,7 @@ tools::Long OutputDevice::LogicToLogic(tools::Long nLongSource, MapUnit eUnitSou
     else if (eUnitDest == MapUnit::MapPixel)
         nNumerator *= 72;
 
-    return fn3(nLongSource, nNumerator, nDenominator);
+    return Geometry::fn3(nLongSource, nNumerator, nDenominator);
 }
 
 void OutputDevice::SetOffsetFromOriginInPixels(Size const& rOffset)

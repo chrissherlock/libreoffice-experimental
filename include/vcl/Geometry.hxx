@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#pragma once
+
 #include <tools/gen.hxx>
 #include <tools/long.hxx>
 #include <tools/poly.hxx>
@@ -158,6 +160,10 @@ public:
                                      MapMode const& rMapMode) const;
     basegfx::B2DPolyPolygon PixelToLogic(basegfx::B2DPolyPolygon const& rDevicePolyPoly,
                                          MapMode const& rMapMode) const;
+
+    static tools::Long fn5(const tools::Long n1, const tools::Long n2, const tools::Long n3,
+                           const tools::Long n4, const tools::Long n5);
+    static tools::Long fn3(const tools::Long n1, const tools::Long n2, const tools::Long n3);
 
     /** Get device transformation.
 
