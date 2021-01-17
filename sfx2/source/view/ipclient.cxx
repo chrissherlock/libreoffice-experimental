@@ -589,7 +589,7 @@ void SfxInPlaceClient_Impl::SizeHasChanged()
                 MapMode aClientMap( m_pClient->GetEditWin()->GetMapMode().GetMapUnit() );
 
                 // convert to logical coordinates of the embedded object
-                Size aNewSize = m_pClient->GetEditWin()->LogicToLogic( m_aObjArea.GetSize(), &aClientMap, &aObjectMap );
+                Size aNewSize = m_pClient->GetEditWin()->LogicToLogic( m_aObjArea.GetSize(), &aClientMap, &aObjectMap, 0 );
                 m_xObject->setVisualAreaSize( m_nAspect, awt::Size( aNewSize.Width(), aNewSize.Height() ) );
             }
 
@@ -966,7 +966,7 @@ ErrCode SfxInPlaceClient::DoVerb(sal_Int32 nVerb)
                                 awt::Size aSize = m_xImp->m_xObject->getVisualAreaSize( m_xImp->m_nAspect );
                                 MapMode aObjectMap( VCLUnoHelper::UnoEmbed2VCLMapUnit( m_xImp->m_xObject->getMapUnit( m_xImp->m_nAspect ) ) );
                                 MapMode aClientMap( GetEditWin()->GetMapMode().GetMapUnit() );
-                                Size aNewSize = GetEditWin()->LogicToLogic( Size( aSize.Width, aSize.Height ), &aObjectMap, &aClientMap );
+                                Size aNewSize = GetEditWin()->LogicToLogic( Size( aSize.Width, aSize.Height ), &aObjectMap, &aClientMap, 0 );
 
                                 tools::Rectangle aScaledArea = GetScaledObjArea();
                                 m_xImp->m_aObjArea.SetSize( aNewSize );

@@ -201,7 +201,7 @@ void SvTabListBox::SetTabs(sal_uInt16 nTabs, tools::Long const pTabPositions[], 
     for( sal_uInt16 nIdx = 0; nIdx < sal_uInt16(mvTabList.size()); nIdx++, pTabPositions++ )
     {
         Size aSize( *pTabPositions, 0 );
-        aSize = LogicToLogic( aSize, &aMMSource, &aMMDest );
+        aSize = LogicToLogic( aSize, &aMMSource, &aMMDest, 0 );
         tools::Long nNewTab = aSize.Width();
         mvTabList[nIdx].SetPos( nNewTab );
         mvTabList[nIdx].nFlags &= MYTABMASK;

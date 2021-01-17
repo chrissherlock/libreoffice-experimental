@@ -1440,38 +1440,25 @@ public:
 public:
     void SetOffsetFromOriginInPixels(Size const& rOffset) override;
 
-    Point                       PixelToLogic( const Point& rDevicePt,
-                                              const MapMode& rMapMode ) const;
-    Size                        PixelToLogic( const Size& rDeviceSize,
-                                              const MapMode& rMapMode ) const;
-    tools::Rectangle                   PixelToLogic( const tools::Rectangle& rDeviceRect,
-                                              const MapMode& rMapMode ) const;
-    tools::Polygon              PixelToLogic( const tools::Polygon& rDevicePoly,
-                                              const MapMode& rMapMode ) const;
-    basegfx::B2DPolygon         PixelToLogic( const basegfx::B2DPolygon& rDevicePoly,
-                                              const MapMode& rMapMode ) const;
-    basegfx::B2DPolyPolygon     PixelToLogic( const basegfx::B2DPolyPolygon& rDevicePolyPoly,
-                                              const MapMode& rMapMode ) const;
-
     Point                       LogicToLogic( const Point&      rPtSource,
                                               const MapMode*    pMapModeSource,
-                                              const MapMode*    pMapModeDest ) const;
+                                              const MapMode*    pMapModeDest, int ) const;
     Size                        LogicToLogic( const Size&       rSzSource,
                                               const MapMode*    pMapModeSource,
-                                              const MapMode*    pMapModeDest ) const;
-    tools::Rectangle                   LogicToLogic( const tools::Rectangle&  rRectSource,
+                                              const MapMode*    pMapModeDest, int ) const;
+    tools::Rectangle            LogicToLogic( const tools::Rectangle&  rRectSource,
                                               const MapMode*    pMapModeSource,
-                                              const MapMode*    pMapModeDest ) const;
+                                              const MapMode*    pMapModeDest, int ) const;
     static Point                LogicToLogic( const Point&      rPtSource,
                                               const MapMode&    rMapModeSource,
                                               const MapMode&    rMapModeDest );
     static Size                 LogicToLogic( const Size&       rSzSource,
                                               const MapMode&    rMapModeSource,
                                               const MapMode&    rMapModeDest );
-    static tools::Rectangle            LogicToLogic( const tools::Rectangle&  rRectSource,
+    static tools::Rectangle     LogicToLogic( const tools::Rectangle&  rRectSource,
                                               const MapMode&    rMapModeSource,
                                               const MapMode&    rMapModeDest );
-    static tools::Long                 LogicToLogic( tools::Long              nLongSource,
+    static tools::Long          LogicToLogic( tools::Long       nLongSource,
                                               MapUnit           eUnitSource,
                                               MapUnit           eUnitDest );
 

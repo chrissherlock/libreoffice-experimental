@@ -128,7 +128,7 @@ void DrawDocShell::Draw(OutputDevice* pOut, const JobSetup&, sal_uInt16 nAspect)
         Size aSize = mpDoc->GetSdPage(0, PageKind::Standard)->GetSize();
         aSrcMapMode.SetMapUnit(MapUnit::Map100thMM);
 
-        aSize = Application::GetDefaultDevice()->LogicToLogic(aSize, &aSrcMapMode, &aDstMapMode);
+        aSize = Application::GetDefaultDevice()->LogicToLogic(aSize, &aSrcMapMode, &aDstMapMode, 0);
         aVisArea.SetSize(aSize);
     }
     else

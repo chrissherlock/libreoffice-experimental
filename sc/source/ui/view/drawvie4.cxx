@@ -465,7 +465,7 @@ void ScDrawView::SetMarkedOriginalSize()
                         aOriginalSize = OutputDevice::LogicToLogic(
                                             Size( aSz.Width, aSz.Height ),
                                             MapMode(aUnit),
-                                            MapMode(MapUnit::Map100thMM));
+                                            MapMode(MapUnit::Map100thMM) );
                         bDo = true;
                     } catch( embed::NoVisualAreaSizeException& )
                     {
@@ -494,7 +494,7 @@ void ScDrawView::SetMarkedOriginalSize()
                 if (pActWin)
                 {
                     aOriginalSize = pActWin->LogicToLogic(
-                                    rGraphic.GetPrefSize(), &aSourceMap, &aDestMap );
+                                    rGraphic.GetPrefSize(), &aSourceMap, &aDestMap, 0 );
                     bDo = true;
                 }
             }

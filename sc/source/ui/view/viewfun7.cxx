@@ -422,7 +422,7 @@ bool ScViewFunc::PasteGraphic( const Point& rPos, const Graphic& rGraphic,
         aDestMap.SetScaleY(aScaleY);
     }
 
-    Size aSize = pWin->LogicToLogic( rGraphic.GetPrefSize(), &aSourceMap, &aDestMap );
+    Size aSize = pWin->LogicToLogic( rGraphic.GetPrefSize(), &aSourceMap, &aDestMap, 0 );
 
     if ( GetViewData().GetDocument().IsNegativePage( GetViewData().GetTabNo() ) )
         aPos.AdjustX( -(aSize.Width()) );

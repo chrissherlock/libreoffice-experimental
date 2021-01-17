@@ -168,7 +168,7 @@ void OutputDevice::SetRelativeMapMode(const MapMode& rNewMapMode)
         rNewMapMode.GetScaleY().GetNumerator(), maMapMode.GetScaleY().GetDenominator(),
         rNewMapMode.GetScaleY().GetDenominator(), maMapMode.GetScaleY().GetNumerator());
 
-    Point aPt(LogicToLogic(Point(), nullptr, &rNewMapMode));
+    Point aPt(LogicToLogic(Point(), nullptr, &rNewMapMode, 1));
     if (eNew != eOld)
     {
         if (eOld > MapUnit::MapPixel)
@@ -229,7 +229,7 @@ static void verifyUnitSourceDest(MapUnit eUnitSource, MapUnit eUnitDest)
 }
 
 Point OutputDevice::LogicToLogic(const Point& rPtSource, const MapMode* pMapModeSource,
-                                 const MapMode* pMapModeDest) const
+                                 const MapMode* pMapModeDest, int) const
 {
     if (!pMapModeSource)
         pMapModeSource = &maMapMode;
@@ -278,7 +278,7 @@ Point OutputDevice::LogicToLogic(const Point& rPtSource, const MapMode* pMapMode
 }
 
 Size OutputDevice::LogicToLogic(const Size& rSzSource, const MapMode* pMapModeSource,
-                                const MapMode* pMapModeDest) const
+                                const MapMode* pMapModeDest, int) const
 {
     if (!pMapModeSource)
         pMapModeSource = &maMapMode;
@@ -325,7 +325,7 @@ Size OutputDevice::LogicToLogic(const Size& rSzSource, const MapMode* pMapModeSo
 
 tools::Rectangle OutputDevice::LogicToLogic(const tools::Rectangle& rRectSource,
                                             const MapMode* pMapModeSource,
-                                            const MapMode* pMapModeDest) const
+                                            const MapMode* pMapModeDest, int) const
 {
     if (!pMapModeSource)
         pMapModeSource = &maMapMode;

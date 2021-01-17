@@ -154,7 +154,7 @@ void EditRTFParser::AddRTFDefaultValues( const EditPaM& rStart, const EditPaM& r
     Size aSz( 12, 0 );
     MapMode aPntMode( MapUnit::MapPoint );
     MapMode _aEditMapMode(mpEditEngine->GetRefDevice()->GetMapMode().GetMapUnit());
-    aSz = mpEditEngine->GetRefDevice()->LogicToLogic(aSz, &aPntMode, &_aEditMapMode);
+    aSz = mpEditEngine->GetRefDevice()->LogicToLogic(aSz, &aPntMode, &_aEditMapMode, 0);
     SvxFontHeightItem aFontHeightItem( aSz.Width(), 100, EE_CHAR_FONTHEIGHT );
     vcl::Font aDefFont( GetFont( nDefFont ) );
     SvxFontItem aFontItem( aDefFont.GetFamilyType(), aDefFont.GetFamilyName(),
