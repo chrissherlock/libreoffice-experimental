@@ -20,14 +20,19 @@
 #ifndef INCLUDED_VCL_MAPMOD_HXX
 #define INCLUDED_VCL_MAPMOD_HXX
 
-#include <vcl/dllapi.h>
+#include <tools/gen.hxx>
 #include <tools/mapunit.hxx>
 #include <o3tl/cow_wrapper.hxx>
 
-#include <ostream>
+#include <vcl/dllapi.h>
 
+#include <ostream>
+#include <tuple>
+
+struct MappingMetrics;
 class Point;
 class Fraction;
+class Geometry;
 class SvStream;
 
 class SAL_WARN_UNUSED VCL_DLLPUBLIC MapMode
@@ -69,9 +74,14 @@ public:
     // vcl::ScopedBitmapAccess in parallelized 3D renderer
     typedef o3tl::cow_wrapper< ImplMapMode, o3tl::ThreadSafeRefCountingPolicy > ImplType;
 
-private:
-    ImplType        mpImplMapMode;
+    Point MapTo(MapMode const& rMapMode, Point const& rPtSource, Geometry const& rGeometry);
+    Size MapTo(MapMode const& rMapMode, Size const& rSzSource, Geometry const& rGeometry);
+    tools::Rectangle MapTo(MapMode const& rMapMode, tools::Rectangle const& rRectSource, Geometry const& rGeometry);
 
+private:
+    ImplType mpImplMapMode;
+
+    std::tuple<MappingMetrics, MappingMetrics> GetMappingMetrics(MapMode const& rMapMode, Geometry const& rGeometry);
     SAL_DLLPRIVATE bool IsSimple() const;
 };
 

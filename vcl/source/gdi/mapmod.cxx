@@ -17,13 +17,16 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <vcl/mapmod.hxx>
-
+#include <rtl/instance.hxx>
 #include <tools/gen.hxx>
 #include <tools/fract.hxx>
+#include <tools/mapunit.hxx>
 #include <tools/stream.hxx>
 #include <tools/vcompat.hxx>
-#include <rtl/instance.hxx>
+
+#include <vcl/mapmod.hxx>
+#include <vcl/Geometry.hxx>
+#include <vcl/MappingMetrics.hxx>
 #include <vcl/TypeSerializer.hxx>
 
 struct MapMode::ImplMapMode
@@ -174,5 +177,103 @@ const Fraction& MapMode::GetScaleX() const { return mpImplMapMode->maScaleX; }
 const Fraction& MapMode::GetScaleY() const { return mpImplMapMode->maScaleY; }
 
 bool MapMode::IsSimple() const { return mpImplMapMode->mbSimple; }
+
+std::tuple<MappingMetrics, MappingMetrics> MapMode::GetMappingMetrics(MapMode const& rMapMode, Geometry const& rGeometry)
+{
+    MappingMetrics aMappingMetricSource;
+
+    if (!rGeometry.IsMapModeEnabled())
+    {
+        if (GetMapUnit() == MapUnit::MapRelative)
+            aMappingMetricSource = rGeometry.GetMappingMetrics();
+
+        aMappingMetricSource.Calculate(*this, rGeometry.GetDPIX(), rGeometry.GetDPIY());
+    }
+    else
+    {
+        aMappingMetricSource = rGeometry.GetMappingMetrics();
+    }
+
+    MappingMetrics aMappingMetricDest;
+
+    if (!rGeometry.IsMapModeEnabled() || rMapMode != *this)
+    {
+        if (rMapMode.GetMapUnit() == MapUnit::MapRelative)
+            aMappingMetricDest = rGeometry.GetMappingMetrics();
+
+        aMappingMetricDest.Calculate(rMapMode, rGeometry.GetDPIX(), rGeometry.GetDPIY());
+    }
+    else
+    {
+        aMappingMetricDest = rGeometry.GetMappingMetrics();
+    }
+
+    return std::make_tuple(aMappingMetricSource, aMappingMetricDest);
+}
+
+Point MapMode::MapTo(MapMode const& rMapMode, Point const& rPtSource, Geometry const& rGeometry)
+{
+    if (*this == rMapMode)
+        return rPtSource;
+
+    MappingMetrics aMappingMetricSource;
+    MappingMetrics aMappingMetricDest;
+
+    std::tie(aMappingMetricSource, aMappingMetricDest) = GetMappingMetrics(rMapMode, rGeometry);
+
+    return Point(Geometry::fn5(rPtSource.X() + aMappingMetricSource.mnMapOfsX,
+                     aMappingMetricSource.mnMapScNumX, aMappingMetricDest.mnMapScDenomX,
+                     aMappingMetricSource.mnMapScDenomX, aMappingMetricDest.mnMapScNumX)
+                     - aMappingMetricDest.mnMapOfsX,
+                 Geometry::fn5(rPtSource.Y() + aMappingMetricSource.mnMapOfsY,
+                     aMappingMetricSource.mnMapScNumY, aMappingMetricDest.mnMapScDenomY,
+                     aMappingMetricSource.mnMapScDenomY, aMappingMetricDest.mnMapScNumY)
+                     - aMappingMetricDest.mnMapOfsY);
+}
+
+Size MapMode::MapTo(MapMode const& rMapMode, Size const& rSzSource, Geometry const& rGeometry)
+{
+    if (*this == rMapMode)
+        return rSzSource;
+
+    MappingMetrics aMappingMetricSource;
+    MappingMetrics aMappingMetricDest;
+
+    std::tie(aMappingMetricSource, aMappingMetricDest) = GetMappingMetrics(rMapMode, rGeometry);
+
+    return Size(
+        Geometry::fn5(rSzSource.Width(), aMappingMetricSource.mnMapScNumX, aMappingMetricDest.mnMapScDenomX,
+            aMappingMetricSource.mnMapScDenomX, aMappingMetricDest.mnMapScNumX),
+        Geometry::fn5(rSzSource.Height(), aMappingMetricSource.mnMapScNumY, aMappingMetricDest.mnMapScDenomY,
+            aMappingMetricSource.mnMapScDenomY, aMappingMetricDest.mnMapScNumY));
+}
+
+tools::Rectangle MapMode::MapTo(MapMode const& rMapMode, tools::Rectangle const& rRectSource, Geometry const& rGeometry)
+{
+    if (*this == rMapMode)
+        return rRectSource;
+
+    MappingMetrics aMappingMetricSource;
+    MappingMetrics aMappingMetricDest;
+
+    std::tie(aMappingMetricSource, aMappingMetricDest) = GetMappingMetrics(rMapMode, rGeometry);
+
+    return tools::Rectangle(Geometry::fn5(rRectSource.Left() + aMappingMetricSource.mnMapOfsX,
+                                aMappingMetricSource.mnMapScNumX, aMappingMetricDest.mnMapScDenomX,
+                                aMappingMetricSource.mnMapScDenomX, aMappingMetricDest.mnMapScNumX)
+                                - aMappingMetricDest.mnMapOfsX,
+                            Geometry::fn5(rRectSource.Top() + aMappingMetricSource.mnMapOfsY,
+                                aMappingMetricSource.mnMapScNumY, aMappingMetricDest.mnMapScDenomY,
+                                aMappingMetricSource.mnMapScDenomY, aMappingMetricDest.mnMapScNumY)
+                                - aMappingMetricDest.mnMapOfsY,
+                            Geometry::fn5(rRectSource.Right() + aMappingMetricSource.mnMapOfsX,
+                                aMappingMetricSource.mnMapScNumX, aMappingMetricDest.mnMapScDenomX,
+                                aMappingMetricSource.mnMapScDenomX, aMappingMetricDest.mnMapScNumX)
+                                - aMappingMetricDest.mnMapOfsX,
+                            Geometry::fn5(rRectSource.Bottom() + aMappingMetricSource.mnMapOfsY,
+                                aMappingMetricSource.mnMapScNumY, aMappingMetricDest.mnMapScDenomY,
+                                aMappingMetricSource.mnMapScDenomY, aMappingMetricDest.mnMapScNumY)
+                                - aMappingMetricDest.mnMapOfsY);
+}
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
