@@ -72,7 +72,7 @@ void ImplDrawDefault( OutputDevice* pOutDev, const OUString* pText,
     if ( !aSize.IsEmpty() && pFont && pText && pText->getLength() && pOutDev->IsOutputEnabled() )
     {
         MapMode aMapMode( MapUnit::MapPoint );
-        Size    aSz = pOutDev->LogicToLogic( Size( 0, 12 ), &aMapMode, nullptr, 2 );
+        Size aSz = aMapMode.MapTo(pOutDev->GetMapMode(), Size(0, 12), pOutDev->GetGeometry());
         tools::Long    nThreshold = aSz.Height() / 2;
         tools::Long    nStep = nThreshold / 3;
 

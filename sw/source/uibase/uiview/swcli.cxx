@@ -71,7 +71,7 @@ void SwOleClient::RequestNewObjectArea( tools::Rectangle& aLogRect )
                           tools::Long( aLogRect.GetHeight() / GetScaleHeight() ) );
 
         // convert to logical coordinates of the embedded object
-        Size aNewSize = GetEditWin()->LogicToLogic( aNewObjSize, &aClientMap, &aObjectMap, 0 );
+        Size aNewSize = aClientMap.MapTo(aObjectMap, aNewObjSize, GetEditWin()->GetGeometry());
         GetObject()->setVisualAreaSize( GetAspect(), awt::Size( aNewSize.Width(), aNewSize.Height() ) );
     }
 

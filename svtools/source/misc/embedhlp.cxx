@@ -635,7 +635,7 @@ std::unique_ptr<SvStream> EmbeddedObjectRef::GetGraphicStream( bool bUpdate ) co
 void EmbeddedObjectRef::DrawPaintReplacement( const tools::Rectangle &rRect, const OUString &rText, OutputDevice *pOut )
 {
     MapMode aMM( MapUnit::MapAppFont );
-    Size aAppFontSz = pOut->LogicToLogic( Size( 0, 8 ), &aMM, nullptr, 2 );
+    Size aAppFontSz = aMM.MapTo(pOut->GetMapMode(), Size(0, 8), pOut->GetGeometry());
     vcl::Font aFnt( "Helvetica", aAppFontSz );
     aFnt.SetTransparent( true );
     aFnt.SetColor( COL_LIGHTRED );

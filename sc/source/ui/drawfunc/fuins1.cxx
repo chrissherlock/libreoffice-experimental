@@ -161,8 +161,8 @@ static void lcl_InsertGraphic( const Graphic& rGraphic,
         aDestMap.SetScaleX(aScaleX);
         aDestMap.SetScaleY(aScaleY);
     }
-    Size aLogicSize = pWindow->LogicToLogic(
-                            rGraphic.GetPrefSize(), &aSourceMap, &aDestMap, 0 );
+
+    Size aLogicSize = aSourceMap.MapTo(aDestMap, rGraphic.GetPrefSize(), pWindow->GetGeometry());
 
     //  Limit size
 

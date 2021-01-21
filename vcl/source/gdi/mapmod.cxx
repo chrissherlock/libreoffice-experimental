@@ -178,7 +178,7 @@ const Fraction& MapMode::GetScaleY() const { return mpImplMapMode->maScaleY; }
 
 bool MapMode::IsSimple() const { return mpImplMapMode->mbSimple; }
 
-std::tuple<MappingMetrics, MappingMetrics> MapMode::GetMappingMetrics(MapMode const& rMapMode, Geometry const& rGeometry)
+std::tuple<MappingMetrics, MappingMetrics> MapMode::GetMappingMetrics(MapMode const& rMapMode, Geometry const& rGeometry) const
 {
     MappingMetrics aMappingMetricSource;
 
@@ -211,7 +211,7 @@ std::tuple<MappingMetrics, MappingMetrics> MapMode::GetMappingMetrics(MapMode co
     return std::make_tuple(aMappingMetricSource, aMappingMetricDest);
 }
 
-Point MapMode::MapTo(MapMode const& rMapMode, Point const& rPtSource, Geometry const& rGeometry)
+Point MapMode::MapTo(MapMode const& rMapMode, Point const& rPtSource, Geometry const& rGeometry) const
 {
     if (*this == rMapMode)
         return rPtSource;
@@ -231,7 +231,7 @@ Point MapMode::MapTo(MapMode const& rMapMode, Point const& rPtSource, Geometry c
                      - aMappingMetricDest.mnMapOfsY);
 }
 
-Size MapMode::MapTo(MapMode const& rMapMode, Size const& rSzSource, Geometry const& rGeometry)
+Size MapMode::MapTo(MapMode const& rMapMode, Size const& rSzSource, Geometry const& rGeometry) const
 {
     if (*this == rMapMode)
         return rSzSource;
@@ -248,7 +248,7 @@ Size MapMode::MapTo(MapMode const& rMapMode, Size const& rSzSource, Geometry con
             aMappingMetricSource.mnMapScDenomY, aMappingMetricDest.mnMapScNumY));
 }
 
-tools::Rectangle MapMode::MapTo(MapMode const& rMapMode, tools::Rectangle const& rRectSource, Geometry const& rGeometry)
+tools::Rectangle MapMode::MapTo(MapMode const& rMapMode, tools::Rectangle const& rRectSource, Geometry const& rGeometry) const
 {
     if (*this == rMapMode)
         return rRectSource;

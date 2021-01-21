@@ -74,14 +74,14 @@ public:
     // vcl::ScopedBitmapAccess in parallelized 3D renderer
     typedef o3tl::cow_wrapper< ImplMapMode, o3tl::ThreadSafeRefCountingPolicy > ImplType;
 
-    Point MapTo(MapMode const& rMapMode, Point const& rPtSource, Geometry const& rGeometry);
-    Size MapTo(MapMode const& rMapMode, Size const& rSzSource, Geometry const& rGeometry);
-    tools::Rectangle MapTo(MapMode const& rMapMode, tools::Rectangle const& rRectSource, Geometry const& rGeometry);
+    Point MapTo(MapMode const& rMapMode, Point const& rPtSource, Geometry const& rGeometry) const;
+    Size MapTo(MapMode const& rMapMode, Size const& rSzSource, Geometry const& rGeometry) const;
+    tools::Rectangle MapTo(MapMode const& rMapMode, tools::Rectangle const& rRectSource, Geometry const& rGeometry) const;
 
 private:
     ImplType mpImplMapMode;
 
-    std::tuple<MappingMetrics, MappingMetrics> GetMappingMetrics(MapMode const& rMapMode, Geometry const& rGeometry);
+    std::tuple<MappingMetrics, MappingMetrics> GetMappingMetrics(MapMode const& rMapMode, Geometry const& rGeometry) const;
     SAL_DLLPRIVATE bool IsSimple() const;
 };
 

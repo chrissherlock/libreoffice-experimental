@@ -493,8 +493,7 @@ void ScDrawView::SetMarkedOriginalSize()
                 vcl::Window* pActWin = pViewData->GetActiveWin();
                 if (pActWin)
                 {
-                    aOriginalSize = pActWin->LogicToLogic(
-                                    rGraphic.GetPrefSize(), &aSourceMap, &aDestMap, 0 );
+                    aOriginalSize = aSourceMap.MapTo(aDestMap, rGraphic.GetPrefSize(), pActWin->GetGeometry());
                     bDo = true;
                 }
             }
