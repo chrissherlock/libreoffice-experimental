@@ -178,14 +178,15 @@ void OutputDevice::DrawBitmap(const Point& rDestPt, const Size& rDestSize, const
 Bitmap OutputDevice::GetBitmap(const Point& rSrcPt, const Size& rSize) const
 {
     Bitmap aBmp;
-    tools::Long nX = maGeometry.LogicXToDevicePixel(rSrcPt.X());
-    tools::Long nY = maGeometry.LogicYToDevicePixel(rSrcPt.Y());
-    tools::Long nWidth = maGeometry.LogicWidthToDevicePixel(rSize.Width());
-    tools::Long nHeight = maGeometry.LogicHeightToDevicePixel(rSize.Height());
 
     if (mpGraphics || AcquireGraphics())
     {
         assert(mpGraphics);
+
+        tools::Long nX = maGeometry.LogicXToDevicePixel(rSrcPt.X());
+        tools::Long nY = maGeometry.LogicYToDevicePixel(rSrcPt.Y());
+        tools::Long nWidth = maGeometry.LogicWidthToDevicePixel(rSize.Width());
+        tools::Long nHeight = maGeometry.LogicHeightToDevicePixel(rSize.Height());
 
         if (nWidth > 0 && nHeight > 0 && nX <= (GetWidthInPixels() + GetXOffsetInPixels())
             && nY <= (GetHeightInPixels() + GetYOffsetInPixels()))
