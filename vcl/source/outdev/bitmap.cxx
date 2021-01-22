@@ -19,7 +19,6 @@
 
 #include <config_features.h>
 
-#include <osl/diagnose.h>
 #include <rtl/math.hxx>
 #include <sal/log.hxx>
 #include <basegfx/matrix/b2dhommatrixtools.hxx>
@@ -263,10 +262,8 @@ Bitmap OutputDevice::GetBitmap(const Point& rSrcPt, const Size& rSize) const
                                 nHeight);
                             aVDev->mpGraphics->CopyBits(aPosAry, *mpGraphics, *this, *this);
                         }
-                        else
-                        {
-                            OSL_ENSURE(false, "CopyBits with zero or negative width or height");
-                        }
+
+                        SAL_WARN_IF(nWidth <= 0 || nHeight <= 0, "vcl.gdi", "CopyBits with zero or negative width or height");
 
                         aBmp = aVDev->GetBitmap(Point(), aVDev->GetSizeInPixels());
                     }
