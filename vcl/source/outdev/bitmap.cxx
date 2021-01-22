@@ -38,7 +38,8 @@ void OutputDevice::DrawBitmap(const Point& rDestPt, const Bitmap& rBitmap)
     assert(!is_double_buffered_window());
 
     const Size aSizePix(rBitmap.GetSizePixel());
-    DrawBitmap(rDestPt, maGeometry.PixelToLogic(aSizePix), Point(), aSizePix, rBitmap, MetaActionType::BMP);
+    DrawBitmap(rDestPt, maGeometry.PixelToLogic(aSizePix), Point(), aSizePix, rBitmap,
+               MetaActionType::BMP);
 }
 
 void OutputDevice::DrawBitmap(const Point& rDestPt, const Size& rDestSize, const Bitmap& rBitmap)
@@ -130,8 +131,7 @@ void OutputDevice::DrawBitmap(const Point& rDestPt, const Size& rDestSize, const
     if (!aBmp.IsEmpty())
     {
         SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(),
-                           rSrcSizePixel.Height(),
-                           maGeometry.LogicXToDevicePixel(rDestPt.X()),
+                           rSrcSizePixel.Height(), maGeometry.LogicXToDevicePixel(rDestPt.X()),
                            maGeometry.LogicYToDevicePixel(rDestPt.Y()),
                            maGeometry.LogicWidthToDevicePixel(rDestSize.Width()),
                            maGeometry.LogicHeightToDevicePixel(rDestSize.Height()));
@@ -175,97 +175,126 @@ void OutputDevice::DrawBitmap(const Point& rDestPt, const Size& rDestSize, const
     }
 }
 
+std::tuple<Point, Size, tools::Rectangle, bool>
+OutputDevice::GetBitmapGeometry(Point const& rSrcPt, Size const& rSize) const
+{
+    tools::Long nX = rSrcPt.X();
+    tools::Long nY = rSrcPt.Y();
+    tools::Long nWidth = rSize.Width();
+    tools::Long nHeight = rSize.Height();
+
+    bool bClipped = false;
+
+    tools::Rectangle aRect(Point(nX, nY), Size(nWidth, nHeight));
+
+    if (nWidth > 0 && nHeight > 0 && nX <= (GetWidthInPixels() + GetXOffsetInPixels())
+        && nY <= (GetHeightInPixels() + GetYOffsetInPixels()))
+    {
+        // X-Coordinate outside of draw area?
+        if (nX < GetXOffsetInPixels())
+        {
+            nWidth -= (GetXOffsetInPixels() - nX);
+            nX = GetXOffsetInPixels();
+            bClipped = true;
+        }
+
+        // Y-Coordinate outside of draw area?
+        if (nY < GetYOffsetInPixels())
+        {
+            nHeight -= (GetYOffsetInPixels() - nY);
+            nY = GetYOffsetInPixels();
+            bClipped = true;
+        }
+
+        // Width outside of draw area?
+        if ((nWidth + nX) > (GetWidthInPixels() + GetXOffsetInPixels()))
+        {
+            nWidth = GetXOffsetInPixels() + GetWidthInPixels() - nX;
+            bClipped = true;
+        }
+
+        // Height outside of draw area?
+        if ((nHeight + nY) > (GetHeightInPixels() + GetYOffsetInPixels()))
+        {
+            nHeight = GetYOffsetInPixels() + GetHeightInPixels() - nY;
+            bClipped = true;
+        }
+    }
+
+    return std::make_tuple(Point(nX, nY), Size(nWidth, nHeight), aRect, bClipped);
+}
+
 Bitmap OutputDevice::GetBitmap(const Point& rSrcPt, const Size& rSize) const
 {
     Bitmap aBmp;
 
-    if (mpGraphics || AcquireGraphics())
+    tools::Long nX = maGeometry.LogicXToDevicePixel(rSrcPt.X());
+    tools::Long nY = maGeometry.LogicYToDevicePixel(rSrcPt.Y());
+    tools::Long nWidth = maGeometry.LogicWidthToDevicePixel(rSize.Width());
+    tools::Long nHeight = maGeometry.LogicHeightToDevicePixel(rSize.Height());
+
+    Point aBmpPt(nX, nY);
+    Size aBmpSize(nWidth, nHeight);
+    tools::Rectangle aRect;
+    bool bClipped;
+
+    std::tie(aBmpPt, aBmpSize, aRect, bClipped) = GetBitmapGeometry(rSrcPt, rSize);
+
+    if (aBmpSize.Width() > 0 && aBmpSize.Height() > 0 && aBmpPt.X() <= (GetWidthInPixels() + GetXOffsetInPixels())
+        && aBmpPt.Y() <= (GetHeightInPixels() + GetYOffsetInPixels()))
     {
-        assert(mpGraphics);
-
-        tools::Long nX = maGeometry.LogicXToDevicePixel(rSrcPt.X());
-        tools::Long nY = maGeometry.LogicYToDevicePixel(rSrcPt.Y());
-        tools::Long nWidth = maGeometry.LogicWidthToDevicePixel(rSize.Width());
-        tools::Long nHeight = maGeometry.LogicHeightToDevicePixel(rSize.Height());
-
-        if (nWidth > 0 && nHeight > 0 && nX <= (GetWidthInPixels() + GetXOffsetInPixels())
-            && nY <= (GetHeightInPixels() + GetYOffsetInPixels()))
+        if (bClipped && (mpGraphics || AcquireGraphics()))
         {
-            tools::Rectangle aRect(Point(nX, nY), Size(nWidth, nHeight));
-            bool bClipped = false;
+            assert(mpGraphics);
 
-            // X-Coordinate outside of draw area?
-            if (nX < GetXOffsetInPixels())
+            // If the visible part has been clipped, we have to create a
+            // Bitmap with the correct size in which we copy the clipped
+            // Bitmap to the correct position.
+            ScopedVclPtrInstance<VirtualDevice> aVDev(*this);
+
+            if (aVDev->SetOutputSizePixel(aRect.GetSize()))
             {
-                nWidth -= (GetXOffsetInPixels() - nX);
-                nX = GetXOffsetInPixels();
-                bClipped = true;
-            }
-
-            // Y-Coordinate outside of draw area?
-            if (nY < GetYOffsetInPixels())
-            {
-                nHeight -= (GetYOffsetInPixels() - nY);
-                nY = GetYOffsetInPixels();
-                bClipped = true;
-            }
-
-            // Width outside of draw area?
-            if ((nWidth + nX) > (GetWidthInPixels() + GetXOffsetInPixels()))
-            {
-                nWidth = GetXOffsetInPixels() + GetWidthInPixels() - nX;
-                bClipped = true;
-            }
-
-            // Height outside of draw area?
-            if ((nHeight + nY) > (GetHeightInPixels() + GetYOffsetInPixels()))
-            {
-                nHeight = GetYOffsetInPixels() + GetHeightInPixels() - nY;
-                bClipped = true;
-            }
-
-            if (bClipped)
-            {
-                // If the visible part has been clipped, we have to create a
-                // Bitmap with the correct size in which we copy the clipped
-                // Bitmap to the correct position.
-                ScopedVclPtrInstance<VirtualDevice> aVDev(*this);
-
-                if (aVDev->SetOutputSizePixel(aRect.GetSize()))
+                if (aVDev->mpGraphics || aVDev->AcquireGraphics())
                 {
-                    if (aVDev->mpGraphics || aVDev->AcquireGraphics())
+                    if ((aBmpSize.Width() > 0) && (aBmpSize.Height() > 0))
                     {
-                        if ((nWidth > 0) && (nHeight > 0))
-                        {
-                            SalTwoRect aPosAry(
-                                nX, nY, nWidth, nHeight,
-                                (aRect.Left() < GetXOffsetInPixels()) ? (GetXOffsetInPixels() - aRect.Left()) : 0L,
-                                (aRect.Top() < GetYOffsetInPixels()) ? (GetYOffsetInPixels() - aRect.Top()) : 0L, nWidth,
-                                nHeight);
-                            aVDev->mpGraphics->CopyBits(aPosAry, *mpGraphics, *this, *this);
-                        }
-
-                        SAL_WARN_IF(nWidth <= 0 || nHeight <= 0, "vcl.gdi", "CopyBits with zero or negative width or height");
-
-                        aBmp = aVDev->GetBitmap(Point(), aVDev->GetSizeInPixels());
+                        SalTwoRect aPosAry(aBmpPt.X(), aBmpPt.Y(), aBmpSize.Width(),
+                                           aBmpSize.Height(),
+                                           (aRect.Left() < GetXOffsetInPixels())
+                                               ? (GetXOffsetInPixels() - aRect.Left())
+                                               : 0L,
+                                           (aRect.Top() < GetYOffsetInPixels())
+                                               ? (GetYOffsetInPixels() - aRect.Top())
+                                               : 0L,
+                                           aBmpSize.Width(), aBmpSize.Height());
+                        aVDev->mpGraphics->CopyBits(aPosAry, *mpGraphics, *this, *this);
                     }
-                    else
-                        bClipped = false;
+
+                    SAL_WARN_IF(aBmpSize.Width() <= 0 || aBmpSize.Height() <= 0, "vcl.gdi",
+                                "CopyBits with zero or negative width or height");
+
+                    aBmp = aVDev->GetBitmap(Point(), aVDev->GetSizeInPixels());
                 }
                 else
-                    bClipped = false;
-            }
-
-            if (!bClipped)
-            {
-                std::shared_ptr<SalBitmap> pSalBmp
-                    = mpGraphics->GetBitmap(nX, nY, nWidth, nHeight, *this);
-
-                if (pSalBmp)
                 {
-                    aBmp.ImplSetSalBitmap(pSalBmp);
+                    bClipped = false;
                 }
             }
+            else
+            {
+                bClipped = false;
+            }
+        }
+
+        if (!bClipped && (mpGraphics || AcquireGraphics()))
+        {
+            assert(mpGraphics);
+
+            std::shared_ptr<SalBitmap> pSalBmp = mpGraphics->GetBitmap(
+                aBmpPt.X(), aBmpPt.Y(), aBmpSize.Width(), aBmpSize.Height(), *this);
+
+            if (pSalBmp)
+                aBmp.ImplSetSalBitmap(pSalBmp);
         }
     }
 
@@ -273,8 +302,8 @@ Bitmap OutputDevice::GetBitmap(const Point& rSrcPt, const Size& rSize) const
 }
 
 void OutputDevice::DrawTransparentAlphaBitmap(const Bitmap& rBmp, const AlphaMask& rAlpha,
-                                         const Point& rDestPt, const Size& rDestSize,
-                                         const Point& rSrcPtPixel, const Size& rSrcSizePixel)
+                                              const Point& rDestPt, const Size& rDestSize,
+                                              const Point& rSrcPtPixel, const Size& rSrcSizePixel)
 {
     assert(!is_double_buffered_window());
 
@@ -368,10 +397,11 @@ void OutputDevice::DrawTransparentAlphaBitmap(const Bitmap& rBmp, const AlphaMas
     }
 }
 
-void OutputDevice::DrawTransparentAlphaBitmapSlowPath(const Bitmap& rBitmap, const AlphaMask& rAlpha,
-                                                 tools::Rectangle aDstRect,
-                                                 tools::Rectangle aBmpRect, Size const& aOutSize,
-                                                 Point const& aOutPoint)
+void OutputDevice::DrawTransparentAlphaBitmapSlowPath(const Bitmap& rBitmap,
+                                                      const AlphaMask& rAlpha,
+                                                      tools::Rectangle aDstRect,
+                                                      tools::Rectangle aBmpRect,
+                                                      Size const& aOutSize, Point const& aOutPoint)
 {
     assert(!is_double_buffered_window());
 
