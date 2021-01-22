@@ -46,6 +46,7 @@
 #include <salgdi.hxx>
 #include <salbmp.hxx>
 
+#include "TradScaleContext.hxx"
 #include "LinearScaleContext.hxx"
 
 #include <cassert>
@@ -387,53 +388,6 @@ void OutputDevice::DrawTransparentAlphaBitmap(const Bitmap& rBmp, const AlphaMas
         DrawTransparentAlphaBitmapSlowPath(bitmap, alpha, aDstRect, aBmpRect, auxOutSz, auxOutPt);
     }
 }
-
-namespace
-{
-struct TradScaleContext
-{
-    std::unique_ptr<tools::Long[]> mpMapX;
-    std::unique_ptr<tools::Long[]> mpMapY;
-
-    TradScaleContext(tools::Rectangle const& aDstRect, tools::Rectangle const& aBitmapRect,
-                     Size const& aOutSize, tools::Long nOffX, tools::Long nOffY)
-
-        : mpMapX(new tools::Long[aDstRect.GetWidth()])
-        , mpMapY(new tools::Long[aDstRect.GetHeight()])
-    {
-        const tools::Long nSrcWidth = aBitmapRect.GetWidth();
-        const tools::Long nSrcHeight = aBitmapRect.GetHeight();
-
-        const bool bHMirr = aOutSize.Width() < 0;
-        const bool bVMirr = aOutSize.Height() < 0;
-
-        generateSimpleMap(nSrcWidth, aDstRect.GetWidth(), aBitmapRect.Left(), aOutSize.Width(),
-                          nOffX, bHMirr, mpMapX.get());
-
-        generateSimpleMap(nSrcHeight, aDstRect.GetHeight(), aBitmapRect.Top(), aOutSize.Height(),
-                          nOffY, bVMirr, mpMapY.get());
-    }
-
-private:
-    static void generateSimpleMap(tools::Long nSrcDimension, tools::Long nDstDimension,
-                                  tools::Long nDstLocation, tools::Long nOutDimension,
-                                  tools::Long nOffset, bool bMirror, tools::Long* pMap)
-    {
-        tools::Long nMirrorOffset = 0;
-
-        if (bMirror)
-            nMirrorOffset = (nDstLocation << 1) + nSrcDimension - 1;
-
-        for (tools::Long i = 0; i < nDstDimension; ++i, ++nOffset)
-        {
-            pMap[i] = nDstLocation + nOffset * nSrcDimension / nOutDimension;
-            if (bMirror)
-                pMap[i] = nMirrorOffset - pMap[i];
-        }
-    }
-};
-
-} // end anonymous namespace
 
 void OutputDevice::DrawTransparentAlphaBitmapSlowPath(const Bitmap& rBitmap, const AlphaMask& rAlpha,
                                                  tools::Rectangle aDstRect,
