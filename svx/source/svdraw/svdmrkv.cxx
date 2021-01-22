@@ -257,7 +257,7 @@ void SdrMarkView::ModelHasChanged()
             if (OutputDevice* pOutputDevice = mpMarkedPV->GetView().GetFirstOutputDevice())
             {
                 if (pOutputDevice->GetMapMode().GetMapUnit() == MapUnit::Map100thMM)
-                    aSelection = OutputDevice::LogicToLogic(aSelection, MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapTwip));
+                    aSelection = Geometry::LogicToLogic(aSelection, MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapTwip));
             }
         }
 
@@ -716,7 +716,7 @@ void SdrMarkView::SetMarkHandlesForLOKit(tools::Rectangle const & rRect, const S
             if (OutputDevice* pOutputDevice = mpMarkedPV->GetView().GetFirstOutputDevice())
             {
                 if (pOutputDevice->GetMapMode().GetMapUnit() == MapUnit::Map100thMM)
-                    aSelection = OutputDevice::LogicToLogic(aSelection, MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapTwip));
+                    aSelection = Geometry::LogicToLogic(aSelection, MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapTwip));
             }
         }
 
@@ -818,7 +818,7 @@ void SdrMarkView::SetMarkHandlesForLOKit(tools::Rectangle const & rRect, const S
                                 Point aMinPos(aDragParameters[1], aDragParameters[2]);
                                 Point aMaxPos(aDragParameters[3], aDragParameters[4]);
                                 Point aDragDirection = aMaxPos - aMinPos;
-                                aDragDirection = OutputDevice::LogicToLogic(aDragDirection, MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapTwip));
+                                aDragDirection = Geometry::LogicToLogic(aDragDirection, MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapTwip));
 
                                 aExtraInfo.append(", \"dragDirection\": [");
                                 aExtraInfo.append(aDragDirection.toString());
@@ -854,7 +854,7 @@ void SdrMarkView::SetMarkHandlesForLOKit(tools::Rectangle const & rRect, const S
                                                 }
                                                 sPolygonElem += R"elem(\" style=\"stroke: none; fill: rgb(114,159,207); fill-opacity: 0.8\"/>)elem";
 
-                                                aSelection = OutputDevice::LogicToLogic(aSelection, MapMode(MapUnit::MapTwip), MapMode(MapUnit::Map100thMM));
+                                                aSelection = Geometry::LogicToLogic(aSelection, MapMode(MapUnit::MapTwip), MapMode(MapUnit::Map100thMM));
 
                                                 OString sSVGElem = R"elem(<svg version=\"1.2\" width=\")elem" +
                                                     OString::number(aSelection.GetWidth() / 100.0) +

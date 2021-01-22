@@ -3929,7 +3929,7 @@ static void doc_postUnoCommand(LibreOfficeKitDocument* pThis, const char* pComma
                         || rPropValue.Name == "TransformRotationY")
                 {
                     rPropValue.Value >>= value;
-                    value = OutputDevice::LogicToLogic(value, MapUnit::MapTwip, MapUnit::Map100thMM);
+                    value = Geometry::LogicToLogic(value, MapUnit::MapTwip, MapUnit::Map100thMM);
                     rPropValue.Value <<= value;
                 }
             }
@@ -3940,8 +3940,8 @@ static void doc_postUnoCommand(LibreOfficeKitDocument* pThis, const char* pComma
             if (aPropertyValuesVector[0].Name != "Action")
             {
                 tools::Rectangle aChartBB = aChartHelper.GetChartBoundingBox();
-                int nLeft = OutputDevice::LogicToLogic(aChartBB.Left(), MapUnit::MapTwip, MapUnit::Map100thMM);
-                int nTop = OutputDevice::LogicToLogic(aChartBB.Top(), MapUnit::MapTwip, MapUnit::Map100thMM);
+                int nLeft = Geometry::LogicToLogic(aChartBB.Left(), MapUnit::MapTwip, MapUnit::Map100thMM);
+                int nTop = Geometry::LogicToLogic(aChartBB.Top(), MapUnit::MapTwip, MapUnit::Map100thMM);
 
                 for (beans::PropertyValue& rPropValue: aPropertyValuesVector)
                 {

@@ -1601,7 +1601,7 @@ void ScViewData::SetEditEngine( ScSplitPos eWhich,
         {
             Size aGridSize(nGridWidthPx, nGridHeightPx);
             const MapMode& rWinMapMode = GetLogicMode();
-            aGridSize = OutputDevice::LogicToLogic(
+            aGridSize = Geometry::LogicToLogic(
                 pWin->GetGeometry().PixelToLogic(aGridSize, rWinMapMode),
                 rWinMapMode, MapMode(MapUnit::MapTwip));
             nGridWidthTwips = aGridSize.Width();
@@ -1675,7 +1675,7 @@ void ScViewData::SetEditEngine( ScSplitPos eWhich,
                                     HMM_PER_TWIPS, HMM_PER_TWIPS, aFract, aFract ).GetEditArea( pPattern, false );
             aPaperSize.setWidth( aUtilRect.GetWidth() );
             if (bLOKPrintTwips)
-                aPaperSizePTwips.setWidth(OutputDevice::LogicToLogic(
+                aPaperSizePTwips.setWidth(Geometry::LogicToLogic(
                         aUtilRect.GetWidth(), MapUnit::Map100thMM, MapUnit::MapTwip));
         }
 

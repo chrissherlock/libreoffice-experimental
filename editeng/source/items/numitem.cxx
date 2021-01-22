@@ -510,7 +510,7 @@ Size SvxNumberFormat::GetGraphicSizeMM100(const Graphic* pGraphic)
         pOutDev->SetMapMode( aOldMap );
     }
     else
-        aRetSize = OutputDevice::LogicToLogic( rSize, pGraphic->GetPrefMapMode(), aMapMM100 );
+        aRetSize = Geometry::LogicToLogic( rSize, pGraphic->GetPrefMapMode(), aMapMM100 );
     return aRetSize;
 }
 

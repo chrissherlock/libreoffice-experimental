@@ -155,7 +155,7 @@ void GraphCtrl::SetGraphic( const Graphic& rGraphic, bool bNewModel )
     if ( aGraphic.GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel )
         aGraphSize = Application::GetDefaultDevice()->GetGeometry().PixelToLogic( aGraphic.GetPrefSize(), aMap100 );
     else
-        aGraphSize = OutputDevice::LogicToLogic( aGraphic.GetPrefSize(), aGraphic.GetPrefMapMode(), aMap100 );
+        aGraphSize = Geometry::LogicToLogic( aGraphic.GetPrefSize(), aGraphic.GetPrefMapMode(), aMap100 );
 
     if ( mbSdrMode && bNewModel )
         InitSdrModel();
@@ -214,7 +214,7 @@ void GraphCtrl::Resize()
         aDisplayMap.SetScaleX( Fraction( aNewSize.Width(), aGraphSize.Width() ) );
         aDisplayMap.SetScaleY( Fraction( aNewSize.Height(), aGraphSize.Height() ) );
 
-        aDisplayMap.SetOrigin( OutputDevice::LogicToLogic( aNewPos, aMap100, aDisplayMap ) );
+        aDisplayMap.SetOrigin( Geometry::LogicToLogic( aNewPos, aMap100, aDisplayMap ) );
         rDevice.SetMapMode( aDisplayMap );
         xVD->SetMapMode( aDisplayMap );
     }

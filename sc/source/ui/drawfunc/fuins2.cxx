@@ -318,17 +318,17 @@ FuInsertOLE::FuInsertOLE(ScTabViewShell& rViewSh, vcl::Window* pWin, ScDrawView*
                     // rectangle with balanced edge ratio
                     aSize.setWidth( 5000 );
                     aSize.setHeight( 5000 );
-                    Size aTmp = OutputDevice::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(aMapUnit));
+                    Size aTmp = Geometry::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(aMapUnit));
                     aSz.Width = aTmp.Width();
                     aSz.Height = aTmp.Height();
                     xObj->setVisualAreaSize( nAspect, aSz );
 
                     //  re-convert aSize to 1/100th mm to avoid rounding errors in comparison below
-                    aSize = OutputDevice::LogicToLogic( aTmp,
+                    aSize = Geometry::LogicToLogic( aTmp,
                                     MapMode( aMapUnit ), aMap100 );
                 }
                 else
-                    aSize = OutputDevice::LogicToLogic( aSize,
+                    aSize = Geometry::LogicToLogic( aSize,
                                     MapMode( aMapUnit ), aMap100 );
             }
 
@@ -361,7 +361,7 @@ FuInsertOLE::FuInsertOLE(ScTabViewShell& rViewSh, vcl::Window* pWin, ScDrawView*
                     awt::Size aSz = xObj->getVisualAreaSize( nAspect );
 
                     Size aNewSize( aSz.Width, aSz.Height );
-                    aNewSize = OutputDevice::LogicToLogic(aNewSize, MapMode(aMapUnit), MapMode(MapUnit::Map100thMM));
+                    aNewSize = Geometry::LogicToLogic(aNewSize, MapMode(aMapUnit), MapMode(MapUnit::Map100thMM));
 
                     if ( aNewSize != aSize )
                     {
@@ -506,7 +506,7 @@ FuInsertChart::FuInsertChart(ScTabViewShell& rViewSh, vcl::Window* pWin, ScDrawV
     }
     if (bSizeCh)
     {
-        aSize = OutputDevice::LogicToLogic( aSize, MapMode( MapUnit::Map100thMM ), MapMode( aMapUnit ) );
+        aSize = Geometry::LogicToLogic( aSize, MapMode( MapUnit::Map100thMM ), MapMode( aMapUnit ) );
         aSz.Width = aSize.Width();
         aSz.Height = aSize.Height();
         xObj->setVisualAreaSize( nAspect, aSz );

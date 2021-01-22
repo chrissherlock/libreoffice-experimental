@@ -21,6 +21,7 @@
 
 #include <tools/gen.hxx>
 #include <tools/long.hxx>
+#include <tools/mapunit.hxx>
 #include <tools/poly.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
 
@@ -161,9 +162,30 @@ public:
     basegfx::B2DPolyPolygon PixelToLogic(basegfx::B2DPolyPolygon const& rDevicePolyPoly,
                                          MapMode const& rMapMode) const;
 
-    static tools::Long fn5(const tools::Long n1, const tools::Long n2, const tools::Long n3,
-                           const tools::Long n4, const tools::Long n5);
-    static tools::Long fn3(const tools::Long n1, const tools::Long n2, const tools::Long n3);
+    static Point LogicToLogic(Point const& rPtSource, MapMode const& rMapModeSource,
+                              MapMode const& rMapModeDest);
+
+    static Size LogicToLogic(Size const& rSzSource, MapMode const& rMapModeSource,
+                             MapMode const& rMapModeDest);
+
+    static tools::Rectangle LogicToLogic(tools::Rectangle const& rRectSource,
+                                         MapMode const& rMapModeSource,
+                                         MapMode const& rMapModeDest);
+
+    static tools::Long LogicToLogic(tools::Long nLongSource, MapUnit eUnitSource,
+                                    MapUnit eUnitDest);
+
+    static basegfx::B2DPolygon LogicToLogic(basegfx::B2DPolygon const& rPoly,
+                                            MapMode const& rMapModeSource,
+                                            MapMode const& rMapModeDest);
+
+    /** Create a mapping transformation
+
+        Create a mapping transformation from rMapModeSource to rMapModeDest (the above methods
+        for B2DPoly/Polygons use this internally anyway to transform the B2DPolygon).
+     */
+    static basegfx::B2DHomMatrix LogicToLogic(MapMode const& rMapModeSource,
+                                              MapMode const& rMapModeDest);
 
     /** Get device transformation.
 

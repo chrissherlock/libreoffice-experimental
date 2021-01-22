@@ -894,7 +894,7 @@ IMPL_LINK_NOARG(SvxBitmapPickTabPage, NumSelectHdl_Impl, ValueSet*, void)
             {
                 Size aSize = SvxNumberFormat::GetGraphicSizeMM100(&aGraphic);
                 sal_Int16 eOrient = text::VertOrientation::LINE_CENTER;
-                aSize = OutputDevice::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(eCoreUnit));
+                aSize = Geometry::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(eCoreUnit));
                 SvxBrushItem aBrush(aGraphic, GPOS_AREA, SID_ATTR_BRUSH );
                 aFmt.SetGraphicBrush( &aBrush, &aSize, &eOrient );
             }
@@ -1837,7 +1837,7 @@ IMPL_LINK(SvxNumOptionsTabPage, GraphicHdl_Impl, const OString&, rIdent, void)
     if(!bSucc)
         return;
 
-    aSize = OutputDevice::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(eCoreUnit));
+    aSize = Geometry::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(eCoreUnit));
 
     sal_uInt16 nMask = 1;
     for(sal_uInt16 i = 0; i < pActNum->GetLevelCount(); i++)
@@ -1989,9 +1989,9 @@ IMPL_LINK( SvxNumOptionsTabPage, SizeHdl_Impl, weld::MetricSpinButton&, rField, 
     bool bRatio = m_xRatioCB->get_active();
     tools::Long nWidthVal = static_cast<tools::Long>(m_xWidthMF->denormalize(m_xWidthMF->get_value(FieldUnit::MM_100TH)));
     tools::Long nHeightVal = static_cast<tools::Long>(m_xHeightMF->denormalize(m_xHeightMF->get_value(FieldUnit::MM_100TH)));
-    nWidthVal = OutputDevice::LogicToLogic( nWidthVal ,
+    nWidthVal = Geometry::LogicToLogic( nWidthVal ,
                                                 MapUnit::Map100thMM, eCoreUnit );
-    nHeightVal = OutputDevice::LogicToLogic( nHeightVal,
+    nHeightVal = Geometry::LogicToLogic( nHeightVal,
                                                 MapUnit::Map100thMM, eCoreUnit);
     double  fSizeRatio;
 
@@ -2020,7 +2020,7 @@ IMPL_LINK( SvxNumOptionsTabPage, SizeHdl_Impl, weld::MetricSpinButton&, rField, 
                     {
                         aSize.setHeight( aInitSize[i].Height() + static_cast<tools::Long>(static_cast<double>(nDelta) / fSizeRatio) );
                         m_xHeightMF->set_value(m_xHeightMF->normalize(
-                            OutputDevice::LogicToLogic( aSize.Height(), eCoreUnit, MapUnit::Map100thMM )),
+                            Geometry::LogicToLogic( aSize.Height(), eCoreUnit, MapUnit::Map100thMM )),
                                 FieldUnit::MM_100TH);
                     }
                 }
@@ -2032,7 +2032,7 @@ IMPL_LINK( SvxNumOptionsTabPage, SizeHdl_Impl, weld::MetricSpinButton&, rField, 
                     {
                         aSize.setWidth( aInitSize[i].Width() + static_cast<tools::Long>(static_cast<double>(nDelta) * fSizeRatio) );
                         m_xWidthMF->set_value(m_xWidthMF->normalize(
-                            OutputDevice::LogicToLogic( aSize.Width(), eCoreUnit, MapUnit::Map100thMM )),
+                            Geometry::LogicToLogic( aSize.Width(), eCoreUnit, MapUnit::Map100thMM )),
                                 FieldUnit::MM_100TH);
                     }
                 }

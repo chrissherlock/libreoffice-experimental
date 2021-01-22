@@ -689,7 +689,7 @@ void SwWrtShell::CalcAndSetScale( svt::EmbeddedObjectRef& xObj,
                 MapUnit aUnit = VCLUnoHelper::UnoEmbed2VCLMapUnit( xObj->getMapUnit( nAspect ) );
 
                 // TODO/LATER: needs complete VisArea?!
-                Size aSize( OutputDevice::LogicToLogic(aRect.SVRect(), MapMode(MapUnit::MapTwip), MapMode(aUnit)).GetSize() );
+                Size aSize( Geometry::LogicToLogic(aRect.SVRect(), MapMode(MapUnit::MapTwip), MapMode(aUnit)).GetSize() );
                 awt::Size aSz;
                 aSz.Width = aSize.Width();
                 aSz.Height = aSize.Height();
@@ -794,7 +794,7 @@ void SwWrtShell::CalcAndSetScale( svt::EmbeddedObjectRef& xObj,
     {
         const MapMode aTmp( MapUnit::MapTwip );
         MapUnit aUnit = VCLUnoHelper::UnoEmbed2VCLMapUnit( xObj->getMapUnit( nAspect ) );
-        _aVisArea = OutputDevice::LogicToLogic(_aVisArea, MapMode(aUnit), aTmp);
+        _aVisArea = Geometry::LogicToLogic(_aVisArea, MapMode(aUnit), aTmp);
         Size aObjArea;
         if ( pFlyPrtRect )
             aObjArea = pFlyPrtRect->SSize();

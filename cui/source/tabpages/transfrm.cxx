@@ -955,13 +955,13 @@ bool SvxPositionSizeTabPage::FillItemSet( SfxItemSet* rOutAttrs )
         // get Width
         double nWidth = static_cast<double>(m_xMtrWidth->get_value(FieldUnit::MM_100TH));
         tools::Long lWidth = tools::Long(nWidth * static_cast<double>(aUIScale));
-        lWidth = OutputDevice::LogicToLogic( lWidth, MapUnit::Map100thMM, mePoolUnit );
+        lWidth = Geometry::LogicToLogic( lWidth, MapUnit::Map100thMM, mePoolUnit );
         lWidth = static_cast<tools::Long>(m_xMtrWidth->denormalize( lWidth ));
 
         // get Height
         double nHeight = static_cast<double>(m_xMtrHeight->get_value(FieldUnit::MM_100TH));
         tools::Long lHeight = tools::Long(nHeight * static_cast<double>(aUIScale));
-        lHeight = OutputDevice::LogicToLogic( lHeight, MapUnit::Map100thMM, mePoolUnit );
+        lHeight = Geometry::LogicToLogic( lHeight, MapUnit::Map100thMM, mePoolUnit );
         lHeight = static_cast<tools::Long>(m_xMtrHeight->denormalize( lHeight ));
 
         // put Width & Height to itemset
@@ -1059,7 +1059,7 @@ void SvxPositionSizeTabPage::Reset( const SfxItemSet*  )
     { // #i75273# set width
         pItem = GetItem( mrOutAttrs, SID_ATTR_TRANSFORM_WIDTH );
         mfOldWidth = std::max( pItem ? static_cast<double>(static_cast<const SfxUInt32Item*>(pItem)->GetValue()) : 0.0, 1.0 );
-        double fTmpWidth((OutputDevice::LogicToLogic(static_cast<sal_Int32>(mfOldWidth), mePoolUnit, MapUnit::Map100thMM)) / fUIScale);
+        double fTmpWidth((Geometry::LogicToLogic(static_cast<sal_Int32>(mfOldWidth), mePoolUnit, MapUnit::Map100thMM)) / fUIScale);
         if (m_xMtrWidth->get_digits())
             fTmpWidth *= pow(10.0, m_xMtrWidth->get_digits());
         m_xMtrWidth->set_value(static_cast<int>(fTmpWidth), FieldUnit::MM_100TH);
@@ -1068,7 +1068,7 @@ void SvxPositionSizeTabPage::Reset( const SfxItemSet*  )
     { // #i75273# set height
         pItem = GetItem( mrOutAttrs, SID_ATTR_TRANSFORM_HEIGHT );
         mfOldHeight = std::max( pItem ? static_cast<double>(static_cast<const SfxUInt32Item*>(pItem)->GetValue()) : 0.0, 1.0 );
-        double fTmpHeight((OutputDevice::LogicToLogic(static_cast<sal_Int32>(mfOldHeight), mePoolUnit, MapUnit::Map100thMM)) / fUIScale);
+        double fTmpHeight((Geometry::LogicToLogic(static_cast<sal_Int32>(mfOldHeight), mePoolUnit, MapUnit::Map100thMM)) / fUIScale);
         if (m_xMtrHeight->get_digits())
             fTmpHeight *= pow(10.0, m_xMtrHeight->get_digits());
         m_xMtrHeight->set_value(static_cast<int>(fTmpHeight), FieldUnit::MM_100TH);

@@ -243,8 +243,8 @@ void PageMarginControl::SetMetricFieldMaxValues( const Size& rPageSize )
     const tools::Long nMT = m_xTopMarginEdit->denormalize( m_xTopMarginEdit->get_value( FieldUnit::TWIP ) );
     const tools::Long nMB = m_xBottomMarginEdit->denormalize( m_xBottomMarginEdit->get_value( FieldUnit::TWIP ) );
 
-    const tools::Long nPH  = OutputDevice::LogicToLogic( rPageSize.Height(), m_eUnit, MapUnit::MapTwip );
-    const tools::Long nPW  = OutputDevice::LogicToLogic( rPageSize.Width(),  m_eUnit, MapUnit::MapTwip );
+    const tools::Long nPH  = Geometry::LogicToLogic( rPageSize.Height(), m_eUnit, MapUnit::MapTwip );
+    const tools::Long nPW  = Geometry::LogicToLogic( rPageSize.Width(),  m_eUnit, MapUnit::MapTwip );
 
     // Left
     tools::Long nMax = nPW - nMR - MINBODY;

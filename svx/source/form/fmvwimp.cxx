@@ -1443,8 +1443,8 @@ SdrObjectUniquePtr FmXFormView::implCreateXFormsControl( const svx::OXFormsDescr
                     nObjID));
             controlSize.setWidth( tools::Long(controlSize.Width() * eTargetMode.GetScaleX()) );
             controlSize.setHeight( tools::Long(controlSize.Height() * eTargetMode.GetScaleY()) );
-            ::Point controlPos( OutputDevice::LogicToLogic( ::Point( controlSize.Width(), 0 ), eSourceMode, eTargetMode ) );
-            ::tools::Rectangle controlRect( controlPos, OutputDevice::LogicToLogic( controlSize, eSourceMode, eTargetMode ) );
+            ::Point controlPos( Geometry::LogicToLogic( ::Point( controlSize.Width(), 0 ), eSourceMode, eTargetMode ) );
+            ::tools::Rectangle controlRect( controlPos, Geometry::LogicToLogic( controlSize, eSourceMode, eTargetMode ) );
             pControl->SetLogicRect(controlRect);
 
             // set the button label
@@ -1543,7 +1543,7 @@ bool FmXFormView::createControlLabelPair( OutputDevice const & _rOutDev, sal_Int
     ::Size aDefSize(4000, 500);
     ::Size aDefImageSize(4000, 4000);
 
-    ::Size aRealSize = OutputDevice::LogicToLogic(aTextSize, eTargetMode, eSourceMode);
+    ::Size aRealSize = Geometry::LogicToLogic(aTextSize, eTargetMode, eSourceMode);
     aRealSize.setWidth( std::max(aRealSize.Width(), aDefTxtSize.Width()) );
     aRealSize.setHeight( aDefSize.Height() );
 
@@ -1586,8 +1586,8 @@ bool FmXFormView::createControlLabelPair( OutputDevice const & _rOutDev, sal_Int
         }
 
         pLabel->SetLogicRect( ::tools::Rectangle(
-            OutputDevice::LogicToLogic( ::Point( _nXOffsetMM, _nYOffsetMM ), eSourceMode, eTargetMode ),
-            OutputDevice::LogicToLogic( aRealSize, eSourceMode, eTargetMode )
+            Geometry::LogicToLogic( ::Point( _nXOffsetMM, _nYOffsetMM ), eSourceMode, eTargetMode ),
+            Geometry::LogicToLogic( aRealSize, eSourceMode, eTargetMode )
         ) );
     }
 
@@ -1630,8 +1630,8 @@ bool FmXFormView::createControlLabelPair( OutputDevice const & _rOutDev, sal_Int
     aControlSize.setHeight( tools::Long(Fraction(aControlSize.Height(), 1) * eTargetMode.GetScaleY()) );
 
     pControl->SetLogicRect( ::tools::Rectangle(
-        OutputDevice::LogicToLogic( ::Point( aRealSize.Width() + _nXOffsetMM, _nYOffsetMM ), eSourceMode, eTargetMode ),
-        OutputDevice::LogicToLogic( aControlSize, eSourceMode, eTargetMode )
+        Geometry::LogicToLogic( ::Point( aRealSize.Width() + _nXOffsetMM, _nYOffsetMM ), eSourceMode, eTargetMode ),
+        Geometry::LogicToLogic( aControlSize, eSourceMode, eTargetMode )
     ) );
 
     // some initializations

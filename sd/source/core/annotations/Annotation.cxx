@@ -359,7 +359,7 @@ std::string lcl_LOKGetCommentPayload(CommentNotificationType nType, uno::Referen
         geometry::RealPoint2D const & rPoint = rxAnnotation->getPosition();
         geometry::RealSize2D const & rSize = rxAnnotation->getSize();
         ::tools::Rectangle aRectangle(Point(rPoint.X * 100.0, rPoint.Y * 100.0), Size(rSize.Width * 100.0, rSize.Height * 100.0));
-        aRectangle = OutputDevice::LogicToLogic(aRectangle, MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapTwip));
+        aRectangle = Geometry::LogicToLogic(aRectangle, MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapTwip));
         OString sRectangle = aRectangle.toString();
         aAnnotation.put("rectangle", sRectangle.getStr());
     }

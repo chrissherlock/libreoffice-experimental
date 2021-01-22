@@ -856,7 +856,7 @@ void OutlineTypeMgr::ApplyNumRule(SvxNumRule& aNum, sal_uInt16 nIndex, sal_uInt1
                         aSize = aFmt.GetGraphicSize();
                     else if (aSize.IsEmpty() && pGrf)
                         aSize = SvxNumberFormat::GetGraphicSizeMM100( pGrf );
-                    aSize = OutputDevice::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(GetMapUnit()));
+                    aSize = Geometry::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(GetMapUnit()));
                     aFmt.SetGraphicBrush( pLevelSettings->pBrushItem, &aSize, &eOrient );
             }
         } else

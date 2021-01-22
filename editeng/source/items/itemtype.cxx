@@ -48,7 +48,7 @@ OUString GetMetricText( tools::Long nVal, MapUnit eSrcUnit, MapUnit eDestUnit, c
         case MapUnit::MapMM:
         case MapUnit::MapCM:
         {
-            nRet = OutputDevice::LogicToLogic( nVal, eSrcUnit, MapUnit::Map100thMM );
+            nRet = Geometry::LogicToLogic( nVal, eSrcUnit, MapUnit::Map100thMM );
 
             switch ( eDestUnit )
             {
@@ -65,7 +65,7 @@ OUString GetMetricText( tools::Long nVal, MapUnit eSrcUnit, MapUnit eDestUnit, c
         case MapUnit::Map10thInch:
         case MapUnit::MapInch:
         {
-            nRet = OutputDevice::LogicToLogic( nVal, eSrcUnit, MapUnit::Map1000thInch );
+            nRet = Geometry::LogicToLogic( nVal, eSrcUnit, MapUnit::Map1000thInch );
 
             switch ( eDestUnit )
             {
@@ -79,13 +79,13 @@ OUString GetMetricText( tools::Long nVal, MapUnit eSrcUnit, MapUnit eDestUnit, c
 
         case MapUnit::MapPoint:
             // fractions of a point are used, e.g., for font size
-            nRet = OutputDevice::LogicToLogic(nVal, eSrcUnit, MapUnit::MapTwip) * 50;
+            nRet = Geometry::LogicToLogic(nVal, eSrcUnit, MapUnit::MapTwip) * 50;
             bShowAtLeastOneDecimalDigit = false;
             break;
 
         case MapUnit::MapTwip:
         case MapUnit::MapPixel:
-            return OUString::number( OutputDevice::LogicToLogic(
+            return OUString::number( Geometry::LogicToLogic(
                         nVal, eSrcUnit, eDestUnit ));
 
         default:

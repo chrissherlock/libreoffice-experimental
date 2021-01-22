@@ -510,7 +510,7 @@ const OUString & SVGTextWriter::implGetValidIDFromInterface( const Reference< XI
 void SVGTextWriter::implMap( const Size& rSz, Size& rDstSz ) const
 {
     if( mpVDev && mpTargetMapMode )
-        rDstSz = OutputDevice::LogicToLogic( rSz, mpVDev->GetMapMode(), *mpTargetMapMode );
+        rDstSz = Geometry::LogicToLogic( rSz, mpVDev->GetMapMode(), *mpTargetMapMode );
     else
         OSL_FAIL( "SVGTextWriter::implMap: invalid virtual device or map mode." );
 }
@@ -519,7 +519,7 @@ void SVGTextWriter::implMap( const Size& rSz, Size& rDstSz ) const
 void SVGTextWriter::implMap( const Point& rPt, Point& rDstPt ) const
 {
     if( mpVDev && mpTargetMapMode )
-        rDstPt = OutputDevice::LogicToLogic( rPt, mpVDev->GetMapMode(), *mpTargetMapMode );
+        rDstPt = Geometry::LogicToLogic( rPt, mpVDev->GetMapMode(), *mpTargetMapMode );
     else
         OSL_FAIL( "SVGTextWriter::implMap: invalid virtual device or map mode." );
 }
@@ -1797,14 +1797,14 @@ tools::Long SVGActionWriter::ImplMap( sal_Int32 nVal ) const
 
 Point& SVGActionWriter::ImplMap( const Point& rPt, Point& rDstPt ) const
 {
-    rDstPt = OutputDevice::LogicToLogic( rPt, mpVDev->GetMapMode(), maTargetMapMode );
+    rDstPt = Geometry::LogicToLogic( rPt, mpVDev->GetMapMode(), maTargetMapMode );
     return rDstPt;
 }
 
 
 Size& SVGActionWriter::ImplMap( const Size& rSz, Size& rDstSz ) const
 {
-    rDstSz = OutputDevice::LogicToLogic( rSz, mpVDev->GetMapMode(), maTargetMapMode );
+    rDstSz = Geometry::LogicToLogic( rSz, mpVDev->GetMapMode(), maTargetMapMode );
     return rDstSz;
 }
 
@@ -3880,13 +3880,13 @@ void SVGActionWriter::WriteMetaFile( const Point& rPos100thmm,
 
     mpVDev->Push();
 
-    Size aSize( OutputDevice::LogicToLogic(rSize100thmm, MapMode(MapUnit::Map100thMM), aMapMode) );
+    Size aSize( Geometry::LogicToLogic(rSize100thmm, MapMode(MapUnit::Map100thMM), aMapMode) );
     aFractionX *= Fraction( aSize.Width(), aPrefSize.Width() );
     aMapMode.SetScaleX( aFractionX );
     aFractionY *= Fraction( aSize.Height(), aPrefSize.Height() );
     aMapMode.SetScaleY( aFractionY );
 
-    Point aOffset( OutputDevice::LogicToLogic(rPos100thmm, MapMode(MapUnit::Map100thMM), aMapMode ) );
+    Point aOffset( Geometry::LogicToLogic(rPos100thmm, MapMode(MapUnit::Map100thMM), aMapMode ) );
     aOffset += aMapMode.GetOrigin();
     aMapMode.SetOrigin( aOffset );
 

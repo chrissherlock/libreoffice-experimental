@@ -584,8 +584,8 @@ namespace frm
         }
         else
         {
-            aPos = OutputDevice::LogicToLogic( _rPos, aOriginalMapMode, aNormalizedMapMode );
-            aSize = OutputDevice::LogicToLogic( _rSize, aOriginalMapMode, aNormalizedMapMode );
+            aPos = Geometry::LogicToLogic( _rPos, aOriginalMapMode, aNormalizedMapMode );
+            aSize = Geometry::LogicToLogic( _rSize, aOriginalMapMode, aNormalizedMapMode );
         }
 
         tools::Rectangle aPlayground( aPos, aSize );

@@ -2351,7 +2351,7 @@ void SvxTableController::updateSelectionOverlay()
     tools::Rectangle aSelection(a2DRange.getMinX(), a2DRange.getMinY(), a2DRange.getMaxX(), a2DRange.getMaxY());
 
     if (pOutDev->GetMapMode().GetMapUnit() == MapUnit::Map100thMM)
-        aSelection = OutputDevice::LogicToLogic(aSelection, MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapTwip));
+        aSelection = Geometry::LogicToLogic(aSelection, MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapTwip));
 
     if(SfxViewShell* pViewShell = SfxViewShell::Current())
     {

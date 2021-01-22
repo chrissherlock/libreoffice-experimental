@@ -159,7 +159,7 @@ Point LOKSpecialPositioning::convertUnit(const Point& rPos, MapUnit ePosUnit) co
     if (ePosUnit == meUnit)
         return rPos;
 
-    return OutputDevice::LogicToLogic(rPos, MapMode(ePosUnit), MapMode(meUnit));
+    return Geometry::LogicToLogic(rPos, MapMode(ePosUnit), MapMode(meUnit));
 }
 
 tools::Rectangle LOKSpecialPositioning::convertUnit(const tools::Rectangle& rRect, MapUnit eRectUnit) const
@@ -167,7 +167,7 @@ tools::Rectangle LOKSpecialPositioning::convertUnit(const tools::Rectangle& rRec
     if (eRectUnit == meUnit)
         return rRect;
 
-    return OutputDevice::LogicToLogic(rRect, MapMode(eRectUnit), MapMode(meUnit));
+    return Geometry::LogicToLogic(rRect, MapMode(eRectUnit), MapMode(meUnit));
 }
 
 Point LOKSpecialPositioning::GetRefPoint() const
@@ -396,7 +396,7 @@ void ImpEditView::lokSelectionCallback(const std::unique_ptr<tools::PolyPolygon>
             for (tools::Rectangle & rRectangle : aRectangles)
             {
                 if (bMm100ToTwip)
-                    rRectangle = OutputDevice::LogicToLogic(rRectangle, MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapTwip));
+                    rRectangle = Geometry::LogicToLogic(rRectangle, MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapTwip));
                 rRectangle.Move(aOrigin.getX(), aOrigin.getY());
                 v.emplace_back(rRectangle.toString().getStr());
             }
@@ -1340,7 +1340,7 @@ void ImpEditView::ShowCursor( bool bGotoCursor, bool bForceVisCursor )
 
             // LOK output is always in twips, convert from mm100 if necessary.
             if (rOutDev.GetMapMode().GetMapUnit() == MapUnit::Map100thMM)
-                aRect = OutputDevice::LogicToLogic(aRect, MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapTwip));
+                aRect = Geometry::LogicToLogic(aRect, MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapTwip));
             else if (rOutDev.GetMapMode().GetMapUnit() == MapUnit::MapTwip)
             {
                 // Writer comments: they use editeng, but are separate widgets.

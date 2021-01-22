@@ -249,7 +249,7 @@ namespace
         aFontItem.PutValue( uno::makeAny( aControlFont ), 0 );
         _rItemSet.Put(aFontItem);
 
-        _rItemSet.Put(SvxFontHeightItem(OutputDevice::LogicToLogic(Size(0, aFont.GetFontHeight()), MapMode(MapUnit::MapPoint), MapMode(MapUnit::MapTwip)).Height(), 100, _nFontHeight));
+        _rItemSet.Put(SvxFontHeightItem(Geometry::LogicToLogic(Size(0, aFont.GetFontHeight()), MapMode(MapUnit::MapPoint), MapMode(MapUnit::MapTwip)).Height(), 100, _nFontHeight));
         lang::Locale aLocale;
         switch(_nWhich)
         {
@@ -395,7 +395,7 @@ namespace
         if ( SfxItemState::SET == _rItemSet.GetItemState( _nFontHeight,true,&pItem) )
             if ( auto pFontItem = dynamic_cast< const SvxFontHeightItem *>( pItem ) )
             {
-                aNewFont.SetFontHeight(OutputDevice::LogicToLogic(Size(0, pFontItem->GetHeight()), MapMode(MapUnit::MapTwip), MapMode(MapUnit::MapPoint)).Height());
+                aNewFont.SetFontHeight(Geometry::LogicToLogic(Size(0, pFontItem->GetHeight()), MapMode(MapUnit::MapTwip), MapMode(MapUnit::MapPoint)).Height());
             }
         if ( SfxItemState::SET == _rItemSet.GetItemState( _nPosture,true,&pItem) )
             if ( auto pFontItem = dynamic_cast< const SvxPostureItem *>( pItem ) )

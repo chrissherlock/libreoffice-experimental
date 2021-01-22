@@ -700,7 +700,7 @@ namespace drawinglayer::primitive2d
                 }
                 else
                 {
-                    aNewSize = OutputDevice::LogicToLogic(
+                    aNewSize = Geometry::LogicToLogic(
                         aGraphic.GetPrefSize(),
                         aGraphic.GetPrefMapMode(),
                         MapMode(aDestinationMapUnit));

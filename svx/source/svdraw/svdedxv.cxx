@@ -1736,8 +1736,8 @@ bool SdrObjEditView::IsTextEditHit(const Point& rHit) const
             tools::Long nHitTol = 2000;
             OutputDevice* pRef = pTextEditOutliner->GetRefDevice();
             if (pRef)
-                nHitTol = OutputDevice::LogicToLogic(nHitTol, MapUnit::Map100thMM,
-                                                     pRef->GetMapMode().GetMapUnit());
+                nHitTol = Geometry::LogicToLogic(nHitTol, MapUnit::Map100thMM,
+                                                 pRef->GetMapMode().GetMapUnit());
 
             bOk = pTextEditOutliner->IsTextPos(aPnt, static_cast<sal_uInt16>(nHitTol));
         }

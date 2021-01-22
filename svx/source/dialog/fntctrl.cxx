@@ -849,7 +849,7 @@ void SvxFontPrevWindow::SetFontSize( const SfxItemSet& rSet, sal_uInt16 nSlot, S
     tools::Long nH;
     if (GetWhich(rSet, nSlot, nWhich))
     {
-        nH = OutputDevice::LogicToLogic(static_cast<const SvxFontHeightItem&>(rSet.Get(nWhich)).GetHeight(),
+        nH = Geometry::LogicToLogic(static_cast<const SvxFontHeightItem&>(rSet.Get(nWhich)).GetHeight(),
                           rSet.GetPool()->GetMetric(nWhich),
                           MapUnit::MapTwip);
     }
@@ -1045,7 +1045,7 @@ void SvxFontPrevWindow::SetFromItemSet(const SfxItemSet &rSet, bool bPreviewBack
     if( GetWhich( rSet, SID_ATTR_CHAR_KERNING, nWhich ) )
     {
         const SvxKerningItem& rItem = static_cast<const SvxKerningItem&>( rSet.Get( nWhich ) );
-        short nKern = static_cast<short>(OutputDevice::LogicToLogic(rItem.GetValue(), rSet.GetPool()->GetMetric(nWhich), MapUnit::MapTwip));
+        short nKern = static_cast<short>(Geometry::LogicToLogic(rItem.GetValue(), rSet.GetPool()->GetMetric(nWhich), MapUnit::MapTwip));
         rFont.SetFixKerning( nKern );
         rCJKFont.SetFixKerning( nKern );
         rCTLFont.SetFixKerning( nKern );

@@ -296,7 +296,7 @@ GEOMETRY lcl_convert( const MapMode& _rSource, const MapMode& _rDest, OutputDevi
     if ( MapUnit::MapPixel == _rSource.GetMapUnit() )
         aPoint = _pPixelConversion->GetGeometry().PixelToLogic( _rObject, _rDest );
     else
-        aPoint = OutputDevice::LogicToLogic( _rObject, _rSource, _rDest );
+        aPoint = Geometry::LogicToLogic( _rObject, _rSource, _rDest );
 
     return aPoint;
 }
@@ -3586,7 +3586,7 @@ Font PDFWriterImpl::replaceFont( const vcl::Font& rControlFont, const vcl::Font&
     {
         Size aFontSize = aFont.GetFontSize();
         OutputDevice* pDefDev = Application::GetDefaultDevice();
-        aFontSize = OutputDevice::LogicToLogic( aFontSize, pDefDev->GetMapMode(), getMapMode() );
+        aFontSize = Geometry::LogicToLogic( aFontSize, pDefDev->GetMapMode(), getMapMode() );
         aFont.SetFontSize( aFontSize );
     }
     return aFont;
@@ -9677,14 +9677,10 @@ void PDFWriterImpl::moveClipRegion( sal_Int32 nX, sal_Int32 nY )
     // tdf#130150 improve coordinate manipulations to double precision transformations
     basegfx::B2DHomMatrix aConvertA;
 
-    if(MapUnit::MapPixel == m_aGraphicsStack.front().m_aMapMode.GetMapUnit())
-    {
+    if (m_aGraphicsStack.front().m_aMapMode.GetMapUnit() == MapUnit::MapPixel)
         aConvertA = GetInverseViewTransformation(m_aMapMode);
-    }
     else
-    {
-        aConvertA = LogicToLogic(m_aGraphicsStack.front().m_aMapMode, m_aMapMode);
-    }
+        aConvertA = maGeometry.LogicToLogic(m_aGraphicsStack.front().m_aMapMode, m_aMapMode);
 
     basegfx::B2DPoint aB2DPointA(nX, nY);
     basegfx::B2DPoint aB2DPointB(0.0, 0.0);

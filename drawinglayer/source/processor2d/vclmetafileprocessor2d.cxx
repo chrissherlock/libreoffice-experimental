@@ -1002,7 +1002,7 @@ void VclMetafileProcessor2D::processGraphicPrimitive2D(
 
         {
             const MapMode aMapMode100thmm(MapUnit::Map100thMM);
-            const Size aBitmapSize(OutputDevice::LogicToLogic(
+            const Size aBitmapSize(Geometry::LogicToLogic(
                 rGraphicPrimitive.getGraphicObject().GetPrefSize(),
                 rGraphicPrimitive.getGraphicObject().GetPrefMapMode(), aMapMode100thmm));
             const double fDivX(aBitmapSize.Width() - rAttr.GetLeftCrop() - rAttr.GetRightCrop());
@@ -1130,8 +1130,8 @@ void VclMetafileProcessor2D::processControlPrimitive2D(
             pPDFControl->Location = aRectLogic;
 
             Size aFontSize(pPDFControl->TextFont.GetFontSize());
-            aFontSize = OutputDevice::LogicToLogic(aFontSize, MapMode(MapUnit::MapPoint),
-                                                   mpOutputDevice->GetMapMode());
+            aFontSize = Geometry::LogicToLogic(aFontSize, MapMode(MapUnit::MapPoint),
+                                               mpOutputDevice->GetMapMode());
             pPDFControl->TextFont.SetFontSize(aFontSize);
 
             mpPDFExtOutDevData->BeginStructureElement(vcl::PDFWriter::Form);

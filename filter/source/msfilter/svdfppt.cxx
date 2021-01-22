@@ -1945,7 +1945,7 @@ SdrObject* SdrPowerPointImport::ImportOLE( sal_uInt32 nOLEId,
                                             if ( rVisArea.IsEmpty() )
                                             {
                                                 MapUnit aMapUnit = VCLUnoHelper::UnoEmbed2VCLMapUnit( xObj->getMapUnit( rOe.nAspect ) );
-                                                Size aSize( OutputDevice::LogicToLogic( aGraphic.GetPrefSize(),
+                                                Size aSize( Geometry::LogicToLogic( aGraphic.GetPrefSize(),
                                                     aGraphic.GetPrefMapMode(), MapMode( aMapUnit ) ) );
 
                                                 awt::Size aSz;

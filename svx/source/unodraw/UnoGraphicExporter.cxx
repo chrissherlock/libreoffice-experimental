@@ -198,7 +198,7 @@ namespace {
         else
         {
             // use 100th mm for primitive bitmap converter tool
-            const Size aSize100th(OutputDevice::LogicToLogic(rMtf.GetPrefSize(), rMtf.GetPrefMapMode(), MapMode(MapUnit::Map100thMM)));
+            const Size aSize100th(Geometry::LogicToLogic(rMtf.GetPrefSize(), rMtf.GetPrefMapMode(), MapMode(MapUnit::Map100thMM)));
 
             aRange.expand(basegfx::B2DPoint(aSize100th.Width(), aSize100th.Height()));
         }

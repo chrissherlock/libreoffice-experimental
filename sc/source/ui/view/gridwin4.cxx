@@ -1201,7 +1201,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
                 // This is for sending the pixel-aligned twips position of the cursor to the specific views with
                 // the same given zoom level.
                 tools::Rectangle aCursorRect = pEditView->GetEditCursor();
-                Point aCursPos = OutputDevice::LogicToLogic(aCursorRect.TopLeft(),
+                Point aCursPos = Geometry::LogicToLogic(aCursorRect.TopLeft(),
                         MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapTwip));
 
                 const MapMode& rDevMM = rDevice.GetMapMode();
@@ -1507,7 +1507,7 @@ void ScGridWindow::LogicInvalidate(const tools::Rectangle* pRectangle)
         if (IsMapModeEnabled())
         {
             if (GetMapMode().GetMapUnit() == MapUnit::Map100thMM)
-                aRectangle = OutputDevice::LogicToLogic(aRectangle, MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapTwip));
+                aRectangle = Geometry::LogicToLogic(aRectangle, MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapTwip));
         }
         else
             aRectangle = maGeometry.PixelToLogic(aRectangle, MapMode(MapUnit::MapTwip));

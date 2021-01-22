@@ -3806,7 +3806,7 @@ bool SdrDragCrop::EndSdrDrag(bool /*bCopy*/)
         if (MapUnit::MapPixel == rGraphicObject.GetPrefMapMode().GetMapUnit())
             aGraphicSize = Application::GetDefaultDevice()->GetGeometry().PixelToLogic(aGraphicSize, aMapModePool);
         else
-            aGraphicSize = OutputDevice::LogicToLogic(aGraphicSize, rGraphicObject.GetPrefMapMode(), aMapModePool);
+            aGraphicSize = Geometry::LogicToLogic(aGraphicSize, rGraphicObject.GetPrefMapMode(), aMapModePool);
 
         if(0 == aGraphicSize.Width() || 0 == aGraphicSize.Height())
         {

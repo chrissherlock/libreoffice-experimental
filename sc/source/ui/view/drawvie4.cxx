@@ -462,7 +462,7 @@ void ScDrawView::SetMarkedOriginalSize()
                     try
                     {
                         awt::Size aSz = xObj->getVisualAreaSize( static_cast<SdrOle2Obj*>(pObj)->GetAspect() );
-                        aOriginalSize = OutputDevice::LogicToLogic(
+                        aOriginalSize = Geometry::LogicToLogic(
                                             Size( aSz.Width, aSz.Height ),
                                             MapMode(aUnit),
                                             MapMode(MapUnit::Map100thMM) );

@@ -888,7 +888,7 @@ void AnimationWindow::CreateAnimObj (::sd::View& rView )
         if ( aGraphic.GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel )
             aTmpSizeLog = pDefDev->GetGeometry().PixelToLogic( aGraphic.GetPrefSize(), aMap100 );
         else
-            aTmpSizeLog = OutputDevice::LogicToLogic( aGraphic.GetPrefSize(), aGraphic.GetPrefMapMode(), aMap100 );
+            aTmpSizeLog = Geometry::LogicToLogic( aGraphic.GetPrefSize(), aGraphic.GetPrefMapMode(), aMap100 );
 
         aMaxSizeLog.setWidth( std::max( aMaxSizeLog.Width(), aTmpSizeLog.Width() ) );
         aMaxSizeLog.setHeight( std::max( aMaxSizeLog.Height(), aTmpSizeLog.Height() ) );

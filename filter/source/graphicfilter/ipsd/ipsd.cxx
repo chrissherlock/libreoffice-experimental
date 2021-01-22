@@ -145,7 +145,7 @@ bool PSDReader::ReadPSD(Graphic & rGraphic )
             Fraction    aFractX( 1, mnXResFixed >> 16 );
             Fraction    aFractY( 1, mnYResFixed >> 16 );
             MapMode     aMapMode( MapUnit::MapInch, Point(), aFractX, aFractY );
-            Size        aPrefSize = OutputDevice::LogicToLogic(aBitmapSize, aMapMode, MapMode(MapUnit::Map100thMM));
+            Size        aPrefSize = Geometry::LogicToLogic(aBitmapSize, aMapMode, MapMode(MapUnit::Map100thMM));
             rGraphic.SetPrefSize( aPrefSize );
             rGraphic.SetPrefMapMode( MapMode( MapUnit::Map100thMM ) );
         }

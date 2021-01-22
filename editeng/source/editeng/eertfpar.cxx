@@ -320,7 +320,7 @@ void EditRTFParser::SetAttrInDoc( SvxRTFItemStackType &rSet )
             {
                 sal_uInt32 nHeight  = static_cast<const SvxFontHeightItem*>(pItem)->GetHeight();
                 tools::Long nNewHeight;
-                nNewHeight = OutputDevice::LogicToLogic( static_cast<tools::Long>(nHeight), gRTFMapUnit, eDestUnit );
+                nNewHeight = Geometry::LogicToLogic( static_cast<tools::Long>(nHeight), gRTFMapUnit, eDestUnit );
 
                 SvxFontHeightItem aFntHeightItem( nNewHeight, 100, aFntHeightIem );
                 aFntHeightItem.SetProp(
@@ -504,7 +504,7 @@ void EditRTFParser::CalcValue()
 {
     const MapUnit eDestUnit = aEditMapMode.GetMapUnit();
     if (eDestUnit != gRTFMapUnit)
-        nTokenValue = OutputDevice::LogicToLogic( nTokenValue, gRTFMapUnit, eDestUnit );
+        nTokenValue = Geometry::LogicToLogic( nTokenValue, gRTFMapUnit, eDestUnit );
 }
 
 void EditRTFParser::ReadField()

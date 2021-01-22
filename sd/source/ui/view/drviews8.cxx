@@ -63,7 +63,7 @@ void DrawViewShell::ScannerEvent()
                     if( aScanBmp.GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel )
                         aBmpSize = GetActiveWindow()->GetGeometry().PixelToLogic( aBmpSize, aMap100 );
                     else
-                        aBmpSize = OutputDevice::LogicToLogic( aBmpSize, aScanBmp.GetPrefMapMode(), aMap100 );
+                        aBmpSize = Geometry::LogicToLogic( aBmpSize, aScanBmp.GetPrefMapMode(), aMap100 );
 
                     aPageSize.AdjustWidth( -(pPage->GetLeftBorder() + pPage->GetRightBorder()) );
                     aPageSize.AdjustHeight( -(pPage->GetUpperBorder() + pPage->GetLowerBorder()) );

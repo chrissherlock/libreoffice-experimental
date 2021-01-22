@@ -65,12 +65,12 @@ ImplEESdrWriter::ImplEESdrWriter( EscherEx& rEx )
 
 Point ImplEESdrWriter::ImplMapPoint( const Point& rPoint )
 {
-    return OutputDevice::LogicToLogic( rPoint, maMapModeSrc, maMapModeDest );
+    return Geometry::LogicToLogic( rPoint, maMapModeSrc, maMapModeDest );
 }
 
 Size ImplEESdrWriter::ImplMapSize( const Size& rSize )
 {
-    Size aRetSize( OutputDevice::LogicToLogic( rSize, maMapModeSrc, maMapModeDest ) );
+    Size aRetSize( Geometry::LogicToLogic( rSize, maMapModeSrc, maMapModeDest ) );
 
     if ( !aRetSize.Width() )
         aRetSize.AdjustWidth( 1 );

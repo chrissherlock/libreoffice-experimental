@@ -213,31 +213,31 @@ void WMFWriter::CountActionsAndBitmaps( const GDIMetaFile & rMTF )
 
 void WMFWriter::WritePointXY(const Point & rPoint)
 {
-    Point aPt( OutputDevice::LogicToLogic(rPoint,aSrcMapMode,aTargetMapMode) );
+    Point aPt( Geometry::LogicToLogic(rPoint,aSrcMapMode,aTargetMapMode) );
     pWMF->WriteInt16( aPt.X() ).WriteInt16( aPt.Y() );
 }
 
 void WMFWriter::WritePointYX(const Point & rPoint)
 {
-    Point aPt( OutputDevice::LogicToLogic(rPoint,aSrcMapMode,aTargetMapMode) );
+    Point aPt( Geometry::LogicToLogic(rPoint,aSrcMapMode,aTargetMapMode) );
     pWMF->WriteInt16( aPt.Y() ).WriteInt16( aPt.X() );
 }
 
 sal_Int32 WMFWriter::ScaleWidth( sal_Int32 nDX )
 {
-    Size aSz( OutputDevice::LogicToLogic(Size(nDX,0),aSrcMapMode,aTargetMapMode) );
+    Size aSz( Geometry::LogicToLogic(Size(nDX,0),aSrcMapMode,aTargetMapMode) );
     return aSz.Width();
 }
 
 void WMFWriter::WriteSize(const Size & rSize)
 {
-    Size aSz( OutputDevice::LogicToLogic(rSize,aSrcMapMode,aTargetMapMode) );
+    Size aSz( Geometry::LogicToLogic(rSize,aSrcMapMode,aTargetMapMode) );
     pWMF->WriteInt16( aSz.Width() ).WriteInt16( aSz.Height() );
 }
 
 void WMFWriter::WriteHeightWidth(const Size & rSize)
 {
-    Size aSz( OutputDevice::LogicToLogic(rSize,aSrcMapMode,aTargetMapMode) );
+    Size aSz( Geometry::LogicToLogic(rSize,aSrcMapMode,aTargetMapMode) );
     pWMF->WriteInt16( aSz.Height() ).WriteInt16( aSz.Width() );
 }
 
@@ -516,7 +516,7 @@ bool WMFWriter::WMFRecord_Escape_Unicode( const Point& rPoint, const OUString& r
                                            + sizeof( nSkipActions );
 
                     SvMemoryStream aMemoryStream( nStrmLen );
-                    Point aPt( OutputDevice::LogicToLogic( rPoint, aSrcMapMode, aTargetMapMode ) );
+                    Point aPt( Geometry::LogicToLogic( rPoint, aSrcMapMode, aTargetMapMode ) );
                     aMemoryStream.WriteInt32( aPt.X() )
                                  .WriteInt32( aPt.Y() )
                                  .WriteUInt32( nStringLen );
@@ -1628,7 +1628,7 @@ void WMFWriter::WriteHeader( bool bPlaceable )
     if( bPlaceable )
     {
         sal_uInt16  nCheckSum, nValue;
-        Size    aSize( OutputDevice::LogicToLogic(Size(1,1),MapMode(MapUnit::MapInch), aTargetMapMode) );
+        Size    aSize( Geometry::LogicToLogic(Size(1,1),MapMode(MapUnit::MapInch), aTargetMapMode) );
         sal_uInt16  nUnitsPerInch = static_cast<sal_uInt16>( ( aSize.Width() + aSize.Height() ) >> 1 );
 
         nCheckSum=0;
@@ -1718,7 +1718,7 @@ bool WMFWriter::WriteWMF( const GDIMetaFile& rMTF, SvStream& rTargetStream,
 
         aTargetMapMode.SetScaleX( aFrac );
         aTargetMapMode.SetScaleY( aFrac );
-        aTargetSize = OutputDevice::LogicToLogic( rMTF.GetPrefSize(), aSrcMapMode, aTargetMapMode );
+        aTargetSize = Geometry::LogicToLogic( rMTF.GetPrefSize(), aSrcMapMode, aTargetMapMode );
     }
 
     pVirDev->SetMapMode( aTargetMapMode );
@@ -1800,7 +1800,7 @@ sal_uInt16 WMFWriter::CalcSaveTargetMapMode(MapMode& rMapMode,
     Fraction    aDivFrac(2, 1);
     sal_uInt16      nDivisor = 1;
 
-    Size aSize = OutputDevice::LogicToLogic( rPrefSize, aSrcMapMode, rMapMode );
+    Size aSize = Geometry::LogicToLogic( rPrefSize, aSrcMapMode, rMapMode );
 
     while( nDivisor <= 64 && (aSize.Width() > 32767 || aSize.Height() > 32767) )
     {
@@ -1812,7 +1812,7 @@ sal_uInt16 WMFWriter::CalcSaveTargetMapMode(MapMode& rMapMode,
         aFrac *= aDivFrac;
         rMapMode.SetScaleY(aFrac);
         nDivisor <<= 1;
-        aSize = OutputDevice::LogicToLogic( rPrefSize, aSrcMapMode, rMapMode );
+        aSize = Geometry::LogicToLogic( rPrefSize, aSrcMapMode, rMapMode );
     }
 
     return nDivisor;

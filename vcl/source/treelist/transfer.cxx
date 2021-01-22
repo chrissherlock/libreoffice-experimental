@@ -1646,7 +1646,7 @@ bool TransferableDataHelper::GetBitmapEx( const DataFlavor& rFlavor, BitmapEx& r
 
             if(MapUnit::MapPixel != aMapMode.GetMapUnit())
             {
-                const Size aSize(OutputDevice::LogicToLogic(rBmpEx.GetPrefSize(), aMapMode, MapMode(MapUnit::Map100thMM)));
+                const Size aSize(Geometry::LogicToLogic(rBmpEx.GetPrefSize(), aMapMode, MapMode(MapUnit::Map100thMM)));
 
                 // #i122388# This wrongly corrects in the given case; changing from 5000 100th mm to
                 // the described 50 cm (which is 50000 100th mm)
@@ -1655,7 +1655,7 @@ bool TransferableDataHelper::GetBitmapEx( const DataFlavor& rFlavor, BitmapEx& r
                     rBmpEx.SetPrefMapMode(MapMode(MapUnit::MapPixel));
 
                     // #i122388# also adapt size by applying the mew MapMode
-                    const Size aNewSize(OutputDevice::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapPixel)));
+                    const Size aNewSize(Geometry::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapPixel)));
                     rBmpEx.SetPrefSize(aNewSize);
                 }
             }

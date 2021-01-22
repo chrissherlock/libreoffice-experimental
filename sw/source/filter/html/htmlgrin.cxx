@@ -596,7 +596,7 @@ IMAGE_SETEVENT:
         else
         {   // some bitmaps may have a size in metric units (e.g. PNG); use that
             assert(aGraphic.GetPrefMapMode().GetMapUnit() < MapUnit::MapPixel);
-            aTwipSz = OutputDevice::LogicToLogic(aGraphic.GetPrefSize(),
+            aTwipSz = Geometry::LogicToLogic(aGraphic.GetPrefSize(),
                     aGraphic.GetPrefMapMode(), MapMode(MapUnit::MapTwip));
         }
     }

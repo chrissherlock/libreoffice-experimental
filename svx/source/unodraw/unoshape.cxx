@@ -776,7 +776,7 @@ uno::Any SvxShape::GetBitmap( bool bMetaFile /* = false */ ) const
                     // to Map100thMM we need to embed the primitives to an adapting
                     // homogen transformation for correct values
                     const basegfx::B2DHomMatrix aMapTransform(
-                        OutputDevice::LogicToLogic(
+                        Geometry::LogicToLogic(
                             MapMode(aSourceMapUnit),
                             MapMode(MapUnit::Map100thMM)));
 

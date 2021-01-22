@@ -783,7 +783,7 @@ Point WeldViewForwarder::LogicToPixel(const Point& rPoint, const MapMode& rMapMo
     if (pOutDev)
     {
         MapMode aMapMode(pOutDev->GetMapMode());
-        Point aPoint(OutputDevice::LogicToLogic(rPoint, rMapMode, MapMode(aMapMode.GetMapUnit())));
+        Point aPoint(Geometry::LogicToLogic(rPoint, rMapMode, MapMode(aMapMode.GetMapUnit())));
         aMapMode.SetOrigin(Point());
         return pOutDev->GetGeometry().LogicToPixel(aPoint, aMapMode);
     }
@@ -801,7 +801,7 @@ Point WeldViewForwarder::PixelToLogic(const Point& rPoint, const MapMode& rMapMo
         MapMode aMapMode(pOutDev->GetMapMode());
         aMapMode.SetOrigin(Point());
         Point aPoint(pOutDev->GetGeometry().PixelToLogic(rPoint, aMapMode));
-        return OutputDevice::LogicToLogic(aPoint, MapMode(aMapMode.GetMapUnit()), rMapMode);
+        return Geometry::LogicToLogic(aPoint, MapMode(aMapMode.GetMapUnit()), rMapMode);
     }
 
     return Point();
@@ -1356,7 +1356,7 @@ Point WeldEditViewForwarder::LogicToPixel(const Point& rPoint, const MapMode& rM
     if (pOutDev)
     {
         MapMode aMapMode(pOutDev->GetMapMode());
-        Point aPoint(OutputDevice::LogicToLogic(rPoint, rMapMode, MapMode(aMapMode.GetMapUnit())));
+        Point aPoint(Geometry::LogicToLogic(rPoint, rMapMode, MapMode(aMapMode.GetMapUnit())));
         aMapMode.SetOrigin(Point());
         return pOutDev->GetGeometry().LogicToPixel(aPoint, aMapMode);
     }
@@ -1374,7 +1374,7 @@ Point WeldEditViewForwarder::PixelToLogic(const Point& rPoint, const MapMode& rM
         MapMode aMapMode(pOutDev->GetMapMode());
         aMapMode.SetOrigin(Point());
         Point aPoint(pOutDev->GetGeometry().PixelToLogic(rPoint, aMapMode));
-        return OutputDevice::LogicToLogic(aPoint, MapMode(aMapMode.GetMapUnit()), rMapMode);
+        return Geometry::LogicToLogic(aPoint, MapMode(aMapMode.GetMapUnit()), rMapMode);
     }
 
     return Point();

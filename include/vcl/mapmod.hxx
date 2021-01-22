@@ -37,7 +37,7 @@ class SvStream;
 
 class SAL_WARN_UNUSED VCL_DLLPUBLIC MapMode
 {
-    friend class        OutputDevice;
+    friend class Geometry;
 
 public:
     struct SAL_DLLPRIVATE ImplMapMode;
@@ -77,6 +77,10 @@ public:
     Point MapTo(MapMode const& rMapMode, Point const& rPtSource, Geometry const& rGeometry) const;
     Size MapTo(MapMode const& rMapMode, Size const& rSzSource, Geometry const& rGeometry) const;
     tools::Rectangle MapTo(MapMode const& rMapMode, tools::Rectangle const& rRectSource, Geometry const& rGeometry) const;
+
+    static tools::Long fn5(const tools::Long n1, const tools::Long n2, const tools::Long n3,
+                          const tools::Long n4, const tools::Long n5);
+    static tools::Long fn3(const tools::Long n1, const tools::Long n2, const tools::Long n3);
 
 private:
     ImplType mpImplMapMode;

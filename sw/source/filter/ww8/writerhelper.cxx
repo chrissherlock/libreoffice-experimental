@@ -171,7 +171,7 @@ namespace ww8
         }
         else
         {
-            aSize = OutputDevice::LogicToLogic( aSize,rGrf.GetPrefMapMode(), aMap100mm );
+            aSize = Geometry::LogicToLogic( aSize,rGrf.GetPrefMapMode(), aMap100mm );
         }
         maSize = aSize;
         maLayoutSize = maSize;

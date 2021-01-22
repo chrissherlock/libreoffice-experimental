@@ -175,7 +175,7 @@ void SvxGrfCropPage::Reset( const SfxItemSet *rSet )
     }
     else
     {
-        aPageSize = OutputDevice::LogicToLogic(
+        aPageSize = Geometry::LogicToLogic(
                         Size( CM_1_TO_TWIP,  CM_1_TO_TWIP ),
                         MapMode( MapUnit::MapTwip ),
                         MapMode( rSet->GetPool()->GetMetric( nW ) ) );
@@ -674,7 +674,7 @@ Size SvxGrfCropPage::GetGrfOrigSize(const Graphic& rGrf)
     if( MapUnit::MapPixel == rGrf.GetPrefMapMode().GetMapUnit() )
         aSize = Application::GetDefaultDevice()->GetGeometry().PixelToLogic(aSize, aMapTwip);
     else
-        aSize = OutputDevice::LogicToLogic( aSize,
+        aSize = Geometry::LogicToLogic( aSize,
                                         rGrf.GetPrefMapMode(), aMapTwip );
     return aSize;
 }
@@ -695,7 +695,7 @@ void SvxCropExample::SetDrawingArea(weld::DrawingArea* pDrawingArea)
     pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
 
     m_aMapMode = rDevice.GetMapMode();
-    m_aFrameSize = OutputDevice::LogicToLogic(
+    m_aFrameSize = Geometry::LogicToLogic(
                             Size(CM_1_TO_TWIP / 2, CM_1_TO_TWIP / 2),
                             MapMode(MapUnit::MapTwip), m_aMapMode);
 }

@@ -111,7 +111,7 @@ static Size GetMinBorderSpace_Impl( const SvxShadowItem& rShadow, const SvxBoxIt
 
 static tools::Long ConvertLong_Impl( const tools::Long nIn, MapUnit eUnit )
 {
-    return OutputDevice::LogicToLogic( nIn, eUnit, MapUnit::MapTwip );
+    return Geometry::LogicToLogic( nIn, eUnit, MapUnit::MapTwip );
 }
 
 static bool IsEqualSize_Impl( const SvxSizeItem* pSize, const Size& rSize )
@@ -459,7 +459,7 @@ void SvxPageDescPage::Reset( const SfxItemSet* rSet )
     m_aBspWin.SetSize( Size( ConvertLong_Impl( aPaperSize.Width(), eUnit ),
                            ConvertLong_Impl( aPaperSize.Height(), eUnit ) ) );
 
-    aPaperSize = OutputDevice::LogicToLogic(aPaperSize, MapMode(eUnit), MapMode(MapUnit::Map100thMM));
+    aPaperSize = Geometry::LogicToLogic(aPaperSize, MapMode(eUnit), MapMode(MapUnit::Map100thMM));
     if ( bLandscape )
         Swap( aPaperSize );
 

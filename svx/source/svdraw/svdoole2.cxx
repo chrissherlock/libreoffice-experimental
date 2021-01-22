@@ -258,7 +258,7 @@ void SAL_CALL SdrLightEmbeddedClient_Impl::notifyEvent( const document::EventObj
         }
 
         aVisArea.SetSize( Size( aSz.Width, aSz.Height ) );
-        aVisArea = OutputDevice::LogicToLogic(aVisArea, MapMode(aObjMapUnit), MapMode(aContainerMapUnit));
+        aVisArea = Geometry::LogicToLogic(aVisArea, MapMode(aObjMapUnit), MapMode(aContainerMapUnit));
         Size aScaledSize( static_cast< tools::Long >( m_aScaleWidth * Fraction( aVisArea.GetWidth() ) ),
                             static_cast< tools::Long >( m_aScaleHeight * Fraction( aVisArea.GetHeight() ) ) );
         tools::Rectangle aLogicRect( mpObj->GetLogicRect() );
@@ -1474,7 +1474,7 @@ void SdrOle2Obj::ImpSetVisAreaSize()
             Size aVisSize( static_cast<tools::Long>( Fraction( maRect.GetWidth() ) / aScaleWidth ),
                             static_cast<tools::Long>( Fraction( maRect.GetHeight() ) / aScaleHeight ) );
 
-            aVisSize = OutputDevice::LogicToLogic(
+            aVisSize = Geometry::LogicToLogic(
                 aVisSize,
                 MapMode(getSdrModelFromSdrObject().GetScaleUnit()),
                 MapMode(aMapUnit));
@@ -1499,7 +1499,7 @@ void SdrOle2Obj::ImpSetVisAreaSize()
                 // store the new value as given by the object
                 MapUnit aNewMapUnit = VCLUnoHelper::UnoEmbed2VCLMapUnit( mpImpl->mxObjRef->getMapUnit( GetAspect() ) );
                 maRect.SetSize(
-                    OutputDevice::LogicToLogic(
+                    Geometry::LogicToLogic(
                         aAcceptedVisArea.GetSize(),
                         MapMode(aNewMapUnit),
                         MapMode(getSdrModelFromSdrObject().GetScaleUnit())));
@@ -1554,12 +1554,12 @@ void SdrOle2Obj::ImpSetVisAreaSize()
             const Point aTL( maRect.TopLeft() );
             const Point aBR( maRect.BottomRight() );
             const Point aTL2(
-                OutputDevice::LogicToLogic(
+                Geometry::LogicToLogic(
                     aTL,
                     MapMode(getSdrModelFromSdrObject().GetScaleUnit()),
                     MapMode(aMapUnit)));
             const Point aBR2(
-                OutputDevice::LogicToLogic(
+                Geometry::LogicToLogic(
                     aBR,
                     MapMode(getSdrModelFromSdrObject().GetScaleUnit()),
                     MapMode(aMapUnit)));

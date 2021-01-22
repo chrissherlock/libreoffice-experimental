@@ -827,17 +827,17 @@ void ConvertItem( std::unique_ptr<SfxPoolItem>& rPoolItem, MapUnit eSourceUnit, 
         {
             assert(dynamic_cast<const SvxLRSpaceItem *>(rPoolItem.get()) != nullptr);
             SvxLRSpaceItem& rItem = static_cast<SvxLRSpaceItem&>(*rPoolItem);
-            rItem.SetTextFirstLineOffset( sal::static_int_cast< short >( OutputDevice::LogicToLogic( rItem.GetTextFirstLineOffset(), eSourceUnit, eDestUnit ) ) );
-            rItem.SetTextLeft( OutputDevice::LogicToLogic( rItem.GetTextLeft(), eSourceUnit, eDestUnit ) );
-            rItem.SetRight( OutputDevice::LogicToLogic( rItem.GetRight(), eSourceUnit, eDestUnit ) );
+            rItem.SetTextFirstLineOffset( sal::static_int_cast< short >( Geometry::LogicToLogic( rItem.GetTextFirstLineOffset(), eSourceUnit, eDestUnit ) ) );
+            rItem.SetTextLeft( Geometry::LogicToLogic( rItem.GetTextLeft(), eSourceUnit, eDestUnit ) );
+            rItem.SetRight( Geometry::LogicToLogic( rItem.GetRight(), eSourceUnit, eDestUnit ) );
         }
         break;
         case EE_PARA_ULSPACE:
         {
             assert(dynamic_cast<const SvxULSpaceItem *>(rPoolItem.get()) != nullptr);
             SvxULSpaceItem& rItem = static_cast<SvxULSpaceItem&>(*rPoolItem);
-            rItem.SetUpper( sal::static_int_cast< sal_uInt16 >( OutputDevice::LogicToLogic( rItem.GetUpper(), eSourceUnit, eDestUnit ) ) );
-            rItem.SetLower( sal::static_int_cast< sal_uInt16 >( OutputDevice::LogicToLogic( rItem.GetLower(), eSourceUnit, eDestUnit ) ) );
+            rItem.SetUpper( sal::static_int_cast< sal_uInt16 >( Geometry::LogicToLogic( rItem.GetUpper(), eSourceUnit, eDestUnit ) ) );
+            rItem.SetLower( sal::static_int_cast< sal_uInt16 >( Geometry::LogicToLogic( rItem.GetLower(), eSourceUnit, eDestUnit ) ) );
         }
         break;
         case EE_PARA_SBL:
@@ -846,7 +846,7 @@ void ConvertItem( std::unique_ptr<SfxPoolItem>& rPoolItem, MapUnit eSourceUnit, 
             SvxLineSpacingItem& rItem = static_cast<SvxLineSpacingItem&>(*rPoolItem);
             // SetLineHeight changes also eLineSpace!
             if ( rItem.GetLineSpaceRule() == SvxLineSpaceRule::Min )
-                rItem.SetLineHeight( sal::static_int_cast< sal_uInt16 >( OutputDevice::LogicToLogic( rItem.GetLineHeight(), eSourceUnit, eDestUnit ) ) );
+                rItem.SetLineHeight( sal::static_int_cast< sal_uInt16 >( Geometry::LogicToLogic( rItem.GetLineHeight(), eSourceUnit, eDestUnit ) ) );
         }
         break;
         case EE_PARA_TABS:
@@ -857,7 +857,7 @@ void ConvertItem( std::unique_ptr<SfxPoolItem>& rPoolItem, MapUnit eSourceUnit, 
             for ( sal_uInt16 i = 0; i < rItem.Count(); i++ )
             {
                 const SvxTabStop& rTab = rItem[i];
-                SvxTabStop aNewStop( OutputDevice::LogicToLogic( rTab.GetTabPos(), eSourceUnit, eDestUnit ), rTab.GetAdjustment(), rTab.GetDecimal(), rTab.GetFill() );
+                SvxTabStop aNewStop( Geometry::LogicToLogic( rTab.GetTabPos(), eSourceUnit, eDestUnit ), rTab.GetAdjustment(), rTab.GetDecimal(), rTab.GetFill() );
                 pNewItem->Insert( aNewStop );
             }
             rPoolItem.reset(pNewItem);
@@ -869,7 +869,7 @@ void ConvertItem( std::unique_ptr<SfxPoolItem>& rPoolItem, MapUnit eSourceUnit, 
         {
             assert(dynamic_cast<const SvxFontHeightItem *>(rPoolItem.get()) != nullptr);
             SvxFontHeightItem& rItem = static_cast<SvxFontHeightItem&>(*rPoolItem);
-            rItem.SetHeight( OutputDevice::LogicToLogic( rItem.GetHeight(), eSourceUnit, eDestUnit ) );
+            rItem.SetHeight( Geometry::LogicToLogic( rItem.GetHeight(), eSourceUnit, eDestUnit ) );
         }
         break;
     }

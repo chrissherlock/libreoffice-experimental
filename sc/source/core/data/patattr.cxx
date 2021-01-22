@@ -353,7 +353,7 @@ void ScPatternAttr::GetFont(
             Fraction aFractOne(1,1);
             aDestMode.SetScaleX( aFractOne );
             aDestMode.SetScaleY( aFractOne );
-            aEffSize = OutputDevice::LogicToLogic( aSize, aSrcMode, aDestMode );
+            aEffSize = Geometry::LogicToLogic( aSize, aSrcMode, aDestMode );
         }
         rFont.SetFontSize( aEffSize );
     }

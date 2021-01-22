@@ -3085,7 +3085,7 @@ tools::Rectangle SwAccessibleMap::GetVisibleArea() const
 {
     MapMode aSrc( MapUnit::MapTwip );
     MapMode aDest( MapUnit::Map100thMM );
-    return OutputDevice::LogicToLogic( GetVisArea().SVRect(), aSrc, aDest );
+    return Geometry::LogicToLogic( GetVisArea().SVRect(), aSrc, aDest );
 }
 
 // Convert a MM100 value relative to the document root into a pixel value
@@ -3095,7 +3095,7 @@ Point SwAccessibleMap::LogicToPixel( const Point& rPoint ) const
     MapMode aSrc( MapUnit::Map100thMM );
     MapMode aDest( MapUnit::MapTwip );
 
-    Point aPoint = OutputDevice::LogicToLogic( rPoint, aSrc, aDest );
+    Point aPoint = Geometry::LogicToLogic( rPoint, aSrc, aDest );
     if (const vcl::Window* pWin = GetShell()->GetWin())
     {
         MapMode aMapMode;
@@ -3111,7 +3111,7 @@ Size SwAccessibleMap::LogicToPixel( const Size& rSize ) const
 {
     MapMode aSrc( MapUnit::Map100thMM );
     MapMode aDest( MapUnit::MapTwip );
-    Size aSize( OutputDevice::LogicToLogic( rSize, aSrc, aDest ) );
+    Size aSize( Geometry::LogicToLogic( rSize, aSrc, aDest ) );
     if (const OutputDevice* pWin = GetShell()->GetWin())
     {
         MapMode aMapMode;

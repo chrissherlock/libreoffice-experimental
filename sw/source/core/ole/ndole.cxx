@@ -933,7 +933,7 @@ uno::Reference < embed::XEmbeddedObject > const & SwOLEObj::GetOleRef()
                 Size aSz( pFrame->getFrameArea().SSize() );
                 const MapMode aSrc ( MapUnit::MapTwip );
                 const MapMode aDest( MapUnit::Map100thMM );
-                aSz = OutputDevice::LogicToLogic( aSz, aSrc, aDest );
+                aSz = Geometry::LogicToLogic( aSz, aSrc, aDest );
                 aArea.SetSize( aSz );
             }
             else

@@ -484,10 +484,10 @@ Size SdrGrafObj::getOriginalSize() const
 
     if (aGrafInfo.IsCropped())
     {
-        const tools::Long aCroppedTop(OutputDevice::LogicToLogic(aGrafInfo.GetTopCrop(), getSdrModelFromSdrObject().GetScaleUnit(), GetGrafPrefMapMode().GetMapUnit()));
-        const tools::Long aCroppedBottom(OutputDevice::LogicToLogic(aGrafInfo.GetBottomCrop(), getSdrModelFromSdrObject().GetScaleUnit(), GetGrafPrefMapMode().GetMapUnit()));
-        const tools::Long aCroppedLeft(OutputDevice::LogicToLogic(aGrafInfo.GetLeftCrop(), getSdrModelFromSdrObject().GetScaleUnit(), GetGrafPrefMapMode().GetMapUnit()));
-        const tools::Long aCroppedRight(OutputDevice::LogicToLogic(aGrafInfo.GetRightCrop(), getSdrModelFromSdrObject().GetScaleUnit(), GetGrafPrefMapMode().GetMapUnit()));
+        const tools::Long aCroppedTop(Geometry::LogicToLogic(aGrafInfo.GetTopCrop(), getSdrModelFromSdrObject().GetScaleUnit(), GetGrafPrefMapMode().GetMapUnit()));
+        const tools::Long aCroppedBottom(Geometry::LogicToLogic(aGrafInfo.GetBottomCrop(), getSdrModelFromSdrObject().GetScaleUnit(), GetGrafPrefMapMode().GetMapUnit()));
+        const tools::Long aCroppedLeft(Geometry::LogicToLogic(aGrafInfo.GetLeftCrop(), getSdrModelFromSdrObject().GetScaleUnit(), GetGrafPrefMapMode().GetMapUnit()));
+        const tools::Long aCroppedRight(Geometry::LogicToLogic(aGrafInfo.GetRightCrop(), getSdrModelFromSdrObject().GetScaleUnit(), GetGrafPrefMapMode().GetMapUnit()));
         const tools::Long aCroppedWidth(aSize.getWidth() - aCroppedLeft + aCroppedRight);
         const tools::Long aCroppedHeight(aSize.getHeight() - aCroppedTop + aCroppedBottom);
 
@@ -497,7 +497,7 @@ Size SdrGrafObj::getOriginalSize() const
     if ( GetGrafPrefMapMode().GetMapUnit() == MapUnit::MapPixel )
         aSize = Application::GetDefaultDevice()->GetGeometry().PixelToLogic(aSize, MapMode(getSdrModelFromSdrObject().GetScaleUnit()));
     else
-        aSize = OutputDevice::LogicToLogic(aSize, GetGrafPrefMapMode(), MapMode(getSdrModelFromSdrObject().GetScaleUnit()));
+        aSize = Geometry::LogicToLogic(aSize, GetGrafPrefMapMode(), MapMode(getSdrModelFromSdrObject().GetScaleUnit()));
 
     return aSize;
 }
@@ -1073,7 +1073,7 @@ void SdrGrafObj::AdjustToMaxRect( const tools::Rectangle& rMaxRect, bool bShrink
     if (mpGraphicObject->GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel)
         aSize = Application::GetDefaultDevice()->GetGeometry().PixelToLogic(mpGraphicObject->GetPrefSize(), MapMode(MapUnit::Map100thMM));
     else
-        aSize = OutputDevice::LogicToLogic( mpGraphicObject->GetPrefSize(),
+        aSize = Geometry::LogicToLogic( mpGraphicObject->GetPrefSize(),
                                             mpGraphicObject->GetPrefMapMode(),
                                             MapMode( MapUnit::Map100thMM ) );
 

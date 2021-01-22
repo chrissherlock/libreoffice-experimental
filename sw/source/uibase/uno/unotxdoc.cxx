@@ -2755,7 +2755,7 @@ uno::Sequence< beans::PropertyValue > SAL_CALL SwXTextDocument::getRenderer(
             {
                 // HTML source view and prospect adapt to the printer's paper size
                 aTmpSize = pPrinter->GetPaperSize();
-                aTmpSize = OutputDevice::LogicToLogic( aTmpSize,
+                aTmpSize = Geometry::LogicToLogic( aTmpSize,
                             pPrinter->GetMapMode(), MapMode( MapUnit::Map100thMM ));
                 aPageSize = awt::Size( aTmpSize.Width(), aTmpSize.Height() );
                 #if 0

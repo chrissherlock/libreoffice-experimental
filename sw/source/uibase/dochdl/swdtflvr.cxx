@@ -1004,7 +1004,7 @@ int SwTransferable::PrepareForCopy( bool bIsCut )
 
         // --> OD #i98753#
         // set size of embedded object at the object description structure
-        m_aObjDesc.maSize = OutputDevice::LogicToLogic(m_pWrtShell->GetObjSize(), MapMode(MapUnit::MapTwip), MapMode(MapUnit::Map100thMM));
+        m_aObjDesc.maSize = Geometry::LogicToLogic(m_pWrtShell->GetObjSize(), MapMode(MapUnit::MapTwip), MapMode(MapUnit::Map100thMM));
         // <--
         PrepareOLE( m_aObjDesc );
 
@@ -1152,7 +1152,7 @@ int SwTransferable::PrepareForCopy( bool bIsCut )
         //Now adjust it. Thus in GetData the first query can still
         //be answered with delayed rendering.
         Size aSz( OLESIZE );
-        m_aObjDesc.maSize = OutputDevice::LogicToLogic(aSz, MapMode(MapUnit::MapTwip), MapMode(MapUnit::Map100thMM));
+        m_aObjDesc.maSize = Geometry::LogicToLogic(aSz, MapMode(MapUnit::MapTwip), MapMode(MapUnit::Map100thMM));
 
         PrepareOLE( m_aObjDesc );
 #if HAVE_FEATURE_DESKTOP
@@ -1255,7 +1255,7 @@ bool SwTransferable::CopyGlossary( SwTextBlocks& rGlossary, const OUString& rStr
     //Now adjust it. Thus in GetData the first query can still
     //be answered with delayed rendering.
     Size aSz( OLESIZE );
-    m_aObjDesc.maSize = OutputDevice::LogicToLogic(aSz, MapMode(MapUnit::MapTwip), MapMode(MapUnit::Map100thMM));
+    m_aObjDesc.maSize = Geometry::LogicToLogic(aSz, MapMode(MapUnit::MapTwip), MapMode(MapUnit::Map100thMM));
 
     PrepareOLE( m_aObjDesc );
     AddFormat( SotClipboardFormatId::OBJECTDESCRIPTOR );
@@ -2385,7 +2385,7 @@ bool SwTransferable::PasteOLE( TransferableDataHelper& rData, SwWrtShell& rSh,
             {
                 aSize = aObjDesc.maSize;    //always 100TH_MM
                 MapUnit aUnit = VCLUnoHelper::UnoEmbed2VCLMapUnit( xObj->getMapUnit( aObjDesc.mnViewAspect ) );
-                aSize = OutputDevice::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(aUnit));
+                aSize = Geometry::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(aUnit));
                 awt::Size aSz;
                 try
                 {
@@ -3628,7 +3628,7 @@ void SwTransferable::SetDataForDragAndDrop( const Point& rSttPos )
         //Now adjust it. Thus in GetData the first query can still
         //be answered with delayed rendering.
         m_aObjDesc.maDragStartPos = rSttPos;
-        m_aObjDesc.maSize = OutputDevice::LogicToLogic( Size( OLESIZE ),
+        m_aObjDesc.maSize = Geometry::LogicToLogic( Size( OLESIZE ),
                     MapMode(MapUnit::MapTwip), MapMode(MapUnit::Map100thMM));
         PrepareOLE( m_aObjDesc );
         AddFormat( SotClipboardFormatId::OBJECTDESCRIPTOR );

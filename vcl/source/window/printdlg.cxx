@@ -242,7 +242,7 @@ void PrintDialog::PrintPreviewWindow::setPreview( const GDIMetaFile& i_rNewPrevi
         eUnit = MapUnit::Map100thInch;
         nDigits = 2;
     }
-    Size aLogicPaperSize(OutputDevice::LogicToLogic(i_rOrigSize, MapMode(MapUnit::Map100thMM), MapMode(eUnit)));
+    Size aLogicPaperSize(Geometry::LogicToLogic(i_rOrigSize, MapMode(MapUnit::Map100thMM), MapMode(eUnit)));
     OUString aNumText( rLocWrap.getNum( aLogicPaperSize.Width(), nDigits ) );
     OUStringBuffer aBuf;
     aBuf.append( aNumText )
@@ -835,7 +835,7 @@ void PrintDialog::setPaperSizes()
                 nDigits = 2;
             }
             Size aSize = aPrt->GetPaperSize( nPaper );
-            Size aLogicPaperSize( OutputDevice::LogicToLogic( aSize, MapMode( MapUnit::Map100thMM ), MapMode( eUnit ) ) );
+            Size aLogicPaperSize( Geometry::LogicToLogic( aSize, MapMode( MapUnit::Map100thMM ), MapMode( eUnit ) ) );
 
             OUString aWidth( rLocWrap.getNum( aLogicPaperSize.Width(), nDigits ) );
             OUString aHeight( rLocWrap.getNum( aLogicPaperSize.Height(), nDigits ) );

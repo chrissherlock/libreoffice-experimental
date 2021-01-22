@@ -124,7 +124,7 @@ namespace accessibility
     {
         if( IsValid() && mrView.GetModel() )
         {
-            Point aPoint( OutputDevice::LogicToLogic( rPoint, rMapMode,
+            Point aPoint( Geometry::LogicToLogic( rPoint, rMapMode,
                                                       MapMode(mrView.GetModel()->GetScaleUnit()) ) );
             MapMode aMapMode(mrWindow.GetMapMode());
             aMapMode.SetOrigin(Point());
@@ -141,7 +141,7 @@ namespace accessibility
             MapMode aMapMode(mrWindow.GetMapMode());
             aMapMode.SetOrigin(Point());
             Point aPoint( mrWindow.GetGeometry().PixelToLogic( rPoint, aMapMode ) );
-            return OutputDevice::LogicToLogic( aPoint,
+            return Geometry::LogicToLogic( aPoint,
                                                MapMode(mrView.GetModel()->GetScaleUnit()),
                                                rMapMode );
         }

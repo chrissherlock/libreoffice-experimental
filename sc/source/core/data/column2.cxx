@@ -446,7 +446,7 @@ tools::Long ScColumn::GetNeededSize(
             if ( !bTextWysiwyg )
             {
                 aPaper = bInPrintTwips ?
-                        OutputDevice::LogicToLogic(aPaper, aTwipMode, aHMMMode) :
+                        Geometry::LogicToLogic(aPaper, aTwipMode, aHMMMode) :
                         pDev->GetGeometry().PixelToLogic(aPaper, aHMMMode);
             }
         }
@@ -502,7 +502,7 @@ tools::Long ScColumn::GetNeededSize(
             aSize = Size( nWidth, nHeight );
 
             Size aTextSize = bInPrintTwips ?
-                    OutputDevice::LogicToLogic(aSize, aHMMMode, aTwipMode) :
+                    Geometry::LogicToLogic(aSize, aHMMMode, aTwipMode) :
                     pDev->GetGeometry().LogicToPixel(aSize, aHMMMode);
 
             if ( bEdWidth )
@@ -528,7 +528,7 @@ tools::Long ScColumn::GetNeededSize(
             {
                 Size aTextSize(pEngine->CalcTextWidth(), 0);
                 nValue = bInPrintTwips ?
-                        OutputDevice::LogicToLogic(aTextSize, aHMMMode, aTwipMode).Width() :
+                        Geometry::LogicToLogic(aTextSize, aHMMMode, aTwipMode).Width() :
                         pDev->GetGeometry().LogicToPixel(aTextSize, aHMMMode).Width();
             }
         }
@@ -536,7 +536,7 @@ tools::Long ScColumn::GetNeededSize(
         {
             Size aTextSize(0, pEngine->GetTextHeight());
             nValue = bInPrintTwips ?
-                    OutputDevice::LogicToLogic(aTextSize, aHMMMode, aTwipMode).Height() :
+                    Geometry::LogicToLogic(aTextSize, aHMMMode, aTwipMode).Height() :
                     pDev->GetGeometry().LogicToPixel(aTextSize, aHMMMode).Height();
 
             // With non-100% zoom and several lines or paragraphs, don't shrink below the result with FORMAT100 set
@@ -547,7 +547,7 @@ tools::Long ScColumn::GetNeededSize(
                 pEngine->QuickFormatDoc( true );
                 aTextSize = Size(0, pEngine->GetTextHeight());
                 tools::Long nSecondValue = bInPrintTwips ?
-                        OutputDevice::LogicToLogic(aTextSize, aHMMMode, aTwipMode).Height() :
+                        Geometry::LogicToLogic(aTextSize, aHMMMode, aTwipMode).Height() :
                         pDev->GetGeometry().LogicToPixel(aTextSize, aHMMMode).Height();
                 if ( nSecondValue > nValue )
                     nValue = nSecondValue;

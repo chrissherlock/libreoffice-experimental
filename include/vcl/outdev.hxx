@@ -1436,30 +1436,7 @@ public:
     void SetMapMode(MapMode const& rNewMapMode) override;
     void SetRelativeMapMode( const MapMode& rNewMapMode );
     virtual void SetMetafileMapMode(const MapMode& rNewMapMode, bool bIsRecord);
-
-public:
     void SetOffsetFromOriginInPixels(Size const& rOffset) override;
-
-    static Point                LogicToLogic( const Point&      rPtSource,
-                                              const MapMode&    rMapModeSource,
-                                              const MapMode&    rMapModeDest );
-    static Size                 LogicToLogic( const Size&       rSzSource,
-                                              const MapMode&    rMapModeSource,
-                                              const MapMode&    rMapModeDest );
-    static tools::Rectangle     LogicToLogic( const tools::Rectangle&  rRectSource,
-                                              const MapMode&    rMapModeSource,
-                                              const MapMode&    rMapModeDest );
-    static tools::Long          LogicToLogic( tools::Long       nLongSource,
-                                              MapUnit           eUnitSource,
-                                              MapUnit           eUnitDest );
-
-    static basegfx::B2DPolygon  LogicToLogic( const basegfx::B2DPolygon& rPoly,
-                                              const MapMode&    rMapModeSource,
-                                              const MapMode&    rMapModeDest );
-
-    // create a mapping transformation from rMapModeSource to rMapModeDest (the above methods
-    // for B2DPoly/Polygons use this internally anyway to transform the B2DPolygon)
-    static basegfx::B2DHomMatrix LogicToLogic(const MapMode& rMapModeSource, const MapMode& rMapModeDest);
 
     /** @name Native Widget Rendering functions
 

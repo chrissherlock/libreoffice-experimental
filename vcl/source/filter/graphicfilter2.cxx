@@ -357,7 +357,7 @@ bool GraphicDescriptor::ImpDetectJPG( SvStream& rStm,  bool bExtendedInfo )
                                                 aMap.SetMapUnit( nUnits == 1 ? MapUnit::MapInch : MapUnit::MapCM );
                                                 aMap.SetScaleX( Fraction( 1, nHorizontalResolution ) );
                                                 aMap.SetScaleY( Fraction( 1, nVerticalResolution ) );
-                                                aLogSize = OutputDevice::LogicToLogic( aPixSize, aMap, MapMode( MapUnit::Map100thMM ) );
+                                                aLogSize = Geometry::LogicToLogic( aPixSize, aMap, MapMode( MapUnit::Map100thMM ) );
                                             }
                                         }
                                     }
@@ -407,7 +407,7 @@ bool GraphicDescriptor::ImpDetectJPG( SvStream& rStm,  bool bExtendedInfo )
                                         // We already know the DPI, but the
                                         // pixel size arrived later, so do the
                                         // conversion again.
-                                        aLogSize = OutputDevice::LogicToLogic(
+                                        aLogSize = Geometry::LogicToLogic(
                                             aPixSize, aMap, MapMode(MapUnit::Map100thMM));
 
                                     bScanFinished = true;
@@ -514,7 +514,7 @@ bool GraphicDescriptor::ImpDetectPCX( SvStream& rStm )
             // set logical size
             MapMode aMap( MapUnit::MapInch, Point(),
                           Fraction( 1, nDPIx ), Fraction( 1, nDPIy ) );
-            aLogSize = OutputDevice::LogicToLogic( aPixSize, aMap,
+            aLogSize = Geometry::LogicToLogic( aPixSize, aMap,
                                                    MapMode( MapUnit::Map100thMM ) );
 
             // number of color planes
@@ -1036,7 +1036,7 @@ bool GraphicDescriptor::ImpDetectSVM( SvStream& rStm, bool bExtendedInfo )
                 // read MapUnit and determine PrefSize
                 nTemp16 = 0;
                 rStm.ReadUInt16( nTemp16 );
-                aLogSize = OutputDevice::LogicToLogic( aLogSize,
+                aLogSize = Geometry::LogicToLogic( aLogSize,
                                                        MapMode( static_cast<MapUnit>(nTemp16) ),
                                                        MapMode( MapUnit::Map100thMM ) );
             }
@@ -1067,7 +1067,7 @@ bool GraphicDescriptor::ImpDetectSVM( SvStream& rStm, bool bExtendedInfo )
                     ReadMapMode( rStm, aMapMode );
                     TypeSerializer aSerializer(rStm);
                     aSerializer.readSize(aLogSize);
-                    aLogSize = OutputDevice::LogicToLogic( aLogSize, aMapMode, MapMode( MapUnit::Map100thMM ) );
+                    aLogSize = Geometry::LogicToLogic( aLogSize, aMapMode, MapMode( MapUnit::Map100thMM ) );
                 }
             }
         }

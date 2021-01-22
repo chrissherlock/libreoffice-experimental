@@ -86,7 +86,7 @@ void SetFieldUnit(weld::MetricSpinButton& rField, FieldUnit eUnit, bool bAll)
 
 void SetMetricValue(weld::MetricSpinButton& rField, int nCoreValue, MapUnit eUnit)
 {
-    auto nVal = OutputDevice::LogicToLogic(nCoreValue, eUnit, MapUnit::Map100thMM);
+    auto nVal = Geometry::LogicToLogic(nCoreValue, eUnit, MapUnit::Map100thMM);
     nVal = rField.normalize(nVal);
     rField.set_value(nVal, FieldUnit::MM_100TH);
 }
@@ -109,7 +109,7 @@ int GetCoreValue(const weld::MetricSpinButton& rField, MapUnit eUnit)
     }
     if( bRoundBefore )
         nVal = rField.denormalize( nVal );
-    auto nUnitVal = OutputDevice::LogicToLogic(nVal, MapUnit::Map100thMM, eUnit);
+    auto nUnitVal = Geometry::LogicToLogic(nVal, MapUnit::Map100thMM, eUnit);
     if (!bRoundBefore)
         nUnitVal = rField.denormalize(nUnitVal);
     return nUnitVal;

@@ -179,22 +179,22 @@ void ScNoteMarker::InvalidateWin()
     aRect.AdjustRight(aPixelSize.getWidth());
     aRect.AdjustBottom(aPixelSize.getHeight());
 
-    m_pWindow->Invalidate( OutputDevice::LogicToLogic(aRect, m_aMapMode, m_pWindow->GetMapMode()) );
+    m_pWindow->Invalidate( Geometry::LogicToLogic(aRect, m_aMapMode, m_pWindow->GetMapMode()) );
 
     if ( !(m_pRightWin || m_pBottomWin) )
         return;
 
     Size aWinSize = m_pWindow->GetGeometry().PixelToLogic( m_pWindow->GetSizeInPixels(), m_aMapMode );
     if ( m_pRightWin )
-        m_pRightWin->Invalidate( OutputDevice::LogicToLogic(aRect,
+        m_pRightWin->Invalidate( Geometry::LogicToLogic(aRect,
                                 lcl_MoveMapMode( m_aMapMode, Size( aWinSize.Width(), 0 ) ),
                                 m_pRightWin->GetMapMode()) );
     if ( m_pBottomWin )
-        m_pBottomWin->Invalidate( OutputDevice::LogicToLogic(aRect,
+        m_pBottomWin->Invalidate( Geometry::LogicToLogic(aRect,
                                 lcl_MoveMapMode( m_aMapMode, Size( 0, aWinSize.Height() ) ),
                                 m_pBottomWin->GetMapMode()) );
     if ( m_pDiagWin )
-        m_pDiagWin->Invalidate( OutputDevice::LogicToLogic(aRect,
+        m_pDiagWin->Invalidate( Geometry::LogicToLogic(aRect,
                                 lcl_MoveMapMode( m_aMapMode, aWinSize ),
                                 m_pDiagWin->GetMapMode()) );
 }

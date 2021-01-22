@@ -492,8 +492,8 @@ SmPrinterAccess::SmPrinterAccess( SmDocShell &rDocShell )
                 MapMode aMap( pPrinter->GetMapMode() );
                 aMap.SetMapUnit( MapUnit::Map100thMM );
                 Point aTmp( aMap.GetOrigin() );
-                aTmp.setX( OutputDevice::LogicToLogic( aTmp.X(), eOld, MapUnit::Map100thMM ) );
-                aTmp.setY( OutputDevice::LogicToLogic( aTmp.Y(), eOld, MapUnit::Map100thMM ) );
+                aTmp.setX( Geometry::LogicToLogic( aTmp.X(), eOld, MapUnit::Map100thMM ) );
+                aTmp.setY( Geometry::LogicToLogic( aTmp.Y(), eOld, MapUnit::Map100thMM ) );
                 aMap.SetOrigin( aTmp );
                 pPrinter->SetMapMode( aMap );
             }
@@ -520,8 +520,8 @@ SmPrinterAccess::SmPrinterAccess( SmDocShell &rDocShell )
         MapMode aMap( pRefDev->GetMapMode() );
         aMap.SetMapUnit( MapUnit::Map100thMM );
         Point aTmp( aMap.GetOrigin() );
-        aTmp.setX( OutputDevice::LogicToLogic( aTmp.X(), eOld, MapUnit::Map100thMM ) );
-        aTmp.setY( OutputDevice::LogicToLogic( aTmp.Y(), eOld, MapUnit::Map100thMM ) );
+        aTmp.setX( Geometry::LogicToLogic( aTmp.X(), eOld, MapUnit::Map100thMM ) );
+        aTmp.setY( Geometry::LogicToLogic( aTmp.Y(), eOld, MapUnit::Map100thMM ) );
         aMap.SetOrigin( aTmp );
         pRefDev->SetMapMode( aMap );
     }

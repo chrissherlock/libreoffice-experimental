@@ -5622,7 +5622,7 @@ void DocxAttributeOutput::WriteOLE( SwOLENode& rNode, const Size& rSize, const S
             awt::Size aSize = xObj->getVisualAreaSize( rNode.GetAspect() );
 
             MapUnit aUnit = VCLUnoHelper::UnoEmbed2VCLMapUnit( xObj->getMapUnit( rNode.GetAspect() ) );
-            Size aOriginalSize( OutputDevice::LogicToLogic(Size( aSize.Width, aSize.Height),
+            Size aOriginalSize( Geometry::LogicToLogic(Size( aSize.Width, aSize.Height),
                                                 MapMode(aUnit), MapMode(MapUnit::MapTwip)));
 
             m_pSerializer->startElementNS( XML_w, XML_object,

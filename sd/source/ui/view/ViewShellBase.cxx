@@ -1009,7 +1009,7 @@ void ViewShellBase::NotifyCursor(SfxViewShell* pOtherShell) const
             ::tools::Rectangle aRectangle = pOutlinerView->GetOutputArea();
             vcl::Window* pWin = pThisShell->GetActiveWindow();
             if (pWin && pWin->GetMapMode().GetMapUnit() == MapUnit::Map100thMM)
-                aRectangle = OutputDevice::LogicToLogic(aRectangle, MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapTwip));
+                aRectangle = Geometry::LogicToLogic(aRectangle, MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapTwip));
             OString sRectangle = aRectangle.toString();
             SfxLokHelper::notifyOtherView(&pDrawViewShell->GetViewShellBase(), pOtherShell, LOK_CALLBACK_VIEW_LOCK, "rectangle", sRectangle);
         }

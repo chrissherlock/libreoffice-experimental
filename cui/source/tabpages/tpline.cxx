@@ -893,7 +893,7 @@ void SvxLineTabPage::Reset( const SfxItemSet* rAttrs )
             }
             if(!bIgnoreSize)
             {
-                m_aSymbolSize=OutputDevice::LogicToLogic( pGraphic->GetPrefSize(),
+                m_aSymbolSize=Geometry::LogicToLogic( pGraphic->GetPrefSize(),
                                                         pGraphic->GetPrefMapMode(),
                                                         MapMode(MapUnit::Map100thMM));
             }
@@ -1565,7 +1565,7 @@ IMPL_LINK(SvxLineTabPage, GraphicHdl_Impl, const OString&, rIdent, void)
     if (pGraphic)
     {
         Size aSize = SvxNumberFormat::GetGraphicSizeMM100(pGraphic);
-        aSize = OutputDevice::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(m_ePoolUnit));
+        aSize = Geometry::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(m_ePoolUnit));
         m_aSymbolGraphic=*pGraphic;
         if( bResetSize )
         {
@@ -1604,8 +1604,8 @@ IMPL_LINK( SvxLineTabPage, SizeHdl_Impl, weld::MetricSpinButton&, rField, void)
     bool bRatio = m_xSymbolRatioCB->get_active();
     tools::Long nWidthVal = static_cast<tools::Long>(m_xSymbolWidthMF->denormalize(m_xSymbolWidthMF->get_value(FieldUnit::MM_100TH)));
     tools::Long nHeightVal= static_cast<tools::Long>(m_xSymbolHeightMF->denormalize(m_xSymbolHeightMF->get_value(FieldUnit::MM_100TH)));
-    nWidthVal = OutputDevice::LogicToLogic(nWidthVal,MapUnit::Map100thMM, m_ePoolUnit );
-    nHeightVal = OutputDevice::LogicToLogic(nHeightVal,MapUnit::Map100thMM, m_ePoolUnit);
+    nWidthVal = Geometry::LogicToLogic(nWidthVal,MapUnit::Map100thMM, m_ePoolUnit );
+    nHeightVal = Geometry::LogicToLogic(nHeightVal,MapUnit::Map100thMM, m_ePoolUnit);
     m_aSymbolSize = Size(nWidthVal,nHeightVal);
     double fSizeRatio = double(1);
 
@@ -1622,7 +1622,7 @@ IMPL_LINK( SvxLineTabPage, SizeHdl_Impl, weld::MetricSpinButton&, rField, void)
         if (bRatio)
         {
             m_aSymbolSize.setHeight( m_aSymbolLastSize.Height() + static_cast<tools::Long>(static_cast<double>(nDelta) / fSizeRatio) );
-            m_aSymbolSize.setHeight( OutputDevice::LogicToLogic( m_aSymbolSize.Height(), m_ePoolUnit, MapUnit::Map100thMM ) );
+            m_aSymbolSize.setHeight( Geometry::LogicToLogic( m_aSymbolSize.Height(), m_ePoolUnit, MapUnit::Map100thMM ) );
 //TODO            m_xSymbolHeightMF->SetUserValue(m_xSymbolHeightMF->normalize(m_aSymbolSize.Height()), FieldUnit::MM_100TH);
             m_xSymbolHeightMF->set_value(m_xSymbolHeightMF->normalize(m_aSymbolSize.Height()), FieldUnit::MM_100TH);
         }
@@ -1634,7 +1634,7 @@ IMPL_LINK( SvxLineTabPage, SizeHdl_Impl, weld::MetricSpinButton&, rField, void)
         if (bRatio)
         {
             m_aSymbolSize.setWidth( m_aSymbolLastSize.Width() + static_cast<tools::Long>(static_cast<double>(nDelta) * fSizeRatio) );
-            m_aSymbolSize.setWidth( OutputDevice::LogicToLogic( m_aSymbolSize.Width(), m_ePoolUnit, MapUnit::Map100thMM ) );
+            m_aSymbolSize.setWidth( Geometry::LogicToLogic( m_aSymbolSize.Width(), m_ePoolUnit, MapUnit::Map100thMM ) );
 //TODO            m_xSymbolWidthMF->SetUserValue(m_xSymbolWidthMF->normalize(m_aSymbolSize.Width()), FieldUnit::MM_100TH);
             m_xSymbolWidthMF->set_value(m_xSymbolWidthMF->normalize(m_aSymbolSize.Width()), FieldUnit::MM_100TH);
         }

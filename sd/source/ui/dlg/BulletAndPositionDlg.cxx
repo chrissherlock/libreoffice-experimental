@@ -831,7 +831,7 @@ IMPL_LINK(SvxBulletAndPositionDlg, GraphicHdl_Impl, const OString&, rIdent, void
     if (!bSucc)
         return;
 
-    aSize = OutputDevice::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(eCoreUnit));
+    aSize = Geometry::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(eCoreUnit));
 
     sal_uInt16 nMask = 1;
     for (sal_uInt16 i = 0; i < pActNum->GetLevelCount(); i++)
@@ -987,8 +987,8 @@ IMPL_LINK(SvxBulletAndPositionDlg, SizeHdl_Impl, weld::MetricSpinButton&, rField
         m_xWidthMF->denormalize(m_xWidthMF->get_value(FieldUnit::MM_100TH)));
     tools::Long nHeightVal = static_cast<tools::Long>(
         m_xHeightMF->denormalize(m_xHeightMF->get_value(FieldUnit::MM_100TH)));
-    nWidthVal = OutputDevice::LogicToLogic(nWidthVal, MapUnit::Map100thMM, eCoreUnit);
-    nHeightVal = OutputDevice::LogicToLogic(nHeightVal, MapUnit::Map100thMM, eCoreUnit);
+    nWidthVal = Geometry::LogicToLogic(nWidthVal, MapUnit::Map100thMM, eCoreUnit);
+    nHeightVal = Geometry::LogicToLogic(nHeightVal, MapUnit::Map100thMM, eCoreUnit);
     double fSizeRatio;
 
     bool bRepaint = false;
@@ -1018,7 +1018,7 @@ IMPL_LINK(SvxBulletAndPositionDlg, SizeHdl_Impl, weld::MetricSpinButton&, rField
                         aSize.setHeight(
                             aInitSize[i].Height()
                             + static_cast<tools::Long>(static_cast<double>(nDelta) / fSizeRatio));
-                        m_xHeightMF->set_value(m_xHeightMF->normalize(OutputDevice::LogicToLogic(
+                        m_xHeightMF->set_value(m_xHeightMF->normalize(Geometry::LogicToLogic(
                                                    aSize.Height(), eCoreUnit, MapUnit::Map100thMM)),
                                                FieldUnit::MM_100TH);
                     }
@@ -1032,7 +1032,7 @@ IMPL_LINK(SvxBulletAndPositionDlg, SizeHdl_Impl, weld::MetricSpinButton&, rField
                         aSize.setWidth(
                             aInitSize[i].Width()
                             + static_cast<tools::Long>(static_cast<double>(nDelta) * fSizeRatio));
-                        m_xWidthMF->set_value(m_xWidthMF->normalize(OutputDevice::LogicToLogic(
+                        m_xWidthMF->set_value(m_xWidthMF->normalize(Geometry::LogicToLogic(
                                                   aSize.Width(), eCoreUnit, MapUnit::Map100thMM)),
                                               FieldUnit::MM_100TH);
                     }

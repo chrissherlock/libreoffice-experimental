@@ -141,7 +141,7 @@ void* GraphicHelper::getWinMetaFileFromGDI_Impl( const GDIMetaFile* pGDIMeta, co
                         }
                         else
                         {
-                            Size aWinSize = OutputDevice::LogicToLogic( Size( aMetaSize.Width(), aMetaSize.Height() ),
+                            Size aWinSize = Geometry::LogicToLogic( Size( aMetaSize.Width(), aMetaSize.Height() ),
                                                                         pGDIMeta->GetPrefMapMode(),
                                                                         aWinMode );
                             pMF->xExt = aWinSize.Width();

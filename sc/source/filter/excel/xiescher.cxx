@@ -1752,7 +1752,7 @@ SdrObjectUniquePtr XclImpChartObj::DoCreateSdrObj( XclImpDffConverter& rDffConv,
             inserted into the draw page. */
         sal_Int64 nAspect = css::embed::Aspects::MSOLE_CONTENT;
         MapUnit aUnit = VCLUnoHelper::UnoEmbed2VCLMapUnit( xEmbObj->getMapUnit( nAspect ) );
-        Size aSize( OutputDevice::LogicToLogic( rAnchorRect.GetSize(), MapMode( MapUnit::Map100thMM ), MapMode( aUnit ) ) );
+        Size aSize( Geometry::LogicToLogic( rAnchorRect.GetSize(), MapMode( MapUnit::Map100thMM ), MapMode( aUnit ) ) );
         css::awt::Size aAwtSize( aSize.Width(), aSize.Height() );
         xEmbObj->setVisualAreaSize( nAspect, aAwtSize );
 

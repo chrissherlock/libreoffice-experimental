@@ -1822,7 +1822,7 @@ static Writer& OutHTML_FrameFormatGrfNode( Writer& rWrt, const SwFrameFormat& rF
 
             Size aMM100Size;
             const SwFormatFrameSize& rSize = rFrameFormat.GetFrameSize();
-            aMM100Size = OutputDevice::LogicToLogic( rSize.GetSize(),
+            aMM100Size = Geometry::LogicToLogic( rSize.GetSize(),
                             MapMode( MapUnit::MapTwip ), MapMode( MapUnit::Map100thMM ));
 
             OUString aFilterName("");

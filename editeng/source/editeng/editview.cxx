@@ -1484,7 +1484,7 @@ bool EditView::ChangeFontSize( bool bGrow, SfxItemSet& rSet, const FontList* pFo
         SvxFontHeightItem aFontHeightItem( static_cast<const SvxFontHeightItem&>(rSet.Get( *pWhich )) );
         tools::Long nHeight = aFontHeightItem.GetHeight();
         const MapUnit eUnit = rSet.GetPool()->GetMetric( *pWhich );
-        nHeight = OutputDevice::LogicToLogic(nHeight * 10, eUnit, MapUnit::MapPoint);
+        nHeight = Geometry::LogicToLogic(nHeight * 10, eUnit, MapUnit::MapPoint);
 
         FontMetric aFontMetric = pFontList->Get( rFontItem.GetFamilyName(), rFontItem.GetStyleName() );
         const int* pAry = pFontList->GetSizeAry( aFontMetric );
@@ -1537,7 +1537,7 @@ bool EditView::ChangeFontSize( bool bGrow, SfxItemSet& rSet, const FontList* pFo
 
         if( (nHeight >= 2) && (nHeight <= 9999 ) )
         {
-            nHeight = OutputDevice::LogicToLogic( nHeight, MapUnit::MapPoint, eUnit  ) / 10;
+            nHeight = Geometry::LogicToLogic( nHeight, MapUnit::MapPoint, eUnit  ) / 10;
 
             if( nHeight != static_cast<tools::Long>(aFontHeightItem.GetHeight()) )
             {

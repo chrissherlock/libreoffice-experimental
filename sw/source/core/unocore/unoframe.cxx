@@ -2117,7 +2117,7 @@ uno::Any SwXFrame::getPropertyValue(const OUString& rPropertyName)
 
                         awt::Size aFrameSize = getSize();
                         Size aSize100thmm(aFrameSize.Width, aFrameSize.Height);
-                        Size aSize = OutputDevice::LogicToLogic(aSize100thmm, MapMode(MapUnit::Map100thMM), aGraphicObj.GetPrefMapMode());
+                        Size aSize = Geometry::LogicToLogic(aSize100thmm, MapMode(MapUnit::Map100thMM), aGraphicObj.GetPrefMapMode());
                         Graphic aGraphic = aGraphicObj.GetTransformedGraphic(aSize, aGraphicObj.GetPrefMapMode(), aGraphicAttr);
                         aAny <<= aGraphic.GetXGraphic();
                     }
@@ -2232,7 +2232,7 @@ uno::Any SwXFrame::getPropertyValue(const OUString& rPropertyName)
             {
                 OSL_ENSURE( pTmpFrame->isFrameAreaDefinitionValid(), "frame not valid" );
                 const SwRect &rRect = pTmpFrame->getFrameArea();
-                Size aMM100Size = OutputDevice::LogicToLogic(
+                Size aMM100Size = Geometry::LogicToLogic(
                         Size( rRect.Width(), rRect.Height() ),
                         MapMode( MapUnit::MapTwip ), MapMode( MapUnit::Map100thMM ));
                 aAny <<= awt::Size( aMM100Size.Width(), aMM100Size.Height() );
@@ -2941,7 +2941,7 @@ void SwXFrame::attachToRange(uno::Reference<text::XTextRange> const& xTextRange,
                 {
                     sal_Int64 nAspect = m_nDrawAspect;
                     MapUnit aUnit = VCLUnoHelper::UnoEmbed2VCLMapUnit( xIPObj->getMapUnit( nAspect ) );
-                    Size aSize( OutputDevice::LogicToLogic(Size( m_nVisibleAreaWidth, m_nVisibleAreaHeight),
+                    Size aSize( Geometry::LogicToLogic(Size( m_nVisibleAreaWidth, m_nVisibleAreaHeight),
                         MapMode(MapUnit::MapTwip), MapMode(aUnit)));
                     awt::Size aSz;
                     aSz.Width = aSize.Width();
@@ -2979,11 +2979,11 @@ void SwXFrame::attachToRange(uno::Reference<text::XTextRange> const& xTextRange,
                     {
                         aSz.setWidth(5000);
                         aSz.setHeight(5000);
-                        aSz = OutputDevice::LogicToLogic(aSz,
+                        aSz = Geometry::LogicToLogic(aSz,
                                 MapMode(MapUnit::Map100thMM), MapMode(aRefMap));
                     }
                     MapMode aMyMap( MapUnit::MapTwip );
-                    aSz = OutputDevice::LogicToLogic(aSz, MapMode(aRefMap), aMyMap);
+                    aSz = Geometry::LogicToLogic(aSz, MapMode(aRefMap), aMyMap);
                     SwFormatFrameSize aFrameSz;
                     aFrameSz.SetSize(aSz);
                     aFrameSet.Put(aFrameSz);

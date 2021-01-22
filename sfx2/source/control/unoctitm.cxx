@@ -1321,7 +1321,7 @@ static void InterceptLOKStateChangeEvent(sal_uInt16 nSID, SfxViewFrame* pViewFra
         {
             float nScaleValue = 1000.0;
             nValue *= nScaleValue;
-            sal_Int32 nConvertedValue = OutputDevice::LogicToLogic(nValue, MapUnit::MapTwip, MapUnit::MapInch);
+            sal_Int32 nConvertedValue = Geometry::LogicToLogic(nValue, MapUnit::MapTwip, MapUnit::MapInch);
             aBuffer.append(OUString::number(nConvertedValue / nScaleValue));
         }
     }

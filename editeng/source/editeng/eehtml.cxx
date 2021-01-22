@@ -612,7 +612,7 @@ void EditHTMLParser::ImpSetStyleSheet( sal_uInt16 nHLevel )
         else if ( nHLevel == 4 )
             nPoints = 11;
 
-        nPoints = OutputDevice::LogicToLogic( nPoints, MapUnit::MapPoint, eUnit );
+        nPoints = Geometry::LogicToLogic( nPoints, MapUnit::MapPoint, eUnit );
 
         SvxFontHeightItem aHeightItem( nPoints, 100, EE_CHAR_FONTHEIGHT );
         aItems.Put( aHeightItem );
@@ -627,8 +627,8 @@ void EditHTMLParser::ImpSetStyleSheet( sal_uInt16 nHLevel )
         if (nHLevel <= 6)
         {
             SvxULSpaceItem aULSpaceItem( EE_PARA_ULSPACE );
-            aULSpaceItem.SetUpper( static_cast<sal_uInt16>(OutputDevice::LogicToLogic( 42, MapUnit::Map10thMM, eUnit )) );
-            aULSpaceItem.SetLower( static_cast<sal_uInt16>(OutputDevice::LogicToLogic( 35, MapUnit::Map10thMM, eUnit )) );
+            aULSpaceItem.SetUpper( static_cast<sal_uInt16>(Geometry::LogicToLogic( 42, MapUnit::Map10thMM, eUnit )) );
+            aULSpaceItem.SetLower( static_cast<sal_uInt16>(Geometry::LogicToLogic( 35, MapUnit::Map10thMM, eUnit )) );
             aItems.Put( aULSpaceItem );
         }
     }

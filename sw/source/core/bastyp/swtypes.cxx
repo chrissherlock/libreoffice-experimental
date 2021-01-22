@@ -44,7 +44,7 @@ Size GetGraphicSizeTwip(const Graphic& rGraphic, vcl::RenderContext* pOutDev)
     }
     else
     {
-        aSize = OutputDevice::LogicToLogic(aSize, rGraphic.GetPrefMapMode(), aMapTwip);
+        aSize = Geometry::LogicToLogic(aSize, rGraphic.GetPrefMapMode(), aMapTwip);
     }
     return aSize;
 }

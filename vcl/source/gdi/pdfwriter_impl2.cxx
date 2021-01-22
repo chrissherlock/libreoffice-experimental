@@ -533,10 +533,10 @@ void PDFWriterImpl::playMetafile( const GDIMetaFile& i_rMtf, vcl::PDFExtOutDevDa
                     pDummyVDev->Push();
 
                     MapMode aMapMode( aSubstitute.GetPrefMapMode() );
-                    Size aOutSize( OutputDevice::LogicToLogic( pA->GetSize(), pDummyVDev->GetMapMode(), aMapMode ) );
+                    Size aOutSize( Geometry::LogicToLogic( pA->GetSize(), pDummyVDev->GetMapMode(), aMapMode ) );
                     aMapMode.SetScaleX( Fraction( aOutSize.Width(), aSubstitute.GetPrefSize().Width() ) );
                     aMapMode.SetScaleY( Fraction( aOutSize.Height(), aSubstitute.GetPrefSize().Height() ) );
-                    aMapMode.SetOrigin( OutputDevice::LogicToLogic( pA->GetPoint(), pDummyVDev->GetMapMode(), aMapMode ) );
+                    aMapMode.SetOrigin( Geometry::LogicToLogic( pA->GetPoint(), pDummyVDev->GetMapMode(), aMapMode ) );
 
                     m_rOuterFace.SetMapMode( aMapMode );
                     pDummyVDev->SetMapMode( aMapMode );
@@ -730,7 +730,7 @@ void PDFWriterImpl::playMetafile( const GDIMetaFile& i_rMtf, vcl::PDFExtOutDevDa
                 {
                     const MetaBmpAction* pA = static_cast<const MetaBmpAction*>(pAction);
                     BitmapEx aBitmapEx( pA->GetBitmap() );
-                    Size aSize( OutputDevice::LogicToLogic( aBitmapEx.GetPrefSize(),
+                    Size aSize( Geometry::LogicToLogic( aBitmapEx.GetPrefSize(),
                                                             aBitmapEx.GetPrefMapMode(), pDummyVDev->GetMapMode() ) );
                     if( ! ( aSize.Width() && aSize.Height() ) )
                         aSize = pDummyVDev->GetGeometry().PixelToLogic( aBitmapEx.GetSizePixel() );
@@ -762,7 +762,7 @@ void PDFWriterImpl::playMetafile( const GDIMetaFile& i_rMtf, vcl::PDFExtOutDevDa
                 {
                     const MetaBmpExAction*  pA = static_cast<const MetaBmpExAction*>(pAction);
                     const BitmapEx& aBitmapEx( pA->GetBitmapEx() );
-                    Size aSize( OutputDevice::LogicToLogic( aBitmapEx.GetPrefSize(),
+                    Size aSize( Geometry::LogicToLogic( aBitmapEx.GetPrefSize(),
                             aBitmapEx.GetPrefMapMode(), pDummyVDev->GetMapMode() ) );
                     Graphic aGraphic = i_pOutDevData ? i_pOutDevData->GetCurrentGraphic() : Graphic();
                     implWriteBitmapEx( pA->GetPoint(), aSize, aBitmapEx, aGraphic, pDummyVDev, i_rContext );

@@ -182,7 +182,7 @@ void ScTabViewShell::ActivateObject(SdrOle2Obj* pObj, sal_Int32 nVerb)
                 if ( aDrawSize != aOleSize )
                 {
                     MapUnit aUnit = VCLUnoHelper::UnoEmbed2VCLMapUnit( xObj->getMapUnit( pClient->GetAspect() ) );
-                    aOleSize = OutputDevice::LogicToLogic( aDrawSize,
+                    aOleSize = Geometry::LogicToLogic( aDrawSize,
                                 MapMode(MapUnit::Map100thMM), MapMode(aUnit));
                     awt::Size aSz( aOleSize.Width(), aOleSize.Height() );
                     xObj->setVisualAreaSize( pClient->GetAspect(), aSz );

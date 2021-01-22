@@ -264,7 +264,7 @@ SwFrameFormat* SwWW8ImplReader::ImportOle(const Graphic* pGrf,
         aAnchor.SetAnchor( m_pPaM->GetPoint() );
         pTempSet->Put( aAnchor );
 
-        const Size aSizeTwip = OutputDevice::LogicToLogic(
+        const Size aSizeTwip = Geometry::LogicToLogic(
             aGraph.GetPrefSize(), aGraph.GetPrefMapMode(), MapMode(MapUnit::MapTwip));
 
         pTempSet->Put( SwFormatFrameSize( SwFrameSize::Fixed, aSizeTwip.Width(),
@@ -313,7 +313,7 @@ bool SwWW8ImplReader::ImportOleWMF(const tools::SvRef<SotStorage>& xSrc1, GDIMet
         Size aFinalSize, aOrigSize;
         aFinalSize.setWidth( rX );
         aFinalSize.setHeight( rY );
-        aFinalSize = OutputDevice::LogicToLogic(
+        aFinalSize = Geometry::LogicToLogic(
             aFinalSize, MapMode(MapUnit::MapTwip), rWMF.GetPrefMapMode() );
         aOrigSize = rWMF.GetPrefSize();
         Fraction aScaleX(aFinalSize.Width(),aOrigSize.Width());
@@ -347,7 +347,7 @@ SdrObject* SwWW8ImplReader::ImportOleBase( Graphic& rGraph,
     if (pGrf)
     {
         rGraph = *pGrf;
-        const Size aSizeTwip = OutputDevice::LogicToLogic(
+        const Size aSizeTwip = Geometry::LogicToLogic(
             rGraph.GetPrefSize(), rGraph.GetPrefMapMode(), MapMode(MapUnit::MapTwip));
         nX = aSizeTwip.Width();
         nY = aSizeTwip.Height();
@@ -361,7 +361,7 @@ SdrObject* SwWW8ImplReader::ImportOleBase( Graphic& rGraph,
         else if( SwWw6ReadMacPICTStream( rGraph, xSrc1 ) )
         {
             // 03-META stream is not available. Maybe it's a 03-PICT?
-            const Size aSizeTwip = OutputDevice::LogicToLogic(
+            const Size aSizeTwip = Geometry::LogicToLogic(
                 rGraph.GetPrefSize(), rGraph.GetPrefMapMode(), MapMode(MapUnit::MapTwip));
             nX = aSizeTwip.Width();
             nY = aSizeTwip.Height();

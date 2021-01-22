@@ -737,7 +737,7 @@ void SdOutliner::sendLOKSearchResultCallback(const std::shared_ptr<sd::ViewShell
 
         tools::Rectangle aSelection(Point(aSelectionHMM.getMinX(), aSelectionHMM.getMinY()),
                                     Size(aSelectionHMM.getWidth(), aSelectionHMM.getHeight()));
-        aSelection = OutputDevice::LogicToLogic(aSelection, MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapTwip));
+        aSelection = Geometry::LogicToLogic(aSelection, MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapTwip));
         aLogicRects.push_back(aSelection);
     }
     else
@@ -751,7 +751,7 @@ void SdOutliner::sendLOKSearchResultCallback(const std::shared_ptr<sd::ViewShell
         {
             for (tools::Rectangle& rRectangle : aLogicRects)
             {
-                rRectangle = OutputDevice::LogicToLogic(rRectangle, MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapTwip));
+                rRectangle = Geometry::LogicToLogic(rRectangle, MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapTwip));
             }
         }
     }

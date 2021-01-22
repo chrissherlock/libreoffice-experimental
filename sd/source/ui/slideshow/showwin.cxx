@@ -455,8 +455,8 @@ void ShowWindow::DrawPauseScene( bool bTimeoutOnly )
     const MapMode&  rMap = GetMapMode();
     const Point     aOutOrg( GetGeometry().PixelToLogic( Point() ) );
     const Size      aOutSize( GetSizeInLogicalUnits() );
-    const Size      aTextSize(LogicToLogic(Size(0, 14), MapMode(MapUnit::MapPoint), rMap));
-    const Size      aOffset(LogicToLogic(Size(1000, 1000), MapMode(MapUnit::Map100thMM), rMap));
+    const Size      aTextSize(maGeometry.LogicToLogic(Size(0, 14), MapMode(MapUnit::MapPoint), rMap));
+    const Size      aOffset(maGeometry.LogicToLogic(Size(1000, 1000), MapMode(MapUnit::Map100thMM), rMap));
     OUString        aText( SdResId( STR_PRES_PAUSE ) );
     bool            bDrawn = false;
 
@@ -475,7 +475,7 @@ void ShowWindow::DrawPauseScene( bool bTimeoutOnly )
         if (maLogo.GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel)
             aGrfSize = maGeometry.PixelToLogic( maLogo.GetPrefSize() );
         else
-            aGrfSize = LogicToLogic( maLogo.GetPrefSize(), maLogo.GetPrefMapMode(), rMap );
+            aGrfSize = maGeometry.LogicToLogic( maLogo.GetPrefSize(), maLogo.GetPrefMapMode(), rMap );
 
         const Point aGrfPos( std::max( aOutOrg.X() + aOutSize.Width() - aGrfSize.Width() - aOffset.Width(), aOutOrg.X() ),
                              std::max( aOutOrg.Y() + aOutSize.Height() - aGrfSize.Height() - aOffset.Height(), aOutOrg.Y() ) );
@@ -527,7 +527,7 @@ void ShowWindow::DrawEndScene()
     vcl::Font       aFont( GetSettings().GetStyleSettings().GetMenuFont() );
 
     const Point     aOutOrg( maGeometry.PixelToLogic( Point() ) );
-    const Size      aTextSize(LogicToLogic(Size(0, 14), MapMode(MapUnit::MapPoint), GetMapMode()));
+    const Size      aTextSize(maGeometry.LogicToLogic(Size(0, 14), MapMode(MapUnit::MapPoint), GetMapMode()));
     const OUString  aText( SdResId( STR_PRES_SOFTEND ) );
 
     aFont.SetFontSize( aTextSize );

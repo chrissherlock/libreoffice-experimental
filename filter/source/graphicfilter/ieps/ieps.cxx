@@ -134,7 +134,7 @@ static void MakeAsMeta(Graphic &rGraphic)
         aSize = Application::GetDefaultDevice()->GetGeometry().PixelToLogic(
             rGraphic.GetSizePixel(), MapMode(MapUnit::Map100thMM));
     else
-        aSize = OutputDevice::LogicToLogic( aSize,
+        aSize = Geometry::LogicToLogic( aSize,
             rGraphic.GetPrefMapMode(), MapMode(MapUnit::Map100thMM));
 
     pVDev->EnableOutput( false );
@@ -751,7 +751,7 @@ ipsGraphicImport( SvStream & rStream, Graphic & rGraphic, FilterConfigItem* )
                                 Size            aSize( nWidth, nHeight );
                                 pVDev->EnableOutput( false );
                                 aMtf.Record( pVDev );
-                                aSize = OutputDevice::LogicToLogic(aSize, MapMode(), MapMode(MapUnit::Map100thMM));
+                                aSize = Geometry::LogicToLogic(aSize, MapMode(), MapMode(MapUnit::Map100thMM));
                                 pVDev->DrawBitmapEx( Point(), aSize, vcl::bitmap::CreateFromData(std::move(aBitmap)) );
                                 aMtf.Stop();
                                 aMtf.WindStart();

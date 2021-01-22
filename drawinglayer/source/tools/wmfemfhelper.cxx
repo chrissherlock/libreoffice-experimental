@@ -2581,7 +2581,7 @@ namespace wmfemfhelper
                         aFontSize = Size(0, 16);
 
                         // convert to target MapUnit if not pixels
-                        aFontSize = OutputDevice::LogicToLogic(
+                        aFontSize = Geometry::LogicToLogic(
                             aFontSize, MapMode(MapUnit::MapPixel), MapMode(rPropertyHolders.Current().getMapUnit()));
 
                         aCorrectedFont.SetFontSize(aFontSize);

@@ -2576,7 +2576,7 @@ IMPL_LINK_NOARG(SvxCharPositionPage, FitToLineHdl_Impl, weld::ToggleButton&, voi
 IMPL_LINK_NOARG(SvxCharPositionPage, KerningModifyHdl_Impl, weld::MetricSpinButton&, void)
 {
     tools::Long nVal = static_cast<tools::Long>(m_xKerningMF->get_value(FieldUnit::POINT));
-    nVal = OutputDevice::LogicToLogic( nVal, MapUnit::MapPoint, MapUnit::MapTwip );
+    nVal = Geometry::LogicToLogic( nVal, MapUnit::MapPoint, MapUnit::MapTwip );
     tools::Long nKern = static_cast<short>(m_xKerningMF->denormalize(nVal));
 
     SvxFont& rFont = GetPreviewFont();
@@ -2754,10 +2754,10 @@ void SvxCharPositionPage::Reset( const SfxItemSet* rSet )
         const SvxKerningItem& rItem = static_cast<const SvxKerningItem&>(rSet->Get( nWhich ));
         MapUnit eUnit = rSet->GetPool()->GetMetric( nWhich );
         tools::Long nBig = static_cast<tools::Long>(m_xKerningMF->normalize( static_cast<tools::Long>(rItem.GetValue()) ));
-        tools::Long nKerning = OutputDevice::LogicToLogic(nBig, eUnit, MapUnit::MapPoint);
+        tools::Long nKerning = Geometry::LogicToLogic(nBig, eUnit, MapUnit::MapPoint);
 
         // set Kerning at the Font, convert into Twips before
-        tools::Long nKern = OutputDevice::LogicToLogic(rItem.GetValue(), eUnit, MapUnit::MapTwip);
+        tools::Long nKern = Geometry::LogicToLogic(rItem.GetValue(), eUnit, MapUnit::MapTwip);
         rFont.SetFixKerning( static_cast<short>(nKern) );
         rCJKFont.SetFixKerning( static_cast<short>(nKern) );
         rCTLFont.SetFixKerning( static_cast<short>(nKern) );
@@ -2922,7 +2922,7 @@ bool SvxCharPositionPage::FillItemSet( SfxItemSet* rSet )
     MapUnit eUnit = rSet->GetPool()->GetMetric( nWhich );
 
     tools::Long nTmp = static_cast<tools::Long>(m_xKerningMF->get_value(FieldUnit::POINT));
-    tools::Long nVal = OutputDevice::LogicToLogic(nTmp, MapUnit::MapPoint, eUnit);
+    tools::Long nVal = Geometry::LogicToLogic(nTmp, MapUnit::MapPoint, eUnit);
     nKerning = static_cast<short>(m_xKerningMF->denormalize( nVal ));
 
     SfxItemState eOldKernState = rOldSet.GetItemState( nWhich, false );

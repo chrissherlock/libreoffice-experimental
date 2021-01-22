@@ -18,6 +18,7 @@
  */
 
 #include <rtl/instance.hxx>
+#include <tools/bigint.hxx>
 #include <tools/gen.hxx>
 #include <tools/fract.hxx>
 #include <tools/mapunit.hxx>
@@ -221,11 +222,11 @@ Point MapMode::MapTo(MapMode const& rMapMode, Point const& rPtSource, Geometry c
 
     std::tie(aMappingMetricSource, aMappingMetricDest) = GetMappingMetrics(rMapMode, rGeometry);
 
-    return Point(Geometry::fn5(rPtSource.X() + aMappingMetricSource.mnMapOfsX,
+    return Point(MapMode::fn5(rPtSource.X() + aMappingMetricSource.mnMapOfsX,
                      aMappingMetricSource.mnMapScNumX, aMappingMetricDest.mnMapScDenomX,
                      aMappingMetricSource.mnMapScDenomX, aMappingMetricDest.mnMapScNumX)
                      - aMappingMetricDest.mnMapOfsX,
-                 Geometry::fn5(rPtSource.Y() + aMappingMetricSource.mnMapOfsY,
+                 MapMode::fn5(rPtSource.Y() + aMappingMetricSource.mnMapOfsY,
                      aMappingMetricSource.mnMapScNumY, aMappingMetricDest.mnMapScDenomY,
                      aMappingMetricSource.mnMapScDenomY, aMappingMetricDest.mnMapScNumY)
                      - aMappingMetricDest.mnMapOfsY);
@@ -242,9 +243,9 @@ Size MapMode::MapTo(MapMode const& rMapMode, Size const& rSzSource, Geometry con
     std::tie(aMappingMetricSource, aMappingMetricDest) = GetMappingMetrics(rMapMode, rGeometry);
 
     return Size(
-        Geometry::fn5(rSzSource.Width(), aMappingMetricSource.mnMapScNumX, aMappingMetricDest.mnMapScDenomX,
+        MapMode::fn5(rSzSource.Width(), aMappingMetricSource.mnMapScNumX, aMappingMetricDest.mnMapScDenomX,
             aMappingMetricSource.mnMapScDenomX, aMappingMetricDest.mnMapScNumX),
-        Geometry::fn5(rSzSource.Height(), aMappingMetricSource.mnMapScNumY, aMappingMetricDest.mnMapScDenomY,
+        MapMode::fn5(rSzSource.Height(), aMappingMetricSource.mnMapScNumY, aMappingMetricDest.mnMapScDenomY,
             aMappingMetricSource.mnMapScDenomY, aMappingMetricDest.mnMapScNumY));
 }
 
@@ -258,22 +259,180 @@ tools::Rectangle MapMode::MapTo(MapMode const& rMapMode, tools::Rectangle const&
 
     std::tie(aMappingMetricSource, aMappingMetricDest) = GetMappingMetrics(rMapMode, rGeometry);
 
-    return tools::Rectangle(Geometry::fn5(rRectSource.Left() + aMappingMetricSource.mnMapOfsX,
+    return tools::Rectangle(MapMode::fn5(rRectSource.Left() + aMappingMetricSource.mnMapOfsX,
                                 aMappingMetricSource.mnMapScNumX, aMappingMetricDest.mnMapScDenomX,
                                 aMappingMetricSource.mnMapScDenomX, aMappingMetricDest.mnMapScNumX)
                                 - aMappingMetricDest.mnMapOfsX,
-                            Geometry::fn5(rRectSource.Top() + aMappingMetricSource.mnMapOfsY,
+                            MapMode::fn5(rRectSource.Top() + aMappingMetricSource.mnMapOfsY,
                                 aMappingMetricSource.mnMapScNumY, aMappingMetricDest.mnMapScDenomY,
                                 aMappingMetricSource.mnMapScDenomY, aMappingMetricDest.mnMapScNumY)
                                 - aMappingMetricDest.mnMapOfsY,
-                            Geometry::fn5(rRectSource.Right() + aMappingMetricSource.mnMapOfsX,
+                            MapMode::fn5(rRectSource.Right() + aMappingMetricSource.mnMapOfsX,
                                 aMappingMetricSource.mnMapScNumX, aMappingMetricDest.mnMapScDenomX,
                                 aMappingMetricSource.mnMapScDenomX, aMappingMetricDest.mnMapScNumX)
                                 - aMappingMetricDest.mnMapOfsX,
-                            Geometry::fn5(rRectSource.Bottom() + aMappingMetricSource.mnMapOfsY,
+                            MapMode::fn5(rRectSource.Bottom() + aMappingMetricSource.mnMapOfsY,
                                 aMappingMetricSource.mnMapScNumY, aMappingMetricDest.mnMapScDenomY,
                                 aMappingMetricSource.mnMapScDenomY, aMappingMetricDest.mnMapScNumY)
                                 - aMappingMetricDest.mnMapOfsY);
 }
 
+// return (n1 * n2 * n3) / (n4 * n5)
+tools::Long MapMode::fn5(const tools::Long n1, const tools::Long n2, const tools::Long n3,
+                          const tools::Long n4, const tools::Long n5)
+{
+    if (n1 == 0 || n2 == 0 || n3 == 0 || n4 == 0 || n5 == 0)
+        return 0;
+    if (std::numeric_limits<tools::Long>::max() / std::abs(n2) < std::abs(n3))
+    {
+        // a6 is skipped
+        BigInt a7 = n2;
+        a7 *= n3;
+        a7 *= n1;
+
+        if (std::numeric_limits<tools::Long>::max() / std::abs(n4) < std::abs(n5))
+        {
+            BigInt a8 = n4;
+            a8 *= n5;
+
+            BigInt a9 = a8;
+            a9 /= 2;
+            if (a7.IsNeg())
+                a7 -= a9;
+            else
+                a7 += a9;
+
+            a7 /= a8;
+        }
+        else
+        {
+            tools::Long n8 = n4 * n5;
+
+            if (a7.IsNeg())
+                a7 -= n8 / 2;
+            else
+                a7 += n8 / 2;
+
+            a7 /= n8;
+        }
+
+        return static_cast<tools::Long>(a7);
+    }
+    else
+    {
+        tools::Long n6 = n2 * n3;
+
+        if (std::numeric_limits<tools::Long>::max() / std::abs(n1) < std::abs(n6))
+        {
+            BigInt a7 = n1;
+            a7 *= n6;
+
+            if (std::numeric_limits<tools::Long>::max() / std::abs(n4) < std::abs(n5))
+            {
+                BigInt a8 = n4;
+                a8 *= n5;
+
+                BigInt a9 = a8;
+                a9 /= 2;
+                if (a7.IsNeg())
+                    a7 -= a9;
+                else
+                    a7 += a9;
+
+                a7 /= a8;
+            }
+            else
+            {
+                tools::Long n8 = n4 * n5;
+
+                if (a7.IsNeg())
+                    a7 -= n8 / 2;
+                else
+                    a7 += n8 / 2;
+
+                a7 /= n8;
+            }
+            return static_cast<tools::Long>(a7);
+        }
+        else
+        {
+            tools::Long n7 = n1 * n6;
+
+            if (std::numeric_limits<tools::Long>::max() / std::abs(n4) < std::abs(n5))
+            {
+                BigInt a7 = n7;
+                BigInt a8 = n4;
+                a8 *= n5;
+
+                BigInt a9 = a8;
+                a9 /= 2;
+
+                if (a7.IsNeg())
+                    a7 -= a9;
+                else
+                    a7 += a9;
+
+                a7 /= a8;
+
+                return static_cast<tools::Long>(a7);
+            }
+            else
+            {
+                const tools::Long n8 = n4 * n5;
+                const tools::Long n8_2 = n8 / 2;
+
+                if (n7 < 0)
+                {
+                    if ((n7 - std::numeric_limits<tools::Long>::min()) >= n8_2)
+                        n7 -= n8_2;
+                }
+                else if ((std::numeric_limits<tools::Long>::max() - n7) >= n8_2)
+                {
+                    n7 += n8_2;
+                }
+
+                return n7 / n8;
+            }
+        }
+    }
+}
+
+// return (n1 * n2) / n3
+tools::Long MapMode::fn3(const tools::Long n1, const tools::Long n2, const tools::Long n3)
+{
+    if (n1 == 0 || n2 == 0 || n3 == 0)
+        return 0;
+
+    if (std::numeric_limits<tools::Long>::max() / std::abs(n1) < std::abs(n2))
+    {
+        BigInt a4 = n1;
+        a4 *= n2;
+
+        if (a4.IsNeg())
+            a4 -= n3 / 2;
+        else
+            a4 += n3 / 2;
+
+        a4 /= n3;
+
+        return static_cast<tools::Long>(a4);
+    }
+    else
+    {
+        tools::Long n4 = n1 * n2;
+        const tools::Long n3_2 = n3 / 2;
+
+        if (n4 < 0)
+        {
+            if ((n4 - std::numeric_limits<tools::Long>::min()) >= n3_2)
+                n4 -= n3_2;
+        }
+        else if ((std::numeric_limits<tools::Long>::max() - n4) >= n3_2)
+        {
+            n4 += n3_2;
+        }
+
+        return n4 / n3;
+    }
+}
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

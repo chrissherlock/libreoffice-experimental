@@ -860,7 +860,7 @@ Point SvxTextEditSourceImpl::LogicToPixel( const Point& rPoint, const MapMode& r
         aPoint1.AdjustX(maTextOffset.X() );
         aPoint1.AdjustY(maTextOffset.Y() );
 
-        Point aPoint2( OutputDevice::LogicToLogic( aPoint1, rMapMode,
+        Point aPoint2( Geometry::LogicToLogic( aPoint1, rMapMode,
                                                    MapMode(mpModel->GetScaleUnit()) ) );
         MapMode aMapMode(mpWindow->GetMapMode());
         aMapMode.SetOrigin(Point());
@@ -890,7 +890,7 @@ Point SvxTextEditSourceImpl::PixelToLogic( const Point& rPoint, const MapMode& r
         MapMode aMapMode(mpWindow->GetMapMode());
         aMapMode.SetOrigin(Point());
         Point aPoint1( mpWindow->GetGeometry().PixelToLogic( rPoint, aMapMode ) );
-        Point aPoint2( OutputDevice::LogicToLogic( aPoint1,
+        Point aPoint2( Geometry::LogicToLogic( aPoint1,
                                                    MapMode(mpModel->GetScaleUnit()),
                                                    rMapMode ) );
         aPoint2.AdjustX( -(maTextOffset.X()) );

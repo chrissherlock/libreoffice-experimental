@@ -310,8 +310,8 @@ bool SVGFilter::filterImpressOrDraw( const Sequence< PropertyValue >& rDescripto
             if (eDestUnit != eSrcUnit)
             {
                 aGraphicSize = Size(
-                    OutputDevice::LogicToLogic(aGraphicSize.Width(), eSrcUnit, eDestUnit),
-                    OutputDevice::LogicToLogic(aGraphicSize.Height(), eSrcUnit, eDestUnit));
+                    Geometry::LogicToLogic(aGraphicSize.Width(), eSrcUnit, eDestUnit),
+                    Geometry::LogicToLogic(aGraphicSize.Height(), eSrcUnit, eDestUnit));
             }
 
             // Based on GraphicSize, set size of Page. Do not forget to adapt PageBorders,

@@ -922,7 +922,7 @@ void RTFDocumentImpl::resolvePict(bool const bInline, uno::Reference<drawing::XS
         if (aGraphic.GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel)
             aSize = Application::GetDefaultDevice()->GetGeometry().PixelToLogic(aSize, aMap);
         else
-            aSize = OutputDevice::LogicToLogic(aSize, aGraphic.GetPrefMapMode(), aMap);
+            aSize = Geometry::LogicToLogic(aSize, aGraphic.GetPrefMapMode(), aMap);
         m_aStates.top().getPicture().nWidth = aSize.Width();
         m_aStates.top().getPicture().nHeight = aSize.Height();
     }

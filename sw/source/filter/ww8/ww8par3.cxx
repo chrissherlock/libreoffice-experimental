@@ -2297,7 +2297,7 @@ awt::Size SwWW8ImplReader::MiserableDropDownFormHack(const OUString &rString,
                             static_cast<const SvxFontHeightItem*>(pItem)->GetHeight() );
                 aTmp <<= static_cast<float>(aSize.Height()) / 20.0;
 
-                aFont.SetFontSize(OutputDevice::LogicToLogic(aSize,
+                aFont.SetFontSize(Geometry::LogicToLogic(aSize,
                     MapMode(MapUnit::MapTwip), MapMode(MapUnit::Map100thMM)));
             }
             break;

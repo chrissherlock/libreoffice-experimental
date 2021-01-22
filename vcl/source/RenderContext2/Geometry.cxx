@@ -17,7 +17,11 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <sal/log.hxx>
 #include <tools/bigint.hxx>
+#include <tools/debug.hxx>
+#include <basegfx/matrix/b2dhommatrix.hxx>
+#include <o3tl/enumarray.hxx>
 
 #include <vcl/Geometry.hxx>
 #include <vcl/mapmod.hxx>
@@ -1043,163 +1047,288 @@ basegfx::B2DPolyPolygon Geometry::PixelToLogic(basegfx::B2DPolyPolygon const& rP
     return aTransformedPoly;
 }
 
-// return (n1 * n2 * n3) / (n4 * n5)
-tools::Long Geometry::fn5(const tools::Long n1, const tools::Long n2, const tools::Long n3,
-                          const tools::Long n4, const tools::Long n5)
+// we don't actually handle units beyond, hence the zeros in the arrays
+const MapUnit s_MaxValidUnit = MapUnit::MapPixel;
+const o3tl::enumarray<MapUnit, tools::Long> aImplNumeratorAry
+    = { 1, 1, 5, 50, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0 };
+const o3tl::enumarray<MapUnit, tools::Long> aImplDenominatorAry
+    = { 2540, 254, 127, 127, 1000, 100, 10, 1, 72, 1440, 1, 0, 0, 0 };
+
+static void verifyUnitSourceDest(MapUnit eUnitSource, MapUnit eUnitDest)
 {
-    if (n1 == 0 || n2 == 0 || n3 == 0 || n4 == 0 || n5 == 0)
-        return 0;
-    if (std::numeric_limits<tools::Long>::max() / std::abs(n2) < std::abs(n3))
+    DBG_ASSERT(eUnitSource != MapUnit::MapSysFont && eUnitSource != MapUnit::MapAppFont
+                   && eUnitSource != MapUnit::MapRelative,
+               "Source MapUnit is not permitted");
+    DBG_ASSERT(eUnitDest != MapUnit::MapSysFont && eUnitDest != MapUnit::MapAppFont
+                   && eUnitDest != MapUnit::MapRelative,
+               "Destination MapUnit is not permitted");
+}
+
+Point Geometry::LogicToLogic(Point const& rPtSource, MapMode const& rMapModeSource,
+                             MapMode const& rMapModeDest)
+{
+    if (rMapModeSource == rMapModeDest)
+        return rPtSource;
+
+    MapUnit eUnitSource = rMapModeSource.GetMapUnit();
+    MapUnit eUnitDest = rMapModeDest.GetMapUnit();
+    verifyUnitSourceDest(eUnitSource, eUnitDest);
+
+    if (rMapModeSource.IsSimple() && rMapModeDest.IsSimple())
     {
-        // a6 is skipped
-        BigInt a7 = n2;
-        a7 *= n3;
-        a7 *= n1;
+        tools::Long nNumerator = 1;
+        tools::Long nDenominator = 1;
+        SAL_WARN_IF(eUnitSource > s_MaxValidUnit, "vcl.gdi", "Invalid source map unit");
+        SAL_WARN_IF(eUnitDest > s_MaxValidUnit, "vcl.gdi", "Invalid destination map unit");
 
-        if (std::numeric_limits<tools::Long>::max() / std::abs(n4) < std::abs(n5))
+        if ((eUnitSource <= s_MaxValidUnit) && (eUnitDest <= s_MaxValidUnit))
         {
-            BigInt a8 = n4;
-            a8 *= n5;
-
-            BigInt a9 = a8;
-            a9 /= 2;
-            if (a7.IsNeg())
-                a7 -= a9;
-            else
-                a7 += a9;
-
-            a7 /= a8;
-        }
-        else
-        {
-            tools::Long n8 = n4 * n5;
-
-            if (a7.IsNeg())
-                a7 -= n8 / 2;
-            else
-                a7 += n8 / 2;
-
-            a7 /= n8;
+            nNumerator = aImplNumeratorAry[eUnitSource] * aImplDenominatorAry[eUnitDest];
+            nDenominator = aImplNumeratorAry[eUnitDest] * aImplDenominatorAry[eUnitSource];
         }
 
-        return static_cast<tools::Long>(a7);
+        if (eUnitSource == MapUnit::MapPixel)
+            nDenominator *= 72;
+        else if (eUnitDest == MapUnit::MapPixel)
+            nNumerator *= 72;
+
+        return Point(MapMode::fn3(rPtSource.X(), nNumerator, nDenominator),
+                     MapMode::fn3(rPtSource.Y(), nNumerator, nDenominator));
     }
     else
     {
-        tools::Long n6 = n2 * n3;
+        MappingMetrics aMappingMetricSource(rMapModeSource, 72, 72);
+        MappingMetrics aMappingMetricDest(rMapModeDest, 72, 72);
 
-        if (std::numeric_limits<tools::Long>::max() / std::abs(n1) < std::abs(n6))
-        {
-            BigInt a7 = n1;
-            a7 *= n6;
-
-            if (std::numeric_limits<tools::Long>::max() / std::abs(n4) < std::abs(n5))
-            {
-                BigInt a8 = n4;
-                a8 *= n5;
-
-                BigInt a9 = a8;
-                a9 /= 2;
-                if (a7.IsNeg())
-                    a7 -= a9;
-                else
-                    a7 += a9;
-
-                a7 /= a8;
-            }
-            else
-            {
-                tools::Long n8 = n4 * n5;
-
-                if (a7.IsNeg())
-                    a7 -= n8 / 2;
-                else
-                    a7 += n8 / 2;
-
-                a7 /= n8;
-            }
-            return static_cast<tools::Long>(a7);
-        }
-        else
-        {
-            tools::Long n7 = n1 * n6;
-
-            if (std::numeric_limits<tools::Long>::max() / std::abs(n4) < std::abs(n5))
-            {
-                BigInt a7 = n7;
-                BigInt a8 = n4;
-                a8 *= n5;
-
-                BigInt a9 = a8;
-                a9 /= 2;
-
-                if (a7.IsNeg())
-                    a7 -= a9;
-                else
-                    a7 += a9;
-
-                a7 /= a8;
-
-                return static_cast<tools::Long>(a7);
-            }
-            else
-            {
-                const tools::Long n8 = n4 * n5;
-                const tools::Long n8_2 = n8 / 2;
-
-                if (n7 < 0)
-                {
-                    if ((n7 - std::numeric_limits<tools::Long>::min()) >= n8_2)
-                        n7 -= n8_2;
-                }
-                else if ((std::numeric_limits<tools::Long>::max() - n7) >= n8_2)
-                {
-                    n7 += n8_2;
-                }
-
-                return n7 / n8;
-            }
-        }
+        return Point(
+            MapMode::fn5(rPtSource.X() + aMappingMetricSource.mnMapOfsX,
+                         aMappingMetricSource.mnMapScNumX, aMappingMetricDest.mnMapScDenomX,
+                         aMappingMetricSource.mnMapScDenomX, aMappingMetricDest.mnMapScNumX)
+                - aMappingMetricDest.mnMapOfsX,
+            MapMode::fn5(rPtSource.Y() + aMappingMetricSource.mnMapOfsY,
+                         aMappingMetricSource.mnMapScNumY, aMappingMetricDest.mnMapScDenomY,
+                         aMappingMetricSource.mnMapScDenomY, aMappingMetricDest.mnMapScNumY)
+                - aMappingMetricDest.mnMapOfsY);
     }
 }
 
-// return (n1 * n2) / n3
-tools::Long Geometry::fn3(const tools::Long n1, const tools::Long n2, const tools::Long n3)
+Size Geometry::LogicToLogic(Size const& rSzSource, MapMode const& rMapModeSource,
+                            MapMode const& rMapModeDest)
 {
-    if (n1 == 0 || n2 == 0 || n3 == 0)
-        return 0;
+    if (rMapModeSource == rMapModeDest)
+        return rSzSource;
 
-    if (std::numeric_limits<tools::Long>::max() / std::abs(n1) < std::abs(n2))
+    MapUnit eUnitSource = rMapModeSource.GetMapUnit();
+    MapUnit eUnitDest = rMapModeDest.GetMapUnit();
+    verifyUnitSourceDest(eUnitSource, eUnitDest);
+
+    if (rMapModeSource.IsSimple() && rMapModeDest.IsSimple())
     {
-        BigInt a4 = n1;
-        a4 *= n2;
+        tools::Long nNumerator = 1;
+        tools::Long nDenominator = 1;
+        SAL_WARN_IF(eUnitSource > s_MaxValidUnit, "vcl.gdi", "Invalid source map unit");
+        SAL_WARN_IF(eUnitDest > s_MaxValidUnit, "vcl.gdi", "Invalid destination map unit");
 
-        if (a4.IsNeg())
-            a4 -= n3 / 2;
-        else
-            a4 += n3 / 2;
+        if ((eUnitSource <= s_MaxValidUnit) && (eUnitDest <= s_MaxValidUnit))
+        {
+            nNumerator = aImplNumeratorAry[eUnitSource] * aImplDenominatorAry[eUnitDest];
+            nDenominator = aImplNumeratorAry[eUnitDest] * aImplDenominatorAry[eUnitSource];
+        }
 
-        a4 /= n3;
+        if (eUnitSource == MapUnit::MapPixel)
+            nDenominator *= 72;
+        else if (eUnitDest == MapUnit::MapPixel)
+            nNumerator *= 72;
 
-        return static_cast<tools::Long>(a4);
+        return Size(MapMode::fn3(rSzSource.Width(), nNumerator, nDenominator),
+                    MapMode::fn3(rSzSource.Height(), nNumerator, nDenominator));
     }
     else
     {
-        tools::Long n4 = n1 * n2;
-        const tools::Long n3_2 = n3 / 2;
+        MappingMetrics aMappingMetricSource(rMapModeSource, 72, 72);
+        MappingMetrics aMappingMetricDest(rMapModeDest, 72, 72);
 
-        if (n4 < 0)
-        {
-            if ((n4 - std::numeric_limits<tools::Long>::min()) >= n3_2)
-                n4 -= n3_2;
-        }
-        else if ((std::numeric_limits<tools::Long>::max() - n4) >= n3_2)
-        {
-            n4 += n3_2;
-        }
-
-        return n4 / n3;
+        return Size(
+            MapMode::fn5(rSzSource.Width(), aMappingMetricSource.mnMapScNumX,
+                         aMappingMetricDest.mnMapScDenomX, aMappingMetricSource.mnMapScDenomX,
+                         aMappingMetricDest.mnMapScNumX),
+            MapMode::fn5(rSzSource.Height(), aMappingMetricSource.mnMapScNumY,
+                         aMappingMetricDest.mnMapScDenomY, aMappingMetricSource.mnMapScDenomY,
+                         aMappingMetricDest.mnMapScNumY));
     }
+}
+
+basegfx::B2DPolygon Geometry::LogicToLogic(basegfx::B2DPolygon const& rPolySource,
+                                           MapMode const& rMapModeSource,
+                                           MapMode const& rMapModeDest)
+{
+    if (rMapModeSource == rMapModeDest)
+    {
+        return rPolySource;
+    }
+
+    const basegfx::B2DHomMatrix aTransform(LogicToLogic(rMapModeSource, rMapModeDest));
+    basegfx::B2DPolygon aPoly(rPolySource);
+
+    aPoly.transform(aTransform);
+    return aPoly;
+}
+
+basegfx::B2DHomMatrix Geometry::LogicToLogic(MapMode const& rMapModeSource,
+                                             MapMode const& rMapModeDest)
+{
+    basegfx::B2DHomMatrix aTransform;
+
+    if (rMapModeSource == rMapModeDest)
+    {
+        return aTransform;
+    }
+
+    MapUnit eUnitSource = rMapModeSource.GetMapUnit();
+    MapUnit eUnitDest = rMapModeDest.GetMapUnit();
+    verifyUnitSourceDest(eUnitSource, eUnitDest);
+
+    if (rMapModeSource.IsSimple() && rMapModeDest.IsSimple())
+    {
+        tools::Long nNumerator = 1;
+        tools::Long nDenominator = 1;
+        SAL_WARN_IF(eUnitSource > s_MaxValidUnit, "vcl.gdi", "Invalid source map unit");
+        SAL_WARN_IF(eUnitDest > s_MaxValidUnit, "vcl.gdi", "Invalid destination map unit");
+
+        if ((eUnitSource <= s_MaxValidUnit) && (eUnitDest <= s_MaxValidUnit))
+        {
+            nNumerator = aImplNumeratorAry[eUnitSource] * aImplDenominatorAry[eUnitDest];
+            nDenominator = aImplNumeratorAry[eUnitDest] * aImplDenominatorAry[eUnitSource];
+        }
+
+        if (eUnitSource == MapUnit::MapPixel)
+            nDenominator *= 72;
+        else if (eUnitDest == MapUnit::MapPixel)
+            nNumerator *= 72;
+
+        const double fScaleFactor(static_cast<double>(nNumerator)
+                                  / static_cast<double>(nDenominator));
+        aTransform.set(0, 0, fScaleFactor);
+        aTransform.set(1, 1, fScaleFactor);
+    }
+    else
+    {
+        MappingMetrics aMappingMetricSource(rMapModeSource, 72, 72);
+        MappingMetrics aMappingMetricDest(rMapModeDest, 72, 72);
+
+        const double fScaleFactorX(
+            (double(aMappingMetricSource.mnMapScNumX) * double(aMappingMetricDest.mnMapScDenomX))
+            / (double(aMappingMetricSource.mnMapScDenomX)
+               * double(aMappingMetricDest.mnMapScNumX)));
+        const double fScaleFactorY(
+            (double(aMappingMetricSource.mnMapScNumY) * double(aMappingMetricDest.mnMapScDenomY))
+            / (double(aMappingMetricSource.mnMapScDenomY)
+               * double(aMappingMetricDest.mnMapScNumY)));
+        const double fZeroPointX(double(aMappingMetricSource.mnMapOfsX) * fScaleFactorX
+                                 - double(aMappingMetricDest.mnMapOfsX));
+        const double fZeroPointY(double(aMappingMetricSource.mnMapOfsY) * fScaleFactorY
+                                 - double(aMappingMetricDest.mnMapOfsY));
+
+        aTransform.set(0, 0, fScaleFactorX);
+        aTransform.set(1, 1, fScaleFactorY);
+        aTransform.set(0, 2, fZeroPointX);
+        aTransform.set(1, 2, fZeroPointY);
+    }
+
+    return aTransform;
+}
+
+tools::Rectangle Geometry::LogicToLogic(tools::Rectangle const& rRectSource,
+                                        MapMode const& rMapModeSource, MapMode const& rMapModeDest)
+{
+    if (rMapModeSource == rMapModeDest)
+        return rRectSource;
+
+    MapUnit eUnitSource = rMapModeSource.GetMapUnit();
+    MapUnit eUnitDest = rMapModeDest.GetMapUnit();
+    verifyUnitSourceDest(eUnitSource, eUnitDest);
+
+    if (rMapModeSource.IsSimple() && rMapModeDest.IsSimple())
+    {
+        tools::Long nNumerator = 1;
+        tools::Long nDenominator = 1;
+        SAL_WARN_IF(eUnitSource > s_MaxValidUnit, "vcl.gdi", "Invalid source map unit");
+        SAL_WARN_IF(eUnitDest > s_MaxValidUnit, "vcl.gdi", "Invalid destination map unit");
+
+        if ((eUnitSource <= s_MaxValidUnit) && (eUnitDest <= s_MaxValidUnit))
+        {
+            nNumerator = aImplNumeratorAry[eUnitSource] * aImplDenominatorAry[eUnitDest];
+            nDenominator = aImplNumeratorAry[eUnitDest] * aImplDenominatorAry[eUnitSource];
+        }
+
+        if (eUnitSource == MapUnit::MapPixel)
+            nDenominator *= 72;
+        else if (eUnitDest == MapUnit::MapPixel)
+            nNumerator *= 72;
+
+        auto left = MapMode::fn3(rRectSource.Left(), nNumerator, nDenominator);
+        auto top = MapMode::fn3(rRectSource.Top(), nNumerator, nDenominator);
+        if (rRectSource.IsEmpty())
+            return tools::Rectangle(left, top);
+
+        auto right = MapMode::fn3(rRectSource.Right(), nNumerator, nDenominator);
+        auto bottom = MapMode::fn3(rRectSource.Bottom(), nNumerator, nDenominator);
+        return tools::Rectangle(left, top, right, bottom);
+    }
+    else
+    {
+        MappingMetrics aMappingMetricSource(rMapModeSource, 72, 72);
+        MappingMetrics aMappingMetricDest(rMapModeDest, 72, 72);
+
+        auto left = MapMode::fn5(rRectSource.Left() + aMappingMetricSource.mnMapOfsX,
+                                 aMappingMetricSource.mnMapScNumX, aMappingMetricDest.mnMapScDenomX,
+                                 aMappingMetricSource.mnMapScDenomX, aMappingMetricDest.mnMapScNumX)
+                    - aMappingMetricDest.mnMapOfsX;
+        auto top = MapMode::fn5(rRectSource.Top() + aMappingMetricSource.mnMapOfsY,
+                                aMappingMetricSource.mnMapScNumY, aMappingMetricDest.mnMapScDenomY,
+                                aMappingMetricSource.mnMapScDenomY, aMappingMetricDest.mnMapScNumY)
+                   - aMappingMetricDest.mnMapOfsY;
+        if (rRectSource.IsEmpty())
+            return tools::Rectangle(left, top);
+
+        auto right
+            = MapMode::fn5(rRectSource.Right() + aMappingMetricSource.mnMapOfsX,
+                           aMappingMetricSource.mnMapScNumX, aMappingMetricDest.mnMapScDenomX,
+                           aMappingMetricSource.mnMapScDenomX, aMappingMetricDest.mnMapScNumX)
+              - aMappingMetricDest.mnMapOfsX;
+        auto bottom
+            = MapMode::fn5(rRectSource.Bottom() + aMappingMetricSource.mnMapOfsY,
+                           aMappingMetricSource.mnMapScNumY, aMappingMetricDest.mnMapScDenomY,
+                           aMappingMetricSource.mnMapScDenomY, aMappingMetricDest.mnMapScNumY)
+              - aMappingMetricDest.mnMapOfsY;
+        return tools::Rectangle(left, top, right, bottom);
+    }
+}
+
+tools::Long Geometry::LogicToLogic(tools::Long nLongSource, MapUnit eUnitSource, MapUnit eUnitDest)
+{
+    if (eUnitSource == eUnitDest)
+        return nLongSource;
+
+    verifyUnitSourceDest(eUnitSource, eUnitDest);
+
+    tools::Long nNumerator = 1;
+    tools::Long nDenominator = 1;
+    SAL_WARN_IF(eUnitSource > s_MaxValidUnit, "vcl.gdi", "Invalid source map unit");
+    SAL_WARN_IF(eUnitDest > s_MaxValidUnit, "vcl.gdi", "Invalid destination map unit");
+
+    if ((eUnitSource <= s_MaxValidUnit) && (eUnitDest <= s_MaxValidUnit))
+    {
+        nNumerator = aImplNumeratorAry[eUnitSource] * aImplDenominatorAry[eUnitDest];
+        nDenominator = aImplNumeratorAry[eUnitDest] * aImplDenominatorAry[eUnitSource];
+    }
+
+    if (eUnitSource == MapUnit::MapPixel)
+        nDenominator *= 72;
+    else if (eUnitDest == MapUnit::MapPixel)
+        nNumerator *= 72;
+
+    return MapMode::fn3(nLongSource, nNumerator, nDenominator);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

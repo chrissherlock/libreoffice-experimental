@@ -475,7 +475,7 @@ Point FloatingWindow::ImplCalcPos(vcl::Window* pWindow,
         }
         else
         {
-            *pLOKTwipsPos = OutputDevice::LogicToLogic(aPos, pW->GetMapMode(), MapMode(MapUnit::MapTwip));
+            *pLOKTwipsPos = Geometry::LogicToLogic(aPos, pW->GetMapMode(), MapMode(MapUnit::MapTwip));
         }
     }
 
