@@ -175,8 +175,8 @@ void OutputDevice::DrawBitmap(const Point& rDestPt, const Size& rDestSize, const
     }
 }
 
-std::tuple<Point, Size, tools::Rectangle, bool>
-OutputDevice::GetBitmapGeometry(Point const& rSrcPt, Size const& rSize) const
+static std::tuple<Point, Size, tools::Rectangle, bool>
+GetBitmapGeometry(Point const& rSrcPt, Size const& rSize, Geometry const& rGeom)
 {
     tools::Long nX = rSrcPt.X();
     tools::Long nY = rSrcPt.Y();
@@ -187,36 +187,36 @@ OutputDevice::GetBitmapGeometry(Point const& rSrcPt, Size const& rSize) const
 
     tools::Rectangle aRect(Point(nX, nY), Size(nWidth, nHeight));
 
-    if (nWidth > 0 && nHeight > 0 && nX <= (GetWidthInPixels() + GetXOffsetInPixels())
-        && nY <= (GetHeightInPixels() + GetYOffsetInPixels()))
+    if (nWidth > 0 && nHeight > 0 && nX <= (rGeom.GetWidthInPixels() + rGeom.GetXOffsetInPixels())
+        && nY <= (rGeom.GetHeightInPixels() + rGeom.GetYOffsetInPixels()))
     {
         // X-Coordinate outside of draw area?
-        if (nX < GetXOffsetInPixels())
+        if (nX < rGeom.GetXOffsetInPixels())
         {
-            nWidth -= (GetXOffsetInPixels() - nX);
-            nX = GetXOffsetInPixels();
+            nWidth -= (rGeom.GetXOffsetInPixels() - nX);
+            nX = rGeom.GetXOffsetInPixels();
             bClipped = true;
         }
 
         // Y-Coordinate outside of draw area?
-        if (nY < GetYOffsetInPixels())
+        if (nY < rGeom.GetYOffsetInPixels())
         {
-            nHeight -= (GetYOffsetInPixels() - nY);
-            nY = GetYOffsetInPixels();
+            nHeight -= (rGeom.GetYOffsetInPixels() - nY);
+            nY = rGeom.GetYOffsetInPixels();
             bClipped = true;
         }
 
         // Width outside of draw area?
-        if ((nWidth + nX) > (GetWidthInPixels() + GetXOffsetInPixels()))
+        if ((nWidth + nX) > (rGeom.GetWidthInPixels() + rGeom.GetXOffsetInPixels()))
         {
-            nWidth = GetXOffsetInPixels() + GetWidthInPixels() - nX;
+            nWidth = rGeom.GetXOffsetInPixels() + rGeom.GetWidthInPixels() - nX;
             bClipped = true;
         }
 
         // Height outside of draw area?
-        if ((nHeight + nY) > (GetHeightInPixels() + GetYOffsetInPixels()))
+        if ((nHeight + nY) > (rGeom.GetHeightInPixels() + rGeom.GetYOffsetInPixels()))
         {
-            nHeight = GetYOffsetInPixels() + GetHeightInPixels() - nY;
+            nHeight = rGeom.GetYOffsetInPixels() + rGeom.GetHeightInPixels() - nY;
             bClipped = true;
         }
     }
@@ -238,7 +238,7 @@ Bitmap OutputDevice::GetBitmap(const Point& rSrcPt, const Size& rSize) const
     tools::Rectangle aRect;
     bool bClipped;
 
-    std::tie(aBmpPt, aBmpSize, aRect, bClipped) = GetBitmapGeometry(rSrcPt, rSize);
+    std::tie(aBmpPt, aBmpSize, aRect, bClipped) = GetBitmapGeometry(rSrcPt, rSize, maGeometry);
 
     if (aBmpSize.Width() > 0 && aBmpSize.Height() > 0 && aBmpPt.X() <= (GetWidthInPixels() + GetXOffsetInPixels())
         && aBmpPt.Y() <= (GetHeightInPixels() + GetYOffsetInPixels()))

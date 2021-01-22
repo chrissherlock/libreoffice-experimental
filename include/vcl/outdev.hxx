@@ -1255,8 +1255,6 @@ public:
                                     const BitmapEx& rBitmapEx);
 
 protected:
-    std::tuple<Point, Size, tools::Rectangle, bool> GetBitmapGeometry(Point const& rSrcPt,Size const& rSize) const;
-
     virtual void                DrawTransparentBitmapEx(
                                     const Point& rDestPt, const Size& rDestSize,
                                     const Point& rSrcPtPixel, const Size& rSrcSizePixel,
