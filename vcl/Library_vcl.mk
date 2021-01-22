@@ -135,6 +135,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/RenderContext2/settings \
     vcl/source/RenderContext2/text \
     vcl/source/RenderContext2/viewtransform \
+    vcl/source/outdev/LinearScaleContext \
     vcl/source/outdev/outdev \
     vcl/source/outdev/outdevstate \
     vcl/source/outdev/antialias \
