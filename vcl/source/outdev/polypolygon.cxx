@@ -77,7 +77,7 @@ void OutputDevice::DrawPolyPolygon(const tools::PolyPolygon& rPolyPoly)
 
         if (IsOpaqueLineColor())
         {
-            const bool bPixelSnapHairline(mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+            const bool bPixelSnapHairline(GetAntialiasing() & AntialiasingFlags::PixelSnapHairline);
 
             for (auto const& rPolygon : aB2DPolyPolygon)
             {
@@ -179,7 +179,7 @@ void OutputDevice::ImplDrawPolyPolygonWithB2DPolyPolygon(
 
         if (bSuccess && IsOpaqueLineColor())
         {
-            const bool bPixelSnapHairline(mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+            const bool bPixelSnapHairline(GetAntialiasing() & AntialiasingFlags::PixelSnapHairline);
 
             for (auto const& rPolygon : aB2DPolyPolygon)
             {

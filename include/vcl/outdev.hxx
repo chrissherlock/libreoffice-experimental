@@ -31,6 +31,8 @@
 #include <unotools/fontdefs.hxx>
 #include <o3tl/typed_flags_set.hxx>
 
+#include <vcl/AddFontSubstituteFlags.hxx>
+#include <vcl/RenderContext2.hxx>
 #include <vcl/bitmap.hxx>
 #include <vcl/cairo.hxx>
 #include <vcl/devicecoordinate.hxx>
@@ -43,8 +45,6 @@
 #include <vcl/MappingMetrics.hxx>
 #include <vcl/outdevstate.hxx>
 #include <vcl/wall.hxx>
-#include <vcl/AddFontSubstituteFlags.hxx>
-#include <vcl/RenderContext2.hxx>
 
 #include <com/sun/star/drawing/LineCap.hpp>
 #include <com/sun/star/uno/Reference.h>
@@ -196,19 +196,6 @@ namespace o3tl
     template<> struct typed_flags<DrawGridFlags> : is_typed_flags<DrawGridFlags, 0x0007> {};
 }
 
-// Antialiasing
-enum class AntialiasingFlags
-{
-    NONE                = 0x0000,
-    DisableText         = 0x0001,
-    Enable              = 0x0002,
-    PixelSnapHairline  = 0x0004,
-};
-namespace o3tl
-{
-    template<> struct typed_flags<AntialiasingFlags> : is_typed_flags<AntialiasingFlags, 0x07> {};
-}
-
 // GetDefaultFont() flags
 enum class GetDefaultFontFlags
 {
@@ -300,7 +287,6 @@ private:
     RasterOp                        meRasterOp;
     Wallpaper                       maBackground;
     Point                           maRefPoint;
-    AntialiasingFlags               mnAntialiasing;
 
     mutable bool                    mbClipRegion : 1;
     mutable bool                    mbBackground : 1;
@@ -456,8 +442,7 @@ public:
     bool                        IsOutputEnabled() const { return mbOutput; }
     bool                        IsDeviceOutputNecessary() const { return (mbOutput && mbDevOutput); }
 
-    void                        SetAntialiasing( AntialiasingFlags nMode );
-    AntialiasingFlags           GetAntialiasing() const { return mnAntialiasing; }
+    void                        SetAntialiasing( AntialiasingFlags nMode ) override;
     void                        SetDrawMode(DrawModeFlags nDrawMode) override;
     void                        SetLayoutMode(ComplexTextLayoutFlags nTextLayoutMode) override;
     void                        SetDigitLanguage(LanguageType) override;

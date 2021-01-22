@@ -19,6 +19,7 @@
 #include <vcl/mapmod.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/vclreferencebase.hxx>
+#include <vcl/AntialiasingFlags.hxx>
 #include <vcl/ComplexTextLayoutFlags.hxx>
 #include <vcl/DrawModeFlags.hxx>
 #include <vcl/Geometry.hxx>
@@ -87,6 +88,9 @@ public:
 
     TextAlign GetTextAlign() const;
     virtual void SetTextAlign(TextAlign eAlign);
+
+    AntialiasingFlags GetAntialiasing() const;
+    virtual void SetAntialiasing(AntialiasingFlags nMode);
 
     bool IsMapModeEnabled() const;
     virtual void EnableMapMode();
@@ -239,6 +243,7 @@ private:
     Color maOverlineColor;
     DrawModeFlags mnDrawMode;
     RasterOp meRasterOp;
+    AntialiasingFlags mnAntialiasing;
 
     mutable bool mbOpaqueLineColor : 1;
     mutable bool mbOpaqueFillColor : 1;

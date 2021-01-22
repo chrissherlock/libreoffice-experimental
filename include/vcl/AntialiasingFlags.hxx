@@ -1,4 +1,4 @@
-/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; fill-column: 100 -*- */
 /*
  * This file is part of the LibreOffice project.
  *
@@ -17,16 +17,22 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <vcl/virdev.hxx>
+#pragma once
 
-#include <salgdi.hxx>
+#include <o3tl/typed_flags_set.hxx>
 
-void OutputDevice::SetAntialiasing(AntialiasingFlags nMode)
+enum class AntialiasingFlags
 {
-    RenderContext2::SetAntialiasing(nMode);
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->SetAntialiasing(nMode);
+    NONE = 0x0000,
+    DisableText = 0x0001,
+    Enable = 0x0002,
+    PixelSnapHairline = 0x0004,
+};
+namespace o3tl
+{
+template <> struct typed_flags<AntialiasingFlags> : is_typed_flags<AntialiasingFlags, 0x07>
+{
+};
 }
 
-/* vim:set shiftwidth=4 softtabstop=4 expandtab: */
+/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

@@ -79,7 +79,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mbDevOutput                     = false;
     mbOutputClipped                 = false;
     maTextColor                     = COL_BLACK;
-    mnAntialiasing                  = AntialiasingFlags::NONE;
     mbInitClipRegion                = true;
     mbClipRegionSet                 = false;
     mbTextLines                     = false;

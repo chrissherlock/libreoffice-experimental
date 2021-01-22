@@ -65,7 +65,7 @@ void OutputDevice::DrawPolyLine( const tools::Polygon& rPoly )
 
     const basegfx::B2DPolygon aB2DPolyLine(rPoly.getB2DPolygon());
     const basegfx::B2DHomMatrix aTransform(GetDeviceTransformation());
-    const bool bPixelSnapHairline(mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+    const bool bPixelSnapHairline(GetAntialiasing() & AntialiasingFlags::PixelSnapHairline);
 
     mpGraphics->DrawPolyLine(
         aTransform,
@@ -335,7 +335,7 @@ bool OutputDevice::DrawPolyLineDirectInternal(
     {
         // combine rObjectTransform with WorldToDevice
         const basegfx::B2DHomMatrix aTransform(GetDeviceTransformation() * rObjectTransform);
-        const bool bPixelSnapHairline((mnAntialiasing & AntialiasingFlags::PixelSnapHairline) && rB2DPolygon.count() < 1000);
+        const bool bPixelSnapHairline((GetAntialiasing() & AntialiasingFlags::PixelSnapHairline) && rB2DPolygon.count() < 1000);
 
         const double fAdjustedTransparency = mpAlphaVDev ? 0 : fTransparency;
         // draw the polyline

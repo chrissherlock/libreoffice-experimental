@@ -90,7 +90,7 @@ void OutputDevice::DrawPolygon(const tools::Polygon& rPoly)
 
         if (IsOpaqueLineColor())
         {
-            const bool bPixelSnapHairline(mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+            const bool bPixelSnapHairline(GetAntialiasing() & AntialiasingFlags::PixelSnapHairline);
 
             mpGraphics->DrawPolyLine(
                 aTransform, aB2DPolygon, 0.0,

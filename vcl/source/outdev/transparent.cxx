@@ -158,7 +158,7 @@ void OutputDevice::DrawTransparent(
 
         if (IsOpaqueLineColor())
         {
-            const bool bPixelSnapHairline(mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+            const bool bPixelSnapHairline(GetAntialiasing() & AntialiasingFlags::PixelSnapHairline);
 
             for (auto const& rPolygon : aB2DPolyPolygon)
             {
@@ -294,7 +294,7 @@ void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
             mpGraphics->SetFillColor();
 
             // draw the border line
-            const bool bPixelSnapHairline(mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+            const bool bPixelSnapHairline(GetAntialiasing() & AntialiasingFlags::PixelSnapHairline);
 
             for(auto const& rPolygon : aB2DPolyPolygon)
             {

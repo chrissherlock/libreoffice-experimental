@@ -17,16 +17,22 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <vcl/virdev.hxx>
+#include <vcl/RenderContext2.hxx>
 
 #include <salgdi.hxx>
 
-void OutputDevice::SetAntialiasing(AntialiasingFlags nMode)
-{
-    RenderContext2::SetAntialiasing(nMode);
+AntialiasingFlags RenderContext2::GetAntialiasing() const { return mnAntialiasing; }
 
-    if (mpAlphaVDev)
-        mpAlphaVDev->SetAntialiasing(nMode);
+void RenderContext2::SetAntialiasing(AntialiasingFlags nMode)
+{
+    if (mnAntialiasing != nMode)
+    {
+        mnAntialiasing = nMode;
+        SetInitFontFlag(true);
+
+        if (mpGraphics)
+            mpGraphics->setAntiAlias(bool(mnAntialiasing & AntialiasingFlags::Enable));
+    }
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

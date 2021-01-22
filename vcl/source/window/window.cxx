@@ -877,7 +877,7 @@ bool Window::AcquireGraphics() const
             pSVData->maGDIData.mpLastWinGraphics = const_cast<vcl::Window*>(this);
 
         mpGraphics->SetXORMode( (RasterOp::Invert == meRasterOp) || (RasterOp::Xor == meRasterOp), RasterOp::Invert == meRasterOp );
-        mpGraphics->setAntiAlias(bool(mnAntialiasing & AntialiasingFlags::Enable));
+        mpGraphics->setAntiAlias(bool(GetAntialiasing() & AntialiasingFlags::Enable));
     }
 
     return mpGraphics != nullptr;
