@@ -1263,22 +1263,6 @@ protected:
                                     const basegfx::B2DHomMatrix& aFullTransform,
                                     const BitmapEx& rBitmapEx);
 
-    /** Transform and reduce the area that needs to be drawn of the bitmap and return the new
-        visible range and the maximum area.
-
-
-      @param     aFullTransform      B2DHomMatrix used for transformation
-      @param     aVisibleRange       The new visible area of the bitmap
-      @param     fMaximumArea        The maximum area of the bitmap
-
-      @returns true if there is an area to be drawn, otherwise nothing is left to be drawn
-        so return false
-      */
-    virtual bool                TransformAndReduceBitmapExToTargetRange(
-                                    const basegfx::B2DHomMatrix& aFullTransform,
-                                    basegfx::B2DRange &aVisibleRange,
-                                    double &fMaximumArea);
-
 private:
 
     SAL_DLLPRIVATE void         DrawTransparentAlphaBitmap(
