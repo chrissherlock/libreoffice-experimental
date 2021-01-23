@@ -256,6 +256,10 @@ protected:
 
     void SetClipRegionFlag(bool bFlag);
 
+    virtual bool DrawMaskedAlphaBitmapEx(Point const& rDestPt, Size const& rDestSize,
+                                         Point const& rSrcPtPixel, Size const& rSrcSizePixel,
+                                         BitmapEx const& rBitmapEx);
+
     // TODO eventually make these private when all text/font functions migrated from
     // OutputDevice to RenderContext2
     Color maTextLineColor;

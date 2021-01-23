@@ -1280,12 +1280,12 @@ private:
                                     const Size& rSrcSizePixel,
                                     BitmapEx const& rBitmapEx);
 
-    SAL_DLLPRIVATE bool         DrawMaskedAlphaBitmapEx(
+    bool                        DrawMaskedAlphaBitmapEx(
                                     const Point& rDestPt,
                                     const Size& rDestSize,
                                     const Point& rSrcPtPixel,
                                     const Size& rSrcSizePixel,
-                                    BitmapEx const& rBitmapEx);
+                                    BitmapEx const& rBitmapEx) override;
 
     SAL_DLLPRIVATE void         DrawTransparentAlphaBitmapSlowPath(
                                     const Bitmap& rBitmap, const AlphaMask& rAlpha,

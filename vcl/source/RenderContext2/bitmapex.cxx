@@ -117,4 +117,79 @@ bool RenderContext2::TransformAndReduceBitmapExToTargetRange(
     return true;
 }
 
+bool RenderContext2::DrawMaskedAlphaBitmapEx(Point const& rDestPt, Size const& rDestSize,
+                                             Point const& rSrcPtPixel, Size const& rSrcSizePixel,
+                                             BitmapEx const& rBitmapEx)
+{
+    BitmapEx aBmpEx(rBitmapEx);
+
+    SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(),
+                       rSrcSizePixel.Height(), maGeometry.LogicXToDevicePixel(rDestPt.X()),
+                       maGeometry.LogicYToDevicePixel(rDestPt.Y()),
+                       maGeometry.LogicWidthToDevicePixel(rDestSize.Width()),
+                       maGeometry.LogicHeightToDevicePixel(rDestSize.Height()));
+
+    const SalBitmap* pSalSrcBmp = aBmpEx.ImplGetBitmapSalBitmap().get();
+    std::shared_ptr<SalBitmap> xMaskBmp = aBmpEx.ImplGetMaskSalBitmap();
+
+    if (!xMaskBmp)
+        return false;
+
+    assert(pSalSrcBmp);
+
+    // temporary till I migrate over to RenderContext2
+    OutputDevice const* pOutDev = dynamic_cast<OutputDevice const*>(this);
+
+    // try to paint as alpha directly. If this worked, we are done (except alpha, see below)
+    if (!mpGraphics->DrawAlphaBitmap(aPosAry, *pSalSrcBmp, *xMaskBmp, *pOutDev))
+    {
+        // #4919452# reduce operation area to bounds of cliprect. since masked transparency involves
+        // creation of a large vdev and copying the screen content into that (slooow read from
+        // framebuffer), that should considerably increase performance for large bitmaps and small
+        // clippings.
+
+        // Note that this optimization is a workaround for a Writer peculiarity, namely, to decompose
+        // background graphics into myriads of disjunct, tiny rectangles. That otherwise kills us
+        // here, since for transparent output, SAL always prepares the whole bitmap, if aPosAry
+        // contains the whole bitmap (and it's _not_ to blame for that).
+
+        // Note the call to ImplPixelToDevicePixel(), since aPosAry already contains the
+        // mnOutOff-offsets, they also have to be applied to the region
+        tools::Rectangle aClipRegionBounds(maGeometry.PixelToDevicePixel(maRegion).GetBoundRect());
+
+        // TODO: Also respect scaling (that's a bit tricky, since the source points have to move
+        // fractional amounts (which is not possible, thus has to be emulated by increases of the
+        // copy area)
+
+        // for now, only identity scales allowed
+        if (!aClipRegionBounds.IsEmpty() && aPosAry.mnDestWidth == aPosAry.mnSrcWidth
+            && aPosAry.mnDestHeight == aPosAry.mnSrcHeight)
+        {
+            // now intersect dest rect with clip region
+            aClipRegionBounds.Intersection(tools::Rectangle(
+                aPosAry.mnDestX, aPosAry.mnDestY, aPosAry.mnDestX + aPosAry.mnDestWidth - 1,
+                aPosAry.mnDestY + aPosAry.mnDestHeight - 1));
+
+            // Note: I could theoretically optimize away the DrawBitmap below, if the region is empty
+            // here. Unfortunately, cannot rule out that somebody relies on the side effects.
+            if (!aClipRegionBounds.IsEmpty())
+            {
+                aPosAry.mnSrcX += aClipRegionBounds.Left() - aPosAry.mnDestX;
+                aPosAry.mnSrcY += aClipRegionBounds.Top() - aPosAry.mnDestY;
+                aPosAry.mnSrcWidth = aClipRegionBounds.GetWidth();
+                aPosAry.mnSrcHeight = aClipRegionBounds.GetHeight();
+
+                aPosAry.mnDestX = aClipRegionBounds.Left();
+                aPosAry.mnDestY = aClipRegionBounds.Top();
+                aPosAry.mnDestWidth = aClipRegionBounds.GetWidth();
+                aPosAry.mnDestHeight = aClipRegionBounds.GetHeight();
+            }
+        }
+
+        mpGraphics->DrawBitmap(aPosAry, *pSalSrcBmp, *xMaskBmp, *pOutDev);
+    }
+
+    return true;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
