@@ -124,6 +124,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/RenderContext2/RenderContext2 \
     vcl/source/RenderContext2/ViewTransformer \
     vcl/source/RenderContext2/antialias \
+    vcl/source/RenderContext2/bitmap \
     vcl/source/RenderContext2/drawmode \
     vcl/source/RenderContext2/emphasismark \
     vcl/source/RenderContext2/fill \

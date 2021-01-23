@@ -15,6 +15,7 @@
 #include <i18nlangtag/lang.h>
 
 #include <vcl/dllapi.h>
+#include <vcl/bitmap.hxx>
 #include <vcl/font.hxx>
 #include <vcl/mapmod.hxx>
 #include <vcl/settings.hxx>
@@ -174,6 +175,8 @@ public:
     basegfx::B2DHomMatrix GetInverseViewTransformation() const;
     basegfx::B2DHomMatrix GetInverseViewTransformation(MapMode const& rMapMode) const;
     basegfx::B2DHomMatrix GetDeviceTransformation() const;
+
+    virtual Bitmap GetBitmap(const Point& rSrcPt, const Size& rSize) const;
 
 protected:
     void dispose();

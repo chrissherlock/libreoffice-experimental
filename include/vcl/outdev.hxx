@@ -1232,9 +1232,6 @@ public:
                                     const Image& rImage,
                                     DrawImageFlags nStyle = DrawImageFlags::NONE );
 
-
-    virtual Bitmap              GetBitmap( const Point& rSrcPt, const Size& rSize ) const;
-
     /** Query extended bitmap (with alpha channel, if available).
      */
     BitmapEx                    GetBitmapEx( const Point& rSrcPt, const Size& rSize ) const;
