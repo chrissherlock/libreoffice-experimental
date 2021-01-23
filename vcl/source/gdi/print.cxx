@@ -297,7 +297,7 @@ bool Printer::TransformAndReduceBitmapExToTargetRange(
 
 void Printer::DrawTransparentBitmapEx( const Point& rDestPt, const Size& rDestSize,
                                 const Point& rSrcPtPixel, const Size& rSrcSizePixel,
-                                BitmapEx& rBmpEx )
+                                BitmapEx const& rBmpEx, const MetaActionType )
 {
     if( rBmpEx.IsAlpha() )
     {

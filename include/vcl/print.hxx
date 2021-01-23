@@ -245,7 +245,7 @@ protected:
 
     void                        DrawTransparentBitmapEx( const Point& rDestPt, const Size& rDestSize,
                                     const Point& rSrcPtPixel, const Size& rSrcSizePixel,
-                                    BitmapEx& rBitmapEx ) override;
+                                    BitmapEx const& rBitmapEx, const MetaActionType ) override;
 
     virtual void                SetFontOrientation( LogicalFontInstance* const pFontInstance ) const override;
 

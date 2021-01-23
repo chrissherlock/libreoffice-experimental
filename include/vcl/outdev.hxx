@@ -1253,9 +1253,9 @@ public:
 
 protected:
     virtual void                DrawTransparentBitmapEx(
-                                    const Point& rDestPt, const Size& rDestSize,
-                                    const Point& rSrcPtPixel, const Size& rSrcSizePixel,
-                                    BitmapEx& rBitmapEx );
+                                    Point const& rDestPt, Size const& rDestSize,
+                                    Point const& rSrcPtPixel, Size const& rSrcSizePixel,
+                                    BitmapEx const& rBitmapEx, const MetaActionType nAction);
 
     virtual bool                CanSubsampleBitmap() const { return true; }
 

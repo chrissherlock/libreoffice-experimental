@@ -50,6 +50,23 @@
 #include <cstdlib>
 #include <memory>
 
+BitmapEx OutputDevice::GetBitmapEx(const Point& rSrcPt, const Size& rSize) const
+{
+    // #110958# Extract alpha value from VDev, if any
+    if (mpAlphaVDev)
+    {
+        Bitmap aAlphaBitmap(mpAlphaVDev->GetBitmap(rSrcPt, rSize));
+
+        // ensure 8 bit alpha
+        if (aAlphaBitmap.GetBitCount() > 8)
+            aAlphaBitmap.Convert(BmpConversion::N8BitNoConversion);
+
+        return BitmapEx(GetBitmap(rSrcPt, rSize), AlphaMask(aAlphaBitmap));
+    }
+
+    return RenderContext2::GetBitmapEx(rSrcPt, rSize);
+}
+
 void OutputDevice::DrawBitmapEx(const Point& rDestPt, const BitmapEx& rBitmapEx)
 {
     assert(!is_double_buffered_window());
@@ -97,125 +114,107 @@ void OutputDevice::DrawBitmapEx(const Point& rDestPt, const Size& rDestSize,
     if (ImplIsRecordLayout())
         return;
 
-    if (TransparentType::NONE == rBitmapEx.GetTransparentType())
+    if (rBitmapEx.GetTransparentType() == TransparentType::NONE)
     {
         DrawBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmapEx.GetBitmap());
+        return;
     }
-    else
+
+    if (meRasterOp == RasterOp::Invert)
     {
-        if (RasterOp::Invert == meRasterOp)
-        {
-            DrawRect(tools::Rectangle(rDestPt, rDestSize));
-            return;
-        }
-
-        BitmapEx aBmpEx(rBitmapEx);
-
-        if (GetDrawMode()
-            & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap | DrawModeFlags::GrayBitmap))
-        {
-            if (GetDrawMode() & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap))
-            {
-                Bitmap aColorBmp(aBmpEx.GetSizePixel(), 1);
-                sal_uInt8 cCmpVal;
-
-                if (GetDrawMode() & DrawModeFlags::BlackBitmap)
-                    cCmpVal = 0;
-                else
-                    cCmpVal = 255;
-
-                aColorBmp.Erase(Color(cCmpVal, cCmpVal, cCmpVal));
-
-                if (aBmpEx.IsAlpha())
-                {
-                    // Create one-bit mask out of alpha channel, by
-                    // thresholding it at alpha=0.5. As
-                    // DRAWMODE_BLACK/WHITEBITMAP requires monochrome
-                    // output, having alpha-induced grey levels is not
-                    // acceptable.
-                    BitmapEx aMaskEx(aBmpEx.GetAlpha().GetBitmap());
-                    BitmapFilter::Filter(aMaskEx, BitmapMonochromeFilter(129));
-                    aBmpEx = BitmapEx(aColorBmp, aMaskEx.GetBitmap());
-                }
-                else
-                {
-                    aBmpEx = BitmapEx(aColorBmp, aBmpEx.GetMask());
-                }
-            }
-            else if (!!aBmpEx)
-            {
-                if (GetDrawMode() & DrawModeFlags::GrayBitmap)
-                    aBmpEx.Convert(BmpConversion::N8BitGreys);
-            }
-        }
-
-        if (mpMetaFile)
-        {
-            switch (nAction)
-            {
-                case MetaActionType::BMPEX:
-                    mpMetaFile->AddAction(new MetaBmpExAction(rDestPt, aBmpEx));
-                    break;
-
-                case MetaActionType::BMPEXSCALE:
-                    mpMetaFile->AddAction(new MetaBmpExScaleAction(rDestPt, rDestSize, aBmpEx));
-                    break;
-
-                case MetaActionType::BMPEXSCALEPART:
-                    mpMetaFile->AddAction(new MetaBmpExScalePartAction(
-                        rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmpEx));
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
-        if (!IsDeviceOutputNecessary())
-            return;
-
-        if (!mpGraphics && !AcquireGraphics())
-            return;
-
-        if (mbInitClipRegion)
-            InitClipRegion();
-
-        if (mbOutputClipped)
-            return;
-
-        DrawTransparentBitmapEx(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmpEx);
-    }
-}
-
-BitmapEx OutputDevice::GetBitmapEx(const Point& rSrcPt, const Size& rSize) const
-{
-    // #110958# Extract alpha value from VDev, if any
-    if (mpAlphaVDev)
-    {
-        Bitmap aAlphaBitmap(mpAlphaVDev->GetBitmap(rSrcPt, rSize));
-
-        // ensure 8 bit alpha
-        if (aAlphaBitmap.GetBitCount() > 8)
-            aAlphaBitmap.Convert(BmpConversion::N8BitNoConversion);
-
-        return BitmapEx(GetBitmap(rSrcPt, rSize), AlphaMask(aAlphaBitmap));
+        DrawRect(tools::Rectangle(rDestPt, rDestSize));
+        return;
     }
 
-    return RenderContext2::GetBitmapEx(rSrcPt, rSize);
+    DrawTransparentBitmapEx(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmapEx, nAction);
 }
 
 void OutputDevice::DrawTransparentBitmapEx(const Point& rDestPt, const Size& rDestSize,
                                            const Point& rSrcPtPixel, const Size& rSrcSizePixel,
-                                           BitmapEx& rBitmapEx)
+                                           BitmapEx const& rBitmapEx, const MetaActionType nAction)
 {
+    BitmapEx aBmpEx(rBitmapEx);
+
+    if (GetDrawMode()
+        & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap | DrawModeFlags::GrayBitmap))
+    {
+        if (GetDrawMode() & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap))
+        {
+            Bitmap aColorBmp(aBmpEx.GetSizePixel(), 1);
+            sal_uInt8 cCmpVal;
+
+            if (GetDrawMode() & DrawModeFlags::BlackBitmap)
+                cCmpVal = 0;
+            else
+                cCmpVal = 255;
+
+            aColorBmp.Erase(Color(cCmpVal, cCmpVal, cCmpVal));
+
+            if (aBmpEx.IsAlpha())
+            {
+                // Create one-bit mask out of alpha channel, by
+                // thresholding it at alpha=0.5. As
+                // DRAWMODE_BLACK/WHITEBITMAP requires monochrome
+                // output, having alpha-induced grey levels is not
+                // acceptable.
+                BitmapEx aMaskEx(aBmpEx.GetAlpha().GetBitmap());
+                BitmapFilter::Filter(aMaskEx, BitmapMonochromeFilter(129));
+                aBmpEx = BitmapEx(aColorBmp, aMaskEx.GetBitmap());
+            }
+            else
+            {
+                aBmpEx = BitmapEx(aColorBmp, aBmpEx.GetMask());
+            }
+        }
+        else if (!!aBmpEx)
+        {
+            if (GetDrawMode() & DrawModeFlags::GrayBitmap)
+                aBmpEx.Convert(BmpConversion::N8BitGreys);
+        }
+    }
+
+    if (mpMetaFile)
+    {
+        switch (nAction)
+        {
+            case MetaActionType::BMPEX:
+                mpMetaFile->AddAction(new MetaBmpExAction(rDestPt, aBmpEx));
+                break;
+
+            case MetaActionType::BMPEXSCALE:
+                mpMetaFile->AddAction(new MetaBmpExScaleAction(rDestPt, rDestSize, aBmpEx));
+                break;
+
+            case MetaActionType::BMPEXSCALEPART:
+                mpMetaFile->AddAction(new MetaBmpExScalePartAction(rDestPt, rDestSize, rSrcPtPixel,
+                                                                   rSrcSizePixel, aBmpEx));
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    if (!IsDeviceOutputNecessary())
+        return;
+
+    if (!mpGraphics && !AcquireGraphics())
+        return;
+
+    if (mbInitClipRegion)
+        InitClipRegion();
+
+    if (mbOutputClipped)
+        return;
+
     assert(!is_double_buffered_window());
 
-    if (rBitmapEx.IsAlpha())
+    if (aBmpEx.IsAlpha())
     {
-        DrawTransparentAlphaBitmap(rBitmapEx.GetBitmap(), rBitmapEx.GetAlpha(), rDestPt, rDestSize,
+        DrawTransparentAlphaBitmap(aBmpEx.GetBitmap(), aBmpEx.GetAlpha(), rDestPt, rDestSize,
                                    rSrcPtPixel, rSrcSizePixel);
     }
-    else if (!!rBitmapEx)
+    else if (!!aBmpEx)
     {
         SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(),
                            rSrcSizePixel.Height(), maGeometry.LogicXToDevicePixel(rDestPt.X()),
@@ -223,16 +222,16 @@ void OutputDevice::DrawTransparentBitmapEx(const Point& rDestPt, const Size& rDe
                            maGeometry.LogicWidthToDevicePixel(rDestSize.Width()),
                            maGeometry.LogicHeightToDevicePixel(rDestSize.Height()));
 
-        const BmpMirrorFlags nMirrFlags = AdjustTwoRect(aPosAry, rBitmapEx.GetSizePixel());
+        const BmpMirrorFlags nMirrFlags = AdjustTwoRect(aPosAry, aBmpEx.GetSizePixel());
 
         if (aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth
             && aPosAry.mnDestHeight)
         {
             if (nMirrFlags != BmpMirrorFlags::NONE)
-                rBitmapEx.Mirror(nMirrFlags);
+                aBmpEx.Mirror(nMirrFlags);
 
-            const SalBitmap* pSalSrcBmp = rBitmapEx.ImplGetBitmapSalBitmap().get();
-            std::shared_ptr<SalBitmap> xMaskBmp = rBitmapEx.ImplGetMaskSalBitmap();
+            const SalBitmap* pSalSrcBmp = aBmpEx.ImplGetBitmapSalBitmap().get();
+            std::shared_ptr<SalBitmap> xMaskBmp = aBmpEx.ImplGetMaskSalBitmap();
 
             if (xMaskBmp)
             {
@@ -315,7 +314,7 @@ void OutputDevice::DrawTransparentBitmapEx(const Point& rDestPt, const Size& rDe
                 // the transparency mask of itself
                 if (mpAlphaVDev)
                     mpAlphaVDev->DrawBitmapEx(rDestPt, rDestSize,
-                                              BitmapEx(rBitmapEx.GetMask(), rBitmapEx.GetMask()));
+                                              BitmapEx(aBmpEx.GetMask(), aBmpEx.GetMask()));
             }
             else
             {
