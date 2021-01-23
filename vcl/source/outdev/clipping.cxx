@@ -34,11 +34,6 @@ void OutputDevice::SaveBackground(VirtualDevice& rSaveDevice,
    rSaveDevice.DrawOutDev(Point(), rBackgroundSize, rPos, rSize, *this);
 }
 
-vcl::Region OutputDevice::GetClipRegion() const
-{
-    return maGeometry.PixelToLogic( maRegion );
-}
-
 void OutputDevice::SetClipRegion()
 {
 
@@ -90,7 +85,7 @@ bool OutputDevice::SelectClipRegion( const vcl::Region& rRegion, SalGraphics* pG
 void OutputDevice::MoveClipRegion( tools::Long nHorzMove, tools::Long nVertMove )
 {
 
-    if ( mbClipRegion )
+    if (IsClipRegion())
     {
         if( mpMetaFile )
             mpMetaFile->AddAction( new MetaMoveClipRegionAction( nHorzMove, nVertMove ) );
@@ -112,7 +107,7 @@ void OutputDevice::IntersectClipRegion( const tools::Rectangle& rRect )
 
     tools::Rectangle aRect = maGeometry.LogicToPixel( rRect );
     maRegion.Intersect( aRect );
-    mbClipRegion        = true;
+    SetClipRegionFlag(true);
     mbInitClipRegion    = true;
 
     if( mpAlphaVDev )
@@ -129,7 +124,7 @@ void OutputDevice::IntersectClipRegion( const vcl::Region& rRegion )
 
         vcl::Region aRegion = maGeometry.LogicToPixel( rRegion );
         maRegion.Intersect( aRegion );
-        mbClipRegion        = true;
+        SetClipRegionFlag(true);
         mbInitClipRegion    = true;
     }
 
@@ -141,7 +136,7 @@ void OutputDevice::InitClipRegion()
 {
     DBG_TESTSOLARMUTEX();
 
-    if ( mbClipRegion )
+    if (IsClipRegion())
     {
         if ( maRegion.IsEmpty() )
         {
@@ -192,11 +187,6 @@ vcl::Region OutputDevice::ClipToDeviceBounds(vcl::Region aRegion) const
     return aRegion;
 }
 
-vcl::Region OutputDevice::GetActiveClipRegion() const
-{
-    return GetClipRegion();
-}
-
 void OutputDevice::ClipToPaintRegion(tools::Rectangle& /*rDstRect*/)
 {
     // this is only used in Window, but we still need it as it's called
@@ -209,17 +199,17 @@ void OutputDevice::SetDeviceClipRegion( const vcl::Region* pRegion )
 
     if ( !pRegion )
     {
-        if ( mbClipRegion )
+        if (IsClipRegion())
         {
-            maRegion            = vcl::Region(true);
-            mbClipRegion        = false;
+            maRegion = vcl::Region(true);
+            SetClipRegionFlag(false);
             mbInitClipRegion    = true;
         }
     }
     else
     {
         maRegion            = *pRegion;
-        mbClipRegion        = true;
+        SetClipRegionFlag(true);
         mbInitClipRegion    = true;
     }
 }

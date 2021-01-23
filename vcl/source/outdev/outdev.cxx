@@ -51,8 +51,7 @@ namespace {
 // Begin initializer and accessor public functions
 
 OutputDevice::OutputDevice(OutDevType eOutDevType) :
-    meOutDevType(eOutDevType),
-    maRegion(true)
+    meOutDevType(eOutDevType)
 {
     mpGraphics                      = nullptr;
     mpUnoGraphicsList               = nullptr;
@@ -73,7 +72,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
         mnTextLayoutMode            = ComplexTextLayoutFlags::BiDiRtl | ComplexTextLayoutFlags::TextOriginLeft;
 
     meOutDevViewType                = OutDevViewType::DontKnow;
-    mbClipRegion                    = false;
     mbBackground                    = false;
     mbOutput                        = true;
     mbDevOutput                     = false;

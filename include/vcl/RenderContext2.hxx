@@ -18,6 +18,7 @@
 #include <vcl/bitmapex.hxx>
 #include <vcl/font.hxx>
 #include <vcl/mapmod.hxx>
+#include <vcl/region.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/vclreferencebase.hxx>
 #include <vcl/AntialiasingFlags.hxx>
@@ -179,6 +180,10 @@ public:
     virtual Bitmap GetBitmap(const Point& rSrcPt, const Size& rSize) const;
     virtual BitmapEx GetBitmapEx(const Point& rSrcPt, const Size& rSize) const;
 
+    bool IsClipRegion() const;
+    vcl::Region GetClipRegion() const;
+    virtual vcl::Region GetActiveClipRegion() const;
+
 protected:
     void dispose();
 
@@ -231,6 +236,8 @@ protected:
     mutable SalGraphics* mpGraphics;
     std::unique_ptr<AllSettings> mxSettings;
 
+    void SetClipRegionFlag(bool bFlag);
+
     // TODO eventually make these private when all text/font functions migrated from
     // OutputDevice to RenderContext2
     Color maTextLineColor;
@@ -239,6 +246,7 @@ protected:
     LanguageType meTextLanguage;
     Geometry maGeometry;
     MapMode maMapMode;
+    vcl::Region maRegion; ///< contains the clip region, see SetClipRegion(...)
 
 private:
     Color maTextColor;
@@ -256,6 +264,7 @@ private:
     mutable bool mbInitTextColor : 1;
     mutable bool mbInitFont : 1;
     mutable bool mbNewFont : 1;
+    mutable bool mbClipRegion : 1;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

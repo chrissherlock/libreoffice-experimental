@@ -746,7 +746,7 @@ private:
                                         ImplGetCanvas( bool bSpriteCanvas ) const;
 
 public:
-    virtual vcl::Region                 GetActiveClipRegion() const override;
+    vcl::Region                 GetActiveClipRegion() const override;
     virtual vcl::Region                 GetOutputBoundsClipRegion() const override;
 
 protected:

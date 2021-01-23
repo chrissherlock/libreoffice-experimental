@@ -1716,14 +1716,17 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
         else
             ImplClipChildren( aRegion );
     }
-    if ( mbClipRegion && (nFlags & ScrollFlags::UseClipRegion) )
+
+    if ( IsClipRegion() && (nFlags & ScrollFlags::UseClipRegion) )
         aRegion.Intersect( maRegion );
+
     if ( !aRegion.IsEmpty() )
     {
         if ( mpWindowImpl->mpWinData )
         {
             if ( mpWindowImpl->mbFocusVisible )
                 ImplInvertFocus( *mpWindowImpl->mpWinData->mpFocusRect );
+
             if ( mpWindowImpl->mbTrackVisible && (mpWindowImpl->mpWinData->mnTrackFlags & ShowTrackFlags::TrackWindow) )
                 InvertTracking( *mpWindowImpl->mpWinData->mpTrackRect, mpWindowImpl->mpWinData->mnTrackFlags );
         }

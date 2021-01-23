@@ -282,13 +282,11 @@ private:
     mutable tools::Long                    mnEmphasisDescent;
     const OutDevType                meOutDevType;
     OutDevViewType                  meOutDevViewType;
-    vcl::Region                     maRegion;           // contains the clip region, see SetClipRegion(...)
     Color                           maTextColor;
     RasterOp                        meRasterOp;
     Wallpaper                       maBackground;
     Point                           maRefPoint;
 
-    mutable bool                    mbClipRegion : 1;
     mutable bool                    mbBackground : 1;
     mutable bool                    mbOutput : 1;
     mutable bool                    mbDevOutput : 1;
@@ -483,19 +481,14 @@ protected:
     ///@{
 
 public:
-
-    vcl::Region                 GetClipRegion() const;
     void                        SetClipRegion();
     void                        SetClipRegion( const vcl::Region& rRegion );
     bool                        SelectClipRegion( const vcl::Region&, SalGraphics* pGraphics = nullptr );
-
-    bool                        IsClipRegion() const { return mbClipRegion; }
 
     void                        MoveClipRegion( tools::Long nHorzMove, tools::Long nVertMove );
     void                        IntersectClipRegion( const tools::Rectangle& rRect );
     void                        IntersectClipRegion( const vcl::Region& rRegion );
 
-    virtual vcl::Region         GetActiveClipRegion() const;
     virtual vcl::Region         GetOutputBoundsClipRegion() const;
 
 protected:

@@ -42,7 +42,9 @@ void Window::InitClipRegion()
     vcl::Region  aRegion;
 
     if ( mpWindowImpl->mbInPaint )
+    {
         aRegion = *(mpWindowImpl->mpPaintRegion);
+    }
     else
     {
         aRegion = *(ImplGetWinChildClipRegion());
@@ -51,10 +53,14 @@ void Window::InitClipRegion()
         if( ImplIsAntiparallel() )
             ReMirror ( aRegion );
     }
-    if ( mbClipRegion )
+
+    if (IsClipRegion())
         aRegion.Intersect( maGeometry.PixelToDevicePixel( maRegion ) );
+
     if ( aRegion.IsEmpty() )
+    {
         mbOutputClipped = true;
+    }
     else
     {
         mbOutputClipped = false;
@@ -141,7 +147,7 @@ vcl::Region Window::GetActiveClipRegion() const
         aRegion.Move( -GetXOffsetInPixels(), -GetYOffsetInPixels() );
     }
 
-    if ( mbClipRegion )
+    if (IsClipRegion())
         aRegion.Intersect( maRegion );
 
     return maGeometry.PixelToLogic( aRegion );

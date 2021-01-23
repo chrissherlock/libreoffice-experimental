@@ -108,7 +108,7 @@ void OutputDevice::Push( PushFlags nFlags )
         rState.mbMapActive = IsMapModeEnabled();
     }
 
-    if (nFlags & PushFlags::CLIPREGION && mbClipRegion)
+    if (nFlags & PushFlags::CLIPREGION && IsClipRegion())
         rState.mpClipRegion.reset( new vcl::Region( maRegion ) );
 
     if (nFlags & PushFlags::REFPOINT && mbRefPoint)
