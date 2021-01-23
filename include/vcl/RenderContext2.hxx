@@ -15,7 +15,7 @@
 #include <i18nlangtag/lang.h>
 
 #include <vcl/dllapi.h>
-#include <vcl/bitmap.hxx>
+#include <vcl/bitmapex.hxx>
 #include <vcl/font.hxx>
 #include <vcl/mapmod.hxx>
 #include <vcl/settings.hxx>
@@ -177,6 +177,7 @@ public:
     basegfx::B2DHomMatrix GetDeviceTransformation() const;
 
     virtual Bitmap GetBitmap(const Point& rSrcPt, const Size& rSize) const;
+    virtual BitmapEx GetBitmapEx(const Point& rSrcPt, const Size& rSize) const;
 
 protected:
     void dispose();

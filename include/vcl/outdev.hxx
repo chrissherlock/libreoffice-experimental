@@ -1234,7 +1234,7 @@ public:
 
     /** Query extended bitmap (with alpha channel, if available).
      */
-    BitmapEx                    GetBitmapEx( const Point& rSrcPt, const Size& rSize ) const;
+    BitmapEx GetBitmapEx(Point const& rSrcPt, Size const& rSize) const override;
 
 
     /** Draw BitmapEx transformed

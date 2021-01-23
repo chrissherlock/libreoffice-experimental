@@ -200,8 +200,8 @@ BitmapEx OutputDevice::GetBitmapEx(const Point& rSrcPt, const Size& rSize) const
 
         return BitmapEx(GetBitmap(rSrcPt, rSize), AlphaMask(aAlphaBitmap));
     }
-    else
-        return BitmapEx(GetBitmap(rSrcPt, rSize));
+
+    return RenderContext2::GetBitmapEx(rSrcPt, rSize);
 }
 
 void OutputDevice::DrawTransparentBitmapEx(const Point& rDestPt, const Size& rDestSize,
