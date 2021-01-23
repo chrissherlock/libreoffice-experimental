@@ -186,6 +186,8 @@ public:
 
     bool                IsScreenComp() const override { return mbScreenComp; }
 
+    Bitmap ClipBitmap(Point const& rPos, Size const& rSize, tools::Rectangle const& rOrigRect);
+
 private:
     SAL_DLLPRIVATE void ImplSetReferenceDevice( RefDevMode, sal_Int32 i_nDPIX, sal_Int32 i_nDPIY );
 
@@ -193,7 +195,6 @@ protected:
     virtual bool        UsePolyPolygonForComplexGradient() override;
 
     virtual tools::Long        GetFontExtLeading() const override;
-
 };
 
 #endif // INCLUDED_VCL_VIRDEV_HXX

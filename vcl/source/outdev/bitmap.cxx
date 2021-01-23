@@ -252,38 +252,10 @@ Bitmap OutputDevice::GetBitmap(const Point& rSrcPt, const Size& rSize) const
             // Bitmap to the correct position.
             ScopedVclPtrInstance<VirtualDevice> aVDev(*this);
 
-            if (aVDev->SetOutputSizePixel(aRect.GetSize()))
-            {
-                if (aVDev->mpGraphics || aVDev->AcquireGraphics())
-                {
-                    if ((aBmpSize.Width() > 0) && (aBmpSize.Height() > 0))
-                    {
-                        SalTwoRect aPosAry(aBmpPt.X(), aBmpPt.Y(), aBmpSize.Width(),
-                                           aBmpSize.Height(),
-                                           (aRect.Left() < GetXOffsetInPixels())
-                                               ? (GetXOffsetInPixels() - aRect.Left())
-                                               : 0L,
-                                           (aRect.Top() < GetYOffsetInPixels())
-                                               ? (GetYOffsetInPixels() - aRect.Top())
-                                               : 0L,
-                                           aBmpSize.Width(), aBmpSize.Height());
-                        aVDev->mpGraphics->CopyBits(aPosAry, *mpGraphics, *this, *this);
-                    }
+            aBmp = aVDev->ClipBitmap(aBmpPt, aBmpSize, aRect);
 
-                    SAL_WARN_IF(aBmpSize.Width() <= 0 || aBmpSize.Height() <= 0, "vcl.gdi",
-                                "CopyBits with zero or negative width or height");
-
-                    aBmp = aVDev->GetBitmap(Point(), aVDev->GetSizeInPixels());
-                }
-                else
-                {
-                    bClipped = false;
-                }
-            }
-            else
-            {
-                bClipped = false;
-            }
+            if (!aBmp.IsEmpty())
+                bClipped = true;
         }
 
         if (!bClipped && (mpGraphics || AcquireGraphics()))

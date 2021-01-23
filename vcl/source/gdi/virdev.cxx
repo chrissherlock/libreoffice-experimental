@@ -519,4 +519,37 @@ tools::Long VirtualDevice::GetFontExtLeading() const
     return mpFontInstance->mxFontMetric->GetExternalLeading();
 }
 
+Bitmap VirtualDevice::ClipBitmap(Point const& rPos, Size const& rSize, tools::Rectangle const& rOrigRect)
+{
+    Bitmap aBmp;
+
+    if (SetOutputSizePixel(rOrigRect.GetSize()))
+    {
+        if (mpGraphics || AcquireGraphics())
+        {
+            if ((rSize.Width() > 0) && (rSize.Height() > 0))
+            {
+                SalTwoRect aPosAry(rPos.X(), rPos.Y(), rSize.Width(),
+                                   rSize.Height(),
+                                   (rOrigRect.Left() < GetXOffsetInPixels())
+                                       ? (GetXOffsetInPixels() - rOrigRect.Left())
+                                       : 0L,
+                                   (rOrigRect.Top() < GetYOffsetInPixels())
+                                       ? (GetYOffsetInPixels() - rOrigRect.Top())
+                                       : 0L,
+                                   rSize.Width(), rSize.Height());
+
+                mpGraphics->CopyBits(aPosAry, *mpGraphics, *this, *this);
+            }
+
+            SAL_WARN_IF(rSize.Width() <= 0 || rSize.Height() <= 0, "vcl.gdi",
+                        "CopyBits with zero or negative width or height");
+
+            aBmp = GetBitmap(Point(), GetSizeInPixels());
+        }
+    }
+
+    return aBmp;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
