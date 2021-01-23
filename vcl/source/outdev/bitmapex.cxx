@@ -202,16 +202,17 @@ void OutputDevice::DrawAlphaBitmapEx(Point const& rDestPt, Size const& rDestSize
         if (nMirrFlags != BmpMirrorFlags::NONE)
             aBmpEx.Mirror(nMirrFlags);
 
-        if (!DrawMaskedAlphaBitmapEx(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmpEx))
-        {
-            const SalBitmap* pSalSrcBmp = aBmpEx.ImplGetBitmapSalBitmap().get();
-            mpGraphics->DrawBitmap(aPosAry, *pSalSrcBmp, *this);
+        if (DrawMaskedAlphaBitmapEx(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmpEx))
+            return;
 
-            // #i32109#: Make bitmap area opaque
-            if (mpAlphaVDev)
-                mpAlphaVDev->ImplFillOpaqueRectangle(tools::Rectangle(rDestPt, rDestSize));
-        }
+        const SalBitmap* pSalSrcBmp = aBmpEx.ImplGetBitmapSalBitmap().get();
+        mpGraphics->DrawBitmap(aPosAry, *pSalSrcBmp, *this);
     }
+
+    // #i32109#: Make bitmap area opaque
+    if (mpAlphaVDev && aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth
+        && aPosAry.mnDestHeight)
+        mpAlphaVDev->ImplFillOpaqueRectangle(tools::Rectangle(rDestPt, rDestSize));
 }
 
 bool OutputDevice::DrawMaskedAlphaBitmapEx(Point const& rDestPt, Size const& rDestSize,
