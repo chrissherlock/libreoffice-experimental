@@ -240,12 +240,9 @@ void OutputDevice::DrawAlphaBitmapEx(Point const& rDestPt, Size const& rDestSize
         {
             assert(pSalSrcBmp);
 
-            if (mpGraphics->DrawAlphaBitmap(aPosAry, *pSalSrcBmp, *xMaskBmp, *this))
-            {
-                // tried to paint as alpha directly. If this worked, we are done (except
-                // alpha, see below)
-            }
-            else
+            // tried to paint as alpha directly. If this worked, we are done (except
+            // alpha, see below)
+            if (!mpGraphics->DrawAlphaBitmap(aPosAry, *pSalSrcBmp, *xMaskBmp, *this))
             {
                 // #4919452# reduce operation area to bounds of
                 // cliprect. since masked transparency involves
