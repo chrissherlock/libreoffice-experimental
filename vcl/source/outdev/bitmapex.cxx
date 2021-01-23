@@ -265,36 +265,26 @@ bool OutputDevice::DrawMaskedAlphaBitmapEx(Point const& rDestPt, Size const& rDe
 
     assert(pSalSrcBmp);
 
-    // tried to paint as alpha directly. If this worked, we are done (except
-    // alpha, see below)
+    // try to paint as alpha directly. If this worked, we are done (except alpha, see below)
     if (!mpGraphics->DrawAlphaBitmap(aPosAry, *pSalSrcBmp, *xMaskBmp, *this))
     {
-        // #4919452# reduce operation area to bounds of
-        // cliprect. since masked transparency involves
-        // creation of a large vdev and copying the screen
-        // content into that (slooow read from framebuffer),
-        // that should considerably increase performance for
-        // large bitmaps and small clippings.
+        // #4919452# reduce operation area to bounds of cliprect. since masked transparency involves
+        // creation of a large vdev and copying the screen content into that (slooow read from
+        // framebuffer), that should considerably increase performance for large bitmaps and small
+        // clippings.
 
-        // Note that this optimization is a workaround for a
-        // Writer peculiarity, namely, to decompose background
-        // graphics into myriads of disjunct, tiny
-        // rectangles. That otherwise kills us here, since for
-        // transparent output, SAL always prepares the whole
-        // bitmap, if aPosAry contains the whole bitmap (and
-        // it's _not_ to blame for that).
+        // Note that this optimization is a workaround for a Writer peculiarity, namely, to decompose
+        // background graphics into myriads of disjunct, tiny rectangles. That otherwise kills us
+        // here, since for transparent output, SAL always prepares the whole bitmap, if aPosAry
+        // contains the whole bitmap (and it's _not_ to blame for that).
 
-        // Note the call to ImplPixelToDevicePixel(), since
-        // aPosAry already contains the mnOutOff-offsets, they
-        // also have to be applied to the region
+        // Note the call to ImplPixelToDevicePixel(), since aPosAry already contains the
+        // mnOutOff-offsets, they also have to be applied to the region
         tools::Rectangle aClipRegionBounds(maGeometry.PixelToDevicePixel(maRegion).GetBoundRect());
 
-        // TODO: Also respect scaling (that's a bit tricky,
-        // since the source points have to move fractional
-        // amounts (which is not possible, thus has to be
-        // emulated by increases copy area)
-        // const double nScaleX( aPosAry.mnDestWidth / aPosAry.mnSrcWidth );
-        // const double nScaleY( aPosAry.mnDestHeight / aPosAry.mnSrcHeight );
+        // TODO: Also respect scaling (that's a bit tricky, since the source points have to move
+        // fractional amounts (which is not possible, thus has to be emulated by increases of the
+        // copy area)
 
         // for now, only identity scales allowed
         if (!aClipRegionBounds.IsEmpty() && aPosAry.mnDestWidth == aPosAry.mnSrcWidth
@@ -305,10 +295,8 @@ bool OutputDevice::DrawMaskedAlphaBitmapEx(Point const& rDestPt, Size const& rDe
                 aPosAry.mnDestX, aPosAry.mnDestY, aPosAry.mnDestX + aPosAry.mnDestWidth - 1,
                 aPosAry.mnDestY + aPosAry.mnDestHeight - 1));
 
-            // Note: I could theoretically optimize away the
-            // DrawBitmap below, if the region is empty
-            // here. Unfortunately, cannot rule out that
-            // somebody relies on the side effects.
+            // Note: I could theoretically optimize away the DrawBitmap below, if the region is empty
+            // here. Unfortunately, cannot rule out that somebody relies on the side effects.
             if (!aClipRegionBounds.IsEmpty())
             {
                 aPosAry.mnSrcX += aClipRegionBounds.Left() - aPosAry.mnDestX;
@@ -326,15 +314,12 @@ bool OutputDevice::DrawMaskedAlphaBitmapEx(Point const& rDestPt, Size const& rDe
         mpGraphics->DrawBitmap(aPosAry, *pSalSrcBmp, *xMaskBmp, *this);
     }
 
-    // #110958# Paint mask to alpha channel. Luckily, the
-    // black and white representation of the mask maps to
-    // the alpha channel
+    // #110958# Paint mask to alpha channel. Luckily, the black and white representation of the mask
+    // maps to the alpha channel
 
-    // #i25167# Restrict mask painting to _opaque_ areas
-    // of the mask, otherwise we spoil areas where no
-    // bitmap content was ever visible. Interestingly
-    // enough, this can be achieved by taking the mask as
-    // the transparency mask of itself
+    // #i25167# Restrict mask painting to _opaque_ areas of the mask, otherwise we spoil areas where
+    // no bitmap content was ever visible. Interestingly enough, this can be achieved by taking the
+    // mask as the transparency mask of itself
     if (mpAlphaVDev)
         mpAlphaVDev->DrawBitmapEx(rDestPt, rDestSize, BitmapEx(aBmpEx.GetMask(), aBmpEx.GetMask()));
 
