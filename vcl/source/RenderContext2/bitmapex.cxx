@@ -17,13 +17,31 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
 */
 
-#include <vcl/RenderContext2.hxx>
+#include <vcl/outdev.hxx>
 #include <vcl/canvastools.hxx>
+
+#include <salgdi.hxx>
 
 BitmapEx RenderContext2::GetBitmapEx(Point const& rSrcPt, Size const& rSize) const
 {
     return BitmapEx(GetBitmap(rSrcPt, rSize));
 }
+
+bool RenderContext2::DrawTransformBitmapExDirect(basegfx::B2DHomMatrix const& aFullTransform,
+                                                 BitmapEx const& rBitmapEx)
+{
+    SalBitmap* pSalAlphaBmp = rBitmapEx.GetBitmap().ImplGetSalBitmap().get();
+
+    // try to paint directly
+    const basegfx::B2DPoint aNull(aFullTransform * basegfx::B2DPoint(0.0, 0.0));
+    const basegfx::B2DPoint aTopX(aFullTransform * basegfx::B2DPoint(1.0, 0.0));
+    const basegfx::B2DPoint aTopY(aFullTransform * basegfx::B2DPoint(0.0, 1.0));
+    SalBitmap* pSalSrcBmp = rBitmapEx.GetBitmap().ImplGetSalBitmap().get();
+
+    OutputDevice const* pOutDev = dynamic_cast<OutputDevice const*>(this);
+    return mpGraphics->DrawTransformedBitmap(aNull, aTopX, aTopY, *pSalSrcBmp, pSalAlphaBmp,
+                                             *pOutDev);
+};
 
 bool RenderContext2::TransformAndReduceBitmapExToTargetRange(
     const basegfx::B2DHomMatrix& aFullTransform, basegfx::B2DRange& aVisibleRange,

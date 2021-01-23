@@ -345,12 +345,10 @@ bool OutputDevice::DrawMaskedAlphaBitmapEx(Point const& rDestPt, Size const& rDe
     return false;
 }
 
-bool OutputDevice::DrawTransformBitmapExDirect(const basegfx::B2DHomMatrix& aFullTransform,
-                                               const BitmapEx& rBitmapEx)
+bool OutputDevice::DrawTransformBitmapExDirect(basegfx::B2DHomMatrix const& aFullTransform,
+                                               BitmapEx const& rBitmapEx)
 {
     assert(!is_double_buffered_window());
-
-    bool bDone = false;
 
     Bitmap aAlphaBitmap;
 
@@ -367,16 +365,8 @@ bool OutputDevice::DrawTransformBitmapExDirect(const basegfx::B2DHomMatrix& aFul
         aAlphaBitmap.Erase(COL_BLACK); // opaque
     }
 
-    SalBitmap* pSalAlphaBmp = aAlphaBitmap.ImplGetSalBitmap().get();
-
-    // try to paint directly
-    const basegfx::B2DPoint aNull(aFullTransform * basegfx::B2DPoint(0.0, 0.0));
-    const basegfx::B2DPoint aTopX(aFullTransform * basegfx::B2DPoint(1.0, 0.0));
-    const basegfx::B2DPoint aTopY(aFullTransform * basegfx::B2DPoint(0.0, 1.0));
-    SalBitmap* pSalSrcBmp = rBitmapEx.GetBitmap().ImplGetSalBitmap().get();
-
-    bDone
-        = mpGraphics->DrawTransformedBitmap(aNull, aTopX, aTopY, *pSalSrcBmp, pSalAlphaBmp, *this);
+    bool bDone
+        = RenderContext2::DrawTransformBitmapExDirect(aFullTransform, BitmapEx(aAlphaBitmap));
 
     if (mpAlphaVDev)
     {

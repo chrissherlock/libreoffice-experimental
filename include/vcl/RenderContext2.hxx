@@ -180,6 +180,9 @@ public:
     virtual Bitmap GetBitmap(const Point& rSrcPt, const Size& rSize) const;
     virtual BitmapEx GetBitmapEx(const Point& rSrcPt, const Size& rSize) const;
 
+    virtual bool DrawTransformBitmapExDirect(basegfx::B2DHomMatrix const& aFullTransform,
+                                             BitmapEx const& rBitmapEx);
+
     /** Transform and reduce the area that needs to be drawn of the bitmap and return the new
         visible range and the maximum area.
 
