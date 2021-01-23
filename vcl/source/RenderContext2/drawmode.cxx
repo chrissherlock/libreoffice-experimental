@@ -17,9 +17,10 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <vcl/settings.hxx>
+#include <vcl/BitmapMonochromeFilter.hxx>
 #include <vcl/DrawModeFlags.hxx>
 #include <vcl/RenderContext2.hxx>
+#include <vcl/settings.hxx>
 
 #include <drawmode.hxx>
 
@@ -192,6 +193,43 @@ vcl::Font GetDrawModeFont(vcl::Font const& rFont, DrawModeFlags nDrawMode,
     }
 
     return aFont;
+}
+
+BitmapEx GetDrawModeBitmapEx(BitmapEx const& rBitmapEx, DrawModeFlags nDrawMode)
+{
+    BitmapEx aBmpEx(rBitmapEx);
+
+    if (nDrawMode & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap))
+    {
+        Bitmap aColorBmp(aBmpEx.GetSizePixel(), 1);
+        sal_uInt8 cCmpVal;
+
+        if (nDrawMode & DrawModeFlags::BlackBitmap)
+            cCmpVal = 0;
+        else
+            cCmpVal = 255;
+
+        aColorBmp.Erase(Color(cCmpVal, cCmpVal, cCmpVal));
+
+        if (aBmpEx.IsAlpha())
+        {
+            // Create one-bit mask out of alpha channel, by thresholding it at alpha=0.5. As
+            // DRAWMODE_BLACK/WHITEBITMAP requires monochrome output, having alpha-induced
+            // grey levels is not acceptable.
+            BitmapEx aMaskEx(aBmpEx.GetAlpha().GetBitmap());
+            BitmapFilter::Filter(aMaskEx, BitmapMonochromeFilter(129));
+            aBmpEx = BitmapEx(aColorBmp, aMaskEx.GetBitmap());
+        }
+        else
+        {
+            aBmpEx = BitmapEx(aColorBmp, aBmpEx.GetMask());
+        }
+    }
+
+    if (nDrawMode & DrawModeFlags::GrayBitmap && !!aBmpEx)
+        aBmpEx.Convert(BmpConversion::N8BitGreys);
+
+    return aBmpEx;
 }
 
 DrawModeFlags RenderContext2::GetDrawMode() const { return mnDrawMode; }

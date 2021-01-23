@@ -21,8 +21,9 @@
 
 #include <tools/color.hxx>
 
-#include <vcl/font.hxx>
 #include <vcl/DrawModeFlags.hxx>
+#include <vcl/bitmapex.hxx>
+#include <vcl/font.hxx>
 
 class StyleSettings;
 
@@ -37,5 +38,7 @@ Color GetDrawModeTextColor(Color const& rColor, DrawModeFlags nDrawMode,
 
 vcl::Font GetDrawModeFont(vcl::Font const& rFont, DrawModeFlags nDrawMode,
                           StyleSettings const& rStyleSettings);
+
+BitmapEx GetDrawModeBitmapEx(BitmapEx const& rBitmapEx, DrawModeFlags nDrawMode);
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

@@ -43,6 +43,7 @@
 
 #include <bitmap/BitmapWriteAccess.hxx>
 #include <bitmap/bmpfast.hxx>
+#include <drawmode.hxx>
 #include <salgdi.hxx>
 #include <salbmp.hxx>
 
@@ -133,39 +134,7 @@ void OutputDevice::DrawTransparentBitmapEx(const Point& rDestPt, const Size& rDe
                                            const Point& rSrcPtPixel, const Size& rSrcSizePixel,
                                            BitmapEx const& rBitmapEx, const MetaActionType nAction)
 {
-    BitmapEx aBmpEx(rBitmapEx);
-
-    if (GetDrawMode() & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap))
-    {
-        Bitmap aColorBmp(aBmpEx.GetSizePixel(), 1);
-        sal_uInt8 cCmpVal;
-
-        if (GetDrawMode() & DrawModeFlags::BlackBitmap)
-            cCmpVal = 0;
-        else
-            cCmpVal = 255;
-
-        aColorBmp.Erase(Color(cCmpVal, cCmpVal, cCmpVal));
-
-        if (aBmpEx.IsAlpha())
-        {
-            // Create one-bit mask out of alpha channel, by
-            // thresholding it at alpha=0.5. As
-            // DRAWMODE_BLACK/WHITEBITMAP requires monochrome
-            // output, having alpha-induced grey levels is not
-            // acceptable.
-            BitmapEx aMaskEx(aBmpEx.GetAlpha().GetBitmap());
-            BitmapFilter::Filter(aMaskEx, BitmapMonochromeFilter(129));
-            aBmpEx = BitmapEx(aColorBmp, aMaskEx.GetBitmap());
-        }
-        else
-        {
-            aBmpEx = BitmapEx(aColorBmp, aBmpEx.GetMask());
-        }
-    }
-
-    if (GetDrawMode() & DrawModeFlags::GrayBitmap && !!aBmpEx)
-        aBmpEx.Convert(BmpConversion::N8BitGreys);
+    BitmapEx aBmpEx(GetDrawModeBitmapEx(rBitmapEx, GetDrawMode()));
 
     if (mpMetaFile)
     {
