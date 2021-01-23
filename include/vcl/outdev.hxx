@@ -1303,6 +1303,13 @@ private:
                                     const Size& rSrcSizePixel,
                                     BitmapEx const& rBitmapEx);
 
+    SAL_DLLPRIVATE bool         DrawMaskedAlphaBitmapEx(
+                                    const Point& rDestPt,
+                                    const Size& rDestSize,
+                                    const Point& rSrcPtPixel,
+                                    const Size& rSrcSizePixel,
+                                    BitmapEx const& rBitmapEx);
+
     SAL_DLLPRIVATE void         DrawTransparentAlphaBitmapSlowPath(
                                     const Bitmap& rBitmap, const AlphaMask& rAlpha,
                                     tools::Rectangle aDstRect, tools::Rectangle aBmpRect,
