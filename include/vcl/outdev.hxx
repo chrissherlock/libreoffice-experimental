@@ -1263,23 +1263,6 @@ protected:
                                     const basegfx::B2DHomMatrix& aFullTransform,
                                     const BitmapEx& rBitmapEx) override;
 
-private:
-
-    SAL_DLLPRIVATE void         DrawTransparentAlphaBitmap(
-                                    const Bitmap& rBmp,
-                                    const AlphaMask& rAlpha,
-                                    const Point& rDestPt,
-                                    const Size& rDestSize,
-                                    const Point& rSrcPtPixel,
-                                    const Size& rSrcSizePixel );
-
-    SAL_DLLPRIVATE void         DrawAlphaBitmapEx(
-                                    const Point& rDestPt,
-                                    const Size& rDestSize,
-                                    const Point& rSrcPtPixel,
-                                    const Size& rSrcSizePixel,
-                                    BitmapEx const& rBitmapEx);
-
     bool                        DrawMaskedAlphaBitmapEx(
                                     const Point& rDestPt,
                                     const Size& rDestSize,
@@ -1287,11 +1270,26 @@ private:
                                     const Size& rSrcSizePixel,
                                     BitmapEx const& rBitmapEx) override;
 
+    void                        DrawAlphaBitmapEx(
+                                    const Point& rDestPt,
+                                    const Size& rDestSize,
+                                    const Point& rSrcPtPixel,
+                                    const Size& rSrcSizePixel,
+                                    BitmapEx const& rBitmapEx) override;
+
+private:
+    SAL_DLLPRIVATE void         DrawTransparentAlphaBitmap(
+                                    const Bitmap& rBmp,
+                                    const AlphaMask& rAlpha,
+                                    const Point& rDestPt,
+                                    const Size& rDestSize,
+                                    const Point& rSrcPtPixel,
+                                    const Size& rSrcSizePixel);
+
     SAL_DLLPRIVATE void         DrawTransparentAlphaBitmapSlowPath(
                                     const Bitmap& rBitmap, const AlphaMask& rAlpha,
                                     tools::Rectangle aDstRect, tools::Rectangle aBmpRect,
                                     Size const & aOutSz, Point const & aOutPt);
-
 
     SAL_DLLPRIVATE void         BlendBitmap(
                                     const SalTwoRect&   rPosAry,

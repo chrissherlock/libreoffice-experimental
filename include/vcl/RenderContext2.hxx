@@ -260,6 +260,10 @@ protected:
                                          Point const& rSrcPtPixel, Size const& rSrcSizePixel,
                                          BitmapEx const& rBitmapEx);
 
+    virtual void DrawAlphaBitmapEx(const Point& rDestPt, const Size& rDestSize,
+                                   const Point& rSrcPtPixel, const Size& rSrcSizePixel,
+                                   BitmapEx const& rBitmapEx);
+
     // TODO eventually make these private when all text/font functions migrated from
     // OutputDevice to RenderContext2
     Color maTextLineColor;

@@ -192,4 +192,34 @@ bool RenderContext2::DrawMaskedAlphaBitmapEx(Point const& rDestPt, Size const& r
     return true;
 }
 
+void RenderContext2::DrawAlphaBitmapEx(Point const& rDestPt, Size const& rDestSize,
+                                       Point const& rSrcPtPixel, Size const& rSrcSizePixel,
+                                       BitmapEx const& rBitmapEx)
+{
+    BitmapEx aBmpEx(rBitmapEx);
+
+    SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(),
+                       rSrcSizePixel.Height(), maGeometry.LogicXToDevicePixel(rDestPt.X()),
+                       maGeometry.LogicYToDevicePixel(rDestPt.Y()),
+                       maGeometry.LogicWidthToDevicePixel(rDestSize.Width()),
+                       maGeometry.LogicHeightToDevicePixel(rDestSize.Height()));
+
+    const BmpMirrorFlags nMirrFlags = AdjustTwoRect(aPosAry, aBmpEx.GetSizePixel());
+
+    if (aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth && aPosAry.mnDestHeight)
+    {
+        if (nMirrFlags != BmpMirrorFlags::NONE)
+            aBmpEx.Mirror(nMirrFlags);
+
+        if (DrawMaskedAlphaBitmapEx(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmpEx))
+            return;
+
+        const SalBitmap* pSalSrcBmp = aBmpEx.ImplGetBitmapSalBitmap().get();
+
+        // temporary till I migrate over to RenderContext2
+        OutputDevice const* pOutDev = dynamic_cast<OutputDevice const*>(this);
+        mpGraphics->DrawBitmap(aPosAry, *pSalSrcBmp, *pOutDev);
+    }
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

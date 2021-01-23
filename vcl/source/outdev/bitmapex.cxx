@@ -187,27 +187,13 @@ void OutputDevice::DrawAlphaBitmapEx(Point const& rDestPt, Size const& rDestSize
                                      Point const& rSrcPtPixel, Size const& rSrcSizePixel,
                                      BitmapEx const& rBitmapEx)
 {
-    BitmapEx aBmpEx(rBitmapEx);
+    RenderContext2::DrawAlphaBitmapEx(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmapEx);
 
     SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(),
                        rSrcSizePixel.Height(), maGeometry.LogicXToDevicePixel(rDestPt.X()),
                        maGeometry.LogicYToDevicePixel(rDestPt.Y()),
                        maGeometry.LogicWidthToDevicePixel(rDestSize.Width()),
                        maGeometry.LogicHeightToDevicePixel(rDestSize.Height()));
-
-    const BmpMirrorFlags nMirrFlags = AdjustTwoRect(aPosAry, aBmpEx.GetSizePixel());
-
-    if (aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth && aPosAry.mnDestHeight)
-    {
-        if (nMirrFlags != BmpMirrorFlags::NONE)
-            aBmpEx.Mirror(nMirrFlags);
-
-        if (DrawMaskedAlphaBitmapEx(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmpEx))
-            return;
-
-        const SalBitmap* pSalSrcBmp = aBmpEx.ImplGetBitmapSalBitmap().get();
-        mpGraphics->DrawBitmap(aPosAry, *pSalSrcBmp, *this);
-    }
 
     // #i32109#: Make bitmap area opaque
     if (mpAlphaVDev && aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth
