@@ -65,29 +65,29 @@ void OutputDevice::DrawBitmap(const Point& rDestPt, const Size& rDestSize, const
         return;
     }
 
+    if (GetDrawMode() & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap))
+    {
+        sal_uInt8 cCmpVal;
+
+        if (GetDrawMode() & DrawModeFlags::BlackBitmap)
+            cCmpVal = 0;
+        else
+            cCmpVal = 255;
+
+        Color aCol(cCmpVal, cCmpVal, cCmpVal);
+        Push(PushFlags::LINECOLOR | PushFlags::FILLCOLOR);
+        SetLineColor(aCol);
+        SetFillColor(aCol);
+        DrawRect(tools::Rectangle(rDestPt, rDestSize));
+        Pop();
+        return;
+    }
+
     Bitmap aBmp(rBitmap);
 
-    if (GetDrawMode()
-        & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap | DrawModeFlags::GrayBitmap))
+    if (GetDrawMode() & DrawModeFlags::GrayBitmap)
     {
-        if (GetDrawMode() & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap))
-        {
-            sal_uInt8 cCmpVal;
-
-            if (GetDrawMode() & DrawModeFlags::BlackBitmap)
-                cCmpVal = 0;
-            else
-                cCmpVal = 255;
-
-            Color aCol(cCmpVal, cCmpVal, cCmpVal);
-            Push(PushFlags::LINECOLOR | PushFlags::FILLCOLOR);
-            SetLineColor(aCol);
-            SetFillColor(aCol);
-            DrawRect(tools::Rectangle(rDestPt, rDestSize));
-            Pop();
-            return;
-        }
-        else if (!!aBmp)
+        if (!!aBmp)
         {
             if (GetDrawMode() & DrawModeFlags::GrayBitmap)
                 aBmp.Convert(BmpConversion::N8BitGreys);
