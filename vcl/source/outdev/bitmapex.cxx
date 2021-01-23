@@ -352,11 +352,6 @@ bool OutputDevice::DrawTransformBitmapExDirect(const basegfx::B2DHomMatrix& aFul
 
     bool bDone = false;
 
-    // try to paint directly
-    const basegfx::B2DPoint aNull(aFullTransform * basegfx::B2DPoint(0.0, 0.0));
-    const basegfx::B2DPoint aTopX(aFullTransform * basegfx::B2DPoint(1.0, 0.0));
-    const basegfx::B2DPoint aTopY(aFullTransform * basegfx::B2DPoint(0.0, 1.0));
-    SalBitmap* pSalSrcBmp = rBitmapEx.GetBitmap().ImplGetSalBitmap().get();
     Bitmap aAlphaBitmap;
 
     if (rBitmapEx.IsTransparent())
@@ -373,6 +368,12 @@ bool OutputDevice::DrawTransformBitmapExDirect(const basegfx::B2DHomMatrix& aFul
     }
 
     SalBitmap* pSalAlphaBmp = aAlphaBitmap.ImplGetSalBitmap().get();
+
+    // try to paint directly
+    const basegfx::B2DPoint aNull(aFullTransform * basegfx::B2DPoint(0.0, 0.0));
+    const basegfx::B2DPoint aTopX(aFullTransform * basegfx::B2DPoint(1.0, 0.0));
+    const basegfx::B2DPoint aTopY(aFullTransform * basegfx::B2DPoint(0.0, 1.0));
+    SalBitmap* pSalSrcBmp = rBitmapEx.GetBitmap().ImplGetSalBitmap().get();
 
     bDone
         = mpGraphics->DrawTransformedBitmap(aNull, aTopX, aTopY, *pSalSrcBmp, pSalAlphaBmp, *this);
