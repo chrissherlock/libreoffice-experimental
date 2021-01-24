@@ -18,6 +18,7 @@
 #include <vcl/bitmapex.hxx>
 #include <vcl/font.hxx>
 #include <vcl/mapmod.hxx>
+#include <vcl/metaactiontypes.hxx>
 #include <vcl/region.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/vclreferencebase.hxx>
@@ -39,6 +40,10 @@ class VCL_DLLPUBLIC RenderContext2 : public virtual VclReferenceBase
 public:
     RenderContext2();
     virtual ~RenderContext2() {}
+
+    void DrawBitmap(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
+                    Size const& rSrcSizePixel, Bitmap const& rBitmap,
+                    MetaActionType nAction = MetaActionType::BMPSCALEPART);
 
     virtual bool DrawTransformBitmapExDirect(basegfx::B2DHomMatrix const& aFullTransform,
                                              BitmapEx const& rBitmapEx);

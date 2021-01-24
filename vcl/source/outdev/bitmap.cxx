@@ -108,57 +108,7 @@ void OutputDevice::DrawBitmap(const Point& rDestPt, const Size& rDestSize, const
         }
     }
 
-    if (!IsDeviceOutputNecessary())
-        return;
-
-    if (!mpGraphics && !AcquireGraphics())
-        return;
-
-    if (IsInitClipped())
-        InitClipRegion();
-
-    if (maRegion.IsEmpty())
-        return;
-
-    if (!aBmp.IsEmpty())
-    {
-        SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(),
-                           rSrcSizePixel.Height(), maGeometry.LogicXToDevicePixel(rDestPt.X()),
-                           maGeometry.LogicYToDevicePixel(rDestPt.Y()),
-                           maGeometry.LogicWidthToDevicePixel(rDestSize.Width()),
-                           maGeometry.LogicHeightToDevicePixel(rDestSize.Height()));
-
-        if (aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth
-            && aPosAry.mnDestHeight)
-        {
-            const BmpMirrorFlags nMirrFlags = AdjustTwoRect(aPosAry, aBmp.GetSizePixel());
-
-            if (nMirrFlags != BmpMirrorFlags::NONE)
-                aBmp.Mirror(nMirrFlags);
-
-            if (aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth
-                && aPosAry.mnDestHeight)
-            {
-                if (nAction == MetaActionType::BMPSCALE && CanSubsampleBitmap())
-                {
-                    const double nScaleX
-                        = aPosAry.mnDestWidth / static_cast<double>(aPosAry.mnSrcWidth);
-                    const double nScaleY
-                        = aPosAry.mnDestHeight / static_cast<double>(aPosAry.mnSrcHeight);
-
-                    // If subsampling, use Bitmap::Scale() for subsampling of better quality.
-                    if (nScaleX < 1.0 || nScaleY < 1.0)
-                    {
-                        aBmp.Scale(nScaleX, nScaleY);
-                        aPosAry.mnSrcWidth = aPosAry.mnDestWidth;
-                        aPosAry.mnSrcHeight = aPosAry.mnDestHeight;
-                    }
-                }
-
-                mpGraphics->DrawBitmap(aPosAry, *aBmp.ImplGetSalBitmap(), *this);
-            }
-        }
-    }
+    RenderContext2::DrawBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmap, nAction);
 
     if (mpAlphaVDev)
     {
