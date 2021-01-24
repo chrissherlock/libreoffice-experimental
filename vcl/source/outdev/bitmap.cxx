@@ -212,24 +212,14 @@ void OutputDevice::DrawTransparentAlphaBitmap(const Bitmap& rBmp, const AlphaMas
     }
 }
 
-void OutputDevice::DrawTransparentAlphaBitmapSlowPath(const Bitmap& rBitmap,
-                                                      const AlphaMask& rAlpha,
-                                                      tools::Rectangle aDstRect,
-                                                      tools::Rectangle aBmpRect,
-                                                      Size const& aOutSize, Point const& aOutPoint)
+Bitmap OutputDevice::CreateTransparentAlphaBitmap(const Bitmap& rBitmap,
+                                                const AlphaMask& rAlpha,
+                                                tools::Rectangle aDstRect,
+                                                tools::Rectangle aBmpRect,
+                                                Size const& aOutSize, Point const& aOutPoint)
 {
-    assert(!is_double_buffered_window());
-
     const bool bHMirr = aOutSize.Width() < 0;
     const bool bVMirr = aOutSize.Height() < 0;
-
-    // The scaling in this code path produces really ugly results - it
-    // does the most trivial scaling with no smoothing.
-    GDIMetaFile* pOldMetaFile = mpMetaFile;
-    const bool bOldMap = IsMapModeEnabled();
-
-    mpMetaFile = nullptr; // fdo#55044 reset before GetBitmap!
-    DisableMapMode();
 
     Bitmap aBmp(GetBitmap(aDstRect.TopLeft(), aDstRect.GetSize()));
 
@@ -270,8 +260,7 @@ void OutputDevice::DrawTransparentAlphaBitmapSlowPath(const Bitmap& rBitmap,
                                           aDstRect, nOffY, aDstRect.GetHeight(), nOffX, aDstRect.GetWidth(),
                                           aTradContext.mpMapX.get(), aTradContext.mpMapY.get());
     }
-
-    if (!mpAlphaVDev && aBmp.ImplGetSalBitmap())
+    else if (!mpAlphaVDev && aBmp.ImplGetSalBitmap())
     {
         Bitmap::ScopedReadAccess pBitmapReadAccess(const_cast<Bitmap&>(rBitmap));
         AlphaMask::ScopedReadAccess pAlphaReadAccess(const_cast<AlphaMask&>(rAlpha));
@@ -297,6 +286,27 @@ void OutputDevice::DrawTransparentAlphaBitmapSlowPath(const Bitmap& rBitmap,
                               aTradContext.mpMapX.get(), aTradContext.mpMapY.get());
         }
     }
+
+    return aNewBitmap;
+}
+
+void OutputDevice::DrawTransparentAlphaBitmapSlowPath(const Bitmap& rBitmap,
+                                                      const AlphaMask& rAlpha,
+                                                      tools::Rectangle aDstRect,
+                                                      tools::Rectangle aBmpRect,
+                                                      Size const& aOutSize, Point const& aOutPoint)
+{
+    assert(!is_double_buffered_window());
+
+    // The scaling in this code path produces really ugly results - it
+    // does the most trivial scaling with no smoothing.
+    GDIMetaFile* pOldMetaFile = mpMetaFile;
+    const bool bOldMap = IsMapModeEnabled();
+
+    mpMetaFile = nullptr; // fdo#55044 reset before GetBitmap!
+    DisableMapMode();
+
+    Bitmap aNewBitmap(CreateTransparentAlphaBitmap(rBitmap, rAlpha, aDstRect, aBmpRect, aOutSize, aOutPoint));
 
     // #110958# Disable alpha VDev, we're doing the necessary
     // stuff explicitly further below

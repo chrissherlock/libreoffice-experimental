@@ -1290,6 +1290,13 @@ private:
                                     const Point& rSrcPtPixel,
                                     const Size& rSrcSizePixel);
 
+    Bitmap                      CreateTransparentAlphaBitmap(
+                                    const Bitmap& rBitmap,
+                                    const AlphaMask& rAlpha,
+                                    tools::Rectangle aDstRect,
+                                    tools::Rectangle aBmpRect,
+                                    Size const& aOutSize, Point const& aOutPoint);
+
     SAL_DLLPRIVATE void         DrawTransparentAlphaBitmapSlowPath(
                                     const Bitmap& rBitmap, const AlphaMask& rAlpha,
                                     tools::Rectangle aDstRect, tools::Rectangle aBmpRect,
