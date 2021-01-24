@@ -73,8 +73,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
 
     meOutDevViewType                = OutDevViewType::DontKnow;
     mbBackground                    = false;
-    mbOutput                        = true;
-    mbDevOutput                     = false;
     maTextColor                     = COL_BLACK;
     mbTextLines                     = false;
     mbTextSpecial                   = false;
@@ -133,22 +131,6 @@ void OutputDevice::dispose()
 bool OutputDevice::IsVirtual() const
 {
     return false;
-}
-
-void OutputDevice::EnableOutput()
-{
-    mbOutput = true;
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->EnableOutput();
-}
-
-void OutputDevice::DisableOutput()
-{
-    mbOutput = false;
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->EnableOutput();
 }
 
 SalGraphics* OutputDevice::GetGraphics()

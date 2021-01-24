@@ -1307,7 +1307,7 @@ void Window::ImplSetReallyVisible()
 
     bool bBecameReallyVisible = !mpWindowImpl->mbReallyVisible;
 
-    mbDevOutput     = true;
+    EnableDeviceOutput();
     mpWindowImpl->mbReallyVisible = true;
     mpWindowImpl->mbReallyShown   = true;
 

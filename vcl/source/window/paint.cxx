@@ -1436,8 +1436,8 @@ void Window::ImplPaintToDevice( OutputDevice* i_pTargetOutDev, const Point& i_rP
 
     bool bRVisible = mpWindowImpl->mbReallyVisible;
     mpWindowImpl->mbReallyVisible = mpWindowImpl->mbVisible;
-    bool bDevOutput = mbDevOutput;
-    mbDevOutput = true;
+    bool bDevOutput = IsDeviceOutputEnabled();
+    EnableDeviceOutput();
 
     const OutputDevice *pOutDev = GetOutDev();
     tools::Long nOldDPIX = pOutDev->GetDPIX();
@@ -1564,7 +1564,12 @@ void Window::ImplPaintToDevice( OutputDevice* i_pTargetOutDev, const Point& i_rP
         DisableOutput();
 
     mpWindowImpl->mbReallyVisible = bRVisible;
-    mbDevOutput = bDevOutput;
+
+    if (bDevOutput)
+        EnableDeviceOutput();
+    else
+        DisableDeviceOutput();
+
     SetDPIX(nOldDPIX);
     SetDPIY(nOldDPIY);
 }

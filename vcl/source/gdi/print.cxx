@@ -467,7 +467,7 @@ OUString Printer::GetDefaultPrinterName()
 
 void Printer::ImplInitData()
 {
-    mbDevOutput         = false;
+    DisableDeviceOutput();
     mbDefPrinter        = false;
     mnError             = ERRCODE_NONE;
     mnPageQueueSize     = 0;
@@ -1565,7 +1565,7 @@ void Printer::EndJob()
 
         mbPrinting      = false;
 
-        mbDevOutput = false;
+        DisableDeviceOutput();
         mpPrinter->EndJob();
         mpPrinter.reset();
     }
@@ -1586,7 +1586,8 @@ void Printer::ImplStartPage()
         ReleaseGraphics();
         mpJobGraphics = pGraphics;
     }
-    mbDevOutput = true;
+
+    EnableDeviceOutput();
 
     // PrintJob not aborted ???
     if ( IsJobActive() )
@@ -1604,7 +1605,7 @@ void Printer::ImplEndPage()
     {
         mpPrinter->EndPage();
         ReleaseGraphics();
-        mbDevOutput = false;
+        DisableDeviceOutput();
 
         mpJobGraphics = nullptr;
         mbNewJobSetup = false;

@@ -58,6 +58,12 @@ public:
     TransformAndReduceBitmapExToTargetRange(basegfx::B2DHomMatrix const& aFullTransform,
                                             basegfx::B2DRange& aVisibleRange, double& fMaximumArea);
 
+    void EnableOutput();
+    void DisableOutput();
+    bool IsOutputEnabled() const;
+    bool IsDeviceOutputEnabled() const;
+    bool IsDeviceOutputNecessary() const;
+
     virtual AllSettings const& GetSettings() const;
     virtual void SetSettings(AllSettings const& rSettings);
 
@@ -250,6 +256,8 @@ protected:
     void SetInitClipFlag(bool bFlag);
     bool IsClipRegionSet() const;
     void SetClipRegionSetFlag(bool bFlag);
+    void EnableDeviceOutput();
+    void DisableDeviceOutput();
 
     // TODO these init functions will need to become private once all related
     // functions are moved out of OutputDevice
@@ -311,6 +319,8 @@ private:
     mutable bool mbInitClipRegion : 1;
     mutable bool mbClipRegion : 1;
     mutable bool mbClipRegionSet : 1;
+    mutable bool mbOutput : 1;
+    mutable bool mbDevOutput : 1;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

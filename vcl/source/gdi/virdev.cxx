@@ -176,7 +176,7 @@ void VirtualDevice::ImplInitVirDev( const OutputDevice* pOutDev,
 
     mbScreenComp    = pOutDev->IsScreenComp();
 
-    mbDevOutput     = true;
+    EnableDeviceOutput();
     mxFontCollection = pSVData->maGDIData.mxScreenFontList;
     mxFontCache     = pSVData->maGDIData.mxScreenFontCache;
     SetDPIX(pOutDev->GetDPIX());

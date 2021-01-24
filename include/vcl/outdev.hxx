@@ -288,8 +288,6 @@ private:
     Point                           maRefPoint;
 
     mutable bool                    mbBackground : 1;
-    mutable bool                    mbOutput : 1;
-    mutable bool                    mbDevOutput : 1;
     mutable bool                    mbTextLines : 1;
     mutable bool                    mbTextSpecial : 1;
     mutable bool                    mbRefPoint : 1;
@@ -432,11 +430,6 @@ public:
     void                        Push( PushFlags nFlags = PushFlags::ALL );
     void                        Pop();
     void                        ClearStack();
-
-    void                        EnableOutput();
-    void                        DisableOutput();
-    bool                        IsOutputEnabled() const { return mbOutput; }
-    bool                        IsDeviceOutputNecessary() const { return (mbOutput && mbDevOutput); }
 
     void                        SetAntialiasing( AntialiasingFlags nMode ) override;
     void                        SetDrawMode(DrawModeFlags nDrawMode) override;

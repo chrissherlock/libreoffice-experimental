@@ -32,9 +32,19 @@ RenderContext2::RenderContext2()
     , mbInitClipRegion(false)
     , mbClipRegion(false)
     , mbClipRegionSet(false)
+    , mbOutput(true)
+    , mbDevOutput(false)
 {
 }
 
 void RenderContext2::dispose() {}
+
+void RenderContext2::EnableOutput() { mbOutput = true; }
+void RenderContext2::DisableOutput() { mbOutput = false; }
+bool RenderContext2::IsOutputEnabled() const { return mbOutput; }
+bool RenderContext2::IsDeviceOutputEnabled() const { return mbDevOutput; }
+bool RenderContext2::IsDeviceOutputNecessary() const { return (mbOutput && mbDevOutput); }
+void RenderContext2::EnableDeviceOutput() { mbDevOutput = true; }
+void RenderContext2::DisableDeviceOutput() { mbDevOutput = false; }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
