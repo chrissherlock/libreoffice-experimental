@@ -39,6 +39,8 @@ Color GetDrawModeTextColor(Color const& rColor, DrawModeFlags nDrawMode,
 vcl::Font GetDrawModeFont(vcl::Font const& rFont, DrawModeFlags nDrawMode,
                           StyleSettings const& rStyleSettings);
 
+Bitmap GetDrawModeBitmap(Bitmap const& rBitmap, DrawModeFlags nDrawMode);
+
 BitmapEx GetDrawModeBitmapEx(BitmapEx const& rBitmapEx, DrawModeFlags nDrawMode);
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

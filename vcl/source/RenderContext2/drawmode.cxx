@@ -195,6 +195,19 @@ vcl::Font GetDrawModeFont(vcl::Font const& rFont, DrawModeFlags nDrawMode,
     return aFont;
 }
 
+Bitmap GetDrawModeBitmap(Bitmap const& rBitmap, DrawModeFlags nDrawMode)
+{
+    Bitmap aBmp(rBitmap);
+
+    if (nDrawMode & DrawModeFlags::GrayBitmap)
+    {
+        if (!!aBmp)
+            aBmp.Convert(BmpConversion::N8BitGreys);
+    }
+
+    return aBmp;
+}
+
 BitmapEx GetDrawModeBitmapEx(BitmapEx const& rBitmapEx, DrawModeFlags nDrawMode)
 {
     BitmapEx aBmpEx(rBitmapEx);

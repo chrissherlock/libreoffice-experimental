@@ -28,6 +28,7 @@
 #include <vcl/virdev.hxx>
 
 #include <bitmap/BitmapWriteAccess.hxx>
+#include <drawmode.hxx>
 #include <salgdi.hxx>
 
 #include "TradScaleContext.hxx"
@@ -83,16 +84,7 @@ void OutputDevice::DrawBitmap(const Point& rDestPt, const Size& rDestSize, const
         return;
     }
 
-    Bitmap aBmp(rBitmap);
-
-    if (GetDrawMode() & DrawModeFlags::GrayBitmap)
-    {
-        if (!!aBmp)
-        {
-            if (GetDrawMode() & DrawModeFlags::GrayBitmap)
-                aBmp.Convert(BmpConversion::N8BitGreys);
-        }
-    }
+    Bitmap aBmp(GetDrawModeBitmap(rBitmap, GetDrawMode()));
 
     if (mpMetaFile)
     {
