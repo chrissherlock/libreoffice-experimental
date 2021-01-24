@@ -221,8 +221,6 @@ void OutputDevice::DrawTransparentAlphaBitmapSlowPath(const Bitmap& rBitmap,
 {
     assert(!is_double_buffered_window());
 
-    VirtualDevice* pOldVDev = mpAlphaVDev;
-
     const bool bHMirr = aOutSize.Width() < 0;
     const bool bVMirr = aOutSize.Height() < 0;
 
@@ -243,9 +241,7 @@ void OutputDevice::DrawTransparentAlphaBitmapSlowPath(const Bitmap& rBitmap,
     // access)
     // #i38887# reading from screen may sometimes fail
     if (aBmp.ImplGetSalBitmap())
-    {
         aDstRect.SetSize(aBmp.GetSizePixel());
-    }
 
     const tools::Long nDstWidth = aDstRect.GetWidth();
     const tools::Long nDstHeight = aDstRect.GetHeight();
@@ -269,46 +265,46 @@ void OutputDevice::DrawTransparentAlphaBitmapSlowPath(const Bitmap& rBitmap,
     DBG_ASSERT(pAlphaReadAccess->GetScanlineFormat() == ScanlineFormat::N8BitPal,
                "OutputDevice::ImplDrawAlpha(): non-8bit alpha no longer supported!");
 
-    // #i38887# reading from screen may sometimes fail
-    if (aBmp.ImplGetSalBitmap())
-    {
-        Bitmap aNewBitmap;
+    Bitmap aNewBitmap;
 
-        if (mpAlphaVDev)
+    // #i38887# reading from screen may sometimes fail
+    if (mpAlphaVDev && aBmp.ImplGetSalBitmap())
+    {
+        aNewBitmap = BlendBitmapWithAlpha(aBmp, pBitmapReadAccess.get(), pAlphaReadAccess.get(),
+                                          aDstRect, nOffY, nDstHeight, nOffX, nDstWidth,
+                                          aTradContext.mpMapX.get(), aTradContext.mpMapY.get());
+    }
+
+    if (!mpAlphaVDev && aBmp.ImplGetSalBitmap())
+    {
+        LinearScaleContext aLinearContext(aDstRect, aBmpRect, aOutSize, nOffX, nOffY);
+
+        if (aLinearContext.blendBitmap(BitmapScopedWriteAccess(aBmp).get(),
+                                       pBitmapReadAccess.get(), pAlphaReadAccess.get(),
+                                       nDstWidth, nDstHeight))
         {
-            aNewBitmap = BlendBitmapWithAlpha(aBmp, pBitmapReadAccess.get(), pAlphaReadAccess.get(),
-                                              aDstRect, nOffY, nDstHeight, nOffX, nDstWidth,
-                                              aTradContext.mpMapX.get(), aTradContext.mpMapY.get());
+            aNewBitmap = aBmp;
         }
         else
         {
-            LinearScaleContext aLinearContext(aDstRect, aBmpRect, aOutSize, nOffX, nOffY);
-
-            if (aLinearContext.blendBitmap(BitmapScopedWriteAccess(aBmp).get(),
-                                           pBitmapReadAccess.get(), pAlphaReadAccess.get(),
-                                           nDstWidth, nDstHeight))
-            {
-                aNewBitmap = aBmp;
-            }
-            else
-            {
-                aNewBitmap
-                    = BlendBitmap(aBmp, pBitmapReadAccess.get(), pAlphaReadAccess.get(), nOffY,
-                                  nDstHeight, nOffX, nDstWidth, aBmpRect, aOutSize, bHMirr, bVMirr,
-                                  aTradContext.mpMapX.get(), aTradContext.mpMapY.get());
-            }
+            aNewBitmap
+                = BlendBitmap(aBmp, pBitmapReadAccess.get(), pAlphaReadAccess.get(), nOffY,
+                              nDstHeight, nOffX, nDstWidth, aBmpRect, aOutSize, bHMirr, bVMirr,
+                              aTradContext.mpMapX.get(), aTradContext.mpMapY.get());
         }
-
-        // #110958# Disable alpha VDev, we're doing the necessary
-        // stuff explicitly further below
-        if (mpAlphaVDev)
-            mpAlphaVDev = nullptr;
-
-        DrawBitmap(aDstRect.TopLeft(), aNewBitmap);
-
-        // #110958# Enable alpha VDev again
-        mpAlphaVDev = pOldVDev;
     }
+
+    // #110958# Disable alpha VDev, we're doing the necessary
+    // stuff explicitly further below
+    VirtualDevice* pOldVDev = mpAlphaVDev;
+
+    if (mpAlphaVDev)
+        mpAlphaVDev = nullptr;
+
+    DrawBitmap(aDstRect.TopLeft(), aNewBitmap);
+
+    // #110958# Enable alpha VDev again
+    mpAlphaVDev = pOldVDev;
 
     if (bOldMap)
         EnableMapMode();
