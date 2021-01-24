@@ -137,7 +137,7 @@ static void MakeAsMeta(Graphic &rGraphic)
         aSize = Geometry::LogicToLogic( aSize,
             rGraphic.GetPrefMapMode(), MapMode(MapUnit::Map100thMM));
 
-    pVDev->EnableOutput( false );
+    pVDev->DisableOutput();
     aMtf.Record( pVDev );
     pVDev->DrawBitmapEx( Point(), aSize, rGraphic.GetBitmapEx() );
     aMtf.Stop();
@@ -471,7 +471,7 @@ static void MakePreview(sal_uInt8* pBuf, sal_uInt32 nBytesRead,
     ScopedVclPtrInstance< VirtualDevice > pVDev;
     vcl::Font       aFont;
 
-    pVDev->EnableOutput( false );
+    pVDev->DisableOutput();
     aMtf.Record( pVDev );
     pVDev->SetLineColor( COL_RED );
     pVDev->SetFillColor();
@@ -749,7 +749,7 @@ ipsGraphicImport( SvStream & rStream, Graphic & rGraphic, FilterConfigItem* )
                                 ScopedVclPtrInstance<VirtualDevice> pVDev;
                                 GDIMetaFile     aMtf;
                                 Size            aSize( nWidth, nHeight );
-                                pVDev->EnableOutput( false );
+                                pVDev->DisableOutput();
                                 aMtf.Record( pVDev );
                                 aSize = Geometry::LogicToLogic(aSize, MapMode(), MapMode(MapUnit::Map100thMM));
                                 pVDev->DrawBitmapEx( Point(), aSize, vcl::bitmap::CreateFromData(std::move(aBitmap)) );

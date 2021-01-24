@@ -731,7 +731,7 @@ uno::Any SvxShape::GetBitmap( bool bMetaFile /* = false */ ) const
         GDIMetaFile aMtf;
 
         pVDev->SetMapMode(MapMode(MapUnit::Map100thMM));
-        pVDev->EnableOutput(false);
+        pVDev->DisableOutput();
         aMtf.Record(pVDev);
         GetSdrObject()->SingleObjectPainter(*pVDev);
         aMtf.Stop();

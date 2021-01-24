@@ -1775,7 +1775,7 @@ SVGActionWriter::SVGActionWriter( SVGExport& rExport, SVGFontExport& rFontExport
     mbClipAttrChanged( false ),
     mbIsPlaceholderShape( false )
 {
-    mpVDev->EnableOutput( false );
+    mpVDev->DisableOutput();
     maTargetMapMode = MapMode(MapUnit::Map100thMM);
     maTextWriter.setVirtualDevice( mpVDev, maTargetMapMode );
 }

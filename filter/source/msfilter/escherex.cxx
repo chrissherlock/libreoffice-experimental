@@ -1445,7 +1445,7 @@ Graphic lclDrawHatch( const drawing::Hatch& rHatch, const Color& rBackColor, boo
     GDIMetaFile aMtf;
 
     pVDev->SetOutputSizePixel(Size(2, 2));
-    pVDev->EnableOutput(false);
+    pVDev->DisableOutput();
     pVDev->SetMapMode(MapMode(MapUnit::Map100thMM));
     aMtf.Clear();
     aMtf.Record(pVDev);

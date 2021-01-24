@@ -534,7 +534,7 @@ GDIMetaFile SdrExchangeView::GetMarkedObjMetaFile(bool bNoVDevIfOneMtfMarked) co
             const Size aDummySize(2, 2);
 
             pOut->SetOutputSizePixel(aDummySize);
-            pOut->EnableOutput(false);
+            pOut->DisableOutput();
             pOut->SetMapMode(aMap);
             aMtf.Clear();
             aMtf.Record(pOut);
@@ -623,7 +623,7 @@ Graphic SdrExchangeView::GetObjGraphic(const SdrObject& rSdrObject)
             rSdrObject.getSdrModelFromSdrObject().GetScaleFraction(),
             rSdrObject.getSdrModelFromSdrObject().GetScaleFraction());
 
-        pOut->EnableOutput(false);
+        pOut->DisableOutput();
         pOut->SetMapMode(aMap);
         aMtf.Record(pOut);
         rSdrObject.SingleObjectPainter(*pOut);

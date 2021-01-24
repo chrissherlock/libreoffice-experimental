@@ -873,7 +873,7 @@ GDIMetaFile SdrGrafObj::getMetafileFromEmbeddedVectorGraphicData() const
             getSdrModelFromSdrObject().GetScaleFraction(),
             getSdrModelFromSdrObject().GetScaleFraction());
 
-        pOut->EnableOutput(false);
+        pOut->DisableOutput();
         pOut->SetMapMode(aMap);
         aRetval.Record(pOut);
         SingleObjectPainter(*pOut);

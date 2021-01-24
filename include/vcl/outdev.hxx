@@ -433,7 +433,8 @@ public:
     void                        Pop();
     void                        ClearStack();
 
-    void                        EnableOutput( bool bEnable = true );
+    void                        EnableOutput();
+    void                        DisableOutput();
     bool                        IsOutputEnabled() const { return mbOutput; }
     bool                        IsDeviceOutputNecessary() const { return (mbOutput && mbDevOutput); }
 

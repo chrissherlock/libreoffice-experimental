@@ -693,7 +693,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
         ScopedVclPtrInstance< VirtualDevice > aMapModeVDev;
         aMapModeVDev->SetDPIX(GetDPIX());
         aMapModeVDev->SetDPIY(GetDPIY());
-        aMapModeVDev->EnableOutput(false);
+        aMapModeVDev->DisableOutput();
 
         int nLastBgAction, nActionNum;
 
@@ -1090,7 +1090,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                         Size            aDstSzPix;
 
                         ScopedVclPtrInstance<VirtualDevice> aMapVDev;   // here, we record only mapmode information
-                        aMapVDev->EnableOutput(false);
+                        aMapVDev->DisableOutput();
 
                         ScopedVclPtrInstance<VirtualDevice> aPaintVDev; // into this one, we render.
                         aPaintVDev->SetBackground( aBackgroundComponent.aBgColor );
@@ -1124,7 +1124,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                                     aMapVDev->SetDPIY(GetDPIY());
                                     aPaintVDev->SetDPIY(GetDPIY());
 
-                                    aPaintVDev->EnableOutput(false);
+                                    aPaintVDev->DisableOutput();
 
                                     // iterate over all actions
                                     for( pCurrAct=const_cast<GDIMetaFile&>(rInMtf).FirstAction(), nActionNum=0;

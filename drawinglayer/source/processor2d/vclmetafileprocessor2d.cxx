@@ -227,7 +227,7 @@ VclMetafileProcessor2D::impDumpToMetaFile(const primitive2d::Primitive2DContaine
 
     mpOutputDevice = aContentVDev.get();
     mpMetaFile = &o_rContentMetafile;
-    aContentVDev->EnableOutput(false);
+    aContentVDev->DisableOutput();
     aContentVDev->SetMapMode(pLastOutputDevice->GetMapMode());
     o_rContentMetafile.Record(aContentVDev.get());
     aContentVDev->SetLineColor(pLastOutputDevice->GetLineColor());

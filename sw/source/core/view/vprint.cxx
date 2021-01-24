@@ -458,7 +458,7 @@ bool SwViewShell::PrintOrPDFExport(
         pOrigRecorder = pOutDev->GetConnectMetaFile();
         pOutDev->SetConnectMetaFile(nullptr);
         // turn off output to the device
-        pOutDev->EnableOutput(false);
+        pOutDev->DisableOutput();
         // just record the rendering commands to the metafile
         // instead
         pMetaFile.reset(new GDIMetaFile);

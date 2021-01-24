@@ -635,7 +635,7 @@ void GDIMetaFile::Move( tools::Long nX, tools::Long nY )
     Size            aOffset( aBaseOffset );
     ScopedVclPtrInstance< VirtualDevice > aMapVDev;
 
-    aMapVDev->EnableOutput( false );
+    aMapVDev->DisableOutput();
     aMapVDev->SetMapMode( GetPrefMapMode() );
 
     for( MetaAction* pAct = FirstAction(); pAct; pAct = NextAction() )
@@ -669,7 +669,7 @@ void GDIMetaFile::Move( tools::Long nX, tools::Long nY, tools::Long nDPIX, tools
     Size            aOffset( aBaseOffset );
     ScopedVclPtrInstance< VirtualDevice > aMapVDev;
 
-    aMapVDev->EnableOutput( false );
+    aMapVDev->DisableOutput();
     aMapVDev->SetReferenceDevice( nDPIX, nDPIY );
     aMapVDev->SetMapMode( GetPrefMapMode() );
 
@@ -737,7 +737,7 @@ void GDIMetaFile::Clip( const tools::Rectangle& i_rClipRect )
     tools::Rectangle aCurRect( i_rClipRect );
     ScopedVclPtrInstance< VirtualDevice > aMapVDev;
 
-    aMapVDev->EnableOutput( false );
+    aMapVDev->DisableOutput();
     aMapVDev->SetMapMode( GetPrefMapMode() );
 
     for( MetaAction* pAct = FirstAction(); pAct; pAct = NextAction() )
@@ -802,7 +802,7 @@ void GDIMetaFile::ImplAddGradientEx( GDIMetaFile&         rMtf,
 {
     // Generate comment, GradientEx and Gradient actions (within DrawGradient)
     ScopedVclPtrInstance< VirtualDevice > aVDev(rMapDev, DeviceFormat::DEFAULT);
-    aVDev->EnableOutput( false );
+    aVDev->DisableOutput();
     GDIMetaFile aGradMtf;
 
     aGradMtf.Record( aVDev.get() );
@@ -835,7 +835,7 @@ void GDIMetaFile::Rotate( Degree10 nAngle10 )
 
     aPoly.Rotate( Point(), fSin, fCos );
 
-    aMapVDev->EnableOutput( false );
+    aMapVDev->DisableOutput();
     aMapVDev->SetMapMode( GetPrefMapMode() );
 
     const tools::Rectangle aNewBound( aPoly.GetBoundRect() );
@@ -1306,7 +1306,7 @@ tools::Rectangle GDIMetaFile::GetBoundRect( OutputDevice& i_rReference, tools::R
 {
     ScopedVclPtrInstance< VirtualDevice > aMapVDev(  i_rReference  );
 
-    aMapVDev->EnableOutput( false );
+    aMapVDev->DisableOutput();
     aMapVDev->SetMapMode( GetPrefMapMode() );
 
     std::vector<tools::Rectangle> aClipStack( 1, tools::Rectangle() );

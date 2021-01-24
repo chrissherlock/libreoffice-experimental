@@ -159,7 +159,8 @@ void OutputDevice::ClipAndDrawGradientMetafile ( const Gradient &rGradient, cons
     const tools::Rectangle aBoundRect( rPolyPoly.GetBoundRect() );
     const bool  bOldOutput = IsOutputEnabled();
 
-    EnableOutput( false );
+    DisableOutput();
+
     Push( PushFlags::RASTEROP );
     SetRasterOp( RasterOp::Xor );
     DrawGradient( aBoundRect, rGradient );
@@ -169,7 +170,11 @@ void OutputDevice::ClipAndDrawGradientMetafile ( const Gradient &rGradient, cons
     SetRasterOp( RasterOp::Xor );
     DrawGradient( aBoundRect, rGradient );
     Pop();
-    EnableOutput( bOldOutput );
+
+    if (bOldOutput)
+        EnableOutput();
+    else
+        DisableOutput();
 }
 
 void OutputDevice::DrawGradientToMetafile ( const tools::PolyPolygon& rPolyPoly,

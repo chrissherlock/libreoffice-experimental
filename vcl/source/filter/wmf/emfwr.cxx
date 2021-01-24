@@ -240,7 +240,7 @@ bool EMFWriter::WriteEMF(const GDIMetaFile& rMtf)
 {
     const sal_uLong nHeaderPos = m_rStm.Tell();
 
-    maVDev->EnableOutput( false );
+    maVDev->DisableOutput();
     maVDev->SetMapMode( rMtf.GetPrefMapMode() );
     // don't work with pixel as destination map mode -> higher resolution preferable
     maDestMapMode.SetMapUnit( MapUnit::Map100thMM );

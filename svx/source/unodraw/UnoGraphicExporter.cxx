@@ -711,7 +711,7 @@ bool GraphicExporter::GetGraphic( ExportSettings const & rSettings, Graphic& aGr
                 aVDev->SetMapMode( aMap );
                 if( rSettings.mbUseHighContrast )
                     aVDev->SetDrawMode( aVDev->GetDrawMode() | DrawModeFlags::SettingsLine | DrawModeFlags::SettingsFill | DrawModeFlags::SettingsText | DrawModeFlags::SettingsGradient );
-                aVDev->EnableOutput( false );
+                aVDev->DisableOutput();
                 aMtf.Record( aVDev );
                 Size aNewSize;
 
@@ -910,7 +910,7 @@ bool GraphicExporter::GetGraphic( ExportSettings const & rSettings, Graphic& aGr
                 }
             }
 
-            aOut->EnableOutput( false );
+            aOut->DisableOutput();
             aOut->SetMapMode( aMap );
             if( rSettings.mbUseHighContrast )
                 aOut->SetDrawMode( aOut->GetDrawMode() | DrawModeFlags::SettingsLine | DrawModeFlags::SettingsFill | DrawModeFlags::SettingsText | DrawModeFlags::SettingsGradient );

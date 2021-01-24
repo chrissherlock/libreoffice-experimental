@@ -461,7 +461,7 @@ void VirtualDevice::ImplSetReferenceDevice( RefDevMode i_eRefDevMode, sal_Int32 
     SetDPIY(i_nDPIY);
     SetDPIScalePercentage(100);
 
-    EnableOutput( false );  // prevent output on reference device
+    DisableOutput();  // prevent output on reference device
     mbScreenComp = false;
 
     // invalidate currently selected fonts

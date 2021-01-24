@@ -1684,7 +1684,7 @@ void OutputDevice::AddTextRectActions( const tools::Rectangle& rRect,
     GDIMetaFile* pMtf = mpMetaFile;
 
     mpMetaFile = &rMtf;
-    EnableOutput( false );
+    DisableOutput();
 
     // #i47157# Factored out to ImplDrawTextRect(), to be shared
     // between us and DrawText()
@@ -1692,7 +1692,11 @@ void OutputDevice::AddTextRectActions( const tools::Rectangle& rRect,
     ImplDrawText( *this, rRect, rOrigStr, nStyle, nullptr, nullptr, aLayout );
 
     // and restore again
-    EnableOutput( bOutputEnabled );
+    if (bOutputEnabled)
+        EnableOutput();
+    else
+        DisableOutput();
+
     mpMetaFile = pMtf;
 }
 

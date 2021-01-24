@@ -111,7 +111,7 @@ ImpSdrPdfImport::ImpSdrPdfImport(SdrModel& rModel, SdrLayerID nLay, const tools:
     , mdPageHeightPts(0)
     , mpPDFium(vcl::pdf::PDFiumLibrary::get())
 {
-    mpVD->EnableOutput(false);
+    mpVD->DisableOutput();
     mpVD->SetLineColor();
     mpVD->SetFillColor();
     maOldLineColor.SetRed(mpVD->GetLineColor().GetRed() + 1);

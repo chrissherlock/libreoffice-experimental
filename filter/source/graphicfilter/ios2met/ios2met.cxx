@@ -444,7 +444,7 @@ OS2METReader::OS2METReader()
     , aAttr()
     , pAttrStack(nullptr)
 {
-    pVirDev->EnableOutput(false);
+    pVirDev->DisableOutput();
 }
 
 OS2METReader::~OS2METReader()

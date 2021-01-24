@@ -1237,7 +1237,7 @@ bool SwFEShell::GetDrawObjGraphic( SotClipboardFormatId nFormat, Graphic& rGrf )
                             GetGrfSize( aSz );
 
                             ScopedVclPtrInstance< VirtualDevice > pVirtDev;
-                            pVirtDev->EnableOutput( false );
+                            pVirtDev->DisableOutput();
 
                             MapMode aTmp( GetWin()->GetMapMode() );
                             aTmp.SetOrigin( aPt );

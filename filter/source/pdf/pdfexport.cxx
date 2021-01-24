@@ -199,7 +199,7 @@ bool PDFExport::ExportSelection( vcl::PDFWriter& rPDFWriter,
                     const Size                  aMtfSize( aPageSize.Width, aPageSize.Height );
 
                     pOut->Push();
-                    pOut->EnableOutput( false );
+                    pOut->DisableOutput();
                     pOut->SetMapMode( aMapMode );
 
                     aMtf.SetPrefSize( aMtfSize );

@@ -105,7 +105,7 @@ ImpSdrGDIMetaFileImport::ImpSdrGDIMetaFileImport(
     mbLastObjWasLine(false),
     maClip()
 {
-    mpVD->EnableOutput(false);
+    mpVD->DisableOutput();
     mpVD->SetLineColor();
     mpVD->SetFillColor();
     maOldLineColor.SetRed( mpVD->GetLineColor().GetRed() + 1 );

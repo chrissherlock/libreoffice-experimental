@@ -416,7 +416,7 @@ bool ScTransferObj::GetData( const datatransfer::DataFlavor& rFlavor, const OUSt
             MapMode         aMapMode( pEmbObj->GetMapUnit() );
             tools::Rectangle       aVisArea( pEmbObj->GetVisArea( ASPECT_CONTENT ) );
 
-            pVDev->EnableOutput( false );
+            pVDev->DisableOutput();
             pVDev->SetMapMode( aMapMode );
             aMtf.SetPrefSize( aVisArea.GetSize() );
             aMtf.SetPrefMapMode( aMapMode );

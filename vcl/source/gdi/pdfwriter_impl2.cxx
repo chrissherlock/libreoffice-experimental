@@ -283,7 +283,7 @@ void PDFWriterImpl::playMetafile( const GDIMetaFile& i_rMtf, vcl::PDFExtOutDevDa
     {
         xPrivateDevice.disposeAndReset(VclPtr<VirtualDevice>::Create());
         pDummyVDev = xPrivateDevice.get();
-        pDummyVDev->EnableOutput( false );
+        pDummyVDev->DisableOutput();
         pDummyVDev->SetMapMode( i_rMtf.GetPrefMapMode() );
     }
     const GDIMetaFile& aMtf( i_rMtf );

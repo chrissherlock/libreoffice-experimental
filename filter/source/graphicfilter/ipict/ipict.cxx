@@ -1920,7 +1920,7 @@ void PictReader::ReadPict( SvStream & rStreamPict, GDIMetaFile & rGDIMetaFile )
     aHRes = aVRes = Fraction( 1, 1 );
 
     pVirDev = VclPtr<VirtualDevice>::Create();
-    pVirDev->EnableOutput(false);
+    pVirDev->DisableOutput();
     rGDIMetaFile.Record(pVirDev);
 
     pPict->SetEndian(SvStreamEndian::BIG);

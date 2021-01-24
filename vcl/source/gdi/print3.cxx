@@ -1031,7 +1031,7 @@ PrinterController::PageSize PrinterController::getPageFile( int i_nUnfilteredPag
     o_rMtf.SetPrefSize( aPageSize.aSize );
     o_rMtf.SetPrefMapMode( aMapMode );
 
-    mpImplData->mxPrinter->EnableOutput( false );
+    mpImplData->mxPrinter->DisableOutput();
 
     o_rMtf.Record( mpImplData->mxPrinter.get() );
 

@@ -626,7 +626,7 @@ void ImplApplyFilterData( ::Graphic& rGraphic, const uno::Sequence< beans::Prope
             MapMode aNewMapMode( MapUnit::Map100thMM );
             aNewMapMode.SetScaleX( Fraction( aLogicalSize.Width, aMtfSize.Width() ) );
             aNewMapMode.SetScaleY( Fraction( aLogicalSize.Height, aMtfSize.Height() ) );
-            aDummyVDev->EnableOutput( false );
+            aDummyVDev->DisableOutput();
             aDummyVDev->SetMapMode( aNewMapMode );
 
             for( size_t i = 0, nObjCount = aMtf.GetActionSize(); i < nObjCount; i++ )

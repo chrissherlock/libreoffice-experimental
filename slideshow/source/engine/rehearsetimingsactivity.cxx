@@ -157,7 +157,7 @@ RehearseTimingsActivity::RehearseTimingsActivity( const SlideShowContext& rConte
 
     // determine sprite size (in pixel):
     ScopedVclPtrInstance< VirtualDevice > blackHole;
-    blackHole->EnableOutput(false);
+    blackHole->DisableOutput();
     blackHole->SetFont( maFont );
     blackHole->SetMapMode(MapMode(MapUnit::MapPixel));
     tools::Rectangle rect;
@@ -434,7 +434,7 @@ void RehearseTimingsActivity::paint( cppcanvas::CanvasSharedPtr const & canvas )
     ScopedVclPtrInstance< VirtualDevice > blackHole;
     metaFile.Record( blackHole );
     metaFile.SetPrefSize( Size( 1, 1 ) );
-    blackHole->EnableOutput(false);
+    blackHole->DisableOutput();
     blackHole->SetMapMode(MapMode(MapUnit::MapPixel));
     blackHole->SetFont( maFont );
     tools::Rectangle rect( 0,0,

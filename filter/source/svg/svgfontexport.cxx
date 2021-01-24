@@ -78,7 +78,7 @@ void SVGFontExport::implCollectGlyphs()
 {
     ScopedVclPtrInstance< VirtualDevice > pVDev;
 
-    pVDev->EnableOutput( false );
+    pVDev->DisableOutput();
 
     for (auto const& elem : maObjects)
     {

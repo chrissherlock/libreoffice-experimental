@@ -135,12 +135,20 @@ bool OutputDevice::IsVirtual() const
     return false;
 }
 
-void OutputDevice::EnableOutput( bool bEnable )
+void OutputDevice::EnableOutput()
 {
-    mbOutput = bEnable;
+    mbOutput = true;
 
-    if( mpAlphaVDev )
-        mpAlphaVDev->EnableOutput( bEnable );
+    if (mpAlphaVDev)
+        mpAlphaVDev->EnableOutput();
+}
+
+void OutputDevice::DisableOutput()
+{
+    mbOutput = false;
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->EnableOutput();
 }
 
 SalGraphics* OutputDevice::GetGraphics()

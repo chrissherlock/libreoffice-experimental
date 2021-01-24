@@ -821,7 +821,7 @@ bool DXF2GDIMetaFile::Convert(const DXFRepresentation & rDXF, GDIMetaFile & rMTF
         aParentLayerDXFLineInfo.fDistance = 0;
     }
 
-    pVirDev->EnableOutput(false);
+    pVirDev->DisableOutput();
     if (!utl::ConfigManager::IsFuzzing()) // for fuzzing don't bother recording the drawing
         rMTF.Record(pVirDev);
 

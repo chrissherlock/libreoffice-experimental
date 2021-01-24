@@ -97,7 +97,7 @@ SfxObjectShell::GetPreviewMetaFile( bool bFullContent ) const
 {
     auto xFile = std::make_shared<GDIMetaFile>();
     ScopedVclPtrInstance< VirtualDevice > pDevice;
-    pDevice->EnableOutput( false );
+    pDevice->DisableOutput();
     if(!CreatePreview_Impl(bFullContent, pDevice, xFile.get()))
         return std::shared_ptr<GDIMetaFile>();
     return xFile;

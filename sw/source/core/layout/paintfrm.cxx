@@ -7419,7 +7419,7 @@ Graphic SwFlyFrameFormat::MakeGraphic( ImageMap* pMap )
 
         OutputDevice *pOld = pSh->GetOut();
         ScopedVclPtrInstance< VirtualDevice > pDev( *pOld );
-        pDev->EnableOutput( false );
+        pDev->DisableOutput();
 
         GDIMetaFile aMet;
         MapMode aMap( pOld->GetMapMode().GetMapUnit() );
