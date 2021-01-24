@@ -34,35 +34,28 @@ void OutputDevice::SaveBackground(VirtualDevice& rSaveDevice,
    rSaveDevice.DrawOutDev(Point(), rBackgroundSize, rPos, rSize, *this);
 }
 
-void OutputDevice::SetClipRegion()
+void OutputDevice::SetClipRegion(vcl::Region const& rRegion)
 {
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaClipRegionAction( vcl::Region(), false ) );
-
-    SetDeviceClipRegion( nullptr );
-
-    if( mpAlphaVDev )
-        mpAlphaVDev->SetClipRegion();
-}
-
-void OutputDevice::SetClipRegion( const vcl::Region& rRegion )
-{
-
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaClipRegionAction( rRegion, true ) );
-
-    if ( rRegion.IsNull() )
+    if (mpMetaFile)
     {
-        SetDeviceClipRegion( nullptr );
+        if (!rRegion.IsNull())
+            mpMetaFile->AddAction(new MetaClipRegionAction(rRegion, true));
+        else
+            mpMetaFile->AddAction(new MetaClipRegionAction(vcl::Region(), false));
+    }
+
+    if (rRegion.IsNull())
+    {
+        SetDeviceClipRegion(nullptr);
     }
     else
     {
-        vcl::Region aRegion = maGeometry.LogicToPixel( rRegion );
+        vcl::Region aRegion = maGeometry.LogicToPixel(rRegion);
         SetDeviceClipRegion( &aRegion );
     }
 
-    if( mpAlphaVDev )
+    if (mpAlphaVDev)
         mpAlphaVDev->SetClipRegion( rRegion );
 }
 

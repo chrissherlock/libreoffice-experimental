@@ -481,8 +481,7 @@ protected:
     ///@{
 
 public:
-    void                        SetClipRegion();
-    void                        SetClipRegion( const vcl::Region& rRegion );
+    void                        SetClipRegion(vcl::Region const& rRegion = vcl::Region(true));
     bool                        SelectClipRegion( const vcl::Region&, SalGraphics* pGraphics = nullptr );
 
     void                        MoveClipRegion( tools::Long nHorzMove, tools::Long nVertMove );
