@@ -290,6 +290,8 @@ protected:
                                    const Point& rSrcPtPixel, const Size& rSrcSizePixel,
                                    BitmapEx const& rBitmapEx);
 
+    virtual bool CanSubsampleBitmap() const;
+
     // TODO eventually make these private when all text/font functions migrated from
     // OutputDevice to RenderContext2
     Color maTextLineColor;

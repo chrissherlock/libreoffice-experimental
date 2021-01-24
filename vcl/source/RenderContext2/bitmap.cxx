@@ -23,6 +23,8 @@
 #include <salbmp.hxx>
 #include <salgdi.hxx>
 
+bool RenderContext2::CanSubsampleBitmap() const { return true; }
+
 static std::tuple<Point, Size, tools::Rectangle, bool>
 GetBitmapGeometry(Point const& rSrcPt, Size const& rSize, Geometry const& rGeom)
 {

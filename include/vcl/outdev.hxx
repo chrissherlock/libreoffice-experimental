@@ -1225,8 +1225,6 @@ protected:
                                     Point const& rSrcPtPixel, Size const& rSrcSizePixel,
                                     BitmapEx const& rBitmapEx, const MetaActionType nAction);
 
-    virtual bool                CanSubsampleBitmap() const { return true; }
-
     /** Transform and draw a bitmap directly
 
      @param     aFullTransform      The B2DHomMatrix used for the transformation
