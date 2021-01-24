@@ -27,12 +27,11 @@
 #include <vcl/skia/SkiaHelper.hxx>
 #include <vcl/virdev.hxx>
 
+#include <TradScaleContext.hxx>
+#include <LinearScaleContext.hxx>
 #include <bitmap/BitmapWriteAccess.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
-
-#include "TradScaleContext.hxx"
-#include "LinearScaleContext.hxx"
 
 void OutputDevice::DrawBitmap(const Point& rDestPt, const Bitmap& rBitmap)
 {

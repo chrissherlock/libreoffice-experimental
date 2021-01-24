@@ -19,7 +19,7 @@
 
 #include <tools/gen.hxx>
 
-#include "TradScaleContext.hxx"
+#include <TradScaleContext.hxx>
 
 TradScaleContext::TradScaleContext(tools::Rectangle const& aDstRect,
                                    tools::Rectangle const& aBitmapRect, Size const& aOutSize,

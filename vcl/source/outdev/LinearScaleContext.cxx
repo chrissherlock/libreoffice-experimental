@@ -20,9 +20,8 @@
 #include <tools/gen.hxx>
 #include <tools/helpers.hxx>
 
+#include <LinearScaleContext.hxx>
 #include <bitmap/BitmapWriteAccess.hxx>
-
-#include "LinearScaleContext.hxx"
 
 LinearScaleContext::LinearScaleContext(tools::Rectangle const& aDstRect,
                                        tools::Rectangle const& aBitmapRect, Size const& aOutSize,
