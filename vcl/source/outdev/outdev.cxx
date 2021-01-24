@@ -646,6 +646,12 @@ bool OutputDevice::DrawEPS( const Point& rPoint, const Size& rSize,
     return bDrawn;
 }
 
+void OutputDevice::SaveBackground(VirtualDevice& rSaveDevice,
+                                  const Point& rPos, const Size& rSize, const Size& rBackgroundSize) const
+{
+   rSaveDevice.DrawOutDev(Point(), rBackgroundSize, rPos, rSize, *this);
+}
+
 css::awt::DeviceInfo OutputDevice::GetCommonDeviceInfo(Size const& rDevSz) const
 {
     css::awt::DeviceInfo aInfo;
