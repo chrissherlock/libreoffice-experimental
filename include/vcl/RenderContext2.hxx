@@ -245,6 +245,8 @@ protected:
     void SetInitFontFlag(bool bFlag);
     bool IsInitClipped() const;
     void SetInitClipFlag(bool bFlag);
+    bool IsClipRegionSet() const;
+    void SetClipRegionSetFlag(bool bFlag);
 
     // TODO these init functions will need to become private once all related
     // functions are moved out of OutputDevice
@@ -259,6 +261,15 @@ protected:
 
     void SetClipRegionFlag(bool bFlag);
     bool SelectClipRegion(vcl::Region const&, SalGraphics* pGraphics = nullptr);
+    virtual void InitClipRegion();
+
+    /** Perform actual rect clip against outdev dimensions, to generate
+        empty clips whenever one of the values is completely off the device.
+
+        @param aRegion      region to be clipped to the device dimensions
+        @returns            region clipped to the device bounds
+     **/
+    virtual vcl::Region ClipToDeviceBounds(vcl::Region aRegion) const;
 
     virtual bool DrawMaskedAlphaBitmapEx(Point const& rDestPt, Size const& rDestSize,
                                          Point const& rSrcPtPixel, Size const& rSrcSizePixel,
@@ -296,6 +307,7 @@ private:
     mutable bool mbNewFont : 1;
     mutable bool mbInitClipRegion : 1;
     mutable bool mbClipRegion : 1;
+    mutable bool mbClipRegionSet : 1;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

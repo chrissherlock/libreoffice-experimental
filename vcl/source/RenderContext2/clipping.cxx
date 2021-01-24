@@ -76,4 +76,47 @@ bool RenderContext2::SelectClipRegion(vcl::Region const& rRegion, SalGraphics* p
     return bClipRegion;
 }
 
+bool RenderContext2::IsClipRegionSet() const { return mbClipRegionSet; }
+
+void RenderContext2::SetClipRegionSetFlag(bool bFlag) { mbClipRegionSet = bFlag; }
+
+void RenderContext2::InitClipRegion()
+{
+    DBG_TESTSOLARMUTEX();
+
+    if (IsClipRegion())
+    {
+        if (!maRegion.IsEmpty())
+        {
+            // #102532# Respect output offset also for clip region
+            vcl::Region aRegion = ClipToDeviceBounds(maGeometry.PixelToDevicePixel(maRegion));
+
+            if (!aRegion.IsEmpty())
+                SelectClipRegion(aRegion);
+        }
+
+        SetClipRegionSetFlag(true);
+    }
+    else
+    {
+        if (mbClipRegionSet)
+        {
+            if (mpGraphics)
+                mpGraphics->ResetClipRegion();
+
+            SetClipRegionSetFlag(false);
+        }
+    }
+
+    SetInitClipFlag(false);
+}
+
+vcl::Region RenderContext2::ClipToDeviceBounds(vcl::Region aRegion) const
+{
+    aRegion.Intersect(tools::Rectangle{ GetXOffsetInPixels(), GetYOffsetInPixels(),
+                                        GetXOffsetInPixels() + GetWidthInPixels() - 1,
+                                        GetYOffsetInPixels() + GetHeightInPixels() - 1 });
+    return aRegion;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

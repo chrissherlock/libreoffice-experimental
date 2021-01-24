@@ -99,47 +99,6 @@ void OutputDevice::IntersectClipRegion(vcl::Region const& rRegion)
         mpAlphaVDev->IntersectClipRegion( rRegion );
 }
 
-void OutputDevice::InitClipRegion()
-{
-    DBG_TESTSOLARMUTEX();
-
-    if (IsClipRegion())
-    {
-        if (!maRegion.IsEmpty())
-        {
-            // #102532# Respect output offset also for clip region
-            vcl::Region aRegion = ClipToDeviceBounds(maGeometry.PixelToDevicePixel(maRegion));
-
-            if (!aRegion.IsEmpty())
-                SelectClipRegion( aRegion );
-        }
-
-        mbClipRegionSet = true;
-    }
-    else
-    {
-        if (mbClipRegionSet)
-        {
-            if (mpGraphics)
-                mpGraphics->ResetClipRegion();
-
-            mbClipRegionSet = false;
-        }
-    }
-
-    SetInitClipFlag(false);
-}
-
-vcl::Region OutputDevice::ClipToDeviceBounds(vcl::Region aRegion) const
-{
-    aRegion.Intersect(tools::Rectangle{GetXOffsetInPixels(),
-                                       GetYOffsetInPixels(),
-                                       GetXOffsetInPixels() + GetWidthInPixels() - 1,
-                                       GetYOffsetInPixels() + GetHeightInPixels() - 1
-                                      });
-    return aRegion;
-}
-
 void OutputDevice::ClipToPaintRegion(tools::Rectangle& /*rDstRect*/)
 {
     // this is only used in Window, but we still need it as it's called

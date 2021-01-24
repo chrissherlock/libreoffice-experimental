@@ -31,6 +31,7 @@ RenderContext2::RenderContext2()
     , mbNewFont(true)
     , mbInitClipRegion(false)
     , mbClipRegion(false)
+    , mbClipRegionSet(false)
 {
 }
 

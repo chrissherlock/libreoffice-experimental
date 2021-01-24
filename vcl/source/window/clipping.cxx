@@ -60,8 +60,7 @@ void Window::InitClipRegion()
     if (!aRegion.IsEmpty())
         SelectClipRegion( aRegion );
 
-    mbClipRegionSet = true;
-
+    SetClipRegionSetFlag(true);
     SetInitClipFlag(false);
 }
 

@@ -76,7 +76,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mbOutput                        = true;
     mbDevOutput                     = false;
     maTextColor                     = COL_BLACK;
-    mbClipRegionSet                 = false;
     mbTextLines                     = false;
     mbTextSpecial                   = false;
     mbRefPoint                      = false;
