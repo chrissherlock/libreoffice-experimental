@@ -242,9 +242,6 @@ void OutputDevice::DrawTransparentAlphaBitmapSlowPath(const Bitmap& rBitmap,
     if (aBmp.ImplGetSalBitmap())
         aDstRect.SetSize(aBmp.GetSizePixel());
 
-    const tools::Long nDstWidth = aDstRect.GetWidth();
-    const tools::Long nDstHeight = aDstRect.GetHeight();
-
     // calculate offset in original bitmap
     // in RTL case this is a little more complicated since the contents of the
     // bitmap is not mirrored (it never is), however the paint region and bmp region
@@ -256,39 +253,47 @@ void OutputDevice::DrawTransparentAlphaBitmapSlowPath(const Bitmap& rBitmap,
 
     const tools::Long nOffY = aDstRect.Top() - aOutPoint.Y();
 
-    TradScaleContext aTradContext(aDstRect, aBmpRect, aOutSize, nOffX, nOffY);
-
-    Bitmap::ScopedReadAccess pBitmapReadAccess(const_cast<Bitmap&>(rBitmap));
-    AlphaMask::ScopedReadAccess pAlphaReadAccess(const_cast<AlphaMask&>(rAlpha));
-
-    DBG_ASSERT(pAlphaReadAccess->GetScanlineFormat() == ScanlineFormat::N8BitPal,
-               "OutputDevice::ImplDrawAlpha(): non-8bit alpha no longer supported!");
-
     Bitmap aNewBitmap;
 
     // #i38887# reading from screen may sometimes fail
     if (mpAlphaVDev && aBmp.ImplGetSalBitmap())
     {
+        TradScaleContext aTradContext(aDstRect, aBmpRect, aOutSize, nOffX, nOffY);
+
+        Bitmap::ScopedReadAccess pBitmapReadAccess(const_cast<Bitmap&>(rBitmap));
+        AlphaMask::ScopedReadAccess pAlphaReadAccess(const_cast<AlphaMask&>(rAlpha));
+
+        DBG_ASSERT(pAlphaReadAccess->GetScanlineFormat() == ScanlineFormat::N8BitPal,
+               "OutputDevice::ImplDrawAlpha(): non-8bit alpha no longer supported!");
+
         aNewBitmap = BlendBitmapWithAlpha(aBmp, pBitmapReadAccess.get(), pAlphaReadAccess.get(),
-                                          aDstRect, nOffY, nDstHeight, nOffX, nDstWidth,
+                                          aDstRect, nOffY, aDstRect.GetHeight(), nOffX, aDstRect.GetWidth(),
                                           aTradContext.mpMapX.get(), aTradContext.mpMapY.get());
     }
 
     if (!mpAlphaVDev && aBmp.ImplGetSalBitmap())
     {
+        Bitmap::ScopedReadAccess pBitmapReadAccess(const_cast<Bitmap&>(rBitmap));
+        AlphaMask::ScopedReadAccess pAlphaReadAccess(const_cast<AlphaMask&>(rAlpha));
+
+        DBG_ASSERT(pAlphaReadAccess->GetScanlineFormat() == ScanlineFormat::N8BitPal,
+                   "OutputDevice::ImplDrawAlpha(): non-8bit alpha no longer supported!");
+
         LinearScaleContext aLinearContext(aDstRect, aBmpRect, aOutSize, nOffX, nOffY);
 
         if (aLinearContext.blendBitmap(BitmapScopedWriteAccess(aBmp).get(),
                                        pBitmapReadAccess.get(), pAlphaReadAccess.get(),
-                                       nDstWidth, nDstHeight))
+                                       aDstRect.GetWidth(), aDstRect.GetHeight()))
         {
             aNewBitmap = aBmp;
         }
         else
         {
+            TradScaleContext aTradContext(aDstRect, aBmpRect, aOutSize, nOffX, nOffY);
+
             aNewBitmap
                 = BlendBitmap(aBmp, pBitmapReadAccess.get(), pAlphaReadAccess.get(), nOffY,
-                              nDstHeight, nOffX, nDstWidth, aBmpRect, aOutSize, bHMirr, bVMirr,
+                              aDstRect.GetHeight(), nOffX, aDstRect.GetWidth(), aBmpRect, aOutSize, bHMirr, bVMirr,
                               aTradContext.mpMapX.get(), aTradContext.mpMapY.get());
         }
     }
