@@ -56,12 +56,7 @@ void OutputDevice::MoveClipRegion(tools::Long nHorzMove, tools::Long nVertMove)
     if (IsClipRegion() && mpMetaFile)
         mpMetaFile->AddAction(new MetaMoveClipRegionAction(nHorzMove, nVertMove));
 
-    if (IsClipRegion())
-    {
-        maRegion.Move(maGeometry.LogicWidthToDevicePixel(nHorzMove),
-                      maGeometry.LogicHeightToDevicePixel(nVertMove));
-        SetInitClipFlag(true);
-    }
+    RenderContext2::MoveClipRegion(nHorzMove, nVertMove);
 
     if (mpAlphaVDev)
         mpAlphaVDev->MoveClipRegion(nHorzMove, nVertMove);
@@ -72,10 +67,7 @@ void OutputDevice::IntersectClipRegion(tools::Rectangle const& rRect)
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaISectRectClipRegionAction(rRect));
 
-    tools::Rectangle aRect = maGeometry.LogicToPixel( rRect );
-    maRegion.Intersect( aRect );
-    SetClipRegionFlag(true);
-    SetInitClipFlag(true);
+    RenderContext2::IntersectClipRegion(rRect);
 
     if (mpAlphaVDev)
         mpAlphaVDev->IntersectClipRegion( rRect );
@@ -87,13 +79,7 @@ void OutputDevice::IntersectClipRegion(vcl::Region const& rRegion)
     if (!rRegion.IsNull() && mpMetaFile)
         mpMetaFile->AddAction(new MetaISectRegionClipRegionAction(rRegion));
 
-    if (!rRegion.IsNull())
-    {
-        vcl::Region aRegion = maGeometry.LogicToPixel(rRegion);
-        maRegion.Intersect(aRegion);
-        SetClipRegionFlag(true);
-        SetInitClipFlag(true);
-    }
+    RenderContext2::IntersectClipRegion(rRegion);
 
     if (mpAlphaVDev)
         mpAlphaVDev->IntersectClipRegion( rRegion );

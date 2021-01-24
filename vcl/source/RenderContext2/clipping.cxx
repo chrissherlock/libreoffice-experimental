@@ -119,4 +119,33 @@ vcl::Region RenderContext2::ClipToDeviceBounds(vcl::Region aRegion) const
     return aRegion;
 }
 
+void RenderContext2::MoveClipRegion(tools::Long nHorzMove, tools::Long nVertMove)
+{
+    if (IsClipRegion())
+    {
+        maRegion.Move(maGeometry.LogicWidthToDevicePixel(nHorzMove),
+                      maGeometry.LogicHeightToDevicePixel(nVertMove));
+        SetInitClipFlag(true);
+    }
+}
+
+void RenderContext2::IntersectClipRegion(tools::Rectangle const& rRect)
+{
+    tools::Rectangle aRect = maGeometry.LogicToPixel(rRect);
+    maRegion.Intersect(aRect);
+    SetClipRegionFlag(true);
+    SetInitClipFlag(true);
+}
+
+void RenderContext2::IntersectClipRegion(vcl::Region const& rRegion)
+{
+    if (!rRegion.IsNull())
+    {
+        vcl::Region aRegion = maGeometry.LogicToPixel(rRegion);
+        maRegion.Intersect(aRegion);
+        SetClipRegionFlag(true);
+        SetInitClipFlag(true);
+    }
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

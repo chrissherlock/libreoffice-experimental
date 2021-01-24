@@ -202,6 +202,9 @@ public:
     vcl::Region GetClipRegion() const;
     virtual vcl::Region GetActiveClipRegion() const;
     virtual void SetClipRegion(vcl::Region const& rRegion = vcl::Region(true));
+    virtual void MoveClipRegion(tools::Long nHorzMove, tools::Long nVertMove);
+    virtual void IntersectClipRegion(tools::Rectangle const& rRect);
+    virtual void IntersectClipRegion(vcl::Region const& rRegion);
 
 protected:
     void dispose();

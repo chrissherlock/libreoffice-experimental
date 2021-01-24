@@ -480,9 +480,9 @@ protected:
 public:
     void                        SetClipRegion(vcl::Region const& rRegion = vcl::Region(true)) override;
 
-    void                        MoveClipRegion( tools::Long nHorzMove, tools::Long nVertMove );
-    void                        IntersectClipRegion( const tools::Rectangle& rRect );
-    void                        IntersectClipRegion( const vcl::Region& rRegion );
+    void                        MoveClipRegion(tools::Long nHorzMove, tools::Long nVertMove) override;
+    void                        IntersectClipRegion(tools::Rectangle const& rRect) override;
+    void                        IntersectClipRegion(vcl::Region const& rRegion) override;
 
     virtual vcl::Region         GetOutputBoundsClipRegion() const;
 
