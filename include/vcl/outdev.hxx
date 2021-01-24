@@ -290,7 +290,6 @@ private:
     mutable bool                    mbBackground : 1;
     mutable bool                    mbOutput : 1;
     mutable bool                    mbDevOutput : 1;
-    mutable bool                    mbOutputClipped : 1;
     mutable bool                    mbClipRegionSet : 1;
     mutable bool                    mbTextLines : 1;
     mutable bool                    mbTextSpecial : 1;

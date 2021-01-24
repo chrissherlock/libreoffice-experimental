@@ -36,7 +36,7 @@ Color OutputDevice::GetPixel(const Point& rPoint) const
         if (IsInitClipped())
             const_cast<OutputDevice*>(this)->InitClipRegion();
 
-        if (!mbOutputClipped)
+        if (!maRegion.IsEmpty())
         {
             const tools::Long nX = maGeometry.LogicXToDevicePixel(rPoint.X());
             const tools::Long nY = maGeometry.LogicYToDevicePixel(rPoint.Y());
@@ -70,7 +70,7 @@ void OutputDevice::DrawPixel( const Point& rPt )
     if ( IsInitClipped() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( maRegion.IsEmpty() )
         return;
 
     if ( IsInitLineColor() )
@@ -102,7 +102,7 @@ void OutputDevice::DrawPixel( const Point& rPt, const Color& rColor )
     if ( IsInitClipped() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( maRegion.IsEmpty() )
         return;
 
     mpGraphics->DrawPixel( aPt.X(), aPt.Y(), aColor, *this );

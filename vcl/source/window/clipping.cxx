@@ -57,15 +57,9 @@ void Window::InitClipRegion()
     if (IsClipRegion())
         aRegion.Intersect( maGeometry.PixelToDevicePixel( maRegion ) );
 
-    if ( aRegion.IsEmpty() )
-    {
-        mbOutputClipped = true;
-    }
-    else
-    {
-        mbOutputClipped = false;
+    if (!aRegion.IsEmpty())
         SelectClipRegion( aRegion );
-    }
+
     mbClipRegionSet = true;
 
     SetInitClipFlag(false);

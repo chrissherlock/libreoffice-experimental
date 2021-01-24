@@ -49,7 +49,7 @@ void OutputDevice::DrawPolyLine( const tools::Polygon& rPoly )
     if ( IsInitClipped() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( maRegion.IsEmpty() )
         return;
 
     if ( IsInitLineColor() )
@@ -141,7 +141,7 @@ void OutputDevice::DrawPolyLine( const basegfx::B2DPolygon& rB2DPolygon,
     if( IsInitClipped() )
         InitClipRegion();
 
-    if( mbOutputClipped )
+    if( maRegion.IsEmpty() )
         return;
 
     if( IsInitLineColor() )
@@ -233,7 +233,7 @@ void OutputDevice::drawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
     if ( IsInitClipped() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( maRegion.IsEmpty() )
         return;
 
     if ( IsInitLineColor() )
@@ -288,7 +288,7 @@ bool OutputDevice::DrawPolyLineDirect(
     if (IsInitClipped())
         InitClipRegion();
 
-    if (mbOutputClipped)
+    if (maRegion.IsEmpty())
         return true;
 
     if (IsInitLineColor())

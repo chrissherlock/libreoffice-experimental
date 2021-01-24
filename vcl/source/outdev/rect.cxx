@@ -72,7 +72,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect )
     if ( IsInitClipped() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( maRegion.IsEmpty() )
         return;
 
     if ( IsInitLineColor() )
@@ -113,7 +113,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
     if ( IsInitClipped() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( maRegion.IsEmpty() )
         return;
 
     if ( IsInitLineColor() )
@@ -164,7 +164,7 @@ void OutputDevice::Invert( const tools::Rectangle& rRect, InvertFlags nFlags )
     if ( IsInitClipped() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( maRegion.IsEmpty() )
         return;
 
     SalInvert nSalFlags = SalInvert::NONE;
@@ -195,7 +195,7 @@ void OutputDevice::Invert( const tools::Polygon& rPoly, InvertFlags nFlags )
     if ( IsInitClipped() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( maRegion.IsEmpty() )
         return;
 
     SalInvert nSalFlags = SalInvert::NONE;
@@ -249,7 +249,7 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
     if( IsInitClipped() )
         InitClipRegion();
 
-    if( mbOutputClipped )
+    if( maRegion.IsEmpty() )
         return;
 
     const tools::Long nDistX = std::max( rDist.Width(), tools::Long(1) );

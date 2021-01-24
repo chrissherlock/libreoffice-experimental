@@ -52,7 +52,7 @@ void OutputDevice::DrawPolyPolygon(const tools::PolyPolygon& rPolyPoly)
     if (IsInitClipped())
         InitClipRegion();
 
-    if (mbOutputClipped)
+    if (maRegion.IsEmpty())
         return;
 
     if (IsInitLineColor())
@@ -153,7 +153,7 @@ void OutputDevice::ImplDrawPolyPolygonWithB2DPolyPolygon(
     if (IsInitClipped())
         InitClipRegion();
 
-    if (mbOutputClipped)
+    if (maRegion.IsEmpty())
         return;
 
     if (IsInitLineColor())

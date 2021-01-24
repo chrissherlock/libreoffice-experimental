@@ -450,7 +450,7 @@ void OutputDevice::ImplDrawText( SalLayout& rSalLayout )
     if( IsInitClipped() )
         InitClipRegion();
 
-    if( mbOutputClipped )
+    if( maRegion.IsEmpty() )
         return;
 
     if (IsInitTextColor())
@@ -883,7 +883,7 @@ void OutputDevice::DrawTextArray( const Point& rStartPt, const OUString& rStr,
         return;
     if( IsInitClipped() )
         InitClipRegion();
-    if( mbOutputClipped )
+    if( maRegion.IsEmpty() )
         return;
 
     std::unique_ptr<SalLayout> pSalLayout = ImplLayout(rStr, nIndex, nLen, rStartPt, 0, pDXAry, flags, nullptr, pSalLayoutCache);
@@ -1720,7 +1720,7 @@ void OutputDevice::DrawText( const tools::Rectangle& rRect, const OUString& rOri
         return;
     if( IsInitClipped() )
         InitClipRegion();
-    if( mbOutputClipped && !bDecomposeTextRectAction )
+    if( maRegion.IsEmpty() && !bDecomposeTextRectAction )
         return;
 
     // temporarily disable mtf action generation (ImplDrawText _does_
@@ -2023,7 +2023,7 @@ void OutputDevice::DrawCtrlText( const Point& rPos, const OUString& rStr,
         return;
     if( IsInitClipped() )
         InitClipRegion();
-    if ( mbOutputClipped )
+    if ( maRegion.IsEmpty() )
         return;
 
     if( nIndex >= rStr.getLength() )

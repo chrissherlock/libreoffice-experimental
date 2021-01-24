@@ -91,7 +91,7 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
     if( IsInitClipped() )
         InitClipRegion();
 
-    if( mbOutputClipped )
+    if( maRegion.IsEmpty() )
         return;
 
     if (rPolyPoly.Count())

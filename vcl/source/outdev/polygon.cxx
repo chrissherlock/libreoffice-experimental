@@ -64,7 +64,7 @@ void OutputDevice::DrawPolygon(const tools::Polygon& rPoly)
     if (IsInitClipped())
         InitClipRegion();
 
-    if (mbOutputClipped)
+    if (maRegion.IsEmpty())
         return;
 
     if (IsInitLineColor())

@@ -268,7 +268,7 @@ bool OutputDevice::DrawNativeControl( ControlType nType,
 
     if ( IsInitClipped() )
         InitClipRegion();
-    if ( mbOutputClipped )
+    if ( maRegion.IsEmpty() )
         return true;
 
     if ( IsInitLineColor() )

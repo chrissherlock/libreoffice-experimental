@@ -181,7 +181,7 @@ void Window::InvertTracking( const tools::Rectangle& rRect, ShowTrackFlags nFlag
         if ( IsInitClipped() )
             InitClipRegion();
 
-        if ( mbOutputClipped )
+        if ( maRegion.IsEmpty() )
             return;
 
         pGraphics = mpGraphics;

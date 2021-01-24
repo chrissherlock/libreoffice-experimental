@@ -75,7 +75,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mbBackground                    = false;
     mbOutput                        = true;
     mbDevOutput                     = false;
-    mbOutputClipped                 = false;
     maTextColor                     = COL_BLACK;
     mbClipRegionSet                 = false;
     mbTextLines                     = false;
@@ -320,7 +319,7 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
     if (IsInitClipped())
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( maRegion.IsEmpty() )
         return;
 
     tools::Long nSrcWidth   = maGeometry.LogicWidthToDevicePixel( rSrcSize.Width() );
@@ -381,7 +380,7 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
     if ( IsInitClipped() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( maRegion.IsEmpty() )
         return;
 
     if (rOutDev.mpAlphaVDev)
@@ -427,7 +426,7 @@ void OutputDevice::CopyArea( const Point& rDestPt,
     if ( IsInitClipped() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( maRegion.IsEmpty() )
         return;
 
     tools::Long nSrcWidth = maGeometry.LogicWidthToDevicePixel( rSrcSize.Width() );
@@ -610,7 +609,7 @@ bool OutputDevice::DrawEPS( const Point& rPoint, const Size& rSize,
     if ( !IsDeviceOutputNecessary() || ImplIsRecordLayout() )
         return bDrawn;
 
-    if( mbOutputClipped )
+    if( maRegion.IsEmpty() )
         return bDrawn;
 
     tools::Rectangle aRect( maGeometry.LogicToDevicePixel( tools::Rectangle( rPoint, rSize ) ) );

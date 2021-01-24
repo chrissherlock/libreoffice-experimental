@@ -117,7 +117,7 @@ void OutputDevice::DrawBitmap(const Point& rDestPt, const Size& rDestSize, const
     if (IsInitClipped())
         InitClipRegion();
 
-    if (mbOutputClipped)
+    if (maRegion.IsEmpty())
         return;
 
     if (!aBmp.IsEmpty())

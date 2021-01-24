@@ -146,7 +146,7 @@ void OutputDevice::DrawTransparentBitmapEx(const Point& rDestPt, const Size& rDe
     if (IsInitClipped())
         InitClipRegion();
 
-    if (mbOutputClipped)
+    if (maRegion.IsEmpty())
         return;
 
     assert(!is_double_buffered_window());
@@ -287,13 +287,13 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
     /*
        tdf#135325 typically in these OutputDevice methods, for the in
        record-to-metafile case the  MetaFile is already written to before the
-       test against mbOutputClipped to determine that output to the current
+       test against maRegion.IsEmpty() to determine that output to the current
        device would result in no visual output. In this case the metafile is
-       written after the test, so we must continue past mbOutputClipped if
+       written after the test, so we must continue past maRegion.IsEmpty() if
        recording to a metafile. It's typical to record with a device of nominal
        size and play back later against something of a totally different size.
      */
-    if (mbOutputClipped && !bMetafile)
+    if (maRegion.IsEmpty() && !bMetafile)
         return;
 
 #ifdef DO_TIME_TEST

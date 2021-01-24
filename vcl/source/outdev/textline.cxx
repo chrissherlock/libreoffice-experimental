@@ -874,7 +874,7 @@ void OutputDevice::DrawTextLine( const Point& rPos, tools::Long nWidth,
     if( IsInitClipped() )
         InitClipRegion();
 
-    if( mbOutputClipped )
+    if( maRegion.IsEmpty() )
         return;
 
     // initialize font if needed to get text offsets
@@ -906,7 +906,7 @@ void OutputDevice::DrawWaveLine(const Point& rStartPos, const Point& rEndPos, to
     if ( IsInitClipped() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( maRegion.IsEmpty() )
         return;
 
     if (!InitFont())

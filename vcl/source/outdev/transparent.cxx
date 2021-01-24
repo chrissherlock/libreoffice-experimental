@@ -129,7 +129,7 @@ void OutputDevice::DrawTransparent(
     if (IsInitClipped())
         InitClipRegion();
 
-    if (mbOutputClipped)
+    if (maRegion.IsEmpty())
         return;
 
     if (IsInitLineColor())
@@ -260,7 +260,7 @@ void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
         if( IsInitClipped() )
             InitClipRegion();
 
-        if( mbOutputClipped )
+        if( maRegion.IsEmpty() )
             return;
 
         if( IsInitLineColor() )

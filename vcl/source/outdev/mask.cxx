@@ -92,7 +92,7 @@ void OutputDevice::DrawMask( const Point& rDestPt, const Size& rDestSize,
     if ( IsInitClipped() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( maRegion.IsEmpty() )
         return;
 
     DrawDeviceMask( rBitmap, rMaskColor, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel );

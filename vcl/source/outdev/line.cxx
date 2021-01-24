@@ -79,7 +79,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
     if ( IsInitClipped() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( maRegion.IsEmpty() )
         return;
 
     const Point aStartPt( maGeometry.LogicToDevicePixel( rStartPt ) );
@@ -124,7 +124,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt )
     if ( IsInitClipped() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( maRegion.IsEmpty() )
         return;
 
     if ( IsInitLineColor() )

@@ -105,40 +105,26 @@ void OutputDevice::InitClipRegion()
 
     if (IsClipRegion())
     {
-        if ( maRegion.IsEmpty() )
+        if (!maRegion.IsEmpty())
         {
-            mbOutputClipped = true;
-        }
-        else
-        {
-            mbOutputClipped = false;
-
             // #102532# Respect output offset also for clip region
             vcl::Region aRegion = ClipToDeviceBounds(maGeometry.PixelToDevicePixel(maRegion));
 
-            if ( aRegion.IsEmpty() )
-            {
-                mbOutputClipped = true;
-            }
-            else
-            {
-                mbOutputClipped = false;
+            if (!aRegion.IsEmpty())
                 SelectClipRegion( aRegion );
-            }
         }
 
         mbClipRegionSet = true;
     }
     else
     {
-        if ( mbClipRegionSet )
+        if (mbClipRegionSet)
         {
             if (mpGraphics)
                 mpGraphics->ResetClipRegion();
+
             mbClipRegionSet = false;
         }
-
-        mbOutputClipped = false;
     }
 
     SetInitClipFlag(false);

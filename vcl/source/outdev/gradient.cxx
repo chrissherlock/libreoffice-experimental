@@ -52,7 +52,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
 
     if (IsInitClipped())
         InitClipRegion();
-    // don't return on mbOutputClipped here, as we may need to draw the clipped metafile, even if the output is clipped
+    // don't return on maRegion.IsEmpty() here, as we may need to draw the clipped metafile, even if the output is clipped
 
     if ( rPolyPoly.Count() && rPolyPoly[ 0 ].GetSize() )
     {
@@ -104,10 +104,10 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
                     InitClipRegion();
 
                 // try to draw gradient natively
-                if (!mbOutputClipped)
+                if (!maRegion.IsEmpty())
                     bDrawn = mpGraphics->DrawGradient( aClixPolyPoly, aGradient, *this );
 
-                if (!bDrawn && !mbOutputClipped)
+                if (!bDrawn && !maRegion.IsEmpty())
                 {
                     // draw gradients without border
                     if( IsOpaqueLineColor() || IsInitLineColor() )
@@ -219,7 +219,7 @@ void OutputDevice::DrawGradientToMetafile ( const tools::PolyPolygon& rPolyPoly,
     if ( aRect.IsEmpty() )
         return;
 
-    if( mbOutputClipped )
+    if( maRegion.IsEmpty() )
         return;
 
     // calculate step count if necessary
