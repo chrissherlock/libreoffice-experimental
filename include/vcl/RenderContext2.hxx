@@ -258,6 +258,7 @@ protected:
     std::unique_ptr<AllSettings> mxSettings;
 
     void SetClipRegionFlag(bool bFlag);
+    bool SelectClipRegion(vcl::Region const&, SalGraphics* pGraphics = nullptr);
 
     virtual bool DrawMaskedAlphaBitmapEx(Point const& rDestPt, Size const& rDestSize,
                                          Point const& rSrcPtPixel, Size const& rSrcSizePixel,

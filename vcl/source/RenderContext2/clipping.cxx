@@ -17,9 +17,12 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <sal/log.hxx>
 #include <tools/debug.hxx>
 
 #include <vcl/RenderContext2.hxx>
+
+#include <salgdi.hxx>
 
 bool RenderContext2::IsInitClipped() const { return mbInitClipRegion; }
 
@@ -52,6 +55,25 @@ void RenderContext2::SetClipRegion(vcl::Region const& rRegion)
         SetClipRegionFlag(true);
         SetInitClipFlag(true);
     }
+}
+
+bool RenderContext2::SelectClipRegion(vcl::Region const& rRegion, SalGraphics* pGraphics)
+{
+    DBG_TESTSOLARMUTEX();
+
+    if (!pGraphics)
+    {
+        if (!mpGraphics && !AcquireGraphics())
+            return false;
+        pGraphics = mpGraphics;
+    }
+
+    OutputDevice const* pOutDev = dynamic_cast<OutputDevice const*>(this);
+
+    bool bClipRegion = pGraphics->SetClipRegion(rRegion, *pOutDev);
+    SAL_WARN_IF(!bClipRegion, "vcl.gdi",
+                "RenderContext2::SelectClipRegion() - can't create region");
+    return bClipRegion;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

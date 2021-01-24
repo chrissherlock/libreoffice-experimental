@@ -481,7 +481,6 @@ protected:
 
 public:
     void                        SetClipRegion(vcl::Region const& rRegion = vcl::Region(true)) override;
-    bool                        SelectClipRegion( const vcl::Region&, SalGraphics* pGraphics = nullptr );
 
     void                        MoveClipRegion( tools::Long nHorzMove, tools::Long nVertMove );
     void                        IntersectClipRegion( const tools::Rectangle& rRect );

@@ -51,22 +51,6 @@ void OutputDevice::SetClipRegion(vcl::Region const& rRegion)
         mpAlphaVDev->SetClipRegion(rRegion);
 }
 
-bool OutputDevice::SelectClipRegion( const vcl::Region& rRegion, SalGraphics* pGraphics )
-{
-    DBG_TESTSOLARMUTEX();
-
-    if( !pGraphics )
-    {
-        if( !mpGraphics && !AcquireGraphics() )
-            return false;
-        pGraphics = mpGraphics;
-    }
-
-    bool bClipRegion = pGraphics->SetClipRegion( rRegion, *this );
-    OSL_ENSURE( bClipRegion, "OutputDevice::SelectClipRegion() - can't create region" );
-    return bClipRegion;
-}
-
 void OutputDevice::MoveClipRegion( tools::Long nHorzMove, tools::Long nVertMove )
 {
 
