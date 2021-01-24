@@ -23,6 +23,7 @@
 #include <vcl/pdfextoutdevdata.hxx>
 #include <vcl/virdev.hxx>
 
+#include <PhysicalFontCollection.hxx>
 #include <font/ImplDeviceFontList.hxx>
 #include <font/ImplDeviceFontSizeList.hxx>
 #include <impfontcache.hxx>
@@ -30,7 +31,6 @@
 #include <salgdi.hxx>
 #include <salvd.hxx>
 #include <svdata.hxx>
-#include <PhysicalFontCollection.hxx>
 
 using namespace ::com::sun::star::uno;
 

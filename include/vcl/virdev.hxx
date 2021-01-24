@@ -20,15 +20,20 @@
 #ifndef INCLUDED_VCL_VIRDEV_HXX
 #define INCLUDED_VCL_VIRDEV_HXX
 
+#include <tools/long.hxx>
+
 #include <vcl/dllapi.h>
 #include <vcl/outdev.hxx>
 #include <vcl/salgtype.hxx>
+
 #include <memory>
 
+class Bitmap;
+class BitmapReadAccess;
 class SalVirtualDevice;
 struct SystemGraphicsData;
 typedef struct _cairo_surface cairo_surface_t;
-typedef void (OutputDevice::* FontUpdateHandler_t)(bool);
+typedef void (OutputDevice::*FontUpdateHandler_t)(bool);
 
 void UpdateFontDataForAllFrames(FontUpdateHandler_t, bool);
 
@@ -42,42 +47,45 @@ class SAL_WARN_UNUSED VCL_DLLPUBLIC VirtualDevice : public OutputDevice
 
 public:
     // reference device modes for different compatibility levels
-    enum class RefDevMode { NONE = 0,
-                            Dpi600 = 1,      // 600 dpi
-                            MSO1 = 3,
-                            PDF1 = 4,
-                            Custom = 5
-                          };
+    enum class RefDevMode
+    {
+        NONE = 0,
+        Dpi600 = 1, // 600 dpi
+        MSO1 = 3,
+        PDF1 = 4,
+        Custom = 5
+    };
 
 private:
     std::unique_ptr<SalVirtualDevice> mpVirDev;
-    VclPtr<VirtualDevice>  mpPrev;
-    VclPtr<VirtualDevice>  mpNext;
-    sal_uInt16          mnBitCount;
-    bool                mbScreenComp;
-    const DeviceFormat  meFormat;
-    const DeviceFormat  meAlphaFormat;
-    RefDevMode          meRefDevMode;
-    bool                mbForceZeroExtleadBug;
+    VclPtr<VirtualDevice> mpPrev;
+    VclPtr<VirtualDevice> mpNext;
+    sal_uInt16 mnBitCount;
+    bool mbScreenComp;
+    const DeviceFormat meFormat;
+    const DeviceFormat meAlphaFormat;
+    RefDevMode meRefDevMode;
+    bool mbForceZeroExtleadBug;
 
-    SAL_DLLPRIVATE void ImplInitVirDev( const OutputDevice* pOutDev, tools::Long nDX, tools::Long nDY, const SystemGraphicsData *pData = nullptr );
-    SAL_DLLPRIVATE bool InnerImplSetOutputSizePixel( const Size& rNewSize, bool bErase,
-                                                     sal_uInt8* pBuffer );
-    SAL_DLLPRIVATE bool ImplSetOutputSizePixel( const Size& rNewSize, bool bErase,
-                                                sal_uInt8* pBuffer );
+    SAL_DLLPRIVATE void ImplInitVirDev(const OutputDevice* pOutDev, tools::Long nDX,
+                                       tools::Long nDY, const SystemGraphicsData* pData = nullptr);
+    SAL_DLLPRIVATE bool InnerImplSetOutputSizePixel(const Size& rNewSize, bool bErase,
+                                                    sal_uInt8* pBuffer);
+    SAL_DLLPRIVATE bool ImplSetOutputSizePixel(const Size& rNewSize, bool bErase,
+                                               sal_uInt8* pBuffer);
 
-    VirtualDevice (const VirtualDevice &) = delete;
-    VirtualDevice & operator= (const VirtualDevice &) = delete;
+    VirtualDevice(const VirtualDevice&) = delete;
+    VirtualDevice& operator=(const VirtualDevice&) = delete;
 
     /** Used for alpha VDev, to set areas to opaque
 
         @since \#i32109#
      */
-    SAL_DLLPRIVATE void ImplFillOpaqueRectangle( const tools::Rectangle& rRect );
+    SAL_DLLPRIVATE void ImplFillOpaqueRectangle(const tools::Rectangle& rRect);
 
 protected:
     virtual bool AcquireGraphics() const override;
-    virtual void ReleaseGraphics( bool bRelease = true ) override;
+    virtual void ReleaseGraphics(bool bRelease = true) override;
 
     /** Create a virtual device of size 1x1
 
@@ -102,7 +110,6 @@ protected:
                            DeviceFormat eAlphaFormat, OutDevType eOutDevType);
 
 public:
-
     /** Create a virtual device of size 1x1
 
         @param eFormat
@@ -115,8 +122,11 @@ public:
         indicate: take default screen depth. Only DeviceFormat::BITMASK
         is the other possibility to denote a binary mask.
      */
-    explicit VirtualDevice(DeviceFormat eFormat = DeviceFormat::DEFAULT, DeviceFormat eAlphaFormat = DeviceFormat::NONE)
-        : VirtualDevice(nullptr, eFormat, eAlphaFormat, OUTDEV_VIRDEV) {}
+    explicit VirtualDevice(DeviceFormat eFormat = DeviceFormat::DEFAULT,
+                           DeviceFormat eAlphaFormat = DeviceFormat::NONE)
+        : VirtualDevice(nullptr, eFormat, eAlphaFormat, OUTDEV_VIRDEV)
+    {
+    }
 
     /** Create a virtual device of size 1x1
 
@@ -130,7 +140,9 @@ public:
      */
     explicit VirtualDevice(const OutputDevice& rCompDev,
                            DeviceFormat eFormat = DeviceFormat::DEFAULT)
-        : VirtualDevice(&rCompDev, eFormat, DeviceFormat::NONE, OUTDEV_VIRDEV) {}
+        : VirtualDevice(&rCompDev, eFormat, DeviceFormat::NONE, OUTDEV_VIRDEV)
+    {
+    }
 
     /** Create a virtual device  of size 1x1 with alpha channel
 
@@ -147,54 +159,56 @@ public:
         indicate: take default screen depth. Only DeviceFormat::BITMASK
         is the other possibility to denote a binary mask.
      */
-    explicit VirtualDevice(const OutputDevice& rCompDev,
-                           DeviceFormat eFormat, DeviceFormat eAlphaFormat)
-        : VirtualDevice(&rCompDev, eFormat, eAlphaFormat, OUTDEV_VIRDEV) {}
+    explicit VirtualDevice(const OutputDevice& rCompDev, DeviceFormat eFormat,
+                           DeviceFormat eAlphaFormat)
+        : VirtualDevice(&rCompDev, eFormat, eAlphaFormat, OUTDEV_VIRDEV)
+    {
+    }
 
     /** Create a virtual device using an existing system dependent device or graphics context
         Any rendering will happen directly on the context and not on any intermediate bitmap.
         Note: This might not be supported on all platforms !
      */
-    explicit VirtualDevice(const SystemGraphicsData& rData, const Size &rSize,
+    explicit VirtualDevice(const SystemGraphicsData& rData, const Size& rSize,
                            DeviceFormat eFormat);
 
-    virtual             ~VirtualDevice() override;
-    virtual void        dispose() override;
+    virtual ~VirtualDevice() override;
+    virtual void dispose() override;
 
-    bool                CanEnableNativeWidget() const override;
+    bool CanEnableNativeWidget() const override;
 
-    virtual void        EnableRTL( bool bEnable = true ) override;
+    virtual void EnableRTL(bool bEnable = true) override;
 
-    bool                SetOutputSizePixel( const Size& rNewSize, bool bErase = true );
-    bool                SetOutputSizePixelScaleOffsetAndBuffer( const Size& rNewSize,
-                                                                const Fraction& rScale,
-                                                                const Point& rNewOffset,
-                                                                sal_uInt8* pBuffer);
+    bool SetOutputSizePixel(const Size& rNewSize, bool bErase = true);
+    bool SetOutputSizePixelScaleOffsetAndBuffer(const Size& rNewSize, const Fraction& rScale,
+                                                const Point& rNewOffset, sal_uInt8* pBuffer);
 
-    bool                SetOutputSize( const Size& rNewSize )
-                            { return SetOutputSizePixel( maGeometry.LogicToPixel( rNewSize ) ); }
+    bool SetOutputSize(const Size& rNewSize)
+    {
+        return SetOutputSizePixel(maGeometry.LogicToPixel(rNewSize));
+    }
 
-    void                SetReferenceDevice( RefDevMode );
+    void SetReferenceDevice(RefDevMode);
 
-    void                Compat_ZeroExtleadBug(); // enable workaround for #i60495#
+    void Compat_ZeroExtleadBug(); // enable workaround for #i60495#
 
-    void                SetReferenceDevice( sal_Int32 i_nDPIX, sal_Int32 i_nDPIY );
+    void SetReferenceDevice(sal_Int32 i_nDPIX, sal_Int32 i_nDPIY);
 
-    virtual sal_uInt16  GetBitCount() const override;
+    virtual sal_uInt16 GetBitCount() const override;
 
     bool IsVirtual() const override;
 
-    bool                IsScreenComp() const override { return mbScreenComp; }
+    bool IsScreenComp() const override { return mbScreenComp; }
 
     Bitmap ClipBitmap(Point const& rPos, Size const& rSize, tools::Rectangle const& rOrigRect);
 
 private:
-    SAL_DLLPRIVATE void ImplSetReferenceDevice( RefDevMode, sal_Int32 i_nDPIX, sal_Int32 i_nDPIY );
+    SAL_DLLPRIVATE void ImplSetReferenceDevice(RefDevMode, sal_Int32 i_nDPIX, sal_Int32 i_nDPIY);
 
 protected:
-    virtual bool        UsePolyPolygonForComplexGradient() override;
+    virtual bool UsePolyPolygonForComplexGradient() override;
 
-    virtual tools::Long        GetFontExtLeading() const override;
+    virtual tools::Long GetFontExtLeading() const override;
 };
 
 #endif // INCLUDED_VCL_VIRDEV_HXX

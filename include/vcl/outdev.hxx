@@ -1250,20 +1250,6 @@ protected:
                                     const Size& rSrcSizePixel,
                                     BitmapEx const& rBitmapEx) override;
 
-private:
-    SAL_DLLPRIVATE void         DrawTransparentAlphaBitmap(
-                                    const Bitmap& rBmp,
-                                    const AlphaMask& rAlpha,
-                                    const Point& rDestPt,
-                                    const Size& rDestSize,
-                                    const Point& rSrcPtPixel,
-                                    const Size& rSrcSizePixel);
-
-    SAL_DLLPRIVATE void         DrawTransparentAlphaBitmapSlowPath(
-                                    const Bitmap& rBitmap, const AlphaMask& rAlpha,
-                                    tools::Rectangle aDstRect, tools::Rectangle aBmpRect,
-                                    Size const & aOutSz, Point const & aOutPt);
-
     SAL_DLLPRIVATE void         BlendBitmap(
                                     const SalTwoRect&   rPosAry,
                                     const Bitmap&       rBmp );
@@ -1294,6 +1280,20 @@ private:
                                     const sal_Int32     nDstWidth,
                                     const tools::Long*         pMapX,
                                     const tools::Long*         pMapY );
+
+private:
+    SAL_DLLPRIVATE void         DrawTransparentAlphaBitmap(
+                                    const Bitmap& rBmp,
+                                    const AlphaMask& rAlpha,
+                                    const Point& rDestPt,
+                                    const Size& rDestSize,
+                                    const Point& rSrcPtPixel,
+                                    const Size& rSrcSizePixel);
+
+    SAL_DLLPRIVATE void         DrawTransparentAlphaBitmapSlowPath(
+                                    const Bitmap& rBitmap, const AlphaMask& rAlpha,
+                                    tools::Rectangle aDstRect, tools::Rectangle aBmpRect,
+                                    Size const & aOutSz, Point const & aOutPt);
     ///@}
 
 
