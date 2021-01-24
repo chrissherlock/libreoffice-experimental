@@ -291,7 +291,6 @@ private:
     mutable bool                    mbOutput : 1;
     mutable bool                    mbDevOutput : 1;
     mutable bool                    mbOutputClipped : 1;
-    mutable bool                    mbInitClipRegion : 1;
     mutable bool                    mbClipRegionSet : 1;
     mutable bool                    mbTextLines : 1;
     mutable bool                    mbTextSpecial : 1;
@@ -481,7 +480,7 @@ protected:
     ///@{
 
 public:
-    void                        SetClipRegion(vcl::Region const& rRegion = vcl::Region(true));
+    void                        SetClipRegion(vcl::Region const& rRegion = vcl::Region(true)) override;
     bool                        SelectClipRegion( const vcl::Region&, SalGraphics* pGraphics = nullptr );
 
     void                        MoveClipRegion( tools::Long nHorzMove, tools::Long nVertMove );
@@ -502,10 +501,6 @@ protected:
      **/
     virtual vcl::Region         ClipToDeviceBounds(vcl::Region aRegion) const;
     virtual void                ClipToPaintRegion    ( tools::Rectangle& rDstRect );
-
-private:
-
-    SAL_DLLPRIVATE void         SetDeviceClipRegion( const vcl::Region* pRegion );
     ///@}
 
 public:

@@ -178,7 +178,7 @@ void Window::InvertTracking( const tools::Rectangle& rRect, ShowTrackFlags nFlag
                 return;
         }
 
-        if ( mbInitClipRegion )
+        if ( IsInitClipped() )
             InitClipRegion();
 
         if ( mbOutputClipped )

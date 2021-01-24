@@ -45,18 +45,10 @@ void OutputDevice::SetClipRegion(vcl::Region const& rRegion)
             mpMetaFile->AddAction(new MetaClipRegionAction(vcl::Region(), false));
     }
 
-    if (rRegion.IsNull())
-    {
-        SetDeviceClipRegion(nullptr);
-    }
-    else
-    {
-        vcl::Region aRegion = maGeometry.LogicToPixel(rRegion);
-        SetDeviceClipRegion( &aRegion );
-    }
+    RenderContext2::SetClipRegion(rRegion);
 
     if (mpAlphaVDev)
-        mpAlphaVDev->SetClipRegion( rRegion );
+        mpAlphaVDev->SetClipRegion(rRegion);
 }
 
 bool OutputDevice::SelectClipRegion( const vcl::Region& rRegion, SalGraphics* pGraphics )
@@ -85,7 +77,7 @@ void OutputDevice::MoveClipRegion( tools::Long nHorzMove, tools::Long nVertMove 
 
         maRegion.Move( maGeometry.LogicWidthToDevicePixel( nHorzMove ),
                        maGeometry.LogicHeightToDevicePixel( nVertMove ) );
-        mbInitClipRegion = true;
+        SetInitClipFlag(true);
     }
 
     if( mpAlphaVDev )
@@ -101,7 +93,7 @@ void OutputDevice::IntersectClipRegion( const tools::Rectangle& rRect )
     tools::Rectangle aRect = maGeometry.LogicToPixel( rRect );
     maRegion.Intersect( aRect );
     SetClipRegionFlag(true);
-    mbInitClipRegion    = true;
+    SetInitClipFlag(true);
 
     if( mpAlphaVDev )
         mpAlphaVDev->IntersectClipRegion( rRect );
@@ -118,7 +110,7 @@ void OutputDevice::IntersectClipRegion( const vcl::Region& rRegion )
         vcl::Region aRegion = maGeometry.LogicToPixel( rRegion );
         maRegion.Intersect( aRegion );
         SetClipRegionFlag(true);
-        mbInitClipRegion    = true;
+        SetInitClipFlag(true);
     }
 
     if( mpAlphaVDev )
@@ -167,7 +159,7 @@ void OutputDevice::InitClipRegion()
         mbOutputClipped = false;
     }
 
-    mbInitClipRegion = false;
+    SetInitClipFlag(false);
 }
 
 vcl::Region OutputDevice::ClipToDeviceBounds(vcl::Region aRegion) const
@@ -184,27 +176,6 @@ void OutputDevice::ClipToPaintRegion(tools::Rectangle& /*rDstRect*/)
 {
     // this is only used in Window, but we still need it as it's called
     // on in other clipping functions
-}
-
-void OutputDevice::SetDeviceClipRegion( const vcl::Region* pRegion )
-{
-    DBG_TESTSOLARMUTEX();
-
-    if ( !pRegion )
-    {
-        if (IsClipRegion())
-        {
-            maRegion = vcl::Region(true);
-            SetClipRegionFlag(false);
-            mbInitClipRegion    = true;
-        }
-    }
-    else
-    {
-        maRegion            = *pRegion;
-        SetClipRegionFlag(true);
-        mbInitClipRegion    = true;
-    }
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -89,7 +89,7 @@ void OutputDevice::DrawMask( const Point& rDestPt, const Size& rDestSize,
     if ( !mpGraphics && !AcquireGraphics() )
         return;
 
-    if ( mbInitClipRegion )
+    if ( IsInitClipped() )
         InitClipRegion();
 
     if ( mbOutputClipped )

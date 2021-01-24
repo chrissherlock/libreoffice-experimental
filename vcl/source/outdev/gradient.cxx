@@ -50,7 +50,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
 {
     assert(!is_double_buffered_window());
 
-    if (mbInitClipRegion)
+    if (IsInitClipped())
         InitClipRegion();
     // don't return on mbOutputClipped here, as we may need to draw the clipped metafile, even if the output is clipped
 
@@ -100,7 +100,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
                 Push( PushFlags::CLIPREGION );
                 IntersectClipRegion( aBoundRect );
 
-                if (mbInitClipRegion)
+                if (IsInitClipped())
                     InitClipRegion();
 
                 // try to draw gradient natively

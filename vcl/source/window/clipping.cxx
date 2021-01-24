@@ -68,7 +68,7 @@ void Window::InitClipRegion()
     }
     mbClipRegionSet = true;
 
-    mbInitClipRegion = false;
+    SetInitClipFlag(false);
 }
 
 void Window::SetParentClipMode( ParentClipMode nMode )
@@ -114,7 +114,7 @@ void Window::ExpandPaintClipRegion( const vcl::Region& rRegion )
     if( ! aDevPixRegion.IsEmpty() )
     {
         mpWindowImpl->mpPaintRegion->Union( aDevPixRegion );
-        mbInitClipRegion = true;
+        SetInitClipFlag(true);
     }
 }
 
@@ -418,7 +418,7 @@ bool Window::ImplSetClipFlagChildren( bool bSysObjOnlySmaller )
         if ( bSysObjOnlySmaller && !mpWindowImpl->mbInitWinClipRegion )
             pOldRegion.reset(new vcl::Region( mpWindowImpl->maWinClipRegion ));
 
-        mbInitClipRegion = true;
+        SetInitClipFlag(true);
         mpWindowImpl->mbInitWinClipRegion = true;
 
         vcl::Window* pWindow = mpWindowImpl->mpFirstChild;
@@ -431,14 +431,14 @@ bool Window::ImplSetClipFlagChildren( bool bSysObjOnlySmaller )
 
         if ( !ImplSysObjClip( pOldRegion.get() ) )
         {
-            mbInitClipRegion = true;
+            SetInitClipFlag(true);
             mpWindowImpl->mbInitWinClipRegion = true;
             bUpdate = false;
         }
     }
     else
     {
-        mbInitClipRegion = true;
+        SetInitClipFlag(true);
         mpWindowImpl->mbInitWinClipRegion = true;
 
         vcl::Window* pWindow = mpWindowImpl->mpFirstChild;
@@ -477,7 +477,7 @@ bool Window::ImplSetClipFlag( bool bSysObjOnlySmaller )
         if ( pParent &&
              ((pParent->GetStyle() & WB_CLIPCHILDREN) || (mpWindowImpl->mnParentClipMode & ParentClipMode::Clip)) )
         {
-            pParent->mbInitClipRegion = true;
+            pParent->SetInitClipFlag(true);
             pParent->mpWindowImpl->mbInitChildRegion = true;
         }
 

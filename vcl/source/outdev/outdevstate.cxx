@@ -208,8 +208,13 @@ void OutputDevice::Pop()
             DisableMapMode();
     }
 
-    if ( rState.mnFlags & PushFlags::CLIPREGION )
-        SetDeviceClipRegion( rState.mpClipRegion.get() );
+    if (rState.mnFlags & PushFlags::CLIPREGION)
+    {
+        if (rState.mpClipRegion.get())
+            RenderContext2::SetClipRegion(*rState.mpClipRegion.get());
+        else
+            RenderContext2::SetClipRegion();
+    }
 
     if ( rState.mnFlags & PushFlags::REFPOINT )
     {

@@ -44,7 +44,7 @@ void OutputDevice::DrawEllipse( const tools::Rectangle& rRect )
     if ( !mpGraphics && !AcquireGraphics() )
         return;
 
-    if ( mbInitClipRegion )
+    if ( IsInitClipped() )
         InitClipRegion();
     if ( mbOutputClipped )
         return;
@@ -89,7 +89,7 @@ void OutputDevice::DrawArc( const tools::Rectangle& rRect,
     if ( !mpGraphics && !AcquireGraphics() )
         return;
 
-    if ( mbInitClipRegion )
+    if ( IsInitClipped() )
         InitClipRegion();
     if ( mbOutputClipped )
         return;
@@ -130,7 +130,7 @@ void OutputDevice::DrawPie( const tools::Rectangle& rRect,
     if ( !mpGraphics && !AcquireGraphics() )
         return;
 
-    if ( mbInitClipRegion )
+    if ( IsInitClipped() )
         InitClipRegion();
     if ( mbOutputClipped )
         return;
@@ -178,7 +178,7 @@ void OutputDevice::DrawChord( const tools::Rectangle& rRect,
     if ( !mpGraphics && !AcquireGraphics() )
         return;
 
-    if ( mbInitClipRegion )
+    if ( IsInitClipped() )
         InitClipRegion();
     if ( mbOutputClipped )
         return;

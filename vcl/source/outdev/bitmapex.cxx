@@ -143,7 +143,7 @@ void OutputDevice::DrawTransparentBitmapEx(const Point& rDestPt, const Size& rDe
     if (!mpGraphics && !AcquireGraphics())
         return;
 
-    if (mbInitClipRegion)
+    if (IsInitClipped())
         InitClipRegion();
 
     if (mbOutputClipped)
@@ -280,7 +280,7 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
     if (!mpGraphics && !AcquireGraphics())
         return;
 
-    if (mbInitClipRegion)
+    if (IsInitClipped())
         InitClipRegion();
 
     const bool bMetafile(nullptr != mpMetaFile);

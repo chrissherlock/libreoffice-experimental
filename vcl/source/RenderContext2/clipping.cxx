@@ -17,7 +17,13 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <tools/debug.hxx>
+
 #include <vcl/RenderContext2.hxx>
+
+bool RenderContext2::IsInitClipped() const { return mbInitClipRegion; }
+
+void RenderContext2::SetInitClipFlag(bool bFlag) { mbInitClipRegion = bFlag; }
 
 void RenderContext2::SetClipRegionFlag(bool bFlag) { mbClipRegion = bFlag; }
 
@@ -26,5 +32,26 @@ bool RenderContext2::IsClipRegion() const { return mbClipRegion; }
 vcl::Region RenderContext2::GetActiveClipRegion() const { return GetClipRegion(); }
 
 vcl::Region RenderContext2::GetClipRegion() const { return maGeometry.PixelToLogic(maRegion); }
+
+void RenderContext2::SetClipRegion(vcl::Region const& rRegion)
+{
+    DBG_TESTSOLARMUTEX();
+
+    if (rRegion.IsNull())
+    {
+        if (IsClipRegion())
+        {
+            maRegion = vcl::Region(true);
+            SetClipRegionFlag(false);
+            SetInitClipFlag(true);
+        }
+    }
+    else
+    {
+        maRegion = maGeometry.LogicToPixel(rRegion);
+        SetClipRegionFlag(true);
+        SetInitClipFlag(true);
+    }
+}
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

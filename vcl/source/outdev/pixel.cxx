@@ -33,7 +33,7 @@ Color OutputDevice::GetPixel(const Point& rPoint) const
 
     if (mpGraphics || AcquireGraphics())
     {
-        if (mbInitClipRegion)
+        if (IsInitClipped())
             const_cast<OutputDevice*>(this)->InitClipRegion();
 
         if (!mbOutputClipped)
@@ -67,7 +67,7 @@ void OutputDevice::DrawPixel( const Point& rPt )
     if ( !mpGraphics && !AcquireGraphics() )
         return;
 
-    if ( mbInitClipRegion )
+    if ( IsInitClipped() )
         InitClipRegion();
 
     if ( mbOutputClipped )
@@ -99,7 +99,7 @@ void OutputDevice::DrawPixel( const Point& rPt, const Color& rColor )
     if ( !mpGraphics && !AcquireGraphics() )
         return;
 
-    if ( mbInitClipRegion )
+    if ( IsInitClipped() )
         InitClipRegion();
 
     if ( mbOutputClipped )

@@ -479,7 +479,7 @@ void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderCo
     if ( mpWindowImpl->mpCursor )
         pHelper->SetRestoreCursor(mpWindowImpl->mpCursor->ImplSuspend());
 
-    mbInitClipRegion = true;
+    SetInitClipFlag(true);
     mpWindowImpl->mbInPaint = true;
 
     // restore Paint-Region
@@ -524,7 +524,7 @@ void Window::PopPaintHelper(PaintHelper const *pHelper)
             ImplInvertFocus(*mpWindowImpl->mpWinData->mpFocusRect);
     }
     mpWindowImpl->mbInPaint = false;
-    mbInitClipRegion = true;
+    SetInitClipFlag(true);
     mpWindowImpl->mpPaintRegion = nullptr;
     if (mpWindowImpl->mpCursor)
         mpWindowImpl->mpCursor->ImplResume(pHelper->GetRestoreCursor());

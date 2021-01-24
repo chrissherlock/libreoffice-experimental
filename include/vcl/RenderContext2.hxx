@@ -40,6 +40,24 @@ public:
     RenderContext2();
     virtual ~RenderContext2() {}
 
+    virtual bool DrawTransformBitmapExDirect(basegfx::B2DHomMatrix const& aFullTransform,
+                                             BitmapEx const& rBitmapEx);
+
+    /** Transform and reduce the area that needs to be drawn of the bitmap and return the new
+        visible range and the maximum area.
+
+
+      @param     aFullTransform      B2DHomMatrix used for transformation
+      @param     aVisibleRange       The new visible area of the bitmap
+      @param     fMaximumArea        The maximum area of the bitmap
+
+      @returns true if there is an area to be drawn, otherwise nothing is left to be drawn
+        so return false
+     */
+    virtual bool
+    TransformAndReduceBitmapExToTargetRange(basegfx::B2DHomMatrix const& aFullTransform,
+                                            basegfx::B2DRange& aVisibleRange, double& fMaximumArea);
+
     virtual AllSettings const& GetSettings() const;
     virtual void SetSettings(AllSettings const& rSettings);
 
@@ -180,27 +198,10 @@ public:
     virtual Bitmap GetBitmap(const Point& rSrcPt, const Size& rSize) const;
     virtual BitmapEx GetBitmapEx(const Point& rSrcPt, const Size& rSize) const;
 
-    virtual bool DrawTransformBitmapExDirect(basegfx::B2DHomMatrix const& aFullTransform,
-                                             BitmapEx const& rBitmapEx);
-
-    /** Transform and reduce the area that needs to be drawn of the bitmap and return the new
-        visible range and the maximum area.
-
-
-      @param     aFullTransform      B2DHomMatrix used for transformation
-      @param     aVisibleRange       The new visible area of the bitmap
-      @param     fMaximumArea        The maximum area of the bitmap
-
-      @returns true if there is an area to be drawn, otherwise nothing is left to be drawn
-        so return false
-     */
-    virtual bool
-    TransformAndReduceBitmapExToTargetRange(basegfx::B2DHomMatrix const& aFullTransform,
-                                            basegfx::B2DRange& aVisibleRange, double& fMaximumArea);
-
     bool IsClipRegion() const;
     vcl::Region GetClipRegion() const;
     virtual vcl::Region GetActiveClipRegion() const;
+    virtual void SetClipRegion(vcl::Region const& rRegion = vcl::Region(true));
 
 protected:
     void dispose();
@@ -242,6 +243,8 @@ protected:
     void SetInitTextColorFlag(bool bFlag);
     bool IsInitFont() const;
     void SetInitFontFlag(bool bFlag);
+    bool IsInitClipped() const;
+    void SetInitClipFlag(bool bFlag);
 
     // TODO these init functions will need to become private once all related
     // functions are moved out of OutputDevice
@@ -290,6 +293,7 @@ private:
     mutable bool mbInitTextColor : 1;
     mutable bool mbInitFont : 1;
     mutable bool mbNewFont : 1;
+    mutable bool mbInitClipRegion : 1;
     mutable bool mbClipRegion : 1;
 };
 

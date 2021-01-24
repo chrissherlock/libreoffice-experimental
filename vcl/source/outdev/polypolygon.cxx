@@ -49,7 +49,7 @@ void OutputDevice::DrawPolyPolygon(const tools::PolyPolygon& rPolyPoly)
     if (!mpGraphics && !AcquireGraphics())
         return;
 
-    if (mbInitClipRegion)
+    if (IsInitClipped())
         InitClipRegion();
 
     if (mbOutputClipped)
@@ -150,7 +150,7 @@ void OutputDevice::ImplDrawPolyPolygonWithB2DPolyPolygon(
     if (!mpGraphics && !AcquireGraphics())
         return;
 
-    if (mbInitClipRegion)
+    if (IsInitClipped())
         InitClipRegion();
 
     if (mbOutputClipped)

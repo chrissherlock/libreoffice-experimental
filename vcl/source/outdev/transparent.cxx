@@ -126,7 +126,7 @@ void OutputDevice::DrawTransparent(
     if (!mpGraphics && !AcquireGraphics())
         return;
 
-    if (mbInitClipRegion)
+    if (IsInitClipped())
         InitClipRegion();
 
     if (mbOutputClipped)
@@ -257,7 +257,7 @@ void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
         )
     {
         // prepare the graphics device
-        if( mbInitClipRegion )
+        if( IsInitClipped() )
             InitClipRegion();
 
         if( mbOutputClipped )

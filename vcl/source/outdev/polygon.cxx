@@ -61,7 +61,7 @@ void OutputDevice::DrawPolygon(const tools::Polygon& rPoly)
     if (!mpGraphics && !AcquireGraphics())
         return;
 
-    if (mbInitClipRegion)
+    if (IsInitClipped())
         InitClipRegion();
 
     if (mbOutputClipped)

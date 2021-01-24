@@ -77,7 +77,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mbDevOutput                     = false;
     mbOutputClipped                 = false;
     maTextColor                     = COL_BLACK;
-    mbInitClipRegion                = true;
     mbClipRegionSet                 = false;
     mbTextLines                     = false;
     mbTextSpecial                   = false;
@@ -318,7 +317,7 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
     if ( !mpGraphics && !AcquireGraphics() )
         return;
 
-    if ( mbInitClipRegion )
+    if (IsInitClipped())
         InitClipRegion();
 
     if ( mbOutputClipped )
@@ -379,7 +378,7 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
     if ( !mpGraphics && !AcquireGraphics() )
         return;
 
-    if ( mbInitClipRegion )
+    if ( IsInitClipped() )
         InitClipRegion();
 
     if ( mbOutputClipped )
@@ -425,7 +424,7 @@ void OutputDevice::CopyArea( const Point& rDestPt,
     if ( !mpGraphics && !AcquireGraphics() )
         return;
 
-    if ( mbInitClipRegion )
+    if ( IsInitClipped() )
         InitClipRegion();
 
     if ( mbOutputClipped )
@@ -624,7 +623,7 @@ bool OutputDevice::DrawEPS( const Point& rPoint, const Size& rSize,
             if( !mpGraphics && !AcquireGraphics() )
                 return bDrawn;
 
-            if( mbInitClipRegion )
+            if (IsInitClipped())
                 InitClipRegion();
 
             aRect.Justify();

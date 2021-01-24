@@ -114,7 +114,7 @@ void OutputDevice::DrawBitmap(const Point& rDestPt, const Size& rDestSize, const
     if (!mpGraphics && !AcquireGraphics())
         return;
 
-    if (mbInitClipRegion)
+    if (IsInitClipped())
         InitClipRegion();
 
     if (mbOutputClipped)

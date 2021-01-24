@@ -500,12 +500,12 @@ bool Printer::AcquireGraphics() const
     if ( mpGraphics )
         return true;
 
-    Printer *pWin = const_cast<Printer*>(this);
-    pWin->SetInitLineColorFlag(true);
-    pWin->SetInitFillColorFlag(true);
-    pWin->SetInitFontFlag(true);
-    pWin->SetInitTextColorFlag(true);
-    mbInitClipRegion    = true;
+    Printer *pPrinter = const_cast<Printer*>(this);
+    pPrinter->SetInitLineColorFlag(true);
+    pPrinter->SetInitFillColorFlag(true);
+    pPrinter->SetInitFontFlag(true);
+    pPrinter->SetInitTextColorFlag(true);
+    pPrinter->SetInitClipFlag(true);
 
     ImplSVData* pSVData = ImplGetSVData();
 

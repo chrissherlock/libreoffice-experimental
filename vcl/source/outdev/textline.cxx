@@ -646,7 +646,7 @@ void OutputDevice::ImplDrawStrikeoutChar( tools::Long nBaseX, tools::Long nBaseY
 
     Push( PushFlags::CLIPREGION );
     IntersectClipRegion( maGeometry.PixelToLogic(aPixelRect) );
-    if( mbInitClipRegion )
+    if( IsInitClipped() )
         InitClipRegion();
 
     pLayout->DrawText( *mpGraphics );
@@ -871,7 +871,7 @@ void OutputDevice::DrawTextLine( const Point& rPos, tools::Long nWidth,
     if ( !IsDeviceOutputNecessary() || ImplIsRecordLayout() )
         return;
 
-    if( mbInitClipRegion )
+    if( IsInitClipped() )
         InitClipRegion();
 
     if( mbOutputClipped )
@@ -903,7 +903,7 @@ void OutputDevice::DrawWaveLine(const Point& rStartPos, const Point& rEndPos, to
     if( !mpGraphics && !AcquireGraphics() )
         return;
 
-    if ( mbInitClipRegion )
+    if ( IsInitClipped() )
         InitClipRegion();
 
     if ( mbOutputClipped )

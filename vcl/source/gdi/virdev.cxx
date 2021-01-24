@@ -53,7 +53,7 @@ bool VirtualDevice::AcquireGraphics() const
     pVirDev->SetInitFillColorFlag(true);
     pVirDev->SetInitFontFlag(true);
     pVirDev->SetInitTextColorFlag(true);
-    mbInitClipRegion    = true;
+    pVirDev->SetInitClipFlag(true);
 
     ImplSVData* pSVData = ImplGetSVData();
 

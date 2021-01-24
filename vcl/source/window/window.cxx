@@ -830,7 +830,7 @@ bool Window::AcquireGraphics() const
     pWin->SetInitFillColorFlag(true);
     pWin->SetInitFontFlag(true);
     pWin->SetInitTextColorFlag(true);
-    mbInitClipRegion    = true;
+    pWin->SetInitClipFlag(true);
 
     ImplSVData* pSVData = ImplGetSVData();
 
@@ -1283,7 +1283,7 @@ SalGraphics* Window::ImplGetFrameGraphics() const
 {
     if ( mpWindowImpl->mpFrameWindow->mpGraphics )
     {
-        mpWindowImpl->mpFrameWindow->mbInitClipRegion = true;
+        mpWindowImpl->mpFrameWindow->SetInitClipFlag(true);
     }
     else
     {

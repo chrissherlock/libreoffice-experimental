@@ -266,7 +266,7 @@ bool OutputDevice::DrawNativeControl( ControlType nType,
     if ( !mpGraphics && !AcquireGraphics() )
         return false;
 
-    if ( mbInitClipRegion )
+    if ( IsInitClipped() )
         InitClipRegion();
     if ( mbOutputClipped )
         return true;
