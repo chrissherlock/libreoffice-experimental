@@ -721,14 +721,8 @@ public:
 
 #ifdef _MSC_VER
     void                        DrawHatch( const tools::PolyPolygon& rPolyPoly, const ::Hatch& rHatch );
-    void                        AddHatchActions( const tools::PolyPolygon& rPolyPoly,
-                                                 const ::Hatch& rHatch,
-                                                 GDIMetaFile& rMtf );
 #else
     void                        DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch );
-    void                        AddHatchActions( const tools::PolyPolygon& rPolyPoly,
-                                                 const Hatch& rHatch,
-                                                 GDIMetaFile& rMtf );
 #endif
 
     void                        DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch, bool bMtf );

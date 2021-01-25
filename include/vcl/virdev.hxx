@@ -203,6 +203,12 @@ public:
 
     Bitmap ClipBitmap(Point const& rPos, Size const& rSize, tools::Rectangle const& rOrigRect);
 
+#ifdef _MSC_VER
+    void AddHatchActions(const tools::PolyPolygon& rPolyPoly, const ::Hatch& rHatch, GDIMetaFile& rMtf);
+#else
+    void AddHatchActions(const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch, GDIMetaFile& rMtf);
+#endif
+
 private:
     SAL_DLLPRIVATE void ImplSetReferenceDevice(RefDevMode, sal_Int32 i_nDPIX, sal_Int32 i_nDPIY);
 

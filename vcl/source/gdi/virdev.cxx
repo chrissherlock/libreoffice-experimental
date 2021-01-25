@@ -20,6 +20,8 @@
 #include <sal/log.hxx>
 #include <tools/debug.hxx>
 
+#include <vcl/gdimtf.hxx>
+#include <vcl/metaact.hxx>
 #include <vcl/pdfextoutdevdata.hxx>
 #include <vcl/virdev.hxx>
 
@@ -563,6 +565,28 @@ Bitmap VirtualDevice::ClipBitmap(Point const& rPos, Size const& rSize, tools::Re
     }
 
     return aBmp;
+}
+
+void VirtualDevice::AddHatchActions(const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch,
+                                    GDIMetaFile& rMtf)
+{
+
+    tools::PolyPolygon aPolyPoly(rPolyPoly);
+    aPolyPoly.Optimize(PolyOptimizeFlags::NO_SAME | PolyOptimizeFlags::CLOSE);
+
+    if( aPolyPoly.Count() )
+    {
+        GDIMetaFile* pOldMtf = GetConnectMetaFile();
+        GDIMetaFile* pMtf = GetConnectMetaFile();
+
+        pMtf = &rMtf;
+        pMtf->AddAction(new MetaPushAction(PushFlags::ALL));
+        pMtf->AddAction(new MetaLineColorAction(rHatch.GetColor(), true));
+        DrawHatch( aPolyPoly, rHatch, true);
+        pMtf->AddAction(new MetaPopAction());
+
+        SetConnectMetaFile(pOldMtf);
+    }
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

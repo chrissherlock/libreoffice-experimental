@@ -97,26 +97,6 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
         mpAlphaVDev->DrawHatch( rPolyPoly, rHatch );
 }
 
-void OutputDevice::AddHatchActions( const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch,
-                                    GDIMetaFile& rMtf )
-{
-
-    tools::PolyPolygon aPolyPoly( rPolyPoly );
-    aPolyPoly.Optimize( PolyOptimizeFlags::NO_SAME | PolyOptimizeFlags::CLOSE );
-
-    if( aPolyPoly.Count() )
-    {
-        GDIMetaFile* pOldMtf = mpMetaFile;
-
-        mpMetaFile = &rMtf;
-        mpMetaFile->AddAction( new MetaPushAction( PushFlags::ALL ) );
-        mpMetaFile->AddAction( new MetaLineColorAction( rHatch.GetColor(), true ) );
-        DrawHatch( aPolyPoly, rHatch, true );
-        mpMetaFile->AddAction( new MetaPopAction() );
-        mpMetaFile = pOldMtf;
-    }
-}
-
 void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch, bool bMtf )
 {
     assert(!is_double_buffered_window());
