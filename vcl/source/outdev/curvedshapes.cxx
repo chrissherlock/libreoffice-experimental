@@ -26,185 +26,71 @@
 
 #include <salgdi.hxx>
 
-void OutputDevice::DrawEllipse( const tools::Rectangle& rRect )
+void OutputDevice::DrawEllipse(const tools::Rectangle& rRect)
 {
     assert(!is_double_buffered_window());
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaEllipseAction( rRect ) );
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaEllipseAction(rRect));
 
-    if  ( !IsDeviceOutputNecessary() || (!IsOpaqueLineColor() && !IsOpaqueFillColor()) || ImplIsRecordLayout() )
+    if (ImplIsRecordLayout())
         return;
 
-    tools::Rectangle aRect( maGeometry.LogicToDevicePixel( rRect ) );
-    if ( aRect.IsEmpty() )
-        return;
+    RenderContext2::DrawEllipse(rRect);
 
-    // we need a graphics
-    if ( !mpGraphics && !AcquireGraphics() )
-        return;
-
-    if ( IsInitClipped() )
-        InitClipRegion();
-    if ( maRegion.IsEmpty() )
-        return;
-
-    if ( IsInitLineColor() )
-        InitLineColor();
-
-    tools::Polygon aRectPoly( aRect.Center(), aRect.GetWidth() >> 1, aRect.GetHeight() >> 1 );
-    if ( aRectPoly.GetSize() >= 2 )
-    {
-        Point* pPtAry = aRectPoly.GetPointAry();
-        if ( !IsOpaqueFillColor() )
-            mpGraphics->DrawPolyLine( aRectPoly.GetSize(), pPtAry, *this );
-        else
-        {
-            if ( IsInitFillColor() )
-                InitFillColor();
-            mpGraphics->DrawPolygon( aRectPoly.GetSize(), pPtAry, *this );
-        }
-    }
-
-    if( mpAlphaVDev )
-        mpAlphaVDev->DrawEllipse( rRect );
+    if (mpAlphaVDev)
+        mpAlphaVDev->DrawEllipse(rRect);
 }
 
-void OutputDevice::DrawArc( const tools::Rectangle& rRect,
-                            const Point& rStartPt, const Point& rEndPt )
+void OutputDevice::DrawArc(const tools::Rectangle& rRect, const Point& rStartPt,
+                           const Point& rEndPt)
 {
     assert(!is_double_buffered_window());
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaArcAction( rRect, rStartPt, rEndPt ) );
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaArcAction(rRect, rStartPt, rEndPt));
 
-    if ( !IsDeviceOutputNecessary() || !IsOpaqueLineColor() || ImplIsRecordLayout() )
+    if (ImplIsRecordLayout())
         return;
 
-    tools::Rectangle aRect( maGeometry.LogicToDevicePixel( rRect ) );
-    if ( aRect.IsEmpty() )
-        return;
+    RenderContext2::DrawArc(rRect, rStartPt, rEndPt);
 
-    // we need a graphics
-    if ( !mpGraphics && !AcquireGraphics() )
-        return;
-
-    if ( IsInitClipped() )
-        InitClipRegion();
-    if ( maRegion.IsEmpty() )
-        return;
-
-    if ( IsInitLineColor() )
-        InitLineColor();
-
-    const Point     aStart( maGeometry.LogicToDevicePixel( rStartPt ) );
-    const Point     aEnd( maGeometry.LogicToDevicePixel( rEndPt ) );
-    tools::Polygon aArcPoly( aRect, aStart, aEnd, PolyStyle::Arc );
-
-    if ( aArcPoly.GetSize() >= 2 )
-    {
-        Point* pPtAry = aArcPoly.GetPointAry();
-        mpGraphics->DrawPolyLine( aArcPoly.GetSize(), pPtAry, *this );
-    }
-
-    if( mpAlphaVDev )
-        mpAlphaVDev->DrawArc( rRect, rStartPt, rEndPt );
+    if (mpAlphaVDev)
+        mpAlphaVDev->DrawArc(rRect, rStartPt, rEndPt);
 }
 
-void OutputDevice::DrawPie( const tools::Rectangle& rRect,
-                            const Point& rStartPt, const Point& rEndPt )
+void OutputDevice::DrawPie(const tools::Rectangle& rRect, const Point& rStartPt,
+                           const Point& rEndPt)
 {
     assert(!is_double_buffered_window());
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaPieAction( rRect, rStartPt, rEndPt ) );
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaPieAction(rRect, rStartPt, rEndPt));
 
-    if ( !IsDeviceOutputNecessary() || (!IsOpaqueLineColor() && !IsOpaqueFillColor()) || ImplIsRecordLayout() )
+    if (ImplIsRecordLayout())
         return;
 
-    tools::Rectangle aRect( maGeometry.LogicToDevicePixel( rRect ) );
-    if ( aRect.IsEmpty() )
-        return;
+    RenderContext2::DrawPie(rRect, rStartPt, rEndPt);
 
-    // we need a graphics
-    if ( !mpGraphics && !AcquireGraphics() )
-        return;
-
-    if ( IsInitClipped() )
-        InitClipRegion();
-    if ( maRegion.IsEmpty() )
-        return;
-
-    if ( IsInitLineColor() )
-        InitLineColor();
-
-    const Point     aStart( maGeometry.LogicToDevicePixel( rStartPt ) );
-    const Point     aEnd( maGeometry.LogicToDevicePixel( rEndPt ) );
-    tools::Polygon aPiePoly( aRect, aStart, aEnd, PolyStyle::Pie );
-
-    if ( aPiePoly.GetSize() >= 2 )
-    {
-        Point* pPtAry = aPiePoly.GetPointAry();
-        if ( !IsOpaqueFillColor() )
-            mpGraphics->DrawPolyLine( aPiePoly.GetSize(), pPtAry, *this );
-        else
-        {
-            if ( IsInitFillColor() )
-                InitFillColor();
-            mpGraphics->DrawPolygon( aPiePoly.GetSize(), pPtAry, *this );
-        }
-    }
-
-    if( mpAlphaVDev )
-        mpAlphaVDev->DrawPie( rRect, rStartPt, rEndPt );
+    if (mpAlphaVDev)
+        mpAlphaVDev->DrawPie(rRect, rStartPt, rEndPt);
 }
 
-void OutputDevice::DrawChord( const tools::Rectangle& rRect,
-                              const Point& rStartPt, const Point& rEndPt )
+void OutputDevice::DrawChord(const tools::Rectangle& rRect, const Point& rStartPt,
+                             const Point& rEndPt)
 {
     assert(!is_double_buffered_window());
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaChordAction( rRect, rStartPt, rEndPt ) );
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaChordAction(rRect, rStartPt, rEndPt));
 
-    if ( !IsDeviceOutputNecessary() || (!IsOpaqueLineColor() && !IsOpaqueFillColor()) || ImplIsRecordLayout() )
+    if (ImplIsRecordLayout())
         return;
 
-    tools::Rectangle aRect( maGeometry.LogicToDevicePixel( rRect ) );
-    if ( aRect.IsEmpty() )
-        return;
+    RenderContext2::DrawChord(rRect, rStartPt, rEndPt);
 
-    // we need a graphics
-    if ( !mpGraphics && !AcquireGraphics() )
-        return;
-
-    if ( IsInitClipped() )
-        InitClipRegion();
-    if ( maRegion.IsEmpty() )
-        return;
-
-    if ( IsInitLineColor() )
-        InitLineColor();
-
-    const Point     aStart( maGeometry.LogicToDevicePixel( rStartPt ) );
-    const Point     aEnd( maGeometry.LogicToDevicePixel( rEndPt ) );
-    tools::Polygon aChordPoly( aRect, aStart, aEnd, PolyStyle::Chord );
-
-    if ( aChordPoly.GetSize() >= 2 )
-    {
-        Point* pPtAry = aChordPoly.GetPointAry();
-        if ( !IsOpaqueFillColor() )
-            mpGraphics->DrawPolyLine( aChordPoly.GetSize(), pPtAry, *this );
-        else
-        {
-            if ( IsInitFillColor() )
-                InitFillColor();
-            mpGraphics->DrawPolygon( aChordPoly.GetSize(), pPtAry, *this );
-        }
-    }
-
-    if( mpAlphaVDev )
-        mpAlphaVDev->DrawChord( rRect, rStartPt, rEndPt );
+    if (mpAlphaVDev)
+        mpAlphaVDev->DrawChord(rRect, rStartPt, rEndPt);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

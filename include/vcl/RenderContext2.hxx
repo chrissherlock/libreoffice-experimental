@@ -68,6 +68,15 @@ public:
     TransformAndReduceBitmapExToTargetRange(basegfx::B2DHomMatrix const& aFullTransform,
                                             basegfx::B2DRange& aVisibleRange, double& fMaximumArea);
 
+    virtual void DrawEllipse(const tools::Rectangle& rRect);
+
+    virtual void DrawArc(const tools::Rectangle& rRect, const Point& rStartPt, const Point& rEndPt);
+
+    virtual void DrawPie(const tools::Rectangle& rRect, const Point& rStartPt, const Point& rEndPt);
+
+    virtual void DrawChord(const tools::Rectangle& rRect, const Point& rStartPt,
+                           const Point& rEndPt);
+
     virtual sal_uInt16 GetBitCount() const;
 
     void EnableOutput();

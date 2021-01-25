@@ -662,19 +662,19 @@ private:
 
 public:
 
-    void                        DrawEllipse( const tools::Rectangle& rRect );
+    void                        DrawEllipse( const tools::Rectangle& rRect ) override;
 
     void                        DrawArc(
                                     const tools::Rectangle& rRect,
-                                    const Point& rStartPt, const Point& rEndPt );
+                                    const Point& rStartPt, const Point& rEndPt ) override;
 
     void                        DrawPie(
                                     const tools::Rectangle& rRect,
-                                    const Point& rStartPt, const Point& rEndPt );
+                                    const Point& rStartPt, const Point& rEndPt ) override;
 
     void                        DrawChord(
                                     const tools::Rectangle& rRect,
-                                    const Point& rStartPt, const Point& rEndPt );
+                                    const Point& rStartPt, const Point& rEndPt ) override;
 
     ///@}
 
