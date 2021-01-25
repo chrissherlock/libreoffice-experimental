@@ -1395,7 +1395,13 @@ void TabBar::StateChanged(StateChangedType nType)
         bool bIsRTLEnabled = IsRTLEnabled();
         // reacts on calls of EnableRTL, have to mirror all child controls
         if (mpImpl->mpSizer)
-            mpImpl->mpSizer->EnableRTL(bIsRTLEnabled);
+        {
+            if (bIsRTLEnabled)
+                mpImpl->mpSizer->EnableRTL();
+            else
+                mpImpl->mpSizer->DisableRTL();
+        }
+
         if (mpImpl->mxButtonBox)
         {
             mpImpl->mxButtonBox->m_xFirstButton->set_direction(bIsRTLEnabled);

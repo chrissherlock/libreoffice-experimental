@@ -83,7 +83,7 @@ SmEditWindow::SmEditWindow( SmCmdBoxWindow &rMyCmdBoxWin ) :
     SetMapMode(MapMode(MapUnit::MapPixel));
 
     // Even RTL languages don't use RTL for math
-    EnableRTL( false );
+    DisableRTL();
 
     // compare DataChanged
     SetBackground( GetSettings().GetStyleSettings().GetWindowColor() );

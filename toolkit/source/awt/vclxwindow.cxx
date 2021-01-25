@@ -1356,7 +1356,10 @@ namespace
             OSL_FAIL( "lcl_updateWritingMode: unsupported WritingMode!" );
         }   // switch ( nWritingMode )
 
-        _rWindow.EnableRTL( bEnableRTL );
+        if (bEnableRTL)
+            _rWindow.EnableRTL();
+        else
+            _rWindow.DisableRTL();
     }
 }
 

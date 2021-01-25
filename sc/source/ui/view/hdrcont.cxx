@@ -68,7 +68,7 @@ ScHeaderControl::ScHeaderControl( vcl::Window* pParent, SelectionEngine* pSelect
     // mirror the vertical window for correct border drawing
     // table layout depends on sheet format, not UI setting, so the
     // borders of the vertical window have to be handled manually, too.
-    EnableRTL( false );
+    DisableRTL();
 
     aNormFont = GetFont();
     aNormFont.SetTransparent( true );       //! hard-set WEIGHT_NORMAL ???

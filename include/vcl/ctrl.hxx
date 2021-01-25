@@ -129,7 +129,8 @@ public:
     virtual         ~Control() override;
     virtual void    dispose() override;
 
-    virtual void    EnableRTL ( bool bEnable = true ) override;
+    virtual void    EnableRTL () override;
+    virtual void    DisableRTL () override;
 
     virtual bool    EventNotify( NotifyEvent& rNEvt ) override;
     virtual void    StateChanged( StateChangedType nStateChange ) override;

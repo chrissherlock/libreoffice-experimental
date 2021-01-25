@@ -479,7 +479,13 @@ void SalInstanceWidget::grab_remove() { m_xWidget->ReleaseMouse(); }
 
 bool SalInstanceWidget::get_direction() const { return m_xWidget->IsRTLEnabled(); }
 
-void SalInstanceWidget::set_direction(bool bRTL) { m_xWidget->EnableRTL(bRTL); }
+void SalInstanceWidget::set_direction(bool bRTL)
+{
+    if (bRTL)
+        m_xWidget->EnableRTL();
+    else
+        m_xWidget->DisableRTL();
+}
 
 void SalInstanceWidget::freeze() { m_xWidget->SetUpdateMode(false); }
 

@@ -89,7 +89,7 @@ Window::Window(vcl::Window* pParent)
         : sd::OUTPUT_DRAWMODE_COLOR );
 
     // #i78183# Added after discussed with AF
-    EnableRTL(false);
+    DisableRTL();
 }
 
 Window::~Window()

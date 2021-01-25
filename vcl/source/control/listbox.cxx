@@ -798,12 +798,27 @@ void ListBox::StateChanged( StateChangedType nType )
     {
         if( mpBtn )
         {
-            mpBtn->EnableRTL( IsRTLEnabled() );
+            if (IsRTLEnabled())
+                mpBtn->EnableRTL();
+            else
+                mpBtn->DisableRTL();
+
             ImplInitDropDownButton( mpBtn );
         }
-        mpImplLB->EnableRTL( IsRTLEnabled() );
-        if( mpImplWin )
-            mpImplWin->EnableRTL( IsRTLEnabled() );
+
+        if (IsRTLEnabled())
+            mpImplLB->EnableRTL();
+        else
+            mpImplLB->DisableRTL();
+
+        if (mpImplWin)
+        {
+            if (IsRTLEnabled())
+                mpImplWin->EnableRTL();
+            else
+                mpImplWin->DisableRTL();
+        }
+
         Resize();
     }
 

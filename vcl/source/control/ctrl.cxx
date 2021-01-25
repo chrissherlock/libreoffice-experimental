@@ -62,13 +62,20 @@ void Control::dispose()
     Window::dispose();
 }
 
-void Control::EnableRTL( bool bEnable )
+void Control::EnableRTL()
 {
     // convenience: for controls also switch layout mode
-    SetLayoutMode( bEnable ? ComplexTextLayoutFlags::BiDiRtl | ComplexTextLayoutFlags::TextOriginLeft :
-                                ComplexTextLayoutFlags::TextOriginLeft );
-    CompatStateChanged( StateChangedType::Mirroring );
-    OutputDevice::EnableRTL(bEnable);
+    SetLayoutMode(ComplexTextLayoutFlags::BiDiRtl | ComplexTextLayoutFlags::TextOriginLeft);
+    CompatStateChanged(StateChangedType::Mirroring);
+    OutputDevice::EnableRTL();
+}
+
+void Control::DisableRTL()
+{
+    // convenience: for controls also switch layout mode
+    SetLayoutMode(ComplexTextLayoutFlags::TextOriginLeft);
+    CompatStateChanged(StateChangedType::Mirroring);
+    OutputDevice::DisableRTL();
 }
 
 void Control::Resize()

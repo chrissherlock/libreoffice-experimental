@@ -102,7 +102,11 @@ PaintBufferGuard::PaintBufferGuard(ImplFrameData* pFrameData, vcl::Window* pWind
     mnOffsetYpx = pFrameData->mpBuffer->GetYOffsetInPixels();
     pFrameData->mpBuffer->SetXOffsetInPixels(pWindow->GetXOffsetInPixels());
     pFrameData->mpBuffer->SetYOffsetInPixels(pWindow->GetYOffsetInPixels());
-    pFrameData->mpBuffer->EnableRTL(pWindow->IsRTLEnabled());
+
+    if (pWindow->IsRTLEnabled())
+        pFrameData->mpBuffer->EnableRTL();
+    else
+        pFrameData->mpBuffer->DisableRTL();
 }
 
 PaintBufferGuard::~PaintBufferGuard()
@@ -1531,7 +1535,12 @@ void Window::ImplPaintToDevice( OutputDevice* i_pTargetOutDev, const Point& i_rP
                                                 DeviceFormat::DEFAULT);
 
     pMaskedDevice->SetOutputSizePixel( GetSizeInPixels() );
-    pMaskedDevice->EnableRTL( IsRTLEnabled() );
+
+    if (IsRTLEnabled())
+        pMaskedDevice->EnableRTL();
+    else
+        pMaskedDevice->DisableRTL();
+
     aMtf.WindStart();
     aMtf.Play( pMaskedDevice );
     BitmapEx aBmpEx( pMaskedDevice->GetBitmapEx( Point( 0, 0 ), aPaintRect.GetSize() ) );

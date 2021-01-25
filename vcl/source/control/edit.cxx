@@ -280,7 +280,7 @@ void Edit::ImplInitEditData()
 
     // no default mirroring for Edit controls
     // note: controls that use a subedit will revert this (SpinField, ComboBox)
-    EnableRTL( false );
+    DisableRTL();
 
     vcl::unohelper::DragAndDropWrapper* pDnDWrapper = new vcl::unohelper::DragAndDropWrapper( this );
     mxDnDListener = pDnDWrapper;

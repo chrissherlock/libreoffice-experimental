@@ -76,7 +76,7 @@ ScCornerButton::ScCornerButton( vcl::Window* pParent, ScViewData* pData ) :
     Window( pParent, WinBits( 0 ) ),
     pViewData( pData )
 {
-    EnableRTL( false );
+    DisableRTL();
 }
 
 ScCornerButton::~ScCornerButton()
@@ -229,7 +229,11 @@ void ScTabView::InitScrollBar( ScrollBar& rScrollBar, tools::Long nMaxVal )
     rScrollBar.SetScrollHdl( LINK(this, ScTabView, ScrollHdl) );
     rScrollBar.SetEndScrollHdl( LINK(this, ScTabView, EndScrollHdl) );
 
-    rScrollBar.EnableRTL( aViewData.GetDocument().IsLayoutRTL( aViewData.GetTabNo() ) );
+    if ( aViewData.GetDocument().IsLayoutRTL( aViewData.GetTabNo() ) )
+        rScrollBar.EnableRTL();
+    else
+        rScrollBar.DisableRTL();
+
 }
 
 //  Scroll-Timer

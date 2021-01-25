@@ -428,10 +428,15 @@ void StatusBar::ImplDrawItem(vcl::RenderContext& rRenderContext, bool bOffScreen
         if (bOffScreen)
         {
             mbInUserDraw = true;
-            mpImplData->mpVirDev->EnableRTL( IsRTLEnabled() );
+
+            if (IsRTLEnabled())
+                mpImplData->mpVirDev->EnableRTL();
+            else
+                mpImplData->mpVirDev->DisableRTL();
+
             UserDrawEvent aODEvt(this, mpImplData->mpVirDev, tools::Rectangle(Point(), aTextRectSize), pItem->mnId);
             UserDraw(aODEvt);
-            mpImplData->mpVirDev->EnableRTL(false);
+            mpImplData->mpVirDev->DisableRTL();
             mbInUserDraw = false;
         }
         else

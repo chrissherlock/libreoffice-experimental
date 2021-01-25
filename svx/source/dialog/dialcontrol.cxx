@@ -37,7 +37,7 @@ DialControlBmp::DialControlBmp(OutputDevice& rReference)
     , mnCenterX(0)
     , mnCenterY(0)
 {
-    EnableRTL(false);
+    DisableRTL();
 }
 
 void DialControlBmp::InitBitmap(const vcl::Font& rFont)
@@ -187,7 +187,7 @@ void DialControlBmp::DrawBackground()
     SetFillColor( aColor );
     DrawPie( maRect, maRect.TopLeft(), maRect.LeftCenter() );
 
-    EnableRTL( false );
+    DisableRTL();
 
     // *** calibration ***
 

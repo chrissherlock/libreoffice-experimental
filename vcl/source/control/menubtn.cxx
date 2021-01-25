@@ -49,7 +49,11 @@ void MenuButton::ImplInit( vcl::Window* pParent, WinBits nStyle )
         nStyle |= WB_TABSTOP;
 
     PushButton::ImplInit( pParent, nStyle );
-    EnableRTL( AllSettings::GetLayoutRTL() );
+
+    if (AllSettings::GetLayoutRTL())
+        EnableRTL();
+    else
+        DisableRTL();
 }
 
 void MenuButton::ExecuteMenu()

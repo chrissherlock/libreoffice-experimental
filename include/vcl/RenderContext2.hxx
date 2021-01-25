@@ -42,9 +42,13 @@ public:
     RenderContext2();
     virtual ~RenderContext2() {}
 
-    void DrawBitmap(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
-                    Size const& rSrcSizePixel, Bitmap const& rBitmap,
-                    MetaActionType nAction = MetaActionType::BMPSCALEPART);
+    virtual void DrawBitmap(Point const& rDestPt, Bitmap const& rBitmap);
+
+    virtual void DrawBitmap(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap);
+
+    virtual void DrawBitmap(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
+                            Size const& rSrcSizePixel, Bitmap const& rBitmap,
+                            MetaActionType nAction = MetaActionType::BMPSCALEPART);
 
     virtual bool DrawTransformBitmapExDirect(basegfx::B2DHomMatrix const& aFullTransform,
                                              BitmapEx const& rBitmapEx);
@@ -73,6 +77,8 @@ public:
     bool IsDeviceOutputNecessary() const;
 
     bool IsRTLEnabled() const;
+    virtual void EnableRTL();
+    virtual void DisableRTL();
 
     virtual AllSettings const& GetSettings() const;
     virtual void SetSettings(AllSettings const& rSettings);
@@ -324,7 +330,6 @@ protected:
     Geometry maGeometry;
     MapMode maMapMode;
     vcl::Region maRegion; ///< contains the clip region, see SetClipRegion(...)
-    mutable bool mbEnableRTL : 1;
 
 private:
     Color maTextColor;
@@ -347,6 +352,7 @@ private:
     mutable bool mbClipRegionSet : 1;
     mutable bool mbOutput : 1;
     mutable bool mbDevOutput : 1;
+    mutable bool mbEnableRTL : 1;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

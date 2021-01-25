@@ -276,7 +276,11 @@ void AnnotationWindow::InitControls()
 
     // window control for author and date
     mpMeta = VclPtr<FixedText>::Create(this);
-    mpMeta->EnableRTL(AllSettings::GetLayoutRTL());
+
+    if (AllSettings::GetLayoutRTL())
+        mpMeta->EnableRTL();
+    else
+        mpMeta->DisableRTL();
 
     // we should leave this setting alone, but for this we need a better layout algo
     // with variable meta size height
@@ -299,7 +303,7 @@ void AnnotationWindow::InitControls()
         mpOutliner->SetRefDevice( pDev );
     }
 
-    mpTextWindow->EnableRTL( false );
+    mpTextWindow->DisableRTL();
     mpOutlinerView.reset( new OutlinerView ( mpOutliner.get(), mpTextWindow ) );
     mpOutliner->InsertView(mpOutlinerView.get() );
     mpTextWindow->SetOutlinerView(mpOutlinerView.get());
@@ -308,7 +312,7 @@ void AnnotationWindow::InitControls()
     //create Scrollbars
     mpVScrollbar = VclPtr<ScrollBar>::Create(this, WB_3DLOOK |WB_VSCROLL|WB_DRAG);
     mpVScrollbar->EnableNativeWidget(false);
-    mpVScrollbar->EnableRTL( false );
+    mpVScrollbar->DisableRTL();
     mpVScrollbar->SetScrollHdl(LINK(this, AnnotationWindow, ScrollHdl));
     mpVScrollbar->EnableDrag();
 

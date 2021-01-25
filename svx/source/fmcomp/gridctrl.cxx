@@ -853,7 +853,10 @@ void DbGridControl::ImplInitWindow( const InitWindowFacet _eInitWhat )
     {
         if ( m_bNavigationBar )
         {
-            m_aBar->EnableRTL( IsRTLEnabled() );
+            if (IsRTLEnabled())
+                m_aBar->EnableRTL();
+            else
+                m_aBar->DisableRTL();
         }
     }
 

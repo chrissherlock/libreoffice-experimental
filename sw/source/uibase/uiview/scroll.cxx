@@ -31,7 +31,7 @@ SwScrollbar::SwScrollbar( vcl::Window *pWin, bool bHoriz ) :
 {
     // No mirroring for horizontal scrollbars
     if( bHoriz )
-        EnableRTL( false );
+        DisableRTL();
 }
 
  SwScrollbar::~SwScrollbar() {}

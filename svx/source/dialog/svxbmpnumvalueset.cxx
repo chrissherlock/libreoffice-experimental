@@ -188,7 +188,12 @@ void SvxNumValueSet::UserDraw( const UserDrawEvent& rUDEvt )
         // page is currently done
         pVDev = VclPtr<VirtualDevice>::Create(*pDev);
         pVDev->SetMapMode(pDev->GetMapMode());
-        pVDev->EnableRTL( IsRTLEnabled() );
+
+        if (IsRTLEnabled())
+            pVDev->EnableRTL();
+        else
+            pVDev->DisableRTL();
+
         pVDev->SetOutputSize( aRectSize );
         aOrgRect = aRect;
         pVDev->SetFillColor( aBackColor );

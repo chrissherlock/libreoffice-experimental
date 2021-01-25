@@ -60,7 +60,7 @@ ShowWindow::ShowWindow( const ::rtl::Reference< SlideshowImpl >& xController, vc
 
     // Do never mirror the preview window.  This explicitly includes right
     // to left writing environments.
-    EnableRTL (false);
+    DisableRTL();
 
     MapMode aMap(GetMapMode());
     aMap.SetMapUnit(MapUnit::Map100thMM);

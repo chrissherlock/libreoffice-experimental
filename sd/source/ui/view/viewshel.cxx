@@ -207,7 +207,7 @@ void ViewShell::construct()
     {
         // Create scroll bars and the filler between the scroll bars.
         mpHorizontalScrollBar.reset (VclPtr<ScrollBar>::Create(GetParentWindow(), WinBits(WB_HSCROLL | WB_DRAG)));
-        mpHorizontalScrollBar->EnableRTL (false);
+        mpHorizontalScrollBar->DisableRTL();
         mpHorizontalScrollBar->SetRange(Range(0, 32000));
         mpHorizontalScrollBar->SetScrollHdl(LINK(this, ViewShell, HScrollHdl));
 

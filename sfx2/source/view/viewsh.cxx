@@ -1043,7 +1043,7 @@ void SfxViewShell::SetWindow
     if( pWindow )
     {
         // Disable automatic GUI mirroring (right-to-left) for document windows
-        pWindow->EnableRTL( false );
+        pWindow->DisableRTL();
     }
 
     if ( bHadFocus && pWindow )

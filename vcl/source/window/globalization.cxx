@@ -22,10 +22,16 @@
 
 namespace vcl {
 
-void Window::EnableRTL ( bool bEnable )
+void Window::EnableRTL()
 {
-    CompatStateChanged( StateChangedType::Mirroring );
-    OutputDevice::EnableRTL(bEnable);
+    CompatStateChanged(StateChangedType::Mirroring);
+    OutputDevice::EnableRTL();
+}
+
+void Window::DisableRTL()
+{
+    CompatStateChanged(StateChangedType::Mirroring);
+    OutputDevice::DisableRTL();
 }
 
 } /* namespace vcl */

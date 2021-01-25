@@ -132,6 +132,19 @@ Bitmap RenderContext2::GetBitmap(const Point& rSrcPt, const Size& rSize) const
     return aBmp;
 }
 
+void RenderContext2::DrawBitmap(const Point& rDestPt, const Bitmap& rBitmap)
+{
+    const Size aSizePix(rBitmap.GetSizePixel());
+    DrawBitmap(rDestPt, maGeometry.PixelToLogic(aSizePix), Point(), aSizePix, rBitmap,
+               MetaActionType::BMP);
+}
+
+void RenderContext2::DrawBitmap(const Point& rDestPt, const Size& rDestSize, const Bitmap& rBitmap)
+{
+    DrawBitmap(rDestPt, rDestSize, Point(), rBitmap.GetSizePixel(), rBitmap,
+               MetaActionType::BMPSCALE);
+}
+
 void RenderContext2::DrawBitmap(Point const& rDestPt, Size const& rDestSize,
                                 Point const& rSrcPtPixel, Size const& rSrcSizePixel,
                                 Bitmap const& rBitmap, const MetaActionType nAction)
@@ -193,9 +206,9 @@ void RenderContext2::DrawBitmap(Point const& rDestPt, Size const& rDestSize,
 }
 
 Bitmap RenderContext2::CreateTransparentAlphaBitmap(const Bitmap& rBitmap, const AlphaMask& rAlpha,
-                                                  tools::Rectangle aDstRect,
-                                                  tools::Rectangle aBmpRect, Size const& aOutSize,
-                                                  Point const& aOutPoint)
+                                                    tools::Rectangle aDstRect,
+                                                    tools::Rectangle aBmpRect, Size const& aOutSize,
+                                                    Point const& aOutPoint)
 {
     const bool bHMirr = aOutSize.Width() < 0;
     const bool bVMirr = aOutSize.Height() < 0;
@@ -230,7 +243,7 @@ Bitmap RenderContext2::CreateTransparentAlphaBitmap(const Bitmap& rBitmap, const
         AlphaMask::ScopedReadAccess pAlphaReadAccess(const_cast<AlphaMask&>(rAlpha));
 
         DBG_ASSERT(pAlphaReadAccess->GetScanlineFormat() == ScanlineFormat::N8BitPal,
-                   "OutputDevice::ImplDrawAlpha(): non-8bit alpha no longer supported!");
+                   "RenderContext2::ImplDrawAlpha(): non-8bit alpha no longer supported!");
 
         LinearScaleContext aLinearContext(aDstRect, aBmpRect, aOutSize, nOffX, nOffY);
 

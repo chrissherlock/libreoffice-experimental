@@ -147,7 +147,7 @@ struct ImpTextView
 TextView::TextView( ExtTextEngine* pEng, vcl::Window* pWindow ) :
     mpImpl(new ImpTextView)
 {
-    pWindow->EnableRTL( false );
+    pWindow->DisableRTL();
 
     mpImpl->mpWindow = pWindow;
     mpImpl->mpTextEngine = pEng;

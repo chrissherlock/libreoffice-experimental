@@ -700,7 +700,12 @@ void DbCellControl::ImplInitWindow( vcl::Window const & rParent, const InitWindo
         for (vcl::Window* pWindow : pWindows)
         {
             if (pWindow)
-                pWindow->EnableRTL(rParent.IsRTLEnabled());
+            {
+                if (rParent.IsRTLEnabled())
+                    pWindow->EnableRTL();
+                else
+                    pWindow->DisableRTL();
+            }
         }
     }
 

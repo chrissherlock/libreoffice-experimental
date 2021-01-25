@@ -27,7 +27,7 @@ ScTabSplitter::ScTabSplitter( vcl::Window* pParent, WinBits nWinStyle, const ScV
     pViewData(pData)
 {
     SetFixed(false);
-    EnableRTL(false);
+    DisableRTL();
 }
 
 ScTabSplitter::~ScTabSplitter()

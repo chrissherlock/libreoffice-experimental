@@ -62,7 +62,7 @@ void ScTabView::Init()
         the sheet orientation, not the UI setting. Note: controls that are
         already constructed (e.g. scroll bars) have the RTL setting of the GUI.
         Eventually this has to be disabled manually (see below). */
-    pFrameWin->EnableRTL( false );
+    pFrameWin->DisableRTL();
 
     sal_uInt16 i;
 
@@ -105,7 +105,10 @@ void ScTabView::Init()
         is needed to draw the 3D effect correctly. The base TabBar implements
         mirroring independent from the GUI direction. Have to set RTL mode
         explicitly because the parent frame window is already RTL disabled. */
-    pTabControl->EnableRTL( AllSettings::GetLayoutRTL() );
+    if (AllSettings::GetLayoutRTL())
+        pTabControl->EnableRTL();
+    else
+        pTabControl->DisableRTL();
 
     InitScrollBar( *aHScrollLeft,    aViewData.GetDocument().MaxCol()+1 );
     InitScrollBar( *aHScrollRight,   aViewData.GetDocument().MaxCol()+1 );

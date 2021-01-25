@@ -112,8 +112,12 @@ ValueSet::ValueSet(std::unique_ptr<weld::ScrolledWindow> pScrolledWindow)
 void ValueSet::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     CustomWidgetController::SetDrawingArea(pDrawingArea);
+
     // #106446#, #106601# force mirroring of virtual device
-    maVirDev->EnableRTL(pDrawingArea->get_direction());
+    if (pDrawingArea->get_direction())
+        maVirDev->EnableRTL();
+    else
+        maVirDev->DisableRTL();
 }
 
 Reference<XAccessible> ValueSet::CreateAccessible()

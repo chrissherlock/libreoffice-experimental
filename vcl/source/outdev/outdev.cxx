@@ -77,7 +77,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mbTextLines                     = false;
     mbTextSpecial                   = false;
     mbRefPoint                      = false;
-    mbEnableRTL                     = false;    // mirroring must be explicitly allowed (typically for windows only)
 
     // struct ImplOutDevData- see #i82615#
     mpOutDevData.reset(new ImplOutDevData);
@@ -499,14 +498,6 @@ tools::Rectangle OutputDevice::GetBackgroundComponentBounds() const
 }
 
 // Layout public functions
-
-void OutputDevice::EnableRTL( bool bEnable )
-{
-    mbEnableRTL = bEnable;
-
-    if( mpAlphaVDev )
-        mpAlphaVDev->EnableRTL( bEnable );
-}
 
 bool OutputDevice::ImplIsAntiparallel() const
 {

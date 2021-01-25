@@ -1985,7 +1985,12 @@ public:
         rRenderContext.Pop();
 
         ScopedVclPtrInstance< VirtualDevice > pDev(*this);
-        pDev->EnableRTL(IsRTLEnabled());
+
+        if (IsRTLEnabled())
+            pDev->EnableRTL();
+        else
+            pDev->DisableRTL();
+
         pDev->SetOutputSizePixel(aExclude.GetSize());
 
         tools::Rectangle aSubRect(aWholeSize);

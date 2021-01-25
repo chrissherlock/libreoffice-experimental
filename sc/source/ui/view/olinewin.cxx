@@ -54,7 +54,7 @@ ScOutlineWindow::ScOutlineWindow( vcl::Window* pParent, ScOutlineMode eMode, ScV
     mnFocusEntry( SC_OL_HEADERENTRY ),
     mbDontDrawFocus( false )
 {
-    EnableRTL( false );                 // mirroring is done manually
+    DisableRTL();                 // mirroring is done manually
 
     InitSettings();
     maFocusRect.SetEmpty();

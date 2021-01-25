@@ -104,14 +104,33 @@ void BrowseBox::StateChanged( StateChangedType nStateChange )
 
     if ( StateChangedType::Mirroring == nStateChange )
     {
-        pDataWin->EnableRTL( IsRTLEnabled() );
-
         HeaderBar* pHeaderBar = pDataWin->pHeaderBar;
-        if ( pHeaderBar )
-            pHeaderBar->EnableRTL( IsRTLEnabled() );
-        aHScroll->EnableRTL( IsRTLEnabled() );
-        if( pVScroll )
-            pVScroll->EnableRTL( IsRTLEnabled() );
+
+        if (IsRTLEnabled())
+        {
+            pDataWin->EnableRTL();
+
+            if (pHeaderBar)
+                pHeaderBar->EnableRTL();
+
+            aHScroll->EnableRTL();
+
+            if (pVScroll)
+                pVScroll->EnableRTL();
+        }
+        else
+        {
+            pDataWin->DisableRTL();
+
+            if (pHeaderBar)
+                pHeaderBar->DisableRTL();
+
+            aHScroll->DisableRTL();
+
+            if (pVScroll)
+                pVScroll->DisableRTL();
+        }
+
         Resize();
     }
     else if ( StateChangedType::InitShow == nStateChange )

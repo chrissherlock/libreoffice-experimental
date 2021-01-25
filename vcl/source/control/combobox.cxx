@@ -222,7 +222,7 @@ void ComboBox::ImplInit( vcl::Window* pParent, WinBits nStyle )
     }
 
     m_pImpl->m_pSubEdit.set( VclPtr<Edit>::Create( this, nEditStyle ) );
-    m_pImpl->m_pSubEdit->EnableRTL( false );
+    m_pImpl->m_pSubEdit->DisableRTL();
     SetSubEdit( m_pImpl->m_pSubEdit );
     m_pImpl->m_pSubEdit->SetPosPixel( Point() );
     EnableAutocomplete( true );
@@ -680,11 +680,20 @@ void ComboBox::StateChanged( StateChangedType nType )
     {
         if (m_pImpl->m_pBtn)
         {
-            m_pImpl->m_pBtn->EnableRTL( IsRTLEnabled() );
+            if (IsRTLEnabled())
+                m_pImpl->m_pBtn->EnableRTL();
+            else
+                m_pImpl->m_pBtn->DisableRTL();
+
             ImplInitDropDownButton( m_pImpl->m_pBtn );
         }
         m_pImpl->m_pSubEdit->CompatStateChanged( StateChangedType::Mirroring );
-        m_pImpl->m_pImplLB->EnableRTL( IsRTLEnabled() );
+
+        if (IsRTLEnabled())
+            m_pImpl->m_pImplLB->EnableRTL();
+        else
+            m_pImpl->m_pImplLB->DisableRTL();
+
         Resize();
     }
 }

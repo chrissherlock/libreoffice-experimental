@@ -2364,9 +2364,19 @@ void ImplListBox::StateChanged( StateChangedType nType )
     }
     else if( nType == StateChangedType::Mirroring )
     {
-        maLBWindow->EnableRTL( IsRTLEnabled() );
-        mpHScrollBar->EnableRTL( IsRTLEnabled() );
-        mpVScrollBar->EnableRTL( IsRTLEnabled() );
+        if (IsRTLEnabled())
+        {
+            maLBWindow->EnableRTL();
+            mpHScrollBar->EnableRTL();
+            mpVScrollBar->EnableRTL();
+        }
+        else
+        {
+            maLBWindow->DisableRTL();
+            mpHScrollBar->DisableRTL();
+            mpVScrollBar->DisableRTL();
+        }
+
         ImplResizeControls();
     }
 

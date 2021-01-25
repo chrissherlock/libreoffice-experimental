@@ -177,7 +177,8 @@ public:
 
     bool CanEnableNativeWidget() const override;
 
-    virtual void EnableRTL(bool bEnable = true) override;
+    void EnableRTL() override;
+    void DisableRTL() override;
 
     bool SetOutputSizePixel(const Size& rNewSize, bool bErase = true);
     bool SetOutputSizePixelScaleOffsetAndBuffer(const Size& rNewSize, const Fraction& rScale,

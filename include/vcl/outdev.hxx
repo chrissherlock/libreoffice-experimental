@@ -1092,10 +1092,6 @@ public:
                                     LogicalFontInstance* pLogicalFont, int nFallbackLevel,
                                     ImplLayoutArgs& rLayoutArgs) const;
 
-
-    // Enabling/disabling RTL only makes sense for OutputDevices that use a mirroring SalGraphicsLayout
-    virtual void                EnableRTL( bool bEnable = true);
-
     bool                        GetTextIsRTL( const OUString&, sal_Int32 nIndex, sal_Int32 nLen ) const;
 
     ///@}
@@ -1118,7 +1114,8 @@ public:
       */
     void                        DrawBitmap(
                                     const Point& rDestPt,
-                                    const Bitmap& rBitmap );
+                                    const Bitmap& rBitmap ) override;
+
 
     /** @overload
         void DrawBitmap(
@@ -1132,7 +1129,7 @@ public:
     void                        DrawBitmap(
                                     const Point& rDestPt,
                                     const Size& rDestSize,
-                                    const Bitmap& rBitmap );
+                                    const Bitmap& rBitmap ) override;
 
     void                        DrawBitmap(
                                     const Point& rDestPt,
@@ -1140,7 +1137,7 @@ public:
                                     const Point& rSrcPtPixel,
                                     const Size& rSrcSizePixel,
                                     const Bitmap& rBitmap,
-                                    MetaActionType nAction = MetaActionType::BMPSCALEPART );
+                                    MetaActionType nAction = MetaActionType::BMPSCALEPART ) override;
 
     /** @overload
         void DrawBitmapEx(
@@ -1268,11 +1265,11 @@ private:
                                     Size const & aOutSz, Point const & aOutPt);
 
     Bitmap                      BlendBitmapWithAlpha(Bitmap& aBmp, BitmapReadAccess const* pP,
-                                     BitmapReadAccess const* pA,
-                                     const tools::Rectangle& aDstRect, const sal_Int32 nOffY,
-                                     const sal_Int32 nDstHeight, const sal_Int32 nOffX,
-                                     const sal_Int32 nDstWidth, const tools::Long* pMapX,
-                                     const tools::Long* pMapY);
+                                    BitmapReadAccess const* pA,
+                                    const tools::Rectangle& aDstRect, const sal_Int32 nOffY,
+                                    const sal_Int32 nDstHeight, const sal_Int32 nOffX,
+                                    const sal_Int32 nDstWidth, const tools::Long* pMapX,
+                                    const tools::Long* pMapY);
     ///@}
 
 

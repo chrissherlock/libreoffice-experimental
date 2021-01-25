@@ -124,7 +124,10 @@ SplashScreenWindow::SplashScreenWindow(SplashScreen *pSplash)
     , pSpl( pSplash )
     , _vdev(VclPtr<VirtualDevice>::Create(*this))
 {
-    _vdev->EnableRTL(IsRTLEnabled());
+    if (IsRTLEnabled())
+        _vdev->EnableRTL();
+    else
+        _vdev->DisableRTL();
 }
 
 void SplashScreenWindow::dispose()

@@ -2194,7 +2194,12 @@ void SvxNumberingPreview::Paint(vcl::RenderContext& rRenderContext, const ::tool
     const Color aTextColor = rStyleSettings.GetFieldTextColor();
 
     ScopedVclPtrInstance<VirtualDevice> pVDev(rRenderContext);
-    pVDev->EnableRTL(rRenderContext.IsRTLEnabled());
+
+    if (rRenderContext.IsRTLEnabled())
+        pVDev->EnableRTL();
+    else
+        pVDev->DisableRTL();
+
     pVDev->SetMapMode(rRenderContext.GetMapMode());
     pVDev->SetOutputSize(aSize);
 

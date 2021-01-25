@@ -446,7 +446,7 @@ ScGridWindow::ScGridWindow( vcl::Window* pParent, ScViewData& rData, ScSplitPos 
     SetHelpId( HID_SC_WIN_GRIDWIN );
 
     SetDigitLanguage( SC_MOD()->GetOptDigitLanguage() );
-    EnableRTL( false );
+    DisableRTL();
 }
 
 ScGridWindow::~ScGridWindow()

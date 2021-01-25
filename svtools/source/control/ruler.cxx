@@ -187,7 +187,7 @@ void Ruler::ImplInit( WinBits nWinBits )
 
         // RTL: no UI mirroring for horizontal rulers, because
         // the document is also not mirrored
-        EnableRTL( false );
+        DisableRTL();
     }
 
     // Initialize variables

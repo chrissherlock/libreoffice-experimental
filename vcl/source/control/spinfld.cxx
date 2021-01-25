@@ -322,7 +322,7 @@ void SpinField::ImplInit(vcl::Window* pParent, WinBits nWinStyle)
     else
         mpEdit.set(VclPtr<Edit>::Create(this, WB_NOBORDER));
 
-    mpEdit->EnableRTL(false);
+    mpEdit->DisableRTL();
     mpEdit->SetPosPixel(Point());
     mpEdit->Show();
 

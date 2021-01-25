@@ -393,16 +393,28 @@ bool VirtualDevice::ImplSetOutputSizePixel( const Size& rNewSize, bool bErase,
     return false;
 }
 
-void VirtualDevice::EnableRTL( bool bEnable )
+void VirtualDevice::EnableRTL()
 {
     // virdevs default to not mirroring, they will only be set to mirroring
     // under rare circumstances in the UI, eg the valueset control
     // because each virdev has its own SalGraphics we can safely switch the SalGraphics here
     // ...hopefully
     if( AcquireGraphics() )
-        mpGraphics->SetLayout( bEnable ? SalLayoutFlags::BiDiRtl : SalLayoutFlags::NONE );
+        mpGraphics->SetLayout(SalLayoutFlags::BiDiRtl);
 
-    OutputDevice::EnableRTL(bEnable);
+    RenderContext2::EnableRTL();
+}
+
+void VirtualDevice::DisableRTL()
+{
+    // virdevs default to not mirroring, they will only be set to mirroring
+    // under rare circumstances in the UI, eg the valueset control
+    // because each virdev has its own SalGraphics we can safely switch the SalGraphics here
+    // ...hopefully
+    if (AcquireGraphics())
+        mpGraphics->SetLayout(SalLayoutFlags::NONE);
+
+    RenderContext2::DisableRTL();
 }
 
 bool VirtualDevice::SetOutputSizePixel( const Size& rNewSize, bool bErase )

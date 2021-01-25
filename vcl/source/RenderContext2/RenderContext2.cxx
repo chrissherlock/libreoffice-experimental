@@ -36,6 +36,7 @@ RenderContext2::RenderContext2()
     , mbClipRegionSet(false)
     , mbOutput(true)
     , mbDevOutput(false)
+    , mbEnableRTL(false)
 {
 }
 
@@ -59,5 +60,7 @@ void RenderContext2::EnableDeviceOutput() { mbDevOutput = true; }
 void RenderContext2::DisableDeviceOutput() { mbDevOutput = false; }
 
 bool RenderContext2::IsRTLEnabled() const { return mbEnableRTL; }
+void RenderContext2::EnableRTL() { mbEnableRTL = true; }
+void RenderContext2::DisableRTL() { mbEnableRTL = false; }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
