@@ -1290,7 +1290,7 @@ private:
                                     const Point& rSrcPtPixel,
                                     const Size& rSrcSizePixel);
 
-    Bitmap                      CreateTransparentAlphaBitmap(
+    virtual Bitmap              CreateTransparentAlphaBitmap(
                                     const Bitmap& rBitmap,
                                     const AlphaMask& rAlpha,
                                     tools::Rectangle aDstRect,

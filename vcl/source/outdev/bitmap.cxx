@@ -234,7 +234,7 @@ Bitmap OutputDevice::CreateTransparentAlphaBitmap(const Bitmap& rBitmap,
     // contents of the bitmap is not mirrored (it never is), however the paint region and bmp region
     // are in mirrored coordinates, so the intersection of (aOutPt,aOutSz) with these is content
     // wise somewhere else and needs to take mirroring into account
-    tools::Long nOffX;
+    tools::Long nOffX = 0;
 
     if (IsRTLEnabled())
         nOffX = aOutSize.Width() - aDstRect.GetWidth() - (aDstRect.Left() - aOutPoint.X());
@@ -243,30 +243,21 @@ Bitmap OutputDevice::CreateTransparentAlphaBitmap(const Bitmap& rBitmap,
 
     const tools::Long nOffY = aDstRect.Top() - aOutPoint.Y();
 
-    Bitmap aNewBitmap;
+    // #i38887# reading from screen may sometimes fail
 
     // #i38887# reading from screen may sometimes fail
     if (mpAlphaVDev && aBmp.ImplGetSalBitmap())
-    {
-        TradScaleContext aTradContext(aDstRect, aBmpRect, aOutSize, nOffX, nOffY);
+        return mpAlphaVDev->CreateTransparentAlphaBitmap(rBitmap, rAlpha, aDstRect, aBmpRect, aOutSize, aOutPoint);
 
-        Bitmap::ScopedReadAccess pBitmapReadAccess(const_cast<Bitmap&>(rBitmap));
-        AlphaMask::ScopedReadAccess pAlphaReadAccess(const_cast<AlphaMask&>(rAlpha));
+    Bitmap aNewBitmap;
 
-        DBG_ASSERT(pAlphaReadAccess->GetScanlineFormat() == ScanlineFormat::N8BitPal,
-               "OutputDevice::ImplDrawAlpha(): non-8bit alpha no longer supported!");
-
-        aNewBitmap = BlendBitmapWithAlpha(aBmp, pBitmapReadAccess.get(), pAlphaReadAccess.get(),
-                                          aDstRect, nOffY, aDstRect.GetHeight(), nOffX, aDstRect.GetWidth(),
-                                          aTradContext.mpMapX.get(), aTradContext.mpMapY.get());
-    }
-    else if (!mpAlphaVDev && aBmp.ImplGetSalBitmap())
+    if (!mpAlphaVDev && aBmp.ImplGetSalBitmap())
     {
         Bitmap::ScopedReadAccess pBitmapReadAccess(const_cast<Bitmap&>(rBitmap));
         AlphaMask::ScopedReadAccess pAlphaReadAccess(const_cast<AlphaMask&>(rAlpha));
 
         DBG_ASSERT(pAlphaReadAccess->GetScanlineFormat() == ScanlineFormat::N8BitPal,
-                   "OutputDevice::ImplDrawAlpha(): non-8bit alpha no longer supported!");
+                   "non-8bit alpha no longer supported!");
 
         LinearScaleContext aLinearContext(aDstRect, aBmpRect, aOutSize, nOffX, nOffY);
 

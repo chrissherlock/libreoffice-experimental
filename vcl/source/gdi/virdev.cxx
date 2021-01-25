@@ -24,6 +24,7 @@
 #include <vcl/virdev.hxx>
 
 #include <PhysicalFontCollection.hxx>
+#include <TradScaleContext.hxx>
 #include <font/ImplDeviceFontList.hxx>
 #include <font/ImplDeviceFontSizeList.hxx>
 #include <impfontcache.hxx>
