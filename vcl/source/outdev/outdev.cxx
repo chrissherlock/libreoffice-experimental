@@ -248,15 +248,6 @@ void OutputDevice::SetRefPoint( const Point& rRefPoint )
         mpAlphaVDev->SetRefPoint( rRefPoint );
 }
 
-sal_uInt16 OutputDevice::GetBitCount() const
-{
-    // we need a graphics instance
-    if ( !mpGraphics && !AcquireGraphics() )
-        return 0;
-
-    return mpGraphics->GetBitCount();
-}
-
 css::uno::Reference< css::awt::XGraphics > OutputDevice::CreateUnoGraphics()
 {
     UnoWrapperBase* pWrapper = UnoWrapperBase::GetUnoWrapper();

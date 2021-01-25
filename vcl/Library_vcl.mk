@@ -126,6 +126,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/RenderContext2/antialias \
     vcl/source/RenderContext2/bitmap \
     vcl/source/RenderContext2/bitmapex \
+    vcl/source/RenderContext2/blend \
     vcl/source/RenderContext2/clipping \
     vcl/source/RenderContext2/drawmode \
     vcl/source/RenderContext2/emphasismark \
@@ -154,7 +155,6 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/outdev/mask \
     vcl/source/outdev/bitmap \
     vcl/source/outdev/bitmapex \
-    vcl/source/outdev/blend \
     vcl/source/outdev/image \
     vcl/source/outdev/font \
     vcl/source/outdev/text \

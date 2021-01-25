@@ -337,8 +337,6 @@ public:
 
     virtual bool                IsScreenComp() const { return true; }
 
-    virtual sal_uInt16          GetBitCount() const;
-
     Size                        GetSizeInLogicalUnits() const
                                     { return maGeometry.PixelToLogic( maGeometry.GetSizeInPixels() ); }
     Point                       GetOutputOffPixel() const
@@ -1250,37 +1248,6 @@ protected:
                                     const Size& rSrcSizePixel,
                                     BitmapEx const& rBitmapEx) override;
 
-    SAL_DLLPRIVATE void         BlendBitmap(
-                                    const SalTwoRect&   rPosAry,
-                                    const Bitmap&       rBmp );
-
-    SAL_DLLPRIVATE Bitmap       BlendBitmap(
-                                    Bitmap&             aBmp,
-                                    BitmapReadAccess const * pP,
-                                    BitmapReadAccess const * pA,
-                                    const sal_Int32     nOffY,
-                                    const sal_Int32     nDstHeight,
-                                    const sal_Int32     nOffX,
-                                    const sal_Int32     nDstWidth,
-                                    const tools::Rectangle&    aBmpRect,
-                                    const Size&         aOutSz,
-                                    const bool          bHMirr,
-                                    const bool          bVMirr,
-                                    const tools::Long*         pMapX,
-                                    const tools::Long*         pMapY );
-
-    SAL_DLLPRIVATE Bitmap       BlendBitmapWithAlpha(
-                                    Bitmap&             aBmp,
-                                    BitmapReadAccess const *   pP,
-                                    BitmapReadAccess const *   pA,
-                                    const tools::Rectangle&    aDstRect,
-                                    const sal_Int32     nOffY,
-                                    const sal_Int32     nDstHeight,
-                                    const sal_Int32     nOffX,
-                                    const sal_Int32     nDstWidth,
-                                    const tools::Long*         pMapX,
-                                    const tools::Long*         pMapY );
-
 private:
     SAL_DLLPRIVATE void         DrawTransparentAlphaBitmap(
                                     const Bitmap& rBmp,
@@ -1301,6 +1268,13 @@ private:
                                     const Bitmap& rBitmap, const AlphaMask& rAlpha,
                                     tools::Rectangle aDstRect, tools::Rectangle aBmpRect,
                                     Size const & aOutSz, Point const & aOutPt);
+
+    Bitmap                      BlendBitmapWithAlpha(Bitmap& aBmp, BitmapReadAccess const* pP,
+                                     BitmapReadAccess const* pA,
+                                     const tools::Rectangle& aDstRect, const sal_Int32 nOffY,
+                                     const sal_Int32 nDstHeight, const sal_Int32 nOffX,
+                                     const sal_Int32 nDstWidth, const tools::Long* pMapX,
+                                     const tools::Long* pMapY);
     ///@}
 
 

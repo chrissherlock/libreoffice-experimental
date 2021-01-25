@@ -34,6 +34,7 @@
 
 class AllSettings;
 class SalGraphics;
+struct SalTwoRect;
 
 class VCL_DLLPUBLIC RenderContext2 : public virtual VclReferenceBase
 {
@@ -62,6 +63,8 @@ public:
     virtual bool
     TransformAndReduceBitmapExToTargetRange(basegfx::B2DHomMatrix const& aFullTransform,
                                             basegfx::B2DRange& aVisibleRange, double& fMaximumArea);
+
+    virtual sal_uInt16 GetBitCount() const;
 
     void EnableOutput();
     void DisableOutput();
@@ -286,6 +289,14 @@ protected:
         @returns            region clipped to the device bounds
      **/
     virtual vcl::Region ClipToDeviceBounds(vcl::Region aRegion) const;
+
+    void BlendBitmap(const SalTwoRect& rPosAry, const Bitmap& rBmp);
+
+    Bitmap BlendBitmap(Bitmap& aBmp, BitmapReadAccess const* pP, BitmapReadAccess const* pA,
+                       const sal_Int32 nOffY, const sal_Int32 nDstHeight, const sal_Int32 nOffX,
+                       const sal_Int32 nDstWidth, const tools::Rectangle& aBmpRect,
+                       const Size& aOutSz, const bool bHMirr, const bool bVMirr,
+                       const tools::Long* pMapX, const tools::Long* pMapY);
 
     virtual bool DrawMaskedAlphaBitmapEx(Point const& rDestPt, Size const& rDestSize,
                                          Point const& rSrcPtPixel, Size const& rSrcSizePixel,

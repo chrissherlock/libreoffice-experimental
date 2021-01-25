@@ -11,6 +11,8 @@
 #include <vcl/settings.hxx>
 #include <vcl/svapp.hxx>
 
+#include <salgdi.hxx>
+
 RenderContext2::RenderContext2()
     : mxSettings(new AllSettings(Application::GetSettings()))
     , maTextLineColor(COL_TRANSPARENT)
@@ -38,6 +40,15 @@ RenderContext2::RenderContext2()
 }
 
 void RenderContext2::dispose() {}
+
+sal_uInt16 RenderContext2::GetBitCount() const
+{
+    // we need a graphics instance
+    if (!mpGraphics && !AcquireGraphics())
+        return 0;
+
+    return mpGraphics->GetBitCount();
+}
 
 void RenderContext2::EnableOutput() { mbOutput = true; }
 void RenderContext2::DisableOutput() { mbOutput = false; }
