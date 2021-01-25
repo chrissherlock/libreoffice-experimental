@@ -267,4 +267,21 @@ Bitmap RenderContext2::CreateTransparentAlphaBitmap(const Bitmap& rBitmap, const
     return aNewBitmap;
 }
 
+void RenderContext2::DrawTransparentAlphaBitmapSlowPath(
+    const Bitmap& rBitmap, const AlphaMask& rAlpha, tools::Rectangle aDstRect,
+    tools::Rectangle aBmpRect, Size const& aOutSize, Point const& aOutPoint)
+{
+    // The scaling in this code path produces really ugly results - it does the most trivial
+    // scaling with no smoothing.
+    const bool bOldMap = IsMapModeEnabled();
+    DisableMapMode();
+
+    DrawBitmap(aDstRect.TopLeft(), CreateTransparentAlphaBitmap(rBitmap, rAlpha, aDstRect, aBmpRect,
+                                                                aOutSize, aOutPoint));
+
+    if (bOldMap)
+        EnableMapMode();
+    else
+        DisableMapMode();
+}
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

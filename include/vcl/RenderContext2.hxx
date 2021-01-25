@@ -319,6 +319,10 @@ protected:
                                                 tools::Rectangle aBmpRect, Size const& aOutSize,
                                                 Point const& aOutPoint);
 
+    void DrawTransparentAlphaBitmapSlowPath(const Bitmap& rBitmap, const AlphaMask& rAlpha,
+                                            tools::Rectangle aDstRect, tools::Rectangle aBmpRect,
+                                            Size const& aOutSz, Point const& aOutPt);
+
     virtual bool CanSubsampleBitmap() const;
 
     // TODO eventually make these private when all text/font functions migrated from
