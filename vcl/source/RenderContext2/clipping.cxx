@@ -148,4 +148,10 @@ void RenderContext2::IntersectClipRegion(vcl::Region const& rRegion)
     }
 }
 
+void RenderContext2::ClipToPaintRegion(tools::Rectangle& /*rDstRect*/)
+{
+    // this is only used in Window, but we still need it as it's called
+    // on in other clipping functions
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

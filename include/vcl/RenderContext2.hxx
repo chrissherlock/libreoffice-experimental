@@ -289,6 +289,7 @@ protected:
     void SetClipRegionFlag(bool bFlag);
     bool SelectClipRegion(vcl::Region const&, SalGraphics* pGraphics = nullptr);
     virtual void InitClipRegion();
+    virtual void ClipToPaintRegion(tools::Rectangle& rDstRect);
 
     /** Perform actual rect clip against outdev dimensions, to generate
         empty clips whenever one of the values is completely off the device.
