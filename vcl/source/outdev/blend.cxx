@@ -17,39 +17,12 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <config_features.h>
-
-#include <osl/diagnose.h>
-#include <rtl/math.hxx>
-#include <sal/log.hxx>
-#include <basegfx/matrix/b2dhommatrixtools.hxx>
-#include <tools/debug.hxx>
-#include <tools/helpers.hxx>
-#include <tools/stream.hxx>
-#include <comphelper/lok.hxx>
-
-#include <vcl/BitmapColor.hxx>
-#include <vcl/BitmapFilterStackBlur.hxx>
-#include <vcl/dibtools.hxx>
-#include <vcl/bitmap.hxx>
-#include <vcl/bitmapex.hxx>
-#include <vcl/canvastools.hxx>
-#include <vcl/gdimtf.hxx>
-#include <vcl/metaact.hxx>
-#include <vcl/skia/SkiaHelper.hxx>
-#include <vcl/outdev.hxx>
 #include <vcl/virdev.hxx>
-#include <vcl/image.hxx>
-#include <vcl/BitmapMonochromeFilter.hxx>
 
 #include <bitmap/BitmapWriteAccess.hxx>
 #include <bitmap/bmpfast.hxx>
 #include <salgdi.hxx>
 #include <salbmp.hxx>
-
-#include <cassert>
-#include <cstdlib>
-#include <memory>
 
 void OutputDevice::BlendBitmap(const SalTwoRect& rPosAry, const Bitmap& rBmp)
 {
