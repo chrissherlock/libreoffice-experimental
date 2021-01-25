@@ -96,6 +96,32 @@ Color GetDrawModeFillColor(Color const& rColor, DrawModeFlags nDrawMode,
     return aColor;
 }
 
+Color GetDrawModeHatchColor(Color const& rColor, DrawModeFlags nDrawMode,
+                            StyleSettings const& rStyleSettings)
+{
+    Color aColor(rColor);
+
+    if (nDrawMode & DrawModeFlags::BlackLine)
+    {
+        aColor = COL_BLACK;
+    }
+    else if (nDrawMode & DrawModeFlags::WhiteLine)
+    {
+        aColor = COL_WHITE;
+    }
+    else if (nDrawMode & DrawModeFlags::GrayLine)
+    {
+        const sal_uInt8 cLum = aColor.GetLuminance();
+        aColor = Color(cLum, cLum, cLum);
+    }
+    else if (nDrawMode & DrawModeFlags::SettingsLine)
+    {
+        aColor = rStyleSettings.GetFontColor();
+    }
+
+    return aColor;
+}
+
 Color GetDrawModeTextColor(Color const& rColor, DrawModeFlags nDrawMode,
                            StyleSettings const& rStyleSettings)
 {

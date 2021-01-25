@@ -33,6 +33,9 @@ Color GetDrawModeLineColor(Color const& rColor, DrawModeFlags nDrawMode,
 Color GetDrawModeFillColor(Color const& rColor, DrawModeFlags nDrawMode,
                            StyleSettings const& rStyleSettings);
 
+Color GetDrawModeHatchColor(Color const& rColor, DrawModeFlags nDrawMode,
+                            StyleSettings const& rStyleSettings);
+
 Color GetDrawModeTextColor(Color const& rColor, DrawModeFlags nDrawMode,
                            StyleSettings const& rStyleSettings);
 
