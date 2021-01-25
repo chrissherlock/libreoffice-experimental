@@ -223,23 +223,23 @@ Bitmap OutputDevice::CreateTransparentAlphaBitmap(const Bitmap& rBitmap,
 
     Bitmap aBmp(GetBitmap(aDstRect.TopLeft(), aDstRect.GetSize()));
 
-    // #109044# The generated bitmap need not necessarily be
-    // of aDstRect dimensions, it's internally clipped to
-    // window bounds. Thus, we correct the dest size here,
-    // since we later use it (in nDstWidth/Height) for pixel
-    // access)
+    // #109044# The generated bitmap need not necessarily be of aDstRect dimensions, it's internally
+    // clipped to window bounds. Thus, we correct the dest size here, since we later use it (in
+    // nDstWidth/Height) for pixel access).
     // #i38887# reading from screen may sometimes fail
     if (aBmp.ImplGetSalBitmap())
         aDstRect.SetSize(aBmp.GetSizePixel());
 
-    // calculate offset in original bitmap
-    // in RTL case this is a little more complicated since the contents of the
-    // bitmap is not mirrored (it never is), however the paint region and bmp region
-    // are in mirrored coordinates, so the intersection of (aOutPt,aOutSz) with these
-    // is content wise somewhere else and needs to take mirroring into account
-    const tools::Long nOffX = IsRTLEnabled() ? aOutSize.Width() - aDstRect.GetWidth()
-                                                   - (aDstRect.Left() - aOutPoint.X())
-                                             : aDstRect.Left() - aOutPoint.X();
+    // calculate offset in original bitmap in RTL case this is a little more complicated since the
+    // contents of the bitmap is not mirrored (it never is), however the paint region and bmp region
+    // are in mirrored coordinates, so the intersection of (aOutPt,aOutSz) with these is content
+    // wise somewhere else and needs to take mirroring into account
+    tools::Long nOffX;
+
+    if (IsRTLEnabled())
+        nOffX = aOutSize.Width() - aDstRect.GetWidth() - (aDstRect.Left() - aOutPoint.X());
+    else
+        nOffX = aDstRect.Left() - aOutPoint.X();
 
     const tools::Long nOffY = aDstRect.Top() - aOutPoint.Y();
 
