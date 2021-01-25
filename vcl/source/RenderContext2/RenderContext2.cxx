@@ -58,4 +58,6 @@ bool RenderContext2::IsDeviceOutputNecessary() const { return (mbOutput && mbDev
 void RenderContext2::EnableDeviceOutput() { mbDevOutput = true; }
 void RenderContext2::DisableDeviceOutput() { mbDevOutput = false; }
 
+bool RenderContext2::IsRTLEnabled() const { return mbEnableRTL; }
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

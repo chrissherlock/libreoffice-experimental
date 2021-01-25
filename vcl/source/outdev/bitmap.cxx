@@ -219,9 +219,6 @@ Bitmap OutputDevice::CreateTransparentAlphaBitmap(const Bitmap& rBitmap,
                                                 tools::Rectangle aBmpRect,
                                                 Size const& aOutSize, Point const& aOutPoint)
 {
-    const bool bHMirr = aOutSize.Width() < 0;
-    const bool bVMirr = aOutSize.Height() < 0;
-
     Bitmap aBmp(GetBitmap(aDstRect.TopLeft(), aDstRect.GetSize()));
 
     // #109044# The generated bitmap need not necessarily be of aDstRect dimensions, it's internally
@@ -242,44 +239,13 @@ Bitmap OutputDevice::CreateTransparentAlphaBitmap(const Bitmap& rBitmap,
     else
         nOffX = aDstRect.Left() - aOutPoint.X();
 
-    const tools::Long nOffY = aDstRect.Top() - aOutPoint.Y();
-
     // #i38887# reading from screen may sometimes fail
 
     // #i38887# reading from screen may sometimes fail
     if (mpAlphaVDev && aBmp.ImplGetSalBitmap())
         return mpAlphaVDev->CreateTransparentAlphaBitmap(rBitmap, rAlpha, aDstRect, aBmpRect, aOutSize, aOutPoint);
 
-    Bitmap aNewBitmap;
-
-    if (!mpAlphaVDev && aBmp.ImplGetSalBitmap())
-    {
-        Bitmap::ScopedReadAccess pBitmapReadAccess(const_cast<Bitmap&>(rBitmap));
-        AlphaMask::ScopedReadAccess pAlphaReadAccess(const_cast<AlphaMask&>(rAlpha));
-
-        DBG_ASSERT(pAlphaReadAccess->GetScanlineFormat() == ScanlineFormat::N8BitPal,
-                   "non-8bit alpha no longer supported!");
-
-        LinearScaleContext aLinearContext(aDstRect, aBmpRect, aOutSize, nOffX, nOffY);
-
-        if (aLinearContext.blendBitmap(BitmapScopedWriteAccess(aBmp).get(),
-                                       pBitmapReadAccess.get(), pAlphaReadAccess.get(),
-                                       aDstRect.GetWidth(), aDstRect.GetHeight()))
-        {
-            aNewBitmap = aBmp;
-        }
-        else
-        {
-            TradScaleContext aTradContext(aDstRect, aBmpRect, aOutSize, nOffX, nOffY);
-
-            aNewBitmap
-                = BlendBitmap(aBmp, pBitmapReadAccess.get(), pAlphaReadAccess.get(), nOffY,
-                              aDstRect.GetHeight(), nOffX, aDstRect.GetWidth(), aBmpRect, aOutSize, bHMirr, bVMirr,
-                              aTradContext.mpMapX.get(), aTradContext.mpMapY.get());
-        }
-    }
-
-    return aNewBitmap;
+    return RenderContext2::CreateTransparentAlphaBitmap(rBitmap, rAlpha, aDstRect, aBmpRect, aOutSize, aOutPoint);
 }
 
 void OutputDevice::DrawTransparentAlphaBitmapSlowPath(const Bitmap& rBitmap,

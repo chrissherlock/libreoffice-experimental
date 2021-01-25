@@ -291,7 +291,6 @@ private:
     mutable bool                    mbTextLines : 1;
     mutable bool                    mbTextSpecial : 1;
     mutable bool                    mbRefPoint : 1;
-    mutable bool                    mbEnableRTL : 1;
 
     /** @name Initialization and accessor functions
      */
@@ -1096,7 +1095,6 @@ public:
 
     // Enabling/disabling RTL only makes sense for OutputDevices that use a mirroring SalGraphicsLayout
     virtual void                EnableRTL( bool bEnable = true);
-    bool                        IsRTLEnabled() const { return mbEnableRTL; }
 
     bool                        GetTextIsRTL( const OUString&, sal_Int32 nIndex, sal_Int32 nLen ) const;
 
@@ -1248,6 +1246,13 @@ protected:
                                     const Size& rSrcSizePixel,
                                     BitmapEx const& rBitmapEx) override;
 
+    Bitmap                      CreateTransparentAlphaBitmap(
+                                    const Bitmap& rBitmap,
+                                    const AlphaMask& rAlpha,
+                                    tools::Rectangle aDstRect,
+                                    tools::Rectangle aBmpRect,
+                                    Size const& aOutSize, Point const& aOutPoint) override;
+
 private:
     SAL_DLLPRIVATE void         DrawTransparentAlphaBitmap(
                                     const Bitmap& rBmp,
@@ -1256,13 +1261,6 @@ private:
                                     const Size& rDestSize,
                                     const Point& rSrcPtPixel,
                                     const Size& rSrcSizePixel);
-
-    virtual Bitmap              CreateTransparentAlphaBitmap(
-                                    const Bitmap& rBitmap,
-                                    const AlphaMask& rAlpha,
-                                    tools::Rectangle aDstRect,
-                                    tools::Rectangle aBmpRect,
-                                    Size const& aOutSize, Point const& aOutPoint);
 
     SAL_DLLPRIVATE void         DrawTransparentAlphaBitmapSlowPath(
                                     const Bitmap& rBitmap, const AlphaMask& rAlpha,

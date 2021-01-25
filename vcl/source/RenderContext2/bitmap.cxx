@@ -17,9 +17,14 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <tools/debug.hxx>
+
 #include <vcl/RenderContext2.hxx>
 #include <vcl/virdev.hxx>
 
+#include <LinearScaleContext.hxx>
+#include <TradScaleContext.hxx>
+#include <bitmap/BitmapWriteAccess.hxx>
 #include <drawmode.hxx>
 #include <salbmp.hxx>
 #include <salgdi.hxx>
@@ -185,6 +190,68 @@ void RenderContext2::DrawBitmap(Point const& rDestPt, Size const& rDestSize,
             }
         }
     }
+}
+
+Bitmap RenderContext2::CreateTransparentAlphaBitmap(const Bitmap& rBitmap, const AlphaMask& rAlpha,
+                                                  tools::Rectangle aDstRect,
+                                                  tools::Rectangle aBmpRect, Size const& aOutSize,
+                                                  Point const& aOutPoint)
+{
+    const bool bHMirr = aOutSize.Width() < 0;
+    const bool bVMirr = aOutSize.Height() < 0;
+
+    Bitmap aBmp(GetBitmap(aDstRect.TopLeft(), aDstRect.GetSize()));
+
+    // #109044# The generated bitmap need not necessarily be of aDstRect dimensions, it's internally
+    // clipped to window bounds. Thus, we correct the dest size here, since we later use it (in
+    // nDstWidth/Height) for pixel access).
+    // #i38887# reading from screen may sometimes fail
+    if (aBmp.ImplGetSalBitmap())
+        aDstRect.SetSize(aBmp.GetSizePixel());
+
+    // calculate offset in original bitmap in RTL case this is a little more complicated since the
+    // contents of the bitmap is not mirrored (it never is), however the paint region and bmp region
+    // are in mirrored coordinates, so the intersection of (aOutPt,aOutSz) with these is content
+    // wise somewhere else and needs to take mirroring into account
+    tools::Long nOffX = 0;
+
+    if (IsRTLEnabled())
+        nOffX = aOutSize.Width() - aDstRect.GetWidth() - (aDstRect.Left() - aOutPoint.X());
+    else
+        nOffX = aDstRect.Left() - aOutPoint.X();
+
+    const tools::Long nOffY = aDstRect.Top() - aOutPoint.Y();
+
+    Bitmap aNewBitmap;
+
+    if (aBmp.ImplGetSalBitmap())
+    {
+        Bitmap::ScopedReadAccess pBitmapReadAccess(const_cast<Bitmap&>(rBitmap));
+        AlphaMask::ScopedReadAccess pAlphaReadAccess(const_cast<AlphaMask&>(rAlpha));
+
+        DBG_ASSERT(pAlphaReadAccess->GetScanlineFormat() == ScanlineFormat::N8BitPal,
+                   "OutputDevice::ImplDrawAlpha(): non-8bit alpha no longer supported!");
+
+        LinearScaleContext aLinearContext(aDstRect, aBmpRect, aOutSize, nOffX, nOffY);
+
+        if (aLinearContext.blendBitmap(BitmapScopedWriteAccess(aBmp).get(), pBitmapReadAccess.get(),
+                                       pAlphaReadAccess.get(), aDstRect.GetWidth(),
+                                       aDstRect.GetHeight()))
+        {
+            aNewBitmap = aBmp;
+        }
+        else
+        {
+            TradScaleContext aTradContext(aDstRect, aBmpRect, aOutSize, nOffX, nOffY);
+
+            aNewBitmap
+                = BlendBitmap(aBmp, pBitmapReadAccess.get(), pAlphaReadAccess.get(), nOffY,
+                              aDstRect.GetHeight(), nOffX, aDstRect.GetWidth(), aBmpRect, aOutSize,
+                              bHMirr, bVMirr, aTradContext.mpMapX.get(), aTradContext.mpMapY.get());
+        }
+    }
+
+    return aNewBitmap;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

@@ -72,6 +72,8 @@ public:
     bool IsDeviceOutputEnabled() const;
     bool IsDeviceOutputNecessary() const;
 
+    bool IsRTLEnabled() const;
+
     virtual AllSettings const& GetSettings() const;
     virtual void SetSettings(AllSettings const& rSettings);
 
@@ -306,6 +308,11 @@ protected:
                                    const Point& rSrcPtPixel, const Size& rSrcSizePixel,
                                    BitmapEx const& rBitmapEx);
 
+    virtual Bitmap CreateTransparentAlphaBitmap(const Bitmap& rBitmap, const AlphaMask& rAlpha,
+                                                tools::Rectangle aDstRect,
+                                                tools::Rectangle aBmpRect, Size const& aOutSize,
+                                                Point const& aOutPoint);
+
     virtual bool CanSubsampleBitmap() const;
 
     // TODO eventually make these private when all text/font functions migrated from
@@ -317,6 +324,7 @@ protected:
     Geometry maGeometry;
     MapMode maMapMode;
     vcl::Region maRegion; ///< contains the clip region, see SetClipRegion(...)
+    mutable bool mbEnableRTL : 1;
 
 private:
     Color maTextColor;
