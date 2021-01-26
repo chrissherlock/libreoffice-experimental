@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
 */
 
+#include <comphelper/lok.hxx>
+
 #include <vcl/outdev.hxx>
 #include <vcl/canvastools.hxx>
 
@@ -25,6 +27,27 @@
 BitmapEx RenderContext2::GetBitmapEx(Point const& rSrcPt, Size const& rSize) const
 {
     return BitmapEx(GetBitmap(rSrcPt, rSize));
+}
+
+Point RenderContext2::ShiftPoint(Point const& rDestPt, Point const& rOrigin)
+{
+    Point aDestPt(rDestPt);
+
+    if (comphelper::LibreOfficeKit::isActive() && GetMapMode().GetMapUnit() != MapUnit::MapPixel)
+    {
+        aDestPt.Move(rOrigin.getX(), rOrigin.getY());
+        DisableMapMode();
+    }
+
+    return aDestPt;
+}
+
+void RenderContext2::RestoreAfterShift()
+{
+    if (comphelper::LibreOfficeKit::isActive() && GetMapMode().GetMapUnit() != MapUnit::MapPixel)
+    {
+        EnableMapMode();
+    }
 }
 
 bool RenderContext2::DrawTransformBitmapExDirect(basegfx::B2DHomMatrix const& aFullTransform,

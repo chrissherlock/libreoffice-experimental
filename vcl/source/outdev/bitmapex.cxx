@@ -264,6 +264,29 @@ struct LocalTimeTest
 };
 #endif
 
+Point OutputDevice::ShiftPoint(Point const& rDestPt, Point const& rOrigin)
+{
+    Point aDestPt(rDestPt);
+
+    if (!mpMetaFile && comphelper::LibreOfficeKit::isActive()
+        && GetMapMode().GetMapUnit() != MapUnit::MapPixel)
+    {
+        aDestPt.Move(rOrigin.getX(), rOrigin.getY());
+        DisableMapMode();
+    }
+
+    return aDestPt;
+}
+
+void OutputDevice::RestoreAfterShift()
+{
+    if (!mpMetaFile && comphelper::LibreOfficeKit::isActive()
+        && GetMapMode().GetMapUnit() != MapUnit::MapPixel)
+    {
+        EnableMapMode();
+    }
+}
+
 void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransformation,
                                            const BitmapEx& rBitmapEx)
 {
@@ -345,19 +368,11 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
         const Size aDestSize(basegfx::fround(aScale.getX() + aTranslate.getX()) - aDestPt.X(),
                              basegfx::fround(aScale.getY() + aTranslate.getY()) - aDestPt.Y());
         const Point aOrigin = GetMapMode().GetOrigin();
-        if (!mpMetaFile && comphelper::LibreOfficeKit::isActive()
-            && GetMapMode().GetMapUnit() != MapUnit::MapPixel)
-        {
-            aDestPt.Move(aOrigin.getX(), aOrigin.getY());
-            DisableMapMode();
-        }
 
+        aDestPt = ShiftPoint(aDestPt, aOrigin);
         DrawBitmapEx(aDestPt, aDestSize, rBitmapEx);
-        if (!mpMetaFile && comphelper::LibreOfficeKit::isActive()
-            && GetMapMode().GetMapUnit() != MapUnit::MapPixel)
-        {
-            EnableMapMode();
-        }
+        RestoreAfterShift();
+
         return;
     }
 

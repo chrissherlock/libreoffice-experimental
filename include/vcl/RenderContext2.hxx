@@ -331,6 +331,9 @@ protected:
                                             tools::Rectangle aDstRect, tools::Rectangle aBmpRect,
                                             Size const& aOutSz, Point const& aOutPt);
 
+    virtual Point ShiftPoint(Point const& rDestPt, Point const&);
+    virtual void RestoreAfterShift();
+
     virtual bool CanSubsampleBitmap() const;
 
     // TODO eventually make these private when all text/font functions migrated from

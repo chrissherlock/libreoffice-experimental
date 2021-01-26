@@ -1204,6 +1204,10 @@ public:
                                     const BitmapEx& rBitmapEx);
 
 protected:
+    // for DrawTransformedBitmapEx()
+    Point ShiftPoint(Point const& rDestPt, Point const& rOrigin) override;
+    void RestoreAfterShift() override;
+
     virtual void                DrawTransparentBitmapEx(
                                     Point const& rDestPt, Size const& rDestSize,
                                     Point const& rSrcPtPixel, Size const& rSrcSizePixel,
