@@ -31,15 +31,21 @@ void RenderContext2::BlendBitmap(const SalTwoRect& rPosAry, const Bitmap& rBmp)
 }
 
 Bitmap RenderContext2::BlendBitmap(Bitmap& aBmp, BitmapReadAccess const* pP,
-                                   BitmapReadAccess const* pA, const sal_Int32 nOffY,
-                                   const sal_Int32 nDstHeight, const sal_Int32 nOffX,
-                                   const sal_Int32 nDstWidth, const tools::Rectangle& aBmpRect,
-                                   const Size& aOutSz, const bool bHMirr, const bool bVMirr,
+                                   BitmapReadAccess const* pA, const Point aOffsetPos,
+                                   const tools::Rectangle& rDstRect,
+                                   const tools::Rectangle& rBmpRect, const Size& rOutSize,
                                    const tools::Long* pMapX, const tools::Long* pMapY)
 {
     BitmapColor aDstCol;
     Bitmap res;
     int nX, nY;
+
+    const tools::Long nOffX = aOffsetPos.X();
+    const tools::Long nOffY = aOffsetPos.Y();
+    const tools::Long nDstHeight = rDstRect.GetHeight();
+    const tools::Long nDstWidth = rDstRect.GetWidth();
+    const bool bVMirr = rOutSize.Height() < 0;
+    const bool bHMirr = rOutSize.Width() < 0;
 
     if (GetBitCount() <= 8)
     {
@@ -57,7 +63,7 @@ Bitmap RenderContext2::BlendBitmap(Bitmap& aBmp, BitmapReadAccess const* pP,
                 tools::Long nMapY = pMapY[nY];
                 if (bVMirr)
                 {
-                    nMapY = aBmpRect.Bottom() - nMapY;
+                    nMapY = rBmpRect.Bottom() - nMapY;
                 }
                 const tools::Long nModY = (nOutY & 0x0FL) << 4;
                 int nOutX;
@@ -69,7 +75,7 @@ Bitmap RenderContext2::BlendBitmap(Bitmap& aBmp, BitmapReadAccess const* pP,
                     tools::Long nMapX = pMapX[nX];
                     if (bHMirr)
                     {
-                        nMapX = aBmpRect.Right() - nMapX;
+                        nMapX = rBmpRect.Right() - nMapX;
                     }
                     const sal_uLong nD = nVCLDitherLut[nModY | (nOutX & 0x0FL)];
 
@@ -96,8 +102,8 @@ Bitmap RenderContext2::BlendBitmap(Bitmap& aBmp, BitmapReadAccess const* pP,
         bool bFastBlend = false;
         if (pP && pA && pB && !bHMirr && !bVMirr)
         {
-            SalTwoRect aTR(aBmpRect.Left(), aBmpRect.Top(), aBmpRect.GetWidth(),
-                           aBmpRect.GetHeight(), nOffX, nOffY, aOutSz.Width(), aOutSz.Height());
+            SalTwoRect aTR(rBmpRect.Left(), rBmpRect.Top(), rBmpRect.GetWidth(),
+                           rBmpRect.GetHeight(), nOffX, nOffY, rOutSize.Width(), rOutSize.Height());
 
             bFastBlend = ImplFastBitmapBlending(*pB, *pP, *pA, aTR);
         }
@@ -113,7 +119,7 @@ Bitmap RenderContext2::BlendBitmap(Bitmap& aBmp, BitmapReadAccess const* pP,
                         tools::Long nMapY = pMapY[nY];
                         if (bVMirr)
                         {
-                            nMapY = aBmpRect.Bottom() - nMapY;
+                            nMapY = rBmpRect.Bottom() - nMapY;
                         }
                         Scanline pPScan = pP->GetScanline(nMapY);
                         Scanline pAScan = pA->GetScanline(nMapY);
@@ -125,7 +131,7 @@ Bitmap RenderContext2::BlendBitmap(Bitmap& aBmp, BitmapReadAccess const* pP,
 
                             if (bHMirr)
                             {
-                                nMapX = aBmpRect.Right() - nMapX;
+                                nMapX = rBmpRect.Right() - nMapX;
                             }
                             aDstCol = pB->GetPixelFromData(pBScan, nX);
                             aDstCol.Merge(pP->GetPaletteColor(pPScan[nMapX]), pAScan[nMapX]);
@@ -143,7 +149,7 @@ Bitmap RenderContext2::BlendBitmap(Bitmap& aBmp, BitmapReadAccess const* pP,
 
                         if (bVMirr)
                         {
-                            nMapY = aBmpRect.Bottom() - nMapY;
+                            nMapY = rBmpRect.Bottom() - nMapY;
                         }
                         Scanline pAScan = pA->GetScanline(nMapY);
                         Scanline pBScan = pB->GetScanline(nY);
@@ -153,7 +159,7 @@ Bitmap RenderContext2::BlendBitmap(Bitmap& aBmp, BitmapReadAccess const* pP,
 
                             if (bHMirr)
                             {
-                                nMapX = aBmpRect.Right() - nMapX;
+                                nMapX = rBmpRect.Right() - nMapX;
                             }
                             aDstCol = pB->GetPixelFromData(pBScan, nX);
                             aDstCol.Merge(pP->GetColor(nMapY, nMapX), pAScan[nMapX]);

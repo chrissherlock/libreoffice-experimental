@@ -210,9 +210,6 @@ Bitmap RenderContext2::CreateTransparentAlphaBitmap(const Bitmap& rBitmap, const
                                                     tools::Rectangle aBmpRect, Size const& aOutSize,
                                                     Point const& aOutPoint)
 {
-    const bool bHMirr = aOutSize.Width() < 0;
-    const bool bVMirr = aOutSize.Height() < 0;
-
     Bitmap aBmp(GetBitmap(aDstRect.TopLeft(), aDstRect.GetSize()));
 
     // #109044# The generated bitmap need not necessarily be of aDstRect dimensions, it's internally
@@ -234,6 +231,8 @@ Bitmap RenderContext2::CreateTransparentAlphaBitmap(const Bitmap& rBitmap, const
         nOffX = aDstRect.Left() - aOutPoint.X();
 
     const tools::Long nOffY = aDstRect.Top() - aOutPoint.Y();
+
+    Point aOffsetPos(nOffX, nOffY);
 
     Bitmap aNewBitmap;
 
@@ -257,10 +256,9 @@ Bitmap RenderContext2::CreateTransparentAlphaBitmap(const Bitmap& rBitmap, const
         {
             TradScaleContext aTradContext(aDstRect, aBmpRect, aOutSize, nOffX, nOffY);
 
-            aNewBitmap
-                = BlendBitmap(aBmp, pBitmapReadAccess.get(), pAlphaReadAccess.get(), nOffY,
-                              aDstRect.GetHeight(), nOffX, aDstRect.GetWidth(), aBmpRect, aOutSize,
-                              bHMirr, bVMirr, aTradContext.mpMapX.get(), aTradContext.mpMapY.get());
+            aNewBitmap = BlendBitmap(aBmp, pBitmapReadAccess.get(), pAlphaReadAccess.get(),
+                                     aOffsetPos, aDstRect, aBmpRect, aOutSize,
+                                     aTradContext.mpMapX.get(), aTradContext.mpMapY.get());
         }
     }
 

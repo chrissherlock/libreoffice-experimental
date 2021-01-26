@@ -310,12 +310,6 @@ protected:
 
     void BlendBitmap(const SalTwoRect& rPosAry, const Bitmap& rBmp);
 
-    Bitmap BlendBitmap(Bitmap& aBmp, BitmapReadAccess const* pP, BitmapReadAccess const* pA,
-                       const sal_Int32 nOffY, const sal_Int32 nDstHeight, const sal_Int32 nOffX,
-                       const sal_Int32 nDstWidth, const tools::Rectangle& aBmpRect,
-                       const Size& aOutSz, const bool bHMirr, const bool bVMirr,
-                       const tools::Long* pMapX, const tools::Long* pMapY);
-
     virtual bool DrawMaskedAlphaBitmapEx(Point const& rDestPt, Size const& rDestSize,
                                          Point const& rSrcPtPixel, Size const& rSrcSizePixel,
                                          BitmapEx const& rBitmapEx);
@@ -346,6 +340,11 @@ protected:
     vcl::Region maRegion; ///< contains the clip region, see SetClipRegion(...)
 
 private:
+    Bitmap BlendBitmap(Bitmap& aBmp, BitmapReadAccess const* pP, BitmapReadAccess const* pA,
+                       const Point aOffsetPos, tools::Rectangle const& rDstRect,
+                       tools::Rectangle const& rBmpRect, Size const& aOutSz,
+                       const tools::Long* pMapX, const tools::Long* pMapY);
+
     Color maTextColor;
     Color maLineColor;
     Color maFillColor;
