@@ -150,48 +150,8 @@ void OutputDevice::DrawTransparentAlphaBitmap(const Bitmap& rBmp, const AlphaMas
     if (aDstRect.Intersection(tools::Rectangle(aOutPt, aOutSz)).IsEmpty())
         return;
 
-    {
-        Point aRelPt = aOutPt + Point(GetXOffsetInPixels(), GetYOffsetInPixels());
-        SalTwoRect aTR(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(),
-                       rSrcSizePixel.Height(), aRelPt.X(), aRelPt.Y(), aOutSz.Width(),
-                       aOutSz.Height());
-
-        Bitmap bitmap(rBmp);
-        AlphaMask alpha(rAlpha);
-        if (bHMirr || bVMirr)
-        {
-            bitmap.Mirror(mirrorFlags);
-            alpha.Mirror(mirrorFlags);
-        }
-        SalBitmap* pSalSrcBmp = bitmap.ImplGetSalBitmap().get();
-        SalBitmap* pSalAlphaBmp = alpha.ImplGetSalBitmap().get();
-
-        // #i83087# Naturally, system alpha blending (SalGraphics::DrawAlphaBitmap) cannot work
-        // with separate alpha VDev
-
-        // try to blend the alpha bitmap with the alpha virtual device
-        if (mpAlphaVDev)
-        {
-            Bitmap aAlphaBitmap(mpAlphaVDev->GetBitmap(aRelPt, aOutSz));
-            if (SalBitmap* pSalAlphaBmp2 = aAlphaBitmap.ImplGetSalBitmap().get())
-            {
-                if (mpGraphics->BlendAlphaBitmap(aTR, *pSalSrcBmp, *pSalAlphaBmp, *pSalAlphaBmp2,
-                                                 *this))
-                {
-                    mpAlphaVDev->BlendBitmap(aTR, rAlpha);
-                    return;
-                }
-            }
-        }
-        else
-        {
-            if (mpGraphics->DrawAlphaBitmap(aTR, *pSalSrcBmp, *pSalAlphaBmp, *this))
-                return;
-        }
-
-        // we need to make sure Skia never reaches this slow code path
-        assert(!SkiaHelper::isVCLSkiaEnabled());
-    }
+    if (DrawAlphaBitmap(rBmp, rAlpha, aOutPt, aOutSz, rSrcPtPixel, rSrcSizePixel, mirrorFlags))
+        return;
 
     tools::Rectangle aBmpRect(Point(), rBmp.GetSizePixel());
     if (!aBmpRect.Intersection(tools::Rectangle(rSrcPtPixel, rSrcSizePixel)).IsEmpty())
@@ -213,6 +173,55 @@ void OutputDevice::DrawTransparentAlphaBitmap(const Bitmap& rBmp, const AlphaMas
     }
 }
 
+bool OutputDevice::DrawAlphaBitmap(Bitmap const& rBmp, AlphaMask const& rAlpha, Point const& rOutPt, Size const& rOutSz, Point const& rSrcPtPixel, Size const& rSrcSizePixel, const BmpMirrorFlags mirrorFlags)
+{
+    Point aRelPt = rOutPt + Point(GetXOffsetInPixels(), GetYOffsetInPixels());
+    SalTwoRect aTR(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(),
+                   rSrcSizePixel.Height(), aRelPt.X(), aRelPt.Y(), rOutSz.Width(),
+                   rOutSz.Height());
+
+    Bitmap bitmap(rBmp);
+    AlphaMask alpha(rAlpha);
+
+    const bool bHMirr = rOutSz.Width() < 0;
+    const bool bVMirr = rOutSz.Height() < 0;
+
+    if (bHMirr || bVMirr)
+    {
+        bitmap.Mirror(mirrorFlags);
+        alpha.Mirror(mirrorFlags);
+    }
+
+    SalBitmap* pSalSrcBmp = bitmap.ImplGetSalBitmap().get();
+    SalBitmap* pSalAlphaBmp = alpha.ImplGetSalBitmap().get();
+
+    // #i83087# Naturally, system alpha blending (SalGraphics::DrawAlphaBitmap) cannot work
+    // with separate alpha VDev
+
+    // try to blend the alpha bitmap with the alpha virtual device
+    if (mpAlphaVDev)
+    {
+        Bitmap aAlphaBitmap(mpAlphaVDev->GetBitmap(aRelPt, rOutSz));
+        if (SalBitmap* pSalAlphaBmp2 = aAlphaBitmap.ImplGetSalBitmap().get())
+        {
+            if (mpGraphics->BlendAlphaBitmap(aTR, *pSalSrcBmp, *pSalAlphaBmp, *pSalAlphaBmp2,
+                                             *this))
+            {
+                mpAlphaVDev->BlendBitmap(aTR, rAlpha);
+                return true;
+            }
+        }
+    }
+    else
+    {
+        if (mpGraphics->DrawAlphaBitmap(aTR, *pSalSrcBmp, *pSalAlphaBmp, *this))
+            return true;
+    }
+
+    // we need to make sure Skia never reaches this slow code path
+    assert(!SkiaHelper::isVCLSkiaEnabled());
+    return false;
+}
 Bitmap OutputDevice::CreateTransparentAlphaBitmap(const Bitmap& rBitmap,
                                                 const AlphaMask& rAlpha,
                                                 tools::Rectangle aDstRect,

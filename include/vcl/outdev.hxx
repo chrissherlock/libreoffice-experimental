@@ -1250,6 +1250,15 @@ private:
                                     const Point& rSrcPtPixel,
                                     const Size& rSrcSizePixel);
 
+    virtual bool                DrawAlphaBitmap(
+                                    Bitmap const& rBmp,
+                                    AlphaMask const& rAlpha,
+                                    Point const& rOutPt,
+                                    Size const& rOutSz,
+                                    Point const& rSrcPtPixel,
+                                    Size const& rSrcSizePixel,
+                                    const BmpMirrorFlags mirrorFlags);
+
     SAL_DLLPRIVATE void         DrawTransparentAlphaBitmapSlowPath(
                                     const Bitmap& rBitmap, const AlphaMask& rAlpha,
                                     tools::Rectangle aDstRect, tools::Rectangle aBmpRect,
