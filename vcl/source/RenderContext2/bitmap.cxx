@@ -238,22 +238,21 @@ Bitmap RenderContext2::CreateTransparentAlphaBitmap(const Bitmap& rBitmap, const
 
     if (aBmp.ImplGetSalBitmap())
     {
-        Bitmap::ScopedReadAccess pBitmapReadAccess(const_cast<Bitmap&>(rBitmap));
-        AlphaMask::ScopedReadAccess pAlphaReadAccess(const_cast<AlphaMask&>(rAlpha));
-
-        DBG_ASSERT(pAlphaReadAccess->GetScanlineFormat() == ScanlineFormat::N8BitPal,
-                   "RenderContext2::ImplDrawAlpha(): non-8bit alpha no longer supported!");
-
         LinearScaleContext aLinearContext(aDstRect, aBmpRect, aOutSize, nOffX, nOffY);
 
-        if (aLinearContext.blendBitmap(BitmapScopedWriteAccess(aBmp).get(), pBitmapReadAccess.get(),
-                                       pAlphaReadAccess.get(), aDstRect.GetWidth(),
+        if (aLinearContext.blendBitmap(rBitmap, aBmp, rAlpha, aDstRect.GetWidth(),
                                        aDstRect.GetHeight()))
         {
             aNewBitmap = aBmp;
         }
         else
         {
+            Bitmap::ScopedReadAccess pBitmapReadAccess(const_cast<Bitmap&>(rBitmap));
+            AlphaMask::ScopedReadAccess pAlphaReadAccess(const_cast<AlphaMask&>(rAlpha));
+
+            DBG_ASSERT(pAlphaReadAccess->GetScanlineFormat() == ScanlineFormat::N8BitPal,
+                       "RenderContext2::ImplDrawAlpha(): non-8bit alpha no longer supported!");
+
             TradScaleContext aTradContext(aDstRect, aBmpRect, aOutSize, nOffX, nOffY);
 
             aNewBitmap = BlendBitmap(aBmp, pBitmapReadAccess.get(), pAlphaReadAccess.get(),

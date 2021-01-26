@@ -62,11 +62,14 @@ void LinearScaleContext::generateSimpleMap(tools::Long nSrcDimension, tools::Lon
     }
 }
 
-bool LinearScaleContext::blendBitmap(const BitmapWriteAccess* pDestination,
-                                     const BitmapReadAccess* pSource,
-                                     const BitmapReadAccess* pSourceAlpha,
-                                     const tools::Long nDstWidth, const tools::Long nDstHeight)
+bool LinearScaleContext::blendBitmap(Bitmap const& rBitmapSource, Bitmap const& rBitmapDest,
+                                     AlphaMask const& rAlpha, const tools::Long nDstWidth,
+                                     const tools::Long nDstHeight)
 {
+    Bitmap::ScopedReadAccess pSource(const_cast<Bitmap&>(rBitmapSource));
+    BitmapScopedWriteAccess pDestination(BitmapScopedWriteAccess(const_cast<Bitmap&>(rBitmapDest)));
+    AlphaMask::ScopedReadAccess pSourceAlpha(const_cast<AlphaMask&>(rAlpha));
+
     if (pSource && pSourceAlpha && pDestination)
     {
         ScanlineFormat nSourceFormat = pSource->GetScanlineFormat();
@@ -82,7 +85,8 @@ bool LinearScaleContext::blendBitmap(const BitmapWriteAccess* pDestination,
                     || (nSourceFormat == ScanlineFormat::N24BitTcRgb
                         && nDestinationFormat == ScanlineFormat::N32BitTcRgba))
                 {
-                    blendBitmap24(pDestination, pSource, pSourceAlpha, nDstWidth, nDstHeight);
+                    blendBitmap24(pDestination.get(), pSource.get(), pSourceAlpha.get(), nDstWidth,
+                                  nDstHeight);
                     return true;
                 }
             }

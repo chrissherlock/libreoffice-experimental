@@ -23,8 +23,11 @@
 
 #include <memory>
 
+class AlphaMask;
+class Bitmap;
 class BitmapReadAccess;
 class BitmapWriteAccess;
+
 namespace tools
 {
 class Rectangle;
@@ -47,8 +50,8 @@ private:
                                   tools::Long nOffset, tools::Long* pMap, tools::Long* pMapOffset);
 
 public:
-    bool blendBitmap(const BitmapWriteAccess* pDestination, const BitmapReadAccess* pSource,
-                     const BitmapReadAccess* pSourceAlpha, const tools::Long nDstWidth,
+    bool blendBitmap(Bitmap const& rBitmapSource, Bitmap const& rBitmapDest,
+                     AlphaMask const& rAlpha, const tools::Long nDstWidth,
                      const tools::Long nDstHeight);
 
     void blendBitmap24(const BitmapWriteAccess* pDestination, const BitmapReadAccess* pSource,
