@@ -357,7 +357,6 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
             && GetMapMode().GetMapUnit() != MapUnit::MapPixel)
         {
             EnableMapMode();
-            aDestPt.Move(-aOrigin.getX(), -aOrigin.getY());
         }
         return;
     }
