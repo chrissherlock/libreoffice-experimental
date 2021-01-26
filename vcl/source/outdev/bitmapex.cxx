@@ -323,10 +323,7 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
         const basegfx::B2DHomMatrix aFullTransform(GetDeviceTransformation() * rTransformation);
 
         if (DrawTransformBitmapExDirect(aFullTransform, rBitmapEx))
-        {
-            // we are done
             return;
-        }
     }
 
     // decompose matrix to check rotation and shear
