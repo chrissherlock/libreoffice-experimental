@@ -246,17 +246,11 @@ Bitmap RenderContext2::CreateTransparentAlphaBitmap(const Bitmap& rBitmap, const
         }
         else
         {
-            Bitmap::ScopedReadAccess pBitmapReadAccess(const_cast<Bitmap&>(rBitmap));
-            AlphaMask::ScopedReadAccess pAlphaReadAccess(const_cast<AlphaMask&>(rAlpha));
-
-            DBG_ASSERT(pAlphaReadAccess->GetScanlineFormat() == ScanlineFormat::N8BitPal,
-                       "RenderContext2::ImplDrawAlpha(): non-8bit alpha no longer supported!");
-
             TradScaleContext aTradContext(aDstRect, aBmpRect, aOutSize, nOffX, nOffY);
 
-            aNewBitmap = BlendBitmap(aBmp, pBitmapReadAccess.get(), pAlphaReadAccess.get(),
-                                     aOffsetPos, aDstRect, aBmpRect, aOutSize,
-                                     aTradContext.mpMapX.get(), aTradContext.mpMapY.get());
+            aNewBitmap
+                = BlendBitmap(aBmp, rBitmap, rAlpha, aOffsetPos, aDstRect.GetSize(), aBmpRect,
+                              aOutSize, aTradContext.mpMapX.get(), aTradContext.mpMapY.get());
         }
     }
 

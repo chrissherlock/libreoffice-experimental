@@ -30,28 +30,34 @@ void RenderContext2::BlendBitmap(const SalTwoRect& rPosAry, const Bitmap& rBmp)
     mpGraphics->BlendBitmap(rPosAry, *rBmp.ImplGetSalBitmap(), *pOutDev);
 }
 
-Bitmap RenderContext2::BlendBitmap(Bitmap& aBmp, BitmapReadAccess const* pP,
-                                   BitmapReadAccess const* pA, const Point aOffsetPos,
-                                   const tools::Rectangle& rDstRect,
-                                   const tools::Rectangle& rBmpRect, const Size& rOutSize,
-                                   const tools::Long* pMapX, const tools::Long* pMapY)
+Bitmap RenderContext2::BlendBitmap(Bitmap& rBitmap1, Bitmap const& rBitmap2,
+                                   AlphaMask const& rAlpha, const Point aOffsetPos,
+                                   Size const& rDstSize, tools::Rectangle const& rBmpRect,
+                                   Size const& rOutSize, const tools::Long* pMapX,
+                                   const tools::Long* pMapY)
 {
+    Bitmap::ScopedReadAccess pP(const_cast<Bitmap&>(rBitmap2));
+    AlphaMask::ScopedReadAccess pA(const_cast<AlphaMask&>(rAlpha));
+
+    assert(pA->GetScanlineFormat() == ScanlineFormat::N8BitPal
+           && "non-8bit alpha no longer supported!");
+
     BitmapColor aDstCol;
     Bitmap res;
     int nX, nY;
 
     const tools::Long nOffX = aOffsetPos.X();
     const tools::Long nOffY = aOffsetPos.Y();
-    const tools::Long nDstHeight = rDstRect.GetHeight();
-    const tools::Long nDstWidth = rDstRect.GetWidth();
+    const tools::Long nDstHeight = rDstSize.Height();
+    const tools::Long nDstWidth = rDstSize.Width();
     const bool bVMirr = rOutSize.Height() < 0;
     const bool bHMirr = rOutSize.Width() < 0;
 
     if (GetBitCount() <= 8)
     {
-        Bitmap aDither(aBmp.GetSizePixel(), 8);
+        Bitmap aDither(rBitmap1.GetSizePixel(), 8);
         BitmapColor aIndex(0);
-        Bitmap::ScopedReadAccess pB(aBmp);
+        Bitmap::ScopedReadAccess pB(rBitmap1);
         BitmapScopedWriteAccess pW(aDither);
 
         if (pB && pP && pA && pW)
@@ -97,7 +103,7 @@ Bitmap RenderContext2::BlendBitmap(Bitmap& aBmp, BitmapReadAccess const* pP,
     }
     else
     {
-        BitmapScopedWriteAccess pB(aBmp);
+        BitmapScopedWriteAccess pB(rBitmap1);
 
         bool bFastBlend = false;
         if (pP && pA && pB && !bHMirr && !bVMirr)
@@ -172,7 +178,7 @@ Bitmap RenderContext2::BlendBitmap(Bitmap& aBmp, BitmapReadAccess const* pP,
         }
 
         pB.reset();
-        res = aBmp;
+        res = rBitmap1;
     }
 
     return res;

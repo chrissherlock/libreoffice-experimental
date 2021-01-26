@@ -340,8 +340,8 @@ protected:
     vcl::Region maRegion; ///< contains the clip region, see SetClipRegion(...)
 
 private:
-    Bitmap BlendBitmap(Bitmap& aBmp, BitmapReadAccess const* pP, BitmapReadAccess const* pA,
-                       const Point aOffsetPos, tools::Rectangle const& rDstRect,
+    Bitmap BlendBitmap(Bitmap& rBitmap1, Bitmap const& rBitmap2, AlphaMask const& rAlpha,
+                       const Point aOffsetPos, Size const& rDstRect,
                        tools::Rectangle const& rBmpRect, Size const& aOutSz,
                        const tools::Long* pMapX, const tools::Long* pMapY);
 
