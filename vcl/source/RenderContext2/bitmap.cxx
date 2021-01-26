@@ -216,10 +216,10 @@ Bitmap RenderContext2::CreateTransparentAlphaBitmap(const Bitmap& rBitmap, const
     // clipped to window bounds. Thus, we correct the dest size here, since we later use it (in
     // nDstWidth/Height) for pixel access).
     // #i38887# reading from screen may sometimes fail
-    if (aRenderContextBmp.ImplGetSalBitmap())
-        aDstRect.SetSize(aRenderContextBmp.GetSizePixel());
-    else
+    if (!aRenderContextBmp.ImplGetSalBitmap())
         return Bitmap();
+
+    aDstRect.SetSize(aRenderContextBmp.GetSizePixel());
 
     // calculate offset in original bitmap in RTL case this is a little more complicated since the
     // contents of the bitmap is not mirrored (it never is), however the paint region and bmp region
