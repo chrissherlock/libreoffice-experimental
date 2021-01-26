@@ -323,6 +323,10 @@ protected:
                                                 tools::Rectangle aBmpRect, Size const& aOutSize,
                                                 Point const& aOutPoint);
 
+    virtual bool DrawAlphaBitmap(Bitmap const& rBmp, AlphaMask const& rAlpha, Point const& rOutPt,
+                                 Size const& rOutSz, Point const& rSrcPtPixel,
+                                 Size const& rSrcSizePixel, const BmpMirrorFlags mirrorFlags);
+
     void DrawTransparentAlphaBitmapSlowPath(const Bitmap& rBitmap, const AlphaMask& rAlpha,
                                             tools::Rectangle aDstRect, tools::Rectangle aBmpRect,
                                             Size const& aOutSz, Point const& aOutPt);

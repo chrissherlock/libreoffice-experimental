@@ -1257,7 +1257,7 @@ private:
                                     Size const& rOutSz,
                                     Point const& rSrcPtPixel,
                                     Size const& rSrcSizePixel,
-                                    const BmpMirrorFlags mirrorFlags);
+                                    const BmpMirrorFlags mirrorFlags) override;
 
     SAL_DLLPRIVATE void         DrawTransparentAlphaBitmapSlowPath(
                                     const Bitmap& rBitmap, const AlphaMask& rAlpha,

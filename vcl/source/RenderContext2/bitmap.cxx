@@ -20,6 +20,7 @@
 #include <tools/debug.hxx>
 
 #include <vcl/RenderContext2.hxx>
+#include <vcl/skia/SkiaHelper.hxx>
 #include <vcl/virdev.hxx>
 
 #include <LinearScaleContext.hxx>
@@ -245,10 +246,45 @@ Bitmap RenderContext2::CreateTransparentAlphaBitmap(const Bitmap& rBitmap, const
                        aOutSize, aTradContext.mpMapX.get(), aTradContext.mpMapY.get());
 }
 
+bool RenderContext2::DrawAlphaBitmap(Bitmap const& rBmp, AlphaMask const& rAlpha,
+                                     Point const& rOutPt, Size const& rOutSz,
+                                     Point const& rSrcPtPixel, Size const& rSrcSizePixel,
+                                     const BmpMirrorFlags mirrorFlags)
+{
+    Point aRelPt = rOutPt + Point(GetXOffsetInPixels(), GetYOffsetInPixels());
+    SalTwoRect aTR(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(), rSrcSizePixel.Height(),
+                   aRelPt.X(), aRelPt.Y(), rOutSz.Width(), rOutSz.Height());
+
+    Bitmap bitmap(rBmp);
+    AlphaMask alpha(rAlpha);
+
+    const bool bHMirr = rOutSz.Width() < 0;
+    const bool bVMirr = rOutSz.Height() < 0;
+
+    if (bHMirr || bVMirr)
+    {
+        bitmap.Mirror(mirrorFlags);
+        alpha.Mirror(mirrorFlags);
+    }
+
+    SalBitmap* pSalSrcBmp = bitmap.ImplGetSalBitmap().get();
+    SalBitmap* pSalAlphaBmp = alpha.ImplGetSalBitmap().get();
+
+    const OutputDevice* pOutDev = dynamic_cast<const OutputDevice*>(this);
+
+    if (mpGraphics->DrawAlphaBitmap(aTR, *pSalSrcBmp, *pSalAlphaBmp, *pOutDev))
+        return true;
+
+    return false;
+}
+
 void RenderContext2::DrawTransparentAlphaBitmapSlowPath(
     const Bitmap& rBitmap, const AlphaMask& rAlpha, tools::Rectangle aDstRect,
     tools::Rectangle aBmpRect, Size const& aOutSize, Point const& aOutPoint)
 {
+    // we need to make sure Skia never reaches this slow code path
+    assert(!SkiaHelper::isVCLSkiaEnabled());
+
     // The scaling in this code path produces really ugly results - it does the most trivial
     // scaling with no smoothing.
     const bool bOldMap = IsMapModeEnabled();

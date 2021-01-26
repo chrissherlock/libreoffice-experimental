@@ -177,6 +177,10 @@ bool OutputDevice::DrawAlphaBitmap(Bitmap const& rBmp, AlphaMask const& rAlpha, 
                                    Size const& rOutSz, Point const& rSrcPtPixel,
                                    Size const& rSrcSizePixel, const BmpMirrorFlags mirrorFlags)
 {
+    if (!mpAlphaVDev)
+        return RenderContext2::DrawAlphaBitmap(rBmp, rAlpha, rOutPt, rOutSz, rSrcPtPixel,
+                                               rSrcSizePixel, mirrorFlags);
+
     Point aRelPt = rOutPt + Point(GetXOffsetInPixels(), GetYOffsetInPixels());
     SalTwoRect aTR(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(), rSrcSizePixel.Height(),
                    aRelPt.X(), aRelPt.Y(), rOutSz.Width(), rOutSz.Height());
@@ -200,29 +204,21 @@ bool OutputDevice::DrawAlphaBitmap(Bitmap const& rBmp, AlphaMask const& rAlpha, 
     // with separate alpha VDev
 
     // try to blend the alpha bitmap with the alpha virtual device
-    if (mpAlphaVDev)
+    Bitmap aAlphaBitmap(mpAlphaVDev->GetBitmap(aRelPt, rOutSz));
+    if (SalBitmap* pSalAlphaBmp2 = aAlphaBitmap.ImplGetSalBitmap().get())
     {
-        Bitmap aAlphaBitmap(mpAlphaVDev->GetBitmap(aRelPt, rOutSz));
-        if (SalBitmap* pSalAlphaBmp2 = aAlphaBitmap.ImplGetSalBitmap().get())
+        if (mpGraphics->BlendAlphaBitmap(aTR, *pSalSrcBmp, *pSalAlphaBmp, *pSalAlphaBmp2, *this))
         {
-            if (mpGraphics->BlendAlphaBitmap(aTR, *pSalSrcBmp, *pSalAlphaBmp, *pSalAlphaBmp2,
-                                             *this))
-            {
-                mpAlphaVDev->BlendBitmap(aTR, rAlpha);
-                return true;
-            }
-        }
-    }
-    else
-    {
-        if (mpGraphics->DrawAlphaBitmap(aTR, *pSalSrcBmp, *pSalAlphaBmp, *this))
+            mpAlphaVDev->BlendBitmap(aTR, rAlpha);
             return true;
+        }
     }
 
     // we need to make sure Skia never reaches this slow code path
     assert(!SkiaHelper::isVCLSkiaEnabled());
     return false;
 }
+
 Bitmap OutputDevice::CreateTransparentAlphaBitmap(const Bitmap& rBitmap, const AlphaMask& rAlpha,
                                                   tools::Rectangle aDstRect,
                                                   tools::Rectangle aBmpRect, Size const& aOutSize,
