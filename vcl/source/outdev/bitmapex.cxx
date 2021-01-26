@@ -283,7 +283,6 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
     if (IsInitClipped())
         InitClipRegion();
 
-    const bool bMetafile(nullptr != mpMetaFile);
     /*
        tdf#135325 typically in these OutputDevice methods, for the in
        record-to-metafile case the  MetaFile is already written to before the
@@ -293,7 +292,7 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
        recording to a metafile. It's typical to record with a device of nominal
        size and play back later against something of a totally different size.
      */
-    if (maRegion.IsEmpty() && !bMetafile)
+    if (maRegion.IsEmpty() && !mpMetaFile)
         return;
 
 #ifdef DO_TIME_TEST
@@ -310,10 +309,12 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
     // Check for exclusion parameters that may prevent using it
     static bool bAllowPreferDirectPaint(true);
     const bool bInvert(RasterOp::Invert == meRasterOp);
+
     const bool bBitmapChangedColor(
         GetDrawMode()
         & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap | DrawModeFlags::GrayBitmap));
-    const bool bTryDirectPaint(!bInvert && !bBitmapChangedColor && !bMetafile);
+
+    const bool bTryDirectPaint(!bInvert && !bBitmapChangedColor && !mpMetaFile);
 
     if (bAllowPreferDirectPaint && bTryDirectPaint)
     {
@@ -344,7 +345,7 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
         const Size aDestSize(basegfx::fround(aScale.getX() + aTranslate.getX()) - aDestPt.X(),
                              basegfx::fround(aScale.getY() + aTranslate.getY()) - aDestPt.Y());
         const Point aOrigin = GetMapMode().GetOrigin();
-        if (!bMetafile && comphelper::LibreOfficeKit::isActive()
+        if (!mpMetaFile && comphelper::LibreOfficeKit::isActive()
             && GetMapMode().GetMapUnit() != MapUnit::MapPixel)
         {
             aDestPt.Move(aOrigin.getX(), aOrigin.getY());
@@ -352,7 +353,7 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
         }
 
         DrawBitmapEx(aDestPt, aDestSize, rBitmapEx);
-        if (!bMetafile && comphelper::LibreOfficeKit::isActive()
+        if (!mpMetaFile && comphelper::LibreOfficeKit::isActive()
             && GetMapMode().GetMapUnit() != MapUnit::MapPixel)
         {
             EnableMapMode();
@@ -411,11 +412,9 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
     // GetDeviceTransformation declaration
     basegfx::B2DHomMatrix aFullTransform(GetDeviceTransformation() * rTransformation);
 
-    if (!bMetafile)
-    {
-        if (!TransformAndReduceBitmapExToTargetRange(aFullTransform, aVisibleRange, fMaximumArea))
-            return;
-    }
+    if (!mpMetaFile
+        && !TransformAndReduceBitmapExToTargetRange(aFullTransform, aVisibleRange, fMaximumArea))
+        return;
 
     if (aVisibleRange.isEmpty())
         return;
@@ -441,6 +440,7 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
     basegfx::B2DVector aFullScale, aFullTranslate;
     double fFullRotate, fFullShearX;
     aFullTransform.decompose(aFullScale, aFullTranslate, fFullRotate, fFullShearX);
+
     // Require positive scaling, negative scaling would loose horizontal or vertical flip.
     if (aFullScale.getX() > 0 && aFullScale.getY() > 0)
     {
@@ -452,14 +452,12 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
 
     double fSourceRatio = 1.0;
     if (rOriginalSizePixel.getHeight() != 0)
-    {
         fSourceRatio = rOriginalSizePixel.getWidth() / rOriginalSizePixel.getHeight();
-    }
+
     double fTargetRatio = 1.0;
     if (aFullScale.getY() != 0)
-    {
         fTargetRatio = aFullScale.getX() / aFullScale.getY();
-    }
+
     bool bAspectRatioKept = rtl::math::approxEqual(fSourceRatio, fTargetRatio);
     if (bSheared || !bAspectRatioKept)
     {
@@ -477,6 +475,7 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
         Degree10 nAngle10(basegfx::fround(basegfx::rad2deg(fFullRotate) * 10));
         aTransformed.Rotate(nAngle10, COL_TRANSPARENT);
     }
+
     basegfx::B2DRange aTargetRange(0.0, 0.0, 1.0, 1.0);
 
     // get logic object target range
