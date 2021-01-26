@@ -51,8 +51,7 @@ private:
 
 public:
     bool blendBitmap(Bitmap const& rBitmapSource, Bitmap const& rBitmapDest,
-                     AlphaMask const& rAlpha, const tools::Long nDstWidth,
-                     const tools::Long nDstHeight);
+                     AlphaMask const& rAlpha, Size const& rDstSize);
 
     void blendBitmap24(const BitmapWriteAccess* pDestination, const BitmapReadAccess* pSource,
                        const BitmapReadAccess* pSourceAlpha, const tools::Long nDstWidth,

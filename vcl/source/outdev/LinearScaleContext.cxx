@@ -23,6 +23,8 @@
 #include <LinearScaleContext.hxx>
 #include <bitmap/BitmapWriteAccess.hxx>
 
+#include <cassert>
+
 LinearScaleContext::LinearScaleContext(tools::Rectangle const& aDstRect,
                                        tools::Rectangle const& aBitmapRect, Size const& aOutSize,
                                        tools::Long nOffX, tools::Long nOffY)
@@ -63,12 +65,14 @@ void LinearScaleContext::generateSimpleMap(tools::Long nSrcDimension, tools::Lon
 }
 
 bool LinearScaleContext::blendBitmap(Bitmap const& rBitmapSource, Bitmap const& rBitmapDest,
-                                     AlphaMask const& rAlpha, const tools::Long nDstWidth,
-                                     const tools::Long nDstHeight)
+                                     AlphaMask const& rAlpha, Size const& rDstSize)
 {
     Bitmap::ScopedReadAccess pSource(const_cast<Bitmap&>(rBitmapSource));
     BitmapScopedWriteAccess pDestination(BitmapScopedWriteAccess(const_cast<Bitmap&>(rBitmapDest)));
     AlphaMask::ScopedReadAccess pSourceAlpha(const_cast<AlphaMask&>(rAlpha));
+
+    assert(pSourceAlpha->GetScanlineFormat() == ScanlineFormat::N8BitPal
+           && "non-8bit alpha no longer supported!");
 
     if (pSource && pSourceAlpha && pDestination)
     {
@@ -80,6 +84,9 @@ bool LinearScaleContext::blendBitmap(Bitmap const& rBitmapSource, Bitmap const& 
             case ScanlineFormat::N24BitTcRgb:
             case ScanlineFormat::N24BitTcBgr:
             {
+                const tools::Long nDstWidth = rDstSize.Width();
+                const tools::Long nDstHeight = rDstSize.Height();
+
                 if ((nSourceFormat == ScanlineFormat::N24BitTcBgr
                      && nDestinationFormat == ScanlineFormat::N32BitTcBgra)
                     || (nSourceFormat == ScanlineFormat::N24BitTcRgb

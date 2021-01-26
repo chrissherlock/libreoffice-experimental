@@ -240,8 +240,7 @@ Bitmap RenderContext2::CreateTransparentAlphaBitmap(const Bitmap& rBitmap, const
     {
         LinearScaleContext aLinearContext(aDstRect, aBmpRect, aOutSize, nOffX, nOffY);
 
-        if (aLinearContext.blendBitmap(rBitmap, aBmp, rAlpha, aDstRect.GetWidth(),
-                                       aDstRect.GetHeight()))
+        if (aLinearContext.blendBitmap(rBitmap, aBmp, rAlpha, aDstRect.GetSize()))
         {
             aNewBitmap = aBmp;
         }
