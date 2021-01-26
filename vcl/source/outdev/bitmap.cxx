@@ -24,7 +24,6 @@
 
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
-#include <vcl/skia/SkiaHelper.hxx>
 #include <vcl/virdev.hxx>
 
 #include <TradScaleContext.hxx>
@@ -214,8 +213,6 @@ bool OutputDevice::DrawAlphaBitmap(Bitmap const& rBmp, AlphaMask const& rAlpha, 
         }
     }
 
-    // we need to make sure Skia never reaches this slow code path
-    assert(!SkiaHelper::isVCLSkiaEnabled());
     return false;
 }
 
