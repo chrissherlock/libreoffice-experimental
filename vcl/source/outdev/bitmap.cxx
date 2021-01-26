@@ -173,12 +173,13 @@ void OutputDevice::DrawTransparentAlphaBitmap(const Bitmap& rBmp, const AlphaMas
     }
 }
 
-bool OutputDevice::DrawAlphaBitmap(Bitmap const& rBmp, AlphaMask const& rAlpha, Point const& rOutPt, Size const& rOutSz, Point const& rSrcPtPixel, Size const& rSrcSizePixel, const BmpMirrorFlags mirrorFlags)
+bool OutputDevice::DrawAlphaBitmap(Bitmap const& rBmp, AlphaMask const& rAlpha, Point const& rOutPt,
+                                   Size const& rOutSz, Point const& rSrcPtPixel,
+                                   Size const& rSrcSizePixel, const BmpMirrorFlags mirrorFlags)
 {
     Point aRelPt = rOutPt + Point(GetXOffsetInPixels(), GetYOffsetInPixels());
-    SalTwoRect aTR(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(),
-                   rSrcSizePixel.Height(), aRelPt.X(), aRelPt.Y(), rOutSz.Width(),
-                   rOutSz.Height());
+    SalTwoRect aTR(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(), rSrcSizePixel.Height(),
+                   aRelPt.X(), aRelPt.Y(), rOutSz.Width(), rOutSz.Height());
 
     Bitmap bitmap(rBmp);
     AlphaMask alpha(rAlpha);
@@ -222,11 +223,10 @@ bool OutputDevice::DrawAlphaBitmap(Bitmap const& rBmp, AlphaMask const& rAlpha, 
     assert(!SkiaHelper::isVCLSkiaEnabled());
     return false;
 }
-Bitmap OutputDevice::CreateTransparentAlphaBitmap(const Bitmap& rBitmap,
-                                                const AlphaMask& rAlpha,
-                                                tools::Rectangle aDstRect,
-                                                tools::Rectangle aBmpRect,
-                                                Size const& aOutSize, Point const& aOutPoint)
+Bitmap OutputDevice::CreateTransparentAlphaBitmap(const Bitmap& rBitmap, const AlphaMask& rAlpha,
+                                                  tools::Rectangle aDstRect,
+                                                  tools::Rectangle aBmpRect, Size const& aOutSize,
+                                                  Point const& aOutPoint)
 {
     Bitmap aBmp(GetBitmap(aDstRect.TopLeft(), aDstRect.GetSize()));
 
@@ -252,9 +252,11 @@ Bitmap OutputDevice::CreateTransparentAlphaBitmap(const Bitmap& rBitmap,
 
     // #i38887# reading from screen may sometimes fail
     if (mpAlphaVDev && aBmp.ImplGetSalBitmap())
-        return mpAlphaVDev->CreateTransparentAlphaBitmap(rBitmap, rAlpha, aDstRect, aBmpRect, aOutSize, aOutPoint);
+        return mpAlphaVDev->CreateTransparentAlphaBitmap(rBitmap, rAlpha, aDstRect, aBmpRect,
+                                                         aOutSize, aOutPoint);
 
-    return RenderContext2::CreateTransparentAlphaBitmap(rBitmap, rAlpha, aDstRect, aBmpRect, aOutSize, aOutPoint);
+    return RenderContext2::CreateTransparentAlphaBitmap(rBitmap, rAlpha, aDstRect, aBmpRect,
+                                                        aOutSize, aOutPoint);
 }
 
 void OutputDevice::DrawTransparentAlphaBitmapSlowPath(const Bitmap& rBitmap,
