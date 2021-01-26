@@ -210,14 +210,16 @@ Bitmap RenderContext2::CreateTransparentAlphaBitmap(const Bitmap& rBitmap, const
                                                     tools::Rectangle aBmpRect, Size const& aOutSize,
                                                     Point const& aOutPoint)
 {
-    Bitmap aBmp(GetBitmap(aDstRect.TopLeft(), aDstRect.GetSize()));
+    Bitmap aRenderContextBmp(GetBitmap(aDstRect.TopLeft(), aDstRect.GetSize()));
 
     // #109044# The generated bitmap need not necessarily be of aDstRect dimensions, it's internally
     // clipped to window bounds. Thus, we correct the dest size here, since we later use it (in
     // nDstWidth/Height) for pixel access).
     // #i38887# reading from screen may sometimes fail
-    if (aBmp.ImplGetSalBitmap())
-        aDstRect.SetSize(aBmp.GetSizePixel());
+    if (aRenderContextBmp.ImplGetSalBitmap())
+        aDstRect.SetSize(aRenderContextBmp.GetSizePixel());
+    else
+        return Bitmap();
 
     // calculate offset in original bitmap in RTL case this is a little more complicated since the
     // contents of the bitmap is not mirrored (it never is), however the paint region and bmp region
@@ -234,27 +236,13 @@ Bitmap RenderContext2::CreateTransparentAlphaBitmap(const Bitmap& rBitmap, const
 
     Point aOffsetPos(nOffX, nOffY);
 
-    Bitmap aNewBitmap;
+    LinearScaleContext aLinearContext(aDstRect, aBmpRect, aOutSize, nOffX, nOffY);
+    if (aLinearContext.blendBitmap(rBitmap, aRenderContextBmp, rAlpha, aDstRect.GetSize()))
+        return aRenderContextBmp;
 
-    if (aBmp.ImplGetSalBitmap())
-    {
-        LinearScaleContext aLinearContext(aDstRect, aBmpRect, aOutSize, nOffX, nOffY);
-
-        if (aLinearContext.blendBitmap(rBitmap, aBmp, rAlpha, aDstRect.GetSize()))
-        {
-            aNewBitmap = aBmp;
-        }
-        else
-        {
-            TradScaleContext aTradContext(aDstRect, aBmpRect, aOutSize, nOffX, nOffY);
-
-            aNewBitmap
-                = BlendBitmap(aBmp, rBitmap, rAlpha, aOffsetPos, aDstRect.GetSize(), aBmpRect,
-                              aOutSize, aTradContext.mpMapX.get(), aTradContext.mpMapY.get());
-        }
-    }
-
-    return aNewBitmap;
+    TradScaleContext aTradContext(aDstRect, aBmpRect, aOutSize, nOffX, nOffY);
+    return BlendBitmap(aRenderContextBmp, rBitmap, rAlpha, aOffsetPos, aDstRect.GetSize(), aBmpRect,
+                       aOutSize, aTradContext.mpMapX.get(), aTradContext.mpMapY.get());
 }
 
 void RenderContext2::DrawTransparentAlphaBitmapSlowPath(
