@@ -85,13 +85,13 @@ void OutputDevice::SetFont(vcl::Font const& rNewFont)
     }
 }
 
-FontMetric OutputDevice::GetDevFont( int nDevFontIndex ) const
+FontMetric OutputDevice::GetDeviceFontMetric( int nDevFontIndex ) const
 {
     FontMetric aFontMetric;
 
-    ImplInitFontList();
+    InitFontCollection();
 
-    int nCount = GetDevFontCount();
+    int nCount = GetDeviceFontMetricCount();
     if( nDevFontIndex < nCount )
     {
         const PhysicalFontFace& rData = *mpDeviceFontList->Get( nDevFontIndex );
@@ -110,7 +110,7 @@ FontMetric OutputDevice::GetDevFont( int nDevFontIndex ) const
     return aFontMetric;
 }
 
-int OutputDevice::GetDevFontCount() const
+int OutputDevice::GetDeviceFontMetricCount() const
 {
     if( !mpDeviceFontList )
     {
@@ -132,7 +132,7 @@ int OutputDevice::GetDevFontCount() const
 
 bool OutputDevice::IsFontAvailable( const OUString& rFontName ) const
 {
-    ImplInitFontList();
+    InitFontCollection();
     PhysicalFontFamily* pFound = mxFontCollection->FindFontFamily( rFontName );
     return (pFound != nullptr);
 }
@@ -141,7 +141,7 @@ int OutputDevice::GetDevFontSizeCount( const vcl::Font& rFont ) const
 {
     mpDeviceFontSizeList.reset();
 
-    ImplInitFontList();
+    InitFontCollection();
     mpDeviceFontSizeList = mxFontCollection->GetDeviceFontSizeList( rFont.GetFamilyName() );
     return mpDeviceFontSizeList->Count();
 }
@@ -178,7 +178,7 @@ Size OutputDevice::GetDevFontSize( const vcl::Font& rFont, int nSizeIndex ) cons
 
 bool OutputDevice::AddTempDevFont( const OUString& rFileURL, const OUString& rFontName )
 {
-    ImplInitFontList();
+    InitFontCollection();
 
     if( !mpGraphics && !AcquireGraphics() )
         return false;
@@ -456,7 +456,7 @@ vcl::Font OutputDevice::GetDefaultFont( DefaultFontType nType, LanguageType eLan
         // Should we only return available fonts on the given device
         if ( pOutDev )
         {
-            pOutDev->ImplInitFontList();
+            pOutDev->InitFontCollection();
 
             // Search Font in the FontList
             OUString      aName;
@@ -487,7 +487,7 @@ vcl::Font OutputDevice::GetDefaultFont( DefaultFontType nType, LanguageType eLan
                 }
                 else
                 {
-                    pOutDev->ImplInitFontList();
+                    pOutDev->InitFontCollection();
 
                     aFont.SetFamilyName( aSearch );
 
@@ -565,28 +565,6 @@ vcl::Font OutputDevice::GetDefaultFont( DefaultFontType nType, LanguageType eLan
     return aFont;
 }
 
-void OutputDevice::ImplInitFontList() const
-{
-    if( mxFontCollection->Count() )
-        return;
-
-    if( !(mpGraphics || AcquireGraphics()) )
-        return;
-
-    SAL_INFO( "vcl.gdi", "OutputDevice::ImplInitFontList()" );
-    mpGraphics->GetDevFontList(mxFontCollection.get());
-
-    // There is absolutely no way there should be no fonts available on the device
-    if( !mxFontCollection->Count() )
-    {
-        OUString aError( "Application error: no fonts and no vcl resource found on your system" );
-        OUString aResStr(VclResId(SV_ACCESSERROR_NO_FONTS));
-        if (!aResStr.isEmpty())
-            aError = aResStr;
-        Application::Abort(aError);
-    }
-}
-
 bool OutputDevice::InitFont()
 {
     DBG_TESTSOLARMUTEX();
@@ -641,7 +619,7 @@ bool OutputDevice::ImplNewFont() const
         return false;
     }
 
-    ImplInitFontList();
+    InitFontCollection();
 
     // convert to pixel height
     // TODO: replace integer based aSize completely with subpixel accurate type

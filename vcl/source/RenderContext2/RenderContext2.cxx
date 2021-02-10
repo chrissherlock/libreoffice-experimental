@@ -40,7 +40,7 @@ RenderContext2::RenderContext2()
 {
 }
 
-void RenderContext2::dispose() {}
+void RenderContext2::dispose() { mxFontCollection.reset(); }
 
 sal_uInt16 RenderContext2::GetBitCount() const
 {

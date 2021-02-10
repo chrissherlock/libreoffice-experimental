@@ -264,7 +264,6 @@ private:
     GDIMetaFile*                    mpMetaFile;
     mutable rtl::Reference<LogicalFontInstance> mpFontInstance;
     mutable std::shared_ptr<ImplFontCache> mxFontCache;
-    mutable std::shared_ptr<PhysicalFontCollection> mxFontCollection;
     mutable std::unique_ptr<ImplDeviceFontList>     mpDeviceFontList;
     mutable std::unique_ptr<ImplDeviceFontSizeList> mpDeviceFontSizeList;
     std::vector<OutDevState>        maOutDevStateStack;
@@ -979,8 +978,8 @@ private:
 
 public:
 
-    FontMetric                  GetDevFont( int nDevFontIndex ) const;
-    int                         GetDevFontCount() const;
+    FontMetric                  GetDeviceFontMetric( int nDevFontIndex ) const;
+    int                         GetDeviceFontMetricCount() const;
 
     bool                        IsFontAvailable( const OUString& rFontName ) const;
 
@@ -1020,7 +1019,6 @@ public:
                                                 GetDefaultFontFlags nFlags,
                                                 const OutputDevice* pOutDev = nullptr );
 
-    SAL_DLLPRIVATE void         ImplInitFontList() const;
     SAL_DLLPRIVATE void         ImplUpdateFontData();
 
 protected:

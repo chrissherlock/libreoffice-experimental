@@ -18,13 +18,41 @@
  */
 
 #include <vcl/RenderContext2.hxx>
+#include <vcl/svapp.hxx>
 
+#include <PhysicalFontCollection.hxx>
 #include <drawmode.hxx>
+#include <salgdi.hxx>
+#include <svdata.hxx>
+
+#include <strings.hrc>
 
 bool RenderContext2::IsInitFont() const { return mbInitFont; }
 void RenderContext2::SetInitFontFlag(bool bFlag) { mbInitFont = bFlag; }
 bool RenderContext2::IsNewFont() const { return mbNewFont; }
 void RenderContext2::SetNewFontFlag(bool bFlag) { mbNewFont = bFlag; }
+
+void RenderContext2::InitFontCollection() const
+{
+    if (mxFontCollection->Count())
+        return;
+
+    if (!(mpGraphics || AcquireGraphics()))
+        return;
+
+    SAL_INFO("vcl.gdi", "OutputDevice::ImplInitFontList()");
+    mpGraphics->GetDevFontList(mxFontCollection.get());
+
+    // There is absolutely no way there should be no fonts available on the device
+    if (!mxFontCollection->Count())
+    {
+        OUString aError("Application error: no fonts and no vcl resource found on your system");
+        OUString aResStr(VclResId(SV_ACCESSERROR_NO_FONTS));
+        if (!aResStr.isEmpty())
+            aError = aResStr;
+        Application::Abort(aError);
+    }
+}
 
 const vcl::Font& RenderContext2::GetFont() const { return maFont; }
 

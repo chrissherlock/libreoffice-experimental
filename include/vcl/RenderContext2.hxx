@@ -33,6 +33,7 @@
 #include <memory>
 
 class AllSettings;
+class PhysicalFontCollection;
 class SalGraphics;
 struct SalTwoRect;
 
@@ -292,8 +293,7 @@ protected:
 
     virtual void InitMapModeObjects();
 
-    mutable SalGraphics* mpGraphics;
-    std::unique_ptr<AllSettings> mxSettings;
+    void InitFontCollection() const;
 
     void SetClipRegionFlag(bool bFlag);
     bool SelectClipRegion(vcl::Region const&, SalGraphics* pGraphics = nullptr);
@@ -335,6 +335,9 @@ protected:
 
     virtual bool CanSubsampleBitmap() const;
 
+    mutable SalGraphics* mpGraphics;
+    std::unique_ptr<AllSettings> mxSettings;
+
     // TODO eventually make these private when all text/font functions migrated from
     // OutputDevice to RenderContext2
     Color maTextLineColor;
@@ -344,6 +347,7 @@ protected:
     Geometry maGeometry;
     MapMode maMapMode;
     vcl::Region maRegion; ///< contains the clip region, see SetClipRegion(...)
+    mutable std::shared_ptr<PhysicalFontCollection> mxFontCollection;
 
 private:
     Bitmap BlendBitmap(Bitmap& rBitmap1, Bitmap const& rBitmap2, AlphaMask const& rAlpha,

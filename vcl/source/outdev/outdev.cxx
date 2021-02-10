@@ -118,9 +118,6 @@ void OutputDevice::dispose()
     // release ImplFontCache specific to this OutputDevice
     mxFontCache.reset();
 
-    // release ImplFontList specific to this OutputDevice
-    mxFontCollection.reset();
-
     mpAlphaVDev.disposeAndClear();
     mpPrevGraphics.clear();
     mpNextGraphics.clear();
