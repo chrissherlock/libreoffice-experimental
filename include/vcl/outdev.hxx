@@ -1238,7 +1238,7 @@ protected:
                                     const Size& rSrcSizePixel,
                                     BitmapEx const& rBitmapEx) override;
 
-    Bitmap                      CreateTransparentAlphaBitmap(
+    Bitmap                      CreateAlphaBitmap(
                                     const Bitmap& rBitmap,
                                     const AlphaMask& rAlpha,
                                     tools::Rectangle aDstRect,
@@ -1246,7 +1246,7 @@ protected:
                                     Size const& aOutSize, Point const& aOutPoint) override;
 
 private:
-    SAL_DLLPRIVATE void         DrawTransparentAlphaBitmap(
+    SAL_DLLPRIVATE void         DrawAlphaBitmap(
                                     const Bitmap& rBmp,
                                     const AlphaMask& rAlpha,
                                     const Point& rDestPt,
@@ -1263,7 +1263,7 @@ private:
                                     Size const& rSrcSizePixel,
                                     const BmpMirrorFlags mirrorFlags) override;
 
-    SAL_DLLPRIVATE void         DrawTransparentAlphaBitmapSlowPath(
+    SAL_DLLPRIVATE void         DrawAlphaBitmapSlowPath(
                                     const Bitmap& rBitmap, const AlphaMask& rAlpha,
                                     tools::Rectangle aDstRect, tools::Rectangle aBmpRect,
                                     Size const & aOutSz, Point const & aOutPt);

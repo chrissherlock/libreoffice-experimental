@@ -116,9 +116,9 @@ void OutputDevice::DrawBitmap(const Point& rDestPt, const Size& rDestSize, const
     }
 }
 
-void OutputDevice::DrawTransparentAlphaBitmap(const Bitmap& rBmp, const AlphaMask& rAlpha,
-                                              const Point& rDestPt, const Size& rDestSize,
-                                              const Point& rSrcPtPixel, const Size& rSrcSizePixel)
+void OutputDevice::DrawAlphaBitmap(const Bitmap& rBmp, const AlphaMask& rAlpha,
+                                   const Point& rDestPt, const Size& rDestSize,
+                                   const Point& rSrcPtPixel, const Size& rSrcSizePixel)
 {
     assert(!is_double_buffered_window());
 
@@ -168,7 +168,7 @@ void OutputDevice::DrawTransparentAlphaBitmap(const Bitmap& rBmp, const AlphaMas
             auxOutPt = aOutPt;
             auxOutSz = aOutSz;
         }
-        DrawTransparentAlphaBitmapSlowPath(bitmap, alpha, aDstRect, aBmpRect, auxOutSz, auxOutPt);
+        DrawAlphaBitmapSlowPath(bitmap, alpha, aDstRect, aBmpRect, auxOutSz, auxOutPt);
     }
 }
 
@@ -216,10 +216,9 @@ bool OutputDevice::DrawAlphaBitmap(Bitmap const& rBmp, AlphaMask const& rAlpha, 
     return false;
 }
 
-Bitmap OutputDevice::CreateTransparentAlphaBitmap(const Bitmap& rBitmap, const AlphaMask& rAlpha,
-                                                  tools::Rectangle aDstRect,
-                                                  tools::Rectangle aBmpRect, Size const& aOutSize,
-                                                  Point const& aOutPoint)
+Bitmap OutputDevice::CreateAlphaBitmap(const Bitmap& rBitmap, const AlphaMask& rAlpha,
+                                       tools::Rectangle aDstRect, tools::Rectangle aBmpRect,
+                                       Size const& aOutSize, Point const& aOutPoint)
 {
     Bitmap aBmp(GetBitmap(aDstRect.TopLeft(), aDstRect.GetSize()));
 
@@ -245,18 +244,16 @@ Bitmap OutputDevice::CreateTransparentAlphaBitmap(const Bitmap& rBitmap, const A
 
     // #i38887# reading from screen may sometimes fail
     if (mpAlphaVDev && aBmp.ImplGetSalBitmap())
-        return mpAlphaVDev->CreateTransparentAlphaBitmap(rBitmap, rAlpha, aDstRect, aBmpRect,
-                                                         aOutSize, aOutPoint);
+        return mpAlphaVDev->CreateAlphaBitmap(rBitmap, rAlpha, aDstRect, aBmpRect, aOutSize,
+                                              aOutPoint);
 
-    return RenderContext2::CreateTransparentAlphaBitmap(rBitmap, rAlpha, aDstRect, aBmpRect,
-                                                        aOutSize, aOutPoint);
+    return RenderContext2::CreateAlphaBitmap(rBitmap, rAlpha, aDstRect, aBmpRect, aOutSize,
+                                             aOutPoint);
 }
 
-void OutputDevice::DrawTransparentAlphaBitmapSlowPath(const Bitmap& rBitmap,
-                                                      const AlphaMask& rAlpha,
-                                                      tools::Rectangle aDstRect,
-                                                      tools::Rectangle aBmpRect,
-                                                      Size const& aOutSize, Point const& aOutPoint)
+void OutputDevice::DrawAlphaBitmapSlowPath(const Bitmap& rBitmap, const AlphaMask& rAlpha,
+                                           tools::Rectangle aDstRect, tools::Rectangle aBmpRect,
+                                           Size const& aOutSize, Point const& aOutPoint)
 {
     assert(!is_double_buffered_window());
 
@@ -268,7 +265,7 @@ void OutputDevice::DrawTransparentAlphaBitmapSlowPath(const Bitmap& rBitmap,
     mpMetaFile = nullptr; // fdo#55044 reset before GetBitmap!
     DisableMapMode();
 
-    Bitmap aNewBitmap(CreateTransparentAlphaBitmap(rBitmap, rAlpha, aDstRect, aBmpRect, aOutSize, aOutPoint));
+    Bitmap aNewBitmap(CreateAlphaBitmap(rBitmap, rAlpha, aDstRect, aBmpRect, aOutSize, aOutPoint));
 
     // #110958# Disable alpha VDev, we're doing the necessary
     // stuff explicitly further below

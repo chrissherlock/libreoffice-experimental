@@ -318,18 +318,17 @@ protected:
                                    const Point& rSrcPtPixel, const Size& rSrcSizePixel,
                                    BitmapEx const& rBitmapEx);
 
-    virtual Bitmap CreateTransparentAlphaBitmap(const Bitmap& rBitmap, const AlphaMask& rAlpha,
-                                                tools::Rectangle aDstRect,
-                                                tools::Rectangle aBmpRect, Size const& aOutSize,
-                                                Point const& aOutPoint);
+    virtual Bitmap CreateAlphaBitmap(const Bitmap& rBitmap, const AlphaMask& rAlpha,
+                                     tools::Rectangle aDstRect, tools::Rectangle aBmpRect,
+                                     Size const& aOutSize, Point const& aOutPoint);
 
     virtual bool DrawAlphaBitmap(Bitmap const& rBmp, AlphaMask const& rAlpha, Point const& rOutPt,
                                  Size const& rOutSz, Point const& rSrcPtPixel,
                                  Size const& rSrcSizePixel, const BmpMirrorFlags mirrorFlags);
 
-    void DrawTransparentAlphaBitmapSlowPath(const Bitmap& rBitmap, const AlphaMask& rAlpha,
-                                            tools::Rectangle aDstRect, tools::Rectangle aBmpRect,
-                                            Size const& aOutSz, Point const& aOutPt);
+    void DrawAlphaBitmapSlowPath(const Bitmap& rBitmap, const AlphaMask& rAlpha,
+                                 tools::Rectangle aDstRect, tools::Rectangle aBmpRect,
+                                 Size const& aOutSz, Point const& aOutPt);
 
     virtual Point ShiftPoint(Point const& rDestPt, Point const&);
     virtual void RestoreAfterShift();

@@ -153,8 +153,8 @@ void OutputDevice::DrawTransparentBitmapEx(const Point& rDestPt, const Size& rDe
 
     if (aBmpEx.IsAlpha())
     {
-        DrawTransparentAlphaBitmap(aBmpEx.GetBitmap(), aBmpEx.GetAlpha(), rDestPt, rDestSize,
-                                   rSrcPtPixel, rSrcSizePixel);
+        DrawAlphaBitmap(aBmpEx.GetBitmap(), aBmpEx.GetAlpha(), rDestPt, rDestSize, rSrcPtPixel,
+                        rSrcSizePixel);
     }
     else if (!!aBmpEx)
     {

@@ -206,10 +206,9 @@ void RenderContext2::DrawBitmap(Point const& rDestPt, Size const& rDestSize,
     }
 }
 
-Bitmap RenderContext2::CreateTransparentAlphaBitmap(const Bitmap& rBitmap, const AlphaMask& rAlpha,
-                                                    tools::Rectangle aDstRect,
-                                                    tools::Rectangle aBmpRect, Size const& aOutSize,
-                                                    Point const& aOutPoint)
+Bitmap RenderContext2::CreateAlphaBitmap(const Bitmap& rBitmap, const AlphaMask& rAlpha,
+                                         tools::Rectangle aDstRect, tools::Rectangle aBmpRect,
+                                         Size const& aOutSize, Point const& aOutPoint)
 {
     Bitmap aRenderContextBmp(GetBitmap(aDstRect.TopLeft(), aDstRect.GetSize()));
 
@@ -278,9 +277,9 @@ bool RenderContext2::DrawAlphaBitmap(Bitmap const& rBmp, AlphaMask const& rAlpha
     return false;
 }
 
-void RenderContext2::DrawTransparentAlphaBitmapSlowPath(
-    const Bitmap& rBitmap, const AlphaMask& rAlpha, tools::Rectangle aDstRect,
-    tools::Rectangle aBmpRect, Size const& aOutSize, Point const& aOutPoint)
+void RenderContext2::DrawAlphaBitmapSlowPath(const Bitmap& rBitmap, const AlphaMask& rAlpha,
+                                             tools::Rectangle aDstRect, tools::Rectangle aBmpRect,
+                                             Size const& aOutSize, Point const& aOutPoint)
 {
     // we need to make sure Skia never reaches this slow code path
     assert(!SkiaHelper::isVCLSkiaEnabled());
@@ -290,8 +289,8 @@ void RenderContext2::DrawTransparentAlphaBitmapSlowPath(
     const bool bOldMap = IsMapModeEnabled();
     DisableMapMode();
 
-    DrawBitmap(aDstRect.TopLeft(), CreateTransparentAlphaBitmap(rBitmap, rAlpha, aDstRect, aBmpRect,
-                                                                aOutSize, aOutPoint));
+    DrawBitmap(aDstRect.TopLeft(),
+               CreateAlphaBitmap(rBitmap, rAlpha, aDstRect, aBmpRect, aOutSize, aOutPoint));
 
     if (bOldMap)
         EnableMapMode();
