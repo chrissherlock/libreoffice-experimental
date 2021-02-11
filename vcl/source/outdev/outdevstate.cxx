@@ -28,7 +28,7 @@
 #include <vcl/settings.hxx>
 
 #include <drawmode.hxx>
-#include <font/ImplDeviceFontList.hxx>
+#include <font/PhysicalFontFaceCollection.hxx>
 #include <font/ImplDeviceFontSizeList.hxx>
 #include <salgdi.hxx>
 

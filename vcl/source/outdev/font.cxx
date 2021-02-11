@@ -32,7 +32,7 @@
 #include <drawmode.hxx>
 #include <font/emphasismark.hxx>
 #include <font/font.hxx>
-#include <font/ImplDeviceFontList.hxx>
+#include <font/PhysicalFontFaceCollection.hxx>
 #include <font/ImplDeviceFontSizeList.hxx>
 #include <font/ImplDirectFontSubstitution.hxx>
 #include <font/ImplFontSubstEntry.hxx>
@@ -94,7 +94,7 @@ FontMetric OutputDevice::GetDeviceFontMetric( int nDevFontIndex ) const
     int nCount = GetDeviceFontMetricCount();
     if( nDevFontIndex < nCount )
     {
-        const PhysicalFontFace& rData = *mpDeviceFontList->Get( nDevFontIndex );
+        const PhysicalFontFace& rData = *mpPhysicalFontFaceCollection->Get( nDevFontIndex );
         aFontMetric.SetFamilyName( rData.GetFamilyName() );
         aFontMetric.SetStyleName( rData.GetStyleName() );
         aFontMetric.SetCharSet( rData.GetCharSet() );
@@ -112,22 +112,22 @@ FontMetric OutputDevice::GetDeviceFontMetric( int nDevFontIndex ) const
 
 int OutputDevice::GetDeviceFontMetricCount() const
 {
-    if( !mpDeviceFontList )
+    if( !mpPhysicalFontFaceCollection )
     {
         if (!mxFontCollection)
         {
             return 0;
         }
 
-        mpDeviceFontList = mxFontCollection->GetDeviceFontList();
+        mpPhysicalFontFaceCollection = mxFontCollection->GetDeviceFontList();
 
-        if (!mpDeviceFontList->Count())
+        if (!mpPhysicalFontFaceCollection->Count())
         {
-            mpDeviceFontList.reset();
+            mpPhysicalFontFaceCollection.reset();
             return 0;
         }
     }
-    return mpDeviceFontList->Count();
+    return mpPhysicalFontFaceCollection->Count();
 }
 
 bool OutputDevice::IsFontAvailable( const OUString& rFontName ) const
@@ -319,7 +319,7 @@ void OutputDevice::ImplClearFontData( const bool bNewFontLists )
 
     if ( bNewFontLists )
     {
-        mpDeviceFontList.reset();
+        mpPhysicalFontFaceCollection.reset();
         mpDeviceFontSizeList.reset();
 
         // release all physically selected fonts on this device
@@ -1000,7 +1000,7 @@ void OutputDevice::ImplReleaseFonts()
     SetInitFontFlag(true);
 
     mpFontInstance.clear();
-    mpDeviceFontList.reset();
+    mpPhysicalFontFaceCollection.reset();
     mpDeviceFontSizeList.reset();
 }
 

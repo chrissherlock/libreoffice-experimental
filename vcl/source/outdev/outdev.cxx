@@ -31,7 +31,7 @@
 #include <vcl/virdev.hxx>
 
 #include <window.h>
-#include <font/ImplDeviceFontList.hxx>
+#include <font/PhysicalFontFaceCollection.hxx>
 #include <font/ImplDeviceFontSizeList.hxx>
 #include <salgdi.hxx>
 #include <ImplOutDevData.hxx>
@@ -59,7 +59,7 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mpNextGraphics                  = nullptr;
     mpMetaFile                      = nullptr;
     mpFontInstance                     = nullptr;
-    mpDeviceFontList                = nullptr;
+    mpPhysicalFontFaceCollection                = nullptr;
     mpDeviceFontSizeList            = nullptr;
     mpAlphaVDev                     = nullptr;
     mpExtOutDevData                 = nullptr;
@@ -112,7 +112,7 @@ void OutputDevice::dispose()
     mpFontInstance.clear();
 
     // remove cached results of GetDevFontList/GetDevSizeList
-    mpDeviceFontList.reset();
+    mpPhysicalFontFaceCollection.reset();
     mpDeviceFontSizeList.reset();
 
     // release ImplFontCache specific to this OutputDevice

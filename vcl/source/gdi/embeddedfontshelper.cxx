@@ -19,7 +19,7 @@
 #include <vcl/svapp.hxx>
 #include <vcl/virdev.hxx>
 
-#include <font/ImplDeviceFontList.hxx>
+#include <font/PhysicalFontFaceCollection.hxx>
 #include <salgdi.hxx>
 #include <sft.hxx>
 #include <PhysicalFontCollection.hxx>
@@ -260,7 +260,7 @@ OUString EmbeddedFontsHelper::fontFileUrl( std::u16string_view familyName, FontF
     SalGraphics* graphics = Application::GetDefaultDevice()->GetGraphics();
     PhysicalFontCollection fonts;
     graphics->GetDevFontList( &fonts );
-    std::unique_ptr< ImplDeviceFontList > fontInfo( fonts.GetDeviceFontList());
+    std::unique_ptr< PhysicalFontFaceCollection > fontInfo( fonts.GetDeviceFontList());
     PhysicalFontFace* selected = nullptr;
     for( int i = 0;
          i < fontInfo->Count();
