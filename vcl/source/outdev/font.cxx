@@ -112,22 +112,19 @@ FontMetric OutputDevice::GetDeviceFontMetric( int nDevFontIndex ) const
 
 int OutputDevice::GetDeviceFontMetricCount() const
 {
-    if( !mpPhysicalFontFaceCollection )
-    {
-        if (!mxFontCollection)
-        {
-            return 0;
-        }
-
-        mpPhysicalFontFaceCollection = mxFontCollection->GetDeviceFontList();
-
-        if (!mpPhysicalFontFaceCollection->Count())
-        {
-            mpPhysicalFontFaceCollection.reset();
-            return 0;
-        }
-    }
+    InitPhysicalFontFaceCollection();
     return mpPhysicalFontFaceCollection->Count();
+}
+
+void OutputDevice::InitPhysicalFontFaceCollection() const
+{
+    if (!mpPhysicalFontFaceCollection && !mxFontCollection)
+        return;
+
+    mpPhysicalFontFaceCollection = mxFontCollection->GetDeviceFontList();
+
+    if (!mpPhysicalFontFaceCollection->Count())
+        mpPhysicalFontFaceCollection.reset();
 }
 
 bool OutputDevice::IsFontAvailable( const OUString& rFontName ) const

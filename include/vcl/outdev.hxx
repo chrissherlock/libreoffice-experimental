@@ -1041,6 +1041,7 @@ private:
     typedef void ( OutputDevice::* FontUpdateHandler_t )( bool );
 
     SAL_DLLPRIVATE bool         ImplNewFont() const;
+    void InitPhysicalFontFaceCollection() const;
 
     static
     SAL_DLLPRIVATE OUString     ImplGetEllipsisString( const OutputDevice& rTargetDevice, const OUString& rStr,
