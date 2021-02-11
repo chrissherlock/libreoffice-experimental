@@ -42,7 +42,7 @@
 #include <algorithm>
 #include <memory>
 
-#include <impglyphitem.hxx>
+#include <font/impglyphitem.hxx>
 
 // Glyph Flags
 #define GF_FONTMASK  0xF0000000

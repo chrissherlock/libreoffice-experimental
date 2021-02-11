@@ -25,11 +25,11 @@
 #include <Qt5Font.hxx>
 #include <Qt5Tools.hxx>
 
-#include <sft.hxx>
-#include <impfontcharmap.hxx>
-#include <fontinstance.hxx>
-#include <fontselect.hxx>
-#include <PhysicalFontCollection.hxx>
+#include <font/PhysicalFontCollection.hxx>
+#include <font/fontinstance.hxx>
+#include <font/fontselect.hxx>
+#include <font/impfontcharmap.hxx>
+#include <font/sft.hxx>
 
 #include <QtGui/QFont>
 #include <QtGui/QFontDatabase>

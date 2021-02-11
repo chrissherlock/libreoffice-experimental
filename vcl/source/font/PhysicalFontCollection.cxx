@@ -23,11 +23,11 @@
 #include <unotools/fontdefs.hxx>
 #include <o3tl/sorted_vector.hxx>
 
-#include <font/PhysicalFontFaceCollection.hxx>
 #include <font/ImplDeviceFontSizeList.hxx>
 #include <font/ImplGlyphFallbackFontSubstitution.hxx>
 #include <font/ImplPreMatchFontSubstitution.hxx>
-#include <PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFaceCollection.hxx>
+#include <font/PhysicalFontCollection.hxx>
 
 #include <memory>
 

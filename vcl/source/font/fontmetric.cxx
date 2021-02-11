@@ -17,20 +17,21 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <sal/log.hxx>
 #include <i18nlangtag/mslangid.hxx>
-#include <officecfg/Office/Common.hxx>
 #include <unotools/configmgr.hxx>
+#include <comphelper/sequence.hxx>
+#include <officecfg/Office/Common.hxx>
+
 #include <vcl/metric.hxx>
 #include <vcl/outdev.hxx>
-#include <sal/log.hxx>
 
-#include <fontinstance.hxx>
-#include <fontselect.hxx>
-#include <impfontmetricdata.hxx>
-#include <sft.hxx>
+#include <font/fontinstance.hxx>
+#include <font/fontselect.hxx>
+#include <font/impfontmetricdata.hxx>
+#include <font/sft.hxx>
 
 #include <com/sun/star/uno/Sequence.hxx>
-#include <comphelper/sequence.hxx>
 
 using namespace ::com::sun::star;
 using namespace ::com::sun::star::uno;

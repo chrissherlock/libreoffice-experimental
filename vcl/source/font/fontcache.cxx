@@ -17,12 +17,13 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <fontinstance.hxx>
-#include <impfontcache.hxx>
-#include <PhysicalFontCollection.hxx>
-#include <PhysicalFontFace.hxx>
-#include <PhysicalFontFamily.hxx>
 #include <sal/log.hxx>
+
+#include <font/PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFace.hxx>
+#include <font/PhysicalFontFamily.hxx>
+#include <font/fontinstance.hxx>
+#include <font/impfontcache.hxx>
 
 #if !(defined(_WIN32) || defined(MACOSX) || defined(IOS))
 #include <unx/glyphcache.hxx>

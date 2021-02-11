@@ -40,11 +40,11 @@
 
 #include <quartz/ctfonts.hxx>
 #include <font/ImplGlyphFallbackFontSubstitution.hxx>
-#include <fontsubset.hxx>
-#include <impfont.hxx>
-#include <impfontcharmap.hxx>
-#include <impfontmetricdata.hxx>
-#include <PhysicalFontCollection.hxx>
+#include <font/PhysicalFontCollection.hxx>
+#include <font/fontsubset.hxx>
+#include <font/impfont.hxx>
+#include <font/impfontcharmap.hxx>
+#include <font/impfontmetricdata.hxx>
 
 #ifdef MACOSX
 #include <osx/salframe.h>
@@ -54,7 +54,7 @@
 #include "saldatabasic.hxx"
 #endif
 #include <sallayout.hxx>
-#include <sft.hxx>
+#include <font/sft.hxx>
 
 using namespace vcl;
 

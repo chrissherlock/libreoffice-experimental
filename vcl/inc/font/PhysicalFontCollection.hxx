@@ -23,7 +23,8 @@
 #include <vcl/dllapi.h>
 
 #include "fontinstance.hxx"
-#include "PhysicalFontFamily.hxx"
+#include <font/PhysicalFontFamily.hxx>
+
 #include <array>
 
 #define MAX_GLYPHFALLBACK 16

@@ -18,12 +18,13 @@
  */
 
 #include <sal/config.h>
-#include <o3tl/safeint.hxx>
 #include <tools/gen.hxx>
+#include <o3tl/safeint.hxx>
+
 #include <vcl/font.hxx>
 
-#include <PhysicalFontFace.hxx>
-#include <fontselect.hxx>
+#include <font/PhysicalFontFace.hxx>
+#include <font/fontselect.hxx>
 
 // These mustn't conflict with font name lists which use ; and ,
 const char FontSelectPattern::FEAT_PREFIX = ':';

@@ -17,18 +17,19 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <fontattributes.hxx>
+#include <font/FontAttributes.hxx>
 
 FontAttributes::FontAttributes()
-:   meWeight( WEIGHT_DONTKNOW ),
-    meFamily( FAMILY_DONTKNOW ),
-    mePitch( PITCH_DONTKNOW ),
-    meWidthType ( WIDTH_DONTKNOW ),
-    meItalic ( ITALIC_NONE ),
-    meCharSet( RTL_TEXTENCODING_DONTKNOW ),
-    mbSymbolFlag( false ),
-    mnQuality( 0 )
-{}
+    : meWeight(WEIGHT_DONTKNOW)
+    , meFamily(FAMILY_DONTKNOW)
+    , mePitch(PITCH_DONTKNOW)
+    , meWidthType(WIDTH_DONTKNOW)
+    , meItalic(ITALIC_NONE)
+    , meCharSet(RTL_TEXTENCODING_DONTKNOW)
+    , mbSymbolFlag(false)
+    , mnQuality(0)
+{
+}
 
 bool FontAttributes::CompareDeviceIndependentFontAttributes(const FontAttributes& rOther) const
 {

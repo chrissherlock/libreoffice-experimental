@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-02-10 21:31:35 using:
+ Generated on 2021-02-11 21:46:41 using:
  ./bin/update_pch vcl vcl --cutoff=6 --exclude:system --include:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -46,6 +46,7 @@
 #include <string.h>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
@@ -120,7 +121,6 @@
 #include <basegfx/vector/b2enums.hxx>
 #include <basegfx/vector/b2ivector.hxx>
 #include <bitmap/BitmapWriteAccess.hxx>
-#include <bitmap/bmpfast.hxx>
 #include <com/sun/star/awt/Key.hpp>
 #include <com/sun/star/awt/KeyGroup.hpp>
 #include <com/sun/star/beans/PropertyValue.hpp>
@@ -186,8 +186,13 @@
 #include <cppuhelper/weak.hxx>
 #include <cppuhelper/weakagg.hxx>
 #include <cppuhelper/weakref.hxx>
-#include <font/ImplDeviceFontList.hxx>
 #include <font/ImplDeviceFontSizeList.hxx>
+#include <font/PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFace.hxx>
+#include <font/PhysicalFontFaceCollection.hxx>
+#include <font/impfontcache.hxx>
+#include <font/impglyphitem.hxx>
+#include <font/sft.hxx>
 #include <i18nlangtag/lang.h>
 #include <i18nlangtag/languagetag.hxx>
 #include <i18nlangtag/mslangid.hxx>
@@ -212,6 +217,7 @@
 #include <svl/svldllapi.h>
 #include <svl/typedwhich.hxx>
 #include <test/outputdevice.hxx>
+#include <tools/bigint.hxx>
 #include <tools/color.hxx>
 #include <tools/contnr.hxx>
 #include <tools/date.hxx>
@@ -250,14 +256,12 @@
 #include <unotools/unotoolsdllapi.h>
 #endif // PCH_LEVEL >= 3
 #if PCH_LEVEL >= 4
-#include <PhysicalFontCollection.hxx>
-#include <PhysicalFontFace.hxx>
+#include <SaveAndDisableMapMode.hxx>
 #include <brdwin.hxx>
 #include <configsettings.hxx>
 #include <controldata.hxx>
 #include <drawmode.hxx>
-#include <impfontcache.hxx>
-#include <impglyphitem.hxx>
+#include <fontattributes.hxx>
 #include <salbmp.hxx>
 #include <salframe.hxx>
 #include <salgdi.hxx>
@@ -272,13 +276,11 @@
 #include <salusereventlist.hxx>
 #include <salvd.hxx>
 #include <salvtables.hxx>
-#include <sft.hxx>
 #include <svdata.hxx>
 #include <vcl/AccessibleBrowseBoxObjType.hxx>
 #include <vcl/BinaryDataContainer.hxx>
 #include <vcl/BitmapColor.hxx>
 #include <vcl/BitmapFilter.hxx>
-#include <vcl/BitmapMonochromeFilter.hxx>
 #include <vcl/BitmapReadAccess.hxx>
 #include <vcl/BitmapTools.hxx>
 #include <vcl/FilterConfigItem.hxx>

@@ -24,10 +24,10 @@
 #include <window.h>
 #include <font/ImplDirectFontSubstitution.hxx>
 #include <font/ImplFontSubstEntry.hxx>
-#include <impfontcache.hxx>
+#include <font/PhysicalFontCollection.hxx>
+#include <font/impfontcache.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>
-#include <PhysicalFontCollection.hxx>
 
 void BeginFontSubstitution()
 {

@@ -28,7 +28,6 @@
 #include <vcl/virdev.hxx>
 #include <vcl/print.hxx>
 
-#include <impfontcache.hxx>
 #include <jobset.h>
 #include <print.h>
 #include <salinst.hxx>
@@ -37,9 +36,10 @@
 #include <salptype.hxx>
 #include <salvd.hxx>
 #include <svdata.hxx>
+#include <font/PhysicalFontCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <font/ImplDeviceFontSizeList.hxx>
-#include <PhysicalFontCollection.hxx>
+#include <font/impfontcache.hxx>
 
 #include <print.hrc>
 

@@ -21,7 +21,7 @@
 
 #include <rtl/ref.hxx>
 
-#include <PhysicalFontFace.hxx>
+#include <font/PhysicalFontFace.hxx>
 
 #include <vector>
 

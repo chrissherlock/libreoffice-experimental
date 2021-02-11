@@ -27,15 +27,15 @@
 
 
 #include <quartz/ctfonts.hxx>
-#include <impfont.hxx>
+#include <font/impfont.hxx>
 #ifdef MACOSX
 #include <osx/saldata.hxx>
 #include <osx/salinst.h>
 #endif
-#include <fontinstance.hxx>
-#include <fontattributes.hxx>
-#include <impglyphitem.hxx>
-#include <PhysicalFontCollection.hxx>
+#include <font/PhysicalFontCollection.hxx>
+#include <font/fontinstance.hxx>
+#include <font/FontAttributes.hxx>
+#include <font/impglyphitem.hxx>
 #include <quartz/salgdi.h>
 #include <quartz/utils.h>
 #include <sallayout.hxx>

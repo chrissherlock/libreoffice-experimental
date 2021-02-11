@@ -31,7 +31,7 @@
 #include <vcl/virdev.hxx>
 
 #include <drawmode.hxx>
-#include <impglyphitem.hxx>
+#include <font/impglyphitem.hxx>
 #include <salgdi.hxx>
 
 #define UNDERLINE_LAST      LINESTYLE_BOLDWAVE

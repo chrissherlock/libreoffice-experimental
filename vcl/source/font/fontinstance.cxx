@@ -17,14 +17,12 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-
 #include <hb-ot.h>
 #include <hb-graphite2.h>
 
-#include <fontinstance.hxx>
-#include <impfontcache.hxx>
-
-#include <PhysicalFontFace.hxx>
+#include <font/PhysicalFontFace.hxx>
+#include <font/fontinstance.hxx>
+#include <font/impfontcache.hxx>
 
 // extend std namespace to add custom hash needed for LogicalFontInstance
 

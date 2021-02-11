@@ -39,10 +39,9 @@
 #include <vcl/fontcapabilities.hxx>
 #include <vcl/metric.hxx>
 
-
-#include <fontinstance.hxx>
-#include <impfontmetricdata.hxx>
-#include <PhysicalFontFace.hxx>
+#include <font/PhysicalFontFace.hxx>
+#include <font/fontinstance.hxx>
+#include <font/impfontmetricdata.hxx>
 #include <salgdi.hxx>
 
 #include <quartz/salgdicommon.hxx>

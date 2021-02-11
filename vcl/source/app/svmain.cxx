@@ -64,13 +64,13 @@
 #include <jni.h>
 #endif
 
-#include <impfontcache.hxx>
 #include <salinst.hxx>
 #include <svdata.hxx>
 #include <vcl/svmain.hxx>
 #include <dbggui.hxx>
 #include <accmgr.hxx>
-#include <PhysicalFontCollection.hxx>
+#include <font/PhysicalFontCollection.hxx>
+#include <font/impfontcache.hxx>
 #include <print.h>
 #include <salsys.hxx>
 #include <saltimer.hxx>

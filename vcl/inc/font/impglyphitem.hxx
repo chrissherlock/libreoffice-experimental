@@ -20,14 +20,16 @@
 #ifndef INCLUDED_VCL_IMPGLYPHITEM_HXX
 #define INCLUDED_VCL_IMPGLYPHITEM_HXX
 
-#include <o3tl/typed_flags_set.hxx>
 #include <tools/gen.hxx>
+#include <o3tl/typed_flags_set.hxx>
+
 #include <vcl/dllapi.h>
 #include <vcl/glyphitem.hxx>
 #include <vcl/outdev.hxx>
-#include <vector>
 
-#include "fontinstance.hxx"
+#include <font/fontinstance.hxx>
+
+#include <vector>
 
 enum class GlyphItemFlags
 {

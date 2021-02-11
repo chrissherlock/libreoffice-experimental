@@ -32,13 +32,13 @@
 #include <vcl/event.hxx>
 
 #include <window.h>
+#include <font/FeatureCollector.hxx>
+#include <font/PhysicalFontCollection.hxx>
+#include <font/emphasismark.hxx>
+#include <font/impglyphitem.hxx>
 #include <sallayout.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>
-#include <impglyphitem.hxx>
-#include <PhysicalFontCollection.hxx>
-#include <font/FeatureCollector.hxx>
-#include <font/emphasismark.hxx>
 
 #include <strings.hrc>
 

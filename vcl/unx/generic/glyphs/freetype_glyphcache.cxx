@@ -24,8 +24,8 @@
 
 #include <unx/freetype_glyphcache.hxx>
 
-#include <fontinstance.hxx>
-#include <fontattributes.hxx>
+#include <font/fontinstance.hxx>
+#include <font/FontAttributes.hxx>
 
 #include <unotools/fontdefs.hxx>
 
@@ -36,8 +36,8 @@
 #include <sal/log.hxx>
 
 #include <langboost.hxx>
-#include <PhysicalFontCollection.hxx>
-#include <sft.hxx>
+#include <font/PhysicalFontCollection.hxx>
+#include <font/sft.hxx>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -59,7 +59,7 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <unx/fontmanager.hxx>
-#include <impfontcharmap.hxx>
+#include <font/impfontcharmap.hxx>
 
 static FT_Library aLibFT = nullptr;
 

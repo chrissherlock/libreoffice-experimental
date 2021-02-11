@@ -34,8 +34,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #endif
-#include <sft.hxx>
-#include <impfontcharmap.hxx>
+#include <font/sft.hxx>
+#include <font/impfontcharmap.hxx>
 #include "ttcr.hxx"
 #include "xlat.hxx"
 #include <rtl/crc.h>

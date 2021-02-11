@@ -19,7 +19,7 @@
 
 #include "glyphset.hxx"
 
-#include <sft.hxx>
+#include <font/sft.hxx>
 
 #include <unx/printergfx.hxx>
 #include <fontsubset.hxx>

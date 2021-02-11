@@ -19,10 +19,10 @@
 
 #include <impfontcache.hxx>
 #include <font/ImplGlyphFallbackFontSubstitution.hxx>
+#include <font/PhysicalFontCollection.hxx>
 #include <unx/geninst.h>
 #include <unx/fontmanager.hxx>
 #include <ImplOutDevData.hxx>
-#include <PhysicalFontCollection.hxx>
 
 // platform specific font substitution hooks
 

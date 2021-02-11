@@ -19,8 +19,8 @@
 #ifndef INCLUDED_VCL_SOURCE_PDF_BUILDIN_FONTS_HXX
 #define INCLUDED_VCL_SOURCE_PDF_BUILDIN_FONTS_HXX
 
-#include <PhysicalFontFace.hxx>
-#include <fontinstance.hxx>
+#include <font/PhysicalFontFace.hxx>
+#include <font/fontinstance.hxx>
 
 namespace vcl::pdf
 {

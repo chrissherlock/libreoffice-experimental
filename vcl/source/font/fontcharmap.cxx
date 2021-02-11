@@ -15,15 +15,18 @@
  *   except in compliance with the License. You may obtain a copy of
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
-#include <vcl/fontcharmap.hxx>
-#include <impfontcharmap.hxx>
+
+#include <sal/log.hxx>
 #include <rtl/textcvt.h>
 #include <rtl/textenc.h>
-#include <sal/log.hxx>
+#include <o3tl/sorted_vector.hxx>
+
+#include <vcl/fontcharmap.hxx>
+
+#include <font/impfontcharmap.hxx>
 
 #include <algorithm>
 #include <vector>
-#include <o3tl/sorted_vector.hxx>
 
 CmapResult::CmapResult( bool bSymbolic,
     const sal_UCS4* pRangeCodes, int nRangeCount )

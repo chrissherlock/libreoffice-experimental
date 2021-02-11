@@ -23,7 +23,7 @@
 
 #include <unx/fontmanager.hxx>
 #include <fontsubset.hxx>
-#include <impfontcharmap.hxx>
+#include <font/impfontcharmap.hxx>
 #include <unx/gendata.hxx>
 #include <unx/helper.hxx>
 #include <vcl/fontcharmap.hxx>
@@ -40,7 +40,7 @@
 
 #include <i18nlangtag/applelangid.hxx>
 
-#include <sft.hxx>
+#include <font/sft.hxx>
 
 #if OSL_DEBUG_LEVEL > 1
 #include <sys/times.h>

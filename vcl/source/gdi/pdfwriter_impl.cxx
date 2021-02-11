@@ -69,16 +69,16 @@
 #include <comphelper/hash.hxx>
 
 #include <bitmap/BitmapWriteAccess.hxx>
-#include <fontsubset.hxx>
-#include <PhysicalFontFace.hxx>
+#include <font/PhysicalFontFace.hxx>
+#include <font/emphasismark.hxx>
+#include <font/fontsubset.hxx>
+#include <font/impglyphitem.hxx>
 #include <salgdi.hxx>
 #include <textlayout.hxx>
 #include <textlineinfo.hxx>
-#include <impglyphitem.hxx>
 #include <pdf/XmpMetadata.hxx>
 #include <pdf/objectcopier.hxx>
 #include <o3tl/sorted_vector.hxx>
-#include <font/emphasismark.hxx>
 
 #include "pdfwriter_impl.hxx"
 

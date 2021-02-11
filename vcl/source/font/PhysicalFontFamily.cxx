@@ -20,8 +20,8 @@
 #include <rtl/ustring.hxx>
 #include <unotools/fontdefs.hxx>
 
+#include <font/PhysicalFontCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
-#include <PhysicalFontCollection.hxx>
 
 void PhysicalFontFamily::CalcType( ImplFontAttrs& rType, FontWeight& rWeight, FontWidth& rWidth,
                                    FontFamily eFamily, const utl::FontNameAttr* pFontAttr )

@@ -25,11 +25,11 @@
 #include <vcl/pdfextoutdevdata.hxx>
 #include <vcl/virdev.hxx>
 
-#include <PhysicalFontCollection.hxx>
 #include <TradScaleContext.hxx>
+#include <font/PhysicalFontCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <font/ImplDeviceFontSizeList.hxx>
-#include <impfontcache.hxx>
+#include <font/impfontcache.hxx>
 #include <salinst.hxx>
 #include <salgdi.hxx>
 #include <salvd.hxx>

@@ -21,7 +21,7 @@
 #define INCLUDED_VCL_INC_FONTINSTANCE_HXX
 
 #include "fontselect.hxx"
-#include "impfontmetricdata.hxx"
+#include <font/impfontmetricdata.hxx>
 
 #include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <rtl/ref.hxx>

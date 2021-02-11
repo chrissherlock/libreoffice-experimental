@@ -17,29 +17,28 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <rtl/instance.hxx>
+#include <tools/gen.hxx>
 #include <tools/stream.hxx>
 #include <tools/vcompat.hxx>
-#include <tools/gen.hxx>
 #include <unotools/fontcfg.hxx>
 #include <unotools/fontdefs.hxx>
 
-#include <vcl/font.hxx>
-
-#include <impfont.hxx>
-#include <fontattributes.hxx>
-#include <sft.hxx>
-
-#include <algorithm>
-#include <string_view>
-
-#include <rtl/instance.hxx>
 #include <vcl/TypeSerializer.hxx>
+#include <vcl/font.hxx>
 
 #ifdef _WIN32
 #include <vcl/metric.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/svapp.hxx>
 #endif
+
+#include <font/FontAttributes.hxx>
+#include <font/impfont.hxx>
+#include <font/sft.hxx>
+
+#include <algorithm>
+#include <string_view>
 
 using namespace vcl;
 

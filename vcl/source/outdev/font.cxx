@@ -32,15 +32,15 @@
 #include <drawmode.hxx>
 #include <font/emphasismark.hxx>
 #include <font/font.hxx>
+#include <font/PhysicalFontCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <font/ImplDeviceFontSizeList.hxx>
 #include <font/ImplDirectFontSubstitution.hxx>
 #include <font/ImplFontSubstEntry.hxx>
 #include <font/FeatureCollector.hxx>
-#include <impfontcache.hxx>
+#include <font/impfontcache.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>
-#include <PhysicalFontCollection.hxx>
 
 #include <strings.hrc>
 

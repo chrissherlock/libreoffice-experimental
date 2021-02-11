@@ -20,7 +20,7 @@
 #pragma once
 
 #include <vclpluginapi.h>
-#include <PhysicalFontFace.hxx>
+#include <font/PhysicalFontFace.hxx>
 
 #include <tools/ref.hxx>
 #include <vcl/fontcapabilities.hxx>

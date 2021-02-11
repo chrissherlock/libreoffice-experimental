@@ -33,7 +33,7 @@
 #include <salgdi.hxx>
 #include <sallayout.hxx>
 #include "svpcairotextrender.hxx"
-#include <impfontmetricdata.hxx>
+#include <font/impfontmetricdata.hxx>
 
 #include <cairo.h>
 

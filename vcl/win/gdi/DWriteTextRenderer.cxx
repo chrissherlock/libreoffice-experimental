@@ -19,12 +19,12 @@
 
 #include <win/salgdi.h>
 #include <win/saldata.hxx>
-#include <impfontcache.hxx>
+#include <font/impfontcache.hxx>
 #include <ImplOutDevData.hxx>
 
 #include <win/DWriteTextRenderer.hxx>
 
-#include <sft.hxx>
+#include <font/sft.hxx>
 #include <sallayout.hxx>
 
 #include <shlwapi.h>

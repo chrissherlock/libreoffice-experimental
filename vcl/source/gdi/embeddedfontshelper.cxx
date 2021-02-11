@@ -19,10 +19,10 @@
 #include <vcl/svapp.hxx>
 #include <vcl/virdev.hxx>
 
+#include <font/PhysicalFontCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
+#include <font/sft.hxx>
 #include <salgdi.hxx>
-#include <sft.hxx>
-#include <PhysicalFontCollection.hxx>
 
 #include <com/sun/star/io/XInputStream.hpp>
 

@@ -23,12 +23,12 @@
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <basegfx/matrix/b2dhommatrixtools.hxx>
 
-#include <PhysicalFontFace.hxx>
-#include <fontsubset.hxx>
+#include <FileDefinitionWidgetDraw.hxx>
+#include <font/PhysicalFontFace.hxx>
+#include <font/fontsubset.hxx>
+#include <font/sft.hxx>
 #include <salgdi.hxx>
 #include <salframe.hxx>
-#include <sft.hxx>
-#include <FileDefinitionWidgetDraw.hxx>
 
 #include "polypolygon.hxx"
 

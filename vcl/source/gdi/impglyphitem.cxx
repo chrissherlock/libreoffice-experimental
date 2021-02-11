@@ -17,7 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <impglyphitem.hxx>
+#include <font/impglyphitem.hxx>
 
 #if (defined UNX && !defined MACOSX && !defined IOS)
 #include <unx/freetype_glyphcache.hxx>

@@ -38,17 +38,17 @@
 #include <vcl/fontcharmap.hxx>
 #include <config_cairo_canvas.h>
 
-#include <fontsubset.hxx>
+#include <font/fontsubset.hxx>
 #include <unx/freetype_glyphcache.hxx>
 #include <unx/geninst.h>
 #include <unx/genpspgraphics.h>
 #include <unx/printergfx.hxx>
 #include <langboost.hxx>
-#include <fontinstance.hxx>
-#include <fontattributes.hxx>
-#include <impfontmetricdata.hxx>
-#include <PhysicalFontCollection.hxx>
-#include <PhysicalFontFace.hxx>
+#include <font/fontinstance.hxx>
+#include <font/FontAttributes.hxx>
+#include <font/impfontmetricdata.hxx>
+#include <font/PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFace.hxx>
 #include <salbmp.hxx>
 #include <sallayout.hxx>
 

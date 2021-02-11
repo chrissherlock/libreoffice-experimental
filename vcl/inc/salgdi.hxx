@@ -22,7 +22,7 @@
 
 #include <vcl/outdev.hxx>
 
-#include "impfontmetricdata.hxx"
+#include <font/impfontmetricdata.hxx>
 #include "salgdiimpl.hxx"
 #include "sallayout.hxx"
 #include "SalGradient.hxx"

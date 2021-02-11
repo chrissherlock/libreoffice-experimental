@@ -33,7 +33,7 @@
 #include <tools/long.hxx>
 #include <vcl/sysdata.hxx>
 
-#include <fontsubset.hxx>
+#include <font/fontsubset.hxx>
 #include <quartz/salbmp.h>
 #ifdef MACOSX
 #include <quartz/salgdi.h>
@@ -42,7 +42,7 @@
 #ifdef IOS
 #include "saldatabasic.hxx"
 #endif
-#include <sft.hxx>
+#include <font/sft.hxx>
 
 using namespace vcl;
 

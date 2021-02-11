@@ -20,8 +20,8 @@
 #include <vcl/RenderContext2.hxx>
 #include <vcl/svapp.hxx>
 
-#include <PhysicalFontCollection.hxx>
 #include <drawmode.hxx>
+#include <font/PhysicalFontCollection.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>
 
