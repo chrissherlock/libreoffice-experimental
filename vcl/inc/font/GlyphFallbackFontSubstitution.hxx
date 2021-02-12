@@ -22,9 +22,9 @@
 class FontSelectPattern;
 class LogicalFontInstance;
 
-// ImplGlyphFallbackFontSubstitution
+// GlyphFallbackFontSubstitution
 // abstracts the concept of finding the best font to support an incomplete font
-class ImplGlyphFallbackFontSubstitution : public FontSubstitution
+class GlyphFallbackFontSubstitution : public FontSubstitution
 {
 public:
     virtual bool FindFontSubstitute(FontSelectPattern&, LogicalFontInstance* pLogicalFont,

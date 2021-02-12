@@ -39,7 +39,7 @@
 #include <vcl/sysdata.hxx>
 
 #include <quartz/ctfonts.hxx>
-#include <font/ImplGlyphFallbackFontSubstitution.hxx>
+#include <font/GlyphFallbackFontSubstitution.hxx>
 #include <font/PhysicalFontCollection.hxx>
 #include <font/fontsubset.hxx>
 #include <font/impfont.hxx>
@@ -61,7 +61,7 @@ using namespace vcl;
 namespace {
 
 class CoreTextGlyphFallbackSubstititution
-:    public ImplGlyphFallbackFontSubstitution
+:    public GlyphFallbackFontSubstitution
 {
 public:
     bool FindFontSubstitute(FontSelectPattern&, LogicalFontInstance* pLogicalFont, OUString&) const override;

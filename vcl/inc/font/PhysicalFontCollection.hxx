@@ -30,7 +30,7 @@
 #define MAX_GLYPHFALLBACK 16
 
 class DeviceFontSizes;
-class ImplGlyphFallbackFontSubstitution;
+class GlyphFallbackFontSubstitution;
 class PreMatchFontSubstitution;
 
 
@@ -63,7 +63,7 @@ public:
 
     // prepare platform specific font substitutions
     void                    SetPreMatchHook( PreMatchFontSubstitution* );
-    void                    SetFallbackHook( ImplGlyphFallbackFontSubstitution* );
+    void                    SetFallbackHook( GlyphFallbackFontSubstitution* );
 
     // misc utilities
     std::shared_ptr<PhysicalFontCollection> Clone() const;
@@ -77,7 +77,7 @@ private:
     PhysicalFontFamilies    maPhysicalFontFamilies;
 
     PreMatchFontSubstitution* mpPreMatchHook;       // device specific prematch substitution
-    ImplGlyphFallbackFontSubstitution* mpFallbackHook;  // device specific glyph fallback substitution
+    GlyphFallbackFontSubstitution* mpFallbackHook;  // device specific glyph fallback substitution
 
     mutable std::unique_ptr<std::array<PhysicalFontFamily*,MAX_GLYPHFALLBACK>>  mpFallbackList;
     mutable int             mnFallbackCount;

@@ -24,7 +24,7 @@
 #include <o3tl/sorted_vector.hxx>
 
 #include <font/DeviceFontSizes.hxx>
-#include <font/ImplGlyphFallbackFontSubstitution.hxx>
+#include <font/GlyphFallbackFontSubstitution.hxx>
 #include <font/PreMatchFontSubstitution.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <font/PhysicalFontCollection.hxx>
@@ -82,7 +82,7 @@ void PhysicalFontCollection::SetPreMatchHook( PreMatchFontSubstitution* pHook )
     mpPreMatchHook = pHook;
 }
 
-void PhysicalFontCollection::SetFallbackHook( ImplGlyphFallbackFontSubstitution* pHook )
+void PhysicalFontCollection::SetFallbackHook( GlyphFallbackFontSubstitution* pHook )
 {
     mpFallbackHook = pHook;
 }
