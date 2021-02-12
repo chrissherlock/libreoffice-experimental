@@ -495,7 +495,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/font/ImplDirectFontSubstitution \
     vcl/source/font/FontSubstitutionEntry \
     vcl/source/font/OpenTypeFeatureDefinitionList \
-    vcl/source/font/PhysicalFontCollection \
+    vcl/source/font/PhysicalFontFamilyCollection \
     vcl/source/font/PhysicalFontFamily \
     vcl/source/font/PhysicalFontFace \
     vcl/source/font/FontAttributes \

@@ -33,7 +33,7 @@
 #include <memory>
 
 class AllSettings;
-class PhysicalFontCollection;
+class PhysicalFontFamilyCollection;
 class SalGraphics;
 struct SalTwoRect;
 
@@ -347,7 +347,7 @@ protected:
     Geometry maGeometry;
     MapMode maMapMode;
     vcl::Region maRegion; ///< contains the clip region, see SetClipRegion(...)
-    mutable std::shared_ptr<PhysicalFontCollection> mxFontCollection;
+    mutable std::shared_ptr<PhysicalFontFamilyCollection> mxFontCollection;
 
 private:
     Bitmap BlendBitmap(Bitmap& rBitmap1, Bitmap const& rBitmap2, AlphaMask const& rAlpha,

@@ -58,7 +58,7 @@ struct ImplOutDevData;
 class LogicalFontInstance;
 struct SystemGraphicsData;
 class ImplFontCache;
-class PhysicalFontCollection;
+class PhysicalFontFamilyCollection;
 class PhysicalFontFaceCollection;
 class PhysicalFontFamilySizes;
 class ImplMultiTextLineInfo;

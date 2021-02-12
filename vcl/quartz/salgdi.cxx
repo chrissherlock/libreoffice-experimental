@@ -40,7 +40,7 @@
 
 #include <quartz/ctfonts.hxx>
 #include <font/GlyphFallbackFontSubstitution.hxx>
-#include <font/PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFamilyCollection.hxx>
 #include <font/fontsubset.hxx>
 #include <font/impfont.hxx>
 #include <font/impfontcharmap.hxx>
@@ -339,7 +339,7 @@ static void AddLocalTempFontDirs()
     AddTempFontDir( aBrandStr + "/" LIBO_SHARE_FOLDER "/fonts/truetype/" );
 }
 
-void AquaSalGraphics::GetDevFontList( PhysicalFontCollection* pFontCollection )
+void AquaSalGraphics::GetDevFontList( PhysicalFontFamilyCollection* pFontCollection )
 {
     SAL_WARN_IF( !pFontCollection, "vcl", "AquaSalGraphics::GetDevFontList(NULL) !");
 
@@ -371,7 +371,7 @@ void AquaSalGraphics::ClearDevFontCache()
     pSalData->mpFontList = nullptr;
 }
 
-bool AquaSalGraphics::AddTempDevFont( PhysicalFontCollection*,
+bool AquaSalGraphics::AddTempDevFont( PhysicalFontFamilyCollection*,
     const OUString& rFontFileURL, const OUString& /*rFontName*/ )
 {
     return ::AddTempDevFont(rFontFileURL);

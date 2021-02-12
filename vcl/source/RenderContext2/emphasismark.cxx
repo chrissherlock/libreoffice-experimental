@@ -33,7 +33,7 @@
 
 #include <window.h>
 #include <font/FeatureCollector.hxx>
-#include <font/PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFamilyCollection.hxx>
 #include <font/emphasismark.hxx>
 #include <font/impglyphitem.hxx>
 #include <sallayout.hxx>

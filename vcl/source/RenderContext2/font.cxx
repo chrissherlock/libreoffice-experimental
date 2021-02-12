@@ -21,7 +21,7 @@
 #include <vcl/svapp.hxx>
 
 #include <drawmode.hxx>
-#include <font/PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFamilyCollection.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>
 

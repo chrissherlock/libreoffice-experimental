@@ -31,9 +31,9 @@
 
 class Size;
 namespace vcl { class Font; }
-class PhysicalFontCollection;
+class PhysicalFontFamilyCollection;
 
-// TODO: closely couple with PhysicalFontCollection
+// TODO: closely couple with PhysicalFontFamilyCollection
 
 struct GlyphBoundRectCacheKey
 {
@@ -74,15 +74,15 @@ private:
     FontInstanceList maFontInstanceList;
     GlyphBoundRectCache m_aBoundRectCache;
 
-    rtl::Reference<LogicalFontInstance> GetFontInstance(PhysicalFontCollection const*, FontSelectPattern&);
+    rtl::Reference<LogicalFontInstance> GetFontInstance(PhysicalFontFamilyCollection const*, FontSelectPattern&);
 
 public:
     ImplFontCache();
     ~ImplFontCache();
 
-    rtl::Reference<LogicalFontInstance> GetFontInstance(PhysicalFontCollection const *,
+    rtl::Reference<LogicalFontInstance> GetFontInstance(PhysicalFontFamilyCollection const *,
                              const vcl::Font&, const Size& rPixelSize, float fExactHeight, bool bNonAntialias = false);
-    rtl::Reference<LogicalFontInstance> GetGlyphFallbackFont( PhysicalFontCollection const *, FontSelectPattern&,
+    rtl::Reference<LogicalFontInstance> GetGlyphFallbackFont( PhysicalFontFamilyCollection const *, FontSelectPattern&,
                             LogicalFontInstance* pLogicalFont,
                             int nFallbackLevel, OUString& rMissingCodes );
 

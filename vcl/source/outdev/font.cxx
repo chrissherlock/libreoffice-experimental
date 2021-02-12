@@ -32,7 +32,7 @@
 #include <drawmode.hxx>
 #include <font/emphasismark.hxx>
 #include <font/font.hxx>
-#include <font/PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFamilyCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <font/PhysicalFontFamilySizes.hxx>
 #include <font/DirectFontSubstitution.hxx>

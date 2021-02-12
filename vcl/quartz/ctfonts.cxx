@@ -32,7 +32,7 @@
 #include <osx/saldata.hxx>
 #include <osx/salinst.h>
 #endif
-#include <font/PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFamilyCollection.hxx>
 #include <font/fontinstance.hxx>
 #include <font/FontAttributes.hxx>
 #include <font/impglyphitem.hxx>
@@ -506,7 +506,7 @@ void SystemFontList::AddFont( CoreTextFontFace* pFontData )
     maFontContainer[ nFontId ] = pFontData;
 }
 
-void SystemFontList::AnnounceFonts( PhysicalFontCollection& rFontCollection ) const
+void SystemFontList::AnnounceFonts( PhysicalFontFamilyCollection& rFontCollection ) const
 {
     for(const auto& rEntry : maFontContainer )
     {

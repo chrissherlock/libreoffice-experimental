@@ -34,7 +34,7 @@
 #include <map>
 #include <vector>
 
-class PhysicalFontCollection;
+class PhysicalFontFamilyCollection;
 class SalBitmap;
 class FontSelectPattern;
 class FontAttributes;
@@ -143,12 +143,12 @@ public:
     virtual bool GetFontCapabilities(vcl::FontCapabilities& rFontCapabilities) const = 0;
 
     // graphics must fill supplied font list
-    virtual void GetDevFontList(PhysicalFontCollection*) = 0;
+    virtual void GetDevFontList(PhysicalFontFamilyCollection*) = 0;
 
     // graphics must drop any cached font info
     virtual void ClearDevFontCache() = 0;
 
-    virtual bool AddTempDevFont(PhysicalFontCollection*, const OUString& rFileURL,
+    virtual bool AddTempDevFont(PhysicalFontFamilyCollection*, const OUString& rFileURL,
                                 const OUString& rFontName)
         = 0;
 

@@ -24,7 +24,7 @@
 #include <window.h>
 #include <font/DirectFontSubstitution.hxx>
 #include <font/FontSubstitutionEntry.hxx>
-#include <font/PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFamilyCollection.hxx>
 #include <font/impfontcache.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>

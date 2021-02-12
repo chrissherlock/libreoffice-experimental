@@ -19,7 +19,7 @@
 
 #include <sal/log.hxx>
 
-#include <font/PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFamilyCollection.hxx>
 #include <font/PhysicalFontFace.hxx>
 #include <font/PhysicalFontFamily.hxx>
 #include <font/fontinstance.hxx>
@@ -101,7 +101,7 @@ ImplFontCache::~ImplFontCache()
     }
 }
 
-rtl::Reference<LogicalFontInstance> ImplFontCache::GetFontInstance( PhysicalFontCollection const * pFontList,
+rtl::Reference<LogicalFontInstance> ImplFontCache::GetFontInstance( PhysicalFontFamilyCollection const * pFontList,
     const vcl::Font& rFont, const Size& rSize, float fExactHeight, bool bNonAntialias )
 {
     // initialize internal font request object
@@ -109,7 +109,7 @@ rtl::Reference<LogicalFontInstance> ImplFontCache::GetFontInstance( PhysicalFont
     return GetFontInstance( pFontList, aFontSelData );
 }
 
-rtl::Reference<LogicalFontInstance> ImplFontCache::GetFontInstance( PhysicalFontCollection const * pFontList,
+rtl::Reference<LogicalFontInstance> ImplFontCache::GetFontInstance( PhysicalFontFamilyCollection const * pFontList,
     FontSelectPattern& aFontSelData )
 {
     rtl::Reference<LogicalFontInstance> pFontInstance;
@@ -203,7 +203,7 @@ rtl::Reference<LogicalFontInstance> ImplFontCache::GetFontInstance( PhysicalFont
     return pFontInstance;
 }
 
-rtl::Reference<LogicalFontInstance> ImplFontCache::GetGlyphFallbackFont( PhysicalFontCollection const * pFontCollection,
+rtl::Reference<LogicalFontInstance> ImplFontCache::GetGlyphFallbackFont( PhysicalFontFamilyCollection const * pFontCollection,
     FontSelectPattern& rFontSelData, LogicalFontInstance* pFontInstance, int nFallbackLevel, OUString& rMissingCodes )
 {
     // get a candidate font for glyph fallback

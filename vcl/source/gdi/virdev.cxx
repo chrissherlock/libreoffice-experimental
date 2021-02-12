@@ -26,7 +26,7 @@
 #include <vcl/virdev.hxx>
 
 #include <TradScaleContext.hxx>
-#include <font/PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFamilyCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <font/PhysicalFontFamilySizes.hxx>
 #include <font/impfontcache.hxx>

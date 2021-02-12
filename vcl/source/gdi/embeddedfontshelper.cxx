@@ -19,7 +19,7 @@
 #include <vcl/svapp.hxx>
 #include <vcl/virdev.hxx>
 
-#include <font/PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFamilyCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <font/sft.hxx>
 #include <salgdi.hxx>
@@ -258,7 +258,7 @@ OUString EmbeddedFontsHelper::fontFileUrl( std::u16string_view familyName, FontF
     }
     bool ok = false;
     SalGraphics* graphics = Application::GetDefaultDevice()->GetGraphics();
-    PhysicalFontCollection fonts;
+    PhysicalFontFamilyCollection fonts;
     graphics->GetDevFontList( &fonts );
     std::unique_ptr< PhysicalFontFaceCollection > fontInfo( fonts.GetPhysicalFontFaceCollection());
     PhysicalFontFace* selected = nullptr;
