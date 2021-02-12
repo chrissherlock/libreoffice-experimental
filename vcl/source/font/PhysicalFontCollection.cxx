@@ -889,7 +889,7 @@ std::shared_ptr<PhysicalFontCollection> PhysicalFontCollection::Clone() const
     return xClonedCollection;
 }
 
-std::unique_ptr<PhysicalFontFaceCollection> PhysicalFontCollection::GetDeviceFontList() const
+std::unique_ptr<PhysicalFontFaceCollection> PhysicalFontCollection::GetPhysicalFontFaceCollection() const
 {
     std::unique_ptr<PhysicalFontFaceCollection> pDeviceFontList(new PhysicalFontFaceCollection);
 

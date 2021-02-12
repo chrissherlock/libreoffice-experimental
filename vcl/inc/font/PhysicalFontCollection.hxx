@@ -67,7 +67,7 @@ public:
 
     // misc utilities
     std::shared_ptr<PhysicalFontCollection> Clone() const;
-    std::unique_ptr<PhysicalFontFaceCollection> GetDeviceFontList() const;
+    std::unique_ptr<PhysicalFontFaceCollection> GetPhysicalFontFaceCollection() const;
     std::unique_ptr<DeviceFontSizes> GetDeviceFontSizeList( const OUString& rFontName ) const;
 
 private:

@@ -260,7 +260,7 @@ OUString EmbeddedFontsHelper::fontFileUrl( std::u16string_view familyName, FontF
     SalGraphics* graphics = Application::GetDefaultDevice()->GetGraphics();
     PhysicalFontCollection fonts;
     graphics->GetDevFontList( &fonts );
-    std::unique_ptr< PhysicalFontFaceCollection > fontInfo( fonts.GetDeviceFontList());
+    std::unique_ptr< PhysicalFontFaceCollection > fontInfo( fonts.GetPhysicalFontFaceCollection());
     PhysicalFontFace* selected = nullptr;
     for( int i = 0;
          i < fontInfo->Count();

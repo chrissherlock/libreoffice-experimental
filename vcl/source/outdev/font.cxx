@@ -121,7 +121,7 @@ void OutputDevice::InitPhysicalFontFaceCollection() const
     if (!mpPhysicalFontFaceCollection && !mxFontCollection)
         return;
 
-    mpPhysicalFontFaceCollection = mxFontCollection->GetDeviceFontList();
+    mpPhysicalFontFaceCollection = mxFontCollection->GetPhysicalFontFaceCollection();
 
     if (!mpPhysicalFontFaceCollection->Count())
         mpPhysicalFontFaceCollection.reset();
