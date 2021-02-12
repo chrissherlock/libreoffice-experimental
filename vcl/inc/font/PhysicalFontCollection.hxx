@@ -31,7 +31,7 @@
 
 class DeviceFontSizes;
 class ImplGlyphFallbackFontSubstitution;
-class ImplPreMatchFontSubstitution;
+class PreMatchFontSubstitution;
 
 
 // TODO: merge with ImplFontCache
@@ -62,7 +62,7 @@ public:
                                                   OUString& rMissingCodes, int nFallbackLevel ) const;
 
     // prepare platform specific font substitutions
-    void                    SetPreMatchHook( ImplPreMatchFontSubstitution* );
+    void                    SetPreMatchHook( PreMatchFontSubstitution* );
     void                    SetFallbackHook( ImplGlyphFallbackFontSubstitution* );
 
     // misc utilities
@@ -76,7 +76,7 @@ private:
     typedef std::unordered_map<OUString, std::unique_ptr<PhysicalFontFamily>> PhysicalFontFamilies;
     PhysicalFontFamilies    maPhysicalFontFamilies;
 
-    ImplPreMatchFontSubstitution* mpPreMatchHook;       // device specific prematch substitution
+    PreMatchFontSubstitution* mpPreMatchHook;       // device specific prematch substitution
     ImplGlyphFallbackFontSubstitution* mpFallbackHook;  // device specific glyph fallback substitution
 
     mutable std::unique_ptr<std::array<PhysicalFontFamily*,MAX_GLYPHFALLBACK>>  mpFallbackList;

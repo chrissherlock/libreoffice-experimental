@@ -24,7 +24,7 @@
 // PreMatchFontSubstitution
 // abstracts the concept of a configured font substitution
 // before the availability of the originally selected font has been checked
-class ImplPreMatchFontSubstitution : public FontSubstitution
+class PreMatchFontSubstitution : public FontSubstitution
 {
 public:
     virtual bool FindFontSubstitute(FontSelectPattern&) const = 0;

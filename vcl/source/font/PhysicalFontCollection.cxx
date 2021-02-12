@@ -25,7 +25,7 @@
 
 #include <font/DeviceFontSizes.hxx>
 #include <font/ImplGlyphFallbackFontSubstitution.hxx>
-#include <font/ImplPreMatchFontSubstitution.hxx>
+#include <font/PreMatchFontSubstitution.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <font/PhysicalFontCollection.hxx>
 
@@ -77,7 +77,7 @@ PhysicalFontCollection::~PhysicalFontCollection()
     Clear();
 }
 
-void PhysicalFontCollection::SetPreMatchHook( ImplPreMatchFontSubstitution* pHook )
+void PhysicalFontCollection::SetPreMatchHook( PreMatchFontSubstitution* pHook )
 {
     mpPreMatchHook = pHook;
 }
