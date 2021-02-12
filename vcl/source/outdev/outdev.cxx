@@ -32,7 +32,7 @@
 
 #include <window.h>
 #include <font/PhysicalFontFaceCollection.hxx>
-#include <font/ImplDeviceFontSizeList.hxx>
+#include <font/DeviceFontSizes.hxx>
 #include <salgdi.hxx>
 #include <ImplOutDevData.hxx>
 
@@ -60,7 +60,7 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mpMetaFile                      = nullptr;
     mpFontInstance                     = nullptr;
     mpPhysicalFontFaceCollection                = nullptr;
-    mpDeviceFontSizeList            = nullptr;
+    mpDeviceFontSizes            = nullptr;
     mpAlphaVDev                     = nullptr;
     mpExtOutDevData                 = nullptr;
     mnTextOffX                      = 0;
@@ -113,7 +113,7 @@ void OutputDevice::dispose()
 
     // remove cached results of GetDevFontList/GetDevSizeList
     mpPhysicalFontFaceCollection.reset();
-    mpDeviceFontSizeList.reset();
+    mpDeviceFontSizes.reset();
 
     // release ImplFontCache specific to this OutputDevice
     mxFontCache.reset();

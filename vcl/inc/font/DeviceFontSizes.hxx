@@ -23,13 +23,13 @@
 
 #include <vector>
 
-class ImplDeviceFontSizeList
+class DeviceFontSizes
 {
 private:
     std::vector<int> maSizeList;
 
 public:
-    ImplDeviceFontSizeList() { maSizeList.reserve(32); }
+    DeviceFontSizes() { maSizeList.reserve(32); }
     void Add(int nHeight) { maSizeList.push_back(nHeight); }
     int Count() const { return maSizeList.size(); }
     int Get(int nIndex) const { return maSizeList[nIndex]; }

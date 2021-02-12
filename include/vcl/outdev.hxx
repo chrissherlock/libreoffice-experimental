@@ -60,7 +60,7 @@ struct SystemGraphicsData;
 class ImplFontCache;
 class PhysicalFontCollection;
 class PhysicalFontFaceCollection;
-class ImplDeviceFontSizeList;
+class DeviceFontSizes;
 class ImplMultiTextLineInfo;
 class SalGraphics;
 class Gradient;
@@ -265,7 +265,7 @@ private:
     mutable rtl::Reference<LogicalFontInstance> mpFontInstance;
     mutable std::shared_ptr<ImplFontCache> mxFontCache;
     mutable std::unique_ptr<PhysicalFontFaceCollection>     mpPhysicalFontFaceCollection;
-    mutable std::unique_ptr<ImplDeviceFontSizeList> mpDeviceFontSizeList;
+    mutable std::unique_ptr<DeviceFontSizes> mpDeviceFontSizes;
     std::vector<OutDevState>        maOutDevStateStack;
     std::unique_ptr<ImplOutDevData> mpOutDevData;
     std::vector< VCLXGraphics* >*   mpUnoGraphicsList;

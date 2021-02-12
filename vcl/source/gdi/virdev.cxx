@@ -28,7 +28,7 @@
 #include <TradScaleContext.hxx>
 #include <font/PhysicalFontCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
-#include <font/ImplDeviceFontSizeList.hxx>
+#include <font/DeviceFontSizes.hxx>
 #include <font/impfontcache.hxx>
 #include <salinst.hxx>
 #include <salgdi.hxx>
@@ -493,7 +493,7 @@ void VirtualDevice::ImplSetReferenceDevice( RefDevMode i_eRefDevMode, sal_Int32 
     // => clean up the original font lists before getting new ones
     mpFontInstance.clear();
     mpPhysicalFontFaceCollection.reset();
-    mpDeviceFontSizeList.reset();
+    mpDeviceFontSizes.reset();
 
     // preserve global font lists
     ImplSVData* pSVData = ImplGetSVData();

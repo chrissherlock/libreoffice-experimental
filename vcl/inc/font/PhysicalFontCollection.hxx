@@ -29,7 +29,7 @@
 
 #define MAX_GLYPHFALLBACK 16
 
-class ImplDeviceFontSizeList;
+class DeviceFontSizes;
 class ImplGlyphFallbackFontSubstitution;
 class ImplPreMatchFontSubstitution;
 
@@ -68,7 +68,7 @@ public:
     // misc utilities
     std::shared_ptr<PhysicalFontCollection> Clone() const;
     std::unique_ptr<PhysicalFontFaceCollection> GetDeviceFontList() const;
-    std::unique_ptr<ImplDeviceFontSizeList> GetDeviceFontSizeList( const OUString& rFontName ) const;
+    std::unique_ptr<DeviceFontSizes> GetDeviceFontSizeList( const OUString& rFontName ) const;
 
 private:
     mutable bool            mbMatchData;    // true if matching attributes are initialized

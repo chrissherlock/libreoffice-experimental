@@ -29,7 +29,7 @@
 
 #include <drawmode.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
-#include <font/ImplDeviceFontSizeList.hxx>
+#include <font/DeviceFontSizes.hxx>
 #include <salgdi.hxx>
 
 OutDevState::OutDevState()
