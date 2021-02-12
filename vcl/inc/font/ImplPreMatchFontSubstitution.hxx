@@ -19,12 +19,12 @@
 
 #pragma once
 
-#include <font/ImplFontSubstitution.hxx>
+#include <font/FontSubstitution.hxx>
 
 // PreMatchFontSubstitution
 // abstracts the concept of a configured font substitution
 // before the availability of the originally selected font has been checked
-class ImplPreMatchFontSubstitution : public ImplFontSubstitution
+class ImplPreMatchFontSubstitution : public FontSubstitution
 {
 public:
     virtual bool FindFontSubstitute(FontSelectPattern&) const = 0;

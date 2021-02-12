@@ -17,14 +17,14 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <font/ImplFontSubstitution.hxx>
+#include <font/FontSubstitution.hxx>
 
 class FontSelectPattern;
 class LogicalFontInstance;
 
 // ImplGlyphFallbackFontSubstitution
 // abstracts the concept of finding the best font to support an incomplete font
-class ImplGlyphFallbackFontSubstitution : public ImplFontSubstitution
+class ImplGlyphFallbackFontSubstitution : public FontSubstitution
 {
 public:
     virtual bool FindFontSubstitute(FontSelectPattern&, LogicalFontInstance* pLogicalFont,

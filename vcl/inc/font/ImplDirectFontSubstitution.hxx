@@ -21,14 +21,14 @@
 
 #include <vcl/AddFontSubstituteFlags.hxx>
 
-#include <font/ImplFontSubstitution.hxx>
+#include <font/FontSubstitution.hxx>
 
 #include <string_view>
 #include <vector>
 
 struct ImplFontSubstEntry;
 
-class ImplDirectFontSubstitution final : public ImplFontSubstitution
+class ImplDirectFontSubstitution final : public FontSubstitution
 {
 private:
     std::vector<ImplFontSubstEntry> maFontSubstList;

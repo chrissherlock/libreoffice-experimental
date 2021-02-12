@@ -27,11 +27,11 @@
 // - substitutions for incomplete fonts (implicit, generic, EUDC and/or platform dependent fallbacks)
 // - substitutions for missing symbol fonts by translating code points into other symbol fonts
 
-class ImplFontSubstitution
+class FontSubstitution
 {
     // TODO: there is more commonality between the different substitutions
 protected:
-    virtual ~ImplFontSubstitution() {}
+    virtual ~FontSubstitution() {}
 };
 
 void SubstituteFont(OUString& rFontName);
