@@ -23,13 +23,13 @@
 
 #include <vector>
 
-class DeviceFontSizes
+class PhysicalFontFamilySizes
 {
 private:
     std::vector<int> maSizeList;
 
 public:
-    DeviceFontSizes() { maSizeList.reserve(32); }
+    PhysicalFontFamilySizes() { maSizeList.reserve(32); }
     void Add(int nHeight) { maSizeList.push_back(nHeight); }
     int Count() const { return maSizeList.size(); }
     int Get(int nIndex) const { return maSizeList[nIndex]; }

@@ -23,7 +23,7 @@
 #include <unotools/fontdefs.hxx>
 #include <o3tl/sorted_vector.hxx>
 
-#include <font/DeviceFontSizes.hxx>
+#include <font/PhysicalFontFamilySizes.hxx>
 #include <font/GlyphFallbackFontSubstitution.hxx>
 #include <font/PreMatchFontSubstitution.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
@@ -902,9 +902,9 @@ std::unique_ptr<PhysicalFontFaceCollection> PhysicalFontCollection::GetPhysicalF
     return pDeviceFontList;
 }
 
-std::unique_ptr<DeviceFontSizes> PhysicalFontCollection::GetDeviceFontSizeList( const OUString& rFontName ) const
+std::unique_ptr<PhysicalFontFamilySizes> PhysicalFontCollection::GetDeviceFontSizeList( const OUString& rFontName ) const
 {
-    std::unique_ptr<DeviceFontSizes> pDeviceFontSizeList(new DeviceFontSizes);
+    std::unique_ptr<PhysicalFontFamilySizes> pDeviceFontSizeList(new PhysicalFontFamilySizes);
 
     PhysicalFontFamily* pFontFamily = FindFontFamily( rFontName );
     if( pFontFamily != nullptr )

@@ -34,7 +34,7 @@
 #include <font/font.hxx>
 #include <font/PhysicalFontCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
-#include <font/DeviceFontSizes.hxx>
+#include <font/PhysicalFontFamilySizes.hxx>
 #include <font/DirectFontSubstitution.hxx>
 #include <font/FontSubstitutionEntry.hxx>
 #include <font/FeatureCollector.hxx>
@@ -136,11 +136,11 @@ bool OutputDevice::IsFontAvailable( const OUString& rFontName ) const
 
 int OutputDevice::GetDevFontSizeCount( const vcl::Font& rFont ) const
 {
-    mpDeviceFontSizes.reset();
+    mpPhysicalFontFamilySizes.reset();
 
     InitFontCollection();
-    mpDeviceFontSizes = mxFontCollection->GetDeviceFontSizeList( rFont.GetFamilyName() );
-    return mpDeviceFontSizes->Count();
+    mpPhysicalFontFamilySizes = mxFontCollection->GetDeviceFontSizeList( rFont.GetFamilyName() );
+    return mpPhysicalFontFamilySizes->Count();
 }
 
 Size OutputDevice::GetDevFontSize( const vcl::Font& rFont, int nSizeIndex ) const
@@ -151,7 +151,7 @@ Size OutputDevice::GetDevFontSize( const vcl::Font& rFont, int nSizeIndex ) cons
         return Size();
 
     // when mapping is enabled round to .5 points
-    Size aSize( 0, mpDeviceFontSizes->Get( nSizeIndex ) );
+    Size aSize( 0, mpPhysicalFontFamilySizes->Get( nSizeIndex ) );
     if (IsMapModeEnabled())
     {
         aSize.setHeight( aSize.Height() * 10 );
@@ -317,7 +317,7 @@ void OutputDevice::ImplClearFontData( const bool bNewFontLists )
     if ( bNewFontLists )
     {
         mpPhysicalFontFaceCollection.reset();
-        mpDeviceFontSizes.reset();
+        mpPhysicalFontFamilySizes.reset();
 
         // release all physically selected fonts on this device
         if( AcquireGraphics() )
@@ -998,7 +998,7 @@ void OutputDevice::ImplReleaseFonts()
 
     mpFontInstance.clear();
     mpPhysicalFontFaceCollection.reset();
-    mpDeviceFontSizes.reset();
+    mpPhysicalFontFamilySizes.reset();
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
