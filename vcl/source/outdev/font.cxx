@@ -36,7 +36,7 @@
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <font/DeviceFontSizes.hxx>
 #include <font/DirectFontSubstitution.hxx>
-#include <font/ImplFontSubstEntry.hxx>
+#include <font/FontSubstitutionEntry.hxx>
 #include <font/FeatureCollector.hxx>
 #include <font/impfontcache.hxx>
 #include <salgdi.hxx>

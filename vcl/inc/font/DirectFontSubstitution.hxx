@@ -26,12 +26,12 @@
 #include <string_view>
 #include <vector>
 
-struct ImplFontSubstEntry;
+struct FontSubstitutionEntry;
 
 class DirectFontSubstitution final : public FontSubstitution
 {
 private:
-    std::vector<ImplFontSubstEntry> maFontSubstList;
+    std::vector<FontSubstitutionEntry> maFontSubstList;
 
 public:
     void AddFontSubstitute(const OUString& rFontName, const OUString& rSubstName,

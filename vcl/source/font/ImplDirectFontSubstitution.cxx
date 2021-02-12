@@ -20,7 +20,7 @@
 #include <rtl/ustring.hxx>
 
 #include <font/DirectFontSubstitution.hxx>
-#include <font/ImplFontSubstEntry.hxx>
+#include <font/FontSubstitutionEntry.hxx>
 
 void DirectFontSubstitution::AddFontSubstitute(const OUString& rFontName,
                                                const OUString& rSubstFontName,
@@ -35,8 +35,8 @@ bool DirectFontSubstitution::FindFontSubstitute(OUString& rSubstName,
                                                 std::u16string_view rSearchName) const
 {
     // TODO: get rid of O(N) searches
-    std::vector<ImplFontSubstEntry>::const_iterator it = std::find_if(
-        maFontSubstList.begin(), maFontSubstList.end(), [&](const ImplFontSubstEntry& s) {
+    std::vector<FontSubstitutionEntry>::const_iterator it = std::find_if(
+        maFontSubstList.begin(), maFontSubstList.end(), [&](const FontSubstitutionEntry& s) {
             return (s.mnFlags & AddFontSubstituteFlags::ALWAYS) && (s.maSearchName == rSearchName);
         });
     if (it != maFontSubstList.end())

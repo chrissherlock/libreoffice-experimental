@@ -17,16 +17,20 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <unotools/fontdefs.hxx>
+#pragma once
 
-#include <font/ImplFontSubstEntry.hxx>
+#include <rtl/ustring.hxx>
 
-ImplFontSubstEntry::ImplFontSubstEntry(const OUString& rFontName, const OUString& rSubstFontName,
-                                       AddFontSubstituteFlags nSubstFlags)
-    : mnFlags(nSubstFlags)
+#include <vcl/AddFontSubstituteFlags.hxx>
+
+struct FontSubstitutionEntry
 {
-    maSearchName = GetEnglishSearchFontName(rFontName);
-    maSearchReplaceName = GetEnglishSearchFontName(rSubstFontName);
-}
+    OUString maSearchName;
+    OUString maSearchReplaceName;
+    AddFontSubstituteFlags mnFlags;
+
+    FontSubstitutionEntry(const OUString& rFontName, const OUString& rSubstFontName,
+                          AddFontSubstituteFlags nSubstFlags);
+};
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

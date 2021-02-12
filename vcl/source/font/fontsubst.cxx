@@ -23,7 +23,7 @@
 
 #include <window.h>
 #include <font/DirectFontSubstitution.hxx>
-#include <font/ImplFontSubstEntry.hxx>
+#include <font/FontSubstitutionEntry.hxx>
 #include <font/PhysicalFontCollection.hxx>
 #include <font/impfontcache.hxx>
 #include <salgdi.hxx>
