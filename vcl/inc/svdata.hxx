@@ -50,7 +50,7 @@ struct ImplPostEventData;
 struct ImplTimerData;
 struct ImplIdleData;
 struct ImplConfigData;
-class ImplDirectFontSubstitution;
+class DirectFontSubstitution;
 struct ImplHotKey;
 struct ImplEventHook;
 class Point;
@@ -222,7 +222,7 @@ struct ImplSVGDIData
     std::shared_ptr<PhysicalFontCollection> mxScreenFontList; // Screen-Font-List
     std::shared_ptr<ImplFontCache> mxScreenFontCache;       // Screen-Font-Cache
     lru_scale_cache         maScaleCache = lru_scale_cache(10); // Cache for scaled images
-    ImplDirectFontSubstitution* mpDirectFontSubst = nullptr; // Font-Substitutions defined in Tools->Options->Fonts
+    DirectFontSubstitution* mpDirectFontSubst = nullptr; // Font-Substitutions defined in Tools->Options->Fonts
     std::unique_ptr<GraphicConverter> mxGrfConverter;       // Converter for graphics
     tools::Long                    mnAppFontX = 0;                 // AppFont X-Numenator for 40/tel Width
     tools::Long                    mnAppFontY = 0;                 // AppFont Y-Numenator for 80/tel Height

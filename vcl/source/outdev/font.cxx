@@ -35,7 +35,7 @@
 #include <font/PhysicalFontCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <font/DeviceFontSizes.hxx>
-#include <font/ImplDirectFontSubstitution.hxx>
+#include <font/DirectFontSubstitution.hxx>
 #include <font/ImplFontSubstEntry.hxx>
 #include <font/FeatureCollector.hxx>
 #include <font/impfontcache.hxx>
@@ -356,7 +356,7 @@ void SubstituteFont(OUString& rFontName)
     OUString aSubstFontName;
 
     // apply user-configurable font replacement (eg, from the list in Tools->Options)
-    const ImplDirectFontSubstitution* pSubst = ImplGetSVData()->maGDIData.mpDirectFontSubst;
+    const DirectFontSubstitution* pSubst = ImplGetSVData()->maGDIData.mpDirectFontSubst;
     if (pSubst && pSubst->FindFontSubstitute(aSubstFontName, rFontName))
     {
         rFontName = aSubstFontName;

@@ -19,20 +19,20 @@
 
 #include <rtl/ustring.hxx>
 
-#include <font/ImplDirectFontSubstitution.hxx>
+#include <font/DirectFontSubstitution.hxx>
 #include <font/ImplFontSubstEntry.hxx>
 
-void ImplDirectFontSubstitution::AddFontSubstitute(const OUString& rFontName,
-                                                   const OUString& rSubstFontName,
-                                                   AddFontSubstituteFlags nFlags)
+void DirectFontSubstitution::AddFontSubstitute(const OUString& rFontName,
+                                               const OUString& rSubstFontName,
+                                               AddFontSubstituteFlags nFlags)
 {
     maFontSubstList.emplace_back(rFontName, rSubstFontName, nFlags);
 }
 
-void ImplDirectFontSubstitution::RemoveFontsSubstitute() { maFontSubstList.clear(); }
+void DirectFontSubstitution::RemoveFontsSubstitute() { maFontSubstList.clear(); }
 
-bool ImplDirectFontSubstitution::FindFontSubstitute(OUString& rSubstName,
-                                                    std::u16string_view rSearchName) const
+bool DirectFontSubstitution::FindFontSubstitute(OUString& rSubstName,
+                                                std::u16string_view rSearchName) const
 {
     // TODO: get rid of O(N) searches
     std::vector<ImplFontSubstEntry>::const_iterator it = std::find_if(

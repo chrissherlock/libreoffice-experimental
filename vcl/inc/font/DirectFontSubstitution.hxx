@@ -28,7 +28,7 @@
 
 struct ImplFontSubstEntry;
 
-class ImplDirectFontSubstitution final : public FontSubstitution
+class DirectFontSubstitution final : public FontSubstitution
 {
 private:
     std::vector<ImplFontSubstEntry> maFontSubstList;

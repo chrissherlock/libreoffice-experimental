@@ -22,7 +22,7 @@
 #include <vcl/outdev.hxx>
 
 #include <window.h>
-#include <font/ImplDirectFontSubstitution.hxx>
+#include <font/DirectFontSubstitution.hxx>
 #include <font/ImplFontSubstEntry.hxx>
 #include <font/PhysicalFontCollection.hxx>
 #include <font/impfontcache.hxx>
@@ -52,16 +52,16 @@ void EndFontSubstitution()
 void AddFontSubstitute(const OUString& rFontName, const OUString& rReplaceFontName,
                        AddFontSubstituteFlags nFlags)
 {
-    ImplDirectFontSubstitution*& rpSubst = ImplGetSVData()->maGDIData.mpDirectFontSubst;
+    DirectFontSubstitution*& rpSubst = ImplGetSVData()->maGDIData.mpDirectFontSubst;
     if (!rpSubst)
-        rpSubst = new ImplDirectFontSubstitution;
+        rpSubst = new DirectFontSubstitution;
     rpSubst->AddFontSubstitute(rFontName, rReplaceFontName, nFlags);
     ImplGetSVData()->maGDIData.mbFontSubChanged = true;
 }
 
 void RemoveFontsSubstitute()
 {
-    ImplDirectFontSubstitution* pSubst = ImplGetSVData()->maGDIData.mpDirectFontSubst;
+    DirectFontSubstitution* pSubst = ImplGetSVData()->maGDIData.mpDirectFontSubst;
     if (pSubst)
         pSubst->RemoveFontsSubstitute();
 }
