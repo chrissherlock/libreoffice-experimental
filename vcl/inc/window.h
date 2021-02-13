@@ -41,7 +41,7 @@ class FixedText;
 class VclSizeGroup;
 class VirtualDevice;
 class PhysicalFontFamilyCollection;
-class ImplFontCache;
+class FontCache;
 class VCLXWindow;
 class WindowStateData;
 class SalFrame;
@@ -136,7 +136,7 @@ struct ImplFrameData
     VclPtr<vcl::Window> mpMouseDownWin;         //< last window, where MouseButtonDown() called
     std::vector<VclPtr<vcl::Window> > maOwnerDrawList;    //< List of system windows with owner draw decoration
     std::shared_ptr<PhysicalFontFamilyCollection> mxPhysicalFontFamilyCollection;   //< Font-List for this frame
-    std::shared_ptr<ImplFontCache> mxFontCache; //< Font-Cache for this frame
+    std::shared_ptr<FontCache> mxFontCache; //< Font-Cache for this frame
     sal_Int32           mnDPIX;                 //< Original Screen Resolution
     sal_Int32           mnDPIY;                 //< Original Screen Resolution
     ImplSVEvent *       mnFocusId;              //< FocusId for PostUserLink

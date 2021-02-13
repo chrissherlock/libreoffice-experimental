@@ -57,7 +57,7 @@
 struct ImplOutDevData;
 class LogicalFontInstance;
 struct SystemGraphicsData;
-class ImplFontCache;
+class FontCache;
 class PhysicalFontFamilyCollection;
 class PhysicalFontFaceCollection;
 class ImplMultiTextLineInfo;
@@ -262,7 +262,7 @@ private:
     mutable VclPtr<OutputDevice>    mpNextGraphics;     ///< Next output device in list
     GDIMetaFile*                    mpMetaFile;
     mutable rtl::Reference<LogicalFontInstance> mpFontInstance;
-    mutable std::shared_ptr<ImplFontCache> mxFontCache;
+    mutable std::shared_ptr<FontCache> mxFontCache;
     mutable std::unique_ptr<PhysicalFontFaceCollection>     mpPhysicalFontFaceCollection;
     std::vector<OutDevState>        maOutDevStateStack;
     std::unique_ptr<ImplOutDevData> mpOutDevData;

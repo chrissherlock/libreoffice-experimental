@@ -62,7 +62,7 @@ struct GlyphBoundRectCacheHash
 typedef o3tl::lru_map<GlyphBoundRectCacheKey, tools::Rectangle,
                       GlyphBoundRectCacheHash> GlyphBoundRectCache;
 
-class ImplFontCache
+class FontCache
 {
 private:
     // cache of recently used font instances
@@ -77,8 +77,8 @@ private:
     rtl::Reference<LogicalFontInstance> GetFontInstance(PhysicalFontFamilyCollection const*, FontSelectPattern&);
 
 public:
-    ImplFontCache();
-    ~ImplFontCache();
+    FontCache();
+    ~FontCache();
 
     rtl::Reference<LogicalFontInstance> GetFontInstance(PhysicalFontFamilyCollection const *,
                              const vcl::Font&, const Size& rPixelSize, float fExactHeight, bool bNonAntialias = false);

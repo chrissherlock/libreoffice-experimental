@@ -25,7 +25,7 @@
 #include <font/DirectFontSubstitution.hxx>
 #include <font/FontSubstitutionEntry.hxx>
 #include <font/PhysicalFontFamilyCollection.hxx>
-#include <font/impfontcache.hxx>
+#include <font/FontCache.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>
 

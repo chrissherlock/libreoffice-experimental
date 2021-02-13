@@ -38,7 +38,7 @@
 #include <hb.h>
 
 class ConvertChar;
-class ImplFontCache;
+class FontCache;
 class PhysicalFontFace;
 
 // TODO: allow sharing of metrics for related fonts
@@ -48,7 +48,7 @@ class VCL_PLUGIN_PUBLIC LogicalFontInstance : public salhelper::SimpleReferenceO
     // just declaring the factory function doesn't work AKA
     // friend LogicalFontInstance* PhysicalFontFace::CreateFontInstance(const FontSelectPattern&) const;
     friend class PhysicalFontFace;
-    friend class ImplFontCache;
+    friend class FontCache;
 
 public: // TODO: make data members private
     virtual ~LogicalFontInstance() override;
@@ -73,7 +73,7 @@ public: // TODO: make data members private
 
     const PhysicalFontFace* GetFontFace() const { return m_pFontFace.get(); }
     PhysicalFontFace* GetFontFace() { return m_pFontFace.get(); }
-    const ImplFontCache* GetFontCache() const { return mpFontCache; }
+    const FontCache* GetFontCache() const { return mpFontCache; }
 
     bool GetGlyphBoundRect(sal_GlyphId, tools::Rectangle&, bool) const;
     virtual bool GetGlyphOutline(sal_GlyphId, basegfx::B2DPolyPolygon&, bool) const = 0;
@@ -98,7 +98,7 @@ private:
     // TODO: at least the ones which just differ in orientation, stretching or height
     typedef ::std::unordered_map< ::std::pair<sal_UCS4,FontWeight>, OUString > UnicodeFallbackList;
     std::unique_ptr<UnicodeFallbackList> mpUnicodeFallbackList;
-    mutable ImplFontCache * mpFontCache;
+    mutable FontCache * mpFontCache;
     const FontSelectPattern m_aFontSelData;
     hb_font_t* m_pHbFont;
     double m_nAveWidthFactor;

@@ -56,7 +56,7 @@ struct ImplEventHook;
 class Point;
 class ImplAccelManager;
 class PhysicalFontFamilyCollection;
-class ImplFontCache;
+class FontCache;
 class HelpTextWindow;
 class ImplTBDragMgr;
 class ImplIdleMgr;
@@ -220,7 +220,7 @@ struct ImplSVGDIData
     VclPtr<Printer>         mpFirstPrinter;                 // First Printer
     std::unique_ptr<ImplPrnQueueList> mpPrinterQueueList;   // List of all printer queue
     std::shared_ptr<PhysicalFontFamilyCollection> mxScreenFontList; // Screen-Font-List
-    std::shared_ptr<ImplFontCache> mxScreenFontCache;       // Screen-Font-Cache
+    std::shared_ptr<FontCache> mxScreenFontCache;       // Screen-Font-Cache
     lru_scale_cache         maScaleCache = lru_scale_cache(10); // Cache for scaled images
     DirectFontSubstitution* mpDirectFontSubst = nullptr; // Font-Substitutions defined in Tools->Options->Fonts
     std::unique_ptr<GraphicConverter> mxGrfConverter;       // Converter for graphics

@@ -28,7 +28,7 @@
 #include <TradScaleContext.hxx>
 #include <font/PhysicalFontFamilyCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
-#include <font/impfontcache.hxx>
+#include <font/FontCache.hxx>
 #include <salinst.hxx>
 #include <salgdi.hxx>
 #include <salvd.hxx>
@@ -503,7 +503,7 @@ void VirtualDevice::ImplSetReferenceDevice( RefDevMode i_eRefDevMode, sal_Int32 
     mxPhysicalFontFamilyCollection = pSVData->maGDIData.mxScreenFontList->Clone();
 
     // prepare to use new font lists
-    mxFontCache = std::make_shared<ImplFontCache>();
+    mxFontCache = std::make_shared<FontCache>();
 }
 
 sal_uInt16 VirtualDevice::GetBitCount() const

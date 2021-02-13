@@ -37,7 +37,7 @@
 #include <font/DirectFontSubstitution.hxx>
 #include <font/FontSubstitutionEntry.hxx>
 #include <font/FeatureCollector.hxx>
-#include <font/impfontcache.hxx>
+#include <font/FontCache.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>
 
@@ -982,7 +982,7 @@ void OutputDevice::SetFontCollectionFromSVData()
 
 void OutputDevice::ResetNewFontCache()
 {
-    mxFontCache = std::make_shared<ImplFontCache>();
+    mxFontCache = std::make_shared<FontCache>();
 }
 
 void OutputDevice::ImplReleaseFonts()

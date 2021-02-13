@@ -14506,7 +14506,7 @@ vcl/inc/font/LogicalFontInstance.hxx
 vcl/inc/font/FontSelectPattern.hxx
 vcl/inc/font/FontSubsetInfo.hxx
 vcl/inc/font/impfont.hxx
-vcl/inc/font/impfontcache.hxx
+vcl/inc/font/FontCache.hxx
 vcl/inc/font/impfontcharmap.hxx
 vcl/inc/font/impfontmetricdata.hxx
 vcl/inc/font/sft.hxx

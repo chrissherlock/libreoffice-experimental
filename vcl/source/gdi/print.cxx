@@ -38,7 +38,7 @@
 #include <svdata.hxx>
 #include <font/PhysicalFontFamilyCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
-#include <font/impfontcache.hxx>
+#include <font/FontCache.hxx>
 
 #include <print.hrc>
 
@@ -682,7 +682,7 @@ void Printer::ImplInit( SalPrinterQueueInfo* pInfo )
     // Init data
     ImplUpdatePageData();
     mxPhysicalFontFamilyCollection = std::make_shared<PhysicalFontFamilyCollection>();
-    mxFontCache = std::make_shared<ImplFontCache>();
+    mxFontCache = std::make_shared<FontCache>();
     mpGraphics->GetDevFontList(mxPhysicalFontFamilyCollection.get());
 }
 

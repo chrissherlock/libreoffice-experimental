@@ -45,7 +45,7 @@
 
 #include <vcl/uitest/uiobject.hxx>
 
-#include <font/impfontcache.hxx>
+#include <font/FontCache.hxx>
 #include <salframe.hxx>
 #include <salobj.hxx>
 #include <salinst.hxx>
