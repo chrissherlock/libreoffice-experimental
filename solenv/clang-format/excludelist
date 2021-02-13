@@ -14502,7 +14502,7 @@ vcl/inc/font/PhysicalFontCollection.hxx
 vcl/inc/font/PhysicalFontFace.hxx
 vcl/inc/font/PhysicalFontFamily.hxx
 vcl/inc/font/fontattributes.hxx
-vcl/inc/font/fontinstance.hxx
+vcl/inc/font/LogicalFontInstance.hxx
 vcl/inc/font/fontselect.hxx
 vcl/inc/font/fontsubset.hxx
 vcl/inc/font/impfont.hxx
@@ -14967,7 +14967,7 @@ vcl/source/font/font.cxx
 vcl/source/font/fontattributes.cxx
 vcl/source/font/fontcache.cxx
 vcl/source/font/fontcharmap.cxx
-vcl/source/font/fontinstance.cxx
+vcl/source/font/LogicalFontInstance.cxx
 vcl/source/font/fontmetric.cxx
 vcl/source/font/fontselect.cxx
 vcl/source/fontsubset/cff.cxx

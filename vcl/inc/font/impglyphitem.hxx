@@ -27,7 +27,7 @@
 #include <vcl/glyphitem.hxx>
 #include <vcl/outdev.hxx>
 
-#include <font/fontinstance.hxx>
+#include <font/LogicalFontInstance.hxx>
 
 #include <vector>
 

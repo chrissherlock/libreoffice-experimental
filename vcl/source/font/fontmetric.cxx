@@ -26,7 +26,7 @@
 #include <vcl/metric.hxx>
 #include <vcl/outdev.hxx>
 
-#include <font/fontinstance.hxx>
+#include <font/LogicalFontInstance.hxx>
 #include <font/fontselect.hxx>
 #include <font/impfontmetricdata.hxx>
 #include <font/sft.hxx>

@@ -32,7 +32,7 @@
 #include <vcl/outdev.hxx>
 
 #include <font/fontattributes.hxx>
-#include <font/fontinstance.hxx>
+#include <font/LogicalFontInstance.hxx>
 #include <font/impfontmetricdata.hxx>
 
 #include <unordered_map>

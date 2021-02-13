@@ -33,7 +33,7 @@
 #include <osx/salinst.h>
 #endif
 #include <font/PhysicalFontFamilyCollection.hxx>
-#include <font/fontinstance.hxx>
+#include <font/LogicalFontInstance.hxx>
 #include <font/FontAttributes.hxx>
 #include <font/impglyphitem.hxx>
 #include <quartz/salgdi.h>

@@ -22,7 +22,7 @@
 
 #include <vcl/dllapi.h>
 
-#include "fontinstance.hxx"
+#include <font/LogicalFontInstance.hxx>
 #include <font/PhysicalFontFamily.hxx>
 
 #include <array>

@@ -21,7 +21,7 @@
 #include <unx/freetype_glyphcache.hxx>
 #include <unx/gendata.hxx>
 
-#include <font/fontinstance.hxx>
+#include <font/LogicalFontInstance.hxx>
 
 #include <rtl/ustring.hxx>
 #include <sal/log.hxx>

@@ -24,7 +24,7 @@
 
 #include <unx/freetype_glyphcache.hxx>
 
-#include <font/fontinstance.hxx>
+#include <font/LogicalFontInstance.hxx>
 #include <font/FontAttributes.hxx>
 
 #include <unotools/fontdefs.hxx>

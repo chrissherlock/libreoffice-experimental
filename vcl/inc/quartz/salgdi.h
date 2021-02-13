@@ -40,7 +40,7 @@
 #include <vcl/metric.hxx>
 
 #include <font/PhysicalFontFace.hxx>
-#include <font/fontinstance.hxx>
+#include <font/LogicalFontInstance.hxx>
 #include <font/impfontmetricdata.hxx>
 #include <salgdi.hxx>
 

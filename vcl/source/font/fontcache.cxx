@@ -22,7 +22,7 @@
 #include <font/PhysicalFontFamilyCollection.hxx>
 #include <font/PhysicalFontFace.hxx>
 #include <font/PhysicalFontFamily.hxx>
-#include <font/fontinstance.hxx>
+#include <font/LogicalFontInstance.hxx>
 #include <font/impfontcache.hxx>
 
 #if !(defined(_WIN32) || defined(MACOSX) || defined(IOS))

@@ -20,7 +20,7 @@
 #define INCLUDED_VCL_SOURCE_PDF_BUILDIN_FONTS_HXX
 
 #include <font/PhysicalFontFace.hxx>
-#include <font/fontinstance.hxx>
+#include <font/LogicalFontInstance.hxx>
 
 namespace vcl::pdf
 {

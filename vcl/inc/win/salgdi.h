@@ -23,10 +23,10 @@
 #include <vcl/fontcapabilities.hxx>
 #include <vcl/fontcharmap.hxx>
 
+#include <font/FontAttributes.hxx>
+#include <font/LogicalFontInstance.hxx>
 #include <font/PhysicalFontFace.hxx>
 #include <font/impfont.hxx>
-#include <font/fontinstance.hxx>
-#include <font/FontAttributes.hxx>
 #include <sallayout.hxx>
 #include <salgeom.hxx>
 #include <salgdi.hxx>

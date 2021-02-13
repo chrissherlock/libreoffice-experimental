@@ -21,7 +21,7 @@
 #include <hb-graphite2.h>
 
 #include <font/PhysicalFontFace.hxx>
-#include <font/fontinstance.hxx>
+#include <font/LogicalFontInstance.hxx>
 #include <font/impfontcache.hxx>
 
 // extend std namespace to add custom hash needed for LogicalFontInstance

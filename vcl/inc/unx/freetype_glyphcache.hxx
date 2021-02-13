@@ -22,7 +22,7 @@
 
 #include <unx/glyphcache.hxx>
 #include <font/PhysicalFontFace.hxx>
-#include <font/fontinstance.hxx>
+#include <font/LogicalFontInstance.hxx>
 #include <vcl/glyphitem.hxx>
 
 class CmapResult;
