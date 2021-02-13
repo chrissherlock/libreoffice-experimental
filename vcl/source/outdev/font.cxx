@@ -90,7 +90,7 @@ FontMetric OutputDevice::GetDeviceFontMetric( int nDevFontIndex ) const
 
     InitFontCollection();
 
-    int nCount = GetDeviceFontMetricCount();
+    int nCount = GetPhysicalFontFaceCount();
     if( nDevFontIndex < nCount )
     {
         const PhysicalFontFace& rData = *mpPhysicalFontFaceCollection->Get( nDevFontIndex );
@@ -109,7 +109,7 @@ FontMetric OutputDevice::GetDeviceFontMetric( int nDevFontIndex ) const
     return aFontMetric;
 }
 
-int OutputDevice::GetDeviceFontMetricCount() const
+int OutputDevice::GetPhysicalFontFaceCount() const
 {
     InitPhysicalFontFaceCollection();
     return mpPhysicalFontFaceCollection->Count();

@@ -253,11 +253,11 @@ void FontList::ImplInsertFonts(OutputDevice* pDevice, bool bInsertData)
         nType = FontListFontNameType::PRINTER;
 
     // inquire all fonts from the device
-    int n = pDevice->GetDeviceFontMetricCount();
+    int n = pDevice->GetPhysicalFontFaceCount();
     if (n == 0 && comphelper::LibreOfficeKit::isActive())
     {
         pDevice->RefreshFontData(true);
-        n = pDevice->GetDeviceFontMetricCount();
+        n = pDevice->GetPhysicalFontFaceCount();
     }
 
     for (int i = 0; i < n; ++i)

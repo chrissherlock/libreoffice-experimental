@@ -977,7 +977,7 @@ private:
 public:
 
     FontMetric                  GetDeviceFontMetric( int nDevFontIndex ) const;
-    int                         GetDeviceFontMetricCount() const;
+    int                         GetPhysicalFontFaceCount() const;
 
     bool                        IsFontAvailable( const OUString& rFontName ) const;
 

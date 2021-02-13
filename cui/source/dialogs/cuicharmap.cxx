@@ -418,7 +418,7 @@ void SvxCharacterMap::init()
 
     OUString aDefStr( aFont.GetFamilyName() );
     OUString aLastName;
-    int nCount = m_xVirDev->GetDeviceFontMetricCount();
+    int nCount = m_xVirDev->GetPhysicalFontFaceCount();
     std::vector<weld::ComboBoxEntry> aEntries;
     aEntries.reserve(nCount);
     for (int i = 0; i < nCount; ++i)

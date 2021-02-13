@@ -226,7 +226,7 @@ void MyWin::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle& rR
                          Size(aPaperSize.Width() - 600,
                               aPaperSize.Height() - 600)));
 
-    const int nFontCount = rRenderContext.GetDeviceFontMetricCount();
+    const int nFontCount = rRenderContext.GetPhysicalFontFaceCount();
     const int nFontSamples = (nFontCount < 15) ? nFontCount : 15;
     for (int i = 0; i < nFontSamples; ++i)
     {

@@ -927,7 +927,7 @@ void SmDocShell::Execute(SfxRequest& rReq)
         {
             // get device used to retrieve the FontList
             OutputDevice *pDev = GetPrinter();
-            if (!pDev || pDev->GetDeviceFontMetricCount() == 0)
+            if (!pDev || pDev->GetPhysicalFontFaceCount() == 0)
                 pDev = &SM_MOD()->GetDefaultVirtualDev();
             OSL_ENSURE (pDev, "device for font list missing" );
 
