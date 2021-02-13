@@ -96,7 +96,9 @@ PhysicalFontFamily::PhysicalFontFamily( const OUString& rSearchName )
     mnMatchType( ImplFontAttrs::None ),
     meMatchWeight( WEIGHT_DONTKNOW ),
     meMatchWidth( WIDTH_DONTKNOW )
-{}
+{
+    maSizes.reserve(32);
+}
 
 PhysicalFontFamily::~PhysicalFontFamily()
 {

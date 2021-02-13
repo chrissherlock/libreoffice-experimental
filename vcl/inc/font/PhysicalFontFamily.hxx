@@ -76,8 +76,12 @@ public:
     void                UpdateDevFontList( PhysicalFontFaceCollection& ) const;
     void                UpdateCloneFontList(PhysicalFontFamilyCollection&) const;
 
-static void             CalcType( ImplFontAttrs& rType, FontWeight& rWeight, FontWidth& rWidth,
+    static void         CalcType( ImplFontAttrs& rType, FontWeight& rWeight, FontWidth& rWidth,
                                   FontFamily eFamily, const utl::FontNameAttr* pFontAttr );
+
+    void AddFontSize(int nHeight) { maSizes.push_back(nHeight); }
+    int CountFontSizes() { return maSizes.size(); }
+    int GetFontSize(int nIndex) { return maSizes[nIndex]; }
 
 private:
     std::vector< rtl::Reference<PhysicalFontFace> > maFontFaces;
@@ -89,6 +93,7 @@ private:
     FontFamily          meFamily;
     FontPitch           mePitch;
     int                 mnMinQuality;       // quality of the worst font face
+    std::vector<int> maSizes;
 
     ImplFontAttrs       mnMatchType;        // MATCH - Type
     OUString            maMatchFamilyName;  // MATCH - FamilyName

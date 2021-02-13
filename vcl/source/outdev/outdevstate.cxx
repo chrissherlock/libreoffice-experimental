@@ -29,7 +29,6 @@
 
 #include <drawmode.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
-#include <font/PhysicalFontFamilySizes.hxx>
 #include <salgdi.hxx>
 
 OutDevState::OutDevState()

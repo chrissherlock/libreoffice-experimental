@@ -32,7 +32,6 @@
 
 #include <window.h>
 #include <font/PhysicalFontFaceCollection.hxx>
-#include <font/PhysicalFontFamilySizes.hxx>
 #include <salgdi.hxx>
 #include <ImplOutDevData.hxx>
 
@@ -60,7 +59,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mpMetaFile                      = nullptr;
     mpFontInstance                     = nullptr;
     mpPhysicalFontFaceCollection                = nullptr;
-    mpPhysicalFontFamilySizes            = nullptr;
     mpAlphaVDev                     = nullptr;
     mpExtOutDevData                 = nullptr;
     mnTextOffX                      = 0;
@@ -111,9 +109,7 @@ void OutputDevice::dispose()
     // release the active font instance
     mpFontInstance.clear();
 
-    // remove cached results of GetDevFontList/GetDevSizeList
     mpPhysicalFontFaceCollection.reset();
-    mpPhysicalFontFamilySizes.reset();
 
     // release ImplFontCache specific to this OutputDevice
     mxFontCache.reset();

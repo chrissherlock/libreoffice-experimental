@@ -23,7 +23,6 @@
 #include <unotools/fontdefs.hxx>
 #include <o3tl/sorted_vector.hxx>
 
-#include <font/PhysicalFontFamilySizes.hxx>
 #include <font/GlyphFallbackFontSubstitution.hxx>
 #include <font/PreMatchFontSubstitution.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
@@ -955,24 +954,6 @@ PhysicalFontFamilyCollection::GetPhysicalFontFaceCollection() const
     }
 
     return pDeviceFontList;
-}
-
-std::unique_ptr<PhysicalFontFamilySizes>
-PhysicalFontFamilyCollection::GetDeviceFontSizeList(const OUString& rFontName) const
-{
-    std::unique_ptr<PhysicalFontFamilySizes> pDeviceFontSizeList(new PhysicalFontFamilySizes);
-
-    PhysicalFontFamily* pFontFamily = FindFontFamily(rFontName);
-    if (pFontFamily != nullptr)
-    {
-        o3tl::sorted_vector<int> rHeights;
-        pFontFamily->GetFontHeights(rHeights);
-
-        for (const auto& rHeight : rHeights)
-            pDeviceFontSizeList->Add(rHeight);
-    }
-
-    return pDeviceFontSizeList;
 }
 
 // These are the metric-compatible replacement fonts that are bundled with

@@ -66,7 +66,6 @@ public:
     // misc utilities
     std::shared_ptr<PhysicalFontFamilyCollection> Clone() const;
     std::unique_ptr<PhysicalFontFaceCollection> GetPhysicalFontFaceCollection() const;
-    std::unique_ptr<PhysicalFontFamilySizes> GetDeviceFontSizeList(const OUString& rFontName) const;
 
 private:
     mutable bool mbMatchData; // true if matching attributes are initialized
