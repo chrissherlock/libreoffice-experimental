@@ -21,7 +21,7 @@
 #include <osl/diagnose.h>
 #include <sal/log.hxx>
 
-#include <font/fontsubset.hxx>
+#include <font/FontSubsetInfo.hxx>
 #include <font/sft.hxx>
 
 FontSubsetInfo::FontSubsetInfo()

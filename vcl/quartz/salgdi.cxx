@@ -41,7 +41,7 @@
 #include <quartz/ctfonts.hxx>
 #include <font/GlyphFallbackFontSubstitution.hxx>
 #include <font/PhysicalFontFamilyCollection.hxx>
-#include <font/fontsubset.hxx>
+#include <font/FontSubsetInfo.hxx>
 #include <font/impfont.hxx>
 #include <font/impfontcharmap.hxx>
 #include <font/impfontmetricdata.hxx>
@@ -762,7 +762,7 @@ void AquaSalGraphics::GetGlyphWidths( const PhysicalFontFace* pFontData, bool bV
     if( !GetRawFontData( pFontData, aBuffer, nullptr ) )
         return;
 
-    // TODO: modernize psprint's horrible fontsubset C-API
+    // TODO: modernize psprint's horrible FontSubsetInfo C-API
     // this probably only makes sense after the switch to another SCM
     // that can preserve change history after file renames
 

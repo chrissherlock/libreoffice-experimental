@@ -53,7 +53,7 @@
 #include <font/ImplGlyphFallbackFontSubstitution.hxx>
 #include <font/PhysicalFontCollection.hxx>
 #include <font/PhysicalFontFace.hxx>
-#include <fontsubset.hxx>
+#include <font/FontSubsetInfo.hxx>
 #include <font/impfontcharmap.hxx>
 #include <font/impfontmetricdata.hxx>
 #include <font/impglyphitem.hxx>

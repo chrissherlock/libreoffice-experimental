@@ -71,7 +71,7 @@
 #include <bitmap/BitmapWriteAccess.hxx>
 #include <font/PhysicalFontFace.hxx>
 #include <font/emphasismark.hxx>
-#include <font/fontsubset.hxx>
+#include <font/FontSubsetInfo.hxx>
 #include <font/impglyphitem.hxx>
 #include <salgdi.hxx>
 #include <textlayout.hxx>

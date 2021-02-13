@@ -22,7 +22,7 @@
 #include <osl/thread.h>
 
 #include <unx/fontmanager.hxx>
-#include <fontsubset.hxx>
+#include <font/FontSubsetInfo.hxx>
 #include <font/impfontcharmap.hxx>
 #include <unx/gendata.hxx>
 #include <unx/helper.hxx>

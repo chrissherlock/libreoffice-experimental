@@ -33,7 +33,7 @@
 #include <tools/long.hxx>
 #include <vcl/sysdata.hxx>
 
-#include <font/fontsubset.hxx>
+#include <font/FontSubsetInfo.hxx>
 #include <quartz/salbmp.h>
 #ifdef MACOSX
 #include <quartz/salgdi.h>
@@ -169,7 +169,7 @@ bool AquaSalGraphics::CreateFontSubset( const OUString& rToFile,
         return SalGraphics::CreateCFFfontSubset(aBuffer.data(), aBuffer.size(), aToFile, pGlyphIds,
                                                 pEncoding, pGlyphWidths, nGlyphCount, rInfo);
 
-    // TODO: modernize psprint's horrible fontsubset C-API
+    // TODO: modernize psprint's horrible FontSubsetInfo C-API
     // this probably only makes sense after the switch to another SCM
     // that can preserve change history after file renames
 

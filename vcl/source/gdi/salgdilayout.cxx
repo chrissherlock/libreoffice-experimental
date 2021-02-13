@@ -25,7 +25,7 @@
 
 #include <FileDefinitionWidgetDraw.hxx>
 #include <font/PhysicalFontFace.hxx>
-#include <font/fontsubset.hxx>
+#include <font/FontSubsetInfo.hxx>
 #include <font/sft.hxx>
 #include <salgdi.hxx>
 #include <salframe.hxx>
