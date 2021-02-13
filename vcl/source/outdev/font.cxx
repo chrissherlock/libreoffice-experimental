@@ -672,7 +672,8 @@ static Size GetFontSizeInPixels(vcl::Font const& rFont, Geometry const& rGeometr
     return aSize;
 }
 
-static float GetFontHeightInPixels(vcl::Font const& rFont, Size const& rSize, Geometry const& rGeometry)
+static float GetFontHeightInPixels(vcl::Font const& rFont, Size const& rSize,
+                                   Geometry const& rGeometry)
 {
     // convert to pixel height
     // TODO: replace integer based aSize completely with subpixel accurate type
@@ -683,6 +684,22 @@ static float GetFontHeightInPixels(vcl::Font const& rFont, Size const& rSize, Ge
         return rGeometry.FloatLogicHeightToDevicePixel(static_cast<float>(rFont.GetFontHeight()));
 }
 
+static bool UseAntialiasing(vcl::Font const& rFont, AntialiasingFlags eFlags,
+                            StyleSettings const& rStyleSettings)
+{
+    // decide if antialiasing is appropriate
+    bool bNonAntialiased(eFlags & AntialiasingFlags::DisableText);
+
+    if (!utl::ConfigManager::IsFuzzing())
+    {
+        bNonAntialiased |= bool(rStyleSettings.GetDisplayOptions() & DisplayOptions::AADisable);
+        bNonAntialiased
+            |= (int(rStyleSettings.GetAntialiasingMinPixelHeight()) > rFont.GetFontSize().Height());
+    }
+
+    return bNonAntialiased;
+}
+
 bool OutputDevice::ImplNewFont() const
 {
     DBG_TESTSOLARMUTEX();
@@ -691,6 +708,7 @@ bool OutputDevice::ImplNewFont() const
     if (GetOutDevType() == OUTDEV_PDF)
     {
         const ImplSVData* pSVData = ImplGetSVData();
+
         if (mxPhysicalFontFamilyCollection == pSVData->maGDIData.mxScreenFontList
             || mxFontCache == pSVData->maGDIData.mxScreenFontCache)
             const_cast<OutputDevice&>(*this).ImplUpdateFontData();
@@ -711,20 +729,12 @@ bool OutputDevice::ImplNewFont() const
     Size aSize = GetFontSizeInPixels(maFont, maGeometry);
     float fExactHeight = GetFontHeightInPixels(maFont, aSize, maGeometry);
 
-    // decide if antialiasing is appropriate
-    bool bNonAntialiased(GetAntialiasing() & AntialiasingFlags::DisableText);
-    if (!utl::ConfigManager::IsFuzzing())
-    {
-        const StyleSettings& rStyleSettings = GetSettings().GetStyleSettings();
-        bNonAntialiased |= bool(rStyleSettings.GetDisplayOptions() & DisplayOptions::AADisable);
-        bNonAntialiased |= (int(rStyleSettings.GetAntialiasingMinPixelHeight())
-                            > maFont.GetFontSize().Height());
-    }
-
     // get font entry
     rtl::Reference<LogicalFontInstance> pOldFontInstance = mpFontInstance;
-    mpFontInstance = mxFontCache->GetFontInstance(mxPhysicalFontFamilyCollection.get(), maFont,
-                                                  aSize, fExactHeight, bNonAntialiased);
+    mpFontInstance = mxFontCache->GetFontInstance(
+        mxPhysicalFontFamilyCollection.get(), maFont, aSize, fExactHeight,
+        UseAntialiasing(maFont, GetAntialiasing(), GetSettings().GetStyleSettings()));
+
     const bool bNewFontInstance = pOldFontInstance.get() != mpFontInstance.get();
     pOldFontInstance.clear();
 
@@ -766,6 +776,7 @@ bool OutputDevice::ImplNewFont() const
     // calculate EmphasisArea
     mnEmphasisAscent = 0;
     mnEmphasisDescent = 0;
+
     if (maFont.GetEmphasisMark() & FontEmphasisMark::Style)
     {
         FontEmphasisMark nEmphasisMark = GetEmphasisMarkStyle(maFont);
