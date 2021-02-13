@@ -133,16 +133,16 @@ bool OutputDevice::IsFontAvailable( const OUString& rFontName ) const
     return (pFound != nullptr);
 }
 
-int OutputDevice::GetDevFontSizeCount( const vcl::Font& rFont ) const
+int OutputDevice::GetPhysicalFontFamilySizesCount( const vcl::Font& rFont ) const
 {
     InitFontCollection();
     return mxFontCollection->FindFontFamily(rFont.GetFamilyName())->CountFontSizes();
 }
 
-Size OutputDevice::GetDevFontSize( const vcl::Font& rFont, int nSizeIndex ) const
+Size OutputDevice::GetPhysicalFontFamilySize( const vcl::Font& rFont, int nSizeIndex ) const
 {
     // check range
-    int nCount = GetDevFontSizeCount( rFont );
+    int nCount = GetPhysicalFontFamilySizesCount( rFont );
     if ( nSizeIndex >= nCount )
         return Size();
 

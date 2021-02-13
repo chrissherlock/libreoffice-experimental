@@ -981,8 +981,8 @@ public:
 
     bool                        IsFontAvailable( const OUString& rFontName ) const;
 
-    Size                        GetDevFontSize( const vcl::Font& rFont, int nSizeIndex ) const;
-    int                         GetDevFontSizeCount( const vcl::Font& ) const;
+    Size                        GetPhysicalFontFamilySize( const vcl::Font& rFont, int nSizeIndex ) const;
+    int                         GetPhysicalFontFamilySizesCount( const vcl::Font& ) const;
 
     bool                        AddTempDevFont( const OUString& rFileURL, const OUString& rFontName );
     virtual void                RefreshFontData( const bool bNewFontLists );
