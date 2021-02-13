@@ -40,7 +40,7 @@ RenderContext2::RenderContext2()
 {
 }
 
-void RenderContext2::dispose() { mxFontCollection.reset(); }
+void RenderContext2::dispose() { mxPhysicalFontFamilyCollection.reset(); }
 
 sal_uInt16 RenderContext2::GetBitCount() const
 {

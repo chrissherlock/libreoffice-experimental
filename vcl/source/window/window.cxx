@@ -780,7 +780,7 @@ ImplFrameData::ImplFrameData( vcl::Window *pWindow )
     mpFocusWin         = nullptr;
     mpMouseMoveWin     = nullptr;
     mpMouseDownWin     = nullptr;
-    mxFontCollection   = pSVData->maGDIData.mxScreenFontList;
+    mxPhysicalFontFamilyCollection   = pSVData->maGDIData.mxScreenFontList;
     mxFontCache        = pSVData->maGDIData.mxScreenFontCache;
     mnFocusId          = nullptr;
     mnMouseMoveId      = nullptr;
@@ -1085,7 +1085,7 @@ void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* p
     mpWindowImpl->mpRealParent = pRealParent;
 
     // #99318: make sure fontcache and list is available before call to SetSettings
-    mxFontCollection = mpWindowImpl->mpFrameData->mxFontCollection;
+    mxPhysicalFontFamilyCollection = mpWindowImpl->mpFrameData->mxPhysicalFontFamilyCollection;
     mxFontCache = mpWindowImpl->mpFrameData->mxFontCache;
 
     if ( mpWindowImpl->mbFrame )
@@ -1779,7 +1779,7 @@ void Window::ImplNewInputContext()
             else
                 aSize.setHeight( (12*pFocusWin->GetDPIY())/72 );
         }
-        pFontInstance = pFocusWin->mxFontCache->GetFontInstance( pFocusWin->mxFontCollection.get(),
+        pFontInstance = pFocusWin->mxFontCache->GetFontInstance( pFocusWin->mxPhysicalFontFamilyCollection.get(),
                          rFont, aSize, static_cast<float>(aSize.Height()) );
         if ( pFontInstance )
             aNewContext.mpFont = pFontInstance;

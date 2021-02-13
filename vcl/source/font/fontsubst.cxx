@@ -92,7 +92,7 @@ void ImplClearAllFontData(bool bNewFontLists)
             OutputDevice* pDevice = pFrame;
             pDevice->mpGraphics->ClearDevFontCache();
             pDevice->mpGraphics->GetDevFontList(
-                pFrame->mpWindowImpl->mpFrameData->mxFontCollection.get());
+                pFrame->mpWindowImpl->mpFrameData->mxPhysicalFontFamilyCollection.get());
         }
     }
 }

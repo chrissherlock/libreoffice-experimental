@@ -347,7 +347,7 @@ protected:
     Geometry maGeometry;
     MapMode maMapMode;
     vcl::Region maRegion; ///< contains the clip region, see SetClipRegion(...)
-    mutable std::shared_ptr<PhysicalFontFamilyCollection> mxFontCollection;
+    mutable std::shared_ptr<PhysicalFontFamilyCollection> mxPhysicalFontFamilyCollection;
 
 private:
     Bitmap BlendBitmap(Bitmap& rBitmap1, Bitmap const& rBitmap2, AlphaMask const& rAlpha,

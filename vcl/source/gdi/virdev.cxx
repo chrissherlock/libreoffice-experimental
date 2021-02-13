@@ -179,7 +179,7 @@ void VirtualDevice::ImplInitVirDev( const OutputDevice* pOutDev,
     mbScreenComp    = pOutDev->IsScreenComp();
 
     EnableDeviceOutput();
-    mxFontCollection = pSVData->maGDIData.mxScreenFontList;
+    mxPhysicalFontFamilyCollection = pSVData->maGDIData.mxScreenFontList;
     mxFontCache     = pSVData->maGDIData.mxScreenFontCache;
     SetDPIX(pOutDev->GetDPIX());
     SetDPIY(pOutDev->GetDPIY());
@@ -495,12 +495,12 @@ void VirtualDevice::ImplSetReferenceDevice( RefDevMode i_eRefDevMode, sal_Int32 
 
     // preserve global font lists
     ImplSVData* pSVData = ImplGetSVData();
-    mxFontCollection.reset();
+    mxPhysicalFontFamilyCollection.reset();
     mxFontCache.reset();
 
     // get font list with scalable fonts only
     (void)AcquireGraphics();
-    mxFontCollection = pSVData->maGDIData.mxScreenFontList->Clone();
+    mxPhysicalFontFamilyCollection = pSVData->maGDIData.mxScreenFontList->Clone();
 
     // prepare to use new font lists
     mxFontCache = std::make_shared<ImplFontCache>();

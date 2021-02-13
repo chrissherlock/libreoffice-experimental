@@ -34,17 +34,17 @@ void RenderContext2::SetNewFontFlag(bool bFlag) { mbNewFont = bFlag; }
 
 void RenderContext2::InitFontCollection() const
 {
-    if (mxFontCollection->Count())
+    if (mxPhysicalFontFamilyCollection->Count())
         return;
 
     if (!(mpGraphics || AcquireGraphics()))
         return;
 
     SAL_INFO("vcl.gdi", "OutputDevice::ImplInitFontList()");
-    mpGraphics->GetDevFontList(mxFontCollection.get());
+    mpGraphics->GetDevFontList(mxPhysicalFontFamilyCollection.get());
 
     // There is absolutely no way there should be no fonts available on the device
-    if (!mxFontCollection->Count())
+    if (!mxPhysicalFontFamilyCollection->Count())
     {
         OUString aError("Application error: no fonts and no vcl resource found on your system");
         OUString aResStr(VclResId(SV_ACCESSERROR_NO_FONTS));
