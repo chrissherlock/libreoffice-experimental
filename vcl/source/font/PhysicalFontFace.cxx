@@ -23,7 +23,7 @@
 
 #include <font/PhysicalFontFace.hxx>
 #include <font/FontAttributes.hxx>
-#include <font/fontselect.hxx>
+#include <font/FontSelectPattern.hxx>
 
 PhysicalFontFace::PhysicalFontFace( const FontAttributes& rDFA )
     : FontAttributes( rDFA )

@@ -25,7 +25,7 @@
 #include <comphelper/sequence.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/vclenum.hxx>
-#include <fontselect.hxx>
+#include <FontSelectPattern.hxx>
 #include <i18nlangtag/languagetag.hxx>
 #include <i18nutil/unicode.hxx>
 #include <rtl/strbuf.hxx>

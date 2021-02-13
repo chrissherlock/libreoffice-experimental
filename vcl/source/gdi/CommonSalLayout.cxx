@@ -36,7 +36,7 @@
 #include <salgdi.hxx>
 #include <unicode/uchar.h>
 
-#include <font/fontselect.hxx>
+#include <font/FontSelectPattern.hxx>
 
 #if !HB_VERSION_ATLEAST(1, 1, 0)
 // Disabled Unicode compatibility decomposition, see fdo#66715

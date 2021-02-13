@@ -27,7 +27,7 @@
 #include <tools/gen.hxx>
 #include <vcl/glyphitem.hxx>
 
-#include "fontselect.hxx"
+#include "FontSelectPattern.hxx"
 
 class Size;
 namespace vcl { class Font; }

@@ -27,7 +27,7 @@
 #include <i18nlangtag/languagetag.hxx>
 #include <vcl/fntstyle.hxx>
 
-#include "fontselect.hxx"
+#include "FontSelectPattern.hxx"
 
 /* The following class is extraordinarily similar to FontAttributes. */
 

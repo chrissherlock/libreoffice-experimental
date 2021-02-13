@@ -20,7 +20,7 @@
 #ifndef INCLUDED_VCL_INC_FONTINSTANCE_HXX
 #define INCLUDED_VCL_INC_FONTINSTANCE_HXX
 
-#include "fontselect.hxx"
+#include "FontSelectPattern.hxx"
 #include <font/impfontmetricdata.hxx>
 
 #include <basegfx/polygon/b2dpolypolygon.hxx>
