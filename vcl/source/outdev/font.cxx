@@ -652,6 +652,37 @@ const LogicalFontInstance* OutputDevice::GetFontInstance() const
     return mpFontInstance.get();
 }
 
+static Size GetFontSizeInPixels(vcl::Font const& rFont, Geometry const& rGeometry)
+{
+    Size aSize = rGeometry.LogicToDevicePixel(rFont.GetFontSize());
+
+    if (!aSize.Height())
+    {
+        // use default pixel height only when logical height is zero
+        if (rFont.GetFontSize().Height())
+            aSize.setHeight(1);
+        else
+            aSize.setHeight((12 * rGeometry.GetDPIY()) / 72);
+    }
+
+    // select the default width only when logical width is zero
+    if ((aSize.Width() == 0) && (rFont.GetFontSize().Width()) != 0)
+        aSize.setWidth(1);
+
+    return aSize;
+}
+
+static float GetFontHeightInPixels(vcl::Font const& rFont, Size const& rSize, Geometry const& rGeometry)
+{
+    // convert to pixel height
+    // TODO: replace integer based aSize completely with subpixel accurate type
+
+    if (!rSize.Height())
+        return static_cast<float>(rSize.Height());
+    else
+        return rGeometry.FloatLogicHeightToDevicePixel(static_cast<float>(rFont.GetFontHeight()));
+}
+
 bool OutputDevice::ImplNewFont() const
 {
     DBG_TESTSOLARMUTEX();
@@ -677,24 +708,8 @@ bool OutputDevice::ImplNewFont() const
 
     InitFontCollection();
 
-    // convert to pixel height
-    // TODO: replace integer based aSize completely with subpixel accurate type
-    float fExactHeight
-        = maGeometry.FloatLogicHeightToDevicePixel(static_cast<float>(maFont.GetFontHeight()));
-    Size aSize = maGeometry.LogicToDevicePixel(maFont.GetFontSize());
-    if (!aSize.Height())
-    {
-        // use default pixel height only when logical height is zero
-        if (maFont.GetFontSize().Height())
-            aSize.setHeight(1);
-        else
-            aSize.setHeight((12 * GetDPIY()) / 72);
-        fExactHeight = static_cast<float>(aSize.Height());
-    }
-
-    // select the default width only when logical width is zero
-    if ((0 == aSize.Width()) && (0 != maFont.GetFontSize().Width()))
-        aSize.setWidth(1);
+    Size aSize = GetFontSizeInPixels(maFont, maGeometry);
+    float fExactHeight = GetFontHeightInPixels(maFont, aSize, maGeometry);
 
     // decide if antialiasing is appropriate
     bool bNonAntialiased(GetAntialiasing() & AntialiasingFlags::DisableText);
