@@ -1038,7 +1038,7 @@ private:
 
     typedef void ( OutputDevice::* FontUpdateHandler_t )( bool );
 
-    SAL_DLLPRIVATE bool         ImplNewFont() const;
+    SAL_DLLPRIVATE bool         InitNewFont() const;
     void InitPhysicalFontFaceCollection() const;
 
     static

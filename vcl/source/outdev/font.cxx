@@ -192,7 +192,7 @@ bool OutputDevice::AddTempDevFont(const OUString& rFileURL, const OUString& rFon
 
 bool OutputDevice::GetFontFeatures(std::vector<vcl::font::Feature>& rFontFeatures) const
 {
-    if (!ImplNewFont())
+    if (!InitNewFont())
         return false;
 
     LogicalFontInstance* pFontInstance = mpFontInstance.get();
@@ -219,7 +219,7 @@ bool OutputDevice::GetFontFeatures(std::vector<vcl::font::Feature>& rFontFeature
 FontMetric OutputDevice::GetFontMetric() const
 {
     FontMetric aMetric;
-    if (!ImplNewFont())
+    if (!InitNewFont())
         return aMetric;
 
     LogicalFontInstance* pFontInstance = mpFontInstance.get();
@@ -625,7 +625,7 @@ bool OutputDevice::InitFont()
 {
     DBG_TESTSOLARMUTEX();
 
-    if (!ImplNewFont())
+    if (!InitNewFont())
         return false;
     if (!mpFontInstance)
         return false;
@@ -700,7 +700,7 @@ static bool UseAntialiasing(vcl::Font const& rFont, AntialiasingFlags eFlags,
     return bNonAntialiased;
 }
 
-bool OutputDevice::ImplNewFont() const
+bool OutputDevice::InitNewFont() const
 {
     DBG_TESTSOLARMUTEX();
 
@@ -720,7 +720,7 @@ bool OutputDevice::ImplNewFont() const
     // we need a graphics
     if (!mpGraphics && !AcquireGraphics())
     {
-        SAL_WARN("vcl.gdi", "OutputDevice::ImplNewFont(): no Graphics, no Font");
+        SAL_WARN("vcl.gdi", "OutputDevice::InitNewFont(): no Graphics, no Font");
         return false;
     }
 
@@ -742,7 +742,7 @@ bool OutputDevice::ImplNewFont() const
 
     if (!pFontInstance)
     {
-        SAL_WARN("vcl.gdi", "OutputDevice::ImplNewFont(): no LogicalFontInstance, no Font");
+        SAL_WARN("vcl.gdi", "OutputDevice::InitNewFont(): no LogicalFontInstance, no Font");
         return false;
     }
 
@@ -843,7 +843,7 @@ bool OutputDevice::ImplNewFont() const
             const_cast<vcl::Font&>(maFont).SetFontSize(Size(nNewWidth, aSize.Height()));
             const_cast<OutputDevice*>(this)->DisableMapMode();
             const_cast<OutputDevice*>(this)->SetNewFontFlag(true);
-            bRet = ImplNewFont(); // recurse once using stretched width
+            bRet = InitNewFont(); // recurse once using stretched width
             const_cast<OutputDevice*>(this)->EnableMapMode();
             const_cast<vcl::Font&>(maFont).SetFontSize(aOrigSize);
         }
@@ -986,7 +986,7 @@ OutputDevice::ImplGlyphFallbackLayout(std::unique_ptr<SalLayout> pSalLayout,
 
 tools::Long OutputDevice::GetMinKashida() const
 {
-    if (!ImplNewFont())
+    if (!InitNewFont())
         return 0;
 
     return maGeometry.DevicePixelToLogicWidth(mpFontInstance->mxFontMetric->GetMinKashida());
