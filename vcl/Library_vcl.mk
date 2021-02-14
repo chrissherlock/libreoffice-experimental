@@ -492,6 +492,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/font/Feature \
     vcl/source/font/FeatureCollector \
     vcl/source/font/FeatureParser \
+    vcl/source/font/FontAttributes \
     vcl/source/font/ImplDirectFontSubstitution \
     vcl/source/font/FontSubstitutionEntry \
     vcl/source/font/OpenTypeFeatureDefinitionList \
