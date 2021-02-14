@@ -627,17 +627,15 @@ bool OutputDevice::InitFont()
 
     if (!InitNewFont())
         return false;
+
     if (!mpFontInstance)
         return false;
-    if (!mpGraphics)
-    {
-        if (!AcquireGraphics())
-            return false;
-    }
-    else if (!IsInitFont())
-    {
+
+    if (!mpGraphics && !AcquireGraphics())
+        return false;
+
+    if (!IsInitFont())
         return true;
-    }
 
     mpGraphics->SetFont(mpFontInstance.get(), 0);
     SetInitFontFlag(false);
