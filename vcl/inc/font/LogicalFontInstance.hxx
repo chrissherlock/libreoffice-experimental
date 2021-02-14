@@ -20,16 +20,17 @@
 #ifndef INCLUDED_VCL_INC_FONTINSTANCE_HXX
 #define INCLUDED_VCL_INC_FONTINSTANCE_HXX
 
-#include "FontSelectPattern.hxx"
-#include <font/impfontmetricdata.hxx>
-
-#include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <rtl/ref.hxx>
 #include <salhelper/simplereferenceobject.hxx>
 #include <tools/gen.hxx>
 #include <tools/fontenum.hxx>
 #include <tools/degree.hxx>
+#include <basegfx/polygon/b2dpolypolygon.hxx>
+
 #include <vcl/glyphitem.hxx>
+
+#include <font/FontSelectPattern.hxx>
+#include <font/impfontmetricdata.hxx>
 
 #include <optional>
 #include <unordered_map>
@@ -39,6 +40,7 @@
 
 class ConvertChar;
 class FontCache;
+class FontSelectPattern;
 class PhysicalFontFace;
 
 // TODO: allow sharing of metrics for related fonts
@@ -65,15 +67,15 @@ public: // TODO: make data members private
     bool GetFallbackForUnicode(sal_UCS4, FontWeight eWeight, OUString* pFontName) const;
     void IgnoreFallbackForUnicode(sal_UCS4, FontWeight eWeight, std::u16string_view rFontName);
 
-    inline hb_font_t* GetHbFont();
+    hb_font_t* GetHbFont();
     bool IsGraphiteFont();
-    void SetAverageWidthFactor(double nFactor) { m_nAveWidthFactor = std::abs(nFactor); }
-    double GetAverageWidthFactor() const { return m_nAveWidthFactor; }
-    const FontSelectPattern& GetFontSelectPattern() const { return m_aFontSelData; }
+    void SetAverageWidthFactor(double nFactor);
+    double GetAverageWidthFactor() const;
+    FontSelectPattern const& GetFontSelectPattern() const;
 
-    const PhysicalFontFace* GetFontFace() const { return m_pFontFace.get(); }
-    PhysicalFontFace* GetFontFace() { return m_pFontFace.get(); }
-    const FontCache* GetFontCache() const { return mpFontCache; }
+    PhysicalFontFace const* GetFontFace() const;
+    PhysicalFontFace* GetFontFace();
+    FontCache const* GetFontCache() const;
 
     bool GetGlyphBoundRect(sal_GlyphId, tools::Rectangle&, bool) const;
     virtual bool GetGlyphOutline(sal_GlyphId, basegfx::B2DPolyPolygon&, bool) const = 0;
@@ -81,7 +83,7 @@ public: // TODO: make data members private
     int GetKashidaWidth();
 
     void GetScale(double* nXScale, double* nYScale);
-    static inline void DecodeOpenTypeTag(const uint32_t nTableTag, char* pTagName);
+    static void DecodeOpenTypeTag(const uint32_t nTableTag, char* pTagName);
 
 protected:
     explicit LogicalFontInstance(const PhysicalFontFace&, const FontSelectPattern&);
@@ -90,11 +92,7 @@ protected:
 
     // Takes ownership of pHbFace.
     static hb_font_t* InitHbFont(hb_face_t* pHbFace);
-    virtual hb_font_t* ImplInitHbFont()
-    {
-        assert(false);
-        return hb_font_get_empty();
-    }
+    virtual hb_font_t* ImplInitHbFont();
 
 private:
     // cache of Unicode characters and replacement font names
@@ -109,22 +107,6 @@ private:
     rtl::Reference<PhysicalFontFace> m_pFontFace;
     std::optional<bool> m_xbIsGraphiteFont;
 };
-
-inline hb_font_t* LogicalFontInstance::GetHbFont()
-{
-    if (!m_pHbFont)
-        m_pHbFont = ImplInitHbFont();
-    return m_pHbFont;
-}
-
-inline void LogicalFontInstance::DecodeOpenTypeTag(const uint32_t nTableTag, char* pTagName)
-{
-    pTagName[0] = static_cast<char>(nTableTag >> 24);
-    pTagName[1] = static_cast<char>(nTableTag >> 16);
-    pTagName[2] = static_cast<char>(nTableTag >> 8);
-    pTagName[3] = static_cast<char>(nTableTag);
-    pTagName[4] = 0;
-}
 
 #endif // INCLUDED_VCL_INC_FONTINSTANCE_HXX
 

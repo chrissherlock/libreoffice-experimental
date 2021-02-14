@@ -78,6 +78,14 @@ hb_font_t* LogicalFontInstance::InitHbFont(hb_face_t* pHbFace)
     return pHbFont;
 }
 
+void LogicalFontInstance::SetAverageWidthFactor(double nFactor) { m_nAveWidthFactor = std::abs(nFactor); }
+double LogicalFontInstance::GetAverageWidthFactor() const { return m_nAveWidthFactor; }
+FontSelectPattern const& LogicalFontInstance::GetFontSelectPattern() const { return m_aFontSelData; }
+
+PhysicalFontFace const* LogicalFontInstance::GetFontFace() const { return m_pFontFace.get(); }
+PhysicalFontFace* LogicalFontInstance::GetFontFace() { return m_pFontFace.get(); }
+FontCache const* LogicalFontInstance::GetFontCache() const { return mpFontCache; }
+
 int LogicalFontInstance::GetKashidaWidth()
 {
     hb_font_t* pHbFont = GetHbFont();
@@ -161,6 +169,28 @@ bool LogicalFontInstance::IsGraphiteFont()
         m_xbIsGraphiteFont = hb_graphite2_face_get_gr_face(hb_font_get_face(GetHbFont())) != nullptr;
     }
     return *m_xbIsGraphiteFont;
+}
+
+hb_font_t* LogicalFontInstance::ImplInitHbFont()
+{
+    assert(false);
+    return hb_font_get_empty();
+}
+
+hb_font_t* LogicalFontInstance::GetHbFont()
+{
+    if (!m_pHbFont)
+        m_pHbFont = ImplInitHbFont();
+    return m_pHbFont;
+}
+
+void LogicalFontInstance::DecodeOpenTypeTag(const uint32_t nTableTag, char* pTagName)
+{
+    pTagName[0] = static_cast<char>(nTableTag >> 24);
+    pTagName[1] = static_cast<char>(nTableTag >> 16);
+    pTagName[2] = static_cast<char>(nTableTag >> 8);
+    pTagName[3] = static_cast<char>(nTableTag);
+    pTagName[4] = 0;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
