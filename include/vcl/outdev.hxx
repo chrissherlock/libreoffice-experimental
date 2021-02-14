@@ -31,12 +31,18 @@
 #include <unotools/fontdefs.hxx>
 #include <o3tl/typed_flags_set.hxx>
 
-#include <vcl/AddFontSubstituteFlags.hxx>
+#include <vcl/dllapi.h>
 #include <vcl/RenderContext2.hxx>
 #include <vcl/bitmap.hxx>
 #include <vcl/cairo.hxx>
 #include <vcl/devicecoordinate.hxx>
-#include <vcl/dllapi.h>
+#include <vcl/flags/AddFontSubstituteFlags.hxx>
+#include <vcl/flags/DrawTextFlags.hxx>
+#include <vcl/flags/DrawImageFlags.hxx>
+#include <vcl/flags/DrawGridFlags.hxx>
+#include <vcl/flags/GetDefaultFontFlags.hxx>
+#include <vcl/flags/InvertFlags.hxx>
+#include <vcl/flags/SalLayoutFlags.hxx>
 #include <vcl/font.hxx>
 #include <vcl/mapmod.hxx>
 #include <vcl/metaactiontypes.hxx>
@@ -116,107 +122,9 @@ namespace com::sun::star::awt {
 #define GLYPH_FONT_HEIGHT   256
 #endif
 
-// Text Layout options
-enum class SalLayoutFlags
-{
-    NONE                    = 0x0000,
-    BiDiRtl                 = 0x0001,
-    BiDiStrong              = 0x0002,
-    RightAlign              = 0x0004,
-    DisableKerning          = 0x0010,
-    KerningAsian            = 0x0020,
-    Vertical                = 0x0040,
-    KashidaJustification    = 0x0800,
-    ForFallback             = 0x2000,
-    GlyphItemsOnly          = 0x4000,
-};
-namespace o3tl
-{
-    template<> struct typed_flags<SalLayoutFlags> : is_typed_flags<SalLayoutFlags, 0x6877> {};
-}
-
 typedef std::vector< tools::Rectangle > MetricVector;
 
 // OutputDevice-Types
-
-// Flags for DrawText()
-enum class DrawTextFlags
-{
-    NONE                  = 0x00000000,
-    Disable               = 0x00000001,
-    Mnemonic              = 0x00000002,
-    Mono                  = 0x00000004,
-    Clip                  = 0x00000008,
-    Left                  = 0x00000010,
-    Center                = 0x00000020,
-    Right                 = 0x00000040,
-    Top                   = 0x00000080,
-    VCenter               = 0x00000100,
-    Bottom                = 0x00000200,
-    EndEllipsis           = 0x00000400,
-    PathEllipsis          = 0x00000800,
-    MultiLine             = 0x00001000,
-    WordBreak             = 0x00002000,
-    NewsEllipsis          = 0x00004000,
-    WordBreakHyphenation  = 0x00008000 | WordBreak,
-    CenterEllipsis        = 0x00010000,
-    HideMnemonic          = 0x00020000,
-};
-namespace o3tl
-{
-    template<> struct typed_flags<DrawTextFlags> : is_typed_flags<DrawTextFlags, 0x3ffff> {};
-}
-
-// Flags for DrawImage(), these must match the definitions in css::awt::ImageDrawMode
-enum class DrawImageFlags
-{
-    NONE                 = 0x0000,
-    Disable              = 0x0001,
-    Highlight            = 0x0002,
-    Deactive             = 0x0004,
-    ColorTransform       = 0x0008,
-    SemiTransparent      = 0x0010,
-};
-namespace o3tl
-{
-    template<> struct typed_flags<DrawImageFlags> : is_typed_flags<DrawImageFlags, 0x001f> {};
-}
-
-// Flags for DrawGrid()
-enum class DrawGridFlags
-{
-    NONE                 = 0x0000,
-    Dots                 = 0x0001,
-    HorzLines            = 0x0002,
-    VertLines            = 0x0004
-};
-namespace o3tl
-{
-    template<> struct typed_flags<DrawGridFlags> : is_typed_flags<DrawGridFlags, 0x0007> {};
-}
-
-// GetDefaultFont() flags
-enum class GetDefaultFontFlags
-{
-    NONE          = 0x0000,
-    OnlyOne       = 0x0001,
-};
-namespace o3tl
-{
-    template<> struct typed_flags<GetDefaultFontFlags> : is_typed_flags<GetDefaultFontFlags, 0x01> {};
-}
-
-// Flags for Invert()
-enum class InvertFlags
-{
-    NONE                    = 0x0000,
-    N50                     = 0x0001,
-    TrackFrame              = 0x0002
-};
-namespace o3tl
-{
-    template<> struct typed_flags<InvertFlags> : is_typed_flags<InvertFlags, 0x0003> {};
-}
 
 enum OutDevType { OUTDEV_WINDOW, OUTDEV_PRINTER, OUTDEV_VIRDEV, OUTDEV_PDF };
 

@@ -21,7 +21,7 @@
 
 #include <rtl/ustring.hxx>
 
-#include <vcl/AddFontSubstituteFlags.hxx>
+#include <vcl/flags/AddFontSubstituteFlags.hxx>
 
 SAL_DLLPUBLIC void BeginFontSubstitution();
 SAL_DLLPUBLIC void EndFontSubstitution();

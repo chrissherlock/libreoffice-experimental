@@ -18,8 +18,8 @@
  */
 
 #include <vcl/BitmapMonochromeFilter.hxx>
-#include <vcl/DrawModeFlags.hxx>
 #include <vcl/RenderContext2.hxx>
+#include <vcl/flags/DrawModeFlags.hxx>
 #include <vcl/settings.hxx>
 
 #include <drawmode.hxx>

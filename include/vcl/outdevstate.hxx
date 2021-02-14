@@ -26,9 +26,9 @@
 #include <i18nlangtag/lang.h>
 #include <o3tl/typed_flags_set.hxx>
 
-#include <vcl/ComplexTextLayoutFlags.hxx>
-#include <vcl/PushFlags.hxx>
 #include <vcl/RasterOp.hxx>
+#include <vcl/flags/ComplexTextLayoutFlags.hxx>
+#include <vcl/flags/PushFlags.hxx>
 #include <vcl/mapmod.hxx>
 #include <vcl/vclenum.hxx>
 

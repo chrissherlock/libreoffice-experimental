@@ -1,4 +1,4 @@
-/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; fill-column: 100 -*- */
 /*
  * This file is part of the LibreOffice project.
  *
@@ -19,18 +19,19 @@
 
 #pragma once
 
-#include <rtl/ustring.hxx>
+#include <o3tl/typed_flags_set.hxx>
 
-#include <vcl/flags/AddFontSubstituteFlags.hxx>
-
-struct FontSubstitutionEntry
+enum class InvertFlags
 {
-    OUString maSearchName;
-    OUString maSearchReplaceName;
-    AddFontSubstituteFlags mnFlags;
-
-    FontSubstitutionEntry(const OUString& rFontName, const OUString& rSubstFontName,
-                          AddFontSubstituteFlags nSubstFlags);
+    NONE = 0x0000,
+    N50 = 0x0001,
+    TrackFrame = 0x0002
 };
+namespace o3tl
+{
+template <> struct typed_flags<InvertFlags> : is_typed_flags<InvertFlags, 0x0003>
+{
+};
+}
 
-/* vim:set shiftwidth=4 softtabstop=4 expandtab: */
+/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

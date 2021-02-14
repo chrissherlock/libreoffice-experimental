@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <vcl/AddFontSubstituteFlags.hxx>
+#include <vcl/flags/AddFontSubstituteFlags.hxx>
 
 #include <font/FontSubstitution.hxx>
 

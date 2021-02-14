@@ -15,20 +15,23 @@
 #include <i18nlangtag/lang.h>
 
 #include <vcl/dllapi.h>
+#include <vcl/flags/AntialiasingFlags.hxx>
+#include <vcl/flags/ComplexTextLayoutFlags.hxx>
+#include <vcl/flags/DrawModeFlags.hxx>
+#include <vcl/Geometry.hxx>
+#include <vcl/MappingMetrics.hxx>
+#include <vcl/RasterOp.hxx>
+#include <vcl/ViewTransformer.hxx>
 #include <vcl/bitmapex.hxx>
+#include <vcl/flags/AntialiasingFlags.hxx>
+#include <vcl/flags/ComplexTextLayoutFlags.hxx>
+#include <vcl/flags/DrawModeFlags.hxx>
 #include <vcl/font.hxx>
 #include <vcl/mapmod.hxx>
 #include <vcl/metaactiontypes.hxx>
 #include <vcl/region.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/vclreferencebase.hxx>
-#include <vcl/AntialiasingFlags.hxx>
-#include <vcl/ComplexTextLayoutFlags.hxx>
-#include <vcl/DrawModeFlags.hxx>
-#include <vcl/Geometry.hxx>
-#include <vcl/MappingMetrics.hxx>
-#include <vcl/RasterOp.hxx>
-#include <vcl/ViewTransformer.hxx>
 
 #include <memory>
 
