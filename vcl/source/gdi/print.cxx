@@ -860,11 +860,6 @@ void Printer::ImplUpdatePageData()
     SetHeightInPixels(nHeight);
 }
 
-void Printer::ImplUpdateFontList()
-{
-    ImplUpdateFontData();
-}
-
 tools::Long Printer::GetGradientStepCount( tools::Long nMinRect )
 {
     // use display-equivalent step size calculation
@@ -1031,7 +1026,7 @@ bool Printer::SetJobSetup( const JobSetup& rSetup )
         mbNewJobSetup = true;
         maJobSetup = aJobSetup;
         ImplUpdatePageData();
-        ImplUpdateFontList();
+        ImplUpdateFontData();
         return true;
     }
 
@@ -1072,7 +1067,7 @@ bool Printer::Setup(weld::Window* pWindow, PrinterSetupMode eMode)
         mbNewJobSetup = true;
         maJobSetup = aJobSetup;
         ImplUpdatePageData();
-        ImplUpdateFontList();
+        ImplUpdateFontData();
         return true;
     }
     return false;
@@ -1180,7 +1175,7 @@ bool Printer::SetOrientation( Orientation eOrientation )
             mbNewJobSetup = true;
             maJobSetup = aJobSetup;
             ImplUpdatePageData();
-            ImplUpdateFontList();
+            ImplUpdateFontData();
             return true;
         }
         else
@@ -1221,7 +1216,7 @@ bool Printer::SetPaperBin( sal_uInt16 nPaperBin )
             mbNewJobSetup = true;
             maJobSetup = aJobSetup;
             ImplUpdatePageData();
-            ImplUpdateFontList();
+            ImplUpdateFontData();
             return true;
         }
         else
@@ -1343,7 +1338,7 @@ void Printer::SetPaper( Paper ePaper )
         mbNewJobSetup = true;
         maJobSetup = aJobSetup;
         ImplUpdatePageData();
-        ImplUpdateFontList();
+        ImplUpdateFontData();
     }
 }
 
@@ -1395,7 +1390,7 @@ bool Printer::SetPaperSizeUser( const Size& rSize )
             mbNewJobSetup = true;
             maJobSetup = aJobSetup;
             ImplUpdatePageData();
-            ImplUpdateFontList();
+            ImplUpdateFontData();
             return true;
         }
         else
@@ -1487,7 +1482,7 @@ void Printer::SetDuplexMode( DuplexMode eDuplex )
         mbNewJobSetup = true;
         maJobSetup = aJobSetup;
         ImplUpdatePageData();
-        ImplUpdateFontList();
+        ImplUpdateFontData();
     }
 }
 

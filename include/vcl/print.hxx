@@ -180,7 +180,6 @@ private:
     VCL_DLLPRIVATE static SalPrinterQueueInfo*
                                 ImplGetQueueInfo( const OUString& rPrinterName, const OUString* pDriver );
     VCL_DLLPRIVATE void         ImplUpdatePageData();
-    VCL_DLLPRIVATE void         ImplUpdateFontList();
     VCL_DLLPRIVATE void         ImplFindPaperFormatForUserSize( JobSetup& );
 
     VCL_DLLPRIVATE bool         StartJob( const OUString& rJobName, std::shared_ptr<vcl::PrinterController> const & );
