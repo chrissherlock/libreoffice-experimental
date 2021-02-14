@@ -98,12 +98,12 @@ FontMetric OutputDevice::GetDeviceFontMetric(int nDevFontIndex) const
         aFontMetric.SetFamilyName(rData.GetFamilyName());
         aFontMetric.SetStyleName(rData.GetStyleName());
         aFontMetric.SetCharSet(rData.GetCharSet());
-        aFontMetric.SetFamily(rData.GetFamilyType());
-        aFontMetric.SetPitch(rData.GetPitch());
-        aFontMetric.SetWeight(rData.GetWeight());
-        aFontMetric.SetItalic(rData.GetItalic());
+        aFontMetric.SetFamily(rData.GetFamilyTypeNoAsk());
+        aFontMetric.SetPitch(rData.GetPitchNoAsk());
+        aFontMetric.SetWeight(rData.GetWeightNoAsk());
+        aFontMetric.SetItalic(rData.GetItalicNoAsk());
         aFontMetric.SetAlignment(TextAlign::ALIGN_TOP);
-        aFontMetric.SetWidthType(rData.GetWidthType());
+        aFontMetric.SetWidthType(rData.GetWidthTypeNoAsk());
         aFontMetric.SetQuality(rData.GetQuality());
     }
 
@@ -236,12 +236,12 @@ FontMetric OutputDevice::GetFontMetric() const
                                           - xFontMetric->GetInternalLeading())));
     aMetric.SetCharSet(xFontMetric->IsSymbolFont() ? RTL_TEXTENCODING_SYMBOL
                                                    : RTL_TEXTENCODING_UNICODE);
-    aMetric.SetFamily(xFontMetric->GetFamilyType());
-    aMetric.SetPitch(xFontMetric->GetPitch());
-    aMetric.SetWeight(xFontMetric->GetWeight());
-    aMetric.SetItalic(xFontMetric->GetItalic());
+    aMetric.SetFamily(xFontMetric->GetFamilyTypeNoAsk());
+    aMetric.SetPitch(xFontMetric->GetPitchNoAsk());
+    aMetric.SetWeight(xFontMetric->GetWeightNoAsk());
+    aMetric.SetItalic(xFontMetric->GetItalicNoAsk());
     aMetric.SetAlignment(TextAlign::ALIGN_TOP);
-    aMetric.SetWidthType(xFontMetric->GetWidthType());
+    aMetric.SetWidthType(xFontMetric->GetWidthTypeNoAsk());
     if (pFontInstance->mnOwnOrientation)
         aMetric.SetOrientation(pFontInstance->mnOwnOrientation);
     else

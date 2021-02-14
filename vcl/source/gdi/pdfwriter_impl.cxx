@@ -2580,13 +2580,13 @@ sal_Int32 PDFWriterImpl::emitFontDescriptor( const PhysicalFontFace* pFont, Font
     // possibly characters outside Adobe standard encoding
     // so set Symbolic flag
     sal_Int32 nFontFlags = (1<<2);
-    if( pFont->GetItalic() == ITALIC_NORMAL || pFont->GetItalic() == ITALIC_OBLIQUE )
+    if( pFont->GetItalicNoAsk() == ITALIC_NORMAL || pFont->GetItalicNoAsk() == ITALIC_OBLIQUE )
         nFontFlags |= (1 << 6);
-    if( pFont->GetPitch() == PITCH_FIXED )
+    if( pFont->GetPitchNoAsk() == PITCH_FIXED )
         nFontFlags |= 1;
-    if( pFont->GetFamilyType() == FAMILY_SCRIPT )
+    if( pFont->GetFamilyTypeNoAsk() == FAMILY_SCRIPT )
         nFontFlags |= (1 << 3);
-    else if( pFont->GetFamilyType() == FAMILY_ROMAN )
+    else if( pFont->GetFamilyTypeNoAsk() == FAMILY_ROMAN )
         nFontFlags |= (1 << 1);
 
     sal_Int32 nFontDescriptor = createObject();
@@ -2610,7 +2610,7 @@ sal_Int32 PDFWriterImpl::emitFontDescriptor( const PhysicalFontFace* pFont, Font
     aLine.append( ' ' );
     aLine.append( static_cast<sal_Int32>(rInfo.m_aFontBBox.Bottom()+1) );
     aLine.append( "]/ItalicAngle " );
-    if( pFont->GetItalic() == ITALIC_OBLIQUE || pFont->GetItalic() == ITALIC_NORMAL )
+    if( pFont->GetItalicNoAsk() == ITALIC_OBLIQUE || pFont->GetItalicNoAsk() == ITALIC_NORMAL )
         aLine.append( "-30" );
     else
         aLine.append( "0" );
@@ -2883,12 +2883,12 @@ bool PDFWriterImpl::emitFonts()
                 aErrorComment.append( "CreateFontSubset failed for font \"" );
                 aErrorComment.append( OUStringToOString( pFont->GetFamilyName(), RTL_TEXTENCODING_UTF8 ) );
                 aErrorComment.append( '\"' );
-                if( pFont->GetItalic() == ITALIC_NORMAL )
+                if( pFont->GetItalicNoAsk() == ITALIC_NORMAL )
                     aErrorComment.append( " italic" );
-                else if( pFont->GetItalic() == ITALIC_OBLIQUE )
+                else if( pFont->GetItalicNoAsk() == ITALIC_OBLIQUE )
                     aErrorComment.append( " oblique" );
                 aErrorComment.append( " weight=" );
-                aErrorComment.append( sal_Int32(pFont->GetWeight()) );
+                aErrorComment.append( sal_Int32(pFont->GetWeightNoAsk()) );
                 emitComment( aErrorComment.getStr() );
             }
         }
@@ -6061,8 +6061,8 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
     // perform artificial italics if necessary
     if( ( m_aCurrentPDFState.m_aFont.GetItalic() == ITALIC_NORMAL ||
           m_aCurrentPDFState.m_aFont.GetItalic() == ITALIC_OBLIQUE ) &&
-        ( GetFontInstance()->GetFontFace()->GetItalic() != ITALIC_NORMAL &&
-           GetFontInstance()->GetFontFace()->GetItalic() != ITALIC_OBLIQUE )
+        ( GetFontInstance()->GetFontFace()->GetItalicNoAsk() != ITALIC_NORMAL &&
+           GetFontInstance()->GetFontFace()->GetItalicNoAsk() != ITALIC_OBLIQUE )
         )
     {
         fSkew = M_PI/12.0;
@@ -6089,8 +6089,8 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
     bool bPop = false;
     bool bABold = false;
     // artificial bold necessary ?
-    if( GetFontInstance()->GetFontFace()->GetWeight() <= WEIGHT_MEDIUM &&
-        GetFontInstance()->GetFontSelectPattern().GetWeight() > WEIGHT_MEDIUM )
+    if( GetFontInstance()->GetFontFace()->GetWeightNoAsk() <= WEIGHT_MEDIUM &&
+        GetFontInstance()->GetFontSelectPattern().GetWeightNoAsk() > WEIGHT_MEDIUM )
     {
         aLine.append("q ");
         bPop = true;

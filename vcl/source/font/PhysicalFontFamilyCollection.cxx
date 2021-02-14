@@ -235,7 +235,7 @@ PhysicalFontFamily* PhysicalFontFamilyCollection::GetGlyphFallbackFont(
         while (nStrIndex < rMissingCodes.getLength())
         {
             cChar = rMissingCodes.iterateCodePoints(&nStrIndex);
-            bCached = pFontInstance->GetFallbackForUnicode(cChar, rFontSelData.GetWeight(),
+            bCached = pFontInstance->GetFallbackForUnicode(cChar, rFontSelData.GetWeightNoAsk(),
                                                            &rFontSelData.maSearchName);
 
             // ignore entries which don't have a fallback
@@ -255,7 +255,7 @@ PhysicalFontFamily* PhysicalFontFamilyCollection::GetGlyphFallbackFont(
             while (nStrIndex < rMissingCodes.getLength())
             {
                 cChar = rMissingCodes.iterateCodePoints(&nStrIndex);
-                bCached = pFontInstance->GetFallbackForUnicode(cChar, rFontSelData.GetWeight(),
+                bCached = pFontInstance->GetFallbackForUnicode(cChar, rFontSelData.GetWeightNoAsk(),
                                                                &aFontName);
                 if (!bCached || (rFontSelData.maSearchName != aFontName))
                     pRemainingCodes[nRemainingLength++] = cChar;
@@ -285,9 +285,9 @@ PhysicalFontFamily* PhysicalFontFamilyCollection::GetGlyphFallbackFont(
             {
                 for (;;)
                 {
-                    if (!pFontInstance->GetFallbackForUnicode(cChar, rFontSelData.GetWeight(),
+                    if (!pFontInstance->GetFallbackForUnicode(cChar, rFontSelData.GetWeightNoAsk(),
                                                               &rFontSelData.maSearchName))
-                        pFontInstance->AddFallbackForUnicode(cChar, rFontSelData.GetWeight(),
+                        pFontInstance->AddFallbackForUnicode(cChar, rFontSelData.GetWeightNoAsk(),
                                                              rFontSelData.maSearchName);
                     if (nStrIndex >= aOldMissingCodes.getLength())
                         break;
@@ -299,8 +299,8 @@ PhysicalFontFamily* PhysicalFontFamilyCollection::GetGlyphFallbackFont(
                     for (nStrIndex = 0; nStrIndex < rMissingCodes.getLength();)
                     {
                         cChar = rMissingCodes.iterateCodePoints(&nStrIndex);
-                        pFontInstance->IgnoreFallbackForUnicode(cChar, rFontSelData.GetWeight(),
-                                                                rFontSelData.maSearchName);
+                        pFontInstance->IgnoreFallbackForUnicode(
+                            cChar, rFontSelData.GetWeightNoAsk(), rFontSelData.maSearchName);
                     }
                 }
             }
@@ -1024,7 +1024,7 @@ PhysicalFontFamily* PhysicalFontFamilyCollection::FindFontFamily(FontSelectPatte
         SubstituteFont(aSearchName);
         // #114999# special emboldening for Ricoh fonts
         // TODO: smarter check for special cases by using PreMatch infrastructure?
-        if ((rFSD.GetWeight() > WEIGHT_MEDIUM) && aSearchName.startsWithIgnoreAsciiCase("hg"))
+        if ((rFSD.GetWeightNoAsk() > WEIGHT_MEDIUM) && aSearchName.startsWithIgnoreAsciiCase("hg"))
         {
             OUString aBoldName;
             if (aSearchName.startsWithIgnoreAsciiCase("hggothicb"))
@@ -1134,8 +1134,8 @@ PhysicalFontFamily* PhysicalFontFamilyCollection::FindFontFamily(FontSelectPatte
 
     OUString aSearchShortName;
     OUString aSearchFamilyName;
-    FontWeight eSearchWeight = rFSD.GetWeight();
-    FontWidth eSearchWidth = rFSD.GetWidthType();
+    FontWeight eSearchWeight = rFSD.GetWeightNoAsk();
+    FontWidth eSearchWidth = rFSD.GetWidthTypeNoAsk();
     ImplFontAttrs nSearchType = ImplFontAttrs::None;
     utl::FontSubstConfiguration::getMapName(aSearchName, aSearchShortName, aSearchFamilyName,
                                             eSearchWeight, eSearchWidth, nSearchType);
@@ -1209,7 +1209,7 @@ PhysicalFontFamily* PhysicalFontFamilyCollection::FindFontFamily(FontSelectPatte
         OUString aTempShortName;
         OUString aTempFamilyName;
         ImplFontAttrs nTempType = ImplFontAttrs::None;
-        FontWeight eTempWeight = rFSD.GetWeight();
+        FontWeight eTempWeight = rFSD.GetWeightNoAsk();
         FontWidth eTempWidth = WIDTH_DONTKNOW;
         utl::FontSubstConfiguration::getMapName(aSearchName, aTempShortName, aTempFamilyName,
                                                 eTempWeight, eTempWidth, nTempType);
@@ -1265,20 +1265,20 @@ PhysicalFontFamily* PhysicalFontFamilyCollection::FindFontFamily(FontSelectPatte
             nSearchType |= ImplFontAttrs::Symbol;
     }
 
-    PhysicalFontFamily::CalcType(nSearchType, eSearchWeight, eSearchWidth, rFSD.GetFamilyType(),
-                                 pFontAttr);
+    PhysicalFontFamily::CalcType(nSearchType, eSearchWeight, eSearchWidth,
+                                 rFSD.GetFamilyTypeNoAsk(), pFontAttr);
     PhysicalFontFamily* pFoundData = FindFontFamilyByAttributes(
-        nSearchType, eSearchWeight, eSearchWidth, rFSD.GetItalic(), aSearchFamilyName);
+        nSearchType, eSearchWeight, eSearchWidth, rFSD.GetItalicNoAsk(), aSearchFamilyName);
 
     if (pFoundData)
     {
         // overwrite font selection attributes using info from the typeface flags
-        if ((eSearchWeight >= WEIGHT_BOLD) && (eSearchWeight > rFSD.GetWeight())
+        if ((eSearchWeight >= WEIGHT_BOLD) && (eSearchWeight > rFSD.GetWeightNoAsk())
             && (pFoundData->GetTypeFaces() & FontTypeFaces::Bold))
         {
             rFSD.SetWeight(eSearchWeight);
         }
-        else if ((eSearchWeight < WEIGHT_NORMAL) && (eSearchWeight < rFSD.GetWeight())
+        else if ((eSearchWeight < WEIGHT_NORMAL) && (eSearchWeight < rFSD.GetWeightNoAsk())
                  && (eSearchWeight != WEIGHT_DONTKNOW)
                  && (pFoundData->GetTypeFaces() & FontTypeFaces::Light))
         {
@@ -1286,7 +1286,8 @@ PhysicalFontFamily* PhysicalFontFamilyCollection::FindFontFamily(FontSelectPatte
         }
 
         if ((nSearchType & ImplFontAttrs::Italic)
-            && ((rFSD.GetItalic() == ITALIC_DONTKNOW) || (rFSD.GetItalic() == ITALIC_NONE))
+            && ((rFSD.GetItalicNoAsk() == ITALIC_DONTKNOW)
+                || (rFSD.GetItalicNoAsk() == ITALIC_NONE))
             && (pFoundData->GetTypeFaces() & FontTypeFaces::Italic))
         {
             rFSD.SetItalic(ITALIC_NORMAL);

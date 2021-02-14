@@ -88,10 +88,10 @@ bool CoreTextGlyphFallbackSubstititution::FindFontSubstitute(FontSelectPattern& 
 
             rPattern.maSearchName = rAttr.GetFamilyName();
 
-            rPattern.SetWeight(rAttr.GetWeight());
-            rPattern.SetItalic(rAttr.GetItalic());
-            rPattern.SetPitch(rAttr.GetPitch());
-            rPattern.SetWidthType(rAttr.GetWidthType());
+            rPattern.SetWeight(rAttr.GetWeightNoAsk());
+            rPattern.SetItalic(rAttr.GetItalicNoAsk());
+            rPattern.SetPitch(rAttr.GetPitchNoAsk());
+            rPattern.SetWidthType(rAttr.GetWidthTypeNoAsk());
 
             CFRelease(pFallback);
             CFRelease(pDesc);

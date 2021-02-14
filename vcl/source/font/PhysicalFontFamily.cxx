@@ -110,16 +110,16 @@ void PhysicalFontFamily::AddFontFace( PhysicalFontFace* pNewFontFace )
     {
         maFamilyName   = pNewFontFace->GetFamilyName();
         maMapNames     = pNewFontFace->GetMapNames();
-        meFamily       = pNewFontFace->GetFamilyType();
-        mePitch        = pNewFontFace->GetPitch();
+        meFamily       = pNewFontFace->GetFamilyTypeNoAsk();
+        mePitch        = pNewFontFace->GetPitchNoAsk();
         mnMinQuality   = pNewFontFace->GetQuality();
     }
     else
     {
         if( meFamily == FAMILY_DONTKNOW )
-            meFamily = pNewFontFace->GetFamilyType();
+            meFamily = pNewFontFace->GetFamilyTypeNoAsk();
         if( mePitch == PITCH_DONTKNOW )
-            mePitch = pNewFontFace->GetPitch();
+            mePitch = pNewFontFace->GetPitchNoAsk();
         if( mnMinQuality > pNewFontFace->GetQuality() )
             mnMinQuality = pNewFontFace->GetQuality();
     }
@@ -132,20 +132,20 @@ void PhysicalFontFamily::AddFontFace( PhysicalFontFace* pNewFontFace )
     else
         mnTypeFaces |= FontTypeFaces::NoneSymbol;
 
-    if( pNewFontFace->GetWeight() != WEIGHT_DONTKNOW )
+    if( pNewFontFace->GetWeightNoAsk() != WEIGHT_DONTKNOW )
     {
-        if( pNewFontFace->GetWeight() >= WEIGHT_SEMIBOLD )
+        if( pNewFontFace->GetWeightNoAsk() >= WEIGHT_SEMIBOLD )
             mnTypeFaces |= FontTypeFaces::Bold;
-        else if( pNewFontFace->GetWeight() <= WEIGHT_SEMILIGHT )
+        else if( pNewFontFace->GetWeightNoAsk() <= WEIGHT_SEMILIGHT )
             mnTypeFaces |= FontTypeFaces::Light;
         else
             mnTypeFaces |= FontTypeFaces::Normal;
     }
 
-    if( pNewFontFace->GetItalic() == ITALIC_NONE )
+    if( pNewFontFace->GetItalicNoAsk() == ITALIC_NONE )
         mnTypeFaces |= FontTypeFaces::NoneItalic;
-    else if( (pNewFontFace->GetItalic() == ITALIC_NORMAL)
-         ||  (pNewFontFace->GetItalic() == ITALIC_OBLIQUE) )
+    else if( (pNewFontFace->GetItalicNoAsk() == ITALIC_NORMAL)
+         ||  (pNewFontFace->GetItalicNoAsk() == ITALIC_OBLIQUE) )
         mnTypeFaces |= FontTypeFaces::Italic;
 
     // reassign name (sharing saves memory)

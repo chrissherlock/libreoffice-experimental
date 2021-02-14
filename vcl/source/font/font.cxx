@@ -852,7 +852,7 @@ ImplFont::ImplFont() :
     mnQuality( 0 )
 {}
 
-ImplFont::ImplFont( const ImplFont& rImplFont ) :
+ImplFont::ImplFont(ImplFont const& rImplFont) :
     maFamilyName( rImplFont.maFamilyName ),
     maStyleName( rImplFont.maStyleName ),
     meWeight( rImplFont.meWeight ),

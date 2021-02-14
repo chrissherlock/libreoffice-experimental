@@ -98,8 +98,8 @@ size_t FontSelectPattern::hashCode() const
         nHash = maSearchName.hashCode();
     }
     nHash += 11U * mnHeight;
-    nHash += 19 * GetWeight();
-    nHash += 29 * GetItalic();
+    nHash += 19 * GetWeightNoAsk();
+    nHash += 29 * GetItalicNoAsk();
     nHash += 37 * mnOrientation.get();
     nHash += 41 * static_cast<sal_uInt16>(meLanguage);
     if( mbVertical )

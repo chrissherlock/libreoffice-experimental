@@ -39,19 +39,19 @@ PhysicalFontFace::PhysicalFontFace( const FontAttributes& rDFA )
 sal_Int32 PhysicalFontFace::CompareIgnoreSize( const PhysicalFontFace& rOther ) const
 {
     // compare their width, weight, italic, style name and family name
-    if( GetWidthType() < rOther.GetWidthType() )
+    if( GetWidthTypeNoAsk() < rOther.GetWidthTypeNoAsk() )
         return -1;
-    else if( GetWidthType() > rOther.GetWidthType() )
+    else if( GetWidthTypeNoAsk() > rOther.GetWidthTypeNoAsk() )
         return 1;
 
-    if( GetWeight() < rOther.GetWeight() )
+    if( GetWeightNoAsk() < rOther.GetWeightNoAsk() )
         return -1;
-    else if( GetWeight() > rOther.GetWeight() )
+    else if( GetWeightNoAsk() > rOther.GetWeightNoAsk() )
         return 1;
 
-    if( GetItalic() < rOther.GetItalic() )
+    if( GetItalicNoAsk() < rOther.GetItalicNoAsk() )
         return -1;
-    else if( GetItalic() > rOther.GetItalic() )
+    else if( GetItalicNoAsk() > rOther.GetItalicNoAsk() )
         return 1;
 
     sal_Int32 nRet = GetFamilyName().compareTo( rOther.GetFamilyName() );
@@ -95,27 +95,27 @@ bool PhysicalFontFace::IsBetterMatch( const FontSelectPattern& rFSD, FontMatchSt
     &&  GetStyleName().equalsIgnoreAsciiCase( *rStatus.mpTargetStyleName ) )
         nMatch += 120000;
 
-    if( (rFSD.GetPitch() != PITCH_DONTKNOW) && (rFSD.GetPitch() == GetPitch()) )
+    if( (rFSD.GetPitchNoAsk() != PITCH_DONTKNOW) && (rFSD.GetPitchNoAsk() == GetPitchNoAsk()) )
         nMatch += 20000;
 
     // prefer NORMAL font width
     // TODO: change when the upper layers can tell their width preference
-    if( GetWidthType() == WIDTH_NORMAL )
+    if( GetWidthTypeNoAsk() == WIDTH_NORMAL )
         nMatch += 400;
-    else if( (GetWidthType() == WIDTH_SEMI_EXPANDED) || (GetWidthType() == WIDTH_SEMI_CONDENSED) )
+    else if( (GetWidthTypeNoAsk() == WIDTH_SEMI_EXPANDED) || (GetWidthTypeNoAsk() == WIDTH_SEMI_CONDENSED) )
         nMatch += 300;
 
-    if( rFSD.GetWeight() != WEIGHT_DONTKNOW )
+    if( rFSD.GetWeightNoAsk() != WEIGHT_DONTKNOW )
     {
         // if not bold or requiring emboldening prefer light fonts to bold fonts
-        FontWeight ePatternWeight = rFSD.mbEmbolden ? WEIGHT_NORMAL : rFSD.GetWeight();
+        FontWeight ePatternWeight = rFSD.mbEmbolden ? WEIGHT_NORMAL : rFSD.GetWeightNoAsk();
 
         int nReqWeight = static_cast<int>(ePatternWeight);
         if ( ePatternWeight > WEIGHT_MEDIUM )
             nReqWeight += 100;
 
-        int nGivenWeight = static_cast<int>(GetWeight());
-        if( GetWeight() > WEIGHT_MEDIUM )
+        int nGivenWeight = static_cast<int>(GetWeightNoAsk());
+        if( GetWeightNoAsk() > WEIGHT_MEDIUM )
             nGivenWeight += 100;
 
         int nWeightDiff = nReqWeight - nGivenWeight;
@@ -131,29 +131,29 @@ bool PhysicalFontFace::IsBetterMatch( const FontSelectPattern& rFSD, FontMatchSt
     {
         // prefer NORMAL font weight
         // TODO: change when the upper layers can tell their weight preference
-        if( GetWeight() == WEIGHT_NORMAL )
+        if( GetWeightNoAsk() == WEIGHT_NORMAL )
             nMatch += 450;
-        else if( GetWeight() == WEIGHT_MEDIUM )
+        else if( GetWeightNoAsk() == WEIGHT_MEDIUM )
             nMatch += 350;
-        else if( (GetWeight() == WEIGHT_SEMILIGHT) || (GetWeight() == WEIGHT_SEMIBOLD) )
+        else if( (GetWeightNoAsk() == WEIGHT_SEMILIGHT) || (GetWeightNoAsk() == WEIGHT_SEMIBOLD) )
             nMatch += 200;
-        else if( GetWeight() == WEIGHT_LIGHT )
+        else if( GetWeightNoAsk() == WEIGHT_LIGHT )
             nMatch += 150;
     }
 
     // if requiring custom matrix to fake italic, prefer upright font
-    FontItalic ePatternItalic = rFSD.maItalicMatrix != ItalicMatrix() ? ITALIC_NONE : rFSD.GetItalic();
+    FontItalic ePatternItalic = rFSD.maItalicMatrix != ItalicMatrix() ? ITALIC_NONE : rFSD.GetItalicNoAsk();
 
     if ( ePatternItalic == ITALIC_NONE )
     {
-        if( GetItalic() == ITALIC_NONE )
+        if( GetItalicNoAsk() == ITALIC_NONE )
             nMatch += 900;
     }
     else
     {
-        if( ePatternItalic == GetItalic() )
+        if( ePatternItalic == GetItalicNoAsk() )
             nMatch += 900;
-        else if( GetItalic() != ITALIC_NONE )
+        else if( GetItalicNoAsk() != ITALIC_NONE )
             nMatch += 600;
     }
 

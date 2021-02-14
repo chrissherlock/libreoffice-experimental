@@ -25,6 +25,7 @@
 #include <tools/fontenum.hxx>
 #include <tools/gen.hxx>
 #include <i18nlangtag/languagetag.hxx>
+
 #include <vcl/fntstyle.hxx>
 
 #include "FontSelectPattern.hxx"
@@ -35,7 +36,7 @@ class ImplFont
 {
 public:
     explicit            ImplFont();
-    explicit            ImplFont( const ImplFont& );
+    ImplFont(ImplFont const&);
 
     // device independent font functions
     const OUString&     GetFamilyName() const                           { return maFamilyName; }
@@ -64,7 +65,7 @@ public:
     void                SetCharSet( const rtl_TextEncoding eCharSet )   { meCharSet = eCharSet; }
     void                SetFontSize( const Size& rSize )         { maAverageFontSize = rSize; }
 
-    void                SetSymbolFlag( const bool bSymbolFlag )         { mbSymbolFlag = bSymbolFlag; }
+    void                SetSymbolFlag( const bool bSymbolFlag );
 
     // straight properties, no getting them from AskConfig()
     FontFamily          GetFamilyTypeNoAsk() const                      { return meFamily; }
@@ -79,6 +80,8 @@ public:
     void                SetQuality( int nQuality )                      { mnQuality = nQuality; }
     void                IncreaseQualityBy( int nQualityAmount )         { mnQuality += nQualityAmount; }
     void                DecreaseQualityBy( int nQualityAmount )         { mnQuality -= nQualityAmount; }
+
+    void                AddMapName(OUString const&);
 
     bool                operator==( const ImplFont& ) const;
 
@@ -128,9 +131,45 @@ private:
     // TODO: metric data, should be migrated to ImplFontMetric
     Degree10            mnOrientation;
 
+    OUString            maMapNames;
     int                 mnQuality;
-
 };
+
+inline void ImplFont::SetSymbolFlag(const bool bSymbolFlag)
+{
+    mbSymbolFlag = bSymbolFlag;
+
+    if (mbSymbolFlag)
+    {
+        meCharSet = RTL_TEXTENCODING_SYMBOL;
+    }
+    else
+    {
+        // if the symbol flag is unset, but it was a symbol font before then
+        // until the character set encoding is set via SetCharSet then we
+        // can't know what the characterset is!
+        if (meCharSet == RTL_TEXTENCODING_SYMBOL)
+        {
+            meCharSet = RTL_TEXTENCODING_DONTKNOW;
+        }
+    }
+}
+
+inline void ImplFont::AddMapName(OUString const& aMapName)
+{
+    if (maMapNames.getLength() > 0)
+    {
+        maMapNames += ";";
+    }
+
+    if (aMapName.getLength() == 0)
+    {
+        SAL_WARN("vcl.fonts", "New map name is empty");
+        return;
+    }
+
+    maMapNames += aMapName;
+}
 
 #endif // INCLUDED_VCL_INC_IMPFONT_HXX
 

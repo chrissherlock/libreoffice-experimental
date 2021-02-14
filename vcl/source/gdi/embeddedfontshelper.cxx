@@ -274,18 +274,18 @@ OUString EmbeddedFontsHelper::fontFileUrl( std::u16string_view familyName, FontF
             // and just having a unicode font doesn't say what glyphs it actually contains).
             // It is possible that it still may be needed to do at least some checks here
             // for some encodings (can one font have more font files for more encodings?).
-            if(( family == FAMILY_DONTKNOW || f->GetFamilyType() == family )
-                && ( italic == ITALIC_DONTKNOW || f->GetItalic() == italic )
-                && ( weight == WEIGHT_DONTKNOW || f->GetWeight() == weight )
-                && ( pitch == PITCH_DONTKNOW || f->GetPitch() == pitch ))
+            if(( family == FAMILY_DONTKNOW || f->GetFamilyTypeNoAsk() == family )
+                && ( italic == ITALIC_DONTKNOW || f->GetItalicNoAsk() == italic )
+                && ( weight == WEIGHT_DONTKNOW || f->GetWeightNoAsk() == weight )
+                && ( pitch == PITCH_DONTKNOW || f->GetPitchNoAsk() == pitch ))
             { // Exact match, return it immediately.
                 selected = f;
                 break;
             }
-            if(( f->GetFamilyType() == FAMILY_DONTKNOW || family == FAMILY_DONTKNOW || f->GetFamilyType() == family )
-                && ( f->GetItalic() == ITALIC_DONTKNOW || italic == ITALIC_DONTKNOW || f->GetItalic() == italic )
-                && ( f->GetWeight() == WEIGHT_DONTKNOW || weight == WEIGHT_DONTKNOW || f->GetWeight() == weight )
-                && ( f->GetPitch() == PITCH_DONTKNOW || pitch == PITCH_DONTKNOW || f->GetPitch() == pitch ))
+            if(( f->GetFamilyTypeNoAsk() == FAMILY_DONTKNOW || family == FAMILY_DONTKNOW || f->GetFamilyTypeNoAsk() == family )
+                && ( f->GetItalicNoAsk() == ITALIC_DONTKNOW || italic == ITALIC_DONTKNOW || f->GetItalicNoAsk() == italic )
+                && ( f->GetWeightNoAsk() == WEIGHT_DONTKNOW || weight == WEIGHT_DONTKNOW || f->GetWeightNoAsk() == weight )
+                && ( f->GetPitchNoAsk() == PITCH_DONTKNOW || pitch == PITCH_DONTKNOW || f->GetPitchNoAsk() == pitch ))
             { // Some fonts specify 'DONTKNOW' for some things, still a good match, if we don't find a better one.
                 selected = f;
             }

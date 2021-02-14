@@ -78,17 +78,17 @@ CoreTextStyle::CoreTextStyle(const PhysicalFontFace& rPFF, const FontSelectPatte
     CFDictionarySetValue( mpStyleDict, kCTVerticalFormsAttributeName, pCFVertBool );
 
     // fake bold
-    if ( (rFSP.GetWeight() >= WEIGHT_BOLD) &&
-         ((rPFF.GetWeight() < WEIGHT_SEMIBOLD) &&
-          (rPFF.GetWeight() != WEIGHT_DONTKNOW)) )
+    if ( (rFSP.GetWeightNoAsk() >= WEIGHT_BOLD) &&
+         ((rPFF.GetWeightNoAsk() < WEIGHT_SEMIBOLD) &&
+          (rPFF.GetWeightNoAsk() != WEIGHT_DONTKNOW)) )
     {
         mbFauxBold = true;
     }
 
     // fake italic
-    if (((rFSP.GetItalic() == ITALIC_NORMAL) ||
-         (rFSP.GetItalic() == ITALIC_OBLIQUE)) &&
-        (rPFF.GetItalic() == ITALIC_NONE))
+    if (((rFSP.GetItalicNoAsk() == ITALIC_NORMAL) ||
+         (rFSP.GetItalicNoAsk() == ITALIC_OBLIQUE)) &&
+        (rPFF.GetItalicNoAsk() == ITALIC_NONE))
     {
         aMatrix = CGAffineTransformConcat(aMatrix, CGAffineTransformMake(1, 0, toRadian(120), 1, 0, 0));
     }

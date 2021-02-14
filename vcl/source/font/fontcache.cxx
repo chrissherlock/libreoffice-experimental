@@ -52,10 +52,10 @@ bool FontCache::IFSD_Equal::operator()(const FontSelectPattern& rA, const FontSe
         return false;
 
     // check font face attributes
-    if( (rA.GetWeight()    != rB.GetWeight())
-    ||  (rA.GetItalic()    != rB.GetItalic())
+    if( (rA.GetWeightNoAsk()    != rB.GetWeightNoAsk())
+    ||  (rA.GetItalicNoAsk()    != rB.GetItalicNoAsk())
 //  ||  (rA.meFamily       != rB.meFamily) // TODO: remove this mostly obsolete member
-    ||  (rA.GetPitch()     != rB.GetPitch()) )
+    ||  (rA.GetPitchNoAsk()     != rB.GetPitchNoAsk()) )
         return false;
 
     // check style name
