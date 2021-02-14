@@ -53,17 +53,17 @@ class VCL_PLUGIN_PUBLIC LogicalFontInstance : public salhelper::SimpleReferenceO
 public: // TODO: make data members private
     virtual ~LogicalFontInstance() override;
 
-    ImplFontMetricDataRef mxFontMetric;        // Font attributes
-    const ConvertChar* mpConversion;        // used e.g. for StarBats->StarSymbol
+    ImplFontMetricDataRef mxFontMetric; // Font attributes
+    const ConvertChar* mpConversion; // used e.g. for StarBats->StarSymbol
 
-    tools::Long            mnLineHeight;
-    Degree10        mnOwnOrientation;       // text angle if lower layers don't rotate text themselves
-    Degree10        mnOrientation;          // text angle in 3600 system
-    bool            mbInit;                 // true if maFontMetric member is valid
+    tools::Long mnLineHeight;
+    Degree10 mnOwnOrientation; // text angle if lower layers don't rotate text themselves
+    Degree10 mnOrientation; // text angle in 3600 system
+    bool mbInit; // true if maFontMetric member is valid
 
-    void            AddFallbackForUnicode( sal_UCS4, FontWeight eWeight, const OUString& rFontName );
-    bool            GetFallbackForUnicode( sal_UCS4, FontWeight eWeight, OUString* pFontName ) const;
-    void            IgnoreFallbackForUnicode( sal_UCS4, FontWeight eWeight, std::u16string_view rFontName );
+    void AddFallbackForUnicode(sal_UCS4, FontWeight eWeight, const OUString& rFontName);
+    bool GetFallbackForUnicode(sal_UCS4, FontWeight eWeight, OUString* pFontName) const;
+    void IgnoreFallbackForUnicode(sal_UCS4, FontWeight eWeight, std::u16string_view rFontName);
 
     inline hb_font_t* GetHbFont();
     bool IsGraphiteFont();
@@ -90,15 +90,19 @@ protected:
 
     // Takes ownership of pHbFace.
     static hb_font_t* InitHbFont(hb_face_t* pHbFace);
-    virtual hb_font_t* ImplInitHbFont() { assert(false); return hb_font_get_empty(); }
+    virtual hb_font_t* ImplInitHbFont()
+    {
+        assert(false);
+        return hb_font_get_empty();
+    }
 
 private:
     // cache of Unicode characters and replacement font names
     // TODO: a fallback map can be shared with many other ImplFontEntries
     // TODO: at least the ones which just differ in orientation, stretching or height
-    typedef ::std::unordered_map< ::std::pair<sal_UCS4,FontWeight>, OUString > UnicodeFallbackList;
+    typedef ::std::unordered_map<::std::pair<sal_UCS4, FontWeight>, OUString> UnicodeFallbackList;
     std::unique_ptr<UnicodeFallbackList> mpUnicodeFallbackList;
-    mutable FontCache * mpFontCache;
+    mutable FontCache* mpFontCache;
     const FontSelectPattern m_aFontSelData;
     hb_font_t* m_pHbFont;
     double m_nAveWidthFactor;
