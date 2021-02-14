@@ -700,6 +700,16 @@ static bool UseAntialiasing(vcl::Font const& rFont, AntialiasingFlags eFlags,
     return bNonAntialiased;
 }
 
+static tools::Long GetEmphasisHeight(LogicalFontInstance const* pFontInstance)
+{
+    tools::Long nEmphasisHeight = (pFontInstance->mnLineHeight * 250) / 1000;
+
+    if (nEmphasisHeight < 1)
+        nEmphasisHeight = 1;
+
+    return nEmphasisHeight;
+}
+
 bool OutputDevice::InitNewFont() const
 {
     DBG_TESTSOLARMUTEX();
@@ -779,13 +789,10 @@ bool OutputDevice::InitNewFont() const
 
     if (maFont.GetEmphasisMark() & FontEmphasisMark::Style)
     {
-        FontEmphasisMark nEmphasisMark = GetEmphasisMarkStyle(maFont);
-        tools::Long nEmphasisHeight = (pFontInstance->mnLineHeight * 250) / 1000;
+        FontEmphasisMark eEmphasisMark = GetEmphasisMarkStyle(maFont);
+        tools::Long nEmphasisHeight = GetEmphasisHeight(pFontInstance);
 
-        if (nEmphasisHeight < 1)
-            nEmphasisHeight = 1;
-
-        if (nEmphasisMark & FontEmphasisMark::PosBelow)
+        if (eEmphasisMark & FontEmphasisMark::PosBelow)
             mnEmphasisDescent = nEmphasisHeight;
         else
             mnEmphasisAscent = nEmphasisHeight;
@@ -825,6 +832,7 @@ bool OutputDevice::InitNewFont() const
                       && (maFont.GetOverline() != LINESTYLE_DONTKNOW))
                   || ((maFont.GetStrikeout() != STRIKEOUT_NONE)
                       && (maFont.GetStrikeout() != STRIKEOUT_DONTKNOW));
+
     mbTextSpecial
         = maFont.IsShadow() || maFont.IsOutline() || (maFont.GetRelief() != FontRelief::NONE);
 
