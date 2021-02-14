@@ -30,7 +30,10 @@
 #include "FontSelectPattern.hxx"
 
 class Size;
-namespace vcl { class Font; }
+namespace vcl
+{
+class Font;
+}
 class PhysicalFontFamilyCollection;
 
 // TODO: closely couple with PhysicalFontFamilyCollection
@@ -41,11 +44,15 @@ struct GlyphBoundRectCacheKey
     const sal_GlyphId m_nId;
 
     GlyphBoundRectCacheKey(const LogicalFontInstance* pFont, sal_GlyphId nID)
-        : m_pFont(pFont), m_nId(nID)
-    {}
+        : m_pFont(pFont)
+        , m_nId(nID)
+    {
+    }
 
     bool operator==(GlyphBoundRectCacheKey const& aOther) const
-    { return m_pFont == aOther.m_pFont && m_nId == aOther.m_nId; }
+    {
+        return m_pFont == aOther.m_pFont && m_nId == aOther.m_nId;
+    }
 };
 
 struct GlyphBoundRectCacheHash
@@ -59,37 +66,50 @@ struct GlyphBoundRectCacheHash
     }
 };
 
-typedef o3tl::lru_map<GlyphBoundRectCacheKey, tools::Rectangle,
-                      GlyphBoundRectCacheHash> GlyphBoundRectCache;
+typedef o3tl::lru_map<GlyphBoundRectCacheKey, tools::Rectangle, GlyphBoundRectCacheHash>
+    GlyphBoundRectCache;
 
 class FontCache
 {
 private:
     // cache of recently used font instances
-    struct IFSD_Equal { bool operator()( const FontSelectPattern&, const FontSelectPattern& ) const; };
-    struct IFSD_Hash { size_t operator()( const FontSelectPattern& ) const; };
-    typedef o3tl::lru_map<FontSelectPattern, rtl::Reference<LogicalFontInstance>, IFSD_Hash, IFSD_Equal> FontInstanceList;
+    struct IFSD_Equal
+    {
+        bool operator()(const FontSelectPattern&, const FontSelectPattern&) const;
+    };
+    struct IFSD_Hash
+    {
+        size_t operator()(const FontSelectPattern&) const;
+    };
+    typedef o3tl::lru_map<FontSelectPattern, rtl::Reference<LogicalFontInstance>, IFSD_Hash,
+                          IFSD_Equal>
+        FontInstanceList;
 
     LogicalFontInstance* mpLastHitCacheEntry; ///< keeps the last hit cache entry
     FontInstanceList maFontInstanceList;
     GlyphBoundRectCache m_aBoundRectCache;
 
-    rtl::Reference<LogicalFontInstance> GetFontInstance(PhysicalFontFamilyCollection const*, FontSelectPattern&);
+    rtl::Reference<LogicalFontInstance> GetFontInstance(PhysicalFontFamilyCollection const*,
+                                                        FontSelectPattern&);
 
 public:
     FontCache();
     ~FontCache();
 
-    rtl::Reference<LogicalFontInstance> GetFontInstance(PhysicalFontFamilyCollection const *,
-                             const vcl::Font&, const Size& rPixelSize, float fExactHeight, bool bNonAntialias = false);
-    rtl::Reference<LogicalFontInstance> GetGlyphFallbackFont( PhysicalFontFamilyCollection const *, FontSelectPattern&,
-                            LogicalFontInstance* pLogicalFont,
-                            int nFallbackLevel, OUString& rMissingCodes );
+    rtl::Reference<LogicalFontInstance> GetFontInstance(PhysicalFontFamilyCollection const*,
+                                                        const vcl::Font&, const Size& rPixelSize,
+                                                        float fExactHeight,
+                                                        bool bNonAntialias = false);
+    rtl::Reference<LogicalFontInstance> GetGlyphFallbackFont(PhysicalFontFamilyCollection const*,
+                                                             FontSelectPattern&,
+                                                             LogicalFontInstance* pLogicalFont,
+                                                             int nFallbackLevel,
+                                                             OUString& rMissingCodes);
 
-    bool GetCachedGlyphBoundRect(const LogicalFontInstance *, sal_GlyphId, tools::Rectangle &);
-    void CacheGlyphBoundRect(const LogicalFontInstance *, sal_GlyphId, tools::Rectangle &);
+    bool GetCachedGlyphBoundRect(const LogicalFontInstance*, sal_GlyphId, tools::Rectangle&);
+    void CacheGlyphBoundRect(const LogicalFontInstance*, sal_GlyphId, tools::Rectangle&);
 
-    void                Invalidate();
+    void Invalidate();
 };
 
 #endif // INCLUDED_VCL_INC_IMPFONTCACHE_HXX
