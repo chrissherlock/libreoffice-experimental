@@ -42,7 +42,7 @@
 #include <font/GlyphFallbackFontSubstitution.hxx>
 #include <font/PhysicalFontFamilyCollection.hxx>
 #include <font/FontSubsetInfo.hxx>
-#include <font/impfont.hxx>
+#include <font/FontAttributes.hxx>
 #include <font/impfontcharmap.hxx>
 #include <font/impfontmetricdata.hxx>
 

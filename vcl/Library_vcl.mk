@@ -498,7 +498,6 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/font/PhysicalFontFamilyCollection \
     vcl/source/font/PhysicalFontFamily \
     vcl/source/font/PhysicalFontFace \
-    vcl/source/font/FontAttributes \
     vcl/source/font/FontSelectPattern \
     vcl/source/font/LogicalFontInstance \
     vcl/source/font/fontcache \

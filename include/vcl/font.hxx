@@ -163,12 +163,12 @@ public:
 
     static Font identifyFont( const void* pBuffer, sal_uInt32 nLen );
 
-    typedef o3tl::cow_wrapper< ImplFont > ImplType;
+    typedef o3tl::cow_wrapper< FontAttributes > ImplType;
 
     inline bool IsUnderlineAbove() const;
 
 private:
-    ImplType mpImplFont;
+    ImplType mpFontAttributes;
 };
 
 inline bool Font::IsUnderlineAbove() const
