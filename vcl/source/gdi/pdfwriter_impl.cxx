@@ -80,6 +80,8 @@
 #include <pdf/objectcopier.hxx>
 #include <o3tl/sorted_vector.hxx>
 
+#include <svdata.hxx>
+
 #include "pdfwriter_impl.hxx"
 
 #ifdef _WIN32
@@ -252,6 +254,7 @@ void appendLiteralString( const char* pStr, sal_Int32 nLength, OStringBuffer& rB
  * Further limitation: it is advisable to use standard ASCII characters for
  * OOo bookmarks.
 */
+
 void appendDestinationName( const OUString& rString, OStringBuffer& rBuffer )
 {
     const sal_Unicode* pStr = rString.getStr();
@@ -314,6 +317,19 @@ void PDFWriter::AppendUnicodeTextString(const OUString& rString, OStringBuffer& 
         appendHex( static_cast<sal_Int8>(aChar >> 8), rBuffer );
         appendHex( static_cast<sal_Int8>(aChar & 255 ), rBuffer );
     }
+}
+
+bool PDFWriterImpl::InitNewFont() const
+{
+    const ImplSVData* pSVData = ImplGetSVData();
+
+    if (mxPhysicalFontFamilyCollection == pSVData->maGDIData.mxScreenFontList
+        || mxFontCache == pSVData->maGDIData.mxScreenFontCache)
+    {
+        const_cast<PDFWriterImpl&>(*this).ImplUpdateFontData();
+    }
+
+    return OutputDevice::InitNewFont();
 }
 
 void PDFWriterImpl::createWidgetFieldName( sal_Int32 i_nWidgetIndex, const PDFWriter::AnyWidget& i_rControl )

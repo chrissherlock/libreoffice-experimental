@@ -262,7 +262,6 @@ private:
     mutable VclPtr<OutputDevice>    mpNextGraphics;     ///< Next output device in list
     GDIMetaFile*                    mpMetaFile;
     mutable rtl::Reference<LogicalFontInstance> mpFontInstance;
-    mutable std::shared_ptr<FontCache> mxFontCache;
     mutable std::unique_ptr<PhysicalFontFaceCollection>     mpPhysicalFontFaceCollection;
     std::vector<OutDevState>        maOutDevStateStack;
     std::unique_ptr<ImplOutDevData> mpOutDevData;
@@ -288,6 +287,9 @@ private:
     mutable bool                    mbTextLines : 1;
     mutable bool                    mbTextSpecial : 1;
     mutable bool                    mbRefPoint : 1;
+
+protected:
+    mutable std::shared_ptr<FontCache> mxFontCache;
 
     /** @name Initialization and accessor functions
      */
@@ -1025,8 +1027,9 @@ protected:
     SAL_DLLPRIVATE tools::Long GetEmphasisDescent() const { return mnEmphasisDescent; }
 
     SAL_DLLPRIVATE bool InitFont();
-    virtual void                SetFontOrientation( LogicalFontInstance* const pFontInstance ) const;
-    virtual tools::Long                GetFontExtLeading() const;
+    virtual bool InitNewFont() const;
+    virtual void SetFontOrientation( LogicalFontInstance* const pFontInstance ) const;
+    virtual tools::Long GetFontExtLeading() const;
 
     virtual void ImplClearFontData(bool bNewFontLists);
     void ReleaseFontCache();
@@ -1038,7 +1041,6 @@ private:
 
     typedef void ( OutputDevice::* FontUpdateHandler_t )( bool );
 
-    SAL_DLLPRIVATE bool         InitNewFont() const;
     void InitPhysicalFontFaceCollection() const;
 
     static
