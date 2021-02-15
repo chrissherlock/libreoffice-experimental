@@ -768,6 +768,27 @@ bool OutputDevice::InitNewFont() const
         pFontInstance->mnLineHeight
             = pFontInstance->mxFontMetric->GetAscent() + pFontInstance->mxFontMetric->GetDescent();
 
+        // calculate EmphasisArea
+        mnEmphasisAscent = 0;
+        mnEmphasisDescent = 0;
+
+        if (maFont.GetEmphasisMark() & FontEmphasisMark::Style)
+        {
+            FontEmphasisMark eEmphasisMark = GetEmphasisMarkStyle(maFont);
+            tools::Long nEmphasisHeight = GetEmphasisHeight(pFontInstance);
+
+            if (eEmphasisMark & FontEmphasisMark::PosBelow)
+            {
+                pFontInstance->mxFontMetric->SetEmphasisDescent(nEmphasisHeight);
+                pFontInstance->mxFontMetric->SetEmphasisAscent(0);
+            }
+            else
+            {
+                pFontInstance->mxFontMetric->SetEmphasisDescent(0);
+                pFontInstance->mxFontMetric->SetEmphasisAscent(nEmphasisHeight);
+            }
+        }
+
         SetFontOrientation(pFontInstance);
     }
 

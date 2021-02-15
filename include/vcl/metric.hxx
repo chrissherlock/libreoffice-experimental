@@ -63,13 +63,13 @@ public:
     bool                operator!=( const FontMetric& rMetric ) const
                             { return !operator==( rMetric ); }
 private:
-    tools::Long                mnAscent;                      // Ascent
-    tools::Long                mnDescent;                     // Descent
-    tools::Long                mnIntLeading;                  // Internal Leading
-    tools::Long                mnExtLeading;                  // External Leading
-    tools::Long                mnLineHeight;                  // Ascent+Descent+EmphasisMark
-    tools::Long                mnSlant;                       // Slant
-    tools::Long                mnBulletOffset;                // Offset for non-printing character
+    tools::Long         mnAscent;                      // Ascent
+    tools::Long         mnDescent;                     // Descent
+    tools::Long         mnIntLeading;                  // Internal Leading
+    tools::Long         mnExtLeading;                  // External Leading
+    tools::Long         mnLineHeight;                  // Ascent+Descent+EmphasisMark
+    tools::Long         mnSlant;                       // Slant
+    tools::Long         mnBulletOffset;                // Offset for non-printing character
 
     bool                mbFullstopCentered;
 };

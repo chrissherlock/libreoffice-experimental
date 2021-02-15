@@ -41,55 +41,59 @@ public:
     explicit        ImplFontMetricData( const FontSelectPattern& );
 
     // font instance attributes from the font request
-    tools::Long            GetWidth() const                                                { return mnWidth; }
+    tools::Long     GetWidth() const                                                { return mnWidth; }
     Degree10        GetOrientation() const                                          { return mnOrientation; }
 
-    void            SetWidth(tools::Long nWidth)                                           { mnWidth=nWidth; }
-    void            SetOrientation(Degree10 nOrientation)                               { mnOrientation=nOrientation; }
+    void            SetWidth(tools::Long nWidth)                                    { mnWidth=nWidth; }
+    void            SetOrientation(Degree10 nOrientation)                           { mnOrientation=nOrientation; }
 
     // font metrics measured for the font instance
-    tools::Long            GetAscent() const                                               { return mnAscent; }
-    tools::Long            GetDescent() const                                              { return mnDescent; }
-    tools::Long            GetInternalLeading() const                                      { return mnIntLeading; }
-    tools::Long            GetExternalLeading() const                                      { return mnExtLeading; }
+    tools::Long     GetAscent() const                                               { return mnAscent; }
+    tools::Long     GetDescent() const                                              { return mnDescent; }
+    tools::Long     GetInternalLeading() const                                      { return mnIntLeading; }
+    tools::Long     GetExternalLeading() const                                      { return mnExtLeading; }
     int             GetSlant() const                                                { return mnSlant; }
-    tools::Long            GetMinKashida() const                                           { return mnMinKashida; }
+    tools::Long     GetMinKashida() const                                           { return mnMinKashida; }
+    tools::Long     GetEmphasisDescent() const                                      { return mnEmphasisDescent; }
+    tools::Long     GetEmphasisAscent() const                                       { return mnEmphasisAscent; }
 
     void            SetSlant(int nSlant)                                            { mnSlant=nSlant; }
-    void            SetMinKashida( tools::Long nMinKashida )                               { mnMinKashida=nMinKashida; }
+    void            SetEmphasisDescent(tools::Long nDescent)                        { mnEmphasisDescent=nDescent; }
+    void            SetEmphasisAscent(tools::Long nAscent)                          { mnEmphasisAscent=nAscent; }
+    void            SetMinKashida( tools::Long nMinKashida )                        { mnMinKashida=nMinKashida; }
 
     // font attributes queried from the font instance
     bool            IsFullstopCentered() const                                      { return mbFullstopCentered; }
-    tools::Long            GetBulletOffset() const                                         { return mnBulletOffset; }
+    tools::Long     GetBulletOffset() const                                         { return mnBulletOffset; }
 
     void            SetFullstopCenteredFlag(bool bFullstopCentered)                 { mbFullstopCentered = bFullstopCentered; }
 
     // font metrics that are usually derived from the measurements
-    tools::Long            GetUnderlineSize() const                                        { return mnUnderlineSize; }
-    tools::Long            GetUnderlineOffset() const                                      { return mnUnderlineOffset; }
-    tools::Long            GetBoldUnderlineSize() const                                    { return mnBUnderlineSize; }
-    tools::Long            GetBoldUnderlineOffset() const                                  { return mnBUnderlineOffset; }
-    tools::Long            GetDoubleUnderlineSize() const                                  { return mnDUnderlineSize; }
-    tools::Long            GetDoubleUnderlineOffset1() const                               { return mnDUnderlineOffset1; }
-    tools::Long            GetDoubleUnderlineOffset2() const                               { return mnDUnderlineOffset2; }
-    tools::Long            GetWavelineUnderlineSize() const                                { return mnWUnderlineSize; }
-    tools::Long            GetWavelineUnderlineOffset() const                              { return mnWUnderlineOffset; }
-    tools::Long            GetAboveUnderlineSize() const                                   { return mnAboveUnderlineSize; }
-    tools::Long            GetAboveUnderlineOffset() const                                 { return mnAboveUnderlineOffset; }
-    tools::Long            GetAboveBoldUnderlineSize() const                               { return mnAboveBUnderlineSize; }
-    tools::Long            GetAboveBoldUnderlineOffset() const                             { return mnAboveBUnderlineOffset; }
-    tools::Long            GetAboveDoubleUnderlineSize() const                             { return mnAboveDUnderlineSize; }
-    tools::Long            GetAboveDoubleUnderlineOffset1() const                          { return mnAboveDUnderlineOffset1; }
-    tools::Long            GetAboveDoubleUnderlineOffset2() const                          { return mnAboveDUnderlineOffset2; }
-    tools::Long            GetAboveWavelineUnderlineSize() const                           { return mnAboveWUnderlineSize; }
-    tools::Long            GetAboveWavelineUnderlineOffset() const                         { return mnAboveWUnderlineOffset; }
-    tools::Long            GetStrikeoutSize() const                                        { return mnStrikeoutSize; }
-    tools::Long            GetStrikeoutOffset() const                                      { return mnStrikeoutOffset; }
-    tools::Long            GetBoldStrikeoutSize() const                                    { return mnBStrikeoutSize; }
-    tools::Long            GetBoldStrikeoutOffset() const                                  { return mnBStrikeoutOffset; }
-    tools::Long            GetDoubleStrikeoutSize() const                                  { return mnDStrikeoutSize; }
-    tools::Long            GetDoubleStrikeoutOffset1() const                               { return mnDStrikeoutOffset1; }
-    tools::Long            GetDoubleStrikeoutOffset2() const                               { return mnDStrikeoutOffset2; }
+    tools::Long     GetUnderlineSize() const                                        { return mnUnderlineSize; }
+    tools::Long     GetUnderlineOffset() const                                      { return mnUnderlineOffset; }
+    tools::Long     GetBoldUnderlineSize() const                                    { return mnBUnderlineSize; }
+    tools::Long     GetBoldUnderlineOffset() const                                  { return mnBUnderlineOffset; }
+    tools::Long     GetDoubleUnderlineSize() const                                  { return mnDUnderlineSize; }
+    tools::Long     GetDoubleUnderlineOffset1() const                               { return mnDUnderlineOffset1; }
+    tools::Long     GetDoubleUnderlineOffset2() const                               { return mnDUnderlineOffset2; }
+    tools::Long     GetWavelineUnderlineSize() const                                { return mnWUnderlineSize; }
+    tools::Long     GetWavelineUnderlineOffset() const                              { return mnWUnderlineOffset; }
+    tools::Long     GetAboveUnderlineSize() const                                   { return mnAboveUnderlineSize; }
+    tools::Long     GetAboveUnderlineOffset() const                                 { return mnAboveUnderlineOffset; }
+    tools::Long     GetAboveBoldUnderlineSize() const                               { return mnAboveBUnderlineSize; }
+    tools::Long     GetAboveBoldUnderlineOffset() const                             { return mnAboveBUnderlineOffset; }
+    tools::Long     GetAboveDoubleUnderlineSize() const                             { return mnAboveDUnderlineSize; }
+    tools::Long     GetAboveDoubleUnderlineOffset1() const                          { return mnAboveDUnderlineOffset1; }
+    tools::Long     GetAboveDoubleUnderlineOffset2() const                          { return mnAboveDUnderlineOffset2; }
+    tools::Long     GetAboveWavelineUnderlineSize() const                           { return mnAboveWUnderlineSize; }
+    tools::Long     GetAboveWavelineUnderlineOffset() const                         { return mnAboveWUnderlineOffset; }
+    tools::Long     GetStrikeoutSize() const                                        { return mnStrikeoutSize; }
+    tools::Long     GetStrikeoutOffset() const                                      { return mnStrikeoutOffset; }
+    tools::Long     GetBoldStrikeoutSize() const                                    { return mnBStrikeoutSize; }
+    tools::Long     GetBoldStrikeoutOffset() const                                  { return mnBStrikeoutOffset; }
+    tools::Long     GetDoubleStrikeoutSize() const                                  { return mnDStrikeoutSize; }
+    tools::Long     GetDoubleStrikeoutOffset1() const                               { return mnDStrikeoutOffset1; }
+    tools::Long     GetDoubleStrikeoutOffset2() const                               { return mnDStrikeoutOffset2; }
 
     void            ImplInitTextLineSize( const OutputDevice* pDev );
     void            ImplInitAboveTextLineSize();
@@ -111,6 +115,8 @@ private:
     tools::Long            mnExtLeading;               // External Leading
     int             mnSlant;                    // Slant (Italic/Oblique)
     tools::Long            mnMinKashida;               // Minimal width of kashida (Arabic)
+    tools::Long         mnEmphasisAscent;
+    tools::Long         mnEmphasisDescent;
 
     // font attributes queried from the font instance
     bool            mbFullstopCentered;
