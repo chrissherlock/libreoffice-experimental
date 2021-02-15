@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <rtl/ref.hxx>
 #include <tools/color.hxx>
 #include <tools/fontenum.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
@@ -36,6 +37,9 @@
 #include <memory>
 
 class AllSettings;
+class FontCache;
+class LogicalFontInstance;
+class PhysicalFontFaceCollection;
 class PhysicalFontFamilyCollection;
 class SalGraphics;
 struct SalTwoRect;
@@ -44,7 +48,7 @@ class VCL_DLLPUBLIC RenderContext2 : public virtual VclReferenceBase
 {
 public:
     RenderContext2();
-    virtual ~RenderContext2() {}
+    virtual ~RenderContext2();
 
     virtual void DrawBitmap(Point const& rDestPt, Bitmap const& rBitmap);
 
@@ -351,6 +355,14 @@ protected:
     MapMode maMapMode;
     vcl::Region maRegion; ///< contains the clip region, see SetClipRegion(...)
     mutable std::shared_ptr<PhysicalFontFamilyCollection> mxPhysicalFontFamilyCollection;
+
+    mutable rtl::Reference<LogicalFontInstance> mpFontInstance;
+    mutable std::unique_ptr<PhysicalFontFaceCollection> mpPhysicalFontFaceCollection;
+    mutable std::shared_ptr<FontCache> mxFontCache;
+    mutable tools::Long mnTextOffX;
+    mutable tools::Long mnTextOffY;
+    mutable tools::Long mnEmphasisAscent;
+    mutable tools::Long mnEmphasisDescent;
 
 private:
     Bitmap BlendBitmap(Bitmap& rBitmap1, Bitmap const& rBitmap2, AlphaMask const& rAlpha,

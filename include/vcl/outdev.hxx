@@ -63,7 +63,6 @@
 struct ImplOutDevData;
 class LogicalFontInstance;
 struct SystemGraphicsData;
-class FontCache;
 class PhysicalFontFamilyCollection;
 class PhysicalFontFaceCollection;
 class ImplMultiTextLineInfo;
@@ -169,8 +168,6 @@ private:
     mutable VclPtr<OutputDevice>    mpPrevGraphics;     ///< Previous output device in list
     mutable VclPtr<OutputDevice>    mpNextGraphics;     ///< Next output device in list
     GDIMetaFile*                    mpMetaFile;
-    mutable rtl::Reference<LogicalFontInstance> mpFontInstance;
-    mutable std::unique_ptr<PhysicalFontFaceCollection>     mpPhysicalFontFaceCollection;
     std::vector<OutDevState>        maOutDevStateStack;
     std::unique_ptr<ImplOutDevData> mpOutDevData;
     std::vector< VCLXGraphics* >*   mpUnoGraphicsList;
@@ -180,10 +177,6 @@ private:
     VclPtr<VirtualDevice>           mpAlphaVDev;
 
     /// font specific text alignment offsets in pixel units
-    mutable tools::Long                    mnTextOffX;
-    mutable tools::Long                    mnTextOffY;
-    mutable tools::Long                    mnEmphasisAscent;
-    mutable tools::Long                    mnEmphasisDescent;
     const OutDevType                meOutDevType;
     OutDevViewType                  meOutDevViewType;
     Color                           maTextColor;
@@ -195,9 +188,6 @@ private:
     mutable bool                    mbTextLines : 1;
     mutable bool                    mbTextSpecial : 1;
     mutable bool                    mbRefPoint : 1;
-
-protected:
-    mutable std::shared_ptr<FontCache> mxFontCache;
 
     /** @name Initialization and accessor functions
      */

@@ -25,6 +25,8 @@
 #include <vcl/MappingMetrics.hxx>
 #include <vcl/wrkwin.hxx>
 
+#include <font/LogicalFontInstance.hxx>
+#include <font/PhysicalFontFaceCollection.hxx>
 #include <svdata.hxx>
 
 MappingMetrics::MappingMetrics()

@@ -11,6 +11,8 @@
 #include <vcl/settings.hxx>
 #include <vcl/svapp.hxx>
 
+#include <font/LogicalFontInstance.hxx>
+#include <font/PhysicalFontFaceCollection.hxx>
 #include <salgdi.hxx>
 
 RenderContext2::RenderContext2()
@@ -19,6 +21,12 @@ RenderContext2::RenderContext2()
     , mnTextLayoutMode(ComplexTextLayoutFlags::Default)
     , meTextLanguage(LANGUAGE_SYSTEM) // TODO: get default from configuration?
     , maRegion(true)
+    , mpFontInstance(nullptr)
+    , mpPhysicalFontFaceCollection(nullptr)
+    , mnTextOffX(0)
+    , mnTextOffY(0)
+    , mnEmphasisAscent(0)
+    , mnEmphasisDescent(0)
     , maFillColor(COL_WHITE)
     , maOverlineColor(COL_TRANSPARENT)
     , mnDrawMode(DrawModeFlags::Default)
@@ -39,6 +47,8 @@ RenderContext2::RenderContext2()
     , mbEnableRTL(false)
 {
 }
+
+RenderContext2::~RenderContext2() {}
 
 void RenderContext2::dispose() { mxPhysicalFontFamilyCollection.reset(); }
 

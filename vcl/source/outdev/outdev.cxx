@@ -57,14 +57,8 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mpPrevGraphics                  = nullptr;
     mpNextGraphics                  = nullptr;
     mpMetaFile                      = nullptr;
-    mpFontInstance                     = nullptr;
-    mpPhysicalFontFaceCollection                = nullptr;
     mpAlphaVDev                     = nullptr;
     mpExtOutDevData                 = nullptr;
-    mnTextOffX                      = 0;
-    mnTextOffY                      = 0;
-    mnEmphasisAscent                = 0;
-    mnEmphasisDescent               = 0;
 
     if( AllSettings::GetLayoutRTL() ) //#i84553# tip BiDi preference to RTL
         mnTextLayoutMode            = ComplexTextLayoutFlags::BiDiRtl | ComplexTextLayoutFlags::TextOriginLeft;
