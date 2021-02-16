@@ -85,6 +85,8 @@ public: // TODO: make data members private
     void GetScale(double* nXScale, double* nYScale);
     static void DecodeOpenTypeTag(const uint32_t nTableTag, char* pTagName);
 
+    tools::Long GetEmphasisHeight();
+
 protected:
     explicit LogicalFontInstance(const PhysicalFontFace&, const FontSelectPattern&);
 

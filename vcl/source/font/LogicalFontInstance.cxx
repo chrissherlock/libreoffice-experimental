@@ -193,4 +193,14 @@ void LogicalFontInstance::DecodeOpenTypeTag(const uint32_t nTableTag, char* pTag
     pTagName[4] = 0;
 }
 
+tools::Long LogicalFontInstance::GetEmphasisHeight()
+{
+    tools::Long nEmphasisHeight = (mnLineHeight * 250) / 1000;
+
+    if (nEmphasisHeight < 1)
+        nEmphasisHeight = 1;
+
+    return nEmphasisHeight;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

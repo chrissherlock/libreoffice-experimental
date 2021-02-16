@@ -698,16 +698,6 @@ static bool UseAntialiasing(vcl::Font const& rFont, AntialiasingFlags eFlags,
     return bNonAntialiased;
 }
 
-static tools::Long GetEmphasisHeight(LogicalFontInstance const* pFontInstance)
-{
-    tools::Long nEmphasisHeight = (pFontInstance->mnLineHeight * 250) / 1000;
-
-    if (nEmphasisHeight < 1)
-        nEmphasisHeight = 1;
-
-    return nEmphasisHeight;
-}
-
 bool OutputDevice::InitNewFont() const
 {
     DBG_TESTSOLARMUTEX();
@@ -772,7 +762,7 @@ bool OutputDevice::InitNewFont() const
         if (maFont.GetEmphasisMark() & FontEmphasisMark::Style)
         {
             FontEmphasisMark eEmphasisMark = GetEmphasisMarkStyle(maFont);
-            tools::Long nEmphasisHeight = GetEmphasisHeight(pFontInstance);
+            tools::Long nEmphasisHeight = pFontInstance->GetEmphasisHeight();
 
             if (eEmphasisMark & FontEmphasisMark::PosBelow)
             {
