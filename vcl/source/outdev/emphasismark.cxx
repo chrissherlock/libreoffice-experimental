@@ -77,10 +77,13 @@ void OutputDevice::DrawEmphasisMarks( SalLayout& rSalLayout )
     FontEmphasisMark nEmphasisMark = GetEmphasisMarkStyle(maFont);
     tools::Long nEmphasisHeight;
 
+    LogicalFontInstance* pFontInstance = mpFontInstance.get();
+    ImplFontMetricDataRef xFontMetric = pFontInstance->mxFontMetric;
+
     if (nEmphasisMark & FontEmphasisMark::PosBelow)
-        nEmphasisHeight = mnEmphasisDescent;
+        nEmphasisHeight = xFontMetric->GetEmphasisDescent();
     else
-        nEmphasisHeight = mnEmphasisAscent;
+        nEmphasisHeight = xFontMetric->GetEmphasisAscent();
 
     tools::PolyPolygon aPolyPoly;
     bool bPolyLine = false;

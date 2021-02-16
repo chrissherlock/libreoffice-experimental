@@ -167,9 +167,9 @@ void OutputDevice::ImplDrawTextBackground( const SalLayout& rSalLayout )
     mpGraphics->SetFillColor( GetTextFillColor() );
     SetInitFillColorFlag(true);
 
-    ImplDrawTextRect( nX, nY, 0, -(mpFontInstance->mxFontMetric->GetAscent() + mnEmphasisAscent),
+    ImplDrawTextRect( nX, nY, 0, -(mpFontInstance->mxFontMetric->GetAscent() + mpFontInstance->mxFontMetric->GetEmphasisAscent()),
                       nWidth,
-                      mpFontInstance->mnLineHeight+mnEmphasisAscent+mnEmphasisDescent );
+                      mpFontInstance->mnLineHeight+ mpFontInstance->mxFontMetric->GetEmphasisAscent() + mpFontInstance->mxFontMetric->GetEmphasisDescent() );
 }
 
 tools::Rectangle OutputDevice::ImplGetTextBoundRect( const SalLayout& rSalLayout )
@@ -179,9 +179,9 @@ tools::Rectangle OutputDevice::ImplGetTextBoundRect( const SalLayout& rSalLayout
     tools::Long nY = aPoint.Y();
 
     tools::Long nWidth = rSalLayout.GetTextWidth();
-    tools::Long nHeight = mpFontInstance->mnLineHeight + mnEmphasisAscent + mnEmphasisDescent;
+    tools::Long nHeight = mpFontInstance->mnLineHeight + mpFontInstance->mxFontMetric->GetEmphasisAscent() + mpFontInstance->mxFontMetric->GetEmphasisDescent();
 
-    nY -= mpFontInstance->mxFontMetric->GetAscent() + mnEmphasisAscent;
+    nY -= mpFontInstance->mxFontMetric->GetAscent() + mpFontInstance->mxFontMetric->GetEmphasisAscent();
 
     if ( mpFontInstance->mnOrientation )
     {
@@ -222,8 +222,8 @@ bool OutputDevice::ImplDrawRotateText( SalLayout& rSalLayout )
     {
         // guess vertical text extents if GetBoundRect failed
         tools::Long nRight = rSalLayout.GetTextWidth();
-        tools::Long nTop = mpFontInstance->mxFontMetric->GetAscent() + mnEmphasisAscent;
-        tools::Long nHeight = mpFontInstance->mnLineHeight + mnEmphasisAscent + mnEmphasisDescent;
+        tools::Long nTop = mpFontInstance->mxFontMetric->GetAscent() + mpFontInstance->mxFontMetric->GetEmphasisAscent();
+        tools::Long nHeight = mpFontInstance->mnLineHeight + mpFontInstance->mxFontMetric->GetEmphasisAscent() + mpFontInstance->mxFontMetric->GetEmphasisDescent();
         aBoundRect = tools::Rectangle( 0, -nTop, nRight, nHeight - nTop );
     }
 
@@ -842,7 +842,7 @@ tools::Long OutputDevice::GetTextHeight() const
     if (!pOutDev->InitFont())
         return 0;
 
-    tools::Long nHeight = mpFontInstance->mnLineHeight + mnEmphasisAscent + mnEmphasisDescent;
+    tools::Long nHeight = mpFontInstance->mnLineHeight + mpFontInstance->mxFontMetric->GetEmphasisAscent() + mpFontInstance->mxFontMetric->GetEmphasisDescent();
 
     if (IsMapModeEnabled())
         nHeight = maGeometry.DevicePixelToLogicHeight( nHeight );

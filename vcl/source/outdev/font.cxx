@@ -250,17 +250,17 @@ FontMetric OutputDevice::GetFontMetric() const
     // set remaining metric fields
     aMetric.SetFullstopCenteredFlag(xFontMetric->IsFullstopCentered());
     aMetric.SetBulletOffset(xFontMetric->GetBulletOffset());
-    aMetric.SetAscent(
-        maGeometry.DevicePixelToLogicHeight(xFontMetric->GetAscent() + mnEmphasisAscent));
-    aMetric.SetDescent(
-        maGeometry.DevicePixelToLogicHeight(xFontMetric->GetDescent() + mnEmphasisDescent));
-    aMetric.SetInternalLeading(
-        maGeometry.DevicePixelToLogicHeight(xFontMetric->GetInternalLeading() + mnEmphasisAscent));
+    aMetric.SetAscent(maGeometry.DevicePixelToLogicHeight(xFontMetric->GetAscent()
+                                                          + xFontMetric->GetEmphasisAscent()));
+    aMetric.SetDescent(maGeometry.DevicePixelToLogicHeight(xFontMetric->GetDescent()
+                                                           + xFontMetric->GetEmphasisDescent()));
+    aMetric.SetInternalLeading(maGeometry.DevicePixelToLogicHeight(
+        xFontMetric->GetInternalLeading() + xFontMetric->GetEmphasisAscent()));
     // OutputDevice has its own external leading function due to #i60945#
     aMetric.SetExternalLeading(maGeometry.DevicePixelToLogicHeight(GetFontExtLeading()));
-    aMetric.SetLineHeight(
-        maGeometry.DevicePixelToLogicHeight(xFontMetric->GetAscent() + xFontMetric->GetDescent()
-                                            + mnEmphasisAscent + mnEmphasisDescent));
+    aMetric.SetLineHeight(maGeometry.DevicePixelToLogicHeight(
+        xFontMetric->GetAscent() + xFontMetric->GetDescent() + xFontMetric->GetEmphasisAscent()
+        + xFontMetric->GetEmphasisDescent()));
     aMetric.SetSlant(maGeometry.DevicePixelToLogicHeight(xFontMetric->GetSlant()));
 
     // get miscellaneous data
@@ -769,9 +769,6 @@ bool OutputDevice::InitNewFont() const
             = pFontInstance->mxFontMetric->GetAscent() + pFontInstance->mxFontMetric->GetDescent();
 
         // calculate EmphasisArea
-        mnEmphasisAscent = 0;
-        mnEmphasisDescent = 0;
-
         if (maFont.GetEmphasisMark() & FontEmphasisMark::Style)
         {
             FontEmphasisMark eEmphasisMark = GetEmphasisMarkStyle(maFont);
@@ -792,21 +789,6 @@ bool OutputDevice::InitNewFont() const
         SetFontOrientation(pFontInstance);
     }
 
-    // calculate EmphasisArea
-    mnEmphasisAscent = 0;
-    mnEmphasisDescent = 0;
-
-    if (maFont.GetEmphasisMark() & FontEmphasisMark::Style)
-    {
-        FontEmphasisMark eEmphasisMark = GetEmphasisMarkStyle(maFont);
-        tools::Long nEmphasisHeight = GetEmphasisHeight(pFontInstance);
-
-        if (eEmphasisMark & FontEmphasisMark::PosBelow)
-            mnEmphasisDescent = nEmphasisHeight;
-        else
-            mnEmphasisAscent = nEmphasisHeight;
-    }
-
     // calculate text offset depending on TextAlignment
     TextAlign eAlign = maFont.GetAlignment();
     if (eAlign == ALIGN_BASELINE)
@@ -817,7 +799,8 @@ bool OutputDevice::InitNewFont() const
     else if (eAlign == ALIGN_TOP)
     {
         mnTextOffX = 0;
-        mnTextOffY = +pFontInstance->mxFontMetric->GetAscent() + mnEmphasisAscent;
+        mnTextOffY = +pFontInstance->mxFontMetric->GetAscent()
+                     + pFontInstance->mxFontMetric->GetEmphasisAscent();
         if (pFontInstance->mnOrientation)
         {
             Point aOriginPt(0, 0);
@@ -827,7 +810,8 @@ bool OutputDevice::InitNewFont() const
     else // eAlign == ALIGN_BOTTOM
     {
         mnTextOffX = 0;
-        mnTextOffY = -pFontInstance->mxFontMetric->GetDescent() + mnEmphasisDescent;
+        mnTextOffY = -pFontInstance->mxFontMetric->GetDescent()
+                     + pFontInstance->mxFontMetric->GetEmphasisDescent();
         if (pFontInstance->mnOrientation)
         {
             Point aOriginPt(0, 0);

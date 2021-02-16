@@ -6411,10 +6411,12 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
 
     nEmphMark = GetEmphasisMarkStyle(m_aCurrentPDFState.m_aFont);
 
+    LogicalFontInstance const* pFontInstance = GetFontInstance();
+
     if (nEmphMark & FontEmphasisMark::PosBelow)
-        nEmphHeight = GetEmphasisDescent();
+        nEmphHeight = pFontInstance->mxFontMetric->GetEmphasisDescent();
     else
-        nEmphHeight = GetEmphasisAscent();
+        nEmphHeight = pFontInstance->mxFontMetric->GetEmphasisAscent();
 
     tools::PolyPolygon aEmphPoly;
     bool bEmphPolyLine;

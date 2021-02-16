@@ -361,8 +361,6 @@ protected:
     mutable std::shared_ptr<FontCache> mxFontCache;
     mutable tools::Long mnTextOffX;
     mutable tools::Long mnTextOffY;
-    mutable tools::Long mnEmphasisAscent;
-    mutable tools::Long mnEmphasisDescent;
 
 private:
     Bitmap BlendBitmap(Bitmap& rBitmap1, Bitmap const& rBitmap2, AlphaMask const& rAlpha,

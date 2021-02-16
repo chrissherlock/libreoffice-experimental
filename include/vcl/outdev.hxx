@@ -921,8 +921,6 @@ public:
 
 protected:
     SAL_DLLPRIVATE const LogicalFontInstance* GetFontInstance() const;
-    SAL_DLLPRIVATE tools::Long GetEmphasisAscent() const { return mnEmphasisAscent; }
-    SAL_DLLPRIVATE tools::Long GetEmphasisDescent() const { return mnEmphasisDescent; }
 
     SAL_DLLPRIVATE bool InitFont();
     virtual bool InitNewFont() const;
