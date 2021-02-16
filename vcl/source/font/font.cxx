@@ -23,6 +23,7 @@
 #include <tools/vcompat.hxx>
 #include <unotools/fontcfg.hxx>
 #include <unotools/fontdefs.hxx>
+#include <i18nlangtag/mslangid.hxx>
 
 #include <vcl/TypeSerializer.hxx>
 #include <vcl/font.hxx>
@@ -275,6 +276,34 @@ void Font::SetEmphasisMark( FontEmphasisMark eEmphasisMark )
 {
     if (const_cast<const ImplType&>(mpFontAttributes)->meEmphasisMark != eEmphasisMark )
         mpFontAttributes->meEmphasisMark = eEmphasisMark;
+}
+
+FontEmphasisMark Font::GetEmphasisMarkStyle() const
+{
+    FontEmphasisMark nEmphasisMark = GetEmphasisMark();
+
+    // If no Position is set, then calculate the default position, which
+    // depends on the language
+    if (!(nEmphasisMark & (FontEmphasisMark::PosAbove | FontEmphasisMark::PosBelow)))
+    {
+        LanguageType eLang = GetLanguage();
+        // In Chinese Simplified the EmphasisMarks are below/left
+        if (MsLangId::isSimplifiedChinese(eLang))
+        {
+            nEmphasisMark |= FontEmphasisMark::PosBelow;
+        }
+        else
+        {
+            eLang = GetCJKContextLanguage();
+            // In Chinese Simplified the EmphasisMarks are below/left
+            if (MsLangId::isSimplifiedChinese(eLang))
+                nEmphasisMark |= FontEmphasisMark::PosBelow;
+            else
+                nEmphasisMark |= FontEmphasisMark::PosAbove;
+        }
+    }
+
+    return nEmphasisMark;
 }
 
 void Font::SetWordLineMode( bool bWordLine )

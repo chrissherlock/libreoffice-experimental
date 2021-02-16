@@ -145,6 +145,7 @@ public:
     FontStrikeout       GetStrikeout() const;
     void                SetEmphasisMark( FontEmphasisMark );
     FontEmphasisMark    GetEmphasisMark() const;
+    FontEmphasisMark    GetEmphasisMarkStyle() const;
     void                SetWordLineMode( bool bWordLine );
     bool                IsWordLineMode() const;
 

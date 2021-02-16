@@ -202,30 +202,4 @@ GetEmphasisMark(FontEmphasisMark eEmphasis, tools::Long nHeight, sal_Int32 nDPIY
     return std::make_tuple(aPolyPoly, bIsPolyLine, nYOff, nWidth, aRect1, aRect2);
 }
 
-FontEmphasisMark GetEmphasisMarkStyle(const vcl::Font& rFont)
-{
-    FontEmphasisMark nEmphasisMark = rFont.GetEmphasisMark();
-
-    // If no Position is set, then calculate the default position, which
-    // depends on the language
-    if (!(nEmphasisMark & (FontEmphasisMark::PosAbove | FontEmphasisMark::PosBelow)))
-    {
-        LanguageType eLang = rFont.GetLanguage();
-        // In Chinese Simplified the EmphasisMarks are below/left
-        if (MsLangId::isSimplifiedChinese(eLang))
-            nEmphasisMark |= FontEmphasisMark::PosBelow;
-        else
-        {
-            eLang = rFont.GetCJKContextLanguage();
-            // In Chinese Simplified the EmphasisMarks are below/left
-            if (MsLangId::isSimplifiedChinese(eLang))
-                nEmphasisMark |= FontEmphasisMark::PosBelow;
-            else
-                nEmphasisMark |= FontEmphasisMark::PosAbove;
-        }
-    }
-
-    return nEmphasisMark;
-}
-
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

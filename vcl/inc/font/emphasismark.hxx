@@ -32,6 +32,4 @@ class Font;
 std::tuple<tools::PolyPolygon, bool, tools::Long, tools::Long, tools::Rectangle, tools::Rectangle>
 GetEmphasisMark(FontEmphasisMark eEmphasis, tools::Long nHeight, sal_Int32 nDPIY);
 
-FontEmphasisMark GetEmphasisMarkStyle(const vcl::Font& rFont);
-
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

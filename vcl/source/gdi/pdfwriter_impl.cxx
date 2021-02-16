@@ -6409,7 +6409,7 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
     aLine.setLength( 0 );
     aLine.append( "q\n" );
 
-    nEmphMark = GetEmphasisMarkStyle(m_aCurrentPDFState.m_aFont);
+    nEmphMark = m_aCurrentPDFState.m_aFont.GetEmphasisMarkStyle();
 
     LogicalFontInstance const* pFontInstance = GetFontInstance();
 

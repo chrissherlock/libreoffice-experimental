@@ -74,7 +74,7 @@ void OutputDevice::DrawEmphasisMarks( SalLayout& rSalLayout )
     mpMetaFile = nullptr;
     SaveAndDisableMapMode aSave(this);
 
-    FontEmphasisMark nEmphasisMark = GetEmphasisMarkStyle(maFont);
+    FontEmphasisMark nEmphasisMark = maFont.GetEmphasisMarkStyle();
     tools::Long nEmphasisHeight;
 
     LogicalFontInstance* pFontInstance = mpFontInstance.get();
