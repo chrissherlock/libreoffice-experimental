@@ -86,6 +86,7 @@ public: // TODO: make data members private
     static void DecodeOpenTypeTag(const uint32_t nTableTag, char* pTagName);
 
     tools::Long GetEmphasisHeight();
+    void SetEmphasisMarkStyle(FontEmphasisMark eEmphasisMark);
 
 protected:
     explicit LogicalFontInstance(const PhysicalFontFace&, const FontSelectPattern&);

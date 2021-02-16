@@ -760,21 +760,7 @@ bool OutputDevice::InitNewFont() const
 
         // calculate EmphasisArea
         if (maFont.GetEmphasisMark() & FontEmphasisMark::Style)
-        {
-            FontEmphasisMark eEmphasisMark = maFont.GetEmphasisMarkStyle();
-            tools::Long nEmphasisHeight = pFontInstance->GetEmphasisHeight();
-
-            if (eEmphasisMark & FontEmphasisMark::PosBelow)
-            {
-                pFontInstance->mxFontMetric->SetEmphasisDescent(nEmphasisHeight);
-                pFontInstance->mxFontMetric->SetEmphasisAscent(0);
-            }
-            else
-            {
-                pFontInstance->mxFontMetric->SetEmphasisDescent(0);
-                pFontInstance->mxFontMetric->SetEmphasisAscent(nEmphasisHeight);
-            }
-        }
+            pFontInstance->SetEmphasisMarkStyle(maFont.GetEmphasisMarkStyle());
 
         SetFontOrientation(pFontInstance);
     }

@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <tools/fontenum.hxx>
+
 #include <hb-ot.h>
 #include <hb-graphite2.h>
 
@@ -201,6 +203,22 @@ tools::Long LogicalFontInstance::GetEmphasisHeight()
         nEmphasisHeight = 1;
 
     return nEmphasisHeight;
+}
+
+void LogicalFontInstance::SetEmphasisMarkStyle(FontEmphasisMark eEmphasisMark)
+{
+    tools::Long nEmphasisHeight = GetEmphasisHeight();
+
+    if (eEmphasisMark & FontEmphasisMark::PosBelow)
+    {
+        mxFontMetric->SetEmphasisDescent(nEmphasisHeight);
+        mxFontMetric->SetEmphasisAscent(0);
+    }
+    else
+    {
+        mxFontMetric->SetEmphasisDescent(0);
+        mxFontMetric->SetEmphasisAscent(nEmphasisHeight);
+    }
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
