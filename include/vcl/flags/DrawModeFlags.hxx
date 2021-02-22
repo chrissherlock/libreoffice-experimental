@@ -15,31 +15,43 @@
  *   License, Version 2.0 (the "License"); you may not use this file
  *   except in compliance with the License. You may obtain a copy of
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
- */
+*/
 
-#include <vcl/RenderContext2.hxx>
-#include <vcl/settings.hxx>
-#include <vcl/virdev.hxx>
+#pragma once
 
-RenderContext2::RenderContext2()
-    : mpGraphics(nullptr)
-    , mpAlphaVDev(nullptr)
-    , mnDrawMode(DrawModeFlags::Default)
-    , mbOutput(true)
+#include <sal/types.h>
+#include <o3tl/typed_flags_set.hxx>
+
+enum class DrawModeFlags : sal_uInt32
 {
-    // #i84553 toop BiDi preference to RTL
-    if (AllSettings::GetLayoutRTL())
-        mnTextLayoutMode = ComplexTextLayoutFlags::BiDiRtl | ComplexTextLayoutFlags::TextOriginLeft;
-    else
-        mnTextLayoutMode = ComplexTextLayoutFlags::Default;
-}
-
-RenderContext2::~RenderContext2() { disposeOnce(); }
-
-void RenderContext2::dispose()
+    Default = 0x00000000,
+    BlackLine = 0x00000001,
+    BlackFill = 0x00000002,
+    BlackText = 0x00000004,
+    BlackBitmap = 0x00000008,
+    BlackGradient = 0x00000010,
+    GrayLine = 0x00000020,
+    GrayFill = 0x00000040,
+    GrayText = 0x00000080,
+    GrayBitmap = 0x00000100,
+    GrayGradient = 0x00000200,
+    NoFill = 0x00000400,
+    WhiteLine = 0x00000800,
+    WhiteFill = 0x00001000,
+    WhiteText = 0x00002000,
+    WhiteBitmap = 0x00004000,
+    WhiteGradient = 0x00008000,
+    SettingsLine = 0x00010000,
+    SettingsFill = 0x00020000,
+    SettingsText = 0x00040000,
+    SettingsGradient = 0x00080000,
+    NoTransparency = 0x00100000,
+};
+namespace o3tl
 {
-    mpAlphaVDev.disposeAndClear();
-    VclReferenceBase::dispose();
+template <> struct typed_flags<DrawModeFlags> : is_typed_flags<DrawModeFlags, 0x1fffff>
+{
+};
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

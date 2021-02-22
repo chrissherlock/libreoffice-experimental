@@ -21,6 +21,7 @@
 
 #include <vcl/dllapi.h>
 #include <vcl/flags/ComplexTextLayoutFlags.hxx>
+#include <vcl/flags/DrawModeFlags.hxx>
 #include <vcl/vclptr.hxx>
 #include <vcl/vclreferencebase.hxx>
 
@@ -47,6 +48,9 @@ public:
 
     ComplexTextLayoutFlags GetLayoutMode() const;
     virtual void SetLayoutMode(ComplexTextLayoutFlags nTextLayoutMode);
+
+    DrawModeFlags GetDrawMode() const;
+    void SetDrawMode(DrawModeFlags nDrawMode);
 
 protected:
     virtual void dispose() override;
@@ -84,6 +88,7 @@ protected:
     VclPtr<VirtualDevice> mpAlphaVDev;
 
     ComplexTextLayoutFlags mnTextLayoutMode;
+    DrawModeFlags mnDrawMode;
 
 private:
     mutable bool mbOutput : 1;
