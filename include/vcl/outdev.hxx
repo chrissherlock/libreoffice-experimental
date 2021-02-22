@@ -26,6 +26,8 @@
 #include <tools/color.hxx>
 #include <tools/poly.hxx>
 #include <o3tl/typed_flags_set.hxx>
+
+#include <vcl/RenderContext2.hxx>
 #include <vcl/bitmap.hxx>
 #include <vcl/cairo.hxx>
 #include <vcl/devicecoordinate.hxx>
@@ -38,7 +40,6 @@
 #include <vcl/salnativewidgets.hxx>
 #include <vcl/outdevstate.hxx>
 #include <vcl/outdevmap.hxx>
-#include <vcl/vclreferencebase.hxx>
 
 #include <basegfx/numeric/ftools.hxx>
 #include <basegfx/vector/b2enums.hxx>
@@ -335,7 +336,7 @@ typedef struct _cairo_surface cairo_surface_t;
 * so we need to use virtual inheritance to keep the referencing counting
 * OK.
 */
-class SAL_WARN_UNUSED VCL_DLLPUBLIC OutputDevice : public virtual VclReferenceBase
+class SAL_WARN_UNUSED VCL_DLLPUBLIC OutputDevice : public RenderContext2
 {
     friend class Printer;
     friend class VirtualDevice;
