@@ -173,7 +173,6 @@ void OutputDevice::dispose()
     mpAlphaVDev.disposeAndClear();
     mpPrevGraphics.clear();
     mpNextGraphics.clear();
-    VclReferenceBase::dispose();
 }
 
 bool OutputDevice::IsVirtual() const { return false; }
