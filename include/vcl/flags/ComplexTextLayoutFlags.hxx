@@ -17,28 +17,24 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <vcl/RenderContext2.hxx>
-#include <vcl/settings.hxx>
-#include <vcl/virdev.hxx>
+#pragma once
 
-RenderContext2::RenderContext2()
-    : mpGraphics(nullptr)
-    , mpAlphaVDev(nullptr)
-    , mbOutput(true)
+#include <o3tl/typed_flags_set.hxx>
+
+enum class ComplexTextLayoutFlags
 {
-    // #i84553 toop BiDi preference to RTL
-    if (AllSettings::GetLayoutRTL())
-        mnTextLayoutMode = ComplexTextLayoutFlags::BiDiRtl | ComplexTextLayoutFlags::TextOriginLeft;
-    else
-        mnTextLayoutMode = ComplexTextLayoutFlags::Default;
-}
-
-RenderContext2::~RenderContext2() { disposeOnce(); }
-
-void RenderContext2::dispose()
+    Default = 0x0000,
+    BiDiRtl = 0x0001,
+    BiDiStrong = 0x0002,
+    TextOriginLeft = 0x0004,
+    TextOriginRight = 0x0008
+};
+namespace o3tl
 {
-    mpAlphaVDev.disposeAndClear();
-    VclReferenceBase::dispose();
+template <>
+struct typed_flags<ComplexTextLayoutFlags> : is_typed_flags<ComplexTextLayoutFlags, 0x000f>
+{
+};
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

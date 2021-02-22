@@ -20,6 +20,7 @@
 #pragma once
 
 #include <vcl/dllapi.h>
+#include <vcl/flags/ComplexTextLayoutFlags.hxx>
 #include <vcl/vclptr.hxx>
 #include <vcl/vclreferencebase.hxx>
 
@@ -41,8 +42,11 @@ public:
     SalGraphics const* GetGraphics() const;
     SalGraphics* GetGraphics();
 
-    bool IsOutputEnabled() const;
     void EnableOutput(bool bEnable = true);
+    bool IsOutputEnabled() const;
+
+    ComplexTextLayoutFlags GetLayoutMode() const;
+    virtual void SetLayoutMode(ComplexTextLayoutFlags nTextLayoutMode);
 
 protected:
     virtual void dispose() override;
@@ -78,6 +82,8 @@ protected:
 
     mutable SalGraphics* mpGraphics; ///< Graphics context to draw on
     VclPtr<VirtualDevice> mpAlphaVDev;
+
+    ComplexTextLayoutFlags mnTextLayoutMode;
 
 private:
     mutable bool mbOutput : 1;

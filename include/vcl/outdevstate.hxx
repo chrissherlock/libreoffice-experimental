@@ -20,6 +20,7 @@
 #ifndef INCLUDED_VCL_OUTDEVSTATE_HXX
 #define INCLUDED_VCL_OUTDEVSTATE_HXX
 
+#include <vcl/flags/ComplexTextLayoutFlags.hxx>
 #include <vcl/mapmod.hxx>
 #include <vcl/vclenum.hxx>
 
@@ -60,20 +61,6 @@ namespace o3tl
 }
 #define PUSH_ALLTEXT  (PushFlags::TEXTCOLOR | PushFlags::TEXTFILLCOLOR | PushFlags::TEXTLINECOLOR | PushFlags::OVERLINECOLOR | PushFlags::TEXTALIGN | PushFlags::TEXTLAYOUTMODE | PushFlags::TEXTLANGUAGE)
 #define PUSH_ALLFONT  (PUSH_ALLTEXT | PushFlags::FONT)
-
-// Layout flags for Complex Text Layout
-// These are flag values, i.e they can be combined
-enum class ComplexTextLayoutFlags
-{
-    Default           = 0x0000,
-    BiDiRtl           = 0x0001,
-    BiDiStrong        = 0x0002,
-    TextOriginLeft    = 0x0004,
-    TextOriginRight   = 0x0008
-};
-namespace o3tl {
-    template<> struct typed_flags<ComplexTextLayoutFlags> : is_typed_flags<ComplexTextLayoutFlags, 0x000f> {};
-}
 
 struct OutDevState
 {
