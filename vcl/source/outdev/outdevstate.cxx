@@ -56,11 +56,10 @@ OutDevState::~OutDevState()
     mpRefPoint.reset();
 }
 
-void OutputDevice::Push( PushFlags nFlags )
+void OutputDevice::Push(PushFlags nFlags)
 {
-
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaPushAction( nFlags ) );
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaPushAction(nFlags));
 
     maOutDevStateStack.emplace_back();
     OutDevState& rState = maOutDevStateStack.back();
@@ -75,9 +74,9 @@ void OutputDevice::Push( PushFlags nFlags )
     {
         rState.mpFillColor = maFillColor;
     }
-    if ( nFlags & PushFlags::FONT )
-        rState.mpFont.reset( new vcl::Font( maFont ) );
-    if ( nFlags & PushFlags::TEXTCOLOR )
+    if (nFlags & PushFlags::FONT)
+        rState.mpFont.reset(new vcl::Font(maFont));
+    if (nFlags & PushFlags::TEXTCOLOR)
         rState.mpTextColor = GetTextColor();
     if (nFlags & PushFlags::TEXTFILLCOLOR && IsTextFillColor())
     {
@@ -91,125 +90,124 @@ void OutputDevice::Push( PushFlags nFlags )
     {
         rState.mpOverlineColor = GetOverlineColor();
     }
-    if ( nFlags & PushFlags::TEXTALIGN )
+    if (nFlags & PushFlags::TEXTALIGN)
         rState.meTextAlign = GetTextAlign();
-    if( nFlags & PushFlags::TEXTLAYOUTMODE )
+    if (nFlags & PushFlags::TEXTLAYOUTMODE)
         rState.mnTextLayoutMode = GetLayoutMode();
-    if( nFlags & PushFlags::TEXTLANGUAGE )
+    if (nFlags & PushFlags::TEXTLANGUAGE)
         rState.meTextLanguage = GetDigitLanguage();
-    if ( nFlags & PushFlags::RASTEROP )
+    if (nFlags & PushFlags::RASTEROP)
         rState.meRasterOp = GetRasterOp();
-    if ( nFlags & PushFlags::MAPMODE )
+    if (nFlags & PushFlags::MAPMODE)
     {
         rState.mpMapMode = maMapMode;
         rState.mbMapActive = mbMap;
     }
     if (nFlags & PushFlags::CLIPREGION && mbClipRegion)
     {
-        rState.mpClipRegion.reset( new vcl::Region( maRegion ) );
+        rState.mpClipRegion.reset(new vcl::Region(maRegion));
     }
     if (nFlags & PushFlags::REFPOINT && mbRefPoint)
     {
         rState.mpRefPoint = maRefPoint;
     }
 
-    if( mpAlphaVDev )
+    if (mpAlphaVDev)
         mpAlphaVDev->Push();
 }
 
 void OutputDevice::Pop()
 {
-
-    if( mpMetaFile )
-        mpMetaFile->AddAction( new MetaPopAction() );
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaPopAction());
 
     GDIMetaFile* pOldMetaFile = mpMetaFile;
     mpMetaFile = nullptr;
 
-    if ( maOutDevStateStack.empty() )
+    if (maOutDevStateStack.empty())
     {
-        SAL_WARN( "vcl.gdi", "OutputDevice::Pop() without OutputDevice::Push()" );
+        SAL_WARN("vcl.gdi", "OutputDevice::Pop() without OutputDevice::Push()");
         return;
     }
     const OutDevState& rState = maOutDevStateStack.back();
 
-    if( mpAlphaVDev )
+    if (mpAlphaVDev)
         mpAlphaVDev->Pop();
 
-    if ( rState.mnFlags & PushFlags::LINECOLOR )
+    if (rState.mnFlags & PushFlags::LINECOLOR)
     {
-        if ( rState.mpLineColor )
-            SetLineColor( *rState.mpLineColor );
+        if (rState.mpLineColor)
+            SetLineColor(*rState.mpLineColor);
         else
             SetLineColor();
     }
 
-    if ( rState.mnFlags & PushFlags::FILLCOLOR )
+    if (rState.mnFlags & PushFlags::FILLCOLOR)
     {
-        if ( rState.mpFillColor )
-            SetFillColor( *rState.mpFillColor );
+        if (rState.mpFillColor)
+            SetFillColor(*rState.mpFillColor);
         else
             SetFillColor();
     }
 
-    if ( rState.mnFlags & PushFlags::FONT )
-        SetFont( *rState.mpFont );
+    if (rState.mnFlags & PushFlags::FONT)
+        SetFont(*rState.mpFont);
 
-    if ( rState.mnFlags & PushFlags::TEXTCOLOR )
-        SetTextColor( *rState.mpTextColor );
+    if (rState.mnFlags & PushFlags::TEXTCOLOR)
+        SetTextColor(*rState.mpTextColor);
 
-    if ( rState.mnFlags & PushFlags::TEXTFILLCOLOR )
+    if (rState.mnFlags & PushFlags::TEXTFILLCOLOR)
     {
-        if ( rState.mpTextFillColor )
-            SetTextFillColor( *rState.mpTextFillColor );
+        if (rState.mpTextFillColor)
+            SetTextFillColor(*rState.mpTextFillColor);
         else
             SetTextFillColor();
     }
 
-    if ( rState.mnFlags & PushFlags::TEXTLINECOLOR )
+    if (rState.mnFlags & PushFlags::TEXTLINECOLOR)
     {
-        if ( rState.mpTextLineColor )
-            SetTextLineColor( *rState.mpTextLineColor );
+        if (rState.mpTextLineColor)
+            SetTextLineColor(*rState.mpTextLineColor);
         else
             SetTextLineColor();
     }
 
-    if ( rState.mnFlags & PushFlags::OVERLINECOLOR )
+    if (rState.mnFlags & PushFlags::OVERLINECOLOR)
     {
-        if ( rState.mpOverlineColor )
-            SetOverlineColor( *rState.mpOverlineColor );
+        if (rState.mpOverlineColor)
+            SetOverlineColor(*rState.mpOverlineColor);
         else
             SetOverlineColor();
     }
 
-    if ( rState.mnFlags & PushFlags::TEXTALIGN )
-        SetTextAlign( rState.meTextAlign );
+    if (rState.mnFlags & PushFlags::TEXTALIGN)
+        SetTextAlign(rState.meTextAlign);
 
-    if( rState.mnFlags & PushFlags::TEXTLAYOUTMODE )
-        SetLayoutMode( rState.mnTextLayoutMode );
+    if (rState.mnFlags & PushFlags::TEXTLAYOUTMODE)
+        SetLayoutMode(rState.mnTextLayoutMode);
 
-    if( rState.mnFlags & PushFlags::TEXTLANGUAGE )
-        SetDigitLanguage( rState.meTextLanguage );
+    if (rState.mnFlags & PushFlags::TEXTLANGUAGE)
+        SetDigitLanguage(rState.meTextLanguage);
 
-    if ( rState.mnFlags & PushFlags::RASTEROP )
-        SetRasterOp( rState.meRasterOp );
+    if (rState.mnFlags & PushFlags::RASTEROP)
+        SetRasterOp(rState.meRasterOp);
 
-    if ( rState.mnFlags & PushFlags::MAPMODE )
+    if (rState.mnFlags & PushFlags::MAPMODE)
     {
-        if ( rState.mpMapMode )
-            SetMapMode( *rState.mpMapMode );
+        if (rState.mpMapMode)
+            SetMapMode(*rState.mpMapMode);
         else
             SetMapMode();
         mbMap = rState.mbMapActive;
     }
 
-    if ( rState.mnFlags & PushFlags::CLIPREGION )
-        SetDeviceClipRegion( rState.mpClipRegion.get() );
+    if (rState.mnFlags & PushFlags::CLIPREGION)
+        SetDeviceClipRegion(rState.mpClipRegion.get());
 
-    if ( rState.mnFlags & PushFlags::REFPOINT )
+    if (rState.mnFlags & PushFlags::REFPOINT)
     {
-        if ( rState.mpRefPoint )
-            SetRefPoint( *rState.mpRefPoint );
+        if (rState.mpRefPoint)
+            SetRefPoint(*rState.mpRefPoint);
         else
             SetRefPoint();
     }
@@ -219,147 +217,130 @@ void OutputDevice::Pop()
     mpMetaFile = pOldMetaFile;
 }
 
-sal_uInt32 OutputDevice::GetGCStackDepth() const
-{
-    return maOutDevStateStack.size();
-}
+sal_uInt32 OutputDevice::GetGCStackDepth() const { return maOutDevStateStack.size(); }
 
 void OutputDevice::ClearStack()
 {
     sal_uInt32 nCount = GetGCStackDepth();
-    while( nCount-- )
+    while (nCount--)
         Pop();
 }
 
-void OutputDevice::SetAntialiasing( AntialiasingFlags nMode )
+void OutputDevice::SetAntialiasing(AntialiasingFlags nMode)
 {
-    if ( mnAntialiasing != nMode )
+    if (mnAntialiasing != nMode)
     {
         mnAntialiasing = nMode;
         mbInitFont = true;
 
-        if(mpGraphics)
+        if (mpGraphics)
         {
             mpGraphics->setAntiAlias(bool(mnAntialiasing & AntialiasingFlags::Enable));
         }
     }
 
-    if( mpAlphaVDev )
-        mpAlphaVDev->SetAntialiasing( nMode );
+    if (mpAlphaVDev)
+        mpAlphaVDev->SetAntialiasing(nMode);
 }
 
-void OutputDevice::SetDrawMode( DrawModeFlags nDrawMode )
+void OutputDevice::SetDrawMode(DrawModeFlags nDrawMode)
 {
-
     mnDrawMode = nDrawMode;
 
-    if( mpAlphaVDev )
-        mpAlphaVDev->SetDrawMode( nDrawMode );
+    if (mpAlphaVDev)
+        mpAlphaVDev->SetDrawMode(nDrawMode);
 }
 
-void OutputDevice::SetLayoutMode( ComplexTextLayoutFlags nTextLayoutMode )
+void OutputDevice::SetDigitLanguage(LanguageType eTextLanguage)
 {
-    if( mpMetaFile )
-        mpMetaFile->AddAction( new MetaLayoutModeAction( nTextLayoutMode ) );
-
-    mnTextLayoutMode = nTextLayoutMode;
-
-    if( mpAlphaVDev )
-        mpAlphaVDev->SetLayoutMode( nTextLayoutMode );
-}
-
-void OutputDevice::SetDigitLanguage( LanguageType eTextLanguage )
-{
-    if( mpMetaFile )
-        mpMetaFile->AddAction( new MetaTextLanguageAction( eTextLanguage ) );
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaTextLanguageAction(eTextLanguage));
 
     meTextLanguage = eTextLanguage;
 
-    if( mpAlphaVDev )
-        mpAlphaVDev->SetDigitLanguage( eTextLanguage );
+    if (mpAlphaVDev)
+        mpAlphaVDev->SetDigitLanguage(eTextLanguage);
 }
 
-void OutputDevice::SetRasterOp( RasterOp eRasterOp )
+void OutputDevice::SetRasterOp(RasterOp eRasterOp)
 {
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaRasterOpAction(eRasterOp));
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaRasterOpAction( eRasterOp ) );
-
-    if ( meRasterOp != eRasterOp )
+    if (meRasterOp != eRasterOp)
     {
         meRasterOp = eRasterOp;
         mbInitLineColor = mbInitFillColor = true;
 
-        if( mpGraphics || AcquireGraphics() )
+        if (mpGraphics || AcquireGraphics())
         {
             assert(mpGraphics);
-            mpGraphics->SetXORMode( (RasterOp::Invert == meRasterOp) || (RasterOp::Xor == meRasterOp), RasterOp::Invert == meRasterOp );
+            mpGraphics->SetXORMode((RasterOp::Invert == meRasterOp)
+                                       || (RasterOp::Xor == meRasterOp),
+                                   RasterOp::Invert == meRasterOp);
         }
     }
 
-    if( mpAlphaVDev )
-        mpAlphaVDev->SetRasterOp( eRasterOp );
+    if (mpAlphaVDev)
+        mpAlphaVDev->SetRasterOp(eRasterOp);
 }
-
 
 void OutputDevice::SetFillColor()
 {
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaFillColorAction(Color(), false));
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaFillColorAction( Color(), false ) );
-
-    if ( mbFillColor )
+    if (mbFillColor)
     {
         mbInitFillColor = true;
         mbFillColor = false;
         maFillColor = COL_TRANSPARENT;
     }
 
-    if( mpAlphaVDev )
+    if (mpAlphaVDev)
         mpAlphaVDev->SetFillColor();
 }
 
-void OutputDevice::SetFillColor( const Color& rColor )
+void OutputDevice::SetFillColor(const Color& rColor)
 {
+    Color aColor(rColor);
 
-    Color aColor( rColor );
-
-    if( mnDrawMode & ( DrawModeFlags::BlackFill | DrawModeFlags::WhiteFill |
-                       DrawModeFlags::GrayFill | DrawModeFlags::NoFill |
-                       DrawModeFlags::SettingsFill ) )
+    if (mnDrawMode
+        & (DrawModeFlags::BlackFill | DrawModeFlags::WhiteFill | DrawModeFlags::GrayFill
+           | DrawModeFlags::NoFill | DrawModeFlags::SettingsFill))
     {
-        if( !aColor.IsTransparent() )
+        if (!aColor.IsTransparent())
         {
-            if( mnDrawMode & DrawModeFlags::BlackFill )
+            if (mnDrawMode & DrawModeFlags::BlackFill)
             {
                 aColor = COL_BLACK;
             }
-            else if( mnDrawMode & DrawModeFlags::WhiteFill )
+            else if (mnDrawMode & DrawModeFlags::WhiteFill)
             {
                 aColor = COL_WHITE;
             }
-            else if( mnDrawMode & DrawModeFlags::GrayFill )
+            else if (mnDrawMode & DrawModeFlags::GrayFill)
             {
                 const sal_uInt8 cLum = aColor.GetLuminance();
-                aColor = Color( cLum, cLum, cLum );
+                aColor = Color(cLum, cLum, cLum);
             }
-            else if( mnDrawMode & DrawModeFlags::NoFill )
+            else if (mnDrawMode & DrawModeFlags::NoFill)
             {
                 aColor = COL_TRANSPARENT;
             }
-            else if( mnDrawMode & DrawModeFlags::SettingsFill )
+            else if (mnDrawMode & DrawModeFlags::SettingsFill)
             {
                 aColor = GetSettings().GetStyleSettings().GetWindowColor();
             }
         }
     }
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaFillColorAction( aColor, true ) );
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaFillColorAction(aColor, true));
 
-    if ( aColor.IsTransparent() )
+    if (aColor.IsTransparent())
     {
-        if ( mbFillColor )
+        if (mbFillColor)
         {
             mbInitFillColor = true;
             mbFillColor = false;
@@ -368,7 +349,7 @@ void OutputDevice::SetFillColor( const Color& rColor )
     }
     else
     {
-        if ( maFillColor != aColor )
+        if (maFillColor != aColor)
         {
             mbInitFillColor = true;
             mbFillColor = true;
@@ -376,38 +357,36 @@ void OutputDevice::SetFillColor( const Color& rColor )
         }
     }
 
-    if( mpAlphaVDev )
-        mpAlphaVDev->SetFillColor( COL_BLACK );
+    if (mpAlphaVDev)
+        mpAlphaVDev->SetFillColor(COL_BLACK);
 }
 
 void OutputDevice::SetLineColor()
 {
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaLineColorAction(Color(), false));
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaLineColorAction( Color(), false ) );
-
-    if ( mbLineColor )
+    if (mbLineColor)
     {
         mbInitLineColor = true;
         mbLineColor = false;
         maLineColor = COL_TRANSPARENT;
     }
 
-    if( mpAlphaVDev )
+    if (mpAlphaVDev)
         mpAlphaVDev->SetLineColor();
 }
 
-void OutputDevice::SetLineColor( const Color& rColor )
+void OutputDevice::SetLineColor(const Color& rColor)
 {
+    Color aColor = ImplDrawModeToColor(rColor);
 
-    Color aColor = ImplDrawModeToColor( rColor );
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaLineColorAction(aColor, true));
 
-    if( mpMetaFile )
-        mpMetaFile->AddAction( new MetaLineColorAction( aColor, true ) );
-
-    if( aColor.IsTransparent() )
+    if (aColor.IsTransparent())
     {
-        if ( mbLineColor )
+        if (mbLineColor)
         {
             mbInitLineColor = true;
             mbLineColor = false;
@@ -416,7 +395,7 @@ void OutputDevice::SetLineColor( const Color& rColor )
     }
     else
     {
-        if( maLineColor != aColor )
+        if (maLineColor != aColor)
         {
             mbInitLineColor = true;
             mbLineColor = true;
@@ -424,171 +403,169 @@ void OutputDevice::SetLineColor( const Color& rColor )
         }
     }
 
-    if( mpAlphaVDev )
-        mpAlphaVDev->SetLineColor( COL_BLACK );
+    if (mpAlphaVDev)
+        mpAlphaVDev->SetLineColor(COL_BLACK);
 }
 
 void OutputDevice::SetBackground()
 {
-
     maBackground = Wallpaper();
     mbBackground = false;
 
-    if( mpAlphaVDev )
+    if (mpAlphaVDev)
         mpAlphaVDev->SetBackground();
 }
 
-void OutputDevice::SetBackground( const Wallpaper& rBackground )
+void OutputDevice::SetBackground(const Wallpaper& rBackground)
 {
-
     maBackground = rBackground;
 
-    if( rBackground.GetStyle() == WallpaperStyle::NONE )
+    if (rBackground.GetStyle() == WallpaperStyle::NONE)
         mbBackground = false;
     else
         mbBackground = true;
 
-    if( mpAlphaVDev )
+    if (mpAlphaVDev)
     {
         // Some of these are probably wrong (e.g. if the gradient has transparency),
         // but hopefully nobody uses that. If you do, feel free to implement it properly.
-        if( rBackground.GetStyle() == WallpaperStyle::NONE )
-            mpAlphaVDev->SetBackground( rBackground );
-        else if( rBackground.IsBitmap())
+        if (rBackground.GetStyle() == WallpaperStyle::NONE)
+            mpAlphaVDev->SetBackground(rBackground);
+        else if (rBackground.IsBitmap())
         {
             BitmapEx bitmap = rBackground.GetBitmap();
-            if( bitmap.IsAlpha())
-                mpAlphaVDev->SetBackground( Wallpaper( BitmapEx( Bitmap( bitmap.GetAlpha()))));
+            if (bitmap.IsAlpha())
+                mpAlphaVDev->SetBackground(Wallpaper(BitmapEx(Bitmap(bitmap.GetAlpha()))));
             else
             {
-                switch( bitmap.GetTransparentType())
+                switch (bitmap.GetTransparentType())
                 {
                     case TransparentType::NONE:
-                        mpAlphaVDev->SetBackground( Wallpaper( COL_BLACK ));
+                        mpAlphaVDev->SetBackground(Wallpaper(COL_BLACK));
                         break;
                     case TransparentType::Bitmap:
-                        mpAlphaVDev->SetBackground( Wallpaper( BitmapEx( bitmap.GetMask())));
+                        mpAlphaVDev->SetBackground(Wallpaper(BitmapEx(bitmap.GetMask())));
                         break;
                 }
             }
         }
-        else if( rBackground.IsGradient())
-            mpAlphaVDev->SetBackground( Wallpaper( COL_BLACK ));
+        else if (rBackground.IsGradient())
+            mpAlphaVDev->SetBackground(Wallpaper(COL_BLACK));
         else
         {
             // Color background.
             int transparency = 255 - rBackground.GetColor().GetAlpha();
-            mpAlphaVDev->SetBackground( Wallpaper( Color( transparency, transparency, transparency )));
+            mpAlphaVDev->SetBackground(Wallpaper(Color(transparency, transparency, transparency)));
         }
     }
 }
 
-void OutputDevice::SetFont( const vcl::Font& rNewFont )
+void OutputDevice::SetFont(const vcl::Font& rNewFont)
 {
-
-    vcl::Font aFont( rNewFont );
-    if ( mnDrawMode & (DrawModeFlags::BlackText | DrawModeFlags::WhiteText | DrawModeFlags::GrayText | DrawModeFlags::SettingsText |
-                       DrawModeFlags::BlackFill | DrawModeFlags::WhiteFill | DrawModeFlags::GrayFill | DrawModeFlags::NoFill |
-                       DrawModeFlags::SettingsFill ) )
+    vcl::Font aFont(rNewFont);
+    if (mnDrawMode
+        & (DrawModeFlags::BlackText | DrawModeFlags::WhiteText | DrawModeFlags::GrayText
+           | DrawModeFlags::SettingsText | DrawModeFlags::BlackFill | DrawModeFlags::WhiteFill
+           | DrawModeFlags::GrayFill | DrawModeFlags::NoFill | DrawModeFlags::SettingsFill))
     {
-        Color aTextColor( aFont.GetColor() );
+        Color aTextColor(aFont.GetColor());
 
-        if ( mnDrawMode & DrawModeFlags::BlackText )
+        if (mnDrawMode & DrawModeFlags::BlackText)
             aTextColor = COL_BLACK;
-        else if ( mnDrawMode & DrawModeFlags::WhiteText )
+        else if (mnDrawMode & DrawModeFlags::WhiteText)
             aTextColor = COL_WHITE;
-        else if ( mnDrawMode & DrawModeFlags::GrayText )
+        else if (mnDrawMode & DrawModeFlags::GrayText)
         {
             const sal_uInt8 cLum = aTextColor.GetLuminance();
-            aTextColor = Color( cLum, cLum, cLum );
+            aTextColor = Color(cLum, cLum, cLum);
         }
-        else if ( mnDrawMode & DrawModeFlags::SettingsText )
+        else if (mnDrawMode & DrawModeFlags::SettingsText)
             aTextColor = GetSettings().GetStyleSettings().GetFontColor();
 
-        aFont.SetColor( aTextColor );
+        aFont.SetColor(aTextColor);
 
         bool bTransFill = aFont.IsTransparent();
-        if ( !bTransFill )
+        if (!bTransFill)
         {
-            Color aTextFillColor( aFont.GetFillColor() );
+            Color aTextFillColor(aFont.GetFillColor());
 
-            if ( mnDrawMode & DrawModeFlags::BlackFill )
+            if (mnDrawMode & DrawModeFlags::BlackFill)
                 aTextFillColor = COL_BLACK;
-            else if ( mnDrawMode & DrawModeFlags::WhiteFill )
+            else if (mnDrawMode & DrawModeFlags::WhiteFill)
                 aTextFillColor = COL_WHITE;
-            else if ( mnDrawMode & DrawModeFlags::GrayFill )
+            else if (mnDrawMode & DrawModeFlags::GrayFill)
             {
                 const sal_uInt8 cLum = aTextFillColor.GetLuminance();
-                aTextFillColor = Color( cLum, cLum, cLum );
+                aTextFillColor = Color(cLum, cLum, cLum);
             }
-            else if( mnDrawMode & DrawModeFlags::SettingsFill )
+            else if (mnDrawMode & DrawModeFlags::SettingsFill)
                 aTextFillColor = GetSettings().GetStyleSettings().GetWindowColor();
-            else if ( mnDrawMode & DrawModeFlags::NoFill )
+            else if (mnDrawMode & DrawModeFlags::NoFill)
             {
                 aTextFillColor = COL_TRANSPARENT;
             }
 
-            aFont.SetFillColor( aTextFillColor );
+            aFont.SetFillColor(aTextFillColor);
         }
     }
 
-    if ( mpMetaFile )
+    if (mpMetaFile)
     {
-        mpMetaFile->AddAction( new MetaFontAction( aFont ) );
+        mpMetaFile->AddAction(new MetaFontAction(aFont));
         // the color and alignment actions don't belong here
         // TODO: get rid of them without breaking anything...
-        mpMetaFile->AddAction( new MetaTextAlignAction( aFont.GetAlignment() ) );
-        mpMetaFile->AddAction( new MetaTextFillColorAction( aFont.GetFillColor(), !aFont.IsTransparent() ) );
+        mpMetaFile->AddAction(new MetaTextAlignAction(aFont.GetAlignment()));
+        mpMetaFile->AddAction(
+            new MetaTextFillColorAction(aFont.GetFillColor(), !aFont.IsTransparent()));
     }
 
-    if ( maFont.IsSameInstance( aFont ) )
+    if (maFont.IsSameInstance(aFont))
         return;
 
     // Optimization MT/HDU: COL_TRANSPARENT means SetFont should ignore the font color,
     // because SetTextColor() is used for this.
     // #i28759# maTextColor might have been changed behind our back, commit then, too.
-    if( aFont.GetColor() != COL_TRANSPARENT
-    && (aFont.GetColor() != maFont.GetColor() || aFont.GetColor() != maTextColor ) )
+    if (aFont.GetColor() != COL_TRANSPARENT
+        && (aFont.GetColor() != maFont.GetColor() || aFont.GetColor() != maTextColor))
     {
         maTextColor = aFont.GetColor();
         mbInitTextColor = true;
-        if( mpMetaFile )
-            mpMetaFile->AddAction( new MetaTextColorAction( aFont.GetColor() ) );
+        if (mpMetaFile)
+            mpMetaFile->AddAction(new MetaTextColorAction(aFont.GetColor()));
     }
-    maFont      = aFont;
-    mbNewFont   = true;
+    maFont = aFont;
+    mbNewFont = true;
 
-    if( !mpAlphaVDev )
+    if (!mpAlphaVDev)
         return;
 
     // #i30463#
     // Since SetFont might change the text color, apply that only
     // selectively to alpha vdev (which normally paints opaque text
     // with COL_BLACK)
-    if( aFont.GetColor() != COL_TRANSPARENT )
+    if (aFont.GetColor() != COL_TRANSPARENT)
     {
-        mpAlphaVDev->SetTextColor( COL_BLACK );
-        aFont.SetColor( COL_TRANSPARENT );
+        mpAlphaVDev->SetTextColor(COL_BLACK);
+        aFont.SetColor(COL_TRANSPARENT);
     }
 
-    mpAlphaVDev->SetFont( aFont );
+    mpAlphaVDev->SetFont(aFont);
 }
-
 
 void OutputDevice::InitLineColor()
 {
     DBG_TESTSOLARMUTEX();
 
-    if( mbLineColor )
+    if (mbLineColor)
     {
-        if( RasterOp::N0 == meRasterOp )
-            mpGraphics->SetROPLineColor( SalROPColor::N0 );
-        else if( RasterOp::N1 == meRasterOp )
-            mpGraphics->SetROPLineColor( SalROPColor::N1 );
-        else if( RasterOp::Invert == meRasterOp )
-            mpGraphics->SetROPLineColor( SalROPColor::Invert );
+        if (RasterOp::N0 == meRasterOp)
+            mpGraphics->SetROPLineColor(SalROPColor::N0);
+        else if (RasterOp::N1 == meRasterOp)
+            mpGraphics->SetROPLineColor(SalROPColor::N1);
+        else if (RasterOp::Invert == meRasterOp)
+            mpGraphics->SetROPLineColor(SalROPColor::Invert);
         else
-            mpGraphics->SetLineColor( maLineColor );
+            mpGraphics->SetLineColor(maLineColor);
     }
     else
         mpGraphics->SetLineColor();
@@ -596,21 +573,20 @@ void OutputDevice::InitLineColor()
     mbInitLineColor = false;
 }
 
-
 void OutputDevice::InitFillColor()
 {
     DBG_TESTSOLARMUTEX();
 
-    if( mbFillColor )
+    if (mbFillColor)
     {
-        if( RasterOp::N0 == meRasterOp )
-            mpGraphics->SetROPFillColor( SalROPColor::N0 );
-        else if( RasterOp::N1 == meRasterOp )
-            mpGraphics->SetROPFillColor( SalROPColor::N1 );
-        else if( RasterOp::Invert == meRasterOp )
-            mpGraphics->SetROPFillColor( SalROPColor::Invert );
+        if (RasterOp::N0 == meRasterOp)
+            mpGraphics->SetROPFillColor(SalROPColor::N0);
+        else if (RasterOp::N1 == meRasterOp)
+            mpGraphics->SetROPFillColor(SalROPColor::N1);
+        else if (RasterOp::Invert == meRasterOp)
+            mpGraphics->SetROPFillColor(SalROPColor::Invert);
         else
-            mpGraphics->SetFillColor( maFillColor );
+            mpGraphics->SetFillColor(maFillColor);
     }
     else
         mpGraphics->SetFillColor();
@@ -629,6 +605,5 @@ void OutputDevice::ImplReleaseFonts()
     mpDeviceFontList.reset();
     mpDeviceFontSizeList.reset();
 }
-
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

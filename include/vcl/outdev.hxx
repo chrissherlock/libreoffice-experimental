@@ -389,7 +389,6 @@ private:
     mutable tools::Long mnEmphasisAscent;
     mutable tools::Long mnEmphasisDescent;
     DrawModeFlags mnDrawMode;
-    ComplexTextLayoutFlags mnTextLayoutMode;
     ImplMapRes maMapRes;
     const OutDevType meOutDevType;
     OutDevViewType meOutDevViewType;
@@ -588,8 +587,7 @@ public:
     void SetDrawMode(DrawModeFlags nDrawMode);
     DrawModeFlags GetDrawMode() const { return mnDrawMode; }
 
-    void SetLayoutMode(ComplexTextLayoutFlags nTextLayoutMode);
-    ComplexTextLayoutFlags GetLayoutMode() const { return mnTextLayoutMode; }
+    void SetLayoutMode(ComplexTextLayoutFlags nTextLayoutMode) override;
 
     void SetDigitLanguage(LanguageType);
     LanguageType GetDigitLanguage() const { return meTextLanguage; }
