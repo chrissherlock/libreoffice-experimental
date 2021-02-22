@@ -56,7 +56,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     , maTextLineColor(COL_TRANSPARENT)
     , mxSettings(new AllSettings(Application::GetSettings()))
 {
-    mpGraphics = nullptr;
     mpUnoGraphicsList = nullptr;
     mpPrevGraphics = nullptr;
     mpNextGraphics = nullptr;
@@ -176,26 +175,6 @@ void OutputDevice::dispose()
 }
 
 bool OutputDevice::IsVirtual() const { return false; }
-
-SalGraphics* OutputDevice::GetGraphics()
-{
-    DBG_TESTSOLARMUTEX();
-
-    if (!mpGraphics && !AcquireGraphics())
-        SAL_WARN("vcl.gdi", "No mpGraphics set");
-
-    return mpGraphics;
-}
-
-SalGraphics const* OutputDevice::GetGraphics() const
-{
-    DBG_TESTSOLARMUTEX();
-
-    if (!mpGraphics && !AcquireGraphics())
-        SAL_WARN("vcl.gdi", "No mpGraphics set");
-
-    return mpGraphics;
-}
 
 void OutputDevice::SetConnectMetaFile(GDIMetaFile* pMtf) { mpMetaFile = pMtf; }
 
