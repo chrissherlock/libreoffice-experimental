@@ -80,7 +80,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mnOutOffLogicY = 0;
     mnEmphasisAscent = 0;
     mnEmphasisDescent = 0;
-    mnDrawMode = DrawModeFlags::Default;
     meOutDevViewType = OutDevViewType::DontKnow;
     mbMap = false;
     mbClipRegion = false;

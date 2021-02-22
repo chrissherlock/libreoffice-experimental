@@ -17,14 +17,15 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <cassert>
-
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/virdev.hxx>
 
+#include <drawmode.hxx>
 #include <salgdi.hxx>
+
+#include <cassert>
 
 Color OutputDevice::GetPixel(const Point& rPoint) const
 {
@@ -52,66 +53,72 @@ Color OutputDevice::GetPixel(const Point& rPoint) const
     return aColor;
 }
 
-void OutputDevice::DrawPixel( const Point& rPt )
+void OutputDevice::DrawPixel(const Point& rPt)
 {
     assert(!is_double_buffered_window());
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaPointAction( rPt ) );
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaPointAction(rPt));
 
-    if ( !IsDeviceOutputNecessary() || !mbLineColor || ImplIsRecordLayout() )
+    if (!IsDeviceOutputNecessary() || !mbLineColor || ImplIsRecordLayout())
         return;
 
-    Point aPt = ImplLogicToDevicePixel( rPt );
+    Point aPt = ImplLogicToDevicePixel(rPt);
 
-    if ( !mpGraphics && !AcquireGraphics() )
+    if (!mpGraphics && !AcquireGraphics())
         return;
     assert(mpGraphics);
 
-    if ( mbInitClipRegion )
+    if (mbInitClipRegion)
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if (mbOutputClipped)
         return;
 
-    if ( mbInitLineColor )
+    if (mbInitLineColor)
         InitLineColor();
 
-    mpGraphics->DrawPixel( aPt.X(), aPt.Y(), *this );
+    mpGraphics->DrawPixel(aPt.X(), aPt.Y(), *this);
 
-    if( mpAlphaVDev )
-        mpAlphaVDev->DrawPixel( rPt );
+    if (mpAlphaVDev)
+        mpAlphaVDev->DrawPixel(rPt);
 }
 
-void OutputDevice::DrawPixel( const Point& rPt, const Color& rColor )
+void OutputDevice::DrawPixel(const Point& rPt, const Color& rColor)
 {
     assert(!is_double_buffered_window());
 
-    Color aColor = ImplDrawModeToColor( rColor );
+    Color aColor;
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaPixelAction( rPt, aColor ) );
+    if (rColor.IsTransparent())
+        aColor = rColor;
+    else
+        aColor = GetDrawModeLineColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings());
 
-    if ( !IsDeviceOutputNecessary() || ImplIsRecordLayout() )
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaPixelAction(rPt, aColor));
+
+    if (!IsDeviceOutputNecessary() || ImplIsRecordLayout())
         return;
 
-    Point aPt = ImplLogicToDevicePixel( rPt );
+    Point aPt = ImplLogicToDevicePixel(rPt);
 
-    if ( !mpGraphics && !AcquireGraphics() )
+    if (!mpGraphics && !AcquireGraphics())
         return;
     assert(mpGraphics);
 
-    if ( mbInitClipRegion )
+    if (mbInitClipRegion)
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if (mbOutputClipped)
         return;
 
-    mpGraphics->DrawPixel( aPt.X(), aPt.Y(), aColor, *this );
+    mpGraphics->DrawPixel(aPt.X(), aPt.Y(), aColor, *this);
 
     if (mpAlphaVDev)
     {
-        Color aAlphaColor(255 - rColor.GetAlpha(), 255 - rColor.GetAlpha(), 255 - rColor.GetAlpha());
+        Color aAlphaColor(255 - rColor.GetAlpha(), 255 - rColor.GetAlpha(),
+                          255 - rColor.GetAlpha());
         mpAlphaVDev->DrawPixel(rPt, aAlphaColor);
     }
 }
