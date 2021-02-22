@@ -17,21 +17,31 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <vcl/RenderContext2.hxx>
-#include <vcl/virdev.hxx>
+#include <sal/log.hxx>
+#include <tools/debug.hxx>
 
-RenderContext2::RenderContext2()
-    : mpGraphics(nullptr)
-    , mpAlphaVDev(nullptr)
+#include <vcl/RenderContext2.hxx>
+
+#include <salgdi.hxx>
+
+SalGraphics* RenderContext2::GetGraphics()
 {
+    DBG_TESTSOLARMUTEX();
+
+    if (!mpGraphics && !AcquireGraphics())
+        SAL_WARN("vcl.gdi", "No mpGraphics set");
+
+    return mpGraphics;
 }
 
-RenderContext2::~RenderContext2() { disposeOnce(); }
-
-void RenderContext2::dispose()
+SalGraphics const* RenderContext2::GetGraphics() const
 {
-    mpAlphaVDev.disposeAndClear();
-    VclReferenceBase::dispose();
+    DBG_TESTSOLARMUTEX();
+
+    if (!mpGraphics && !AcquireGraphics())
+        SAL_WARN("vcl.gdi", "No mpGraphics set");
+
+    return mpGraphics;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
