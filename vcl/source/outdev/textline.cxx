@@ -807,23 +807,16 @@ void OutputDevice::SetOverlineColor()
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaOverlineColorAction(Color(), false));
 
-    maOverlineColor = COL_TRANSPARENT;
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->SetOverlineColor();
+    RenderContext2::SetOverlineColor();
 }
 
-void OutputDevice::SetOverlineColor(const Color& rColor)
+void OutputDevice::SetOverlineColor(Color const& rColor)
 {
-    Color aColor = GetDrawModeTextColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings());
-
     if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaOverlineColorAction(aColor, true));
+        mpMetaFile->AddAction(new MetaOverlineColorAction(
+            GetDrawModeTextColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings()), true));
 
-    maOverlineColor = aColor;
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->SetOverlineColor(COL_BLACK);
+    RenderContext2::SetOverlineColor(rColor);
 }
 
 void OutputDevice::DrawTextLine(const Point& rPos, tools::Long nWidth, FontStrikeout eStrikeout,

@@ -45,7 +45,7 @@ void RenderContext2::SetDigitLanguage(LanguageType eTextLanguage)
 
 Color const& RenderContext2::GetTextColor() const { return maTextColor; }
 
-void RenderContext2::SetTextColor(const Color& rColor)
+void RenderContext2::SetTextColor(Color const& rColor)
 {
     Color aColor = GetDrawModeTextColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings());
 
@@ -57,6 +57,26 @@ void RenderContext2::SetTextColor(const Color& rColor)
 
     if (mpAlphaVDev)
         mpAlphaVDev->SetTextColor(COL_BLACK);
+}
+
+bool RenderContext2::IsOverlineColor() const { return !maOverlineColor.IsTransparent(); }
+
+Color const& RenderContext2::GetOverlineColor() const { return maOverlineColor; }
+
+void RenderContext2::SetOverlineColor()
+{
+    maOverlineColor = COL_TRANSPARENT;
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->SetOverlineColor();
+}
+
+void RenderContext2::SetOverlineColor(Color const& rColor)
+{
+    maOverlineColor = GetDrawModeTextColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings());
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->SetOverlineColor(COL_BLACK);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
