@@ -783,23 +783,16 @@ void OutputDevice::SetTextLineColor()
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaTextLineColorAction(Color(), false));
 
-    maTextLineColor = COL_TRANSPARENT;
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->SetTextLineColor();
+    RenderContext2::SetTextLineColor();
 }
 
 void OutputDevice::SetTextLineColor(const Color& rColor)
 {
-    Color aColor = GetDrawModeTextColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings());
-
     if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaTextLineColorAction(aColor, true));
+        mpMetaFile->AddAction(new MetaTextLineColorAction(
+            GetDrawModeTextColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings()), true));
 
-    maTextLineColor = aColor;
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->SetTextLineColor(COL_BLACK);
+    RenderContext2::SetTextLineColor(rColor);
 }
 
 void OutputDevice::SetOverlineColor()

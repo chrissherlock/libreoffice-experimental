@@ -905,17 +905,10 @@ public:
                             DrawTextFlags nStyle, GDIMetaFile& rMtf);
 
     void SetTextColor(Color const& rColor) override;
-
-    void SetTextFillColor();
-    void SetTextFillColor(const Color& rColor);
-    Color GetTextFillColor() const;
-    bool IsTextFillColor() const { return !maFont.IsTransparent(); }
-
-    void SetTextLineColor();
-    void SetTextLineColor(const Color& rColor);
-    const Color& GetTextLineColor() const { return maTextLineColor; }
-    bool IsTextLineColor() const { return !maTextLineColor.IsTransparent(); }
-
+    void SetTextFillColor() override;
+    void SetTextFillColor(Color const& rColor) override;
+    void SetTextLineColor() override;
+    void SetTextLineColor(Color const& rColor) override;
     void SetOverlineColor() override;
     void SetOverlineColor(Color const& rColor) override;
 
