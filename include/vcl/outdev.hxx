@@ -324,7 +324,6 @@ private:
     OutDevViewType meOutDevViewType;
     vcl::Region maRegion; // contains the clip region, see SetClipRegion(...)
     Color maTextLineColor;
-    Color maOverlineColor;
 
     mutable bool mbClipRegion : 1;
     mutable bool mbDevOutput : 1;
@@ -920,10 +919,8 @@ public:
     const Color& GetTextLineColor() const { return maTextLineColor; }
     bool IsTextLineColor() const { return !maTextLineColor.IsTransparent(); }
 
-    void SetOverlineColor();
-    void SetOverlineColor(const Color& rColor);
-    const Color& GetOverlineColor() const { return maOverlineColor; }
-    bool IsOverlineColor() const { return !maOverlineColor.IsTransparent(); }
+    void SetOverlineColor() override;
+    void SetOverlineColor(Color const& rColor) override;
 
     void SetTextAlign(TextAlign eAlign);
     TextAlign GetTextAlign() const { return maFont.GetAlignment(); }

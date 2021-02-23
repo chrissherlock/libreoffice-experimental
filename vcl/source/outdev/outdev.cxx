@@ -80,7 +80,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mbClipRegion = false;
     mbDevOutput = false;
     mbOutputClipped = false;
-    maOverlineColor = COL_TRANSPARENT;
     mbInitClipRegion = true;
     mbClipRegionSet = false;
     mbTextLines = false;
