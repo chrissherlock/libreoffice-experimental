@@ -912,8 +912,7 @@ public:
     void SetOverlineColor() override;
     void SetOverlineColor(Color const& rColor) override;
 
-    void SetTextAlign(TextAlign eAlign);
-    TextAlign GetTextAlign() const { return maFont.GetAlignment(); }
+    void SetTextAlign(TextAlign eAlign) override;
 
     /** Width of the text.
 

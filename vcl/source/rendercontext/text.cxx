@@ -167,4 +167,18 @@ void RenderContext2::SetOverlineColor(Color const& rColor)
         mpAlphaVDev->SetOverlineColor(COL_BLACK);
 }
 
+TextAlign RenderContext2::GetTextAlign() const { return maFont.GetAlignment(); }
+
+void RenderContext2::SetTextAlign(TextAlign eAlign)
+{
+    if (maFont.GetAlignment() != eAlign)
+    {
+        maFont.SetAlignment(eAlign);
+        mbNewFont = true;
+    }
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->SetTextAlign(eAlign);
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

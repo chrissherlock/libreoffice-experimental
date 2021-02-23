@@ -106,6 +106,9 @@ public:
     virtual void SetOverlineColor();
     virtual void SetOverlineColor(Color const& rColor);
 
+    TextAlign GetTextAlign() const;
+    virtual void SetTextAlign(TextAlign eAlign);
+
     virtual void SetSettings(AllSettings const& rSettings);
     AllSettings const& GetSettings() const;
 
