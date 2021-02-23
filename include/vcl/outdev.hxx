@@ -312,9 +312,6 @@ private:
     std::vector<VCLXGraphics*>* mpUnoGraphicsList;
     vcl::ExtOutDevData* mpExtOutDevData;
 
-    // TEMP TEMP TEMP
-    VclPtr<VirtualDevice> mpAlphaVDev;
-
     /// font specific text alignment offsets in pixel units
     mutable tools::Long mnTextOffX;
     mutable tools::Long mnTextOffY;
