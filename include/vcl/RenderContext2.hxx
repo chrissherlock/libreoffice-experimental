@@ -91,6 +91,16 @@ public:
     Color const& GetTextColor() const;
     virtual void SetTextColor(Color const& rColor);
 
+    bool IsTextLineColor() const;
+    Color const& GetTextLineColor() const;
+    virtual void SetTextLineColor();
+    virtual void SetTextLineColor(Color const& rColor);
+
+    bool IsTextFillColor() const;
+    Color GetTextFillColor() const;
+    virtual void SetTextFillColor();
+    virtual void SetTextFillColor(Color const& rColor);
+
     bool IsOverlineColor() const;
     Color const& GetOverlineColor() const;
     virtual void SetOverlineColor();
@@ -487,6 +497,8 @@ protected:
     Color maFillColor;
     vcl::Font maFont;
     Color maTextColor;
+    Color maTextLineColor;
+    Color maTextFillColor;
     Color maOverlineColor;
     Wallpaper maBackground;
     Point maRefPoint;

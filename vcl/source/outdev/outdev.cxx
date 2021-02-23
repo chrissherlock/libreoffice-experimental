@@ -53,7 +53,6 @@ namespace
 OutputDevice::OutputDevice(OutDevType eOutDevType)
     : meOutDevType(eOutDevType)
     , maRegion(true)
-    , maTextLineColor(COL_TRANSPARENT)
 {
     mpUnoGraphicsList = nullptr;
     mpPrevGraphics = nullptr;

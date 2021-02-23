@@ -700,15 +700,7 @@ void OutputDevice::SetTextFillColor()
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaTextFillColorAction(Color(), false));
 
-    if (maFont.GetColor() != COL_TRANSPARENT)
-    {
-        maFont.SetFillColor(COL_TRANSPARENT);
-    }
-    if (!maFont.IsTransparent())
-        maFont.SetTransparent(true);
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->SetTextFillColor();
+    RenderContext2::SetTextFillColor();
 }
 
 void OutputDevice::SetTextFillColor(const Color& rColor)
@@ -723,20 +715,25 @@ void OutputDevice::SetTextFillColor(const Color& rColor)
                | DrawModeFlags::NoFill | DrawModeFlags::SettingsFill))
         {
             if (mnDrawMode & DrawModeFlags::BlackFill)
+            {
                 aColor = COL_BLACK;
+            }
             else if (mnDrawMode & DrawModeFlags::WhiteFill)
+            {
                 aColor = COL_WHITE;
+            }
             else if (mnDrawMode & DrawModeFlags::GrayFill)
             {
                 const sal_uInt8 cLum = aColor.GetLuminance();
                 aColor = Color(cLum, cLum, cLum);
             }
             else if (mnDrawMode & DrawModeFlags::SettingsFill)
+            {
                 aColor = GetSettings().GetStyleSettings().GetWindowColor();
+            }
             else if (mnDrawMode & DrawModeFlags::NoFill)
             {
                 aColor = COL_TRANSPARENT;
-                bTransFill = true;
             }
         }
     }
@@ -744,21 +741,7 @@ void OutputDevice::SetTextFillColor(const Color& rColor)
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaTextFillColorAction(aColor, true));
 
-    if (maFont.GetFillColor() != aColor)
-        maFont.SetFillColor(aColor);
-    if (maFont.IsTransparent() != bTransFill)
-        maFont.SetTransparent(bTransFill);
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->SetTextFillColor(COL_BLACK);
-}
-
-Color OutputDevice::GetTextFillColor() const
-{
-    if (maFont.IsTransparent())
-        return COL_TRANSPARENT;
-    else
-        return maFont.GetFillColor();
+    RenderContext2::SetTextFillColor(rColor);
 }
 
 void OutputDevice::SetTextAlign(TextAlign eAlign)
