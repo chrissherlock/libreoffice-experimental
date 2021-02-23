@@ -749,14 +749,7 @@ void OutputDevice::SetTextAlign(TextAlign eAlign)
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaTextAlignAction(eAlign));
 
-    if (maFont.GetAlignment() != eAlign)
-    {
-        maFont.SetAlignment(eAlign);
-        mbNewFont = true;
-    }
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->SetTextAlign(eAlign);
+    RenderContext2::SetTextAlign(eAlign);
 }
 
 vcl::Region OutputDevice::GetOutputBoundsClipRegion() const { return GetClipRegion(); }
