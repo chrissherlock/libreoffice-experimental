@@ -606,8 +606,8 @@ void OutputDevice::DrawTransparent(const GDIMetaFile& rMtf, const Point& rPos, c
             // Create transparent buffer
             ScopedVclPtrInstance<VirtualDevice> xVDev(DeviceFormat::DEFAULT, DeviceFormat::DEFAULT);
 
-            xVDev->mnDPIX = mnDPIX;
-            xVDev->mnDPIY = mnDPIY;
+            xVDev->SetDPIX(GetDPIX());
+            xVDev->SetDPIY(GetDPIY());
 
             if (xVDev->SetOutputSizePixel(aDstRect.GetSize()))
             {

@@ -177,9 +177,9 @@ void VirtualDevice::ImplInitVirDev( const OutputDevice* pOutDev,
     mbDevOutput     = true;
     mxFontCollection = pSVData->maGDIData.mxScreenFontList;
     mxFontCache     = pSVData->maGDIData.mxScreenFontCache;
-    mnDPIX          = pOutDev->mnDPIX;
-    mnDPIY          = pOutDev->mnDPIY;
-    mnDPIScalePercentage = pOutDev->mnDPIScalePercentage;
+    SetDPIX(pOutDev->GetDPIX());
+    SetDPIY(pOutDev->GetDPIY());
+    SetDPIScalePercentage(pOutDev->GetDPIScalePercentage());
     maFont          = pOutDev->maFont;
 
     if( maTextColor != pOutDev->maTextColor )
@@ -457,9 +457,9 @@ bool VirtualDevice::IsVirtual() const
 
 void VirtualDevice::ImplSetReferenceDevice( RefDevMode i_eRefDevMode, sal_Int32 i_nDPIX, sal_Int32 i_nDPIY )
 {
-    mnDPIX = i_nDPIX;
-    mnDPIY = i_nDPIY;
-    mnDPIScalePercentage = 100;
+    SetDPIX(i_nDPIX);
+    SetDPIY(i_nDPIY);
+    SetDPIScalePercentage(100);
 
     EnableOutput( false );  // prevent output on reference device
     mbScreenComp = false;

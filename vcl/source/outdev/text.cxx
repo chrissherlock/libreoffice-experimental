@@ -360,7 +360,7 @@ void OutputDevice::ImplDrawSpecialText(SalLayout& rSalLayout)
         // calculate offset - for high resolution printers the offset
         // should be greater so that the effect is visible
         tools::Long nOff = 1;
-        nOff += mnDPIX / 300;
+        nOff += GetDPIX() / 300;
 
         if (eRelief == FontRelief::Engraved)
             nOff = -nOff;

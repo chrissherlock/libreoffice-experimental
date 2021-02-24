@@ -1133,9 +1133,9 @@ void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* p
     }
 
     // setup the scale factor for HiDPI displays
-    mnDPIScalePercentage = CountDPIScaleFactor(mpWindowImpl->mpFrameData->mnDPIY);
-    mnDPIX = mpWindowImpl->mpFrameData->mnDPIX;
-    mnDPIY = mpWindowImpl->mpFrameData->mnDPIY;
+    SetDPIScalePercentage(CountDPIScaleFactor(mpWindowImpl->mpFrameData->mnDPIY));
+    SetDPIX(mpWindowImpl->mpFrameData->mnDPIX);
+    SetDPIY(mpWindowImpl->mpFrameData->mnDPIY);
 
     if (!utl::ConfigManager::IsFuzzing())
     {
@@ -1335,19 +1335,19 @@ void Window::ImplInitResolutionSettings()
     // recalculate AppFont-resolution and DPI-resolution
     if (mpWindowImpl->mbFrame)
     {
-        mnDPIX = mpWindowImpl->mpFrameData->mnDPIX;
-        mnDPIY = mpWindowImpl->mpFrameData->mnDPIY;
+        SetDPIX(mpWindowImpl->mpFrameData->mnDPIX);
+        SetDPIY(mpWindowImpl->mpFrameData->mnDPIY);
 
         // setup the scale factor for HiDPI displays
-        mnDPIScalePercentage = CountDPIScaleFactor(mpWindowImpl->mpFrameData->mnDPIY);
+        SetDPIScalePercentage(CountDPIScaleFactor(mpWindowImpl->mpFrameData->mnDPIY));
         const StyleSettings& rStyleSettings = mxSettings->GetStyleSettings();
         SetPointFont(*this, rStyleSettings.GetAppFont());
     }
     else if ( mpWindowImpl->mpParent )
     {
-        mnDPIX  = mpWindowImpl->mpParent->mnDPIX;
-        mnDPIY  = mpWindowImpl->mpParent->mnDPIY;
-        mnDPIScalePercentage = mpWindowImpl->mpParent->mnDPIScalePercentage;
+        SetDPIX(mpWindowImpl->mpParent->GetDPIX());
+        SetDPIY(mpWindowImpl->mpParent->GetDPIY());
+        SetDPIScalePercentage(mpWindowImpl->mpParent->GetDPIScalePercentage());
     }
 
     // update the recalculated values for logical units
@@ -1756,7 +1756,7 @@ void Window::ImplNewInputContext()
             if ( rFont.GetFontSize().Height() )
                 aSize.setHeight( 1 );
             else
-                aSize.setHeight( (12*pFocusWin->mnDPIY)/72 );
+                aSize.setHeight( (12*pFocusWin->GetDPIY())/72 );
         }
         pFontInstance = pFocusWin->mxFontCache->GetFontInstance( pFocusWin->mxFontCollection.get(),
                          rFont, aSize, static_cast<float>(aSize.Height()) );

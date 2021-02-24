@@ -68,9 +68,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mnOutOffY = 0;
     mnOutWidth = 0;
     mnOutHeight = 0;
-    mnDPIX = 0;
-    mnDPIY = 0;
-    mnDPIScalePercentage = 100;
     mnTextOffX = 0;
     mnTextOffY = 0;
     mnOutOffOrigX = 0;
@@ -206,10 +203,6 @@ sal_uInt16 OutputDevice::GetBitCount() const
 
     return mpGraphics->GetBitCount();
 }
-
-void OutputDevice::SetOutOffXPixel(tools::Long nOutOffX) { mnOutOffX = nOutOffX; }
-
-void OutputDevice::SetOutOffYPixel(tools::Long nOutOffY) { mnOutOffY = nOutOffY; }
 
 css::uno::Reference<css::awt::XGraphics> OutputDevice::CreateUnoGraphics()
 {

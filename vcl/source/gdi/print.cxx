@@ -772,8 +772,8 @@ void Printer::ImplInitDisplay()
     mpDisplayDev = VclPtr<VirtualDevice>::Create();
     mxFontCollection    = pSVData->maGDIData.mxScreenFontList;
     mxFontCache         = pSVData->maGDIData.mxScreenFontCache;
-    mnDPIX              = mpDisplayDev->mnDPIX;
-    mnDPIY              = mpDisplayDev->mnDPIY;
+    SetDPIX(mpDisplayDev->GetDPIX());
+    SetDPIY(mpDisplayDev->GetDPIY());
 }
 
 void Printer::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
@@ -912,7 +912,12 @@ void Printer::ImplUpdatePageData()
     if ( !AcquireGraphics() )
         return;
 
-    mpGraphics->GetResolution( mnDPIX, mnDPIY );
+    sal_Int32 nDPIX = GetDPIX();
+    sal_Int32 nDPIY = GetDPIY();
+    mpGraphics->GetResolution(nDPIX, nDPIY);
+    SetDPIX(nDPIX);
+    SetDPIY(nDPIY);
+
     mpInfoPrinter->GetPageInfo( &maJobSetup.ImplGetConstData(),
                                 mnOutWidth, mnOutHeight,
                                 maPageOffset,

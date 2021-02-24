@@ -689,8 +689,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
 
         // create an OutputDevice to record mapmode changes and the like
         ScopedVclPtrInstance< VirtualDevice > aMapModeVDev;
-        aMapModeVDev->mnDPIX = mnDPIX;
-        aMapModeVDev->mnDPIY = mnDPIY;
+        aMapModeVDev->SetDPIX(GetDPIX());
+        aMapModeVDev->SetDPIY(GetDPIY());
         aMapModeVDev->EnableOutput(false);
 
         // weed out page-filling background objects (if they are
@@ -1127,8 +1127,10 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                                     aPaintVDev->Push();
                                     aMapVDev->Push();
 
-                                    aMapVDev->mnDPIX = aPaintVDev->mnDPIX = mnDPIX;
-                                    aMapVDev->mnDPIY = aPaintVDev->mnDPIY = mnDPIY;
+                                    aMapVDev->SetDPIX(GetDPIX());
+                                    aPaintVDev->SetDPIX(GetDPIX());
+                                    aMapVDev->SetDPIY(GetDPIY());
+                                    aPaintVDev->SetDPIY(GetDPIY());
 
                                     aPaintVDev->EnableOutput(false);
 
