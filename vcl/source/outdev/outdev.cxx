@@ -90,7 +90,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mbMap = false;
     mbClipRegion = false;
     mbBackground = false;
-    mbOutput = true;
     mbDevOutput = false;
     mbOutputClipped = false;
     maTextColor = COL_BLACK;

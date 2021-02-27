@@ -411,7 +411,6 @@ private:
     mutable bool mbMap : 1;
     mutable bool mbClipRegion : 1;
     mutable bool mbBackground : 1;
-    mutable bool mbOutput : 1;
     mutable bool mbDevOutput : 1;
     mutable bool mbOutputClipped : 1;
     mutable bool mbLineColor : 1;
@@ -581,7 +580,6 @@ public:
     sal_uInt32 GetGCStackDepth() const;
     void ClearStack();
 
-    void EnableOutput(bool bEnable = true);
     bool IsOutputEnabled() const { return mbOutput; }
     bool IsDeviceOutputNecessary() const { return (mbOutput && mbDevOutput); }
 

@@ -41,6 +41,8 @@ public:
     SalGraphics const* GetGraphics() const;
     SalGraphics* GetGraphics();
 
+    void EnableOutput(bool bEnable = true);
+
 protected:
     virtual void dispose() override;
 
@@ -75,6 +77,8 @@ protected:
 
     mutable SalGraphics* mpGraphics; ///< Graphics context to draw on
     VclPtr<VirtualDevice> mpAlphaVDev;
+
+    mutable bool mbOutput : 1;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
