@@ -41,6 +41,7 @@ public:
     SalGraphics const* GetGraphics() const;
     SalGraphics* GetGraphics();
 
+    bool IsOutputEnabled() const;
     void EnableOutput(bool bEnable = true);
 
 protected:
@@ -78,6 +79,7 @@ protected:
     mutable SalGraphics* mpGraphics; ///< Graphics context to draw on
     VclPtr<VirtualDevice> mpAlphaVDev;
 
+private:
     mutable bool mbOutput : 1;
 };
 
