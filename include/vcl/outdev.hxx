@@ -580,8 +580,7 @@ public:
     sal_uInt32 GetGCStackDepth() const;
     void ClearStack();
 
-    bool IsOutputEnabled() const { return mbOutput; }
-    bool IsDeviceOutputNecessary() const { return (mbOutput && mbDevOutput); }
+    bool IsDeviceOutputNecessary() const { return (IsOutputEnabled() && mbDevOutput); }
 
     void SetAntialiasing(AntialiasingFlags nMode);
     AntialiasingFlags GetAntialiasing() const { return mnAntialiasing; }

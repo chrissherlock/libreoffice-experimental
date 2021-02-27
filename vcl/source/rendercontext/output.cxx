@@ -20,6 +20,8 @@
 #include <vcl/RenderContext2.hxx>
 #include <vcl/virdev.hxx>
 
+bool RenderContext2::IsOutputEnabled() const { return mbOutput; }
+
 void RenderContext2::EnableOutput(bool bEnable)
 {
     mbOutput = bEnable;
