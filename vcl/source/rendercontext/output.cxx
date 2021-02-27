@@ -20,19 +20,12 @@
 #include <vcl/RenderContext2.hxx>
 #include <vcl/virdev.hxx>
 
-RenderContext2::RenderContext2()
-    : mpGraphics(nullptr)
-    , mpAlphaVDev(nullptr)
-    , mbOutput(true)
+void RenderContext2::EnableOutput(bool bEnable)
 {
-}
+    mbOutput = bEnable;
 
-RenderContext2::~RenderContext2() { disposeOnce(); }
-
-void RenderContext2::dispose()
-{
-    mpAlphaVDev.disposeAndClear();
-    VclReferenceBase::dispose();
+    if (mpAlphaVDev)
+        mpAlphaVDev->EnableOutput(bEnable);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

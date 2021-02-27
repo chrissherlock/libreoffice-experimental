@@ -123,6 +123,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/bubblewindow \
     vcl/source/rendercontext/RenderContext2 \
     vcl/source/rendercontext/graphics \
+    vcl/source/rendercontext/output \
     vcl/source/window/errinf \
     vcl/source/window/settings \
     vcl/source/window/paint \
