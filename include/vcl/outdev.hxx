@@ -208,21 +208,6 @@ template <> struct typed_flags<DrawGridFlags> : is_typed_flags<DrawGridFlags, 0x
 };
 }
 
-// Antialiasing
-enum class AntialiasingFlags
-{
-    NONE = 0x0000,
-    DisableText = 0x0001,
-    Enable = 0x0002,
-    PixelSnapHairline = 0x0004,
-};
-namespace o3tl
-{
-template <> struct typed_flags<AntialiasingFlags> : is_typed_flags<AntialiasingFlags, 0x07>
-{
-};
-}
-
 // AddFontSubstitute() flags
 enum class AddFontSubstituteFlags
 {
@@ -370,7 +355,6 @@ private:
     std::unique_ptr<AllSettings> mxSettings;
     MapMode maMapMode;
     Point maRefPoint;
-    AntialiasingFlags mnAntialiasing;
     LanguageType meTextLanguage;
 
     mutable bool mbMap : 1;
@@ -541,9 +525,6 @@ public:
     void ClearStack();
 
     bool IsDeviceOutputNecessary() const { return (IsOutputEnabled() && mbDevOutput); }
-
-    void SetAntialiasing(AntialiasingFlags nMode);
-    AntialiasingFlags GetAntialiasing() const { return mnAntialiasing; }
 
     void SetLayoutMode(ComplexTextLayoutFlags nTextLayoutMode) override;
 

@@ -224,23 +224,6 @@ void OutputDevice::ClearStack()
         Pop();
 }
 
-void OutputDevice::SetAntialiasing(AntialiasingFlags nMode)
-{
-    if (mnAntialiasing != nMode)
-    {
-        mnAntialiasing = nMode;
-        mbInitFont = true;
-
-        if (mpGraphics)
-        {
-            mpGraphics->setAntiAlias(bool(mnAntialiasing & AntialiasingFlags::Enable));
-        }
-    }
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->SetAntialiasing(nMode);
-}
-
 void OutputDevice::SetDigitLanguage(LanguageType eTextLanguage)
 {
     if (mpMetaFile)

@@ -20,6 +20,7 @@
 #pragma once
 
 #include <vcl/dllapi.h>
+#include <vcl/flags/AntialiasingFlags.hxx>
 #include <vcl/flags/ComplexTextLayoutFlags.hxx>
 #include <vcl/flags/DrawModeFlags.hxx>
 #include <vcl/vclptr.hxx>
@@ -51,6 +52,9 @@ public:
 
     DrawModeFlags GetDrawMode() const;
     void SetDrawMode(DrawModeFlags nDrawMode);
+
+    AntialiasingFlags GetAntialiasing() const;
+    void SetAntialiasing(AntialiasingFlags nMode);
 
 protected:
     virtual void dispose() override;
@@ -89,6 +93,7 @@ protected:
 
     ComplexTextLayoutFlags mnTextLayoutMode;
     DrawModeFlags mnDrawMode;
+    AntialiasingFlags mnAntialiasing;
 
     mutable bool mbInitFont : 1;
 
