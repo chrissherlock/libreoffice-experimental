@@ -68,50 +68,49 @@ void OutputDevice::Push(PushFlags nFlags)
     rState.mnFlags = nFlags;
 
     if (nFlags & PushFlags::LINECOLOR && mbLineColor)
-    {
         rState.mpLineColor = maLineColor;
-    }
+
     if (nFlags & PushFlags::FILLCOLOR && mbFillColor)
-    {
         rState.mpFillColor = maFillColor;
-    }
+
     if (nFlags & PushFlags::FONT)
         rState.mpFont.reset(new vcl::Font(maFont));
+
     if (nFlags & PushFlags::TEXTCOLOR)
         rState.mpTextColor = GetTextColor();
+
     if (nFlags & PushFlags::TEXTFILLCOLOR && IsTextFillColor())
-    {
         rState.mpTextFillColor = GetTextFillColor();
-    }
+
     if (nFlags & PushFlags::TEXTLINECOLOR && IsTextLineColor())
-    {
         rState.mpTextLineColor = GetTextLineColor();
-    }
+
     if (nFlags & PushFlags::OVERLINECOLOR && IsOverlineColor())
-    {
         rState.mpOverlineColor = GetOverlineColor();
-    }
+
     if (nFlags & PushFlags::TEXTALIGN)
         rState.meTextAlign = GetTextAlign();
+
     if (nFlags & PushFlags::TEXTLAYOUTMODE)
         rState.mnTextLayoutMode = GetLayoutMode();
+
     if (nFlags & PushFlags::TEXTLANGUAGE)
         rState.meTextLanguage = GetDigitLanguage();
+
     if (nFlags & PushFlags::RASTEROP)
         rState.meRasterOp = GetRasterOp();
+
     if (nFlags & PushFlags::MAPMODE)
     {
         rState.mpMapMode = maMapMode;
         rState.mbMapActive = mbMap;
     }
+
     if (nFlags & PushFlags::CLIPREGION && mbClipRegion)
-    {
         rState.mpClipRegion.reset(new vcl::Region(maRegion));
-    }
+
     if (nFlags & PushFlags::REFPOINT && mbRefPoint)
-    {
         rState.mpRefPoint = maRefPoint;
-    }
 
     if (mpAlphaVDev)
         mpAlphaVDev->Push();
