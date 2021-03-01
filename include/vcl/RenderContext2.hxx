@@ -90,6 +90,8 @@ protected:
     ComplexTextLayoutFlags mnTextLayoutMode;
     DrawModeFlags mnDrawMode;
 
+    mutable bool mbInitFont : 1;
+
 private:
     mutable bool mbOutput : 1;
 };

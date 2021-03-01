@@ -25,6 +25,7 @@ RenderContext2::RenderContext2()
     : mpGraphics(nullptr)
     , mpAlphaVDev(nullptr)
     , mnDrawMode(DrawModeFlags::Default)
+    , mbInitFont(true)
     , mbOutput(true)
 {
     // #i84553 toop BiDi preference to RTL
