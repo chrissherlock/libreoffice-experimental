@@ -229,10 +229,7 @@ void OutputDevice::SetDigitLanguage(LanguageType eTextLanguage)
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaTextLanguageAction(eTextLanguage));
 
-    meTextLanguage = eTextLanguage;
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->SetDigitLanguage(eTextLanguage);
+    RenderContext2::SetDigitLanguage(eTextLanguage);
 }
 
 void OutputDevice::SetRasterOp(RasterOp eRasterOp)
