@@ -355,7 +355,6 @@ private:
     std::unique_ptr<AllSettings> mxSettings;
     MapMode maMapMode;
     Point maRefPoint;
-    LanguageType meTextLanguage;
 
     mutable bool mbMap : 1;
     mutable bool mbClipRegion : 1;
@@ -525,13 +524,10 @@ public:
     void ClearStack();
 
     bool IsDeviceOutputNecessary() const { return (IsOutputEnabled() && mbDevOutput); }
-
     void SetLayoutMode(ComplexTextLayoutFlags nTextLayoutMode) override;
-
-    void SetDigitLanguage(LanguageType);
-    LanguageType GetDigitLanguage() const { return meTextLanguage; }
-
+    void SetDigitLanguage(LanguageType) override;
     void SetRasterOp(RasterOp eRasterOp);
+
     RasterOp GetRasterOp() const { return meRasterOp; }
 
     /**

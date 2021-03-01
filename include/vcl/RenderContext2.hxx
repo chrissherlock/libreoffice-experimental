@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <i18nlangtag/lang.h>
+
 #include <vcl/dllapi.h>
 #include <vcl/flags/AntialiasingFlags.hxx>
 #include <vcl/flags/ComplexTextLayoutFlags.hxx>
@@ -55,6 +57,9 @@ public:
 
     AntialiasingFlags GetAntialiasing() const;
     void SetAntialiasing(AntialiasingFlags nMode);
+
+    LanguageType GetDigitLanguage() const;
+    virtual void SetDigitLanguage(LanguageType);
 
 protected:
     virtual void dispose() override;
@@ -94,6 +99,7 @@ protected:
     ComplexTextLayoutFlags mnTextLayoutMode;
     DrawModeFlags mnDrawMode;
     AntialiasingFlags mnAntialiasing;
+    LanguageType meTextLanguage;
 
     mutable bool mbInitFont : 1;
 

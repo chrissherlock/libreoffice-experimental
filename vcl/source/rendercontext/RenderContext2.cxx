@@ -26,6 +26,7 @@ RenderContext2::RenderContext2()
     , mpAlphaVDev(nullptr)
     , mnDrawMode(DrawModeFlags::Default)
     , mnAntialiasing(AntialiasingFlags::NONE)
+    , meTextLanguage(LANGUAGE_SYSTEM) // TODO: get default from configuration?
     , mbInitFont(true)
     , mbOutput(true)
 {

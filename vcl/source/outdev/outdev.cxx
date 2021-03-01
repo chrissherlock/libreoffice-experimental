@@ -89,7 +89,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     maTextColor = COL_BLACK;
     maOverlineColor = COL_TRANSPARENT;
     meRasterOp = RasterOp::OverPaint;
-    meTextLanguage = LANGUAGE_SYSTEM; // TODO: get default from configuration?
     mbLineColor = true;
     mbFillColor = true;
     mbInitLineColor = true;
