@@ -18,30 +18,26 @@
  */
 
 #include <vcl/RenderContext2.hxx>
-#include <vcl/settings.hxx>
+#include <vcl/flags/AntialiasingFlags.hxx>
 #include <vcl/virdev.hxx>
 
-RenderContext2::RenderContext2()
-    : mpGraphics(nullptr)
-    , mpAlphaVDev(nullptr)
-    , mnDrawMode(DrawModeFlags::Default)
-    , mnAntialiasing(AntialiasingFlags::NONE)
-    , mbInitFont(true)
-    , mbOutput(true)
-{
-    // #i84553 toop BiDi preference to RTL
-    if (AllSettings::GetLayoutRTL())
-        mnTextLayoutMode = ComplexTextLayoutFlags::BiDiRtl | ComplexTextLayoutFlags::TextOriginLeft;
-    else
-        mnTextLayoutMode = ComplexTextLayoutFlags::Default;
-}
+#include <salgdi.hxx>
 
-RenderContext2::~RenderContext2() { disposeOnce(); }
+AntialiasingFlags RenderContext2::GetAntialiasing() const { return mnAntialiasing; }
 
-void RenderContext2::dispose()
+void RenderContext2::SetAntialiasing(AntialiasingFlags nMode)
 {
-    mpAlphaVDev.disposeAndClear();
-    VclReferenceBase::dispose();
+    if (mnAntialiasing != nMode)
+    {
+        mnAntialiasing = nMode;
+        mbInitFont = true;
+
+        if (mpGraphics)
+            mpGraphics->setAntiAlias(bool(mnAntialiasing & AntialiasingFlags::Enable));
+    }
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->SetAntialiasing(nMode);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

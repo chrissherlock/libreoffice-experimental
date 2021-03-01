@@ -17,31 +17,22 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <vcl/RenderContext2.hxx>
-#include <vcl/settings.hxx>
-#include <vcl/virdev.hxx>
+#pragma once
 
-RenderContext2::RenderContext2()
-    : mpGraphics(nullptr)
-    , mpAlphaVDev(nullptr)
-    , mnDrawMode(DrawModeFlags::Default)
-    , mnAntialiasing(AntialiasingFlags::NONE)
-    , mbInitFont(true)
-    , mbOutput(true)
+#include <o3tl/typed_flags_set.hxx>
+
+enum class AntialiasingFlags
 {
-    // #i84553 toop BiDi preference to RTL
-    if (AllSettings::GetLayoutRTL())
-        mnTextLayoutMode = ComplexTextLayoutFlags::BiDiRtl | ComplexTextLayoutFlags::TextOriginLeft;
-    else
-        mnTextLayoutMode = ComplexTextLayoutFlags::Default;
-}
-
-RenderContext2::~RenderContext2() { disposeOnce(); }
-
-void RenderContext2::dispose()
+    NONE = 0x0000,
+    DisableText = 0x0001,
+    Enable = 0x0002,
+    PixelSnapHairline = 0x0004,
+};
+namespace o3tl
 {
-    mpAlphaVDev.disposeAndClear();
-    VclReferenceBase::dispose();
+template <> struct typed_flags<AntialiasingFlags> : is_typed_flags<AntialiasingFlags, 0x07>
+{
+};
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
