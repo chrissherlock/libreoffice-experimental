@@ -382,7 +382,6 @@ private:
     mutable bool mbFillColor : 1;
     mutable bool mbInitLineColor : 1;
     mutable bool mbInitFillColor : 1;
-    mutable bool mbInitFont : 1;
     mutable bool mbInitTextColor : 1;
     mutable bool mbInitClipRegion : 1;
     mutable bool mbClipRegionSet : 1;
