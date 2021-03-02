@@ -52,7 +52,6 @@ namespace
 OutputDevice::OutputDevice(OutDevType eOutDevType)
     : meOutDevType(eOutDevType)
     , maRegion(true)
-    , maFillColor(COL_WHITE)
     , maTextLineColor(COL_TRANSPARENT)
 {
     mpUnoGraphicsList = nullptr;
@@ -89,9 +88,7 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     maOverlineColor = COL_TRANSPARENT;
     meRasterOp = RasterOp::OverPaint;
     mbLineColor = true;
-    mbFillColor = true;
     mbInitLineColor = true;
-    mbInitFillColor = true;
     mbInitTextColor = true;
     mbInitClipRegion = true;
     mbClipRegionSet = false;
