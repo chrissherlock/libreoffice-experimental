@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <tools/color.hxx>
 #include <i18nlangtag/lang.h>
 
 #include <vcl/dllapi.h>
@@ -28,6 +29,7 @@
 #include <vcl/vclptr.hxx>
 #include <vcl/vclreferencebase.hxx>
 
+class AllSettings;
 class SalGraphics;
 class VirtualDevice;
 
@@ -60,6 +62,9 @@ public:
 
     LanguageType GetDigitLanguage() const;
     virtual void SetDigitLanguage(LanguageType);
+
+    virtual void SetSettings(AllSettings const& rSettings);
+    AllSettings const& GetSettings() const;
 
 protected:
     virtual void dispose() override;
@@ -99,9 +104,13 @@ protected:
     ComplexTextLayoutFlags mnTextLayoutMode;
     DrawModeFlags mnDrawMode;
     AntialiasingFlags mnAntialiasing;
+    std::unique_ptr<AllSettings> mxSettings;
     LanguageType meTextLanguage;
+    Color maFillColor;
 
     mutable bool mbInitFont : 1;
+    mutable bool mbInitFillColor : 1;
+    mutable bool mbFillColor : 1;
 
 private:
     mutable bool mbOutput : 1;

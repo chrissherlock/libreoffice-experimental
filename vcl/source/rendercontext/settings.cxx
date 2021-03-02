@@ -19,32 +19,16 @@
 
 #include <vcl/RenderContext2.hxx>
 #include <vcl/settings.hxx>
-#include <vcl/svapp.hxx>
 #include <vcl/virdev.hxx>
 
-RenderContext2::RenderContext2()
-    : mpGraphics(nullptr)
-    , mpAlphaVDev(nullptr)
-    , mnDrawMode(DrawModeFlags::Default)
-    , mnAntialiasing(AntialiasingFlags::NONE)
-    , mxSettings(new AllSettings(Application::GetSettings()))
-    , meTextLanguage(LANGUAGE_SYSTEM) // TODO: get default from configuration?
-    , mbInitFont(true)
-    , mbOutput(true)
-{
-    // #i84553 toop BiDi preference to RTL
-    if (AllSettings::GetLayoutRTL())
-        mnTextLayoutMode = ComplexTextLayoutFlags::BiDiRtl | ComplexTextLayoutFlags::TextOriginLeft;
-    else
-        mnTextLayoutMode = ComplexTextLayoutFlags::Default;
-}
+const AllSettings& RenderContext2::GetSettings() const { return *mxSettings; }
 
-RenderContext2::~RenderContext2() { disposeOnce(); }
-
-void RenderContext2::dispose()
+void RenderContext2::SetSettings(AllSettings const& rSettings)
 {
-    mpAlphaVDev.disposeAndClear();
-    VclReferenceBase::dispose();
+    *mxSettings = rSettings;
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->SetSettings(rSettings);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

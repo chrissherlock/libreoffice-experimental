@@ -352,7 +352,6 @@ private:
     Color maOverlineColor;
     RasterOp meRasterOp;
     Wallpaper maBackground;
-    std::unique_ptr<AllSettings> mxSettings;
     MapMode maMapMode;
     Point maRefPoint;
 
@@ -386,9 +385,6 @@ protected:
 public:
     void SetConnectMetaFile(GDIMetaFile* pMtf);
     GDIMetaFile* GetConnectMetaFile() const { return mpMetaFile; }
-
-    virtual void SetSettings(const AllSettings& rSettings);
-    const AllSettings& GetSettings() const { return *mxSettings; }
 
     SystemGraphicsData GetSystemGfxData() const;
     bool SupportsCairo() const;
@@ -546,8 +542,8 @@ public:
     bool IsLineColor() const { return mbLineColor; }
 
     void SetFillColor();
-    void SetFillColor(const Color& rColor);
-    const Color& GetFillColor() const { return maFillColor; }
+    void SetFillColor(Color const& rColor);
+    Color const& GetFillColor() const { return maFillColor; }
     bool IsFillColor() const { return mbFillColor; }
 
     void SetBackground();
