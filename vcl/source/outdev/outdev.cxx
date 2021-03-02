@@ -54,7 +54,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     , maRegion(true)
     , maFillColor(COL_WHITE)
     , maTextLineColor(COL_TRANSPARENT)
-    , mxSettings(new AllSettings(Application::GetSettings()))
 {
     mpUnoGraphicsList = nullptr;
     mpPrevGraphics = nullptr;
@@ -167,14 +166,6 @@ void OutputDevice::dispose()
 bool OutputDevice::IsVirtual() const { return false; }
 
 void OutputDevice::SetConnectMetaFile(GDIMetaFile* pMtf) { mpMetaFile = pMtf; }
-
-void OutputDevice::SetSettings(const AllSettings& rSettings)
-{
-    *mxSettings = rSettings;
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->SetSettings(rSettings);
-}
 
 SystemGraphicsData OutputDevice::GetSystemGfxData() const
 {
