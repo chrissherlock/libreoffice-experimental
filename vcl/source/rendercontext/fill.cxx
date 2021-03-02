@@ -19,35 +19,52 @@
 
 #include <vcl/RenderContext2.hxx>
 #include <vcl/settings.hxx>
-#include <vcl/svapp.hxx>
 #include <vcl/virdev.hxx>
 
-RenderContext2::RenderContext2()
-    : mpGraphics(nullptr)
-    , mpAlphaVDev(nullptr)
-    , mnDrawMode(DrawModeFlags::Default)
-    , mnAntialiasing(AntialiasingFlags::NONE)
-    , mxSettings(new AllSettings(Application::GetSettings()))
-    , meTextLanguage(LANGUAGE_SYSTEM) // TODO: get default from configuration?
-    , maFillColor(COL_WHITE)
-    , mbInitFont(true)
-    , mbInitFillColor(true)
-    , mbFillColor(true)
-    , mbOutput(true)
+#include <drawmode.hxx>
+
+Color const& RenderContext2::GetFillColor() const { return maFillColor; }
+
+bool RenderContext2::IsFillColor() const { return mbFillColor; }
+
+void RenderContext2::SetFillColor()
 {
-    // #i84553 toop BiDi preference to RTL
-    if (AllSettings::GetLayoutRTL())
-        mnTextLayoutMode = ComplexTextLayoutFlags::BiDiRtl | ComplexTextLayoutFlags::TextOriginLeft;
-    else
-        mnTextLayoutMode = ComplexTextLayoutFlags::Default;
+    if (mbFillColor)
+    {
+        mbInitFillColor = true;
+        mbFillColor = false;
+        maFillColor = COL_TRANSPARENT;
+    }
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->SetFillColor();
 }
 
-RenderContext2::~RenderContext2() { disposeOnce(); }
-
-void RenderContext2::dispose()
+void RenderContext2::SetFillColor(Color const& rColor)
 {
-    mpAlphaVDev.disposeAndClear();
-    VclReferenceBase::dispose();
+    Color aColor = GetDrawModeFillColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings());
+
+    if (aColor.IsTransparent())
+    {
+        if (mbFillColor)
+        {
+            mbInitFillColor = true;
+            mbFillColor = false;
+            maFillColor = COL_TRANSPARENT;
+        }
+    }
+    else
+    {
+        if (maFillColor != aColor)
+        {
+            mbInitFillColor = true;
+            mbFillColor = true;
+            maFillColor = aColor;
+        }
+    }
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->SetFillColor(COL_BLACK);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

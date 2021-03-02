@@ -260,45 +260,15 @@ void OutputDevice::SetFillColor()
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaFillColorAction(Color(), false));
 
-    if (mbFillColor)
-    {
-        mbInitFillColor = true;
-        mbFillColor = false;
-        maFillColor = COL_TRANSPARENT;
-    }
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->SetFillColor();
+    RenderContext2::SetFillColor();
 }
 
-void OutputDevice::SetFillColor(const Color& rColor)
+void OutputDevice::SetFillColor(Color const& rColor)
 {
-    Color aColor = GetDrawModeFillColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings());
-
     if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaFillColorAction(aColor, true));
+        mpMetaFile->AddAction(new MetaFillColorAction(GetDrawModeFillColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings()), true));
 
-    if (aColor.IsTransparent())
-    {
-        if (mbFillColor)
-        {
-            mbInitFillColor = true;
-            mbFillColor = false;
-            maFillColor = COL_TRANSPARENT;
-        }
-    }
-    else
-    {
-        if (maFillColor != aColor)
-        {
-            mbInitFillColor = true;
-            mbFillColor = true;
-            maFillColor = aColor;
-        }
-    }
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->SetFillColor(COL_BLACK);
+    RenderContext2::SetFillColor(rColor);
 }
 
 void OutputDevice::SetLineColor()

@@ -63,6 +63,11 @@ public:
     LanguageType GetDigitLanguage() const;
     virtual void SetDigitLanguage(LanguageType);
 
+    Color const& GetFillColor() const;
+    bool IsFillColor() const;
+    virtual void SetFillColor();
+    virtual void SetFillColor(Color const& rColor);
+
     virtual void SetSettings(AllSettings const& rSettings);
     AllSettings const& GetSettings() const;
 
