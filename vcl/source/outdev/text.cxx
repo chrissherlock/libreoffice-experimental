@@ -685,21 +685,13 @@ tools::Long OutputDevice::ImplGetTextLines(ImplMultiTextLineInfo& rLineInfo, too
     return nMaxLineWidth;
 }
 
-void OutputDevice::SetTextColor(const Color& rColor)
+void OutputDevice::SetTextColor(Color const& rColor)
 {
-    Color aColor = GetDrawModeTextColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings());
-
     if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaTextColorAction(aColor));
+        mpMetaFile->AddAction(new MetaTextColorAction(
+            GetDrawModeTextColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings())));
 
-    if (maTextColor != aColor)
-    {
-        maTextColor = aColor;
-        mbInitTextColor = true;
-    }
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->SetTextColor(COL_BLACK);
+    RenderContext2::SetTextColor(rColor);
 }
 
 void OutputDevice::SetTextFillColor()

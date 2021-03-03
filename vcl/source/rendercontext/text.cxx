@@ -18,7 +18,10 @@
  */
 
 #include <vcl/RenderContext2.hxx>
+#include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
+
+#include <drawmode.hxx>
 
 ComplexTextLayoutFlags RenderContext2::GetLayoutMode() const { return mnTextLayoutMode; }
 
@@ -38,6 +41,22 @@ void RenderContext2::SetDigitLanguage(LanguageType eTextLanguage)
 
     if (mpAlphaVDev)
         mpAlphaVDev->SetDigitLanguage(eTextLanguage);
+}
+
+Color const& RenderContext2::GetTextColor() const { return maTextColor; }
+
+void RenderContext2::SetTextColor(const Color& rColor)
+{
+    Color aColor = GetDrawModeTextColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings());
+
+    if (maTextColor != aColor)
+    {
+        maTextColor = aColor;
+        mbInitTextColor = true;
+    }
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->SetTextColor(COL_BLACK);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

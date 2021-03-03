@@ -69,6 +69,9 @@ public:
     virtual void SetFillColor();
     virtual void SetFillColor(Color const& rColor);
 
+    Color const& GetTextColor() const;
+    virtual void SetTextColor(Color const& rColor);
+
     virtual void SetSettings(AllSettings const& rSettings);
     AllSettings const& GetSettings() const;
 
@@ -118,10 +121,12 @@ protected:
     std::unique_ptr<AllSettings> mxSettings;
     LanguageType meTextLanguage;
     Color maFillColor;
+    Color maTextColor;
     Wallpaper maBackground;
 
     mutable bool mbInitFont : 1;
     mutable bool mbInitFillColor : 1;
+    mutable bool mbInitTextColor : 1;
     mutable bool mbFillColor : 1;
     mutable bool mbBackground : 1;
 
