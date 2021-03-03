@@ -81,7 +81,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     meOutDevViewType = OutDevViewType::DontKnow;
     mbMap = false;
     mbClipRegion = false;
-    mbBackground = false;
     mbDevOutput = false;
     mbOutputClipped = false;
     maTextColor = COL_BLACK;
