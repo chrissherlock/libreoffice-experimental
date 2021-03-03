@@ -33,6 +33,7 @@ RenderContext2::RenderContext2()
     , mbInitFont(true)
     , mbInitFillColor(true)
     , mbFillColor(true)
+    , mbBackground(false)
     , mbOutput(true)
 {
     // #i84553 toop BiDi preference to RTL

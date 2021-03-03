@@ -28,6 +28,7 @@
 #include <vcl/flags/DrawModeFlags.hxx>
 #include <vcl/vclptr.hxx>
 #include <vcl/vclreferencebase.hxx>
+#include <vcl/wall.hxx>
 
 class AllSettings;
 class SalGraphics;
@@ -71,6 +72,11 @@ public:
     virtual void SetSettings(AllSettings const& rSettings);
     AllSettings const& GetSettings() const;
 
+    bool IsBackground() const;
+    Wallpaper const& GetBackground() const;
+    virtual void SetBackground();
+    virtual void SetBackground(Wallpaper const& rBackground);
+
 protected:
     virtual void dispose() override;
 
@@ -112,10 +118,12 @@ protected:
     std::unique_ptr<AllSettings> mxSettings;
     LanguageType meTextLanguage;
     Color maFillColor;
+    Wallpaper maBackground;
 
     mutable bool mbInitFont : 1;
     mutable bool mbInitFillColor : 1;
     mutable bool mbFillColor : 1;
+    mutable bool mbBackground : 1;
 
 private:
     mutable bool mbOutput : 1;

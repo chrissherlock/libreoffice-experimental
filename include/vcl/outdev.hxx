@@ -350,13 +350,11 @@ private:
     Color maTextLineColor;
     Color maOverlineColor;
     RasterOp meRasterOp;
-    Wallpaper maBackground;
     MapMode maMapMode;
     Point maRefPoint;
 
     mutable bool mbMap : 1;
     mutable bool mbClipRegion : 1;
-    mutable bool mbBackground : 1;
     mutable bool mbDevOutput : 1;
     mutable bool mbOutputClipped : 1;
     mutable bool mbLineColor : 1;
@@ -541,15 +539,10 @@ public:
     void SetFillColor() override;
     void SetFillColor(Color const& rColor) override;
 
-    void SetBackground();
-    void SetBackground(const Wallpaper& rBackground);
+    virtual Color GetBackgroundColor() const;
+    virtual Color GetReadableFontColor(Color const& rFontColor, Color const& rBgColor) const;
     virtual void SaveBackground(VirtualDevice& rSaveDevice, const Point& rPos, const Size& rSize,
                                 const Size& rBackgroundSize) const;
-
-    const Wallpaper& GetBackground() const { return maBackground; }
-    virtual Color GetBackgroundColor() const;
-    virtual Color GetReadableFontColor(const Color& rFontColor, const Color& rBgColor) const;
-    bool IsBackground() const { return mbBackground; }
 
     void SetFont(const vcl::Font& rNewFont);
     const vcl::Font& GetFont() const { return maFont; }
