@@ -346,7 +346,6 @@ private:
     vcl::Region maRegion; // contains the clip region, see SetClipRegion(...)
     Color maLineColor;
     vcl::Font maFont;
-    Color maTextColor;
     Color maTextLineColor;
     Color maOverlineColor;
     RasterOp meRasterOp;
@@ -359,7 +358,6 @@ private:
     mutable bool mbOutputClipped : 1;
     mutable bool mbLineColor : 1;
     mutable bool mbInitLineColor : 1;
-    mutable bool mbInitTextColor : 1;
     mutable bool mbInitClipRegion : 1;
     mutable bool mbClipRegionSet : 1;
     mutable bool mbNewFont : 1;
@@ -987,8 +985,7 @@ public:
     void AddTextRectActions(const tools::Rectangle& rRect, const OUString& rOrigStr,
                             DrawTextFlags nStyle, GDIMetaFile& rMtf);
 
-    void SetTextColor(const Color& rColor);
-    const Color& GetTextColor() const { return maTextColor; }
+    void SetTextColor(Color const& rColor) override;
 
     void SetTextFillColor();
     void SetTextFillColor(const Color& rColor);
