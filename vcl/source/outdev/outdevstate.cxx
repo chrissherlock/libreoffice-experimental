@@ -224,14 +224,6 @@ void OutputDevice::ClearStack()
         Pop();
 }
 
-void OutputDevice::SetDigitLanguage(LanguageType eTextLanguage)
-{
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaTextLanguageAction(eTextLanguage));
-
-    RenderContext2::SetDigitLanguage(eTextLanguage);
-}
-
 void OutputDevice::SetRasterOp(RasterOp eRasterOp)
 {
     if (mpMetaFile)
