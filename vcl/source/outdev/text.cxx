@@ -53,6 +53,14 @@
 #define TEXT_DRAW_ELLIPSIS                                                                         \
     (DrawTextFlags::EndEllipsis | DrawTextFlags::PathEllipsis | DrawTextFlags::NewsEllipsis)
 
+void OutputDevice::SetDigitLanguage(LanguageType eTextLanguage)
+{
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaTextLanguageAction(eTextLanguage));
+
+    RenderContext2::SetDigitLanguage(eTextLanguage);
+}
+
 void OutputDevice::SetLayoutMode(ComplexTextLayoutFlags nTextLayoutMode)
 {
     if (mpMetaFile)
