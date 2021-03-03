@@ -48,12 +48,16 @@ void RenderContext2::SetBackground(const Wallpaper& rBackground)
         // Some of these are probably wrong (e.g. if the gradient has transparency),
         // but hopefully nobody uses that. If you do, feel free to implement it properly.
         if (rBackground.GetStyle() == WallpaperStyle::NONE)
+        {
             mpAlphaVDev->SetBackground(rBackground);
+        }
         else if (rBackground.IsBitmap())
         {
             BitmapEx bitmap = rBackground.GetBitmap();
             if (bitmap.IsAlpha())
+            {
                 mpAlphaVDev->SetBackground(Wallpaper(BitmapEx(Bitmap(bitmap.GetAlpha()))));
+            }
             else
             {
                 switch (bitmap.GetTransparentType())
@@ -68,7 +72,9 @@ void RenderContext2::SetBackground(const Wallpaper& rBackground)
             }
         }
         else if (rBackground.IsGradient())
+        {
             mpAlphaVDev->SetBackground(Wallpaper(COL_BLACK));
+        }
         else
         {
             // Color background.
