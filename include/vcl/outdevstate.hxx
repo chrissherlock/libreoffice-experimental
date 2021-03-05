@@ -20,6 +20,7 @@
 #ifndef INCLUDED_VCL_OUTDEVSTATE_HXX
 #define INCLUDED_VCL_OUTDEVSTATE_HXX
 
+#include <vcl/RasterOp.hxx>
 #include <vcl/flags/ComplexTextLayoutFlags.hxx>
 #include <vcl/mapmod.hxx>
 #include <vcl/vclenum.hxx>

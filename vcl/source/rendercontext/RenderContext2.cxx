@@ -27,6 +27,7 @@ RenderContext2::RenderContext2()
     , mpAlphaVDev(nullptr)
     , mnDrawMode(DrawModeFlags::Default)
     , mnAntialiasing(AntialiasingFlags::NONE)
+    , meRasterOp(RasterOp::OverPaint)
     , mxSettings(new AllSettings(Application::GetSettings()))
     , meTextLanguage(LANGUAGE_SYSTEM) // TODO: get default from configuration?
     , maFillColor(COL_WHITE)

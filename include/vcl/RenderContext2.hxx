@@ -23,6 +23,7 @@
 #include <i18nlangtag/lang.h>
 
 #include <vcl/dllapi.h>
+#include <vcl/RasterOp.hxx>
 #include <vcl/flags/AntialiasingFlags.hxx>
 #include <vcl/flags/ComplexTextLayoutFlags.hxx>
 #include <vcl/flags/DrawModeFlags.hxx>
@@ -94,6 +95,9 @@ public:
     virtual void SetRefPoint();
     virtual void SetRefPoint(Point const& rRefPoint);
 
+    RasterOp GetRasterOp() const;
+    virtual void SetRasterOp(RasterOp eRasterOp);
+
 protected:
     virtual void dispose() override;
 
@@ -132,6 +136,7 @@ protected:
     ComplexTextLayoutFlags mnTextLayoutMode;
     DrawModeFlags mnDrawMode;
     AntialiasingFlags mnAntialiasing;
+    RasterOp meRasterOp;
     std::unique_ptr<AllSettings> mxSettings;
     LanguageType meTextLanguage;
     Color maLineColor;

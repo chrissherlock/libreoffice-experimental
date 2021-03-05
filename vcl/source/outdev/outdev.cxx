@@ -84,7 +84,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mbDevOutput = false;
     mbOutputClipped = false;
     maOverlineColor = COL_TRANSPARENT;
-    meRasterOp = RasterOp::OverPaint;
     mbInitClipRegion = true;
     mbClipRegionSet = false;
     mbTextLines = false;
