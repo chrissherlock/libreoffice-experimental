@@ -26,6 +26,7 @@
 #include <vcl/flags/AntialiasingFlags.hxx>
 #include <vcl/flags/ComplexTextLayoutFlags.hxx>
 #include <vcl/flags/DrawModeFlags.hxx>
+#include <vcl/font.hxx>
 #include <vcl/vclptr.hxx>
 #include <vcl/vclreferencebase.hxx>
 #include <vcl/wall.hxx>
@@ -127,6 +128,7 @@ protected:
     LanguageType meTextLanguage;
     Color maLineColor;
     Color maFillColor;
+    vcl::Font maFont;
     Color maTextColor;
     Wallpaper maBackground;
 
@@ -136,6 +138,7 @@ protected:
     mutable bool mbLineColor : 1;
     mutable bool mbInitLineColor : 1;
     mutable bool mbFillColor : 1;
+    mutable bool mbNewFont : 1;
     mutable bool mbBackground : 1;
 
 private:
