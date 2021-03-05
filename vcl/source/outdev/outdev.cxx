@@ -87,7 +87,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     meRasterOp = RasterOp::OverPaint;
     mbInitClipRegion = true;
     mbClipRegionSet = false;
-    mbNewFont = true;
     mbTextLines = false;
     mbTextSpecial = false;
     mbRefPoint = false;

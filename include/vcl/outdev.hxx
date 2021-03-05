@@ -344,7 +344,6 @@ private:
     const OutDevType meOutDevType;
     OutDevViewType meOutDevViewType;
     vcl::Region maRegion; // contains the clip region, see SetClipRegion(...)
-    vcl::Font maFont;
     Color maTextLineColor;
     Color maOverlineColor;
     RasterOp meRasterOp;
@@ -357,7 +356,6 @@ private:
     mutable bool mbOutputClipped : 1;
     mutable bool mbInitClipRegion : 1;
     mutable bool mbClipRegionSet : 1;
-    mutable bool mbNewFont : 1;
     mutable bool mbTextLines : 1;
     mutable bool mbTextSpecial : 1;
     mutable bool mbRefPoint : 1;
