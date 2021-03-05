@@ -89,6 +89,11 @@ public:
     virtual void SetBackground();
     virtual void SetBackground(Wallpaper const& rBackground);
 
+    bool IsRefPoint() const;
+    Point const& GetRefPoint() const;
+    virtual void SetRefPoint();
+    virtual void SetRefPoint(Point const& rRefPoint);
+
 protected:
     virtual void dispose() override;
 
@@ -134,6 +139,7 @@ protected:
     vcl::Font maFont;
     Color maTextColor;
     Wallpaper maBackground;
+    Point maRefPoint;
 
     mutable bool mbInitFont : 1;
     mutable bool mbInitFillColor : 1;
@@ -142,6 +148,7 @@ protected:
     mutable bool mbInitLineColor : 1;
     mutable bool mbFillColor : 1;
     mutable bool mbNewFont : 1;
+    mutable bool mbRefPoint : 1;
     mutable bool mbBackground : 1;
 
 private:

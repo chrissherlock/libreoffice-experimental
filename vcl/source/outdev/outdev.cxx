@@ -89,7 +89,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mbClipRegionSet = false;
     mbTextLines = false;
     mbTextSpecial = false;
-    mbRefPoint = false;
     mbEnableRTL = false; // mirroring must be explicitly allowed (typically for windows only)
 
     // struct ImplMapRes
@@ -221,31 +220,6 @@ css::uno::Any OutputDevice::GetSystemGfxDataAny() const
     css::uno::Sequence<sal_Int8> aSeq(reinterpret_cast<sal_Int8 const*>(&aSysData), aSysData.nSize);
 
     return css::uno::makeAny(aSeq);
-}
-
-void OutputDevice::SetRefPoint()
-{
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaRefPointAction(Point(), false));
-
-    mbRefPoint = false;
-    maRefPoint.setX(0);
-    maRefPoint.setY(0);
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->SetRefPoint();
-}
-
-void OutputDevice::SetRefPoint(const Point& rRefPoint)
-{
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaRefPointAction(rRefPoint, true));
-
-    mbRefPoint = true;
-    maRefPoint = rRefPoint;
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->SetRefPoint(rRefPoint);
 }
 
 sal_uInt16 OutputDevice::GetBitCount() const

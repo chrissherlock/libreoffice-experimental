@@ -130,6 +130,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/rendercontext/graphics \
     vcl/source/rendercontext/line \
     vcl/source/rendercontext/output \
+    vcl/source/rendercontext/refpoint \
     vcl/source/rendercontext/settings \
     vcl/source/rendercontext/text \
     vcl/source/window/errinf \
@@ -245,6 +246,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/outdev/outdevstate \
     vcl/source/outdev/clipping \
     vcl/source/outdev/polygon \
+    vcl/source/outdev/refpoint \
     vcl/source/outdev/transparent \
     vcl/source/outdev/mask \
     vcl/source/outdev/bitmap \
