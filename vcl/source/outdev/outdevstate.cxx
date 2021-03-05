@@ -263,57 +263,6 @@ void OutputDevice::SetFillColor(Color const& rColor)
     RenderContext2::SetFillColor(rColor);
 }
 
-void OutputDevice::SetLineColor()
-{
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaLineColorAction(Color(), false));
-
-    if (mbLineColor)
-    {
-        mbInitLineColor = true;
-        mbLineColor = false;
-        maLineColor = COL_TRANSPARENT;
-    }
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->SetLineColor();
-}
-
-void OutputDevice::SetLineColor(const Color& rColor)
-{
-    Color aColor;
-
-    if (rColor.IsTransparent())
-        aColor = rColor;
-    else
-        aColor = GetDrawModeLineColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings());
-
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaLineColorAction(aColor, true));
-
-    if (aColor.IsTransparent())
-    {
-        if (mbLineColor)
-        {
-            mbInitLineColor = true;
-            mbLineColor = false;
-            maLineColor = COL_TRANSPARENT;
-        }
-    }
-    else
-    {
-        if (maLineColor != aColor)
-        {
-            mbInitLineColor = true;
-            mbLineColor = true;
-            maLineColor = aColor;
-        }
-    }
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->SetLineColor(COL_BLACK);
-}
-
 void OutputDevice::SetFont(const vcl::Font& rNewFont)
 {
     vcl::Font aFont = GetDrawModeFont(rNewFont, GetDrawMode(), GetSettings().GetStyleSettings());

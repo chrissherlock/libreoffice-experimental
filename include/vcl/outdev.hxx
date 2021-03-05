@@ -344,7 +344,6 @@ private:
     const OutDevType meOutDevType;
     OutDevViewType meOutDevViewType;
     vcl::Region maRegion; // contains the clip region, see SetClipRegion(...)
-    Color maLineColor;
     vcl::Font maFont;
     Color maTextLineColor;
     Color maOverlineColor;
@@ -356,8 +355,6 @@ private:
     mutable bool mbClipRegion : 1;
     mutable bool mbDevOutput : 1;
     mutable bool mbOutputClipped : 1;
-    mutable bool mbLineColor : 1;
-    mutable bool mbInitLineColor : 1;
     mutable bool mbInitClipRegion : 1;
     mutable bool mbClipRegionSet : 1;
     mutable bool mbNewFont : 1;
@@ -529,10 +526,8 @@ public:
     void SetOutDevViewType(OutDevViewType eOutDevViewType) { meOutDevViewType = eOutDevViewType; }
     OutDevViewType GetOutDevViewType() const { return meOutDevViewType; }
 
-    Color const& GetLineColor() const { return maLineColor; }
-    bool IsLineColor() const { return mbLineColor; }
-    void SetLineColor();
-    void SetLineColor(const Color& rColor);
+    void SetLineColor() override;
+    void SetLineColor(Color const& rColor) override;
 
     void SetFillColor() override;
     void SetFillColor(Color const& rColor) override;

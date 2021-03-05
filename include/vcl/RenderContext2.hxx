@@ -64,6 +64,11 @@ public:
     LanguageType GetDigitLanguage() const;
     virtual void SetDigitLanguage(LanguageType);
 
+    Color const& GetLineColor() const;
+    bool IsLineColor() const;
+    virtual void SetLineColor();
+    virtual void SetLineColor(Color const& rColor);
+
     Color const& GetFillColor() const;
     bool IsFillColor() const;
     virtual void SetFillColor();
@@ -120,6 +125,7 @@ protected:
     AntialiasingFlags mnAntialiasing;
     std::unique_ptr<AllSettings> mxSettings;
     LanguageType meTextLanguage;
+    Color maLineColor;
     Color maFillColor;
     Color maTextColor;
     Wallpaper maBackground;
@@ -127,6 +133,8 @@ protected:
     mutable bool mbInitFont : 1;
     mutable bool mbInitFillColor : 1;
     mutable bool mbInitTextColor : 1;
+    mutable bool mbLineColor : 1;
+    mutable bool mbInitLineColor : 1;
     mutable bool mbFillColor : 1;
     mutable bool mbBackground : 1;
 
