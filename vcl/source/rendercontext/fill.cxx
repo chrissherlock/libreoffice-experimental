@@ -17,11 +17,14 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <tools/debug.hxx>
+
 #include <vcl/RenderContext2.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
 
 #include <drawmode.hxx>
+#include <salgdi.hxx>
 
 Color const& RenderContext2::GetFillColor() const { return maFillColor; }
 
@@ -65,6 +68,29 @@ void RenderContext2::SetFillColor(Color const& rColor)
 
     if (mpAlphaVDev)
         mpAlphaVDev->SetFillColor(COL_BLACK);
+}
+
+void RenderContext2::InitFillColor()
+{
+    DBG_TESTSOLARMUTEX();
+
+    if (mbFillColor)
+    {
+        if (RasterOp::N0 == meRasterOp)
+            mpGraphics->SetROPFillColor(SalROPColor::N0);
+        else if (RasterOp::N1 == meRasterOp)
+            mpGraphics->SetROPFillColor(SalROPColor::N1);
+        else if (RasterOp::Invert == meRasterOp)
+            mpGraphics->SetROPFillColor(SalROPColor::Invert);
+        else
+            mpGraphics->SetFillColor(maFillColor);
+    }
+    else
+    {
+        mpGraphics->SetFillColor();
+    }
+
+    mbInitFillColor = false;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

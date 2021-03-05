@@ -225,46 +225,4 @@ void OutputDevice::ClearStack()
 }
 
 
-void OutputDevice::InitLineColor()
-{
-    DBG_TESTSOLARMUTEX();
-
-    if (mbLineColor)
-    {
-        if (RasterOp::N0 == meRasterOp)
-            mpGraphics->SetROPLineColor(SalROPColor::N0);
-        else if (RasterOp::N1 == meRasterOp)
-            mpGraphics->SetROPLineColor(SalROPColor::N1);
-        else if (RasterOp::Invert == meRasterOp)
-            mpGraphics->SetROPLineColor(SalROPColor::Invert);
-        else
-            mpGraphics->SetLineColor(maLineColor);
-    }
-    else
-        mpGraphics->SetLineColor();
-
-    mbInitLineColor = false;
-}
-
-void OutputDevice::InitFillColor()
-{
-    DBG_TESTSOLARMUTEX();
-
-    if (mbFillColor)
-    {
-        if (RasterOp::N0 == meRasterOp)
-            mpGraphics->SetROPFillColor(SalROPColor::N0);
-        else if (RasterOp::N1 == meRasterOp)
-            mpGraphics->SetROPFillColor(SalROPColor::N1);
-        else if (RasterOp::Invert == meRasterOp)
-            mpGraphics->SetROPFillColor(SalROPColor::Invert);
-        else
-            mpGraphics->SetFillColor(maFillColor);
-    }
-    else
-        mpGraphics->SetFillColor();
-
-    mbInitFillColor = false;
-}
-
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
