@@ -505,14 +505,6 @@ vcl::Region OutputDevice::ImplPixelToDevicePixel( const vcl::Region& rRegion ) c
     return aRegion;
 }
 
-void OutputDevice::EnableMapMode( bool bEnable )
-{
-    mbMap = bEnable;
-
-    if( mpAlphaVDev )
-        mpAlphaVDev->EnableMapMode( bEnable );
-}
-
 void OutputDevice::SetMapMode()
 {
 
