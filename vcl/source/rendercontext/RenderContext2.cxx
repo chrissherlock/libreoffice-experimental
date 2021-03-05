@@ -32,6 +32,7 @@ RenderContext2::RenderContext2()
     , meTextLanguage(LANGUAGE_SYSTEM) // TODO: get default from configuration?
     , maFillColor(COL_WHITE)
     , maTextColor(COL_BLACK)
+    , mbMap(false)
     , mbInitFont(true)
     , mbInitFillColor(true)
     , mbInitTextColor(true)

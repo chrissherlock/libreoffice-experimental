@@ -98,6 +98,9 @@ public:
     RasterOp GetRasterOp() const;
     virtual void SetRasterOp(RasterOp eRasterOp);
 
+    void EnableMapMode(bool bEnable = true);
+    bool IsMapModeEnabled() const;
+
 protected:
     virtual void dispose() override;
 
@@ -149,6 +152,7 @@ protected:
     Wallpaper maBackground;
     Point maRefPoint;
 
+    mutable bool mbMap : 1;
     mutable bool mbInitFont : 1;
     mutable bool mbInitFillColor : 1;
     mutable bool mbInitTextColor : 1;

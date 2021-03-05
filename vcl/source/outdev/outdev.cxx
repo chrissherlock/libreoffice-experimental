@@ -79,7 +79,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mnEmphasisAscent = 0;
     mnEmphasisDescent = 0;
     meOutDevViewType = OutDevViewType::DontKnow;
-    mbMap = false;
     mbClipRegion = false;
     mbDevOutput = false;
     mbOutputClipped = false;
