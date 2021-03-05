@@ -252,6 +252,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/outdev/textline \
     vcl/source/outdev/pixel \
     vcl/source/outdev/rect \
+    vcl/source/outdev/fill \
     vcl/source/outdev/line \
     vcl/source/outdev/polyline \
     vcl/source/outdev/hatch \
