@@ -533,11 +533,6 @@ public:
 protected:
     virtual void ImplReleaseFonts();
 
-private:
-    SAL_DLLPRIVATE void InitLineColor();
-
-    SAL_DLLPRIVATE void InitFillColor();
-
     ///@}
 
     /** @name Clipping functions

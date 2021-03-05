@@ -17,11 +17,14 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <tools/debug.hxx>
+
 #include <vcl/RenderContext2.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
 
 #include <drawmode.hxx>
+#include <salgdi.hxx>
 
 bool RenderContext2::IsLineColor() const { return mbLineColor; }
 
@@ -70,6 +73,27 @@ void RenderContext2::SetLineColor(const Color& rColor)
 
     if (mpAlphaVDev)
         mpAlphaVDev->SetLineColor(COL_BLACK);
+}
+
+void RenderContext2::InitLineColor()
+{
+    DBG_TESTSOLARMUTEX();
+
+    if (mbLineColor)
+    {
+        if (RasterOp::N0 == meRasterOp)
+            mpGraphics->SetROPLineColor(SalROPColor::N0);
+        else if (RasterOp::N1 == meRasterOp)
+            mpGraphics->SetROPLineColor(SalROPColor::N1);
+        else if (RasterOp::Invert == meRasterOp)
+            mpGraphics->SetROPLineColor(SalROPColor::Invert);
+        else
+            mpGraphics->SetLineColor(maLineColor);
+    }
+    else
+        mpGraphics->SetLineColor();
+
+    mbInitLineColor = false;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

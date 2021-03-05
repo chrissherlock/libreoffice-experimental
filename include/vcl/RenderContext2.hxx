@@ -130,6 +130,9 @@ protected:
      */
     virtual void ReleaseGraphics(bool bRelease = true) = 0;
 
+    SAL_DLLPRIVATE void InitLineColor();
+    SAL_DLLPRIVATE void InitFillColor();
+
     mutable SalGraphics* mpGraphics; ///< Graphics context to draw on
     VclPtr<VirtualDevice> mpAlphaVDev;
 
