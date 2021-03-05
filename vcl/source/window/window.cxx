@@ -45,6 +45,7 @@
 
 #include <vcl/uitest/uiobject.hxx>
 
+#include <ImplOutDevData.hxx>
 #include <salframe.hxx>
 #include <salobj.hxx>
 #include <salinst.hxx>

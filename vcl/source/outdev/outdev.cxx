@@ -30,9 +30,10 @@
 #include <vcl/svapp.hxx>
 #include <vcl/sysdata.hxx>
 
-#include <salgdi.hxx>
-#include <window.h>
 #include <outdev.h>
+#include <window.h>
+#include <ImplOutDevData.hxx>
+#include <salgdi.hxx>
 
 #include <com/sun/star/awt/DeviceCapability.hpp>
 

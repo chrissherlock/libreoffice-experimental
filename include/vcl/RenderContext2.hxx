@@ -137,7 +137,7 @@ protected:
     SAL_DLLPRIVATE void InitLineColor();
     SAL_DLLPRIVATE void InitFillColor();
 
-    SAL_DLLPRIVATE virtual void ImplInitMapModeObjects();
+    virtual void ImplInitMapModeObjects();
 
     mutable SalGraphics* mpGraphics; ///< Graphics context to draw on
     VclPtr<VirtualDevice> mpAlphaVDev;
