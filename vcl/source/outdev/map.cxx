@@ -221,25 +221,6 @@ static void ImplCalcMapResolution( const MapMode& rMapMode,
     rMapRes.mnMapScDenomY = aTempY.GetDenominator();
 }
 
-// #i75163#
-void OutputDevice::ImplInvalidateViewTransform()
-{
-    if(!mpOutDevData)
-        return;
-
-    if(mpOutDevData->mpViewTransform)
-    {
-        delete mpOutDevData->mpViewTransform;
-        mpOutDevData->mpViewTransform = nullptr;
-    }
-
-    if(mpOutDevData->mpInverseViewTransform)
-    {
-        delete mpOutDevData->mpInverseViewTransform;
-        mpOutDevData->mpInverseViewTransform = nullptr;
-    }
-}
-
 static tools::Long ImplLogicToPixel(tools::Long n, tools::Long nDPI, tools::Long nMapNum,
                                     tools::Long nMapDenom)
 {
