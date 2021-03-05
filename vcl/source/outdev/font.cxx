@@ -17,32 +17,60 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <sal/log.hxx>
+#include <rtl/ustrbuf.hxx>
+#include <tools/debug.hxx>
 #include <i18nlangtag/mslangid.hxx>
 #include <i18nlangtag/lang.h>
-
 #include <unotools/configmgr.hxx>
+
+#include <vcl/event.hxx>
+#include <vcl/gdimtf.hxx>
+#include <vcl/metaact.hxx>
+#include <vcl/fontcharmap.hxx>
 #include <vcl/metric.hxx>
-#include <vcl/virdev.hxx>
 #include <vcl/print.hxx>
 #include <vcl/sysdata.hxx>
-#include <vcl/fontcharmap.hxx>
-#include <vcl/event.hxx>
-#include <font/FeatureCollector.hxx>
-#include <rtl/ustrbuf.hxx>
-#include <sal/log.hxx>
-#include <tools/debug.hxx>
+#include <vcl/virdev.hxx>
 
+#include <outdev.h>
+#include <window.h>
+#include <PhysicalFontCollection.hxx>
+#include <drawmode.hxx>
+#include <font/FeatureCollector.hxx>
 #include <sallayout.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>
 #include <impglyphitem.hxx>
 
-#include <outdev.h>
-#include <window.h>
-
-#include <PhysicalFontCollection.hxx>
-
 #include <strings.hrc>
+
+void OutputDevice::SetFont(vcl::Font const& rNewFont)
+{
+    vcl::Font aFont = GetDrawModeFont(rNewFont, GetDrawMode(), GetSettings().GetStyleSettings());
+
+    if (mpMetaFile)
+    {
+        mpMetaFile->AddAction(new MetaFontAction(aFont));
+        // the color and alignment actions don't belong here
+        // TODO: get rid of them without breaking anything...
+        mpMetaFile->AddAction(new MetaTextAlignAction(aFont.GetAlignment()));
+        mpMetaFile->AddAction(
+            new MetaTextFillColorAction(aFont.GetFillColor(), !aFont.IsTransparent()));
+    }
+
+    // Optimization MT/HDU: COL_TRANSPARENT means SetFont should ignore the font color,
+    // because SetTextColor() is used for this.
+    // #i28759# maTextColor might have been changed behind our back, commit then, too.
+    if (aFont.GetColor() != COL_TRANSPARENT
+        && (aFont.GetColor() != maFont.GetColor() || aFont.GetColor() != maTextColor)
+        && mpMetaFile)
+    {
+        mpMetaFile->AddAction(new MetaTextColorAction(aFont.GetColor()));
+    }
+
+    RenderContext2::SetFont(rNewFont);
+}
 
 FontMetric OutputDevice::GetDevFont( int nDevFontIndex ) const
 {

@@ -75,6 +75,9 @@ public:
     virtual void SetFillColor();
     virtual void SetFillColor(Color const& rColor);
 
+    vcl::Font const& GetFont() const;
+    virtual void SetFont(vcl::Font const& rNewFont);
+
     Color const& GetTextColor() const;
     virtual void SetTextColor(Color const& rColor);
 
