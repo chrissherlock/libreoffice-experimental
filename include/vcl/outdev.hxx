@@ -27,7 +27,6 @@
 #include <tools/poly.hxx>
 #include <o3tl/typed_flags_set.hxx>
 
-#include <vcl/ImplMapRes.hxx>
 #include <vcl/RenderContext2.hxx>
 #include <vcl/bitmap.hxx>
 #include <vcl/cairo.hxx>
@@ -340,7 +339,6 @@ private:
     mutable tools::Long mnTextOffY;
     mutable tools::Long mnEmphasisAscent;
     mutable tools::Long mnEmphasisDescent;
-    ImplMapRes maMapRes;
     const OutDevType meOutDevType;
     OutDevViewType meOutDevViewType;
     vcl::Region maRegion; // contains the clip region, see SetClipRegion(...)
@@ -1399,8 +1397,6 @@ public:
                                           bool bDownsampleBitmaps,
                                           const Color& rBackground = COL_TRANSPARENT);
 
-    SAL_DLLPRIVATE Color ImplDrawModeToColor(const Color& rColor) const;
-
     void DrawTransparent(const tools::PolyPolygon& rPolyPoly, sal_uInt16 nTransparencePercent);
 
     void DrawTransparent(const basegfx::B2DHomMatrix& rObjectTransform,
@@ -1452,9 +1448,6 @@ public:
     void SetRelativeMapMode(const MapMode& rNewMapMode);
     virtual void SetMetafileMapMode(const MapMode& rNewMapMode, bool bIsRecord);
     const MapMode& GetMapMode() const { return maMapMode; }
-
-protected:
-    virtual void ImplInitMapModeObjects();
 
 public:
     // #i75163#

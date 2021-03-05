@@ -629,8 +629,6 @@ void OutputDevice::SetMetafileMapMode(const MapMode& rNewMapMode, bool bIsRecord
         SetMapMode(rNewMapMode);
 }
 
-void OutputDevice::ImplInitMapModeObjects() {}
-
 void OutputDevice::SetRelativeMapMode( const MapMode& rNewMapMode )
 {
     // do nothing if MapMode did not change
