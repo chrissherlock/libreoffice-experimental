@@ -535,8 +535,7 @@ public:
     virtual void SaveBackground(VirtualDevice& rSaveDevice, const Point& rPos, const Size& rSize,
                                 const Size& rBackgroundSize) const;
 
-    void SetFont(const vcl::Font& rNewFont);
-    const vcl::Font& GetFont() const { return maFont; }
+    void SetFont(vcl::Font const& rNewFont) override;
 
 protected:
     virtual void ImplReleaseFonts();
