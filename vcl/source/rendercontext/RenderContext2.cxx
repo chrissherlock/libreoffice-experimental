@@ -22,6 +22,8 @@
 #include <vcl/svapp.hxx>
 #include <vcl/virdev.hxx>
 
+#include <ImplOutDevData.hxx>
+
 RenderContext2::RenderContext2()
     : mpGraphics(nullptr)
     , mpAlphaVDev(nullptr)
@@ -49,12 +51,25 @@ RenderContext2::RenderContext2()
         mnTextLayoutMode = ComplexTextLayoutFlags::BiDiRtl | ComplexTextLayoutFlags::TextOriginLeft;
     else
         mnTextLayoutMode = ComplexTextLayoutFlags::Default;
+
+    // struct ImplOutDevData- see #i82615#
+    mpOutDevData.reset(new ImplOutDevData);
+    mpOutDevData->mpRotateDev = nullptr;
+    mpOutDevData->mpRecordLayout = nullptr;
+
+    // #i75163#
+    mpOutDevData->mpViewTransform = nullptr;
+    mpOutDevData->mpInverseViewTransform = nullptr;
 }
 
 RenderContext2::~RenderContext2() { disposeOnce(); }
 
 void RenderContext2::dispose()
 {
+    mpOutDevData->mpRotateDev.disposeAndClear();
+    ImplInvalidateViewTransform(); // #i75163#
+    mpOutDevData.reset();
+
     mpAlphaVDev.disposeAndClear();
     VclReferenceBase::dispose();
 }

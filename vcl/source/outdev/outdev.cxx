@@ -89,15 +89,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mbTextLines = false;
     mbTextSpecial = false;
     mbEnableRTL = false; // mirroring must be explicitly allowed (typically for windows only)
-
-    // struct ImplOutDevData- see #i82615#
-    mpOutDevData.reset(new ImplOutDevData);
-    mpOutDevData->mpRotateDev = nullptr;
-    mpOutDevData->mpRecordLayout = nullptr;
-
-    // #i75163#
-    mpOutDevData->mpViewTransform = nullptr;
-    mpOutDevData->mpInverseViewTransform = nullptr;
 }
 
 OutputDevice::~OutputDevice() { disposeOnce(); }
@@ -112,13 +103,6 @@ void OutputDevice::dispose()
         delete mpUnoGraphicsList;
         mpUnoGraphicsList = nullptr;
     }
-
-    mpOutDevData->mpRotateDev.disposeAndClear();
-
-    // #i75163#
-    ImplInvalidateViewTransform();
-
-    mpOutDevData.reset();
 
     // for some reason, we haven't removed state from the stack properly
     if (!maOutDevStateStack.empty())

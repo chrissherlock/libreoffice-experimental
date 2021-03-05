@@ -36,6 +36,7 @@
 class AllSettings;
 class SalGraphics;
 class VirtualDevice;
+struct ImplOutDevData;
 
 class VCL_DLLPUBLIC RenderContext2 : public virtual VclReferenceBase
 {
@@ -139,6 +140,12 @@ protected:
 
     virtual void ImplInitMapModeObjects();
 
+    /** Invalidate the view transformation.
+
+     @since AOO bug 75163 (OpenOffice.org 2.4.3 - OOH 680 milestone 212)
+     */
+    SAL_DLLPRIVATE void ImplInvalidateViewTransform();
+
     mutable SalGraphics* mpGraphics; ///< Graphics context to draw on
     VclPtr<VirtualDevice> mpAlphaVDev;
 
@@ -155,6 +162,7 @@ protected:
     Wallpaper maBackground;
     Point maRefPoint;
     ImplMapRes maMapRes;
+    std::unique_ptr<ImplOutDevData> mpOutDevData;
 
     mutable bool mbMap : 1;
     mutable bool mbInitFont : 1;

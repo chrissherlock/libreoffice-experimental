@@ -17,8 +17,12 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <basegfx/matrix/b2dhommatrix.hxx>
+
 #include <vcl/RenderContext2.hxx>
 #include <vcl/virdev.hxx>
+
+#include <ImplOutDevData.hxx>
 
 bool RenderContext2::IsMapModeEnabled() const { return mbMap; }
 
@@ -31,5 +35,23 @@ void RenderContext2::EnableMapMode(bool bEnable)
 }
 
 void RenderContext2::ImplInitMapModeObjects() {}
+
+void RenderContext2::ImplInvalidateViewTransform()
+{
+    if (!mpOutDevData)
+        return;
+
+    if (mpOutDevData->mpViewTransform)
+    {
+        delete mpOutDevData->mpViewTransform;
+        mpOutDevData->mpViewTransform = nullptr;
+    }
+
+    if (mpOutDevData->mpInverseViewTransform)
+    {
+        delete mpOutDevData->mpInverseViewTransform;
+        mpOutDevData->mpInverseViewTransform = nullptr;
+    }
+}
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
