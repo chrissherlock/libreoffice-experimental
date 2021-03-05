@@ -247,22 +247,6 @@ void OutputDevice::SetRasterOp(RasterOp eRasterOp)
         mpAlphaVDev->SetRasterOp(eRasterOp);
 }
 
-void OutputDevice::SetFillColor()
-{
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaFillColorAction(Color(), false));
-
-    RenderContext2::SetFillColor();
-}
-
-void OutputDevice::SetFillColor(Color const& rColor)
-{
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaFillColorAction(GetDrawModeFillColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings()), true));
-
-    RenderContext2::SetFillColor(rColor);
-}
-
 void OutputDevice::SetFont(const vcl::Font& rNewFont)
 {
     vcl::Font aFont = GetDrawModeFont(rNewFont, GetDrawMode(), GetSettings().GetStyleSettings());
