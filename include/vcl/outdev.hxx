@@ -27,6 +27,7 @@
 #include <tools/poly.hxx>
 #include <o3tl/typed_flags_set.hxx>
 
+#include <vcl/ImplMapRes.hxx>
 #include <vcl/RenderContext2.hxx>
 #include <vcl/bitmap.hxx>
 #include <vcl/cairo.hxx>
@@ -39,7 +40,6 @@
 #include <vcl/metaactiontypes.hxx>
 #include <vcl/salnativewidgets.hxx>
 #include <vcl/outdevstate.hxx>
-#include <vcl/outdevmap.hxx>
 
 #include <basegfx/numeric/ftools.hxx>
 #include <basegfx/vector/b2enums.hxx>
