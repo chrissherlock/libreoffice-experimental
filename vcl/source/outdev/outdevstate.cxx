@@ -224,28 +224,6 @@ void OutputDevice::ClearStack()
         Pop();
 }
 
-void OutputDevice::SetRasterOp(RasterOp eRasterOp)
-{
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaRasterOpAction(eRasterOp));
-
-    if (meRasterOp != eRasterOp)
-    {
-        meRasterOp = eRasterOp;
-        mbInitLineColor = mbInitFillColor = true;
-
-        if (mpGraphics || AcquireGraphics())
-        {
-            assert(mpGraphics);
-            mpGraphics->SetXORMode((RasterOp::Invert == meRasterOp)
-                                       || (RasterOp::Xor == meRasterOp),
-                                   RasterOp::Invert == meRasterOp);
-        }
-    }
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->SetRasterOp(eRasterOp);
-}
 
 void OutputDevice::InitLineColor()
 {

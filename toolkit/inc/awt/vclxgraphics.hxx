@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <vcl/RasterOp.hxx>
 
 #include <com/sun/star/awt/XGraphics2.hpp>
 #include <com/sun/star/lang/XTypeProvider.hpp>

@@ -346,7 +346,6 @@ private:
     vcl::Region maRegion; // contains the clip region, see SetClipRegion(...)
     Color maTextLineColor;
     Color maOverlineColor;
-    RasterOp meRasterOp;
     MapMode maMapMode;
 
     mutable bool mbMap : 1;
@@ -506,9 +505,7 @@ public:
     bool IsDeviceOutputNecessary() const { return (IsOutputEnabled() && mbDevOutput); }
     void SetLayoutMode(ComplexTextLayoutFlags nTextLayoutMode) override;
     void SetDigitLanguage(LanguageType) override;
-    void SetRasterOp(RasterOp eRasterOp);
-
-    RasterOp GetRasterOp() const { return meRasterOp; }
+    void SetRasterOp(RasterOp eRasterOp) override;
 
     /**
     If this OutputDevice is used for displaying a Print Preview
