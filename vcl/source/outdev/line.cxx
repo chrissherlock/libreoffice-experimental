@@ -17,8 +17,10 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <cassert>
-#include <numeric>
+#include <basegfx/matrix/b2dhommatrix.hxx>
+#include <basegfx/polygon/b2dpolygontools.hxx>
+#include <basegfx/polygon/b2dpolypolygontools.hxx>
+#include <basegfx/polygon/b2dlinegeometry.hxx>
 
 #include <vcl/gdimtf.hxx>
 #include <vcl/lineinfo.hxx>
@@ -26,12 +28,34 @@
 #include <vcl/outdev.hxx>
 #include <vcl/virdev.hxx>
 
+#include <drawmode.hxx>
 #include <salgdi.hxx>
 
-#include <basegfx/matrix/b2dhommatrix.hxx>
-#include <basegfx/polygon/b2dpolygontools.hxx>
-#include <basegfx/polygon/b2dpolypolygontools.hxx>
-#include <basegfx/polygon/b2dlinegeometry.hxx>
+#include <cassert>
+#include <numeric>
+
+void OutputDevice::SetLineColor()
+{
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaLineColorAction(Color(), false));
+
+    RenderContext2::SetLineColor();
+}
+
+void OutputDevice::SetLineColor(Color const& rColor)
+{
+    Color aColor;
+
+    if (rColor.IsTransparent())
+        aColor = rColor;
+    else
+        aColor = GetDrawModeLineColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings());
+
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaLineColorAction(aColor, true));
+
+    RenderContext2::SetLineColor(rColor);
+}
 
 void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
                              const LineInfo& rLineInfo )

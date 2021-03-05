@@ -19,40 +19,57 @@
 
 #include <vcl/RenderContext2.hxx>
 #include <vcl/settings.hxx>
-#include <vcl/svapp.hxx>
 #include <vcl/virdev.hxx>
 
-RenderContext2::RenderContext2()
-    : mpGraphics(nullptr)
-    , mpAlphaVDev(nullptr)
-    , mnDrawMode(DrawModeFlags::Default)
-    , mnAntialiasing(AntialiasingFlags::NONE)
-    , mxSettings(new AllSettings(Application::GetSettings()))
-    , meTextLanguage(LANGUAGE_SYSTEM) // TODO: get default from configuration?
-    , maFillColor(COL_WHITE)
-    , maTextColor(COL_BLACK)
-    , mbInitFont(true)
-    , mbInitFillColor(true)
-    , mbInitTextColor(true)
-    , mbLineColor(true)
-    , mbInitLineColor(true)
-    , mbFillColor(true)
-    , mbBackground(false)
-    , mbOutput(true)
+#include <drawmode.hxx>
+
+bool RenderContext2::IsLineColor() const { return mbLineColor; }
+
+Color const& RenderContext2::GetLineColor() const { return maLineColor; }
+
+void RenderContext2::SetLineColor()
 {
-    // #i84553 toop BiDi preference to RTL
-    if (AllSettings::GetLayoutRTL())
-        mnTextLayoutMode = ComplexTextLayoutFlags::BiDiRtl | ComplexTextLayoutFlags::TextOriginLeft;
-    else
-        mnTextLayoutMode = ComplexTextLayoutFlags::Default;
+    if (mbLineColor)
+    {
+        mbInitLineColor = true;
+        mbLineColor = false;
+        maLineColor = COL_TRANSPARENT;
+    }
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->SetLineColor();
 }
 
-RenderContext2::~RenderContext2() { disposeOnce(); }
-
-void RenderContext2::dispose()
+void RenderContext2::SetLineColor(const Color& rColor)
 {
-    mpAlphaVDev.disposeAndClear();
-    VclReferenceBase::dispose();
+    Color aColor;
+
+    if (rColor.IsTransparent())
+        aColor = rColor;
+    else
+        aColor = GetDrawModeLineColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings());
+
+    if (aColor.IsTransparent())
+    {
+        if (mbLineColor)
+        {
+            mbInitLineColor = true;
+            mbLineColor = false;
+            maLineColor = COL_TRANSPARENT;
+        }
+    }
+    else
+    {
+        if (maLineColor != aColor)
+        {
+            mbInitLineColor = true;
+            mbLineColor = true;
+            maLineColor = aColor;
+        }
+    }
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->SetLineColor(COL_BLACK);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
