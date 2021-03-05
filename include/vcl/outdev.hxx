@@ -348,7 +348,6 @@ private:
     Color maOverlineColor;
     RasterOp meRasterOp;
     MapMode maMapMode;
-    Point maRefPoint;
 
     mutable bool mbMap : 1;
     mutable bool mbClipRegion : 1;
@@ -358,7 +357,6 @@ private:
     mutable bool mbClipRegionSet : 1;
     mutable bool mbTextLines : 1;
     mutable bool mbTextSpecial : 1;
-    mutable bool mbRefPoint : 1;
     mutable bool mbEnableRTL : 1;
 
     /** @name Initialization and accessor functions
@@ -388,10 +386,8 @@ public:
                                          const basegfx::B2ISize& rSize) const;
     css::uno::Any GetSystemGfxDataAny() const;
 
-    void SetRefPoint();
-    void SetRefPoint(const Point& rRefPoint);
-    const Point& GetRefPoint() const { return maRefPoint; }
-    bool IsRefPoint() const { return mbRefPoint; }
+    void SetRefPoint() override;
+    void SetRefPoint(Point const& rRefPoint) override;
 
     virtual bool IsScreenComp() const { return true; }
 

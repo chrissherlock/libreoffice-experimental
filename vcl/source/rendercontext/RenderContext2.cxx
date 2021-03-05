@@ -38,6 +38,7 @@ RenderContext2::RenderContext2()
     , mbInitLineColor(true)
     , mbFillColor(true)
     , mbNewFont(true)
+    , mbRefPoint(false)
     , mbBackground(false)
     , mbOutput(true)
 {
