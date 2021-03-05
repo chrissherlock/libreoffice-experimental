@@ -122,21 +122,6 @@ public:
     virtual bool FindFontSubstitute(FontSelectPattern&, LogicalFontInstance* pLogicalFont, OUString& rMissingCodes) const = 0;
 };
 
-namespace vcl { struct ControlLayoutData; }
-// #i75163#
-namespace basegfx { class B2DHomMatrix; }
-
-struct ImplOutDevData
-{
-    VclPtr<VirtualDevice>       mpRotateDev;
-    vcl::ControlLayoutData*     mpRecordLayout;
-    tools::Rectangle                   maRecordRect;
-
-    // #i75163#
-    basegfx::B2DHomMatrix*      mpViewTransform;
-    basegfx::B2DHomMatrix*      mpInverseViewTransform;
-};
-
 void ImplFontSubstitute( OUString& rFontName );
 
 #endif // INCLUDED_VCL_INC_OUTDEV_H
