@@ -52,7 +52,6 @@ namespace
 
 OutputDevice::OutputDevice(OutDevType eOutDevType)
     : meOutDevType(eOutDevType)
-    , maRegion(true)
 {
     mpUnoGraphicsList = nullptr;
     mpPrevGraphics = nullptr;
@@ -76,10 +75,8 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mnEmphasisAscent = 0;
     mnEmphasisDescent = 0;
     meOutDevViewType = OutDevViewType::DontKnow;
-    mbClipRegion = false;
     mbDevOutput = false;
     mbOutputClipped = false;
-    mbInitClipRegion = true;
     mbClipRegionSet = false;
     mbTextLines = false;
     mbTextSpecial = false;

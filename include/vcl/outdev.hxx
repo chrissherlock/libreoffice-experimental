@@ -319,13 +319,10 @@ private:
     mutable tools::Long mnEmphasisDescent;
     const OutDevType meOutDevType;
     OutDevViewType meOutDevViewType;
-    vcl::Region maRegion; // contains the clip region, see SetClipRegion(...)
     Color maTextLineColor;
 
-    mutable bool mbClipRegion : 1;
     mutable bool mbDevOutput : 1;
     mutable bool mbOutputClipped : 1;
-    mutable bool mbInitClipRegion : 1;
     mutable bool mbClipRegionSet : 1;
     mutable bool mbTextLines : 1;
     mutable bool mbTextSpecial : 1;
@@ -504,9 +501,6 @@ protected:
      **/
     virtual vcl::Region ClipToDeviceBounds(vcl::Region aRegion) const;
     virtual void ClipToPaintRegion(tools::Rectangle& rDstRect);
-
-private:
-    SAL_DLLPRIVATE void SetDeviceClipRegion(const vcl::Region* pRegion);
     ///@}
 
 public:

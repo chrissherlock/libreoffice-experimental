@@ -125,6 +125,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/rendercontext/RenderContext2 \
     vcl/source/rendercontext/antialiasing \
     vcl/source/rendercontext/background \
+    vcl/source/rendercontext/clipping \
     vcl/source/rendercontext/drawmode \
     vcl/source/rendercontext/font \
     vcl/source/rendercontext/fill \

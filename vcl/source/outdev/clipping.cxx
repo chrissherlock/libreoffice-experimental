@@ -203,25 +203,4 @@ void OutputDevice::ClipToPaintRegion(tools::Rectangle& /*rDstRect*/)
     // on in other clipping functions
 }
 
-void OutputDevice::SetDeviceClipRegion( const vcl::Region* pRegion )
-{
-    DBG_TESTSOLARMUTEX();
-
-    if ( !pRegion )
-    {
-        if ( mbClipRegion )
-        {
-            maRegion            = vcl::Region(true);
-            mbClipRegion        = false;
-            mbInitClipRegion    = true;
-        }
-    }
-    else
-    {
-        maRegion            = *pRegion;
-        mbClipRegion        = true;
-        mbInitClipRegion    = true;
-    }
-}
-
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
