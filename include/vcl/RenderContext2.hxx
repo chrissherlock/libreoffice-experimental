@@ -44,6 +44,7 @@
 #include <vector>
 
 class AllSettings;
+class PhysicalFontCollection;
 class SalGraphics;
 class VirtualDevice;
 struct ImplOutDevData;
@@ -532,6 +533,8 @@ protected:
 
     SAL_DLLPRIVATE bool is_double_buffered_window() const;
 
+    SAL_DLLPRIVATE void ImplInitFontList() const;
+
     mutable SalGraphics* mpGraphics; ///< Graphics context to draw on
     VclPtr<VirtualDevice> mpAlphaVDev;
 
@@ -554,6 +557,7 @@ protected:
     MapMode maMapMode;
     ImplMapRes maMapRes;
     std::unique_ptr<ImplOutDevData> mpOutDevData;
+    mutable std::shared_ptr<PhysicalFontCollection> mxFontCollection;
     /// Additional output pixel offset, applied in LogicToPixel (used by SetPixelOffset/GetPixelOffset)
     tools::Long mnOutOffOrigX;
     /// Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)

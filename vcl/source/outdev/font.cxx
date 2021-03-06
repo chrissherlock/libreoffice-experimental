@@ -37,8 +37,6 @@
 #include <salgdi.hxx>
 #include <svdata.hxx>
 
-#include <strings.hrc>
-
 void OutputDevice::SetFont(vcl::Font const& rNewFont)
 {
     vcl::Font aFont = GetDrawModeFont(rNewFont, GetDrawMode(), GetSettings().GetStyleSettings());
@@ -162,7 +160,6 @@ bool OutputDevice::AddTempDevFont( const OUString& rFileURL, const OUString& rFo
 
     if( !mpGraphics && !AcquireGraphics() )
         return false;
-    assert(mpGraphics);
 
     bool bRC = mpGraphics->AddTempDevFont( mxFontCollection.get(), rFileURL, rFontName );
     if( !bRC )
@@ -511,7 +508,7 @@ void OutputDevice::RefreshFontData( const bool bNewFontLists )
 void OutputDevice::ImplRefreshFontData( const bool bNewFontLists )
 {
     if (bNewFontLists && AcquireGraphics())
-        mpGraphics->GetDevFontList( mxFontCollection.get() );
+            mpGraphics->GetDevFontList( mxFontCollection.get() );
 }
 
 void OutputDevice::ImplUpdateFontData()
@@ -877,29 +874,6 @@ vcl::Font OutputDevice::GetDefaultFont( DefaultFontType nType, LanguageType eLan
 #endif
 
     return aFont;
-}
-
-void OutputDevice::ImplInitFontList() const
-{
-    if( mxFontCollection->Count() )
-        return;
-
-    if( !(mpGraphics || AcquireGraphics()) )
-        return;
-    assert(mpGraphics);
-
-    SAL_INFO( "vcl.gdi", "OutputDevice::ImplInitFontList()" );
-    mpGraphics->GetDevFontList(mxFontCollection.get());
-
-    // There is absolutely no way there should be no fonts available on the device
-    if( !mxFontCollection->Count() )
-    {
-        OUString aError( "Application error: no fonts and no vcl resource found on your system" );
-        OUString aResStr(VclResId(SV_ACCESSERROR_NO_FONTS));
-        if (!aResStr.isEmpty())
-            aError = aResStr;
-        Application::Abort(aError);
-    }
 }
 
 bool OutputDevice::InitFont() const
@@ -1298,7 +1272,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplGlyphFallbackLayout( std::unique_pt
         // find a font family suited for glyph fallback
         // GetGlyphFallbackFont() needs a valid FontInstance
         // if the system-specific glyph fallback is active
-        if( !pFallbackFont )
+        if(!pFallbackFont)
             pFallbackFont = mxFontCache->GetGlyphFallbackFont( mxFontCollection.get(),
                 aFontSelData, mpFontInstance.get(), nFallbackLevel, aMissingCodes );
         if( !pFallbackFont )
