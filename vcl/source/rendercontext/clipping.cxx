@@ -21,12 +21,37 @@
 #include <tools/debug.hxx>
 
 #include <vcl/RenderContext2.hxx>
+#include <vcl/virdev.hxx>
 
 #include <salgdi.hxx>
 
 vcl::Region RenderContext2::GetClipRegion() const { return PixelToLogic(maRegion); }
 
-bool RenderContext2::SelectClipRegion(const vcl::Region& rRegion, SalGraphics* pGraphics)
+void RenderContext2::SetClipRegion()
+{
+    SetDeviceClipRegion(nullptr);
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->SetClipRegion();
+}
+
+void RenderContext2::SetClipRegion(vcl::Region const& rRegion)
+{
+    if (rRegion.IsNull())
+    {
+        SetDeviceClipRegion(nullptr);
+    }
+    else
+    {
+        vcl::Region aRegion = LogicToPixel(rRegion);
+        SetDeviceClipRegion(&aRegion);
+    }
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->SetClipRegion(rRegion);
+}
+
+bool RenderContext2::SelectClipRegion(vcl::Region const& rRegion, SalGraphics* pGraphics)
 {
     DBG_TESTSOLARMUTEX();
 

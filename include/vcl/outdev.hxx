@@ -471,8 +471,8 @@ protected:
     ///@{
 
 public:
-    void SetClipRegion();
-    void SetClipRegion(const vcl::Region& rRegion);
+    void SetClipRegion() override;
+    void SetClipRegion(vcl::Region const& rRegion) override;
 
     bool IsClipRegion() const { return mbClipRegion; }
 
