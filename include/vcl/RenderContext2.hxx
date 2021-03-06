@@ -112,6 +112,7 @@ public:
     virtual void SetFillColor();
     virtual void SetFillColor(Color const& rColor);
 
+    bool IsFontAvailable(OUString const& rFontName) const;
     vcl::Font const& GetFont() const;
     virtual void SetFont(vcl::Font const& rNewFont);
 

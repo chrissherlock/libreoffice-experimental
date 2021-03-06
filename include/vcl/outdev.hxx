@@ -962,8 +962,6 @@ public:
     FontMetric GetDevFont(int nDevFontIndex) const;
     int GetDevFontCount() const;
 
-    bool IsFontAvailable(const OUString& rFontName) const;
-
     Size GetDevFontSize(const vcl::Font& rFont, int nSizeIndex) const;
     int GetDevFontSizeCount(const vcl::Font&) const;
 
