@@ -471,10 +471,8 @@ protected:
     ///@{
 
 public:
-    vcl::Region GetClipRegion() const;
     void SetClipRegion();
     void SetClipRegion(const vcl::Region& rRegion);
-    bool SelectClipRegion(const vcl::Region&, SalGraphics* pGraphics = nullptr);
 
     bool IsClipRegion() const { return mbClipRegion; }
 
