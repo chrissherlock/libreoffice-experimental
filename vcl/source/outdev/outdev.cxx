@@ -58,8 +58,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mpNextGraphics = nullptr;
     mpMetaFile = nullptr;
     mpFontInstance = nullptr;
-    mpDeviceFontList = nullptr;
-    mpDeviceFontSizeList = nullptr;
     mpAlphaVDev = nullptr;
     mpExtOutDevData = nullptr;
     mnOutOffX = 0;
@@ -94,10 +92,6 @@ void OutputDevice::dispose()
 
     // release the active font instance
     mpFontInstance.clear();
-
-    // remove cached results of GetDevFontList/GetDevSizeList
-    mpDeviceFontList.reset();
-    mpDeviceFontSizeList.reset();
 
     // release ImplFontCache specific to this OutputDevice
     mxFontCache.reset();
