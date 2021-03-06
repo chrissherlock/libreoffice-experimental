@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <sal/log.hxx>
+
 #include <vcl/RenderContext2.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/svapp.hxx>
@@ -85,6 +87,12 @@ void RenderContext2::dispose()
     mpOutDevData->mpRotateDev.disposeAndClear();
     ImplInvalidateViewTransform(); // #i75163#
     mpOutDevData.reset();
+
+    // for some reason, we haven't removed state from the stack properly
+    SAL_WARN_IF(!maOutDevStateStack.empty(), "vcl.gdi",
+                "RenderContext2::~RenderContext2(): RenderContext2::Push() calls != "
+                "RenderContext2::Pop() calls");
+    maOutDevStateStack.clear();
 
     mpAlphaVDev.disposeAndClear();
     VclReferenceBase::dispose();

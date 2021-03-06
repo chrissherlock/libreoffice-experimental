@@ -137,6 +137,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/rendercontext/rasterop \
     vcl/source/rendercontext/refpoint \
     vcl/source/rendercontext/settings \
+    vcl/source/rendercontext/stack \
     vcl/source/rendercontext/text \
     vcl/source/window/errinf \
     vcl/source/window/settings \
@@ -249,7 +250,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/toolkit/morebtn \
     vcl/source/outdev/ImplMapRes \
     vcl/source/outdev/outdev \
-    vcl/source/outdev/outdevstate \
+    vcl/source/outdev/stack \
     vcl/source/outdev/clipping \
     vcl/source/outdev/polygon \
     vcl/source/outdev/rasterop \

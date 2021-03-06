@@ -96,12 +96,6 @@ void OutputDevice::dispose()
         mpUnoGraphicsList = nullptr;
     }
 
-    // for some reason, we haven't removed state from the stack properly
-    if (!maOutDevStateStack.empty())
-        SAL_WARN("vcl.gdi", "OutputDevice::~OutputDevice(): OutputDevice::Push() calls != "
-                            "OutputDevice::Pop() calls");
-    maOutDevStateStack.clear();
-
     // release the active font instance
     mpFontInstance.clear();
 

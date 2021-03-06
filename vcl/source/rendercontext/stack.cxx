@@ -1,4 +1,4 @@
-/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; fill-column: 100 -*- */
 /*
  * This file is part of the LibreOffice project.
  *
@@ -20,22 +20,15 @@
 #include <sal/config.h>
 #include <sal/log.hxx>
 
-#include <tools/debug.hxx>
-#include <vcl/gdimtf.hxx>
-#include <vcl/metaact.hxx>
 #include <vcl/outdevstate.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/settings.hxx>
 
 #include <outdev.h>
 #include <drawmode.hxx>
-#include <salgdi.hxx>
 
-void OutputDevice::Push(PushFlags nFlags)
+void RenderContext2::Push(PushFlags nFlags)
 {
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaPushAction(nFlags));
-
     maOutDevStateStack.emplace_back();
     OutDevState& rState = maOutDevStateStack.back();
 
@@ -90,19 +83,14 @@ void OutputDevice::Push(PushFlags nFlags)
         mpAlphaVDev->Push();
 }
 
-void OutputDevice::Pop()
+void RenderContext2::Pop()
 {
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaPopAction());
-
-    GDIMetaFile* pOldMetaFile = mpMetaFile;
-    mpMetaFile = nullptr;
-
     if (maOutDevStateStack.empty())
     {
-        SAL_WARN("vcl.gdi", "OutputDevice::Pop() without OutputDevice::Push()");
+        SAL_WARN("vcl.gdi", "RenderContext2::Pop() without RenderContext2::Push()");
         return;
     }
+
     const OutDevState& rState = maOutDevStateStack.back();
 
     if (mpAlphaVDev)
@@ -187,16 +175,13 @@ void OutputDevice::Pop()
     }
 
     maOutDevStateStack.pop_back();
-
-    mpMetaFile = pOldMetaFile;
 }
 
-void OutputDevice::ClearStack()
+void RenderContext2::ClearStack()
 {
     sal_uInt32 nCount = maOutDevStateStack.size();
     while (nCount--)
         Pop();
 }
 
-
-/* vim:set shiftwidth=4 softtabstop=4 expandtab: */
+/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
