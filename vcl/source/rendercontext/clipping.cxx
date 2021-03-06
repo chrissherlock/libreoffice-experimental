@@ -94,4 +94,17 @@ void RenderContext2::SetDeviceClipRegion(vcl::Region const* pRegion)
     }
 }
 
+void RenderContext2::MoveClipRegion(tools::Long nHorzMove, tools::Long nVertMove)
+{
+    if (mbClipRegion)
+    {
+        maRegion.Move(ImplLogicWidthToDevicePixel(nHorzMove),
+                      ImplLogicHeightToDevicePixel(nVertMove));
+        mbInitClipRegion = true;
+    }
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->MoveClipRegion(nHorzMove, nVertMove);
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
