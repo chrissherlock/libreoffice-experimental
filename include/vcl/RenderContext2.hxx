@@ -341,6 +341,12 @@ public:
      */
     SAL_DLLPRIVATE tools::Long ImplLogicWidthToDevicePixel(tools::Long nWidth) const;
 
+    virtual void DrawEllipse(tools::Rectangle const& rRect);
+    virtual void DrawArc(tools::Rectangle const& rRect, Point const& rStartPt, Point const& rEndPt);
+    virtual void DrawPie(tools::Rectangle const& rRect, Point const& rStartPt, Point const& rEndPt);
+    virtual void DrawChord(tools::Rectangle const& rRect, Point const& rStartPt,
+                           Point const& rEndPt);
+
 protected:
     virtual void dispose() override;
 

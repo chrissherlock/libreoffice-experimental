@@ -631,18 +631,15 @@ private:
     ImplDrawPolyPolygonWithB2DPolyPolygon(const basegfx::B2DPolyPolygon& rB2DPolyPoly);
     ///@}
 
+public:
     /** @name Curved shape functions
      */
     ///@{
 
-public:
-    void DrawEllipse(const tools::Rectangle& rRect);
-
-    void DrawArc(const tools::Rectangle& rRect, const Point& rStartPt, const Point& rEndPt);
-
-    void DrawPie(const tools::Rectangle& rRect, const Point& rStartPt, const Point& rEndPt);
-
-    void DrawChord(const tools::Rectangle& rRect, const Point& rStartPt, const Point& rEndPt);
+    void DrawEllipse(tools::Rectangle const& rRect) override;
+    void DrawArc(tools::Rectangle const& rRect, Point const& rStartPt, Point const& rEndPt) override;
+    void DrawPie(tools::Rectangle const& rRect, Point const& rStartPt, Point const& rEndPt) override;
+    void DrawChord(tools::Rectangle const& rRect, Point const& rStartPt, Point const& rEndPt) override;
 
     ///@}
 
