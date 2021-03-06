@@ -325,7 +325,6 @@ private:
     mutable bool mbClipRegionSet : 1;
     mutable bool mbTextLines : 1;
     mutable bool mbTextSpecial : 1;
-    mutable bool mbEnableRTL : 1;
 
     /** @name Initialization and accessor functions
      */
@@ -373,7 +372,6 @@ public:
 
 public:
     OutDevType GetOutDevType() const { return meOutDevType; }
-    virtual bool IsVirtual() const;
 
     /** Query an OutputDevice to see whether it supports a specific operation
 
@@ -1097,8 +1095,6 @@ private:
     ///@{
 
 public:
-    // tells whether this output device is RTL in an LTR UI or LTR in a RTL UI
-    SAL_DLLPRIVATE bool ImplIsAntiparallel() const;
     SAL_DLLPRIVATE void ReMirror(Point& rPoint) const;
     SAL_DLLPRIVATE void ReMirror(tools::Rectangle& rRect) const;
     SAL_DLLPRIVATE void ReMirror(vcl::Region& rRegion) const;
@@ -1125,8 +1121,6 @@ public:
 
     // Enabling/disabling RTL only makes sense for OutputDevices that use a mirroring SalGraphicsLayout
     virtual void EnableRTL(bool bEnable = true);
-    bool IsRTLEnabled() const { return mbEnableRTL; }
-
     bool GetTextIsRTL(const OUString&, sal_Int32 nIndex, sal_Int32 nLen) const;
 
     ///@}

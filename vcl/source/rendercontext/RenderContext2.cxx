@@ -59,6 +59,7 @@ RenderContext2::RenderContext2()
     , mbBackground(false)
     , mbInitClipRegion(true)
     , mbClipRegion(false)
+    , mbEnableRTL(false) // mirroring must be explicitly allowed (typically for windows only)
     , mnDPIX(0)
     , mnDPIY(0)
     , mnDPIScalePercentage(100)
@@ -97,5 +98,7 @@ void RenderContext2::dispose()
     mpAlphaVDev.disposeAndClear();
     VclReferenceBase::dispose();
 }
+
+bool RenderContext2::IsVirtual() const { return false; }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

@@ -80,7 +80,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mbClipRegionSet = false;
     mbTextLines = false;
     mbTextSpecial = false;
-    mbEnableRTL = false; // mirroring must be explicitly allowed (typically for windows only)
 }
 
 OutputDevice::~OutputDevice() { disposeOnce(); }
@@ -113,8 +112,6 @@ void OutputDevice::dispose()
     mpPrevGraphics.clear();
     mpNextGraphics.clear();
 }
-
-bool OutputDevice::IsVirtual() const { return false; }
 
 void OutputDevice::SetConnectMetaFile(GDIMetaFile* pMtf) { mpMetaFile = pMtf; }
 
@@ -452,20 +449,6 @@ void OutputDevice::EnableRTL(bool bEnable)
 
     if (mpAlphaVDev)
         mpAlphaVDev->EnableRTL(bEnable);
-}
-
-bool OutputDevice::ImplIsAntiparallel() const
-{
-    bool bRet = false;
-    if (AcquireGraphics())
-    {
-        if (((mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl) && !IsRTLEnabled())
-            || (!(mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl) && IsRTLEnabled()))
-        {
-            bRet = true;
-        }
-    }
-    return bRet;
 }
 
 // note: the coordinates to be remirrored are in frame coordinates !
