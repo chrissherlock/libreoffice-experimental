@@ -17,20 +17,16 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <sal/log.hxx>
 #include <rtl/ustrbuf.hxx>
 #include <tools/debug.hxx>
 #include <i18nlangtag/mslangid.hxx>
-#include <i18nlangtag/lang.h>
 #include <unotools/configmgr.hxx>
 
 #include <vcl/event.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
-#include <vcl/fontcharmap.hxx>
 #include <vcl/metric.hxx>
 #include <vcl/print.hxx>
-#include <vcl/sysdata.hxx>
 #include <vcl/virdev.hxx>
 
 #include <outdev.h>
@@ -38,10 +34,8 @@
 #include <PhysicalFontCollection.hxx>
 #include <drawmode.hxx>
 #include <font/FeatureCollector.hxx>
-#include <sallayout.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>
-#include <impglyphitem.hxx>
 
 #include <strings.hrc>
 
