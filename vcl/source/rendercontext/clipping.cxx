@@ -185,4 +185,6 @@ void RenderContext2::InitClipRegion()
     mbInitClipRegion = false;
 }
 
+vcl::Region RenderContext2::GetActiveClipRegion() const { return GetClipRegion(); }
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
