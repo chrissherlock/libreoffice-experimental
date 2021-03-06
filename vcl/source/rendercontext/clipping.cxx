@@ -132,4 +132,57 @@ void RenderContext2::IntersectClipRegion(vcl::Region const& rRegion)
         mpAlphaVDev->IntersectClipRegion(rRegion);
 }
 
+vcl::Region RenderContext2::ClipToDeviceBounds(vcl::Region aRegion) const
+{
+    aRegion.Intersect(tools::Rectangle{ mnOutOffX, mnOutOffY, mnOutOffX + GetOutputWidthPixel() - 1,
+                                        mnOutOffY + GetOutputHeightPixel() - 1 });
+    return aRegion;
+}
+
+void RenderContext2::InitClipRegion()
+{
+    DBG_TESTSOLARMUTEX();
+
+    if (mbClipRegion)
+    {
+        if (maRegion.IsEmpty())
+        {
+            mbOutputClipped = true;
+        }
+        else
+        {
+            mbOutputClipped = false;
+
+            // #102532# Respect output offset also for clip region
+            vcl::Region aRegion = ClipToDeviceBounds(ImplPixelToDevicePixel(maRegion));
+
+            if (aRegion.IsEmpty())
+            {
+                mbOutputClipped = true;
+            }
+            else
+            {
+                mbOutputClipped = false;
+                SelectClipRegion(aRegion);
+            }
+        }
+
+        mbClipRegionSet = true;
+    }
+    else
+    {
+        if (mbClipRegionSet)
+        {
+            if (mpGraphics)
+                mpGraphics->ResetClipRegion();
+
+            mbClipRegionSet = false;
+        }
+
+        mbOutputClipped = false;
+    }
+
+    mbInitClipRegion = false;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
