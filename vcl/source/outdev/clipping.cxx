@@ -50,7 +50,7 @@ void OutputDevice::SetClipRegion(vcl::Region const& rRegion )
     RenderContext2::SetClipRegion(rRegion);
 }
 
-void OutputDevice::MoveClipRegion( tools::Long nHorzMove, tools::Long nVertMove )
+void OutputDevice::MoveClipRegion(tools::Long nHorzMove, tools::Long nVertMove)
 {
     if (mbClipRegion && mpMetaFile)
         mpMetaFile->AddAction(new MetaMoveClipRegionAction(nHorzMove, nVertMove));
@@ -58,37 +58,20 @@ void OutputDevice::MoveClipRegion( tools::Long nHorzMove, tools::Long nVertMove 
     RenderContext2::MoveClipRegion(nHorzMove, nVertMove);
 }
 
-void OutputDevice::IntersectClipRegion( const tools::Rectangle& rRect )
+void OutputDevice::IntersectClipRegion(tools::Rectangle const& rRect)
 {
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaISectRectClipRegionAction(rRect));
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaISectRectClipRegionAction( rRect ) );
-
-    tools::Rectangle aRect = LogicToPixel( rRect );
-    maRegion.Intersect( aRect );
-    mbClipRegion        = true;
-    mbInitClipRegion    = true;
-
-    if( mpAlphaVDev )
-        mpAlphaVDev->IntersectClipRegion( rRect );
+    RenderContext2::IntersectClipRegion(rRect);
 }
 
-void OutputDevice::IntersectClipRegion( const vcl::Region& rRegion )
+void OutputDevice::IntersectClipRegion(vcl::Region const& rRegion)
 {
+    if (!rRegion.IsNull() && mpMetaFile)
+        mpMetaFile->AddAction(new MetaISectRegionClipRegionAction(rRegion));
 
-    if(!rRegion.IsNull())
-    {
-        if ( mpMetaFile )
-            mpMetaFile->AddAction( new MetaISectRegionClipRegionAction( rRegion ) );
-
-        vcl::Region aRegion = LogicToPixel( rRegion );
-        maRegion.Intersect( aRegion );
-        mbClipRegion        = true;
-        mbInitClipRegion    = true;
-    }
-
-    if( mpAlphaVDev )
-        mpAlphaVDev->IntersectClipRegion( rRegion );
+    RenderContext2::IntersectClipRegion(rRegion);
 }
 
 void OutputDevice::InitClipRegion()
@@ -125,6 +108,7 @@ void OutputDevice::InitClipRegion()
         {
             if (mpGraphics)
                 mpGraphics->ResetClipRegion();
+
             mbClipRegionSet = false;
         }
 
