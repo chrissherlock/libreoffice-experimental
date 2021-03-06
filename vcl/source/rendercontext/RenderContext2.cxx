@@ -99,6 +99,8 @@ void RenderContext2::dispose()
                 "RenderContext2::Pop() calls");
     maOutDevStateStack.clear();
 
+    mxFontCollection.reset(); // release ImplFontList specific to this OutputDevice
+
     mpAlphaVDev.disposeAndClear();
     VclReferenceBase::dispose();
 }

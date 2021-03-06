@@ -305,7 +305,6 @@ private:
     GDIMetaFile* mpMetaFile;
     mutable rtl::Reference<LogicalFontInstance> mpFontInstance;
     mutable std::shared_ptr<ImplFontCache> mxFontCache;
-    mutable std::shared_ptr<PhysicalFontCollection> mxFontCollection;
     mutable std::unique_ptr<ImplDeviceFontList> mpDeviceFontList;
     mutable std::unique_ptr<ImplDeviceFontSizeList> mpDeviceFontSizeList;
     std::vector<VCLXGraphics*>* mpUnoGraphicsList;
@@ -1012,7 +1011,6 @@ public:
                                     GetDefaultFontFlags nFlags,
                                     const OutputDevice* pOutDev = nullptr);
 
-    SAL_DLLPRIVATE void ImplInitFontList() const;
     SAL_DLLPRIVATE void ImplUpdateFontData();
 
     //drop font data for all outputdevices.

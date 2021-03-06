@@ -20,8 +20,14 @@
 #include <vcl/RenderContext2.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
+#include <vcl/svapp.hxx>
 
+#include <PhysicalFontCollection.hxx>
 #include <drawmode.hxx>
+#include <salgdi.hxx>
+#include <svdata.hxx>
+
+#include <strings.hrc>
 
 vcl::Font const& RenderContext2::GetFont() const { return maFont; }
 
@@ -59,6 +65,28 @@ void RenderContext2::SetFont(vcl::Font const& rNewFont)
     }
 
     mpAlphaVDev->SetFont(aFont);
+}
+
+void RenderContext2::ImplInitFontList() const
+{
+    if (mxFontCollection->Count())
+        return;
+
+    if (!(mpGraphics || AcquireGraphics()))
+        return;
+
+    SAL_INFO("vcl.gdi", "RenderContext2::ImplInitFontList()");
+    mpGraphics->GetDevFontList(mxFontCollection.get());
+
+    // There is absolutely no way there should be no fonts available on the device
+    if (!mxFontCollection->Count())
+    {
+        OUString aError("Application error: no fonts and no vcl resource found on your system");
+        OUString aResStr(VclResId(SV_ACCESSERROR_NO_FONTS));
+        if (!aResStr.isEmpty())
+            aError = aResStr;
+        Application::Abort(aError);
+    }
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
