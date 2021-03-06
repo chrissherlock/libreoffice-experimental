@@ -71,6 +71,12 @@ public:
     void EnableOutput(bool bEnable = true);
     bool IsOutputEnabled() const;
 
+    virtual bool IsVirtual() const;
+
+    /// tells whether this output device is RTL in an LTR UI or LTR in a RTL UI
+    SAL_DLLPRIVATE bool ImplIsAntiparallel() const;
+    bool IsRTLEnabled() const;
+
     ComplexTextLayoutFlags GetLayoutMode() const;
     virtual void SetLayoutMode(ComplexTextLayoutFlags nTextLayoutMode);
 
@@ -546,6 +552,7 @@ protected:
     mutable bool mbBackground : 1;
     mutable bool mbInitClipRegion : 1;
     mutable bool mbClipRegion : 1;
+    mutable bool mbEnableRTL : 1;
 
 private:
     std::vector<OutDevState> maOutDevStateStack;
