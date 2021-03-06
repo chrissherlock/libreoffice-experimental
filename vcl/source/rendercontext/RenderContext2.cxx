@@ -23,6 +23,7 @@
 #include <vcl/settings.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/virdev.hxx>
+#include <vcl/window.hxx>
 
 #include <ImplOutDevData.hxx>
 
@@ -102,5 +103,11 @@ void RenderContext2::dispose()
 }
 
 bool RenderContext2::IsVirtual() const { return false; }
+
+bool RenderContext2::is_double_buffered_window() const
+{
+    const vcl::Window* pWindow = dynamic_cast<const vcl::Window*>(this);
+    return pWindow && pWindow->SupportsDoubleBuffering();
+}
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

@@ -439,12 +439,6 @@ void OutputDevice::DrawLinearGradient( const tools::Rectangle& rRect,
 
 }
 
-bool OutputDevice::is_double_buffered_window() const
-{
-    const vcl::Window *pWindow = dynamic_cast<const vcl::Window*>(this);
-    return pWindow && pWindow->SupportsDoubleBuffering();
-}
-
 void OutputDevice::DrawComplexGradient( const tools::Rectangle& rRect,
                                         const Gradient& rGradient,
                                         const tools::PolyPolygon* pClixPolyPoly )

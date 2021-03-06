@@ -523,6 +523,8 @@ protected:
      */
     SAL_DLLPRIVATE void ImplInvalidateViewTransform();
 
+    SAL_DLLPRIVATE bool is_double_buffered_window() const;
+
     mutable SalGraphics* mpGraphics; ///< Graphics context to draw on
     VclPtr<VirtualDevice> mpAlphaVDev;
 

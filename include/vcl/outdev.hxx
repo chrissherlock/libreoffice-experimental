@@ -414,8 +414,6 @@ protected:
 
     SAL_DLLPRIVATE void drawOutDevDirect(const OutputDevice& rSrcDev, SalTwoRect& rPosAry);
 
-    SAL_DLLPRIVATE bool is_double_buffered_window() const;
-
 private:
     // not implemented; to detect misuses of DrawOutDev(...OutputDevice&);
     SAL_DLLPRIVATE void DrawOutDev(const Point&, const Size&, const Point&, const Size&,
