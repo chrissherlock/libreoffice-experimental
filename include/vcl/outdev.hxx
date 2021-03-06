@@ -308,7 +308,6 @@ private:
     mutable std::shared_ptr<PhysicalFontCollection> mxFontCollection;
     mutable std::unique_ptr<ImplDeviceFontList> mpDeviceFontList;
     mutable std::unique_ptr<ImplDeviceFontSizeList> mpDeviceFontSizeList;
-    std::vector<OutDevState> maOutDevStateStack;
     std::vector<VCLXGraphics*>* mpUnoGraphicsList;
     vcl::ExtOutDevData* mpExtOutDevData;
 
@@ -433,10 +432,8 @@ private:
     ///@{
 
 public:
-    void Push(PushFlags nFlags = PushFlags::ALL);
-    void Pop();
-
-    void ClearStack();
+    void Push(PushFlags nFlags = PushFlags::ALL) override;
+    void Pop() override;
 
     bool IsDeviceOutputNecessary() const { return (IsOutputEnabled() && mbDevOutput); }
     void SetLayoutMode(ComplexTextLayoutFlags nTextLayoutMode) override;

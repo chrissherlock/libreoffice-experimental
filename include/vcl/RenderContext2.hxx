@@ -32,6 +32,7 @@
 #include <vcl/flags/AntialiasingFlags.hxx>
 #include <vcl/flags/ComplexTextLayoutFlags.hxx>
 #include <vcl/flags/DrawModeFlags.hxx>
+#include <vcl/flags/PushFlags.hxx>
 #include <vcl/font.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/mapmod.hxx>
@@ -40,10 +41,13 @@
 #include <vcl/vclreferencebase.hxx>
 #include <vcl/wall.hxx>
 
+#include <vector>
+
 class AllSettings;
 class SalGraphics;
 class VirtualDevice;
 struct ImplOutDevData;
+struct OutDevState;
 
 class VCL_DLLPUBLIC RenderContext2 : public virtual VclReferenceBase
 {
@@ -59,6 +63,10 @@ public:
      */
     SalGraphics const* GetGraphics() const;
     SalGraphics* GetGraphics();
+
+    virtual void Push(PushFlags nFlags = PushFlags::ALL);
+    virtual void Pop();
+    void ClearStack();
 
     void EnableOutput(bool bEnable = true);
     bool IsOutputEnabled() const;
@@ -540,6 +548,7 @@ protected:
     mutable bool mbClipRegion : 1;
 
 private:
+    std::vector<OutDevState> maOutDevStateStack;
     sal_Int32 mnDPIX;
     sal_Int32 mnDPIY;
     sal_Int32
