@@ -370,7 +370,15 @@ protected:
      */
     virtual void ReleaseGraphics(bool bRelease = true) = 0;
 
+    /** Perform actual rect clip against outdev dimensions, to generate
+        empty clips whenever one of the values is completely off the device.
+
+        @param aRegion      region to be clipped to the device dimensions
+        @returns            region clipped to the device bounds
+     **/
+    virtual vcl::Region ClipToDeviceBounds(vcl::Region aRegion) const;
     SAL_DLLPRIVATE void SetDeviceClipRegion(vcl::Region const* pRegion);
+    virtual void InitClipRegion();
 
     SAL_DLLPRIVATE void InitLineColor();
     SAL_DLLPRIVATE void InitFillColor();
@@ -561,6 +569,8 @@ protected:
     mutable bool mbBackground : 1;
     mutable bool mbInitClipRegion : 1;
     mutable bool mbClipRegion : 1;
+    mutable bool mbClipRegionSet : 1;
+    mutable bool mbOutputClipped : 1;
     mutable bool mbEnableRTL : 1;
 
 private:
