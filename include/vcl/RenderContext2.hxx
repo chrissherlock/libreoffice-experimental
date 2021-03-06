@@ -73,6 +73,7 @@ public:
     virtual void SetClipRegion();
     virtual void SetClipRegion(vcl::Region const& rRegion);
     bool SelectClipRegion(vcl::Region const&, SalGraphics* pGraphics = nullptr);
+    virtual void MoveClipRegion(tools::Long nHorzMove, tools::Long nVertMove);
 
     void EnableOutput(bool bEnable = true);
     bool IsOutputEnabled() const;

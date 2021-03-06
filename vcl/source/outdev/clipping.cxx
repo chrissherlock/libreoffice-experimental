@@ -52,19 +52,10 @@ void OutputDevice::SetClipRegion(vcl::Region const& rRegion )
 
 void OutputDevice::MoveClipRegion( tools::Long nHorzMove, tools::Long nVertMove )
 {
+    if (mbClipRegion && mpMetaFile)
+        mpMetaFile->AddAction(new MetaMoveClipRegionAction(nHorzMove, nVertMove));
 
-    if ( mbClipRegion )
-    {
-        if( mpMetaFile )
-            mpMetaFile->AddAction( new MetaMoveClipRegionAction( nHorzMove, nVertMove ) );
-
-        maRegion.Move( ImplLogicWidthToDevicePixel( nHorzMove ),
-                       ImplLogicHeightToDevicePixel( nVertMove ) );
-        mbInitClipRegion = true;
-    }
-
-    if( mpAlphaVDev )
-        mpAlphaVDev->MoveClipRegion( nHorzMove, nVertMove );
+    RenderContext2::MoveClipRegion(nHorzMove, nVertMove);
 }
 
 void OutputDevice::IntersectClipRegion( const tools::Rectangle& rRect )
