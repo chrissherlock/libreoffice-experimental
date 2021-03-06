@@ -305,8 +305,6 @@ private:
     GDIMetaFile* mpMetaFile;
     mutable rtl::Reference<LogicalFontInstance> mpFontInstance;
     mutable std::shared_ptr<ImplFontCache> mxFontCache;
-    mutable std::unique_ptr<ImplDeviceFontList> mpDeviceFontList;
-    mutable std::unique_ptr<ImplDeviceFontSizeList> mpDeviceFontSizeList;
     std::vector<VCLXGraphics*>* mpUnoGraphicsList;
     vcl::ExtOutDevData* mpExtOutDevData;
 
@@ -959,13 +957,6 @@ private:
     ///@{
 
 public:
-    FontMetric GetDevFont(int nDevFontIndex) const;
-    int GetDevFontCount() const;
-
-    Size GetDevFontSize(const vcl::Font& rFont, int nSizeIndex) const;
-    int GetDevFontSizeCount(const vcl::Font&) const;
-
-    bool AddTempDevFont(const OUString& rFileURL, const OUString& rFontName);
     void RefreshFontData(const bool bNewFontLists);
 
     FontMetric GetFontMetric() const;

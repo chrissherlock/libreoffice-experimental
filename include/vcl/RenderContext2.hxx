@@ -36,6 +36,7 @@
 #include <vcl/font.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/mapmod.hxx>
+#include <vcl/metric.hxx>
 #include <vcl/region.hxx>
 #include <vcl/vclptr.hxx>
 #include <vcl/vclreferencebase.hxx>
@@ -44,6 +45,8 @@
 #include <vector>
 
 class AllSettings;
+class ImplDeviceFontList;
+class ImplDeviceFontSizeList;
 class PhysicalFontCollection;
 class SalGraphics;
 class VirtualDevice;
@@ -115,6 +118,12 @@ public:
     bool IsFontAvailable(OUString const& rFontName) const;
     vcl::Font const& GetFont() const;
     virtual void SetFont(vcl::Font const& rNewFont);
+
+    FontMetric GetDevFont(int nDevFontIndex) const;
+    int GetDevFontCount() const;
+    bool AddTempDevFont(OUString const& rFileURL, OUString const& rFontName);
+    Size GetDevFontSize(vcl::Font const& rFont, int nSizeIndex) const;
+    int GetDevFontSizeCount(vcl::Font const&) const;
 
     Color const& GetTextColor() const;
     virtual void SetTextColor(Color const& rColor);
@@ -559,6 +568,8 @@ protected:
     ImplMapRes maMapRes;
     std::unique_ptr<ImplOutDevData> mpOutDevData;
     mutable std::shared_ptr<PhysicalFontCollection> mxFontCollection;
+    mutable std::unique_ptr<ImplDeviceFontList> mpDeviceFontList;
+    mutable std::unique_ptr<ImplDeviceFontSizeList> mpDeviceFontSizeList;
     /// Additional output pixel offset, applied in LogicToPixel (used by SetPixelOffset/GetPixelOffset)
     tools::Long mnOutOffOrigX;
     /// Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)

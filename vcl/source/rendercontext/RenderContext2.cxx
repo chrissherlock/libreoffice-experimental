@@ -25,6 +25,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/window.hxx>
 
+#include <outdev.h>
 #include <ImplOutDevData.hxx>
 
 RenderContext2::RenderContext2()
@@ -40,6 +41,8 @@ RenderContext2::RenderContext2()
     , maTextLineColor(COL_TRANSPARENT)
     , maOverlineColor(COL_TRANSPARENT)
     , maRegion(true)
+    , mpDeviceFontList(nullptr)
+    , mpDeviceFontSizeList(nullptr)
     , mnOutOffOrigX(0)
     , mnOutOffLogicX(0)
     , mnOutOffOrigY(0)
@@ -99,6 +102,8 @@ void RenderContext2::dispose()
                 "RenderContext2::Pop() calls");
     maOutDevStateStack.clear();
 
+    mpDeviceFontList.reset();
+    mpDeviceFontSizeList.reset();
     mxFontCollection.reset(); // release ImplFontList specific to this OutputDevice
 
     mpAlphaVDev.disposeAndClear();
