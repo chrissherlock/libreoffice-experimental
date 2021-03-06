@@ -67,6 +67,13 @@ void RenderContext2::SetFont(vcl::Font const& rNewFont)
     mpAlphaVDev->SetFont(aFont);
 }
 
+bool RenderContext2::IsFontAvailable(OUString const& rFontName) const
+{
+    ImplInitFontList();
+    PhysicalFontFamily* pFound = mxFontCollection->FindFontFamily(rFontName);
+    return (pFound != nullptr);
+}
+
 void RenderContext2::ImplInitFontList() const
 {
     if (mxFontCollection->Count())

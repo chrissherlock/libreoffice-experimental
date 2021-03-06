@@ -108,13 +108,6 @@ int OutputDevice::GetDevFontCount() const
     return mpDeviceFontList->Count();
 }
 
-bool OutputDevice::IsFontAvailable( const OUString& rFontName ) const
-{
-    ImplInitFontList();
-    PhysicalFontFamily* pFound = mxFontCollection->FindFontFamily( rFontName );
-    return (pFound != nullptr);
-}
-
 int OutputDevice::GetDevFontSizeCount( const vcl::Font& rFont ) const
 {
     mpDeviceFontSizeList.reset();
