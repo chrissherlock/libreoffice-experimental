@@ -57,16 +57,15 @@ void OutputDevice::SetFont(vcl::Font const& rNewFont)
         mpMetaFile->AddAction(new MetaTextAlignAction(aFont.GetAlignment()));
         mpMetaFile->AddAction(
             new MetaTextFillColorAction(aFont.GetFillColor(), !aFont.IsTransparent()));
-    }
 
-    // Optimization MT/HDU: COL_TRANSPARENT means SetFont should ignore the font color,
-    // because SetTextColor() is used for this.
-    // #i28759# maTextColor might have been changed behind our back, commit then, too.
-    if (aFont.GetColor() != COL_TRANSPARENT
-        && (aFont.GetColor() != maFont.GetColor() || aFont.GetColor() != maTextColor)
-        && mpMetaFile)
-    {
-        mpMetaFile->AddAction(new MetaTextColorAction(aFont.GetColor()));
+        // Optimization MT/HDU: COL_TRANSPARENT means SetFont should ignore the font color,
+        // because SetTextColor() is used for this.
+        // #i28759# maTextColor might have been changed behind our back, commit then, too.
+        if (aFont.GetColor() != COL_TRANSPARENT
+            && (aFont.GetColor() != maFont.GetColor() || aFont.GetColor() != maTextColor))
+        {
+            mpMetaFile->AddAction(new MetaTextColorAction(aFont.GetColor()));
+        }
     }
 
     RenderContext2::SetFont(rNewFont);
