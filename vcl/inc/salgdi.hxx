@@ -43,7 +43,7 @@ class SalLayout;
 class ImplLayoutArgs;
 namespace tools { class Rectangle; }
 class FontSubsetInfo;
-class OutputDevice;
+class RenderContext2;
 class FreetypeFont;
 struct SystemGraphicsData;
 
@@ -210,44 +210,44 @@ public:
     SalLayoutFlags              GetLayout() const { return m_nLayout; }
     void                        SetLayout( SalLayoutFlags aLayout ) { m_nLayout = aLayout;}
 
-    void                        mirror( tools::Long& nX, const OutputDevice& rOutDev ) const;
+    void                        mirror( tools::Long& nX, const RenderContext2& rOutDev ) const;
     // only called mirror2 to avoid ambiguity
-    [[nodiscard]] tools::Long   mirror2( tools::Long nX, const OutputDevice& rOutDev ) const;
-    void                        mirror( tools::Long& nX, tools::Long nWidth, const OutputDevice& rOutDev, bool bBack = false ) const;
-    bool                        mirror( sal_uInt32 nPoints, const Point *pPtAry, Point *pPtAry2, const OutputDevice& rOutDev ) const;
-    void                        mirror( tools::Rectangle& rRect, const OutputDevice&, bool bBack = false ) const;
-    void                        mirror( vcl::Region& rRgn, const OutputDevice& rOutDev ) const;
-    void                        mirror( ImplControlValue&, const OutputDevice& ) const;
-    basegfx::B2DPolyPolygon     mirror( const basegfx::B2DPolyPolygon& i_rPoly, const OutputDevice& rOutDev ) const;
-    const basegfx::B2DHomMatrix& getMirror( const OutputDevice& rOutDev ) const;
+    [[nodiscard]] tools::Long   mirror2( tools::Long nX, const RenderContext2& rOutDev ) const;
+    void                        mirror( tools::Long& nX, tools::Long nWidth, const RenderContext2& rOutDev, bool bBack = false ) const;
+    bool                        mirror( sal_uInt32 nPoints, const Point *pPtAry, Point *pPtAry2, const RenderContext2& rOutDev ) const;
+    void                        mirror( tools::Rectangle& rRect, const RenderContext2&, bool bBack = false ) const;
+    void                        mirror( vcl::Region& rRgn, const RenderContext2& rOutDev ) const;
+    void                        mirror( ImplControlValue&, const RenderContext2& ) const;
+    basegfx::B2DPolyPolygon     mirror( const basegfx::B2DPolyPolygon& i_rPoly, const RenderContext2& rOutDev ) const;
+    const basegfx::B2DHomMatrix& getMirror( const RenderContext2& rOutDev ) const;
 
     // non virtual methods; these do possible coordinate mirroring and
     // then delegate to protected virtual methods
-    bool                        SetClipRegion( const vcl::Region&, const OutputDevice& rOutDev );
+    bool                        SetClipRegion( const vcl::Region&, const RenderContext2& rOutDev );
 
     // draw --> LineColor and FillColor and RasterOp and ClipRegion
-    void                        DrawPixel( tools::Long nX, tools::Long nY, const OutputDevice& rOutDev );
-    void                        DrawPixel( tools::Long nX, tools::Long nY, Color nColor, const OutputDevice& rOutDev );
+    void                        DrawPixel( tools::Long nX, tools::Long nY, const RenderContext2& rOutDev );
+    void                        DrawPixel( tools::Long nX, tools::Long nY, Color nColor, const RenderContext2& rOutDev );
 
-    void                        DrawLine( tools::Long nX1, tools::Long nY1, tools::Long nX2, tools::Long nY2, const OutputDevice& rOutDev );
+    void                        DrawLine( tools::Long nX1, tools::Long nY1, tools::Long nX2, tools::Long nY2, const RenderContext2& rOutDev );
 
-    void                        DrawRect( tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight, const OutputDevice& rOutDev );
+    void                        DrawRect( tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight, const RenderContext2& rOutDev );
 
-    void                        DrawPolyLine( sal_uInt32 nPoints, Point const * pPtAry, const OutputDevice& rOutDev );
+    void                        DrawPolyLine( sal_uInt32 nPoints, Point const * pPtAry, const RenderContext2& rOutDev );
 
-    void                        DrawPolygon( sal_uInt32 nPoints, const Point* pPtAry, const OutputDevice& rOutDev );
+    void                        DrawPolygon( sal_uInt32 nPoints, const Point* pPtAry, const RenderContext2& rOutDev );
 
     void                        DrawPolyPolygon(
                                     sal_uInt32 nPoly,
                                     const sal_uInt32* pPoints,
                                     const Point** pPtAry,
-                                    const OutputDevice& rOutDev );
+                                    const RenderContext2& rOutDev );
 
     bool                        DrawPolyPolygon(
                                     const basegfx::B2DHomMatrix& rObjectToDevice,
                                     const basegfx::B2DPolyPolygon &i_rPolyPolygon,
                                     double i_fTransparency,
-                                    const OutputDevice& i_rOutDev);
+                                    const RenderContext2& i_rOutDev);
 
     bool                        DrawPolyLine(
                                     const basegfx::B2DHomMatrix& rObjectToDevice,
@@ -259,99 +259,99 @@ public:
                                     css::drawing::LineCap i_eLineCap,
                                     double i_fMiterMinimumAngle,
                                     bool bPixelSnapHairline,
-                                    const OutputDevice& i_rOutDev);
+                                    const RenderContext2& i_rOutDev);
 
     bool                        DrawPolyLineBezier(
                                     sal_uInt32 nPoints,
                                     const Point* pPtAry,
                                     const PolyFlags* pFlgAry,
-                                    const OutputDevice& rOutDev );
+                                    const RenderContext2& rOutDev );
 
     bool                        DrawPolygonBezier(
                                     sal_uInt32 nPoints,
                                     const Point* pPtAry,
                                     const PolyFlags* pFlgAry,
-                                    const OutputDevice& rOutDev );
+                                    const RenderContext2& rOutDev );
 
     bool                        DrawPolyPolygonBezier(
                                     sal_uInt32 nPoly,
                                     const sal_uInt32* pPoints,
                                     const Point* const* pPtAry,
                                     const PolyFlags* const* pFlgAry,
-                                    const OutputDevice& rOutDev );
+                                    const RenderContext2& rOutDev );
 
     bool                        DrawGradient(
                                     const tools::PolyPolygon& rPolyPoly,
                                     const Gradient& rGradient,
-                                    const OutputDevice& rOutDev);
+                                    const RenderContext2& rOutDev);
 
     // CopyArea --> No RasterOp, but ClipRegion
     void                        CopyArea(
                                     tools::Long nDestX, tools::Long nDestY,
                                     tools::Long nSrcX, tools::Long nSrcY,
                                     tools::Long nSrcWidth, tools::Long nSrcHeight,
-                                    const OutputDevice& rOutDev );
+                                    const RenderContext2& rOutDev );
 
     // CopyBits --> RasterOp and ClipRegion
     // CopyBits() CopyBits on same Graphics
     void                        CopyBits(
                                     const SalTwoRect& rPosAry,
-                                    const OutputDevice& rOutDev);
+                                    const RenderContext2& rOutDev);
 
     // CopyBits --> RasterOp and ClipRegion
     // CopyBits() CopyBits on different Graphics
     void                        CopyBits(
                                     const SalTwoRect& rPosAry,
                                     SalGraphics& rSrcGraphics,
-                                    const OutputDevice& rOutDev,
-                                    const OutputDevice& rSrcOutDev );
+                                    const RenderContext2& rOutDev,
+                                    const RenderContext2& rSrcOutDev );
 
 
     void                        DrawBitmap(
                                     const SalTwoRect& rPosAry,
                                     const SalBitmap& rSalBitmap,
-                                    const OutputDevice& rOutDev );
+                                    const RenderContext2& rOutDev );
 
     void                        DrawBitmap(
                                     const SalTwoRect& rPosAry,
                                     const SalBitmap& rSalBitmap,
                                     const SalBitmap& rTransparentBitmap,
-                                    const OutputDevice& rOutDev );
+                                    const RenderContext2& rOutDev );
 
     void                        DrawMask(
                                     const SalTwoRect& rPosAry,
                                     const SalBitmap& rSalBitmap,
                                     Color nMaskColor,
-                                    const OutputDevice& rOutDev );
+                                    const RenderContext2& rOutDev );
 
     std::shared_ptr<SalBitmap>  GetBitmap(
                                     tools::Long nX, tools::Long nY,
                                     tools::Long nWidth, tools::Long nHeight,
-                                    const OutputDevice& rOutDev );
+                                    const RenderContext2& rOutDev );
 
     Color                       GetPixel(
                                     tools::Long nX, tools::Long nY,
-                                    const OutputDevice& rOutDev );
+                                    const RenderContext2& rOutDev );
 
     // invert --> ClipRegion (only Windows)
     void                        Invert(
                                     tools::Long nX, tools::Long nY,
                                     tools::Long nWidth, tools::Long nHeight,
                                     SalInvert nFlags,
-                                    const OutputDevice& rOutDev );
+                                    const RenderContext2& rOutDev );
 
     void                        Invert(
                                     sal_uInt32 nPoints,
                                     const Point* pPtAry,
                                     SalInvert nFlags,
-                                    const OutputDevice& rOutDev );
+                                    const RenderContext2& rOutDev );
 
     bool                        DrawEPS(
                                     tools::Long nX, tools::Long nY,
                                     tools::Long nWidth, tools::Long nHeight,
                                     void* pPtr,
                                     sal_uInt32 nSize,
-                                    const OutputDevice& rOutDev );
+                                    const RenderContext2& rOutDev );
 
     //  native widget rendering functions
 
@@ -368,7 +368,7 @@ public:
                                     const tools::Rectangle& rControlRegion,
                                     const Point& aPos,
                                     bool& rIsInside,
-                                    const OutputDevice& rOutDev);
+                                    const RenderContext2& rOutDev);
 
     /**
      * @see WidgetDrawInterface::drawNativeControl
@@ -380,7 +380,7 @@ public:
                                     ControlState nState,
                                     const ImplControlValue& aValue,
                                     const OUString& aCaption,
-                                    const OutputDevice& rOutDev,
+                                    const RenderContext2& rOutDev,
                                     const Color& rBackgroundColor = COL_AUTO );
 
     /**
@@ -394,7 +394,7 @@ public:
                                     const ImplControlValue& aValue,
                                     tools::Rectangle &rNativeBoundingRegion,
                                     tools::Rectangle &rNativeContentRegion,
-                                    const OutputDevice& rOutDev );
+                                    const RenderContext2& rOutDev );
 
     /**
      * @see WidgetDrawInterface::updateSettings
@@ -404,20 +404,20 @@ public:
     bool                        BlendBitmap(
                                     const SalTwoRect& rPosAry,
                                     const SalBitmap& rSalBitmap,
-                                    const OutputDevice& rOutDev );
+                                    const RenderContext2& rOutDev );
 
     bool                        BlendAlphaBitmap(
                                     const SalTwoRect& rPosAry,
                                     const SalBitmap& rSalSrcBitmap,
                                     const SalBitmap& rSalMaskBitmap,
                                     const SalBitmap& rSalAlphaBitmap,
-                                    const OutputDevice& rOutDev );
+                                    const RenderContext2& rOutDev );
 
     bool                        DrawAlphaBitmap(
                                     const SalTwoRect&,
                                     const SalBitmap& rSourceBitmap,
                                     const SalBitmap& rAlphaBitmap,
-                                    const OutputDevice& rOutDev );
+                                    const RenderContext2& rOutDev );
 
     bool                        DrawTransformedBitmap(
                                     const basegfx::B2DPoint& rNull,
@@ -426,7 +426,7 @@ public:
                                     const SalBitmap& rSourceBitmap,
                                     const SalBitmap* pAlphaBitmap,
                                     double fAlpha,
-                                    const OutputDevice& rOutDev );
+                                    const RenderContext2& rOutDev );
 
     bool                        HasFastDrawTransformedBitmap() const;
 
@@ -434,7 +434,7 @@ public:
                                     tools::Long nX, tools::Long nY,
                                     tools::Long nWidth, tools::Long nHeight,
                                     sal_uInt8 nTransparency,
-                                    const OutputDevice& rOutDev );
+                                    const RenderContext2& rOutDev );
 
     virtual OUString getRenderBackendName() const;
 
@@ -447,9 +447,9 @@ public:
     /// Create Surface from given cairo surface
     virtual cairo::SurfaceSharedPtr CreateSurface(const cairo::CairoSurfaceSharedPtr& rSurface) const = 0;
     /// Create surface with given dimensions
-    virtual cairo::SurfaceSharedPtr CreateSurface(const OutputDevice& rRefDevice, int x, int y, int width, int height) const = 0;
+    virtual cairo::SurfaceSharedPtr CreateSurface(const RenderContext2& rRefDevice, int x, int y, int width, int height) const = 0;
     /// Create Surface for given bitmap data
-    virtual cairo::SurfaceSharedPtr CreateBitmapSurface(const OutputDevice& rRefDevice, const BitmapSystemData& rData, const Size& rSize) const = 0;
+    virtual cairo::SurfaceSharedPtr CreateBitmapSurface(const RenderContext2& rRefDevice, const BitmapSystemData& rData, const Size& rSize) const = 0;
     virtual css::uno::Any       GetNativeSurfaceHandle(cairo::SurfaceSharedPtr& rSurface, const basegfx::B2ISize& rSize) const = 0;
 
 #endif // ENABLE_CAIRO_CANVAS
@@ -627,10 +627,10 @@ private:
     bool                        m_bLastMirrorDeviceLTRButBiDiRtlSet;
 
 protected:
-    /// flags which hold the SetAntialiasing() value from OutputDevice
+    /// flags which hold the SetAntialiasing() value from RenderContext2
     bool                        m_bAntiAlias : 1;
 
-    inline tools::Long GetDeviceWidth(const OutputDevice& rOutDev) const;
+    inline tools::Long GetDeviceWidth(const RenderContext2& rOutDev) const;
 
     /**
      * Handle damage done by drawing with a widget draw override
