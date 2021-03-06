@@ -347,6 +347,8 @@ protected:
      */
     virtual void ReleaseGraphics(bool bRelease = true) = 0;
 
+    SAL_DLLPRIVATE void SetDeviceClipRegion(vcl::Region const* pRegion);
+
     SAL_DLLPRIVATE void InitLineColor();
     SAL_DLLPRIVATE void InitFillColor();
 
@@ -504,6 +506,7 @@ protected:
     Color maTextFillColor;
     Color maOverlineColor;
     Wallpaper maBackground;
+    vcl::Region maRegion; ///< contains the clip region, see SetClipRegion(...)
     Point maRefPoint;
     MapMode maMapMode;
     ImplMapRes maMapRes;
@@ -533,6 +536,8 @@ protected:
     mutable bool mbNewFont : 1;
     mutable bool mbRefPoint : 1;
     mutable bool mbBackground : 1;
+    mutable bool mbInitClipRegion : 1;
+    mutable bool mbClipRegion : 1;
 
 private:
     sal_Int32 mnDPIX;
