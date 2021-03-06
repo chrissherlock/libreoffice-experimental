@@ -476,7 +476,6 @@ public:
     void IntersectClipRegion(tools::Rectangle const& rRect) override;
     void IntersectClipRegion(vcl::Region const& rRegion) override;
 
-    virtual vcl::Region GetActiveClipRegion() const;
     virtual vcl::Region GetOutputBoundsClipRegion() const;
 
 protected:

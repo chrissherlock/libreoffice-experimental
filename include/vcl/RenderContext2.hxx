@@ -70,6 +70,8 @@ public:
 
     bool IsClipRegion() const;
     vcl::Region GetClipRegion() const;
+    virtual vcl::Region GetActiveClipRegion() const;
+    virtual vcl::Region GetOutputBoundsClipRegion() const;
     virtual void SetClipRegion();
     virtual void SetClipRegion(vcl::Region const& rRegion);
     bool SelectClipRegion(vcl::Region const&, SalGraphics* pGraphics = nullptr);
@@ -377,6 +379,7 @@ protected:
         @returns            region clipped to the device bounds
      **/
     virtual vcl::Region ClipToDeviceBounds(vcl::Region aRegion) const;
+    virtual void ClipToPaintRegion(tools::Rectangle& rDstRect);
     SAL_DLLPRIVATE void SetDeviceClipRegion(vcl::Region const* pRegion);
     virtual void InitClipRegion();
 
