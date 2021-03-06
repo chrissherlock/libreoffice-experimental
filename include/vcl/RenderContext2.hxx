@@ -69,6 +69,8 @@ public:
     void ClearStack();
 
     vcl::Region GetClipRegion() const;
+    virtual void SetClipRegion();
+    virtual void SetClipRegion(vcl::Region const& rRegion);
     bool SelectClipRegion(vcl::Region const&, SalGraphics* pGraphics = nullptr);
 
     void EnableOutput(bool bEnable = true);

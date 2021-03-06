@@ -36,32 +36,18 @@ void OutputDevice::SaveBackground(VirtualDevice& rSaveDevice,
 
 void OutputDevice::SetClipRegion()
 {
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaClipRegionAction( vcl::Region(), false ) );
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaClipRegionAction(vcl::Region(), false));
 
-    SetDeviceClipRegion( nullptr );
-
-    if( mpAlphaVDev )
-        mpAlphaVDev->SetClipRegion();
+    RenderContext2::SetClipRegion();
 }
 
-void OutputDevice::SetClipRegion( const vcl::Region& rRegion )
+void OutputDevice::SetClipRegion(vcl::Region const& rRegion )
 {
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaClipRegionAction( rRegion, true ) );
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaClipRegionAction(rRegion, true));
 
-    if ( rRegion.IsNull() )
-    {
-        SetDeviceClipRegion( nullptr );
-    }
-    else
-    {
-        vcl::Region aRegion = LogicToPixel( rRegion );
-        SetDeviceClipRegion( &aRegion );
-    }
-
-    if( mpAlphaVDev )
-        mpAlphaVDev->SetClipRegion( rRegion );
+    RenderContext2::SetClipRegion(rRegion);
 }
 
 void OutputDevice::MoveClipRegion( tools::Long nHorzMove, tools::Long nVertMove )
