@@ -68,6 +68,7 @@ public:
     virtual void Pop();
     void ClearStack();
 
+    bool IsClipRegion() const;
     vcl::Region GetClipRegion() const;
     virtual void SetClipRegion();
     virtual void SetClipRegion(vcl::Region const& rRegion);

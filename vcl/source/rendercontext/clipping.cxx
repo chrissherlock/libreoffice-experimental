@@ -25,6 +25,8 @@
 
 #include <salgdi.hxx>
 
+bool RenderContext2::IsClipRegion() const { return mbClipRegion; }
+
 vcl::Region RenderContext2::GetClipRegion() const { return PixelToLogic(maRegion); }
 
 void RenderContext2::SetClipRegion()
