@@ -81,6 +81,7 @@ public:
 
     void EnableOutput(bool bEnable = true);
     bool IsOutputEnabled() const;
+    bool IsDeviceOutputNecessary() const;
 
     virtual bool IsVirtual() const;
 
@@ -577,6 +578,7 @@ protected:
     mutable bool mbClipRegionSet : 1;
     mutable bool mbOutputClipped : 1;
     mutable bool mbEnableRTL : 1;
+    mutable bool mbDevOutput : 1;
 
 private:
     std::vector<OutDevState> maOutDevStateStack;

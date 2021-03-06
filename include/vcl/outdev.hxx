@@ -320,7 +320,6 @@ private:
     OutDevViewType meOutDevViewType;
     Color maTextLineColor;
 
-    mutable bool mbDevOutput : 1;
     mutable bool mbTextLines : 1;
     mutable bool mbTextSpecial : 1;
 
@@ -429,7 +428,6 @@ public:
     void Push(PushFlags nFlags = PushFlags::ALL) override;
     void Pop() override;
 
-    bool IsDeviceOutputNecessary() const { return (IsOutputEnabled() && mbDevOutput); }
     void SetLayoutMode(ComplexTextLayoutFlags nTextLayoutMode) override;
     void SetDigitLanguage(LanguageType) override;
     void SetRasterOp(RasterOp eRasterOp) override;

@@ -30,4 +30,6 @@ void RenderContext2::EnableOutput(bool bEnable)
         mpAlphaVDev->EnableOutput(bEnable);
 }
 
+bool RenderContext2::IsDeviceOutputNecessary() const { return (IsOutputEnabled() && mbDevOutput); }
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
