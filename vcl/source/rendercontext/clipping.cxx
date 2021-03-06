@@ -185,6 +185,14 @@ void RenderContext2::InitClipRegion()
     mbInitClipRegion = false;
 }
 
+void RenderContext2::ClipToPaintRegion(tools::Rectangle& /*rDstRect*/)
+{
+    // this is only used in Window, but we still need it as it's called
+    // on in other clipping functions
+}
+
 vcl::Region RenderContext2::GetActiveClipRegion() const { return GetClipRegion(); }
+
+vcl::Region RenderContext2::GetOutputBoundsClipRegion() const { return GetClipRegion(); }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

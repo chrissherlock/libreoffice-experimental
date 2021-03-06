@@ -752,8 +752,6 @@ void OutputDevice::SetTextAlign(TextAlign eAlign)
     RenderContext2::SetTextAlign(eAlign);
 }
 
-vcl::Region OutputDevice::GetOutputBoundsClipRegion() const { return GetClipRegion(); }
-
 #if !ENABLE_FUZZERS
 const SalLayoutFlags eDefaultLayout = SalLayoutFlags::NONE;
 #else
