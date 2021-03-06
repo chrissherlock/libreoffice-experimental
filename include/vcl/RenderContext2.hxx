@@ -68,6 +68,9 @@ public:
     virtual void Pop();
     void ClearStack();
 
+    vcl::Region GetClipRegion() const;
+    bool SelectClipRegion(vcl::Region const&, SalGraphics* pGraphics = nullptr);
+
     void EnableOutput(bool bEnable = true);
     bool IsOutputEnabled() const;
 

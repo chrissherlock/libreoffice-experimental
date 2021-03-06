@@ -17,9 +17,34 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <sal/log.hxx>
 #include <tools/debug.hxx>
 
 #include <vcl/RenderContext2.hxx>
+
+#include <salgdi.hxx>
+
+vcl::Region RenderContext2::GetClipRegion() const { return PixelToLogic(maRegion); }
+
+bool RenderContext2::SelectClipRegion(const vcl::Region& rRegion, SalGraphics* pGraphics)
+{
+    DBG_TESTSOLARMUTEX();
+
+    if (!pGraphics)
+    {
+        if (!mpGraphics && !AcquireGraphics())
+        {
+            assert(mpGraphics);
+            return false;
+        }
+
+        pGraphics = mpGraphics;
+    }
+
+    bool bClipRegion = pGraphics->SetClipRegion(rRegion, *this);
+    SAL_WARN_IF(bClipRegion, "vcl.gdi", "RenderContext2::SelectClipRegion() - can't create region");
+    return bClipRegion;
+}
 
 void RenderContext2::SetDeviceClipRegion(vcl::Region const* pRegion)
 {

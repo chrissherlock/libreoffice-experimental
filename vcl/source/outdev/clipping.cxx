@@ -34,15 +34,8 @@ void OutputDevice::SaveBackground(VirtualDevice& rSaveDevice,
    rSaveDevice.DrawOutDev(Point(), rBackgroundSize, rPos, rSize, *this);
 }
 
-vcl::Region OutputDevice::GetClipRegion() const
-{
-
-    return PixelToLogic( maRegion );
-}
-
 void OutputDevice::SetClipRegion()
 {
-
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaClipRegionAction( vcl::Region(), false ) );
 
@@ -54,7 +47,6 @@ void OutputDevice::SetClipRegion()
 
 void OutputDevice::SetClipRegion( const vcl::Region& rRegion )
 {
-
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaClipRegionAction( rRegion, true ) );
 
@@ -70,23 +62,6 @@ void OutputDevice::SetClipRegion( const vcl::Region& rRegion )
 
     if( mpAlphaVDev )
         mpAlphaVDev->SetClipRegion( rRegion );
-}
-
-bool OutputDevice::SelectClipRegion( const vcl::Region& rRegion, SalGraphics* pGraphics )
-{
-    DBG_TESTSOLARMUTEX();
-
-    if( !pGraphics )
-    {
-        if( !mpGraphics && !AcquireGraphics() )
-            return false;
-        assert(mpGraphics);
-        pGraphics = mpGraphics;
-    }
-
-    bool bClipRegion = pGraphics->SetClipRegion( rRegion, *this );
-    OSL_ENSURE( bClipRegion, "OutputDevice::SelectClipRegion() - can't create region" );
-    return bClipRegion;
 }
 
 void OutputDevice::MoveClipRegion( tools::Long nHorzMove, tools::Long nVertMove )
