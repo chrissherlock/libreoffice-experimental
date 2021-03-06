@@ -22,6 +22,8 @@
 
 #include <vcl/RenderContext2.hxx>
 
+#include <algorithm>
+
 sal_Int32 RenderContext2::GetDPIX() const { return mnDPIX; }
 
 sal_Int32 RenderContext2::GetDPIY() const { return mnDPIY; }
@@ -36,7 +38,7 @@ sal_Int32 RenderContext2::GetDPIScalePercentage() const { return mnDPIScalePerce
 
 void RenderContext2::SetDPIScalePercentage(sal_Int32 nPercent)
 {
-    nPercent > 100 ? mnDPIScalePercentage = 100 : mnDPIScalePercentage = nPercent;
+    mnDPIScalePercentage = std::max(100, nPercent);
 }
 
 Size RenderContext2::GetOutputSizePixel() const { return Size(mnOutWidth, mnOutHeight); }
