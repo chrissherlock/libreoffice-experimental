@@ -1027,10 +1027,10 @@ protected:
     void SetFontCollectionFromSVData();
     void ResetNewFontCache();
 
+    SAL_DLLPRIVATE bool ImplNewFont() const;
+
 private:
     typedef void (OutputDevice::*FontUpdateHandler_t)(bool);
-
-    SAL_DLLPRIVATE bool ImplNewFont() const;
 
     SAL_DLLPRIVATE static void ImplUpdateFontDataForAllFrames(FontUpdateHandler_t pHdl,
                                                               bool bNewFontLists);
