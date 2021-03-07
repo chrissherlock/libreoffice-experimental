@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <rtl/ref.hxx>
 #include <tools/color.hxx>
 #include <tools/mapunit.hxx>
 #include <tools/poly.hxx>
@@ -48,6 +49,7 @@ class AllSettings;
 class ImplDeviceFontList;
 class ImplDeviceFontSizeList;
 class ImplFontCache;
+class LogicalFontInstance;
 class PhysicalFontCollection;
 class SalGraphics;
 class VirtualDevice;
@@ -571,6 +573,7 @@ protected:
     mutable std::shared_ptr<PhysicalFontCollection> mxFontCollection;
     mutable std::unique_ptr<ImplDeviceFontList> mpDeviceFontList;
     mutable std::unique_ptr<ImplDeviceFontSizeList> mpDeviceFontSizeList;
+    mutable rtl::Reference<LogicalFontInstance> mpFontInstance;
     mutable std::shared_ptr<ImplFontCache> mxFontCache;
     /// Additional output pixel offset, applied in LogicToPixel (used by SetPixelOffset/GetPixelOffset)
     tools::Long mnOutOffOrigX;
