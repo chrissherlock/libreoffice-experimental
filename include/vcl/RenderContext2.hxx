@@ -83,7 +83,20 @@ public:
     virtual ~RenderContext2();
 
     virtual void DrawRect(tools::Rectangle const& rRect);
+
     virtual void DrawPolyLine(tools::Polygon const& rPoly);
+
+    /** Render the given polygon
+
+        The given polygon is stroked with the current LineColor, and
+        filled with the current FillColor. If one of these colors are
+        transparent, the corresponding stroke or fill stays
+        invisible. Start and end point of the polygon are
+        automatically connected.
+
+        @see DrawPolyLine
+     */
+    virtual void DrawPolygon(tools::Polygon const& rPoly);
 
     /** Get the graphic context that the output device uses to draw on.
 
