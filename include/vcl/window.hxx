@@ -454,6 +454,7 @@ class VCL_DLLPUBLIC Window : public ::OutputDevice
 {
     friend class ::vcl::Cursor;
     friend class ::OutputDevice;
+    friend class ::RenderContext2;
     friend class ::Application;
     friend class ::SystemWindow;
     friend class ::WorkWindow;

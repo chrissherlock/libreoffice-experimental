@@ -143,6 +143,7 @@ public:
 class VCL_DLLPUBLIC Printer : public OutputDevice
 {
     friend class                ::OutputDevice;
+    friend class                ::RenderContext2;
 
 private:
     SalInfoPrinter*             mpInfoPrinter;

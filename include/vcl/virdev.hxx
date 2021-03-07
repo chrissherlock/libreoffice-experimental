@@ -33,6 +33,7 @@ class SAL_WARN_UNUSED VCL_DLLPUBLIC VirtualDevice : public OutputDevice
 {
     friend class Application;
     friend class ::OutputDevice;
+    friend class ::RenderContext2;
     friend class Printer;
     friend cairo_surface_t* get_underlying_cairo_surface(const VirtualDevice&);
 public:

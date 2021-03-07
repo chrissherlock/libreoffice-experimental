@@ -125,36 +125,6 @@ typedef std::vector<tools::Rectangle> MetricVector;
 
 // OutputDevice-Types
 
-// Flags for DrawText()
-enum class DrawTextFlags
-{
-    NONE = 0x00000000,
-    Disable = 0x00000001,
-    Mnemonic = 0x00000002,
-    Mono = 0x00000004,
-    Clip = 0x00000008,
-    Left = 0x00000010,
-    Center = 0x00000020,
-    Right = 0x00000040,
-    Top = 0x00000080,
-    VCenter = 0x00000100,
-    Bottom = 0x00000200,
-    EndEllipsis = 0x00000400,
-    PathEllipsis = 0x00000800,
-    MultiLine = 0x00001000,
-    WordBreak = 0x00002000,
-    NewsEllipsis = 0x00004000,
-    WordBreakHyphenation = 0x00008000 | WordBreak,
-    CenterEllipsis = 0x00010000,
-    HideMnemonic = 0x00020000,
-};
-namespace o3tl
-{
-template <> struct typed_flags<DrawTextFlags> : is_typed_flags<DrawTextFlags, 0x3ffff>
-{
-};
-}
-
 // Flags for DrawImage(), these must match the definitions in css::awt::ImageDrawMode
 enum class DrawImageFlags
 {
@@ -183,34 +153,6 @@ enum class DrawGridFlags
 namespace o3tl
 {
 template <> struct typed_flags<DrawGridFlags> : is_typed_flags<DrawGridFlags, 0x0007>
-{
-};
-}
-
-// AddFontSubstitute() flags
-enum class AddFontSubstituteFlags
-{
-    NONE = 0x00,
-    ALWAYS = 0x01,
-    ScreenOnly = 0x02,
-};
-namespace o3tl
-{
-template <>
-struct typed_flags<AddFontSubstituteFlags> : is_typed_flags<AddFontSubstituteFlags, 0x03>
-{
-};
-}
-
-// GetDefaultFont() flags
-enum class GetDefaultFontFlags
-{
-    NONE = 0x0000,
-    OnlyOne = 0x0001,
-};
-namespace o3tl
-{
-template <> struct typed_flags<GetDefaultFontFlags> : is_typed_flags<GetDefaultFontFlags, 0x01>
 {
 };
 }
@@ -421,9 +363,6 @@ public:
                                 const Size& rBackgroundSize) const;
 
     void SetFont(vcl::Font const& rNewFont) override;
-
-protected:
-    virtual void ImplReleaseFonts();
 
     ///@}
 
@@ -832,93 +771,6 @@ private:
                                               FontStrikeout eStrikeout, Color aColor);
     SAL_DLLPRIVATE void ImplDrawMnemonicLine(tools::Long nX, tools::Long nY, tools::Long nWidth);
 
-    ///@}
-
-    /** @name Font functions
-     */
-    ///@{
-
-public:
-    void RefreshFontData(const bool bNewFontLists);
-
-    FontMetric GetFontMetric() const;
-    FontMetric GetFontMetric(const vcl::Font& rFont) const;
-
-    bool GetFontCharMap(FontCharMapRef& rxFontCharMap) const;
-    bool GetFontCapabilities(vcl::FontCapabilities& rFontCapabilities) const;
-
-    bool GetFontFeatures(std::vector<vcl::font::Feature>& rFontFeatures) const;
-
-    bool GetGlyphBoundRects(const Point& rOrigin, const OUString& rStr, int nIndex, int nLen,
-                            MetricVector& rVector);
-
-    sal_Int32 HasGlyphs(const vcl::Font& rFont, const OUString& rStr, sal_Int32 nIndex = 0,
-                        sal_Int32 nLen = -1) const;
-
-    tools::Long GetMinKashida() const;
-
-    // i60594
-    // validate kashida positions against the current font
-    // returns count of invalid kashida positions
-    sal_Int32 ValidateKashidas(const OUString& rTxt, sal_Int32 nIdx, sal_Int32 nLen,
-                               sal_Int32 nKashCount, // number of suggested kashida positions (in)
-                               const sal_Int32* pKashidaPos, // suggested kashida positions (in)
-                               sal_Int32* pKashidaPosDropped // invalid kashida positions (out)
-                               ) const;
-
-    static void BeginFontSubstitution();
-    static void EndFontSubstitution();
-    static void AddFontSubstitute(const OUString& rFontName, const OUString& rReplaceFontName,
-                                  AddFontSubstituteFlags nFlags);
-    static void RemoveFontsSubstitute();
-
-    static vcl::Font GetDefaultFont(DefaultFontType nType, LanguageType eLang,
-                                    GetDefaultFontFlags nFlags,
-                                    const OutputDevice* pOutDev = nullptr);
-
-    SAL_DLLPRIVATE void ImplUpdateFontData();
-
-    //drop font data for all outputdevices.
-    //If bNewFontLists is true then empty lists of system fonts
-    SAL_DLLPRIVATE static void ImplClearAllFontData(bool bNewFontLists);
-    //fetch font data for all outputdevices
-    //If bNewFontLists is true then fetch lists of system fonts
-    SAL_DLLPRIVATE static void ImplRefreshAllFontData(bool bNewFontLists);
-    //drop and fetch font data for all outputdevices
-    //If bNewFontLists is true then drop and refetch lists of system fonts
-    SAL_DLLPRIVATE static void ImplUpdateAllFontData(bool bNewFontLists);
-
-protected:
-    SAL_DLLPRIVATE const LogicalFontInstance* GetFontInstance() const;
-    SAL_DLLPRIVATE tools::Long GetEmphasisAscent() const { return mnEmphasisAscent; }
-    SAL_DLLPRIVATE tools::Long GetEmphasisDescent() const { return mnEmphasisDescent; }
-
-    virtual tools::Long GetFontExtLeading() const;
-
-    virtual void ImplClearFontData(bool bNewFontLists);
-    virtual void ImplRefreshFontData(bool bNewFontLists);
-    void ReleaseFontCache();
-    void ReleaseFontCollection();
-    void SetFontCollectionFromSVData();
-    void ResetNewFontCache();
-
-private:
-    typedef void (OutputDevice::*FontUpdateHandler_t)(bool);
-
-    SAL_DLLPRIVATE static void ImplUpdateFontDataForAllFrames(FontUpdateHandler_t pHdl,
-                                                              bool bNewFontLists);
-
-    static SAL_DLLPRIVATE OUString ImplGetEllipsisString(const OutputDevice& rTargetDevice,
-                                                         const OUString& rStr,
-                                                         tools::Long nMaxWidth,
-                                                         DrawTextFlags nStyle,
-                                                         const vcl::ITextLayout& _rLayout);
-
-    SAL_DLLPRIVATE void ImplDrawEmphasisMark(tools::Long nBaseX, tools::Long nX, tools::Long nY,
-                                             const tools::PolyPolygon& rPolyPoly, bool bPolyLine,
-                                             const tools::Rectangle& rRect1,
-                                             const tools::Rectangle& rRect2);
-    SAL_DLLPRIVATE void ImplDrawEmphasisMarks(SalLayout&);
     ///@}
 
     /** @name Layout functions
