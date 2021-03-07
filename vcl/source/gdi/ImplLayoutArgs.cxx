@@ -17,12 +17,17 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <sal/log.hxx>
+
+#include <vcl/vclenum.hxx>
+
 #include <ImplLayoutArgs.hxx>
 
 #include <unicode/ubidi.h>
 #include <unicode/uchar.h>
 
 #include <algorithm>
+#include <iomanip>
 #include <memory>
 
 //#include <impglyphitem.hxx>

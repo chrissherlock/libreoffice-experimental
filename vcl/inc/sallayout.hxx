@@ -37,10 +37,11 @@
 #include <vcl/devicecoordinate.hxx>
 #include <vcl/vcllayout.hxx>
 
+#include <ImplLayoutRuns.hxx>
+
 #include "impglyphitem.hxx"
 
 #define MAX_FALLBACK 16
-
 
 class SalGraphics;
 class PhysicalFontFace;
@@ -49,29 +50,6 @@ enum class SalLayoutFlags;
 namespace vcl {
     class TextLayoutCache;
 }
-
-// used for managing runs e.g. for BiDi, glyph and script fallback
-class ImplLayoutRuns
-{
-private:
-    int                 mnRunIndex;
-    std::vector<int>    maRuns;
-
-public:
-            ImplLayoutRuns() { mnRunIndex = 0; maRuns.reserve(8); }
-
-    void    Clear()             { maRuns.clear(); }
-    void    AddPos( int nCharPos, bool bRTL );
-    void    AddRun( int nMinRunPos, int nEndRunPos, bool bRTL );
-
-    bool    IsEmpty() const     { return maRuns.empty(); }
-    void    ResetPos()          { mnRunIndex = 0; }
-    void    NextRun()           { mnRunIndex += 2; }
-    bool    GetRun( int* nMinRunPos, int* nEndRunPos, bool* bRTL ) const;
-    bool    GetNextPos( int* nCharPos, bool* bRTL );
-    bool    PosIsInRun( int nCharPos ) const;
-    bool    PosIsInAnyRun( int nCharPos ) const;
-};
 
 class MultiSalLayout final : public SalLayout
 {
