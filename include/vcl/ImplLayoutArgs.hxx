@@ -21,10 +21,9 @@
 #include <i18nlangtag/languagetag.hxx>
 
 #include <vcl/dllapi.h>
+#include <vcl/ImplLayoutRuns.hxx>
 #include <vcl/devicecoordinate.hxx>
 #include <vcl/flags/SalLayoutFlags.hxx>
-
-#include <ImplLayoutRuns.hxx>
 
 #include <ostream>
 

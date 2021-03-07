@@ -31,7 +31,6 @@
 
 #include <outdev.h>
 #include <window.h>
-#include <ImplLayoutArgs.hxx>
 #include <PhysicalFontCollection.hxx>
 #include <drawmode.hxx>
 #include <font/FeatureCollector.hxx>

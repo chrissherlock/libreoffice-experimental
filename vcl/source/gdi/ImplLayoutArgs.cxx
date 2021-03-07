@@ -19,9 +19,8 @@
 
 #include <sal/log.hxx>
 
+#include <vcl/ImplLayoutArgs.hxx>
 #include <vcl/vclenum.hxx>
-
-#include <ImplLayoutArgs.hxx>
 
 #include <unicode/ubidi.h>
 #include <unicode/uchar.h>

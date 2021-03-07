@@ -1044,10 +1044,6 @@ public:
                                           SalLayoutFlags flags = SalLayoutFlags::NONE,
                                           vcl::TextLayoutCache const* = nullptr,
                                           const SalLayoutGlyphs* pGlyphs = nullptr) const;
-    SAL_DLLPRIVATE ImplLayoutArgs ImplPrepareLayoutArgs(
-        OUString&, const sal_Int32 nIndex, const sal_Int32 nLen, DeviceCoordinate nPixelWidth,
-        const DeviceCoordinate* pPixelDXArray, SalLayoutFlags flags = SalLayoutFlags::NONE,
-        vcl::TextLayoutCache const* = nullptr) const;
     SAL_DLLPRIVATE std::unique_ptr<SalLayout> ImplGlyphFallbackLayout(std::unique_ptr<SalLayout>,
                                                                       ImplLayoutArgs&,
                                                                       const SalLayoutGlyphs*) const;

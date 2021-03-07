@@ -27,7 +27,6 @@
 
 #include <math.h>
 
-#include <ImplLayoutArgs.hxx>
 #include <salgdi.hxx>
 #include <sallayout.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
