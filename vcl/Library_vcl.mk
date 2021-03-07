@@ -128,6 +128,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/rendercontext/clipping \
     vcl/source/rendercontext/curvedshapes \
     vcl/source/rendercontext/drawmode \
+    vcl/source/rendercontext/emphasismarks \
     vcl/source/rendercontext/font \
     vcl/source/rendercontext/fill \
     vcl/source/rendercontext/geometry \

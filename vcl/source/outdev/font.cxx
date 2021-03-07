@@ -331,32 +331,6 @@ void OutputDevice::ImplGetEmphasisMark( tools::PolyPolygon& rPolyPoly, bool& rPo
         rYOff += nDotSize;
 }
 
-FontEmphasisMark OutputDevice::ImplGetEmphasisMarkStyle( const vcl::Font& rFont )
-{
-    FontEmphasisMark nEmphasisMark = rFont.GetEmphasisMark();
-
-    // If no Position is set, then calculate the default position, which
-    // depends on the language
-    if ( !(nEmphasisMark & (FontEmphasisMark::PosAbove | FontEmphasisMark::PosBelow)) )
-    {
-        LanguageType eLang = rFont.GetLanguage();
-        // In Chinese Simplified the EmphasisMarks are below/left
-        if (MsLangId::isSimplifiedChinese(eLang))
-            nEmphasisMark |= FontEmphasisMark::PosBelow;
-        else
-        {
-            eLang = rFont.GetCJKContextLanguage();
-            // In Chinese Simplified the EmphasisMarks are below/left
-            if (MsLangId::isSimplifiedChinese(eLang))
-                nEmphasisMark |= FontEmphasisMark::PosBelow;
-            else
-                nEmphasisMark |= FontEmphasisMark::PosAbove;
-        }
-    }
-
-    return nEmphasisMark;
-}
-
 tools::Long OutputDevice::GetFontExtLeading() const
 {
     return mpFontInstance->mxFontMetric->GetExternalLeading();
