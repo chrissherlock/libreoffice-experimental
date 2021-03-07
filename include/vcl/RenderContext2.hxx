@@ -60,6 +60,11 @@ class VirtualDevice;
 struct ImplOutDevData;
 struct OutDevState;
 
+namespace basegfx
+{
+class B2DPolyPolygon;
+}
+
 namespace tools
 {
 class Rectangle;
@@ -493,6 +498,17 @@ protected:
                                basegfx::B2DLineJoin eLineJoin = basegfx::B2DLineJoin::NONE,
                                css::drawing::LineCap eLineCap = css::drawing::LineCap_BUTT,
                                double fMiterMinimumAngle = basegfx::deg2rad(15.0));
+
+    SAL_DLLPRIVATE void ImplDrawPolyPolygon(tools::PolyPolygon const& rPolyPoly,
+                                            tools::PolyPolygon const* pClipPolyPoly);
+
+    SAL_DLLPRIVATE void ImplDrawPolyPolygon(sal_uInt16 nPoly, tools::PolyPolygon const& rPolyPoly);
+
+    // #i101491#
+    // Helper who implements the DrawPolyPolygon functionality for basegfx::B2DPolyPolygon
+    // without MetaFile processing
+    SAL_DLLPRIVATE void
+    ImplDrawPolyPolygonWithB2DPolyPolygon(basegfx::B2DPolyPolygon const& rB2DPolyPoly);
 
     /** Perform actual rect clip against outdev dimensions, to generate
         empty clips whenever one of the values is completely off the device.
