@@ -60,21 +60,7 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mpFontInstance = nullptr;
     mpAlphaVDev = nullptr;
     mpExtOutDevData = nullptr;
-    mnOutOffX = 0;
-    mnOutOffY = 0;
-    mnOutWidth = 0;
-    mnOutHeight = 0;
-    mnTextOffX = 0;
-    mnTextOffY = 0;
-    mnOutOffOrigX = 0;
-    mnOutOffLogicX = 0;
-    mnOutOffOrigY = 0;
-    mnOutOffLogicY = 0;
-    mnEmphasisAscent = 0;
-    mnEmphasisDescent = 0;
     meOutDevViewType = OutDevViewType::DontKnow;
-    mbTextLines = false;
-    mbTextSpecial = false;
 }
 
 OutputDevice::~OutputDevice() { disposeOnce(); }

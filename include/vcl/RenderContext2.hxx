@@ -20,6 +20,7 @@
 #pragma once
 
 #include <rtl/ref.hxx>
+#include <tools/solar.h>
 #include <tools/color.hxx>
 #include <tools/mapunit.hxx>
 #include <tools/poly.hxx>
@@ -53,6 +54,8 @@ class ImplFontCache;
 class LogicalFontInstance;
 class PhysicalFontCollection;
 class SalGraphics;
+class SalLayout;
+class SalLayoutGlyphs;
 class VirtualDevice;
 struct ImplOutDevData;
 struct OutDevState;
@@ -206,6 +209,80 @@ public:
     Point GetOutputOffPixel() const;
     tools::Rectangle GetOutputRectPixel() const;
     Size GetOutputSize() const;
+
+    tools::Long GetTextArray(OUString const& rStr, tools::Long* pDXAry, sal_Int32 nIndex = 0,
+                             sal_Int32 nLen = -1, vcl::TextLayoutCache const* = nullptr,
+                             SalLayoutGlyphs const* const pLayoutCache = nullptr) const;
+
+    /** Return the exact bounding rectangle of rStr.
+
+        The text is then drawn exactly from rRect.TopLeft() to
+        rRect.BottomRight(), don't assume that rRect.TopLeft() is [0, 0].
+
+        Please note that you don't always want to use GetTextBoundRect(); in
+        many cases you actually want to use GetTextHeight(), because
+        GetTextBoundRect() gives you the exact bounding rectangle regardless
+        what is the baseline of the text.
+
+        Code snippet to get just exactly the text (no filling around that) as
+        a bitmap via a VirtualDevice (regardless what is the baseline):
+
+        <code>
+        VirtualDevice aDevice;
+        vcl::Font aFont = aDevice.GetFont();
+        aFont.SetSize(Size(0, 96));
+        aFont.SetColor(COL_BLACK);
+        aDevice.SetFont(aFont);
+        aDevice.Erase();
+
+        tools::Rectangle aRect;
+        aDevice.GetTextBoundRect(aRect, aText);
+        aDevice.SetOutputSize(Size(aRect.Right() + 1, aRect.Bottom() + 1));
+        aDevice.SetBackground(Wallpaper(COL_TRANSPARENT));
+        aDevice.DrawText(Point(0,0), aText);
+
+        // exactly only the text, regardless of the baseline
+        Bitmap aBitmap(aDevice.GetBitmap(aRect.TopLeft(), aRect.GetSize()));
+        </code>
+
+        Code snippet to get the text as a bitmap via a Virtual device that
+        contains even the filling so that the baseline is always preserved
+        (ie. the text will not jump up and down according to whether it
+        contains 'y' or not etc.)
+
+        <code>
+        VirtualDevice aDevice;
+        // + the appropriate font / device setup, see above
+
+        aDevice.SetOutputSize(Size(aDevice.GetTextWidth(aText), aDevice.GetTextHeight()));
+        aDevice.SetBackground(Wallpaper(COL_TRANSPARENT));
+        aDevice.DrawText(Point(0,0), aText);
+
+        // bitmap that contains even the space around the text,
+        // that means, preserves the baseline etc.
+        Bitmap aBitmap(aDevice.GetBitmap(Point(0, 0), aDevice.GetOutputSize()));
+        </code>
+    */
+    bool GetTextBoundRect(tools::Rectangle& rRect, OUString const& rStr, sal_Int32 nBase = 0,
+                          sal_Int32 nIndex = 0, sal_Int32 nLen = -1, sal_uLong nLayoutWidth = 0,
+                          tools::Long const* pDXArray = nullptr,
+                          SalLayoutGlyphs const* pGlyphs = nullptr) const;
+
+    /** Width of the text.
+
+        See also GetTextBoundRect() for more explanation + code examples.
+    */
+    tools::Long GetTextWidth(OUString const& rStr, sal_Int32 nIndex = 0, sal_Int32 nLen = -1,
+                             vcl::TextLayoutCache const* = nullptr,
+                             SalLayoutGlyphs const* const pLayoutCache = nullptr) const;
+
+    std::unique_ptr<SalLayout> ImplLayout(OUString const&, sal_Int32 nIndex, sal_Int32 nLen,
+                                          Point const& rLogicPos = Point(0, 0),
+                                          tools::Long nLogicWidth = 0,
+                                          tools::Long const* pLogicDXArray = nullptr,
+                                          SalLayoutFlags flags = SalLayoutFlags::NONE,
+                                          vcl::TextLayoutCache const* = nullptr,
+                                          SalLayoutGlyphs const* pGlyphs = nullptr) const;
 
     /** Get the offset in pixel
 
@@ -552,6 +629,8 @@ protected:
 
     SAL_DLLPRIVATE bool is_double_buffered_window() const;
 
+    SAL_DLLPRIVATE bool InitFont() const;
+    SAL_DLLPRIVATE bool ImplNewFont() const;
     SAL_DLLPRIVATE void ImplInitFontList() const;
     virtual void SetFontOrientation(LogicalFontInstance* const pFontInstance) const;
 
@@ -603,6 +682,11 @@ protected:
     tools::Long mnOutOffY;
     tools::Long mnOutWidth;
     tools::Long mnOutHeight;
+    /// font specific text alignment offsets in pixel units
+    mutable tools::Long mnTextOffX;
+    mutable tools::Long mnTextOffY;
+    mutable tools::Long mnEmphasisAscent;
+    mutable tools::Long mnEmphasisDescent;
 
     mutable bool mbMap : 1;
     mutable bool mbInitFont : 1;
@@ -620,8 +704,19 @@ protected:
     mutable bool mbOutputClipped : 1;
     mutable bool mbEnableRTL : 1;
     mutable bool mbDevOutput : 1;
+    mutable bool mbTextLines : 1;
+    mutable bool mbTextSpecial : 1;
 
 private:
+    SAL_DLLPRIVATE std::unique_ptr<SalLayout> ImplGlyphFallbackLayout(std::unique_ptr<SalLayout>,
+                                                                      ImplLayoutArgs&,
+                                                                      const SalLayoutGlyphs*) const;
+
+    SAL_DLLPRIVATE std::unique_ptr<SalLayout> getFallbackLayout(LogicalFontInstance* pLogicalFont,
+                                                                int nFallbackLevel,
+                                                                ImplLayoutArgs& rLayoutArgs,
+                                                                const SalLayoutGlyphs*) const;
+
     std::vector<OutDevState> maOutDevStateStack;
     sal_Int32 mnDPIX;
     sal_Int32 mnDPIY;
