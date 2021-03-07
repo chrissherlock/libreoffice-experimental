@@ -555,6 +555,8 @@ protected:
     SAL_DLLPRIVATE void ImplInitFontList() const;
     virtual void SetFontOrientation(LogicalFontInstance* const pFontInstance) const;
 
+    SAL_DLLPRIVATE static FontEmphasisMark ImplGetEmphasisMarkStyle(vcl::Font const& rFont);
+
     SAL_DLLPRIVATE ImplLayoutArgs ImplPrepareLayoutArgs(
         OUString&, const sal_Int32 nIndex, const sal_Int32 nLen, DeviceCoordinate nPixelWidth,
         const DeviceCoordinate* pPixelDXArray, SalLayoutFlags flags = SalLayoutFlags::NONE,
