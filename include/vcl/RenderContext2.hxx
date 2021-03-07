@@ -47,6 +47,7 @@
 class AllSettings;
 class ImplDeviceFontList;
 class ImplDeviceFontSizeList;
+class ImplFontCache;
 class PhysicalFontCollection;
 class SalGraphics;
 class VirtualDevice;
@@ -570,6 +571,7 @@ protected:
     mutable std::shared_ptr<PhysicalFontCollection> mxFontCollection;
     mutable std::unique_ptr<ImplDeviceFontList> mpDeviceFontList;
     mutable std::unique_ptr<ImplDeviceFontSizeList> mpDeviceFontSizeList;
+    mutable std::shared_ptr<ImplFontCache> mxFontCache;
     /// Additional output pixel offset, applied in LogicToPixel (used by SetPixelOffset/GetPixelOffset)
     tools::Long mnOutOffOrigX;
     /// Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)

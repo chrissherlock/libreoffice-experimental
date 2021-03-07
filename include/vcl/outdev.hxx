@@ -304,7 +304,6 @@ private:
     mutable VclPtr<OutputDevice> mpNextGraphics; ///< Next output device in list
     GDIMetaFile* mpMetaFile;
     mutable rtl::Reference<LogicalFontInstance> mpFontInstance;
-    mutable std::shared_ptr<ImplFontCache> mxFontCache;
     std::vector<VCLXGraphics*>* mpUnoGraphicsList;
     vcl::ExtOutDevData* mpExtOutDevData;
 
