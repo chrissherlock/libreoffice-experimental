@@ -553,6 +553,7 @@ protected:
     SAL_DLLPRIVATE bool is_double_buffered_window() const;
 
     SAL_DLLPRIVATE void ImplInitFontList() const;
+    virtual void SetFontOrientation(LogicalFontInstance* const pFontInstance) const;
 
     SAL_DLLPRIVATE ImplLayoutArgs ImplPrepareLayoutArgs(
         OUString&, const sal_Int32 nIndex, const sal_Int32 nLen, DeviceCoordinate nPixelWidth,

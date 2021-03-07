@@ -77,6 +77,20 @@ bool RenderContext2::IsFontAvailable(OUString const& rFontName) const
     return (pFound != nullptr);
 }
 
+void RenderContext2::SetFontOrientation(LogicalFontInstance* const pFontInstance) const
+{
+    if (pFontInstance->GetFontSelectPattern().mnOrientation
+        && !pFontInstance->mxFontMetric->GetOrientation())
+    {
+        pFontInstance->mnOwnOrientation = pFontInstance->GetFontSelectPattern().mnOrientation;
+        pFontInstance->mnOrientation = pFontInstance->mnOwnOrientation;
+    }
+    else
+    {
+        pFontInstance->mnOrientation = pFontInstance->mxFontMetric->GetOrientation();
+    }
+}
+
 void RenderContext2::ImplInitFontList() const
 {
     if (mxFontCollection->Count())

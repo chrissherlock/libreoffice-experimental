@@ -952,19 +952,6 @@ bool OutputDevice::ImplNewFont() const
     return bRet;
 }
 
-void OutputDevice::SetFontOrientation( LogicalFontInstance* const pFontInstance ) const
-{
-    if( pFontInstance->GetFontSelectPattern().mnOrientation && !pFontInstance->mxFontMetric->GetOrientation() )
-    {
-        pFontInstance->mnOwnOrientation = pFontInstance->GetFontSelectPattern().mnOrientation;
-        pFontInstance->mnOrientation = pFontInstance->mnOwnOrientation;
-    }
-    else
-    {
-        pFontInstance->mnOrientation = pFontInstance->mxFontMetric->GetOrientation();
-    }
-}
-
 void OutputDevice::ImplDrawEmphasisMark( tools::Long nBaseX, tools::Long nX, tools::Long nY,
                                          const tools::PolyPolygon& rPolyPoly, bool bPolyLine,
                                          const tools::Rectangle& rRect1, const tools::Rectangle& rRect2 )
