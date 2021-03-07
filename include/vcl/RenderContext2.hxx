@@ -27,6 +27,7 @@
 #include <i18nlangtag/lang.h>
 
 #include <vcl/dllapi.h>
+#include <vcl/ImplLayoutArgs.hxx>
 #include <vcl/ImplMapRes.hxx>
 #include <vcl/RasterOp.hxx>
 #include <vcl/devicecoordinate.hxx>
@@ -55,6 +56,11 @@ class SalGraphics;
 class VirtualDevice;
 struct ImplOutDevData;
 struct OutDevState;
+
+namespace vcl
+{
+class TextLayoutCache;
+}
 
 class VCL_DLLPUBLIC RenderContext2 : public virtual VclReferenceBase
 {
@@ -547,6 +553,11 @@ protected:
     SAL_DLLPRIVATE bool is_double_buffered_window() const;
 
     SAL_DLLPRIVATE void ImplInitFontList() const;
+
+    SAL_DLLPRIVATE ImplLayoutArgs ImplPrepareLayoutArgs(
+        OUString&, const sal_Int32 nIndex, const sal_Int32 nLen, DeviceCoordinate nPixelWidth,
+        const DeviceCoordinate* pPixelDXArray, SalLayoutFlags flags = SalLayoutFlags::NONE,
+        vcl::TextLayoutCache const* = nullptr) const;
 
     mutable SalGraphics* mpGraphics; ///< Graphics context to draw on
     VclPtr<VirtualDevice> mpAlphaVDev;

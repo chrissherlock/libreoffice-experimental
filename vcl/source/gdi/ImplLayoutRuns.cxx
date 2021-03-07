@@ -19,9 +19,8 @@
 
 #include <i18nlangtag/lang.h>
 
+#include <vcl/ImplLayoutRuns.hxx>
 #include <vcl/vclenum.hxx>
-
-#include <ImplLayoutRuns.hxx>
 
 #include <unicode/uchar.h>
 

@@ -41,7 +41,6 @@
 
 #include <config_fuzzers.h>
 #include <outdev.h>
-#include <ImplLayoutArgs.hxx>
 #include <ImplOutDevData.hxx>
 #include <salgdi.hxx>
 #include <drawmode.hxx>
@@ -1103,117 +1102,6 @@ void OutputDevice::DrawStretchText(const Point& rStartPt, sal_uLong nWidth, cons
         mpAlphaVDev->DrawStretchText(rStartPt, nWidth, rStr, nIndex, nLen);
 }
 
-ImplLayoutArgs
-OutputDevice::ImplPrepareLayoutArgs(OUString& rStr, const sal_Int32 nMinIndex, const sal_Int32 nLen,
-                                    DeviceCoordinate nPixelWidth, DeviceCoordinate const* pDXArray,
-                                    SalLayoutFlags nLayoutFlags,
-                                    vcl::TextLayoutCache const* const pLayoutCache) const
-{
-    assert(nMinIndex >= 0);
-    assert(nLen >= 0);
-
-    // get string length for calculating extents
-    sal_Int32 nEndIndex = rStr.getLength();
-
-    if (nMinIndex + nLen < nEndIndex)
-        nEndIndex = nMinIndex + nLen;
-
-    // don't bother if there is nothing to do
-    if (nEndIndex < nMinIndex)
-        nEndIndex = nMinIndex;
-
-    if (mnTextLayoutMode & ComplexTextLayoutFlags::BiDiRtl)
-        nLayoutFlags |= SalLayoutFlags::BiDiRtl;
-
-    if (mnTextLayoutMode & ComplexTextLayoutFlags::BiDiStrong)
-    {
-        nLayoutFlags |= SalLayoutFlags::BiDiStrong;
-    }
-    else if (!(mnTextLayoutMode & ComplexTextLayoutFlags::BiDiRtl))
-    {
-        // Disable Bidi if no RTL hint and only known LTR codes used.
-        bool bAllLtr = true;
-        for (sal_Int32 i = nMinIndex; i < nEndIndex; i++)
-        {
-            // [0x0000, 0x052F] are Latin, Greek and Cyrillic.
-            // [0x0370, 0x03FF] has a few holes as if Unicode 10.0.0, but
-            //                  hopefully no RTL character will be encoded there.
-            if (rStr[i] > 0x052F)
-            {
-                bAllLtr = false;
-                break;
-            }
-        }
-
-        if (bAllLtr)
-            nLayoutFlags |= SalLayoutFlags::BiDiStrong;
-    }
-
-    if (!maFont.IsKerning())
-        nLayoutFlags |= SalLayoutFlags::DisableKerning;
-
-    if (maFont.GetKerning() & FontKerning::Asian)
-        nLayoutFlags |= SalLayoutFlags::KerningAsian;
-
-    if (maFont.IsVertical())
-        nLayoutFlags |= SalLayoutFlags::Vertical;
-
-    if (meTextLanguage) //TODO: (mnTextLayoutMode & ComplexTextLayoutFlags::SubstituteDigits)
-    {
-        // disable character localization when no digits used
-        const sal_Unicode* pBase = rStr.getStr();
-        const sal_Unicode* pStr = pBase + nMinIndex;
-        const sal_Unicode* pEnd = pBase + nEndIndex;
-        std::optional<OUStringBuffer> xTmpStr;
-        for (; pStr < pEnd; ++pStr)
-        {
-            // TODO: are there non-digit localizations?
-            if ((*pStr >= '0') && (*pStr <= '9'))
-            {
-                // translate characters to local preference
-                sal_UCS4 cChar = GetLocalizedChar(*pStr, meTextLanguage);
-                if (cChar != *pStr)
-                {
-                    if (!xTmpStr)
-                        xTmpStr = OUStringBuffer(rStr);
-
-                    // TODO: are the localized digit surrogates?
-                    (*xTmpStr)[pStr - pBase] = cChar;
-                }
-            }
-        }
-        if (xTmpStr)
-            rStr = (*xTmpStr).makeStringAndClear();
-    }
-
-    // right align for RTL text, DRAWPOS_REVERSED, RTL window style
-    bool bRightAlign = bool(mnTextLayoutMode & ComplexTextLayoutFlags::BiDiRtl);
-
-    if (mnTextLayoutMode & ComplexTextLayoutFlags::TextOriginLeft)
-        bRightAlign = false;
-    else if (mnTextLayoutMode & ComplexTextLayoutFlags::TextOriginRight)
-        bRightAlign = true;
-
-    // SSA: hack for western office, ie text get right aligned
-    //      for debugging purposes of mirrored UI
-    bool bRTLWindow = IsRTLEnabled();
-    bRightAlign ^= bRTLWindow;
-
-    if (bRightAlign)
-        nLayoutFlags |= SalLayoutFlags::RightAlign;
-
-    // set layout options
-    ImplLayoutArgs aLayoutArgs(rStr, nMinIndex, nEndIndex, nLayoutFlags, maFont.GetLanguageTag(),
-                               pLayoutCache);
-
-    Degree10 nOrientation = mpFontInstance ? mpFontInstance->mnOrientation : 0_deg10;
-    aLayoutArgs.SetOrientation(nOrientation);
-
-    aLayoutArgs.SetLayoutWidth(nPixelWidth);
-    aLayoutArgs.SetDXArray(pDXArray);
-
-    return aLayoutArgs;
-}
 
 std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
     const OUString& rOrigStr, sal_Int32 nMinIndex, sal_Int32 nLen, const Point& rLogicalPos,
