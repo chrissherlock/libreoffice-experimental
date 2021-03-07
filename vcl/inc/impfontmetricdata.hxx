@@ -31,7 +31,7 @@
 class ImplFontMetricData;
 typedef tools::SvRef<ImplFontMetricData> ImplFontMetricDataRef;
 
-class OutputDevice;
+class RenderContext2;
 class FontSelectPattern;
 class LogicalFontInstance;
 
@@ -91,9 +91,9 @@ public:
     tools::Long            GetDoubleStrikeoutOffset1() const                               { return mnDStrikeoutOffset1; }
     tools::Long            GetDoubleStrikeoutOffset2() const                               { return mnDStrikeoutOffset2; }
 
-    void            ImplInitTextLineSize( const OutputDevice* pDev );
+    void            ImplInitTextLineSize( const RenderContext2* pDev );
     void            ImplInitAboveTextLineSize();
-    void            ImplInitFlags( const OutputDevice* pDev );
+    void            ImplInitFlags( const RenderContext2* pDev );
     void            ImplCalcLineSpacing(LogicalFontInstance *pFontInstance);
 
 private:
