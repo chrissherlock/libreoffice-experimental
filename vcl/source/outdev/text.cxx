@@ -41,6 +41,7 @@
 
 #include <config_fuzzers.h>
 #include <outdev.h>
+#include <ImplLayoutArgs.hxx>
 #include <ImplOutDevData.hxx>
 #include <salgdi.hxx>
 #include <drawmode.hxx>
