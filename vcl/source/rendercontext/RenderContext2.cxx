@@ -104,6 +104,7 @@ void RenderContext2::dispose()
 
     mpDeviceFontList.reset();
     mpDeviceFontSizeList.reset();
+    mxFontCache.reset(); // release ImplFontCache specific to this OutputDevice
     mxFontCollection.reset(); // release ImplFontList specific to this OutputDevice
 
     mpAlphaVDev.disposeAndClear();

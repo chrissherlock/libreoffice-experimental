@@ -93,9 +93,6 @@ void OutputDevice::dispose()
     // release the active font instance
     mpFontInstance.clear();
 
-    // release ImplFontCache specific to this OutputDevice
-    mxFontCache.reset();
-
     mpAlphaVDev.disposeAndClear();
     mpPrevGraphics.clear();
     mpNextGraphics.clear();
