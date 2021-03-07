@@ -90,9 +90,6 @@ void OutputDevice::dispose()
         mpUnoGraphicsList = nullptr;
     }
 
-    // release the active font instance
-    mpFontInstance.clear();
-
     mpAlphaVDev.disposeAndClear();
     mpPrevGraphics.clear();
     mpNextGraphics.clear();

@@ -43,6 +43,7 @@ RenderContext2::RenderContext2()
     , maRegion(true)
     , mpDeviceFontList(nullptr)
     , mpDeviceFontSizeList(nullptr)
+    , mpFontInstance(nullptr)
     , mnOutOffOrigX(0)
     , mnOutOffLogicX(0)
     , mnOutOffOrigY(0)
@@ -102,6 +103,7 @@ void RenderContext2::dispose()
                 "RenderContext2::Pop() calls");
     maOutDevStateStack.clear();
 
+    mpFontInstance.clear(); // release the active font instance
     mpDeviceFontList.reset();
     mpDeviceFontSizeList.reset();
     mxFontCache.reset(); // release ImplFontCache specific to this OutputDevice
