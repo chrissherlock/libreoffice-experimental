@@ -63,6 +63,7 @@ struct OutDevState;
 namespace tools
 {
 class Rectangle;
+class Polygon;
 }
 
 namespace vcl
@@ -77,6 +78,7 @@ public:
     virtual ~RenderContext2();
 
     virtual void DrawRect(tools::Rectangle const& rRect);
+    virtual void DrawPolyLine(tools::Polygon const& rPoly);
 
     /** Get the graphic context that the output device uses to draw on.
 
@@ -482,6 +484,15 @@ protected:
                                 physically released graphics device.
      */
     virtual void ReleaseGraphics(bool bRelease = true) = 0;
+
+    virtual bool
+    DrawPolyLineDirectInternal(basegfx::B2DHomMatrix const& rObjectTransform,
+                               basegfx::B2DPolygon const& rB2DPolygon, double fLineWidth = 0.0,
+                               double fTransparency = 0.0,
+                               std::vector<double> const* = nullptr, // MM01
+                               basegfx::B2DLineJoin eLineJoin = basegfx::B2DLineJoin::NONE,
+                               css::drawing::LineCap eLineCap = css::drawing::LineCap_BUTT,
+                               double fMiterMinimumAngle = basegfx::deg2rad(15.0));
 
     /** Perform actual rect clip against outdev dimensions, to generate
         empty clips whenever one of the values is completely off the device.
