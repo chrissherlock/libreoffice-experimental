@@ -292,6 +292,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/treelist/svimpbox \
     vcl/source/treelist/svlbitm \
     vcl/source/treelist/uiobject \
+    vcl/source/gdi/ImplLayoutRuns \
     vcl/source/gdi/ImplLayoutArgs \
     vcl/source/gdi/configsettings \
     vcl/source/gdi/cvtgrf \

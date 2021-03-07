@@ -27,11 +27,12 @@
 #include <tools/poly.hxx>
 #include <o3tl/typed_flags_set.hxx>
 
+#include <vcl/dllapi.h>
 #include <vcl/RenderContext2.hxx>
 #include <vcl/bitmap.hxx>
 #include <vcl/cairo.hxx>
 #include <vcl/devicecoordinate.hxx>
-#include <vcl/dllapi.h>
+#include <vcl/flags/SalLayoutFlags.hxx>
 #include <vcl/font.hxx>
 #include <vcl/region.hxx>
 #include <vcl/mapmod.hxx>
@@ -119,27 +120,6 @@ class XGraphics;
 #else
 #define GLYPH_FONT_HEIGHT 256
 #endif
-
-// Text Layout options
-enum class SalLayoutFlags
-{
-    NONE = 0x0000,
-    BiDiRtl = 0x0001,
-    BiDiStrong = 0x0002,
-    RightAlign = 0x0004,
-    DisableKerning = 0x0010,
-    KerningAsian = 0x0020,
-    Vertical = 0x0040,
-    KashidaJustification = 0x0800,
-    ForFallback = 0x2000,
-    GlyphItemsOnly = 0x4000,
-};
-namespace o3tl
-{
-template <> struct typed_flags<SalLayoutFlags> : is_typed_flags<SalLayoutFlags, 0x6877>
-{
-};
-}
 
 typedef std::vector<tools::Rectangle> MetricVector;
 

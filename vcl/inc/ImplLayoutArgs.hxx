@@ -17,7 +17,21 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <sallayout.hxx>
+#include <tools/degree.hxx>
+#include <i18nlangtag/languagetag.hxx>
+
+#include <vcl/dllapi.h>
+#include <vcl/devicecoordinate.hxx>
+#include <vcl/flags/SalLayoutFlags.hxx>
+
+#include <ImplLayoutRuns.hxx>
+
+#include <ostream>
+
+namespace vcl
+{
+class TextLayoutCache;
+}
 
 class VCL_DLLPUBLIC ImplLayoutArgs
 {
