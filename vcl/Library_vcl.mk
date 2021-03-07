@@ -137,6 +137,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/rendercontext/map \
     vcl/source/rendercontext/output \
     vcl/source/rendercontext/rasterop \
+    vcl/source/rendercontext/rect \
     vcl/source/rendercontext/refpoint \
     vcl/source/rendercontext/rtl \
     vcl/source/rendercontext/settings \

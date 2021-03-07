@@ -60,6 +60,11 @@ class VirtualDevice;
 struct ImplOutDevData;
 struct OutDevState;
 
+namespace tools
+{
+class Rectangle;
+}
+
 namespace vcl
 {
 class TextLayoutCache;
@@ -70,6 +75,8 @@ class VCL_DLLPUBLIC RenderContext2 : public virtual VclReferenceBase
 public:
     RenderContext2();
     virtual ~RenderContext2();
+
+    virtual void DrawRect(tools::Rectangle const& rRect);
 
     /** Get the graphic context that the output device uses to draw on.
 

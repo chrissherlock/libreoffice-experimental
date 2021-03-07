@@ -48,43 +48,17 @@ void OutputDevice::DrawBorder(tools::Rectangle aBorderRect)
     DrawRect(aBorderRect);
 }
 
-void OutputDevice::DrawRect( const tools::Rectangle& rRect )
+void OutputDevice::DrawRect(tools::Rectangle const& rRect)
 {
     assert(!is_double_buffered_window());
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaRectAction( rRect ) );
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaRectAction(rRect));
 
-    if ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
+    if (ImplIsRecordLayout())
         return;
 
-    tools::Rectangle aRect( ImplLogicToDevicePixel( rRect ) );
-
-    if ( aRect.IsEmpty() )
-        return;
-
-    aRect.Justify();
-
-    if ( !mpGraphics && !AcquireGraphics() )
-        return;
-    assert(mpGraphics);
-
-    if ( mbInitClipRegion )
-        InitClipRegion();
-
-    if ( mbOutputClipped )
-        return;
-
-    if ( mbInitLineColor )
-        InitLineColor();
-
-    if ( mbInitFillColor )
-        InitFillColor();
-
-    mpGraphics->DrawRect( aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(), *this );
-
-    if( mpAlphaVDev )
-        mpAlphaVDev->DrawRect( rRect );
+    RenderContext2::DrawRect(rRect);
 }
 
 void OutputDevice::DrawRect( const tools::Rectangle& rRect,
@@ -109,6 +83,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
     // we need a graphics
     if ( !mpGraphics && !AcquireGraphics() )
         return;
+
     assert(mpGraphics);
 
     if ( mbInitClipRegion )
@@ -161,6 +136,7 @@ void OutputDevice::Invert( const tools::Rectangle& rRect, InvertFlags nFlags )
     // we need a graphics
     if ( !mpGraphics && !AcquireGraphics() )
         return;
+
     assert(mpGraphics);
 
     if ( mbInitClipRegion )
@@ -193,6 +169,7 @@ void OutputDevice::Invert( const tools::Polygon& rPoly, InvertFlags nFlags )
     // we need a graphics
     if ( !mpGraphics && !AcquireGraphics() )
         return;
+
     assert(mpGraphics);
 
     if ( mbInitClipRegion )
@@ -248,6 +225,7 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
 
     if( !mpGraphics && !AcquireGraphics() )
         return;
+
     assert(mpGraphics);
 
     if( mbInitClipRegion )
