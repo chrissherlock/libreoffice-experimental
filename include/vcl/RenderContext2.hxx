@@ -24,6 +24,7 @@
 #include <tools/color.hxx>
 #include <tools/mapunit.hxx>
 #include <tools/poly.hxx>
+#include <unotools/fontdefs.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <i18nlangtag/lang.h>
 
@@ -32,9 +33,12 @@
 #include <vcl/ImplMapRes.hxx>
 #include <vcl/RasterOp.hxx>
 #include <vcl/devicecoordinate.hxx>
+#include <vcl/flags/AddFontSubstituteFlags.hxx>
 #include <vcl/flags/AntialiasingFlags.hxx>
 #include <vcl/flags/ComplexTextLayoutFlags.hxx>
 #include <vcl/flags/DrawModeFlags.hxx>
+#include <vcl/flags/DrawTextFlags.hxx>
+#include <vcl/flags/GetDefaultFontFlags.hxx>
 #include <vcl/flags/PushFlags.hxx>
 #include <vcl/font.hxx>
 #include <vcl/lineinfo.hxx>
@@ -73,7 +77,14 @@ class Polygon;
 
 namespace vcl
 {
+class ITextLayout;
 class TextLayoutCache;
+struct FontCapabilities;
+
+namespace font
+{
+struct Feature;
+}
 }
 
 class VCL_DLLPUBLIC RenderContext2 : public virtual VclReferenceBase
@@ -157,6 +168,9 @@ public:
 
     bool IsFontAvailable(OUString const& rFontName) const;
     vcl::Font const& GetFont() const;
+    static vcl::Font GetDefaultFont(DefaultFontType nType, LanguageType eLang,
+                                    GetDefaultFontFlags nFlags,
+                                    RenderContext2 const* pOutDev = nullptr);
     virtual void SetFont(vcl::Font const& rNewFont);
 
     FontMetric GetDevFont(int nDevFontIndex) const;
@@ -164,6 +178,39 @@ public:
     bool AddTempDevFont(OUString const& rFileURL, OUString const& rFontName);
     Size GetDevFontSize(vcl::Font const& rFont, int nSizeIndex) const;
     int GetDevFontSizeCount(vcl::Font const&) const;
+
+    void RefreshFontData(const bool bNewFontLists);
+
+    FontMetric GetFontMetric() const;
+    FontMetric GetFontMetric(const vcl::Font& rFont) const;
+
+    bool GetFontCharMap(FontCharMapRef& rxFontCharMap) const;
+    bool GetFontCapabilities(vcl::FontCapabilities& rFontCapabilities) const;
+
+    bool GetFontFeatures(std::vector<vcl::font::Feature>& rFontFeatures) const;
+
+    bool GetGlyphBoundRects(const Point& rOrigin, const OUString& rStr, int nIndex, int nLen,
+                            std::vector<tools::Rectangle>& rVector);
+
+    sal_Int32 HasGlyphs(const vcl::Font& rFont, const OUString& rStr, sal_Int32 nIndex = 0,
+                        sal_Int32 nLen = -1) const;
+
+    tools::Long GetMinKashida() const;
+
+    // i60594
+    // validate kashida positions against the current font
+    // returns count of invalid kashida positions
+    sal_Int32 ValidateKashidas(const OUString& rTxt, sal_Int32 nIdx, sal_Int32 nLen,
+                               sal_Int32 nKashCount, // number of suggested kashida positions (in)
+                               const sal_Int32* pKashidaPos, // suggested kashida positions (in)
+                               sal_Int32* pKashidaPosDropped // invalid kashida positions (out)
+                               ) const;
+
+    static void BeginFontSubstitution();
+    static void EndFontSubstitution();
+    static void AddFontSubstitute(const OUString& rFontName, const OUString& rReplaceFontName,
+                                  AddFontSubstituteFlags nFlags);
+    static void RemoveFontsSubstitute();
 
     Color const& GetTextColor() const;
     virtual void SetTextColor(Color const& rColor);
@@ -311,6 +358,18 @@ public:
                                           SalLayoutFlags flags = SalLayoutFlags::NONE,
                                           vcl::TextLayoutCache const* = nullptr,
                                           SalLayoutGlyphs const* pGlyphs = nullptr) const;
+
+    SAL_DLLPRIVATE void ImplUpdateFontData();
+
+    //drop font data for all outputdevices.
+    //If bNewFontLists is true then empty lists of system fonts
+    SAL_DLLPRIVATE static void ImplClearAllFontData(bool bNewFontLists);
+    //fetch font data for all outputdevices
+    //If bNewFontLists is true then fetch lists of system fonts
+    SAL_DLLPRIVATE static void ImplRefreshAllFontData(bool bNewFontLists);
+    //drop and fetch font data for all outputdevices
+    //If bNewFontLists is true then drop and refetch lists of system fonts
+    SAL_DLLPRIVATE static void ImplUpdateAllFontData(bool bNewFontLists);
 
     /** Get the offset in pixel
 
@@ -682,12 +741,34 @@ protected:
     SAL_DLLPRIVATE void ImplInitFontList() const;
     virtual void SetFontOrientation(LogicalFontInstance* const pFontInstance) const;
 
+    SAL_DLLPRIVATE const LogicalFontInstance* GetFontInstance() const;
+    SAL_DLLPRIVATE tools::Long GetEmphasisAscent() const { return mnEmphasisAscent; }
+    SAL_DLLPRIVATE tools::Long GetEmphasisDescent() const { return mnEmphasisDescent; }
+
+    virtual tools::Long GetFontExtLeading() const;
+
+    virtual void ImplReleaseFonts();
+    virtual void ImplClearFontData(bool bNewFontLists);
+    virtual void ImplRefreshFontData(bool bNewFontLists);
+    void ReleaseFontCache();
+    void ReleaseFontCollection();
+    void SetFontCollectionFromSVData();
+    void ResetNewFontCache();
+
+    static SAL_DLLPRIVATE OUString ImplGetEllipsisString(RenderContext2 const& rTargetDevice,
+                                                         OUString const& rStr,
+                                                         tools::Long nMaxWidth,
+                                                         DrawTextFlags nStyle,
+                                                         vcl::ITextLayout const& _rLayout);
+
     SAL_DLLPRIVATE void ImplGetEmphasisMark(tools::PolyPolygon& rPolyPoly, bool& rPolyLine,
                                             tools::Rectangle& rRect1, tools::Rectangle& rRect2,
                                             tools::Long& rYOff, tools::Long& rWidth,
                                             FontEmphasisMark eEmphasis, tools::Long nHeight);
 
     SAL_DLLPRIVATE static FontEmphasisMark ImplGetEmphasisMarkStyle(vcl::Font const& rFont);
+
+    SAL_DLLPRIVATE void ImplDrawEmphasisMarks(SalLayout&);
 
     SAL_DLLPRIVATE ImplLayoutArgs ImplPrepareLayoutArgs(
         OUString&, const sal_Int32 nIndex, const sal_Int32 nLen, DeviceCoordinate nPixelWidth,
@@ -769,6 +850,16 @@ private:
                                                                 int nFallbackLevel,
                                                                 ImplLayoutArgs& rLayoutArgs,
                                                                 const SalLayoutGlyphs*) const;
+
+    typedef void (OutputDevice::*FontUpdateHandler_t)(bool);
+
+    SAL_DLLPRIVATE static void ImplUpdateFontDataForAllFrames(FontUpdateHandler_t pHdl,
+                                                              bool bNewFontLists);
+
+    SAL_DLLPRIVATE void ImplDrawEmphasisMark(tools::Long nBaseX, tools::Long nX, tools::Long nY,
+                                             const tools::PolyPolygon& rPolyPoly, bool bPolyLine,
+                                             const tools::Rectangle& rRect1,
+                                             const tools::Rectangle& rRect2);
 
     std::vector<OutDevState> maOutDevStateStack;
     sal_Int32 mnDPIX;
