@@ -85,6 +85,7 @@ public:
     virtual void DrawRect(tools::Rectangle const& rRect);
 
     virtual void DrawPolyLine(tools::Polygon const& rPoly);
+    virtual void DrawPolyPolygon(tools::PolyPolygon const& rPolyPoly);
 
     /** Render the given polygon
 
