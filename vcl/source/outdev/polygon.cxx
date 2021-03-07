@@ -152,105 +152,17 @@ void OutputDevice::DrawPolygon( const basegfx::B2DPolygon& rB2DPolygon)
     }
 }
 
-void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
+void OutputDevice::DrawPolygon(tools::Polygon const& rPoly)
 {
     assert(!is_double_buffered_window());
 
-    if( mpMetaFile )
-        mpMetaFile->AddAction( new MetaPolygonAction( rPoly ) );
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaPolygonAction(rPoly));
 
-    sal_uInt16 nPoints = rPoly.GetSize();
-
-    if ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || (nPoints < 2) || ImplIsRecordLayout() )
+    if (ImplIsRecordLayout())
         return;
 
-    // we need a graphics
-    if ( !mpGraphics && !AcquireGraphics() )
-        return;
-
-    assert(mpGraphics);
-
-    if ( mbInitClipRegion )
-        InitClipRegion();
-
-    if ( mbOutputClipped )
-        return;
-
-    if ( mbInitLineColor )
-        InitLineColor();
-
-    if ( mbInitFillColor )
-        InitFillColor();
-
-    // use b2dpolygon drawing if possible
-    if(mpGraphics->supportsOperation(OutDevSupportType::B2DDraw) &&
-       RasterOp::OverPaint == GetRasterOp() &&
-       (IsLineColor() || IsFillColor()))
-    {
-        const basegfx::B2DHomMatrix aTransform(ImplGetDeviceTransformation());
-        basegfx::B2DPolygon aB2DPolygon(rPoly.getB2DPolygon());
-        bool bSuccess(true);
-
-        // ensure closed - maybe assert, hinders buffering
-        if(!aB2DPolygon.isClosed())
-        {
-            aB2DPolygon.setClosed(true);
-        }
-
-        if(IsFillColor())
-        {
-            bSuccess = mpGraphics->DrawPolyPolygon(
-                aTransform,
-                basegfx::B2DPolyPolygon(aB2DPolygon),
-                0.0,
-                *this);
-        }
-
-        if(bSuccess && IsLineColor())
-        {
-            const bool bPixelSnapHairline(mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
-
-            bSuccess = mpGraphics->DrawPolyLine(
-                aTransform,
-                aB2DPolygon,
-                0.0,
-                0.0, // tdf#124848 hairline
-                nullptr, // MM01
-                basegfx::B2DLineJoin::NONE,
-                css::drawing::LineCap_BUTT,
-                basegfx::deg2rad(15.0), // not used with B2DLineJoin::NONE, but the correct default
-                bPixelSnapHairline,
-                *this);
-        }
-
-        if(bSuccess)
-        {
-            if( mpAlphaVDev )
-                mpAlphaVDev->DrawPolygon( rPoly );
-            return;
-        }
-    }
-
-    tools::Polygon aPoly = ImplLogicToDevicePixel( rPoly );
-    const Point* pPtAry = aPoly.GetConstPointAry();
-
-    // #100127# Forward beziers to sal, if any
-    if( aPoly.HasFlags() )
-    {
-        const PolyFlags* pFlgAry = aPoly.GetConstFlagAry();
-        if( !mpGraphics->DrawPolygonBezier( nPoints, pPtAry, pFlgAry, *this ) )
-        {
-            aPoly = tools::Polygon::SubdivideBezier(aPoly);
-            pPtAry = aPoly.GetConstPointAry();
-            mpGraphics->DrawPolygon( aPoly.GetSize(), pPtAry, *this );
-        }
-    }
-    else
-    {
-        mpGraphics->DrawPolygon( nPoints, pPtAry, *this );
-    }
-    if( mpAlphaVDev )
-        mpAlphaVDev->DrawPolygon( rPoly );
+    RenderContext2::DrawPolygon(rPoly);
 }
 
 // Caution: This method is nearly the same as
