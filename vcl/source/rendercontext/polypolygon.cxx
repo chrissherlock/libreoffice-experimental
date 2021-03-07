@@ -26,8 +26,102 @@
 
 #define OUTDEV_POLYPOLY_STACKBUF 32
 
+void RenderContext2::DrawPolyPolygon(const tools::PolyPolygon& rPolyPoly)
+{
+    assert(!is_double_buffered_window());
+
+    sal_uInt16 nPoly = rPolyPoly.Count();
+
+    if (!IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || !nPoly)
+        return;
+
+    // we need a graphics
+    if (!mpGraphics && !AcquireGraphics())
+        return;
+
+    assert(mpGraphics);
+
+    if (mbInitClipRegion)
+        InitClipRegion();
+
+    if (mbOutputClipped)
+        return;
+
+    if (mbInitLineColor)
+        InitLineColor();
+
+    if (mbInitFillColor)
+        InitFillColor();
+
+    // use b2dpolygon drawing if possible
+    if (mpGraphics->supportsOperation(OutDevSupportType::B2DDraw)
+        && RasterOp::OverPaint == GetRasterOp() && (IsLineColor() || IsFillColor()))
+    {
+        const basegfx::B2DHomMatrix aTransform(ImplGetDeviceTransformation());
+        basegfx::B2DPolyPolygon aB2DPolyPolygon(rPolyPoly.getB2DPolyPolygon());
+        bool bSuccess(true);
+
+        // ensure closed - may be asserted, will prevent buffering
+        if (!aB2DPolyPolygon.isClosed())
+        {
+            aB2DPolyPolygon.setClosed(true);
+        }
+
+        if (IsFillColor())
+        {
+            bSuccess = mpGraphics->DrawPolyPolygon(aTransform, aB2DPolyPolygon, 0.0, *this);
+        }
+
+        if (bSuccess && IsLineColor())
+        {
+            const bool bPixelSnapHairline(mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+
+            for (auto const& rPolygon : aB2DPolyPolygon)
+            {
+                bSuccess = mpGraphics->DrawPolyLine(
+                    aTransform, rPolygon, 0.0,
+                    0.0, // tdf#124848 hairline
+                    nullptr, // MM01
+                    basegfx::B2DLineJoin::NONE, css::drawing::LineCap_BUTT,
+                    basegfx::deg2rad(
+                        15.0), // not used with B2DLineJoin::NONE, but the correct default
+                    bPixelSnapHairline, *this);
+
+                if (!bSuccess)
+                    break;
+            }
+        }
+
+        if (bSuccess)
+        {
+            if (mpAlphaVDev)
+                mpAlphaVDev->DrawPolyPolygon(rPolyPoly);
+
+            return;
+        }
+    }
+
+    if (nPoly == 1)
+    {
+        // #100127# Map to DrawPolygon
+        const tools::Polygon& aPoly = rPolyPoly.GetObject(0);
+        if (aPoly.GetSize() >= 2)
+            DrawPolygon(aPoly);
+    }
+    else
+    {
+        // #100127# moved real tools::PolyPolygon draw to separate method,
+        // have to call recursively, avoiding duplicate
+        // ImplLogicToDevicePixel calls
+        ImplDrawPolyPolygon(nPoly, ImplLogicToDevicePixel(rPolyPoly));
+    }
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->DrawPolyPolygon(rPolyPoly);
+}
+
 void RenderContext2::ImplDrawPolyPolygonWithB2DPolyPolygon(
-    const basegfx::B2DPolyPolygon& rB2DPolyPoly)
+    basegfx::B2DPolyPolygon const& rB2DPolyPoly)
 {
     // Do not paint empty PolyPolygons
     if (!rB2DPolyPoly.count() || !IsDeviceOutputNecessary())
