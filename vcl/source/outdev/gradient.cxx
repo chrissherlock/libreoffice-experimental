@@ -17,19 +17,19 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <memory>
-#include <cassert>
-
 #include <tools/poly.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/gradient.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/settings.hxx>
-#include <vcl/outdev.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/window.hxx>
 
 #include <salgdi.hxx>
+
+#include <cassert>
+#include <algorithm>
+#include <memory>
 
 #define GRADIENT_DEFAULT_STEPCOUNT  0
 
@@ -246,12 +246,7 @@ void OutputDevice::DrawGradientToMetafile ( const tools::PolyPolygon& rPolyPoly,
 
 static sal_uInt8 GetGradientColorValue( tools::Long nValue )
 {
-    if ( nValue < 0 )
-        return 0;
-    else if ( nValue > 0xFF )
-        return 0xFF;
-    else
-        return static_cast<sal_uInt8>(nValue);
+    return static_cast<sal_uInt8>(std::clamp(nValue, 0L, 0xFFL));
 }
 
 void OutputDevice::DrawLinearGradientToMetafile( const tools::Rectangle& rRect,
