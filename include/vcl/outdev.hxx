@@ -506,9 +506,6 @@ public:
     void DrawPolyPolygon(tools::PolyPolygon const& rPolyPoly) override;
     void DrawPolyPolygon(const basegfx::B2DPolyPolygon&);
 
-private:
-    SAL_DLLPRIVATE void ImplDrawPolygon(const tools::Polygon& rPoly,
-                                        const tools::PolyPolygon* pClipPolyPoly = nullptr);
     ///@}
 
 public:
