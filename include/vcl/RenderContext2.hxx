@@ -780,6 +780,12 @@ protected:
 
     SAL_DLLPRIVATE Color GetSingleColorGradientFill();
 
+    SAL_DLLPRIVATE tools::Long GetGradientSteps(Gradient const& rGradient,
+                                                tools::Rectangle const& rRect, bool bMtf,
+                                                bool bComplex = false);
+
+    virtual tools::Long GetGradientStepCount(tools::Long nMinRect);
+
     mutable SalGraphics* mpGraphics; ///< Graphics context to draw on
     VclPtr<VirtualDevice> mpAlphaVDev;
 

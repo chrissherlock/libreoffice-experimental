@@ -537,8 +537,6 @@ public:
 protected:
     virtual bool UsePolyPolygonForComplexGradient() = 0;
 
-    virtual tools::Long GetGradientStepCount(tools::Long nMinRect);
-
 private:
     SAL_DLLPRIVATE void DrawLinearGradient(const tools::Rectangle& rRect, const Gradient& rGradient,
                                            const tools::PolyPolygon* pClipPolyPoly);
@@ -552,10 +550,6 @@ private:
                                                      const Gradient& rGradient);
     SAL_DLLPRIVATE void DrawComplexGradientToMetafile(const tools::Rectangle& rRect,
                                                       const Gradient& rGradient);
-
-    SAL_DLLPRIVATE tools::Long GetGradientSteps(const Gradient& rGradient,
-                                                const tools::Rectangle& rRect, bool bMtf,
-                                                bool bComplex = false);
     ///@}
 
     /** @name Hatch functions
