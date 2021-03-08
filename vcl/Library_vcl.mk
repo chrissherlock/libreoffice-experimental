@@ -132,6 +132,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/rendercontext/font \
     vcl/source/rendercontext/fill \
     vcl/source/rendercontext/geometry \
+    vcl/source/rendercontext/gradient \
     vcl/source/rendercontext/graphics \
     vcl/source/rendercontext/line \
     vcl/source/rendercontext/map \
