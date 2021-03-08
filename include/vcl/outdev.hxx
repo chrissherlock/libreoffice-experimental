@@ -538,8 +538,6 @@ protected:
     virtual bool UsePolyPolygonForComplexGradient() = 0;
 
 private:
-    SAL_DLLPRIVATE void DrawLinearGradient(const tools::Rectangle& rRect, const Gradient& rGradient,
-                                           const tools::PolyPolygon* pClipPolyPoly);
     SAL_DLLPRIVATE void DrawComplexGradient(const tools::Rectangle& rRect,
                                             const Gradient& rGradient,
                                             const tools::PolyPolygon* pClipPolyPoly);
