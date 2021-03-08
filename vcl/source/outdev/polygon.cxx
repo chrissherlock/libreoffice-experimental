@@ -84,22 +84,4 @@ void OutputDevice::DrawPolyPolygon( const basegfx::B2DPolyPolygon& rB2DPolyPoly 
     ImplDrawPolyPolygonWithB2DPolyPolygon(rB2DPolyPoly);
 }
 
-void OutputDevice::ImplDrawPolygon( const tools::Polygon& rPoly, const tools::PolyPolygon* pClipPolyPoly )
-{
-    if( pClipPolyPoly )
-    {
-        ImplDrawPolyPolygon( rPoly, pClipPolyPoly );
-    }
-    else
-    {
-        sal_uInt16 nPoints = rPoly.GetSize();
-
-        if ( nPoints < 2 )
-            return;
-
-        const Point* pPtAry = rPoly.GetConstPointAry();
-        mpGraphics->DrawPolygon( nPoints, pPtAry, *this );
-    }
-}
-
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

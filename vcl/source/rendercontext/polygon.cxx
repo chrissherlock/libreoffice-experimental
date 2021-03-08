@@ -112,4 +112,23 @@ void RenderContext2::DrawPolygon(tools::Polygon const& rPoly)
         mpAlphaVDev->DrawPolygon(rPoly);
 }
 
+void RenderContext2::ImplDrawPolygon(tools::Polygon const& rPoly,
+                                     tools::PolyPolygon const* pClipPolyPoly)
+{
+    if (pClipPolyPoly)
+    {
+        ImplDrawPolyPolygon(rPoly, pClipPolyPoly);
+    }
+    else
+    {
+        sal_uInt16 nPoints = rPoly.GetSize();
+
+        if (nPoints < 2)
+            return;
+
+        const Point* pPtAry = rPoly.GetConstPointAry();
+        mpGraphics->DrawPolygon(nPoints, pPtAry, *this);
+    }
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

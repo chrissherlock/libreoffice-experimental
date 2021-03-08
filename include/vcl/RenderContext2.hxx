@@ -563,6 +563,9 @@ protected:
      */
     virtual void ReleaseGraphics(bool bRelease = true) = 0;
 
+    SAL_DLLPRIVATE void ImplDrawPolygon(tools::Polygon const& rPoly,
+                                        tools::PolyPolygon const* pClipPolyPoly = nullptr);
+
     virtual bool
     DrawPolyLineDirectInternal(basegfx::B2DHomMatrix const& rObjectTransform,
                                basegfx::B2DPolygon const& rB2DPolygon, double fLineWidth = 0.0,
