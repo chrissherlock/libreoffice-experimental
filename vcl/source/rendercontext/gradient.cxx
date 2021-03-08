@@ -18,9 +18,11 @@
  */
 
 #include <vcl/flags/DrawModeFlags.hxx>
-#include <vcl/RenderContext2.hxx>
 #include <vcl/gradient.hxx>
 #include <vcl/settings.hxx>
+#include <vcl/virdev.hxx>
+
+#include <salgdi.hxx>
 
 #include <cassert>
 
@@ -41,6 +43,16 @@ Color RenderContext2::GetSingleColorGradientFill()
         aColor = GetSettings().GetStyleSettings().GetWindowColor();
 
     return aColor;
+}
+
+static sal_uInt8 GetGradientColorValue(tools::Long nValue)
+{
+    if (nValue < 0)
+        return 0;
+    else if (nValue > 0xFF)
+        return 0xFF;
+    else
+        return static_cast<sal_uInt8>(nValue);
 }
 
 tools::Long RenderContext2::GetGradientStepCount(tools::Long nMinRect)
@@ -76,6 +88,191 @@ tools::Long RenderContext2::GetGradientSteps(Gradient const& rGradient,
     }
 
     return nStepCount;
+}
+
+void RenderContext2::DrawLinearGradient(tools::Rectangle const& rRect, Gradient const& rGradient,
+                                        tools::PolyPolygon const* pClixPolyPoly)
+{
+    assert(!is_double_buffered_window());
+
+    // get BoundRect of rotated rectangle
+    tools::Rectangle aRect;
+    Point aCenter;
+    Degree10 nAngle = rGradient.GetAngle() % 3600_deg10;
+
+    rGradient.GetBoundRect(rRect, aRect, aCenter);
+
+    bool bLinear = (rGradient.GetStyle() == GradientStyle::Linear);
+    double fBorder = rGradient.GetBorder() * aRect.GetHeight() / 100.0;
+
+    if (!bLinear)
+        fBorder /= 2.0;
+
+    tools::Rectangle aMirrorRect = aRect; // used in style axial
+    aMirrorRect.SetTop((aRect.Top() + aRect.Bottom()) / 2);
+
+    if (!bLinear)
+        aRect.SetBottom(aMirrorRect.Top());
+
+    // colour-intensities of start- and finish; change if needed
+    tools::Long nFactor;
+    Color aStartCol = rGradient.GetStartColor();
+    Color aEndCol = rGradient.GetEndColor();
+    tools::Long nStartRed = aStartCol.GetRed();
+    tools::Long nStartGreen = aStartCol.GetGreen();
+    tools::Long nStartBlue = aStartCol.GetBlue();
+    tools::Long nEndRed = aEndCol.GetRed();
+    tools::Long nEndGreen = aEndCol.GetGreen();
+    tools::Long nEndBlue = aEndCol.GetBlue();
+    nFactor = rGradient.GetStartIntensity();
+    nStartRed = (nStartRed * nFactor) / 100;
+    nStartGreen = (nStartGreen * nFactor) / 100;
+    nStartBlue = (nStartBlue * nFactor) / 100;
+    nFactor = rGradient.GetEndIntensity();
+    nEndRed = (nEndRed * nFactor) / 100;
+    nEndGreen = (nEndGreen * nFactor) / 100;
+    nEndBlue = (nEndBlue * nFactor) / 100;
+
+    // gradient style axial has exchanged start and end colors
+    if (!bLinear)
+    {
+        tools::Long nTempColor = nStartRed;
+        nStartRed = nEndRed;
+        nEndRed = nTempColor;
+        nTempColor = nStartGreen;
+        nStartGreen = nEndGreen;
+        nEndGreen = nTempColor;
+        nTempColor = nStartBlue;
+        nStartBlue = nEndBlue;
+        nEndBlue = nTempColor;
+    }
+
+    sal_uInt8 nRed;
+    sal_uInt8 nGreen;
+    sal_uInt8 nBlue;
+
+    // Create border
+    tools::Rectangle aBorderRect = aRect;
+    tools::Polygon aPoly(4);
+    if (fBorder > 0.0)
+    {
+        nRed = static_cast<sal_uInt8>(nStartRed);
+        nGreen = static_cast<sal_uInt8>(nStartGreen);
+        nBlue = static_cast<sal_uInt8>(nStartBlue);
+
+        mpGraphics->SetFillColor(Color(nRed, nGreen, nBlue));
+
+        aBorderRect.SetBottom(static_cast<tools::Long>(aBorderRect.Top() + fBorder));
+        aRect.SetTop(aBorderRect.Bottom());
+        aPoly[0] = aBorderRect.TopLeft();
+        aPoly[1] = aBorderRect.TopRight();
+        aPoly[2] = aBorderRect.BottomRight();
+        aPoly[3] = aBorderRect.BottomLeft();
+        aPoly.Rotate(aCenter, nAngle);
+
+        ImplDrawPolygon(aPoly, pClixPolyPoly);
+
+        if (!bLinear)
+        {
+            aBorderRect = aMirrorRect;
+            aBorderRect.SetTop(static_cast<tools::Long>(aBorderRect.Bottom() - fBorder));
+            aMirrorRect.SetBottom(aBorderRect.Top());
+            aPoly[0] = aBorderRect.TopLeft();
+            aPoly[1] = aBorderRect.TopRight();
+            aPoly[2] = aBorderRect.BottomRight();
+            aPoly[3] = aBorderRect.BottomLeft();
+            aPoly.Rotate(aCenter, nAngle);
+
+            ImplDrawPolygon(aPoly, pClixPolyPoly);
+        }
+    }
+
+    // calculate step count
+    tools::Long nStepCount = GetGradientSteps(rGradient, aRect, false /*bMtf*/);
+
+    // minimal three steps and maximal as max color steps
+    tools::Long nAbsRedSteps = std::abs(nEndRed - nStartRed);
+    tools::Long nAbsGreenSteps = std::abs(nEndGreen - nStartGreen);
+    tools::Long nAbsBlueSteps = std::abs(nEndBlue - nStartBlue);
+    tools::Long nMaxColorSteps = std::max(nAbsRedSteps, nAbsGreenSteps);
+    nMaxColorSteps = std::max(nMaxColorSteps, nAbsBlueSteps);
+    tools::Long nSteps = std::min(nStepCount, nMaxColorSteps);
+
+    if (nSteps < 3)
+        nSteps = 3;
+
+    double fScanInc = static_cast<double>(aRect.GetHeight()) / static_cast<double>(nSteps);
+    double fGradientLine = static_cast<double>(aRect.Top());
+    double fMirrorGradientLine = static_cast<double>(aMirrorRect.Bottom());
+
+    const double fStepsMinus1 = static_cast<double>(nSteps) - 1.0;
+
+    if (!bLinear)
+        nSteps -= 1; // draw middle polygons as one polygon after loop to avoid gap
+
+    for (tools::Long i = 0; i < nSteps; i++)
+    {
+        // linear interpolation of color
+        const double fAlpha = static_cast<double>(i) / fStepsMinus1;
+        double fTempColor = static_cast<double>(nStartRed) * (1.0 - fAlpha)
+                            + static_cast<double>(nEndRed) * fAlpha;
+        nRed = GetGradientColorValue(static_cast<tools::Long>(fTempColor));
+        fTempColor = static_cast<double>(nStartGreen) * (1.0 - fAlpha)
+                     + static_cast<double>(nEndGreen) * fAlpha;
+        nGreen = GetGradientColorValue(static_cast<tools::Long>(fTempColor));
+        fTempColor = static_cast<double>(nStartBlue) * (1.0 - fAlpha)
+                     + static_cast<double>(nEndBlue) * fAlpha;
+        nBlue = GetGradientColorValue(static_cast<tools::Long>(fTempColor));
+
+        mpGraphics->SetFillColor(Color(nRed, nGreen, nBlue));
+
+        // Polygon for this color step
+        aRect.SetTop(static_cast<tools::Long>(fGradientLine + static_cast<double>(i) * fScanInc));
+        aRect.SetBottom(
+            static_cast<tools::Long>(fGradientLine + (static_cast<double>(i) + 1.0) * fScanInc));
+        aPoly[0] = aRect.TopLeft();
+        aPoly[1] = aRect.TopRight();
+        aPoly[2] = aRect.BottomRight();
+        aPoly[3] = aRect.BottomLeft();
+        aPoly.Rotate(aCenter, nAngle);
+
+        ImplDrawPolygon(aPoly, pClixPolyPoly);
+
+        if (!bLinear)
+        {
+            aMirrorRect.SetBottom(
+                static_cast<tools::Long>(fMirrorGradientLine - static_cast<double>(i) * fScanInc));
+            aMirrorRect.SetTop(static_cast<tools::Long>(
+                fMirrorGradientLine - (static_cast<double>(i) + 1.0) * fScanInc));
+            aPoly[0] = aMirrorRect.TopLeft();
+            aPoly[1] = aMirrorRect.TopRight();
+            aPoly[2] = aMirrorRect.BottomRight();
+            aPoly[3] = aMirrorRect.BottomLeft();
+            aPoly.Rotate(aCenter, nAngle);
+
+            ImplDrawPolygon(aPoly, pClixPolyPoly);
+        }
+    }
+    if (bLinear)
+        return;
+
+    // draw middle polygon with end color
+    nRed = GetGradientColorValue(nEndRed);
+    nGreen = GetGradientColorValue(nEndGreen);
+    nBlue = GetGradientColorValue(nEndBlue);
+
+    mpGraphics->SetFillColor(Color(nRed, nGreen, nBlue));
+
+    aRect.SetTop(static_cast<tools::Long>(fGradientLine + static_cast<double>(nSteps) * fScanInc));
+    aRect.SetBottom(
+        static_cast<tools::Long>(fMirrorGradientLine - static_cast<double>(nSteps) * fScanInc));
+    aPoly[0] = aRect.TopLeft();
+    aPoly[1] = aRect.TopRight();
+    aPoly[2] = aRect.BottomRight();
+    aPoly[3] = aRect.BottomLeft();
+    aPoly.Rotate(aCenter, nAngle);
+
+    ImplDrawPolygon(aPoly, pClixPolyPoly);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
