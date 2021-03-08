@@ -19,6 +19,7 @@
 
 #include <vcl/flags/DrawModeFlags.hxx>
 #include <vcl/RenderContext2.hxx>
+#include <vcl/gradient.hxx>
 #include <vcl/settings.hxx>
 
 #include <cassert>
@@ -40,6 +41,41 @@ Color RenderContext2::GetSingleColorGradientFill()
         aColor = GetSettings().GetStyleSettings().GetWindowColor();
 
     return aColor;
+}
+
+tools::Long RenderContext2::GetGradientStepCount(tools::Long nMinRect)
+{
+    tools::Long nInc = (nMinRect < 50) ? 2 : 4;
+    return nInc;
+}
+
+tools::Long RenderContext2::GetGradientSteps(Gradient const& rGradient,
+                                             tools::Rectangle const& rRect, bool bMtf,
+                                             bool bComplex)
+{
+    // calculate step count
+    tools::Long nStepCount = rGradient.GetSteps();
+    tools::Long nMinRect;
+
+    // generate nStepCount, if not passed
+    if (bComplex)
+        nMinRect = std::min(rRect.GetWidth(), rRect.GetHeight());
+    else
+        nMinRect = rRect.GetHeight();
+
+    if (!nStepCount)
+    {
+        tools::Long nInc;
+
+        nInc = GetGradientStepCount(nMinRect);
+
+        if (!nInc || bMtf)
+            nInc = 1;
+
+        nStepCount = nMinRect / nInc;
+    }
+
+    return nStepCount;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

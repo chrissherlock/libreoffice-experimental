@@ -929,38 +929,6 @@ void OutputDevice::DrawComplexGradientToMetafile( const tools::Rectangle& rRect,
     mpMetaFile->AddAction( new MetaPolygonAction( rPoly ) );
 }
 
-tools::Long OutputDevice::GetGradientStepCount( tools::Long nMinRect )
-{
-    tools::Long nInc = (nMinRect < 50) ? 2 : 4;
-
-    return nInc;
-}
-
-tools::Long OutputDevice::GetGradientSteps( const Gradient& rGradient, const tools::Rectangle& rRect, bool bMtf, bool bComplex )
-{
-    // calculate step count
-    tools::Long nStepCount  = rGradient.GetSteps();
-    tools::Long nMinRect;
-
-    // generate nStepCount, if not passed
-    if (bComplex)
-        nMinRect = std::min( rRect.GetWidth(), rRect.GetHeight() );
-    else
-        nMinRect = rRect.GetHeight();
-
-    if ( !nStepCount )
-    {
-        tools::Long nInc;
-
-        nInc = GetGradientStepCount (nMinRect);
-        if ( !nInc || bMtf )
-            nInc = 1;
-        nStepCount = nMinRect / nInc;
-    }
-
-    return nStepCount;
-}
-
 void OutputDevice::AddGradientActions( const tools::Rectangle& rRect, const Gradient& rGradient,
                                        GDIMetaFile& rMtf )
 {
