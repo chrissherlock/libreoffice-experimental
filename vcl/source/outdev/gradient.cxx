@@ -961,23 +961,6 @@ tools::Long OutputDevice::GetGradientSteps( const Gradient& rGradient, const too
     return nStepCount;
 }
 
-Color OutputDevice::GetSingleColorGradientFill()
-{
-    Color aColor;
-
-    // we should never call on this function if any of these aren't set!
-    assert( mnDrawMode & ( DrawModeFlags::BlackGradient | DrawModeFlags::WhiteGradient | DrawModeFlags::SettingsGradient) );
-
-    if ( mnDrawMode & DrawModeFlags::BlackGradient )
-        aColor = COL_BLACK;
-    else if ( mnDrawMode & DrawModeFlags::WhiteGradient )
-        aColor = COL_WHITE;
-    else if ( mnDrawMode & DrawModeFlags::SettingsGradient )
-        aColor = GetSettings().GetStyleSettings().GetWindowColor();
-
-    return aColor;
-}
-
 void OutputDevice::AddGradientActions( const tools::Rectangle& rRect, const Gradient& rGradient,
                                        GDIMetaFile& rMtf )
 {

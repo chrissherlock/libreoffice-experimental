@@ -775,6 +775,8 @@ protected:
         const DeviceCoordinate* pPixelDXArray, SalLayoutFlags flags = SalLayoutFlags::NONE,
         vcl::TextLayoutCache const* = nullptr) const;
 
+    SAL_DLLPRIVATE Color GetSingleColorGradientFill();
+
     mutable SalGraphics* mpGraphics; ///< Graphics context to draw on
     VclPtr<VirtualDevice> mpAlphaVDev;
 
