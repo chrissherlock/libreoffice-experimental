@@ -779,8 +779,15 @@ protected:
         vcl::TextLayoutCache const* = nullptr) const;
 
     SAL_DLLPRIVATE Color GetSingleColorGradientFill();
+
     SAL_DLLPRIVATE void DrawLinearGradient(tools::Rectangle const& rRect, Gradient const& rGradient,
                                            tools::PolyPolygon const* pClipPolyPoly);
+
+    SAL_DLLPRIVATE void DrawComplexGradient(tools::Rectangle const& rRect,
+                                            Gradient const& rGradient,
+                                            tools::PolyPolygon const* pClipPolyPoly);
+
+    virtual bool UsePolyPolygonForComplexGradient() = 0;
 
     SAL_DLLPRIVATE tools::Long GetGradientSteps(Gradient const& rGradient,
                                                 tools::Rectangle const& rRect, bool bMtf,
