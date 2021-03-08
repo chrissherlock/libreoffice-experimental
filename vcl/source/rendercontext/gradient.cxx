@@ -24,6 +24,7 @@
 
 #include <salgdi.hxx>
 
+#include <algorithm>
 #include <cassert>
 
 Color RenderContext2::GetSingleColorGradientFill()
@@ -47,12 +48,7 @@ Color RenderContext2::GetSingleColorGradientFill()
 
 static sal_uInt8 GetGradientColorValue(tools::Long nValue)
 {
-    if (nValue < 0)
-        return 0;
-    else if (nValue > 0xFF)
-        return 0xFF;
-    else
-        return static_cast<sal_uInt8>(nValue);
+    return static_cast<sal_uInt8>(std::clamp(nValue, 0L, 0xFFL));
 }
 
 tools::Long RenderContext2::GetGradientStepCount(tools::Long nMinRect)
