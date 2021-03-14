@@ -528,8 +528,8 @@ public:
     ///@{
 
 public:
-    void DrawGradient(const tools::Rectangle& rRect, const Gradient& rGradient);
-    void DrawGradient(const tools::PolyPolygon& rPolyPoly, const Gradient& rGradient);
+    void DrawGradient(tools::Rectangle const& rRect, Gradient const& rGradient) override;
+    void DrawGradient(tools::PolyPolygon const& rPolyPoly, Gradient const& rGradient) override;
 
     void AddGradientActions(const tools::Rectangle& rRect, const Gradient& rGradient,
                             GDIMetaFile& rMtf);

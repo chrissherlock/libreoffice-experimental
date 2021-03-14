@@ -22,10 +22,136 @@
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
 
+#include <drawmode.hxx>
 #include <salgdi.hxx>
 
 #include <algorithm>
 #include <cassert>
+
+void RenderContext2::DrawGradient(tools::Rectangle const& rRect, Gradient const& rGradient)
+{
+    assert(!is_double_buffered_window());
+
+    // Convert rectangle to a tools::PolyPolygon by first converting to a Polygon
+    tools::Polygon aPolygon(rRect);
+    tools::PolyPolygon aPolyPoly(aPolygon);
+
+    DrawGradient(aPolyPoly, rGradient);
+}
+
+void RenderContext2::DrawGradient(tools::PolyPolygon const& rPolyPoly, Gradient const& rGradient)
+{
+    assert(!is_double_buffered_window());
+
+    if (mbInitClipRegion)
+        InitClipRegion();
+
+    if (rPolyPoly.Count() && rPolyPoly[0].GetSize())
+    {
+        if (mnDrawMode
+            & (DrawModeFlags::BlackGradient | DrawModeFlags::WhiteGradient
+               | DrawModeFlags::SettingsGradient))
+        {
+            Color aColor = GetSingleColorGradientFill();
+
+            Push(PushFlags::LINECOLOR | PushFlags::FILLCOLOR);
+            SetLineColor(aColor);
+            SetFillColor(aColor);
+            DrawPolyPolygon(rPolyPoly);
+            Pop();
+            return;
+        }
+
+        if (!IsDeviceOutputNecessary())
+            return;
+
+        Gradient aGradient(rGradient);
+
+        if (mnDrawMode & DrawModeFlags::GrayGradient)
+            aGradient.MakeGrayscale();
+
+        // Clip and then draw the gradient
+        if (!tools::Rectangle(PixelToLogic(Point()), GetOutputSize()).IsEmpty())
+        {
+            const tools::Rectangle aBoundRect(rPolyPoly.GetBoundRect());
+
+            // convert rectangle to pixels
+            tools::Rectangle aRect(ImplLogicToDevicePixel(aBoundRect));
+            aRect.Justify();
+
+            // do nothing if the rectangle is empty
+            if (!aRect.IsEmpty())
+            {
+                tools::PolyPolygon aClixPolyPoly(ImplLogicToDevicePixel(rPolyPoly));
+                bool bDrawn = false;
+
+                if (!mpGraphics && !AcquireGraphics())
+                    return;
+
+                // secure clip region
+                Push(PushFlags::CLIPREGION);
+                IntersectClipRegion(aBoundRect);
+
+                if (mbInitClipRegion)
+                    InitClipRegion();
+
+                // try to draw gradient natively
+                if (!mbOutputClipped)
+                    bDrawn = mpGraphics->DrawGradient(aClixPolyPoly, aGradient, *this);
+
+                if (!bDrawn && !mbOutputClipped)
+                {
+                    // draw gradients without border
+                    if (mbLineColor || mbInitLineColor)
+                    {
+                        mpGraphics->SetLineColor();
+                        mbInitLineColor = true;
+                    }
+
+                    mbInitFillColor = true;
+
+                    // calculate step count if necessary
+                    if (!aGradient.GetSteps())
+                        aGradient.SetSteps(GRADIENT_DEFAULT_STEPCOUNT);
+
+                    if (rPolyPoly.IsRect())
+                    {
+                        // because we draw with no border line, we have to expand gradient
+                        // rect to avoid missing lines on the right and bottom edge
+                        aRect.AdjustLeft(-1);
+                        aRect.AdjustTop(-1);
+                        aRect.AdjustRight(1);
+                        aRect.AdjustBottom(1);
+                    }
+
+                    // if the clipping polypolygon is a rectangle, then it's the same size as the bounding of the
+                    // polypolygon, so pass in a NULL for the clipping parameter
+                    if (aGradient.GetStyle() == GradientStyle::Linear
+                        || rGradient.GetStyle() == GradientStyle::Axial)
+                    {
+                        DrawLinearGradient(aRect, aGradient,
+                                           aClixPolyPoly.IsRect() ? nullptr : &aClixPolyPoly);
+                    }
+                    else
+                    {
+                        DrawComplexGradient(aRect, aGradient,
+                                            aClixPolyPoly.IsRect() ? nullptr : &aClixPolyPoly);
+                    }
+                }
+
+                Pop();
+            }
+        }
+    }
+
+    if (mpAlphaVDev)
+    {
+        const Color aFillCol(mpAlphaVDev->GetFillColor());
+        mpAlphaVDev->SetFillColor(COL_BLACK);
+        mpAlphaVDev->DrawPolyPolygon(rPolyPoly);
+        mpAlphaVDev->SetFillColor(aFillCol);
+    }
+}
 
 Color RenderContext2::GetSingleColorGradientFill()
 {
