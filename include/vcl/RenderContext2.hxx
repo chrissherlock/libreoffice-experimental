@@ -51,6 +51,8 @@
 
 #include <vector>
 
+#define GRADIENT_DEFAULT_STEPCOUNT 0
+
 class AllSettings;
 class ImplDeviceFontList;
 class ImplDeviceFontSizeList;
@@ -109,6 +111,9 @@ public:
         @see DrawPolyLine
      */
     virtual void DrawPolygon(tools::Polygon const& rPoly);
+
+    virtual void DrawGradient(tools::Rectangle const& rRect, Gradient const& rGradient);
+    virtual void DrawGradient(tools::PolyPolygon const& rPolyPoly, Gradient const& rGradient);
 
     /** Get the graphic context that the output device uses to draw on.
 
