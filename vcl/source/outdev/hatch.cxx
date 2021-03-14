@@ -157,7 +157,6 @@ void OutputDevice::DrawHatch(const tools::PolyPolygon& rPolyPoly, const Hatch& r
         aRect.AdjustBottom(nLogPixelWidth);
 
         CalcHatchValues(aRect, nWidth, rHatch.GetAngle(), aPt1, aPt2, aInc, aEndPt1);
-
         do
         {
             DrawHatchLines(tools::Line(aPt1, aPt2), rPolyPoly, pPtBuffer.get(), bMtf);
@@ -310,11 +309,8 @@ void OutputDevice::CalcHatchValues(const tools::Rectangle& rRect, tools::Long nD
     }
 }
 
-void OutputDevice::DrawHatchLines(tools::Line const& rLine, tools::PolyPolygon const& rPolyPoly,
-                                 Point* pPtBuffer, bool bMtf)
+std::tuple<tools::Long, Point*> OutputDevice::GenerateHatchPointBuffer(tools::Line const& rLine, tools::PolyPolygon const& rPolyPoly, Point* pPtBuffer)
 {
-    assert(!is_double_buffered_window());
-
     double fX, fY;
     tools::Long nAdd, nPCounter = 0;
 
@@ -374,13 +370,23 @@ void OutputDevice::DrawHatchLines(tools::Line const& rLine, tools::PolyPolygon c
         }
     }
 
-    if (nPCounter <= 1)
-        return;
+    assert(nPCounter <= 1);
 
     qsort(pPtBuffer, nPCounter, sizeof(Point), HatchCmpFnc);
 
     if (nPCounter & 1)
         nPCounter--;
+
+    return std::make_tuple(nPCounter, pPtBuffer);
+}
+
+void OutputDevice::DrawHatchLines(tools::Line const& rLine, tools::PolyPolygon const& rPolyPoly,
+                                 Point* pPtBuffer, bool bMtf)
+{
+    assert(!is_double_buffered_window());
+
+    tools::Long nPCounter = 0;
+    std::tie(nPCounter, pPtBuffer) = GenerateHatchPointBuffer(rLine, rPolyPoly, pPtBuffer);
 
     if (bMtf)
     {

@@ -556,6 +556,9 @@ public:
     void DrawHatch(const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch, bool bMtf);
 
 protected:
+    std::tuple<tools::Long, Point*> GenerateHatchPointBuffer(tools::Line const& rLine,
+                                                             tools::PolyPolygon const& rPolyPoly,
+                                                             Point* pPtBuffer);
     virtual void DrawHatchLine(Point const& rStartPoint, Point const& rEndPoint);
 
 private:
