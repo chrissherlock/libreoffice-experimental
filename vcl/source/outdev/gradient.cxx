@@ -74,16 +74,73 @@ void OutputDevice::DrawGradient(tools::PolyPolygon const& rPolyPoly, Gradient co
             return;
         }
 
-        DrawGradientToMetafile(rPolyPoly, rGradient);
+        Gradient aGradient(rGradient);
+
+        if (mnDrawMode & DrawModeFlags::GrayGradient)
+            aGradient.MakeGrayscale();
+
+        const tools::Rectangle aBoundRect(rPolyPoly.GetBoundRect());
+
+        if (rPolyPoly.IsRect())
+        {
+            mpMetaFile->AddAction(new MetaGradientAction(aBoundRect, aGradient));
+        }
+        else
+        {
+            mpMetaFile->AddAction(new MetaCommentAction("XGRAD_SEQ_BEGIN"));
+            mpMetaFile->AddAction(new MetaGradientExAction(rPolyPoly, rGradient));
+
+            ClipAndDrawGradientMetafile(rGradient, rPolyPoly);
+
+            mpMetaFile->AddAction(new MetaCommentAction("XGRAD_SEQ_END"));
+        }
+
+        if (!IsDeviceOutputNecessary() | ImplIsRecordLayout())
+            return;
+
+        // Clip and then draw the gradient
+        if (tools::Rectangle(PixelToLogic(Point()), GetOutputSize()).IsEmpty())
+            return;
+
+        // convert rectangle to pixels
+        tools::Rectangle aRect(ImplLogicToDevicePixel(aBoundRect));
+        aRect.Justify();
+
+        // do nothing if the rectangle is empty
+        if (aRect.IsEmpty())
+            return;
+
+        if (mbOutputClipped)
+            return;
+
+        // calculate step count if necessary
+        if (!aGradient.GetSteps())
+            aGradient.SetSteps(GRADIENT_DEFAULT_STEPCOUNT);
+
+        if (rPolyPoly.IsRect())
+        {
+            // because we draw with no border line, we have to expand gradient
+            // rect to avoid missing lines on the right and bottom edge
+            aRect.AdjustLeft(-1);
+            aRect.AdjustTop(-1);
+            aRect.AdjustRight(1);
+            aRect.AdjustBottom(1);
+        }
+
+        // if the clipping polypolygon is a rectangle, then it's the same size as the bounding of the
+        // polypolygon, so pass in a NULL for the clipping parameter
+        if (aGradient.GetStyle() == GradientStyle::Linear
+            || rGradient.GetStyle() == GradientStyle::Axial)
+        {
+            DrawLinearGradientToMetafile(aRect, aGradient);
+        }
+        else
+        {
+            DrawComplexGradientToMetafile(aRect, aGradient);
+        }
 
         if (!tools::Rectangle(PixelToLogic(Point()), GetOutputSize()).IsEmpty())
         {
-            const tools::Rectangle aBoundRect(rPolyPoly.GetBoundRect());
-
-            // convert rectangle to pixels
-            tools::Rectangle aRect(ImplLogicToDevicePixel(aBoundRect));
-            aRect.Justify();
-
             mpMetaFile->AddAction(new MetaPushAction(PushFlags::CLIPREGION));
             mpMetaFile->AddAction(new MetaISectRectClipRegionAction(aRect));
             mpMetaFile->AddAction(new MetaPopAction());
@@ -110,79 +167,6 @@ void OutputDevice::ClipAndDrawGradientMetafile(const Gradient& rGradient,
     DrawGradient(aBoundRect, rGradient);
     Pop();
     EnableOutput(bOldOutput);
-}
-
-void OutputDevice::DrawGradientToMetafile(const tools::PolyPolygon& rPolyPoly,
-                                          const Gradient& rGradient)
-{
-    assert(!is_double_buffered_window());
-
-    if (!mpMetaFile)
-        return;
-
-    if (!(rPolyPoly.Count() && rPolyPoly[0].GetSize()))
-        return;
-
-    Gradient aGradient(rGradient);
-
-    if (mnDrawMode & DrawModeFlags::GrayGradient)
-        aGradient.MakeGrayscale();
-
-    const tools::Rectangle aBoundRect(rPolyPoly.GetBoundRect());
-
-    if (rPolyPoly.IsRect())
-    {
-        mpMetaFile->AddAction(new MetaGradientAction(aBoundRect, aGradient));
-    }
-    else
-    {
-        mpMetaFile->AddAction(new MetaCommentAction("XGRAD_SEQ_BEGIN"));
-        mpMetaFile->AddAction(new MetaGradientExAction(rPolyPoly, rGradient));
-
-        ClipAndDrawGradientMetafile(rGradient, rPolyPoly);
-
-        mpMetaFile->AddAction(new MetaCommentAction("XGRAD_SEQ_END"));
-    }
-
-    if (!IsDeviceOutputNecessary() || ImplIsRecordLayout())
-        return;
-
-    // Clip and then draw the gradient
-    if (tools::Rectangle(PixelToLogic(Point()), GetOutputSize()).IsEmpty())
-        return;
-
-    // convert rectangle to pixels
-    tools::Rectangle aRect(ImplLogicToDevicePixel(aBoundRect));
-    aRect.Justify();
-
-    // do nothing if the rectangle is empty
-    if (aRect.IsEmpty())
-        return;
-
-    if (mbOutputClipped)
-        return;
-
-    // calculate step count if necessary
-    if (!aGradient.GetSteps())
-        aGradient.SetSteps(GRADIENT_DEFAULT_STEPCOUNT);
-
-    if (rPolyPoly.IsRect())
-    {
-        // because we draw with no border line, we have to expand gradient
-        // rect to avoid missing lines on the right and bottom edge
-        aRect.AdjustLeft(-1);
-        aRect.AdjustTop(-1);
-        aRect.AdjustRight(1);
-        aRect.AdjustBottom(1);
-    }
-
-    // if the clipping polypolygon is a rectangle, then it's the same size as the bounding of the
-    // polypolygon, so pass in a NULL for the clipping parameter
-    if (aGradient.GetStyle() == GradientStyle::Linear
-        || rGradient.GetStyle() == GradientStyle::Axial)
-        DrawLinearGradientToMetafile(aRect, aGradient);
-    else
-        DrawComplexGradientToMetafile(aRect, aGradient);
 }
 
 static sal_uInt8 GetGradientColorValue(tools::Long nValue)
