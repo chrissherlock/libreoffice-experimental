@@ -25,6 +25,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/window.hxx>
 
+#include <drawmode.hxx>
 #include <salgdi.hxx>
 
 #include <cassert>
@@ -50,7 +51,50 @@ void OutputDevice::DrawGradient(const tools::PolyPolygon& rPolyPoly, const Gradi
 
     if (mbInitClipRegion)
         InitClipRegion();
+
     // don't return on mbOutputClipped here, as we may need to draw the clipped metafile, even if the output is clipped
+
+    if (mpMetaFile && rPolyPoly.Count() && rPolyPoly[0].GetSize())
+    {
+        if (mnDrawMode
+            & (DrawModeFlags::BlackGradient | DrawModeFlags::WhiteGradient
+               | DrawModeFlags::SettingsGradient))
+        {
+            Color aColor = GetSingleColorGradientFill();
+            Color aLineColor;
+
+            if (!aColor.IsTransparent())
+                aLineColor = GetDrawModeLineColor(aColor, GetDrawMode(), GetSettings().GetStyleSettings());
+
+            mpMetaFile->AddAction(new MetaPushAction(PushFlags::LINECOLOR | PushFlags::FILLCOLOR));
+            mpMetaFile->AddAction(new MetaLineColorAction(aLineColor, true));
+            mpMetaFile->AddAction(new MetaFillColorAction(
+                GetDrawModeFillColor(aColor, GetDrawMode(), GetSettings().GetStyleSettings()), true));
+            mpMetaFile->AddAction(new MetaPolyPolygonAction(rPolyPoly));
+            mpMetaFile->AddAction(new MetaPopAction());
+
+            return;
+        }
+
+        DrawGradientToMetafile(rPolyPoly, rGradient);
+
+        /* uncomment this code when migrating DrawGradient() to RenderContext2
+
+        if (!tools::Rectangle(PixelToLogic(Point()), GetOutputSize()).IsEmpty())
+        {
+            const tools::Rectangle aBoundRect(rPolyPoly.GetBoundRect());
+
+            // convert rectangle to pixels
+            tools::Rectangle aRect(ImplLogicToDevicePixel(aBoundRect));
+            aRect.Justify();
+
+            mpMetaFile->AddAction(new MetaPushAction(PushFlags::CLIPREGION));
+            mpMetaFile->AddAction(new MetaISectRectClipRegionAction(aRect));
+            mpMetaFile->AddAction(new MetaPopAction());
+        }
+
+        */
+    }
 
     if (rPolyPoly.Count() && rPolyPoly[0].GetSize())
     {
@@ -68,15 +112,13 @@ void OutputDevice::DrawGradient(const tools::PolyPolygon& rPolyPoly, const Gradi
             return;
         }
 
+        if (!IsDeviceOutputNecessary() || ImplIsRecordLayout())
+            return;
+
         Gradient aGradient(rGradient);
 
         if (mnDrawMode & DrawModeFlags::GrayGradient)
             aGradient.MakeGrayscale();
-
-        DrawGradientToMetafile(rPolyPoly, rGradient);
-
-        if (!IsDeviceOutputNecessary() || ImplIsRecordLayout())
-            return;
 
         // Clip and then draw the gradient
         if (!tools::Rectangle(PixelToLogic(Point()), GetOutputSize()).IsEmpty())
