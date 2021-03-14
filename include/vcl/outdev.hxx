@@ -535,8 +535,6 @@ public:
                             GDIMetaFile& rMtf);
 
 private:
-    SAL_DLLPRIVATE void DrawGradientToMetafile(const tools::PolyPolygon& rPolyPoly,
-                                               const Gradient& rGradient);
     SAL_DLLPRIVATE void DrawLinearGradientToMetafile(const tools::Rectangle& rRect,
                                                      const Gradient& rGradient);
     SAL_DLLPRIVATE void DrawComplexGradientToMetafile(const tools::Rectangle& rRect,
