@@ -1944,7 +1944,7 @@ void PDFWriterImpl::writeG4Stream( BitmapReadAccess const * i_pBitmap )
     }
 }
 
-void PDFWriterImpl::DrawHatchLine_DrawLine(const Point& rStartPoint, const Point& rEndPoint)
+void PDFWriterImpl::DrawHatchLine(Point const& rStartPoint, Point const& rEndPoint)
 {
     drawLine(rStartPoint, rEndPoint);
 }
