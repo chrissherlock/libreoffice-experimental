@@ -128,9 +128,7 @@ void OutputDevice::DrawHatch(const tools::PolyPolygon& rPolyPoly, const Hatch& r
     for (sal_uInt16 a(0); !bIsCurve && a < rPolyPoly.Count(); a++)
     {
         if (rPolyPoly[a].HasFlags())
-        {
             bIsCurve = true;
-        }
     }
 
     if (bIsCurve)
@@ -157,7 +155,9 @@ void OutputDevice::DrawHatch(const tools::PolyPolygon& rPolyPoly, const Hatch& r
         aRect.AdjustTop(-nLogPixelWidth);
         aRect.AdjustRight(nLogPixelWidth);
         aRect.AdjustBottom(nLogPixelWidth);
+
         CalcHatchValues(aRect, nWidth, rHatch.GetAngle(), aPt1, aPt2, aInc, aEndPt1);
+
         do
         {
             DrawHatchLine(tools::Line(aPt1, aPt2), rPolyPoly, pPtBuffer.get(), bMtf);
@@ -361,7 +361,9 @@ void OutputDevice::DrawHatchLine(const tools::Line& rLine, const tools::PolyPoly
                         }
                     }
                     else
+                    {
                         nAdd = 1;
+                    }
 
                     if (nAdd)
                         pPtBuffer[nPCounter++] = Point(FRound(fX), FRound(fY));
@@ -383,12 +385,16 @@ void OutputDevice::DrawHatchLine(const tools::Line& rLine, const tools::PolyPoly
     if (bMtf)
     {
         for (tools::Long i = 0; i < nPCounter; i += 2)
+        {
             mpMetaFile->AddAction(new MetaLineAction(pPtBuffer[i], pPtBuffer[i + 1]));
+        }
     }
     else
     {
         for (tools::Long i = 0; i < nPCounter; i += 2)
+        {
             DrawHatchLine_DrawLine(pPtBuffer[i], pPtBuffer[i + 1]);
+        }
     }
 }
 
