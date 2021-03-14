@@ -544,30 +544,19 @@ private:
 
 public:
 #ifdef _MSC_VER
-    void DrawHatch(const tools::PolyPolygon& rPolyPoly, const ::Hatch& rHatch);
-    void AddHatchActions(const tools::PolyPolygon& rPolyPoly, const ::Hatch& rHatch,
+    void DrawHatch(tools::PolyPolygon const& rPolyPoly, ::Hatch const& rHatch) override;
+    void AddHatchActions(tools::PolyPolygon const& rPolyPoly, ::Hatch const& rHatch,
                          GDIMetaFile& rMtf);
 #else
-    void DrawHatch(const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch);
-    void AddHatchActions(const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch,
+    void DrawHatch(tools::PolyPolygon const& rPolyPoly, Hatch const& rHatch) override;
+    void AddHatchActions(tools::PolyPolygon const& rPolyPoly, Hatch const& rHatch,
                          GDIMetaFile& rMtf);
 #endif
 
-    void DrawHatch(const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch, bool bMtf);
-
 protected:
-    std::tuple<tools::Long, Point*> GenerateHatchPointBuffer(tools::Line const& rLine,
-                                                             tools::PolyPolygon const& rPolyPoly,
-                                                             Point* pPtBuffer);
-    virtual void DrawHatchLine(Point const& rStartPoint, Point const& rEndPoint);
-
-private:
-    SAL_DLLPRIVATE void CalcHatchValues(const tools::Rectangle& rRect, tools::Long nDist,
-                                        Degree10 nAngle10, Point& rPt1, Point& rPt2, Size& rInc,
-                                        Point& rEndPt1);
-    SAL_DLLPRIVATE void DrawHatchLines(tools::Line const& rLine,
-                                       tools::PolyPolygon const& rPolyPoly, Point* pPtBuffer,
-                                       bool bMtf);
+    void DrawHatchLine(Point const& rStartPoint, Point const& rEndPoint) override;
+    void DrawHatchLines(tools::Line const& rLine, tools::PolyPolygon const& rPolyPoly,
+                        Point* pPtBuffer) override;
     ///@}
 
     /** @name Wallpaper functions
