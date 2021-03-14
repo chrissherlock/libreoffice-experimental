@@ -95,7 +95,7 @@ void OutputDevice::DrawGradient(tools::PolyPolygon const& rPolyPoly, Gradient co
             mpMetaFile->AddAction(new MetaCommentAction("XGRAD_SEQ_END"));
         }
 
-        if (!IsDeviceOutputNecessary() | ImplIsRecordLayout())
+        if (ImplIsRecordLayout())
             return;
 
         // Clip and then draw the gradient
