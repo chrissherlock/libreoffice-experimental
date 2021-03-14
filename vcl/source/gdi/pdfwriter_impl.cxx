@@ -9293,7 +9293,7 @@ void PDFWriterImpl::drawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch&
         aPolyPoly.Optimize( PolyOptimizeFlags::NO_SAME );
         push( PushFlags::LINECOLOR );
         setLineColor( rHatch.GetColor() );
-        DrawHatch( aPolyPoly, rHatch, false );
+        RenderContext2::DrawHatch( aPolyPoly, rHatch );
         pop();
     }
 }

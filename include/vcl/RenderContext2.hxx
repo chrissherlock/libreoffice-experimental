@@ -52,8 +52,10 @@
 #include <vector>
 
 #define GRADIENT_DEFAULT_STEPCOUNT 0
+#define HATCH_MAXPOINTS 1024
 
 class AllSettings;
+class Hatch;
 class ImplDeviceFontList;
 class ImplDeviceFontSizeList;
 class ImplFontCache;
@@ -73,6 +75,7 @@ class B2DPolyPolygon;
 
 namespace tools
 {
+class Line;
 class Rectangle;
 class Polygon;
 }
@@ -114,6 +117,8 @@ public:
 
     virtual void DrawGradient(tools::Rectangle const& rRect, Gradient const& rGradient);
     virtual void DrawGradient(tools::PolyPolygon const& rPolyPoly, Gradient const& rGradient);
+
+    virtual void DrawHatch(tools::PolyPolygon const& rPolyPoly, Hatch const& rHatch);
 
     /** Get the graphic context that the output device uses to draw on.
 
@@ -590,6 +595,17 @@ protected:
     // without MetaFile processing
     SAL_DLLPRIVATE void
     ImplDrawPolyPolygonWithB2DPolyPolygon(basegfx::B2DPolyPolygon const& rB2DPolyPoly);
+
+    virtual void DrawHatchLine(Point const& rStartPoint, Point const& rEndPoint);
+    virtual void DrawHatchLines(tools::Line const& rLine, tools::PolyPolygon const& rPolyPoly,
+                                Point* pPtBuffer);
+
+    void CalcHatchValues(tools::Rectangle const& rRect, tools::Long nDist, Degree10 nAngle10,
+                         Point& rPt1, Point& rPt2, Size& rInc, Point& rEndPt1);
+
+    std::tuple<tools::Long, Point*> GenerateHatchPointBuffer(tools::Line const& rLine,
+                                                             tools::PolyPolygon const& rPolyPoly,
+                                                             Point* pPtBuffer);
 
     /** Perform actual rect clip against outdev dimensions, to generate
         empty clips whenever one of the values is completely off the device.
