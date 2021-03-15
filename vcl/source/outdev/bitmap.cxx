@@ -39,25 +39,27 @@
 #include <cassert>
 #include <memory>
 
-void OutputDevice::DrawBitmap(const Point& rDestPt, const Bitmap& rBitmap)
+void OutputDevice::DrawBitmap(Point const& rDestPt, Bitmap const& rBitmap)
 {
     assert(!is_double_buffered_window());
 
     const Size aSizePix(rBitmap.GetSizePixel());
-    DrawBitmap(rDestPt, PixelToLogic(aSizePix), Point(), aSizePix, rBitmap, MetaActionType::BMP);
+    DrawScaledPartBitmap(rDestPt, PixelToLogic(aSizePix), Point(), aSizePix, rBitmap,
+                         MetaActionType::BMP);
 }
 
-void OutputDevice::DrawBitmap(const Point& rDestPt, const Size& rDestSize, const Bitmap& rBitmap)
+void OutputDevice::DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize,
+                                    Bitmap const& rBitmap)
 {
     assert(!is_double_buffered_window());
 
-    DrawBitmap(rDestPt, rDestSize, Point(), rBitmap.GetSizePixel(), rBitmap,
-               MetaActionType::BMPSCALE);
+    DrawScaledPartBitmap(rDestPt, rDestSize, Point(), rBitmap.GetSizePixel(), rBitmap,
+                         MetaActionType::BMPSCALE);
 }
 
-void OutputDevice::DrawBitmap(const Point& rDestPt, const Size& rDestSize, const Point& rSrcPtPixel,
-                              const Size& rSrcSizePixel, const Bitmap& rBitmap,
-                              const MetaActionType nAction)
+void OutputDevice::DrawScaledPartBitmap(Point const& rDestPt, Size const& rDestSize,
+                                        Point const& rSrcPtPixel, Size const& rSrcSizePixel,
+                                        Bitmap const& rBitmap, const MetaActionType nAction)
 {
     assert(!is_double_buffered_window());
 

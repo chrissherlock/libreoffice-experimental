@@ -760,31 +760,11 @@ public:
     ///@{
 
 public:
-    /** @overload
-        void DrawBitmap(
-                const Point& rDestPt,
-                const Size& rDestSize,
-                const Point& rSrcPtPixel,
-                const Size& rSecSizePixel,
-                const Bitmap& rBitmap,
-                MetaActionType nAction = MetaActionType::BMPSCALEPART)
-      */
-    void DrawBitmap(const Point& rDestPt, const Bitmap& rBitmap);
-
-    /** @overload
-        void DrawBitmap(
-                const Point& rDestPt,
-                const Size& rDestSize,
-                const Point& rSrcPtPixel,
-                const Size& rSecSizePixel,
-                const Bitmap& rBitmap,
-                MetaActionType nAction = MetaActionType::BMPSCALEPART)
-      */
-    void DrawBitmap(const Point& rDestPt, const Size& rDestSize, const Bitmap& rBitmap);
-
-    void DrawBitmap(const Point& rDestPt, const Size& rDestSize, const Point& rSrcPtPixel,
-                    const Size& rSrcSizePixel, const Bitmap& rBitmap,
-                    MetaActionType nAction = MetaActionType::BMPSCALEPART);
+    void DrawBitmap(Point const& rDestPt, Bitmap const& rBitmap);
+    void DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap);
+    void DrawScaledPartBitmap(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
+                              Size const& rSrcSizePixel, Bitmap const& rBitmap,
+                              MetaActionType nAction = MetaActionType::BMPSCALEPART);
 
     /** @overload
         void DrawBitmapEx(
