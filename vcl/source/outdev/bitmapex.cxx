@@ -62,7 +62,7 @@ void OutputDevice::DrawBitmapEx(const Point& rDestPt, const Size& rDestSize,
 
     if (TransparentType::NONE == rBitmapEx.GetTransparentType())
     {
-        DrawScaledBitmap(rDestPt, rDestSize, rBitmapEx.GetBitmap());
+        DrawBitmap(rDestPt, rDestSize, rBitmapEx.GetBitmap());
     }
     else
     {
@@ -82,7 +82,7 @@ void OutputDevice::DrawBitmapEx(const Point& rDestPt, const Size& rDestSize,
 
     if (TransparentType::NONE == rBitmapEx.GetTransparentType())
     {
-        DrawScaledPartBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmapEx.GetBitmap());
+        DrawBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmapEx.GetBitmap());
     }
     else
     {

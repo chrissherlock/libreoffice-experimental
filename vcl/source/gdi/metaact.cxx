@@ -1533,7 +1533,7 @@ MetaBmpScaleAction::MetaBmpScaleAction( const Point& rPt, const Size& rSz,
 
 void MetaBmpScaleAction::Execute( OutputDevice* pOut )
 {
-    pOut->DrawScaledBitmap( maPt, maSz, maBmp );
+    pOut->DrawBitmap( maPt, maSz, maBmp );
 }
 
 rtl::Reference<MetaAction> MetaBmpScaleAction::Clone()
@@ -1597,7 +1597,7 @@ MetaBmpScalePartAction::MetaBmpScalePartAction( const Point& rDstPt, const Size&
 
 void MetaBmpScalePartAction::Execute( OutputDevice* pOut )
 {
-    pOut->DrawScaledPartBitmap( maDstPt, maDstSz, maSrcPt, maSrcSz, maBmp );
+    pOut->DrawBitmap( maDstPt, maDstSz, maSrcPt, maSrcSz, maBmp );
 }
 
 rtl::Reference<MetaAction> MetaBmpScalePartAction::Clone()

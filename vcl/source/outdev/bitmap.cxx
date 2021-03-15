@@ -43,72 +43,88 @@ void OutputDevice::DrawBitmap(Point const& rDestPt, Bitmap const& rBitmap)
 {
     assert(!is_double_buffered_window());
 
-    const Size aSizePix(rBitmap.GetSizePixel());
-    DrawScaledPartBitmap(rDestPt, PixelToLogic(aSizePix), Point(), aSizePix, rBitmap,
-                         MetaActionType::BMP);
+    if (ProcessBitmapRasterOpInvert(rDestPt, PixelToLogic(rBitmap.GetSizePixel())))
+        return;
+
+    if (ProcessBitmapDrawModeBlackWhite(rDestPt, PixelToLogic(rBitmap.GetSizePixel())))
+        return;
+
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaBmpAction(rDestPt, ProcessBitmapDrawModeGray(rBitmap)));
+
+    DrawScaledBitmap(rDestPt, PixelToLogic(rBitmap.GetSizePixel()), Point(),
+               PixelToLogic(rBitmap.GetSizePixel()), rBitmap);
 }
 
-void OutputDevice::DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize,
-                                    Bitmap const& rBitmap)
+static void MirrorBitmap(Bitmap& rBitmap, SalTwoRect& rPosAry)
 {
-    assert(!is_double_buffered_window());
-
-    DrawScaledPartBitmap(rDestPt, rDestSize, Point(), rBitmap.GetSizePixel(), rBitmap,
-                         MetaActionType::BMPSCALE);
-}
-
-bool OutputDevice::ProcessBitmapRasterOpInvert(Point const& rDestPt, Size const& rDestSize)
-{
-    assert(!is_double_buffered_window());
-
-    if (meRasterOp == RasterOp::Invert)
+    if (rPosAry.mnSrcWidth && rPosAry.mnSrcHeight && rPosAry.mnDestWidth && rPosAry.mnDestHeight)
     {
-        DrawRect(tools::Rectangle(rDestPt, rDestSize));
-        return true;
+        const BmpMirrorFlags nMirrFlags = AdjustTwoRect(rPosAry, rBitmap.GetSizePixel());
+
+        if (nMirrFlags != BmpMirrorFlags::NONE)
+            rBitmap.Mirror(nMirrFlags);
+    }
+}
+
+void OutputDevice::DrawBitmap(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap)
+{
+    assert(!is_double_buffered_window());
+
+    if (ProcessBitmapRasterOpInvert(rDestPt, rDestSize))
+        return;
+
+    if (ProcessBitmapDrawModeBlackWhite(rDestPt, rDestSize))
+        return;
+
+    if (mpMetaFile)
+        mpMetaFile->AddAction(
+            new MetaBmpScaleAction(rDestPt, rDestSize, ProcessBitmapDrawModeGray(rBitmap)));
+
+    if (!rBitmap.IsEmpty())
+    {
+        Point aSrcPtPixel;
+        Size aSrcSizePixel(PixelToLogic(rBitmap.GetSizePixel()));
+
+        SalTwoRect aPosAry(aSrcPtPixel.X(), aSrcPtPixel.Y(), aSrcSizePixel.Width(),
+                           aSrcSizePixel.Height(), ImplLogicXToDevicePixel(rDestPt.X()),
+                           ImplLogicYToDevicePixel(rDestPt.Y()),
+                           ImplLogicWidthToDevicePixel(rDestSize.Width()),
+                           ImplLogicHeightToDevicePixel(rDestSize.Height()));
+
+        Bitmap aBmp(rBitmap);
+
+        MirrorBitmap(aBmp, aPosAry);
+
+        if (aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth
+            && aPosAry.mnDestHeight)
+        {
+            const double nScaleX = aPosAry.mnDestWidth / static_cast<double>(aPosAry.mnSrcWidth);
+            const double nScaleY = aPosAry.mnDestHeight / static_cast<double>(aPosAry.mnSrcHeight);
+
+            // If subsampling, use Bitmap::Scale() for subsampling of better quality.
+            if (nScaleX < 1.0 || nScaleY < 1.0)
+            {
+                aBmp.Scale(nScaleX, nScaleY);
+                aPosAry.mnSrcWidth = aPosAry.mnDestWidth;
+                aPosAry.mnSrcHeight = aPosAry.mnDestHeight;
+            }
+
+            mpGraphics->DrawBitmap(aPosAry, *aBmp.ImplGetSalBitmap(), *this);
+        }
     }
 
-    return false;
-}
-
-bool OutputDevice::ProcessBitmapDrawModeBlackWhite(Point const& rDestPt, Size const& rDestSize)
-{
-    if (mnDrawMode & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap))
+    if (mpAlphaVDev)
     {
-        sal_uInt8 cCmpVal;
-
-        if (mnDrawMode & DrawModeFlags::BlackBitmap)
-            cCmpVal = 0;
-        else
-            cCmpVal = 255;
-
-        Color aCol(cCmpVal, cCmpVal, cCmpVal);
-        Push(PushFlags::LINECOLOR | PushFlags::FILLCOLOR);
-        SetLineColor(aCol);
-        SetFillColor(aCol);
-        DrawRect(tools::Rectangle(rDestPt, rDestSize));
-        Pop();
-        return true;
+        // #i32109#: Make bitmap area opaque
+        mpAlphaVDev->ImplFillOpaqueRectangle(tools::Rectangle(rDestPt, rDestSize));
     }
-
-    return false;
 }
 
-Bitmap OutputDevice::ProcessBitmapDrawModeGray(Bitmap const& rBitmap)
-{
-    Bitmap aBmp(rBitmap);
-
-    if ((mnDrawMode & DrawModeFlags::GrayBitmap) && !aBmp.IsEmpty())
-        aBmp.Convert(BmpConversion::N8BitGreys);
-
-    return aBmp;
-}
-
-void OutputDevice::DrawScaledPartBitmap(Point const& rDestPt, Size const& rDestSize,
-                                        Point const& rSrcPtPixel, Size const& rSrcSizePixel,
-                                        Bitmap const& rBitmap, const MetaActionType nAction)
+void OutputDevice::DrawBitmap(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
+                              Size const& rSrcSizePixel, Bitmap const& rBitmap)
 {
     assert(!is_double_buffered_window());
-
 
     if (ImplIsRecordLayout())
         return;
@@ -123,25 +139,68 @@ void OutputDevice::DrawScaledPartBitmap(Point const& rDestPt, Size const& rDestS
 
     if (mpMetaFile)
     {
-        switch (nAction)
+        mpMetaFile->AddAction(
+            new MetaBmpScalePartAction(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp));
+    }
+
+
+    if (!IsDeviceOutputNecessary())
+        return;
+
+    if (!mpGraphics && !AcquireGraphics())
+        return;
+
+    if (mbInitClipRegion)
+        InitClipRegion();
+
+    if (mbOutputClipped)
+        return;
+
+    if (!aBmp.IsEmpty())
+    {
+        SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(),
+                           rSrcSizePixel.Height(), ImplLogicXToDevicePixel(rDestPt.X()),
+                           ImplLogicYToDevicePixel(rDestPt.Y()),
+                           ImplLogicWidthToDevicePixel(rDestSize.Width()),
+                           ImplLogicHeightToDevicePixel(rDestSize.Height()));
+
+        if (aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth
+            && aPosAry.mnDestHeight)
         {
-            case MetaActionType::BMP:
-                mpMetaFile->AddAction(new MetaBmpAction(rDestPt, aBmp));
-                break;
-
-            case MetaActionType::BMPSCALE:
-                mpMetaFile->AddAction(new MetaBmpScaleAction(rDestPt, rDestSize, aBmp));
-                break;
-
-            case MetaActionType::BMPSCALEPART:
-                mpMetaFile->AddAction(new MetaBmpScalePartAction(rDestPt, rDestSize, rSrcPtPixel,
-                                                                 rSrcSizePixel, aBmp));
-                break;
-
-            default:
-                break;
+            mpGraphics->DrawBitmap(aPosAry, *aBmp.ImplGetSalBitmap(), *this);
         }
     }
+
+    if (mpAlphaVDev)
+    {
+        // #i32109#: Make bitmap area opaque
+        mpAlphaVDev->ImplFillOpaqueRectangle(tools::Rectangle(rDestPt, rDestSize));
+    }
+}
+
+void OutputDevice::DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize,
+                                        Point const& rSrcPtPixel, Size const& rSrcSizePixel,
+                                        Bitmap const& rBitmap)
+{
+    assert(!is_double_buffered_window());
+
+    if (ImplIsRecordLayout())
+        return;
+
+    if (ProcessBitmapRasterOpInvert(rDestPt, rDestSize))
+        return;
+
+    if (ProcessBitmapDrawModeBlackWhite(rDestPt, rDestSize))
+        return;
+
+    Bitmap aBmp(ProcessBitmapDrawModeGray(rBitmap));
+
+    if (mpMetaFile)
+    {
+        mpMetaFile->AddAction(
+            new MetaBmpScalePartAction(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp));
+    }
+
 
     if (!IsDeviceOutputNecessary())
         return;
@@ -176,7 +235,7 @@ void OutputDevice::DrawScaledPartBitmap(Point const& rDestPt, Size const& rDestS
             if (aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth
                 && aPosAry.mnDestHeight)
             {
-                if (nAction == MetaActionType::BMPSCALE && CanSubsampleBitmap())
+                if (CanSubsampleBitmap())
                 {
                     const double nScaleX
                         = aPosAry.mnDestWidth / static_cast<double>(aPosAry.mnSrcWidth);
