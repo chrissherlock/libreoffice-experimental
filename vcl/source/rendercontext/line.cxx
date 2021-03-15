@@ -17,13 +17,11 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <basegfx/matrix/b2dhommatrix.hxx>
 #include <basegfx/polygon/b2dpolygontools.hxx>
 #include <basegfx/polygon/b2dpolypolygontools.hxx>
 #include <basegfx/polygon/b2dlinegeometry.hxx>
 #include <tools/debug.hxx>
 
-#include <vcl/RenderContext2.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
 
