@@ -191,7 +191,7 @@ void OutputDevice::drawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
 
     if (bDashUsed || bLineWidthUsed)
     {
-        drawLine(basegfx::B2DPolyPolygon(aPoly.getB2DPolygon()), aInfo);
+        RenderContext2::DrawLine(basegfx::B2DPolyPolygon(aPoly.getB2DPolygon()), aInfo);
     }
     else
     {
