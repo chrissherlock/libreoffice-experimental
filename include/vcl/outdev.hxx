@@ -840,6 +840,10 @@ protected:
 
     virtual bool CanSubsampleBitmap() const { return true; }
 
+    bool ProcessBitmapRasterOpInvert(Point const& rDestPt, Size const& rDestSize);
+    bool ProcessBitmapDrawModeBlackWhite(Point const& rDestPt, Size const& rDestSize);
+    Bitmap ProcessBitmapDrawModeGray(Bitmap const& rBitmap);
+
     /** Transform and draw a bitmap directly
 
      @param     aFullTransform      The B2DHomMatrix used for the transformation

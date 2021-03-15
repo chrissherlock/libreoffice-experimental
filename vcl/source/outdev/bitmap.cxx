@@ -57,23 +57,21 @@ void OutputDevice::DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize,
                          MetaActionType::BMPSCALE);
 }
 
-void OutputDevice::DrawScaledPartBitmap(Point const& rDestPt, Size const& rDestSize,
-                                        Point const& rSrcPtPixel, Size const& rSrcSizePixel,
-                                        Bitmap const& rBitmap, const MetaActionType nAction)
+bool OutputDevice::ProcessBitmapRasterOpInvert(Point const& rDestPt, Size const& rDestSize)
 {
     assert(!is_double_buffered_window());
 
-    if (ImplIsRecordLayout())
-        return;
-
-    if (RasterOp::Invert == meRasterOp)
+    if (meRasterOp == RasterOp::Invert)
     {
         DrawRect(tools::Rectangle(rDestPt, rDestSize));
-        return;
+        return true;
     }
 
-    Bitmap aBmp(rBitmap);
+    return false;
+}
 
+bool OutputDevice::ProcessBitmapDrawModeBlackWhite(Point const& rDestPt, Size const& rDestSize)
+{
     if (mnDrawMode & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap))
     {
         sal_uInt8 cCmpVal;
@@ -89,11 +87,38 @@ void OutputDevice::DrawScaledPartBitmap(Point const& rDestPt, Size const& rDestS
         SetFillColor(aCol);
         DrawRect(tools::Rectangle(rDestPt, rDestSize));
         Pop();
-        return;
+        return true;
     }
+
+    return false;
+}
+
+Bitmap OutputDevice::ProcessBitmapDrawModeGray(Bitmap const& rBitmap)
+{
+    Bitmap aBmp(rBitmap);
 
     if ((mnDrawMode & DrawModeFlags::GrayBitmap) && !aBmp.IsEmpty())
         aBmp.Convert(BmpConversion::N8BitGreys);
+
+    return aBmp;
+}
+
+void OutputDevice::DrawScaledPartBitmap(Point const& rDestPt, Size const& rDestSize,
+                                        Point const& rSrcPtPixel, Size const& rSrcSizePixel,
+                                        Bitmap const& rBitmap, const MetaActionType nAction)
+{
+    assert(!is_double_buffered_window());
+
+    if (ImplIsRecordLayout())
+        return;
+
+    if (ProcessBitmapRasterOpInvert(rDestPt, rDestSize))
+        return;
+
+    if (ProcessBitmapDrawModeBlackWhite(rDestPt, rDestSize))
+        return;
+
+    Bitmap aBmp(ProcessBitmapDrawModeGray(rBitmap));
 
     if (mpMetaFile)
     {
