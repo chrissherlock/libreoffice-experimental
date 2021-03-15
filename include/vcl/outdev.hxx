@@ -422,14 +422,8 @@ public:
     ///@{
 
 public:
-    void DrawLine(const Point& rStartPt, const Point& rEndPt);
-
-    void DrawLine(const Point& rStartPt, const Point& rEndPt, const LineInfo& rLineInfo);
-
-private:
-    /** Helper for line geometry paint with support for graphic expansion (pattern and fat_to_area)
-     */
-    SAL_DLLPRIVATE void drawLine(basegfx::B2DPolyPolygon aLinePolyPolygon, const LineInfo& rInfo);
+    void DrawLine(Point const& rStartPt, Point const& rEndPt) override;
+    void DrawLine(Point const& rStartPt, Point const& rEndPt, LineInfo const& rLineInfo) override;
     ///@}
 
     /** @name Polyline functions

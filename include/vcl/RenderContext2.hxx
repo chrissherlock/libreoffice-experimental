@@ -26,6 +26,7 @@
 #include <tools/poly.hxx>
 #include <unotools/fontdefs.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
+#include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <i18nlangtag/lang.h>
 
 #include <vcl/dllapi.h>
@@ -97,6 +98,13 @@ class VCL_DLLPUBLIC RenderContext2 : public virtual VclReferenceBase
 public:
     RenderContext2();
     virtual ~RenderContext2();
+
+    virtual void DrawLine(Point const& rStartPt, Point const& rEndPt);
+    virtual void DrawLine(Point const& rStartPt, Point const& rEndPt, LineInfo const& rLineInfo);
+
+    /** Helper for line geometry paint with support for graphic expansion (pattern and fat_to_area)
+     */
+    void DrawLine(basegfx::B2DPolyPolygon aLinePolyPolygon, LineInfo const& rInfo);
 
     virtual void DrawRect(tools::Rectangle const& rRect);
 
