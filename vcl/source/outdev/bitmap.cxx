@@ -109,6 +109,7 @@ void OutputDevice::DrawScaledPartBitmap(Point const& rDestPt, Size const& rDestS
 {
     assert(!is_double_buffered_window());
 
+
     if (ImplIsRecordLayout())
         return;
 
