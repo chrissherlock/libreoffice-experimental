@@ -19,6 +19,7 @@
 
 #include <vcl/BitmapMonochromeFilter.hxx>
 #include <vcl/RenderContext2.hxx>
+#include <vcl/bitmap/BitmapTypes.hxx>
 #include <vcl/flags/DrawModeFlags.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
