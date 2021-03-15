@@ -17,22 +17,14 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <basegfx/matrix/b2dhommatrix.hxx>
-#include <basegfx/polygon/b2dpolygontools.hxx>
-#include <basegfx/polygon/b2dpolypolygontools.hxx>
-#include <basegfx/polygon/b2dlinegeometry.hxx>
-
 #include <vcl/gdimtf.hxx>
-#include <vcl/lineinfo.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/outdev.hxx>
-#include <vcl/virdev.hxx>
+#include <vcl/settings.hxx>
 
 #include <drawmode.hxx>
-#include <salgdi.hxx>
 
 #include <cassert>
-#include <numeric>
 
 void OutputDevice::SetLineColor()
 {
