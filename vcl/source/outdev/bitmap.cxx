@@ -17,39 +17,29 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <cassert>
-#include <cstdlib>
+#include <osl/diagnose.h>
+#include <rtl/math.hxx>
+#include <comphelper/lok.hxx>
+#include <basegfx/matrix/b2dhommatrixtools.hxx>
+#include <tools/debug.hxx>
+#include <tools/helpers.hxx>
+#include <o3tl/unit_conversion.hxx>
 
-#include <vcl/bitmap.hxx>
-#include <vcl/bitmapex.hxx>
-#include <vcl/BitmapFilterStackBlur.hxx>
+#include <vcl/BitmapMonochromeFilter.hxx>
 #include <vcl/canvastools.hxx>
 #include <vcl/gdimtf.hxx>
-#include <vcl/metaact.hxx>
-#include <config_features.h>
-#include <vcl/skia/SkiaHelper.hxx>
-#include <vcl/outdev.hxx>
-#include <vcl/virdev.hxx>
 #include <vcl/image.hxx>
-#include <vcl/BitmapMonochromeFilter.hxx>
+#include <vcl/metaact.hxx>
+#include <vcl/skia/SkiaHelper.hxx>
+#include <vcl/virdev.hxx>
 
 #include <bitmap/BitmapWriteAccess.hxx>
 #include <bitmap/bmpfast.hxx>
-#include <salgdi.hxx>
 #include <salbmp.hxx>
+#include <salgdi.hxx>
 
-#include <basegfx/matrix/b2dhommatrixtools.hxx>
+#include <cassert>
 #include <memory>
-#include <comphelper/lok.hxx>
-#include <sal/log.hxx>
-#include <osl/diagnose.h>
-#include <tools/helpers.hxx>
-#include <tools/debug.hxx>
-#include <rtl/math.hxx>
-#include <o3tl/unit_conversion.hxx>
-
-#include <vcl/dibtools.hxx>
-#include <tools/stream.hxx>
 
 void OutputDevice::DrawBitmap( const Point& rDestPt, const Bitmap& rBitmap )
 {
