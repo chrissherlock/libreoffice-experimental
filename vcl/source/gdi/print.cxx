@@ -266,7 +266,7 @@ void Printer::ImplPrintTransparent( const Bitmap& rBmp, const Bitmap& rMask,
         Bitmap aBandBmp(aPaint);
 
         aBandBmp.Crop(rectangle);
-        DrawScaledPartBitmap(aMapPt, aMapSz, Point(), aBandBmp.GetSizePixel(), aBandBmp);
+        DrawBitmap(aMapPt, aMapSz, Point(), aBandBmp.GetSizePixel(), aBandBmp);
     }
 
     mbMap = bOldMap;
@@ -303,7 +303,7 @@ void Printer::DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize,
         // background here.
         Bitmap aBmp( rBmpEx.GetBitmap() );
         aBmp.Blend( rBmpEx.GetAlpha(), COL_WHITE );
-        DrawScaledPartBitmap( rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp );
+        DrawBitmap( rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp );
     }
     else
     {

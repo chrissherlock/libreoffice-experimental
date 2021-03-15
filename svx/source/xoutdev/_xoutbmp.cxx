@@ -256,7 +256,7 @@ ErrCode XOutBitmap::WriteGraphic( const Graphic& rGraphic, OUString& rFileName,
                         rGraphic.Draw( pVDev.get(), aPt, aSize );
 
                         pVDev->SetRasterOp( RasterOp::Xor );
-                        pVDev->DrawScaledBitmap( aPt, aSize, aBitmap );
+                        pVDev->DrawBitmap( aPt, aSize, aBitmap );
                         aGraphic = BitmapEx( aBitmap, pVDev->GetBitmap( aPt, aSize ) );
                     }
                     else
