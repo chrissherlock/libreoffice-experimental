@@ -33,6 +33,7 @@
 #include <vcl/ImplLayoutArgs.hxx>
 #include <vcl/ImplMapRes.hxx>
 #include <vcl/RasterOp.hxx>
+#include <vcl/bitmap.hxx>
 #include <vcl/devicecoordinate.hxx>
 #include <vcl/flags/AddFontSubstituteFlags.hxx>
 #include <vcl/flags/AntialiasingFlags.hxx>
@@ -127,6 +128,11 @@ public:
     virtual void DrawGradient(tools::PolyPolygon const& rPolyPoly, Gradient const& rGradient);
 
     virtual void DrawHatch(tools::PolyPolygon const& rPolyPoly, Hatch const& rHatch);
+
+    virtual void DrawBitmap(Point const& rDestPt, Bitmap const& rBitmap);
+    virtual void DrawBitmap(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap);
+    virtual void DrawBitmap(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
+                            Size const& rSrcSizePixel, Bitmap const& rBitmap);
 
     /** Get the graphic context that the output device uses to draw on.
 
@@ -614,6 +620,15 @@ protected:
     std::tuple<tools::Long, Point*> GenerateHatchPointBuffer(tools::Line const& rLine,
                                                              tools::PolyPolygon const& rPolyPoly,
                                                              Point* pPtBuffer);
+
+    
+    virtual void DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize, const Point& rSrcPtPixel,
+                    Size const& rSrcSizePixel, Bitmap const& rBitmap);
+
+    virtual bool CanSubsampleBitmap() const { return true; }
+    bool ProcessBitmapRasterOpInvert(Point const& rDestPt, Size const& rDestSize);
+    bool ProcessBitmapDrawModeBlackWhite(Point const& rDestPt, Size const& rDestSize);
+    Bitmap ProcessBitmapDrawModeGray(Bitmap const& rBitmap);
 
     /** Perform actual rect clip against outdev dimensions, to generate
         empty clips whenever one of the values is completely off the device.

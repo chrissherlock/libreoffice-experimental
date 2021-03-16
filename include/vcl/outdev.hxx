@@ -760,10 +760,10 @@ public:
     ///@{
 
 public:
-    void DrawBitmap(Point const& rDestPt, Bitmap const& rBitmap);
-    void DrawBitmap(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap);
+    void DrawBitmap(Point const& rDestPt, Bitmap const& rBitmap) override;
+    void DrawBitmap(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap) override;
     void DrawBitmap(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
-                    Size const& rSrcSizePixel, Bitmap const& rBitmap);
+                    Size const& rSrcSizePixel, Bitmap const& rBitmap) override;
 
     /** @overload
         void DrawBitmapEx(
@@ -833,15 +833,12 @@ public:
     bool HasFastDrawTransformedBitmap() const;
 
 protected:
+    void DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize, const Point& rSrcPtPixel,
+                    Size const& rSrcSizePixel, Bitmap const& rBitmap) override;
+
     virtual void DrawDeviceBitmap(const Point& rDestPt, const Size& rDestSize,
                                   const Point& rSrcPtPixel, const Size& rSrcSizePixel,
                                   BitmapEx& rBitmapEx);
-
-    virtual bool CanSubsampleBitmap() const { return true; }
-
-    bool ProcessBitmapRasterOpInvert(Point const& rDestPt, Size const& rDestSize);
-    bool ProcessBitmapDrawModeBlackWhite(Point const& rDestPt, Size const& rDestSize);
-    Bitmap ProcessBitmapDrawModeGray(Bitmap const& rBitmap);
 
     /** Transform and draw a bitmap directly
 
@@ -869,9 +866,6 @@ protected:
                                             basegfx::B2DRange& aVisibleRange, double& fMaximumArea);
 
 private:
-    void DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize, const Point& rSrcPtPixel,
-                    Size const& rSrcSizePixel, Bitmap const& rBitmap);
-
     SAL_DLLPRIVATE void DrawDeviceAlphaBitmap(const Bitmap& rBmp, const AlphaMask& rAlpha,
                                               const Point& rDestPt, const Size& rDestSize,
                                               const Point& rSrcPtPixel, const Size& rSrcSizePixel);
