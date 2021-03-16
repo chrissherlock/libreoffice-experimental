@@ -28,6 +28,7 @@
 #include <vcl/virdev.hxx>
 
 #include <bitmap/bmpfast.hxx>
+#include <drawmode.hxx>
 #include <salgdi.hxx>
 
 #include <cassert>
@@ -91,45 +92,7 @@ void OutputDevice::DrawBitmapEx(const Point& rDestPt, const Size& rDestSize,
             return;
         }
 
-        BitmapEx aBmpEx(rBitmapEx);
-
-        if (mnDrawMode
-            & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap | DrawModeFlags::GrayBitmap))
-        {
-            if (mnDrawMode & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap))
-            {
-                Bitmap aColorBmp(aBmpEx.GetSizePixel(), vcl::PixelFormat::N1_BPP);
-                sal_uInt8 cCmpVal;
-
-                if (mnDrawMode & DrawModeFlags::BlackBitmap)
-                    cCmpVal = 0;
-                else
-                    cCmpVal = 255;
-
-                aColorBmp.Erase(Color(cCmpVal, cCmpVal, cCmpVal));
-
-                if (aBmpEx.IsAlpha())
-                {
-                    // Create one-bit mask out of alpha channel, by
-                    // thresholding it at alpha=0.5. As
-                    // DRAWMODE_BLACK/WHITEBITMAP requires monochrome
-                    // output, having alpha-induced grey levels is not
-                    // acceptable.
-                    BitmapEx aMaskEx(aBmpEx.GetAlpha().GetBitmap());
-                    BitmapFilter::Filter(aMaskEx, BitmapMonochromeFilter(129));
-                    aBmpEx = BitmapEx(aColorBmp, aMaskEx.GetBitmap());
-                }
-                else
-                {
-                    aBmpEx = BitmapEx(aColorBmp, aBmpEx.GetMask());
-                }
-            }
-            else if (!!aBmpEx)
-            {
-                if (mnDrawMode & DrawModeFlags::GrayBitmap)
-                    aBmpEx.Convert(BmpConversion::N8BitGreys);
-            }
-        }
+        BitmapEx aBmpEx(GetDrawModeBitmapEx(rBitmapEx, GetDrawMode()));
 
         switch (nAction)
         {
@@ -166,45 +129,7 @@ void OutputDevice::DrawBitmapEx(const Point& rDestPt, const Size& rDestSize,
     BitmapEx aBmpEx(rBitmapEx);
 
     if (rBitmapEx.GetTransparentType() != TransparentType::NONE)
-    {
-        if (mnDrawMode
-            & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap | DrawModeFlags::GrayBitmap))
-        {
-            if (mnDrawMode & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap))
-            {
-                Bitmap aColorBmp(aBmpEx.GetSizePixel(), 1);
-                sal_uInt8 cCmpVal;
-
-                if (mnDrawMode & DrawModeFlags::BlackBitmap)
-                    cCmpVal = 0;
-                else
-                    cCmpVal = 255;
-
-                aColorBmp.Erase(Color(cCmpVal, cCmpVal, cCmpVal));
-
-                if (aBmpEx.IsAlpha())
-                {
-                    // Create one-bit mask out of alpha channel, by
-                    // thresholding it at alpha=0.5. As
-                    // DRAWMODE_BLACK/WHITEBITMAP requires monochrome
-                    // output, having alpha-induced grey levels is not
-                    // acceptable.
-                    BitmapEx aMaskEx(aBmpEx.GetAlpha().GetBitmap());
-                    BitmapFilter::Filter(aMaskEx, BitmapMonochromeFilter(129));
-                    aBmpEx = BitmapEx(aColorBmp, aMaskEx.GetBitmap());
-                }
-                else
-                {
-                    aBmpEx = BitmapEx(aColorBmp, aBmpEx.GetMask());
-                }
-            }
-            else if (!!aBmpEx)
-            {
-                if (mnDrawMode & DrawModeFlags::GrayBitmap)
-                    aBmpEx.Convert(BmpConversion::N8BitGreys);
-            }
-        }
-    }
+        aBmpEx = GetDrawModeBitmapEx(rBitmapEx, GetDrawMode());
 
     if (!IsDeviceOutputNecessary())
         return;
