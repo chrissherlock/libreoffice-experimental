@@ -133,9 +133,9 @@ void OutputDevice::DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize,
     RenderContext2::DrawScaledBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmap);
 }
 
-void OutputDevice::DrawDeviceAlphaBitmap(const Bitmap& rBmp, const AlphaMask& rAlpha,
-                                         const Point& rDestPt, const Size& rDestSize,
-                                         const Point& rSrcPtPixel, const Size& rSrcSizePixel)
+void OutputDevice::DrawDeviceAlphaBitmap(Bitmap const& rBmp, AlphaMask const& rAlpha,
+                                         Point const& rDestPt, Size const& rDestSize,
+                                         Point const& rSrcPtPixel, Size const& rSrcSizePixel)
 {
     assert(!is_double_buffered_window());
 
@@ -462,7 +462,7 @@ private:
 
 } // end anonymous namespace
 
-void OutputDevice::DrawDeviceAlphaBitmapSlowPath(const Bitmap& rBitmap, const AlphaMask& rAlpha,
+void OutputDevice::DrawDeviceAlphaBitmapSlowPath(Bitmap const& rBitmap, AlphaMask const& rAlpha,
                                                  tools::Rectangle aDstRect,
                                                  tools::Rectangle aBmpRect, Size const& aOutSize,
                                                  Point const& aOutPoint)
