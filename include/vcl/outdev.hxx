@@ -784,8 +784,7 @@ public:
     void DrawBitmapEx(const Point& rDestPt, const Size& rDestSize, const BitmapEx& rBitmapEx);
 
     void DrawBitmapEx(const Point& rDestPt, const Size& rDestSize, const Point& rSrcPtPixel,
-                      const Size& rSrcSizePixel, const BitmapEx& rBitmapEx,
-                      MetaActionType nAction = MetaActionType::BMPEXSCALEPART);
+                      const Size& rSrcSizePixel, const BitmapEx& rBitmapEx);
 
     /** @overload
         virtual void DrawImage(
@@ -860,6 +859,9 @@ protected:
                                             basegfx::B2DRange& aVisibleRange, double& fMaximumArea);
 
 private:
+    void DrawBitmapEx2(const Point& rDestPt, const Size& rDestSize, const Point& rSrcPtPixel,
+                       const Size& rSrcSizePixel, const BitmapEx& rBitmapEx);
+
     SAL_DLLPRIVATE void DrawDeviceAlphaBitmap(Bitmap const& rBmp, AlphaMask const& rAlpha,
                                               Point const& rDestPt, Size const& rDestSize,
                                               Point const& rSrcPtPixel, Size const& rSrcSizePixel);
