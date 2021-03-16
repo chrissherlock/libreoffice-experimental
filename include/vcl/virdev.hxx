@@ -56,7 +56,7 @@ private:
     RefDevMode          meRefDevMode;
     bool                mbForceZeroExtleadBug;
 
-    SAL_DLLPRIVATE void ImplInitVirDev( const OutputDevice* pOutDev, tools::Long nDX, tools::Long nDY, const SystemGraphicsData *pData = nullptr );
+    SAL_DLLPRIVATE void ImplInitVirDev( const RenderContext2* pOutDev, tools::Long nDX, tools::Long nDY, const SystemGraphicsData *pData = nullptr );
     SAL_DLLPRIVATE bool InnerImplSetOutputSizePixel( const Size& rNewSize, bool bErase,
                                                      sal_uInt8* pBuffer );
     SAL_DLLPRIVATE bool ImplSetOutputSizePixel( const Size& rNewSize, bool bErase,
@@ -94,7 +94,7 @@ protected:
         @param eOutDevType
         This real virtual output device type.
      */
-    explicit VirtualDevice(const OutputDevice* pCompDev, DeviceFormat eFormat,
+    explicit VirtualDevice(const RenderContext2* pCompDev, DeviceFormat eFormat,
                            DeviceFormat eAlphaFormat, OutDevType eOutDevType);
 
 public:
@@ -124,7 +124,7 @@ public:
         indicate: take default screen depth. Only DeviceFormat::BITMASK
         is the other possibility to denote a binary mask.
      */
-    explicit VirtualDevice(const OutputDevice& rCompDev,
+    explicit VirtualDevice(const RenderContext2& rCompDev,
                            DeviceFormat eFormat = DeviceFormat::DEFAULT)
         : VirtualDevice(&rCompDev, eFormat, DeviceFormat::NONE, OUTDEV_VIRDEV) {}
 
@@ -143,7 +143,7 @@ public:
         indicate: take default screen depth. Only DeviceFormat::BITMASK
         is the other possibility to denote a binary mask.
      */
-    explicit VirtualDevice(const OutputDevice& rCompDev,
+    explicit VirtualDevice(const RenderContext2& rCompDev,
                            DeviceFormat eFormat, DeviceFormat eAlphaFormat)
         : VirtualDevice(&rCompDev, eFormat, eAlphaFormat, OUTDEV_VIRDEV) {}
 

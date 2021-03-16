@@ -262,10 +262,6 @@ public:
     void SetRefPoint() override;
     void SetRefPoint(Point const& rRefPoint) override;
 
-    virtual bool IsScreenComp() const { return true; }
-
-    virtual sal_uInt16 GetBitCount() const;
-
     css::uno::Reference<css::awt::XGraphics> CreateUnoGraphics();
     std::vector<VCLXGraphics*>* GetUnoGraphicsList() const { return mpUnoGraphicsList; }
     std::vector<VCLXGraphics*>* CreateUnoGraphicsList();
@@ -803,8 +799,6 @@ public:
 
     void DrawImage(const Point& rPos, const Size& rSize, const Image& rImage,
                    DrawImageFlags nStyle = DrawImageFlags::NONE);
-
-    virtual Bitmap GetBitmap(const Point& rSrcPt, const Size& rSize) const;
 
     /** Query extended bitmap (with alpha channel, if available).
      */

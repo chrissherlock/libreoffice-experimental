@@ -148,16 +148,6 @@ css::uno::Any OutputDevice::GetSystemGfxDataAny() const
     return css::uno::makeAny(aSeq);
 }
 
-sal_uInt16 OutputDevice::GetBitCount() const
-{
-    // we need a graphics instance
-    if (!mpGraphics && !AcquireGraphics())
-        return 0;
-    assert(mpGraphics);
-
-    return mpGraphics->GetBitCount();
-}
-
 css::uno::Reference<css::awt::XGraphics> OutputDevice::CreateUnoGraphics()
 {
     UnoWrapperBase* pWrapper = UnoWrapperBase::GetUnoWrapper();
@@ -205,6 +195,7 @@ void OutputDevice::DrawOutDev(const Point& rDestPt, const Size& rDestSize, const
 
     if (!mpGraphics && !AcquireGraphics())
         return;
+
     assert(mpGraphics);
 
     if (mbInitClipRegion)
@@ -266,6 +257,7 @@ void OutputDevice::DrawOutDev(const Point& rDestPt, const Size& rDestSize, const
 
     if (!mpGraphics && !AcquireGraphics())
         return;
+
     assert(mpGraphics);
 
     if (mbInitClipRegion)
@@ -312,6 +304,7 @@ void OutputDevice::CopyArea(const Point& rDestPt, const Point& rSrcPt, const Siz
 
     if (!mpGraphics && !AcquireGraphics())
         return;
+
     assert(mpGraphics);
 
     if (mbInitClipRegion)
@@ -367,6 +360,7 @@ void OutputDevice::drawOutDevDirect(const OutputDevice& rSrcDev, SalTwoRect& rPo
 
     if (!mpGraphics && !AcquireGraphics())
         return;
+
     assert(mpGraphics);
 
     // #102532# Offset only has to be pseudo window offset

@@ -96,6 +96,8 @@ struct Feature;
 
 class VCL_DLLPUBLIC RenderContext2 : public virtual VclReferenceBase
 {
+    friend VirtualDevice;
+
 public:
     RenderContext2();
     virtual ~RenderContext2();
@@ -129,6 +131,7 @@ public:
 
     virtual void DrawHatch(tools::PolyPolygon const& rPolyPoly, Hatch const& rHatch);
 
+    virtual Bitmap GetBitmap(Point const& rSrcPt, Size const& rSize) const;
     virtual void DrawBitmap(Point const& rDestPt, Bitmap const& rBitmap);
     virtual void DrawBitmap(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap);
     virtual void DrawBitmap(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
@@ -162,6 +165,8 @@ public:
     bool IsOutputEnabled() const;
     bool IsDeviceOutputNecessary() const;
 
+    virtual bool IsScreenComp() const;
+    virtual sal_uInt16 GetBitCount() const;
     virtual bool IsVirtual() const;
 
     /// tells whether this output device is RTL in an LTR UI or LTR in a RTL UI

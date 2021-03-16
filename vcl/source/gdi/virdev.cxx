@@ -118,7 +118,7 @@ void VirtualDevice::ReleaseGraphics( bool bRelease )
     mpNextGraphics  = nullptr;
 }
 
-void VirtualDevice::ImplInitVirDev( const OutputDevice* pOutDev,
+void VirtualDevice::ImplInitVirDev( const RenderContext2* pOutDev,
                                     tools::Long nDX, tools::Long nDY, const SystemGraphicsData *pData )
 {
     SAL_INFO( "vcl.virdev", "ImplInitVirDev(" << nDX << "," << nDY << ")" );
@@ -203,7 +203,7 @@ void VirtualDevice::ImplInitVirDev( const OutputDevice* pOutDev,
     pSVData->maGDIData.mpFirstVirDev = this;
 }
 
-VirtualDevice::VirtualDevice(const OutputDevice* pCompDev, DeviceFormat eFormat,
+VirtualDevice::VirtualDevice(const RenderContext2* pCompDev, DeviceFormat eFormat,
                              DeviceFormat eAlphaFormat, OutDevType eOutDevType)
     : OutputDevice(eOutDevType)
     , meFormat(eFormat)

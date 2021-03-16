@@ -119,6 +119,8 @@ void RenderContext2::dispose()
     VclReferenceBase::dispose();
 }
 
+bool RenderContext2::IsScreenComp() const { return true; }
+
 bool RenderContext2::IsVirtual() const { return false; }
 
 bool RenderContext2::is_double_buffered_window() const
