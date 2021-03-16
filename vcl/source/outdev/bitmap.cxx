@@ -43,6 +43,9 @@ void OutputDevice::DrawBitmap(Point const& rDestPt, Bitmap const& rBitmap)
 {
     assert(!is_double_buffered_window());
 
+    if (ImplIsRecordLayout())
+        return;
+
     if (ProcessBitmapRasterOpInvert(rDestPt, PixelToLogic(rBitmap.GetSizePixel())))
         return;
 
@@ -52,24 +55,17 @@ void OutputDevice::DrawBitmap(Point const& rDestPt, Bitmap const& rBitmap)
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaBmpAction(rDestPt, ProcessBitmapDrawModeGray(rBitmap)));
 
+
     DrawScaledBitmap(rDestPt, PixelToLogic(rBitmap.GetSizePixel()), Point(),
                PixelToLogic(rBitmap.GetSizePixel()), rBitmap);
-}
-
-static void MirrorBitmap(Bitmap& rBitmap, SalTwoRect& rPosAry)
-{
-    if (rPosAry.mnSrcWidth && rPosAry.mnSrcHeight && rPosAry.mnDestWidth && rPosAry.mnDestHeight)
-    {
-        const BmpMirrorFlags nMirrFlags = AdjustTwoRect(rPosAry, rBitmap.GetSizePixel());
-
-        if (nMirrFlags != BmpMirrorFlags::NONE)
-            rBitmap.Mirror(nMirrFlags);
-    }
 }
 
 void OutputDevice::DrawBitmap(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap)
 {
     assert(!is_double_buffered_window());
+
+    if (ImplIsRecordLayout())
+        return;
 
     if (ProcessBitmapRasterOpInvert(rDestPt, rDestSize))
         return;
@@ -78,47 +74,12 @@ void OutputDevice::DrawBitmap(Point const& rDestPt, Size const& rDestSize, Bitma
         return;
 
     if (mpMetaFile)
+    {
         mpMetaFile->AddAction(
             new MetaBmpScaleAction(rDestPt, rDestSize, ProcessBitmapDrawModeGray(rBitmap)));
-
-    if (!rBitmap.IsEmpty())
-    {
-        Point aSrcPtPixel;
-        Size aSrcSizePixel(PixelToLogic(rBitmap.GetSizePixel()));
-
-        SalTwoRect aPosAry(aSrcPtPixel.X(), aSrcPtPixel.Y(), aSrcSizePixel.Width(),
-                           aSrcSizePixel.Height(), ImplLogicXToDevicePixel(rDestPt.X()),
-                           ImplLogicYToDevicePixel(rDestPt.Y()),
-                           ImplLogicWidthToDevicePixel(rDestSize.Width()),
-                           ImplLogicHeightToDevicePixel(rDestSize.Height()));
-
-        Bitmap aBmp(rBitmap);
-
-        MirrorBitmap(aBmp, aPosAry);
-
-        if (aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth
-            && aPosAry.mnDestHeight)
-        {
-            const double nScaleX = aPosAry.mnDestWidth / static_cast<double>(aPosAry.mnSrcWidth);
-            const double nScaleY = aPosAry.mnDestHeight / static_cast<double>(aPosAry.mnSrcHeight);
-
-            // If subsampling, use Bitmap::Scale() for subsampling of better quality.
-            if (nScaleX < 1.0 || nScaleY < 1.0)
-            {
-                aBmp.Scale(nScaleX, nScaleY);
-                aPosAry.mnSrcWidth = aPosAry.mnDestWidth;
-                aPosAry.mnSrcHeight = aPosAry.mnDestHeight;
-            }
-
-            mpGraphics->DrawBitmap(aPosAry, *aBmp.ImplGetSalBitmap(), *this);
-        }
     }
 
-    if (mpAlphaVDev)
-    {
-        // #i32109#: Make bitmap area opaque
-        mpAlphaVDev->ImplFillOpaqueRectangle(tools::Rectangle(rDestPt, rDestSize));
-    }
+    RenderContext2::DrawBitmap(rDestPt, rDestSize, rBitmap);
 }
 
 void OutputDevice::DrawBitmap(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
@@ -135,47 +96,16 @@ void OutputDevice::DrawBitmap(Point const& rDestPt, Size const& rDestSize, Point
     if (ProcessBitmapDrawModeBlackWhite(rDestPt, rDestSize))
         return;
 
-    Bitmap aBmp(ProcessBitmapDrawModeGray(rBitmap));
-
     if (mpMetaFile)
     {
         mpMetaFile->AddAction(
-            new MetaBmpScalePartAction(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp));
+            new MetaBmpScalePartAction(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, ProcessBitmapDrawModeGray(rBitmap)));
     }
 
-
-    if (!IsDeviceOutputNecessary())
+    if (ImplIsRecordLayout())
         return;
 
-    if (!mpGraphics && !AcquireGraphics())
-        return;
-
-    if (mbInitClipRegion)
-        InitClipRegion();
-
-    if (mbOutputClipped)
-        return;
-
-    if (!aBmp.IsEmpty())
-    {
-        SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(),
-                           rSrcSizePixel.Height(), ImplLogicXToDevicePixel(rDestPt.X()),
-                           ImplLogicYToDevicePixel(rDestPt.Y()),
-                           ImplLogicWidthToDevicePixel(rDestSize.Width()),
-                           ImplLogicHeightToDevicePixel(rDestSize.Height()));
-
-        if (aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth
-            && aPosAry.mnDestHeight)
-        {
-            mpGraphics->DrawBitmap(aPosAry, *aBmp.ImplGetSalBitmap(), *this);
-        }
-    }
-
-    if (mpAlphaVDev)
-    {
-        // #i32109#: Make bitmap area opaque
-        mpAlphaVDev->ImplFillOpaqueRectangle(tools::Rectangle(rDestPt, rDestSize));
-    }
+    RenderContext2::DrawBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmap);
 }
 
 void OutputDevice::DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize,
@@ -193,74 +123,14 @@ void OutputDevice::DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize,
     if (ProcessBitmapDrawModeBlackWhite(rDestPt, rDestSize))
         return;
 
-    Bitmap aBmp(ProcessBitmapDrawModeGray(rBitmap));
-
     if (mpMetaFile)
     {
         mpMetaFile->AddAction(
-            new MetaBmpScalePartAction(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp));
+            new MetaBmpScaleAction(rDestPt, rDestSize, ProcessBitmapDrawModeGray(rBitmap)));
     }
 
 
-    if (!IsDeviceOutputNecessary())
-        return;
-
-    if (!mpGraphics && !AcquireGraphics())
-        return;
-
-    assert(mpGraphics);
-
-    if (mbInitClipRegion)
-        InitClipRegion();
-
-    if (mbOutputClipped)
-        return;
-
-    if (!aBmp.IsEmpty())
-    {
-        SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(),
-                           rSrcSizePixel.Height(), ImplLogicXToDevicePixel(rDestPt.X()),
-                           ImplLogicYToDevicePixel(rDestPt.Y()),
-                           ImplLogicWidthToDevicePixel(rDestSize.Width()),
-                           ImplLogicHeightToDevicePixel(rDestSize.Height()));
-
-        if (aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth
-            && aPosAry.mnDestHeight)
-        {
-            const BmpMirrorFlags nMirrFlags = AdjustTwoRect(aPosAry, aBmp.GetSizePixel());
-
-            if (nMirrFlags != BmpMirrorFlags::NONE)
-                aBmp.Mirror(nMirrFlags);
-
-            if (aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth
-                && aPosAry.mnDestHeight)
-            {
-                if (CanSubsampleBitmap())
-                {
-                    const double nScaleX
-                        = aPosAry.mnDestWidth / static_cast<double>(aPosAry.mnSrcWidth);
-                    const double nScaleY
-                        = aPosAry.mnDestHeight / static_cast<double>(aPosAry.mnSrcHeight);
-
-                    // If subsampling, use Bitmap::Scale() for subsampling of better quality.
-                    if (nScaleX < 1.0 || nScaleY < 1.0)
-                    {
-                        aBmp.Scale(nScaleX, nScaleY);
-                        aPosAry.mnSrcWidth = aPosAry.mnDestWidth;
-                        aPosAry.mnSrcHeight = aPosAry.mnDestHeight;
-                    }
-                }
-
-                mpGraphics->DrawBitmap(aPosAry, *aBmp.ImplGetSalBitmap(), *this);
-            }
-        }
-    }
-
-    if (mpAlphaVDev)
-    {
-        // #i32109#: Make bitmap area opaque
-        mpAlphaVDev->ImplFillOpaqueRectangle(tools::Rectangle(rDestPt, rDestSize));
-    }
+    RenderContext2::DrawScaledBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmap);
 }
 
 Bitmap OutputDevice::GetBitmap(const Point& rSrcPt, const Size& rSize) const
