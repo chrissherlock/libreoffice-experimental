@@ -56,7 +56,7 @@ void OutputDevice::DrawBitmap(Point const& rDestPt, Bitmap const& rBitmap)
         mpMetaFile->AddAction(new MetaBmpAction(rDestPt, ProcessBitmapDrawModeGray(rBitmap)));
 
 
-    DrawScaledBitmap(rDestPt, PixelToLogic(rBitmap.GetSizePixel()), Point(),
+    DrawBitmap(rDestPt, PixelToLogic(rBitmap.GetSizePixel()), Point(),
                PixelToLogic(rBitmap.GetSizePixel()), rBitmap);
 }
 
@@ -131,104 +131,6 @@ void OutputDevice::DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize,
 
 
     RenderContext2::DrawScaledBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmap);
-}
-
-Bitmap OutputDevice::GetBitmap(const Point& rSrcPt, const Size& rSize) const
-{
-    Bitmap aBmp;
-    tools::Long nX = ImplLogicXToDevicePixel(rSrcPt.X());
-    tools::Long nY = ImplLogicYToDevicePixel(rSrcPt.Y());
-    tools::Long nWidth = ImplLogicWidthToDevicePixel(rSize.Width());
-    tools::Long nHeight = ImplLogicHeightToDevicePixel(rSize.Height());
-
-    if (mpGraphics || AcquireGraphics())
-    {
-        assert(mpGraphics);
-
-        if (nWidth > 0 && nHeight > 0 && nX <= (mnOutWidth + mnOutOffX)
-            && nY <= (mnOutHeight + mnOutOffY))
-        {
-            tools::Rectangle aRect(Point(nX, nY), Size(nWidth, nHeight));
-            bool bClipped = false;
-
-            // X-Coordinate outside of draw area?
-            if (nX < mnOutOffX)
-            {
-                nWidth -= (mnOutOffX - nX);
-                nX = mnOutOffX;
-                bClipped = true;
-            }
-
-            // Y-Coordinate outside of draw area?
-            if (nY < mnOutOffY)
-            {
-                nHeight -= (mnOutOffY - nY);
-                nY = mnOutOffY;
-                bClipped = true;
-            }
-
-            // Width outside of draw area?
-            if ((nWidth + nX) > (mnOutWidth + mnOutOffX))
-            {
-                nWidth = mnOutOffX + mnOutWidth - nX;
-                bClipped = true;
-            }
-
-            // Height outside of draw area?
-            if ((nHeight + nY) > (mnOutHeight + mnOutOffY))
-            {
-                nHeight = mnOutOffY + mnOutHeight - nY;
-                bClipped = true;
-            }
-
-            if (bClipped)
-            {
-                // If the visible part has been clipped, we have to create a
-                // Bitmap with the correct size in which we copy the clipped
-                // Bitmap to the correct position.
-                ScopedVclPtrInstance<VirtualDevice> aVDev(*this);
-
-                if (aVDev->SetOutputSizePixel(aRect.GetSize()))
-                {
-                    if (aVDev->mpGraphics || aVDev->AcquireGraphics())
-                    {
-                        if ((nWidth > 0) && (nHeight > 0))
-                        {
-                            SalTwoRect aPosAry(
-                                nX, nY, nWidth, nHeight,
-                                (aRect.Left() < mnOutOffX) ? (mnOutOffX - aRect.Left()) : 0L,
-                                (aRect.Top() < mnOutOffY) ? (mnOutOffY - aRect.Top()) : 0L, nWidth,
-                                nHeight);
-                            aVDev->mpGraphics->CopyBits(aPosAry, *mpGraphics, *this, *this);
-                        }
-                        else
-                        {
-                            OSL_ENSURE(false, "CopyBits with zero or negative width or height");
-                        }
-
-                        aBmp = aVDev->GetBitmap(Point(), aVDev->GetOutputSizePixel());
-                    }
-                    else
-                        bClipped = false;
-                }
-                else
-                    bClipped = false;
-            }
-
-            if (!bClipped)
-            {
-                std::shared_ptr<SalBitmap> pSalBmp
-                    = mpGraphics->GetBitmap(nX, nY, nWidth, nHeight, *this);
-
-                if (pSalBmp)
-                {
-                    aBmp.ImplSetSalBitmap(pSalBmp);
-                }
-            }
-        }
-    }
-
-    return aBmp;
 }
 
 void OutputDevice::DrawDeviceAlphaBitmap(const Bitmap& rBmp, const AlphaMask& rAlpha,

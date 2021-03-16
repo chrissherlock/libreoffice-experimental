@@ -44,4 +44,15 @@ SalGraphics const* RenderContext2::GetGraphics() const
     return mpGraphics;
 }
 
+sal_uInt16 RenderContext2::GetBitCount() const
+{
+    // we need a graphics instance
+    if (!mpGraphics && !AcquireGraphics())
+        return 0;
+
+    assert(mpGraphics);
+
+    return mpGraphics->GetBitCount();
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
