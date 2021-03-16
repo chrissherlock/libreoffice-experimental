@@ -77,16 +77,15 @@ void OutputDevice::DrawBitmapEx(const Point& rDestPt, const Size& rDestSize,
 {
     assert(!is_double_buffered_window());
 
-    if (ImplIsRecordLayout())
-        return;
-
-    if (TransparentType::NONE == rBitmapEx.GetTransparentType())
+    if (rBitmapEx.GetTransparentType() != TransparentType::NONE)
     {
         DrawBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmapEx.GetBitmap());
+        return;
     }
-    else
+
+    if (mpMetaFile && rBitmapEx.GetTransparentType() != TransparentType::NONE)
     {
-        if (RasterOp::Invert == meRasterOp)
+        if (meRasterOp == RasterOp::Invert)
         {
             DrawRect(tools::Rectangle(rDestPt, rDestSize));
             return;
@@ -125,51 +124,101 @@ void OutputDevice::DrawBitmapEx(const Point& rDestPt, const Size& rDestSize,
                     aBmpEx = BitmapEx(aColorBmp, aBmpEx.GetMask());
                 }
             }
-            else if (!aBmpEx.IsEmpty())
+            else if (!!aBmpEx)
             {
                 if (mnDrawMode & DrawModeFlags::GrayBitmap)
                     aBmpEx.Convert(BmpConversion::N8BitGreys);
             }
         }
 
-        if (mpMetaFile)
+        switch (nAction)
         {
-            switch (nAction)
+            case MetaActionType::BMPEX:
+                mpMetaFile->AddAction(new MetaBmpExAction(rDestPt, aBmpEx));
+                break;
+
+            case MetaActionType::BMPEXSCALE:
+                mpMetaFile->AddAction(new MetaBmpExScaleAction(rDestPt, rDestSize, aBmpEx));
+                break;
+
+            case MetaActionType::BMPEXSCALEPART:
+                mpMetaFile->AddAction(new MetaBmpExScalePartAction(rDestPt, rDestSize, rSrcPtPixel,
+                                                                   rSrcSizePixel, aBmpEx));
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    if (ImplIsRecordLayout())
+        return;
+
+    if (!mpMetaFile && rBitmapEx.GetTransparentType() != TransparentType::NONE)
+    {
+        if (RasterOp::Invert == meRasterOp)
+        {
+            DrawRect(tools::Rectangle(rDestPt, rDestSize));
+            return;
+        }
+    }
+
+    BitmapEx aBmpEx(rBitmapEx);
+
+    if (rBitmapEx.GetTransparentType() != TransparentType::NONE)
+    {
+        if (mnDrawMode
+            & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap | DrawModeFlags::GrayBitmap))
+        {
+            if (mnDrawMode & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap))
             {
-                case MetaActionType::BMPEX:
-                    mpMetaFile->AddAction(new MetaBmpExAction(rDestPt, aBmpEx));
-                    break;
+                Bitmap aColorBmp(aBmpEx.GetSizePixel(), 1);
+                sal_uInt8 cCmpVal;
 
-                case MetaActionType::BMPEXSCALE:
-                    mpMetaFile->AddAction(new MetaBmpExScaleAction(rDestPt, rDestSize, aBmpEx));
-                    break;
+                if (mnDrawMode & DrawModeFlags::BlackBitmap)
+                    cCmpVal = 0;
+                else
+                    cCmpVal = 255;
 
-                case MetaActionType::BMPEXSCALEPART:
-                    mpMetaFile->AddAction(new MetaBmpExScalePartAction(
-                        rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmpEx));
-                    break;
+                aColorBmp.Erase(Color(cCmpVal, cCmpVal, cCmpVal));
 
-                default:
-                    break;
+                if (aBmpEx.IsAlpha())
+                {
+                    // Create one-bit mask out of alpha channel, by
+                    // thresholding it at alpha=0.5. As
+                    // DRAWMODE_BLACK/WHITEBITMAP requires monochrome
+                    // output, having alpha-induced grey levels is not
+                    // acceptable.
+                    BitmapEx aMaskEx(aBmpEx.GetAlpha().GetBitmap());
+                    BitmapFilter::Filter(aMaskEx, BitmapMonochromeFilter(129));
+                    aBmpEx = BitmapEx(aColorBmp, aMaskEx.GetBitmap());
+                }
+                else
+                {
+                    aBmpEx = BitmapEx(aColorBmp, aBmpEx.GetMask());
+                }
+            }
+            else if (!!aBmpEx)
+            {
+                if (mnDrawMode & DrawModeFlags::GrayBitmap)
+                    aBmpEx.Convert(BmpConversion::N8BitGreys);
             }
         }
-
-        if (!IsDeviceOutputNecessary())
-            return;
-
-        if (!mpGraphics && !AcquireGraphics())
-            return;
-
-        assert(mpGraphics);
-
-        if (mbInitClipRegion)
-            InitClipRegion();
-
-        if (mbOutputClipped)
-            return;
-
-        DrawDeviceBitmapEx(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmpEx);
     }
+
+    if (!IsDeviceOutputNecessary())
+        return;
+
+    if (!mpGraphics && !AcquireGraphics())
+        return;
+
+    if (mbInitClipRegion)
+        InitClipRegion();
+
+    if (mbOutputClipped)
+        return;
+
+    DrawDeviceBitmapEx(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmpEx);
 }
 
 BitmapEx OutputDevice::GetBitmapEx(const Point& rSrcPt, const Size& rSize) const
