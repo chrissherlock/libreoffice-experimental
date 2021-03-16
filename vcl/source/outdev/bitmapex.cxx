@@ -168,7 +168,7 @@ void OutputDevice::DrawBitmapEx(const Point& rDestPt, const Size& rDestSize,
         if (mbOutputClipped)
             return;
 
-        DrawDeviceBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmpEx);
+        DrawDeviceBitmapEx(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmpEx);
     }
 }
 
@@ -189,9 +189,9 @@ BitmapEx OutputDevice::GetBitmapEx(const Point& rSrcPt, const Size& rSize) const
         return BitmapEx(GetBitmap(rSrcPt, rSize));
 }
 
-void OutputDevice::DrawDeviceBitmap(const Point& rDestPt, const Size& rDestSize,
-                                    const Point& rSrcPtPixel, const Size& rSrcSizePixel,
-                                    BitmapEx& rBitmapEx)
+void OutputDevice::DrawDeviceBitmapEx(const Point& rDestPt, const Size& rDestSize,
+                                      const Point& rSrcPtPixel, const Size& rSrcSizePixel,
+                                      BitmapEx& rBitmapEx)
 {
     assert(!is_double_buffered_window());
 
