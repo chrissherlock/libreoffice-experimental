@@ -34,7 +34,7 @@
 #include <cassert>
 #include <memory>
 
-void OutputDevice::DrawBitmapEx(const Point& rDestPt, const BitmapEx& rBitmapEx)
+void OutputDevice::DrawBitmapEx(Point const& rDestPt, BitmapEx const& rBitmapEx)
 {
     assert(!is_double_buffered_window());
 
@@ -63,8 +63,8 @@ void OutputDevice::DrawBitmapEx(const Point& rDestPt, const BitmapEx& rBitmapEx)
     }
 }
 
-void OutputDevice::DrawBitmapEx(const Point& rDestPt, const Size& rDestSize,
-                                const BitmapEx& rBitmapEx)
+void OutputDevice::DrawBitmapEx(Point const& rDestPt, Size const& rDestSize,
+                                BitmapEx const& rBitmapEx)
 {
     assert(!is_double_buffered_window());
 
@@ -91,9 +91,9 @@ void OutputDevice::DrawBitmapEx(const Point& rDestPt, const Size& rDestSize,
     }
 }
 
-void OutputDevice::DrawBitmapEx(const Point& rDestPt, const Size& rDestSize,
-                                const Point& rSrcPtPixel, const Size& rSrcSizePixel,
-                                const BitmapEx& rBitmapEx)
+void OutputDevice::DrawBitmapEx(Point const& rDestPt, Size const& rDestSize,
+                                Point const& rSrcPtPixel, Size const& rSrcSizePixel,
+                                BitmapEx const& rBitmapEx)
 {
     assert(!is_double_buffered_window());
 
@@ -119,9 +119,9 @@ void OutputDevice::DrawBitmapEx(const Point& rDestPt, const Size& rDestSize,
     DrawBitmapEx2(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmapEx);
 }
 
-void OutputDevice::DrawBitmapEx2(const Point& rDestPt, const Size& rDestSize,
-                                 const Point& rSrcPtPixel, const Size& rSrcSizePixel,
-                                 const BitmapEx& rBitmapEx)
+void OutputDevice::DrawBitmapEx2(Point const& rDestPt, Size const& rDestSize,
+                                 Point const& rSrcPtPixel, Size const& rSrcSizePixel,
+                                 BitmapEx const& rBitmapEx)
 {
     if (ImplIsRecordLayout())
         return;
@@ -155,7 +155,7 @@ void OutputDevice::DrawBitmapEx2(const Point& rDestPt, const Size& rDestSize,
     DrawDeviceBitmapEx(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmpEx);
 }
 
-BitmapEx OutputDevice::GetBitmapEx(const Point& rSrcPt, const Size& rSize) const
+BitmapEx OutputDevice::GetBitmapEx(Point const& rSrcPt, Size const& rSize) const
 {
     // #110958# Extract alpha value from VDev, if any
     if (mpAlphaVDev)
@@ -172,8 +172,8 @@ BitmapEx OutputDevice::GetBitmapEx(const Point& rSrcPt, const Size& rSize) const
         return BitmapEx(GetBitmap(rSrcPt, rSize));
 }
 
-void OutputDevice::DrawDeviceBitmapEx(const Point& rDestPt, const Size& rDestSize,
-                                      const Point& rSrcPtPixel, const Size& rSrcSizePixel,
+void OutputDevice::DrawDeviceBitmapEx(Point const& rDestPt, Size const& rDestSize,
+                                      Point const& rSrcPtPixel, Size const& rSrcSizePixel,
                                       BitmapEx& rBitmapEx)
 {
     assert(!is_double_buffered_window());
@@ -300,8 +300,8 @@ void OutputDevice::DrawDeviceBitmapEx(const Point& rDestPt, const Size& rDestSiz
     }
 }
 
-bool OutputDevice::DrawTransformBitmapExDirect(const basegfx::B2DHomMatrix& aFullTransform,
-                                               const BitmapEx& rBitmapEx, double fAlpha)
+bool OutputDevice::DrawTransformBitmapExDirect(basegfx::B2DHomMatrix const& aFullTransform,
+                                               BitmapEx const& rBitmapEx, double fAlpha)
 {
     assert(!is_double_buffered_window());
 
@@ -348,7 +348,7 @@ bool OutputDevice::DrawTransformBitmapExDirect(const basegfx::B2DHomMatrix& aFul
 };
 
 bool OutputDevice::TransformAndReduceBitmapExToTargetRange(
-    const basegfx::B2DHomMatrix& aFullTransform, basegfx::B2DRange& aVisibleRange,
+    basegfx::B2DHomMatrix const& aFullTransform, basegfx::B2DRange& aVisibleRange,
     double& fMaximumArea)
 {
     // limit TargetRange to existing pixels (if pixel device)
