@@ -681,6 +681,14 @@ protected:
                                       const Size& aOutSz, const bool bHMirr, const bool bVMirr,
                                       tools::Long const* pMapX, tools::Long const* pMapY);
 
+    // TODO make private
+    SAL_DLLPRIVATE Bitmap BlendBitmapWithAlpha(Bitmap& aBmp, BitmapReadAccess const* pP,
+                                               BitmapReadAccess const* pA,
+                                               tools::Rectangle const& aDstRect,
+                                               const sal_Int32 nOffY, const sal_Int32 nDstHeight,
+                                               const sal_Int32 nOffX, const sal_Int32 nDstWidth,
+                                               tools::Long const* pMapX, tools::Long const* pMapY);
+
     /** Perform actual rect clip against outdev dimensions, to generate
         empty clips whenever one of the values is completely off the device.
 
