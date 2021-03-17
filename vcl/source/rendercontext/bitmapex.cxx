@@ -17,11 +17,17 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <basegfx/matrix/b2dhommatrixtools.hxx>
+
+#include <vcl/alpha.hxx>
+#include <vcl/bitmapex.hxx>
+#include <vcl/virdev.hxx>
+
+#include <salgdi.hxx>
+
 bool RenderContext2::DrawTransformBitmapExDirect(basegfx::B2DHomMatrix const& aFullTransform,
                                                  BitmapEx const& rBitmapEx, double fAlpha)
 {
-    assert(!is_double_buffered_window());
-
     bool bDone = false;
 
     // try to paint directly
