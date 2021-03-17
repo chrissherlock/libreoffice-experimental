@@ -42,21 +42,20 @@ void OutputDevice::DrawBitmapEx(Point const& rDestPt, BitmapEx const& rBitmapEx)
         return;
 
     if (rBitmapEx.GetTransparentType() == TransparentType::NONE)
-    {
         DrawBitmap(rDestPt, rBitmapEx.GetBitmap());
-    }
-    else
+
+    if (mpMetaFile && rBitmapEx.GetTransparentType() == TransparentType::NONE)
     {
         if (meRasterOp == RasterOp::Invert)
         {
             const Size aSizePix(rBitmapEx.GetSizePixel());
-            DrawRect(tools::Rectangle(rDestPt, PixelToLogic(aSizePix)));
+            mpMetaFile->AddAction(new MetaRectAction(tools::Rectangle(rDestPt, PixelToLogic(aSizePix))));
+            RenderContext2::DrawRect(tools::Rectangle(rDestPt, PixelToLogic(aSizePix)));
             return;
         }
 
-        if (mpMetaFile)
-            mpMetaFile->AddAction(
-                new MetaBmpExAction(rDestPt, GetDrawModeBitmapEx(rBitmapEx, GetDrawMode())));
+        mpMetaFile->AddAction(
+            new MetaBmpExAction(rDestPt, GetDrawModeBitmapEx(rBitmapEx, GetDrawMode())));
 
         const Size aSizePix(rBitmapEx.GetSizePixel());
         DrawBitmapEx2(rDestPt, PixelToLogic(aSizePix), Point(), aSizePix, rBitmapEx);
@@ -72,20 +71,18 @@ void OutputDevice::DrawBitmapEx(Point const& rDestPt, Size const& rDestSize,
         return;
 
     if (rBitmapEx.GetTransparentType() == TransparentType::NONE)
-    {
         DrawBitmap(rDestPt, rDestSize, rBitmapEx.GetBitmap());
-    }
-    else
+
+    if (mpMetaFile && rBitmapEx.GetTransparentType() == TransparentType::NONE)
     {
         if (meRasterOp == RasterOp::Invert)
         {
-            DrawRect(tools::Rectangle(rDestPt, rDestSize));
+            mpMetaFile->AddAction(new MetaRectAction(tools::Rectangle(rDestPt, rDestSize)));
             return;
         }
 
-        if (mpMetaFile)
-            mpMetaFile->AddAction(new MetaBmpExScaleAction(
-                rDestPt, rDestSize, GetDrawModeBitmapEx(rBitmapEx, GetDrawMode())));
+        mpMetaFile->AddAction(new MetaBmpExScaleAction(
+            rDestPt, rDestSize, GetDrawModeBitmapEx(rBitmapEx, GetDrawMode())));
 
         DrawBitmapEx2(rDestPt, rDestSize, Point(), rBitmapEx.GetSizePixel(), rBitmapEx);
     }
@@ -97,6 +94,9 @@ void OutputDevice::DrawBitmapEx(Point const& rDestPt, Size const& rDestSize,
 {
     assert(!is_double_buffered_window());
 
+    if (ImplIsRecordLayout())
+        return;
+
     if (rBitmapEx.GetTransparentType() != TransparentType::NONE)
     {
         DrawBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmapEx.GetBitmap());
@@ -107,7 +107,7 @@ void OutputDevice::DrawBitmapEx(Point const& rDestPt, Size const& rDestSize,
     {
         if (meRasterOp == RasterOp::Invert)
         {
-            DrawRect(tools::Rectangle(rDestPt, rDestSize));
+            mpMetaFile->AddAction(new MetaRectAction(tools::Rectangle(rDestPt, rDestSize)));
             return;
         }
 
@@ -123,14 +123,11 @@ void OutputDevice::DrawBitmapEx2(Point const& rDestPt, Size const& rDestSize,
                                  Point const& rSrcPtPixel, Size const& rSrcSizePixel,
                                  BitmapEx const& rBitmapEx)
 {
-    if (ImplIsRecordLayout())
-        return;
-
-    if (!mpMetaFile && rBitmapEx.GetTransparentType() != TransparentType::NONE)
+    if (rBitmapEx.GetTransparentType() != TransparentType::NONE)
     {
         if (RasterOp::Invert == meRasterOp)
         {
-            DrawRect(tools::Rectangle(rDestPt, rDestSize));
+            RenderContext2::DrawRect(tools::Rectangle(rDestPt, rDestSize));
             return;
         }
     }

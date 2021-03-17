@@ -812,10 +812,6 @@ protected:
 private:
     void DrawBitmapEx2(const Point& rDestPt, const Size& rDestSize, const Point& rSrcPtPixel,
                        const Size& rSrcSizePixel, const BitmapEx& rBitmapEx);
-
-    SAL_DLLPRIVATE void DrawDeviceAlphaBitmap(Bitmap const& rBmp, AlphaMask const& rAlpha,
-                                              Point const& rDestPt, Size const& rDestSize,
-                                              Point const& rSrcPtPixel, Size const& rSrcSizePixel);
     ///@}
 
     /** @name Transparency functions
