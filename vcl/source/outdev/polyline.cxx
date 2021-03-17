@@ -115,7 +115,7 @@ void OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2DPolygon, double f
 
     // #i101491#
     // no output yet; fallback to geometry decomposition and use filled polygon paint
-    // when line is fat and not too complex. ImplDrawPolyPolygonWithB2DPolyPolygon
+    // when line is fat and not too complex. DrawPolyPolygon
     // will do internal needed AA checks etc.
     if (fLineWidth >= 2.5 && rB2DPolygon.count() && rB2DPolygon.count() <= 1000)
     {
@@ -133,7 +133,7 @@ void OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2DPolygon, double f
         // draw using a loop; else the topology will paint a PolyPolygon
         for (auto const& rPolygon : aAreaPolyPolygon)
         {
-            ImplDrawPolyPolygonWithB2DPolyPolygon(basegfx::B2DPolyPolygon(rPolygon));
+            RenderContext2::DrawPolyPolygon(basegfx::B2DPolyPolygon(rPolygon));
         }
 
         SetLineColor(aOldLineColor);

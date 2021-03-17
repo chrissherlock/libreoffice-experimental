@@ -114,6 +114,7 @@ public:
 
     virtual void DrawPolyLine(tools::Polygon const& rPoly);
     virtual void DrawPolyPolygon(tools::PolyPolygon const& rPolyPoly);
+    virtual void DrawPolyPolygon(basegfx::B2DPolyPolygon const& rB2DPolyPoly);
 
     /** Render the given polygon
 
@@ -645,12 +646,6 @@ protected:
                                             tools::PolyPolygon const* pClipPolyPoly);
 
     SAL_DLLPRIVATE void ImplDrawPolyPolygon(sal_uInt16 nPoly, tools::PolyPolygon const& rPolyPoly);
-
-    // #i101491#
-    // Helper who implements the DrawPolyPolygon functionality for basegfx::B2DPolyPolygon
-    // without MetaFile processing
-    SAL_DLLPRIVATE void
-    ImplDrawPolyPolygonWithB2DPolyPolygon(basegfx::B2DPolyPolygon const& rB2DPolyPoly);
 
     virtual void DrawHatchLine(Point const& rStartPoint, Point const& rEndPoint);
     virtual void DrawHatchLines(tools::Line const& rLine, tools::PolyPolygon const& rPolyPoly,

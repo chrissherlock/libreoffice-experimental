@@ -475,7 +475,7 @@ public:
         @see DrawPolyLine
      */
     void DrawPolyPolygon(tools::PolyPolygon const& rPolyPoly) override;
-    void DrawPolyPolygon(const basegfx::B2DPolyPolygon&);
+    void DrawPolyPolygon(basegfx::B2DPolyPolygon const& rPolyPoly) override;
 
     ///@}
 
