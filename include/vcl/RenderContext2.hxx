@@ -141,6 +141,12 @@ public:
      */
     BitmapEx GetBitmapEx(const Point& rSrcPt, const Size& rSize) const;
 
+    /** Return true if DrawTransformedBitmapEx() is fast.
+
+        @since 7.2
+    */
+    virtual bool HasFastDrawTransformedBitmap() const;
+
     /** Get the graphic context that the output device uses to draw on.
 
      If no graphics device exists, then initialize it.

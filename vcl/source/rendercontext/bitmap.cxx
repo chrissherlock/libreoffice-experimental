@@ -375,4 +375,12 @@ Bitmap RenderContext2::GetBitmap(Point const& rSrcPt, Size const& rSize) const
     return aBmp;
 }
 
+bool RenderContext2::HasFastDrawTransformedBitmap() const
+{
+    if (!mpGraphics && !AcquireGraphics())
+        return false;
+
+    return mpGraphics->HasFastDrawTransformedBitmap();
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
