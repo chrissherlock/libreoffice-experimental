@@ -567,10 +567,7 @@ bool OutputDevice::HasFastDrawTransformedBitmap() const
     if (ImplIsRecordLayout())
         return false;
 
-    if (!mpGraphics && !AcquireGraphics())
-        return false;
-
-    return mpGraphics->HasFastDrawTransformedBitmap();
+    return RenderContext2::HasFastDrawTransformedBitmap();
 }
 
 void OutputDevice::DrawImage(const Point& rPos, const Image& rImage, DrawImageFlags nStyle)

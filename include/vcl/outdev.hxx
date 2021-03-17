@@ -815,11 +815,7 @@ public:
     void DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransformation,
                                  const BitmapEx& rBitmapEx, double fAlpha = 1.0);
 
-    /** Return true if DrawTransformedBitmapEx() is fast.
-
-        @since 7.2
-    */
-    bool HasFastDrawTransformedBitmap() const;
+    bool HasFastDrawTransformedBitmap() const override;
 
 protected:
     void DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize, const Point& rSrcPtPixel,
