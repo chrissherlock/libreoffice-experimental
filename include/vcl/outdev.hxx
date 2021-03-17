@@ -833,16 +833,6 @@ protected:
                                     Point const& rSrcPtPixel, Size const& rSrcSizePixel,
                                     BitmapEx& rBitmapEx);
 
-    /** Transform and draw a bitmap directly
-
-     @param     aFullTransform      The B2DHomMatrix used for the transformation
-     @param     rBitmapEx           Reference to the bitmap to be transformed and drawn
-
-     @return true if it was able to draw the bitmap, false if not
-     */
-    virtual bool DrawTransformBitmapExDirect(const basegfx::B2DHomMatrix& aFullTransform,
-                                             const BitmapEx& rBitmapEx, double fAlpha = 1.0);
-
     /** Transform and reduce the area that needs to be drawn of the bitmap and return the new
         visible range and the maximum area.
 

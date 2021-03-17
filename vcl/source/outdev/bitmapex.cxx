@@ -300,53 +300,6 @@ void OutputDevice::DrawDeviceBitmapEx(Point const& rDestPt, Size const& rDestSiz
     }
 }
 
-bool OutputDevice::DrawTransformBitmapExDirect(basegfx::B2DHomMatrix const& aFullTransform,
-                                               BitmapEx const& rBitmapEx, double fAlpha)
-{
-    assert(!is_double_buffered_window());
-
-    bool bDone = false;
-
-    // try to paint directly
-    const basegfx::B2DPoint aNull(aFullTransform * basegfx::B2DPoint(0.0, 0.0));
-    const basegfx::B2DPoint aTopX(aFullTransform * basegfx::B2DPoint(1.0, 0.0));
-    const basegfx::B2DPoint aTopY(aFullTransform * basegfx::B2DPoint(0.0, 1.0));
-    SalBitmap* pSalSrcBmp = rBitmapEx.GetBitmap().ImplGetSalBitmap().get();
-    Bitmap aAlphaBitmap;
-
-    if (rBitmapEx.IsTransparent())
-    {
-        if (rBitmapEx.IsAlpha())
-        {
-            aAlphaBitmap = rBitmapEx.GetAlpha();
-        }
-        else
-        {
-            aAlphaBitmap = rBitmapEx.GetMask();
-        }
-    }
-    else if (mpAlphaVDev)
-    {
-        aAlphaBitmap = AlphaMask(rBitmapEx.GetSizePixel());
-        aAlphaBitmap.Erase(COL_BLACK); // opaque
-    }
-
-    SalBitmap* pSalAlphaBmp = aAlphaBitmap.ImplGetSalBitmap().get();
-
-    bDone = mpGraphics->DrawTransformedBitmap(aNull, aTopX, aTopY, *pSalSrcBmp, pSalAlphaBmp,
-                                              fAlpha, *this);
-
-    if (mpAlphaVDev)
-    {
-        // Merge bitmap alpha to alpha device
-        AlphaMask aAlpha(rBitmapEx.GetSizePixel());
-        aAlpha.Erase((1 - fAlpha) * 255);
-        mpAlphaVDev->DrawTransformBitmapExDirect(aFullTransform, BitmapEx(aAlpha, aAlphaBitmap));
-    }
-
-    return bDone;
-};
-
 bool OutputDevice::TransformAndReduceBitmapExToTargetRange(
     basegfx::B2DHomMatrix const& aFullTransform, basegfx::B2DRange& aVisibleRange,
     double& fMaximumArea)

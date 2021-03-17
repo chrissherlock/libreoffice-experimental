@@ -592,6 +592,16 @@ protected:
      */
     virtual void ReleaseGraphics(bool bRelease = true) = 0;
 
+    /** Transform and draw a bitmap directly
+
+     @param     aFullTransform      The B2DHomMatrix used for the transformation
+     @param     rBitmapEx           Reference to the bitmap to be transformed and drawn
+
+     @return true if it was able to draw the bitmap, false if not
+     */
+    virtual bool DrawTransformBitmapExDirect(basegfx::B2DHomMatrix const& aFullTransform,
+                                             BitmapEx const& rBitmapEx, double fAlpha = 1.0);
+
     SAL_DLLPRIVATE void ImplDrawPolygon(tools::Polygon const& rPoly,
                                         tools::PolyPolygon const* pClipPolyPoly = nullptr);
 
