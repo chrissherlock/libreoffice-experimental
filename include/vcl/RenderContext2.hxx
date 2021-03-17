@@ -605,6 +605,11 @@ protected:
      */
     virtual void ReleaseGraphics(bool bRelease = true) = 0;
 
+    // make private
+    SAL_DLLPRIVATE void DrawDeviceAlphaBitmap(Bitmap const& rBmp, AlphaMask const& rAlpha,
+                                              Point const& rDestPt, Size const& rDestSize,
+                                              Point const& rSrcPtPixel, Size const& rSrcSizePixel);
+
     /** Transform and draw a bitmap directly
 
      @param     aFullTransform      The B2DHomMatrix used for the transformation
@@ -672,13 +677,6 @@ protected:
     virtual bool
     TransformAndReduceBitmapExToTargetRange(basegfx::B2DHomMatrix const& aFullTransform,
                                             basegfx::B2DRange& aVisibleRange, double& fMaximumArea);
-
-    // TODO make private
-    SAL_DLLPRIVATE void DrawDeviceAlphaBitmapSlowPath(Bitmap const& rBitmap,
-                                                      AlphaMask const& rAlpha,
-                                                      tools::Rectangle aDstRect,
-                                                      tools::Rectangle aBmpRect, Size const& aOutSz,
-                                                      Point const& aOutPt);
 
     /** Perform actual rect clip against outdev dimensions, to generate
         empty clips whenever one of the values is completely off the device.
@@ -956,6 +954,12 @@ protected:
     mutable bool mbTextSpecial : 1;
 
 private:
+    SAL_DLLPRIVATE void DrawDeviceAlphaBitmapSlowPath(Bitmap const& rBitmap,
+                                                      AlphaMask const& rAlpha,
+                                                      tools::Rectangle aDstRect,
+                                                      tools::Rectangle aBmpRect, Size const& aOutSz,
+                                                      Point const& aOutPt);
+
     SAL_DLLPRIVATE Bitmap BlendBitmap(Bitmap& aBmp, BitmapReadAccess const* pP,
                                       BitmapReadAccess const* pA, const sal_Int32 nOffY,
                                       const sal_Int32 nDstHeight, const sal_Int32 nOffX,

@@ -19,6 +19,7 @@
 
 #include <tools/helpers.hxx>
 
+#include <vcl/skia/SkiaHelper.hxx>
 #include <vcl/vclptr.hxx>
 #include <vcl/virdev.hxx>
 
@@ -703,6 +704,102 @@ void RenderContext2::DrawDeviceAlphaBitmapSlowPath(Bitmap const& rBitmap, AlphaM
     }
 
     mbMap = bOldMap;
+}
+
+void RenderContext2::DrawDeviceAlphaBitmap(Bitmap const& rBmp, AlphaMask const& rAlpha,
+                                           Point const& rDestPt, Size const& rDestSize,
+                                           Point const& rSrcPtPixel, Size const& rSrcSizePixel)
+{
+    assert(!is_double_buffered_window());
+
+    Point aOutPt(LogicToPixel(rDestPt));
+    Size aOutSz(LogicToPixel(rDestSize));
+    tools::Rectangle aDstRect(Point(), GetOutputSizePixel());
+
+    const bool bHMirr = aOutSz.Width() < 0;
+    const bool bVMirr = aOutSz.Height() < 0;
+
+    ClipToPaintRegion(aDstRect);
+
+    BmpMirrorFlags mirrorFlags = BmpMirrorFlags::NONE;
+    if (bHMirr)
+    {
+        aOutSz.setWidth(-aOutSz.Width());
+        aOutPt.AdjustX(-(aOutSz.Width() - 1));
+        mirrorFlags |= BmpMirrorFlags::Horizontal;
+    }
+
+    if (bVMirr)
+    {
+        aOutSz.setHeight(-aOutSz.Height());
+        aOutPt.AdjustY(-(aOutSz.Height() - 1));
+        mirrorFlags |= BmpMirrorFlags::Vertical;
+    }
+
+    if (aDstRect.Intersection(tools::Rectangle(aOutPt, aOutSz)).IsEmpty())
+        return;
+
+    {
+        Point aRelPt = aOutPt + Point(mnOutOffX, mnOutOffY);
+        SalTwoRect aTR(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(),
+                       rSrcSizePixel.Height(), aRelPt.X(), aRelPt.Y(), aOutSz.Width(),
+                       aOutSz.Height());
+
+        Bitmap bitmap(rBmp);
+        AlphaMask alpha(rAlpha);
+        if (bHMirr || bVMirr)
+        {
+            bitmap.Mirror(mirrorFlags);
+            alpha.Mirror(mirrorFlags);
+        }
+        SalBitmap* pSalSrcBmp = bitmap.ImplGetSalBitmap().get();
+        SalBitmap* pSalAlphaBmp = alpha.ImplGetSalBitmap().get();
+
+        // #i83087# Naturally, system alpha blending (SalGraphics::DrawAlphaBitmap) cannot work
+        // with separate alpha VDev
+
+        // try to blend the alpha bitmap with the alpha virtual device
+        if (mpAlphaVDev)
+        {
+            Bitmap aAlphaBitmap(mpAlphaVDev->GetBitmap(aRelPt, aOutSz));
+            if (SalBitmap* pSalAlphaBmp2 = aAlphaBitmap.ImplGetSalBitmap().get())
+            {
+                if (mpGraphics->BlendAlphaBitmap(aTR, *pSalSrcBmp, *pSalAlphaBmp, *pSalAlphaBmp2,
+                                                 *this))
+                {
+                    mpAlphaVDev->RenderContext2::BlendBitmap(aTR, rAlpha);
+                    return;
+                }
+            }
+        }
+        else
+        {
+            if (mpGraphics->DrawAlphaBitmap(aTR, *pSalSrcBmp, *pSalAlphaBmp, *this))
+                return;
+        }
+
+        // we need to make sure Skia never reaches this slow code path
+        assert(!SkiaHelper::isVCLSkiaEnabled());
+    }
+
+    tools::Rectangle aBmpRect(Point(), rBmp.GetSizePixel());
+    if (!aBmpRect.Intersection(tools::Rectangle(rSrcPtPixel, rSrcSizePixel)).IsEmpty())
+    {
+        Point auxOutPt(LogicToPixel(rDestPt));
+        Size auxOutSz(LogicToPixel(rDestSize));
+
+        // HACK: The function is broken with alpha vdev and mirroring, mirror here.
+        Bitmap bitmap(rBmp);
+        AlphaMask alpha(rAlpha);
+        if (mpAlphaVDev && (bHMirr || bVMirr))
+        {
+            bitmap.Mirror(mirrorFlags);
+            alpha.Mirror(mirrorFlags);
+            auxOutPt = aOutPt;
+            auxOutSz = aOutSz;
+        }
+        DrawDeviceAlphaBitmapSlowPath(bitmap, alpha, aDstRect, aBmpRect, auxOutSz, auxOutPt);
+    }
 }
 
 bool RenderContext2::HasFastDrawTransformedBitmap() const
