@@ -674,20 +674,11 @@ protected:
                                             basegfx::B2DRange& aVisibleRange, double& fMaximumArea);
 
     // TODO make private
-    SAL_DLLPRIVATE Bitmap BlendBitmap(Bitmap& aBmp, BitmapReadAccess const* pP,
-                                      BitmapReadAccess const* pA, const sal_Int32 nOffY,
-                                      const sal_Int32 nDstHeight, const sal_Int32 nOffX,
-                                      const sal_Int32 nDstWidth, tools::Rectangle const& aBmpRect,
-                                      const Size& aOutSz, const bool bHMirr, const bool bVMirr,
-                                      tools::Long const* pMapX, tools::Long const* pMapY);
-
-    // TODO make private
-    SAL_DLLPRIVATE Bitmap BlendBitmapWithAlpha(Bitmap& aBmp, BitmapReadAccess const* pP,
-                                               BitmapReadAccess const* pA,
-                                               tools::Rectangle const& aDstRect,
-                                               const sal_Int32 nOffY, const sal_Int32 nDstHeight,
-                                               const sal_Int32 nOffX, const sal_Int32 nDstWidth,
-                                               tools::Long const* pMapX, tools::Long const* pMapY);
+    SAL_DLLPRIVATE void DrawDeviceAlphaBitmapSlowPath(Bitmap const& rBitmap,
+                                                      AlphaMask const& rAlpha,
+                                                      tools::Rectangle aDstRect,
+                                                      tools::Rectangle aBmpRect, Size const& aOutSz,
+                                                      Point const& aOutPt);
 
     /** Perform actual rect clip against outdev dimensions, to generate
         empty clips whenever one of the values is completely off the device.
@@ -965,6 +956,20 @@ protected:
     mutable bool mbTextSpecial : 1;
 
 private:
+    SAL_DLLPRIVATE Bitmap BlendBitmap(Bitmap& aBmp, BitmapReadAccess const* pP,
+                                      BitmapReadAccess const* pA, const sal_Int32 nOffY,
+                                      const sal_Int32 nDstHeight, const sal_Int32 nOffX,
+                                      const sal_Int32 nDstWidth, tools::Rectangle const& aBmpRect,
+                                      const Size& aOutSz, const bool bHMirr, const bool bVMirr,
+                                      tools::Long const* pMapX, tools::Long const* pMapY);
+
+    SAL_DLLPRIVATE Bitmap BlendBitmapWithAlpha(Bitmap& aBmp, BitmapReadAccess const* pP,
+                                               BitmapReadAccess const* pA,
+                                               tools::Rectangle const& aDstRect,
+                                               const sal_Int32 nOffY, const sal_Int32 nDstHeight,
+                                               const sal_Int32 nOffX, const sal_Int32 nDstWidth,
+                                               tools::Long const* pMapX, tools::Long const* pMapY);
+
     SAL_DLLPRIVATE std::unique_ptr<SalLayout> ImplGlyphFallbackLayout(std::unique_ptr<SalLayout>,
                                                                       ImplLayoutArgs&,
                                                                       const SalLayoutGlyphs*) const;

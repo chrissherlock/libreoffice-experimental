@@ -816,12 +816,6 @@ private:
     SAL_DLLPRIVATE void DrawDeviceAlphaBitmap(Bitmap const& rBmp, AlphaMask const& rAlpha,
                                               Point const& rDestPt, Size const& rDestSize,
                                               Point const& rSrcPtPixel, Size const& rSrcSizePixel);
-
-    SAL_DLLPRIVATE void DrawDeviceAlphaBitmapSlowPath(Bitmap const& rBitmap,
-                                                      AlphaMask const& rAlpha,
-                                                      tools::Rectangle aDstRect,
-                                                      tools::Rectangle aBmpRect, Size const& aOutSz,
-                                                      Point const& aOutPt);
     ///@}
 
     /** @name Transparency functions
