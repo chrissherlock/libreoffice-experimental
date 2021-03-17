@@ -1,4 +1,4 @@
-/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; fill-column: 100 -*- */
 /*
  * This file is part of the LibreOffice project.
  *
@@ -26,29 +26,32 @@
 
 #include <cassert>
 
-void OutputDevice::DrawPolygon(basegfx::B2DPolygon const& rB2DPolygon)
-{
-    assert(!is_double_buffered_window());
-
-    // AW: Do NOT paint empty polygons
-    if (rB2DPolygon.count())
-    {
-        basegfx::B2DPolyPolygon aPP(rB2DPolygon);
-        DrawPolyPolygon(aPP);
-    }
-}
-
-void OutputDevice::DrawPolygon(tools::Polygon const& rPoly)
+void OutputDevice::DrawPolyPolygon(tools::PolyPolygon const& rPolyPoly)
 {
     assert(!is_double_buffered_window());
 
     if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaPolygonAction(rPoly));
+        mpMetaFile->AddAction(new MetaPolyPolygonAction(rPolyPoly));
 
     if (ImplIsRecordLayout())
         return;
 
-    RenderContext2::DrawPolygon(rPoly);
+    RenderContext2::DrawPolyPolygon(rPolyPoly);
 }
 
-/* vim:set shiftwidth=4 softtabstop=4 expandtab: */
+// Caution: This method is nearly the same as
+// OutputDevice::DrawTransparent( const basegfx::B2DPolyPolygon& rB2DPolyPoly, double fTransparency),
+// so when changes are made here do not forget to make changes there, too
+
+void OutputDevice::DrawPolyPolygon(basegfx::B2DPolyPolygon const& rB2DPolyPoly)
+{
+    assert(!is_double_buffered_window());
+
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaPolyPolygonAction(tools::PolyPolygon(rB2DPolyPoly)));
+
+    // call helper
+    ImplDrawPolyPolygonWithB2DPolyPolygon(rB2DPolyPoly);
+}
+
+/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
