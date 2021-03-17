@@ -51,7 +51,7 @@ void OutputDevice::DrawPolyPolygon(basegfx::B2DPolyPolygon const& rB2DPolyPoly)
         mpMetaFile->AddAction(new MetaPolyPolygonAction(tools::PolyPolygon(rB2DPolyPoly)));
 
     // call helper
-    ImplDrawPolyPolygonWithB2DPolyPolygon(rB2DPolyPoly);
+    RenderContext2::DrawPolyPolygon(rB2DPolyPoly);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

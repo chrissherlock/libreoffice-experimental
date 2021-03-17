@@ -120,8 +120,7 @@ void RenderContext2::DrawPolyPolygon(const tools::PolyPolygon& rPolyPoly)
         mpAlphaVDev->DrawPolyPolygon(rPolyPoly);
 }
 
-void RenderContext2::ImplDrawPolyPolygonWithB2DPolyPolygon(
-    basegfx::B2DPolyPolygon const& rB2DPolyPoly)
+void RenderContext2::DrawPolyPolygon(basegfx::B2DPolyPolygon const& rB2DPolyPoly)
 {
     // Do not paint empty PolyPolygons
     if (!rB2DPolyPoly.count() || !IsDeviceOutputNecessary())
@@ -191,7 +190,7 @@ void RenderContext2::ImplDrawPolyPolygonWithB2DPolyPolygon(
     }
 
     if (mpAlphaVDev)
-        mpAlphaVDev->ImplDrawPolyPolygonWithB2DPolyPolygon(rB2DPolyPoly);
+        mpAlphaVDev->RenderContext2::DrawPolyPolygon(rB2DPolyPoly);
 }
 
 // #100127# Extracted from RenderContext2::DrawPolyPolygon()
