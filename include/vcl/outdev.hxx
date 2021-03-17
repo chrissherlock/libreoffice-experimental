@@ -799,10 +799,6 @@ public:
     void DrawImage(const Point& rPos, const Size& rSize, const Image& rImage,
                    DrawImageFlags nStyle = DrawImageFlags::NONE);
 
-    /** Query extended bitmap (with alpha channel, if available).
-     */
-    BitmapEx GetBitmapEx(const Point& rSrcPt, const Size& rSize) const;
-
     /** Draw BitmapEx transformed
 
         @param rTransformation
@@ -832,21 +828,6 @@ protected:
     virtual void DrawDeviceBitmapEx(Point const& rDestPt, Size const& rDestSize,
                                     Point const& rSrcPtPixel, Size const& rSrcSizePixel,
                                     BitmapEx& rBitmapEx);
-
-    /** Transform and reduce the area that needs to be drawn of the bitmap and return the new
-        visible range and the maximum area.
-
-
-      @param     aFullTransform      B2DHomMatrix used for transformation
-      @param     aVisibleRange       The new visible area of the bitmap
-      @param     fMaximumArea        The maximum area of the bitmap
-
-      @returns true if there is an area to be drawn, otherwise nothing is left to be drawn
-        so return false
-      */
-    virtual bool
-    TransformAndReduceBitmapExToTargetRange(const basegfx::B2DHomMatrix& aFullTransform,
-                                            basegfx::B2DRange& aVisibleRange, double& fMaximumArea);
 
 private:
     void DrawBitmapEx2(const Point& rDestPt, const Size& rDestSize, const Point& rSrcPtPixel,

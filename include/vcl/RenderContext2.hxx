@@ -33,7 +33,7 @@
 #include <vcl/ImplLayoutArgs.hxx>
 #include <vcl/ImplMapRes.hxx>
 #include <vcl/RasterOp.hxx>
-#include <vcl/bitmap.hxx>
+#include <vcl/bitmapex.hxx>
 #include <vcl/devicecoordinate.hxx>
 #include <vcl/flags/AddFontSubstituteFlags.hxx>
 #include <vcl/flags/AntialiasingFlags.hxx>
@@ -136,6 +136,10 @@ public:
     virtual void DrawBitmap(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap);
     virtual void DrawBitmap(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
                             Size const& rSrcSizePixel, Bitmap const& rBitmap);
+
+    /** Query extended bitmap (with alpha channel, if available).
+     */
+    BitmapEx GetBitmapEx(const Point& rSrcPt, const Size& rSize) const;
 
     /** Get the graphic context that the output device uses to draw on.
 
@@ -644,6 +648,21 @@ protected:
     bool ProcessBitmapRasterOpInvert(Point const& rDestPt, Size const& rDestSize);
     bool ProcessBitmapDrawModeBlackWhite(Point const& rDestPt, Size const& rDestSize);
     Bitmap ProcessBitmapDrawModeGray(Bitmap const& rBitmap);
+
+    /** Transform and reduce the area that needs to be drawn of the bitmap and return the new
+        visible range and the maximum area.
+
+
+      @param     aFullTransform      B2DHomMatrix used for transformation
+      @param     aVisibleRange       The new visible area of the bitmap
+      @param     fMaximumArea        The maximum area of the bitmap
+
+      @returns true if there is an area to be drawn, otherwise nothing is left to be drawn
+        so return false
+      */
+    virtual bool
+    TransformAndReduceBitmapExToTargetRange(basegfx::B2DHomMatrix const& aFullTransform,
+                                            basegfx::B2DRange& aVisibleRange, double& fMaximumArea);
 
     /** Perform actual rect clip against outdev dimensions, to generate
         empty clips whenever one of the values is completely off the device.
