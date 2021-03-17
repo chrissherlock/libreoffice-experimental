@@ -32,6 +32,7 @@
 #include <vcl/bitmap.hxx>
 #include <vcl/cairo.hxx>
 #include <vcl/devicecoordinate.hxx>
+#include <vcl/flags/DrawImageFlags.hxx>
 #include <vcl/flags/SalLayoutFlags.hxx>
 #include <vcl/font.hxx>
 #include <vcl/region.hxx>
@@ -124,23 +125,6 @@ class XGraphics;
 typedef std::vector<tools::Rectangle> MetricVector;
 
 // OutputDevice-Types
-
-// Flags for DrawImage(), these must match the definitions in css::awt::ImageDrawMode
-enum class DrawImageFlags
-{
-    NONE = 0x0000,
-    Disable = 0x0001,
-    Highlight = 0x0002,
-    Deactive = 0x0004,
-    ColorTransform = 0x0008,
-    SemiTransparent = 0x0010,
-};
-namespace o3tl
-{
-template <> struct typed_flags<DrawImageFlags> : is_typed_flags<DrawImageFlags, 0x001f>
-{
-};
-}
 
 // Flags for DrawGrid()
 enum class DrawGridFlags
