@@ -142,7 +142,12 @@ public:
 
     /** Query extended bitmap (with alpha channel, if available).
      */
-    BitmapEx GetBitmapEx(const Point& rSrcPt, const Size& rSize) const;
+    BitmapEx GetBitmapEx(Point const& rSrcPt, Size const& rSize) const;
+    virtual void DrawBitmapEx(Point const& rDestPt, BitmapEx const& rBitmapEx);
+    virtual void DrawBitmapEx(Point const& rDestPt, Size const& rDestSize,
+                              BitmapEx const& rBitmapEx);
+    virtual void DrawBitmapEx(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
+                              Size const& rSrcSizePixel, BitmapEx const& rBitmapEx);
 
     /** Return true if DrawTransformedBitmapEx() is fast.
 
@@ -605,6 +610,10 @@ protected:
      */
     virtual void ReleaseGraphics(bool bRelease = true) = 0;
 
+    virtual void DrawDeviceBitmapEx(Point const& rDestPt, Size const& rDestSize,
+                                    Point const& rSrcPtPixel, Size const& rSrcSizePixel,
+                                    BitmapEx& rBitmapEx);
+
     // make private
     SAL_DLLPRIVATE void DrawDeviceAlphaBitmap(Bitmap const& rBmp, AlphaMask const& rAlpha,
                                               Point const& rDestPt, Size const& rDestSize,
@@ -973,6 +982,9 @@ private:
                                                const sal_Int32 nOffY, const sal_Int32 nDstHeight,
                                                const sal_Int32 nOffX, const sal_Int32 nDstWidth,
                                                tools::Long const* pMapX, tools::Long const* pMapY);
+
+    void DrawBitmapEx2(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
+                       Size const& rSrcSizePixel, BitmapEx const& rBitmapEx);
 
     SAL_DLLPRIVATE std::unique_ptr<SalLayout> ImplGlyphFallbackLayout(std::unique_ptr<SalLayout>,
                                                                       ImplLayoutArgs&,

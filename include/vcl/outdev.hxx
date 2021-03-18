@@ -745,30 +745,11 @@ public:
     void DrawBitmap(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
                     Size const& rSrcSizePixel, Bitmap const& rBitmap) override;
 
-    /** @overload
-        void DrawBitmapEx(
-                const Point& rDestPt,
-                const Size& rDestSize,
-                const Point& rSrcPtPixel,
-                const Size& rSecSizePixel,
-                const BitmapEx& rBitmapEx,
-                MetaActionType nAction = MetaActionType::BMPEXSCALEPART)
-     */
-    void DrawBitmapEx(const Point& rDestPt, const BitmapEx& rBitmapEx);
-
-    /** @overload
-        void DrawBitmapEx(
-                const Point& rDestPt,
-                const Size& rDestSize,
-                const Point& rSrcPtPixel,
-                const Size& rSecSizePixel,
-                const BitmapEx& rBitmapEx,
-                MetaActionType nAction = MetaActionType::BMPEXSCALEPART)
-     */
-    void DrawBitmapEx(const Point& rDestPt, const Size& rDestSize, const BitmapEx& rBitmapEx);
-
+    void DrawBitmapEx(const Point& rDestPt, const BitmapEx& rBitmapEx) override;
+    void DrawBitmapEx(const Point& rDestPt, const Size& rDestSize,
+                      const BitmapEx& rBitmapEx) override;
     void DrawBitmapEx(const Point& rDestPt, const Size& rDestSize, const Point& rSrcPtPixel,
-                      const Size& rSrcSizePixel, const BitmapEx& rBitmapEx);
+                      const Size& rSrcSizePixel, const BitmapEx& rBitmapEx) override;
 
     /** @overload
         virtual void DrawImage(
@@ -803,15 +784,12 @@ public:
 
 protected:
     void DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize, const Point& rSrcPtPixel,
-                    Size const& rSrcSizePixel, Bitmap const& rBitmap) override;
-
-    virtual void DrawDeviceBitmapEx(Point const& rDestPt, Size const& rDestSize,
-                                    Point const& rSrcPtPixel, Size const& rSrcSizePixel,
-                                    BitmapEx& rBitmapEx);
+                          Size const& rSrcSizePixel, Bitmap const& rBitmap) override;
 
 private:
-    void DrawBitmapEx2(const Point& rDestPt, const Size& rDestSize, const Point& rSrcPtPixel,
-                       const Size& rSrcSizePixel, const BitmapEx& rBitmapEx);
+    void DrawBitmapEx2(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
+                       Size const& rSrcSizePixel, BitmapEx const& rBitmapEx);
+
     ///@}
 
     /** @name Transparency functions
