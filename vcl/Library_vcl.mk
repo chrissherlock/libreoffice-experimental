@@ -268,6 +268,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/outdev/cairo \
     vcl/source/outdev/stack \
     vcl/source/outdev/clipping \
+    vcl/source/outdev/eps \
     vcl/source/outdev/polygon \
     vcl/source/outdev/polypolygon \
     vcl/source/outdev/rasterop \
