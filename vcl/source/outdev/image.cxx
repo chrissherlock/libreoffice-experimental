@@ -33,7 +33,13 @@ void OutputDevice::DrawImage(const Point& rPos, const Size& rSize, const Image& 
 {
     assert(!is_double_buffered_window());
 
-    if (!ImplIsRecordLayout() && rImage.Exists() && (IsDeviceOutputNecessary() || mpMetaFile))
+    if (ImplIsRecordLayout())
+        return;
+
+    if (!(IsDeviceOutputNecessary() || mpMetaFile))
+        return;
+
+    if (rImage.Exists())
     {
         Size aOutSize(rSize);
 
