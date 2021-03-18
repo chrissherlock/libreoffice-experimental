@@ -19,6 +19,7 @@
 
 #include <vcl/image.hxx>
 #include <vcl/outdev.hxx>
+#include <vcl/settings.hxx>
 
 void OutputDevice::DrawImage(const Point& rPos, const Image& rImage, DrawImageFlags nStyle)
 {
@@ -32,15 +33,15 @@ void OutputDevice::DrawImage(const Point& rPos, const Size& rSize, const Image& 
 {
     assert(!is_double_buffered_window());
 
-    bool bIsSizeValid = !rSize.IsEmpty();
-
-    if (!ImplIsRecordLayout())
+    if (!ImplIsRecordLayout() && rImage.Exists() && (IsDeviceOutputNecessary() || mpMetaFile))
     {
-        Image& rNonConstImage = const_cast<Image&>(rImage);
-        if (bIsSizeValid)
-            rNonConstImage.Draw(this, rPos, nStyle, &rSize);
-        else
-            rNonConstImage.Draw(this, rPos, nStyle);
+        Size aOutSize(rSize);
+
+        if (rSize.IsEmpty())
+            aOutSize = PixelToLogic(rImage.GetSizePixel());
+
+        DrawBitmapEx(rPos, aOutSize,
+                     rImage.GenerateBitmap(nStyle, GetSettings().GetStyleSettings()));
     }
 }
 

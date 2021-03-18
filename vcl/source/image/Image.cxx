@@ -121,7 +121,7 @@ bool Image::Exists() const
     return false;
 }
 
-BitmapEx Image::GenerateBitmap(DrawImageFlags nStyle, StyleSettings const& rSettings)
+BitmapEx Image::GenerateBitmap(DrawImageFlags nStyle, StyleSettings const& rSettings) const
 {
     BitmapEx aRenderBmp = mpImplData->getBitmapExForHiDPI(bool(nStyle & DrawImageFlags::Disable));
 
@@ -160,15 +160,6 @@ BitmapEx Image::GenerateBitmap(DrawImageFlags nStyle, StyleSettings const& rSett
     }
 
     return aRenderBmp;
-}
-
-void Image::Draw(OutputDevice* pOutDev, const Point& rPos, DrawImageFlags nStyle, const Size* pSize)
-{
-    if (!Exists() || (!pOutDev->IsDeviceOutputNecessary() && pOutDev->GetConnectMetaFile() == nullptr))
-        return;
-
-    Size aOutSize = pSize ? *pSize : pOutDev->PixelToLogic(mpImplData->getSizePixel());
-    pOutDev->DrawBitmapEx(rPos, aOutSize, GenerateBitmap(nStyle, pOutDev->GetSettings().GetStyleSettings()));
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
