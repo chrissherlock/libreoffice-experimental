@@ -15044,7 +15044,6 @@ vcl/source/outdev/font.cxx
 vcl/source/outdev/gradient.cxx
 vcl/source/outdev/hatch.cxx
 vcl/source/outdev/map.cxx
-vcl/source/outdev/nativecontrols.cxx
 vcl/source/outdev/outdev.cxx
 vcl/source/outdev/outdevstate.cxx
 vcl/source/outdev/pixel.cxx

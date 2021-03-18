@@ -38,7 +38,6 @@
 #include <vcl/mapmod.hxx>
 #include <vcl/wall.hxx>
 #include <vcl/metaactiontypes.hxx>
-#include <vcl/salnativewidgets.hxx>
 #include <vcl/outdevstate.hxx>
 
 #include <basegfx/numeric/ftools.hxx>
@@ -841,42 +840,6 @@ public:
     void SetMapMode() override;
     void SetMapMode(MapMode const& rNewMapMode) override;
     virtual void SetMetafileMapMode(const MapMode& rNewMapMode, bool bIsRecord);
-    ///@}
-
-    /** @name Native Widget Rendering functions
-
-        These all just call through to the private mpGraphics functions of the same name.
-     */
-    ///@{
-
-public:
-    /** Determine if native widgets can be enabled
-     */
-    virtual bool CanEnableNativeWidget() const { return false; }
-
-    /** Query the platform layer for control support
-     */
-    bool IsNativeControlSupported(ControlType nType, ControlPart nPart) const;
-
-    /** Query the native control to determine if it was acted upon
-     */
-    bool HitTestNativeScrollbar(ControlPart nPart, const tools::Rectangle& rControlRegion,
-                                const Point& aPos, bool& rIsInside) const;
-
-    /** Request rendering of a particular control and/or part
-     */
-    bool DrawNativeControl(ControlType nType, ControlPart nPart,
-                           const tools::Rectangle& rControlRegion, ControlState nState,
-                           const ImplControlValue& aValue, const OUString& aCaption,
-                           const Color& rBackgroundColor = COL_AUTO);
-
-    /** Query the native control's actual drawing region (including adornment)
-     */
-    bool GetNativeControlRegion(ControlType nType, ControlPart nPart,
-                                const tools::Rectangle& rControlRegion, ControlState nState,
-                                const ImplControlValue& aValue,
-                                tools::Rectangle& rNativeBoundingRegion,
-                                tools::Rectangle& rNativeContentRegion) const;
     ///@}
 
     /** @name EPS functions

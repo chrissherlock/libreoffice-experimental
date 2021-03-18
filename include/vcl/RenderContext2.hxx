@@ -48,6 +48,7 @@
 #include <vcl/mapmod.hxx>
 #include <vcl/metric.hxx>
 #include <vcl/region.hxx>
+#include <vcl/salnativewidgets.hxx>
 #include <vcl/vclptr.hxx>
 #include <vcl/vclreferencebase.hxx>
 #include <vcl/wall.hxx>
@@ -174,6 +175,34 @@ public:
                            DrawImageFlags nStyle = DrawImageFlags::NONE);
     virtual void DrawImage(Point const& rPos, Size const& rSize, Image const& rImage,
                            DrawImageFlags nStyle = DrawImageFlags::NONE);
+
+    /** Determine if native widgets can be enabled
+     */
+    virtual bool CanEnableNativeWidget() const { return false; }
+
+    /** Query the platform layer for control support
+     */
+    bool IsNativeControlSupported(ControlType nType, ControlPart nPart) const;
+
+    /** Query the native control to determine if it was acted upon
+     */
+    bool HitTestNativeScrollbar(ControlPart nPart, tools::Rectangle const& rControlRegion,
+                                Point const& aPos, bool& rIsInside) const;
+
+    /** Request rendering of a particular control and/or part
+     */
+    bool DrawNativeControl(ControlType nType, ControlPart nPart,
+                           tools::Rectangle const& rControlRegion, ControlState nState,
+                           ImplControlValue const& aValue, OUString const& aCaption,
+                           Color const& rBackgroundColor = COL_AUTO);
+
+    /** Query the native control's actual drawing region (including adornment)
+     */
+    bool GetNativeControlRegion(ControlType nType, ControlPart nPart,
+                                tools::Rectangle const& rControlRegion, ControlState nState,
+                                ImplControlValue const& aValue,
+                                tools::Rectangle& rNativeBoundingRegion,
+                                tools::Rectangle& rNativeContentRegion) const;
 
     /** Get the graphic context that the output device uses to draw on.
 
