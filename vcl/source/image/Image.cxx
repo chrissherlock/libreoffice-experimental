@@ -113,13 +113,16 @@ bool Image::operator==(const Image& rImage) const
     return bRet;
 }
 
-void Image::Draw(OutputDevice* pOutDev, const Point& rPos, DrawImageFlags nStyle, const Size* pSize)
+bool Image::Exists() const
 {
-    if (!mpImplData || (!pOutDev->IsDeviceOutputNecessary() && pOutDev->GetConnectMetaFile() == nullptr))
-        return;
+    if (mpImplData)
+        return true;
 
-    Size aOutSize = pSize ? *pSize : pOutDev->PixelToLogic(mpImplData->getSizePixel());
+    return false;
+}
 
+BitmapEx Image::GenerateBitmap(DrawImageFlags nStyle, StyleSettings const& rSettings)
+{
     BitmapEx aRenderBmp = mpImplData->getBitmapExForHiDPI(bool(nStyle & DrawImageFlags::Disable));
 
     if (!(nStyle & DrawImageFlags::Disable) &&
@@ -130,7 +133,6 @@ void Image::Draw(OutputDevice* pOutDev, const Point& rPos, DrawImageFlags nStyle
 
         if (nStyle & (DrawImageFlags::Highlight | DrawImageFlags::Deactive))
         {
-            const StyleSettings& rSettings = pOutDev->GetSettings().GetStyleSettings();
             Color aColor;
             if (nStyle & DrawImageFlags::Highlight)
                 aColor = rSettings.GetHighlightColor();
@@ -157,7 +159,16 @@ void Image::Draw(OutputDevice* pOutDev, const Point& rPos, DrawImageFlags nStyle
         aRenderBmp = aTempBitmapEx;
     }
 
-    pOutDev->DrawBitmapEx(rPos, aOutSize, aRenderBmp);
+    return aRenderBmp;
+}
+
+void Image::Draw(OutputDevice* pOutDev, const Point& rPos, DrawImageFlags nStyle, const Size* pSize)
+{
+    if (!Exists() || (!pOutDev->IsDeviceOutputNecessary() && pOutDev->GetConnectMetaFile() == nullptr))
+        return;
+
+    Size aOutSize = pSize ? *pSize : pOutDev->PixelToLogic(mpImplData->getSizePixel());
+    pOutDev->DrawBitmapEx(rPos, aOutSize, GenerateBitmap(nStyle, pOutDev->GetSettings().GetStyleSettings()));
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

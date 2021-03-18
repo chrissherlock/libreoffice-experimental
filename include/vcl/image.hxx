@@ -28,6 +28,7 @@
 #include <memory>
 
 class ImplImage;
+class StyleSettings;
 
 namespace com::sun::star::graphic { class XGraphic; }
 namespace com::sun::star::uno { template <class interface_type> class Reference; }
@@ -46,6 +47,8 @@ public:
     explicit Image(OUString const & rPNGFileUrl);
     explicit Image(StockImage, OUString const & rPNGFilePath);
 
+    bool Exists() const;
+
     Size GetSizePixel() const;
     BitmapEx GetBitmapEx() const;
 
@@ -61,6 +64,7 @@ public:
 
     OUString GetStock() const;
 
+    BitmapEx GenerateBitmap(DrawImageFlags nStyle, StyleSettings const& rSettings);
     void Draw(OutputDevice* pOutDev, const Point& rPos, DrawImageFlags nStyle, const Size* pSize = nullptr);
 
 private:
