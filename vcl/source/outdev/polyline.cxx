@@ -79,11 +79,23 @@ void OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2DPolygon, double f
 {
     assert(!is_double_buffered_window());
 
+    // use b2dpolygon drawing if possible
+    if (DrawPolyLineDirect(basegfx::B2DHomMatrix(), rB2DPolygon, fLineWidth, 0.0,
+                           nullptr, // MM01
+                           eLineJoin, eLineCap, fMiterMinimumAngle))
+    {
+        return;
+    }
+
     if (mpMetaFile)
     {
         LineInfo aLineInfo;
         if (fLineWidth != 0.0)
             aLineInfo.SetWidth(static_cast<tools::Long>(fLineWidth + 0.5));
+
+        // Transport known information, might be needed
+        aLineInfo.SetLineJoin(eLineJoin);
+        aLineInfo.SetLineCap(eLineCap);
 
         const tools::Polygon aToolsPolygon(rB2DPolygon);
         mpMetaFile->AddAction(new MetaPolyLineAction(aToolsPolygon, aLineInfo));
@@ -107,14 +119,6 @@ void OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2DPolygon, double f
 
     if (mbInitLineColor)
         InitLineColor();
-
-    // use b2dpolygon drawing if possible
-    if (DrawPolyLineDirect(basegfx::B2DHomMatrix(), rB2DPolygon, fLineWidth, 0.0,
-                           nullptr, // MM01
-                           eLineJoin, eLineCap, fMiterMinimumAngle))
-    {
-        return;
-    }
 
     // #i101491#
     // no output yet; fallback to geometry decomposition and use filled polygon paint
