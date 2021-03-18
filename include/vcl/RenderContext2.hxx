@@ -38,6 +38,7 @@
 #include <vcl/flags/AddFontSubstituteFlags.hxx>
 #include <vcl/flags/AntialiasingFlags.hxx>
 #include <vcl/flags/ComplexTextLayoutFlags.hxx>
+#include <vcl/flags/DrawImageFlags.hxx>
 #include <vcl/flags/DrawModeFlags.hxx>
 #include <vcl/flags/DrawTextFlags.hxx>
 #include <vcl/flags/GetDefaultFontFlags.hxx>
@@ -58,6 +59,7 @@
 
 class AllSettings;
 class Hatch;
+class Image;
 class ImplDeviceFontList;
 class ImplDeviceFontSizeList;
 class ImplFontCache;
@@ -160,6 +162,11 @@ public:
         @since 7.2
     */
     virtual bool HasFastDrawTransformedBitmap() const;
+
+    virtual void DrawImage(Point const& rPos, Image const& rImage,
+                           DrawImageFlags nStyle = DrawImageFlags::NONE);
+    virtual void DrawImage(Point const& rPos, Size const& rSize, Image const& rImage,
+                           DrawImageFlags nStyle = DrawImageFlags::NONE);
 
     /** Get the graphic context that the output device uses to draw on.
 
