@@ -49,10 +49,8 @@ void RenderContext2::DrawPolyLine(const tools::Polygon& rPoly)
         InitLineColor();
 
     // use b2dpolygon drawing if possible
-    if (DrawPolyLineDirectInternal(basegfx::B2DHomMatrix(), rPoly.getB2DPolygon()))
-    {
+    if (DrawPolyLineDirect(basegfx::B2DHomMatrix(), rPoly.getB2DPolygon()))
         return;
-    }
 
     const basegfx::B2DPolygon aB2DPolyLine(rPoly.getB2DPolygon());
     const basegfx::B2DHomMatrix aTransform(ImplGetDeviceTransformation());
@@ -91,13 +89,12 @@ void RenderContext2::DrawPolyLine(const tools::Polygon& rPoly)
         mpAlphaVDev->DrawPolyLine(rPoly);
 }
 
-bool RenderContext2::DrawPolyLineDirectInternal(const basegfx::B2DHomMatrix& rObjectTransform,
-                                                const basegfx::B2DPolygon& rB2DPolygon,
-                                                double fLineWidth, double fTransparency,
-                                                const std::vector<double>* pStroke, // MM01
-                                                basegfx::B2DLineJoin eLineJoin,
-                                                css::drawing::LineCap eLineCap,
-                                                double fMiterMinimumAngle)
+bool RenderContext2::DrawPolyLineDirect(const basegfx::B2DHomMatrix& rObjectTransform,
+                                        const basegfx::B2DPolygon& rB2DPolygon, double fLineWidth,
+                                        double fTransparency,
+                                        const std::vector<double>* pStroke, // MM01
+                                        basegfx::B2DLineJoin eLineJoin,
+                                        css::drawing::LineCap eLineCap, double fMiterMinimumAngle)
 {
     assert(!is_double_buffered_window());
 

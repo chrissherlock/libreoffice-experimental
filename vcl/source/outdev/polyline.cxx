@@ -106,9 +106,9 @@ void OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2DPolygon, double f
         InitLineColor();
 
     // use b2dpolygon drawing if possible
-    if (DrawPolyLineDirectInternal(basegfx::B2DHomMatrix(), rB2DPolygon, fLineWidth, 0.0,
-                                   nullptr, // MM01
-                                   eLineJoin, eLineCap, fMiterMinimumAngle))
+    if (DrawPolyLineDirect(basegfx::B2DHomMatrix(), rB2DPolygon, fLineWidth, 0.0,
+                           nullptr, // MM01
+                           eLineJoin, eLineCap, fMiterMinimumAngle))
     {
         return;
     }
@@ -145,7 +145,7 @@ void OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2DPolygon, double f
         // to avoid optical gaps
         for (auto const& rPolygon : aAreaPolyPolygon)
         {
-            (void)DrawPolyLineDirectInternal(basegfx::B2DHomMatrix(), rPolygon);
+            (void)DrawPolyLineDirect(basegfx::B2DHomMatrix(), rPolygon);
         }
     }
     else
@@ -218,8 +218,8 @@ bool OutputDevice::DrawPolyLineDirect(const basegfx::B2DHomMatrix& rObjectTransf
                                       basegfx::B2DLineJoin eLineJoin,
                                       css::drawing::LineCap eLineCap, double fMiterMinimumAngle)
 {
-    if (DrawPolyLineDirectInternal(rObjectTransform, rB2DPolygon, fLineWidth, fTransparency,
-                                   pStroke, eLineJoin, eLineCap, fMiterMinimumAngle))
+    if (RenderContext2::DrawPolyLineDirect(rObjectTransform, rB2DPolygon, fLineWidth, fTransparency,
+                                           pStroke, eLineJoin, eLineCap, fMiterMinimumAngle))
     {
         // Worked, add metafile action (if recorded). This is done only here,
         // because this function is public, other OutDev functions already add metafile
@@ -229,15 +229,19 @@ bool OutputDevice::DrawPolyLineDirect(const basegfx::B2DHomMatrix& rObjectTransf
             LineInfo aLineInfo;
             if (fLineWidth != 0.0)
                 aLineInfo.SetWidth(static_cast<tools::Long>(fLineWidth + 0.5));
+
             // Transport known information, might be needed
             aLineInfo.SetLineJoin(eLineJoin);
             aLineInfo.SetLineCap(eLineCap);
+
             // MiterMinimumAngle does not exist yet in LineInfo
             const tools::Polygon aToolsPolygon(rB2DPolygon);
             mpMetaFile->AddAction(new MetaPolyLineAction(aToolsPolygon, aLineInfo));
         }
+
         return true;
     }
+
     return false;
 }
 
