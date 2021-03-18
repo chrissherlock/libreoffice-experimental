@@ -823,19 +823,25 @@ private:
     ///@{
 
 public:
-    void DrawMask(const Point& rDestPt, const Bitmap& rBitmap, const Color& rMaskColor);
+    void DrawMask(Point const& rDestPt, Bitmap const& rBitmap, Color const& rMaskColor);
 
-    void DrawMask(const Point& rDestPt, const Size& rDestSize, const Bitmap& rBitmap,
-                  const Color& rMaskColor);
+    void DrawMask(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap,
+                  Color const& rMaskColor);
 
-    void DrawMask(const Point& rDestPt, const Size& rDestSize, const Point& rSrcPtPixel,
-                  const Size& rSrcSizePixel, const Bitmap& rBitmap, const Color& rMaskColor,
-                  MetaActionType nAction);
+    void DrawScaledMask(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
+                        Size const& rSrcSizePixel, Bitmap const& rBitmap, Color const& rMaskColor);
+
+    void DrawMask(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
+                  Size const& rSrcSizePixel, Bitmap const& rBitmap, Color const& rMaskColor);
 
 protected:
-    virtual void DrawDeviceMask(const Bitmap& rMask, const Color& rMaskColor, const Point& rDestPt,
-                                const Size& rDestSize, const Point& rSrcPtPixel,
-                                const Size& rSrcSizePixel);
+    virtual void DrawDeviceMask(Bitmap const& rMask, Color const& rMaskColor, Point const& rDestPt,
+                                Size const& rDestSize, Point const& rSrcPtPixel,
+                                Size const& rSrcSizePixel);
+
+private:
+    void DrawMask2(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
+                   Size const& rSrcSizePixel, Bitmap const& rBitmap, Color const& rMaskColor);
     ///@}
 
     /** @name Map functions
