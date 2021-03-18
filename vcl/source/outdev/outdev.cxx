@@ -76,7 +76,6 @@ void OutputDevice::dispose()
         mpUnoGraphicsList = nullptr;
     }
 
-    mpAlphaVDev.disposeAndClear();
     mpPrevGraphics.clear();
     mpNextGraphics.clear();
 }
