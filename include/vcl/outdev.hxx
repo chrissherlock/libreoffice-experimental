@@ -32,7 +32,6 @@
 #include <vcl/bitmap.hxx>
 #include <vcl/cairo.hxx>
 #include <vcl/devicecoordinate.hxx>
-#include <vcl/flags/DrawImageFlags.hxx>
 #include <vcl/flags/SalLayoutFlags.hxx>
 #include <vcl/font.hxx>
 #include <vcl/region.hxx>
@@ -744,18 +743,10 @@ public:
     void DrawBitmapEx(const Point& rDestPt, const Size& rDestSize, const Point& rSrcPtPixel,
                       const Size& rSrcSizePixel, const BitmapEx& rBitmapEx) override;
 
-    /** @overload
-        virtual void DrawImage(
-                        const Point& rPos,
-                        const Size& rSize,
-                        const Image& rImage,
-                        sal_uInt16 nStyle = 0)
-     */
-    void DrawImage(const Point& rPos, const Image& rImage,
-                   DrawImageFlags nStyle = DrawImageFlags::NONE);
-
-    void DrawImage(const Point& rPos, const Size& rSize, const Image& rImage,
-                   DrawImageFlags nStyle = DrawImageFlags::NONE);
+    void DrawImage(Point const& rPos, Image const& rImage,
+                   DrawImageFlags nStyle = DrawImageFlags::NONE) override;
+    void DrawImage(Point const& rPos, Size const& rSize, Image const& rImage,
+                   DrawImageFlags nStyle = DrawImageFlags::NONE) override;
 
     /** Draw BitmapEx transformed
 

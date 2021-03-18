@@ -17,44 +17,34 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/RenderContext2.hxx>
 #include <vcl/image.hxx>
-#include <vcl/outdev.hxx>
 #include <vcl/settings.hxx>
 
-void OutputDevice::DrawImage(Point const& rPos, Image const& rImage, DrawImageFlags nStyle)
+void RenderContext2::DrawImage(Point const& rPos, Image const& rImage, DrawImageFlags nStyle)
 {
     assert(!is_double_buffered_window());
 
     DrawImage(rPos, Size(), rImage, nStyle);
 }
 
-void OutputDevice::DrawImage(Point const& rPos, Size const& rSize, Image const& rImage,
-                             DrawImageFlags nStyle)
+void RenderContext2::DrawImage(Point const& rPos, Size const& rSize, Image const& rImage,
+                               DrawImageFlags nStyle)
 {
     assert(!is_double_buffered_window());
 
-    if (ImplIsRecordLayout())
-        return;
-
-    if (!(IsDeviceOutputNecessary() || mpMetaFile))
+    if (!IsDeviceOutputNecessary())
         return;
 
     if (rImage.Exists())
     {
-        if (mpMetaFile)
-        {
-            Size aOutSize(rSize);
+        Size aOutSize(rSize);
 
-            if (rSize.IsEmpty())
-                aOutSize = PixelToLogic(rImage.GetSizePixel());
+        if (rSize.IsEmpty())
+            aOutSize = PixelToLogic(rImage.GetSizePixel());
 
-            DrawBitmapEx(rPos, aOutSize,
-                         rImage.GenerateBitmap(nStyle, GetSettings().GetStyleSettings()));
-        }
-        else
-        {
-            RenderContext2::DrawImage(rPos, rSize, rImage, nStyle);
-        }
+        DrawBitmapEx(rPos, aOutSize,
+                     rImage.GenerateBitmap(nStyle, GetSettings().GetStyleSettings()));
     }
 }
 
