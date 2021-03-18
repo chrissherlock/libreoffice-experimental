@@ -436,7 +436,7 @@ public:
         @see DrawPolygon
         @see DrawPolyPolygon
      */
-    void DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLineInfo);
+    void DrawPolyLine(tools::Polygon const& rPoly, LineInfo const& rLineInfo) override;
 
     // #i101491#
     // Helper who tries to use SalGDI's DrawPolyLine direct and returns it's bool.
@@ -447,13 +447,6 @@ public:
                             basegfx::B2DLineJoin eLineJoin = basegfx::B2DLineJoin::NONE,
                             css::drawing::LineCap eLineCap = css::drawing::LineCap_BUTT,
                             double fMiterMinimumAngle = basegfx::deg2rad(15.0)) override;
-
-private:
-    // #i101491#
-    // Helper which holds the old line geometry creation and is extended to use AA when
-    // switched on. Advantage is that line geometry is only temporarily used for paint
-    SAL_DLLPRIVATE void drawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLineInfo);
-
     ///@}
 
     /** @name Polygon functions

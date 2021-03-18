@@ -113,6 +113,7 @@ public:
     virtual void DrawRect(tools::Rectangle const& rRect);
 
     virtual void DrawPolyLine(tools::Polygon const& rPoly);
+    virtual void DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLineInfo);
     virtual void DrawPolyPolygon(tools::PolyPolygon const& rPolyPoly);
     virtual void DrawPolyPolygon(basegfx::B2DPolyPolygon const& rB2DPolyPoly);
 
