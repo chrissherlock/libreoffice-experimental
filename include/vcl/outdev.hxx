@@ -424,7 +424,7 @@ public:
     void DrawPolyLine(const basegfx::B2DPolygon&, double fLineWidth = 0.0,
                       basegfx::B2DLineJoin eLineJoin = basegfx::B2DLineJoin::Round,
                       css::drawing::LineCap eLineCap = css::drawing::LineCap_BUTT,
-                      double fMiterMinimumAngle = basegfx::deg2rad(15.0));
+                      double fMiterMinimumAngle = basegfx::deg2rad(15.0)) override;
 
     /** Render the given polygon as a line stroke
 

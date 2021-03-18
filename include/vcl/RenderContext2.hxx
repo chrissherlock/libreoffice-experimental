@@ -114,6 +114,10 @@ public:
 
     virtual void DrawPolyLine(tools::Polygon const& rPoly);
     virtual void DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLineInfo);
+    virtual void DrawPolyLine(const basegfx::B2DPolygon&, double fLineWidth = 0.0,
+                              basegfx::B2DLineJoin eLineJoin = basegfx::B2DLineJoin::Round,
+                              css::drawing::LineCap eLineCap = css::drawing::LineCap_BUTT,
+                              double fMiterMinimumAngle = basegfx::deg2rad(15.0));
     virtual void DrawPolyPolygon(tools::PolyPolygon const& rPolyPoly);
     virtual void DrawPolyPolygon(basegfx::B2DPolyPolygon const& rB2DPolyPoly);
 

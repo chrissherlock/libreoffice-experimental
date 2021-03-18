@@ -140,6 +140,86 @@ void RenderContext2::DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& r
         mpAlphaVDev->DrawPolyLine(rPoly, rLineInfo);
 }
 
+void RenderContext2::DrawPolyLine(const basegfx::B2DPolygon& rB2DPolygon, double fLineWidth,
+                                  basegfx::B2DLineJoin eLineJoin, css::drawing::LineCap eLineCap,
+                                  double fMiterMinimumAngle)
+{
+    assert(!is_double_buffered_window());
+
+    // use b2dpolygon drawing if possible
+    if (DrawPolyLineDirect(basegfx::B2DHomMatrix(), rB2DPolygon, fLineWidth, 0.0,
+                           nullptr, // MM01
+                           eLineJoin, eLineCap, fMiterMinimumAngle))
+    {
+        return;
+    }
+
+    // Do not paint empty PolyPolygons
+    if (!rB2DPolygon.count() || !IsDeviceOutputNecessary())
+        return;
+
+    // we need a graphics
+    if (!mpGraphics && !AcquireGraphics())
+        return;
+
+    assert(mpGraphics);
+
+    if (mbInitClipRegion)
+        InitClipRegion();
+
+    if (mbOutputClipped)
+        return;
+
+    if (mbInitLineColor)
+        InitLineColor();
+
+    // #i101491#
+    // no output yet; fallback to geometry decomposition and use filled polygon paint
+    // when line is fat and not too complex. DrawPolyPolygon
+    // will do internal needed AA checks etc.
+    if (fLineWidth >= 2.5 && rB2DPolygon.count() && rB2DPolygon.count() <= 1000)
+    {
+        const double fHalfLineWidth((fLineWidth * 0.5) + 0.5);
+        const basegfx::B2DPolyPolygon aAreaPolyPolygon(basegfx::utils::createAreaGeometry(
+            rB2DPolygon, fHalfLineWidth, eLineJoin, eLineCap, fMiterMinimumAngle));
+        const Color aOldLineColor(maLineColor);
+        const Color aOldFillColor(maFillColor);
+
+        SetLineColor();
+        InitLineColor();
+        SetFillColor(aOldLineColor);
+        InitFillColor();
+
+        // draw using a loop; else the topology will paint a PolyPolygon
+        for (auto const& rPolygon : aAreaPolyPolygon)
+        {
+            DrawPolyPolygon(basegfx::B2DPolyPolygon(rPolygon));
+        }
+
+        SetLineColor(aOldLineColor);
+        InitLineColor();
+        SetFillColor(aOldFillColor);
+        InitFillColor();
+
+        // when AA it is necessary to also paint the filled polygon's outline
+        // to avoid optical gaps
+        for (auto const& rPolygon : aAreaPolyPolygon)
+        {
+            (void)DrawPolyLineDirect(basegfx::B2DHomMatrix(), rPolygon);
+        }
+    }
+    else
+    {
+        // fallback to old polygon drawing if needed
+        const tools::Polygon aToolsPolygon(rB2DPolygon);
+        LineInfo aLineInfo;
+        if (fLineWidth != 0.0)
+            aLineInfo.SetWidth(static_cast<tools::Long>(fLineWidth + 0.5));
+
+        DrawPolyLine(aToolsPolygon, aLineInfo);
+    }
+}
+
 bool RenderContext2::DrawPolyLineDirect(const basegfx::B2DHomMatrix& rObjectTransform,
                                         const basegfx::B2DPolygon& rB2DPolygon, double fLineWidth,
                                         double fTransparency,
