@@ -1965,7 +1965,7 @@ MetaMaskScalePartAction::MetaMaskScalePartAction( const Point& rDstPt, const Siz
 
 void MetaMaskScalePartAction::Execute( OutputDevice* pOut )
 {
-    pOut->DrawMask( maDstPt, maDstSz, maSrcPt, maSrcSz, maBmp, maColor, MetaActionType::MASKSCALE );
+    pOut->DrawScaledMask( maDstPt, maDstSz, maSrcPt, maSrcSz, maBmp, maColor );
 }
 
 rtl::Reference<MetaAction> MetaMaskScalePartAction::Clone()
