@@ -823,25 +823,14 @@ private:
     ///@{
 
 public:
-    void DrawMask(Point const& rDestPt, Bitmap const& rBitmap, Color const& rMaskColor);
-
+    void DrawMask(Point const& rDestPt, Bitmap const& rBitmap, Color const& rMaskColor) override;
     void DrawMask(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap,
-                  Color const& rMaskColor);
-
+                  Color const& rMaskColor) override;
     void DrawScaledMask(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
                         Size const& rSrcSizePixel, Bitmap const& rBitmap, Color const& rMaskColor);
-
     void DrawMask(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
-                  Size const& rSrcSizePixel, Bitmap const& rBitmap, Color const& rMaskColor);
-
-protected:
-    virtual void DrawDeviceMask(Bitmap const& rMask, Color const& rMaskColor, Point const& rDestPt,
-                                Size const& rDestSize, Point const& rSrcPtPixel,
-                                Size const& rSrcSizePixel);
-
-private:
-    void DrawMask2(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
-                   Size const& rSrcSizePixel, Bitmap const& rBitmap, Color const& rMaskColor);
+                  Size const& rSrcSizePixel, Bitmap const& rBitmap,
+                  Color const& rMaskColor) override;
     ///@}
 
     /** @name Map functions

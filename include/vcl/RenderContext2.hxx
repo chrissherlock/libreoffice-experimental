@@ -163,6 +163,13 @@ public:
     */
     virtual bool HasFastDrawTransformedBitmap() const;
 
+    virtual void DrawMask(Point const& rDestPt, Bitmap const& rBitmap, Color const& rMaskColor);
+    virtual void DrawMask(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap,
+                          Color const& rMaskColor);
+    virtual void DrawMask(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
+                          Size const& rSrcSizePixel, Bitmap const& rBitmap,
+                          Color const& rMaskColor);
+
     virtual void DrawImage(Point const& rPos, Image const& rImage,
                            DrawImageFlags nStyle = DrawImageFlags::NONE);
     virtual void DrawImage(Point const& rPos, Size const& rSize, Image const& rImage,
@@ -592,7 +599,7 @@ public:
                            Point const& rEndPt);
 
 protected:
-    virtual void dispose() override;
+    virtual void dispose();
 
     /** Acquire a graphics device that the output device uses to draw on.
 
@@ -641,6 +648,10 @@ protected:
      */
     virtual bool DrawTransformBitmapExDirect(basegfx::B2DHomMatrix const& aFullTransform,
                                              BitmapEx const& rBitmapEx, double fAlpha = 1.0);
+
+    virtual void DrawDeviceMask(Bitmap const& rMask, Color const& rMaskColor, Point const& rDestPt,
+                                Size const& rDestSize, Point const& rSrcPtPixel,
+                                Size const& rSrcSizePixel);
 
     SAL_DLLPRIVATE void ImplDrawPolygon(tools::Polygon const& rPoly,
                                         tools::PolyPolygon const* pClipPolyPoly = nullptr);
