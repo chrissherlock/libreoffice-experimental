@@ -633,14 +633,13 @@ protected:
     SAL_DLLPRIVATE void ImplDrawPolygon(tools::Polygon const& rPoly,
                                         tools::PolyPolygon const* pClipPolyPoly = nullptr);
 
-    virtual bool
-    DrawPolyLineDirectInternal(basegfx::B2DHomMatrix const& rObjectTransform,
-                               basegfx::B2DPolygon const& rB2DPolygon, double fLineWidth = 0.0,
-                               double fTransparency = 0.0,
-                               std::vector<double> const* = nullptr, // MM01
-                               basegfx::B2DLineJoin eLineJoin = basegfx::B2DLineJoin::NONE,
-                               css::drawing::LineCap eLineCap = css::drawing::LineCap_BUTT,
-                               double fMiterMinimumAngle = basegfx::deg2rad(15.0));
+    virtual bool DrawPolyLineDirect(basegfx::B2DHomMatrix const& rObjectTransform,
+                                    basegfx::B2DPolygon const& rB2DPolygon, double fLineWidth = 0.0,
+                                    double fTransparency = 0.0,
+                                    std::vector<double> const* = nullptr, // MM01
+                                    basegfx::B2DLineJoin eLineJoin = basegfx::B2DLineJoin::NONE,
+                                    css::drawing::LineCap eLineCap = css::drawing::LineCap_BUTT,
+                                    double fMiterMinimumAngle = basegfx::deg2rad(15.0));
 
     SAL_DLLPRIVATE void ImplDrawPolyPolygon(tools::PolyPolygon const& rPolyPoly,
                                             tools::PolyPolygon const* pClipPolyPoly);
