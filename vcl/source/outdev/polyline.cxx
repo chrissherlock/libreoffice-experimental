@@ -67,7 +67,10 @@ void OutputDevice::DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaPolyLineAction(rPoly, rLineInfo));
 
-    drawPolyLine(rPoly, rLineInfo);
+    if (ImplIsRecordLayout())
+        return;
+
+    RenderContext2::DrawPolyLine(rPoly, rLineInfo);
 }
 
 void OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2DPolygon, double fLineWidth,
@@ -150,65 +153,17 @@ void OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2DPolygon, double f
     }
     else
     {
+        if (ImplIsRecordLayout())
+            return;
+
         // fallback to old polygon drawing if needed
         const tools::Polygon aToolsPolygon(rB2DPolygon);
         LineInfo aLineInfo;
         if (fLineWidth != 0.0)
             aLineInfo.SetWidth(static_cast<tools::Long>(fLineWidth + 0.5));
 
-        drawPolyLine(aToolsPolygon, aLineInfo);
+        RenderContext2::DrawPolyLine(aToolsPolygon, aLineInfo);
     }
-}
-
-void OutputDevice::drawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLineInfo)
-{
-    sal_uInt16 nPoints(rPoly.GetSize());
-
-    if (!IsDeviceOutputNecessary() || !mbLineColor || (nPoints < 2)
-        || (LineStyle::NONE == rLineInfo.GetStyle()) || ImplIsRecordLayout())
-        return;
-
-    tools::Polygon aPoly = ImplLogicToDevicePixel(rPoly);
-
-    // we need a graphics
-    if (!mpGraphics && !AcquireGraphics())
-        return;
-
-    assert(mpGraphics);
-
-    if (mbInitClipRegion)
-        InitClipRegion();
-
-    if (mbOutputClipped)
-        return;
-
-    if (mbInitLineColor)
-        InitLineColor();
-
-    const LineInfo aInfo(ImplLogicToDevicePixel(rLineInfo));
-    const bool bDashUsed(LineStyle::Dash == aInfo.GetStyle());
-    const bool bLineWidthUsed(aInfo.GetWidth() > 1);
-
-    if (bDashUsed || bLineWidthUsed)
-    {
-        RenderContext2::DrawLine(basegfx::B2DPolyPolygon(aPoly.getB2DPolygon()), aInfo);
-    }
-    else
-    {
-        // #100127# the subdivision HAS to be done here since only a pointer
-        // to an array of points is given to the DrawPolyLine method, there is
-        // NO way to find out there that it's a curve.
-        if (aPoly.HasFlags())
-        {
-            aPoly = tools::Polygon::SubdivideBezier(aPoly);
-            nPoints = aPoly.GetSize();
-        }
-
-        mpGraphics->DrawPolyLine(nPoints, aPoly.GetPointAry(), *this);
-    }
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->DrawPolyLine(rPoly, rLineInfo);
 }
 
 bool OutputDevice::DrawPolyLineDirect(const basegfx::B2DHomMatrix& rObjectTransform,
