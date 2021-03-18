@@ -64,8 +64,7 @@ public:
 
     OUString GetStock() const;
 
-    BitmapEx GenerateBitmap(DrawImageFlags nStyle, StyleSettings const& rSettings);
-    void Draw(OutputDevice* pOutDev, const Point& rPos, DrawImageFlags nStyle, const Size* pSize = nullptr);
+    BitmapEx GenerateBitmap(DrawImageFlags nStyle, StyleSettings const& rSettings) const;
 
 private:
 
