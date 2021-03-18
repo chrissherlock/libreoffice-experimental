@@ -142,6 +142,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/rendercontext/line \
     vcl/source/rendercontext/map \
     vcl/source/rendercontext/mask \
+    vcl/source/rendercontext/nativecontrols \
     vcl/source/rendercontext/output \
     vcl/source/rendercontext/polyline \
     vcl/source/rendercontext/polygon \
@@ -288,7 +289,6 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/outdev/curvedshapes \
     vcl/source/outdev/wallpaper \
     vcl/source/outdev/vclreferencebase \
-    vcl/source/outdev/nativecontrols \
     vcl/source/outdev/map \
     vcl/source/treelist/headbar \
     vcl/source/treelist/iconview \
