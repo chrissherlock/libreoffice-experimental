@@ -138,6 +138,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/rendercontext/geometry \
     vcl/source/rendercontext/gradient \
     vcl/source/rendercontext/graphics \
+    vcl/source/rendercontext/grid \
     vcl/source/rendercontext/hatch \
     vcl/source/rendercontext/invert \
     vcl/source/rendercontext/image \
@@ -287,6 +288,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/outdev/pixel \
     vcl/source/outdev/border \
     vcl/source/outdev/rect \
+    vcl/source/outdev/grid \
     vcl/source/outdev/fill \
     vcl/source/outdev/line \
     vcl/source/outdev/polyline \

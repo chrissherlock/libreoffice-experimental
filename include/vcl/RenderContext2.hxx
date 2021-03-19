@@ -39,6 +39,7 @@
 #include <vcl/flags/AntialiasingFlags.hxx>
 #include <vcl/flags/ComplexTextLayoutFlags.hxx>
 #include <vcl/flags/DrawImageFlags.hxx>
+#include <vcl/flags/DrawGridFlags.hxx>
 #include <vcl/flags/DrawModeFlags.hxx>
 #include <vcl/flags/DrawTextFlags.hxx>
 #include <vcl/flags/GetDefaultFontFlags.hxx>
@@ -121,6 +122,8 @@ public:
     virtual void DrawRect(tools::Rectangle const& rRect);
     virtual void DrawRect(tools::Rectangle const& rRect, sal_uLong nHorzRount,
                           sal_uLong nVertRound);
+
+    virtual void DrawGrid(tools::Rectangle const& rRect, Size const& rDist, DrawGridFlags nFlags);
 
     virtual void DrawBorder(tools::Rectangle aBorderRect);
 
