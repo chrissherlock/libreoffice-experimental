@@ -110,10 +110,10 @@ void OutputDevice::DrawPolyLine(basegfx::B2DPolygon const& rB2DPolygon, double f
     RenderContext2::DrawPolyLine(rB2DPolygon, fLineWidth, eLineJoin, eLineCap, fMiterMinimumAngle);
 }
 
-bool OutputDevice::DrawPolyLineDirect(const basegfx::B2DHomMatrix& rObjectTransform,
-                                      const basegfx::B2DPolygon& rB2DPolygon, double fLineWidth,
+bool OutputDevice::DrawPolyLineDirect(basegfx::B2DHomMatrix const& rObjectTransform,
+                                      basegfx::B2DPolygon const& rB2DPolygon, double fLineWidth,
                                       double fTransparency,
-                                      const std::vector<double>* pStroke, // MM01
+                                      std::vector<double> const* pStroke, // MM01
                                       basegfx::B2DLineJoin eLineJoin,
                                       css::drawing::LineCap eLineCap, double fMiterMinimumAngle)
 {

@@ -24,7 +24,7 @@
 
 #include <salgdi.hxx>
 
-void RenderContext2::DrawPolyLine(const tools::Polygon& rPoly)
+void RenderContext2::DrawPolyLine(tools::Polygon const& rPoly)
 {
     assert(!is_double_buffered_window());
 
@@ -89,7 +89,7 @@ void RenderContext2::DrawPolyLine(const tools::Polygon& rPoly)
         mpAlphaVDev->DrawPolyLine(rPoly);
 }
 
-void RenderContext2::DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLineInfo)
+void RenderContext2::DrawPolyLine(tools::Polygon const& rPoly, LineInfo const& rLineInfo)
 {
     sal_uInt16 nPoints(rPoly.GetSize());
 
@@ -140,7 +140,7 @@ void RenderContext2::DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& r
         mpAlphaVDev->DrawPolyLine(rPoly, rLineInfo);
 }
 
-void RenderContext2::DrawPolyLine(const basegfx::B2DPolygon& rB2DPolygon, double fLineWidth,
+void RenderContext2::DrawPolyLine(basegfx::B2DPolygon const& rB2DPolygon, double fLineWidth,
                                   basegfx::B2DLineJoin eLineJoin, css::drawing::LineCap eLineCap,
                                   double fMiterMinimumAngle)
 {
@@ -220,10 +220,10 @@ void RenderContext2::DrawPolyLine(const basegfx::B2DPolygon& rB2DPolygon, double
     }
 }
 
-bool RenderContext2::DrawPolyLineDirect(const basegfx::B2DHomMatrix& rObjectTransform,
-                                        const basegfx::B2DPolygon& rB2DPolygon, double fLineWidth,
+bool RenderContext2::DrawPolyLineDirect(basegfx::B2DHomMatrix const& rObjectTransform,
+                                        basegfx::B2DPolygon const& rB2DPolygon, double fLineWidth,
                                         double fTransparency,
-                                        const std::vector<double>* pStroke, // MM01
+                                        std::vector<double> const* pStroke, // MM01
                                         basegfx::B2DLineJoin eLineJoin,
                                         css::drawing::LineCap eLineCap, double fMiterMinimumAngle)
 {
