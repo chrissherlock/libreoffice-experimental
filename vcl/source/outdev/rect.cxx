@@ -42,64 +42,18 @@ void OutputDevice::DrawRect(tools::Rectangle const& rRect)
     RenderContext2::DrawRect(rRect);
 }
 
-void OutputDevice::DrawRect( const tools::Rectangle& rRect,
-                             sal_uLong nHorzRound, sal_uLong nVertRound )
+void OutputDevice::DrawRect(tools::Rectangle const& rRect,
+                             sal_uLong nHorzRound, sal_uLong nVertRound)
 {
     assert(!is_double_buffered_window());
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaRoundRectAction( rRect, nHorzRound, nVertRound ) );
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaRoundRectAction(rRect, nHorzRound, nVertRound));
 
-    if ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
+    if (ImplIsRecordLayout())
         return;
 
-    const tools::Rectangle aRect( ImplLogicToDevicePixel( rRect ) );
-
-    if ( aRect.IsEmpty() )
-        return;
-
-    nHorzRound = ImplLogicWidthToDevicePixel( nHorzRound );
-    nVertRound = ImplLogicHeightToDevicePixel( nVertRound );
-
-    // we need a graphics
-    if ( !mpGraphics && !AcquireGraphics() )
-        return;
-
-    assert(mpGraphics);
-
-    if ( mbInitClipRegion )
-        InitClipRegion();
-
-    if ( mbOutputClipped )
-        return;
-
-    if ( mbInitLineColor )
-        InitLineColor();
-
-    if ( mbInitFillColor )
-        InitFillColor();
-
-    if ( !nHorzRound && !nVertRound )
-    {
-        mpGraphics->DrawRect( aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(), *this );
-    }
-    else
-    {
-        tools::Polygon aRoundRectPoly( aRect, nHorzRound, nVertRound );
-
-        if ( aRoundRectPoly.GetSize() >= 2 )
-        {
-            Point* pPtAry = aRoundRectPoly.GetPointAry();
-
-            if ( !mbFillColor )
-                mpGraphics->DrawPolyLine( aRoundRectPoly.GetSize(), pPtAry, *this );
-            else
-                mpGraphics->DrawPolygon( aRoundRectPoly.GetSize(), pPtAry, *this );
-        }
-    }
-
-    if( mpAlphaVDev )
-        mpAlphaVDev->DrawRect( rRect, nHorzRound, nVertRound );
+    RenderContext2::DrawRect(rRect, nHorzRound, nVertRound);
 }
 
 void OutputDevice::Invert( const tools::Rectangle& rRect, InvertFlags nFlags )
@@ -150,8 +104,6 @@ void OutputDevice::Invert( const tools::Polygon& rPoly, InvertFlags nFlags )
     // we need a graphics
     if ( !mpGraphics && !AcquireGraphics() )
         return;
-
-    assert(mpGraphics);
 
     if ( mbInitClipRegion )
         InitClipRegion();

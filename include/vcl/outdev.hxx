@@ -372,7 +372,8 @@ public:
 
 public:
     void DrawRect(tools::Rectangle const& rRect) override;
-    void DrawRect(const tools::Rectangle& rRect, sal_uLong nHorzRount, sal_uLong nVertRound);
+    void DrawRect(tools::Rectangle const& rRect, sal_uLong nHorzRount,
+                  sal_uLong nVertRound) override;
 
     /// Fill the given rectangle with checkered rectangles of size nLen x nLen using the colors aStart and aEnd
     void DrawCheckered(const Point& rPos, const Size& rSize, sal_uInt32 nLen = 8,
