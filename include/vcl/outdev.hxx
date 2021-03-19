@@ -139,20 +139,6 @@ template <> struct typed_flags<DrawGridFlags> : is_typed_flags<DrawGridFlags, 0x
 };
 }
 
-// Flags for Invert()
-enum class InvertFlags
-{
-    NONE = 0x0000,
-    N50 = 0x0001,
-    TrackFrame = 0x0002
-};
-namespace o3tl
-{
-template <> struct typed_flags<InvertFlags> : is_typed_flags<InvertFlags, 0x0003>
-{
-};
-}
-
 enum OutDevType
 {
     OUTDEV_WINDOW,
@@ -381,14 +367,6 @@ public:
 
     void DrawGrid(const tools::Rectangle& rRect, const Size& rDist, DrawGridFlags nFlags);
 
-    ///@}
-
-    /** @name Invert functions
-     */
-    ///@{
-public:
-    void Invert(const tools::Rectangle& rRect, InvertFlags nFlags = InvertFlags::NONE);
-    void Invert(const tools::Polygon& rPoly, InvertFlags nFlags = InvertFlags::NONE);
     ///@}
 
     /** @name Line functions
