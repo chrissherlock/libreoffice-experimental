@@ -139,6 +139,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/rendercontext/gradient \
     vcl/source/rendercontext/graphics \
     vcl/source/rendercontext/hatch \
+    vcl/source/rendercontext/invert \
     vcl/source/rendercontext/image \
     vcl/source/rendercontext/line \
     vcl/source/rendercontext/map \

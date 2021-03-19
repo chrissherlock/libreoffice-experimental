@@ -42,6 +42,7 @@
 #include <vcl/flags/DrawModeFlags.hxx>
 #include <vcl/flags/DrawTextFlags.hxx>
 #include <vcl/flags/GetDefaultFontFlags.hxx>
+#include <vcl/flags/InvertFlags.hxx>
 #include <vcl/flags/PushFlags.hxx>
 #include <vcl/font.hxx>
 #include <vcl/lineinfo.hxx>
@@ -120,7 +121,11 @@ public:
     virtual void DrawRect(tools::Rectangle const& rRect);
     virtual void DrawRect(tools::Rectangle const& rRect, sal_uLong nHorzRount,
                           sal_uLong nVertRound);
+
     virtual void DrawBorder(tools::Rectangle aBorderRect);
+
+    void Invert(tools::Rectangle const& rRect, InvertFlags nFlags = InvertFlags::NONE);
+    void Invert(tools::Polygon const& rPoly, InvertFlags nFlags = InvertFlags::NONE);
 
     virtual void DrawPolyLine(tools::Polygon const& rPoly);
     virtual void DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLineInfo);
