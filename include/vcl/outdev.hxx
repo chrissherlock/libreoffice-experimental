@@ -124,21 +124,6 @@ typedef std::vector<tools::Rectangle> MetricVector;
 
 // OutputDevice-Types
 
-// Flags for DrawGrid()
-enum class DrawGridFlags
-{
-    NONE = 0x0000,
-    Dots = 0x0001,
-    HorzLines = 0x0002,
-    VertLines = 0x0004
-};
-namespace o3tl
-{
-template <> struct typed_flags<DrawGridFlags> : is_typed_flags<DrawGridFlags, 0x0007>
-{
-};
-}
-
 enum OutDevType
 {
     OUTDEV_WINDOW,
@@ -361,11 +346,11 @@ public:
     void DrawRect(tools::Rectangle const& rRect, sal_uLong nHorzRount,
                   sal_uLong nVertRound) override;
 
+    void DrawGrid(tools::Rectangle const& rRect, Size const& rDist, DrawGridFlags nFlags) override;
+
     /// Fill the given rectangle with checkered rectangles of size nLen x nLen using the colors aStart and aEnd
     void DrawCheckered(const Point& rPos, const Size& rSize, sal_uInt32 nLen = 8,
                        Color aStart = COL_WHITE, Color aEnd = COL_BLACK);
-
-    void DrawGrid(const tools::Rectangle& rRect, const Size& rDist, DrawGridFlags nFlags);
 
     ///@}
 
