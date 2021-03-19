@@ -365,10 +365,8 @@ public:
     ///@{
 
 public:
-    void DrawPixel(const Point& rPt);
-    void DrawPixel(const Point& rPt, const Color& rColor);
-
-    Color GetPixel(const Point& rPt) const;
+    void DrawPixel(Point const& rPt) override;
+    void DrawPixel(Point const& rPt, Color const& rColor) override;
     ///@}
 
     /** @name Rectangle functions

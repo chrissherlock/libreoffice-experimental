@@ -106,6 +106,10 @@ public:
     RenderContext2();
     virtual ~RenderContext2();
 
+    Color GetPixel(Point const& rPt) const;
+    virtual void DrawPixel(Point const& rPt);
+    virtual void DrawPixel(Point const& rPt, Color const& rColor);
+
     virtual void DrawLine(Point const& rStartPt, Point const& rEndPt);
     virtual void DrawLine(Point const& rStartPt, Point const& rEndPt, LineInfo const& rLineInfo);
 
@@ -709,9 +713,9 @@ protected:
                                                              tools::PolyPolygon const& rPolyPoly,
                                                              Point* pPtBuffer);
 
-    
-    virtual void DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize, const Point& rSrcPtPixel,
-                    Size const& rSrcSizePixel, Bitmap const& rBitmap);
+    virtual void DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize,
+                                  const Point& rSrcPtPixel, Size const& rSrcSizePixel,
+                                  Bitmap const& rBitmap);
 
     virtual bool CanSubsampleBitmap() const { return true; }
     bool ProcessBitmapRasterOpInvert(Point const& rDestPt, Size const& rDestSize);
