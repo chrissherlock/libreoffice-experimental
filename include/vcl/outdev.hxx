@@ -355,7 +355,7 @@ public:
     ///@}
 
 public:
-    virtual void DrawBorder(tools::Rectangle aBorderRect);
+    void DrawBorder(tools::Rectangle aBorderRect) override;
 
     /** @name Pixel functions
      */

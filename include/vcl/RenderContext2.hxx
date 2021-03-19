@@ -118,6 +118,7 @@ public:
     void DrawLine(basegfx::B2DPolyPolygon aLinePolyPolygon, LineInfo const& rInfo);
 
     virtual void DrawRect(tools::Rectangle const& rRect);
+    virtual void DrawBorder(tools::Rectangle aBorderRect);
 
     virtual void DrawPolyLine(tools::Polygon const& rPoly);
     virtual void DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLineInfo);
