@@ -172,9 +172,6 @@ enum class OutDevViewType
 
 typedef tools::SvRef<FontCharMap> FontCharMapRef;
 
-BmpMirrorFlags AdjustTwoRect(SalTwoRect& rTwoRect, const Size& rSizePix);
-void AdjustTwoRect(SalTwoRect& rTwoRect, const tools::Rectangle& rValidSrcRect);
-
 class OutputDevice;
 
 namespace vcl
