@@ -144,6 +144,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/rendercontext/mask \
     vcl/source/rendercontext/nativecontrols \
     vcl/source/rendercontext/output \
+    vcl/source/rendercontext/pixel \
     vcl/source/rendercontext/polyline \
     vcl/source/rendercontext/polygon \
     vcl/source/rendercontext/polypolygon \
