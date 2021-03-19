@@ -17,17 +17,12 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <cassert>
-
-#include <sal/types.h>
-
-#include <tools/poly.hxx>
-#include <tools/helpers.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/outdev.hxx>
-#include <vcl/virdev.hxx>
 
 #include <salgdi.hxx>
+
+#include <cassert>
 
 void OutputDevice::DrawRect(tools::Rectangle const& rRect)
 {
@@ -54,32 +49,6 @@ void OutputDevice::DrawRect(tools::Rectangle const& rRect,
         return;
 
     RenderContext2::DrawRect(rRect, nHorzRound, nVertRound);
-}
-
-void OutputDevice::DrawCheckered(const Point& rPos, const Size& rSize, sal_uInt32 nLen, Color aStart, Color aEnd)
-{
-    assert(!is_double_buffered_window());
-
-    const sal_uInt32 nMaxX(rPos.X() + rSize.Width());
-    const sal_uInt32 nMaxY(rPos.Y() + rSize.Height());
-
-    Push(PushFlags::LINECOLOR|PushFlags::FILLCOLOR);
-    SetLineColor();
-
-    for(sal_uInt32 x(0), nX(rPos.X()); nX < nMaxX; x++, nX += nLen)
-    {
-        const sal_uInt32 nRight(std::min(nMaxX, nX + nLen));
-
-        for(sal_uInt32 y(0), nY(rPos.Y()); nY < nMaxY; y++, nY += nLen)
-        {
-            const sal_uInt32 nBottom(std::min(nMaxY, nY + nLen));
-
-            SetFillColor(((x & 0x0001) ^ (y & 0x0001)) ? aStart : aEnd);
-            DrawRect(tools::Rectangle(nX, nY, nRight, nBottom));
-        }
-    }
-
-    Pop();
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

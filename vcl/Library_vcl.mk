@@ -129,6 +129,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/rendercontext/bitmapex \
     vcl/source/rendercontext/blend \
     vcl/source/rendercontext/border \
+    vcl/source/rendercontext/checkered \
     vcl/source/rendercontext/clipping \
     vcl/source/rendercontext/curvedshapes \
     vcl/source/rendercontext/drawmode \
@@ -288,6 +289,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/outdev/pixel \
     vcl/source/outdev/border \
     vcl/source/outdev/rect \
+    vcl/source/outdev/checkered \
     vcl/source/outdev/grid \
     vcl/source/outdev/fill \
     vcl/source/outdev/line \
