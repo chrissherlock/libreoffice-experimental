@@ -20,9 +20,12 @@
 #ifndef INCLUDED_VCL_SALGTYPE_HXX
 #define INCLUDED_VCL_SALGTYPE_HXX
 
-#include <o3tl/typed_flags_set.hxx>
 #include <tools/color.hxx>
 #include <tools/gen.hxx>
+#include <o3tl/typed_flags_set.hxx>
+
+#include <vcl/flags/BmpMirrorFlags.hxx>
+
 #include <ostream>
 
 enum class DeviceFormat {
@@ -81,6 +84,9 @@ namespace o3tl
 {
     template<> struct typed_flags<SalInvert> : is_typed_flags<SalInvert, 0x03> {};
 }
+
+BmpMirrorFlags AdjustTwoRect(SalTwoRect& rTwoRect, Size const& rSizePix);
+void AdjustTwoRect(SalTwoRect& rTwoRect, tools::Rectangle const& rValidSrcRect);
 
 #endif // INCLUDED_VCL_SALGTYPE_HXX
 

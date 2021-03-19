@@ -22,14 +22,15 @@
 
 #include <tools/solar.h>
 #include <tools/degree.hxx>
-#include <vcl/checksum.hxx>
+#include <o3tl/typed_flags_set.hxx>
+
 #include <vcl/dllapi.h>
+#include <vcl/checksum.hxx>
+#include <vcl/bitmap/BitmapTypes.hxx>
+#include <vcl/flags/BmpMirrorFlags.hxx>
 #include <vcl/mapmod.hxx>
 #include <vcl/region.hxx>
 #include <vcl/scopedbitmapaccess.hxx>
-#include <vcl/bitmap/BitmapTypes.hxx>
-
-#include <o3tl/typed_flags_set.hxx>
 
 #include <memory>
 
@@ -38,18 +39,6 @@
 class Color;
 
 template <typename Arg, typename Ret> class Link;
-
-enum class BmpMirrorFlags
-{
-    NONE             = 0x00,
-    Horizontal       = 0x01,
-    Vertical         = 0x02,
-};
-
-namespace o3tl
-{
-    template<> struct typed_flags<BmpMirrorFlags> : is_typed_flags<BmpMirrorFlags, 0x03> {};
-}
 
 enum class BmpScaleFlag
 {
