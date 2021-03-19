@@ -123,9 +123,12 @@ public:
     virtual void DrawRect(tools::Rectangle const& rRect, sal_uLong nHorzRount,
                           sal_uLong nVertRound);
 
+    virtual void DrawBorder(tools::Rectangle aBorderRect);
+
     virtual void DrawGrid(tools::Rectangle const& rRect, Size const& rDist, DrawGridFlags nFlags);
 
-    virtual void DrawBorder(tools::Rectangle aBorderRect);
+    virtual void DrawCheckered(Point const& rPos, Size const& rSize, sal_uInt32 nLen = 8,
+                               Color aStart = COL_WHITE, Color aEnd = COL_BLACK);
 
     void Invert(tools::Rectangle const& rRect, InvertFlags nFlags = InvertFlags::NONE);
     void Invert(tools::Polygon const& rPoly, InvertFlags nFlags = InvertFlags::NONE);
