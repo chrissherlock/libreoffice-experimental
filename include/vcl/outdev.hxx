@@ -50,6 +50,7 @@
 #include <com/sun/star/uno/Reference.h>
 #include <com/sun/star/awt/DeviceInfo.hpp>
 
+#include <tuple>
 #include <memory>
 #include <vector>
 
@@ -630,6 +631,9 @@ protected:
                                                        DrawTextFlags nStyle,
                                                        const vcl::ITextLayout& _rLayout);
     SAL_DLLPRIVATE float approximate_char_width() const;
+
+    virtual void InitWaveLineColor(Color const& rColor, tools::Long);
+    virtual std::tuple<bool, Size> GetWaveLineSize(tools::Long nLineWidth) const;
 
 private:
     SAL_DLLPRIVATE void ImplDrawTextDirect(SalLayout&, bool bTextLines);

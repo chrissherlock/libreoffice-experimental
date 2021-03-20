@@ -32,7 +32,6 @@
 #include <salgdi.hxx>
 #include <impglyphitem.hxx>
 
-
 #include <cassert>
 
 #define UNDERLINE_LAST LINESTYLE_BOLDWAVE
@@ -68,6 +67,17 @@ void OutputDevice::ImplDrawWavePixel(tools::Long nOriginX, tools::Long nOriginY,
     {
         pGraphics->DrawPixel(nCurX, nCurY, rOutDev);
     }
+}
+
+void OutputDevice::InitWaveLineColor(Color const& rColor, tools::Long)
+{
+    mpGraphics->SetLineColor(rColor);
+    mbInitLineColor = true;
+}
+
+std::tuple<bool, Size> OutputDevice::GetWaveLineSize(tools::Long) const
+{
+    return std::make_tuple(false, Size(1, 1));
 }
 
 void OutputDevice::ImplDrawWaveLine(tools::Long nBaseX, tools::Long nBaseY, tools::Long nDistX,
@@ -109,27 +119,14 @@ void OutputDevice::ImplDrawWaveLine(tools::Long nBaseX, tools::Long nBaseY, tool
         tools::Long nPixHeight;
         bool bDrawPixAsRect;
         // On printers that output pixel via DrawRect()
-        if ((GetOutDevType() == OUTDEV_PRINTER) || (nLineWidth > 1))
-        {
-            if (mbLineColor || mbInitLineColor)
-            {
-                mpGraphics->SetLineColor();
-                mbInitLineColor = true;
-            }
-            mpGraphics->SetFillColor(rColor);
-            mbInitFillColor = true;
-            bDrawPixAsRect = true;
-            nPixWidth = nLineWidth;
-            nPixHeight = ((nLineWidth * GetDPIX()) + (GetDPIY() / 2)) / GetDPIY();
-        }
-        else
-        {
-            mpGraphics->SetLineColor(rColor);
-            mbInitLineColor = true;
-            nPixWidth = 1;
-            nPixHeight = 1;
-            bDrawPixAsRect = false;
-        }
+
+        InitWaveLineColor(rColor, nLineWidth);
+
+        Size aPixSize;
+        std::tie(bDrawPixAsRect, aPixSize) = GetWaveLineSize(nLineWidth);
+
+        nPixWidth = aPixSize.Width();
+        nPixHeight = aPixSize.Height();
 
         if (!nDiffY)
         {
