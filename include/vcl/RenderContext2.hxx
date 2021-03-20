@@ -764,6 +764,7 @@ protected:
 
     SAL_DLLPRIVATE void InitLineColor();
     SAL_DLLPRIVATE void InitFillColor();
+    SAL_DLLPRIVATE void ImplInitTextColor();
 
     virtual void ImplInitMapModeObjects();
 
