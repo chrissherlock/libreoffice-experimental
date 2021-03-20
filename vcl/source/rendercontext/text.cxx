@@ -221,6 +221,24 @@ void RenderContext2::DrawTextArray(Point const& rStartPt, OUString const& rStr,
         mpAlphaVDev->DrawTextArray(rStartPt, rStr, pDXAry, nIndex, nLen, flags);
 }
 
+void RenderContext2::DrawStretchText(Point const& rStartPt, sal_uLong nWidth, OUString const& rStr,
+                                     sal_Int32 nIndex, sal_Int32 nLen)
+{
+    if ((nLen < 0) || (nIndex + nLen >= rStr.getLength()))
+        nLen = rStr.getLength() - nIndex;
+
+    if (!IsDeviceOutputNecessary())
+        return;
+
+    std::unique_ptr<SalLayout> pSalLayout = ImplLayout(rStr, nIndex, nLen, rStartPt, nWidth);
+
+    if (pSalLayout)
+        ImplDrawText(*pSalLayout);
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->DrawStretchText(rStartPt, nWidth, rStr, nIndex, nLen);
+}
+
 void RenderContext2::DrawTextLine(Point const& rPos, tools::Long nWidth, FontStrikeout eStrikeout,
                                   FontLineStyle eUnderline, FontLineStyle eOverline,
                                   bool bUnderlineAbove)

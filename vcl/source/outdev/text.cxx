@@ -19,7 +19,7 @@
 
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
-#include <vcl/virdev.hxx>
+#include <vcl/outdev.hxx>
 
 #include <salgdi.hxx>
 #include <drawmode.hxx>
@@ -70,7 +70,7 @@ void OutputDevice::DrawTextArray(Point const& rStartPt, OUString const& rStr,
     RenderContext2::DrawTextArray(rStartPt, rStr, pDXAry, nIndex, nLen, flags, pSalLayoutCache);
 }
 
-void OutputDevice::DrawStretchText(const Point& rStartPt, sal_uLong nWidth, const OUString& rStr,
+void OutputDevice::DrawStretchText(Point const& rStartPt, sal_uLong nWidth, OUString const& rStr,
                                    sal_Int32 nIndex, sal_Int32 nLen)
 {
     assert(!is_double_buffered_window());
@@ -81,16 +81,7 @@ void OutputDevice::DrawStretchText(const Point& rStartPt, sal_uLong nWidth, cons
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaStretchTextAction(rStartPt, nWidth, rStr, nIndex, nLen));
 
-    if (!IsDeviceOutputNecessary())
-        return;
-
-    std::unique_ptr<SalLayout> pSalLayout = ImplLayout(rStr, nIndex, nLen, rStartPt, nWidth);
-
-    if (pSalLayout)
-        ImplDrawText(*pSalLayout);
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->DrawStretchText(rStartPt, nWidth, rStr, nIndex, nLen);
+    RenderContext2::DrawStretchText(rStartPt, nWidth, rStr, nIndex, nLen);
 }
 
 void OutputDevice::AddTextRectActions(const tools::Rectangle& rRect, const OUString& rOrigStr,

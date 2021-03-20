@@ -551,8 +551,8 @@ public:
                        SalLayoutFlags flags = SalLayoutFlags::NONE,
                        SalLayoutGlyphs const* pLayoutCache = nullptr) override;
 
-    void DrawStretchText(const Point& rStartPt, sal_uLong nWidth, const OUString& rStr,
-                         sal_Int32 nIndex = 0, sal_Int32 nLen = -1);
+    void DrawStretchText(Point const& rStartPt, sal_uLong nWidth, OUString const& rStr,
+                         sal_Int32 nIndex = 0, sal_Int32 nLen = -1) override;
 
 protected:
     SAL_DLLPRIVATE void ImplInitTextLineSize();

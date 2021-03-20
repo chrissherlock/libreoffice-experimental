@@ -190,6 +190,9 @@ public:
                                SalLayoutFlags flags = SalLayoutFlags::NONE,
                                SalLayoutGlyphs const* pLayoutCache = nullptr);
 
+    virtual void DrawStretchText(Point const& rStartPt, sal_uLong nWidth, OUString const& rStr,
+                                 sal_Int32 nIndex = 0, sal_Int32 nLen = -1);
+
     virtual void DrawTextLine(const Point& rPos, tools::Long nWidth, FontStrikeout eStrikeout,
                               FontLineStyle eUnderline, FontLineStyle eOverline,
                               bool bUnderlineAbove = false);
