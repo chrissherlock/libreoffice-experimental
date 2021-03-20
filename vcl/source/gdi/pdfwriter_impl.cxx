@@ -68,13 +68,14 @@
 #include <vcl/filter/pdfdocument.hxx>
 #include <comphelper/hash.hxx>
 
+#include <ImplMultiTextLineInfo.hxx>
+#include <textlineinfo.hxx>
 #include <svdata.hxx>
 #include <bitmap/BitmapWriteAccess.hxx>
 #include <fontsubset.hxx>
 #include <PhysicalFontFace.hxx>
 #include <salgdi.hxx>
 #include <textlayout.hxx>
-#include <textlineinfo.hxx>
 #include <impglyphitem.hxx>
 #include <pdf/XmpMetadata.hxx>
 #include <pdf/objectcopier.hxx>

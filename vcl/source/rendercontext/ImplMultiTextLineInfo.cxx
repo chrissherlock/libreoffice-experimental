@@ -1,4 +1,4 @@
-/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; fill-column: 100 -*- */
 /*
  * This file is part of the LibreOffice project.
  *
@@ -17,32 +17,27 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#ifndef INCLUDED_VCL_INC_TEXTLINEINFO_HXX
-#define INCLUDED_VCL_INC_TEXTLINEINFO_HXX
+#include <tools/long.hxx>
 
-#include <memory>
-#include <vector>
+#include <ImplMultiTextLineInfo.hxx>
+#include <textlineinfo.hxx>
 
-class ImplTextLineInfo
+ImplMultiTextLineInfo::ImplMultiTextLineInfo() {}
+
+ImplMultiTextLineInfo::~ImplMultiTextLineInfo() {}
+
+ImplTextLineInfo* ImplMultiTextLineInfo::GetLine(sal_Int32 nLine) const
 {
-private:
-    tools::Long        mnWidth;
-    sal_Int32   mnIndex;
-    sal_Int32   mnLen;
+    return mvLines[nLine].get();
+}
 
-public:
-   ImplTextLineInfo( tools::Long nWidth, sal_Int32 nIndex, sal_Int32 nLen )
-   {
-       mnWidth = nWidth;
-       mnIndex = nIndex;
-       mnLen   = nLen;
-   }
+sal_Int32 ImplMultiTextLineInfo::Count() const { return mvLines.size(); }
 
-    tools::Long       GetWidth() const { return mnWidth; }
-    sal_Int32  GetIndex() const { return mnIndex; }
-    sal_Int32  GetLen() const { return mnLen; }
-};
+void ImplMultiTextLineInfo::AddLine(ImplTextLineInfo* pLine)
+{
+    mvLines.push_back(std::unique_ptr<ImplTextLineInfo>(pLine));
+}
 
-#endif // INCLUDED_VCL_INC_TEXTLINEINFO_HXX
+void ImplMultiTextLineInfo::Clear() { mvLines.clear(); }
 
-/* vim:set shiftwidth=4 softtabstop=4 expandtab: */
+/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

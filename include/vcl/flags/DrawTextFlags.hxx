@@ -48,4 +48,7 @@ template <> struct typed_flags<DrawTextFlags> : is_typed_flags<DrawTextFlags, 0x
 };
 }
 
+#define TEXT_DRAW_ELLIPSIS                                                                         \
+    (DrawTextFlags::EndEllipsis | DrawTextFlags::PathEllipsis | DrawTextFlags::NewsEllipsis)
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
