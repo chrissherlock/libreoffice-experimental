@@ -17,40 +17,13 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <memory>
-#include <basegfx/matrix/b2dhommatrix.hxx>
-
-#include <com/sun/star/i18n/WordType.hpp>
-#include <com/sun/star/i18n/XBreakIterator.hpp>
-#include <com/sun/star/linguistic2/LinguServiceManager.hpp>
-
-#include <comphelper/processfactory.hxx>
-#include <osl/file.h>
-#include <rtl/ustrbuf.hxx>
-#include <sal/log.hxx>
-#include <tools/lineend.hxx>
-#include <tools/debug.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
-#include <vcl/metric.hxx>
-#include <vcl/textrectinfo.hxx>
 #include <vcl/virdev.hxx>
-#include <vcl/sysdata.hxx>
-#include <vcl/unohelp.hxx>
-#include <vcl/toolkit/controllayout.hxx>
 
-#include <config_fuzzers.h>
-#include <outdev.h>
-#include <ImplMultiTextLineInfo.hxx>
-#include <ImplOutDevData.hxx>
 #include <salgdi.hxx>
 #include <drawmode.hxx>
-#include <svdata.hxx>
 #include <textlayout.hxx>
-#include <textlineinfo.hxx>
-#include <impglyphitem.hxx>
-
-#include <optional>
 
 void OutputDevice::DrawText(Point const& rStartPt, OUString const& rStr, sal_Int32 nIndex,
                             sal_Int32 nLen, std::vector<tools::Rectangle>* pVector, OUString* pDisplayText,
