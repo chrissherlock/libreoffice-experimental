@@ -50,7 +50,6 @@
 #include <com/sun/star/uno/Reference.h>
 #include <com/sun/star/awt/DeviceInfo.hpp>
 
-#include <tuple>
 #include <memory>
 #include <vector>
 
@@ -120,7 +119,6 @@ class XGraphics;
 #else
 #define GLYPH_FONT_HEIGHT 256
 #endif
-
 // OutputDevice-Types
 
 enum OutDevType
@@ -510,72 +508,22 @@ private:
     ///@{
 
 public:
-    void DrawText(const Point& rStartPt, const OUString& rStr, sal_Int32 nIndex = 0,
+    void DrawText(Point const& rStartPt, OUString const& rStr, sal_Int32 nIndex = 0,
                   sal_Int32 nLen = -1, std::vector<tools::Rectangle>* pVector = nullptr,
-                  OUString* pDisplayText = nullptr, const SalLayoutGlyphs* pLayoutCache = nullptr);
+                  OUString* pDisplayText = nullptr,
+                  SalLayoutGlyphs const* pLayoutCache = nullptr) override;
 
-    void DrawText(const tools::Rectangle& rRect, const OUString& rStr,
-                  DrawTextFlags nStyle = DrawTextFlags::NONE, std::vector<tools::Rectangle>* pVector = nullptr,
-                  OUString* pDisplayText = nullptr, vcl::ITextLayout* _pTextLayout = nullptr);
-
-    static void ImplDrawText(OutputDevice& rTargetDevice, const tools::Rectangle& rRect,
-                             const OUString& rOrigStr, DrawTextFlags nStyle, std::vector<tools::Rectangle>* pVector,
-                             OUString* pDisplayText, vcl::ITextLayout& _rLayout);
-
-    void ImplDrawText(SalLayout&);
-
-    void ImplDrawTextBackground(const SalLayout&);
-
-    void DrawCtrlText(const Point& rPos, const OUString& rStr, sal_Int32 nIndex = 0,
-                      sal_Int32 nLen = -1, DrawTextFlags nStyle = DrawTextFlags::Mnemonic,
-                      std::vector<tools::Rectangle>* pVector = nullptr, OUString* pDisplayText = nullptr,
-                      const SalLayoutGlyphs* pGlyphs = nullptr);
+    void DrawText(tools::Rectangle const& rRect, OUString const& rStr,
+                  DrawTextFlags nStyle = DrawTextFlags::NONE,
+                  std::vector<tools::Rectangle>* pVector = nullptr,
+                  OUString* pDisplayText = nullptr,
+                  vcl::ITextLayout* _pTextLayout = nullptr) override;
 
     void DrawTextLine(const Point& rPos, tools::Long nWidth, FontStrikeout eStrikeout,
                       FontLineStyle eUnderline, FontLineStyle eOverline,
-                      bool bUnderlineAbove = false);
-
-    void ImplDrawTextLine(tools::Long nBaseX, tools::Long nX, tools::Long nY,
-                          DeviceCoordinate nWidth, FontStrikeout eStrikeout,
-                          FontLineStyle eUnderline, FontLineStyle eOverline, bool bUnderlineAbove);
-
-    void ImplDrawTextLines(SalLayout&, FontStrikeout eStrikeout, FontLineStyle eUnderline,
-                           FontLineStyle eOverline, bool bWordLine, bool bUnderlineAbove);
+                      bool bUnderlineAbove = false) override;
 
     void DrawWaveLine(const Point& rStartPos, const Point& rEndPos, tools::Long nLineWidth = 1);
-
-    bool ImplDrawRotateText(SalLayout&);
-
-    tools::Rectangle GetTextRect(const tools::Rectangle& rRect, const OUString& rStr,
-                                 DrawTextFlags nStyle = DrawTextFlags::WordBreak,
-                                 TextRectInfo* pInfo = nullptr,
-                                 const vcl::ITextLayout* _pTextLayout = nullptr) const;
-
-    tools::Rectangle ImplGetTextBoundRect(const SalLayout&);
-
-    bool GetTextOutline(tools::PolyPolygon&, const OUString& rStr) const;
-
-    bool GetTextOutlines(PolyPolyVector&, const OUString& rStr, sal_Int32 nBase = 0,
-                         sal_Int32 nIndex = 0, sal_Int32 nLen = -1, sal_uLong nLayoutWidth = 0,
-                         const tools::Long* pDXArray = nullptr) const;
-
-    bool GetTextOutlines(basegfx::B2DPolyPolygonVector& rVector, const OUString& rStr,
-                         sal_Int32 nBase, sal_Int32 nIndex = 0, sal_Int32 nLen = -1,
-                         sal_uLong nLayoutWidth = 0, const tools::Long* pDXArray = nullptr) const;
-
-    OUString GetEllipsisString(const OUString& rStr, tools::Long nMaxWidth,
-                               DrawTextFlags nStyle = DrawTextFlags::EndEllipsis) const;
-
-    tools::Long GetCtrlTextWidth(const OUString& rStr,
-                                 const SalLayoutGlyphs* pLayoutCache = nullptr) const;
-
-    static OUString GetNonMnemonicString(const OUString& rStr, sal_Int32& rMnemonicPos);
-
-    static OUString GetNonMnemonicString(const OUString& rStr)
-    {
-        sal_Int32 nDummy;
-        return GetNonMnemonicString(rStr, nDummy);
-    }
 
     /** Generate MetaTextActions for the text rect
 
@@ -598,74 +546,17 @@ public:
 
     void SetTextAlign(TextAlign eAlign) override;
 
-    /** Height where any character of the current font fits; in logic coordinates.
-
-        See also GetTextBoundRect() for more explanation + code examples.
-    */
-    tools::Long GetTextHeight() const;
-    float approximate_digit_width() const;
-
-    void DrawTextArray(const Point& rStartPt, const OUString& rStr, const tools::Long* pDXAry,
+    void DrawTextArray(Point const& rStartPt, OUString const& rStr, tools::Long const* pDXAry,
                        sal_Int32 nIndex = 0, sal_Int32 nLen = -1,
                        SalLayoutFlags flags = SalLayoutFlags::NONE,
-                       const SalLayoutGlyphs* pLayoutCache = nullptr);
+                       SalLayoutGlyphs const* pLayoutCache = nullptr) override;
 
-    void GetCaretPositions(const OUString&, tools::Long* pCaretXArray, sal_Int32 nIndex,
-                           sal_Int32 nLen, const SalLayoutGlyphs* pGlyphs = nullptr) const;
     void DrawStretchText(const Point& rStartPt, sal_uLong nWidth, const OUString& rStr,
                          sal_Int32 nIndex = 0, sal_Int32 nLen = -1);
-    sal_Int32 GetTextBreak(const OUString& rStr, tools::Long nTextWidth, sal_Int32 nIndex,
-                           sal_Int32 nLen = -1, tools::Long nCharExtra = 0,
-                           vcl::TextLayoutCache const* = nullptr,
-                           const SalLayoutGlyphs* pGlyphs = nullptr) const;
-    sal_Int32 GetTextBreak(const OUString& rStr, tools::Long nTextWidth, sal_Unicode nExtraChar,
-                           sal_Int32& rExtraCharPos, sal_Int32 nIndex, sal_Int32 nLen,
-                           tools::Long nCharExtra, vcl::TextLayoutCache const* = nullptr) const;
-    static std::shared_ptr<vcl::TextLayoutCache> CreateTextLayoutCache(OUString const&);
 
 protected:
     SAL_DLLPRIVATE void ImplInitTextLineSize();
     SAL_DLLPRIVATE void ImplInitAboveTextLineSize();
-    static SAL_DLLPRIVATE tools::Long ImplGetTextLines(ImplMultiTextLineInfo& rLineInfo,
-                                                       tools::Long nWidth, const OUString& rStr,
-                                                       DrawTextFlags nStyle,
-                                                       const vcl::ITextLayout& _rLayout);
-    SAL_DLLPRIVATE float approximate_char_width() const;
-
-    virtual void InitWaveLineColor(Color const& rColor, tools::Long);
-    virtual std::tuple<bool, Size> GetWaveLineSize(tools::Long nLineWidth) const;
-
-private:
-    SAL_DLLPRIVATE void ImplDrawTextDirect(SalLayout&, bool bTextLines);
-    SAL_DLLPRIVATE void ImplDrawSpecialText(SalLayout&);
-    SAL_DLLPRIVATE void ImplDrawTextRect(tools::Long nBaseX, tools::Long nBaseY, tools::Long nX,
-                                         tools::Long nY, tools::Long nWidth, tools::Long nHeight);
-
-    SAL_DLLPRIVATE static void ImplDrawWavePixel(tools::Long nOriginX, tools::Long nOriginY,
-                                                 tools::Long nCurX, tools::Long nCurY,
-                                                 Degree10 nOrientation, SalGraphics* pGraphics,
-                                                 const OutputDevice& rOutDev, bool bDrawPixAsRect,
-                                                 tools::Long nPixWidth, tools::Long nPixHeight);
-    SAL_DLLPRIVATE void ImplDrawWaveLine(tools::Long nBaseX, tools::Long nBaseY,
-                                         tools::Long nStartX, tools::Long nStartY,
-                                         tools::Long nWidth, tools::Long nHeight,
-                                         tools::Long nLineWidth, Degree10 nOrientation,
-                                         const Color& rColor);
-    SAL_DLLPRIVATE void ImplDrawWaveTextLine(tools::Long nBaseX, tools::Long nBaseY, tools::Long nX,
-                                             tools::Long nY, tools::Long nWidth,
-                                             FontLineStyle eTextLine, Color aColor, bool bIsAbove);
-    SAL_DLLPRIVATE void ImplDrawStraightTextLine(tools::Long nBaseX, tools::Long nBaseY,
-                                                 tools::Long nX, tools::Long nY, tools::Long nWidth,
-                                                 FontLineStyle eTextLine, Color aColor,
-                                                 bool bIsAbove);
-    SAL_DLLPRIVATE void ImplDrawStrikeoutLine(tools::Long nBaseX, tools::Long nBaseY,
-                                              tools::Long nX, tools::Long nY, tools::Long nWidth,
-                                              FontStrikeout eStrikeout, Color aColor);
-    SAL_DLLPRIVATE void ImplDrawStrikeoutChar(tools::Long nBaseX, tools::Long nBaseY,
-                                              tools::Long nX, tools::Long nY, tools::Long nWidth,
-                                              FontStrikeout eStrikeout, Color aColor);
-    SAL_DLLPRIVATE void ImplDrawMnemonicLine(tools::Long nX, tools::Long nY, tools::Long nWidth);
-
     ///@}
 
     /** @name Layout functions
@@ -677,7 +568,6 @@ public:
 
     // Enabling/disabling RTL only makes sense for OutputDevices that use a mirroring SalGraphicsLayout
     virtual void EnableRTL(bool bEnable = true);
-    bool GetTextIsRTL(const OUString&, sal_Int32 nIndex, sal_Int32 nLen) const;
 
     ///@}
 

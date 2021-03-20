@@ -21,14 +21,15 @@
 #define INCLUDED_VCL_TEXTRECTINFO_HXX
 
 #include <sal/config.h>
-
 #include <tools/long.hxx>
+
 #include <vcl/dllapi.h>
-class OutputDevice;
+
+class RenderContext2;
 
 class VCL_DLLPUBLIC TextRectInfo
 {
-    friend class ::OutputDevice;
+    friend class ::RenderContext2;
 
 private:
     tools::Long                mnMaxWidth;

@@ -41,12 +41,12 @@ namespace vcl
     };
 
     /** is an implementation of the ITextLayout interface which simply delegates its calls to the respective
-        methods of an OutputDevice instance, without any inbetween magic.
+        methods of an RenderContext2 instance, without any inbetween magic.
     */
     class DefaultTextLayout final : public ITextLayout
     {
     public:
-        DefaultTextLayout( OutputDevice& _rTargetDevice )
+        DefaultTextLayout( RenderContext2& _rTargetDevice )
             : m_rTargetDevice( _rTargetDevice )
         {
         }
@@ -77,7 +77,7 @@ namespace vcl
         virtual bool        DecomposeTextRectAction() const override;
 
     private:
-        OutputDevice&   m_rTargetDevice;
+        RenderContext2&   m_rTargetDevice;
     };
 
     class ReferenceDeviceTextLayout;
@@ -87,7 +87,7 @@ namespace vcl
     class ControlTextRenderer final
     {
     public:
-        ControlTextRenderer( const Control& _rControl, OutputDevice& _rTargetDevice, OutputDevice& _rReferenceDevice );
+        ControlTextRenderer( const Control& _rControl, RenderContext2& _rTargetDevice, RenderContext2& _rReferenceDevice );
         ~ControlTextRenderer();
 
         tools::Rectangle   DrawText( const tools::Rectangle& _rRect,

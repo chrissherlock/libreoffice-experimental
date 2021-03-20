@@ -70,7 +70,7 @@ namespace vcl
     class ReferenceDeviceTextLayout : public ITextLayout
     {
     public:
-        ReferenceDeviceTextLayout( const Control& _rControl, OutputDevice& _rTargetDevice, OutputDevice& _rReferenceDevice );
+        ReferenceDeviceTextLayout( const Control& _rControl, RenderContext2& _rTargetDevice, RenderContext2& _rReferenceDevice );
         virtual ~ReferenceDeviceTextLayout();
 
         // ITextLayout
@@ -81,22 +81,22 @@ namespace vcl
         virtual bool        DecomposeTextRectAction() const override;
 
     public:
-        // equivalents to the respective OutputDevice methods, which take the reference device into account
+        // equivalents to the respective RenderContext2 methods, which take the reference device into account
         tools::Rectangle   DrawText( const tools::Rectangle& _rRect, const OUString& _rText, DrawTextFlags _nStyle, std::vector<tools::Rectangle>* _pVector, OUString* _pDisplayText, const Size* i_pDeviceSize );
         tools::Rectangle   GetTextRect( const tools::Rectangle& _rRect, const OUString& _rText, DrawTextFlags _nStyle, Size* o_pDeviceSize );
 
     private:
         tools::Long        GetTextArray( const OUString& _rText, tools::Long* _pDXAry, sal_Int32 _nStartIndex, sal_Int32 _nLength ) const;
 
-        OutputDevice&   m_rTargetDevice;
-        OutputDevice&   m_rReferenceDevice;
+        RenderContext2&   m_rTargetDevice;
+        RenderContext2&   m_rReferenceDevice;
         const bool      m_bRTLEnabled;
 
         tools::Rectangle       m_aCompleteTextRect;
     };
 
-    ReferenceDeviceTextLayout::ReferenceDeviceTextLayout( const Control& _rControl, OutputDevice& _rTargetDevice,
-        OutputDevice& _rReferenceDevice )
+    ReferenceDeviceTextLayout::ReferenceDeviceTextLayout( const Control& _rControl, RenderContext2& _rTargetDevice,
+        RenderContext2& _rReferenceDevice )
         :m_rTargetDevice( _rTargetDevice )
         ,m_rReferenceDevice( _rReferenceDevice )
         ,m_bRTLEnabled( _rControl.IsRTLEnabled() )
@@ -129,13 +129,13 @@ namespace vcl
 
         // now that the Zoom is part of the map mode, reset the target device's font to the "unzoomed" version
         Font aDrawFont( aUnzoomedPointFont );
-        aDrawFont.SetFontSize( OutputDevice::LogicToLogic(aDrawFont.GetFontSize(), MapMode(MapUnit::MapPoint), MapMode(eTargetMapUnit)) );
+        aDrawFont.SetFontSize( RenderContext2::LogicToLogic(aDrawFont.GetFontSize(), MapMode(MapUnit::MapPoint), MapMode(eTargetMapUnit)) );
         _rTargetDevice.SetFont( aDrawFont );
 
         // transfer font to the reference device
         m_rReferenceDevice.Push( PushFlags::FONT | PushFlags::TEXTLAYOUTMODE );
         Font aRefFont( aUnzoomedPointFont );
-        aRefFont.SetFontSize( OutputDevice::LogicToLogic(
+        aRefFont.SetFontSize( RenderContext2::LogicToLogic(
             aRefFont.GetFontSize(), MapMode(MapUnit::MapPoint), m_rReferenceDevice.GetMapMode()) );
         m_rReferenceDevice.SetFont( aRefFont );
     }
@@ -270,7 +270,7 @@ namespace vcl
         {
             // this happens for instance if we're in a PaintToDevice call, where only a MetaFile is recorded,
             // but no actual painting happens, so our "DrawText( Point, ... )" is never called
-            // In this case, calculate the rect from what OutputDevice::GetTextRect would give us. This has
+            // In this case, calculate the rect from what RenderContext2::GetTextRect would give us. This has
             // the disadvantage of less accuracy, compared with the approach to calculate the rect from the
             // single "DrawText( Point, ... )" calls, since more intermediate arithmetic will translate
             // from ref- to target-units.
@@ -324,7 +324,7 @@ namespace vcl
         return aTextRect;
     }
 
-    ControlTextRenderer::ControlTextRenderer( const Control& _rControl, OutputDevice& _rTargetDevice, OutputDevice& _rReferenceDevice )
+    ControlTextRenderer::ControlTextRenderer( const Control& _rControl, RenderContext2& _rTargetDevice, RenderContext2& _rReferenceDevice )
         :m_pImpl( new ReferenceDeviceTextLayout( _rControl, _rTargetDevice, _rReferenceDevice ) )
     {
     }
