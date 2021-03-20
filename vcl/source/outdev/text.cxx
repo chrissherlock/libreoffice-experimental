@@ -26,8 +26,8 @@
 #include <textlayout.hxx>
 
 void OutputDevice::DrawText(Point const& rStartPt, OUString const& rStr, sal_Int32 nIndex,
-                            sal_Int32 nLen, std::vector<tools::Rectangle>* pVector, OUString* pDisplayText,
-                            SalLayoutGlyphs const* pLayoutCache)
+                            sal_Int32 nLen, std::vector<tools::Rectangle>* pVector,
+                            OUString* pDisplayText, SalLayoutGlyphs const* pLayoutCache)
 {
     assert(!is_double_buffered_window());
 
@@ -41,8 +41,8 @@ void OutputDevice::DrawText(Point const& rStartPt, OUString const& rStr, sal_Int
 }
 
 void OutputDevice::DrawText(tools::Rectangle const& rRect, OUString const& rOrigStr,
-                            DrawTextFlags nStyle, std::vector<tools::Rectangle>* pVector, OUString* pDisplayText,
-                            vcl::ITextLayout* _pTextLayout)
+                            DrawTextFlags nStyle, std::vector<tools::Rectangle>* pVector,
+                            OUString* pDisplayText, vcl::ITextLayout* _pTextLayout)
 {
     assert(!is_double_buffered_window());
 
@@ -66,7 +66,6 @@ void OutputDevice::DrawTextArray(Point const& rStartPt, OUString const& rStr,
 
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaTextArrayAction(rStartPt, rStr, pDXAry, nIndex, nLen));
-
 
     RenderContext2::DrawTextArray(rStartPt, rStr, pDXAry, nIndex, nLen, flags, pSalLayoutCache);
 }
@@ -161,41 +160,11 @@ void OutputDevice::SetTextFillColor()
 
 void OutputDevice::SetTextFillColor(const Color& rColor)
 {
-    Color aColor(rColor);
-    bool bTransFill = aColor.IsTransparent();
-
-    if (!bTransFill)
-    {
-        if (mnDrawMode
-            & (DrawModeFlags::BlackFill | DrawModeFlags::WhiteFill | DrawModeFlags::GrayFill
-               | DrawModeFlags::NoFill | DrawModeFlags::SettingsFill))
-        {
-            if (mnDrawMode & DrawModeFlags::BlackFill)
-            {
-                aColor = COL_BLACK;
-            }
-            else if (mnDrawMode & DrawModeFlags::WhiteFill)
-            {
-                aColor = COL_WHITE;
-            }
-            else if (mnDrawMode & DrawModeFlags::GrayFill)
-            {
-                const sal_uInt8 cLum = aColor.GetLuminance();
-                aColor = Color(cLum, cLum, cLum);
-            }
-            else if (mnDrawMode & DrawModeFlags::SettingsFill)
-            {
-                aColor = GetSettings().GetStyleSettings().GetWindowColor();
-            }
-            else if (mnDrawMode & DrawModeFlags::NoFill)
-            {
-                aColor = COL_TRANSPARENT;
-            }
-        }
-    }
-
     if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaTextFillColorAction(aColor, true));
+    {
+        mpMetaFile->AddAction(new MetaTextFillColorAction(
+            GetDrawModeFillColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings()), true));
+    }
 
     RenderContext2::SetTextFillColor(rColor);
 }
