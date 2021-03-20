@@ -121,6 +121,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/cnttype/mcnttype \
     vcl/source/printer/QueueInfo \
     vcl/source/window/bubblewindow \
+    vcl/source/rendercontext/ImplMultiTextLineInfo \
     vcl/source/rendercontext/OutDevState \
     vcl/source/rendercontext/RenderContext2 \
     vcl/source/rendercontext/antialiasing \

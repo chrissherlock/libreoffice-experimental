@@ -41,6 +41,7 @@
 
 #include <config_fuzzers.h>
 #include <outdev.h>
+#include <ImplMultiTextLineInfo.hxx>
 #include <ImplOutDevData.hxx>
 #include <salgdi.hxx>
 #include <drawmode.hxx>
@@ -50,9 +51,6 @@
 #include <impglyphitem.hxx>
 
 #include <optional>
-
-#define TEXT_DRAW_ELLIPSIS                                                                         \
-    (DrawTextFlags::EndEllipsis | DrawTextFlags::PathEllipsis | DrawTextFlags::NewsEllipsis)
 
 void OutputDevice::SetDigitLanguage(LanguageType eTextLanguage)
 {
@@ -69,17 +67,6 @@ void OutputDevice::SetLayoutMode(ComplexTextLayoutFlags nTextLayoutMode)
 
     RenderContext2::SetLayoutMode(nTextLayoutMode);
 }
-
-ImplMultiTextLineInfo::ImplMultiTextLineInfo() {}
-
-ImplMultiTextLineInfo::~ImplMultiTextLineInfo() {}
-
-void ImplMultiTextLineInfo::AddLine(ImplTextLineInfo* pLine)
-{
-    mvLines.push_back(std::unique_ptr<ImplTextLineInfo>(pLine));
-}
-
-void ImplMultiTextLineInfo::Clear() { mvLines.clear(); }
 
 void OutputDevice::ImplInitTextColor()
 {
