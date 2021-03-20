@@ -68,6 +68,313 @@ void OutputDevice::SetLayoutMode(ComplexTextLayoutFlags nTextLayoutMode)
     RenderContext2::SetLayoutMode(nTextLayoutMode);
 }
 
+void OutputDevice::SetTextColor(Color const& rColor)
+{
+    if (mpMetaFile)
+    {
+        mpMetaFile->AddAction(new MetaTextColorAction(
+            GetDrawModeTextColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings())));
+    }
+
+    RenderContext2::SetTextColor(rColor);
+}
+
+void OutputDevice::SetTextFillColor()
+{
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaTextFillColorAction(Color(), false));
+
+    RenderContext2::SetTextFillColor();
+}
+
+void OutputDevice::SetTextFillColor(const Color& rColor)
+{
+    Color aColor(rColor);
+    bool bTransFill = aColor.IsTransparent();
+
+    if (!bTransFill)
+    {
+        if (mnDrawMode
+            & (DrawModeFlags::BlackFill | DrawModeFlags::WhiteFill | DrawModeFlags::GrayFill
+               | DrawModeFlags::NoFill | DrawModeFlags::SettingsFill))
+        {
+            if (mnDrawMode & DrawModeFlags::BlackFill)
+            {
+                aColor = COL_BLACK;
+            }
+            else if (mnDrawMode & DrawModeFlags::WhiteFill)
+            {
+                aColor = COL_WHITE;
+            }
+            else if (mnDrawMode & DrawModeFlags::GrayFill)
+            {
+                const sal_uInt8 cLum = aColor.GetLuminance();
+                aColor = Color(cLum, cLum, cLum);
+            }
+            else if (mnDrawMode & DrawModeFlags::SettingsFill)
+            {
+                aColor = GetSettings().GetStyleSettings().GetWindowColor();
+            }
+            else if (mnDrawMode & DrawModeFlags::NoFill)
+            {
+                aColor = COL_TRANSPARENT;
+            }
+        }
+    }
+
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaTextFillColorAction(aColor, true));
+
+    RenderContext2::SetTextFillColor(rColor);
+}
+
+void OutputDevice::SetTextAlign(TextAlign eAlign)
+{
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaTextAlignAction(eAlign));
+
+    RenderContext2::SetTextAlign(eAlign);
+}
+
+#if !ENABLE_FUZZERS
+const SalLayoutFlags eDefaultLayout = SalLayoutFlags::NONE;
+#else
+// ofz#23573 skip detecting bidi directions
+const SalLayoutFlags eDefaultLayout = SalLayoutFlags::BiDiStrong;
+#endif
+
+void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int32 nIndex,
+                            sal_Int32 nLen, std::vector<tools::Rectangle>* pVector, OUString* pDisplayText,
+                            const SalLayoutGlyphs* pLayoutCache)
+{
+    assert(!is_double_buffered_window());
+
+    if ((nLen < 0) || (nIndex + nLen >= rStr.getLength()))
+        nLen = rStr.getLength() - nIndex;
+
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaTextAction(rStartPt, rStr, nIndex, nLen));
+
+    if (mpOutDevData->mpRecordLayout)
+    {
+        pVector = &mpOutDevData->mpRecordLayout->m_aUnicodeBoundRects;
+        pDisplayText = &mpOutDevData->mpRecordLayout->m_aDisplayText;
+    }
+
+#if OSL_DEBUG_LEVEL > 2
+    SAL_INFO("vcl.gdi", "OutputDevice::DrawText(\"" << rStr << "\")");
+#endif
+
+    if (pVector)
+    {
+        vcl::Region aClip(GetOutputBoundsClipRegion());
+
+        if (mpOutDevData->mpRecordLayout)
+        {
+            mpOutDevData->mpRecordLayout->m_aLineIndices.push_back(
+                mpOutDevData->mpRecordLayout->m_aDisplayText.getLength());
+            aClip.Intersect(mpOutDevData->maRecordRect);
+        }
+        if (!aClip.IsNull())
+        {
+            std::vector<tools::Rectangle> aTmp;
+            GetGlyphBoundRects(rStartPt, rStr, nIndex, nLen, aTmp);
+
+            bool bInserted = false;
+            for (std::vector<tools::Rectangle>::const_iterator it = aTmp.begin(); it != aTmp.end(); ++it, nIndex++)
+            {
+                bool bAppend = false;
+
+                if (aClip.IsOver(*it))
+                    bAppend = true;
+                else if (rStr[nIndex] == ' ' && bInserted)
+                {
+                    std::vector<tools::Rectangle>::const_iterator next = it;
+                    ++next;
+                    if (next != aTmp.end() && aClip.IsOver(*next))
+                        bAppend = true;
+                }
+
+                if (bAppend)
+                {
+                    pVector->push_back(*it);
+                    if (pDisplayText)
+                        *pDisplayText += OUStringChar(rStr[nIndex]);
+                    bInserted = true;
+                }
+            }
+        }
+        else
+        {
+            GetGlyphBoundRects(rStartPt, rStr, nIndex, nLen, *pVector);
+            if (pDisplayText)
+                *pDisplayText += rStr.subView(nIndex, nLen);
+        }
+    }
+
+    if (!IsDeviceOutputNecessary() || pVector)
+        return;
+
+    if (mpFontInstance)
+        // do not use cache with modified string
+        if (mpFontInstance->mpConversion)
+            pLayoutCache = nullptr;
+
+    std::unique_ptr<SalLayout> pSalLayout = ImplLayout(rStr, nIndex, nLen, rStartPt, 0, nullptr,
+                                                       eDefaultLayout, nullptr, pLayoutCache);
+    if (pSalLayout)
+    {
+        ImplDrawText(*pSalLayout);
+    }
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->DrawText(rStartPt, rStr, nIndex, nLen, pVector, pDisplayText);
+}
+
+void OutputDevice::DrawTextArray(const Point& rStartPt, const OUString& rStr,
+                                 const tools::Long* pDXAry, sal_Int32 nIndex, sal_Int32 nLen,
+                                 SalLayoutFlags flags, const SalLayoutGlyphs* pSalLayoutCache)
+{
+    assert(!is_double_buffered_window());
+
+    if (nLen < 0 || nIndex + nLen >= rStr.getLength())
+        nLen = rStr.getLength() - nIndex;
+
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaTextArrayAction(rStartPt, rStr, pDXAry, nIndex, nLen));
+
+    if (!IsDeviceOutputNecessary())
+        return;
+
+    if (!mpGraphics && !AcquireGraphics())
+        return;
+
+    assert(mpGraphics);
+
+    if (mbInitClipRegion)
+        InitClipRegion();
+
+    if (mbOutputClipped)
+        return;
+
+    std::unique_ptr<SalLayout> pSalLayout
+        = ImplLayout(rStr, nIndex, nLen, rStartPt, 0, pDXAry, flags, nullptr, pSalLayoutCache);
+    if (pSalLayout)
+        ImplDrawText(*pSalLayout);
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->DrawTextArray(rStartPt, rStr, pDXAry, nIndex, nLen, flags);
+}
+
+void OutputDevice::DrawStretchText(const Point& rStartPt, sal_uLong nWidth, const OUString& rStr,
+                                   sal_Int32 nIndex, sal_Int32 nLen)
+{
+    assert(!is_double_buffered_window());
+
+    if ((nLen < 0) || (nIndex + nLen >= rStr.getLength()))
+        nLen = rStr.getLength() - nIndex;
+
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaStretchTextAction(rStartPt, nWidth, rStr, nIndex, nLen));
+
+    if (!IsDeviceOutputNecessary())
+        return;
+
+    std::unique_ptr<SalLayout> pSalLayout = ImplLayout(rStr, nIndex, nLen, rStartPt, nWidth);
+
+    if (pSalLayout)
+        ImplDrawText(*pSalLayout);
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->DrawStretchText(rStartPt, nWidth, rStr, nIndex, nLen);
+}
+
+void OutputDevice::DrawText(const tools::Rectangle& rRect, const OUString& rOrigStr,
+                            DrawTextFlags nStyle, std::vector<tools::Rectangle>* pVector, OUString* pDisplayText,
+                            vcl::ITextLayout* _pTextLayout)
+{
+    assert(!is_double_buffered_window());
+
+    if (mpOutDevData->mpRecordLayout)
+    {
+        pVector = &mpOutDevData->mpRecordLayout->m_aUnicodeBoundRects;
+        pDisplayText = &mpOutDevData->mpRecordLayout->m_aDisplayText;
+    }
+
+    bool bDecomposeTextRectAction
+        = (_pTextLayout != nullptr) && _pTextLayout->DecomposeTextRectAction();
+
+    if (mpMetaFile && !bDecomposeTextRectAction)
+        mpMetaFile->AddAction(new MetaTextRectAction(rRect, rOrigStr, nStyle));
+
+    if ((!IsDeviceOutputNecessary() && !pVector && !bDecomposeTextRectAction) || rOrigStr.isEmpty()
+        || rRect.IsEmpty())
+    {
+        return;
+    }
+
+    // we need a graphics
+    if (!mpGraphics && !AcquireGraphics())
+        return;
+
+    assert(mpGraphics);
+
+    if (mbInitClipRegion)
+        InitClipRegion();
+
+    if (mbOutputClipped && !bDecomposeTextRectAction)
+        return;
+
+    // temporarily disable mtf action generation (ImplDrawText _does_
+    // create MetaActionType::TEXTs otherwise)
+    GDIMetaFile* pMtf = mpMetaFile;
+
+    if (!bDecomposeTextRectAction)
+        mpMetaFile = nullptr;
+
+    // #i47157# Factored out to ImplDrawText(), to be used also
+    // from AddTextRectActions()
+    vcl::DefaultTextLayout aDefaultLayout(*this);
+    ImplDrawText(*this, rRect, rOrigStr, nStyle, pVector, pDisplayText,
+                 _pTextLayout ? *_pTextLayout : aDefaultLayout);
+
+    // and enable again
+    mpMetaFile = pMtf;
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->DrawText(rRect, rOrigStr, nStyle, pVector, pDisplayText);
+}
+
+void OutputDevice::AddTextRectActions(const tools::Rectangle& rRect, const OUString& rOrigStr,
+                                      DrawTextFlags nStyle, GDIMetaFile& rMtf)
+{
+    if (rOrigStr.isEmpty() || rRect.IsEmpty())
+        return;
+
+    // we need a graphics
+    if (!mpGraphics && !AcquireGraphics())
+        return;
+    if (mbInitClipRegion)
+        InitClipRegion();
+
+    // temporarily swap in passed mtf for action generation, and
+    // disable output generation.
+    const bool bOutputEnabled(IsOutputEnabled());
+    GDIMetaFile* pMtf = mpMetaFile;
+
+    mpMetaFile = &rMtf;
+    EnableOutput(false);
+
+    // #i47157# Factored out to ImplDrawTextRect(), to be shared
+    // between us and DrawText()
+    vcl::DefaultTextLayout aLayout(*this);
+    ImplDrawText(*this, rRect, rOrigStr, nStyle, nullptr, nullptr, aLayout);
+
+    // and restore again
+    EnableOutput(bOutputEnabled);
+    mpMetaFile = pMtf;
+}
+
 void OutputDevice::ImplDrawTextRect(tools::Long nBaseX, tools::Long nBaseY, tools::Long nDistX,
                                     tools::Long nDistY, tools::Long nWidth, tools::Long nHeight)
 {
@@ -662,168 +969,6 @@ tools::Long OutputDevice::ImplGetTextLines(ImplMultiTextLineInfo& rLineInfo, too
     return nMaxLineWidth;
 }
 
-void OutputDevice::SetTextColor(Color const& rColor)
-{
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaTextColorAction(
-            GetDrawModeTextColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings())));
-
-    RenderContext2::SetTextColor(rColor);
-}
-
-void OutputDevice::SetTextFillColor()
-{
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaTextFillColorAction(Color(), false));
-
-    RenderContext2::SetTextFillColor();
-}
-
-void OutputDevice::SetTextFillColor(const Color& rColor)
-{
-    Color aColor(rColor);
-    bool bTransFill = aColor.IsTransparent();
-
-    if (!bTransFill)
-    {
-        if (mnDrawMode
-            & (DrawModeFlags::BlackFill | DrawModeFlags::WhiteFill | DrawModeFlags::GrayFill
-               | DrawModeFlags::NoFill | DrawModeFlags::SettingsFill))
-        {
-            if (mnDrawMode & DrawModeFlags::BlackFill)
-            {
-                aColor = COL_BLACK;
-            }
-            else if (mnDrawMode & DrawModeFlags::WhiteFill)
-            {
-                aColor = COL_WHITE;
-            }
-            else if (mnDrawMode & DrawModeFlags::GrayFill)
-            {
-                const sal_uInt8 cLum = aColor.GetLuminance();
-                aColor = Color(cLum, cLum, cLum);
-            }
-            else if (mnDrawMode & DrawModeFlags::SettingsFill)
-            {
-                aColor = GetSettings().GetStyleSettings().GetWindowColor();
-            }
-            else if (mnDrawMode & DrawModeFlags::NoFill)
-            {
-                aColor = COL_TRANSPARENT;
-            }
-        }
-    }
-
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaTextFillColorAction(aColor, true));
-
-    RenderContext2::SetTextFillColor(rColor);
-}
-
-void OutputDevice::SetTextAlign(TextAlign eAlign)
-{
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaTextAlignAction(eAlign));
-
-    RenderContext2::SetTextAlign(eAlign);
-}
-
-#if !ENABLE_FUZZERS
-const SalLayoutFlags eDefaultLayout = SalLayoutFlags::NONE;
-#else
-// ofz#23573 skip detecting bidi directions
-const SalLayoutFlags eDefaultLayout = SalLayoutFlags::BiDiStrong;
-#endif
-
-void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int32 nIndex,
-                            sal_Int32 nLen, std::vector<tools::Rectangle>* pVector, OUString* pDisplayText,
-                            const SalLayoutGlyphs* pLayoutCache)
-{
-    assert(!is_double_buffered_window());
-
-    if ((nLen < 0) || (nIndex + nLen >= rStr.getLength()))
-    {
-        nLen = rStr.getLength() - nIndex;
-    }
-
-    if (mpOutDevData->mpRecordLayout)
-    {
-        pVector = &mpOutDevData->mpRecordLayout->m_aUnicodeBoundRects;
-        pDisplayText = &mpOutDevData->mpRecordLayout->m_aDisplayText;
-    }
-
-#if OSL_DEBUG_LEVEL > 2
-    SAL_INFO("vcl.gdi", "OutputDevice::DrawText(\"" << rStr << "\")");
-#endif
-
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaTextAction(rStartPt, rStr, nIndex, nLen));
-    if (pVector)
-    {
-        vcl::Region aClip(GetOutputBoundsClipRegion());
-
-        if (mpOutDevData->mpRecordLayout)
-        {
-            mpOutDevData->mpRecordLayout->m_aLineIndices.push_back(
-                mpOutDevData->mpRecordLayout->m_aDisplayText.getLength());
-            aClip.Intersect(mpOutDevData->maRecordRect);
-        }
-        if (!aClip.IsNull())
-        {
-            std::vector<tools::Rectangle> aTmp;
-            GetGlyphBoundRects(rStartPt, rStr, nIndex, nLen, aTmp);
-
-            bool bInserted = false;
-            for (std::vector<tools::Rectangle>::const_iterator it = aTmp.begin(); it != aTmp.end(); ++it, nIndex++)
-            {
-                bool bAppend = false;
-
-                if (aClip.IsOver(*it))
-                    bAppend = true;
-                else if (rStr[nIndex] == ' ' && bInserted)
-                {
-                    std::vector<tools::Rectangle>::const_iterator next = it;
-                    ++next;
-                    if (next != aTmp.end() && aClip.IsOver(*next))
-                        bAppend = true;
-                }
-
-                if (bAppend)
-                {
-                    pVector->push_back(*it);
-                    if (pDisplayText)
-                        *pDisplayText += OUStringChar(rStr[nIndex]);
-                    bInserted = true;
-                }
-            }
-        }
-        else
-        {
-            GetGlyphBoundRects(rStartPt, rStr, nIndex, nLen, *pVector);
-            if (pDisplayText)
-                *pDisplayText += rStr.subView(nIndex, nLen);
-        }
-    }
-
-    if (!IsDeviceOutputNecessary() || pVector)
-        return;
-
-    if (mpFontInstance)
-        // do not use cache with modified string
-        if (mpFontInstance->mpConversion)
-            pLayoutCache = nullptr;
-
-    std::unique_ptr<SalLayout> pSalLayout = ImplLayout(rStr, nIndex, nLen, rStartPt, 0, nullptr,
-                                                       eDefaultLayout, nullptr, pLayoutCache);
-    if (pSalLayout)
-    {
-        ImplDrawText(*pSalLayout);
-    }
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->DrawText(rStartPt, rStr, nIndex, nLen, pVector, pDisplayText);
-}
-
 tools::Long OutputDevice::GetTextHeight() const
 {
     if (!InitFont())
@@ -846,39 +991,6 @@ float OutputDevice::approximate_char_width() const
 }
 
 float OutputDevice::approximate_digit_width() const { return GetTextWidth("0123456789") / 10.0; }
-
-void OutputDevice::DrawTextArray(const Point& rStartPt, const OUString& rStr,
-                                 const tools::Long* pDXAry, sal_Int32 nIndex, sal_Int32 nLen,
-                                 SalLayoutFlags flags, const SalLayoutGlyphs* pSalLayoutCache)
-{
-    assert(!is_double_buffered_window());
-
-    if (nLen < 0 || nIndex + nLen >= rStr.getLength())
-    {
-        nLen = rStr.getLength() - nIndex;
-    }
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaTextArrayAction(rStartPt, rStr, pDXAry, nIndex, nLen));
-
-    if (!IsDeviceOutputNecessary())
-        return;
-    if (!mpGraphics && !AcquireGraphics())
-        return;
-    if (mbInitClipRegion)
-        InitClipRegion();
-    if (mbOutputClipped)
-        return;
-
-    std::unique_ptr<SalLayout> pSalLayout
-        = ImplLayout(rStr, nIndex, nLen, rStartPt, 0, pDXAry, flags, nullptr, pSalLayoutCache);
-    if (pSalLayout)
-    {
-        ImplDrawText(*pSalLayout);
-    }
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->DrawTextArray(rStartPt, rStr, pDXAry, nIndex, nLen, flags);
-}
 
 void OutputDevice::GetCaretPositions(const OUString& rStr, tools::Long* pCaretXArray,
                                      sal_Int32 nIndex, sal_Int32 nLen,
@@ -932,32 +1044,6 @@ void OutputDevice::GetCaretPositions(const OUString& rStr, tools::Long* pCaretXA
         for (i = 0; i < 2 * nLen; ++i)
             pCaretXArray[i] /= nWidthFactor;
     }
-}
-
-void OutputDevice::DrawStretchText(const Point& rStartPt, sal_uLong nWidth, const OUString& rStr,
-                                   sal_Int32 nIndex, sal_Int32 nLen)
-{
-    assert(!is_double_buffered_window());
-
-    if ((nLen < 0) || (nIndex + nLen >= rStr.getLength()))
-    {
-        nLen = rStr.getLength() - nIndex;
-    }
-
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaStretchTextAction(rStartPt, nWidth, rStr, nIndex, nLen));
-
-    if (!IsDeviceOutputNecessary())
-        return;
-
-    std::unique_ptr<SalLayout> pSalLayout = ImplLayout(rStr, nIndex, nLen, rStartPt, nWidth);
-    if (pSalLayout)
-    {
-        ImplDrawText(*pSalLayout);
-    }
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->DrawStretchText(rStartPt, nWidth, rStr, nIndex, nLen);
 }
 
 std::shared_ptr<vcl::TextLayoutCache> OutputDevice::CreateTextLayoutCache(OUString const& rString)
@@ -1331,91 +1417,6 @@ void OutputDevice::ImplDrawText(OutputDevice& rTargetDevice, const tools::Rectan
         if (bRestoreFillColor)
             rTargetDevice.SetTextFillColor(aOldTextFillColor);
     }
-}
-
-void OutputDevice::AddTextRectActions(const tools::Rectangle& rRect, const OUString& rOrigStr,
-                                      DrawTextFlags nStyle, GDIMetaFile& rMtf)
-{
-    if (rOrigStr.isEmpty() || rRect.IsEmpty())
-        return;
-
-    // we need a graphics
-    if (!mpGraphics && !AcquireGraphics())
-        return;
-
-    assert(mpGraphics);
-
-    if(mbInitClipRegion)
-        InitClipRegion();
-
-    // temporarily swap in passed mtf for action generation, and
-    // disable output generation.
-    const bool bOutputEnabled(IsOutputEnabled());
-    GDIMetaFile* pMtf = mpMetaFile;
-
-    mpMetaFile = &rMtf;
-    EnableOutput(false);
-
-    // #i47157# Factored out to ImplDrawTextRect(), to be shared
-    // between us and DrawText()
-    vcl::DefaultTextLayout aLayout(*this);
-    ImplDrawText(*this, rRect, rOrigStr, nStyle, nullptr, nullptr, aLayout);
-
-    // and restore again
-    EnableOutput(bOutputEnabled);
-    mpMetaFile = pMtf;
-}
-
-void OutputDevice::DrawText(const tools::Rectangle& rRect, const OUString& rOrigStr,
-                            DrawTextFlags nStyle, std::vector<tools::Rectangle>* pVector, OUString* pDisplayText,
-                            vcl::ITextLayout* _pTextLayout)
-{
-    assert(!is_double_buffered_window());
-
-    if (mpOutDevData->mpRecordLayout)
-    {
-        pVector = &mpOutDevData->mpRecordLayout->m_aUnicodeBoundRects;
-        pDisplayText = &mpOutDevData->mpRecordLayout->m_aDisplayText;
-    }
-
-    bool bDecomposeTextRectAction
-        = (_pTextLayout != nullptr) && _pTextLayout->DecomposeTextRectAction();
-    if (mpMetaFile && !bDecomposeTextRectAction)
-        mpMetaFile->AddAction(new MetaTextRectAction(rRect, rOrigStr, nStyle));
-
-    if ((!IsDeviceOutputNecessary() && !pVector && !bDecomposeTextRectAction) || rOrigStr.isEmpty()
-        || rRect.IsEmpty())
-        return;
-
-    // we need a graphics
-    if (!mpGraphics && !AcquireGraphics())
-        return;
-
-    assert(mpGraphics);
-
-    if (mbInitClipRegion)
-        InitClipRegion();
-
-    if (mbOutputClipped && !bDecomposeTextRectAction)
-        return;
-
-    // temporarily disable mtf action generation (ImplDrawText _does_
-    // create MetaActionType::TEXTs otherwise)
-    GDIMetaFile* pMtf = mpMetaFile;
-    if (!bDecomposeTextRectAction)
-        mpMetaFile = nullptr;
-
-    // #i47157# Factored out to ImplDrawText(), to be used also
-    // from AddTextRectActions()
-    vcl::DefaultTextLayout aDefaultLayout(*this);
-    ImplDrawText(*this, rRect, rOrigStr, nStyle, pVector, pDisplayText,
-                 _pTextLayout ? *_pTextLayout : aDefaultLayout);
-
-    // and enable again
-    mpMetaFile = pMtf;
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->DrawText(rRect, rOrigStr, nStyle, pVector, pDisplayText);
 }
 
 tools::Rectangle OutputDevice::GetTextRect(const tools::Rectangle& rRect, const OUString& rStr,
