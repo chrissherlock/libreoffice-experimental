@@ -1757,4 +1757,27 @@ css::awt::DeviceInfo Printer::GetDeviceInfo() const
     return aInfo;
 }
 
+void Printer::InitWaveLineColor(Color const& rColor, tools::Long nLineWidth)
+{
+    if (nLineWidth > 1)
+    {
+       if (mbLineColor || mbInitLineColor)
+        {
+            mpGraphics->SetLineColor();
+            mbInitLineColor = true;
+        }
+
+        mpGraphics->SetFillColor(rColor);
+        mbInitFillColor = true;
+    }
+}
+
+std::tuple<bool, Size> Printer::GetWaveLineSize(tools::Long nLineWidth) const
+{
+    if (nLineWidth > 1)
+        return std::make_tuple(true, Size(nLineWidth, ((nLineWidth * GetDPIX()) + (GetDPIY() / 2)) / GetDPIY()));
+
+    return std::make_tuple(false, Size(1, 1));
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

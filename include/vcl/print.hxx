@@ -35,6 +35,7 @@
 #include <com/sun/star/uno/Sequence.hxx>
 #include <com/sun/star/view/PrintableState.hpp>
 
+#include <tuple>
 #include <memory>
 #include <unordered_map>
 
@@ -211,6 +212,9 @@ protected:
 
     bool                        CanSubsampleBitmap() const override { return false; }
     vcl::Region                 ClipToDeviceBounds(vcl::Region aRegion) const override;
+
+    void                        InitWaveLineColor(Color const& rColor, tools::Long nLineWidth) override;
+    std::tuple<bool, Size>      GetWaveLineSize(tools::Long nLineWidth) const override;
 
 public:
     void                        DrawGradientEx( OutputDevice* pOut, const tools::Rectangle& rRect,
