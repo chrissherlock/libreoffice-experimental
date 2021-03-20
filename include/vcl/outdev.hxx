@@ -632,8 +632,6 @@ protected:
     SAL_DLLPRIVATE float approximate_char_width() const;
 
 private:
-    SAL_DLLPRIVATE void ImplInitTextColor();
-
     SAL_DLLPRIVATE void ImplDrawTextDirect(SalLayout&, bool bTextLines);
     SAL_DLLPRIVATE void ImplDrawSpecialText(SalLayout&);
     SAL_DLLPRIVATE void ImplDrawTextRect(tools::Long nBaseX, tools::Long nBaseY, tools::Long nX,

@@ -21,6 +21,7 @@
 #include <config_fuzzers.h>
 
 #include <rtl/ustrbuf.hxx>
+#include <tools/debug.hxx>
 
 #include <vcl/RenderContext2.hxx>
 #include <vcl/TextLayoutCache.hxx>
@@ -35,6 +36,17 @@
 #include <impfontcache.hxx>
 #include <salgdi.hxx>
 #include <sallayout.hxx>
+
+void RenderContext2::ImplInitTextColor()
+{
+    DBG_TESTSOLARMUTEX();
+
+    if (mbInitTextColor)
+    {
+        mpGraphics->SetTextColor(GetTextColor());
+        mbInitTextColor = false;
+    }
+}
 
 tools::Long RenderContext2::GetTextWidth(const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen,
                                          vcl::TextLayoutCache const* const pLayoutCache,

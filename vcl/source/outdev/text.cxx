@@ -68,17 +68,6 @@ void OutputDevice::SetLayoutMode(ComplexTextLayoutFlags nTextLayoutMode)
     RenderContext2::SetLayoutMode(nTextLayoutMode);
 }
 
-void OutputDevice::ImplInitTextColor()
-{
-    DBG_TESTSOLARMUTEX();
-
-    if (mbInitTextColor)
-    {
-        mpGraphics->SetTextColor(GetTextColor());
-        mbInitTextColor = false;
-    }
-}
-
 void OutputDevice::ImplDrawTextRect(tools::Long nBaseX, tools::Long nBaseY, tools::Long nDistX,
                                     tools::Long nDistY, tools::Long nWidth, tools::Long nHeight)
 {
