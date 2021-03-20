@@ -120,8 +120,6 @@ class XGraphics;
 #define GLYPH_FONT_HEIGHT 256
 #endif
 
-typedef std::vector<tools::Rectangle> MetricVector;
-
 // OutputDevice-Types
 
 enum OutDevType
@@ -512,15 +510,15 @@ private:
 
 public:
     void DrawText(const Point& rStartPt, const OUString& rStr, sal_Int32 nIndex = 0,
-                  sal_Int32 nLen = -1, MetricVector* pVector = nullptr,
+                  sal_Int32 nLen = -1, std::vector<tools::Rectangle>* pVector = nullptr,
                   OUString* pDisplayText = nullptr, const SalLayoutGlyphs* pLayoutCache = nullptr);
 
     void DrawText(const tools::Rectangle& rRect, const OUString& rStr,
-                  DrawTextFlags nStyle = DrawTextFlags::NONE, MetricVector* pVector = nullptr,
+                  DrawTextFlags nStyle = DrawTextFlags::NONE, std::vector<tools::Rectangle>* pVector = nullptr,
                   OUString* pDisplayText = nullptr, vcl::ITextLayout* _pTextLayout = nullptr);
 
     static void ImplDrawText(OutputDevice& rTargetDevice, const tools::Rectangle& rRect,
-                             const OUString& rOrigStr, DrawTextFlags nStyle, MetricVector* pVector,
+                             const OUString& rOrigStr, DrawTextFlags nStyle, std::vector<tools::Rectangle>* pVector,
                              OUString* pDisplayText, vcl::ITextLayout& _rLayout);
 
     void ImplDrawText(SalLayout&);
@@ -529,7 +527,7 @@ public:
 
     void DrawCtrlText(const Point& rPos, const OUString& rStr, sal_Int32 nIndex = 0,
                       sal_Int32 nLen = -1, DrawTextFlags nStyle = DrawTextFlags::Mnemonic,
-                      MetricVector* pVector = nullptr, OUString* pDisplayText = nullptr,
+                      std::vector<tools::Rectangle>* pVector = nullptr, OUString* pDisplayText = nullptr,
                       const SalLayoutGlyphs* pGlyphs = nullptr);
 
     void DrawTextLine(const Point& rPos, tools::Long nWidth, FontStrikeout eStrikeout,

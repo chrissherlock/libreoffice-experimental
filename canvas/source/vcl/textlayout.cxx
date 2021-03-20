@@ -22,6 +22,7 @@
 
 #include <tools/diagnose_ex.h>
 #include <tools/long.hxx>
+#include <tools/gen.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <basegfx/numeric/ftools.hxx>
 #include <basegfx/utils/canvastools.hxx>
@@ -169,7 +170,7 @@ namespace vclcanvas
         std::unique_ptr< ::tools::Long []> aOffsets(new ::tools::Long[maLogicalAdvancements.getLength()]);
         setupTextOffsets(aOffsets.get(), maLogicalAdvancements, aViewState, aRenderState);
 
-        MetricVector aMetricVector;
+        std::vector<::tools::Rectangle> aMetricVector;
         uno::Sequence<geometry::RealRectangle2D> aBoundingBoxes;
         if (pVDev->GetGlyphBoundRects(
             Point(0,0),
