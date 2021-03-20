@@ -669,11 +669,7 @@ private:
     ///@{
 
 public:
-    SAL_DLLPRIVATE void ReMirror(Point& rPoint) const;
-    SAL_DLLPRIVATE void ReMirror(tools::Rectangle& rRect) const;
-    SAL_DLLPRIVATE void ReMirror(vcl::Region& rRegion) const;
     SAL_DLLPRIVATE bool ImplIsRecordLayout() const;
-    virtual bool HasMirroredGraphics() const;
 
     // Enabling/disabling RTL only makes sense for OutputDevices that use a mirroring SalGraphicsLayout
     virtual void EnableRTL(bool bEnable = true);
