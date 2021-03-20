@@ -364,44 +364,6 @@ void OutputDevice::EnableRTL(bool bEnable)
         mpAlphaVDev->EnableRTL(bEnable);
 }
 
-// note: the coordinates to be remirrored are in frame coordinates !
-
-void OutputDevice::ReMirror(Point& rPoint) const
-{
-    rPoint.setX(mnOutOffX + mnOutWidth - 1 - rPoint.X() + mnOutOffX);
-}
-void OutputDevice::ReMirror(tools::Rectangle& rRect) const
-{
-    tools::Long nWidth = rRect.Right() - rRect.Left();
-
-    //long lc_x = rRect.nLeft - mnOutOffX;    // normalize
-    //lc_x = mnOutWidth - nWidth - 1 - lc_x;  // mirror
-    //rRect.nLeft = lc_x + mnOutOffX;         // re-normalize
-
-    rRect.SetLeft(mnOutOffX + mnOutWidth - nWidth - 1 - rRect.Left() + mnOutOffX);
-    rRect.SetRight(rRect.Left() + nWidth);
-}
-
-void OutputDevice::ReMirror(vcl::Region& rRegion) const
-{
-    RectangleVector aRectangles;
-    rRegion.GetRegionRectangles(aRectangles);
-    vcl::Region aMirroredRegion;
-
-    for (auto& rectangle : aRectangles)
-    {
-        ReMirror(rectangle);
-        aMirroredRegion.Union(rectangle);
-    }
-
-    rRegion = aMirroredRegion;
-}
-
-bool OutputDevice::HasMirroredGraphics() const
-{
-    return (AcquireGraphics() && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
-}
-
 bool OutputDevice::ImplIsRecordLayout() const
 {
     if (!mpOutDevData)

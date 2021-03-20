@@ -147,6 +147,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/rendercontext/line \
     vcl/source/rendercontext/map \
     vcl/source/rendercontext/mask \
+    vcl/source/rendercontext/mirror \
     vcl/source/rendercontext/nativecontrols \
     vcl/source/rendercontext/output \
     vcl/source/rendercontext/pixel \
