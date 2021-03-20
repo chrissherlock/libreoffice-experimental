@@ -22,6 +22,7 @@
 #include <rtl/ref.hxx>
 #include <tools/solar.h>
 #include <tools/color.hxx>
+#include <tools/fontenum.hxx>
 #include <tools/mapunit.hxx>
 #include <tools/poly.hxx>
 #include <unotools/fontdefs.hxx>
@@ -51,6 +52,7 @@
 #include <vcl/metric.hxx>
 #include <vcl/region.hxx>
 #include <vcl/salnativewidgets.hxx>
+#include <vcl/textrectinfo.hxx>
 #include <vcl/vclptr.hxx>
 #include <vcl/vclreferencebase.hxx>
 #include <vcl/wall.hxx>
@@ -66,6 +68,7 @@ class Image;
 class ImplDeviceFontList;
 class ImplDeviceFontSizeList;
 class ImplFontCache;
+class ImplMultiTextLineInfo;
 class LogicalFontInstance;
 class PhysicalFontCollection;
 class SalGraphics;
@@ -130,6 +133,12 @@ public:
     virtual void DrawCheckered(Point const& rPos, Size const& rSize, sal_uInt32 nLen = 8,
                                Color aStart = COL_WHITE, Color aEnd = COL_BLACK);
 
+    virtual void DrawEllipse(tools::Rectangle const& rRect);
+    virtual void DrawArc(tools::Rectangle const& rRect, Point const& rStartPt, Point const& rEndPt);
+    virtual void DrawPie(tools::Rectangle const& rRect, Point const& rStartPt, Point const& rEndPt);
+    virtual void DrawChord(tools::Rectangle const& rRect, Point const& rStartPt,
+                           Point const& rEndPt);
+
     void Invert(tools::Rectangle const& rRect, InvertFlags nFlags = InvertFlags::NONE);
     void Invert(tools::Polygon const& rPoly, InvertFlags nFlags = InvertFlags::NONE);
 
@@ -164,6 +173,31 @@ public:
     virtual void DrawBitmap(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap);
     virtual void DrawBitmap(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
                             Size const& rSrcSizePixel, Bitmap const& rBitmap);
+
+    virtual void DrawText(Point const& rStartPt, OUString const& rStr, sal_Int32 nIndex = 0,
+                          sal_Int32 nLen = -1, std::vector<tools::Rectangle>* pVector = nullptr,
+                          OUString* pDisplayText = nullptr,
+                          SalLayoutGlyphs const* pLayoutCache = nullptr);
+
+    virtual void DrawText(tools::Rectangle const& rRect, OUString const& rStr,
+                          DrawTextFlags nStyle = DrawTextFlags::NONE,
+                          std::vector<tools::Rectangle>* pVector = nullptr,
+                          OUString* pDisplayText = nullptr,
+                          vcl::ITextLayout* _pTextLayout = nullptr);
+
+    virtual void DrawTextArray(Point const& rStartPt, OUString const& rStr,
+                               tools::Long const* pDXAry, sal_Int32 nIndex = 0, sal_Int32 nLen = -1,
+                               SalLayoutFlags flags = SalLayoutFlags::NONE,
+                               SalLayoutGlyphs const* pLayoutCache = nullptr);
+
+    virtual void DrawTextLine(const Point& rPos, tools::Long nWidth, FontStrikeout eStrikeout,
+                              FontLineStyle eUnderline, FontLineStyle eOverline,
+                              bool bUnderlineAbove = false);
+
+    void DrawCtrlText(Point const& rPos, OUString const& rStr, sal_Int32 nIndex = 0,
+                      sal_Int32 nLen = -1, DrawTextFlags nStyle = DrawTextFlags::Mnemonic,
+                      std::vector<tools::Rectangle>* pVector = nullptr,
+                      OUString* pDisplayText = nullptr, SalLayoutGlyphs const* pGlyphs = nullptr);
 
     SAL_DLLPRIVATE void BlendBitmap(SalTwoRect const& rPosAry, Bitmap const& rBmp);
 
@@ -352,6 +386,41 @@ public:
     TextAlign GetTextAlign() const;
     virtual void SetTextAlign(TextAlign eAlign);
 
+    sal_Int32 GetTextBreak(OUString const& rStr, tools::Long nTextWidth, sal_Int32 nIndex,
+                           sal_Int32 nLen = -1, tools::Long nCharExtra = 0,
+                           vcl::TextLayoutCache const* = nullptr,
+                           SalLayoutGlyphs const* pGlyphs = nullptr) const;
+    sal_Int32 GetTextBreak(OUString const& rStr, tools::Long nTextWidth, sal_Unicode nExtraChar,
+                           sal_Int32& rExtraCharPos, sal_Int32 nIndex, sal_Int32 nLen,
+                           tools::Long nCharExtra, vcl::TextLayoutCache const* = nullptr) const;
+
+    tools::Rectangle GetTextRect(tools::Rectangle const& rRect, const OUString& rStr,
+                                 DrawTextFlags nStyle = DrawTextFlags::WordBreak,
+                                 TextRectInfo* pInfo = nullptr,
+                                 vcl::ITextLayout const* _pTextLayout = nullptr) const;
+
+    bool GetTextIsRTL(OUString const&, sal_Int32 nIndex, sal_Int32 nLen) const;
+
+    void GetCaretPositions(OUString const&, tools::Long* pCaretXArray, sal_Int32 nIndex,
+                           sal_Int32 nLen, SalLayoutGlyphs const* pGlyphs = nullptr) const;
+
+    OUString GetEllipsisString(OUString const& rStr, tools::Long nMaxWidth,
+                               DrawTextFlags nStyle = DrawTextFlags::EndEllipsis) const;
+
+    static OUString GetNonMnemonicString(const OUString& rStr, sal_Int32& rMnemonicPos);
+    static OUString GetNonMnemonicString(const OUString& rStr);
+
+    tools::Long GetCtrlTextWidth(OUString const& rStr,
+                                 SalLayoutGlyphs const* pLayoutCache = nullptr) const;
+
+    bool GetTextOutlines(PolyPolyVector&, OUString const& rStr, sal_Int32 nBase = 0,
+                         sal_Int32 nIndex = 0, sal_Int32 nLen = -1, sal_uLong nLayoutWidth = 0,
+                         tools::Long const* pDXArray = nullptr) const;
+    bool GetTextOutlines(basegfx::B2DPolyPolygonVector& rVector, OUString const& rStr,
+                         sal_Int32 nBase, sal_Int32 nIndex = 0, sal_Int32 nLen = -1,
+                         sal_uLong nLayoutWidth = 0, tools::Long const* pDXArray = nullptr) const;
+    bool GetTextOutline(tools::PolyPolygon&, OUString const& rStr) const;
+
     virtual void SetSettings(AllSettings const& rSettings);
     AllSettings const& GetSettings() const;
 
@@ -462,6 +531,13 @@ public:
                           tools::Long const* pDXArray = nullptr,
                           SalLayoutGlyphs const* pGlyphs = nullptr) const;
 
+    /** Height where any character of the current font fits; in logic coordinates.
+
+        See also GetTextBoundRect() for more explanation + code examples.
+    */
+    tools::Long GetTextHeight() const;
+    float approximate_digit_width() const;
+
     /** Width of the text.
 
         See also GetTextBoundRect() for more explanation + code examples.
@@ -478,6 +554,10 @@ public:
                                           vcl::TextLayoutCache const* = nullptr,
                                           SalLayoutGlyphs const* pGlyphs = nullptr) const;
 
+    tools::Rectangle ImplGetTextBoundRect(SalLayout const&);
+
+    static std::shared_ptr<vcl::TextLayoutCache> CreateTextLayoutCache(OUString const&);
+
     SAL_DLLPRIVATE void ImplUpdateFontData();
 
     //drop font data for all outputdevices.
@@ -492,7 +572,7 @@ public:
 
     /** Get the offset in pixel
 
-        @see OutputDevice::SetPixelOffset for details
+        @see RenderContext2::SetPixelOffset for details
 
         @return the current offset in pixel
      */
@@ -509,7 +589,7 @@ public:
         @attention This offset is only applied when converting to
         pixel, i.e. some output modes such as metafile recordings
         might be completely unaffected by this method! Use with
-        care. Furthermore, if the OutputDevice's MapMode is the
+        care. Furthermore, if the RenderContext2's MapMode is the
         default (that's MapUnit::MapPixel), then any pixel offset set is
         ignored also. This might be unintuitive for cases, but would
         have been far more fragile to implement. What's more, the
@@ -644,30 +724,24 @@ public:
      */
     SAL_DLLPRIVATE tools::Long ImplLogicWidthToDevicePixel(tools::Long nWidth) const;
 
-    virtual void DrawEllipse(tools::Rectangle const& rRect);
-    virtual void DrawArc(tools::Rectangle const& rRect, Point const& rStartPt, Point const& rEndPt);
-    virtual void DrawPie(tools::Rectangle const& rRect, Point const& rStartPt, Point const& rEndPt);
-    virtual void DrawChord(tools::Rectangle const& rRect, Point const& rStartPt,
-                           Point const& rEndPt);
-
 protected:
     virtual void dispose();
 
     /** Acquire a graphics device that the output device uses to draw on.
 
-     There is an LRU of OutputDevices that is used to get the graphics. The
+     There is an LRU of RenderContext2s that is used to get the graphics. The
      actual creation of a SalGraphics instance is done via the SalFrame
      implementation.
 
      However, the SalFrame instance will only return a valid SalGraphics
      instance if it is not in use or there wasn't one in the first place. When
-     this happens, AcquireGraphics finds the least recently used OutputDevice
+     this happens, AcquireGraphics finds the least recently used RenderContext2
      in a different frame and "steals" it (releases it then starts using it).
 
-     If there are no frames to steal an OutputDevice's SalGraphics instance from
+     If there are no frames to steal an RenderContext2's SalGraphics instance from
      then it blocks until the graphics is released.
 
-     Once it has acquired a graphics instance, then we add the OutputDevice to
+     Once it has acquired a graphics instance, then we add the RenderContext2 to
      the LRU.
 
      @returns true if was able to initialize the graphics device, false otherwise.
@@ -681,6 +755,16 @@ protected:
                                 physically released graphics device.
      */
     virtual void ReleaseGraphics(bool bRelease = true) = 0;
+
+    void ImplDrawText(SalLayout&);
+
+    static void ImplDrawText(RenderContext2& rTargetDevice, tools::Rectangle const& rRect,
+                             OUString const& rOrigStr, DrawTextFlags nStyle,
+                             std::vector<tools::Rectangle>* pVector, OUString* pDisplayText,
+                             vcl::ITextLayout& _rLayout);
+
+    SAL_DLLPRIVATE void ImplDrawTextRect(tools::Long nBaseX, tools::Long nBaseY, tools::Long nX,
+                                         tools::Long nY, tools::Long nWidth, tools::Long nHeight);
 
     virtual void DrawDeviceBitmapEx(Point const& rDestPt, Size const& rDestSize,
                                     Point const& rSrcPtPixel, Size const& rSrcSizePixel,
@@ -731,6 +815,9 @@ protected:
     std::tuple<tools::Long, Point*> GenerateHatchPointBuffer(tools::Line const& rLine,
                                                              tools::PolyPolygon const& rPolyPoly,
                                                              Point* pPtBuffer);
+
+    virtual void InitWaveLineColor(Color const& rColor, tools::Long);
+    virtual std::tuple<bool, Size> GetWaveLineSize(tools::Long nLineWidth) const;
 
     virtual void DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize,
                                   const Point& rSrcPtPixel, Size const& rSrcSizePixel,
@@ -929,6 +1016,11 @@ protected:
     void SetFontCollectionFromSVData();
     void ResetNewFontCache();
 
+    static SAL_DLLPRIVATE tools::Long ImplGetTextLines(ImplMultiTextLineInfo& rLineInfo,
+                                                       tools::Long nWidth, OUString const& rStr,
+                                                       DrawTextFlags nStyle,
+                                                       vcl::ITextLayout const& _rLayout);
+
     static SAL_DLLPRIVATE OUString ImplGetEllipsisString(RenderContext2 const& rTargetDevice,
                                                          OUString const& rStr,
                                                          tools::Long nMaxWidth,
@@ -943,6 +1035,8 @@ protected:
     SAL_DLLPRIVATE static FontEmphasisMark ImplGetEmphasisMarkStyle(vcl::Font const& rFont);
 
     SAL_DLLPRIVATE void ImplDrawEmphasisMarks(SalLayout&);
+
+    SAL_DLLPRIVATE float approximate_char_width() const;
 
     SAL_DLLPRIVATE ImplLayoutArgs ImplPrepareLayoutArgs(
         OUString&, const sal_Int32 nIndex, const sal_Int32 nLen, DeviceCoordinate nPixelWidth,
@@ -1065,7 +1159,7 @@ private:
                                                                 ImplLayoutArgs& rLayoutArgs,
                                                                 const SalLayoutGlyphs*) const;
 
-    typedef void (OutputDevice::*FontUpdateHandler_t)(bool);
+    typedef void (RenderContext2::*FontUpdateHandler_t)(bool);
 
     SAL_DLLPRIVATE static void ImplUpdateFontDataForAllFrames(FontUpdateHandler_t pHdl,
                                                               bool bNewFontLists);
@@ -1074,6 +1168,50 @@ private:
                                              const tools::PolyPolygon& rPolyPoly, bool bPolyLine,
                                              const tools::Rectangle& rRect1,
                                              const tools::Rectangle& rRect2);
+
+    // text functions
+    SAL_DLLPRIVATE void ImplDrawTextDirect(SalLayout&, bool bTextLines);
+    SAL_DLLPRIVATE void ImplDrawSpecialText(SalLayout&);
+    void ImplDrawTextBackground(SalLayout const&);
+    bool ImplDrawRotateText(SalLayout&);
+
+    void ImplDrawTextLine(tools::Long nBaseX, tools::Long nX, tools::Long nY,
+                          DeviceCoordinate nWidth, FontStrikeout eStrikeout,
+                          FontLineStyle eUnderline, FontLineStyle eOverline, bool bUnderlineAbove);
+
+    void ImplDrawTextLines(SalLayout&, FontStrikeout eStrikeout, FontLineStyle eUnderline,
+                           FontLineStyle eOverline, bool bWordLine, bool bUnderlineAbove);
+
+    SAL_DLLPRIVATE void ImplDrawWaveTextLine(tools::Long nBaseX, tools::Long nBaseY, tools::Long nX,
+                                             tools::Long nY, tools::Long nWidth,
+                                             FontLineStyle eTextLine, Color aColor, bool bIsAbove);
+
+    SAL_DLLPRIVATE void ImplDrawStraightTextLine(tools::Long nBaseX, tools::Long nBaseY,
+                                                 tools::Long nX, tools::Long nY, tools::Long nWidth,
+                                                 FontLineStyle eTextLine, Color aColor,
+                                                 bool bIsAbove);
+
+    SAL_DLLPRIVATE void ImplDrawWaveLine(tools::Long nBaseX, tools::Long nBaseY,
+                                         tools::Long nStartX, tools::Long nStartY,
+                                         tools::Long nWidth, tools::Long nHeight,
+                                         tools::Long nLineWidth, Degree10 nOrientation,
+                                         Color const& rColor);
+
+    SAL_DLLPRIVATE static void ImplDrawWavePixel(tools::Long nOriginX, tools::Long nOriginY,
+                                                 tools::Long nCurX, tools::Long nCurY,
+                                                 Degree10 nOrientation, SalGraphics* pGraphics,
+                                                 RenderContext2 const& rOutDev, bool bDrawPixAsRect,
+                                                 tools::Long nPixWidth, tools::Long nPixHeight);
+
+    SAL_DLLPRIVATE void ImplDrawStrikeoutLine(tools::Long nBaseX, tools::Long nBaseY,
+                                              tools::Long nX, tools::Long nY, tools::Long nWidth,
+                                              FontStrikeout eStrikeout, Color aColor);
+
+    SAL_DLLPRIVATE void ImplDrawStrikeoutChar(tools::Long nBaseX, tools::Long nBaseY,
+                                              tools::Long nX, tools::Long nY, tools::Long nWidth,
+                                              FontStrikeout eStrikeout, Color aColor);
+
+    SAL_DLLPRIVATE void ImplDrawMnemonicLine(tools::Long nX, tools::Long nY, tools::Long nWidth);
 
     std::vector<OutDevState> maOutDevStateStack;
     sal_Int32 mnDPIX;
