@@ -3175,4 +3175,14 @@ std::tuple<bool, Size> RenderContext2::GetWaveLineSize(tools::Long) const
     return std::make_tuple(false, Size(1, 1));
 }
 
+void RenderContext2::ImplInitTextLineSize()
+{
+    mpFontInstance->mxFontMetric->ImplInitTextLineSize(this);
+}
+
+void RenderContext2::ImplInitAboveTextLineSize()
+{
+    mpFontInstance->mxFontMetric->ImplInitAboveTextLineSize();
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
