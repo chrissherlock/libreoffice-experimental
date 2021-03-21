@@ -784,12 +784,12 @@ protected:
 
     /** Transform and draw a bitmap directly
 
-     @param     aFullTransform      The B2DHomMatrix used for the transformation
+     @param     rFullTransform      The B2DHomMatrix used for the transformation
      @param     rBitmapEx           Reference to the bitmap to be transformed and drawn
 
      @return true if it was able to draw the bitmap, false if not
      */
-    virtual bool DrawTransformBitmapExDirect(basegfx::B2DHomMatrix const& aFullTransform,
+    virtual bool DrawTransformBitmapExDirect(basegfx::B2DHomMatrix const& rFullTransform,
                                              BitmapEx const& rBitmapEx, double fAlpha = 1.0);
 
     virtual void DrawDeviceMask(Bitmap const& rMask, Color const& rMaskColor, Point const& rDestPt,
@@ -839,16 +839,16 @@ protected:
         visible range and the maximum area.
 
 
-      @param     aFullTransform      B2DHomMatrix used for transformation
-      @param     aVisibleRange       The new visible area of the bitmap
+      @param     rFullTransform      B2DHomMatrix used for transformation
+      @param     rVisibleRange       The new visible area of the bitmap
       @param     fMaximumArea        The maximum area of the bitmap
 
       @returns true if there is an area to be drawn, otherwise nothing is left to be drawn
         so return false
       */
     virtual bool
-    TransformAndReduceBitmapExToTargetRange(basegfx::B2DHomMatrix const& aFullTransform,
-                                            basegfx::B2DRange& aVisibleRange, double& fMaximumArea);
+    TransformAndReduceBitmapExToTargetRange(basegfx::B2DHomMatrix const& rFullTransform,
+                                            basegfx::B2DRange& rVisibleRange, double& fMaximumArea);
 
     /** Perform actual rect clip against outdev dimensions, to generate
         empty clips whenever one of the values is completely off the device.
