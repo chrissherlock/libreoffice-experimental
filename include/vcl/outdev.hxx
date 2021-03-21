@@ -551,10 +551,6 @@ public:
 
     void DrawStretchText(Point const& rStartPt, sal_uLong nWidth, OUString const& rStr,
                          sal_Int32 nIndex = 0, sal_Int32 nLen = -1) override;
-
-protected:
-    SAL_DLLPRIVATE void ImplInitTextLineSize();
-    SAL_DLLPRIVATE void ImplInitAboveTextLineSize();
     ///@}
 
     /** @name Layout functions

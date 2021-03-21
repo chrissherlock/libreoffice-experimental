@@ -1023,6 +1023,9 @@ protected:
     void SetFontCollectionFromSVData();
     void ResetNewFontCache();
 
+    SAL_DLLPRIVATE void ImplInitTextLineSize();
+    SAL_DLLPRIVATE void ImplInitAboveTextLineSize();
+
     static SAL_DLLPRIVATE tools::Long ImplGetTextLines(ImplMultiTextLineInfo& rLineInfo,
                                                        tools::Long nWidth, OUString const& rStr,
                                                        DrawTextFlags nStyle,

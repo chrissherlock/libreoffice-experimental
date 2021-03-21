@@ -32,16 +32,6 @@
 
 #include <cassert>
 
-void OutputDevice::ImplInitTextLineSize()
-{
-    mpFontInstance->mxFontMetric->ImplInitTextLineSize(this);
-}
-
-void OutputDevice::ImplInitAboveTextLineSize()
-{
-    mpFontInstance->mxFontMetric->ImplInitAboveTextLineSize();
-}
-
 void OutputDevice::SetTextLineColor()
 {
     if (mpMetaFile)
