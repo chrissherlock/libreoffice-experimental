@@ -58,7 +58,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mpNextGraphics = nullptr;
     mpMetaFile = nullptr;
     mpFontInstance = nullptr;
-    mpAlphaVDev = nullptr;
     mpExtOutDevData = nullptr;
     meOutDevViewType = OutDevViewType::DontKnow;
 }
@@ -362,14 +361,6 @@ void OutputDevice::EnableRTL(bool bEnable)
 
     if (mpAlphaVDev)
         mpAlphaVDev->EnableRTL(bEnable);
-}
-
-bool OutputDevice::ImplIsRecordLayout() const
-{
-    if (!mpOutDevData)
-        return false;
-
-    return mpOutDevData->mpRecordLayout;
 }
 
 css::awt::DeviceInfo OutputDevice::GetCommonDeviceInfo(Size const& rDevSz) const

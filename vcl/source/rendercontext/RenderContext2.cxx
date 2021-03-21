@@ -123,6 +123,14 @@ bool RenderContext2::IsScreenComp() const { return true; }
 
 bool RenderContext2::IsVirtual() const { return false; }
 
+bool RenderContext2::ImplIsRecordLayout() const
+{
+    if (!mpOutDevData)
+        return false;
+
+    return mpOutDevData->mpRecordLayout;
+}
+
 bool RenderContext2::is_double_buffered_window() const
 {
     const vcl::Window* pWindow = dynamic_cast<const vcl::Window*>(this);

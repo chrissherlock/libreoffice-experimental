@@ -523,8 +523,6 @@ public:
                       FontLineStyle eUnderline, FontLineStyle eOverline,
                       bool bUnderlineAbove = false) override;
 
-    void DrawWaveLine(const Point& rStartPos, const Point& rEndPos, tools::Long nLineWidth = 1);
-
     /** Generate MetaTextActions for the text rect
 
         This method splits up the text rect into multiple
@@ -564,8 +562,6 @@ protected:
     ///@{
 
 public:
-    SAL_DLLPRIVATE bool ImplIsRecordLayout() const;
-
     // Enabling/disabling RTL only makes sense for OutputDevices that use a mirroring SalGraphicsLayout
     virtual void EnableRTL(bool bEnable = true);
 
