@@ -84,6 +84,24 @@ void OutputDevice::DrawStretchText(Point const& rStartPt, sal_uLong nWidth, OUSt
     RenderContext2::DrawStretchText(rStartPt, nWidth, rStr, nIndex, nLen);
 }
 
+void OutputDevice::DrawTextLine(const Point& rPos, tools::Long nWidth, FontStrikeout eStrikeout,
+                                FontLineStyle eUnderline, FontLineStyle eOverline,
+                                bool bUnderlineAbove)
+{
+    assert(!is_double_buffered_window());
+
+    if (ImplIsRecordLayout())
+        return;
+
+    if (mpMetaFile)
+    {
+        mpMetaFile->AddAction(
+            new MetaTextLineAction(rPos, nWidth, eStrikeout, eUnderline, eOverline));
+    }
+
+    RenderContext2::DrawTextLine(rPos, nWidth, eStrikeout, eUnderline, eOverline, bUnderlineAbove);
+}
+
 void OutputDevice::AddTextRectActions(const tools::Rectangle& rRect, const OUString& rOrigStr,
                                       DrawTextFlags nStyle, GDIMetaFile& rMtf)
 {
@@ -163,6 +181,40 @@ void OutputDevice::SetTextAlign(TextAlign eAlign)
         mpMetaFile->AddAction(new MetaTextAlignAction(eAlign));
 
     RenderContext2::SetTextAlign(eAlign);
+}
+
+void OutputDevice::SetTextLineColor()
+{
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaTextLineColorAction(Color(), false));
+
+    RenderContext2::SetTextLineColor();
+}
+
+void OutputDevice::SetTextLineColor(const Color& rColor)
+{
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaTextLineColorAction(
+            GetDrawModeTextColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings()), true));
+
+    RenderContext2::SetTextLineColor(rColor);
+}
+
+void OutputDevice::SetOverlineColor()
+{
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaOverlineColorAction(Color(), false));
+
+    RenderContext2::SetOverlineColor();
+}
+
+void OutputDevice::SetOverlineColor(Color const& rColor)
+{
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaOverlineColorAction(
+            GetDrawModeTextColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings()), true));
+
+    RenderContext2::SetOverlineColor(rColor);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

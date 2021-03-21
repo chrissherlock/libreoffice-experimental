@@ -287,7 +287,6 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/outdev/image \
     vcl/source/outdev/font \
     vcl/source/outdev/text \
-    vcl/source/outdev/textline \
     vcl/source/outdev/pixel \
     vcl/source/outdev/border \
     vcl/source/outdev/rect \
