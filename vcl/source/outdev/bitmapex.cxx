@@ -358,29 +358,51 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
     // at this point we are either sheared or rotated or both
     assert(bSheared || bRotated);
 
-    // fallback; create transformed bitmap the hard way (back-transform
-    // the pixels) and paint
     basegfx::B2DRange aVisibleRange(0.0, 0.0, 1.0, 1.0);
 
     // limit maximum area to something looking good for non-pixel-based targets (metafile, printer)
     // by using a fixed minimum (allow at least, but no need to utilize) for good smoothing and an area
     // dependent of original size for good quality when e.g. rotated/sheared. Still, limit to a maximum
     // to avoid crashes/resource problems (ca. 1500x3000 here)
-    const Size& rOriginalSizePixel(bitmapEx.GetSizePixel());
+    const Size& rOriginalSizePixel(rBitmapEx.GetSizePixel());
     const double fOrigArea(rOriginalSizePixel.Width() * rOriginalSizePixel.Height() * 0.5);
     const double fOrigAreaScaled(fOrigArea * 1.44);
     double fMaximumArea(std::clamp(fOrigAreaScaled, 1000000.0, 4500000.0));
 
-    if (!mpMetaFile)
-    {
-        if (!TransformAndReduceBitmapExToTargetRange(aFullTransform, aVisibleRange, fMaximumArea))
-            return;
-    }
+    if (!TransformAndReduceBitmapExToTargetRange(aFullTransform, aVisibleRange, fMaximumArea))
+        return;
 
     if (aVisibleRange.isEmpty())
         return;
 
-    BitmapEx aTransformed(bitmapEx);
+    // fallback; create transformed bitmap the hard way (back-transform the pixels) and paint
+    Point aDestPt;
+    Size aDestSize;
+    BitmapEx aTransformed;
+    std::tie(aDestPt, aDestSize, aTransformed) = CreateTransformedBitmapFallback(
+        bitmapEx, rOriginalSizePixel, rTransformation, aVisibleRange, fMaximumArea);
+
+    DrawBitmapEx(aDestPt, aDestSize, aTransformed);
+}
+
+std::tuple<Point, Size, BitmapEx>
+OutputDevice::CreateTransformedBitmapFallback(BitmapEx const& rBitmapEx,
+                                              Size const& rOriginalSizePixel,
+                                              basegfx::B2DHomMatrix const& rTransformation,
+                                              basegfx::B2DRange aVisibleRange, double fMaximumArea)
+{
+    BitmapEx aTransformed(rBitmapEx);
+
+    // Remove scaling from aFulltransform: we transform due to shearing or rotation, scaling
+    // will happen according to aDestSize.
+    basegfx::B2DVector aFullScale, aFullTranslate;
+    double fFullRotate, fFullShearX;
+
+    rTransformation.decompose(aFullScale, aFullTranslate, fFullRotate, fFullShearX);
+    const bool bRotated(!basegfx::fTools::equalZero(fFullRotate));
+    const bool bSheared(!basegfx::fTools::equalZero(fFullShearX));
+
+    basegfx::B2DHomMatrix aFullTransform(ImplGetDeviceTransformation() * rTransformation);
 
     // #122923# when the result needs an alpha channel due to being rotated or sheared
     // and thus uncovering areas, add these channels so that the own transformer (used
@@ -395,13 +417,6 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
 
         aTransformed = BitmapEx(aContent, aMaskBmp);
     }
-
-    // Remove scaling from aFulltransform: we transform due to shearing or rotation, scaling
-    // will happen according to aDestSize.
-    basegfx::B2DVector aFullScale, aFullTranslate;
-    double fFullRotate, fFullShearX;
-
-    aFullTransform.decompose(aFullScale, aFullTranslate, fFullRotate, fFullShearX);
 
     // Require positive scaling, negative scaling would loose horizontal or vertical flip.
     if (aFullScale.getX() > 0 && aFullScale.getY() > 0)
@@ -457,7 +472,18 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
     const Size aDestSize(basegfx::fround(aVisibleRange.getMaxX()) - aDestPt.X(),
                          basegfx::fround(aVisibleRange.getMaxY()) - aDestPt.Y());
 
-    DrawBitmapEx(aDestPt, aDestSize, aTransformed);
+    return std::make_tuple(aDestPt, aDestSize, aTransformed);
+}
+
+bool OutputDevice::TransformAndReduceBitmapExToTargetRange(
+    basegfx::B2DHomMatrix const& rFullTransform, basegfx::B2DRange& aVisibleRange,
+    double& fMaximumArea)
+{
+    if (!mpMetaFile)
+        return RenderContext2::TransformAndReduceBitmapExToTargetRange(rFullTransform,
+                                                                       aVisibleRange, fMaximumArea);
+
+    return false;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -305,14 +305,14 @@ bool RenderContext2::DrawTransformBitmapExDirect(basegfx::B2DHomMatrix const& aF
 };
 
 bool RenderContext2::TransformAndReduceBitmapExToTargetRange(
-    basegfx::B2DHomMatrix const& aFullTransform, basegfx::B2DRange& aVisibleRange,
+    basegfx::B2DHomMatrix const& rFullTransform, basegfx::B2DRange& rVisibleRange,
     double& fMaximumArea)
 {
     // limit TargetRange to existing pixels (if pixel device)
     // first get discrete range of object
-    basegfx::B2DRange aFullPixelRange(aVisibleRange);
+    basegfx::B2DRange aFullPixelRange(rVisibleRange);
 
-    aFullPixelRange.transform(aFullTransform);
+    aFullPixelRange.transform(rFullTransform);
 
     if (basegfx::fTools::equalZero(aFullPixelRange.getWidth())
         || basegfx::fTools::equalZero(aFullPixelRange.getHeight()))
@@ -355,11 +355,11 @@ bool RenderContext2::TransformAndReduceBitmapExToTargetRange(
         // the object range
         basegfx::B2DHomMatrix aMakeVisibleRangeRelative;
 
-        aVisibleRange = aVisiblePixelRange;
+        rVisibleRange = aVisiblePixelRange;
         aMakeVisibleRangeRelative.translate(-aFullPixelRange.getMinX(), -aFullPixelRange.getMinY());
         aMakeVisibleRangeRelative.scale(1.0 / aFullPixelRange.getWidth(),
                                         1.0 / aFullPixelRange.getHeight());
-        aVisibleRange.transform(aMakeVisibleRangeRelative);
+        rVisibleRange.transform(aMakeVisibleRangeRelative);
     }
 
     // for pixel devices, do *not* limit size, else RenderContext2::DrawDeviceAlphaBitmap
