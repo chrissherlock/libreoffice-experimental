@@ -181,6 +181,51 @@ struct LocalTimeTest
 };
 #endif
 
+bool OutputDevice::TryDirectBitmapExPaint() const
+{
+    const bool bInvert(RasterOp::Invert == meRasterOp);
+    const bool bBitmapChangedColor(
+        mnDrawMode
+        & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap | DrawModeFlags::GrayBitmap));
+
+    return (!bInvert && !bBitmapChangedColor && !mpMetaFile);
+}
+
+bool OutputDevice::DrawTransformedAlphaBitmapExDirect(basegfx::B2DHomMatrix const& rFullTransform,
+                                                      BitmapEx const& rBitmapEx, float fAlpha)
+{
+    // First try to handle additional alpha blending, either directly, or modify the bitmap.
+    if (!rtl::math::approxEqual(fAlpha, 1.0))
+    {
+        if (TryDirectBitmapExPaint()
+            && DrawTransformBitmapExDirect(rFullTransform, rBitmapEx, fAlpha))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+BitmapEx OutputDevice::ApplyAlphaBitmapEx(BitmapEx const& rBitmapEx, float fAlpha) const
+{
+    BitmapEx bitmapEx(rBitmapEx);
+
+    if (!rtl::math::approxEqual(fAlpha, 1.0))
+    {
+        // Apply the alpha manually.
+        sal_uInt8 nColor(static_cast<sal_uInt8>(::basegfx::fround(255.0 * (1.0 - fAlpha) + .5)));
+        AlphaMask aAlpha(bitmapEx.GetSizePixel(), &nColor);
+
+        if (bitmapEx.IsTransparent())
+            aAlpha.BlendWith(bitmapEx.GetAlpha());
+
+        bitmapEx = BitmapEx(bitmapEx.GetBitmap(), aAlpha);
+    }
+
+    return bitmapEx;
+}
+
 void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransformation,
                                            const BitmapEx& rBitmapEx, double fAlpha)
 {
@@ -226,41 +271,20 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
         bUseTimer && rBitmapEx.GetSizeBytes() > 10000 ? new LocalTimeTest() : nullptr);
 #endif
 
-    BitmapEx bitmapEx = rBitmapEx;
-
-    const bool bInvert(RasterOp::Invert == meRasterOp);
-    const bool bBitmapChangedColor(
-        mnDrawMode
-        & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap | DrawModeFlags::GrayBitmap));
-    const bool bTryDirectPaint(!bInvert && !bBitmapChangedColor && !mpMetaFile);
     // tdf#130768 CAUTION(!) using GetViewTransformation() is *not* enough here, it may
     // be that mnOutOffX/mnOutOffY is used - see AOO bug 75163, mentioned at
     // ImplGetDeviceTransformation declaration
     basegfx::B2DHomMatrix aFullTransform(ImplGetDeviceTransformation() * rTransformation);
 
-    // First try to handle additional alpha blending, either directly, or modify the bitmap.
-    if (!rtl::math::approxEqual(fAlpha, 1.0))
-    {
-        if (bTryDirectPaint)
-        {
-            if (DrawTransformBitmapExDirect(aFullTransform, bitmapEx, fAlpha))
-                return; // we are done
-        }
+    if (DrawTransformedAlphaBitmapExDirect(aFullTransform, rBitmapEx, fAlpha))
+        return;
 
-        // Apply the alpha manually.
-        sal_uInt8 nColor(static_cast<sal_uInt8>(::basegfx::fround(255.0 * (1.0 - fAlpha) + .5)));
-        AlphaMask aAlpha(bitmapEx.GetSizePixel(), &nColor);
-
-        if (bitmapEx.IsTransparent())
-            aAlpha.BlendWith(bitmapEx.GetAlpha());
-
-        bitmapEx = BitmapEx(bitmapEx.GetBitmap(), aAlpha);
-    }
+    BitmapEx bitmapEx = ApplyAlphaBitmapEx(rBitmapEx, fAlpha);
 
     if (rtl::math::approxEqual(fAlpha, 1.0))
         fAlpha = 1.0; // avoid the need for approxEqual in backends
 
-    if (bTryDirectPaint && mpGraphics->HasFastDrawTransformedBitmap()
+    if (TryDirectBitmapExPaint() && mpGraphics->HasFastDrawTransformedBitmap()
         && DrawTransformBitmapExDirect(aFullTransform, bitmapEx))
     {
         return;
@@ -304,7 +328,7 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
         return;
     }
 
-    if (bTryDirectPaint && DrawTransformBitmapExDirect(aFullTransform, bitmapEx))
+    if (TryDirectBitmapExPaint() && DrawTransformBitmapExDirect(aFullTransform, bitmapEx))
         return; // we are done
 
     // take the fallback when no rotate and shear, but mirror (else we would have done this above)
