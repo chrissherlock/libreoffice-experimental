@@ -49,7 +49,8 @@ void OutputDevice::DrawBitmapEx(Point const& rDestPt, BitmapEx const& rBitmapEx)
         if (meRasterOp == RasterOp::Invert)
         {
             const Size aSizePix(rBitmapEx.GetSizePixel());
-            mpMetaFile->AddAction(new MetaRectAction(tools::Rectangle(rDestPt, PixelToLogic(aSizePix))));
+            mpMetaFile->AddAction(
+                new MetaRectAction(tools::Rectangle(rDestPt, PixelToLogic(aSizePix))));
             return;
         }
 
@@ -271,10 +272,10 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
     rTransformation.decompose(aScale, aTranslate, fRotate, fShearX);
     const bool bRotated(!basegfx::fTools::equalZero(fRotate));
     const bool bSheared(!basegfx::fTools::equalZero(fShearX));
-    const bool bMirroredX(basegfx::fTools::less(aScale.getX(), 0.0));
-    const bool bMirroredY(basegfx::fTools::less(aScale.getY(), 0.0));
+    const bool bMirrored(basegfx::fTools::less(aScale.getX(), 0.0)
+                         || basegfx::fTools::less(aScale.getY(), 0.0));
 
-    if (!bRotated && !bSheared && !bMirroredX && !bMirroredY)
+    if (!bRotated && !bSheared && !bMirrored)
     {
         // with no rotation, shear or mirroring it can be mapped to DrawBitmapEx
         // do *not* execute the mirroring here, it's done in the fallback
