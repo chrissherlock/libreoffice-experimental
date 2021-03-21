@@ -255,6 +255,20 @@ void OutputDevice::DrawNonShearedRotatedMirroredBitmapEx(BitmapEx const& rBitmap
     }
 }
 
+void OutputDevice::DrawMirroredBitmapEx(BitmapEx const& rBitmapEx,
+                                        basegfx::B2DVector const& rTranslate,
+                                        basegfx::B2DVector const& rScale)
+{
+    // with no rotation or shear it can be mapped to DrawBitmapEx
+    // do *not* execute the mirroring here, it's done in the fallback
+    // #i124580# the correct DestSize needs to be calculated based on MaxXY values
+    const Point aDestPt(basegfx::fround(rTranslate.getX()), basegfx::fround(rTranslate.getY()));
+    const Size aDestSize(basegfx::fround(rScale.getX() + rTranslate.getX()) - aDestPt.X(),
+                         basegfx::fround(rScale.getY() + rTranslate.getY()) - aDestPt.Y());
+
+    DrawBitmapEx(aDestPt, aDestSize, rBitmapEx);
+}
+
 void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransformation,
                                            const BitmapEx& rBitmapEx, double fAlpha)
 {
@@ -337,14 +351,7 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
     // take the fallback when no rotate and shear, but mirror (else we would have done this above)
     if (!bRotated && !bSheared)
     {
-        // with no rotation or shear it can be mapped to DrawBitmapEx
-        // do *not* execute the mirroring here, it's done in the fallback
-        // #i124580# the correct DestSize needs to be calculated based on MaxXY values
-        const Point aDestPt(basegfx::fround(aTranslate.getX()), basegfx::fround(aTranslate.getY()));
-        const Size aDestSize(basegfx::fround(aScale.getX() + aTranslate.getX()) - aDestPt.X(),
-                             basegfx::fround(aScale.getY() + aTranslate.getY()) - aDestPt.Y());
-
-        DrawBitmapEx(aDestPt, aDestSize, bitmapEx);
+        DrawMirroredBitmapEx(bitmapEx, aTranslate, aScale);
         return;
     }
 
