@@ -281,9 +281,6 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
 
     BitmapEx bitmapEx = ApplyAlphaBitmapEx(rBitmapEx, fAlpha);
 
-    if (rtl::math::approxEqual(fAlpha, 1.0))
-        fAlpha = 1.0; // avoid the need for approxEqual in backends
-
     if (TryDirectBitmapExPaint() && mpGraphics->HasFastDrawTransformedBitmap()
         && DrawTransformBitmapExDirect(aFullTransform, bitmapEx))
     {
