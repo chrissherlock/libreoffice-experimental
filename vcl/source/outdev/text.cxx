@@ -20,8 +20,8 @@
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/outdev.hxx>
+#include <vcl/settings.hxx>
 
-#include <salgdi.hxx>
 #include <drawmode.hxx>
 #include <textlayout.hxx>
 
@@ -90,9 +90,6 @@ void OutputDevice::AddTextRectActions(const tools::Rectangle& rRect, const OUStr
     if (rOrigStr.isEmpty() || rRect.IsEmpty())
         return;
 
-    // we need a graphics
-    if (!mpGraphics && !AcquireGraphics())
-        return;
     if (mbInitClipRegion)
         InitClipRegion();
 
