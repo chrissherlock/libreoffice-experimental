@@ -610,6 +610,10 @@ protected:
 
     BitmapEx ApplyAlphaBitmapEx(BitmapEx const& rBitmapEx, float fAlpha) const;
 
+    void DrawNonShearedRotatedMirroredBitmapEx(BitmapEx const& rBitmapEx,
+                                               basegfx::B2DVector const& rTranslate,
+                                               basegfx::B2DVector const& rScale);
+
     void DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize, const Point& rSrcPtPixel,
                           Size const& rSrcSizePixel, Bitmap const& rBitmap) override;
 
