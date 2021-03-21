@@ -614,6 +614,9 @@ protected:
                                                basegfx::B2DVector const& rTranslate,
                                                basegfx::B2DVector const& rScale);
 
+    void DrawMirroredBitmapEx(BitmapEx const& rBitmapEx, basegfx::B2DVector const& rTranslate,
+                              basegfx::B2DVector const& rScale);
+
     void DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize, const Point& rSrcPtPixel,
                           Size const& rSrcSizePixel, Bitmap const& rBitmap) override;
 
