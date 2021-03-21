@@ -226,9 +226,9 @@ BitmapEx OutputDevice::ApplyAlphaBitmapEx(BitmapEx const& rBitmapEx, float fAlph
     return bitmapEx;
 }
 
-void OutputDevice::DrawNonShearedRotatedMirroredBitmapEx(BitmapEx const& rBitmapEx,
-                                                         basegfx::B2DVector const& rTranslate,
-                                                         basegfx::B2DVector const& rScale)
+void OutputDevice::DrawUntransformedBitmapEx(BitmapEx const& rBitmapEx,
+                                             basegfx::B2DVector const& rTranslate,
+                                             basegfx::B2DVector const& rScale)
 {
     // with no rotation, shear or mirroring it can be mapped to DrawBitmapEx
     // do *not* execute the mirroring here, it's done in the fallback
@@ -341,7 +341,7 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
 
     if (!bRotated && !bSheared && !bMirrored)
     {
-        DrawNonShearedRotatedMirroredBitmapEx(bitmapEx, aTranslate, aScale);
+        DrawUntransformedBitmapEx(bitmapEx, aTranslate, aScale);
         return;
     }
 
