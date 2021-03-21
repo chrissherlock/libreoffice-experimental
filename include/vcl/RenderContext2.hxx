@@ -197,6 +197,8 @@ public:
                               FontLineStyle eUnderline, FontLineStyle eOverline,
                               bool bUnderlineAbove = false);
 
+    void DrawWaveLine(Point const& rStartPos, Point const& rEndPos, tools::Long nLineWidth = 1);
+
     void DrawCtrlText(Point const& rPos, OUString const& rStr, sal_Int32 nIndex = 0,
                       sal_Int32 nLen = -1, DrawTextFlags nStyle = DrawTextFlags::Mnemonic,
                       std::vector<tools::Rectangle>* pVector = nullptr,
@@ -295,6 +297,8 @@ public:
     virtual bool IsScreenComp() const;
     virtual sal_uInt16 GetBitCount() const;
     virtual bool IsVirtual() const;
+
+    SAL_DLLPRIVATE bool ImplIsRecordLayout() const;
 
     /// tells whether this output device is RTL in an LTR UI or LTR in a RTL UI
     SAL_DLLPRIVATE bool ImplIsAntiparallel() const;
