@@ -18,6 +18,7 @@
  */
 
 #include <rtl/math.hxx>
+#include <comphelper/lok.hxx>
 #include <basegfx/matrix/b2dhommatrixtools.hxx>
 
 #include <vcl/alpha.hxx>
@@ -461,6 +462,95 @@ BitmapEx RenderContext2::ApplyAlphaBitmapEx(BitmapEx const& rBitmapEx, float fAl
     }
 
     return bitmapEx;
+}
+
+std::tuple<Point, Size, BitmapEx> RenderContext2::CreateTransformedBitmapFallback(
+    BitmapEx const& rBitmapEx, Size const& rOriginalSizePixel,
+    basegfx::B2DHomMatrix const& rTransformation, basegfx::B2DRange aVisibleRange,
+    double fMaximumArea)
+{
+    BitmapEx aTransformed(rBitmapEx);
+
+    // Remove scaling from aFulltransform: we transform due to shearing or rotation, scaling
+    // will happen according to aDestSize.
+    basegfx::B2DVector aFullScale, aFullTranslate;
+    double fFullRotate, fFullShearX;
+
+    rTransformation.decompose(aFullScale, aFullTranslate, fFullRotate, fFullShearX);
+    const bool bRotated(!basegfx::fTools::equalZero(fFullRotate));
+    const bool bSheared(!basegfx::fTools::equalZero(fFullShearX));
+
+    basegfx::B2DHomMatrix aFullTransform(ImplGetDeviceTransformation() * rTransformation);
+
+    // #122923# when the result needs an alpha channel due to being rotated or sheared
+    // and thus uncovering areas, add these channels so that the own transformer (used
+    // in getTransformed) also creates a transformed alpha channel
+    if (!aTransformed.IsTransparent() && (bSheared || bRotated))
+    {
+        // parts will be uncovered, extend aTransformed with a mask bitmap
+        const Bitmap aContent(aTransformed.GetBitmap());
+
+        AlphaMask aMaskBmp(aContent.GetSizePixel());
+        aMaskBmp.Erase(0);
+
+        aTransformed = BitmapEx(aContent, aMaskBmp);
+    }
+
+    // Require positive scaling, negative scaling would loose horizontal or vertical flip.
+    if (aFullScale.getX() > 0 && aFullScale.getY() > 0)
+    {
+        basegfx::B2DHomMatrix aTransform = basegfx::utils::createScaleB2DHomMatrix(
+            rOriginalSizePixel.getWidth() / aFullScale.getX(),
+            rOriginalSizePixel.getHeight() / aFullScale.getY());
+        aFullTransform *= aTransform;
+    }
+
+    double fSourceRatio = 1.0;
+
+    if (rOriginalSizePixel.getHeight() != 0)
+        fSourceRatio = rOriginalSizePixel.getWidth() / rOriginalSizePixel.getHeight();
+
+    double fTargetRatio = 1.0;
+
+    if (aFullScale.getY() != 0)
+        fTargetRatio = aFullScale.getX() / aFullScale.getY();
+
+    bool bAspectRatioKept = rtl::math::approxEqual(fSourceRatio, fTargetRatio);
+
+    if (bSheared || !bAspectRatioKept)
+    {
+        // Not only rotation, or scaling does not keep aspect ratio.
+        aTransformed = aTransformed.getTransformed(aFullTransform, aVisibleRange, fMaximumArea);
+    }
+    else
+    {
+        // Just rotation, can do that directly.
+        fFullRotate = fmod(fFullRotate * -1, F_2PI);
+        if (fFullRotate < 0)
+        {
+            fFullRotate += F_2PI;
+        }
+        Degree10 nAngle10(basegfx::fround(basegfx::rad2deg(fFullRotate) * 10));
+        aTransformed.Rotate(nAngle10, COL_TRANSPARENT);
+    }
+
+    basegfx::B2DRange aTargetRange(0.0, 0.0, 1.0, 1.0);
+
+    // get logic object target range
+    aTargetRange.transform(rTransformation);
+
+    // get from unified/relative VisibleRange to logoc one
+    aVisibleRange.transform(basegfx::utils::createScaleTranslateB2DHomMatrix(
+        aTargetRange.getRange(), aTargetRange.getMinimum()));
+
+    // extract point and size; do not remove size, the bitmap may have been prepared reduced by purpose
+    // #i124580# the correct DestSize needs to be calculated based on MaxXY values
+    const Point aDestPt(basegfx::fround(aVisibleRange.getMinX()),
+                        basegfx::fround(aVisibleRange.getMinY()));
+    const Size aDestSize(basegfx::fround(aVisibleRange.getMaxX()) - aDestPt.X(),
+                         basegfx::fround(aVisibleRange.getMaxY()) - aDestPt.Y());
+
+    return std::make_tuple(aDestPt, aDestSize, aTransformed);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

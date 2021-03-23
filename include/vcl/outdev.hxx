@@ -611,11 +611,6 @@ protected:
     void DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize, const Point& rSrcPtPixel,
                           Size const& rSrcSizePixel, Bitmap const& rBitmap) override;
 
-    std::tuple<Point, Size, BitmapEx>
-    CreateTransformedBitmapFallback(BitmapEx const& rBitmapEx, Size const& rOriginalSizePixel,
-                                    basegfx::B2DHomMatrix const& rTransformation,
-                                    basegfx::B2DRange aVisibleRange, double fMaximumArea);
-
 private:
     void DrawBitmapEx2(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
                        Size const& rSrcSizePixel, BitmapEx const& rBitmapEx);
