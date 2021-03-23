@@ -220,20 +220,6 @@ void OutputDevice::DrawUntransformedBitmapEx(BitmapEx const& rBitmapEx,
     }
 }
 
-void OutputDevice::DrawMirroredBitmapEx(BitmapEx const& rBitmapEx,
-                                        basegfx::B2DVector const& rTranslate,
-                                        basegfx::B2DVector const& rScale)
-{
-    // with no rotation or shear it can be mapped to DrawBitmapEx
-    // do *not* execute the mirroring here, it's done in the fallback
-    // #i124580# the correct DestSize needs to be calculated based on MaxXY values
-    const Point aDestPt(basegfx::fround(rTranslate.getX()), basegfx::fround(rTranslate.getY()));
-    const Size aDestSize(basegfx::fround(rScale.getX() + rTranslate.getX()) - aDestPt.X(),
-                         basegfx::fround(rScale.getY() + rTranslate.getY()) - aDestPt.Y());
-
-    DrawBitmapEx(aDestPt, aDestSize, rBitmapEx);
-}
-
 void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransformation,
                                            const BitmapEx& rBitmapEx, double fAlpha)
 {
