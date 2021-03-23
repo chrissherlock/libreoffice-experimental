@@ -191,22 +191,6 @@ bool OutputDevice::TryDirectBitmapExPaint() const
     return (!bInvert && !bBitmapChangedColor && !mpMetaFile);
 }
 
-bool OutputDevice::DrawTransformedAlphaBitmapExDirect(basegfx::B2DHomMatrix const& rFullTransform,
-                                                      BitmapEx const& rBitmapEx, float fAlpha)
-{
-    // First try to handle additional alpha blending, either directly, or modify the bitmap.
-    if (!rtl::math::approxEqual(fAlpha, 1.0))
-    {
-        if (TryDirectBitmapExPaint()
-            && DrawTransformBitmapExDirect(rFullTransform, rBitmapEx, fAlpha))
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 BitmapEx OutputDevice::ApplyAlphaBitmapEx(BitmapEx const& rBitmapEx, float fAlpha) const
 {
     BitmapEx bitmapEx(rBitmapEx);

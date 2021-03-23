@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <rtl/math.hxx>
 #include <basegfx/matrix/b2dhommatrixtools.hxx>
 
 #include <vcl/alpha.hxx>
@@ -384,6 +385,22 @@ bool RenderContext2::TryDirectBitmapExPaint() const
         & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap | DrawModeFlags::GrayBitmap));
 
     return (!bInvert && !bBitmapChangedColor);
+}
+
+bool RenderContext2::DrawTransformedAlphaBitmapExDirect(basegfx::B2DHomMatrix const& rFullTransform,
+                                                        BitmapEx const& rBitmapEx, float fAlpha)
+{
+    // First try to handle additional alpha blending, either directly, or modify the bitmap.
+    if (!rtl::math::approxEqual(fAlpha, 1.0))
+    {
+        if (TryDirectBitmapExPaint()
+            && DrawTransformBitmapExDirect(rFullTransform, rBitmapEx, fAlpha))
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
