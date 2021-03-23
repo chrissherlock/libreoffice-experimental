@@ -403,4 +403,23 @@ bool RenderContext2::DrawTransformedAlphaBitmapExDirect(basegfx::B2DHomMatrix co
     return false;
 }
 
+BitmapEx RenderContext2::ApplyAlphaBitmapEx(BitmapEx const& rBitmapEx, float fAlpha) const
+{
+    BitmapEx bitmapEx(rBitmapEx);
+
+    if (!rtl::math::approxEqual(fAlpha, 1.0))
+    {
+        // Apply the alpha manually.
+        sal_uInt8 nColor(static_cast<sal_uInt8>(::basegfx::fround(255.0 * (1.0 - fAlpha) + .5)));
+        AlphaMask aAlpha(bitmapEx.GetSizePixel(), &nColor);
+
+        if (bitmapEx.IsTransparent())
+            aAlpha.BlendWith(bitmapEx.GetAlpha());
+
+        bitmapEx = BitmapEx(bitmapEx.GetBitmap(), aAlpha);
+    }
+
+    return bitmapEx;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

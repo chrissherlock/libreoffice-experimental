@@ -605,8 +605,6 @@ public:
 protected:
     bool TryDirectBitmapExPaint() const override;
 
-    BitmapEx ApplyAlphaBitmapEx(BitmapEx const& rBitmapEx, float fAlpha) const;
-
     void DrawUntransformedBitmapEx(BitmapEx const& rBitmapEx, basegfx::B2DVector const& rTranslate,
                                    basegfx::B2DVector const& rScale);
 
