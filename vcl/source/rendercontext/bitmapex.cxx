@@ -387,6 +387,33 @@ bool RenderContext2::TryDirectBitmapExPaint() const
     return (!bInvert && !bBitmapChangedColor);
 }
 
+void RenderContext2::DrawUntransformedBitmapEx(BitmapEx const& rBitmapEx,
+                                               basegfx::B2DVector const& rTranslate,
+                                               basegfx::B2DVector const& rScale)
+{
+    // with no rotation, shear or mirroring it can be mapped to DrawBitmapEx
+    // do *not* execute the mirroring here, it's done in the fallback
+    // #i124580# the correct DestSize needs to be calculated based on MaxXY values
+    Point aDestPt(basegfx::fround(rTranslate.getX()), basegfx::fround(rTranslate.getY()));
+    const Size aDestSize(basegfx::fround(rScale.getX() + rTranslate.getX()) - aDestPt.X(),
+                         basegfx::fround(rScale.getY() + rTranslate.getY()) - aDestPt.Y());
+    const Point aOrigin = GetMapMode().GetOrigin();
+
+    if (comphelper::LibreOfficeKit::isActive() && GetMapMode().GetMapUnit() != MapUnit::MapPixel)
+    {
+        aDestPt.Move(aOrigin.getX(), aOrigin.getY());
+        EnableMapMode(false);
+    }
+
+    DrawBitmapEx(aDestPt, aDestSize, rBitmapEx);
+
+    if (comphelper::LibreOfficeKit::isActive() && GetMapMode().GetMapUnit() != MapUnit::MapPixel)
+    {
+        EnableMapMode();
+        aDestPt.Move(-aOrigin.getX(), -aOrigin.getY());
+    }
+}
+
 bool RenderContext2::DrawTransformedAlphaBitmapExDirect(basegfx::B2DHomMatrix const& rFullTransform,
                                                         BitmapEx const& rBitmapEx, float fAlpha)
 {
