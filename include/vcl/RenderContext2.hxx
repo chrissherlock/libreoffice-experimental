@@ -835,6 +835,8 @@ protected:
     bool ProcessBitmapDrawModeBlackWhite(Point const& rDestPt, Size const& rDestSize);
     Bitmap ProcessBitmapDrawModeGray(Bitmap const& rBitmap);
 
+    virtual bool TryDirectBitmapExPaint() const;
+
     virtual basegfx::B2DRange
     ReduceBitmapExVisibleRange(basegfx::B2DHomMatrix const& rFullTransform,
                                basegfx::B2DRange const& rVisibleRange);

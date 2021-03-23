@@ -603,7 +603,7 @@ public:
     bool HasFastDrawTransformedBitmap() const override;
 
 protected:
-    bool TryDirectBitmapExPaint() const;
+    bool TryDirectBitmapExPaint() const override;
 
     bool DrawTransformedAlphaBitmapExDirect(basegfx::B2DHomMatrix const& rFullTransform,
                                             BitmapEx const& rBitmapEx, float fAlpha);
