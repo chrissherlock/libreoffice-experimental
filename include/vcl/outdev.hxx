@@ -606,7 +606,7 @@ protected:
     bool TryDirectBitmapExPaint() const override;
 
     void DrawUntransformedBitmapEx(BitmapEx const& rBitmapEx, basegfx::B2DVector const& rTranslate,
-                                   basegfx::B2DVector const& rScale);
+                                   basegfx::B2DVector const& rScale) override;
 
     void DrawMirroredBitmapEx(BitmapEx const& rBitmapEx, basegfx::B2DVector const& rTranslate,
                               basegfx::B2DVector const& rScale);

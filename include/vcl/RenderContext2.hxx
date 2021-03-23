@@ -837,6 +837,10 @@ protected:
 
     virtual bool TryDirectBitmapExPaint() const;
 
+    virtual void DrawUntransformedBitmapEx(BitmapEx const& rBitmapEx,
+                                           basegfx::B2DVector const& rTranslate,
+                                           basegfx::B2DVector const& rScale);
+
     bool DrawTransformedAlphaBitmapExDirect(basegfx::B2DHomMatrix const& rFullTransform,
                                             BitmapEx const& rBitmapEx, float fAlpha);
     BitmapEx ApplyAlphaBitmapEx(BitmapEx const& rBitmapEx, float fAlpha) const;
