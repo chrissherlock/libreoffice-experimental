@@ -241,9 +241,6 @@ protected:
     bool                        DrawTransformBitmapExDirect( const basegfx::B2DHomMatrix& aFullTransform,
                                     const BitmapEx& rBitmapEx, double fAlpha = 1.0) override;
 
-    bool                        TransformAndReduceBitmapExToTargetRange( const basegfx::B2DHomMatrix& aFullTransform,
-                                    basegfx::B2DRange &aVisibleRange, double &fMaximumArea) override;
-
     void                        DrawDeviceBitmapEx( const Point& rDestPt, const Size& rDestSize,
                                     const Point& rSrcPtPixel, const Size& rSrcSizePixel,
                                     BitmapEx& rBitmapEx ) override;
@@ -252,6 +249,9 @@ protected:
                                     sal_uInt16 nTransparencePercent ) override;
 
     virtual void                SetFontOrientation( LogicalFontInstance* const pFontInstance ) const override;
+
+    basegfx::B2DRange           ReduceBitmapExVisibleRange(basegfx::B2DHomMatrix const& rFullTransform,
+                                                           basegfx::B2DRange const& rVisibleRange) override;
 
 public:
                                 Printer();

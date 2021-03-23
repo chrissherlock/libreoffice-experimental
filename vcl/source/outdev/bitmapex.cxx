@@ -369,8 +369,15 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
     const double fOrigAreaScaled(fOrigArea * 1.44);
     double fMaximumArea(std::clamp(fOrigAreaScaled, 1000000.0, 4500000.0));
 
-    if (!TransformAndReduceBitmapExToTargetRange(aFullTransform, aVisibleRange, fMaximumArea))
-        return;
+    if (!mpMetaFile)
+    {
+        aVisibleRange = ReduceBitmapExVisibleRange(aFullTransform, aVisibleRange);
+
+        if (aVisibleRange.isEmpty())
+            return;
+
+        fMaximumArea = GetMaximumBitmapExArea(aVisibleRange);
+    }
 
     if (aVisibleRange.isEmpty())
         return;
@@ -473,17 +480,6 @@ OutputDevice::CreateTransformedBitmapFallback(BitmapEx const& rBitmapEx,
                          basegfx::fround(aVisibleRange.getMaxY()) - aDestPt.Y());
 
     return std::make_tuple(aDestPt, aDestSize, aTransformed);
-}
-
-bool OutputDevice::TransformAndReduceBitmapExToTargetRange(
-    basegfx::B2DHomMatrix const& rFullTransform, basegfx::B2DRange& aVisibleRange,
-    double& fMaximumArea)
-{
-    if (!mpMetaFile)
-        return RenderContext2::TransformAndReduceBitmapExToTargetRange(rFullTransform,
-                                                                       aVisibleRange, fMaximumArea);
-
-    return false;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
