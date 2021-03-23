@@ -850,6 +850,11 @@ protected:
     TransformAndReduceBitmapExToTargetRange(basegfx::B2DHomMatrix const& rFullTransform,
                                             basegfx::B2DRange& rVisibleRange, double& fMaximumArea);
 
+    basegfx::B2DRange ReduceBitmapExVisibleRange(basegfx::B2DHomMatrix const& rFullTransform,
+                                                 basegfx::B2DRange const& rVisibleRange);
+
+    double GetMaximumBitmapExArea(basegfx::B2DRange const& rVisiblePixelRange);
+
     /** Perform actual rect clip against outdev dimensions, to generate
         empty clips whenever one of the values is completely off the device.
 

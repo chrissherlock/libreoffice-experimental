@@ -308,6 +308,20 @@ bool RenderContext2::TransformAndReduceBitmapExToTargetRange(
     basegfx::B2DHomMatrix const& rFullTransform, basegfx::B2DRange& rVisibleRange,
     double& fMaximumArea)
 {
+    rVisibleRange = ReduceBitmapExVisibleRange(rFullTransform, rVisibleRange);
+
+    if (rVisibleRange.isEmpty())
+        return false;
+
+    fMaximumArea = GetMaximumBitmapExArea(rVisibleRange);
+
+    return true;
+}
+
+basegfx::B2DRange
+RenderContext2::ReduceBitmapExVisibleRange(basegfx::B2DHomMatrix const& rFullTransform,
+                                           basegfx::B2DRange const& rVisibleRange)
+{
     // limit TargetRange to existing pixels (if pixel device)
     // first get discrete range of object
     basegfx::B2DRange aFullPixelRange(rVisibleRange);
@@ -318,7 +332,7 @@ bool RenderContext2::TransformAndReduceBitmapExToTargetRange(
         || basegfx::fTools::equalZero(aFullPixelRange.getHeight()))
     {
         // object is outside of visible area
-        return false;
+        return basegfx::B2DRange(0.0, 0.0, 0.0, 0.0);
     }
 
     // now get discrete target pixels; start with OutDev pixel size and evtl.
@@ -337,39 +351,43 @@ bool RenderContext2::TransformAndReduceBitmapExToTargetRange(
     }
 
     if (aOutPixel.isEmpty())
-        return false; // no active output area
+        return aOutPixel; // no active output area
 
     // if aFullPixelRange is not completely inside of aOutPixel,
     // reduction of target pixels is possible
-    basegfx::B2DRange aVisiblePixelRange(aFullPixelRange);
+    basegfx::B2DRange aFinalRange(rVisibleRange);
 
     if (!aOutPixel.isInside(aFullPixelRange))
     {
+        basegfx::B2DRange aVisiblePixelRange(aFullPixelRange);
         aVisiblePixelRange.intersect(aOutPixel);
 
         if (aVisiblePixelRange.isEmpty())
-            return false; // nothing in visible part, reduces to nothing
+            return aVisiblePixelRange; // nothing in visible part, reduces to nothing
 
         // aVisiblePixelRange contains the reduced output area in
         // discrete coordinates. To make it useful everywhere, make it relative to
         // the object range
         basegfx::B2DHomMatrix aMakeVisibleRangeRelative;
 
-        rVisibleRange = aVisiblePixelRange;
+        aFinalRange = aVisiblePixelRange;
         aMakeVisibleRangeRelative.translate(-aFullPixelRange.getMinX(), -aFullPixelRange.getMinY());
         aMakeVisibleRangeRelative.scale(1.0 / aFullPixelRange.getWidth(),
                                         1.0 / aFullPixelRange.getHeight());
-        rVisibleRange.transform(aMakeVisibleRangeRelative);
+        aFinalRange.transform(aMakeVisibleRangeRelative);
     }
 
+    return aFinalRange;
+}
+
+double RenderContext2::GetMaximumBitmapExArea(basegfx::B2DRange const& rVisiblePixelRange)
+{
     // for pixel devices, do *not* limit size, else RenderContext2::DrawDeviceAlphaBitmap
     // will create another, badly scaled bitmap to do the job. Nonetheless, do a
     // maximum clipping of something big (1600x1280x2). Add 1.0 to avoid rounding
     // errors in rough estimations
-    const double fNewMaxArea(aVisiblePixelRange.getWidth() * aVisiblePixelRange.getHeight());
-
-    fMaximumArea = std::min(4096000.0, fNewMaxArea + 1.0);
-
-    return true;
+    const double fNewMaxArea(rVisiblePixelRange.getWidth() * rVisiblePixelRange.getHeight());
+    return std::min(4096000.0, fNewMaxArea + 1.0);
 }
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
