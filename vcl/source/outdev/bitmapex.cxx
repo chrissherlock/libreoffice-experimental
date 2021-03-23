@@ -181,45 +181,6 @@ struct LocalTimeTest
 };
 #endif
 
-bool OutputDevice::TryDirectBitmapExPaint() const
-{
-    const bool bInvert(RasterOp::Invert == meRasterOp);
-    const bool bBitmapChangedColor(
-        mnDrawMode
-        & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap | DrawModeFlags::GrayBitmap));
-
-    return (!bInvert && !bBitmapChangedColor && !mpMetaFile);
-}
-
-void OutputDevice::DrawUntransformedBitmapEx(BitmapEx const& rBitmapEx,
-                                             basegfx::B2DVector const& rTranslate,
-                                             basegfx::B2DVector const& rScale)
-{
-    // with no rotation, shear or mirroring it can be mapped to DrawBitmapEx
-    // do *not* execute the mirroring here, it's done in the fallback
-    // #i124580# the correct DestSize needs to be calculated based on MaxXY values
-    Point aDestPt(basegfx::fround(rTranslate.getX()), basegfx::fround(rTranslate.getY()));
-    const Size aDestSize(basegfx::fround(rScale.getX() + rTranslate.getX()) - aDestPt.X(),
-                         basegfx::fround(rScale.getY() + rTranslate.getY()) - aDestPt.Y());
-    const Point aOrigin = GetMapMode().GetOrigin();
-
-    if (!mpMetaFile && comphelper::LibreOfficeKit::isActive()
-        && GetMapMode().GetMapUnit() != MapUnit::MapPixel)
-    {
-        aDestPt.Move(aOrigin.getX(), aOrigin.getY());
-        EnableMapMode(false);
-    }
-
-    DrawBitmapEx(aDestPt, aDestSize, rBitmapEx);
-
-    if (!mpMetaFile && comphelper::LibreOfficeKit::isActive()
-        && GetMapMode().GetMapUnit() != MapUnit::MapPixel)
-    {
-        EnableMapMode();
-        aDestPt.Move(-aOrigin.getX(), -aOrigin.getY());
-    }
-}
-
 void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransformation,
                                            const BitmapEx& rBitmapEx, double fAlpha)
 {
@@ -431,6 +392,45 @@ OutputDevice::CreateTransformedBitmapFallback(BitmapEx const& rBitmapEx,
                          basegfx::fround(aVisibleRange.getMaxY()) - aDestPt.Y());
 
     return std::make_tuple(aDestPt, aDestSize, aTransformed);
+}
+
+bool OutputDevice::TryDirectBitmapExPaint() const
+{
+    const bool bInvert(RasterOp::Invert == meRasterOp);
+    const bool bBitmapChangedColor(
+        mnDrawMode
+        & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap | DrawModeFlags::GrayBitmap));
+
+    return (!bInvert && !bBitmapChangedColor && !mpMetaFile);
+}
+
+void OutputDevice::DrawUntransformedBitmapEx(BitmapEx const& rBitmapEx,
+                                             basegfx::B2DVector const& rTranslate,
+                                             basegfx::B2DVector const& rScale)
+{
+    // with no rotation, shear or mirroring it can be mapped to DrawBitmapEx
+    // do *not* execute the mirroring here, it's done in the fallback
+    // #i124580# the correct DestSize needs to be calculated based on MaxXY values
+    Point aDestPt(basegfx::fround(rTranslate.getX()), basegfx::fround(rTranslate.getY()));
+    const Size aDestSize(basegfx::fround(rScale.getX() + rTranslate.getX()) - aDestPt.X(),
+                         basegfx::fround(rScale.getY() + rTranslate.getY()) - aDestPt.Y());
+    const Point aOrigin = GetMapMode().GetOrigin();
+
+    if (!mpMetaFile && comphelper::LibreOfficeKit::isActive()
+        && GetMapMode().GetMapUnit() != MapUnit::MapPixel)
+    {
+        aDestPt.Move(aOrigin.getX(), aOrigin.getY());
+        EnableMapMode(false);
+    }
+
+    DrawBitmapEx(aDestPt, aDestSize, rBitmapEx);
+
+    if (!mpMetaFile && comphelper::LibreOfficeKit::isActive()
+        && GetMapMode().GetMapUnit() != MapUnit::MapPixel)
+    {
+        EnableMapMode();
+        aDestPt.Move(-aOrigin.getX(), -aOrigin.getY());
+    }
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
