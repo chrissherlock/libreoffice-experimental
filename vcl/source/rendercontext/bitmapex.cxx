@@ -304,20 +304,6 @@ bool RenderContext2::DrawTransformBitmapExDirect(basegfx::B2DHomMatrix const& aF
     return bDone;
 };
 
-bool RenderContext2::TransformAndReduceBitmapExToTargetRange(
-    basegfx::B2DHomMatrix const& rFullTransform, basegfx::B2DRange& rVisibleRange,
-    double& fMaximumArea)
-{
-    rVisibleRange = ReduceBitmapExVisibleRange(rFullTransform, rVisibleRange);
-
-    if (rVisibleRange.isEmpty())
-        return false;
-
-    fMaximumArea = GetMaximumBitmapExArea(rVisibleRange);
-
-    return true;
-}
-
 basegfx::B2DRange
 RenderContext2::ReduceBitmapExVisibleRange(basegfx::B2DHomMatrix const& rFullTransform,
                                            basegfx::B2DRange const& rVisibleRange)

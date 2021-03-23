@@ -282,16 +282,6 @@ bool Printer::DrawTransformBitmapExDirect(
     return false;
 }
 
-bool Printer::TransformAndReduceBitmapExToTargetRange(
-    const basegfx::B2DHomMatrix& /*aFullTransform*/,
-    basegfx::B2DRange& /*aVisibleRange*/,
-    double& /*fMaximumArea*/)
-{
-    // deliberately do nothing - you can't reduce the
-    // target range for a printer at all
-    return true;
-}
-
 void Printer::DrawDeviceBitmapEx( const Point& rDestPt, const Size& rDestSize,
                                 const Point& rSrcPtPixel, const Size& rSrcSizePixel,
                                 BitmapEx& rBmpEx )
@@ -1778,6 +1768,13 @@ std::tuple<bool, Size> Printer::GetWaveLineSize(tools::Long nLineWidth) const
         return std::make_tuple(true, Size(nLineWidth, ((nLineWidth * GetDPIX()) + (GetDPIY() / 2)) / GetDPIY()));
 
     return std::make_tuple(false, Size(1, 1));
+}
+
+basegfx::B2DRange Printer::ReduceBitmapExVisibleRange(basegfx::B2DHomMatrix const&,
+                                             basegfx::B2DRange const&)
+{
+    // there is no visible range for printers
+    return basegfx::B2DRange(0.0, 0.0, 0.0, 0.0);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

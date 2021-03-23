@@ -835,23 +835,9 @@ protected:
     bool ProcessBitmapDrawModeBlackWhite(Point const& rDestPt, Size const& rDestSize);
     Bitmap ProcessBitmapDrawModeGray(Bitmap const& rBitmap);
 
-    /** Transform and reduce the area that needs to be drawn of the bitmap and return the new
-        visible range and the maximum area.
-
-
-      @param     rFullTransform      B2DHomMatrix used for transformation
-      @param     rVisibleRange       The new visible area of the bitmap
-      @param     fMaximumArea        The maximum area of the bitmap
-
-      @returns true if there is an area to be drawn, otherwise nothing is left to be drawn
-        so return false
-      */
-    virtual bool
-    TransformAndReduceBitmapExToTargetRange(basegfx::B2DHomMatrix const& rFullTransform,
-                                            basegfx::B2DRange& rVisibleRange, double& fMaximumArea);
-
-    basegfx::B2DRange ReduceBitmapExVisibleRange(basegfx::B2DHomMatrix const& rFullTransform,
-                                                 basegfx::B2DRange const& rVisibleRange);
+    virtual basegfx::B2DRange
+    ReduceBitmapExVisibleRange(basegfx::B2DHomMatrix const& rFullTransform,
+                               basegfx::B2DRange const& rVisibleRange);
 
     double GetMaximumBitmapExArea(basegfx::B2DRange const& rVisiblePixelRange);
 

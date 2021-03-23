@@ -624,10 +624,6 @@ protected:
                                     basegfx::B2DHomMatrix const& rTransformation,
                                     basegfx::B2DRange aVisibleRange, double fMaximumArea);
 
-    bool TransformAndReduceBitmapExToTargetRange(basegfx::B2DHomMatrix const& rFullTransform,
-                                                 basegfx::B2DRange& rVisibleRange,
-                                                 double& fMaximumArea) override;
-
 private:
     void DrawBitmapEx2(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
                        Size const& rSrcSizePixel, BitmapEx const& rBitmapEx);
