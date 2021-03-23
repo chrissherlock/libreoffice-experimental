@@ -376,4 +376,14 @@ double RenderContext2::GetMaximumBitmapExArea(basegfx::B2DRange const& rVisibleP
     return std::min(4096000.0, fNewMaxArea + 1.0);
 }
 
+bool RenderContext2::TryDirectBitmapExPaint() const
+{
+    const bool bInvert(RasterOp::Invert == meRasterOp);
+    const bool bBitmapChangedColor(
+        mnDrawMode
+        & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap | DrawModeFlags::GrayBitmap));
+
+    return (!bInvert && !bBitmapChangedColor);
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
