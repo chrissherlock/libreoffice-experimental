@@ -841,6 +841,11 @@ protected:
                                            basegfx::B2DVector const& rTranslate,
                                            basegfx::B2DVector const& rScale);
 
+    std::tuple<Point, Size, BitmapEx>
+    CreateTransformedBitmapFallback(BitmapEx const& rBitmapEx, Size const& rOriginalSizePixel,
+                                    basegfx::B2DHomMatrix const& rTransformation,
+                                    basegfx::B2DRange aVisibleRange, double fMaximumArea);
+
     void DrawMirroredBitmapEx(BitmapEx const& rBitmapEx, basegfx::B2DVector const& rTranslate,
                               basegfx::B2DVector const& rScale);
 
