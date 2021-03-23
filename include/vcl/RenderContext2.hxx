@@ -839,6 +839,7 @@ protected:
 
     bool DrawTransformedAlphaBitmapExDirect(basegfx::B2DHomMatrix const& rFullTransform,
                                             BitmapEx const& rBitmapEx, float fAlpha);
+    BitmapEx ApplyAlphaBitmapEx(BitmapEx const& rBitmapEx, float fAlpha) const;
 
     virtual basegfx::B2DRange
     ReduceBitmapExVisibleRange(basegfx::B2DHomMatrix const& rFullTransform,
