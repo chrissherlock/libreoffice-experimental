@@ -181,11 +181,14 @@ struct LocalTimeTest
 };
 #endif
 
-void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransformation,
-                                           const BitmapEx& rBitmapEx, double fAlpha)
-{
-    assert(!is_double_buffered_window());
+// Note: this is extremely similar to RenderContext2::DrawTransformedBitmapEx(). Most of the
+// common functionality has been refactored into functions, but if the code similarities are
+// very similar, it is because the core logic is mostly similar but to split out Metafile
+// processing from actually rendering functionality requires mostly the same logic.
 
+void OutputDevice::DrawTransformedBitmapEx(basegfx::B2DHomMatrix const& rTransformation,
+                                           BitmapEx const& rBitmapEx, double fAlpha)
+{
     if (ImplIsRecordLayout())
         return;
 
@@ -194,16 +197,6 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
 
     if (rtl::math::approxEqual(fAlpha, 0.0))
         return;
-
-    // MM02 compared to other public methods of OutputDevice
-    // this test was missing and led to zero-ptr-accesses
-    if (!mpGraphics && !AcquireGraphics())
-        return;
-
-    assert(mpGraphics);
-
-    if (mbInitClipRegion)
-        InitClipRegion();
 
     /*
        tdf#135325 typically in these OutputDevice methods, for the in
@@ -231,16 +224,7 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
     // ImplGetDeviceTransformation declaration
     basegfx::B2DHomMatrix aFullTransform(ImplGetDeviceTransformation() * rTransformation);
 
-    if (DrawTransformedAlphaBitmapExDirect(aFullTransform, rBitmapEx, fAlpha))
-        return;
-
     BitmapEx bitmapEx = ApplyAlphaBitmapEx(rBitmapEx, fAlpha);
-
-    if (TryDirectBitmapExPaint() && mpGraphics->HasFastDrawTransformedBitmap()
-        && DrawTransformBitmapExDirect(aFullTransform, bitmapEx))
-    {
-        return;
-    }
 
     // decompose matrix to check rotation and shear
     basegfx::B2DVector aScale, aTranslate;
@@ -256,9 +240,6 @@ void OutputDevice::DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransfo
         DrawUntransformedBitmapEx(bitmapEx, aTranslate, aScale);
         return;
     }
-
-    if (TryDirectBitmapExPaint() && DrawTransformBitmapExDirect(aFullTransform, bitmapEx))
-        return; // we are done
 
     // take the fallback when no rotate and shear, but mirror (else we would have done this above)
     if (!bRotated && !bSheared)

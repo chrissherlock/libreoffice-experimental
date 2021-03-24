@@ -261,6 +261,137 @@ void RenderContext2::DrawDeviceBitmapEx(Point const& rDestPt, Size const& rDestS
     }
 }
 
+// MM02 add some test class to get a simple timer-based output to be able
+// to check if it gets faster - and how much. Uncomment next line or set
+// DO_TIME_TEST for compile time if you want to use it
+// #define DO_TIME_TEST
+#ifdef DO_TIME_TEST
+#include <tools/time.hxx>
+struct LocalTimeTest
+{
+    const sal_uInt64 nStartTime;
+    LocalTimeTest()
+        : nStartTime(tools::Time::GetSystemTicks())
+    {
+    }
+    ~LocalTimeTest()
+    {
+        const sal_uInt64 nEndTime(tools::Time::GetSystemTicks());
+        const sal_uInt64 nDiffTime(nEndTime - nStartTime);
+
+        if (nDiffTime > 0)
+        {
+            OStringBuffer aOutput("Time: ");
+            OString aNumber(OString::number(nDiffTime));
+            aOutput.append(aNumber);
+            OSL_FAIL(aOutput.getStr());
+        }
+    }
+};
+#endif
+
+void RenderContext2::DrawTransformedBitmapEx(basegfx::B2DHomMatrix const& rTransformation,
+                                             BitmapEx const& rBitmapEx, double fAlpha)
+{
+    assert(!is_double_buffered_window());
+
+    if (ImplIsRecordLayout())
+        return;
+
+    if (rBitmapEx.IsEmpty())
+        return;
+
+    if (rtl::math::approxEqual(fAlpha, 0.0))
+        return;
+
+    // MM02 compared to other public methods of RenderContext2
+    // this test was missing and led to zero-ptr-accesses
+    if (!mpGraphics && !AcquireGraphics())
+        return;
+
+    assert(mpGraphics);
+
+    if (mbInitClipRegion)
+        InitClipRegion();
+
+    if (mbOutputClipped)
+        return;
+
+    // tdf#130768 CAUTION(!) using GetViewTransformation() is *not* enough here, it may
+    // be that mnOutOffX/mnOutOffY is used - see AOO bug 75163, mentioned at
+    // ImplGetDeviceTransformation declaration
+    basegfx::B2DHomMatrix aFullTransform(ImplGetDeviceTransformation() * rTransformation);
+
+    if (DrawTransformedAlphaBitmapExDirect(aFullTransform, rBitmapEx, fAlpha))
+        return;
+
+    BitmapEx bitmapEx = ApplyAlphaBitmapEx(rBitmapEx, fAlpha);
+
+    if (TryDirectBitmapExPaint() && mpGraphics->HasFastDrawTransformedBitmap()
+        && DrawTransformBitmapExDirect(aFullTransform, bitmapEx))
+    {
+        return;
+    }
+
+    // decompose matrix to check rotation and shear
+    basegfx::B2DVector aScale, aTranslate;
+    double fRotate, fShearX;
+    rTransformation.decompose(aScale, aTranslate, fRotate, fShearX);
+    const bool bRotated(!basegfx::fTools::equalZero(fRotate));
+    const bool bSheared(!basegfx::fTools::equalZero(fShearX));
+    const bool bMirrored(basegfx::fTools::less(aScale.getX(), 0.0)
+                         || basegfx::fTools::less(aScale.getY(), 0.0));
+
+    if (!bRotated && !bSheared && !bMirrored)
+    {
+        DrawUntransformedBitmapEx(bitmapEx, aTranslate, aScale);
+        return;
+    }
+
+    if (TryDirectBitmapExPaint() && DrawTransformBitmapExDirect(aFullTransform, bitmapEx))
+        return; // we are done
+
+    // take the fallback when no rotate and shear, but mirror (else we would have done this above)
+    if (!bRotated && !bSheared)
+    {
+        DrawMirroredBitmapEx(bitmapEx, aTranslate, aScale);
+        return;
+    }
+
+    // at this point we are either sheared or rotated or both
+    assert(bSheared || bRotated);
+
+    basegfx::B2DRange aVisibleRange(0.0, 0.0, 1.0, 1.0);
+
+    // limit maximum area to something looking good for non-pixel-based targets (metafile, printer)
+    // by using a fixed minimum (allow at least, but no need to utilize) for good smoothing and an area
+    // dependent of original size for good quality when e.g. rotated/sheared. Still, limit to a maximum
+    // to avoid crashes/resource problems (ca. 1500x3000 here)
+    const Size& rOriginalSizePixel(rBitmapEx.GetSizePixel());
+    const double fOrigArea(rOriginalSizePixel.Width() * rOriginalSizePixel.Height() * 0.5);
+    const double fOrigAreaScaled(fOrigArea * 1.44);
+    double fMaximumArea(std::clamp(fOrigAreaScaled, 1000000.0, 4500000.0));
+
+    aVisibleRange = ReduceBitmapExVisibleRange(aFullTransform, aVisibleRange);
+
+    if (aVisibleRange.isEmpty())
+        return;
+
+    fMaximumArea = GetMaximumBitmapExArea(aVisibleRange);
+
+    if (aVisibleRange.isEmpty())
+        return;
+
+    // fallback; create transformed bitmap the hard way (back-transform the pixels) and paint
+    Point aDestPt;
+    Size aDestSize;
+    BitmapEx aTransformed;
+    std::tie(aDestPt, aDestSize, aTransformed) = CreateTransformedBitmapFallback(
+        bitmapEx, rOriginalSizePixel, rTransformation, aVisibleRange, fMaximumArea);
+
+    DrawBitmapEx(aDestPt, aDestSize, aTransformed);
+}
+
 bool RenderContext2::DrawTransformBitmapExDirect(basegfx::B2DHomMatrix const& aFullTransform,
                                                  BitmapEx const& rBitmapEx, double fAlpha)
 {

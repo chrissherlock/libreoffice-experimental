@@ -220,6 +220,8 @@ public:
         @since 7.2
     */
     virtual bool HasFastDrawTransformedBitmap() const;
+    virtual void DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransformation,
+                                         const BitmapEx& rBitmapEx, double fAlpha = 1.0);
 
     virtual void DrawMask(Point const& rDestPt, Bitmap const& rBitmap, Color const& rMaskColor);
     virtual void DrawMask(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap,

@@ -584,21 +584,8 @@ public:
     void DrawImage(Point const& rPos, Size const& rSize, Image const& rImage,
                    DrawImageFlags nStyle = DrawImageFlags::NONE) override;
 
-    /** Draw BitmapEx transformed
-
-        @param rTransformation
-        The transformation describing the target positioning of the given bitmap. Transforming
-        the unit object coordinates (0, 0, 1, 1) with this matrix is the transformation to
-        discrete coordinates
-
-        @param rBitmapEx
-        The BitmapEx to be painted
-
-        @param fAlpha
-        Optional additional alpha to use for drawing (0 to 1, 1 being no change).
-    */
     void DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransformation,
-                                 const BitmapEx& rBitmapEx, double fAlpha = 1.0);
+                                 const BitmapEx& rBitmapEx, double fAlpha = 1.0) override;
 
     bool HasFastDrawTransformedBitmap() const override;
 
