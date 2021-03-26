@@ -91,6 +91,7 @@ public:
     SAL_DLLPRIVATE static void ImplIncAnimCount() { mnAnimCount++; }
     SAL_DLLPRIVATE static void ImplDecAnimCount() { mnAnimCount--; }
     SAL_DLLPRIVATE sal_uLong ImplGetCurPos() const { return mnPos; }
+    SAL_DLLPRIVATE void ImplSetCurPos(sal_uLong nPos) { mnPos = nPos; }
 
 private:
     SAL_DLLPRIVATE static sal_uLong mnAnimCount;
