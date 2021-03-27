@@ -256,16 +256,7 @@ public:
 protected:
     virtual void CopyDeviceArea(SalTwoRect& aPosAry, bool bWindowInvalidate);
 
-    virtual const OutputDevice* DrawOutDevDirectCheck(const OutputDevice& rSrcDev) const;
-
-    virtual void DrawOutDevDirectProcess(const OutputDevice& rSrcDev, SalTwoRect& rPosAry,
-                                         SalGraphics* pSrcGraphics);
-
-private:
-    // not implemented; to detect misuses of DrawOutDev(...OutputDevice&);
-    SAL_DLLPRIVATE void DrawOutDev(const Point&, const Size&, const Point&, const Size&,
-                                   const Printer&)
-        = delete;
+    virtual const OutputDevice* DrawOutDevDirectCheck(OutputDevice const& rSrcDev) const;
     ///@}
 
     /** @name OutputDevice state functions

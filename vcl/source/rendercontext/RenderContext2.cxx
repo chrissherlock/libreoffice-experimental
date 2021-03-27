@@ -27,6 +27,7 @@
 
 #include <outdev.h>
 #include <ImplOutDevData.hxx>
+#include <salgdi.hxx>
 
 RenderContext2::RenderContext2()
     : mpGraphics(nullptr)
@@ -112,8 +113,8 @@ void RenderContext2::dispose()
     mpFontInstance.clear(); // release the active font instance
     mpDeviceFontList.reset();
     mpDeviceFontSizeList.reset();
-    mxFontCache.reset(); // release ImplFontCache specific to this OutputDevice
-    mxFontCollection.reset(); // release ImplFontList specific to this OutputDevice
+    mxFontCache.reset(); // release ImplFontCache specific to this RenderContext2
+    mxFontCollection.reset(); // release ImplFontList specific to this RenderContext2
 
     mpAlphaVDev.disposeAndClear();
     VclReferenceBase::dispose();
@@ -135,6 +136,23 @@ bool RenderContext2::is_double_buffered_window() const
 {
     const vcl::Window* pWindow = dynamic_cast<const vcl::Window*>(this);
     return pWindow && pWindow->SupportsDoubleBuffering();
+}
+
+void RenderContext2::DrawOutDevDirect(RenderContext2 const& rSrcDev, SalTwoRect& rPosAry,
+                                      SalGraphics* pSrcGraphics)
+{
+    if (pSrcGraphics && (pSrcGraphics->GetLayout() & SalLayoutFlags::BiDiRtl))
+    {
+        SalTwoRect aPosAry2 = rPosAry;
+        pSrcGraphics->mirror(aPosAry2.mnSrcX, aPosAry2.mnSrcWidth, rSrcDev);
+        mpGraphics->CopyBits(aPosAry2, *pSrcGraphics, *this, rSrcDev);
+        return;
+    }
+
+    if (pSrcGraphics)
+        mpGraphics->CopyBits(rPosAry, *pSrcGraphics, *this, rSrcDev);
+    else
+        mpGraphics->CopyBits(rPosAry, *this);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

@@ -73,6 +73,7 @@ class ImplFontCache;
 class ImplMultiTextLineInfo;
 class LogicalFontInstance;
 class PhysicalFontCollection;
+class Printer;
 class SalGraphics;
 class SalLayout;
 class SalLayoutGlyphs;
@@ -238,6 +239,11 @@ public:
                            DrawImageFlags nStyle = DrawImageFlags::NONE);
 
     virtual bool CanAnimate();
+
+    // not implemented; to detect misuses of DrawOutDev(...OutputDevice&);
+    SAL_DLLPRIVATE void DrawOutDev(const Point&, const Size&, const Point&, const Size&,
+                                   const Printer&)
+        = delete;
 
     /** Determine if native widgets can be enabled
      */
@@ -772,6 +778,9 @@ protected:
                                 physically released graphics device.
      */
     virtual void ReleaseGraphics(bool bRelease = true) = 0;
+
+    virtual void DrawOutDevDirect(RenderContext2 const& rSrcDev, SalTwoRect& rPosAry,
+                                  SalGraphics* pSrcGraphics);
 
     void ImplDrawText(SalLayout&);
 

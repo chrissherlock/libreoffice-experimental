@@ -259,7 +259,7 @@ void OutputDevice::DrawOutDev(const Point& rDestPt, const Size& rDestSize, const
             // mirroring may be required
             // because only windows have a SalGraphicsLayout
             // mirroring is performed here
-            DrawOutDevDirectProcess(rOutDev, aPosAry, pSrcGraphics);
+            DrawOutDevDirect(rOutDev, aPosAry, pSrcGraphics);
         }
 
         // #i32109#: make destination rectangle opaque - source has no alpha
@@ -326,22 +326,6 @@ void OutputDevice::CopyDeviceArea(SalTwoRect& aPosAry, bool /*bWindowInvalidate*
 const OutputDevice* OutputDevice::DrawOutDevDirectCheck(const OutputDevice& rSrcDev) const
 {
     return this == &rSrcDev ? nullptr : &rSrcDev;
-}
-
-void OutputDevice::DrawOutDevDirectProcess(const OutputDevice& rSrcDev, SalTwoRect& rPosAry,
-                                           SalGraphics* pSrcGraphics)
-{
-    if (pSrcGraphics && (pSrcGraphics->GetLayout() & SalLayoutFlags::BiDiRtl))
-    {
-        SalTwoRect aPosAry2 = rPosAry;
-        pSrcGraphics->mirror(aPosAry2.mnSrcX, aPosAry2.mnSrcWidth, rSrcDev);
-        mpGraphics->CopyBits(aPosAry2, *pSrcGraphics, *this, rSrcDev);
-        return;
-    }
-    if (pSrcGraphics)
-        mpGraphics->CopyBits(rPosAry, *pSrcGraphics, *this, rSrcDev);
-    else
-        mpGraphics->CopyBits(rPosAry, *this);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
