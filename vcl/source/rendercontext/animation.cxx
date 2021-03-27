@@ -9,6 +9,6 @@
 
 #include <vcl/outdev.hxx>
 
-bool OutputDevice::CanAnimate() { return false; }
+bool RenderContext2::CanAnimate() { return false; }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

@@ -124,6 +124,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/rendercontext/ImplMultiTextLineInfo \
     vcl/source/rendercontext/OutDevState \
     vcl/source/rendercontext/RenderContext2 \
+    vcl/source/rendercontext/animation \
     vcl/source/rendercontext/antialiasing \
     vcl/source/rendercontext/background \
     vcl/source/rendercontext/bitmap \
@@ -271,7 +272,6 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/toolkit/group \
     vcl/source/toolkit/morebtn \
     vcl/source/outdev/ImplMapRes \
-    vcl/source/outdev/animation \
     vcl/source/outdev/outdev \
     vcl/source/outdev/cairo \
     vcl/source/outdev/stack \

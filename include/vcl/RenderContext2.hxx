@@ -235,6 +235,8 @@ public:
     virtual void DrawImage(Point const& rPos, Size const& rSize, Image const& rImage,
                            DrawImageFlags nStyle = DrawImageFlags::NONE);
 
+    virtual bool CanAnimate();
+
     /** Determine if native widgets can be enabled
      */
     virtual bool CanEnableNativeWidget() const { return false; }
