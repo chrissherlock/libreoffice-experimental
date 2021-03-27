@@ -651,8 +651,9 @@ public:
                  GDIMetaFile* pSubst = nullptr);
     ///@}
 
-    void DrawAnimationViewToPos(ImplAnimView& rAnimView, sal_uLong nPos);
-    void DrawAnimationView(ImplAnimView& rAnimView, sal_uLong nPos, VirtualDevice* pVDev = nullptr);
+    virtual void DrawAnimationViewToPos(ImplAnimView& rAnimView, sal_uLong nPos);
+    virtual void DrawAnimationView(ImplAnimView& rAnimView, sal_uLong nPos,
+                                   VirtualDevice* pVDev = nullptr);
 };
 
 #endif // INCLUDED_VCL_OUTDEV_HXX

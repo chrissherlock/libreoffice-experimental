@@ -62,12 +62,6 @@ void OutputDevice::DrawAnimationViewToPos(ImplAnimView& rAnimView, sal_uLong nPo
     VclPtr<vcl::RenderContext> pRenderContext = this;
 
     std::unique_ptr<vcl::PaintBufferGuard> pGuard;
-    if (pRenderContext->GetOutDevType() == OUTDEV_WINDOW)
-    {
-        vcl::Window* pWindow = static_cast<vcl::Window*>(rAnimView.mpRenderContext.get());
-        pGuard.reset(new vcl::PaintBufferGuard(pWindow->ImplGetWindowImpl()->mpFrameData, pWindow));
-        pRenderContext = pGuard->GetRenderContext();
-    }
 
     ScopedVclPtrInstance<VirtualDevice> aVDev;
     std::unique_ptr<vcl::Region> xOldClip(
@@ -99,12 +93,6 @@ void OutputDevice::DrawAnimationView(ImplAnimView& rAnimView, sal_uLong nPos, Vi
     VclPtr<vcl::RenderContext> pRenderContext = this;
 
     std::unique_ptr<vcl::PaintBufferGuard> pGuard;
-    if (!pVDev && pRenderContext->GetOutDevType() == OUTDEV_WINDOW)
-    {
-        vcl::Window* pWindow = static_cast<vcl::Window*>(rAnimView.mpRenderContext.get());
-        pGuard.reset(new vcl::PaintBufferGuard(pWindow->ImplGetWindowImpl()->mpFrameData, pWindow));
-        pRenderContext = pGuard->GetRenderContext();
-    }
 
     tools::Rectangle aOutRect(pRenderContext->PixelToLogic(Point()),
                               pRenderContext->GetOutputSize());

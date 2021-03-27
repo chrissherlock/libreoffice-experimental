@@ -1166,6 +1166,9 @@ public:
     /// Same as MouseMove(), but coordinates are in logic unit. used for LOK
     virtual void LogicMouseMove(const MouseEvent&) {};
 
+    void DrawAnimationView(ImplAnimView& rAnimView, sal_uLong nPos, VirtualDevice* pVDev = nullptr) override;
+    void DrawAnimationViewToPos(ImplAnimView& rAnimView, sal_uLong nPos) override;
+
     /** @name Accessibility
      */
     ///@{

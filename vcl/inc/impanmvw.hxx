@@ -21,7 +21,7 @@
 #define INCLUDED_VCL_SOURCE_GDI_IMPANMVW_HXX
 
 #include <vcl/animate/Animation.hxx>
-#include <vcl/outdev.hxx>
+#include <vcl/window.hxx>
 #include <vcl/vclptr.hxx>
 
 class Animation;
@@ -48,6 +48,8 @@ private:
     friend void OutputDevice::DrawAnimation(Animation *const, Point const&, Size const&) const;
     friend void OutputDevice::DrawAnimationView(ImplAnimView&, sal_uLong, VirtualDevice*);
     friend void OutputDevice::DrawAnimationViewToPos(ImplAnimView&, sal_uLong);
+    friend void vcl::Window::DrawAnimationView(ImplAnimView&, sal_uLong, VirtualDevice*);
+    friend void vcl::Window::DrawAnimationViewToPos(ImplAnimView&, sal_uLong);
 
     Animation*      mpParent;
     VclPtr<OutputDevice>  mpRenderContext;
