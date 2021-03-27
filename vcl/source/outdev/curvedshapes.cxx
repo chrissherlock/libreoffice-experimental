@@ -32,9 +32,6 @@ void OutputDevice::DrawEllipse(tools::Rectangle const& rRect)
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaEllipseAction(rRect));
 
-    if (ImplIsRecordLayout())
-        return;
-
     RenderContext2::DrawEllipse(rRect);
 }
 
@@ -45,9 +42,6 @@ void OutputDevice::DrawArc(tools::Rectangle const& rRect, Point const& rStartPt,
 
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaArcAction(rRect, rStartPt, rEndPt));
-
-    if (ImplIsRecordLayout())
-        return;
 
     RenderContext2::DrawArc(rRect, rStartPt, rEndPt);
 }
@@ -60,9 +54,6 @@ void OutputDevice::DrawPie(tools::Rectangle const& rRect, Point const& rStartPt,
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaPieAction(rRect, rStartPt, rEndPt));
 
-    if (ImplIsRecordLayout())
-        return;
-
     RenderContext2::DrawPie(rRect, rStartPt, rEndPt);
 }
 
@@ -73,9 +64,6 @@ void OutputDevice::DrawChord(tools::Rectangle const& rRect, Point const& rStartP
 
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaChordAction(rRect, rStartPt, rEndPt));
-
-    if (ImplIsRecordLayout())
-        return;
 
     RenderContext2::DrawChord(rRect, rStartPt, rEndPt);
 }

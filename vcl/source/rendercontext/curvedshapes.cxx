@@ -25,6 +25,9 @@
 
 void RenderContext2::DrawEllipse(tools::Rectangle const& rRect)
 {
+    if (ImplIsRecordLayout())
+        return;
+
     if (!IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor))
         return;
 
@@ -72,6 +75,9 @@ void RenderContext2::DrawEllipse(tools::Rectangle const& rRect)
 void RenderContext2::DrawArc(tools::Rectangle const& rRect, Point const& rStartPt,
                              Point const& rEndPt)
 {
+    if (ImplIsRecordLayout())
+        return;
+
     if (!IsDeviceOutputNecessary() || !mbLineColor)
         return;
 
@@ -111,6 +117,9 @@ void RenderContext2::DrawArc(tools::Rectangle const& rRect, Point const& rStartP
 void RenderContext2::DrawPie(tools::Rectangle const& rRect, Point const& rStartPt,
                              Point const& rEndPt)
 {
+    if (ImplIsRecordLayout())
+        return;
+
     if (!IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor))
         return;
 
@@ -160,6 +169,9 @@ void RenderContext2::DrawPie(tools::Rectangle const& rRect, Point const& rStartP
 void RenderContext2::DrawChord(tools::Rectangle const& rRect, Point const& rStartPt,
                                Point const& rEndPt)
 {
+    if (ImplIsRecordLayout())
+        return;
+
     if (!IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor))
         return;
 
