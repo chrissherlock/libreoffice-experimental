@@ -50,6 +50,9 @@ Color RenderContext2::GetPixel(Point const& rPoint) const
 
 void RenderContext2::DrawPixel(Point const& rPt)
 {
+    if (ImplIsRecordLayout())
+        return;
+
     if (!IsDeviceOutputNecessary() || !mbLineColor)
         return;
 
