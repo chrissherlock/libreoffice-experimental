@@ -1249,13 +1249,11 @@ void Window::CopyDeviceArea( SalTwoRect& aPosAry, bool bWindowInvalidate )
     OutputDevice::CopyDeviceArea(aPosAry, bWindowInvalidate);
 }
 
-const OutputDevice* Window::DrawOutDevDirectCheck(const OutputDevice& rSrcDev) const
+RenderContext2 const* Window::DrawOutDevDirectCheck(RenderContext2 const& rSrcDev) const
 {
-    const OutputDevice* pSrcDevChecked;
+    const RenderContext2* pSrcDevChecked;
     if ( this == &rSrcDev )
         pSrcDevChecked = nullptr;
-    else if (GetOutDevType() != rSrcDev.GetOutDevType())
-        pSrcDevChecked = &rSrcDev;
     else if (this->mpWindowImpl->mpFrameWindow == static_cast<const vcl::Window&>(rSrcDev).mpWindowImpl->mpFrameWindow)
         pSrcDevChecked = nullptr;
     else

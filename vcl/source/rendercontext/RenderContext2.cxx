@@ -124,6 +124,14 @@ bool RenderContext2::IsScreenComp() const { return true; }
 
 bool RenderContext2::IsVirtual() const { return false; }
 
+bool RenderContext2::UsesAlphaVDev() const
+{
+    if (mpAlphaVDev)
+        return true;
+
+    return false;
+}
+
 bool RenderContext2::ImplIsRecordLayout() const
 {
     if (!mpOutDevData)
@@ -136,6 +144,135 @@ bool RenderContext2::is_double_buffered_window() const
 {
     const vcl::Window* pWindow = dynamic_cast<const vcl::Window*>(this);
     return pWindow && pWindow->SupportsDoubleBuffering();
+}
+
+void RenderContext2::DrawOutDev(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPt,
+                                Size const& rSrcSize)
+{
+    if (ImplIsRecordLayout())
+        return;
+
+    if (meRasterOp == RasterOp::Invert)
+    {
+        DrawRect(tools::Rectangle(rDestPt, rDestSize));
+        return;
+    }
+
+    if (!IsDeviceOutputNecessary())
+        return;
+
+    if (!mpGraphics && !AcquireGraphics())
+        return;
+
+    assert(mpGraphics);
+
+    if (mbInitClipRegion)
+        InitClipRegion();
+
+    if (mbOutputClipped)
+        return;
+
+    tools::Long nSrcWidth = ImplLogicWidthToDevicePixel(rSrcSize.Width());
+    tools::Long nSrcHeight = ImplLogicHeightToDevicePixel(rSrcSize.Height());
+    tools::Long nDestWidth = ImplLogicWidthToDevicePixel(rDestSize.Width());
+    tools::Long nDestHeight = ImplLogicHeightToDevicePixel(rDestSize.Height());
+
+    if (nSrcWidth && nSrcHeight && nDestWidth && nDestHeight)
+    {
+        SalTwoRect aPosAry(ImplLogicXToDevicePixel(rSrcPt.X()), ImplLogicYToDevicePixel(rSrcPt.Y()),
+                           nSrcWidth, nSrcHeight, ImplLogicXToDevicePixel(rDestPt.X()),
+                           ImplLogicYToDevicePixel(rDestPt.Y()), nDestWidth, nDestHeight);
+
+        AdjustTwoRect(aPosAry, GetOutputRectPixel());
+
+        if (aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth
+            && aPosAry.mnDestHeight)
+            mpGraphics->CopyBits(aPosAry, *this);
+    }
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->DrawOutDev(rDestPt, rDestSize, rSrcPt, rSrcSize);
+}
+
+void RenderContext2::DrawOutDev(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPt,
+                                Size const& rSrcSize, RenderContext2 const& rOutDev)
+{
+    if (ImplIsRecordLayout())
+        return;
+
+    if (RasterOp::Invert == meRasterOp)
+    {
+        DrawRect(tools::Rectangle(rDestPt, rDestSize));
+        return;
+    }
+
+    if (!IsDeviceOutputNecessary())
+        return;
+
+    if (!mpGraphics && !AcquireGraphics())
+        return;
+
+    assert(mpGraphics);
+
+    if (mbInitClipRegion)
+        InitClipRegion();
+
+    if (mbOutputClipped)
+        return;
+
+    if (rOutDev.mpAlphaVDev)
+    {
+        // alpha-blend source over destination
+        DrawBitmapEx(rDestPt, rDestSize, rOutDev.GetBitmapEx(rSrcPt, rSrcSize));
+    }
+    else
+    {
+        SalGraphics* pSrcGraphics;
+
+        if (RenderContext2 const* pCheckedSrc = DrawOutDevDirectCheck(rOutDev))
+        {
+            if (!pCheckedSrc->mpGraphics && !pCheckedSrc->AcquireGraphics())
+                return;
+
+            pSrcGraphics = pCheckedSrc->mpGraphics;
+        }
+        else
+        {
+            pSrcGraphics = nullptr;
+        }
+
+        if (!mpGraphics && !AcquireGraphics())
+            return;
+
+        assert(mpGraphics);
+
+        // #102532# Offset only has to be pseudo window offset
+
+        SalTwoRect aPosAry(rOutDev.ImplLogicXToDevicePixel(rSrcPt.X()),
+                           rOutDev.ImplLogicYToDevicePixel(rSrcPt.Y()),
+                           rOutDev.ImplLogicWidthToDevicePixel(rSrcSize.Width()),
+                           rOutDev.ImplLogicHeightToDevicePixel(rSrcSize.Height()),
+                           ImplLogicXToDevicePixel(rDestPt.X()),
+                           ImplLogicYToDevicePixel(rDestPt.Y()),
+                           ImplLogicWidthToDevicePixel(rDestSize.Width()),
+                           ImplLogicHeightToDevicePixel(rDestSize.Height()));
+
+        AdjustTwoRect(aPosAry, rOutDev.GetOutputRectPixel());
+
+        if (aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth
+            && aPosAry.mnDestHeight)
+        {
+            // if this is no window, but rSrcDev is a window
+            // mirroring may be required
+            // because only windows have a SalGraphicsLayout
+            // mirroring is performed here
+            DrawOutDevDirect(rOutDev, aPosAry, pSrcGraphics);
+        }
+
+        // #i32109#: make destination rectangle opaque - source has no alpha
+        if (mpAlphaVDev)
+            mpAlphaVDev->ImplFillOpaqueRectangle(tools::Rectangle(rDestPt, rDestSize));
+    }
 }
 
 void RenderContext2::DrawOutDevDirect(RenderContext2 const& rSrcDev, SalTwoRect& rPosAry,
@@ -153,6 +290,11 @@ void RenderContext2::DrawOutDevDirect(RenderContext2 const& rSrcDev, SalTwoRect&
         mpGraphics->CopyBits(rPosAry, *pSrcGraphics, *this, rSrcDev);
     else
         mpGraphics->CopyBits(rPosAry, *this);
+}
+
+RenderContext2 const* RenderContext2::DrawOutDevDirectCheck(RenderContext2 const& rSrcDev) const
+{
+    return this == &rSrcDev ? nullptr : &rSrcDev;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

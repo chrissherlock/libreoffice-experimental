@@ -354,9 +354,9 @@ public:
     virtual void                DrawOutDev( const Point& rDestPt, const Size& rDestSize,
                                     const Point& rSrcPt,  const Size& rSrcSize ) override;
 
-    virtual void                DrawOutDev( const Point& rDestPt, const Size& rDestSize,
-                                    const Point& rSrcPt,  const Size& rSrcSize,
-                                    const OutputDevice& rOutDev ) override;
+    virtual void                DrawOutDev(Point const& rDestPt, Size const& rDestSize,
+                                    Point const& rSrcPt, Size const& rSrcSize,
+                                    RenderContext2 const& rOutDev) override;
 
     virtual void                CopyArea( const Point& rDestPt, const Point& rSrcPt,
                                     const Size& rSrcSize, bool bWindowInvalidate = false ) override;
