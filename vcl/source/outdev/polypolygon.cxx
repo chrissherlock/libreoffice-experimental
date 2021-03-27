@@ -33,9 +33,6 @@ void OutputDevice::DrawPolyPolygon(tools::PolyPolygon const& rPolyPoly)
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaPolyPolygonAction(rPolyPoly));
 
-    if (ImplIsRecordLayout())
-        return;
-
     RenderContext2::DrawPolyPolygon(rPolyPoly);
 }
 
