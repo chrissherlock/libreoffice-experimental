@@ -59,6 +59,8 @@
 
 #include <vector>
 
+#include <com/sun/star/awt/DeviceInfo.hpp>
+
 #define GRADIENT_DEFAULT_STEPCOUNT 0
 #define HATCH_MAXPOINTS 1024
 
@@ -583,6 +585,8 @@ public:
     //If bNewFontLists is true then drop and refetch lists of system fonts
     SAL_DLLPRIVATE static void ImplUpdateAllFontData(bool bNewFontLists);
 
+    virtual css::awt::DeviceInfo GetDeviceInfo() const;
+
     /** Get the offset in pixel
 
         @see RenderContext2::SetPixelOffset for details
@@ -881,6 +885,8 @@ protected:
     SAL_DLLPRIVATE void ImplInitTextColor();
 
     virtual void ImplInitMapModeObjects();
+
+    css::awt::DeviceInfo GetCommonDeviceInfo(Size const& aDevSize) const;
 
     /** Get device transformation.
 
