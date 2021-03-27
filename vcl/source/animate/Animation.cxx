@@ -258,7 +258,7 @@ void Animation::Draw(OutputDevice* pOut, const Point& rDestPt, const Size& rDest
     {
         const size_t nOldPos = mnPos;
 
-        if (mbLoopTerminated)
+        if (pAnim->IsLoopTerminated())
             pAnim->ImplSetCurPos(nCount - 1);
 
         {
