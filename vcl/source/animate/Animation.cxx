@@ -230,43 +230,14 @@ void Animation::Stop(const OutputDevice* pOut, tools::Long nExtraData)
     }
 }
 
-void Animation::Draw(OutputDevice* pOut, const Point& rDestPt) const
+void Animation::Draw(OutputDevice* pOut, const Point& rDestPt)
 {
     Draw(pOut, rDestPt, pOut->PixelToLogic(maGlobalSize));
 }
 
-void Animation::Draw(OutputDevice* pOut, const Point& rDestPt, const Size& rDestSz) const
+void Animation::Draw(OutputDevice* pOut, const Point& rDestPt, const Size& rDestSz)
 {
-    Animation* pAnim = const_cast<Animation*>(this);
-    const size_t nCount = pAnim->Count();
-
-    if (!nCount)
-        return;
-
-    sal_uLong nPos = pAnim->ImplGetCurPos();
-    AnimationBitmap* pObj = const_cast<AnimationBitmap*>(&pAnim->Get(std::min(nPos, nCount - 1)));
-
-    if (pOut->GetConnectMetaFile() || (pOut->GetOutDevType() == OUTDEV_PRINTER))
-    {
-        pAnim->Get(0).maBitmapEx.Draw(pOut, rDestPt, rDestSz);
-    }
-    else if (ANIMATION_TIMEOUT_ON_CLICK == pObj->mnWait)
-    {
-        pObj->maBitmapEx.Draw(pOut, rDestPt, rDestSz);
-    }
-    else
-    {
-        const size_t nOldPos = mnPos;
-
-        if (pAnim->IsLoopTerminated())
-            pAnim->ImplSetCurPos(nCount - 1);
-
-        {
-            ImplAnimView{ pAnim, pOut, rDestPt, rDestSz, 0 };
-        }
-
-        pAnim->ImplSetCurPos(nOldPos);
-    }
+    pOut->DrawAnimation(this, rDestPt, rDestSz);
 }
 
 namespace

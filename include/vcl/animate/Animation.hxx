@@ -46,8 +46,8 @@ public:
 
     void Stop(const OutputDevice* pOutDev = nullptr, tools::Long nExtraData = 0);
 
-    void Draw(OutputDevice* pOutDev, const Point& rDestPt) const;
-    void Draw(OutputDevice* pOutDev, const Point& rDestPt, const Size& rDestSz) const;
+    void Draw(OutputDevice* pOutDev, const Point& rDestPt);
+    void Draw(OutputDevice* pOutDev, const Point& rDestPt, const Size& rDestSz);
 
     bool IsInAnimation() const { return mbIsInAnimation; }
     bool IsLoopTerminated() const { return mbLoopTerminated; }

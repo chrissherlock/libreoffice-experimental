@@ -53,6 +53,7 @@
 #include <memory>
 #include <vector>
 
+class Animation;
 struct ImplOutDevData;
 class LogicalFontInstance;
 struct SystemGraphicsData;
@@ -583,6 +584,8 @@ public:
                    DrawImageFlags nStyle = DrawImageFlags::NONE) override;
     void DrawImage(Point const& rPos, Size const& rSize, Image const& rImage,
                    DrawImageFlags nStyle = DrawImageFlags::NONE) override;
+
+    void DrawAnimation(Animation* const pAnim, Point const& rDestPt, Size const& rDestSz) const;
 
     void DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransformation,
                                  const BitmapEx& rBitmapEx, double fAlpha = 1.0) override;
