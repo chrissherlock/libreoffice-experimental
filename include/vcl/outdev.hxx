@@ -242,8 +242,6 @@ public:
     ///@{
 
 public:
-    virtual void Flush() {}
-
     void DrawOutDev(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPt,
                     Size const& rSrcSize) override;
 

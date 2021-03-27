@@ -240,6 +240,8 @@ public:
 
     virtual bool CanAnimate();
 
+    virtual void Flush() {}
+
     virtual void DrawOutDev(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPt,
                             Size const& rSrcSize);
 
