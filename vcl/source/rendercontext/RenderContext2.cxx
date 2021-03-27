@@ -297,4 +297,59 @@ RenderContext2 const* RenderContext2::DrawOutDevDirectCheck(RenderContext2 const
     return this == &rSrcDev ? nullptr : &rSrcDev;
 }
 
+void RenderContext2::CopyArea(Point const& rDestPt, Point const& rSrcPt, Size const& rSrcSize,
+                              bool bWindowInvalidate)
+{
+    if (ImplIsRecordLayout())
+        return;
+
+    RasterOp eOldRop = GetRasterOp();
+    SetRasterOp(RasterOp::OverPaint);
+
+    if (!IsDeviceOutputNecessary())
+        return;
+
+    if (!mpGraphics && !AcquireGraphics())
+        return;
+
+    assert(mpGraphics);
+
+    if (mbInitClipRegion)
+        InitClipRegion();
+
+    if (mbOutputClipped)
+        return;
+
+    tools::Long nSrcWidth = ImplLogicWidthToDevicePixel(rSrcSize.Width());
+    tools::Long nSrcHeight = ImplLogicHeightToDevicePixel(rSrcSize.Height());
+    if (nSrcWidth && nSrcHeight)
+    {
+        SalTwoRect aPosAry(ImplLogicXToDevicePixel(rSrcPt.X()), ImplLogicYToDevicePixel(rSrcPt.Y()),
+                           nSrcWidth, nSrcHeight, ImplLogicXToDevicePixel(rDestPt.X()),
+                           ImplLogicYToDevicePixel(rDestPt.Y()), nSrcWidth, nSrcHeight);
+
+        AdjustTwoRect(aPosAry, GetOutputRectPixel());
+
+        CopyDeviceArea(aPosAry, bWindowInvalidate);
+    }
+
+    SetRasterOp(eOldRop);
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->CopyArea(rDestPt, rSrcPt, rSrcSize, bWindowInvalidate);
+}
+
+// Direct OutputDevice drawing protected function
+
+void RenderContext2::CopyDeviceArea(SalTwoRect& aPosAry, bool /*bWindowInvalidate*/)
+{
+    if (aPosAry.mnSrcWidth == 0 || aPosAry.mnSrcHeight == 0 || aPosAry.mnDestWidth == 0
+        || aPosAry.mnDestHeight == 0)
+        return;
+
+    aPosAry.mnDestWidth = aPosAry.mnSrcWidth;
+    aPosAry.mnDestHeight = aPosAry.mnSrcHeight;
+    mpGraphics->CopyBits(aPosAry, *this);
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

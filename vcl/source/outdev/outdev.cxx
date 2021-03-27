@@ -136,8 +136,6 @@ void OutputDevice::DrawOutDev(Point const& rDestPt, Size const& rDestSize, Point
             return;
         }
 
-    if (mpMetaFile)
-    {
         const Bitmap aBmp(GetBitmap(rSrcPt, rSrcSize));
         mpMetaFile->AddAction(new MetaBmpScaleAction(rDestPt, rDestSize, aBmp));
     }
@@ -150,12 +148,6 @@ void OutputDevice::DrawOutDev(Point const& rDestPt, Size const& rDestSize, Point
 {
     if (ImplIsRecordLayout())
         return;
-
-    if (RasterOp::Invert == meRasterOp)
-    {
-        DrawRect(tools::Rectangle(rDestPt, rDestSize));
-        return;
-    }
 
     if (mpMetaFile)
     {
@@ -178,61 +170,6 @@ void OutputDevice::DrawOutDev(Point const& rDestPt, Size const& rDestSize, Point
     }
 
     RenderContext2::DrawOutDev(rDestPt, rDestSize, rSrcPt, rSrcSize, rOutDev);
-}
-
-void OutputDevice::CopyArea(const Point& rDestPt, const Point& rSrcPt, const Size& rSrcSize,
-                            bool bWindowInvalidate)
-{
-    if (ImplIsRecordLayout())
-        return;
-
-    RasterOp eOldRop = GetRasterOp();
-    SetRasterOp(RasterOp::OverPaint);
-
-    if (!IsDeviceOutputNecessary())
-        return;
-
-    if (!mpGraphics && !AcquireGraphics())
-        return;
-
-    assert(mpGraphics);
-
-    if (mbInitClipRegion)
-        InitClipRegion();
-
-    if (mbOutputClipped)
-        return;
-
-    tools::Long nSrcWidth = ImplLogicWidthToDevicePixel(rSrcSize.Width());
-    tools::Long nSrcHeight = ImplLogicHeightToDevicePixel(rSrcSize.Height());
-    if (nSrcWidth && nSrcHeight)
-    {
-        SalTwoRect aPosAry(ImplLogicXToDevicePixel(rSrcPt.X()), ImplLogicYToDevicePixel(rSrcPt.Y()),
-                           nSrcWidth, nSrcHeight, ImplLogicXToDevicePixel(rDestPt.X()),
-                           ImplLogicYToDevicePixel(rDestPt.Y()), nSrcWidth, nSrcHeight);
-
-        AdjustTwoRect(aPosAry, GetOutputRectPixel());
-
-        CopyDeviceArea(aPosAry, bWindowInvalidate);
-    }
-
-    SetRasterOp(eOldRop);
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->CopyArea(rDestPt, rSrcPt, rSrcSize, bWindowInvalidate);
-}
-
-// Direct OutputDevice drawing protected function
-
-void OutputDevice::CopyDeviceArea(SalTwoRect& aPosAry, bool /*bWindowInvalidate*/)
-{
-    if (aPosAry.mnSrcWidth == 0 || aPosAry.mnSrcHeight == 0 || aPosAry.mnDestWidth == 0
-        || aPosAry.mnDestHeight == 0)
-        return;
-
-    aPosAry.mnDestWidth = aPosAry.mnSrcWidth;
-    aPosAry.mnDestHeight = aPosAry.mnSrcHeight;
-    mpGraphics->CopyBits(aPosAry, *this);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

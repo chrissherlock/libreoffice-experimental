@@ -246,6 +246,9 @@ public:
     virtual void DrawOutDev(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPt,
                             Size const& rSrcSize, RenderContext2 const& rOutDev);
 
+    virtual void CopyArea(Point const& rDestPt, Point const& rSrcPt, Size const& rSrcSize,
+                          bool bWindowInvalidate = false);
+
     // not implemented; to detect misuses of DrawOutDev(...OutputDevice&);
     SAL_DLLPRIVATE void DrawOutDev(const Point&, const Size&, const Point&, const Size&,
                                    const Printer&)
@@ -786,6 +789,8 @@ protected:
                                 physically released graphics device.
      */
     virtual void ReleaseGraphics(bool bRelease = true) = 0;
+
+    virtual void CopyDeviceArea(SalTwoRect& aPosAry, bool bWindowInvalidate);
 
     virtual void DrawOutDevDirect(RenderContext2 const& rSrcDev, SalTwoRect& rPosAry,
                                   SalGraphics* pSrcGraphics);
