@@ -28,12 +28,6 @@
 
 #include <salgdi.hxx>
 
-void OutputDevice::SaveBackground(VirtualDevice& rSaveDevice,
-                                  const Point& rPos, const Size& rSize, const Size& rBackgroundSize) const
-{
-   rSaveDevice.DrawOutDev(Point(), rBackgroundSize, rPos, rSize, *this);
-}
-
 void OutputDevice::SetClipRegion()
 {
     if (mpMetaFile)

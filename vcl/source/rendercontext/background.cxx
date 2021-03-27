@@ -84,4 +84,10 @@ void RenderContext2::SetBackground(const Wallpaper& rBackground)
     }
 }
 
+void RenderContext2::SaveBackground(VirtualDevice& rSaveDevice, Point const& rPos,
+                                    Size const& rSize, Size const& rBackgroundSize) const
+{
+    rSaveDevice.DrawOutDev(Point(), rBackgroundSize, rPos, rSize, *this);
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
