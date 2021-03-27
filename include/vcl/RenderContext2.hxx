@@ -306,6 +306,8 @@ public:
 
     /// tells whether this output device is RTL in an LTR UI or LTR in a RTL UI
     SAL_DLLPRIVATE bool ImplIsAntiparallel() const;
+    /// Enabling/disabling RTL only makes sense for OutputDevices that use a mirroring SalGraphicsLayout
+    virtual void EnableRTL(bool bEnable = true);
     bool IsRTLEnabled() const;
 
     ComplexTextLayoutFlags GetLayoutMode() const;

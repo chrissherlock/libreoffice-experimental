@@ -554,16 +554,6 @@ public:
                          sal_Int32 nIndex = 0, sal_Int32 nLen = -1) override;
     ///@}
 
-    /** @name Layout functions
-     */
-    ///@{
-
-public:
-    // Enabling/disabling RTL only makes sense for OutputDevices that use a mirroring SalGraphicsLayout
-    virtual void EnableRTL(bool bEnable = true);
-
-    ///@}
-
     /** @name Bitmap functions
      */
     ///@{

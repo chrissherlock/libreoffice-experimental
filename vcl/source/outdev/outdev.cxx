@@ -353,16 +353,6 @@ tools::Rectangle OutputDevice::GetBackgroundComponentBounds() const
     return tools::Rectangle(Point(0, 0), GetOutputSizePixel());
 }
 
-// Layout public functions
-
-void OutputDevice::EnableRTL(bool bEnable)
-{
-    mbEnableRTL = bEnable;
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->EnableRTL(bEnable);
-}
-
 css::awt::DeviceInfo OutputDevice::GetCommonDeviceInfo(Size const& rDevSz) const
 {
     css::awt::DeviceInfo aInfo;
