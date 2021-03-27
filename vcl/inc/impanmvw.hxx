@@ -46,6 +46,8 @@ class ImplAnimView
 private:
     friend class Animation;
     friend void OutputDevice::DrawAnimation(Animation *const, Point const&, Size const&) const;
+    friend void OutputDevice::DrawAnimationView(ImplAnimView&, sal_uLong, VirtualDevice*);
+    friend void OutputDevice::DrawAnimationViewToPos(ImplAnimView&, sal_uLong);
 
     Animation*      mpParent;
     VclPtr<OutputDevice>  mpRenderContext;
@@ -75,8 +77,6 @@ private:
                                   OutputDevice* pFirstFrameOutDev = nullptr );
 
     bool            matches(const OutputDevice* pOut, tools::Long nExtraData) const;
-    void            drawToPos( sal_uLong nPos );
-    void            draw( sal_uLong nPos, VirtualDevice* pVDev=nullptr );
     void            repaint();
     AInfo*          createAInfo() const;
 

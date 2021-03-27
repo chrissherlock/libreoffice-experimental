@@ -53,6 +53,7 @@
 #include <vector>
 
 class Animation;
+class ImplAnimView;
 struct ImplOutDevData;
 class LogicalFontInstance;
 struct SystemGraphicsData;
@@ -649,6 +650,9 @@ public:
     bool DrawEPS(const Point& rPt, const Size& rSz, const GfxLink& rGfxLink,
                  GDIMetaFile* pSubst = nullptr);
     ///@}
+
+    void DrawAnimationViewToPos(ImplAnimView& rAnimView, sal_uLong nPos);
+    void DrawAnimationView(ImplAnimView& rAnimView, sal_uLong nPos, VirtualDevice* pVDev = nullptr);
 };
 
 #endif // INCLUDED_VCL_OUTDEV_HXX

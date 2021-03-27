@@ -7,7 +7,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include <vcl/outdev.hxx>
+#include <vcl/RenderContext2.hxx>
 
 bool RenderContext2::CanAnimate() { return false; }
 
