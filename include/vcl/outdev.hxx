@@ -249,12 +249,6 @@ public:
 
     void DrawOutDev(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPt,
                     Size const& rSrcSize, RenderContext2 const& rOutDev) override;
-
-    virtual void CopyArea(const Point& rDestPt, const Point& rSrcPt, const Size& rSrcSize,
-                          bool bWindowInvalidate = false);
-
-protected:
-    virtual void CopyDeviceArea(SalTwoRect& aPosAry, bool bWindowInvalidate);
     ///@}
 
     /** @name OutputDevice state functions
