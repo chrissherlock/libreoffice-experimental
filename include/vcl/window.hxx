@@ -785,6 +785,8 @@ public:
     virtual bool                        PreNotify( NotifyEvent& rNEvt );
     virtual bool                        EventNotify( NotifyEvent& rNEvt );
 
+    bool                                CanAnimate() override { return true; }
+
     // These methods call the relevant virtual method when not in/post dispose
     void                                CompatGetFocus();
     void                                CompatLoseFocus();
