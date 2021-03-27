@@ -50,6 +50,9 @@ BitmapEx RenderContext2::GetBitmapEx(Point const& rSrcPt, Size const& rSize) con
 
 void RenderContext2::DrawBitmapEx(Point const& rDestPt, BitmapEx const& rBitmapEx)
 {
+    if (ImplIsRecordLayout())
+        return;
+
     if (rBitmapEx.GetTransparentType() == TransparentType::NONE)
     {
         DrawBitmap(rDestPt, rBitmapEx.GetBitmap());
@@ -71,6 +74,9 @@ void RenderContext2::DrawBitmapEx(Point const& rDestPt, BitmapEx const& rBitmapE
 void RenderContext2::DrawBitmapEx(Point const& rDestPt, Size const& rDestSize,
                                   BitmapEx const& rBitmapEx)
 {
+    if (ImplIsRecordLayout())
+        return;
+
     if (rBitmapEx.GetTransparentType() == TransparentType::NONE)
     {
         DrawBitmap(rDestPt, rDestSize, rBitmapEx.GetBitmap());
@@ -91,6 +97,9 @@ void RenderContext2::DrawBitmapEx(Point const& rDestPt, Size const& rDestSize,
                                   Point const& rSrcPtPixel, Size const& rSrcSizePixel,
                                   BitmapEx const& rBitmapEx)
 {
+    if (ImplIsRecordLayout())
+        return;
+
     if (rBitmapEx.GetTransparentType() != TransparentType::NONE)
     {
         DrawBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmapEx.GetBitmap());
