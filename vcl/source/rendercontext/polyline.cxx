@@ -28,6 +28,9 @@ void RenderContext2::DrawPolyLine(tools::Polygon const& rPoly)
 {
     assert(!is_double_buffered_window());
 
+    if (ImplIsRecordLayout())
+        return;
+
     sal_uInt16 nPoints = rPoly.GetSize();
 
     if (!IsDeviceOutputNecessary() || !mbLineColor || (nPoints < 2))
@@ -91,6 +94,9 @@ void RenderContext2::DrawPolyLine(tools::Polygon const& rPoly)
 
 void RenderContext2::DrawPolyLine(tools::Polygon const& rPoly, LineInfo const& rLineInfo)
 {
+    if (ImplIsRecordLayout())
+        return;
+
     sal_uInt16 nPoints(rPoly.GetSize());
 
     if (!IsDeviceOutputNecessary() || !mbLineColor || (nPoints < 2)

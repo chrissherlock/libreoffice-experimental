@@ -37,9 +37,6 @@ void OutputDevice::DrawPolyLine(tools::Polygon const& rPoly)
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaPolyLineAction(rPoly));
 
-    if (ImplIsRecordLayout())
-        return;
-
     RenderContext2::DrawPolyLine(rPoly);
 }
 
@@ -66,9 +63,6 @@ void OutputDevice::DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
 
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaPolyLineAction(rPoly, rLineInfo));
-
-    if (ImplIsRecordLayout())
-        return;
 
     RenderContext2::DrawPolyLine(rPoly, rLineInfo);
 }
