@@ -17,9 +17,17 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <vcl/RenderContext2.hxx>
+#include <vcl/virdev.hxx>
 
 #include <salgdi.hxx>
+
+void RenderContext2::EnableRTL(bool bEnable)
+{
+    mbEnableRTL = bEnable;
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->EnableRTL(bEnable);
+}
 
 bool RenderContext2::IsRTLEnabled() const { return mbEnableRTL; }
 
