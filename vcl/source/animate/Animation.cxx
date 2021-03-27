@@ -245,20 +245,26 @@ void Animation::Draw(OutputDevice* pOut, const Point& rDestPt, const Size& rDest
     AnimationBitmap* pObj = maList[std::min(mnPos, nCount - 1)].get();
 
     if (pOut->GetConnectMetaFile() || (pOut->GetOutDevType() == OUTDEV_PRINTER))
+    {
         maList[0]->maBitmapEx.Draw(pOut, rDestPt, rDestSz);
+    }
     else if (ANIMATION_TIMEOUT_ON_CLICK == pObj->mnWait)
+    {
         pObj->maBitmapEx.Draw(pOut, rDestPt, rDestSz);
+    }
     else
     {
+        Animation* pAnim = const_cast<Animation*>(this);
         const size_t nOldPos = mnPos;
+
         if (mbLoopTerminated)
-            const_cast<Animation*>(this)->mnPos = nCount - 1;
+            pAnim->mnPos = nCount - 1;
 
         {
-            ImplAnimView{ const_cast<Animation*>(this), pOut, rDestPt, rDestSz, 0 };
+            ImplAnimView{ pAnim, pOut, rDestPt, rDestSz, 0 };
         }
 
-        const_cast<Animation*>(this)->mnPos = nOldPos;
+        pAnim->mnPos = nOldPos;
     }
 }
 
