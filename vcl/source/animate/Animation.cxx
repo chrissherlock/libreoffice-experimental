@@ -329,8 +329,9 @@ IMPL_LINK_NOARG(Animation, ImplTimeoutHdl, Timer*, void)
             }
 
             // Paint all views.
-            std::for_each(maViewList.cbegin(), maViewList.cend(),
-                          [this](const auto& pView) { pView->draw(mnPos); });
+            std::for_each(maViewList.cbegin(), maViewList.cend(), [this](const auto& pView) {
+                pView->mpRenderContext->DrawAnimationView(*pView, mnPos);
+            });
             /*
              * If a view is marked, remove the view, because
              * area of output lies out of display area of window.
