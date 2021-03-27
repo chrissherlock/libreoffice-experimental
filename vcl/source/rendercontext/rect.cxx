@@ -25,6 +25,9 @@
 
 void RenderContext2::DrawRect(tools::Rectangle const& rRect)
 {
+    if (ImplIsRecordLayout())
+        return;
+
     if (!IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor))
         return;
 
@@ -61,6 +64,9 @@ void RenderContext2::DrawRect(tools::Rectangle const& rRect)
 void RenderContext2::DrawRect(tools::Rectangle const& rRect, sal_uLong nHorzRound,
                               sal_uLong nVertRound)
 {
+    if (ImplIsRecordLayout())
+        return;
+
     if (!IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor))
         return;
 

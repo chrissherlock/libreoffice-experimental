@@ -31,9 +31,6 @@ void OutputDevice::DrawRect(tools::Rectangle const& rRect)
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaRectAction(rRect));
 
-    if (ImplIsRecordLayout())
-        return;
-
     RenderContext2::DrawRect(rRect);
 }
 
@@ -44,9 +41,6 @@ void OutputDevice::DrawRect(tools::Rectangle const& rRect,
 
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaRoundRectAction(rRect, nHorzRound, nVertRound));
-
-    if (ImplIsRecordLayout())
-        return;
 
     RenderContext2::DrawRect(rRect, nHorzRound, nVertRound);
 }
