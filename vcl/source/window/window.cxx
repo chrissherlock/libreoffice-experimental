@@ -46,6 +46,7 @@
 #include <vcl/uitest/uiobject.hxx>
 
 #include <ImplOutDevData.hxx>
+#include <impanmvw.hxx>
 #include <salframe.hxx>
 #include <salobj.hxx>
 #include <salinst.hxx>
@@ -3936,6 +3937,56 @@ css::awt::DeviceInfo Window::GetDeviceInfo() const
     css::awt::DeviceInfo aInfo = GetCommonDeviceInfo(GetSizePixel());
     GetBorder(aInfo.LeftInset, aInfo.TopInset, aInfo.RightInset, aInfo.BottomInset);
     return aInfo;
+}
+
+void Window::DrawAnimationViewToPos(ImplAnimView& rAnimView, sal_uLong nPos)
+{
+    VclPtr<vcl::RenderContext> pRenderContext = this;
+
+    std::unique_ptr<vcl::PaintBufferGuard> pGuard;
+
+    vcl::Window* pWindow = static_cast<vcl::Window*>(rAnimView.mpRenderContext.get());
+    pGuard.reset(new vcl::PaintBufferGuard(pWindow->ImplGetWindowImpl()->mpFrameData, pWindow));
+    pRenderContext = pGuard->GetRenderContext();
+
+    ScopedVclPtrInstance<VirtualDevice> aVDev;
+    std::unique_ptr<vcl::Region> xOldClip(
+    !rAnimView.maClip.IsNull() ? new vcl::Region(pRenderContext->GetClipRegion()) : nullptr);
+
+    aVDev->SetOutputSizePixel(rAnimView.maSzPix, false);
+    nPos = std::min(nPos, static_cast<sal_uLong>(rAnimView.mpParent->Count()) - 1);
+
+    for (sal_uLong i = 0; i <= nPos; i++)
+    {
+        DrawAnimationView(rAnimView, i, aVDev.get());
+    }
+
+    if (xOldClip)
+        pRenderContext->SetClipRegion(rAnimView.maClip);
+
+    pRenderContext->DrawOutDev(rAnimView.maDispPt, rAnimView.maDispSz, Point(), rAnimView.maSzPix,
+                               *aVDev);
+
+    if (pGuard)
+        pGuard->SetPaintRect(tools::Rectangle(rAnimView.maDispPt, rAnimView.maDispSz));
+
+    if (xOldClip)
+        pRenderContext->SetClipRegion(*xOldClip);
+}
+
+void Window::DrawAnimationView(ImplAnimView& rAnimView, sal_uLong nPos, VirtualDevice* pVDev)
+{
+    VclPtr<vcl::RenderContext> pRenderContext = this;
+
+    std::unique_ptr<vcl::PaintBufferGuard> pGuard;
+    if (!pVDev && pRenderContext->GetOutDevType() == OUTDEV_WINDOW)
+    {
+        vcl::Window* pWindow = static_cast<vcl::Window*>(rAnimView.mpRenderContext.get());
+        pGuard.reset(new vcl::PaintBufferGuard(pWindow->ImplGetWindowImpl()->mpFrameData, pWindow));
+        pRenderContext = pGuard->GetRenderContext();
+    }
+
+    OutputDevice::DrawAnimationView(rAnimView, nPos, pVDev);
 }
 
 } /* namespace vcl */
