@@ -50,6 +50,7 @@ public:
     void Draw(OutputDevice* pOutDev, const Point& rDestPt, const Size& rDestSz) const;
 
     bool IsInAnimation() const { return mbIsInAnimation; }
+    bool IsLoopTerminated() const { return mbLoopTerminated; }
     bool IsTransparent() const;
 
     const Size& GetDisplaySizePixel() const { return maGlobalSize; }
