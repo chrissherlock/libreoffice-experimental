@@ -30,6 +30,9 @@ void RenderContext2::DrawPolyPolygon(const tools::PolyPolygon& rPolyPoly)
 {
     assert(!is_double_buffered_window());
 
+    if (ImplIsRecordLayout())
+        return;
+
     sal_uInt16 nPoly = rPolyPoly.Count();
 
     if (!IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || !nPoly)
