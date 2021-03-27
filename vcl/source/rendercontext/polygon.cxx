@@ -25,6 +25,9 @@
 
 void RenderContext2::DrawPolygon(tools::Polygon const& rPoly)
 {
+    if (ImplIsRecordLayout())
+        return;
+
     sal_uInt16 nPoints = rPoly.GetSize();
 
     if (!IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || (nPoints < 2))
