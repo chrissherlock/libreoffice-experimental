@@ -261,8 +261,6 @@ protected:
     virtual void DrawOutDevDirectProcess(const OutputDevice& rSrcDev, SalTwoRect& rPosAry,
                                          SalGraphics* pSrcGraphics);
 
-    SAL_DLLPRIVATE void drawOutDevDirect(const OutputDevice& rSrcDev, SalTwoRect& rPosAry);
-
 private:
     // not implemented; to detect misuses of DrawOutDev(...OutputDevice&);
     SAL_DLLPRIVATE void DrawOutDev(const Point&, const Size&, const Point&, const Size&,

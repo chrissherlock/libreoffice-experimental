@@ -84,6 +84,7 @@ SystemGraphicsData OutputDevice::GetSystemGfxData() const
 {
     if (!mpGraphics && !AcquireGraphics())
         return SystemGraphicsData();
+
     assert(mpGraphics);
 
     return mpGraphics->GetGraphicsData();
@@ -222,6 +223,25 @@ void OutputDevice::DrawOutDev(const Point& rDestPt, const Size& rDestSize, const
     }
     else
     {
+        SalGraphics* pSrcGraphics;
+
+        if (const OutputDevice* pCheckedSrc = DrawOutDevDirectCheck(rOutDev))
+        {
+            if (!pCheckedSrc->mpGraphics && !pCheckedSrc->AcquireGraphics())
+                return;
+
+            pSrcGraphics = pCheckedSrc->mpGraphics;
+        }
+        else
+        {
+            pSrcGraphics = nullptr;
+        }
+
+        if (!mpGraphics && !AcquireGraphics())
+            return;
+
+        // #102532# Offset only has to be pseudo window offset
+
         SalTwoRect aPosAry(rOutDev.ImplLogicXToDevicePixel(rSrcPt.X()),
                            rOutDev.ImplLogicYToDevicePixel(rSrcPt.Y()),
                            rOutDev.ImplLogicWidthToDevicePixel(rSrcSize.Width()),
@@ -231,7 +251,16 @@ void OutputDevice::DrawOutDev(const Point& rDestPt, const Size& rDestSize, const
                            ImplLogicWidthToDevicePixel(rDestSize.Width()),
                            ImplLogicHeightToDevicePixel(rDestSize.Height()));
 
-        drawOutDevDirect(rOutDev, aPosAry);
+        AdjustTwoRect(aPosAry, rOutDev.GetOutputRectPixel());
+
+        if (aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth && aPosAry.mnDestHeight)
+        {
+            // if this is no window, but rSrcDev is a window
+            // mirroring may be required
+            // because only windows have a SalGraphicsLayout
+            // mirroring is performed here
+            DrawOutDevDirectProcess(rOutDev, aPosAry, pSrcGraphics);
+        }
 
         // #i32109#: make destination rectangle opaque - source has no alpha
         if (mpAlphaVDev)
@@ -292,38 +321,6 @@ void OutputDevice::CopyDeviceArea(SalTwoRect& aPosAry, bool /*bWindowInvalidate*
     aPosAry.mnDestWidth = aPosAry.mnSrcWidth;
     aPosAry.mnDestHeight = aPosAry.mnSrcHeight;
     mpGraphics->CopyBits(aPosAry, *this);
-}
-
-// Direct OutputDevice drawing private function
-void OutputDevice::drawOutDevDirect(const OutputDevice& rSrcDev, SalTwoRect& rPosAry)
-{
-    SalGraphics* pSrcGraphics;
-    if (const OutputDevice* pCheckedSrc = DrawOutDevDirectCheck(rSrcDev))
-    {
-        if (!pCheckedSrc->mpGraphics && !pCheckedSrc->AcquireGraphics())
-            return;
-        pSrcGraphics = pCheckedSrc->mpGraphics;
-    }
-    else
-        pSrcGraphics = nullptr;
-
-    if (!mpGraphics && !AcquireGraphics())
-        return;
-
-    assert(mpGraphics);
-
-    // #102532# Offset only has to be pseudo window offset
-
-    AdjustTwoRect(rPosAry, rSrcDev.GetOutputRectPixel());
-
-    if (rPosAry.mnSrcWidth && rPosAry.mnSrcHeight && rPosAry.mnDestWidth && rPosAry.mnDestHeight)
-    {
-        // if this is no window, but rSrcDev is a window
-        // mirroring may be required
-        // because only windows have a SalGraphicsLayout
-        // mirroring is performed here
-        DrawOutDevDirectProcess(rSrcDev, rPosAry, pSrcGraphics);
-    }
 }
 
 const OutputDevice* OutputDevice::DrawOutDevDirectCheck(const OutputDevice& rSrcDev) const
