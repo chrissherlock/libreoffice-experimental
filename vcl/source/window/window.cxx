@@ -1264,7 +1264,7 @@ const OutputDevice* Window::DrawOutDevDirectCheck(const OutputDevice& rSrcDev) c
     return pSrcDevChecked;
 }
 
-void Window::DrawOutDevDirectProcess( const OutputDevice& rSrcDev, SalTwoRect& rPosAry, SalGraphics* pSrcGraphics )
+void Window::DrawOutDevDirect(RenderContext2 const& rSrcDev, SalTwoRect& rPosAry, SalGraphics* pSrcGraphics)
 {
     if (pSrcGraphics)
         mpGraphics->CopyBits(rPosAry, *pSrcGraphics, *this, rSrcDev);
