@@ -347,9 +347,4 @@ void OutputDevice::DrawOutDevDirectProcess(const OutputDevice& rSrcDev, SalTwoRe
         mpGraphics->CopyBits(rPosAry, *this);
 }
 
-tools::Rectangle OutputDevice::GetBackgroundComponentBounds() const
-{
-    return tools::Rectangle(Point(0, 0), GetOutputSizePixel());
-}
-
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
