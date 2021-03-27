@@ -33,9 +33,6 @@ void OutputDevice::DrawPixel(const Point& rPt)
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaPointAction(rPt));
 
-    if (ImplIsRecordLayout())
-        return;
-
     RenderContext2::DrawPixel(rPt);
 }
 
