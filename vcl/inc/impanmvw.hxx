@@ -21,10 +21,10 @@
 #define INCLUDED_VCL_SOURCE_GDI_IMPANMVW_HXX
 
 #include <vcl/animate/Animation.hxx>
+#include <vcl/outdev.hxx>
 #include <vcl/vclptr.hxx>
 
 class Animation;
-class OutputDevice;
 class VirtualDevice;
 struct AnimationBitmap;
 
@@ -44,8 +44,8 @@ struct AInfo
 class ImplAnimView
 {
 private:
-
     friend class Animation;
+    friend void OutputDevice::DrawAnimation(Animation *const, Point const&, Size const&) const;
 
     Animation*      mpParent;
     VclPtr<OutputDevice>  mpRenderContext;
