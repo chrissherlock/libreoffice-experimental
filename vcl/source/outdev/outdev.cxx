@@ -122,17 +122,19 @@ bool OutputDevice::SupportsOperation(OutDevSupportType eType) const
 
 // Direct OutputDevice drawing public functions
 
-void OutputDevice::DrawOutDev(const Point& rDestPt, const Size& rDestSize, const Point& rSrcPt,
-                              const Size& rSrcSize)
+void OutputDevice::DrawOutDev(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPt,
+                              Size const& rSrcSize)
 {
     if (ImplIsRecordLayout())
         return;
 
-    if (RasterOp::Invert == meRasterOp)
+    if (mpMetaFile)
     {
-        DrawRect(tools::Rectangle(rDestPt, rDestSize));
-        return;
-    }
+        if (meRasterOp == RasterOp::Invert)
+        {
+            mpMetaFile->AddAction(new MetaRectAction(tools::Rectangle(rDestPt, rDestSize)));
+            return;
+        }
 
     if (mpMetaFile)
     {
@@ -140,44 +142,11 @@ void OutputDevice::DrawOutDev(const Point& rDestPt, const Size& rDestSize, const
         mpMetaFile->AddAction(new MetaBmpScaleAction(rDestPt, rDestSize, aBmp));
     }
 
-    if (!IsDeviceOutputNecessary())
-        return;
-
-    if (!mpGraphics && !AcquireGraphics())
-        return;
-
-    assert(mpGraphics);
-
-    if (mbInitClipRegion)
-        InitClipRegion();
-
-    if (mbOutputClipped)
-        return;
-
-    tools::Long nSrcWidth = ImplLogicWidthToDevicePixel(rSrcSize.Width());
-    tools::Long nSrcHeight = ImplLogicHeightToDevicePixel(rSrcSize.Height());
-    tools::Long nDestWidth = ImplLogicWidthToDevicePixel(rDestSize.Width());
-    tools::Long nDestHeight = ImplLogicHeightToDevicePixel(rDestSize.Height());
-
-    if (nSrcWidth && nSrcHeight && nDestWidth && nDestHeight)
-    {
-        SalTwoRect aPosAry(ImplLogicXToDevicePixel(rSrcPt.X()), ImplLogicYToDevicePixel(rSrcPt.Y()),
-                           nSrcWidth, nSrcHeight, ImplLogicXToDevicePixel(rDestPt.X()),
-                           ImplLogicYToDevicePixel(rDestPt.Y()), nDestWidth, nDestHeight);
-
-        AdjustTwoRect(aPosAry, GetOutputRectPixel());
-
-        if (aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth
-            && aPosAry.mnDestHeight)
-            mpGraphics->CopyBits(aPosAry, *this);
-    }
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->DrawOutDev(rDestPt, rDestSize, rSrcPt, rSrcSize);
+    RenderContext2::DrawOutDev(rDestPt, rDestSize, rSrcPt, rSrcSize);
 }
 
-void OutputDevice::DrawOutDev(const Point& rDestPt, const Size& rDestSize, const Point& rSrcPt,
-                              const Size& rSrcSize, const OutputDevice& rOutDev)
+void OutputDevice::DrawOutDev(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPt,
+                              Size const& rSrcSize, RenderContext2 const& rOutDev)
 {
     if (ImplIsRecordLayout())
         return;
@@ -190,7 +159,13 @@ void OutputDevice::DrawOutDev(const Point& rDestPt, const Size& rDestSize, const
 
     if (mpMetaFile)
     {
-        if (rOutDev.mpAlphaVDev)
+        if (meRasterOp == RasterOp::Invert)
+        {
+            mpMetaFile->AddAction(new MetaRectAction(tools::Rectangle(rDestPt, rDestSize)));
+            return;
+        }
+
+        if (rOutDev.UsesAlphaVDev())
         {
             const BitmapEx aBmpEx(rOutDev.GetBitmapEx(rSrcPt, rSrcSize));
             mpMetaFile->AddAction(new MetaBmpExScaleAction(rDestPt, rDestSize, aBmpEx));
@@ -202,70 +177,7 @@ void OutputDevice::DrawOutDev(const Point& rDestPt, const Size& rDestSize, const
         }
     }
 
-    if (!IsDeviceOutputNecessary())
-        return;
-
-    if (!mpGraphics && !AcquireGraphics())
-        return;
-
-    assert(mpGraphics);
-
-    if (mbInitClipRegion)
-        InitClipRegion();
-
-    if (mbOutputClipped)
-        return;
-
-    if (rOutDev.mpAlphaVDev)
-    {
-        // alpha-blend source over destination
-        DrawBitmapEx(rDestPt, rDestSize, rOutDev.GetBitmapEx(rSrcPt, rSrcSize));
-    }
-    else
-    {
-        SalGraphics* pSrcGraphics;
-
-        if (const OutputDevice* pCheckedSrc = DrawOutDevDirectCheck(rOutDev))
-        {
-            if (!pCheckedSrc->mpGraphics && !pCheckedSrc->AcquireGraphics())
-                return;
-
-            pSrcGraphics = pCheckedSrc->mpGraphics;
-        }
-        else
-        {
-            pSrcGraphics = nullptr;
-        }
-
-        if (!mpGraphics && !AcquireGraphics())
-            return;
-
-        // #102532# Offset only has to be pseudo window offset
-
-        SalTwoRect aPosAry(rOutDev.ImplLogicXToDevicePixel(rSrcPt.X()),
-                           rOutDev.ImplLogicYToDevicePixel(rSrcPt.Y()),
-                           rOutDev.ImplLogicWidthToDevicePixel(rSrcSize.Width()),
-                           rOutDev.ImplLogicHeightToDevicePixel(rSrcSize.Height()),
-                           ImplLogicXToDevicePixel(rDestPt.X()),
-                           ImplLogicYToDevicePixel(rDestPt.Y()),
-                           ImplLogicWidthToDevicePixel(rDestSize.Width()),
-                           ImplLogicHeightToDevicePixel(rDestSize.Height()));
-
-        AdjustTwoRect(aPosAry, rOutDev.GetOutputRectPixel());
-
-        if (aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth && aPosAry.mnDestHeight)
-        {
-            // if this is no window, but rSrcDev is a window
-            // mirroring may be required
-            // because only windows have a SalGraphicsLayout
-            // mirroring is performed here
-            DrawOutDevDirect(rOutDev, aPosAry, pSrcGraphics);
-        }
-
-        // #i32109#: make destination rectangle opaque - source has no alpha
-        if (mpAlphaVDev)
-            mpAlphaVDev->ImplFillOpaqueRectangle(tools::Rectangle(rDestPt, rDestSize));
-    }
+    RenderContext2::DrawOutDev(rDestPt, rDestSize, rSrcPt, rSrcSize, rOutDev);
 }
 
 void OutputDevice::CopyArea(const Point& rDestPt, const Point& rSrcPt, const Size& rSrcSize,
@@ -321,11 +233,6 @@ void OutputDevice::CopyDeviceArea(SalTwoRect& aPosAry, bool /*bWindowInvalidate*
     aPosAry.mnDestWidth = aPosAry.mnSrcWidth;
     aPosAry.mnDestHeight = aPosAry.mnSrcHeight;
     mpGraphics->CopyBits(aPosAry, *this);
-}
-
-const OutputDevice* OutputDevice::DrawOutDevDirectCheck(const OutputDevice& rSrcDev) const
-{
-    return this == &rSrcDev ? nullptr : &rSrcDev;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

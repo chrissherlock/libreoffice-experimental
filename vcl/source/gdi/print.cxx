@@ -388,7 +388,7 @@ void Printer::DrawOutDev( const Point& /*rDestPt*/, const Size& /*rDestSize*/,
 
 void Printer::DrawOutDev( const Point& /*rDestPt*/, const Size& /*rDestSize*/,
                                const Point& /*rSrcPt*/,  const Size& /*rSrcSize*/,
-                               const OutputDevice& /*rOutDev*/ )
+                               const RenderContext2& /*rOutDev*/ )
 {
     SAL_WARN( "vcl.gdi", "Don't use OutputDevice::DrawOutDev(...) with printer devices!" );
 }

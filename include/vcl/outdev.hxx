@@ -244,19 +244,17 @@ public:
 public:
     virtual void Flush() {}
 
-    virtual void DrawOutDev(const Point& rDestPt, const Size& rDestSize, const Point& rSrcPt,
-                            const Size& rSrcSize);
+    void DrawOutDev(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPt,
+                    Size const& rSrcSize) override;
 
-    virtual void DrawOutDev(const Point& rDestPt, const Size& rDestSize, const Point& rSrcPt,
-                            const Size& rSrcSize, const OutputDevice& rOutDev);
+    void DrawOutDev(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPt,
+                    Size const& rSrcSize, RenderContext2 const& rOutDev) override;
 
     virtual void CopyArea(const Point& rDestPt, const Point& rSrcPt, const Size& rSrcSize,
                           bool bWindowInvalidate = false);
 
 protected:
     virtual void CopyDeviceArea(SalTwoRect& aPosAry, bool bWindowInvalidate);
-
-    virtual const OutputDevice* DrawOutDevDirectCheck(OutputDevice const& rSrcDev) const;
     ///@}
 
     /** @name OutputDevice state functions

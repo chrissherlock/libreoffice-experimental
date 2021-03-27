@@ -240,6 +240,12 @@ public:
 
     virtual bool CanAnimate();
 
+    virtual void DrawOutDev(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPt,
+                            Size const& rSrcSize);
+
+    virtual void DrawOutDev(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPt,
+                            Size const& rSrcSize, RenderContext2 const& rOutDev);
+
     // not implemented; to detect misuses of DrawOutDev(...OutputDevice&);
     SAL_DLLPRIVATE void DrawOutDev(const Point&, const Size&, const Point&, const Size&,
                                    const Printer&)
@@ -457,6 +463,8 @@ public:
 
     RasterOp GetRasterOp() const;
     virtual void SetRasterOp(RasterOp eRasterOp);
+
+    bool UsesAlphaVDev() const;
 
     void EnableMapMode(bool bEnable = true);
     bool IsMapModeEnabled() const;
@@ -781,6 +789,8 @@ protected:
 
     virtual void DrawOutDevDirect(RenderContext2 const& rSrcDev, SalTwoRect& rPosAry,
                                   SalGraphics* pSrcGraphics);
+
+    virtual RenderContext2 const* DrawOutDevDirectCheck(RenderContext2 const& rSrcDev) const;
 
     void ImplDrawText(SalLayout&);
 
