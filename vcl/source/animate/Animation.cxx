@@ -237,16 +237,18 @@ void Animation::Draw(OutputDevice* pOut, const Point& rDestPt) const
 
 void Animation::Draw(OutputDevice* pOut, const Point& rDestPt, const Size& rDestSz) const
 {
-    const size_t nCount = maList.size();
+    Animation* pAnim = const_cast<Animation*>(this);
+    const size_t nCount = pAnim->Count();
 
     if (!nCount)
         return;
 
-    AnimationBitmap* pObj = maList[std::min(mnPos, nCount - 1)].get();
+    sal_uLong nPos = pAnim->ImplGetCurPos();
+    AnimationBitmap* pObj = const_cast<AnimationBitmap*>(&pAnim->Get(std::min(nPos, nCount - 1)));
 
     if (pOut->GetConnectMetaFile() || (pOut->GetOutDevType() == OUTDEV_PRINTER))
     {
-        maList[0]->maBitmapEx.Draw(pOut, rDestPt, rDestSz);
+        pAnim->Get(0).maBitmapEx.Draw(pOut, rDestPt, rDestSz);
     }
     else if (ANIMATION_TIMEOUT_ON_CLICK == pObj->mnWait)
     {
@@ -254,17 +256,16 @@ void Animation::Draw(OutputDevice* pOut, const Point& rDestPt, const Size& rDest
     }
     else
     {
-        Animation* pAnim = const_cast<Animation*>(this);
         const size_t nOldPos = mnPos;
 
         if (mbLoopTerminated)
-            pAnim->mnPos = nCount - 1;
+            pAnim->ImplSetCurPos(nCount - 1);
 
         {
             ImplAnimView{ pAnim, pOut, rDestPt, rDestSz, 0 };
         }
 
-        pAnim->mnPos = nOldPos;
+        pAnim->ImplSetCurPos(nOldPos);
     }
 }
 
