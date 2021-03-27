@@ -28,6 +28,9 @@
 
 void RenderContext2::DrawBitmap(Point const& rDestPt, Bitmap const& rBitmap)
 {
+    if (ImplIsRecordLayout())
+        return;
+
     if (ProcessBitmapRasterOpInvert(rDestPt, PixelToLogic(rBitmap.GetSizePixel())))
         return;
 
@@ -51,6 +54,9 @@ static void MirrorBitmap(Bitmap& rBitmap, SalTwoRect& rPosAry)
 
 void RenderContext2::DrawBitmap(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap)
 {
+    if (ImplIsRecordLayout())
+        return;
+
     if (ProcessBitmapRasterOpInvert(rDestPt, rDestSize))
         return;
 
@@ -115,6 +121,9 @@ void RenderContext2::DrawBitmap(Point const& rDestPt, Size const& rDestSize,
                                 Point const& rSrcPtPixel, Size const& rSrcSizePixel,
                                 Bitmap const& rBitmap)
 {
+    if (ImplIsRecordLayout())
+        return;
+
     if (ProcessBitmapRasterOpInvert(rDestPt, rDestSize))
         return;
 
@@ -162,10 +171,13 @@ void RenderContext2::DrawBitmap(Point const& rDestPt, Size const& rDestSize,
 }
 
 void RenderContext2::DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize,
-                                        Point const& rSrcPtPixel, Size const& rSrcSizePixel,
-                                        Bitmap const& rBitmap)
+                                      Point const& rSrcPtPixel, Size const& rSrcSizePixel,
+                                      Bitmap const& rBitmap)
 {
     assert(!is_double_buffered_window());
+
+    if (ImplIsRecordLayout())
+        return;
 
     if (ProcessBitmapRasterOpInvert(rDestPt, rDestSize))
         return;
@@ -804,6 +816,9 @@ void RenderContext2::DrawDeviceAlphaBitmap(Bitmap const& rBmp, AlphaMask const& 
 
 bool RenderContext2::HasFastDrawTransformedBitmap() const
 {
+    if (ImplIsRecordLayout())
+        return false;
+
     if (!mpGraphics && !AcquireGraphics())
         return false;
 

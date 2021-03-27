@@ -55,7 +55,6 @@ void OutputDevice::DrawBitmap(Point const& rDestPt, Bitmap const& rBitmap)
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaBmpAction(rDestPt, ProcessBitmapDrawModeGray(rBitmap)));
 
-
     DrawBitmap(rDestPt, PixelToLogic(rBitmap.GetSizePixel()), Point(),
                PixelToLogic(rBitmap.GetSizePixel()), rBitmap);
 }
@@ -98,8 +97,8 @@ void OutputDevice::DrawBitmap(Point const& rDestPt, Size const& rDestSize, Point
 
     if (mpMetaFile)
     {
-        mpMetaFile->AddAction(
-            new MetaBmpScalePartAction(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, ProcessBitmapDrawModeGray(rBitmap)));
+        mpMetaFile->AddAction(new MetaBmpScalePartAction(
+            rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, ProcessBitmapDrawModeGray(rBitmap)));
     }
 
     if (ImplIsRecordLayout())
@@ -109,8 +108,8 @@ void OutputDevice::DrawBitmap(Point const& rDestPt, Size const& rDestSize, Point
 }
 
 void OutputDevice::DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize,
-                                        Point const& rSrcPtPixel, Size const& rSrcSizePixel,
-                                        Bitmap const& rBitmap)
+                                    Point const& rSrcPtPixel, Size const& rSrcSizePixel,
+                                    Bitmap const& rBitmap)
 {
     assert(!is_double_buffered_window());
 
@@ -129,17 +128,7 @@ void OutputDevice::DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize,
             new MetaBmpScaleAction(rDestPt, rDestSize, ProcessBitmapDrawModeGray(rBitmap)));
     }
 
-
     RenderContext2::DrawScaledBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmap);
-}
-
-
-bool OutputDevice::HasFastDrawTransformedBitmap() const
-{
-    if (ImplIsRecordLayout())
-        return false;
-
-    return RenderContext2::HasFastDrawTransformedBitmap();
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
