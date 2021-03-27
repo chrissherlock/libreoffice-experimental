@@ -48,7 +48,6 @@
 
 #include <com/sun/star/drawing/LineCap.hpp>
 #include <com/sun/star/uno/Reference.h>
-#include <com/sun/star/awt/DeviceInfo.hpp>
 
 #include <memory>
 #include <vector>
@@ -675,12 +674,6 @@ public:
     bool DrawEPS(const Point& rPt, const Size& rSz, const GfxLink& rGfxLink,
                  GDIMetaFile* pSubst = nullptr);
     ///@}
-
-public:
-    virtual css::awt::DeviceInfo GetDeviceInfo() const;
-
-protected:
-    css::awt::DeviceInfo GetCommonDeviceInfo(Size const& aDevSize) const;
 };
 
 #endif // INCLUDED_VCL_OUTDEV_HXX

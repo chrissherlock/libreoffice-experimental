@@ -353,34 +353,4 @@ tools::Rectangle OutputDevice::GetBackgroundComponentBounds() const
     return tools::Rectangle(Point(0, 0), GetOutputSizePixel());
 }
 
-css::awt::DeviceInfo OutputDevice::GetCommonDeviceInfo(Size const& rDevSz) const
-{
-    css::awt::DeviceInfo aInfo;
-
-    aInfo.Width = rDevSz.Width();
-    aInfo.Height = rDevSz.Height();
-
-    Size aTmpSz = LogicToPixel(Size(1000, 1000), MapMode(MapUnit::MapCM));
-    aInfo.PixelPerMeterX = aTmpSz.Width() / 10;
-    aInfo.PixelPerMeterY = aTmpSz.Height() / 10;
-    aInfo.BitsPerPixel = GetBitCount();
-
-    aInfo.Capabilities
-        = css::awt::DeviceCapability::RASTEROPERATIONS | css::awt::DeviceCapability::GETBITS;
-
-    return aInfo;
-}
-
-css::awt::DeviceInfo OutputDevice::GetDeviceInfo() const
-{
-    css::awt::DeviceInfo aInfo = GetCommonDeviceInfo(GetOutputSizePixel());
-
-    aInfo.LeftInset = 0;
-    aInfo.TopInset = 0;
-    aInfo.RightInset = 0;
-    aInfo.BottomInset = 0;
-
-    return aInfo;
-}
-
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
