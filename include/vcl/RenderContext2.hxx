@@ -458,6 +458,8 @@ public:
     Wallpaper const& GetBackground() const;
     virtual void SetBackground();
     virtual void SetBackground(Wallpaper const& rBackground);
+    virtual void SaveBackground(VirtualDevice& rSaveDevice, const Point& rPos, const Size& rSize,
+                                const Size& rBackgroundSize) const;
 
     bool IsRefPoint() const;
     Point const& GetRefPoint() const;

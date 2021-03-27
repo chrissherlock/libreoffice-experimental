@@ -281,8 +281,6 @@ public:
 
     virtual Color GetBackgroundColor() const;
     virtual Color GetReadableFontColor(Color const& rFontColor, Color const& rBgColor) const;
-    virtual void SaveBackground(VirtualDevice& rSaveDevice, const Point& rPos, const Size& rSize,
-                                const Size& rBackgroundSize) const;
 
     void SetFont(vcl::Font const& rNewFont) override;
 
