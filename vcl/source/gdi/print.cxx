@@ -23,6 +23,7 @@
 #include <tools/helpers.hxx>
 #include <tools/debug.hxx>
 
+#include <vcl/animate/Animation.hxx>
 #include <vcl/QueueInfo.hxx>
 #include <vcl/event.hxx>
 #include <vcl/virdev.hxx>
@@ -1775,6 +1776,16 @@ basegfx::B2DRange Printer::ReduceBitmapExVisibleRange(basegfx::B2DHomMatrix cons
 {
     // there is no visible range for printers
     return basegfx::B2DRange(0.0, 0.0, 0.0, 0.0);
+}
+
+void Printer::DrawAnimation(Animation* const pAnim, Point const& rDestPt,
+                                 Size const& rDestSz) const
+{
+    if (!pAnim->Count())
+        return;
+
+    Printer* pPrinter = const_cast<Printer*>(this);
+    pAnim->Get(0).maBitmapEx.Draw(pPrinter, rDestPt, rDestSz);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

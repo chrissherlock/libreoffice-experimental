@@ -29,7 +29,7 @@
 ImplAnimView::ImplAnimView( Animation* pParent, RenderContext2* pOut,
                             const Point& rPt, const Size& rSz,
                             sal_uLong nExtraData,
-                            OutputDevice* pFirstFrameOutDev ) :
+                            RenderContext2* pFirstFrameOutDev ) :
         mpParent        ( pParent ),
         mpRenderContext ( pFirstFrameOutDev ? pFirstFrameOutDev : pOut ),
         mnExtraData     ( nExtraData ),
@@ -80,7 +80,7 @@ ImplAnimView::ImplAnimView( Animation* pParent, RenderContext2* pOut,
     // Initialize drawing to actual position
     mpRenderContext->DrawAnimationViewToPos(*this, mpParent->ImplGetCurPos());
 
-    // If first frame OutputDevice is set, update variables now for real OutputDevice
+    // If first frame RenderContext2 is set, update variables now for real RenderContext2
     if( pFirstFrameOutDev )
     {
         mpRenderContext = pOut;
@@ -96,7 +96,7 @@ ImplAnimView::~ImplAnimView()
     Animation::ImplDecAnimCount();
 }
 
-bool ImplAnimView::matches(const OutputDevice* pOut, tools::Long nExtraData) const
+bool ImplAnimView::matches(const RenderContext2* pOut, tools::Long nExtraData) const
 {
     return (!pOut || pOut == mpRenderContext) && (nExtraData == 0 || nExtraData == mnExtraData);
 }

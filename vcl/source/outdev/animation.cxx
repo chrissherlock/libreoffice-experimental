@@ -30,7 +30,7 @@ void OutputDevice::DrawAnimation(Animation* const pAnim, Point const& rDestPt,
 
     OutputDevice* pOutDev = const_cast<OutputDevice*>(this);
 
-    if (mpMetaFile || (GetOutDevType() == OUTDEV_PRINTER))
+    if (mpMetaFile)
     {
         pAnim->Get(0).maBitmapEx.Draw(pOutDev, rDestPt, rDestSz);
         return;

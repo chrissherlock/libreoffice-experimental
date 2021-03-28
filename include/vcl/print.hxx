@@ -39,6 +39,7 @@
 #include <memory>
 #include <unordered_map>
 
+class Animation;
 class GDIMetaFile;
 class SalInfoPrinter;
 struct SalPrinterQueueInfo;
@@ -204,6 +205,9 @@ protected:
     virtual bool                AcquireGraphics() const override;
     virtual void                ReleaseGraphics( bool bRelease = true ) override;
     virtual void                ImplReleaseFonts() override;
+
+    void DrawAnimation(Animation* const pAnim, Point const& rDestPt,
+                       Size const& rDestSz) const override;
 
     virtual tools::Long                GetGradientStepCount( tools::Long nMinRect ) override;
     virtual bool                UsePolyPolygonForComplexGradient() override;

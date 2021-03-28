@@ -240,10 +240,10 @@ public:
     virtual void DrawImage(Point const& rPos, Size const& rSize, Image const& rImage,
                            DrawImageFlags nStyle = DrawImageFlags::NONE);
 
+    virtual bool CanAnimate();
+
     virtual void DrawAnimation(Animation* const pAnim, Point const& rDestPt,
                                Size const& rDestSz) const;
-
-    virtual bool CanAnimate();
 
     virtual void DrawAnimationViewToPos(ImplAnimView& rAnimView, sal_uLong nPos);
     virtual void DrawAnimationView(ImplAnimView& rAnimView, sal_uLong nPos,
