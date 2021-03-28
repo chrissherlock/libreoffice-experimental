@@ -26,7 +26,7 @@
 
 #include <window.h>
 
-ImplAnimView::ImplAnimView( Animation* pParent, OutputDevice* pOut,
+ImplAnimView::ImplAnimView( Animation* pParent, RenderContext2* pOut,
                             const Point& rPt, const Size& rSz,
                             sal_uLong nExtraData,
                             OutputDevice* pFirstFrameOutDev ) :

@@ -28,6 +28,8 @@
 
 #include <sal/types.h>
 
+class RenderContext2;
+
 namespace com::sun::star::rendering {
     class XBitmapCanvas;
 }
@@ -64,9 +66,9 @@ public:
     void                SetEmpty();
     void                Clear();
 
-    void                Draw( OutputDevice* pOutDev,
+    void                Draw( RenderContext2* pOutDev,
                               const Point& rDestPt ) const;
-    void                Draw( OutputDevice* pOutDev,
+    void                Draw( RenderContext2* pOutDev,
                               const Point& rDestPt, const Size& rDestSize ) const;
 
     bool                IsTransparent() const;
@@ -464,7 +466,7 @@ public:
 
 private:
     friend class ImpGraphic;
-    friend class OutputDevice;
+    friend class RenderContext2;
     friend bool VCL_DLLPUBLIC WriteDIBBitmapEx(const BitmapEx& rSource, SvStream& rOStm);
     friend bool VCL_DLLPUBLIC ReadRawDIB(BitmapEx& rTarget, const unsigned char* pBuf,
                                     const ScanlineFormat nFormat,

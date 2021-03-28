@@ -25,36 +25,18 @@
 void OutputDevice::DrawAnimation(Animation* const pAnim, Point const& rDestPt,
                                  Size const& rDestSz) const
 {
-    const size_t nCount = pAnim->Count();
-
-    if (!nCount)
+    if (!pAnim->Count())
         return;
 
-    sal_uLong nPos = pAnim->ImplGetCurPos();
-    AnimationBitmap* pObj = const_cast<AnimationBitmap*>(&pAnim->Get(std::min(nPos, nCount - 1)));
     OutputDevice* pOutDev = const_cast<OutputDevice*>(this);
 
     if (mpMetaFile || (GetOutDevType() == OUTDEV_PRINTER))
     {
         pAnim->Get(0).maBitmapEx.Draw(pOutDev, rDestPt, rDestSz);
+        return;
     }
-    else if (ANIMATION_TIMEOUT_ON_CLICK == pObj->mnWait)
-    {
-        pAnim->GetBitmapEx().Draw(pOutDev, rDestPt, rDestSz);
-    }
-    else
-    {
-        const size_t nOldPos = nPos;
 
-        if (pAnim->IsLoopTerminated())
-            pAnim->ImplSetCurPos(nCount - 1);
-
-        {
-            ImplAnimView{ pAnim, pOutDev, rDestPt, rDestSz, 0 };
-        }
-
-        pAnim->ImplSetCurPos(nOldPos);
-    }
+    RenderContext2::DrawAnimation(pAnim, rDestPt, rDestSz);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

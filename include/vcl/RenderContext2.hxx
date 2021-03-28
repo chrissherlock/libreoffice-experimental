@@ -65,6 +65,7 @@
 #define HATCH_MAXPOINTS 1024
 
 class AllSettings;
+class Animation;
 class Hatch;
 class Image;
 class ImplAnimView;
@@ -238,6 +239,9 @@ public:
                            DrawImageFlags nStyle = DrawImageFlags::NONE);
     virtual void DrawImage(Point const& rPos, Size const& rSize, Image const& rImage,
                            DrawImageFlags nStyle = DrawImageFlags::NONE);
+
+    virtual void DrawAnimation(Animation* const pAnim, Point const& rDestPt,
+                               Size const& rDestSz) const;
 
     virtual bool CanAnimate();
 

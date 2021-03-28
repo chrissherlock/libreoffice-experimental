@@ -7,12 +7,44 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include <vcl/bitmapex.hxx>
 #include <vcl/virdev.hxx>
 
 #include <window.h>
 #include <impanmvw.hxx>
 
 bool RenderContext2::CanAnimate() { return false; }
+
+void RenderContext2::DrawAnimation(Animation* const pAnim, Point const& rDestPt,
+                                   Size const& rDestSz) const
+{
+    const size_t nCount = pAnim->Count();
+
+    if (!nCount)
+        return;
+
+    sal_uLong nPos = pAnim->ImplGetCurPos();
+    AnimationBitmap* pObj = const_cast<AnimationBitmap*>(&pAnim->Get(std::min(nPos, nCount - 1)));
+    RenderContext2* pRC = const_cast<RenderContext2*>(this);
+
+    if (pObj->mnWait & ANIMATION_TIMEOUT_ON_CLICK)
+    {
+        pAnim->GetBitmapEx().Draw(pRC, rDestPt, rDestSz);
+    }
+    else
+    {
+        const size_t nOldPos = nPos;
+
+        if (pAnim->IsLoopTerminated())
+            pAnim->ImplSetCurPos(nCount - 1);
+
+        {
+            ImplAnimView{ pAnim, pRC, rDestPt, rDestSz, 0 };
+        }
+
+        pAnim->ImplSetCurPos(nOldPos);
+    }
+}
 
 void RenderContext2::DrawAnimationViewToPos(ImplAnimView& rAnimView, sal_uLong nPos)
 {
