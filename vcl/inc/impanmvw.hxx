@@ -46,8 +46,8 @@ class ImplAnimView
 private:
     friend class Animation;
     friend void OutputDevice::DrawAnimation(Animation *const, Point const&, Size const&) const;
-    friend void OutputDevice::DrawAnimationView(ImplAnimView&, sal_uLong, VirtualDevice*);
-    friend void OutputDevice::DrawAnimationViewToPos(ImplAnimView&, sal_uLong);
+    friend void RenderContext2::DrawAnimationView(ImplAnimView&, sal_uLong, VirtualDevice*);
+    friend void RenderContext2::DrawAnimationViewToPos(ImplAnimView&, sal_uLong);
     friend void vcl::Window::DrawAnimationView(ImplAnimView&, sal_uLong, VirtualDevice*);
     friend void vcl::Window::DrawAnimationViewToPos(ImplAnimView&, sal_uLong);
 

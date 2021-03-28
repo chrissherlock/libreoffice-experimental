@@ -67,6 +67,7 @@
 class AllSettings;
 class Hatch;
 class Image;
+class ImplAnimView;
 class ImplDeviceFontList;
 class ImplDeviceFontSizeList;
 class ImplFontCache;
@@ -108,7 +109,7 @@ struct Feature;
 
 class VCL_DLLPUBLIC RenderContext2 : public virtual VclReferenceBase
 {
-    friend VirtualDevice;
+    friend class VirtualDevice;
 
 public:
     RenderContext2();
@@ -239,6 +240,10 @@ public:
                            DrawImageFlags nStyle = DrawImageFlags::NONE);
 
     virtual bool CanAnimate();
+
+    virtual void DrawAnimationViewToPos(ImplAnimView& rAnimView, sal_uLong nPos);
+    virtual void DrawAnimationView(ImplAnimView& rAnimView, sal_uLong nPos,
+                                   VirtualDevice* pVDev = nullptr);
 
     virtual void Flush() {}
 

@@ -650,10 +650,6 @@ public:
     bool DrawEPS(const Point& rPt, const Size& rSz, const GfxLink& rGfxLink,
                  GDIMetaFile* pSubst = nullptr);
     ///@}
-
-    virtual void DrawAnimationViewToPos(ImplAnimView& rAnimView, sal_uLong nPos);
-    virtual void DrawAnimationView(ImplAnimView& rAnimView, sal_uLong nPos,
-                                   VirtualDevice* pVDev = nullptr);
 };
 
 #endif // INCLUDED_VCL_OUTDEV_HXX
