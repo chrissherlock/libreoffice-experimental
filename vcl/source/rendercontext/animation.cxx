@@ -27,7 +27,7 @@ void RenderContext2::DrawAnimation(Animation* const pAnim, Point const& rDestPt,
     AnimationBitmap* pObj = const_cast<AnimationBitmap*>(&pAnim->Get(std::min(nPos, nCount - 1)));
     RenderContext2* pRC = const_cast<RenderContext2*>(this);
 
-    if (pObj->mnWait & ANIMATION_TIMEOUT_ON_CLICK)
+    if (pObj->mnWait == ANIMATION_TIMEOUT_ON_CLICK)
     {
         pAnim->GetBitmapEx().Draw(pRC, rDestPt, rDestSz);
     }

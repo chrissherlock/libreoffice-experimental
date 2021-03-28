@@ -76,9 +76,9 @@ public:
 private:
                     ImplAnimView( Animation* pParent, RenderContext2* pOut,
                                   const Point& rPt, const Size& rSz, sal_uLong nExtraData,
-                                  OutputDevice* pFirstFrameOutDev = nullptr );
+                                  RenderContext2* pFirstFrameOutDev = nullptr );
 
-    bool            matches(const OutputDevice* pOut, tools::Long nExtraData) const;
+    bool            matches(const RenderContext2* pOut, tools::Long nExtraData) const;
     void            repaint();
     AInfo*          createAInfo() const;
 
