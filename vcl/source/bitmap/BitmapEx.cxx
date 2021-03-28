@@ -592,12 +592,12 @@ bool BitmapEx::Adjust( short nLuminancePercent, short nContrastPercent,
                                         fGamma, bInvert, msoBrightness );
 }
 
-void BitmapEx::Draw( OutputDevice* pOutDev, const Point& rDestPt ) const
+void BitmapEx::Draw( RenderContext2* pOutDev, const Point& rDestPt ) const
 {
     pOutDev->DrawBitmapEx( rDestPt, *this );
 }
 
-void BitmapEx::Draw( OutputDevice* pOutDev,
+void BitmapEx::Draw( RenderContext2* pOutDev,
                      const Point& rDestPt, const Size& rDestSize ) const
 {
     pOutDev->DrawBitmapEx( rDestPt, rDestSize, *this );

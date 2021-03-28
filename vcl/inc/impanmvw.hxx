@@ -32,7 +32,7 @@ struct AInfo
 {
     Point           aStartOrg;
     Size            aStartSize;
-    VclPtr<OutputDevice>   pOutDev;
+    VclPtr<RenderContext2>   pOutDev;
     void*           pViewData;
     tools::Long            nExtraData;
     bool            bPause;
@@ -45,14 +45,14 @@ class ImplAnimView
 {
 private:
     friend class Animation;
-    friend void OutputDevice::DrawAnimation(Animation *const, Point const&, Size const&) const;
+    friend void RenderContext2::DrawAnimation(Animation *const, Point const&, Size const&) const;
     friend void RenderContext2::DrawAnimationView(ImplAnimView&, sal_uLong, VirtualDevice*);
     friend void RenderContext2::DrawAnimationViewToPos(ImplAnimView&, sal_uLong);
     friend void vcl::Window::DrawAnimationView(ImplAnimView&, sal_uLong, VirtualDevice*);
     friend void vcl::Window::DrawAnimationViewToPos(ImplAnimView&, sal_uLong);
 
     Animation*      mpParent;
-    VclPtr<OutputDevice>  mpRenderContext;
+    VclPtr<RenderContext2>  mpRenderContext;
     tools::Long            mnExtraData;
     Point           maPt;
     Point           maDispPt;
@@ -74,7 +74,7 @@ private:
 public:
                     ~ImplAnimView();
 private:
-                    ImplAnimView( Animation* pParent, OutputDevice* pOut,
+                    ImplAnimView( Animation* pParent, RenderContext2* pOut,
                                   const Point& rPt, const Size& rSz, sal_uLong nExtraData,
                                   OutputDevice* pFirstFrameOutDev = nullptr );
 
