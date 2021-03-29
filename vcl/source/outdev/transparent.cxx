@@ -172,7 +172,7 @@ void OutputDevice::DrawTransparent(const basegfx::B2DHomMatrix& rObjectTransform
     DrawTransparent(toPolyPolygon(aB2DPolyPoly), static_cast<sal_uInt16>(fTransparency * 100.0));
 }
 
-void OutputDevice::DrawTransparent(const tools::PolyPolygon& rPolyPoly,
+void OutputDevice::DrawTransparent(tools::PolyPolygon const& rPolyPoly,
                                    sal_uInt16 nTransparencePercent)
 {
     assert(!is_double_buffered_window());
@@ -180,14 +180,26 @@ void OutputDevice::DrawTransparent(const tools::PolyPolygon& rPolyPoly,
     // short circuit for drawing an opaque polygon
     if ((nTransparencePercent < 1) || (mnDrawMode & DrawModeFlags::NoTransparency))
     {
-        DrawPolyPolygon(rPolyPoly);
+        mpMetaFile->AddAction(new MetaPolyPolygonAction(rPolyPoly));
         return;
     }
 
     // short circuit for drawing an invisible polygon
     if (!mbFillColor || (nTransparencePercent >= 100))
     {
-        DrawInvisiblePolygon(rPolyPoly);
+        // short circuit if the polygon border is invisible too
+        if (!mbLineColor)
+            return;
+
+        // we assume that the border is NOT to be drawn transparently???
+        if (mpMetaFile)
+        {
+            mpMetaFile->AddAction(new MetaPushAction(PushFlags::FILLCOLOR));
+            mpMetaFile->AddAction(new MetaFillColorAction(Color(), false));
+            mpMetaFile->AddAction(new MetaPolyPolygonAction(rPolyPoly));
+            mpMetaFile->AddAction(new MetaPopAction());
+        }
+
         return; // tdf#84294: do not record it in metafile
     }
 
@@ -195,101 +207,7 @@ void OutputDevice::DrawTransparent(const tools::PolyPolygon& rPolyPoly,
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaTransparentAction(rPolyPoly, nTransparencePercent));
 
-    if (!IsDeviceOutputNecessary() || ImplIsRecordLayout())
-        return;
-
-    // get the device graphics as drawing target
-    if (!mpGraphics && !AcquireGraphics())
-        return;
-
-    assert(mpGraphics);
-
-    // try hard to draw it directly, because the emulation layers are slower
-    bool bDrawn = false;
-
-    if (mpGraphics->supportsOperation(OutDevSupportType::B2DDraw)
-#if defined UNX && !defined MACOSX && !defined IOS
-        && GetBitCount() > 8
-#endif
-#ifdef _WIN32
-        // workaround bad dithering on remote displaying when using GDI+ with toolbar button highlighting
-        && !rPolyPoly.IsRect()
-#endif
-    )
-    {
-        // prepare the graphics device
-        if (mbInitClipRegion)
-            InitClipRegion();
-
-        if (mbOutputClipped)
-            return;
-
-        if (mbInitLineColor)
-            InitLineColor();
-
-        if (mbInitFillColor)
-            InitFillColor();
-
-        // get the polygon in device coordinates
-        basegfx::B2DPolyPolygon aB2DPolyPolygon(rPolyPoly.getB2DPolyPolygon());
-        const basegfx::B2DHomMatrix aTransform(ImplGetDeviceTransformation());
-
-        const double fTransparency = 0.01 * nTransparencePercent;
-        if (mbFillColor)
-        {
-            // #i121591#
-            // CAUTION: Only non printing (pixel-renderer) VCL commands from OutputDevices
-            // should be used when printing. Normally this is avoided by the printer being
-            // non-AAed and thus e.g. on WIN GdiPlus calls are not used. It may be necessary
-            // to figure out a way of moving this code to its own function that is
-            // overridden by the Print class, which will mean we deliberately override the
-            // functionality and we use the fallback some lines below (which is not very good,
-            // though. For now, WinSalGraphics::drawPolyPolygon will detect printer usage and
-            // correct the wrong mapping (see there for details)
-            bDrawn = mpGraphics->DrawPolyPolygon(aTransform, aB2DPolyPolygon, fTransparency, *this);
-        }
-
-        if (mbLineColor)
-        {
-            // disable the fill color for now
-            mpGraphics->SetFillColor();
-
-            // draw the border line
-            const bool bPixelSnapHairline(mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
-
-            for (auto const& rPolygon : aB2DPolyPolygon)
-            {
-                bDrawn = mpGraphics->DrawPolyLine(
-                    aTransform, rPolygon, fTransparency,
-                    0.0, // tdf#124848 hairline
-                    nullptr, // MM01
-                    basegfx::B2DLineJoin::NONE, css::drawing::LineCap_BUTT,
-                    basegfx::deg2rad(
-                        15.0), // not used with B2DLineJoin::NONE, but the correct default
-                    bPixelSnapHairline, *this);
-            }
-
-            // prepare to restore the fill color
-            mbInitFillColor = mbFillColor;
-        }
-    }
-
-    if (!bDrawn)
-        EmulateDrawTransparent(rPolyPoly, nTransparencePercent);
-
-    // #110958# Apply alpha value also to VDev alpha channel
-    if (mpAlphaVDev)
-    {
-        const Color aFillCol(mpAlphaVDev->GetFillColor());
-        mpAlphaVDev->SetFillColor(
-            Color(sal::static_int_cast<sal_uInt8>(255 * nTransparencePercent / 100),
-                  sal::static_int_cast<sal_uInt8>(255 * nTransparencePercent / 100),
-                  sal::static_int_cast<sal_uInt8>(255 * nTransparencePercent / 100)));
-
-        mpAlphaVDev->DrawTransparent(rPolyPoly, nTransparencePercent);
-
-        mpAlphaVDev->SetFillColor(aFillCol);
-    }
+    RenderContext2::DrawTransparent(rPolyPoly, nTransparencePercent);
 }
 
 void OutputDevice::DrawTransparent(const GDIMetaFile& rMtf, const Point& rPos, const Size& rSize,
@@ -432,26 +350,6 @@ void OutputDevice::DrawTransparent(const GDIMetaFile& rMtf, const Point& rPos, c
 
         mpMetaFile = pOldMetaFile;
     }
-}
-
-void OutputDevice::DrawInvisiblePolygon(tools::PolyPolygon const& rPolyPoly)
-{
-    assert(!is_double_buffered_window());
-
-    // short circuit if the polygon border is invisible too
-    if (!mbLineColor)
-        return;
-
-    // we assume that the border is NOT to be drawn transparently???
-    if (mpMetaFile)
-    {
-        mpMetaFile->AddAction(new MetaPushAction(PushFlags::FILLCOLOR));
-        mpMetaFile->AddAction(new MetaFillColorAction(Color(), false));
-        mpMetaFile->AddAction(new MetaPolyPolygonAction(rPolyPoly));
-        mpMetaFile->AddAction(new MetaPopAction());
-    }
-
-    RenderContext2::DrawInvisiblePolygon(rPolyPoly);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
