@@ -20,6 +20,7 @@
 #pragma once
 
 #include <vcl/RenderContext2.hxx>
+#include <vcl/OutDevType.hxx>
 #include <vcl/cairo.hxx>
 #include <vcl/metaactiontypes.hxx>
 #include <vcl/outdevstate.hxx>
@@ -66,16 +67,6 @@ namespace com::sun::star::awt
 {
 class XGraphics;
 }
-
-// OutputDevice-Types
-
-enum OutDevType
-{
-    OUTDEV_WINDOW,
-    OUTDEV_PRINTER,
-    OUTDEV_VIRDEV,
-    OUTDEV_PDF
-};
 
 enum class OutDevViewType
 {
