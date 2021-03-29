@@ -33,14 +33,12 @@
 #include <cassert>
 #include <memory>
 
-namespace
-{
 /**
      * Perform a safe approximation of a polygon from double-precision
      * coordinates to integer coordinates, to ensure that it has at least 2
      * pixels in both X and Y directions.
      */
-tools::Polygon toPolygon(const basegfx::B2DPolygon& rPoly)
+static tools::Polygon toPolygon(const basegfx::B2DPolygon& rPoly)
 {
     basegfx::B2DRange aRange = rPoly.getB2DRange();
     double fW = aRange.getWidth(), fH = aRange.getHeight();
@@ -63,14 +61,13 @@ tools::Polygon toPolygon(const basegfx::B2DPolygon& rPoly)
     return tools::Polygon(rPoly);
 }
 
-tools::PolyPolygon toPolyPolygon(const basegfx::B2DPolyPolygon& rPolyPoly)
+static tools::PolyPolygon toPolyPolygon(const basegfx::B2DPolyPolygon& rPolyPoly)
 {
     tools::PolyPolygon aTarget;
     for (auto const& rB2DPolygon : rPolyPoly)
         aTarget.Insert(toPolygon(rB2DPolygon));
 
     return aTarget;
-}
 }
 
 // Caution: This method is nearly the same as
