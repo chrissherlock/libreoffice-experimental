@@ -17,57 +17,91 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <cassert>
-
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
-#include <vcl/outdev.hxx>
 #include <vcl/virdev.hxx>
 
-void OutputDevice::DrawWallpaper( const tools::Rectangle& rRect,
-                                  const Wallpaper& rWallpaper )
+#include <cassert>
+
+void OutputDevice::Erase()
+{
+    if (!IsDeviceOutputNecessary() || ImplIsRecordLayout())
+        return;
+
+    if (mbBackground)
+    {
+        RasterOp eRasterOp = GetRasterOp();
+
+        if (eRasterOp != RasterOp::OverPaint)
+            SetRasterOp(RasterOp::OverPaint);
+
+        DrawWallpaper(0, 0, mnOutWidth, mnOutHeight, maBackground);
+
+        if (eRasterOp != RasterOp::OverPaint)
+            SetRasterOp(eRasterOp);
+    }
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->Erase();
+}
+
+void OutputDevice::Erase(tools::Rectangle const& rRect)
+{
+    const RasterOp eRasterOp = GetRasterOp();
+
+    if (eRasterOp != RasterOp::OverPaint)
+        SetRasterOp(RasterOp::OverPaint);
+
+    DrawWallpaper(rRect, GetBackground());
+
+    if (eRasterOp != RasterOp::OverPaint)
+        SetRasterOp(eRasterOp);
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->Erase(rRect);
+}
+
+void OutputDevice::DrawWallpaper(tools::Rectangle const& rRect, Wallpaper const& rWallpaper)
 {
     assert(!is_double_buffered_window());
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaWallpaperAction( rRect, rWallpaper ) );
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaWallpaperAction(rRect, rWallpaper));
 
-    if ( !IsDeviceOutputNecessary() || ImplIsRecordLayout() )
+    if (!IsDeviceOutputNecessary() || ImplIsRecordLayout())
         return;
 
-    if ( rWallpaper.GetStyle() != WallpaperStyle::NONE )
+    if (rWallpaper.GetStyle() != WallpaperStyle::NONE)
     {
-        tools::Rectangle aRect = LogicToPixel( rRect );
+        tools::Rectangle aRect = LogicToPixel(rRect);
         aRect.Justify();
 
-        if ( !aRect.IsEmpty() )
+        if (!aRect.IsEmpty())
         {
-            DrawWallpaper( aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(),
-                               rWallpaper );
+            DrawWallpaper(aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(),
+                          rWallpaper);
         }
     }
 
-    if( mpAlphaVDev )
-        mpAlphaVDev->DrawWallpaper( rRect, rWallpaper );
+    if (mpAlphaVDev)
+        mpAlphaVDev->DrawWallpaper(rRect, rWallpaper);
 }
 
-void OutputDevice::DrawWallpaper( tools::Long nX, tools::Long nY,
-                                  tools::Long nWidth, tools::Long nHeight,
-                                  const Wallpaper& rWallpaper )
+void OutputDevice::DrawWallpaper(tools::Long nX, tools::Long nY, tools::Long nWidth,
+                                 tools::Long nHeight, Wallpaper const& rWallpaper)
 {
     assert(!is_double_buffered_window());
 
-    if( rWallpaper.IsBitmap() )
-        DrawBitmapWallpaper( nX, nY, nWidth, nHeight, rWallpaper );
-    else if( rWallpaper.IsGradient() )
-        DrawGradientWallpaper( nX, nY, nWidth, nHeight, rWallpaper );
+    if (rWallpaper.IsBitmap())
+        DrawBitmapWallpaper(nX, nY, nWidth, nHeight, rWallpaper);
+    else if (rWallpaper.IsGradient())
+        DrawGradientWallpaper(nX, nY, nWidth, nHeight, rWallpaper);
     else
-        DrawColorWallpaper(  nX, nY, nWidth, nHeight, rWallpaper );
+        DrawColorWallpaper(nX, nY, nWidth, nHeight, rWallpaper);
 }
 
-void OutputDevice::DrawColorWallpaper( tools::Long nX, tools::Long nY,
-                                       tools::Long nWidth, tools::Long nHeight,
-                                       const Wallpaper& rWallpaper )
+void OutputDevice::DrawColorWallpaper(tools::Long nX, tools::Long nY, tools::Long nWidth,
+                                      tools::Long nHeight, Wallpaper const& rWallpaper)
 {
     assert(!is_double_buffered_window());
 
@@ -75,56 +109,23 @@ void OutputDevice::DrawColorWallpaper( tools::Long nX, tools::Long nY,
     Color aOldLineColor = GetLineColor();
     Color aOldFillColor = GetFillColor();
     SetLineColor();
-    SetFillColor( rWallpaper.GetColor() );
+    SetFillColor(rWallpaper.GetColor());
 
     bool bMap = mbMap;
-    EnableMapMode( false );
-    DrawRect( tools::Rectangle( Point( nX, nY ), Size( nWidth, nHeight ) ) );
-    SetLineColor( aOldLineColor );
-    SetFillColor( aOldFillColor );
-    EnableMapMode( bMap );
+    EnableMapMode(false);
+    DrawRect(tools::Rectangle(Point(nX, nY), Size(nWidth, nHeight)));
+    SetLineColor(aOldLineColor);
+    SetFillColor(aOldFillColor);
+    EnableMapMode(bMap);
 }
 
-void OutputDevice::Erase()
-{
-    if ( !IsDeviceOutputNecessary() || ImplIsRecordLayout() )
-        return;
-
-    if ( mbBackground )
-    {
-        RasterOp eRasterOp = GetRasterOp();
-        if ( eRasterOp != RasterOp::OverPaint )
-            SetRasterOp( RasterOp::OverPaint );
-        DrawWallpaper( 0, 0, mnOutWidth, mnOutHeight, maBackground );
-        if ( eRasterOp != RasterOp::OverPaint )
-            SetRasterOp( eRasterOp );
-    }
-
-    if( mpAlphaVDev )
-        mpAlphaVDev->Erase();
-}
-
-void OutputDevice::Erase(const tools::Rectangle& rRect)
-{
-    const RasterOp eRasterOp = GetRasterOp();
-    if ( eRasterOp != RasterOp::OverPaint )
-        SetRasterOp( RasterOp::OverPaint );
-    DrawWallpaper(rRect, GetBackground());
-    if ( eRasterOp != RasterOp::OverPaint )
-        SetRasterOp( eRasterOp );
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->Erase(rRect);
-}
-
-void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
-                                            tools::Long nWidth, tools::Long nHeight,
-                                            const Wallpaper& rWallpaper )
+void OutputDevice::DrawBitmapWallpaper(tools::Long nX, tools::Long nY, tools::Long nWidth,
+                                       tools::Long nHeight, Wallpaper const& rWallpaper)
 {
     assert(!is_double_buffered_window());
 
     BitmapEx aBmpEx;
-    const BitmapEx* pCached = rWallpaper.ImplGetCachedBitmap();
+    BitmapEx const* pCached = rWallpaper.ImplGetCachedBitmap();
     Point aPos;
     Size aSize;
     GDIMetaFile* pOldMetaFile = mpMetaFile;
@@ -134,7 +135,7 @@ void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
     bool bDrawGradientBackground = false;
     bool bDrawColorBackground = false;
 
-    if( pCached )
+    if (pCached)
         aBmpEx = *pCached;
     else
         aBmpEx = rWallpaper.GetBitmap();
@@ -144,146 +145,150 @@ void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
     const bool bTransparent = aBmpEx.IsTransparent();
 
     // draw background
-    if( bTransparent )
+    if (bTransparent)
     {
-        if( rWallpaper.IsGradient() )
+        if (rWallpaper.IsGradient())
+        {
             bDrawGradientBackground = true;
+        }
         else
         {
-            if( !pCached && !rWallpaper.GetColor().IsTransparent() )
+            if (!pCached && !rWallpaper.GetColor().IsTransparent())
             {
-                ScopedVclPtrInstance< VirtualDevice > aVDev(  *this  );
-                aVDev->SetBackground( rWallpaper.GetColor() );
-                aVDev->SetOutputSizePixel( Size( nBmpWidth, nBmpHeight ) );
-                aVDev->DrawBitmapEx( Point(), aBmpEx );
-                aBmpEx = aVDev->GetBitmapEx( Point(), aVDev->GetOutputSizePixel() );
+                ScopedVclPtrInstance<VirtualDevice> aVDev(*this);
+                aVDev->SetBackground(rWallpaper.GetColor());
+                aVDev->SetOutputSizePixel(Size(nBmpWidth, nBmpHeight));
+                aVDev->DrawBitmapEx(Point(), aBmpEx);
+                aBmpEx = aVDev->GetBitmapEx(Point(), aVDev->GetOutputSizePixel());
             }
 
             bDrawColorBackground = true;
         }
     }
-    else if( eStyle != WallpaperStyle::Tile && eStyle != WallpaperStyle::Scale )
+    else if (eStyle != WallpaperStyle::Tile && eStyle != WallpaperStyle::Scale)
     {
-        if( rWallpaper.IsGradient() )
+        if (rWallpaper.IsGradient())
             bDrawGradientBackground = true;
         else
             bDrawColorBackground = true;
     }
 
     // background of bitmap?
-    if( bDrawGradientBackground )
-        DrawGradientWallpaper( nX, nY, nWidth, nHeight, rWallpaper );
-    else if( bDrawColorBackground && bTransparent )
+    if (bDrawGradientBackground)
     {
-        DrawColorWallpaper( nX, nY, nWidth, nHeight, rWallpaper );
+        DrawGradientWallpaper(nX, nY, nWidth, nHeight, rWallpaper);
+    }
+    else if (bDrawColorBackground && bTransparent)
+    {
+        DrawColorWallpaper(nX, nY, nWidth, nHeight, rWallpaper);
         bDrawColorBackground = false;
     }
 
     // calc pos and size
-    if( rWallpaper.IsRect() )
+    if (rWallpaper.IsRect())
     {
-        const tools::Rectangle aBound( LogicToPixel( rWallpaper.GetRect() ) );
+        const tools::Rectangle aBound(LogicToPixel(rWallpaper.GetRect()));
         aPos = aBound.TopLeft();
         aSize = aBound.GetSize();
     }
     else
     {
-        aPos = Point( 0, 0 );
-        aSize = Size( nWidth, nHeight );
+        aPos = Point(0, 0);
+        aSize = Size(nWidth, nHeight);
     }
 
     mpMetaFile = nullptr;
-    EnableMapMode( false );
-    Push( PushFlags::CLIPREGION );
-    IntersectClipRegion( tools::Rectangle( Point( nX, nY ), Size( nWidth, nHeight ) ) );
+    EnableMapMode(false);
+    Push(PushFlags::CLIPREGION);
+    IntersectClipRegion(tools::Rectangle(Point(nX, nY), Size(nWidth, nHeight)));
 
-    switch( eStyle )
+    switch (eStyle)
     {
-    case WallpaperStyle::Scale:
-        if( !pCached || ( pCached->GetSizePixel() != aSize ) )
-        {
-            if( pCached )
-                rWallpaper.ImplReleaseCachedBitmap();
+        case WallpaperStyle::Scale:
+            if (!pCached || (pCached->GetSizePixel() != aSize))
+            {
+                if (pCached)
+                    rWallpaper.ImplReleaseCachedBitmap();
 
-            aBmpEx = rWallpaper.GetBitmap();
-            aBmpEx.Scale( aSize );
-            aBmpEx = BitmapEx( aBmpEx.GetBitmap().CreateDisplayBitmap( this ), aBmpEx.GetMask() );
-        }
-        break;
+                aBmpEx = rWallpaper.GetBitmap();
+                aBmpEx.Scale(aSize);
+                aBmpEx = BitmapEx(aBmpEx.GetBitmap().CreateDisplayBitmap(this), aBmpEx.GetMask());
+            }
+            break;
 
-    case WallpaperStyle::TopLeft:
-        break;
+        case WallpaperStyle::TopLeft:
+            break;
 
-    case WallpaperStyle::Top:
-        aPos.AdjustX(( aSize.Width() - nBmpWidth ) >> 1 );
-        break;
+        case WallpaperStyle::Top:
+            aPos.AdjustX((aSize.Width() - nBmpWidth) >> 1);
+            break;
 
-    case WallpaperStyle::TopRight:
-        aPos.AdjustX( aSize.Width() - nBmpWidth);
-        break;
+        case WallpaperStyle::TopRight:
+            aPos.AdjustX(aSize.Width() - nBmpWidth);
+            break;
 
-    case WallpaperStyle::Left:
-        aPos.AdjustY(( aSize.Height() - nBmpHeight ) >> 1 );
-        break;
+        case WallpaperStyle::Left:
+            aPos.AdjustY((aSize.Height() - nBmpHeight) >> 1);
+            break;
 
-    case WallpaperStyle::Center:
-        aPos.AdjustX(( aSize.Width() - nBmpWidth ) >> 1 );
-        aPos.AdjustY(( aSize.Height() - nBmpHeight ) >> 1 );
-        break;
+        case WallpaperStyle::Center:
+            aPos.AdjustX((aSize.Width() - nBmpWidth) >> 1);
+            aPos.AdjustY((aSize.Height() - nBmpHeight) >> 1);
+            break;
 
-    case WallpaperStyle::Right:
-        aPos.AdjustX(aSize.Width() - nBmpWidth);
-        aPos.AdjustY(( aSize.Height() - nBmpHeight ) >> 1 );
-        break;
+        case WallpaperStyle::Right:
+            aPos.AdjustX(aSize.Width() - nBmpWidth);
+            aPos.AdjustY((aSize.Height() - nBmpHeight) >> 1);
+            break;
 
-    case WallpaperStyle::BottomLeft:
-        aPos.AdjustY( aSize.Height() - nBmpHeight );
-        break;
+        case WallpaperStyle::BottomLeft:
+            aPos.AdjustY(aSize.Height() - nBmpHeight);
+            break;
 
-    case WallpaperStyle::Bottom:
-        aPos.AdjustX(( aSize.Width() - nBmpWidth ) >> 1 );
-        aPos.AdjustY( aSize.Height() - nBmpHeight );
-        break;
+        case WallpaperStyle::Bottom:
+            aPos.AdjustX((aSize.Width() - nBmpWidth) >> 1);
+            aPos.AdjustY(aSize.Height() - nBmpHeight);
+            break;
 
-    case WallpaperStyle::BottomRight:
-        aPos.AdjustX( aSize.Width() - nBmpWidth );
-        aPos.AdjustY( aSize.Height() - nBmpHeight );
-        break;
+        case WallpaperStyle::BottomRight:
+            aPos.AdjustX(aSize.Width() - nBmpWidth);
+            aPos.AdjustY(aSize.Height() - nBmpHeight);
+            break;
 
-    default:
+        default:
         {
             const tools::Long nRight = nX + nWidth - 1;
             const tools::Long nBottom = nY + nHeight - 1;
             tools::Long nFirstX;
             tools::Long nFirstY;
 
-            if( eStyle == WallpaperStyle::Tile )
+            if (eStyle == WallpaperStyle::Tile)
             {
                 nFirstX = aPos.X();
                 nFirstY = aPos.Y();
             }
             else
             {
-                nFirstX = aPos.X() + ( ( aSize.Width() - nBmpWidth ) >> 1 );
-                nFirstY = aPos.Y() + ( ( aSize.Height() - nBmpHeight ) >> 1 );
+                nFirstX = aPos.X() + ((aSize.Width() - nBmpWidth) >> 1);
+                nFirstY = aPos.Y() + ((aSize.Height() - nBmpHeight) >> 1);
             }
 
-            const tools::Long nOffX = ( nFirstX - nX ) % nBmpWidth;
-            const tools::Long nOffY = ( nFirstY - nY ) % nBmpHeight;
+            const tools::Long nOffX = (nFirstX - nX) % nBmpWidth;
+            const tools::Long nOffY = (nFirstY - nY) % nBmpHeight;
             tools::Long nStartX = nX + nOffX;
             tools::Long nStartY = nY + nOffY;
 
-            if( nOffX > 0 )
+            if (nOffX > 0)
                 nStartX -= nBmpWidth;
 
-            if( nOffY > 0 )
+            if (nOffY > 0)
                 nStartY -= nBmpHeight;
 
-            for( tools::Long nBmpY = nStartY; nBmpY <= nBottom; nBmpY += nBmpHeight )
+            for (tools::Long nBmpY = nStartY; nBmpY <= nBottom; nBmpY += nBmpHeight)
             {
-                for( tools::Long nBmpX = nStartX; nBmpX <= nRight; nBmpX += nBmpWidth )
+                for (tools::Long nBmpX = nStartX; nBmpX <= nRight; nBmpX += nBmpWidth)
                 {
-                    DrawBitmapEx( Point( nBmpX, nBmpY ), aBmpEx );
+                    DrawBitmapEx(Point(nBmpX, nBmpY), aBmpEx);
                 }
             }
             bDrawn = true;
@@ -291,72 +296,68 @@ void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
         break;
     }
 
-    if( !bDrawn )
+    if (!bDrawn)
     {
         // optimized for non-transparent bitmaps
-        if( bDrawColorBackground )
+        if (bDrawColorBackground)
         {
-            const Size aBmpSize( aBmpEx.GetSizePixel() );
+            const Size aBmpSize(aBmpEx.GetSizePixel());
             const Point aTmpPoint;
-            const tools::Rectangle aOutRect( aTmpPoint, GetOutputSizePixel() );
-            const tools::Rectangle aColRect( Point( nX, nY ), Size( nWidth, nHeight ) );
+            const tools::Rectangle aOutRect(aTmpPoint, GetOutputSizePixel());
+            const tools::Rectangle aColRect(Point(nX, nY), Size(nWidth, nHeight));
 
-            tools::Rectangle aWorkRect( 0, 0, aOutRect.Right(), aPos.Y() - 1 );
+            tools::Rectangle aWorkRect(0, 0, aOutRect.Right(), aPos.Y() - 1);
             aWorkRect.Justify();
-            aWorkRect.Intersection( aColRect );
-            if( !aWorkRect.IsEmpty() )
+            aWorkRect.Intersection(aColRect);
+            if (!aWorkRect.IsEmpty())
             {
-                DrawColorWallpaper( aWorkRect.Left(), aWorkRect.Top(),
-                                    aWorkRect.GetWidth(), aWorkRect.GetHeight(),
-                                    rWallpaper );
+                DrawColorWallpaper(aWorkRect.Left(), aWorkRect.Top(), aWorkRect.GetWidth(),
+                                   aWorkRect.GetHeight(), rWallpaper);
             }
 
-            aWorkRect = tools::Rectangle( 0, aPos.Y(), aPos.X() - 1, aPos.Y() + aBmpSize.Height() - 1 );
+            aWorkRect
+                = tools::Rectangle(0, aPos.Y(), aPos.X() - 1, aPos.Y() + aBmpSize.Height() - 1);
             aWorkRect.Justify();
-            aWorkRect.Intersection( aColRect );
-            if( !aWorkRect.IsEmpty() )
+            aWorkRect.Intersection(aColRect);
+            if (!aWorkRect.IsEmpty())
             {
-                DrawColorWallpaper( aWorkRect.Left(), aWorkRect.Top(),
-                                    aWorkRect.GetWidth(), aWorkRect.GetHeight(),
-                                    rWallpaper );
+                DrawColorWallpaper(aWorkRect.Left(), aWorkRect.Top(), aWorkRect.GetWidth(),
+                                   aWorkRect.GetHeight(), rWallpaper);
             }
 
-            aWorkRect = tools::Rectangle( aPos.X() + aBmpSize.Width(), aPos.Y(),
-                                   aOutRect.Right(), aPos.Y() + aBmpSize.Height() - 1 );
+            aWorkRect = tools::Rectangle(aPos.X() + aBmpSize.Width(), aPos.Y(), aOutRect.Right(),
+                                         aPos.Y() + aBmpSize.Height() - 1);
             aWorkRect.Justify();
-            aWorkRect.Intersection( aColRect );
-            if( !aWorkRect.IsEmpty() )
+            aWorkRect.Intersection(aColRect);
+            if (!aWorkRect.IsEmpty())
             {
-                DrawColorWallpaper( aWorkRect.Left(), aWorkRect.Top(),
-                                    aWorkRect.GetWidth(), aWorkRect.GetHeight(),
-                                    rWallpaper );
+                DrawColorWallpaper(aWorkRect.Left(), aWorkRect.Top(), aWorkRect.GetWidth(),
+                                   aWorkRect.GetHeight(), rWallpaper);
             }
 
-            aWorkRect = tools::Rectangle( 0, aPos.Y() + aBmpSize.Height(),
-                                   aOutRect.Right(), aOutRect.Bottom() );
+            aWorkRect = tools::Rectangle(0, aPos.Y() + aBmpSize.Height(), aOutRect.Right(),
+                                         aOutRect.Bottom());
             aWorkRect.Justify();
-            aWorkRect.Intersection( aColRect );
-            if( !aWorkRect.IsEmpty() )
+            aWorkRect.Intersection(aColRect);
+            if (!aWorkRect.IsEmpty())
             {
-                DrawColorWallpaper( aWorkRect.Left(), aWorkRect.Top(),
-                                    aWorkRect.GetWidth(), aWorkRect.GetHeight(),
-                                    rWallpaper );
+                DrawColorWallpaper(aWorkRect.Left(), aWorkRect.Top(), aWorkRect.GetWidth(),
+                                   aWorkRect.GetHeight(), rWallpaper);
             }
         }
 
-        DrawBitmapEx( aPos, aBmpEx );
+        DrawBitmapEx(aPos, aBmpEx);
     }
 
-    rWallpaper.ImplSetCachedBitmap( aBmpEx );
+    rWallpaper.ImplSetCachedBitmap(aBmpEx);
 
     Pop();
-    EnableMapMode( bOldMap );
+    EnableMapMode(bOldMap);
     mpMetaFile = pOldMetaFile;
 }
 
-void OutputDevice::DrawGradientWallpaper( tools::Long nX, tools::Long nY,
-                                          tools::Long nWidth, tools::Long nHeight,
-                                          const Wallpaper& rWallpaper )
+void OutputDevice::DrawGradientWallpaper(tools::Long nX, tools::Long nY, tools::Long nWidth,
+                                         tools::Long nHeight, Wallpaper const& rWallpaper)
 {
     assert(!is_double_buffered_window());
 
@@ -364,17 +365,17 @@ void OutputDevice::DrawGradientWallpaper( tools::Long nX, tools::Long nY,
     GDIMetaFile* pOldMetaFile = mpMetaFile;
     const bool bOldMap = mbMap;
 
-    aBound = tools::Rectangle( Point( nX, nY ), Size( nWidth, nHeight ) );
+    aBound = tools::Rectangle(Point(nX, nY), Size(nWidth, nHeight));
 
     mpMetaFile = nullptr;
-    EnableMapMode( false );
-    Push( PushFlags::CLIPREGION );
-    IntersectClipRegion( tools::Rectangle( Point( nX, nY ), Size( nWidth, nHeight ) ) );
+    EnableMapMode(false);
+    Push(PushFlags::CLIPREGION);
+    IntersectClipRegion(tools::Rectangle(Point(nX, nY), Size(nWidth, nHeight)));
 
-    DrawGradient( aBound, rWallpaper.GetGradient() );
+    DrawGradient(aBound, rWallpaper.GetGradient());
 
     Pop();
-    EnableMapMode( bOldMap );
+    EnableMapMode(bOldMap);
     mpMetaFile = pOldMetaFile;
 }
 
