@@ -17,12 +17,14 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <rtl/math.hxx>
 #include <tools/helpers.hxx>
 #include <tools/poly.hxx>
 
 #include <vcl/virdev.hxx>
 
 #include <bitmap/BitmapWriteAccess.hxx>
+#include <polygontools.hxx>
 #include <salgdi.hxx>
 
 void RenderContext2::DrawTransparent(tools::PolyPolygon const& rPolyPoly,
@@ -148,6 +150,98 @@ void RenderContext2::DrawTransparent(tools::PolyPolygon const& rPolyPoly,
 
         mpAlphaVDev->SetFillColor(aFillCol);
     }
+}
+
+// Caution: This method is nearly the same as
+// void OutputDevice::DrawPolyPolygon( const basegfx::B2DPolyPolygon& rB2DPolyPoly )
+// so when changes are made here do not forget to make changes there, too
+
+void RenderContext2::DrawTransparent(basegfx::B2DHomMatrix const& rObjectTransform,
+                                     basegfx::B2DPolyPolygon const& rB2DPolyPoly,
+                                     double fTransparency)
+{
+    assert(!is_double_buffered_window());
+
+    // AW: Do NOT paint empty PolyPolygons
+    if (!rB2DPolyPoly.count())
+        return;
+
+    // we need a graphics
+    if (!mpGraphics && !AcquireGraphics())
+        return;
+
+    assert(mpGraphics);
+
+    if (mbInitClipRegion)
+        InitClipRegion();
+
+    if (mbOutputClipped)
+        return;
+
+    if (mbInitLineColor)
+        InitLineColor();
+
+    if (mbInitFillColor)
+        InitFillColor();
+
+    if (mpGraphics->supportsOperation(OutDevSupportType::B2DDraw)
+        && (RasterOp::OverPaint == GetRasterOp()))
+    {
+        // b2dpolygon support not implemented yet on non-UNX platforms
+        basegfx::B2DPolyPolygon aB2DPolyPolygon(rB2DPolyPoly);
+
+        // ensure it is closed
+        if (!aB2DPolyPolygon.isClosed())
+        {
+            // maybe assert, prevents buffering due to making a copy
+            aB2DPolyPolygon.setClosed(true);
+        }
+
+        // create ObjectToDevice transformation
+        const basegfx::B2DHomMatrix aFullTransform(ImplGetDeviceTransformation()
+                                                   * rObjectTransform);
+        // TODO: this must not drop transparency for mpAlphaVDev case, but instead use premultiplied
+        // alpha... but that requires using premultiplied alpha also for already drawn data
+        const double fAdjustedTransparency = mpAlphaVDev ? 0 : fTransparency;
+        bool bDrawnOk(true);
+
+        if (IsFillColor())
+        {
+            bDrawnOk = mpGraphics->DrawPolyPolygon(aFullTransform, aB2DPolyPolygon,
+                                                   fAdjustedTransparency, *this);
+        }
+
+        if (bDrawnOk && IsLineColor())
+        {
+            const bool bPixelSnapHairline(mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+
+            for (auto const& rPolygon : aB2DPolyPolygon)
+            {
+                mpGraphics->DrawPolyLine(
+                    aFullTransform, rPolygon, fAdjustedTransparency,
+                    0.0, // tdf#124848 hairline
+                    nullptr, // MM01
+                    basegfx::B2DLineJoin::NONE, css::drawing::LineCap_BUTT,
+                    basegfx::deg2rad(
+                        15.0), // not used with B2DLineJoin::NONE, but the correct default
+                    bPixelSnapHairline, *this);
+            }
+        }
+
+        if (bDrawnOk)
+        {
+            if (mpAlphaVDev)
+                mpAlphaVDev->DrawTransparent(rObjectTransform, rB2DPolyPoly, fTransparency);
+
+            return;
+        }
+    }
+
+    // fallback to old polygon drawing if needed
+    // tdf#119843 need transformed Polygon here
+    basegfx::B2DPolyPolygon aB2DPolyPoly(rB2DPolyPoly);
+    aB2DPolyPoly.transform(rObjectTransform);
+    DrawTransparent(toPolyPolygon(aB2DPolyPoly), static_cast<sal_uInt16>(fTransparency * 100.0));
 }
 
 void RenderContext2::EmulateDrawTransparent(tools::PolyPolygon const& rPolyPoly,

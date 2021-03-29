@@ -28,148 +28,42 @@
 #include <vcl/virdev.hxx>
 
 #include <bitmap/BitmapWriteAccess.hxx>
+#include <polygontools.hxx>
 #include <salgdi.hxx>
 
 #include <cassert>
 #include <memory>
 
-/**
-     * Perform a safe approximation of a polygon from double-precision
-     * coordinates to integer coordinates, to ensure that it has at least 2
-     * pixels in both X and Y directions.
-     */
-static tools::Polygon toPolygon(const basegfx::B2DPolygon& rPoly)
-{
-    basegfx::B2DRange aRange = rPoly.getB2DRange();
-    double fW = aRange.getWidth(), fH = aRange.getHeight();
-    if (0.0 < fW && 0.0 < fH && (fW <= 1.0 || fH <= 1.0))
-    {
-        // This polygon not empty but is too small to display.  Approximate it
-        // with a rectangle large enough to be displayed.
-        double nX = aRange.getMinX(), nY = aRange.getMinY();
-        double nW = std::max<double>(1.0, rtl::math::round(fW));
-        double nH = std::max<double>(1.0, rtl::math::round(fH));
-
-        tools::Polygon aTarget;
-        aTarget.Insert(0, Point(nX, nY));
-        aTarget.Insert(1, Point(nX + nW, nY));
-        aTarget.Insert(2, Point(nX + nW, nY + nH));
-        aTarget.Insert(3, Point(nX, nY + nH));
-        aTarget.Insert(4, Point(nX, nY));
-        return aTarget;
-    }
-    return tools::Polygon(rPoly);
-}
-
-static tools::PolyPolygon toPolyPolygon(const basegfx::B2DPolyPolygon& rPolyPoly)
-{
-    tools::PolyPolygon aTarget;
-    for (auto const& rB2DPolygon : rPolyPoly)
-        aTarget.Insert(toPolygon(rB2DPolygon));
-
-    return aTarget;
-}
-
-// Caution: This method is nearly the same as
-// void OutputDevice::DrawPolyPolygon( const basegfx::B2DPolyPolygon& rB2DPolyPoly )
-// so when changes are made here do not forget to make changes there, too
-
-void OutputDevice::DrawTransparent(const basegfx::B2DHomMatrix& rObjectTransform,
-                                   const basegfx::B2DPolyPolygon& rB2DPolyPoly,
+void OutputDevice::DrawTransparent(basegfx::B2DHomMatrix const& rObjectTransform,
+                                   basegfx::B2DPolyPolygon const& rB2DPolyPoly,
                                    double fTransparency)
 {
     assert(!is_double_buffered_window());
 
-    // AW: Do NOT paint empty PolyPolygons
-    if (!rB2DPolyPoly.count())
-        return;
-
-    // we need a graphics
-    if (!mpGraphics && !AcquireGraphics())
-        return;
-
-    assert(mpGraphics);
-
-    if (mbInitClipRegion)
-        InitClipRegion();
-
-    if (mbOutputClipped)
-        return;
-
-    if (mbInitLineColor)
-        InitLineColor();
-
-    if (mbInitFillColor)
-        InitFillColor();
-
-    if (mpGraphics->supportsOperation(OutDevSupportType::B2DDraw)
-        && (RasterOp::OverPaint == GetRasterOp()))
+    if (mpMetaFile)
     {
-        // b2dpolygon support not implemented yet on non-UNX platforms
-        basegfx::B2DPolyPolygon aB2DPolyPolygon(rB2DPolyPoly);
-
-        // ensure it is closed
-        if (!aB2DPolyPolygon.isClosed())
+        if (GetRasterOp() == RasterOp::OverPaint)
         {
-            // maybe assert, prevents buffering due to making a copy
-            aB2DPolyPolygon.setClosed(true);
+            // tdf#119843 need transformed Polygon here
+            basegfx::B2DPolyPolygon aB2DPolyPoly(rB2DPolyPoly);
+            aB2DPolyPoly.transform(rObjectTransform);
+            mpMetaFile->AddAction(
+                new MetaTransparentAction(tools::PolyPolygon(aB2DPolyPoly),
+                                          static_cast<sal_uInt16>(fTransparency * 100.0)));
         }
-
-        // create ObjectToDevice transformation
-        const basegfx::B2DHomMatrix aFullTransform(ImplGetDeviceTransformation()
-                                                   * rObjectTransform);
-        // TODO: this must not drop transparency for mpAlphaVDev case, but instead use premultiplied
-        // alpha... but that requires using premultiplied alpha also for already drawn data
-        const double fAdjustedTransparency = mpAlphaVDev ? 0 : fTransparency;
-        bool bDrawnOk(true);
-
-        if (IsFillColor())
+        else
         {
-            bDrawnOk = mpGraphics->DrawPolyPolygon(aFullTransform, aB2DPolyPolygon,
-                                                   fAdjustedTransparency, *this);
-        }
-
-        if (bDrawnOk && IsLineColor())
-        {
-            const bool bPixelSnapHairline(mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
-
-            for (auto const& rPolygon : aB2DPolyPolygon)
-            {
-                mpGraphics->DrawPolyLine(
-                    aFullTransform, rPolygon, fAdjustedTransparency,
-                    0.0, // tdf#124848 hairline
-                    nullptr, // MM01
-                    basegfx::B2DLineJoin::NONE, css::drawing::LineCap_BUTT,
-                    basegfx::deg2rad(
-                        15.0), // not used with B2DLineJoin::NONE, but the correct default
-                    bPixelSnapHairline, *this);
-            }
-        }
-
-        if (bDrawnOk)
-        {
-            if (mpMetaFile)
-            {
-                // tdf#119843 need transformed Polygon here
-                basegfx::B2DPolyPolygon aB2DPolyPoly(rB2DPolyPoly);
-                aB2DPolyPoly.transform(rObjectTransform);
-                mpMetaFile->AddAction(
-                    new MetaTransparentAction(tools::PolyPolygon(aB2DPolyPoly),
-                                              static_cast<sal_uInt16>(fTransparency * 100.0)));
-            }
-
-            if (mpAlphaVDev)
-                mpAlphaVDev->DrawTransparent(rObjectTransform, rB2DPolyPoly, fTransparency);
+            // fallback to old polygon drawing if needed
+            // tdf#119843 need transformed Polygon here
+            basegfx::B2DPolyPolygon aB2DPolyPoly(rB2DPolyPoly);
+            aB2DPolyPoly.transform(rObjectTransform);
+            DrawTransparent(toPolyPolygon(aB2DPolyPoly), static_cast<sal_uInt16>(fTransparency * 100.0));
 
             return;
         }
     }
 
-    // fallback to old polygon drawing if needed
-    // tdf#119843 need transformed Polygon here
-    basegfx::B2DPolyPolygon aB2DPolyPoly(rB2DPolyPoly);
-    aB2DPolyPoly.transform(rObjectTransform);
-    DrawTransparent(toPolyPolygon(aB2DPolyPoly), static_cast<sal_uInt16>(fTransparency * 100.0));
+    RenderContext2::DrawTransparent(rObjectTransform, rB2DPolyPoly, fTransparency);
 }
 
 void OutputDevice::DrawTransparent(tools::PolyPolygon const& rPolyPoly,

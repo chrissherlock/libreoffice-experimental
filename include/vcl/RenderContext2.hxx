@@ -242,6 +242,8 @@ public:
 
     virtual void DrawTransparent(tools::PolyPolygon const& rPolyPoly,
                                  sal_uInt16 nTransparencePercent);
+    virtual void DrawTransparent(basegfx::B2DHomMatrix const& rObjectTransform,
+                                 basegfx::B2DPolyPolygon const& rB2DPolyPoly, double fTransparency);
 
     virtual bool CanAnimate();
 
