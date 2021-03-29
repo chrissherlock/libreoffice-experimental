@@ -601,16 +601,10 @@ public:
                          const Gradient& rTransparenceGradient);
 
 protected:
-    virtual void EmulateDrawTransparent(const tools::PolyPolygon& rPolyPoly,
-                                        sal_uInt16 nTransparencePercent);
-    void DrawInvisiblePolygon(const tools::PolyPolygon& rPolyPoly);
+    void DrawInvisiblePolygon(tools::PolyPolygon const& rPolyPoly) override;
 
     virtual void ClipAndDrawGradientMetafile(const Gradient& rGradient,
                                              const tools::PolyPolygon& rPolyPoly);
-
-private:
-    SAL_DLLPRIVATE bool DrawTransparentNatively(const tools::PolyPolygon& rPolyPoly,
-                                                sal_uInt16 nTransparencePercent);
     ///@}
 
     /** @name Mask functions
