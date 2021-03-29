@@ -17,13 +17,14 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <vcl/RenderContext2.hxx>
 #include <vcl/bitmapex.hxx>
 #include <vcl/virdev.hxx>
 
 bool RenderContext2::IsBackground() const { return mbBackground; }
 
 Wallpaper const& RenderContext2::GetBackground() const { return maBackground; }
+
+Color RenderContext2::GetBackgroundColor() const { return GetBackground().GetColor(); }
 
 void RenderContext2::SetBackground()
 {

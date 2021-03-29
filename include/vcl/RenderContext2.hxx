@@ -475,6 +475,7 @@ public:
 
     bool IsBackground() const;
     Wallpaper const& GetBackground() const;
+    virtual Color GetBackgroundColor() const;
     virtual void SetBackground();
     virtual void SetBackground(Wallpaper const& rBackground);
     virtual void SaveBackground(VirtualDevice& rSaveDevice, const Point& rPos, const Size& rSize,
