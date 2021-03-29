@@ -85,6 +85,16 @@ bool RenderContext2::IsFontAvailable(OUString const& rFontName) const
     return (pFound != nullptr);
 }
 
+Color RenderContext2::GetReadableFontColor(const Color& rFontColor, const Color& rBgColor) const
+{
+    if (rBgColor.IsDark() && rFontColor.IsDark())
+        return COL_WHITE;
+    else if (rBgColor.IsBright() && rFontColor.IsBright())
+        return COL_BLACK;
+    else
+        return rFontColor;
+}
+
 bool RenderContext2::InitFont() const
 {
     DBG_TESTSOLARMUTEX();

@@ -372,6 +372,7 @@ public:
     static vcl::Font GetDefaultFont(DefaultFontType nType, LanguageType eLang,
                                     GetDefaultFontFlags nFlags,
                                     RenderContext2 const* pOutDev = nullptr);
+    virtual Color GetReadableFontColor(Color const& rFontColor, Color const& rBgColor) const;
     virtual void SetFont(vcl::Font const& rNewFont);
 
     FontMetric GetDevFont(int nDevFontIndex) const;
