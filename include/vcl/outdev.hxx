@@ -115,11 +115,6 @@ namespace com::sun::star::awt
 class XGraphics;
 }
 
-#if defined UNX
-#define GLYPH_FONT_HEIGHT 128
-#else
-#define GLYPH_FONT_HEIGHT 256
-#endif
 // OutputDevice-Types
 
 enum OutDevType
