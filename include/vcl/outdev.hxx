@@ -593,8 +593,9 @@ public:
     void DrawTransparent(tools::PolyPolygon const& rPolyPoly,
                          sal_uInt16 nTransparencePercent) override;
 
-    void DrawTransparent(const basegfx::B2DHomMatrix& rObjectTransform,
-                         const basegfx::B2DPolyPolygon& rB2DPolyPoly, double fTransparency);
+    void DrawTransparent(basegfx::B2DHomMatrix const& rObjectTransform,
+                         basegfx::B2DPolyPolygon const& rB2DPolyPoly,
+                         double fTransparency) override;
 
     void DrawTransparent(const GDIMetaFile& rMtf, const Point& rPos, const Size& rSize,
                          const Gradient& rTransparenceGradient);
