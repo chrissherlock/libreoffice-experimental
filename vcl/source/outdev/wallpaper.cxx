@@ -24,11 +24,6 @@
 #include <vcl/outdev.hxx>
 #include <vcl/virdev.hxx>
 
-Color OutputDevice::GetBackgroundColor() const
-{
-    return GetBackground().GetColor();
-}
-
 void OutputDevice::DrawWallpaper( const tools::Rectangle& rRect,
                                   const Wallpaper& rWallpaper )
 {

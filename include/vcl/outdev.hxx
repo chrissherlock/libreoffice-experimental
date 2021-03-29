@@ -276,8 +276,6 @@ public:
     void SetFillColor() override;
     void SetFillColor(Color const& rColor) override;
 
-    virtual Color GetBackgroundColor() const;
-
     void SetFont(vcl::Font const& rNewFont) override;
 
     ///@}
