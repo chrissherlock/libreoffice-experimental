@@ -75,11 +75,6 @@ typedef tools::SvRef<FontCharMap> FontCharMapRef;
 
 typedef struct _cairo_surface cairo_surface_t;
 
-/**
-* Some things multiple-inherit from VclAbstractDialog and OutputDevice,
-* so we need to use virtual inheritance to keep the referencing counting
-* OK.
-*/
 class SAL_WARN_UNUSED VCL_DLLPUBLIC OutputDevice : public RenderContext2
 {
     friend class Printer;

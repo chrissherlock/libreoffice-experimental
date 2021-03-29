@@ -108,6 +108,11 @@ struct Feature;
 }
 }
 
+/**
+* Some things multiple-inherit from VclAbstractDialog and RenderContext/OutputDevice,
+* so we need to use virtual inheritance to keep the referencing counting
+* OK.
+*/
 class VCL_DLLPUBLIC RenderContext2 : public virtual VclReferenceBase
 {
     friend class VirtualDevice;
