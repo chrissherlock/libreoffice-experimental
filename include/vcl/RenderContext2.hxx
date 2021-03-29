@@ -240,6 +240,9 @@ public:
     virtual void DrawImage(Point const& rPos, Size const& rSize, Image const& rImage,
                            DrawImageFlags nStyle = DrawImageFlags::NONE);
 
+    virtual void DrawTransparent(tools::PolyPolygon const& rPolyPoly,
+                                 sal_uInt16 nTransparencePercent);
+
     virtual bool CanAnimate();
 
     virtual void DrawAnimation(Animation* const pAnim, Point const& rDestPt,
@@ -848,7 +851,6 @@ protected:
     SAL_DLLPRIVATE void ImplDrawPolygon(tools::Polygon const& rPoly,
                                         tools::PolyPolygon const* pClipPolyPoly = nullptr);
 
-    virtual void DrawInvisiblePolygon(tools::PolyPolygon const& rPolyPoly);
     virtual void EmulateDrawTransparent(tools::PolyPolygon const& rPolyPoly,
                                         sal_uInt16 nTransparencePercent);
 

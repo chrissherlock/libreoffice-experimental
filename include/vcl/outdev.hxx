@@ -590,7 +590,8 @@ public:
                                           bool bDownsampleBitmaps,
                                           const Color& rBackground = COL_TRANSPARENT);
 
-    void DrawTransparent(const tools::PolyPolygon& rPolyPoly, sal_uInt16 nTransparencePercent);
+    void DrawTransparent(tools::PolyPolygon const& rPolyPoly,
+                         sal_uInt16 nTransparencePercent) override;
 
     void DrawTransparent(const basegfx::B2DHomMatrix& rObjectTransform,
                          const basegfx::B2DPolyPolygon& rB2DPolyPoly, double fTransparency);
@@ -599,8 +600,6 @@ public:
                          const Gradient& rTransparenceGradient);
 
 protected:
-    void DrawInvisiblePolygon(tools::PolyPolygon const& rPolyPoly) override;
-
     virtual void ClipAndDrawGradientMetafile(const Gradient& rGradient,
                                              const tools::PolyPolygon& rPolyPoly);
     ///@}
