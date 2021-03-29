@@ -101,6 +101,8 @@ namespace weld { class Window; }
 template<class T> class VclPtr;
 namespace tools { class JsonWriter; }
 
+VCL_DLLPUBLIC void DrawFocusRect(vcl::RenderContext& rRenderContext, const tools::Rectangle& rRect);
+
 // Type for GetWindow()
 enum class GetWindowType
 {
