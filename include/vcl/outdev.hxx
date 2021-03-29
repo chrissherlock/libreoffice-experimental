@@ -214,8 +214,6 @@ public:
     std::vector<VCLXGraphics*>* GetUnoGraphicsList() const { return mpUnoGraphicsList; }
     std::vector<VCLXGraphics*>* CreateUnoGraphicsList();
 
-    virtual size_t GetSyncCount() const { return 0xffffffff; }
-
     /** @name Helper functions
      */
     ///@{

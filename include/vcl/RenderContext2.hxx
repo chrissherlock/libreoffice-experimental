@@ -302,6 +302,8 @@ public:
     SalGraphics const* GetGraphics() const;
     SalGraphics* GetGraphics();
 
+    virtual size_t GetSyncCount() const { return 0xffffffff; }
+
     virtual void Push(PushFlags nFlags = PushFlags::ALL);
     virtual void Pop();
     void ClearStack();
