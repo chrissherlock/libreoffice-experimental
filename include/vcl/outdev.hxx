@@ -143,8 +143,6 @@ namespace vcl
 typedef OutputDevice RenderContext;
 }
 
-VCL_DLLPUBLIC void DrawFocusRect(vcl::RenderContext& rRenderContext, const tools::Rectangle& rRect);
-
 typedef struct _cairo_surface cairo_surface_t;
 
 /**
