@@ -166,29 +166,6 @@ class SAL_WARN_UNUSED VCL_DLLPUBLIC OutputDevice : public RenderContext2
     friend void ImplHandleResize(vcl::Window* pWindow, tools::Long nNewWidth,
                                  tools::Long nNewHeight);
 
-private:
-    OutputDevice(const OutputDevice&) = delete;
-    OutputDevice& operator=(const OutputDevice&) = delete;
-
-    mutable VclPtr<OutputDevice> mpPrevGraphics; ///< Previous output device in list
-    mutable VclPtr<OutputDevice> mpNextGraphics; ///< Next output device in list
-    GDIMetaFile* mpMetaFile;
-    std::vector<VCLXGraphics*>* mpUnoGraphicsList;
-    vcl::ExtOutDevData* mpExtOutDevData;
-
-    const OutDevType meOutDevType;
-    OutDevViewType meOutDevViewType;
-    Color maTextLineColor;
-
-    /** @name Initialization and accessor functions
-     */
-    ///@{
-
-protected:
-    OutputDevice(OutDevType eOutDevType);
-    virtual ~OutputDevice() override;
-    virtual void dispose() override;
-
 public:
     void SetConnectMetaFile(GDIMetaFile* pMtf);
     GDIMetaFile* GetConnectMetaFile() const { return mpMetaFile; }
@@ -218,7 +195,6 @@ public:
      */
     ///@{
 
-public:
     OutDevType GetOutDevType() const { return meOutDevType; }
 
     /** Query an OutputDevice to see whether it supports a specific operation
@@ -236,7 +212,6 @@ public:
      */
     ///@{
 
-public:
     void DrawOutDev(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPt,
                     Size const& rSrcSize) override;
 
@@ -248,7 +223,6 @@ public:
      */
     ///@{
 
-public:
     void Push(PushFlags nFlags = PushFlags::ALL) override;
     void Pop() override;
 
@@ -276,7 +250,6 @@ public:
 
     ///@}
 
-public:
     /** @name Clipping functions
      */
     ///@{
@@ -289,14 +262,10 @@ public:
     void IntersectClipRegion(vcl::Region const& rRegion) override;
     ///@}
 
-public:
-    void DrawBorder(tools::Rectangle aBorderRect) override;
-
     /** @name Pixel functions
      */
     ///@{
 
-public:
     void DrawPixel(Point const& rPt) override;
     void DrawPixel(Point const& rPt, Color const& rColor) override;
     ///@}
@@ -305,12 +274,12 @@ public:
      */
     ///@{
 
-public:
     void DrawRect(tools::Rectangle const& rRect) override;
     void DrawRect(tools::Rectangle const& rRect, sal_uLong nHorzRount,
                   sal_uLong nVertRound) override;
 
     void DrawGrid(tools::Rectangle const& rRect, Size const& rDist, DrawGridFlags nFlags) override;
+    void DrawBorder(tools::Rectangle aBorderRect) override;
 
     /// Fill the given rectangle with checkered rectangles of size nLen x nLen using the colors aStart and aEnd
     void DrawCheckered(const Point& rPos, const Size& rSize, sal_uInt32 nLen = 8,
@@ -322,16 +291,15 @@ public:
      */
     ///@{
 
-public:
     void DrawLine(Point const& rStartPt, Point const& rEndPt) override;
     void DrawLine(Point const& rStartPt, Point const& rEndPt, LineInfo const& rLineInfo) override;
+
     ///@}
 
     /** @name Polyline functions
      */
     ///@{
 
-public:
     /** Render the given polygon as a line stroke
 
         The given polygon is stroked with the current LineColor, start
@@ -374,7 +342,6 @@ public:
      */
     ///@{
 
-public:
     void DrawPolygon(tools::Polygon const& rPoly) override;
     void DrawPolygon(const basegfx::B2DPolygon&);
 
@@ -393,7 +360,6 @@ public:
 
     ///@}
 
-public:
     /** @name Curved shape functions
      */
     ///@{
@@ -412,25 +378,18 @@ public:
      */
     ///@{
 
-public:
     void DrawGradient(tools::Rectangle const& rRect, Gradient const& rGradient) override;
     void DrawGradient(tools::PolyPolygon const& rPolyPoly, Gradient const& rGradient) override;
 
     void AddGradientActions(const tools::Rectangle& rRect, const Gradient& rGradient,
                             GDIMetaFile& rMtf);
 
-private:
-    SAL_DLLPRIVATE void DrawLinearGradientToMetafile(const tools::Rectangle& rRect,
-                                                     const Gradient& rGradient);
-    SAL_DLLPRIVATE void DrawComplexGradientToMetafile(const tools::Rectangle& rRect,
-                                                      const Gradient& rGradient);
     ///@}
 
     /** @name Hatch functions
      */
     ///@{
 
-public:
 #ifdef _MSC_VER
     void DrawHatch(tools::PolyPolygon const& rPolyPoly, ::Hatch const& rHatch) override;
     void AddHatchActions(tools::PolyPolygon const& rPolyPoly, ::Hatch const& rHatch,
@@ -441,40 +400,23 @@ public:
                          GDIMetaFile& rMtf);
 #endif
 
-protected:
-    void DrawHatchLine(Point const& rStartPoint, Point const& rEndPoint) override;
-    void DrawHatchLines(tools::Line const& rLine, tools::PolyPolygon const& rPolyPoly,
-                        Point* pPtBuffer) override;
     ///@}
 
     /** @name Wallpaper functions
      */
     ///@{
 
-public:
     void DrawWallpaper(const tools::Rectangle& rRect, const Wallpaper& rWallpaper);
 
     void Erase();
     void Erase(const tools::Rectangle& rRect);
 
-protected:
-    void DrawGradientWallpaper(tools::Long nX, tools::Long nY, tools::Long nWidth,
-                               tools::Long nHeight, const Wallpaper& rWallpaper);
-
-private:
-    SAL_DLLPRIVATE void DrawWallpaper(tools::Long nX, tools::Long nY, tools::Long nWidth,
-                                      tools::Long nHeight, const Wallpaper& rWallpaper);
-    SAL_DLLPRIVATE void DrawColorWallpaper(tools::Long nX, tools::Long nY, tools::Long nWidth,
-                                           tools::Long nHeight, const Wallpaper& rWallpaper);
-    SAL_DLLPRIVATE void DrawBitmapWallpaper(tools::Long nX, tools::Long nY, tools::Long nWidth,
-                                            tools::Long nHeight, const Wallpaper& rWallpaper);
     ///@}
 
     /** @name Text functions
      */
     ///@{
 
-public:
     void DrawText(Point const& rStartPt, OUString const& rStr, sal_Int32 nIndex = 0,
                   sal_Int32 nLen = -1, std::vector<tools::Rectangle>* pVector = nullptr,
                   OUString* pDisplayText = nullptr,
@@ -524,7 +466,6 @@ public:
      */
     ///@{
 
-public:
     void DrawBitmap(Point const& rDestPt, Bitmap const& rBitmap) override;
     void DrawBitmap(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap) override;
     void DrawBitmap(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
@@ -547,26 +488,12 @@ public:
     void DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransformation,
                                  const BitmapEx& rBitmapEx, double fAlpha = 1.0) override;
 
-protected:
-    bool TryDirectBitmapExPaint() const override;
-
-    void DrawUntransformedBitmapEx(BitmapEx const& rBitmapEx, basegfx::B2DVector const& rTranslate,
-                                   basegfx::B2DVector const& rScale) override;
-
-    void DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize, const Point& rSrcPtPixel,
-                          Size const& rSrcSizePixel, Bitmap const& rBitmap) override;
-
-private:
-    void DrawBitmapEx2(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
-                       Size const& rSrcSizePixel, BitmapEx const& rBitmapEx);
-
     ///@}
 
     /** @name Transparency functions
      */
     ///@{
 
-public:
     /** helper method removing transparencies from a metafile (e.g. for printing)
 
         @returns
@@ -593,16 +520,12 @@ public:
     void DrawTransparent(const GDIMetaFile& rMtf, const Point& rPos, const Size& rSize,
                          const Gradient& rTransparenceGradient);
 
-protected:
-    virtual void ClipAndDrawGradientMetafile(const Gradient& rGradient,
-                                             const tools::PolyPolygon& rPolyPoly);
     ///@}
 
     /** @name Mask functions
      */
     ///@{
 
-public:
     void DrawMask(Point const& rDestPt, Bitmap const& rBitmap, Color const& rMaskColor) override;
     void DrawMask(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap,
                   Color const& rMaskColor) override;
@@ -617,7 +540,6 @@ public:
      */
     ///@{
 
-public:
     void SetMapMode() override;
     void SetMapMode(MapMode const& rNewMapMode) override;
     virtual void SetMetafileMapMode(const MapMode& rNewMapMode, bool bIsRecord);
@@ -627,7 +549,6 @@ public:
      */
     ///@{
 
-public:
     /** @returns boolean value to see if EPS could be painted directly.
         Theoretically, handing over a matrix would be needed to handle
         painting rotated EPS files (e.g. contained in Metafiles). This
@@ -636,6 +557,58 @@ public:
     bool DrawEPS(const Point& rPt, const Size& rSz, const GfxLink& rGfxLink,
                  GDIMetaFile* pSubst = nullptr);
     ///@}
+
+protected:
+    OutputDevice(OutDevType eOutDevType);
+    virtual ~OutputDevice() override;
+    virtual void dispose() override;
+
+    void DrawHatchLine(Point const& rStartPoint, Point const& rEndPoint) override;
+    void DrawHatchLines(tools::Line const& rLine, tools::PolyPolygon const& rPolyPoly,
+                        Point* pPtBuffer) override;
+
+    bool TryDirectBitmapExPaint() const override;
+
+    void DrawUntransformedBitmapEx(BitmapEx const& rBitmapEx, basegfx::B2DVector const& rTranslate,
+                                   basegfx::B2DVector const& rScale) override;
+
+    void DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize, const Point& rSrcPtPixel,
+                          Size const& rSrcSizePixel, Bitmap const& rBitmap) override;
+
+    void DrawGradientWallpaper(tools::Long nX, tools::Long nY, tools::Long nWidth,
+                               tools::Long nHeight, const Wallpaper& rWallpaper);
+
+    virtual void ClipAndDrawGradientMetafile(const Gradient& rGradient,
+                                             const tools::PolyPolygon& rPolyPoly);
+
+private:
+    OutputDevice(const OutputDevice&) = delete;
+    OutputDevice& operator=(const OutputDevice&) = delete;
+
+    void DrawBitmapEx2(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
+                       Size const& rSrcSizePixel, BitmapEx const& rBitmapEx);
+
+    SAL_DLLPRIVATE void DrawLinearGradientToMetafile(const tools::Rectangle& rRect,
+                                                     const Gradient& rGradient);
+    SAL_DLLPRIVATE void DrawComplexGradientToMetafile(const tools::Rectangle& rRect,
+                                                      const Gradient& rGradient);
+
+    SAL_DLLPRIVATE void DrawWallpaper(tools::Long nX, tools::Long nY, tools::Long nWidth,
+                                      tools::Long nHeight, const Wallpaper& rWallpaper);
+    SAL_DLLPRIVATE void DrawColorWallpaper(tools::Long nX, tools::Long nY, tools::Long nWidth,
+                                           tools::Long nHeight, const Wallpaper& rWallpaper);
+    SAL_DLLPRIVATE void DrawBitmapWallpaper(tools::Long nX, tools::Long nY, tools::Long nWidth,
+                                            tools::Long nHeight, const Wallpaper& rWallpaper);
+
+    mutable VclPtr<OutputDevice> mpPrevGraphics; ///< Previous output device in list
+    mutable VclPtr<OutputDevice> mpNextGraphics; ///< Next output device in list
+    GDIMetaFile* mpMetaFile;
+    std::vector<VCLXGraphics*>* mpUnoGraphicsList;
+    vcl::ExtOutDevData* mpExtOutDevData;
+
+    const OutDevType meOutDevType;
+    OutDevViewType meOutDevViewType;
+    Color maTextLineColor;
 };
 
 #endif // INCLUDED_VCL_OUTDEV_HXX
