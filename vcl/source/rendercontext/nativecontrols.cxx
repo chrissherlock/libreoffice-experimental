@@ -29,6 +29,9 @@
 
 #include <salgdi.hxx>
 
+Size RenderContext2::GetButtonBorderSize() { return Size(1, 1); };
+Color RenderContext2::GetMonochromeButtonColor() { return COL_WHITE; }
+
 ImplControlValue::~ImplControlValue() {}
 
 ImplControlValue* ImplControlValue::clone() const

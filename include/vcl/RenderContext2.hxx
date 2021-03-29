@@ -298,6 +298,9 @@ public:
                                 tools::Rectangle& rNativeBoundingRegion,
                                 tools::Rectangle& rNativeContentRegion) const;
 
+    virtual Size GetButtonBorderSize();
+    virtual Color GetMonochromeButtonColor();
+
     /** Get the graphic context that the output device uses to draw on.
 
      If no graphics device exists, then initialize it.
