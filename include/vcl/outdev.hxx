@@ -27,54 +27,9 @@
 #include <memory>
 #include <vector>
 
-class Animation;
-class ImplAnimView;
-struct ImplOutDevData;
-class LogicalFontInstance;
-struct SystemGraphicsData;
-class ImplFontCache;
-class PhysicalFontCollection;
-class ImplDeviceFontList;
-class ImplDeviceFontSizeList;
-class ImplMultiTextLineInfo;
-class SalGraphics;
-class Gradient;
-class Hatch;
-class AllSettings;
-class BitmapReadAccess;
-class BitmapEx;
-class Image;
-class TextRectInfo;
-class FontMetric;
-class GDIMetaFile;
-class GfxLink;
 namespace tools
 {
 class Line;
-}
-class LineInfo;
-class AlphaMask;
-class FontCharMap;
-class SalLayout;
-class ImplLayoutArgs;
-class VirtualDevice;
-struct SalTwoRect;
-class Printer;
-class VCLXGraphics;
-class OutDevStateStack;
-class SalLayoutGlyphs;
-
-namespace vcl
-{
-class ExtOutDevData;
-class ITextLayout;
-struct FontCapabilities;
-class TextLayoutCache;
-class Window;
-namespace font
-{
-struct Feature;
-}
 }
 
 namespace basegfx
@@ -83,6 +38,28 @@ class B2DHomMatrix;
 class B2DPolygon;
 class B2IVector;
 typedef B2IVector B2ISize;
+}
+
+class Animation;
+class BitmapEx;
+class FontCharMap;
+class GDIMetaFile;
+class GfxLink;
+class Gradient;
+class Hatch;
+class Image;
+class LineInfo;
+class Printer;
+class SalLayoutGlyphs;
+class VCLXGraphics;
+class VirtualDevice;
+struct SystemGraphicsData;
+
+namespace vcl
+{
+class ExtOutDevData;
+class ITextLayout;
+class Window;
 }
 
 namespace com::sun::star::awt
