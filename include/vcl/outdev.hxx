@@ -608,7 +608,6 @@ private:
 
     const OutDevType meOutDevType;
     OutDevViewType meOutDevViewType;
-    Color maTextLineColor;
 };
 
 #endif // INCLUDED_VCL_OUTDEV_HXX
