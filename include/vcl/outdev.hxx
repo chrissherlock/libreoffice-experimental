@@ -20,34 +20,10 @@
 #ifndef INCLUDED_VCL_OUTDEV_HXX
 #define INCLUDED_VCL_OUTDEV_HXX
 
-#include <tools/gen.hxx>
-#include <tools/ref.hxx>
-#include <tools/solar.h>
-#include <tools/color.hxx>
-#include <tools/poly.hxx>
-#include <o3tl/typed_flags_set.hxx>
-
-#include <vcl/dllapi.h>
 #include <vcl/RenderContext2.hxx>
-#include <vcl/bitmap.hxx>
 #include <vcl/cairo.hxx>
-#include <vcl/devicecoordinate.hxx>
-#include <vcl/flags/SalLayoutFlags.hxx>
-#include <vcl/font.hxx>
-#include <vcl/region.hxx>
-#include <vcl/mapmod.hxx>
-#include <vcl/wall.hxx>
 #include <vcl/metaactiontypes.hxx>
 #include <vcl/outdevstate.hxx>
-
-#include <basegfx/numeric/ftools.hxx>
-#include <basegfx/vector/b2enums.hxx>
-#include <basegfx/polygon/b2dpolypolygon.hxx>
-
-#include <unotools/fontdefs.hxx>
-
-#include <com/sun/star/drawing/LineCap.hpp>
-#include <com/sun/star/uno/Reference.h>
 
 #include <memory>
 #include <vector>
