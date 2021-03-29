@@ -17,22 +17,13 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <sal/types.h>
-#include <tools/helpers.hxx>
-#include <rtl/math.hxx>
-
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
-#include <vcl/outdev.hxx>
-#include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
 
-#include <bitmap/BitmapWriteAccess.hxx>
 #include <polygontools.hxx>
-#include <salgdi.hxx>
 
 #include <cassert>
-#include <memory>
 
 void OutputDevice::DrawTransparent(basegfx::B2DHomMatrix const& rObjectTransform,
                                    basegfx::B2DPolyPolygon const& rB2DPolyPoly,
