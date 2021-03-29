@@ -21,6 +21,7 @@
 
 #include <vcl/RenderContext2.hxx>
 #include <vcl/OutDevType.hxx>
+#include <vcl/OutDevViewType.hxx>
 #include <vcl/cairo.hxx>
 #include <vcl/metaactiontypes.hxx>
 #include <vcl/outdevstate.hxx>
@@ -50,6 +51,7 @@ class Gradient;
 class Hatch;
 class Image;
 class LineInfo;
+class OutputDevice;
 class Printer;
 class SalLayoutGlyphs;
 class VCLXGraphics;
@@ -61,6 +63,7 @@ namespace vcl
 class ExtOutDevData;
 class ITextLayout;
 class Window;
+typedef OutputDevice RenderContext;
 }
 
 namespace com::sun::star::awt
@@ -68,23 +71,7 @@ namespace com::sun::star::awt
 class XGraphics;
 }
 
-enum class OutDevViewType
-{
-    DontKnow,
-    PrintPreview,
-    SlideShow
-};
-
-// OutputDevice
-
 typedef tools::SvRef<FontCharMap> FontCharMapRef;
-
-class OutputDevice;
-
-namespace vcl
-{
-typedef OutputDevice RenderContext;
-}
 
 typedef struct _cairo_surface cairo_surface_t;
 
