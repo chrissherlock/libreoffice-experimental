@@ -18,24 +18,13 @@
  */
 
 #include <sal/config.h>
-#include <sal/log.hxx>
 
-#include <tools/debug.hxx>
-#include <vcl/gdimtf.hxx>
-#include <vcl/graph.hxx>
-#include <vcl/metaact.hxx>
-#include <vcl/virdev.hxx>
+#include <vcl/cairo.hxx>
 #include <vcl/outdev.hxx>
-#include <vcl/toolkit/unowrap.hxx>
-#include <vcl/svapp.hxx>
-#include <vcl/sysdata.hxx>
 
-#include <outdev.h>
-#include <window.h>
-#include <ImplOutDevData.hxx>
 #include <salgdi.hxx>
 
-#include <com/sun/star/awt/DeviceCapability.hpp>
+#include <com/sun/star/uno/Any.hxx>
 
 #if ENABLE_CAIRO_CANVAS
 
@@ -54,6 +43,9 @@ OutputDevice::CreateSurface(const cairo::CairoSurfaceSharedPtr& rSurface) const
 {
     if (!mpGraphics && !AcquireGraphics())
         return cairo::SurfaceSharedPtr();
+
+    assert(mpGraphics);
+
     return mpGraphics->CreateSurface(rSurface);
 }
 
