@@ -101,6 +101,7 @@ class Polygon;
 
 namespace vcl
 {
+class ExtOutDevData;
 class ITextLayout;
 class TextLayoutCache;
 struct FontCapabilities;
@@ -359,6 +360,9 @@ public:
     /// Return native handle for underlying surface
     css::uno::Any GetNativeSurfaceHandle(cairo::SurfaceSharedPtr& rSurface,
                                          const basegfx::B2ISize& rSize) const;
+
+    vcl::ExtOutDevData* GetExtOutDevData() const;
+    void SetExtOutDevData(vcl::ExtOutDevData* pExtOutDevData);
 
     SAL_DLLPRIVATE bool ImplIsRecordLayout() const;
 
@@ -1318,6 +1322,7 @@ private:
 
     SAL_DLLPRIVATE void ImplDrawMnemonicLine(tools::Long nX, tools::Long nY, tools::Long nWidth);
 
+    vcl::ExtOutDevData* mpExtOutDevData;
     std::vector<OutDevState> maOutDevStateStack;
     sal_Int32 mnDPIX;
     sal_Int32 mnDPIY;

@@ -57,7 +57,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mpPrevGraphics = nullptr;
     mpNextGraphics = nullptr;
     mpMetaFile = nullptr;
-    mpExtOutDevData = nullptr;
     meOutDevViewType = OutDevViewType::DontKnow;
 }
 

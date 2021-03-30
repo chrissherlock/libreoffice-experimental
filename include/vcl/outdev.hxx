@@ -109,10 +109,6 @@ public:
      @returns true if operation supported, else false
     */
     bool SupportsOperation(OutDevSupportType) const;
-
-    void SetExtOutDevData(vcl::ExtOutDevData* pExtOutDevData) { mpExtOutDevData = pExtOutDevData; }
-    vcl::ExtOutDevData* GetExtOutDevData() const { return mpExtOutDevData; }
-
     ///@}
 
     /** @name Direct OutputDevice drawing functions
@@ -511,7 +507,6 @@ private:
     mutable VclPtr<OutputDevice> mpNextGraphics; ///< Next output device in list
     GDIMetaFile* mpMetaFile;
     std::vector<VCLXGraphics*>* mpUnoGraphicsList;
-    vcl::ExtOutDevData* mpExtOutDevData;
 
     const OutDevType meOutDevType;
     OutDevViewType meOutDevViewType;
