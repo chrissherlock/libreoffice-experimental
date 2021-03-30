@@ -138,6 +138,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/rendercontext/deviceinfo \
     vcl/source/rendercontext/drawmode \
     vcl/source/rendercontext/emphasismarks \
+    vcl/source/rendercontext/extoudevdata \
     vcl/source/rendercontext/font \
     vcl/source/rendercontext/fill \
     vcl/source/rendercontext/geometry \
