@@ -131,6 +131,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/rendercontext/bitmapex \
     vcl/source/rendercontext/blend \
     vcl/source/rendercontext/border \
+    vcl/source/rendercontext/cairo \
     vcl/source/rendercontext/checkered \
     vcl/source/rendercontext/clipping \
     vcl/source/rendercontext/curvedshapes \
@@ -276,7 +277,6 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/outdev/ImplMapRes \
     vcl/source/outdev/animation \
     vcl/source/outdev/outdev \
-    vcl/source/outdev/cairo \
     vcl/source/outdev/stack \
     vcl/source/outdev/clipping \
     vcl/source/outdev/eps \

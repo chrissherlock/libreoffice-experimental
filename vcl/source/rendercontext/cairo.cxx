@@ -19,8 +19,7 @@
 
 #include <sal/config.h>
 
-#include <vcl/cairo.hxx>
-#include <vcl/outdev.hxx>
+#include <vcl/RenderContext2.hxx>
 
 #include <salgdi.hxx>
 
@@ -28,7 +27,7 @@
 
 #if ENABLE_CAIRO_CANVAS
 
-bool OutputDevice::SupportsCairo() const
+bool RenderContext2::SupportsCairo() const
 {
     if (!mpGraphics && !AcquireGraphics())
         return false;
@@ -39,7 +38,7 @@ bool OutputDevice::SupportsCairo() const
 }
 
 cairo::SurfaceSharedPtr
-OutputDevice::CreateSurface(const cairo::CairoSurfaceSharedPtr& rSurface) const
+RenderContext2::CreateSurface(const cairo::CairoSurfaceSharedPtr& rSurface) const
 {
     if (!mpGraphics && !AcquireGraphics())
         return cairo::SurfaceSharedPtr();
@@ -49,7 +48,7 @@ OutputDevice::CreateSurface(const cairo::CairoSurfaceSharedPtr& rSurface) const
     return mpGraphics->CreateSurface(rSurface);
 }
 
-cairo::SurfaceSharedPtr OutputDevice::CreateSurface(int x, int y, int width, int height) const
+cairo::SurfaceSharedPtr RenderContext2::CreateSurface(int x, int y, int width, int height) const
 {
     if (!mpGraphics && !AcquireGraphics())
         return cairo::SurfaceSharedPtr();
@@ -59,8 +58,8 @@ cairo::SurfaceSharedPtr OutputDevice::CreateSurface(int x, int y, int width, int
     return mpGraphics->CreateSurface(*this, x, y, width, height);
 }
 
-cairo::SurfaceSharedPtr OutputDevice::CreateBitmapSurface(const BitmapSystemData& rData,
-                                                          const Size& rSize) const
+cairo::SurfaceSharedPtr RenderContext2::CreateBitmapSurface(const BitmapSystemData& rData,
+                                                            const Size& rSize) const
 {
     if (!mpGraphics && !AcquireGraphics())
         return cairo::SurfaceSharedPtr();
@@ -70,8 +69,8 @@ cairo::SurfaceSharedPtr OutputDevice::CreateBitmapSurface(const BitmapSystemData
     return mpGraphics->CreateBitmapSurface(*this, rData, rSize);
 }
 
-css::uno::Any OutputDevice::GetNativeSurfaceHandle(cairo::SurfaceSharedPtr& rSurface,
-                                                   const basegfx::B2ISize& rSize) const
+css::uno::Any RenderContext2::GetNativeSurfaceHandle(cairo::SurfaceSharedPtr& rSurface,
+                                                     const basegfx::B2ISize& rSize) const
 {
     if (!mpGraphics && !AcquireGraphics())
         return css::uno::Any();
