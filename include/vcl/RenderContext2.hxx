@@ -35,6 +35,7 @@
 #include <vcl/ImplMapRes.hxx>
 #include <vcl/RasterOp.hxx>
 #include <vcl/bitmapex.hxx>
+#include <vcl/cairo.hxx>
 #include <vcl/devicecoordinate.hxx>
 #include <vcl/flags/AddFontSubstituteFlags.hxx>
 #include <vcl/flags/AntialiasingFlags.hxx>
@@ -87,6 +88,8 @@ struct SalTwoRect;
 namespace basegfx
 {
 class B2DPolyPolygon;
+class B2IVector;
+typedef B2IVector B2ISize;
 }
 
 namespace tools
@@ -344,6 +347,18 @@ public:
     virtual bool IsScreenComp() const;
     virtual sal_uInt16 GetBitCount() const;
     virtual bool IsVirtual() const;
+
+    bool SupportsCairo() const;
+    /// Create Surface from given cairo surface
+    cairo::SurfaceSharedPtr CreateSurface(const cairo::CairoSurfaceSharedPtr& rSurface) const;
+    /// Create surface with given dimensions
+    cairo::SurfaceSharedPtr CreateSurface(int x, int y, int width, int height) const;
+    /// Create Surface for given bitmap data
+    cairo::SurfaceSharedPtr CreateBitmapSurface(const BitmapSystemData& rData,
+                                                const Size& rSize) const;
+    /// Return native handle for underlying surface
+    css::uno::Any GetNativeSurfaceHandle(cairo::SurfaceSharedPtr& rSurface,
+                                         const basegfx::B2ISize& rSize) const;
 
     SAL_DLLPRIVATE bool ImplIsRecordLayout() const;
 
