@@ -56,7 +56,6 @@ class Printer;
 class SalLayoutGlyphs;
 class VCLXGraphics;
 class VirtualDevice;
-struct SystemGraphicsData;
 
 namespace vcl
 {
@@ -87,9 +86,6 @@ class SAL_WARN_UNUSED VCL_DLLPUBLIC OutputDevice : public RenderContext2
 public:
     void SetConnectMetaFile(GDIMetaFile* pMtf);
     GDIMetaFile* GetConnectMetaFile() const { return mpMetaFile; }
-
-    SystemGraphicsData GetSystemGfxData() const;
-    css::uno::Any GetSystemGfxDataAny() const;
 
     void SetRefPoint() override;
     void SetRefPoint(Point const& rRefPoint) override;

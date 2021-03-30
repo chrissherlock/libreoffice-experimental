@@ -84,6 +84,7 @@ class VirtualDevice;
 struct ImplOutDevData;
 struct OutDevState;
 struct SalTwoRect;
+struct SystemGraphicsData;
 
 namespace basegfx
 {
@@ -318,6 +319,9 @@ public:
      */
     SalGraphics const* GetGraphics() const;
     SalGraphics* GetGraphics();
+
+    SystemGraphicsData GetSystemGfxData() const;
+    css::uno::Any GetSystemGfxDataAny() const;
 
     virtual size_t GetSyncCount() const { return 0xffffffff; }
 
