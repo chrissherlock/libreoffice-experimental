@@ -164,6 +164,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/rendercontext/rtl \
     vcl/source/rendercontext/settings \
     vcl/source/rendercontext/stack \
+    vcl/source/rendercontext/sysgfxdata \
     vcl/source/rendercontext/text \
     vcl/source/rendercontext/transparent \
     vcl/source/window/errinf \
@@ -304,6 +305,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/outdev/gradient \
     vcl/source/outdev/curvedshapes \
     vcl/source/outdev/wallpaper \
+    vcl/source/outdev/unographics \
     vcl/source/outdev/vclreferencebase \
     vcl/source/outdev/map \
     vcl/source/treelist/headbar \

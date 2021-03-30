@@ -26,7 +26,6 @@
 #include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/outdev.hxx>
-#include <vcl/toolkit/unowrap.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/sysdata.hxx>
 
@@ -53,7 +52,6 @@ namespace
 OutputDevice::OutputDevice(OutDevType eOutDevType)
     : meOutDevType(eOutDevType)
 {
-    mpUnoGraphicsList = nullptr;
     mpPrevGraphics = nullptr;
     mpNextGraphics = nullptr;
     mpMetaFile = nullptr;
@@ -64,50 +62,11 @@ OutputDevice::~OutputDevice() { disposeOnce(); }
 
 void OutputDevice::dispose()
 {
-    if (GetUnoGraphicsList())
-    {
-        UnoWrapperBase* pWrapper = UnoWrapperBase::GetUnoWrapper(false);
-        if (pWrapper)
-            pWrapper->ReleaseAllGraphics(this);
-        delete mpUnoGraphicsList;
-        mpUnoGraphicsList = nullptr;
-    }
-
     mpPrevGraphics.clear();
     mpNextGraphics.clear();
 }
 
 void OutputDevice::SetConnectMetaFile(GDIMetaFile* pMtf) { mpMetaFile = pMtf; }
-
-SystemGraphicsData OutputDevice::GetSystemGfxData() const
-{
-    if (!mpGraphics && !AcquireGraphics())
-        return SystemGraphicsData();
-
-    assert(mpGraphics);
-
-    return mpGraphics->GetGraphicsData();
-}
-
-css::uno::Any OutputDevice::GetSystemGfxDataAny() const
-{
-    const SystemGraphicsData aSysData = GetSystemGfxData();
-    css::uno::Sequence<sal_Int8> aSeq(reinterpret_cast<sal_Int8 const*>(&aSysData), aSysData.nSize);
-
-    return css::uno::makeAny(aSeq);
-}
-
-css::uno::Reference<css::awt::XGraphics> OutputDevice::CreateUnoGraphics()
-{
-    UnoWrapperBase* pWrapper = UnoWrapperBase::GetUnoWrapper();
-    return pWrapper ? pWrapper->CreateGraphics(this) : css::uno::Reference<css::awt::XGraphics>();
-}
-
-std::vector<VCLXGraphics*>* OutputDevice::CreateUnoGraphicsList()
-{
-    mpUnoGraphicsList = new std::vector<VCLXGraphics*>;
-    return mpUnoGraphicsList;
-}
 
 // Helper public function
 
