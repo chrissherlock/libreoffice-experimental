@@ -371,6 +371,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/gdi/sallayout \
     vcl/source/gdi/salmisc \
     vcl/source/gdi/vectorgraphicdata \
+    vcl/source/gdi/text \
     vcl/source/gdi/textlayout \
     vcl/source/gdi/virdev \
     vcl/source/gdi/wall \
