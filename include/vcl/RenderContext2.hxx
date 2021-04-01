@@ -856,16 +856,6 @@ protected:
                                     Point const& rSrcPtPixel, Size const& rSrcSizePixel,
                                     BitmapEx& rBitmapEx);
 
-    /** Transform and draw a bitmap directly
-
-     @param     rFullTransform      The B2DHomMatrix used for the transformation
-     @param     rBitmapEx           Reference to the bitmap to be transformed and drawn
-
-     @return true if it was able to draw the bitmap, false if not
-     */
-    virtual bool DrawTransformBitmapExDirect(basegfx::B2DHomMatrix const& rFullTransform,
-                                             BitmapEx const& rBitmapEx, double fAlpha = 1.0);
-
     virtual void DrawDeviceMask(Bitmap const& rMask, Color const& rMaskColor, Point const& rDestPt,
                                 Size const& rDestSize, Point const& rSrcPtPixel,
                                 Size const& rSrcSizePixel);
@@ -1230,6 +1220,16 @@ private:
                                                       tools::Rectangle aDstRect,
                                                       tools::Rectangle aBmpRect, Size const& aOutSz,
                                                       Point const& aOutPt);
+
+    /** Transform and draw a bitmap directly
+
+     @param     rFullTransform      The B2DHomMatrix used for the transformation
+     @param     rBitmapEx           Reference to the bitmap to be transformed and drawn
+
+     @return true if it was able to draw the bitmap, false if not
+     */
+    virtual bool DrawTransformBitmapExDirect(basegfx::B2DHomMatrix const& rFullTransform,
+                                             BitmapEx const& rBitmapEx, double fAlpha = 1.0);
 
     SAL_DLLPRIVATE Bitmap BlendBitmap(Bitmap& aBmp, BitmapReadAccess const* pP,
                                       BitmapReadAccess const* pA, const sal_Int32 nOffY,
