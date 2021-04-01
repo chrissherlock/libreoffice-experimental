@@ -848,8 +848,6 @@ protected:
     virtual void DrawOutDevDirect(RenderContext2 const& rSrcDev, SalTwoRect& rPosAry,
                                   SalGraphics* pSrcGraphics);
 
-    virtual RenderContext2 const* DrawOutDevDirectCheck(RenderContext2 const& rSrcDev) const;
-
     void ImplDrawText(SalLayout&);
 
     static void ImplDrawText(RenderContext2& rTargetDevice, tools::Rectangle const& rRect,
@@ -1240,6 +1238,8 @@ protected:
     mutable bool mbTextSpecial : 1;
 
 private:
+    virtual RenderContext2 const* DrawOutDevDirectCheck(RenderContext2 const& rSrcDev) const;
+
     SAL_DLLPRIVATE void DrawDeviceAlphaBitmapSlowPath(Bitmap const& rBitmap,
                                                       AlphaMask const& rAlpha,
                                                       tools::Rectangle aDstRect,
