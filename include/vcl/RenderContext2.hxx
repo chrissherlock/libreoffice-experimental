@@ -278,10 +278,6 @@ public:
                                    const Printer&)
         = delete;
 
-    /** Determine if native widgets can be enabled
-     */
-    virtual bool CanEnableNativeWidget() const { return false; }
-
     /** Query the platform layer for control support
      */
     bool IsNativeControlSupported(ControlType nType, ControlPart nPart) const;
@@ -1116,6 +1112,10 @@ private:
     SAL_DLLPRIVATE void ImplInitFontList() const;
     SAL_DLLPRIVATE void ImplInitTextColor();
     virtual void InitWaveLineColor(Color const& rColor, tools::Long);
+
+    /** Determine if native widgets can be enabled
+     */
+    virtual bool CanEnableNativeWidget() const { return false; }
 
     SAL_DLLPRIVATE ImplLayoutArgs ImplPrepareLayoutArgs(
         OUString&, const sal_Int32 nIndex, const sal_Int32 nLen, DeviceCoordinate nPixelWidth,

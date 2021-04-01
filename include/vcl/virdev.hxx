@@ -71,6 +71,8 @@ private:
      */
     SAL_DLLPRIVATE void ImplFillOpaqueRectangle( const tools::Rectangle& rRect );
 
+    bool CanEnableNativeWidget() const override;
+
 protected:
     virtual bool AcquireGraphics() const override;
     virtual void ReleaseGraphics( bool bRelease = true ) override;
@@ -156,8 +158,6 @@ public:
 
     virtual             ~VirtualDevice() override;
     virtual void        dispose() override;
-
-    bool                CanEnableNativeWidget() const override;
 
     virtual void        EnableRTL( bool bEnable = true ) override;
 
