@@ -918,7 +918,6 @@ protected:
 
     SAL_DLLPRIVATE void InitLineColor();
     SAL_DLLPRIVATE void InitFillColor();
-    SAL_DLLPRIVATE void ImplInitTextColor();
 
     virtual void ImplInitMapModeObjects();
 
@@ -1196,6 +1195,7 @@ protected:
     mutable bool mbTextSpecial : 1;
 
 private:
+    SAL_DLLPRIVATE void ImplInitTextColor();
     virtual void InitWaveLineColor(Color const& rColor, tools::Long);
 
     virtual bool TryDirectBitmapExPaint() const;
