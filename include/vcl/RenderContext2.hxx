@@ -1037,8 +1037,6 @@ protected:
                                             tools::Long& rYOff, tools::Long& rWidth,
                                             FontEmphasisMark eEmphasis, tools::Long nHeight);
 
-    SAL_DLLPRIVATE static FontEmphasisMark ImplGetEmphasisMarkStyle(vcl::Font const& rFont);
-
     SAL_DLLPRIVATE void ImplDrawEmphasisMarks(SalLayout&);
 
     SAL_DLLPRIVATE float approximate_char_width() const;

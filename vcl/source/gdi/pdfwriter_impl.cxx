@@ -81,6 +81,7 @@
 #include <pdf/objectcopier.hxx>
 #include <o3tl/sorted_vector.hxx>
 #include <text.hxx>
+#include <emphasismark.hxx>
 
 #include "pdfwriter_impl.hxx"
 
@@ -6411,7 +6412,7 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
     aLine.setLength( 0 );
     aLine.append( "q\n" );
 
-    nEmphMark = OutputDevice::ImplGetEmphasisMarkStyle( m_aCurrentPDFState.m_aFont );
+    nEmphMark = ImplGetEmphasisMarkStyle( m_aCurrentPDFState.m_aFont );
     if ( nEmphMark & FontEmphasisMark::PosBelow )
         nEmphHeight = GetEmphasisDescent();
     else
