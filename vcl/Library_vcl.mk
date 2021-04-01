@@ -167,6 +167,38 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/rendercontext/sysgfxdata \
     vcl/source/rendercontext/text \
     vcl/source/rendercontext/transparent \
+    vcl/source/outdev/ImplMapRes \
+    vcl/source/outdev/animation \
+    vcl/source/outdev/outdev \
+    vcl/source/outdev/stack \
+    vcl/source/outdev/clipping \
+    vcl/source/outdev/eps \
+    vcl/source/outdev/polygon \
+    vcl/source/outdev/polypolygon \
+    vcl/source/outdev/rasterop \
+    vcl/source/outdev/refpoint \
+    vcl/source/outdev/transparent \
+    vcl/source/outdev/mask \
+    vcl/source/outdev/bitmap \
+    vcl/source/outdev/bitmapex \
+    vcl/source/outdev/image \
+    vcl/source/outdev/font \
+    vcl/source/outdev/text \
+    vcl/source/outdev/pixel \
+    vcl/source/outdev/border \
+    vcl/source/outdev/rect \
+    vcl/source/outdev/checkered \
+    vcl/source/outdev/grid \
+    vcl/source/outdev/fill \
+    vcl/source/outdev/line \
+    vcl/source/outdev/polyline \
+    vcl/source/outdev/hatch \
+    vcl/source/outdev/gradient \
+    vcl/source/outdev/curvedshapes \
+    vcl/source/outdev/wallpaper \
+    vcl/source/outdev/vclreferencebase \
+    vcl/source/outdev/map \
+    vcl/source/outdev/unographics \
     vcl/source/window/errinf \
     vcl/source/window/settings \
     vcl/source/window/paint \
@@ -276,38 +308,6 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/edit/xtextedt \
     vcl/source/toolkit/group \
     vcl/source/toolkit/morebtn \
-    vcl/source/outdev/ImplMapRes \
-    vcl/source/outdev/animation \
-    vcl/source/outdev/outdev \
-    vcl/source/outdev/stack \
-    vcl/source/outdev/clipping \
-    vcl/source/outdev/eps \
-    vcl/source/outdev/polygon \
-    vcl/source/outdev/polypolygon \
-    vcl/source/outdev/rasterop \
-    vcl/source/outdev/refpoint \
-    vcl/source/outdev/transparent \
-    vcl/source/outdev/mask \
-    vcl/source/outdev/bitmap \
-    vcl/source/outdev/bitmapex \
-    vcl/source/outdev/image \
-    vcl/source/outdev/font \
-    vcl/source/outdev/text \
-    vcl/source/outdev/pixel \
-    vcl/source/outdev/border \
-    vcl/source/outdev/rect \
-    vcl/source/outdev/checkered \
-    vcl/source/outdev/grid \
-    vcl/source/outdev/fill \
-    vcl/source/outdev/line \
-    vcl/source/outdev/polyline \
-    vcl/source/outdev/hatch \
-    vcl/source/outdev/gradient \
-    vcl/source/outdev/curvedshapes \
-    vcl/source/outdev/wallpaper \
-    vcl/source/outdev/unographics \
-    vcl/source/outdev/vclreferencebase \
-    vcl/source/outdev/map \
     vcl/source/treelist/headbar \
     vcl/source/treelist/iconview \
     vcl/source/treelist/iconviewimpl \
