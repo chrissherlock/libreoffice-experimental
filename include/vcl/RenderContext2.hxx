@@ -321,7 +321,6 @@ public:
     bool IsClipRegion() const;
     vcl::Region GetClipRegion() const;
     virtual vcl::Region GetActiveClipRegion() const;
-    virtual vcl::Region GetOutputBoundsClipRegion() const;
     virtual void SetClipRegion();
     virtual void SetClipRegion(vcl::Region const& rRegion);
     bool SelectClipRegion(vcl::Region const&, SalGraphics* pGraphics = nullptr);
@@ -1130,6 +1129,8 @@ private:
 
     virtual bool TryDirectBitmapExPaint() const;
     virtual bool CanSubsampleBitmap() const { return true; }
+
+    virtual vcl::Region GetOutputBoundsClipRegion() const;
 
     virtual RenderContext2 const* DrawOutDevDirectCheck(RenderContext2 const& rSrcDev) const;
 
