@@ -852,9 +852,6 @@ protected:
                       std::vector<tools::Rectangle>* pVector, OUString* pDisplayText,
                       vcl::ITextLayout& _rLayout);
 
-    SAL_DLLPRIVATE void ImplDrawTextRect(tools::Long nBaseX, tools::Long nBaseY, tools::Long nX,
-                                         tools::Long nY, tools::Long nWidth, tools::Long nHeight);
-
     virtual void DrawDeviceBitmapEx(Point const& rDestPt, Size const& rDestSize,
                                     Point const& rSrcPtPixel, Size const& rSrcSizePixel,
                                     BitmapEx& rBitmapEx);
@@ -1282,6 +1279,8 @@ private:
     // text functions
     void ImplDrawText(SalLayout&);
     SAL_DLLPRIVATE void ImplDrawTextDirect(SalLayout&, bool bTextLines);
+    SAL_DLLPRIVATE void ImplDrawTextRect(tools::Long nBaseX, tools::Long nBaseY, tools::Long nX,
+                                         tools::Long nY, tools::Long nWidth, tools::Long nHeight);
     SAL_DLLPRIVATE void ImplDrawSpecialText(SalLayout&);
     void ImplDrawTextBackground(SalLayout const&);
     bool ImplDrawRotateText(SalLayout&);
