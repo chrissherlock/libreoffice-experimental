@@ -856,10 +856,6 @@ protected:
                                     Point const& rSrcPtPixel, Size const& rSrcSizePixel,
                                     BitmapEx& rBitmapEx);
 
-    virtual void DrawDeviceMask(Bitmap const& rMask, Color const& rMaskColor, Point const& rDestPt,
-                                Size const& rDestSize, Point const& rSrcPtPixel,
-                                Size const& rSrcSizePixel);
-
     virtual void EmulateDrawTransparent(tools::PolyPolygon const& rPolyPoly,
                                         sal_uInt16 nTransparencePercent);
 
@@ -1247,6 +1243,10 @@ private:
 
     void DrawBitmapEx2(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
                        Size const& rSrcSizePixel, BitmapEx const& rBitmapEx);
+
+    virtual void DrawDeviceMask(Bitmap const& rMask, Color const& rMaskColor, Point const& rDestPt,
+                                Size const& rDestSize, Point const& rSrcPtPixel,
+                                Size const& rSrcSizePixel);
 
     SAL_DLLPRIVATE void ImplDrawPolygon(tools::Polygon const& rPoly,
                                         tools::PolyPolygon const* pClipPolyPoly = nullptr);
