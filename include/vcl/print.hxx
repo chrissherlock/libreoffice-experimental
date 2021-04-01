@@ -242,9 +242,6 @@ protected:
                                     const Point& rSrcPtPixel, const Size& rSrcSizePixel,
                                     BitmapEx& rBitmapEx ) override;
 
-    virtual void                EmulateDrawTransparent( const tools::PolyPolygon& rPolyPoly,
-                                    sal_uInt16 nTransparencePercent ) override;
-
     virtual void                SetFontOrientation( LogicalFontInstance* const pFontInstance ) const override;
 
     basegfx::B2DRange           ReduceBitmapExVisibleRange(basegfx::B2DHomMatrix const& rFullTransform,
@@ -257,6 +254,9 @@ private:
 
     bool                        DrawTransformBitmapExDirect( const basegfx::B2DHomMatrix& aFullTransform,
                                     const BitmapEx& rBitmapEx, double fAlpha = 1.0) override;
+
+    virtual void                EmulateDrawTransparent( const tools::PolyPolygon& rPolyPoly,
+                                    sal_uInt16 nTransparencePercent ) override;
 
 public:
                                 Printer();

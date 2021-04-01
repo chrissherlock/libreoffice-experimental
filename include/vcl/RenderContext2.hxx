@@ -856,9 +856,6 @@ protected:
                                     Point const& rSrcPtPixel, Size const& rSrcSizePixel,
                                     BitmapEx& rBitmapEx);
 
-    virtual void EmulateDrawTransparent(tools::PolyPolygon const& rPolyPoly,
-                                        sal_uInt16 nTransparencePercent);
-
     virtual bool DrawPolyLineDirect(basegfx::B2DHomMatrix const& rObjectTransform,
                                     basegfx::B2DPolygon const& rB2DPolygon, double fLineWidth = 0.0,
                                     double fTransparency = 0.0,
@@ -1247,6 +1244,9 @@ private:
     virtual void DrawDeviceMask(Bitmap const& rMask, Color const& rMaskColor, Point const& rDestPt,
                                 Size const& rDestSize, Point const& rSrcPtPixel,
                                 Size const& rSrcSizePixel);
+
+    virtual void EmulateDrawTransparent(tools::PolyPolygon const& rPolyPoly,
+                                        sal_uInt16 nTransparencePercent);
 
     SAL_DLLPRIVATE void ImplDrawPolygon(tools::Polygon const& rPoly,
                                         tools::PolyPolygon const* pClipPolyPoly = nullptr);
