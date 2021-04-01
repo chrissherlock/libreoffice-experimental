@@ -875,7 +875,6 @@ protected:
                                                              tools::PolyPolygon const& rPolyPoly,
                                                              Point* pPtBuffer);
 
-    virtual void InitWaveLineColor(Color const& rColor, tools::Long);
     virtual std::tuple<bool, Size> GetWaveLineSize(tools::Long nLineWidth) const;
 
     virtual void DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize,
@@ -1202,6 +1201,8 @@ protected:
     mutable bool mbTextSpecial : 1;
 
 private:
+    virtual void InitWaveLineColor(Color const& rColor, tools::Long);
+
     virtual RenderContext2 const* DrawOutDevDirectCheck(RenderContext2 const& rSrcDev) const;
 
     SAL_DLLPRIVATE void DrawDeviceAlphaBitmap(Bitmap const& rBmp, AlphaMask const& rAlpha,
