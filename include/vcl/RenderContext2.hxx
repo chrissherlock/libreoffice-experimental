@@ -929,8 +929,6 @@ protected:
      */
     SAL_DLLPRIVATE basegfx::B2DHomMatrix ImplGetDeviceTransformation() const;
 
-    SAL_DLLPRIVATE DeviceCoordinate LogicWidthToDeviceCoordinate(tools::Long nWidth) const;
-
     /** Convert a logical X coordinate to a device pixel's X coordinate.
 
      To get the device's X coordinate, it must calculate the mapping offset
@@ -1321,6 +1319,8 @@ private:
 
     virtual vcl::Region ClipToDeviceBounds(vcl::Region aRegion) const;
     SAL_DLLPRIVATE void SetDeviceClipRegion(vcl::Region const* pRegion);
+
+    SAL_DLLPRIVATE DeviceCoordinate LogicWidthToDeviceCoordinate(tools::Long nWidth) const;
 
     vcl::ExtOutDevData* mpExtOutDevData;
     std::vector<OutDevState> maOutDevStateStack;
