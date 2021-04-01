@@ -17,8 +17,28 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <sal/log.hxx>
+#include <osl/file.h>
+#include <rtl/ustrbuf.hxx>
+#include <tools/gen.hxx>
+#include <comphelper/processfactory.hxx>
+#include <i18nlangtag/languagetag.hxx>
+
+#include <vcl/settings.hxx>
+#include <vcl/svapp.hxx>
+#include <vcl/unohelp.hxx>
+
+#include <ImplMultiTextLineInfo.hxx>
 #include <text.hxx>
 #include <textlayout.hxx>
+#include <textlineinfo.hxx>
+
+#include <com/sun/star/i18n/WordType.hpp>
+#include <com/sun/star/i18n/XBreakIterator.hpp>
+#include <com/sun/star/linguistic2/LinguServiceManager.hpp>
+#include <com/sun/star/linguistic2/XHyphenator.hpp>
+#include <com/sun/star/uno/Reference.hxx>
+#include <com/sun/star/uno/XComponentContext.hpp>
 
 tools::Long ImplGetTextLines(ImplMultiTextLineInfo& rLineInfo, tools::Long nWidth,
                              OUString const& rStr, DrawTextFlags nStyle,
@@ -243,4 +263,174 @@ tools::Long ImplGetTextLines(ImplMultiTextLineInfo& rLineInfo, tools::Long nWidt
 
     return nMaxLineWidth;
 }
+
+static bool ImplIsCharIn(sal_Unicode c, char const* pStr)
+{
+    while (*pStr)
+    {
+        if (*pStr == c)
+            return true;
+
+        pStr++;
+    }
+
+    return false;
+}
+
+OUString ImplGetEllipsisString(OUString const& rOrigStr, tools::Long nMaxWidth,
+                               DrawTextFlags nStyle, vcl::ITextLayout const& _rLayout)
+{
+    OUString aStr = rOrigStr;
+    sal_Int32 nIndex = _rLayout.GetTextBreak(aStr, nMaxWidth, 0, aStr.getLength());
+
+    if (nIndex != -1)
+    {
+        if ((nStyle & DrawTextFlags::CenterEllipsis) == DrawTextFlags::CenterEllipsis)
+        {
+            OUStringBuffer aTmpStr(aStr);
+            // speed it up by removing all but 1.33x as many as the break pos.
+            sal_Int32 nEraseChars = std::max<sal_Int32>(4, aStr.getLength() - (nIndex * 4) / 3);
+
+            while (nEraseChars < aStr.getLength()
+                   && _rLayout.GetTextWidth(aTmpStr.toString(), 0, aTmpStr.getLength()) > nMaxWidth)
+            {
+                aTmpStr = aStr;
+                sal_Int32 i = (aTmpStr.getLength() - nEraseChars) / 2;
+                aTmpStr.remove(i, nEraseChars++);
+                aTmpStr.insert(i, "...");
+            }
+
+            aStr = aTmpStr.makeStringAndClear();
+        }
+        else if (nStyle & DrawTextFlags::EndEllipsis)
+        {
+            aStr = aStr.copy(0, nIndex);
+
+            if (nIndex > 1)
+            {
+                aStr += "...";
+
+                while (!aStr.isEmpty()
+                       && (_rLayout.GetTextWidth(aStr, 0, aStr.getLength()) > nMaxWidth))
+                {
+                    if ((nIndex > 1) || (nIndex == aStr.getLength()))
+                        nIndex--;
+
+                    aStr = aStr.replaceAt(nIndex, 1, "");
+                }
+            }
+
+            if (aStr.isEmpty() && (nStyle & DrawTextFlags::Clip))
+                aStr += OUStringChar(rOrigStr[0]);
+        }
+        else if (nStyle & DrawTextFlags::PathEllipsis)
+        {
+            OUString aPath(rOrigStr);
+            OUString aAbbreviatedPath;
+            osl_abbreviateSystemPath(aPath.pData, &aAbbreviatedPath.pData, nIndex, nullptr);
+            aStr = aAbbreviatedPath;
+        }
+        else if (nStyle & DrawTextFlags::NewsEllipsis)
+        {
+            static char const pSepChars[] = ".";
+
+            // Determine last section
+            sal_Int32 nLastContent = aStr.getLength();
+
+            while (nLastContent)
+            {
+                nLastContent--;
+                if (ImplIsCharIn(aStr[nLastContent], pSepChars))
+                    break;
+            }
+
+            while (nLastContent && ImplIsCharIn(aStr[nLastContent - 1], pSepChars))
+            {
+                nLastContent--;
+            }
+
+            OUString aLastStr = aStr.copy(nLastContent);
+            OUString aTempLastStr1 = "..." + aLastStr;
+
+            if (_rLayout.GetTextWidth(aTempLastStr1, 0, aTempLastStr1.getLength()) > nMaxWidth)
+            {
+                aStr = ImplGetEllipsisString(aStr, nMaxWidth, nStyle | DrawTextFlags::EndEllipsis,
+                                             _rLayout);
+            }
+            else
+            {
+                sal_Int32 nFirstContent = 0;
+                while (nFirstContent < nLastContent)
+                {
+                    nFirstContent++;
+                    if (ImplIsCharIn(aStr[nFirstContent], pSepChars))
+                        break;
+                }
+
+                while ((nFirstContent < nLastContent)
+                       && ImplIsCharIn(aStr[nFirstContent], pSepChars))
+                {
+                    nFirstContent++;
+                }
+
+                // MEM continue here
+                if (nFirstContent >= nLastContent)
+                {
+                    aStr = ImplGetEllipsisString(aStr, nMaxWidth,
+                                                 nStyle | DrawTextFlags::EndEllipsis, _rLayout);
+                }
+                else
+                {
+                    if (nFirstContent > 4)
+                        nFirstContent = 4;
+
+                    OUString aFirstStr = OUString::Concat(aStr.subView(0, nFirstContent)) + "...";
+                    OUString aTempStr = aFirstStr + aLastStr;
+
+                    if (_rLayout.GetTextWidth(aTempStr, 0, aTempStr.getLength()) > nMaxWidth)
+                    {
+                        aStr = ImplGetEllipsisString(aStr, nMaxWidth,
+                                                     nStyle | DrawTextFlags::EndEllipsis, _rLayout);
+                    }
+                    else
+                    {
+                        do
+                        {
+                            aStr = aTempStr;
+
+                            if (nLastContent > aStr.getLength())
+                                nLastContent = aStr.getLength();
+
+                            while (nFirstContent < nLastContent)
+                            {
+                                nLastContent--;
+                                if (ImplIsCharIn(aStr[nLastContent], pSepChars))
+                                    break;
+                            }
+
+                            while ((nFirstContent < nLastContent)
+                                   && ImplIsCharIn(aStr[nLastContent - 1], pSepChars))
+                            {
+                                nLastContent--;
+                            }
+
+                            if (nFirstContent < nLastContent)
+                            {
+                                OUString aTempLastStr = aStr.copy(nLastContent);
+                                aTempStr = aFirstStr + aTempLastStr;
+
+                                if (_rLayout.GetTextWidth(aTempStr, 0, aTempStr.getLength())
+                                    > nMaxWidth)
+                                    break;
+                            }
+                        } while (nFirstContent < nLastContent);
+                    }
+                }
+            }
+        }
+    }
+
+    return aStr;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

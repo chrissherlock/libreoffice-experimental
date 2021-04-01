@@ -26,33 +26,19 @@
 #include <tools/lineend.hxx>
 #include <basegfx/matrix/b2dhommatrixtools.hxx>
 #include <basegfx/polygon/WaveLine.hxx>
-#include <comphelper/processfactory.hxx>
 
 #include <vcl/RenderContext2.hxx>
-#include <vcl/TextLayoutCache.hxx>
-#include <vcl/glyphitem.hxx>
-#include <vcl/settings.hxx>
-#include <vcl/svapp.hxx>
 #include <vcl/toolkit/controllayout.hxx>
-#include <vcl/unohelp.hxx>
-#include <vcl/vcllayout.hxx>
 #include <vcl/virdev.hxx>
 
 #include <ImplMultiTextLineInfo.hxx>
 #include <ImplOutDevData.hxx>
 #include <drawmode.hxx>
-#include <fontinstance.hxx>
-#include <fontselect.hxx>
-#include <impfontcache.hxx>
 #include <salgdi.hxx>
-#include <sallayout.hxx>
 #include <svdata.hxx>
 #include <text.hxx>
 #include <textlayout.hxx>
 #include <textlineinfo.hxx>
-
-#include <com/sun/star/i18n/WordType.hpp>
-#include <com/sun/star/linguistic2/LinguServiceManager.hpp>
 
 #define UNDERLINE_LAST LINESTYLE_BOLDWAVE
 #define STRIKEOUT_LAST STRIKEOUT_X
@@ -1765,7 +1751,7 @@ void RenderContext2::ImplDrawText(tools::Rectangle const& rRect, OUString const&
                             aLastLineBuffer[i] = ' ';
                     }
                     aLastLine = aLastLineBuffer.makeStringAndClear();
-                    aLastLine = ImplGetEllipsisString(*this, aLastLine, nWidth, nStyle, _rLayout);
+                    aLastLine = ImplGetEllipsisString(aLastLine, nWidth, nStyle, _rLayout);
                     nStyle &= ~DrawTextFlags(DrawTextFlags::VCenter | DrawTextFlags::Bottom);
                     nStyle |= DrawTextFlags::Top;
                 }
@@ -1856,7 +1842,7 @@ void RenderContext2::ImplDrawText(tools::Rectangle const& rRect, OUString const&
         {
             if (nStyle & TEXT_DRAW_ELLIPSIS)
             {
-                aStr = ImplGetEllipsisString(*this, aStr, nWidth, nStyle, _rLayout);
+                aStr = ImplGetEllipsisString(aStr, nWidth, nStyle, _rLayout);
                 nStyle &= ~DrawTextFlags(DrawTextFlags::Center | DrawTextFlags::Right);
                 nStyle |= DrawTextFlags::Left;
                 nTextWidth = _rLayout.GetTextWidth(aStr, 0, aStr.getLength());
@@ -2051,7 +2037,7 @@ OUString RenderContext2::GetEllipsisString(const OUString& rOrigStr, tools::Long
                                            DrawTextFlags nStyle) const
 {
     vcl::DefaultTextLayout aTextLayout(*const_cast<RenderContext2*>(this));
-    return ImplGetEllipsisString(*this, rOrigStr, nMaxWidth, nStyle, aTextLayout);
+    return ImplGetEllipsisString(rOrigStr, nMaxWidth, nStyle, aTextLayout);
 }
 
 void RenderContext2::DrawCtrlText(const Point& rPos, const OUString& rStr, sal_Int32 nIndex,

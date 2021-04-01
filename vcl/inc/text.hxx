@@ -22,8 +22,7 @@
 
 #include <vcl/flags/DrawTextFlags.hxx>
 
-class ImiplMultiTextLineInfo;
-class RenderContext2;
+class ImplMultiTextLineInfo;
 
 namespace vcl
 {
@@ -33,5 +32,8 @@ class ITextLayout;
 tools::Long ImplGetTextLines(ImplMultiTextLineInfo& rLineInfo, tools::Long nWidth,
                              OUString const& rStr, DrawTextFlags nStyle,
                              vcl::ITextLayout const& _rLayout);
+
+OUString ImplGetEllipsisString(OUString const& rStr, tools::Long nMaxWidth, DrawTextFlags nStyle,
+                               vcl::ITextLayout const& _rLayout);
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
