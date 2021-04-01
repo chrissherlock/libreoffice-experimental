@@ -182,10 +182,8 @@ public:
 
     bool                IsScreenComp() const override { return mbScreenComp; }
 
-protected:
-    virtual bool        UsePolyPolygonForComplexGradient() override;
-
 private:
+    virtual bool UsePolyPolygonForComplexGradient() override;
     SAL_DLLPRIVATE void ImplSetReferenceDevice( RefDevMode, sal_Int32 i_nDPIX, sal_Int32 i_nDPIY );
     virtual tools::Long GetFontExtLeading() const override;
 };

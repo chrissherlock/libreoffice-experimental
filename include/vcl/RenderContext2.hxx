@@ -1041,8 +1041,6 @@ protected:
 
     SAL_DLLPRIVATE Color GetSingleColorGradientFill();
 
-    virtual bool UsePolyPolygonForComplexGradient() = 0;
-
     SAL_DLLPRIVATE tools::Long GetGradientSteps(Gradient const& rGradient,
                                                 tools::Rectangle const& rRect, bool bMtf,
                                                 bool bComplex = false);
@@ -1128,6 +1126,8 @@ private:
 
     virtual tools::Long GetFontExtLeading() const;
     virtual void SetFontOrientation(LogicalFontInstance* const pFontInstance) const;
+
+    virtual bool UsePolyPolygonForComplexGradient() = 0;
 
     virtual bool TryDirectBitmapExPaint() const;
     virtual bool CanSubsampleBitmap() const { return true; }

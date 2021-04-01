@@ -740,12 +740,12 @@ protected:
     virtual void                        CopyDeviceArea( SalTwoRect& aPosAry, bool bWindowInvalidate) override;
     virtual void                        DrawOutDevDirect(RenderContext2 const& rSrcDev, SalTwoRect& rPosAry, SalGraphics* pSrcGraphics) override;
     virtual void                        ClipToPaintRegion( tools::Rectangle& rDstRect ) override;
-    virtual bool                        UsePolyPolygonForComplexGradient() override;
 
     virtual void ApplySettings(vcl::RenderContext& rRenderContext);
 
 private:
     virtual RenderContext2 const*       DrawOutDevDirectCheck(RenderContext2 const& rSrcDev) const override;
+    virtual bool                        UsePolyPolygonForComplexGradient() override;
 
 public:
     // Single argument ctors shall be explicit.
