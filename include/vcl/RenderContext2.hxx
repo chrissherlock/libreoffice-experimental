@@ -885,8 +885,6 @@ protected:
     bool ProcessBitmapDrawModeBlackWhite(Point const& rDestPt, Size const& rDestSize);
     Bitmap ProcessBitmapDrawModeGray(Bitmap const& rBitmap);
 
-    virtual bool TryDirectBitmapExPaint() const;
-
     virtual void DrawUntransformedBitmapEx(BitmapEx const& rBitmapEx,
                                            basegfx::B2DVector const& rTranslate,
                                            basegfx::B2DVector const& rScale);
@@ -1202,6 +1200,7 @@ protected:
 private:
     virtual void InitWaveLineColor(Color const& rColor, tools::Long);
 
+    virtual bool TryDirectBitmapExPaint() const;
     virtual bool CanSubsampleBitmap() const { return true; }
 
     virtual RenderContext2 const* DrawOutDevDirectCheck(RenderContext2 const& rSrcDev) const;
