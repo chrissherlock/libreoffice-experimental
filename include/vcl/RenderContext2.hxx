@@ -1032,11 +1032,6 @@ protected:
     SAL_DLLPRIVATE void ImplInitTextLineSize();
     SAL_DLLPRIVATE void ImplInitAboveTextLineSize();
 
-    static SAL_DLLPRIVATE tools::Long ImplGetTextLines(ImplMultiTextLineInfo& rLineInfo,
-                                                       tools::Long nWidth, OUString const& rStr,
-                                                       DrawTextFlags nStyle,
-                                                       vcl::ITextLayout const& _rLayout);
-
     static SAL_DLLPRIVATE OUString ImplGetEllipsisString(RenderContext2 const& rTargetDevice,
                                                          OUString const& rStr,
                                                          tools::Long nMaxWidth,
