@@ -1039,11 +1039,6 @@ protected:
 
     SAL_DLLPRIVATE float approximate_char_width() const;
 
-    SAL_DLLPRIVATE ImplLayoutArgs ImplPrepareLayoutArgs(
-        OUString&, const sal_Int32 nIndex, const sal_Int32 nLen, DeviceCoordinate nPixelWidth,
-        const DeviceCoordinate* pPixelDXArray, SalLayoutFlags flags = SalLayoutFlags::NONE,
-        vcl::TextLayoutCache const* = nullptr) const;
-
     SAL_DLLPRIVATE Color GetSingleColorGradientFill();
 
     SAL_DLLPRIVATE void DrawLinearGradient(tools::Rectangle const& rRect, Gradient const& rGradient,
@@ -1132,6 +1127,11 @@ private:
     SAL_DLLPRIVATE void ImplInitFontList() const;
     SAL_DLLPRIVATE void ImplInitTextColor();
     virtual void InitWaveLineColor(Color const& rColor, tools::Long);
+
+    SAL_DLLPRIVATE ImplLayoutArgs ImplPrepareLayoutArgs(
+        OUString&, const sal_Int32 nIndex, const sal_Int32 nLen, DeviceCoordinate nPixelWidth,
+        const DeviceCoordinate* pPixelDXArray, SalLayoutFlags flags = SalLayoutFlags::NONE,
+        vcl::TextLayoutCache const* = nullptr) const;
 
     virtual tools::Long GetFontExtLeading() const;
     virtual void SetFontOrientation(LogicalFontInstance* const pFontInstance) const;
