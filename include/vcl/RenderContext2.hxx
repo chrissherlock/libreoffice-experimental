@@ -1013,12 +1013,6 @@ protected:
      */
     SAL_DLLPRIVATE vcl::Region ImplPixelToDevicePixel(const vcl::Region& rRegion) const;
 
-    /** Invalidate the view transformation.
-
-     @since AOO bug 75163 (OpenOffice.org 2.4.3 - OOH 680 milestone 212)
-     */
-    SAL_DLLPRIVATE void ImplInvalidateViewTransform();
-
     SAL_DLLPRIVATE bool is_double_buffered_window() const;
 
     SAL_DLLPRIVATE bool InitFont() const;
@@ -1321,6 +1315,12 @@ private:
      @returns Exact height in pixels - returns as a float to provide for subpixel value.
      */
     SAL_DLLPRIVATE float ImplFloatLogicHeightToDevicePixel(float fLogicHeight) const;
+
+    /** Invalidate the view transformation.
+
+     @since AOO bug 75163 (OpenOffice.org 2.4.3 - OOH 680 milestone 212)
+     */
+    SAL_DLLPRIVATE void ImplInvalidateViewTransform();
 
     vcl::ExtOutDevData* mpExtOutDevData;
     std::vector<OutDevState> maOutDevStateStack;
