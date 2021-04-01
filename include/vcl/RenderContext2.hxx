@@ -1045,8 +1045,6 @@ protected:
                                                 tools::Rectangle const& rRect, bool bMtf,
                                                 bool bComplex = false);
 
-    virtual tools::Long GetGradientStepCount(tools::Long nMinRect);
-
     mutable SalGraphics* mpGraphics; ///< Graphics context to draw on
     VclPtr<VirtualDevice> mpAlphaVDev;
 
@@ -1128,6 +1126,7 @@ private:
     virtual void SetFontOrientation(LogicalFontInstance* const pFontInstance) const;
 
     virtual bool UsePolyPolygonForComplexGradient() = 0;
+    virtual tools::Long GetGradientStepCount(tools::Long nMinRect);
 
     virtual bool TryDirectBitmapExPaint() const;
     virtual bool CanSubsampleBitmap() const { return true; }
