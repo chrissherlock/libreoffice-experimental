@@ -183,7 +183,7 @@ void RenderContext2::DrawText(tools::Rectangle const& rRect, OUString const& rOr
     // #i47157# Factored out to ImplDrawText(), to be used also
     // from AddTextRectActions()
     vcl::DefaultTextLayout aDefaultLayout(*this);
-    ImplDrawText(*this, rRect, rOrigStr, nStyle, pVector, pDisplayText,
+    ImplDrawText(rRect, rOrigStr, nStyle, pVector, pDisplayText,
                  _pTextLayout ? *_pTextLayout : aDefaultLayout);
 
     if (mpAlphaVDev)
@@ -1879,10 +1879,9 @@ sal_Int32 RenderContext2::GetTextBreak(const OUString& rStr, tools::Long nTextWi
     return nRetVal;
 }
 
-void RenderContext2::ImplDrawText(RenderContext2& rTargetDevice, const tools::Rectangle& rRect,
-                                  const OUString& rOrigStr, DrawTextFlags nStyle,
-                                  std::vector<tools::Rectangle>* pVector, OUString* pDisplayText,
-                                  vcl::ITextLayout& _rLayout)
+void RenderContext2::ImplDrawText(tools::Rectangle const& rRect, OUString const& rOrigStr,
+                                  DrawTextFlags nStyle, std::vector<tools::Rectangle>* pVector,
+                                  OUString* pDisplayText, vcl::ITextLayout& _rLayout)
 {
     Color aOldTextColor;
     Color aOldTextFillColor;
@@ -1891,12 +1890,12 @@ void RenderContext2::ImplDrawText(RenderContext2& rTargetDevice, const tools::Re
     {
         bool bHighContrastBlack = false;
         bool bHighContrastWhite = false;
-        const StyleSettings& rStyleSettings(rTargetDevice.GetSettings().GetStyleSettings());
+        const StyleSettings& rStyleSettings(GetSettings().GetStyleSettings());
         if (rStyleSettings.GetHighContrastMode())
         {
             Color aCol;
-            if (rTargetDevice.IsBackground())
-                aCol = rTargetDevice.GetBackground().GetColor();
+            if (IsBackground())
+                aCol = GetBackground().GetColor();
             else
                 // best guess is the face color here
                 // but it may be totally wrong. the background color
@@ -1907,22 +1906,26 @@ void RenderContext2::ImplDrawText(RenderContext2& rTargetDevice, const tools::Re
             bHighContrastWhite = aCol.IsBright();
         }
 
-        aOldTextColor = rTargetDevice.GetTextColor();
-        if (rTargetDevice.IsTextFillColor())
+        aOldTextColor = GetTextColor();
+        if (IsTextFillColor())
         {
             bRestoreFillColor = true;
-            aOldTextFillColor = rTargetDevice.GetTextFillColor();
+            aOldTextFillColor = GetTextFillColor();
         }
+
         if (bHighContrastBlack)
-            rTargetDevice.SetTextColor(COL_GREEN);
+        {
+            SetTextColor(COL_GREEN);
+        }
         else if (bHighContrastWhite)
-            rTargetDevice.SetTextColor(COL_LIGHTGREEN);
+        {
+            SetTextColor(COL_LIGHTGREEN);
+        }
         else
         {
             // draw disabled text always without shadow
             // as it fits better with native look
-            rTargetDevice.SetTextColor(
-                rTargetDevice.GetSettings().GetStyleSettings().GetDisableColor());
+            SetTextColor(GetSettings().GetStyleSettings().GetDisableColor());
         }
     }
 
@@ -1934,17 +1937,17 @@ void RenderContext2::ImplDrawText(RenderContext2& rTargetDevice, const tools::Re
 
     Point aPos = rRect.TopLeft();
 
-    tools::Long nTextHeight = rTargetDevice.GetTextHeight();
-    TextAlign eAlign = rTargetDevice.GetTextAlign();
+    tools::Long nTextHeight = GetTextHeight();
+    TextAlign eAlign = GetTextAlign();
     sal_Int32 nMnemonicPos = -1;
 
     OUString aStr = rOrigStr;
     if (nStyle & DrawTextFlags::Mnemonic)
         aStr = GetNonMnemonicString(aStr, nMnemonicPos);
 
-    const bool bDrawMnemonics = !(rTargetDevice.GetSettings().GetStyleSettings().GetOptions()
-                                  & StyleSettingsOptions::NoMnemonics)
-                                && !pVector;
+    const bool bDrawMnemonics
+        = !(GetSettings().GetStyleSettings().GetOptions() & StyleSettingsOptions::NoMnemonics)
+          && !pVector;
 
     // We treat multiline text differently
     if (nStyle & DrawTextFlags::MultiLine)
@@ -1981,8 +1984,7 @@ void RenderContext2::ImplDrawText(RenderContext2& rTargetDevice, const tools::Re
                             aLastLineBuffer[i] = ' ';
                     }
                     aLastLine = aLastLineBuffer.makeStringAndClear();
-                    aLastLine
-                        = ImplGetEllipsisString(rTargetDevice, aLastLine, nWidth, nStyle, _rLayout);
+                    aLastLine = ImplGetEllipsisString(*this, aLastLine, nWidth, nStyle, _rLayout);
                     nStyle &= ~DrawTextFlags(DrawTextFlags::VCenter | DrawTextFlags::Bottom);
                     nStyle |= DrawTextFlags::Top;
                 }
@@ -2000,8 +2002,8 @@ void RenderContext2::ImplDrawText(RenderContext2& rTargetDevice, const tools::Re
             // Set clipping
             if (nStyle & DrawTextFlags::Clip)
             {
-                rTargetDevice.Push(PushFlags::CLIPREGION);
-                rTargetDevice.IntersectClipRegion(rRect);
+                Push(PushFlags::CLIPREGION);
+                IntersectClipRegion(rRect);
             }
 
             // Vertical alignment
@@ -2014,7 +2016,7 @@ void RenderContext2::ImplDrawText(RenderContext2& rTargetDevice, const tools::Re
             if (eAlign == ALIGN_BOTTOM)
                 aPos.AdjustY(nTextHeight);
             else if (eAlign == ALIGN_BASELINE)
-                aPos.AdjustY(rTargetDevice.GetFontMetric().GetAscent());
+                aPos.AdjustY(GetFontMetric().GetAscent());
 
             // Output all lines except for the last one
             for (i = 0; i < nFormatLines; i++)
@@ -2041,17 +2043,14 @@ void RenderContext2::ImplDrawText(RenderContext2& rTargetDevice, const tools::Re
                                                                       nIndex, nLineLen);
                         tools::Long lc_x1 = pCaretXArray[2 * (nMnemonicPos - nIndex)];
                         tools::Long lc_x2 = pCaretXArray[2 * (nMnemonicPos - nIndex) + 1];
-                        nMnemonicWidth
-                            = rTargetDevice.LogicWidthToDeviceCoordinate(std::abs(lc_x1 - lc_x2));
+                        nMnemonicWidth = LogicWidthToDeviceCoordinate(std::abs(lc_x1 - lc_x2));
 
-                        Point aTempPos = rTargetDevice.LogicToPixel(aPos);
-                        nMnemonicX
-                            = rTargetDevice.GetOutOffXPixel() + aTempPos.X()
-                              + rTargetDevice.ImplLogicWidthToDevicePixel(std::min(lc_x1, lc_x2));
-                        nMnemonicY = rTargetDevice.GetOutOffYPixel() + aTempPos.Y()
-                                     + rTargetDevice.ImplLogicWidthToDevicePixel(
-                                           rTargetDevice.GetFontMetric().GetAscent());
-                        rTargetDevice.ImplDrawMnemonicLine(nMnemonicX, nMnemonicY, nMnemonicWidth);
+                        Point aTempPos = LogicToPixel(aPos);
+                        nMnemonicX = GetOutOffXPixel() + aTempPos.X()
+                                     + ImplLogicWidthToDevicePixel(std::min(lc_x1, lc_x2));
+                        nMnemonicY = GetOutOffYPixel() + aTempPos.Y()
+                                     + ImplLogicWidthToDevicePixel(GetFontMetric().GetAscent());
+                        ImplDrawMnemonicLine(nMnemonicX, nMnemonicY, nMnemonicWidth);
                     }
                 }
                 aPos.AdjustY(nTextHeight);
@@ -2064,7 +2063,7 @@ void RenderContext2::ImplDrawText(RenderContext2& rTargetDevice, const tools::Re
 
             // Reset clipping
             if (nStyle & DrawTextFlags::Clip)
-                rTargetDevice.Pop();
+                Pop();
         }
     }
     else
@@ -2076,7 +2075,7 @@ void RenderContext2::ImplDrawText(RenderContext2& rTargetDevice, const tools::Re
         {
             if (nStyle & TEXT_DRAW_ELLIPSIS)
             {
-                aStr = ImplGetEllipsisString(rTargetDevice, aStr, nWidth, nStyle, _rLayout);
+                aStr = ImplGetEllipsisString(*this, aStr, nWidth, nStyle, _rLayout);
                 nStyle &= ~DrawTextFlags(DrawTextFlags::Center | DrawTextFlags::Right);
                 nStyle |= DrawTextFlags::Left;
                 nTextWidth = _rLayout.GetTextWidth(aStr, 0, aStr.getLength());
@@ -2098,7 +2097,7 @@ void RenderContext2::ImplDrawText(RenderContext2& rTargetDevice, const tools::Re
         if (eAlign == ALIGN_BOTTOM)
             aPos.AdjustY(nTextHeight);
         else if (eAlign == ALIGN_BASELINE)
-            aPos.AdjustY(rTargetDevice.GetFontMetric().GetAscent());
+            aPos.AdjustY(GetFontMetric().GetAscent());
 
         if (nStyle & DrawTextFlags::Bottom)
             aPos.AdjustY(nHeight - nTextHeight);
@@ -2116,38 +2115,37 @@ void RenderContext2::ImplDrawText(RenderContext2& rTargetDevice, const tools::Re
                                                           aStr.getLength());
             tools::Long lc_x1 = pCaretXArray[2 * nMnemonicPos];
             tools::Long lc_x2 = pCaretXArray[2 * nMnemonicPos + 1];
-            nMnemonicWidth = rTargetDevice.LogicWidthToDeviceCoordinate(std::abs(lc_x1 - lc_x2));
+            nMnemonicWidth = LogicWidthToDeviceCoordinate(std::abs(lc_x1 - lc_x2));
 
-            Point aTempPos = rTargetDevice.LogicToPixel(aPos);
-            nMnemonicX = rTargetDevice.GetOutOffXPixel() + aTempPos.X()
-                         + rTargetDevice.ImplLogicWidthToDevicePixel(std::min(lc_x1, lc_x2));
-            nMnemonicY = rTargetDevice.GetOutOffYPixel() + aTempPos.Y()
-                         + rTargetDevice.ImplLogicWidthToDevicePixel(
-                               rTargetDevice.GetFontMetric().GetAscent());
+            Point aTempPos = LogicToPixel(aPos);
+            nMnemonicX = GetOutOffXPixel() + aTempPos.X()
+                         + ImplLogicWidthToDevicePixel(std::min(lc_x1, lc_x2));
+            nMnemonicY = GetOutOffYPixel() + aTempPos.Y()
+                         + ImplLogicWidthToDevicePixel(GetFontMetric().GetAscent());
         }
 
         if (nStyle & DrawTextFlags::Clip)
         {
-            rTargetDevice.Push(PushFlags::CLIPREGION);
-            rTargetDevice.IntersectClipRegion(rRect);
+            Push(PushFlags::CLIPREGION);
+            IntersectClipRegion(rRect);
             _rLayout.DrawText(aPos, aStr, 0, aStr.getLength(), pVector, pDisplayText);
             if (bDrawMnemonics && nMnemonicPos != -1)
-                rTargetDevice.ImplDrawMnemonicLine(nMnemonicX, nMnemonicY, nMnemonicWidth);
-            rTargetDevice.Pop();
+                ImplDrawMnemonicLine(nMnemonicX, nMnemonicY, nMnemonicWidth);
+            Pop();
         }
         else
         {
             _rLayout.DrawText(aPos, aStr, 0, aStr.getLength(), pVector, pDisplayText);
             if (bDrawMnemonics && nMnemonicPos != -1)
-                rTargetDevice.ImplDrawMnemonicLine(nMnemonicX, nMnemonicY, nMnemonicWidth);
+                ImplDrawMnemonicLine(nMnemonicX, nMnemonicY, nMnemonicWidth);
         }
     }
 
     if (nStyle & DrawTextFlags::Disable && !pVector)
     {
-        rTargetDevice.SetTextColor(aOldTextColor);
+        SetTextColor(aOldTextColor);
         if (bRestoreFillColor)
-            rTargetDevice.SetTextFillColor(aOldTextFillColor);
+            SetTextFillColor(aOldTextFillColor);
     }
 }
 

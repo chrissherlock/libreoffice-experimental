@@ -848,10 +848,9 @@ protected:
     virtual void DrawOutDevDirect(RenderContext2 const& rSrcDev, SalTwoRect& rPosAry,
                                   SalGraphics* pSrcGraphics);
 
-    static void ImplDrawText(RenderContext2& rTargetDevice, tools::Rectangle const& rRect,
-                             OUString const& rOrigStr, DrawTextFlags nStyle,
-                             std::vector<tools::Rectangle>* pVector, OUString* pDisplayText,
-                             vcl::ITextLayout& _rLayout);
+    void ImplDrawText(tools::Rectangle const& rRect, OUString const& rOrigStr, DrawTextFlags nStyle,
+                      std::vector<tools::Rectangle>* pVector, OUString* pDisplayText,
+                      vcl::ITextLayout& _rLayout);
 
     SAL_DLLPRIVATE void ImplDrawTextRect(tools::Long nBaseX, tools::Long nBaseY, tools::Long nX,
                                          tools::Long nY, tools::Long nWidth, tools::Long nHeight);
