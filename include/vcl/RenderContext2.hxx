@@ -856,11 +856,6 @@ protected:
                                     Point const& rSrcPtPixel, Size const& rSrcSizePixel,
                                     BitmapEx& rBitmapEx);
 
-    // make private
-    SAL_DLLPRIVATE void DrawDeviceAlphaBitmap(Bitmap const& rBmp, AlphaMask const& rAlpha,
-                                              Point const& rDestPt, Size const& rDestSize,
-                                              Point const& rSrcPtPixel, Size const& rSrcSizePixel);
-
     /** Transform and draw a bitmap directly
 
      @param     rFullTransform      The B2DHomMatrix used for the transformation
@@ -1233,6 +1228,10 @@ protected:
 
 private:
     virtual RenderContext2 const* DrawOutDevDirectCheck(RenderContext2 const& rSrcDev) const;
+
+    SAL_DLLPRIVATE void DrawDeviceAlphaBitmap(Bitmap const& rBmp, AlphaMask const& rAlpha,
+                                              Point const& rDestPt, Size const& rDestSize,
+                                              Point const& rSrcPtPixel, Size const& rSrcSizePixel);
 
     SAL_DLLPRIVATE void DrawDeviceAlphaBitmapSlowPath(Bitmap const& rBitmap,
                                                       AlphaMask const& rAlpha,
