@@ -23,6 +23,7 @@
 #include <memory>
 
 class Control;
+class RenderContext2;
 
 namespace vcl
 {
