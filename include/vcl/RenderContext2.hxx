@@ -1016,7 +1016,6 @@ protected:
     SAL_DLLPRIVATE bool is_double_buffered_window() const;
 
     SAL_DLLPRIVATE bool ImplNewFont() const;
-    virtual void SetFontOrientation(LogicalFontInstance* const pFontInstance) const;
 
     SAL_DLLPRIVATE const LogicalFontInstance* GetFontInstance() const;
     SAL_DLLPRIVATE tools::Long GetEmphasisAscent() const { return mnEmphasisAscent; }
@@ -1150,6 +1149,8 @@ private:
     SAL_DLLPRIVATE void ImplInitFontList() const;
     SAL_DLLPRIVATE void ImplInitTextColor();
     virtual void InitWaveLineColor(Color const& rColor, tools::Long);
+
+    virtual void SetFontOrientation(LogicalFontInstance* const pFontInstance) const;
 
     virtual bool TryDirectBitmapExPaint() const;
     virtual bool CanSubsampleBitmap() const { return true; }
