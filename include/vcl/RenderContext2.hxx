@@ -1041,13 +1041,6 @@ protected:
 
     SAL_DLLPRIVATE Color GetSingleColorGradientFill();
 
-    SAL_DLLPRIVATE void DrawLinearGradient(tools::Rectangle const& rRect, Gradient const& rGradient,
-                                           tools::PolyPolygon const* pClipPolyPoly);
-
-    SAL_DLLPRIVATE void DrawComplexGradient(tools::Rectangle const& rRect,
-                                            Gradient const& rGradient,
-                                            tools::PolyPolygon const* pClipPolyPoly);
-
     virtual bool UsePolyPolygonForComplexGradient() = 0;
 
     SAL_DLLPRIVATE tools::Long GetGradientSteps(Gradient const& rGradient,
@@ -1140,6 +1133,13 @@ private:
     virtual bool CanSubsampleBitmap() const { return true; }
 
     virtual RenderContext2 const* DrawOutDevDirectCheck(RenderContext2 const& rSrcDev) const;
+
+    SAL_DLLPRIVATE void DrawLinearGradient(tools::Rectangle const& rRect, Gradient const& rGradient,
+                                           tools::PolyPolygon const* pClipPolyPoly);
+
+    SAL_DLLPRIVATE void DrawComplexGradient(tools::Rectangle const& rRect,
+                                            Gradient const& rGradient,
+                                            tools::PolyPolygon const* pClipPolyPoly);
 
     SAL_DLLPRIVATE void DrawDeviceAlphaBitmap(Bitmap const& rBmp, AlphaMask const& rAlpha,
                                               Point const& rDestPt, Size const& rDestSize,
