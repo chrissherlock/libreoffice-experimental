@@ -929,32 +929,6 @@ protected:
      */
     SAL_DLLPRIVATE basegfx::B2DHomMatrix ImplGetDeviceTransformation() const;
 
-    /** Convert a logical X coordinate to a device pixel's X coordinate.
-
-     To get the device's X coordinate, it must calculate the mapping offset
-     coordinate X position (if there is one - if not then it just adds
-     the pseudo-window offset to the logical X coordinate), the X-DPI of
-     the device and the mapping's X scaling factor.
-
-     @param         nX          Logical X coordinate
-
-     @returns Device's X pixel coordinate
-     */
-    SAL_DLLPRIVATE tools::Long ImplLogicXToDevicePixel(tools::Long nX) const;
-
-    /** Convert a logical Y coordinate to a device pixel's Y coordinate.
-
-     To get the device's Y coordinate, it must calculate the mapping offset
-     coordinate Y position (if there is one - if not then it just adds
-     the pseudo-window offset to the logical Y coordinate), the Y-DPI of
-     the device and the mapping's Y scaling factor.
-
-     @param         nY          Logical Y coordinate
-
-     @returns Device's Y pixel coordinate
-     */
-    SAL_DLLPRIVATE tools::Long ImplLogicYToDevicePixel(tools::Long nY) const;
-
     /** Convert a logical height to a height in units of device pixels.
 
      To get the number of device pixels, it must calculate the Y-DPI of the device and
@@ -1321,6 +1295,32 @@ private:
     SAL_DLLPRIVATE void SetDeviceClipRegion(vcl::Region const* pRegion);
 
     SAL_DLLPRIVATE DeviceCoordinate LogicWidthToDeviceCoordinate(tools::Long nWidth) const;
+
+    /** Convert a logical X coordinate to a device pixel's X coordinate.
+
+     To get the device's X coordinate, it must calculate the mapping offset
+     coordinate X position (if there is one - if not then it just adds
+     the pseudo-window offset to the logical X coordinate), the X-DPI of
+     the device and the mapping's X scaling factor.
+
+     @param         nX          Logical X coordinate
+
+     @returns Device's X pixel coordinate
+     */
+    SAL_DLLPRIVATE tools::Long ImplLogicXToDevicePixel(tools::Long nX) const;
+
+    /** Convert a logical Y coordinate to a device pixel's Y coordinate.
+
+     To get the device's Y coordinate, it must calculate the mapping offset
+     coordinate Y position (if there is one - if not then it just adds
+     the pseudo-window offset to the logical Y coordinate), the Y-DPI of
+     the device and the mapping's Y scaling factor.
+
+     @param         nY          Logical Y coordinate
+
+     @returns Device's Y pixel coordinate
+     */
+    SAL_DLLPRIVATE tools::Long ImplLogicYToDevicePixel(tools::Long nY) const;
 
     vcl::ExtOutDevData* mpExtOutDevData;
     std::vector<OutDevState> maOutDevStateStack;
