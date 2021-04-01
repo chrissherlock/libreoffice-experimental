@@ -785,7 +785,7 @@ void RenderContext2::DrawDeviceAlphaBitmap(Bitmap const& rBmp, AlphaMask const& 
                 if (mpGraphics->BlendAlphaBitmap(aTR, *pSalSrcBmp, *pSalAlphaBmp, *pSalAlphaBmp2,
                                                  *this))
                 {
-                    mpAlphaVDev->RenderContext2::BlendBitmap(aTR, rAlpha);
+                    mpAlphaVDev->BlendBitmap(aTR, rAlpha);
                     return;
                 }
             }

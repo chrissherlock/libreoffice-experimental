@@ -219,8 +219,6 @@ public:
                       std::vector<tools::Rectangle>* pVector = nullptr,
                       OUString* pDisplayText = nullptr, SalLayoutGlyphs const* pGlyphs = nullptr);
 
-    SAL_DLLPRIVATE void BlendBitmap(SalTwoRect const& rPosAry, Bitmap const& rBmp);
-
     /** Query extended bitmap (with alpha channel, if available).
      */
     BitmapEx GetBitmapEx(Point const& rSrcPt, Size const& rSize) const;
@@ -855,6 +853,8 @@ protected:
     virtual void DrawDeviceBitmapEx(Point const& rDestPt, Size const& rDestSize,
                                     Point const& rSrcPtPixel, Size const& rSrcSizePixel,
                                     BitmapEx& rBitmapEx);
+
+    SAL_DLLPRIVATE void BlendBitmap(SalTwoRect const& rPosAry, Bitmap const& rBmp);
 
     virtual bool DrawPolyLineDirect(basegfx::B2DHomMatrix const& rObjectTransform,
                                     basegfx::B2DPolygon const& rB2DPolygon, double fLineWidth = 0.0,
