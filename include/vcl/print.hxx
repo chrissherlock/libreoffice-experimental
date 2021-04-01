@@ -214,12 +214,11 @@ protected:
     virtual void                ClipAndDrawGradientMetafile ( const Gradient &rGradient,
                                     const tools::PolyPolygon &rPolyPoly ) override;
 
-    vcl::Region                 ClipToDeviceBounds(vcl::Region aRegion) const override;
-
     void                        InitWaveLineColor(Color const& rColor, tools::Long nLineWidth) override;
     std::tuple<bool, Size>      GetWaveLineSize(tools::Long nLineWidth) const override;
 
 private:
+    vcl::Region                 ClipToDeviceBounds(vcl::Region aRegion) const override;
     bool                        CanSubsampleBitmap() const override { return false; }
 
 public:
