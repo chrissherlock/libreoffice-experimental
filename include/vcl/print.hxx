@@ -238,10 +238,6 @@ public:
     css::awt::DeviceInfo GetDeviceInfo() const override;
 
 protected:
-    virtual void                DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
-                                    const Point& rDestPt, const Size& rDestSize,
-                                    const Point& rSrcPtPixel, const Size& rSrcSizePixel) override;
-
     void                        DrawDeviceBitmapEx( const Point& rDestPt, const Size& rDestSize,
                                     const Point& rSrcPtPixel, const Size& rSrcSizePixel,
                                     BitmapEx& rBitmapEx ) override;
@@ -255,6 +251,10 @@ protected:
                                                            basegfx::B2DRange const& rVisibleRange) override;
 
 private:
+    virtual void                DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
+                                    const Point& rDestPt, const Size& rDestSize,
+                                    const Point& rSrcPtPixel, const Size& rSrcSizePixel) override;
+
     bool                        DrawTransformBitmapExDirect( const basegfx::B2DHomMatrix& aFullTransform,
                                     const BitmapEx& rBitmapEx, double fAlpha = 1.0) override;
 
