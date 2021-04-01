@@ -715,7 +715,6 @@ private:
 
 public:
     virtual vcl::Region                 GetActiveClipRegion() const override;
-    virtual vcl::Region                 GetOutputBoundsClipRegion() const override;
 
 protected:
     // Single argument ctors shall be explicit.
@@ -728,6 +727,7 @@ protected:
     virtual bool                        AcquireGraphics() const override;
     virtual void                        ReleaseGraphics( bool bRelease = true ) override;
 
+    virtual vcl::Region                 GetOutputBoundsClipRegion() const override;
     virtual void                        InitClipRegion() override;
 
     void ImplClearFontData(bool bNewFontLists) override;
