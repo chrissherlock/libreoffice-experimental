@@ -226,6 +226,8 @@ void RenderContext2::DrawTextArray(Point const& rStartPt, OUString const& rStr,
 void RenderContext2::DrawStretchText(Point const& rStartPt, sal_uLong nWidth, OUString const& rStr,
                                      sal_Int32 nIndex, sal_Int32 nLen)
 {
+    assert(!is_double_buffered_window());
+
     if ((nLen < 0) || (nIndex + nLen >= rStr.getLength()))
         nLen = rStr.getLength() - nIndex;
 
@@ -245,6 +247,8 @@ void RenderContext2::DrawTextLine(Point const& rPos, tools::Long nWidth, FontStr
                                   FontLineStyle eUnderline, FontLineStyle eOverline,
                                   bool bUnderlineAbove)
 {
+    assert(!is_double_buffered_window());
+
     if (((eUnderline == LINESTYLE_NONE) || (eUnderline == LINESTYLE_DONTKNOW))
         && ((eOverline == LINESTYLE_NONE) || (eOverline == LINESTYLE_DONTKNOW))
         && ((eStrikeout == STRIKEOUT_NONE) || (eStrikeout == STRIKEOUT_DONTKNOW)))

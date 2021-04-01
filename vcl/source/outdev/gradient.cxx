@@ -18,7 +18,6 @@
  */
 
 #include <tools/poly.hxx>
-#include <vcl/gdimtf.hxx>
 #include <vcl/gradient.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/settings.hxx>
@@ -26,16 +25,12 @@
 #include <vcl/window.hxx>
 
 #include <drawmode.hxx>
-#include <salgdi.hxx>
 
-#include <cassert>
 #include <algorithm>
 #include <memory>
 
 void OutputDevice::DrawGradient(tools::Rectangle const& rRect, Gradient const& rGradient)
 {
-    assert(!is_double_buffered_window());
-
     // Convert rectangle to a tools::PolyPolygon by first converting to a Polygon
     tools::Polygon aPolygon(rRect);
     tools::PolyPolygon aPolyPoly(aPolygon);
@@ -45,8 +40,6 @@ void OutputDevice::DrawGradient(tools::Rectangle const& rRect, Gradient const& r
 
 void OutputDevice::DrawGradient(tools::PolyPolygon const& rPolyPoly, Gradient const& rGradient)
 {
-    assert(!is_double_buffered_window());
-
     if (mbInitClipRegion)
         InitClipRegion();
 
@@ -177,8 +170,6 @@ static sal_uInt8 GetGradientColorValue(tools::Long nValue)
 void OutputDevice::DrawLinearGradientToMetafile(const tools::Rectangle& rRect,
                                                 const Gradient& rGradient)
 {
-    assert(!is_double_buffered_window());
-
     // get BoundRect of rotated rectangle
     tools::Rectangle aRect;
     Point aCenter;
@@ -363,8 +354,6 @@ void OutputDevice::DrawLinearGradientToMetafile(const tools::Rectangle& rRect,
 void OutputDevice::DrawComplexGradientToMetafile(const tools::Rectangle& rRect,
                                                  const Gradient& rGradient)
 {
-    assert(!is_double_buffered_window());
-
     // Determine if we output via Polygon or PolyPolygon
     // For all rasteroperations other than Overpaint always use PolyPolygon,
     // as we will get wrong results if we output multiple times on top of each other.

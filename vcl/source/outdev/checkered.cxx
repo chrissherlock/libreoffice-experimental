@@ -24,8 +24,6 @@
 void OutputDevice::DrawCheckered(Point const& rPos, Size const& rSize, sal_uInt32 nLen,
                                  Color aStart, Color aEnd)
 {
-    assert(!is_double_buffered_window());
-
     const sal_uInt32 nMaxX(rPos.X() + rSize.Width());
     const sal_uInt32 nMaxY(rPos.Y() + rSize.Height());
 

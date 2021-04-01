@@ -29,8 +29,6 @@ void OutputDevice::DrawText(Point const& rStartPt, OUString const& rStr, sal_Int
                             sal_Int32 nLen, std::vector<tools::Rectangle>* pVector,
                             OUString* pDisplayText, SalLayoutGlyphs const* pLayoutCache)
 {
-    assert(!is_double_buffered_window());
-
     if ((nLen < 0) || (nIndex + nLen >= rStr.getLength()))
         nLen = rStr.getLength() - nIndex;
 
@@ -44,8 +42,6 @@ void OutputDevice::DrawText(tools::Rectangle const& rRect, OUString const& rOrig
                             DrawTextFlags nStyle, std::vector<tools::Rectangle>* pVector,
                             OUString* pDisplayText, vcl::ITextLayout* _pTextLayout)
 {
-    assert(!is_double_buffered_window());
-
     bool bDecomposeTextRectAction
         = (_pTextLayout != nullptr) && _pTextLayout->DecomposeTextRectAction();
 
@@ -59,8 +55,6 @@ void OutputDevice::DrawTextArray(Point const& rStartPt, OUString const& rStr,
                                  tools::Long const* pDXAry, sal_Int32 nIndex, sal_Int32 nLen,
                                  SalLayoutFlags flags, SalLayoutGlyphs const* pSalLayoutCache)
 {
-    assert(!is_double_buffered_window());
-
     if (nLen < 0 || nIndex + nLen >= rStr.getLength())
         nLen = rStr.getLength() - nIndex;
 
@@ -73,8 +67,6 @@ void OutputDevice::DrawTextArray(Point const& rStartPt, OUString const& rStr,
 void OutputDevice::DrawStretchText(Point const& rStartPt, sal_uLong nWidth, OUString const& rStr,
                                    sal_Int32 nIndex, sal_Int32 nLen)
 {
-    assert(!is_double_buffered_window());
-
     if ((nLen < 0) || (nIndex + nLen >= rStr.getLength()))
         nLen = rStr.getLength() - nIndex;
 
@@ -88,8 +80,6 @@ void OutputDevice::DrawTextLine(const Point& rPos, tools::Long nWidth, FontStrik
                                 FontLineStyle eUnderline, FontLineStyle eOverline,
                                 bool bUnderlineAbove)
 {
-    assert(!is_double_buffered_window());
-
     if (ImplIsRecordLayout())
         return;
 

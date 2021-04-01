@@ -21,7 +21,6 @@
 #include <tools/helpers.hxx>
 #include <tools/line.hxx>
 
-#include <vcl/gdimtf.hxx>
 #include <vcl/hatch.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/outdev.hxx>
@@ -29,14 +28,11 @@
 
 #include <drawmode.hxx>
 
-#include <cassert>
 #include <cstdlib>
 #include <memory>
 
 void OutputDevice::DrawHatch(tools::PolyPolygon const& rPolyPoly, Hatch const& rHatch)
 {
-    assert(!is_double_buffered_window());
-
     Hatch aHatch(rHatch);
     aHatch.SetColor(GetDrawModeHatchColor(rHatch.GetColor(), GetDrawMode(), GetSettings().GetStyleSettings()));
 
@@ -49,8 +45,6 @@ void OutputDevice::DrawHatch(tools::PolyPolygon const& rPolyPoly, Hatch const& r
 void OutputDevice::DrawHatchLines(tools::Line const& rLine, tools::PolyPolygon const& rPolyPoly,
                                  Point* pPtBuffer)
 {
-    assert(!is_double_buffered_window());
-
     tools::Long nPCounter = 0;
     std::tie(nPCounter, pPtBuffer) = GenerateHatchPointBuffer(rLine, rPolyPoly, pPtBuffer);
 
@@ -68,8 +62,6 @@ void OutputDevice::DrawHatchLine(Point const& rStartPoint, Point const& rEndPoin
 void OutputDevice::AddHatchActions(tools::PolyPolygon const& rPolyPoly, Hatch const& rHatch,
                                    GDIMetaFile& rMtf)
 {
-    assert(!is_double_buffered_window());
-
     tools::PolyPolygon aPolyPoly(rPolyPoly);
     aPolyPoly.Optimize(PolyOptimizeFlags::NO_SAME | PolyOptimizeFlags::CLOSE);
 

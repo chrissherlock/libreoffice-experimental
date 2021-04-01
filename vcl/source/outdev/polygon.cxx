@@ -20,16 +20,11 @@
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <tools/poly.hxx>
 
-#include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/outdev.hxx>
 
-#include <cassert>
-
 void OutputDevice::DrawPolygon(basegfx::B2DPolygon const& rB2DPolygon)
 {
-    assert(!is_double_buffered_window());
-
     // AW: Do NOT paint empty polygons
     if (rB2DPolygon.count())
     {
@@ -40,8 +35,6 @@ void OutputDevice::DrawPolygon(basegfx::B2DPolygon const& rB2DPolygon)
 
 void OutputDevice::DrawPolygon(tools::Polygon const& rPoly)
 {
-    assert(!is_double_buffered_window());
-
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaPolygonAction(rPoly));
 

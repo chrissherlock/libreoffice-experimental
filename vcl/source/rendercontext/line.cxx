@@ -32,6 +32,8 @@
 
 void RenderContext2::DrawLine(Point const& rStartPt, Point const& rEndPt)
 {
+    assert(!is_double_buffered_window());
+
     if (ImplIsRecordLayout())
         return;
 
@@ -91,6 +93,8 @@ void RenderContext2::DrawLine(Point const& rStartPt, Point const& rEndPt)
 
 void RenderContext2::DrawLine(Point const& rStartPt, Point const& rEndPt, LineInfo const& rLineInfo)
 {
+    assert(!is_double_buffered_window());
+
     if (ImplIsRecordLayout())
         return;
 

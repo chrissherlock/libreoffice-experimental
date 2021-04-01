@@ -25,6 +25,8 @@
 
 void RenderContext2::DrawEllipse(tools::Rectangle const& rRect)
 {
+    assert(!is_double_buffered_window());
+
     if (ImplIsRecordLayout())
         return;
 
@@ -75,6 +77,8 @@ void RenderContext2::DrawEllipse(tools::Rectangle const& rRect)
 void RenderContext2::DrawArc(tools::Rectangle const& rRect, Point const& rStartPt,
                              Point const& rEndPt)
 {
+    assert(!is_double_buffered_window());
+
     if (ImplIsRecordLayout())
         return;
 
@@ -117,6 +121,8 @@ void RenderContext2::DrawArc(tools::Rectangle const& rRect, Point const& rStartP
 void RenderContext2::DrawPie(tools::Rectangle const& rRect, Point const& rStartPt,
                              Point const& rEndPt)
 {
+    assert(!is_double_buffered_window());
+
     if (ImplIsRecordLayout())
         return;
 
@@ -169,6 +175,8 @@ void RenderContext2::DrawPie(tools::Rectangle const& rRect, Point const& rStartP
 void RenderContext2::DrawChord(tools::Rectangle const& rRect, Point const& rStartPt,
                                Point const& rEndPt)
 {
+    assert(!is_double_buffered_window());
+
     if (ImplIsRecordLayout())
         return;
 

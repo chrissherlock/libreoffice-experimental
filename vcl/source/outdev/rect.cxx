@@ -20,14 +20,8 @@
 #include <vcl/metaact.hxx>
 #include <vcl/outdev.hxx>
 
-#include <salgdi.hxx>
-
-#include <cassert>
-
 void OutputDevice::DrawRect(tools::Rectangle const& rRect)
 {
-    assert(!is_double_buffered_window());
-
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaRectAction(rRect));
 
@@ -37,8 +31,6 @@ void OutputDevice::DrawRect(tools::Rectangle const& rRect)
 void OutputDevice::DrawRect(tools::Rectangle const& rRect,
                              sal_uLong nHorzRound, sal_uLong nVertRound)
 {
-    assert(!is_double_buffered_window());
-
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaRoundRectAction(rRect, nHorzRound, nVertRound));
 

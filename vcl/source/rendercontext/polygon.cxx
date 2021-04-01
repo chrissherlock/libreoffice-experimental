@@ -25,6 +25,8 @@
 
 void RenderContext2::DrawPolygon(tools::Polygon const& rPoly)
 {
+    assert(!is_double_buffered_window());
+
     if (ImplIsRecordLayout())
         return;
 
@@ -118,6 +120,8 @@ void RenderContext2::DrawPolygon(tools::Polygon const& rPoly)
 void RenderContext2::ImplDrawPolygon(tools::Polygon const& rPoly,
                                      tools::PolyPolygon const* pClipPolyPoly)
 {
+    assert(!is_double_buffered_window());
+
     if (pClipPolyPoly)
     {
         ImplDrawPolyPolygon(rPoly, pClipPolyPoly);

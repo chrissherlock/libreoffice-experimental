@@ -17,16 +17,11 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/outdev.hxx>
 
-#include <cassert>
-
 void OutputDevice::DrawMask(Point const& rDestPt, Bitmap const& rBitmap, Color const& rMaskColor)
 {
-    assert(!is_double_buffered_window());
-
     if (ImplIsRecordLayout())
         return;
 
@@ -47,8 +42,6 @@ void OutputDevice::DrawMask(Point const& rDestPt, Bitmap const& rBitmap, Color c
 void OutputDevice::DrawMask(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap,
                             Color const& rMaskColor)
 {
-    assert(!is_double_buffered_window());
-
     if (ImplIsRecordLayout())
         return;
 
@@ -68,8 +61,6 @@ void OutputDevice::DrawMask(Point const& rDestPt, Size const& rDestSize, Point c
                             Size const& rSrcSizePixel, Bitmap const& rBitmap,
                             Color const& rMaskColor)
 {
-    assert(!is_double_buffered_window());
-
     if (ImplIsRecordLayout())
         return;
 
@@ -92,8 +83,6 @@ void OutputDevice::DrawScaledMask(Point const& rDestPt, Size const& rDestSize,
                                   Point const& rSrcPtPixel, Size const& rSrcSizePixel,
                                   Bitmap const& rBitmap, Color const& rMaskColor)
 {
-    assert(!is_double_buffered_window());
-
     if (ImplIsRecordLayout())
         return;
 

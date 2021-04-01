@@ -50,6 +50,8 @@ BitmapEx RenderContext2::GetBitmapEx(Point const& rSrcPt, Size const& rSize) con
 
 void RenderContext2::DrawBitmapEx(Point const& rDestPt, BitmapEx const& rBitmapEx)
 {
+    assert(!is_double_buffered_window());
+
     if (ImplIsRecordLayout())
         return;
 
@@ -74,6 +76,8 @@ void RenderContext2::DrawBitmapEx(Point const& rDestPt, BitmapEx const& rBitmapE
 void RenderContext2::DrawBitmapEx(Point const& rDestPt, Size const& rDestSize,
                                   BitmapEx const& rBitmapEx)
 {
+    assert(!is_double_buffered_window());
+
     if (ImplIsRecordLayout())
         return;
 
@@ -97,6 +101,8 @@ void RenderContext2::DrawBitmapEx(Point const& rDestPt, Size const& rDestSize,
                                   Point const& rSrcPtPixel, Size const& rSrcSizePixel,
                                   BitmapEx const& rBitmapEx)
 {
+    assert(!is_double_buffered_window());
+
     if (ImplIsRecordLayout())
         return;
 

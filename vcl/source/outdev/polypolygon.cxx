@@ -20,16 +20,11 @@
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <tools/poly.hxx>
 
-#include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/outdev.hxx>
 
-#include <cassert>
-
 void OutputDevice::DrawPolyPolygon(tools::PolyPolygon const& rPolyPoly)
 {
-    assert(!is_double_buffered_window());
-
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaPolyPolygonAction(rPolyPoly));
 
@@ -42,8 +37,6 @@ void OutputDevice::DrawPolyPolygon(tools::PolyPolygon const& rPolyPoly)
 
 void OutputDevice::DrawPolyPolygon(basegfx::B2DPolyPolygon const& rB2DPolyPoly)
 {
-    assert(!is_double_buffered_window());
-
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaPolyPolygonAction(tools::PolyPolygon(rB2DPolyPoly)));
 

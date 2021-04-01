@@ -17,7 +17,6 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
 
@@ -63,8 +62,6 @@ void OutputDevice::Erase(tools::Rectangle const& rRect)
 
 void OutputDevice::DrawWallpaper(tools::Rectangle const& rRect, Wallpaper const& rWallpaper)
 {
-    assert(!is_double_buffered_window());
-
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaWallpaperAction(rRect, rWallpaper));
 

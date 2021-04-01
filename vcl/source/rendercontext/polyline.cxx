@@ -94,6 +94,8 @@ void RenderContext2::DrawPolyLine(tools::Polygon const& rPoly)
 
 void RenderContext2::DrawPolyLine(tools::Polygon const& rPoly, LineInfo const& rLineInfo)
 {
+    assert(!is_double_buffered_window());
+
     if (ImplIsRecordLayout())
         return;
 
@@ -282,6 +284,7 @@ bool RenderContext2::DrawPolyLineDirect(basegfx::B2DHomMatrix const& rObjectTran
             return true;
         }
     }
+
     return false;
 }
 

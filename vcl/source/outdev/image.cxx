@@ -23,16 +23,12 @@
 
 void OutputDevice::DrawImage(Point const& rPos, Image const& rImage, DrawImageFlags nStyle)
 {
-    assert(!is_double_buffered_window());
-
     DrawImage(rPos, Size(), rImage, nStyle);
 }
 
 void OutputDevice::DrawImage(Point const& rPos, Size const& rSize, Image const& rImage,
                              DrawImageFlags nStyle)
 {
-    assert(!is_double_buffered_window());
-
     if (!(IsDeviceOutputNecessary() || mpMetaFile))
         return;
 

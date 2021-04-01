@@ -36,13 +36,10 @@
 #include <salbmp.hxx>
 #include <salgdi.hxx>
 
-#include <cassert>
 #include <memory>
 
 void OutputDevice::DrawBitmap(Point const& rDestPt, Bitmap const& rBitmap)
 {
-    assert(!is_double_buffered_window());
-
     if (ImplIsRecordLayout())
         return;
 
@@ -61,8 +58,6 @@ void OutputDevice::DrawBitmap(Point const& rDestPt, Bitmap const& rBitmap)
 
 void OutputDevice::DrawBitmap(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap)
 {
-    assert(!is_double_buffered_window());
-
     if (ImplIsRecordLayout())
         return;
 
@@ -84,8 +79,6 @@ void OutputDevice::DrawBitmap(Point const& rDestPt, Size const& rDestSize, Bitma
 void OutputDevice::DrawBitmap(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
                               Size const& rSrcSizePixel, Bitmap const& rBitmap)
 {
-    assert(!is_double_buffered_window());
-
     if (ImplIsRecordLayout())
         return;
 
@@ -111,8 +104,6 @@ void OutputDevice::DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize,
                                     Point const& rSrcPtPixel, Size const& rSrcSizePixel,
                                     Bitmap const& rBitmap)
 {
-    assert(!is_double_buffered_window());
-
     if (ImplIsRecordLayout())
         return;
 

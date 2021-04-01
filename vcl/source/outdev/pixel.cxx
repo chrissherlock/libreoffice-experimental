@@ -17,19 +17,14 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/settings.hxx>
 
 #include <drawmode.hxx>
 
-#include <cassert>
-
 void OutputDevice::DrawPixel(const Point& rPt)
 {
-    assert(!is_double_buffered_window());
-
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaPointAction(rPt));
 
@@ -38,8 +33,6 @@ void OutputDevice::DrawPixel(const Point& rPt)
 
 void OutputDevice::DrawPixel(Point const& rPt, Color const& rColor)
 {
-    assert(!is_double_buffered_window());
-
     Color aColor;
 
     if (rColor.IsTransparent())

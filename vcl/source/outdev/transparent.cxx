@@ -39,8 +39,6 @@ void OutputDevice::DrawTransparent(basegfx::B2DHomMatrix const& rObjectTransform
                                    basegfx::B2DPolyPolygon const& rB2DPolyPoly,
                                    double fTransparency)
 {
-    assert(!is_double_buffered_window());
-
     if (mpMetaFile)
     {
         if (GetRasterOp() == RasterOp::OverPaint)
@@ -70,8 +68,6 @@ void OutputDevice::DrawTransparent(basegfx::B2DHomMatrix const& rObjectTransform
 void OutputDevice::DrawTransparent(tools::PolyPolygon const& rPolyPoly,
                                    sal_uInt16 nTransparencePercent)
 {
-    assert(!is_double_buffered_window());
-
     // short circuit for drawing an opaque polygon
     if ((nTransparencePercent < 1) || (mnDrawMode & DrawModeFlags::NoTransparency))
     {
@@ -108,8 +104,6 @@ void OutputDevice::DrawTransparent(tools::PolyPolygon const& rPolyPoly,
 void OutputDevice::DrawTransparent(const GDIMetaFile& rMtf, const Point& rPos, const Size& rSize,
                                    const Gradient& rTransparenceGradient)
 {
-    assert(!is_double_buffered_window());
-
     const Color aBlack(COL_BLACK);
 
     if (mpMetaFile)

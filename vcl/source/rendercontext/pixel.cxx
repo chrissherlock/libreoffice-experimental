@@ -50,6 +50,8 @@ Color RenderContext2::GetPixel(Point const& rPoint) const
 
 void RenderContext2::DrawPixel(Point const& rPt)
 {
+    assert(!is_double_buffered_window());
+
     if (ImplIsRecordLayout())
         return;
 
@@ -80,6 +82,8 @@ void RenderContext2::DrawPixel(Point const& rPt)
 
 void RenderContext2::DrawPixel(Point const& rPt, Color const& rColor)
 {
+    assert(!is_double_buffered_window());
+
     if (!IsDeviceOutputNecessary())
         return;
 
