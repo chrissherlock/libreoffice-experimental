@@ -1037,8 +1037,6 @@ protected:
                                             tools::Long& rYOff, tools::Long& rWidth,
                                             FontEmphasisMark eEmphasis, tools::Long nHeight);
 
-    SAL_DLLPRIVATE void ImplDrawEmphasisMarks(SalLayout&);
-
     SAL_DLLPRIVATE float approximate_char_width() const;
 
     SAL_DLLPRIVATE ImplLayoutArgs ImplPrepareLayoutArgs(
@@ -1194,6 +1192,8 @@ private:
                                             tools::PolyPolygon const* pClipPolyPoly);
 
     SAL_DLLPRIVATE void ImplDrawPolyPolygon(sal_uInt16 nPoly, tools::PolyPolygon const& rPolyPoly);
+
+    SAL_DLLPRIVATE void ImplDrawEmphasisMarks(SalLayout&);
 
     SAL_DLLPRIVATE std::unique_ptr<SalLayout> ImplGlyphFallbackLayout(std::unique_ptr<SalLayout>,
                                                                       ImplLayoutArgs&,
