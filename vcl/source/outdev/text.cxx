@@ -122,7 +122,7 @@ void OutputDevice::AddTextRectActions(const tools::Rectangle& rRect, const OUStr
     // #i47157# Factored out to ImplDrawTextRect(), to be shared
     // between us and DrawText()
     vcl::DefaultTextLayout aLayout(*this);
-    ImplDrawText(*this, rRect, rOrigStr, nStyle, nullptr, nullptr, aLayout);
+    ImplDrawText(rRect, rOrigStr, nStyle, nullptr, nullptr, aLayout);
 
     // and restore again
     EnableOutput(bOutputEnabled);
