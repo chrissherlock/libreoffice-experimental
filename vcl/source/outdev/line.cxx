@@ -17,14 +17,11 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/settings.hxx>
 
 #include <drawmode.hxx>
-
-#include <cassert>
 
 void OutputDevice::SetLineColor()
 {
@@ -51,8 +48,6 @@ void OutputDevice::SetLineColor(Color const& rColor)
 
 void OutputDevice::DrawLine(Point const& rStartPt, Point const& rEndPt, LineInfo const& rLineInfo)
 {
-    assert(!is_double_buffered_window());
-
     if (rLineInfo.IsDefault())
     {
         DrawLine(rStartPt, rEndPt);
@@ -70,8 +65,6 @@ void OutputDevice::DrawLine(Point const& rStartPt, Point const& rEndPt, LineInfo
 
 void OutputDevice::DrawLine(Point const& rStartPt, Point const& rEndPt)
 {
-    assert(!is_double_buffered_window());
-
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaLineAction(rStartPt, rEndPt));
 

@@ -19,12 +19,8 @@
 
 #include <vcl/outdev.hxx>
 
-#include <cassert>
-
 void OutputDevice::DrawGrid(tools::Rectangle const& rRect, Size const& rDist, DrawGridFlags nFlags)
 {
-    assert(!is_double_buffered_window());
-
     if (ImplIsRecordLayout())
         return;
 

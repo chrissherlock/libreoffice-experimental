@@ -31,13 +31,10 @@
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 
-#include <cassert>
 #include <memory>
 
 void OutputDevice::DrawBitmapEx(Point const& rDestPt, BitmapEx const& rBitmapEx)
 {
-    assert(!is_double_buffered_window());
-
     if (ImplIsRecordLayout())
         return;
 
@@ -65,8 +62,6 @@ void OutputDevice::DrawBitmapEx(Point const& rDestPt, BitmapEx const& rBitmapEx)
 void OutputDevice::DrawBitmapEx(Point const& rDestPt, Size const& rDestSize,
                                 BitmapEx const& rBitmapEx)
 {
-    assert(!is_double_buffered_window());
-
     if (ImplIsRecordLayout())
         return;
 
@@ -92,8 +87,6 @@ void OutputDevice::DrawBitmapEx(Point const& rDestPt, Size const& rDestSize,
                                 Point const& rSrcPtPixel, Size const& rSrcSizePixel,
                                 BitmapEx const& rBitmapEx)
 {
-    assert(!is_double_buffered_window());
-
     if (ImplIsRecordLayout())
         return;
 

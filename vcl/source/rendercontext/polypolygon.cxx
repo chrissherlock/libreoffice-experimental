@@ -125,6 +125,8 @@ void RenderContext2::DrawPolyPolygon(const tools::PolyPolygon& rPolyPoly)
 
 void RenderContext2::DrawPolyPolygon(basegfx::B2DPolyPolygon const& rB2DPolyPoly)
 {
+    assert(!is_double_buffered_window());
+
     // Do not paint empty PolyPolygons
     if (!rB2DPolyPoly.count() || !IsDeviceOutputNecessary())
         return;

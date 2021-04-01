@@ -25,6 +25,8 @@
 
 void RenderContext2::DrawRect(tools::Rectangle const& rRect)
 {
+    assert(!is_double_buffered_window());
+
     if (ImplIsRecordLayout())
         return;
 
@@ -64,6 +66,8 @@ void RenderContext2::DrawRect(tools::Rectangle const& rRect)
 void RenderContext2::DrawRect(tools::Rectangle const& rRect, sal_uLong nHorzRound,
                               sal_uLong nVertRound)
 {
+    assert(!is_double_buffered_window());
+
     if (ImplIsRecordLayout())
         return;
 

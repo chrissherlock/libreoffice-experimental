@@ -17,18 +17,11 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/outdev.hxx>
 
-#include <salgdi.hxx>
-
-#include <cassert>
-
 void OutputDevice::DrawEllipse(tools::Rectangle const& rRect)
 {
-    assert(!is_double_buffered_window());
-
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaEllipseAction(rRect));
 
@@ -38,8 +31,6 @@ void OutputDevice::DrawEllipse(tools::Rectangle const& rRect)
 void OutputDevice::DrawArc(tools::Rectangle const& rRect, Point const& rStartPt,
                            Point const& rEndPt)
 {
-    assert(!is_double_buffered_window());
-
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaArcAction(rRect, rStartPt, rEndPt));
 
@@ -49,8 +40,6 @@ void OutputDevice::DrawArc(tools::Rectangle const& rRect, Point const& rStartPt,
 void OutputDevice::DrawPie(tools::Rectangle const& rRect, Point const& rStartPt,
                            Point const& rEndPt)
 {
-    assert(!is_double_buffered_window());
-
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaPieAction(rRect, rStartPt, rEndPt));
 
@@ -60,8 +49,6 @@ void OutputDevice::DrawPie(tools::Rectangle const& rRect, Point const& rStartPt,
 void OutputDevice::DrawChord(tools::Rectangle const& rRect, Point const& rStartPt,
                              Point const& rEndPt)
 {
-    assert(!is_double_buffered_window());
-
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaChordAction(rRect, rStartPt, rEndPt));
 

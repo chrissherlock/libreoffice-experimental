@@ -28,6 +28,8 @@
 
 void RenderContext2::DrawBitmap(Point const& rDestPt, Bitmap const& rBitmap)
 {
+    assert(!is_double_buffered_window());
+
     if (ImplIsRecordLayout())
         return;
 
@@ -54,6 +56,8 @@ static void MirrorBitmap(Bitmap& rBitmap, SalTwoRect& rPosAry)
 
 void RenderContext2::DrawBitmap(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap)
 {
+    assert(!is_double_buffered_window());
+
     if (ImplIsRecordLayout())
         return;
 
@@ -121,6 +125,8 @@ void RenderContext2::DrawBitmap(Point const& rDestPt, Size const& rDestSize,
                                 Point const& rSrcPtPixel, Size const& rSrcSizePixel,
                                 Bitmap const& rBitmap)
 {
+    assert(!is_double_buffered_window());
+
     if (ImplIsRecordLayout())
         return;
 

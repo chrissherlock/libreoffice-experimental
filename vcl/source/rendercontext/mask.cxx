@@ -26,6 +26,8 @@
 
 void RenderContext2::DrawMask(Point const& rDestPt, Bitmap const& rBitmap, Color const& rMaskColor)
 {
+    assert(!is_double_buffered_window());
+
     DrawMask(rDestPt, PixelToLogic(rBitmap.GetSizePixel()), Point(), rBitmap.GetSizePixel(),
              rBitmap, rMaskColor);
 }
@@ -33,6 +35,8 @@ void RenderContext2::DrawMask(Point const& rDestPt, Bitmap const& rBitmap, Color
 void RenderContext2::DrawMask(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap,
                               Color const& rMaskColor)
 {
+    assert(!is_double_buffered_window());
+
     DrawMask(rDestPt, rDestSize, Point(), rBitmap.GetSizePixel(), rBitmap, rMaskColor);
 }
 
@@ -40,6 +44,8 @@ void RenderContext2::DrawMask(Point const& rDestPt, Size const& rDestSize, Point
                               Size const& rSrcSizePixel, Bitmap const& rBitmap,
                               Color const& rMaskColor)
 {
+    assert(!is_double_buffered_window());
+
     if (!IsDeviceOutputNecessary())
         return;
 

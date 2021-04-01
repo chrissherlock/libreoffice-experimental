@@ -33,6 +33,8 @@
 
 void RenderContext2::DrawHatch(const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch)
 {
+    assert(!is_double_buffered_window());
+
     Hatch aHatch(rHatch);
     aHatch.SetColor(
         GetDrawModeHatchColor(rHatch.GetColor(), GetDrawMode(), GetSettings().GetStyleSettings()));
@@ -168,6 +170,8 @@ void RenderContext2::DrawHatchLines(tools::Line const& rLine, tools::PolyPolygon
 
 void RenderContext2::DrawHatchLine(Point const& rStartPoint, Point const& rEndPoint)
 {
+    assert(!is_double_buffered_window());
+
     Point aPt1{ ImplLogicToDevicePixel(rStartPoint) }, aPt2{ ImplLogicToDevicePixel(rEndPoint) };
     mpGraphics->DrawLine(aPt1.X(), aPt1.Y(), aPt2.X(), aPt2.Y(), *this);
 }

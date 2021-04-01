@@ -17,23 +17,15 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <cassert>
-
 #include <sal/types.h>
-
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <basegfx/polygon/b2dlinegeometry.hxx>
-#include <vcl/gdimtf.hxx>
+
 #include <vcl/metaact.hxx>
 #include <vcl/outdev.hxx>
-#include <vcl/virdev.hxx>
-
-#include <salgdi.hxx>
 
 void OutputDevice::DrawPolyLine(tools::Polygon const& rPoly)
 {
-    assert(!is_double_buffered_window());
-
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaPolyLineAction(rPoly));
 
@@ -42,8 +34,6 @@ void OutputDevice::DrawPolyLine(tools::Polygon const& rPoly)
 
 void OutputDevice::DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLineInfo)
 {
-    assert(!is_double_buffered_window());
-
     if (rLineInfo.IsDefault())
     {
         DrawPolyLine(rPoly);
@@ -71,8 +61,6 @@ void OutputDevice::DrawPolyLine(basegfx::B2DPolygon const& rB2DPolygon, double f
                                 basegfx::B2DLineJoin eLineJoin, css::drawing::LineCap eLineCap,
                                 double fMiterMinimumAngle)
 {
-    assert(!is_double_buffered_window());
-
     // use b2dpolygon drawing if possible
     if (DrawPolyLineDirect(basegfx::B2DHomMatrix(), rB2DPolygon, fLineWidth, 0.0,
                            nullptr, // MM01
