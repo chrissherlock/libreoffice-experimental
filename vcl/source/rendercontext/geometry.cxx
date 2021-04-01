@@ -64,9 +64,4 @@ tools::Rectangle RenderContext2::GetOutputRectPixel() const
 
 Size RenderContext2::GetOutputSize() const { return PixelToLogic(GetOutputSizePixel()); }
 
-tools::Rectangle RenderContext2::GetBackgroundComponentBounds() const
-{
-    return tools::Rectangle(Point(0, 0), GetOutputSizePixel());
-}
-
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

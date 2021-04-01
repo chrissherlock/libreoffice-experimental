@@ -217,6 +217,8 @@ protected:
     void                        InitWaveLineColor(Color const& rColor, tools::Long nLineWidth) override;
     std::tuple<bool, Size>      GetWaveLineSize(tools::Long nLineWidth) const override;
 
+    tools::Rectangle GetBackgroundComponentBounds() const override;
+
 private:
     vcl::Region                 ClipToDeviceBounds(vcl::Region aRegion) const override;
     bool                        CanSubsampleBitmap() const override { return false; }
@@ -366,8 +368,6 @@ public:
 
     virtual void                CopyArea( const Point& rDestPt, const Point& rSrcPt,
                                     const Size& rSrcSize, bool bWindowInvalidate = false ) override;
-
-    virtual tools::Rectangle    GetBackgroundComponentBounds() const override;
 
     // These 3 together are more modular PrintJob(), allowing printing more documents as one print job
     // by repeated calls to ExecutePrintJob(). Used by mailmerge.

@@ -923,8 +923,6 @@ protected:
 
     css::awt::DeviceInfo GetCommonDeviceInfo(Size const& aDevSize) const;
 
-    virtual tools::Rectangle GetBackgroundComponentBounds() const;
-
     /** Get device transformation.
 
      @since AOO bug 75163 (OpenOffice.org 2.4.3 - OOH 680 milestone 212)
