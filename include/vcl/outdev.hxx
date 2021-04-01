@@ -478,6 +478,8 @@ protected:
     virtual void ClipAndDrawGradientMetafile(const Gradient& rGradient,
                                              const tools::PolyPolygon& rPolyPoly);
 
+    virtual tools::Rectangle GetBackgroundComponentBounds() const;
+
 private:
     OutputDevice(const OutputDevice&) = delete;
     OutputDevice& operator=(const OutputDevice&) = delete;
