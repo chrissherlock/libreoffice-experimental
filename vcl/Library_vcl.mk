@@ -335,6 +335,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/gdi/FileDefinitionWidgetDraw \
     vcl/source/gdi/WidgetDefinitionReader \
     vcl/source/gdi/WidgetDefinition \
+    vcl/source/gdi/emphasismark \
     vcl/source/gdi/extoutdevdata \
     vcl/source/gdi/gdimtf \
     vcl/source/gdi/mtfxmldump \

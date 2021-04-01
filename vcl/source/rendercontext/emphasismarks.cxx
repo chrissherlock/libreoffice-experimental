@@ -179,32 +179,4 @@ void RenderContext2::ImplGetEmphasisMark(tools::PolyPolygon& rPolyPoly, bool& rP
         rYOff += nDotSize;
 }
 
-FontEmphasisMark RenderContext2::ImplGetEmphasisMarkStyle(vcl::Font const& rFont)
-{
-    FontEmphasisMark nEmphasisMark = rFont.GetEmphasisMark();
-
-    // If no Position is set, then calculate the default position, which
-    // depends on the language
-    if (!(nEmphasisMark & (FontEmphasisMark::PosAbove | FontEmphasisMark::PosBelow)))
-    {
-        LanguageType eLang = rFont.GetLanguage();
-        // In Chinese Simplified the EmphasisMarks are below/left
-        if (MsLangId::isSimplifiedChinese(eLang))
-        {
-            nEmphasisMark |= FontEmphasisMark::PosBelow;
-        }
-        else
-        {
-            eLang = rFont.GetCJKContextLanguage();
-            // In Chinese Simplified the EmphasisMarks are below/left
-            if (MsLangId::isSimplifiedChinese(eLang))
-                nEmphasisMark |= FontEmphasisMark::PosBelow;
-            else
-                nEmphasisMark |= FontEmphasisMark::PosAbove;
-        }
-    }
-
-    return nEmphasisMark;
-}
-
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

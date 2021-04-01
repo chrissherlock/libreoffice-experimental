@@ -33,6 +33,7 @@
 #include <outdev.h>
 #include <window.h>
 #include <PhysicalFontCollection.hxx>
+#include <emphasismark.hxx>
 #include <font/FeatureCollector.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
