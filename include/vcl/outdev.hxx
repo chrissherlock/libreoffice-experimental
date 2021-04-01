@@ -466,8 +466,6 @@ protected:
     void DrawHatchLines(tools::Line const& rLine, tools::PolyPolygon const& rPolyPoly,
                         Point* pPtBuffer) override;
 
-    bool TryDirectBitmapExPaint() const override;
-
     void DrawUntransformedBitmapEx(BitmapEx const& rBitmapEx, basegfx::B2DVector const& rTranslate,
                                    basegfx::B2DVector const& rScale) override;
 
@@ -486,6 +484,8 @@ private:
 
     void DrawBitmapEx2(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
                        Size const& rSrcSizePixel, BitmapEx const& rBitmapEx);
+
+    bool TryDirectBitmapExPaint() const override;
 
     SAL_DLLPRIVATE void DrawLinearGradientToMetafile(const tools::Rectangle& rRect,
                                                      const Gradient& rGradient);
