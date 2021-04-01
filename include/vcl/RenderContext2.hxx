@@ -881,11 +881,6 @@ protected:
                                     css::drawing::LineCap eLineCap = css::drawing::LineCap_BUTT,
                                     double fMiterMinimumAngle = basegfx::deg2rad(15.0));
 
-    SAL_DLLPRIVATE void ImplDrawPolyPolygon(tools::PolyPolygon const& rPolyPoly,
-                                            tools::PolyPolygon const* pClipPolyPoly);
-
-    SAL_DLLPRIVATE void ImplDrawPolyPolygon(sal_uInt16 nPoly, tools::PolyPolygon const& rPolyPoly);
-
     virtual void DrawHatchLine(Point const& rStartPoint, Point const& rEndPoint);
     virtual void DrawHatchLines(tools::Line const& rLine, tools::PolyPolygon const& rPolyPoly,
                                 Point* pPtBuffer);
@@ -1255,6 +1250,11 @@ private:
 
     SAL_DLLPRIVATE void ImplDrawPolygon(tools::Polygon const& rPoly,
                                         tools::PolyPolygon const* pClipPolyPoly = nullptr);
+
+    SAL_DLLPRIVATE void ImplDrawPolyPolygon(tools::PolyPolygon const& rPolyPoly,
+                                            tools::PolyPolygon const* pClipPolyPoly);
+
+    SAL_DLLPRIVATE void ImplDrawPolyPolygon(sal_uInt16 nPoly, tools::PolyPolygon const& rPolyPoly);
 
     SAL_DLLPRIVATE std::unique_ptr<SalLayout> ImplGlyphFallbackLayout(std::unique_ptr<SalLayout>,
                                                                       ImplLayoutArgs&,
