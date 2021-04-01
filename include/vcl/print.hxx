@@ -242,9 +242,6 @@ protected:
                                     const Point& rDestPt, const Size& rDestSize,
                                     const Point& rSrcPtPixel, const Size& rSrcSizePixel) override;
 
-    bool                        DrawTransformBitmapExDirect( const basegfx::B2DHomMatrix& aFullTransform,
-                                    const BitmapEx& rBitmapEx, double fAlpha = 1.0) override;
-
     void                        DrawDeviceBitmapEx( const Point& rDestPt, const Size& rDestSize,
                                     const Point& rSrcPtPixel, const Size& rSrcSizePixel,
                                     BitmapEx& rBitmapEx ) override;
@@ -256,6 +253,10 @@ protected:
 
     basegfx::B2DRange           ReduceBitmapExVisibleRange(basegfx::B2DHomMatrix const& rFullTransform,
                                                            basegfx::B2DRange const& rVisibleRange) override;
+
+private:
+    bool                        DrawTransformBitmapExDirect( const basegfx::B2DHomMatrix& aFullTransform,
+                                    const BitmapEx& rBitmapEx, double fAlpha = 1.0) override;
 
 public:
                                 Printer();
