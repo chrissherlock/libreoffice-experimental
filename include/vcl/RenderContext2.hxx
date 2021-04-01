@@ -1015,7 +1015,6 @@ protected:
 
     SAL_DLLPRIVATE bool is_double_buffered_window() const;
 
-    SAL_DLLPRIVATE bool InitFont() const;
     SAL_DLLPRIVATE bool ImplNewFont() const;
     SAL_DLLPRIVATE void ImplInitFontList() const;
     virtual void SetFontOrientation(LogicalFontInstance* const pFontInstance) const;
@@ -1148,6 +1147,7 @@ protected:
     mutable bool mbTextSpecial : 1;
 
 private:
+    SAL_DLLPRIVATE bool InitFont() const;
     SAL_DLLPRIVATE void ImplInitTextColor();
     virtual void InitWaveLineColor(Color const& rColor, tools::Long);
 
