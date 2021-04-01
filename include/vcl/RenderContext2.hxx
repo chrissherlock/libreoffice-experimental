@@ -1021,8 +1021,6 @@ protected:
     SAL_DLLPRIVATE tools::Long GetEmphasisAscent() const { return mnEmphasisAscent; }
     SAL_DLLPRIVATE tools::Long GetEmphasisDescent() const { return mnEmphasisDescent; }
 
-    virtual tools::Long GetFontExtLeading() const;
-
     virtual void ImplReleaseFonts();
     virtual void ImplClearFontData(bool bNewFontLists);
     virtual void ImplRefreshFontData(bool bNewFontLists);
@@ -1150,6 +1148,7 @@ private:
     SAL_DLLPRIVATE void ImplInitTextColor();
     virtual void InitWaveLineColor(Color const& rColor, tools::Long);
 
+    virtual tools::Long GetFontExtLeading() const;
     virtual void SetFontOrientation(LogicalFontInstance* const pFontInstance) const;
 
     virtual bool TryDirectBitmapExPaint() const;

@@ -182,14 +182,12 @@ public:
 
     bool                IsScreenComp() const override { return mbScreenComp; }
 
-private:
-    SAL_DLLPRIVATE void ImplSetReferenceDevice( RefDevMode, sal_Int32 i_nDPIX, sal_Int32 i_nDPIY );
-
 protected:
     virtual bool        UsePolyPolygonForComplexGradient() override;
 
-    virtual tools::Long        GetFontExtLeading() const override;
-
+private:
+    SAL_DLLPRIVATE void ImplSetReferenceDevice( RefDevMode, sal_Int32 i_nDPIX, sal_Int32 i_nDPIY );
+    virtual tools::Long GetFontExtLeading() const override;
 };
 
 #endif // INCLUDED_VCL_VIRDEV_HXX
