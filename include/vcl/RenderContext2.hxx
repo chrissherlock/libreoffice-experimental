@@ -881,7 +881,6 @@ protected:
                                   const Point& rSrcPtPixel, Size const& rSrcSizePixel,
                                   Bitmap const& rBitmap);
 
-    virtual bool CanSubsampleBitmap() const { return true; }
     bool ProcessBitmapRasterOpInvert(Point const& rDestPt, Size const& rDestSize);
     bool ProcessBitmapDrawModeBlackWhite(Point const& rDestPt, Size const& rDestSize);
     Bitmap ProcessBitmapDrawModeGray(Bitmap const& rBitmap);
@@ -1202,6 +1201,8 @@ protected:
 
 private:
     virtual void InitWaveLineColor(Color const& rColor, tools::Long);
+
+    virtual bool CanSubsampleBitmap() const { return true; }
 
     virtual RenderContext2 const* DrawOutDevDirectCheck(RenderContext2 const& rSrcDev) const;
 
