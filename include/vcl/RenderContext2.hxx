@@ -282,11 +282,6 @@ public:
      */
     bool IsNativeControlSupported(ControlType nType, ControlPart nPart) const;
 
-    /** Query the native control to determine if it was acted upon
-     */
-    bool HitTestNativeScrollbar(ControlPart nPart, tools::Rectangle const& rControlRegion,
-                                Point const& aPos, bool& rIsInside) const;
-
     /** Request rendering of a particular control and/or part
      */
     bool DrawNativeControl(ControlType nType, ControlPart nPart,
@@ -918,6 +913,11 @@ protected:
     virtual void ImplInitMapModeObjects();
 
     css::awt::DeviceInfo GetCommonDeviceInfo(Size const& aDevSize) const;
+
+    /** Query the native control to determine if it was acted upon
+     */
+    bool HitTestNativeScrollbar(ControlPart nPart, tools::Rectangle const& rControlRegion,
+                                Point const& aPos, bool& rIsInside) const;
 
     /** Get device transformation.
 
