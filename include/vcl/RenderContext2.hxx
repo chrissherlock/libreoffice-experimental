@@ -323,7 +323,6 @@ public:
     virtual vcl::Region GetActiveClipRegion() const;
     virtual void SetClipRegion();
     virtual void SetClipRegion(vcl::Region const& rRegion);
-    bool SelectClipRegion(vcl::Region const&, SalGraphics* pGraphics = nullptr);
     virtual void MoveClipRegion(tools::Long nHorzMove, tools::Long nVertMove);
     virtual void IntersectClipRegion(const tools::Rectangle& rRect);
     virtual void IntersectClipRegion(const vcl::Region& rRegion);
@@ -905,6 +904,7 @@ protected:
      **/
     virtual void ClipToPaintRegion(tools::Rectangle& rDstRect);
     virtual void InitClipRegion();
+    bool SelectClipRegion(vcl::Region const&, SalGraphics* pGraphics = nullptr);
 
     SAL_DLLPRIVATE void InitLineColor();
     SAL_DLLPRIVATE void InitFillColor();
