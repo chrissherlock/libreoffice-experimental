@@ -696,91 +696,91 @@ public:
     basegfx::B2DHomMatrix GetViewTransformation(MapMode const& rMapMode) const;
     basegfx::B2DHomMatrix GetInverseViewTransformation(MapMode const& rMapMode) const;
 
-    Point LogicToPixel(const Point& rLogicPt) const;
+    Point LogicToPixel(Point const& rLogicPt) const;
 
-    Size LogicToPixel(const Size& rLogicSize) const;
+    Size LogicToPixel(Size const& rLogicSize) const;
 
-    tools::Rectangle LogicToPixel(const tools::Rectangle& rLogicRect) const;
+    tools::Rectangle LogicToPixel(tools::Rectangle const& rLogicRect) const;
 
-    tools::Polygon LogicToPixel(const tools::Polygon& rLogicPoly) const;
+    tools::Polygon LogicToPixel(tools::Polygon const& rLogicPoly) const;
 
-    tools::PolyPolygon LogicToPixel(const tools::PolyPolygon& rLogicPolyPoly) const;
+    tools::PolyPolygon LogicToPixel(tools::PolyPolygon const& rLogicPolyPoly) const;
 
-    basegfx::B2DPolyPolygon LogicToPixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly) const;
+    basegfx::B2DPolyPolygon LogicToPixel(basegfx::B2DPolyPolygon const& rLogicPolyPoly) const;
 
-    vcl::Region LogicToPixel(const vcl::Region& rLogicRegion) const;
+    vcl::Region LogicToPixel(vcl::Region const& rLogicRegion) const;
 
-    Point LogicToPixel(const Point& rLogicPt, const MapMode& rMapMode) const;
+    Point LogicToPixel(Point const& rLogicPt, MapMode const& rMapMode) const;
 
-    Size LogicToPixel(const Size& rLogicSize, const MapMode& rMapMode) const;
+    Size LogicToPixel(Size const& rLogicSize, MapMode const& rMapMode) const;
 
-    tools::Rectangle LogicToPixel(const tools::Rectangle& rLogicRect,
-                                  const MapMode& rMapMode) const;
+    tools::Rectangle LogicToPixel(tools::Rectangle const& rLogicRect,
+                                  MapMode const& rMapMode) const;
 
-    tools::Polygon LogicToPixel(const tools::Polygon& rLogicPoly, const MapMode& rMapMode) const;
+    tools::Polygon LogicToPixel(tools::Polygon const& rLogicPoly, MapMode const& rMapMode) const;
 
-    basegfx::B2DPolyPolygon LogicToPixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
-                                         const MapMode& rMapMode) const;
+    basegfx::B2DPolyPolygon LogicToPixel(basegfx::B2DPolyPolygon const& rLogicPolyPoly,
+                                         MapMode const& rMapMode) const;
 
-    Point PixelToLogic(const Point& rDevicePt) const;
+    Point PixelToLogic(Point const& rDevicePt) const;
 
-    Size PixelToLogic(const Size& rDeviceSize) const;
+    Size PixelToLogic(Size const& rDeviceSize) const;
 
-    tools::Rectangle PixelToLogic(const tools::Rectangle& rDeviceRect) const;
+    tools::Rectangle PixelToLogic(tools::Rectangle const& rDeviceRect) const;
 
-    tools::Polygon PixelToLogic(const tools::Polygon& rDevicePoly) const;
+    tools::Polygon PixelToLogic(tools::Polygon const& rDevicePoly) const;
 
-    tools::PolyPolygon PixelToLogic(const tools::PolyPolygon& rDevicePolyPoly) const;
+    tools::PolyPolygon PixelToLogic(tools::PolyPolygon const& rDevicePolyPoly) const;
 
-    basegfx::B2DPolyPolygon PixelToLogic(const basegfx::B2DPolyPolygon& rDevicePolyPoly) const;
+    basegfx::B2DPolyPolygon PixelToLogic(basegfx::B2DPolyPolygon const& rDevicePolyPoly) const;
 
-    vcl::Region PixelToLogic(const vcl::Region& rDeviceRegion) const;
+    vcl::Region PixelToLogic(vcl::Region const& rDeviceRegion) const;
 
-    Point PixelToLogic(const Point& rDevicePt, const MapMode& rMapMode) const;
+    Point PixelToLogic(Point const& rDevicePt, MapMode const& rMapMode) const;
 
-    Size PixelToLogic(const Size& rDeviceSize, const MapMode& rMapMode) const;
+    Size PixelToLogic(Size const& rDeviceSize, MapMode const& rMapMode) const;
 
-    tools::Rectangle PixelToLogic(const tools::Rectangle& rDeviceRect,
-                                  const MapMode& rMapMode) const;
+    tools::Rectangle PixelToLogic(tools::Rectangle const& rDeviceRect,
+                                  MapMode const& rMapMode) const;
 
-    tools::Polygon PixelToLogic(const tools::Polygon& rDevicePoly, const MapMode& rMapMode) const;
+    tools::Polygon PixelToLogic(tools::Polygon const& rDevicePoly, MapMode const& rMapMode) const;
 
-    basegfx::B2DPolygon PixelToLogic(const basegfx::B2DPolygon& rDevicePoly,
-                                     const MapMode& rMapMode) const;
+    basegfx::B2DPolygon PixelToLogic(basegfx::B2DPolygon const& rDevicePoly,
+                                     MapMode const& rMapMode) const;
 
-    basegfx::B2DPolyPolygon PixelToLogic(const basegfx::B2DPolyPolygon& rDevicePolyPoly,
-                                         const MapMode& rMapMode) const;
+    basegfx::B2DPolyPolygon PixelToLogic(basegfx::B2DPolyPolygon const& rDevicePolyPoly,
+                                         MapMode const& rMapMode) const;
 
-    Point LogicToLogic(const Point& rPtSource, const MapMode* pMapModeSource,
-                       const MapMode* pMapModeDest) const;
+    Point LogicToLogic(Point const& rPtSource, MapMode const* pMapModeSource,
+                       MapMode const* pMapModeDest) const;
 
-    Size LogicToLogic(const Size& rSzSource, const MapMode* pMapModeSource,
-                      const MapMode* pMapModeDest) const;
+    Size LogicToLogic(Size const& rSzSource, MapMode const* pMapModeSource,
+                      MapMode const* pMapModeDest) const;
 
-    tools::Rectangle LogicToLogic(const tools::Rectangle& rRectSource,
-                                  const MapMode* pMapModeSource, const MapMode* pMapModeDest) const;
+    tools::Rectangle LogicToLogic(tools::Rectangle const& rRectSource,
+                                  MapMode const* pMapModeSource, MapMode const* pMapModeDest) const;
 
-    static Point LogicToLogic(const Point& rPtSource, const MapMode& rMapModeSource,
-                              const MapMode& rMapModeDest);
+    static Point LogicToLogic(Point const& rPtSource, MapMode const& rMapModeSource,
+                              MapMode const& rMapModeDest);
 
-    static Size LogicToLogic(const Size& rSzSource, const MapMode& rMapModeSource,
-                             const MapMode& rMapModeDest);
+    static Size LogicToLogic(Size const& rSzSource, MapMode const& rMapModeSource,
+                             MapMode const& rMapModeDest);
 
-    static tools::Rectangle LogicToLogic(const tools::Rectangle& rRectSource,
-                                         const MapMode& rMapModeSource,
-                                         const MapMode& rMapModeDest);
+    static tools::Rectangle LogicToLogic(tools::Rectangle const& rRectSource,
+                                         MapMode const& rMapModeSource,
+                                         MapMode const& rMapModeDest);
 
     static tools::Long LogicToLogic(tools::Long nLongSource, MapUnit eUnitSource,
                                     MapUnit eUnitDest);
 
-    static basegfx::B2DPolygon LogicToLogic(const basegfx::B2DPolygon& rPoly,
-                                            const MapMode& rMapModeSource,
-                                            const MapMode& rMapModeDest);
+    static basegfx::B2DPolygon LogicToLogic(basegfx::B2DPolygon const& rPoly,
+                                            MapMode const& rMapModeSource,
+                                            MapMode const& rMapModeDest);
 
     // create a mapping transformation from rMapModeSource to rMapModeDest (the above methods
     // for B2DPoly/Polygons use this internally anyway to transform the B2DPolygon)
-    static basegfx::B2DHomMatrix LogicToLogic(const MapMode& rMapModeSource,
-                                              const MapMode& rMapModeDest);
+    static basegfx::B2DHomMatrix LogicToLogic(MapMode const& rMapModeSource,
+                                              MapMode const& rMapModeDest);
 
     /** Convert a logical rectangle to a rectangle in physical device pixel units.
 
@@ -789,7 +789,7 @@ public:
      @returns Rectangle based on physical device pixel coordinates and units.
      */
     SAL_DLLPRIVATE tools::Rectangle
-    ImplLogicToDevicePixel(const tools::Rectangle& rLogicRect) const;
+    ImplLogicToDevicePixel(tools::Rectangle const& rLogicRect) const;
 
     /** Convert a logical point to a physical point on the device.
 
@@ -797,7 +797,7 @@ public:
 
      @returns Physical point on the device.
      */
-    SAL_DLLPRIVATE Point ImplLogicToDevicePixel(const Point& rLogicPt) const;
+    SAL_DLLPRIVATE Point ImplLogicToDevicePixel(Point const& rLogicPt) const;
 
     /** Convert a logical width to a width in units of device pixels.
 
