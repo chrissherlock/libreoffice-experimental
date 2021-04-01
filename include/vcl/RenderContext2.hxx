@@ -914,7 +914,6 @@ protected:
         @returns            region clipped to the device bounds
      **/
     virtual void ClipToPaintRegion(tools::Rectangle& rDstRect);
-    SAL_DLLPRIVATE void SetDeviceClipRegion(vcl::Region const* pRegion);
     virtual void InitClipRegion();
 
     SAL_DLLPRIVATE void InitLineColor();
@@ -1323,6 +1322,7 @@ private:
     SAL_DLLPRIVATE void ImplDrawMnemonicLine(tools::Long nX, tools::Long nY, tools::Long nWidth);
 
     virtual vcl::Region ClipToDeviceBounds(vcl::Region aRegion) const;
+    SAL_DLLPRIVATE void SetDeviceClipRegion(vcl::Region const* pRegion);
 
     vcl::ExtOutDevData* mpExtOutDevData;
     std::vector<OutDevState> maOutDevStateStack;
