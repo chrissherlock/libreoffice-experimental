@@ -29,7 +29,8 @@ void OutputDevice::DrawMask(Point const& rDestPt, Bitmap const& rBitmap, Color c
 
     if (meRasterOp == RasterOp::Invert)
     {
-        DrawRect(tools::Rectangle(rDestPt, PixelToLogic(aSizePix)));
+        mpMetaFile->AddAction(
+            new MetaRectAction(tools::Rectangle(rDestPt, PixelToLogic(aSizePix))));
         return;
     }
 
@@ -47,7 +48,7 @@ void OutputDevice::DrawMask(Point const& rDestPt, Size const& rDestSize, Bitmap 
 
     if (meRasterOp == RasterOp::Invert)
     {
-        DrawRect(tools::Rectangle(rDestPt, rDestSize));
+        mpMetaFile->AddAction(new MetaRectAction(tools::Rectangle(rDestPt, rDestSize)));
         return;
     }
 
@@ -66,7 +67,7 @@ void OutputDevice::DrawMask(Point const& rDestPt, Size const& rDestSize, Point c
 
     if (meRasterOp == RasterOp::Invert)
     {
-        DrawRect(tools::Rectangle(rDestPt, rDestSize));
+        mpMetaFile->AddAction(new MetaRectAction(tools::Rectangle(rDestPt, rDestSize)));
         return;
     }
 
@@ -88,14 +89,15 @@ void OutputDevice::DrawScaledMask(Point const& rDestPt, Size const& rDestSize,
 
     if (meRasterOp == RasterOp::Invert)
     {
-        DrawRect(tools::Rectangle(rDestPt, rDestSize));
+        mpMetaFile->AddAction(new MetaRectAction(tools::Rectangle(rDestPt, rDestSize)));
         return;
     }
 
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaMaskScaleAction(rDestPt, rDestSize, rBitmap, rMaskColor));
 
-    RenderContext2::DrawMask(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmap, rMaskColor);
+    RenderContext2::DrawScaledMask(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmap,
+                                   rMaskColor);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -429,7 +429,8 @@ public:
     void DrawMask(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap,
                   Color const& rMaskColor) override;
     void DrawScaledMask(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
-                        Size const& rSrcSizePixel, Bitmap const& rBitmap, Color const& rMaskColor);
+                        Size const& rSrcSizePixel, Bitmap const& rBitmap,
+                        Color const& rMaskColor) override;
     void DrawMask(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
                   Size const& rSrcSizePixel, Bitmap const& rBitmap,
                   Color const& rMaskColor) override;
