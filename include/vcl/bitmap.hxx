@@ -37,6 +37,7 @@
 #define GAMMA( _def_cVal, _def_InvGamma )   (static_cast<sal_uInt8>(MinMax(FRound(pow( _def_cVal/255.0,_def_InvGamma)*255.0),0,255)))
 
 class Color;
+class RenderContext2;
 
 template <typename Arg, typename Ret> class Link;
 
@@ -137,7 +138,7 @@ public:
 
     BitmapChecksum          GetChecksum() const;
 
-    Bitmap                  CreateDisplayBitmap( OutputDevice* pDisplay ) const;
+    Bitmap                  CreateDisplayBitmap( RenderContext2* pDisplay ) const;
 
     static const BitmapPalette&
                             GetGreyPalette( int nEntries );

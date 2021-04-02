@@ -138,6 +138,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/rendercontext/deviceinfo \
     vcl/source/rendercontext/drawmode \
     vcl/source/rendercontext/emphasismarks \
+    vcl/source/rendercontext/eps \
     vcl/source/rendercontext/extoudevdata \
     vcl/source/rendercontext/font \
     vcl/source/rendercontext/fill \
@@ -167,6 +168,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/rendercontext/sysgfxdata \
     vcl/source/rendercontext/text \
     vcl/source/rendercontext/transparent \
+    vcl/source/rendercontext/wallpaper \
     vcl/source/outdev/ImplMapRes \
     vcl/source/outdev/animation \
     vcl/source/outdev/outdev \

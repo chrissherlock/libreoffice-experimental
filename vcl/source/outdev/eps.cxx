@@ -27,8 +27,6 @@
 bool OutputDevice::DrawEPS(Point const& rPoint, Size const& rSize, GfxLink const& rGfxLink,
                            GDIMetaFile* pSubst)
 {
-    bool bDrawn(true);
-
     if (mpMetaFile)
     {
         GDIMetaFile aSubst;
@@ -39,46 +37,7 @@ bool OutputDevice::DrawEPS(Point const& rPoint, Size const& rSize, GfxLink const
         mpMetaFile->AddAction(new MetaEPSAction(rPoint, rSize, rGfxLink, aSubst));
     }
 
-    if (!IsDeviceOutputNecessary() || ImplIsRecordLayout())
-        return bDrawn;
-
-    if (mbOutputClipped)
-        return bDrawn;
-
-    tools::Rectangle aRect(ImplLogicToDevicePixel(tools::Rectangle(rPoint, rSize)));
-
-    if (!aRect.IsEmpty())
-    {
-        // draw the real EPS graphics
-        if (rGfxLink.GetData() && rGfxLink.GetDataSize())
-        {
-            if (!mpGraphics && !AcquireGraphics())
-                return bDrawn;
-
-            if (mbInitClipRegion)
-                InitClipRegion();
-
-            aRect.Justify();
-            bDrawn = mpGraphics->DrawEPS(
-                aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(),
-                const_cast<sal_uInt8*>(rGfxLink.GetData()), rGfxLink.GetDataSize(), *this);
-        }
-
-        // else draw the substitution graphics
-        if (!bDrawn && pSubst)
-        {
-            GDIMetaFile* pOldMetaFile = mpMetaFile;
-
-            mpMetaFile = nullptr;
-            Graphic(*pSubst).Draw(this, rPoint, rSize);
-            mpMetaFile = pOldMetaFile;
-        }
-    }
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->DrawEPS(rPoint, rSize, rGfxLink, pSubst);
-
-    return bDrawn;
+    return RenderContext2::DrawEPS(rPoint, rSize, rGfxLink, pSubst);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
