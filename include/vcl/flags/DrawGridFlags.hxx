@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#pragma once
+
 #include <o3tl/typed_flags_set.hxx>
 
 enum class DrawGridFlags

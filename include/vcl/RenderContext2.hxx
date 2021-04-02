@@ -31,6 +31,7 @@
 #include <i18nlangtag/lang.h>
 
 #include <vcl/dllapi.h>
+#include <vcl/DrawingInterface.hxx>
 #include <vcl/ImplLayoutArgs.hxx>
 #include <vcl/ImplMapRes.hxx>
 #include <vcl/RasterOp.hxx>
@@ -120,7 +121,8 @@ struct Feature;
 * so we need to use virtual inheritance to keep the referencing counting
 * OK.
 */
-class VCL_DLLPUBLIC RenderContext2 : public virtual VclReferenceBase
+class VCL_DLLPUBLIC RenderContext2 : public virtual DrawingInterface,
+                                     public virtual VclReferenceBase
 {
     friend class VirtualDevice;
 
@@ -129,44 +131,46 @@ public:
     virtual ~RenderContext2();
 
     Color GetPixel(Point const& rPt) const;
-    virtual void DrawPixel(Point const& rPt);
-    virtual void DrawPixel(Point const& rPt, Color const& rColor);
+    void DrawPixel(Point const& rPt) override;
+    void DrawPixel(Point const& rPt, Color const& rColor) override;
 
-    virtual void DrawLine(Point const& rStartPt, Point const& rEndPt);
-    virtual void DrawLine(Point const& rStartPt, Point const& rEndPt, LineInfo const& rLineInfo);
+    void DrawLine(Point const& rStartPt, Point const& rEndPt) override;
+    void DrawLine(Point const& rStartPt, Point const& rEndPt, LineInfo const& rLineInfo) override;
 
     /** Helper for line geometry paint with support for graphic expansion (pattern and fat_to_area)
      */
     void DrawLine(basegfx::B2DPolyPolygon aLinePolyPolygon, LineInfo const& rInfo);
 
-    virtual void DrawRect(tools::Rectangle const& rRect);
-    virtual void DrawRect(tools::Rectangle const& rRect, sal_uLong nHorzRount,
-                          sal_uLong nVertRound);
+    void DrawRect(tools::Rectangle const& rRect) override;
+    void DrawRect(tools::Rectangle const& rRect, sal_uLong nHorzRount,
+                  sal_uLong nVertRound) override;
 
-    virtual void DrawBorder(tools::Rectangle aBorderRect);
+    void DrawBorder(tools::Rectangle aBorderRect) override;
 
-    virtual void DrawGrid(tools::Rectangle const& rRect, Size const& rDist, DrawGridFlags nFlags);
+    void DrawGrid(tools::Rectangle const& rRect, Size const& rDist, DrawGridFlags nFlags) override;
 
-    virtual void DrawCheckered(Point const& rPos, Size const& rSize, sal_uInt32 nLen = 8,
-                               Color aStart = COL_WHITE, Color aEnd = COL_BLACK);
+    void DrawCheckered(Point const& rPos, Size const& rSize, sal_uInt32 nLen = 8,
+                       Color aStart = COL_WHITE, Color aEnd = COL_BLACK) override;
 
-    virtual void DrawEllipse(tools::Rectangle const& rRect);
-    virtual void DrawArc(tools::Rectangle const& rRect, Point const& rStartPt, Point const& rEndPt);
-    virtual void DrawPie(tools::Rectangle const& rRect, Point const& rStartPt, Point const& rEndPt);
-    virtual void DrawChord(tools::Rectangle const& rRect, Point const& rStartPt,
-                           Point const& rEndPt);
+    void DrawEllipse(tools::Rectangle const& rRect) override;
+    void DrawArc(tools::Rectangle const& rRect, Point const& rStartPt,
+                 Point const& rEndPt) override;
+    void DrawPie(tools::Rectangle const& rRect, Point const& rStartPt,
+                 Point const& rEndPt) override;
+    void DrawChord(tools::Rectangle const& rRect, Point const& rStartPt,
+                   Point const& rEndPt) override;
 
-    void Invert(tools::Rectangle const& rRect, InvertFlags nFlags = InvertFlags::NONE);
-    void Invert(tools::Polygon const& rPoly, InvertFlags nFlags = InvertFlags::NONE);
+    void Invert(tools::Rectangle const& rRect, InvertFlags nFlags = InvertFlags::NONE) override;
+    void Invert(tools::Polygon const& rPoly, InvertFlags nFlags = InvertFlags::NONE) override;
 
-    virtual void DrawPolyLine(tools::Polygon const& rPoly);
-    virtual void DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLineInfo);
-    virtual void DrawPolyLine(const basegfx::B2DPolygon&, double fLineWidth = 0.0,
-                              basegfx::B2DLineJoin eLineJoin = basegfx::B2DLineJoin::Round,
-                              css::drawing::LineCap eLineCap = css::drawing::LineCap_BUTT,
-                              double fMiterMinimumAngle = basegfx::deg2rad(15.0));
-    virtual void DrawPolyPolygon(tools::PolyPolygon const& rPolyPoly);
-    virtual void DrawPolyPolygon(basegfx::B2DPolyPolygon const& rB2DPolyPoly);
+    void DrawPolyLine(tools::Polygon const& rPoly) override;
+    void DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLineInfo) override;
+    void DrawPolyLine(const basegfx::B2DPolygon&, double fLineWidth = 0.0,
+                      basegfx::B2DLineJoin eLineJoin = basegfx::B2DLineJoin::Round,
+                      css::drawing::LineCap eLineCap = css::drawing::LineCap_BUTT,
+                      double fMiterMinimumAngle = basegfx::deg2rad(15.0)) override;
+    void DrawPolyPolygon(tools::PolyPolygon const& rPolyPoly) override;
+    void DrawPolyPolygon(basegfx::B2DPolyPolygon const& rB2DPolyPoly) override;
 
     /** Render the given polygon
 
@@ -178,95 +182,98 @@ public:
 
         @see DrawPolyLine
      */
-    virtual void DrawPolygon(tools::Polygon const& rPoly);
+    void DrawPolygon(tools::Polygon const& rPoly) override;
 
-    virtual void Erase();
-    virtual void Erase(tools::Rectangle const& rRect);
+    virtual void Erase() override;
+    virtual void Erase(tools::Rectangle const& rRect) override;
 
-    virtual void DrawWallpaper(tools::Rectangle const& rRect, Wallpaper const& rWallpaper);
+    void DrawWallpaper(tools::Rectangle const& rRect, Wallpaper const& rWallpaper) override;
 
-    virtual void DrawGradient(tools::Rectangle const& rRect, Gradient const& rGradient);
-    virtual void DrawGradient(tools::PolyPolygon const& rPolyPoly, Gradient const& rGradient);
+    void DrawGradient(tools::Rectangle const& rRect, Gradient const& rGradient) override;
+    void DrawGradient(tools::PolyPolygon const& rPolyPoly, Gradient const& rGradient) override;
 
-    virtual void DrawHatch(tools::PolyPolygon const& rPolyPoly, Hatch const& rHatch);
+    void DrawHatch(tools::PolyPolygon const& rPolyPoly, Hatch const& rHatch) override;
 
     virtual Bitmap GetBitmap(Point const& rSrcPt, Size const& rSize) const;
-    virtual void DrawBitmap(Point const& rDestPt, Bitmap const& rBitmap);
-    virtual void DrawBitmap(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap);
-    virtual void DrawBitmap(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
-                            Size const& rSrcSizePixel, Bitmap const& rBitmap);
+    void DrawBitmap(Point const& rDestPt, Bitmap const& rBitmap) override;
+    void DrawBitmap(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap) override;
+    void DrawBitmap(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
+                    Size const& rSrcSizePixel, Bitmap const& rBitmap) override;
 
-    virtual void DrawText(Point const& rStartPt, OUString const& rStr, sal_Int32 nIndex = 0,
-                          sal_Int32 nLen = -1, std::vector<tools::Rectangle>* pVector = nullptr,
-                          OUString* pDisplayText = nullptr,
-                          SalLayoutGlyphs const* pLayoutCache = nullptr);
+    void DrawText(Point const& rStartPt, OUString const& rStr, sal_Int32 nIndex = 0,
+                  sal_Int32 nLen = -1, std::vector<tools::Rectangle>* pVector = nullptr,
+                  OUString* pDisplayText = nullptr,
+                  SalLayoutGlyphs const* pLayoutCache = nullptr) override;
 
-    virtual void DrawText(tools::Rectangle const& rRect, OUString const& rStr,
-                          DrawTextFlags nStyle = DrawTextFlags::NONE,
-                          std::vector<tools::Rectangle>* pVector = nullptr,
-                          OUString* pDisplayText = nullptr,
-                          vcl::ITextLayout* _pTextLayout = nullptr);
+    void DrawText(tools::Rectangle const& rRect, OUString const& rStr,
+                  DrawTextFlags nStyle = DrawTextFlags::NONE,
+                  std::vector<tools::Rectangle>* pVector = nullptr,
+                  OUString* pDisplayText = nullptr,
+                  vcl::ITextLayout* _pTextLayout = nullptr) override;
 
-    virtual void DrawTextArray(Point const& rStartPt, OUString const& rStr,
-                               tools::Long const* pDXAry, sal_Int32 nIndex = 0, sal_Int32 nLen = -1,
-                               SalLayoutFlags flags = SalLayoutFlags::NONE,
-                               SalLayoutGlyphs const* pLayoutCache = nullptr);
+    void DrawTextArray(Point const& rStartPt, OUString const& rStr, tools::Long const* pDXAry,
+                       sal_Int32 nIndex = 0, sal_Int32 nLen = -1,
+                       SalLayoutFlags flags = SalLayoutFlags::NONE,
+                       SalLayoutGlyphs const* pLayoutCache = nullptr) override;
 
-    virtual void DrawStretchText(Point const& rStartPt, sal_uLong nWidth, OUString const& rStr,
-                                 sal_Int32 nIndex = 0, sal_Int32 nLen = -1);
+    void DrawStretchText(Point const& rStartPt, sal_uLong nWidth, OUString const& rStr,
+                         sal_Int32 nIndex = 0, sal_Int32 nLen = -1) override;
 
-    virtual void DrawTextLine(const Point& rPos, tools::Long nWidth, FontStrikeout eStrikeout,
-                              FontLineStyle eUnderline, FontLineStyle eOverline,
-                              bool bUnderlineAbove = false);
+    void DrawTextLine(const Point& rPos, tools::Long nWidth, FontStrikeout eStrikeout,
+                      FontLineStyle eUnderline, FontLineStyle eOverline,
+                      bool bUnderlineAbove = false) override;
 
-    void DrawWaveLine(Point const& rStartPos, Point const& rEndPos, tools::Long nLineWidth = 1);
+    void DrawWaveLine(Point const& rStartPos, Point const& rEndPos,
+                      tools::Long nLineWidth = 1) override;
 
     void DrawCtrlText(Point const& rPos, OUString const& rStr, sal_Int32 nIndex = 0,
                       sal_Int32 nLen = -1, DrawTextFlags nStyle = DrawTextFlags::Mnemonic,
                       std::vector<tools::Rectangle>* pVector = nullptr,
-                      OUString* pDisplayText = nullptr, SalLayoutGlyphs const* pGlyphs = nullptr);
+                      OUString* pDisplayText = nullptr,
+                      SalLayoutGlyphs const* pGlyphs = nullptr) override;
 
     /** Query extended bitmap (with alpha channel, if available).
      */
     BitmapEx GetBitmapEx(Point const& rSrcPt, Size const& rSize) const;
-    virtual void DrawBitmapEx(Point const& rDestPt, BitmapEx const& rBitmapEx);
-    virtual void DrawBitmapEx(Point const& rDestPt, Size const& rDestSize,
-                              BitmapEx const& rBitmapEx);
-    virtual void DrawBitmapEx(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
-                              Size const& rSrcSizePixel, BitmapEx const& rBitmapEx);
+    void DrawBitmapEx(Point const& rDestPt, BitmapEx const& rBitmapEx) override;
+    void DrawBitmapEx(Point const& rDestPt, Size const& rDestSize,
+                      BitmapEx const& rBitmapEx) override;
+    void DrawBitmapEx(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
+                      Size const& rSrcSizePixel, BitmapEx const& rBitmapEx) override;
 
     /** Return true if DrawTransformedBitmapEx() is fast.
 
         @since 7.2
     */
     virtual bool HasFastDrawTransformedBitmap() const;
-    virtual void DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransformation,
-                                         const BitmapEx& rBitmapEx, double fAlpha = 1.0);
+    void DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransformation,
+                                 const BitmapEx& rBitmapEx, double fAlpha = 1.0) override;
 
-    virtual void DrawMask(Point const& rDestPt, Bitmap const& rBitmap, Color const& rMaskColor);
-    virtual void DrawMask(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap,
-                          Color const& rMaskColor);
-    virtual void DrawScaledMask(Point const& rDestPt, Size const& rDestSize,
-                                Point const& rSrcPtPixel, Size const& rSrcSizePixel,
-                                Bitmap const& rBitmap, Color const& rMaskColor);
-    virtual void DrawMask(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
-                          Size const& rSrcSizePixel, Bitmap const& rBitmap,
-                          Color const& rMaskColor);
+    void DrawMask(Point const& rDestPt, Bitmap const& rBitmap, Color const& rMaskColor) override;
+    void DrawMask(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap,
+                  Color const& rMaskColor) override;
+    void DrawScaledMask(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
+                        Size const& rSrcSizePixel, Bitmap const& rBitmap,
+                        Color const& rMaskColor) override;
+    void DrawMask(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
+                  Size const& rSrcSizePixel, Bitmap const& rBitmap,
+                  Color const& rMaskColor) override;
 
-    virtual void DrawImage(Point const& rPos, Image const& rImage,
-                           DrawImageFlags nStyle = DrawImageFlags::NONE);
-    virtual void DrawImage(Point const& rPos, Size const& rSize, Image const& rImage,
-                           DrawImageFlags nStyle = DrawImageFlags::NONE);
+    void DrawImage(Point const& rPos, Image const& rImage,
+                   DrawImageFlags nStyle = DrawImageFlags::NONE) override;
+    void DrawImage(Point const& rPos, Size const& rSize, Image const& rImage,
+                   DrawImageFlags nStyle = DrawImageFlags::NONE) override;
 
-    virtual void DrawTransparent(tools::PolyPolygon const& rPolyPoly,
-                                 sal_uInt16 nTransparencePercent);
-    virtual void DrawTransparent(basegfx::B2DHomMatrix const& rObjectTransform,
-                                 basegfx::B2DPolyPolygon const& rB2DPolyPoly, double fTransparency);
+    void DrawTransparent(tools::PolyPolygon const& rPolyPoly,
+                         sal_uInt16 nTransparencePercent) override;
+    void DrawTransparent(basegfx::B2DHomMatrix const& rObjectTransform,
+                         basegfx::B2DPolyPolygon const& rB2DPolyPoly,
+                         double fTransparency) override;
 
     virtual bool CanAnimate();
 
-    virtual void DrawAnimation(Animation* const pAnim, Point const& rDestPt,
-                               Size const& rDestSz) const;
+    void DrawAnimation(Animation* const pAnim, Point const& rDestPt,
+                       Size const& rDestSz) const override;
 
     virtual void DrawAnimationViewToPos(ImplAnimView& rAnimView, sal_uLong nPos);
     virtual void DrawAnimationView(ImplAnimView& rAnimView, sal_uLong nPos,
@@ -277,8 +284,8 @@ public:
         painting rotated EPS files (e.g. contained in Metafiles). This
         would then need to be supported for Mac and PS printers, but
         that's too much for now, wrote \#i107046# for this */
-    virtual bool DrawEPS(const Point& rPt, const Size& rSz, const GfxLink& rGfxLink,
-                         GDIMetaFile* pSubst = nullptr);
+    bool DrawEPS(const Point& rPt, const Size& rSz, const GfxLink& rGfxLink,
+                 GDIMetaFile* pSubst = nullptr) override;
 
     virtual void Flush() {}
 
@@ -817,7 +824,7 @@ public:
     SAL_DLLPRIVATE tools::Long ImplLogicWidthToDevicePixel(tools::Long nWidth) const;
 
 protected:
-    virtual void dispose();
+    void dispose() override;
 
     /** Acquire a graphics device that the output device uses to draw on.
 

@@ -242,7 +242,7 @@ public:
     ///@{
 
     void DrawPolygon(tools::Polygon const& rPoly) override;
-    void DrawPolygon(const basegfx::B2DPolygon&);
+    void DrawPolygon(basegfx::B2DPolygon const&);
 
     /** Render the given poly-polygon
 
