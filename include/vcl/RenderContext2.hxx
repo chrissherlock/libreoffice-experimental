@@ -180,6 +180,9 @@ public:
      */
     virtual void DrawPolygon(tools::Polygon const& rPoly);
 
+    virtual void Erase();
+    virtual void Erase(tools::Rectangle const& rRect);
+
     virtual void DrawWallpaper(tools::Rectangle const& rRect, Wallpaper const& rWallpaper);
 
     virtual void DrawGradient(tools::Rectangle const& rRect, Gradient const& rGradient);

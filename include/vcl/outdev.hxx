@@ -307,8 +307,8 @@ public:
 
     void DrawWallpaper(const tools::Rectangle& rRect, const Wallpaper& rWallpaper) override;
 
-    void Erase();
-    void Erase(const tools::Rectangle& rRect);
+    void Erase() override;
+    void Erase(tools::Rectangle const& rRect) override;
 
     ///@}
 
