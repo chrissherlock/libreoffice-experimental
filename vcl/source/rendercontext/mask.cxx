@@ -46,6 +46,12 @@ void RenderContext2::DrawMask(Point const& rDestPt, Size const& rDestSize, Point
 {
     assert(!is_double_buffered_window());
 
+    if (meRasterOp == RasterOp::Invert)
+    {
+        DrawRect(tools::Rectangle(rDestPt, rDestSize));
+        return;
+    }
+
     if (!IsDeviceOutputNecessary())
         return;
 
@@ -59,6 +65,13 @@ void RenderContext2::DrawMask(Point const& rDestPt, Size const& rDestSize, Point
         return;
 
     DrawDeviceMask(rBitmap, rMaskColor, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
+}
+
+void RenderContext2::DrawScaledMask(Point const& rDestPt, Size const& rDestSize,
+                                    Point const& rSrcPtPixel, Size const& rSrcSizePixel,
+                                    Bitmap const& rBitmap, Color const& rMaskColor)
+{
+    DrawMask(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmap, rMaskColor);
 }
 
 void RenderContext2::DrawDeviceMask(Bitmap const& rMask, Color const& rMaskColor,
