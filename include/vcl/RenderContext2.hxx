@@ -67,6 +67,7 @@
 
 class AllSettings;
 class Animation;
+class GfxLink;
 class Hatch;
 class Image;
 class ImplAnimView;
@@ -81,6 +82,7 @@ class SalGraphics;
 class SalLayout;
 class SalLayoutGlyphs;
 class VirtualDevice;
+class Wallpaper;
 struct ImplOutDevData;
 struct OutDevState;
 struct SalTwoRect;
@@ -178,6 +180,8 @@ public:
      */
     virtual void DrawPolygon(tools::Polygon const& rPoly);
 
+    virtual void DrawWallpaper(tools::Rectangle const& rRect, Wallpaper const& rWallpaper);
+
     virtual void DrawGradient(tools::Rectangle const& rRect, Gradient const& rGradient);
     virtual void DrawGradient(tools::PolyPolygon const& rPolyPoly, Gradient const& rGradient);
 
@@ -264,6 +268,14 @@ public:
     virtual void DrawAnimationViewToPos(ImplAnimView& rAnimView, sal_uLong nPos);
     virtual void DrawAnimationView(ImplAnimView& rAnimView, sal_uLong nPos,
                                    VirtualDevice* pVDev = nullptr);
+
+    /** @returns boolean value to see if EPS could be painted directly.
+        Theoretically, handing over a matrix would be needed to handle
+        painting rotated EPS files (e.g. contained in Metafiles). This
+        would then need to be supported for Mac and PS printers, but
+        that's too much for now, wrote \#i107046# for this */
+    virtual bool DrawEPS(const Point& rPt, const Size& rSz, const GfxLink& rGfxLink,
+                         GDIMetaFile* pSubst = nullptr);
 
     virtual void Flush() {}
 
@@ -1134,6 +1146,15 @@ private:
     virtual bool CanSubsampleBitmap() const { return true; }
 
     virtual vcl::Region GetOutputBoundsClipRegion() const;
+
+    SAL_DLLPRIVATE void DrawWallpaper(tools::Long nX, tools::Long nY, tools::Long nWidth,
+                                      tools::Long nHeight, const Wallpaper& rWallpaper);
+    SAL_DLLPRIVATE void DrawColorWallpaper(tools::Long nX, tools::Long nY, tools::Long nWidth,
+                                           tools::Long nHeight, const Wallpaper& rWallpaper);
+    SAL_DLLPRIVATE void DrawBitmapWallpaper(tools::Long nX, tools::Long nY, tools::Long nWidth,
+                                            tools::Long nHeight, const Wallpaper& rWallpaper);
+    SAL_DLLPRIVATE void DrawGradientWallpaper(tools::Long nX, tools::Long nY, tools::Long nWidth,
+                                              tools::Long nHeight, const Wallpaper& rWallpaper);
 
     virtual RenderContext2 const* DrawOutDevDirectCheck(RenderContext2 const& rSrcDev) const;
 
