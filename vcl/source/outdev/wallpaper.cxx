@@ -20,28 +20,21 @@
 #include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
 
-#include <cassert>
-
 void OutputDevice::Erase()
 {
-    if (!IsDeviceOutputNecessary() || ImplIsRecordLayout())
-        return;
-
-    if (mbBackground)
+    if (IsBackground())
     {
         RasterOp eRasterOp = GetRasterOp();
 
         if (eRasterOp != RasterOp::OverPaint)
             SetRasterOp(RasterOp::OverPaint);
 
-        DrawWallpaper(tools::Rectangle(Point(0, 0), Size(mnOutWidth, mnOutHeight)), maBackground);
+        DrawWallpaper(tools::Rectangle(Point(0, 0), Size(mnOutWidth, mnOutHeight)),
+                      GetBackground());
 
         if (eRasterOp != RasterOp::OverPaint)
             SetRasterOp(eRasterOp);
     }
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->Erase();
 }
 
 void OutputDevice::Erase(tools::Rectangle const& rRect)
@@ -55,9 +48,6 @@ void OutputDevice::Erase(tools::Rectangle const& rRect)
 
     if (eRasterOp != RasterOp::OverPaint)
         SetRasterOp(eRasterOp);
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->Erase(rRect);
 }
 
 void OutputDevice::DrawWallpaper(tools::Rectangle const& rRect, Wallpaper const& rWallpaper)

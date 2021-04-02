@@ -22,6 +22,44 @@
 
 #include <cassert>
 
+void RenderContext2::Erase()
+{
+    if (!IsDeviceOutputNecessary() || ImplIsRecordLayout())
+        return;
+
+    if (mbBackground)
+    {
+        RasterOp eRasterOp = GetRasterOp();
+
+        if (eRasterOp != RasterOp::OverPaint)
+            SetRasterOp(RasterOp::OverPaint);
+
+        DrawWallpaper(tools::Rectangle(Point(0, 0), Size(mnOutWidth, mnOutHeight)), maBackground);
+
+        if (eRasterOp != RasterOp::OverPaint)
+            SetRasterOp(eRasterOp);
+    }
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->Erase();
+}
+
+void RenderContext2::Erase(tools::Rectangle const& rRect)
+{
+    const RasterOp eRasterOp = GetRasterOp();
+
+    if (eRasterOp != RasterOp::OverPaint)
+        SetRasterOp(RasterOp::OverPaint);
+
+    DrawWallpaper(rRect, GetBackground());
+
+    if (eRasterOp != RasterOp::OverPaint)
+        SetRasterOp(eRasterOp);
+
+    if (mpAlphaVDev)
+        mpAlphaVDev->Erase(rRect);
+}
+
 void RenderContext2::DrawWallpaper(tools::Rectangle const& rRect, Wallpaper const& rWallpaper)
 {
     if (!IsDeviceOutputNecessary() || ImplIsRecordLayout())
