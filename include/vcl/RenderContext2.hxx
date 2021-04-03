@@ -32,6 +32,7 @@
 
 #include <vcl/dllapi.h>
 #include <vcl/DrawingInterface.hxx>
+#include <vcl/Geometry.hxx>
 #include <vcl/ImplLayoutArgs.hxx>
 #include <vcl/ImplMapRes.hxx>
 #include <vcl/RasterOp.hxx>
@@ -1092,12 +1093,9 @@ protected:
     mutable std::unique_ptr<ImplDeviceFontSizeList> mpDeviceFontSizeList;
     mutable rtl::Reference<LogicalFontInstance> mpFontInstance;
     mutable std::shared_ptr<ImplFontCache> mxFontCache;
-    /// Additional output pixel offset, applied in LogicToPixel (used by SetPixelOffset/GetPixelOffset)
-    tools::Long mnOutOffOrigX;
+    Geometry maGeometry;
     /// Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
     tools::Long mnOutOffLogicX;
-    /// Additional output pixel offset, applied in LogicToPixel (used by SetPixelOffset/GetPixelOffset)
-    tools::Long mnOutOffOrigY;
     /// Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
     tools::Long mnOutOffLogicY;
     /// Output offset for device output in pixel (pseudo window offset within window system's frames)
