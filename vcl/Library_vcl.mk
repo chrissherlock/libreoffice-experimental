@@ -142,7 +142,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/rendercontext/extoudevdata \
     vcl/source/rendercontext/font \
     vcl/source/rendercontext/fill \
-    vcl/source/rendercontext/geometry \
+    vcl/source/rendercontext/geom \
     vcl/source/rendercontext/gradient \
     vcl/source/rendercontext/graphics \
     vcl/source/rendercontext/grid \
