@@ -23,7 +23,6 @@
 #include <tools/helpers.hxx>
 #include <tools/debug.hxx>
 
-#include <vcl/animate/Animation.hxx>
 #include <vcl/QueueInfo.hxx>
 #include <vcl/event.hxx>
 #include <vcl/virdev.hxx>
@@ -1786,6 +1785,11 @@ void Printer::DrawAnimation(Animation* const pAnim, Point const& rDestPt,
 
     Printer* pPrinter = const_cast<Printer*>(this);
     pAnim->Get(0).maBitmapEx.Draw(pPrinter, rDestPt, rDestSz);
+}
+
+void Printer::SetSystemTextColor(DrawFlags, bool)
+{
+    SetTextColor(COL_BLACK);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

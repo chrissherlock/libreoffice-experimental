@@ -23,6 +23,7 @@
 #include <vcl/OutDevType.hxx>
 #include <vcl/OutDevViewType.hxx>
 #include <vcl/cairo.hxx>
+#include <vcl/flags/DrawFlags.hxx>
 #include <vcl/metaactiontypes.hxx>
 #include <vcl/outdevstate.hxx>
 
@@ -343,6 +344,7 @@ public:
                             DrawTextFlags nStyle, GDIMetaFile& rMtf);
 
     void SetTextColor(Color const& rColor) override;
+    virtual void SetSystemTextColor(DrawFlags nFlags, bool bEnabled = false);
     void SetTextFillColor() override;
     void SetTextFillColor(Color const& rColor) override;
     void SetTextLineColor() override;

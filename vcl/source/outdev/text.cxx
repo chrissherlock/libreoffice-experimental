@@ -207,4 +207,24 @@ void OutputDevice::SetOverlineColor(Color const& rColor)
     RenderContext2::SetOverlineColor(rColor);
 }
 
+void OutputDevice::SetSystemTextColor(DrawFlags nFlags, bool bEnabled)
+{
+    if (nFlags & DrawFlags::Mono)
+    {
+        SetTextColor(COL_BLACK);
+    }
+    else
+    {
+        if (!bEnabled)
+        {
+            const StyleSettings& rStyleSettings = GetSettings().GetStyleSettings();
+            SetTextColor(rStyleSettings.GetDisableColor());
+        }
+        else
+        {
+            SetTextColor(GetTextColor());
+        }
+    }
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
