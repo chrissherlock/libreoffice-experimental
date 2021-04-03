@@ -47,15 +47,24 @@ tools::Long RenderContext2::GetOutputWidthPixel() const { return mnOutWidth; }
 
 tools::Long RenderContext2::GetOutputHeightPixel() const { return mnOutHeight; }
 
-tools::Long RenderContext2::GetOutOffXPixel() const { return mnOutOffX; }
+tools::Long RenderContext2::GetOutOffXPixel() const { return maGeometry.GetXOffsetInPixels(); }
 
-tools::Long RenderContext2::GetOutOffYPixel() const { return mnOutOffY; }
+tools::Long RenderContext2::GetOutOffYPixel() const { return maGeometry.GetYOffsetInPixels(); }
 
-void RenderContext2::SetOutOffXPixel(tools::Long nOutOffX) { mnOutOffX = nOutOffX; }
+void RenderContext2::SetOutOffXPixel(tools::Long nOutOffX)
+{
+    maGeometry.SetXOffsetInPixels(nOutOffX);
+}
 
-void RenderContext2::SetOutOffYPixel(tools::Long nOutOffY) { mnOutOffY = nOutOffY; }
+void RenderContext2::SetOutOffYPixel(tools::Long nOutOffY)
+{
+    maGeometry.SetYOffsetInPixels(nOutOffY);
+}
 
-Point RenderContext2::GetOutputOffPixel() const { return Point(mnOutOffX, mnOutOffY); }
+Point RenderContext2::GetOutputOffPixel() const
+{
+    return Point(maGeometry.GetXOffsetInPixels(), maGeometry.GetYOffsetInPixels());
+}
 
 tools::Rectangle RenderContext2::GetOutputRectPixel() const
 {

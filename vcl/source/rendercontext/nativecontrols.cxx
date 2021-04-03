@@ -140,12 +140,14 @@ bool RenderContext2::HitTestNativeScrollbar(ControlPart nPart,
 
     assert(mpGraphics);
 
-    Point aWinOffs(mnOutOffX, mnOutOffY);
+    Point aWinOffs(maGeometry.GetXOffsetInPixels(), maGeometry.GetYOffsetInPixels());
     tools::Rectangle screenRegion(rControlRegion);
     screenRegion.Move(aWinOffs.X(), aWinOffs.Y());
 
-    return mpGraphics->HitTestNativeScrollbar(
-        nPart, screenRegion, Point(aPos.X() + mnOutOffX, aPos.Y() + mnOutOffY), rIsInside, *this);
+    return mpGraphics->HitTestNativeScrollbar(nPart, screenRegion,
+                                              Point(aPos.X() + maGeometry.GetXOffsetInPixels(),
+                                                    aPos.Y() + maGeometry.GetYOffsetInPixels()),
+                                              rIsInside, *this);
 }
 
 static std::unique_ptr<ImplControlValue> TransformControlValue(ImplControlValue const& rVal,

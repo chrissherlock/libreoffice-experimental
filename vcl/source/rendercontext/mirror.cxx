@@ -25,18 +25,20 @@
 
 void RenderContext2::ReMirror(Point& rPoint) const
 {
-    rPoint.setX(mnOutOffX + mnOutWidth - 1 - rPoint.X() + mnOutOffX);
+    rPoint.setX(maGeometry.GetXOffsetInPixels() + mnOutWidth - 1 - rPoint.X()
+                + maGeometry.GetXOffsetInPixels());
 }
 
 void RenderContext2::ReMirror(tools::Rectangle& rRect) const
 {
     tools::Long nWidth = rRect.Right() - rRect.Left();
 
-    //long lc_x = rRect.nLeft - mnOutOffX;    // normalize
+    //long lc_x = rRect.nLeft - maGeometry.GetXOffsetInPixels();    // normalize
     //lc_x = mnOutWidth - nWidth - 1 - lc_x;  // mirror
-    //rRect.nLeft = lc_x + mnOutOffX;         // re-normalize
+    //rRect.nLeft = lc_x + maGeometry.GetXOffsetInPixels();         // re-normalize
 
-    rRect.SetLeft(mnOutOffX + mnOutWidth - nWidth - 1 - rRect.Left() + mnOutOffX);
+    rRect.SetLeft(maGeometry.GetXOffsetInPixels() + mnOutWidth - nWidth - 1 - rRect.Left()
+                  + maGeometry.GetXOffsetInPixels());
     rRect.SetRight(rRect.Left() + nWidth);
 }
 

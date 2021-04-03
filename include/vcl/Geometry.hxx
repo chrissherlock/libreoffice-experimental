@@ -40,11 +40,21 @@ public:
     tools::Long GetYOffsetFromOriginInLogicalUnits() const;
     void SetYOffsetFromOriginInLogicalUnits(tools::Long nOffsetFromOriginYInLogicalUnits);
 
+    tools::Long GetXOffsetInPixels() const;
+    void SetXOffsetInPixels(tools::Long nOffsetXpx);
+
+    tools::Long GetYOffsetInPixels() const;
+    void SetYOffsetInPixels(tools::Long nOffsetYpx);
+
 private:
     tools::Long mnOutOffOrigX;
     tools::Long mnOutOffOrigY;
     tools::Long mnOutOffLogicX;
     tools::Long mnOutOffLogicY;
+    tools::Long
+        mnOutOffX; /// Output offset for device output in pixels (pseudo window offset within window system's frames)
+    tools::Long
+        mnOutOffY; /// Output offset for device output in pixels (pseudo window offset within window system's frames)
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

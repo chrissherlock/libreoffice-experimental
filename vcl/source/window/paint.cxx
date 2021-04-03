@@ -1127,7 +1127,7 @@ vcl::Region Window::GetPaintRegion() const
     if ( mpWindowImpl->mpPaintRegion )
     {
         vcl::Region aRegion = *mpWindowImpl->mpPaintRegion;
-        aRegion.Move( -mnOutOffX, -mnOutOffY );
+        aRegion.Move( -maGeometry.GetXOffsetInPixels(), -maGeometry.GetYOffsetInPixels());
         return PixelToLogic( aRegion );
     }
     else
@@ -1403,8 +1403,8 @@ void Window::ImplPaintToDevice( OutputDevice* i_pTargetOutDev, const Point& i_rP
         {
             if( pChild->mpWindowImpl->mpFrame == mpWindowImpl->mpFrame && pChild->IsVisible() )
             {
-                tools::Long nDeltaX = pChild->mnOutOffX - mnOutOffX;
-                tools::Long nDeltaY = pChild->mnOutOffY - mnOutOffY;
+                tools::Long nDeltaX = pChild->GetGeometry().GetXOffsetInPixels() - maGeometry.GetXOffsetInPixels();
+                tools::Long nDeltaY = pChild->GetGeometry().GetYOffsetInPixels() - maGeometry.GetYOffsetInPixels();
 
                 Point aPos( i_rPos );
                 aPos += Point(nDeltaX, nDeltaY);
@@ -1520,7 +1520,7 @@ void Window::ImplPaintToDevice( OutputDevice* i_pTargetOutDev, const Point& i_rP
     {
         if( pChild->mpWindowImpl->mpFrame == mpWindowImpl->mpFrame && pChild->IsVisible() )
         {
-            tools::Long nDeltaX = pChild->mnOutOffX - mnOutOffX;
+            tools::Long nDeltaX = pChild->GetGeometry().GetXOffsetInPixels() - maGeometry.GetXOffsetInPixels();
 
             if( pOutDev->HasMirroredGraphics() )
                 nDeltaX = mnOutWidth - nDeltaX - pChild->mnOutWidth;

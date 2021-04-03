@@ -1158,8 +1158,8 @@ void RenderContext2::ImplDrawEmphasisMark(tools::Long nBaseX, tools::Long nX, to
     if (IsRTLEnabled())
         nX = nBaseX - (nX - nBaseX - 1);
 
-    nX -= mnOutOffX;
-    nY -= mnOutOffY;
+    nX -= maGeometry.GetXOffsetInPixels();
+    nY -= maGeometry.GetYOffsetInPixels();
 
     if (rPolyPoly.Count())
     {

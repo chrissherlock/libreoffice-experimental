@@ -389,6 +389,7 @@ public:
     virtual void EnableRTL(bool bEnable = true);
     bool IsRTLEnabled() const;
 
+    Geometry const& GetGeometry() const { return maGeometry; }
     ComplexTextLayoutFlags GetLayoutMode() const;
     virtual void SetLayoutMode(ComplexTextLayoutFlags nTextLayoutMode);
 
@@ -1094,10 +1095,6 @@ protected:
     mutable rtl::Reference<LogicalFontInstance> mpFontInstance;
     mutable std::shared_ptr<ImplFontCache> mxFontCache;
     Geometry maGeometry;
-    /// Output offset for device output in pixel (pseudo window offset within window system's frames)
-    tools::Long mnOutOffX;
-    /// Output offset for device output in pixel (pseudo window offset within window system's frames)
-    tools::Long mnOutOffY;
     tools::Long mnOutWidth;
     tools::Long mnOutHeight;
     /// font specific text alignment offsets in pixel units

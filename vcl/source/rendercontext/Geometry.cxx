@@ -24,6 +24,8 @@ Geometry::Geometry()
     , mnOutOffOrigY(0)
     , mnOutOffLogicX(0)
     , mnOutOffLogicY(0)
+    , mnOutOffX(0)
+    , mnOutOffY(0)
 {
 }
 
@@ -54,5 +56,13 @@ void Geometry::SetYOffsetFromOriginInLogicalUnits(tools::Long nOffsetFromOriginY
 {
     mnOutOffLogicY = nOffsetFromOriginYInLogicalUnits;
 }
+
+tools::Long Geometry::GetXOffsetInPixels() const { return mnOutOffX; }
+
+void Geometry::SetXOffsetInPixels(tools::Long nOffsetXpx) { mnOutOffX = nOffsetXpx; }
+
+tools::Long Geometry::GetYOffsetInPixels() const { return mnOutOffY; }
+
+void Geometry::SetYOffsetInPixels(tools::Long nOffsetYpx) { mnOutOffY = nOffsetYpx; }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

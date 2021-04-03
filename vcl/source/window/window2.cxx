@@ -935,12 +935,12 @@ void Window::ImplSetMouseTransparent( bool bTransparent )
 
 Point Window::ImplOutputToFrame( const Point& rPos )
 {
-    return Point( rPos.X()+mnOutOffX, rPos.Y()+mnOutOffY );
+    return Point( rPos.X()+maGeometry.GetXOffsetInPixels(), rPos.Y()+maGeometry.GetYOffsetInPixels() );
 }
 
 Point Window::ImplFrameToOutput( const Point& rPos )
 {
-    return Point( rPos.X()-mnOutOffX, rPos.Y()-mnOutOffY );
+    return Point( rPos.X()-maGeometry.GetXOffsetInPixels(), rPos.Y()-maGeometry.GetYOffsetInPixels() );
 }
 
 void Window::SetCompoundControl( bool bCompound )
