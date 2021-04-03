@@ -124,6 +124,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/rendercontext/Geometry \
     vcl/source/rendercontext/ImplMultiTextLineInfo \
     vcl/source/rendercontext/OutDevState \
+    vcl/source/rendercontext/MappingMetrics \
     vcl/source/rendercontext/RenderContext2 \
     vcl/source/rendercontext/animation \
     vcl/source/rendercontext/antialiasing \
@@ -170,7 +171,6 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/rendercontext/text \
     vcl/source/rendercontext/transparent \
     vcl/source/rendercontext/wallpaper \
-    vcl/source/outdev/ImplMapRes \
     vcl/source/outdev/animation \
     vcl/source/outdev/outdev \
     vcl/source/outdev/stack \

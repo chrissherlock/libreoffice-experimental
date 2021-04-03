@@ -33,9 +33,9 @@
 #include <svdata.hxx>
 
 static void ImplCalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX, tools::Long nDPIY,
-                                  ImplMapRes& rMapRes);
+                                  MappingMetrics& rMapRes);
 
-static auto setMapRes(ImplMapRes& rMapRes, const o3tl::Length eUnit);
+static auto setMapRes(MappingMetrics& rMapRes, const o3tl::Length eUnit);
 
 static Fraction ImplMakeFraction(tools::Long nN1, tools::Long nN2, tools::Long nD1,
                                  tools::Long nD2);
@@ -294,7 +294,7 @@ basegfx::B2DHomMatrix RenderContext2::GetInverseViewTransformation() const
 basegfx::B2DHomMatrix RenderContext2::GetViewTransformation(const MapMode& rMapMode) const
 {
     // #i82615#
-    ImplMapRes aMapRes;
+    MappingMetrics aMapRes;
     ImplCalcMapResolution(rMapMode, mnDPIX, mnDPIY, aMapRes);
 
     basegfx::B2DHomMatrix aTransform;
@@ -767,7 +767,7 @@ Point RenderContext2::LogicToPixel(const Point& rLogicPt, const MapMode& rMapMod
         return rLogicPt;
 
     // convert MapMode resolution and convert
-    ImplMapRes aMapRes;
+    MappingMetrics aMapRes;
     ImplCalcMapResolution(rMapMode, mnDPIX, mnDPIY, aMapRes);
 
     return Point(ImplLogicToPixel(rLogicPt.X() + aMapRes.mnMapOfsX, mnDPIX, aMapRes.mnMapScNumX,
@@ -784,7 +784,7 @@ Size RenderContext2::LogicToPixel(const Size& rLogicSize, const MapMode& rMapMod
         return rLogicSize;
 
     // convert MapMode resolution and convert
-    ImplMapRes aMapRes;
+    MappingMetrics aMapRes;
     ImplCalcMapResolution(rMapMode, mnDPIX, mnDPIY, aMapRes);
 
     return Size(
@@ -799,7 +799,7 @@ tools::Rectangle RenderContext2::LogicToPixel(const tools::Rectangle& rLogicRect
         return rLogicRect;
 
     // convert MapMode resolution and convert
-    ImplMapRes aMapRes;
+    MappingMetrics aMapRes;
     ImplCalcMapResolution(rMapMode, mnDPIX, mnDPIY, aMapRes);
 
     return tools::Rectangle(ImplLogicToPixel(rLogicRect.Left() + aMapRes.mnMapOfsX, mnDPIX,
@@ -823,7 +823,7 @@ tools::Polygon RenderContext2::LogicToPixel(const tools::Polygon& rLogicPoly,
         return rLogicPoly;
 
     // convert MapMode resolution and convert
-    ImplMapRes aMapRes;
+    MappingMetrics aMapRes;
     ImplCalcMapResolution(rMapMode, mnDPIX, mnDPIY, aMapRes);
 
     sal_uInt16 i;
@@ -988,7 +988,7 @@ Point RenderContext2::PixelToLogic(const Point& rDevicePt, const MapMode& rMapMo
         return rDevicePt;
 
     // calculate MapMode-resolution and convert
-    ImplMapRes aMapRes;
+    MappingMetrics aMapRes;
     ImplCalcMapResolution(rMapMode, mnDPIX, mnDPIY, aMapRes);
 
     return Point(ImplPixelToLogic(rDevicePt.X(), mnDPIX, aMapRes.mnMapScNumX, aMapRes.mnMapScDenomX)
@@ -1004,7 +1004,7 @@ Size RenderContext2::PixelToLogic(const Size& rDeviceSize, const MapMode& rMapMo
         return rDeviceSize;
 
     // calculate MapMode-resolution and convert
-    ImplMapRes aMapRes;
+    MappingMetrics aMapRes;
     ImplCalcMapResolution(rMapMode, mnDPIX, mnDPIY, aMapRes);
 
     return Size(
@@ -1020,7 +1020,7 @@ tools::Rectangle RenderContext2::PixelToLogic(const tools::Rectangle& rDeviceRec
         return rDeviceRect;
 
     // calculate MapMode-resolution and convert
-    ImplMapRes aMapRes;
+    MappingMetrics aMapRes;
     ImplCalcMapResolution(rMapMode, mnDPIX, mnDPIY, aMapRes);
 
     return tools::Rectangle(
@@ -1042,7 +1042,7 @@ tools::Polygon RenderContext2::PixelToLogic(const tools::Polygon& rDevicePoly,
         return rDevicePoly;
 
     // calculate MapMode-resolution and convert
-    ImplMapRes aMapRes;
+    MappingMetrics aMapRes;
     ImplCalcMapResolution(rMapMode, mnDPIX, mnDPIY, aMapRes);
 
     sal_uInt16 i;
@@ -1092,8 +1092,8 @@ basegfx::B2DPolyPolygon RenderContext2::PixelToLogic(const basegfx::B2DPolyPolyg
     if (*pMapModeSource == *pMapModeDest)                                                          \
         return rSource;                                                                            \
                                                                                                    \
-    ImplMapRes aMapResSource;                                                                      \
-    ImplMapRes aMapResDest;                                                                        \
+    MappingMetrics aMapResSource;                                                                  \
+    MappingMetrics aMapResDest;                                                                    \
                                                                                                    \
     if (!mbMap || pMapModeSource != &maMapMode)                                                    \
     {                                                                                              \
@@ -1143,8 +1143,8 @@ auto getCorrectedUnit(MapUnit eMapSrc, MapUnit eMapDst)
 }
 
 #define ENTER4(rMapModeSource, rMapModeDest)                                                       \
-    ImplMapRes aMapResSource;                                                                      \
-    ImplMapRes aMapResDest;                                                                        \
+    MappingMetrics aMapResSource;                                                                  \
+    MappingMetrics aMapResDest;                                                                    \
                                                                                                    \
     ImplCalcMapResolution(rMapModeSource, 72, 72, aMapResSource);                                  \
     ImplCalcMapResolution(rMapModeDest, 72, 72, aMapResDest)
@@ -1627,7 +1627,7 @@ static Fraction ImplMakeFraction(tools::Long nN1, tools::Long nN2, tools::Long n
     return aF;
 }
 
-static auto setMapRes(ImplMapRes& rMapRes, const o3tl::Length eUnit)
+static auto setMapRes(MappingMetrics& rMapRes, const o3tl::Length eUnit)
 {
     const auto[nNum, nDen] = o3tl::getConversionMulDiv(eUnit, o3tl::Length::in);
     rMapRes.mnMapScNumX = rMapRes.mnMapScNumY = nNum;
@@ -1635,7 +1635,7 @@ static auto setMapRes(ImplMapRes& rMapRes, const o3tl::Length eUnit)
 };
 
 static void ImplCalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX, tools::Long nDPIY,
-                                  ImplMapRes& rMapRes)
+                                  MappingMetrics& rMapRes)
 {
     switch (rMapMode.GetMapUnit())
     {

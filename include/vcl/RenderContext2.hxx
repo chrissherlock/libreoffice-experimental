@@ -34,7 +34,7 @@
 #include <vcl/DrawingInterface.hxx>
 #include <vcl/Geometry.hxx>
 #include <vcl/ImplLayoutArgs.hxx>
-#include <vcl/ImplMapRes.hxx>
+#include <vcl/MappingMetrics.hxx>
 #include <vcl/RasterOp.hxx>
 #include <vcl/bitmapex.hxx>
 #include <vcl/cairo.hxx>
@@ -1087,7 +1087,7 @@ protected:
     vcl::Region maRegion; ///< contains the clip region, see SetClipRegion(...)
     Point maRefPoint;
     MapMode maMapMode;
-    ImplMapRes maMapRes;
+    MappingMetrics maMapRes;
     std::unique_ptr<ImplOutDevData> mpOutDevData;
     mutable std::shared_ptr<PhysicalFontCollection> mxFontCollection;
     mutable std::unique_ptr<ImplDeviceFontList> mpDeviceFontList;
