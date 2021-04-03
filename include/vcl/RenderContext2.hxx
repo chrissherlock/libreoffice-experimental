@@ -1094,10 +1094,6 @@ protected:
     mutable rtl::Reference<LogicalFontInstance> mpFontInstance;
     mutable std::shared_ptr<ImplFontCache> mxFontCache;
     Geometry maGeometry;
-    /// Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
-    tools::Long mnOutOffLogicX;
-    /// Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
-    tools::Long mnOutOffLogicY;
     /// Output offset for device output in pixel (pseudo window offset within window system's frames)
     tools::Long mnOutOffX;
     /// Output offset for device output in pixel (pseudo window offset within window system's frames)

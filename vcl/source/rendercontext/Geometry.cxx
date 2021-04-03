@@ -22,19 +22,37 @@
 Geometry::Geometry()
     : mnOutOffOrigX(0)
     , mnOutOffOrigY(0)
+    , mnOutOffLogicX(0)
+    , mnOutOffLogicY(0)
 {
 }
 
 tools::Long Geometry::GetXOffsetFromOriginInPixels() const { return mnOutOffOrigX; }
+
 void Geometry::SetXOffsetFromOriginInPixels(tools::Long nOffsetFromOriginXpx)
 {
     mnOutOffOrigX = nOffsetFromOriginXpx;
 }
 
 tools::Long Geometry::GetYOffsetFromOriginInPixels() const { return mnOutOffOrigY; }
+
 void Geometry::SetYOffsetFromOriginInPixels(tools::Long nOffsetFromOriginYpx)
 {
     mnOutOffOrigY = nOffsetFromOriginYpx;
+}
+
+tools::Long Geometry::GetXOffsetFromOriginInLogicalUnits() const { return mnOutOffLogicX; }
+
+void Geometry::SetXOffsetFromOriginInLogicalUnits(tools::Long nOffsetFromOriginXInLogicalUnits)
+{
+    mnOutOffLogicX = nOffsetFromOriginXInLogicalUnits;
+}
+
+tools::Long Geometry::GetYOffsetFromOriginInLogicalUnits() const { return mnOutOffLogicX; }
+
+void Geometry::SetYOffsetFromOriginInLogicalUnits(tools::Long nOffsetFromOriginYInLogicalUnits)
+{
+    mnOutOffLogicY = nOffsetFromOriginYInLogicalUnits;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

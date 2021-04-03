@@ -30,12 +30,21 @@ public:
 
     tools::Long GetXOffsetFromOriginInPixels() const;
     void SetXOffsetFromOriginInPixels(tools::Long nOffsetFromOriginXpx);
+
     tools::Long GetYOffsetFromOriginInPixels() const;
     void SetYOffsetFromOriginInPixels(tools::Long nOffsetFromOriginYpx);
+
+    tools::Long GetXOffsetFromOriginInLogicalUnits() const;
+    void SetXOffsetFromOriginInLogicalUnits(tools::Long nOffsetFromOriginXInLogicalUnits);
+
+    tools::Long GetYOffsetFromOriginInLogicalUnits() const;
+    void SetYOffsetFromOriginInLogicalUnits(tools::Long nOffsetFromOriginYInLogicalUnits);
 
 private:
     tools::Long mnOutOffOrigX;
     tools::Long mnOutOffOrigY;
+    tools::Long mnOutOffLogicX;
+    tools::Long mnOutOffLogicY;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
