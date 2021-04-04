@@ -245,9 +245,9 @@ void Printer::ImplPrintTransparent(const Bitmap& rBmp, const Bitmap& rMask, cons
     tools::Long nX, nY; // , nWorkX, nWorkY, nWorkWidth, nWorkHeight;
     std::unique_ptr<tools::Long[]> pMapX(new tools::Long[nSrcWidth + 1]);
     std::unique_ptr<tools::Long[]> pMapY(new tools::Long[nSrcHeight + 1]);
-    const bool bOldMap = mbMap;
+    const bool bOldMap = IsMapModeEnabled();
 
-    mbMap = false;
+    EnableMapMode(false);
 
     // create forward mapping tables
     for (nX = 0; nX <= nSrcWidth; nX++)
@@ -274,7 +274,7 @@ void Printer::ImplPrintTransparent(const Bitmap& rBmp, const Bitmap& rMask, cons
         DrawBitmap(aMapPt, aMapSz, Point(), aBandBmp.GetSizePixel(), aBandBmp);
     }
 
-    mbMap = bOldMap;
+    EnableMapMode(bOldMap);
 }
 
 bool Printer::DrawTransformBitmapExDirect(const basegfx::B2DHomMatrix& /*aFullTransform*/,
@@ -360,7 +360,7 @@ void Printer::EmulateDrawTransparent(const tools::PolyPolygon& rPolyPoly,
     Push(PushFlags::CLIPREGION | PushFlags::LINECOLOR);
     IntersectClipRegion(vcl::Region(rPolyPoly));
     SetLineColor(GetFillColor());
-    const bool bOldMap = mbMap;
+    const bool bOldMap = IsMapModeEnabled();
     EnableMapMode(false);
 
     if (nMove)
@@ -824,10 +824,10 @@ void Printer::DrawDeviceMask(const Bitmap& rMask, const Color& rMaskColor, const
     std::unique_ptr<tools::Long[]> pMapX(new tools::Long[nSrcWidth + 1]);
     std::unique_ptr<tools::Long[]> pMapY(new tools::Long[nSrcHeight + 1]);
     GDIMetaFile* pOldMetaFile = mpMetaFile;
-    const bool bOldMap = mbMap;
+    const bool bOldMap = IsMapModeEnabled();
 
     mpMetaFile = nullptr;
-    mbMap = false;
+    EnableMapMode(false);
     Push(PushFlags::FILLCOLOR | PushFlags::LINECOLOR);
     SetLineColor(rMaskColor);
     SetFillColor(rMaskColor);
@@ -858,7 +858,7 @@ void Printer::DrawDeviceMask(const Bitmap& rMask, const Color& rMaskColor, const
     }
 
     Pop();
-    mbMap = bOldMap;
+    EnableMapMode(bOldMap);
     mpMetaFile = pOldMetaFile;
 }
 
@@ -918,8 +918,11 @@ void Printer::ImplUpdatePageData()
     SetDPIX(nDPIX);
     SetDPIY(nDPIY);
 
-    mpInfoPrinter->GetPageInfo(&maJobSetup.ImplGetConstData(), mnOutWidth, mnOutHeight,
+    tools::Long nWidth, nHeight;
+    mpInfoPrinter->GetPageInfo(&maJobSetup.ImplGetConstData(), nWidth, nHeight,
                                maPageOffset, maPaperSize);
+    SetWidthInPixels(nWidth);
+    SetHeightInPixels(nHeight);
 }
 
 void Printer::ImplUpdateFontList() { ImplUpdateFontData(); }

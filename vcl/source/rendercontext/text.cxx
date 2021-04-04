@@ -364,12 +364,13 @@ void RenderContext2::ImplInitTextColor()
 
 tools::Long RenderContext2::GetTextHeight() const
 {
-    if (!InitFont())
+    RenderContext2* pRC = const_cast<RenderContext2*>(this);
+    if (!pRC->InitFont())
         return 0;
 
     tools::Long nHeight = mpFontInstance->mnLineHeight + mnEmphasisAscent + mnEmphasisDescent;
 
-    if (mbMap)
+    if (maGeometry.IsMapModeEnabled())
         nHeight = ImplDevicePixelToLogicHeight(nHeight);
 
     return nHeight;
@@ -491,7 +492,7 @@ bool RenderContext2::GetTextBoundRect(tools::Rectangle& rRect, OUString const& r
             aPixelRect += aRotatedOfs;
             rRect = PixelToLogic(aPixelRect);
 
-            if (mbMap)
+            if (maGeometry.IsMapModeEnabled())
                 rRect += Point(maMapRes.mnMapOfsX, maMapRes.mnMapOfsY);
         }
     }
@@ -544,7 +545,7 @@ tools::Long RenderContext2::GetTextArray(const OUString& rStr, tools::Long* pDXA
             pDXPixelArray[i] += pDXPixelArray[i - 1];
         }
     }
-    if (mbMap)
+    if (maGeometry.IsMapModeEnabled())
     {
         if (pDXPixelArray)
         {
@@ -590,7 +591,7 @@ tools::Long RenderContext2::GetTextArray(const OUString& rStr, tools::Long* pDXA
     }
 
     // convert from font units to logical units
-    if (mbMap)
+    if (maGeometry.IsMapModeEnabled())
     {
         if (pDXAry)
         {
@@ -808,7 +809,8 @@ std::unique_ptr<SalLayout> RenderContext2::ImplLayout(
         pGlyphs = nullptr;
     }
 
-    if (!InitFont())
+    RenderContext2* pRC = const_cast<RenderContext2*>(this);
+    if (!pRC->InitFont())
         return nullptr;
 
     // check string index and length
@@ -832,14 +834,14 @@ std::unique_ptr<SalLayout> RenderContext2::ImplLayout(
     }
 
     DeviceCoordinate nPixelWidth = static_cast<DeviceCoordinate>(nLogicalWidth);
-    if (nLogicalWidth && mbMap)
+    if (nLogicalWidth && maGeometry.IsMapModeEnabled())
         nPixelWidth = LogicWidthToDeviceCoordinate(nLogicalWidth);
 
     std::unique_ptr<DeviceCoordinate[]> xDXPixelArray;
     DeviceCoordinate* pDXPixelArray(nullptr);
     if (pDXArray)
     {
-        if (mbMap)
+        if (maGeometry.IsMapModeEnabled())
         {
             // convert from logical units to font units using a temporary array
             xDXPixelArray.reset(new DeviceCoordinate[nLen]);
@@ -1192,7 +1194,7 @@ bool RenderContext2::ImplDrawRotateText(SalLayout& rSalLayout)
     // mask output with text colored bitmap
     tools::Long nOldOffX = maGeometry.GetXOffsetInPixels();
     tools::Long nOldOffY = maGeometry.GetYOffsetInPixels();
-    bool bOldMap = mbMap;
+    bool bOldMap = maGeometry.IsMapModeEnabled();
 
     maGeometry.SetXOffsetInPixels(0);
     maGeometry.SetYOffsetInPixels(0);
@@ -1216,7 +1218,8 @@ void RenderContext2::ImplDrawTextDirect(SalLayout& rSalLayout, bool bTextLines)
     tools::Long nOldX = rSalLayout.DrawBase().X();
     if (HasMirroredGraphics())
     {
-        tools::Long w = IsVirtual() ? mnOutWidth : mpGraphics->GetGraphicsWidth();
+        tools::Long w
+            = IsVirtual() ? maGeometry.GetWidthInPixels() : mpGraphics->GetGraphicsWidth();
         tools::Long x = rSalLayout.DrawBase().X();
         rSalLayout.DrawBase().setX(w - 1 - x);
         if (!IsRTLEnabled())
@@ -1224,11 +1227,12 @@ void RenderContext2::ImplDrawTextDirect(SalLayout& rSalLayout, bool bTextLines)
             RenderContext2* pOutDevRef = this;
             // mirror this window back
             tools::Long devX
-                = w - pOutDevRef->mnOutWidth
+                = w - pOutDevRef->maGeometry.GetWidthInPixels()
                   - pOutDevRef->maGeometry
                         .GetXOffsetInPixels(); // re-mirrored maGeometry.GetXOffsetInPixels()
-            rSalLayout.DrawBase().setX(
-                devX + (pOutDevRef->mnOutWidth - 1 - (rSalLayout.DrawBase().X() - devX)));
+            rSalLayout.DrawBase().setX(devX
+                                       + (pOutDevRef->maGeometry.GetWidthInPixels() - 1
+                                          - (rSalLayout.DrawBase().X() - devX)));
         }
     }
     else if (IsRTLEnabled())
@@ -1238,8 +1242,8 @@ void RenderContext2::ImplDrawTextDirect(SalLayout& rSalLayout, bool bTextLines)
         // mirror this window back
         tools::Long devX = pOutDevRef->maGeometry
                                .GetXOffsetInPixels(); // re-mirrored maGeometry.GetXOffsetInPixels()
-        rSalLayout.DrawBase().setX(pOutDevRef->mnOutWidth - 1 - (rSalLayout.DrawBase().X() - devX)
-                                   + devX);
+        rSalLayout.DrawBase().setX(pOutDevRef->maGeometry.GetWidthInPixels() - 1
+                                   - (rSalLayout.DrawBase().X() - devX) + devX);
     }
 
     rSalLayout.DrawText(*mpGraphics);
@@ -1555,7 +1559,7 @@ void RenderContext2::GetCaretPositions(const OUString& rStr, tools::Long* pCaret
     }
 
     // convert from font units to logical units
-    if (mbMap)
+    if (maGeometry.IsMapModeEnabled())
     {
         for (i = 0; i < 2 * nLen; ++i)
             pCaretXArray[i] = ImplDevicePixelToLogicWidth(pCaretXArray[i]);
@@ -2233,24 +2237,26 @@ bool RenderContext2::GetTextOutlines(basegfx::B2DPolyPolygonVector& rVector, con
                                      sal_Int32 nBase, sal_Int32 nIndex, sal_Int32 nLen,
                                      sal_uLong nLayoutWidth, const tools::Long* pDXArray) const
 {
-    if (!InitFont())
+    RenderContext2* pRC = const_cast<RenderContext2*>(this);
+    if (!pRC->InitFont())
         return false;
 
     bool bRet = false;
+
     rVector.clear();
+
     if (nLen < 0)
-    {
         nLen = rStr.getLength() - nIndex;
-    }
+
     rVector.reserve(nLen);
 
     // we want to get the Rectangle in logical units, so to
     // avoid rounding errors we just size the font in logical units
-    bool bOldMap = mbMap;
+    bool bOldMap = maGeometry.IsMapModeEnabled();
     if (bOldMap)
     {
-        const_cast<RenderContext2&>(*this).mbMap = false;
-        const_cast<RenderContext2&>(*this).mbNewFont = true;
+        pRC->EnableMapMode(false);
+        pRC->mbNewFont = true;
     }
 
     std::unique_ptr<SalLayout> pSalLayout;
@@ -2308,8 +2314,8 @@ bool RenderContext2::GetTextOutlines(basegfx::B2DPolyPolygonVector& rVector, con
     if (bOldMap)
     {
         // restore original font size and map mode
-        const_cast<RenderContext2&>(*this).mbMap = bOldMap;
-        const_cast<RenderContext2&>(*this).mbNewFont = true;
+        pRC->EnableMapMode(bOldMap);
+        pRC->mbNewFont = true;
     }
 
     return bRet;

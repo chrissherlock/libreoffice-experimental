@@ -92,7 +92,7 @@ void RenderContext2::DrawGrid(tools::Rectangle const& rRect, Size const& rDist,
     if (mbInitFillColor)
         InitFillColor();
 
-    const bool bOldMap = mbMap;
+    const bool bOldMap = IsMapModeEnabled();
     EnableMapMode(false);
 
     if (nFlags & DrawGridFlags::Dots)

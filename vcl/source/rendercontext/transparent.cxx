@@ -315,7 +315,7 @@ void RenderContext2::EmulateDrawTransparent(tools::PolyPolygon const& rPolyPoly,
 
             if (aVDev->SetOutputSizePixel(aDstSz))
             {
-                const bool bOldMap = mbMap;
+                const bool bOldMap = maGeometry.IsMapModeEnabled();
 
                 EnableMapMode(false);
 

@@ -29,8 +29,9 @@ void OutputDevice::Erase()
         if (eRasterOp != RasterOp::OverPaint)
             SetRasterOp(RasterOp::OverPaint);
 
-        DrawWallpaper(tools::Rectangle(Point(0, 0), Size(mnOutWidth, mnOutHeight)),
-                      GetBackground());
+        DrawWallpaper(
+            tools::Rectangle(Point(0, 0), Size(GetOutputWidthPixel(), GetOutputHeightPixel())),
+            GetBackground());
 
         if (eRasterOp != RasterOp::OverPaint)
             SetRasterOp(eRasterOp);

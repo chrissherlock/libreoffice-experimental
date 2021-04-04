@@ -564,8 +564,11 @@ public:
     void SetDPIScalePercentage(sal_Int32 nPercent);
 
     Size GetOutputSizePixel() const;
+    void SetSizeInPixels(Size const& rSize);
     tools::Long GetOutputWidthPixel() const;
     tools::Long GetOutputHeightPixel() const;
+    void SetWidthInPixels(tools::Long nWidth);
+    void SetHeightInPixels(tools::Long nHeight);
     tools::Long GetOutOffXPixel() const;
     tools::Long GetOutOffYPixel() const;
     void SetOutOffXPixel(tools::Long nOutOffX);
@@ -1041,7 +1044,7 @@ protected:
 
     SAL_DLLPRIVATE bool is_double_buffered_window() const;
 
-    SAL_DLLPRIVATE bool ImplNewFont() const;
+    SAL_DLLPRIVATE bool ImplNewFont();
 
     SAL_DLLPRIVATE const LogicalFontInstance* GetFontInstance() const;
     SAL_DLLPRIVATE tools::Long GetEmphasisAscent() const { return mnEmphasisAscent; }
@@ -1099,15 +1102,12 @@ protected:
     mutable rtl::Reference<LogicalFontInstance> mpFontInstance;
     mutable std::shared_ptr<ImplFontCache> mxFontCache;
     Geometry maGeometry;
-    tools::Long mnOutWidth;
-    tools::Long mnOutHeight;
     /// font specific text alignment offsets in pixel units
     mutable tools::Long mnTextOffX;
     mutable tools::Long mnTextOffY;
     mutable tools::Long mnEmphasisAscent;
     mutable tools::Long mnEmphasisDescent;
 
-    mutable bool mbMap : 1;
     mutable bool mbInitFont : 1;
     mutable bool mbInitFillColor : 1;
     mutable bool mbInitTextColor : 1;
@@ -1127,7 +1127,7 @@ protected:
     mutable bool mbTextSpecial : 1;
 
 private:
-    SAL_DLLPRIVATE bool InitFont() const;
+    SAL_DLLPRIVATE bool InitFont();
     SAL_DLLPRIVATE void ImplInitFontList() const;
     SAL_DLLPRIVATE void ImplInitTextColor();
     virtual void InitWaveLineColor(Color const& rColor, tools::Long);

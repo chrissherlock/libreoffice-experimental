@@ -20,7 +20,10 @@
 #include <vcl/Geometry.hxx>
 
 Geometry::Geometry()
-    : mnOutOffOrigX(0)
+    : mbMap(false)
+    , mnOutWidth(0)
+    , mnOutHeight(0)
+    , mnOutOffOrigX(0)
     , mnOutOffOrigY(0)
     , mnOutOffLogicX(0)
     , mnOutOffLogicY(0)
@@ -31,6 +34,26 @@ Geometry::Geometry()
     , mnDPIScalePercentage(100)
 {
 }
+
+bool Geometry::IsMapModeEnabled() const { return mbMap; }
+
+void Geometry::EnableMapMode(bool bEnable) { mbMap = bEnable; }
+
+Size Geometry::GetSizeInPixels() const { return Size(mnOutWidth, mnOutHeight); }
+
+void Geometry::SetSizeInPixels(Size const& rSize)
+{
+    mnOutWidth = rSize.Width();
+    mnOutHeight = rSize.Height();
+}
+
+void Geometry::SetWidthInPixels(tools::Long nWidth) { mnOutWidth = nWidth; }
+
+void Geometry::SetHeightInPixels(tools::Long nHeight) { mnOutHeight = nHeight; }
+
+tools::Long Geometry::GetWidthInPixels() const { return mnOutWidth; }
+
+tools::Long Geometry::GetHeightInPixels() const { return mnOutHeight; }
 
 tools::Long Geometry::GetXOffsetFromOriginInPixels() const { return mnOutOffOrigX; }
 

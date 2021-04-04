@@ -43,11 +43,11 @@ static Fraction ImplMakeFraction(tools::Long nN1, tools::Long nN2, tools::Long n
 static tools::Long ImplPixelToLogic(tools::Long n, tools::Long nDPI, tools::Long nMapNum,
                                     tools::Long nMapDenom);
 
-bool RenderContext2::IsMapModeEnabled() const { return mbMap; }
+bool RenderContext2::IsMapModeEnabled() const { return maGeometry.IsMapModeEnabled(); }
 
 void RenderContext2::EnableMapMode(bool bEnable)
 {
-    mbMap = bEnable;
+    maGeometry.EnableMapMode(bEnable);
 
     if (mpAlphaVDev)
         mpAlphaVDev->EnableMapMode(bEnable);
@@ -57,9 +57,9 @@ MapMode const& RenderContext2::GetMapMode() const { return maMapMode; }
 
 void RenderContext2::SetMapMode()
 {
-    if (mbMap || !maMapMode.IsDefault())
+    if (maGeometry.IsMapModeEnabled() || !maMapMode.IsDefault())
     {
-        mbMap = false;
+        maGeometry.EnableMapMode(false);
         maMapMode = MapMode();
 
         // create new objects (clip region are not re-scaled)
@@ -92,14 +92,16 @@ void RenderContext2::SetMapMode(const MapMode& rNewMapMode)
         mpAlphaVDev->SetMapMode(rNewMapMode);
 
     // if default MapMode calculate nothing
-    bool bOldMap = mbMap;
-    mbMap = !rNewMapMode.IsDefault();
-    if (mbMap)
+    bool bOldMap = maGeometry.IsMapModeEnabled();
+    EnableMapMode(!rNewMapMode.IsDefault());
+
+    if (maGeometry.IsMapModeEnabled())
     {
         // if only the origin is converted, do not scale new
         if ((rNewMapMode.GetMapUnit() == maMapMode.GetMapUnit())
             && (rNewMapMode.GetScaleX() == maMapMode.GetScaleX())
-            && (rNewMapMode.GetScaleY() == maMapMode.GetScaleY()) && (bOldMap == mbMap))
+            && (rNewMapMode.GetScaleY() == maMapMode.GetScaleY())
+            && (bOldMap == maGeometry.IsMapModeEnabled()))
         {
             // set offset
             Point aOrigin = rNewMapMode.GetOrigin();
@@ -236,7 +238,7 @@ void RenderContext2::SetRelativeMapMode(MapMode const& rNewMapMode)
 
 basegfx::B2DHomMatrix RenderContext2::GetViewTransformation() const
 {
-    if (mbMap && mpOutDevData)
+    if (maGeometry.IsMapModeEnabled() && mpOutDevData)
     {
         if (!mpOutDevData->mpViewTransform)
         {
@@ -272,7 +274,7 @@ basegfx::B2DHomMatrix RenderContext2::GetViewTransformation() const
 // #i75163#
 basegfx::B2DHomMatrix RenderContext2::GetInverseViewTransformation() const
 {
-    if (mbMap && mpOutDevData)
+    if (maGeometry.IsMapModeEnabled() && mpOutDevData)
     {
         if (!mpOutDevData->mpInverseViewTransform)
         {
@@ -393,7 +395,7 @@ static tools::Long ImplPixelToLogic(tools::Long n, tools::Long nDPI, tools::Long
 
 tools::Long RenderContext2::ImplLogicXToDevicePixel(tools::Long nX) const
 {
-    if (!mbMap)
+    if (!maGeometry.IsMapModeEnabled())
         return nX + maGeometry.GetXOffsetInPixels();
 
     return ImplLogicToPixel(nX + maMapRes.mnMapOfsX, GetDPIX(), maMapRes.mnMapScNumX,
@@ -403,7 +405,7 @@ tools::Long RenderContext2::ImplLogicXToDevicePixel(tools::Long nX) const
 
 tools::Long RenderContext2::ImplLogicYToDevicePixel(tools::Long nY) const
 {
-    if (!mbMap)
+    if (!maGeometry.IsMapModeEnabled())
         return nY + maGeometry.GetYOffsetInPixels();
 
     return ImplLogicToPixel(nY + maMapRes.mnMapOfsY, GetDPIY(), maMapRes.mnMapScNumY,
@@ -413,7 +415,7 @@ tools::Long RenderContext2::ImplLogicYToDevicePixel(tools::Long nY) const
 
 tools::Long RenderContext2::ImplLogicWidthToDevicePixel(tools::Long nWidth) const
 {
-    if (!mbMap)
+    if (!maGeometry.IsMapModeEnabled())
         return nWidth;
 
     return ImplLogicToPixel(nWidth, GetDPIX(), maMapRes.mnMapScNumX, maMapRes.mnMapScDenomX);
@@ -421,7 +423,7 @@ tools::Long RenderContext2::ImplLogicWidthToDevicePixel(tools::Long nWidth) cons
 
 tools::Long RenderContext2::ImplLogicHeightToDevicePixel(tools::Long nHeight) const
 {
-    if (!mbMap)
+    if (!maGeometry.IsMapModeEnabled())
         return nHeight;
 
     return ImplLogicToPixel(nHeight, GetDPIY(), maMapRes.mnMapScNumY, maMapRes.mnMapScDenomY);
@@ -429,7 +431,7 @@ tools::Long RenderContext2::ImplLogicHeightToDevicePixel(tools::Long nHeight) co
 
 float RenderContext2::ImplFloatLogicHeightToDevicePixel(float fLogicHeight) const
 {
-    if (!mbMap)
+    if (!maGeometry.IsMapModeEnabled())
         return fLogicHeight;
     float fPixelHeight = (fLogicHeight * GetDPIY() * maMapRes.mnMapScNumY) / maMapRes.mnMapScDenomY;
     return fPixelHeight;
@@ -437,7 +439,7 @@ float RenderContext2::ImplFloatLogicHeightToDevicePixel(float fLogicHeight) cons
 
 tools::Long RenderContext2::ImplDevicePixelToLogicWidth(tools::Long nWidth) const
 {
-    if (!mbMap)
+    if (!maGeometry.IsMapModeEnabled())
         return nWidth;
 
     return ImplPixelToLogic(nWidth, GetDPIX(), maMapRes.mnMapScNumX, maMapRes.mnMapScDenomX);
@@ -445,7 +447,7 @@ tools::Long RenderContext2::ImplDevicePixelToLogicWidth(tools::Long nWidth) cons
 
 tools::Long RenderContext2::ImplDevicePixelToLogicHeight(tools::Long nHeight) const
 {
-    if (!mbMap)
+    if (!maGeometry.IsMapModeEnabled())
         return nHeight;
 
     return ImplPixelToLogic(nHeight, GetDPIY(), maMapRes.mnMapScNumY, maMapRes.mnMapScDenomY);
@@ -453,7 +455,7 @@ tools::Long RenderContext2::ImplDevicePixelToLogicHeight(tools::Long nHeight) co
 
 Point RenderContext2::ImplLogicToDevicePixel(const Point& rLogicPt) const
 {
-    if (!mbMap)
+    if (!maGeometry.IsMapModeEnabled())
         return Point(rLogicPt.X() + maGeometry.GetXOffsetInPixels(),
                      rLogicPt.Y() + maGeometry.GetYOffsetInPixels());
 
@@ -467,7 +469,7 @@ Point RenderContext2::ImplLogicToDevicePixel(const Point& rLogicPt) const
 
 Size RenderContext2::ImplLogicToDevicePixel(const Size& rLogicSize) const
 {
-    if (!mbMap)
+    if (!maGeometry.IsMapModeEnabled())
         return rLogicSize;
 
     return Size(ImplLogicToPixel(rLogicSize.Width(), GetDPIX(), maMapRes.mnMapScNumX,
@@ -481,7 +483,7 @@ tools::Rectangle RenderContext2::ImplLogicToDevicePixel(const tools::Rectangle& 
     if (rLogicRect.IsEmpty())
         return rLogicRect;
 
-    if (!mbMap)
+    if (!maGeometry.IsMapModeEnabled())
     {
         return tools::Rectangle(rLogicRect.Left() + maGeometry.GetXOffsetInPixels(),
                                 rLogicRect.Top() + maGeometry.GetYOffsetInPixels(),
@@ -506,7 +508,8 @@ tools::Rectangle RenderContext2::ImplLogicToDevicePixel(const tools::Rectangle& 
 
 tools::Polygon RenderContext2::ImplLogicToDevicePixel(const tools::Polygon& rLogicPoly) const
 {
-    if (!mbMap && !maGeometry.GetXOffsetInPixels() && !maGeometry.GetYOffsetInPixels())
+    if (!maGeometry.IsMapModeEnabled() && !maGeometry.GetXOffsetInPixels()
+        && !maGeometry.GetYOffsetInPixels())
         return rLogicPoly;
 
     sal_uInt16 i;
@@ -516,7 +519,7 @@ tools::Polygon RenderContext2::ImplLogicToDevicePixel(const tools::Polygon& rLog
     // get pointer to Point-array (copy data)
     const Point* pPointAry = aPoly.GetConstPointAry();
 
-    if (mbMap)
+    if (maGeometry.IsMapModeEnabled())
     {
         for (i = 0; i < nPoints; i++)
         {
@@ -548,7 +551,8 @@ tools::Polygon RenderContext2::ImplLogicToDevicePixel(const tools::Polygon& rLog
 tools::PolyPolygon
 RenderContext2::ImplLogicToDevicePixel(const tools::PolyPolygon& rLogicPolyPoly) const
 {
-    if (!mbMap && !maGeometry.GetXOffsetInPixels() && !maGeometry.GetYOffsetInPixels())
+    if (!maGeometry.IsMapModeEnabled() && !maGeometry.GetXOffsetInPixels()
+        && !maGeometry.GetYOffsetInPixels())
         return rLogicPolyPoly;
 
     tools::PolyPolygon aPolyPoly(rLogicPolyPoly);
@@ -595,7 +599,7 @@ tools::Rectangle RenderContext2::ImplDevicePixelToLogic(const tools::Rectangle& 
     if (rPixelRect.IsEmpty())
         return rPixelRect;
 
-    if (!mbMap)
+    if (!maGeometry.IsMapModeEnabled())
     {
         return tools::Rectangle(rPixelRect.Left() - maGeometry.GetXOffsetInPixels(),
                                 rPixelRect.Top() - maGeometry.GetYOffsetInPixels(),
@@ -635,7 +639,7 @@ vcl::Region RenderContext2::ImplPixelToDevicePixel(const vcl::Region& rRegion) c
 
 Point RenderContext2::LogicToPixel(const Point& rLogicPt) const
 {
-    if (!mbMap)
+    if (!maGeometry.IsMapModeEnabled())
         return rLogicPt;
 
     return Point(ImplLogicToPixel(rLogicPt.X() + maMapRes.mnMapOfsX, GetDPIX(),
@@ -648,7 +652,7 @@ Point RenderContext2::LogicToPixel(const Point& rLogicPt) const
 
 Size RenderContext2::LogicToPixel(const Size& rLogicSize) const
 {
-    if (!mbMap)
+    if (!maGeometry.IsMapModeEnabled())
         return rLogicSize;
 
     return Size(ImplLogicToPixel(rLogicSize.Width(), GetDPIX(), maMapRes.mnMapScNumX,
@@ -659,7 +663,7 @@ Size RenderContext2::LogicToPixel(const Size& rLogicSize) const
 
 tools::Rectangle RenderContext2::LogicToPixel(const tools::Rectangle& rLogicRect) const
 {
-    if (!mbMap || rLogicRect.IsEmpty())
+    if (!maGeometry.IsMapModeEnabled() || rLogicRect.IsEmpty())
         return rLogicRect;
 
     return tools::Rectangle(ImplLogicToPixel(rLogicRect.Left() + maMapRes.mnMapOfsX, GetDPIX(),
@@ -678,7 +682,7 @@ tools::Rectangle RenderContext2::LogicToPixel(const tools::Rectangle& rLogicRect
 
 tools::Polygon RenderContext2::LogicToPixel(const tools::Polygon& rLogicPoly) const
 {
-    if (!mbMap)
+    if (!maGeometry.IsMapModeEnabled())
         return rLogicPoly;
 
     sal_uInt16 i;
@@ -706,7 +710,7 @@ tools::Polygon RenderContext2::LogicToPixel(const tools::Polygon& rLogicPoly) co
 
 tools::PolyPolygon RenderContext2::LogicToPixel(const tools::PolyPolygon& rLogicPolyPoly) const
 {
-    if (!mbMap)
+    if (!maGeometry.IsMapModeEnabled())
         return rLogicPolyPoly;
 
     tools::PolyPolygon aPolyPoly(rLogicPolyPoly);
@@ -730,7 +734,7 @@ RenderContext2::LogicToPixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly) cons
 
 vcl::Region RenderContext2::LogicToPixel(const vcl::Region& rLogicRegion) const
 {
-    if (!mbMap || rLogicRegion.IsNull() || rLogicRegion.IsEmpty())
+    if (!maGeometry.IsMapModeEnabled() || rLogicRegion.IsNull() || rLogicRegion.IsEmpty())
     {
         return rLogicRegion;
     }
@@ -862,7 +866,7 @@ basegfx::B2DPolyPolygon RenderContext2::LogicToPixel(const basegfx::B2DPolyPolyg
 
 Point RenderContext2::PixelToLogic(const Point& rDevicePt) const
 {
-    if (!mbMap)
+    if (!maGeometry.IsMapModeEnabled())
         return rDevicePt;
 
     return Point(
@@ -874,7 +878,7 @@ Point RenderContext2::PixelToLogic(const Point& rDevicePt) const
 
 Size RenderContext2::PixelToLogic(const Size& rDeviceSize) const
 {
-    if (!mbMap)
+    if (!maGeometry.IsMapModeEnabled())
         return rDeviceSize;
 
     return Size(ImplPixelToLogic(rDeviceSize.Width(), GetDPIX(), maMapRes.mnMapScNumX,
@@ -885,7 +889,7 @@ Size RenderContext2::PixelToLogic(const Size& rDeviceSize) const
 
 tools::Rectangle RenderContext2::PixelToLogic(const tools::Rectangle& rDeviceRect) const
 {
-    if (!mbMap || rDeviceRect.IsEmpty())
+    if (!maGeometry.IsMapModeEnabled() || rDeviceRect.IsEmpty())
         return rDeviceRect;
 
     return tools::Rectangle(
@@ -904,7 +908,7 @@ tools::Rectangle RenderContext2::PixelToLogic(const tools::Rectangle& rDeviceRec
 
 tools::Polygon RenderContext2::PixelToLogic(const tools::Polygon& rDevicePoly) const
 {
-    if (!mbMap)
+    if (!maGeometry.IsMapModeEnabled())
         return rDevicePoly;
 
     sal_uInt16 i;
@@ -930,7 +934,7 @@ tools::Polygon RenderContext2::PixelToLogic(const tools::Polygon& rDevicePoly) c
 
 tools::PolyPolygon RenderContext2::PixelToLogic(const tools::PolyPolygon& rDevicePolyPoly) const
 {
-    if (!mbMap)
+    if (!maGeometry.IsMapModeEnabled())
         return rDevicePolyPoly;
 
     tools::PolyPolygon aPolyPoly(rDevicePolyPoly);
@@ -954,7 +958,7 @@ RenderContext2::PixelToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly) cons
 
 vcl::Region RenderContext2::PixelToLogic(const vcl::Region& rDeviceRegion) const
 {
-    if (!mbMap || rDeviceRegion.IsNull() || rDeviceRegion.IsEmpty())
+    if (!maGeometry.IsMapModeEnabled() || rDeviceRegion.IsNull() || rDeviceRegion.IsEmpty())
     {
         return rDeviceRegion;
     }
@@ -1103,7 +1107,7 @@ basegfx::B2DPolyPolygon RenderContext2::PixelToLogic(const basegfx::B2DPolyPolyg
     MappingMetrics aMapResSource;                                                                  \
     MappingMetrics aMapResDest;                                                                    \
                                                                                                    \
-    if (!mbMap || pMapModeSource != &maMapMode)                                                    \
+    if (!maGeometry.IsMapModeEnabled() || pMapModeSource != &maMapMode)                            \
     {                                                                                              \
         if (pMapModeSource->GetMapUnit() == MapUnit::MapRelative)                                  \
             aMapResSource = maMapRes;                                                              \
@@ -1111,7 +1115,7 @@ basegfx::B2DPolyPolygon RenderContext2::PixelToLogic(const basegfx::B2DPolyPolyg
     }                                                                                              \
     else                                                                                           \
         aMapResSource = maMapRes;                                                                  \
-    if (!mbMap || pMapModeDest != &maMapMode)                                                      \
+    if (!maGeometry.IsMapModeEnabled() || pMapModeDest != &maMapMode)                              \
     {                                                                                              \
         if (pMapModeDest->GetMapUnit() == MapUnit::MapRelative)                                    \
             aMapResDest = maMapRes;                                                                \
@@ -1546,7 +1550,7 @@ void RenderContext2::SetPixelOffset(const Size& rOffset)
 
 DeviceCoordinate RenderContext2::LogicWidthToDeviceCoordinate(tools::Long nWidth) const
 {
-    if (!mbMap)
+    if (!maGeometry.IsMapModeEnabled())
         return static_cast<DeviceCoordinate>(nWidth);
 
 #if VCL_FLOAT_DEVICE_PIXEL

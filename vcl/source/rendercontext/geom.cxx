@@ -44,11 +44,23 @@ void RenderContext2::SetDPIScalePercentage(sal_Int32 nPercent)
     maGeometry.SetDPIScalePercentage(std::max(100, nPercent));
 }
 
-Size RenderContext2::GetOutputSizePixel() const { return Size(mnOutWidth, mnOutHeight); }
+Size RenderContext2::GetOutputSizePixel() const
+{
+    return Size(maGeometry.GetWidthInPixels(), maGeometry.GetHeightInPixels());
+}
 
-tools::Long RenderContext2::GetOutputWidthPixel() const { return mnOutWidth; }
+tools::Long RenderContext2::GetOutputWidthPixel() const { return maGeometry.GetWidthInPixels(); }
 
-tools::Long RenderContext2::GetOutputHeightPixel() const { return mnOutHeight; }
+tools::Long RenderContext2::GetOutputHeightPixel() const { return maGeometry.GetHeightInPixels(); }
+
+void RenderContext2::SetSizeInPixels(Size const& rSize) { maGeometry.SetSizeInPixels(rSize); }
+
+void RenderContext2::SetWidthInPixels(tools::Long nWidth) { maGeometry.SetWidthInPixels(nWidth); }
+
+void RenderContext2::SetHeightInPixels(tools::Long nHeight)
+{
+    maGeometry.SetHeightInPixels(nHeight);
+}
 
 tools::Long RenderContext2::GetOutOffXPixel() const { return maGeometry.GetXOffsetInPixels(); }
 

@@ -70,7 +70,7 @@ void RenderContext2::Push(PushFlags nFlags)
     if (nFlags & PushFlags::MAPMODE)
     {
         rState.mpMapMode = maMapMode;
-        rState.mbMapActive = mbMap;
+        rState.mbMapActive = maGeometry.IsMapModeEnabled();
     }
 
     if (nFlags & PushFlags::CLIPREGION && mbClipRegion)
@@ -160,7 +160,7 @@ void RenderContext2::Pop()
             SetMapMode(*rState.mpMapMode);
         else
             SetMapMode();
-        mbMap = rState.mbMapActive;
+        maGeometry.EnableMapMode(rState.mbMapActive);
     }
 
     if (rState.mnFlags & PushFlags::CLIPREGION)

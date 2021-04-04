@@ -59,7 +59,7 @@ void RenderContext2::DrawHatch(const tools::PolyPolygon& rPolyPoly, const Hatch&
     if (rPolyPoly.Count())
     {
         tools::PolyPolygon aPolyPoly(LogicToPixel(rPolyPoly));
-        bool bOldMap = mbMap;
+        bool bOldMap = IsMapModeEnabled();
 
         aPolyPoly.Optimize(PolyOptimizeFlags::NO_SAME);
         aHatch.SetDistance(ImplLogicWidthToDevicePixel(aHatch.GetDistance()));

@@ -34,7 +34,9 @@ void RenderContext2::Erase()
         if (eRasterOp != RasterOp::OverPaint)
             SetRasterOp(RasterOp::OverPaint);
 
-        DrawWallpaper(tools::Rectangle(Point(0, 0), Size(mnOutWidth, mnOutHeight)), maBackground);
+        DrawWallpaper(tools::Rectangle(Point(0, 0), Size(maGeometry.GetWidthInPixels(),
+                                                         maGeometry.GetHeightInPixels())),
+                      maBackground);
 
         if (eRasterOp != RasterOp::OverPaint)
             SetRasterOp(eRasterOp);
@@ -105,7 +107,7 @@ void RenderContext2::DrawColorWallpaper(tools::Long nX, tools::Long nY, tools::L
     SetLineColor();
     SetFillColor(rWallpaper.GetColor());
 
-    bool bMap = mbMap;
+    bool bMap = maGeometry.IsMapModeEnabled();
     EnableMapMode(false);
     DrawRect(tools::Rectangle(Point(nX, nY), Size(nWidth, nHeight)));
     SetLineColor(aOldLineColor);
@@ -123,7 +125,7 @@ void RenderContext2::DrawBitmapWallpaper(tools::Long nX, tools::Long nY, tools::
     Point aPos;
     Size aSize;
     const WallpaperStyle eStyle = rWallpaper.GetStyle();
-    const bool bOldMap = mbMap;
+    const bool bOldMap = maGeometry.IsMapModeEnabled();
     bool bDrawn = false;
     bool bDrawGradientBackground = false;
     bool bDrawColorBackground = false;
@@ -353,7 +355,7 @@ void RenderContext2::DrawGradientWallpaper(tools::Long nX, tools::Long nY, tools
     assert(!is_double_buffered_window());
 
     tools::Rectangle aBound;
-    const bool bOldMap = mbMap;
+    const bool bOldMap = maGeometry.IsMapModeEnabled();
 
     aBound = tools::Rectangle(Point(nX, nY), Size(nWidth, nHeight));
 

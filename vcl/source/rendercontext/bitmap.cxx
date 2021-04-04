@@ -310,8 +310,9 @@ Bitmap RenderContext2::GetBitmap(Point const& rSrcPt, Size const& rSize) const
     {
         assert(mpGraphics);
 
-        if (nWidth > 0 && nHeight > 0 && nX <= (mnOutWidth + maGeometry.GetXOffsetInPixels())
-            && nY <= (mnOutHeight + maGeometry.GetYOffsetInPixels()))
+        if (nWidth > 0 && nHeight > 0
+            && nX <= (maGeometry.GetWidthInPixels() + maGeometry.GetXOffsetInPixels())
+            && nY <= (maGeometry.GetHeightInPixels() + maGeometry.GetYOffsetInPixels()))
         {
             tools::Rectangle aRect(Point(nX, nY), Size(nWidth, nHeight));
             bool bClipped = false;
@@ -333,16 +334,16 @@ Bitmap RenderContext2::GetBitmap(Point const& rSrcPt, Size const& rSize) const
             }
 
             // Width outside of draw area?
-            if ((nWidth + nX) > (mnOutWidth + maGeometry.GetXOffsetInPixels()))
+            if ((nWidth + nX) > (maGeometry.GetWidthInPixels() + maGeometry.GetXOffsetInPixels()))
             {
-                nWidth = maGeometry.GetXOffsetInPixels() + mnOutWidth - nX;
+                nWidth = maGeometry.GetXOffsetInPixels() + maGeometry.GetWidthInPixels() - nX;
                 bClipped = true;
             }
 
             // Height outside of draw area?
-            if ((nHeight + nY) > (mnOutHeight + maGeometry.GetYOffsetInPixels()))
+            if ((nHeight + nY) > (maGeometry.GetHeightInPixels() + maGeometry.GetYOffsetInPixels()))
             {
-                nHeight = maGeometry.GetYOffsetInPixels() + mnOutHeight - nY;
+                nHeight = maGeometry.GetYOffsetInPixels() + maGeometry.GetHeightInPixels() - nY;
                 bClipped = true;
             }
 
@@ -646,8 +647,8 @@ void RenderContext2::DrawDeviceAlphaBitmapSlowPath(Bitmap const& rBitmap, AlphaM
 
     // The scaling in this code path produces really ugly results - it
     // does the most trivial scaling with no smoothing.
-    const bool bOldMap = mbMap;
-    mbMap = false;
+    const bool bOldMap = IsMapModeEnabled();
+    EnableMapMode(false);
 
     Bitmap aBmp(GetBitmap(aDstRect.TopLeft(), aDstRect.GetSize()));
 
@@ -725,7 +726,7 @@ void RenderContext2::DrawDeviceAlphaBitmapSlowPath(Bitmap const& rBitmap, AlphaM
         mpAlphaVDev = pOldVDev;
     }
 
-    mbMap = bOldMap;
+    EnableMapMode(bOldMap);
 }
 
 void RenderContext2::DrawDeviceAlphaBitmap(Bitmap const& rBmp, AlphaMask const& rAlpha,

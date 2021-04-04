@@ -1369,7 +1369,7 @@ void PDFWriterImpl::dispose()
     VirtualDevice::dispose();
 }
 
-bool PDFWriterImpl::ImplNewFont() const
+bool PDFWriterImpl::ImplNewFont()
 {
     const ImplSVData* pSVData = ImplGetSVData();
 

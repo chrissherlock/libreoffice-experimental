@@ -166,8 +166,9 @@ void VirtualDevice::ImplInitVirDev( const RenderContext2* pOutDev,
             mnBitCount = pOutDev->GetBitCount();
             break;
     }
-    mnOutWidth      = nDX;
-    mnOutHeight     = nDY;
+
+    SetWidthInPixels(nDX);
+    SetHeightInPixels(nDY);
 
     if (meFormat == DeviceFormat::BITMASK)
         SetAntialiasing( AntialiasingFlags::DisableText );
@@ -290,8 +291,8 @@ bool VirtualDevice::InnerImplSetOutputSizePixel( const Size& rNewSize, bool bEra
 
         if ( bRet )
         {
-            mnOutWidth  = rNewSize.Width();
-            mnOutHeight = rNewSize.Height();
+            SetWidthInPixels(rNewSize.Width());
+            SetHeightInPixels(rNewSize.Height());
             Erase();
         }
     }
@@ -314,12 +315,12 @@ bool VirtualDevice::InnerImplSetOutputSizePixel( const Size& rNewSize, bool bEra
             {
                 tools::Long nWidth;
                 tools::Long nHeight;
-                if ( mnOutWidth < nNewWidth )
-                    nWidth = mnOutWidth;
+                if ( GetOutputWidthPixel() < nNewWidth )
+                    nWidth = GetOutputWidthPixel();
                 else
                     nWidth = nNewWidth;
-                if ( mnOutHeight < nNewHeight )
-                    nHeight = mnOutHeight;
+                if ( GetOutputHeightPixel() < nNewHeight )
+                    nHeight = GetOutputHeightPixel();
                 else
                     nHeight = nNewHeight;
                 SalTwoRect aPosAry(0, 0, nWidth, nHeight, 0, 0, nWidth, nHeight);
@@ -327,8 +328,8 @@ bool VirtualDevice::InnerImplSetOutputSizePixel( const Size& rNewSize, bool bEra
                 pNewVirDev->ReleaseGraphics( pGraphics );
                 ReleaseGraphics();
                 mpVirDev = std::move(pNewVirDev);
-                mnOutWidth  = rNewSize.Width();
-                mnOutHeight = rNewSize.Height();
+                SetWidthInPixels(rNewSize.Width());
+                SetHeightInPixels(rNewSize.Height());
                 bRet = true;
             }
             else

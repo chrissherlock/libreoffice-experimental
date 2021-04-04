@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <tools/gen.hxx>
 #include <tools/long.hxx>
 
 #include <vcl/dllapi.h>
@@ -27,6 +28,16 @@ class VCL_DLLPUBLIC Geometry
 {
 public:
     Geometry();
+
+    bool IsMapModeEnabled() const;
+    void EnableMapMode(bool bEnable = true);
+
+    Size GetSizeInPixels() const;
+    tools::Long GetWidthInPixels() const;
+    tools::Long GetHeightInPixels() const;
+    void SetSizeInPixels(Size const& rSize);
+    void SetWidthInPixels(tools::Long nWidth);
+    void SetHeightInPixels(tools::Long nHeight);
 
     tools::Long GetXOffsetFromOriginInPixels() const;
     void SetXOffsetFromOriginInPixels(tools::Long nOffsetFromOriginXpx);
@@ -52,6 +63,10 @@ public:
     void SetDPIScalePercentage(sal_Int32 nPercentage);
 
 private:
+    bool mbMap;
+
+    tools::Long mnOutWidth;
+    tools::Long mnOutHeight;
     tools::Long mnOutOffOrigX;
     tools::Long mnOutOffOrigY;
     tools::Long mnOutOffLogicX;
