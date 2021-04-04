@@ -20,15 +20,15 @@
 #include <vcl/toolkit/unowrap.hxx>
 #include <vcl/outdev.hxx>
 
-css::uno::Reference< css::awt::XGraphics > OutputDevice::CreateUnoGraphics()
+css::uno::Reference<css::awt::XGraphics> OutputDevice::CreateUnoGraphics()
 {
     UnoWrapperBase* pWrapper = UnoWrapperBase::GetUnoWrapper();
-    return pWrapper ? pWrapper->CreateGraphics( this ) : css::uno::Reference< css::awt::XGraphics >();
+    return pWrapper ? pWrapper->CreateGraphics(this) : css::uno::Reference<css::awt::XGraphics>();
 }
 
-std::vector< VCLXGraphics* > *OutputDevice::CreateUnoGraphicsList()
+std::vector<VCLXGraphics*>* OutputDevice::CreateUnoGraphicsList()
 {
-    mpUnoGraphicsList = new std::vector< VCLXGraphics* >;
+    mpUnoGraphicsList = new std::vector<VCLXGraphics*>;
     return mpUnoGraphicsList;
 }
 
