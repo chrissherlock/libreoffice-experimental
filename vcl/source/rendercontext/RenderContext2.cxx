@@ -347,4 +347,8 @@ void RenderContext2::CopyDeviceArea(SalTwoRect& aPosAry, bool /*bWindowInvalidat
     mpGraphics->CopyBits(aPosAry, *this);
 }
 
+Point RenderContext2::GetBandedPageOffset() const { return Point(); }
+
+Size RenderContext2::GetBandedPageSize() const { return GetOutputSizePixel(); }
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

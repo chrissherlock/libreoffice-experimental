@@ -11016,6 +11016,17 @@ void PDFWriterImpl::MARK( const char* pString )
         emitComment( pString );
 }
 
+Size PDFWriterImpl::GetBandedPageSize() const
+{
+    Size aTmpSize(LogicToPixel(getCurPageSize(), MapMode(MapUnit::MapPoint)));
+
+    PDFWriterImpl* pThis = const_cast<PDFWriterImpl*>(this);
+    // also add error code to PDFWriter
+    pThis->insertError(vcl::PDFWriter::Warning_Transparency_Converted);
+
+    return aTmpSize;
+}
+
 sal_Int32 ReferenceXObjectEmit::getObject() const
 {
     if (m_nFormObject > 0)

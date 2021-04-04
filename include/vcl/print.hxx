@@ -315,6 +315,9 @@ public:
     void SetDuplexMode(DuplexMode);
     DuplexMode GetDuplexMode() const;
 
+    Point GetBandedPageOffset() const override;
+    Size GetBandedPageSize() const override;
+
     bool SetPaperBin(sal_uInt16 nPaperBin);
     sal_uInt16 GetPaperBin() const;
     void SetPaper(Paper ePaper);

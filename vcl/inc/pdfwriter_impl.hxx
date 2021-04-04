@@ -675,6 +675,8 @@ public:
 
     static void convertLineInfoToExtLineInfo(const LineInfo& rIn, PDFWriter::ExtLineInfo& rOut);
 
+    Size GetBandedPageSize() const override;
+
 protected:
     SAL_DLLPRIVATE bool ImplNewFont() const;
     void ImplClearFontData(bool bNewFontLists) override;

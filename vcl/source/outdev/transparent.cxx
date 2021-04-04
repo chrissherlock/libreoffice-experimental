@@ -1257,26 +1257,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
         }
 
         //  STAGE 3.2: Generate banded bitmaps for special regions
-
-        Point aPageOffset;
-        Size aTmpSize( GetOutputSizePixel() );
-        if( meOutDevType == OUTDEV_PDF )
-        {
-            auto pPdfWriter = static_cast<vcl::PDFWriterImpl*>(this);
-            aTmpSize = LogicToPixel(pPdfWriter->getCurPageSize(), MapMode(MapUnit::MapPoint));
-
-            // also add error code to PDFWriter
-            pPdfWriter->insertError(vcl::PDFWriter::Warning_Transparency_Converted);
-        }
-        else if( meOutDevType == OUTDEV_PRINTER )
-        {
-            Printer* pThis = dynamic_cast<Printer*>(this);
-            assert(pThis);
-            aPageOffset = pThis->GetPageOffsetPixel();
-            aPageOffset = Point( 0, 0 ) - aPageOffset;
-            aTmpSize  = pThis->GetPaperSizePixel();
-        }
-        const tools::Rectangle aOutputRect( aPageOffset, aTmpSize );
+        const tools::Rectangle aOutputRect(GetBandedPageOffset(), GetBandedPageSize());
         bool bTiling = dynamic_cast<Printer*>(this) != nullptr;
 
         // iterate over all aCCList members and generate bitmaps for the special ones

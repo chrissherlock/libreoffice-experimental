@@ -1841,4 +1841,17 @@ void Printer::DrawAnimation(Animation* const pAnim, Point const& rDestPt, Size c
 
 void Printer::SetSystemTextColor(DrawFlags, bool) { SetTextColor(COL_BLACK); }
 
+Point Printer::GetBandedPageOffset() const
+{
+    Point aPageOffset(GetPageOffsetPixel());
+    aPageOffset = Point(0, 0) - aPageOffset;
+
+    return aPageOffset;
+}
+
+Size Printer::GetBandedPageSize() const
+{
+    return GetPaperSizePixel();
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

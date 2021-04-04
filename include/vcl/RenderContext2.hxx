@@ -564,6 +564,8 @@ public:
     void SetDPIScalePercentage(sal_Int32 nPercent);
 
     Size GetOutputSizePixel() const;
+    virtual Point GetBandedPageOffset() const;
+    virtual Size GetBandedPageSize() const;
     tools::Long GetOutputWidthPixel() const;
     tools::Long GetOutputHeightPixel() const;
     tools::Long GetOutOffXPixel() const;
