@@ -356,7 +356,7 @@ ImplNoBorderWindowView::ImplNoBorderWindowView()
 {
 }
 
-void ImplNoBorderWindowView::Init( OutputDevice*, tools::Long, tools::Long )
+void ImplNoBorderWindowView::Init( vcl::Window*, tools::Long, tools::Long )
 {
 }
 
@@ -391,16 +391,14 @@ ImplSmallBorderWindowView::ImplSmallBorderWindowView( ImplBorderWindow* pBorderW
 {
 }
 
-void ImplSmallBorderWindowView::Init( OutputDevice* pDev, tools::Long nWidth, tools::Long nHeight )
+void ImplSmallBorderWindowView::Init( vcl::Window* pWin, tools::Long nWidth, tools::Long nHeight )
 {
-    mpOutDev    = pDev;
+    mpOutDev    = pWin;
     mnWidth     = nWidth;
     mnHeight    = nHeight;
     mbNWFBorder = false;
 
-    vcl::Window *pWin = nullptr, *pCtrl = nullptr;
-    if (mpOutDev->GetOutDevType() == OUTDEV_WINDOW)
-        pWin = static_cast<vcl::Window*>(mpOutDev.get());
+    vcl::Window *pCtrl = nullptr;
 
     if (pWin)
         pCtrl = mpBorderWindow->GetWindow(GetWindowType::Client);
@@ -1221,7 +1219,7 @@ tools::Rectangle ImplStdBorderWindowView::GetMenuRect() const
     return maFrameData.maMenuRect;
 }
 
-void ImplStdBorderWindowView::Init( OutputDevice* pDev, tools::Long nWidth, tools::Long nHeight )
+void ImplStdBorderWindowView::Init( vcl::Window* pDev, tools::Long nWidth, tools::Long nHeight )
 {
     ImplBorderFrameData*    pData = &maFrameData;
     ImplBorderWindow*       pBorderWindow = maFrameData.mpBorderWindow;

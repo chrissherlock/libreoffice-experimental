@@ -215,7 +215,7 @@ public:
     virtual bool            Tracking( const TrackingEvent& rTEvt );
     virtual OUString        RequestHelp( const Point& rPos, tools::Rectangle& rHelpRect );
 
-    virtual void            Init( OutputDevice* pDev, tools::Long nWidth, tools::Long nHeight ) = 0;
+    virtual void            Init( vcl::Window* pWin, tools::Long nWidth, tools::Long nHeight ) = 0;
     virtual void            GetBorder( sal_Int32& rLeftBorder, sal_Int32& rTopBorder,
                                        sal_Int32& rRightBorder, sal_Int32& rBottomBorder ) const = 0;
     virtual tools::Long            CalcTitleWidth() const = 0;
@@ -234,7 +234,7 @@ class ImplNoBorderWindowView final : public ImplBorderWindowView
 public:
                             ImplNoBorderWindowView();
 
-    virtual void            Init( OutputDevice* pDev, tools::Long nWidth, tools::Long nHeight ) override;
+    virtual void            Init( vcl::Window* pWin, tools::Long nWidth, tools::Long nHeight ) override;
     virtual void            GetBorder( sal_Int32& rLeftBorder, sal_Int32& rTopBorder,
                                        sal_Int32& rRightBorder, sal_Int32& rBottomBorder ) const override;
     virtual tools::Long            CalcTitleWidth() const override;
@@ -256,7 +256,7 @@ class ImplSmallBorderWindowView : public ImplBorderWindowView
 public:
                             ImplSmallBorderWindowView( ImplBorderWindow* pBorderWindow );
 
-    virtual void            Init( OutputDevice* pOutDev, tools::Long nWidth, tools::Long nHeight ) override;
+    virtual void            Init( vcl::Window* pOutDev, tools::Long nWidth, tools::Long nHeight ) override;
     virtual void            GetBorder( sal_Int32& rLeftBorder, sal_Int32& rTopBorder,
                                        sal_Int32& rRightBorder, sal_Int32& rBottomBorder ) const override;
     virtual tools::Long            CalcTitleWidth() const override;
@@ -277,7 +277,7 @@ public:
     virtual OUString        RequestHelp( const Point& rPos, tools::Rectangle& rHelpRect ) override;
     virtual tools::Rectangle       GetMenuRect() const override;
 
-    virtual void            Init( OutputDevice* pDev, tools::Long nWidth, tools::Long nHeight ) override;
+    virtual void            Init( vcl::Window* pDev, tools::Long nWidth, tools::Long nHeight ) override;
     virtual void            GetBorder( sal_Int32& rLeftBorder, sal_Int32& rTopBorder,
                                        sal_Int32& rRightBorder, sal_Int32& rBottomBorder ) const override;
     virtual tools::Long            CalcTitleWidth() const override;
