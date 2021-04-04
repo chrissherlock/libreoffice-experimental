@@ -42,6 +42,7 @@
 #include <vcl/flags/AddFontSubstituteFlags.hxx>
 #include <vcl/flags/AntialiasingFlags.hxx>
 #include <vcl/flags/ComplexTextLayoutFlags.hxx>
+#include <vcl/flags/DrawFlags.hxx>
 #include <vcl/flags/DrawImageFlags.hxx>
 #include <vcl/flags/DrawGridFlags.hxx>
 #include <vcl/flags/DrawModeFlags.hxx>
@@ -461,6 +462,7 @@ public:
 
     Color const& GetTextColor() const;
     virtual void SetTextColor(Color const& rColor);
+    virtual void SetSystemTextColor(DrawFlags nFlags, bool bEnabled = false);
 
     bool IsTextLineColor() const;
     Color const& GetTextLineColor() const;

@@ -24,6 +24,7 @@
 #include <tools/debug.hxx>
 
 #include <vcl/QueueInfo.hxx>
+#include <vcl/animate/Animation.hxx>
 #include <vcl/event.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/print.hxx>

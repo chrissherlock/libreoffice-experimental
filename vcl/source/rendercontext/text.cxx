@@ -655,6 +655,26 @@ void RenderContext2::SetTextColor(Color const& rColor)
         mpAlphaVDev->SetTextColor(COL_BLACK);
 }
 
+void RenderContext2::SetSystemTextColor(DrawFlags nFlags, bool bEnabled)
+{
+    if (nFlags & DrawFlags::Mono)
+    {
+        SetTextColor(COL_BLACK);
+    }
+    else
+    {
+        if (!bEnabled)
+        {
+            const StyleSettings& rStyleSettings = GetSettings().GetStyleSettings();
+            SetTextColor(rStyleSettings.GetDisableColor());
+        }
+        else
+        {
+            SetTextColor(GetTextColor());
+        }
+    }
+}
+
 bool RenderContext2::IsTextFillColor() const { return !maFont.IsTransparent(); }
 
 Color RenderContext2::GetTextFillColor() const
