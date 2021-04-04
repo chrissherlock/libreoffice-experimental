@@ -26,6 +26,9 @@ Geometry::Geometry()
     , mnOutOffLogicY(0)
     , mnOutOffX(0)
     , mnOutOffY(0)
+    , mnDPIX(0)
+    , mnDPIY(0)
+    , mnDPIScalePercentage(100)
 {
 }
 
@@ -64,5 +67,19 @@ void Geometry::SetXOffsetInPixels(tools::Long nOffsetXpx) { mnOutOffX = nOffsetX
 tools::Long Geometry::GetYOffsetInPixels() const { return mnOutOffY; }
 
 void Geometry::SetYOffsetInPixels(tools::Long nOffsetYpx) { mnOutOffY = nOffsetYpx; }
+
+sal_Int32 Geometry::GetDPIX() const { return mnDPIX; }
+
+sal_Int32 Geometry::GetDPIY() const { return mnDPIY; }
+
+void Geometry::SetDPIX(sal_Int32 nDPIX) { mnDPIX = nDPIX; }
+
+void Geometry::SetDPIY(sal_Int32 nDPIY) { mnDPIY = nDPIY; }
+
+float Geometry::GetDPIScaleFactor() const { return mnDPIScalePercentage / 100.0f; }
+
+sal_Int32 Geometry::GetDPIScalePercentage() const { return mnDPIScalePercentage; }
+
+void Geometry::SetDPIScalePercentage(sal_Int32 nPercentage) { mnDPIScalePercentage = nPercentage; }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

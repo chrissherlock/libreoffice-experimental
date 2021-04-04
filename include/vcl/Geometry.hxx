@@ -30,21 +30,26 @@ public:
 
     tools::Long GetXOffsetFromOriginInPixels() const;
     void SetXOffsetFromOriginInPixels(tools::Long nOffsetFromOriginXpx);
-
     tools::Long GetYOffsetFromOriginInPixels() const;
     void SetYOffsetFromOriginInPixels(tools::Long nOffsetFromOriginYpx);
 
     tools::Long GetXOffsetFromOriginInLogicalUnits() const;
     void SetXOffsetFromOriginInLogicalUnits(tools::Long nOffsetFromOriginXInLogicalUnits);
-
     tools::Long GetYOffsetFromOriginInLogicalUnits() const;
     void SetYOffsetFromOriginInLogicalUnits(tools::Long nOffsetFromOriginYInLogicalUnits);
 
     tools::Long GetXOffsetInPixels() const;
     void SetXOffsetInPixels(tools::Long nOffsetXpx);
-
     tools::Long GetYOffsetInPixels() const;
     void SetYOffsetInPixels(tools::Long nOffsetYpx);
+
+    sal_Int32 GetDPIX() const;
+    sal_Int32 GetDPIY() const;
+    void SetDPIX(sal_Int32 nDPIX);
+    void SetDPIY(sal_Int32 nDPIY);
+    float GetDPIScaleFactor() const;
+    sal_Int32 GetDPIScalePercentage() const;
+    void SetDPIScalePercentage(sal_Int32 nPercentage);
 
 private:
     tools::Long mnOutOffOrigX;
@@ -55,6 +60,11 @@ private:
         mnOutOffX; /// Output offset for device output in pixels (pseudo window offset within window system's frames)
     tools::Long
         mnOutOffY; /// Output offset for device output in pixels (pseudo window offset within window system's frames)
+
+    sal_Int32 mnDPIX;
+    sal_Int32 mnDPIY;
+    sal_Int32
+        mnDPIScalePercentage; ///< For HiDPI displays, we want to draw elements for a percentage larger
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

@@ -2815,7 +2815,7 @@ void RenderContext2::SetWaveLineColors(Color const& rColor, tools::Long nLineWid
 Size RenderContext2::GetWaveLineSize(tools::Long nLineWidth) const
 {
     if (nLineWidth > 1)
-        return Size(nLineWidth, ((nLineWidth * mnDPIX) + (mnDPIY / 2)) / mnDPIY);
+        return Size(nLineWidth, ((nLineWidth * GetDPIX()) + (GetDPIY() / 2)) / GetDPIY());
 
     return Size(1, 1);
 }

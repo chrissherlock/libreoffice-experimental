@@ -70,9 +70,6 @@ RenderContext2::RenderContext2()
     , mbTextLines(false)
     , mbTextSpecial(false)
     , mpExtOutDevData(nullptr)
-    , mnDPIX(0)
-    , mnDPIY(0)
-    , mnDPIScalePercentage(100)
     , mbOutput(true)
 {
     // #i84553 toop BiDi preference to RTL

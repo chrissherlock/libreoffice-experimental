@@ -1346,10 +1346,6 @@ private:
 
     vcl::ExtOutDevData* mpExtOutDevData;
     std::vector<OutDevState> maOutDevStateStack;
-    sal_Int32 mnDPIX;
-    sal_Int32 mnDPIY;
-    sal_Int32
-        mnDPIScalePercentage; ///< For HiDPI displays, we want to draw elements for a percentage larger
 
     mutable bool mbOutput : 1;
 };

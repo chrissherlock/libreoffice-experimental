@@ -24,21 +24,24 @@
 
 #include <algorithm>
 
-sal_Int32 RenderContext2::GetDPIX() const { return mnDPIX; }
+sal_Int32 RenderContext2::GetDPIX() const { return maGeometry.GetDPIX(); }
 
-sal_Int32 RenderContext2::GetDPIY() const { return mnDPIY; }
+sal_Int32 RenderContext2::GetDPIY() const { return maGeometry.GetDPIY(); }
 
-void RenderContext2::SetDPIX(sal_Int32 nDPIX) { mnDPIX = nDPIX; }
+void RenderContext2::SetDPIX(sal_Int32 nDPIX) { maGeometry.SetDPIX(nDPIX); }
 
-void RenderContext2::SetDPIY(sal_Int32 nDPIY) { mnDPIY = nDPIY; }
+void RenderContext2::SetDPIY(sal_Int32 nDPIY) { maGeometry.SetDPIY(nDPIY); }
 
-float RenderContext2::GetDPIScaleFactor() const { return mnDPIScalePercentage / 100.0f; }
+float RenderContext2::GetDPIScaleFactor() const { return maGeometry.GetDPIScaleFactor(); }
 
-sal_Int32 RenderContext2::GetDPIScalePercentage() const { return mnDPIScalePercentage; }
+sal_Int32 RenderContext2::GetDPIScalePercentage() const
+{
+    return maGeometry.GetDPIScalePercentage();
+}
 
 void RenderContext2::SetDPIScalePercentage(sal_Int32 nPercent)
 {
-    mnDPIScalePercentage = std::max(100, nPercent);
+    maGeometry.SetDPIScalePercentage(std::max(100, nPercent));
 }
 
 Size RenderContext2::GetOutputSizePixel() const { return Size(mnOutWidth, mnOutHeight); }
