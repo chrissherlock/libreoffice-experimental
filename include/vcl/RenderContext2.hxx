@@ -564,8 +564,6 @@ public:
     void SetDPIScalePercentage(sal_Int32 nPercent);
 
     Size GetOutputSizePixel() const;
-    virtual Point GetBandedPageOffset() const;
-    virtual Size GetBandedPageSize() const;
     tools::Long GetOutputWidthPixel() const;
     tools::Long GetOutputHeightPixel() const;
     tools::Long GetOutOffXPixel() const;
@@ -865,6 +863,10 @@ protected:
 
     virtual void DrawOutDevDirect(RenderContext2 const& rSrcDev, SalTwoRect& rPosAry,
                                   SalGraphics* pSrcGraphics);
+
+    virtual Point GetBandedPageOffset() const;
+
+    virtual Size GetBandedPageSize() const;
 
     void ImplDrawText(tools::Rectangle const& rRect, OUString const& rOrigStr, DrawTextFlags nStyle,
                       std::vector<tools::Rectangle>* pVector, OUString* pDisplayText,

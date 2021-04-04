@@ -255,6 +255,10 @@ protected:
     basegfx::B2DRange ReduceBitmapExVisibleRange(basegfx::B2DHomMatrix const& rFullTransform,
                                                  basegfx::B2DRange const& rVisibleRange) override;
 
+    Point GetBandedPageOffset() const override;
+
+    Size GetBandedPageSize() const override;
+
 private:
     virtual void DrawDeviceMask(const Bitmap& rMask, const Color& rMaskColor, const Point& rDestPt,
                                 const Size& rDestSize, const Point& rSrcPtPixel,
@@ -314,9 +318,6 @@ public:
     Orientation GetOrientation() const;
     void SetDuplexMode(DuplexMode);
     DuplexMode GetDuplexMode() const;
-
-    Point GetBandedPageOffset() const override;
-    Size GetBandedPageSize() const override;
 
     bool SetPaperBin(sal_uInt16 nPaperBin);
     sal_uInt16 GetPaperBin() const;

@@ -675,14 +675,13 @@ public:
 
     static void convertLineInfoToExtLineInfo(const LineInfo& rIn, PDFWriter::ExtLineInfo& rOut);
 
-    Size GetBandedPageSize() const override;
-
 protected:
     SAL_DLLPRIVATE bool ImplNewFont() const;
     void ImplClearFontData(bool bNewFontLists) override;
     void ImplRefreshFontData(bool bNewFontLists) override;
     vcl::Region ClipToDeviceBounds(vcl::Region aRegion) const override;
     void DrawHatchLine(Point const& rStartPoint, Point const& rEndPoint) override;
+    Size GetBandedPageSize() const override;
 
 private:
     MapMode m_aMapMode; // PDFWriterImpl scaled units
