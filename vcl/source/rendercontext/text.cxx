@@ -2677,20 +2677,17 @@ void RenderContext2::ImplDrawStraightTextLine(tools::Long nBaseX, tools::Long nB
 void RenderContext2::ImplDrawWaveLine(tools::Long nBaseX, tools::Long nBaseY, tools::Long nDistX,
                                       tools::Long nDistY, tools::Long nWidth, tools::Long nHeight,
                                       tools::Long nLineWidth, Degree10 nOrientation,
-                                      const Color& rColor)
+                                      Color const& rColor)
 {
     if (!nHeight)
         return;
-
     tools::Long nStartX = nBaseX + nDistX;
     tools::Long nStartY = nBaseY + nDistY;
-
     // If the height is 1 pixel, it's enough output a line
     if ((nLineWidth == 1) && (nHeight == 1))
     {
         mpGraphics->SetLineColor(rColor);
         mbInitLineColor = true;
-
         tools::Long nEndX = nStartX + nWidth;
         tools::Long nEndY = nStartY;
         if (nOrientation)
@@ -2709,24 +2706,16 @@ void RenderContext2::ImplDrawWaveLine(tools::Long nBaseX, tools::Long nBaseY, to
         tools::Long nDiffY = nHeight - 1;
         tools::Long nCount = nWidth;
         tools::Long nOffY = -1;
-        tools::Long nPixWidth;
-        tools::Long nPixHeight;
-        bool bDrawPixAsRect;
-
-        InitWaveLineColor(rColor, nLineWidth);
-
-        Size aPixSize;
-        std::tie(bDrawPixAsRect, aPixSize) = GetWaveLineSize(nLineWidth);
-
-        nPixWidth = aPixSize.Width();
-        nPixHeight = aPixSize.Height();
-
+        SetWaveLineColors(rColor, nLineWidth);
+        Size aSize(GetWaveLineSize(nLineWidth));
+        tools::Long nPixWidth = aSize.Width();
+        tools::Long nPixHeight = aSize.Height();
         if (!nDiffY)
         {
             while (nWidth)
             {
-                ImplDrawWavePixel(nBaseX, nBaseY, nCurX, nCurY, nOrientation, mpGraphics, *this,
-                                  bDrawPixAsRect, nPixWidth, nPixHeight);
+                ImplDrawWavePixel(nBaseX, nBaseY, nCurX, nCurY, nLineWidth, nOrientation,
+                                  mpGraphics, *this, nPixWidth, nPixHeight);
                 nCurX++;
                 nWidth--;
             }
@@ -2739,15 +2728,15 @@ void RenderContext2::ImplDrawWaveLine(tools::Long nBaseX, tools::Long nBaseY, to
             {
                 for (tools::Long i = nDiffY; i; --i)
                 {
-                    ImplDrawWavePixel(nBaseX, nBaseY, nCurX, nCurY, nOrientation, mpGraphics, *this,
-                                      bDrawPixAsRect, nPixWidth, nPixHeight);
+                    ImplDrawWavePixel(nBaseX, nBaseY, nCurX, nCurY, nLineWidth, nOrientation,
+                                      mpGraphics, *this, nPixWidth, nPixHeight);
                     nCurX++;
                     nCurY += nOffY;
                 }
                 for (tools::Long i = nDiffX; i; --i)
                 {
-                    ImplDrawWavePixel(nBaseX, nBaseY, nCurX, nCurY, nOrientation, mpGraphics, *this,
-                                      bDrawPixAsRect, nPixWidth, nPixHeight);
+                    ImplDrawWavePixel(nBaseX, nBaseY, nCurX, nCurY, nLineWidth, nOrientation,
+                                      mpGraphics, *this, nPixWidth, nPixHeight);
                     nCurX++;
                 }
                 nOffY = -nOffY;
@@ -2757,15 +2746,15 @@ void RenderContext2::ImplDrawWaveLine(tools::Long nBaseX, tools::Long nBaseY, to
             {
                 for (tools::Long i = nDiffY; i && nFreq; --i, --nFreq)
                 {
-                    ImplDrawWavePixel(nBaseX, nBaseY, nCurX, nCurY, nOrientation, mpGraphics, *this,
-                                      bDrawPixAsRect, nPixWidth, nPixHeight);
+                    ImplDrawWavePixel(nBaseX, nBaseY, nCurX, nCurY, nLineWidth, nOrientation,
+                                      mpGraphics, *this, nPixWidth, nPixHeight);
                     nCurX++;
                     nCurY += nOffY;
                 }
                 for (tools::Long i = nDiffX; i && nFreq; --i, --nFreq)
                 {
-                    ImplDrawWavePixel(nBaseX, nBaseY, nCurX, nCurY, nOrientation, mpGraphics, *this,
-                                      bDrawPixAsRect, nPixWidth, nPixHeight);
+                    ImplDrawWavePixel(nBaseX, nBaseY, nCurX, nCurY, nLineWidth, nOrientation,
+                                      mpGraphics, *this, nPixWidth, nPixHeight);
                     nCurX++;
                 }
             }
@@ -2774,9 +2763,9 @@ void RenderContext2::ImplDrawWaveLine(tools::Long nBaseX, tools::Long nBaseY, to
 }
 
 void RenderContext2::ImplDrawWavePixel(tools::Long nOriginX, tools::Long nOriginY,
-                                       tools::Long nCurX, tools::Long nCurY, Degree10 nOrientation,
-                                       SalGraphics* pGraphics, RenderContext2 const& rOutDev,
-                                       bool bDrawPixAsRect, tools::Long nPixWidth,
+                                       tools::Long nCurX, tools::Long nCurY, tools::Long nWidth,
+                                       Degree10 nOrientation, SalGraphics* pGraphics,
+                                       RenderContext2 const& rOutDev, tools::Long nPixWidth,
                                        tools::Long nPixHeight)
 {
     if (nOrientation)
@@ -2785,7 +2774,7 @@ void RenderContext2::ImplDrawWavePixel(tools::Long nOriginX, tools::Long nOrigin
         aPoint.RotateAround(nCurX, nCurY, nOrientation);
     }
 
-    if (bDrawPixAsRect)
+    if (DrawWavePixelAsRect(nWidth))
     {
         pGraphics->DrawRect(nCurX, nCurY, nPixWidth, nPixHeight, rOutDev);
     }
@@ -2793,6 +2782,42 @@ void RenderContext2::ImplDrawWavePixel(tools::Long nOriginX, tools::Long nOrigin
     {
         pGraphics->DrawPixel(nCurX, nCurY, rOutDev);
     }
+}
+
+bool RenderContext2::DrawWavePixelAsRect(tools::Long nLineWidth) const
+{
+    if (nLineWidth > 1)
+        return true;
+
+    return false;
+}
+
+void RenderContext2::SetWaveLineColors(Color const& rColor, tools::Long nLineWidth)
+{
+    // On printers that output pixel via DrawRect()
+    if (nLineWidth > 1)
+    {
+        if (mbLineColor || mbInitLineColor)
+        {
+            mpGraphics->SetLineColor();
+            mbInitLineColor = true;
+        }
+        mpGraphics->SetFillColor(rColor);
+        mbInitFillColor = true;
+    }
+    else
+    {
+        mpGraphics->SetLineColor(rColor);
+        mbInitLineColor = true;
+    }
+}
+
+Size RenderContext2::GetWaveLineSize(tools::Long nLineWidth) const
+{
+    if (nLineWidth > 1)
+        return Size(nLineWidth, ((nLineWidth * mnDPIX) + (mnDPIY / 2)) / mnDPIY);
+
+    return Size(1, 1);
 }
 void RenderContext2::ImplDrawStrikeoutLine(tools::Long nBaseX, tools::Long nBaseY,
                                            tools::Long nDistX, tools::Long nDistY,
@@ -2956,11 +2981,6 @@ void RenderContext2::InitWaveLineColor(Color const& rColor, tools::Long)
 {
     mpGraphics->SetLineColor(rColor);
     mbInitLineColor = true;
-}
-
-std::tuple<bool, Size> RenderContext2::GetWaveLineSize(tools::Long) const
-{
-    return std::make_tuple(false, Size(1, 1));
 }
 
 void RenderContext2::ImplInitTextLineSize()

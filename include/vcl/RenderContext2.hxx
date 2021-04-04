@@ -893,8 +893,6 @@ protected:
                                                              tools::PolyPolygon const& rPolyPoly,
                                                              Point* pPtBuffer);
 
-    virtual std::tuple<bool, Size> GetWaveLineSize(tools::Long nLineWidth) const;
-
     virtual void DrawScaledBitmap(Point const& rDestPt, Size const& rDestSize,
                                   const Point& rSrcPtPixel, Size const& rSrcSizePixel,
                                   Bitmap const& rBitmap);
@@ -1272,11 +1270,17 @@ private:
                                          tools::Long nLineWidth, Degree10 nOrientation,
                                          Color const& rColor);
 
-    SAL_DLLPRIVATE static void ImplDrawWavePixel(tools::Long nOriginX, tools::Long nOriginY,
-                                                 tools::Long nCurX, tools::Long nCurY,
-                                                 Degree10 nOrientation, SalGraphics* pGraphics,
-                                                 RenderContext2 const& rOutDev, bool bDrawPixAsRect,
-                                                 tools::Long nPixWidth, tools::Long nPixHeight);
+    virtual void SetWaveLineColors(Color const& rColor, tools::Long nLineWidth);
+
+    virtual Size GetWaveLineSize(tools::Long nLineWidth) const;
+
+    SAL_DLLPRIVATE void ImplDrawWavePixel(tools::Long nOriginX, tools::Long nOriginY,
+                                          tools::Long nCurX, tools::Long nCurY, tools::Long nWidth,
+                                          Degree10 nOrientation, SalGraphics* pGraphics,
+                                          RenderContext2 const& rOutDev, tools::Long nPixWidth,
+                                          tools::Long nPixHeight);
+
+    virtual bool DrawWavePixelAsRect(tools::Long nLineWidth) const;
 
     SAL_DLLPRIVATE void ImplDrawStrikeoutLine(tools::Long nBaseX, tools::Long nBaseY,
                                               tools::Long nX, tools::Long nY, tools::Long nWidth,
