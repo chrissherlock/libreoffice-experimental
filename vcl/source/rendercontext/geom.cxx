@@ -49,9 +49,9 @@ Size RenderContext2::GetSize() const
     return Size(maGeometry.GetWidthInPixels(), maGeometry.GetHeightInPixels());
 }
 
-tools::Long RenderContext2::GetOutputWidthPixel() const { return maGeometry.GetWidthInPixels(); }
+tools::Long RenderContext2::GetWidth() const { return maGeometry.GetWidthInPixels(); }
 
-tools::Long RenderContext2::GetOutputHeightPixel() const { return maGeometry.GetHeightInPixels(); }
+tools::Long RenderContext2::GetHeight() const { return maGeometry.GetHeightInPixels(); }
 
 void RenderContext2::SetSize(Size const& rSize) { maGeometry.SetSize(rSize); }
 

@@ -315,12 +315,12 @@ bool VirtualDevice::InnerImplSetOutputSizePixel( const Size& rNewSize, bool bEra
             {
                 tools::Long nWidth;
                 tools::Long nHeight;
-                if ( GetOutputWidthPixel() < nNewWidth )
-                    nWidth = GetOutputWidthPixel();
+                if ( GetWidth() < nNewWidth )
+                    nWidth = GetWidth();
                 else
                     nWidth = nNewWidth;
-                if ( GetOutputHeightPixel() < nNewHeight )
-                    nHeight = GetOutputHeightPixel();
+                if ( GetHeight() < nNewHeight )
+                    nHeight = GetHeight();
                 else
                     nHeight = nNewHeight;
                 SalTwoRect aPosAry(0, 0, nWidth, nHeight, 0, 0, nWidth, nHeight);

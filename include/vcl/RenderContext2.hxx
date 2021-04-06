@@ -565,8 +565,8 @@ public:
     void SetDPIScalePercentage(sal_Int32 nPercent);
 
     Size GetSize() const;
-    tools::Long GetOutputWidthPixel() const;
-    tools::Long GetOutputHeightPixel() const;
+    tools::Long GetWidth() const;
+    tools::Long GetHeight() const;
     void SetWidthInPixels(tools::Long nWidth);
     void SetHeightInPixels(tools::Long nHeight);
     tools::Long GetOutOffXPixel() const;
