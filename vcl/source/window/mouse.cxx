@@ -85,7 +85,7 @@ bool Window::ImplTestMousePointerSet()
         return true;
 
     // if the mouse is over the window, switch it
-    tools::Rectangle aClientRect( Point( 0, 0 ), GetOutputSizePixel() );
+    tools::Rectangle aClientRect( Point( 0, 0 ), GetSize() );
     return aClientRect.IsInside( GetPointerPosPixel() );
 }
 

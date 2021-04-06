@@ -1967,7 +1967,7 @@ IMPL_LINK_NOARG(SfxHelpTextWindow_Impl, CheckHdl, weld::Button&, void)
 
 void SfxHelpTextWindow_Impl::Resize()
 {
-    Size aSize = GetOutputSizePixel();
+    Size aSize = GetSize();
     pTextWin->SetPosSizePixel( Point(0, 0), aSize );
 }
 

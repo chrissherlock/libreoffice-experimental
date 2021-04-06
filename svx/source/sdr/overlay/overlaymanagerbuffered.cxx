@@ -31,11 +31,11 @@ namespace sdr::overlay
         void OverlayManagerBuffered::ImpPrepareBufferDevice()
         {
             // compare size of mpBufferDevice with size of visible area
-            if(mpBufferDevice->GetOutputSizePixel() != getOutputDevice().GetOutputSizePixel())
+            if(mpBufferDevice->GetSize() != getOutputDevice().GetSize())
             {
                 // set new buffer size, copy as much content as possible (use bool parameter for vcl).
                 // Newly uncovered regions will be repainted.
-                mpBufferDevice->SetOutputSizePixel(getOutputDevice().GetOutputSizePixel(), false);
+                mpBufferDevice->SetOutputSizePixel(getOutputDevice().GetSize(), false);
             }
 
             // compare the MapModes for zoom/scroll changes
@@ -56,7 +56,7 @@ namespace sdr::overlay
                         // get pixel bounds
                         const Point aOriginOldPixel(mpBufferDevice->LogicToPixel(rOriginOld));
                         const Point aOriginNewPixel(mpBufferDevice->LogicToPixel(rOriginNew));
-                        const Size aOutputSizePixel(mpBufferDevice->GetOutputSizePixel());
+                        const Size aOutputSizePixel(mpBufferDevice->GetSize());
 
                         // remember and switch off MapMode
                         const bool bMapModeWasEnabled(mpBufferDevice->IsMapModeEnabled());
@@ -156,7 +156,7 @@ namespace sdr::overlay
             }
 
             // also limit to buffer size
-            const tools::Rectangle aBufferDeviceRectanglePixel(Point(), mpBufferDevice->GetOutputSizePixel());
+            const tools::Rectangle aBufferDeviceRectanglePixel(Point(), mpBufferDevice->GetSize());
             aRegion.Intersect(aBufferDeviceRectanglePixel);
 
             // MapModes off
@@ -223,8 +223,8 @@ namespace sdr::overlay
             // refresh with prerendering
             {
                 // #i73602# ensure valid and sized mpOutputBufferDevice
-                const Size aDestinationSizePixel(mpBufferDevice->GetOutputSizePixel());
-                const Size aOutputBufferSizePixel(mpOutputBufferDevice->GetOutputSizePixel());
+                const Size aDestinationSizePixel(mpBufferDevice->GetSize());
+                const Size aOutputBufferSizePixel(mpOutputBufferDevice->GetSize());
 
                 if(aDestinationSizePixel != aOutputBufferSizePixel)
                 {
@@ -244,7 +244,7 @@ namespace sdr::overlay
 
                 // truncate aRegionRectanglePixel to destination pixel size, more does
                 // not need to be prepared since destination is a buffer for a window. So,
-                // maximum size indirectly shall be limited to getOutputDevice().GetOutputSizePixel()
+                // maximum size indirectly shall be limited to getOutputDevice().GetSize()
                 if(aRegionRectanglePixel.Left() < 0)
                 {
                     aRegionRectanglePixel.SetLeft( 0 );

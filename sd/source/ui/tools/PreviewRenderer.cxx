@@ -119,7 +119,7 @@ Image PreviewRenderer::RenderPage (
                 PaintSubstitutionText("");
                 PaintFrame();
 
-                Size aSize (mpPreviewDevice->GetOutputSizePixel());
+                Size aSize (mpPreviewDevice->GetSize());
                 aPreview = Image(mpPreviewDevice->GetBitmapEx(
                     mpPreviewDevice->PixelToLogic(Point(0,0)),
                     mpPreviewDevice->PixelToLogic(aSize)));
@@ -169,7 +169,7 @@ Image PreviewRenderer::RenderSubstitution (
         // Clear the background.
         const ::tools::Rectangle aPaintRectangle (
             Point(0,0),
-            mpPreviewDevice->GetOutputSizePixel());
+            mpPreviewDevice->GetSize());
         mpPreviewDevice->EnableMapMode(false);
         mpPreviewDevice->SetLineColor();
         svtools::ColorConfig aColorConfig;
@@ -181,7 +181,7 @@ Image PreviewRenderer::RenderSubstitution (
         PaintSubstitutionText (rSubstitutionText);
         PaintFrame();
 
-        const Size aSize (mpPreviewDevice->GetOutputSizePixel());
+        const Size aSize (mpPreviewDevice->GetSize());
         aPreview = Image(mpPreviewDevice->GetBitmapEx(
             mpPreviewDevice->PixelToLogic(Point(0,0)),
             mpPreviewDevice->PixelToLogic(aSize)));
@@ -319,7 +319,7 @@ void PreviewRenderer::PaintSubstitutionText (const OUString& rSubstitutionText)
     ::tools::Rectangle aTextBox (
         Point(0,0),
         mpPreviewDevice->PixelToLogic(
-            mpPreviewDevice->GetOutputSizePixel()));
+            mpPreviewDevice->GetSize()));
     DrawTextFlags const nTextStyle =
         DrawTextFlags::Center
         | DrawTextFlags::VCenter
@@ -338,7 +338,7 @@ void PreviewRenderer::PaintFrame()
         // Paint a frame around the preview.
         ::tools::Rectangle aPaintRectangle (
             Point(0,0),
-            mpPreviewDevice->GetOutputSizePixel());
+            mpPreviewDevice->GetSize());
         mpPreviewDevice->EnableMapMode(false);
         mpPreviewDevice->SetLineColor(maFrameColor);
         mpPreviewDevice->SetFillColor();

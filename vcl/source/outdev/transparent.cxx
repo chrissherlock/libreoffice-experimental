@@ -129,7 +129,7 @@ void OutputDevice::DrawTransparent(const GDIMetaFile& rMtf, const Point& rPos, c
         GDIMetaFile* pOldMetaFile = mpMetaFile;
         tools::Rectangle aOutRect(LogicToPixel(rPos), LogicToPixel(rSize));
         Point aPoint;
-        tools::Rectangle aDstRect(aPoint, GetOutputSizePixel());
+        tools::Rectangle aDstRect(aPoint, GetSize());
 
         mpMetaFile = nullptr;
         aDstRect.Intersection(aOutRect);
@@ -170,8 +170,8 @@ void OutputDevice::DrawTransparent(const GDIMetaFile& rMtf, const Point& rPos, c
                     xVDev->EnableMapMode(false);
 
                     // copy content from original to buffer
-                    xVDev->DrawOutDev(aPoint, xVDev->GetOutputSizePixel(), // dest
-                                      aDstRect.TopLeft(), xVDev->GetOutputSizePixel(), // source
+                    xVDev->DrawOutDev(aPoint, xVDev->GetSize(), // dest
+                                      aDstRect.TopLeft(), xVDev->GetSize(), // source
                                       *this);
 
                     // draw MetaFile to buffer
@@ -183,7 +183,7 @@ void OutputDevice::DrawTransparent(const GDIMetaFile& rMtf, const Point& rPos, c
                     // get content bitmap from buffer
                     xVDev->EnableMapMode(false);
 
-                    const Bitmap aPaint(xVDev->GetBitmap(aPoint, xVDev->GetOutputSizePixel()));
+                    const Bitmap aPaint(xVDev->GetBitmap(aPoint, xVDev->GetSize()));
 
                     // create alpha mask from gradient and get as Bitmap
                     xVDev->EnableMapMode(bBufferMapModeEnabled);
@@ -192,7 +192,7 @@ void OutputDevice::DrawTransparent(const GDIMetaFile& rMtf, const Point& rPos, c
                     xVDev->SetDrawMode(DrawModeFlags::Default);
                     xVDev->EnableMapMode(false);
 
-                    const AlphaMask aAlpha(xVDev->GetBitmap(aPoint, xVDev->GetOutputSizePixel()));
+                    const AlphaMask aAlpha(xVDev->GetBitmap(aPoint, xVDev->GetSize()));
 
                     xVDev.disposeAndClear();
 
@@ -215,7 +215,7 @@ void OutputDevice::DrawTransparent(const GDIMetaFile& rMtf, const Point& rPos, c
                     const_cast<GDIMetaFile&>(rMtf).Play(xVDev.get(), rPos, rSize);
                     const_cast<GDIMetaFile&>(rMtf).WindStart();
                     xVDev->EnableMapMode(false);
-                    BitmapEx aPaint = xVDev->GetBitmapEx(Point(), xVDev->GetOutputSizePixel());
+                    BitmapEx aPaint = xVDev->GetBitmapEx(Point(), xVDev->GetSize());
                     xVDev->EnableMapMode(
                         bVDevOldMap); // #i35331#: MUST NOT use EnableMapMode( sal_True ) here!
 
@@ -225,7 +225,7 @@ void OutputDevice::DrawTransparent(const GDIMetaFile& rMtf, const Point& rPos, c
                     xVDev->SetDrawMode(DrawModeFlags::Default);
                     xVDev->EnableMapMode(false);
 
-                    AlphaMask aAlpha(xVDev->GetBitmap(Point(), xVDev->GetOutputSizePixel()));
+                    AlphaMask aAlpha(xVDev->GetBitmap(Point(), xVDev->GetSize()));
                     aAlpha.BlendWith(aPaint.GetAlpha());
 
                     xVDev.disposeAndClear();
@@ -243,7 +243,7 @@ void OutputDevice::DrawTransparent(const GDIMetaFile& rMtf, const Point& rPos, c
 
 tools::Rectangle OutputDevice::GetBackgroundComponentBounds() const
 {
-    return tools::Rectangle( Point( 0, 0 ), GetOutputSizePixel() );
+    return tools::Rectangle( Point( 0, 0 ), GetSize() );
 }
 
 typedef ::std::pair< MetaAction*, int > Component; // MetaAction plus index in metafile

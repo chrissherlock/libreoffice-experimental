@@ -246,7 +246,7 @@ void StyleItemController::DrawEntry(vcl::RenderContext& rRenderContext)
     if (!pStyle)
         return;
 
-    Size aSize(rRenderContext.GetOutputSizePixel());
+    Size aSize(rRenderContext.GetSize());
     tools::Rectangle aFullRect(Point(0, 0), aSize);
     tools::Rectangle aContentRect(aFullRect);
 

@@ -117,7 +117,7 @@ void WeldEditView::Resize()
     if (EditView* pEditView = GetEditView())
     {
         OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
-        Size aOutputSize(rDevice.PixelToLogic(GetOutputSizePixel()));
+        Size aOutputSize(rDevice.PixelToLogic(GetSize()));
         Size aSize(aOutputSize);
         GetEditEngine()->SetPaperSize(aSize);
         pEditView->SetOutputArea(tools::Rectangle(Point(0, 0), aOutputSize));
@@ -491,7 +491,7 @@ public:
         if (!m_pController)
             throw css::uno::RuntimeException();
 
-        Size aSz(m_pController->GetOutputSizePixel());
+        Size aSz(m_pController->GetSize());
         return rPoint.X >= 0 && rPoint.Y >= 0 && rPoint.X < aSz.Width() && rPoint.Y < aSz.Height();
     }
 
@@ -512,7 +512,7 @@ public:
             throw css::uno::RuntimeException();
 
         const Point aOutPos;
-        const Size aOutSize(m_pController->GetOutputSizePixel());
+        const Size aOutSize(m_pController->GetSize());
         css::awt::Rectangle aRet;
 
         aRet.X = aOutPos.X();
@@ -573,7 +573,7 @@ public:
         if (!m_pController)
             throw css::uno::RuntimeException();
 
-        Size aSz(m_pController->GetOutputSizePixel());
+        Size aSz(m_pController->GetSize());
         return css::awt::Size(aSz.Width(), aSz.Height());
     }
 

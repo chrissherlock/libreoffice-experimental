@@ -1132,7 +1132,7 @@ void Ruler::ImplFormat(vcl::RenderContext const & rRenderContext)
         aVirDevSize.setHeight( mnVirWidth );
         aVirDevSize.setWidth( mnVirHeight );
     }
-    if (aVirDevSize != maVirDev->GetOutputSizePixel())
+    if (aVirDevSize != maVirDev->GetSize())
         maVirDev->SetOutputSizePixel(aVirDevSize);
     else
         maVirDev->Erase();
@@ -1249,7 +1249,7 @@ void Ruler::ImplFormat(vcl::RenderContext const & rRenderContext)
 
 void Ruler::ImplInitExtraField( bool bUpdate )
 {
-    Size aWinSize = GetOutputSizePixel();
+    Size aWinSize = GetSize();
 
     // extra field evaluate
     if ( mnWinStyle & WB_EXTRAFIELD )
@@ -1309,7 +1309,7 @@ void Ruler::ImplDraw(vcl::RenderContext& rRenderContext)
 
     // output the ruler to the virtual device
     Point aOffPos;
-    Size aVirDevSize = maVirDev->GetOutputSizePixel();
+    Size aVirDevSize = maVirDev->GetSize();
 
     if (mnWinStyle & WB_HORZ)
     {
@@ -2058,7 +2058,7 @@ void Ruler::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle&)
 
 void Ruler::Resize()
 {
-    Size aWinSize = GetOutputSizePixel();
+    Size aWinSize = GetSize();
 
     tools::Long nNewHeight;
     if ( mnWinStyle & WB_HORZ )

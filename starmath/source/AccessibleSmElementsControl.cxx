@@ -316,7 +316,7 @@ awt::Rectangle AccessibleSmElementsControl::implGetBounds()
     awt::Rectangle aRet;
 
     const Point aOutPos;
-    Size aOutSize(m_pControl->GetOutputSizePixel());
+    Size aOutSize(m_pControl->GetSize());
 
     aRet.X = aOutPos.X();
     aRet.Y = aOutPos.Y();
@@ -330,7 +330,7 @@ sal_Bool AccessibleSmElementsControl::containsPoint(const awt::Point& aPoint)
 {
     SolarMutexGuard aGuard;
     TestControl();
-    Size aSz(m_pControl->GetOutputSizePixel());
+    Size aSz(m_pControl->GetSize());
     return aPoint.X >= 0 && aPoint.Y >= 0 && aPoint.X < aSz.Width() && aPoint.Y < aSz.Height();
 }
 

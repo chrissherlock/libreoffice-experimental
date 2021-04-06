@@ -62,7 +62,7 @@ public:
     virtual void    Scroll( tools::Long nDeltaX, tools::Long nDeltaY, ScrollFlags nFlags = ScrollFlags::NONE ) override;
 
 private:
-    Size         GetOutputSizePixel() const;
+    Size         GetSize() const;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

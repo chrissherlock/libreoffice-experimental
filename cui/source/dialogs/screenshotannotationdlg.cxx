@@ -207,7 +207,7 @@ ScreenshotAnnotationDlg_Impl::ScreenshotAnnotationDlg_Impl(
     maSaveAsText(CuiResId(RID_SVXSTR_SAVE_SCREENSHOT_AS))
 {
     VclPtr<VirtualDevice> xParentDialogSurface(rParentDialog.screenshot());
-    maParentDialogSize = xParentDialogSurface->GetOutputSizePixel();
+    maParentDialogSize = xParentDialogSurface->GetSize();
     maParentDialogBitmap = xParentDialogSurface->GetBitmapEx(Point(), maParentDialogSize);
     maDimmedDialogBitmap = maParentDialogBitmap;
 
@@ -339,7 +339,7 @@ IMPL_LINK_NOARG(ScreenshotAnnotationDlg_Impl, saveButtonHandler, weld::Button&, 
     const BitmapEx aTargetBitmap(
         mxVirtualBufferDevice->GetBitmapEx(
         Point(0, 0),
-        mxVirtualBufferDevice->GetOutputSizePixel()));
+        mxVirtualBufferDevice->GetSize()));
 
     // write as PNG
     vcl::PNGWriter aPNGWriter(aTargetBitmap);
@@ -419,7 +419,7 @@ void ScreenshotAnnotationDlg_Impl::PaintScreenShotEntry(
 
 Point ScreenshotAnnotationDlg_Impl::GetOffsetInPicture() const
 {
-    const Size aPixelSizeTarget(maPicture.GetOutputSizePixel());
+    const Size aPixelSizeTarget(maPicture.GetSize());
 
     return Point(
         aPixelSizeTarget.Width() > maParentDialogSize.Width() ? (aPixelSizeTarget.Width() - maParentDialogSize.Width()) >> 1 : 0,
@@ -483,7 +483,7 @@ void ScreenshotAnnotationDlg_Impl::RepaintPictureElement()
 void ScreenshotAnnotationDlg_Impl::Paint(vcl::RenderContext& rRenderContext)
 {
     Point aPos(GetOffsetInPicture());
-    Size aSize(mxVirtualBufferDevice->GetOutputSizePixel());
+    Size aSize(mxVirtualBufferDevice->GetSize());
     rRenderContext.DrawOutDev(aPos, aSize, Point(), aSize, *mxVirtualBufferDevice);
 }
 

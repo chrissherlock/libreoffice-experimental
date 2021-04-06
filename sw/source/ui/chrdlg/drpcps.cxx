@@ -190,7 +190,7 @@ void SwDropCapsPict::UpdatePaintSettings()
     maTextLineColor = COL_LIGHTGRAY;
 
     // gray lines
-    mnTotLineH = (GetOutputSizePixel().Height() - 2 * BORDER) / LINES;
+    mnTotLineH = (GetSize().Height() - 2 * BORDER) / LINES;
     mnLineH = mnTotLineH - 2;
 
     vcl::Font aFont;
@@ -276,7 +276,7 @@ void SwDropCapsPict::Paint(vcl::RenderContext& rRenderContext, const tools::Rect
 
     rRenderContext.SetFillColor(maBackColor);
 
-    Size aOutputSizePixel(GetOutputSizePixel());
+    Size aOutputSizePixel(GetSize());
 
     rRenderContext.DrawRect(tools::Rectangle(Point(0, 0), aOutputSizePixel));
     rRenderContext.SetClipRegion(vcl::Region(tools::Rectangle(Point(BORDER, BORDER),

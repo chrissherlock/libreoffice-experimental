@@ -370,8 +370,8 @@ void SmElementsControl::LayoutOrPaintContents(vcl::RenderContext& rContext, bool
         rContext.Erase();
     }
 
-    const sal_Int32 nControlHeight = GetOutputSizePixel().Height();
-    const sal_Int32 nControlWidth = GetOutputSizePixel().Width();
+    const sal_Int32 nControlHeight = GetSize().Height();
+    const sal_Int32 nControlWidth = GetSize().Width();
 
     sal_Int32 boxX = maMaxElementDimensions.Width()  + 10;
     sal_Int32 boxY = maMaxElementDimensions.Height() + 10;
@@ -494,7 +494,7 @@ void SmElementsControl::LayoutOrPaintContents(vcl::RenderContext& rContext, bool
     if (mbVerticalMode)
     {
         sal_Int32 nTotalControlWidth = x + boxX + mxScroll->hadjustment_get_value();
-        if (nTotalControlWidth > GetOutputSizePixel().Width())
+        if (nTotalControlWidth > GetSize().Width())
         {
             mxScroll->hadjustment_set_upper(nTotalControlWidth);
             mxScroll->hadjustment_set_page_size(nControlWidth);
@@ -510,7 +510,7 @@ void SmElementsControl::LayoutOrPaintContents(vcl::RenderContext& rContext, bool
     else
     {
         sal_Int32 nTotalControlHeight = y + boxY + mxScroll->vadjustment_get_value();
-        if (nTotalControlHeight > GetOutputSizePixel().Height())
+        if (nTotalControlHeight > GetSize().Height())
         {
             mxScroll->vadjustment_set_upper(nTotalControlHeight);
             mxScroll->vadjustment_set_page_size(nControlHeight);
@@ -561,7 +561,7 @@ bool SmElementsControl::MouseMove( const MouseEvent& rMouseEvent )
         return false;
     }
 
-    if (tools::Rectangle(Point(0, 0), GetOutputSizePixel()).IsInside(rMouseEvent.GetPosPixel()))
+    if (tools::Rectangle(Point(0, 0), GetSize()).IsInside(rMouseEvent.GetPosPixel()))
     {
         const SmElement* pPrevElement = current();
         if (pPrevElement)
@@ -613,7 +613,7 @@ bool SmElementsControl::MouseButtonDown(const MouseEvent& rMouseEvent)
 {
     GrabFocus();
 
-    if (rMouseEvent.IsLeft() && tools::Rectangle(Point(0, 0), GetOutputSizePixel()).IsInside(rMouseEvent.GetPosPixel()) && maSelectHdlLink.IsSet())
+    if (rMouseEvent.IsLeft() && tools::Rectangle(Point(0, 0), GetSize()).IsInside(rMouseEvent.GetPosPixel()) && maSelectHdlLink.IsSet())
     {
         const SmElement* pPrevElement = hasRollover() ? current() : nullptr;
         if (pPrevElement)
@@ -694,7 +694,7 @@ void SmElementsControl::scrollToElement(const bool bBackward, const SmElement *p
         auto nScrollPos = mxScroll->hadjustment_get_value();
         nScrollPos += pCur->mBoxLocation.X();
         if (!bBackward)
-            nScrollPos += pCur->mBoxSize.Width() - GetOutputSizePixel().Width();
+            nScrollPos += pCur->mBoxSize.Width() - GetSize().Width();
         mxScroll->hadjustment_set_value(nScrollPos);
     }
     else
@@ -702,7 +702,7 @@ void SmElementsControl::scrollToElement(const bool bBackward, const SmElement *p
         auto nScrollPos = mxScroll->vadjustment_get_value();
         nScrollPos += pCur->mBoxLocation.Y();
         if (!bBackward)
-            nScrollPos += pCur->mBoxSize.Height() - GetOutputSizePixel().Height();
+            nScrollPos += pCur->mBoxSize.Height() - GetSize().Height();
         mxScroll->vadjustment_set_value(nScrollPos);
     }
 }
@@ -719,7 +719,7 @@ void SmElementsControl::stepFocus(const bool bBackward)
         m_nCurrentRolloverElement = SAL_MAX_UINT16;
         setCurrentElement(nPos);
 
-        const tools::Rectangle outputRect(Point(0,0), GetOutputSizePixel());
+        const tools::Rectangle outputRect(Point(0,0), GetSize());
         const SmElement *pCur = maElementList[nPos].get();
         tools::Rectangle elementRect(pCur->mBoxLocation, pCur->mBoxSize);
         if (!outputRect.IsInside(elementRect))
@@ -733,7 +733,7 @@ void SmElementsControl::pageFocus(const bool bBackward)
     const sal_uInt16 nStartPos = m_nCurrentElement;
     const sal_uInt16 nLastElement = (maElementList.size() ? maElementList.size() - 1 : 0);
     assert(nStartPos <= nLastElement);
-    tools::Rectangle outputRect(Point(0,0), GetOutputSizePixel());
+    tools::Rectangle outputRect(Point(0,0), GetSize());
     sal_uInt16 nPrevPos = nStartPos;
     sal_uInt16 nPos = nPrevPos;
 
@@ -1131,7 +1131,7 @@ bool SmElementsControl::itemIsVisible(sal_uInt16 nPos) const
     if (elementRect.IsEmpty())
         return false;
 
-    tools::Rectangle outputRect(Point(0, 0), GetOutputSizePixel());
+    tools::Rectangle outputRect(Point(0, 0), GetSize());
     return outputRect.IsInside(elementRect);
 }
 

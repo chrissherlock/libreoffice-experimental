@@ -92,9 +92,9 @@ void ScrollableWindow::DataChanged( const DataChangedEvent& rDCEvt )
 }
 
 
-Size ScrollableWindow::GetOutputSizePixel() const
+Size ScrollableWindow::GetSize() const
 {
-    Size aSz( Window::GetOutputSizePixel() );
+    Size aSz( Window::GetSize() );
 
     tools::Long nTmp = GetSettings().GetStyleSettings().GetScrollBarSize();
     if ( aHScroll->IsVisible() )
@@ -131,7 +131,7 @@ IMPL_LINK( ScrollableWindow, ScrollHdl, ScrollBar *, pScroll, void )
 void ScrollableWindow::Resize()
 {
     // get the new output-size in pixel
-    Size aOutPixSz = Window::GetOutputSizePixel();
+    Size aOutPixSz = Window::GetSize();
 
     // determine the size of the output-area and if we need scrollbars
     const tools::Long nScrSize = GetSettings().GetStyleSettings().GetScrollBarSize();
@@ -274,7 +274,7 @@ void ScrollableWindow::Scroll( tools::Long nDeltaX, tools::Long nDeltaY, ScrollF
 {
     // get the delta in pixel
     Size aDeltaPix( LogicToPixel( Size(nDeltaX, nDeltaY) ) );
-    Size aOutPixSz( GetOutputSizePixel() );
+    Size aOutPixSz( GetSize() );
     MapMode aMap( GetMapMode() );
     Point aNewPixOffset( aPixOffset );
 

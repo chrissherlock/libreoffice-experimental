@@ -90,7 +90,7 @@ BitmapEx Class::createScreenshot() const            \
 {                                                   \
     VclPtr<VirtualDevice> xDialogSurface(VclPtr<VirtualDevice>::Create(DeviceFormat::DEFAULT)); \
     pDlg->createScreenshot(*xDialogSurface);        \
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel()); \
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSize()); \
 }                                                   \
 OString Class::GetScreenshotId() const              \
 {                                                   \

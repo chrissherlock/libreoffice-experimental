@@ -375,7 +375,7 @@ Bitmap RenderContext2::GetBitmap(Point const& rSrcPt, Size const& rSize) const
                         SAL_WARN_IF((nWidth <= 0) || (nHeight <= 0), "vcl.gdi",
                                     "zero or negative width or height");
 
-                        aBmp = aVDev->GetBitmap(Point(), aVDev->GetOutputSizePixel());
+                        aBmp = aVDev->GetBitmap(Point(), aVDev->GetSize());
                     }
                     else
                     {
@@ -737,7 +737,7 @@ void RenderContext2::DrawDeviceAlphaBitmap(Bitmap const& rBmp, AlphaMask const& 
 
     Point aOutPt(LogicToPixel(rDestPt));
     Size aOutSz(LogicToPixel(rDestSize));
-    tools::Rectangle aDstRect(Point(), GetOutputSizePixel());
+    tools::Rectangle aDstRect(Point(), GetSize());
 
     const bool bHMirr = aOutSz.Width() < 0;
     const bool bVMirr = aOutSz.Height() < 0;

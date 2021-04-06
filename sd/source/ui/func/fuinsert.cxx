@@ -240,7 +240,7 @@ void FuInsertClipboard::DoExecute( SfxRequest&  )
     DrawViewShell* pDrViewSh = nullptr;
 
     if (!mpView->InsertData( aDataHelper,
-                            mpWindow->PixelToLogic( ::tools::Rectangle( Point(), mpWindow->GetOutputSizePixel() ).Center() ),
+                            mpWindow->PixelToLogic( ::tools::Rectangle( Point(), mpWindow->GetSize() ).Center() ),
                             nAction, false, nFormatId ))
     {
         pDrViewSh = dynamic_cast<DrawViewShell*>(mpViewShell);
@@ -631,7 +631,7 @@ void FuInsertOLE::DoExecute( SfxRequest& rReq )
                             mpViewShell->ActivateObject(pObj, embed::EmbedVerbs::MS_OLEVERB_SHOW);
                         }
 
-                        Size aVisSizePixel = mpWindow->GetOutputSizePixel();
+                        Size aVisSizePixel = mpWindow->GetSize();
                         ::tools::Rectangle aVisAreaWin = mpWindow->PixelToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
                         mpViewShell->VisAreaChanged(aVisAreaWin);
                         mpDocSh->SetVisArea(aVisAreaWin);
@@ -719,7 +719,7 @@ void FuInsertAVMedia::DoExecute( SfxRequest& rReq )
 
         if( mpWindow )
         {
-            aPos = mpWindow->PixelToLogic( ::tools::Rectangle( aPos, mpWindow->GetOutputSizePixel() ).Center() );
+            aPos = mpWindow->PixelToLogic( ::tools::Rectangle( aPos, mpWindow->GetSize() ).Center() );
             aPos.AdjustX( -(aSize.Width() >> 1) );
             aPos.AdjustY( -(aSize.Height() >> 1) );
         }

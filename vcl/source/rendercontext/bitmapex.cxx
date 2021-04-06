@@ -471,8 +471,7 @@ RenderContext2::ReduceBitmapExVisibleRange(basegfx::B2DHomMatrix const& rFullTra
 
     // now get discrete target pixels; start with OutDev pixel size and evtl.
     // intersect with active clipping area
-    basegfx::B2DRange aOutPixel(0.0, 0.0, GetOutputSizePixel().Width(),
-                                GetOutputSizePixel().Height());
+    basegfx::B2DRange aOutPixel(0.0, 0.0, GetSize().Width(), GetSize().Height());
 
     if (IsClipRegion())
     {

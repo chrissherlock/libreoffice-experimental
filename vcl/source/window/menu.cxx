@@ -2233,12 +2233,12 @@ void Menu::ImplFillLayoutData() const
     mpLayoutData.reset(new MenuLayoutData);
     if (IsMenuBar())
     {
-        ImplPaint(*pWindow, pWindow->GetOutputSizePixel(), 0, 0, nullptr, false, true); // FIXME
+        ImplPaint(*pWindow, pWindow->GetSize(), 0, 0, nullptr, false, true); // FIXME
     }
     else
     {
         MenuFloatingWindow* pFloat = static_cast<MenuFloatingWindow*>(pWindow.get());
-        ImplPaint(*pWindow, pWindow->GetOutputSizePixel(), pFloat->nScrollerHeight, pFloat->ImplGetStartY(),
+        ImplPaint(*pWindow, pWindow->GetSize(), pFloat->nScrollerHeight, pFloat->ImplGetStartY(),
                   nullptr, false, true); //FIXME
     }
 }

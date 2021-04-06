@@ -607,7 +607,7 @@ void SystemWindow::ImplMoveToScreen( tools::Long& io_rX, tools::Long& io_rY, too
     {
         // calculate absolute screen pos here, since that is what is contained in WindowState
         Point aParentAbsPos( pParent->OutputToAbsoluteScreenPixel( Point(0,0) ) );
-        Size aParentSizePixel( pParent->GetOutputSizePixel() );
+        Size aParentSizePixel( pParent->GetSize() );
         Point aPos( (aParentSizePixel.Width() - i_nWidth) / 2,
                     (aParentSizePixel.Height() - i_nHeight) / 2 );
         io_rX = aParentAbsPos.X() + aPos.X();
@@ -1119,7 +1119,7 @@ VclPtr<VirtualDevice> SystemWindow::createScreenshot()
     ToTop();
     ensureRepaint();
 
-    Size aSize(GetOutputSizePixel());
+    Size aSize(GetSize());
 
     VclPtr<VirtualDevice> xOutput(VclPtr<VirtualDevice>::Create(DeviceFormat::DEFAULT));
     xOutput->SetOutputSizePixel(aSize);

@@ -127,7 +127,7 @@ const tools::Long nSnappingPointsMinDist = nSnappingEpsilon; // minimum distance
 
 sal_uInt16 ScZoomSlider::Offset2Zoom( tools::Long nOffset ) const
 {
-    Size aSliderWindowSize = GetOutputSizePixel();
+    Size aSliderWindowSize = GetSize();
     const tools::Long nControlWidth = aSliderWindowSize.Width();
     sal_uInt16 nRet = 0;
 
@@ -179,7 +179,7 @@ sal_uInt16 ScZoomSlider::Offset2Zoom( tools::Long nOffset ) const
 
 tools::Long ScZoomSlider::Zoom2Offset( sal_uInt16 nCurrentZoom ) const
 {
-    Size aSliderWindowSize = GetOutputSizePixel();
+    Size aSliderWindowSize = GetSize();
     const tools::Long nControlWidth = aSliderWindowSize.Width();
     tools::Long  nRect = nSliderXOffset;
 
@@ -242,7 +242,7 @@ ScZoomSlider::ScZoomSlider(const css::uno::Reference< css::frame::XDispatchProvi
 
 bool ScZoomSlider::MouseButtonDown( const MouseEvent& rMEvt )
 {
-    Size aSliderWindowSize = GetOutputSizePixel();
+    Size aSliderWindowSize = GetSize();
 
     const Point aPoint = rMEvt.GetPosPixel();
 
@@ -297,7 +297,7 @@ bool ScZoomSlider::MouseButtonDown( const MouseEvent& rMEvt )
 
 bool ScZoomSlider::MouseMove( const MouseEvent& rMEvt )
 {
-    Size aSliderWindowSize   = GetOutputSizePixel();
+    Size aSliderWindowSize   = GetSize();
     const tools::Long nControlWidth = aSliderWindowSize.Width();
     const short nButtons     = rMEvt.GetButtons();
 
@@ -392,7 +392,7 @@ void ScZoomSlider::DoPaint(vcl::RenderContext& rRenderContext)
     if (mpImpl->mbOmitPaint)
         return;
 
-    Size aSliderWindowSize(GetOutputSizePixel());
+    Size aSliderWindowSize(GetSize());
     tools::Rectangle aRect(Point(0, 0), aSliderWindowSize);
 
     ScopedVclPtrInstance< VirtualDevice > pVDev(rRenderContext, DeviceFormat::DEFAULT, DeviceFormat::BITMASK);

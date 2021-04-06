@@ -1044,7 +1044,7 @@ void SfxSplitWindow::SetPinned_Impl( bool bOn )
         aPos = GetParent()->OutputToScreenPixel( aPos );
         SetFloatingPos( aPos );
         SetFloatingMode( true );
-        GetFloatingWindow()->SetOutputSizePixel( GetOutputSizePixel() );
+        GetFloatingWindow()->SetOutputSizePixel( GetSize() );
 
         if ( pEmptyWin->bFadeIn )
             Show();
@@ -1052,7 +1052,7 @@ void SfxSplitWindow::SetPinned_Impl( bool bOn )
     else
     {
         pEmptyWin->nState &= ~1;
-        SetOutputSizePixel( GetFloatingWindow()->GetOutputSizePixel() );
+        SetOutputSizePixel( GetFloatingWindow()->GetSize() );
         SetFloatingMode(false);
 
         if ( pEmptyWin->bFadeIn )

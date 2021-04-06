@@ -31,7 +31,7 @@ css::awt::DeviceInfo RenderContext2::GetCommonDeviceInfo(Size const& rDevSz) con
 
 css::awt::DeviceInfo RenderContext2::GetDeviceInfo() const
 {
-    css::awt::DeviceInfo aInfo = GetCommonDeviceInfo(GetOutputSizePixel());
+    css::awt::DeviceInfo aInfo = GetCommonDeviceInfo(GetSize());
 
     aInfo.LeftInset = 0;
     aInfo.TopInset = 0;

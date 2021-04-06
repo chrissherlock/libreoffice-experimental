@@ -85,7 +85,7 @@ PrintDialog::PrintPreviewWindow::~PrintPreviewWindow()
 
 void PrintDialog::PrintPreviewWindow::Resize()
 {
-    Size aNewSize(GetOutputSizePixel());
+    Size aNewSize(GetSize());
     tools::Long nTextHeight = GetDrawingArea()->get_text_height();
     // leave small space for decoration
     aNewSize.AdjustWidth( -(nTextHeight + 2) );
@@ -129,7 +129,7 @@ void PrintDialog::PrintPreviewWindow::Paint(vcl::RenderContext& rRenderContext, 
     rRenderContext.Erase();
 
     auto nTextHeight = rRenderContext.GetTextHeight();
-    Size aSize(GetOutputSizePixel());
+    Size aSize(GetSize());
     Point aOffset((aSize.Width()  - maPreviewSize.Width()  + nTextHeight) / 2,
                   (aSize.Height() - maPreviewSize.Height() + nTextHeight) / 2);
 
@@ -357,7 +357,7 @@ void PrintDialog::PrintPreviewWindow::preparePreviewBitmap()
 
     GDIMetaFile aMtf( maMtf );
 
-    Size aVDevSize( pPrerenderVDev->GetOutputSizePixel() );
+    Size aVDevSize( pPrerenderVDev->GetSize() );
     const Size aLogicSize( pPrerenderVDev->PixelToLogic( aVDevSize, MapMode( MapUnit::Map100thMM ) ) );
     Size aOrigSize( maOrigSize );
     if( aOrigSize.Width() < 1 )
@@ -419,7 +419,7 @@ void PrintDialog::ShowNupOrderWindow::Paint(vcl::RenderContext& rRenderContext, 
     aFont.SetFontSize(Size(0, 24));
     rRenderContext.SetFont(aFont);
     Size aSampleTextSize(rRenderContext.GetTextWidth(OUString::number(nPages + 1)), rRenderContext.GetTextHeight());
-    Size aOutSize(GetOutputSizePixel());
+    Size aOutSize(GetSize());
     Size aSubSize(aOutSize.Width() / mnColumns, aOutSize.Height() / mnRows);
     // calculate font size: shrink the sample text so it fits
     double fX = double(aSubSize.Width()) / double(aSampleTextSize.Width());

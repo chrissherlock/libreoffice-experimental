@@ -476,7 +476,7 @@ void Button::ImplDrawAlignedImage(OutputDevice* pDev, Point& rPos,
 void Button::ImplSetFocusRect(const tools::Rectangle &rFocusRect)
 {
     tools::Rectangle aFocusRect = rFocusRect;
-    tools::Rectangle aOutputRect(Point(), GetOutputSizePixel());
+    tools::Rectangle aOutputRect(Point(), GetSize());
 
     if (!aFocusRect.IsEmpty())
     {
@@ -723,7 +723,7 @@ void PushButton::ImplDrawPushButtonFrame(vcl::RenderContext& rRenderContext,
 bool PushButton::ImplHitTestPushButton( vcl::Window const * pDev,
                                         const Point& rPos )
 {
-    tools::Rectangle   aTestRect( Point(), pDev->GetOutputSizePixel() );
+    tools::Rectangle   aTestRect( Point(), pDev->GetSize() );
 
     return aTestRect.IsInside( rPos );
 }
@@ -894,7 +894,7 @@ void PushButton::ImplDrawPushButton(vcl::RenderContext& rRenderContext)
     HideFocus();
 
     DrawButtonFlags nButtonStyle = GetButtonState();
-    Size aOutSz(GetOutputSizePixel());
+    Size aOutSz(GetSize());
     tools::Rectangle aRect(Point(), aOutSz);
     tools::Rectangle aInRect = aRect;
     bool bNativeOK = false;
@@ -1497,7 +1497,7 @@ bool PushButton::PreNotify( NotifyEvent& rNEvt )
                 if(aCtrlType == ControlType::Combobox)
                 {
                     // only paint the button part to avoid flickering of the combobox text
-                    tools::Rectangle aClipRect( Point(), GetOutputSizePixel() );
+                    tools::Rectangle aClipRect( Point(), GetSize() );
                     aClipRect.SetPos(pBorder->ScreenToOutputPixel(OutputToScreenPixel(aClipRect.TopLeft())));
                     pBorder->Invalidate( aClipRect );
                 }
@@ -1659,7 +1659,7 @@ void PushButton::ShowFocus(const tools::Rectangle& rRect)
     {
         PushButtonValue aControlValue;
         aControlValue.mbIsAction = isAction();
-        tools::Rectangle aInRect(Point(), GetOutputSizePixel());
+        tools::Rectangle aInRect(Point(), GetSize());
         GetOutDev()->DrawNativeControl(ControlType::Pushbutton, ControlPart::Focus, aInRect,
                                        ControlState::FOCUSED, aControlValue, OUString());
     }
@@ -2135,7 +2135,7 @@ void RadioButton::ImplDrawRadioButton(vcl::RenderContext& rRenderContext)
     aImageSize.setHeight( CalcZoom(aImageSize.Height()) );
 
     // Draw control text
-    ImplDraw(&rRenderContext, DrawFlags::NONE, Point(), GetOutputSizePixel(),
+    ImplDraw(&rRenderContext, DrawFlags::NONE, Point(), GetSize(),
              aImageSize, maStateRect, maMouseRect);
 
     if (!maImage && HasFocus())
@@ -3077,7 +3077,7 @@ void CheckBox::ImplDrawCheckBox(vcl::RenderContext& rRenderContext)
 
     HideFocus();
 
-    ImplDraw(&rRenderContext, DrawFlags::NONE, Point(), GetOutputSizePixel(),
+    ImplDraw(&rRenderContext, DrawFlags::NONE, Point(), GetSize(),
              aImageSize, maStateRect, maMouseRect);
 
     ImplDrawCheckBoxState(rRenderContext);

@@ -285,7 +285,7 @@ void BrowseBox::InsertHandleColumn( sal_uLong nWidth )
     {
         pDataWin->pHeaderBar->SetPosSizePixel(
                     Point(nWidth, 0),
-                    Size( GetOutputSizePixel().Width() - nWidth, GetTitleHeight() )
+                    Size( GetSize().Width() - nWidth, GetTitleHeight() )
                     );
     }
 
@@ -545,7 +545,7 @@ void BrowseBox::SetColumnTitle( sal_uInt16 nItemId, const OUString& rTitle )
         // redraw visible columns
         if ( GetUpdateMode() && ( pCol->IsFrozen() || nItemPos > nFirstCol ) )
             Invalidate( tools::Rectangle( Point(0,0),
-                Size( GetOutputSizePixel().Width(), GetTitleHeight() ) ) );
+                Size( GetSize().Width(), GetTitleHeight() ) ) );
     }
 
     if ( isAccessibleAlive() )
@@ -712,7 +712,7 @@ void BrowseBox::RemoveColumn( sal_uInt16 nItemId )
         {
             pDataWin->pHeaderBar->SetPosSizePixel(
                         Point(0, 0),
-                        Size( GetOutputSizePixel().Width(), GetTitleHeight() )
+                        Size( GetSize().Width(), GetTitleHeight() )
                         );
         }
     }
@@ -892,7 +892,7 @@ sal_Int32 BrowseBox::ScrollColumns( sal_Int32 nCols )
             tools::Long nFrozenWidth = GetFrozenWidth();
 
             tools::Rectangle aScrollRect(  Point( nFrozenWidth + nDelta, 0 ),
-                                    Size ( GetOutputSizePixel().Width() - nFrozenWidth - nDelta,
+                                    Size ( GetSize().Width() - nFrozenWidth - nDelta,
                                            GetTitleHeight() - 1
                                          ) );
 
@@ -910,7 +910,7 @@ sal_Int32 BrowseBox::ScrollColumns( sal_Int32 nCols )
             }
 
             // scroll the data-area
-            aScrollRect.SetBottom( pDataWin->GetOutputSizePixel().Height() );
+            aScrollRect.SetBottom( pDataWin->GetSize().Height() );
 
             // actually scroll
             pDataWin->Scroll( -nDelta, 0, aScrollRect, SCROLL_FLAGS );
@@ -938,7 +938,7 @@ sal_Int32 BrowseBox::ScrollColumns( sal_Int32 nCols )
             tools::Long nFrozenWidth = GetFrozenWidth();
 
             tools::Rectangle aScrollRect(  Point(  nFrozenWidth, 0 ),
-                                    Size (  GetOutputSizePixel().Width() - nFrozenWidth,
+                                    Size (  GetSize().Width() - nFrozenWidth,
                                             GetTitleHeight() - 1
                                          ) );
 
@@ -949,7 +949,7 @@ sal_Int32 BrowseBox::ScrollColumns( sal_Int32 nCols )
             }
 
             // scroll the data-area
-            aScrollRect.SetBottom( pDataWin->GetOutputSizePixel().Height() );
+            aScrollRect.SetBottom( pDataWin->GetSize().Height() );
             pDataWin->Scroll( nDelta, 0, aScrollRect, SCROLL_FLAGS );
         }
     }
@@ -959,7 +959,7 @@ sal_Int32 BrowseBox::ScrollColumns( sal_Int32 nCols )
         {
             Invalidate( tools::Rectangle(
                 Point( GetFrozenWidth(), 0 ),
-                Size( GetOutputSizePixel().Width(), GetTitleHeight() ) ) );
+                Size( GetSize().Width(), GetTitleHeight() ) ) );
             pDataWin->Invalidate( tools::Rectangle(
                 Point( GetFrozenWidth(), 0 ),
                 pDataWin->GetSizePixel() ) );
@@ -1015,7 +1015,7 @@ sal_Int32 BrowseBox::ScrollRows( sal_Int32 nRows )
         return 0;
 
     sal_uInt16 nVisibleRows =
-        static_cast<sal_uInt16>(pDataWin->GetOutputSizePixel().Height() / GetDataRowHeight() + 1);
+        static_cast<sal_uInt16>(pDataWin->GetSize().Height() / GetDataRowHeight() + 1);
 
     VisibleRowsChanged(nNewTopRow, nVisibleRows);
 
@@ -1157,7 +1157,7 @@ void BrowseBox::RowInserted( sal_Int32 nRow, sal_Int32 nNumRows, bool bDoPaint, 
 
     // must we paint the new rows?
     sal_Int32 nOldCurRow = nCurRow;
-    Size aSz = pDataWin->GetOutputSizePixel();
+    Size aSz = pDataWin->GetSize();
     if ( bDoPaint && nRow >= nTopRow &&
          nRow <= nTopRow + aSz.Height() / GetDataRowHeight() )
     {
@@ -1300,7 +1300,7 @@ void BrowseBox::RowRemoved( sal_Int32 nRow, sal_Int32 nNumRows, bool bDoPaint )
         nCurRow = nRowCount-1;
 
     // is the deleted row visible?
-    Size aSz = pDataWin->GetOutputSizePixel();
+    Size aSz = pDataWin->GetSize();
     if ( nRow >= nTopRow &&
          nRow <= nTopRow + aSz.Height() / GetDataRowHeight() )
     {
@@ -1661,7 +1661,7 @@ void BrowseBox::SelectAll()
     {
         tools::Rectangle aHighlightRect;
         sal_uInt16 nVisibleRows =
-            static_cast<sal_uInt16>(pDataWin->GetOutputSizePixel().Height() / GetDataRowHeight() + 1);
+            static_cast<sal_uInt16>(pDataWin->GetSize().Height() / GetDataRowHeight() + 1);
         for ( sal_Int32 nRow = std::max<sal_Int32>( nTopRow, uRow.pSel->FirstSelected() );
               nRow != BROWSER_ENDOFSELECTION && nRow < nTopRow + nVisibleRows;
               nRow = uRow.pSel->NextSelected() )
@@ -1819,7 +1819,7 @@ void BrowseBox::SelectColumnPos( sal_uInt16 nNewColPos, bool _bSelect, bool bMak
         tools::Rectangle aRect(
             Point( aFieldRectPix.Left() - MIN_COLUMNWIDTH, 0 ),
             Size( mvCols[ nNewColPos ]->Width(),
-                  pDataWin->GetOutputSizePixel().Height() ) );
+                  pDataWin->GetSize().Height() ) );
         pDataWin->Invalidate( aRect );
         if ( !bSelecting )
             Select();
@@ -1978,7 +1978,7 @@ bool BrowseBox::IsFieldVisible( sal_Int32 nRow, sal_uInt16 nColumnId,
         return false;
 
     // get the visible area
-    tools::Rectangle aOutRect( Point(0, 0), pDataWin->GetOutputSizePixel() );
+    tools::Rectangle aOutRect( Point(0, 0), pDataWin->GetSize() );
 
     if ( bCompletely )
         // test if the field is completely visible
@@ -2020,8 +2020,8 @@ tools::Rectangle BrowseBox::GetRowRectPixel( sal_Int32 nRow  ) const
         return aRect;
     aRect = tools::Rectangle(
         Point( 0, GetDataRowHeight() * (nRow-nTopRow) ),
-        Size( pDataWin->GetOutputSizePixel().Width(), GetDataRowHeight() ) );
-    if ( aRect.Top() > pDataWin->GetOutputSizePixel().Height() )
+        Size( pDataWin->GetSize().Width(), GetDataRowHeight() ) );
+    if ( aRect.Top() > pDataWin->GetSize().Height() )
         // row is below visible area
         return aRect;
 
@@ -2076,7 +2076,7 @@ sal_Int32 BrowseBox::GetRowAtYPosPixel( tools::Long nY, bool bRelToBrowser ) con
     }
 
     // no row there (e.g. in the header)
-    if ( nY < 0 || nY >= pDataWin->GetOutputSizePixel().Height() )
+    if ( nY < 0 || nY >= pDataWin->GetSize().Height() )
         return -1;
 
     return nY / GetDataRowHeight() + nTopRow;
@@ -2126,7 +2126,7 @@ tools::Rectangle BrowseBox::GetControlArea() const
     auto nEndRight = aHScroll->GetPosPixel().X();
 
     return tools::Rectangle(
-        Point( 0, GetOutputSizePixel().Height() - nHeight ),
+        Point( 0, GetSize().Height() - nHeight ),
         Size( nEndRight, nHeight ) );
 }
 
@@ -2380,7 +2380,7 @@ void BrowseBox::GetFocus()
 
 sal_uInt16 BrowseBox::GetVisibleRows() const
 {
-    return static_cast<sal_uInt16>((pDataWin->GetOutputSizePixel().Height() - 1 )/ GetDataRowHeight() + 1);
+    return static_cast<sal_uInt16>((pDataWin->GetSize().Height() - 1 )/ GetDataRowHeight() + 1);
 }
 
 BrowserDataWin& BrowseBox::GetDataWindow() const

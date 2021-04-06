@@ -390,7 +390,6 @@ public:
     virtual void EnableRTL(bool bEnable = true);
     bool IsRTLEnabled() const;
 
-    Geometry const& GetGeometry() const { return maGeometry; }
     ComplexTextLayoutFlags GetLayoutMode() const;
     virtual void SetLayoutMode(ComplexTextLayoutFlags nTextLayoutMode);
 
@@ -545,6 +544,8 @@ public:
     virtual void SetMapMode(MapMode const& rNewMapMode);
     virtual void SetRelativeMapMode(MapMode const& rNewMapMode);
 
+    Geometry const& GetGeometry() const { return maGeometry; }
+
     /** Get the output device's DPI x-axis value.
 
      @returns x-axis DPI value
@@ -563,7 +564,7 @@ public:
     sal_Int32 GetDPIScalePercentage() const;
     void SetDPIScalePercentage(sal_Int32 nPercent);
 
-    Size GetOutputSizePixel() const;
+    Size GetSize() const;
     void SetSizeInPixels(Size const& rSize);
     tools::Long GetOutputWidthPixel() const;
     tools::Long GetOutputHeightPixel() const;

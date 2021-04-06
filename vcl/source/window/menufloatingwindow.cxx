@@ -188,7 +188,7 @@ tools::Long MenuFloatingWindow::ImplGetStartY() const
 
 vcl::Region MenuFloatingWindow::ImplCalcClipRegion() const
 {
-    Size aOutSz = GetOutputSizePixel();
+    Size aOutSz = GetSize();
     tools::Rectangle aRect( Point(), aOutSz );
     aRect.AdjustTop(nScrollerHeight );
     aRect.AdjustBottom( -nScrollerHeight );
@@ -217,7 +217,7 @@ void MenuFloatingWindow::ImplHighlightItem( const MouseEvent& rMEvt, bool bMBDow
 
     tools::Long nY = GetInitialItemY();
     tools::Long nMouseY = rMEvt.GetPosPixel().Y();
-    Size aOutSz = GetOutputSizePixel();
+    Size aOutSz = GetSize();
     if ( ( nMouseY >= nY ) && ( nMouseY < aOutSz.Height() ) )
     {
         bool bHighlighted = false;
@@ -235,7 +235,7 @@ void MenuFloatingWindow::ImplHighlightItem( const MouseEvent& rMEvt, bool bMBDow
                     if ( pItemData->nBits & MenuItemBits::POPUPSELECT )
                     {
                         // only when clicked over the arrow...
-                        Size aSz = GetOutputSizePixel();
+                        Size aSz = GetSize();
                         tools::Long nFontHeight = GetTextHeight();
                         bPopupArea = ( rMEvt.GetPosPixel().X() >= ( aSz.Width() - nFontHeight - nFontHeight/4 ) );
                     }
@@ -346,7 +346,7 @@ IMPL_LINK( MenuFloatingWindow, HighlightChanged, Timer*, pTimer, void )
         nY += pData->aSz.Height();
     }
     pData = pMenu->pItemList->GetDataFromPos( nHighlightedItem );
-    Size MySize = GetOutputSizePixel();
+    Size MySize = GetSize();
     Point aItemTopLeft( 0, nY );
     Point aItemBottomRight( aItemTopLeft );
     aItemBottomRight.AdjustX(MySize.Width() );
@@ -586,7 +586,7 @@ void MenuFloatingWindow::MouseButtonUp( const MouseEvent& rMEvt )
     else if ( ( pData->nBits & MenuItemBits::POPUPSELECT ) && ( nHighlightedItem == _nMBDownPos ) && ( rMEvt.GetClicks() == 2 ) )
     {
         // not when clicked over the arrow...
-        Size aSz = GetOutputSizePixel();
+        Size aSz = GetSize();
         tools::Long nFontHeight = GetTextHeight();
         if ( rMEvt.GetPosPixel().X() < ( aSz.Width() - nFontHeight - nFontHeight/4 ) )
             EndExecute();
@@ -678,7 +678,7 @@ void MenuFloatingWindow::ImplScroll( bool bUp )
                 Invalidate();
             }
 
-            tools::Long nHeight = GetOutputSizePixel().Height();
+            tools::Long nHeight = GetSize().Height();
             sal_uInt16 nLastVisible;
             static_cast<PopupMenu*>(pMenu.get())->ImplCalcVisEntries( nHeight, nFirstEntry, &nLastVisible );
             if ( pMenu->ImplGetNextVisible( nLastVisible ) == ITEMPOS_INVALID )
@@ -696,7 +696,7 @@ void MenuFloatingWindow::ImplScroll( bool bUp )
 
 void MenuFloatingWindow::ImplScroll( const Point& rMousePos )
 {
-    Size aOutSz = GetOutputSizePixel();
+    Size aOutSz = GetSize();
 
     tools::Long nY = nScrollerHeight;
     tools::Long nMouseY = rMousePos.Y();
@@ -834,7 +834,7 @@ void MenuFloatingWindow::RenderHighlightItem(vcl::RenderContext& rRenderContext,
     if (!pMenu)
         return;
 
-    Size aSz(GetOutputSizePixel());
+    Size aSz(GetSize());
 
     tools::Long nX = 0;
     tools::Long nStartY;
@@ -864,7 +864,7 @@ void MenuFloatingWindow::RenderHighlightItem(vcl::RenderContext& rRenderContext,
 
                 if (rRenderContext.IsNativeControlSupported(ControlType::MenuPopup, ControlPart::Entire))
                 {
-                    Size aPxSize(GetOutputSizePixel());
+                    Size aPxSize(GetSize());
                     rRenderContext.Push(PushFlags::CLIPREGION);
                     rRenderContext.IntersectClipRegion(tools::Rectangle(Point(nX, nY), Size(aSz.Width(), pData->aSz.Height())));
                     tools::Rectangle aCtrlRect(Point(nX, 0), Size(aPxSize.Width()-nX, aPxSize.Height()));
@@ -901,7 +901,7 @@ void MenuFloatingWindow::RenderHighlightItem(vcl::RenderContext& rRenderContext,
 
                     rRenderContext.DrawRect(aItemRect);
                 }
-                pMenu->ImplPaint(rRenderContext, GetOutputSizePixel(), nScrollerHeight, nStartY, pData, true/*bHighlight*/);
+                pMenu->ImplPaint(rRenderContext, GetSize(), nScrollerHeight, nStartY, pData, true/*bHighlight*/);
                 if (bRestoreLineColor)
                     rRenderContext.SetLineColor(oldLineColor);
             }
@@ -918,7 +918,7 @@ tools::Rectangle MenuFloatingWindow::ImplGetItemRect( sal_uInt16 nPos )
         return tools::Rectangle();
 
     tools::Rectangle aRect;
-    Size    aSz = GetOutputSizePixel();
+    Size    aSz = GetSize();
     tools::Long    nStartY = ImplGetStartY();
     tools::Long    nY = nScrollerHeight+nStartY;
 
@@ -1014,7 +1014,7 @@ void MenuFloatingWindow::ImplCursorUpDown( bool bUp, bool bHomeEnd )
                 while ( n < nFirstEntry )
                     ImplScroll( true );
 
-                Size aOutSz = GetOutputSizePixel();
+                Size aOutSz = GetSize();
                 sal_uInt16 nLastVisible;
                 static_cast<PopupMenu*>(pMenu.get())->ImplCalcVisEntries( aOutSz.Height(), nFirstEntry, &nLastVisible );
                 while ( n > nLastVisible )
@@ -1217,7 +1217,7 @@ void MenuFloatingWindow::Paint(vcl::RenderContext& rRenderContext, const tools::
     {
         pBuffer->SetClipRegion();
         tools::Long nX = 0;
-        Size aPxSize(GetOutputSizePixel());
+        Size aPxSize(GetSize());
         aPxSize.AdjustWidth( -nX );
         ImplControlValue aVal(pMenu->nTextPos - GUTTERBORDER);
         pBuffer->DrawNativeControl(ControlType::MenuPopup, ControlPart::Entire,
@@ -1231,7 +1231,7 @@ void MenuFloatingWindow::Paint(vcl::RenderContext& rRenderContext, const tools::
         ImplDrawScroller(*pBuffer, false);
     }
     pBuffer->SetFillColor(rRenderContext.GetSettings().GetStyleSettings().GetMenuColor());
-    pMenu->ImplPaint(*pBuffer, GetOutputSizePixel(), nScrollerHeight, ImplGetStartY());
+    pMenu->ImplPaint(*pBuffer, GetSize(), nScrollerHeight, ImplGetStartY());
     if (nHighlightedItem != ITEMPOS_INVALID)
         RenderHighlightItem(*pBuffer, nHighlightedItem);
 
@@ -1246,7 +1246,7 @@ void MenuFloatingWindow::ImplDrawScroller(vcl::RenderContext& rRenderContext, bo
 
     rRenderContext.SetClipRegion();
 
-    Size aOutSz(GetOutputSizePixel());
+    Size aOutSz(GetSize());
     tools::Long nY = bUp ? 0 : (aOutSz.Height() - nScrollerHeight);
     tools::Long nX = 0;
     tools::Rectangle aRect(Point(nX, nY), Size(aOutSz.Width() - nX, nScrollerHeight));

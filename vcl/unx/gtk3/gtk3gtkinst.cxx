@@ -3767,7 +3767,7 @@ public:
     void Layout()
     {
         if (vcl::Window *pChild = GetWindow(GetWindowType::FirstChild))
-            pChild->SetPosSizePixel(Point(0, 0), GetSizePixel());
+            pChild->SetPosSizePixel(Point(0, 0), ());
     }
 
     virtual void Resize() override

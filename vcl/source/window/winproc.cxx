@@ -209,7 +209,7 @@ static bool ImplCallCommand( const VclPtr<vcl::Window>& pChild, CommandEventId n
         else
         {
             // simulate mouseposition at center of window
-            Size aSize( pChild->GetOutputSizePixel() );
+            Size aSize( pChild->GetSize() );
             aPos = Point( aSize.getWidth()/2, aSize.getHeight()/2 );
         }
     }
@@ -1692,7 +1692,7 @@ void ImplHandleResize( vcl::Window* pWindow, tools::Long nNewWidth, tools::Long 
             if (pWindow->SupportsDoubleBuffering() && pWindow->ImplGetWindowImpl()->mbFrame)
             {
                 // Propagate resize for the frame's buffer.
-                pWindow->ImplGetWindowImpl()->mpFrameData->mpBuffer->SetOutputSizePixel(pWindow->GetOutputSizePixel());
+                pWindow->ImplGetWindowImpl()->mpFrameData->mpBuffer->SetOutputSizePixel(pWindow->GetSize());
             }
         }
     }

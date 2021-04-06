@@ -1426,7 +1426,7 @@ public:
         virtual void RenderRegion(OutputDevice &rDev, tools::Rectangle r,
                                   const RenderContext &) override
         {
-            Bitmap aBitmap(rDev.GetBitmap(Point(0,0),rDev.GetOutputSizePixel()));
+            Bitmap aBitmap(rDev.GetBitmap(Point(0,0),rDev.GetSize()));
             aBitmap.Scale(r.GetSize(), BmpScaleFlag::BestQuality);
             rDev.DrawBitmap(r.TopLeft(), aBitmap);
         }
@@ -1473,7 +1473,7 @@ public:
         aCtx.mbVDev = bVDev;
         aCtx.mpDemoRenderer = this;
         aCtx.maSize = aSize;
-        tools::Rectangle aWholeWin(Point(0,0), rDev.GetOutputSizePixel());
+        tools::Rectangle aWholeWin(Point(0,0), rDev.GetSize());
 
         drawBackground(rDev, aWholeWin);
 
@@ -1971,7 +1971,7 @@ public:
     }
     virtual void Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle&) override
     {
-        tools::Rectangle aWholeSize(Point(0, 0),GetOutputSizePixel());
+        tools::Rectangle aWholeSize(Point(0, 0),GetSize());
         vcl::Region aClip(aWholeSize);
         tools::Rectangle aExclude(tools::Rectangle(Point(50,50),Size(100,100)));
         aClip.Exclude(aExclude);
@@ -2029,7 +2029,7 @@ class DemoPopup : public FloatingWindow
 
     virtual void Paint(vcl::RenderContext& /*rRenderContext*/, const tools::Rectangle&) override
     {
-        Size aSize = GetOutputSizePixel();
+        Size aSize = GetSize();
         tools::Rectangle aTextRect(Point(6, 6), aSize);
 
         SetTextColor(COL_BLACK);

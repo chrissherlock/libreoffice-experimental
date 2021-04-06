@@ -256,7 +256,7 @@ void RenderContext2::EmulateDrawTransparent(tools::PolyPolygon const& rPolyPoly,
 
     tools::PolyPolygon aPolyPoly(LogicToPixel(rPolyPoly));
     tools::Rectangle aPolyRect(aPolyPoly.GetBoundRect());
-    tools::Rectangle aDstRect(Point(), GetOutputSizePixel());
+    tools::Rectangle aDstRect(Point(), GetSize());
 
     aDstRect.Intersection(aPolyRect);
 

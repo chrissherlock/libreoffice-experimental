@@ -115,7 +115,7 @@ void ScreenshotTest::saveScreenshot(VclAbstractDialog const & rDialog)
 void ScreenshotTest::saveScreenshot(weld::Window& rDialog)
 {
     VclPtr<VirtualDevice> xDialogSurface(rDialog.screenshot());
-    const BitmapEx aScreenshot(xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel()));
+    const BitmapEx aScreenshot(xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSize()));
 
     if (!aScreenshot.IsEmpty())
     {

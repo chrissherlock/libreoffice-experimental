@@ -320,7 +320,7 @@ awt::Rectangle SAL_CALL ValueItemAcc::getBounds()
     if( mpParent )
     {
         tools::Rectangle   aRect( mpParent->mrParent.GetItemRect(mpParent->mnId) );
-        tools::Rectangle   aParentRect( Point(), mpParent->mrParent.GetOutputSizePixel() );
+        tools::Rectangle   aParentRect( Point(), mpParent->mrParent.GetSize() );
 
         aRect.Intersection( aParentRect );
 
@@ -743,7 +743,7 @@ awt::Rectangle SAL_CALL ValueSetAcc::getBounds()
     ThrowIfDisposed();
     const SolarMutexGuard aSolarGuard;
     const Point         aOutPos;
-    const Size          aOutSize( mpParent->GetOutputSizePixel() );
+    const Size          aOutSize( mpParent->GetSize() );
     awt::Rectangle      aRet;
 
     aRet.X = aOutPos.X();

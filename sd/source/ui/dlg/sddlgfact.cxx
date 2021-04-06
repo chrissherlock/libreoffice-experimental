@@ -58,7 +58,7 @@ short SdAbstractGenericDialog_Impl::Execute()
 BitmapEx SdAbstractGenericDialog_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSize());
 }
 
 OString SdAbstractGenericDialog_Impl::GetScreenshotId() const
@@ -164,7 +164,7 @@ bool AbstractHeaderFooterDialog_Impl::StartExecuteAsync(AsyncContext &rCtx)
 BitmapEx AbstractHeaderFooterDialog_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSize());
 }
 
 OString AbstractHeaderFooterDialog_Impl::GetScreenshotId() const
@@ -195,7 +195,7 @@ short AbstractBreakDlg_Impl::Execute()
 BitmapEx AbstractBreakDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSize());
 }
 
 OString AbstractBreakDlg_Impl::GetScreenshotId() const
@@ -216,7 +216,7 @@ short AbstractMasterLayoutDialog_Impl::Execute()
 BitmapEx AbstractMasterLayoutDialog_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSize());
 }
 
 OString AbstractMasterLayoutDialog_Impl::GetScreenshotId() const
@@ -232,7 +232,7 @@ void AbstractCopyDlg_Impl::GetAttr( SfxItemSet& rOutAttrs )
 BitmapEx AbstractCopyDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSize());
 }
 
 OString AbstractCopyDlg_Impl::GetScreenshotId() const
@@ -253,7 +253,7 @@ bool AbstractSdCustomShowDlg_Impl::IsCustomShow() const
 BitmapEx AbstractSdCustomShowDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSize());
 }
 
 OString AbstractSdCustomShowDlg_Impl::GetScreenshotId() const
@@ -300,7 +300,7 @@ void SdAbstractTabController_Impl::SetText( const OUString& rStr )
 BitmapEx SdAbstractTabController_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSize());
 }
 
 OString SdAbstractTabController_Impl::GetScreenshotId() const
@@ -336,7 +336,7 @@ void AbstractBulletDialog_Impl::SetText( const OUString& rStr )
 BitmapEx AbstractBulletDialog_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSize());
 }
 
 OString AbstractBulletDialog_Impl::GetScreenshotId() const
@@ -372,7 +372,7 @@ void SdPresLayoutTemplateDlg_Impl::SetText( const OUString& rStr )
 BitmapEx SdPresLayoutTemplateDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSize());
 }
 
 OString SdPresLayoutTemplateDlg_Impl::GetScreenshotId() const
@@ -393,7 +393,7 @@ SfxItemSet AbstractSdModifyFieldDlg_Impl::GetItemSet()
 BitmapEx AbstractSdModifyFieldDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSize());
 }
 
 OString AbstractSdModifyFieldDlg_Impl::GetScreenshotId() const
@@ -429,7 +429,7 @@ void AbstractSdSnapLineDlg_Impl::SetText( const OUString& rStr )
 BitmapEx AbstractSdSnapLineDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSize());
 }
 
 OString AbstractSdSnapLineDlg_Impl::GetScreenshotId() const
@@ -450,7 +450,7 @@ void AbstractSdInsertLayerDlg_Impl::SetHelpId( const OString& rHelpId )
 BitmapEx AbstractSdInsertLayerDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSize());
 }
 
 OString AbstractSdInsertLayerDlg_Impl::GetScreenshotId() const
@@ -476,7 +476,7 @@ bool AbstractSdInsertPagesObjsDlg_Impl::IsRemoveUnnecessaryMasterPages() const
 BitmapEx AbstractSdInsertPagesObjsDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSize());
 }
 
 OString AbstractSdInsertPagesObjsDlg_Impl::GetScreenshotId() const
@@ -507,7 +507,7 @@ bool AbstractMorphDlg_Impl::IsOrientationFade() const
 BitmapEx AbstractMorphDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSize());
 }
 
 OString AbstractMorphDlg_Impl::GetScreenshotId() const
@@ -523,7 +523,7 @@ void AbstractSdStartPresDlg_Impl::GetAttr( SfxItemSet& rOutAttrs )
 BitmapEx AbstractSdStartPresDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSize());
 }
 
 OString AbstractSdStartPresDlg_Impl::GetScreenshotId() const
@@ -539,7 +539,7 @@ void AbstractSdPresLayoutDlg_Impl::GetAttr( SfxItemSet& rOutAttrs )
 BitmapEx AbstractSdPresLayoutDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSize());
 }
 
 OString AbstractSdPresLayoutDlg_Impl::GetScreenshotId() const
@@ -565,7 +565,7 @@ const GDIMetaFile& AbstractSdVectorizeDlg_Impl::GetGDIMetaFile() const
 BitmapEx AbstractSdVectorizeDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSize());
 }
 
 OString AbstractSdVectorizeDlg_Impl::GetScreenshotId() const
@@ -581,7 +581,7 @@ void AbstractSdPublishingDlg_Impl::GetParameterSequence( css::uno::Sequence< css
 BitmapEx AbstractSdPublishingDlg_Impl::createScreenshot() const
 {
     VclPtr<VirtualDevice> xDialogSurface(m_xDlg->getDialog()->screenshot());
-    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetOutputSizePixel());
+    return xDialogSurface->GetBitmapEx(Point(), xDialogSurface->GetSize());
 }
 
 OString AbstractSdPublishingDlg_Impl::GetScreenshotId() const

@@ -154,7 +154,7 @@ void RenderContext2::DrawBitmapWallpaper(tools::Long nX, tools::Long nY, tools::
                 aVDev->SetBackground(rWallpaper.GetColor());
                 aVDev->SetOutputSizePixel(Size(nBmpWidth, nBmpHeight));
                 aVDev->DrawBitmapEx(Point(), aBmpEx);
-                aBmpEx = aVDev->GetBitmapEx(Point(), aVDev->GetOutputSizePixel());
+                aBmpEx = aVDev->GetBitmapEx(Point(), aVDev->GetSize());
             }
 
             bDrawColorBackground = true;
@@ -297,7 +297,7 @@ void RenderContext2::DrawBitmapWallpaper(tools::Long nX, tools::Long nY, tools::
         {
             const Size aBmpSize(aBmpEx.GetSizePixel());
             const Point aTmpPoint;
-            const tools::Rectangle aOutRect(aTmpPoint, GetOutputSizePixel());
+            const tools::Rectangle aOutRect(aTmpPoint, GetSize());
             const tools::Rectangle aColRect(Point(nX, nY), Size(nWidth, nHeight));
 
             tools::Rectangle aWorkRect(0, 0, aOutRect.Right(), aPos.Y() - 1);

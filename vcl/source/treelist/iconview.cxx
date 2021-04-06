@@ -41,7 +41,7 @@ IconView::IconView(vcl::Window* pParent, WinBits nBits)
 
 void IconView::Resize()
 {
-    Size aBoxSize = Control::GetParent()->GetOutputSizePixel();
+    Size aBoxSize = Control::GetParent()->GetSize();
 
     if (!aBoxSize.Width())
         return;
@@ -104,7 +104,7 @@ void IconView::PaintEntry(SvTreeListEntry& rEntry, tools::Long nX, tools::Long n
     const Color aHighlightTextColor(rSettings.GetHighlightTextColor());
     aHighlightFont.SetColor(aHighlightTextColor);
 
-    Size aOutputSize = GetOutputSizePixel();
+    Size aOutputSize = GetSize();
     if (aOutputSize.getHeight() < nTempEntryHeight)
         nTempEntryHeight = aOutputSize.getHeight();
 

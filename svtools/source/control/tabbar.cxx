@@ -299,7 +299,7 @@ void ImplTabSizer::Tracking( const TrackingEvent& rTEvt )
 void ImplTabSizer::Paint( vcl::RenderContext& rRenderContext, const tools::Rectangle& )
 {
     DecorationView aDecoView(&rRenderContext);
-    tools::Rectangle aOutputRect(Point(0, 0), GetOutputSizePixel());
+    tools::Rectangle aOutputRect(Point(0, 0), GetSize());
     aDecoView.DrawHandle(aOutputRect);
 }
 
@@ -589,7 +589,7 @@ void TabBar::ImplInitSettings( bool bFont, bool bBackground )
         ApplyControlFont(*this, aToolFont);
 
         // Adapt font size if window too small?
-        while (GetTextHeight() > (GetOutputSizePixel().Height() - 1))
+        while (GetTextHeight() > (GetSize().Height() - 1))
         {
             vcl::Font aFont = GetFont();
             if (aFont.GetFontHeight() <= 6)
@@ -840,7 +840,7 @@ void TabBar::ImplShowPage( sal_uInt16 nPos )
         return;
 
     // calculate width
-    tools::Long nWidth = GetOutputSizePixel().Width();
+    tools::Long nWidth = GetSize().Width();
 
     auto& pItem = mpImpl->mpItemList[nPos];
     if (nPos < mnFirstPos)
@@ -1221,7 +1221,7 @@ void TabBar::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle& r
 
 void TabBar::Resize()
 {
-    Size aNewSize = GetOutputSizePixel();
+    Size aNewSize = GetSize();
 
     tools::Long nSizerWidth = 0;
 

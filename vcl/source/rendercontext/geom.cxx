@@ -44,7 +44,7 @@ void RenderContext2::SetDPIScalePercentage(sal_Int32 nPercent)
     maGeometry.SetDPIScalePercentage(std::max(100, nPercent));
 }
 
-Size RenderContext2::GetOutputSizePixel() const
+Size RenderContext2::GetSize() const
 {
     return Size(maGeometry.GetWidthInPixels(), maGeometry.GetHeightInPixels());
 }
@@ -83,9 +83,9 @@ Point RenderContext2::GetOutputOffPixel() const
 
 tools::Rectangle RenderContext2::GetOutputRectPixel() const
 {
-    return tools::Rectangle(GetOutputOffPixel(), GetOutputSizePixel());
+    return tools::Rectangle(GetOutputOffPixel(), GetSize());
 }
 
-Size RenderContext2::GetOutputSize() const { return PixelToLogic(GetOutputSizePixel()); }
+Size RenderContext2::GetOutputSize() const { return PixelToLogic(GetSize()); }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

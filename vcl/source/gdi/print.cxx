@@ -1792,7 +1792,7 @@ css::awt::DeviceInfo Printer::GetDeviceInfo() const
 {
     Size aDevSz = GetPaperSizePixel();
     css::awt::DeviceInfo aInfo = GetCommonDeviceInfo(aDevSz);
-    Size aOutSz = GetOutputSizePixel();
+    Size aOutSz = GetSize();
     Point aOffset = GetPageOffset();
     aInfo.LeftInset = aOffset.X();
     aInfo.TopInset = aOffset.Y();

@@ -265,7 +265,7 @@ bool VirtualDevice::InnerImplSetOutputSizePixel( const Size& rNewSize, bool bEra
 
     if ( !mpVirDev )
         return false;
-    else if ( rNewSize == GetOutputSizePixel() )
+    else if ( rNewSize == GetSize() )
     {
         if ( bErase )
             Erase();
@@ -366,7 +366,7 @@ bool VirtualDevice::ImplSetOutputSizePixel( const Size& rNewSize, bool bErase,
         if (meAlphaFormat != DeviceFormat::NONE)
         {
             // #110958# Setup alpha bitmap
-            if(mpAlphaVDev && mpAlphaVDev->GetOutputSizePixel() != rNewSize)
+            if(mpAlphaVDev && mpAlphaVDev->GetSize() != rNewSize)
             {
                 mpAlphaVDev.disposeAndClear();
             }

@@ -308,7 +308,7 @@ void ScCsvGrid::InitFonts()
 
 void ScCsvGrid::InitSizeData()
 {
-    maWinSize = GetOutputSizePixel();
+    maWinSize = GetSize();
     mpBackgrDev->SetOutputSizePixel( maWinSize );
     mpGridDev->SetOutputSizePixel( maWinSize );
     InvalidateGfx();

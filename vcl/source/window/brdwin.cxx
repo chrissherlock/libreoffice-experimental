@@ -812,7 +812,7 @@ bool ImplStdBorderWindowView::MouseButtonDown( const MouseEvent& rMEvt )
                 if ( rMEvt.GetClicks() == 1 )
                 {
                     Point aPos  = pBorderWindow->GetPosPixel();
-                    Size  aSize = pBorderWindow->GetOutputSizePixel();
+                    Size  aSize = pBorderWindow->GetSize();
                     maFrameData.mnTrackX      = aPos.X();
                     maFrameData.mnTrackY      = aPos.Y();
                     maFrameData.mnTrackWidth  = aSize.Width();
@@ -1089,7 +1089,7 @@ bool ImplStdBorderWindowView::Tracking( const TrackingEvent& rTEvt )
                 {
                     maFrameData.mnTrackX = aPos.X();
                     maFrameData.mnTrackY = aPos.Y();
-                    pBorderWindow->ShowTracking( tools::Rectangle( pBorderWindow->ScreenToOutputPixel( aPos ), pBorderWindow->GetOutputSizePixel() ), ShowTrackFlags::Big );
+                    pBorderWindow->ShowTracking( tools::Rectangle( pBorderWindow->ScreenToOutputPixel( aPos ), pBorderWindow->GetSize() ), ShowTrackFlags::Big );
                 }
             }
             else
@@ -1666,7 +1666,7 @@ void ImplBorderWindow::RequestHelp( const HelpEvent& rHEvt )
 
 void ImplBorderWindow::Resize()
 {
-    Size aSize = GetOutputSizePixel();
+    Size aSize = GetSize();
 
     vcl::Window* pClientWindow = ImplGetClientWindow();
 
@@ -1759,7 +1759,7 @@ void ImplBorderWindow::DataChanged( const DataChangedEvent& rDCEvt )
           (rDCEvt.GetFlags() & AllSettingsFlags::STYLE)) )
     {
         if ( !mpWindowImpl->mbFrame || (GetStyle() & (WB_OWNERDRAWDECORATION | WB_POPUP)) )
-            UpdateView( true, ImplGetWindow()->GetOutputSizePixel() );
+            UpdateView( true, ImplGetWindow()->GetSize() );
     }
 
     Window::DataChanged( rDCEvt );
@@ -1780,7 +1780,7 @@ void ImplBorderWindow::InitView()
         mpBorderView.reset(new ImplSmallBorderWindowView( this ));
     else
         mpBorderView.reset(new ImplStdBorderWindowView( this ));
-    Size aSize = GetOutputSizePixel();
+    Size aSize = GetSize();
     mpBorderView->Init( this, aSize.Width(), aSize.Height() );
 }
 
@@ -1839,7 +1839,7 @@ void ImplBorderWindow::InvalidateBorder()
     if ( !(nLeftBorder || nTopBorder || nRightBorder || nBottomBorder) )
         return;
 
-    tools::Rectangle   aWinRect( Point( 0, 0 ), GetOutputSizePixel() );
+    tools::Rectangle   aWinRect( Point( 0, 0 ), GetSize() );
     vcl::Region      aRegion( aWinRect );
     aWinRect.AdjustLeft(nLeftBorder );
     aWinRect.AdjustTop(nTopBorder );
@@ -1877,14 +1877,14 @@ void ImplBorderWindow::SetBorderStyle( WindowBorderStyle nStyle )
     if ( !mbFrameBorder && (mnBorderStyle != nStyle) )
     {
         mnBorderStyle = nStyle;
-        UpdateView( false, ImplGetWindow()->GetOutputSizePixel() );
+        UpdateView( false, ImplGetWindow()->GetSize() );
     }
 }
 
 void ImplBorderWindow::SetCloseButton()
 {
     SetStyle( GetStyle() | WB_CLOSEABLE );
-    Size aSize = GetOutputSizePixel();
+    Size aSize = GetSize();
     mpBorderView->Init( this, aSize.Width(), aSize.Height() );
     InvalidateBorder();
 }
@@ -1892,7 +1892,7 @@ void ImplBorderWindow::SetCloseButton()
 void ImplBorderWindow::SetDockButton( bool bDockButton )
 {
     mbDockBtn = bDockButton;
-    Size aSize = GetOutputSizePixel();
+    Size aSize = GetSize();
     mpBorderView->Init( this, aSize.Width(), aSize.Height() );
     InvalidateBorder();
 }
@@ -1900,7 +1900,7 @@ void ImplBorderWindow::SetDockButton( bool bDockButton )
 void ImplBorderWindow::SetHideButton( bool bHideButton )
 {
     mbHideBtn = bHideButton;
-    Size aSize = GetOutputSizePixel();
+    Size aSize = GetSize();
     mpBorderView->Init( this, aSize.Width(), aSize.Height() );
     InvalidateBorder();
 }
@@ -1908,7 +1908,7 @@ void ImplBorderWindow::SetHideButton( bool bHideButton )
 void ImplBorderWindow::SetMenuButton( bool bMenuButton )
 {
     mbMenuBtn = bMenuButton;
-    Size aSize = GetOutputSizePixel();
+    Size aSize = GetSize();
     mpBorderView->Init( this, aSize.Width(), aSize.Height() );
     InvalidateBorder();
 }
