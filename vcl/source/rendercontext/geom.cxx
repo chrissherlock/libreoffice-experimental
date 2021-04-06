@@ -53,7 +53,7 @@ tools::Long RenderContext2::GetOutputWidthPixel() const { return maGeometry.GetW
 
 tools::Long RenderContext2::GetOutputHeightPixel() const { return maGeometry.GetHeightInPixels(); }
 
-void RenderContext2::SetSizeInPixels(Size const& rSize) { maGeometry.SetSizeInPixels(rSize); }
+void RenderContext2::SetSize(Size const& rSize) { maGeometry.SetSize(rSize); }
 
 void RenderContext2::SetWidthInPixels(tools::Long nWidth) { maGeometry.SetWidthInPixels(nWidth); }
 

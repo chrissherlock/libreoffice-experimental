@@ -565,7 +565,6 @@ public:
     void SetDPIScalePercentage(sal_Int32 nPercent);
 
     Size GetSize() const;
-    void SetSizeInPixels(Size const& rSize);
     tools::Long GetOutputWidthPixel() const;
     tools::Long GetOutputHeightPixel() const;
     void SetWidthInPixels(tools::Long nWidth);
@@ -862,6 +861,8 @@ protected:
                                 physically released graphics device.
      */
     virtual void ReleaseGraphics(bool bRelease = true) = 0;
+
+    void SetSize(Size const& rSize);
 
     virtual void CopyDeviceArea(SalTwoRect& aPosAry, bool bWindowInvalidate);
 

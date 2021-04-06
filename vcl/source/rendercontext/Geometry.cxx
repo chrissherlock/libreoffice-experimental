@@ -41,7 +41,7 @@ void Geometry::EnableMapMode(bool bEnable) { mbMap = bEnable; }
 
 Size Geometry::GetSizeInPixels() const { return Size(mnOutWidth, mnOutHeight); }
 
-void Geometry::SetSizeInPixels(Size const& rSize)
+void Geometry::SetSize(Size const& rSize)
 {
     mnOutWidth = rSize.Width();
     mnOutHeight = rSize.Height();

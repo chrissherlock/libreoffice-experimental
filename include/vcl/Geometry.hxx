@@ -35,7 +35,7 @@ public:
     Size GetSizeInPixels() const;
     tools::Long GetWidthInPixels() const;
     tools::Long GetHeightInPixels() const;
-    void SetSizeInPixels(Size const& rSize);
+    void SetSize(Size const& rSize);
     void SetWidthInPixels(tools::Long nWidth);
     void SetHeightInPixels(tools::Long nHeight);
 
