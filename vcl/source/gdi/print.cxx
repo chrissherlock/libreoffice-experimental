@@ -42,6 +42,7 @@
 #include <outdev.h>
 #include <PhysicalFontCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
+#include <font/PhysicalFontFaceSizeCollection.hxx>
 #include <print.h>
 
 #include <com/sun/star/beans/XPropertySet.hpp>

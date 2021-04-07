@@ -36,6 +36,7 @@
 #include <emphasismark.hxx>
 #include <font/FeatureCollector.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
+#include <font/PhysicalFontFaceSizeCollection.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>

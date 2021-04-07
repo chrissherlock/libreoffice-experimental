@@ -76,7 +76,7 @@ class Hatch;
 class Image;
 class ImplAnimView;
 class PhysicalFontFaceCollection;
-class ImplDeviceFontSizeList;
+class PhysicalFontFaceSizeCollection;
 class ImplFontCache;
 class ImplMultiTextLineInfo;
 class LogicalFontInstance;
@@ -1110,7 +1110,7 @@ protected:
     std::unique_ptr<ImplOutDevData> mpOutDevData;
     mutable std::shared_ptr<PhysicalFontCollection> mxFontCollection;
     mutable std::unique_ptr<PhysicalFontFaceCollection> mpDeviceFontList;
-    mutable std::unique_ptr<ImplDeviceFontSizeList> mpDeviceFontSizeList;
+    mutable std::unique_ptr<PhysicalFontFaceSizeCollection> mpDeviceFontSizeList;
     mutable rtl::Reference<LogicalFontInstance> mpFontInstance;
     mutable std::shared_ptr<ImplFontCache> mxFontCache;
     Geometry maGeometry;

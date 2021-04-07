@@ -19,28 +19,18 @@
 
 #pragma once
 
-#include <rtl/ref.hxx>
-
-#include <vcl/metric.hxx>
-
 #include <vector>
 
-class PhysicalFontFace;
-
-// an PhysicalFontFaceCollection is created by a PhysicalFontCollection
-// it becomes invalid when original PhysicalFontCollection is modified
-class PhysicalFontFaceCollection
+class PhysicalFontFaceSizeCollection
 {
 private:
-    std::vector<rtl::Reference<PhysicalFontFace>> maDevFontVector;
+    std::vector<int> maSizeList;
 
 public:
-    PhysicalFontFaceCollection();
-
-    void Add(PhysicalFontFace* pFace);
-    PhysicalFontFace* Get(int nIndex) const;
+    PhysicalFontFaceSizeCollection();
+    void Add(int nHeight);
     int Count() const;
-    FontMetric GetFontMetric(int nIndex) const;
+    int Get(int nIndex) const;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

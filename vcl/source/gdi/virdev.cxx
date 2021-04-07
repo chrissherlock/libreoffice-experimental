@@ -26,6 +26,7 @@
 #include <outdev.h>
 #include <PhysicalFontCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
+#include <font/PhysicalFontFaceSizeCollection.hxx>
 #include <salinst.hxx>
 #include <salgdi.hxx>
 #include <salvd.hxx>

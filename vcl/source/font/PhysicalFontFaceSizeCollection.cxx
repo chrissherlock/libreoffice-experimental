@@ -17,30 +17,14 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#pragma once
+#include <font/PhysicalFontFaceSizeCollection.hxx>
 
-#include <rtl/ref.hxx>
+PhysicalFontFaceSizeCollection::PhysicalFontFaceSizeCollection() { maSizeList.reserve(32); }
 
-#include <vcl/metric.hxx>
+void PhysicalFontFaceSizeCollection::Add(int nHeight) { maSizeList.push_back(nHeight); }
 
-#include <vector>
+int PhysicalFontFaceSizeCollection::Count() const { return maSizeList.size(); }
 
-class PhysicalFontFace;
-
-// an PhysicalFontFaceCollection is created by a PhysicalFontCollection
-// it becomes invalid when original PhysicalFontCollection is modified
-class PhysicalFontFaceCollection
-{
-private:
-    std::vector<rtl::Reference<PhysicalFontFace>> maDevFontVector;
-
-public:
-    PhysicalFontFaceCollection();
-
-    void Add(PhysicalFontFace* pFace);
-    PhysicalFontFace* Get(int nIndex) const;
-    int Count() const;
-    FontMetric GetFontMetric(int nIndex) const;
-};
+int PhysicalFontFaceSizeCollection::Get(int nIndex) const { return maSizeList[nIndex]; }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

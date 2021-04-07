@@ -17,16 +17,18 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <memory>
-
 #include <i18nlangtag/languagetag.hxx>
 #include <i18nlangtag/mslangid.hxx>
 #include <unotools/configmgr.hxx>
 #include <unotools/fontdefs.hxx>
 #include <o3tl/sorted_vector.hxx>
+
 #include <outdev.h>
 #include <PhysicalFontCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
+#include <font/PhysicalFontFaceSizeCollection.hxx>
+
+#include <memory>
 
 static ImplFontAttrs lcl_IsCJKFont( const OUString& rFontName )
 {
@@ -899,9 +901,9 @@ std::unique_ptr<PhysicalFontFaceCollection> PhysicalFontCollection::GetDeviceFon
     return pDeviceFontList;
 }
 
-std::unique_ptr<ImplDeviceFontSizeList> PhysicalFontCollection::GetDeviceFontSizeList( const OUString& rFontName ) const
+std::unique_ptr<PhysicalFontFaceSizeCollection> PhysicalFontCollection::GetDeviceFontSizeList( const OUString& rFontName ) const
 {
-    std::unique_ptr<ImplDeviceFontSizeList> pDeviceFontSizeList(new ImplDeviceFontSizeList);
+    std::unique_ptr<PhysicalFontFaceSizeCollection> pDeviceFontSizeList(new PhysicalFontFaceSizeCollection);
 
     PhysicalFontFamily* pFontFamily = FindFontFamily( rFontName );
     if( pFontFamily != nullptr )
