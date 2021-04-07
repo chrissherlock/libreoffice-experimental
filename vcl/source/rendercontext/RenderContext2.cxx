@@ -172,7 +172,7 @@ void RenderContext2::DrawOutDev(Point const& rDestPt, Size const& rDestSize, Poi
                            nSrcWidth, nSrcHeight, ImplLogicXToDevicePixel(rDestPt.X()),
                            ImplLogicYToDevicePixel(rDestPt.Y()), nDestWidth, nDestHeight);
 
-        AdjustTwoRect(aPosAry, GetOutputRectPixel());
+        AdjustTwoRect(aPosAry, GetFrameRect());
 
         if (aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth
             && aPosAry.mnDestHeight)
@@ -246,7 +246,7 @@ void RenderContext2::DrawOutDev(Point const& rDestPt, Size const& rDestSize, Poi
                            ImplLogicWidthToDevicePixel(rDestSize.Width()),
                            ImplLogicHeightToDevicePixel(rDestSize.Height()));
 
-        AdjustTwoRect(aPosAry, rOutDev.GetOutputRectPixel());
+        AdjustTwoRect(aPosAry, rOutDev.GetFrameRect());
 
         if (aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth
             && aPosAry.mnDestHeight)
@@ -317,7 +317,7 @@ void RenderContext2::CopyArea(Point const& rDestPt, Point const& rSrcPt, Size co
                            nSrcWidth, nSrcHeight, ImplLogicXToDevicePixel(rDestPt.X()),
                            ImplLogicYToDevicePixel(rDestPt.Y()), nSrcWidth, nSrcHeight);
 
-        AdjustTwoRect(aPosAry, GetOutputRectPixel());
+        AdjustTwoRect(aPosAry, GetFrameRect());
 
         CopyDeviceArea(aPosAry, bWindowInvalidate);
     }

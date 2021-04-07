@@ -193,7 +193,7 @@ void Window::InvertTracking( const tools::Rectangle& rRect, ShowTrackFlags nFlag
 
         if ( nFlags & ShowTrackFlags::Clip )
         {
-            vcl::Region aRegion( GetOutputRectPixel() );
+            vcl::Region aRegion( GetFrameRect() );
             ImplClipBoundaries( aRegion, false, false );
             pOutDev->SelectClipRegion( aRegion, pGraphics );
         }

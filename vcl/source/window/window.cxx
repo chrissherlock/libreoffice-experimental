@@ -1546,7 +1546,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
             if ( bCopyBits && !pOverlapRegion )
             {
                 pOverlapRegion.reset( new vcl::Region() );
-                ImplCalcOverlapRegion( GetOutputRectPixel(),
+                ImplCalcOverlapRegion( GetFrameRect(),
                                        *pOverlapRegion, false, true );
             }
             mpWindowImpl->mnX = nX;
@@ -1563,7 +1563,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
             if ( bCopyBits && !pOverlapRegion )
             {
                 pOverlapRegion.reset( new vcl::Region() );
-                ImplCalcOverlapRegion( GetOutputRectPixel(),
+                ImplCalcOverlapRegion( GetFrameRect(),
                                        *pOverlapRegion, false, true );
             }
             mpWindowImpl->mnY = nY;
@@ -1648,7 +1648,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
                     bParentPaint = mpWindowImpl->mpParent->IsPaintEnabled();
                 if ( bCopyBits && bParentPaint && !HasPaintEvent() )
                 {
-                    vcl::Region aRegion( GetOutputRectPixel() );
+                    vcl::Region aRegion( GetFrameRect() );
                     if ( mpWindowImpl->mbWinRegion )
                         aRegion.Intersect( ImplPixelToDevicePixel( mpWindowImpl->maWinRegion ) );
                     ImplClipBoundaries( aRegion, false, true );
@@ -1698,7 +1698,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
             }
             else
             {
-                vcl::Region aRegion( GetOutputRectPixel() );
+                vcl::Region aRegion( GetFrameRect() );
                 aRegion.Exclude( *pOldRegion );
                 if ( mpWindowImpl->mbWinRegion )
                     aRegion.Intersect( ImplPixelToDevicePixel( mpWindowImpl->maWinRegion ) );
@@ -2941,7 +2941,7 @@ tools::Rectangle Window::ImplGetWindowExtentsRelative(const vcl::Window *pRelati
 void Window::Scroll( tools::Long nHorzScroll, tools::Long nVertScroll, ScrollFlags nFlags )
 {
 
-    ImplScroll( GetOutputRectPixel(),
+    ImplScroll( GetFrameRect(),
                 nHorzScroll, nVertScroll, nFlags & ~ScrollFlags::Clip );
 }
 
@@ -2950,7 +2950,7 @@ void Window::Scroll( tools::Long nHorzScroll, tools::Long nVertScroll,
 {
     OutputDevice *pOutDev = GetOutDev();
     tools::Rectangle aRect = pOutDev->ImplLogicToDevicePixel( rRect );
-    aRect.Intersection( GetOutputRectPixel() );
+    aRect.Intersection( GetFrameRect() );
     if ( !aRect.IsEmpty() )
         ImplScroll( aRect, nHorzScroll, nVertScroll, nFlags );
 }
@@ -2958,7 +2958,7 @@ void Window::Scroll( tools::Long nHorzScroll, tools::Long nVertScroll,
 void Window::Flush()
 {
     if (mpWindowImpl)
-        mpWindowImpl->mpFrame->Flush( GetOutputRectPixel() );
+        mpWindowImpl->mpFrame->Flush( GetFrameRect() );
 }
 
 void Window::SetUpdateMode( bool bUpdate )

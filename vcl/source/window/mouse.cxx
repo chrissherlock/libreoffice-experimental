@@ -61,7 +61,7 @@ WindowHitTest Window::ImplHitTest( const Point& rFramePos )
         const OutputDevice *pOutDev = GetOutDev();
         pOutDev->ReMirror( aFramePos );
     }
-    if ( !GetOutputRectPixel().IsInside( aFramePos ) )
+    if ( !GetFrameRect().IsInside( aFramePos ) )
         return WindowHitTest::NONE;
     if ( mpWindowImpl->mbWinRegion )
     {

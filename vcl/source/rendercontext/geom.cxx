@@ -64,7 +64,7 @@ Point RenderContext2::GetFrameOffset() const
     return Point(maGeometry.GetXFrameOffset(), maGeometry.GetYFrameOffset());
 }
 
-tools::Rectangle RenderContext2::GetOutputRectPixel() const
+tools::Rectangle RenderContext2::GetFrameRect() const
 {
     return tools::Rectangle(GetFrameOffset(), GetSize());
 }

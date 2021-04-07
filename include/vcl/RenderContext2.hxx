@@ -569,7 +569,6 @@ public:
     tools::Long GetHeight() const;
 
     Point GetFrameOffset() const;
-    tools::Rectangle GetOutputRectPixel() const;
 
     /** Get the offset in pixel
 
@@ -855,6 +854,8 @@ protected:
                                 physically released graphics device.
      */
     virtual void ReleaseGraphics(bool bRelease = true) = 0;
+
+    tools::Rectangle GetFrameRect() const;
 
     void SetSize(Size const& rSize);
     void SetWidth(tools::Long nWidth);
