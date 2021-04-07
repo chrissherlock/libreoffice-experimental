@@ -774,18 +774,7 @@ tools::Long ScDrawStringsVars::GetExpWidth()
 
 const SalLayoutGlyphs* ScDrawStringsVars::GetLayoutGlyphs(const OUString& rString) const
 {
-    auto it = mCachedGlyphs.find( rString );
-    if( it != mCachedGlyphs.end() && it->second.IsValid())
-        return &it->second;
-    std::unique_ptr<SalLayout> layout = pOutput->pFmtDevice->ImplLayout( rString, 0, rString.getLength(),
-        Point( 0, 0 ), 0, nullptr, SalLayoutFlags::GlyphItemsOnly );
-    if( layout )
-    {
-        mCachedGlyphs.insert( std::make_pair( rString, layout->GetGlyphs()));
-        assert(mCachedGlyphs.find( rString ) == mCachedGlyphs.begin()); // newly inserted item is first
-        return &mCachedGlyphs.begin()->second;
-    }
-    return nullptr;
+    return pOutput->pFmtDevice->GetLayoutGlyphs(rString, mCachedGlyphs);
 }
 
 tools::Long ScDrawStringsVars::GetFmtTextWidth( const OUString& rString )

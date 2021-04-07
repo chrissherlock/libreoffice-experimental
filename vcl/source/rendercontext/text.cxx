@@ -798,6 +798,28 @@ void RenderContext2::SetTextAlign(TextAlign eAlign)
         mpAlphaVDev->SetTextAlign(eAlign);
 }
 
+SalLayoutGlyphs const*
+RenderContext2::GetLayoutGlyphs(OUString const& rString,
+                                o3tl::lru_map<OUString, SalLayoutGlyphs>& rCachedGlyphs)
+{
+    auto it = rCachedGlyphs.find(rString);
+    if (it != rCachedGlyphs.end() && it->second.IsValid())
+        return &it->second;
+
+    std::unique_ptr<SalLayout> layout = ImplLayout(rString, 0, rString.getLength(), Point(0, 0), 0,
+                                                   nullptr, SalLayoutFlags::GlyphItemsOnly);
+
+    if (layout)
+    {
+        rCachedGlyphs.insert(std::make_pair(rString, layout->GetGlyphs()));
+        assert(rCachedGlyphs.find(rString)
+               == rCachedGlyphs.begin()); // newly inserted item is first
+        return &rCachedGlyphs.begin()->second;
+    }
+
+    return nullptr;
+}
+
 std::unique_ptr<SalLayout> RenderContext2::ImplLayout(
     OUString const& rOrigStr, sal_Int32 nMinIndex, sal_Int32 nLen, Point const& rLogicalPos,
     tools::Long nLogicalWidth, tools::Long const* pDXArray, SalLayoutFlags flags,

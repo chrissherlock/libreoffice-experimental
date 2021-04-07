@@ -29,6 +29,7 @@
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <i18nlangtag/lang.h>
+#include <o3tl/lru_map.hxx>
 
 #include <vcl/dllapi.h>
 #include <vcl/DrawingInterface.hxx>
@@ -674,6 +675,9 @@ public:
     tools::Long GetTextWidth(OUString const& rStr, sal_Int32 nIndex = 0, sal_Int32 nLen = -1,
                              vcl::TextLayoutCache const* = nullptr,
                              SalLayoutGlyphs const* const pLayoutCache = nullptr) const;
+
+    SalLayoutGlyphs const* GetLayoutGlyphs(OUString const& rString,
+                                           o3tl::lru_map<OUString, SalLayoutGlyphs>& mCachedGlyphs);
 
     std::unique_ptr<SalLayout> ImplLayout(OUString const&, sal_Int32 nIndex, sal_Int32 nLen,
                                           Point const& rLogicPos = Point(0, 0),
