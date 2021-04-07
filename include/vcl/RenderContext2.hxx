@@ -571,9 +571,41 @@ public:
     tools::Long GetOutOffYPixel() const;
     void SetOutOffXPixel(tools::Long nOutOffX);
     void SetOutOffYPixel(tools::Long nOutOffY);
-    Point GetOutputOffPixel() const;
+    Point GetFrameOffset() const;
     tools::Rectangle GetOutputRectPixel() const;
     Size GetOutputSize() const;
+
+    /** Get the offset in pixel
+
+        @see RenderContext2::SetPixelOffset for details
+
+        @return the current offset in pixel
+     */
+    Size GetPixelOffset() const;
+
+    /** Set an offset in pixel
+
+        This method offsets every drawing operation that converts its
+        coordinates to pixel by the given value. Normally, the effect
+        can be achieved by setting a MapMode with a different
+        origin. Unfortunately, this origin is in logical coordinates
+        and can lead to rounding errors (see #102532# for details).
+
+        @attention This offset is only applied when converting to
+        pixel, i.e. some output modes such as metafile recordings
+        might be completely unaffected by this method! Use with
+        care. Furthermore, if the RenderContext2's MapMode is the
+        default (that's MapUnit::MapPixel), then any pixel offset set is
+        ignored also. This might be unintuitive for cases, but would
+        have been far more fragile to implement. What's more, the
+        reason why the pixel offset was introduced (avoiding rounding
+        errors) does not apply for MapUnit::MapPixel, because one can always
+        use the MapMode origin then.
+
+        @param rOffset
+        The offset in pixel
+     */
+    void SetPixelOffset(const Size& rOffset);
 
     tools::Long GetTextArray(OUString const& rStr, tools::Long* pDXAry, sal_Int32 nIndex = 0,
                              sal_Int32 nLen = -1, vcl::TextLayoutCache const* = nullptr,
@@ -673,38 +705,6 @@ public:
     SAL_DLLPRIVATE static void ImplUpdateAllFontData(bool bNewFontLists);
 
     virtual css::awt::DeviceInfo GetDeviceInfo() const;
-
-    /** Get the offset in pixel
-
-        @see RenderContext2::SetPixelOffset for details
-
-        @return the current offset in pixel
-     */
-    Size GetPixelOffset() const;
-
-    /** Set an offset in pixel
-
-        This method offsets every drawing operation that converts its
-        coordinates to pixel by the given value. Normally, the effect
-        can be achieved by setting a MapMode with a different
-        origin. Unfortunately, this origin is in logical coordinates
-        and can lead to rounding errors (see #102532# for details).
-
-        @attention This offset is only applied when converting to
-        pixel, i.e. some output modes such as metafile recordings
-        might be completely unaffected by this method! Use with
-        care. Furthermore, if the RenderContext2's MapMode is the
-        default (that's MapUnit::MapPixel), then any pixel offset set is
-        ignored also. This might be unintuitive for cases, but would
-        have been far more fragile to implement. What's more, the
-        reason why the pixel offset was introduced (avoiding rounding
-        errors) does not apply for MapUnit::MapPixel, because one can always
-        use the MapMode origin then.
-
-        @param rOffset
-        The offset in pixel
-     */
-    void SetPixelOffset(const Size& rOffset);
 
     // #i75163#
     basegfx::B2DHomMatrix GetViewTransformation() const;

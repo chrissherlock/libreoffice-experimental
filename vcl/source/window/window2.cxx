@@ -1156,7 +1156,7 @@ bool Window::IsDefaultSize() const
 
 Point Window::GetOffsetPixelFrom(const vcl::Window& rWindow) const
 {
-    return Point(GetOutOffXPixel() - rWindow.GetOutOffXPixel(), GetOutOffYPixel() - rWindow.GetOutOffYPixel());
+    return Point(GetFrameOffset().X() - rWindow.GetFrameOffset().X(), GetFrameOffset().Y() - rWindow.GetFrameOffset().Y());
 }
 
 void Window::EnablePaint( bool bEnable )

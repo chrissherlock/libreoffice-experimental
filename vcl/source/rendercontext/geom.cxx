@@ -73,14 +73,14 @@ void RenderContext2::SetOutOffYPixel(tools::Long nOutOffY)
     maGeometry.SetYOffsetInPixels(nOutOffY);
 }
 
-Point RenderContext2::GetOutputOffPixel() const
+Point RenderContext2::GetFrameOffset() const
 {
     return Point(maGeometry.GetXOffsetInPixels(), maGeometry.GetYOffsetInPixels());
 }
 
 tools::Rectangle RenderContext2::GetOutputRectPixel() const
 {
-    return tools::Rectangle(GetOutputOffPixel(), GetSize());
+    return tools::Rectangle(GetFrameOffset(), GetSize());
 }
 
 Size RenderContext2::GetOutputSize() const { return PixelToLogic(GetSize()); }
