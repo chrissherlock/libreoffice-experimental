@@ -767,7 +767,7 @@ void SwStdFontTabPage::Reset( const SfxItemSet* rSet)
     {
         // get the set of distinct available family names
         std::set< OUString > aFontNames;
-        int nFontNames = m_pPrt->GetDevFontCount();
+        int nFontNames = m_pPrt->GetFontMetricCount();
         for( int i = 0; i < nFontNames; i++ )
         {
             FontMetric aFontMetric( m_pPrt->GetFontMetric( i ) );

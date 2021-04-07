@@ -98,7 +98,7 @@ css::uno::Sequence< css::awt::FontDescriptor > VCLXDevice::getFontDescriptors(  
     css::uno::Sequence< css::awt::FontDescriptor> aFonts;
     if( mpOutputDevice )
     {
-        int nFonts = mpOutputDevice->GetDevFontCount();
+        int nFonts = mpOutputDevice->GetFontMetricCount();
         if ( nFonts )
         {
             aFonts = css::uno::Sequence< css::awt::FontDescriptor>( nFonts );

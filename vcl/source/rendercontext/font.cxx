@@ -334,14 +334,14 @@ FontMetric RenderContext2::GetFontMetric(int nDevFontIndex) const
 {
     ImplInitFontList();
 
-    int nCount = GetDevFontCount();
+    int nCount = GetFontMetricCount();
     if (nDevFontIndex < nCount)
         return mpDeviceFontList->GetFontMetric(nDevFontIndex);
 
     return FontMetric();
 }
 
-int RenderContext2::GetDevFontCount() const
+int RenderContext2::GetFontMetricCount() const
 {
     if (!mpDeviceFontList)
     {

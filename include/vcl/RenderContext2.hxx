@@ -421,7 +421,6 @@ public:
     virtual Color GetReadableFontColor(Color const& rFontColor, Color const& rBgColor) const;
     virtual void SetFont(vcl::Font const& rNewFont);
 
-    int GetDevFontCount() const;
     bool AddTempDevFont(OUString const& rFileURL, OUString const& rFontName);
     Size GetDevFontSize(vcl::Font const& rFont, int nSizeIndex) const;
     int GetDevFontSizeCount(vcl::Font const&) const;
@@ -431,6 +430,7 @@ public:
     FontMetric GetFontMetric() const;
     FontMetric GetFontMetric(vcl::Font const& rFont) const;
     FontMetric GetFontMetric(int nDevFontIndex) const;
+    int GetFontMetricCount() const;
 
     bool GetFontCharMap(FontCharMapRef& rxFontCharMap) const;
     bool GetFontCapabilities(vcl::FontCapabilities& rFontCapabilities) const;

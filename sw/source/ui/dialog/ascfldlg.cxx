@@ -190,7 +190,7 @@ SwAsciiFilterDlg::SwAsciiFilterDlg( weld::Window* pParent, SwDocShell& rDocSh,
 
             // get the set of distinct available family names
             std::set< OUString > aFontNames;
-            int nFontNames = pPrt->GetDevFontCount();
+            int nFontNames = pPrt->GetFontMetricCount();
             for( int i = 0; i < nFontNames; i++ )
             {
                 FontMetric aFontMetric( pPrt->GetFontMetric( i ) );
