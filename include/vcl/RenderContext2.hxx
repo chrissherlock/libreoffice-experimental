@@ -422,10 +422,8 @@ public:
     virtual void SetFont(vcl::Font const& rNewFont);
 
     bool AddTempDevFont(OUString const& rFileURL, OUString const& rFontName);
-    Size GetDevFontSize(vcl::Font const& rFont, int nSizeIndex) const;
-    int GetDevFontSizeCount(vcl::Font const&) const;
-
-    void RefreshFontData(const bool bNewFontLists);
+    Size GetPhysicalFontFaceSize(vcl::Font const& rFont, int nSizeIndex) const;
+    int GetPhysicalFontFaceSizeCount(vcl::Font const&) const;
 
     FontMetric GetFontMetric() const;
     FontMetric GetFontMetric(vcl::Font const& rFont) const;
@@ -436,6 +434,8 @@ public:
     bool GetFontCapabilities(vcl::FontCapabilities& rFontCapabilities) const;
 
     bool GetFontFeatures(std::vector<vcl::font::Feature>& rFontFeatures) const;
+
+    void RefreshFontData(const bool bNewFontLists);
 
     bool GetGlyphBoundRects(const Point& rOrigin, const OUString& rStr, int nIndex, int nLen,
                             std::vector<tools::Rectangle>& rVector);

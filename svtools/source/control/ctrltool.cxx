@@ -758,9 +758,9 @@ const int* FontList::GetSizeAry( const FontMetric& rInfo ) const
     if ( pData )
         pDevice = pData->mpFirst->GetDevice();
 
-    int nDevSizeCount = pDevice->GetDevFontSizeCount( rInfo );
+    int nDevSizeCount = pDevice->GetPhysicalFontFaceSizeCount( rInfo );
     if ( !nDevSizeCount ||
-         (pDevice->GetDevFontSize( rInfo, 0 ).Height() == 0) )
+         (pDevice->GetPhysicalFontFaceSize( rInfo, 0 ).Height() == 0) )
         return aStdSizeAry;
 
     MapMode aOldMapMode = pDevice->GetMapMode();
@@ -772,7 +772,7 @@ const int* FontList::GetSizeAry( const FontMetric& rInfo ) const
     mpSizeAry.reset(new int[nDevSizeCount+1] );
     for (int i = 0; i < nDevSizeCount; ++i)
     {
-        Size aSize = pDevice->GetDevFontSize( rInfo, i );
+        Size aSize = pDevice->GetPhysicalFontFaceSize( rInfo, i );
         if ( aSize.Height() != nOldHeight )
         {
             nOldHeight = aSize.Height();

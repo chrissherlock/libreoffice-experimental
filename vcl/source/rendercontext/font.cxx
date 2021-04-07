@@ -362,7 +362,7 @@ int RenderContext2::GetFontMetricCount() const
     return mpDeviceFontList->Count();
 }
 
-int RenderContext2::GetDevFontSizeCount(vcl::Font const& rFont) const
+int RenderContext2::GetPhysicalFontFaceSizeCount(vcl::Font const& rFont) const
 {
     mpDeviceFontSizeList.reset();
 
@@ -371,10 +371,10 @@ int RenderContext2::GetDevFontSizeCount(vcl::Font const& rFont) const
     return mpDeviceFontSizeList->Count();
 }
 
-Size RenderContext2::GetDevFontSize(vcl::Font const& rFont, int nSizeIndex) const
+Size RenderContext2::GetPhysicalFontFaceSize(vcl::Font const& rFont, int nSizeIndex) const
 {
     // check range
-    int nCount = GetDevFontSizeCount(rFont);
+    int nCount = GetPhysicalFontFaceSizeCount(rFont);
     if (nSizeIndex >= nCount)
         return Size();
 
