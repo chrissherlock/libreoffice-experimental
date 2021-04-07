@@ -262,7 +262,7 @@ void FontList::ImplInsertFonts(OutputDevice* pDevice, bool bInsertData)
 
     for (int i = 0; i < n; ++i)
     {
-        FontMetric aFontMetric = pDevice->GetDevFont( i );
+        FontMetric aFontMetric = pDevice->GetFontMetric( i );
         OUString aSearchName(aFontMetric.GetFamilyName());
         ImplFontListNameInfo*   pData;
         sal_uInt32              nIndex;

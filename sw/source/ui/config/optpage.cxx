@@ -770,7 +770,7 @@ void SwStdFontTabPage::Reset( const SfxItemSet* rSet)
         int nFontNames = m_pPrt->GetDevFontCount();
         for( int i = 0; i < nFontNames; i++ )
         {
-            FontMetric aFontMetric( m_pPrt->GetDevFont( i ) );
+            FontMetric aFontMetric( m_pPrt->GetFontMetric( i ) );
             aFontNames.insert( aFontMetric.GetFamilyName() );
         }
 

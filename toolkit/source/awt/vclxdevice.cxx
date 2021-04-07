@@ -104,7 +104,7 @@ css::uno::Sequence< css::awt::FontDescriptor > VCLXDevice::getFontDescriptors(  
             aFonts = css::uno::Sequence< css::awt::FontDescriptor>( nFonts );
             css::awt::FontDescriptor* pFonts = aFonts.getArray();
             for ( int n = 0; n < nFonts; n++ )
-                pFonts[n] = VCLUnoHelper::CreateFontDescriptor( mpOutputDevice->GetDevFont( n ) );
+                pFonts[n] = VCLUnoHelper::CreateFontDescriptor( mpOutputDevice->GetFontMetric( n ) );
         }
     }
     return aFonts;

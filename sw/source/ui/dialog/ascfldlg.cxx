@@ -193,7 +193,7 @@ SwAsciiFilterDlg::SwAsciiFilterDlg( weld::Window* pParent, SwDocShell& rDocSh,
             int nFontNames = pPrt->GetDevFontCount();
             for( int i = 0; i < nFontNames; i++ )
             {
-                FontMetric aFontMetric( pPrt->GetDevFont( i ) );
+                FontMetric aFontMetric( pPrt->GetFontMetric( i ) );
                 aFontNames.insert( aFontMetric.GetFamilyName() );
             }
 

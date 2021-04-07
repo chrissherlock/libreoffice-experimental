@@ -330,7 +330,7 @@ void RenderContext2::ImplInitFontList() const
     }
 }
 
-FontMetric RenderContext2::GetDevFont(int nDevFontIndex) const
+FontMetric RenderContext2::GetFontMetric(int nDevFontIndex) const
 {
     ImplInitFontList();
 

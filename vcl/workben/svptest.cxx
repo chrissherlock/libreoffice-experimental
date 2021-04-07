@@ -231,7 +231,7 @@ void MyWin::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle& rR
     for (int i = 0; i < nFontSamples; ++i)
     {
 
-        FontMetric aFont = rRenderContext.GetDevFont((i * nFontCount) / nFontSamples);
+        FontMetric aFont = rRenderContext.GetFontMetric((i * nFontCount) / nFontSamples);
         aFont.SetFontHeight(400 + (i % 7) * 100);
         aFont.SetOrientation(Degree10(i * (3600 / nFontSamples)));
         rRenderContext.SetFont(aFont);
