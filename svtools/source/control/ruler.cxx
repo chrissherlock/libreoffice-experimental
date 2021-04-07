@@ -64,33 +64,6 @@ using namespace ::com::sun::star::accessibility;
 #define RULER_UNIT_LINE    10
 #define RULER_UNIT_COUNT   11
 
-namespace
-{
-/**
- * Pre-calculates glyph items for rText on rRenderContext. Subsequent calls
- * avoid the calculation and just return a pointer to rTextGlyphs.
- */
-SalLayoutGlyphs* lcl_GetRulerTextGlyphs(const vcl::RenderContext& rRenderContext, const OUString& rText,
-                                        SalLayoutGlyphs& rTextGlyphs)
-{
-    if (rTextGlyphs.IsValid())
-        // Use pre-calculated result.
-        return &rTextGlyphs;
-
-    // Calculate glyph items.
-
-    std::unique_ptr<SalLayout> pLayout = rRenderContext.ImplLayout(
-        rText, 0, rText.getLength(), Point(0, 0), 0, nullptr, SalLayoutFlags::GlyphItemsOnly);
-    if (!pLayout)
-        return nullptr;
-
-    // Remember the calculation result.
-    rTextGlyphs = pLayout->GetGlyphs();
-
-    return &rTextGlyphs;
-}
-}
-
 class ImplRulerData
 {
     friend class Ruler;
@@ -339,7 +312,7 @@ void Ruler::ImplVDrawText(vcl::RenderContext& rRenderContext, tools::Long nX, to
 {
     tools::Rectangle aRect;
     SalLayoutGlyphs* pTextLayout
-        = lcl_GetRulerTextGlyphs(rRenderContext, rText, maTextGlyphs[rText]);
+        = rRenderContext.GetLayoutGlyphs(rText, maTextGlyphs[rText]);
     rRenderContext.GetTextBoundRect(aRect, rText, 0, 0, -1, 0, nullptr, pTextLayout);
 
     tools::Long nShiftX = ( aRect.GetWidth() / 2 ) + aRect.Left();

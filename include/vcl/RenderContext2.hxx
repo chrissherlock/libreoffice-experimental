@@ -679,6 +679,13 @@ public:
     SalLayoutGlyphs const* GetLayoutGlyphs(OUString const& rString,
                                            o3tl::lru_map<OUString, SalLayoutGlyphs>& mCachedGlyphs);
 
+    /** Get text layout glyphs
+
+         Pre-calculates glyph items for rText on rRenderContext. Subsequent calls
+         avoid the calculation and just return a pointer to rTextGlyphs.
+     */
+    SalLayoutGlyphs* GetLayoutGlyphs(OUString const& rString, SalLayoutGlyphs& rTextGlyphs);
+
     std::unique_ptr<SalLayout> ImplLayout(OUString const&, sal_Int32 nIndex, sal_Int32 nLen,
                                           Point const& rLogicPos = Point(0, 0),
                                           tools::Long nLogicWidth = 0,

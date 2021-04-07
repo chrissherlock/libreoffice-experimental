@@ -820,6 +820,27 @@ RenderContext2::GetLayoutGlyphs(OUString const& rString,
     return nullptr;
 }
 
+SalLayoutGlyphs* RenderContext2::GetLayoutGlyphs(OUString const& rText,
+                                                 SalLayoutGlyphs& rTextGlyphs)
+{
+    if (rTextGlyphs.IsValid())
+        // Use pre-calculated result.
+        return &rTextGlyphs;
+
+    // Calculate glyph items.
+
+    std::unique_ptr<SalLayout> pLayout = ImplLayout(rText, 0, rText.getLength(), Point(0, 0), 0,
+                                                    nullptr, SalLayoutFlags::GlyphItemsOnly);
+
+    if (!pLayout)
+        return nullptr;
+
+    // Remember the calculation result.
+    rTextGlyphs = pLayout->GetGlyphs();
+
+    return &rTextGlyphs;
+}
+
 std::unique_ptr<SalLayout> RenderContext2::ImplLayout(
     OUString const& rOrigStr, sal_Int32 nMinIndex, sal_Int32 nLen, Point const& rLogicalPos,
     tools::Long nLogicalWidth, tools::Long const* pDXArray, SalLayoutFlags flags,
