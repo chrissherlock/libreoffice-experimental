@@ -21,7 +21,7 @@
 #define INCLUDED_VCL_GENERIC_GLYPHS_GCACH_FTYP_HXX
 
 #include <unx/glyphcache.hxx>
-#include <PhysicalFontFace.hxx>
+#include <font/PhysicalFontFace.hxx>
 #include <fontinstance.hxx>
 #include <vcl/glyphitem.hxx>
 

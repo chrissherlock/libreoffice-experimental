@@ -20,7 +20,7 @@
 #include <memory>
 #include <config_features.h>
 #include <sal/log.hxx>
-#include <PhysicalFontFace.hxx>
+#include <font/PhysicalFontFace.hxx>
 #include <fontsubset.hxx>
 #include <salgdi.hxx>
 #include <salframe.hxx>

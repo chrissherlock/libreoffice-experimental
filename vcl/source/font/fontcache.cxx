@@ -19,9 +19,9 @@
 
 #include <fontinstance.hxx>
 #include <impfontcache.hxx>
-#include <PhysicalFontCollection.hxx>
-#include <PhysicalFontFace.hxx>
-#include <PhysicalFontFamily.hxx>
+#include <font/PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFace.hxx>
+#include <font/PhysicalFontFamily.hxx>
 #include <sal/log.hxx>
 
 #if !(defined(_WIN32) || defined(MACOSX) || defined(IOS))

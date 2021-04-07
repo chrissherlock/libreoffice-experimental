@@ -73,7 +73,7 @@
 #include <svdata.hxx>
 #include <bitmap/BitmapWriteAccess.hxx>
 #include <fontsubset.hxx>
-#include <PhysicalFontFace.hxx>
+#include <font/PhysicalFontFace.hxx>
 #include <salgdi.hxx>
 #include <textlayout.hxx>
 #include <impglyphitem.hxx>

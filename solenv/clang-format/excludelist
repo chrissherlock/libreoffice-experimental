@@ -14432,9 +14432,6 @@ vcl/headless/svptext.cxx
 vcl/headless/svpvd.cxx
 vcl/inc/IconThemeSelector.hxx
 vcl/inc/IPrioritable.hxx
-vcl/inc/PhysicalFontCollection.hxx
-vcl/inc/PhysicalFontFace.hxx
-vcl/inc/PhysicalFontFamily.hxx
 vcl/inc/ResampleKernel.hxx
 vcl/inc/WidgetThemeLibraryTypes.hxx
 vcl/inc/bitmap/bmpfast.hxx
@@ -14951,9 +14948,6 @@ vcl/source/filter/wmf/emfwr.hxx
 vcl/source/filter/wmf/wmf.cxx
 vcl/source/filter/wmf/wmfwr.cxx
 vcl/source/filter/wmf/wmfwr.hxx
-vcl/source/font/PhysicalFontCollection.cxx
-vcl/source/font/PhysicalFontFace.cxx
-vcl/source/font/PhysicalFontFamily.cxx
 vcl/source/font/font.cxx
 vcl/source/font/fontattributes.cxx
 vcl/source/font/fontcache.cxx

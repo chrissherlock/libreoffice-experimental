@@ -35,7 +35,7 @@
 #include <fontinstance.hxx>
 #include <fontattributes.hxx>
 #include <impglyphitem.hxx>
-#include <PhysicalFontCollection.hxx>
+#include <font/PhysicalFontCollection.hxx>
 #include <quartz/salgdi.h>
 #include <quartz/utils.h>
 #include <sallayout.hxx>

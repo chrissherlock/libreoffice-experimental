@@ -31,8 +31,8 @@
 
 #include <outdev.h>
 #include <window.h>
-#include <PhysicalFontCollection.hxx>
 #include <drawmode.hxx>
+#include <font/PhysicalFontCollection.hxx>
 #include <font/FeatureCollector.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>

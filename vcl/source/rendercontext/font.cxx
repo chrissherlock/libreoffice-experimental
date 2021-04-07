@@ -32,9 +32,9 @@
 
 #include <outdev.h>
 #include <window.h>
-#include <PhysicalFontCollection.hxx>
 #include <emphasismark.hxx>
 #include <font/FeatureCollector.hxx>
+#include <font/PhysicalFontCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <font/PhysicalFontFaceSizeCollection.hxx>
 #include <drawmode.hxx>

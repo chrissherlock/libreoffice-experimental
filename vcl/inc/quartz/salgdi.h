@@ -42,7 +42,7 @@
 
 #include <fontinstance.hxx>
 #include <impfontmetricdata.hxx>
-#include <PhysicalFontFace.hxx>
+#include <font/PhysicalFontFace.hxx>
 #include <salgdi.hxx>
 
 #include <quartz/salgdicommon.hxx>

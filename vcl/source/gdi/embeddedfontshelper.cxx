@@ -19,7 +19,7 @@
 #include <com/sun/star/io/XInputStream.hpp>
 
 #include <outdev.h>
-#include <PhysicalFontCollection.hxx>
+#include <font/PhysicalFontCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <salgdi.hxx>
 #include <sft.hxx>

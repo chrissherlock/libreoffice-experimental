@@ -71,7 +71,7 @@
 #include <vcl/svmain.hxx>
 #include <dbggui.hxx>
 #include <accmgr.hxx>
-#include <PhysicalFontCollection.hxx>
+#include <font/PhysicalFontCollection.hxx>
 #include <print.h>
 #include <salsys.hxx>
 #include <saltimer.hxx>

@@ -36,7 +36,7 @@
 #include <sal/log.hxx>
 
 #include <langboost.hxx>
-#include <PhysicalFontCollection.hxx>
+#include <font/PhysicalFontCollection.hxx>
 #include <sft.hxx>
 
 #include <ft2build.h>

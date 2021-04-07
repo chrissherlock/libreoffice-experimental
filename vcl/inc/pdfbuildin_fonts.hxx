@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <PhysicalFontFace.hxx>
+#include <font/PhysicalFontFace.hxx>
 #include <fontinstance.hxx>
 
 namespace vcl::pdf

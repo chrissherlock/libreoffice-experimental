@@ -25,7 +25,7 @@
 #include <salgdi.hxx>
 #include <fontinstance.hxx>
 #include <fontattributes.hxx>
-#include <PhysicalFontFace.hxx>
+#include <font/PhysicalFontFace.hxx>
 #include <impfont.hxx>
 #include <vcl/fontcapabilities.hxx>
 #include <vcl/fontcharmap.hxx>

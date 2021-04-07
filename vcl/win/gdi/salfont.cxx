@@ -51,8 +51,8 @@
 
 #include <fontsubset.hxx>
 #include <outdev.h>
-#include <PhysicalFontCollection.hxx>
-#include <PhysicalFontFace.hxx>
+#include <font/PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFace.hxx>
 #include <sft.hxx>
 #include <win/saldata.hxx>
 #include <win/salgdi.h>

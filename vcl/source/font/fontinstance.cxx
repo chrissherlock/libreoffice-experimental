@@ -24,7 +24,7 @@
 #include <fontinstance.hxx>
 #include <impfontcache.hxx>
 
-#include <PhysicalFontFace.hxx>
+#include <font/PhysicalFontFace.hxx>
 
 // extend std namespace to add custom hash needed for LogicalFontInstance
 

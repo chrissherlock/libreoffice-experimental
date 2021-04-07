@@ -46,14 +46,14 @@
 #include <fontinstance.hxx>
 #include <fontattributes.hxx>
 #include <impfontmetricdata.hxx>
-#include <PhysicalFontCollection.hxx>
-#include <PhysicalFontFace.hxx>
+#include <font/PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFace.hxx>
 #include <sallayout.hxx>
 
 using namespace psp;
 
 /*******************************************************
- * GenPspGraphics
+ * GenPspGraphics                                         *
  *******************************************************/
 
 GenPspGraphics::GenPspGraphics()
