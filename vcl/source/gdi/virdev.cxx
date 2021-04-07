@@ -520,4 +520,14 @@ tools::Long VirtualDevice::GetFontExtLeading() const
     return mpFontInstance->mxFontMetric->GetExternalLeading();
 }
 
+void VirtualDevice::SetOutOffXPixel(tools::Long nOutOffX)
+{
+    maGeometry.SetXFrameOffset(nOutOffX);
+}
+
+void VirtualDevice::SetOutOffYPixel(tools::Long nOutOffY)
+{
+    maGeometry.SetYFrameOffset(nOutOffY);
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

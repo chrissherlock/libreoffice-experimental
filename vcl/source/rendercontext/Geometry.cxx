@@ -83,13 +83,13 @@ void Geometry::SetYOffsetFromOriginInLogicalUnits(tools::Long nOffsetFromOriginY
     mnOutOffLogicY = nOffsetFromOriginYInLogicalUnits;
 }
 
-tools::Long Geometry::GetXOffsetInPixels() const { return mnOutOffX; }
+tools::Long Geometry::GetXFrameOffset() const { return mnOutOffX; }
 
-void Geometry::SetXOffsetInPixels(tools::Long nOffsetXpx) { mnOutOffX = nOffsetXpx; }
+void Geometry::SetXFrameOffset(tools::Long nOffsetXpx) { mnOutOffX = nOffsetXpx; }
 
-tools::Long Geometry::GetYOffsetInPixels() const { return mnOutOffY; }
+tools::Long Geometry::GetYFrameOffset() const { return mnOutOffY; }
 
-void Geometry::SetYOffsetInPixels(tools::Long nOffsetYpx) { mnOutOffY = nOffsetYpx; }
+void Geometry::SetYFrameOffset(tools::Long nOffsetYpx) { mnOutOffY = nOffsetYpx; }
 
 sal_Int32 Geometry::GetDPIX() const { return mnDPIX; }
 

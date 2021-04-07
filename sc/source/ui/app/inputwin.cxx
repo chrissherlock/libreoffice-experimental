@@ -444,7 +444,7 @@ void ScInputWindow::PixelInvalidate(const tools::Rectangle* pRectangle)
 
     if (pRectangle)
     {
-        const Point aPos(pRectangle->getX() - GetOutOffXPixel(), pRectangle->getY() - GetOutOffYPixel());
+        const Point aPos(pRectangle->getX() - GetFrameOffset().X(), pRectangle->getY() - GetFrameOffset().Y());
         const tools::Rectangle aRect(aPos, pRectangle->GetSize());
         Window::PixelInvalidate(&aRect);
     }
@@ -486,7 +486,7 @@ void ScInputWindow::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long 
     if (const vcl::ILibreOfficeKitNotifier* pNotifier = GetLOKNotifier())
     {
         std::vector<vcl::LOKPayloadItem> aItems;
-        aItems.emplace_back(std::make_pair("position", Point(GetOutOffXPixel(), GetOutOffYPixel()).toString()));
+        aItems.emplace_back(std::make_pair("position", Point(GetFrameOffset().X(), GetFrameOffset().Y()).toString()));
         aItems.emplace_back("size", GetSizePixel().toString());
         aItems.emplace_back("lines", OString::number(mxTextWindow->GetNumLines()));
         pNotifier->notifyWindow(GetLOKWindowId(), "size_changed", aItems);
@@ -526,7 +526,7 @@ void ScInputWindow::Resize()
     if (const vcl::ILibreOfficeKitNotifier* pNotifier = GetLOKNotifier())
     {
         std::vector<vcl::LOKPayloadItem> aItems;
-        aItems.emplace_back(std::make_pair("position", Point(GetOutOffXPixel(), GetOutOffYPixel()).toString()));
+        aItems.emplace_back(std::make_pair("position", Point(GetFrameOffset().X(), GetFrameOffset().Y()).toString()));
         aItems.emplace_back("size", GetSizePixel().toString());
         aItems.emplace_back("lines", OString::number(mxTextWindow->GetNumLines()));
         pNotifier->notifyWindow(GetLOKWindowId(), "size_changed", aItems);
@@ -549,7 +549,7 @@ void ScInputWindow::NotifyLOKClient()
     {
         std::vector<vcl::LOKPayloadItem> aItems;
         aItems.emplace_back("type", "calc-input-win");
-        aItems.emplace_back(std::make_pair("position", Point(GetOutOffXPixel(), GetOutOffYPixel()).toString()));
+        aItems.emplace_back(std::make_pair("position", Point(GetFrameOffset().X(), GetFrameOffset().Y()).toString()));
         aItems.emplace_back(std::make_pair("size", aSize.toString()));
         aItems.emplace_back("lines", OString::number(mxTextWindow->GetNumLines()));
         pNotifier->notifyWindow(GetLOKWindowId(), "created", aItems);

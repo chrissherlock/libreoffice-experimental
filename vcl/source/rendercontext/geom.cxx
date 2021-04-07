@@ -59,23 +59,9 @@ void RenderContext2::SetWidth(tools::Long nWidth) { maGeometry.SetWidth(nWidth);
 
 void RenderContext2::SetHeight(tools::Long nHeight) { maGeometry.SetHeight(nHeight); }
 
-tools::Long RenderContext2::GetOutOffXPixel() const { return maGeometry.GetXOffsetInPixels(); }
-
-tools::Long RenderContext2::GetOutOffYPixel() const { return maGeometry.GetYOffsetInPixels(); }
-
-void RenderContext2::SetOutOffXPixel(tools::Long nOutOffX)
-{
-    maGeometry.SetXOffsetInPixels(nOutOffX);
-}
-
-void RenderContext2::SetOutOffYPixel(tools::Long nOutOffY)
-{
-    maGeometry.SetYOffsetInPixels(nOutOffY);
-}
-
 Point RenderContext2::GetFrameOffset() const
 {
-    return Point(maGeometry.GetXOffsetInPixels(), maGeometry.GetYOffsetInPixels());
+    return Point(maGeometry.GetXFrameOffset(), maGeometry.GetYFrameOffset());
 }
 
 tools::Rectangle RenderContext2::GetOutputRectPixel() const

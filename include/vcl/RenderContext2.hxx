@@ -567,10 +567,7 @@ public:
     Size GetSize() const;
     tools::Long GetWidth() const;
     tools::Long GetHeight() const;
-    tools::Long GetOutOffXPixel() const;
-    tools::Long GetOutOffYPixel() const;
-    void SetOutOffXPixel(tools::Long nOutOffX);
-    void SetOutOffYPixel(tools::Long nOutOffY);
+
     Point GetFrameOffset() const;
     tools::Rectangle GetOutputRectPixel() const;
     Size GetOutputSize() const;

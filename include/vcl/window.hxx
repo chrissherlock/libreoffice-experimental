@@ -702,6 +702,9 @@ private:
                                         ImplGetCanvas( bool bSpriteCanvas ) const;
 
 public:
+    void SetXFrameOffset(tools::Long nOutOffX);
+    void SetYFrameOffset(tools::Long nOutOffY);
+
     virtual vcl::Region                 GetActiveClipRegion() const override;
 
 protected:
@@ -730,6 +733,7 @@ protected:
     virtual void                        ClipToPaintRegion( tools::Rectangle& rDstRect ) override;
 
     virtual void ApplySettings(vcl::RenderContext& rRenderContext);
+
 
 private:
     virtual RenderContext2 const*       DrawOutDevDirectCheck(RenderContext2 const& rSrcDev) const override;

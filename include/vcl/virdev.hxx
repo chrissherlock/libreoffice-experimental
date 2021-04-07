@@ -161,6 +161,9 @@ public:
 
     virtual void        EnableRTL( bool bEnable = true ) override;
 
+    void SetOutOffXPixel(tools::Long nOutOffX);
+    void SetOutOffYPixel(tools::Long nOutOffY);
+
     bool                SetOutputSizePixel( const Size& rNewSize, bool bErase = true );
     bool                SetOutputSizePixelScaleOffsetAndBuffer( const Size& rNewSize,
                                                                 const Fraction& rScale,

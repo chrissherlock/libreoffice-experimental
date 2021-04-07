@@ -1410,15 +1410,15 @@ bool Window::ImplUpdatePos()
 
     if ( ImplIsOverlapWindow() )
     {
-        maGeometry.SetXOffsetInPixels(mpWindowImpl->mnX);
-        maGeometry.SetYOffsetInPixels(mpWindowImpl->mnY);
+        SetXFrameOffset(mpWindowImpl->mnX);
+        SetYFrameOffset(mpWindowImpl->mnY);
     }
     else
     {
         vcl::Window* pParent = ImplGetParent();
 
-        maGeometry.SetXOffsetInPixels(mpWindowImpl->mnX + pParent->maGeometry.GetXOffsetInPixels());
-        maGeometry.SetYOffsetInPixels(mpWindowImpl->mnY + pParent->maGeometry.GetYOffsetInPixels());
+        SetXFrameOffset(mpWindowImpl->mnX + pParent->GetFrameOffset().X());
+        SetYFrameOffset(mpWindowImpl->mnY + pParent->GetFrameOffset().Y());
     }
 
     VclPtr< vcl::Window > pChild = mpWindowImpl->mpFirstChild;
@@ -1438,7 +1438,7 @@ bool Window::ImplUpdatePos()
 void Window::ImplUpdateSysObjPos()
 {
     if ( mpWindowImpl->mpSysObj )
-        mpWindowImpl->mpSysObj->SetPosSize( maGeometry.GetXOffsetInPixels(), maGeometry.GetYOffsetInPixels(), GetWidth(), GetHeight() );
+        mpWindowImpl->mpSysObj->SetPosSize( GetFrameOffset().X(), GetFrameOffset().Y(), GetWidth(), GetHeight() );
 
     VclPtr< vcl::Window > pChild = mpWindowImpl->mpFirstChild;
     while ( pChild )
@@ -1454,8 +1454,8 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
     bool    bNewPos         = false;
     bool    bNewSize        = false;
     bool    bCopyBits       = false;
-    tools::Long    nOldOutOffX     = maGeometry.GetXOffsetInPixels();
-    tools::Long    nOldOutOffY     = maGeometry.GetYOffsetInPixels();
+    tools::Long    nOldOutOffX     = GetFrameOffset().X();
+    tools::Long    nOldOutOffY     = GetFrameOffset().Y();
     tools::Long    nOldOutWidth    = GetWidth();
     tools::Long    nOldOutHeight   = GetHeight();
     std::unique_ptr<vcl::Region> pOverlapRegion;
@@ -1509,7 +1509,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
     if ( nFlags & PosSizeFlags::X )
     {
         tools::Long nOrgX = nX;
-        Point aPtDev( Point( nX+maGeometry.GetXOffsetInPixels(), 0 ) );
+        Point aPtDev( Point( nX+GetFrameOffset().X(), 0 ) );
         OutputDevice *pOutDev = GetOutDev();
         if( pOutDev->HasMirroredGraphics() )
         {
@@ -1654,7 +1654,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
                     ImplClipBoundaries( aRegion, false, true );
                     if ( !pOverlapRegion->IsEmpty() )
                     {
-                        pOverlapRegion->Move( maGeometry.GetXOffsetInPixels()-nOldOutOffX, maGeometry.GetYOffsetInPixels()-nOldOutOffY );
+                        pOverlapRegion->Move( GetFrameOffset().X()-nOldOutOffX, GetFrameOffset().Y()-nOldOutOffY );
                         aRegion.Exclude( *pOverlapRegion );
                     }
                     if ( !aRegion.IsEmpty() )
@@ -1662,7 +1662,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
                         // adapt Paint areas
                         ImplMoveAllInvalidateRegions( tools::Rectangle( Point( nOldOutOffX, nOldOutOffY ),
                                                                  Size( nOldOutWidth, nOldOutHeight ) ),
-                                                      maGeometry.GetXOffsetInPixels()-nOldOutOffX, maGeometry.GetYOffsetInPixels()-nOldOutOffY,
+                                                      GetFrameOffset().X()-nOldOutOffX, GetFrameOffset().Y()-nOldOutOffY,
                                                       true );
                         SalGraphics* pGraphics = ImplGetFrameGraphics();
                         if ( pGraphics )
@@ -1672,7 +1672,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
                             const bool bSelectClipRegion = pOutDev->SelectClipRegion( aRegion, pGraphics );
                             if ( bSelectClipRegion )
                             {
-                                pGraphics->CopyArea( maGeometry.GetXOffsetInPixels(), maGeometry.GetYOffsetInPixels(),
+                                pGraphics->CopyArea( GetFrameOffset().X(), GetFrameOffset().Y(),
                                                      nOldOutOffX, nOldOutOffY,
                                                      nOldOutWidth, nOldOutHeight,
                                                      *this );
@@ -1727,7 +1727,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
     if ( bUpdateSysObjPos )
         ImplUpdateSysObjPos();
     if ( bNewSize && mpWindowImpl->mpSysObj )
-        mpWindowImpl->mpSysObj->SetPosSize( maGeometry.GetXOffsetInPixels(), maGeometry.GetYOffsetInPixels(), GetWidth(), GetHeight() );
+        mpWindowImpl->mpSysObj->SetPosSize( GetFrameOffset().X(), GetFrameOffset().X(), GetWidth(), GetHeight() );
 }
 
 void Window::ImplNewInputContext()
@@ -2700,7 +2700,7 @@ void Window::setPosSizePixel( tools::Long nX, tools::Long nY,
             nSysFlags |= SAL_FRAME_POSSIZE_X;
             if( pWinParent && (pWindow->GetStyle() & WB_SYSTEMCHILDWINDOW) )
             {
-                nX += pWinParent->maGeometry.GetXOffsetInPixels();
+                nX += pWinParent->GetFrameOffset().X();
             }
             if( pParent && pParent->ImplIsAntiparallel() )
             {
@@ -2739,7 +2739,7 @@ void Window::setPosSizePixel( tools::Long nX, tools::Long nY,
             nSysFlags |= SAL_FRAME_POSSIZE_Y;
             if( pWinParent && (pWindow->GetStyle() & WB_SYSTEMCHILDWINDOW) )
             {
-                nY += pWinParent->maGeometry.GetYOffsetInPixels();
+                nY += pWinParent->GetFrameOffset().Y();
             }
         }
 
@@ -2800,31 +2800,31 @@ tools::Rectangle Window::GetDesktopRectPixel() const
 Point Window::OutputToScreenPixel( const Point& rPos ) const
 {
     // relative to top level parent
-    return Point( rPos.X()+maGeometry.GetXOffsetInPixels(), rPos.Y()+maGeometry.GetYOffsetInPixels() );
+    return Point( rPos.X()+GetFrameOffset().X(), rPos.Y()+GetFrameOffset().Y() );
 }
 
 Point Window::ScreenToOutputPixel( const Point& rPos ) const
 {
     // relative to top level parent
-    return Point( rPos.X()-maGeometry.GetXOffsetInPixels(), rPos.Y()-maGeometry.GetYOffsetInPixels() );
+    return Point( rPos.X()-GetFrameOffset().X(), rPos.Y()-GetFrameOffset().Y() );
 }
 
 tools::Long Window::ImplGetUnmirroredOutOffX()
 {
-    // revert maGeometry.GetXOffsetInPixels() changes that were potentially made in ImplPosSizeWindow
-    tools::Long offx = maGeometry.GetXOffsetInPixels();
+    // revert GetFrameOffset().X() changes that were potentially made in ImplPosSizeWindow
+    tools::Long offx = GetFrameOffset().X();
     OutputDevice *pOutDev = GetOutDev();
     if( pOutDev->HasMirroredGraphics() )
     {
         if( mpWindowImpl->mpParent && !mpWindowImpl->mpParent->mpWindowImpl->mbFrame && mpWindowImpl->mpParent->ImplIsAntiparallel() )
         {
             if ( !ImplIsOverlapWindow() )
-                offx -= mpWindowImpl->mpParent->maGeometry.GetXOffsetInPixels();
+                offx -= mpWindowImpl->mpParent->GetFrameOffset().X();
 
             offx = mpWindowImpl->mpParent->GetWidth() - GetWidth() - offx;
 
             if ( !ImplIsOverlapWindow() )
-                offx += mpWindowImpl->mpParent->maGeometry.GetXOffsetInPixels();
+                offx += mpWindowImpl->mpParent->GetFrameOffset().X();
 
         }
     }
@@ -2836,14 +2836,14 @@ Point Window::OutputToNormalizedScreenPixel( const Point& rPos ) const
 {
     // relative to top level parent
     tools::Long offx = const_cast<vcl::Window*>(this)->ImplGetUnmirroredOutOffX();
-    return Point( rPos.X()+offx, rPos.Y()+maGeometry.GetYOffsetInPixels() );
+    return Point( rPos.X()+offx, rPos.Y()+GetFrameOffset().Y() );
 }
 
 Point Window::NormalizedScreenToOutputPixel( const Point& rPos ) const
 {
     // relative to top level parent
     tools::Long offx = const_cast<vcl::Window*>(this)->ImplGetUnmirroredOutOffX();
-    return Point( rPos.X()-offx, rPos.Y()-maGeometry.GetYOffsetInPixels() );
+    return Point( rPos.X()-offx, rPos.Y()-GetFrameOffset().Y() );
 }
 
 Point Window::OutputToAbsoluteScreenPixel( const Point& rPos ) const
@@ -3703,7 +3703,7 @@ Reference< css::rendering::XCanvas > Window::ImplGetCanvas( bool bSpriteCanvas )
 
     // common: first any is VCL pointer to window (for VCL canvas)
     aArg[ 0 ] <<= reinterpret_cast<sal_Int64>(this);
-    aArg[ 1 ] <<= css::awt::Rectangle( maGeometry.GetXOffsetInPixels(), maGeometry.GetYOffsetInPixels(), GetWidth(), GetHeight() );
+    aArg[ 1 ] <<= css::awt::Rectangle( GetFrameOffset().X(), GetFrameOffset().Y(), GetWidth(), GetHeight() );
     aArg[ 2 ] <<= mpWindowImpl->mbAlwaysOnTop;
     aArg[ 3 ] <<= Reference< css::awt::XWindow >(
                              const_cast<vcl::Window*>(this)->GetComponentInterface(),
@@ -3992,6 +3992,16 @@ void Window::DrawAnimationView(ImplAnimView& rAnimView, sal_uLong nPos, VirtualD
     }
 
     OutputDevice::DrawAnimationView(rAnimView, nPos, pVDev);
+}
+
+void Window::SetXFrameOffset(tools::Long nOutOffX)
+{
+    maGeometry.SetXFrameOffset(nOutOffX);
+}
+
+void Window::SetYFrameOffset(tools::Long nOutOffY)
+{
+    maGeometry.SetYFrameOffset(nOutOffY);
 }
 
 } /* namespace vcl */

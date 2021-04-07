@@ -1192,19 +1192,19 @@ bool RenderContext2::ImplDrawRotateText(SalLayout& rSalLayout)
     aPoint += Point(nX, nY);
 
     // mask output with text colored bitmap
-    tools::Long nOldOffX = maGeometry.GetXOffsetInPixels();
-    tools::Long nOldOffY = maGeometry.GetYOffsetInPixels();
+    tools::Long nOldOffX = maGeometry.GetXFrameOffset();
+    tools::Long nOldOffY = maGeometry.GetYFrameOffset();
     bool bOldMap = maGeometry.IsMapModeEnabled();
 
-    maGeometry.SetXOffsetInPixels(0);
-    maGeometry.SetYOffsetInPixels(0);
+    maGeometry.SetXFrameOffset(0);
+    maGeometry.SetYFrameOffset(0);
     EnableMapMode(false);
 
     DrawMask(aPoint, aBmp, GetTextColor());
 
     EnableMapMode(bOldMap);
-    maGeometry.SetXOffsetInPixels(nOldOffX);
-    maGeometry.SetYOffsetInPixels(nOldOffY);
+    maGeometry.SetXFrameOffset(nOldOffX);
+    maGeometry.SetYFrameOffset(nOldOffY);
 
     return true;
 }
@@ -1228,8 +1228,7 @@ void RenderContext2::ImplDrawTextDirect(SalLayout& rSalLayout, bool bTextLines)
             // mirror this window back
             tools::Long devX
                 = w - pOutDevRef->maGeometry.GetWidthInPixels()
-                  - pOutDevRef->maGeometry
-                        .GetXOffsetInPixels(); // re-mirrored maGeometry.GetXOffsetInPixels()
+                  - pOutDevRef->GetFrameOffset().X(); // re-mirrored maGeometry.GetFrameOffset().X()
             rSalLayout.DrawBase().setX(devX
                                        + (pOutDevRef->maGeometry.GetWidthInPixels() - 1
                                           - (rSalLayout.DrawBase().X() - devX)));
@@ -1240,10 +1239,10 @@ void RenderContext2::ImplDrawTextDirect(SalLayout& rSalLayout, bool bTextLines)
         RenderContext2* pOutDevRef = this;
 
         // mirror this window back
-        tools::Long devX = pOutDevRef->maGeometry
-                               .GetXOffsetInPixels(); // re-mirrored maGeometry.GetXOffsetInPixels()
-        rSalLayout.DrawBase().setX(pOutDevRef->maGeometry.GetWidthInPixels() - 1
-                                   - (rSalLayout.DrawBase().X() - devX) + devX);
+        tools::Long devX
+            = pOutDevRef->GetFrameOffset().X(); // re-mirrored maGeometry.GetFrameOffset().X()
+        rSalLayout.DrawBase().setX(pOutDevRef->GetWidth() - 1 - (rSalLayout.DrawBase().X() - devX)
+                                   + devX);
     }
 
     rSalLayout.DrawText(*mpGraphics);
@@ -1840,9 +1839,9 @@ void RenderContext2::ImplDrawText(tools::Rectangle const& rRect, OUString const&
                         nMnemonicWidth = LogicWidthToDeviceCoordinate(std::abs(lc_x1 - lc_x2));
 
                         Point aTempPos = LogicToPixel(aPos);
-                        nMnemonicX = GetOutOffXPixel() + aTempPos.X()
+                        nMnemonicX = GetFrameOffset().X() + aTempPos.X()
                                      + ImplLogicWidthToDevicePixel(std::min(lc_x1, lc_x2));
-                        nMnemonicY = GetOutOffYPixel() + aTempPos.Y()
+                        nMnemonicY = GetFrameOffset().Y() + aTempPos.Y()
                                      + ImplLogicWidthToDevicePixel(GetFontMetric().GetAscent());
                         ImplDrawMnemonicLine(nMnemonicX, nMnemonicY, nMnemonicWidth);
                     }
@@ -1912,9 +1911,9 @@ void RenderContext2::ImplDrawText(tools::Rectangle const& rRect, OUString const&
             nMnemonicWidth = LogicWidthToDeviceCoordinate(std::abs(lc_x1 - lc_x2));
 
             Point aTempPos = LogicToPixel(aPos);
-            nMnemonicX = GetOutOffXPixel() + aTempPos.X()
+            nMnemonicX = GetFrameOffset().X() + aTempPos.X()
                          + ImplLogicWidthToDevicePixel(std::min(lc_x1, lc_x2));
-            nMnemonicY = GetOutOffYPixel() + aTempPos.Y()
+            nMnemonicY = GetFrameOffset().Y() + aTempPos.Y()
                          + ImplLogicWidthToDevicePixel(GetFontMetric().GetAscent());
         }
 
@@ -2147,8 +2146,8 @@ void RenderContext2::DrawCtrlText(const Point& rPos, const OUString& rStr, sal_I
 
             aTempPos += rPos;
             aTempPos = LogicToPixel(aTempPos);
-            nMnemonicX = maGeometry.GetXOffsetInPixels() + aTempPos.X();
-            nMnemonicY = maGeometry.GetYOffsetInPixels() + aTempPos.Y();
+            nMnemonicX = GetFrameOffset().X() + aTempPos.X();
+            nMnemonicY = GetFrameOffset().Y() + aTempPos.Y();
         }
     }
 

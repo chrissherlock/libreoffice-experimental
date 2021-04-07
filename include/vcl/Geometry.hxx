@@ -49,10 +49,10 @@ public:
     tools::Long GetYOffsetFromOriginInLogicalUnits() const;
     void SetYOffsetFromOriginInLogicalUnits(tools::Long nOffsetFromOriginYInLogicalUnits);
 
-    tools::Long GetXOffsetInPixels() const;
-    void SetXOffsetInPixels(tools::Long nOffsetXpx);
-    tools::Long GetYOffsetInPixels() const;
-    void SetYOffsetInPixels(tools::Long nOffsetYpx);
+    tools::Long GetXFrameOffset() const;
+    void SetXFrameOffset(tools::Long nOffsetXpx);
+    tools::Long GetYFrameOffset() const;
+    void SetYFrameOffset(tools::Long nOffsetYpx);
 
     sal_Int32 GetDPIX() const;
     sal_Int32 GetDPIY() const;

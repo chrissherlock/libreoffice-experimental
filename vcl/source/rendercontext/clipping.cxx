@@ -134,10 +134,9 @@ void RenderContext2::IntersectClipRegion(vcl::Region const& rRegion)
 
 vcl::Region RenderContext2::ClipToDeviceBounds(vcl::Region aRegion) const
 {
-    aRegion.Intersect(tools::Rectangle{ maGeometry.GetXOffsetInPixels(),
-                                        maGeometry.GetYOffsetInPixels(),
-                                        maGeometry.GetXOffsetInPixels() + GetWidth() - 1,
-                                        maGeometry.GetYOffsetInPixels() + GetHeight() - 1 });
+    aRegion.Intersect(tools::Rectangle{ maGeometry.GetXFrameOffset(), maGeometry.GetYFrameOffset(),
+                                        maGeometry.GetXFrameOffset() + GetWidth() - 1,
+                                        maGeometry.GetYFrameOffset() + GetHeight() - 1 });
     return aRegion;
 }
 
