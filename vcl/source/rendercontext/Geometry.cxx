@@ -47,9 +47,9 @@ void Geometry::SetSize(Size const& rSize)
     mnOutHeight = rSize.Height();
 }
 
-void Geometry::SetWidthInPixels(tools::Long nWidth) { mnOutWidth = nWidth; }
+void Geometry::SetWidth(tools::Long nWidth) { mnOutWidth = nWidth; }
 
-void Geometry::SetHeightInPixels(tools::Long nHeight) { mnOutHeight = nHeight; }
+void Geometry::SetHeight(tools::Long nHeight) { mnOutHeight = nHeight; }
 
 tools::Long Geometry::GetWidthInPixels() const { return mnOutWidth; }
 

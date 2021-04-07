@@ -567,8 +567,6 @@ public:
     Size GetSize() const;
     tools::Long GetWidth() const;
     tools::Long GetHeight() const;
-    void SetWidthInPixels(tools::Long nWidth);
-    void SetHeightInPixels(tools::Long nHeight);
     tools::Long GetOutOffXPixel() const;
     tools::Long GetOutOffYPixel() const;
     void SetOutOffXPixel(tools::Long nOutOffX);
@@ -863,6 +861,8 @@ protected:
     virtual void ReleaseGraphics(bool bRelease = true) = 0;
 
     void SetSize(Size const& rSize);
+    void SetWidth(tools::Long nWidth);
+    void SetHeight(tools::Long nHeight);
 
     virtual void CopyDeviceArea(SalTwoRect& aPosAry, bool bWindowInvalidate);
 

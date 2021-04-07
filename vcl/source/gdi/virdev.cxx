@@ -167,8 +167,8 @@ void VirtualDevice::ImplInitVirDev( const RenderContext2* pOutDev,
             break;
     }
 
-    SetWidthInPixels(nDX);
-    SetHeightInPixels(nDY);
+    SetWidth(nDX);
+    SetHeight(nDY);
 
     if (meFormat == DeviceFormat::BITMASK)
         SetAntialiasing( AntialiasingFlags::DisableText );
@@ -291,8 +291,8 @@ bool VirtualDevice::InnerImplSetOutputSizePixel( const Size& rNewSize, bool bEra
 
         if ( bRet )
         {
-            SetWidthInPixels(rNewSize.Width());
-            SetHeightInPixels(rNewSize.Height());
+            SetWidth(rNewSize.Width());
+            SetHeight(rNewSize.Height());
             Erase();
         }
     }
@@ -328,8 +328,8 @@ bool VirtualDevice::InnerImplSetOutputSizePixel( const Size& rNewSize, bool bEra
                 pNewVirDev->ReleaseGraphics( pGraphics );
                 ReleaseGraphics();
                 mpVirDev = std::move(pNewVirDev);
-                SetWidthInPixels(rNewSize.Width());
-                SetHeightInPixels(rNewSize.Height());
+                SetWidth(rNewSize.Width());
+                SetHeight(rNewSize.Height());
                 bRet = true;
             }
             else

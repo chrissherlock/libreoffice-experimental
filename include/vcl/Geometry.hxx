@@ -36,8 +36,8 @@ public:
     tools::Long GetWidthInPixels() const;
     tools::Long GetHeightInPixels() const;
     void SetSize(Size const& rSize);
-    void SetWidthInPixels(tools::Long nWidth);
-    void SetHeightInPixels(tools::Long nHeight);
+    void SetWidth(tools::Long nWidth);
+    void SetHeight(tools::Long nHeight);
 
     tools::Long GetXOffsetFromOriginInPixels() const;
     void SetXOffsetFromOriginInPixels(tools::Long nOffsetFromOriginXpx);

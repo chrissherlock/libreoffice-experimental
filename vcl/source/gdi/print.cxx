@@ -921,8 +921,8 @@ void Printer::ImplUpdatePageData()
     tools::Long nWidth, nHeight;
     mpInfoPrinter->GetPageInfo(&maJobSetup.ImplGetConstData(), nWidth, nHeight,
                                maPageOffset, maPaperSize);
-    SetWidthInPixels(nWidth);
-    SetHeightInPixels(nHeight);
+    SetWidth(nWidth);
+    SetHeight(nHeight);
 }
 
 void Printer::ImplUpdateFontList() { ImplUpdateFontData(); }

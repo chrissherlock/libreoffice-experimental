@@ -1117,8 +1117,8 @@ void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* p
         {
             tools::Long nWidth, nHeight;
             mpWindowImpl->mpFrame->GetClientSize( nWidth, nHeight );
-            SetWidthInPixels(nWidth);
-            SetHeightInPixels(nHeight);
+            SetWidth(nWidth);
+            SetHeight(nHeight);
         }
     }
     else
@@ -1489,7 +1489,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
             nWidth = 0;
         if ( nWidth != GetWidth() )
         {
-            SetWidthInPixels(nWidth);
+            SetWidth(nWidth);
             bNewSize = true;
             bCopyBits = false;
         }
@@ -1500,7 +1500,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
             nHeight = 0;
         if ( nHeight != GetHeight() )
         {
-            SetHeightInPixels(nHeight);
+            SetHeight(nHeight);
             bNewSize = true;
             bCopyBits = false;
         }

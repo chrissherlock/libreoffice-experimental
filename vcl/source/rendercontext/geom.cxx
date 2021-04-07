@@ -55,12 +55,9 @@ tools::Long RenderContext2::GetHeight() const { return maGeometry.GetHeightInPix
 
 void RenderContext2::SetSize(Size const& rSize) { maGeometry.SetSize(rSize); }
 
-void RenderContext2::SetWidthInPixels(tools::Long nWidth) { maGeometry.SetWidthInPixels(nWidth); }
+void RenderContext2::SetWidth(tools::Long nWidth) { maGeometry.SetWidth(nWidth); }
 
-void RenderContext2::SetHeightInPixels(tools::Long nHeight)
-{
-    maGeometry.SetHeightInPixels(nHeight);
-}
+void RenderContext2::SetHeight(tools::Long nHeight) { maGeometry.SetHeight(nHeight); }
 
 tools::Long RenderContext2::GetOutOffXPixel() const { return maGeometry.GetXOffsetInPixels(); }
 
