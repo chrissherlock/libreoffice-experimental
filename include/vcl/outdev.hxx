@@ -51,6 +51,7 @@ class Gradient;
 class Hatch;
 class Image;
 class LineInfo;
+class MetaAction;
 class OutputDevice;
 class Printer;
 class SalLayoutGlyphs;
@@ -452,6 +453,9 @@ public:
     bool DrawEPS(const Point& rPt, const Size& rSz, const GfxLink& rGfxLink,
                  GDIMetaFile* pSubst = nullptr) override;
     ///@}
+
+    tools::Rectangle CalcActionBounds(MetaAction const& rAct, sal_Int32 nStrStartPos = 0,
+                                      sal_Int32 nStrEndPos = 0);
 
 protected:
     OutputDevice(OutDevType eOutDevType);

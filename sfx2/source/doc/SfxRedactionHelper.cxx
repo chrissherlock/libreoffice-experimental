@@ -124,59 +124,6 @@ void setPageMargins(const uno::Reference<beans::XPropertySet>& xPageProperySet,
     xPageProperySet->setPropertyValue("BorderRight", css::uno::makeAny(aPageMargins.nRight));
 }
 
-// #i10613# Extracted from ImplCheckRect::ImplCreate
-tools::Rectangle ImplCalcActionBounds(const MetaAction& rAct, const OutputDevice& rOut,
-                                      sal_Int32 nStrStartPos, sal_Int32 nStrEndPos)
-{
-    tools::Rectangle aActionBounds;
-
-    switch (rAct.GetType())
-    {
-        case MetaActionType::TEXTARRAY:
-        {
-            const MetaTextArrayAction& rTextAct = static_cast<const MetaTextArrayAction&>(rAct);
-            const OUString aString(rTextAct.GetText().copy(rTextAct.GetIndex(), rTextAct.GetLen()));
-
-            if (!aString.isEmpty())
-            {
-                // #105987# ImplLayout takes everything in logical coordinates
-                std::unique_ptr<SalLayout> pSalLayout1 = rOut.ImplLayout(
-                    aString, 0, nStrStartPos, rTextAct.GetPoint(), 0, rTextAct.GetDXArray());
-                std::unique_ptr<SalLayout> pSalLayout2 = rOut.ImplLayout(
-                    aString, 0, nStrEndPos, rTextAct.GetPoint(), 0, rTextAct.GetDXArray());
-                if (pSalLayout2)
-                {
-                    tools::Rectangle aBoundRect2(
-                        const_cast<OutputDevice&>(rOut).ImplGetTextBoundRect(*pSalLayout2));
-                    aActionBounds = rOut.PixelToLogic(aBoundRect2);
-                }
-                if (pSalLayout1 && nStrStartPos > 0)
-                {
-                    tools::Rectangle aBoundRect1(
-                        const_cast<OutputDevice&>(rOut).ImplGetTextBoundRect(*pSalLayout1));
-                    aActionBounds.SetLeft(rOut.PixelToLogic(aBoundRect1).getX()
-                                          + rOut.PixelToLogic(aBoundRect1).getWidth());
-                }
-            }
-        }
-        break;
-
-        default:
-            break;
-    }
-
-    if (!aActionBounds.IsEmpty())
-    {
-        // fdo#40421 limit current action's output to clipped area
-        if (rOut.IsClipRegion())
-            return rOut.GetClipRegion().GetBoundRect().Intersection(aActionBounds);
-        else
-            return aActionBounds;
-    }
-    else
-        return aActionBounds;
-}
-
 } // End of anon namespace
 
 void SfxRedactionHelper::getPageMetaFilesFromDoc(std::vector<GDIMetaFile>& aMetaFiles,
@@ -449,7 +396,7 @@ void SfxRedactionHelper::searchInMetaFile(const RedactionTarget* pRedactionTarge
                 OutputDevice* pOutputDevice
                     = SfxObjectShell::GetShellFromComponent(xComponent)->GetDocumentRefDev();
                 tools::Rectangle aNewRect(
-                    ImplCalcActionBounds(*pMetaTextArrayAction, *pOutputDevice, nStart, nEnd));
+                    pOutputDevice->CalcActionBounds(*pMetaTextArrayAction, nStart, nEnd));
 
                 if (!aNewRect.IsEmpty())
                 {

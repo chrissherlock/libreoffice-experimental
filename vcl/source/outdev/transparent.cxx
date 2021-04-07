@@ -575,8 +575,10 @@ bool ImplIsNotTransparent( const MetaAction& rAct, const OutputDevice& rOut )
     return bRet;
 }
 
+} // end anon namespace
+
 // #i10613# Extracted from ImplCheckRect::ImplCreate
-tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevice& rOut )
+tools::Rectangle OutputDevice::CalcActionBounds(MetaAction const& rAct, sal_Int32 nStrStartPos, sal_Int32 nStrEndPos)
 {
     tools::Rectangle aActionBounds;
 
@@ -670,7 +672,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
 
         case MetaActionType::BMP:
             aActionBounds = tools::Rectangle( static_cast<const MetaBmpAction&>(rAct).GetPoint(),
-                                       rOut.PixelToLogic( static_cast<const MetaBmpAction&>(rAct).GetBitmap().GetSizePixel() ) );
+                                       PixelToLogic( static_cast<const MetaBmpAction&>(rAct).GetBitmap().GetSizePixel() ) );
             break;
 
         case MetaActionType::BMPSCALE:
@@ -685,7 +687,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
 
         case MetaActionType::BMPEX:
             aActionBounds = tools::Rectangle( static_cast<const MetaBmpExAction&>(rAct).GetPoint(),
-                                       rOut.PixelToLogic( static_cast<const MetaBmpExAction&>(rAct).GetBitmapEx().GetSizePixel() ) );
+                                       PixelToLogic( static_cast<const MetaBmpExAction&>(rAct).GetBitmapEx().GetSizePixel() ) );
             break;
 
         case MetaActionType::BMPEXSCALE:
@@ -700,7 +702,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
 
         case MetaActionType::MASK:
             aActionBounds = tools::Rectangle( static_cast<const MetaMaskAction&>(rAct).GetPoint(),
-                                       rOut.PixelToLogic( static_cast<const MetaMaskAction&>(rAct).GetBitmap().GetSizePixel() ) );
+                                       PixelToLogic( static_cast<const MetaMaskAction&>(rAct).GetBitmap().GetSizePixel() ) );
             break;
 
         case MetaActionType::MASKSCALE:
@@ -754,7 +756,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
 
                 // #105987# Use API method instead of Impl* methods
                 // #107490# Set base parameter equal to index parameter
-                rOut.GetTextBoundRect( aActionBounds, rTextAct.GetText(), rTextAct.GetIndex(),
+                GetTextBoundRect( aActionBounds, rTextAct.GetText(), rTextAct.GetIndex(),
                                        rTextAct.GetIndex(), rTextAct.GetLen() );
                 aActionBounds.Move( aPtLog.X(), aPtLog.Y() );
             }
@@ -766,16 +768,27 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
             const MetaTextArrayAction&  rTextAct = static_cast<const MetaTextArrayAction&>(rAct);
             const OUString              aString( rTextAct.GetText().copy(rTextAct.GetIndex(), rTextAct.GetLen()) );
 
-            if( !aString.isEmpty() )
+            if (!aString.isEmpty())
             {
                 // #105987# ImplLayout takes everything in logical coordinates
-                std::unique_ptr<SalLayout> pSalLayout = rOut.ImplLayout( rTextAct.GetText(), rTextAct.GetIndex(),
-                                                         rTextAct.GetLen(), rTextAct.GetPoint(),
-                                                         0, rTextAct.GetDXArray() );
-                if( pSalLayout )
+                std::unique_ptr<SalLayout> pSalLayout1 = ImplLayout(
+                    aString, 0, nStrStartPos, rTextAct.GetPoint(), 0, rTextAct.GetDXArray());
+                std::unique_ptr<SalLayout> pSalLayout2 = ImplLayout(
+                    aString, 0, nStrEndPos, rTextAct.GetPoint(), 0, rTextAct.GetDXArray());
+
+                if (pSalLayout2)
                 {
-                    tools::Rectangle aBoundRect( const_cast<OutputDevice&>(rOut).ImplGetTextBoundRect( *pSalLayout ) );
-                    aActionBounds = rOut.PixelToLogic( aBoundRect );
+                    tools::Rectangle aBoundRect2(
+                        ImplGetTextBoundRect(*pSalLayout2));
+                    aActionBounds = PixelToLogic(aBoundRect2);
+                }
+
+                if (pSalLayout1 && nStrStartPos > 0)
+                {
+                    tools::Rectangle aBoundRect1(
+                        ImplGetTextBoundRect(*pSalLayout1));
+                    aActionBounds.SetLeft(PixelToLogic(aBoundRect1).getX()
+                                          + PixelToLogic(aBoundRect1).getWidth());
                 }
             }
         }
@@ -798,13 +811,13 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
             if( !aString.isEmpty() )
             {
                 // #105987# ImplLayout takes everything in logical coordinates
-                std::unique_ptr<SalLayout> pSalLayout = rOut.ImplLayout( rTextAct.GetText(), rTextAct.GetIndex(),
+                std::unique_ptr<SalLayout> pSalLayout = ImplLayout( rTextAct.GetText(), rTextAct.GetIndex(),
                                                          rTextAct.GetLen(), rTextAct.GetPoint(),
                                                          rTextAct.GetWidth() );
                 if( pSalLayout )
                 {
-                    tools::Rectangle aBoundRect( const_cast<OutputDevice&>(rOut).ImplGetTextBoundRect( *pSalLayout ) );
-                    aActionBounds = rOut.PixelToLogic( aBoundRect );
+                    tools::Rectangle aBoundRect( ImplGetTextBoundRect( *pSalLayout ) );
+                    aActionBounds = PixelToLogic( aBoundRect );
                 }
             }
         }
@@ -821,17 +834,17 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
     if( !aActionBounds.IsEmpty() )
     {
         // fdo#40421 limit current action's output to clipped area
-        if( rOut.IsClipRegion() )
-            return rOut.LogicToPixel(
-                rOut.GetClipRegion().GetBoundRect().Intersection( aActionBounds ) );
+        if( IsClipRegion() )
+            return LogicToPixel(
+                GetClipRegion().GetBoundRect().Intersection( aActionBounds ) );
         else
-            return rOut.LogicToPixel( aActionBounds );
+            return LogicToPixel( aActionBounds );
     }
     else
+    {
         return tools::Rectangle();
+    }
 }
-
-} // end anon namespace
 
 bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, GDIMetaFile& rOutMtf,
                                                      tools::Long nMaxBmpDPIX, tools::Long nMaxBmpDPIY,
@@ -985,7 +998,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                         // extend current bounds (next uniform action
                         // needs to fully cover this area)
                         aBackgroundComponent.aBounds.Union(
-                            ImplCalcActionBounds(*pCurrAct, *aMapModeVDev) );
+                            aMapModeVDev->CalcActionBounds(*pCurrAct));
                     break;
                 }
             }
@@ -1042,7 +1055,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
             pCurrAct->Execute( aMapModeVDev.get() );
 
             // cache bounds of current action
-            const tools::Rectangle aBBCurrAct( ImplCalcActionBounds(*pCurrAct, *aMapModeVDev) );
+            const tools::Rectangle aBBCurrAct( aMapModeVDev->CalcActionBounds(*pCurrAct) );
 
             // accumulate collected bounds here, initialize with current action
             tools::Rectangle aTotalBounds( aBBCurrAct ); // thus, aTotalComponents.aBounds is empty
