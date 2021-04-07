@@ -332,27 +332,13 @@ void RenderContext2::ImplInitFontList() const
 
 FontMetric RenderContext2::GetDevFont(int nDevFontIndex) const
 {
-    FontMetric aFontMetric;
-
     ImplInitFontList();
 
     int nCount = GetDevFontCount();
     if (nDevFontIndex < nCount)
-    {
-        const PhysicalFontFace& rData = *mpDeviceFontList->Get(nDevFontIndex);
-        aFontMetric.SetFamilyName(rData.GetFamilyName());
-        aFontMetric.SetStyleName(rData.GetStyleName());
-        aFontMetric.SetCharSet(rData.GetCharSet());
-        aFontMetric.SetFamily(rData.GetFamilyType());
-        aFontMetric.SetPitch(rData.GetPitch());
-        aFontMetric.SetWeight(rData.GetWeight());
-        aFontMetric.SetItalic(rData.GetItalic());
-        aFontMetric.SetAlignment(TextAlign::ALIGN_TOP);
-        aFontMetric.SetWidthType(rData.GetWidthType());
-        aFontMetric.SetQuality(rData.GetQuality());
-    }
+        return mpDeviceFontList->GetFontMetric(nDevFontIndex);
 
-    return aFontMetric;
+    return FontMetric();
 }
 
 int RenderContext2::GetDevFontCount() const

@@ -31,4 +31,24 @@ PhysicalFontFace* PhysicalFontFaceCollection::Get(int nIndex) const
 
 int PhysicalFontFaceCollection::Count() const { return maDevFontVector.size(); }
 
+FontMetric PhysicalFontFaceCollection::GetFontMetric(int nIndex) const
+{
+    PhysicalFontFace* pData = Get(nIndex);
+
+    FontMetric aFontMetric;
+
+    aFontMetric.SetFamilyName(pData->GetFamilyName());
+    aFontMetric.SetStyleName(pData->GetStyleName());
+    aFontMetric.SetCharSet(pData->GetCharSet());
+    aFontMetric.SetFamily(pData->GetFamilyType());
+    aFontMetric.SetPitch(pData->GetPitch());
+    aFontMetric.SetWeight(pData->GetWeight());
+    aFontMetric.SetItalic(pData->GetItalic());
+    aFontMetric.SetAlignment(TextAlign::ALIGN_TOP);
+    aFontMetric.SetWidthType(pData->GetWidthType());
+    aFontMetric.SetQuality(pData->GetQuality());
+
+    return aFontMetric;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

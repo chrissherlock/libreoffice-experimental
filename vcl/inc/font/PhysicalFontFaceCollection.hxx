@@ -19,6 +19,8 @@
 
 #include <rtl/ref.hxx>
 
+#include <vcl/metric.hxx>
+
 #include <vector>
 
 class PhysicalFontFace;
@@ -32,9 +34,11 @@ private:
 
 public:
     PhysicalFontFaceCollection();
+
     void Add(PhysicalFontFace* pFace);
     PhysicalFontFace* Get(int nIndex) const;
     int Count() const;
+    FontMetric GetFontMetric(int nIndex) const;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
