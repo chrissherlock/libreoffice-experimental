@@ -676,6 +676,8 @@ public:
                              vcl::TextLayoutCache const* = nullptr,
                              SalLayoutGlyphs const* const pLayoutCache = nullptr) const;
 
+    SalLayoutGlyphs* GetLayoutGlyphs(OUString const& rText, std::unique_ptr<SalLayout>& pLayout);
+
     SalLayoutGlyphs* GetLayoutGlyphs(OUString const& rText, sal_Int32 nIndex, sal_Int32 nLength);
 
     SalLayoutGlyphs const* GetLayoutGlyphs(OUString const& rString,
@@ -687,14 +689,6 @@ public:
          avoid the calculation and just return a pointer to rTextGlyphs.
      */
     SalLayoutGlyphs* GetLayoutGlyphs(OUString const& rString, SalLayoutGlyphs& rTextGlyphs);
-
-    std::unique_ptr<SalLayout> ImplLayout(OUString const&, sal_Int32 nIndex, sal_Int32 nLen,
-                                          Point const& rLogicPos = Point(0, 0),
-                                          tools::Long nLogicWidth = 0,
-                                          tools::Long const* pLogicDXArray = nullptr,
-                                          SalLayoutFlags flags = SalLayoutFlags::NONE,
-                                          vcl::TextLayoutCache const* = nullptr,
-                                          SalLayoutGlyphs const* pGlyphs = nullptr) const;
 
     tools::Rectangle ImplGetTextBoundRect(SalLayout const&);
 
@@ -873,6 +867,14 @@ protected:
     void SetSize(Size const& rSize);
     void SetWidth(tools::Long nWidth);
     void SetHeight(tools::Long nHeight);
+
+    std::unique_ptr<SalLayout> ImplLayout(OUString const&, sal_Int32 nIndex, sal_Int32 nLen,
+                                          Point const& rLogicPos = Point(0, 0),
+                                          tools::Long nLogicWidth = 0,
+                                          tools::Long const* pLogicDXArray = nullptr,
+                                          SalLayoutFlags flags = SalLayoutFlags::NONE,
+                                          vcl::TextLayoutCache const* = nullptr,
+                                          SalLayoutGlyphs const* pGlyphs = nullptr) const;
 
     virtual void CopyDeviceArea(SalTwoRect& aPosAry, bool bWindowInvalidate);
 

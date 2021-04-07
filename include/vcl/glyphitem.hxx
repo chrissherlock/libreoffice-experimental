@@ -45,6 +45,7 @@ public:
 
     SalLayoutGlyphs& operator=(const SalLayoutGlyphs&) = delete;
     SalLayoutGlyphs& operator=(SalLayoutGlyphs&&);
+    SalLayoutGlyphs& operator=(SalLayoutGlyphs*);
 
     SalLayoutGlyphsImpl* Impl(unsigned int nLevel) const;
     void AppendImpl(SalLayoutGlyphsImpl* pImpl);

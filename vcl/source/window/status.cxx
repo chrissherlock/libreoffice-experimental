@@ -389,17 +389,7 @@ void StatusBar::ImplDrawItem(vcl::RenderContext& rRenderContext, bool bOffScreen
     // if the framework code is drawing status, let it do all the work
     if (!(pItem->mnBits & StatusBarItemBits::UserDraw))
     {
-        SalLayout* pLayoutCache = pItem->mxLayoutCache.get();
-
-        if(!pLayoutCache)
-        {
-            // update cache
-            pItem->mxLayoutCache = rRenderContext.ImplLayout(pItem->maText, 0, -1);
-            pLayoutCache = pItem->mxLayoutCache.get();
-        }
-
-        const SalLayoutGlyphs glyphs = pLayoutCache ? pLayoutCache->GetGlyphs() : SalLayoutGlyphs();
-        const SalLayoutGlyphs* pGlyphs = pLayoutCache ? &glyphs : nullptr;
+        SalLayoutGlyphs const* pGlyphs = GetLayoutGlyphs(pItem->maText, pItem->mxLayoutCache);
         Size aTextSize(rRenderContext.GetTextWidth(pItem->maText,0,-1,nullptr,pGlyphs), rRenderContext.GetTextHeight());
         Point aTextPos = ImplGetItemTextPos(aTextRectSize, aTextSize, pItem->mnBits);
 

@@ -39,21 +39,15 @@ MenuItemData::~MenuItemData()
     pSubMenu.disposeAndClear();
 }
 
-SalLayoutGlyphs* MenuItemData::GetTextGlyphs(const OutputDevice* pOutputDevice)
+SalLayoutGlyphs* MenuItemData::GetTextGlyphs(RenderContext2* pOutputDevice)
 {
     if (aTextGlyphs.IsValid())
         // Use pre-calculated result.
         return &aTextGlyphs;
 
     OUString aNonMnemonicString = OutputDevice::GetNonMnemonicString(aText);
-    std::unique_ptr<SalLayout> pLayout
-        = pOutputDevice->ImplLayout(aNonMnemonicString, 0, aNonMnemonicString.getLength(),
-                                    Point(0, 0), 0, nullptr, SalLayoutFlags::GlyphItemsOnly);
-    if (!pLayout)
-        return nullptr;
 
-    // Remember the calculation result.
-    aTextGlyphs = pLayout->GetGlyphs();
+    aTextGlyphs = pOutputDevice->GetLayoutGlyphs(aNonMnemonicString, 0, aNonMnemonicString.getLength());
 
     return &aTextGlyphs;
 }

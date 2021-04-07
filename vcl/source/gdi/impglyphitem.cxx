@@ -47,6 +47,16 @@ SalLayoutGlyphs& SalLayoutGlyphs::operator=(SalLayoutGlyphs&& rOther)
     return *this;
 }
 
+SalLayoutGlyphs& SalLayoutGlyphs::operator=(SalLayoutGlyphs* rOther)
+{
+    if (this != rOther)
+    {
+        std::swap(m_pImpl, rOther->m_pImpl);
+        std::swap(m_pExtraImpls, rOther->m_pExtraImpls);
+    }
+    return *this;
+}
+
 bool SalLayoutGlyphs::IsValid() const
 {
     if (m_pImpl == nullptr)

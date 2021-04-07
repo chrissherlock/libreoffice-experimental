@@ -581,19 +581,13 @@ tools::Long ImplEntryType::getHeightWithMargin() const
     return mnHeight + ImplGetSVData()->maNWFData.mnListBoxEntryMargin;
 }
 
-SalLayoutGlyphs* ImplEntryType::GetTextGlyphs(const OutputDevice* pOutputDevice)
+SalLayoutGlyphs* ImplEntryType::GetTextGlyphs(RenderContext2* pOutputDevice)
 {
     if (maStrGlyphs.IsValid())
         // Use pre-calculated result.
         return &maStrGlyphs;
 
-    std::unique_ptr<SalLayout> pLayout = pOutputDevice->ImplLayout(
-        maStr, 0, maStr.getLength(), Point(0, 0), 0, nullptr, SalLayoutFlags::GlyphItemsOnly);
-    if (!pLayout)
-        return nullptr;
-
-    // Remember the calculation result.
-    maStrGlyphs = pLayout->GetGlyphs();
+    maStrGlyphs = pOutputDevice->GetLayoutGlyphs(maStr, 0, maStr.getLength());
 
     return &maStrGlyphs;
 }
