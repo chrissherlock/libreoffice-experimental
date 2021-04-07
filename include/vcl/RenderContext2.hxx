@@ -690,8 +690,6 @@ public:
      */
     SalLayoutGlyphs* GetLayoutGlyphs(OUString const& rString, SalLayoutGlyphs& rTextGlyphs);
 
-    tools::Rectangle ImplGetTextBoundRect(SalLayout const&);
-
     static std::shared_ptr<vcl::TextLayoutCache> CreateTextLayoutCache(OUString const&);
 
     SAL_DLLPRIVATE void ImplUpdateFontData();

@@ -21,8 +21,10 @@
 #include <vcl/metaact.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/settings.hxx>
+#include <vcl/vcllayout.hxx>
 
 #include <drawmode.hxx>
+#include <fontinstance.hxx>
 #include <textlayout.hxx>
 
 void OutputDevice::DrawText(Point const& rStartPt, OUString const& rStr, sal_Int32 nIndex,
@@ -205,6 +207,44 @@ void OutputDevice::SetOverlineColor(Color const& rColor)
             GetDrawModeTextColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings()), true));
 
     RenderContext2::SetOverlineColor(rColor);
+}
+
+tools::Rectangle OutputDevice::ImplGetTextBoundRect(SalLayout const& rSalLayout)
+{
+    Point aPoint = rSalLayout.GetDrawPosition();
+    tools::Long nX = aPoint.X();
+    tools::Long nY = aPoint.Y();
+
+    tools::Long nWidth = rSalLayout.GetTextWidth();
+    tools::Long nHeight = mpFontInstance->mnLineHeight + mnEmphasisAscent + mnEmphasisDescent;
+
+    nY -= mpFontInstance->mxFontMetric->GetAscent() + mnEmphasisAscent;
+
+    if (mpFontInstance->mnOrientation)
+    {
+        tools::Long nBaseX = nX, nBaseY = nY;
+        if (!(mpFontInstance->mnOrientation % 900_deg10))
+        {
+            tools::Long nX2 = nX + nWidth;
+            tools::Long nY2 = nY + nHeight;
+
+            Point aBasePt(nBaseX, nBaseY);
+            aBasePt.RotateAround(nX, nY, mpFontInstance->mnOrientation);
+            aBasePt.RotateAround(nX2, nY2, mpFontInstance->mnOrientation);
+            nWidth = nX2 - nX;
+            nHeight = nY2 - nY;
+        }
+        else
+        {
+            // inflate by +1+1 because polygons are drawn smaller
+            tools::Rectangle aRect(Point(nX, nY), Size(nWidth + 1, nHeight + 1));
+            tools::Polygon aPoly(aRect);
+            aPoly.Rotate(Point(nBaseX, nBaseY), mpFontInstance->mnOrientation);
+            return aPoly.GetBoundRect();
+        }
+    }
+
+    return tools::Rectangle(Point(nX, nY), Size(nWidth, nHeight));
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

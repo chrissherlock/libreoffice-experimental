@@ -481,6 +481,8 @@ private:
     OutputDevice(const OutputDevice&) = delete;
     OutputDevice& operator=(const OutputDevice&) = delete;
 
+    SAL_DLLPRIVATE tools::Rectangle ImplGetTextBoundRect(SalLayout const&);
+
     void DrawBitmapEx2(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
                        Size const& rSrcSizePixel, BitmapEx const& rBitmapEx);
 
