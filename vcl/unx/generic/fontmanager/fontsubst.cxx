@@ -20,7 +20,7 @@
 #include <unx/geninst.h>
 #include <outdev.h>
 #include <unx/fontmanager.hxx>
-#include <font/PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFamilyCollection.hxx>
 
 // platform specific font substitution hooks
 
@@ -47,7 +47,7 @@ public:
 
 }
 
-void SalGenericInstance::RegisterFontSubstitutors( PhysicalFontCollection* pFontCollection )
+void SalGenericInstance::RegisterFontSubstitutors( PhysicalFontFamilyCollection* pFontCollection )
 {
     // register font fallback substitutions
     static FcPreMatchSubstitution aSubstPreMatch;

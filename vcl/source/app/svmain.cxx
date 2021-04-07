@@ -71,7 +71,7 @@
 #include <vcl/svmain.hxx>
 #include <dbggui.hxx>
 #include <accmgr.hxx>
-#include <font/PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFamilyCollection.hxx>
 #include <print.h>
 #include <salsys.hxx>
 #include <saltimer.hxx>
@@ -359,7 +359,7 @@ bool InitVCL()
     pSVData->maAppData.mxAppFileName = aNativeFileName;
 
     // Initialize global data
-    pSVData->maGDIData.mxScreenFontList = std::make_shared<PhysicalFontCollection>();
+    pSVData->maGDIData.mxScreenFontList = std::make_shared<PhysicalFontFamilyCollection>();
     pSVData->maGDIData.mxScreenFontCache = std::make_shared<ImplFontCache>();
     pSVData->maGDIData.mxGrfConverter.reset(new GraphicConverter);
 

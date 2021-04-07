@@ -37,7 +37,7 @@ public:
  * Abstract generic class to build vclplugin's instance classes from
  */
 class GenPspGraphics;
-class PhysicalFontCollection;
+class PhysicalFontFamilyCollection;
 class VCL_DLLPUBLIC SalGenericInstance : public SalInstance
 {
 protected:
@@ -66,7 +66,7 @@ public:
     virtual OUString            getOSVersion() override;
 
     // prolly belongs somewhere else ... just a font help
-    static void RegisterFontSubstitutors( PhysicalFontCollection* pFontCollection );
+    static void RegisterFontSubstitutors( PhysicalFontFamilyCollection* pFontCollection );
 
 protected:
     static void configurePspInfoPrinter( PspSalInfoPrinter* pInfoPrinter,

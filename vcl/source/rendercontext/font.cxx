@@ -34,7 +34,7 @@
 #include <window.h>
 #include <emphasismark.hxx>
 #include <font/FeatureCollector.hxx>
-#include <font/PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFamilyCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <font/PhysicalFontFaceSizeCollection.hxx>
 #include <drawmode.hxx>
@@ -83,7 +83,7 @@ void RenderContext2::SetFont(vcl::Font const& rNewFont)
 
 bool RenderContext2::IsFontAvailable(OUString const& rFontName) const
 {
-    InitPhysicalFontCollection();
+    InitPhysicalFontFamilyCollection();
     PhysicalFontFamily* pFound = mxFontCollection->FindFontFamily(rFontName);
     return (pFound != nullptr);
 }
@@ -155,7 +155,7 @@ bool RenderContext2::ImplNewFont()
 
     assert(mpGraphics);
 
-    InitPhysicalFontCollection();
+    InitPhysicalFontFamilyCollection();
 
     // convert to pixel height
     // TODO: replace integer based aSize completely with subpixel accurate type
@@ -307,7 +307,7 @@ bool RenderContext2::ImplNewFont()
     return bRet;
 }
 
-void RenderContext2::InitPhysicalFontCollection() const
+void RenderContext2::InitPhysicalFontFamilyCollection() const
 {
     if (mxFontCollection->Count())
         return;
@@ -317,7 +317,7 @@ void RenderContext2::InitPhysicalFontCollection() const
 
     assert(mpGraphics);
 
-    SAL_INFO("vcl.gdi", "RenderContext2::InitPhysicalFontCollection()");
+    SAL_INFO("vcl.gdi", "RenderContext2::InitPhysicalFontFamilyCollection()");
     mpGraphics->GetDevFontList(mxFontCollection.get());
 
     // There is absolutely no way there should be no fonts available on the device
@@ -333,7 +333,7 @@ void RenderContext2::InitPhysicalFontCollection() const
 
 FontMetric RenderContext2::GetFontMetric(int nDevFontIndex) const
 {
-    InitPhysicalFontCollection();
+    InitPhysicalFontFamilyCollection();
 
     int nCount = GetFontMetricCount();
     if (nDevFontIndex < nCount)
@@ -366,7 +366,7 @@ int RenderContext2::GetDevFontSizeCount(vcl::Font const& rFont) const
 {
     mpDeviceFontSizeList.reset();
 
-    InitPhysicalFontCollection();
+    InitPhysicalFontFamilyCollection();
     mpDeviceFontSizeList = mxFontCollection->GetDeviceFontSizeList(rFont.GetFamilyName());
     return mpDeviceFontSizeList->Count();
 }
@@ -405,7 +405,7 @@ Size RenderContext2::GetDevFontSize(vcl::Font const& rFont, int nSizeIndex) cons
 
 bool RenderContext2::AddTempDevFont(OUString const& rFileURL, OUString const& rFontName)
 {
-    InitPhysicalFontCollection();
+    InitPhysicalFontFamilyCollection();
 
     if (!mpGraphics && !AcquireGraphics())
         return false;
@@ -980,7 +980,7 @@ vcl::Font RenderContext2::GetDefaultFont(DefaultFontType nType, LanguageType eLa
         // Should we only return available fonts on the given device
         if (pOutDev)
         {
-            pOutDev->InitPhysicalFontCollection();
+            pOutDev->InitPhysicalFontFamilyCollection();
 
             // Search Font in the FontList
             OUString aName;
@@ -1013,7 +1013,7 @@ vcl::Font RenderContext2::GetDefaultFont(DefaultFontType nType, LanguageType eLa
                 }
                 else
                 {
-                    pOutDev->InitPhysicalFontCollection();
+                    pOutDev->InitPhysicalFontFamilyCollection();
 
                     aFont.SetFamilyName(aSearch);
 

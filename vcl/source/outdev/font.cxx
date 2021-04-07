@@ -32,7 +32,6 @@
 #include <outdev.h>
 #include <window.h>
 #include <drawmode.hxx>
-#include <font/PhysicalFontCollection.hxx>
 #include <font/FeatureCollector.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>

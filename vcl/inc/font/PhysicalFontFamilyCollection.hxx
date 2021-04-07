@@ -34,11 +34,11 @@ class ImplPreMatchFontSubstitution;
 // TODO: merge with ImplFontCache
 // TODO: rename to LogicalFontManager
 
-class VCL_PLUGIN_PUBLIC PhysicalFontCollection final
+class VCL_PLUGIN_PUBLIC PhysicalFontFamilyCollection final
 {
 public:
-    explicit PhysicalFontCollection();
-    ~PhysicalFontCollection();
+    explicit PhysicalFontFamilyCollection();
+    ~PhysicalFontFamilyCollection();
 
     // fill the list with device font faces
     void Add(PhysicalFontFace*);
@@ -62,7 +62,7 @@ public:
     void SetFallbackHook(ImplGlyphFallbackFontSubstitution*);
 
     // misc utilities
-    std::shared_ptr<PhysicalFontCollection> Clone() const;
+    std::shared_ptr<PhysicalFontFamilyCollection> Clone() const;
     std::unique_ptr<PhysicalFontFaceCollection> GetDeviceFontList() const;
     std::unique_ptr<PhysicalFontFaceSizeCollection>
     GetDeviceFontSizeList(const OUString& rFontName) const;

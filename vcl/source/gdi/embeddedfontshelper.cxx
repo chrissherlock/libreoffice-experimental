@@ -19,7 +19,7 @@
 #include <com/sun/star/io/XInputStream.hpp>
 
 #include <outdev.h>
-#include <font/PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFamilyCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <salgdi.hxx>
 #include <sft.hxx>
@@ -255,7 +255,7 @@ OUString EmbeddedFontsHelper::fontFileUrl( std::u16string_view familyName, FontF
     }
     bool ok = false;
     SalGraphics* graphics = Application::GetDefaultDevice()->GetGraphics();
-    PhysicalFontCollection fonts;
+    PhysicalFontFamilyCollection fonts;
     graphics->GetDevFontList( &fonts );
     std::unique_ptr< PhysicalFontFaceCollection > fontInfo( fonts.GetDeviceFontList());
     PhysicalFontFace* selected = nullptr;

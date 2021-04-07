@@ -21,7 +21,7 @@
 #include <unotools/fontdefs.hxx>
 
 #include <outdev.h>
-#include <font/PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFamilyCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 
 void PhysicalFontFamily::CalcType(ImplFontAttrs& rType, FontWeight& rWeight, FontWidth& rWidth,
@@ -247,7 +247,7 @@ void PhysicalFontFamily::GetFontHeights(o3tl::sorted_vector<int>& rHeights) cons
     }
 }
 
-void PhysicalFontFamily::UpdateCloneFontList(PhysicalFontCollection& rFontCollection) const
+void PhysicalFontFamily::UpdateCloneFontList(PhysicalFontFamilyCollection& rFontCollection) const
 {
     OUString aFamilyName = GetEnglishSearchFontName(GetFamilyName());
     PhysicalFontFamily* pFamily(nullptr);

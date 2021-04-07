@@ -46,7 +46,7 @@
 #include <fontinstance.hxx>
 #include <fontattributes.hxx>
 #include <impfontmetricdata.hxx>
-#include <font/PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFamilyCollection.hxx>
 #include <font/PhysicalFontFace.hxx>
 #include <sallayout.hxx>
 
@@ -231,12 +231,12 @@ void GenPspGraphics::SetTextColor( Color nColor )
     m_pPrinterGfx->SetTextColor (aColor);
 }
 
-bool GenPspGraphics::AddTempDevFont( PhysicalFontCollection*, const OUString&,const OUString& )
+bool GenPspGraphics::AddTempDevFont( PhysicalFontFamilyCollection*, const OUString&,const OUString& )
 {
     return false;
 }
 
-bool GenPspGraphics::AddTempDevFontHelper( PhysicalFontCollection* pFontCollection,
+bool GenPspGraphics::AddTempDevFontHelper( PhysicalFontFamilyCollection* pFontCollection,
                                            const OUString& rFileURL,
                                            const OUString& rFontName)
 {
@@ -270,7 +270,7 @@ bool GenPspGraphics::AddTempDevFontHelper( PhysicalFontCollection* pFontCollecti
     return true;
 }
 
-void GenPspGraphics::GetDevFontList( PhysicalFontCollection *pFontCollection )
+void GenPspGraphics::GetDevFontList( PhysicalFontFamilyCollection *pFontCollection )
 {
     ::std::vector< psp::fontID > aList;
     psp::PrintFontManager& rMgr = psp::PrintFontManager::get();
@@ -405,7 +405,7 @@ namespace vcl
     }
 }
 
-void GenPspGraphics::AnnounceFonts( PhysicalFontCollection* pFontCollection, const psp::FastPrintFontInfo& aInfo )
+void GenPspGraphics::AnnounceFonts( PhysicalFontFamilyCollection* pFontCollection, const psp::FastPrintFontInfo& aInfo )
 {
     int nQuality = 0;
 

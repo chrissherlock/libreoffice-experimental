@@ -80,7 +80,7 @@ class PhysicalFontFaceSizeCollection;
 class ImplFontCache;
 class ImplMultiTextLineInfo;
 class LogicalFontInstance;
-class PhysicalFontCollection;
+class PhysicalFontFamilyCollection;
 class Printer;
 class SalGraphics;
 class SalLayout;
@@ -1108,7 +1108,7 @@ protected:
     MapMode maMapMode;
     MappingMetrics maMapRes;
     std::unique_ptr<ImplOutDevData> mpOutDevData;
-    mutable std::shared_ptr<PhysicalFontCollection> mxFontCollection;
+    mutable std::shared_ptr<PhysicalFontFamilyCollection> mxFontCollection;
     mutable std::unique_ptr<PhysicalFontFaceCollection> mpDeviceFontList;
     mutable std::unique_ptr<PhysicalFontFaceSizeCollection> mpDeviceFontSizeList;
     mutable rtl::Reference<LogicalFontInstance> mpFontInstance;
@@ -1140,7 +1140,7 @@ protected:
 
 private:
     SAL_DLLPRIVATE bool InitFont();
-    SAL_DLLPRIVATE void InitPhysicalFontCollection() const;
+    SAL_DLLPRIVATE void InitPhysicalFontFamilyCollection() const;
     SAL_DLLPRIVATE void ImplInitTextColor();
     virtual void InitWaveLineColor(Color const& rColor, tools::Long);
 

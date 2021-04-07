@@ -549,7 +549,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/font/FeatureCollector \
     vcl/source/font/FeatureParser \
     vcl/source/font/OpenTypeFeatureDefinitionList \
-    vcl/source/font/PhysicalFontCollection \
+    vcl/source/font/PhysicalFontFamilyCollection \
     vcl/source/font/PhysicalFontFace \
     vcl/source/font/PhysicalFontFaceCollection \
     vcl/source/font/PhysicalFontFaceSizeCollection \

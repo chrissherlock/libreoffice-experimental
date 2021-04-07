@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-04-10 05:38:01 using:
+ Generated on 2021-04-10 05:39:00 using:
  ./bin/update_pch vcl vcl --cutoff=6 --exclude:system --include:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -192,10 +192,10 @@
 #include <cppuhelper/weak.hxx>
 #include <cppuhelper/weakagg.hxx>
 #include <cppuhelper/weakref.hxx>
-#include <font/PhysicalFontCollection.hxx>
 #include <font/PhysicalFontFace.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <font/PhysicalFontFaceSizeCollection.hxx>
+#include <font/PhysicalFontFamilyCollection.hxx>
 #include <i18nlangtag/lang.h>
 #include <i18nlangtag/languagetag.hxx>
 #include <i18nlangtag/mslangid.hxx>

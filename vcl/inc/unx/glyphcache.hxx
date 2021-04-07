@@ -42,7 +42,7 @@ class FreetypeFontFile;
 class FreetypeFontInstance;
 class FreetypeFontInfo;
 class FontConfigFontOptions;
-class PhysicalFontCollection;
+class PhysicalFontFamilyCollection;
 class FreetypeFont;
 class SvpGcpHelper;
 
@@ -83,7 +83,7 @@ public:
                                 sal_IntPtr nFontId,
                                 const FontAttributes&);
 
-    void                    AnnounceFonts( PhysicalFontCollection* ) const;
+    void                    AnnounceFonts( PhysicalFontFamilyCollection* ) const;
 
     void                    ClearFontCache();
 

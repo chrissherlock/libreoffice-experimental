@@ -120,7 +120,7 @@ public:
     bool        Init( void );
     void        AddFont( CoreTextFontFace* );
 
-    void    AnnounceFonts( PhysicalFontCollection& ) const;
+    void    AnnounceFonts( PhysicalFontFamilyCollection& ) const;
     CoreTextFontFace* GetFontDataFromId( sal_IntPtr nFontId ) const;
 
 private:
@@ -359,10 +359,10 @@ public:
     virtual FontCharMapRef  GetFontCharMap() const override;
     virtual bool            GetFontCapabilities(vcl::FontCapabilities &rFontCapabilities) const override;
     // graphics must fill supplied font list
-    virtual void            GetDevFontList( PhysicalFontCollection* ) override;
+    virtual void            GetDevFontList( PhysicalFontFamilyCollection* ) override;
     // graphics must drop any cached font info
     virtual void            ClearDevFontCache() override;
-    virtual bool            AddTempDevFont( PhysicalFontCollection*, const OUString& rFileURL, const OUString& rFontName ) override;
+    virtual bool            AddTempDevFont( PhysicalFontFamilyCollection*, const OUString& rFileURL, const OUString& rFontName ) override;
     // CreateFontSubset: a method to get a subset of glyhps of a font
     // inside a new valid font file
     // returns TRUE if creation of subset was successful

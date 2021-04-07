@@ -29,7 +29,7 @@
 #include <impfontcharmap.hxx>
 #include <fontinstance.hxx>
 #include <fontselect.hxx>
-#include <font/PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFamilyCollection.hxx>
 
 #include <QtGui/QFont>
 #include <QtGui/QFontDatabase>

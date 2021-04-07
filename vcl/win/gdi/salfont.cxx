@@ -51,7 +51,7 @@
 
 #include <fontsubset.hxx>
 #include <outdev.h>
-#include <font/PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFamilyCollection.hxx>
 #include <font/PhysicalFontFace.hxx>
 #include <sft.hxx>
 #include <win/saldata.hxx>
@@ -241,7 +241,7 @@ bool WinGlyphFallbackSubstititution::HasMissingChars(PhysicalFontFace* pFace, OU
 namespace
 {
     //used by 2-level font fallback
-    PhysicalFontFamily* findDevFontListByLocale(const PhysicalFontCollection &rFontCollection,
+    PhysicalFontFamily* findDevFontListByLocale(const PhysicalFontFamilyCollection &rFontCollection,
                                                 const LanguageTag& rLanguageTag )
     {
         // get the default font for a specified locale
@@ -298,7 +298,7 @@ bool WinGlyphFallbackSubstititution::FindFontSubstitute(FontSelectPattern& rFont
 
     // first level fallback:
     // try use the locale specific default fonts defined in VCL.xcu
-    const PhysicalFontCollection* pFontCollection = ImplGetSVData()->maGDIData.mxScreenFontList.get();
+    const PhysicalFontFamilyCollection* pFontCollection = ImplGetSVData()->maGDIData.mxScreenFontList.get();
     PhysicalFontFamily* pFontFamily = findDevFontListByLocale(*pFontCollection, aLanguageTag);
     if( pFontFamily )
     {
@@ -353,7 +353,7 @@ namespace {
 struct ImplEnumInfo
 {
     HDC                 mhDC;
-    PhysicalFontCollection* mpList;
+    PhysicalFontFamilyCollection* mpList;
     OUString*           mpName;
     LOGFONTW*           mpLogFont;
     bool                mbPrinter;
@@ -1140,7 +1140,7 @@ static OUString lcl_GetFontFamilyName(const OUString& rFontFileURL)
     return OUString(aBuffer + nNameOfs, nPos - nNameOfs, osl_getThreadTextEncoding());
 }
 
-bool WinSalGraphics::AddTempDevFont(PhysicalFontCollection* pFontCollection,
+bool WinSalGraphics::AddTempDevFont(PhysicalFontFamilyCollection* pFontCollection,
                                     const OUString& rFontFileURL, const OUString& rFontName)
 {
     OUString aFontFamily = lcl_GetFontFamilyName(rFontFileURL);
@@ -1172,7 +1172,7 @@ bool WinSalGraphics::AddTempDevFont(PhysicalFontCollection* pFontCollection,
     aLogFont.lfCharSet = DEFAULT_CHARSET;
     aInfo.mpLogFont = &aLogFont;
 
-    // add the font to the PhysicalFontCollection
+    // add the font to the PhysicalFontFamilyCollection
     EnumFontFamiliesExW(getHDC(), &aLogFont,
         SalEnumFontsProcExW, reinterpret_cast<LPARAM>(&aInfo), 0);
 
@@ -1182,7 +1182,7 @@ bool WinSalGraphics::AddTempDevFont(PhysicalFontCollection* pFontCollection,
     return true;
 }
 
-void WinSalGraphics::GetDevFontList( PhysicalFontCollection* pFontCollection )
+void WinSalGraphics::GetDevFontList( PhysicalFontFamilyCollection* pFontCollection )
 {
     // make sure all LO shared fonts are registered temporarily
     static std::once_flag init;
@@ -1235,7 +1235,7 @@ void WinSalGraphics::GetDevFontList( PhysicalFontCollection* pFontCollection )
     aLogFont.lfCharSet = DEFAULT_CHARSET;
     aInfo.mpLogFont = &aLogFont;
 
-    // fill the PhysicalFontCollection
+    // fill the PhysicalFontFamilyCollection
     EnumFontFamiliesExW( getHDC(), &aLogFont,
         SalEnumFontsProcExW, reinterpret_cast<LPARAM>(&aInfo), 0 );
 

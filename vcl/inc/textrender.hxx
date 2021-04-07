@@ -23,7 +23,7 @@
 #include "salgdi.hxx"
 
 class ImplFontMetricData;
-class PhysicalFontCollection;
+class PhysicalFontFamilyCollection;
 class PhysicalFontFace;
 
 class TextRenderImpl
@@ -38,9 +38,9 @@ public:
     virtual void                    GetFontMetric( ImplFontMetricDataRef&, int nFallbackLevel ) = 0;
     virtual FontCharMapRef          GetFontCharMap() const = 0;
     virtual bool                    GetFontCapabilities(vcl::FontCapabilities &rFontCapabilities) const = 0;
-    virtual void                    GetDevFontList( PhysicalFontCollection* ) = 0;
+    virtual void                    GetDevFontList( PhysicalFontFamilyCollection* ) = 0;
     virtual void                    ClearDevFontCache() = 0;
-    virtual bool                    AddTempDevFont( PhysicalFontCollection*, const OUString& rFileURL, const OUString& rFontName ) = 0;
+    virtual bool                    AddTempDevFont( PhysicalFontFamilyCollection*, const OUString& rFileURL, const OUString& rFontName ) = 0;
     virtual bool                    CreateFontSubset(
                                         const OUString& rToFile,
                                         const PhysicalFontFace*,

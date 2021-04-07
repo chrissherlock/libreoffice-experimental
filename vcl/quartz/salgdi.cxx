@@ -44,7 +44,7 @@
 #include <impfontcharmap.hxx>
 #include <impfontmetricdata.hxx>
 #include <outdev.h>
-#include <font/PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFamilyCollection.hxx>
 
 #ifdef MACOSX
 #include <osx/salframe.h>
@@ -331,7 +331,7 @@ static void AddLocalTempFontDirs()
     AddTempFontDir( aBrandStr + "/" LIBO_SHARE_FOLDER "/fonts/truetype/" );
 }
 
-void AquaSalGraphics::GetDevFontList( PhysicalFontCollection* pFontCollection )
+void AquaSalGraphics::GetDevFontList( PhysicalFontFamilyCollection* pFontCollection )
 {
     SAL_WARN_IF( !pFontCollection, "vcl", "AquaSalGraphics::GetDevFontList(NULL) !");
 
@@ -363,7 +363,7 @@ void AquaSalGraphics::ClearDevFontCache()
     pSalData->mpFontList = nullptr;
 }
 
-bool AquaSalGraphics::AddTempDevFont( PhysicalFontCollection*,
+bool AquaSalGraphics::AddTempDevFont( PhysicalFontFamilyCollection*,
     const OUString& rFontFileURL, const OUString& /*rFontName*/ )
 {
     return ::AddTempDevFont(rFontFileURL);

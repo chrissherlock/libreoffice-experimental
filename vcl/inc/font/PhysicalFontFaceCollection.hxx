@@ -27,8 +27,8 @@
 
 class PhysicalFontFace;
 
-// an PhysicalFontFaceCollection is created by a PhysicalFontCollection
-// it becomes invalid when original PhysicalFontCollection is modified
+// an PhysicalFontFaceCollection is created by a PhysicalFontFamilyCollection
+// it becomes invalid when original PhysicalFontFamilyCollection is modified
 class PhysicalFontFaceCollection
 {
 private:

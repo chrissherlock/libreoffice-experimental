@@ -178,9 +178,9 @@ public:
     virtual void            GetFontMetric( ImplFontMetricDataRef&, int nFallbackLevel ) override;
     virtual FontCharMapRef  GetFontCharMap() const override;
     virtual bool GetFontCapabilities(vcl::FontCapabilities &rFontCapabilities) const override;
-    virtual void            GetDevFontList( PhysicalFontCollection* ) override;
+    virtual void            GetDevFontList( PhysicalFontFamilyCollection* ) override;
     virtual void ClearDevFontCache() override;
-    virtual bool            AddTempDevFont( PhysicalFontCollection*, const OUString& rFileURL, const OUString& rFontName ) override;
+    virtual bool            AddTempDevFont( PhysicalFontFamilyCollection*, const OUString& rFileURL, const OUString& rFontName ) override;
     virtual bool        CreateFontSubset( const OUString& rToFile,
                                               const PhysicalFontFace*,
                                               const sal_GlyphId* pGlyphIds,

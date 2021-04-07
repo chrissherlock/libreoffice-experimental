@@ -33,7 +33,6 @@
 class Size;
 namespace vcl { class Font; }
 class VirtualDevice;
-class PhysicalFontCollection;
 enum class AddFontSubstituteFlags;
 
 // nowadays these substitutions are needed for backward compatibility and tight platform integration:
