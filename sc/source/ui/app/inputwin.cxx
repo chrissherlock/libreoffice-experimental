@@ -1362,7 +1362,7 @@ void ScTextWnd::SetScrollBarRange()
         return;
 
     OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
-    Size aOutputSize = rDevice.GetOutputSize();
+    Size aOutputSize = rDevice.PixelToLogic(rDevice.GetSize());
 
     int nUpper = GetEditEngTxtHeight();
     int nCurrentDocPos = m_xEditView->GetVisArea().Top();

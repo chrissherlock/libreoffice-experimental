@@ -1011,7 +1011,7 @@ void SAL_CALL SmModel::render(
     Printer *pPrinter = aPrinterAccess.GetPrinter();
 
     Size    aPrtPaperSize ( pPrinter->GetPaperSize() );
-    Size    aOutputSize   ( pPrinter->GetOutputSize() );
+    Size    aOutputSize   ( pPrinter->PixelToLogic(pPrinter->GetSize()) );
     Point   aPrtPageOffset( pPrinter->GetPageOffset() );
 
     // no real printer ??

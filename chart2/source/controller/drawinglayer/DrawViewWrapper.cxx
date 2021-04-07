@@ -106,7 +106,7 @@ void DrawViewWrapper::ReInit()
     OutputDevice* pOutDev = GetFirstOutputDevice();
     Size aOutputSize(100,100);
     if(pOutDev)
-        aOutputSize = pOutDev->GetOutputSize();
+        aOutputSize = pOutDev->PixelToLogic(pOutDev->GetSize());
 
     mbPageVisible = false;
     mbPageBorderVisible = false;

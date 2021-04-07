@@ -288,7 +288,7 @@ void SvxRectCtl::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangl
 
     rRenderContext.SetLineColor(rStyles.GetDialogColor());
     rRenderContext.SetFillColor(rStyles.GetDialogColor());
-    rRenderContext.DrawRect(tools::Rectangle(Point(0,0), rRenderContext.GetOutputSize()));
+    rRenderContext.DrawRect(tools::Rectangle(Point(0,0), rRenderContext.PixelToLogic(rRenderContext.GetSize())));
 
     if (IsEnabled())
         rRenderContext.SetLineColor(rStyles.GetLabelTextColor());
@@ -1244,7 +1244,7 @@ void SvxXShadowPreview::Paint(vcl::RenderContext& rRenderContext, const tools::R
     LocalPrePaint(rRenderContext);
 
     // prepare size
-    Size aSize = rRenderContext.GetOutputSize();
+    Size aSize = rRenderContext.PixelToLogic(rRenderContext.GetSize());
     aSize.setWidth( aSize.Width() / 3 );
     aSize.setHeight( aSize.Height() / 3 );
 

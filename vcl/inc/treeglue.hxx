@@ -136,7 +136,7 @@ public:
         }
         else
         {
-            Size aSize(pImpl->GetOutputSize());
+            Size aSize(pImpl->GetSize());
             if (rPos.Y() > aSize.Height() - 12)
             {
                 ImplShowTargetEmphasis(pTargetEntry, false);

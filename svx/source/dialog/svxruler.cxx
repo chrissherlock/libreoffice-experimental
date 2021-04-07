@@ -1511,7 +1511,7 @@ void SvxRuler::DrawLine_Impl(tools::Long& lTabPosition, int nNew, bool bHorizont
     */
     if(bHorizontal)
     {
-        const tools::Long nHeight = pEditWin->GetOutputSize().Height();
+        const tools::Long nHeight = pEditWin->PixelToLogic(pEditWin->GetSize()).Height();
         Point aZero = pEditWin->GetMapMode().GetOrigin();
         if(lTabPosition != -1)
         {
@@ -1535,7 +1535,7 @@ void SvxRuler::DrawLine_Impl(tools::Long& lTabPosition, int nNew, bool bHorizont
     }
     else
     {
-        const tools::Long nWidth = pEditWin->GetOutputSize().Width();
+        const tools::Long nWidth = pEditWin->PixelToLogic(pEditWin->GetSize()).Width();
         Point aZero = pEditWin->GetMapMode().GetOrigin();
         if(lTabPosition != -1)
         {

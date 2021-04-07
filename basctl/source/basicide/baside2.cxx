@@ -109,7 +109,7 @@ namespace
 
 void lcl_PrintHeader( Printer* pPrinter, sal_uInt16 nPages, sal_uInt16 nCurPage, const OUString& rTitle, bool bOutput )
 {
-    Size const aSz = pPrinter->GetOutputSize();
+    Size const aSz = pPrinter->PixelToLogic(pPrinter->GetSize());
 
     const Color aOldLineColor( pPrinter->GetLineColor() );
     const Color aOldFillColor( pPrinter->GetFillColor() );
@@ -829,7 +829,7 @@ sal_Int32 ModulWindow::FormatAndPrint( Printer* pPrinter, sal_Int32 nPrintPage )
         nLineHeight = 1;
     }
 
-    Size aPaperSz = pPrinter->GetOutputSize();
+    Size aPaperSz = pPrinter->PixelToLogic(pPrinter->GetSize());
     aPaperSz.AdjustWidth( -(Print::nLeftMargin + Print::nRightMargin) );
     aPaperSz.AdjustHeight( -(Print::nTopMargin + Print::nBottomMargin) );
 

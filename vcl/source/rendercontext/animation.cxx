@@ -85,7 +85,7 @@ void RenderContext2::DrawAnimationView(ImplAnimView& rAnimView, sal_uLong nPos,
     std::unique_ptr<vcl::PaintBufferGuard> pGuard;
 
     tools::Rectangle aOutRect(pRenderContext->PixelToLogic(Point()),
-                              pRenderContext->GetOutputSize());
+                              pRenderContext->PixelToLogic(pRenderContext->GetSize()));
 
     // check, if output lies out of display
     if (aOutRect.Intersection(tools::Rectangle(rAnimView.maDispPt, rAnimView.maDispSz)).IsEmpty())

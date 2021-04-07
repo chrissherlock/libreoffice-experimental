@@ -690,7 +690,7 @@ void RubyPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Rectang
 
     rRenderContext.SetMapMode(MapMode(MapUnit::MapTwip));
 
-    Size aWinSize = rRenderContext.GetOutputSize();
+    Size aWinSize = rRenderContext.PixelToLogic(rRenderContext.GetSize());
 
     const StyleSettings& rStyleSettings = Application::GetSettings().GetStyleSettings();
     svtools::ColorConfig aColorConfig;

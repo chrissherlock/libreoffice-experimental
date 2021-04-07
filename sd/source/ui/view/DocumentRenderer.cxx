@@ -832,7 +832,7 @@ namespace {
             MapMode aMap (rPrinter.GetMapMode());
 
             const Size aPageSize (pPageToPrint->GetSize());
-            const Size aPrintSize (rPrinter.GetOutputSize());
+            const Size aPrintSize (rPrinter.PixelToLogic(rPrinter.GetSize()));
 
             const sal_Int32 nPageWidth (aPageSize.Width() + mnGap
                 - pPageToPrint->GetLeftBorder() - pPageToPrint->GetRightBorder());
@@ -1121,7 +1121,7 @@ namespace {
             rPrinter.SetMapMode(maMap);
 
             // Get and set up the outliner.
-            const ::tools::Rectangle aOutRect (rPrinter.GetPageOffset(), rPrinter.GetOutputSize());
+            const ::tools::Rectangle aOutRect (rPrinter.GetPageOffset(), rPrinter.PixelToLogic(rPrinter.GetSize()));
             Outliner* pOutliner = rDocument.GetInternalOutliner();
             const OutlinerMode nSavedOutlMode (pOutliner->GetMode());
             const bool bSavedUpdateMode (pOutliner->GetUpdateMode());
@@ -1456,7 +1456,7 @@ private:
         }
         else
         {
-            aInfo.maPrintSize = aInfo.mpPrinter->GetOutputSize();
+            aInfo.maPrintSize = aInfo.mpPrinter->PixelToLogic(aInfo.mpPrinter->GetSize());
             maPrintSize = awt::Size(
                 aInfo.mpPrinter->GetPaperSize().Width(),
                 aInfo.mpPrinter->GetPaperSize().Height());
@@ -1615,7 +1615,7 @@ private:
         aMap.SetScaleY(Fraction(1,2));
         mpPrinter->SetMapMode(aMap);
 
-        ::tools::Rectangle aOutRect(aPageOfs, rInfo.mpPrinter->GetOutputSize());
+        ::tools::Rectangle aOutRect(aPageOfs, rInfo.mpPrinter->PixelToLogic(rInfo.mpPrinter->GetSize()));
         if( aOutRect.GetWidth() > aOutRect.GetHeight() )
         {
             Size aPaperSize( rInfo.mpPrinter->PixelToLogic( rInfo.mpPrinter->GetPaperSizePixel(), MapMode( MapUnit::Map100thMM ) ) );
@@ -1803,7 +1803,7 @@ private:
         if ( bScalePage )
         {
             const Size aPageSize (rHandoutPage.GetSize());
-            const Size aPrintSize (rInfo.mpPrinter->GetOutputSize());
+            const Size aPrintSize (rInfo.mpPrinter->PixelToLogic((rInfo.mpPrinter->GetSize())));
 
             const double fHorz = static_cast<double>(aPrintSize.Width())    / aPageSize.Width();
             const double fVert = static_cast<double>(aPrintSize.Height()) / aPageSize.Height();

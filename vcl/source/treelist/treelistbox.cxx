@@ -2400,7 +2400,7 @@ void SvTreeListBox::EditItemText(SvTreeListEntry* pEntry, SvLBoxString* pItem, c
     Point aPos = GetEntryPosition( pEntry );
     aPos.AdjustY(( nEntryHeight - nItemHeight ) / 2 );
     aPos.setX( GetTabPos( pEntry, pTab ) );
-    tools::Long nOutputWidth = pImpl->GetOutputSize().Width();
+    tools::Long nOutputWidth = pImpl->GetSize().Width();
     Size aSize( nOutputWidth - aPos.X(), nItemHeight );
     sal_uInt16 nPos = std::find_if( aTabs.begin(), aTabs.end(),
                         [pTab](const std::unique_ptr<SvLBoxTab>& p) { return p.get() == pTab; })
@@ -2502,7 +2502,7 @@ SvTreeListEntry* SvTreeListBox::GetDropTarget( const Point& rPos )
     }
     else
     {
-        Size aSize( pImpl->GetOutputSize() );
+        Size aSize( pImpl->GetSize() );
         if( rPos.Y() > aSize.Height() - 12 )
         {
             ImplShowTargetEmphasis(pTargetEntry, false);
@@ -2580,7 +2580,7 @@ void SvTreeListBox::PaintEntry1(SvTreeListEntry& rEntry, tools::Long nLine, vcl:
         SetTabs();
 
     short nTempEntryHeight = GetEntryHeight();
-    tools::Long nWidth = pImpl->GetOutputSize().Width();
+    tools::Long nWidth = pImpl->GetSize().Width();
 
     // Did we turn on the scrollbar within PreparePaints? If yes, we have to set
     // the ClipRegion anew.
@@ -2879,7 +2879,7 @@ tools::Rectangle SvTreeListBox::GetFocusRect(const SvTreeListEntry* pEntry, tool
     aRect.SetTop( nLine );
     aSize.setHeight( GetEntryHeight() );
 
-    tools::Long nRealWidth = pImpl->GetOutputSize().Width();
+    tools::Long nRealWidth = pImpl->GetSize().Width();
     nRealWidth -= GetMapMode().GetOrigin().X();
 
     sal_uInt16 nCurTab;
@@ -2989,7 +2989,7 @@ SvLBoxItem* SvTreeListBox::GetItem_Impl( SvTreeListEntry* pEntry, tools::Long nX
     SvLBoxItem* pItem = &pEntry->GetItem(0);
     sal_uInt16 nNextItem = 1;
     nX -= GetMapMode().GetOrigin().X();
-    tools::Long nRealWidth = pImpl->GetOutputSize().Width();
+    tools::Long nRealWidth = pImpl->GetSize().Width();
     nRealWidth -= GetMapMode().GetOrigin().X();
 
     while( true )
@@ -3046,7 +3046,7 @@ std::pair<tools::Long, tools::Long> SvTreeListBox::GetItemPos(SvTreeListEntry* p
     SvLBoxItem* pItem = &pEntry->GetItem(nTabIdx);
     sal_uInt16 nNextItem = nTabIdx + 1;
 
-    tools::Long nRealWidth = pImpl->GetOutputSize().Width();
+    tools::Long nRealWidth = pImpl->GetSize().Width();
     nRealWidth -= GetMapMode().GetOrigin().X();
 
     SvLBoxTab* pNextTab = nNextItem < nTabCount ? aTabs[nNextItem].get() : nullptr;
@@ -3228,7 +3228,7 @@ void SvTreeListBox::ClearTabList()
 
 Size SvTreeListBox::GetSize() const
 {
-    Size aSize = pImpl->GetOutputSize();
+    Size aSize = pImpl->GetSize();
     return aSize;
 }
 
@@ -3399,7 +3399,7 @@ SvTreeListEntry* SvTreeListBox::GetNextEntryInView(SvTreeListEntry* pEntry ) con
     if( pNext )
     {
         Point aPos( GetEntryPosition(pNext) );
-        const Size& rSize = pImpl->GetOutputSize();
+        const Size& rSize = pImpl->GetSize();
         if( aPos.Y() < 0 || aPos.Y() >= rSize.Height() )
             return nullptr;
     }

@@ -2007,7 +2007,7 @@ void SmViewShell::ZoomByItemSet(const SfxItemSet *pSet)
         {
             const MapMode aMap( MapUnit::Map100thMM );
             SfxPrinter *pPrinter = GetPrinter( true );
-            tools::Rectangle  OutputRect(Point(), pPrinter->GetOutputSize());
+            tools::Rectangle  OutputRect(Point(), pPrinter->PixelToLogic(pPrinter->GetSize()));
             Size       OutputSize(pPrinter->LogicToPixel(Size(OutputRect.GetWidth(),
                                                               OutputRect.GetHeight()), aMap));
             Size       GraphicSize(pPrinter->LogicToPixel(GetDoc()->GetSize(), aMap));

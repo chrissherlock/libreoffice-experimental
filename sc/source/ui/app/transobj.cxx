@@ -95,7 +95,7 @@ void ScTransferObj::GetAreaSize( const ScDocument& rDoc, SCTAB nTab1, SCTAB nTab
 void ScTransferObj::PaintToDev( OutputDevice* pDev, ScDocument& rDoc, double nPrintFactor,
                                 const ScRange& rBlock )
 {
-    tools::Rectangle aBound( Point(), pDev->GetOutputSize() );      //! use size from clip area?
+    tools::Rectangle aBound( Point(), pDev->PixelToLogic(pDev->GetSize()) );      //! use size from clip area?
 
     ScViewData aViewData(rDoc);
 
@@ -398,7 +398,7 @@ bool ScTransferObj::GetData( const datatransfer::DataFlavor& rFlavor, const OUSt
             PaintToDev( pVirtDev, *m_pDoc, 1.0, aReducedBlock );
 
             pVirtDev->SetMapMode( MapMode( MapUnit::MapPixel ) );
-            BitmapEx aBmp = pVirtDev->GetBitmapEx( Point(), pVirtDev->GetOutputSize() );
+            BitmapEx aBmp = pVirtDev->GetBitmapEx( Point(), pVirtDev->PixelToLogic(pVirtDev->GetSize()) );
             bOK = SetBitmapEx( aBmp, rFlavor );
         }
         else if ( nFormat == SotClipboardFormatId::GDIMETAFILE )

@@ -476,7 +476,7 @@ void ScPrintFunc::DrawToDev(ScDocument& rDoc, OutputDevice* pDev, double /* nPri
     tools::Rectangle aRect = rBound;
 
     if (aRect.Right() < aRect.Left() || aRect.Bottom() < aRect.Top())
-        aRect = tools::Rectangle( Point(), pDev->GetOutputSize() );
+        aRect = tools::Rectangle( Point(), pDev->PixelToLogic(pDev->GetSize()) );
 
     SCCOL nX1 = 0;
     SCROW nY1 = 0;

@@ -1742,7 +1742,7 @@ void ImplListBoxWindow::DrawEntry(vcl::RenderContext& rRenderContext, sal_Int32 
 void ImplListBoxWindow::FillLayoutData() const
 {
     mpControlData->mpLayoutData.reset( new vcl::ControlLayoutData );
-    const_cast<ImplListBoxWindow*>(this)->Invalidate(tools::Rectangle(Point(0, 0), GetOutputSize()));
+    const_cast<ImplListBoxWindow*>(this)->Invalidate(tools::Rectangle(Point(0, 0), PixelToLogic(GetSize())));
 }
 
 void ImplListBoxWindow::ImplDoPaint(vcl::RenderContext& rRenderContext, const tools::Rectangle& rRect)

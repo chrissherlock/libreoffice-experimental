@@ -30,7 +30,7 @@ namespace vcl {
 vcl::Region Window::GetOutputBoundsClipRegion() const
 {
     vcl::Region aClip(GetClipRegion());
-    aClip.Intersect(tools::Rectangle(Point(), GetOutputSize()));
+    aClip.Intersect(tools::Rectangle(Point(), PixelToLogic(GetSize())));
 
     return aClip;
 }

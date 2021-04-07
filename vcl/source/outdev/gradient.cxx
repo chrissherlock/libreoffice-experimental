@@ -92,7 +92,7 @@ void OutputDevice::DrawGradient(tools::PolyPolygon const& rPolyPoly, Gradient co
             return;
 
         // Clip and then draw the gradient
-        if (tools::Rectangle(PixelToLogic(Point()), GetOutputSize()).IsEmpty())
+        if (tools::Rectangle(PixelToLogic(Point()), PixelToLogic(GetSize())).IsEmpty())
             return;
 
         // convert rectangle to pixels
@@ -132,7 +132,7 @@ void OutputDevice::DrawGradient(tools::PolyPolygon const& rPolyPoly, Gradient co
             DrawComplexGradientToMetafile(aRect, aGradient);
         }
 
-        if (!tools::Rectangle(PixelToLogic(Point()), GetOutputSize()).IsEmpty())
+        if (!tools::Rectangle(PixelToLogic(Point()), PixelToLogic(GetSize())).IsEmpty())
         {
             mpMetaFile->AddAction(new MetaPushAction(PushFlags::CLIPREGION));
             mpMetaFile->AddAction(new MetaISectRectClipRegionAction(aRect));

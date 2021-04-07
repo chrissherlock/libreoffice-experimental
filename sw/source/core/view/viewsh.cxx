@@ -362,7 +362,7 @@ void SwViewShell::ImplEndAction( const bool bIdleEnd )
                         aTmp1 = GetOut()->PixelToLogic( aTmp1 );
                         aRect = SwRect( aTmp1 );
 
-                        const Size aTmp( pVout->GetOutputSize() );
+                        const Size aTmp( pVout->PixelToLogic(pVout->GetSize()) );
                         if ( aTmp.Height() < aRect.Height() ||
                              aTmp.Width()  < aRect.Width() )
                         {

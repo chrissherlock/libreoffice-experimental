@@ -1328,7 +1328,7 @@ void E3dView::Start3DCreation()
         tools::Long nDst = pOut->PixelToLogic(Size(0,10)).Height();
 
         nOutMin =  -pOut->GetMapMode().GetOrigin().Y();
-        nOutMax =  pOut->GetOutputSize().Height() - 1 + nOutMin;
+        nOutMax =  pOut->PixelToLogic(pOut->GetSize()).Height() - 1 + nOutMin;
         nOutMin += nDst;
         nOutMax -= nDst;
 

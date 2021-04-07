@@ -29,7 +29,7 @@ void RenderContext2::DrawGrid(tools::Rectangle const& rRect, Size const& rDist,
     if (ImplIsRecordLayout())
         return;
 
-    tools::Rectangle aDstRect(PixelToLogic(Point()), GetOutputSize());
+    tools::Rectangle aDstRect(PixelToLogic(Point()), PixelToLogic(GetSize()));
     aDstRect.Intersection(rRect);
 
     if (aDstRect.IsEmpty())

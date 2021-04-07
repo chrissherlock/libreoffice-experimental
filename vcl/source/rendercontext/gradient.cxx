@@ -71,7 +71,7 @@ void RenderContext2::DrawGradient(tools::PolyPolygon const& rPolyPoly, Gradient 
             aGradient.MakeGrayscale();
 
         // Clip and then draw the gradient
-        if (!tools::Rectangle(PixelToLogic(Point()), GetOutputSize()).IsEmpty())
+        if (!tools::Rectangle(PixelToLogic(Point()), PixelToLogic(GetSize())).IsEmpty())
         {
             const tools::Rectangle aBoundRect(rPolyPoly.GetBoundRect());
 

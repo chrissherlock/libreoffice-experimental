@@ -546,7 +546,7 @@ sal_uInt16 ViewShellBase::SetPrinter (
         aMap.SetMapUnit(MapUnit::Map100thMM);
         MapMode aOldMap = pNewPrinter->GetMapMode();
         pNewPrinter->SetMapMode(aMap);
-        Size aNewSize = pNewPrinter->GetOutputSize();
+        Size aNewSize = pNewPrinter->PixelToLogic(pNewPrinter->GetSize());
 
         std::shared_ptr<DrawViewShell> pDrawViewShell (
             std::dynamic_pointer_cast<DrawViewShell>(GetMainViewShell()));

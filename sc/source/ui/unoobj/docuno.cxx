@@ -2068,7 +2068,7 @@ void SAL_CALL ScModelObj::render( sal_Int32 nSelRenderer, const uno::Any& aSelec
     {
         // Similar to as in and when calling ScTransferObj::PaintToDev()
 
-        tools::Rectangle aBound( Point(), pDev->GetOutputSize());
+        tools::Rectangle aBound( Point(), pDev->PixelToLogic(pDev->GetSize()));
 
         ScViewData aViewData(rDoc);
 

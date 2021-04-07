@@ -756,7 +756,7 @@ bool SvImpLBox::EntryReallyHit(SvTreeListEntry* pEntry, const Point& rPosPixel, 
         return true;
 
     tools::Rectangle aRect( m_pView->GetFocusRect( pEntry, nLine ));
-    aRect.SetRight( GetOutputSize().Width() - m_pView->GetMapMode().GetOrigin().X() );
+    aRect.SetRight( GetSize().Width() - m_pView->GetMapMode().GetOrigin().X() );
 
     SvLBoxContextBmp* pBmp = static_cast<SvLBoxContextBmp*>(pEntry->GetFirstItem(SvLBoxItemType::ContextBmp));
     aRect.AdjustLeft( -pBmp->GetWidth(m_pView,pEntry) );
@@ -1110,7 +1110,7 @@ void SvImpLBox::AdjustScrollBars( Size& rSize )
     const WinBits nWindowStyle = m_pView->GetStyle();
     bool bVerSBar = ( nWindowStyle & WB_VSCROLL ) != 0;
     bool bHorBar = false;
-    tools::Long nMaxRight = aOSize.Width(); //GetOutputSize().Width();
+    tools::Long nMaxRight = aOSize.Width(); //GetSize().Width();
     Point aOrigin( m_pView->GetMapMode().GetOrigin() );
     aOrigin.setX( aOrigin.X() * -1 );
     nMaxRight += aOrigin.X() - 1;
@@ -1317,7 +1317,7 @@ void SvImpLBox::ShowVerSBar()
         }
     }
 
-    tools::Long nMaxRight = GetOutputSize().Width();
+    tools::Long nMaxRight = GetSize().Width();
     Point aPos( m_pView->GetMapMode().GetOrigin() );
     aPos.setX( aPos.X() * -1 ); // convert document coordinates
     nMaxRight = nMaxRight + aPos.X() - 1;
@@ -2982,7 +2982,7 @@ bool SvImpLBox::SetMostRight( SvTreeListEntry* pEntry )
 
         tools::Long nTabPos = m_pView->GetTabPos( pEntry, pTab );
 
-        tools::Long nMaxRight = GetOutputSize().Width();
+        tools::Long nMaxRight = GetSize().Width();
         Point aPos( m_pView->GetMapMode().GetOrigin() );
         aPos.setX( aPos.X() * -1 ); // conversion document coordinates
         nMaxRight = nMaxRight + aPos.X() - 1;

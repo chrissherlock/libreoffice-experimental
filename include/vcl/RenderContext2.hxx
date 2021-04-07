@@ -570,7 +570,6 @@ public:
 
     Point GetFrameOffset() const;
     tools::Rectangle GetOutputRectPixel() const;
-    Size GetOutputSize() const;
 
     /** Get the offset in pixel
 

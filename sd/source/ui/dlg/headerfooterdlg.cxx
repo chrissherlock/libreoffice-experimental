@@ -699,7 +699,7 @@ void PresLayoutPreview::Paint(vcl::RenderContext& rRenderContext, const ::tools:
 {
     rRenderContext.Push();
 
-    maOutRect = ::tools::Rectangle(Point(0,0), rRenderContext.GetOutputSize());
+    maOutRect = ::tools::Rectangle(Point(0,0), rRenderContext.PixelToLogic(rRenderContext.GetSize()));
 
     // calculate page size with correct aspect ratio
     int nWidth, nHeight;

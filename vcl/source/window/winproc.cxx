@@ -1033,7 +1033,7 @@ static bool ImplHandleKey( vcl::Window* pWindow, MouseNotifyEvent nSVEvent,
                 // TipHelp via Keyboard (Shift-F2 or Ctrl-F1)
                 // simulate mouseposition at center of window
 
-                Size aSize = pChild->GetOutputSize();
+                Size aSize = pChild->PixelToLogic(pChild->GetSize());
                 Point aPos( aSize.getWidth()/2, aSize.getHeight()/2 );
                 aPos = pChild->OutputToScreenPixel( aPos );
 

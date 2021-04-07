@@ -457,7 +457,7 @@ void ShowWindow::DrawPauseScene( bool bTimeoutOnly )
 {
     const MapMode&  rMap = GetMapMode();
     const Point     aOutOrg( PixelToLogic( Point() ) );
-    const Size      aOutSize( GetOutputSize() );
+    const Size      aOutSize( GetSize() );
     const Size      aTextSize(LogicToLogic(Size(0, 14), MapMode(MapUnit::MapPoint), rMap));
     const Size      aOffset(LogicToLogic(Size(1000, 1000), MapMode(MapUnit::Map100thMM), rMap));
     OUString        aText( SdResId( STR_PRES_PAUSE ) );

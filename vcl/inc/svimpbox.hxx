@@ -290,7 +290,7 @@ public:
     static const Image& GetDefaultExpandedNodeImage( );
     static const Image& GetDefaultCollapsedNodeImage( );
 
-    const Size&         GetOutputSize() const { return m_aOutputSize;}
+    const Size&         GetSize() const { return m_aOutputSize;}
     virtual void        KeyUp( bool bPageUp );
     virtual void        KeyDown( bool bPageDown );
     void                Command( const CommandEvent& rCEvt );

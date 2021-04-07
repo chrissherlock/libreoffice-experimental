@@ -2257,7 +2257,7 @@ void Edit::ImplShowDDCursor()
     {
         tools::Long nTextWidth = GetTextWidth( maText.toString(), 0, mpDDInfo->nDropPos );
         tools::Long nTextHeight = GetTextHeight();
-        tools::Rectangle aCursorRect( Point( nTextWidth + mnXOffset, (GetOutputSize().Height()-nTextHeight)/2 ), Size( 2, nTextHeight ) );
+        tools::Rectangle aCursorRect( Point( nTextWidth + mnXOffset, (PixelToLogic(GetSize()).Height()-nTextHeight)/2 ), Size( 2, nTextHeight ) );
         mpDDInfo->aCursor.SetWindow( this );
         mpDDInfo->aCursor.SetPos( aCursorRect.TopLeft() );
         mpDDInfo->aCursor.SetSize( aCursorRect.GetSize() );
