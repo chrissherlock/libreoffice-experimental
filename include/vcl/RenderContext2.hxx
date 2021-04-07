@@ -676,6 +676,8 @@ public:
                              vcl::TextLayoutCache const* = nullptr,
                              SalLayoutGlyphs const* const pLayoutCache = nullptr) const;
 
+    SalLayoutGlyphs* GetLayoutGlyphs(OUString const& rText, sal_Int32 nIndex, sal_Int32 nLength);
+
     SalLayoutGlyphs const* GetLayoutGlyphs(OUString const& rString,
                                            o3tl::lru_map<OUString, SalLayoutGlyphs>& mCachedGlyphs);
 

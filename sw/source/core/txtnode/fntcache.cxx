@@ -223,19 +223,7 @@ static SalLayoutGlyphs* lcl_CreateLayout(const SwTextGlyphsKey& rKey, std::map<S
 {
     assert (!it->second.m_aTextGlyphs.IsValid());
 
-    if (rKey.m_nIndex >= rKey.m_aText.getLength())
-        // Same as in OutputDevice::GetTextArray().
-        return nullptr;
-
-    // Calculate glyph items.
-    std::unique_ptr<SalLayout> pLayout
-        = rKey.m_pOutputDevice->ImplLayout(rKey.m_aText, rKey.m_nIndex, rKey.m_nLength, Point(0, 0), 0,
-                                         nullptr, SalLayoutFlags::GlyphItemsOnly);
-    if (!pLayout)
-        return nullptr;
-
-    // Remember the calculation result.
-    it->second.m_aTextGlyphs = pLayout->GetGlyphs();
+    it->second.m_aTextGlyphs = rKey.m_pOutputDevice->GetLayoutGlyphs(rKey.m_aText, rKey.m_nIndex, rKey.m_nLength);
 
     return &it->second.m_aTextGlyphs;
 }

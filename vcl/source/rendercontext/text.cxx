@@ -798,6 +798,24 @@ void RenderContext2::SetTextAlign(TextAlign eAlign)
         mpAlphaVDev->SetTextAlign(eAlign);
 }
 
+SalLayoutGlyphs* RenderContext2::GetLayoutGlyphs(OUString const& rText, sal_Int32 nIndex,
+                                                 sal_Int32 nLength)
+{
+    if (nIndex >= rText.getLength())
+    {
+        // Same as in OutputDevice::GetTextArray().
+        return nullptr;
+    }
+
+    std::unique_ptr<SalLayout> pLayout = ImplLayout(rText, nIndex, nLength, Point(0, 0), 0, nullptr,
+                                                    SalLayoutFlags::GlyphItemsOnly);
+
+    if (!pLayout)
+        return nullptr;
+
+    return new SalLayoutGlyphs(pLayout->GetGlyphs());
+}
+
 SalLayoutGlyphs const*
 RenderContext2::GetLayoutGlyphs(OUString const& rString,
                                 o3tl::lru_map<OUString, SalLayoutGlyphs>& rCachedGlyphs)
