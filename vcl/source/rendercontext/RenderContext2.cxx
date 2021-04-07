@@ -27,6 +27,7 @@
 
 #include <outdev.h>
 #include <ImplOutDevData.hxx>
+#include <font/PhysicalFontFaceCollection.hxx>
 #include <salgdi.hxx>
 
 RenderContext2::RenderContext2()

@@ -75,7 +75,7 @@ class GfxLink;
 class Hatch;
 class Image;
 class ImplAnimView;
-class ImplDeviceFontList;
+class PhysicalFontFaceCollection;
 class ImplDeviceFontSizeList;
 class ImplFontCache;
 class ImplMultiTextLineInfo;
@@ -1109,7 +1109,7 @@ protected:
     MappingMetrics maMapRes;
     std::unique_ptr<ImplOutDevData> mpOutDevData;
     mutable std::shared_ptr<PhysicalFontCollection> mxFontCollection;
-    mutable std::unique_ptr<ImplDeviceFontList> mpDeviceFontList;
+    mutable std::unique_ptr<PhysicalFontFaceCollection> mpDeviceFontList;
     mutable std::unique_ptr<ImplDeviceFontSizeList> mpDeviceFontSizeList;
     mutable rtl::Reference<LogicalFontInstance> mpFontInstance;
     mutable std::shared_ptr<ImplFontCache> mxFontCache;

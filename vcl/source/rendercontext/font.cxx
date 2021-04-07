@@ -35,6 +35,7 @@
 #include <PhysicalFontCollection.hxx>
 #include <emphasismark.hxx>
 #include <font/FeatureCollector.hxx>
+#include <font/PhysicalFontFaceCollection.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>

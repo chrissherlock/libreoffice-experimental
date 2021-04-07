@@ -41,6 +41,7 @@
 #include <jobset.h>
 #include <outdev.h>
 #include <PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFaceCollection.hxx>
 #include <print.h>
 
 #include <com/sun/star/beans/XPropertySet.hpp>
