@@ -30,8 +30,8 @@
 #include <o3tl/cow_wrapper.hxx>
 
 #include <vcl/dllapi.h>
+#include <vcl/font/FontKerning.hxx>
 #include <vcl/font/FontRelief.hxx>
-#include <vcl/fntstyle.hxx>
 
 class Size;
 class LanguageTag;
