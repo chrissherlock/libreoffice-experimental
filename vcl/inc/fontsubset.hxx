@@ -22,28 +22,13 @@
 
 #include <rtl/ustring.hxx>
 #include <tools/gen.hxx>
-#include <o3tl/typed_flags_set.hxx>
 
 #include <vcl/dllapi.h>
 #include <vcl/glyphitem.hxx>
 
-namespace vcl { class TrueTypeFont; } ///< SFT's idea of a TTF font
+#include <font/FontType.hxx>
 
-enum class FontType {
-    NO_FONT     = 0,
-    SFNT_TTF    = 1<<1,                     ///< SFNT container with TrueType glyphs
-    SFNT_CFF    = 1<<2,                     ///< SFNT container with CFF-container
-    TYPE1_PFA   = 1<<3,                     ///< PSType1 Postscript Font Ascii
-    TYPE1_PFB   = 1<<4,                     ///< PSType1 Postscript Font Binary
-    CFF_FONT    = 1<<5,                     ///< CFF-container with PSType2 glyphs
-    TYPE3_FONT  = 1<<6,                     ///< PSType3 Postscript font
-    TYPE42_FONT = 1<<7,                     ///< PSType42 wrapper for an SFNT_TTF
-    ANY_SFNT    = SFNT_TTF | SFNT_CFF,
-    ANY_TYPE1   = TYPE1_PFA | TYPE1_PFB
-};
-namespace o3tl {
-    template<> struct typed_flags<FontType> : is_typed_flags<FontType, (1<<8)-1> {};
-}
+namespace vcl { class TrueTypeFont; } ///< SFT's idea of a TTF font
 
 class VCL_DLLPUBLIC FontSubsetInfo final
 {
