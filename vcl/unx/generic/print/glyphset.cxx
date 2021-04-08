@@ -21,8 +21,8 @@
 
 #include <sft.hxx>
 
+#include <font/FontSubsetInfo.hxx>
 #include <unx/printergfx.hxx>
-#include <fontsubset.hxx>
 #include <unx/fontmanager.hxx>
 
 #include <tools/gen.hxx>

@@ -21,8 +21,8 @@
 #include <unistd.h>
 #include <osl/thread.h>
 
+#include <font/FontSubsetInfo.hxx>
 #include <unx/fontmanager.hxx>
-#include <fontsubset.hxx>
 #include <impfontcharmap.hxx>
 #include <unx/gendata.hxx>
 #include <unx/helper.hxx>

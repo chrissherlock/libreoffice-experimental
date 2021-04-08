@@ -14449,7 +14449,6 @@ vcl/inc/dndeventdispatcher.hxx
 vcl/inc/dndlistenercontainer.hxx
 vcl/inc/factory.hxx
 vcl/inc/fltcall.hxx
-vcl/inc/fontsubset.hxx
 vcl/inc/graphic/UnoGraphic.hxx
 vcl/inc/graphic/UnoGraphicDescriptor.hxx
 vcl/inc/graphic/UnoGraphicTransformer.hxx

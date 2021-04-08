@@ -22,7 +22,7 @@
 #include <vector>
 #include <assert.h>
 
-#include <fontsubset.hxx>
+#include <font/FontSubsetInfo.hxx>
 
 #include <o3tl/safeint.hxx>
 #include <strhelper.hxx>

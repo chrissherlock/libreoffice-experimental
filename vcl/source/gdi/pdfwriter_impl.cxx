@@ -72,7 +72,7 @@
 #include <textlineinfo.hxx>
 #include <svdata.hxx>
 #include <bitmap/BitmapWriteAccess.hxx>
-#include <fontsubset.hxx>
+#include <font/FontSubsetInfo.hxx>
 #include <font/PhysicalFontFace.hxx>
 #include <salgdi.hxx>
 #include <textlayout.hxx>

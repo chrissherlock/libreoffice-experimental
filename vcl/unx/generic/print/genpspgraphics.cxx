@@ -37,7 +37,7 @@
 #include <vcl/fontcharmap.hxx>
 #include <config_cairo_canvas.h>
 
-#include <fontsubset.hxx>
+#include <font/FontSubsetInfo.hxx>
 #include <unx/freetype_glyphcache.hxx>
 #include <unx/geninst.h>
 #include <unx/genpspgraphics.h>

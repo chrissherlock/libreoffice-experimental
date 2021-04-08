@@ -33,7 +33,7 @@
 #include <tools/long.hxx>
 #include <vcl/sysdata.hxx>
 
-#include <fontsubset.hxx>
+#include <font/FontSubsetInfo.hxx>
 #include <quartz/salbmp.h>
 #ifdef MACOSX
 #include <quartz/salgdi.h>

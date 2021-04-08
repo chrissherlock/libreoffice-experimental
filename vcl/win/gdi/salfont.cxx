@@ -49,8 +49,8 @@
 #include <vcl/fontcharmap.hxx>
 #include <comphelper/scopeguard.hxx>
 
-#include <fontsubset.hxx>
 #include <outdev.h>
+#include <font/FontSubsetInfo.hxx>
 #include <font/PhysicalFontFamilyCollection.hxx>
 #include <font/PhysicalFontFace.hxx>
 #include <sft.hxx>
