@@ -66,13 +66,13 @@ public: // TODO: make data members private
 
     inline hb_font_t* GetHbFont();
     bool IsGraphiteFont();
-    void SetAverageWidthFactor(double nFactor) { m_nAveWidthFactor = std::abs(nFactor); }
-    double GetAverageWidthFactor() const { return m_nAveWidthFactor; }
-    const FontSelectPattern& GetFontSelectPattern() const { return m_aFontSelData; }
+    void SetAverageWidthFactor(double nFactor);
+    double GetAverageWidthFactor() const;
+    const FontSelectPattern& GetFontSelectPattern() const;
 
-    const PhysicalFontFace* GetFontFace() const { return m_pFontFace.get(); }
-    PhysicalFontFace* GetFontFace() { return m_pFontFace.get(); }
-    const ImplFontCache* GetFontCache() const { return mpFontCache; }
+    const PhysicalFontFace* GetFontFace() const;
+    PhysicalFontFace* GetFontFace();
+    const ImplFontCache* GetFontCache() const;
 
     bool GetGlyphBoundRect(sal_GlyphId, tools::Rectangle&, bool) const;
     virtual bool GetGlyphOutline(sal_GlyphId, basegfx::B2DPolyPolygon&, bool) const = 0;
@@ -89,11 +89,7 @@ protected:
 
     // Takes ownership of pHbFace.
     static hb_font_t* InitHbFont(hb_face_t* pHbFace);
-    virtual hb_font_t* ImplInitHbFont()
-    {
-        assert(false);
-        return hb_font_get_empty();
-    }
+    virtual hb_font_t* ImplInitHbFont();
 
 private:
     // cache of Unicode characters and replacement font names

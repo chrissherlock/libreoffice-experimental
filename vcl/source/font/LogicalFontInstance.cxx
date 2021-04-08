@@ -171,4 +171,28 @@ bool LogicalFontInstance::IsGraphiteFont()
     return *m_xbIsGraphiteFont;
 }
 
+void LogicalFontInstance::SetAverageWidthFactor(double nFactor)
+{
+    m_nAveWidthFactor = std::abs(nFactor);
+}
+
+double LogicalFontInstance::GetAverageWidthFactor() const { return m_nAveWidthFactor; }
+
+const FontSelectPattern& LogicalFontInstance::GetFontSelectPattern() const
+{
+    return m_aFontSelData;
+}
+
+const PhysicalFontFace* LogicalFontInstance::GetFontFace() const { return m_pFontFace.get(); }
+
+PhysicalFontFace* LogicalFontInstance::GetFontFace() { return m_pFontFace.get(); }
+
+const ImplFontCache* LogicalFontInstance::GetFontCache() const { return mpFontCache; }
+
+hb_font_t* LogicalFontInstance::ImplInitHbFont()
+{
+    assert(false);
+    return hb_font_get_empty();
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
