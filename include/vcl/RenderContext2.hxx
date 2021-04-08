@@ -28,12 +28,12 @@
 #include <o3tl/lru_map.hxx>
 
 #include <vcl/dllapi.h>
+#include <vcl/DeviceInterface.hxx>
 #include <vcl/DrawingInterface.hxx>
 #include <vcl/Geometry.hxx>
 #include <vcl/ImplLayoutArgs.hxx>
 #include <vcl/MappingMetrics.hxx>
 #include <vcl/RasterOp.hxx>
-#include <vcl/bitmapex.hxx>
 #include <vcl/cairo.hxx>
 #include <vcl/devicecoordinate.hxx>
 #include <vcl/flags/AddFontSubstituteFlags.hxx>
@@ -51,8 +51,6 @@
 #include <vcl/wall.hxx>
 
 #include <vector>
-
-#include <com/sun/star/awt/DeviceInfo.hpp>
 
 #define GRADIENT_DEFAULT_STEPCOUNT 0
 #define HATCH_MAXPOINTS 1024
@@ -117,6 +115,7 @@ OUString VCL_DLLPUBLIC GetNonMnemonicString(const OUString& rStr);
 * OK.
 */
 class VCL_DLLPUBLIC RenderContext2 : public virtual DrawingInterface,
+                                     public virtual DeviceInterface,
                                      public virtual VclReferenceBase
 {
     friend class VirtualDevice;
@@ -124,6 +123,26 @@ class VCL_DLLPUBLIC RenderContext2 : public virtual DrawingInterface,
 public:
     RenderContext2();
     virtual ~RenderContext2();
+
+    // DeviceInterface methods
+
+    /** Get the graphic context that the output device uses to draw on.
+
+     If no graphics device exists, then initialize it.
+
+     @returns SalGraphics instance.
+     */
+    SalGraphics const* GetGraphics() const override;
+    SalGraphics* GetGraphics() override;
+
+    css::awt::DeviceInfo GetDeviceInfo() const override;
+
+    FontMetric GetFontMetric(int nDevFontIndex) const override;
+
+    Bitmap GetBitmap(Point const& rSrcPt, Size const& rSize) const override;
+    BitmapEx GetBitmapEx(Point const& rSrcPt, Size const& rSize) const override;
+
+    // DrawingInterface methods
 
     FontMetric GetFontMetric() const override;
 
@@ -205,7 +224,6 @@ public:
 
     void DrawHatch(tools::PolyPolygon const& rPolyPoly, Hatch const& rHatch) override;
 
-    virtual Bitmap GetBitmap(Point const& rSrcPt, Size const& rSize) const;
     void DrawBitmap(Point const& rDestPt, Bitmap const& rBitmap) override;
     void DrawBitmap(Point const& rDestPt, Size const& rDestSize, Bitmap const& rBitmap) override;
     void DrawBitmap(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
@@ -243,9 +261,6 @@ public:
                       OUString* pDisplayText = nullptr,
                       SalLayoutGlyphs const* pGlyphs = nullptr) override;
 
-    /** Query extended bitmap (with alpha channel, if available).
-     */
-    BitmapEx GetBitmapEx(Point const& rSrcPt, Size const& rSize) const;
     void DrawBitmapEx(Point const& rDestPt, BitmapEx const& rBitmapEx) override;
     void DrawBitmapEx(Point const& rDestPt, Size const& rDestSize,
                       BitmapEx const& rBitmapEx) override;
@@ -338,15 +353,6 @@ public:
     virtual Size GetButtonBorderSize();
     virtual Color GetMonochromeButtonColor();
 
-    /** Get the graphic context that the output device uses to draw on.
-
-     If no graphics device exists, then initialize it.
-
-     @returns SalGraphics instance.
-     */
-    SalGraphics const* GetGraphics() const;
-    SalGraphics* GetGraphics();
-
     SystemGraphicsData GetSystemGfxData() const;
     css::uno::Any GetSystemGfxDataAny() const;
 
@@ -427,7 +433,6 @@ public:
     int GetPhysicalFontFaceSizeCount(vcl::Font const&) const;
 
     FontMetric GetFontMetric(vcl::Font const& rFont) const;
-    FontMetric GetFontMetric(int nDevFontIndex) const;
     int GetFontMetricCount() const;
 
     bool GetFontCharMap(FontCharMapRef& rxFontCharMap) const;
@@ -695,8 +700,6 @@ public:
     //drop and fetch font data for all outputdevices
     //If bNewFontLists is true then drop and refetch lists of system fonts
     SAL_DLLPRIVATE static void ImplUpdateAllFontData(bool bNewFontLists);
-
-    virtual css::awt::DeviceInfo GetDeviceInfo() const;
 
     // #i75163#
     basegfx::B2DHomMatrix GetViewTransformation() const;
