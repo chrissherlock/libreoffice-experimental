@@ -13,8 +13,8 @@
 #include <optional>
 #include <tools/fontenum.hxx>
 #include <tools/color.hxx>
-#include <vcl/fntstyle.hxx>
 #include <i18nlangtag/lang.h>
+#include <vcl/font/FontRelief.hxx>
 
 class SvxFontItem;
 

@@ -1,4 +1,4 @@
-/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; fill-column: 100 -*- */
 /*
  * This file is part of the LibreOffice project.
  *
@@ -17,22 +17,16 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#ifndef INCLUDED_VCL_FNTSTYLE_HXX
-#define INCLUDED_VCL_FNTSTYLE_HXX
+#pragma once
 
-#include <o3tl/typed_flags_set.hxx>
+#include <sal/types.h>
 
-enum class FontKerning
+enum class FontRelief
 {
-    NONE                = 0x00,
-    FontSpecific        = 0x01,
-    Asian               = 0x02,
+    NONE,
+    Embossed,
+    Engraved,
+    FontRelief_FORCE_EQUAL_SIZE = SAL_MAX_ENUM
 };
-namespace o3tl
-{
-    template<> struct typed_flags<FontKerning> : is_typed_flags<FontKerning, 0x03> {};
-}
 
-#endif // INCLUDED_VCL_FNTSTYLE_HXX
-
-/* vim:set shiftwidth=4 softtabstop=4 expandtab: */
+/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

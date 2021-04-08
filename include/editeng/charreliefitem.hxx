@@ -19,8 +19,8 @@
 #ifndef INCLUDED_EDITENG_CHARRELIEFITEM_HXX
 #define INCLUDED_EDITENG_CHARRELIEFITEM_HXX
 
+#include <vcl/font/FontRelief.hxx>
 #include <svl/eitem.hxx>
-#include <vcl/fntstyle.hxx>
 #include <editeng/editengdllapi.h>
 
 // class SvxCharRotateItem ----------------------------------------------

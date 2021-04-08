@@ -29,9 +29,8 @@
 #include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <tools/fontenum.hxx>
 #include <tools/gen.hxx>
-#include <vcl/fntstyle.hxx>
 #include <vcl/outdevstate.hxx>
-
+#include <vcl/font/FontRelief.hxx>
 
 namespace cppcanvas::internal
     {
