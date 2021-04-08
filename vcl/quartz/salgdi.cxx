@@ -38,6 +38,7 @@
 #include <vcl/svapp.hxx>
 #include <vcl/sysdata.hxx>
 
+#include <font/CmapResult.hxx>
 #include <font/ImplFont.hxx>
 #include <font/ImplFontCharMap.hxx>
 #include <font/ImplFontMetricData.hxx>

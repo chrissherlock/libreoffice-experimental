@@ -20,6 +20,7 @@
 #include <rtl/textenc.h>
 #include <sal/log.hxx>
 
+#include <font/CmapResult.hxx>
 #include <font/ImplFontCharMap.hxx>
 
 #include <algorithm>

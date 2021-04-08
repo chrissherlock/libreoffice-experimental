@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include <osl/thread.h>
 
+#include <font/CmapResult.hxx>
 #include <font/FontSubsetInfo.hxx>
 #include <font/ImplFontCharMap.hxx>
 #include <unx/fontmanager.hxx>

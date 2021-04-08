@@ -26,6 +26,7 @@
 #include <Qt5Tools.hxx>
 
 #include <sft.hxx>
+#include <font/CmapResult.hxx>
 #include <font/ImplFontCharMap.hxx>
 #include <font/FontSelectPattern.hxx>
 #include <font/LogicalFontInstance.hxx>

@@ -50,6 +50,7 @@
 #include <comphelper/scopeguard.hxx>
 
 #include <outdev.h>
+#include <font/CmapResult.hxx>
 #include <font/FontSubsetInfo.hxx>
 #include <font/GlyphItem.hxx>
 #include <font/ImplFontCharMap.hxx>

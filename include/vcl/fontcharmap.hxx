@@ -154,21 +154,6 @@ private:
     void                operator=( const FontCharMap& ) = delete;
 };
 
-// CmapResult is a normalized version of the many CMAP formats
-class VCL_PLUGIN_PUBLIC CmapResult
-{
-public:
-    explicit            CmapResult( bool bSymbolic = false,
-                            const sal_UCS4* pRangeCodes = nullptr, int nRangeCount = 0 );
-
-    const sal_UCS4*     mpRangeCodes;
-    const int*          mpStartGlyphs;
-    const sal_uInt16*   mpGlyphIds;
-    int                 mnRangeCount;
-    bool                mbSymbolic;
-    bool                mbRecoded;
-};
-
 #endif // INCLUDED_FONTCHARMAP_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
