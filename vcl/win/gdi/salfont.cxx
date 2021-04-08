@@ -51,6 +51,7 @@
 
 #include <outdev.h>
 #include <font/FontSubsetInfo.hxx>
+#include <font/GlyphItem.hxx>
 #include <font/ImplFontCharMap.hxx>
 #include <font/ImplFontMetricData.hxx>
 #include <font/PhysicalFontFamilyCollection.hxx>
@@ -60,7 +61,6 @@
 #include <win/salgdi.h>
 #include <win/winlayout.hxx>
 #include <win/wingdiimpl.hxx>
-#include <impglyphitem.hxx>
 
 #if HAVE_FEATURE_SKIA
 #include <vcl/skia/SkiaHelper.hxx>

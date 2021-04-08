@@ -17,45 +17,35 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#ifndef INCLUDED_VCL_IMPGLYPHITEM_HXX
-#define INCLUDED_VCL_IMPGLYPHITEM_HXX
+#pragma once
 
 #include <tools/gen.hxx>
+
 #include <vcl/dllapi.h>
 #include <vcl/glyphitem.hxx>
 #include <vcl/outdev.hxx>
-#include <vector>
 
 #include <font/GlyphItemFlags.hxx>
 #include <font/LogicalFontInstance.hxx>
 #include <font/SalLayoutGlyphsImpl.hxx>
 
+#include <vector>
+
 class VCL_DLLPUBLIC GlyphItem
 {
-    sal_GlyphId m_aGlyphId;
-    int m_nCharCount; // number of characters making up this glyph
-    int m_nOrigWidth; // original glyph width
-    LogicalFontInstance* m_pFontInstance;
-    int m_nCharPos; // index in string
-    GlyphItemFlags m_nFlags;
-    int m_nXOffset;
-
 public:
-    int m_nNewWidth; // width after adjustments
-    Point m_aLinearPos; // absolute position of non rotated string
-
     GlyphItem(int nCharPos, int nCharCount, sal_GlyphId aGlyphId, const Point& rLinearPos,
               GlyphItemFlags nFlags, int nOrigWidth, int nXOffset,
               LogicalFontInstance* pFontInstance)
-        : m_aGlyphId(aGlyphId)
+        : m_nNewWidth(nOrigWidth)
+        , m_aLinearPos(rLinearPos)
+        , m_aGlyphId(aGlyphId)
         , m_nCharCount(nCharCount)
         , m_nOrigWidth(nOrigWidth)
         , m_pFontInstance(pFontInstance)
         , m_nCharPos(nCharPos)
         , m_nFlags(nFlags)
         , m_nXOffset(nXOffset)
-        , m_nNewWidth(nOrigWidth)
-        , m_aLinearPos(rLinearPos)
     {
         assert(m_pFontInstance);
     }
@@ -78,6 +68,18 @@ public:
     int origWidth() const { return m_nOrigWidth; }
     int charPos() const { return m_nCharPos; }
     int xOffset() const { return m_nXOffset; }
+
+    int m_nNewWidth; // width after adjustments
+    Point m_aLinearPos; // absolute position of non rotated string
+
+private:
+    sal_GlyphId m_aGlyphId;
+    int m_nCharCount; ///< number of characters making up this glyph
+    int m_nOrigWidth; ///< original glyph width
+    LogicalFontInstance* m_pFontInstance;
+    int m_nCharPos; ///< index in string
+    GlyphItemFlags m_nFlags;
+    int m_nXOffset;
 };
 
 VCL_DLLPUBLIC bool GlyphItem::GetGlyphBoundRect(tools::Rectangle& rRect) const
@@ -95,7 +97,5 @@ void GlyphItem::dropGlyph()
     m_nCharPos = -1;
     m_nFlags |= GlyphItemFlags::IS_DROPPED;
 }
-
-#endif // INCLUDED_VCL_IMPGLYPHITEM_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

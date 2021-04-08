@@ -73,10 +73,10 @@
 #include <svdata.hxx>
 #include <bitmap/BitmapWriteAccess.hxx>
 #include <font/FontSubsetInfo.hxx>
+#include <font/GlyphItem.hxx>
 #include <font/PhysicalFontFace.hxx>
 #include <salgdi.hxx>
 #include <textlayout.hxx>
-#include <impglyphitem.hxx>
 #include <pdf/XmpMetadata.hxx>
 #include <pdf/objectcopier.hxx>
 #include <o3tl/sorted_vector.hxx>

@@ -36,13 +36,13 @@
 
 #include <vcl/svapp.hxx>
 
+#include <font/GlyphItem.hxx>
+
 #include <unicode/ubidi.h>
 #include <unicode/uchar.h>
 
 #include <algorithm>
 #include <memory>
-
-#include <impglyphitem.hxx>
 
 // Glyph Flags
 #define GF_FONTMASK  0xF0000000

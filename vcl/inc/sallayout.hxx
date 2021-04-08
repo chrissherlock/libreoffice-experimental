@@ -39,7 +39,7 @@
 #include <vcl/devicecoordinate.hxx>
 #include <vcl/vcllayout.hxx>
 
-#include "impglyphitem.hxx"
+#include <font/GlyphItem.hxx>
 
 #define MAX_FALLBACK 16
 

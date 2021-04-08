@@ -29,8 +29,6 @@
 #include <iomanip>
 #include <memory>
 
-//#include <impglyphitem.hxx>
-
 ImplLayoutArgs::ImplLayoutArgs(const OUString& rStr, int nMinCharPos, int nEndCharPos,
                                SalLayoutFlags nFlags, const LanguageTag& rLanguageTag,
                                vcl::TextLayoutCache const* const pLayoutCache)

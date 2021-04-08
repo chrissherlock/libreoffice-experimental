@@ -25,7 +25,7 @@
 #include <vcl/dllapi.h>
 #include <vcl/glyphitem.hxx>
 
-#include <impglyphitem.hxx>
+#include <font/GlyphItem.hxx>
 
 #include <list>
 #include <vector>
