@@ -32,8 +32,8 @@
 #include <vcl/outdev.hxx>
 
 #include <font/FontAttributes.hxx>
+#include <font/ImplFontMetricData.hxx>
 #include <font/LogicalFontInstance.hxx>
-#include <impfontmetricdata.hxx>
 
 #include <unordered_map>
 

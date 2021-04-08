@@ -25,8 +25,8 @@
 #include <sal/log.hxx>
 
 #include <font/FontSelectPattern.hxx>
+#include <font/ImplFontMetricData.hxx>
 #include <font/LogicalFontInstance.hxx>
-#include <impfontmetricdata.hxx>
 #include <sft.hxx>
 
 #include <com/sun/star/uno/Sequence.hxx>

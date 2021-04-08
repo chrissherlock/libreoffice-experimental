@@ -43,9 +43,9 @@
 #include <unx/genpspgraphics.h>
 #include <unx/printergfx.hxx>
 #include <langboost.hxx>
+#include <font/ImplFontMetricData.hxx>
 #include <font/FontAttributes.hxx>
 #include <font/LogicalFontInstance.hxx>
-#include <impfontmetricdata.hxx>
 #include <font/PhysicalFontFamilyCollection.hxx>
 #include <font/PhysicalFontFace.hxx>
 #include <sallayout.hxx>

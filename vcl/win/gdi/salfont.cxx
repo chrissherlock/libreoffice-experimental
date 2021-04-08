@@ -52,6 +52,7 @@
 #include <outdev.h>
 #include <font/FontSubsetInfo.hxx>
 #include <font/ImplFontCharMap.hxx>
+#include <font/ImplFontMetricData.hxx>
 #include <font/PhysicalFontFamilyCollection.hxx>
 #include <font/PhysicalFontFace.hxx>
 #include <sft.hxx>
@@ -59,7 +60,6 @@
 #include <win/salgdi.h>
 #include <win/winlayout.hxx>
 #include <win/wingdiimpl.hxx>
-#include <impfontmetricdata.hxx>
 #include <impglyphitem.hxx>
 
 #if HAVE_FEATURE_SKIA

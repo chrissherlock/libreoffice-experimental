@@ -14464,8 +14464,6 @@ vcl/inc/image.h
 vcl/inc/imagerepository.hxx
 vcl/inc/impanmvw.hxx
 vcl/inc/impdel.hxx
-vcl/inc/impfont.hxx
-vcl/inc/impfontmetricdata.hxx
 vcl/inc/impgraph.hxx
 vcl/inc/implimagetree.hxx
 vcl/inc/jobdata.hxx

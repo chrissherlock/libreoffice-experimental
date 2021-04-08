@@ -19,8 +19,6 @@
 
 #pragma once
 
-#include "impfontmetricdata.hxx"
-
 #include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <rtl/ref.hxx>
 #include <salhelper/simplereferenceobject.hxx>
@@ -31,6 +29,7 @@
 #include <vcl/glyphitem.hxx>
 
 #include <font/FontSelectPattern.hxx>
+#include <font/ImplFontMetricData.hxx>
 
 #include <optional>
 #include <unordered_map>

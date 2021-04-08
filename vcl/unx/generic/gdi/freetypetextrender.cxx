@@ -31,8 +31,8 @@
 #include <unx/glyphcache.hxx>
 #include <unx/fc_fontoptions.hxx>
 #include <unx/freetype_glyphcache.hxx>
+#include <font/ImplFontMetricData.hxx>
 #include <font/PhysicalFontFace.hxx>
-#include <impfontmetricdata.hxx>
 
 #include <sallayout.hxx>
 

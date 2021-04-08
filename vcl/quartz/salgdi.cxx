@@ -40,9 +40,9 @@
 
 #include <font/ImplFont.hxx>
 #include <font/ImplFontCharMap.hxx>
+#include <font/ImplFontMetricData.hxx>
 #include <font/FontSubsetInfo.hxx>
 #include <quartz/ctfonts.hxx>
-#include <impfontmetricdata.hxx>
 #include <outdev.h>
 #include <font/PhysicalFontFamilyCollection.hxx>
 

@@ -40,8 +40,8 @@
 #include <vcl/metric.hxx>
 
 
+#include <font/ImplFontMetricData.hxx>
 #include <font/LogicalFontInstance.hxx>
-#include <impfontmetricdata.hxx>
 #include <font/PhysicalFontFace.hxx>
 #include <salgdi.hxx>
 

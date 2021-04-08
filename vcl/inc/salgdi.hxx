@@ -20,13 +20,14 @@
 #ifndef INCLUDED_VCL_INC_SALGDI_HXX
 #define INCLUDED_VCL_INC_SALGDI_HXX
 
+#include <basegfx/matrix/b2dhommatrix.hxx>
+
 #include <vcl/outdev.hxx>
 
-#include "impfontmetricdata.hxx"
+#include <font/ImplFontMetricData.hxx>
 #include "salgdiimpl.hxx"
 #include "sallayout.hxx"
 #include "SalGradient.hxx"
-#include <basegfx/matrix/b2dhommatrix.hxx>
 #include "WidgetDrawInterface.hxx"
 
 #include <config_cairo_canvas.h>

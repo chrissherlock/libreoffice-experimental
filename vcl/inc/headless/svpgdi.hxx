@@ -30,10 +30,10 @@
 #include <vcl/sysdata.hxx>
 #include <config_cairo_canvas.h>
 
+#include <font/ImplFontMetricData.hxx>
 #include <salgdi.hxx>
 #include <sallayout.hxx>
 #include "svpcairotextrender.hxx"
-#include <impfontmetricdata.hxx>
 
 #include <cairo.h>
 
