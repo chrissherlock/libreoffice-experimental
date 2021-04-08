@@ -28,6 +28,7 @@
 
 #include <font/GlyphItemFlags.hxx>
 #include <font/LogicalFontInstance.hxx>
+#include <font/SalLayoutGlyphsImpl.hxx>
 
 class VCL_DLLPUBLIC GlyphItem
 {
@@ -94,25 +95,6 @@ void GlyphItem::dropGlyph()
     m_nCharPos = -1;
     m_nFlags |= GlyphItemFlags::IS_DROPPED;
 }
-
-class SalLayoutGlyphsImpl : public std::vector<GlyphItem>
-{
-    friend class GenericSalLayout;
-
-public:
-    SalLayoutGlyphsImpl* clone() const;
-    const rtl::Reference<LogicalFontInstance>& GetFont() const { return m_rFontInstance; }
-    bool IsValid() const;
-
-private:
-    rtl::Reference<LogicalFontInstance> m_rFontInstance;
-    SalLayoutFlags mnFlags = SalLayoutFlags::NONE;
-
-    SalLayoutGlyphsImpl(LogicalFontInstance& rFontInstance)
-        : m_rFontInstance(&rFontInstance)
-    {
-    }
-};
 
 #endif // INCLUDED_VCL_IMPGLYPHITEM_HXX
 
