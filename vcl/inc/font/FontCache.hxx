@@ -25,9 +25,10 @@
 #include <rtl/ref.hxx>
 #include <o3tl/lru_map.hxx>
 #include <tools/gen.hxx>
+
 #include <vcl/glyphitem.hxx>
 
-#include "fontselect.hxx"
+#include <font/FontSelectPattern.hxx>
 
 class Size;
 namespace vcl

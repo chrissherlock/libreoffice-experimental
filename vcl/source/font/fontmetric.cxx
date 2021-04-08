@@ -24,8 +24,8 @@
 #include <vcl/outdev.hxx>
 #include <sal/log.hxx>
 
+#include <font/FontSelectPattern.hxx>
 #include <font/LogicalFontInstance.hxx>
-#include <fontselect.hxx>
 #include <impfontmetricdata.hxx>
 #include <sft.hxx>
 

@@ -26,7 +26,6 @@
 #include <comphelper/sequence.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/vclenum.hxx>
-#include <fontselect.hxx>
 #include <i18nlangtag/languagetag.hxx>
 #include <i18nutil/unicode.hxx>
 #include <rtl/strbuf.hxx>
@@ -36,6 +35,8 @@
 #include <unicode/uscript.h>
 #include <officecfg/Office/Common.hxx>
 #include <org/freedesktop/PackageKit/SyncDbusSessionHelper.hpp>
+
+#include <font/FontSelectPattern.hxx>
 
 using namespace psp;
 

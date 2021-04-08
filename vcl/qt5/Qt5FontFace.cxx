@@ -27,8 +27,8 @@
 
 #include <sft.hxx>
 #include <impfontcharmap.hxx>
+#include <font/FontSelectPattern.hxx>
 #include <font/LogicalFontInstance.hxx>
-#include <fontselect.hxx>
 #include <font/PhysicalFontFamilyCollection.hxx>
 
 #include <QtGui/QFont>

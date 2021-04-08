@@ -20,9 +20,11 @@
 #ifndef INCLUDED_VCL_INC_IMPFONTMETRICDATA_HXX
 #define INCLUDED_VCL_INC_IMPFONTMETRICDATA_HXX
 
-#include <vcl/dllapi.h>
+#include <tools/degree.hxx>
 #include <tools/long.hxx>
 #include <tools/ref.hxx>
+
+#include <vcl/dllapi.h>
 
 #include <font/FontAttributes.hxx>
 

@@ -22,7 +22,7 @@
 #include <unotools/fontdefs.hxx>
 
 #include <font/FontAttributes.hxx>
-#include <fontselect.hxx>
+#include <font/FontSelectPattern.hxx>
 
 #include <font/PhysicalFontFace.hxx>
 

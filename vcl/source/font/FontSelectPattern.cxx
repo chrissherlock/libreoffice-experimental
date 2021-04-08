@@ -20,61 +20,61 @@
 #include <sal/config.h>
 #include <o3tl/safeint.hxx>
 #include <tools/gen.hxx>
+
 #include <vcl/font.hxx>
 
+#include <font/FontSelectPattern.hxx>
 #include <font/PhysicalFontFace.hxx>
-#include <fontselect.hxx>
 
 // These mustn't conflict with font name lists which use ; and ,
 const char FontSelectPattern::FEAT_PREFIX = ':';
 const char FontSelectPattern::FEAT_SEPARATOR = '&';
 
-FontSelectPattern::FontSelectPattern( const vcl::Font& rFont,
-    const OUString& rSearchName, const Size& rSize, float fExactHeight, bool bNonAntialias)
-    : maSearchName( rSearchName )
-    , mnWidth( rSize.Width() )
-    , mnHeight( rSize.Height() )
-    , mfExactHeight( fExactHeight)
-    , mnOrientation( rFont.GetOrientation() )
-    , meLanguage( rFont.GetLanguage() )
-    , mbVertical( rFont.IsVertical() )
+FontSelectPattern::FontSelectPattern(const vcl::Font& rFont, const OUString& rSearchName,
+                                     const Size& rSize, float fExactHeight, bool bNonAntialias)
+    : maSearchName(rSearchName)
+    , mnWidth(rSize.Width())
+    , mnHeight(rSize.Height())
+    , mfExactHeight(fExactHeight)
+    , mnOrientation(rFont.GetOrientation())
+    , meLanguage(rFont.GetLanguage())
+    , mbVertical(rFont.IsVertical())
     , mbNonAntialiased(bNonAntialias)
-    , mbEmbolden( false )
+    , mbEmbolden(false)
 {
     maTargetName = GetFamilyName();
 
-    rFont.GetFontAttributes( *this );
+    rFont.GetFontAttributes(*this);
 
     // normalize orientation between 0 and 3600
-    if( mnOrientation < 0_deg10 || mnOrientation >= 3600_deg10 )
+    if (mnOrientation < 0_deg10 || mnOrientation >= 3600_deg10)
     {
-        if( mnOrientation >= 0_deg10 )
+        if (mnOrientation >= 0_deg10)
             mnOrientation %= 3600_deg10;
         else
             mnOrientation = 3600_deg10 - (-mnOrientation % 3600_deg10);
     }
 
     // normalize width and height
-    if( mnHeight < 0 )
+    if (mnHeight < 0)
         mnHeight = o3tl::saturating_toggle_sign(mnHeight);
-    if( mnWidth < 0 )
+    if (mnWidth < 0)
         mnWidth = o3tl::saturating_toggle_sign(mnWidth);
 }
 
-
 // NOTE: this ctor is still used on Windows. Do not remove.
 #ifdef _WIN32
-FontSelectPattern::FontSelectPattern( const PhysicalFontFace& rFontData,
-    const Size& rSize, float fExactHeight, int nOrientation, bool bVertical )
-    : FontAttributes( rFontData )
-    , mnWidth( rSize.Width() )
-    , mnHeight( rSize.Height() )
-    , mfExactHeight( fExactHeight )
-    , mnOrientation( nOrientation )
-    , meLanguage( 0 )
-    , mbVertical( bVertical )
-    , mbNonAntialiased( false )
-    , mbEmbolden( false )
+FontSelectPattern::FontSelectPattern(const PhysicalFontFace& rFontData, const Size& rSize,
+                                     float fExactHeight, int nOrientation, bool bVertical)
+    : FontAttributes(rFontData)
+    , mnWidth(rSize.Width())
+    , mnHeight(rSize.Height())
+    , mfExactHeight(fExactHeight)
+    , mnOrientation(nOrientation)
+    , meLanguage(0)
+    , mbVertical(bVertical)
+    , mbNonAntialiased(false)
+    , mbEmbolden(false)
 {
     maTargetName = maSearchName = GetFamilyName();
     // NOTE: no normalization for width/height/orientation
@@ -87,8 +87,7 @@ size_t FontSelectPattern::hashCode() const
     // TODO: does it pay off to improve this hash function?
     size_t nHash;
     // check for features and generate a unique hash if necessary
-    if (maTargetName.indexOf(FontSelectPattern::FEAT_PREFIX)
-        != -1)
+    if (maTargetName.indexOf(FontSelectPattern::FEAT_PREFIX) != -1)
     {
         nHash = maTargetName.hashCode();
     }
@@ -101,7 +100,7 @@ size_t FontSelectPattern::hashCode() const
     nHash += 29 * GetItalic();
     nHash += 37 * mnOrientation.get();
     nHash += 41 * static_cast<sal_uInt16>(meLanguage);
-    if( mbVertical )
+    if (mbVertical)
         nHash += 53;
     return nHash;
 }

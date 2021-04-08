@@ -19,7 +19,6 @@
 
 #pragma once
 
-#include "fontselect.hxx"
 #include "impfontmetricdata.hxx"
 
 #include <basegfx/polygon/b2dpolypolygon.hxx>
@@ -28,7 +27,10 @@
 #include <tools/gen.hxx>
 #include <tools/fontenum.hxx>
 #include <tools/degree.hxx>
+
 #include <vcl/glyphitem.hxx>
+
+#include <font/FontSelectPattern.hxx>
 
 #include <optional>
 #include <unordered_map>
