@@ -432,6 +432,8 @@ public:
     int GetPhysicalFontFaceSizeCount(vcl::Font const&) const;
 
     FontMetric GetFontMetric(vcl::Font const& rFont) const;
+
+    /// How many fonts are available from the system
     int GetFontMetricCount() const;
 
     bool GetFontCharMap(FontCharMapRef& rxFontCharMap) const;
