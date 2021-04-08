@@ -19,8 +19,8 @@
 
 #pragma once
 
+#include <font/LogicalFontInstance.hxx>
 #include <font/PhysicalFontFace.hxx>
-#include <fontinstance.hxx>
 
 namespace vcl::pdf
 {

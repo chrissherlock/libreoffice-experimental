@@ -14450,7 +14450,6 @@ vcl/inc/dndlistenercontainer.hxx
 vcl/inc/factory.hxx
 vcl/inc/fltcall.hxx
 vcl/inc/fontattributes.hxx
-vcl/inc/fontinstance.hxx
 vcl/inc/fontselect.hxx
 vcl/inc/fontsubset.hxx
 vcl/inc/graphic/UnoGraphic.hxx
@@ -14952,7 +14951,6 @@ vcl/source/font/font.cxx
 vcl/source/font/fontattributes.cxx
 vcl/source/font/fontcache.cxx
 vcl/source/font/fontcharmap.cxx
-vcl/source/font/fontinstance.cxx
 vcl/source/font/fontmetric.cxx
 vcl/source/font/fontselect.cxx
 vcl/source/fontsubset/cff.cxx

@@ -24,6 +24,7 @@
 #include <o3tl/sorted_vector.hxx>
 
 #include <outdev.h>
+#include <font/LogicalFontInstance.hxx>
 #include <font/PhysicalFontFamilyCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <font/PhysicalFontFaceSizeCollection.hxx>

@@ -21,12 +21,13 @@
 
 #include <vcl/dllapi.h>
 
-#include "fontinstance.hxx"
 #include <font/PhysicalFontFamily.hxx>
+
 #include <array>
 
 #define MAX_GLYPHFALLBACK 16
 
+class LogicalFontInstance;
 class PhysicalFontFaceSizeCollection;
 class ImplGlyphFallbackFontSubstitution;
 class ImplPreMatchFontSubstitution;

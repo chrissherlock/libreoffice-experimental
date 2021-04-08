@@ -26,12 +26,12 @@
 #include <tools/gen.hxx>
 #include <vcl/vclptr.hxx>
 
-#include "fontinstance.hxx"
 #include <font/PhysicalFontFace.hxx>
 #include "impfontcache.hxx"
 
 class Size;
 namespace vcl { class Font; }
+class LogicalFontInstance;
 class VirtualDevice;
 enum class AddFontSubstituteFlags;
 

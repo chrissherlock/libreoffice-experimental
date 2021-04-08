@@ -17,11 +17,10 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-
 #include <hb-ot.h>
 #include <hb-graphite2.h>
 
-#include <fontinstance.hxx>
+#include <font/LogicalFontInstance.hxx>
 #include <impfontcache.hxx>
 
 #include <font/PhysicalFontFace.hxx>
@@ -30,27 +29,27 @@
 
 namespace std
 {
-    template <> struct hash< pair< sal_UCS4, FontWeight > >
+template <> struct hash<pair<sal_UCS4, FontWeight>>
+{
+    size_t operator()(const pair<sal_UCS4, FontWeight>& rData) const
     {
-        size_t operator()(const pair< sal_UCS4, FontWeight >& rData) const
-        {
-            std::size_t seed = 0;
-            boost::hash_combine(seed, rData.first);
-            boost::hash_combine(seed, rData.second);
-            return seed;
-        }
-    };
+        std::size_t seed = 0;
+        boost::hash_combine(seed, rData.first);
+        boost::hash_combine(seed, rData.second);
+        return seed;
+    }
+};
 }
 
-
-LogicalFontInstance::LogicalFontInstance(const PhysicalFontFace& rFontFace, const FontSelectPattern& rFontSelData )
-    : mxFontMetric( new ImplFontMetricData( rFontSelData ))
-    , mpConversion( nullptr )
-    , mnLineHeight( 0 )
-    , mnOwnOrientation( 0 )
-    , mnOrientation( 0 )
-    , mbInit( false )
-    , mpFontCache( nullptr )
+LogicalFontInstance::LogicalFontInstance(const PhysicalFontFace& rFontFace,
+                                         const FontSelectPattern& rFontSelData)
+    : mxFontMetric(new ImplFontMetricData(rFontSelData))
+    , mpConversion(nullptr)
+    , mnLineHeight(0)
+    , mnOwnOrientation(0)
+    , mnOrientation(0)
+    , mbInit(false)
+    , mpFontCache(nullptr)
     , m_aFontSelData(rFontSelData)
     , m_pHbFont(nullptr)
     , m_nAveWidthFactor(1.0f)
@@ -116,36 +115,42 @@ void LogicalFontInstance::GetScale(double* nXScale, double* nYScale)
         *nXScale = nWidth / nUPEM;
 }
 
-void LogicalFontInstance::AddFallbackForUnicode( sal_UCS4 cChar, FontWeight eWeight, const OUString& rFontName )
+void LogicalFontInstance::AddFallbackForUnicode(sal_UCS4 cChar, FontWeight eWeight,
+                                                const OUString& rFontName)
 {
-    if( !mpUnicodeFallbackList )
+    if (!mpUnicodeFallbackList)
         mpUnicodeFallbackList.reset(new UnicodeFallbackList);
-    (*mpUnicodeFallbackList)[ std::pair< sal_UCS4, FontWeight >(cChar,eWeight) ] = rFontName;
+    (*mpUnicodeFallbackList)[std::pair<sal_UCS4, FontWeight>(cChar, eWeight)] = rFontName;
 }
 
-bool LogicalFontInstance::GetFallbackForUnicode( sal_UCS4 cChar, FontWeight eWeight, OUString* pFontName ) const
+bool LogicalFontInstance::GetFallbackForUnicode(sal_UCS4 cChar, FontWeight eWeight,
+                                                OUString* pFontName) const
 {
-    if( !mpUnicodeFallbackList )
+    if (!mpUnicodeFallbackList)
         return false;
 
-    UnicodeFallbackList::const_iterator it = mpUnicodeFallbackList->find( std::pair< sal_UCS4, FontWeight >(cChar,eWeight) );
-    if( it == mpUnicodeFallbackList->end() )
+    UnicodeFallbackList::const_iterator it
+        = mpUnicodeFallbackList->find(std::pair<sal_UCS4, FontWeight>(cChar, eWeight));
+    if (it == mpUnicodeFallbackList->end())
         return false;
 
     *pFontName = (*it).second;
     return true;
 }
 
-void LogicalFontInstance::IgnoreFallbackForUnicode( sal_UCS4 cChar, FontWeight eWeight, std::u16string_view rFontName )
+void LogicalFontInstance::IgnoreFallbackForUnicode(sal_UCS4 cChar, FontWeight eWeight,
+                                                   std::u16string_view rFontName)
 {
-    UnicodeFallbackList::iterator it = mpUnicodeFallbackList->find( std::pair< sal_UCS4,FontWeight >(cChar,eWeight) );
-    if( it == mpUnicodeFallbackList->end() )
+    UnicodeFallbackList::iterator it
+        = mpUnicodeFallbackList->find(std::pair<sal_UCS4, FontWeight>(cChar, eWeight));
+    if (it == mpUnicodeFallbackList->end())
         return;
-    if( (*it).second == rFontName )
-        mpUnicodeFallbackList->erase( it );
+    if ((*it).second == rFontName)
+        mpUnicodeFallbackList->erase(it);
 }
 
-bool LogicalFontInstance::GetGlyphBoundRect(sal_GlyphId nID, tools::Rectangle &rRect, bool bVertical) const
+bool LogicalFontInstance::GetGlyphBoundRect(sal_GlyphId nID, tools::Rectangle& rRect,
+                                            bool bVertical) const
 {
     if (mpFontCache && mpFontCache->GetCachedGlyphBoundRect(this, nID, rRect))
         return true;
@@ -160,7 +165,8 @@ bool LogicalFontInstance::IsGraphiteFont()
 {
     if (!m_xbIsGraphiteFont)
     {
-        m_xbIsGraphiteFont = hb_graphite2_face_get_gr_face(hb_font_get_face(GetHbFont())) != nullptr;
+        m_xbIsGraphiteFont
+            = hb_graphite2_face_get_gr_face(hb_font_get_face(GetHbFont())) != nullptr;
     }
     return *m_xbIsGraphiteFont;
 }

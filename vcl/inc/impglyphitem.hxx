@@ -27,7 +27,7 @@
 #include <vcl/outdev.hxx>
 #include <vector>
 
-#include "fontinstance.hxx"
+#include <font/LogicalFontInstance.hxx>
 
 enum class GlyphItemFlags
 {

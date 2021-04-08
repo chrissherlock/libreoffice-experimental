@@ -20,10 +20,12 @@
 #ifndef INCLUDED_VCL_GENERIC_GLYPHS_GCACH_FTYP_HXX
 #define INCLUDED_VCL_GENERIC_GLYPHS_GCACH_FTYP_HXX
 
-#include <unx/glyphcache.hxx>
-#include <font/PhysicalFontFace.hxx>
-#include <fontinstance.hxx>
 #include <vcl/glyphitem.hxx>
+
+#include <font/LogicalFontInstance.hxx>
+#include <font/PhysicalFontFace.hxx>
+
+#include <unx/glyphcache.hxx>
 
 class CmapResult;
 

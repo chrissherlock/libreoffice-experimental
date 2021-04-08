@@ -549,6 +549,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/font/Feature \
     vcl/source/font/FeatureCollector \
     vcl/source/font/FeatureParser \
+    vcl/source/font/LogicalFontInstance \
     vcl/source/font/OpenTypeFeatureDefinitionList \
     vcl/source/font/PhysicalFontFamilyCollection \
     vcl/source/font/PhysicalFontFace \
@@ -557,7 +558,6 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/font/PhysicalFontFamily \
     vcl/source/font/fontattributes \
     vcl/source/font/fontselect \
-    vcl/source/font/fontinstance \
     vcl/source/font/fontcache \
     vcl/source/font/fontcharmap \
     vcl/source/font/fontmetric \

@@ -31,8 +31,8 @@
 #include <vcl/dllapi.h>
 #include <vcl/outdev.hxx>
 
+#include <font/LogicalFontInstance.hxx>
 #include <fontattributes.hxx>
-#include <fontinstance.hxx>
 #include <impfontmetricdata.hxx>
 
 #include <unordered_map>

@@ -27,7 +27,7 @@
 
 #include <sft.hxx>
 #include <impfontcharmap.hxx>
-#include <fontinstance.hxx>
+#include <font/LogicalFontInstance.hxx>
 #include <fontselect.hxx>
 #include <font/PhysicalFontFamilyCollection.hxx>
 

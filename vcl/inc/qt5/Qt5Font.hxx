@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <fontinstance.hxx>
+#include <font/LogicalFontInstance.hxx>
 
 #include <QtGui/QFont>
 
