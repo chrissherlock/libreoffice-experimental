@@ -38,9 +38,9 @@
 #include <vcl/svapp.hxx>
 #include <vcl/sysdata.hxx>
 
+#include <font/ImplFont.hxx>
 #include <font/FontSubsetInfo.hxx>
 #include <quartz/ctfonts.hxx>
-#include <impfont.hxx>
 #include <impfontcharmap.hxx>
 #include <impfontmetricdata.hxx>
 #include <outdev.h>

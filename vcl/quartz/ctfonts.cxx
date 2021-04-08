@@ -27,7 +27,7 @@
 
 
 #include <quartz/ctfonts.hxx>
-#include <impfont.hxx>
+#include <font/ImplFont.hxx>
 #ifdef MACOSX
 #include <osx/saldata.hxx>
 #include <osx/salinst.h>
