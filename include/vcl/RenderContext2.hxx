@@ -119,6 +119,9 @@ struct Feature;
 }
 }
 
+OUString VCL_DLLPUBLIC GetNonMnemonicString(const OUString& rStr, sal_Int32& rMnemonicPos);
+OUString VCL_DLLPUBLIC GetNonMnemonicString(const OUString& rStr);
+
 /**
 * Some things multiple-inherit from VclAbstractDialog and RenderContext/OutputDevice,
 * so we need to use virtual inheritance to keep the referencing counting
@@ -502,9 +505,6 @@ public:
 
     OUString GetEllipsisString(OUString const& rStr, tools::Long nMaxWidth,
                                DrawTextFlags nStyle = DrawTextFlags::EndEllipsis) const;
-
-    static OUString GetNonMnemonicString(const OUString& rStr, sal_Int32& rMnemonicPos);
-    static OUString GetNonMnemonicString(const OUString& rStr);
 
     tools::Long GetCtrlTextWidth(OUString const& rStr,
                                  SalLayoutGlyphs const* pLayoutCache = nullptr) const;

@@ -133,7 +133,7 @@ OUString VCLXAccessibleTabPage::GetPageText()
 {
     OUString sText;
     if ( m_pTabControl )
-        sText = OutputDevice::GetNonMnemonicString( m_pTabControl->GetPageText( m_nPageId ) );
+        sText = GetNonMnemonicString( m_pTabControl->GetPageText( m_nPageId ) );
 
     return sText;
 }

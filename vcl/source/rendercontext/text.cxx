@@ -395,47 +395,6 @@ tools::Long RenderContext2::GetTextWidth(const OUString& rStr, sal_Int32 nIndex,
     return nWidth;
 }
 
-OUString RenderContext2::GetNonMnemonicString(const OUString& rStr)
-{
-    sal_Int32 nDummy;
-    return GetNonMnemonicString(rStr, nDummy);
-}
-
-OUString RenderContext2::GetNonMnemonicString(const OUString& rStr, sal_Int32& rMnemonicPos)
-{
-    OUString aStr = rStr;
-    sal_Int32 nLen = aStr.getLength();
-    sal_Int32 i = 0;
-
-    rMnemonicPos = -1;
-    while (i < nLen)
-    {
-        if (aStr[i] == '~')
-        {
-            if (nLen <= i + 1)
-                break;
-
-            if (aStr[i + 1] != '~')
-            {
-                if (rMnemonicPos == -1)
-                    rMnemonicPos = i;
-                aStr = aStr.replaceAt(i, 1, "");
-                nLen--;
-            }
-            else
-            {
-                aStr = aStr.replaceAt(i, 1, "");
-                nLen--;
-                i++;
-            }
-        }
-        else
-            i++;
-    }
-
-    return aStr;
-}
-
 bool RenderContext2::GetTextBoundRect(tools::Rectangle& rRect, OUString const& rStr,
                                       sal_Int32 nBase, sal_Int32 nIndex, sal_Int32 nLen,
                                       sal_uLong nLayoutWidth, tools::Long const* pDXAry,

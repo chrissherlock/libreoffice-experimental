@@ -45,7 +45,7 @@ SalLayoutGlyphs* MenuItemData::GetTextGlyphs(RenderContext2* pOutputDevice)
         // Use pre-calculated result.
         return &aTextGlyphs;
 
-    OUString aNonMnemonicString = OutputDevice::GetNonMnemonicString(aText);
+    OUString aNonMnemonicString = GetNonMnemonicString(aText);
 
     aTextGlyphs = pOutputDevice->GetLayoutGlyphs(aNonMnemonicString, 0, aNonMnemonicString.getLength());
 

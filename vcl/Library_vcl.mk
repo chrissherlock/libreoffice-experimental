@@ -167,6 +167,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/rendercontext/rtl \
     vcl/source/rendercontext/settings \
     vcl/source/rendercontext/stack \
+    vcl/source/rendercontext/string \
     vcl/source/rendercontext/sysgfxdata \
     vcl/source/rendercontext/text \
     vcl/source/rendercontext/transparent \
