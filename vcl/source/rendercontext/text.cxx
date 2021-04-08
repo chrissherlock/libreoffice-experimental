@@ -121,9 +121,11 @@ void RenderContext2::DrawText(Point const& rStartPt, OUString const& rStr, sal_I
         return;
 
     if (mpFontInstance)
+    {
         // do not use cache with modified string
-        if (mpFontInstance->mpConversion)
+        if (mpFontInstance->CanRecodeString())
             pLayoutCache = nullptr;
+    }
 
     std::unique_ptr<SalLayout> pSalLayout = ImplLayout(rStr, nIndex, nLen, rStartPt, 0, nullptr,
                                                        eDefaultLayout, nullptr, pLayoutCache);
@@ -864,9 +866,9 @@ std::unique_ptr<SalLayout> RenderContext2::ImplLayout(
 
     // convert from logical units to physical units
     // recode string if needed
-    if (mpFontInstance->mpConversion)
+    if (mpFontInstance->CanRecodeString())
     {
-        mpFontInstance->mpConversion->RecodeString(aStr, 0, aStr.getLength());
+        mpFontInstance->RecodeString(aStr);
         pLayoutCache = nullptr; // don't use cache with modified string!
         pGlyphs = nullptr;
     }

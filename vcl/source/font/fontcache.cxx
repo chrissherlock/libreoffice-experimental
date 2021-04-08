@@ -154,7 +154,10 @@ rtl::Reference<LogicalFontInstance> ImplFontCache::GetFontInstance( PhysicalFont
         if( pFontData->IsSymbolFont() || aFontSelData.IsSymbolFont() )
         {
             if( aFontSelData.maTargetName != aFontSelData.maSearchName )
-                pFontInstance->mpConversion = ConvertChar::GetRecodeData( aFontSelData.maTargetName, aFontSelData.maSearchName );
+            {
+                ConvertChar const* pConvertChar = ConvertChar::GetRecodeData(aFontSelData.maTargetName, aFontSelData.maSearchName);
+                pFontInstance->InitConversion(pConvertChar);
+            }
         }
 
 #ifdef MACOSX

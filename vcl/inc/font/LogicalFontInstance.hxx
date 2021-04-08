@@ -53,7 +53,6 @@ public: // TODO: make data members private
     virtual ~LogicalFontInstance() override;
 
     ImplFontMetricDataRef mxFontMetric; // Font attributes
-    const ConvertChar* mpConversion; // used e.g. for StarBats->StarSymbol
 
     tools::Long mnLineHeight;
     Degree10 mnOwnOrientation; // text angle if lower layers don't rotate text themselves
@@ -82,6 +81,10 @@ public: // TODO: make data members private
     void GetScale(double* nXScale, double* nYScale);
     static inline void DecodeOpenTypeTag(const uint32_t nTableTag, char* pTagName);
 
+    void InitConversion(ConvertChar const* pConvertChar);
+    void RecodeString(OUString& rString);
+    bool CanRecodeString();
+
 protected:
     explicit LogicalFontInstance(const PhysicalFontFace&, const FontSelectPattern&);
 
@@ -95,6 +98,7 @@ private:
     // cache of Unicode characters and replacement font names
     // TODO: a fallback map can be shared with many other ImplFontEntries
     // TODO: at least the ones which just differ in orientation, stretching or height
+    ConvertChar const* mpConversion; // used e.g. for StarBats->StarSymbol
     typedef ::std::unordered_map<::std::pair<sal_UCS4, FontWeight>, OUString> UnicodeFallbackList;
     std::unique_ptr<UnicodeFallbackList> mpUnicodeFallbackList;
     mutable ImplFontCache* mpFontCache;

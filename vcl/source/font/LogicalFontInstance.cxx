@@ -17,13 +17,14 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <hb-ot.h>
-#include <hb-graphite2.h>
+#include <unotools/fontdefs.hxx>
 
 #include <font/LogicalFontInstance.hxx>
+#include <font/PhysicalFontFace.hxx>
 #include <impfontcache.hxx>
 
-#include <font/PhysicalFontFace.hxx>
+#include <hb-ot.h>
+#include <hb-graphite2.h>
 
 // extend std namespace to add custom hash needed for LogicalFontInstance
 
@@ -44,11 +45,11 @@ template <> struct hash<pair<sal_UCS4, FontWeight>>
 LogicalFontInstance::LogicalFontInstance(const PhysicalFontFace& rFontFace,
                                          const FontSelectPattern& rFontSelData)
     : mxFontMetric(new ImplFontMetricData(rFontSelData))
-    , mpConversion(nullptr)
     , mnLineHeight(0)
     , mnOwnOrientation(0)
     , mnOrientation(0)
     , mbInit(false)
+    , mpConversion(nullptr)
     , mpFontCache(nullptr)
     , m_aFontSelData(rFontSelData)
     , m_pHbFont(nullptr)
@@ -193,6 +194,25 @@ hb_font_t* LogicalFontInstance::ImplInitHbFont()
 {
     assert(false);
     return hb_font_get_empty();
+}
+
+void LogicalFontInstance::InitConversion(ConvertChar const* pConvertChar)
+{
+    mpConversion = pConvertChar;
+}
+
+bool LogicalFontInstance::CanRecodeString()
+{
+    if (mpConversion)
+        return true;
+
+    return false;
+}
+
+void LogicalFontInstance::RecodeString(OUString& rString)
+{
+    if (mpConversion)
+        mpConversion->RecodeString(rString, 0, rString.getLength());
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
