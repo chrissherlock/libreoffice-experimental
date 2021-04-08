@@ -358,6 +358,11 @@ public:
      */
     ///@{
 
+    /** @returns boolean value to see if EPS could be painted directly.
+        Theoretically, handing over a matrix would be needed to handle
+        painting rotated EPS files (e.g. contained in Metafiles). This
+        would then need to be supported for Mac and PS printers, but
+        that's too much for now, wrote \#i107046# for this */
     virtual bool DrawEPS(const Point& rPt, const Size& rSz, const GfxLink& rGfxLink,
                          GDIMetaFile* pSubst = nullptr)
         = 0;

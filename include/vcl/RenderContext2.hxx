@@ -167,10 +167,6 @@ public:
     void DrawLine(Point const& rStartPt, Point const& rEndPt) override;
     void DrawLine(Point const& rStartPt, Point const& rEndPt, LineInfo const& rLineInfo) override;
 
-    /** Helper for line geometry paint with support for graphic expansion (pattern and fat_to_area)
-     */
-    void DrawLine(basegfx::B2DPolyPolygon aLinePolyPolygon, LineInfo const& rInfo);
-
     void DrawRect(tools::Rectangle const& rRect) override;
     void DrawRect(tools::Rectangle const& rRect, sal_uLong nHorzRount,
                   sal_uLong nVertRound) override;
@@ -267,11 +263,6 @@ public:
     void DrawBitmapEx(Point const& rDestPt, Size const& rDestSize, Point const& rSrcPtPixel,
                       Size const& rSrcSizePixel, BitmapEx const& rBitmapEx) override;
 
-    /** Return true if DrawTransformedBitmapEx() is fast.
-
-        @since 7.2
-    */
-    virtual bool HasFastDrawTransformedBitmap() const;
     void DrawTransformedBitmapEx(const basegfx::B2DHomMatrix& rTransformation,
                                  const BitmapEx& rBitmapEx, double fAlpha = 1.0) override;
 
@@ -296,22 +287,13 @@ public:
                          basegfx::B2DPolyPolygon const& rB2DPolyPoly,
                          double fTransparency) override;
 
-    virtual bool CanAnimate();
-
     void DrawAnimation(Animation* const pAnim, Point const& rDestPt,
                        Size const& rDestSz) const override;
 
-    virtual void DrawAnimationViewToPos(ImplAnimView& rAnimView, sal_uLong nPos);
-    virtual void DrawAnimationView(ImplAnimView& rAnimView, sal_uLong nPos,
-                                   VirtualDevice* pVDev = nullptr);
-
-    /** @returns boolean value to see if EPS could be painted directly.
-        Theoretically, handing over a matrix would be needed to handle
-        painting rotated EPS files (e.g. contained in Metafiles). This
-        would then need to be supported for Mac and PS printers, but
-        that's too much for now, wrote \#i107046# for this */
     bool DrawEPS(const Point& rPt, const Size& rSz, const GfxLink& rGfxLink,
                  GDIMetaFile* pSubst = nullptr) override;
+
+    // methods not handled by an interface
 
     virtual void Flush() {}
 
@@ -328,6 +310,22 @@ public:
     SAL_DLLPRIVATE void DrawOutDev(const Point&, const Size&, const Point&, const Size&,
                                    const Printer&)
         = delete;
+
+    /** Helper for line geometry paint with support for graphic expansion (pattern and fat_to_area)
+     */
+    void DrawLine(basegfx::B2DPolyPolygon aLinePolyPolygon, LineInfo const& rInfo);
+
+    /** Return true if DrawTransformedBitmapEx() is fast.
+
+        @since 7.2
+    */
+    virtual bool HasFastDrawTransformedBitmap() const;
+
+    virtual bool CanAnimate();
+
+    virtual void DrawAnimationViewToPos(ImplAnimView& rAnimView, sal_uLong nPos);
+    virtual void DrawAnimationView(ImplAnimView& rAnimView, sal_uLong nPos,
+                                   VirtualDevice* pVDev = nullptr);
 
     /** Query the platform layer for control support
      */
@@ -426,6 +424,7 @@ public:
     static vcl::Font GetDefaultFont(DefaultFontType nType, LanguageType eLang,
                                     GetDefaultFontFlags nFlags,
                                     RenderContext2 const* pOutDev = nullptr);
+
     virtual Color GetReadableFontColor(Color const& rFontColor, Color const& rBgColor) const;
 
     bool AddTempDevFont(OUString const& rFileURL, OUString const& rFontName);
