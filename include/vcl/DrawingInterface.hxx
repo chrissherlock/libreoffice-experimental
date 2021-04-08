@@ -22,12 +22,19 @@
 #include <sal/types.h>
 #include <tools/solar.h>
 #include <tools/color.hxx>
+#include <tools/fontenum.hxx>
+#include <i18nlangtag/lang.h>
 
+#include <vcl/RasterOp.hxx>
+#include <vcl/flags/ComplexTextLayoutFlags.hxx>
 #include <vcl/flags/DrawGridFlags.hxx>
 #include <vcl/flags/DrawImageFlags.hxx>
 #include <vcl/flags/DrawTextFlags.hxx>
 #include <vcl/flags/InvertFlags.hxx>
+#include <vcl/flags/PushFlags.hxx>
 #include <vcl/flags/SalLayoutFlags.hxx>
+#include <vcl/mapmod.hxx>
+#include <vcl/metric.hxx>
 
 #include <com/sun/star/drawing/LineCap.hpp>
 
@@ -36,6 +43,7 @@ enum class B2DLineJoin;
 class Animation;
 class Bitmap;
 class BitmapEx;
+class Color;
 class GDIMetaFile;
 class GfxLink;
 class Gradient;
@@ -43,11 +51,14 @@ class Hatch;
 class Image;
 class LineInfo;
 class SalLayoutGlyphs;
+class Region;
 class Wallpaper;
 
 namespace vcl
 {
+class Font;
 class ITextLayout;
+class Region;
 }
 
 namespace basegfx
@@ -67,6 +78,23 @@ class DrawingInterface
 {
 public:
     virtual ~DrawingInterface() {}
+
+    virtual FontMetric GetFontMetric() const = 0;
+
+    virtual void SetFont(vcl::Font const& rNewFont) = 0;
+    virtual void SetTextColor(Color const& rColor) = 0;
+    virtual void SetTextFillColor(Color const& rColor) = 0;
+    virtual void SetLineColor(Color const& rColor) = 0;
+    virtual void SetFillColor(Color const& rColor) = 0;
+    virtual void SetRasterOp(RasterOp eRasterOp) = 0;
+    virtual void SetMapMode(MapMode const& rNewMapMode) = 0;
+    virtual void SetTextAlign(TextAlign eAlign) = 0;
+    virtual void SetLayoutMode(ComplexTextLayoutFlags nTextLayoutMode) = 0;
+    virtual void SetDigitLanguage(LanguageType) = 0;
+    virtual void SetClipRegion(vcl::Region const& rRegion) = 0;
+    virtual void IntersectClipRegion(vcl::Region const& rRegion) = 0;
+    virtual void Push(PushFlags nFlags = PushFlags::ALL) = 0;
+    virtual void Pop() = 0;
 
     /** @name Pixel functions
      */

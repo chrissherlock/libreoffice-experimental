@@ -20,15 +20,11 @@
 #pragma once
 
 #include <rtl/ref.hxx>
-#include <tools/solar.h>
-#include <tools/color.hxx>
-#include <tools/fontenum.hxx>
 #include <tools/mapunit.hxx>
 #include <tools/poly.hxx>
 #include <unotools/fontdefs.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
-#include <i18nlangtag/lang.h>
 #include <o3tl/lru_map.hxx>
 
 #include <vcl/dllapi.h>
@@ -42,19 +38,11 @@
 #include <vcl/devicecoordinate.hxx>
 #include <vcl/flags/AddFontSubstituteFlags.hxx>
 #include <vcl/flags/AntialiasingFlags.hxx>
-#include <vcl/flags/ComplexTextLayoutFlags.hxx>
 #include <vcl/flags/DrawFlags.hxx>
-#include <vcl/flags/DrawImageFlags.hxx>
-#include <vcl/flags/DrawGridFlags.hxx>
 #include <vcl/flags/DrawModeFlags.hxx>
-#include <vcl/flags/DrawTextFlags.hxx>
 #include <vcl/flags/GetDefaultFontFlags.hxx>
-#include <vcl/flags/InvertFlags.hxx>
-#include <vcl/flags/PushFlags.hxx>
 #include <vcl/font.hxx>
 #include <vcl/lineinfo.hxx>
-#include <vcl/mapmod.hxx>
-#include <vcl/metric.hxx>
 #include <vcl/region.hxx>
 #include <vcl/salnativewidgets.hxx>
 #include <vcl/textrectinfo.hxx>
@@ -110,6 +98,7 @@ namespace vcl
 {
 class ExtOutDevData;
 class ITextLayout;
+class Region;
 class TextLayoutCache;
 struct FontCapabilities;
 
@@ -136,7 +125,23 @@ public:
     RenderContext2();
     virtual ~RenderContext2();
 
-    Color GetPixel(Point const& rPt) const;
+    FontMetric GetFontMetric() const override;
+
+    void SetFont(vcl::Font const& rNewFont) override;
+    void SetTextColor(Color const& rColor) override;
+    void SetTextFillColor(Color const& rColor) override;
+    void SetFillColor(Color const& rColor) override;
+    void SetLineColor(Color const& rColor) override;
+    void SetMapMode(MapMode const& rNewMapMode) override;
+    void SetRasterOp(RasterOp eRasterOp) override;
+    void SetTextAlign(TextAlign eAlign) override;
+    void SetLayoutMode(ComplexTextLayoutFlags nTextLayoutMode) override;
+    void SetDigitLanguage(LanguageType) override;
+    void SetClipRegion(vcl::Region const& rRegion) override;
+    void IntersectClipRegion(vcl::Region const& rRegion) override;
+    void Push(PushFlags nFlags = PushFlags::ALL) override;
+    void Pop() override;
+
     void DrawPixel(Point const& rPt) override;
     void DrawPixel(Point const& rPt, Color const& rColor) override;
 
@@ -320,6 +325,8 @@ public:
                            ImplControlValue const& aValue, OUString const& aCaption,
                            Color const& rBackgroundColor = COL_AUTO);
 
+    Color GetPixel(Point const& rPt) const;
+
     /** Query the native control's actual drawing region (including adornment)
      */
     bool GetNativeControlRegion(ControlType nType, ControlPart nPart,
@@ -345,18 +352,14 @@ public:
 
     virtual size_t GetSyncCount() const { return 0xffffffff; }
 
-    virtual void Push(PushFlags nFlags = PushFlags::ALL);
-    virtual void Pop();
     void ClearStack();
 
     bool IsClipRegion() const;
     vcl::Region GetClipRegion() const;
     virtual vcl::Region GetActiveClipRegion() const;
     virtual void SetClipRegion();
-    virtual void SetClipRegion(vcl::Region const& rRegion);
     virtual void MoveClipRegion(tools::Long nHorzMove, tools::Long nVertMove);
     virtual void IntersectClipRegion(const tools::Rectangle& rRect);
-    virtual void IntersectClipRegion(const vcl::Region& rRegion);
 
     void EnableOutput(bool bEnable = true);
     bool IsOutputEnabled() const;
@@ -395,7 +398,6 @@ public:
     bool IsRTLEnabled() const;
 
     ComplexTextLayoutFlags GetLayoutMode() const;
-    virtual void SetLayoutMode(ComplexTextLayoutFlags nTextLayoutMode);
 
     DrawModeFlags GetDrawMode() const;
     void SetDrawMode(DrawModeFlags nDrawMode);
@@ -404,17 +406,14 @@ public:
     void SetAntialiasing(AntialiasingFlags nMode);
 
     LanguageType GetDigitLanguage() const;
-    virtual void SetDigitLanguage(LanguageType);
 
     Color const& GetLineColor() const;
     bool IsLineColor() const;
     virtual void SetLineColor();
-    virtual void SetLineColor(Color const& rColor);
 
     Color const& GetFillColor() const;
     bool IsFillColor() const;
     virtual void SetFillColor();
-    virtual void SetFillColor(Color const& rColor);
 
     bool IsFontAvailable(OUString const& rFontName) const;
     vcl::Font const& GetFont() const;
@@ -422,13 +421,11 @@ public:
                                     GetDefaultFontFlags nFlags,
                                     RenderContext2 const* pOutDev = nullptr);
     virtual Color GetReadableFontColor(Color const& rFontColor, Color const& rBgColor) const;
-    virtual void SetFont(vcl::Font const& rNewFont);
 
     bool AddTempDevFont(OUString const& rFileURL, OUString const& rFontName);
     Size GetPhysicalFontFaceSize(vcl::Font const& rFont, int nSizeIndex) const;
     int GetPhysicalFontFaceSizeCount(vcl::Font const&) const;
 
-    FontMetric GetFontMetric() const;
     FontMetric GetFontMetric(vcl::Font const& rFont) const;
     FontMetric GetFontMetric(int nDevFontIndex) const;
     int GetFontMetricCount() const;
@@ -464,7 +461,6 @@ public:
     static void RemoveFontsSubstitute();
 
     Color const& GetTextColor() const;
-    virtual void SetTextColor(Color const& rColor);
     virtual void SetSystemTextColor(DrawFlags nFlags, bool bEnabled = false);
 
     bool IsTextLineColor() const;
@@ -475,7 +471,6 @@ public:
     bool IsTextFillColor() const;
     Color GetTextFillColor() const;
     virtual void SetTextFillColor();
-    virtual void SetTextFillColor(Color const& rColor);
 
     bool IsOverlineColor() const;
     Color const& GetOverlineColor() const;
@@ -483,7 +478,6 @@ public:
     virtual void SetOverlineColor(Color const& rColor);
 
     TextAlign GetTextAlign() const;
-    virtual void SetTextAlign(TextAlign eAlign);
 
     sal_Int32 GetTextBreak(OUString const& rStr, tools::Long nTextWidth, sal_Int32 nIndex,
                            sal_Int32 nLen = -1, tools::Long nCharExtra = 0,
@@ -534,7 +528,6 @@ public:
     virtual void SetRefPoint(Point const& rRefPoint);
 
     RasterOp GetRasterOp() const;
-    virtual void SetRasterOp(RasterOp eRasterOp);
 
     bool UsesAlphaVDev() const;
 
@@ -542,7 +535,6 @@ public:
     bool IsMapModeEnabled() const;
     MapMode const& GetMapMode() const;
     virtual void SetMapMode();
-    virtual void SetMapMode(MapMode const& rNewMapMode);
     virtual void SetRelativeMapMode(MapMode const& rNewMapMode);
 
     Geometry const& GetGeometry() const { return maGeometry; }

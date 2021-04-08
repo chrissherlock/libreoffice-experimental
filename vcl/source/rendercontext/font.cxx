@@ -642,7 +642,7 @@ FontMetric RenderContext2::GetFontMetric() const
     return aMetric;
 }
 
-FontMetric RenderContext2::GetFontMetric(const vcl::Font& rFont) const
+FontMetric RenderContext2::GetFontMetric(vcl::Font const& rFont) const
 {
     // select font, query metrics, select original font again
     vcl::Font aOldFont = GetFont();
