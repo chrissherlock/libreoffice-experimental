@@ -35,7 +35,7 @@
 #include <unistd.h>
 #endif
 #include <sft.hxx>
-#include <impfontcharmap.hxx>
+#include <font/ImplFontCharMap.hxx>
 #include "ttcr.hxx"
 #include "xlat.hxx"
 #include <rtl/crc.h>
