@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-04-10 05:39:00 using:
+ Generated on 2021-04-10 05:39:56 using:
  ./bin/update_pch vcl vcl --cutoff=6 --exclude:system --include:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -192,6 +192,7 @@
 #include <cppuhelper/weak.hxx>
 #include <cppuhelper/weakagg.hxx>
 #include <cppuhelper/weakref.hxx>
+#include <font/FontAttributes.hxx>
 #include <font/PhysicalFontFace.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <font/PhysicalFontFaceSizeCollection.hxx>
@@ -253,6 +254,7 @@
 #include <uno/data.h>
 #include <uno/sequence2.h>
 #include <unotools/configmgr.hxx>
+#include <unotools/fontdefs.hxx>
 #include <unotools/localedatawrapper.hxx>
 #include <unotools/ucbstreamhelper.hxx>
 #include <unotools/unotoolsdllapi.h>
@@ -262,7 +264,6 @@
 #include <configsettings.hxx>
 #include <controldata.hxx>
 #include <drawmode.hxx>
-#include <fontattributes.hxx>
 #include <fontselect.hxx>
 #include <impfontmetricdata.hxx>
 #include <outdev.h>

@@ -24,7 +24,7 @@
 #include <tools/degree.hxx>
 #include <vcl/vclenum.hxx>
 
-#include "fontattributes.hxx"
+#include <font/FontAttributes.hxx>
 
 #include <ostream>
 

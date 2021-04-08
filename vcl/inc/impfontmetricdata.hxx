@@ -23,7 +23,9 @@
 #include <vcl/dllapi.h>
 #include <tools/long.hxx>
 #include <tools/ref.hxx>
-#include "fontattributes.hxx"
+
+#include <font/FontAttributes.hxx>
+
 #include "sft.hxx"
 
 #include <vector>

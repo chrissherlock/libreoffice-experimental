@@ -25,7 +25,7 @@
 #include <vcl/dllapi.h>
 #include <vcl/fontcharmap.hxx>
 
-#include "fontattributes.hxx"
+#include <font/FontAttributes.hxx>
 
 class LogicalFontInstance;
 struct FontMatchStatus;

@@ -28,8 +28,8 @@
 #include <vcl/outdev.hxx>
 #include <vcl/virdev.hxx>
 
+#include <font/FontAttributes.hxx>
 #include <impfont.hxx>
-#include <fontattributes.hxx>
 #include <sft.hxx>
 
 #include <algorithm>

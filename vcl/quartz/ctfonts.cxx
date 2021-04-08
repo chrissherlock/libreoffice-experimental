@@ -32,8 +32,8 @@
 #include <osx/saldata.hxx>
 #include <osx/salinst.h>
 #endif
+#include <font/FontAttributes.hxx>
 #include <font/LogicalFontInstance.hxx>
-#include <fontattributes.hxx>
 #include <impglyphitem.hxx>
 #include <font/PhysicalFontFamilyCollection.hxx>
 #include <quartz/salgdi.h>

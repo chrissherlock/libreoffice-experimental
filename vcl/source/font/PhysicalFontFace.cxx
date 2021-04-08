@@ -21,7 +21,7 @@
 #include <tools/fontenum.hxx>
 #include <unotools/fontdefs.hxx>
 
-#include <fontattributes.hxx>
+#include <font/FontAttributes.hxx>
 #include <fontselect.hxx>
 
 #include <font/PhysicalFontFace.hxx>
