@@ -31,6 +31,7 @@
 #include <osl/file.hxx>
 #include <sal/types.h>
 #include <tools/long.hxx>
+#include <vcl/font/FontCharMap.hxx>
 #include <vcl/sysdata.hxx>
 
 #include <font/FontSubsetInfo.hxx>

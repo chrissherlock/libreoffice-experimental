@@ -23,6 +23,7 @@
 #include <unotools/configmgr.hxx>
 
 #include <vcl/RenderContext2.hxx>
+#include <vcl/font/FontCharMap.hxx>
 #include <vcl/flags/AddFontSubstituteFlags.hxx>
 #include <vcl/event.hxx>
 #include <vcl/settings.hxx>

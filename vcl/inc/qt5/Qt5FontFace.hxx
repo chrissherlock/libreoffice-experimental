@@ -20,12 +20,12 @@
 #pragma once
 
 #include <vcl/font/FontCapabilities.hxx>
+#include <vcl/font/FontCharMap.hxx>
 
 #include <vclpluginapi.h>
 #include <PhysicalFontFace.hxx>
 
 #include <tools/ref.hxx>
-#include <vcl/fontcharmap.hxx>
 
 #include <QtCore/QString>
 #include <QtGui/QFont>

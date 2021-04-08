@@ -17,12 +17,12 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#ifndef INCLUDED_FONTCHARMAP_HXX
-#define INCLUDED_FONTCHARMAP_HXX
+#pragma once
+
+#include <tools/ref.hxx>
 
 #include <vcl/dllapi.h>
 #include <vcl/vclenum.hxx>
-#include <tools/ref.hxx>
 
 class ImplFontCharMap;
 class CmapResult;
@@ -42,7 +42,7 @@ public:
 
     /** A new FontCharMap is created based on the CmapResult
      */
-    FontCharMap( const CmapResult& rCR );
+    FontCharMap(const CmapResult& rCR);
 
     virtual ~FontCharMap() override;
 
@@ -50,20 +50,20 @@ public:
 
         @returns the default font character map.
      */
-    static FontCharMapRef GetDefaultMap( bool bSymbols );
+    static FontCharMapRef GetDefaultMap(bool bSymbols);
 
     /** Determines if the font character map is the "default". The default map
         includes all codepoints in the Unicode BMP range, including surrogates.
 
         @returns true if default map, false if not default map.
      */
-    bool                IsDefaultMap() const;
+    bool IsDefaultMap() const;
 
     /** Does the font character map include the UCS4 character?
 
         @returns true if character exists in font character map, false is not.
      */
-    bool                HasChar( sal_UCS4 ) const;
+    bool HasChar(sal_UCS4) const;
 
     /** Returns the number of chars supported by the font, which
         are inside the unicode range from cMin to cMax (inclusive).
@@ -74,25 +74,25 @@ public:
         @returns number of characters in the font charmap between the two
                  codepoints.
      */
-    int                 CountCharsInRange( sal_UCS4 cMin, sal_UCS4 cMax ) const;
+    int CountCharsInRange(sal_UCS4 cMin, sal_UCS4 cMax) const;
 
     /** Get the number of characters in the font character map.
 
         @returns number of characters in the font character map.
      */
-    int                 GetCharCount() const;
+    int GetCharCount() const;
 
     /** Get the first character in the font character map.
 
         @returns first character in the font character map.
      */
-    sal_UCS4            GetFirstChar() const;
+    sal_UCS4 GetFirstChar() const;
 
     /** Get the last character in the font character map.
 
         @returns last character in the font character map.
      */
-    sal_UCS4            GetLastChar() const;
+    sal_UCS4 GetLastChar() const;
 
     /** Get the next character in the font character map. This is important
         because character maps (e.g. the default map which holds the characters
@@ -102,7 +102,7 @@ public:
 
         @returns next character in the font character map.
      */
-    sal_UCS4            GetNextChar( sal_UCS4 cChar ) const;
+    sal_UCS4 GetNextChar(sal_UCS4 cChar) const;
 
     /** Get the previous character in the font character map. This is important
         because character maps (e.g. the default map which holds the characters
@@ -112,7 +112,7 @@ public:
 
         @returns previous character in the font character map.
      */
-    sal_UCS4            GetPrevChar( sal_UCS4 cChar ) const;
+    sal_UCS4 GetPrevChar(sal_UCS4 cChar) const;
 
     /** Get the index of a particular character in the font character map. The
         index is different from the codepoint, because font character maps can
@@ -123,7 +123,7 @@ public:
 
         @returns Index of character in font character map.
      */
-    int                 GetIndexFromChar( sal_UCS4 cChar ) const;
+    int GetIndexFromChar(sal_UCS4 cChar) const;
 
     /** Get the character at a particular index in the font character map. The
         index is different from the codepoint, because font character maps can
@@ -134,9 +134,9 @@ public:
 
         @returns Character in font character map.
      */
-    sal_UCS4            GetCharFromIndex( int nCharIndex ) const;
+    sal_UCS4 GetCharFromIndex(int nCharIndex) const;
 
-    int                 GetGlyphIndex( sal_UCS4 ) const;
+    int GetGlyphIndex(sal_UCS4) const;
 
     bool isSymbolic() const;
 
@@ -145,15 +145,13 @@ private:
 
     friend class ::OutputDevice;
 
-    int                 findRangeIndex( sal_UCS4 ) const;
+    int findRangeIndex(sal_UCS4) const;
 
-                        FontCharMap( ImplFontCharMapRef const & pIFCMap );
+    FontCharMap(ImplFontCharMapRef const& pIFCMap);
 
     // prevent assignment and copy construction
-                        FontCharMap( const FontCharMap& ) = delete;
-    void                operator=( const FontCharMap& ) = delete;
+    FontCharMap(const FontCharMap&) = delete;
+    void operator=(const FontCharMap&) = delete;
 };
-
-#endif // INCLUDED_FONTCHARMAP_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

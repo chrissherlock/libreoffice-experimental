@@ -26,8 +26,8 @@
 
 #include <rtl/textenc.h>
 #include <svx/ucsubset.hxx>
+#include <vcl/font/FontCharMap.hxx>
 #include <vcl/settings.hxx>
-#include <vcl/fontcharmap.hxx>
 #include <vcl/virdev.hxx>
 #include <svl/stritem.hxx>
 #include <o3tl/temporary.hxx>

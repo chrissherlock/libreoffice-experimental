@@ -19,6 +19,7 @@
 
 #include "pdfwriter_impl.hxx"
 
+#include <vcl/font/FontCharMap.hxx>
 #include <vcl/pdfextoutdevdata.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/gdimtf.hxx>

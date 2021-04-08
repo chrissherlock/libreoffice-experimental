@@ -23,7 +23,6 @@
 #include <Qt5Painter.hxx>
 
 #include <font/FontSubsetInfo.hxx>
-#include <vcl/fontcharmap.hxx>
 #include <unx/geninst.h>
 #include <unx/fontmanager.hxx>
 #include <unx/glyphcache.hxx>

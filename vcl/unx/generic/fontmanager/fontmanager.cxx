@@ -21,13 +21,14 @@
 #include <unistd.h>
 #include <osl/thread.h>
 
+#include <vcl/font/FontCharMap.hxx>
+
 #include <font/CmapResult.hxx>
 #include <font/FontSubsetInfo.hxx>
 #include <font/ImplFontCharMap.hxx>
 #include <unx/fontmanager.hxx>
 #include <unx/gendata.hxx>
 #include <unx/helper.hxx>
-#include <vcl/fontcharmap.hxx>
 
 #include <tools/urlobj.hxx>
 

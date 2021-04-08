@@ -32,7 +32,7 @@
 #include <svtools/ctrltool.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/wall.hxx>
-#include <vcl/fontcharmap.hxx>
+#include <vcl/font/FontCharMap.hxx>
 #include <sfx2/dispatch.hxx>
 #include <svx/charmap.hxx>
 #include <svx/ucsubset.hxx>

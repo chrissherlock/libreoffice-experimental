@@ -20,10 +20,12 @@
 #include <unx/freetypetextrender.hxx>
 
 #include <unotools/configmgr.hxx>
+
+#include <vcl/font/FontCharMap.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/sysdata.hxx>
 #include <vcl/svapp.hxx>
-#include <vcl/fontcharmap.hxx>
+
 #include <sal/log.hxx>
 
 #include <unx/genpspgraphics.h>

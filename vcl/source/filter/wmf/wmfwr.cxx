@@ -32,12 +32,12 @@
 #include <tools/fract.hxx>
 #include <tools/stream.hxx>
 #include <vcl/dibtools.hxx>
+#include <vcl/font/FontCharMap.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/FilterConfigItem.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <memory>
-#include <vcl/fontcharmap.hxx>
 #include <comphelper/sequenceashashmap.hxx>
 
 // MS Windows defines

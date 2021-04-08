@@ -127,7 +127,7 @@
 #include <tools/json_writer.hxx>
 #include <svtools/ctrltool.hxx>
 #include <svtools/langtab.hxx>
-#include <vcl/fontcharmap.hxx>
+#include <vcl/font/FontCharMap.hxx>
 #include <vcl/graphicfilter.hxx>
 #ifdef IOS
 #include <vcl/sysdata.hxx>

@@ -19,15 +19,17 @@
 
 #pragma once
 
-#include <salhelper/simplereferenceobject.hxx>
 #include <rtl/ref.hxx>
+#include <salhelper/simplereferenceobject.hxx>
 #include <tools/long.hxx>
+#include <tools/ref.hxx>
+
 #include <vcl/dllapi.h>
-#include <vcl/fontcharmap.hxx>
 
 #include <font/FontAttributes.hxx>
 
 class LogicalFontInstance;
+class FontCharMap;
 struct FontMatchStatus;
 class FontSelectPattern;
 class PhysicalFontFamily;
@@ -36,6 +38,8 @@ namespace vcl
 {
 struct FontCapabilities;
 }
+
+typedef tools::SvRef<FontCharMap> FontCharMapRef;
 
 struct FontMatchStatus
 {

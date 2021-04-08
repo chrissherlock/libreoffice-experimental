@@ -33,8 +33,8 @@
 #include <tools/long.hxx>
 #include <comphelper/lok.hxx>
 
+#include <vcl/font/FontCharMap.hxx>
 #include <vcl/metric.hxx>
-#include <vcl/fontcharmap.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/sysdata.hxx>
 

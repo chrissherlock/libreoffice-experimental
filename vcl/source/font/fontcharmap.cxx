@@ -15,10 +15,12 @@
  *   except in compliance with the License. You may obtain a copy of
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
-#include <vcl/fontcharmap.hxx>
+
 #include <rtl/textcvt.h>
 #include <rtl/textenc.h>
 #include <sal/log.hxx>
+
+#include <vcl/font/FontCharMap.hxx>
 
 #include <font/CmapResult.hxx>
 #include <font/ImplFontCharMap.hxx>

@@ -6,11 +6,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+
 #include <svtools/sampletext.hxx>
 #include <vcl/font.hxx>
+#include <vcl/font/FontCharMap.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/virdev.hxx>
-#include <vcl/fontcharmap.hxx>
 #include <i18nutil/unicode.hxx>
 #include <sal/log.hxx>
 #include <com/sun/star/i18n/ScriptType.hpp>

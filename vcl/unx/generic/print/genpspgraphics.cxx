@@ -31,10 +31,10 @@
 
 #include <i18nlangtag/mslangid.hxx>
 #include <jobdata.hxx>
+#include <vcl/font/FontCharMap.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/sysdata.hxx>
-#include <vcl/fontcharmap.hxx>
 #include <config_cairo_canvas.h>
 
 #include <font/FontSubsetInfo.hxx>

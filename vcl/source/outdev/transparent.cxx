@@ -21,6 +21,7 @@
 #include <officecfg/Office/Common.hxx>
 
 #include <vcl/BitmapReadAccess.hxx>
+#include <vcl/font/FontCharMap.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/print.hxx>

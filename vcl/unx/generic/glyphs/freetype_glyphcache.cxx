@@ -18,12 +18,11 @@
  */
 
 #include <sal/config.h>
-
 #include <o3tl/safeint.hxx>
-#include <vcl/fontcharmap.hxx>
+
+#include <vcl/font/FontCharMap.hxx>
 
 #include <unx/freetype_glyphcache.hxx>
-
 #include <font/CmapResult.hxx>
 #include <font/FontAttributes.hxx>
 #include <font/LogicalFontInstance.hxx>

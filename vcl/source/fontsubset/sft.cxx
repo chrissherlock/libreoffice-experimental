@@ -24,6 +24,8 @@
  *
  */
 
+#include <vcl/font/FontCharMap.hxx>
+
 #include <assert.h>
 
 #include <stdlib.h>

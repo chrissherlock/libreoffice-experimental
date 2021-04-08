@@ -58,7 +58,7 @@
 #include <vcl/bitmapex.hxx>
 #include <vcl/canvastools.hxx>
 #include <vcl/cvtgrf.hxx>
-#include <vcl/fontcharmap.hxx>
+#include <vcl/font/FontCharMap.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/metric.hxx>
 #include <vcl/settings.hxx>

@@ -24,6 +24,7 @@
 #include <unotools/fontdefs.hxx>
 
 #include <vcl/font.hxx>
+#include <vcl/font/FontCharMap.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/virdev.hxx>

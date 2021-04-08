@@ -17,8 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/font/FontCharMap.hxx>
 #include <vcl/sysdata.hxx>
-#include <vcl/fontcharmap.hxx>
 
 #include <unx/salgdi.h>
 #include <textrender.hxx>

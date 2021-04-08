@@ -14,6 +14,8 @@
 #include <sal/types.h>
 #include <tools/stream.hxx>
 #include <tools/zcodec.hxx>
+
+#include <vcl/font/FontCharMap.hxx>
 #include <vcl/filter/pdfdocument.hxx>
 #include <vcl/filter/pdfobjectcontainer.hxx>
 

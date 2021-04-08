@@ -40,15 +40,19 @@
 #ifndef INCLUDED_VCL_INC_SFT_HXX
 #define INCLUDED_VCL_INC_SFT_HXX
 
+#include <tools/ref.hxx>
+#include <i18nlangtag/lang.h>
+
 #include <vcl/dllapi.h>
 #include <vcl/font/FontCapabilities.hxx>
-#include <vcl/fontcharmap.hxx>
-#include <i18nlangtag/lang.h>
 
 #include <array>
 #include <memory>
 #include <vector>
 #include <cstdint>
+
+class FontCharMap;
+typedef tools::SvRef<FontCharMap> FontCharMapRef;
 
 namespace vcl
 {

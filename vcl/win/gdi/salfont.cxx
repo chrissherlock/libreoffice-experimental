@@ -43,10 +43,10 @@
 #include <tools/stream.hxx>
 #include <tools/urlobj.hxx>
 #include <unotools/fontcfg.hxx>
+#include <vcl/font/FontCharMap.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/sysdata.hxx>
 #include <vcl/metric.hxx>
-#include <vcl/fontcharmap.hxx>
 #include <comphelper/scopeguard.hxx>
 
 #include <outdev.h>

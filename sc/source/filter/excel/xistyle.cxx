@@ -47,7 +47,7 @@
 #include <sal/macros.h>
 #include <sal/log.hxx>
 #include <tools/UnitConversion.hxx>
-#include <vcl/fontcharmap.hxx>
+#include <vcl/font/FontCharMap.hxx>
 #include <vcl/outdev.hxx>
 #include <document.hxx>
 #include <documentimport.hxx>

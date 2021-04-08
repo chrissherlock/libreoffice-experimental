@@ -29,6 +29,7 @@
 #include <basegfx/matrix/b2dhommatrixtools.hxx>
 #include <FileDefinitionWidgetDraw.hxx>
 #include <rtl/math.hxx>
+#include <vcl/font/FontCharMap.hxx>
 
 // The only common SalFrame method
 

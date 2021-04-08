@@ -17,9 +17,11 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include "pdfbuildin_fonts.hxx"
-
 #include <rtl/strbuf.hxx>
+
+#include <vcl/font/FontCharMap.hxx>
+
+#include "pdfbuildin_fonts.hxx"
 
 namespace vcl::pdf
 {
