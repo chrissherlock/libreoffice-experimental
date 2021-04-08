@@ -10,8 +10,8 @@
 
 #include <svtools/svtdllapi.h>
 #include <rtl/ustring.hxx>
+#include <vcl/font/FontCapabilities.hxx>
 #include <unicode/uscript.h>
-#include <vcl/fontcapabilities.hxx>
 
 class OutputDevice;
 namespace vcl

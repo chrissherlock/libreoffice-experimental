@@ -41,7 +41,7 @@
 #define INCLUDED_VCL_INC_SFT_HXX
 
 #include <vcl/dllapi.h>
-#include <vcl/fontcapabilities.hxx>
+#include <vcl/font/FontCapabilities.hxx>
 #include <vcl/fontcharmap.hxx>
 #include <i18nlangtag/lang.h>
 

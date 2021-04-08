@@ -108,7 +108,7 @@ def is_ignore(srcLoc):
          "drawinglayer/source/tools/emfpbrush.hxx",
          "drawinglayer/source/tools/emfppen.cxx",
          "include/oox/ppt/animationspersist.hxx",
-         "include/vcl/fontcapabilities.hxx",
+         "include/vcl/font/FontCapabilities.hxx",
          "sw/inc/poolfmt.hxx",
          "include/xmloff/xmltoken.hxx",
         # unit test code

@@ -20,6 +20,9 @@
 #ifndef INCLUDED_VCL_INC_WIN_SALGDI_H
 #define INCLUDED_VCL_INC_WIN_SALGDI_H
 
+#include <vcl/font/FontCapabilities.hxx>
+#include <vcl/fontcharmap.hxx>
+
 #include <sallayout.hxx>
 #include <salgeom.hxx>
 #include <salgdi.hxx>
@@ -27,8 +30,6 @@
 #include <font/ImplFont.hxx>
 #include <font/LogicalFontInstance.hxx>
 #include <font/PhysicalFontFace.hxx>
-#include <vcl/fontcapabilities.hxx>
-#include <vcl/fontcharmap.hxx>
 
 #include <memory>
 #include <unordered_set>

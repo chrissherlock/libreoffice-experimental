@@ -19,11 +19,12 @@
 
 #pragma once
 
+#include <vcl/font/FontCapabilities.hxx>
+
 #include <vclpluginapi.h>
 #include <PhysicalFontFace.hxx>
 
 #include <tools/ref.hxx>
-#include <vcl/fontcapabilities.hxx>
 #include <vcl/fontcharmap.hxx>
 
 #include <QtCore/QString>

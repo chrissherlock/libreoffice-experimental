@@ -36,9 +36,8 @@
 #endif
 #include <postmac.h>
 
-#include <vcl/fontcapabilities.hxx>
+#include <vcl/font/FontCapabilities.hxx>
 #include <vcl/metric.hxx>
-
 
 #include <font/ImplFontMetricData.hxx>
 #include <font/LogicalFontInstance.hxx>
