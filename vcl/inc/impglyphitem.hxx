@@ -20,33 +20,14 @@
 #ifndef INCLUDED_VCL_IMPGLYPHITEM_HXX
 #define INCLUDED_VCL_IMPGLYPHITEM_HXX
 
-#include <o3tl/typed_flags_set.hxx>
 #include <tools/gen.hxx>
 #include <vcl/dllapi.h>
 #include <vcl/glyphitem.hxx>
 #include <vcl/outdev.hxx>
 #include <vector>
 
+#include <font/GlyphItemFlags.hxx>
 #include <font/LogicalFontInstance.hxx>
-
-enum class GlyphItemFlags
-{
-    NONE = 0,
-    IS_IN_CLUSTER = 0x001,
-    IS_RTL_GLYPH = 0x002,
-    IS_DIACRITIC = 0x004,
-    IS_VERTICAL = 0x008,
-    IS_SPACING = 0x010,
-    ALLOW_KASHIDA = 0x020,
-    IS_DROPPED = 0x040,
-    IS_CLUSTER_START = 0x080
-};
-namespace o3tl
-{
-template <> struct typed_flags<GlyphItemFlags> : is_typed_flags<GlyphItemFlags, 0xff>
-{
-};
-};
 
 class VCL_DLLPUBLIC GlyphItem
 {
