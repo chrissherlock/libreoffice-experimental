@@ -17,8 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <font/FontCache.hxx>
 #include <font/LogicalFontInstance.hxx>
-#include <impfontcache.hxx>
 #include <font/PhysicalFontFamilyCollection.hxx>
 #include <font/PhysicalFontFace.hxx>
 #include <font/PhysicalFontFamily.hxx>
@@ -28,12 +28,12 @@
 #include <unx/glyphcache.hxx>
 #endif
 
-size_t ImplFontCache::IFSD_Hash::operator()( const FontSelectPattern& rFSD ) const
+size_t FontCache::IFSD_Hash::operator()( const FontSelectPattern& rFSD ) const
 {
     return rFSD.hashCode();
 }
 
-bool ImplFontCache::IFSD_Equal::operator()(const FontSelectPattern& rA, const FontSelectPattern& rB) const
+bool FontCache::IFSD_Equal::operator()(const FontSelectPattern& rA, const FontSelectPattern& rB) const
 {
     // check normalized font family name
     if( rA.maSearchName != rB.maSearchName )
@@ -85,14 +85,14 @@ bool ImplFontCache::IFSD_Equal::operator()(const FontSelectPattern& rA, const Fo
     return true;
 }
 
-ImplFontCache::ImplFontCache()
+FontCache::FontCache()
     : mpLastHitCacheEntry( nullptr )
     , maFontInstanceList(0)
     // The cache limit is set by the rough number of characters needed to read your average Asian newspaper.
     , m_aBoundRectCache(3000)
 {}
 
-ImplFontCache::~ImplFontCache()
+FontCache::~FontCache()
 {
     for (const auto & rLFI : maFontInstanceList)
     {
@@ -100,7 +100,7 @@ ImplFontCache::~ImplFontCache()
     }
 }
 
-rtl::Reference<LogicalFontInstance> ImplFontCache::GetFontInstance( PhysicalFontFamilyCollection const * pFontList,
+rtl::Reference<LogicalFontInstance> FontCache::GetFontInstance( PhysicalFontFamilyCollection const * pFontList,
     const vcl::Font& rFont, const Size& rSize, float fExactHeight, bool bNonAntialias )
 {
     // initialize internal font request object
@@ -108,7 +108,7 @@ rtl::Reference<LogicalFontInstance> ImplFontCache::GetFontInstance( PhysicalFont
     return GetFontInstance( pFontList, aFontSelData );
 }
 
-rtl::Reference<LogicalFontInstance> ImplFontCache::GetFontInstance( PhysicalFontFamilyCollection const * pFontList,
+rtl::Reference<LogicalFontInstance> FontCache::GetFontInstance( PhysicalFontFamilyCollection const * pFontList,
     FontSelectPattern& aFontSelData )
 {
     rtl::Reference<LogicalFontInstance> pFontInstance;
@@ -129,7 +129,7 @@ rtl::Reference<LogicalFontInstance> ImplFontCache::GetFontInstance( PhysicalFont
     {
         // find the best matching logical font family and update font selector accordingly
         pFontFamily = pFontList->FindFontFamily( aFontSelData );
-        SAL_WARN_IF( (pFontFamily == nullptr), "vcl", "ImplFontCache::Get() No logical font found!" );
+        SAL_WARN_IF( (pFontFamily == nullptr), "vcl", "FontCache::Get() No logical font found!" );
         if( pFontFamily )
         {
             aFontSelData.maSearchName = pFontFamily->GetSearchName();
@@ -205,7 +205,7 @@ rtl::Reference<LogicalFontInstance> ImplFontCache::GetFontInstance( PhysicalFont
     return pFontInstance;
 }
 
-rtl::Reference<LogicalFontInstance> ImplFontCache::GetGlyphFallbackFont( PhysicalFontFamilyCollection const * pFontCollection,
+rtl::Reference<LogicalFontInstance> FontCache::GetGlyphFallbackFont( PhysicalFontFamilyCollection const * pFontCollection,
     FontSelectPattern& rFontSelData, LogicalFontInstance* pFontInstance, int nFallbackLevel, OUString& rMissingCodes )
 {
     // get a candidate font for glyph fallback
@@ -240,7 +240,7 @@ rtl::Reference<LogicalFontInstance> ImplFontCache::GetGlyphFallbackFont( Physica
     return pFallbackFont;
 }
 
-void ImplFontCache::Invalidate()
+void FontCache::Invalidate()
 {
     // #112304# make sure the font cache is really clean
     mpLastHitCacheEntry = nullptr;
@@ -250,7 +250,7 @@ void ImplFontCache::Invalidate()
     m_aBoundRectCache.clear();
 }
 
-bool ImplFontCache::GetCachedGlyphBoundRect(const LogicalFontInstance *pFont, sal_GlyphId nID, tools::Rectangle &rRect)
+bool FontCache::GetCachedGlyphBoundRect(const LogicalFontInstance *pFont, sal_GlyphId nID, tools::Rectangle &rRect)
 {
     if (!pFont->GetFontCache())
         return false;
@@ -267,7 +267,7 @@ bool ImplFontCache::GetCachedGlyphBoundRect(const LogicalFontInstance *pFont, sa
     return false;
 }
 
-void ImplFontCache::CacheGlyphBoundRect(const LogicalFontInstance *pFont, sal_GlyphId nID, tools::Rectangle &rRect)
+void FontCache::CacheGlyphBoundRect(const LogicalFontInstance *pFont, sal_GlyphId nID, tools::Rectangle &rRect)
 {
     if (!pFont->GetFontCache())
         return;

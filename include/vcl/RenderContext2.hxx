@@ -63,7 +63,7 @@ class Image;
 class ImplAnimView;
 class PhysicalFontFaceCollection;
 class PhysicalFontFaceSizeCollection;
-class ImplFontCache;
+class FontCache;
 class ImplMultiTextLineInfo;
 class LogicalFontInstance;
 class PhysicalFontFamilyCollection;
@@ -1108,7 +1108,7 @@ protected:
     mutable std::unique_ptr<PhysicalFontFaceCollection> mpDeviceFontList;
     mutable std::unique_ptr<PhysicalFontFaceSizeCollection> mpDeviceFontSizeList;
     mutable rtl::Reference<LogicalFontInstance> mpFontInstance;
-    mutable std::shared_ptr<ImplFontCache> mxFontCache;
+    mutable std::shared_ptr<FontCache> mxFontCache;
     Geometry maGeometry;
     /// font specific text alignment offsets in pixel units
     mutable tools::Long mnTextOffX;

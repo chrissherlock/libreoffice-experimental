@@ -65,12 +65,12 @@
 #include <jni.h>
 #endif
 
-#include <impfontcache.hxx>
 #include <salinst.hxx>
 #include <svdata.hxx>
 #include <vcl/svmain.hxx>
 #include <dbggui.hxx>
 #include <accmgr.hxx>
+#include <font/FontCache.hxx>
 #include <font/PhysicalFontFamilyCollection.hxx>
 #include <print.h>
 #include <salsys.hxx>
@@ -360,7 +360,7 @@ bool InitVCL()
 
     // Initialize global data
     pSVData->maGDIData.mxScreenFontList = std::make_shared<PhysicalFontFamilyCollection>();
-    pSVData->maGDIData.mxScreenFontCache = std::make_shared<ImplFontCache>();
+    pSVData->maGDIData.mxScreenFontCache = std::make_shared<FontCache>();
     pSVData->maGDIData.mxGrfConverter.reset(new GraphicConverter);
 
     g_bIsLeanException = getenv("LO_LEAN_EXCEPTION") != nullptr;

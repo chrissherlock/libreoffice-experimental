@@ -757,7 +757,7 @@ void Printer::ImplInit(SalPrinterQueueInfo* pInfo)
     // Init data
     ImplUpdatePageData();
     mxFontCollection = std::make_shared<PhysicalFontFamilyCollection>();
-    mxFontCache = std::make_shared<ImplFontCache>();
+    mxFontCache = std::make_shared<FontCache>();
     mpGraphics->GetDevFontList(mxFontCollection.get());
 }
 

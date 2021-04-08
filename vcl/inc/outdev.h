@@ -26,8 +26,8 @@
 #include <tools/gen.hxx>
 #include <vcl/vclptr.hxx>
 
+#include <font/FontCache.hxx>
 #include <font/PhysicalFontFace.hxx>
-#include "impfontcache.hxx"
 
 class Size;
 namespace vcl { class Font; }

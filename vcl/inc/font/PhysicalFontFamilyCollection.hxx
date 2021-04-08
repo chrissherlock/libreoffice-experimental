@@ -32,7 +32,7 @@ class PhysicalFontFaceSizeCollection;
 class ImplGlyphFallbackFontSubstitution;
 class ImplPreMatchFontSubstitution;
 
-// TODO: merge with ImplFontCache
+// TODO: merge with FontCache
 // TODO: rename to LogicalFontManager
 
 class VCL_PLUGIN_PUBLIC PhysicalFontFamilyCollection final

@@ -14467,7 +14467,6 @@ vcl/inc/imagerepository.hxx
 vcl/inc/impanmvw.hxx
 vcl/inc/impdel.hxx
 vcl/inc/impfont.hxx
-vcl/inc/impfontcache.hxx
 vcl/inc/impfontcharmap.hxx
 vcl/inc/impfontmetricdata.hxx
 vcl/inc/impgraph.hxx

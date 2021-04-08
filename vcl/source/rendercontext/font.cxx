@@ -1358,7 +1358,7 @@ void RenderContext2::SetFontCollectionFromSVData()
     mxFontCollection = ImplGetSVData()->maGDIData.mxScreenFontList->Clone();
 }
 
-void RenderContext2::ResetNewFontCache() { mxFontCache = std::make_shared<ImplFontCache>(); }
+void RenderContext2::ResetNewFontCache() { mxFontCache = std::make_shared<FontCache>(); }
 
 void RenderContext2::ImplReleaseFonts()
 {

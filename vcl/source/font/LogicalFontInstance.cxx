@@ -19,9 +19,9 @@
 
 #include <unotools/fontdefs.hxx>
 
+#include <font/FontCache.hxx>
 #include <font/LogicalFontInstance.hxx>
 #include <font/PhysicalFontFace.hxx>
-#include <impfontcache.hxx>
 
 #include <hb-ot.h>
 #include <hb-graphite2.h>
@@ -188,7 +188,7 @@ const PhysicalFontFace* LogicalFontInstance::GetFontFace() const { return m_pFon
 
 PhysicalFontFace* LogicalFontInstance::GetFontFace() { return m_pFontFace.get(); }
 
-const ImplFontCache* LogicalFontInstance::GetFontCache() const { return mpFontCache; }
+const FontCache* LogicalFontInstance::GetFontCache() const { return mpFontCache; }
 
 hb_font_t* LogicalFontInstance::ImplInitHbFont()
 {
