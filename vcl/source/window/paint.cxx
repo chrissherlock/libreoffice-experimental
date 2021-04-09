@@ -490,8 +490,8 @@ void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderCo
     // RTL: re-mirror paint rect and region at this window
     if (ImplIsAntiparallel())
     {
-        rRenderContext.ReMirror(aPaintRect);
-        rRenderContext.ReMirror(rPaintRegion);
+        ReMirror(aPaintRect);
+        ReMirror(rPaintRegion);
     }
     aPaintRect = ImplDevicePixelToLogic(aPaintRect);
     mpWindowImpl->mpPaintRegion = &rPaintRegion;
@@ -822,10 +822,8 @@ void Window::ImplInvalidate( const vcl::Region* pRegion, InvalidateFlags nFlags 
             // RTL: remirror region before intersecting it
             if ( ImplIsAntiparallel() )
             {
-                const OutputDevice *pOutDev = GetOutDev();
-
                 vcl::Region aRgn( *pRegion );
-                pOutDev->ReMirror( aRgn );
+                ReMirror( aRgn );
                 aRegion.Intersect( aRgn );
             }
             else
@@ -1656,7 +1654,7 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
     {
         //  make sure the invalidate region of this window is
         // computed in the same coordinate space as the one from the overlap windows
-        pOutDev->ReMirror( aRectMirror );
+        ReMirror( aRectMirror );
     }
 
     // adapt paint areas
@@ -1729,9 +1727,7 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
         if (pGraphics && !SupportsDoubleBuffering())
         {
             if( bReMirror )
-            {
-                pOutDev->ReMirror( aRegion );
-            }
+                ReMirror( aRegion );
 
             pOutDev->SelectClipRegion( aRegion, pGraphics );
             pGraphics->CopyArea( rRect.Left()+nHorzScroll, rRect.Top()+nVertScroll,

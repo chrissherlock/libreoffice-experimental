@@ -366,8 +366,7 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, MouseNotifyEvent 
         if( pChild->ImplIsAntiparallel() )
         {
             // re-mirror frame pos at pChild
-            const OutputDevice *pChildWinOutDev = pChild->GetOutDev();
-            pChildWinOutDev->ReMirror( aMousePos );
+            pChild->ReMirror( aMousePos );
         }
 
         // no mouse messages to disabled windows

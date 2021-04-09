@@ -2705,8 +2705,7 @@ void Window::setPosSizePixel( tools::Long nX, tools::Long nY,
             if( pParent && pParent->ImplIsAntiparallel() )
             {
                 tools::Rectangle aRect( Point ( nX, nY ), Size( nWidth, nHeight ) );
-                const OutputDevice *pParentOutDev = pParent->GetOutDev();
-                pParentOutDev->ReMirror( aRect );
+                pParent->ReMirror( aRect );
                 nX = aRect.Left();
             }
         }

@@ -2972,10 +2972,9 @@ void ImplListBoxFloatingWindow::StartFloat( bool bStartTracking )
     // where the document is unmirrored
     // because StartPopupMode() expects a rectangle in mirrored coordinates we have to re-mirror
     vcl::Window *pGrandparent = GetParent()->GetParent();
-    const OutputDevice *pGrandparentOutDev = pGrandparent->GetOutDev();
 
     if( pGrandparent->ImplIsAntiparallel() )
-        pGrandparentOutDev->ReMirror( aRect );
+        pGrandparent->ReMirror( aRect );
 
     // mouse-button right: close the List-Box-Float-win and don't stop the handling fdo#84795
     StartPopupMode( aRect, FloatWinPopupFlags::Down | FloatWinPopupFlags::NoHorzPlacement | FloatWinPopupFlags::AllMouseButtonClose );

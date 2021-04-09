@@ -214,6 +214,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/accessibility \
     vcl/source/window/legacyaccessibility \
     vcl/source/window/clipping \
+    vcl/source/window/mirror \
     vcl/source/window/stacking \
     vcl/source/window/debug \
     vcl/source/window/globalization \

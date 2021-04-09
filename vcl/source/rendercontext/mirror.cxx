@@ -21,42 +21,6 @@
 
 #include <salgdi.hxx>
 
-// note: the coordinates to be remirrored are in frame coordinates !
-
-void RenderContext2::ReMirror(Point& rPoint) const
-{
-    rPoint.setX(maGeometry.GetXFrameOffset() + maGeometry.GetWidthInPixels() - 1 - rPoint.X()
-                + maGeometry.GetXFrameOffset());
-}
-
-void RenderContext2::ReMirror(tools::Rectangle& rRect) const
-{
-    tools::Long nWidth = rRect.Right() - rRect.Left();
-
-    //long lc_x = rRect.nLeft - maGeometry.GetXFrameOffset();    // normalize
-    //lc_x = maGeometry.GetWidthInPixels() - nWidth - 1 - lc_x;  // mirror
-    //rRect.nLeft = lc_x + maGeometry.GetXFrameOffset();         // re-normalize
-
-    rRect.SetLeft(maGeometry.GetXFrameOffset() + maGeometry.GetWidthInPixels() - nWidth - 1
-                  - rRect.Left() + maGeometry.GetXFrameOffset());
-    rRect.SetRight(rRect.Left() + nWidth);
-}
-
-void RenderContext2::ReMirror(vcl::Region& rRegion) const
-{
-    std::vector<tools::Rectangle> aRectangles;
-    rRegion.GetRegionRectangles(aRectangles);
-    vcl::Region aMirroredRegion;
-
-    for (auto& rectangle : aRectangles)
-    {
-        ReMirror(rectangle);
-        aMirroredRegion.Union(rectangle);
-    }
-
-    rRegion = aMirroredRegion;
-}
-
 bool RenderContext2::HasMirroredGraphics() const
 {
     return (AcquireGraphics() && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));

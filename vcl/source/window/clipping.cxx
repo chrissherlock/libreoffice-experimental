@@ -100,8 +100,7 @@ void Window::ExpandPaintClipRegion( const vcl::Region& rRegion )
     // only this region is in frame coordinates, so re-mirror it
     if( ImplIsAntiparallel() )
     {
-        const OutputDevice *pOutDev = GetOutDev();
-        pOutDev->ReMirror( aWinChildRegion );
+        ReMirror( aWinChildRegion );
     }
 
     aDevPixRegion.Intersect( aWinChildRegion );

@@ -57,12 +57,11 @@ WindowHitTest Window::ImplHitTest( const Point& rFramePos )
 {
     Point aFramePos( rFramePos );
     if( ImplIsAntiparallel() )
-    {
-        const OutputDevice *pOutDev = GetOutDev();
-        pOutDev->ReMirror( aFramePos );
-    }
+        ReMirror( aFramePos );
+
     if ( !GetFrameRect().IsInside( aFramePos ) )
         return WindowHitTest::NONE;
+
     if ( mpWindowImpl->mbWinRegion )
     {
         Point aTempPos = aFramePos;
@@ -520,20 +519,19 @@ void Window::EnableChildPointerOverwrite( bool bOverwrite )
 void Window::SetPointerPosPixel( const Point& rPos )
 {
     Point aPos = ImplOutputToFrame( rPos );
-    const OutputDevice *pOutDev = GetOutDev();
-    if( pOutDev->HasMirroredGraphics() )
+    if( HasMirroredGraphics() )
     {
         if( !IsRTLEnabled() )
-        {
-            pOutDev->ReMirror( aPos );
-        }
+            ReMirror( aPos );
+
         // mirroring is required here, SetPointerPos bypasses SalGraphics
         aPos.setX( mpGraphics->mirror2( aPos.X(), *this ) );
     }
     else if( ImplIsAntiparallel() )
     {
-        pOutDev->ReMirror( aPos );
+        ReMirror( aPos );
     }
+
     mpWindowImpl->mpFrame->SetPointerPos( aPos.X(), aPos.Y() );
 }
 
@@ -551,10 +549,8 @@ Point Window::GetPointerPosPixel()
 
     Point aPos( mpWindowImpl->mpFrameData->mnLastMouseX, mpWindowImpl->mpFrameData->mnLastMouseY );
     if( ImplIsAntiparallel() )
-    {
-        const OutputDevice *pOutDev = GetOutDev();
-        pOutDev->ReMirror( aPos );
-    }
+        ReMirror( aPos );
+
     return ImplFrameToOutput( aPos );
 }
 
@@ -563,10 +559,8 @@ Point Window::GetLastPointerPosPixel()
 
     Point aPos( mpWindowImpl->mpFrameData->mnBeforeLastMouseX, mpWindowImpl->mpFrameData->mnBeforeLastMouseY );
     if( ImplIsAntiparallel() )
-    {
-        const OutputDevice *pOutDev = GetOutDev();
-        pOutDev->ReMirror( aPos );
-    }
+        ReMirror( aPos );
+
     return ImplFrameToOutput( aPos );
 }
 
@@ -592,10 +586,8 @@ Window::PointerState Window::GetPointerState()
     {
         SalFrame::SalPointerState aSalPointerState = mpWindowImpl->mpFrame->GetPointerState();
         if( ImplIsAntiparallel() )
-        {
-            const OutputDevice *pOutDev = GetOutDev();
-            pOutDev->ReMirror( aSalPointerState.maPos );
-        }
+            ReMirror( aSalPointerState.maPos );
+
         aState.maPos = ImplFrameToOutput( aSalPointerState.maPos );
         aState.mnState = aSalPointerState.mnState;
     }

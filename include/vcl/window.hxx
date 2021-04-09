@@ -556,6 +556,10 @@ public:
 
     SAL_DLLPRIVATE static void          ImplCalcSymbolRect( tools::Rectangle& rRect );
 
+    SAL_DLLPRIVATE void ReMirror(Point& rPoint) const;
+    SAL_DLLPRIVATE void ReMirror(tools::Rectangle& rRect) const;
+    SAL_DLLPRIVATE void ReMirror(vcl::Region& rRegion) const;
+
 protected:
 
     /** This is intended to be used to clear any locally held references to other Window-subclass objects */

@@ -482,13 +482,11 @@ Point FloatingWindow::ImplConvertToAbsPos(vcl::Window* pReference, const Point& 
 {
     Point aAbsolute( rPos );
 
-    const OutputDevice *pWindowOutDev = pReference->GetOutDev();
-
     // compare coordinates in absolute screen coordinates
     if( pReference->HasMirroredGraphics()  )
     {
         if(!pReference->IsRTLEnabled() )
-            pWindowOutDev->ReMirror( aAbsolute );
+            pReference->ReMirror( aAbsolute );
 
         tools::Rectangle aRect( pReference->ScreenToOutputPixel(aAbsolute), Size(1,1) ) ;
         aRect = pReference->ImplOutputToUnmirroredAbsoluteScreenPixel( aRect );
@@ -505,14 +503,12 @@ tools::Rectangle FloatingWindow::ImplConvertToAbsPos(vcl::Window* pReference, co
 {
     tools::Rectangle aFloatRect = rRect;
 
-    const OutputDevice *pParentWinOutDev = pReference->GetOutDev();
-
     // compare coordinates in absolute screen coordinates
     // Keep in sync with FloatingWindow::ImplFloatHitTest, e.g. fdo#33509
     if( pReference->HasMirroredGraphics()  )
     {
         if(!pReference->IsRTLEnabled() )
-            pParentWinOutDev->ReMirror(aFloatRect);
+            pReference->ReMirror(aFloatRect);
 
         aFloatRect.SetPos(pReference->ScreenToOutputPixel(aFloatRect.TopLeft()));
         aFloatRect = pReference->ImplOutputToUnmirroredAbsoluteScreenPixel(aFloatRect);
@@ -527,8 +523,6 @@ tools::Rectangle FloatingWindow::ImplConvertToRelPos(vcl::Window* pReference, co
 {
     tools::Rectangle aFloatRect = rRect;
 
-    const OutputDevice *pParentWinOutDev = pReference->GetOutDev();
-
     // compare coordinates in absolute screen coordinates
     // Keep in sync with FloatingWindow::ImplFloatHitTest, e.g. fdo#33509
     if( pReference->HasMirroredGraphics()  )
@@ -537,7 +531,7 @@ tools::Rectangle FloatingWindow::ImplConvertToRelPos(vcl::Window* pReference, co
         aFloatRect.SetPos(pReference->OutputToScreenPixel(aFloatRect.TopLeft()));
 
         if(!pReference->IsRTLEnabled() )
-            pParentWinOutDev->ReMirror(aFloatRect);
+            pReference->ReMirror(aFloatRect);
     }
     else
         aFloatRect.SetPos(pReference->OutputToScreenPixel(pReference->AbsoluteScreenToOutputPixel(rRect.TopLeft())));

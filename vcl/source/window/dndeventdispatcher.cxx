@@ -59,10 +59,7 @@ vcl::Window* DNDEventDispatcher::findTopLevelWindow(Point location)
         pChildWindow = pChildWindow->ImplGetClientWindow();
 
     if( pChildWindow->ImplIsAntiparallel() )
-    {
-        const OutputDevice *pChildWinOutDev = pChildWindow->GetOutDev();
-        pChildWinOutDev->ReMirror( location );
-    }
+        pChildWindow->ReMirror( location );
 
     return pChildWindow;
 }

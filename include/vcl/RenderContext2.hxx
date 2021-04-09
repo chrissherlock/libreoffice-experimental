@@ -369,9 +369,6 @@ public:
     bool IsOutputEnabled() const;
     bool IsDeviceOutputNecessary() const;
 
-    SAL_DLLPRIVATE void ReMirror(Point& rPoint) const;
-    SAL_DLLPRIVATE void ReMirror(tools::Rectangle& rRect) const;
-    SAL_DLLPRIVATE void ReMirror(vcl::Region& rRegion) const;
     virtual bool HasMirroredGraphics() const;
 
     virtual bool IsScreenComp() const;
