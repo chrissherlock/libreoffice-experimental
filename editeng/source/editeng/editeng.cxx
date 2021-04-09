@@ -276,7 +276,7 @@ void EditEngine::Draw( OutputDevice* pOutDev, const tools::Rectangle& rOutRect, 
                 aClipRect.AdjustRight(aPixSz.Width() );
                 aClipRect.AdjustBottom(aPixSz.Width() );
             }
-            pOutDev->IntersectClipRegion( aClipRect );
+            pOutDev->IntersectClipRegion( vcl::Region( aClipRect ) );
         }
     }
 

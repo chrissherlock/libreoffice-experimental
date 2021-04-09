@@ -174,7 +174,7 @@ void SwAnnotationWin::DrawForPage(OutputDevice* pDev, const Point& rPt)
         Size aSize(PixelToLogic(Size(width, height)));
 
         pDev->Push(PushFlags::CLIPREGION);
-        pDev->IntersectClipRegion(tools::Rectangle(aPos, aSize));
+        pDev->IntersectClipRegion(vcl::Region(tools::Rectangle(aPos, aSize)));
         pDev->DrawText(aPos, mxMetadataAuthor->get_label());
         pDev->Pop();
     }
@@ -189,7 +189,7 @@ void SwAnnotationWin::DrawForPage(OutputDevice* pDev, const Point& rPt)
         Size aSize(PixelToLogic(Size(width, height)));
 
         pDev->Push(PushFlags::CLIPREGION);
-        pDev->IntersectClipRegion(tools::Rectangle(aPos, aSize));
+        pDev->IntersectClipRegion(vcl::Region(tools::Rectangle(aPos, aSize)));
         pDev->DrawText(aPos, mxMetadataDate->get_label());
         pDev->Pop();
     }
@@ -202,7 +202,7 @@ void SwAnnotationWin::DrawForPage(OutputDevice* pDev, const Point& rPt)
         Size aSize(PixelToLogic(Size(width, height)));
 
         pDev->Push(PushFlags::CLIPREGION);
-        pDev->IntersectClipRegion(tools::Rectangle(aPos, aSize));
+        pDev->IntersectClipRegion(vcl::Region(tools::Rectangle(aPos, aSize)));
         pDev->DrawText(aPos, mxMetadataResolved->get_label());
         pDev->Pop();
     }

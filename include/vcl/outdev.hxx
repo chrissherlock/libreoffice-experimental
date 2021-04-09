@@ -158,7 +158,6 @@ public:
     void SetClipRegion(vcl::Region const& rRegion) override;
 
     void MoveClipRegion(tools::Long nHorzMove, tools::Long nVertMove) override;
-    void IntersectClipRegion(tools::Rectangle const& rRect) override;
     void IntersectClipRegion(vcl::Region const& rRegion) override;
     ///@}
 

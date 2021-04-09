@@ -194,7 +194,7 @@ void RenderContext2::DrawBitmapWallpaper(tools::Long nX, tools::Long nY, tools::
 
     EnableMapMode(false);
     Push(PushFlags::CLIPREGION);
-    IntersectClipRegion(tools::Rectangle(Point(nX, nY), Size(nWidth, nHeight)));
+    IntersectClipRegion(vcl::Region(tools::Rectangle(Point(nX, nY), Size(nWidth, nHeight))));
 
     switch (eStyle)
     {
@@ -361,7 +361,7 @@ void RenderContext2::DrawGradientWallpaper(tools::Long nX, tools::Long nY, tools
 
     EnableMapMode(false);
     Push(PushFlags::CLIPREGION);
-    IntersectClipRegion(tools::Rectangle(Point(nX, nY), Size(nWidth, nHeight)));
+    IntersectClipRegion(vcl::Region(tools::Rectangle(Point(nX, nY), Size(nWidth, nHeight))));
 
     DrawGradient(aBound, rWallpaper.GetGradient());
 

@@ -1533,7 +1533,7 @@ void ScOutputData::DrawRotatedFrame(vcl::RenderContext& rRenderContext)
     if (bMetaFile)
     {
         rRenderContext.Push();
-        rRenderContext.IntersectClipRegion( aClipRect );
+        rRenderContext.IntersectClipRegion( vcl::Region( aClipRect ) );
     }
     else
         rRenderContext.SetClipRegion( vcl::Region( aClipRect ) );

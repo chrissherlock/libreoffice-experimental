@@ -1798,7 +1798,7 @@ void RenderContext2::ImplDrawText(tools::Rectangle const& rRect, OUString const&
             if (nStyle & DrawTextFlags::Clip)
             {
                 Push(PushFlags::CLIPREGION);
-                IntersectClipRegion(rRect);
+                IntersectClipRegion(vcl::Region(rRect));
             }
 
             // Vertical alignment
@@ -1922,7 +1922,7 @@ void RenderContext2::ImplDrawText(tools::Rectangle const& rRect, OUString const&
         if (nStyle & DrawTextFlags::Clip)
         {
             Push(PushFlags::CLIPREGION);
-            IntersectClipRegion(rRect);
+            IntersectClipRegion(vcl::Region(rRect));
             _rLayout.DrawText(aPos, aStr, 0, aStr.getLength(), pVector, pDisplayText);
             if (bDrawMnemonics && nMnemonicPos != -1)
                 ImplDrawMnemonicLine(nMnemonicX, nMnemonicY, nMnemonicWidth);
@@ -2972,7 +2972,7 @@ void RenderContext2::ImplDrawStrikeoutChar(tools::Long nBaseX, tools::Long nBase
     }
 
     Push(PushFlags::CLIPREGION);
-    IntersectClipRegion(PixelToLogic(aPixelRect));
+    IntersectClipRegion(vcl::Region(PixelToLogic(aPixelRect)));
     if (mbInitClipRegion)
         InitClipRegion();
 

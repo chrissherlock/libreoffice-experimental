@@ -499,7 +499,7 @@ void ImpEditView::DrawSelectionXOR( EditSelection aTmpSel, vcl::Region* pRegion,
         tools::Rectangle aTmpOutArea( aOutArea );
         if ( aTmpOutArea.GetWidth() > pEditEngine->pImpEditEngine->GetPaperSize().Width() )
             aTmpOutArea.SetRight( aTmpOutArea.Left() + pEditEngine->pImpEditEngine->GetPaperSize().Width() );
-        rTarget.IntersectClipRegion( aTmpOutArea );
+        rTarget.IntersectClipRegion( vcl::Region( aTmpOutArea ) );
 
         if (pOutWin && pOutWin->GetCursor())
             pOutWin->GetCursor()->Hide();

@@ -871,7 +871,7 @@ static void lcl_DrawSpecial( const SwTextPaintInfo& rTextPaintInfo, const SwLine
     static SwFont s_aFnt = [&]()
     {
         SwFont tmp( *pOldFnt );
-        tmp.SetFamily( FAMILY_DONTKNOW, tmp.GetActual() );
+        tmp.SetFamily( tools::FAMILY_DONTKNOW, tmp.GetActual() );
         tmp.SetName( numfunc::GetDefBulletFontname(), tmp.GetActual() );
         tmp.SetStyleName(OUString(), tmp.GetActual());
         tmp.SetCharSet( RTL_TEXTENCODING_SYMBOL, tmp.GetActual() );

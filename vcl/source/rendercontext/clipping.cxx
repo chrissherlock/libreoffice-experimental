@@ -107,17 +107,6 @@ void RenderContext2::MoveClipRegion(tools::Long nHorzMove, tools::Long nVertMove
         mpAlphaVDev->MoveClipRegion(nHorzMove, nVertMove);
 }
 
-void RenderContext2::IntersectClipRegion(tools::Rectangle const& rRect)
-{
-    tools::Rectangle aRect = LogicToPixel(rRect);
-    maRegion.Intersect(aRect);
-    mbClipRegion = true;
-    mbInitClipRegion = true;
-
-    if (mpAlphaVDev)
-        mpAlphaVDev->IntersectClipRegion(rRect);
-}
-
 void RenderContext2::IntersectClipRegion(vcl::Region const& rRegion)
 {
     if (!rRegion.IsNull())

@@ -547,7 +547,7 @@ bool SwTextFrame::PaintEmpty( const SwRect &rRect, bool bCheck ) const
                 if( RTL_TEXTENCODING_SYMBOL == pFnt->GetCharSet( SwFontScript::Latin ) &&
                     pFnt->GetName( SwFontScript::Latin ) != numfunc::GetDefBulletFontname() )
                 {
-                    pFnt->SetFamily( FAMILY_DONTKNOW, SwFontScript::Latin );
+                    pFnt->SetFamily( tools::FAMILY_DONTKNOW, SwFontScript::Latin );
                     pFnt->SetName( numfunc::GetDefBulletFontname(), SwFontScript::Latin );
                     pFnt->SetStyleName(OUString(), SwFontScript::Latin);
                     pFnt->SetCharSet( RTL_TEXTENCODING_SYMBOL, SwFontScript::Latin );

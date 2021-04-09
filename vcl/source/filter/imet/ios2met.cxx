@@ -2244,7 +2244,7 @@ void OS2METReader::ReadDsc(sal_uInt16 nDscID)
             aBoundingRect.SetBottom( y2 );
 
             // no output beside this bounding rect
-            pVirDev->IntersectClipRegion( tools::Rectangle( Point(), aBoundingRect.GetSize() ) );
+            pVirDev->IntersectClipRegion(vcl::Region(tools::Rectangle(Point(), aBoundingRect.GetSize())));
 
             break;
         }

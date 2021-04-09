@@ -527,7 +527,7 @@ namespace vclcanvas
                 // twice for XOR
 
                 rOutDev.Push( PushFlags::CLIPREGION );
-                rOutDev.IntersectClipRegion( aPolygonDeviceRectOrig );
+                rOutDev.IntersectClipRegion( vcl::Region( aPolygonDeviceRectOrig ) );
                 doGradientFill( rOutDev,
                                 rValues,
                                 rColors,
@@ -946,7 +946,7 @@ namespace vclcanvas
                                     ::basegfx::fround( 255.0 * textures[0].Alpha ) ) );
                         }
 
-                        rOutDev.IntersectClipRegion( aPolygonDeviceRect );
+                        rOutDev.IntersectClipRegion( vcl::Region( aPolygonDeviceRect ) );
                         textureFill( rOutDev,
                                      *pGrfObj,
                                      aPt,
@@ -960,7 +960,7 @@ namespace vclcanvas
                         if( mp2ndOutDevProvider )
                         {
                             OutputDevice& r2ndOutDev( mp2ndOutDevProvider->getOutDev() );
-                            r2ndOutDev.IntersectClipRegion( aPolygonDeviceRect );
+                            r2ndOutDev.IntersectClipRegion( vcl::Region( aPolygonDeviceRect ) );
                             textureFill( r2ndOutDev,
                                          *pGrfObj,
                                          aPt,

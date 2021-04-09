@@ -90,7 +90,7 @@ void RenderContext2::DrawGradient(tools::PolyPolygon const& rPolyPoly, Gradient 
 
                 // secure clip region
                 Push(PushFlags::CLIPREGION);
-                IntersectClipRegion(aBoundRect);
+                IntersectClipRegion(vcl::Region(aBoundRect));
 
                 if (mbInitClipRegion)
                     InitClipRegion();

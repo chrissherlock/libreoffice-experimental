@@ -163,7 +163,7 @@ void ImageControl::Draw( OutputDevice* pDev, const Point& rPos, DrawFlags )
     {
         ImplDrawFrame( pDev, aRect );
     }
-    pDev->IntersectClipRegion( aRect );
+    pDev->IntersectClipRegion(vcl::Region(aRect));
     ImplDraw( *pDev, aRect.TopLeft(), aRect.GetSize() );
 
     pDev->Pop();

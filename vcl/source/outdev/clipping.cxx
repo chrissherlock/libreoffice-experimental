@@ -52,14 +52,6 @@ void OutputDevice::MoveClipRegion(tools::Long nHorzMove, tools::Long nVertMove)
     RenderContext2::MoveClipRegion(nHorzMove, nVertMove);
 }
 
-void OutputDevice::IntersectClipRegion(tools::Rectangle const& rRect)
-{
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaISectRectClipRegionAction(rRect));
-
-    RenderContext2::IntersectClipRegion(rRect);
-}
-
 void OutputDevice::IntersectClipRegion(vcl::Region const& rRegion)
 {
     if (!rRegion.IsNull() && mpMetaFile)

@@ -1685,7 +1685,7 @@ static void lcl_DrawGraphic( const SvxBrushItem& rBrush, vcl::RenderContext *pOu
     if ( bNotInside )
     {
         pOut->Push( PushFlags::CLIPREGION );
-        pOut->IntersectClipRegion( rOut.SVRect() );
+        pOut->IntersectClipRegion( vcl::Region( rOut.SVRect() ) );
     }
 
     GraphicObject *pGrf = const_cast<GraphicObject*>(rBrush.GetGraphicObject());
@@ -1927,7 +1927,7 @@ void DrawGraphic(
             aGrf.Pos() = rOrg.Pos();
             // setup clipping at output device
             pOutDev->Push( PushFlags::CLIPREGION );
-            pOutDev->IntersectClipRegion( rOut.SVRect() );
+            pOutDev->IntersectClipRegion( vcl::Region( rOut.SVRect() ) );
             // use new method <GraphicObject::DrawTiled(::)>
             {
                 // calculate paint offset
@@ -7125,7 +7125,7 @@ const vcl::Font& SwPageFrame::GetEmptyPageFont()
         tmp.SetWeight( WEIGHT_BOLD );
         tmp.SetStyleName(OUString());
         tmp.SetFamilyName("Helvetica");
-        tmp.SetFamily( FAMILY_SWISS );
+        tmp.SetFamily( tools::FAMILY_SWISS );
         tmp.SetTransparent( true );
         tmp.SetColor( COL_GRAY );
         return tmp;

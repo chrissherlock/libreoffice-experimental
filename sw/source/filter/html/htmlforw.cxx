@@ -1085,12 +1085,12 @@ Writer& OutHTML_DrawFrameFormatAsControl( Writer& rWrt,
                                         GetDefaultFontFlags::OnlyOne ) );
                     if( !bEdit || *aFName != aFixedFont.GetFamilyName() )
                     {
-                        FontFamily eFamily = FAMILY_DONTKNOW;
+                        tools::FontFamily eFamily = tools::FAMILY_DONTKNOW;
                         if( xPropSetInfo->hasPropertyByName( "FontFamily" ) )
                         {
                             auto aTmp2 = xPropSet->getPropertyValue( "FontFamily" );
                             if( auto n = o3tl::tryAccess<sal_Int16>(aTmp2) )
-                                eFamily = static_cast<FontFamily>(*n);
+                                eFamily = static_cast<tools::FontFamily>(*n);
                         }
                         SvxFontItem aItem(eFamily, *aFName, OUString(), PITCH_DONTKNOW, RTL_TEXTENCODING_DONTKNOW, RES_CHRATR_FONT);
                         aItemSet.Put( aItem );

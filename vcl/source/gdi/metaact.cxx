@@ -2292,7 +2292,7 @@ MetaISectRectClipRegionAction::MetaISectRectClipRegionAction( const tools::Recta
 
 void MetaISectRectClipRegionAction::Execute( OutputDevice* pOut )
 {
-    pOut->IntersectClipRegion( maRect );
+    pOut->IntersectClipRegion(vcl::Region(maRect));
 }
 
 rtl::Reference<MetaAction> MetaISectRectClipRegionAction::Clone()

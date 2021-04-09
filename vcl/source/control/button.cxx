@@ -777,7 +777,7 @@ void PushButton::ImplDrawPushButtonContent(OutputDevice *pDev, DrawFlags nDrawFl
         return;
 
     pDev->Push(PushFlags::CLIPREGION);
-    pDev->IntersectClipRegion(aInRect);
+    pDev->IntersectClipRegion(vcl::Region(aInRect));
 
     if (nDrawFlags & DrawFlags::Mono)
         aColor = COL_BLACK;
@@ -2049,7 +2049,7 @@ void RadioButton::ImplDraw( OutputDevice* pDev, DrawFlags nDrawFlags,
     OUString                aText( GetText() );
 
     pDev->Push( PushFlags::CLIPREGION );
-    pDev->IntersectClipRegion( tools::Rectangle( rPos, rSize ) );
+    pDev->IntersectClipRegion(vcl::Region(tools::Rectangle(rPos, rSize)));
 
     // no image radio button
     if ( !maImage )
@@ -3037,7 +3037,7 @@ void CheckBox::ImplDraw( OutputDevice* pDev, DrawFlags nDrawFlags,
     OUString                aText( GetText() );
 
     pDev->Push( PushFlags::CLIPREGION | PushFlags::LINECOLOR );
-    pDev->IntersectClipRegion( tools::Rectangle( rPos, rSize ) );
+    pDev->IntersectClipRegion(vcl::Region(tools::Rectangle(rPos, rSize)));
 
     if (!aText.isEmpty() || HasImage())
     {

@@ -363,7 +363,6 @@ public:
     virtual vcl::Region GetActiveClipRegion() const;
     virtual void SetClipRegion();
     virtual void MoveClipRegion(tools::Long nHorzMove, tools::Long nVertMove);
-    virtual void IntersectClipRegion(const tools::Rectangle& rRect);
 
     void EnableOutput(bool bEnable = true);
     bool IsOutputEnabled() const;

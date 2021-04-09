@@ -866,7 +866,7 @@ void MenuFloatingWindow::RenderHighlightItem(vcl::RenderContext& rRenderContext,
                 {
                     Size aPxSize(GetSize());
                     rRenderContext.Push(PushFlags::CLIPREGION);
-                    rRenderContext.IntersectClipRegion(tools::Rectangle(Point(nX, nY), Size(aSz.Width(), pData->aSz.Height())));
+                    rRenderContext.IntersectClipRegion(vcl::Region(tools::Rectangle(Point(nX, nY), Size(aSz.Width(), pData->aSz.Height()))));
                     tools::Rectangle aCtrlRect(Point(nX, 0), Size(aPxSize.Width()-nX, aPxSize.Height()));
                     MenupopupValue aVal(pMenu->nTextPos-GUTTERBORDER, aItemRect);
                     rRenderContext.DrawNativeControl(ControlType::MenuPopup, ControlPart::Entire,

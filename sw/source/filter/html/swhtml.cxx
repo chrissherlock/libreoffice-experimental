@@ -3793,7 +3793,7 @@ void SwHTMLParser::NewFontAttr( HtmlTokenId nToken )
 
     OUString aFontName;
     const OUString aStyleName;
-    FontFamily eFamily = FAMILY_DONTKNOW;   // family and pitch,
+    tools::FontFamily eFamily = tools::FAMILY_DONTKNOW;   // family and pitch,
     FontPitch ePitch = PITCH_DONTKNOW;      // if not found
     rtl_TextEncoding eEnc = osl_getThreadTextEncoding();
 

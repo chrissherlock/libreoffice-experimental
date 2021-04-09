@@ -1112,11 +1112,11 @@ void SwHTMLWriter::PrepareFontList( const SvxFontItem& rFontItem,
     const char *pStr = nullptr;
     switch( rFontItem.GetFamily() )
     {
-    case FAMILY_ROMAN:      pStr = sCSS1_PV_serif;      break;
-    case FAMILY_SWISS:      pStr = sCSS1_PV_sans_serif; break;
-    case FAMILY_SCRIPT:     pStr = sCSS1_PV_cursive;    break;
-    case FAMILY_DECORATIVE: pStr = sCSS1_PV_fantasy;    break;
-    case FAMILY_MODERN:     pStr = sCSS1_PV_monospace;  break;
+    case tools::FAMILY_ROMAN:      pStr = sCSS1_PV_serif;      break;
+    case tools::FAMILY_SWISS:      pStr = sCSS1_PV_sans_serif; break;
+    case tools::FAMILY_SCRIPT:     pStr = sCSS1_PV_cursive;    break;
+    case tools::FAMILY_DECORATIVE: pStr = sCSS1_PV_fantasy;    break;
+    case tools::FAMILY_MODERN:     pStr = sCSS1_PV_monospace;  break;
     default:
         ;
     }

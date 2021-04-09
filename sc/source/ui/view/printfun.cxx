@@ -1121,7 +1121,7 @@ static void lcl_DrawGraphic( const Graphic &rGraphic, vcl::RenderContext *pOut,
     if ( bNotInside )
     {
         pOut->Push();
-        pOut->IntersectClipRegion( rOut );
+        pOut->IntersectClipRegion( vcl::Region( rOut ) );
     }
 
     rGraphic.Draw( pOut, rGrf.TopLeft(), rGrf.GetSize() );
