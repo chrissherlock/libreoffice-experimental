@@ -25,6 +25,7 @@
 #include <tools/fontenum.hxx>
 #include <i18nlangtag/lang.h>
 
+#include <vcl/ClippingInterface.hxx>
 #include <vcl/RasterOp.hxx>
 #include <vcl/flags/ComplexTextLayoutFlags.hxx>
 #include <vcl/flags/DrawGridFlags.hxx>
@@ -74,7 +75,7 @@ class PolyPolygon;
 class Rectangle;
 }
 
-class DrawingInterface
+class DrawingInterface : public ClippingInterface
 {
 public:
     virtual ~DrawingInterface() {}
@@ -91,8 +92,6 @@ public:
     virtual void SetTextAlign(TextAlign eAlign) = 0;
     virtual void SetLayoutMode(ComplexTextLayoutFlags nTextLayoutMode) = 0;
     virtual void SetDigitLanguage(LanguageType) = 0;
-    virtual void SetClipRegion(vcl::Region const& rRegion) = 0;
-    virtual void IntersectClipRegion(vcl::Region const& rRegion) = 0;
     virtual void Push(PushFlags nFlags = PushFlags::ALL) = 0;
     virtual void Pop() = 0;
 

@@ -156,10 +156,12 @@ public:
     void SetTextAlign(TextAlign eAlign) override;
     void SetLayoutMode(ComplexTextLayoutFlags nTextLayoutMode) override;
     void SetDigitLanguage(LanguageType) override;
-    void SetClipRegion(vcl::Region const& rRegion) override;
-    void IntersectClipRegion(vcl::Region const& rRegion) override;
     void Push(PushFlags nFlags = PushFlags::ALL) override;
     void Pop() override;
+
+    void SetClipRegion(vcl::Region const& rRegion) override;
+    void IntersectClipRegion(vcl::Region const& rRegion) override;
+    void MoveClipRegion(tools::Long nHorzMove, tools::Long nVertMove) override;
 
     void DrawPixel(Point const& rPt) override;
     void DrawPixel(Point const& rPt, Color const& rColor) override;
@@ -362,7 +364,6 @@ public:
     vcl::Region GetClipRegion() const;
     virtual vcl::Region GetActiveClipRegion() const;
     virtual void SetClipRegion();
-    virtual void MoveClipRegion(tools::Long nHorzMove, tools::Long nVertMove);
 
     void EnableOutput(bool bEnable = true);
     bool IsOutputEnabled() const;
