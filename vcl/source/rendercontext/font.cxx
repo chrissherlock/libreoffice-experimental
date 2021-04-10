@@ -167,6 +167,29 @@ FontSize RenderContext2::GetFontSize(vcl::Font const& rFont) const
     return FontSize(aSize.Width(), fExactHeight);
 }
 
+void RenderContext2::InitFontInstance()
+{
+    // select font when it has not been initialized yet
+    if (!mpFontInstance->mbInit && InitFont())
+    {
+        // get metric data from device layers
+        mpFontInstance->mbInit = true;
+
+        mpFontInstance->mxFontMetric->SetOrientation(
+            mpFontInstance->GetFontSelectPattern().mnOrientation);
+        mpGraphics->GetFontMetric(mpFontInstance->mxFontMetric, 0);
+
+        mpFontInstance->mxFontMetric->ImplInitTextLineSize(this);
+        mpFontInstance->mxFontMetric->ImplInitAboveTextLineSize();
+        mpFontInstance->mxFontMetric->ImplInitFlags(this);
+
+        mpFontInstance->mnLineHeight = mpFontInstance->mxFontMetric->GetAscent()
+                                       + mpFontInstance->mxFontMetric->GetDescent();
+
+        SetFontOrientation(mpFontInstance.get());
+    }
+}
+
 bool RenderContext2::ImplNewFont()
 {
     DBG_TESTSOLARMUTEX();
@@ -217,25 +240,7 @@ bool RenderContext2::ImplNewFont()
     if (bNewFontInstance)
         mbInitFont = true;
 
-    // select font when it has not been initialized yet
-    if (!pFontInstance->mbInit && InitFont())
-    {
-        // get metric data from device layers
-        pFontInstance->mbInit = true;
-
-        pFontInstance->mxFontMetric->SetOrientation(
-            mpFontInstance->GetFontSelectPattern().mnOrientation);
-        mpGraphics->GetFontMetric(pFontInstance->mxFontMetric, 0);
-
-        pFontInstance->mxFontMetric->ImplInitTextLineSize(this);
-        pFontInstance->mxFontMetric->ImplInitAboveTextLineSize();
-        pFontInstance->mxFontMetric->ImplInitFlags(this);
-
-        pFontInstance->mnLineHeight
-            = pFontInstance->mxFontMetric->GetAscent() + pFontInstance->mxFontMetric->GetDescent();
-
-        SetFontOrientation(pFontInstance);
-    }
+    InitFontInstance();
 
     // calculate EmphasisArea
     mnEmphasisAscent = 0;
