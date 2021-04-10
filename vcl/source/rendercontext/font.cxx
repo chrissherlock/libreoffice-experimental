@@ -185,16 +185,6 @@ bool RenderContext2::InitNewFont()
 
     InitPhysicalFontFamilyCollection();
 
-    // decide if antialiasing is appropriate
-    bool bNonAntialiased(GetAntialiasing() & AntialiasingFlags::DisableText);
-    if (!utl::ConfigManager::IsFuzzing())
-    {
-        const StyleSettings& rStyleSettings = GetSettings().GetStyleSettings();
-        bNonAntialiased |= bool(rStyleSettings.GetDisplayOptions() & DisplayOptions::AADisable);
-        bNonAntialiased |= (int(rStyleSettings.GetAntialiasingMinPixelHeight())
-                            > maFont.GetFontSize().Height());
-    }
-
     if (!InitFontInstance())
         return false;
 
@@ -212,15 +202,29 @@ bool RenderContext2::InitNewFont()
     return FixOLEScaleFactors();
 }
 
+bool RenderContext2::IsFontUnantialiased() const
+{
+    bool bNonAntialiased(GetAntialiasing() & AntialiasingFlags::DisableText);
+
+    if (!utl::ConfigManager::IsFuzzing())
+    {
+        const StyleSettings& rStyleSettings = GetSettings().GetStyleSettings();
+        bNonAntialiased |= bool(rStyleSettings.GetDisplayOptions() & DisplayOptions::AADisable);
+        bNonAntialiased |= (int(rStyleSettings.GetAntialiasingMinPixelHeight())
+                            > maFont.GetFontSize().Height());
+    }
+
+    return bNonAntialiased;
+}
+
 bool RenderContext2::InitFontInstance()
 {
     FontSize aSize = GetFontSize(maFont);
-    bool bNonAntialiased(GetAntialiasing() & AntialiasingFlags::DisableText);
 
     // get font entry
     rtl::Reference<LogicalFontInstance> pOldFontInstance = mpFontInstance;
-    mpFontInstance
-        = mxFontCache->GetFontInstance(mxFontCollection.get(), maFont, aSize, bNonAntialiased);
+    mpFontInstance = mxFontCache->GetFontInstance(mxFontCollection.get(), maFont, aSize,
+                                                  IsFontUnantialiased());
     const bool bNewFontInstance = pOldFontInstance.get() != mpFontInstance.get();
     pOldFontInstance.clear();
 

@@ -1051,6 +1051,7 @@ protected:
 
     SAL_DLLPRIVATE bool is_double_buffered_window() const;
 
+    SAL_DLLPRIVATE bool IsFontUnantialiased() const;
     SAL_DLLPRIVATE bool InitNewFont();
     SAL_DLLPRIVATE bool InitFontInstance();
 
