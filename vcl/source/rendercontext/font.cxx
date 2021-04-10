@@ -167,6 +167,51 @@ FontSize RenderContext2::GetFontSize(vcl::Font const& rFont) const
     return FontSize(aSize.Width(), fExactHeight);
 }
 
+bool RenderContext2::InitNewFont()
+{
+    DBG_TESTSOLARMUTEX();
+
+    if (!mbNewFont)
+        return true;
+
+    // we need a graphics
+    if (!mpGraphics && !AcquireGraphics())
+    {
+        SAL_WARN("vcl.gdi", "RenderContext2::InitNewFont(): no Graphics, no Font");
+        return false;
+    }
+
+    assert(mpGraphics);
+
+    InitPhysicalFontFamilyCollection();
+
+    // decide if antialiasing is appropriate
+    bool bNonAntialiased(GetAntialiasing() & AntialiasingFlags::DisableText);
+    if (!utl::ConfigManager::IsFuzzing())
+    {
+        const StyleSettings& rStyleSettings = GetSettings().GetStyleSettings();
+        bNonAntialiased |= bool(rStyleSettings.GetDisplayOptions() & DisplayOptions::AADisable);
+        bNonAntialiased |= (int(rStyleSettings.GetAntialiasingMinPixelHeight())
+                            > maFont.GetFontSize().Height());
+    }
+
+    if (!InitFontInstance())
+        return false;
+
+    InitTextOffsets();
+
+    mbTextLines = ((maFont.GetUnderline() != LINESTYLE_NONE)
+                   && (maFont.GetUnderline() != LINESTYLE_DONTKNOW))
+                  || ((maFont.GetOverline() != LINESTYLE_NONE)
+                      && (maFont.GetOverline() != LINESTYLE_DONTKNOW))
+                  || ((maFont.GetStrikeout() != STRIKEOUT_NONE)
+                      && (maFont.GetStrikeout() != STRIKEOUT_DONTKNOW));
+    mbTextSpecial
+        = maFont.IsShadow() || maFont.IsOutline() || (maFont.GetRelief() != FontRelief::NONE);
+
+    return FixOLEScaleFactors();
+}
+
 bool RenderContext2::InitFontInstance()
 {
     FontSize aSize = GetFontSize(maFont);
@@ -217,51 +262,6 @@ bool RenderContext2::InitFontInstance()
         mpFontInstance->SetEmphasisMarkStyle(ImplGetEmphasisMarkStyle(maFont));
 
     return true;
-}
-
-bool RenderContext2::InitNewFont()
-{
-    DBG_TESTSOLARMUTEX();
-
-    if (!mbNewFont)
-        return true;
-
-    // we need a graphics
-    if (!mpGraphics && !AcquireGraphics())
-    {
-        SAL_WARN("vcl.gdi", "RenderContext2::InitNewFont(): no Graphics, no Font");
-        return false;
-    }
-
-    assert(mpGraphics);
-
-    InitPhysicalFontFamilyCollection();
-
-    // decide if antialiasing is appropriate
-    bool bNonAntialiased(GetAntialiasing() & AntialiasingFlags::DisableText);
-    if (!utl::ConfigManager::IsFuzzing())
-    {
-        const StyleSettings& rStyleSettings = GetSettings().GetStyleSettings();
-        bNonAntialiased |= bool(rStyleSettings.GetDisplayOptions() & DisplayOptions::AADisable);
-        bNonAntialiased |= (int(rStyleSettings.GetAntialiasingMinPixelHeight())
-                            > maFont.GetFontSize().Height());
-    }
-
-    if (!InitFontInstance())
-        return false;
-
-    InitTextOffsets();
-
-    mbTextLines = ((maFont.GetUnderline() != LINESTYLE_NONE)
-                   && (maFont.GetUnderline() != LINESTYLE_DONTKNOW))
-                  || ((maFont.GetOverline() != LINESTYLE_NONE)
-                      && (maFont.GetOverline() != LINESTYLE_DONTKNOW))
-                  || ((maFont.GetStrikeout() != STRIKEOUT_NONE)
-                      && (maFont.GetStrikeout() != STRIKEOUT_DONTKNOW));
-    mbTextSpecial
-        = maFont.IsShadow() || maFont.IsOutline() || (maFont.GetRelief() != FontRelief::NONE);
-
-    return FixOLEScaleFactors();
 }
 
 void RenderContext2::InitTextOffsets()
