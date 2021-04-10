@@ -1369,7 +1369,7 @@ void PDFWriterImpl::dispose()
     VirtualDevice::dispose();
 }
 
-bool PDFWriterImpl::ImplNewFont()
+bool PDFWriterImpl::InitNewFont()
 {
     const ImplSVData* pSVData = ImplGetSVData();
 
@@ -1379,7 +1379,7 @@ bool PDFWriterImpl::ImplNewFont()
         const_cast<vcl::PDFWriterImpl&>(*this).ImplUpdateFontData();
     }
 
-    return OutputDevice::ImplNewFont();
+    return RenderContext2::InitNewFont();
 }
 
 void PDFWriterImpl::setupDocInfo()

@@ -103,7 +103,7 @@ bool RenderContext2::InitFont()
 {
     DBG_TESTSOLARMUTEX();
 
-    if (!ImplNewFont())
+    if (!InitNewFont())
         return false;
 
     if (!mpFontInstance)
@@ -183,7 +183,7 @@ bool RenderContext2::InitFontInstance()
 
     if (!pFontInstance)
     {
-        SAL_WARN("vcl.gdi", "RenderContext2::ImplNewFont(): no LogicalFontInstance, no Font");
+        SAL_WARN("vcl.gdi", "RenderContext2::InitNewFont(): no LogicalFontInstance, no Font");
         return false;
     }
 
@@ -219,7 +219,7 @@ bool RenderContext2::InitFontInstance()
     return true;
 }
 
-bool RenderContext2::ImplNewFont()
+bool RenderContext2::InitNewFont()
 {
     DBG_TESTSOLARMUTEX();
 
@@ -229,7 +229,7 @@ bool RenderContext2::ImplNewFont()
     // we need a graphics
     if (!mpGraphics && !AcquireGraphics())
     {
-        SAL_WARN("vcl.gdi", "RenderContext2::ImplNewFont(): no Graphics, no Font");
+        SAL_WARN("vcl.gdi", "RenderContext2::InitNewFont(): no Graphics, no Font");
         return false;
     }
 
@@ -318,7 +318,7 @@ bool RenderContext2::FixOLEScaleFactors()
             const_cast<vcl::Font&>(maFont).SetFontSize(Size(nNewWidth, aSize.GetHeight()));
             EnableMapMode(false);
             mbNewFont = true;
-            bRet = ImplNewFont(); // recurse once using stretched width
+            bRet = InitNewFont(); // recurse once using stretched width
             EnableMapMode();
             const_cast<vcl::Font&>(maFont).SetFontSize(aOrigSize);
         }
@@ -581,7 +581,7 @@ std::unique_ptr<SalLayout> RenderContext2::getFallbackLayout(LogicalFontInstance
 bool RenderContext2::GetFontFeatures(std::vector<vcl::font::Feature>& rFontFeatures) const
 {
     RenderContext2* pRC = const_cast<RenderContext2*>(this);
-    if (!pRC->ImplNewFont())
+    if (!pRC->InitNewFont())
         return false;
 
     LogicalFontInstance* pFontInstance = mpFontInstance.get();
@@ -610,7 +610,7 @@ FontMetric RenderContext2::GetFontMetric() const
     FontMetric aMetric;
 
     RenderContext2* pRC = const_cast<RenderContext2*>(this);
-    if (!pRC->ImplNewFont())
+    if (!pRC->InitNewFont())
         return aMetric;
 
     LogicalFontInstance* pFontInstance = mpFontInstance.get();
@@ -1278,7 +1278,7 @@ void RenderContext2::ImplDrawEmphasisMarks(SalLayout& rSalLayout)
 tools::Long RenderContext2::GetMinKashida() const
 {
     RenderContext2* pRC = const_cast<RenderContext2*>(this);
-    if (!pRC->ImplNewFont())
+    if (!pRC->InitNewFont())
         return 0;
 
     return ImplDevicePixelToLogicWidth(mpFontInstance->mxFontMetric->GetMinKashida());

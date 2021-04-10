@@ -676,7 +676,7 @@ public:
     static void convertLineInfoToExtLineInfo(const LineInfo& rIn, PDFWriter::ExtLineInfo& rOut);
 
 protected:
-    SAL_DLLPRIVATE bool ImplNewFont();
+    SAL_DLLPRIVATE bool InitNewFont();
     void ImplClearFontData(bool bNewFontLists) override;
     void ImplRefreshFontData(bool bNewFontLists) override;
     vcl::Region ClipToDeviceBounds(vcl::Region aRegion) const override;
