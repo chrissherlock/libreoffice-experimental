@@ -248,10 +248,7 @@ bool RenderContext2::ImplNewFont()
     if (maFont.GetEmphasisMark() & FontEmphasisMark::Style)
     {
         FontEmphasisMark nEmphasisMark = ImplGetEmphasisMarkStyle(maFont);
-        tools::Long nEmphasisHeight = (pFontInstance->mnLineHeight * 250) / 1000;
-
-        if (nEmphasisHeight < 1)
-            nEmphasisHeight = 1;
+        pFontInstance->GetEmphasisHeight();
 
         if (nEmphasisMark & FontEmphasisMark::PosBelow)
             mnEmphasisDescent = nEmphasisHeight;

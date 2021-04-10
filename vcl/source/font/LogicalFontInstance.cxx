@@ -215,4 +215,14 @@ void LogicalFontInstance::RecodeString(OUString& rString)
         mpConversion->RecodeString(rString, 0, rString.getLength());
 }
 
+tools::Long LogicalFontInstance::GetEmphasisHeight() const
+{
+    tools::Long nEmphasisHeight = (mnLineHeight * 250) / 1000;
+
+    if (nEmphasisHeight < 1)
+        nEmphasisHeight = 1;
+
+    return nEmphasisHeight;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

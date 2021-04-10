@@ -69,8 +69,9 @@ public: // TODO: make data members private
     void SetAverageWidthFactor(double nFactor);
     double GetAverageWidthFactor() const;
     const FontSelectPattern& GetFontSelectPattern() const;
+    tools::Long GetEmphasisHeight() const
 
-    const PhysicalFontFace* GetFontFace() const;
+        const PhysicalFontFace* GetFontFace() const;
     PhysicalFontFace* GetFontFace();
     const FontCache* GetFontCache() const;
 
