@@ -64,8 +64,6 @@ RenderContext2::RenderContext2()
     , mbOutputClipped(false)
     , mbEnableRTL(false) // mirroring must be explicitly allowed (typically for windows only)
     , mbDevOutput(false)
-    , mbTextLines(false)
-    , mbTextSpecial(false)
     , mpExtOutDevData(nullptr)
     , mbOutput(true)
 {

@@ -1211,8 +1211,10 @@ bool RenderContext2::ImplDrawRotateText(SalLayout& rSalLayout)
     return true;
 }
 
-void RenderContext2::ImplDrawTextDirect(SalLayout& rSalLayout, bool bTextLines)
+void RenderContext2::ImplDrawTextDirect(SalLayout& rSalLayout)
 {
+    bool bTextLines = HasTextLines();
+
     if (mpFontInstance->mnOwnOrientation)
         if (ImplDrawRotateText(rSalLayout))
             return;
@@ -1301,14 +1303,14 @@ void RenderContext2::ImplDrawSpecialText(SalLayout& rSalLayout)
         if (eRelief == FontRelief::Engraved)
             nOff = -nOff;
         rSalLayout.DrawOffset() += Point(nOff, nOff);
-        ImplDrawTextDirect(rSalLayout, mbTextLines);
+        ImplDrawTextDirect(rSalLayout);
         rSalLayout.DrawOffset() -= Point(nOff, nOff);
 
         SetTextLineColor(aTextLineColor);
         SetOverlineColor(aOverlineColor);
         SetTextColor(aTextColor);
         ImplInitTextColor();
-        ImplDrawTextDirect(rSalLayout, mbTextLines);
+        ImplDrawTextDirect(rSalLayout);
 
         SetTextLineColor(aOldTextLineColor);
         SetOverlineColor(aOldOverlineColor);
@@ -1334,7 +1336,7 @@ void RenderContext2::ImplDrawSpecialText(SalLayout& rSalLayout)
                 SetTextColor(COL_BLACK);
             ImplInitTextColor();
             rSalLayout.DrawBase() += Point(nOff, nOff);
-            ImplDrawTextDirect(rSalLayout, mbTextLines);
+            ImplDrawTextDirect(rSalLayout);
             rSalLayout.DrawBase() -= Point(nOff, nOff);
             SetTextColor(aOldColor);
             SetTextLineColor(aOldTextLineColor);
@@ -1342,34 +1344,34 @@ void RenderContext2::ImplDrawSpecialText(SalLayout& rSalLayout)
             ImplInitTextColor();
 
             if (!maFont.IsOutline())
-                ImplDrawTextDirect(rSalLayout, mbTextLines);
+                ImplDrawTextDirect(rSalLayout);
         }
 
         if (maFont.IsOutline())
         {
             rSalLayout.DrawBase() = aOrigPos + Point(-1, -1);
-            ImplDrawTextDirect(rSalLayout, mbTextLines);
+            ImplDrawTextDirect(rSalLayout);
             rSalLayout.DrawBase() = aOrigPos + Point(+1, +1);
-            ImplDrawTextDirect(rSalLayout, mbTextLines);
+            ImplDrawTextDirect(rSalLayout);
             rSalLayout.DrawBase() = aOrigPos + Point(-1, +0);
-            ImplDrawTextDirect(rSalLayout, mbTextLines);
+            ImplDrawTextDirect(rSalLayout);
             rSalLayout.DrawBase() = aOrigPos + Point(-1, +1);
-            ImplDrawTextDirect(rSalLayout, mbTextLines);
+            ImplDrawTextDirect(rSalLayout);
             rSalLayout.DrawBase() = aOrigPos + Point(+0, +1);
-            ImplDrawTextDirect(rSalLayout, mbTextLines);
+            ImplDrawTextDirect(rSalLayout);
             rSalLayout.DrawBase() = aOrigPos + Point(+0, -1);
-            ImplDrawTextDirect(rSalLayout, mbTextLines);
+            ImplDrawTextDirect(rSalLayout);
             rSalLayout.DrawBase() = aOrigPos + Point(+1, -1);
-            ImplDrawTextDirect(rSalLayout, mbTextLines);
+            ImplDrawTextDirect(rSalLayout);
             rSalLayout.DrawBase() = aOrigPos + Point(+1, +0);
-            ImplDrawTextDirect(rSalLayout, mbTextLines);
+            ImplDrawTextDirect(rSalLayout);
             rSalLayout.DrawBase() = aOrigPos;
 
             SetTextColor(COL_WHITE);
             SetTextLineColor(COL_WHITE);
             SetOverlineColor(COL_WHITE);
             ImplInitTextColor();
-            ImplDrawTextDirect(rSalLayout, mbTextLines);
+            ImplDrawTextDirect(rSalLayout);
             SetTextColor(aOldColor);
             SetTextLineColor(aOldTextLineColor);
             SetOverlineColor(aOldOverlineColor);
@@ -1382,8 +1384,10 @@ void RenderContext2::ImplDrawText(SalLayout& rSalLayout)
 {
     if (mbInitClipRegion)
         InitClipRegion();
+
     if (mbOutputClipped)
         return;
+
     if (mbInitTextColor)
         ImplInitTextColor();
 
@@ -1392,10 +1396,10 @@ void RenderContext2::ImplDrawText(SalLayout& rSalLayout)
     if (IsTextFillColor())
         ImplDrawTextBackground(rSalLayout);
 
-    if (mbTextSpecial)
+    if (IsTextSpecial())
         ImplDrawSpecialText(rSalLayout);
     else
-        ImplDrawTextDirect(rSalLayout, mbTextLines);
+        ImplDrawTextDirect(rSalLayout);
 }
 
 void RenderContext2::ImplDrawTextLines(SalLayout& rSalLayout, FontStrikeout eStrikeout,

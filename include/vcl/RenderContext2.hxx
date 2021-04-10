@@ -1128,8 +1128,6 @@ protected:
     mutable bool mbOutputClipped : 1;
     mutable bool mbEnableRTL : 1;
     mutable bool mbDevOutput : 1;
-    mutable bool mbTextLines : 1;
-    mutable bool mbTextSpecial : 1;
 
 private:
     SAL_DLLPRIVATE bool InitFont();
@@ -1139,6 +1137,9 @@ private:
 
     SAL_DLLPRIVATE void InitTextOffsets();
     SAL_DLLPRIVATE bool FixOLEScaleFactors();
+
+    bool HasTextLines() const;
+    bool IsTextSpecial() const;
 
     /** Determine if native widgets can be enabled
      */
@@ -1253,7 +1254,7 @@ private:
 
     // text functions
     void ImplDrawText(SalLayout&);
-    SAL_DLLPRIVATE void ImplDrawTextDirect(SalLayout&, bool bTextLines);
+    SAL_DLLPRIVATE void ImplDrawTextDirect(SalLayout&);
     SAL_DLLPRIVATE void ImplDrawTextRect(tools::Long nBaseX, tools::Long nBaseY, tools::Long nX,
                                          tools::Long nY, tools::Long nWidth, tools::Long nHeight);
     SAL_DLLPRIVATE void ImplDrawSpecialText(SalLayout&);

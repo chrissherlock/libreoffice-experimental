@@ -190,16 +190,22 @@ bool RenderContext2::InitNewFont()
 
     InitTextOffsets();
 
-    mbTextLines = ((maFont.GetUnderline() != LINESTYLE_NONE)
-                   && (maFont.GetUnderline() != LINESTYLE_DONTKNOW))
-                  || ((maFont.GetOverline() != LINESTYLE_NONE)
-                      && (maFont.GetOverline() != LINESTYLE_DONTKNOW))
-                  || ((maFont.GetStrikeout() != STRIKEOUT_NONE)
-                      && (maFont.GetStrikeout() != STRIKEOUT_DONTKNOW));
-    mbTextSpecial
-        = maFont.IsShadow() || maFont.IsOutline() || (maFont.GetRelief() != FontRelief::NONE);
-
     return FixOLEScaleFactors();
+}
+
+bool RenderContext2::HasTextLines() const
+{
+    return ((maFont.GetUnderline() != LINESTYLE_NONE)
+            && (maFont.GetUnderline() != LINESTYLE_DONTKNOW))
+           || ((maFont.GetOverline() != LINESTYLE_NONE)
+               && (maFont.GetOverline() != LINESTYLE_DONTKNOW))
+           || ((maFont.GetStrikeout() != STRIKEOUT_NONE)
+               && (maFont.GetStrikeout() != STRIKEOUT_DONTKNOW));
+}
+
+bool RenderContext2::IsTextSpecial() const
+{
+    return maFont.IsShadow() || maFont.IsOutline() || (maFont.GetRelief() != FontRelief::NONE);
 }
 
 bool RenderContext2::IsFontUnantialiased() const
