@@ -174,17 +174,6 @@ bool RenderContext2::InitNewFont()
     if (!mbNewFont)
         return true;
 
-    // we need a graphics
-    if (!mpGraphics && !AcquireGraphics())
-    {
-        SAL_WARN("vcl.gdi", "RenderContext2::InitNewFont(): no Graphics, no Font");
-        return false;
-    }
-
-    assert(mpGraphics);
-
-    InitPhysicalFontFamilyCollection();
-
     if (!InitFontInstance())
         return false;
 
@@ -208,30 +197,6 @@ bool RenderContext2::IsTextSpecial() const
     return maFont.IsShadow() || maFont.IsOutline() || (maFont.GetRelief() != FontRelief::NONE);
 }
 
-void RenderContext2::InitPhysicalFontFamilyCollection() const
-{
-    if (mxFontCollection->Count())
-        return;
-
-    if (!(mpGraphics || AcquireGraphics()))
-        return;
-
-    assert(mpGraphics);
-
-    SAL_INFO("vcl.gdi", "RenderContext2::InitPhysicalFontFamilyCollection()");
-    mpGraphics->GetDevFontList(mxFontCollection.get());
-
-    // There is absolutely no way there should be no fonts available on the device
-    if (!mxFontCollection->Count())
-    {
-        OUString aError("Application error: no fonts and no vcl resource found on your system");
-        OUString aResStr(VclResId(SV_ACCESSERROR_NO_FONTS));
-        if (!aResStr.isEmpty())
-            aError = aResStr;
-        Application::Abort(aError);
-    }
-}
-
 bool RenderContext2::IsFontUnantialiased() const
 {
     bool bNonAntialiased(GetAntialiasing() & AntialiasingFlags::DisableText);
@@ -249,6 +214,8 @@ bool RenderContext2::IsFontUnantialiased() const
 
 bool RenderContext2::InitFontInstance()
 {
+    InitPhysicalFontFamilyCollection();
+
     FontSize aSize = GetFontSize(maFont);
 
     // get font entry
@@ -296,6 +263,30 @@ bool RenderContext2::InitFontInstance()
         mpFontInstance->SetEmphasisMarkStyle(ImplGetEmphasisMarkStyle(maFont));
 
     return true;
+}
+
+void RenderContext2::InitPhysicalFontFamilyCollection() const
+{
+    if (mxFontCollection->Count())
+        return;
+
+    if (!(mpGraphics || AcquireGraphics()))
+        return;
+
+    assert(mpGraphics);
+
+    SAL_INFO("vcl.gdi", "RenderContext2::InitPhysicalFontFamilyCollection()");
+    mpGraphics->GetDevFontList(mxFontCollection.get());
+
+    // There is absolutely no way there should be no fonts available on the device
+    if (!mxFontCollection->Count())
+    {
+        OUString aError("Application error: no fonts and no vcl resource found on your system");
+        OUString aResStr(VclResId(SV_ACCESSERROR_NO_FONTS));
+        if (!aResStr.isEmpty())
+            aError = aResStr;
+        Application::Abort(aError);
+    }
 }
 
 void RenderContext2::InitTextOffsets()
