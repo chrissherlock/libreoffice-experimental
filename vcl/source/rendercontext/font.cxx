@@ -246,36 +246,7 @@ bool RenderContext2::ImplNewFont()
     if (maFont.GetEmphasisMark() & FontEmphasisMark::Style)
         pFontInstance->SetEmphasisMarkStyle(ImplGetEmphasisMarkStyle(maFont));
 
-    // calculate text offset depending on TextAlignment
-    TextAlign eAlign = maFont.GetAlignment();
-    if (eAlign == ALIGN_BASELINE)
-    {
-        mnTextOffX = 0;
-        mnTextOffY = 0;
-    }
-    else if (eAlign == ALIGN_TOP)
-    {
-        mnTextOffX = 0;
-        mnTextOffY = +pFontInstance->mxFontMetric->GetAscent() + pFontInstance->GetEmphasisAscent();
-
-        if (pFontInstance->mnOrientation)
-        {
-            Point aOriginPt(0, 0);
-            aOriginPt.RotateAround(mnTextOffX, mnTextOffY, pFontInstance->mnOrientation);
-        }
-    }
-    else // eAlign == ALIGN_BOTTOM
-    {
-        mnTextOffX = 0;
-        mnTextOffY
-            = -pFontInstance->mxFontMetric->GetDescent() + pFontInstance->GetEmphasisDescent();
-
-        if (pFontInstance->mnOrientation)
-        {
-            Point aOriginPt(0, 0);
-            aOriginPt.RotateAround(mnTextOffX, mnTextOffY, pFontInstance->mnOrientation);
-        }
-    }
+    InitTextOffsets();
 
     mbTextLines = ((maFont.GetUnderline() != LINESTYLE_NONE)
                    && (maFont.GetUnderline() != LINESTYLE_DONTKNOW))
@@ -308,6 +279,42 @@ bool RenderContext2::ImplNewFont()
     }
 
     return bRet;
+}
+
+void RenderContext2::InitTextOffsets()
+{
+    LogicalFontInstance* pFontInstance = mpFontInstance.get();
+
+    // calculate text offset depending on TextAlignment
+    TextAlign eAlign = maFont.GetAlignment();
+    if (eAlign == ALIGN_BASELINE)
+    {
+        mnTextOffX = 0;
+        mnTextOffY = 0;
+    }
+    else if (eAlign == ALIGN_TOP)
+    {
+        mnTextOffX = 0;
+        mnTextOffY = +pFontInstance->mxFontMetric->GetAscent() + pFontInstance->GetEmphasisAscent();
+
+        if (pFontInstance->mnOrientation)
+        {
+            Point aOriginPt(0, 0);
+            aOriginPt.RotateAround(mnTextOffX, mnTextOffY, pFontInstance->mnOrientation);
+        }
+    }
+    else // eAlign == ALIGN_BOTTOM
+    {
+        mnTextOffX = 0;
+        mnTextOffY
+            = -pFontInstance->mxFontMetric->GetDescent() + pFontInstance->GetEmphasisDescent();
+
+        if (pFontInstance->mnOrientation)
+        {
+            Point aOriginPt(0, 0);
+            aOriginPt.RotateAround(mnTextOffX, mnTextOffY, pFontInstance->mnOrientation);
+        }
+    }
 }
 
 void RenderContext2::InitPhysicalFontFamilyCollection() const

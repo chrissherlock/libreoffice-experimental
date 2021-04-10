@@ -1136,6 +1136,8 @@ private:
     SAL_DLLPRIVATE void ImplInitTextColor();
     virtual void InitWaveLineColor(Color const& rColor, tools::Long);
 
+    void InitTextOffsets();
+
     /** Determine if native widgets can be enabled
      */
     virtual bool CanEnableNativeWidget() const { return false; }
