@@ -167,58 +167,10 @@ FontSize RenderContext2::GetFontSize(vcl::Font const& rFont) const
     return FontSize(aSize.Width(), fExactHeight);
 }
 
-void RenderContext2::InitFontInstance()
+bool RenderContext2::InitFontInstance()
 {
-    // select font when it has not been initialized yet
-    if (!mpFontInstance->mbInit && InitFont())
-    {
-        // get metric data from device layers
-        mpFontInstance->mbInit = true;
-
-        mpFontInstance->mxFontMetric->SetOrientation(
-            mpFontInstance->GetFontSelectPattern().mnOrientation);
-        mpGraphics->GetFontMetric(mpFontInstance->mxFontMetric, 0);
-
-        mpFontInstance->mxFontMetric->ImplInitTextLineSize(this);
-        mpFontInstance->mxFontMetric->ImplInitAboveTextLineSize();
-        mpFontInstance->mxFontMetric->ImplInitFlags(this);
-
-        mpFontInstance->mnLineHeight = mpFontInstance->mxFontMetric->GetAscent()
-                                       + mpFontInstance->mxFontMetric->GetDescent();
-
-        SetFontOrientation(mpFontInstance.get());
-    }
-}
-
-bool RenderContext2::ImplNewFont()
-{
-    DBG_TESTSOLARMUTEX();
-
-    if (!mbNewFont)
-        return true;
-
-    // we need a graphics
-    if (!mpGraphics && !AcquireGraphics())
-    {
-        SAL_WARN("vcl.gdi", "RenderContext2::ImplNewFont(): no Graphics, no Font");
-        return false;
-    }
-
-    assert(mpGraphics);
-
-    InitPhysicalFontFamilyCollection();
-
     FontSize aSize = GetFontSize(maFont);
-
-    // decide if antialiasing is appropriate
     bool bNonAntialiased(GetAntialiasing() & AntialiasingFlags::DisableText);
-    if (!utl::ConfigManager::IsFuzzing())
-    {
-        const StyleSettings& rStyleSettings = GetSettings().GetStyleSettings();
-        bNonAntialiased |= bool(rStyleSettings.GetDisplayOptions() & DisplayOptions::AADisable);
-        bNonAntialiased |= (int(rStyleSettings.GetAntialiasingMinPixelHeight())
-                            > maFont.GetFontSize().Height());
-    }
 
     // get font entry
     rtl::Reference<LogicalFontInstance> pOldFontInstance = mpFontInstance;
@@ -240,11 +192,63 @@ bool RenderContext2::ImplNewFont()
     if (bNewFontInstance)
         mbInitFont = true;
 
-    InitFontInstance();
+    // select font when it has not been initialized yet
+    if (!mpFontInstance->mbInit && InitFont())
+    {
+        // get metric data from device layers
+        mpFontInstance->mbInit = true;
+
+        mpFontInstance->mxFontMetric->SetOrientation(
+            mpFontInstance->GetFontSelectPattern().mnOrientation);
+        mpGraphics->GetFontMetric(mpFontInstance->mxFontMetric, 0);
+
+        mpFontInstance->mxFontMetric->ImplInitTextLineSize(this);
+        mpFontInstance->mxFontMetric->ImplInitAboveTextLineSize();
+        mpFontInstance->mxFontMetric->ImplInitFlags(this);
+
+        mpFontInstance->mnLineHeight = mpFontInstance->mxFontMetric->GetAscent()
+                                       + mpFontInstance->mxFontMetric->GetDescent();
+
+        SetFontOrientation(mpFontInstance.get());
+    }
+
+    return true;
+}
+
+bool RenderContext2::ImplNewFont()
+{
+    DBG_TESTSOLARMUTEX();
+
+    if (!mbNewFont)
+        return true;
+
+    // we need a graphics
+    if (!mpGraphics && !AcquireGraphics())
+    {
+        SAL_WARN("vcl.gdi", "RenderContext2::ImplNewFont(): no Graphics, no Font");
+        return false;
+    }
+
+    assert(mpGraphics);
+
+    InitPhysicalFontFamilyCollection();
+
+    // decide if antialiasing is appropriate
+    bool bNonAntialiased(GetAntialiasing() & AntialiasingFlags::DisableText);
+    if (!utl::ConfigManager::IsFuzzing())
+    {
+        const StyleSettings& rStyleSettings = GetSettings().GetStyleSettings();
+        bNonAntialiased |= bool(rStyleSettings.GetDisplayOptions() & DisplayOptions::AADisable);
+        bNonAntialiased |= (int(rStyleSettings.GetAntialiasingMinPixelHeight())
+                            > maFont.GetFontSize().Height());
+    }
+
+    if (!InitFontInstance())
+        return false;
 
     // calculate EmphasisArea
     if (maFont.GetEmphasisMark() & FontEmphasisMark::Style)
-        pFontInstance->SetEmphasisMarkStyle(ImplGetEmphasisMarkStyle(maFont));
+        mpFontInstance->SetEmphasisMarkStyle(ImplGetEmphasisMarkStyle(maFont));
 
     InitTextOffsets();
 

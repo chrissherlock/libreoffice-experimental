@@ -1052,7 +1052,7 @@ protected:
     SAL_DLLPRIVATE bool is_double_buffered_window() const;
 
     SAL_DLLPRIVATE bool ImplNewFont();
-    SAL_DLLPRIVATE void InitFontInstance();
+    SAL_DLLPRIVATE bool InitFontInstance();
 
     SAL_DLLPRIVATE const LogicalFontInstance* GetFontInstance() const;
 
