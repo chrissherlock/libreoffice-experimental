@@ -212,6 +212,10 @@ bool RenderContext2::InitFontInstance()
         SetFontOrientation(mpFontInstance.get());
     }
 
+    // calculate EmphasisArea
+    if (maFont.GetEmphasisMark() & FontEmphasisMark::Style)
+        mpFontInstance->SetEmphasisMarkStyle(ImplGetEmphasisMarkStyle(maFont));
+
     return true;
 }
 
@@ -245,10 +249,6 @@ bool RenderContext2::ImplNewFont()
 
     if (!InitFontInstance())
         return false;
-
-    // calculate EmphasisArea
-    if (maFont.GetEmphasisMark() & FontEmphasisMark::Style)
-        mpFontInstance->SetEmphasisMarkStyle(ImplGetEmphasisMarkStyle(maFont));
 
     InitTextOffsets();
 
