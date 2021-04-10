@@ -6413,10 +6413,12 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
     aLine.append( "q\n" );
 
     nEmphMark = ImplGetEmphasisMarkStyle( m_aCurrentPDFState.m_aFont );
+
     if ( nEmphMark & FontEmphasisMark::PosBelow )
-        nEmphHeight = GetEmphasisDescent();
+        nEmphHeight = GetFontInstance()->GetEmphasisDescent();
     else
-        nEmphHeight = GetEmphasisAscent();
+        nEmphHeight = GetFontInstance()->GetEmphasisAscent();
+
     ImplGetEmphasisMark( aEmphPoly,
                                              bEmphPolyLine,
                                              aEmphRect1,

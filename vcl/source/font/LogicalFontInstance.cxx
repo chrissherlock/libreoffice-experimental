@@ -225,4 +225,30 @@ tools::Long LogicalFontInstance::GetEmphasisHeight() const
     return nEmphasisHeight;
 }
 
+void LogicalFontInstance::SetEmphasisMarkStyle(FontEmphasisMark eEmphasisMark)
+{
+    tools::Long nEmphasisHeight = GetEmphasisHeight();
+
+    if (eEmphasisMark & FontEmphasisMark::PosBelow)
+    {
+        mxFontMetric->SetEmphasisDescent(nEmphasisHeight);
+        mxFontMetric->SetEmphasisAscent(0);
+    }
+    else
+    {
+        mxFontMetric->SetEmphasisDescent(0);
+        mxFontMetric->SetEmphasisAscent(nEmphasisHeight);
+    }
+}
+
+tools::Long LogicalFontInstance::GetEmphasisAscent() const
+{
+    return mxFontMetric->GetEmphasisAscent();
+}
+
+tools::Long LogicalFontInstance::GetEmphasisDescent() const
+{
+    return mxFontMetric->GetEmphasisDescent();
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

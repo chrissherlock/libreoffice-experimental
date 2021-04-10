@@ -216,9 +216,9 @@ tools::Rectangle OutputDevice::ImplGetTextBoundRect(SalLayout const& rSalLayout)
     tools::Long nY = aPoint.Y();
 
     tools::Long nWidth = rSalLayout.GetTextWidth();
-    tools::Long nHeight = mpFontInstance->mnLineHeight + mnEmphasisAscent + mnEmphasisDescent;
+    tools::Long nHeight = mpFontInstance->mnLineHeight + mpFontInstance->GetEmphasisAscent() + mpFontInstance->GetEmphasisDescent();
 
-    nY -= mpFontInstance->mxFontMetric->GetAscent() + mnEmphasisAscent;
+    nY -= mpFontInstance->mxFontMetric->GetAscent() + mpFontInstance->GetEmphasisAscent();
 
     if (mpFontInstance->mnOrientation)
     {

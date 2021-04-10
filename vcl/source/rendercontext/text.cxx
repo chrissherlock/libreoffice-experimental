@@ -370,7 +370,7 @@ tools::Long RenderContext2::GetTextHeight() const
     if (!pRC->InitFont())
         return 0;
 
-    tools::Long nHeight = mpFontInstance->mnLineHeight + mnEmphasisAscent + mnEmphasisDescent;
+    tools::Long nHeight = mpFontInstance->mnLineHeight + mpFontInstance->GetEmphasisAscent() + mpFontInstance->GetEmphasisDescent();
 
     if (maGeometry.IsMapModeEnabled())
         nHeight = ImplDevicePixelToLogicHeight(nHeight);
@@ -1138,8 +1138,8 @@ void RenderContext2::ImplDrawTextBackground(const SalLayout& rSalLayout)
     mpGraphics->SetFillColor(GetTextFillColor());
     mbInitFillColor = true;
 
-    ImplDrawTextRect(nX, nY, 0, -(mpFontInstance->mxFontMetric->GetAscent() + mnEmphasisAscent),
-                     nWidth, mpFontInstance->mnLineHeight + mnEmphasisAscent + mnEmphasisDescent);
+    ImplDrawTextRect(nX, nY, 0, -(mpFontInstance->mxFontMetric->GetAscent() + mpFontInstance->GetEmphasisAscent()),
+                     nWidth, mpFontInstance->mnLineHeight + mpFontInstance->GetEmphasisAscent() + mpFontInstance->GetEmphasisDescent());
 }
 
 bool RenderContext2::ImplDrawRotateText(SalLayout& rSalLayout)
@@ -1154,8 +1154,8 @@ bool RenderContext2::ImplDrawRotateText(SalLayout& rSalLayout)
     {
         // guess vertical text extents if GetBoundRect failed
         tools::Long nRight = rSalLayout.GetTextWidth();
-        tools::Long nTop = mpFontInstance->mxFontMetric->GetAscent() + mnEmphasisAscent;
-        tools::Long nHeight = mpFontInstance->mnLineHeight + mnEmphasisAscent + mnEmphasisDescent;
+        tools::Long nTop = mpFontInstance->mxFontMetric->GetAscent() + mpFontInstance->GetEmphasisAscent();
+        tools::Long nHeight = mpFontInstance->mnLineHeight + mpFontInstance->GetEmphasisAscent() + mpFontInstance->GetEmphasisDescent();
         aBoundRect = tools::Rectangle(0, -nTop, nRight, nHeight - nTop);
     }
 

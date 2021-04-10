@@ -1055,8 +1055,6 @@ protected:
     SAL_DLLPRIVATE void InitFontInstance();
 
     SAL_DLLPRIVATE const LogicalFontInstance* GetFontInstance() const;
-    SAL_DLLPRIVATE tools::Long GetEmphasisAscent() const { return mnEmphasisAscent; }
-    SAL_DLLPRIVATE tools::Long GetEmphasisDescent() const { return mnEmphasisDescent; }
 
     virtual void ImplReleaseFonts();
     virtual void ImplClearFontData(bool bNewFontLists);
@@ -1113,8 +1111,6 @@ protected:
     /// font specific text alignment offsets in pixel units
     mutable tools::Long mnTextOffX;
     mutable tools::Long mnTextOffY;
-    mutable tools::Long mnEmphasisAscent;
-    mutable tools::Long mnEmphasisDescent;
 
     mutable bool mbInitFont : 1;
     mutable bool mbInitFillColor : 1;

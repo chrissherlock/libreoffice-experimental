@@ -243,18 +243,8 @@ bool RenderContext2::ImplNewFont()
     InitFontInstance();
 
     // calculate EmphasisArea
-    mnEmphasisAscent = 0;
-    mnEmphasisDescent = 0;
     if (maFont.GetEmphasisMark() & FontEmphasisMark::Style)
-    {
-        FontEmphasisMark nEmphasisMark = ImplGetEmphasisMarkStyle(maFont);
-        pFontInstance->GetEmphasisHeight();
-
-        if (nEmphasisMark & FontEmphasisMark::PosBelow)
-            mnEmphasisDescent = nEmphasisHeight;
-        else
-            mnEmphasisAscent = nEmphasisHeight;
-    }
+        pFontInstance->SetEmphasisMarkStyle(ImplGetEmphasisMarkStyle(maFont));
 
     // calculate text offset depending on TextAlignment
     TextAlign eAlign = maFont.GetAlignment();
@@ -266,7 +256,7 @@ bool RenderContext2::ImplNewFont()
     else if (eAlign == ALIGN_TOP)
     {
         mnTextOffX = 0;
-        mnTextOffY = +pFontInstance->mxFontMetric->GetAscent() + mnEmphasisAscent;
+        mnTextOffY = +pFontInstance->mxFontMetric->GetAscent() + pFontInstance->GetEmphasisAscent();
 
         if (pFontInstance->mnOrientation)
         {
@@ -277,7 +267,8 @@ bool RenderContext2::ImplNewFont()
     else // eAlign == ALIGN_BOTTOM
     {
         mnTextOffX = 0;
-        mnTextOffY = -pFontInstance->mxFontMetric->GetDescent() + mnEmphasisDescent;
+        mnTextOffY
+            = -pFontInstance->mxFontMetric->GetDescent() + pFontInstance->GetEmphasisDescent();
 
         if (pFontInstance->mnOrientation)
         {
@@ -633,15 +624,17 @@ FontMetric RenderContext2::GetFontMetric() const
     // set remaining metric fields
     aMetric.SetFullstopCenteredFlag(xFontMetric->IsFullstopCentered());
     aMetric.SetBulletOffset(xFontMetric->GetBulletOffset());
-    aMetric.SetAscent(ImplDevicePixelToLogicHeight(xFontMetric->GetAscent() + mnEmphasisAscent));
-    aMetric.SetDescent(ImplDevicePixelToLogicHeight(xFontMetric->GetDescent() + mnEmphasisDescent));
-    aMetric.SetInternalLeading(
-        ImplDevicePixelToLogicHeight(xFontMetric->GetInternalLeading() + mnEmphasisAscent));
+    aMetric.SetAscent(ImplDevicePixelToLogicHeight(xFontMetric->GetAscent()
+                                                   + pFontInstance->GetEmphasisAscent()));
+    aMetric.SetDescent(ImplDevicePixelToLogicHeight(xFontMetric->GetDescent()
+                                                    + pFontInstance->GetEmphasisDescent()));
+    aMetric.SetInternalLeading(ImplDevicePixelToLogicHeight(xFontMetric->GetInternalLeading()
+                                                            + pFontInstance->GetEmphasisAscent()));
     // RenderContext2 has its own external leading function due to #i60945#
     aMetric.SetExternalLeading(ImplDevicePixelToLogicHeight(GetFontExtLeading()));
-    aMetric.SetLineHeight(ImplDevicePixelToLogicHeight(xFontMetric->GetAscent()
-                                                       + xFontMetric->GetDescent()
-                                                       + mnEmphasisAscent + mnEmphasisDescent));
+    aMetric.SetLineHeight(ImplDevicePixelToLogicHeight(
+        xFontMetric->GetAscent() + xFontMetric->GetDescent() + pFontInstance->GetEmphasisAscent()
+        + pFontInstance->GetEmphasisDescent()));
     aMetric.SetSlant(ImplDevicePixelToLogicHeight(xFontMetric->GetSlant()));
 
     // get miscellaneous data
@@ -1206,9 +1199,9 @@ void RenderContext2::ImplDrawEmphasisMarks(SalLayout& rSalLayout)
     bool bPolyLine;
 
     if (nEmphasisMark & FontEmphasisMark::PosBelow)
-        nEmphasisHeight = mnEmphasisDescent;
+        nEmphasisHeight = mpFontInstance->GetEmphasisDescent();
     else
-        nEmphasisHeight = mnEmphasisAscent;
+        nEmphasisHeight = mpFontInstance->GetEmphasisAscent();
 
     ImplGetEmphasisMark(aPolyPoly, bPolyLine, aRect1, aRect2, nEmphasisYOff, nEmphasisWidth,
                         nEmphasisMark, nEmphasisHeight);

@@ -57,6 +57,10 @@ public:
     tools::Long GetExternalLeading() const { return mnExtLeading; }
     int GetSlant() const { return mnSlant; }
     tools::Long GetMinKashida() const { return mnMinKashida; }
+    tools::Long GetEmphasisDescent() const { return mnEmphasisDescent; }
+    tools::Long GetEmphasisAscent() const { return mnEmphasisAscent; }
+    void SetEmphasisDescent(tools::Long nDescent) { mnEmphasisDescent = nDescent; }
+    void SetEmphasisAscent(tools::Long nAscent) { mnEmphasisAscent = nAscent; }
 
     void SetSlant(int nSlant) { mnSlant = nSlant; }
     void SetMinKashida(tools::Long nMinKashida) { mnMinKashida = nMinKashida; }
@@ -110,6 +114,8 @@ private:
     // font metrics measured for the font instance
     tools::Long mnAscent; // Ascent
     tools::Long mnDescent; // Descent
+    tools::Long mnEmphasisAscent; // Emphasis descent
+    tools::Long mnEmphasisDescent; // Emphasis descent
     tools::Long mnIntLeading; // Internal Leading
     tools::Long mnExtLeading; // External Leading
     int mnSlant; // Slant (Italic/Oblique)

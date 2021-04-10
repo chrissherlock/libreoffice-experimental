@@ -60,6 +60,9 @@ public: // TODO: make data members private
     Degree10 mnOrientation; // text angle in 3600 system
     bool mbInit; // true if maFontMetric member is valid
 
+    tools::Long GetEmphasisAscent() const;
+    tools::Long GetEmphasisDescent() const;
+
     void AddFallbackForUnicode(sal_UCS4, FontWeight eWeight, const OUString& rFontName);
     bool GetFallbackForUnicode(sal_UCS4, FontWeight eWeight, OUString* pFontName) const;
     void IgnoreFallbackForUnicode(sal_UCS4, FontWeight eWeight, std::u16string_view rFontName);
@@ -69,9 +72,10 @@ public: // TODO: make data members private
     void SetAverageWidthFactor(double nFactor);
     double GetAverageWidthFactor() const;
     const FontSelectPattern& GetFontSelectPattern() const;
-    tools::Long GetEmphasisHeight() const
+    tools::Long GetEmphasisHeight() const;
+    void SetEmphasisMarkStyle(FontEmphasisMark eEmphasisMark);
 
-        const PhysicalFontFace* GetFontFace() const;
+    const PhysicalFontFace* GetFontFace() const;
     PhysicalFontFace* GetFontFace();
     const FontCache* GetFontCache() const;
 
