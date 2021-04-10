@@ -140,6 +140,33 @@ void RenderContext2::SetFontOrientation(LogicalFontInstance* const pFontInstance
     }
 }
 
+FontSize RenderContext2::GetFontSize(vcl::Font const& rFont) const
+{
+    // convert to pixel height
+    // TODO: replace integer based aSize completely with subpixel accurate type
+    float fExactHeight
+        = ImplFloatLogicHeightToDevicePixel(static_cast<float>(rFont.GetFontHeight()));
+
+    Size aSize = ImplLogicToDevicePixel(rFont.GetFontSize());
+
+    if (!aSize.Height())
+    {
+        // use default pixel height only when logical height is zero
+        if (rFont.GetFontSize().Height())
+            aSize.setHeight(1);
+        else
+            aSize.setHeight((12 * GetDPIY()) / 72);
+
+        fExactHeight = static_cast<float>(aSize.Height());
+    }
+
+    // select the default width only when logical width is zero
+    if ((aSize.Width() == 0) && (rFont.GetFontSize().Width() != 0))
+        aSize.setWidth(1);
+
+    return FontSize(aSize.Width(), fExactHeight);
+}
+
 bool RenderContext2::ImplNewFont()
 {
     DBG_TESTSOLARMUTEX();
@@ -158,25 +185,7 @@ bool RenderContext2::ImplNewFont()
 
     InitPhysicalFontFamilyCollection();
 
-    // convert to pixel height
-    // TODO: replace integer based aSize completely with subpixel accurate type
-    float fExactHeight
-        = ImplFloatLogicHeightToDevicePixel(static_cast<float>(maFont.GetFontHeight()));
-    Size aSize = ImplLogicToDevicePixel(maFont.GetFontSize());
-    if (!aSize.Height())
-    {
-        // use default pixel height only when logical height is zero
-        if (maFont.GetFontSize().Height())
-            aSize.setHeight(1);
-        else
-            aSize.setHeight((12 * GetDPIY()) / 72);
-
-        fExactHeight = static_cast<float>(aSize.Height());
-    }
-
-    // select the default width only when logical width is zero
-    if ((aSize.Width() == 0) && (maFont.GetFontSize().Width() != 0))
-        aSize.setWidth(1);
+    FontSize aSize = GetFontSize(maFont);
 
     // decide if antialiasing is appropriate
     bool bNonAntialiased(GetAntialiasing() & AntialiasingFlags::DisableText);
@@ -190,8 +199,8 @@ bool RenderContext2::ImplNewFont()
 
     // get font entry
     rtl::Reference<LogicalFontInstance> pOldFontInstance = mpFontInstance;
-    mpFontInstance = mxFontCache->GetFontInstance(mxFontCollection.get(), maFont, aSize,
-                                                  fExactHeight, bNonAntialiased);
+    mpFontInstance
+        = mxFontCache->GetFontInstance(mxFontCollection.get(), maFont, aSize, bNonAntialiased);
     const bool bNewFontInstance = pOldFontInstance.get() != mpFontInstance.get();
     pOldFontInstance.clear();
 
@@ -287,7 +296,7 @@ bool RenderContext2::ImplNewFont()
     bool bRet = true;
 
     // #95414# fix for OLE objects which use scale factors very creatively
-    if (IsMapModeEnabled() && !aSize.Width())
+    if (IsMapModeEnabled() && !aSize.GetWidth())
     {
         int nOrigWidth = pFontInstance->mxFontMetric->GetWidth();
         float fStretch = static_cast<float>(maMapRes.mnMapScNumX) * maMapRes.mnMapScDenomY;
@@ -296,7 +305,7 @@ bool RenderContext2::ImplNewFont()
         if ((nNewWidth != nOrigWidth) && (nNewWidth != 0))
         {
             Size aOrigSize = maFont.GetFontSize();
-            const_cast<vcl::Font&>(maFont).SetFontSize(Size(nNewWidth, aSize.Height()));
+            const_cast<vcl::Font&>(maFont).SetFontSize(Size(nNewWidth, aSize.GetHeight()));
             EnableMapMode(false);
             mbNewFont = true;
             bRet = ImplNewFont(); // recurse once using stretched width
@@ -1019,25 +1028,13 @@ vcl::Font RenderContext2::GetDefaultFont(DefaultFontType nType, LanguageType eLa
                     aFont.SetFamilyName(aSearch);
 
                     // convert to pixel height
-                    Size aSize = pOutDev->ImplLogicToDevicePixel(aFont.GetFontSize());
-                    if (!aSize.Height())
-                    {
-                        // use default pixel height only when logical height is zero
-                        if (aFont.GetFontHeight())
-                            aSize.setHeight(1);
-                        else
-                            aSize.setHeight((12 * pOutDev->GetDPIY()) / 72);
-                    }
-
-                    // use default width only when logical width is zero
-                    if ((0 == aSize.Width()) && (0 != aFont.GetFontSize().Width()))
-                        aSize.setWidth(1);
+                    FontSize aSize = pOutDev->GetFontSize(aFont);
 
                     // get the name of the first available font
-                    float fExactHeight = static_cast<float>(aSize.Height());
                     rtl::Reference<LogicalFontInstance> pFontInstance
                         = pOutDev->mxFontCache->GetFontInstance(pOutDev->mxFontCollection.get(),
-                                                                aFont, aSize, fExactHeight);
+                                                                aFont, aSize);
+
                     if (pFontInstance)
                     {
                         assert(pFontInstance->GetFontFace());
@@ -1046,7 +1043,9 @@ vcl::Font RenderContext2::GetDefaultFont(DefaultFontType nType, LanguageType eLa
                 }
             }
             else
+            {
                 aFont.SetFamilyName(aSearch);
+            }
         }
     }
 

@@ -31,6 +31,7 @@
 #include <font/FontSelectPattern.hxx>
 
 class Size;
+class FontSize;
 namespace vcl
 {
 class Font;
@@ -98,8 +99,8 @@ public:
     ~FontCache();
 
     rtl::Reference<LogicalFontInstance> GetFontInstance(PhysicalFontFamilyCollection const*,
-                                                        const vcl::Font&, const Size& rPixelSize,
-                                                        float fExactHeight,
+                                                        const vcl::Font&,
+                                                        const FontSize& rPixelSize,
                                                         bool bNonAntialias = false);
     rtl::Reference<LogicalFontInstance> GetGlyphFallbackFont(PhysicalFontFamilyCollection const*,
                                                              FontSelectPattern&,

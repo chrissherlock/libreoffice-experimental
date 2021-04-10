@@ -42,6 +42,7 @@
 #include <vcl/flags/DrawModeFlags.hxx>
 #include <vcl/flags/GetDefaultFontFlags.hxx>
 #include <vcl/font.hxx>
+#include <vcl/font/FontSize.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/region.hxx>
 #include <vcl/salnativewidgets.hxx>
@@ -423,6 +424,7 @@ public:
                                     RenderContext2 const* pOutDev = nullptr);
 
     virtual Color GetReadableFontColor(Color const& rFontColor, Color const& rBgColor) const;
+    FontSize GetFontSize(vcl::Font const& rFont) const;
 
     bool AddTempDevFont(OUString const& rFileURL, OUString const& rFontName);
     Size GetPhysicalFontFaceSize(vcl::Font const& rFont, int nSizeIndex) const;

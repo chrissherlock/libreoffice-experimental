@@ -17,12 +17,15 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <sal/log.hxx>
+
+#include <vcl/font/FontSize.hxx>
+
 #include <font/FontCache.hxx>
 #include <font/LogicalFontInstance.hxx>
 #include <font/PhysicalFontFamilyCollection.hxx>
 #include <font/PhysicalFontFace.hxx>
 #include <font/PhysicalFontFamily.hxx>
-#include <sal/log.hxx>
 
 #if !(defined(_WIN32) || defined(MACOSX) || defined(IOS))
 #include <unx/glyphcache.hxx>
@@ -101,10 +104,10 @@ FontCache::~FontCache()
 }
 
 rtl::Reference<LogicalFontInstance> FontCache::GetFontInstance( PhysicalFontFamilyCollection const * pFontList,
-    const vcl::Font& rFont, const Size& rSize, float fExactHeight, bool bNonAntialias )
+    const vcl::Font& rFont, const FontSize& rFontSize, bool bNonAntialias )
 {
     // initialize internal font request object
-    FontSelectPattern aFontSelData(rFont, rFont.GetFamilyName(), rSize, fExactHeight, bNonAntialias);
+    FontSelectPattern aFontSelData(rFont, rFont.GetFamilyName(), rFontSize, bNonAntialias);
     return GetFontInstance( pFontList, aFontSelData );
 }
 

@@ -1751,19 +1751,11 @@ void Window::ImplNewInputContext()
     aNewContext.mpFont = nullptr;
     if (!rFontName.isEmpty())
     {
-        OutputDevice *pFocusWinOutDev = pFocusWin->GetOutDev();
-        Size aSize = pFocusWinOutDev->ImplLogicToDevicePixel( rFont.GetFontSize() );
-        if ( !aSize.Height() )
-        {
-            // only set default sizes if the font height in logical
-            // coordinates equals 0
-            if ( rFont.GetFontSize().Height() )
-                aSize.setHeight( 1 );
-            else
-                aSize.setHeight( (12*pFocusWin->GetDPIY())/72 );
-        }
+        FontSize aSize = pFocusWin->GetFontSize(rFont);
+
         pFontInstance = pFocusWin->mxFontCache->GetFontInstance( pFocusWin->mxFontCollection.get(),
-                         rFont, aSize, static_cast<float>(aSize.Height()) );
+                         rFont, aSize );
+
         if ( pFontInstance )
             aNewContext.mpFont = pFontInstance;
     }

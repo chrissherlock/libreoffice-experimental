@@ -22,6 +22,7 @@
 #include <tools/gen.hxx>
 
 #include <vcl/font.hxx>
+#include <vcl/font/FontSize.hxx>
 
 #include <font/FontSelectPattern.hxx>
 #include <font/PhysicalFontFace.hxx>
@@ -30,12 +31,12 @@
 const char FontSelectPattern::FEAT_PREFIX = ':';
 const char FontSelectPattern::FEAT_SEPARATOR = '&';
 
-FontSelectPattern::FontSelectPattern(const vcl::Font& rFont, const OUString& rSearchName,
-                                     const Size& rSize, float fExactHeight, bool bNonAntialias)
+FontSelectPattern::FontSelectPattern(vcl::Font const& rFont, OUString const& rSearchName,
+                                     FontSize const& rSize, bool bNonAntialias)
     : maSearchName(rSearchName)
-    , mnWidth(rSize.Width())
-    , mnHeight(rSize.Height())
-    , mfExactHeight(fExactHeight)
+    , mnWidth(rSize.GetWidth())
+    , mnHeight(rSize.GetHeight())
+    , mfExactHeight(rSize.GetHeight())
     , mnOrientation(rFont.GetOrientation())
     , meLanguage(rFont.GetLanguage())
     , mbVertical(rFont.IsVertical())
