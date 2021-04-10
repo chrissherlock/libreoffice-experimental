@@ -257,12 +257,54 @@ bool RenderContext2::ImplNewFont()
     mbTextSpecial
         = maFont.IsShadow() || maFont.IsOutline() || (maFont.GetRelief() != FontRelief::NONE);
 
+    return FixOLEScaleFactors();
+}
+
+void RenderContext2::InitTextOffsets()
+{
+    // calculate text offset depending on TextAlignment
+    TextAlign eAlign = maFont.GetAlignment();
+    if (eAlign == ALIGN_BASELINE)
+    {
+        mnTextOffX = 0;
+        mnTextOffY = 0;
+    }
+    else if (eAlign == ALIGN_TOP)
+    {
+        mnTextOffX = 0;
+        mnTextOffY
+            = +mpFontInstance->mxFontMetric->GetAscent() + mpFontInstance->GetEmphasisAscent();
+
+        if (mpFontInstance->mnOrientation)
+        {
+            Point aOriginPt(0, 0);
+            aOriginPt.RotateAround(mnTextOffX, mnTextOffY, mpFontInstance->mnOrientation);
+        }
+    }
+    else // eAlign == ALIGN_BOTTOM
+    {
+        mnTextOffX = 0;
+        mnTextOffY
+            = -mpFontInstance->mxFontMetric->GetDescent() + mpFontInstance->GetEmphasisDescent();
+
+        if (mpFontInstance->mnOrientation)
+        {
+            Point aOriginPt(0, 0);
+            aOriginPt.RotateAround(mnTextOffX, mnTextOffY, mpFontInstance->mnOrientation);
+        }
+    }
+}
+
+bool RenderContext2::FixOLEScaleFactors()
+{
     bool bRet = true;
+
+    FontSize aSize = GetFontSize(maFont);
 
     // #95414# fix for OLE objects which use scale factors very creatively
     if (IsMapModeEnabled() && !aSize.GetWidth())
     {
-        int nOrigWidth = pFontInstance->mxFontMetric->GetWidth();
+        int nOrigWidth = mpFontInstance->mxFontMetric->GetWidth();
         float fStretch = static_cast<float>(maMapRes.mnMapScNumX) * maMapRes.mnMapScDenomY;
         fStretch /= static_cast<float>(maMapRes.mnMapScNumY) * maMapRes.mnMapScDenomX;
         int nNewWidth = static_cast<int>(nOrigWidth * fStretch + 0.5);
@@ -279,42 +321,6 @@ bool RenderContext2::ImplNewFont()
     }
 
     return bRet;
-}
-
-void RenderContext2::InitTextOffsets()
-{
-    LogicalFontInstance* pFontInstance = mpFontInstance.get();
-
-    // calculate text offset depending on TextAlignment
-    TextAlign eAlign = maFont.GetAlignment();
-    if (eAlign == ALIGN_BASELINE)
-    {
-        mnTextOffX = 0;
-        mnTextOffY = 0;
-    }
-    else if (eAlign == ALIGN_TOP)
-    {
-        mnTextOffX = 0;
-        mnTextOffY = +pFontInstance->mxFontMetric->GetAscent() + pFontInstance->GetEmphasisAscent();
-
-        if (pFontInstance->mnOrientation)
-        {
-            Point aOriginPt(0, 0);
-            aOriginPt.RotateAround(mnTextOffX, mnTextOffY, pFontInstance->mnOrientation);
-        }
-    }
-    else // eAlign == ALIGN_BOTTOM
-    {
-        mnTextOffX = 0;
-        mnTextOffY
-            = -pFontInstance->mxFontMetric->GetDescent() + pFontInstance->GetEmphasisDescent();
-
-        if (pFontInstance->mnOrientation)
-        {
-            Point aOriginPt(0, 0);
-            aOriginPt.RotateAround(mnTextOffX, mnTextOffY, pFontInstance->mnOrientation);
-        }
-    }
 }
 
 void RenderContext2::InitPhysicalFontFamilyCollection() const
