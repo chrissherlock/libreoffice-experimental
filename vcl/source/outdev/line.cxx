@@ -62,9 +62,6 @@ void OutputDevice::DrawLine(Point const& rStartPt, Point const& rEndPt, LineInfo
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaLineAction(rStartPt, rEndPt, rLineInfo));
 
-    if (ImplIsRecordLayout())
-        return;
-
     RenderContext2::DrawLine(rStartPt, rEndPt, rLineInfo);
 }
 
@@ -74,9 +71,6 @@ void OutputDevice::DrawLine(Point const& rStartPt, Point const& rEndPt)
 
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaLineAction(rStartPt, rEndPt));
-
-    if (ImplIsRecordLayout())
-        return;
 
     RenderContext2::DrawLine(rStartPt, rEndPt);
 }

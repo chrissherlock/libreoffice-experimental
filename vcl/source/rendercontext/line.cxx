@@ -32,6 +32,9 @@
 
 void RenderContext2::DrawLine(Point const& rStartPt, Point const& rEndPt)
 {
+    if (ImplIsRecordLayout())
+        return;
+
     if (!IsDeviceOutputNecessary() || !mbLineColor)
         return;
 
@@ -88,6 +91,9 @@ void RenderContext2::DrawLine(Point const& rStartPt, Point const& rEndPt)
 
 void RenderContext2::DrawLine(Point const& rStartPt, Point const& rEndPt, LineInfo const& rLineInfo)
 {
+    if (ImplIsRecordLayout())
+        return;
+
     if (rLineInfo.IsDefault())
     {
         DrawLine(rStartPt, rEndPt);
