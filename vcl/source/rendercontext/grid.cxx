@@ -21,9 +21,13 @@
 
 #include <salgdi.hxx>
 
-void RenderContext2::DrawGrid(tools::Rectangle const& rRect, Size const& rDist, DrawGridFlags nFlags)
+void RenderContext2::DrawGrid(tools::Rectangle const& rRect, Size const& rDist,
+                              DrawGridFlags nFlags)
 {
     assert(!is_double_buffered_window());
+
+    if (ImplIsRecordLayout())
+        return;
 
     tools::Rectangle aDstRect(PixelToLogic(Point()), GetOutputSize());
     aDstRect.Intersection(rRect);
