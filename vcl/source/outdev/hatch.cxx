@@ -43,9 +43,6 @@ void OutputDevice::DrawHatch(tools::PolyPolygon const& rPolyPoly, Hatch const& r
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaHatchAction(rPolyPoly, aHatch));
 
-    if (ImplIsRecordLayout())
-        return;
-
     RenderContext2::DrawHatch(rPolyPoly, rHatch);
 }
 

@@ -33,6 +33,9 @@
 
 void RenderContext2::DrawHatch(const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch)
 {
+    if (ImplIsRecordLayout())
+        return;
+
     Hatch aHatch(rHatch);
     aHatch.SetColor(
         GetDrawModeHatchColor(rHatch.GetColor(), GetDrawMode(), GetSettings().GetStyleSettings()));
