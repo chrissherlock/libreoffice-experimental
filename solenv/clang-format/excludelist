@@ -14939,7 +14939,6 @@ vcl/source/filter/wmf/wmfwr.cxx
 vcl/source/filter/wmf/wmfwr.hxx
 vcl/source/font/font.cxx
 vcl/source/font/fontattributes.cxx
-vcl/source/font/fontcache.cxx
 vcl/source/font/fontcharmap.cxx
 vcl/source/font/fontmetric.cxx
 vcl/source/fontsubset/cff.cxx

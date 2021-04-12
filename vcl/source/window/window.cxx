@@ -45,6 +45,7 @@
 
 #include <vcl/uitest/uiobject.hxx>
 
+#include <font/PhysicalFontFamilyCollection.hxx>
 #include <ImplOutDevData.hxx>
 #include <impanmvw.hxx>
 #include <salframe.hxx>
@@ -777,7 +778,6 @@ ImplFrameData::ImplFrameData( vcl::Window *pWindow )
     mpMouseMoveWin     = nullptr;
     mpMouseDownWin     = nullptr;
     mxFontCollection   = pSVData->maGDIData.mxScreenFontList;
-    mxFontCache        = pSVData->maGDIData.mxScreenFontCache;
     mnFocusId          = nullptr;
     mnMouseMoveId      = nullptr;
     mnLastMouseX       = -1;
@@ -1075,7 +1075,7 @@ void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* p
 
     // #99318: make sure fontcache and list is available before call to SetSettings
     mxFontCollection = mpWindowImpl->mpFrameData->mxFontCollection;
-    mxFontCache = mpWindowImpl->mpFrameData->mxFontCache;
+    mxFontCollection = mpWindowImpl->mpFrameData->mxFontCollection;
 
     if ( mpWindowImpl->mbFrame )
     {
@@ -1753,8 +1753,7 @@ void Window::ImplNewInputContext()
     {
         FontSize aSize = pFocusWin->GetFontSize(rFont);
 
-        pFontInstance = pFocusWin->mxFontCache->GetFontInstance( pFocusWin->mxFontCollection.get(),
-                         rFont, aSize );
+        pFontInstance = pFocusWin->mxFontCollection->GetFontInstance(rFont, aSize);
 
         if ( pFontInstance )
             aNewContext.mpFont = pFontInstance;

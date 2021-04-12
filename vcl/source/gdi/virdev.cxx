@@ -179,7 +179,6 @@ void VirtualDevice::ImplInitVirDev( const RenderContext2* pOutDev,
 
     mbDevOutput     = true;
     mxFontCollection = pSVData->maGDIData.mxScreenFontList;
-    mxFontCache     = pSVData->maGDIData.mxScreenFontCache;
     SetDPIX(pOutDev->GetDPIX());
     SetDPIY(pOutDev->GetDPIY());
     SetDPIScalePercentage(pOutDev->GetDPIScalePercentage());
@@ -486,14 +485,11 @@ void VirtualDevice::ImplSetReferenceDevice( RefDevMode i_eRefDevMode, sal_Int32 
     // preserve global font lists
     ImplSVData* pSVData = ImplGetSVData();
     mxFontCollection.reset();
-    mxFontCache.reset();
+    mxFontCollection.reset();
 
     // get font list with scalable fonts only
     (void)AcquireGraphics();
     mxFontCollection = pSVData->maGDIData.mxScreenFontList->Clone();
-
-    // prepare to use new font lists
-    mxFontCache = std::make_shared<FontCache>();
 }
 
 sal_uInt16 VirtualDevice::GetBitCount() const

@@ -1060,7 +1060,6 @@ protected:
     virtual void ImplReleaseFonts();
     virtual void ImplClearFontData(bool bNewFontLists);
     virtual void ImplRefreshFontData(bool bNewFontLists);
-    void ReleaseFontCache();
     void ReleaseFontCollection();
     void SetFontCollectionFromSVData();
     void ResetNewFontCache();
@@ -1107,7 +1106,6 @@ protected:
     mutable std::unique_ptr<PhysicalFontFaceCollection> mpDeviceFontList;
     mutable std::unique_ptr<PhysicalFontFaceSizeCollection> mpDeviceFontSizeList;
     mutable rtl::Reference<LogicalFontInstance> mpFontInstance;
-    mutable std::shared_ptr<FontCache> mxFontCache;
     Geometry maGeometry;
     /// font specific text alignment offsets in pixel units
     mutable tools::Long mnTextOffX;

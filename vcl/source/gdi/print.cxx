@@ -757,7 +757,6 @@ void Printer::ImplInit(SalPrinterQueueInfo* pInfo)
     // Init data
     ImplUpdatePageData();
     mxFontCollection = std::make_shared<PhysicalFontFamilyCollection>();
-    mxFontCache = std::make_shared<FontCache>();
     mpGraphics->GetDevFontList(mxFontCollection.get());
 }
 
@@ -771,7 +770,6 @@ void Printer::ImplInitDisplay()
 
     mpDisplayDev = VclPtr<VirtualDevice>::Create();
     mxFontCollection = pSVData->maGDIData.mxScreenFontList;
-    mxFontCache = pSVData->maGDIData.mxScreenFontCache;
     SetDPIX(mpDisplayDev->GetDPIX());
     SetDPIY(mpDisplayDev->GetDPIY());
 }
@@ -1017,7 +1015,6 @@ void Printer::dispose()
         mpFontInstance.clear();
         mpDeviceFontList.reset();
         mpDeviceFontSizeList.reset();
-        mxFontCache.reset();
         // font list deleted by OutputDevice dtor
     }
 
@@ -1165,7 +1162,6 @@ bool Printer::SetPrinterProps(const Printer* pPrinter)
             mpDeviceFontList.reset();
             mpDeviceFontSizeList.reset();
             // clean up font list
-            mxFontCache.reset();
             mxFontCollection.reset();
 
             mbInitFont = true;
@@ -1193,7 +1189,6 @@ bool Printer::SetPrinterProps(const Printer* pPrinter)
             mpFontInstance.clear();
             mpDeviceFontList.reset();
             mpDeviceFontSizeList.reset();
-            mxFontCache.reset();
             mxFontCollection.reset();
             mbInitFont = true;
             mbNewFont = true;

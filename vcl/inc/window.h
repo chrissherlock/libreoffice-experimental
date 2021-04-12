@@ -136,7 +136,6 @@ struct ImplFrameData
     VclPtr<vcl::Window> mpMouseDownWin;         //< last window, where MouseButtonDown() called
     std::vector<VclPtr<vcl::Window> > maOwnerDrawList;    //< List of system windows with owner draw decoration
     std::shared_ptr<PhysicalFontFamilyCollection> mxFontCollection;   //< Font-List for this frame
-    std::shared_ptr<FontCache> mxFontCache; //< Font-Cache for this frame
     sal_Int32           mnDPIX;                 //< Original Screen Resolution
     sal_Int32           mnDPIY;                 //< Original Screen Resolution
     ImplSVEvent *       mnFocusId;              //< FocusId for PostUserLink

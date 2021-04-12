@@ -19,11 +19,16 @@
 
 #pragma once
 
+#include <o3tl/lru_map.hxx>
+
 #include <vcl/dllapi.h>
+#include <vcl/glyphitem.hxx>
 
 #include <font/PhysicalFontFamily.hxx>
 
 #include <array>
+
+#include <boost/functional/hash.hpp>
 
 #define MAX_GLYPHFALLBACK 16
 
@@ -32,8 +37,38 @@ class PhysicalFontFaceSizeCollection;
 class ImplGlyphFallbackFontSubstitution;
 class ImplPreMatchFontSubstitution;
 
-// TODO: merge with FontCache
 // TODO: rename to LogicalFontManager
+
+struct GlyphBoundRectCacheKey
+{
+    const LogicalFontInstance* m_pFont;
+    const sal_GlyphId m_nId;
+
+    GlyphBoundRectCacheKey(const LogicalFontInstance* pFont, sal_GlyphId nID)
+        : m_pFont(pFont)
+        , m_nId(nID)
+    {
+    }
+
+    bool operator==(GlyphBoundRectCacheKey const& aOther) const
+    {
+        return m_pFont == aOther.m_pFont && m_nId == aOther.m_nId;
+    }
+};
+
+struct GlyphBoundRectCacheHash
+{
+    std::size_t operator()(GlyphBoundRectCacheKey const& aCache) const
+    {
+        std::size_t seed = 0;
+        boost::hash_combine(seed, aCache.m_pFont);
+        boost::hash_combine(seed, aCache.m_nId);
+        return seed;
+    }
+};
+
+typedef o3tl::lru_map<GlyphBoundRectCacheKey, tools::Rectangle, GlyphBoundRectCacheHash>
+    GlyphBoundRectCache;
 
 class VCL_PLUGIN_PUBLIC PhysicalFontFamilyCollection final
 {
@@ -54,9 +89,17 @@ public:
     PhysicalFontFamily* FindFontFamilyByAttributes(ImplFontAttrs nSearchType, FontWeight, FontWidth,
                                                    FontItalic, const OUString& rSearchFamily) const;
 
+    rtl::Reference<LogicalFontInstance>
+    GetFontInstance(const vcl::Font&, const FontSize& rPixelSize, bool bNonAntialias = false);
     // suggest fonts for glyph fallback
-    PhysicalFontFamily* GetGlyphFallbackFont(FontSelectPattern&, LogicalFontInstance* pLogicalFont,
-                                             OUString& rMissingCodes, int nFallbackLevel) const;
+    PhysicalFontFamily* GetGlyphFallbackFontFamily(FontSelectPattern&,
+                                                   LogicalFontInstance* pLogicalFont,
+                                                   OUString& rMissingCodes,
+                                                   int nFallbackLevel) const;
+
+    rtl::Reference<LogicalFontInstance>
+    GetGlyphFallbackFontInstance(FontSelectPattern&, LogicalFontInstance* pLogicalFont,
+                                 int nFallbackLevel, OUString& rMissingCodes);
 
     // prepare platform specific font substitutions
     void SetPreMatchHook(ImplPreMatchFontSubstitution*);
@@ -68,7 +111,27 @@ public:
     std::unique_ptr<PhysicalFontFaceSizeCollection>
     GetDeviceFontSizeList(const OUString& rFontName) const;
 
+    // font cache
+    bool GetCachedGlyphBoundRect(const LogicalFontInstance*, sal_GlyphId, tools::Rectangle&);
+    void CacheGlyphBoundRect(const LogicalFontInstance*, sal_GlyphId, tools::Rectangle&);
+    void Invalidate();
+
 private:
+    // cache of recently used font instances
+    struct IFSD_Equal
+    {
+        bool operator()(const FontSelectPattern&, const FontSelectPattern&) const;
+    };
+
+    struct IFSD_Hash
+    {
+        size_t operator()(const FontSelectPattern&) const;
+    };
+
+    typedef o3tl::lru_map<FontSelectPattern, rtl::Reference<LogicalFontInstance>, IFSD_Hash,
+                          IFSD_Equal>
+        FontInstanceList;
+
     mutable bool mbMatchData; // true if matching attributes are initialized
 
     typedef std::unordered_map<OUString, std::unique_ptr<PhysicalFontFamily>> PhysicalFontFamilies;
@@ -81,6 +144,10 @@ private:
     mutable std::unique_ptr<std::array<PhysicalFontFamily*, MAX_GLYPHFALLBACK>> mpFallbackList;
     mutable int mnFallbackCount;
 
+    LogicalFontInstance* mpLastHitCacheEntry; ///< keeps the last hit cache entry
+    FontInstanceList maFontInstanceList;
+    GlyphBoundRectCache m_aBoundRectCache;
+
     void ImplInitMatchData() const;
     void ImplInitGenericGlyphFallback() const;
 
@@ -88,6 +155,8 @@ private:
     PhysicalFontFamily* ImplFindFontFamilyBySubstFontAttr(const utl::FontNameAttr&) const;
 
     PhysicalFontFamily* ImplFindFontFamilyOfDefaultFont() const;
+
+    rtl::Reference<LogicalFontInstance> GetFontInstance(FontSelectPattern&);
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

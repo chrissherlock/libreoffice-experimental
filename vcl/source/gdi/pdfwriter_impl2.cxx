@@ -1967,11 +1967,9 @@ static bool lcl_canUsePDFAxialShading(const Gradient& rGradient) {
 void PDFWriterImpl::ImplClearFontData(bool bNewFontLists)
 {
     VirtualDevice::ImplClearFontData(bNewFontLists);
+
     if (bNewFontLists && AcquireGraphics())
-    {
         ReleaseFontCollection();
-        ReleaseFontCache();
-    }
 }
 
 void PDFWriterImpl::ImplRefreshFontData(bool bNewFontLists)

@@ -21,6 +21,7 @@
 #include <unotools/fontdefs.hxx>
 
 #include <outdev.h>
+#include <font/FontSelectPattern.hxx>
 #include <font/PhysicalFontFamilyCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 

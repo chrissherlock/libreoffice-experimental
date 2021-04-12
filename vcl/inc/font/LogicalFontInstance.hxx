@@ -38,7 +38,7 @@
 #include <hb.h>
 
 class ConvertChar;
-class FontCache;
+class PhysicalFontFamilyCollection;
 class PhysicalFontFace;
 
 // TODO: allow sharing of metrics for related fonts
@@ -48,7 +48,7 @@ class VCL_PLUGIN_PUBLIC LogicalFontInstance : public salhelper::SimpleReferenceO
     // just declaring the factory function doesn't work AKA
     // friend LogicalFontInstance* PhysicalFontFace::CreateFontInstance(const FontSelectPattern&) const;
     friend class PhysicalFontFace;
-    friend class FontCache;
+    friend class PhysicalFontFamilyCollection;
 
 public: // TODO: make data members private
     virtual ~LogicalFontInstance() override;
@@ -76,8 +76,9 @@ public: // TODO: make data members private
     void SetEmphasisMarkStyle(FontEmphasisMark eEmphasisMark);
 
     const PhysicalFontFace* GetFontFace() const;
+    const PhysicalFontFamilyCollection* GetPhysicalFontFamilyCollection() const;
     PhysicalFontFace* GetFontFace();
-    const FontCache* GetFontCache() const;
+    const PhysicalFontFamilyCollection* GetFontCache() const;
 
     bool GetGlyphBoundRect(sal_GlyphId, tools::Rectangle&, bool) const;
     virtual bool GetGlyphOutline(sal_GlyphId, basegfx::B2DPolyPolygon&, bool) const = 0;
@@ -107,7 +108,7 @@ private:
     ConvertChar const* mpConversion; // used e.g. for StarBats->StarSymbol
     typedef ::std::unordered_map<::std::pair<sal_UCS4, FontWeight>, OUString> UnicodeFallbackList;
     std::unique_ptr<UnicodeFallbackList> mpUnicodeFallbackList;
-    mutable FontCache* mpFontCache;
+    mutable PhysicalFontFamilyCollection* mpPhysicalFontFamilyCollection;
     const FontSelectPattern m_aFontSelData;
     hb_font_t* m_pHbFont;
     double m_nAveWidthFactor;

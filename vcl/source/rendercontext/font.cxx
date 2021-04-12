@@ -220,8 +220,7 @@ bool RenderContext2::InitFontInstance()
 
     // get font entry
     rtl::Reference<LogicalFontInstance> pOldFontInstance = mpFontInstance;
-    mpFontInstance = mxFontCache->GetFontInstance(mxFontCollection.get(), maFont, aSize,
-                                                  IsFontUnantialiased());
+    mpFontInstance = mxFontCollection->GetFontInstance(maFont, aSize, IsFontUnantialiased());
     const bool bNewFontInstance = pOldFontInstance.get() != mpFontInstance.get();
     pOldFontInstance.clear();
 
@@ -488,13 +487,12 @@ RenderContext2::ImplGlyphFallbackLayout(std::unique_ptr<SalLayout> pSalLayout,
             pFallbackFont = pGlyphs->Impl(nFallbackLevel)->GetFont();
 
         // find a font family suited for glyph fallback
-        // GetGlyphFallbackFont() needs a valid FontInstance
+        // GetGlyphFallbackFontInstance() needs a valid FontInstance
         // if the system-specific glyph fallback is active
         if (!pFallbackFont)
         {
-            pFallbackFont = mxFontCache->GetGlyphFallbackFont(mxFontCollection.get(), aFontSelData,
-                                                              mpFontInstance.get(), nFallbackLevel,
-                                                              aMissingCodes);
+            pFallbackFont = mxFontCollection->GetGlyphFallbackFontInstance(
+                aFontSelData, mpFontInstance.get(), nFallbackLevel, aMissingCodes);
         }
 
         if (!pFallbackFont)
@@ -727,8 +725,8 @@ void RenderContext2::ImplClearFontData(const bool bNewFontLists)
 
     ImplSVData* pSVData = ImplGetSVData();
 
-    if (mxFontCache && mxFontCache != pSVData->maGDIData.mxScreenFontCache)
-        mxFontCache->Invalidate();
+    if (mxFontCollection && mxFontCollection != pSVData->maGDIData.mxScreenFontList)
+        mxFontCollection->Invalidate();
 
     if (bNewFontLists && AcquireGraphics())
     {
@@ -761,7 +759,7 @@ void RenderContext2::ImplClearAllFontData(bool bNewFontLists)
     ImplUpdateFontDataForAllFrames(&RenderContext2::ImplClearFontData, bNewFontLists);
 
     // clear global font lists to have them updated
-    pSVData->maGDIData.mxScreenFontCache->Invalidate();
+    pSVData->maGDIData.mxScreenFontList->Invalidate();
     if (!bNewFontLists)
         return;
 
@@ -1045,8 +1043,7 @@ vcl::Font RenderContext2::GetDefaultFont(DefaultFontType nType, LanguageType eLa
 
                     // get the name of the first available font
                     rtl::Reference<LogicalFontInstance> pFontInstance
-                        = pOutDev->mxFontCache->GetFontInstance(pOutDev->mxFontCollection.get(),
-                                                                aFont, aSize);
+                        = pOutDev->mxFontCollection->GetFontInstance(aFont, aSize);
 
                     if (pFontInstance)
                     {
@@ -1362,8 +1359,6 @@ sal_Int32 RenderContext2::HasGlyphs(const vcl::Font& rTempFont, const OUString& 
     return -1;
 }
 
-void RenderContext2::ReleaseFontCache() { mxFontCache.reset(); }
-
 void RenderContext2::ReleaseFontCollection() { mxFontCollection.reset(); }
 
 void RenderContext2::SetFontCollectionFromSVData()
@@ -1371,7 +1366,10 @@ void RenderContext2::SetFontCollectionFromSVData()
     mxFontCollection = ImplGetSVData()->maGDIData.mxScreenFontList->Clone();
 }
 
-void RenderContext2::ResetNewFontCache() { mxFontCache = std::make_shared<FontCache>(); }
+void RenderContext2::ResetNewFontCache()
+{
+    mxFontCollection = std::make_shared<PhysicalFontFamilyCollection>();
+}
 
 void RenderContext2::ImplReleaseFonts()
 {

@@ -26,7 +26,6 @@
 #include <tools/gen.hxx>
 #include <vcl/vclptr.hxx>
 
-#include <font/FontCache.hxx>
 #include <font/PhysicalFontFace.hxx>
 
 class Size;
