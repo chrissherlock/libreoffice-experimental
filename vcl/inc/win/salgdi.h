@@ -46,7 +46,7 @@
 class FontSelectPattern;
 class WinFontInstance;
 class ImplFontAttrCache;
-class PhysicalFontFamilyCollection;
+class LogicalFontManager;
 class SalGraphicsImpl;
 class WinSalGraphicsImplBase;
 class ImplFontMetricData;
@@ -341,10 +341,10 @@ public:
     // get the layout capabilities of the current font
     virtual bool GetFontCapabilities(vcl::FontCapabilities &rGetFontCapabilities) const override;
     // graphics must fill supplied font list
-    virtual void            GetDevFontList( PhysicalFontFamilyCollection* ) override;
+    virtual void            GetDevFontList( LogicalFontManager* ) override;
     // graphics must drop any cached font info
     virtual void            ClearDevFontCache() override;
-    virtual bool            AddTempDevFont( PhysicalFontFamilyCollection*, const OUString& rFileURL, const OUString& rFontName ) override;
+    virtual bool            AddTempDevFont( LogicalFontManager*, const OUString& rFileURL, const OUString& rFontName ) override;
     // CreateFontSubset: a method to get a subset of glyhps of a font
     // inside a new valid font file
     // returns TRUE if creation of subset was successful

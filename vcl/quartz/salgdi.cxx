@@ -45,7 +45,7 @@
 #include <font/FontSubsetInfo.hxx>
 #include <quartz/ctfonts.hxx>
 #include <outdev.h>
-#include <font/PhysicalFontFamilyCollection.hxx>
+#include <font/LogicalFontManager.hxx>
 
 #ifdef MACOSX
 #include <osx/salframe.h>
@@ -332,7 +332,7 @@ static void AddLocalTempFontDirs()
     AddTempFontDir( aBrandStr + "/" LIBO_SHARE_FOLDER "/fonts/truetype/" );
 }
 
-void AquaSalGraphics::GetDevFontList( PhysicalFontFamilyCollection* pFontCollection )
+void AquaSalGraphics::GetDevFontList( LogicalFontManager* pFontCollection )
 {
     SAL_WARN_IF( !pFontCollection, "vcl", "AquaSalGraphics::GetDevFontList(NULL) !");
 
@@ -364,7 +364,7 @@ void AquaSalGraphics::ClearDevFontCache()
     pSalData->mpFontList = nullptr;
 }
 
-bool AquaSalGraphics::AddTempDevFont( PhysicalFontFamilyCollection*,
+bool AquaSalGraphics::AddTempDevFont( LogicalFontManager*,
     const OUString& rFontFileURL, const OUString& /*rFontName*/ )
 {
     return ::AddTempDevFont(rFontFileURL);

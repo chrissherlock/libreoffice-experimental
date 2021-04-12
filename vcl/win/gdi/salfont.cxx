@@ -55,7 +55,7 @@
 #include <font/GlyphItem.hxx>
 #include <font/ImplFontCharMap.hxx>
 #include <font/ImplFontMetricData.hxx>
-#include <font/PhysicalFontFamilyCollection.hxx>
+#include <font/LogicalFontManager.hxx>
 #include <font/PhysicalFontFace.hxx>
 #include <sft.hxx>
 #include <win/saldata.hxx>
@@ -242,7 +242,7 @@ bool WinGlyphFallbackSubstititution::HasMissingChars(PhysicalFontFace* pFace, OU
 namespace
 {
     //used by 2-level font fallback
-    PhysicalFontFamily* findDevFontListByLocale(const PhysicalFontFamilyCollection &rFontCollection,
+    PhysicalFontFamily* findDevFontListByLocale(const LogicalFontManager &rFontCollection,
                                                 const LanguageTag& rLanguageTag )
     {
         // get the default font for a specified locale
@@ -299,8 +299,8 @@ bool WinGlyphFallbackSubstititution::FindFontSubstitute(FontSelectPattern& rFont
 
     // first level fallback:
     // try use the locale specific default fonts defined in VCL.xcu
-    const PhysicalFontFamilyCollection* pFontCollection = ImplGetSVData()->maGDIData.mxScreenFontList.get();
-    PhysicalFontFamily* pFontFamily = findDevFontListByLocale(*pFontCollection, aLanguageTag);
+    const LogicalFontManager* pFontManager = ImplGetSVData()->maGDIData.mxScreenFontManager.get();
+    PhysicalFontFamily* pFontFamily = findDevFontListByLocale(*pFontManager, aLanguageTag);
     if( pFontFamily )
     {
         PhysicalFontFace* pFace = pFontFamily->FindBestFontFace( rFontSelData );
@@ -312,7 +312,7 @@ bool WinGlyphFallbackSubstititution::FindFontSubstitute(FontSelectPattern& rFont
     }
 
     // are the missing characters symbols?
-    pFontFamily = pFontCollection->FindFontFamilyByAttributes( ImplFontAttrs::Symbol,
+    pFontFamily = pFontManager->FindFontFamilyByAttributes( ImplFontAttrs::Symbol,
                                                      rFontSelData.GetWeight(),
                                                      rFontSelData.GetWidthType(),
                                                      rFontSelData.GetItalic(),
@@ -328,7 +328,7 @@ bool WinGlyphFallbackSubstititution::FindFontSubstitute(FontSelectPattern& rFont
     }
 
     // last level fallback, check each font type face one by one
-    std::unique_ptr<ImplDeviceFontList> pTestFontList = pFontCollection->GetDeviceFontList();
+    std::unique_ptr<ImplDeviceFontList> pTestFontList = pFontManager->GetDeviceFontList();
     // limit the count of fonts to be checked to prevent hangs
     static const int MAX_GFBFONT_COUNT = 600;
     int nTestFontCount = pTestFontList->Count();
@@ -354,7 +354,7 @@ namespace {
 struct ImplEnumInfo
 {
     HDC                 mhDC;
-    PhysicalFontFamilyCollection* mpList;
+    LogicalFontManager* mpList;
     OUString*           mpName;
     LOGFONTW*           mpLogFont;
     bool                mbPrinter;
@@ -1141,7 +1141,7 @@ static OUString lcl_GetFontFamilyName(const OUString& rFontFileURL)
     return OUString(aBuffer + nNameOfs, nPos - nNameOfs, osl_getThreadTextEncoding());
 }
 
-bool WinSalGraphics::AddTempDevFont(PhysicalFontFamilyCollection* pFontCollection,
+bool WinSalGraphics::AddTempDevFont(LogicalFontManager* pFontManager,
                                     const OUString& rFontFileURL, const OUString& rFontName)
 {
     OUString aFontFamily = lcl_GetFontFamilyName(rFontFileURL);
@@ -1163,27 +1163,27 @@ bool WinSalGraphics::AddTempDevFont(PhysicalFontFamilyCollection* pFontCollectio
 
     ImplEnumInfo aInfo;
     aInfo.mhDC = getHDC();
-    aInfo.mpList = pFontCollection;
+    aInfo.mpList = pFontManager;
     aInfo.mpName = &aFontFamily;
     aInfo.mbPrinter = mbPrinter;
-    aInfo.mnFontCount = pFontCollection->Count();
+    aInfo.mnFontCount = pFontManager->Count();
     const int nExpectedFontCount = aInfo.mnFontCount + nFonts;
 
     LOGFONTW aLogFont = {};
     aLogFont.lfCharSet = DEFAULT_CHARSET;
     aInfo.mpLogFont = &aLogFont;
 
-    // add the font to the PhysicalFontFamilyCollection
+    // add the font to the LogicalFontManager
     EnumFontFamiliesExW(getHDC(), &aLogFont,
         SalEnumFontsProcExW, reinterpret_cast<LPARAM>(&aInfo), 0);
 
-    SAL_WARN_IF(nExpectedFontCount != pFontCollection->Count(), "vcl.fonts",
+    SAL_WARN_IF(nExpectedFontCount != pFontManager->Count(), "vcl.fonts",
         "temp font was registered but is not in enumeration: " << rFontFileURL);
 
     return true;
 }
 
-void WinSalGraphics::GetDevFontList( PhysicalFontFamilyCollection* pFontCollection )
+void WinSalGraphics::GetDevFontList( LogicalFontManager* pFontManager )
 {
     // make sure all LO shared fonts are registered temporarily
     static std::once_flag init;
@@ -1227,7 +1227,7 @@ void WinSalGraphics::GetDevFontList( PhysicalFontFamilyCollection* pFontCollecti
 
     ImplEnumInfo aInfo;
     aInfo.mhDC          = getHDC();
-    aInfo.mpList        = pFontCollection;
+    aInfo.mpList        = pFontManager;
     aInfo.mpName        = nullptr;
     aInfo.mbPrinter     = mbPrinter;
     aInfo.mnFontCount   = 0;
@@ -1236,15 +1236,15 @@ void WinSalGraphics::GetDevFontList( PhysicalFontFamilyCollection* pFontCollecti
     aLogFont.lfCharSet = DEFAULT_CHARSET;
     aInfo.mpLogFont = &aLogFont;
 
-    // fill the PhysicalFontFamilyCollection
+    // fill the LogicalFontManager
     EnumFontFamiliesExW( getHDC(), &aLogFont,
         SalEnumFontsProcExW, reinterpret_cast<LPARAM>(&aInfo), 0 );
 
     // set glyph fallback hook
     static WinGlyphFallbackSubstititution aSubstFallback;
     static WinPreMatchFontSubstititution aPreMatchFont;
-    pFontCollection->SetFallbackHook( &aSubstFallback );
-    pFontCollection->SetPreMatchHook(&aPreMatchFont);
+    pFontManager->SetFallbackHook( &aSubstFallback );
+    pFontManager->SetPreMatchHook(&aPreMatchFont);
 }
 
 void WinSalGraphics::ClearDevFontCache()

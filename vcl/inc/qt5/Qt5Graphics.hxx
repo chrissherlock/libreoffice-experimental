@@ -29,7 +29,7 @@
 
 #include "Qt5GraphicsBase.hxx"
 
-class PhysicalFontFamilyCollection;
+class LogicalFontManager;
 class QImage;
 class QPushButton;
 class Qt5Font;
@@ -222,9 +222,9 @@ public:
     virtual void GetFontMetric(ImplFontMetricDataRef&, int nFallbackLevel) override;
     virtual FontCharMapRef GetFontCharMap() const override;
     virtual bool GetFontCapabilities(vcl::FontCapabilities& rFontCapabilities) const override;
-    virtual void GetDevFontList(PhysicalFontFamilyCollection*) override;
+    virtual void GetDevFontList(LogicalFontManager*) override;
     virtual void ClearDevFontCache() override;
-    virtual bool AddTempDevFont(PhysicalFontFamilyCollection*, const OUString& rFileURL,
+    virtual bool AddTempDevFont(LogicalFontManager*, const OUString& rFileURL,
                                 const OUString& rFontName) override;
     virtual bool CreateFontSubset(const OUString& rToFile, const PhysicalFontFace* pFont,
                                   const sal_GlyphId* pGlyphIds, const sal_uInt8* pEncoding,

@@ -70,11 +70,11 @@ struct GlyphBoundRectCacheHash
 typedef o3tl::lru_map<GlyphBoundRectCacheKey, tools::Rectangle, GlyphBoundRectCacheHash>
     GlyphBoundRectCache;
 
-class VCL_PLUGIN_PUBLIC PhysicalFontFamilyCollection final
+class VCL_PLUGIN_PUBLIC LogicalFontManager final
 {
 public:
-    explicit PhysicalFontFamilyCollection();
-    ~PhysicalFontFamilyCollection();
+    explicit LogicalFontManager();
+    ~LogicalFontManager();
 
     // fill the list with device font faces
     void Add(PhysicalFontFace*);
@@ -106,7 +106,7 @@ public:
     void SetFallbackHook(ImplGlyphFallbackFontSubstitution*);
 
     // misc utilities
-    std::shared_ptr<PhysicalFontFamilyCollection> Clone() const;
+    std::shared_ptr<LogicalFontManager> Clone() const;
     std::unique_ptr<PhysicalFontFaceCollection> GetDeviceFontList() const;
     std::unique_ptr<PhysicalFontFaceSizeCollection>
     GetDeviceFontSizeList(const OUString& rFontName) const;

@@ -47,7 +47,7 @@ bool SvpSalGraphics::GetFontCapabilities(vcl::FontCapabilities &rFontCapabilitie
     return m_aTextRenderImpl.GetFontCapabilities(rFontCapabilities);
 }
 
-void SvpSalGraphics::GetDevFontList( PhysicalFontFamilyCollection* pFontCollection )
+void SvpSalGraphics::GetDevFontList( LogicalFontManager* pFontCollection )
 {
     m_aTextRenderImpl.GetDevFontList(pFontCollection);
 }
@@ -57,7 +57,7 @@ void SvpSalGraphics::ClearDevFontCache()
     m_aTextRenderImpl.ClearDevFontCache();
 }
 
-bool SvpSalGraphics::AddTempDevFont( PhysicalFontFamilyCollection* pFontCollection,
+bool SvpSalGraphics::AddTempDevFont( LogicalFontManager* pFontCollection,
     const OUString& rFileURL, const OUString& rFontName)
 {
     return m_aTextRenderImpl.AddTempDevFont(pFontCollection, rFileURL, rFontName);

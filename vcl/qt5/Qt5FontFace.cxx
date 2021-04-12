@@ -30,7 +30,7 @@
 #include <font/ImplFontCharMap.hxx>
 #include <font/FontSelectPattern.hxx>
 #include <font/LogicalFontInstance.hxx>
-#include <font/PhysicalFontFamilyCollection.hxx>
+#include <font/LogicalFontManager.hxx>
 
 #include <QtGui/QFont>
 #include <QtGui/QFontDatabase>

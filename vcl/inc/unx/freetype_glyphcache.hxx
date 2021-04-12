@@ -72,7 +72,7 @@ public:
     bool                  IsSymbolFont() const      { return maDevFontAttributes.IsSymbolFont(); }
     const FontAttributes& GetFontAttributes() const { return maDevFontAttributes; }
 
-    void                  AnnounceFont( PhysicalFontFamilyCollection* );
+    void                  AnnounceFont( LogicalFontManager* );
 
     const FontCharMapRef & GetFontCharMap() const;
     bool GetFontCapabilities(vcl::FontCapabilities&) const;

@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-04-10 05:39:56 using:
+ Generated on 2021-04-13 03:54:35 using:
  ./bin/update_pch vcl vcl --cutoff=6 --exclude:system --include:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -38,7 +38,6 @@
 #include <iomanip>
 #include <limits.h>
 #include <limits>
-#include <list>
 #include <map>
 #include <math.h>
 #include <memory>
@@ -193,10 +192,13 @@
 #include <cppuhelper/weakagg.hxx>
 #include <cppuhelper/weakref.hxx>
 #include <font/FontAttributes.hxx>
+#include <font/FontSelectPattern.hxx>
+#include <font/ImplFontMetricData.hxx>
+#include <font/LogicalFontInstance.hxx>
+#include <font/LogicalFontManager.hxx>
 #include <font/PhysicalFontFace.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <font/PhysicalFontFaceSizeCollection.hxx>
-#include <font/PhysicalFontFamilyCollection.hxx>
 #include <i18nlangtag/lang.h>
 #include <i18nlangtag/languagetag.hxx>
 #include <i18nlangtag/mslangid.hxx>
@@ -264,8 +266,6 @@
 #include <configsettings.hxx>
 #include <controldata.hxx>
 #include <drawmode.hxx>
-#include <fontselect.hxx>
-#include <impfontmetricdata.hxx>
 #include <outdev.h>
 #include <salbmp.hxx>
 #include <salframe.hxx>
@@ -314,6 +314,7 @@
 #include <vcl/dockwin.hxx>
 #include <vcl/event.hxx>
 #include <vcl/font.hxx>
+#include <vcl/font/FontCharMap.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/glyphitem.hxx>
 #include <vcl/gradient.hxx>

@@ -30,7 +30,7 @@
 
 class PhysicalFontFaceCollection;
 class PhysicalFontFace;
-class PhysicalFontFamilyCollection;
+class LogicalFontManager;
 
 // flags for mnTypeFaces member
 enum class FontTypeFaces
@@ -76,7 +76,7 @@ public:
     PhysicalFontFace* FindBestFontFace(const FontSelectPattern& rFSD) const;
 
     void UpdateDevFontList(PhysicalFontFaceCollection&) const;
-    void UpdateCloneFontList(PhysicalFontFamilyCollection&) const;
+    void UpdateCloneFontList(LogicalFontManager&) const;
 
     static void CalcType(ImplFontAttrs& rType, FontWeight& rWeight, FontWidth& rWidth,
                          FontFamily eFamily, const utl::FontNameAttr* pFontAttr);

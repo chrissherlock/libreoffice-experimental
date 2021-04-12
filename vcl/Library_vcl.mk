@@ -552,8 +552,8 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/font/FeatureParser \
     vcl/source/font/FontSelectPattern \
     vcl/source/font/LogicalFontInstance \
+    vcl/source/font/LogicalFontManager \
     vcl/source/font/OpenTypeFeatureDefinitionList \
-    vcl/source/font/PhysicalFontFamilyCollection \
     vcl/source/font/PhysicalFontFace \
     vcl/source/font/PhysicalFontFaceCollection \
     vcl/source/font/PhysicalFontFaceSizeCollection \

@@ -20,7 +20,7 @@
 #include <unotools/fontdefs.hxx>
 
 #include <font/LogicalFontInstance.hxx>
-#include <font/PhysicalFontFamilyCollection.hxx>
+#include <font/LogicalFontManager.hxx>
 #include <font/PhysicalFontFace.hxx>
 
 #include <hb-ot.h>
@@ -50,7 +50,7 @@ LogicalFontInstance::LogicalFontInstance(const PhysicalFontFace& rFontFace,
     , mnOrientation(0)
     , mbInit(false)
     , mpConversion(nullptr)
-    , mpPhysicalFontFamilyCollection(nullptr)
+    , mpLogicalFontManager(nullptr)
     , m_aFontSelData(rFontSelData)
     , m_pHbFont(nullptr)
     , m_nAveWidthFactor(1.0f)
@@ -61,7 +61,7 @@ LogicalFontInstance::LogicalFontInstance(const PhysicalFontFace& rFontFace,
 LogicalFontInstance::~LogicalFontInstance()
 {
     mpUnicodeFallbackList.reset();
-    mpPhysicalFontFamilyCollection = nullptr;
+    mpLogicalFontManager = nullptr;
     mxFontMetric = nullptr;
 
     if (m_pHbFont)
@@ -153,13 +153,12 @@ void LogicalFontInstance::IgnoreFallbackForUnicode(sal_UCS4 cChar, FontWeight eW
 bool LogicalFontInstance::GetGlyphBoundRect(sal_GlyphId nID, tools::Rectangle& rRect,
                                             bool bVertical) const
 {
-    if (mpPhysicalFontFamilyCollection
-        && mpPhysicalFontFamilyCollection->GetCachedGlyphBoundRect(this, nID, rRect))
+    if (mpLogicalFontManager && mpLogicalFontManager->GetCachedGlyphBoundRect(this, nID, rRect))
         return true;
 
     bool res = ImplGetGlyphBoundRect(nID, rRect, bVertical);
-    if (mpPhysicalFontFamilyCollection && res)
-        mpPhysicalFontFamilyCollection->CacheGlyphBoundRect(this, nID, rRect);
+    if (mpLogicalFontManager && res)
+        mpLogicalFontManager->CacheGlyphBoundRect(this, nID, rRect);
     return res;
 }
 
@@ -187,10 +186,7 @@ const FontSelectPattern& LogicalFontInstance::GetFontSelectPattern() const
 
 const PhysicalFontFace* LogicalFontInstance::GetFontFace() const { return m_pFontFace.get(); }
 
-const PhysicalFontFamilyCollection* LogicalFontInstance::GetFontCache() const
-{
-    return mpPhysicalFontFamilyCollection;
-}
+const LogicalFontManager* LogicalFontInstance::GetFontCache() const { return mpLogicalFontManager; }
 
 PhysicalFontFace* LogicalFontInstance::GetFontFace() { return m_pFontFace.get(); }
 

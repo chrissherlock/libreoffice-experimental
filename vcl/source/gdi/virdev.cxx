@@ -24,7 +24,7 @@
 #include <vcl/virdev.hxx>
 
 #include <outdev.h>
-#include <font/PhysicalFontFamilyCollection.hxx>
+#include <font/LogicalFontManager.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <font/PhysicalFontFaceSizeCollection.hxx>
 #include <salinst.hxx>
@@ -178,7 +178,7 @@ void VirtualDevice::ImplInitVirDev( const RenderContext2* pOutDev,
     mbScreenComp    = pOutDev->IsScreenComp();
 
     mbDevOutput     = true;
-    mxFontCollection = pSVData->maGDIData.mxScreenFontList;
+    mxFontManager = pSVData->maGDIData.mxScreenFontManager;
     SetDPIX(pOutDev->GetDPIX());
     SetDPIY(pOutDev->GetDPIY());
     SetDPIScalePercentage(pOutDev->GetDPIScalePercentage());
@@ -484,12 +484,12 @@ void VirtualDevice::ImplSetReferenceDevice( RefDevMode i_eRefDevMode, sal_Int32 
 
     // preserve global font lists
     ImplSVData* pSVData = ImplGetSVData();
-    mxFontCollection.reset();
-    mxFontCollection.reset();
+    mxFontManager.reset();
+    mxFontManager.reset();
 
     // get font list with scalable fonts only
     (void)AcquireGraphics();
-    mxFontCollection = pSVData->maGDIData.mxScreenFontList->Clone();
+    mxFontManager = pSVData->maGDIData.mxScreenFontManager->Clone();
 }
 
 sal_uInt16 VirtualDevice::GetBitCount() const

@@ -1373,7 +1373,7 @@ bool PDFWriterImpl::InitNewFont()
 {
     const ImplSVData* pSVData = ImplGetSVData();
 
-    if (mxFontCollection == pSVData->maGDIData.mxScreenFontList)
+    if (mxFontManager == pSVData->maGDIData.mxScreenFontManager)
     {
         const_cast<vcl::PDFWriterImpl&>(*this).ImplUpdateFontData();
     }

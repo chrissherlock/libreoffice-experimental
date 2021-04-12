@@ -93,7 +93,7 @@ FreeTypeTextRenderImpl::SetTextColor( Color nColor )
     }
 }
 
-bool FreeTypeTextRenderImpl::AddTempDevFont( PhysicalFontFamilyCollection* pFontCollection,
+bool FreeTypeTextRenderImpl::AddTempDevFont( LogicalFontManager* pFontCollection,
                                      const OUString& rFileURL,
                                      const OUString& rFontName )
 {
@@ -106,7 +106,7 @@ void FreeTypeTextRenderImpl::ClearDevFontCache()
     psp::PrintFontManager::clearFontOptionsCache();
 }
 
-void FreeTypeTextRenderImpl::GetDevFontList( PhysicalFontFamilyCollection* pFontCollection )
+void FreeTypeTextRenderImpl::GetDevFontList( LogicalFontManager* pFontCollection )
 {
     // prepare the FreetypeManager using psprint's font infos
     FreetypeManager& rFreetypeManager = FreetypeManager::get();

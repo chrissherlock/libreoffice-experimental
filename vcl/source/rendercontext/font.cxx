@@ -35,7 +35,7 @@
 #include <window.h>
 #include <emphasismark.hxx>
 #include <font/FeatureCollector.hxx>
-#include <font/PhysicalFontFamilyCollection.hxx>
+#include <font/LogicalFontManager.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <font/PhysicalFontFaceSizeCollection.hxx>
 #include <drawmode.hxx>
@@ -84,8 +84,8 @@ void RenderContext2::SetFont(vcl::Font const& rNewFont)
 
 bool RenderContext2::IsFontAvailable(OUString const& rFontName) const
 {
-    InitPhysicalFontFamilyCollection();
-    PhysicalFontFamily* pFound = mxFontCollection->FindFontFamily(rFontName);
+    InitLogicalFontManager();
+    PhysicalFontFamily* pFound = mxFontManager->FindFontFamily(rFontName);
     return (pFound != nullptr);
 }
 
@@ -214,13 +214,13 @@ bool RenderContext2::IsFontUnantialiased() const
 
 bool RenderContext2::InitFontInstance()
 {
-    InitPhysicalFontFamilyCollection();
+    InitLogicalFontManager();
 
     FontSize aSize = GetFontSize(maFont);
 
     // get font entry
     rtl::Reference<LogicalFontInstance> pOldFontInstance = mpFontInstance;
-    mpFontInstance = mxFontCollection->GetFontInstance(maFont, aSize, IsFontUnantialiased());
+    mpFontInstance = mxFontManager->GetFontInstance(maFont, aSize, IsFontUnantialiased());
     const bool bNewFontInstance = pOldFontInstance.get() != mpFontInstance.get();
     pOldFontInstance.clear();
 
@@ -264,9 +264,9 @@ bool RenderContext2::InitFontInstance()
     return true;
 }
 
-void RenderContext2::InitPhysicalFontFamilyCollection() const
+void RenderContext2::InitLogicalFontManager() const
 {
-    if (mxFontCollection->Count())
+    if (mxFontManager->Count())
         return;
 
     if (!(mpGraphics || AcquireGraphics()))
@@ -274,11 +274,11 @@ void RenderContext2::InitPhysicalFontFamilyCollection() const
 
     assert(mpGraphics);
 
-    SAL_INFO("vcl.gdi", "RenderContext2::InitPhysicalFontFamilyCollection()");
-    mpGraphics->GetDevFontList(mxFontCollection.get());
+    SAL_INFO("vcl.gdi", "RenderContext2::InitLogicalFontManager()");
+    mpGraphics->GetDevFontList(mxFontManager.get());
 
     // There is absolutely no way there should be no fonts available on the device
-    if (!mxFontCollection->Count())
+    if (!mxFontManager->Count())
     {
         OUString aError("Application error: no fonts and no vcl resource found on your system");
         OUString aResStr(VclResId(SV_ACCESSERROR_NO_FONTS));
@@ -353,7 +353,7 @@ bool RenderContext2::FixOLEScaleFactors()
 
 FontMetric RenderContext2::GetFontMetric(int nDevFontIndex) const
 {
-    InitPhysicalFontFamilyCollection();
+    InitLogicalFontManager();
 
     int nCount = GetFontMetricCount();
     if (nDevFontIndex < nCount)
@@ -366,12 +366,12 @@ int RenderContext2::GetFontMetricCount() const
 {
     if (!mpDeviceFontList)
     {
-        if (!mxFontCollection)
+        if (!mxFontManager)
         {
             return 0;
         }
 
-        mpDeviceFontList = mxFontCollection->GetDeviceFontList();
+        mpDeviceFontList = mxFontManager->GetDeviceFontList();
 
         if (!mpDeviceFontList->Count())
         {
@@ -386,8 +386,8 @@ int RenderContext2::GetPhysicalFontFaceSizeCount(vcl::Font const& rFont) const
 {
     mpDeviceFontSizeList.reset();
 
-    InitPhysicalFontFamilyCollection();
-    mpDeviceFontSizeList = mxFontCollection->GetDeviceFontSizeList(rFont.GetFamilyName());
+    InitLogicalFontManager();
+    mpDeviceFontSizeList = mxFontManager->GetDeviceFontSizeList(rFont.GetFamilyName());
     return mpDeviceFontSizeList->Count();
 }
 
@@ -425,12 +425,12 @@ Size RenderContext2::GetPhysicalFontFaceSize(vcl::Font const& rFont, int nSizeIn
 
 bool RenderContext2::AddTempDevFont(OUString const& rFileURL, OUString const& rFontName)
 {
-    InitPhysicalFontFamilyCollection();
+    InitLogicalFontManager();
 
     if (!mpGraphics && !AcquireGraphics())
         return false;
 
-    bool bRC = mpGraphics->AddTempDevFont(mxFontCollection.get(), rFileURL, rFontName);
+    bool bRC = mpGraphics->AddTempDevFont(mxFontManager.get(), rFileURL, rFontName);
     if (!bRC)
         return false;
 
@@ -491,7 +491,7 @@ RenderContext2::ImplGlyphFallbackLayout(std::unique_ptr<SalLayout> pSalLayout,
         // if the system-specific glyph fallback is active
         if (!pFallbackFont)
         {
-            pFallbackFont = mxFontCollection->GetGlyphFallbackFontInstance(
+            pFallbackFont = mxFontManager->GetGlyphFallbackFontInstance(
                 aFontSelData, mpFontInstance.get(), nFallbackLevel, aMissingCodes);
         }
 
@@ -725,13 +725,13 @@ void RenderContext2::ImplClearFontData(const bool bNewFontLists)
 
     ImplSVData* pSVData = ImplGetSVData();
 
-    if (mxFontCollection && mxFontCollection != pSVData->maGDIData.mxScreenFontList)
-        mxFontCollection->Invalidate();
+    if (mxFontManager && mxFontManager != pSVData->maGDIData.mxScreenFontManager)
+        mxFontManager->Invalidate();
 
     if (bNewFontLists && AcquireGraphics())
     {
-        if (mxFontCollection && mxFontCollection != pSVData->maGDIData.mxScreenFontList)
-            mxFontCollection->Clear();
+        if (mxFontManager && mxFontManager != pSVData->maGDIData.mxScreenFontManager)
+            mxFontManager->Clear();
     }
 }
 
@@ -743,7 +743,7 @@ void RenderContext2::RefreshFontData(const bool bNewFontLists)
 void RenderContext2::ImplRefreshFontData(const bool bNewFontLists)
 {
     if (bNewFontLists && AcquireGraphics())
-        mpGraphics->GetDevFontList(mxFontCollection.get());
+        mpGraphics->GetDevFontList(mxFontManager.get());
 }
 
 void RenderContext2::ImplUpdateFontData()
@@ -759,11 +759,11 @@ void RenderContext2::ImplClearAllFontData(bool bNewFontLists)
     ImplUpdateFontDataForAllFrames(&RenderContext2::ImplClearFontData, bNewFontLists);
 
     // clear global font lists to have them updated
-    pSVData->maGDIData.mxScreenFontList->Invalidate();
+    pSVData->maGDIData.mxScreenFontManager->Invalidate();
     if (!bNewFontLists)
         return;
 
-    pSVData->maGDIData.mxScreenFontList->Clear();
+    pSVData->maGDIData.mxScreenFontManager->Clear();
     vcl::Window* pFrame = pSVData->maFrameData.mpFirstFrame;
     if (pFrame)
     {
@@ -772,7 +772,7 @@ void RenderContext2::ImplClearAllFontData(bool bNewFontLists)
             RenderContext2* pDevice = pFrame;
             pDevice->mpGraphics->ClearDevFontCache();
             pDevice->mpGraphics->GetDevFontList(
-                pFrame->mpWindowImpl->mpFrameData->mxFontCollection.get());
+                pFrame->mpWindowImpl->mpFrameData->mxFontManager.get());
         }
     }
 }
@@ -1001,7 +1001,7 @@ vcl::Font RenderContext2::GetDefaultFont(DefaultFontType nType, LanguageType eLa
         // Should we only return available fonts on the given device
         if (pOutDev)
         {
-            pOutDev->InitPhysicalFontFamilyCollection();
+            pOutDev->InitLogicalFontManager();
 
             // Search Font in the FontList
             OUString aName;
@@ -1009,7 +1009,7 @@ vcl::Font RenderContext2::GetDefaultFont(DefaultFontType nType, LanguageType eLa
             do
             {
                 PhysicalFontFamily* pFontFamily
-                    = pOutDev->mxFontCollection->FindFontFamily(GetNextFontToken(aSearch, nIndex));
+                    = pOutDev->mxFontManager->FindFontFamily(GetNextFontToken(aSearch, nIndex));
                 if (pFontFamily)
                 {
                     AddTokenFontName(aName, pFontFamily->GetFamilyName());
@@ -1034,7 +1034,7 @@ vcl::Font RenderContext2::GetDefaultFont(DefaultFontType nType, LanguageType eLa
                 }
                 else
                 {
-                    pOutDev->InitPhysicalFontFamilyCollection();
+                    pOutDev->InitLogicalFontManager();
 
                     aFont.SetFamilyName(aSearch);
 
@@ -1043,7 +1043,7 @@ vcl::Font RenderContext2::GetDefaultFont(DefaultFontType nType, LanguageType eLa
 
                     // get the name of the first available font
                     rtl::Reference<LogicalFontInstance> pFontInstance
-                        = pOutDev->mxFontCollection->GetFontInstance(aFont, aSize);
+                        = pOutDev->mxFontManager->GetFontInstance(aFont, aSize);
 
                     if (pFontInstance)
                     {
@@ -1359,17 +1359,14 @@ sal_Int32 RenderContext2::HasGlyphs(const vcl::Font& rTempFont, const OUString& 
     return -1;
 }
 
-void RenderContext2::ReleaseFontCollection() { mxFontCollection.reset(); }
+void RenderContext2::ReleaseFontCollection() { mxFontManager.reset(); }
 
 void RenderContext2::SetFontCollectionFromSVData()
 {
-    mxFontCollection = ImplGetSVData()->maGDIData.mxScreenFontList->Clone();
+    mxFontManager = ImplGetSVData()->maGDIData.mxScreenFontManager->Clone();
 }
 
-void RenderContext2::ResetNewFontCache()
-{
-    mxFontCollection = std::make_shared<PhysicalFontFamilyCollection>();
-}
+void RenderContext2::ResetNewFontCache() { mxFontManager = std::make_shared<LogicalFontManager>(); }
 
 void RenderContext2::ImplReleaseFonts()
 {

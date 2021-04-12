@@ -100,8 +100,7 @@ void RenderContext2::dispose()
     mpFontInstance.clear(); // release the active font instance
     mpDeviceFontList.reset();
     mpDeviceFontSizeList.reset();
-    mxFontCollection
-        .reset(); // release PhysicalFontFamilyCollection specific to this RenderContext2
+    mxFontManager.reset(); // release LogicalFontManager specific to this RenderContext2
 
     mpAlphaVDev.disposeAndClear();
     VclReferenceBase::dispose();
