@@ -1085,7 +1085,7 @@ void ODBExport::exportAutoStyle(XPropertySet* _xProp)
             xCollection.set( xSup->getColumns(), UNO_SET_THROW );
             awt::FontDescriptor aFont;
             _xProp->getPropertyValue(PROPERTY_FONT) >>= aFont;
-            GetFontAutoStylePool()->Add(aFont.Name,aFont.StyleName,static_cast<FontFamily>(aFont.Family),
+            GetFontAutoStylePool()->Add(aFont.Name,aFont.StyleName,static_cast<tools::FontFamily>(aFont.Family),
                 static_cast<FontPitch>(aFont.Pitch),aFont.CharSet );
 
             m_aCurrentPropertyStates = m_xCellExportHelper->Filter(_xProp);

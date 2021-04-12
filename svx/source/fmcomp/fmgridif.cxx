@@ -111,7 +111,7 @@ static vcl::Font ImplCreateFont( const css::awt::FontDescriptor& rDescr )
     aFont.SetFamilyName( rDescr.Name );
     aFont.SetStyleName( rDescr.StyleName );
     aFont.SetFontSize( ::Size( rDescr.Width, rDescr.Height ) );
-    aFont.SetFamily( static_cast<FontFamily>(rDescr.Family) );
+    aFont.SetFamily( static_cast<tools::FontFamily>(rDescr.Family) );
     aFont.SetCharSet( static_cast<rtl_TextEncoding>(rDescr.CharSet) );
     aFont.SetPitch( static_cast<FontPitch>(rDescr.Pitch) );
     aFont.SetWidthType( vcl::unohelper::ConvertFontWidth( rDescr.CharacterWidth ) );

@@ -1037,22 +1037,22 @@ const char* getUnderlineOOXValue(FontLineStyle eUnderline)
     }
 }
 
-const char* getFontFamilyOOXValue(FontFamily eValue)
+const char* getFontFamilyOOXValue(tools::FontFamily eValue)
 {
     switch (eValue)
     {
-        case FAMILY_DONTKNOW:
+        case tools::FAMILY_DONTKNOW:
             return "0";
-        case FAMILY_SWISS:
-        case FAMILY_SYSTEM:
+        case tools::FAMILY_SWISS:
+        case tools::FAMILY_SYSTEM:
             return "2";
-        case FAMILY_ROMAN:
+        case tools::FAMILY_ROMAN:
             return "1";
-        case FAMILY_SCRIPT:
+        case tools::FAMILY_SCRIPT:
             return "4";
-        case FAMILY_MODERN:
+        case tools::FAMILY_MODERN:
             return "3";
-        case FAMILY_DECORATIVE:
+        case tools::FAMILY_DECORATIVE:
             return "5";
         default:
             return "0";
@@ -1086,7 +1086,7 @@ void XclExpDxfFont::SaveXml(XclExpXmlStream& rStrm)
             rStyleSheet->singleElement(XML_charset, XML_val, OString::number(nExcelCharSet));
         }
 
-        FontFamily eFamily = (*maDxfData.pFontAttr)->GetFamily();
+        tools::FontFamily eFamily = (*maDxfData.pFontAttr)->GetFamily();
         const char* pVal = getFontFamilyOOXValue(eFamily);
         if (pVal)
         {
@@ -1256,7 +1256,7 @@ void XclExpFontBuffer::InitDefaultFonts()
 {
     XclFontData aFontData;
     aFontData.maName = "Arial";
-    aFontData.SetScFamily( FAMILY_DONTKNOW );
+    aFontData.SetScFamily( tools::FAMILY_DONTKNOW );
     aFontData.SetFontEncoding( ScfTools::GetSystemTextEncoding() );
     aFontData.SetScHeight( 200 );   // 200 twips = 10 pt
     aFontData.SetScWeight( WEIGHT_NORMAL );

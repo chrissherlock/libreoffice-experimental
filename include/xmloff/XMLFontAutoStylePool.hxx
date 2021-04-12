@@ -62,14 +62,14 @@ public:
     OUString Add(
             const OUString& rFamilyName,
             const OUString& rStyleName,
-            FontFamily nFamily,
+            tools::FontFamily nFamily,
             FontPitch nPitch,
             rtl_TextEncoding eEnc );
 
     OUString Find(
             const OUString& rFamilyName,
             const OUString& rStyleName,
-            FontFamily nFamily,
+            tools::FontFamily nFamily,
             FontPitch nPitch,
             rtl_TextEncoding eEnc )const;
 

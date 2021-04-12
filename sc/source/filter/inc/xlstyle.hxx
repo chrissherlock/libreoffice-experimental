@@ -315,7 +315,7 @@ struct XclFontData
 // *** conversion of VCL/SVX constants *** ------------------------------------
 
     /** Returns the Calc font family. */
-    FontFamily          GetScFamily( rtl_TextEncoding eDefTextEnc ) const;
+    tools::FontFamily    GetScFamily( rtl_TextEncoding eDefTextEnc ) const;
     /** Returns the font text encoding. */
     rtl_TextEncoding    GetFontEncoding() const;
     /** Returns the Calc font posture. */
@@ -332,7 +332,7 @@ struct XclFontData
     /** Sets the Calc font height (in twips). */
     void                SetScHeight( sal_Int32 nTwips );
     /** Sets the Calc font family. */
-    void                SetScFamily( FontFamily eScFamily );
+    void                SetScFamily( tools::FontFamily eScFamily );
     /** Sets the font text encoding. */
     void                SetFontEncoding( rtl_TextEncoding eFontEnc );
     /** Sets the Calc font posture. */

@@ -945,27 +945,27 @@ vcl::Font RenderContext2::GetDefaultFont(DefaultFontType nType, LanguageType eLa
     {
         case DefaultFontType::SANS_UNICODE:
         case DefaultFontType::UI_SANS:
-            aFont.SetFamily(FAMILY_SWISS);
+            aFont.SetFamily(tools::FAMILY_SWISS);
             break;
 
         case DefaultFontType::SANS:
         case DefaultFontType::LATIN_HEADING:
         case DefaultFontType::LATIN_SPREADSHEET:
         case DefaultFontType::LATIN_DISPLAY:
-            aFont.SetFamily(FAMILY_SWISS);
+            aFont.SetFamily(tools::FAMILY_SWISS);
             break;
 
         case DefaultFontType::SERIF:
         case DefaultFontType::LATIN_TEXT:
         case DefaultFontType::LATIN_PRESENTATION:
-            aFont.SetFamily(FAMILY_ROMAN);
+            aFont.SetFamily(tools::FAMILY_ROMAN);
             break;
 
         case DefaultFontType::FIXED:
         case DefaultFontType::LATIN_FIXED:
         case DefaultFontType::UI_FIXED:
             aFont.SetPitch(PITCH_FIXED);
-            aFont.SetFamily(FAMILY_MODERN);
+            aFont.SetFamily(tools::FAMILY_MODERN);
             break;
 
         case DefaultFontType::SYMBOL:
@@ -977,7 +977,8 @@ vcl::Font RenderContext2::GetDefaultFont(DefaultFontType nType, LanguageType eLa
         case DefaultFontType::CJK_SPREADSHEET:
         case DefaultFontType::CJK_HEADING:
         case DefaultFontType::CJK_DISPLAY:
-            aFont.SetFamily(FAMILY_SYSTEM); // don't care, but don't use font subst config later...
+            aFont.SetFamily(
+                tools::FAMILY_SYSTEM); // don't care, but don't use font subst config later...
             break;
 
         case DefaultFontType::CTL_TEXT:
@@ -985,7 +986,8 @@ vcl::Font RenderContext2::GetDefaultFont(DefaultFontType nType, LanguageType eLa
         case DefaultFontType::CTL_SPREADSHEET:
         case DefaultFontType::CTL_HEADING:
         case DefaultFontType::CTL_DISPLAY:
-            aFont.SetFamily(FAMILY_SYSTEM); // don't care, but don't use font subst config later...
+            aFont.SetFamily(
+                tools::FAMILY_SYSTEM); // don't care, but don't use font subst config later...
             break;
     }
 

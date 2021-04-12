@@ -658,7 +658,7 @@ public:
     void FontCharset(sal_uInt8 nCharSet) const;
 
     /// Font family.
-    void FontFamilyType(FontFamily eFamily, const wwFont& rFont) const;
+    void FontFamilyType(tools::FontFamily eFamily, const wwFont& rFont) const;
 
     /// Font pitch.
     void FontPitchType(FontPitch ePitch) const;

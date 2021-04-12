@@ -31,7 +31,7 @@ struct BuildinFont
     const char* m_pPSName;
     int const m_nAscent;
     int const m_nDescent;
-    FontFamily const m_eFamily;
+    tools::FontFamily const m_eFamily;
     rtl_TextEncoding const m_eCharSet;
     FontPitch const m_ePitch;
     FontWidth const m_eWidthType;

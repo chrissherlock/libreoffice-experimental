@@ -34,7 +34,7 @@ public:
 
     // device independent font functions
     const OUString& GetFamilyName() const { return maFamilyName; }
-    FontFamily GetFamilyType() const { return meFamily; }
+    tools::FontFamily GetFamilyType() const { return meFamily; }
     const OUString& GetStyleName() const { return maStyleName; }
 
     FontWeight GetWeight() const { return meWeight; }
@@ -47,7 +47,7 @@ public:
 
     void SetFamilyName(const OUString& sFamilyName) { maFamilyName = sFamilyName; }
     void SetStyleName(const OUString& sStyleName) { maStyleName = sStyleName; }
-    void SetFamilyType(const FontFamily eFontFamily) { meFamily = eFontFamily; }
+    void SetFamilyType(const tools::FontFamily eFontFamily) { meFamily = eFontFamily; }
 
     void SetPitch(const FontPitch ePitch) { mePitch = ePitch; }
     void SetItalic(const FontItalic eItalic) { meItalic = eItalic; }
@@ -71,7 +71,7 @@ private:
     OUString maFamilyName; // Font Family Name
     OUString maStyleName; // Font Style Name
     FontWeight meWeight; // Weight Type
-    FontFamily meFamily; // Family Type
+    tools::FontFamily meFamily; // Family Type
     FontPitch mePitch; // Pitch Type
     FontWidth meWidthType; // Width Type
     FontItalic meItalic; // Slant Type

@@ -69,7 +69,7 @@ struct FastPrintFontInfo
     OUString                       m_aFamilyName;
     OUString                       m_aStyleName;
     std::vector< OUString >        m_aAliases;
-    FontFamily                     m_eFamilyStyle;
+    tools::FontFamily              m_eFamilyStyle;
     FontItalic                     m_eItalic;
     FontWidth                      m_eWidth;
     FontWeight                     m_eWeight;
@@ -78,7 +78,7 @@ struct FastPrintFontInfo
 
     FastPrintFontInfo()
         : m_nID(0)
-        , m_eFamilyStyle(FAMILY_DONTKNOW)
+        , m_eFamilyStyle(tools::FAMILY_DONTKNOW)
         , m_eItalic(ITALIC_DONTKNOW)
         , m_eWidth(WIDTH_DONTKNOW)
         , m_eWeight(WEIGHT_DONTKNOW)

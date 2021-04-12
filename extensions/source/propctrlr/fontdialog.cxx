@@ -216,7 +216,7 @@ namespace pcr
             sal_Int32 nColor32              = aPropExtractor.getInt32FontProperty(PROPERTY_TEXTCOLOR, 0);
 
             // build SfxItems with the values
-            SvxFontItem aFontItem(static_cast<FontFamily>(nFontFamily), aFontName, aFontStyleName, PITCH_DONTKNOW, nFontCharset, CFID_FONT);
+            SvxFontItem aFontItem(static_cast<tools::FontFamily>(nFontFamily), aFontName, aFontStyleName, PITCH_DONTKNOW, nFontCharset, CFID_FONT);
 
             nFontHeight = static_cast<float>(OutputDevice::LogicToLogic(Size(0, static_cast<sal_Int32>(nFontHeight)), MapMode(MapUnit::MapPoint), MapMode(MapUnit::MapTwip)).Height());
             SvxFontHeightItem aSvxFontHeightItem(static_cast<sal_uInt32>(nFontHeight),100,CFID_HEIGHT);

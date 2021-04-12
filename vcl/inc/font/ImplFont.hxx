@@ -37,9 +37,9 @@ public:
 
     // device independent font functions
     const OUString& GetFamilyName() const { return maFamilyName; }
-    FontFamily GetFamilyType()
+    tools::FontFamily GetFamilyType()
     {
-        if (meFamily == FAMILY_DONTKNOW)
+        if (meFamily == tools::FAMILY_DONTKNOW)
             AskConfig();
 
         return meFamily;
@@ -83,7 +83,7 @@ public:
 
     void SetFamilyName(const OUString& sFamilyName) { maFamilyName = sFamilyName; }
     void SetStyleName(const OUString& sStyleName) { maStyleName = sStyleName; }
-    void SetFamilyType(const FontFamily eFontFamily) { meFamily = eFontFamily; }
+    void SetFamilyType(const tools::FontFamily eFontFamily) { meFamily = eFontFamily; }
 
     void SetPitch(const FontPitch ePitch) { mePitch = ePitch; }
     void SetItalic(const FontItalic eItalic) { meItalic = eItalic; }
@@ -105,7 +105,7 @@ public:
     void SetSymbolFlag(const bool bSymbolFlag) { mbSymbolFlag = bSymbolFlag; }
 
     // straight properties, no getting them from AskConfig()
-    FontFamily GetFamilyTypeNoAsk() const { return meFamily; }
+    tools::FontFamily GetFamilyTypeNoAsk() const { return meFamily; }
     FontWeight GetWeightNoAsk() const { return meWeight; }
     FontItalic GetItalicNoAsk() const { return meItalic; }
     FontPitch GetPitchNoAsk() const { return mePitch; }
@@ -134,7 +134,7 @@ private:
     OUString maFamilyName;
     OUString maStyleName;
     FontWeight meWeight;
-    FontFamily meFamily;
+    tools::FontFamily meFamily;
     FontPitch mePitch;
     FontWidth meWidthType;
     FontItalic meItalic;

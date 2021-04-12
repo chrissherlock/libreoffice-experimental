@@ -52,7 +52,7 @@ public:
       Returns URL for a font file for the given font, or empty if it does not exist.
     */
     static OUString fontFileUrl(
-        std::u16string_view familyName, FontFamily family, FontItalic italic,
+        std::u16string_view familyName, tools::FontFamily family, FontItalic italic,
         FontWeight weight, FontPitch pitch, FontRights rights );
 
     /**

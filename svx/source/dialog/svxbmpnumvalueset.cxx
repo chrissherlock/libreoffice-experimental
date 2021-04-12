@@ -66,7 +66,7 @@ static vcl::Font& lcl_GetDefaultBulletFont()
     {
         static vcl::Font tmp("OpenSymbol", "", Size(0, 14));
         tmp.SetCharSet( RTL_TEXTENCODING_SYMBOL );
-        tmp.SetFamily( FAMILY_DONTKNOW );
+        tmp.SetFamily( tools::FAMILY_DONTKNOW );
         tmp.SetPitch( PITCH_DONTKNOW );
         tmp.SetWeight( WEIGHT_DONTKNOW );
         tmp.SetTransparent( true );

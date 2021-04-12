@@ -102,18 +102,18 @@ void LotusFontBuffer::SetType( const sal_uInt16 nIndex, const sal_uInt16 nType )
 
 void LotusFontBuffer::MakeFont( ENTRY* pEntry )
 {
-    FontFamily      eFamily = FAMILY_DONTKNOW;
+    tools::FontFamily      eFamily = tools::FAMILY_DONTKNOW;
     FontPitch       ePitch = PITCH_DONTKNOW;
     rtl_TextEncoding eCharSet = RTL_TEXTENCODING_DONTKNOW;
 
     switch( pEntry->nType )
     {
         case 0x00:                      // Helvetica
-            eFamily = FAMILY_SWISS;
+            eFamily = tools::FAMILY_SWISS;
             ePitch  = PITCH_VARIABLE;
             break;
         case 0x01:                      // Times Roman
-            eFamily = FAMILY_ROMAN;
+            eFamily = tools::FAMILY_ROMAN;
             ePitch  = PITCH_VARIABLE;
             break;
         case 0x02:                      // Courier

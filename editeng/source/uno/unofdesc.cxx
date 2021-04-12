@@ -45,7 +45,7 @@ void SvxUnoFontDescriptor::ConvertToFont( const awt::FontDescriptor& rDesc, vcl:
     rFont.SetFamilyName( rDesc.Name );
     rFont.SetStyleName( rDesc.StyleName );
     rFont.SetFontSize( Size( rDesc.Width, rDesc.Height ) );
-    rFont.SetFamily( static_cast<FontFamily>(rDesc.Family) );
+    rFont.SetFamily( static_cast<tools::FontFamily>(rDesc.Family) );
     rFont.SetCharSet( static_cast<rtl_TextEncoding>(rDesc.CharSet) );
     rFont.SetPitch( static_cast<FontPitch>(rDesc.Pitch) );
     rFont.SetOrientation( Degree10(static_cast<sal_Int16>(rDesc.Orientation*10)) );
@@ -83,7 +83,7 @@ void SvxUnoFontDescriptor::FillItemSet( const awt::FontDescriptor& rDesc, SfxIte
         SvxFontItem aFontItem( EE_CHAR_FONTINFO );
         aFontItem.SetFamilyName( rDesc.Name);
         aFontItem.SetStyleName( rDesc.StyleName);
-        aFontItem.SetFamily( static_cast<FontFamily>(rDesc.Family));
+        aFontItem.SetFamily( static_cast<tools::FontFamily>(rDesc.Family));
         aFontItem.SetCharSet( rDesc.CharSet );
         aFontItem.SetPitch( static_cast<FontPitch>(rDesc.Pitch));
         rSet.Put(aFontItem);

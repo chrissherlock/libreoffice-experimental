@@ -2586,9 +2586,9 @@ sal_Int32 PDFWriterImpl::emitFontDescriptor( const PhysicalFontFace* pFont, Font
         nFontFlags |= (1 << 6);
     if( pFont->GetPitch() == PITCH_FIXED )
         nFontFlags |= 1;
-    if( pFont->GetFamilyType() == FAMILY_SCRIPT )
+    if( pFont->GetFamilyType() == tools::FAMILY_SCRIPT )
         nFontFlags |= (1 << 3);
-    else if( pFont->GetFamilyType() == FAMILY_ROMAN )
+    else if( pFont->GetFamilyType() == tools::FAMILY_ROMAN )
         nFontFlags |= (1 << 1);
 
     sal_Int32 nFontDescriptor = createObject();
@@ -3614,7 +3614,7 @@ sal_Int32 PDFWriterImpl::getBestBuildinFont( const vcl::Font& rFont )
 {
     sal_Int32 nBest = 4; // default to Helvetica
 
-    if (rFont.GetFamilyType() == FAMILY_ROMAN)
+    if (rFont.GetFamilyType() == tools::FAMILY_ROMAN)
     {
         // Serif: default to Times-Roman.
         nBest = 8;

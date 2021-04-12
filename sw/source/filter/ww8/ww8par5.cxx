@@ -1952,7 +1952,7 @@ eF_ResT SwWW8ImplReader::Read_F_Symbol( WW8FieldDesc*, OUString& rStr )
     {
         if (!aName.isEmpty())                           // Font Name set ?
         {
-            SvxFontItem aFont(FAMILY_DONTKNOW, aName, OUString(),
+            SvxFontItem aFont(tools::FAMILY_DONTKNOW, aName, OUString(),
                 PITCH_DONTKNOW, RTL_TEXTENCODING_SYMBOL, RES_CHRATR_FONT);
             NewAttr(aFont);                       // new Font
         }
@@ -2342,7 +2342,7 @@ eF_ResT SwWW8ImplReader::Read_F_Macro( WW8FieldDesc*, OUString& rStr)
         sal_uInt16 i = 0;
         for ( ; i < m_xFonts->GetMax(); i++ )
         {
-            FontFamily eFamily;
+            tools::FontFamily eFamily;
             OUString aFontName;
             FontPitch ePitch;
             rtl_TextEncoding eSrcCharSet;
@@ -2795,7 +2795,7 @@ void SwWW8ImplReader::Read_SubF_Ruby( WW8ReadFieldParams& rReadParam)
         aNm+=OUString::number(m_aRubyCharFormats.size()+1);
         SwCharFormat *pFormat = m_rDoc.MakeCharFormat(aNm, m_rDoc.GetDfltCharFormat());
         SvxFontHeightItem aHeightItem(nFontSize*10, 100, RES_CHRATR_FONTSIZE);
-        SvxFontItem aFontItem(FAMILY_DONTKNOW,sFontName,
+        SvxFontItem aFontItem(tools::FAMILY_DONTKNOW,sFontName,
             OUString(), PITCH_DONTKNOW, RTL_TEXTENCODING_DONTKNOW, RES_CHRATR_FONT);
         aHeightItem.SetWhich(GetWhichOfScript(RES_CHRATR_FONTSIZE,nScript));
         aFontItem.SetWhich(GetWhichOfScript(RES_CHRATR_FONT,nScript));

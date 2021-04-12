@@ -225,22 +225,22 @@ void XclFontData::FillFromSvxFont( const SvxFont& rFont )
 
 // *** conversion of VCL/SVX constants *** ------------------------------------
 
-FontFamily XclFontData::GetScFamily( rtl_TextEncoding eDefTextEnc ) const
+tools::FontFamily XclFontData::GetScFamily( rtl_TextEncoding eDefTextEnc ) const
 {
-    FontFamily eScFamily;
+    tools::FontFamily eScFamily;
     // ! format differs from Windows documentation: family is in lower nibble, pitch unknown
     switch( mnFamily & 0x0F )
     {
-        case EXC_FONTFAM_ROMAN:         eScFamily = FAMILY_ROMAN;       break;
-        case EXC_FONTFAM_SWISS:         eScFamily = FAMILY_SWISS;       break;
-        case EXC_FONTFAM_MODERN:        eScFamily = FAMILY_MODERN;      break;
-        case EXC_FONTFAM_SCRIPT:        eScFamily = FAMILY_SCRIPT;      break;
-        case EXC_FONTFAM_DECORATIVE:    eScFamily = FAMILY_DECORATIVE;  break;
+        case EXC_FONTFAM_ROMAN:         eScFamily = tools::FAMILY_ROMAN;       break;
+        case EXC_FONTFAM_SWISS:         eScFamily = tools::FAMILY_SWISS;       break;
+        case EXC_FONTFAM_MODERN:        eScFamily = tools::FAMILY_MODERN;      break;
+        case EXC_FONTFAM_SCRIPT:        eScFamily = tools::FAMILY_SCRIPT;      break;
+        case EXC_FONTFAM_DECORATIVE:    eScFamily = tools::FAMILY_DECORATIVE;  break;
         default:
             eScFamily =
                 ((eDefTextEnc == RTL_TEXTENCODING_APPLE_ROMAN) &&
                 (maName.equalsIgnoreAsciiCase( "Geneva" ) || maName.equalsIgnoreAsciiCase( "Chicago" ))) ?
-                FAMILY_SWISS : FAMILY_DONTKNOW;
+                tools::FAMILY_SWISS : tools::FAMILY_DONTKNOW;
     }
     return eScFamily;
 }
@@ -309,17 +309,17 @@ void XclFontData::SetScHeight( sal_Int32 nTwips )
     mnHeight = static_cast< sal_uInt16 >( ::std::min( nTwips, static_cast<sal_Int32>(0x7FFFL) ) );
 }
 
-void XclFontData::SetScFamily( FontFamily eScFamily )
+void XclFontData::SetScFamily( tools::FontFamily eScFamily )
 {
     switch( eScFamily )
     {
-        case FAMILY_DONTKNOW:   mnFamily = EXC_FONTFAM_DONTKNOW;    break;
-        case FAMILY_DECORATIVE: mnFamily = EXC_FONTFAM_DECORATIVE;  break;
-        case FAMILY_MODERN:     mnFamily = EXC_FONTFAM_MODERN;      break;
-        case FAMILY_ROMAN:      mnFamily = EXC_FONTFAM_ROMAN;       break;
-        case FAMILY_SCRIPT:     mnFamily = EXC_FONTFAM_SCRIPT;      break;
-        case FAMILY_SWISS:      mnFamily = EXC_FONTFAM_SWISS;       break;
-        case FAMILY_SYSTEM:     mnFamily = EXC_FONTFAM_SYSTEM;      break;
+        case tools::FAMILY_DONTKNOW:   mnFamily = EXC_FONTFAM_DONTKNOW;    break;
+        case tools::FAMILY_DECORATIVE: mnFamily = EXC_FONTFAM_DECORATIVE;  break;
+        case tools::FAMILY_MODERN:     mnFamily = EXC_FONTFAM_MODERN;      break;
+        case tools::FAMILY_ROMAN:      mnFamily = EXC_FONTFAM_ROMAN;       break;
+        case tools::FAMILY_SCRIPT:     mnFamily = EXC_FONTFAM_SCRIPT;      break;
+        case tools::FAMILY_SWISS:      mnFamily = EXC_FONTFAM_SWISS;       break;
+        case tools::FAMILY_SYSTEM:     mnFamily = EXC_FONTFAM_SYSTEM;      break;
         default:
             OSL_FAIL( "XclFontData::SetScFamily - unknown font family" );
             mnFamily = EXC_FONTFAM_DONTKNOW;
@@ -398,12 +398,12 @@ sal_Int16 XclFontData::GetApiFamily() const
     sal_Int16 nApiFamily = AwtFontFamily::DONTKNOW;
     switch( mnFamily )
     {
-        case FAMILY_DECORATIVE: nApiFamily = AwtFontFamily::DECORATIVE; break;
-        case FAMILY_MODERN:     nApiFamily = AwtFontFamily::MODERN;     break;
-        case FAMILY_ROMAN:      nApiFamily = AwtFontFamily::ROMAN;      break;
-        case FAMILY_SCRIPT:     nApiFamily = AwtFontFamily::SCRIPT;     break;
-        case FAMILY_SWISS:      nApiFamily = AwtFontFamily::SWISS;      break;
-        case FAMILY_SYSTEM:     nApiFamily = AwtFontFamily::SYSTEM;     break;
+        case tools::FAMILY_DECORATIVE: nApiFamily = AwtFontFamily::DECORATIVE; break;
+        case tools::FAMILY_MODERN:     nApiFamily = AwtFontFamily::MODERN;     break;
+        case tools::FAMILY_ROMAN:      nApiFamily = AwtFontFamily::ROMAN;      break;
+        case tools::FAMILY_SCRIPT:     nApiFamily = AwtFontFamily::SCRIPT;     break;
+        case tools::FAMILY_SWISS:      nApiFamily = AwtFontFamily::SWISS;      break;
+        case tools::FAMILY_SYSTEM:     nApiFamily = AwtFontFamily::SYSTEM;     break;
     }
     return nApiFamily;
 }
@@ -462,13 +462,13 @@ void XclFontData::SetApiFamily( sal_Int16 nApiFamily )
 {
     switch( nApiFamily )
     {
-        case AwtFontFamily::DECORATIVE: mnFamily = FAMILY_DECORATIVE;   break;
-        case AwtFontFamily::MODERN:     mnFamily = FAMILY_MODERN;       break;
-        case AwtFontFamily::ROMAN:      mnFamily = FAMILY_ROMAN;        break;
-        case AwtFontFamily::SCRIPT:     mnFamily = FAMILY_SCRIPT;       break;
-        case AwtFontFamily::SWISS:      mnFamily = FAMILY_SWISS;        break;
-        case AwtFontFamily::SYSTEM:     mnFamily = FAMILY_SYSTEM;       break;
-        default:                        mnFamily = FAMILY_DONTKNOW;
+        case AwtFontFamily::DECORATIVE: mnFamily = tools::FAMILY_DECORATIVE;   break;
+        case AwtFontFamily::MODERN:     mnFamily = tools::FAMILY_MODERN;       break;
+        case AwtFontFamily::ROMAN:      mnFamily = tools::FAMILY_ROMAN;        break;
+        case AwtFontFamily::SCRIPT:     mnFamily = tools::FAMILY_SCRIPT;       break;
+        case AwtFontFamily::SWISS:      mnFamily = tools::FAMILY_SWISS;        break;
+        case AwtFontFamily::SYSTEM:     mnFamily = tools::FAMILY_SYSTEM;       break;
+        default:                        mnFamily = tools::FAMILY_DONTKNOW;
     }
 }
 

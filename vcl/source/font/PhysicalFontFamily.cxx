@@ -26,19 +26,19 @@
 #include <font/PhysicalFontFaceCollection.hxx>
 
 void PhysicalFontFamily::CalcType(ImplFontAttrs& rType, FontWeight& rWeight, FontWidth& rWidth,
-                                  FontFamily eFamily, const utl::FontNameAttr* pFontAttr)
+                                  tools::FontFamily eFamily, const utl::FontNameAttr* pFontAttr)
 {
-    if (eFamily != FAMILY_DONTKNOW)
+    if (eFamily != tools::FAMILY_DONTKNOW)
     {
-        if (eFamily == FAMILY_SWISS)
+        if (eFamily == tools::FAMILY_SWISS)
             rType |= ImplFontAttrs::SansSerif;
-        else if (eFamily == FAMILY_ROMAN)
+        else if (eFamily == tools::FAMILY_ROMAN)
             rType |= ImplFontAttrs::Serif;
-        else if (eFamily == FAMILY_SCRIPT)
+        else if (eFamily == tools::FAMILY_SCRIPT)
             rType |= ImplFontAttrs::Script;
-        else if (eFamily == FAMILY_MODERN)
+        else if (eFamily == tools::FAMILY_MODERN)
             rType |= ImplFontAttrs::Fixed;
-        else if (eFamily == FAMILY_DECORATIVE)
+        else if (eFamily == tools::FAMILY_DECORATIVE)
             rType |= ImplFontAttrs::Decorative;
     }
 
@@ -87,7 +87,7 @@ static ImplFontAttrs lcl_IsCJKFont(const OUString& rFontName)
 PhysicalFontFamily::PhysicalFontFamily(const OUString& rSearchName)
     : maSearchName(rSearchName)
     , mnTypeFaces(FontTypeFaces::NONE)
-    , meFamily(FAMILY_DONTKNOW)
+    , meFamily(tools::FAMILY_DONTKNOW)
     , mePitch(PITCH_DONTKNOW)
     , mnMinQuality(-1)
     , mnMatchType(ImplFontAttrs::None)
@@ -110,7 +110,7 @@ void PhysicalFontFamily::AddFontFace(PhysicalFontFace* pNewFontFace)
     }
     else
     {
-        if (meFamily == FAMILY_DONTKNOW)
+        if (meFamily == tools::FAMILY_DONTKNOW)
             meFamily = pNewFontFace->GetFamilyType();
         if (mePitch == PITCH_DONTKNOW)
             mePitch = pNewFontFace->GetPitch();

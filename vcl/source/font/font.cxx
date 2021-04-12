@@ -76,7 +76,7 @@ Font::Font( const OUString& rFamilyName, const OUString& rStyleName, const Size&
     mpImplFont->SetFontSize( rSize );
 }
 
-Font::Font( FontFamily eFamily, const Size& rSize ) : mpImplFont()
+Font::Font( tools::FontFamily eFamily, const Size& rSize ) : mpImplFont()
 {
     mpImplFont->SetFamilyType( eFamily );
     mpImplFont->SetFontSize( rSize );
@@ -129,7 +129,7 @@ void Font::SetFontSize( const Size& rSize )
         mpImplFont->SetFontSize( rSize );
 }
 
-void Font::SetFamily( FontFamily eFamily )
+void Font::SetFamily( tools::FontFamily eFamily )
 {
     if (const_cast<const ImplType&>(mpImplFont)->GetFamilyTypeNoAsk() != eFamily)
         mpImplFont->SetFamilyType( eFamily );
@@ -427,7 +427,7 @@ SvStream& ReadImplFont( SvStream& rIStm, ImplFont& rImplFont, tools::Long& rnNor
     aSerializer.readSize(rImplFont.maAverageFontSize);
 
     rIStm.ReadUInt16( nTmp16 ); rImplFont.SetCharSet( static_cast<rtl_TextEncoding>(nTmp16) );
-    rIStm.ReadUInt16( nTmp16 ); rImplFont.SetFamilyType( static_cast<FontFamily>(nTmp16) );
+    rIStm.ReadUInt16( nTmp16 ); rImplFont.SetFamilyType( static_cast<tools::FontFamily>(nTmp16) );
     rIStm.ReadUInt16( nTmp16 ); rImplFont.SetPitch( static_cast<FontPitch>(nTmp16) );
     rIStm.ReadUInt16( nTmp16 ); rImplFont.SetWeight( static_cast<FontWeight>(nTmp16) );
     rIStm.ReadUInt16( nTmp16 ); rImplFont.meUnderline = static_cast<FontLineStyle>(nTmp16);
@@ -849,13 +849,13 @@ FontPitch Font::GetPitch() { return mpImplFont->GetPitch(); }
 FontWeight Font::GetWeight() { return mpImplFont->GetWeight(); }
 FontWidth Font::GetWidthType() { return mpImplFont->GetWidthType(); }
 FontItalic Font::GetItalic() { return mpImplFont->GetItalic(); }
-FontFamily Font::GetFamilyType() { return mpImplFont->GetFamilyType(); }
+tools::FontFamily Font::GetFamilyType() { return mpImplFont->GetFamilyType(); }
 
 FontPitch Font::GetPitch() const { return mpImplFont->GetPitchNoAsk(); }
 FontWeight Font::GetWeight() const { return mpImplFont->GetWeightNoAsk(); }
 FontWidth Font::GetWidthType() const { return mpImplFont->GetWidthTypeNoAsk(); }
 FontItalic Font::GetItalic() const { return mpImplFont->GetItalicNoAsk(); }
-FontFamily Font::GetFamilyType() const { return mpImplFont->GetFamilyTypeNoAsk(); }
+tools::FontFamily Font::GetFamilyType() const { return mpImplFont->GetFamilyTypeNoAsk(); }
 
 int Font::GetQuality() const { return mpImplFont->GetQuality(); }
 void Font::SetQuality( int nQuality ) { mpImplFont->SetQuality( nQuality ); }
@@ -875,7 +875,7 @@ bool Font::IsSameInstance( const vcl::Font& rFont ) const { return (mpImplFont =
 
 ImplFont::ImplFont() :
     meWeight( WEIGHT_DONTKNOW ),
-    meFamily( FAMILY_DONTKNOW ),
+    meFamily( tools::FAMILY_DONTKNOW ),
     mePitch( PITCH_DONTKNOW ),
     meWidthType( WIDTH_DONTKNOW ),
     meItalic( ITALIC_NONE ),
@@ -1009,18 +1009,18 @@ void ImplFont::AskConfig()
     if( pFontAttr )
     {
         // the font was found in the configuration
-        if( meFamily == FAMILY_DONTKNOW )
+        if( meFamily == tools::FAMILY_DONTKNOW )
         {
             if ( pFontAttr->Type & ImplFontAttrs::Serif )
-                meFamily = FAMILY_ROMAN;
+                meFamily = tools::FAMILY_ROMAN;
             else if ( pFontAttr->Type & ImplFontAttrs::SansSerif )
-                meFamily = FAMILY_SWISS;
+                meFamily = tools::FAMILY_SWISS;
             else if ( pFontAttr->Type & ImplFontAttrs::Typewriter )
-                meFamily = FAMILY_MODERN;
+                meFamily = tools::FAMILY_MODERN;
             else if ( pFontAttr->Type & ImplFontAttrs::Italic )
-                meFamily = FAMILY_SCRIPT;
+                meFamily = tools::FAMILY_SCRIPT;
             else if ( pFontAttr->Type & ImplFontAttrs::Decorative )
-                meFamily = FAMILY_DECORATIVE;
+                meFamily = tools::FAMILY_DECORATIVE;
         }
 
         if( mePitch == PITCH_DONTKNOW )
@@ -1031,18 +1031,18 @@ void ImplFont::AskConfig()
     }
 
     // if some attributes are still unknown then use the FontSubst magic
-    if( meFamily == FAMILY_DONTKNOW )
+    if( meFamily == tools::FAMILY_DONTKNOW )
     {
         if( nType & ImplFontAttrs::Serif )
-            meFamily = FAMILY_ROMAN;
+            meFamily = tools::FAMILY_ROMAN;
         else if( nType & ImplFontAttrs::SansSerif )
-            meFamily = FAMILY_SWISS;
+            meFamily = tools::FAMILY_SWISS;
         else if( nType & ImplFontAttrs::Typewriter )
-            meFamily = FAMILY_MODERN;
+            meFamily = tools::FAMILY_MODERN;
         else if( nType & ImplFontAttrs::Italic )
-            meFamily = FAMILY_SCRIPT;
+            meFamily = tools::FAMILY_SCRIPT;
         else if( nType & ImplFontAttrs::Decorative )
-            meFamily = FAMILY_DECORATIVE;
+            meFamily = tools::FAMILY_DECORATIVE;
     }
 
     if( GetWeight() == WEIGHT_DONTKNOW )

@@ -227,8 +227,8 @@ vcl::Font VCLUnoHelper::CreateFont( const css::awt::FontDescriptor& rDescr, cons
         aFont.SetStyleName( rDescr.StyleName );
     if ( rDescr.Height )
         aFont.SetFontSize( Size( rDescr.Width, rDescr.Height ) );
-    if ( static_cast<FontFamily>(rDescr.Family) != FAMILY_DONTKNOW )
-        aFont.SetFamily( static_cast<FontFamily>(rDescr.Family) );
+    if ( static_cast<tools::FontFamily>(rDescr.Family) != tools::FAMILY_DONTKNOW )
+        aFont.SetFamily( static_cast<tools::FontFamily>(rDescr.Family) );
     if ( static_cast<rtl_TextEncoding>(rDescr.CharSet) != RTL_TEXTENCODING_DONTKNOW )
         aFont.SetCharSet( static_cast<rtl_TextEncoding>(rDescr.CharSet) );
     if ( static_cast<FontPitch>(rDescr.Pitch) != PITCH_DONTKNOW )

@@ -332,12 +332,12 @@ void XclImpFont::FillToItemSet( SfxItemSet& rItemSet, XclFontItemType eType, boo
 
         //add corresponding pitch for FontFamily
         FontPitch ePitch = PITCH_DONTKNOW;
-        FontFamily eFtFamily = maData.GetScFamily( GetTextEncoding() );
+        tools::FontFamily eFtFamily = maData.GetScFamily( GetTextEncoding() );
         switch( eFtFamily ) //refer http://msdn.microsoft.com/en-us/library/aa246306(v=VS.60).aspx
         {
-            case FAMILY_ROMAN:              ePitch = PITCH_VARIABLE;        break;
-            case FAMILY_SWISS:              ePitch = PITCH_VARIABLE;        break;
-            case FAMILY_MODERN:             ePitch = PITCH_FIXED;           break;
+            case tools::FAMILY_ROMAN:              ePitch = PITCH_VARIABLE;        break;
+            case tools::FAMILY_SWISS:              ePitch = PITCH_VARIABLE;        break;
+            case tools::FAMILY_MODERN:             ePitch = PITCH_FIXED;           break;
             default:                        break;
          }
         SvxFontItem aFontItem( eFtFamily , maData.maName, EMPTY_OUSTRING, ePitch, eTempTextEnc, ATTR_FONT );

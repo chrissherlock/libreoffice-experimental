@@ -242,13 +242,13 @@ bool WinGlyphFallbackSubstititution::HasMissingChars(PhysicalFontFace* pFace, OU
 namespace
 {
     //used by 2-level font fallback
-    PhysicalFontFamily* findDevFontListByLocale(const LogicalFontManager &rFontCollection,
+    Physicaltools::FontFamily* findDevFontListByLocale(const LogicalFontManager &rFontCollection,
                                                 const LanguageTag& rLanguageTag )
     {
         // get the default font for a specified locale
         const utl::DefaultFontConfiguration& rDefaults = utl::DefaultFontConfiguration::get();
         const OUString aDefault = rDefaults.getUserInterfaceFont(rLanguageTag);
-        return rFontCollection.FindFontFamilyByTokenNames(aDefault);
+        return rFontCollection.Findtools::FontFamilyByTokenNames(aDefault);
     }
 }
 
@@ -300,29 +300,29 @@ bool WinGlyphFallbackSubstititution::FindFontSubstitute(FontSelectPattern& rFont
     // first level fallback:
     // try use the locale specific default fonts defined in VCL.xcu
     const LogicalFontManager* pFontManager = ImplGetSVData()->maGDIData.mxScreenFontManager.get();
-    PhysicalFontFamily* pFontFamily = findDevFontListByLocale(*pFontManager, aLanguageTag);
-    if( pFontFamily )
+    Physicaltools::FontFamily* ptools::FontFamily = findDevFontListByLocale(*pFontManager, aLanguageTag);
+    if( ptools::FontFamily )
     {
-        PhysicalFontFace* pFace = pFontFamily->FindBestFontFace( rFontSelData );
+        PhysicalFontFace* pFace = ptools::FontFamily->FindBestFontFace( rFontSelData );
         if( HasMissingChars( pFace, rMissingChars ) )
         {
-            rFontSelData.maSearchName = pFontFamily->GetSearchName();
+            rFontSelData.maSearchName = ptools::FontFamily->GetSearchName();
             return true;
         }
     }
 
     // are the missing characters symbols?
-    pFontFamily = pFontManager->FindFontFamilyByAttributes( ImplFontAttrs::Symbol,
+    ptools::FontFamily = pFontManager->Findtools::FontFamilyByAttributes( ImplFontAttrs::Symbol,
                                                      rFontSelData.GetWeight(),
                                                      rFontSelData.GetWidthType(),
                                                      rFontSelData.GetItalic(),
                                                      rFontSelData.maSearchName );
-    if( pFontFamily )
+    if( ptools::FontFamily )
     {
-        PhysicalFontFace* pFace = pFontFamily->FindBestFontFace( rFontSelData );
+        PhysicalFontFace* pFace = ptools::FontFamily->FindBestFontFace( rFontSelData );
         if( HasMissingChars( pFace, rMissingChars ) )
         {
-            rFontSelData.maSearchName = pFontFamily->GetSearchName();
+            rFontSelData.maSearchName = ptools::FontFamily->GetSearchName();
             return true;
         }
     }
@@ -392,52 +392,52 @@ static rtl_TextEncoding ImplCharSetToSal( BYTE nCharSet )
     return eTextEncoding;
 }
 
-static FontFamily ImplFamilyToSal( BYTE nFamily )
+static tools::FontFamily ImplFamilyToSal( BYTE nFamily )
 {
     switch ( nFamily & 0xF0 )
     {
         case FF_DECORATIVE:
-            return FAMILY_DECORATIVE;
+            return tools::FAMILY_DECORATIVE;
 
         case FF_MODERN:
-            return FAMILY_MODERN;
+            return tools::FAMILY_MODERN;
 
         case FF_ROMAN:
-            return FAMILY_ROMAN;
+            return tools::FAMILY_ROMAN;
 
         case FF_SCRIPT:
-            return FAMILY_SCRIPT;
+            return tools::FAMILY_SCRIPT;
 
         case FF_SWISS:
-            return FAMILY_SWISS;
+            return tools::FAMILY_SWISS;
 
         default:
             break;
     }
 
-    return FAMILY_DONTKNOW;
+    return tools::FAMILY_DONTKNOW;
 }
 
-static BYTE ImplFamilyToWin( FontFamily eFamily )
+static BYTE ImplFamilyToWin( tools::FontFamily eFamily )
 {
     switch ( eFamily )
     {
-        case FAMILY_DECORATIVE:
+        case tools::FAMILY_DECORATIVE:
             return FF_DECORATIVE;
 
-        case FAMILY_MODERN:
+        case tools::FAMILY_MODERN:
             return FF_MODERN;
 
-        case FAMILY_ROMAN:
+        case tools::FAMILY_ROMAN:
             return FF_ROMAN;
 
-        case FAMILY_SCRIPT:
+        case tools::FAMILY_SCRIPT:
             return FF_SCRIPT;
 
-        case FAMILY_SWISS:
+        case tools::FAMILY_SWISS:
             return FF_SWISS;
 
-        case FAMILY_SYSTEM:
+        case tools::FAMILY_SYSTEM:
             return FF_SWISS;
 
         default:
@@ -1089,7 +1089,7 @@ void ImplReleaseTempFonts(SalData& rSalData, bool bAll)
     }
 }
 
-static OUString lcl_GetFontFamilyName(const OUString& rFontFileURL)
+static OUString lcl_Gettools::FontFamilyName(const OUString& rFontFileURL)
 {
     // Create temporary file name
     OUString aTempFileURL;
@@ -1144,14 +1144,14 @@ static OUString lcl_GetFontFamilyName(const OUString& rFontFileURL)
 bool WinSalGraphics::AddTempDevFont(LogicalFontManager* pFontManager,
                                     const OUString& rFontFileURL, const OUString& rFontName)
 {
-    OUString aFontFamily = lcl_GetFontFamilyName(rFontFileURL);
-    if (aFontFamily.isEmpty())
+    OUString atools::FontFamily = lcl_Gettools::FontFamilyName(rFontFileURL);
+    if (atools::FontFamily.isEmpty())
     {
         SAL_WARN("vcl.fonts", "error extracting font family from " << rFontFileURL);
         return false;
     }
 
-    if (rFontName != aFontFamily)
+    if (rFontName != atools::FontFamily)
     {
         SAL_WARN("vcl.fonts", "font family renaming not implemented; skipping embedded " << rFontName);
         return false;
@@ -1164,7 +1164,7 @@ bool WinSalGraphics::AddTempDevFont(LogicalFontManager* pFontManager,
     ImplEnumInfo aInfo;
     aInfo.mhDC = getHDC();
     aInfo.mpList = pFontManager;
-    aInfo.mpName = &aFontFamily;
+    aInfo.mpName = &atools::FontFamily;
     aInfo.mbPrinter = mbPrinter;
     aInfo.mnFontCount = pFontManager->Count();
     const int nExpectedFontCount = aInfo.mnFontCount + nFonts;

@@ -622,7 +622,7 @@ ImplStyleData::ImplStyleData( const ImplStyleData& rData ) :
 
 void ImplStyleData::SetStandardStyles()
 {
-    vcl::Font aStdFont( FAMILY_SWISS, Size( 0, 8 ) );
+    vcl::Font aStdFont( tools::FAMILY_SWISS, Size( 0, 8 ) );
     aStdFont.SetCharSet( osl_getThreadTextEncoding() );
     aStdFont.SetWeight( WEIGHT_NORMAL );
     if (!utl::ConfigManager::IsFuzzing())

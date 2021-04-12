@@ -317,7 +317,7 @@ SmFontDialog::SmFontDialog(weld::Window * pParent, OutputDevice *pFntListDevice,
         maFont.SetFontSize(Size(0, 24));
         maFont.SetWeight(WEIGHT_NORMAL);
         maFont.SetItalic(ITALIC_NONE);
-        maFont.SetFamily(FAMILY_DONTKNOW);
+        maFont.SetFamily(tools::FAMILY_DONTKNOW);
         maFont.SetPitch(PITCH_DONTKNOW);
         maFont.SetCharSet(RTL_TEXTENCODING_DONTKNOW);
         maFont.SetTransparent(true);

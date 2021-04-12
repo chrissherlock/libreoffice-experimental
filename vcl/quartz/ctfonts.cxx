@@ -308,7 +308,7 @@ FontAttributes DevFontFromCTFontDescriptor( CTFontDescriptorRef pFD, bool* bFont
     rDFA.SetQuality( 0 );
 
     // reset the font attributes
-    rDFA.SetFamilyType( FAMILY_DONTKNOW );
+    rDFA.SetFamilyType( tools::FAMILY_DONTKNOW );
     rDFA.SetPitch( PITCH_VARIABLE );
     rDFA.SetWidthType( WIDTH_NORMAL );
     rDFA.SetWeight( WEIGHT_NORMAL );

@@ -302,10 +302,10 @@ private:
     OUString msAltNm;
     bool mbAlt;
     FontPitch mePitch;
-    FontFamily meFamily;
+    tools::FontFamily meFamily;
     rtl_TextEncoding meChrSet;
 public:
-     wwFont( const OUString &rFamilyName, FontPitch ePitch, FontFamily eFamily,
+     wwFont( const OUString &rFamilyName, FontPitch ePitch, tools::FontFamily eFamily,
         rtl_TextEncoding eChrSet);
     void Write( SvStream *pTableStram ) const;
     void WriteDocx( DocxAttributeOutput* rAttrOutput ) const;

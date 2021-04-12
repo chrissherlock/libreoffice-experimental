@@ -720,7 +720,7 @@ const SwNumRule* MSWordStyles::GetSwNumRule(sal_uInt16 nId) const
 
 //          Fonts
 
-wwFont::wwFont(const OUString &rFamilyName, FontPitch ePitch, FontFamily eFamily,
+wwFont::wwFont(const OUString &rFamilyName, FontPitch ePitch, tools::FontFamily eFamily,
         rtl_TextEncoding eChrSet)
     : mbAlt(false), mePitch(ePitch), meFamily(eFamily), meChrSet(eChrSet)
 {
@@ -754,19 +754,19 @@ wwFont::wwFont(const OUString &rFamilyName, FontPitch ePitch, FontFamily eFamily
 
     switch(eFamily)
     {
-        case FAMILY_ROMAN:
+        case tools::FAMILY_ROMAN:
             aB |= 1 << 4;   // aF.ff = 1;
             break;
-        case FAMILY_SWISS:
+        case tools::FAMILY_SWISS:
             aB |= 2 << 4;   // aF.ff = 2;
             break;
-        case FAMILY_MODERN:
+        case tools::FAMILY_MODERN:
             aB |= 3 << 4;   // aF.ff = 3;
             break;
-        case FAMILY_SCRIPT:
+        case tools::FAMILY_SCRIPT:
             aB |= 4 << 4;   // aF.ff = 4;
             break;
-        case FAMILY_DECORATIVE:
+        case tools::FAMILY_DECORATIVE:
             aB |= 5 << 4;   // aF.ff = 5;
             break;
         default:            // aF.ff = 0; FF_DONTCARE (windows.h)
@@ -860,12 +860,12 @@ sal_uInt16 wwFontHelper::GetId(const wwFont &rFont)
 void wwFontHelper::InitFontTable(const SwDoc& rDoc)
 {
     GetId(wwFont("Times New Roman", PITCH_VARIABLE,
-        FAMILY_ROMAN, RTL_TEXTENCODING_MS_1252));
+        tools::FAMILY_ROMAN, RTL_TEXTENCODING_MS_1252));
 
-    GetId(wwFont("Symbol", PITCH_VARIABLE, FAMILY_ROMAN,
+    GetId(wwFont("Symbol", PITCH_VARIABLE, tools::FAMILY_ROMAN,
         RTL_TEXTENCODING_SYMBOL));
 
-    GetId(wwFont("Arial", PITCH_VARIABLE, FAMILY_SWISS,
+    GetId(wwFont("Arial", PITCH_VARIABLE, tools::FAMILY_SWISS,
         RTL_TEXTENCODING_MS_1252));
 
     const SvxFontItem* pFont = GetDfltAttr(RES_CHRATR_FONT);

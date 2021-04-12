@@ -226,7 +226,7 @@ SvxXMLListLevelStyleContext_Impl::SvxXMLListLevelStyleContext_Impl(
 ,   nNumStartValue( 1 )
 ,   nNumDisplayLevels( 1 )
 ,   eAdjust( HoriOrientation::LEFT )
-,   eBulletFontFamily( FAMILY_DONTKNOW )
+,   eBulletFontFamily( tools::FAMILY_DONTKNOW )
 ,   eBulletFontPitch( PITCH_DONTKNOW )
 ,   eBulletFontEncoding( RTL_TEXTENCODING_DONTKNOW )
 ,   eImageVertOrient(0)
@@ -1074,7 +1074,7 @@ void SvxXMLListStyleContext::SetDefaultStyle(
                         "starbats"
 #endif
                                         ;
-        aFDesc.Family = FAMILY_DONTKNOW ;
+        aFDesc.Family = tools::FAMILY_DONTKNOW ;
         aFDesc.Pitch = PITCH_DONTKNOW ;
         aFDesc.CharSet = RTL_TEXTENCODING_SYMBOL ;
         aFDesc.Weight = WEIGHT_DONTKNOW;

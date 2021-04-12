@@ -74,7 +74,7 @@ const BuildinFont BuildinFontFace::m_aBuildinFonts[14]
           "Courier", // PSName
           629,
           -157, // ascend, descend
-          FAMILY_MODERN, // family style
+          tools::FAMILY_MODERN, // family style
           RTL_TEXTENCODING_MS_1252, // charset
           PITCH_FIXED, // pitch
           WIDTH_NORMAL, // width type
@@ -121,7 +121,7 @@ const BuildinFont BuildinFontFace::m_aBuildinFonts[14]
           "Courier-Oblique", // PSName
           629,
           -157, // ascend, descend
-          FAMILY_MODERN, // family style
+          tools::FAMILY_MODERN, // family style
           RTL_TEXTENCODING_MS_1252, // charset
           PITCH_FIXED, // pitch
           WIDTH_NORMAL, // width type
@@ -168,7 +168,7 @@ const BuildinFont BuildinFontFace::m_aBuildinFonts[14]
           "Courier-Bold", // PSName
           629,
           -157, // ascend, descend
-          FAMILY_MODERN, // family style
+          tools::FAMILY_MODERN, // family style
           RTL_TEXTENCODING_MS_1252, // charset
           PITCH_FIXED, // pitch
           WIDTH_NORMAL, // width type
@@ -215,7 +215,7 @@ const BuildinFont BuildinFontFace::m_aBuildinFonts[14]
           "Courier-BoldOblique", // PSName
           629,
           -157, // ascend, descend
-          FAMILY_MODERN, // family style
+          tools::FAMILY_MODERN, // family style
           RTL_TEXTENCODING_MS_1252, // charset
           PITCH_FIXED, // pitch
           WIDTH_NORMAL, // width type
@@ -262,7 +262,7 @@ const BuildinFont BuildinFontFace::m_aBuildinFonts[14]
           "Helvetica", // PSName
           718,
           -207, // ascend, descend
-          FAMILY_SWISS, // family style
+          tools::FAMILY_SWISS, // family style
           RTL_TEXTENCODING_MS_1252, // charset
           PITCH_VARIABLE, // pitch
           WIDTH_NORMAL, // width type
@@ -309,7 +309,7 @@ const BuildinFont BuildinFontFace::m_aBuildinFonts[14]
           "Helvetica-Oblique", // PSName
           718,
           -207, // ascend, descend
-          FAMILY_SWISS, // family style
+          tools::FAMILY_SWISS, // family style
           RTL_TEXTENCODING_MS_1252, // charset
           PITCH_VARIABLE, // pitch
           WIDTH_NORMAL, // width type
@@ -356,7 +356,7 @@ const BuildinFont BuildinFontFace::m_aBuildinFonts[14]
           "Helvetica-Bold", // PSName
           718,
           -207, // ascend, descend
-          FAMILY_SWISS, // family style
+          tools::FAMILY_SWISS, // family style
           RTL_TEXTENCODING_MS_1252, // charset
           PITCH_VARIABLE, // pitch
           WIDTH_NORMAL, // width type
@@ -403,7 +403,7 @@ const BuildinFont BuildinFontFace::m_aBuildinFonts[14]
           "Helvetica-BoldOblique", // PSName
           718,
           -207, // ascend, descend
-          FAMILY_SWISS, // family style
+          tools::FAMILY_SWISS, // family style
           RTL_TEXTENCODING_MS_1252, // charset
           PITCH_VARIABLE, // pitch
           WIDTH_NORMAL, // width type
@@ -450,7 +450,7 @@ const BuildinFont BuildinFontFace::m_aBuildinFonts[14]
           "Times-Roman", // PSName
           683,
           -217, // ascend, descend
-          FAMILY_ROMAN, // family style
+          tools::FAMILY_ROMAN, // family style
           RTL_TEXTENCODING_MS_1252, // charset
           PITCH_VARIABLE, // pitch
           WIDTH_NORMAL, // width type
@@ -497,7 +497,7 @@ const BuildinFont BuildinFontFace::m_aBuildinFonts[14]
           "Times-Italic", // PSName
           683,
           -217, // ascend, descend
-          FAMILY_ROMAN, // family style
+          tools::FAMILY_ROMAN, // family style
           RTL_TEXTENCODING_MS_1252, // charset
           PITCH_VARIABLE, // pitch
           WIDTH_NORMAL, // width type
@@ -544,7 +544,7 @@ const BuildinFont BuildinFontFace::m_aBuildinFonts[14]
           "Times-Bold", // PSName
           683,
           -217, // ascend, descend
-          FAMILY_ROMAN, // family style
+          tools::FAMILY_ROMAN, // family style
           RTL_TEXTENCODING_MS_1252, // charset
           PITCH_VARIABLE, // pitch
           WIDTH_NORMAL, // width type
@@ -591,7 +591,7 @@ const BuildinFont BuildinFontFace::m_aBuildinFonts[14]
           "Times-BoldItalic", // PSName
           683,
           -217, // ascend, descend
-          FAMILY_ROMAN, // family style
+          tools::FAMILY_ROMAN, // family style
           RTL_TEXTENCODING_MS_1252, // charset
           PITCH_VARIABLE, // pitch
           WIDTH_NORMAL, // width type
@@ -640,7 +640,7 @@ const BuildinFont BuildinFontFace::m_aBuildinFonts[14]
           "Symbol", // PSName
           1010,
           -293, // ascend, descend
-          FAMILY_DONTKNOW, // family style
+          tools::FAMILY_DONTKNOW, // family style
           RTL_TEXTENCODING_ADOBE_SYMBOL, // charset
           PITCH_VARIABLE, // pitch
           WIDTH_NORMAL, // width type
@@ -687,7 +687,7 @@ const BuildinFont BuildinFontFace::m_aBuildinFonts[14]
           "ZapfDingbats", // PSName
           820,
           -143, // ascend, descend
-          FAMILY_DONTKNOW, // family style
+          tools::FAMILY_DONTKNOW, // family style
           RTL_TEXTENCODING_ADOBE_DINGBATS, // charset
           PITCH_VARIABLE, // pitch
           WIDTH_NORMAL, // width type

@@ -149,7 +149,7 @@ static const vcl::Font& lcl_GetDefaultBulletFont()
     {
         vcl::Font tmp("OpenSymbol", "", Size(0, 14));
         tmp.SetCharSet( RTL_TEXTENCODING_SYMBOL );
-        tmp.SetFamily( FAMILY_DONTKNOW );
+        tmp.SetFamily( tools::FAMILY_DONTKNOW );
         tmp.SetPitch( PITCH_DONTKNOW );
         tmp.SetWeight( WEIGHT_DONTKNOW );
         tmp.SetTransparent( true );
@@ -679,7 +679,7 @@ IMPL_LINK_NOARG(SvxNumPickTabPage, NumSelectHdl_Impl, ValueSet*, void)
                     vcl::Font aCreateFont( pLevelSettings->sBulletFont,
                                             OUString(), Size( 0, 14 ) );
                     aCreateFont.SetCharSet( RTL_TEXTENCODING_DONTKNOW );
-                    aCreateFont.SetFamily( FAMILY_DONTKNOW );
+                    aCreateFont.SetFamily( tools::FAMILY_DONTKNOW );
                     aCreateFont.SetPitch( PITCH_DONTKNOW );
                     aCreateFont.SetWeight( WEIGHT_DONTKNOW );
                     aCreateFont.SetTransparent( true );

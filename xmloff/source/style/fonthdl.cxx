@@ -35,18 +35,18 @@
 using namespace ::com::sun::star;
 using namespace ::xmloff::token;
 
-static const SvXMLEnumMapEntry<FontFamily>* lcl_getFontFamilyGenericMapping()
+static const SvXMLEnumMapEntry<tools::FontFamily>* lcl_getFontFamilyGenericMapping()
 {
-    static SvXMLEnumMapEntry<FontFamily> const aFontFamilyGenericMapping[] =
+    static SvXMLEnumMapEntry<tools::FontFamily> const aFontFamilyGenericMapping[] =
     {
-        { XML_DECORATIVE,       FAMILY_DECORATIVE },
+        { XML_DECORATIVE,       tools::FAMILY_DECORATIVE },
 
-        { XML_MODERN,           FAMILY_MODERN   },
-        { XML_ROMAN,            FAMILY_ROMAN    },
-        { XML_SCRIPT,           FAMILY_SCRIPT   },
-        { XML_SWISS,            FAMILY_SWISS    },
-        { XML_SYSTEM,           FAMILY_SYSTEM   },
-        { XML_TOKEN_INVALID,    FontFamily(0)   }
+        { XML_MODERN,           tools::FAMILY_MODERN   },
+        { XML_ROMAN,            tools::FAMILY_ROMAN    },
+        { XML_SCRIPT,           tools::FAMILY_SCRIPT   },
+        { XML_SWISS,            tools::FAMILY_SWISS    },
+        { XML_SYSTEM,           tools::FAMILY_SYSTEM   },
+        { XML_TOKEN_INVALID,    tools::FontFamily(0)   }
     };
     return aFontFamilyGenericMapping;
 }
@@ -196,7 +196,7 @@ XMLFontFamilyPropHdl::~XMLFontFamilyPropHdl()
 
 bool XMLFontFamilyPropHdl::importXML( const OUString& rStrImpValue, uno::Any& rValue, const SvXMLUnitConverter& ) const
 {
-    FontFamily eNewFamily;
+    tools::FontFamily eNewFamily;
     bool bRet = SvXMLUnitConverter::convertEnum( eNewFamily, rStrImpValue, lcl_getFontFamilyGenericMapping() );
     if( bRet )
         rValue <<= static_cast<sal_Int16>(eNewFamily);
@@ -212,8 +212,8 @@ bool XMLFontFamilyPropHdl::exportXML( OUString& rStrExpValue, const uno::Any& rV
     sal_Int16 nFamily = sal_Int16();
     if( rValue >>= nFamily )
     {
-        FontFamily eFamily = static_cast<FontFamily>(nFamily);
-        if( eFamily != FAMILY_DONTKNOW )
+        tools::FontFamily eFamily = static_cast<tools::FontFamily>(nFamily);
+        if( eFamily != tools::FAMILY_DONTKNOW )
             bRet = SvXMLUnitConverter::convertEnum( aOut, eFamily, lcl_getFontFamilyGenericMapping() );
     }
 

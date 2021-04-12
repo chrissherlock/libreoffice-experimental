@@ -103,7 +103,7 @@ class SwSubFont final : public SvxFont
     inline void SetEscapement( const short nNewEsc );
     inline void SetProportion( const sal_uInt8 nNewPropr );
 
-    inline void SetFamily( const FontFamily eFamily );
+    inline void SetFamily( const tools::FontFamily eFamily );
     inline void SetName( const OUString& rName );
     inline void SetStyleName( const OUString& rStyleName );
     inline void SetSize( const Size& rSize );
@@ -232,7 +232,7 @@ public:
 
     inline void SetPropWidth( const sal_uInt16 nNew );
 
-    inline void SetFamily( const FontFamily eFamily, const SwFontScript nWhich );
+    inline void SetFamily( const tools::FontFamily eFamily, const SwFontScript nWhich );
     inline void SetName( const OUString& rName, const SwFontScript nWhich );
     inline void SetStyleName( const OUString& rStyleName, const SwFontScript nWhich );
     inline void SetSize( const Size& rSize, const SwFontScript nWhich );
@@ -439,13 +439,13 @@ inline void SwFont::SetFillColor( const Color& rColor )
 }
 
 // encapsulated SV-Font-method
-inline void SwSubFont::SetFamily( const FontFamily eFamily )
+inline void SwSubFont::SetFamily( const tools::FontFamily eFamily )
 {
     m_nFontCacheId = nullptr;
     Font::SetFamily( eFamily );
 }
 
-inline void SwFont::SetFamily( const FontFamily eFamily, const SwFontScript nWhich )
+inline void SwFont::SetFamily( const tools::FontFamily eFamily, const SwFontScript nWhich )
 {
     m_bFontChg = true;
     m_aSub[nWhich].SetFamily( eFamily );

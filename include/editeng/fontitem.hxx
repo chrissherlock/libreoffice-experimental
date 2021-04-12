@@ -30,7 +30,7 @@ class EDITENG_DLLPUBLIC SvxFontItem final : public SfxPoolItem
 {
     OUString aFamilyName;
     OUString  aStyleName;
-    FontFamily eFamily;
+    tools::FontFamily eFamily;
     FontPitch ePitch;
     rtl_TextEncoding eTextEncoding;
 
@@ -38,7 +38,7 @@ public:
     static SfxPoolItem* CreateDefault();
 
     explicit SvxFontItem(const sal_uInt16 nId);
-    SvxFontItem(const FontFamily eFam, const OUString& rFamilyName,
+    SvxFontItem(const tools::FontFamily eFam, const OUString& rFamilyName,
                 const OUString& rStyleName,
                 const FontPitch eFontPitch /*= PITCH_DONTKNOW*/,
                 const rtl_TextEncoding eFontTextEncoding /*= RTL_TEXTENCODING_DONTKNOW*/,
@@ -73,11 +73,11 @@ public:
         return aStyleName;
     }
 
-    void SetFamily(FontFamily _eFamily)
+    void SetFamily(tools::FontFamily _eFamily)
     {
         eFamily = _eFamily;
     }
-    FontFamily GetFamily() const
+    tools::FontFamily GetFamily() const
     {
         return eFamily;
     }

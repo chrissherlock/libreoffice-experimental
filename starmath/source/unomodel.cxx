@@ -637,7 +637,7 @@ void SmModel::_setPropertyValues(const PropertyMapEntry** ppEntries, const Any* 
                     vcl::Font aFont;
                     aFont.SetFamilyName ( rDescriptor.sFontName );
                     aFont.SetCharSet ( static_cast < rtl_TextEncoding > (rDescriptor.nCharSet) );
-                    aFont.SetFamily ( static_cast < FontFamily > (rDescriptor.nFamily ) );
+                    aFont.SetFamily ( static_cast < tools::FontFamily > (rDescriptor.nFamily ) );
                     aFont.SetPitch  ( static_cast < FontPitch >  (rDescriptor.nPitch ) );
                     aFont.SetWeight ( static_cast < FontWeight > (rDescriptor.nWeight ) );
                     aFont.SetItalic ( static_cast < FontItalic > (rDescriptor.nItalic ) );

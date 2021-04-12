@@ -653,7 +653,7 @@ void SwWW8ImplReader::SetAnlvStrings(SwNumFormat &rNum, WW8_ANLV const &rAV,
         bInsert = true;
         if( bListSymbol )
         {
-            FontFamily eFamily;
+            tools::FontFamily eFamily;
             OUString aName;
             FontPitch ePitch;
 

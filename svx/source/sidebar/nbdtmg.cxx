@@ -67,7 +67,7 @@ const vcl::Font& lcl_GetDefaultBulletFont()
     {
         static vcl::Font tmp("OpenSymbol", "", Size(0, 14));
         tmp.SetCharSet( RTL_TEXTENCODING_SYMBOL );
-        tmp.SetFamily( FAMILY_DONTKNOW );
+        tmp.SetFamily( tools::FAMILY_DONTKNOW );
         tmp.SetPitch( PITCH_DONTKNOW );
         tmp.SetWeight( WEIGHT_DONTKNOW );
         tmp.SetTransparent( true );
@@ -817,7 +817,7 @@ void OutlineTypeMgr::ApplyNumRule(SvxNumRule& aNum, sal_uInt16 nIndex, sal_uInt1
                     //if it cannot be found then create a new one
                     vcl::Font aCreateFont( pLevelSettings->sBulletFont, OUString(), Size( 0, 14 ) );
                     aCreateFont.SetCharSet( RTL_TEXTENCODING_DONTKNOW );
-                    aCreateFont.SetFamily( FAMILY_DONTKNOW );
+                    aCreateFont.SetFamily( tools::FAMILY_DONTKNOW );
                     aCreateFont.SetPitch( PITCH_DONTKNOW );
                     aCreateFont.SetWeight( WEIGHT_DONTKNOW );
                     aCreateFont.SetTransparent( true );

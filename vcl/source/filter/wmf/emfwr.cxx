@@ -519,11 +519,11 @@ void EMFWriter::ImplCheckTextAttr()
 
     switch( rFont.GetFamilyType() )
     {
-        case FAMILY_DECORATIVE: nPitchAndFamily |= 0x50; break;
-        case FAMILY_MODERN:     nPitchAndFamily |= 0x30; break;
-        case FAMILY_ROMAN:      nPitchAndFamily |= 0x10; break;
-        case FAMILY_SCRIPT:     nPitchAndFamily |= 0x40; break;
-        case FAMILY_SWISS:      nPitchAndFamily |= 0x20; break;
+        case tools::FAMILY_DECORATIVE: nPitchAndFamily |= 0x50; break;
+        case tools::FAMILY_MODERN:     nPitchAndFamily |= 0x30; break;
+        case tools::FAMILY_ROMAN:      nPitchAndFamily |= 0x10; break;
+        case tools::FAMILY_SCRIPT:     nPitchAndFamily |= 0x40; break;
+        case tools::FAMILY_SWISS:      nPitchAndFamily |= 0x20; break;
         default: break;
     }
 

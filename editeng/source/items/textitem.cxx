@@ -158,13 +158,13 @@ bool SvxFontListItem::GetPresentation
 SvxFontItem::SvxFontItem( const sal_uInt16 nId ) :
     SfxPoolItem( nId )
 {
-    eFamily = FAMILY_SWISS;
+    eFamily = tools::FAMILY_SWISS;
     ePitch = PITCH_VARIABLE;
     eTextEncoding = RTL_TEXTENCODING_DONTKNOW;
 }
 
 
-SvxFontItem::SvxFontItem( const FontFamily eFam, const OUString& aName,
+SvxFontItem::SvxFontItem( const tools::FontFamily eFam, const OUString& aName,
                   const OUString& aStName, const FontPitch eFontPitch,
                   const rtl_TextEncoding eFontTextEncoding, const sal_uInt16 nId ) :
 
@@ -221,7 +221,7 @@ bool SvxFontItem::PutValue( const uno::Any& rVal, sal_uInt8 nMemberId)
 
             aFamilyName = aFontDescriptor.Name;
             aStyleName = aFontDescriptor.StyleName;
-            eFamily = static_cast<FontFamily>(aFontDescriptor.Family);
+            eFamily = static_cast<tools::FontFamily>(aFontDescriptor.Family);
             eTextEncoding = static_cast<rtl_TextEncoding>(aFontDescriptor.CharSet);
             ePitch = static_cast<FontPitch>(aFontDescriptor.Pitch);
         }
@@ -247,7 +247,7 @@ bool SvxFontItem::PutValue( const uno::Any& rVal, sal_uInt8 nMemberId)
             sal_Int16 nFamily = sal_Int16();
             if(!(rVal >>= nFamily))
                 return false;
-            eFamily = static_cast<FontFamily>(nFamily);
+            eFamily = static_cast<tools::FontFamily>(nFamily);
         }
         break;
         case MID_FONT_CHAR_SET  :

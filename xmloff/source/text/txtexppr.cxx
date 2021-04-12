@@ -229,7 +229,7 @@ void XMLTextExportPropertySetMapper::ContextFontFilter(
 {
     OUString sFamilyName;
     OUString sStyleName;
-    FontFamily nFamily = FAMILY_DONTKNOW;
+    tools::FontFamily nFamily = tools::FAMILY_DONTKNOW;
     FontPitch nPitch = PITCH_DONTKNOW;
     rtl_TextEncoding eEnc = RTL_TEXTENCODING_DONTKNOW;
 
@@ -241,7 +241,7 @@ void XMLTextExportPropertySetMapper::ContextFontFilter(
 
     sal_Int16 nTmp = sal_Int16();
     if( pFontFamilyState && (pFontFamilyState->maValue >>= nTmp ) )
-        nFamily = static_cast< FontFamily >( nTmp );
+        nFamily = static_cast< tools::FontFamily >( nTmp );
     if( pFontPitchState && (pFontPitchState->maValue >>= nTmp ) )
         nPitch = static_cast< FontPitch >( nTmp );
     if( pFontCharsetState && (pFontCharsetState->maValue >>= nTmp ) )

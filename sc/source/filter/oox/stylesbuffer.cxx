@@ -834,28 +834,28 @@ bool Font::needsRichTextFormat() const
     return maApiData.mnEscapement != API_ESCAPE_NONE;
 }
 
-static ::FontFamily lcl_getFontFamily( sal_Int32 nFamily )
+static tools::FontFamily lcl_getFontFamily( sal_Int32 nFamily )
 {
-    ::FontFamily eScFamily = FAMILY_DONTKNOW;
+    tools::FontFamily eScFamily = tools::FAMILY_DONTKNOW;
     switch( nFamily )
     {
         case css::awt::FontFamily::DONTKNOW:
-            eScFamily = FAMILY_DONTKNOW;
+            eScFamily = tools::FAMILY_DONTKNOW;
             break;
         case css::awt::FontFamily::ROMAN:
-            eScFamily = FAMILY_ROMAN;
+            eScFamily = tools::FAMILY_ROMAN;
             break;
         case css::awt::FontFamily::SWISS:
-            eScFamily = FAMILY_SWISS;
+            eScFamily = tools::FAMILY_SWISS;
             break;
         case css::awt::FontFamily::MODERN:
-            eScFamily = FAMILY_MODERN;
+            eScFamily = tools::FAMILY_MODERN;
             break;
         case css::awt::FontFamily::SCRIPT:
-            eScFamily = FAMILY_SCRIPT;
+            eScFamily = tools::FAMILY_SCRIPT;
             break;
         case css::awt::FontFamily::DECORATIVE:
-            eScFamily = FAMILY_DECORATIVE;
+            eScFamily = tools::FAMILY_DECORATIVE;
             break;
     }
     return eScFamily;

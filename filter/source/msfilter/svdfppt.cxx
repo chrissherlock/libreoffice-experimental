@@ -404,27 +404,27 @@ SvStream& ReadPptFontEntityAtom( SvStream& rIn, PptFontEntityAtom& rAtom )
     switch ( lfPitchAndFamily & 0xf0 )
     {
         case FF_ROMAN:
-            rAtom.eFamily = FAMILY_ROMAN;
+            rAtom.eFamily = tools::FAMILY_ROMAN;
         break;
 
         case FF_SWISS:
-            rAtom.eFamily = FAMILY_SWISS;
+            rAtom.eFamily = tools::FAMILY_SWISS;
         break;
 
         case FF_MODERN:
-            rAtom.eFamily = FAMILY_MODERN;
+            rAtom.eFamily = tools::FAMILY_MODERN;
         break;
 
         case FF_SCRIPT:
-            rAtom.eFamily = FAMILY_SCRIPT;
+            rAtom.eFamily = tools::FAMILY_SCRIPT;
         break;
 
         case FF_DECORATIVE:
-             rAtom.eFamily = FAMILY_DECORATIVE;
+             rAtom.eFamily = tools::FAMILY_DECORATIVE;
         break;
 
         default:
-            rAtom.eFamily = FAMILY_DONTKNOW;
+            rAtom.eFamily = tools::FAMILY_DONTKNOW;
         break;
     }
 

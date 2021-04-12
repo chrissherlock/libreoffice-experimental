@@ -436,21 +436,21 @@ void SVGAttributeWriter::setFontFamily()
     else
     {
         const OUString& rsFontName = rCurFont.GetFamilyName();
-        OUString sFontFamily( rsFontName.getToken( 0, ';' ) );
+        OUString sFamily( rsFontName.getToken( 0, ';' ) );
         FontPitch ePitch = rCurFont.GetPitch();
         if( ePitch == PITCH_FIXED )
         {
-            sFontFamily += ", monospace";
+            sFamily += ", monospace";
         }
         else
         {
-            FontFamily eFamily = rCurFont.GetFamilyType();
-            if( eFamily == FAMILY_ROMAN )
-                sFontFamily += ", serif";
-            else if( eFamily == FAMILY_SWISS )
-                sFontFamily += ", sans-serif";
+            tools::FontFamily eFamily = rCurFont.GetFamilyType();
+            if( eFamily == tools::FAMILY_ROMAN )
+                sFamily += ", serif";
+            else if( eFamily == tools::FAMILY_SWISS )
+                sFamily += ", sans-serif";
         }
-        mrExport.AddAttribute( XML_NAMESPACE_NONE, aXMLAttrFontFamily, sFontFamily );
+        mrExport.AddAttribute( XML_NAMESPACE_NONE, aXMLAttrFontFamily, sFamily );
     }
 }
 
@@ -928,10 +928,10 @@ void SVGTextWriter::implSetFontFamily()
     }
     else
     {
-        FontFamily eFamily = maCurrentFont.GetFamilyType();
-        if( eFamily == FAMILY_ROMAN )
+        tools::FontFamily eFamily = maCurrentFont.GetFamilyType();
+        if( eFamily == tools::FAMILY_ROMAN )
             sFontFamily += ", serif";
-        else if( eFamily == FAMILY_SWISS )
+        else if( eFamily == tools::FAMILY_SWISS )
             sFontFamily += ", sans-serif";
     }
     mrExport.AddAttribute( XML_NAMESPACE_NONE, aXMLAttrFontFamily, sFontFamily );

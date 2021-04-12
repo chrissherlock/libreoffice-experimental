@@ -640,7 +640,7 @@ void EmbeddedObjectRef::DrawPaintReplacement( const tools::Rectangle &rRect, con
     aFnt.SetTransparent( true );
     aFnt.SetColor( COL_LIGHTRED );
     aFnt.SetWeight( WEIGHT_BOLD );
-    aFnt.SetFamily( FAMILY_SWISS );
+    aFnt.SetFamily( tools::FAMILY_SWISS );
 
     pOut->Push();
     pOut->SetBackground();

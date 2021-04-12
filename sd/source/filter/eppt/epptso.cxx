@@ -487,7 +487,7 @@ bool PPTWriter::ImplCloseDocument()
                 break;
 
                 default:
-                    lfPitchAndFamily |= FAMILY_DONTKNOW;
+                    lfPitchAndFamily |= tools::FAMILY_DONTKNOW;
                 break;
             }
             switch( pDesc->Pitch )

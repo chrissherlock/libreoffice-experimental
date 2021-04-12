@@ -158,7 +158,7 @@ SmCfgOther::SmCfgOther()
 SmFontFormat::SmFontFormat()
     : aName(FONTNAME_MATH)
     , nCharSet(RTL_TEXTENCODING_UNICODE)
-    , nFamily(FAMILY_DONTKNOW)
+    , nFamily(tools::FAMILY_DONTKNOW)
     , nPitch(PITCH_DONTKNOW)
     , nWeight(WEIGHT_DONTKNOW)
     , nItalic(ITALIC_NONE)
@@ -182,7 +182,7 @@ vcl::Font SmFontFormat::GetFont() const
     vcl::Font aRes;
     aRes.SetFamilyName( aName );
     aRes.SetCharSet( static_cast<rtl_TextEncoding>(nCharSet) );
-    aRes.SetFamily( static_cast<FontFamily>(nFamily) );
+    aRes.SetFamily( static_cast<tools::FontFamily>(nFamily) );
     aRes.SetPitch( static_cast<FontPitch>(nPitch) );
     aRes.SetWeight( static_cast<FontWeight>(nWeight) );
     aRes.SetItalic( static_cast<FontItalic>(nItalic) );

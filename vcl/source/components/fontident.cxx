@@ -103,12 +103,12 @@ Any SAL_CALL FontIdentificator::getMaterial()
     aFD.Type                = 0;
     switch( m_aFont.GetFamilyType() )
     {
-    case FAMILY_DECORATIVE: aFD.Family = css::awt::FontFamily::DECORATIVE;break;
-    case FAMILY_MODERN: aFD.Family = css::awt::FontFamily::MODERN;break;
-    case FAMILY_ROMAN: aFD.Family = css::awt::FontFamily::ROMAN;break;
-    case FAMILY_SCRIPT: aFD.Family = css::awt::FontFamily::SCRIPT;break;
-    case FAMILY_SWISS: aFD.Family = css::awt::FontFamily::SWISS;break;
-    case FAMILY_SYSTEM: aFD.Family = css::awt::FontFamily::SYSTEM;break;
+    case tools::FAMILY_DECORATIVE: aFD.Family = css::awt::FontFamily::DECORATIVE;break;
+    case tools::FAMILY_MODERN: aFD.Family = css::awt::FontFamily::MODERN;break;
+    case tools::FAMILY_ROMAN: aFD.Family = css::awt::FontFamily::ROMAN;break;
+    case tools::FAMILY_SCRIPT: aFD.Family = css::awt::FontFamily::SCRIPT;break;
+    case tools::FAMILY_SWISS: aFD.Family = css::awt::FontFamily::SWISS;break;
+    case tools::FAMILY_SYSTEM: aFD.Family = css::awt::FontFamily::SYSTEM;break;
     default:
         aFD.Family = css::awt::FontFamily::DONTKNOW;
         break;

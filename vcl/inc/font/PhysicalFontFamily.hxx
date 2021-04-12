@@ -79,7 +79,7 @@ public:
     void UpdateCloneFontList(LogicalFontManager&) const;
 
     static void CalcType(ImplFontAttrs& rType, FontWeight& rWeight, FontWidth& rWidth,
-                         FontFamily eFamily, const utl::FontNameAttr* pFontAttr);
+                         tools::FontFamily eFamily, const utl::FontNameAttr* pFontAttr);
 
 private:
     std::vector<rtl::Reference<PhysicalFontFace>> maFontFaces;
@@ -88,7 +88,7 @@ private:
     OUString maSearchName; // normalized font family name
     OUString maMapNames; // fontname aliases
     FontTypeFaces mnTypeFaces; // Typeface Flags
-    FontFamily meFamily;
+    tools::FontFamily meFamily;
     FontPitch mePitch;
     int mnMinQuality; // quality of the worst font face
 

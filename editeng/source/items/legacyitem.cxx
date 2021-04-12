@@ -100,7 +100,7 @@ namespace legacy
 
             rItem.SetFamilyName(aName);
             rItem.SetStyleName(aStyle);
-            rItem.SetFamily(static_cast<FontFamily>(_eFamily));
+            rItem.SetFamily(static_cast<tools::FontFamily>(_eFamily));
             rItem.SetPitch(static_cast<FontPitch>(eFontPitch));
             rItem.SetCharSet(static_cast<rtl_TextEncoding>(eFontTextEncoding));
         }

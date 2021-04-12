@@ -337,17 +337,17 @@ ErrCode ImpEditEngine::WriteRTF( SvStream& rOutput, EditSelection aSel )
         rOutput.WriteUInt32AsString( j );
         switch ( pFontItem->GetFamily()  )
         {
-            case FAMILY_DONTKNOW:       rOutput.WriteCharPtr( OOO_STRING_SVTOOLS_RTF_FNIL );
+            case tools::FAMILY_DONTKNOW:       rOutput.WriteCharPtr( OOO_STRING_SVTOOLS_RTF_FNIL );
                                         break;
-            case FAMILY_DECORATIVE:     rOutput.WriteCharPtr( OOO_STRING_SVTOOLS_RTF_FDECOR );
+            case tools::FAMILY_DECORATIVE:     rOutput.WriteCharPtr( OOO_STRING_SVTOOLS_RTF_FDECOR );
                                         break;
-            case FAMILY_MODERN:         rOutput.WriteCharPtr( OOO_STRING_SVTOOLS_RTF_FMODERN );
+            case tools::FAMILY_MODERN:         rOutput.WriteCharPtr( OOO_STRING_SVTOOLS_RTF_FMODERN );
                                         break;
-            case FAMILY_ROMAN:          rOutput.WriteCharPtr( OOO_STRING_SVTOOLS_RTF_FROMAN );
+            case tools::FAMILY_ROMAN:          rOutput.WriteCharPtr( OOO_STRING_SVTOOLS_RTF_FROMAN );
                                         break;
-            case FAMILY_SCRIPT:         rOutput.WriteCharPtr( OOO_STRING_SVTOOLS_RTF_FSCRIPT );
+            case tools::FAMILY_SCRIPT:         rOutput.WriteCharPtr( OOO_STRING_SVTOOLS_RTF_FSCRIPT );
                                         break;
-            case FAMILY_SWISS:          rOutput.WriteCharPtr( OOO_STRING_SVTOOLS_RTF_FSWISS );
+            case tools::FAMILY_SWISS:          rOutput.WriteCharPtr( OOO_STRING_SVTOOLS_RTF_FSWISS );
                                         break;
             default:
                 break;

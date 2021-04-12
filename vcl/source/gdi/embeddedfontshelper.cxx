@@ -238,7 +238,7 @@ bool EmbeddedFontsHelper::sufficientTTFRights( const void* data, tools::Long siz
     return true; // no known restriction
 }
 
-OUString EmbeddedFontsHelper::fontFileUrl( std::u16string_view familyName, FontFamily family, FontItalic italic,
+OUString EmbeddedFontsHelper::fontFileUrl( std::u16string_view familyName, tools::FontFamily family, FontItalic italic,
     FontWeight weight, FontPitch pitch, FontRights rights )
 {
     OUString path = "${$BRAND_BASE_DIR/" LIBO_ETC_FOLDER "/" SAL_CONFIGFILE( "bootstrap") "::UserInstallation}";
@@ -272,7 +272,7 @@ OUString EmbeddedFontsHelper::fontFileUrl( std::u16string_view familyName, FontF
             // and just having a unicode font doesn't say what glyphs it actually contains).
             // It is possible that it still may be needed to do at least some checks here
             // for some encodings (can one font have more font files for more encodings?).
-            if(( family == FAMILY_DONTKNOW || f->GetFamilyType() == family )
+            if(( family == tools::FAMILY_DONTKNOW || f->GetFamilyType() == family )
                 && ( italic == ITALIC_DONTKNOW || f->GetItalic() == italic )
                 && ( weight == WEIGHT_DONTKNOW || f->GetWeight() == weight )
                 && ( pitch == PITCH_DONTKNOW || f->GetPitch() == pitch ))
@@ -280,7 +280,7 @@ OUString EmbeddedFontsHelper::fontFileUrl( std::u16string_view familyName, FontF
                 selected = f;
                 break;
             }
-            if(( f->GetFamilyType() == FAMILY_DONTKNOW || family == FAMILY_DONTKNOW || f->GetFamilyType() == family )
+            if(( f->GetFamilyType() == tools::FAMILY_DONTKNOW || family == tools::FAMILY_DONTKNOW || f->GetFamilyType() == family )
                 && ( f->GetItalic() == ITALIC_DONTKNOW || italic == ITALIC_DONTKNOW || f->GetItalic() == italic )
                 && ( f->GetWeight() == WEIGHT_DONTKNOW || weight == WEIGHT_DONTKNOW || f->GetWeight() == weight )
                 && ( f->GetPitch() == PITCH_DONTKNOW || pitch == PITCH_DONTKNOW || f->GetPitch() == pitch ))

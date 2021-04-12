@@ -319,13 +319,13 @@ public:
     void FontCharset( sal_uInt8 nCharSet, rtl_TextEncoding nEncoding ) const;
 
     /// Font family.
-    void FontFamilyType( FontFamily eFamily ) const;
+    void FontFamilyType( tools::FontFamily eFamily ) const;
 
     /// Font pitch.
     void FontPitchType( FontPitch ePitch ) const;
 
     /// Write out the font into the document, if it's an embedded font.
-    void EmbedFont( std::u16string_view name, FontFamily family, FontPitch pitch );
+    void EmbedFont( std::u16string_view name, tools::FontFamily family, FontPitch pitch );
 
     /// Definition of a numbering instance.
     virtual void NumberingDefinition( sal_uInt16 nId, const SwNumRule &rRule ) override;
@@ -436,7 +436,7 @@ private:
     void WriteFFData( const FieldInfos& rInfos );
     void WritePendingPlaceholder();
 
-    void EmbedFontStyle( std::u16string_view name, int tag, FontFamily family, FontItalic italic, FontWeight weight,
+    void EmbedFontStyle( std::u16string_view name, int tag, tools::FontFamily family, FontItalic italic, FontWeight weight,
         FontPitch pitch );
 
     /**

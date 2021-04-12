@@ -1540,7 +1540,7 @@ void SvxFontNameBox_Base::Update( const css::awt::FontDescriptor* pFontDesc )
     if ( pFontDesc )
     {
         aCurFont.SetFamilyName  ( pFontDesc->Name );
-        aCurFont.SetFamily      ( FontFamily( pFontDesc->Family ) );
+        aCurFont.SetFamily      ( tools::FontFamily( pFontDesc->Family ) );
         aCurFont.SetStyleName   ( pFontDesc->StyleName );
         aCurFont.SetPitch       ( FontPitch( pFontDesc->Pitch ) );
         aCurFont.SetCharSet     ( rtl_TextEncoding( pFontDesc->CharSet ) );

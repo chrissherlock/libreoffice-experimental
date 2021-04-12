@@ -1358,13 +1358,13 @@ sal_uInt64 PictReader::ReadData(sal_uInt16 nOpcode)
 
     case 0x0003:   // TxFont
         pPict->ReadUInt16( nUSHORT );
-        if      (nUSHORT <=    1) aActFont.SetFamily(FAMILY_SWISS);
-        else if (nUSHORT <=   12) aActFont.SetFamily(FAMILY_DECORATIVE);
-        else if (nUSHORT <=   20) aActFont.SetFamily(FAMILY_ROMAN);
-        else if (nUSHORT ==   21) aActFont.SetFamily(FAMILY_SWISS);
-        else if (nUSHORT ==   22) aActFont.SetFamily(FAMILY_MODERN);
-        else if (nUSHORT <= 1023) aActFont.SetFamily(FAMILY_SWISS);
-        else                      aActFont.SetFamily(FAMILY_ROMAN);
+        if      (nUSHORT <=    1) aActFont.SetFamily(tools::FAMILY_SWISS);
+        else if (nUSHORT <=   12) aActFont.SetFamily(tools::FAMILY_DECORATIVE);
+        else if (nUSHORT <=   20) aActFont.SetFamily(tools::FAMILY_ROMAN);
+        else if (nUSHORT ==   21) aActFont.SetFamily(tools::FAMILY_SWISS);
+        else if (nUSHORT ==   22) aActFont.SetFamily(tools::FAMILY_MODERN);
+        else if (nUSHORT <= 1023) aActFont.SetFamily(tools::FAMILY_SWISS);
+        else                      aActFont.SetFamily(tools::FAMILY_ROMAN);
         aActFont.SetCharSet(GetTextEncoding(nUSHORT));
         eActMethod = PictDrawingMethod::UNDEFINED;
         nDataSize=2;
@@ -1599,13 +1599,13 @@ sal_uInt64 PictReader::ReadData(sal_uInt16 nOpcode)
         sal_uInt16  nLen;
         pPict->ReadUInt16( nUSHORT ); nDataSize=nUSHORT+2;
         pPict->ReadUInt16( nUSHORT );
-        if      (nUSHORT <=    1) aActFont.SetFamily(FAMILY_SWISS);
-        else if (nUSHORT <=   12) aActFont.SetFamily(FAMILY_DECORATIVE);
-        else if (nUSHORT <=   20) aActFont.SetFamily(FAMILY_ROMAN);
-        else if (nUSHORT ==   21) aActFont.SetFamily(FAMILY_SWISS);
-        else if (nUSHORT ==   22) aActFont.SetFamily(FAMILY_MODERN);
-        else if (nUSHORT <= 1023) aActFont.SetFamily(FAMILY_SWISS);
-        else                      aActFont.SetFamily(FAMILY_ROMAN);
+        if      (nUSHORT <=    1) aActFont.SetFamily(tools::FAMILY_SWISS);
+        else if (nUSHORT <=   12) aActFont.SetFamily(tools::FAMILY_DECORATIVE);
+        else if (nUSHORT <=   20) aActFont.SetFamily(tools::FAMILY_ROMAN);
+        else if (nUSHORT ==   21) aActFont.SetFamily(tools::FAMILY_SWISS);
+        else if (nUSHORT ==   22) aActFont.SetFamily(tools::FAMILY_MODERN);
+        else if (nUSHORT <= 1023) aActFont.SetFamily(tools::FAMILY_SWISS);
+        else                      aActFont.SetFamily(tools::FAMILY_ROMAN);
         aActFont.SetCharSet(GetTextEncoding(nUSHORT));
         pPict->ReadChar( nByteLen ); nLen=static_cast<sal_uInt16>(nByteLen)&0x00ff;
         pPict->ReadBytes(&sFName, nLen);
@@ -1912,7 +1912,7 @@ void PictReader::ReadPict( SvStream & rStreamPict, GDIMetaFile & rGDIMetaFile )
     aActOvalSize        = Size(1,1);
 
     aActFont.SetCharSet( GetTextEncoding());
-    aActFont.SetFamily(FAMILY_SWISS);
+    aActFont.SetFamily(tools::FAMILY_SWISS);
     aActFont.SetFontSize(Size(0,12));
     aActFont.SetAlignment(ALIGN_BASELINE);
 

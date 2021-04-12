@@ -400,7 +400,7 @@ void SvxSwAutoCorrCfg::Load(bool bInit)
                 case  18:
                 {
                     sal_Int32 nVal = 0; pValues[nProp] >>= nVal;
-                    rSwFlags.aBulletFont.SetFamily(FontFamily(nVal));
+                    rSwFlags.aBulletFont.SetFamily(tools::FontFamily(nVal));
                 }
                 break; // "Format/Option/ChangeToBullets/SpecialCharacter/FontFamily",
                 case  19:
@@ -476,7 +476,7 @@ void SvxSwAutoCorrCfg::Load(bool bInit)
                 case 44 :
                 {
                     sal_Int32 nVal = 0; pValues[nProp] >>= nVal;
-                    rSwFlags.aByInputBulletFont.SetFamily(FontFamily(nVal));
+                    rSwFlags.aByInputBulletFont.SetFamily(tools::FontFamily(nVal));
                 }
                 break;// "Format/ByInput/ApplyNumbering/SpecialCharacter/FontFamily",
                 case 45 :

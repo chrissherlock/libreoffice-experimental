@@ -3889,26 +3889,26 @@ void RtfAttributeOutput::FontCharset(sal_uInt8 nCharSet) const
 }
 
 /// Font family.
-void RtfAttributeOutput::FontFamilyType(FontFamily eFamily, const wwFont& rFont) const
+void RtfAttributeOutput::FontFamilyType(tools::FontFamily eFamily, const wwFont& rFont) const
 {
     m_rExport.Strm().WriteChar('{').WriteCharPtr(OOO_STRING_SVTOOLS_RTF_F);
 
     const char* pStr = OOO_STRING_SVTOOLS_RTF_FNIL;
     switch (eFamily)
     {
-        case FAMILY_ROMAN:
+        case tools::FAMILY_ROMAN:
             pStr = OOO_STRING_SVTOOLS_RTF_FROMAN;
             break;
-        case FAMILY_SWISS:
+        case tools::FAMILY_SWISS:
             pStr = OOO_STRING_SVTOOLS_RTF_FSWISS;
             break;
-        case FAMILY_MODERN:
+        case tools::FAMILY_MODERN:
             pStr = OOO_STRING_SVTOOLS_RTF_FMODERN;
             break;
-        case FAMILY_SCRIPT:
+        case tools::FAMILY_SCRIPT:
             pStr = OOO_STRING_SVTOOLS_RTF_FSCRIPT;
             break;
-        case FAMILY_DECORATIVE:
+        case tools::FAMILY_DECORATIVE:
             pStr = OOO_STRING_SVTOOLS_RTF_FDECOR;
             break;
         default:

@@ -350,11 +350,11 @@ void WMFWriter::WMFRecord_CreateFontIndirect(const vcl::Font & rFont)
         default:             nPitchFamily=W_DEFAULT_PITCH;
     }
     switch (rFont.GetFamilyType()) {
-        case FAMILY_DECORATIVE: nPitchFamily|=W_FF_DECORATIVE; break;
-        case FAMILY_MODERN:     nPitchFamily|=W_FF_MODERN;     break;
-        case FAMILY_ROMAN:      nPitchFamily|=W_FF_ROMAN;      break;
-        case FAMILY_SCRIPT:     nPitchFamily|=W_FF_SCRIPT;     break;
-        case FAMILY_SWISS:      nPitchFamily|=W_FF_SWISS;      break;
+        case tools::FAMILY_DECORATIVE: nPitchFamily|=W_FF_DECORATIVE; break;
+        case tools::FAMILY_MODERN:     nPitchFamily|=W_FF_MODERN;     break;
+        case tools::FAMILY_ROMAN:      nPitchFamily|=W_FF_ROMAN;      break;
+        case tools::FAMILY_SCRIPT:     nPitchFamily|=W_FF_SCRIPT;     break;
+        case tools::FAMILY_SWISS:      nPitchFamily|=W_FF_SWISS;      break;
         default:                nPitchFamily|=W_FF_DONTCARE;
     }
     pWMF->WriteUChar( nPitchFamily );

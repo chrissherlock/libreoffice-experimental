@@ -1453,7 +1453,7 @@ private:
                   const bool bFirstLineOfStSet = false,
                   const bool bLeftIndentSet = false );
 
-    bool GetFontParams(sal_uInt16, FontFamily&, OUString&, FontPitch&,
+    bool GetFontParams(sal_uInt16, tools::FontFamily&, OUString&, FontPitch&,
         rtl_TextEncoding&);
     bool SetNewFontAttr(sal_uInt16 nFCode, bool bSetEnums, sal_uInt16 nWhich);
     void ResetCharSetVars();

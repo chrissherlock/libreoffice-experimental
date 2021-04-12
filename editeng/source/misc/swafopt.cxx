@@ -61,7 +61,7 @@ SvxSwAutoFormatFlags::SvxSwAutoFormatFlags()
     nAutoCmpltExpandKey = KEY_RETURN;
 
     aBulletFont.SetCharSet( RTL_TEXTENCODING_SYMBOL );
-    aBulletFont.SetFamily( FAMILY_DONTKNOW );
+    aBulletFont.SetFamily( tools::FAMILY_DONTKNOW );
     aBulletFont.SetPitch( PITCH_DONTKNOW );
     aBulletFont.SetWeight( WEIGHT_DONTKNOW );
     aBulletFont.SetTransparent( true );

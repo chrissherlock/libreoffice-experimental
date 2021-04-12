@@ -3671,7 +3671,7 @@ void SwWW8ImplReader::Read_UnderlineColor(sal_uInt16, const sal_uInt8* pData, sh
         }
     }
 }
-bool SwWW8ImplReader::GetFontParams( sal_uInt16 nFCode, FontFamily& reFamily,
+bool SwWW8ImplReader::GetFontParams( sal_uInt16 nFCode, tools::FontFamily& reFamily,
     OUString& rName, FontPitch& rePitch, rtl_TextEncoding& reCharSet )
 {
     // the definitions that are the base for these tables are in windows.h
@@ -3680,10 +3680,10 @@ bool SwWW8ImplReader::GetFontParams( sal_uInt16 nFCode, FontFamily& reFamily,
         PITCH_DONTKNOW, PITCH_FIXED, PITCH_VARIABLE, PITCH_DONTKNOW
     };
 
-    static const FontFamily eFamilyA[] =
+    static const tools::FontFamily eFamilyA[] =
     {
-        FAMILY_DONTKNOW, FAMILY_ROMAN, FAMILY_SWISS, FAMILY_MODERN,
-        FAMILY_SCRIPT, FAMILY_DECORATIVE, FAMILY_DONTKNOW, FAMILY_DONTKNOW
+        tools::FAMILY_DONTKNOW, tools::FAMILY_ROMAN, tools::FAMILY_SWISS, tools::FAMILY_MODERN,
+        tools::FAMILY_SCRIPT, tools::FAMILY_DECORATIVE, tools::FAMILY_DONTKNOW, tools::FAMILY_DONTKNOW
     };
 
     const WW8_FFN* pF = m_xFonts->GetFont( nFCode );  // Info for it
@@ -3721,7 +3721,7 @@ bool SwWW8ImplReader::GetFontParams( sal_uInt16 nFCode, FontFamily& reFamily,
         rName.startsWithIgnoreAsciiCase("Times Roman") ||
         rName.startsWithIgnoreAsciiCase("Times New Roman"))
     {
-        reFamily = FAMILY_ROMAN;
+        reFamily = tools::FAMILY_ROMAN;
     }
     else if (rName.startsWithIgnoreAsciiCase("Helv") ||
              rName.startsWithIgnoreAsciiCase("Arial") ||
@@ -3731,7 +3731,7 @@ bool SwWW8ImplReader::GetFontParams( sal_uInt16 nFCode, FontFamily& reFamily,
              rName.startsWithIgnoreAsciiCase("Small Fonts") ||
              rName.startsWithIgnoreAsciiCase("MS Sans Serif"))
     {
-        reFamily = FAMILY_SWISS;
+        reFamily = tools::FAMILY_SWISS;
     }
     else
     {
@@ -3744,7 +3744,7 @@ bool SwWW8ImplReader::GetFontParams( sal_uInt16 nFCode, FontFamily& reFamily,
 bool SwWW8ImplReader::SetNewFontAttr(sal_uInt16 nFCode, bool bSetEnums,
     sal_uInt16 nWhich)
 {
-    FontFamily eFamily;
+    tools::FontFamily eFamily;
     OUString aName;
     FontPitch ePitch;
     rtl_TextEncoding eSrcCharSet;

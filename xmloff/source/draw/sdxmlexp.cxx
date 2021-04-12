@@ -2789,7 +2789,7 @@ XMLFontAutoStylePool* SdXMLExport::CreateFontAutoStylePool()
                 for( int i = 0; i < nLen; i++ )
                 {
                     OUString sFamilyName, sStyleName;
-                    sal_Int16 eFamily(FAMILY_DONTKNOW),
+                    sal_Int16 eFamily(tools::FAMILY_DONTKNOW),
                         ePitch(PITCH_DONTKNOW),
                         eCharSet(RTL_TEXTENCODING_DONTKNOW);
 
@@ -2799,7 +2799,7 @@ XMLFontAutoStylePool* SdXMLExport::CreateFontAutoStylePool()
                     aAnySeq[nSeqIndex++] >>= ePitch;
                     aAnySeq[nSeqIndex++] >>= eCharSet;
 
-                    pPool->Add( sFamilyName, sStyleName, FontFamily( eFamily ), FontPitch( ePitch ), rtl_TextEncoding( eCharSet ) );
+                    pPool->Add( sFamilyName, sStyleName, tools::FontFamily( eFamily ), FontPitch( ePitch ), rtl_TextEncoding( eCharSet ) );
                 }
             }
         }

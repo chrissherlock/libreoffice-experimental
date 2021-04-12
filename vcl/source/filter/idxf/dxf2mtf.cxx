@@ -203,7 +203,7 @@ bool DXF2GDIMetaFile::SetFontAttribute(const DXFBasicEntity & rE, short nAngle, 
 
     aFont.SetColor(aColor);
     aFont.SetTransparent(true);
-    aFont.SetFamily(FAMILY_SWISS);
+    aFont.SetFamily(tools::FAMILY_SWISS);
     aFont.SetFontSize(Size(0,nHeight));
     aFont.SetAlignment(ALIGN_BASELINE);
     aFont.SetOrientation(Degree10(nAngle));

@@ -55,12 +55,12 @@ public:
                         Font( Font&& ) noexcept;
     explicit            Font( const OUString& rFamilyName, const Size& );
     explicit            Font( const OUString& rFamilyName, const OUString& rStyleName, const Size& );
-    explicit            Font( FontFamily eFamily, const Size& );
+    explicit            Font( tools::FontFamily eFamily, const Size& );
     virtual             ~Font();
 
     const OUString&     GetFamilyName() const;
-    FontFamily          GetFamilyType();
-    FontFamily          GetFamilyType() const;
+    tools::FontFamily          GetFamilyType();
+    tools::FontFamily          GetFamilyType() const;
     const OUString&     GetStyleName() const;
 
     FontWeight          GetWeight();
@@ -78,7 +78,7 @@ public:
 
     void                SetFamilyName( const OUString& rFamilyName );
     void                SetStyleName( const OUString& rStyleName );
-    void                SetFamily( FontFamily );
+    void                SetFamily( tools::FontFamily );
 
     void                SetPitch( FontPitch ePitch );
     void                SetItalic( FontItalic );

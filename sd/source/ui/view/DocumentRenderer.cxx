@@ -334,7 +334,7 @@ namespace {
         const Point& rPageStringOffset)
     {
         const vcl::Font aOriginalFont (rPrinter.OutputDevice::GetFont());
-        rPrinter.SetFont(vcl::Font(FAMILY_SWISS, Size(0, 423)));
+        rPrinter.SetFont(vcl::Font(::tools::FAMILY_SWISS, Size(0, 423)));
         rPrinter.DrawText(rPageStringOffset, rsPageString);
         rPrinter.SetFont(aOriginalFont);
     }

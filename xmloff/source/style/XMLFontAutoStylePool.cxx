@@ -55,7 +55,7 @@ class XMLFontAutoStylePoolEntry_Impl
     OUString    sName;
     OUString    sFamilyName;
     OUString    sStyleName;
-    FontFamily  nFamily;
+    tools::FontFamily  nFamily;
     FontPitch   nPitch;
     rtl_TextEncoding eEnc;
 
@@ -65,21 +65,21 @@ public:
             const OUString& rName,
             const OUString& rFamilyName,
             const OUString& rStyleName,
-            FontFamily nFamily,
+            tools::FontFamily nFamily,
             FontPitch nPitch,
             rtl_TextEncoding eEnc );
 
     inline XMLFontAutoStylePoolEntry_Impl(
             const OUString& rFamilyName,
             const OUString& rStyleName,
-            FontFamily nFamily,
+            tools::FontFamily nFamily,
             FontPitch nPitch,
             rtl_TextEncoding eEnc );
 
     const OUString& GetName() const { return sName; }
     const OUString& GetFamilyName() const { return sFamilyName; }
     const OUString& GetStyleName() const { return sStyleName; }
-    FontFamily GetFamily() const {   return nFamily; }
+    tools::FontFamily GetFamily() const {   return nFamily; }
     FontPitch GetPitch() const { return nPitch; }
     rtl_TextEncoding GetEncoding() const { return eEnc; }
 };
@@ -90,7 +90,7 @@ inline XMLFontAutoStylePoolEntry_Impl::XMLFontAutoStylePoolEntry_Impl(
         const OUString& rName,
         const OUString& rFamilyName,
         const OUString& rStyleName,
-        FontFamily nFam,
+        tools::FontFamily nFam,
         FontPitch nP,
         rtl_TextEncoding eE ) :
     sName( rName ),
@@ -105,7 +105,7 @@ inline XMLFontAutoStylePoolEntry_Impl::XMLFontAutoStylePoolEntry_Impl(
 inline XMLFontAutoStylePoolEntry_Impl::XMLFontAutoStylePoolEntry_Impl(
         const OUString& rFamilyName,
         const OUString& rStyleName,
-        FontFamily nFam,
+        tools::FontFamily nFam,
         FontPitch nP,
         rtl_TextEncoding eE ) :
     sFamilyName( rFamilyName ),
@@ -166,7 +166,7 @@ XMLFontAutoStylePool::~XMLFontAutoStylePool()
 OUString XMLFontAutoStylePool::Add(
             const OUString& rFamilyName,
             const OUString& rStyleName,
-            FontFamily nFamily,
+            tools::FontFamily nFamily,
             FontPitch nPitch,
             rtl_TextEncoding eEnc )
 {
@@ -219,7 +219,7 @@ OUString XMLFontAutoStylePool::Add(
 OUString XMLFontAutoStylePool::Find(
             const OUString& rFamilyName,
             const OUString& rStyleName,
-            FontFamily nFamily,
+            tools::FontFamily nFamily,
             FontPitch nPitch,
             rtl_TextEncoding eEnc ) const
 {

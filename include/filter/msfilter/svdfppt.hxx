@@ -271,7 +271,7 @@ struct PptFontEntityAtom
     sal_uInt8           lfQuality;
 
     rtl_TextEncoding    eCharSet;
-    FontFamily          eFamily;
+    tools::FontFamily          eFamily;
     FontPitch           ePitch;
     bool                bAvailable;
 

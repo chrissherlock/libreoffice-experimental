@@ -82,7 +82,7 @@ static sal_uInt16 getUInt16BE( const sal_uInt8*& pBuffer )
  *  PrintFont implementations
  */
 PrintFontManager::PrintFont::PrintFont()
-:   m_eFamilyStyle(FAMILY_DONTKNOW)
+:   m_eFamilyStyle(tools::FAMILY_DONTKNOW)
 ,   m_eItalic(ITALIC_DONTKNOW)
 ,   m_eWidth(WIDTH_DONTKNOW)
 ,   m_eWeight(WEIGHT_DONTKNOW)
@@ -843,42 +843,42 @@ int PrintFontManager::getFontFaceVariation( fontID nFontID ) const
     return nRet;
 }
 
-FontFamily PrintFontManager::matchFamilyName( std::u16string_view rFamily )
+tools::FontFamily PrintFontManager::matchFamilyName( std::u16string_view rFamily )
 {
     struct family_t {
         const char*  mpName;
         sal_uInt16   mnLength;
-        FontFamily   meType;
+        tools::FontFamily   meType;
     };
 
 #define InitializeClass( p, a ) p, sizeof(p) - 1, a
     static const family_t pFamilyMatch[] =  {
-        { InitializeClass( "arial",                  FAMILY_SWISS )  },
-        { InitializeClass( "arioso",                 FAMILY_SCRIPT ) },
-        { InitializeClass( "avant garde",            FAMILY_SWISS )  },
-        { InitializeClass( "avantgarde",             FAMILY_SWISS )  },
-        { InitializeClass( "bembo",                  FAMILY_ROMAN )  },
-        { InitializeClass( "bookman",                FAMILY_ROMAN )  },
-        { InitializeClass( "conga",                  FAMILY_ROMAN )  },
-        { InitializeClass( "courier",                FAMILY_MODERN ) },
-        { InitializeClass( "curl",                   FAMILY_SCRIPT ) },
-        { InitializeClass( "fixed",                  FAMILY_MODERN ) },
-        { InitializeClass( "gill",                   FAMILY_SWISS )  },
-        { InitializeClass( "helmet",                 FAMILY_MODERN ) },
-        { InitializeClass( "helvetica",              FAMILY_SWISS )  },
-        { InitializeClass( "international",          FAMILY_MODERN ) },
-        { InitializeClass( "lucida",                 FAMILY_SWISS )  },
-        { InitializeClass( "new century schoolbook", FAMILY_ROMAN )  },
-        { InitializeClass( "palatino",               FAMILY_ROMAN )  },
-        { InitializeClass( "roman",                  FAMILY_ROMAN )  },
-        { InitializeClass( "sans serif",             FAMILY_SWISS )  },
-        { InitializeClass( "sansserif",              FAMILY_SWISS )  },
-        { InitializeClass( "serf",                   FAMILY_ROMAN )  },
-        { InitializeClass( "serif",                  FAMILY_ROMAN )  },
-        { InitializeClass( "times",                  FAMILY_ROMAN )  },
-        { InitializeClass( "utopia",                 FAMILY_ROMAN )  },
-        { InitializeClass( "zapf chancery",          FAMILY_SCRIPT ) },
-        { InitializeClass( "zapfchancery",           FAMILY_SCRIPT ) }
+        { InitializeClass( "arial",                  tools::FAMILY_SWISS )  },
+        { InitializeClass( "arioso",                 tools::FAMILY_SCRIPT ) },
+        { InitializeClass( "avant garde",            tools::FAMILY_SWISS )  },
+        { InitializeClass( "avantgarde",             tools::FAMILY_SWISS )  },
+        { InitializeClass( "bembo",                  tools::FAMILY_ROMAN )  },
+        { InitializeClass( "bookman",                tools::FAMILY_ROMAN )  },
+        { InitializeClass( "conga",                  tools::FAMILY_ROMAN )  },
+        { InitializeClass( "courier",                tools::FAMILY_MODERN ) },
+        { InitializeClass( "curl",                   tools::FAMILY_SCRIPT ) },
+        { InitializeClass( "fixed",                  tools::FAMILY_MODERN ) },
+        { InitializeClass( "gill",                   tools::FAMILY_SWISS )  },
+        { InitializeClass( "helmet",                 tools::FAMILY_MODERN ) },
+        { InitializeClass( "helvetica",              tools::FAMILY_SWISS )  },
+        { InitializeClass( "international",          tools::FAMILY_MODERN ) },
+        { InitializeClass( "lucida",                 tools::FAMILY_SWISS )  },
+        { InitializeClass( "new century schoolbook", tools::FAMILY_ROMAN )  },
+        { InitializeClass( "palatino",               tools::FAMILY_ROMAN )  },
+        { InitializeClass( "roman",                  tools::FAMILY_ROMAN )  },
+        { InitializeClass( "sans serif",             tools::FAMILY_SWISS )  },
+        { InitializeClass( "sansserif",              tools::FAMILY_SWISS )  },
+        { InitializeClass( "serf",                   tools::FAMILY_ROMAN )  },
+        { InitializeClass( "serif",                  tools::FAMILY_ROMAN )  },
+        { InitializeClass( "times",                  tools::FAMILY_ROMAN )  },
+        { InitializeClass( "utopia",                 tools::FAMILY_ROMAN )  },
+        { InitializeClass( "zapf chancery",          tools::FAMILY_SCRIPT ) },
+        { InitializeClass( "zapfchancery",           tools::FAMILY_SCRIPT ) }
     };
 
     OString aFamily = OUStringToOString( rFamily, RTL_TEXTENCODING_ASCII_US );
@@ -905,7 +905,7 @@ FontFamily PrintFontManager::matchFamilyName( std::u16string_view rFamily )
                 return pHaystack->meType;
     }
 
-    return FAMILY_DONTKNOW;
+    return tools::FAMILY_DONTKNOW;
 }
 
 OString PrintFontManager::getFontFile(const PrintFont* pFont) const

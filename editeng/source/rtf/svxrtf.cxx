@@ -487,26 +487,26 @@ void SvxRTFParser::ReadFontTable()
                 ++_nOpenBrakets;
                 break;
             case RTF_FROMAN:
-                pFont->SetFamily( FAMILY_ROMAN );
+                pFont->SetFamily( tools::FAMILY_ROMAN );
                 break;
             case RTF_FSWISS:
-                pFont->SetFamily( FAMILY_SWISS );
+                pFont->SetFamily( tools::FAMILY_SWISS );
                 break;
             case RTF_FMODERN:
-                pFont->SetFamily( FAMILY_MODERN );
+                pFont->SetFamily( tools::FAMILY_MODERN );
                 break;
             case RTF_FSCRIPT:
-                pFont->SetFamily( FAMILY_SCRIPT );
+                pFont->SetFamily( tools::FAMILY_SCRIPT );
                 break;
             case RTF_FDECOR:
-                pFont->SetFamily( FAMILY_DECORATIVE );
+                pFont->SetFamily( tools::FAMILY_DECORATIVE );
                 break;
             // for technical/symbolic font of the rtl_TextEncoding is changed!
             case RTF_FTECH:
                 pFont->SetCharSet( RTL_TEXTENCODING_SYMBOL );
                 [[fallthrough]];
             case RTF_FNIL:
-                pFont->SetFamily( FAMILY_DONTKNOW );
+                pFont->SetFamily( tools::FAMILY_DONTKNOW );
                 break;
             case RTF_FCHARSET:
                 if (-1 != nTokenValue)

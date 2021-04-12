@@ -92,7 +92,7 @@ void SvxXMLNumRuleExport::exportLevelStyle( sal_Int32 nLevel,
 
     sal_UCS4 cBullet = 0xf095;
     OUString sBulletFontName, sBulletFontStyleName ;
-    FontFamily eBulletFontFamily = FAMILY_DONTKNOW;
+    tools::FontFamily eBulletFontFamily = tools::FAMILY_DONTKNOW;
     FontPitch eBulletFontPitch = PITCH_DONTKNOW;
     rtl_TextEncoding eBulletFontEncoding = RTL_TEXTENCODING_DONTKNOW;
 
@@ -147,7 +147,7 @@ void SvxXMLNumRuleExport::exportLevelStyle( sal_Int32 nLevel,
             {
                 sBulletFontName = rFDesc.Name;
                 sBulletFontStyleName = rFDesc.StyleName;
-                eBulletFontFamily = static_cast< FontFamily >( rFDesc.Family );
+                eBulletFontFamily = static_cast< tools::FontFamily >( rFDesc.Family );
                 eBulletFontPitch = static_cast< FontPitch >( rFDesc.Pitch );
                 eBulletFontEncoding = static_cast<rtl_TextEncoding>(rFDesc.CharSet);
             }

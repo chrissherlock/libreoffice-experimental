@@ -1367,7 +1367,7 @@ void ScOrcusStyles::font::applyToItemSet(SfxItemSet& rSet) const
         rSet.Put( SvxColorItem(maColor, ATTR_FONT_COLOR));
 
         if(!maName.isEmpty())
-            rSet.Put( SvxFontItem( FAMILY_DONTKNOW, maName, maName, PITCH_DONTKNOW, RTL_TEXTENCODING_DONTKNOW, ATTR_FONT ));
+            rSet.Put( SvxFontItem( tools::FAMILY_DONTKNOW, maName, maName, PITCH_DONTKNOW, RTL_TEXTENCODING_DONTKNOW, ATTR_FONT ));
 
         rSet.Put( SvxFontHeightItem (translateToInternal(mnSize, orcus::length_unit_t::point), 100, ATTR_FONT_HEIGHT));
     }

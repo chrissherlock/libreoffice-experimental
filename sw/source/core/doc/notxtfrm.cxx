@@ -104,7 +104,7 @@ static void lcl_PaintReplacement( const SwRect &rRect, const OUString &rText,
         tmp.SetWeight( WEIGHT_BOLD );
         tmp.SetStyleName( OUString() );
         tmp.SetFamilyName("Arial Unicode");
-        tmp.SetFamily( FAMILY_SWISS );
+        tmp.SetFamily( tools::FAMILY_SWISS );
         tmp.SetTransparent( true );
         return tmp;
     }();

@@ -412,7 +412,7 @@ void SvxCharacterMap::init()
 {
     aFont = m_xVirDev->GetFont();
     aFont.SetTransparent( true );
-    aFont.SetFamily( FAMILY_DONTKNOW );
+    aFont.SetFamily( tools::FAMILY_DONTKNOW );
     aFont.SetPitch( PITCH_DONTKNOW );
     aFont.SetCharSet( RTL_TEXTENCODING_DONTKNOW );
 
@@ -637,7 +637,7 @@ IMPL_LINK_NOARG(SvxCharacterMap, FontSelectHdl, weld::ComboBox&, void)
     aFont.SetItalic( ITALIC_NONE );
     aFont.SetWidthType( WIDTH_DONTKNOW );
     aFont.SetPitch( PITCH_DONTKNOW );
-    aFont.SetFamily( FAMILY_DONTKNOW );
+    aFont.SetFamily( tools::FAMILY_DONTKNOW );
 
     // notify children using this font
     m_xShowSet->SetFont( aFont );

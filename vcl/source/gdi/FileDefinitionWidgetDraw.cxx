@@ -1086,7 +1086,7 @@ bool FileDefinitionWidgetDraw::updateSettings(AllSettings& rSettings)
     auto& pSettings = m_pWidgetDefinition->mpSettings;
 
     int nFontSize = getSettingValueInteger(pSettings->msDefaultFontSize, 10);
-    vcl::Font aFont(FAMILY_SWISS, Size(0, nFontSize));
+    vcl::Font aFont(tools::FAMILY_SWISS, Size(0, nFontSize));
     aFont.SetCharSet(osl_getThreadTextEncoding());
     aFont.SetWeight(WEIGHT_NORMAL);
     aFont.SetFamilyName("Liberation Sans");

@@ -179,31 +179,31 @@ namespace emfio
             eCharSet = RTL_TEXTENCODING_MS_1252;
         aFont.SetCharSet( eCharSet );
         aFont.SetFamilyName( rFont.alfFaceName );
-        FontFamily eFamily;
+        tools::FontFamily eFamily;
         switch ( rFont.lfPitchAndFamily & 0xf0 )
         {
             case FF_ROMAN:
-                eFamily = FAMILY_ROMAN;
+                eFamily = tools::FAMILY_ROMAN;
             break;
 
             case FF_SWISS:
-                eFamily = FAMILY_SWISS;
+                eFamily = tools::FAMILY_SWISS;
             break;
 
             case FF_MODERN:
-                eFamily = FAMILY_MODERN;
+                eFamily = tools::FAMILY_MODERN;
             break;
 
             case FF_SCRIPT:
-                eFamily = FAMILY_SCRIPT;
+                eFamily = tools::FAMILY_SCRIPT;
             break;
 
             case FF_DECORATIVE:
-                 eFamily = FAMILY_DECORATIVE;
+                 eFamily = tools::FAMILY_DECORATIVE;
             break;
 
             default:
-                eFamily = FAMILY_DONTKNOW;
+                eFamily = tools::FAMILY_DONTKNOW;
             break;
         }
         aFont.SetFamily( eFamily );
