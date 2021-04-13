@@ -53,12 +53,152 @@ class VCL_PLUGIN_PUBLIC FontInstance : public salhelper::SimpleReferenceObject
 public: // TODO: make data members private
     virtual ~FontInstance() override;
 
+    // font instance attributes from the font request
+    tools::Long GetWidth() const { return mxFontMetric->GetWidth(); }
+    Degree10 GetOrientation() const { return mxFontMetric->GetOrientation(); }
+
+    void SetWidth(tools::Long nWidth) { mxFontMetric->SetWidth(nWidth); }
+    void SetOrientation(Degree10 nOrientation) { mxFontMetric->SetOrientation(nOrientation); }
+
+    // font metrics measured for the font instance
+    tools::Long GetAscent() const { return mxFontMetric->GetAscent(); }
+    tools::Long GetDescent() const { return mxFontMetric->GetDescent(); }
+    tools::Long GetInternalLeading() const { return mxFontMetric->GetInternalLeading(); }
+    tools::Long GetExternalLeading() const { return mxFontMetric->GetExternalLeading(); }
+    int GetSlant() const { return mxFontMetric->GetSlant(); }
+    tools::Long GetMinKashida() const { return mxFontMetric->GetMinKashida(); }
+
+    void SetSlant(int nSlant) { mxFontMetric->SetSlant(nSlant); }
+    void SetMinKashida(tools::Long nMinKashida) { mxFontMetric->SetMinKashida(nMinKashida); }
+
+    // font attributes queried from the font instance
+    bool IsFullstopCentered() const { return mxFontMetric->IsFullstopCentered(); }
+    tools::Long GetBulletOffset() const { return mxFontMetric->GetBulletOffset(); }
+
+    void SetFullstopCenteredFlag(bool bFullstopCentered)
+    {
+        mxFontMetric->SetFullstopCenteredFlag(bFullstopCentered);
+    }
+
+    // font metrics that are usually derived from the measurements
+    tools::Long GetUnderlineSize() const { return mxFontMetric->GetUnderlineSize(); }
+
+    tools::Long GetUnderlineOffset() const { return mxFontMetric->GetUnderlineOffset(); }
+
+    tools::Long GetBoldUnderlineSize() const { return mxFontMetric->GetBoldUnderlineSize(); }
+
+    tools::Long GetBoldUnderlineOffset() const { return mxFontMetric->GetBoldUnderlineOffset(); }
+
+    tools::Long GetDoubleUnderlineSize() const { return mxFontMetric->GetDoubleUnderlineSize(); }
+
+    tools::Long GetDoubleUnderlineOffset1() const
+    {
+        return mxFontMetric->GetDoubleUnderlineOffset1();
+    }
+
+    tools::Long GetDoubleUnderlineOffset2() const
+    {
+        return mxFontMetric->GetDoubleUnderlineOffset2();
+    }
+
+    tools::Long GetWavelineUnderlineSize() const
+    {
+        return mxFontMetric->GetWavelineUnderlineSize();
+    }
+
+    tools::Long GetWavelineUnderlineOffset() const
+    {
+        return mxFontMetric->GetWavelineUnderlineOffset();
+    }
+
+    tools::Long GetAboveUnderlineSize() const { return mxFontMetric->GetAboveUnderlineSize(); }
+
+    tools::Long GetAboveUnderlineOffset() const { return mxFontMetric->GetAboveUnderlineOffset(); }
+
+    tools::Long GetAboveBoldUnderlineSize() const
+    {
+        return mxFontMetric->GetAboveBoldUnderlineSize();
+    }
+
+    tools::Long GetAboveBoldUnderlineOffset() const
+    {
+        return mxFontMetric->GetAboveBoldUnderlineOffset();
+    }
+
+    tools::Long GetAboveDoubleUnderlineSize() const
+    {
+        return mxFontMetric->GetAboveDoubleUnderlineSize();
+    }
+
+    tools::Long GetAboveDoubleUnderlineOffset1() const
+    {
+        return mxFontMetric->GetAboveDoubleUnderlineOffset1();
+    }
+
+    tools::Long GetAboveDoubleUnderlineOffset2() const
+    {
+        return mxFontMetric->GetAboveDoubleUnderlineOffset2();
+    }
+
+    tools::Long GetAboveWavelineUnderlineSize() const
+    {
+        return mxFontMetric->GetAboveWavelineUnderlineSize();
+    }
+
+    tools::Long GetAboveWavelineUnderlineOffset() const
+    {
+        return mxFontMetric->GetAboveWavelineUnderlineOffset();
+    }
+
+    tools::Long GetStrikeoutSize() const { return mxFontMetric->GetStrikeoutSize(); }
+
+    tools::Long GetStrikeoutOffset() const { return mxFontMetric->GetStrikeoutOffset(); }
+
+    tools::Long GetBoldStrikeoutSize() const { return mxFontMetric->GetBoldStrikeoutSize(); }
+
+    tools::Long GetBoldStrikeoutOffset() const { return mxFontMetric->GetBoldStrikeoutOffset(); }
+
+    tools::Long GetDoubleStrikeoutSize() const { return mxFontMetric->GetDoubleStrikeoutSize(); }
+
+    tools::Long GetDoubleStrikeoutOffset1() const
+    {
+        return mxFontMetric->GetDoubleStrikeoutOffset1();
+    }
+
+    tools::Long GetDoubleStrikeoutOffset2() const
+    {
+        return mxFontMetric->GetDoubleStrikeoutOffset2();
+    }
+
+    void ImplInitTextLineSize(RenderContext2 const* pDev)
+    {
+        mxFontMetric->ImplInitTextLineSize(pDev);
+    }
+
+    void ImplInitAboveTextLineSize() { mxFontMetric->ImplInitAboveTextLineSize(); }
+
+    void ImplInitFlags(RenderContext2 const* pDev) { mxFontMetric->ImplInitFlags(pDev); }
+
+    void ImplCalcLineSpacing(FontInstance* pFontInstance)
+    {
+        mxFontMetric->ImplCalcLineSpacing(pFontInstance);
+    }
+
     ImplFontMetricDataRef mxFontMetric; // Font attributes
 
     tools::Long mnLineHeight;
     Degree10 mnOwnOrientation; // text angle if lower layers don't rotate text themselves
     Degree10 mnOrientation; // text angle in 3600 system
     bool mbInit; // true if maFontMetric member is valid
+
+    tools::Long GetLineHeight() const { return mnLineHeight; }
+    void SetLineHeight(tools::Long nLineHeight) { mnLineHeight = nLineHeight; }
+    Degree10 GetOwnOrientation() const { return mnOwnOrientation; }
+    void SetOwnOrientation(Degree10 nOwnOrientation) { mnOwnOrientation = nOwnOrientation; }
+    Degree10 GetTextAngle() const { return mnOrientation; }
+    void SetTextAngle(Degree10 nOrientation) { mnOrientation = nOrientation; }
+    bool IsInit() const { return mbInit; }
+    void SetInitFlag(bool bInit) { mbInit = bInit; }
 
     tools::Long GetEmphasisAscent() const;
     tools::Long GetEmphasisDescent() const;
