@@ -251,8 +251,8 @@ bool RenderContext2::InitFontInstance()
         mpFontInstance->mxFontMetric->ImplInitAboveTextLineSize();
         mpFontInstance->mxFontMetric->ImplInitFlags(this);
 
-        mpFontInstance->mnLineHeight = mpFontInstance->mxFontMetric->GetAscent()
-                                       + mpFontInstance->mxFontMetric->GetDescent();
+        mpFontInstance->SetLineHeight(mpFontInstance->mxFontMetric->GetAscent()
+                                      + mpFontInstance->mxFontMetric->GetDescent());
 
         SetFontOrientation(mpFontInstance.get());
     }

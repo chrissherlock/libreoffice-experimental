@@ -5828,7 +5828,7 @@ void PDFWriterImpl::drawShadow( SalLayout& rLayout, const OUString& rText, bool 
     setOverlineColor( rFont.GetColor() );
     updateGraphicsState();
 
-    tools::Long nOff = 1 + ((GetFontInstance()->mnLineHeight-24)/24);
+    tools::Long nOff = 1 + ((GetFontInstance()->GetLineHeight()-24)/24);
     if( rFont.IsOutline() )
         nOff++;
     rLayout.DrawBase() += Point( nOff, nOff );

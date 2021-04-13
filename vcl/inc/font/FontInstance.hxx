@@ -186,8 +186,6 @@ public: // TODO: make data members private
 
     ImplFontMetricDataRef mxFontMetric; // Font attributes
 
-    tools::Long mnLineHeight;
-
     tools::Long GetLineHeight() const { return mnLineHeight; }
     void SetLineHeight(tools::Long nLineHeight) { mnLineHeight = nLineHeight; }
     Degree10 GetOwnOrientation() const { return mnOwnOrientation; }
@@ -239,6 +237,7 @@ protected:
     virtual hb_font_t* ImplInitHbFont();
 
 private:
+    tools::Long mnLineHeight;
     Degree10 mnOwnOrientation; // text angle if lower layers don't rotate text themselves
     Degree10 mnOrientation; // text angle in 3600 system
     bool mbInit; // true if maFontMetric member is valid
