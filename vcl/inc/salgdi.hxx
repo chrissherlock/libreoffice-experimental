@@ -25,7 +25,9 @@
 #include <vcl/outdev.hxx>
 
 #include <font/ImplFontMetricData.hxx>
+
 #include "salgdiimpl.hxx"
+#include "SalFont.hxx"
 #include "sallayout.hxx"
 #include "SalGradient.hxx"
 #include "WidgetDrawInterface.hxx"
@@ -74,6 +76,7 @@ typedef std::map< sal_Ucs, sal_uInt32 >   Ucs2UIntMap;
 // the top/left-position of the virtual output area
 
 class VCL_PLUGIN_PUBLIC SalGraphics : protected vcl::WidgetDrawInterface
+                                      , public SalFont
 {
 public:
     SalGraphics();
@@ -136,30 +139,30 @@ public:
     virtual void                SetTextColor( Color nColor ) = 0;
 
     // set the font
-    virtual void                SetFont(FontInstance*, int nFallbackLevel) = 0;
+    void                        SetFont(FontInstance*, int nFallbackLevel) override = 0;
 
     // release the fonts
-    void                        ReleaseFonts() { SetFont( nullptr, 0 ); }
+    void                        ReleaseFonts() override { SetFont( nullptr, 0 ); }
 
     // get the current font's metrics
-    virtual void                GetFontMetric( ImplFontMetricDataRef&, int nFallbackLevel ) = 0;
+    void                        GetFontMetric( ImplFontMetricDataRef&, int nFallbackLevel ) override = 0;
 
     // get the repertoire of the current font
-    virtual FontCharMapRef      GetFontCharMap() const = 0;
+    FontCharMapRef              GetFontCharMap() const override = 0;
 
     // get the layout capabilities of the current font
-    virtual bool                GetFontCapabilities(vcl::FontCapabilities &rFontCapabilities) const = 0;
+    bool                        GetFontCapabilities(vcl::FontCapabilities &rFontCapabilities) const override = 0;
 
     // graphics must fill supplied font list
-    virtual void                GetDevFontList( FontManager* ) = 0;
+    void                        GetDevFontList( FontManager* ) override = 0;
 
     // graphics must drop any cached font info
-    virtual void                ClearDevFontCache() = 0;
+    void                        ClearDevFontCache() override = 0;
 
-    virtual bool                AddTempDevFont(
+    bool                        AddTempDevFont(
                                     FontManager*,
                                     const OUString& rFileURL,
-                                    const OUString& rFontName ) = 0;
+                                    const OUString& rFontName ) override = 0;
 
     // CreateFontSubset: a method to get a subset of glyhps of a font
     // inside a new valid font file
@@ -173,33 +176,33 @@ public:
     //             rInfo: additional outgoing information
     // implementation note: encoding 0 with glyph id 0 should be added implicitly
     // as "undefined character"
-    virtual bool                CreateFontSubset(
+    bool                        CreateFontSubset(
                                     const OUString& rToFile,
                                     const FontFace* pFont,
                                     const sal_GlyphId* pGlyphIDs,
                                     const sal_uInt8* pEncoding,
                                     sal_Int32* pWidths,
                                     int nGlyphs,
-                                    FontSubsetInfo& rInfo ) = 0;
+                                    FontSubsetInfo& rInfo ) override = 0;
 
     // GetEmbedFontData: gets the font data for a font marked
     // embeddable by GetDevFontList or NULL in case of error
     // parameters: pFont: describes the font in question
     //             pDataLen: out parameter, contains the byte length of the returned buffer
-    virtual const void*         GetEmbedFontData(const FontFace* pFont, tools::Long* pDataLen) = 0;
+    const void*                 GetEmbedFontData(const FontFace* pFont, tools::Long* pDataLen) override = 0;
 
     // free the font data again
-    virtual void                FreeEmbedFontData( const void* pData, tools::Long nDataLen ) = 0;
+    void                        FreeEmbedFontData( const void* pData, tools::Long nDataLen ) override = 0;
 
     // get the same widths as in CreateFontSubset
     // in case of an embeddable font also fill the mapping
     // between unicode and glyph id
     // leave widths vector and mapping untouched in case of failure
-    virtual void                GetGlyphWidths(
+    void                        GetGlyphWidths(
                                     const FontFace* pFont,
                                     bool bVertical,
                                     std::vector< sal_Int32 >& rWidths,
-                                    Ucs2UIntMap& rUnicodeEnc ) = 0;
+                                    Ucs2UIntMap& rUnicodeEnc ) override = 0;
 
     virtual std::unique_ptr<GenericSalLayout>
                                 GetTextLayout(int nFallbackLevel) = 0;
