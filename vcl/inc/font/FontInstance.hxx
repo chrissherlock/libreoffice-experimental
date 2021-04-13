@@ -189,7 +189,6 @@ public: // TODO: make data members private
     tools::Long mnLineHeight;
     Degree10 mnOwnOrientation; // text angle if lower layers don't rotate text themselves
     Degree10 mnOrientation; // text angle in 3600 system
-    bool mbInit; // true if maFontMetric member is valid
 
     tools::Long GetLineHeight() const { return mnLineHeight; }
     void SetLineHeight(tools::Long nLineHeight) { mnLineHeight = nLineHeight; }
@@ -242,6 +241,8 @@ protected:
     virtual hb_font_t* ImplInitHbFont();
 
 private:
+    bool mbInit; // true if maFontMetric member is valid
+
     // cache of Unicode characters and replacement font names
     // TODO: a fallback map can be shared with many other ImplFontEntries
     // TODO: at least the ones which just differ in orientation, stretching or height

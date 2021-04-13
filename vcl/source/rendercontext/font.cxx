@@ -238,10 +238,10 @@ bool RenderContext2::InitFontInstance()
         mbInitFont = true;
 
     // select font when it has not been initialized yet
-    if (!mpFontInstance->mbInit && InitFont())
+    if (!mpFontInstance->IsInit() && InitFont())
     {
         // get metric data from device layers
-        mpFontInstance->mbInit = true;
+        mpFontInstance->SetInitFlag(true);
 
         mpFontInstance->mxFontMetric->SetOrientation(
             mpFontInstance->GetFontSelectPattern().mnOrientation);
