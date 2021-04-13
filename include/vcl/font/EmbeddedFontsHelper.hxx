@@ -7,20 +7,25 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#ifndef INCLUDED_VCL_EMBEDDEDFONTSHELPER_HXX
-#define INCLUDED_VCL_EMBEDDEDFONTSHELPER_HXX
-
-#include <vcl/dllapi.h>
+#pragma once
 
 #include <rtl/ustring.hxx>
 #include <tools/fontenum.hxx>
 #include <tools/long.hxx>
 
+#include <vcl/dllapi.h>
+
 #include <string_view>
 #include <vector>
 
-namespace com::sun::star::io { class XInputStream; }
-namespace com::sun::star::uno { template <typename > class Reference; }
+namespace com::sun::star::io
+{
+class XInputStream;
+}
+namespace com::sun::star::uno
+{
+template <typename> class Reference;
+}
 
 /**
  Helper functions for handling embedded fonts in documents.
@@ -38,7 +43,7 @@ private:
       @param fontName name of the font (e.g. 'Times New Roman')
       @param fileUrl URL of the font file
     */
-    static void activateFont( const OUString& fontName, const OUString& fileUrl );
+    static void activateFont(const OUString& fontName, const OUString& fileUrl);
 
 public:
     /// Specification of what kind of operation is allowed when embedding a font
@@ -51,9 +56,9 @@ public:
     /**
       Returns URL for a font file for the given font, or empty if it does not exist.
     */
-    static OUString fontFileUrl(
-        std::u16string_view familyName, tools::FontFamily family, FontItalic italic,
-        FontWeight weight, FontPitch pitch, FontRights rights );
+    static OUString fontFileUrl(std::u16string_view familyName, tools::FontFamily family,
+                                FontItalic italic, FontWeight weight, FontPitch pitch,
+                                FontRights rights);
 
     /**
       Reads a font from the input stream, saves it to a temporary font file and adds it to the list of
@@ -64,9 +69,9 @@ public:
       @param key key to xor the data with, from the start until the key's length (not repeated)
       @param eot whether the data is compressed in Embedded OpenType format
     */
-    bool addEmbeddedFont( const css::uno::Reference< css::io::XInputStream >& stream,
-        const OUString& fontName, const char* extra,
-        std::vector< unsigned char > const & key, bool eot = false);
+    bool addEmbeddedFont(const css::uno::Reference<css::io::XInputStream>& stream,
+                         const OUString& fontName, const char* extra,
+                         std::vector<unsigned char> const& key, bool eot = false);
 
     /**
       Returns a URL for a file where to store contents of a given temporary font.
@@ -76,7 +81,7 @@ public:
       @param fontName name of the font (e.g. 'Times New Roman')
       @param extra additional text to use for name (e.g. to distinguish regular from bold, italic,...), "?" for unique
     */
-    static OUString fileUrlForTemporaryFont( const OUString& fontName, const char* extra );
+    static OUString fileUrlForTemporaryFont(const OUString& fontName, const char* extra);
 
     /**
       Adds the accumulated fonts to the list of known fonts. The fonts are used only until application
@@ -91,7 +96,7 @@ public:
       @param size size of the font data
       @param rights type of operation to be allowed for the font
     */
-    static bool sufficientTTFRights( const void* data, tools::Long size, FontRights rights );
+    static bool sufficientTTFRights(const void* data, tools::Long size, FontRights rights);
 
     /**
       Removes all temporary fonts in the path used by fileUrlForTemporaryFont().
@@ -99,12 +104,7 @@ public:
     */
     static void clearTemporaryFontFiles();
 
-    ~EmbeddedFontsHelper() COVERITY_NOEXCEPT_FALSE
-    {
-        activateFonts();
-    }
+    ~EmbeddedFontsHelper() COVERITY_NOEXCEPT_FALSE { activateFonts(); }
 };
-
-#endif
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

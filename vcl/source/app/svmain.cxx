@@ -44,7 +44,7 @@
 #include <vcl/toolkit/unowrap.hxx>
 #include <configsettings.hxx>
 #include <vcl/lazydelete.hxx>
-#include <vcl/embeddedfontshelper.hxx>
+#include <vcl/font/EmbeddedFontsHelper.hxx>
 #include <vcl/toolkit/dialog.hxx>
 #include <vcl/menu.hxx>
 #include <vcl/virdev.hxx>

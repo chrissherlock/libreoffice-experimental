@@ -23,7 +23,7 @@
 #include <vector>
 #include <sal/log.hxx>
 #include <rtl/tencinfo.h>
-#include <vcl/embeddedfontshelper.hxx>
+#include <vcl/font/EmbeddedFontsHelper.hxx>
 #include <unotools/fontdefs.hxx>
 
 using namespace com::sun::star;

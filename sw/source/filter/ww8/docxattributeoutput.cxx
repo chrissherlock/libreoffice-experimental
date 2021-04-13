@@ -137,7 +137,7 @@
 #include <o3tl/unit_conversion.hxx>
 #include <osl/file.hxx>
 #include <utility>
-#include <vcl/embeddedfontshelper.hxx>
+#include <vcl/font/EmbeddedFontsHelper.hxx>
 
 #include <com/sun/star/i18n/ScriptType.hpp>
 #include <com/sun/star/i18n/XBreakIterator.hpp>

@@ -25,7 +25,7 @@
 #include "fonthdl.hxx"
 #include <xmloff/xmlexp.hxx>
 #include <xmloff/XMLFontAutoStylePool.hxx>
-#include <vcl/embeddedfontshelper.hxx>
+#include <vcl/font/EmbeddedFontsHelper.hxx>
 #include <osl/file.hxx>
 #include <sal/log.hxx>
 #include <tools/diagnose_ex.h>

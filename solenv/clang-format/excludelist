@@ -6376,7 +6376,6 @@ include/vcl/dibtools.hxx
 include/vcl/dndhelp.hxx
 include/vcl/dockingarea.hxx
 include/vcl/dockwin.hxx
-include/vcl/embeddedfontshelper.hxx
 include/vcl/errcode.hxx
 include/vcl/errinf.hxx
 include/vcl/event.hxx
@@ -14953,7 +14952,6 @@ vcl/source/gdi/CommonSalLayout.cxx
 vcl/source/gdi/VerticalOrientationData.cxx
 vcl/source/gdi/configsettings.cxx
 vcl/source/gdi/cvtgrf.cxx
-vcl/source/gdi/embeddedfontshelper.cxx
 vcl/source/gdi/gdimetafiletools.cxx
 vcl/source/gdi/gdimtf.cxx
 vcl/source/gdi/gfxlink.cxx

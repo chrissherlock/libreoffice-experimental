@@ -285,7 +285,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/control/longcurr \
     vcl/source/control/imp_listbox \
     vcl/source/control/listbox \
-	vcl/source/control/managedmenubutton \
+    vcl/source/control/managedmenubutton \
     vcl/source/control/menubtn \
     vcl/source/control/NotebookbarPopup \
     vcl/source/control/PriorityHBox \
@@ -336,7 +336,6 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/gdi/configsettings \
     vcl/source/gdi/cvtgrf \
     vcl/source/gdi/svmconverter \
-    vcl/source/gdi/embeddedfontshelper \
     vcl/source/gdi/FileDefinitionWidgetDraw \
     vcl/source/gdi/WidgetDefinitionReader \
     vcl/source/gdi/WidgetDefinition \
@@ -547,6 +546,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/filter/wmf/wmfwr \
     vcl/source/filter/png/PngImageReader \
     vcl/source/filter/png/pngwrite \
+    vcl/source/font/EmbeddedFontsHelper \
     vcl/source/font/Feature \
     vcl/source/font/FeatureCollector \
     vcl/source/font/FeatureParser \
