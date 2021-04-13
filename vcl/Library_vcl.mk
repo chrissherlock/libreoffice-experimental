@@ -551,13 +551,13 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/font/FeatureCollector \
     vcl/source/font/FeatureParser \
     vcl/source/font/FontSelectPattern \
-    vcl/source/font/LogicalFontInstance \
-    vcl/source/font/LogicalFontManager \
+    vcl/source/font/FontInstance \
+    vcl/source/font/FontManager \
     vcl/source/font/OpenTypeFeatureDefinitionList \
-    vcl/source/font/PhysicalFontFace \
-    vcl/source/font/PhysicalFontFaceCollection \
-    vcl/source/font/PhysicalFontFaceSizeCollection \
-    vcl/source/font/PhysicalFontFamily \
+    vcl/source/font/FontFace \
+    vcl/source/font/FontFaceCollection \
+    vcl/source/font/FontFaceSizeCollection \
+    vcl/source/font/FontFamily \
     vcl/source/font/fontattributes \
     vcl/source/font/fontcharmap \
     vcl/source/font/fontmetric \

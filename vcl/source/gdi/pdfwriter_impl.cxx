@@ -74,7 +74,7 @@
 #include <bitmap/BitmapWriteAccess.hxx>
 #include <font/FontSubsetInfo.hxx>
 #include <font/GlyphItem.hxx>
-#include <font/PhysicalFontFace.hxx>
+#include <font/FontFace.hxx>
 #include <salgdi.hxx>
 #include <textlayout.hxx>
 #include <pdf/XmpMetadata.hxx>
@@ -2336,7 +2336,7 @@ sal_Int32 PDFWriterImpl::emitBuildinFont(const pdf::BuildinFontFace* pFD, sal_In
     return nFontObject;
 }
 
-std::map< sal_Int32, sal_Int32 > PDFWriterImpl::emitSystemFont( const PhysicalFontFace* pFont, EmbedFont const & rEmbed )
+std::map< sal_Int32, sal_Int32 > PDFWriterImpl::emitSystemFont( const FontFace* pFont, EmbedFont const & rEmbed )
 {
     std::map< sal_Int32, sal_Int32 > aRet;
 
@@ -2575,7 +2575,7 @@ sal_Int32 PDFWriterImpl::createToUnicodeCMap( sal_uInt8 const * pEncoding,
     return nStream;
 }
 
-sal_Int32 PDFWriterImpl::emitFontDescriptor( const PhysicalFontFace* pFont, FontSubsetInfo const & rInfo, sal_Int32 nSubsetID, sal_Int32 nFontStream )
+sal_Int32 PDFWriterImpl::emitFontDescriptor( const FontFace* pFont, FontSubsetInfo const & rInfo, sal_Int32 nSubsetID, sal_Int32 nFontStream )
 {
     OStringBuffer aLine( 1024 );
     // get font flags, see PDF reference 1.4 p. 358
@@ -2880,7 +2880,7 @@ bool PDFWriterImpl::emitFonts()
             }
             else
             {
-                const PhysicalFontFace* pFont = subset.first;
+                const FontFace* pFont = subset.first;
                 OStringBuffer aErrorComment( 256 );
                 aErrorComment.append( "CreateFontSubset failed for font \"" );
                 aErrorComment.append( OUStringToOString( pFont->GetFamilyName(), RTL_TEXTENCODING_UTF8 ) );
@@ -3914,15 +3914,15 @@ void PDFWriterImpl::createDefaultCheckBoxAppearance( PDFWidget& rBox, const PDFW
     SetFont( Font( OUString( "OpenSymbol" ), aFont.GetFontSize() ) );
     FontCharMapRef pMap;
     GetFontCharMap(pMap);
-    const LogicalFontInstance* pFontInstance = GetFontInstance();
-    const PhysicalFontFace* pDevFont = pFontInstance->GetFontFace();
+    const FontInstance* pFontInstance = GetFontInstance();
+    const FontFace* pDevFont = pFontInstance->GetFontFace();
     Pop();
 
     // make sure OpenSymbol is embedded, and includes our checkmark
     const sal_Unicode cMark=0x2713;
     const GlyphItem aItem(0, 0, pMap->GetGlyphIndex(cMark),
                           Point(), GlyphItemFlags::NONE, 0, 0,
-                          const_cast<LogicalFontInstance*>(pFontInstance));
+                          const_cast<FontInstance*>(pFontInstance));
     const std::vector<sal_Ucs> aCodeUnits={ cMark };
     sal_uInt8 nMappedGlyph;
     sal_Int32 nMappedFontObject;
@@ -5703,7 +5703,7 @@ sal_Int32 PDFWriterImpl::getSystemFont( const vcl::Font& i_rFont )
 
     SetFont( i_rFont );
 
-    const PhysicalFontFace* pDevFont = GetFontInstance()->GetFontFace();
+    const FontFace* pDevFont = GetFontInstance()->GetFontFace();
     sal_Int32 nFontID = 0;
     auto it = m_aSystemFonts.find( pDevFont );
     if( it != m_aSystemFonts.end() )
@@ -5720,7 +5720,7 @@ sal_Int32 PDFWriterImpl::getSystemFont( const vcl::Font& i_rFont )
 }
 
 void PDFWriterImpl::registerGlyph(const GlyphItem* pGlyph,
-                                  const PhysicalFontFace* pFont,
+                                  const FontFace* pFont,
                                   const std::vector<sal_Ucs>& rCodeUnits,
                                   sal_uInt8& nMappedGlyph,
                                   sal_Int32& nMappedFontObject)
@@ -6150,9 +6150,9 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
     }
 
     FontMetric aRefDevFontMetric = GetFontMetric();
-    const PhysicalFontFace* pDevFont = GetFontInstance()->GetFontFace();
+    const FontFace* pDevFont = GetFontInstance()->GetFontFace();
     const GlyphItem* pGlyph = nullptr;
-    const PhysicalFontFace* pFallbackFont = nullptr;
+    const FontFace* pFallbackFont = nullptr;
 
     // collect the glyphs into a single array
     std::vector< PDFGlyph > aGlyphs;
@@ -6261,7 +6261,7 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
         // This includes ascent / descent.
         aRectangle.setHeight(aRefDevFontMetric.GetLineHeight());
 
-        const LogicalFontInstance* pFontInstance = GetFontInstance();
+        const FontInstance* pFontInstance = GetFontInstance();
         if (pFontInstance->mnOrientation)
         {
             // Adapt rectangle for rotated text.
@@ -6752,7 +6752,7 @@ void PDFWriterImpl::drawLine( const Point& rStart, const Point& rStop, const Lin
 void PDFWriterImpl::drawWaveTextLine( OStringBuffer& aLine, tools::Long nWidth, FontLineStyle eTextLine, Color aColor, bool bIsAbove )
 {
     // note: units in pFontInstance are ref device pixel
-    const LogicalFontInstance*  pFontInstance = GetFontInstance();
+    const FontInstance*  pFontInstance = GetFontInstance();
     tools::Long            nLineHeight = 0;
     tools::Long            nLinePos = 0;
 
@@ -6822,7 +6822,7 @@ void PDFWriterImpl::drawWaveTextLine( OStringBuffer& aLine, tools::Long nWidth, 
 void PDFWriterImpl::drawStraightTextLine( OStringBuffer& aLine, tools::Long nWidth, FontLineStyle eTextLine, Color aColor, bool bIsAbove )
 {
     // note: units in pFontInstance are ref device pixel
-    const LogicalFontInstance*  pFontInstance = GetFontInstance();
+    const FontInstance*  pFontInstance = GetFontInstance();
     tools::Long            nLineHeight = 0;
     tools::Long            nLinePos  = 0;
     tools::Long            nLinePos2 = 0;
@@ -7013,7 +7013,7 @@ void PDFWriterImpl::drawStraightTextLine( OStringBuffer& aLine, tools::Long nWid
 void PDFWriterImpl::drawStrikeoutLine( OStringBuffer& aLine, tools::Long nWidth, FontStrikeout eStrikeout, Color aColor )
 {
     // note: units in pFontInstance are ref device pixel
-    const LogicalFontInstance*  pFontInstance = GetFontInstance();
+    const FontInstance*  pFontInstance = GetFontInstance();
     tools::Long            nLineHeight = 0;
     tools::Long            nLinePos  = 0;
     tools::Long            nLinePos2 = 0;
@@ -7110,7 +7110,7 @@ void PDFWriterImpl::drawStrikeoutChar( const Point& rPos, tools::Long nWidth, Fo
     aRect.SetBottom( rPos.Y()+aRefDevFontMetric.GetDescent() );
     aRect.SetTop( rPos.Y()-aRefDevFontMetric.GetAscent() );
 
-    const LogicalFontInstance* pFontInstance = GetFontInstance();
+    const FontInstance* pFontInstance = GetFontInstance();
     if (pFontInstance->mnOrientation)
     {
         tools::Polygon aPoly( aRect );
@@ -7145,7 +7145,7 @@ void PDFWriterImpl::drawTextLine( const Point& rPos, tools::Long nWidth, FontStr
     updateGraphicsState();
 
     // note: units in pFontInstance are ref device pixel
-    const LogicalFontInstance* pFontInstance = GetFontInstance();
+    const FontInstance* pFontInstance = GetFontInstance();
     Color           aUnderlineColor = m_aCurrentPDFState.m_aTextLineColor;
     Color           aOverlineColor  = m_aCurrentPDFState.m_aOverlineColor;
     Color           aStrikeoutColor = m_aCurrentPDFState.m_aFont.GetColor();

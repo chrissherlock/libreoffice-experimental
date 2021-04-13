@@ -18,7 +18,7 @@
 // This class only adds SkTypeface in order to allow its caching.
 class SkiaWinFontInstance : public WinFontInstance
 {
-    friend rtl::Reference<LogicalFontInstance>
+    friend rtl::Reference<FontInstance>
     WinFontFace::CreateFontInstance(const FontSelectPattern&) const;
 
 public:

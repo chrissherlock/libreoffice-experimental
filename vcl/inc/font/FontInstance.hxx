@@ -38,20 +38,20 @@
 #include <hb.h>
 
 class ConvertChar;
-class LogicalFontManager;
-class PhysicalFontFace;
+class FontManager;
+class FontFace;
 
 // TODO: allow sharing of metrics for related fonts
 
-class VCL_PLUGIN_PUBLIC LogicalFontInstance : public salhelper::SimpleReferenceObject
+class VCL_PLUGIN_PUBLIC FontInstance : public salhelper::SimpleReferenceObject
 {
     // just declaring the factory function doesn't work AKA
-    // friend LogicalFontInstance* PhysicalFontFace::CreateFontInstance(const FontSelectPattern&) const;
-    friend class PhysicalFontFace;
-    friend class LogicalFontManager;
+    // friend FontInstance* FontFace::CreateFontInstance(const FontSelectPattern&) const;
+    friend class FontFace;
+    friend class FontManager;
 
 public: // TODO: make data members private
-    virtual ~LogicalFontInstance() override;
+    virtual ~FontInstance() override;
 
     ImplFontMetricDataRef mxFontMetric; // Font attributes
 
@@ -75,10 +75,10 @@ public: // TODO: make data members private
     tools::Long GetEmphasisHeight() const;
     void SetEmphasisMarkStyle(FontEmphasisMark eEmphasisMark);
 
-    const PhysicalFontFace* GetFontFace() const;
-    const LogicalFontManager* GetLogicalFontManager() const;
-    PhysicalFontFace* GetFontFace();
-    const LogicalFontManager* GetFontCache() const;
+    const FontFace* GetFontFace() const;
+    const FontManager* GetFontManager() const;
+    FontFace* GetFontFace();
+    const FontManager* GetFontCache() const;
 
     bool GetGlyphBoundRect(sal_GlyphId, tools::Rectangle&, bool) const;
     virtual bool GetGlyphOutline(sal_GlyphId, basegfx::B2DPolyPolygon&, bool) const = 0;
@@ -93,7 +93,7 @@ public: // TODO: make data members private
     bool CanRecodeString();
 
 protected:
-    explicit LogicalFontInstance(const PhysicalFontFace&, const FontSelectPattern&);
+    explicit FontInstance(const FontFace&, const FontSelectPattern&);
 
     virtual bool ImplGetGlyphBoundRect(sal_GlyphId, tools::Rectangle&, bool) const = 0;
 
@@ -108,22 +108,22 @@ private:
     ConvertChar const* mpConversion; // used e.g. for StarBats->StarSymbol
     typedef ::std::unordered_map<::std::pair<sal_UCS4, FontWeight>, OUString> UnicodeFallbackList;
     std::unique_ptr<UnicodeFallbackList> mpUnicodeFallbackList;
-    mutable LogicalFontManager* mpLogicalFontManager;
+    mutable FontManager* mpFontManager;
     const FontSelectPattern m_aFontSelData;
     hb_font_t* m_pHbFont;
     double m_nAveWidthFactor;
-    rtl::Reference<PhysicalFontFace> m_pFontFace;
+    rtl::Reference<FontFace> m_pFontFace;
     std::optional<bool> m_xbIsGraphiteFont;
 };
 
-inline hb_font_t* LogicalFontInstance::GetHbFont()
+inline hb_font_t* FontInstance::GetHbFont()
 {
     if (!m_pHbFont)
         m_pHbFont = ImplInitHbFont();
     return m_pHbFont;
 }
 
-inline void LogicalFontInstance::DecodeOpenTypeTag(const uint32_t nTableTag, char* pTagName)
+inline void FontInstance::DecodeOpenTypeTag(const uint32_t nTableTag, char* pTagName)
 {
     pTagName[0] = static_cast<char>(nTableTag >> 24);
     pTagName[1] = static_cast<char>(nTableTag >> 16);

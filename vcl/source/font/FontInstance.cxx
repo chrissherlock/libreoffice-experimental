@@ -19,14 +19,14 @@
 
 #include <unotools/fontdefs.hxx>
 
-#include <font/LogicalFontInstance.hxx>
-#include <font/LogicalFontManager.hxx>
-#include <font/PhysicalFontFace.hxx>
+#include <font/FontInstance.hxx>
+#include <font/FontManager.hxx>
+#include <font/FontFace.hxx>
 
 #include <hb-ot.h>
 #include <hb-graphite2.h>
 
-// extend std namespace to add custom hash needed for LogicalFontInstance
+// extend std namespace to add custom hash needed for FontInstance
 
 namespace std
 {
@@ -42,33 +42,32 @@ template <> struct hash<pair<sal_UCS4, FontWeight>>
 };
 }
 
-LogicalFontInstance::LogicalFontInstance(const PhysicalFontFace& rFontFace,
-                                         const FontSelectPattern& rFontSelData)
+FontInstance::FontInstance(const FontFace& rFontFace, const FontSelectPattern& rFontSelData)
     : mxFontMetric(new ImplFontMetricData(rFontSelData))
     , mnLineHeight(0)
     , mnOwnOrientation(0)
     , mnOrientation(0)
     , mbInit(false)
     , mpConversion(nullptr)
-    , mpLogicalFontManager(nullptr)
+    , mpFontManager(nullptr)
     , m_aFontSelData(rFontSelData)
     , m_pHbFont(nullptr)
     , m_nAveWidthFactor(1.0f)
-    , m_pFontFace(&const_cast<PhysicalFontFace&>(rFontFace))
+    , m_pFontFace(&const_cast<FontFace&>(rFontFace))
 {
 }
 
-LogicalFontInstance::~LogicalFontInstance()
+FontInstance::~FontInstance()
 {
     mpUnicodeFallbackList.reset();
-    mpLogicalFontManager = nullptr;
+    mpFontManager = nullptr;
     mxFontMetric = nullptr;
 
     if (m_pHbFont)
         hb_font_destroy(m_pHbFont);
 }
 
-hb_font_t* LogicalFontInstance::InitHbFont(hb_face_t* pHbFace)
+hb_font_t* FontInstance::InitHbFont(hb_face_t* pHbFace)
 {
     assert(pHbFace);
     hb_font_t* pHbFont = hb_font_create(pHbFace);
@@ -80,7 +79,7 @@ hb_font_t* LogicalFontInstance::InitHbFont(hb_face_t* pHbFace)
     return pHbFont;
 }
 
-int LogicalFontInstance::GetKashidaWidth()
+int FontInstance::GetKashidaWidth()
 {
     hb_font_t* pHbFont = GetHbFont();
     hb_position_t nWidth = 0;
@@ -96,7 +95,7 @@ int LogicalFontInstance::GetKashidaWidth()
     return nWidth;
 }
 
-void LogicalFontInstance::GetScale(double* nXScale, double* nYScale)
+void FontInstance::GetScale(double* nXScale, double* nYScale)
 {
     hb_face_t* pHbFace = hb_font_get_face(GetHbFont());
     unsigned int nUPEM = hb_face_get_upem(pHbFace);
@@ -116,16 +115,16 @@ void LogicalFontInstance::GetScale(double* nXScale, double* nYScale)
         *nXScale = nWidth / nUPEM;
 }
 
-void LogicalFontInstance::AddFallbackForUnicode(sal_UCS4 cChar, FontWeight eWeight,
-                                                const OUString& rFontName)
+void FontInstance::AddFallbackForUnicode(sal_UCS4 cChar, FontWeight eWeight,
+                                         const OUString& rFontName)
 {
     if (!mpUnicodeFallbackList)
         mpUnicodeFallbackList.reset(new UnicodeFallbackList);
     (*mpUnicodeFallbackList)[std::pair<sal_UCS4, FontWeight>(cChar, eWeight)] = rFontName;
 }
 
-bool LogicalFontInstance::GetFallbackForUnicode(sal_UCS4 cChar, FontWeight eWeight,
-                                                OUString* pFontName) const
+bool FontInstance::GetFallbackForUnicode(sal_UCS4 cChar, FontWeight eWeight,
+                                         OUString* pFontName) const
 {
     if (!mpUnicodeFallbackList)
         return false;
@@ -139,8 +138,8 @@ bool LogicalFontInstance::GetFallbackForUnicode(sal_UCS4 cChar, FontWeight eWeig
     return true;
 }
 
-void LogicalFontInstance::IgnoreFallbackForUnicode(sal_UCS4 cChar, FontWeight eWeight,
-                                                   std::u16string_view rFontName)
+void FontInstance::IgnoreFallbackForUnicode(sal_UCS4 cChar, FontWeight eWeight,
+                                            std::u16string_view rFontName)
 {
     UnicodeFallbackList::iterator it
         = mpUnicodeFallbackList->find(std::pair<sal_UCS4, FontWeight>(cChar, eWeight));
@@ -150,19 +149,18 @@ void LogicalFontInstance::IgnoreFallbackForUnicode(sal_UCS4 cChar, FontWeight eW
         mpUnicodeFallbackList->erase(it);
 }
 
-bool LogicalFontInstance::GetGlyphBoundRect(sal_GlyphId nID, tools::Rectangle& rRect,
-                                            bool bVertical) const
+bool FontInstance::GetGlyphBoundRect(sal_GlyphId nID, tools::Rectangle& rRect, bool bVertical) const
 {
-    if (mpLogicalFontManager && mpLogicalFontManager->GetCachedGlyphBoundRect(this, nID, rRect))
+    if (mpFontManager && mpFontManager->GetCachedGlyphBoundRect(this, nID, rRect))
         return true;
 
     bool res = ImplGetGlyphBoundRect(nID, rRect, bVertical);
-    if (mpLogicalFontManager && res)
-        mpLogicalFontManager->CacheGlyphBoundRect(this, nID, rRect);
+    if (mpFontManager && res)
+        mpFontManager->CacheGlyphBoundRect(this, nID, rRect);
     return res;
 }
 
-bool LogicalFontInstance::IsGraphiteFont()
+bool FontInstance::IsGraphiteFont()
 {
     if (!m_xbIsGraphiteFont)
     {
@@ -172,36 +170,27 @@ bool LogicalFontInstance::IsGraphiteFont()
     return *m_xbIsGraphiteFont;
 }
 
-void LogicalFontInstance::SetAverageWidthFactor(double nFactor)
-{
-    m_nAveWidthFactor = std::abs(nFactor);
-}
+void FontInstance::SetAverageWidthFactor(double nFactor) { m_nAveWidthFactor = std::abs(nFactor); }
 
-double LogicalFontInstance::GetAverageWidthFactor() const { return m_nAveWidthFactor; }
+double FontInstance::GetAverageWidthFactor() const { return m_nAveWidthFactor; }
 
-const FontSelectPattern& LogicalFontInstance::GetFontSelectPattern() const
-{
-    return m_aFontSelData;
-}
+const FontSelectPattern& FontInstance::GetFontSelectPattern() const { return m_aFontSelData; }
 
-const PhysicalFontFace* LogicalFontInstance::GetFontFace() const { return m_pFontFace.get(); }
+const FontFace* FontInstance::GetFontFace() const { return m_pFontFace.get(); }
 
-const LogicalFontManager* LogicalFontInstance::GetFontCache() const { return mpLogicalFontManager; }
+const FontManager* FontInstance::GetFontCache() const { return mpFontManager; }
 
-PhysicalFontFace* LogicalFontInstance::GetFontFace() { return m_pFontFace.get(); }
+FontFace* FontInstance::GetFontFace() { return m_pFontFace.get(); }
 
-hb_font_t* LogicalFontInstance::ImplInitHbFont()
+hb_font_t* FontInstance::ImplInitHbFont()
 {
     assert(false);
     return hb_font_get_empty();
 }
 
-void LogicalFontInstance::InitConversion(ConvertChar const* pConvertChar)
-{
-    mpConversion = pConvertChar;
-}
+void FontInstance::InitConversion(ConvertChar const* pConvertChar) { mpConversion = pConvertChar; }
 
-bool LogicalFontInstance::CanRecodeString()
+bool FontInstance::CanRecodeString()
 {
     if (mpConversion)
         return true;
@@ -209,13 +198,13 @@ bool LogicalFontInstance::CanRecodeString()
     return false;
 }
 
-void LogicalFontInstance::RecodeString(OUString& rString)
+void FontInstance::RecodeString(OUString& rString)
 {
     if (mpConversion)
         mpConversion->RecodeString(rString, 0, rString.getLength());
 }
 
-tools::Long LogicalFontInstance::GetEmphasisHeight() const
+tools::Long FontInstance::GetEmphasisHeight() const
 {
     tools::Long nEmphasisHeight = (mnLineHeight * 250) / 1000;
 
@@ -225,7 +214,7 @@ tools::Long LogicalFontInstance::GetEmphasisHeight() const
     return nEmphasisHeight;
 }
 
-void LogicalFontInstance::SetEmphasisMarkStyle(FontEmphasisMark eEmphasisMark)
+void FontInstance::SetEmphasisMarkStyle(FontEmphasisMark eEmphasisMark)
 {
     tools::Long nEmphasisHeight = GetEmphasisHeight();
 
@@ -241,14 +230,8 @@ void LogicalFontInstance::SetEmphasisMarkStyle(FontEmphasisMark eEmphasisMark)
     }
 }
 
-tools::Long LogicalFontInstance::GetEmphasisAscent() const
-{
-    return mxFontMetric->GetEmphasisAscent();
-}
+tools::Long FontInstance::GetEmphasisAscent() const { return mxFontMetric->GetEmphasisAscent(); }
 
-tools::Long LogicalFontInstance::GetEmphasisDescent() const
-{
-    return mxFontMetric->GetEmphasisDescent();
-}
+tools::Long FontInstance::GetEmphasisDescent() const { return mxFontMetric->GetEmphasisDescent(); }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

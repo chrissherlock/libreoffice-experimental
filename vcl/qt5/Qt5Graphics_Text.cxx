@@ -29,7 +29,7 @@
 #include <unx/genpspgraphics.h>
 
 #include <sallayout.hxx>
-#include <font/LogicalFontManager.hxx>
+#include <font/FontManager.hxx>
 
 #include <QtGui/QGlyphRun>
 #include <QtGui/QFontDatabase>
@@ -38,7 +38,7 @@
 
 void Qt5Graphics::SetTextColor(Color nColor) { m_aTextColor = nColor; }
 
-void Qt5Graphics::SetFont(LogicalFontInstance* pReqFont, int nFallbackLevel)
+void Qt5Graphics::SetFont(FontInstance* pReqFont, int nFallbackLevel)
 {
     // release the text styles
     for (int i = nFallbackLevel; i < MAX_FALLBACK; ++i)
@@ -81,7 +81,7 @@ bool Qt5Graphics::GetFontCapabilities(vcl::FontCapabilities& rFontCapabilities) 
     return m_pTextStyle[0]->GetFontFace()->GetFontCapabilities(rFontCapabilities);
 }
 
-void Qt5Graphics::GetDevFontList(LogicalFontManager* pPFC)
+void Qt5Graphics::GetDevFontList(FontManager* pPFC)
 {
     static const bool bUseFontconfig = (nullptr == getenv("SAL_VCL_QT5_NO_FONTCONFIG"));
 
@@ -121,7 +121,7 @@ void Qt5Graphics::GetDevFontList(LogicalFontManager* pPFC)
 
 void Qt5Graphics::ClearDevFontCache() {}
 
-bool Qt5Graphics::AddTempDevFont(LogicalFontManager*, const OUString& /*rFileURL*/,
+bool Qt5Graphics::AddTempDevFont(FontManager*, const OUString& /*rFileURL*/,
                                  const OUString& /*rFontName*/)
 {
     return false;
@@ -213,7 +213,7 @@ const sal_uInt8* Qt5TrueTypeFont::table(sal_uInt32 ord, sal_uInt32& size) const
 }
 }
 
-bool Qt5Graphics::CreateFontSubset(const OUString& rToFile, const PhysicalFontFace* pFontFace,
+bool Qt5Graphics::CreateFontSubset(const OUString& rToFile, const FontFace* pFontFace,
                                    const sal_GlyphId* pGlyphIds, const sal_uInt8* pEncoding,
                                    sal_Int32* pGlyphWidths, int nGlyphCount, FontSubsetInfo& rInfo)
 {
@@ -251,14 +251,14 @@ bool Qt5Graphics::CreateFontSubset(const OUString& rToFile, const PhysicalFontFa
                                             pGlyphIds, pEncoding, pGlyphWidths, nGlyphCount);
 }
 
-const void* Qt5Graphics::GetEmbedFontData(const PhysicalFontFace*, tools::Long* /*pDataLen*/)
+const void* Qt5Graphics::GetEmbedFontData(const FontFace*, tools::Long* /*pDataLen*/)
 {
     return nullptr;
 }
 
 void Qt5Graphics::FreeEmbedFontData(const void* /*pData*/, tools::Long /*nDataLen*/) {}
 
-void Qt5Graphics::GetGlyphWidths(const PhysicalFontFace* pFontFace, bool bVertical,
+void Qt5Graphics::GetGlyphWidths(const FontFace* pFontFace, bool bVertical,
                                  std::vector<sal_Int32>& rWidths, Ucs2UIntMap& rUnicodeEnc)
 {
     const Qt5FontFace* pQt5FontFace = static_cast<const Qt5FontFace*>(pFontFace);
@@ -272,7 +272,7 @@ namespace
 class Qt5CommonSalLayout : public GenericSalLayout
 {
 public:
-    Qt5CommonSalLayout(LogicalFontInstance& rLFI)
+    Qt5CommonSalLayout(FontInstance& rLFI)
         : GenericSalLayout(rLFI)
     {
     }

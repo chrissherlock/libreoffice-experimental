@@ -28,7 +28,7 @@
 #include <vcl/dllapi.h>
 
 class ImplLayoutArgs;
-class PhysicalFontFace;
+class FontFace;
 class SalGraphics;
 class GlyphItem;
 
@@ -90,7 +90,7 @@ public:
 
     // methods using glyph indexing
     virtual bool    GetNextGlyph(const GlyphItem** pGlyph, Point& rPos, int& nStart,
-                                 const PhysicalFontFace** pFallbackFont = nullptr) const = 0;
+                                 const FontFace** pFallbackFont = nullptr) const = 0;
     virtual bool GetOutline(basegfx::B2DPolyPolygonVector&) const;
     bool GetBoundRect(tools::Rectangle&) const;
 

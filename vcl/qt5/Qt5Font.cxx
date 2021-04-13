@@ -118,8 +118,8 @@ static inline void applyStyle(Qt5Font& rFont, FontItalic eItalic)
     }
 }
 
-Qt5Font::Qt5Font(const PhysicalFontFace& rPFF, const FontSelectPattern& rFSP)
-    : LogicalFontInstance(rPFF, rFSP)
+Qt5Font::Qt5Font(const FontFace& rPFF, const FontSelectPattern& rFSP)
+    : FontInstance(rPFF, rFSP)
 {
     setFamily(toQString(rPFF.GetFamilyName()));
     applyWeight(*this, rPFF.GetWeight());
@@ -131,7 +131,7 @@ Qt5Font::Qt5Font(const PhysicalFontFace& rPFF, const FontSelectPattern& rFSP)
 static hb_blob_t* getFontTable(hb_face_t*, hb_tag_t nTableTag, void* pUserData)
 {
     char pTagName[5];
-    LogicalFontInstance::DecodeOpenTypeTag(nTableTag, pTagName);
+    FontInstance::DecodeOpenTypeTag(nTableTag, pTagName);
 
     Qt5Font* pFont = static_cast<Qt5Font*>(pUserData);
     QRawFont aRawFont(QRawFont::fromFont(*pFont));

@@ -17,23 +17,20 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <font/PhysicalFontFace.hxx>
-#include <font/PhysicalFontFaceCollection.hxx>
+#include <font/FontFace.hxx>
+#include <font/FontFaceCollection.hxx>
 
-PhysicalFontFaceCollection::PhysicalFontFaceCollection() { maDevFontVector.reserve(1024); }
+FontFaceCollection::FontFaceCollection() { maDevFontVector.reserve(1024); }
 
-void PhysicalFontFaceCollection::Add(PhysicalFontFace* pFace) { maDevFontVector.push_back(pFace); }
+void FontFaceCollection::Add(FontFace* pFace) { maDevFontVector.push_back(pFace); }
 
-PhysicalFontFace* PhysicalFontFaceCollection::Get(int nIndex) const
+FontFace* FontFaceCollection::Get(int nIndex) const { return maDevFontVector[nIndex].get(); }
+
+int FontFaceCollection::Count() const { return maDevFontVector.size(); }
+
+FontMetric FontFaceCollection::GetFontMetric(int nIndex) const
 {
-    return maDevFontVector[nIndex].get();
-}
-
-int PhysicalFontFaceCollection::Count() const { return maDevFontVector.size(); }
-
-FontMetric PhysicalFontFaceCollection::GetFontMetric(int nIndex) const
-{
-    PhysicalFontFace* pData = Get(nIndex);
+    FontFace* pData = Get(nIndex);
 
     FontMetric aFontMetric;
 

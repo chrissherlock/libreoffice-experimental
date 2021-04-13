@@ -24,9 +24,9 @@
 #include <font/FontAttributes.hxx>
 #include <font/FontSelectPattern.hxx>
 
-#include <font/PhysicalFontFace.hxx>
+#include <font/FontFace.hxx>
 
-PhysicalFontFace::PhysicalFontFace(const FontAttributes& rDFA)
+FontFace::FontFace(const FontAttributes& rDFA)
     : FontAttributes(rDFA)
     , mnWidth(0)
     , mnHeight(0)
@@ -37,7 +37,7 @@ PhysicalFontFace::PhysicalFontFace(const FontAttributes& rDFA)
             SetSymbolFlag(true);
 }
 
-sal_Int32 PhysicalFontFace::CompareIgnoreSize(const PhysicalFontFace& rOther) const
+sal_Int32 FontFace::CompareIgnoreSize(const FontFace& rOther) const
 {
     // compare their width, weight, italic, style name and family name
     if (GetWidthType() < rOther.GetWidthType())
@@ -65,7 +65,7 @@ sal_Int32 PhysicalFontFace::CompareIgnoreSize(const PhysicalFontFace& rOther) co
     return nRet;
 }
 
-sal_Int32 PhysicalFontFace::CompareWithSize(const PhysicalFontFace& rOther) const
+sal_Int32 FontFace::CompareWithSize(const FontFace& rOther) const
 {
     sal_Int32 nCompare = CompareIgnoreSize(rOther);
     if (nCompare != 0)
@@ -84,7 +84,7 @@ sal_Int32 PhysicalFontFace::CompareWithSize(const PhysicalFontFace& rOther) cons
     return 0;
 }
 
-bool PhysicalFontFace::IsBetterMatch(const FontSelectPattern& rFSD, FontMatchStatus& rStatus) const
+bool FontFace::IsBetterMatch(const FontSelectPattern& rFSD, FontMatchStatus& rStatus) const
 {
     int nMatch = 0;
 

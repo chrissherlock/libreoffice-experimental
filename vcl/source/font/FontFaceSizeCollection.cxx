@@ -17,20 +17,14 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#pragma once
+#include <font/FontFaceSizeCollection.hxx>
 
-#include <vector>
+FontFaceSizeCollection::FontFaceSizeCollection() { maSizeList.reserve(32); }
 
-class PhysicalFontFaceSizeCollection
-{
-private:
-    std::vector<int> maSizeList;
+void FontFaceSizeCollection::Add(int nHeight) { maSizeList.push_back(nHeight); }
 
-public:
-    PhysicalFontFaceSizeCollection();
-    void Add(int nHeight);
-    int Count() const;
-    int Get(int nIndex) const;
-};
+int FontFaceSizeCollection::Count() const { return maSizeList.size(); }
+
+int FontFaceSizeCollection::Get(int nIndex) const { return maSizeList[nIndex]; }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

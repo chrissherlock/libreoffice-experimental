@@ -194,11 +194,11 @@
 #include <font/FontAttributes.hxx>
 #include <font/FontSelectPattern.hxx>
 #include <font/ImplFontMetricData.hxx>
-#include <font/LogicalFontInstance.hxx>
-#include <font/LogicalFontManager.hxx>
-#include <font/PhysicalFontFace.hxx>
-#include <font/PhysicalFontFaceCollection.hxx>
-#include <font/PhysicalFontFaceSizeCollection.hxx>
+#include <font/FontInstance.hxx>
+#include <font/FontManager.hxx>
+#include <font/FontFace.hxx>
+#include <font/FontFaceCollection.hxx>
+#include <font/FontFaceSizeCollection.hxx>
 #include <i18nlangtag/lang.h>
 #include <i18nlangtag/languagetag.hxx>
 #include <i18nlangtag/mslangid.hxx>

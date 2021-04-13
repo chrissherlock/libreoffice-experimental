@@ -21,7 +21,7 @@
 
 #include <vcl/flags/SalLayoutFlags.hxx>
 
-#include <font/LogicalFontInstance.hxx>
+#include <font/FontInstance.hxx>
 
 #include <vector>
 
@@ -33,14 +33,14 @@ class SalLayoutGlyphsImpl : public std::vector<GlyphItem>
 
 public:
     SalLayoutGlyphsImpl* clone() const;
-    const rtl::Reference<LogicalFontInstance>& GetFont() const { return m_rFontInstance; }
+    const rtl::Reference<FontInstance>& GetFont() const { return m_rFontInstance; }
     bool IsValid() const;
 
 private:
-    rtl::Reference<LogicalFontInstance> m_rFontInstance;
+    rtl::Reference<FontInstance> m_rFontInstance;
     SalLayoutFlags mnFlags = SalLayoutFlags::NONE;
 
-    SalLayoutGlyphsImpl(LogicalFontInstance& rFontInstance)
+    SalLayoutGlyphsImpl(FontInstance& rFontInstance)
         : m_rFontInstance(&rFontInstance)
     {
     }

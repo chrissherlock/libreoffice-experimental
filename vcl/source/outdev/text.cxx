@@ -24,7 +24,7 @@
 #include <vcl/vcllayout.hxx>
 
 #include <drawmode.hxx>
-#include <font/LogicalFontInstance.hxx>
+#include <font/FontInstance.hxx>
 #include <textlayout.hxx>
 
 void OutputDevice::DrawText(Point const& rStartPt, OUString const& rStr, sal_Int32 nIndex,

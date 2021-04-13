@@ -45,9 +45,9 @@
 #include <langboost.hxx>
 #include <font/ImplFontMetricData.hxx>
 #include <font/FontAttributes.hxx>
-#include <font/LogicalFontInstance.hxx>
-#include <font/LogicalFontManager.hxx>
-#include <font/PhysicalFontFace.hxx>
+#include <font/FontInstance.hxx>
+#include <font/FontManager.hxx>
+#include <font/FontFace.hxx>
 #include <sallayout.hxx>
 
 using namespace psp;
@@ -110,7 +110,7 @@ namespace {
 class PspSalLayout : public GenericSalLayout
 {
 public:
-    PspSalLayout(psp::PrinterGfx&, LogicalFontInstance &rFontInstance);
+    PspSalLayout(psp::PrinterGfx&, FontInstance &rFontInstance);
 
     void                InitFont() const final override;
 
@@ -126,7 +126,7 @@ private:
 
 }
 
-PspSalLayout::PspSalLayout(::psp::PrinterGfx& rGfx, LogicalFontInstance &rFontInstance)
+PspSalLayout::PspSalLayout(::psp::PrinterGfx& rGfx, FontInstance &rFontInstance)
 :   GenericSalLayout(rFontInstance)
 ,   mrPrinterGfx(rGfx)
 {
@@ -170,7 +170,7 @@ bool GenPspGraphics::GetFontCapabilities(vcl::FontCapabilities &rFontCapabilitie
     return m_pFreetypeFont[0]->GetFreetypeFont().GetFontCapabilities(rFontCapabilities);
 }
 
-void GenPspGraphics::SetFont(LogicalFontInstance *pFontInstance, int nFallbackLevel)
+void GenPspGraphics::SetFont(FontInstance *pFontInstance, int nFallbackLevel)
 {
     // release all fonts that are to be overridden
     for( int i = nFallbackLevel; i < MAX_FALLBACK; ++i )
@@ -231,12 +231,12 @@ void GenPspGraphics::SetTextColor( Color nColor )
     m_pPrinterGfx->SetTextColor (aColor);
 }
 
-bool GenPspGraphics::AddTempDevFont( LogicalFontManager*, const OUString&,const OUString& )
+bool GenPspGraphics::AddTempDevFont( FontManager*, const OUString&,const OUString& )
 {
     return false;
 }
 
-bool GenPspGraphics::AddTempDevFontHelper( LogicalFontManager* pFontCollection,
+bool GenPspGraphics::AddTempDevFontHelper( FontManager* pFontCollection,
                                            const OUString& rFileURL,
                                            const OUString& rFontName)
 {
@@ -270,7 +270,7 @@ bool GenPspGraphics::AddTempDevFontHelper( LogicalFontManager* pFontCollection,
     return true;
 }
 
-void GenPspGraphics::GetDevFontList( LogicalFontManager *pFontCollection )
+void GenPspGraphics::GetDevFontList( FontManager *pFontCollection )
 {
     ::std::vector< psp::fontID > aList;
     psp::PrintFontManager& rMgr = psp::PrintFontManager::get();
@@ -309,7 +309,7 @@ std::unique_ptr<GenericSalLayout> GenPspGraphics::GetTextLayout(int nFallbackLev
 
 bool GenPspGraphics::CreateFontSubset(
                                    const OUString& rToFile,
-                                   const PhysicalFontFace* pFont,
+                                   const FontFace* pFont,
                                    const sal_GlyphId* pGlyphIds,
                                    const sal_uInt8* pEncoding,
                                    sal_Int32* pWidths,
@@ -321,7 +321,7 @@ bool GenPspGraphics::CreateFontSubset(
     // font since they are the only ones left after the PDF
     // export has filtered its list of subsettable fonts (for
     // which this method was created). The correct way would
-    // be to have the FreetypeManager search for the PhysicalFontFace pFont
+    // be to have the FreetypeManager search for the FontFace pFont
     psp::fontID aFont = pFont->GetFontId();
 
     psp::PrintFontManager& rMgr = psp::PrintFontManager::get();
@@ -335,7 +335,7 @@ bool GenPspGraphics::CreateFontSubset(
     return bSuccess;
 }
 
-void GenPspGraphics::GetGlyphWidths( const PhysicalFontFace* pFont,
+void GenPspGraphics::GetGlyphWidths( const FontFace* pFont,
                                   bool bVertical,
                                   std::vector< sal_Int32 >& rWidths,
                                   Ucs2UIntMap& rUnicodeEnc )
@@ -344,7 +344,7 @@ void GenPspGraphics::GetGlyphWidths( const PhysicalFontFace* pFont,
     // font since they are the only ones left after the PDF
     // export has filtered its list of subsettable fonts (for
     // which this method was created). The correct way would
-    // be to have the FreetypeManager search for the PhysicalFontFace pFont
+    // be to have the FreetypeManager search for the FontFace pFont
     psp::fontID aFont = pFont->GetFontId();
     GenPspGraphics::DoGetGlyphWidths( aFont, bVertical, rWidths, rUnicodeEnc );
 }
@@ -405,7 +405,7 @@ namespace vcl
     }
 }
 
-void GenPspGraphics::AnnounceFonts( LogicalFontManager* pFontCollection, const psp::FastPrintFontInfo& aInfo )
+void GenPspGraphics::AnnounceFonts( FontManager* pFontCollection, const psp::FastPrintFontInfo& aInfo )
 {
     int nQuality = 0;
 
@@ -504,13 +504,13 @@ void GenPspGraphics::FreeEmbedFontData( const void* pData, tools::Long nLen )
     DoFreeEmbedFontData( pData, nLen );
 }
 
-const void* GenPspGraphics::GetEmbedFontData(const PhysicalFontFace* pFont, tools::Long* pDataLen)
+const void* GenPspGraphics::GetEmbedFontData(const FontFace* pFont, tools::Long* pDataLen)
 {
     // in this context the pFont->GetFontId() is a valid PSP
     // font since they are the only ones left after the PDF
     // export has filtered its list of subsettable fonts (for
     // which this method was created). The correct way would
-    // be to have the FreetypeManager search for the PhysicalFontFace pFont
+    // be to have the FreetypeManager search for the FontFace pFont
     psp::fontID aFont = pFont->GetFontId();
     return DoGetEmbedFontData(aFont, pDataLen);
 }

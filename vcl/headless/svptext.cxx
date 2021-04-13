@@ -27,7 +27,7 @@
 #include <headless/svpgdi.hxx>
 #include <sallayout.hxx>
 
-void SvpSalGraphics::SetFont(LogicalFontInstance* pIFSD, int nFallbackLevel)
+void SvpSalGraphics::SetFont(FontInstance* pIFSD, int nFallbackLevel)
 {
     m_aTextRenderImpl.SetFont(pIFSD, nFallbackLevel);
 }
@@ -47,7 +47,7 @@ bool SvpSalGraphics::GetFontCapabilities(vcl::FontCapabilities &rFontCapabilitie
     return m_aTextRenderImpl.GetFontCapabilities(rFontCapabilities);
 }
 
-void SvpSalGraphics::GetDevFontList( LogicalFontManager* pFontCollection )
+void SvpSalGraphics::GetDevFontList( FontManager* pFontCollection )
 {
     m_aTextRenderImpl.GetDevFontList(pFontCollection);
 }
@@ -57,7 +57,7 @@ void SvpSalGraphics::ClearDevFontCache()
     m_aTextRenderImpl.ClearDevFontCache();
 }
 
-bool SvpSalGraphics::AddTempDevFont( LogicalFontManager* pFontCollection,
+bool SvpSalGraphics::AddTempDevFont( FontManager* pFontCollection,
     const OUString& rFileURL, const OUString& rFontName)
 {
     return m_aTextRenderImpl.AddTempDevFont(pFontCollection, rFileURL, rFontName);
@@ -65,7 +65,7 @@ bool SvpSalGraphics::AddTempDevFont( LogicalFontManager* pFontCollection,
 
 bool SvpSalGraphics::CreateFontSubset(
     const OUString& rToFile,
-    const PhysicalFontFace* pFont,
+    const FontFace* pFont,
     const sal_GlyphId* pGlyphIds,
     const sal_uInt8* pEncoding,
     sal_Int32* pWidths,
@@ -75,7 +75,7 @@ bool SvpSalGraphics::CreateFontSubset(
     return m_aTextRenderImpl.CreateFontSubset(rToFile, pFont, pGlyphIds, pEncoding, pWidths, nGlyphCount, rInfo);
 }
 
-const void* SvpSalGraphics::GetEmbedFontData(const PhysicalFontFace* pFont, tools::Long* pDataLen)
+const void* SvpSalGraphics::GetEmbedFontData(const FontFace* pFont, tools::Long* pDataLen)
 {
     return m_aTextRenderImpl.GetEmbedFontData(pFont, pDataLen);
 }
@@ -85,7 +85,7 @@ void SvpSalGraphics::FreeEmbedFontData( const void* pData, tools::Long nLen )
     m_aTextRenderImpl.FreeEmbedFontData(pData, nLen);
 }
 
-void SvpSalGraphics::GetGlyphWidths( const PhysicalFontFace* pFont,
+void SvpSalGraphics::GetGlyphWidths( const FontFace* pFont,
                                    bool bVertical,
                                    std::vector< sal_Int32 >& rWidths,
                                    Ucs2UIntMap& rUnicodeEnc )

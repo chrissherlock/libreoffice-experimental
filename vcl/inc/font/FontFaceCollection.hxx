@@ -25,20 +25,20 @@
 
 #include <vector>
 
-class PhysicalFontFace;
+class FontFace;
 
-// an PhysicalFontFaceCollection is created by a LogicalFontManager
-// it becomes invalid when original LogicalFontManager is modified
-class PhysicalFontFaceCollection
+// an FontFaceCollection is created by a FontManager
+// it becomes invalid when original FontManager is modified
+class FontFaceCollection
 {
 private:
-    std::vector<rtl::Reference<PhysicalFontFace>> maDevFontVector;
+    std::vector<rtl::Reference<FontFace>> maDevFontVector;
 
 public:
-    PhysicalFontFaceCollection();
+    FontFaceCollection();
 
-    void Add(PhysicalFontFace* pFace);
-    PhysicalFontFace* Get(int nIndex) const;
+    void Add(FontFace* pFace);
+    FontFace* Get(int nIndex) const;
     int Count() const;
     FontMetric GetFontMetric(int nIndex) const;
 };

@@ -129,7 +129,7 @@ static void AddPolygonToPath( CGMutablePathRef xPath,
 }
 
 bool AquaSalGraphics::CreateFontSubset( const OUString& rToFile,
-                                        const PhysicalFontFace* pFontData,
+                                        const FontFace* pFontData,
                                         const sal_GlyphId* pGlyphIds, const sal_uInt8* pEncoding,
                                         sal_Int32* pGlyphWidths, const int nGlyphCount,
                                         FontSubsetInfo& rInfo )

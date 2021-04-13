@@ -34,7 +34,7 @@
 #include <unx/fc_fontoptions.hxx>
 #include <unx/freetype_glyphcache.hxx>
 #include <font/ImplFontMetricData.hxx>
-#include <font/PhysicalFontFace.hxx>
+#include <font/FontFace.hxx>
 
 #include <sallayout.hxx>
 
@@ -48,7 +48,7 @@ FreeTypeTextRenderImpl::~FreeTypeTextRenderImpl()
     ReleaseFonts();
 }
 
-void FreeTypeTextRenderImpl::SetFont(LogicalFontInstance *pEntry, int nFallbackLevel)
+void FreeTypeTextRenderImpl::SetFont(FontInstance *pEntry, int nFallbackLevel)
 {
     // release all no longer needed font resources
     for( int i = nFallbackLevel; i < MAX_FALLBACK; ++i )
@@ -93,7 +93,7 @@ FreeTypeTextRenderImpl::SetTextColor( Color nColor )
     }
 }
 
-bool FreeTypeTextRenderImpl::AddTempDevFont( LogicalFontManager* pFontCollection,
+bool FreeTypeTextRenderImpl::AddTempDevFont( FontManager* pFontCollection,
                                      const OUString& rFileURL,
                                      const OUString& rFontName )
 {
@@ -106,7 +106,7 @@ void FreeTypeTextRenderImpl::ClearDevFontCache()
     psp::PrintFontManager::clearFontOptionsCache();
 }
 
-void FreeTypeTextRenderImpl::GetDevFontList( LogicalFontManager* pFontCollection )
+void FreeTypeTextRenderImpl::GetDevFontList( FontManager* pFontCollection )
 {
     // prepare the FreetypeManager using psprint's font infos
     FreetypeManager& rFreetypeManager = FreetypeManager::get();
@@ -158,7 +158,7 @@ std::unique_ptr<GenericSalLayout> FreeTypeTextRenderImpl::GetTextLayout(int nFal
 
 bool FreeTypeTextRenderImpl::CreateFontSubset(
                                    const OUString& rToFile,
-                                   const PhysicalFontFace* pFont,
+                                   const FontFace* pFont,
                                    const sal_GlyphId* pGlyphIds,
                                    const sal_uInt8* pEncoding,
                                    sal_Int32* pWidths,
@@ -170,7 +170,7 @@ bool FreeTypeTextRenderImpl::CreateFontSubset(
     // font since they are the only ones left after the PDF
     // export has filtered its list of subsettable fonts (for
     // which this method was created). The correct way would
-    // be to have the FreetypeManager search for the PhysicalFontFace pFont
+    // be to have the FreetypeManager search for the FontFace pFont
     psp::fontID aFont = pFont->GetFontId();
 
     psp::PrintFontManager& rMgr = psp::PrintFontManager::get();
@@ -184,13 +184,13 @@ bool FreeTypeTextRenderImpl::CreateFontSubset(
     return bSuccess;
 }
 
-const void* FreeTypeTextRenderImpl::GetEmbedFontData(const PhysicalFontFace* pFont, tools::Long* pDataLen)
+const void* FreeTypeTextRenderImpl::GetEmbedFontData(const FontFace* pFont, tools::Long* pDataLen)
 {
     // in this context the pFont->GetFontId() is a valid PSP
     // font since they are the only ones left after the PDF
     // export has filtered its list of subsettable fonts (for
     // which this method was created). The correct way would
-    // be to have the FreetypeManager search for the PhysicalFontFace pFont
+    // be to have the FreetypeManager search for the FontFace pFont
     psp::fontID aFont = pFont->GetFontId();
     return GenPspGraphics::DoGetEmbedFontData(aFont, pDataLen);
 }
@@ -200,7 +200,7 @@ void FreeTypeTextRenderImpl::FreeEmbedFontData( const void* pData, tools::Long n
     GenPspGraphics::DoFreeEmbedFontData( pData, nLen );
 }
 
-void FreeTypeTextRenderImpl::GetGlyphWidths( const PhysicalFontFace* pFont,
+void FreeTypeTextRenderImpl::GetGlyphWidths( const FontFace* pFont,
                                    bool bVertical,
                                    std::vector< sal_Int32 >& rWidths,
                                    Ucs2UIntMap& rUnicodeEnc )
@@ -209,7 +209,7 @@ void FreeTypeTextRenderImpl::GetGlyphWidths( const PhysicalFontFace* pFont,
     // font since they are the only ones left after the PDF
     // export has filtered its list of subsettable fonts (for
     // which this method was created). The correct way would
-    // be to have the FreetypeManager search for the PhysicalFontFace pFont
+    // be to have the FreetypeManager search for the FontFace pFont
     psp::fontID aFont = pFont->GetFontId();
     GenPspGraphics::DoGetGlyphWidths( aFont, bVertical, rWidths, rUnicodeEnc );
 }

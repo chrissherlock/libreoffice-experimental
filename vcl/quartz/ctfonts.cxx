@@ -34,8 +34,8 @@
 #endif
 #include <font/FontAttributes.hxx>
 #include <font/GlyphItem.hxx>
-#include <font/LogicalFontInstance.hxx>
-#include <font/LogicalFontManager.hxx>
+#include <font/FontInstance.hxx>
+#include <font/FontManager.hxx>
 #include <quartz/salgdi.h>
 #include <quartz/utils.h>
 #include <sallayout.hxx>
@@ -46,8 +46,8 @@ static double toRadian(int nDegree)
     return nDegree * (M_PI / 1800.0);
 }
 
-CoreTextStyle::CoreTextStyle(const PhysicalFontFace& rPFF, const FontSelectPattern& rFSP)
-    : LogicalFontInstance(rPFF, rFSP)
+CoreTextStyle::CoreTextStyle(const FontFace& rPFF, const FontSelectPattern& rFSP)
+    : FontInstance(rPFF, rFSP)
     , mfFontStretch( 1.0 )
     , mfFontRotation( 0.0 )
     , mbFauxBold(false)
@@ -262,7 +262,7 @@ hb_font_t* CoreTextStyle::ImplInitHbFont()
     return InitHbFont(pHbFace);
 }
 
-rtl::Reference<LogicalFontInstance> CoreTextFontFace::CreateFontInstance(const FontSelectPattern& rFSD) const
+rtl::Reference<FontInstance> CoreTextFontFace::CreateFontInstance(const FontSelectPattern& rFSD) const
 {
     return new CoreTextStyle(*this, rFSD);
 }
@@ -506,7 +506,7 @@ void SystemFontList::AddFont( CoreTextFontFace* pFontData )
     maFontContainer[ nFontId ] = pFontData;
 }
 
-void SystemFontList::AnnounceFonts( LogicalFontManager& rFontCollection ) const
+void SystemFontList::AnnounceFonts( FontManager& rFontCollection ) const
 {
     for(const auto& rEntry : maFontContainer )
     {

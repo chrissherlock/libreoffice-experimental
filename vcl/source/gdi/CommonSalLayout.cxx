@@ -56,7 +56,7 @@ static hb_unicode_funcs_t* getUnicodeFuncs()
 }
 #endif
 
-GenericSalLayout::GenericSalLayout(LogicalFontInstance &rFont)
+GenericSalLayout::GenericSalLayout(FontInstance &rFont)
     : m_GlyphItems(rFont)
     , mpVertGlyphs(nullptr)
     , mbFuzzing(utl::ConfigManager::IsFuzzing())

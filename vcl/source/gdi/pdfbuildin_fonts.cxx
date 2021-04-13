@@ -731,9 +731,8 @@ const BuildinFont BuildinFontFace::m_aBuildinFonts[14]
 
       };
 
-BuildinFontInstance::BuildinFontInstance(const PhysicalFontFace& rFontFace,
-                                         const FontSelectPattern& rFSP)
-    : LogicalFontInstance(rFontFace, rFSP)
+BuildinFontInstance::BuildinFontInstance(const FontFace& rFontFace, const FontSelectPattern& rFSP)
+    : FontInstance(rFontFace, rFSP)
 {
 }
 
@@ -748,12 +747,12 @@ bool BuildinFontInstance::GetGlyphOutline(sal_GlyphId, basegfx::B2DPolyPolygon&,
 }
 
 BuildinFontFace::BuildinFontFace(int nId)
-    : PhysicalFontFace(m_aBuildinFonts[nId].GetFontAttributes())
+    : FontFace(m_aBuildinFonts[nId].GetFontAttributes())
     , mrBuildin(m_aBuildinFonts[nId])
 {
 }
 
-rtl::Reference<LogicalFontInstance>
+rtl::Reference<FontInstance>
 BuildinFontFace::CreateFontInstance(const FontSelectPattern& rFSP) const
 {
     return new BuildinFontInstance(*this, rFSP);

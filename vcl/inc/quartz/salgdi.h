@@ -40,8 +40,8 @@
 #include <vcl/metric.hxx>
 
 #include <font/ImplFontMetricData.hxx>
-#include <font/LogicalFontInstance.hxx>
-#include <font/PhysicalFontFace.hxx>
+#include <font/FontInstance.hxx>
+#include <font/FontFace.hxx>
 #include <salgdi.hxx>
 
 #include <quartz/salgdicommon.hxx>
@@ -55,7 +55,7 @@ class FontAttributes;
 class XorEmulation;
 
 // CoreText-specific physically available font face
-class CoreTextFontFace : public PhysicalFontFace
+class CoreTextFontFace : public FontFace
 {
 public:
                                     CoreTextFontFace( const FontAttributes&, sal_IntPtr nFontID );
@@ -70,7 +70,7 @@ public:
     bool GetFontCapabilities(vcl::FontCapabilities&) const override;
     bool                            HasChar( sal_uInt32 cChar ) const;
 
-    rtl::Reference<LogicalFontInstance> CreateFontInstance(const FontSelectPattern&) const override;
+    rtl::Reference<FontInstance> CreateFontInstance(const FontSelectPattern&) const override;
 
 private:
     const sal_IntPtr                mnFontId;
@@ -79,9 +79,9 @@ private:
     mutable bool                    mbFontCapabilitiesRead;
 };
 
-class CoreTextStyle final : public LogicalFontInstance
+class CoreTextStyle final : public FontInstance
 {
-    friend rtl::Reference<LogicalFontInstance> CoreTextFontFace::CreateFontInstance(const FontSelectPattern&) const;
+    friend rtl::Reference<FontInstance> CoreTextFontFace::CreateFontInstance(const FontSelectPattern&) const;
 
 public:
     ~CoreTextStyle() override;
@@ -99,7 +99,7 @@ public:
     bool mbFauxBold;
 
 private:
-    explicit CoreTextStyle(const PhysicalFontFace&, const FontSelectPattern&);
+    explicit CoreTextStyle(const FontFace&, const FontSelectPattern&);
 
     hb_font_t* ImplInitHbFont() override;
     bool ImplGetGlyphBoundRect(sal_GlyphId, tools::Rectangle&, bool) const override;
@@ -119,7 +119,7 @@ public:
     bool        Init( void );
     void        AddFont( CoreTextFontFace* );
 
-    void    AnnounceFonts( LogicalFontManager& ) const;
+    void    AnnounceFonts( FontManager& ) const;
     CoreTextFontFace* GetFontDataFromId( sal_IntPtr nFontId ) const;
 
 private:
@@ -351,17 +351,17 @@ public:
     // set the text color to a specific color
     virtual void            SetTextColor( Color nColor ) override;
     // set the font
-    virtual void            SetFont( LogicalFontInstance*, int nFallbackLevel ) override;
+    virtual void            SetFont( FontInstance*, int nFallbackLevel ) override;
     // get the current font's metrics
     virtual void            GetFontMetric( ImplFontMetricDataRef&, int nFallbackLevel ) override;
     // get the repertoire of the current font
     virtual FontCharMapRef  GetFontCharMap() const override;
     virtual bool            GetFontCapabilities(vcl::FontCapabilities &rFontCapabilities) const override;
     // graphics must fill supplied font list
-    virtual void            GetDevFontList( LogicalFontManager* ) override;
+    virtual void            GetDevFontList( FontManager* ) override;
     // graphics must drop any cached font info
     virtual void            ClearDevFontCache() override;
-    virtual bool            AddTempDevFont( LogicalFontManager*, const OUString& rFileURL, const OUString& rFontName ) override;
+    virtual bool            AddTempDevFont( FontManager*, const OUString& rFileURL, const OUString& rFontName ) override;
     // CreateFontSubset: a method to get a subset of glyhps of a font
     // inside a new valid font file
     // returns TRUE if creation of subset was successful
@@ -375,7 +375,7 @@ public:
     // implementation note: encoding 0 with glyph id 0 should be added implicitly
     // as "undefined character"
     virtual bool            CreateFontSubset( const OUString& rToFile,
-                                                  const PhysicalFontFace* pFont,
+                                                  const FontFace* pFont,
                                                   const sal_GlyphId* pGlyphIds,
                                                   const sal_uInt8* pEncoding,
                                                   sal_Int32* pWidths,
@@ -387,12 +387,12 @@ public:
     // embeddable by GetDevFontList or NULL in case of error
     // parameters: pFont: describes the font in question
     //             pDataLen: out parameter, contains the byte length of the returned buffer
-    virtual const void*     GetEmbedFontData(const PhysicalFontFace*, tools::Long* pDataLen)
+    virtual const void*     GetEmbedFontData(const FontFace*, tools::Long* pDataLen)
         override;
     // frees the font data again
     virtual void            FreeEmbedFontData( const void* pData, tools::Long nDataLen ) override;
 
-    virtual void            GetGlyphWidths( const PhysicalFontFace*,
+    virtual void            GetGlyphWidths( const FontFace*,
                                             bool bVertical,
                                             std::vector< sal_Int32 >& rWidths,
                                             Ucs2UIntMap& rUnicodeEnc ) override;
@@ -415,7 +415,7 @@ private:
     void                    Pattern50Fill();
     UInt32                  getState( ControlState nState );
     UInt32                  getTrackState( ControlState nState );
-    static bool             GetRawFontData( const PhysicalFontFace* pFontData,
+    static bool             GetRawFontData( const FontFace* pFontData,
                                 std::vector<unsigned char>& rBuffer,
                                 bool* pJustCFF );
 };

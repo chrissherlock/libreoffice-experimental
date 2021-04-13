@@ -35,11 +35,11 @@
 #include <map>
 #include <vector>
 
-class LogicalFontManager;
+class FontManager;
 class SalBitmap;
 class FontSelectPattern;
 class FontAttributes;
-class PhysicalFontFace;
+class FontFace;
 class SalLayout;
 class ImplLayoutArgs;
 namespace tools { class Rectangle; }
@@ -136,7 +136,7 @@ public:
     virtual void                SetTextColor( Color nColor ) = 0;
 
     // set the font
-    virtual void                SetFont(LogicalFontInstance*, int nFallbackLevel) = 0;
+    virtual void                SetFont(FontInstance*, int nFallbackLevel) = 0;
 
     // release the fonts
     void                        ReleaseFonts() { SetFont( nullptr, 0 ); }
@@ -151,13 +151,13 @@ public:
     virtual bool                GetFontCapabilities(vcl::FontCapabilities &rFontCapabilities) const = 0;
 
     // graphics must fill supplied font list
-    virtual void                GetDevFontList( LogicalFontManager* ) = 0;
+    virtual void                GetDevFontList( FontManager* ) = 0;
 
     // graphics must drop any cached font info
     virtual void                ClearDevFontCache() = 0;
 
     virtual bool                AddTempDevFont(
-                                    LogicalFontManager*,
+                                    FontManager*,
                                     const OUString& rFileURL,
                                     const OUString& rFontName ) = 0;
 
@@ -175,7 +175,7 @@ public:
     // as "undefined character"
     virtual bool                CreateFontSubset(
                                     const OUString& rToFile,
-                                    const PhysicalFontFace* pFont,
+                                    const FontFace* pFont,
                                     const sal_GlyphId* pGlyphIDs,
                                     const sal_uInt8* pEncoding,
                                     sal_Int32* pWidths,
@@ -186,7 +186,7 @@ public:
     // embeddable by GetDevFontList or NULL in case of error
     // parameters: pFont: describes the font in question
     //             pDataLen: out parameter, contains the byte length of the returned buffer
-    virtual const void*         GetEmbedFontData(const PhysicalFontFace* pFont, tools::Long* pDataLen) = 0;
+    virtual const void*         GetEmbedFontData(const FontFace* pFont, tools::Long* pDataLen) = 0;
 
     // free the font data again
     virtual void                FreeEmbedFontData( const void* pData, tools::Long nDataLen ) = 0;
@@ -196,7 +196,7 @@ public:
     // between unicode and glyph id
     // leave widths vector and mapping untouched in case of failure
     virtual void                GetGlyphWidths(
-                                    const PhysicalFontFace* pFont,
+                                    const FontFace* pFont,
                                     bool bVertical,
                                     std::vector< sal_Int32 >& rWidths,
                                     Ucs2UIntMap& rUnicodeEnc ) = 0;
@@ -650,7 +650,7 @@ protected:
     vcl::WidgetDrawInterface* forWidget() { return m_pWidgetDraw ? m_pWidgetDraw.get() : this; }
 
     static void GetGlyphWidths(const vcl::AbstractTrueTypeFont& rTTF,
-                               const PhysicalFontFace& rFontFace, bool bVertical,
+                               const FontFace& rFontFace, bool bVertical,
                                std::vector<sal_Int32>& rWidths, Ucs2UIntMap& rUnicodeEnc);
 
     static bool CreateTTFfontSubset(vcl::AbstractTrueTypeFont& aTTF, const OString& rSysPath,

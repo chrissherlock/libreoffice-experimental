@@ -33,8 +33,8 @@ class Font;
 }
 
 class FontSize;
-class LogicalFontInstance;
-class PhysicalFontFace;
+class FontInstance;
+class FontFace;
 class Size;
 
 class VCL_DLLPUBLIC FontSelectPattern : public FontAttributes
@@ -43,7 +43,7 @@ public:
     FontSelectPattern(vcl::Font const&, OUString const& rSearchName, FontSize const&,
                       bool bNonAntialias = false);
 #ifdef _WIN32
-    FontSelectPattern(PhysicalFontFace const&, FontSize const&, int nOrientation, bool bVertical);
+    FontSelectPattern(FontFace const&, FontSize const&, int nOrientation, bool bVertical);
 #endif
 
     size_t hashCode() const;

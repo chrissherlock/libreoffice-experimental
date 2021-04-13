@@ -45,7 +45,7 @@
 
 #include <vcl/uitest/uiobject.hxx>
 
-#include <font/LogicalFontManager.hxx>
+#include <font/FontManager.hxx>
 #include <ImplOutDevData.hxx>
 #include <impanmvw.hxx>
 #include <salframe.hxx>
@@ -1747,7 +1747,7 @@ void Window::ImplNewInputContext()
     SalInputContext         aNewContext;
     const vcl::Font&        rFont = rInputContext.GetFont();
     const OUString&         rFontName = rFont.GetFamilyName();
-    rtl::Reference<LogicalFontInstance> pFontInstance;
+    rtl::Reference<FontInstance> pFontInstance;
     aNewContext.mpFont = nullptr;
     if (!rFontName.isEmpty())
     {

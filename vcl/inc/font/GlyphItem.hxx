@@ -26,7 +26,7 @@
 #include <vcl/outdev.hxx>
 
 #include <font/GlyphItemFlags.hxx>
-#include <font/LogicalFontInstance.hxx>
+#include <font/FontInstance.hxx>
 #include <font/SalLayoutGlyphsImpl.hxx>
 
 #include <vector>
@@ -35,8 +35,7 @@ class VCL_DLLPUBLIC GlyphItem
 {
 public:
     GlyphItem(int nCharPos, int nCharCount, sal_GlyphId aGlyphId, const Point& rLinearPos,
-              GlyphItemFlags nFlags, int nOrigWidth, int nXOffset,
-              LogicalFontInstance* pFontInstance)
+              GlyphItemFlags nFlags, int nOrigWidth, int nXOffset, FontInstance* pFontInstance)
         : m_nNewWidth(nOrigWidth)
         , m_aLinearPos(rLinearPos)
         , m_aGlyphId(aGlyphId)
@@ -76,7 +75,7 @@ private:
     sal_GlyphId m_aGlyphId;
     int m_nCharCount; ///< number of characters making up this glyph
     int m_nOrigWidth; ///< original glyph width
-    LogicalFontInstance* m_pFontInstance;
+    FontInstance* m_pFontInstance;
     int m_nCharPos; ///< index in string
     GlyphItemFlags m_nFlags;
     int m_nXOffset;

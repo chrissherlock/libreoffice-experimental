@@ -22,11 +22,11 @@
 
 #include <outdev.h>
 #include <font/FontSelectPattern.hxx>
-#include <font/LogicalFontManager.hxx>
-#include <font/PhysicalFontFaceCollection.hxx>
+#include <font/FontManager.hxx>
+#include <font/FontFaceCollection.hxx>
 
-void PhysicalFontFamily::CalcType(ImplFontAttrs& rType, FontWeight& rWeight, FontWidth& rWidth,
-                                  tools::FontFamily eFamily, const utl::FontNameAttr* pFontAttr)
+void FontFamily::CalcType(ImplFontAttrs& rType, FontWeight& rWeight, FontWidth& rWidth,
+                          tools::FontFamily eFamily, const utl::FontNameAttr* pFontAttr)
 {
     if (eFamily != tools::FAMILY_DONTKNOW)
     {
@@ -84,7 +84,7 @@ static ImplFontAttrs lcl_IsCJKFont(const OUString& rFontName)
     return ImplFontAttrs::None;
 }
 
-PhysicalFontFamily::PhysicalFontFamily(const OUString& rSearchName)
+FontFamily::FontFamily(const OUString& rSearchName)
     : maSearchName(rSearchName)
     , mnTypeFaces(FontTypeFaces::NONE)
     , meFamily(tools::FAMILY_DONTKNOW)
@@ -96,9 +96,9 @@ PhysicalFontFamily::PhysicalFontFamily(const OUString& rSearchName)
 {
 }
 
-PhysicalFontFamily::~PhysicalFontFamily() {}
+FontFamily::~FontFamily() {}
 
-void PhysicalFontFamily::AddFontFace(PhysicalFontFace* pNewFontFace)
+void FontFamily::AddFontFace(FontFace* pNewFontFace)
 {
     if (maFontFaces.empty())
     {
@@ -151,7 +151,7 @@ void PhysicalFontFamily::AddFontFace(PhysicalFontFace* pNewFontFace)
     auto it(maFontFaces.begin());
     for (; it != maFontFaces.end(); ++it)
     {
-        PhysicalFontFace* pFoundFontFace = it->get();
+        FontFace* pFoundFontFace = it->get();
         sal_Int32 eComp = pNewFontFace->CompareWithSize(*pFoundFontFace);
         if (eComp > 0)
             continue;
@@ -175,8 +175,8 @@ void PhysicalFontFamily::AddFontFace(PhysicalFontFace* pNewFontFace)
 }
 
 // get font attributes using the normalized font family name
-void PhysicalFontFamily::InitMatchData(const utl::FontSubstConfiguration& rFontSubst,
-                                       const OUString& rSearchName)
+void FontFamily::InitMatchData(const utl::FontSubstConfiguration& rFontSubst,
+                               const OUString& rSearchName)
 {
     OUString aShortName;
     OUString aMatchFamilyName(maMatchFamilyName);
@@ -193,7 +193,7 @@ void PhysicalFontFamily::InitMatchData(const utl::FontSubstConfiguration& rFontS
     mnMatchType |= lcl_IsCJKFont(maFamilyName);
 }
 
-PhysicalFontFace* PhysicalFontFamily::FindBestFontFace(const FontSelectPattern& rFSD) const
+FontFace* FontFamily::FindBestFontFace(const FontSelectPattern& rFSD) const
 {
     if (maFontFaces.empty())
         return nullptr;
@@ -212,11 +212,11 @@ PhysicalFontFace* PhysicalFontFamily::FindBestFontFace(const FontSelectPattern& 
     }
 
     // TODO: linear search improve!
-    PhysicalFontFace* pBestFontFace = maFontFaces[0].get();
+    FontFace* pBestFontFace = maFontFaces[0].get();
     FontMatchStatus aFontMatchStatus = { 0, 0, 0, pTargetStyleName };
     for (auto const& font : maFontFaces)
     {
-        PhysicalFontFace* pFoundFontFace = font.get();
+        FontFace* pFoundFontFace = font.get();
         if (pFoundFontFace->IsBetterMatch(rFSD, aFontMatchStatus))
             pBestFontFace = pFoundFontFace;
     }
@@ -226,36 +226,36 @@ PhysicalFontFace* PhysicalFontFamily::FindBestFontFace(const FontSelectPattern& 
 
 // update device font list with unique font faces, with uniqueness
 // meaning different font attributes, but not different fonts sizes
-void PhysicalFontFamily::UpdateDevFontList(PhysicalFontFaceCollection& rDevFontList) const
+void FontFamily::UpdateDevFontList(FontFaceCollection& rDevFontList) const
 {
-    PhysicalFontFace* pPrevFace = nullptr;
+    FontFace* pPrevFace = nullptr;
     for (auto const& font : maFontFaces)
     {
-        PhysicalFontFace* pFoundFontFace = font.get();
+        FontFace* pFoundFontFace = font.get();
         if (!pPrevFace || pFoundFontFace->CompareIgnoreSize(*pPrevFace))
             rDevFontList.Add(pFoundFontFace);
         pPrevFace = pFoundFontFace;
     }
 }
 
-void PhysicalFontFamily::GetFontHeights(o3tl::sorted_vector<int>& rHeights) const
+void FontFamily::GetFontHeights(o3tl::sorted_vector<int>& rHeights) const
 {
     // add all available font heights
     for (auto const& font : maFontFaces)
     {
-        PhysicalFontFace* pFoundFontFace = font.get();
+        FontFace* pFoundFontFace = font.get();
         rHeights.insert(pFoundFontFace->GetHeight());
     }
 }
 
-void PhysicalFontFamily::UpdateCloneFontList(LogicalFontManager& rFontCollection) const
+void FontFamily::UpdateCloneFontList(FontManager& rFontCollection) const
 {
     OUString aFamilyName = GetEnglishSearchFontName(GetFamilyName());
-    PhysicalFontFamily* pFamily(nullptr);
+    FontFamily* pFamily(nullptr);
 
     for (auto const& font : maFontFaces)
     {
-        PhysicalFontFace* pFoundFontFace = font.get();
+        FontFace* pFoundFontFace = font.get();
 
         if (!pFamily)
         { // tdf#98989 lazy create as family without faces won't work

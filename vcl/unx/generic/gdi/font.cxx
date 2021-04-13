@@ -40,7 +40,7 @@ bool X11SalGraphics::GetFontCapabilities(vcl::FontCapabilities &rGetImplFontCapa
 }
 
 // SalGraphics
-void X11SalGraphics::SetFont(LogicalFontInstance* pEntry, int nFallbackLevel)
+void X11SalGraphics::SetFont(FontInstance* pEntry, int nFallbackLevel)
 {
     mxTextRenderImpl->SetFont(pEntry, nFallbackLevel);
 }
@@ -51,7 +51,7 @@ X11SalGraphics::SetTextColor( Color nColor )
     mxTextRenderImpl->SetTextColor(nColor);
 }
 
-bool X11SalGraphics::AddTempDevFont( LogicalFontManager* pFontCollection,
+bool X11SalGraphics::AddTempDevFont( FontManager* pFontCollection,
                                      const OUString& rFileURL,
                                      const OUString& rFontName )
 {
@@ -63,7 +63,7 @@ void X11SalGraphics::ClearDevFontCache()
     mxTextRenderImpl->ClearDevFontCache();
 }
 
-void X11SalGraphics::GetDevFontList( LogicalFontManager* pFontCollection )
+void X11SalGraphics::GetDevFontList( FontManager* pFontCollection )
 {
     mxTextRenderImpl->GetDevFontList(pFontCollection);
 }
@@ -81,7 +81,7 @@ std::unique_ptr<GenericSalLayout> X11SalGraphics::GetTextLayout(int nFallbackLev
 
 bool X11SalGraphics::CreateFontSubset(
                                    const OUString& rToFile,
-                                   const PhysicalFontFace* pFont,
+                                   const FontFace* pFont,
                                    const sal_GlyphId* pGlyphIds,
                                    const sal_uInt8* pEncoding,
                                    sal_Int32* pWidths,
@@ -93,7 +93,7 @@ bool X11SalGraphics::CreateFontSubset(
             pGlyphIds, pEncoding, pWidths, nGlyphCount, rInfo);
 }
 
-const void* X11SalGraphics::GetEmbedFontData(const PhysicalFontFace* pFont, tools::Long* pDataLen)
+const void* X11SalGraphics::GetEmbedFontData(const FontFace* pFont, tools::Long* pDataLen)
 {
     return mxTextRenderImpl->GetEmbedFontData(pFont, pDataLen);
 }
@@ -103,7 +103,7 @@ void X11SalGraphics::FreeEmbedFontData( const void* pData, tools::Long nLen )
     mxTextRenderImpl->FreeEmbedFontData(pData, nLen);
 }
 
-void X11SalGraphics::GetGlyphWidths( const PhysicalFontFace* pFont,
+void X11SalGraphics::GetGlyphWidths( const FontFace* pFont,
                                    bool bVertical,
                                    std::vector< sal_Int32 >& rWidths,
                                    Ucs2UIntMap& rUnicodeEnc )

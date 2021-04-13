@@ -28,9 +28,9 @@
 #include <o3tl/sorted_vector.hxx>
 
 // win32 specific logical font instance
-class WinFontInstance : public LogicalFontInstance
+class WinFontInstance : public FontInstance
 {
-    friend rtl::Reference<LogicalFontInstance> WinFontFace::CreateFontInstance(const FontSelectPattern&) const;
+    friend rtl::Reference<FontInstance> WinFontFace::CreateFontInstance(const FontSelectPattern&) const;
 
 public:
     ~WinFontInstance() override;
@@ -48,8 +48,8 @@ public:
     // Used for the ScopedFont handling
     void SetHFONT(HFONT hFont) { m_hFont = hFont; }
 
-    const WinFontFace * GetFontFace() const { return static_cast<const WinFontFace *>(LogicalFontInstance::GetFontFace()); }
-    WinFontFace * GetFontFace() { return static_cast<WinFontFace *>(LogicalFontInstance::GetFontFace()); }
+    const WinFontFace * GetFontFace() const { return static_cast<const WinFontFace *>(FontInstance::GetFontFace()); }
+    WinFontFace * GetFontFace() { return static_cast<WinFontFace *>(FontInstance::GetFontFace()); }
 
     bool GetGlyphOutline(sal_GlyphId, basegfx::B2DPolyPolygon&, bool) const override;
 

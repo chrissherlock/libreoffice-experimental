@@ -23,7 +23,7 @@
 #include <vcl/font/FontCharMap.hxx>
 
 #include <vclpluginapi.h>
-#include <PhysicalFontFace.hxx>
+#include <FontFace.hxx>
 
 #include <tools/ref.hxx>
 
@@ -33,7 +33,7 @@
 class FontAttributes;
 class FontSelectPattern;
 
-class Qt5FontFace final : public PhysicalFontFace
+class Qt5FontFace final : public FontFace
 {
 public:
     static Qt5FontFace* fromQFont(const QFont& rFont);
@@ -53,8 +53,7 @@ public:
     bool GetFontCapabilities(vcl::FontCapabilities&) const override;
     bool HasChar(sal_uInt32 cChar) const;
 
-    rtl::Reference<LogicalFontInstance>
-    CreateFontInstance(const FontSelectPattern& rFSD) const override;
+    rtl::Reference<FontInstance> CreateFontInstance(const FontSelectPattern& rFSD) const override;
 
 private:
     typedef enum { Font, FontDB } FontIdType;

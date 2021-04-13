@@ -26,11 +26,11 @@
 
 #include <unotools/fontcfg.hxx>
 
-#include <font/PhysicalFontFace.hxx>
+#include <font/FontFace.hxx>
 
-class PhysicalFontFaceCollection;
-class PhysicalFontFace;
-class LogicalFontManager;
+class FontFaceCollection;
+class FontFace;
+class FontManager;
 
 // flags for mnTypeFaces member
 enum class FontTypeFaces
@@ -52,11 +52,11 @@ template <> struct typed_flags<FontTypeFaces> : is_typed_flags<FontTypeFaces, 0x
 };
 };
 
-class VCL_PLUGIN_PUBLIC PhysicalFontFamily
+class VCL_PLUGIN_PUBLIC FontFamily
 {
 public:
-    PhysicalFontFamily(const OUString& rSearchName);
-    ~PhysicalFontFamily();
+    FontFamily(const OUString& rSearchName);
+    ~FontFamily();
 
     const OUString& GetFamilyName() const { return maFamilyName; }
     const OUString& GetSearchName() const { return maSearchName; }
@@ -71,18 +71,18 @@ public:
     FontWidth GetMatchWidth() const { return meMatchWidth; }
     void InitMatchData(const utl::FontSubstConfiguration&, const OUString& rSearchName);
 
-    void AddFontFace(PhysicalFontFace*);
+    void AddFontFace(FontFace*);
 
-    PhysicalFontFace* FindBestFontFace(const FontSelectPattern& rFSD) const;
+    FontFace* FindBestFontFace(const FontSelectPattern& rFSD) const;
 
-    void UpdateDevFontList(PhysicalFontFaceCollection&) const;
-    void UpdateCloneFontList(LogicalFontManager&) const;
+    void UpdateDevFontList(FontFaceCollection&) const;
+    void UpdateCloneFontList(FontManager&) const;
 
     static void CalcType(ImplFontAttrs& rType, FontWeight& rWeight, FontWidth& rWidth,
                          tools::FontFamily eFamily, const utl::FontNameAttr* pFontAttr);
 
 private:
-    std::vector<rtl::Reference<PhysicalFontFace>> maFontFaces;
+    std::vector<rtl::Reference<FontFace>> maFontFaces;
 
     OUString maFamilyName; // original font family name
     OUString maSearchName; // normalized font family name

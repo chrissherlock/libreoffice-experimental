@@ -270,7 +270,7 @@ private:
     virtual void EmulateDrawTransparent(const tools::PolyPolygon& rPolyPoly,
                                         sal_uInt16 nTransparencePercent) override;
 
-    virtual void SetFontOrientation(LogicalFontInstance* const pFontInstance) const override;
+    virtual void SetFontOrientation(FontInstance* const pFontInstance) const override;
 
 public:
     Printer();

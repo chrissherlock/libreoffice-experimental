@@ -40,9 +40,9 @@
 #include <print.hrc>
 #include <jobset.h>
 #include <outdev.h>
-#include <font/LogicalFontManager.hxx>
-#include <font/PhysicalFontFaceCollection.hxx>
-#include <font/PhysicalFontFaceSizeCollection.hxx>
+#include <font/FontManager.hxx>
+#include <font/FontFaceCollection.hxx>
+#include <font/FontFaceSizeCollection.hxx>
 #include <print.h>
 
 #include <com/sun/star/beans/XPropertySet.hpp>
@@ -756,7 +756,7 @@ void Printer::ImplInit(SalPrinterQueueInfo* pInfo)
 
     // Init data
     ImplUpdatePageData();
-    mxFontManager = std::make_shared<LogicalFontManager>();
+    mxFontManager = std::make_shared<FontManager>();
     mpGraphics->GetDevFontList(mxFontManager.get());
 }
 
@@ -1771,7 +1771,7 @@ void Printer::ClipAndDrawGradientMetafile(const Gradient& rGradient,
     Pop();
 }
 
-void Printer::SetFontOrientation(LogicalFontInstance* const pFontEntry) const
+void Printer::SetFontOrientation(FontInstance* const pFontEntry) const
 {
     pFontEntry->mnOrientation = pFontEntry->mxFontMetric->GetOrientation();
 }

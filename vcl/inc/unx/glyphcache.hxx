@@ -33,7 +33,7 @@
 
 #include <font/FontAttributes.hxx>
 #include <font/ImplFontMetricData.hxx>
-#include <font/LogicalFontInstance.hxx>
+#include <font/FontInstance.hxx>
 
 #include <unordered_map>
 
@@ -42,7 +42,7 @@ class FreetypeFontFile;
 class FreetypeFontInstance;
 class FreetypeFontInfo;
 class FontConfigFontOptions;
-class LogicalFontManager;
+class FontManager;
 class FreetypeFont;
 class SvpGcpHelper;
 
@@ -65,8 +65,8 @@ namespace vcl { struct FontCapabilities; }
   *   FreetypeFontInfo = holds the FT_FaceRec_ object, as long as it's used by any FreetypeFont.
   *   FreetypeFont     = holds the FT_SizeRec_ and is owned by a FreetypeFontInstance
   *
-  * FreetypeFontInfo therefore is embedded in the Freetype subclass of PhysicalFontFace.
-  * FreetypeFont is owned by FreetypeFontInstance, the Freetype subclass of LogicalFontInstance.
+  * FreetypeFontInfo therefore is embedded in the Freetype subclass of FontFace.
+  * FreetypeFont is owned by FreetypeFontInstance, the Freetype subclass of FontInstance.
   *
   * Nowadays there is not really a reason to have separate files for the classes, as the FreetypeManager
   * is just about handling of Freetype based fonts, not some abstract glyphs.
@@ -83,7 +83,7 @@ public:
                                 sal_IntPtr nFontId,
                                 const FontAttributes&);
 
-    void                    AnnounceFonts( LogicalFontManager* ) const;
+    void                    AnnounceFonts( FontManager* ) const;
 
     void                    ClearFontCache();
 

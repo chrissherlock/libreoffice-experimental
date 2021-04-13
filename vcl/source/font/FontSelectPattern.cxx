@@ -25,7 +25,7 @@
 #include <vcl/font/FontSize.hxx>
 
 #include <font/FontSelectPattern.hxx>
-#include <font/PhysicalFontFace.hxx>
+#include <font/FontFace.hxx>
 
 // These mustn't conflict with font name lists which use ; and ,
 const char FontSelectPattern::FEAT_PREFIX = ':';
@@ -65,7 +65,7 @@ FontSelectPattern::FontSelectPattern(vcl::Font const& rFont, OUString const& rSe
 
 // NOTE: this ctor is still used on Windows. Do not remove.
 #ifdef _WIN32
-FontSelectPattern::FontSelectPattern(const PhysicalFontFace& rFontData, const Size& rSize,
+FontSelectPattern::FontSelectPattern(const FontFace& rFontData, const Size& rSize,
                                      float fExactHeight, int nOrientation, bool bVertical)
     : FontAttributes(rFontData)
     , mnWidth(rSize.Width())

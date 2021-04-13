@@ -45,7 +45,7 @@
 #include <font/FontSubsetInfo.hxx>
 #include <quartz/ctfonts.hxx>
 #include <outdev.h>
-#include <font/LogicalFontManager.hxx>
+#include <font/FontManager.hxx>
 
 #ifdef MACOSX
 #include <osx/salframe.h>
@@ -65,12 +65,12 @@ class CoreTextGlyphFallbackSubstititution
 :    public ImplGlyphFallbackFontSubstitution
 {
 public:
-    bool FindFontSubstitute(FontSelectPattern&, LogicalFontInstance* pLogicalFont, OUString&) const override;
+    bool FindFontSubstitute(FontSelectPattern&, FontInstance* pLogicalFont, OUString&) const override;
 };
 
 }
 
-bool CoreTextGlyphFallbackSubstititution::FindFontSubstitute(FontSelectPattern& rPattern, LogicalFontInstance* pLogicalFont,
+bool CoreTextGlyphFallbackSubstititution::FindFontSubstitute(FontSelectPattern& rPattern, FontInstance* pLogicalFont,
     OUString& rMissingChars) const
 {
     bool bFound = false;
@@ -104,7 +104,7 @@ bool CoreTextGlyphFallbackSubstititution::FindFontSubstitute(FontSelectPattern& 
 }
 
 CoreTextFontFace::CoreTextFontFace( const FontAttributes& rDFA, sal_IntPtr nFontId )
-  : PhysicalFontFace( rDFA )
+  : FontFace( rDFA )
   , mnFontId( nFontId )
   , mbFontCapabilitiesRead( false )
 {
@@ -332,7 +332,7 @@ static void AddLocalTempFontDirs()
     AddTempFontDir( aBrandStr + "/" LIBO_SHARE_FOLDER "/fonts/truetype/" );
 }
 
-void AquaSalGraphics::GetDevFontList( LogicalFontManager* pFontCollection )
+void AquaSalGraphics::GetDevFontList( FontManager* pFontCollection )
 {
     SAL_WARN_IF( !pFontCollection, "vcl", "AquaSalGraphics::GetDevFontList(NULL) !");
 
@@ -350,7 +350,7 @@ void AquaSalGraphics::GetDevFontList( LogicalFontManager* pFontCollection )
     if( !pSalData->mpFontList )
         pSalData->mpFontList = GetCoretextFontList();
 
-    // Copy all PhysicalFontFace objects contained in the SystemFontList
+    // Copy all FontFace objects contained in the SystemFontList
     pSalData->mpFontList->AnnounceFonts( *pFontCollection );
 
     static CoreTextGlyphFallbackSubstititution aSubstFallback;
@@ -364,7 +364,7 @@ void AquaSalGraphics::ClearDevFontCache()
     pSalData->mpFontList = nullptr;
 }
 
-bool AquaSalGraphics::AddTempDevFont( LogicalFontManager*,
+bool AquaSalGraphics::AddTempDevFont( FontManager*,
     const OUString& rFontFileURL, const OUString& /*rFontName*/ )
 {
     return ::AddTempDevFont(rFontFileURL);
@@ -487,7 +487,7 @@ void AquaSalGraphics::DrawTextLayout(const GenericSalLayout& rLayout)
     maContextHolder.restoreState();
 }
 
-void AquaSalGraphics::SetFont(LogicalFontInstance* pReqFont, int nFallbackLevel)
+void AquaSalGraphics::SetFont(FontInstance* pReqFont, int nFallbackLevel)
 {
     // release the text style
     for (int i = nFallbackLevel; i < MAX_FALLBACK; ++i)
@@ -559,7 +559,7 @@ static void FakeDirEntry( const char aTag[5], ByteCount nOfs, ByteCount nLen,
 
 // fake a TTF or CFF font as directly accessing font file is not possible
 // when only the fontid is known. This approach also handles *.font fonts.
-bool AquaSalGraphics::GetRawFontData( const PhysicalFontFace* pFontData,
+bool AquaSalGraphics::GetRawFontData( const FontFace* pFontData,
                                       std::vector<unsigned char>& rBuffer, bool* pJustCFF )
 {
     const CoreTextFontFace* pMacFont = static_cast<const CoreTextFontFace*>(pFontData);
@@ -745,7 +745,7 @@ bool AquaSalGraphics::GetRawFontData( const PhysicalFontFace* pFontData,
     return true;
 }
 
-void AquaSalGraphics::GetGlyphWidths( const PhysicalFontFace* pFontData, bool bVertical,
+void AquaSalGraphics::GetGlyphWidths( const FontFace* pFontData, bool bVertical,
     std::vector< sal_Int32 >& rGlyphWidths, Ucs2UIntMap& rUnicodeEnc )
 {
     rGlyphWidths.clear();
@@ -771,7 +771,7 @@ void AquaSalGraphics::GetGlyphWidths( const PhysicalFontFace* pFontData, bool bV
     ::CloseTTFont( pSftFont );
 }
 
-const void* AquaSalGraphics::GetEmbedFontData(const PhysicalFontFace*, tools::Long* /*pDataLen*/)
+const void* AquaSalGraphics::GetEmbedFontData(const FontFace*, tools::Long* /*pDataLen*/)
 {
     return nullptr;
 }

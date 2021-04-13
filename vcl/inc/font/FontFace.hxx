@@ -28,11 +28,11 @@
 
 #include <font/FontAttributes.hxx>
 
-class LogicalFontInstance;
+class FontInstance;
 class FontCharMap;
 struct FontMatchStatus;
 class FontSelectPattern;
-class PhysicalFontFamily;
+class FontFamily;
 
 namespace vcl
 {
@@ -57,15 +57,13 @@ public:
 /**
  * abstract base class for physical font faces
  *
- * It acts as a factory for its corresponding LogicalFontInstances and
+ * It acts as a factory for its corresponding FontInstances and
  * can be extended to cache device and font instance specific data.
  */
-class VCL_PLUGIN_PUBLIC PhysicalFontFace : public FontAttributes,
-                                           public salhelper::SimpleReferenceObject
+class VCL_PLUGIN_PUBLIC FontFace : public FontAttributes, public salhelper::SimpleReferenceObject
 {
 public:
-    virtual rtl::Reference<LogicalFontInstance>
-    CreateFontInstance(const FontSelectPattern&) const = 0;
+    virtual rtl::Reference<FontInstance> CreateFontInstance(const FontSelectPattern&) const = 0;
 
     int GetHeight() const { return mnHeight; }
     int GetWidth() const { return mnWidth; }
@@ -74,11 +72,11 @@ public:
     virtual bool GetFontCapabilities(vcl::FontCapabilities&) const = 0;
 
     bool IsBetterMatch(const FontSelectPattern&, FontMatchStatus&) const;
-    sal_Int32 CompareWithSize(const PhysicalFontFace&) const;
-    sal_Int32 CompareIgnoreSize(const PhysicalFontFace&) const;
+    sal_Int32 CompareWithSize(const FontFace&) const;
+    sal_Int32 CompareIgnoreSize(const FontFace&) const;
 
 protected:
-    explicit PhysicalFontFace(const FontAttributes&);
+    explicit FontFace(const FontAttributes&);
     void SetBitmapSize(int nW, int nH)
     {
         mnWidth = nW;

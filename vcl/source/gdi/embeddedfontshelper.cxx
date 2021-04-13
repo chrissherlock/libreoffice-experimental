@@ -20,8 +20,8 @@
 #include <com/sun/star/io/XInputStream.hpp>
 
 #include <outdev.h>
-#include <font/LogicalFontManager.hxx>
-#include <font/PhysicalFontFaceCollection.hxx>
+#include <font/FontManager.hxx>
+#include <font/FontFaceCollection.hxx>
 #include <salgdi.hxx>
 #include <sft.hxx>
 
@@ -211,7 +211,7 @@ void EmbeddedFontsHelper::activateFont( const OUString& fontName, const OUString
 }
 
 // Check if it's (legally) allowed to embed the font file into a document
-// (ttf has a flag allowing this). PhysicalFontFace::IsEmbeddable() appears
+// (ttf has a flag allowing this). FontFace::IsEmbeddable() appears
 // to have a different meaning (guessing from code, IsSubsettable() might
 // possibly mean it's ttf, while IsEmbeddable() might mean it's type1).
 // So just try to open the data as ttf and see.
@@ -256,15 +256,15 @@ OUString EmbeddedFontsHelper::fontFileUrl( std::u16string_view familyName, tools
     }
     bool ok = false;
     SalGraphics* graphics = Application::GetDefaultDevice()->GetGraphics();
-    LogicalFontManager fonts;
+    FontManager fonts;
     graphics->GetDevFontList( &fonts );
-    std::unique_ptr< PhysicalFontFaceCollection > fontInfo( fonts.GetDeviceFontList());
-    PhysicalFontFace* selected = nullptr;
+    std::unique_ptr< FontFaceCollection > fontInfo( fonts.GetDeviceFontList());
+    FontFace* selected = nullptr;
     for( int i = 0;
          i < fontInfo->Count();
          ++i )
      {
-        PhysicalFontFace* f = fontInfo->Get( i );
+        FontFace* f = fontInfo->Get( i );
         if( f->GetFamilyName() == familyName )
         {
             // Ignore comparing text encodings, at least for now. They cannot be trivially compared

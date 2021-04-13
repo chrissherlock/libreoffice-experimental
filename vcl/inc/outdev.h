@@ -26,11 +26,11 @@
 #include <tools/gen.hxx>
 #include <vcl/vclptr.hxx>
 
-#include <font/PhysicalFontFace.hxx>
+#include <font/FontFace.hxx>
 
 class Size;
 namespace vcl { class Font; }
-class LogicalFontInstance;
+class FontInstance;
 class VirtualDevice;
 enum class AddFontSubstituteFlags;
 
@@ -90,7 +90,7 @@ class ImplGlyphFallbackFontSubstitution
 :   public ImplFontSubstitution
 {
 public:
-    virtual bool FindFontSubstitute(FontSelectPattern&, LogicalFontInstance* pLogicalFont, OUString& rMissingCodes) const = 0;
+    virtual bool FindFontSubstitute(FontSelectPattern&, FontInstance* pLogicalFont, OUString& rMissingCodes) const = 0;
 };
 
 void ImplFontSubstitute( OUString& rFontName );

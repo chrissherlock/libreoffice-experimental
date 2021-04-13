@@ -19,15 +19,15 @@
 
 #pragma once
 
-#include <font/LogicalFontInstance.hxx>
+#include <font/FontInstance.hxx>
 
 #include <QtGui/QFont>
 
 #include "Qt5FontFace.hxx"
 
-class Qt5Font final : public QFont, public LogicalFontInstance
+class Qt5Font final : public QFont, public FontInstance
 {
-    friend rtl::Reference<LogicalFontInstance>
+    friend rtl::Reference<FontInstance>
     Qt5FontFace::CreateFontInstance(const FontSelectPattern&) const;
 
     bool GetGlyphOutline(sal_GlyphId, basegfx::B2DPolyPolygon&, bool) const override;
@@ -35,7 +35,7 @@ class Qt5Font final : public QFont, public LogicalFontInstance
 
     virtual hb_font_t* ImplInitHbFont() override;
 
-    explicit Qt5Font(const PhysicalFontFace&, const FontSelectPattern&);
+    explicit Qt5Font(const FontFace&, const FontSelectPattern&);
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

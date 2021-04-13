@@ -29,8 +29,8 @@
 #include <font/CmapResult.hxx>
 #include <font/ImplFontCharMap.hxx>
 #include <font/FontSelectPattern.hxx>
-#include <font/LogicalFontInstance.hxx>
-#include <font/LogicalFontManager.hxx>
+#include <font/FontInstance.hxx>
+#include <font/FontManager.hxx>
 
 #include <QtGui/QFont>
 #include <QtGui/QFontDatabase>
@@ -40,7 +40,7 @@
 using namespace vcl;
 
 Qt5FontFace::Qt5FontFace(const Qt5FontFace& rSrc)
-    : PhysicalFontFace(rSrc)
+    : FontFace(rSrc)
     , m_aFontId(rSrc.m_aFontId)
     , m_eFontIdType(rSrc.m_eFontIdType)
 {
@@ -152,7 +152,7 @@ Qt5FontFace* Qt5FontFace::fromQFontDatabase(const QString& aFamily, const QStrin
 
 Qt5FontFace::Qt5FontFace(const FontAttributes& rFA, const QString& rFontID,
                          const FontIdType eFontIdType)
-    : PhysicalFontFace(rFA)
+    : FontFace(rFA)
     , m_aFontId(rFontID)
     , m_eFontIdType(eFontIdType)
     , m_bFontCapabilitiesRead(false)
@@ -185,8 +185,7 @@ QFont Qt5FontFace::CreateFont() const
     return aFont;
 }
 
-rtl::Reference<LogicalFontInstance>
-Qt5FontFace::CreateFontInstance(const FontSelectPattern& rFSD) const
+rtl::Reference<FontInstance> Qt5FontFace::CreateFontInstance(const FontSelectPattern& rFSD) const
 {
     return new Qt5Font(*this, rFSD);
 }

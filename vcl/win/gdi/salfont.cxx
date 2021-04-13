@@ -55,8 +55,8 @@
 #include <font/GlyphItem.hxx>
 #include <font/ImplFontCharMap.hxx>
 #include <font/ImplFontMetricData.hxx>
-#include <font/LogicalFontManager.hxx>
-#include <font/PhysicalFontFace.hxx>
+#include <font/FontManager.hxx>
+#include <font/FontFace.hxx>
 #include <sft.hxx>
 #include <win/saldata.hxx>
 #include <win/salgdi.h>
@@ -175,10 +175,10 @@ public:
         ReleaseDC(nullptr, mhDC);
     };
 
-    bool FindFontSubstitute(FontSelectPattern&, LogicalFontInstance* pLogicalFont, OUString& rMissingChars) const override;
+    bool FindFontSubstitute(FontSelectPattern&, FontInstance* pLogicalFont, OUString& rMissingChars) const override;
 private:
     HDC mhDC;
-    bool HasMissingChars(PhysicalFontFace*, OUString& rMissingChars) const;
+    bool HasMissingChars(FontFace*, OUString& rMissingChars) const;
 };
 
 }
@@ -242,13 +242,13 @@ bool WinGlyphFallbackSubstititution::HasMissingChars(PhysicalFontFace* pFace, OU
 namespace
 {
     //used by 2-level font fallback
-    Physicaltools::FontFamily* findDevFontListByLocale(const LogicalFontManager &rFontCollection,
+    FontFamily* findDevFontListByLocale(const FontManager &rFontCollection,
                                                 const LanguageTag& rLanguageTag )
     {
         // get the default font for a specified locale
         const utl::DefaultFontConfiguration& rDefaults = utl::DefaultFontConfiguration::get();
         const OUString aDefault = rDefaults.getUserInterfaceFont(rLanguageTag);
-        return rFontCollection.Findtools::FontFamilyByTokenNames(aDefault);
+        return rFontCollection.FindFontFamilyByTokenNames(aDefault);
     }
 }
 
@@ -287,7 +287,7 @@ bool WinPreMatchFontSubstititution::FindFontSubstitute(FontSelectPattern& rFontS
 
 // find a fallback font for missing characters
 // TODO: should stylistic matches be searched and preferred?
-bool WinGlyphFallbackSubstititution::FindFontSubstitute(FontSelectPattern& rFontSelData, LogicalFontInstance* /*pLogicalFont*/, OUString& rMissingChars) const
+bool WinGlyphFallbackSubstititution::FindFontSubstitute(FontSelectPattern& rFontSelData, FontInstance* /*pLogicalFont*/, OUString& rMissingChars) const
 {
     // guess a locale matching to the missing chars
     LanguageType eLang = rFontSelData.meLanguage;
@@ -299,30 +299,30 @@ bool WinGlyphFallbackSubstititution::FindFontSubstitute(FontSelectPattern& rFont
 
     // first level fallback:
     // try use the locale specific default fonts defined in VCL.xcu
-    const LogicalFontManager* pFontManager = ImplGetSVData()->maGDIData.mxScreenFontManager.get();
-    Physicaltools::FontFamily* ptools::FontFamily = findDevFontListByLocale(*pFontManager, aLanguageTag);
-    if( ptools::FontFamily )
+    const FontManager* pFontManager = ImplGetSVData()->maGDIData.mxScreenFontManager.get();
+    FontFamily* pFontFamily = findDevFontListByLocale(*pFontManager, aLanguageTag);
+    if( pFontFamily )
     {
-        PhysicalFontFace* pFace = ptools::FontFamily->FindBestFontFace( rFontSelData );
+        FontFace* pFace = pFontFamily->FindBestFontFace( rFontSelData );
         if( HasMissingChars( pFace, rMissingChars ) )
         {
-            rFontSelData.maSearchName = ptools::FontFamily->GetSearchName();
+            rFontSelData.maSearchName = pFontFamily->GetSearchName();
             return true;
         }
     }
 
     // are the missing characters symbols?
-    ptools::FontFamily = pFontManager->Findtools::FontFamilyByAttributes( ImplFontAttrs::Symbol,
+    pFontFamily = pFontManager->FindFontFamilyByAttributes( ImplFontAttrs::Symbol,
                                                      rFontSelData.GetWeight(),
                                                      rFontSelData.GetWidthType(),
                                                      rFontSelData.GetItalic(),
                                                      rFontSelData.maSearchName );
-    if( ptools::FontFamily )
+    if( pFontFamily )
     {
-        PhysicalFontFace* pFace = ptools::FontFamily->FindBestFontFace( rFontSelData );
+        FontFace* pFace = pFontFamily->FindBestFontFace( rFontSelData );
         if( HasMissingChars( pFace, rMissingChars ) )
         {
-            rFontSelData.maSearchName = ptools::FontFamily->GetSearchName();
+            rFontSelData.maSearchName = pFontFamily->GetSearchName();
             return true;
         }
     }
@@ -338,7 +338,7 @@ bool WinGlyphFallbackSubstititution::FindFontSubstitute(FontSelectPattern& rFont
     bool bFound = false;
     for( int i = 0; i < nTestFontCount; ++i )
     {
-        PhysicalFontFace* pFace = pTestFontList->Get( i );
+        FontFace* pFace = pTestFontList->Get( i );
         bFound = HasMissingChars( pFace, rMissingChars );
         if( !bFound )
             continue;
@@ -354,7 +354,7 @@ namespace {
 struct ImplEnumInfo
 {
     HDC                 mhDC;
-    LogicalFontManager* mpList;
+    FontManager* mpList;
     OUString*           mpName;
     LOGFONTW*           mpLogFont;
     bool                mbPrinter;
@@ -626,7 +626,7 @@ void ImplSalLogFontToFontW( HDC hDC, const LOGFONTW& rLogFont, Font& rFont )
 
 WinFontFace::WinFontFace( const FontAttributes& rDFS,
     BYTE eWinCharSet, BYTE nPitchAndFamily )
-:   PhysicalFontFace( rDFS ),
+:   FontFace( rDFS ),
     mnId( 0 ),
     mbFontCapabilitiesRead( false ),
     meWinCharSet( eWinCharSet ),
@@ -666,7 +666,7 @@ sal_IntPtr WinFontFace::GetFontId() const
     return mnId;
 }
 
-rtl::Reference<LogicalFontInstance> WinFontFace::CreateFontInstance(const FontSelectPattern& rFSD) const
+rtl::Reference<FontInstance> WinFontFace::CreateFontInstance(const FontSelectPattern& rFSD) const
 {
 #if HAVE_FEATURE_SKIA
     if (SkiaHelper::isVCLSkiaEnabled())
@@ -771,7 +771,7 @@ static int CALLBACK SalEnumQueryFontProcExW( const LOGFONTW*,
 
 void ImplGetLogFontFromFontSelect( HDC hDC,
                                    const FontSelectPattern& rFont,
-                                   const PhysicalFontFace* pFontFace,
+                                   const FontFace* pFontFace,
                                    LOGFONTW& rLogFont )
 {
     OUString aName;
@@ -843,7 +843,7 @@ void ImplGetLogFontFromFontSelect( HDC hDC,
 }
 
 HFONT WinSalGraphics::ImplDoSetFont(FontSelectPattern const & i_rFont,
-                                    const PhysicalFontFace * i_pFontFace,
+                                    const FontFace * i_pFontFace,
                                     HFONT& o_rOldFont)
 {
     HFONT hNewFont = nullptr;
@@ -886,7 +886,7 @@ HFONT WinSalGraphics::ImplDoSetFont(FontSelectPattern const & i_rFont,
     return hNewFont;
 }
 
-void WinSalGraphics::SetFont(LogicalFontInstance* pFont, int nFallbackLevel)
+void WinSalGraphics::SetFont(FontInstance* pFont, int nFallbackLevel)
 {
     // return early if there is no new font
     if( !pFont )
@@ -1089,7 +1089,7 @@ void ImplReleaseTempFonts(SalData& rSalData, bool bAll)
     }
 }
 
-static OUString lcl_Gettools::FontFamilyName(const OUString& rFontFileURL)
+static OUString lcl_GetFontFamilyName(const OUString& rFontFileURL)
 {
     // Create temporary file name
     OUString aTempFileURL;
@@ -1141,17 +1141,17 @@ static OUString lcl_Gettools::FontFamilyName(const OUString& rFontFileURL)
     return OUString(aBuffer + nNameOfs, nPos - nNameOfs, osl_getThreadTextEncoding());
 }
 
-bool WinSalGraphics::AddTempDevFont(LogicalFontManager* pFontManager,
+bool WinSalGraphics::AddTempDevFont(FontManager* pFontManager,
                                     const OUString& rFontFileURL, const OUString& rFontName)
 {
-    OUString atools::FontFamily = lcl_Gettools::FontFamilyName(rFontFileURL);
-    if (atools::FontFamily.isEmpty())
+    OUString aFontFamily = lcl_GetFontFamilyName(rFontFileURL);
+    if (aFontFamily.isEmpty())
     {
         SAL_WARN("vcl.fonts", "error extracting font family from " << rFontFileURL);
         return false;
     }
 
-    if (rFontName != atools::FontFamily)
+    if (rFontName != aFontFamily)
     {
         SAL_WARN("vcl.fonts", "font family renaming not implemented; skipping embedded " << rFontName);
         return false;
@@ -1164,7 +1164,7 @@ bool WinSalGraphics::AddTempDevFont(LogicalFontManager* pFontManager,
     ImplEnumInfo aInfo;
     aInfo.mhDC = getHDC();
     aInfo.mpList = pFontManager;
-    aInfo.mpName = &atools::FontFamily;
+    aInfo.mpName = &aFontFamily;
     aInfo.mbPrinter = mbPrinter;
     aInfo.mnFontCount = pFontManager->Count();
     const int nExpectedFontCount = aInfo.mnFontCount + nFonts;
@@ -1173,7 +1173,7 @@ bool WinSalGraphics::AddTempDevFont(LogicalFontManager* pFontManager,
     aLogFont.lfCharSet = DEFAULT_CHARSET;
     aInfo.mpLogFont = &aLogFont;
 
-    // add the font to the LogicalFontManager
+    // add the font to the FontManager
     EnumFontFamiliesExW(getHDC(), &aLogFont,
         SalEnumFontsProcExW, reinterpret_cast<LPARAM>(&aInfo), 0);
 
@@ -1183,7 +1183,7 @@ bool WinSalGraphics::AddTempDevFont(LogicalFontManager* pFontManager,
     return true;
 }
 
-void WinSalGraphics::GetDevFontList( LogicalFontManager* pFontManager )
+void WinSalGraphics::GetDevFontList( FontManager* pFontManager )
 {
     // make sure all LO shared fonts are registered temporarily
     static std::once_flag init;
@@ -1236,7 +1236,7 @@ void WinSalGraphics::GetDevFontList( LogicalFontManager* pFontManager )
     aLogFont.lfCharSet = DEFAULT_CHARSET;
     aInfo.mpLogFont = &aLogFont;
 
-    // fill the LogicalFontManager
+    // fill the FontManager
     EnumFontFamiliesExW( getHDC(), &aLogFont,
         SalEnumFontsProcExW, reinterpret_cast<LPARAM>(&aInfo), 0 );
 
@@ -1545,7 +1545,7 @@ SFErrCodes ScopedTrueTypeFont::open(void const * pBuffer, sal_uInt32 nLen,
 }
 
 bool WinSalGraphics::CreateFontSubset( const OUString& rToFile,
-    const PhysicalFontFace* pFont, const sal_GlyphId* pGlyphIds, const sal_uInt8* pEncoding,
+    const FontFace* pFont, const sal_GlyphId* pGlyphIds, const sal_uInt8* pEncoding,
     sal_Int32* pGlyphWidths, int nGlyphCount, FontSubsetInfo& rInfo )
 {
     // TODO: use more of the central font-subsetting code, move stuff there if needed
@@ -1614,7 +1614,7 @@ bool WinSalGraphics::CreateFontSubset( const OUString& rToFile,
                                             pEncoding, pGlyphWidths, nGlyphCount);
 }
 
-const void* WinSalGraphics::GetEmbedFontData(const PhysicalFontFace* pFont, tools::Long* pDataLen)
+const void* WinSalGraphics::GetEmbedFontData(const FontFace* pFont, tools::Long* pDataLen)
 {
     // create matching FontSelectPattern
     // we need just enough to get to the font file data
@@ -1640,7 +1640,7 @@ void WinSalGraphics::FreeEmbedFontData( const void* pData, tools::Long /*nLen*/ 
     delete[] static_cast<char const *>(pData);
 }
 
-void WinSalGraphics::GetGlyphWidths( const PhysicalFontFace* pFont,
+void WinSalGraphics::GetGlyphWidths( const FontFace* pFont,
                                      bool bVertical,
                                      std::vector< sal_Int32 >& rWidths,
                                      Ucs2UIntMap& rUnicodeEnc )

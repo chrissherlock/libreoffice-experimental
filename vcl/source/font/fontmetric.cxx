@@ -26,7 +26,7 @@
 
 #include <font/FontSelectPattern.hxx>
 #include <font/ImplFontMetricData.hxx>
-#include <font/LogicalFontInstance.hxx>
+#include <font/FontInstance.hxx>
 #include <sft.hxx>
 
 #include <com/sun/star/uno/Sequence.hxx>
@@ -319,7 +319,7 @@ bool ImplFontMetricData::ShouldUseWinMetrics(const vcl::TTGlobalFontInfo& rInfo)
  *   - Use Win metrics if available.
  *   - Unless USE_TYPO_METRICS flag is set, in which case use Typo metrics.
 */
-void ImplFontMetricData::ImplCalcLineSpacing(LogicalFontInstance *pFontInstance)
+void ImplFontMetricData::ImplCalcLineSpacing(FontInstance *pFontInstance)
 {
     mnAscent = mnDescent = mnExtLeading = mnIntLeading = 0;
 

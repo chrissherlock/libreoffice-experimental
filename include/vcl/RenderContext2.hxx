@@ -62,12 +62,12 @@ class GfxLink;
 class Hatch;
 class Image;
 class ImplAnimView;
-class PhysicalFontFaceCollection;
-class PhysicalFontFaceSizeCollection;
+class FontFaceCollection;
+class FontFaceSizeCollection;
 class FontCache;
 class ImplMultiTextLineInfo;
-class LogicalFontInstance;
-class LogicalFontManager;
+class FontInstance;
+class FontManager;
 class Printer;
 class SalGraphics;
 class SalLayout;
@@ -427,8 +427,8 @@ public:
     FontSize GetFontSize(vcl::Font const& rFont) const;
 
     bool AddTempDevFont(OUString const& rFileURL, OUString const& rFontName);
-    Size GetPhysicalFontFaceSize(vcl::Font const& rFont, int nSizeIndex) const;
-    int GetPhysicalFontFaceSizeCount(vcl::Font const&) const;
+    Size GetFontFaceSize(vcl::Font const& rFont, int nSizeIndex) const;
+    int GetFontFaceSizeCount(vcl::Font const&) const;
 
     FontMetric GetFontMetric(vcl::Font const& rFont) const;
 
@@ -1055,7 +1055,7 @@ protected:
     SAL_DLLPRIVATE bool InitNewFont();
     SAL_DLLPRIVATE bool InitFontInstance();
 
-    SAL_DLLPRIVATE const LogicalFontInstance* GetFontInstance() const;
+    SAL_DLLPRIVATE const FontInstance* GetFontInstance() const;
 
     virtual void ImplReleaseFonts();
     virtual void ImplClearFontData(bool bNewFontLists);
@@ -1102,10 +1102,10 @@ protected:
     MapMode maMapMode;
     MappingMetrics maMapRes;
     std::unique_ptr<ImplOutDevData> mpOutDevData;
-    mutable std::shared_ptr<LogicalFontManager> mxFontManager;
-    mutable std::unique_ptr<PhysicalFontFaceCollection> mpDeviceFontList;
-    mutable std::unique_ptr<PhysicalFontFaceSizeCollection> mpDeviceFontSizeList;
-    mutable rtl::Reference<LogicalFontInstance> mpFontInstance;
+    mutable std::shared_ptr<FontManager> mxFontManager;
+    mutable std::unique_ptr<FontFaceCollection> mpDeviceFontList;
+    mutable std::unique_ptr<FontFaceSizeCollection> mpDeviceFontSizeList;
+    mutable rtl::Reference<FontInstance> mpFontInstance;
     Geometry maGeometry;
     /// font specific text alignment offsets in pixel units
     mutable tools::Long mnTextOffX;
@@ -1129,7 +1129,7 @@ protected:
 
 private:
     SAL_DLLPRIVATE bool InitFont();
-    SAL_DLLPRIVATE void InitLogicalFontManager() const;
+    SAL_DLLPRIVATE void InitFontManager() const;
     SAL_DLLPRIVATE void ImplInitTextColor();
     virtual void InitWaveLineColor(Color const& rColor, tools::Long);
 
@@ -1149,7 +1149,7 @@ private:
         vcl::TextLayoutCache const* = nullptr) const;
 
     virtual tools::Long GetFontExtLeading() const;
-    virtual void SetFontOrientation(LogicalFontInstance* const pFontInstance) const;
+    virtual void SetFontOrientation(FontInstance* const pFontInstance) const;
 
     virtual bool UsePolyPolygonForComplexGradient() = 0;
     virtual tools::Long GetGradientStepCount(tools::Long nMinRect);
@@ -1235,7 +1235,7 @@ private:
                                                                       ImplLayoutArgs&,
                                                                       const SalLayoutGlyphs*) const;
 
-    SAL_DLLPRIVATE std::unique_ptr<SalLayout> getFallbackLayout(LogicalFontInstance* pLogicalFont,
+    SAL_DLLPRIVATE std::unique_ptr<SalLayout> getFallbackLayout(FontInstance* pLogicalFont,
                                                                 int nFallbackLevel,
                                                                 ImplLayoutArgs& rLayoutArgs,
                                                                 const SalLayoutGlyphs*) const;

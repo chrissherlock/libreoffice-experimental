@@ -29,8 +29,8 @@
 
 #include <unx/GenPspGfxBackend.hxx>
 
-class PhysicalFontFace;
-class LogicalFontManager;
+class FontFace;
+class FontManager;
 
 namespace psp { struct JobData; class PrinterGfx; }
 
@@ -65,7 +65,7 @@ public:
                                               Ucs2UIntMap& rUnicodeEnc );
 
     static FontAttributes Info2FontAttributes( const psp::FastPrintFontInfo& );
-    static void             AnnounceFonts( LogicalFontManager*,
+    static void             AnnounceFonts( FontManager*,
                                            const psp::FastPrintFontInfo& );
 
     // override all pure virtual methods
@@ -77,30 +77,30 @@ public:
     virtual void            GetResolution( sal_Int32& rDPIX, sal_Int32& rDPIY ) override;
 
     virtual void            SetTextColor( Color nColor ) override;
-    virtual void            SetFont(LogicalFontInstance*, int nFallbackLevel) override;
+    virtual void            SetFont(FontInstance*, int nFallbackLevel) override;
     virtual void            GetFontMetric( ImplFontMetricDataRef&, int nFallbackLevel ) override;
     virtual FontCharMapRef  GetFontCharMap() const override;
     virtual bool            GetFontCapabilities(vcl::FontCapabilities &rFontCapabilities) const override;
-    virtual void            GetDevFontList( LogicalFontManager* ) override;
+    virtual void            GetDevFontList( FontManager* ) override;
     // graphics must drop any cached font info
     virtual void            ClearDevFontCache() override;
-    virtual bool            AddTempDevFont( LogicalFontManager*,
+    virtual bool            AddTempDevFont( FontManager*,
                                             const OUString& rFileURL,
                                             const OUString& rFontName ) override;
-    static bool             AddTempDevFontHelper( LogicalFontManager* pFontCollection,
+    static bool             AddTempDevFontHelper( FontManager* pFontCollection,
                                                   const OUString& rFileURL,
                                                   const OUString& rFontName);
 
     virtual bool            CreateFontSubset( const OUString& rToFile,
-                                              const PhysicalFontFace*,
+                                              const FontFace*,
                                               const sal_GlyphId* pGlyphIDs,
                                               const sal_uInt8* pEncoding,
                                               sal_Int32* pWidths,
                                               int nGlyphs,
                                               FontSubsetInfo& rInfo ) override;
-    virtual const void*     GetEmbedFontData(const PhysicalFontFace*, tools::Long* pDataLen) override;
+    virtual const void*     GetEmbedFontData(const FontFace*, tools::Long* pDataLen) override;
     virtual void            FreeEmbedFontData( const void* pData, tools::Long nDataLen ) override;
-    virtual void            GetGlyphWidths( const PhysicalFontFace*,
+    virtual void            GetGlyphWidths( const FontFace*,
                                             bool bVertical,
                                             std::vector< sal_Int32 >& rWidths,
                                             Ucs2UIntMap& rUnicodeEnc ) override;

@@ -70,7 +70,7 @@
 #include <vcl/svmain.hxx>
 #include <dbggui.hxx>
 #include <accmgr.hxx>
-#include <font/LogicalFontManager.hxx>
+#include <font/FontManager.hxx>
 #include <print.h>
 #include <salsys.hxx>
 #include <saltimer.hxx>
@@ -358,7 +358,7 @@ bool InitVCL()
     pSVData->maAppData.mxAppFileName = aNativeFileName;
 
     // Initialize global data
-    pSVData->maGDIData.mxScreenFontManager = std::make_shared<LogicalFontManager>();
+    pSVData->maGDIData.mxScreenFontManager = std::make_shared<FontManager>();
     pSVData->maGDIData.mxGrfConverter.reset(new GraphicConverter);
 
     g_bIsLeanException = getenv("LO_LEAN_EXCEPTION") != nullptr;

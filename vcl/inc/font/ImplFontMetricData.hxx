@@ -36,7 +36,7 @@ typedef tools::SvRef<ImplFontMetricData> ImplFontMetricDataRef;
 
 class RenderContext2;
 class FontSelectPattern;
-class LogicalFontInstance;
+class FontInstance;
 
 class VCL_DLLPUBLIC ImplFontMetricData : public FontAttributes, public SvRefBase
 {
@@ -101,7 +101,7 @@ public:
     void ImplInitTextLineSize(const RenderContext2* pDev);
     void ImplInitAboveTextLineSize();
     void ImplInitFlags(const RenderContext2* pDev);
-    void ImplCalcLineSpacing(LogicalFontInstance* pFontInstance);
+    void ImplCalcLineSpacing(FontInstance* pFontInstance);
 
 private:
     bool ShouldUseWinMetrics(const vcl::TTGlobalFontInfo& rInfo);

@@ -329,7 +329,7 @@ void RenderContext2::DrawWaveLine(Point const& rStartPos, Point const& rEndPos,
     }
 
     // #109280# make sure the waveline does not exceed the descent to avoid paint problems
-    LogicalFontInstance* pFontInstance = mpFontInstance.get();
+    FontInstance* pFontInstance = mpFontInstance.get();
     if (nWaveHeight > pFontInstance->mxFontMetric->GetWavelineUnderlineSize())
     {
         nWaveHeight = pFontInstance->mxFontMetric->GetWavelineUnderlineSize();
@@ -2382,7 +2382,7 @@ void RenderContext2::ImplDrawWaveTextLine(tools::Long nBaseX, tools::Long nBaseY
                                           tools::Long nWidth, FontLineStyle eTextLine, Color aColor,
                                           bool bIsAbove)
 {
-    LogicalFontInstance* pFontInstance = mpFontInstance.get();
+    FontInstance* pFontInstance = mpFontInstance.get();
     tools::Long nLineHeight;
     tools::Long nLinePos;
 
@@ -2449,7 +2449,7 @@ void RenderContext2::ImplDrawStraightTextLine(tools::Long nBaseX, tools::Long nB
                                               tools::Long nWidth, FontLineStyle eTextLine,
                                               Color aColor, bool bIsAbove)
 {
-    LogicalFontInstance* pFontInstance = mpFontInstance.get();
+    FontInstance* pFontInstance = mpFontInstance.get();
     tools::Long nLineHeight = 0;
     tools::Long nLinePos = 0;
     tools::Long nLinePos2 = 0;
@@ -2835,7 +2835,7 @@ void RenderContext2::ImplDrawStrikeoutLine(tools::Long nBaseX, tools::Long nBase
                                            tools::Long nWidth, FontStrikeout eStrikeout,
                                            Color aColor)
 {
-    LogicalFontInstance* pFontInstance = mpFontInstance.get();
+    FontInstance* pFontInstance = mpFontInstance.get();
     tools::Long nLineHeight = 0;
     tools::Long nLinePos = 0;
     tools::Long nLinePos2 = 0;

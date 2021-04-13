@@ -20,7 +20,7 @@
 #include <unx/geninst.h>
 #include <outdev.h>
 #include <unx/fontmanager.hxx>
-#include <font/LogicalFontManager.hxx>
+#include <font/FontManager.hxx>
 
 // platform specific font substitution hooks
 
@@ -42,12 +42,12 @@ class FcGlyphFallbackSubstitution
 {
     // TODO: add a cache
 public:
-    bool FindFontSubstitute(FontSelectPattern&, LogicalFontInstance* pLogicalFont, OUString& rMissingCodes) const override;
+    bool FindFontSubstitute(FontSelectPattern&, FontInstance* pLogicalFont, OUString& rMissingCodes) const override;
 };
 
 }
 
-void SalGenericInstance::RegisterFontSubstitutors( LogicalFontManager* pFontCollection )
+void SalGenericInstance::RegisterFontSubstitutors( FontManager* pFontCollection )
 {
     // register font fallback substitutions
     static FcPreMatchSubstitution aSubstPreMatch;
@@ -169,7 +169,7 @@ bool FcPreMatchSubstitution::FindFontSubstitute(FontSelectPattern &rFontSelData)
 }
 
 bool FcGlyphFallbackSubstitution::FindFontSubstitute(FontSelectPattern& rFontSelData,
-    LogicalFontInstance* /*pLogicalFont*/,
+    FontInstance* /*pLogicalFont*/,
     OUString& rMissingCodes ) const
 {
     // We don't actually want to talk to Fontconfig at all for symbol fonts

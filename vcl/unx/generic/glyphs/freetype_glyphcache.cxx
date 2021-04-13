@@ -25,7 +25,7 @@
 #include <unx/freetype_glyphcache.hxx>
 #include <font/CmapResult.hxx>
 #include <font/FontAttributes.hxx>
-#include <font/LogicalFontInstance.hxx>
+#include <font/FontInstance.hxx>
 
 #include <unotools/fontdefs.hxx>
 
@@ -36,7 +36,7 @@
 #include <sal/log.hxx>
 
 #include <langboost.hxx>
-#include <font/LogicalFontManager.hxx>
+#include <font/FontManager.hxx>
 #include <sft.hxx>
 
 #include <ft2build.h>
@@ -281,7 +281,7 @@ const unsigned char* FreetypeFontInfo::GetTable( const char* pTag, sal_uLong* pL
     return nullptr;
 }
 
-void FreetypeFontInfo::AnnounceFont( LogicalFontManager* pFontCollection )
+void FreetypeFontInfo::AnnounceFont( FontManager* pFontCollection )
 {
     rtl::Reference<FreetypeFontFace> pFD(new FreetypeFontFace( this, maDevFontAttributes ));
     pFontCollection->Add( pFD.get() );
@@ -358,7 +358,7 @@ void FreetypeManager::AddFontFile(const OString& rNormalizedName,
         m_nMaxFontId = nFontId;
 }
 
-void FreetypeManager::AnnounceFonts( LogicalFontManager* pToAdd ) const
+void FreetypeManager::AnnounceFonts( FontManager* pToAdd ) const
 {
     for (auto const& font : m_aFontInfoList)
     {
@@ -373,7 +373,7 @@ FreetypeFont* FreetypeManager::CreateFont(FreetypeFontInstance* pFontInstance)
     if (!pFontInstance)
         return nullptr;
 
-    const PhysicalFontFace* pFontFace = pFontInstance->GetFontFace();
+    const FontFace* pFontFace = pFontInstance->GetFontFace();
     if (!pFontFace)
         return nullptr;
 
@@ -387,12 +387,12 @@ FreetypeFont* FreetypeManager::CreateFont(FreetypeFontInstance* pFontInstance)
 }
 
 FreetypeFontFace::FreetypeFontFace( FreetypeFontInfo* pFI, const FontAttributes& rDFA )
-:   PhysicalFontFace( rDFA ),
+:   FontFace( rDFA ),
     mpFreetypeFontInfo( pFI )
 {
 }
 
-rtl::Reference<LogicalFontInstance> FreetypeFontFace::CreateFontInstance(const FontSelectPattern& rFSD) const
+rtl::Reference<FontInstance> FreetypeFontFace::CreateFontInstance(const FontSelectPattern& rFSD) const
 {
     return new FreetypeFontInstance(*this, rFSD);
 }

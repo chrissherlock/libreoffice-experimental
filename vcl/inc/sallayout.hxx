@@ -44,7 +44,7 @@
 #define MAX_FALLBACK 16
 
 class SalGraphics;
-class PhysicalFontFace;
+class FontFace;
 class GenericSalLayout;
 enum class SalLayoutFlags;
 namespace vcl {
@@ -59,7 +59,7 @@ public:
     DeviceCoordinate FillDXArray(DeviceCoordinate* pDXArray) const override;
     void            GetCaretPositions(int nArraySize, tools::Long* pCaretXArray) const override;
     bool            GetNextGlyph(const GlyphItem** pGlyph, Point& rPos, int& nStart,
-                                 const PhysicalFontFace** pFallbackFont = nullptr) const override;
+                                 const FontFace** pFallbackFont = nullptr) const override;
     bool            GetOutline(basegfx::B2DPolyPolygonVector&) const override;
     bool            IsKashidaPosValid(int nCharPos) const override;
     SalLayoutGlyphs GetGlyphs() const final override;
@@ -93,7 +93,7 @@ class VCL_DLLPUBLIC GenericSalLayout : public SalLayout
     friend void MultiSalLayout::AdjustLayout(ImplLayoutArgs&);
 
 public:
-                    GenericSalLayout(LogicalFontInstance&);
+                    GenericSalLayout(FontInstance&);
                     ~GenericSalLayout() override;
 
     void            AdjustLayout(ImplLayoutArgs&) final override;
@@ -111,11 +111,11 @@ public:
     void            GetCaretPositions(int nArraySize, tools::Long* pCaretXArray) const final override;
 
     // used by display layers
-    LogicalFontInstance& GetFont() const
+    FontInstance& GetFont() const
         { return *m_GlyphItems.GetFont(); }
 
     bool            GetNextGlyph(const GlyphItem** pGlyph, Point& rPos, int& nStart,
-                                 const PhysicalFontFace** pFallbackFont = nullptr) const override;
+                                 const FontFace** pFallbackFont = nullptr) const override;
 
     const SalLayoutGlyphsImpl& GlyphsImpl() const { return m_GlyphItems; }
 

@@ -55,7 +55,7 @@ struct ImplHotKey;
 struct ImplEventHook;
 class Point;
 class ImplAccelManager;
-class LogicalFontManager;
+class FontManager;
 class HelpTextWindow;
 class ImplTBDragMgr;
 class ImplIdleMgr;
@@ -218,7 +218,7 @@ struct ImplSVGDIData
     OpenGLContext*          mpLastContext = nullptr;        // Last OpenGLContext
     VclPtr<Printer>         mpFirstPrinter;                 // First Printer
     std::unique_ptr<ImplPrnQueueList> mpPrinterQueueList;   // List of all printer queue
-    std::shared_ptr<LogicalFontManager> mxScreenFontManager; // Screen-Font-List
+    std::shared_ptr<FontManager> mxScreenFontManager; // Screen-Font-List
     lru_scale_cache         maScaleCache = lru_scale_cache(10); // Cache for scaled images
     ImplDirectFontSubstitution* mpDirectFontSubst = nullptr; // Font-Substitutions defined in Tools->Options->Fonts
     std::unique_ptr<GraphicConverter> mxGrfConverter;       // Converter for graphics

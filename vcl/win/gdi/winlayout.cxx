@@ -145,7 +145,7 @@ std::unique_ptr<GenericSalLayout> WinSalGraphics::GetTextLayout(int nFallbackLev
 }
 
 WinFontInstance::WinFontInstance(const WinFontFace& rPFF, const FontSelectPattern& rFSP)
-    : LogicalFontInstance(rPFF, rFSP)
+    : FontInstance(rPFF, rFSP)
     , m_pGraphics(nullptr)
     , m_hFont(nullptr)
     , m_fScale(1.0f)
@@ -202,7 +202,7 @@ struct BlobReference
 };
 }
 
-using BlobCacheKey = std::pair<rtl::Reference<PhysicalFontFace>, hb_tag_t>;
+using BlobCacheKey = std::pair<rtl::Reference<FontFace>, hb_tag_t>;
 
 namespace
 {
@@ -228,7 +228,7 @@ static hb_blob_t* getFontTable(hb_face_t* /*face*/, hb_tag_t nTableTag, void* pU
     assert(hDC);
     assert(hFont);
 
-    BlobCacheKey cacheKey{ rtl::Reference<PhysicalFontFace>(pFont->GetFontFace()), nTableTag };
+    BlobCacheKey cacheKey{ rtl::Reference<FontFace>(pFont->GetFontFace()), nTableTag };
     auto it = gCache.find(cacheKey);
     if (it != gCache.end())
     {
@@ -266,7 +266,7 @@ hb_font_t* WinFontInstance::ImplInitHbFont()
     assert(m_pGraphics);
     hb_font_t* pHbFont = InitHbFont(hb_face_create_for_tables(getFontTable, this, nullptr));
 
-    // Calculate the AverageWidthFactor, see LogicalFontInstance::GetScale().
+    // Calculate the AverageWidthFactor, see FontInstance::GetScale().
     if (GetFontSelectPattern().mnWidth)
     {
         double nUPEM = hb_face_get_upem(hb_font_get_face(pHbFont));

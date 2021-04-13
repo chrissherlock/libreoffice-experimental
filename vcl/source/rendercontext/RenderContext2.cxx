@@ -27,8 +27,8 @@
 
 #include <outdev.h>
 #include <ImplOutDevData.hxx>
-#include <font/PhysicalFontFaceCollection.hxx>
-#include <font/PhysicalFontFaceSizeCollection.hxx>
+#include <font/FontFaceCollection.hxx>
+#include <font/FontFaceSizeCollection.hxx>
 #include <salgdi.hxx>
 
 RenderContext2::RenderContext2()
@@ -100,7 +100,7 @@ void RenderContext2::dispose()
     mpFontInstance.clear(); // release the active font instance
     mpDeviceFontList.reset();
     mpDeviceFontSizeList.reset();
-    mxFontManager.reset(); // release LogicalFontManager specific to this RenderContext2
+    mxFontManager.reset(); // release FontManager specific to this RenderContext2
 
     mpAlphaVDev.disposeAndClear();
     VclReferenceBase::dispose();

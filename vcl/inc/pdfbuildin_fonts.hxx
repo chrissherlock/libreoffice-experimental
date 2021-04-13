@@ -19,8 +19,8 @@
 
 #pragma once
 
-#include <font/LogicalFontInstance.hxx>
-#include <font/PhysicalFontFace.hxx>
+#include <font/FontInstance.hxx>
+#include <font/FontFace.hxx>
 
 namespace vcl::pdf
 {
@@ -45,23 +45,22 @@ struct BuildinFont
     FontAttributes GetFontAttributes() const;
 };
 
-class BuildinFontInstance final : public LogicalFontInstance
+class BuildinFontInstance final : public FontInstance
 {
     bool ImplGetGlyphBoundRect(sal_GlyphId nID, tools::Rectangle& rRect, bool) const override;
 
 public:
-    BuildinFontInstance(const PhysicalFontFace&, const FontSelectPattern&);
+    BuildinFontInstance(const FontFace&, const FontSelectPattern&);
 
     bool GetGlyphOutline(sal_GlyphId nId, basegfx::B2DPolyPolygon& rPoly, bool) const override;
 };
 
-class BuildinFontFace final : public PhysicalFontFace
+class BuildinFontFace final : public FontFace
 {
     static const BuildinFont m_aBuildinFonts[14];
     const BuildinFont& mrBuildin;
 
-    rtl::Reference<LogicalFontInstance>
-    CreateFontInstance(const FontSelectPattern& rFSD) const override;
+    rtl::Reference<FontInstance> CreateFontInstance(const FontSelectPattern& rFSD) const override;
 
 public:
     explicit BuildinFontFace(int nId);
