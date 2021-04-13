@@ -62,14 +62,14 @@ static ImplFontAttrs lcl_IsCJKFont(const OUString& rFontName)
 }
 
 FontManager::FontManager()
-    : mbMatchData(false)
-    , mpPreMatchHook(nullptr)
-    , mpFallbackHook(nullptr)
-    , mnFallbackCount(-1)
-    , mpLastHitCacheEntry(nullptr)
+    : mpLastHitCacheEntry(nullptr)
     , maFontInstanceList(0)
     // The cache limit is set by the rough number of characters needed to read your average Asian newspaper.
     , m_aBoundRectCache(3000)
+    , mbMatchData(false)
+    , mpPreMatchHook(nullptr)
+    , mpFallbackHook(nullptr)
+    , mnFallbackCount(-1)
 {
 }
 

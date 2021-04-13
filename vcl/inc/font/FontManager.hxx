@@ -92,14 +92,26 @@ private:
     {
         bool operator()(const FontSelectPattern&, const FontSelectPattern&) const;
     };
-
     struct IFSD_Hash
     {
         size_t operator()(const FontSelectPattern&) const;
     };
-
     typedef o3tl::lru_map<FontSelectPattern, rtl::Reference<FontInstance>, IFSD_Hash, IFSD_Equal>
         FontInstanceList;
+
+    void ImplInitMatchData() const;
+    void ImplInitGenericGlyphFallback() const;
+
+    FontFamily* ImplFindFontFamilyBySearchName(const OUString&) const;
+    FontFamily* ImplFindFontFamilyBySubstFontAttr(const utl::FontNameAttr&) const;
+
+    FontFamily* ImplFindFontFamilyOfDefaultFont() const;
+
+    rtl::Reference<FontInstance> GetFontInstance(FontSelectPattern&);
+
+    FontInstance* mpLastHitCacheEntry; ///< keeps the last hit cache entry
+    FontInstanceList maFontInstanceList;
+    GlyphBoundRectCache m_aBoundRectCache;
 
     mutable bool mbMatchData; // true if matching attributes are initialized
 
@@ -112,20 +124,6 @@ private:
 
     mutable std::unique_ptr<std::array<FontFamily*, MAX_GLYPHFALLBACK>> mpFallbackList;
     mutable int mnFallbackCount;
-
-    FontInstance* mpLastHitCacheEntry; ///< keeps the last hit cache entry
-    FontInstanceList maFontInstanceList;
-    GlyphBoundRectCache m_aBoundRectCache;
-
-    void ImplInitMatchData() const;
-    void ImplInitGenericGlyphFallback() const;
-
-    FontFamily* ImplFindFontFamilyBySearchName(const OUString&) const;
-    FontFamily* ImplFindFontFamilyBySubstFontAttr(const utl::FontNameAttr&) const;
-
-    FontFamily* ImplFindFontFamilyOfDefaultFont() const;
-
-    rtl::Reference<FontInstance> GetFontInstance(FontSelectPattern&);
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
