@@ -131,12 +131,12 @@ void RenderContext2::SetFontOrientation(FontInstance* const pFontInstance) const
     if (pFontInstance->GetFontSelectPattern().mnOrientation
         && !pFontInstance->mxFontMetric->GetOrientation())
     {
-        pFontInstance->mnOwnOrientation = pFontInstance->GetFontSelectPattern().mnOrientation;
-        pFontInstance->mnOrientation = pFontInstance->mnOwnOrientation;
+        pFontInstance->SetOwnOrientation(pFontInstance->GetFontSelectPattern().mnOrientation);
+        pFontInstance->SetTextAngle(pFontInstance->GetOwnOrientation());
     }
     else
     {
-        pFontInstance->mnOrientation = pFontInstance->mxFontMetric->GetOrientation();
+        pFontInstance->SetTextAngle(pFontInstance->mxFontMetric->GetOrientation());
     }
 }
 
@@ -303,10 +303,10 @@ void RenderContext2::InitTextOffsets()
         mnTextOffY
             = +mpFontInstance->mxFontMetric->GetAscent() + mpFontInstance->GetEmphasisAscent();
 
-        if (mpFontInstance->mnOrientation)
+        if (mpFontInstance->GetTextAngle())
         {
             Point aOriginPt(0, 0);
-            aOriginPt.RotateAround(mnTextOffX, mnTextOffY, mpFontInstance->mnOrientation);
+            aOriginPt.RotateAround(mnTextOffX, mnTextOffY, mpFontInstance->GetTextAngle());
         }
     }
     else // eAlign == ALIGN_BOTTOM
@@ -315,10 +315,10 @@ void RenderContext2::InitTextOffsets()
         mnTextOffY
             = -mpFontInstance->mxFontMetric->GetDescent() + mpFontInstance->GetEmphasisDescent();
 
-        if (mpFontInstance->mnOrientation)
+        if (mpFontInstance->GetTextAngle())
         {
             Point aOriginPt(0, 0);
-            aOriginPt.RotateAround(mnTextOffX, mnTextOffY, mpFontInstance->mnOrientation);
+            aOriginPt.RotateAround(mnTextOffX, mnTextOffY, mpFontInstance->GetTextAngle());
         }
     }
 }
@@ -632,8 +632,8 @@ FontMetric RenderContext2::GetFontMetric() const
     aMetric.SetItalic(xFontMetric->GetItalic());
     aMetric.SetAlignment(TextAlign::ALIGN_TOP);
     aMetric.SetWidthType(xFontMetric->GetWidthType());
-    if (pFontInstance->mnOwnOrientation)
-        aMetric.SetOrientation(pFontInstance->mnOwnOrientation);
+    if (pFontInstance->GetOwnOrientation())
+        aMetric.SetOrientation(pFontInstance->GetOwnOrientation());
     else
         aMetric.SetOrientation(xFontMetric->GetOrientation());
 
@@ -1258,10 +1258,10 @@ void RenderContext2::ImplDrawEmphasisMarks(SalLayout& rSalLayout)
         {
             Point aAdjPoint = aOffset;
             aAdjPoint.AdjustX(aRectangle.Left() + (aRectangle.GetWidth() - nEmphasisWidth) / 2);
-            if (mpFontInstance->mnOrientation)
+            if (mpFontInstance->GetTextAngle())
             {
                 Point aOriginPt(0, 0);
-                aOriginPt.RotateAround(aAdjPoint, mpFontInstance->mnOrientation);
+                aOriginPt.RotateAround(aAdjPoint, mpFontInstance->GetTextAngle());
             }
             aOutPoint += aAdjPoint;
             aOutPoint -= Point(nEmphasisWidth2, nEmphasisHeight2);

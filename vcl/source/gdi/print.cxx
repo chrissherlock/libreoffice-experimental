@@ -1773,7 +1773,7 @@ void Printer::ClipAndDrawGradientMetafile(const Gradient& rGradient,
 
 void Printer::SetFontOrientation(FontInstance* const pFontEntry) const
 {
-    pFontEntry->mnOrientation = pFontEntry->mxFontMetric->GetOrientation();
+    pFontEntry->SetTextAngle(pFontEntry->GetOrientation());
 }
 
 vcl::Region Printer::ClipToDeviceBounds(vcl::Region aRegion) const { return aRegion; }

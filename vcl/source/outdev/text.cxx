@@ -220,17 +220,17 @@ tools::Rectangle OutputDevice::ImplGetTextBoundRect(SalLayout const& rSalLayout)
 
     nY -= mpFontInstance->mxFontMetric->GetAscent() + mpFontInstance->GetEmphasisAscent();
 
-    if (mpFontInstance->mnOrientation)
+    if (mpFontInstance->GetTextAngle())
     {
         tools::Long nBaseX = nX, nBaseY = nY;
-        if (!(mpFontInstance->mnOrientation % 900_deg10))
+        if (!(mpFontInstance->GetTextAngle() % 900_deg10))
         {
             tools::Long nX2 = nX + nWidth;
             tools::Long nY2 = nY + nHeight;
 
             Point aBasePt(nBaseX, nBaseY);
-            aBasePt.RotateAround(nX, nY, mpFontInstance->mnOrientation);
-            aBasePt.RotateAround(nX2, nY2, mpFontInstance->mnOrientation);
+            aBasePt.RotateAround(nX, nY, mpFontInstance->GetTextAngle());
+            aBasePt.RotateAround(nX2, nY2, mpFontInstance->GetTextAngle());
             nWidth = nX2 - nX;
             nHeight = nY2 - nY;
         }
@@ -239,7 +239,7 @@ tools::Rectangle OutputDevice::ImplGetTextBoundRect(SalLayout const& rSalLayout)
             // inflate by +1+1 because polygons are drawn smaller
             tools::Rectangle aRect(Point(nX, nY), Size(nWidth + 1, nHeight + 1));
             tools::Polygon aPoly(aRect);
-            aPoly.Rotate(Point(nBaseX, nBaseY), mpFontInstance->mnOrientation);
+            aPoly.Rotate(Point(nBaseX, nBaseY), mpFontInstance->GetTextAngle());
             return aPoly.GetBoundRect();
         }
     }

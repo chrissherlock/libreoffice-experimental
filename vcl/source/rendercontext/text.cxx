@@ -1056,7 +1056,7 @@ RenderContext2::ImplPrepareLayoutArgs(OUString& rStr, const sal_Int32 nMinIndex,
     ImplLayoutArgs aLayoutArgs(rStr, nMinIndex, nEndIndex, nLayoutFlags, maFont.GetLanguageTag(),
                                pLayoutCache);
 
-    Degree10 nOrientation = mpFontInstance ? mpFontInstance->mnOrientation : 0_deg10;
+    Degree10 nOrientation = mpFontInstance ? mpFontInstance->GetTextAngle() : 0_deg10;
     aLayoutArgs.SetOrientation(nOrientation);
 
     aLayoutArgs.SetLayoutWidth(nPixelWidth);
@@ -1071,7 +1071,7 @@ void RenderContext2::ImplDrawTextRect(tools::Long nBaseX, tools::Long nBaseY, to
     tools::Long nX = nDistX;
     tools::Long nY = nDistY;
 
-    Degree10 nOrientation = mpFontInstance->mnOrientation;
+    Degree10 nOrientation = mpFontInstance->GetTextAngle();
     if (nOrientation)
     {
         // Rotate rect without rounding problems for 90 degree rotations
@@ -1112,7 +1112,7 @@ void RenderContext2::ImplDrawTextRect(tools::Long nBaseX, tools::Long nBaseY, to
             // inflate because polygons are drawn smaller
             tools::Rectangle aRect(Point(nX, nY), Size(nWidth + 1, nHeight + 1));
             tools::Polygon aPoly(aRect);
-            aPoly.Rotate(Point(nBaseX, nBaseY), mpFontInstance->mnOrientation);
+            aPoly.Rotate(Point(nBaseX, nBaseY), mpFontInstance->GetTextAngle());
             ImplDrawPolygon(aPoly);
             return;
         }
@@ -1184,12 +1184,12 @@ bool RenderContext2::ImplDrawRotateText(SalLayout& rSalLayout)
     rSalLayout.DrawText(*pVDev->mpGraphics);
 
     Bitmap aBmp = pVDev->GetBitmap(Point(), aBoundRect.GetSize());
-    if (aBmp.IsEmpty() || !aBmp.Rotate(mpFontInstance->mnOwnOrientation, COL_WHITE))
+    if (aBmp.IsEmpty() || !aBmp.Rotate(mpFontInstance->GetOwnOrientation(), COL_WHITE))
         return false;
 
     // calculate rotation offset
     tools::Polygon aPoly(aBoundRect);
-    aPoly.Rotate(Point(), mpFontInstance->mnOwnOrientation);
+    aPoly.Rotate(Point(), mpFontInstance->GetOwnOrientation());
     Point aPoint = aPoly.GetBoundRect().TopLeft();
     aPoint += Point(nX, nY);
 
@@ -1215,9 +1215,11 @@ void RenderContext2::ImplDrawTextDirect(SalLayout& rSalLayout)
 {
     bool bTextLines = HasTextLines();
 
-    if (mpFontInstance->mnOwnOrientation)
+    if (mpFontInstance->GetOwnOrientation())
+    {
         if (ImplDrawRotateText(rSalLayout))
             return;
+    }
 
     tools::Long nOldX = rSalLayout.DrawBase().X();
     if (HasMirroredGraphics())
@@ -1426,10 +1428,10 @@ void RenderContext2::ImplDrawTextLines(SalLayout& rSalLayout, FontStrikeout eStr
                 {
                     // get the distance to the base point (as projected to baseline)
                     nDist = aPos.X() - aStartPt.X();
-                    if (mpFontInstance->mnOrientation)
+                    if (mpFontInstance->GetTextAngle())
                     {
                         const tools::Long nDY = aPos.Y() - aStartPt.Y();
-                        const double fRad = mpFontInstance->mnOrientation.get() * F_PI1800;
+                        const double fRad = mpFontInstance->GetTextAngle().get() * F_PI1800;
                         nDist = FRound(nDist * cos(fRad) - nDY * sin(fRad));
                     }
                 }
@@ -1480,8 +1482,8 @@ void RenderContext2::ImplDrawTextLine(tools::Long nX, tools::Long nY, tools::Lon
     if (IsRTLEnabled())
     {
         tools::Long nXAdd = nWidth - nDistX;
-        if (mpFontInstance->mnOrientation)
-            nXAdd = FRound(nXAdd * cos(mpFontInstance->mnOrientation.get() * F_PI1800));
+        if (mpFontInstance->GetTextAngle())
+            nXAdd = FRound(nXAdd * cos(mpFontInstance->GetTextAngle().get() * F_PI1800));
 
         nX += nXAdd - 1;
     }
@@ -2431,16 +2433,16 @@ void RenderContext2::ImplDrawWaveTextLine(tools::Long nBaseX, tools::Long nBaseY
 
         nLinePos -= nLineWidthHeight - nLineDY2;
         ImplDrawWaveLine(nBaseX, nBaseY, nDistX, nLinePos, nWidth, nLineHeight, nLineWidth,
-                         mpFontInstance->mnOrientation, aColor);
+                         mpFontInstance->GetTextAngle(), aColor);
         nLinePos += nLineWidthHeight + nLineDY;
         ImplDrawWaveLine(nBaseX, nBaseY, nDistX, nLinePos, nWidth, nLineHeight, nLineWidth,
-                         mpFontInstance->mnOrientation, aColor);
+                         mpFontInstance->GetTextAngle(), aColor);
     }
     else
     {
         nLinePos -= nLineWidthHeight / 2;
         ImplDrawWaveLine(nBaseX, nBaseY, nDistX, nLinePos, nWidth, nLineHeight, nLineWidth,
-                         mpFontInstance->mnOrientation, aColor);
+                         mpFontInstance->GetTextAngle(), aColor);
     }
 }
 
@@ -2936,10 +2938,10 @@ void RenderContext2::ImplDrawStrikeoutChar(tools::Long nBaseX, tools::Long nBase
 
     const OUString aStrikeoutText(aChars, nStrikeStrLen);
 
-    if (mpFontInstance->mnOrientation)
+    if (mpFontInstance->GetTextAngle())
     {
         Point aOriginPt(0, 0);
-        aOriginPt.RotateAround(nDistX, nDistY, mpFontInstance->mnOrientation);
+        aOriginPt.RotateAround(nDistX, nDistY, mpFontInstance->GetTextAngle());
     }
 
     nBaseX += nDistX;
@@ -2967,11 +2969,11 @@ void RenderContext2::ImplDrawStrikeoutChar(tools::Long nBaseX, tools::Long nBase
     aPixelRect.SetBottom(nBaseY + mpFontInstance->mxFontMetric->GetDescent());
     aPixelRect.SetTop(nBaseY - mpFontInstance->mxFontMetric->GetAscent());
 
-    if (mpFontInstance->mnOrientation)
+    if (mpFontInstance->GetTextAngle())
     {
         tools::Polygon aPoly(aPixelRect);
         aPoly.Rotate(Point(nBaseX + mnTextOffX, nBaseY + mnTextOffY),
-                     mpFontInstance->mnOrientation);
+                     mpFontInstance->GetTextAngle());
         aPixelRect = aPoly.GetBoundRect();
     }
 

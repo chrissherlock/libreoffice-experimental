@@ -6262,11 +6262,11 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
         aRectangle.setHeight(aRefDevFontMetric.GetLineHeight());
 
         const FontInstance* pFontInstance = GetFontInstance();
-        if (pFontInstance->mnOrientation)
+        if (pFontInstance->GetTextAngle())
         {
             // Adapt rectangle for rotated text.
             tools::Polygon aPolygon(aRectangle);
-            aPolygon.Rotate(PixelToLogic(rLayout.GetDrawPosition()), pFontInstance->mnOrientation);
+            aPolygon.Rotate(PixelToLogic(rLayout.GetDrawPosition()), pFontInstance->GetTextAngle());
             drawPolygon(aPolygon);
         }
         else
@@ -7111,10 +7111,10 @@ void PDFWriterImpl::drawStrikeoutChar( const Point& rPos, tools::Long nWidth, Fo
     aRect.SetTop( rPos.Y()-aRefDevFontMetric.GetAscent() );
 
     const FontInstance* pFontInstance = GetFontInstance();
-    if (pFontInstance->mnOrientation)
+    if (pFontInstance->GetTextAngle())
     {
         tools::Polygon aPoly( aRect );
-        aPoly.Rotate( rPos, pFontInstance->mnOrientation);
+        aPoly.Rotate( rPos, pFontInstance->GetTextAngle());
         aRect = aPoly.GetBoundRect();
     }
 
