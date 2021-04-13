@@ -515,7 +515,7 @@ tools::Long VirtualDevice::GetFontExtLeading() const
         return 0;
 #endif
 
-    return mpFontInstance->mxFontMetric->GetExternalLeading();
+    return mpFontInstance->GetExternalLeading();
 }
 
 void VirtualDevice::SetOutOffXPixel(tools::Long nOutOffX)

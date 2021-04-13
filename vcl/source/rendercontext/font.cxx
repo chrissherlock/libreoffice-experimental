@@ -128,15 +128,14 @@ bool RenderContext2::InitFont()
 
 void RenderContext2::SetFontOrientation(FontInstance* const pFontInstance) const
 {
-    if (pFontInstance->GetFontSelectPattern().mnOrientation
-        && !pFontInstance->mxFontMetric->GetOrientation())
+    if (pFontInstance->GetFontSelectPattern().mnOrientation && !pFontInstance->GetOrientation())
     {
         pFontInstance->SetOwnOrientation(pFontInstance->GetFontSelectPattern().mnOrientation);
         pFontInstance->SetTextAngle(pFontInstance->GetOwnOrientation());
     }
     else
     {
-        pFontInstance->SetTextAngle(pFontInstance->mxFontMetric->GetOrientation());
+        pFontInstance->SetTextAngle(pFontInstance->GetOrientation());
     }
 }
 
@@ -243,16 +242,14 @@ bool RenderContext2::InitFontInstance()
         // get metric data from device layers
         mpFontInstance->SetInitFlag(true);
 
-        mpFontInstance->mxFontMetric->SetOrientation(
-            mpFontInstance->GetFontSelectPattern().mnOrientation);
-        mpGraphics->GetFontMetric(mpFontInstance->mxFontMetric, 0);
+        mpFontInstance->SetOrientation(mpFontInstance->GetFontSelectPattern().mnOrientation);
+        mpGraphics->GetFontMetric(mpFontInstance->GetFontMetricData(), 0);
 
-        mpFontInstance->mxFontMetric->ImplInitTextLineSize(this);
-        mpFontInstance->mxFontMetric->ImplInitAboveTextLineSize();
-        mpFontInstance->mxFontMetric->ImplInitFlags(this);
+        mpFontInstance->ImplInitTextLineSize(this);
+        mpFontInstance->ImplInitAboveTextLineSize();
+        mpFontInstance->ImplInitFlags(this);
 
-        mpFontInstance->SetLineHeight(mpFontInstance->mxFontMetric->GetAscent()
-                                      + mpFontInstance->mxFontMetric->GetDescent());
+        mpFontInstance->SetLineHeight(mpFontInstance->GetAscent() + mpFontInstance->GetDescent());
 
         SetFontOrientation(mpFontInstance.get());
     }
@@ -300,8 +297,7 @@ void RenderContext2::InitTextOffsets()
     else if (eAlign == ALIGN_TOP)
     {
         mnTextOffX = 0;
-        mnTextOffY
-            = +mpFontInstance->mxFontMetric->GetAscent() + mpFontInstance->GetEmphasisAscent();
+        mnTextOffY = +mpFontInstance->GetAscent() + mpFontInstance->GetEmphasisAscent();
 
         if (mpFontInstance->GetTextAngle())
         {
@@ -312,8 +308,7 @@ void RenderContext2::InitTextOffsets()
     else // eAlign == ALIGN_BOTTOM
     {
         mnTextOffX = 0;
-        mnTextOffY
-            = -mpFontInstance->mxFontMetric->GetDescent() + mpFontInstance->GetEmphasisDescent();
+        mnTextOffY = -mpFontInstance->GetDescent() + mpFontInstance->GetEmphasisDescent();
 
         if (mpFontInstance->GetTextAngle())
         {
@@ -332,7 +327,7 @@ bool RenderContext2::FixOLEScaleFactors()
     // #95414# fix for OLE objects which use scale factors very creatively
     if (IsMapModeEnabled() && !aSize.GetWidth())
     {
-        int nOrigWidth = mpFontInstance->mxFontMetric->GetWidth();
+        int nOrigWidth = mpFontInstance->GetWidth();
         float fStretch = static_cast<float>(maMapRes.mnMapScNumX) * maMapRes.mnMapScDenomY;
         fStretch /= static_cast<float>(maMapRes.mnMapScNumY) * maMapRes.mnMapScDenomX;
         int nNewWidth = static_cast<int>(nOrigWidth * fStretch + 0.5);
@@ -613,7 +608,7 @@ FontMetric RenderContext2::GetFontMetric() const
         return aMetric;
 
     FontInstance* pFontInstance = mpFontInstance.get();
-    ImplFontMetricDataRef xFontMetric = pFontInstance->mxFontMetric;
+    ImplFontMetricDataRef xFontMetric = pFontInstance->GetFontMetricData();
 
     // prepare metric
     aMetric = maFont;
@@ -702,7 +697,7 @@ bool RenderContext2::GetFontCapabilities(vcl::FontCapabilities& rFontCapabilitie
 
 tools::Long RenderContext2::GetFontExtLeading() const
 {
-    return mpFontInstance->mxFontMetric->GetExternalLeading();
+    return mpFontInstance->GetExternalLeading();
 }
 
 void RenderContext2::ImplClearFontData(const bool bNewFontLists)
@@ -1237,9 +1232,9 @@ void RenderContext2::ImplDrawEmphasisMarks(SalLayout& rSalLayout)
     Point aOffset(0, 0);
 
     if (nEmphasisMark & FontEmphasisMark::PosBelow)
-        aOffset.AdjustY(mpFontInstance->mxFontMetric->GetDescent() + nEmphasisYOff);
+        aOffset.AdjustY(mpFontInstance->GetDescent() + nEmphasisYOff);
     else
-        aOffset.AdjustY(-(mpFontInstance->mxFontMetric->GetAscent() + nEmphasisYOff));
+        aOffset.AdjustY(-(mpFontInstance->GetAscent() + nEmphasisYOff));
 
     tools::Long nEmphasisWidth2 = nEmphasisWidth / 2;
     tools::Long nEmphasisHeight2 = nEmphasisHeight / 2;
@@ -1281,7 +1276,7 @@ tools::Long RenderContext2::GetMinKashida() const
     if (!pRC->InitNewFont())
         return 0;
 
-    return ImplDevicePixelToLogicWidth(mpFontInstance->mxFontMetric->GetMinKashida());
+    return ImplDevicePixelToLogicWidth(mpFontInstance->GetMinKashida());
 }
 
 sal_Int32 RenderContext2::ValidateKashidas(const OUString& rTxt, sal_Int32 nIdx, sal_Int32 nLen,

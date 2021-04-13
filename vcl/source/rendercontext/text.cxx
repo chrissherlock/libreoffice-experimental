@@ -330,9 +330,9 @@ void RenderContext2::DrawWaveLine(Point const& rStartPos, Point const& rEndPos,
 
     // #109280# make sure the waveline does not exceed the descent to avoid paint problems
     FontInstance* pFontInstance = mpFontInstance.get();
-    if (nWaveHeight > pFontInstance->mxFontMetric->GetWavelineUnderlineSize())
+    if (nWaveHeight > pFontInstance->GetWavelineUnderlineSize())
     {
-        nWaveHeight = pFontInstance->mxFontMetric->GetWavelineUnderlineSize();
+        nWaveHeight = pFontInstance->GetWavelineUnderlineSize();
         // tdf#124848 hairline
         nLineWidth = 0;
     }
@@ -1139,11 +1139,10 @@ void RenderContext2::ImplDrawTextBackground(const SalLayout& rSalLayout)
     mpGraphics->SetFillColor(GetTextFillColor());
     mbInitFillColor = true;
 
-    ImplDrawTextRect(
-        nX, nY, 0,
-        -(mpFontInstance->mxFontMetric->GetAscent() + mpFontInstance->GetEmphasisAscent()), nWidth,
-        mpFontInstance->GetLineHeight() + mpFontInstance->GetEmphasisAscent()
-            + mpFontInstance->GetEmphasisDescent());
+    ImplDrawTextRect(nX, nY, 0,
+                     -(mpFontInstance->GetAscent() + mpFontInstance->GetEmphasisAscent()), nWidth,
+                     mpFontInstance->GetLineHeight() + mpFontInstance->GetEmphasisAscent()
+                         + mpFontInstance->GetEmphasisDescent());
 }
 
 bool RenderContext2::ImplDrawRotateText(SalLayout& rSalLayout)
@@ -1158,8 +1157,7 @@ bool RenderContext2::ImplDrawRotateText(SalLayout& rSalLayout)
     {
         // guess vertical text extents if GetBoundRect failed
         tools::Long nRight = rSalLayout.GetTextWidth();
-        tools::Long nTop
-            = mpFontInstance->mxFontMetric->GetAscent() + mpFontInstance->GetEmphasisAscent();
+        tools::Long nTop = mpFontInstance->GetAscent() + mpFontInstance->GetEmphasisAscent();
         tools::Long nHeight = mpFontInstance->GetLineHeight() + mpFontInstance->GetEmphasisAscent()
                               + mpFontInstance->GetEmphasisDescent();
         aBoundRect = tools::Rectangle(0, -nTop, nRight, nHeight - nTop);
@@ -1333,7 +1331,7 @@ void RenderContext2::ImplDrawSpecialText(SalLayout& rSalLayout)
     {
         if (maFont.IsShadow())
         {
-            tools::Long nOff = 1 + ((mpFontInstance->mnLineHeight - 24) / 24);
+            tools::Long nOff = 1 + ((mpFontInstance->GetLineHeight() - 24) / 24);
             if (maFont.IsOutline())
                 nOff++;
             SetTextLineColor();
@@ -2396,13 +2394,13 @@ void RenderContext2::ImplDrawWaveTextLine(tools::Long nBaseX, tools::Long nBaseY
 
     if (bIsAbove)
     {
-        nLineHeight = pFontInstance->mxFontMetric->GetAboveWavelineUnderlineSize();
-        nLinePos = pFontInstance->mxFontMetric->GetAboveWavelineUnderlineOffset();
+        nLineHeight = pFontInstance->GetAboveWavelineUnderlineSize();
+        nLinePos = pFontInstance->GetAboveWavelineUnderlineOffset();
     }
     else
     {
-        nLineHeight = pFontInstance->mxFontMetric->GetWavelineUnderlineSize();
-        nLinePos = pFontInstance->mxFontMetric->GetWavelineUnderlineOffset();
+        nLineHeight = pFontInstance->GetWavelineUnderlineSize();
+        nLinePos = pFontInstance->GetWavelineUnderlineOffset();
     }
     if ((eTextLine == LINESTYLE_SMALLWAVE) && (nLineHeight > 3))
         nLineHeight = 3;
@@ -2477,13 +2475,13 @@ void RenderContext2::ImplDrawStraightTextLine(tools::Long nBaseX, tools::Long nB
         case LINESTYLE_DASHDOTDOT:
             if (bIsAbove)
             {
-                nLineHeight = pFontInstance->mxFontMetric->GetAboveUnderlineSize();
-                nLinePos = nY + pFontInstance->mxFontMetric->GetAboveUnderlineOffset();
+                nLineHeight = pFontInstance->GetAboveUnderlineSize();
+                nLinePos = nY + pFontInstance->GetAboveUnderlineOffset();
             }
             else
             {
-                nLineHeight = pFontInstance->mxFontMetric->GetUnderlineSize();
-                nLinePos = nY + pFontInstance->mxFontMetric->GetUnderlineOffset();
+                nLineHeight = pFontInstance->GetUnderlineSize();
+                nLinePos = nY + pFontInstance->GetUnderlineOffset();
             }
             break;
         case LINESTYLE_BOLD:
@@ -2494,27 +2492,27 @@ void RenderContext2::ImplDrawStraightTextLine(tools::Long nBaseX, tools::Long nB
         case LINESTYLE_BOLDDASHDOTDOT:
             if (bIsAbove)
             {
-                nLineHeight = pFontInstance->mxFontMetric->GetAboveBoldUnderlineSize();
-                nLinePos = nY + pFontInstance->mxFontMetric->GetAboveBoldUnderlineOffset();
+                nLineHeight = pFontInstance->GetAboveBoldUnderlineSize();
+                nLinePos = nY + pFontInstance->GetAboveBoldUnderlineOffset();
             }
             else
             {
-                nLineHeight = pFontInstance->mxFontMetric->GetBoldUnderlineSize();
-                nLinePos = nY + pFontInstance->mxFontMetric->GetBoldUnderlineOffset();
+                nLineHeight = pFontInstance->GetBoldUnderlineSize();
+                nLinePos = nY + pFontInstance->GetBoldUnderlineOffset();
             }
             break;
         case LINESTYLE_DOUBLE:
             if (bIsAbove)
             {
-                nLineHeight = pFontInstance->mxFontMetric->GetAboveDoubleUnderlineSize();
-                nLinePos = nY + pFontInstance->mxFontMetric->GetAboveDoubleUnderlineOffset1();
-                nLinePos2 = nY + pFontInstance->mxFontMetric->GetAboveDoubleUnderlineOffset2();
+                nLineHeight = pFontInstance->GetAboveDoubleUnderlineSize();
+                nLinePos = nY + pFontInstance->GetAboveDoubleUnderlineOffset1();
+                nLinePos2 = nY + pFontInstance->GetAboveDoubleUnderlineOffset2();
             }
             else
             {
-                nLineHeight = pFontInstance->mxFontMetric->GetDoubleUnderlineSize();
-                nLinePos = nY + pFontInstance->mxFontMetric->GetDoubleUnderlineOffset1();
-                nLinePos2 = nY + pFontInstance->mxFontMetric->GetDoubleUnderlineOffset2();
+                nLineHeight = pFontInstance->GetDoubleUnderlineSize();
+                nLinePos = nY + pFontInstance->GetDoubleUnderlineOffset1();
+                nLinePos2 = nY + pFontInstance->GetDoubleUnderlineOffset2();
             }
             break;
         default:
@@ -2856,17 +2854,17 @@ void RenderContext2::ImplDrawStrikeoutLine(tools::Long nBaseX, tools::Long nBase
     switch (eStrikeout)
     {
         case STRIKEOUT_SINGLE:
-            nLineHeight = pFontInstance->mxFontMetric->GetStrikeoutSize();
-            nLinePos = nY + pFontInstance->mxFontMetric->GetStrikeoutOffset();
+            nLineHeight = pFontInstance->GetStrikeoutSize();
+            nLinePos = nY + pFontInstance->GetStrikeoutOffset();
             break;
         case STRIKEOUT_BOLD:
-            nLineHeight = pFontInstance->mxFontMetric->GetBoldStrikeoutSize();
-            nLinePos = nY + pFontInstance->mxFontMetric->GetBoldStrikeoutOffset();
+            nLineHeight = pFontInstance->GetBoldStrikeoutSize();
+            nLinePos = nY + pFontInstance->GetBoldStrikeoutOffset();
             break;
         case STRIKEOUT_DOUBLE:
-            nLineHeight = pFontInstance->mxFontMetric->GetDoubleStrikeoutSize();
-            nLinePos = nY + pFontInstance->mxFontMetric->GetDoubleStrikeoutOffset1();
-            nLinePos2 = nY + pFontInstance->mxFontMetric->GetDoubleStrikeoutOffset2();
+            nLineHeight = pFontInstance->GetDoubleStrikeoutSize();
+            nLinePos = nY + pFontInstance->GetDoubleStrikeoutOffset1();
+            nLinePos2 = nY + pFontInstance->GetDoubleStrikeoutOffset2();
             break;
         default:
             break;
@@ -2972,8 +2970,8 @@ void RenderContext2::ImplDrawStrikeoutChar(tools::Long nBaseX, tools::Long nBase
     tools::Rectangle aPixelRect;
     aPixelRect.SetLeft(nBaseX + mnTextOffX);
     aPixelRect.SetRight(aPixelRect.Left() + nWidth);
-    aPixelRect.SetBottom(nBaseY + mpFontInstance->mxFontMetric->GetDescent());
-    aPixelRect.SetTop(nBaseY - mpFontInstance->mxFontMetric->GetAscent());
+    aPixelRect.SetBottom(nBaseY + mpFontInstance->GetDescent());
+    aPixelRect.SetTop(nBaseY - mpFontInstance->GetAscent());
 
     if (mpFontInstance->GetTextAngle())
     {
@@ -3002,14 +3000,8 @@ void RenderContext2::InitWaveLineColor(Color const& rColor, tools::Long)
     mbInitLineColor = true;
 }
 
-void RenderContext2::ImplInitTextLineSize()
-{
-    mpFontInstance->mxFontMetric->ImplInitTextLineSize(this);
-}
+void RenderContext2::ImplInitTextLineSize() { mpFontInstance->ImplInitTextLineSize(this); }
 
-void RenderContext2::ImplInitAboveTextLineSize()
-{
-    mpFontInstance->mxFontMetric->ImplInitAboveTextLineSize();
-}
+void RenderContext2::ImplInitAboveTextLineSize() { mpFontInstance->ImplInitAboveTextLineSize(); }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

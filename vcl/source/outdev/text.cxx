@@ -219,7 +219,7 @@ tools::Rectangle OutputDevice::ImplGetTextBoundRect(SalLayout const& rSalLayout)
     tools::Long nHeight = mpFontInstance->GetLineHeight() + mpFontInstance->GetEmphasisAscent()
                           + mpFontInstance->GetEmphasisDescent();
 
-    nY -= mpFontInstance->mxFontMetric->GetAscent() + mpFontInstance->GetEmphasisAscent();
+    nY -= mpFontInstance->GetAscent() + mpFontInstance->GetEmphasisAscent();
 
     if (mpFontInstance->GetTextAngle())
     {

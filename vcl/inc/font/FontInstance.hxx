@@ -184,8 +184,6 @@ public: // TODO: make data members private
         mxFontMetric->ImplCalcLineSpacing(pFontInstance);
     }
 
-    ImplFontMetricDataRef mxFontMetric; // Font attributes
-
     tools::Long GetLineHeight() const { return mnLineHeight; }
     void SetLineHeight(tools::Long nLineHeight) { mnLineHeight = nLineHeight; }
     Degree10 GetOwnOrientation() const { return mnOwnOrientation; }
@@ -227,6 +225,7 @@ public: // TODO: make data members private
     void RecodeString(OUString& rString);
     bool CanRecodeString();
 
+    ImplFontMetricDataRef& GetFontMetricData() { return mxFontMetric; } // Font attributes
 protected:
     explicit FontInstance(const FontFace&, const FontSelectPattern&);
 
@@ -237,6 +236,7 @@ protected:
     virtual hb_font_t* ImplInitHbFont();
 
 private:
+    ImplFontMetricDataRef mxFontMetric; // Font attributes
     tools::Long mnLineHeight;
     Degree10 mnOwnOrientation; // text angle if lower layers don't rotate text themselves
     Degree10 mnOrientation; // text angle in 3600 system
