@@ -25,6 +25,8 @@
 #include <vcl/glyphitem.hxx>
 
 #include <font/FontFamily.hxx>
+#include <font/GlyphBoundRectCacheKey.hxx>
+#include <font/GlyphBoundRectCacheHash.hxx>
 
 #include <array>
 
@@ -36,36 +38,6 @@ class FontInstance;
 class FontFaceSizeCollection;
 class ImplGlyphFallbackFontSubstitution;
 class ImplPreMatchFontSubstitution;
-
-// TODO: rename to FontManager
-
-struct GlyphBoundRectCacheKey
-{
-    const FontInstance* m_pFont;
-    const sal_GlyphId m_nId;
-
-    GlyphBoundRectCacheKey(const FontInstance* pFont, sal_GlyphId nID)
-        : m_pFont(pFont)
-        , m_nId(nID)
-    {
-    }
-
-    bool operator==(GlyphBoundRectCacheKey const& aOther) const
-    {
-        return m_pFont == aOther.m_pFont && m_nId == aOther.m_nId;
-    }
-};
-
-struct GlyphBoundRectCacheHash
-{
-    std::size_t operator()(GlyphBoundRectCacheKey const& aCache) const
-    {
-        std::size_t seed = 0;
-        boost::hash_combine(seed, aCache.m_pFont);
-        boost::hash_combine(seed, aCache.m_nId);
-        return seed;
-    }
-};
 
 typedef o3tl::lru_map<GlyphBoundRectCacheKey, tools::Rectangle, GlyphBoundRectCacheHash>
     GlyphBoundRectCache;
