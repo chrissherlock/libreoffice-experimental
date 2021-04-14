@@ -89,43 +89,6 @@ bool RenderContext2::IsFontAvailable(OUString const& rFontName) const
     return (pFound != nullptr);
 }
 
-Color RenderContext2::GetReadableFontColor(const Color& rFontColor, const Color& rBgColor) const
-{
-    if (rBgColor.IsDark() && rFontColor.IsDark())
-        return COL_WHITE;
-    else if (rBgColor.IsBright() && rFontColor.IsBright())
-        return COL_BLACK;
-    else
-        return rFontColor;
-}
-
-bool RenderContext2::InitFont()
-{
-    DBG_TESTSOLARMUTEX();
-
-    if (!InitNewFont())
-        return false;
-
-    if (!mpFontInstance)
-        return false;
-
-    if (!mpGraphics)
-    {
-        if (!AcquireGraphics())
-            return false;
-    }
-    else if (!mbInitFont)
-    {
-        return true;
-    }
-
-    assert(mpGraphics);
-
-    mpGraphics->SetFont(mpFontInstance.get(), 0);
-    mbInitFont = false;
-    return true;
-}
-
 void RenderContext2::SetFontOrientation(FontInstance* const pFontInstance) const
 {
     if (pFontInstance->GetFontSelectPattern().mnOrientation && !pFontInstance->GetOrientation())
@@ -179,6 +142,43 @@ bool RenderContext2::InitNewFont()
     InitTextOffsets();
 
     return FixOLEScaleFactors();
+}
+
+Color RenderContext2::GetReadableFontColor(const Color& rFontColor, const Color& rBgColor) const
+{
+    if (rBgColor.IsDark() && rFontColor.IsDark())
+        return COL_WHITE;
+    else if (rBgColor.IsBright() && rFontColor.IsBright())
+        return COL_BLACK;
+    else
+        return rFontColor;
+}
+
+bool RenderContext2::InitFont()
+{
+    DBG_TESTSOLARMUTEX();
+
+    if (!InitNewFont())
+        return false;
+
+    if (!mpFontInstance)
+        return false;
+
+    if (!mpGraphics)
+    {
+        if (!AcquireGraphics())
+            return false;
+    }
+    else if (!mbInitFont)
+    {
+        return true;
+    }
+
+    assert(mpGraphics);
+
+    mpGraphics->SetFont(mpFontInstance.get(), 0);
+    mbInitFont = false;
+    return true;
 }
 
 bool RenderContext2::InitFontInstance()
