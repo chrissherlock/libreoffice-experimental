@@ -40,6 +40,7 @@ class FontInstance;
 class FontFaceSizeCollection;
 class ImplGlyphFallbackFontSubstitution;
 class ImplPreMatchFontSubstitution;
+class RenderContext2;
 class SalFont;
 
 typedef o3tl::lru_map<GlyphBoundRectCacheKey, tools::Rectangle, GlyphBoundRectCacheHash>
@@ -51,7 +52,7 @@ public:
     explicit FontManager();
     ~FontManager();
 
-    void Init(SalFont* pFontMgr);
+    void Init(RenderContext2 const* pRenderContext);
 
     // fill the list with device font faces
     void Add(FontFace*);

@@ -119,6 +119,7 @@ class VCL_DLLPUBLIC RenderContext2 : public virtual DrawingInterface,
                                      public virtual DeviceInterface,
                                      public virtual VclReferenceBase
 {
+    friend class FontManager;
     friend class VirtualDevice;
 
 public:

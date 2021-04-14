@@ -23,6 +23,7 @@
 #include <unotools/fontdefs.hxx>
 #include <o3tl/sorted_vector.hxx>
 
+#include <vcl/RenderContext2.hxx>
 #include <vcl/svapp.hxx>
 
 #include <outdev.h>
@@ -32,6 +33,7 @@
 #include <font/FontManager.hxx>
 #include <font/FontFaceCollection.hxx>
 #include <font/FontFaceSizeCollection.hxx>
+#include <salgdi.hxx>
 #include <svdata.hxx>
 
 #include <strings.hrc>
@@ -1573,9 +1575,18 @@ void FontManager::CacheGlyphBoundRect(FontInstance const* pFont, sal_GlyphId nID
     m_aBoundRectCache.insert({ { pFont, nID }, rRect });
 }
 
-void FontManager::Init(SalFont* pFontMgr)
+void FontManager::Init(RenderContext2 const* pRenderContext)
 {
-    pFontMgr->GetDevFontList(this);
+    if (Count())
+        return;
+
+    if (!(pRenderContext->mpGraphics || pRenderContext->AcquireGraphics()))
+        return;
+
+    assert(pRenderContext->mpGraphics);
+
+    SAL_INFO("vcl.gdi", "RenderContext2::InitFontManager()");
+    pRenderContext->mpGraphics->GetDevFontList(this);
 
     // There is absolutely no way there should be no fonts available on the device
     if (!Count())

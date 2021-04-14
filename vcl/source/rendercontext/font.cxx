@@ -227,19 +227,7 @@ bool RenderContext2::InitFontInstance()
     return true;
 }
 
-void RenderContext2::InitFontManager() const
-{
-    if (mxFontManager->Count())
-        return;
-
-    if (!(mpGraphics || AcquireGraphics()))
-        return;
-
-    assert(mpGraphics);
-
-    SAL_INFO("vcl.gdi", "RenderContext2::InitFontManager()");
-    mxFontManager->Init(mpGraphics);
-}
+void RenderContext2::InitFontManager() const { mxFontManager->Init(this); }
 
 void RenderContext2::InitTextOffsets()
 {
