@@ -1130,7 +1130,6 @@ protected:
 
 private:
     SAL_DLLPRIVATE bool InitFont();
-    SAL_DLLPRIVATE void InitFontManager() const;
     SAL_DLLPRIVATE void ImplInitTextColor();
     virtual void InitWaveLineColor(Color const& rColor, tools::Long);
 

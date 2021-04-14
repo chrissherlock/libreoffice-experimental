@@ -84,7 +84,7 @@ void RenderContext2::SetFont(vcl::Font const& rNewFont)
 
 bool RenderContext2::IsFontAvailable(OUString const& rFontName) const
 {
-    InitFontManager();
+    mxFontManager->Init(this);
     FontFamily* pFound = mxFontManager->FindFontFamily(rFontName);
     return (pFound != nullptr);
 }
@@ -179,7 +179,7 @@ bool RenderContext2::InitNewFont()
 
 bool RenderContext2::InitFontInstance()
 {
-    InitFontManager();
+    mxFontManager->Init(this);
 
     FontSize aSize = GetFontSize(maFont);
 
@@ -226,8 +226,6 @@ bool RenderContext2::InitFontInstance()
 
     return true;
 }
-
-void RenderContext2::InitFontManager() const { mxFontManager->Init(this); }
 
 void RenderContext2::InitTextOffsets()
 {
@@ -322,7 +320,7 @@ bool RenderContext2::FixOLEScaleFactors()
 
 FontMetric RenderContext2::GetFontMetric(int nDevFontIndex) const
 {
-    InitFontManager();
+    mxFontManager->Init(this);
 
     int nCount = GetFontMetricCount();
     if (nDevFontIndex < nCount)
@@ -355,7 +353,7 @@ int RenderContext2::GetFontFaceSizeCount(vcl::Font const& rFont) const
 {
     mpDeviceFontSizeList.reset();
 
-    InitFontManager();
+    mxFontManager->Init(this);
     mpDeviceFontSizeList = mxFontManager->GetDeviceFontSizeList(rFont.GetFamilyName());
     return mpDeviceFontSizeList->Count();
 }
@@ -394,7 +392,7 @@ Size RenderContext2::GetFontFaceSize(vcl::Font const& rFont, int nSizeIndex) con
 
 bool RenderContext2::AddTempDevFont(OUString const& rFileURL, OUString const& rFontName)
 {
-    InitFontManager();
+    mxFontManager->Init(this);
 
     if (!mpGraphics && !AcquireGraphics())
         return false;
@@ -972,7 +970,7 @@ vcl::Font RenderContext2::GetDefaultFont(DefaultFontType nType, LanguageType eLa
         // Should we only return available fonts on the given device
         if (pOutDev)
         {
-            pOutDev->InitFontManager();
+            pOutDev->mxFontManager->Init(pOutDev);
 
             // Search Font in the FontList
             OUString aName;
@@ -1005,7 +1003,7 @@ vcl::Font RenderContext2::GetDefaultFont(DefaultFontType nType, LanguageType eLa
                 }
                 else
                 {
-                    pOutDev->InitFontManager();
+                    pOutDev->mxFontManager->Init(pOutDev);
 
                     aFont.SetFamilyName(aSearch);
 
