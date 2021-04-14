@@ -181,36 +181,6 @@ bool RenderContext2::InitNewFont()
     return FixOLEScaleFactors();
 }
 
-bool RenderContext2::HasTextLines() const
-{
-    return ((maFont.GetUnderline() != LINESTYLE_NONE)
-            && (maFont.GetUnderline() != LINESTYLE_DONTKNOW))
-           || ((maFont.GetOverline() != LINESTYLE_NONE)
-               && (maFont.GetOverline() != LINESTYLE_DONTKNOW))
-           || ((maFont.GetStrikeout() != STRIKEOUT_NONE)
-               && (maFont.GetStrikeout() != STRIKEOUT_DONTKNOW));
-}
-
-bool RenderContext2::IsTextSpecial() const
-{
-    return maFont.IsShadow() || maFont.IsOutline() || (maFont.GetRelief() != FontRelief::NONE);
-}
-
-bool RenderContext2::IsFontUnantialiased() const
-{
-    bool bNonAntialiased(GetAntialiasing() & AntialiasingFlags::DisableText);
-
-    if (!utl::ConfigManager::IsFuzzing())
-    {
-        const StyleSettings& rStyleSettings = GetSettings().GetStyleSettings();
-        bNonAntialiased |= bool(rStyleSettings.GetDisplayOptions() & DisplayOptions::AADisable);
-        bNonAntialiased |= (int(rStyleSettings.GetAntialiasingMinPixelHeight())
-                            > maFont.GetFontSize().Height());
-    }
-
-    return bNonAntialiased;
-}
-
 bool RenderContext2::InitFontInstance()
 {
     InitFontManager();
@@ -316,6 +286,36 @@ void RenderContext2::InitTextOffsets()
             aOriginPt.RotateAround(mnTextOffX, mnTextOffY, mpFontInstance->GetTextAngle());
         }
     }
+}
+
+bool RenderContext2::HasTextLines() const
+{
+    return ((maFont.GetUnderline() != LINESTYLE_NONE)
+            && (maFont.GetUnderline() != LINESTYLE_DONTKNOW))
+           || ((maFont.GetOverline() != LINESTYLE_NONE)
+               && (maFont.GetOverline() != LINESTYLE_DONTKNOW))
+           || ((maFont.GetStrikeout() != STRIKEOUT_NONE)
+               && (maFont.GetStrikeout() != STRIKEOUT_DONTKNOW));
+}
+
+bool RenderContext2::IsTextSpecial() const
+{
+    return maFont.IsShadow() || maFont.IsOutline() || (maFont.GetRelief() != FontRelief::NONE);
+}
+
+bool RenderContext2::IsFontUnantialiased() const
+{
+    bool bNonAntialiased(GetAntialiasing() & AntialiasingFlags::DisableText);
+
+    if (!utl::ConfigManager::IsFuzzing())
+    {
+        const StyleSettings& rStyleSettings = GetSettings().GetStyleSettings();
+        bNonAntialiased |= bool(rStyleSettings.GetDisplayOptions() & DisplayOptions::AADisable);
+        bNonAntialiased |= (int(rStyleSettings.GetAntialiasingMinPixelHeight())
+                            > maFont.GetFontSize().Height());
+    }
+
+    return bNonAntialiased;
 }
 
 bool RenderContext2::FixOLEScaleFactors()
