@@ -139,21 +139,6 @@ Color RenderContext2::GetReadableFontColor(const Color& rFontColor, const Color&
         return rFontColor;
 }
 
-bool RenderContext2::InitNewFont()
-{
-    DBG_TESTSOLARMUTEX();
-
-    if (!mbNewFont)
-        return true;
-
-    if (!InitFontInstance())
-        return false;
-
-    InitTextOffsets();
-
-    return FixOLEScaleFactors();
-}
-
 bool RenderContext2::InitFont()
 {
     DBG_TESTSOLARMUTEX();
@@ -179,6 +164,21 @@ bool RenderContext2::InitFont()
     mpGraphics->SetFont(mpFontInstance.get(), 0);
     mbInitFont = false;
     return true;
+}
+
+bool RenderContext2::InitNewFont()
+{
+    DBG_TESTSOLARMUTEX();
+
+    if (!mbNewFont)
+        return true;
+
+    if (!InitFontInstance())
+        return false;
+
+    InitTextOffsets();
+
+    return FixOLEScaleFactors();
 }
 
 bool RenderContext2::InitFontInstance()
