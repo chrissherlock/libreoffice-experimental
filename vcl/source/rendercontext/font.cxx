@@ -149,15 +149,11 @@ bool RenderContext2::InitFont()
     if (!mpFontInstance)
         return false;
 
-    if (!mpGraphics)
-    {
-        if (!AcquireGraphics())
-            return false;
-    }
-    else if (!mbInitFont)
-    {
+    if (!mpGraphics && !AcquireGraphics())
+        return false;
+
+    if (!mbInitFont)
         return true;
-    }
 
     assert(mpGraphics);
 
