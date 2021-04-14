@@ -129,6 +129,16 @@ FontSize RenderContext2::GetFontSize(vcl::Font const& rFont) const
     return FontSize(aSize.Width(), fExactHeight);
 }
 
+Color RenderContext2::GetReadableFontColor(const Color& rFontColor, const Color& rBgColor) const
+{
+    if (rBgColor.IsDark() && rFontColor.IsDark())
+        return COL_WHITE;
+    else if (rBgColor.IsBright() && rFontColor.IsBright())
+        return COL_BLACK;
+    else
+        return rFontColor;
+}
+
 bool RenderContext2::InitNewFont()
 {
     DBG_TESTSOLARMUTEX();
@@ -142,16 +152,6 @@ bool RenderContext2::InitNewFont()
     InitTextOffsets();
 
     return FixOLEScaleFactors();
-}
-
-Color RenderContext2::GetReadableFontColor(const Color& rFontColor, const Color& rBgColor) const
-{
-    if (rBgColor.IsDark() && rFontColor.IsDark())
-        return COL_WHITE;
-    else if (rBgColor.IsBright() && rFontColor.IsBright())
-        return COL_BLACK;
-    else
-        return rFontColor;
 }
 
 bool RenderContext2::InitFont()
