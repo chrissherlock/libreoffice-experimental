@@ -23,12 +23,18 @@
 #include <unotools/fontdefs.hxx>
 #include <o3tl/sorted_vector.hxx>
 
+#include <vcl/svapp.hxx>
+
 #include <outdev.h>
+#include <SalFont.hxx>
 #include <font/FontSelectPattern.hxx>
 #include <font/FontInstance.hxx>
 #include <font/FontManager.hxx>
 #include <font/FontFaceCollection.hxx>
 #include <font/FontFaceSizeCollection.hxx>
+#include <svdata.hxx>
+
+#include <strings.hrc>
 
 #include <memory>
 
@@ -1565,6 +1571,22 @@ void FontManager::CacheGlyphBoundRect(FontInstance const* pFont, sal_GlyphId nID
         return;
 
     m_aBoundRectCache.insert({ { pFont, nID }, rRect });
+}
+
+void FontManager::Init(SalFont* pFontMgr)
+{
+    pFontMgr->GetDevFontList(this);
+
+    // There is absolutely no way there should be no fonts available on the device
+    if (!Count())
+    {
+        OUString aError("Application error: no fonts and no vcl resource found on your system");
+        OUString aResStr(VclResId(SV_ACCESSERROR_NO_FONTS));
+        if (!aResStr.isEmpty())
+            aError = aResStr;
+
+        Application::Abort(aError);
+    }
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

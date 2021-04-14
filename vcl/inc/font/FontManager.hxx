@@ -28,6 +28,8 @@
 #include <font/GlyphBoundRectCacheKey.hxx>
 #include <font/GlyphBoundRectCacheHash.hxx>
 
+#include <strings.hrc>
+
 #include <array>
 
 #include <boost/functional/hash.hpp>
@@ -38,6 +40,7 @@ class FontInstance;
 class FontFaceSizeCollection;
 class ImplGlyphFallbackFontSubstitution;
 class ImplPreMatchFontSubstitution;
+class SalFont;
 
 typedef o3tl::lru_map<GlyphBoundRectCacheKey, tools::Rectangle, GlyphBoundRectCacheHash>
     GlyphBoundRectCache;
@@ -47,6 +50,8 @@ class VCL_PLUGIN_PUBLIC FontManager final
 public:
     explicit FontManager();
     ~FontManager();
+
+    void Init(SalFont* pFontMgr);
 
     // fill the list with device font faces
     void Add(FontFace*);

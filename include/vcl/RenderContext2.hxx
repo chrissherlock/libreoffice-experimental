@@ -1061,7 +1061,7 @@ protected:
     virtual void ImplClearFontData(bool bNewFontLists);
     virtual void ImplRefreshFontData(bool bNewFontLists);
     void ReleaseFontCollection();
-    void SetFontCollectionFromSVData();
+    void CloneFontManager(FontManager const* const pFontManager);
     void ResetNewFontCache();
 
     SAL_DLLPRIVATE void ImplInitTextLineSize();

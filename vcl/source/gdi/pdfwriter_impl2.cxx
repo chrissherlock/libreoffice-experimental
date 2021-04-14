@@ -27,6 +27,8 @@
 #include <vcl/BitmapReadAccess.hxx>
 #include <vcl/graph.hxx>
 
+#include <svdata.hxx>
+
 #include <unotools/streamwrap.hxx>
 
 #include <tools/helpers.hxx>
@@ -1976,7 +1978,7 @@ void PDFWriterImpl::ImplRefreshFontData(bool bNewFontLists)
 {
     if (bNewFontLists && AcquireGraphics())
     {
-        SetFontCollectionFromSVData();
+        CloneFontManager(ImplGetSVData()->maGDIData.mxScreenFontManager.get());
         ResetNewFontCache();
     }
 }

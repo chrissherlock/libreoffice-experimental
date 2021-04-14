@@ -238,17 +238,7 @@ void RenderContext2::InitFontManager() const
     assert(mpGraphics);
 
     SAL_INFO("vcl.gdi", "RenderContext2::InitFontManager()");
-    mpGraphics->GetDevFontList(mxFontManager.get());
-
-    // There is absolutely no way there should be no fonts available on the device
-    if (!mxFontManager->Count())
-    {
-        OUString aError("Application error: no fonts and no vcl resource found on your system");
-        OUString aResStr(VclResId(SV_ACCESSERROR_NO_FONTS));
-        if (!aResStr.isEmpty())
-            aError = aResStr;
-        Application::Abort(aError);
-    }
+    mxFontManager->Init(mpGraphics);
 }
 
 void RenderContext2::InitTextOffsets()
@@ -1354,9 +1344,9 @@ sal_Int32 RenderContext2::HasGlyphs(const vcl::Font& rTempFont, const OUString& 
 
 void RenderContext2::ReleaseFontCollection() { mxFontManager.reset(); }
 
-void RenderContext2::SetFontCollectionFromSVData()
+void RenderContext2::CloneFontManager(FontManager const* const pFontManager)
 {
-    mxFontManager = ImplGetSVData()->maGDIData.mxScreenFontManager->Clone();
+    mxFontManager = pFontManager->Clone();
 }
 
 void RenderContext2::ResetNewFontCache() { mxFontManager = std::make_shared<FontManager>(); }
