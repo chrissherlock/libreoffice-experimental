@@ -1217,7 +1217,7 @@ bool RenderContext2::ImplDrawRotateText(SalLayout& rSalLayout)
 
 void RenderContext2::ImplDrawTextDirect(SalLayout& rSalLayout)
 {
-    bool bTextLines = HasTextLines();
+    bool bTextLines = maFont.HasTextLines();
 
     if (mpFontInstance->GetOwnOrientation())
     {
@@ -1402,7 +1402,7 @@ void RenderContext2::ImplDrawText(SalLayout& rSalLayout)
     if (IsTextFillColor())
         ImplDrawTextBackground(rSalLayout);
 
-    if (IsTextSpecial())
+    if (maFont.IsTextSpecial())
         ImplDrawSpecialText(rSalLayout);
     else
         ImplDrawTextDirect(rSalLayout);

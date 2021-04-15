@@ -19,6 +19,7 @@
 
 #include <tools/stream.hxx>
 #include <tools/vcompat.hxx>
+#include <tools/fontenum.hxx>
 #include <tools/gen.hxx>
 #include <unotools/fontcfg.hxx>
 #include <unotools/fontdefs.hxx>
@@ -872,6 +873,20 @@ FontEmphasisMark Font::GetEmphasisMark() const { return mpImplFont->meEmphasisMa
 bool Font::IsWordLineMode() const { return mpImplFont->mbWordLine; }
 bool Font::IsSameInstance( const vcl::Font& rFont ) const { return (mpImplFont == rFont.mpImplFont); }
 
+bool Font::HasTextLines() const
+{
+    return ((GetUnderline() != LINESTYLE_NONE)
+            && (GetUnderline() != LINESTYLE_DONTKNOW))
+           || ((GetOverline() != LINESTYLE_NONE)
+               && (GetOverline() != LINESTYLE_DONTKNOW))
+           || ((GetStrikeout() != STRIKEOUT_NONE)
+               && (GetStrikeout() != STRIKEOUT_DONTKNOW));
+}
+
+bool Font::IsTextSpecial() const
+{
+    return IsShadow() || IsOutline() || (GetRelief() != FontRelief::NONE);
+}
 
 ImplFont::ImplFont() :
     meWeight( WEIGHT_DONTKNOW ),

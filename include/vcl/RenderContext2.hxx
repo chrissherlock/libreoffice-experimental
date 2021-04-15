@@ -1135,9 +1135,6 @@ private:
     SAL_DLLPRIVATE void InitTextOffsets();
     SAL_DLLPRIVATE bool FixOLEScaleFactors();
 
-    bool HasTextLines() const;
-    bool IsTextSpecial() const;
-
     /** Determine if native widgets can be enabled
      */
     virtual bool CanEnableNativeWidget() const { return false; }
