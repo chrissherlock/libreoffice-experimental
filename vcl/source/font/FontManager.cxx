@@ -24,15 +24,17 @@
 #include <o3tl/sorted_vector.hxx>
 
 #include <vcl/RenderContext2.hxx>
+#include <vcl/font/FontSize.hxx>
 #include <vcl/svapp.hxx>
 
 #include <outdev.h>
 #include <SalFont.hxx>
-#include <font/FontSelectPattern.hxx>
-#include <font/FontInstance.hxx>
-#include <font/FontManager.hxx>
+#include <emphasismark.hxx>
 #include <font/FontFaceCollection.hxx>
 #include <font/FontFaceSizeCollection.hxx>
+#include <font/FontInstance.hxx>
+#include <font/FontManager.hxx>
+#include <font/FontSelectPattern.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>
 
@@ -1600,4 +1602,59 @@ void FontManager::Init(RenderContext2 const* pRenderContext)
     }
 }
 
+bool FontManager::InitFontInstance(RenderContext2* pRenderContext)
+{
+    Init(pRenderContext);
+
+    FontSize aSize = pRenderContext->GetFontSize(pRenderContext->GetFont());
+
+    // get font entry
+    rtl::Reference<FontInstance> pOldFontInstance = pRenderContext->mpFontInstance;
+    pRenderContext->mpFontInstance
+        = GetFontInstance(pRenderContext->GetFont(), aSize, pRenderContext->IsFontUnantialiased());
+    const bool bNewFontInstance = pOldFontInstance.get() != pRenderContext->mpFontInstance.get();
+    pOldFontInstance.clear();
+
+    FontInstance* pFontInstance = pRenderContext->mpFontInstance.get();
+
+    if (!pFontInstance)
+    {
+        SAL_WARN("vcl.gdi", "RenderContext2::InitNewFont(): no FontInstance, no Font");
+        return false;
+    }
+
+    // mark when lower layers need to get involved
+    pRenderContext->mbNewFont = false;
+    if (bNewFontInstance)
+        pRenderContext->mbInitFont = true;
+
+    // select font when it has not been initialized yet
+    if (!pRenderContext->mpFontInstance->IsInit() && pRenderContext->InitFont())
+    {
+        // get metric data from device layers
+        pRenderContext->mpFontInstance->SetInitFlag(true);
+
+        pRenderContext->mpFontInstance->SetOrientation(
+            pRenderContext->mpFontInstance->GetFontSelectPattern().mnOrientation);
+        pRenderContext->mpGraphics->GetFontMetric(
+            pRenderContext->mpFontInstance->GetFontMetricData(), 0);
+
+        pRenderContext->mpFontInstance->ImplInitTextLineSize(pRenderContext);
+        pRenderContext->mpFontInstance->ImplInitAboveTextLineSize();
+        pRenderContext->mpFontInstance->ImplInitFlags(pRenderContext);
+
+        pRenderContext->mpFontInstance->SetLineHeight(
+            pRenderContext->mpFontInstance->GetAscent()
+            + pRenderContext->mpFontInstance->GetDescent());
+
+        pRenderContext->SetFontOrientation(pRenderContext->mpFontInstance.get());
+    }
+
+    // calculate EmphasisArea
+    if (pRenderContext->GetFont().GetEmphasisMark() & FontEmphasisMark::Style)
+        pRenderContext->mpFontInstance->SetEmphasisMarkStyle(
+            ImplGetEmphasisMarkStyle(pRenderContext->GetFont()));
+
+    return true;
+}
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

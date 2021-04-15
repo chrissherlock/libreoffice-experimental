@@ -1054,7 +1054,6 @@ protected:
 
     SAL_DLLPRIVATE bool IsFontUnantialiased() const;
     SAL_DLLPRIVATE bool InitNewFont();
-    SAL_DLLPRIVATE bool InitFontInstance();
 
     SAL_DLLPRIVATE const FontInstance* GetFontInstance() const;
 

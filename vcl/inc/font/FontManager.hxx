@@ -53,6 +53,7 @@ public:
     ~FontManager();
 
     void Init(RenderContext2 const* pRenderContext);
+    bool InitFontInstance(RenderContext2* pRenderContext);
 
     // fill the list with device font faces
     void Add(FontFace*);

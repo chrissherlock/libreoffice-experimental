@@ -169,62 +169,12 @@ bool RenderContext2::InitNewFont()
     if (!mbNewFont)
         return true;
 
-    if (!InitFontInstance())
+    if (!mxFontManager->InitFontInstance(this))
         return false;
 
     InitTextOffsets();
 
     return FixOLEScaleFactors();
-}
-
-bool RenderContext2::InitFontInstance()
-{
-    mxFontManager->Init(this);
-
-    FontSize aSize = GetFontSize(maFont);
-
-    // get font entry
-    rtl::Reference<FontInstance> pOldFontInstance = mpFontInstance;
-    mpFontInstance = mxFontManager->GetFontInstance(maFont, aSize, IsFontUnantialiased());
-    const bool bNewFontInstance = pOldFontInstance.get() != mpFontInstance.get();
-    pOldFontInstance.clear();
-
-    FontInstance* pFontInstance = mpFontInstance.get();
-
-    if (!pFontInstance)
-    {
-        SAL_WARN("vcl.gdi", "RenderContext2::InitNewFont(): no FontInstance, no Font");
-        return false;
-    }
-
-    // mark when lower layers need to get involved
-    mbNewFont = false;
-    if (bNewFontInstance)
-        mbInitFont = true;
-
-    // select font when it has not been initialized yet
-    if (!mpFontInstance->IsInit() && InitFont())
-    {
-        // get metric data from device layers
-        mpFontInstance->SetInitFlag(true);
-
-        mpFontInstance->SetOrientation(mpFontInstance->GetFontSelectPattern().mnOrientation);
-        mpGraphics->GetFontMetric(mpFontInstance->GetFontMetricData(), 0);
-
-        mpFontInstance->ImplInitTextLineSize(this);
-        mpFontInstance->ImplInitAboveTextLineSize();
-        mpFontInstance->ImplInitFlags(this);
-
-        mpFontInstance->SetLineHeight(mpFontInstance->GetAscent() + mpFontInstance->GetDescent());
-
-        SetFontOrientation(mpFontInstance.get());
-    }
-
-    // calculate EmphasisArea
-    if (maFont.GetEmphasisMark() & FontEmphasisMark::Style)
-        mpFontInstance->SetEmphasisMarkStyle(ImplGetEmphasisMarkStyle(maFont));
-
-    return true;
 }
 
 void RenderContext2::InitTextOffsets()
