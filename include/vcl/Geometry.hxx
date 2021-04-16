@@ -23,6 +23,7 @@
 #include <tools/long.hxx>
 
 #include <vcl/dllapi.h>
+#include <vcl/MappingMetrics.hxx>
 
 class VCL_DLLPUBLIC Geometry
 {
@@ -62,6 +63,21 @@ public:
     sal_Int32 GetDPIScalePercentage() const;
     void SetDPIScalePercentage(sal_Int32 nPercentage);
 
+    Point GetMappingOffset() const;
+    void SetMappingXOffset(tools::Long nX);
+    void SetMappingYOffset(tools::Long nY);
+
+    MappingMetrics GetMapMetrics() const;
+
+    tools::Long GetMapScalingXNumerator() const;
+    tools::Long GetMapScalingXDenominator() const;
+    tools::Long GetMapScalingYNumerator() const;
+    tools::Long GetMapScalingYDenominator() const;
+    void SetMapScalingXNumerator(tools::Long nX);
+    void SetMapScalingXDenominator(tools::Long nX);
+    void SetMapScalingYNumerator(tools::Long nY);
+    void SetMapScalingYDenominator(tools::Long nY);
+
 private:
     bool mbMap;
 
@@ -80,6 +96,8 @@ private:
     sal_Int32 mnDPIY;
     sal_Int32
         mnDPIScalePercentage; ///< For HiDPI displays, we want to draw elements for a percentage larger
+
+    MappingMetrics maMapRes;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

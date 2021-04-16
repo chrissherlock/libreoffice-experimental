@@ -190,8 +190,10 @@ bool RenderContext2::FixOLEScaleFactors()
     if (IsMapModeEnabled() && !aSize.GetWidth())
     {
         int nOrigWidth = mpFontInstance->GetWidth();
-        float fStretch = static_cast<float>(maMapRes.mnMapScNumX) * maMapRes.mnMapScDenomY;
-        fStretch /= static_cast<float>(maMapRes.mnMapScNumY) * maMapRes.mnMapScDenomX;
+        float fStretch = static_cast<float>(maGeometry.GetMapScalingXNumerator())
+                         * maGeometry.GetMapScalingYDenominator();
+        fStretch /= static_cast<float>(maGeometry.GetMapScalingYNumerator())
+                    * maGeometry.GetMapScalingXDenominator();
         int nNewWidth = static_cast<int>(nOrigWidth * fStretch + 0.5);
         if ((nNewWidth != nOrigWidth) && (nNewWidth != 0))
         {

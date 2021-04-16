@@ -456,7 +456,7 @@ bool RenderContext2::GetTextBoundRect(tools::Rectangle& rRect, OUString const& r
             rRect = PixelToLogic(aPixelRect);
 
             if (maGeometry.IsMapModeEnabled())
-                rRect += Point(maMapRes.mnMapOfsX, maMapRes.mnMapOfsY);
+                rRect += maGeometry.GetMappingOffset();
         }
     }
 

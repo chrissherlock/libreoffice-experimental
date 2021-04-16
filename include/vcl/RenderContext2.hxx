@@ -1100,7 +1100,6 @@ protected:
     vcl::Region maRegion; ///< contains the clip region, see SetClipRegion(...)
     Point maRefPoint;
     MapMode maMapMode;
-    MappingMetrics maMapRes;
     std::unique_ptr<ImplOutDevData> mpOutDevData;
     mutable std::shared_ptr<FontManager> mxFontManager;
     mutable std::unique_ptr<FontFaceCollection> mpDeviceFontList;

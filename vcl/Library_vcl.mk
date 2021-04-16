@@ -355,6 +355,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/gdi/impgraph \
     vcl/source/gdi/jobset \
     vcl/source/gdi/lineinfo \
+    vcl/source/gdi/makefraction \
     vcl/source/gdi/mapmod \
     vcl/source/gdi/metaact \
     vcl/source/gdi/oldprintadaptor \
