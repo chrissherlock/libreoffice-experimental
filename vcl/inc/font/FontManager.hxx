@@ -72,6 +72,8 @@ public:
     FontFamily* FindFontFamilyByAttributes(ImplFontAttrs nSearchType, FontWeight, FontWidth,
                                            FontItalic, const OUString& rSearchFamily) const;
 
+    bool IsFontAvailable(OUString const& rFontName) const;
+
     rtl::Reference<FontInstance> GetFontInstance(const vcl::Font&, const FontSize& rPixelSize,
                                                  bool bNonAntialias = false);
     // suggest fonts for glyph fallback

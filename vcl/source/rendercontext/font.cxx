@@ -74,8 +74,7 @@ void RenderContext2::SetFont(vcl::Font const& rNewFont)
 bool RenderContext2::IsFontAvailable(OUString const& rFontName) const
 {
     mxFontManager->Init(this);
-    FontFamily* pFound = mxFontManager->FindFontFamily(rFontName);
-    return (pFound != nullptr);
+    return mxFontManager->IsFontAvailable(rFontName);
 }
 
 void RenderContext2::SetFontOrientation(FontInstance* const pFontInstance) const

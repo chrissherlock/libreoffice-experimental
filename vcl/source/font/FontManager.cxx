@@ -1699,4 +1699,10 @@ void FontManager::InitTextOffset(RenderContext2 const* pRenderContext)
     }
 }
 
+bool FontManager::IsFontAvailable(OUString const& rFontName) const
+{
+    FontFamily* pFound = FindFontFamily(rFontName);
+    return (pFound != nullptr);
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
