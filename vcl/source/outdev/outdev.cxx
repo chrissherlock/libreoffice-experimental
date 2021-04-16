@@ -29,7 +29,6 @@
 #include <vcl/svapp.hxx>
 #include <vcl/sysdata.hxx>
 
-#include <outdev.h>
 #include <window.h>
 #include <ImplOutDevData.hxx>
 #include <salgdi.hxx>

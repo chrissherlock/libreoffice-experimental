@@ -27,7 +27,6 @@
 #include <vcl/font/FontSize.hxx>
 #include <vcl/svapp.hxx>
 
-#include <outdev.h>
 #include <SalFont.hxx>
 #include <emphasismark.hxx>
 #include <font/FontFaceCollection.hxx>
@@ -35,6 +34,9 @@
 #include <font/FontInstance.hxx>
 #include <font/FontManager.hxx>
 #include <font/FontSelectPattern.hxx>
+#include <font/ImplGlyphFallbackFontSubstitution.hxx>
+#include <font/ImplPreMatchFontSubstitution.hxx>
+#include <font/fontsubst.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>
 

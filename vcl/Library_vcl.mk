@@ -558,6 +558,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/font/FontFaceCollection \
     vcl/source/font/FontFaceSizeCollection \
     vcl/source/font/FontFamily \
+    vcl/source/font/ImplDirectFontSubstitution \
     vcl/source/font/fontattributes \
     vcl/source/font/fontcharmap \
     vcl/source/font/fontmetric \

@@ -23,7 +23,6 @@
 #include <vcl/pdfextoutdevdata.hxx>
 #include <vcl/virdev.hxx>
 
-#include <outdev.h>
 #include <font/FontManager.hxx>
 #include <font/FontFaceCollection.hxx>
 #include <font/FontFaceSizeCollection.hxx>

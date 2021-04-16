@@ -55,7 +55,6 @@
 #include <svdata.hxx>
 #include <window.h>
 #include <toolbox.h>
-#include <outdev.h>
 #include <brdwin.hxx>
 #include <helpwin.hxx>
 

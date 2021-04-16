@@ -31,13 +31,13 @@
 #include <vcl/virdev.hxx>
 #include <vcl/svapp.hxx>
 
-#include <outdev.h>
 #include <window.h>
 #include <emphasismark.hxx>
 #include <font/FeatureCollector.hxx>
 #include <font/FontManager.hxx>
 #include <font/FontFaceCollection.hxx>
 #include <font/FontFaceSizeCollection.hxx>
+#include <font/ImplDirectFontSubstitution.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>
@@ -590,44 +590,11 @@ void RenderContext2::AddFontSubstitute(const OUString& rFontName, const OUString
     ImplGetSVData()->maGDIData.mbFontSubChanged = true;
 }
 
-void ImplDirectFontSubstitution::AddFontSubstitute(const OUString& rFontName,
-                                                   const OUString& rSubstFontName,
-                                                   AddFontSubstituteFlags nFlags)
-{
-    maFontSubstList.emplace_back(rFontName, rSubstFontName, nFlags);
-}
-
-ImplFontSubstEntry::ImplFontSubstEntry(const OUString& rFontName, const OUString& rSubstFontName,
-                                       AddFontSubstituteFlags nSubstFlags)
-    : mnFlags(nSubstFlags)
-{
-    maSearchName = GetEnglishSearchFontName(rFontName);
-    maSearchReplaceName = GetEnglishSearchFontName(rSubstFontName);
-}
-
 void RenderContext2::RemoveFontsSubstitute()
 {
     ImplDirectFontSubstitution* pSubst = ImplGetSVData()->maGDIData.mpDirectFontSubst;
     if (pSubst)
         pSubst->RemoveFontsSubstitute();
-}
-
-void ImplDirectFontSubstitution::RemoveFontsSubstitute() { maFontSubstList.clear(); }
-
-bool ImplDirectFontSubstitution::FindFontSubstitute(OUString& rSubstName,
-                                                    std::u16string_view rSearchName) const
-{
-    // TODO: get rid of O(N) searches
-    std::vector<ImplFontSubstEntry>::const_iterator it = std::find_if(
-        maFontSubstList.begin(), maFontSubstList.end(), [&](const ImplFontSubstEntry& s) {
-            return (s.mnFlags & AddFontSubstituteFlags::ALWAYS) && (s.maSearchName == rSearchName);
-        });
-    if (it != maFontSubstList.end())
-    {
-        rSubstName = it->maSearchReplaceName;
-        return true;
-    }
-    return false;
 }
 
 void ImplFontSubstitute(OUString& rFontName)

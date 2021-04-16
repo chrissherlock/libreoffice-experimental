@@ -29,7 +29,6 @@
 #include <vcl/print.hxx>
 #include <vcl/virdev.hxx>
 
-#include <outdev.h>
 #include <window.h>
 #include <drawmode.hxx>
 #include <font/FeatureCollector.hxx>

@@ -39,7 +39,6 @@
 #include <svdata.hxx>
 #include <print.hrc>
 #include <jobset.h>
-#include <outdev.h>
 #include <font/FontManager.hxx>
 #include <font/FontFaceCollection.hxx>
 #include <font/FontFaceSizeCollection.hxx>

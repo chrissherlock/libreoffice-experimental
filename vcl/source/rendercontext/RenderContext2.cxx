@@ -25,8 +25,8 @@
 #include <vcl/virdev.hxx>
 #include <vcl/window.hxx>
 
-#include <outdev.h>
 #include <ImplOutDevData.hxx>
+#include <font/FontFace.hxx>
 #include <font/FontFaceCollection.hxx>
 #include <font/FontFaceSizeCollection.hxx>
 #include <salgdi.hxx>

@@ -20,7 +20,6 @@
 #include <rtl/ustring.hxx>
 #include <unotools/fontdefs.hxx>
 
-#include <outdev.h>
 #include <font/FontSelectPattern.hxx>
 #include <font/FontManager.hxx>
 #include <font/FontFaceCollection.hxx>

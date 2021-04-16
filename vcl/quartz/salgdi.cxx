@@ -39,12 +39,12 @@
 #include <vcl/sysdata.hxx>
 
 #include <font/CmapResult.hxx>
+#include <font/FontSubsetInfo.hxx>
 #include <font/ImplFont.hxx>
 #include <font/ImplFontCharMap.hxx>
 #include <font/ImplFontMetricData.hxx>
-#include <font/FontSubsetInfo.hxx>
+#include <font/ImplGlyphFallbackFontSubstitution.hxx>
 #include <quartz/ctfonts.hxx>
-#include <outdev.h>
 #include <font/FontManager.hxx>
 
 #ifdef MACOSX

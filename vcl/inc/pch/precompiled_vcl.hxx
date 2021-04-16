@@ -266,7 +266,7 @@
 #include <configsettings.hxx>
 #include <controldata.hxx>
 #include <drawmode.hxx>
-#include <outdev.h>
+#include <font/ImplFontSubstitution.hxx>
 #include <salbmp.hxx>
 #include <salframe.hxx>
 #include <salgdi.hxx>

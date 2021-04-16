@@ -33,7 +33,7 @@
 #include <win/salgdi.h>
 #include <win/saldata.hxx>
 #include <win/wingdiimpl.hxx>
-#include <outdev.h>
+#include <font/ImplFontSubstitution.hxx>
 
 #include <win/DWriteTextRenderer.hxx>
 #include <win/scoped_gdi.hxx>

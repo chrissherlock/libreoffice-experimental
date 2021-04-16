@@ -24,7 +24,6 @@
 #include <vcl/virdev.hxx>
 #include <vcl/settings.hxx>
 
-#include <outdev.h>
 #include <drawmode.hxx>
 
 void RenderContext2::Push(PushFlags nFlags)

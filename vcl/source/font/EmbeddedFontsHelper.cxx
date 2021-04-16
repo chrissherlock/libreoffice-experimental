@@ -18,7 +18,6 @@
 #include <vcl/font/EmbeddedFontsHelper.hxx>
 #include <vcl/font/FontCharMap.hxx>
 
-#include <outdev.h>
 #include <font/FontManager.hxx>
 #include <font/FontFaceCollection.hxx>
 #include <salgdi.hxx>

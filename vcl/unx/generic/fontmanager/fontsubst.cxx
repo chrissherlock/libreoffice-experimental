@@ -17,10 +17,13 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <unx/geninst.h>
-#include <outdev.h>
-#include <unx/fontmanager.hxx>
 #include <font/FontManager.hxx>
+#include <font/ImplFontSubstitution.hxx>
+#include <font/ImplGlyphFallbackFontSubstitution.hxx>
+#include <font/ImplPreMatchFontSubstitution.hxx>
+
+#include <unx/geninst.h>
+#include <unx/fontmanager.hxx>
 
 // platform specific font substitution hooks
 

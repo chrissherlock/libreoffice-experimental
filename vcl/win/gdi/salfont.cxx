@@ -49,14 +49,15 @@
 #include <vcl/metric.hxx>
 #include <comphelper/scopeguard.hxx>
 
-#include <outdev.h>
+#include <font/ImplFontSubstitution.hxx>
 #include <font/CmapResult.hxx>
+#include <font/FontFace.hxx>
+#include <font/FontManager.hxx>
 #include <font/FontSubsetInfo.hxx>
 #include <font/GlyphItem.hxx>
 #include <font/ImplFontCharMap.hxx>
 #include <font/ImplFontMetricData.hxx>
-#include <font/FontManager.hxx>
-#include <font/FontFace.hxx>
+#include <font/ImplPreMatchFontSubstitution.hxx>
 #include <sft.hxx>
 #include <win/saldata.hxx>
 #include <win/salgdi.h>

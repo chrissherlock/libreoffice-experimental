@@ -19,7 +19,7 @@
 
 #include <win/salgdi.h>
 #include <win/saldata.hxx>
-#include <outdev.h>
+#include <font/ImplFontSubstitution.hxx>
 
 #include <win/DWriteTextRenderer.hxx>
 
