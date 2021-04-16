@@ -143,6 +143,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/rendercontext/eps \
     vcl/source/rendercontext/extoudevdata \
     vcl/source/rendercontext/font \
+    vcl/source/rendercontext/fontsubst \
     vcl/source/rendercontext/fill \
     vcl/source/rendercontext/geom \
     vcl/source/rendercontext/gradient \

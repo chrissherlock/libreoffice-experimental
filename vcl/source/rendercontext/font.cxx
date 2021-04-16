@@ -17,32 +17,21 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <rtl/ustrbuf.hxx>
 #include <tools/debug.hxx>
-#include <tools/fract.hxx>
 #include <unotools/configmgr.hxx>
 
-#include <vcl/RenderContext2.hxx>
 #include <vcl/font/FontCharMap.hxx>
-#include <vcl/flags/AddFontSubstituteFlags.hxx>
-#include <vcl/event.hxx>
-#include <vcl/settings.hxx>
 #include <vcl/print.hxx>
 #include <vcl/virdev.hxx>
-#include <vcl/svapp.hxx>
 
 #include <window.h>
-#include <emphasismark.hxx>
 #include <font/FeatureCollector.hxx>
 #include <font/FontManager.hxx>
 #include <font/FontFaceCollection.hxx>
 #include <font/FontFaceSizeCollection.hxx>
-#include <font/ImplDirectFontSubstitution.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>
-
-#include <strings.hrc>
 
 vcl::Font const& RenderContext2::GetFont() const { return maFont; }
 
@@ -557,59 +546,6 @@ void RenderContext2::ImplUpdateFontDataForAllFrames(const FontUpdateHandler_t pH
     {
         (pPrinter->*pHdl)(bNewFontLists);
         pPrinter = pPrinter->mpNext;
-    }
-}
-
-void RenderContext2::BeginFontSubstitution()
-{
-    ImplSVData* pSVData = ImplGetSVData();
-    pSVData->maGDIData.mbFontSubChanged = false;
-}
-
-void RenderContext2::EndFontSubstitution()
-{
-    ImplSVData* pSVData = ImplGetSVData();
-    if (pSVData->maGDIData.mbFontSubChanged)
-    {
-        ImplUpdateAllFontData(false);
-
-        DataChangedEvent aDCEvt(DataChangedEventType::FONTSUBSTITUTION);
-        Application::ImplCallEventListenersApplicationDataChanged(&aDCEvt);
-        Application::NotifyAllWindows(aDCEvt);
-        pSVData->maGDIData.mbFontSubChanged = false;
-    }
-}
-
-void RenderContext2::AddFontSubstitute(const OUString& rFontName, const OUString& rReplaceFontName,
-                                       AddFontSubstituteFlags nFlags)
-{
-    ImplDirectFontSubstitution*& rpSubst = ImplGetSVData()->maGDIData.mpDirectFontSubst;
-    if (!rpSubst)
-        rpSubst = new ImplDirectFontSubstitution;
-    rpSubst->AddFontSubstitute(rFontName, rReplaceFontName, nFlags);
-    ImplGetSVData()->maGDIData.mbFontSubChanged = true;
-}
-
-void RenderContext2::RemoveFontsSubstitute()
-{
-    ImplDirectFontSubstitution* pSubst = ImplGetSVData()->maGDIData.mpDirectFontSubst;
-    if (pSubst)
-        pSubst->RemoveFontsSubstitute();
-}
-
-void ImplFontSubstitute(OUString& rFontName)
-{
-    // must be canonicalised
-    assert(GetEnglishSearchFontName(rFontName) == rFontName);
-
-    OUString aSubstFontName;
-
-    // apply user-configurable font replacement (eg, from the list in Tools->Options)
-    const ImplDirectFontSubstitution* pSubst = ImplGetSVData()->maGDIData.mpDirectFontSubst;
-    if (pSubst && pSubst->FindFontSubstitute(aSubstFontName, rFontName))
-    {
-        rFontName = aSubstFontName;
-        return;
     }
 }
 
