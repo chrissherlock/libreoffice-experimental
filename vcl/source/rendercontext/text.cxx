@@ -261,7 +261,7 @@ void RenderContext2::DrawTextLine(Point const& rPos, tools::Long nWidth, FontStr
 
     DeviceCoordinate fWidth = LogicWidthToDeviceCoordinate(nWidth);
     Point aPos = ImplLogicToDevicePixel(rPos);
-    aPos += Point(mnTextOffX, mnTextOffY);
+    aPos += GetTextOffset();
 
     ImplDrawTextLine(aPos.X(), aPos.X(), 0, fWidth, eStrikeout, eUnderline, eOverline,
                      bUnderlineAbove);
@@ -449,7 +449,7 @@ bool RenderContext2::GetTextBoundRect(tools::Rectangle& rRect, OUString const& r
                 aPixelRect.SetBottom(static_cast<tools::Long>(aPixelRect.Bottom() * fFactor));
             }
 
-            Point aRotatedOfs(mnTextOffX, mnTextOffY);
+            Point aRotatedOfs(GetTextOffset());
             aRotatedOfs -= pSalLayout->GetDrawPosition(Point(nXOffset, 0));
             aPixelRect += aRotatedOfs;
             rRect = PixelToLogic(aPixelRect);
@@ -1397,7 +1397,7 @@ void RenderContext2::ImplDrawText(SalLayout& rSalLayout)
     if (mbInitTextColor)
         ImplInitTextColor();
 
-    rSalLayout.DrawBase() += Point(mnTextOffX, mnTextOffY);
+    rSalLayout.DrawBase() += GetTextOffset();
 
     if (IsTextFillColor())
         ImplDrawTextBackground(rSalLayout);
@@ -2299,9 +2299,10 @@ bool RenderContext2::GetTextOutlines(basegfx::B2DPolyPolygonVector& rVector, con
             basegfx::B2DHomMatrix aMatrix;
 
             int nWidthFactor = pSalLayout->GetUnitsPerPixel();
-            if (nXOffset | mnTextOffX | mnTextOffY)
+            if (nXOffset | GetTextOffset().X() | GetTextOffset().Y())
             {
-                Point aRotatedOfs(mnTextOffX * nWidthFactor, mnTextOffY * nWidthFactor);
+                Point aRotatedOfs(GetTextOffset().X() * nWidthFactor,
+                                  GetTextOffset().Y() * nWidthFactor);
                 aRotatedOfs -= pSalLayout->GetDrawPosition(Point(nXOffset, 0));
                 aMatrix.translate(aRotatedOfs.X(), aRotatedOfs.Y());
             }
@@ -2965,10 +2966,10 @@ void RenderContext2::ImplDrawStrikeoutChar(tools::Long nBaseX, tools::Long nBase
     SetTextColor(aColor);
     ImplInitTextColor();
 
-    pLayout->DrawBase() = Point(nBaseX + mnTextOffX, nBaseY + mnTextOffY);
+    pLayout->DrawBase() = Point(nBaseX + GetTextOffset().X(), nBaseY + GetTextOffset().Y());
 
     tools::Rectangle aPixelRect;
-    aPixelRect.SetLeft(nBaseX + mnTextOffX);
+    aPixelRect.SetLeft(nBaseX + GetTextOffset().X());
     aPixelRect.SetRight(aPixelRect.Left() + nWidth);
     aPixelRect.SetBottom(nBaseY + mpFontInstance->GetDescent());
     aPixelRect.SetTop(nBaseY - mpFontInstance->GetAscent());
@@ -2976,7 +2977,7 @@ void RenderContext2::ImplDrawStrikeoutChar(tools::Long nBaseX, tools::Long nBase
     if (mpFontInstance->GetTextAngle())
     {
         tools::Polygon aPoly(aPixelRect);
-        aPoly.Rotate(Point(nBaseX + mnTextOffX, nBaseY + mnTextOffY),
+        aPoly.Rotate(Point(nBaseX + GetTextOffset().X(), nBaseY + GetTextOffset().Y()),
                      mpFontInstance->GetTextAngle());
         aPixelRect = aPoly.GetBoundRect();
     }

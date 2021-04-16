@@ -1132,7 +1132,7 @@ private:
     SAL_DLLPRIVATE void ImplInitTextColor();
     virtual void InitWaveLineColor(Color const& rColor, tools::Long);
 
-    SAL_DLLPRIVATE void InitTextOffsets();
+    SAL_DLLPRIVATE Point GetTextOffset() const;
     SAL_DLLPRIVATE bool FixOLEScaleFactors();
 
     /** Determine if native widgets can be enabled

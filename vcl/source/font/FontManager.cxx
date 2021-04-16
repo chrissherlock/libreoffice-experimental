@@ -1657,4 +1657,44 @@ bool FontManager::InitFontInstance(RenderContext2* pRenderContext)
 
     return true;
 }
+
+Point FontManager::GetTextOffset() const { return Point(mnTextXOffset, mnTextYOffset); }
+
+void FontManager::InitTextOffset(RenderContext2 const* pRenderContext)
+{
+    // calculate text offset depending on TextAlignment
+    TextAlign eAlign = pRenderContext->GetFont().GetAlignment();
+    if (eAlign == ALIGN_BASELINE)
+    {
+        mnTextXOffset = 0;
+        mnTextYOffset = 0;
+    }
+    else if (eAlign == ALIGN_TOP)
+    {
+        mnTextXOffset = 0;
+        mnTextYOffset = +pRenderContext->mpFontInstance->GetAscent()
+                        + pRenderContext->mpFontInstance->GetEmphasisAscent();
+
+        if (pRenderContext->mpFontInstance->GetTextAngle())
+        {
+            Point aOriginPt(0, 0);
+            aOriginPt.RotateAround(mnTextXOffset, mnTextYOffset,
+                                   pRenderContext->mpFontInstance->GetTextAngle());
+        }
+    }
+    else // eAlign == ALIGN_BOTTOM
+    {
+        mnTextXOffset = 0;
+        mnTextYOffset = -pRenderContext->mpFontInstance->GetDescent()
+                        + pRenderContext->mpFontInstance->GetEmphasisDescent();
+
+        if (pRenderContext->mpFontInstance->GetTextAngle())
+        {
+            Point aOriginPt(0, 0);
+            aOriginPt.RotateAround(mnTextXOffset, mnTextYOffset,
+                                   pRenderContext->mpFontInstance->GetTextAngle());
+        }
+    }
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

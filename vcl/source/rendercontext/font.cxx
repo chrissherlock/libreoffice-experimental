@@ -172,42 +172,9 @@ bool RenderContext2::InitNewFont()
     if (!mxFontManager->InitFontInstance(this))
         return false;
 
-    InitTextOffsets();
+    mxFontManager->InitTextOffset(this);
 
     return FixOLEScaleFactors();
-}
-
-void RenderContext2::InitTextOffsets()
-{
-    // calculate text offset depending on TextAlignment
-    TextAlign eAlign = maFont.GetAlignment();
-    if (eAlign == ALIGN_BASELINE)
-    {
-        mnTextOffX = 0;
-        mnTextOffY = 0;
-    }
-    else if (eAlign == ALIGN_TOP)
-    {
-        mnTextOffX = 0;
-        mnTextOffY = +mpFontInstance->GetAscent() + mpFontInstance->GetEmphasisAscent();
-
-        if (mpFontInstance->GetTextAngle())
-        {
-            Point aOriginPt(0, 0);
-            aOriginPt.RotateAround(mnTextOffX, mnTextOffY, mpFontInstance->GetTextAngle());
-        }
-    }
-    else // eAlign == ALIGN_BOTTOM
-    {
-        mnTextOffX = 0;
-        mnTextOffY = -mpFontInstance->GetDescent() + mpFontInstance->GetEmphasisDescent();
-
-        if (mpFontInstance->GetTextAngle())
-        {
-            Point aOriginPt(0, 0);
-            aOriginPt.RotateAround(mnTextOffX, mnTextOffY, mpFontInstance->GetTextAngle());
-        }
-    }
 }
 
 bool RenderContext2::IsFontUnantialiased() const
@@ -1283,5 +1250,7 @@ void RenderContext2::ImplReleaseFonts()
     mpDeviceFontList.reset();
     mpDeviceFontSizeList.reset();
 }
+
+Point RenderContext2::GetTextOffset() const { return mxFontManager->GetTextOffset(); }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

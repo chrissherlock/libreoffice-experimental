@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <tools/gen.hxx>
 #include <o3tl/lru_map.hxx>
 
 #include <vcl/dllapi.h>
@@ -54,6 +55,9 @@ public:
 
     void Init(RenderContext2 const* pRenderContext);
     bool InitFontInstance(RenderContext2* pRenderContext);
+
+    Point GetTextOffset() const;
+    void InitTextOffset(RenderContext2 const* pRenderContext);
 
     // fill the list with device font faces
     void Add(FontFace*);
@@ -131,6 +135,9 @@ private:
 
     mutable std::unique_ptr<std::array<FontFamily*, MAX_GLYPHFALLBACK>> mpFallbackList;
     mutable int mnFallbackCount;
+
+    tools::Long mnTextXOffset;
+    tools::Long mnTextYOffset;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
