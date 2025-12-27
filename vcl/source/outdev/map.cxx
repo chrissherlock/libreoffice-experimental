@@ -1421,7 +1421,7 @@ auto lcl_getCorrectedUnit(MapUnit eMapSrc, MapUnit eMapDst)
     return std::make_pair(eSrc, eDst);
 }
 
-std::pair<ImplMapRes, ImplMapRes> ENTER4(const MapMode& rMMSource, const MapMode& rMMDest)
+std::pair<ImplMapRes, ImplMapRes> lcl_calcConversionMapRes(const MapMode& rMMSource, const MapMode& rMMDest)
 {
     std::pair<ImplMapRes, ImplMapRes> result;
     lcl_calcMapResolution(rMMSource, 72, 72, result.first);
@@ -1680,7 +1680,7 @@ Point OutputDevice::LogicToLogic( const Point& rPtSource,
     }
     else
     {
-        const auto [aMapResSource, aMapResDest] = ENTER4( rMapModeSource, rMapModeDest );
+        const auto [aMapResSource, aMapResDest] = lcl_calcConversionMapRes( rMapModeSource, rMapModeDest );
 
         return Point( lcl_scaleLogicValue( rPtSource.X() + aMapResSource.mnMapOfsX,
                            aMapResSource.mnMapScNumX, aMapResDest.mnMapScDenomX,
@@ -1711,7 +1711,7 @@ Size OutputDevice::LogicToLogic( const Size& rSzSource,
     }
     else
     {
-        const auto [aMapResSource, aMapResDest] = ENTER4( rMapModeSource, rMapModeDest );
+        const auto [aMapResSource, aMapResDest] = lcl_calcConversionMapRes( rMapModeSource, rMapModeDest );
 
         return Size( lcl_scaleLogicValue( rSzSource.Width(),
                           aMapResSource.mnMapScNumX, aMapResDest.mnMapScDenomX,
@@ -1762,7 +1762,7 @@ basegfx::B2DHomMatrix OutputDevice::LogicToLogic(const MapMode& rMapModeSource, 
     }
     else
     {
-        const auto [aMapResSource, aMapResDest] = ENTER4(rMapModeSource, rMapModeDest);
+        const auto [aMapResSource, aMapResDest] = lcl_calcConversionMapRes(rMapModeSource, rMapModeDest);
 
         const double fScaleFactorX((double(aMapResSource.mnMapScNumX) * double(aMapResDest.mnMapScDenomX)) / (double(aMapResSource.mnMapScDenomX) * double(aMapResDest.mnMapScNumX)));
         const double fScaleFactorY((double(aMapResSource.mnMapScNumY) * double(aMapResDest.mnMapScDenomY)) / (double(aMapResSource.mnMapScDenomY) * double(aMapResDest.mnMapScNumY)));
@@ -1806,7 +1806,7 @@ tools::Rectangle OutputDevice::LogicToLogic( const tools::Rectangle& rRectSource
     }
     else
     {
-        const auto [aMapResSource, aMapResDest] = ENTER4( rMapModeSource, rMapModeDest );
+        const auto [aMapResSource, aMapResDest] = lcl_calcConversionMapRes( rMapModeSource, rMapModeDest );
 
         auto left = lcl_scaleLogicValue( rRectSource.Left() + aMapResSource.mnMapOfsX,
                                aMapResSource.mnMapScNumX, aMapResDest.mnMapScDenomX,
