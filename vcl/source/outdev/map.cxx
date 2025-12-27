@@ -1461,7 +1461,7 @@ std::pair<ImplMapRes, ImplMapRes> ENTER4(const MapMode& rMMSource, const MapMode
 }
 
 // return (n1 * n2 * n3) / (n4 * n5)
-static tools::Long fn5( const tools::Long n1,
+static tools::Long lcl_scaleLogicValue( const tools::Long n1,
                  const tools::Long n2,
                  const tools::Long n3,
                  const tools::Long n4,
@@ -1570,7 +1570,7 @@ static tools::Long fn5( const tools::Long n1,
     return n7 / n8;
 }
 
-static tools::Long fn3(const tools::Long n1, const o3tl::Length eFrom, const o3tl::Length eTo)
+static tools::Long lcl_convertLogicValue(const tools::Long n1, const o3tl::Length eFrom, const o3tl::Length eTo)
 {
     if (n1 == 0 || eFrom == o3tl::Length::invalid || eTo == o3tl::Length::invalid)
         return 0;
@@ -1600,11 +1600,11 @@ Point OutputDevice::LogicToLogic( const Point& rPtSource,
 {
     ENTER1( rPtSource, pMapModeSource, pMapModeDest );
 
-    return Point( fn5( rPtSource.X() + aMapResSource.mnMapOfsX,
+    return Point( lcl_scaleLogicValue( rPtSource.X() + aMapResSource.mnMapOfsX,
                        aMapResSource.mnMapScNumX, aMapResDest.mnMapScDenomX,
                        aMapResSource.mnMapScDenomX, aMapResDest.mnMapScNumX ) -
                   aMapResDest.mnMapOfsX,
-                  fn5( rPtSource.Y() + aMapResSource.mnMapOfsY,
+                  lcl_scaleLogicValue( rPtSource.Y() + aMapResSource.mnMapOfsY,
                        aMapResSource.mnMapScNumY, aMapResDest.mnMapScDenomY,
                        aMapResSource.mnMapScDenomY, aMapResDest.mnMapScNumY ) -
                   aMapResDest.mnMapOfsY );
@@ -1616,10 +1616,10 @@ Size OutputDevice::LogicToLogic( const Size& rSzSource,
 {
     ENTER1( rSzSource, pMapModeSource, pMapModeDest );
 
-    return Size( fn5( rSzSource.Width(),
+    return Size( lcl_scaleLogicValue( rSzSource.Width(),
                       aMapResSource.mnMapScNumX, aMapResDest.mnMapScDenomX,
                       aMapResSource.mnMapScDenomX, aMapResDest.mnMapScNumX ),
-                 fn5( rSzSource.Height(),
+                 lcl_scaleLogicValue( rSzSource.Height(),
                       aMapResSource.mnMapScNumY, aMapResDest.mnMapScDenomY,
                       aMapResSource.mnMapScDenomY, aMapResDest.mnMapScNumY ) );
 }
@@ -1630,19 +1630,19 @@ tools::Rectangle OutputDevice::LogicToLogic( const tools::Rectangle& rRectSource
 {
     ENTER1( rRectSource, pMapModeSource, pMapModeDest );
 
-    return tools::Rectangle( fn5( rRectSource.Left() + aMapResSource.mnMapOfsX,
+    return tools::Rectangle( lcl_scaleLogicValue( rRectSource.Left() + aMapResSource.mnMapOfsX,
                            aMapResSource.mnMapScNumX, aMapResDest.mnMapScDenomX,
                            aMapResSource.mnMapScDenomX, aMapResDest.mnMapScNumX ) -
                       aMapResDest.mnMapOfsX,
-                      fn5( rRectSource.Top() + aMapResSource.mnMapOfsY,
+                      lcl_scaleLogicValue( rRectSource.Top() + aMapResSource.mnMapOfsY,
                            aMapResSource.mnMapScNumY, aMapResDest.mnMapScDenomY,
                            aMapResSource.mnMapScDenomY, aMapResDest.mnMapScNumY ) -
                       aMapResDest.mnMapOfsY,
-                      fn5( rRectSource.Right() + aMapResSource.mnMapOfsX,
+                      lcl_scaleLogicValue( rRectSource.Right() + aMapResSource.mnMapOfsX,
                            aMapResSource.mnMapScNumX, aMapResDest.mnMapScDenomX,
                            aMapResSource.mnMapScDenomX, aMapResDest.mnMapScNumX ) -
                       aMapResDest.mnMapOfsX,
-                      fn5( rRectSource.Bottom() + aMapResSource.mnMapOfsY,
+                      lcl_scaleLogicValue( rRectSource.Bottom() + aMapResSource.mnMapOfsY,
                            aMapResSource.mnMapScNumY, aMapResDest.mnMapScDenomY,
                            aMapResSource.mnMapScDenomY, aMapResDest.mnMapScNumY ) -
                       aMapResDest.mnMapOfsY );
@@ -1662,17 +1662,17 @@ Point OutputDevice::LogicToLogic( const Point& rPtSource,
     if (rMapModeSource.IsSimple() && rMapModeDest.IsSimple())
     {
         const auto [eFrom, eTo] = getCorrectedUnit(eUnitSource, eUnitDest);
-        return Point(fn3(rPtSource.X(), eFrom, eTo), fn3(rPtSource.Y(), eFrom, eTo));
+        return Point(lcl_convertLogicValue(rPtSource.X(), eFrom, eTo), lcl_convertLogicValue(rPtSource.Y(), eFrom, eTo));
     }
     else
     {
         const auto [aMapResSource, aMapResDest] = ENTER4( rMapModeSource, rMapModeDest );
 
-        return Point( fn5( rPtSource.X() + aMapResSource.mnMapOfsX,
+        return Point( lcl_scaleLogicValue( rPtSource.X() + aMapResSource.mnMapOfsX,
                            aMapResSource.mnMapScNumX, aMapResDest.mnMapScDenomX,
                            aMapResSource.mnMapScDenomX, aMapResDest.mnMapScNumX ) -
                       aMapResDest.mnMapOfsX,
-                      fn5( rPtSource.Y() + aMapResSource.mnMapOfsY,
+                      lcl_scaleLogicValue( rPtSource.Y() + aMapResSource.mnMapOfsY,
                            aMapResSource.mnMapScNumY, aMapResDest.mnMapScDenomY,
                            aMapResSource.mnMapScDenomY, aMapResDest.mnMapScNumY ) -
                       aMapResDest.mnMapOfsY );
@@ -1693,16 +1693,16 @@ Size OutputDevice::LogicToLogic( const Size& rSzSource,
     if (rMapModeSource.IsSimple() && rMapModeDest.IsSimple())
     {
         const auto [eFrom, eTo] = getCorrectedUnit(eUnitSource, eUnitDest);
-        return Size(fn3(rSzSource.Width(), eFrom, eTo), fn3(rSzSource.Height(), eFrom, eTo));
+        return Size(lcl_convertLogicValue(rSzSource.Width(), eFrom, eTo), lcl_convertLogicValue(rSzSource.Height(), eFrom, eTo));
     }
     else
     {
         const auto [aMapResSource, aMapResDest] = ENTER4( rMapModeSource, rMapModeDest );
 
-        return Size( fn5( rSzSource.Width(),
+        return Size( lcl_scaleLogicValue( rSzSource.Width(),
                           aMapResSource.mnMapScNumX, aMapResDest.mnMapScDenomX,
                           aMapResSource.mnMapScDenomX, aMapResDest.mnMapScNumX ),
-                     fn5( rSzSource.Height(),
+                     lcl_scaleLogicValue( rSzSource.Height(),
                           aMapResSource.mnMapScNumY, aMapResDest.mnMapScDenomY,
                           aMapResSource.mnMapScDenomY, aMapResDest.mnMapScNumY ) );
     }
@@ -1781,12 +1781,12 @@ tools::Rectangle OutputDevice::LogicToLogic( const tools::Rectangle& rRectSource
     {
         const auto [eFrom, eTo] = getCorrectedUnit(eUnitSource, eUnitDest);
 
-        auto left = fn3(rRectSource.Left(), eFrom, eTo);
-        auto top = fn3(rRectSource.Top(), eFrom, eTo);
+        auto left = lcl_convertLogicValue(rRectSource.Left(), eFrom, eTo);
+        auto top = lcl_convertLogicValue(rRectSource.Top(), eFrom, eTo);
 
         // tdf#141761 see comments above, IsEmpty() removed
-        auto right = rRectSource.IsWidthEmpty() ? 0 : fn3(rRectSource.Right(), eFrom, eTo);
-        auto bottom = rRectSource.IsHeightEmpty() ? 0 : fn3(rRectSource.Bottom(), eFrom, eTo);
+        auto right = rRectSource.IsWidthEmpty() ? 0 : lcl_convertLogicValue(rRectSource.Right(), eFrom, eTo);
+        auto bottom = rRectSource.IsHeightEmpty() ? 0 : lcl_convertLogicValue(rRectSource.Bottom(), eFrom, eTo);
 
         aRetval = tools::Rectangle(left, top, right, bottom);
     }
@@ -1794,21 +1794,21 @@ tools::Rectangle OutputDevice::LogicToLogic( const tools::Rectangle& rRectSource
     {
         const auto [aMapResSource, aMapResDest] = ENTER4( rMapModeSource, rMapModeDest );
 
-        auto left = fn5( rRectSource.Left() + aMapResSource.mnMapOfsX,
+        auto left = lcl_scaleLogicValue( rRectSource.Left() + aMapResSource.mnMapOfsX,
                                aMapResSource.mnMapScNumX, aMapResDest.mnMapScDenomX,
                                aMapResSource.mnMapScDenomX, aMapResDest.mnMapScNumX ) -
                           aMapResDest.mnMapOfsX;
-        auto top = fn5( rRectSource.Top() + aMapResSource.mnMapOfsY,
+        auto top = lcl_scaleLogicValue( rRectSource.Top() + aMapResSource.mnMapOfsY,
                                aMapResSource.mnMapScNumY, aMapResDest.mnMapScDenomY,
                                aMapResSource.mnMapScDenomY, aMapResDest.mnMapScNumY ) -
                           aMapResDest.mnMapOfsY;
 
         // tdf#141761 see comments above, IsEmpty() removed
-        auto right = rRectSource.IsWidthEmpty() ? 0 : fn5( rRectSource.Right() + aMapResSource.mnMapOfsX,
+        auto right = rRectSource.IsWidthEmpty() ? 0 : lcl_scaleLogicValue( rRectSource.Right() + aMapResSource.mnMapOfsX,
                                aMapResSource.mnMapScNumX, aMapResDest.mnMapScDenomX,
                                aMapResSource.mnMapScDenomX, aMapResDest.mnMapScNumX ) -
                           aMapResDest.mnMapOfsX;
-        auto bottom = rRectSource.IsHeightEmpty() ? 0 : fn5( rRectSource.Bottom() + aMapResSource.mnMapOfsY,
+        auto bottom = rRectSource.IsHeightEmpty() ? 0 : lcl_scaleLogicValue( rRectSource.Bottom() + aMapResSource.mnMapOfsY,
                                aMapResSource.mnMapScNumY, aMapResDest.mnMapScDenomY,
                                aMapResSource.mnMapScDenomY, aMapResDest.mnMapScNumY ) -
                           aMapResDest.mnMapOfsY;
@@ -1833,7 +1833,7 @@ tools::Long OutputDevice::LogicToLogic( tools::Long nLongSource,
 
     verifyUnitSourceDest( eUnitSource, eUnitDest );
     const auto [eFrom, eTo] = getCorrectedUnit(eUnitSource, eUnitDest);
-    return fn3(nLongSource, eFrom, eTo);
+    return lcl_convertLogicValue(nLongSource, eFrom, eTo);
 }
 
 void OutputDevice::SetPixelOffset( const Size& rOffset )
