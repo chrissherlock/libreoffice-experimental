@@ -1390,36 +1390,6 @@ basegfx::B2DPolyPolygon OutputDevice::PixelToLogic( const basegfx::B2DPolyPolygo
     return aTransformedPoly;
 }
 
-#define ENTER1( rSource, pMapModeSource, pMapModeDest )                 \
-    if ( !pMapModeSource )                                              \
-        pMapModeSource = &maMapMode;                                    \
-    if ( !pMapModeDest )                                                \
-        pMapModeDest = &maMapMode;                                      \
-    if ( *pMapModeSource == *pMapModeDest )                             \
-        return rSource;                                                 \
-                                                                        \
-    ImplMapRes aMapResSource;                                           \
-    ImplMapRes aMapResDest;                                             \
-                                                                        \
-    if ( !mbMap || pMapModeSource != &maMapMode )                       \
-    {                                                                   \
-        if ( pMapModeSource->GetMapUnit() == MapUnit::MapRelative )     \
-            aMapResSource = maMapRes;                                   \
-        lcl_calcMapResolution( *pMapModeSource,                         \
-                               mnDPIX, mnDPIY, aMapResSource );         \
-    }                                                                   \
-    else                                                                \
-        aMapResSource = maMapRes;                                       \
-    if ( !mbMap || pMapModeDest != &maMapMode )                         \
-    {                                                                   \
-        if ( pMapModeDest->GetMapUnit() == MapUnit::MapRelative )               \
-            aMapResDest = maMapRes;                                     \
-        lcl_calcMapResolution( *pMapModeDest,                           \
-                               mnDPIX, mnDPIY, aMapResDest );           \
-    }                                                                   \
-    else                                                                \
-        aMapResDest = maMapRes
-
 static void lcl_verifyUnitSourceDest( MapUnit eUnitSource, MapUnit eUnitDest )
 {
     DBG_ASSERT( eUnitSource != MapUnit::MapSysFont
@@ -1594,11 +1564,41 @@ static tools::Long lcl_convertLogicValue(const tools::Long n1, const o3tl::Lengt
         return nResult;
 }
 
+static ImplMapRes lcl_resolveMapRes(
+    const MapMode* pMode,
+    const MapMode& rDefaultMapMode,
+    const ImplMapRes& rDefaultMapRes,
+    bool bMap,
+    tools::Long nDPIX,
+    tools::Long nDPIY)
+{
+    const MapMode* pEffectiveMode = pMode ? pMode : &rDefaultMapMode;
+
+    if (!bMap || pEffectiveMode != &rDefaultMapMode)
+    {
+        if (pEffectiveMode->GetMapUnit() == MapUnit::MapRelative)
+            return rDefaultMapRes;
+
+        ImplMapRes aRes;
+        lcl_calcMapResolution(*pEffectiveMode, nDPIX, nDPIY, aRes);
+        return aRes;
+    }
+
+    return rDefaultMapRes;
+}
+
 Point OutputDevice::LogicToLogic( const Point& rPtSource,
                                   const MapMode* pMapModeSource,
                                   const MapMode* pMapModeDest ) const
 {
-    ENTER1( rPtSource, pMapModeSource, pMapModeDest );
+    const MapMode* pSrc = pMapModeSource ? pMapModeSource : &maMapMode;
+    const MapMode* pDst = pMapModeDest ? pMapModeDest : &maMapMode;
+
+    if (*pSrc == *pDst)
+        return rPtSource;
+
+    ImplMapRes aMapResSource = lcl_resolveMapRes(pMapModeSource, maMapMode, maMapRes, mbMap, mnDPIX, mnDPIY);
+    ImplMapRes aMapResDest   = lcl_resolveMapRes(pMapModeDest, maMapMode, maMapRes, mbMap, mnDPIX, mnDPIY);
 
     return Point( lcl_scaleLogicValue( rPtSource.X() + aMapResSource.mnMapOfsX,
                        aMapResSource.mnMapScNumX, aMapResDest.mnMapScDenomX,
@@ -1614,7 +1614,14 @@ Size OutputDevice::LogicToLogic( const Size& rSzSource,
                                  const MapMode* pMapModeSource,
                                  const MapMode* pMapModeDest ) const
 {
-    ENTER1( rSzSource, pMapModeSource, pMapModeDest );
+    const MapMode* pSrc = pMapModeSource ? pMapModeSource : &maMapMode;
+    const MapMode* pDst = pMapModeDest ? pMapModeDest : &maMapMode;
+
+    if (*pSrc == *pDst)
+        return rSzSource;
+
+    ImplMapRes aMapResSource = lcl_resolveMapRes(pMapModeSource, maMapMode, maMapRes, mbMap, mnDPIX, mnDPIY);
+    ImplMapRes aMapResDest   = lcl_resolveMapRes(pMapModeDest, maMapMode, maMapRes, mbMap, mnDPIX, mnDPIY);
 
     return Size( lcl_scaleLogicValue( rSzSource.Width(),
                       aMapResSource.mnMapScNumX, aMapResDest.mnMapScDenomX,
@@ -1628,7 +1635,14 @@ tools::Rectangle OutputDevice::LogicToLogic( const tools::Rectangle& rRectSource
                                       const MapMode* pMapModeSource,
                                       const MapMode* pMapModeDest ) const
 {
-    ENTER1( rRectSource, pMapModeSource, pMapModeDest );
+    const MapMode* pSrc = pMapModeSource ? pMapModeSource : &maMapMode;
+    const MapMode* pDst = pMapModeDest ? pMapModeDest : &maMapMode;
+
+    if (*pSrc == *pDst)
+        return rRectSource;
+
+    ImplMapRes aMapResSource = lcl_resolveMapRes(pMapModeSource, maMapMode, maMapRes, mbMap, mnDPIX, mnDPIY);
+    ImplMapRes aMapResDest   = lcl_resolveMapRes(pMapModeDest, maMapMode, maMapRes, mbMap, mnDPIX, mnDPIY);
 
     return tools::Rectangle( lcl_scaleLogicValue( rRectSource.Left() + aMapResSource.mnMapOfsX,
                            aMapResSource.mnMapScNumX, aMapResDest.mnMapScDenomX,
