@@ -1682,6 +1682,24 @@ Point OutputDevice::LogicToLogic( const Point& rPtSource,
     {
         const auto [aMapResSource, aMapResDest] = lcl_calcConversionMapRes( rMapModeSource, rMapModeDest );
 
+        /* HISTORICAL NOTE & WARNING:
+         * --------------------------
+         * You might expect the formula below to be: (Point - Origin) * Scale.
+         * * In standard graphics API terminology (like MS GDI):
+         * - "Window Origin" implies shifting the logical coordinate system.
+         * Mathematical effect: Subtraction (Point - Origin).
+         * - "Viewport Origin" implies shifting the destination device output.
+         * Mathematical effect: Addition (Point + Origin).
+         * * VCL's MapMode::SetOrigin() uses the naming convention of a Window Origin,
+         * but historically implements the behavior of a Translation/Viewport Offset.
+         * * Therefore, the formula used throughout VCL (see lcl_logicToPixel) is:
+         * (Point + Origin) * Scale
+         * * We MUST use Addition (+) here to maintain consistency. Changing this to
+         * Subtraction (-) will cause "LogicToLogic" to drift relative to "LogicToPixel",
+         * resulting in printing misalignments and hit-testing errors.
+         */
+
+        // rPtSource.X() + aMapResSource.mnMapOfsX  <-- KEEP AS ADDITION
         return Point( lcl_scaleLogicValue( rPtSource.X() + aMapResSource.mnMapOfsX,
                            aMapResSource.mnMapScNumX, aMapResDest.mnMapScDenomX,
                            aMapResSource.mnMapScDenomX, aMapResDest.mnMapScNumX ) -
