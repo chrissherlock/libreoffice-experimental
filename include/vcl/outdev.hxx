@@ -1760,6 +1760,7 @@ public:
      */
     SAL_DLLPRIVATE tools::Long         ImplDevicePixelToLogicHeight( tools::Long nHeight ) const;
 
+private:
     /** Convert a logical size to the size on the physical device.
 
      @param         rLogicSize  Const reference to a size in logical units
@@ -1828,7 +1829,6 @@ public:
      */
     SAL_DLLPRIVATE basegfx::B2DHomMatrix ImplGetDeviceTransformation() const;
 
-private:
     /** Convert a logical X coordinate to a device pixel's X coordinate.
 
      To get the device's X coordinate, it must calculate the mapping offset
