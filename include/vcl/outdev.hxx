@@ -1723,6 +1723,7 @@ public:
     SAL_DLLPRIVATE tools::Long         ImplLogicWidthToDevicePixel( tools::Long nWidth ) const;
     SAL_DLLPRIVATE double              ImplLogicWidthToDeviceSubPixel(tools::Long nWidth) const;
 
+protected:
     /** Convert a logical height to a height in units of device pixels.
 
      To get the number of device pixels, it must calculate the Y-DPI of the device and
