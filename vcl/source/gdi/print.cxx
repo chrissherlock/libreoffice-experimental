@@ -793,10 +793,16 @@ void Printer::ImplUpdatePageData()
     SetDPIX(nDPIX);
     SetDPIY(nDPIY);
 
-    mpInfoPrinter->GetPageInfo( &maJobSetup.ImplGetConstData(),
-                                mnOutWidth, mnOutHeight,
-                                maPageOffset,
-                                maPaperSize );
+    auto nWidth = GetOutputWidthPixel();
+    auto nHeight = GetOutputHeightPixel();
+
+    mpInfoPrinter->GetPageInfo(&maJobSetup.ImplGetConstData(),
+                               nWidth, nHeight,
+                               maPageOffset,
+                               maPaperSize);
+
+    SetOutputWidthPixel(nWidth);
+    SetOutputHeightPixel(nHeight);
 }
 
 void Printer::ImplUpdateFontList()
