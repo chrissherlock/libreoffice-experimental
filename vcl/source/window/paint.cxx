@@ -1131,7 +1131,7 @@ vcl::Region Window::GetPaintRegion() const
     if ( mpWindowImpl->mpPaintRegion )
     {
         vcl::Region aRegion = *mpWindowImpl->mpPaintRegion;
-        aRegion.Move( -GetOutDev()->mnOutOffX, -GetOutDev()->mnOutOffY );
+        aRegion.Move(-GetOutDev()->GetOutOffXPixel(), -GetOutDev()->GetOutOffYPixel());
         return PixelToLogic( aRegion );
     }
     else
@@ -1437,7 +1437,7 @@ void Window::ImplPaintToDevice( OutputDevice* i_pTargetOutDev, const Point& i_rP
         {
             if( pChild->mpWindowImpl->mpFrame == mpWindowImpl->mpFrame && pChild->IsVisible() )
             {
-                tools::Long nDeltaX = pChild->GetOutDev()->mnOutOffX - GetOutDev()->mnOutOffX;
+                tools::Long nDeltaX = pChild->GetOutDev()->GetOutOffXPixel() - GetOutDev()->GetOutOffXPixel();
                 if( bHasMirroredGraphics )
                     nDeltaX = GetOutDev()->mnOutWidth - nDeltaX - pChild->GetOutDev()->mnOutWidth;
 
@@ -1556,7 +1556,7 @@ void Window::ImplPaintToDevice( OutputDevice* i_pTargetOutDev, const Point& i_rP
     {
         if( pChild->mpWindowImpl->mpFrame == mpWindowImpl->mpFrame && pChild->IsVisible() )
         {
-            tools::Long nDeltaX = pChild->GetOutDev()->mnOutOffX - GetOutDev()->mnOutOffX;
+            tools::Long nDeltaX = pChild->GetOutDev()->GetOutOffXPixel() - GetOutDev()->GetOutOffXPixel();
 
             if( pOutDev->HasMirroredGraphics() )
                 nDeltaX = GetOutDev()->mnOutWidth - nDeltaX - pChild->GetOutDev()->mnOutWidth;

@@ -73,8 +73,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mpForcedFallbackInstance        = nullptr;
     mpFontFaceCollection            = nullptr;
     mpExtOutDevData                 = nullptr;
-    mnOutOffX                       = 0;
-    mnOutOffY                       = 0;
     mnOutWidth                      = 0;
     mnOutHeight                     = 0;
     mnTextOffX                      = 0;
@@ -363,16 +361,6 @@ sal_uInt16 OutputDevice::GetBitCount() const
     return mpGraphics->GetBitCount();
 }
 
-void OutputDevice::SetOutOffXPixel(tools::Long nOutOffX)
-{
-    mnOutOffX = nOutOffX;
-}
-
-void OutputDevice::SetOutOffYPixel(tools::Long nOutOffY)
-{
-    mnOutOffY = nOutOffY;
-}
-
 css::uno::Reference< css::awt::XGraphics > OutputDevice::CreateUnoGraphics()
 {
     UnoWrapperBase* pWrapper = UnoWrapperBase::GetUnoWrapper();
@@ -626,7 +614,7 @@ bool OutputDevice::ImplIsAntiparallel() const
 
 void    OutputDevice::ReMirror( Point &rPoint ) const
 {
-    rPoint.setX( mnOutOffX + mnOutWidth - 1 - rPoint.X() + mnOutOffX );
+    rPoint.setX(GetOutOffXPixel() + mnOutWidth - 1 - rPoint.X() + GetOutOffXPixel());
 }
 void    OutputDevice::ReMirror( tools::Rectangle &rRect ) const
 {
@@ -636,7 +624,7 @@ void    OutputDevice::ReMirror( tools::Rectangle &rRect ) const
     //lc_x = mnOutWidth - nWidth - 1 - lc_x;  // mirror
     //rRect.nLeft = lc_x + mnOutOffX;         // re-normalize
 
-    rRect.SetLeft( mnOutOffX + mnOutWidth - nWidth - 1 - rRect.Left() + mnOutOffX );
+    rRect.SetLeft(GetOutOffXPixel() + mnOutWidth - nWidth - 1 - rRect.Left() + GetOutOffXPixel());
     rRect.SetRight( rRect.Left() + nWidth );
 }
 
@@ -734,7 +722,7 @@ css::uno::Reference< css::rendering::XCanvas > OutputDevice::ImplGetCanvas( bool
      */
     Sequence< Any > aArg{
         Any(reinterpret_cast<sal_Int64>(this)),
-        Any(css::awt::Rectangle( mnOutOffX, mnOutOffY, mnOutWidth, mnOutHeight )),
+        Any(css::awt::Rectangle(GetOutOffXPixel(), GetOutOffYPixel(), mnOutWidth, mnOutHeight )),
         Any(false),
         Any(Reference< css::awt::XWindow >()),
         GetSystemGfxDataAny()

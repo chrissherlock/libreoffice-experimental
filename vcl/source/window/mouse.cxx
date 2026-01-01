@@ -68,8 +68,8 @@ WindowHitTest Window::ImplHitTest( const Point& rFramePos )
     if ( mpWindowImpl->mbWinRegion )
     {
         Point aTempPos = aFramePos;
-        aTempPos.AdjustX( -GetOutDev()->mnOutOffX );
-        aTempPos.AdjustY( -GetOutDev()->mnOutOffY );
+        aTempPos.AdjustX(-GetOutDev()->GetOutOffXPixel());
+        aTempPos.AdjustY(-GetOutDev()->GetOutOffYPixel());
         if ( !mpWindowImpl->maWinRegion.Contains( aTempPos ) )
             return WindowHitTest::NONE;
     }
