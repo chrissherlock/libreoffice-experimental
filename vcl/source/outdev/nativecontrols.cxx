@@ -157,11 +157,11 @@ bool OutputDevice::HitTestNativeScrollbar(
         return false;
     assert(mpGraphics);
 
-    Point aWinOffs( mnOutOffX, mnOutOffY );
+    Point aWinOffs(GetOutOffXPixel(), GetOutOffYPixel());
     tools::Rectangle screenRegion( rControlRegion );
     screenRegion.Move( aWinOffs.X(), aWinOffs.Y());
 
-    return mpGraphics->HitTestNativeScrollbar( nPart, screenRegion, Point( aPos.X() + mnOutOffX, aPos.Y() + mnOutOffY ),
+    return mpGraphics->HitTestNativeScrollbar(nPart, screenRegion, Point( aPos.X() + GetOutOffXPixel(), aPos.Y() + GetOutOffYPixel()),
         rIsInside, *this );
 }
 
