@@ -87,6 +87,7 @@ struct SalTwoRect;
 class Printer;
 class VCLXGraphics;
 class SalLayoutGlyphs;
+class CoordinateMapper;
 
 enum class AddFontSubstituteFlags;
 enum class AntialiasingFlags;
@@ -187,6 +188,8 @@ private:
     std::unique_ptr<ImplOutDevData> mpOutDevData;
     std::vector< VCLXGraphics* >*   mpUnoGraphicsList;
     vcl::ExtOutDevData*             mpExtOutDevData;
+    std::unique_ptr<CoordinateMapper> mpMapper;
+
     // The canvas interface for this output device. Is persistent after the first GetCanvas() call
     mutable css::uno::WeakReference< css::rendering::XCanvas >    mxCanvas;
 
@@ -204,9 +207,6 @@ private:
     tools::Long                            mnOutOffY;
     tools::Long                            mnOutWidth;
     tools::Long                            mnOutHeight;
-    sal_Int32                       mnDPIX;
-    sal_Int32                       mnDPIY;
-    sal_Int32                       mnDPIScalePercentage; ///< For HiDPI displays, we want to draw elements for a percentage larger
     /// font specific text alignment offsets in pixel units
     mutable tools::Long                    mnTextOffX;
     mutable tools::Long                    mnTextOffY;
@@ -380,26 +380,21 @@ public:
 
      @returns x-axis DPI value
      */
-    SAL_DLLPRIVATE sal_Int32    GetDPIX() const { return mnDPIX; }
+    sal_Int32 GetDPIX() const;
 
     /** Get the output device's DPI y-axis value.
 
      @returns y-axis DPI value
      */
-    SAL_DLLPRIVATE sal_Int32    GetDPIY() const { return mnDPIY; }
+    sal_Int32 GetDPIY() const;
 
-    SAL_DLLPRIVATE void         SetDPIX( sal_Int32 nDPIX ) { mnDPIX = nDPIX; }
-    SAL_DLLPRIVATE void         SetDPIY( sal_Int32 nDPIY ) { mnDPIY = nDPIY; }
+    void SetDPIX(sal_Int32 nDPIX);
+    void SetDPIY(sal_Int32 nDPIY);
 
-    float GetDPIScaleFactor() const
-    {
-        return mnDPIScalePercentage / 100.0f;
-    }
+    float GetDPIScaleFactor() const;
 
-    sal_Int32 GetDPIScalePercentage() const
-    {
-        return mnDPIScalePercentage;
-    }
+    sal_Int32 GetDPIScalePercentage() const;
+    void SetDPIScalePercentage(float nPercent);
 
     OutDevType                  GetOutDevType() const { return meOutDevType; }
     virtual bool IsVirtual() const;
