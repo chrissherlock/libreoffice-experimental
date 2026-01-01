@@ -21,6 +21,7 @@
 
 #include <sal/types.h>
 #include <tools/gen.hxx>
+#include <tools/long.hxx>
 
 #include <vcl/dllapi.h>
 
@@ -31,6 +32,9 @@ private:
     sal_Int32 mnDPIY;
     sal_Int32 mnDPIScalePercentage = 100;
 
+    tools::Long mnOutWidth;
+    tools::Long mnOutHeight;
+
     /// Output offset for device output in pixel (pseudo window offset within window system's frames)
     tools::Long mnOutOffX;
     /// Output offset for device output in pixel (pseudo window offset within window system's frames)
@@ -39,6 +43,13 @@ private:
 public:
     SAL_DLLPRIVATE sal_Int32 GetDPIX() const;
     SAL_DLLPRIVATE sal_Int32 GetDPIY() const;
+
+    SAL_DLLPRIVATE tools::Long GetOutputWidthPixel() const;
+    SAL_DLLPRIVATE tools::Long GetOutputHeightPixel() const;
+    SAL_DLLPRIVATE Size GetOutputSizePixel() const;
+
+    SAL_DLLPRIVATE void SetOutputWidthPixel(tools::Long nWidth);
+    SAL_DLLPRIVATE void SetOutputHeightPixel(tools::Long nHeight);
 
     SAL_DLLPRIVATE void SetDPIX(sal_Int32 nDPIX);
     SAL_DLLPRIVATE void SetDPIY(sal_Int32 nDPIY);
