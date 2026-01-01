@@ -26,7 +26,7 @@ class TestVirtualDevice : public VirtualDevice
 public:
     // Expose protected methods using 'using'
     using OutputDevice::ImplLogicHeightToDevicePixel;
-    using OutputDevice::ImplLogicWidthToDevicePixel;
+    using OutputDevice::LogicWidthToDevicePixel;
     using OutputDevice::SetOutOffXPixel;
     using OutputDevice::SetOutOffYPixel;
 

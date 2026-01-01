@@ -291,7 +291,7 @@ tools::Long OutputDevice::ImplLogicYToDevicePixel( tools::Long nY ) const
                              maMapRes.mnMapScNumY, maMapRes.mnMapScDenomY )+mnOutOffY+mnOutOffOrigY;
 }
 
-tools::Long OutputDevice::ImplLogicWidthToDevicePixel( tools::Long nWidth ) const
+tools::Long OutputDevice::LogicWidthToDevicePixel(tools::Long nWidth) const
 {
     if ( !mbMap )
         return nWidth;
@@ -339,7 +339,7 @@ double OutputDevice::ImplDevicePixelToLogicHeightDouble(double nHeight) const
     return lcl_pixelToLogicDouble(nHeight, mnDPIY, maMapRes.mnMapScNumY, maMapRes.mnMapScDenomY);
 }
 
-Point OutputDevice::ImplLogicToDevicePixel( const Point& rLogicPt ) const
+Point OutputDevice::LogicToDevicePixel(const Point& rLogicPt) const
 {
     if ( !mbMap )
         return Point( rLogicPt.X()+mnOutOffX, rLogicPt.Y()+mnOutOffY );
@@ -361,7 +361,7 @@ Size OutputDevice::ImplLogicToDevicePixel( const Size& rLogicSize ) const
                                    maMapRes.mnMapScNumY, maMapRes.mnMapScDenomY ) );
 }
 
-tools::Rectangle OutputDevice::ImplLogicToDevicePixel( const tools::Rectangle& rLogicRect ) const
+tools::Rectangle OutputDevice::LogicToDevicePixel( const tools::Rectangle& rLogicRect ) const
 {
     // tdf#141761 IsEmpty() removed
     // Even if rLogicRect.IsEmpty(), transform of the Position contained
@@ -555,22 +555,22 @@ LineInfo OutputDevice::ImplLogicToDevicePixel( const LineInfo& rLineInfo ) const
     if( aInfo.GetStyle() == LineStyle::Dash )
     {
         if( aInfo.GetDotCount() && aInfo.GetDotLen() )
-            aInfo.SetDotLen( std::max( ImplLogicWidthToDevicePixel( aInfo.GetDotLen() ), tools::Long(1) ) );
+            aInfo.SetDotLen(std::max(LogicWidthToDevicePixel(aInfo.GetDotLen()), tools::Long(1)));
         else
             aInfo.SetDotCount( 0 );
 
         if( aInfo.GetDashCount() && aInfo.GetDashLen() )
-            aInfo.SetDashLen( std::max( ImplLogicWidthToDevicePixel( aInfo.GetDashLen() ), tools::Long(1) ) );
+            aInfo.SetDashLen(std::max(LogicWidthToDevicePixel(aInfo.GetDashLen()), tools::Long(1)));
         else
             aInfo.SetDashCount( 0 );
 
-        aInfo.SetDistance( ImplLogicWidthToDevicePixel( aInfo.GetDistance() ) );
+        aInfo.SetDistance(LogicWidthToDevicePixel(aInfo.GetDistance()));
 
         if( ( !aInfo.GetDashCount() && !aInfo.GetDotCount() ) || !aInfo.GetDistance() )
             aInfo.SetStyle( LineStyle::Solid );
     }
 
-    aInfo.SetWidth( ImplLogicWidthToDevicePixel( aInfo.GetWidth() ) );
+    aInfo.SetWidth(LogicWidthToDevicePixel(aInfo.GetWidth()));
 
     return aInfo;
 }
@@ -1880,7 +1880,7 @@ void OutputDevice::SetPixelOffset( const Size& rOffset )
 }
 
 
-double OutputDevice::ImplLogicWidthToDeviceSubPixel(tools::Long nWidth) const
+double OutputDevice::LogicWidthToDeviceSubPixel(tools::Long nWidth) const
 {
     if (!mbMap)
         return nWidth;
@@ -1898,7 +1898,7 @@ double OutputDevice::ImplLogicHeightToDeviceSubPixel(tools::Long nHeight) const
                                maMapRes.mnMapScNumY, maMapRes.mnMapScDenomY);
 }
 
-basegfx::B2DPoint OutputDevice::ImplLogicToDeviceSubPixel(const Point& rPoint) const
+basegfx::B2DPoint OutputDevice::LogicToDeviceSubPixel(const Point& rPoint) const
 {
     if (!mbMap)
         return basegfx::B2DPoint(rPoint.X() + mnOutOffX, rPoint.Y() + mnOutOffY);

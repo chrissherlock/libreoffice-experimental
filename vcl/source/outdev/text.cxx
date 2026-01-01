@@ -1163,7 +1163,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
     if( nLogicalWidth && mbMap )
     {
         // convert from logical units to physical units
-        nPixelWidth = ImplLogicWidthToDeviceSubPixel(nLogicalWidth);
+        nPixelWidth = LogicWidthToDeviceSubPixel(nLogicalWidth);
     }
 
     vcl::text::ImplLayoutArgs aLayoutArgs = ImplPrepareLayoutArgs( aStr, nMinIndex, nLen,
@@ -1205,7 +1205,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
             {
                 stJustification.SetTotalAdvance(
                     nJustMinCluster + i,
-                    ImplLogicWidthToDeviceSubPixel(pDXArray[i]));
+                    LogicWidthToDeviceSubPixel(pDXArray[i]));
             }
 
             nEndGlyphCoord = stJustification.GetTotalAdvance(nJustMinCluster + nJustLen - 1);
@@ -1289,10 +1289,12 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
     // default to on for pdf export, which uses SubPixelToLogic to convert back to
     // the logical coord space, of if we are scaling/mapping
     if (mbMap || meOutDevType == OUTDEV_PDF)
-        pSalLayout->DrawBase() = ImplLogicToDeviceSubPixel(rLogicalPos);
+    {
+        pSalLayout->DrawBase() = LogicToDeviceSubPixel(rLogicalPos);
+    }
     else
     {
-        Point aDevicePos = ImplLogicToDevicePixel(rLogicalPos);
+        Point aDevicePos = LogicToDevicePixel(rLogicalPos);
         pSalLayout->DrawBase() = basegfx::B2DPoint(aDevicePos.X(), aDevicePos.Y());
     }
 
@@ -1350,10 +1352,10 @@ sal_Int32 OutputDevice::GetTextBreak( const OUString& rStr, tools::Long nTextWid
         tools::Long nSubPixelFactor = 1;
         if (!mbMap)
             nSubPixelFactor = 64;
-        double nTextPixelWidth = ImplLogicWidthToDeviceSubPixel(nTextWidth * nSubPixelFactor);
+        double nTextPixelWidth = LogicWidthToDeviceSubPixel(nTextWidth * nSubPixelFactor);
         double nExtraPixelWidth = 0;
         if( nCharExtra != 0 )
-            nExtraPixelWidth = ImplLogicWidthToDeviceSubPixel(nCharExtra * nSubPixelFactor);
+            nExtraPixelWidth = LogicWidthToDeviceSubPixel(nCharExtra * nSubPixelFactor);
         nRetVal = pSalLayout->GetTextBreak( nTextPixelWidth, nExtraPixelWidth, nSubPixelFactor );
     }
 
@@ -1386,10 +1388,10 @@ sal_Int32 OutputDevice::GetTextBreakArray(const OUString& rStr, tools::Long nTex
         if (!mbMap)
             nSubPixelFactor = 64;
 
-        double nTextPixelWidth = ImplLogicWidthToDeviceSubPixel(nTextWidth * nSubPixelFactor);
+        double nTextPixelWidth = LogicWidthToDeviceSubPixel(nTextWidth * nSubPixelFactor);
         double nExtraPixelWidth = 0;
         if( nCharExtra != 0 )
-            nExtraPixelWidth = ImplLogicWidthToDeviceSubPixel(nCharExtra * nSubPixelFactor);
+            nExtraPixelWidth = LogicWidthToDeviceSubPixel(nCharExtra * nSubPixelFactor);
 
         // calculate un-hyphenated break position
         nRetVal = pSalLayout->GetTextBreak( nTextPixelWidth, nExtraPixelWidth, nSubPixelFactor );
@@ -1589,11 +1591,11 @@ void OutputDevice::ImplDrawText( OutputDevice& rTargetDevice, const tools::Recta
                         sal_Int32 nPos = nMnemonicPos - nIndex;
                         sal_Int32 lc_x1 = nPos ? aDXArray[nPos - 1] : 0;
                         sal_Int32 lc_x2 = aDXArray[nPos];
-                        double nMnemonicWidth = rTargetDevice.ImplLogicWidthToDeviceSubPixel(std::abs(lc_x1 - lc_x2));
+                        double nMnemonicWidth = rTargetDevice.LogicWidthToDeviceSubPixel(std::abs(lc_x1 - lc_x2));
 
                         Point       aTempPos = rTargetDevice.LogicToPixel( aPos );
-                        nMnemonicX = rTargetDevice.GetOutOffXPixel() + aTempPos.X() + rTargetDevice.ImplLogicWidthToDevicePixel( std::min( lc_x1, lc_x2 ) );
-                        nMnemonicY = rTargetDevice.GetOutOffYPixel() + aTempPos.Y() + rTargetDevice.ImplLogicWidthToDevicePixel( rTargetDevice.GetFontMetric().GetAscent() );
+                        nMnemonicX = rTargetDevice.GetOutOffXPixel() + aTempPos.X() + rTargetDevice.LogicWidthToDevicePixel(std::min(lc_x1, lc_x2));
+                        nMnemonicY = rTargetDevice.GetOutOffYPixel() + aTempPos.Y() + rTargetDevice.LogicWidthToDevicePixel(rTargetDevice.GetFontMetric().GetAscent());
                         rTargetDevice.ImplDrawMnemonicLine( nMnemonicX, nMnemonicY, nMnemonicWidth );
                     }
                 }
@@ -1657,11 +1659,11 @@ void OutputDevice::ImplDrawText( OutputDevice& rTargetDevice, const tools::Recta
             _rLayout.GetTextArray(aStr, &aDXArray, 0, aStr.getLength(), true);
             tools::Long lc_x1 = nMnemonicPos? aDXArray[nMnemonicPos - 1] : 0;
             tools::Long lc_x2 = aDXArray[nMnemonicPos];
-            nMnemonicWidth = rTargetDevice.ImplLogicWidthToDeviceSubPixel(std::abs(lc_x1 - lc_x2));
+            nMnemonicWidth = rTargetDevice.LogicWidthToDeviceSubPixel(std::abs(lc_x1 - lc_x2));
 
             Point aTempPos = rTargetDevice.LogicToPixel( aPos );
-            nMnemonicX = rTargetDevice.GetOutOffXPixel() + aTempPos.X() + rTargetDevice.ImplLogicWidthToDevicePixel( std::min(lc_x1, lc_x2) );
-            nMnemonicY = rTargetDevice.GetOutOffYPixel() + aTempPos.Y() + rTargetDevice.ImplLogicWidthToDevicePixel( rTargetDevice.GetFontMetric().GetAscent() );
+            nMnemonicX = rTargetDevice.GetOutOffXPixel() + aTempPos.X() + rTargetDevice.LogicWidthToDevicePixel(std::min(lc_x1, lc_x2));
+            nMnemonicY = rTargetDevice.GetOutOffYPixel() + aTempPos.Y() + rTargetDevice.LogicWidthToDevicePixel(rTargetDevice.GetFontMetric().GetAscent());
         }
 
         if ( nStyle & DrawTextFlags::Clip )

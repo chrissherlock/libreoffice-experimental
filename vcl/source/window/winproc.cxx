@@ -1492,13 +1492,13 @@ static void ImplHandleExtTextInputPos( vcl::Window* pWindow,
         ImplCallCommand( pChild, CommandEventId::CursorPos );
         const tools::Rectangle* pRect = pChild->GetCursorRect();
         if ( pRect )
-            rRect = pChildOutDev->ImplLogicToDevicePixel( *pRect );
+            rRect = pChildOutDev->LogicToDevicePixel( *pRect );
         else
         {
             vcl::Cursor* pCursor = pChild->GetCursor();
             if ( pCursor )
             {
-                Point aPos = pChildOutDev->ImplLogicToDevicePixel( pCursor->GetPos() );
+                Point aPos = pChildOutDev->LogicToDevicePixel(pCursor->GetPos());
                 Size aSize = pChild->LogicToPixel( pCursor->GetSize() );
                 if ( !aSize.Width() )
                     aSize.setWidth( pChild->GetSettings().GetStyleSettings().GetCursorSize() );
@@ -1507,7 +1507,7 @@ static void ImplHandleExtTextInputPos( vcl::Window* pWindow,
             else
                 rRect = tools::Rectangle( Point( pChild->GetOutOffXPixel(), pChild->GetOutOffYPixel() ), Size() );
         }
-        rInputWidth = pChild->GetOutDev()->ImplLogicWidthToDevicePixel( pChild->GetCursorExtTextInputWidth() );
+        rInputWidth = pChild->GetOutDev()->LogicWidthToDevicePixel(pChild->GetCursorExtTextInputWidth());
         if ( !rInputWidth )
             rInputWidth = rRect.GetWidth();
     }
@@ -2657,7 +2657,7 @@ static void ImplHandleSalQueryCharPosition( vcl::Window *pWindow,
 
     const OutputDevice *pChildOutDev = pChild->GetOutDev();
     const tools::Rectangle& aRect = pWinData->mpCompositionCharRects[ pEvt->mnCharPos ];
-    tools::Rectangle aDeviceRect = pChildOutDev->ImplLogicToDevicePixel( aRect );
+    tools::Rectangle aDeviceRect = pChildOutDev->LogicToDevicePixel( aRect );
     AbsoluteScreenPixelPoint aAbsScreenPos = pChild->OutputToAbsoluteScreenPixel( pChild->ScreenToOutputPixel(aDeviceRect.TopLeft()) );
     pEvt->maCursorBound = AbsoluteScreenPixelRectangle(aAbsScreenPos, aDeviceRect.GetSize());
     pEvt->mbVertical = pWinData->mbVertical;

@@ -1699,7 +1699,7 @@ public:
 
      @returns Rectangle based on physical device pixel coordinates and units.
      */
-    SAL_DLLPRIVATE tools::Rectangle    ImplLogicToDevicePixel( const tools::Rectangle& rLogicRect ) const;
+    SAL_DLLPRIVATE tools::Rectangle LogicToDevicePixel( const tools::Rectangle& rLogicRect ) const;
 
     /** Convert a logical point to a physical point on the device.
 
@@ -1707,8 +1707,8 @@ public:
 
      @returns Physical point on the device.
      */
-    SAL_DLLPRIVATE Point        ImplLogicToDevicePixel( const Point& rLogicPt ) const;
-    SAL_DLLPRIVATE basegfx::B2DPoint ImplLogicToDeviceSubPixel(const Point& rLogicPt) const;
+    SAL_DLLPRIVATE Point LogicToDevicePixel(const Point& rLogicPt) const;
+    SAL_DLLPRIVATE basegfx::B2DPoint LogicToDeviceSubPixel(const Point& rLogicPt) const;
 
     /** Convert a logical width to a width in units of device pixels.
 
@@ -1720,8 +1720,8 @@ public:
 
      @returns Width in units of device pixels.
      */
-    SAL_DLLPRIVATE tools::Long         ImplLogicWidthToDevicePixel( tools::Long nWidth ) const;
-    SAL_DLLPRIVATE double              ImplLogicWidthToDeviceSubPixel(tools::Long nWidth) const;
+    SAL_DLLPRIVATE tools::Long LogicWidthToDevicePixel(tools::Long nWidth) const;
+    SAL_DLLPRIVATE double LogicWidthToDeviceSubPixel(tools::Long nWidth) const;
 
 protected:
     /** Convert a logical height to a height in units of device pixels.
