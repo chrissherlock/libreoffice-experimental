@@ -646,8 +646,8 @@ void Printer::ImplInitDisplay()
     mpDisplayDev = VclPtr<VirtualDevice>::Create();
     mxFontCollection    = pSVData->maGDIData.mxScreenFontList;
     mxFontCache         = pSVData->maGDIData.mxScreenFontCache;
-    mnDPIX              = mpDisplayDev->mnDPIX;
-    mnDPIY              = mpDisplayDev->mnDPIY;
+    SetDPIX(mpDisplayDev->GetDPIX());
+    SetDPIY(mpDisplayDev->GetDPIY());
 }
 
 void Printer::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
@@ -786,7 +786,13 @@ void Printer::ImplUpdatePageData()
     if ( !AcquireGraphics() )
         return;
 
-    mpGraphics->GetResolution( mnDPIX, mnDPIY );
+    sal_Int32 nDPIX, nDPIY;
+
+    mpGraphics->GetResolution(nDPIX, nDPIY);
+
+    SetDPIX(nDPIX);
+    SetDPIY(nDPIY);
+
     mpInfoPrinter->GetPageInfo( &maJobSetup.ImplGetConstData(),
                                 mnOutWidth, mnOutHeight,
                                 maPageOffset,
@@ -1671,7 +1677,7 @@ Size Printer::GetWaveLineSize(tools::Long nLineWidth) const
 {
     // FIXME - do we have a bug here? If the linewidth is 0, then we will return
     // Size(0, 0) - is this correct?
-    return Size(nLineWidth, ((nLineWidth*mnDPIX)+(mnDPIY/2))/mnDPIY);
+    return Size(nLineWidth, ((nLineWidth*GetDPIX())+(GetDPIY()/2))/GetDPIY());
 }
 
 void Printer::SetSystemTextColor(SystemTextColorFlags, bool)

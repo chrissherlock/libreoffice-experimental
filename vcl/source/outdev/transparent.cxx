@@ -510,8 +510,8 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
             // Create transparent buffer
             ScopedVclPtrInstance<VirtualDevice> xVDev(DeviceFormat::WITH_ALPHA);
 
-            xVDev->mnDPIX = mnDPIX;
-            xVDev->mnDPIY = mnDPIY;
+            xVDev->SetDPIX(GetDPIX());
+            xVDev->SetDPIY(GetDPIY());
 
             if( xVDev->SetOutputSizePixel( aDstRect.GetSize(), true, true ) )
             {
@@ -1268,8 +1268,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
 
         // create an OutputDevice to record mapmode changes and the like
         ScopedVclPtrInstance< VirtualDevice > aMapModeVDev;
-        aMapModeVDev->mnDPIX = mnDPIX;
-        aMapModeVDev->mnDPIY = mnDPIY;
+        aMapModeVDev->SetDPIX(GetDPIX());
+        aMapModeVDev->SetDPIY(GetDPIY());
         aMapModeVDev->EnableOutput(false);
 
         // weed out page-filling background objects (if they are
@@ -1706,8 +1706,10 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                                     auto popIt1 = aPaintVDev->ScopedPush();
                                     auto popIt2 = aMapVDev->ScopedPush();
 
-                                    aMapVDev->mnDPIX = aPaintVDev->mnDPIX = mnDPIX;
-                                    aMapVDev->mnDPIY = aPaintVDev->mnDPIY = mnDPIY;
+                                    aMapVDev->SetDPIX(GetDPIX());
+                                    aPaintVDev->SetDPIX(GetDPIX());
+                                    aMapVDev->SetDPIY(GetDPIY());
+                                    aPaintVDev->SetDPIY(GetDPIY());
 
                                     aPaintVDev->EnableOutput(false);
 
