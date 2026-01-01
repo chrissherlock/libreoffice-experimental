@@ -201,10 +201,6 @@ private:
     tools::Long                            mnOutOffOrigY;
     /// Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
     tools::Long                            mnOutOffLogicY;
-    /// Output offset for device output in pixel (pseudo window offset within window system's frames)
-    tools::Long                            mnOutOffX;
-    /// Output offset for device output in pixel (pseudo window offset within window system's frames)
-    tools::Long                            mnOutOffY;
     tools::Long                            mnOutWidth;
     tools::Long                            mnOutHeight;
     /// font specific text alignment offsets in pixel units
@@ -311,12 +307,11 @@ public:
                                     { return Size( mnOutWidth, mnOutHeight ); }
     tools::Long                        GetOutputWidthPixel() const { return mnOutWidth; }
     tools::Long                        GetOutputHeightPixel() const { return mnOutHeight; }
-    tools::Long                        GetOutOffXPixel() const { return mnOutOffX; }
-    tools::Long                        GetOutOffYPixel() const { return mnOutOffY; }
-    void         SetOutOffXPixel(tools::Long nOutOffX);
-    void         SetOutOffYPixel(tools::Long nOutOffY);
-    Point                       GetOutputOffPixel() const
-                                    { return Point( mnOutOffX, mnOutOffY ); }
+    tools::Long GetOutOffXPixel() const;
+    tools::Long GetOutOffYPixel() const;
+    void SetOutOffXPixel(tools::Long nOutOffX);
+    void SetOutOffYPixel(tools::Long nOutOffY);
+    Point GetOutputOffPixel() const;
     tools::Rectangle            GetOutputRectPixel() const
                                     { return tools::Rectangle(GetOutputOffPixel(), GetOutputSizePixel() ); }
 

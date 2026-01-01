@@ -867,8 +867,8 @@ void OutputDevice::ImplDrawEmphasisMark( tools::Long nBaseX, tools::Long nX, too
     if( IsRTLEnabled() )
         nX = nBaseX - (nX - nBaseX - 1);
 
-    nX -= mnOutOffX;
-    nY -= mnOutOffY;
+    nX -= GetOutOffXPixel();
+    nY -= GetOutOffYPixel();
 
     if ( rPolyPoly.Count() )
     {

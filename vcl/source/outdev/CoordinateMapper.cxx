@@ -40,4 +40,14 @@ void CoordinateMapper::SetDPIScalePercentage(sal_Int32 nPercent)
 
 float CoordinateMapper::GetDPIScaleFactor() const { return mnDPIScalePercentage / 100.0f; }
 
+tools::Long CoordinateMapper::GetOutOffXPixel() const { return mnOutOffX; }
+
+tools::Long CoordinateMapper::GetOutOffYPixel() const { return mnOutOffY; }
+
+void CoordinateMapper::SetOutOffXPixel(tools::Long nOutOffX) { mnOutOffX = nOutOffX; }
+
+void CoordinateMapper::SetOutOffYPixel(tools::Long nOutOffY) { mnOutOffY = nOutOffY; }
+
+Point CoordinateMapper::GetOutputOffPixel() const { return Point(mnOutOffX, mnOutOffY); }
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

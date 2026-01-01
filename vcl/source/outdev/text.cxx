@@ -263,20 +263,20 @@ bool OutputDevice::ImplDrawRotateText( SalLayout& rSalLayout )
 
     // mask output with text colored bitmap
     GDIMetaFile* pOldMetaFile = mpMetaFile;
-    tools::Long nOldOffX = mnOutOffX;
-    tools::Long nOldOffY = mnOutOffY;
+    tools::Long nOldOffX = GetOutOffXPixel();
+    tools::Long nOldOffY = GetOutOffYPixel();
     bool bOldMap = mbMap;
 
-    mnOutOffX   = 0;
-    mnOutOffY   = 0;
+    SetOutOffXPixel(0);
+    SetOutOffYPixel(0);
     mpMetaFile  = nullptr;
     EnableMapMode( false );
 
     DrawMask( aPoint, aBmp, GetTextColor() );
 
     EnableMapMode( bOldMap );
-    mnOutOffX   = nOldOffX;
-    mnOutOffY   = nOldOffY;
+    SetOutOffXPixel(nOldOffX);
+    SetOutOffYPixel(nOldOffY);
     mpMetaFile  = pOldMetaFile;
 
     return true;
@@ -299,7 +299,7 @@ void OutputDevice::ImplDrawTextDirect( SalLayout& rSalLayout,
         {
             OutputDevice *pOutDevRef = this;
             // mirror this window back
-            tools::Long devX = w-pOutDevRef->mnOutWidth-pOutDevRef->mnOutOffX;   // re-mirrored mnOutOffX
+            tools::Long devX = w-pOutDevRef->mnOutWidth-pOutDevRef->GetOutOffXPixel();   // re-mirrored GetOutOffXPixel()
             rSalLayout.DrawBase().setX( devX + ( pOutDevRef->mnOutWidth - 1 - (rSalLayout.DrawBase().getX() - devX) ) ) ;
         }
     }
@@ -308,7 +308,7 @@ void OutputDevice::ImplDrawTextDirect( SalLayout& rSalLayout,
         OutputDevice *pOutDevRef = this;
 
         // mirror this window back
-        tools::Long devX = pOutDevRef->mnOutOffX;   // re-mirrored mnOutOffX
+        tools::Long devX = pOutDevRef->GetOutOffXPixel();   // re-mirrored GetOutOffXPixel()
         rSalLayout.DrawBase().setX( pOutDevRef->mnOutWidth - 1 - (rSalLayout.DrawBase().getX() - devX) + devX );
     }
 
@@ -1968,8 +1968,8 @@ void OutputDevice::DrawCtrlText( const Point& rPos, const OUString& rStr,
 
             aTempPos += rPos;
             aTempPos = LogicToPixel( aTempPos );
-            nMnemonicX = mnOutOffX + aTempPos.X();
-            nMnemonicY = mnOutOffY + aTempPos.Y();
+            nMnemonicX = GetOutOffXPixel() + aTempPos.X();
+            nMnemonicY = GetOutOffYPixel() + aTempPos.Y();
         }
         else
             nMnemonicPos = -1; // Reset - we don't show the mnemonic

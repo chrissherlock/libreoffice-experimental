@@ -20,6 +20,7 @@
 #pragma once
 
 #include <sal/types.h>
+#include <tools/gen.hxx>
 
 #include <vcl/dllapi.h>
 
@@ -29,6 +30,11 @@ private:
     sal_Int32 mnDPIX;
     sal_Int32 mnDPIY;
     sal_Int32 mnDPIScalePercentage = 100;
+
+    /// Output offset for device output in pixel (pseudo window offset within window system's frames)
+    tools::Long mnOutOffX;
+    /// Output offset for device output in pixel (pseudo window offset within window system's frames)
+    tools::Long mnOutOffY;
 
 public:
     SAL_DLLPRIVATE sal_Int32 GetDPIX() const;
@@ -41,6 +47,14 @@ public:
     SAL_DLLPRIVATE void SetDPIScalePercentage(sal_Int32 nPercentage);
 
     SAL_DLLPRIVATE float GetDPIScaleFactor() const;
+
+    SAL_DLLPRIVATE tools::Long GetOutOffXPixel() const;
+    SAL_DLLPRIVATE tools::Long GetOutOffYPixel() const;
+
+    SAL_DLLPRIVATE void SetOutOffXPixel(tools::Long nOutOffX);
+    SAL_DLLPRIVATE void SetOutOffYPixel(tools::Long nOutOffY);
+
+    SAL_DLLPRIVATE Point GetOutputOffPixel() const;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
