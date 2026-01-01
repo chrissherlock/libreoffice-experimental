@@ -292,7 +292,7 @@ bool SwFEShell::SelectObj( const Point& rPt, sal_uInt8 nFlag, SdrObject *pObj )
         const auto nHdlSizePixel = Imp()->GetDrawView()->GetMarkHdlSizePixel();
         short nMinMove;
         if (comphelper::LibreOfficeKit::isActive())
-            nMinMove = static_cast<short>(OutputDevice::LogicToLogic(Size(nHdlSizePixel/2,0), MapMode(MapUnit::MapPixel), GetOut()->GetMapMode()).Width());
+            nMinMove = static_cast<short>(::LogicToLogic(Size(nHdlSizePixel/2,0), MapMode(MapUnit::MapPixel), GetOut()->GetMapMode()).Width());
         else
             nMinMove = static_cast<short>(GetOut()->PixelToLogic(Size(nHdlSizePixel/2, 0)).Width());
 

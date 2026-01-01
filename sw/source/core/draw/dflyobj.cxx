@@ -835,7 +835,7 @@ void SwVirtFlyDrawObj::NbcCrop(const basegfx::B2DPoint& rRef, double fxFact, dou
     }
     else
     {
-        aGraphicSize = OutputDevice::LogicToLogic( aGraphicSize, pGraphicObject->GetPrefMapMode(), aMapMode100thmm);
+        aGraphicSize = ::LogicToLogic( aGraphicSize, pGraphicObject->GetPrefMapMode(), aMapMode100thmm);
     }
 
     if( aGraphicSize.IsEmpty() )

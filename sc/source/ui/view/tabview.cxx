@@ -1912,7 +1912,7 @@ Point ScTabView::GetChartInsertPos( const Size& rSize, const ScRange& rCellRange
         MapMode aDrawMode = pWin->GetDrawMapMode();
         tools::Rectangle aVisible(
             bLOKActive ?
-            OutputDevice::LogicToLogic( aViewData.getLOKVisibleArea(), MapMode(MapUnit::MapTwip), MapMode(MapUnit::Map100thMM) )
+            ::LogicToLogic( aViewData.getLOKVisibleArea(), MapMode(MapUnit::MapTwip), MapMode(MapUnit::Map100thMM) )
             : pWin->PixelToLogic( tools::Rectangle( Point(0,0), pWin->GetOutputSizePixel() ), aDrawMode ) );
 
         ScDocument& rDoc = aViewData.GetDocument();

@@ -1970,8 +1970,8 @@ bool SdrObjEditView::IsTextEditHit(const Point& rHit) const
             const Point aPnt(rHit - aEditArea.TopLeft());
             tools::Long nHitTol = 2000;
             if (OutputDevice* pRef = mpTextEditOutliner->GetRefDevice())
-                nHitTol = OutputDevice::LogicToLogic(nHitTol, MapUnit::Map100thMM,
-                                                     pRef->GetMapMode().GetMapUnit());
+                nHitTol
+                    = ::LogicToLogic(nHitTol, MapUnit::Map100thMM, pRef->GetMapMode().GetMapUnit());
 
             bOk = mpTextEditOutliner->IsTextPos(aPnt, static_cast<sal_uInt16>(nHitTol));
         }

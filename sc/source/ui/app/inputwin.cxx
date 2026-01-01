@@ -1332,7 +1332,7 @@ void ScTextWnd::Paint( vcl::RenderContext& rRenderContext, const tools::Rectangl
         // EditEngine/EditView works in twips logical coordinates, so set the device map-mode to twips before painting
         // and use twips version of the painting area 'rRect'.
         // Document zoom should not be included in this conversion.
-        tools::Rectangle aLogicRect = OutputDevice::LogicToLogic(rRect, MapMode(MapUnit::MapPixel), MapMode(MapUnit::MapTwip));
+        tools::Rectangle aLogicRect = ::LogicToLogic(rRect, MapMode(MapUnit::MapPixel), MapMode(MapUnit::MapTwip));
         MapMode aOriginalMode = rRenderContext.GetMapMode();
         rRenderContext.SetMapMode(MapMode(MapUnit::MapTwip));
         WeldEditView::Paint(rRenderContext, aLogicRect);

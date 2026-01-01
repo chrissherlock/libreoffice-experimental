@@ -862,13 +862,13 @@ void PosSizePropertyPanel::executeSize()
     // get Width
     double nWidth = static_cast<double>(mxMtrWidth->get_value(FieldUnit::MM_100TH));
     tools::Long lWidth = tools::Long(nWidth * aUIScale);
-    lWidth = OutputDevice::LogicToLogic( lWidth, MapUnit::Map100thMM, mePoolUnit );
+    lWidth = ::LogicToLogic( lWidth, MapUnit::Map100thMM, mePoolUnit );
     lWidth = static_cast<tools::Long>(mxMtrWidth->denormalize( lWidth ));
 
     // get Height
     double nHeight = static_cast<double>(mxMtrHeight->get_value(FieldUnit::MM_100TH));
     tools::Long lHeight = tools::Long(nHeight * aUIScale);
-    lHeight = OutputDevice::LogicToLogic( lHeight, MapUnit::Map100thMM, mePoolUnit );
+    lHeight = ::LogicToLogic( lHeight, MapUnit::Map100thMM, mePoolUnit );
     lHeight = static_cast<tools::Long>(mxMtrHeight->denormalize( lHeight ));
 
     // put Width & Height to itemset

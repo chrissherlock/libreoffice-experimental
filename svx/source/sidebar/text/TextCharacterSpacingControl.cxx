@@ -145,7 +145,7 @@ void TextCharacterSpacingControl::Initialize()
         MapUnit eUnit = GetCoreMetric();
         MapUnit eOrgUnit = eUnit;
         tools::Long nBig = mxEditKerning->normalize(nKerning);
-        nKerning = OutputDevice::LogicToLogic(nBig, eOrgUnit, MapUnit::MapPoint);
+        nKerning = ::LogicToLogic(nBig, eOrgUnit, MapUnit::MapPoint);
         mxEditKerning->set_value(nKerning, FieldUnit::NONE);
     }
     else if(SfxItemState::DISABLED == eState)
@@ -167,7 +167,7 @@ void TextCharacterSpacingControl::ExecuteCharacterSpacing(tools::Long nValue, bo
     tools::Long nSign = (nValue < 0) ? -1 : 1;
     nValue = nValue * nSign;
 
-    tools::Long nVal = OutputDevice::LogicToLogic(nValue, MapUnit::MapPoint, eUnit);
+    tools::Long nVal = ::LogicToLogic(nValue, MapUnit::MapPoint, eUnit);
     short nKern = (nValue == 0) ? 0 : static_cast<short>(mxEditKerning->denormalize(nVal));
 
     css::uno::Sequence<css::beans::PropertyValue> aArgs(1);

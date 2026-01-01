@@ -192,7 +192,7 @@ void SdGRFFilter::InsertSdrGrafObj(const Graphic& rGraphic, SdPage* pPage)
 {
     Point aPos;
     Size aPagSize(pPage->GetSize());
-    Size aGrfSize(OutputDevice::LogicToLogic(rGraphic.GetPrefSize(), rGraphic.GetPrefMapMode(),
+    Size aGrfSize(::LogicToLogic(rGraphic.GetPrefSize(), rGraphic.GetPrefMapMode(),
                                              MapMode(MapUnit::Map100thMM)));
 
     aPagSize.AdjustWidth(-(pPage->GetLeftBorder() + pPage->GetRightBorder()));

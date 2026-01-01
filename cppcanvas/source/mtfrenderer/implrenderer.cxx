@@ -782,7 +782,7 @@ namespace cppcanvas::internal
                 rFontSizeLog = ::Size(0, 16);
 
                 // convert to target MapUnit if not pixels
-                rFontSizeLog = OutputDevice::LogicToLogic(rFontSizeLog, MapMode(MapUnit::MapPixel), rParms.mrVDev.GetMapMode());
+                rFontSizeLog = ::LogicToLogic(rFontSizeLog, MapMode(MapUnit::MapPixel), rParms.mrVDev.GetMapMode());
             }
 
             const sal_Int32 nFontWidthLog = rFontSizeLog.Width();

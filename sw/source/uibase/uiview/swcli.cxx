@@ -142,7 +142,7 @@ void SwOleClient::ViewChanged()
     // coordinates
     const MapMode aMyMap ( MapUnit::MapTwip );
     const MapMode aObjMap( VCLUnoHelper::UnoEmbed2VCLMapUnit( GetObject()->getMapUnit( GetAspect() ) ) );
-    aVisSize = OutputDevice::LogicToLogic( aVisSize, aObjMap, aMyMap );
+    aVisSize = ::LogicToLogic( aVisSize, aObjMap, aMyMap );
 
     aVisSize.setWidth( tools::Long(aVisSize.Width() * GetScaleWidth()) );
     aVisSize.setHeight( tools::Long(aVisSize.Height() * GetScaleHeight()) );

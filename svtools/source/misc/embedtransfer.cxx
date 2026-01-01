@@ -243,7 +243,7 @@ void SvEmbedTransferHelper::FillTransferableObjectDescriptor( TransferableObject
         aMapMode = MapMode( VCLUnoHelper::UnoEmbed2VCLMapUnit( xObj->getMapUnit( rDesc.mnViewAspect ) ) );
     }
 
-    rDesc.maSize = OutputDevice::LogicToLogic( aSize, aMapMode, MapMode( MapUnit::Map100thMM ) );
+    rDesc.maSize = ::LogicToLogic( aSize, aMapMode, MapMode( MapUnit::Map100thMM ) );
     rDesc.maDragStartPos = Point();
     rDesc.maDisplayName.clear();
 }

@@ -219,7 +219,7 @@ void Impl_OlePres::Write( SvStream & rStm )
         if( MapUnit::Map100thMM != nMU )
         {
             Size aPrefS( pMtf->GetPrefSize() );
-            Size aS = OutputDevice::LogicToLogic(aPrefS, MapMode(nMU), MapMode(MapUnit::Map100thMM));
+            Size aS = ::LogicToLogic(aPrefS, MapMode(nMU), MapMode(MapUnit::Map100thMM));
 
             pMtf->Scale( Fraction( aS.Width(), aPrefS.Width() ),
                          Fraction( aS.Height(), aPrefS.Height() ) );
@@ -3787,7 +3787,7 @@ static Size lcl_GetPrefSize(const Graphic& rGraf, const MapMode& aWanted)
     }
     else
     {
-        aRetSize = OutputDevice::LogicToLogic(
+        aRetSize = ::LogicToLogic(
             rGraf.GetPrefSize(), rGraf.GetPrefMapMode(), aWanted);
     }
     return aRetSize;
@@ -6812,7 +6812,7 @@ bool SvxMSDffManager::MakeContentStream( SotStorage * pStor, const GDIMetaFile &
     Size aSize = rMtf.GetPrefSize();
     const MapMode& aMMSrc = rMtf.GetPrefMapMode();
     MapMode aMMDst( MapUnit::Map100thMM );
-    aSize = OutputDevice::LogicToLogic( aSize, aMMSrc, aMMDst );
+    aSize = ::LogicToLogic( aSize, aMMSrc, aMMDst );
     aEle.SetSize( aSize );
     aEle.SetAspect( ASPECT_CONTENT );
     aEle.SetAdviseFlags( 2 );
@@ -7277,7 +7277,7 @@ css::uno::Reference < css::embed::XEmbeddedObject >  SvxMSDffManager::CheckForCo
                 else
                 {
                     aSz = rVisArea.GetSize();
-                    aSz = OutputDevice::LogicToLogic( aSz, MapMode( MapUnit::Map100thMM ), aMapMode );
+                    aSz = ::LogicToLogic( aSz, MapMode( MapUnit::Map100thMM ), aMapMode );
                 }
 
                 // don't modify the object

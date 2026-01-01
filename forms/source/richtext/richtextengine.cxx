@@ -60,7 +60,7 @@ namespace frm
 
         // 12 pt font size
         MapMode aPointMapMode( MapUnit::MapPoint );
-        Size a12PointSize( OutputDevice::LogicToLogic( Size( 12, 0 ), aPointMapMode, aDeviceMapMode ) );
+        Size a12PointSize( ::LogicToLogic( Size( 12, 0 ), aPointMapMode, aDeviceMapMode ) );
         pPool->SetUserDefaultItem( SvxFontHeightItem( a12PointSize.Width(), 100, EE_CHAR_FONTHEIGHT ) );
 
         // font languages

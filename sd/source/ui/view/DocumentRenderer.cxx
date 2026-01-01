@@ -2323,7 +2323,7 @@ private:
         aMap.SetScaleY( Fraction( aPageSize_2.Height(), rInfo.maPageSize.Height() ) );
 
         // calculate adjusted print size
-        const Size aAdjustedPrintSize (OutputDevice::LogicToLogic(
+        const Size aAdjustedPrintSize (::LogicToLogic(
             rInfo.maPrintSize,
             aStdMap,
             aMap));

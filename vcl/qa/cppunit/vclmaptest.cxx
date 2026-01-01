@@ -25,7 +25,7 @@ class TestVirtualDevice : public VirtualDevice
 {
 public:
     // Expose protected methods using 'using'
-    using OutputDevice::ImplLogicHeightToDevicePixel;
+    using OutputDevice::LogicHeightToDevicePixel;
     using OutputDevice::LogicWidthToDevicePixel;
     using OutputDevice::SetOutOffXPixel;
     using OutputDevice::SetOutOffYPixel;
@@ -40,7 +40,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testIdentity)
     MapMode aMode(MapUnit::MapMM);
     Point aPt(1234, 5678);
 
-    Point aResult = OutputDevice::LogicToLogic(aPt, aMode, aMode);
+    Point aResult = LogicToLogic(aPt, aMode, aMode);
 
     CPPUNIT_ASSERT_EQUAL(tools::Long(1234), aResult.X());
     CPPUNIT_ASSERT_EQUAL(tools::Long(5678), aResult.Y());
@@ -53,7 +53,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testSimpleUnitConversion)
     MapMode aDest(MapUnit::MapCM);
     Point aPt(100, 200); // 100mm, 200mm
 
-    Point aResult = OutputDevice::LogicToLogic(aPt, aSource, aDest);
+    Point aResult = LogicToLogic(aPt, aSource, aDest);
 
     CPPUNIT_ASSERT_EQUAL(tools::Long(10), aResult.X()); // 10cm
     CPPUNIT_ASSERT_EQUAL(tools::Long(20), aResult.Y()); // 20cm
@@ -70,7 +70,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testFractionScaling)
     MapMode aDest(MapUnit::MapMM); // Default 1:1
 
     Point aPt(100, 200);
-    Point aResult = OutputDevice::LogicToLogic(aPt, aSource, aDest);
+    Point aResult = LogicToLogic(aPt, aSource, aDest);
 
     CPPUNIT_ASSERT_EQUAL(tools::Long(50), aResult.X());
     CPPUNIT_ASSERT_EQUAL(tools::Long(100), aResult.Y());
@@ -97,7 +97,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testIntermediateOverflow)
     // THIS WILL OVERFLOW 64-bit integer logic if BigInt is missing.
     Point aPt(10000000, 0);
 
-    Point aResult = OutputDevice::LogicToLogic(aPt, aSource, aDest);
+    Point aResult = LogicToLogic(aPt, aSource, aDest);
 
     // Expected: 10,000,000 inches = 25,400,000,000 100thMM
     CPPUNIT_ASSERT_EQUAL(nExpected, aResult.X());
@@ -116,14 +116,14 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testRoundingBehavior)
     MapMode aDest(MapUnit::MapMM);
 
     Point aPt1(150, 140);
-    Point aResult1 = OutputDevice::LogicToLogic(aPt1, aSource, aDest);
+    Point aResult1 = LogicToLogic(aPt1, aSource, aDest);
 
     CPPUNIT_ASSERT_EQUAL(tools::Long(2), aResult1.X()); // 1.5 -> 2
     CPPUNIT_ASSERT_EQUAL(tools::Long(1), aResult1.Y()); // 1.4 -> 1
 
     // Test Negative Rounding
     Point aPt2(-150, -140);
-    Point aResult2 = OutputDevice::LogicToLogic(aPt2, aSource, aDest);
+    Point aResult2 = LogicToLogic(aPt2, aSource, aDest);
 
     CPPUNIT_ASSERT_EQUAL(tools::Long(-2), aResult2.X()); // -1.5 -> -2
     CPPUNIT_ASSERT_EQUAL(tools::Long(-1), aResult2.Y()); // -1.4 -> -1
@@ -151,7 +151,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testOverflowProtectionPositive)
     CPPUNIT_ASSERT(aDest.IsSimple());
 
     Point aPt(nInput, 0);
-    Point aResult = OutputDevice::LogicToLogic(aPt, aSource, aDest);
+    Point aResult = LogicToLogic(aPt, aSource, aDest);
 
     CPPUNIT_ASSERT_EQUAL(nExpected, aResult.X());
 #endif
@@ -169,7 +169,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testOverflowProtectionNegative)
     MapMode aDest(MapUnit::MapMM);
 
     Point aPt(nInput, 0);
-    Point aResult = OutputDevice::LogicToLogic(aPt, aSource, aDest);
+    Point aResult = LogicToLogic(aPt, aSource, aDest);
 
     CPPUNIT_ASSERT_EQUAL(nExpected, aResult.X());
 #endif
@@ -187,7 +187,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testRounding)
     Point aPt(13, 12);
     // 12 * 5 / 127 = 60 / 127 ~= 0.47 -> Rounds to 0
 
-    Point aResult = OutputDevice::LogicToLogic(aPt, aSource, aDest);
+    Point aResult = LogicToLogic(aPt, aSource, aDest);
 
     CPPUNIT_ASSERT_EQUAL(tools::Long(1), aResult.X());
     CPPUNIT_ASSERT_EQUAL(tools::Long(0), aResult.Y());
@@ -204,7 +204,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testTwipsTo100thMM)
 
     Point aPt(7200, 1440); // 5 inches, 1 inch
 
-    Point aResult = OutputDevice::LogicToLogic(aPt, aSource, aDest);
+    Point aResult = LogicToLogic(aPt, aSource, aDest);
 
     // 5 inches = 12700 100thMM
     CPPUNIT_ASSERT_EQUAL(tools::Long(12700), aResult.X());
@@ -220,7 +220,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testPointsToInch)
 
     Point aPt(72, 144); // 1 inch, 2 inches
 
-    Point aResult = OutputDevice::LogicToLogic(aPt, aSource, aDest);
+    Point aResult = LogicToLogic(aPt, aSource, aDest);
 
     CPPUNIT_ASSERT_EQUAL(tools::Long(1), aResult.X());
     CPPUNIT_ASSERT_EQUAL(tools::Long(2), aResult.Y());
@@ -242,7 +242,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testZoomScaling)
     // If I have 100 units at 400% zoom, that is physically 400 units.
     // Converting to 100% zoom, it should remain 400 units.
 
-    Point aResult = OutputDevice::LogicToLogic(aPt, aSource, aDest);
+    Point aResult = LogicToLogic(aPt, aSource, aDest);
 
     CPPUNIT_ASSERT_EQUAL(tools::Long(400), aResult.X());
     CPPUNIT_ASSERT_EQUAL(tools::Long(400), aResult.Y());
@@ -266,7 +266,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testComplexFractions)
     Point aPt(300, 0);
     // 300 * 7 / 3 = 100 * 7 = 700
 
-    Point aResult = OutputDevice::LogicToLogic(aPt, aSource, aDest);
+    Point aResult = LogicToLogic(aPt, aSource, aDest);
 
     CPPUNIT_ASSERT_EQUAL(tools::Long(700), aResult.X());
 }
@@ -290,7 +290,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testCombinedScaleAndOrigin)
     // Actual Calculation: (Point + Origin) * Scale
     // i.e., (30 + 10) * 0.5 = 20mm -> 2000 100thMM.
 
-    Point aResult = OutputDevice::LogicToLogic(aPt, aSource, aDest);
+    Point aResult = LogicToLogic(aPt, aSource, aDest);
 
     // We assert 2000 to enforce consistency with LogicToPixel and historical rendering.
     CPPUNIT_ASSERT_EQUAL(tools::Long(2000), aResult.X());
@@ -335,7 +335,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testMapModePropagation)
     // Test calculation through the residual wrapper
     // 1000 100thmm @ 96 DPI ~= 37.7 pixels
     long nHeightVal = 1000;
-    long nPixelHeight = pDev->ImplLogicHeightToDevicePixel(nHeightVal);
+    long nPixelHeight = pDev->LogicHeightToDevicePixel(nHeightVal);
 
     CPPUNIT_ASSERT(nPixelHeight >= 37 && nPixelHeight <= 38);
 
@@ -344,7 +344,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testMapModePropagation)
     pDev->SetMapMode(aTwips);
 
     // 1440 Twips = 1 Inch = 96 Pixels (usually)
-    long nPixelTwips = pDev->ImplLogicHeightToDevicePixel(1440);
+    long nPixelTwips = pDev->LogicHeightToDevicePixel(1440);
 
     // Check if the change propagated to the internal mapper
     CPPUNIT_ASSERT_EQUAL_MESSAGE("1440 Twips should be approx 96 pixels", long(96), nPixelTwips);

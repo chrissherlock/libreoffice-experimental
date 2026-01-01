@@ -3823,7 +3823,7 @@ bool SdrDragCrop::EndSdrDrag(bool /*bCopy*/)
         }
         else
         {
-            aGraphicSize = OutputDevice::LogicToLogic(aGraphicSize, rGraphicObject.GetPrefMapMode(), aMapModePool);
+            aGraphicSize = ::LogicToLogic(aGraphicSize, rGraphicObject.GetPrefMapMode(), aMapModePool);
         }
 
         if(0 == aGraphicSize.Width() || 0 == aGraphicSize.Height())

@@ -100,7 +100,7 @@ GEOMETRY convert(const MapMode& _rSource, const MapMode& _rDest, OutputDevice* _
     }
     else
     {
-        aPoint = OutputDevice::LogicToLogic(_rObject, _rSource, _rDest);
+        aPoint = ::LogicToLogic(_rObject, _rSource, _rDest);
     }
     return aPoint;
 }

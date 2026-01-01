@@ -161,7 +161,7 @@ Point LOKSpecialPositioning::convertUnit(const Point& rPos, MapUnit ePosUnit) co
     if (ePosUnit == meUnit)
         return rPos;
 
-    return OutputDevice::LogicToLogic(rPos, MapMode(ePosUnit), MapMode(meUnit));
+    return ::LogicToLogic(rPos, MapMode(ePosUnit), MapMode(meUnit));
 }
 
 tools::Rectangle LOKSpecialPositioning::convertUnit(const tools::Rectangle& rRect, MapUnit eRectUnit) const
@@ -169,7 +169,7 @@ tools::Rectangle LOKSpecialPositioning::convertUnit(const tools::Rectangle& rRec
     if (eRectUnit == meUnit)
         return rRect;
 
-    return OutputDevice::LogicToLogic(rRect, MapMode(eRectUnit), MapMode(meUnit));
+    return ::LogicToLogic(rRect, MapMode(eRectUnit), MapMode(meUnit));
 }
 
 Point LOKSpecialPositioning::GetRefPoint() const
@@ -681,7 +681,7 @@ void ImpEditView::ImplDrawHighlightRect( OutputDevice& rTarget, const Point& rDo
             aSelRect.SetRight(nMirrorW - nLeft);
         }
         // Convert from display unit to twips.
-        aSelRect = OutputDevice::LogicToLogic(aSelRect, MapMode(eDevUnit), MapMode(MapUnit::MapTwip));
+        aSelRect = ::LogicToLogic(aSelRect, MapMode(eDevUnit), MapMode(MapUnit::MapTwip));
 
         tools::Polygon aTmpPoly(4);
         aTmpPoly[0] = aSelRect.TopLeft();
@@ -1390,7 +1390,7 @@ void ImpEditView::ShowCursor( bool bGotoCursor, bool bForceVisCursor )
                     aCursorRectPureLogical.SetRight(nMirrorW - nLeft);
                 }
                 // Convert to twips.
-                aCursorRectPureLogical = OutputDevice::LogicToLogic(aCursorRectPureLogical, MapMode(eDevUnit), MapMode(MapUnit::MapTwip));
+                aCursorRectPureLogical = ::LogicToLogic(aCursorRectPureLogical, MapMode(eDevUnit), MapMode(MapUnit::MapTwip));
                 // "refpoint" in print twips.
                 const Point aRefPoint = mpLOKSpecialPositioning->GetRefPoint();
                 aMessageParams.put("relrect", aCursorRectPureLogical.toString());

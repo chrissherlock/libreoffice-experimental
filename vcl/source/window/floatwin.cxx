@@ -470,7 +470,7 @@ Point FloatingWindow::ImplCalcPos(vcl::Window* pWindow,
         }
         else
         {
-            *pLOKTwipsPos = OutputDevice::LogicToLogic(aPosOut, pW->GetMapMode(), MapMode(MapUnit::MapTwip));
+            *pLOKTwipsPos = ::LogicToLogic(aPosOut, pW->GetMapMode(), MapMode(MapUnit::MapTwip));
         }
     }
 

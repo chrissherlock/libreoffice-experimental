@@ -2519,7 +2519,7 @@ bool SwTransferable::PasteOLE( const TransferableDataHelper& rData, SwWrtShell& 
             {
                 aSize = aObjDesc.maSize;    //always 100TH_MM
                 MapUnit aUnit = VCLUnoHelper::UnoEmbed2VCLMapUnit( xObj->getMapUnit( aObjDesc.mnViewAspect ) );
-                aSize = OutputDevice::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(aUnit));
+                aSize = ::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(aUnit));
                 awt::Size aSz;
                 try
                 {

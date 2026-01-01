@@ -300,10 +300,10 @@ void SvxBitmapTabPage::Reset( const SfxItemSet* rAttrs )
     }
     m_fObjectWidth = std::max( transfWidth, 1.0 );
     m_fObjectHeight = std::max( transfHeight, 1.0 );
-    double fTmpWidth((OutputDevice::LogicToLogic(static_cast<sal_Int32>(m_fObjectWidth), mePoolUnit, MapUnit::Map100thMM )) / fUIScale);
+    double fTmpWidth((::LogicToLogic(static_cast<sal_Int32>(m_fObjectWidth), mePoolUnit, MapUnit::Map100thMM )) / fUIScale);
     m_fObjectWidth = fTmpWidth;
 
-    double fTmpHeight((OutputDevice::LogicToLogic(static_cast<sal_Int32>(m_fObjectHeight), mePoolUnit, MapUnit::Map100thMM )) / fUIScale);
+    double fTmpHeight((::LogicToLogic(static_cast<sal_Int32>(m_fObjectHeight), mePoolUnit, MapUnit::Map100thMM )) / fUIScale);
     m_fObjectHeight = fTmpHeight;
 
     const XFillBitmapItem& aItem( rAttrs->Get(XATTR_FILLBITMAP) );

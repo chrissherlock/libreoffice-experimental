@@ -3169,7 +3169,7 @@ Font PDFWriterImpl::replaceFont( const vcl::Font& rControlFont, const vcl::Font&
     {
         Size aFontSize = aFont.GetFontSize();
         OutputDevice* pDefDev = Application::GetDefaultDevice();
-        aFontSize = OutputDevice::LogicToLogic( aFontSize, pDefDev->GetMapMode(), getMapMode() );
+        aFontSize = ::LogicToLogic( aFontSize, pDefDev->GetMapMode(), getMapMode() );
         aFont.SetFontSize( aFontSize );
     }
     return aFont;
@@ -5883,7 +5883,7 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
 
     // transform font height back to current units
     // note: the layout calculates in outdevs device pixel !!
-    sal_Int32 nFontHeight = ImplDevicePixelToLogicHeight( nPixelFontHeight );
+    sal_Int32 nFontHeight = DevicePixelToLogicHeight(nPixelFontHeight);
     if( m_aCurrentPDFState.m_aFont.GetAverageFontWidth() )
     {
         Font aFont( m_aCurrentPDFState.m_aFont );
@@ -6082,7 +6082,7 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
         // This is the top left of the text without ascent / descent.
         basegfx::B2DPoint aDrawPosition(rLayout.GetDrawPosition());
         tools::Rectangle aRectangle(SubPixelToLogic(aDrawPosition),
-                                    Size(ImplDevicePixelToLogicWidth(rLayout.GetTextWidth()), 0));
+                                    Size(DevicePixelToLogicWidth(rLayout.GetTextWidth()), 0));
         aRectangle.AdjustTop(-aRefDevFontMetric.GetAscent());
         // This includes ascent / descent.
         aRectangle.setHeight(aRefDevFontMetric.GetLineHeight());
@@ -6195,27 +6195,27 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
                 }
                 else if( nWidth > 0 )
                 {
-                    drawTextLine( SubPixelToLogic(aStartPt),
-                                  ImplDevicePixelToLogicWidth( nWidth ),
-                                  eStrikeout, eUnderline, eOverline, bUnderlineAbove );
+                    drawTextLine(SubPixelToLogic(aStartPt),
+                                 DevicePixelToLogicWidth(nWidth),
+                                 eStrikeout, eUnderline, eOverline, bUnderlineAbove);
                     nWidth = 0;
                 }
             }
 
             if( nWidth > 0 )
             {
-                drawTextLine( SubPixelToLogic(aStartPt),
-                              ImplDevicePixelToLogicWidth( nWidth ),
-                              eStrikeout, eUnderline, eOverline, bUnderlineAbove );
+                drawTextLine(SubPixelToLogic(aStartPt),
+                             DevicePixelToLogicWidth(nWidth),
+                             eStrikeout, eUnderline, eOverline, bUnderlineAbove);
             }
         }
         else
         {
             basegfx::B2DPoint aStartPt = rLayout.GetDrawPosition();
             int nWidth = rLayout.GetTextWidth();
-            drawTextLine( SubPixelToLogic(aStartPt),
-                          ImplDevicePixelToLogicWidth( nWidth ),
-                          eStrikeout, eUnderline, eOverline, bUnderlineAbove );
+            drawTextLine(SubPixelToLogic(aStartPt),
+                         DevicePixelToLogicWidth(nWidth),
+                         eStrikeout, eUnderline, eOverline, bUnderlineAbove);
         }
     }
 
@@ -6236,7 +6236,7 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
     else
         nEmphHeight = GetEmphasisAscent();
 
-    vcl::font::EmphasisMark aEmphasisMark(nEmphMark, ImplDevicePixelToLogicWidth(nEmphHeight), GetDPIY());
+    vcl::font::EmphasisMark aEmphasisMark(nEmphMark, DevicePixelToLogicWidth(nEmphHeight), GetDPIY());
     if ( aEmphasisMark.IsShapePolyLine() )
     {
         setLineColor( m_aCurrentPDFState.m_aFont.GetColor() );
@@ -6607,7 +6607,7 @@ void PDFWriterImpl::drawLine( const Point& rStart, const Point& rStop, const Lin
     }
 }
 
-#define HCONV( x ) ImplDevicePixelToLogicHeight( x )
+#define HCONV(x) DevicePixelToLogicHeight(x)
 
 void PDFWriterImpl::drawWaveTextLine( OStringBuffer& aLine, tools::Long nWidth, FontLineStyle eTextLine, Color aColor, bool bIsAbove )
 {
@@ -9654,7 +9654,7 @@ void PDFWriterImpl::moveClipRegion( sal_Int32 nX, sal_Int32 nY )
     }
     else
     {
-        aConvertA = LogicToLogic(m_aGraphicsStack.front().m_aMapMode, m_aMapMode);
+        aConvertA = ::LogicToLogic(m_aGraphicsStack.front().m_aMapMode, m_aMapMode);
     }
 
     basegfx::B2DPoint aB2DPointA(nX, nY);

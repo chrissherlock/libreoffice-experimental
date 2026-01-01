@@ -146,7 +146,7 @@ const tools::PolyPolygon *SwNoTextNode::HasContour() const
                         }
                     }
                     else
-                        rPoly[i] = OutputDevice::LogicToLogic( rPoly[i],
+                        rPoly[i] = ::LogicToLogic( rPoly[i],
                                                                  aContourMap,
                                                                  aGrfMap );
                 }
@@ -195,7 +195,7 @@ bool SwNoTextNode::GetContourAPI( tools::PolyPolygon &rContour ) const
                 sal_uInt16 nCount = rPoly.GetSize();
                 for( sal_uInt16 i=0 ; i<nCount; i++ )
                 {
-                    rPoly[i] = OutputDevice::LogicToLogic( rPoly[i], aGrfMap,
+                    rPoly[i] = ::LogicToLogic( rPoly[i], aGrfMap,
                                                            aContourMap );
                 }
             }
