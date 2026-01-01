@@ -1151,9 +1151,9 @@ void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* p
     }
 
     // setup the scale factor for HiDPI displays
-    mpWindowImpl->mxOutDev->mnDPIScalePercentage = CountDPIScaleFactor(mpWindowImpl->mpFrameData->mnDPIY);
-    mpWindowImpl->mxOutDev->mnDPIX = mpWindowImpl->mpFrameData->mnDPIX;
-    mpWindowImpl->mxOutDev->mnDPIY = mpWindowImpl->mpFrameData->mnDPIY;
+    mpWindowImpl->mxOutDev->SetDPIScalePercentage(CountDPIScaleFactor(mpWindowImpl->mpFrameData->mnDPIY));
+    mpWindowImpl->mxOutDev->SetDPIX(mpWindowImpl->mpFrameData->mnDPIX);
+    mpWindowImpl->mxOutDev->SetDPIY(mpWindowImpl->mpFrameData->mnDPIY);
 
     if (!comphelper::IsFuzzing())
     {
@@ -1335,19 +1335,19 @@ void Window::ImplInitResolutionSettings()
     // recalculate AppFont-resolution and DPI-resolution
     if (mpWindowImpl->mbFrame)
     {
-        GetOutDev()->mnDPIX = mpWindowImpl->mpFrameData->mnDPIX;
-        GetOutDev()->mnDPIY = mpWindowImpl->mpFrameData->mnDPIY;
+        GetOutDev()->SetDPIX(mpWindowImpl->mpFrameData->mnDPIX);
+        GetOutDev()->SetDPIY(mpWindowImpl->mpFrameData->mnDPIY);
 
         // setup the scale factor for HiDPI displays
-        GetOutDev()->mnDPIScalePercentage = CountDPIScaleFactor(mpWindowImpl->mpFrameData->mnDPIY);
+        GetOutDev()->SetDPIScalePercentage(CountDPIScaleFactor(mpWindowImpl->mpFrameData->mnDPIY));
         const StyleSettings& rStyleSettings = GetOutDev()->moSettings->GetStyleSettings();
         SetPointFont(*GetOutDev(), rStyleSettings.GetAppFont());
     }
     else if ( mpWindowImpl->mpParent )
     {
-        GetOutDev()->mnDPIX  = mpWindowImpl->mpParent->GetOutDev()->mnDPIX;
-        GetOutDev()->mnDPIY  = mpWindowImpl->mpParent->GetOutDev()->mnDPIY;
-        GetOutDev()->mnDPIScalePercentage = mpWindowImpl->mpParent->GetOutDev()->mnDPIScalePercentage;
+        GetOutDev()->SetDPIX(mpWindowImpl->mpParent->GetOutDev()->GetDPIX());
+        GetOutDev()->SetDPIY(mpWindowImpl->mpParent->GetOutDev()->GetDPIY());
+        GetOutDev()->SetDPIScalePercentage(mpWindowImpl->mpParent->GetOutDev()->GetDPIScalePercentage());
     }
 
     // update the recalculated values for logical units
@@ -1754,7 +1754,7 @@ void Window::ImplNewInputContext()
             if ( rFont.GetFontSize().Height() )
                 aSize.setHeight( 1 );
             else
-                aSize.setHeight( (12*pFocusWin->GetOutDev()->mnDPIY)/72 );
+                aSize.setHeight( (12*pFocusWin->GetOutDev()->GetDPIY())/72 );
         }
         aNewContext.mpFont =
                         pFocusWin->GetOutDev()->mxFontCache->GetFontInstance(
