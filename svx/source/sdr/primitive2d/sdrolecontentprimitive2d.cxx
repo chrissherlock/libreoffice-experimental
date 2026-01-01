@@ -79,7 +79,7 @@ namespace drawinglayer::primitive2d
                 }
                 else
                 {
-                    aPrefSize = OutputDevice::LogicToLogic(aPrefSize, aGraphic.GetPrefMapMode(), MapMode(MapUnit::Map100thMM));
+                    aPrefSize = ::LogicToLogic(aPrefSize, aGraphic.GetPrefMapMode(), MapMode(MapUnit::Map100thMM));
                 }
 
                 const double fOffsetX((aScale.getX() - aPrefSize.getWidth()) / 2.0);

@@ -159,7 +159,7 @@ namespace emfio::emfreader
                     }
                     else
                     {
-                        aSize = OutputDevice::LogicToLogic(aSize, aMtf.GetPrefMapMode(), MapMode(MapUnit::Map100thMM));
+                        aSize = ::LogicToLogic(aSize, aMtf.GetPrefMapMode(), MapMode(MapUnit::Map100thMM));
                     }
 
                     // use size

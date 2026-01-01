@@ -641,11 +641,11 @@ Graphic GraphicObject::GetTransformedGraphic( const Size& rDestSize, const MapMo
         else
         {
             // crops are in GraphicObject units -> to aMapGraph
-            aCropLeftTop = OutputDevice::LogicToLogic(
+            aCropLeftTop = ::LogicToLogic(
                 Size(rAttr.GetLeftCrop(), rAttr.GetTopCrop()),
                 aMap100,
                 aMapGraph);
-            aCropRightBottom = OutputDevice::LogicToLogic(
+            aCropRightBottom = ::LogicToLogic(
                 Size(rAttr.GetRightCrop(), rAttr.GetBottomCrop()),
                 aMap100,
                 aMapGraph);
@@ -682,7 +682,7 @@ Graphic GraphicObject::GetTransformedGraphic( const Size& rDestSize, const MapMo
             Point aNewOrigin( static_cast<tools::Long>(static_cast<double>(aMtfMapMode.GetOrigin().X()) + rDestSize.Width() * aCropLeftTop.Width() / (aSrcSize.Width() - aCropLeftTop.Width() - aCropRightBottom.Width()) + .5),
                               static_cast<tools::Long>(static_cast<double>(aMtfMapMode.GetOrigin().Y()) + rDestSize.Height() * aCropLeftTop.Height() / (aSrcSize.Height() - aCropLeftTop.Height() - aCropRightBottom.Height()) + .5) );
             MapMode aNewMap( rDestMap );
-            aNewMap.SetOrigin( OutputDevice::LogicToLogic(aNewOrigin, aMtfMapMode, rDestMap) );
+            aNewMap.SetOrigin( ::LogicToLogic(aNewOrigin, aMtfMapMode, rDestMap) );
             aMtf.SetPrefMapMode( aNewMap );
         }
         else
@@ -913,7 +913,7 @@ basegfx::B2DVector GraphicObject::calculateCropScaling(
     }
     else
     {
-        aBitmapSize = OutputDevice::LogicToLogic(aBitmapSize, GetPrefMapMode(), aMapMode100thmm);
+        aBitmapSize = ::LogicToLogic(aBitmapSize, GetPrefMapMode(), aMapMode100thmm);
     }
 
     const double fDivX(aBitmapSize.Width() - fLeftCrop - fRightCrop);

@@ -1004,7 +1004,7 @@ bool View::InsertData( const TransferableDataHelper& rDataHelper,
                         MapUnit aMapUnit = VCLUnoHelper::UnoEmbed2VCLMapUnit( xObj->getMapUnit( aObjDesc.mnViewAspect ) );
                         if( aObjDesc.maSize.Width() && aObjDesc.maSize.Height() )
                         {
-                            Size aTmp(OutputDevice::LogicToLogic(aObjDesc.maSize, MapMode(MapUnit::Map100thMM), MapMode(aMapUnit)));
+                            Size aTmp(::LogicToLogic(aObjDesc.maSize, MapMode(MapUnit::Map100thMM), MapMode(aMapUnit)));
                             aSz.Width = aTmp.Width();
                             aSz.Height = aTmp.Height();
                             xObj->setVisualAreaSize( aObjDesc.mnViewAspect, aSz );
@@ -1025,13 +1025,13 @@ bool View::InsertData( const TransferableDataHelper& rDataHelper,
                         {
                             aSize.setWidth( 14100 );
                             aSize.setHeight( 10000 );
-                            aSize = OutputDevice::LogicToLogic(Size(14100, 10000), MapMode(MapUnit::Map100thMM), MapMode(aMapUnit));
+                            aSize = ::LogicToLogic(Size(14100, 10000), MapMode(MapUnit::Map100thMM), MapMode(aMapUnit));
                             aSz.Width = aSize.Width();
                             aSz.Height = aSize.Height();
                             xObj->setVisualAreaSize( aObjDesc.mnViewAspect, aSz );
                         }
 
-                        aSize = OutputDevice::LogicToLogic(aSize, MapMode(aMapUnit), MapMode(MapUnit::Map100thMM));
+                        aSize = ::LogicToLogic(aSize, MapMode(aMapUnit), MapMode(MapUnit::Map100thMM));
                     }
 
                     Size aMaxSize( mrDoc.GetMaxObjSize() );
@@ -1186,7 +1186,7 @@ bool View::InsertData( const TransferableDataHelper& rDataHelper,
 
                         if( aObjDesc.maSize.Width() && aObjDesc.maSize.Height() )
                         {
-                            Size aTmp(OutputDevice::LogicToLogic(aObjDesc.maSize, MapMode(MapUnit::Map100thMM), MapMode(aMapUnit)));
+                            Size aTmp(::LogicToLogic(aObjDesc.maSize, MapMode(MapUnit::Map100thMM), MapMode(aMapUnit)));
                             if ( aSz.Width != aTmp.Width() || aSz.Height != aTmp.Height() )
                             {
                                 aSz.Width = aTmp.Width();
@@ -1199,13 +1199,13 @@ bool View::InsertData( const TransferableDataHelper& rDataHelper,
 
                         if( !aSize.Width() || !aSize.Height() )
                         {
-                            aSize = OutputDevice::LogicToLogic(Size(14100, 10000), MapMode(MapUnit::Map100thMM), MapMode(aMapUnit));
+                            aSize = ::LogicToLogic(Size(14100, 10000), MapMode(MapUnit::Map100thMM), MapMode(aMapUnit));
                             aSz.Width = aSize.Width();
                             aSz.Height = aSize.Height();
                             xObj->setVisualAreaSize( aObjDesc.mnViewAspect, aSz );
                         }
 
-                        aSize = OutputDevice::LogicToLogic(aSize, MapMode(aMapUnit), MapMode(MapUnit::Map100thMM));
+                        aSize = ::LogicToLogic(aSize, MapMode(aMapUnit), MapMode(MapUnit::Map100thMM));
                     }
 
                     Size aMaxSize( mrDoc.GetMaxObjSize() );
@@ -1279,7 +1279,7 @@ bool View::InsertData( const TransferableDataHelper& rDataHelper,
             }
 
             // restrict movement to WorkArea
-            Size aImageMapSize = OutputDevice::LogicToLogic(aGraphic.GetPrefSize(),
+            Size aImageMapSize = ::LogicToLogic(aGraphic.GetPrefSize(),
                 aGraphic.GetPrefMapMode(), MapMode(MapUnit::Map100thMM));
 
             ImpCheckInsertPos(aInsertPos, aImageMapSize, GetWorkArea());
