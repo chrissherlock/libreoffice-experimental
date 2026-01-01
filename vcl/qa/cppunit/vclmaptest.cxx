@@ -25,7 +25,7 @@ class TestVirtualDevice : public VirtualDevice
 {
 public:
     // Expose protected methods using 'using'
-    using OutputDevice::ImplLogicHeightToDevicePixel;
+    using OutputDevice::LogicHeightToDevicePixel;
     using OutputDevice::LogicWidthToDevicePixel;
     using OutputDevice::SetOutOffXPixel;
     using OutputDevice::SetOutOffYPixel;
@@ -349,7 +349,7 @@ public:
         // Test calculation through the residual wrapper
         // 1000 100thmm @ 96 DPI ~= 37.7 pixels
         long nHeightVal = 1000;
-        long nPixelHeight = pDev->ImplLogicHeightToDevicePixel(nHeightVal);
+        long nPixelHeight = pDev->LogicHeightToDevicePixel(nHeightVal);
 
         CPPUNIT_ASSERT(nPixelHeight >= 37 && nPixelHeight <= 38);
 
@@ -358,7 +358,7 @@ public:
         pDev->SetMapMode(aTwips);
 
         // 1440 Twips = 1 Inch = 96 Pixels (usually)
-        long nPixelTwips = pDev->ImplLogicHeightToDevicePixel(1440);
+        long nPixelTwips = pDev->LogicHeightToDevicePixel(1440);
 
         // Check if the change propagated to the internal mapper
         CPPUNIT_ASSERT_EQUAL_MESSAGE("1440 Twips should be approx 96 pixels", long(96),
