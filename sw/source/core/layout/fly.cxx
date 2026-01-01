@@ -3280,7 +3280,7 @@ bool SwFlyFrame::GetContour( tools::PolyPolygon&   rContour,
                     if ( bPixelMap )
                         aOrgSize = pOutDev->PixelToLogic( aGrfSize, aDispMap );
                     else
-                        aOrgSize = OutputDevice::LogicToLogic( aGrfSize, aGrfMap, aDispMap );
+                        aOrgSize = ::LogicToLogic( aGrfSize, aGrfMap, aDispMap );
 
                     if ( aOrgSize.Width() && aOrgSize.Height() )
                     {
@@ -3296,7 +3296,7 @@ bool SwFlyFrame::GetContour( tools::PolyPolygon&   rContour,
                                 if ( bPixelMap )
                                     aNewPoint = pOutDev->PixelToLogic( rPoly[ i ], aDispMap  );
                                 else
-                                    aNewPoint = OutputDevice::LogicToLogic( rPoly[ i ], aGrfMap, aDispMap  );
+                                    aNewPoint = ::LogicToLogic( rPoly[ i ], aGrfMap, aDispMap  );
 
                                 rPoly[ i ] = Point( basegfx::fround<tools::Long>( aNewPoint.getX() * fScaleX ), basegfx::fround<tools::Long>( aNewPoint.getY() * fScaleY ) );
                             }

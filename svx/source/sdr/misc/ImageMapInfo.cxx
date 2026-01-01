@@ -93,8 +93,8 @@ IMapObject* SvxIMapInfo::GetHitIMapObject(const SdrObject* pObj, const Point& rW
                 aGraphSize = Application::GetDefaultDevice()->PixelToLogic(
                     pGrafObj->GetGrafPrefSize(), aMap100);
             else
-                aGraphSize = OutputDevice::LogicToLogic(pGrafObj->GetGrafPrefSize(),
-                                                        pGrafObj->GetGrafPrefMapMode(), aMap100);
+                aGraphSize = ::LogicToLogic(pGrafObj->GetGrafPrefSize(),
+                                            pGrafObj->GetGrafPrefMapMode(), aMap100);
 
             bObjSupported = true;
         }

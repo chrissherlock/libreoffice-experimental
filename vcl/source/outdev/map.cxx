@@ -108,44 +108,6 @@ Point OutputDevice::SubPixelToLogic(const basegfx::B2DPoint& rDevicePt) const
     return ImplSubPixelToLogic(rDevicePt);
 }
 
-Point OutputDevice::LogicToLogic(const Point& rPtSource, const MapMode& rMapModeSource,
-                                 const MapMode& rMapModeDest)
-{
-    return ImplLogicToLogic(rPtSource, rMapModeSource, rMapModeDest);
-}
-
-Size OutputDevice::LogicToLogic(const Size& rSzSource, const MapMode& rMapModeSource,
-                                const MapMode& rMapModeDest)
-{
-    return ImplLogicToLogic(rSzSource, rMapModeSource, rMapModeDest);
-}
-
-basegfx::B2DPolygon OutputDevice::LogicToLogic(const basegfx::B2DPolygon& rPolySource,
-                                               const MapMode& rMapModeSource,
-                                               const MapMode& rMapModeDest)
-{
-    return ImplLogicToLogic(rPolySource, rMapModeSource, rMapModeDest);
-}
-
-basegfx::B2DHomMatrix OutputDevice::LogicToLogic(const MapMode& rMapModeSource,
-                                                 const MapMode& rMapModeDest)
-{
-    return ImplLogicToLogic(rMapModeSource, rMapModeDest);
-}
-
-tools::Rectangle OutputDevice::LogicToLogic(const tools::Rectangle& rRectSource,
-                                            const MapMode& rMapModeSource,
-                                            const MapMode& rMapModeDest)
-{
-    return ImplLogicToLogic(rRectSource, rMapModeSource, rMapModeDest);
-}
-
-tools::Long OutputDevice::LogicToLogic(tools::Long nLongSource, MapUnit eUnitSource,
-                                       MapUnit eUnitDest)
-{
-    return ImplLogicToLogic(nLongSource, eUnitSource, eUnitDest);
-}
-
 void OutputDevice::SetPixelOffset(const Size& rOffset) { ImplSetPixelOffset(rOffset); }
 
 double OutputDevice::LogicWidthToDeviceSubPixel(tools::Long nWidth) const
@@ -1237,8 +1199,7 @@ static tools::Long lcl_convertLogicValue(const tools::Long n1, const o3tl::Lengt
     }
 }
 
-tools::Long OutputDevice::ImplLogicToLogic(tools::Long nLongSource, MapUnit eUnitSource,
-                                           MapUnit eUnitDest)
+tools::Long LogicToLogic(tools::Long nLongSource, MapUnit eUnitSource, MapUnit eUnitDest)
 {
     if (eUnitSource == eUnitDest)
         return nLongSource;
@@ -1373,9 +1334,8 @@ static tools::Long lcl_scaleLogicValue(const tools::Long n1, const tools::Long n
     } // of else
 }
 
-tools::Rectangle OutputDevice::ImplLogicToLogic(const tools::Rectangle& rRectSource,
-                                                const MapMode& rMapModeSource,
-                                                const MapMode& rMapModeDest)
+tools::Rectangle LogicToLogic(const tools::Rectangle& rRectSource, const MapMode& rMapModeSource,
+                              const MapMode& rMapModeDest)
 {
     if (rMapModeSource == rMapModeDest)
         return rRectSource;
@@ -1444,8 +1404,7 @@ tools::Rectangle OutputDevice::ImplLogicToLogic(const tools::Rectangle& rRectSou
     return aRetval;
 }
 
-basegfx::B2DHomMatrix OutputDevice::ImplLogicToLogic(const MapMode& rMapModeSource,
-                                                     const MapMode& rMapModeDest)
+basegfx::B2DHomMatrix LogicToLogic(const MapMode& rMapModeSource, const MapMode& rMapModeDest)
 {
     basegfx::B2DHomMatrix aTransform;
 
@@ -1492,9 +1451,8 @@ basegfx::B2DHomMatrix OutputDevice::ImplLogicToLogic(const MapMode& rMapModeSour
     return aTransform;
 }
 
-basegfx::B2DPolygon OutputDevice::ImplLogicToLogic(const basegfx::B2DPolygon& rPolySource,
-                                                   const MapMode& rMapModeSource,
-                                                   const MapMode& rMapModeDest)
+basegfx::B2DPolygon LogicToLogic(const basegfx::B2DPolygon& rPolySource,
+                                 const MapMode& rMapModeSource, const MapMode& rMapModeDest)
 {
     if (rMapModeSource == rMapModeDest)
         return rPolySource;
@@ -1506,8 +1464,7 @@ basegfx::B2DPolygon OutputDevice::ImplLogicToLogic(const basegfx::B2DPolygon& rP
     return aPoly;
 }
 
-Size OutputDevice::ImplLogicToLogic(const Size& rSzSource, const MapMode& rMapModeSource,
-                                    const MapMode& rMapModeDest)
+Size LogicToLogic(const Size& rSzSource, const MapMode& rMapModeSource, const MapMode& rMapModeDest)
 {
     if (rMapModeSource == rMapModeDest)
         return rSzSource;
@@ -1536,8 +1493,8 @@ Size OutputDevice::ImplLogicToLogic(const Size& rSzSource, const MapMode& rMapMo
     }
 }
 
-Point OutputDevice::ImplLogicToLogic(const Point& rPtSource, const MapMode& rMapModeSource,
-                                     const MapMode& rMapModeDest)
+Point LogicToLogic(const Point& rPtSource, const MapMode& rMapModeSource,
+                   const MapMode& rMapModeDest)
 {
     if (rMapModeSource == rMapModeDest)
         return rPtSource;
@@ -1762,7 +1719,7 @@ Size OutputDevice::ImplPixelToLogic(const Size& rDeviceSize, const MapMode& rMap
 }
 
 tools::Rectangle OutputDevice::ImplPixelToLogic(const tools::Rectangle& rDeviceRect,
-                                            const MapMode& rMapMode) const
+                                                const MapMode& rMapMode) const
 {
     // calculate nothing if default-MapMode
     // tdf#141761 see comments above, IsEmpty() removed
@@ -1797,7 +1754,7 @@ tools::Rectangle OutputDevice::ImplPixelToLogic(const tools::Rectangle& rDeviceR
 }
 
 tools::Polygon OutputDevice::ImplPixelToLogic(const tools::Polygon& rDevicePoly,
-                                          const MapMode& rMapMode) const
+                                              const MapMode& rMapMode) const
 {
     // calculate nothing if default-MapMode
     if (rMapMode.IsDefault())
@@ -1829,7 +1786,7 @@ tools::Polygon OutputDevice::ImplPixelToLogic(const tools::Polygon& rDevicePoly,
 }
 
 basegfx::B2DPolygon OutputDevice::ImplPixelToLogic(const basegfx::B2DPolygon& rPixelPoly,
-                                               const MapMode& rMapMode) const
+                                                   const MapMode& rMapMode) const
 {
     basegfx::B2DPolygon aTransformedPoly = rPixelPoly;
     const basegfx::B2DHomMatrix aTransformationMatrix = GetInverseViewTransformation(rMapMode);
@@ -1837,8 +1794,9 @@ basegfx::B2DPolygon OutputDevice::ImplPixelToLogic(const basegfx::B2DPolygon& rP
     return aTransformedPoly;
 }
 
-basegfx::B2DPolyPolygon OutputDevice::ImplPixelToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly,
-                                                   const MapMode& rMapMode) const
+basegfx::B2DPolyPolygon
+OutputDevice::ImplPixelToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly,
+                               const MapMode& rMapMode) const
 {
     basegfx::B2DPolyPolygon aTransformedPoly = rPixelPolyPoly;
     const basegfx::B2DHomMatrix aTransformationMatrix = GetInverseViewTransformation(rMapMode);

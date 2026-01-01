@@ -508,7 +508,7 @@ const OUString & SVGTextWriter::implGetValidIDFromInterface( const Reference< XI
 void SVGTextWriter::implMap( const Size& rSz, Size& rDstSz ) const
 {
     if( mpVDev && mpTargetMapMode )
-        rDstSz = OutputDevice::LogicToLogic( rSz, mpVDev->GetMapMode(), *mpTargetMapMode );
+        rDstSz = ::LogicToLogic( rSz, mpVDev->GetMapMode(), *mpTargetMapMode );
     else
         OSL_FAIL( "SVGTextWriter::implMap: invalid virtual device or map mode." );
 }
@@ -517,7 +517,7 @@ void SVGTextWriter::implMap( const Size& rSz, Size& rDstSz ) const
 void SVGTextWriter::implMap( const Point& rPt, Point& rDstPt ) const
 {
     if( mpVDev && mpTargetMapMode )
-        rDstPt = OutputDevice::LogicToLogic( rPt, mpVDev->GetMapMode(), *mpTargetMapMode );
+        rDstPt = ::LogicToLogic( rPt, mpVDev->GetMapMode(), *mpTargetMapMode );
     else
         OSL_FAIL( "SVGTextWriter::implMap: invalid virtual device or map mode." );
 }
@@ -1893,14 +1893,14 @@ tools::Long SVGActionWriter::ImplMap( sal_Int32 nVal ) const
 
 Point& SVGActionWriter::ImplMap( const Point& rPt, Point& rDstPt ) const
 {
-    rDstPt = OutputDevice::LogicToLogic( rPt, mpVDev->GetMapMode(), maTargetMapMode );
+    rDstPt = ::LogicToLogic( rPt, mpVDev->GetMapMode(), maTargetMapMode );
     return rDstPt;
 }
 
 
 Size& SVGActionWriter::ImplMap( const Size& rSz, Size& rDstSz ) const
 {
-    rDstSz = OutputDevice::LogicToLogic( rSz, mpVDev->GetMapMode(), maTargetMapMode );
+    rDstSz = ::LogicToLogic( rSz, mpVDev->GetMapMode(), maTargetMapMode );
     return rDstSz;
 }
 
@@ -2948,7 +2948,7 @@ void SVGActionWriter::ImplWriteBmp( const Bitmap& rBmp,
         ImplMap( rSz, aSize );
 
         MapMode aSourceMode( MapUnit::MapPixel );
-        Size aPrefSize = OutputDevice::LogicToLogic( rSrcSz, aSourceMode, maTargetMapMode );
+        Size aPrefSize = ::LogicToLogic( rSrcSz, aSourceMode, maTargetMapMode );
         Fraction aFractionX( aSize.Width(), aPrefSize.Width() );
         Fraction aFractionY( aSize.Height(), aPrefSize.Height() );
         double scaleX = rtl_math_round( double(aFractionX), 3, rtl_math_RoundingMode::rtl_math_RoundingMode_Corrected );
@@ -4196,13 +4196,13 @@ void SVGActionWriter::WriteMetaFile( const Point& rPos100thmm,
 
     auto popIt = mpVDev->ScopedPush();
 
-    Size aSize( OutputDevice::LogicToLogic(rSize100thmm, MapMode(MapUnit::Map100thMM), aMapMode) );
+    Size aSize( ::LogicToLogic(rSize100thmm, MapMode(MapUnit::Map100thMM), aMapMode) );
     aFractionX *= Fraction( aSize.Width(), aPrefSize.Width() );
     aMapMode.SetScaleX( aFractionX );
     aFractionY *= Fraction( aSize.Height(), aPrefSize.Height() );
     aMapMode.SetScaleY( aFractionY );
 
-    Point aOffset( OutputDevice::LogicToLogic(rPos100thmm, MapMode(MapUnit::Map100thMM), aMapMode ) );
+    Point aOffset( ::LogicToLogic(rPos100thmm, MapMode(MapUnit::Map100thMM), aMapMode ) );
     aOffset += aMapMode.GetOrigin();
     aMapMode.SetOrigin( aOffset );
 

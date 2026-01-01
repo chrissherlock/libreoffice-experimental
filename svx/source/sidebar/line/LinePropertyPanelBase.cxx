@@ -232,7 +232,7 @@ void LinePropertyPanelBase::SetWidthIcon()
         return;
     }
 
-    tools::Long nVal = OutputDevice::LogicToLogic(mnWidthCoreValue * 10, meMapUnit, MapUnit::MapPoint);
+    tools::Long nVal = ::LogicToLogic(mnWidthCoreValue * 10, meMapUnit, MapUnit::MapPoint);
 
     Graphic aGraf;
     if(nVal <= 6)

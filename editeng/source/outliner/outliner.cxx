@@ -1324,6 +1324,7 @@ Size Outliner::ImplGetBulletSize( sal_Int32 nPara )
     {
         const SvxNumberFormat* pFmt = GetNumberFormat( nPara );
         assert(pFmt && "ImplGetBulletSize - no Bullet!");
+
         if ( pFmt->GetNumberingType() == SVX_NUM_NUMBER_NONE )
         {
             aSize = Size(0, 0);
@@ -1342,7 +1343,7 @@ Size Outliner::ImplGetBulletSize( sal_Int32 nPara )
         }
         else
         {
-            aSize = OutputDevice::LogicToLogic(pFmt->GetGraphicSize(),
+            aSize = ::LogicToLogic(pFmt->GetGraphicSize(),
                     MapMode(MapUnit::Map100thMM),
                     pEditEngine->GetRefDevice()->GetMapMode());
         }

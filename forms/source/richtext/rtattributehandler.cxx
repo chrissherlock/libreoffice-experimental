@@ -327,7 +327,7 @@ namespace frm
             sal_uInt32 nHeight = pFontHeightItem->GetHeight();
             if ( _rAttribs.GetPool()->GetMetric( getWhich() ) != MapUnit::MapTwip )
             {
-                nHeight = OutputDevice::LogicToLogic(
+                nHeight = ::LogicToLogic(
                     Size( 0, nHeight ),
                     MapMode(  _rAttribs.GetPool()->GetMetric( getWhich() ) ),
                     MapMode( MapUnit::MapTwip )
@@ -354,7 +354,7 @@ namespace frm
         sal_uInt32 nHeight = pFontHeightItem->GetHeight();
         if ( _rNewAttribs.GetPool()->GetMetric( getWhich() ) != MapUnit::MapTwip )
         {
-            nHeight = OutputDevice::LogicToLogic(
+            nHeight = ::LogicToLogic(
                 Size( 0, nHeight ),
                 MapMode( MapUnit::MapTwip ),
                 MapMode( _rNewAttribs.GetPool()->GetMetric( getWhich() ) )

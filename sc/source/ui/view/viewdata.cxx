@@ -1708,7 +1708,7 @@ void ScViewData::SetEditEngine( ScSplitPos eWhich,
         {
             Size aGridSize(nGridWidthPx, nGridHeightPx);
             const MapMode& rWinMapMode = GetLogicMode();
-            aGridSize = OutputDevice::LogicToLogic(
+            aGridSize = ::LogicToLogic(
                 pWin->PixelToLogic(aGridSize, rWinMapMode),
                 rWinMapMode, MapMode(MapUnit::MapTwip));
             nGridWidthTwips = aGridSize.Width();

@@ -907,7 +907,7 @@ void View::SetMarkedOriginalSize()
                         try
                         {
                             awt::Size aSz = xObj->getVisualAreaSize( nAspect );
-                            aOleSize = OutputDevice::LogicToLogic(Size(aSz.Width, aSz.Height), MapMode(aUnit), MapMode(MapUnit::Map100thMM));
+                            aOleSize = ::LogicToLogic(Size(aSz.Width, aSz.Height), MapMode(aUnit), MapMode(MapUnit::Map100thMM));
                             bOK = true;
                         }
                         catch( embed::NoVisualAreaSizeException& )
