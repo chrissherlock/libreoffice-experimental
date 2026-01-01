@@ -110,7 +110,7 @@ void SvxXConnectionPreview::AdaptSize()
     aNewPos.setX( ( nWidth - aNewSize.Width() )  >> 1 );
     aNewPos.setY( ( nHeight - aNewSize.Height() ) >> 1 );
 
-    aDisplayMap.SetOrigin(OutputDevice::LogicToLogic(aNewPos, aMapMode, aDisplayMap));
+    aDisplayMap.SetOrigin(::LogicToLogic(aNewPos, aMapMode, aDisplayMap));
     SetMapMode( aDisplayMap );
 
     // Origin

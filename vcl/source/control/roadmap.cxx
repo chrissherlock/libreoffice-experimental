@@ -572,7 +572,7 @@ void ORoadmap::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle&
 
 void ORoadmap::DrawHeadline(vcl::RenderContext& rRenderContext)
 {
-    Point aTextPos = OutputDevice::LogicToLogic(Point(ROADMAP_INDENT_X, 8), GetMapMode(), MapMode(MapUnit::MapAppFont));
+    Point aTextPos = ::LogicToLogic(Point(ROADMAP_INDENT_X, 8), GetMapMode(), MapMode(MapUnit::MapAppFont));
 
     Size aOutputSize(rRenderContext.GetOutputSize());
 

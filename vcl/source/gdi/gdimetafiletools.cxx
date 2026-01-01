@@ -720,7 +720,7 @@ void clipMetafileContentAgainstOwnRegions(GDIMetaFile& rSource)
                     }
                     else
                     {
-                        aLogicalSize = OutputDevice::LogicToLogic(aLogicalSize, rBitmap.GetPrefMapMode(), aMapModes.back());
+                        aLogicalSize = ::LogicToLogic(aLogicalSize, rBitmap.GetPrefMapMode(), aMapModes.back());
                     }
 
                     bDone = handleBitmapContent(
@@ -747,7 +747,7 @@ void clipMetafileContentAgainstOwnRegions(GDIMetaFile& rSource)
                     }
                     else
                     {
-                        aLogicalSize = OutputDevice::LogicToLogic(aLogicalSize, rBitmap.GetPrefMapMode(), aMapModes.back());
+                        aLogicalSize = ::LogicToLogic(aLogicalSize, rBitmap.GetPrefMapMode(), aMapModes.back());
                     }
 
                     bDone = handleBitmapContent(

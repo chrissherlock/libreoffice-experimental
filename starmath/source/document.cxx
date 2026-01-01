@@ -453,8 +453,8 @@ SmPrinterAccess::SmPrinterAccess( SmDocShell &rDocShell )
                 MapMode aMap( pPrinter->GetMapMode() );
                 aMap.SetMapUnit( SmMapUnit() );
                 Point aTmp( aMap.GetOrigin() );
-                aTmp.setX( OutputDevice::LogicToLogic( aTmp.X(), eOld, SmMapUnit() ) );
-                aTmp.setY( OutputDevice::LogicToLogic( aTmp.Y(), eOld, SmMapUnit() ) );
+                aTmp.setX( ::LogicToLogic( aTmp.X(), eOld, SmMapUnit() ) );
+                aTmp.setY( ::LogicToLogic( aTmp.Y(), eOld, SmMapUnit() ) );
                 aMap.SetOrigin( aTmp );
                 pPrinter->SetMapMode( aMap );
             }
@@ -481,8 +481,8 @@ SmPrinterAccess::SmPrinterAccess( SmDocShell &rDocShell )
         MapMode aMap( pRefDev->GetMapMode() );
         aMap.SetMapUnit( SmMapUnit() );
         Point aTmp( aMap.GetOrigin() );
-        aTmp.setX( OutputDevice::LogicToLogic( aTmp.X(), eOld, SmMapUnit() ) );
-        aTmp.setY( OutputDevice::LogicToLogic( aTmp.Y(), eOld, SmMapUnit() ) );
+        aTmp.setX( ::LogicToLogic( aTmp.X(), eOld, SmMapUnit() ) );
+        aTmp.setY( ::LogicToLogic( aTmp.Y(), eOld, SmMapUnit() ) );
         aMap.SetOrigin( aTmp );
         pRefDev->SetMapMode( aMap );
     }
@@ -1553,13 +1553,13 @@ void SmDocShell::Impl_Print(OutputDevice& rOutDev, const SmPrintUIOptions& rPrin
         }
     }
 
-    aSize = OutputDevice::LogicToLogic(aSize, OutputMapMode, MapMode(SmMapUnit()));
+    aSize = ::LogicToLogic(aSize, OutputMapMode, MapMode(SmMapUnit()));
 
     Point aPos(aOutRect.Left() + (aOutRect.GetWidth() - aSize.Width()) / 2,
                aOutRect.Top() + (aOutRect.GetHeight() - aSize.Height()) / 2);
 
-    aPos = OutputDevice::LogicToLogic(aPos, MapMode(SmMapUnit()), OutputMapMode);
-    aOutRect = OutputDevice::LogicToLogic(aOutRect, MapMode(SmMapUnit()), OutputMapMode);
+    aPos = ::LogicToLogic(aPos, MapMode(SmMapUnit()), OutputMapMode);
+    aOutRect = ::LogicToLogic(aOutRect, MapMode(SmMapUnit()), OutputMapMode);
 
     rOutDev.SetMapMode(OutputMapMode);
     rOutDev.SetClipRegion(vcl::Region(aOutRect));

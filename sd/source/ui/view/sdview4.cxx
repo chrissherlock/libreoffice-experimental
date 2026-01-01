@@ -197,7 +197,7 @@ SdrGrafObj* View::InsertGraphic( const Graphic& rGraphic, sal_Int8& rAction,
         }
         else
         {
-            aSize = OutputDevice::LogicToLogic( rGraphic.GetPrefSize(),
+            aSize = ::LogicToLogic( rGraphic.GetPrefSize(),
                                                 rGraphic.GetPrefMapMode(),
                                                 MapMode( MapUnit::Map100thMM ) );
         }

@@ -118,13 +118,13 @@ short ODateTimeDialog::run()
             if ( m_xDate->get_active() )
             {
                 OUString sDateFormat = m_xDateListBox->get_active_text();
-                nWidth = OutputDevice::LogicToLogic(pDefDev->PixelToLogic(Size(pDefDev->GetCtrlTextWidth(sDateFormat),0)).Width(),
+                nWidth = ::LogicToLogic(pDefDev->PixelToLogic(Size(pDefDev->GetCtrlTextWidth(sDateFormat),0)).Width(),
                         pDefDev->GetMapMode().GetMapUnit(),MapUnit::Map100thMM);
             }
             if ( m_xTime->get_active() )
             {
                 OUString sDateFormat = m_xTimeListBox->get_active_text();
-                nWidth = ::std::max<sal_Int32>(OutputDevice::LogicToLogic(pDefDev->PixelToLogic(Size(pDefDev->GetCtrlTextWidth(sDateFormat),0)).Width(),
+                nWidth = ::std::max<sal_Int32>(::LogicToLogic(pDefDev->PixelToLogic(Size(pDefDev->GetCtrlTextWidth(sDateFormat),0)).Width(),
                         pDefDev->GetMapMode().GetMapUnit(),MapUnit::Map100thMM),nWidth);
             }
 

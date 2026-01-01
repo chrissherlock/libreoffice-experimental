@@ -580,7 +580,7 @@ void MetaBitmapActionGetOrigSize( const MetaAction* pAction, Size& rSz )
         break;
         default: break;
     }
-    rSz = OutputDevice::LogicToLogic( rSz, aSourceMode, aTargetMode );
+    rSz = ::LogicToLogic( rSz, aSourceMode, aTargetMode );
 }
 
 OUString getPatternIdForTiledBackground( std::u16string_view sSlideId, BitmapChecksum nChecksum )
@@ -858,8 +858,8 @@ bool SVGFilter::implExportWriterTextGraphic( const Reference< view::XSelectionSu
     uno::Reference<graphic::XGraphic> xGraphic = bSameGraphic ? xOriginalGraphic : xTransformedGraphic;
 
     // Calculate size from Graphic
-    Point aPos( OutputDevice::LogicToLogic(aGraphic.GetPrefMapMode().GetOrigin(), aGraphic.GetPrefMapMode(), MapMode(MapUnit::Map100thMM)) );
-    Size  aSize( OutputDevice::LogicToLogic(aGraphic.GetPrefSize(), aGraphic.GetPrefMapMode(), MapMode(MapUnit::Map100thMM)) );
+    Point aPos( ::LogicToLogic(aGraphic.GetPrefMapMode().GetOrigin(), aGraphic.GetPrefMapMode(), MapMode(MapUnit::Map100thMM)) );
+    Size  aSize( ::LogicToLogic(aGraphic.GetPrefSize(), aGraphic.GetPrefMapMode(), MapMode(MapUnit::Map100thMM)) );
 
     assert(mSelectedPages.size() == 1);
     SvxDrawPage* pSvxDrawPage(comphelper::getFromUnoTunnel<SvxDrawPage>(mSelectedPages[0]));
@@ -2850,7 +2850,7 @@ IMPL_LINK( SVGFilter, CalcFieldHdl, EditFieldInfo*, pInfo, void )
 
 void SVGExport::writeMtf( const GDIMetaFile& rMtf )
 {
-    const Size aSize( OutputDevice::LogicToLogic(rMtf.GetPrefSize(), rMtf.GetPrefMapMode(), MapMode(MapUnit::MapMM)) );
+    const Size aSize( ::LogicToLogic(rMtf.GetPrefSize(), rMtf.GetPrefMapMode(), MapMode(MapUnit::MapMM)) );
     Reference< XExtendedDocumentHandler> xExtDocHandler( GetDocHandler(), UNO_QUERY );
 
     if( xExtDocHandler.is() && IsUseDTDString() )
@@ -2883,8 +2883,8 @@ void SVGExport::writeMtf( const GDIMetaFile& rMtf )
         aObjects.emplace_back( Reference< XInterface >(), rMtf );
         SVGFontExport aSVGFontExport( *this, std::move(aObjects) );
 
-        Point aPoint100thmm( OutputDevice::LogicToLogic(rMtf.GetPrefMapMode().GetOrigin(), rMtf.GetPrefMapMode(), MapMode(MapUnit::Map100thMM)) );
-        Size  aSize100thmm( OutputDevice::LogicToLogic(rMtf.GetPrefSize(), rMtf.GetPrefMapMode(), MapMode(MapUnit::Map100thMM)) );
+        Point aPoint100thmm( ::LogicToLogic(rMtf.GetPrefMapMode().GetOrigin(), rMtf.GetPrefMapMode(), MapMode(MapUnit::Map100thMM)) );
+        Size  aSize100thmm( ::LogicToLogic(rMtf.GetPrefSize(), rMtf.GetPrefMapMode(), MapMode(MapUnit::Map100thMM)) );
 
         SVGActionWriter aWriter( *this, aSVGFontExport );
         aWriter.WriteMetaFile( aPoint100thmm, aSize100thmm, rMtf,

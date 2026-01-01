@@ -2086,7 +2086,7 @@ uno::Any SwXFrame::getPropertyValue(const OUString& rPropertyName)
 
                     awt::Size aFrameSize = getSize();
                     Size aSize100thmm(aFrameSize.Width, aFrameSize.Height);
-                    Size aSize = OutputDevice::LogicToLogic(aSize100thmm, MapMode(MapUnit::Map100thMM), aGraphicObj.GetPrefMapMode());
+                    Size aSize = ::LogicToLogic(aSize100thmm, MapMode(MapUnit::Map100thMM), aGraphicObj.GetPrefMapMode());
 
                     if (FN_UNO_GRAPHIC_PREVIEW == pEntry->nWID)
                     {
@@ -2912,7 +2912,7 @@ void SwXFrame::attachToRange(uno::Reference<text::XTextRange> const& xTextRange,
                 {
                     sal_Int64 nAspect = m_nDrawAspect;
                     MapUnit aUnit = VCLUnoHelper::UnoEmbed2VCLMapUnit( xIPObj->getMapUnit( nAspect ) );
-                    Size aSize( OutputDevice::LogicToLogic(Size( m_nVisibleAreaWidth, m_nVisibleAreaHeight),
+                    Size aSize( ::LogicToLogic(Size( m_nVisibleAreaWidth, m_nVisibleAreaHeight),
                         MapMode(MapUnit::MapTwip), MapMode(aUnit)));
                     awt::Size aSz;
                     aSz.Width = aSize.Width();
@@ -2951,11 +2951,11 @@ void SwXFrame::attachToRange(uno::Reference<text::XTextRange> const& xTextRange,
                     {
                         aSz.setWidth(5000);
                         aSz.setHeight(5000);
-                        aSz = OutputDevice::LogicToLogic(aSz,
+                        aSz = ::LogicToLogic(aSz,
                                 MapMode(MapUnit::Map100thMM), MapMode(aRefMap));
                     }
                     MapMode aMyMap( MapUnit::MapTwip );
-                    aSz = OutputDevice::LogicToLogic(aSz, MapMode(aRefMap), aMyMap);
+                    aSz = ::LogicToLogic(aSz, MapMode(aRefMap), aMyMap);
                     SwFormatFrameSize aFrameSz;
                     aFrameSz.SetSize(aSz);
                     aFrameSet.Put(aFrameSz);

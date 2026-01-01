@@ -387,7 +387,7 @@ basegfx::B2DSize Graphic::GetPPUnit(const MapMode& unit) const
     basegfx::B2DHomMatrix toPixels = basegfx::utils::createScaleB2DHomMatrix(
         double(aGrfPixelSize.Width()) / aGrfPrefMapModeSize.Width(),
         double(aGrfPixelSize.Height()) / aGrfPrefMapModeSize.Height());
-    toPixels *= OutputDevice::LogicToLogic(unit, GetPrefMapMode());
+    toPixels *= ::LogicToLogic(unit, GetPrefMapMode());
     return toPixels * basegfx::B2DSize(1, 1);
 }
 

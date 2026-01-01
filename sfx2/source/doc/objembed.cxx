@@ -64,7 +64,7 @@ tools::Rectangle SfxObjectShell::GetVisArea( sal_uInt16 nAspect ) const
     else if( nAspect == ASPECT_THUMBNAIL )
     {
         tools::Rectangle aRect;
-        aRect.SetSize( OutputDevice::LogicToLogic( Size( 5000, 5000 ),
+        aRect.SetSize( ::LogicToLogic( Size( 5000, 5000 ),
                          MapMode(MapUnit::Map100thMM), MapMode(GetMapUnit())));
         return aRect;
     }
@@ -125,7 +125,7 @@ void SfxObjectShell::FillTransferableObjectDescriptor( TransferableObjectDescrip
     FillClass( &rDesc.maClassName, &nClipFormat, &rDesc.maTypeName, SOFFICE_FILEFORMAT_CURRENT );
 
     rDesc.mnViewAspect = ASPECT_CONTENT;
-    rDesc.maSize = OutputDevice::LogicToLogic(GetVisArea().GetSize(), MapMode(GetMapUnit()), MapMode(MapUnit::Map100thMM));
+    rDesc.maSize = ::LogicToLogic(GetVisArea().GetSize(), MapMode(GetMapUnit()), MapMode(MapUnit::Map100thMM));
     rDesc.maDragStartPos = Point();
     rDesc.maDisplayName.clear();
 }

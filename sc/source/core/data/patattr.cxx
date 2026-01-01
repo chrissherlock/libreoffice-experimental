@@ -746,7 +746,7 @@ void ScPatternAttr::fillFontOnly(
             Fraction aFractOne(1,1);
             aDestMode.SetScaleX( aFractOne );
             aDestMode.SetScaleY( aFractOne );
-            aEffSize = OutputDevice::LogicToLogic( aSize, aSrcMode, aDestMode );
+            aEffSize = ::LogicToLogic( aSize, aSrcMode, aDestMode );
         }
         rFont.SetFontSize( aEffSize );
     }

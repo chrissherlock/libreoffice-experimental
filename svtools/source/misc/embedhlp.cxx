@@ -565,7 +565,7 @@ Size EmbeddedObjectRef::GetSize( MapMode const * pTargetMapMode ) const
     }
 
     if ( pTargetMapMode )
-        aResult = OutputDevice::LogicToLogic( aResult, aSourceMapMode, *pTargetMapMode );
+        aResult = ::LogicToLogic( aResult, aSourceMapMode, *pTargetMapMode );
 
     return aResult;
 }
