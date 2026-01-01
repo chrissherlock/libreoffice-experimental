@@ -172,8 +172,8 @@ void VirtualDevice::ImplInitVirDev( const OutputDevice* pOutDev,
     }
 
     mnBitCount = pOutDev->GetBitCount();
-    mnOutWidth      = nDX;
-    mnOutHeight     = nDY;
+    SetOutputWidthPixel(nDX);
+    SetOutputHeightPixel(nDY);
 
     mbScreenComp    = pOutDev->IsScreenComp();
 
@@ -286,15 +286,15 @@ bool VirtualDevice::SetOutputSizePixel(const Size& rNewSize, bool bErase,
         bRet = mpVirDev->SetSize( nNewWidth, nNewHeight, bAlphaMaskTransparent );
         if ( bRet )
         {
-            mnOutWidth  = rNewSize.Width();
-            mnOutHeight = rNewSize.Height();
+            SetOutputWidthPixel(rNewSize.Width());
+            SetOutputHeightPixel(rNewSize.Height());
             // So, in theory, the bAlphaMaskTransparent param to the SetSize() call just above should
             // be initialising the data to transparent. But this only works on Linux. On Windows and macOS we
             // have two different kinds of problems in the VirtualDevice subclasses,
             // which means that it ends up being completely ineffective.
             // So just take the heavy handed approach here and force the data to transparent.
             if (bAlphaMaskTransparent)
-                DrawWallpaper(tools::Rectangle(0, 0, mnOutWidth, mnOutHeight), Wallpaper(COL_TRANSPARENT));
+                DrawWallpaper(tools::Rectangle(0, 0, GetOutputWidthPixel(), GetOutputHeightPixel()), Wallpaper(COL_TRANSPARENT));
             else
                 Erase();
         }
@@ -316,12 +316,12 @@ bool VirtualDevice::SetOutputSizePixel(const Size& rNewSize, bool bErase,
             {
                 tools::Long nWidth;
                 tools::Long nHeight;
-                if ( mnOutWidth < nNewWidth )
-                    nWidth = mnOutWidth;
+                if ( GetOutputWidthPixel() < nNewWidth )
+                    nWidth = GetOutputWidthPixel();
                 else
                     nWidth = nNewWidth;
-                if ( mnOutHeight < nNewHeight )
-                    nHeight = mnOutHeight;
+                if ( GetOutputHeightPixel() < nNewHeight )
+                    nHeight = GetOutputHeightPixel();
                 else
                     nHeight = nNewHeight;
                 SalTwoRect aPosAry(0, 0, nWidth, nHeight, 0, 0, nWidth, nHeight);
@@ -329,8 +329,8 @@ bool VirtualDevice::SetOutputSizePixel(const Size& rNewSize, bool bErase,
                 pNewVirDev->ReleaseGraphics( pGraphics );
                 ReleaseGraphics();
                 mpVirDev = std::move(pNewVirDev);
-                mnOutWidth  = rNewSize.Width();
-                mnOutHeight = rNewSize.Height();
+                SetOutputWidthPixel(rNewSize.Width());
+                SetOutputHeightPixel(rNewSize.Height());
                 bRet = true;
             }
             else
@@ -380,8 +380,8 @@ bool VirtualDevice::SetOutputSizePixelScaleOffsetAndLOKBuffer(
     bool bRet = mpVirDev->SetSizeUsingBuffer( rNewSize.Width(), rNewSize.Height(), pBuffer );
     if ( bRet )
     {
-        mnOutWidth  = rNewSize.Width();
-        mnOutHeight = rNewSize.Height();
+        SetOutputWidthPixel(rNewSize.Width());
+        SetOutputHeightPixel(rNewSize.Height());
     }
 
     return bRet;

@@ -299,7 +299,7 @@ Bitmap OutputDevice::GetBitmap( const Point& rSrcPt, const Size& rSize ) const
     tools::Long    nY = ImplLogicYToDevicePixel( rSrcPt.Y() );
     tools::Long nWidth = LogicWidthToDevicePixel(rSize.Width());
     tools::Long nHeight = ImplLogicHeightToDevicePixel(rSize.Height());
-    if ( nWidth <= 0 || nHeight <= 0 || nX > (mnOutWidth + GetOutOffXPixel()) || nY > (mnOutHeight + GetOutOffYPixel()))
+    if ( nWidth <= 0 || nHeight <= 0 || nX > (GetOutputWidthPixel() + GetOutOffXPixel()) || nY > (GetOutputHeightPixel() + GetOutOffYPixel()))
         return Bitmap();
 
     tools::Rectangle   aRect( Point( nX, nY ), Size( nWidth, nHeight ) );
@@ -322,16 +322,16 @@ Bitmap OutputDevice::GetBitmap( const Point& rSrcPt, const Size& rSize ) const
     }
 
     // Width outside of draw area?
-    if ( (nWidth + nX) > (mnOutWidth + GetOutOffXPixel()) )
+    if ( (nWidth + nX) > (GetOutputWidthPixel() + GetOutOffXPixel()) )
     {
-        nWidth  = GetOutOffXPixel() + mnOutWidth - nX;
+        nWidth  = GetOutOffXPixel() + GetOutputWidthPixel() - nX;
         bClipped = true;
     }
 
     // Height outside of draw area?
-    if ( (nHeight + nY) > (mnOutHeight + GetOutOffYPixel()) )
+    if ( (nHeight + nY) > (GetOutputHeightPixel() + GetOutOffYPixel()) )
     {
-        nHeight = GetOutOffYPixel() + mnOutHeight - nY;
+        nHeight = GetOutOffYPixel() + GetOutputHeightPixel() - nY;
         bClipped = true;
     }
 

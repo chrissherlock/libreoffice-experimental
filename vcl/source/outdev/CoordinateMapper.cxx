@@ -40,6 +40,14 @@ void CoordinateMapper::SetDPIScalePercentage(sal_Int32 nPercent)
 
 float CoordinateMapper::GetDPIScaleFactor() const { return mnDPIScalePercentage / 100.0f; }
 
+tools::Long CoordinateMapper::GetOutputWidthPixel() const { return mnOutWidth; }
+
+tools::Long CoordinateMapper::GetOutputHeightPixel() const { return mnOutHeight; }
+
+void CoordinateMapper::SetOutputWidthPixel(tools::Long nWidth) { mnOutWidth = nWidth; }
+
+void CoordinateMapper::SetOutputHeightPixel(tools::Long nHeight) { mnOutHeight = nHeight; }
+
 tools::Long CoordinateMapper::GetOutOffXPixel() const { return mnOutOffX; }
 
 tools::Long CoordinateMapper::GetOutOffYPixel() const { return mnOutOffY; }
