@@ -153,7 +153,7 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
 
     SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(), rSrcSizePixel.Height(),
                        ImplLogicXToDevicePixel(rDestPt.X()), ImplLogicYToDevicePixel(rDestPt.Y()),
-                       ImplLogicWidthToDevicePixel(rDestSize.Width()),
+                       LogicWidthToDevicePixel(rDestSize.Width()),
                        ImplLogicHeightToDevicePixel(rDestSize.Height()));
 
     if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
@@ -268,7 +268,7 @@ void OutputDevice::DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize
     SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(),
                        rSrcSizePixel.Height(), ImplLogicXToDevicePixel(rDestPt.X()),
                        ImplLogicYToDevicePixel(rDestPt.Y()),
-                       ImplLogicWidthToDevicePixel(rDestSize.Width()),
+                       LogicWidthToDevicePixel(rDestSize.Width()),
                        ImplLogicHeightToDevicePixel(rDestSize.Height()));
 
     const BmpMirrorFlags nMirrFlags = AdjustTwoRect(aPosAry, rBitmap.GetSizePixel());
@@ -296,8 +296,8 @@ Bitmap OutputDevice::GetBitmap( const Point& rSrcPt, const Size& rSize ) const
 
     tools::Long    nX = ImplLogicXToDevicePixel( rSrcPt.X() );
     tools::Long    nY = ImplLogicYToDevicePixel( rSrcPt.Y() );
-    tools::Long    nWidth = ImplLogicWidthToDevicePixel( rSize.Width() );
-    tools::Long    nHeight = ImplLogicHeightToDevicePixel( rSize.Height() );
+    tools::Long nWidth = LogicWidthToDevicePixel(rSize.Width());
+    tools::Long nHeight = ImplLogicHeightToDevicePixel(rSize.Height());
     if ( nWidth <= 0 || nHeight <= 0 || nX > (mnOutWidth + mnOutOffX) || nY > (mnOutHeight + mnOutOffY))
         return Bitmap();
 

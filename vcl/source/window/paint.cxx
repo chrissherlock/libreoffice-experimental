@@ -1162,7 +1162,7 @@ void Window::Invalidate( const tools::Rectangle& rRect, InvalidateFlags nFlags )
         return;
 
     OutputDevice *pOutDev = GetOutDev();
-    tools::Rectangle aRect = pOutDev->ImplLogicToDevicePixel( rRect );
+    tools::Rectangle aRect = pOutDev->LogicToDevicePixel( rRect );
     if ( !aRect.IsEmpty() )
     {
         vcl::Region aRegion( aRect );
@@ -1198,7 +1198,7 @@ void Window::LogicInvalidate(const tools::Rectangle* pRectangle)
 {
     if(pRectangle)
     {
-        tools::Rectangle aRect = GetOutDev()->ImplLogicToDevicePixel( *pRectangle );
+        tools::Rectangle aRect = GetOutDev()->LogicToDevicePixel( *pRectangle );
         PixelInvalidate(&aRect);
     }
     else
@@ -1659,8 +1659,8 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
     if ( !GetOutDev()->IsDeviceOutputNecessary() )
         return;
 
-    nHorzScroll = GetOutDev()->ImplLogicWidthToDevicePixel( nHorzScroll );
-    nVertScroll = GetOutDev()->ImplLogicHeightToDevicePixel( nVertScroll );
+    nHorzScroll = GetOutDev()->LogicWidthToDevicePixel(nHorzScroll);
+    nVertScroll = GetOutDev()->ImplLogicHeightToDevicePixel(nVertScroll);
 
     if ( !nHorzScroll && !nVertScroll )
         return;
