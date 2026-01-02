@@ -548,56 +548,7 @@ OutputDevice::ImplLogicToDevicePixel(const basegfx::B2DPolygon& rLogicPoly) cons
     basegfx::B2DPoint aC1;
     basegfx::B2DPoint aC2;
 
-    if (mbMap)
-    {
-        for (sal_uInt32 i = 0; i < nPoints; ++i)
-        {
-            const basegfx::B2DPoint& rPt = aPoly.getB2DPoint(i);
-            basegfx::B2DPoint aPt(lcl_logicToPixel(rPt.getX() + maMapRes.mnMapOfsX, GetDPIX(),
-                                                   maMapRes.mnMapScNumX, maMapRes.mnMapScDenomX)
-                                      + GetOutOffXPixel() + mnOutOffOrigX,
-                                  lcl_logicToPixel(rPt.getY() + maMapRes.mnMapOfsY, GetDPIY(),
-                                                   maMapRes.mnMapScNumY, maMapRes.mnMapScDenomY)
-                                      + GetOutOffYPixel() + mnOutOffOrigY);
-
-            const bool bC1 = aPoly.isPrevControlPointUsed(i);
-            if (bC1)
-            {
-                const basegfx::B2DPoint aB2DC1(aPoly.getPrevControlPoint(i));
-
-                aC1 = basegfx::B2DPoint(
-                    lcl_logicToPixel(aB2DC1.getX() + maMapRes.mnMapOfsX, GetDPIX(),
-                                     maMapRes.mnMapScNumX, maMapRes.mnMapScDenomX)
-                        + GetOutOffXPixel() + mnOutOffOrigX,
-                    lcl_logicToPixel(aB2DC1.getY() + maMapRes.mnMapOfsY, GetDPIY(),
-                                     maMapRes.mnMapScNumY, maMapRes.mnMapScDenomY)
-                        + GetOutOffYPixel() + mnOutOffOrigY);
-            }
-
-            const bool bC2 = aPoly.isNextControlPointUsed(i);
-            if (bC2)
-            {
-                const basegfx::B2DPoint aB2DC2(aPoly.getNextControlPoint(i));
-
-                aC2 = basegfx::B2DPoint(
-                    lcl_logicToPixel(aB2DC2.getX() + maMapRes.mnMapOfsX, GetDPIX(),
-                                     maMapRes.mnMapScNumX, maMapRes.mnMapScDenomX)
-                        + GetOutOffXPixel() + mnOutOffOrigX,
-                    lcl_logicToPixel(aB2DC2.getY() + maMapRes.mnMapOfsY, GetDPIY(),
-                                     maMapRes.mnMapScNumY, maMapRes.mnMapScDenomY)
-                        + GetOutOffYPixel() + mnOutOffOrigY);
-            }
-
-            aPoly.setB2DPoint(i, aPt);
-
-            if (bC1)
-                aPoly.setPrevControlPoint(i, aC1);
-
-            if (bC2)
-                aPoly.setNextControlPoint(i, aC2);
-        }
-    }
-    else
+    if (!mbMap)
     {
         for (sal_uInt32 i = 0; i < nPoints; ++i)
         {
@@ -628,6 +579,55 @@ OutputDevice::ImplLogicToDevicePixel(const basegfx::B2DPolygon& rLogicPoly) cons
             if (bC2)
                 aPoly.setNextControlPoint(i, aC2);
         }
+
+        return aPoly;
+    }
+
+    for (sal_uInt32 i = 0; i < nPoints; ++i)
+    {
+        const basegfx::B2DPoint& rPt = aPoly.getB2DPoint(i);
+        basegfx::B2DPoint aPt(lcl_logicToPixel(rPt.getX() + maMapRes.mnMapOfsX, GetDPIX(),
+                                               maMapRes.mnMapScNumX, maMapRes.mnMapScDenomX)
+                                  + GetOutOffXPixel() + mnOutOffOrigX,
+                              lcl_logicToPixel(rPt.getY() + maMapRes.mnMapOfsY, GetDPIY(),
+                                               maMapRes.mnMapScNumY, maMapRes.mnMapScDenomY)
+                                  + GetOutOffYPixel() + mnOutOffOrigY);
+
+        const bool bC1 = aPoly.isPrevControlPointUsed(i);
+        if (bC1)
+        {
+            const basegfx::B2DPoint aB2DC1(aPoly.getPrevControlPoint(i));
+
+            aC1 = basegfx::B2DPoint(
+                lcl_logicToPixel(aB2DC1.getX() + maMapRes.mnMapOfsX, GetDPIX(),
+                                 maMapRes.mnMapScNumX, maMapRes.mnMapScDenomX)
+                    + GetOutOffXPixel() + mnOutOffOrigX,
+                lcl_logicToPixel(aB2DC1.getY() + maMapRes.mnMapOfsY, GetDPIY(),
+                                 maMapRes.mnMapScNumY, maMapRes.mnMapScDenomY)
+                    + GetOutOffYPixel() + mnOutOffOrigY);
+        }
+
+        const bool bC2 = aPoly.isNextControlPointUsed(i);
+        if (bC2)
+        {
+            const basegfx::B2DPoint aB2DC2(aPoly.getNextControlPoint(i));
+
+            aC2 = basegfx::B2DPoint(
+                lcl_logicToPixel(aB2DC2.getX() + maMapRes.mnMapOfsX, GetDPIX(),
+                                 maMapRes.mnMapScNumX, maMapRes.mnMapScDenomX)
+                    + GetOutOffXPixel() + mnOutOffOrigX,
+                lcl_logicToPixel(aB2DC2.getY() + maMapRes.mnMapOfsY, GetDPIY(),
+                                 maMapRes.mnMapScNumY, maMapRes.mnMapScDenomY)
+                    + GetOutOffYPixel() + mnOutOffOrigY);
+        }
+
+        aPoly.setB2DPoint(i, aPt);
+
+        if (bC1)
+            aPoly.setPrevControlPoint(i, aC1);
+
+        if (bC2)
+            aPoly.setNextControlPoint(i, aC2);
     }
 
     return aPoly;
