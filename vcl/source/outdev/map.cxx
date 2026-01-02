@@ -356,27 +356,24 @@ static tools::Long lcl_pixelToLogic(tools::Long n, tools::Long nDPI, tools::Long
                                     tools::Long nMapDenom)
 {
     assert(nDPI > 0);
+
     if (nMapNum == 0)
         return 0;
-    sal_Int64 nDenom = nDPI;
-    nDenom *= nMapNum;
 
-    sal_Int64 n64 = n;
-    n64 *= nMapDenom;
+    sal_Int64 nDenom = nDPI * nMapNum;
+    sal_Int64 n64 = n * nMapDenom;
+
     if (nDenom == 1)
-    {
-        n = static_cast<tools::Long>(n64);
-    }
+        return static_cast<tools::Long>(n64);
+
+    n64 = 2 * n64 / nDenom;
+
+    if (n64 < 0)
+        --n64;
     else
-    {
-        n64 = 2 * n64 / nDenom;
-        if (n64 < 0)
-            --n64;
-        else
-            ++n64;
-        n = static_cast<tools::Long>(n64 / 2);
-    }
-    return n;
+        ++n64;
+
+    return static_cast<tools::Long>(n64 / 2);
 }
 
 static double lcl_pixelToLogicDouble(double n, tools::Long nDPI, tools::Long nMapNum,
