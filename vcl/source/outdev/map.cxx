@@ -1688,17 +1688,15 @@ static ImplMapRes lcl_resolveMapRes(const MapMode* pMode, const MapMode& rDefaul
 {
     const MapMode* pEffectiveMode = pMode ? pMode : &rDefaultMapMode;
 
-    if (!bMap || pEffectiveMode != &rDefaultMapMode)
-    {
-        if (pEffectiveMode->GetMapUnit() == MapUnit::MapRelative)
-            return rDefaultMapRes;
+    if (bMap && pEffectiveMode == &rDefaultMapMode)
+        return rDefaultMapRes;
 
-        ImplMapRes aRes;
-        aRes.CalcMapResolution(*pEffectiveMode, nDPIX, nDPIY);
-        return aRes;
-    }
+    if (pEffectiveMode->GetMapUnit() == MapUnit::MapRelative)
+        return rDefaultMapRes;
 
-    return rDefaultMapRes;
+    ImplMapRes aRes;
+    aRes.CalcMapResolution(*pEffectiveMode, nDPIX, nDPIY);
+    return aRes;
 }
 
 tools::Long OutputDevice::ImplLogicWidthToDevicePixel(tools::Long nWidth) const
