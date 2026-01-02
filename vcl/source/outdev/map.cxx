@@ -542,7 +542,7 @@ OutputDevice::ImplLogicToDevicePixel(const basegfx::B2DPolygon& rLogicPoly) cons
     if (!mbMap && !GetOutOffXPixel() && !GetOutOffYPixel())
         return rLogicPoly;
 
-    sal_uInt32 nPoints = rLogicPoly.count();
+    const sal_uInt32 nPoints = rLogicPoly.count();
     basegfx::B2DPolygon aPoly(rLogicPoly);
 
     basegfx::B2DPoint aC1;
