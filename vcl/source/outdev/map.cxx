@@ -640,7 +640,8 @@ OutputDevice::ImplLogicToDevicePixel(const tools::PolyPolygon& rLogicPolyPoly) c
         return rLogicPolyPoly;
 
     tools::PolyPolygon aPolyPoly(rLogicPolyPoly);
-    sal_uInt16 nPoly = aPolyPoly.Count();
+    const sal_uInt16 nPoly = aPolyPoly.Count();
+
     for (sal_uInt16 i = 0; i < nPoly; i++)
     {
         tools::Polygon& rPoly = aPolyPoly[i];
