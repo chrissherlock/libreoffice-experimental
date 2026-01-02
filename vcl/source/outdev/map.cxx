@@ -1539,21 +1539,17 @@ basegfx::B2DRectangle OutputDevice::ImplPixelToLogic(const basegfx::B2DRectangle
 vcl::Region OutputDevice::ImplPixelToLogic(const vcl::Region& rDeviceRegion) const
 {
     if (!mbMap || rDeviceRegion.IsNull() || rDeviceRegion.IsEmpty())
-    {
         return rDeviceRegion;
-    }
+
+    if (rDeviceRegion.getB2DPolyPolygon())
+        return vcl::Region(PixelToLogic(*rDeviceRegion.getB2DPolyPolygon()));
+
+    if (rDeviceRegion.getPolyPolygon())
+        return vcl::Region(PixelToLogic(*rDeviceRegion.getPolyPolygon()));
 
     vcl::Region aRegion;
 
-    if (rDeviceRegion.getB2DPolyPolygon())
-    {
-        aRegion = vcl::Region(PixelToLogic(*rDeviceRegion.getB2DPolyPolygon()));
-    }
-    else if (rDeviceRegion.getPolyPolygon())
-    {
-        aRegion = vcl::Region(PixelToLogic(*rDeviceRegion.getPolyPolygon()));
-    }
-    else if (rDeviceRegion.getRegionBand())
+    if (rDeviceRegion.getRegionBand())
     {
         RectangleVector aRectangles;
         rDeviceRegion.GetRegionRectangles(aRectangles);
