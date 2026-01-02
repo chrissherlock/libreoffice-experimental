@@ -1643,7 +1643,7 @@ tools::Polygon OutputDevice::ImplPixelToLogic(const tools::Polygon& rDevicePoly,
     ImplMapRes aMapRes;
     aMapRes.CalcMapResolution(rMapMode, GetDPIX(), GetDPIY());
 
-    sal_uInt16 nPoints = rDevicePoly.GetSize();
+    const sal_uInt16 nPoints = rDevicePoly.GetSize();
     tools::Polygon aPoly(rDevicePoly);
 
     // get pointer to Point-array (copy data)
