@@ -20,10 +20,15 @@
 #pragma once
 
 #include <tools/long.hxx>
+#include <o3tl/unit_conversion.hxx>
+
+class MapMode;
 
 struct ImplMapRes
 {
     ImplMapRes() = default;
+    void SetMapRes(const o3tl::Length eUnit);
+    void CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX, tools::Long nDPIY);
 
     tools::Long mnMapOfsX = 0; ///< Offset in X direction
     tools::Long mnMapOfsY = 0; ///< Offset in Y direction
