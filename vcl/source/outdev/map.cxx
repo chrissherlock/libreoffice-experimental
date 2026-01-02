@@ -1889,32 +1889,28 @@ OutputDevice::ImplLogicToPixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly) co
 vcl::Region OutputDevice::ImplLogicToPixel(const vcl::Region& rLogicRegion) const
 {
     if (!mbMap || rLogicRegion.IsNull() || rLogicRegion.IsEmpty())
-    {
         return rLogicRegion;
-    }
+
+    if (rLogicRegion.getB2DPolyPolygon())
+        return vcl::Region(LogicToPixel(*rLogicRegion.getB2DPolyPolygon()));
+
+    if (rLogicRegion.getPolyPolygon())
+        return vcl::Region(LogicToPixel(*rLogicRegion.getPolyPolygon()));
+
+    if (!rLogicRegion.getRegionBand())
+        return vcl::Region();
+
+    RectangleVector aRectangles;
+    rLogicRegion.GetRegionRectangles(aRectangles);
+    const RectangleVector& rRectangles(aRectangles); // needed to make the '!=' work
 
     vcl::Region aRegion;
 
-    if (rLogicRegion.getB2DPolyPolygon())
+    // make reverse run to fill new region bottom-up, this will speed it up due to the used data structuring
+    for (RectangleVector::const_reverse_iterator aRectIter(rRectangles.rbegin());
+         aRectIter != rRectangles.rend(); ++aRectIter)
     {
-        aRegion = vcl::Region(LogicToPixel(*rLogicRegion.getB2DPolyPolygon()));
-    }
-    else if (rLogicRegion.getPolyPolygon())
-    {
-        aRegion = vcl::Region(LogicToPixel(*rLogicRegion.getPolyPolygon()));
-    }
-    else if (rLogicRegion.getRegionBand())
-    {
-        RectangleVector aRectangles;
-        rLogicRegion.GetRegionRectangles(aRectangles);
-        const RectangleVector& rRectangles(aRectangles); // needed to make the '!=' work
-
-        // make reverse run to fill new region bottom-up, this will speed it up due to the used data structuring
-        for (RectangleVector::const_reverse_iterator aRectIter(rRectangles.rbegin());
-             aRectIter != rRectangles.rend(); ++aRectIter)
-        {
-            aRegion.Union(LogicToPixel(*aRectIter));
-        }
+        aRegion.Union(LogicToPixel(*aRectIter));
     }
 
     return aRegion;
