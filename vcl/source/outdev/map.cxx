@@ -1365,18 +1365,16 @@ Size LogicToLogic(const Size& rSzSource, const MapMode& rMapModeSource, const Ma
         return Size(lcl_convertLogicValue(rSzSource.Width(), eFrom, eTo),
                     lcl_convertLogicValue(rSzSource.Height(), eFrom, eTo));
     }
-    else
-    {
-        const auto[aMapResSource, aMapResDest]
-            = lcl_calcConversionMapRes(rMapModeSource, rMapModeDest);
 
-        return Size(lcl_scaleLogicValue(rSzSource.Width(), aMapResSource.mnMapScNumX,
-                                        aMapResDest.mnMapScDenomX, aMapResSource.mnMapScDenomX,
-                                        aMapResDest.mnMapScNumX),
-                    lcl_scaleLogicValue(rSzSource.Height(), aMapResSource.mnMapScNumY,
-                                        aMapResDest.mnMapScDenomY, aMapResSource.mnMapScDenomY,
-                                        aMapResDest.mnMapScNumY));
-    }
+    const auto[aMapResSource, aMapResDest]
+        = lcl_calcConversionMapRes(rMapModeSource, rMapModeDest);
+
+    return Size(lcl_scaleLogicValue(rSzSource.Width(), aMapResSource.mnMapScNumX,
+                                    aMapResDest.mnMapScDenomX, aMapResSource.mnMapScDenomX,
+                                    aMapResDest.mnMapScNumX),
+                lcl_scaleLogicValue(rSzSource.Height(), aMapResSource.mnMapScNumY,
+                                    aMapResDest.mnMapScDenomY, aMapResSource.mnMapScDenomY,
+                                    aMapResDest.mnMapScNumY));
 }
 
 Point LogicToLogic(const Point& rPtSource, const MapMode& rMapModeSource,
