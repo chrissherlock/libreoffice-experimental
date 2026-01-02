@@ -927,22 +927,19 @@ basegfx::B2DHomMatrix OutputDevice::ImplGetViewTransformation() const
 
 basegfx::B2DHomMatrix OutputDevice::ImplGetInverseViewTransformation() const
 {
-    if (mbMap && mpOutDevData)
-    {
-        if (!mpOutDevData->mpInverseViewTransform)
-        {
-            GetViewTransformation();
-            mpOutDevData->mpInverseViewTransform
-                = new basegfx::B2DHomMatrix(*mpOutDevData->mpViewTransform);
-            mpOutDevData->mpInverseViewTransform->invert();
-        }
-
-        return *mpOutDevData->mpInverseViewTransform;
-    }
-    else
-    {
+    if (!mbMap || !mpOutDevData)
         return basegfx::B2DHomMatrix();
-    }
+
+    if (mpOutDevData->mpInverseViewTransform)
+        return *mpOutDevData->mpInverseViewTransform;
+
+    GetViewTransformation();
+
+    mpOutDevData->mpInverseViewTransform
+        = new basegfx::B2DHomMatrix(*mpOutDevData->mpViewTransform);
+    mpOutDevData->mpInverseViewTransform->invert();
+
+    return *mpOutDevData->mpInverseViewTransform;
 }
 
 basegfx::B2DHomMatrix OutputDevice::ImplGetViewTransformation(const MapMode& rMapMode) const
