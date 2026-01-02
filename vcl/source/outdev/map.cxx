@@ -411,25 +411,19 @@ static tools::Long lcl_logicToPixel(tools::Long n, tools::Long nDPI, tools::Long
                || std::abs(n) < std::numeric_limits<tools::Long>::max() / nMapNum / nDPI);
     }
 
-    sal_Int64 n64 = n;
-    n64 *= nMapNum;
-    n64 *= nDPI;
+    sal_Int64 n64 = n * nMapNum * nDPI;
 
     if (nMapDenom == 1)
-    {
-        n = static_cast<tools::Long>(n64);
-    }
-    else
-    {
-        n64 = 2 * n64 / nMapDenom;
-        if (n64 < 0)
-            --n64;
-        else
-            ++n64;
-        n = static_cast<tools::Long>(n64 / 2);
-    }
+        return static_cast<tools::Long>(n64);
 
-    return n;
+    n64 = 2 * n64 / nMapDenom;
+
+    if (n64 < 0)
+        --n64;
+    else
+        ++n64;
+
+    return static_cast<tools::Long>(n64 / 2);
 }
 
 tools::Long OutputDevice::ImplLogicXToDevicePixel(tools::Long nX) const
