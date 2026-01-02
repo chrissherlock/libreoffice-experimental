@@ -188,7 +188,7 @@ private:
     std::unique_ptr<ImplOutDevData> mpOutDevData;
     std::vector< VCLXGraphics* >*   mpUnoGraphicsList;
     vcl::ExtOutDevData*             mpExtOutDevData;
-    std::unique_ptr<CoordinateMapper> mpMapper;
+    mutable std::unique_ptr<CoordinateMapper> mpMapper;
 
     // The canvas interface for this output device. Is persistent after the first GetCanvas() call
     mutable css::uno::WeakReference< css::rendering::XCanvas >    mxCanvas;
@@ -226,7 +226,6 @@ private:
     AntialiasingFlags               mnAntialiasing;
     LanguageType                    meTextLanguage;
 
-    mutable bool                    mbMap : 1;
     mutable bool                    mbClipRegion : 1;
     mutable bool                    mbBackground : 1;
     mutable bool                    mbOutput : 1;
@@ -1174,7 +1173,7 @@ public:
 
     bool                        IsFontAvailable( std::u16string_view rFontName ) const;
 
-    bool                        AddTempDevFont( const OUString& rFileURL, const OUString& rFontName );
+    bool                        AddTempDevFont( const OUString& rFileURL, const OUString& rFontName ) const;
     bool                        RemoveTempDevFont( const OUString& rFileURL, const OUString& rFontName );
     void                        RefreshFontData( const bool bNewFontLists );
 
@@ -1565,7 +1564,7 @@ protected:
 public:
 
     void                        EnableMapMode( bool bEnable = true );
-    bool                        IsMapModeEnabled() const { return mbMap; }
+    bool                        IsMapModeEnabled() const;
 
     void                        SetMapMode();
     void                        SetMapMode( const MapMode& rNewMapMode );
@@ -1730,7 +1729,6 @@ protected:
     SAL_DLLPRIVATE tools::Long DevicePixelToLogicHeight(tools::Long nHeight) const;
 
 private:
-    SAL_DLLPRIVATE void ImplEnableMapMode(bool bEnable);
     SAL_DLLPRIVATE void ImplSetMapMode();
     SAL_DLLPRIVATE void ImplSetMapMode(const MapMode& rNewMapMode);
     SAL_DLLPRIVATE void ImplSetMetafileMapMode(const MapMode& rNewMapMode, bool bIsRecord);

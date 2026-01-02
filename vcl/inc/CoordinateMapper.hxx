@@ -28,6 +28,8 @@
 class CoordinateMapper
 {
 private:
+    bool mbMap;
+
     sal_Int32 mnDPIX;
     sal_Int32 mnDPIY;
     sal_Int32 mnDPIScalePercentage = 100;
@@ -41,6 +43,9 @@ private:
     tools::Long mnOutOffY;
 
 public:
+    SAL_DLLPRIVATE bool IsMapModeEnabled() const { return mbMap; }
+    SAL_DLLPRIVATE void EnableMapMode(bool bEnable = true) { mbMap = bEnable; }
+
     SAL_DLLPRIVATE sal_Int32 GetDPIX() const;
     SAL_DLLPRIVATE sal_Int32 GetDPIY() const;
 
