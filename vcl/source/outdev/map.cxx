@@ -502,7 +502,7 @@ tools::Polygon OutputDevice::ImplLogicToDevicePixel(const tools::Polygon& rLogic
     if (!mbMap && !GetOutOffXPixel() && !GetOutOffYPixel())
         return rLogicPoly;
 
-    sal_uInt16 nPoints = rLogicPoly.GetSize();
+    const sal_uInt16 nPoints = rLogicPoly.GetSize();
     tools::Polygon aPoly(rLogicPoly);
 
     // get pointer to Point-array (copy data)
