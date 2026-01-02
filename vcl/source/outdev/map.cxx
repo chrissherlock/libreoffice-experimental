@@ -502,7 +502,6 @@ tools::Polygon OutputDevice::ImplLogicToDevicePixel(const tools::Polygon& rLogic
     if (!mbMap && !GetOutOffXPixel() && !GetOutOffYPixel())
         return rLogicPoly;
 
-    sal_uInt16 i;
     sal_uInt16 nPoints = rLogicPoly.GetSize();
     tools::Polygon aPoly(rLogicPoly);
 
@@ -511,7 +510,7 @@ tools::Polygon OutputDevice::ImplLogicToDevicePixel(const tools::Polygon& rLogic
 
     if (mbMap)
     {
-        for (i = 0; i < nPoints; i++)
+        for (sal_uInt16 i = 0; i < nPoints; i++)
         {
             const Point& rPt = pPointAry[i];
             Point aPt(lcl_logicToPixel(rPt.X() + maMapRes.mnMapOfsX, GetDPIX(), maMapRes.mnMapScNumX,
@@ -525,7 +524,7 @@ tools::Polygon OutputDevice::ImplLogicToDevicePixel(const tools::Polygon& rLogic
     }
     else
     {
-        for (i = 0; i < nPoints; i++)
+        for (sal_uInt16 i = 0; i < nPoints; i++)
         {
             Point aPt = pPointAry[i];
             aPt.AdjustX(GetOutOffXPixel());
