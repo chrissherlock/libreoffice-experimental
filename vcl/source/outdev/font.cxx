@@ -37,6 +37,7 @@
 #include <window.h>
 #include <font/EmphasisMark.hxx>
 
+#include <CoordinateMapper.hxx>
 #include <ImplLayoutArgs.hxx>
 #include <drawmode.hxx>
 #include <impfontcache.hxx>
@@ -121,7 +122,7 @@ bool OutputDevice::IsFontAvailable( std::u16string_view rFontName ) const
     return (pFound != nullptr);
 }
 
-bool OutputDevice::AddTempDevFont( const OUString& rFileURL, const OUString& rFontName )
+bool OutputDevice::AddTempDevFont( const OUString& rFileURL, const OUString& rFontName ) const
 {
     ImplInitFontList();
 
@@ -800,7 +801,7 @@ bool OutputDevice::ImplNewFont() const
     bool bRet = true;
 
     // #95414# fix for OLE objects which use scale factors very creatively
-    if (mbMap && !aSize.Width())
+    if (mpMapper->IsMapModeEnabled() && !aSize.Width())
         bRet = AttemptOLEFontScaleFix(const_cast<vcl::Font&>(maFont), aSize.Height());
 
     return bRet;
@@ -821,12 +822,12 @@ bool OutputDevice::AttemptOLEFontScaleFix(vcl::Font& rFont, tools::Long nHeight)
 
     Size aOrigSize = rFont.GetFontSize();
     rFont.SetFontSize(Size(nNewWidth, nHeight));
-    mbMap = false;
+    mpMapper->EnableMapMode(false);
     mbNewFont = true;
 
     const bool bRet = ImplNewFont();  // recurse once using stretched width
 
-    mbMap = true;
+    mpMapper->EnableMapMode();
     rFont.SetFontSize(aOrigSize);
 
     return bRet;
@@ -892,7 +893,7 @@ void OutputDevice::ImplDrawEmphasisMarks( SalLayout& rSalLayout )
     auto popIt = ScopedPush(vcl::PushFlags::FILLCOLOR | vcl::PushFlags::LINECOLOR | vcl::PushFlags::MAPMODE);
     GDIMetaFile*        pOldMetaFile    = mpMetaFile;
     mpMetaFile = nullptr;
-    EnableMapMode( false );
+    mpMapper->EnableMapMode( false );
 
     FontEmphasisMark nEmphasisMark = maFont.GetEmphasisMarkStyle();
     tools::Long nEmphasisHeight;
@@ -1146,7 +1147,7 @@ tools::Long OutputDevice::GetMinKashida() const
         return 0;
 
     auto nKashidaWidth = mpFontInstance->mxFontMetric->GetMinKashida();
-    if (!mbMap)
+    if (!mpMapper->IsMapModeEnabled())
         nKashidaWidth = std::ceil(nKashidaWidth);
 
     return ImplDevicePixelToLogicWidth(nKashidaWidth);
