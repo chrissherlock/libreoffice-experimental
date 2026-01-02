@@ -1133,18 +1133,18 @@ static tools::Long lcl_scaleLogicValue(const tools::Long n1, const tools::Long n
                 a7 += a9;
 
             a7 /= a8;
-        } // of if
+
+            return static_cast<tools::Long>(a7);
+        }
+        tools::Long n8 = n4 * n5;
+
+        if (a7.IsNeg())
+            a7 -= n8 / 2;
         else
-        {
-            tools::Long n8 = n4 * n5;
+            a7 += n8 / 2;
 
-            if (a7.IsNeg())
-                a7 -= n8 / 2;
-            else
-                a7 += n8 / 2;
+        a7 /= n8;
 
-            a7 /= n8;
-        } // of else
         return static_cast<tools::Long>(a7);
     }
 
@@ -1168,18 +1168,18 @@ static tools::Long lcl_scaleLogicValue(const tools::Long n1, const tools::Long n
                 a7 += a9;
 
             a7 /= a8;
-        } // of if
-        else
-        {
-            tools::Long n8 = n4 * n5;
 
-            if (a7.IsNeg())
-                a7 -= n8 / 2;
-            else
-                a7 += n8 / 2;
-
-            a7 /= n8;
+            return static_cast<tools::Long>(a7);
         }
+
+        tools::Long n8 = n4 * n5;
+
+        if (a7.IsNeg())
+            a7 -= n8 / 2;
+        else
+            a7 += n8 / 2;
+
+        a7 /= n8;
 
         return static_cast<tools::Long>(a7);
     }
@@ -1200,6 +1200,7 @@ static tools::Long lcl_scaleLogicValue(const tools::Long n1, const tools::Long n
             a7 += a9;
 
         a7 /= a8;
+
         return static_cast<tools::Long>(a7);
     }
 
