@@ -733,23 +733,23 @@ void OutputDevice::ImplEnableMapMode(bool bEnable) { mbMap = bEnable; }
 
 void OutputDevice::ImplSetMapMode()
 {
-    if (mbMap || !maMapMode.IsDefault())
-    {
-        mbMap = false;
-        maMapMode = MapMode();
+    if (!mbMap && maMapMode.IsDefault())
+        return;
 
-        // create new objects (clip region are not re-scaled)
-        mbNewFont = true;
-        mbInitFont = true;
-        ImplInitMapModeObjects();
+    mbMap = false;
+    maMapMode = MapMode();
 
-        // #106426# Adapt logical offset when changing mapmode
-        mnOutOffLogicX = mnOutOffOrigX; // no mapping -> equal offsets
-        mnOutOffLogicY = mnOutOffOrigY;
+    // create new objects (clip region are not re-scaled)
+    mbNewFont = true;
+    mbInitFont = true;
+    ImplInitMapModeObjects();
 
-        // #i75163#
-        ImplInvalidateViewTransform();
-    }
+    // #106426# Adapt logical offset when changing mapmode
+    mnOutOffLogicX = mnOutOffOrigX; // no mapping -> equal offsets
+    mnOutOffLogicY = mnOutOffOrigY;
+
+    // #i75163#
+    ImplInvalidateViewTransform();
 }
 
 void OutputDevice::ImplSetMapMode(const MapMode& rNewMapMode)
