@@ -898,35 +898,31 @@ void OutputDevice::ImplSetRelativeMapMode(const MapMode& rNewMapMode)
 
 basegfx::B2DHomMatrix OutputDevice::ImplGetViewTransformation() const
 {
-    if (mbMap && mpOutDevData)
-    {
-        if (!mpOutDevData->mpViewTransform)
-        {
-            mpOutDevData->mpViewTransform = new basegfx::B2DHomMatrix;
-
-            const double fScaleFactorX(static_cast<double>(GetDPIX())
-                                       * static_cast<double>(maMapRes.mnMapScNumX)
-                                       / static_cast<double>(maMapRes.mnMapScDenomX));
-            const double fScaleFactorY(static_cast<double>(GetDPIY())
-                                       * static_cast<double>(maMapRes.mnMapScNumY)
-                                       / static_cast<double>(maMapRes.mnMapScDenomY));
-            const double fZeroPointX((static_cast<double>(maMapRes.mnMapOfsX) * fScaleFactorX)
-                                     + static_cast<double>(mnOutOffOrigX));
-            const double fZeroPointY((static_cast<double>(maMapRes.mnMapOfsY) * fScaleFactorY)
-                                     + static_cast<double>(mnOutOffOrigY));
-
-            mpOutDevData->mpViewTransform->set(0, 0, fScaleFactorX);
-            mpOutDevData->mpViewTransform->set(1, 1, fScaleFactorY);
-            mpOutDevData->mpViewTransform->set(0, 2, fZeroPointX);
-            mpOutDevData->mpViewTransform->set(1, 2, fZeroPointY);
-        }
-
-        return *mpOutDevData->mpViewTransform;
-    }
-    else
-    {
+    if (!mbMap || !mpOutDevData)
         return basegfx::B2DHomMatrix();
-    }
+
+    if (mpOutDevData->mpViewTransform)
+        return *mpOutDevData->mpViewTransform;
+
+    mpOutDevData->mpViewTransform = new basegfx::B2DHomMatrix;
+
+    const double fScaleFactorX(static_cast<double>(GetDPIX())
+                               * static_cast<double>(maMapRes.mnMapScNumX)
+                               / static_cast<double>(maMapRes.mnMapScDenomX));
+    const double fScaleFactorY(static_cast<double>(GetDPIY())
+                               * static_cast<double>(maMapRes.mnMapScNumY)
+                               / static_cast<double>(maMapRes.mnMapScDenomY));
+    const double fZeroPointX((static_cast<double>(maMapRes.mnMapOfsX) * fScaleFactorX)
+                             + static_cast<double>(mnOutOffOrigX));
+    const double fZeroPointY((static_cast<double>(maMapRes.mnMapOfsY) * fScaleFactorY)
+                             + static_cast<double>(mnOutOffOrigY));
+
+    mpOutDevData->mpViewTransform->set(0, 0, fScaleFactorX);
+    mpOutDevData->mpViewTransform->set(1, 1, fScaleFactorY);
+    mpOutDevData->mpViewTransform->set(0, 2, fZeroPointX);
+    mpOutDevData->mpViewTransform->set(1, 2, fZeroPointY);
+
+    return *mpOutDevData->mpViewTransform;
 }
 
 basegfx::B2DHomMatrix OutputDevice::ImplGetInverseViewTransformation() const
