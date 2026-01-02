@@ -521,16 +521,16 @@ tools::Polygon OutputDevice::ImplLogicToDevicePixel(const tools::Polygon& rLogic
                           + GetOutOffYPixel() + mnOutOffOrigY);
             aPoly[i] = aPt;
         }
+
+        return aPoly;
     }
-    else
+
+    for (sal_uInt16 i = 0; i < nPoints; i++)
     {
-        for (sal_uInt16 i = 0; i < nPoints; i++)
-        {
-            Point aPt = pPointAry[i];
-            aPt.AdjustX(GetOutOffXPixel());
-            aPt.AdjustY(GetOutOffYPixel());
-            aPoly[i] = aPt;
-        }
+        Point aPt = pPointAry[i];
+        aPt.AdjustX(GetOutOffXPixel());
+        aPt.AdjustY(GetOutOffYPixel());
+        aPoly[i] = aPt;
     }
 
     return aPoly;
