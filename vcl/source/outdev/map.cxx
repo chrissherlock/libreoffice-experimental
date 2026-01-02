@@ -1311,28 +1311,28 @@ basegfx::B2DHomMatrix LogicToLogic(const MapMode& rMapModeSource, const MapMode&
                                       : o3tl::convert(1.0, eFrom, eTo));
         aTransform.set(0, 0, fScaleFactor);
         aTransform.set(1, 1, fScaleFactor);
-    }
-    else
-    {
-        const auto[aMapResSource, aMapResDest]
-            = lcl_calcConversionMapRes(rMapModeSource, rMapModeDest);
 
-        const double fScaleFactorX(
-            (double(aMapResSource.mnMapScNumX) * double(aMapResDest.mnMapScDenomX))
-            / (double(aMapResSource.mnMapScDenomX) * double(aMapResDest.mnMapScNumX)));
-        const double fScaleFactorY(
-            (double(aMapResSource.mnMapScNumY) * double(aMapResDest.mnMapScDenomY))
-            / (double(aMapResSource.mnMapScDenomY) * double(aMapResDest.mnMapScNumY)));
-        const double fZeroPointX(double(aMapResSource.mnMapOfsX) * fScaleFactorX
-                                 - double(aMapResDest.mnMapOfsX));
-        const double fZeroPointY(double(aMapResSource.mnMapOfsY) * fScaleFactorY
-                                 - double(aMapResDest.mnMapOfsY));
-
-        aTransform.set(0, 0, fScaleFactorX);
-        aTransform.set(1, 1, fScaleFactorY);
-        aTransform.set(0, 2, fZeroPointX);
-        aTransform.set(1, 2, fZeroPointY);
+        return aTransform;
     }
+
+    const auto[aMapResSource, aMapResDest]
+        = lcl_calcConversionMapRes(rMapModeSource, rMapModeDest);
+
+    const double fScaleFactorX(
+        (double(aMapResSource.mnMapScNumX) * double(aMapResDest.mnMapScDenomX))
+        / (double(aMapResSource.mnMapScDenomX) * double(aMapResDest.mnMapScNumX)));
+    const double fScaleFactorY(
+        (double(aMapResSource.mnMapScNumY) * double(aMapResDest.mnMapScDenomY))
+        / (double(aMapResSource.mnMapScDenomY) * double(aMapResDest.mnMapScNumY)));
+    const double fZeroPointX(double(aMapResSource.mnMapOfsX) * fScaleFactorX
+                             - double(aMapResDest.mnMapOfsX));
+    const double fZeroPointY(double(aMapResSource.mnMapOfsY) * fScaleFactorY
+                             - double(aMapResDest.mnMapOfsY));
+
+    aTransform.set(0, 0, fScaleFactorX);
+    aTransform.set(1, 1, fScaleFactorY);
+    aTransform.set(0, 2, fZeroPointX);
+    aTransform.set(1, 2, fZeroPointY);
 
     return aTransform;
 }
