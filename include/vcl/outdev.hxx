@@ -221,7 +221,6 @@ private:
     RasterOp                        meRasterOp;
     Wallpaper                       maBackground;
     std::optional<AllSettings>      moSettings;
-    MapMode                         maMapMode;
     Point                           maRefPoint;
     AntialiasingFlags               mnAntialiasing;
     LanguageType                    meTextLanguage;
@@ -1570,7 +1569,7 @@ public:
     void                        SetMapMode( const MapMode& rNewMapMode );
     void                        SetRelativeMapMode( const MapMode& rNewMapMode );
     virtual void                SetMetafileMapMode(const MapMode& rNewMapMode, bool bIsRecord);
-    const MapMode&              GetMapMode() const { return maMapMode; }
+    const MapMode&              GetMapMode() const;
 
 protected:
     virtual void ImplInitMapModeObjects();

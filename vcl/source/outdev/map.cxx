@@ -77,6 +77,8 @@ bool OutputDevice::IsMapModeEnabled() const { return mpMapper->IsMapModeEnabled(
 
 void OutputDevice::EnableMapMode(bool bEnabled) { mpMapper->EnableMapMode(bEnabled); }
 
+const MapMode& OutputDevice::GetMapMode() const { return mpMapper->GetMapMode(); }
+
 void OutputDevice::SetMapMode()
 {
     if (mpMetaFile)
@@ -733,11 +735,11 @@ vcl::Region OutputDevice::ImplPixelToDevicePixel(const vcl::Region& rRegion) con
 
 void OutputDevice::ImplSetMapMode()
 {
-    if (!mpMapper->IsMapModeEnabled() && maMapMode.IsDefault())
+    if (!mpMapper->IsMapModeEnabled() && mpMapper->IsDefaultMapMode())
         return;
 
     mpMapper->EnableMapMode(false);
-    maMapMode = MapMode();
+    mpMapper->ResetMapMode();
 
     // create new objects (clip region are not re-scaled)
     mbNewFont = true;
@@ -757,7 +759,7 @@ void OutputDevice::ImplSetMapMode(const MapMode& rNewMapMode)
     bool bRelMap = (rNewMapMode.GetMapUnit() == MapUnit::MapRelative);
 
     // do nothing if MapMode was not changed
-    if (maMapMode == rNewMapMode)
+    if (mpMapper->GetMapMode() == rNewMapMode)
         return;
 
     // if default MapMode calculate nothing
@@ -766,15 +768,15 @@ void OutputDevice::ImplSetMapMode(const MapMode& rNewMapMode)
     if (mpMapper->IsMapModeEnabled())
     {
         // if only the origin is converted, do not scale new
-        if ((rNewMapMode.GetMapUnit() == maMapMode.GetMapUnit())
-            && (rNewMapMode.GetScaleX() == maMapMode.GetScaleX())
-            && (rNewMapMode.GetScaleY() == maMapMode.GetScaleY()) && (bOldMap == mpMapper->IsMapModeEnabled()))
+        if ((rNewMapMode.GetMapUnit() == mpMapper->GetMapUnit())
+            && (rNewMapMode.GetScaleX() == mpMapper->GetScaleX())
+            && (rNewMapMode.GetScaleY() == mpMapper->GetScaleY()) && (bOldMap == mpMapper->IsMapModeEnabled()))
         {
             // set offset
             Point aOrigin = rNewMapMode.GetOrigin();
             maMapRes.mnMapOfsX = aOrigin.X();
             maMapRes.mnMapOfsY = aOrigin.Y();
-            maMapMode = rNewMapMode;
+            mpMapper->ResetMapMode(rNewMapMode);
 
             // #i75163#
             ImplInvalidateViewTransform();
@@ -798,19 +800,19 @@ void OutputDevice::ImplSetMapMode(const MapMode& rNewMapMode)
     // set new MapMode
     if (bRelMap)
     {
-        maMapMode.SetScaleX(Fraction::MakeFraction(
-            maMapMode.GetScaleX().GetNumerator(), rNewMapMode.GetScaleX().GetNumerator(),
-            maMapMode.GetScaleX().GetDenominator(), rNewMapMode.GetScaleX().GetDenominator()));
+        mpMapper->SetScaleX(Fraction::MakeFraction(
+            mpMapper->GetScaleX().GetNumerator(), rNewMapMode.GetScaleX().GetNumerator(),
+            mpMapper->GetScaleX().GetDenominator(), rNewMapMode.GetScaleX().GetDenominator()));
 
-        maMapMode.SetScaleY(Fraction::MakeFraction(
-            maMapMode.GetScaleY().GetNumerator(), rNewMapMode.GetScaleY().GetNumerator(),
-            maMapMode.GetScaleY().GetDenominator(), rNewMapMode.GetScaleY().GetDenominator()));
+        mpMapper->SetScaleY(Fraction::MakeFraction(
+            mpMapper->GetScaleY().GetNumerator(), rNewMapMode.GetScaleY().GetNumerator(),
+            mpMapper->GetScaleY().GetDenominator(), rNewMapMode.GetScaleY().GetDenominator()));
 
-        maMapMode.SetOrigin(Point(maMapRes.mnMapOfsX, maMapRes.mnMapOfsY));
+        mpMapper->SetOrigin(Point(maMapRes.mnMapOfsX, maMapRes.mnMapOfsY));
     }
     else
     {
-        maMapMode = rNewMapMode;
+        mpMapper->ResetMapMode(rNewMapMode);
     }
 
     // create new objects (clip region are not re-scaled)
@@ -833,19 +835,19 @@ void OutputDevice::ImplInitMapModeObjects() {}
 void OutputDevice::ImplSetRelativeMapMode(const MapMode& rNewMapMode)
 {
     // do nothing if MapMode did not change
-    if (maMapMode == rNewMapMode)
+    if (mpMapper->GetMapMode() == rNewMapMode)
         return;
 
-    MapUnit eOld = maMapMode.GetMapUnit();
+    MapUnit eOld = mpMapper->GetMapUnit();
     MapUnit eNew = rNewMapMode.GetMapUnit();
 
-    // a?F = rNewMapMode.GetScale?() / maMapMode.GetScale?()
+    // a?F = rNewMapMode.GetScale?() / mpMapper->GetMapMode().GetScale?()
     Fraction aXF = Fraction::MakeFraction(
-        rNewMapMode.GetScaleX().GetNumerator(), maMapMode.GetScaleX().GetDenominator(),
-        rNewMapMode.GetScaleX().GetDenominator(), maMapMode.GetScaleX().GetNumerator());
+        rNewMapMode.GetScaleX().GetNumerator(), mpMapper->GetScaleX().GetDenominator(),
+        rNewMapMode.GetScaleX().GetDenominator(), mpMapper->GetScaleX().GetNumerator());
     Fraction aYF = Fraction::MakeFraction(
-        rNewMapMode.GetScaleY().GetNumerator(), maMapMode.GetScaleY().GetDenominator(),
-        rNewMapMode.GetScaleY().GetDenominator(), maMapMode.GetScaleY().GetNumerator());
+        rNewMapMode.GetScaleY().GetNumerator(), mpMapper->GetScaleY().GetDenominator(),
+        rNewMapMode.GetScaleY().GetDenominator(), mpMapper->GetScaleY().GetNumerator());
 
     Point aPt(LogicToLogic(Point(), nullptr, &rNewMapMode));
     if (eNew != eOld)
@@ -887,7 +889,7 @@ void OutputDevice::ImplSetRelativeMapMode(const MapMode& rNewMapMode)
     SetMapMode(aNewMapMode);
 
     if (eNew != eOld)
-        maMapMode = rNewMapMode;
+        mpMapper->ResetMapMode(rNewMapMode);
 
     // #106426# Adapt logical offset when changing MapMode
     mnOutOffLogicX
@@ -2031,16 +2033,16 @@ OutputDevice::ImplLogicToPixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
 Point OutputDevice::ImplLogicToLogic(const Point& rPtSource, const MapMode* pMapModeSource,
                                      const MapMode* pMapModeDest) const
 {
-    const MapMode* pSrc = pMapModeSource ? pMapModeSource : &maMapMode;
-    const MapMode* pDst = pMapModeDest ? pMapModeDest : &maMapMode;
+    const MapMode* pSrc = pMapModeSource ? pMapModeSource : &mpMapper->GetMapMode();
+    const MapMode* pDst = pMapModeDest ? pMapModeDest : &mpMapper->GetMapMode();
 
     if (*pSrc == *pDst)
         return rPtSource;
 
     ImplMapRes aMapResSource
-        = lcl_resolveMapRes(pMapModeSource, maMapMode, maMapRes, mpMapper->IsMapModeEnabled(), GetDPIX(), GetDPIY());
+        = lcl_resolveMapRes(pMapModeSource, mpMapper->GetMapMode(), maMapRes, mpMapper->IsMapModeEnabled(), GetDPIX(), GetDPIY());
     ImplMapRes aMapResDest
-        = lcl_resolveMapRes(pMapModeDest, maMapMode, maMapRes, mpMapper->IsMapModeEnabled(), GetDPIX(), GetDPIY());
+        = lcl_resolveMapRes(pMapModeDest, mpMapper->GetMapMode(), maMapRes, mpMapper->IsMapModeEnabled(), GetDPIX(), GetDPIY());
 
     return Point(lcl_scaleLogicValue(rPtSource.X() + aMapResSource.mnMapOfsX,
                                      aMapResSource.mnMapScNumX, aMapResDest.mnMapScDenomX,
@@ -2055,16 +2057,16 @@ Point OutputDevice::ImplLogicToLogic(const Point& rPtSource, const MapMode* pMap
 Size OutputDevice::ImplLogicToLogic(const Size& rSzSource, const MapMode* pMapModeSource,
                                     const MapMode* pMapModeDest) const
 {
-    const MapMode* pSrc = pMapModeSource ? pMapModeSource : &maMapMode;
-    const MapMode* pDst = pMapModeDest ? pMapModeDest : &maMapMode;
+    const MapMode* pSrc = pMapModeSource ? pMapModeSource : &mpMapper->GetMapMode();
+    const MapMode* pDst = pMapModeDest ? pMapModeDest : &mpMapper->GetMapMode();
 
     if (*pSrc == *pDst)
         return rSzSource;
 
     ImplMapRes aMapResSource
-        = lcl_resolveMapRes(pMapModeSource, maMapMode, maMapRes, mpMapper->IsMapModeEnabled(), GetDPIX(), GetDPIY());
+        = lcl_resolveMapRes(pMapModeSource, mpMapper->GetMapMode(), maMapRes, mpMapper->IsMapModeEnabled(), GetDPIX(), GetDPIY());
     ImplMapRes aMapResDest
-        = lcl_resolveMapRes(pMapModeDest, maMapMode, maMapRes, mpMapper->IsMapModeEnabled(), GetDPIX(), GetDPIY());
+        = lcl_resolveMapRes(pMapModeDest, mpMapper->GetMapMode(), maMapRes, mpMapper->IsMapModeEnabled(), GetDPIX(), GetDPIY());
 
     return Size(lcl_scaleLogicValue(rSzSource.Width(), aMapResSource.mnMapScNumX,
                                     aMapResDest.mnMapScDenomX, aMapResSource.mnMapScDenomX,
@@ -2078,16 +2080,16 @@ tools::Rectangle OutputDevice::ImplLogicToLogic(const tools::Rectangle& rRectSou
                                                 const MapMode* pMapModeSource,
                                                 const MapMode* pMapModeDest) const
 {
-    const MapMode* pSrc = pMapModeSource ? pMapModeSource : &maMapMode;
-    const MapMode* pDst = pMapModeDest ? pMapModeDest : &maMapMode;
+    const MapMode* pSrc = pMapModeSource ? pMapModeSource : &mpMapper->GetMapMode();
+    const MapMode* pDst = pMapModeDest ? pMapModeDest : &mpMapper->GetMapMode();
 
     if (*pSrc == *pDst)
         return rRectSource;
 
     ImplMapRes aMapResSource
-        = lcl_resolveMapRes(pMapModeSource, maMapMode, maMapRes, mpMapper->IsMapModeEnabled(), GetDPIX(), GetDPIY());
+        = lcl_resolveMapRes(pMapModeSource, mpMapper->GetMapMode(), maMapRes, mpMapper->IsMapModeEnabled(), GetDPIX(), GetDPIY());
     ImplMapRes aMapResDest
-        = lcl_resolveMapRes(pMapModeDest, maMapMode, maMapRes, mpMapper->IsMapModeEnabled(), GetDPIX(), GetDPIY());
+        = lcl_resolveMapRes(pMapModeDest, mpMapper->GetMapMode(), maMapRes, mpMapper->IsMapModeEnabled(), GetDPIX(), GetDPIY());
 
     return tools::Rectangle(
         lcl_scaleLogicValue(rRectSource.Left() + aMapResSource.mnMapOfsX, aMapResSource.mnMapScNumX,

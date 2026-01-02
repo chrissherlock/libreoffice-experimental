@@ -21,14 +21,17 @@
 
 #include <sal/types.h>
 #include <tools/gen.hxx>
+#include <tools/fract.hxx>
 #include <tools/long.hxx>
 
 #include <vcl/dllapi.h>
+#include <vcl/mapmod.hxx>
 
 class CoordinateMapper
 {
 private:
     bool mbMap;
+    MapMode maMapMode;
 
     sal_Int32 mnDPIX;
     sal_Int32 mnDPIY;
@@ -45,6 +48,19 @@ private:
 public:
     SAL_DLLPRIVATE bool IsMapModeEnabled() const { return mbMap; }
     SAL_DLLPRIVATE void EnableMapMode(bool bEnable = true) { mbMap = bEnable; }
+
+    SAL_DLLPRIVATE const MapMode& GetMapMode() const { return maMapMode; }
+    SAL_DLLPRIVATE bool IsDefaultMapMode() const { return maMapMode.IsDefault(); }
+    SAL_DLLPRIVATE void ResetMapMode() { maMapMode = MapMode(); }
+    SAL_DLLPRIVATE void ResetMapMode(const MapMode& rMapMode) { maMapMode = rMapMode; }
+    SAL_DLLPRIVATE MapUnit GetMapUnit() const { return maMapMode.GetMapUnit(); }
+
+    SAL_DLLPRIVATE const Fraction& GetScaleX() const { return maMapMode.GetScaleX(); }
+    SAL_DLLPRIVATE const Fraction& GetScaleY() const { return maMapMode.GetScaleY(); }
+    SAL_DLLPRIVATE void SetScaleX(const Fraction& rScale) { maMapMode.SetScaleX(rScale); }
+    SAL_DLLPRIVATE void SetScaleY(const Fraction& rScale) { maMapMode.SetScaleY(rScale); }
+
+    SAL_DLLPRIVATE void SetOrigin(const Point& rPt) { maMapMode.SetOrigin(rPt); }
 
     SAL_DLLPRIVATE sal_Int32 GetDPIX() const;
     SAL_DLLPRIVATE sal_Int32 GetDPIY() const;
