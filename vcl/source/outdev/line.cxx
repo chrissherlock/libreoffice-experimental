@@ -29,6 +29,7 @@
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/virdev.hxx>
 
+#include <CoordinateMapper.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 
@@ -115,7 +116,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
 
     const Point aStartPt(LogicToDevicePixel(rStartPt));
     const Point aEndPt(LogicToDevicePixel(rEndPt));
-    const LineInfo aInfo( ImplLogicToDevicePixel( rLineInfo ) );
+    const LineInfo aInfo(mpMapper->LogicToDevicePixel(rLineInfo));
     const bool bDashUsed(LineStyle::Dash == aInfo.GetStyle());
     const bool bLineWidthUsed(aInfo.GetWidth() > 1);
 
@@ -166,7 +167,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt )
     {
         // at least transform with double precision to device coordinates; this will
         // avoid pixel snap of single, appended lines
-        const basegfx::B2DHomMatrix aTransform(ImplGetDeviceTransformation());
+        const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation());
         basegfx::B2DPolygon aB2DPolyLine;
 
         aB2DPolyLine.append(basegfx::B2DPoint(rStartPt.X(), rStartPt.Y()));
