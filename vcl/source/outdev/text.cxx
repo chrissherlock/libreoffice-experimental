@@ -2087,7 +2087,7 @@ bool OutputDevice::GetTextBoundRect(basegfx::B2DRectangle& rRect, const OUString
             aPixelRect.translate(mnTextOffX - aPos.getX(), mnTextOffY - aPos.getY());
             rRect = PixelToLogic( aPixelRect );
             if (mpMapper->IsMapModeEnabled())
-                rRect.translate(maMapRes.mnMapOfsX, maMapRes.mnMapOfsY);
+                rRect.translate(mpMapper->GetMappingXOffset(), mpMapper->GetMappingYOffset());
         }
     }
 
