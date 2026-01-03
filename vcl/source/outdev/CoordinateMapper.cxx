@@ -48,6 +48,18 @@ void CoordinateMapper::SetOutputWidthPixel(tools::Long nWidth) { mnOutWidth = nW
 
 void CoordinateMapper::SetOutputHeightPixel(tools::Long nHeight) { mnOutHeight = nHeight; }
 
+void CoordinateMapper::SetPixelOffset(const Size& rSize)
+{
+    mnOutOffOrigX = rSize.Width();
+    mnOutOffOrigY = rSize.Height();
+}
+
+void CoordinateMapper::SetLogicalOffset(const Size& rSize)
+{
+    mnOutOffLogicX = rSize.Width();
+    mnOutOffLogicY = rSize.Height();
+}
+
 tools::Long CoordinateMapper::GetOutOffXPixel() const { return mnOutOffX; }
 
 tools::Long CoordinateMapper::GetOutOffYPixel() const { return mnOutOffY; }
@@ -57,5 +69,17 @@ void CoordinateMapper::SetOutOffXPixel(tools::Long nOutOffX) { mnOutOffX = nOutO
 void CoordinateMapper::SetOutOffYPixel(tools::Long nOutOffY) { mnOutOffY = nOutOffY; }
 
 Point CoordinateMapper::GetOutputOffPixel() const { return Point(mnOutOffX, mnOutOffY); }
+
+void CoordinateMapper::CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX,
+                                         tools::Long nDPIY)
+{
+    maMapRes.CalcMapResolution(rMapMode, nDPIX, nDPIY);
+}
+
+ImplMapRes CoordinateMapper::ResolveMapRes(const MapMode* pMode, const MapMode& rDefaultMapMode,
+                                           bool bMap, tools::Long nDPIX, tools::Long nDPIY)
+{
+    return maMapRes.ResolveMapRes(pMode, rDefaultMapMode, bMap, nDPIX, nDPIY);
+}
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
