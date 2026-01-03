@@ -25,6 +25,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/window.hxx>
 
+#include <CoordinateMapper.hxx>
 #include <salgdi.hxx>
 
 #include <cassert>
@@ -91,7 +92,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
     if (aRect.IsEmpty())
         return;
 
-    tools::PolyPolygon aClixPolyPoly( ImplLogicToDevicePixel( rPolyPoly ) );
+    tools::PolyPolygon aClixPolyPoly(mpMapper->LogicToDevicePixel(rPolyPoly));
     bool bDrawn = false;
 
     if( !mpGraphics && !AcquireGraphics() )

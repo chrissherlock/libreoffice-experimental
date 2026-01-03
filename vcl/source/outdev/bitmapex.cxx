@@ -28,6 +28,7 @@
 #include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
 
+#include <CoordinateMapper.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 
@@ -192,8 +193,8 @@ void OutputDevice::DrawTransformedBitmapEx(
     const bool bTryDirectPaint(!bInvert && !bBitmapChangedColor && !mpMetaFile);
     // tdf#130768 CAUTION(!) using GetViewTransformation() is *not* enough here, it may
     // be that mnOutOffX/mnOutOffY is used - see AOO bug 75163, mentioned at
-    // ImplGetDeviceTransformation declaration
-    basegfx::B2DHomMatrix aFullTransform(ImplGetDeviceTransformation() * rTransformation);
+    // GetDeviceTransformation declaration
+    basegfx::B2DHomMatrix aFullTransform(mpMapper->GetDeviceTransformation() * rTransformation);
 
     // First try to handle additional alpha blending, either directly, or modify the bitmap.
     if(!rtl::math::approxEqual( fAlpha, 1.0 ))

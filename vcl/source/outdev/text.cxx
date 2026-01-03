@@ -641,7 +641,7 @@ tools::Long OutputDevice::GetTextHeight() const
     tools::Long nHeight = mpFontInstance->mnLineHeight + mnEmphasisAscent + mnEmphasisDescent;
 
     if (mpMapper->IsMapModeEnabled())
-        nHeight = ImplDevicePixelToLogicHeight( nHeight );
+        nHeight = mpMapper->DevicePixelToLogicHeight( nHeight );
 
     return nHeight;
 }
@@ -653,7 +653,7 @@ double OutputDevice::GetTextHeightDouble() const
 
     tools::Long nHeight = mpFontInstance->mnLineHeight + mnEmphasisAscent + mnEmphasisDescent;
 
-    return ImplDevicePixelToLogicHeightDouble(nHeight);
+    return mpMapper->DevicePixelToLogicHeightDouble(nHeight);
 }
 
 float OutputDevice::approximate_char_width() const
@@ -857,7 +857,7 @@ OutputDevice::GetPartialTextArray(const OUString& rStr, KernArray* pKernArray, s
         if (mpMapper->IsMapModeEnabled())
         {
             for (int i = 0; i < nPartLen; ++i)
-                (*pDXPixelArray)[i] = ImplDevicePixelToLogicWidthDouble((*pDXPixelArray)[i]);
+                (*pDXPixelArray)[i] = mpMapper->DevicePixelToLogicWidthDouble((*pDXPixelArray)[i]);
         }
     }
 
@@ -874,11 +874,11 @@ OutputDevice::GetPartialTextArray(const OUString& rStr, KernArray* pKernArray, s
         if (pSalLayout->GetBoundRect(stRect))
         {
             auto stRect2 = SalLayout::BoundRect2Rectangle(stRect);
-            *pBounds = ImplDevicePixelToLogic(stRect2);
+            *pBounds = mpMapper->DevicePixelToLogic(stRect2);
         }
     }
 
-    return ImplDevicePixelToLogicWidthDouble(nWidth);
+    return mpMapper->DevicePixelToLogicWidthDouble(nWidth);
 }
 
 void OutputDevice::GetCaretPositions( const OUString& rStr, KernArray& rCaretPos,
@@ -932,7 +932,7 @@ void OutputDevice::GetCaretPositions( const OUString& rStr, KernArray& rCaretPos
     if (mpMapper->IsMapModeEnabled())
     {
         for (i = 0; i < nCaretPos; ++i)
-            aCaretPixelPos[i] = ImplDevicePixelToLogicWidthDouble(aCaretPixelPos[i]);
+            aCaretPixelPos[i] = mpMapper->DevicePixelToLogicWidthDouble(aCaretPixelPos[i]);
     }
 
     for (i = 0; i < nCaretPos; ++i)
