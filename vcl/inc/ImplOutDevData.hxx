@@ -40,10 +40,6 @@ struct ImplOutDevData
     VclPtr<VirtualDevice> mpRotateDev;
     vcl::ControlLayoutData* mpRecordLayout;
     tools::Rectangle maRecordRect;
-
-    // #i75163#
-    basegfx::B2DHomMatrix* mpViewTransform;
-    basegfx::B2DHomMatrix* mpInverseViewTransform;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

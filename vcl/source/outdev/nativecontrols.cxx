@@ -24,6 +24,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/window.hxx>
 
+#include <CoordinateMapper.hxx>
 #include <salgdi.hxx>
 #include <toolbarvalue.hxx>
 #include <menubarvalue.hxx>
@@ -317,8 +318,8 @@ bool OutputDevice::GetNativeControlRegion(  ControlType nType,
     if( bRet )
     {
         // transform back native regions
-        rNativeBoundingRegion = ImplDevicePixelToLogic( rNativeBoundingRegion );
-        rNativeContentRegion = ImplDevicePixelToLogic( rNativeContentRegion );
+        rNativeBoundingRegion = mpMapper->DevicePixelToLogic( rNativeBoundingRegion );
+        rNativeContentRegion = mpMapper->DevicePixelToLogic( rNativeContentRegion );
     }
 
     return bRet;

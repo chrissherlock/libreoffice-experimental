@@ -199,18 +199,18 @@ FontMetric OutputDevice::GetFontMetric() const
     // set remaining metric fields
     aMetric.SetFullstopCenteredFlag( xFontMetric->IsFullstopCentered() );
     aMetric.SetBulletOffset( xFontMetric->GetBulletOffset() );
-    aMetric.SetAscent( ImplDevicePixelToLogicHeight( xFontMetric->GetAscent() + mnEmphasisAscent ) );
-    aMetric.SetDescent( ImplDevicePixelToLogicHeight( xFontMetric->GetDescent() + mnEmphasisDescent ) );
-    aMetric.SetInternalLeading( ImplDevicePixelToLogicHeight( xFontMetric->GetInternalLeading() + mnEmphasisAscent ) );
+    aMetric.SetAscent( DevicePixelToLogicHeight( xFontMetric->GetAscent() + mnEmphasisAscent ) );
+    aMetric.SetDescent( DevicePixelToLogicHeight( xFontMetric->GetDescent() + mnEmphasisDescent ) );
+    aMetric.SetInternalLeading( DevicePixelToLogicHeight( xFontMetric->GetInternalLeading() + mnEmphasisAscent ) );
     // OutputDevice has its own external leading function due to #i60945#
-    aMetric.SetExternalLeading( ImplDevicePixelToLogicHeight( GetFontExtLeading() ) );
-    aMetric.SetLineHeight( ImplDevicePixelToLogicHeight( xFontMetric->GetAscent() + xFontMetric->GetDescent() + mnEmphasisAscent + mnEmphasisDescent ) );
-    aMetric.SetSlant( ImplDevicePixelToLogicHeight( xFontMetric->GetSlant() ) );
-    aMetric.SetHangingBaseline( ImplDevicePixelToLogicHeight( xFontMetric->GetHangingBaseline() ) );
+    aMetric.SetExternalLeading( DevicePixelToLogicHeight( GetFontExtLeading() ) );
+    aMetric.SetLineHeight( DevicePixelToLogicHeight( xFontMetric->GetAscent() + xFontMetric->GetDescent() + mnEmphasisAscent + mnEmphasisDescent ) );
+    aMetric.SetSlant( DevicePixelToLogicHeight( xFontMetric->GetSlant() ) );
+    aMetric.SetHangingBaseline( DevicePixelToLogicHeight( xFontMetric->GetHangingBaseline() ) );
 
-    aMetric.SetUnitEm(ImplDevicePixelToLogicWidth(xFontMetric->GetUnitEm()));
-    aMetric.SetHorCJKAdvance(ImplDevicePixelToLogicWidth(xFontMetric->GetHorCJKAdvance()));
-    aMetric.SetVertCJKAdvance(ImplDevicePixelToLogicHeight(xFontMetric->GetVertCJKAdvance()));
+    aMetric.SetUnitEm(DevicePixelToLogicWidth(xFontMetric->GetUnitEm()));
+    aMetric.SetHorCJKAdvance(DevicePixelToLogicWidth(xFontMetric->GetHorCJKAdvance()));
+    aMetric.SetVertCJKAdvance(DevicePixelToLogicHeight(xFontMetric->GetVertCJKAdvance()));
 
     // get miscellaneous data
     aMetric.SetQuality( xFontMetric->GetQuality() );
@@ -547,7 +547,7 @@ vcl::Font OutputDevice::GetDefaultFont( DefaultFontType nType, LanguageType eLan
                     aFont.SetFamilyName( aSearch );
 
                     // convert to pixel height
-                    Size aSize = pOutDev->ImplLogicToDevicePixel( aFont.GetFontSize() );
+                    Size aSize = pOutDev->LogicToDevicePixel( aFont.GetFontSize() );
                     if ( !aSize.Height() )
                     {
                         // use default pixel height only when logical height is zero
@@ -691,8 +691,8 @@ bool OutputDevice::ImplNewFont() const
 
     // convert to pixel height
     // TODO: replace integer based aSize completely with subpixel accurate type
-    float fExactHeight = ImplLogicHeightToDeviceSubPixel(maFont.GetFontHeight());
-    Size aSize = ImplLogicToDevicePixel( maFont.GetFontSize() );
+    float fExactHeight = mpMapper->LogicHeightToDeviceSubPixel(maFont.GetFontHeight());
+    Size aSize = mpMapper->LogicToDevicePixel( maFont.GetFontSize() );
     if ( !aSize.Height() )
     {
         // use default pixel height only when logical height is zero
@@ -1165,7 +1165,7 @@ tools::Long OutputDevice::GetMinKashida() const
     if (!mpMapper->IsMapModeEnabled())
         nKashidaWidth = std::ceil(nKashidaWidth);
 
-    return ImplDevicePixelToLogicWidth(nKashidaWidth);
+    return mpMapper->DevicePixelToLogicWidth(nKashidaWidth);
 }
 
 // tdf#163105: Get map of valid kashida positions for a single word

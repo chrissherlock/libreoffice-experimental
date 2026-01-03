@@ -117,10 +117,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mpOutDevData.reset(new ImplOutDevData);
     mpOutDevData->mpRotateDev       = nullptr;
     mpOutDevData->mpRecordLayout    = nullptr;
-
-    // #i75163#
-    mpOutDevData->mpViewTransform   = nullptr;
-    mpOutDevData->mpInverseViewTransform = nullptr;
 }
 
 OutputDevice::~OutputDevice()
@@ -142,7 +138,7 @@ void OutputDevice::dispose()
     mpOutDevData->mpRotateDev.disposeAndClear();
 
     // #i75163#
-    ImplInvalidateViewTransform();
+    mpMapper->InvalidateViewTransform();
 
     mpOutDevData.reset();
 
@@ -407,15 +403,15 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
         return;
 
     tools::Long nSrcWidth = LogicWidthToDevicePixel(rSrcSize.Width());
-    tools::Long nSrcHeight  = ImplLogicHeightToDevicePixel( rSrcSize.Height() );
+    tools::Long nSrcHeight  = LogicHeightToDevicePixel(rSrcSize.Height());
     tools::Long nDestWidth = LogicWidthToDevicePixel(rDestSize.Width());
-    tools::Long nDestHeight = ImplLogicHeightToDevicePixel( rDestSize.Height() );
+    tools::Long nDestHeight = LogicHeightToDevicePixel(rDestSize.Height());
 
     if (nSrcWidth && nSrcHeight && nDestWidth && nDestHeight)
     {
-        SalTwoRect aPosAry(ImplLogicXToDevicePixel(rSrcPt.X()), ImplLogicYToDevicePixel(rSrcPt.Y()),
+        SalTwoRect aPosAry(LogicXToDevicePixel(rSrcPt.X()), LogicYToDevicePixel(rSrcPt.Y()),
                            nSrcWidth, nSrcHeight,
-                           ImplLogicXToDevicePixel(rDestPt.X()), ImplLogicYToDevicePixel(rDestPt.Y()),
+                           LogicXToDevicePixel(rDestPt.X()), LogicYToDevicePixel(rDestPt.Y()),
                            nDestWidth, nDestHeight);
 
         AdjustTwoRect( aPosAry, GetOutputRectPixel() );
@@ -457,14 +453,14 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
     if ( mbOutputClipped )
         return;
 
-    SalTwoRect aPosAry(rOutDev.ImplLogicXToDevicePixel(rSrcPt.X()),
-                             rOutDev.ImplLogicYToDevicePixel(rSrcPt.Y()),
+    SalTwoRect aPosAry(rOutDev.LogicXToDevicePixel(rSrcPt.X()),
+                             rOutDev.LogicYToDevicePixel(rSrcPt.Y()),
                              rOutDev.LogicWidthToDevicePixel(rSrcSize.Width()),
-                             rOutDev.ImplLogicHeightToDevicePixel(rSrcSize.Height()),
-                             ImplLogicXToDevicePixel(rDestPt.X()),
-                             ImplLogicYToDevicePixel(rDestPt.Y()),
+                             rOutDev.LogicHeightToDevicePixel(rSrcSize.Height()),
+                             LogicXToDevicePixel(rDestPt.X()),
+                             LogicYToDevicePixel(rDestPt.Y()),
                              LogicWidthToDevicePixel(rDestSize.Width()),
-                             ImplLogicHeightToDevicePixel(rDestSize.Height()));
+                             LogicHeightToDevicePixel(rDestSize.Height()));
 
     // if we have alpha, this will blend source over destination
     drawOutDevDirect(rOutDev, aPosAry);
@@ -493,12 +489,12 @@ void OutputDevice::CopyArea( const Point& rDestPt,
         return;
 
     tools::Long nSrcWidth = LogicWidthToDevicePixel(rSrcSize.Width());
-    tools::Long nSrcHeight = ImplLogicHeightToDevicePixel(rSrcSize.Height());
+    tools::Long nSrcHeight = LogicHeightToDevicePixel(rSrcSize.Height());
     if (nSrcWidth && nSrcHeight)
     {
-        SalTwoRect aPosAry(ImplLogicXToDevicePixel(rSrcPt.X()), ImplLogicYToDevicePixel(rSrcPt.Y()),
+        SalTwoRect aPosAry(LogicXToDevicePixel(rSrcPt.X()), LogicYToDevicePixel(rSrcPt.Y()),
                            nSrcWidth, nSrcHeight,
-                           ImplLogicXToDevicePixel(rDestPt.X()), ImplLogicYToDevicePixel(rDestPt.Y()),
+                           LogicXToDevicePixel(rDestPt.X()), LogicYToDevicePixel(rDestPt.Y()),
                            nSrcWidth, nSrcHeight);
 
         AdjustTwoRect( aPosAry, GetOutputRectPixel() );

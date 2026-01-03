@@ -346,7 +346,7 @@ void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderCo
         rRenderContext.ReMirror(aPaintRect);
         rRenderContext.ReMirror(rPaintRegion);
     }
-    aPaintRect = GetOutDev()->ImplDevicePixelToLogic(aPaintRect);
+    aPaintRect = GetOutDev()->DevicePixelToLogic(aPaintRect);
     mpWindowImpl->mpPaintRegion = &rPaintRegion;
     mpWindowImpl->maInvalidateRegion.SetEmpty();
 
@@ -1038,7 +1038,7 @@ void Window::Invalidate( const vcl::Region& rRegion, InvalidateFlags nFlags )
     }
     else
     {
-        vcl::Region aRegion = GetOutDev()->ImplPixelToDevicePixel( LogicToPixel( rRegion ) );
+        vcl::Region aRegion = GetOutDev()->PixelToDevicePixel( LogicToPixel( rRegion ) );
         if ( !aRegion.IsEmpty() )
         {
             ImplInvalidate( &aRegion, nFlags );
@@ -1514,7 +1514,7 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
         return;
 
     nHorzScroll = GetOutDev()->LogicWidthToDevicePixel(nHorzScroll);
-    nVertScroll = GetOutDev()->ImplLogicHeightToDevicePixel(nVertScroll);
+    nVertScroll = GetOutDev()->LogicHeightToDevicePixel(nVertScroll);
 
     if ( !nHorzScroll && !nVertScroll )
         return;
@@ -1580,7 +1580,7 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
     if ( nFlags & ScrollFlags::Clip )
         aRegion.Intersect( rRect );
     if ( mpWindowImpl->mbWinRegion )
-        aRegion.Intersect( GetOutDev()->ImplPixelToDevicePixel( mpWindowImpl->maWinRegion ) );
+        aRegion.Intersect( GetOutDev()->PixelToDevicePixel( mpWindowImpl->maWinRegion ) );
 
     aRegion.Exclude( aInvalidateRegion );
 

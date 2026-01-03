@@ -102,7 +102,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
         return;
 
     nHorzRound = LogicWidthToDevicePixel(nHorzRound);
-    nVertRound = ImplLogicHeightToDevicePixel( nVertRound );
+    nVertRound = LogicHeightToDevicePixel( nVertRound );
 
     // we need a graphics
     if ( !mpGraphics && !AcquireGraphics() )
@@ -183,7 +183,7 @@ void OutputDevice::Invert( const tools::Polygon& rPoly, InvertFlags nFlags )
     if ( nPoints < 2 )
         return;
 
-    tools::Polygon aPoly( ImplLogicToDevicePixel( rPoly ) );
+    tools::Polygon aPoly( mpMapper->LogicToDevicePixel( rPoly ) );
 
     // we need a graphics
     if ( !mpGraphics && !AcquireGraphics() )
@@ -255,10 +255,10 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
     tools::Long nY = ( rRect.Top() >= aDstRect.Top() ) ? rRect.Top() : ( rRect.Top() + ( ( aDstRect.Top() - rRect.Top() ) / nDistY ) * nDistY );
     const tools::Long nRight = aDstRect.Right();
     const tools::Long nBottom = aDstRect.Bottom();
-    const tools::Long nStartX = ImplLogicXToDevicePixel( nX );
-    const tools::Long nEndX = ImplLogicXToDevicePixel( nRight );
-    const tools::Long nStartY = ImplLogicYToDevicePixel( nY );
-    const tools::Long nEndY = ImplLogicYToDevicePixel( nBottom );
+    const tools::Long nStartX = LogicXToDevicePixel( nX );
+    const tools::Long nEndX = LogicXToDevicePixel( nRight );
+    const tools::Long nStartY = LogicYToDevicePixel( nY );
+    const tools::Long nEndY = LogicYToDevicePixel( nBottom );
     tools::Long nHorzCount = 0;
     tools::Long nVertCount = 0;
 
@@ -271,7 +271,7 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
         aVertBuf[ nVertCount++ ] = nStartY;
         while( ( nY += nDistY ) <= nBottom )
         {
-            aVertBuf[ nVertCount++ ] = ImplLogicYToDevicePixel( nY );
+            aVertBuf[ nVertCount++ ] = LogicYToDevicePixel( nY );
         }
     }
 
@@ -281,7 +281,7 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
         aHorzBuf[ nHorzCount++ ] = nStartX;
         while( ( nX += nDistX ) <= nRight )
         {
-            aHorzBuf[ nHorzCount++ ] = ImplLogicXToDevicePixel( nX );
+            aHorzBuf[ nHorzCount++ ] = LogicXToDevicePixel( nX );
         }
     }
 
@@ -387,19 +387,19 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
         nY += nDistanceY;
     }
 
-    const tools::Long nTopPixel = ImplLogicYToDevicePixel(rDrawingArea.Top());
-    const tools::Long nBottomPixel = ImplLogicYToDevicePixel(rDrawingArea.Bottom());
-    const tools::Long nLeftPixel = ImplLogicXToDevicePixel(rDrawingArea.Left());
-    const tools::Long nRightPixel = ImplLogicXToDevicePixel(rDrawingArea.Right());
+    const tools::Long nTopPixel = LogicYToDevicePixel(rDrawingArea.Top());
+    const tools::Long nBottomPixel = LogicYToDevicePixel(rDrawingArea.Bottom());
+    const tools::Long nLeftPixel = LogicXToDevicePixel(rDrawingArea.Left());
+    const tools::Long nRightPixel = LogicXToDevicePixel(rDrawingArea.Right());
 
     // Draw 3x3 pixel crosses within the drawing area
     const tools::Long nHalfCrossSize = 1;
     for (const tools::Long nPositionX : aHorzBuffer)
     {
-        const tools::Long nPositionXPixel = ImplLogicXToDevicePixel(nPositionX);
+        const tools::Long nPositionXPixel = LogicXToDevicePixel(nPositionX);
         for (const tools::Long nPositionY : aVertBuffer)
         {
-            const tools::Long nPositionYPixel = ImplLogicYToDevicePixel(nPositionY);
+            const tools::Long nPositionYPixel = LogicYToDevicePixel(nPositionY);
             const tools::Long nStartXPixel = std::max(nPositionXPixel - nHalfCrossSize, nLeftPixel);
             if (nStartXPixel > nRightPixel)
             {

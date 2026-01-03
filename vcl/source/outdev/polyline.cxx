@@ -25,6 +25,7 @@
 #include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
 
+#include <CoordinateMapper.hxx>
 #include <salgdi.hxx>
 
 #include <cassert>
@@ -64,7 +65,7 @@ void OutputDevice::DrawPolyLine( const tools::Polygon& rPoly )
     }
 
     const basegfx::B2DPolygon aB2DPolyLine(rPoly.getB2DPolygon());
-    const basegfx::B2DHomMatrix aTransform(ImplGetDeviceTransformation());
+    const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation());
     const bool bPixelSnapHairline(mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
 
     bool bDrawn = mpGraphics->DrawPolyLine(
@@ -81,7 +82,7 @@ void OutputDevice::DrawPolyLine( const tools::Polygon& rPoly )
 
     if(!bDrawn)
     {
-        tools::Polygon aPoly = ImplLogicToDevicePixel( rPoly );
+        tools::Polygon aPoly = mpMapper->LogicToDevicePixel(rPoly);
         Point* pPtAry = aPoly.GetPointAry();
 
         // #100127# Forward beziers to sal, if any
@@ -272,18 +273,18 @@ void OutputDevice::drawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
     if ( mbInitLineColor )
         InitLineColor();
 
-    const LineInfo aInfo( ImplLogicToDevicePixel( rLineInfo ) );
+    const LineInfo aInfo(mpMapper->LogicToDevicePixel(rLineInfo));
     const bool bDashUsed(LineStyle::Dash == aInfo.GetStyle());
     const bool bLineWidthUsed(aInfo.GetWidth() > 1);
 
     if (bDashUsed || bLineWidthUsed)
     {
-        basegfx::B2DPolygon aPoly = ImplLogicToDevicePixel(rPoly.getB2DPolygon());
+        basegfx::B2DPolygon aPoly = mpMapper->LogicToDevicePixel(rPoly.getB2DPolygon());
         drawLine(basegfx::B2DPolyPolygon(aPoly), aInfo);
     }
     else
     {
-        tools::Polygon aPoly = ImplLogicToDevicePixel(rPoly);
+        tools::Polygon aPoly = mpMapper->LogicToDevicePixel(rPoly);
 
         // #100127# the subdivision HAS to be done here since only a pointer
         // to an array of points is given to the DrawPolyLine method, there is
@@ -366,7 +367,7 @@ bool OutputDevice::DrawPolyLineDirectInternal(
     if(bTryB2d)
     {
         // combine rObjectTransform with WorldToDevice
-        const basegfx::B2DHomMatrix aTransform(ImplGetDeviceTransformation() * rObjectTransform);
+        const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation() * rObjectTransform);
         const bool bPixelSnapHairline((mnAntialiasing & AntialiasingFlags::PixelSnapHairline) && rB2DPolygon.count() < 1000);
 
         // draw the polyline

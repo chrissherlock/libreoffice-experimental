@@ -1566,14 +1566,6 @@ protected:
     virtual void ImplInitMapModeObjects();
 
 public:
-     // #i75163#
-    basegfx::B2DHomMatrix       GetViewTransformation() const;
-    basegfx::B2DHomMatrix       GetInverseViewTransformation() const;
-
-    SAL_DLLPRIVATE basegfx::B2DHomMatrix GetViewTransformation( const MapMode& rMapMode ) const;
-    basegfx::B2DHomMatrix       GetInverseViewTransformation( const MapMode& rMapMode ) const;
-
-
     /** Set an offset in pixel
 
         This method offsets every drawing operation that converts its
@@ -1609,37 +1601,21 @@ public:
     SAL_WARN_UNUSED_RESULT Point LogicToPixel(const Point& rLogicPt) const;
     SAL_WARN_UNUSED_RESULT Size  LogicToPixel(const Size& rLogicSize) const;
     SAL_WARN_UNUSED_RESULT tools::Rectangle LogicToPixel(const tools::Rectangle& rLogicRect) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE tools::Polygon LogicToPixel(const tools::Polygon& rLogicPoly) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE tools::PolyPolygon LogicToPixel(const tools::PolyPolygon& rLogicPolyPoly) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE basegfx::B2DPolyPolygon LogicToPixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly) const;
     SAL_WARN_UNUSED_RESULT vcl::Region LogicToPixel(const vcl::Region& rLogicRegion)const;
     SAL_WARN_UNUSED_RESULT Point LogicToPixel(const Point& rLogicPt, const MapMode& rMapMode) const;
     SAL_WARN_UNUSED_RESULT Size LogicToPixel(const Size& rLogicSize, const MapMode& rMapMode) const;
     SAL_WARN_UNUSED_RESULT tools::Rectangle LogicToPixel(const tools::Rectangle& rLogicRect,
                                                          const MapMode& rMapMode) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE tools::Polygon LogicToPixel(const tools::Polygon& rLogicPoly,
-                                                       const MapMode& rMapMode) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE basegfx::B2DPolyPolygon LogicToPixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
-                                                                const MapMode& rMapMode) const;
 
     SAL_WARN_UNUSED_RESULT Point PixelToLogic(const Point& rDevicePt) const;
     SAL_WARN_UNUSED_RESULT Size PixelToLogic(const Size& rDeviceSize) const;
     SAL_WARN_UNUSED_RESULT tools::Rectangle PixelToLogic(const tools::Rectangle& rDeviceRect) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE tools::Polygon PixelToLogic(const tools::Polygon& rDevicePoly) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE tools::PolyPolygon PixelToLogic(const tools::PolyPolygon& rDevicePolyPoly) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE basegfx::B2DPolyPolygon PixelToLogic(const basegfx::B2DPolyPolygon& rDevicePolyPoly) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE basegfx::B2DRectangle PixelToLogic(const basegfx::B2DRectangle& rDeviceRect) const;
+
     SAL_WARN_UNUSED_RESULT vcl::Region PixelToLogic(const vcl::Region& rDeviceRegion) const;
     SAL_WARN_UNUSED_RESULT Point PixelToLogic(const Point& rDevicePt, const MapMode& rMapMode) const;
     SAL_WARN_UNUSED_RESULT Size PixelToLogic(const Size& rDeviceSize, const MapMode& rMapMode) const;
     SAL_WARN_UNUSED_RESULT tools::Rectangle PixelToLogic(const tools::Rectangle& rDeviceRect,
                                                          const MapMode& rMapMode) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE tools::Polygon PixelToLogic(const tools::Polygon& rDevicePoly,
-                                                       const MapMode& rMapMode) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE basegfx::B2DPolygon PixelToLogic(const basegfx::B2DPolygon& rDevicePoly,
-                                                            const MapMode& rMapMode) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE basegfx::B2DPolyPolygon PixelToLogic(const basegfx::B2DPolyPolygon& rDevicePolyPoly,
-                                                                const MapMode& rMapMode) const;
 
     SAL_WARN_UNUSED_RESULT Point LogicToLogic(const Point& rPtSource,
                                               const MapMode* pMapModeSource,
@@ -1679,9 +1655,38 @@ public:
      @returns Width in units of device pixels.
      */
     SAL_DLLPRIVATE tools::Long LogicWidthToDevicePixel(tools::Long nWidth) const;
-    SAL_DLLPRIVATE double LogicWidthToDeviceSubPixel(tools::Long nWidth) const;
+
+    SAL_DLLPRIVATE tools::Long LogicXToDevicePixel(tools::Long nX) const;
+    SAL_DLLPRIVATE tools::Long LogicYToDevicePixel(tools::Long nX) const;
+
+    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE tools::Polygon PixelToLogic(const tools::Polygon& rDevicePoly) const;
+    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE tools::Polygon LogicToPixel(const tools::Polygon& rLogicPoly,
+                                                       const MapMode& rMapMode) const;
+    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE tools::Polygon PixelToLogic(const tools::Polygon& rDevicePoly,
+                                                       const MapMode& rMapMode) const;
+    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE basegfx::B2DPolyPolygon LogicToPixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
+                                                                const MapMode& rMapMode) const;
+    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE basegfx::B2DPolygon PixelToLogic(const basegfx::B2DPolygon& rDevicePoly,
+                                                            const MapMode& rMapMode) const;
+
+    basegfx::B2DHomMatrix GetViewTransformation() const;
+    basegfx::B2DHomMatrix GetInverseViewTransformation() const;
+    basegfx::B2DHomMatrix GetViewTransformation(const MapMode& rMapMode) const;
+    basegfx::B2DHomMatrix GetInverseViewTransformation(const MapMode& rMapMode) const;
 
 protected:
+
+    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE tools::Polygon LogicToPixel(const tools::Polygon& rLogicPoly) const;
+    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE tools::PolyPolygon LogicToPixel(const tools::PolyPolygon& rLogicPolyPoly) const;
+    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE basegfx::B2DPolyPolygon LogicToPixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly) const;
+    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE tools::PolyPolygon PixelToLogic(const tools::PolyPolygon& rDevicePolyPoly) const;
+    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE basegfx::B2DPolyPolygon PixelToLogic(const basegfx::B2DPolyPolygon& rDevicePolyPoly) const;
+    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE basegfx::B2DRectangle PixelToLogic(const basegfx::B2DRectangle& rDeviceRect) const;
+    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE basegfx::B2DPolyPolygon PixelToLogic(const basegfx::B2DPolyPolygon& rDevicePolyPoly,
+                                                                const MapMode& rMapMode) const;
+
+    SAL_DLLPRIVATE double LogicWidthToDeviceSubPixel(tools::Long nWidth) const;
+
     /** Convert a logical height to a height in units of device pixels.
 
      To get the number of device pixels, it must calculate the Y-DPI of the device and
@@ -1718,161 +1723,15 @@ protected:
      */
     SAL_DLLPRIVATE tools::Long DevicePixelToLogicHeight(tools::Long nHeight) const;
 
+    SAL_DLLPRIVATE tools::Rectangle DevicePixelToLogic(const tools::Rectangle& rPixelRect) const;
+
+    SAL_DLLPRIVATE vcl::Region PixelToDevicePixel(const vcl::Region& rRegion) const;
+
+    SAL_DLLPRIVATE Size LogicToDevicePixel(const Size& rLogicSize) const;
+
 private:
-    SAL_DLLPRIVATE void ImplSetMapMode();
-    SAL_DLLPRIVATE void ImplSetMapMode(const MapMode& rNewMapMode);
     SAL_DLLPRIVATE void ImplSetMetafileMapMode(const MapMode& rNewMapMode, bool bIsRecord);
-    SAL_DLLPRIVATE void ImplSetRelativeMapMode(const MapMode& rNewMapMode);
     SAL_DLLPRIVATE void ImplSetPixelOffset(const Size& rOffset);
-
-    SAL_DLLPRIVATE basegfx::B2DHomMatrix ImplGetViewTransformation() const;
-    SAL_DLLPRIVATE basegfx::B2DHomMatrix ImplGetInverseViewTransformation() const;
-    SAL_DLLPRIVATE basegfx::B2DHomMatrix ImplGetViewTransformation(const MapMode& rMapMode) const;
-    SAL_DLLPRIVATE basegfx::B2DHomMatrix ImplGetInverseViewTransformation(const MapMode& rMapMode) const;
-
-    SAL_DLLPRIVATE tools::Long ImplLogicHeightToDevicePixel(tools::Long nHeight) const;
-    SAL_DLLPRIVATE double ImplLogicHeightToDeviceSubPixel(tools::Long nHeight) const;
-    SAL_DLLPRIVATE Point ImplSubPixelToLogic(const basegfx::B2DPoint& rDevicePt) const;
-    SAL_DLLPRIVATE tools::Long ImplDevicePixelToLogicWidth(tools::Long nWidth) const;
-    SAL_DLLPRIVATE tools::Long ImplDevicePixelToLogicHeight(tools::Long nHeight) const;
-
-    SAL_DLLPRIVATE basegfx::B2DPoint ImplLogicToDeviceSubPixel(const Point& rLogicPt) const;
-    SAL_DLLPRIVATE double ImplLogicWidthToDeviceSubPixel(tools::Long nWidth) const;
-    SAL_DLLPRIVATE static tools::Long ImplLogicToLogic(tools::Long nLongSource, MapUnit eUnitSource, MapUnit eUnitDest);
-    SAL_DLLPRIVATE static tools::Rectangle ImplLogicToLogic(const tools::Rectangle& rRectSource, const MapMode& rMapModeSource, const MapMode& rMapModeDest);
-    SAL_DLLPRIVATE static basegfx::B2DHomMatrix ImplLogicToLogic(const MapMode& rMapModeSource, const MapMode& rMapModeDest);
-    SAL_DLLPRIVATE static basegfx::B2DPolygon ImplLogicToLogic(const basegfx::B2DPolygon& rPolySource, const MapMode& rMapModeSource, const MapMode& rMapModeDest);
-    SAL_DLLPRIVATE static Size ImplLogicToLogic(const Size& rSzSource, const MapMode& rMapModeSource, const MapMode& rMapModeDest);
-    SAL_DLLPRIVATE static Point ImplLogicToLogic(const Point& rPtSource, const MapMode& rMapModeSource, const MapMode& rMapModeDest);
-    SAL_DLLPRIVATE tools::Rectangle ImplLogicToLogic(const tools::Rectangle& rRectSource, const MapMode* pMapModeSource, const MapMode* pMapModeDest) const;
-    SAL_DLLPRIVATE Size ImplLogicToLogic(const Size& rSzSource, const MapMode* pMapModeSource, const MapMode* pMapModeDest) const;
-    SAL_DLLPRIVATE Point ImplLogicToLogic(const Point& rPtSource, const MapMode* pMapModeSource, const MapMode* pMapModeDest) const;
-    SAL_DLLPRIVATE Point ImplLogicToPixel(const Point& rLogicPt) const;
-    SAL_DLLPRIVATE Size ImplLogicToPixel(const Size& rLogicSize) const;
-    SAL_DLLPRIVATE tools::Rectangle ImplLogicToPixel(const tools::Rectangle& rLogicRect) const;
-    SAL_DLLPRIVATE tools::Polygon ImplLogicToPixel(const tools::Polygon& rLogicPoly) const;
-    SAL_DLLPRIVATE tools::PolyPolygon ImplLogicToPixel(const tools::PolyPolygon& rLogicPolyPoly) const;
-    SAL_DLLPRIVATE basegfx::B2DPolyPolygon ImplLogicToPixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly) const;
-    SAL_DLLPRIVATE vcl::Region ImplLogicToPixel(const vcl::Region& rLogicRegion) const;
-    SAL_DLLPRIVATE Point ImplLogicToPixel(const Point& rLogicPt, const MapMode& rMapMode) const;
-    SAL_DLLPRIVATE Size ImplLogicToPixel(const Size& rLogicSize, const MapMode& rMapMode) const;
-    SAL_DLLPRIVATE tools::Rectangle ImplLogicToPixel(const tools::Rectangle& rLogicRect, const MapMode& rMapMode) const;
-    SAL_DLLPRIVATE tools::Polygon ImplLogicToPixel(const tools::Polygon& rLogicPoly, const MapMode& rMapMode) const;
-    SAL_DLLPRIVATE basegfx::B2DPolyPolygon ImplLogicToPixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly, const MapMode& rMapMode) const;
-    SAL_DLLPRIVATE Point ImplPixelToLogic(const Point& rDevicePt) const;
-    SAL_DLLPRIVATE Size ImplPixelToLogic(const Size& rDeviceSize) const;
-    SAL_DLLPRIVATE tools::Rectangle ImplPixelToLogic(const tools::Rectangle& rDeviceRect) const;
-    SAL_DLLPRIVATE tools::Polygon ImplPixelToLogic(const tools::Polygon& rDevicePoly) const;
-    SAL_DLLPRIVATE tools::PolyPolygon ImplPixelToLogic(const tools::PolyPolygon& rDevicePolyPoly) const;
-    SAL_DLLPRIVATE basegfx::B2DPolyPolygon ImplPixelToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly) const;
-    SAL_DLLPRIVATE basegfx::B2DRectangle ImplPixelToLogic(const basegfx::B2DRectangle& rDeviceRect) const;
-    SAL_DLLPRIVATE vcl::Region ImplPixelToLogic(const vcl::Region& rDeviceRegion) const;
-    SAL_DLLPRIVATE Point ImplPixelToLogic(const Point& rDevicePt, const MapMode& rMapMode) const;
-    SAL_DLLPRIVATE Size ImplPixelToLogic(const Size& rDeviceSize, const MapMode& rMapMode) const;
-    SAL_DLLPRIVATE tools::Rectangle ImplPixelToLogic(const tools::Rectangle& rDeviceRect, const MapMode& rMapMode) const;
-    SAL_DLLPRIVATE tools::Polygon ImplPixelToLogic(const tools::Polygon& rDevicePoly, const MapMode& rMapMode) const;
-    SAL_DLLPRIVATE basegfx::B2DPolygon ImplPixelToLogic(const basegfx::B2DPolygon& rPixelPoly, const MapMode& rMapMode) const;
-    SAL_DLLPRIVATE basegfx::B2DPolyPolygon ImplPixelToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly, const MapMode& rMapMode) const;
-    SAL_DLLPRIVATE tools::Long ImplLogicWidthToDevicePixel(tools::Long nWidth) const;
-    SAL_DLLPRIVATE Point ImplLogicToDevicePixel(const Point& rLogicPt) const;
-    SAL_DLLPRIVATE tools::Rectangle ImplLogicToDevicePixel(const tools::Rectangle& rLogicRect) const;
-
-    /** Convert a logical size to the size on the physical device.
-
-     @param         rLogicSize  Const reference to a size in logical units
-
-     @returns Physical size on the device.
-     */
-    SAL_DLLPRIVATE Size         ImplLogicToDevicePixel( const Size& rLogicSize ) const;
-
-    /** Convert a rectangle in physical pixel units to a rectangle in physical pixel units and coords.
-
-     @param         rPixelRect  Const reference to rectangle in logical units and coords.
-
-     @returns Rectangle based on logical coordinates and units.
-     */
-    SAL_DLLPRIVATE tools::Rectangle    ImplDevicePixelToLogic( const tools::Rectangle& rPixelRect ) const;
-
-    /** Convert a logical polygon to a polygon in physical device pixel units.
-
-     @param         rLogicPoly  Const reference to a polygon in logical units
-
-     @returns Polygon based on physical device pixel coordinates and units.
-     */
-    SAL_DLLPRIVATE tools::Polygon ImplLogicToDevicePixel( const tools::Polygon& rLogicPoly ) const;
-
-    /** Convert a logical B2DPolygon to a B2DPolygon in physical device pixel units.
-
-     @param         rLogicSize  Const reference to a B2DPolygon in logical units
-
-     @returns B2DPolyPolygon based on physical device pixel coordinates and units.
-     */
-    SAL_DLLPRIVATE ::basegfx::B2DPolygon ImplLogicToDevicePixel( const ::basegfx::B2DPolygon& rLogicPoly ) const;
-
-    /** Convert a logical polypolygon to a polypolygon in physical device pixel units.
-
-     @param         rLogicPolyPoly  Const reference to a polypolygon in logical units
-
-     @returns Polypolygon based on physical device pixel coordinates and units.
-     */
-    SAL_DLLPRIVATE tools::PolyPolygon  ImplLogicToDevicePixel( const tools::PolyPolygon& rLogicPolyPoly ) const;
-
-    /** Convert a line in logical units to a line in physical device pixel units.
-
-     @param         rLineInfo   Const reference to a line in logical units
-
-     @returns Line based on physical device pixel coordinates and units.
-     */
-    SAL_DLLPRIVATE LineInfo     ImplLogicToDevicePixel( const LineInfo& rLineInfo ) const;
-
-    /** Convert a region in pixel units to a region in device pixel units and coords.
-
-     @param         rRegion  Const reference to region.
-
-     @returns vcl::Region based on device pixel coordinates and units.
-     */
-    SAL_DLLPRIVATE vcl::Region       ImplPixelToDevicePixel( const vcl::Region& rRegion ) const;
-
-    /** Invalidate the view transformation.
-
-     @since AOO bug 75163 (OpenOffice.org 2.4.3 - OOH 680 milestone 212)
-     */
-    SAL_DLLPRIVATE void         ImplInvalidateViewTransform();
-
-    /** Get device transformation.
-
-     @since AOO bug 75163 (OpenOffice.org 2.4.3 - OOH 680 milestone 212)
-     */
-    SAL_DLLPRIVATE basegfx::B2DHomMatrix ImplGetDeviceTransformation() const;
-
-    /** Convert a logical X coordinate to a device pixel's X coordinate.
-
-     To get the device's X coordinate, it must calculate the mapping offset
-     coordinate X position (if there is one - if not then it just adds
-     the pseudo-window offset to the logical X coordinate), the X-DPI of
-     the device and the mapping's X scaling factor.
-
-     @param         nX          Logical X coordinate
-
-     @returns Device's X pixel coordinate
-     */
-    SAL_DLLPRIVATE tools::Long         ImplLogicXToDevicePixel( tools::Long nX ) const;
-
-    /** Convert a logical Y coordinate to a device pixel's Y coordinate.
-
-     To get the device's Y coordinate, it must calculate the mapping offset
-     coordinate Y position (if there is one - if not then it just adds
-     the pseudo-window offset to the logical Y coordinate), the Y-DPI of
-     the device and the mapping's Y scaling factor.
-
-     @param         nY          Logical Y coordinate
-
-     @returns Device's Y pixel coordinate
-     */
-    SAL_DLLPRIVATE tools::Long         ImplLogicYToDevicePixel( tools::Long nY ) const;
-
-    SAL_DLLPRIVATE double ImplDevicePixelToLogicWidthDouble(double nWidth) const;
-    SAL_DLLPRIVATE double ImplDevicePixelToLogicHeightDouble(double nHeight) const;
 
     /** @name Native Widget Rendering functions
 
