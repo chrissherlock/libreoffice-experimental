@@ -162,4 +162,20 @@ void ImplMapRes::CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX, t
     mnMapScDenomY = aTempY.GetDenominator();
 }
 
+ImplMapRes ImplMapRes::ResolveMapRes(const MapMode* pMode, const MapMode& rDefaultMapMode,
+                                     bool bMap, tools::Long nDPIX, tools::Long nDPIY)
+{
+    const MapMode* pEffectiveMode = pMode ? pMode : &rDefaultMapMode;
+
+    if (bMap && pEffectiveMode == &rDefaultMapMode)
+        return *this;
+
+    if (pEffectiveMode->GetMapUnit() == MapUnit::MapRelative)
+        return *this;
+
+    ImplMapRes aRes;
+    aRes.CalcMapResolution(*pEffectiveMode, nDPIX, nDPIY);
+    return aRes;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
