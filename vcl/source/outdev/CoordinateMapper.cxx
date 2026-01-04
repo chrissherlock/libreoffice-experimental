@@ -5,6 +5,16 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This file incorporates work covered by the following license notice:
+ *
+ *   Licensed to the Apache Software Foundation (ASF) under one or more
+ *   contributor license agreements. See the NOTICE file distributed
+ *   with this work for additional information regarding copyright
+ *   ownership. The ASF licenses this file to you under the Apache
+ *   License, Version 2.0 (the "License"); you may not use this file
+ *   except in compliance with the License. You may obtain a copy of
+ *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
 #include <basegfx/matrix/b2dhommatrix.hxx>
@@ -247,6 +257,14 @@ double CoordinateMapper::LogicHeightToDeviceSubPixel(tools::Long nHeight) const
 
     return lcl_logicToSubPixel(nHeight, GetDPIY(), GetMappingYNumerator(),
                                GetMappingYDenominator());
+}
+
+double CoordinateMapper::LogicWidthToDeviceSubPixel(tools::Long nWidth) const
+{
+    if (!IsMapModeEnabled())
+        return nWidth;
+
+    return lcl_logicToSubPixel(nWidth, GetDPIX(), GetMappingXNumerator(), GetMappingXDenominator());
 }
 
 static tools::Long lcl_logicToPixel(tools::Long n, tools::Long nDPI, tools::Long nMapNum,
@@ -501,7 +519,7 @@ CoordinateMapper::LogicToDevicePixel(const basegfx::B2DPolygon& rLogicPoly) cons
             {
                 const basegfx::B2DPoint aB2DC2(aPoly.getNextControlPoint(i));
 
-                aC2 = basegfx::B2DPoint(aB2DC2.getX() + GetOutOffXPixel(),
+                aC1 = basegfx::B2DPoint(aB2DC2.getX() + GetOutOffXPixel(),
                                         aB2DC2.getY() + GetOutOffYPixel());
             }
 
@@ -1270,14 +1288,6 @@ static tools::Long lcl_scaleLogicValue(const tools::Long n1, const tools::Long n
     }
 
     return n7 / n8;
-}
-
-double CoordinateMapper::LogicWidthToDeviceSubPixel(tools::Long nWidth) const
-{
-    if (!IsMapModeEnabled())
-        return nWidth;
-
-    return lcl_logicToSubPixel(nWidth, GetDPIX(), GetMappingXNumerator(), GetMappingXDenominator());
 }
 
 static void lcl_verifyUnitSourceDest(MapUnit eUnitSource, MapUnit eUnitDest)

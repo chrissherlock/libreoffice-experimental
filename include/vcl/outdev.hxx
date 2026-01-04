@@ -1532,7 +1532,7 @@ protected:
     virtual void ImplInitMapModeObjects();
 
 public:
-    /** Set an offset in pixel
+    /** Set pixel and logical offset
 
         This method offsets every drawing operation that converts its
         coordinates to pixel by the given value. Normally, the effect
@@ -1554,7 +1554,7 @@ public:
         @param rOffset
         The offset in pixel
      */
-    void                        SetPixelOffset( const Size& rOffset );
+    void SetOffset(const Size& rOffset);
 
     /** Get the offset in pixel
 
@@ -1697,7 +1697,6 @@ protected:
 
 private:
     SAL_DLLPRIVATE void ImplSetMetafileMapMode(const MapMode& rNewMapMode, bool bIsRecord);
-    SAL_DLLPRIVATE void ImplSetPixelOffset(const Size& rOffset);
 
     /** @name Native Widget Rendering functions
 
