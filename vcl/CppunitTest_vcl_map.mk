@@ -22,6 +22,7 @@ $(eval $(call gb_CppunitTest_use_libraries,vcl_map, \
 	test \
 	tl \
 	unotest \
+	basegfx \
 	vcl \
 ))
 
