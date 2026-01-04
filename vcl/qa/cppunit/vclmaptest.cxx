@@ -11,6 +11,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/plugin/TestPlugIn.h>
 
+#include <basegfx/matrix/b2dhommatrix.hxx>
 #include <tools/fract.hxx>
 
 #include <vcl/outdev.hxx>
@@ -19,6 +20,19 @@
 
 namespace
 {
+class TestVirtualDevice : public VirtualDevice
+{
+public:
+    // Expose protected methods using 'using'
+    using OutputDevice::ImplLogicHeightToDevicePixel;
+    using OutputDevice::ImplLogicWidthToDevicePixel;
+    using OutputDevice::SetOutOffXPixel;
+    using OutputDevice::SetOutOffYPixel;
+
+    // Explicit wrapper if 'using' doesn't satisfy specific compiler strictness
+    // (Optional, but 'using' is usually sufficient for access)
+};
+
 class VclMapTest : public CppUnit::TestFixture
 {
 public:
@@ -35,6 +49,11 @@ public:
     CPPUNIT_TEST(testPointsToInch);
     CPPUNIT_TEST(testZoomScaling);
     CPPUNIT_TEST(testComplexFractions);
+    CPPUNIT_TEST(testCombinedScaleAndOrigin);
+    CPPUNIT_TEST(testBasicLogicToPixel);
+    CPPUNIT_TEST(testMapModePropagation);
+    CPPUNIT_TEST(testSetRelativeMapMode);
+    CPPUNIT_TEST(testViewTransformation);
     CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -263,6 +282,139 @@ public:
         Point aResult = OutputDevice::LogicToLogic(aPt, aSource, aDest);
 
         CPPUNIT_ASSERT_EQUAL(tools::Long(700), aResult.X());
+    }
+
+    void testCombinedScaleAndOrigin()
+    {
+        // Scenario: Source is MM with 50% scale. Dest is 100thMM.
+        MapMode aSource(MapUnit::MapMM);
+        aSource.SetScaleX(Fraction(1, 2)); // 0.5 Scale
+        aSource.SetScaleY(Fraction(1, 2));
+        aSource.SetOrigin(Point(10, 0));
+
+        MapMode aDest(MapUnit::Map100thMM);
+
+        Point aPt(30, 0);
+
+        // Standard GDI logic would imply: (Point - Origin) * Scale
+        // i.e., (30 - 10) * 0.5 = 10mm -> 1000 100thMM.
+        //
+        // However, VCL historically treats SetOrigin as a Translation Offset (Additive).
+        // Actual Calculation: (Point + Origin) * Scale
+        // i.e., (30 + 10) * 0.5 = 20mm -> 2000 100thMM.
+
+        Point aResult = OutputDevice::LogicToLogic(aPt, aSource, aDest);
+
+        // We assert 2000 to enforce consistency with LogicToPixel and historical rendering.
+        CPPUNIT_ASSERT_EQUAL(tools::Long(2000), aResult.X());
+    }
+
+    void testBasicLogicToPixel()
+    {
+        // Use VirtualDevice as it is lightweight and headless-compatible
+        ScopedVclPtr<TestVirtualDevice> pDev(VclPtr<TestVirtualDevice>::Create());
+
+        // 1. Default MapMode (MapPixel)
+        // In MapPixel, Logic == Pixel
+        Point aLogicPt(100, 100);
+        Point aPixelPt = pDev->LogicToPixel(aLogicPt);
+
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Default MapMode should map 1:1", aLogicPt, aPixelPt);
+
+        // 2. LogicToPixel with specific MapMode override
+        // 100th MM to Pixel.
+        // Assuming 96 DPI for the test VirtualDevice (standard for headless)
+        // 1 inch = 2540 100th MM.
+        // 96 pixels = 2540 logic units.
+        // 1000 logic units = (1000 * 96) / 2540 ~= 37 pixels.
+        MapMode aMap100thMM(MapUnit::Map100thMM);
+        Point aConverted = pDev->LogicToPixel(Point(1000, 1000), aMap100thMM);
+
+        // We allow a small margin for integer arithmetic rounding, though 37 is exact-ish
+        CPPUNIT_ASSERT(aConverted.X() >= 37 && aConverted.X() <= 38);
+    }
+
+    void testMapModePropagation()
+    {
+        ScopedVclPtr<TestVirtualDevice> pDev(VclPtr<TestVirtualDevice>::Create());
+
+        // Set MapMode on OutDev and ensure logic functions use it
+        MapMode aMapMode(MapUnit::Map100thMM);
+        pDev->SetMapMode(aMapMode);
+
+        // Verify state getter
+        CPPUNIT_ASSERT_EQUAL(MapUnit::Map100thMM, pDev->GetMapMode().GetMapUnit());
+
+        // Test calculation through the residual wrapper
+        // 1000 100thmm @ 96 DPI ~= 37.7 pixels
+        long nHeightVal = 1000;
+        long nPixelHeight = pDev->ImplLogicHeightToDevicePixel(nHeightVal);
+
+        CPPUNIT_ASSERT(nPixelHeight >= 37 && nPixelHeight <= 38);
+
+        // Change MapMode again to verify Reset/Update logic in map.cxx
+        MapMode aTwips(MapUnit::MapTwip);
+        pDev->SetMapMode(aTwips);
+
+        // 1440 Twips = 1 Inch = 96 Pixels (usually)
+        long nPixelTwips = pDev->ImplLogicHeightToDevicePixel(1440);
+
+        // Check if the change propagated to the internal mapper
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("1440 Twips should be approx 96 pixels", long(96),
+                                     nPixelTwips);
+    }
+
+    void testSetRelativeMapMode()
+    {
+        ScopedVclPtr<TestVirtualDevice> pDev(VclPtr<TestVirtualDevice>::Create());
+
+        // Initial MapMode: 100th MM
+        pDev->SetMapMode(MapMode(MapUnit::Map100thMM));
+
+        // Target MapMode: Scale by 2 (Relative)
+        MapMode aScaleMode(MapUnit::Map100thMM);
+        aScaleMode.SetScaleX(Fraction(2, 1));
+        aScaleMode.SetScaleY(Fraction(2, 1));
+
+        // This calls the residual SetRelativeMapMode in map.cxx
+        pDev->SetRelativeMapMode(aScaleMode);
+
+        // 1000 logic units * 2 (scale) -> converted to pixels
+        // 1000 units normally ~37 pixels. Scaled by 2 should be ~75 pixels.
+        Point aPt(1000, 1000);
+        Point aPix = pDev->LogicToPixel(aPt);
+
+        CPPUNIT_ASSERT(aPix.X() > 70 && aPix.X() < 80);
+
+        // Ensure the internal mapper updated its scale factor
+        Fraction aResScale = pDev->GetMapMode().GetScaleX();
+        CPPUNIT_ASSERT_EQUAL(long(2), long(aResScale));
+    }
+
+    void testViewTransformation()
+    {
+        ScopedVclPtr<TestVirtualDevice> pDev(VclPtr<TestVirtualDevice>::Create());
+
+        pDev->SetMapMode(MapMode(MapUnit::Map100thMM));
+        pDev->SetOutOffXPixel(10);
+
+        // Get transformation matrix via residual wrapper
+        basegfx::B2DHomMatrix aMat = pDev->GetViewTransformation();
+
+        // Transform a point manually using the matrix
+        basegfx::B2DPoint aPt(1000.0, 1000.0); // 1000 100th mm
+        aPt *= aMat;
+
+        // Transform using the convenience function
+        Point aLogicPt(1000, 1000);
+        Point aPix = pDev->LogicToPixel(aLogicPt);
+
+        // Compare Matrix result vs Helper result
+        // Matrix result includes floating point precision, Helper rounds.
+        // LogicToPixel = (Logic * Scale) + Offset
+        // Offset is 10. 1000 100thMM is approx 37.8 pixels. Total ~47.8.
+
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(double(aPix.X()), aPt.getX(), 1.0);
     }
 };
 
