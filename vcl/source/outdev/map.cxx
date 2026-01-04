@@ -287,14 +287,9 @@ Point OutputDevice::SubPixelToLogic(const basegfx::B2DPoint& rDevicePt) const
     return mpMapper->SubPixelToLogic(rDevicePt);
 }
 
-void OutputDevice::SetPixelOffset(const Size& rOffset) { ImplSetPixelOffset(rOffset); }
-
-void OutputDevice::ImplSetPixelOffset(const Size& rOffset)
+void OutputDevice::SetOffset(const Size& rOffset)
 {
-    mpMapper->SetPixelOffset(rOffset);
-
-    mpMapper->SetLogicalOffset(Size(lcl_pixelToLogic(mpMapper->GetPixelXOffset(), GetDPIX(), mpMapper->GetMappingXNumerator(), mpMapper->GetMappingXDenominator()),
-                                    lcl_pixelToLogic(mpMapper->GetPixelYOffset(), GetDPIY(), mpMapper->GetMappingYNumerator(), mpMapper->GetMappingYDenominator())));
+    mpMapper->SetOffset(rOffset);
 }
 
 double OutputDevice::LogicWidthToDeviceSubPixel(tools::Long nWidth) const

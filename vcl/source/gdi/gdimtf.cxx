@@ -505,9 +505,9 @@ void GDIMetaFile::Play(OutputDevice& rOut, const Point& rPos,
     // reason for having pixel offset in the first place).
     const Size aOldOffset(rOut.GetPixelOffset());
     const Size aEmptySize;
-    rOut.SetPixelOffset(aEmptySize);
+    rOut.SetOffset(aEmptySize);
     aDrawMap.SetOrigin(rOut.PixelToLogic(rOut.LogicToPixel(rPos), aDrawMap));
-    rOut.SetPixelOffset(aOldOffset);
+    rOut.SetOffset(aOldOffset);
 
     auto popIt = rOut.ScopedPush();
 
