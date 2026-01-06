@@ -298,8 +298,8 @@ public:
 
     tools::Long GetOutOffXPixel() const;
     tools::Long GetOutOffYPixel() const;
-    void SetOutOffXPixel(tools::Long nOutOffX);
-    void SetOutOffYPixel(tools::Long nOutOffY);
+    void SetDeviceOriginX(tools::Long nX);
+    void SetDeviceOriginY(tools::Long nY);
     Point GetOutputOffPixel() const;
     tools::Rectangle            GetOutputRectPixel() const
                                     { return tools::Rectangle(GetOutputOffPixel(), GetOutputSizePixel() ); }

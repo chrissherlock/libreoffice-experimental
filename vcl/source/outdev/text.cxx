@@ -268,16 +268,16 @@ bool OutputDevice::ImplDrawRotateText( SalLayout& rSalLayout )
     tools::Long nOldOffY = GetOutOffYPixel();
     bool bOldMap = mpMapper->IsMapModeEnabled();
 
-    SetOutOffXPixel(0);
-    SetOutOffYPixel(0);
+    SetDeviceOriginX(0);
+    SetDeviceOriginY(0);
     mpMetaFile  = nullptr;
     mpMapper->EnableMapMode( false );
 
     DrawMask( aPoint, aBmp, GetTextColor() );
 
     mpMapper->EnableMapMode( bOldMap );
-    SetOutOffXPixel(nOldOffX);
-    SetOutOffYPixel(nOldOffY);
+    SetDeviceOriginX(nOldOffX);
+    SetDeviceOriginY(nOldOffY);
     mpMetaFile  = pOldMetaFile;
 
     return true;
