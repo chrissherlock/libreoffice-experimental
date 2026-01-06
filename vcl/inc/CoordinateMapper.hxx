@@ -130,8 +130,8 @@ public:
     SAL_DLLPRIVATE tools::Long GetOutOffXPixel() const;
     SAL_DLLPRIVATE tools::Long GetOutOffYPixel() const;
 
-    SAL_DLLPRIVATE void SetOutOffXPixel(tools::Long nOutOffX);
-    SAL_DLLPRIVATE void SetOutOffYPixel(tools::Long nOutOffY);
+    SAL_DLLPRIVATE void SetDeviceOriginX(tools::Long nX);
+    SAL_DLLPRIVATE void SetDeviceOriginY(tools::Long nY);
 
     SAL_DLLPRIVATE Point GetOutputOffPixel() const;
 

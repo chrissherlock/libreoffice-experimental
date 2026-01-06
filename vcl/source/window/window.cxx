@@ -1414,15 +1414,15 @@ bool Window::ImplUpdatePos()
 
     if ( ImplIsOverlapWindow() )
     {
-        GetOutDev()->SetOutOffXPixel(mpWindowImpl->mnX);
-        GetOutDev()->SetOutOffYPixel(mpWindowImpl->mnY);
+        GetOutDev()->SetDeviceOriginX(mpWindowImpl->mnX);
+        GetOutDev()->SetDeviceOriginY(mpWindowImpl->mnY);
     }
     else
     {
         vcl::Window* pParent = ImplGetParent();
 
-        GetOutDev()->SetOutOffXPixel(mpWindowImpl->mnX + pParent->GetOutDev()->GetOutOffXPixel());
-        GetOutDev()->SetOutOffYPixel(mpWindowImpl->mnY + pParent->GetOutDev()->GetOutOffYPixel());
+        GetOutDev()->SetDeviceOriginX(mpWindowImpl->mnX + pParent->GetOutDev()->GetOutOffXPixel());
+        GetOutDev()->SetDeviceOriginY(mpWindowImpl->mnY + pParent->GetOutDev()->GetOutOffYPixel());
     }
 
     VclPtr< vcl::Window > pChild = mpWindowImpl->mpFirstChild;

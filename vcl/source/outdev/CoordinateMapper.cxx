@@ -105,9 +105,9 @@ tools::Long CoordinateMapper::GetOutOffXPixel() const { return mnOutOffX; }
 
 tools::Long CoordinateMapper::GetOutOffYPixel() const { return mnOutOffY; }
 
-void CoordinateMapper::SetOutOffXPixel(tools::Long nOutOffX) { mnOutOffX = nOutOffX; }
+void CoordinateMapper::SetDeviceOriginX(tools::Long nX) { mnOutOffX = nX; }
 
-void CoordinateMapper::SetOutOffYPixel(tools::Long nOutOffY) { mnOutOffY = nOutOffY; }
+void CoordinateMapper::SetDeviceOriginY(tools::Long nY) { mnOutOffY = nY; }
 
 Point CoordinateMapper::GetOutputOffPixel() const { return Point(mnOutOffX, mnOutOffY); }
 
