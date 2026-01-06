@@ -104,8 +104,8 @@ PaintBufferGuard::PaintBufferGuard(ImplFrameData* pFrameData, vcl::Window* pWind
 
     mnOutOffX = pFrameData->mpBuffer->GetOutOffXPixel();
     mnOutOffY = pFrameData->mpBuffer->GetOutOffYPixel();
-    pFrameData->mpBuffer->SetOutOffXPixel(pWindow->GetOutOffXPixel());
-    pFrameData->mpBuffer->SetOutOffYPixel(pWindow->GetOutOffYPixel());
+    pFrameData->mpBuffer->SetDeviceOriginX(pWindow->GetOutOffXPixel());
+    pFrameData->mpBuffer->SetDeviceOriginY(pWindow->GetOutOffYPixel());
     pFrameData->mpBuffer->EnableRTL(pWindow->IsRTLEnabled());
 }
 
@@ -140,8 +140,8 @@ PaintBufferGuard::~PaintBufferGuard()
     }
 
     // Restore buffer state.
-    mpFrameData->mpBuffer->SetOutOffXPixel(mnOutOffX);
-    mpFrameData->mpBuffer->SetOutOffYPixel(mnOutOffY);
+    mpFrameData->mpBuffer->SetDeviceOriginX(mnOutOffX);
+    mpFrameData->mpBuffer->SetDeviceOriginY(mnOutOffY);
 
     mpFrameData->mpBuffer->Pop();
     mpFrameData->mpBuffer->SetSettings(maSettings);

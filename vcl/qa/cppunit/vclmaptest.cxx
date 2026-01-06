@@ -26,8 +26,8 @@ public:
     // Expose protected methods using 'using'
     using OutputDevice::LogicHeightToDevicePixel;
     using OutputDevice::LogicWidthToDevicePixel;
-    using OutputDevice::SetOutOffXPixel;
-    using OutputDevice::SetOutOffYPixel;
+    using OutputDevice::SetDeviceOriginX;
+    using OutputDevice::SetDeviceOriginY;
 
     // Explicit wrapper if 'using' doesn't satisfy specific compiler strictness
     // (Optional, but 'using' is usually sufficient for access)
@@ -396,7 +396,7 @@ public:
         ScopedVclPtr<TestVirtualDevice> pDev(VclPtr<TestVirtualDevice>::Create());
 
         pDev->SetMapMode(MapMode(MapUnit::Map100thMM));
-        pDev->SetOutOffXPixel(10);
+        pDev->SetDeviceOriginX(10);
 
         // Get transformation matrix via residual wrapper
         basegfx::B2DHomMatrix aMat = pDev->GetViewTransformation();
