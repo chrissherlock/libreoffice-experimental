@@ -2120,6 +2120,35 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawGradient_rect_complex)
                                  pAction->GetType());
 }
 
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testGraphicStatePushPop)
+{
+    ScopedVclPtr<VirtualDevice> pDev(VclPtr<VirtualDevice>::Create());
+
+    pDev->SetLineColor(COL_RED);
+    pDev->SetFillColor(COL_GREEN);
+    pDev->SetRasterOp(RasterOp::Xor);
+
+    CPPUNIT_ASSERT_EQUAL(COL_RED, pDev->GetLineColor());
+    CPPUNIT_ASSERT_EQUAL(COL_GREEN, pDev->GetFillColor());
+    CPPUNIT_ASSERT_EQUAL(RasterOp::Xor, pDev->GetRasterOp());
+
+    pDev->Push(vcl::PushFlags::LINECOLOR | vcl::PushFlags::FILLCOLOR | vcl::PushFlags::RASTEROP);
+
+    pDev->SetLineColor(COL_BLUE);
+    pDev->SetFillColor(COL_YELLOW);
+    pDev->SetRasterOp(RasterOp::OverPaint);
+
+    CPPUNIT_ASSERT_EQUAL(COL_BLUE, pDev->GetLineColor());
+    CPPUNIT_ASSERT_EQUAL(COL_YELLOW, pDev->GetFillColor());
+    CPPUNIT_ASSERT_EQUAL(RasterOp::OverPaint, pDev->GetRasterOp());
+
+    pDev->Pop();
+
+    CPPUNIT_ASSERT_EQUAL(COL_RED, pDev->GetLineColor());
+    CPPUNIT_ASSERT_EQUAL(COL_GREEN, pDev->GetFillColor());
+    CPPUNIT_ASSERT_EQUAL(RasterOp::Xor, pDev->GetRasterOp());
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
