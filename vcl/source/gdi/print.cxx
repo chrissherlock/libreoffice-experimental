@@ -462,18 +462,18 @@ bool Printer::AcquireGraphics() const
     ImplSVData* pSVData = ImplGetSVData();
 
     if ( mpJobGraphics )
-        mpGraphics = mpJobGraphics;
+        SetGraphics(mpJobGraphics);
     else if ( mpDisplayDev )
     {
         const VirtualDevice* pVirDev = mpDisplayDev;
-        mpGraphics = pVirDev->mpVirDev->AcquireGraphics();
+        SetGraphics(pVirDev->mpVirDev->AcquireGraphics());
         // if needed retry after releasing least recently used virtual device graphics
         while ( !mpGraphics )
         {
             if ( !pSVData->maGDIData.mpLastVirGraphics )
                 break;
             pSVData->maGDIData.mpLastVirGraphics->ReleaseGraphics();
-            mpGraphics = pVirDev->mpVirDev->AcquireGraphics();
+            SetGraphics(pVirDev->mpVirDev->AcquireGraphics());
         }
         // update global LRU list of virtual device graphics
         if ( mpGraphics )
@@ -488,14 +488,14 @@ bool Printer::AcquireGraphics() const
     }
     else
     {
-        mpGraphics = mpInfoPrinter->AcquireGraphics();
+        SetGraphics(mpInfoPrinter->AcquireGraphics());
         // if needed retry after releasing least recently used printer graphics
         while ( !mpGraphics )
         {
             if ( !pSVData->maGDIData.mpLastPrnGraphics )
                 break;
             pSVData->maGDIData.mpLastPrnGraphics->ReleaseGraphics();
-            mpGraphics = mpInfoPrinter->AcquireGraphics();
+            SetGraphics(mpInfoPrinter->AcquireGraphics());
         }
         // update global LRU list of printer graphics
         if ( mpGraphics )
@@ -576,7 +576,7 @@ void Printer::ImplReleaseGraphics(bool bRelease)
         }
     }
 
-    mpGraphics      = nullptr;
+    SetGraphics(nullptr);
     mpPrevGraphics  = nullptr;
     mpNextGraphics  = nullptr;
 }

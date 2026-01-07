@@ -323,6 +323,23 @@ public:
 
 protected:
 
+    /**
+     * @brief Sets the underlying graphics driver (SalGraphics) for this OutputDevice.
+     *
+     * This is the central lifecycle hook for assigning the graphics driver. It ensures
+     * that any cached state dependent on the specific driver (such as FontState or
+     * GraphicState) is correctly invalidated or released when the driver changes.
+     *
+     * @note This method is const because mpGraphics is mutable. This design
+     * allows the driver to be lazily acquired or swapped even within const methods
+     * like AcquireGraphics().
+     *
+     * @internal This method should be the ONLY place where mpGraphics is assigned.
+     *
+     * @param pNewGraphics  The new SalGraphics driver instance, or nullptr to release.
+     */
+    void SetGraphics(SalGraphics* pNew) const;
+
     /** Acquire a graphics device that the output device uses to draw on.
 
      There is an LRU of OutputDevices that is used to get the graphics. The
