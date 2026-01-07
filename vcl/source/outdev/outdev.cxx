@@ -64,7 +64,7 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     maTextLineColor( COL_TRANSPARENT ),
     moSettings( Application::GetSettings() )
 {
-    mpGraphics                      = nullptr;
+    SetGraphics(nullptr);
     mpUnoGraphicsList               = nullptr;
     mpPrevGraphics                  = nullptr;
     mpNextGraphics                  = nullptr;
@@ -174,6 +174,14 @@ SalGraphics* OutputDevice::GetGraphics()
         SAL_WARN("vcl.gdi", "No mpGraphics set");
 
     return mpGraphics;
+}
+
+void OutputDevice::SetGraphics(SalGraphics* pNewGraphics) const
+{
+    if (mpGraphics == pNewGraphics)
+        return;
+
+    mpGraphics = pNewGraphics;
 }
 
 SalGraphics const *OutputDevice::GetGraphics() const
