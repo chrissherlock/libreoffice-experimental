@@ -62,14 +62,14 @@ bool VirtualDevice::AcquireGraphics() const
 
     if ( mpVirDev )
     {
-        mpGraphics = mpVirDev->AcquireGraphics();
+        SetGraphics(mpVirDev->AcquireGraphics());
         // if needed retry after releasing least recently used virtual device graphics
         while ( !mpGraphics )
         {
             if ( !pSVData->maGDIData.mpLastVirGraphics )
                 break;
             pSVData->maGDIData.mpLastVirGraphics->ReleaseGraphics();
-            mpGraphics = mpVirDev->AcquireGraphics();
+            SetGraphics(mpVirDev->AcquireGraphics());
         }
         // update global LRU list of virtual device graphics
         if ( mpGraphics )
@@ -119,7 +119,7 @@ void VirtualDevice::ReleaseGraphics( bool bRelease )
     else
         pSVData->maGDIData.mpLastVirGraphics = mpPrevGraphics;
 
-    mpGraphics      = nullptr;
+    SetGraphics(nullptr);
     mpPrevGraphics  = nullptr;
     mpNextGraphics  = nullptr;
 }
