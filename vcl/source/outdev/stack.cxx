@@ -82,8 +82,8 @@ void OutputDevice::Push(vcl::PushFlags nFlags)
     if (nFlags & vcl::PushFlags::CLIPREGION && mbClipRegion)
         rState.mpClipRegion.reset(new vcl::Region(maRegion));
 
-    if (nFlags & vcl::PushFlags::REFPOINT && mbRefPoint)
-        rState.mpRefPoint = maRefPoint;
+    if (nFlags & vcl::PushFlags::REFPOINT && maGraphicsState.mbRefPoint)
+        rState.mpRefPoint = maGraphicsState.maRefPoint;
 }
 
 void OutputDevice::Pop()
