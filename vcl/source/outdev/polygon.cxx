@@ -41,7 +41,7 @@ void OutputDevice::DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly )
 
     sal_uInt16 nPoly = rPolyPoly.Count();
 
-    if ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || !nPoly || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || (!maGraphicsState.mbLineColor && !mbFillColor) || !nPoly || ImplIsRecordLayout() )
         return;
 
     // we need a graphics
@@ -153,7 +153,7 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
 
     sal_uInt16 nPoints = rPoly.GetSize();
 
-    if ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || (nPoints < 2) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || (!maGraphicsState.mbLineColor && !mbFillColor) || (nPoints < 2) || ImplIsRecordLayout() )
         return;
 
     // we need a graphics

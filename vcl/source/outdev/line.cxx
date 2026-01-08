@@ -37,29 +37,30 @@
 
 void OutputDevice::SetLineColor()
 {
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaLineColorAction( Color(), false ) );
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaLineColorAction(Color(), false));
 
-    if ( mbLineColor )
+    // UPDATE: Access via maGraphicsState
+    if (maGraphicsState.mbLineColor)
     {
         mbInitLineColor = true;
-        mbLineColor = false;
-        maLineColor = COL_TRANSPARENT;
+        maGraphicsState.mbLineColor = false;
+        maGraphicsState.maLineColor = COL_TRANSPARENT;
     }
 }
 
-void OutputDevice::SetLineColor( const Color& rColor )
+void OutputDevice::SetLineColor(const Color& rColor)
 {
     Color aColor = vcl::drawmode::GetLineColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings());
 
-    if( mpMetaFile )
-        mpMetaFile->AddAction( new MetaLineColorAction( aColor, true ) );
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaLineColorAction(aColor, true));
 
-    if( maLineColor != aColor )
+    if (maGraphicsState.maLineColor != aColor)
     {
         mbInitLineColor = true;
-        mbLineColor = true;
-        maLineColor = aColor;
+        maGraphicsState.mbLineColor = true;
+        maGraphicsState.maLineColor = aColor;
     }
 }
 
@@ -67,7 +68,7 @@ void OutputDevice::InitLineColor()
 {
     DBG_TESTSOLARMUTEX();
 
-    if( mbLineColor )
+    if( maGraphicsState.mbLineColor )
     {
         if( RasterOp::N0 == meRasterOp )
             mpGraphics->SetROPLineColor( SalROPColor::N0 );
@@ -76,7 +77,7 @@ void OutputDevice::InitLineColor()
         else if( RasterOp::Invert == meRasterOp )
             mpGraphics->SetROPLineColor( SalROPColor::Invert );
         else
-            mpGraphics->SetLineColor( maLineColor );
+            mpGraphics->SetLineColor(maGraphicsState.maLineColor);
     }
     else
     {
@@ -100,7 +101,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaLineAction( rStartPt, rEndPt, rLineInfo ) );
 
-    if ( !IsDeviceOutputNecessary() || !mbLineColor || ( LineStyle::NONE == rLineInfo.GetStyle() ) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || !maGraphicsState.mbLineColor || ( LineStyle::NONE == rLineInfo.GetStyle() ) || ImplIsRecordLayout() )
         return;
 
     if( !mpGraphics && !AcquireGraphics() )
@@ -143,7 +144,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaLineAction( rStartPt, rEndPt ) );
 
-    if ( !IsDeviceOutputNecessary() || !mbLineColor || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || !maGraphicsState.mbLineColor || ImplIsRecordLayout() )
         return;
 
     if ( !mpGraphics && !AcquireGraphics() )
@@ -291,7 +292,7 @@ void OutputDevice::drawLine( basegfx::B2DPolyPolygon aLinePolyPolygon, const Lin
 
     if(aFillPolyPolygon.count())
     {
-        const Color     aOldLineColor( maLineColor );
+        const Color aOldLineColor(maGraphicsState.maLineColor );
         const Color     aOldFillColor( maFillColor );
 
         SetLineColor();
