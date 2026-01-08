@@ -56,7 +56,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaRectAction( rRect ) );
 
-    if ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || (!maGraphicsState.mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
         return;
 
     tools::Rectangle aRect(LogicToDevicePixel(rRect));
@@ -93,7 +93,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaRoundRectAction( rRect, nHorzRound, nVertRound ) );
 
-    if ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || (!maGraphicsState.mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
         return;
 
     const tools::Rectangle aRect(LogicToDevicePixel(rRect));
@@ -333,7 +333,7 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
 {
     assert(!is_double_buffered_window());
 
-    if (!mbLineColor || ImplIsRecordLayout())
+    if (!maGraphicsState.mbLineColor || ImplIsRecordLayout())
     {
         return;
     }

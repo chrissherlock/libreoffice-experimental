@@ -98,9 +98,8 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     meRasterOp                      = RasterOp::OverPaint;
     mnAntialiasing                  = AntialiasingFlags::NONE;
     meTextLanguage                  = LANGUAGE_SYSTEM;  // TODO: get default from configuration?
-    mbLineColor                     = true;
-    mbFillColor                     = true;
     mbInitLineColor                 = true;
+    mbFillColor                     = true;
     mbInitFillColor                 = true;
     mbInitFont                      = true;
     mbInitTextColor                 = true;

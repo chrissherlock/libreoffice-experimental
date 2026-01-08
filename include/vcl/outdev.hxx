@@ -159,6 +159,17 @@ namespace vcl {
 
 VCL_DLLPUBLIC void InvertFocusRect(vcl::RenderContext& rRenderContext, const tools::Rectangle& rRect);
 
+struct GraphicsState
+{
+    Color maLineColor;
+    bool  mbLineColor;
+
+    GraphicsState()
+        : maLineColor(COL_BLACK)
+        , mbLineColor(true)
+    {}
+};
+
 /**
 * Some things multiple-inherit from VclAbstractDialog and OutputDevice,
 * so we need to use virtual inheritance to keep the referencing counting
@@ -189,6 +200,7 @@ private:
     std::vector< VCLXGraphics* >*   mpUnoGraphicsList;
     vcl::ExtOutDevData*             mpExtOutDevData;
     mutable std::unique_ptr<CoordinateMapper> mpMapper;
+    GraphicsState maGraphicsState;
 
     // The canvas interface for this output device. Is persistent after the first GetCanvas() call
     mutable css::uno::WeakReference< css::rendering::XCanvas >    mxCanvas;
@@ -203,7 +215,6 @@ private:
     const OutDevType                meOutDevType;
     OutDevViewType                  meOutDevViewType;
     vcl::Region                     maRegion;           // contains the clip region, see SetClipRegion(...)
-    Color                           maLineColor;
     Color                           maFillColor;
     vcl::Font                       maFont;
     Color                           maTextColor;
@@ -221,7 +232,6 @@ private:
     mutable bool                    mbOutput : 1;
     mutable bool                    mbDevOutput : 1;
     mutable bool                    mbOutputClipped : 1;
-    mutable bool                    mbLineColor : 1;
     mutable bool                    mbFillColor : 1;
     mutable bool                    mbInitLineColor : 1;
     mutable bool                    mbInitFillColor : 1;
@@ -503,8 +513,8 @@ public:
 
     void                        SetLineColor();
     void                        SetLineColor( const Color& rColor );
-    const Color&                GetLineColor() const { return maLineColor; }
-    bool                        IsLineColor() const { return mbLineColor; }
+    const Color&                GetLineColor() const { return maGraphicsState.maLineColor; }
+    bool                        IsLineColor() const { return maGraphicsState.mbLineColor; }
 
     void                        SetFillColor();
     void                        SetFillColor( const Color& rColor );

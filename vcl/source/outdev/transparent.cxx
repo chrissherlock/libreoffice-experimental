@@ -241,7 +241,7 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
             bDrawn = true;
         }
 
-        if( mbLineColor )
+        if( maGraphicsState.mbLineColor )
         {
             // disable the fill color for now
             mpGraphics->SetFillColor();
@@ -415,7 +415,7 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
 
                     mpMapper->EnableMapMode( bOldMap );
 
-                    if( mbLineColor )
+                    if( maGraphicsState.mbLineColor )
                     {
                         auto popIt = ScopedPush(vcl::PushFlags::FILLCOLOR);
                         SetFillColor();
@@ -446,7 +446,7 @@ void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
     }
 
     // short circuit for drawing an invisible polygon
-    if( (!mbFillColor && !mbLineColor) || (nTransparencePercent >= 100) )
+    if( (!mbFillColor && !maGraphicsState.mbLineColor) || (nTransparencePercent >= 100) )
         return; // tdf#84294: do not record it in metafile
 
     // handle metafile recording
