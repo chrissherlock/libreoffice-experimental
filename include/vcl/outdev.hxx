@@ -164,9 +164,14 @@ struct GraphicsState
     Color maLineColor;
     bool  mbLineColor;
 
+    Color maFillColor;
+    bool  mbFillColor;
+
     GraphicsState()
         : maLineColor(COL_BLACK)
         , mbLineColor(true)
+        , maFillColor(COL_WHITE)
+        , mbFillColor(true)
     {}
 };
 
@@ -215,7 +220,6 @@ private:
     const OutDevType                meOutDevType;
     OutDevViewType                  meOutDevViewType;
     vcl::Region                     maRegion;           // contains the clip region, see SetClipRegion(...)
-    Color                           maFillColor;
     vcl::Font                       maFont;
     Color                           maTextColor;
     Color                           maTextLineColor;
@@ -232,7 +236,6 @@ private:
     mutable bool                    mbOutput : 1;
     mutable bool                    mbDevOutput : 1;
     mutable bool                    mbOutputClipped : 1;
-    mutable bool                    mbFillColor : 1;
     mutable bool                    mbInitLineColor : 1;
     mutable bool                    mbInitFillColor : 1;
     mutable bool                    mbInitFont : 1;
@@ -518,8 +521,8 @@ public:
 
     void                        SetFillColor();
     void                        SetFillColor( const Color& rColor );
-    const Color&                GetFillColor() const { return maFillColor; }
-    bool                        IsFillColor() const { return mbFillColor; }
+    const Color&                GetFillColor() const { return maGraphicsState.maFillColor; }
+    bool                        IsFillColor() const { return maGraphicsState.mbFillColor; }
 
     void                        SetBackground();
     void                        SetBackground( const Wallpaper& rBackground );

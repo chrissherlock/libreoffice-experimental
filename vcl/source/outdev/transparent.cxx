@@ -222,7 +222,7 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
         const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation());
 
         const double fTransparency = 0.01 * nTransparencePercent;
-        if( mbFillColor )
+        if( maGraphicsState.mbFillColor )
         {
             // #i121591#
             // CAUTION: Only non printing (pixel-renderer) VCL commands from OutputDevices
@@ -265,7 +265,7 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
             }
 
             // prepare to restore the fill color
-            mbInitFillColor = mbFillColor;
+            mbInitFillColor = maGraphicsState.mbFillColor;
         }
     }
 
@@ -446,7 +446,7 @@ void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
     }
 
     // short circuit for drawing an invisible polygon
-    if( (!mbFillColor && !maGraphicsState.mbLineColor) || (nTransparencePercent >= 100) )
+    if( (!maGraphicsState.mbFillColor && !maGraphicsState.mbLineColor) || (nTransparencePercent >= 100) )
         return; // tdf#84294: do not record it in metafile
 
     // handle metafile recording

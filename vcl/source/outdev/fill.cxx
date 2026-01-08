@@ -31,11 +31,11 @@ void OutputDevice::SetFillColor()
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaFillColorAction( Color(), false ) );
 
-    if ( mbFillColor )
+    if (maGraphicsState.mbFillColor)
     {
         mbInitFillColor = true;
-        mbFillColor = false;
-        maFillColor = COL_TRANSPARENT;
+        maGraphicsState.mbFillColor = false;
+        maGraphicsState.maFillColor = COL_TRANSPARENT;
     }
 }
 
@@ -46,11 +46,11 @@ void OutputDevice::SetFillColor( const Color& rColor )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaFillColorAction( aColor, true ) );
 
-    if ( maFillColor != aColor )
+    if (maGraphicsState.maFillColor != aColor)
     {
         mbInitFillColor = true;
-        mbFillColor = true;
-        maFillColor = aColor;
+        maGraphicsState.mbFillColor = true;
+        maGraphicsState.maFillColor = aColor;
     }
 }
 
@@ -58,7 +58,7 @@ void OutputDevice::InitFillColor()
 {
     DBG_TESTSOLARMUTEX();
 
-    if( mbFillColor )
+    if (maGraphicsState.mbFillColor)
     {
         if( RasterOp::N0 == meRasterOp )
             mpGraphics->SetROPFillColor( SalROPColor::N0 );
@@ -67,7 +67,7 @@ void OutputDevice::InitFillColor()
         else if( RasterOp::Invert == meRasterOp )
             mpGraphics->SetROPFillColor( SalROPColor::Invert );
         else
-            mpGraphics->SetFillColor( maFillColor );
+            mpGraphics->SetFillColor(maGraphicsState.maFillColor);
     }
     else
     {
