@@ -40,8 +40,8 @@ void OutputDevice::Push(vcl::PushFlags nFlags)
 
     rState.mnFlags = nFlags;
 
-    if (nFlags & vcl::PushFlags::LINECOLOR && mbLineColor)
-        rState.mpLineColor = maLineColor;
+    if (nFlags & vcl::PushFlags::LINECOLOR && maGraphicsState.mbLineColor)
+        rState.mpLineColor = maGraphicsState.maLineColor;
 
     if (nFlags & vcl::PushFlags::FILLCOLOR && mbFillColor)
         rState.mpFillColor = maFillColor;

@@ -155,7 +155,7 @@ void OutputDevice::ImplDrawTextBackground( const SalLayout& rSalLayout )
     const tools::Long nX = aBase.getX();
     const tools::Long nY = aBase.getY();
 
-    if ( mbLineColor || mbInitLineColor )
+    if ( maGraphicsState.mbLineColor || mbInitLineColor )
     {
         mpGraphics->SetLineColor();
         mbInitLineColor = true;

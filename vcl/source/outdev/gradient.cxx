@@ -114,7 +114,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
         return;
 
     // draw gradients without border
-    if( mbLineColor || mbInitLineColor )
+    if( maGraphicsState.mbLineColor || mbInitLineColor )
     {
         mpGraphics->SetLineColor();
         mbInitLineColor = true;

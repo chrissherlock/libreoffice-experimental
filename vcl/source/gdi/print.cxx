@@ -1673,7 +1673,7 @@ css::awt::DeviceInfo Printer::GetDeviceInfo() const
 
 void Printer::SetWaveLineColors(Color const& rColor, tools::Long)
 {
-    if (mbLineColor || mbInitLineColor)
+    if (maGraphicsState.mbLineColor || mbInitLineColor)
     {
         mpGraphics->SetLineColor();
         mbInitLineColor = true;
