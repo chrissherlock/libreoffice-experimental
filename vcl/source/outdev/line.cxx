@@ -293,8 +293,8 @@ void OutputDevice::drawLine( basegfx::B2DPolyPolygon aLinePolyPolygon, const Lin
 
     if(aFillPolyPolygon.count())
     {
-        const Color aOldLineColor(maGraphicsState.maLineColor );
-        const Color     aOldFillColor( maFillColor );
+        const Color aOldLineColor(maGraphicsState.maLineColor);
+        const Color aOldFillColor(maGraphicsState.maFillColor);
 
         SetLineColor();
         InitLineColor();
