@@ -31,7 +31,7 @@ void OutputDevice::DrawEllipse( const tools::Rectangle& rRect )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaEllipseAction( rRect ) );
 
-    if  ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
+    if  ( !IsDeviceOutputNecessary() || (!maGraphicsState.mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
         return;
 
     tools::Rectangle aRect(LogicToDevicePixel(rRect));
@@ -74,7 +74,7 @@ void OutputDevice::DrawArc( const tools::Rectangle& rRect,
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaArcAction( rRect, rStartPt, rEndPt ) );
 
-    if ( !IsDeviceOutputNecessary() || !mbLineColor || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || !maGraphicsState.mbLineColor || ImplIsRecordLayout() )
         return;
 
     tools::Rectangle aRect(LogicToDevicePixel(rRect));
@@ -113,7 +113,7 @@ void OutputDevice::DrawPie( const tools::Rectangle& rRect,
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaPieAction( rRect, rStartPt, rEndPt ) );
 
-    if ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || (!maGraphicsState.mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
         return;
 
     tools::Rectangle aRect(LogicToDevicePixel(rRect));
@@ -159,7 +159,7 @@ void OutputDevice::DrawChord( const tools::Rectangle& rRect,
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaChordAction( rRect, rStartPt, rEndPt ) );
 
-    if ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || (!maGraphicsState.mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
         return;
 
     tools::Rectangle aRect(LogicToDevicePixel(rRect));
