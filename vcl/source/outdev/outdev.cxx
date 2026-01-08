@@ -60,7 +60,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mpMapper(std::make_unique<CoordinateMapper>()),
     meOutDevType(eOutDevType),
     maRegion(true),
-    maFillColor( COL_WHITE ),
     maTextLineColor( COL_TRANSPARENT ),
     moSettings( Application::GetSettings() )
 {
@@ -95,8 +94,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mnAntialiasing                  = AntialiasingFlags::NONE;
     meTextLanguage                  = LANGUAGE_SYSTEM;  // TODO: get default from configuration?
     mbInitLineColor                 = true;
-    mbFillColor                     = true;
-    mbInitFillColor                 = true;
     mbInitFont                      = true;
     mbInitTextColor                 = true;
     mbInitClipRegion                = true;

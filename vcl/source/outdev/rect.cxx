@@ -55,7 +55,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaRectAction( rRect ) );
 
-    if ( !IsDeviceOutputNecessary() || (!maGraphicsState.mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || (!maGraphicsState.mbLineColor && !maGraphicsState.mbFillColor) || ImplIsRecordLayout() )
         return;
 
     tools::Rectangle aRect(LogicToDevicePixel(rRect));
@@ -92,7 +92,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaRoundRectAction( rRect, nHorzRound, nVertRound ) );
 
-    if ( !IsDeviceOutputNecessary() || (!maGraphicsState.mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || (!maGraphicsState.mbLineColor && !maGraphicsState.mbFillColor) || ImplIsRecordLayout() )
         return;
 
     const tools::Rectangle aRect(LogicToDevicePixel(rRect));
@@ -132,7 +132,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
         {
             Point* pPtAry = aRoundRectPoly.GetPointAry();
 
-            if ( !mbFillColor )
+            if ( !maGraphicsState.mbFillColor )
                 mpGraphics->DrawPolyLine( aRoundRectPoly.GetSize(), pPtAry, *this );
             else
                 mpGraphics->DrawPolygon( aRoundRectPoly.GetSize(), pPtAry, *this );
