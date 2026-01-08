@@ -2149,6 +2149,29 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testGraphicStatePushPop)
     CPPUNIT_ASSERT_EQUAL(RasterOp::Xor, pDev->GetRasterOp());
 }
 
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testRefPointLifecycle)
+{
+    ScopedVclPtrInstance<VirtualDevice> pDev;
+
+    Point aPointA(10, 10);
+    Point aPointB(20, 20);
+
+    pDev->SetRefPoint(aPointA);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("RefPoint should be set to Point A", aPointA, pDev->GetRefPoint());
+    CPPUNIT_ASSERT_MESSAGE("RefPoint flag should be active", pDev->IsRefPoint());
+
+    pDev->Push(vcl::PushFlags::REFPOINT);
+
+    pDev->SetRefPoint(aPointB);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("RefPoint should be set to Point B", aPointB, pDev->GetRefPoint());
+
+    pDev->Pop();
+
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("RefPoint should be restored to Point A after Pop", aPointA,
+                                 pDev->GetRefPoint());
+    CPPUNIT_ASSERT_MESSAGE("RefPoint flag should be active after Pop", pDev->IsRefPoint());
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
