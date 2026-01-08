@@ -105,7 +105,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mbNewFont                       = true;
     mbTextLines                     = false;
     mbTextSpecial                   = false;
-    mbRefPoint                      = false;
     mbEnableRTL                     = false;    // mirroring must be explicitly allowed (typically for windows only)
     mbSubpixelPositioning           = false; // tdf#168002 allow SubpixelPositioning (default: false)
 
@@ -286,9 +285,9 @@ void OutputDevice::SetRefPoint()
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaRefPointAction( Point(), false ) );
 
-    mbRefPoint = false;
-    maRefPoint.setX(0);
-    maRefPoint.setY(0);
+    maGraphicsState.mbRefPoint = false;
+    maGraphicsState.maRefPoint.setX(0);
+    maGraphicsState.maRefPoint.setY(0);
 }
 
 void OutputDevice::SetRefPoint( const Point& rRefPoint )
@@ -296,8 +295,8 @@ void OutputDevice::SetRefPoint( const Point& rRefPoint )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaRefPointAction( rRefPoint, true ) );
 
-    mbRefPoint = true;
-    maRefPoint = rRefPoint;
+    maGraphicsState.mbRefPoint = true;
+    maGraphicsState.maRefPoint = rRefPoint;
 }
 
 void OutputDevice::SetRasterOp( RasterOp eRasterOp )

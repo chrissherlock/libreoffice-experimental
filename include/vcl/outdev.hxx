@@ -163,15 +163,18 @@ struct GraphicsState
 {
     Color maLineColor;
     bool  mbLineColor;
-
     Color maFillColor;
     bool  mbFillColor;
+
+    Point maRefPoint;
+    bool  mbRefPoint;
 
     GraphicsState()
         : maLineColor(COL_BLACK)
         , mbLineColor(true)
         , maFillColor(COL_WHITE)
         , mbFillColor(true)
+        , mbRefPoint(false)
     {}
 };
 
@@ -227,7 +230,6 @@ private:
     RasterOp                        meRasterOp;
     Wallpaper                       maBackground;
     std::optional<AllSettings>      moSettings;
-    Point                           maRefPoint;
     AntialiasingFlags               mnAntialiasing;
     LanguageType                    meTextLanguage;
 
@@ -245,7 +247,6 @@ private:
     mutable bool                    mbNewFont : 1;
     mutable bool                    mbTextLines : 1;
     mutable bool                    mbTextSpecial : 1;
-    mutable bool                    mbRefPoint : 1;
     mutable bool                    mbEnableRTL : 1;
     mutable bool                    mbSubpixelPositioning : 1;
 
@@ -296,8 +297,8 @@ public:
 
     void                        SetRefPoint();
     void                        SetRefPoint( const Point& rRefPoint );
-    const Point&                GetRefPoint() const { return maRefPoint; }
-    bool                        IsRefPoint() const { return mbRefPoint; }
+    const Point&                GetRefPoint() const { return maGraphicsState.maRefPoint; }
+    bool                        IsRefPoint() const { return maGraphicsState.mbRefPoint; }
 
     virtual bool                IsScreenComp() const { return true; }
 
