@@ -212,7 +212,7 @@ void OutputDevice::DrawPolyLine( const basegfx::B2DPolygon& rB2DPolygon,
                                                     eLineCap,
                                                     fMiterMinimumAngle));
         const Color aOldLineColor(maGraphicsState.maLineColor);
-        const Color aOldFillColor(maFillColor);
+        const Color aOldFillColor(maGraphicsState.maFillColor);
 
         SetLineColor();
         InitLineColor();
