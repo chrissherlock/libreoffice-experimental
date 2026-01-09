@@ -93,11 +93,11 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
         return;
     }
 
-    if (mnDrawMode & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap))
+    if (maGraphicsState.mnDrawMode & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap))
     {
         sal_uInt8 cCmpVal;
 
-        if (mnDrawMode & DrawModeFlags::BlackBitmap)
+        if (maGraphicsState.mnDrawMode & DrawModeFlags::BlackBitmap)
             cCmpVal = 0;
         else
             cCmpVal = 255;
@@ -112,7 +112,7 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
 
     Bitmap aBmp(rBitmap);
 
-    if (mnDrawMode & DrawModeFlags::GrayBitmap && !aBmp.IsEmpty())
+    if (maGraphicsState.mnDrawMode & DrawModeFlags::GrayBitmap && !aBmp.IsEmpty())
         aBmp.Convert(BmpConversion::N8BitGreys);
 
     if ( mpMetaFile )

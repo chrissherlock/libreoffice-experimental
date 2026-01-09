@@ -79,7 +79,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mnTextOffY                      = 0;
     mnEmphasisAscent                = 0;
     mnEmphasisDescent               = 0;
-    mnDrawMode                      = DrawModeFlags::Default;
     mnTextLayoutMode                = vcl::text::ComplexTextLayoutFlags::Default;
 
     if( AllSettings::GetLayoutRTL() ) //#i84553# tip BiDi preference to RTL
@@ -91,7 +90,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mbOutput                        = true;
     mbDevOutput                     = false;
     mbOutputClipped                 = false;
-    mnAntialiasing                  = AntialiasingFlags::NONE;
     meTextLanguage                  = LANGUAGE_SYSTEM;  // TODO: get default from configuration?
     mbInitLineColor                 = true;
     mbInitFont                      = true;
@@ -320,19 +318,19 @@ void OutputDevice::EnableOutput( bool bEnable )
 
 void OutputDevice::SetAntialiasing( AntialiasingFlags nMode )
 {
-    if ( mnAntialiasing != nMode )
+    if (maGraphicsState.mnAntialiasing != nMode)
     {
-        mnAntialiasing = nMode;
+        maGraphicsState.mnAntialiasing = nMode;
         mbInitFont = true;
 
         if (mpGraphics)
-            mpGraphics->setAntiAlias(bool(mnAntialiasing & AntialiasingFlags::Enable));
+            mpGraphics->setAntiAlias(bool(maGraphicsState.mnAntialiasing & AntialiasingFlags::Enable));
     }
 }
 
 void OutputDevice::SetDrawMode(DrawModeFlags nDrawMode)
 {
-    mnDrawMode = nDrawMode;
+    maGraphicsState.mnDrawMode = nDrawMode;
 }
 
 sal_uInt16 OutputDevice::GetBitCount() const

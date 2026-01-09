@@ -173,6 +173,9 @@ struct GraphicsState
     Color maTextLineColor;
     Color maOverlineColor;
 
+    AntialiasingFlags mnAntialiasing;
+    DrawModeFlags mnDrawMode;
+
     GraphicsState()
         : maLineColor(COL_BLACK)
         , mbLineColor(true)
@@ -183,6 +186,8 @@ struct GraphicsState
         , maTextColor(COL_BLACK)
         , maTextLineColor(COL_TRANSPARENT)
         , maOverlineColor(COL_TRANSPARENT)
+        , mnAntialiasing(AntialiasingFlags::NONE)
+        , mnDrawMode(DrawModeFlags::Default)
     {}
 };
 
@@ -226,7 +231,6 @@ private:
     mutable tools::Long                    mnTextOffY;
     mutable tools::Long                    mnEmphasisAscent;
     mutable tools::Long                    mnEmphasisDescent;
-    DrawModeFlags                   mnDrawMode;
     vcl::text::ComplexTextLayoutFlags mnTextLayoutMode;
     const OutDevType                meOutDevType;
     OutDevViewType                  meOutDevViewType;
@@ -234,7 +238,6 @@ private:
     vcl::Font                       maFont;
     Wallpaper                       maBackground;
     std::optional<AllSettings>      moSettings;
-    AntialiasingFlags               mnAntialiasing;
     LanguageType                    meTextLanguage;
 
     mutable bool                    mbClipRegion : 1;
@@ -495,10 +498,10 @@ public:
     bool                        IsDeviceOutputNecessary() const { return (mbOutput && mbDevOutput); }
 
     void                        SetAntialiasing( AntialiasingFlags nMode );
-    AntialiasingFlags           GetAntialiasing() const { return mnAntialiasing; }
+    AntialiasingFlags           GetAntialiasing() const { return maGraphicsState.mnAntialiasing; }
 
     void                        SetDrawMode( DrawModeFlags nDrawMode );
-    DrawModeFlags               GetDrawMode() const { return mnDrawMode; }
+    DrawModeFlags               GetDrawMode() const { return maGraphicsState.mnDrawMode; }
 
     void                        SetLayoutMode( vcl::text::ComplexTextLayoutFlags nTextLayoutMode );
     vcl::text::ComplexTextLayoutFlags GetLayoutMode() const { return mnTextLayoutMode; }
