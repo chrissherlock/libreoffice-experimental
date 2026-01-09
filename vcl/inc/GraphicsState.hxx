@@ -11,6 +11,8 @@
 
 #include <tools/color.hxx>
 #include <tools/gen.hxx>
+
+#include <vcl/font.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/rendercontext/RasterOp.hxx>
@@ -34,6 +36,8 @@ struct GraphicsState
     AntialiasingFlags mnAntialiasing;
     DrawModeFlags mnDrawMode;
 
+    vcl::Font maFont;
+
     GraphicsState()
         : maLineColor(COL_BLACK)
         , mbLineColor(true)
@@ -46,6 +50,7 @@ struct GraphicsState
         , maOverlineColor(COL_TRANSPARENT)
         , mnAntialiasing(AntialiasingFlags::NONE)
         , mnDrawMode(DrawModeFlags::Default)
+        , maFont()
     {
     }
 };

@@ -319,11 +319,11 @@ void OutputDevice::ImplDrawTextDirect( SalLayout& rSalLayout,
 
     if( bTextLines )
         ImplDrawTextLines( rSalLayout,
-            maFont.GetStrikeout(), maFont.GetUnderline(), maFont.GetOverline(),
-            maFont.IsWordLineMode(), maFont.IsUnderlineAbove() );
+            mpGraphicsState->maFont.GetStrikeout(), mpGraphicsState->maFont.GetUnderline(), mpGraphicsState->maFont.GetOverline(),
+            mpGraphicsState->maFont.IsWordLineMode(), mpGraphicsState->maFont.IsUnderlineAbove() );
 
     // emphasis marks
-    if( maFont.GetEmphasisMark() & FontEmphasisMark::Style )
+    if( mpGraphicsState->maFont.GetEmphasisMark() & FontEmphasisMark::Style )
         ImplDrawEmphasisMarks( rSalLayout );
 }
 
@@ -332,7 +332,7 @@ void OutputDevice::ImplDrawSpecialText( SalLayout& rSalLayout )
     Color       aOldColor           = GetTextColor();
     Color       aOldTextLineColor   = GetTextLineColor();
     Color       aOldOverlineColor   = GetOverlineColor();
-    FontRelief  eRelief             = maFont.GetRelief();
+    FontRelief  eRelief             = mpGraphicsState->maFont.GetRelief();
 
     basegfx::B2DPoint aOrigPos = rSalLayout.DrawBase();
     if ( eRelief != FontRelief::NONE )
@@ -392,10 +392,10 @@ void OutputDevice::ImplDrawSpecialText( SalLayout& rSalLayout )
     }
     else
     {
-        if ( maFont.IsShadow() )
+        if ( mpGraphicsState->maFont.IsShadow() )
         {
             tools::Long nOff = 1 + ((mpFontInstance->mnLineHeight-24)/24);
-            if ( maFont.IsOutline() )
+            if ( mpGraphicsState->maFont.IsOutline() )
                 nOff++;
             SetTextLineColor();
             SetOverlineColor();
@@ -413,11 +413,11 @@ void OutputDevice::ImplDrawSpecialText( SalLayout& rSalLayout )
             SetOverlineColor( aOldOverlineColor );
             ImplInitTextColor();
 
-            if ( !maFont.IsOutline() )
+            if ( !mpGraphicsState->maFont.IsOutline() )
                 ImplDrawTextDirect( rSalLayout, mbTextLines );
         }
 
-        if ( maFont.IsOutline() )
+        if ( mpGraphicsState->maFont.IsOutline() )
         {
             rSalLayout.DrawBase() = aOrigPos + basegfx::B2DPoint(-1,-1);
             ImplDrawTextDirect( rSalLayout, mbTextLines );
@@ -490,16 +490,21 @@ void OutputDevice::SetTextColor( const Color& rColor )
     }
 }
 
+bool OutputDevice::IsTextFillColor() const
+{
+    return !mpGraphicsState->maFont.IsTransparent();
+}
+
 void OutputDevice::SetTextFillColor()
 {
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaTextFillColorAction( Color(), false ) );
 
-    if ( maFont.GetColor() != COL_TRANSPARENT ) {
-        maFont.SetFillColor( COL_TRANSPARENT );
+    if ( mpGraphicsState->maFont.GetColor() != COL_TRANSPARENT ) {
+        mpGraphicsState->maFont.SetFillColor( COL_TRANSPARENT );
     }
-    if ( !maFont.IsTransparent() )
-        maFont.SetTransparent( true );
+    if ( !mpGraphicsState->maFont.IsTransparent() )
+        mpGraphicsState->maFont.SetTransparent( true );
 }
 
 void OutputDevice::SetTextFillColor( const Color& rColor )
@@ -509,18 +514,23 @@ void OutputDevice::SetTextFillColor( const Color& rColor )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaTextFillColorAction( aColor, true ) );
 
-    if ( maFont.GetFillColor() != aColor )
-        maFont.SetFillColor( aColor );
-    if ( maFont.IsTransparent() != rColor.IsTransparent() )
-        maFont.SetTransparent( rColor.IsTransparent() );
+    if ( mpGraphicsState->maFont.GetFillColor() != aColor )
+        mpGraphicsState->maFont.SetFillColor( aColor );
+    if ( mpGraphicsState->maFont.IsTransparent() != rColor.IsTransparent() )
+        mpGraphicsState->maFont.SetTransparent( rColor.IsTransparent() );
 }
 
 Color OutputDevice::GetTextFillColor() const
 {
-    if ( maFont.IsTransparent() )
+    if ( mpGraphicsState->maFont.IsTransparent() )
         return COL_TRANSPARENT;
     else
-        return maFont.GetFillColor();
+        return mpGraphicsState->maFont.GetFillColor();
+}
+
+TextAlign OutputDevice::GetTextAlign() const
+{
+    return mpGraphicsState->maFont.GetAlignment();
 }
 
 void OutputDevice::SetTextAlign( TextAlign eAlign )
@@ -528,9 +538,9 @@ void OutputDevice::SetTextAlign( TextAlign eAlign )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaTextAlignAction( eAlign ) );
 
-    if ( maFont.GetAlignment() != eAlign )
+    if ( mpGraphicsState->maFont.GetAlignment() != eAlign )
     {
-        maFont.SetAlignment( eAlign );
+        mpGraphicsState->maFont.SetAlignment( eAlign );
         mbNewFont = true;
     }
 }
@@ -993,13 +1003,13 @@ vcl::text::ImplLayoutArgs OutputDevice::ImplPrepareLayoutArgs( OUString& rStr,
 
     nLayoutFlags |= GetBiDiLayoutFlags( rStr, nMinIndex, nEndIndex );
 
-    if( !maFont.IsKerning() )
+    if( !mpGraphicsState->maFont.IsKerning() )
         nLayoutFlags |= SalLayoutFlags::DisableKerning;
-    if( maFont.GetKerning() & FontKerning::Asian )
+    if( mpGraphicsState->maFont.GetKerning() & FontKerning::Asian )
         nLayoutFlags |= SalLayoutFlags::KerningAsian;
-    if( maFont.IsVertical() )
+    if( mpGraphicsState->maFont.IsVertical() )
         nLayoutFlags |= SalLayoutFlags::Vertical;
-    if( maFont.IsFixKerning() ||
+    if( mpGraphicsState->maFont.IsFixKerning() ||
         ( mpFontInstance && mpFontInstance->GetFontSelectPattern().GetPitch() == PITCH_FIXED ) )
         nLayoutFlags |= SalLayoutFlags::DisableLigatures;
 
@@ -1024,7 +1034,7 @@ vcl::text::ImplLayoutArgs OutputDevice::ImplPrepareLayoutArgs( OUString& rStr,
         nLayoutFlags |= SalLayoutFlags::RightAlign;
 
     // set layout options
-    vcl::text::ImplLayoutArgs aLayoutArgs(rStr, nMinIndex, nEndIndex, nLayoutFlags, maFont.GetLanguageTag(), pLayoutCache);
+    vcl::text::ImplLayoutArgs aLayoutArgs(rStr, nMinIndex, nEndIndex, nLayoutFlags, mpGraphicsState->maFont.GetLanguageTag(), pLayoutCache);
 
     Degree10 nOrientation = mpFontInstance ? mpFontInstance->mnOrientation : 0_deg10;
     aLayoutArgs.SetOrientation( nOrientation );
@@ -1893,10 +1903,10 @@ tools::Rectangle OutputDevice::GetTextRect( const tools::Rectangle& rRect,
     else
         aRect.AdjustRight( 1 );
 
-    if (maFont.GetOrientation() != 0_deg10)
+    if (mpGraphicsState->maFont.GetOrientation() != 0_deg10)
     {
         tools::Polygon aRotatedPolygon(aRect);
-        aRotatedPolygon.Rotate(Point(aRect.GetWidth() / 2, aRect.GetHeight() / 2), maFont.GetOrientation());
+        aRotatedPolygon.Rotate(Point(aRect.GetWidth() / 2, aRect.GetHeight() / 2), mpGraphicsState->maFont.GetOrientation());
         return aRotatedPolygon.GetBoundRect();
     }
 

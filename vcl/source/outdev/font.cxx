@@ -60,6 +60,11 @@
 
 #include <strings.hrc>
 
+const vcl::Font& OutputDevice::GetFont() const
+{
+    return mpGraphicsState->maFont;
+}
+
 void OutputDevice::SetFont( const vcl::Font& rNewFont )
 {
     vcl::Font aFont = vcl::drawmode::GetFont(rNewFont, GetDrawMode(), GetSettings().GetStyleSettings());
@@ -73,21 +78,21 @@ void OutputDevice::SetFont( const vcl::Font& rNewFont )
         mpMetaFile->AddAction( new MetaTextFillColorAction( aFont.GetFillColor(), !aFont.IsTransparent() ) );
     }
 
-    if ( maFont.IsSameInstance( aFont ) )
+    if ( mpGraphicsState->maFont.IsSameInstance( aFont ) )
         return;
 
     // Optimization MT/HDU: COL_TRANSPARENT means SetFont should ignore the font color,
     // because SetTextColor() is used for this.
     // #i28759# mpGraphicsState->maTextColor might have been changed behind our back, commit then, too.
     if( aFont.GetColor() != COL_TRANSPARENT
-    && (aFont.GetColor() != maFont.GetColor() || aFont.GetColor() != mpGraphicsState->maTextColor ) )
+    && (aFont.GetColor() != mpGraphicsState->maFont.GetColor() || aFont.GetColor() != mpGraphicsState->maTextColor ) )
     {
         mpGraphicsState->maTextColor = aFont.GetColor();
         mbInitTextColor = true;
         if( mpMetaFile )
             mpMetaFile->AddAction( new MetaTextColorAction( aFont.GetColor() ) );
     }
-    maFont      = aFont;
+    mpGraphicsState->maFont = aFont;
     mbNewFont   = true;
 }
 
@@ -179,10 +184,10 @@ FontMetric OutputDevice::GetFontMetric() const
     FontMetricDataRef xFontMetric = pFontInstance->mxFontMetric;
 
     // prepare metric
-    aMetric = maFont;
+    aMetric = mpGraphicsState->maFont;
 
     // set aMetric with info from font
-    aMetric.SetFamilyName( maFont.GetFamilyName() );
+    aMetric.SetFamilyName( mpGraphicsState->maFont.GetFamilyName() );
     aMetric.SetStyleName( xFontMetric->GetStyleName() );
     aMetric.SetFontSize( PixelToLogic( Size( xFontMetric->GetWidth(), xFontMetric->GetAscent() + xFontMetric->GetDescent() - xFontMetric->GetInternalLeading() ) ) );
     aMetric.SetCharSet( xFontMetric->IsMicrosoftSymbolEncoded() ? RTL_TEXTENCODING_SYMBOL : RTL_TEXTENCODING_UNICODE );
@@ -692,12 +697,12 @@ bool OutputDevice::ImplNewFont() const
 
     // convert to pixel height
     // TODO: replace integer based aSize completely with subpixel accurate type
-    float fExactHeight = mpMapper->LogicHeightToDeviceSubPixel(maFont.GetFontHeight());
-    Size aSize = mpMapper->LogicToDevicePixel( maFont.GetFontSize() );
+    float fExactHeight = mpMapper->LogicHeightToDeviceSubPixel(mpGraphicsState->maFont.GetFontHeight());
+    Size aSize = mpMapper->LogicToDevicePixel( mpGraphicsState->maFont.GetFontSize() );
     if ( !aSize.Height() )
     {
         // use default pixel height only when logical height is zero
-        if ( maFont.GetFontSize().Height() )
+        if ( mpGraphicsState->maFont.GetFontSize().Height() )
             aSize.setHeight( 1 );
         else
             aSize.setHeight( (12*GetDPIY())/72 );
@@ -705,7 +710,7 @@ bool OutputDevice::ImplNewFont() const
     }
 
     // select the default width only when logical width is zero
-    if( (0 == aSize.Width()) && (0 != maFont.GetFontSize().Width()) )
+    if( (0 == aSize.Width()) && (0 != mpGraphicsState->maFont.GetFontSize().Width()) )
         aSize.setWidth( 1 );
 
     // decide if antialiasing is appropriate
@@ -714,12 +719,12 @@ bool OutputDevice::ImplNewFont() const
     {
         const StyleSettings& rStyleSettings = GetSettings().GetStyleSettings();
         bNonAntialiased |= bool(rStyleSettings.GetDisplayOptions() & DisplayOptions::AADisable);
-        bNonAntialiased |= (int(rStyleSettings.GetAntialiasingMinPixelHeight()) > maFont.GetFontSize().Height());
+        bNonAntialiased |= (int(rStyleSettings.GetAntialiasingMinPixelHeight()) > mpGraphicsState->maFont.GetFontSize().Height());
     }
 
     // get font entry
     rtl::Reference<LogicalFontInstance> pOldFontInstance = mpFontInstance;
-    mpFontInstance = mxFontCache->GetFontInstance(mxFontCollection.get(), maFont, aSize, fExactHeight, bNonAntialiased);
+    mpFontInstance = mxFontCache->GetFontInstance(mxFontCollection.get(), mpGraphicsState->maFont, aSize, fExactHeight, bNonAntialiased);
     const bool bNewFontInstance = pOldFontInstance.get() != mpFontInstance.get();
     pOldFontInstance.clear();
 
@@ -735,7 +740,7 @@ bool OutputDevice::ImplNewFont() const
     // Compute font size in points for optical sizing.
     if (!pFontInstance->GetPointSize())
     {
-        auto nHeight = maFont.GetFontHeight();
+        auto nHeight = mpGraphicsState->maFont.GetFontHeight();
         auto eFrom = MapToO3tlLength(GetMapMode().GetMapUnit());
         float fPointSize = o3tl::convert(float(nHeight), eFrom, o3tl::Length::pt);
         pFontInstance->SetPointSize(fPointSize);
@@ -767,9 +772,9 @@ bool OutputDevice::ImplNewFont() const
     // calculate EmphasisArea
     mnEmphasisAscent = 0;
     mnEmphasisDescent = 0;
-    if ( maFont.GetEmphasisMark() & FontEmphasisMark::Style )
+    if ( mpGraphicsState->maFont.GetEmphasisMark() & FontEmphasisMark::Style )
     {
-        FontEmphasisMark nEmphasisMark = maFont.GetEmphasisMarkStyle();
+        FontEmphasisMark nEmphasisMark = mpGraphicsState->maFont.GetEmphasisMarkStyle();
         tools::Long                nEmphasisHeight = (pFontInstance->mnLineHeight*250)/1000;
         if ( nEmphasisHeight < 1 )
             nEmphasisHeight = 1;
@@ -780,7 +785,7 @@ bool OutputDevice::ImplNewFont() const
     }
 
     // calculate text offset depending on TextAlignment
-    TextAlign eAlign = maFont.GetAlignment();
+    TextAlign eAlign = mpGraphicsState->maFont.GetAlignment();
     if ( eAlign == ALIGN_BASELINE )
     {
         mnTextOffX = 0;
@@ -807,18 +812,18 @@ bool OutputDevice::ImplNewFont() const
         }
     }
 
-    mbTextLines     = ((maFont.GetUnderline() != LINESTYLE_NONE) && (maFont.GetUnderline() != LINESTYLE_DONTKNOW)) ||
-                      ((maFont.GetOverline()  != LINESTYLE_NONE) && (maFont.GetOverline()  != LINESTYLE_DONTKNOW)) ||
-                      ((maFont.GetStrikeout() != STRIKEOUT_NONE) && (maFont.GetStrikeout() != STRIKEOUT_DONTKNOW));
-    mbTextSpecial   = maFont.IsShadow() || maFont.IsOutline() ||
-                      (maFont.GetRelief() != FontRelief::NONE);
+    mbTextLines     = ((mpGraphicsState->maFont.GetUnderline() != LINESTYLE_NONE) && (mpGraphicsState->maFont.GetUnderline() != LINESTYLE_DONTKNOW)) ||
+                      ((mpGraphicsState->maFont.GetOverline()  != LINESTYLE_NONE) && (mpGraphicsState->maFont.GetOverline()  != LINESTYLE_DONTKNOW)) ||
+                      ((mpGraphicsState->maFont.GetStrikeout() != STRIKEOUT_NONE) && (mpGraphicsState->maFont.GetStrikeout() != STRIKEOUT_DONTKNOW));
+    mbTextSpecial   = mpGraphicsState->maFont.IsShadow() || mpGraphicsState->maFont.IsOutline() ||
+                      (mpGraphicsState->maFont.GetRelief() != FontRelief::NONE);
 
 
     bool bRet = true;
 
     // #95414# fix for OLE objects which use scale factors very creatively
     if (mpMapper->IsMapModeEnabled() && !aSize.Width())
-        bRet = AttemptOLEFontScaleFix(const_cast<vcl::Font&>(maFont), aSize.Height());
+        bRet = AttemptOLEFontScaleFix(const_cast<vcl::Font&>(mpGraphicsState->maFont), aSize.Height());
 
     return bRet;
 }
@@ -911,7 +916,7 @@ void OutputDevice::ImplDrawEmphasisMarks( SalLayout& rSalLayout )
     mpMetaFile = nullptr;
     mpMapper->EnableMapMode( false );
 
-    FontEmphasisMark nEmphasisMark = maFont.GetEmphasisMarkStyle();
+    FontEmphasisMark nEmphasisMark = mpGraphicsState->maFont.GetEmphasisMarkStyle();
     tools::Long nEmphasisHeight;
 
     if ( nEmphasisMark & FontEmphasisMark::PosBelow )
