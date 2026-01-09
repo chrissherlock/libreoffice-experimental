@@ -24,6 +24,7 @@
 #include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
 
+#include <GraphicsState.hxx>
 #include <salgdi.hxx>
 
 void OutputDevice::SaveBackground(VirtualDevice& rSaveDevice,
@@ -35,7 +36,7 @@ void OutputDevice::SaveBackground(VirtualDevice& rSaveDevice,
 vcl::Region OutputDevice::GetClipRegion() const
 {
 
-    return PixelToLogic( maRegion );
+    return PixelToLogic( mpGraphicsState->maClipRegion );
 }
 
 void OutputDevice::SetClipRegion()
@@ -82,12 +83,12 @@ bool OutputDevice::SelectClipRegion( const vcl::Region& rRegion, SalGraphics* pG
 
 void OutputDevice::MoveClipRegion( tools::Long nHorzMove, tools::Long nVertMove )
 {
-    if ( mbClipRegion )
+    if ( mpGraphicsState->mbClipRegion )
     {
         if( mpMetaFile )
             mpMetaFile->AddAction( new MetaMoveClipRegionAction( nHorzMove, nVertMove ) );
 
-        maRegion.Move(LogicWidthToDevicePixel(nHorzMove),
+        mpGraphicsState->maClipRegion.Move(LogicWidthToDevicePixel(nHorzMove),
                       LogicHeightToDevicePixel(nVertMove));
         mbInitClipRegion = true;
     }
@@ -99,8 +100,8 @@ void OutputDevice::IntersectClipRegion( const tools::Rectangle& rRect )
         mpMetaFile->AddAction( new MetaISectRectClipRegionAction( rRect ) );
 
     tools::Rectangle aRect = LogicToPixel( rRect );
-    maRegion.Intersect( aRect );
-    mbClipRegion        = true;
+    mpGraphicsState->maClipRegion.Intersect( aRect );
+    mpGraphicsState->mbClipRegion        = true;
     mbInitClipRegion    = true;
 }
 
@@ -112,8 +113,8 @@ void OutputDevice::IntersectClipRegion( const vcl::Region& rRegion )
             mpMetaFile->AddAction( new MetaISectRegionClipRegionAction( rRegion ) );
 
         vcl::Region aRegion = LogicToPixel( rRegion );
-        maRegion.Intersect( aRegion );
-        mbClipRegion        = true;
+        mpGraphicsState->maClipRegion.Intersect( aRegion );
+        mpGraphicsState->mbClipRegion        = true;
         mbInitClipRegion    = true;
     }
 }
@@ -122,26 +123,21 @@ void OutputDevice::InitClipRegion()
 {
     DBG_TESTSOLARMUTEX();
 
-    if ( mbClipRegion )
+    if ( mpGraphicsState->mbClipRegion )
     {
-        if ( maRegion.IsEmpty() )
+        if ( mpGraphicsState->maClipRegion.IsEmpty() )
             mbOutputClipped = true;
         else
         {
             mbOutputClipped = false;
 
             // #102532# Respect output offset also for clip region
-            vcl::Region aRegion = ClipToDeviceBounds(PixelToDevicePixel(maRegion));
+            vcl::Region aRegion = ClipToDeviceBounds(PixelToDevicePixel(mpGraphicsState->maClipRegion));
 
             if ( aRegion.IsEmpty() )
-            {
                 mbOutputClipped = true;
-            }
             else
-            {
-                mbOutputClipped = false;
                 SelectClipRegion( aRegion );
-            }
         }
 
         mbClipRegionSet = true;
@@ -152,6 +148,7 @@ void OutputDevice::InitClipRegion()
         {
             if (mpGraphics)
                 mpGraphics->ResetClipRegion();
+
             mbClipRegionSet = false;
         }
 
@@ -188,17 +185,17 @@ void OutputDevice::SetDeviceClipRegion( const vcl::Region* pRegion )
 
     if ( !pRegion )
     {
-        if ( mbClipRegion )
+        if ( mpGraphicsState->mbClipRegion )
         {
-            maRegion            = vcl::Region(true);
-            mbClipRegion        = false;
+            mpGraphicsState->maClipRegion            = vcl::Region(true);
+            mpGraphicsState->mbClipRegion        = false;
             mbInitClipRegion    = true;
         }
     }
     else
     {
-        maRegion            = *pRegion;
-        mbClipRegion        = true;
+        mpGraphicsState->maClipRegion            = *pRegion;
+        mpGraphicsState->mbClipRegion        = true;
         mbInitClipRegion    = true;
     }
 }

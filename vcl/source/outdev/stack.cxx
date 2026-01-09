@@ -80,8 +80,8 @@ void OutputDevice::Push(vcl::PushFlags nFlags)
         rState.mbMapActive = mpMapper->IsMapModeEnabled();
     }
 
-    if (nFlags & vcl::PushFlags::CLIPREGION && mbClipRegion)
-        rState.mpClipRegion.reset(new vcl::Region(maRegion));
+    if (nFlags & vcl::PushFlags::CLIPREGION && mpGraphicsState->mbClipRegion)
+        rState.mpClipRegion.reset(new vcl::Region(mpGraphicsState->maClipRegion));
 
     if (nFlags & vcl::PushFlags::REFPOINT && mpGraphicsState->mbRefPoint)
         rState.mpRefPoint = mpGraphicsState->maRefPoint;
