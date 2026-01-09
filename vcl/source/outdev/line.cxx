@@ -71,11 +71,11 @@ void OutputDevice::InitLineColor()
 
     if( maGraphicsState.mbLineColor )
     {
-        if( RasterOp::N0 == meRasterOp )
+        if( RasterOp::N0 == maGraphicsState.meRasterOp )
             mpGraphics->SetROPLineColor( SalROPColor::N0 );
-        else if( RasterOp::N1 == meRasterOp )
+        else if( RasterOp::N1 == maGraphicsState.meRasterOp )
             mpGraphics->SetROPLineColor( SalROPColor::N1 );
-        else if( RasterOp::Invert == meRasterOp )
+        else if( RasterOp::Invert == maGraphicsState.meRasterOp )
             mpGraphics->SetROPLineColor( SalROPColor::Invert );
         else
             mpGraphics->SetLineColor(maGraphicsState.maLineColor);
