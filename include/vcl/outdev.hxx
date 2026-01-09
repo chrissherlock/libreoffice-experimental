@@ -213,9 +213,9 @@ private:
     mutable bool                    mbOutput : 1;
     mutable bool                    mbDevOutput : 1;
     mutable bool                    mbOutputClipped : 1;
-    mutable bool                    mbInitLineColor : 1;
-    mutable bool                    mbInitFillColor : 1;
-    mutable bool                    mbInitFont : 1;
+    mutable bool                    mbLineColorDirty : 1;
+    mutable bool                    mbFillColorDirty : 1;
+    mutable bool                    mbFontDirty : 1;
     mutable bool                    mbInitTextColor : 1;
     mutable bool                    mbInitClipRegion : 1;
     mutable bool                    mbClipRegionSet : 1;

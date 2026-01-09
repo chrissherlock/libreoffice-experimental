@@ -49,7 +49,7 @@ void OutputDevice::DrawEllipse( const tools::Rectangle& rRect )
     if ( mbOutputClipped )
         return;
 
-    if ( mbInitLineColor )
+    if ( mbLineColorDirty )
         InitLineColor();
 
     tools::Polygon aRectPoly( aRect.Center(), aRect.GetWidth() >> 1, aRect.GetHeight() >> 1 );
@@ -60,7 +60,7 @@ void OutputDevice::DrawEllipse( const tools::Rectangle& rRect )
             mpGraphics->DrawPolyLine( aRectPoly.GetSize(), pPtAry, *this );
         else
         {
-            if ( mbInitFillColor )
+            if ( mbFillColorDirty )
                 InitFillColor();
             mpGraphics->DrawPolygon( aRectPoly.GetSize(), pPtAry, *this );
         }
@@ -92,7 +92,7 @@ void OutputDevice::DrawArc( const tools::Rectangle& rRect,
     if ( mbOutputClipped )
         return;
 
-    if ( mbInitLineColor )
+    if ( mbLineColorDirty )
         InitLineColor();
 
     const Point aStart(LogicToDevicePixel(rStartPt));
@@ -131,7 +131,7 @@ void OutputDevice::DrawPie( const tools::Rectangle& rRect,
     if ( mbOutputClipped )
         return;
 
-    if ( mbInitLineColor )
+    if ( mbLineColorDirty )
         InitLineColor();
 
     const Point aStart(LogicToDevicePixel(rStartPt));
@@ -145,7 +145,7 @@ void OutputDevice::DrawPie( const tools::Rectangle& rRect,
             mpGraphics->DrawPolyLine( aPiePoly.GetSize(), pPtAry, *this );
         else
         {
-            if ( mbInitFillColor )
+            if ( mbFillColorDirty )
                 InitFillColor();
             mpGraphics->DrawPolygon( aPiePoly.GetSize(), pPtAry, *this );
         }
@@ -177,7 +177,7 @@ void OutputDevice::DrawChord( const tools::Rectangle& rRect,
     if ( mbOutputClipped )
         return;
 
-    if ( mbInitLineColor )
+    if ( mbLineColorDirty )
         InitLineColor();
 
     const Point aStart(LogicToDevicePixel(rStartPt));
@@ -191,7 +191,7 @@ void OutputDevice::DrawChord( const tools::Rectangle& rRect,
             mpGraphics->DrawPolyLine( aChordPoly.GetSize(), pPtAry, *this );
         else
         {
-            if ( mbInitFillColor )
+            if ( mbFillColorDirty )
                 InitFillColor();
             mpGraphics->DrawPolygon( aChordPoly.GetSize(), pPtAry, *this );
         }

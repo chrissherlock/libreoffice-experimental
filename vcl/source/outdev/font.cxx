@@ -267,7 +267,7 @@ void OutputDevice::ImplClearFontData( const bool bNewFontLists )
     // the currently selected logical font is no longer needed
     mpFontInstance.clear();
 
-    mbInitFont = true;
+    mbFontDirty = true;
     mbNewFont = true;
 
     if ( bNewFontLists )
@@ -662,12 +662,12 @@ bool OutputDevice::InitFont() const
         if (!AcquireGraphics())
             return false;
     }
-    else if (!mbInitFont)
+    else if (!mbFontDirty)
         return true;
 
     assert(mpGraphics);
     mpGraphics->SetFont(mpFontInstance.get(), 0);
-    mbInitFont = false;
+    mbFontDirty = false;
     return true;
 }
 
@@ -749,7 +749,7 @@ bool OutputDevice::ImplNewFont() const
     // mark when lower layers need to get involved
     mbNewFont = false;
     if( bNewFontInstance )
-        mbInitFont = true;
+        mbFontDirty = true;
 
     // select font when it has not been initialized yet
     if (!pFontInstance->mbInit && InitFont())
@@ -1283,7 +1283,7 @@ void OutputDevice::ImplReleaseFonts()
     mpGraphics->ReleaseFonts();
 
     mbNewFont = true;
-    mbInitFont = true;
+    mbFontDirty = true;
 
     mpFontInstance.clear();
     mpForcedFallbackInstance.clear();

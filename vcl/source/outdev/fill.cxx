@@ -45,7 +45,7 @@ void OutputDevice::SetFillColor()
 
     if (mpGraphicsState->mbFillColor)
     {
-        mbInitFillColor = true;
+        mbFillColorDirty = true;
         mpGraphicsState->mbFillColor = false;
         mpGraphicsState->maFillColor = COL_TRANSPARENT;
     }
@@ -60,7 +60,7 @@ void OutputDevice::SetFillColor( const Color& rColor )
 
     if (mpGraphicsState->maFillColor != aColor)
     {
-        mbInitFillColor = true;
+        mbFillColorDirty = true;
         mpGraphicsState->mbFillColor = true;
         mpGraphicsState->maFillColor = aColor;
     }
@@ -86,7 +86,7 @@ void OutputDevice::InitFillColor()
         mpGraphics->SetFillColor();
     }
 
-    mbInitFillColor = false;
+    mbFillColorDirty = false;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

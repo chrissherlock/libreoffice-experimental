@@ -454,9 +454,9 @@ bool Printer::AcquireGraphics() const
     if ( mpGraphics )
         return true;
 
-    mbInitLineColor     = true;
-    mbInitFillColor     = true;
-    mbInitFont          = true;
+    mbLineColorDirty     = true;
+    mbFillColorDirty     = true;
+    mbFontDirty          = true;
     mbInitTextColor     = true;
     mbInitClipRegion    = true;
 
@@ -523,7 +523,7 @@ void Printer::ImplReleaseFonts()
 {
     mpGraphics->ReleaseFonts();
     mbNewFont = true;
-    mbInitFont = true;
+    mbFontDirty = true;
 
     mpFontInstance.clear();
     mpFontFaceCollection.reset();
@@ -1051,7 +1051,7 @@ bool Printer::SetPrinterProps( const Printer* pPrinter )
             mxFontCache.reset();
             mxFontCollection.reset();
 
-            mbInitFont = true;
+            mbFontDirty = true;
             mbNewFont = true;
             mpInfoPrinter = nullptr;
         }
@@ -1077,7 +1077,7 @@ bool Printer::SetPrinterProps( const Printer* pPrinter )
             mpFontFaceCollection.reset();
             mxFontCache.reset();
             mxFontCollection.reset();
-            mbInitFont = true;
+            mbFontDirty = true;
             mbNewFont = true;
             mpInfoPrinter = nullptr;
         }
@@ -1671,14 +1671,14 @@ css::awt::DeviceInfo Printer::GetDeviceInfo() const
 
 void Printer::SetWaveLineColors(Color const& rColor, tools::Long)
 {
-    if (mpGraphicsState->mbLineColor || mbInitLineColor)
+    if (mpGraphicsState->mbLineColor || mbLineColorDirty)
     {
         mpGraphics->SetLineColor();
-        mbInitLineColor = true;
+        mbLineColorDirty = true;
     }
 
     mpGraphics->SetFillColor(rColor);
-    mbInitFillColor = true;
+    mbFillColorDirty = true;
 }
 
 Size Printer::GetWaveLineSize(tools::Long nLineWidth) const

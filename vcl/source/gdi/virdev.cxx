@@ -53,9 +53,9 @@ bool VirtualDevice::AcquireGraphics() const
     if ( mpGraphics )
         return true;
 
-    mbInitLineColor     = true;
-    mbInitFillColor     = true;
-    mbInitFont          = true;
+    mbLineColorDirty     = true;
+    mbFillColorDirty     = true;
+    mbFontDirty          = true;
     mbInitTextColor     = true;
     mbInitClipRegion    = true;
 
@@ -431,7 +431,7 @@ void VirtualDevice::ImplSetReferenceDevice( RefDevMode i_eRefDevMode, sal_Int32 
     mbScreenComp = false;
 
     // invalidate currently selected fonts
-    mbInitFont = true;
+    mbFontDirty = true;
     mbNewFont = true;
 
     // avoid adjusting font lists when already in refdev mode
