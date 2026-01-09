@@ -2227,6 +2227,36 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testClipRegionPushPop)
     CPPUNIT_ASSERT_EQUAL(aEffectiveRegion, pDev->GetClipRegion());
 }
 
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testBackgroundAccess)
+{
+    ScopedVclPtrInstance<VirtualDevice> pDev;
+    pDev->EnableOutput(true);
+
+    pDev->SetBackground();
+
+    CPPUNIT_ASSERT_MESSAGE("Should be no background after clear", !pDev->IsBackground());
+    Wallpaper aEmptyWall;
+    CPPUNIT_ASSERT(aEmptyWall == pDev->GetBackground());
+
+    Wallpaper aWall1(COL_RED);
+    pDev->SetBackground(aWall1);
+
+    // Verify Flag and Value
+    CPPUNIT_ASSERT_MESSAGE("Flag should be true", pDev->IsBackground());
+    CPPUNIT_ASSERT(aWall1 == pDev->GetBackground());
+
+    Wallpaper aWall2(COL_BLUE);
+    pDev->SetBackground(aWall2);
+
+    CPPUNIT_ASSERT(aWall2 == pDev->GetBackground());
+    CPPUNIT_ASSERT(aWall1 != pDev->GetBackground());
+
+    pDev->SetBackground(); // No args = clear
+
+    CPPUNIT_ASSERT_MESSAGE("Flag should be false", !pDev->IsBackground());
+    CPPUNIT_ASSERT(aEmptyWall == pDev->GetBackground());
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
