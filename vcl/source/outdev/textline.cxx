@@ -170,19 +170,19 @@ void OutputDevice::SetWaveLineColors(Color const& rColor, tools::Long nLineWidth
     // On printers that output pixel via DrawRect()
     if (nLineWidth > 1)
     {
-        if (mpGraphicsState->mbLineColor || mbInitLineColor)
+        if (mpGraphicsState->mbLineColor || mbLineColorDirty)
         {
             mpGraphics->SetLineColor();
-            mbInitLineColor = true;
+            mbLineColorDirty = true;
         }
 
         mpGraphics->SetFillColor( rColor );
-        mbInitFillColor = true;
+        mbFillColorDirty = true;
     }
     else
     {
         mpGraphics->SetLineColor( rColor );
-        mbInitLineColor = true;
+        mbLineColorDirty = true;
     }
 }
 
@@ -210,7 +210,7 @@ void OutputDevice::ImplDrawWaveLine( tools::Long nBaseX, tools::Long nBaseY,
     if ( (nLineWidth == 1) && (nHeight == 1) )
     {
         mpGraphics->SetLineColor( rColor );
-        mbInitLineColor = true;
+        mbLineColorDirty = true;
 
         tools::Long nEndX = nStartX+nWidth;
         tools::Long nEndY = nStartY;
@@ -452,13 +452,13 @@ void OutputDevice::ImplDrawStraightTextLine( tools::Long nBaseX, tools::Long nBa
     if ( !nLineHeight )
         return;
 
-    if ( mpGraphicsState->mbLineColor || mbInitLineColor )
+    if ( mpGraphicsState->mbLineColor || mbLineColorDirty )
     {
         mpGraphics->SetLineColor();
-        mbInitLineColor = true;
+        mbLineColorDirty = true;
     }
     mpGraphics->SetFillColor( aColor );
-    mbInitFillColor = true;
+    mbFillColorDirty = true;
 
     tools::Long nLeft = nDistX;
 
@@ -659,13 +659,13 @@ void OutputDevice::ImplDrawStrikeoutLine( tools::Long nBaseX, tools::Long nBaseY
     if ( !nLineHeight )
         return;
 
-    if ( mpGraphicsState->mbLineColor || mbInitLineColor )
+    if ( mpGraphicsState->mbLineColor || mbLineColorDirty )
     {
         mpGraphics->SetLineColor();
-        mbInitLineColor = true;
+        mbLineColorDirty = true;
     }
     mpGraphics->SetFillColor( aColor );
-    mbInitFillColor = true;
+    mbFillColorDirty = true;
 
     const tools::Long& nLeft = nDistX;
 

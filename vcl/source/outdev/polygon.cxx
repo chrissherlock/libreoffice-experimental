@@ -57,10 +57,10 @@ void OutputDevice::DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly )
     if ( mbOutputClipped )
         return;
 
-    if ( mbInitLineColor )
+    if ( mbLineColorDirty )
         InitLineColor();
 
-    if ( mbInitFillColor )
+    if ( mbFillColorDirty )
         InitFillColor();
 
     // use b2dpolygon drawing if possible
@@ -169,10 +169,10 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
     if ( mbOutputClipped )
         return;
 
-    if ( mbInitLineColor )
+    if ( mbLineColorDirty )
         InitLineColor();
 
-    if ( mbInitFillColor )
+    if ( mbFillColorDirty )
         InitFillColor();
 
     // use b2dpolygon drawing if possible
@@ -270,10 +270,10 @@ void OutputDevice::ImplDrawPolyPolygonWithB2DPolyPolygon(const basegfx::B2DPolyP
     if( mbOutputClipped )
         return;
 
-    if( mbInitLineColor )
+    if( mbLineColorDirty )
         InitLineColor();
 
-    if( mbInitFillColor )
+    if( mbFillColorDirty )
         InitFillColor();
 
     bool bSuccess(false);
