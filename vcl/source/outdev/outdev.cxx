@@ -61,7 +61,7 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     : mpMapper(std::make_unique<CoordinateMapper>())
     , mpGraphicsState(std::make_unique<vcl::GraphicsState>())
     , meOutDevType(eOutDevType)
-    , maRegion(true)
+
     , moSettings(Application::GetSettings())
 {
     SetGraphics(nullptr);
@@ -83,7 +83,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
         mnTextLayoutMode            = vcl::text::ComplexTextLayoutFlags::BiDiRtl | vcl::text::ComplexTextLayoutFlags::TextOriginLeft;
 
     meOutDevViewType                = OutDevViewType::DontKnow;
-    mbClipRegion                    = false;
     mbBackground                    = false;
     mbOutput                        = true;
     mbDevOutput                     = false;
@@ -93,7 +92,7 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mbInitFont                      = true;
     mbInitTextColor                 = true;
     mbInitClipRegion                = true;
-    mbClipRegionSet                 = false;
+    mpGraphicsState->mbClipRegion                 = false;
     mbNewFont                       = true;
     mbTextLines                     = false;
     mbTextSpecial                   = false;
