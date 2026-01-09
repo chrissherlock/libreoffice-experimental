@@ -185,9 +185,9 @@ void VirtualDevice::ImplInitVirDev( const OutputDevice* pOutDev,
     SetDPIScalePercentage(pOutDev->GetDPIScalePercentage());
     maFont          = pOutDev->maFont;
 
-    if( maTextColor != pOutDev->maTextColor )
+    if( GetTextColor() != pOutDev->GetTextColor() )
     {
-        maTextColor = pOutDev->maTextColor;
+        maGraphicsState.maTextColor = pOutDev->GetTextColor();
         mbInitTextColor = true;
     }
 
