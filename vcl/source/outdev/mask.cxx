@@ -20,6 +20,7 @@
 #include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
 
+#include <GraphicsState.hxx>
 #include <salgdi.hxx>
 #include <salbmp.hxx>
 
@@ -62,7 +63,7 @@ void OutputDevice::DrawMask( const Point& rDestPt, const Size& rDestSize,
     if( ImplIsRecordLayout() )
         return;
 
-    if( RasterOp::Invert == maGraphicsState.meRasterOp )
+    if( RasterOp::Invert == mpGraphicsState->meRasterOp )
     {
         DrawRect( tools::Rectangle( rDestPt, rDestSize ) );
         return;

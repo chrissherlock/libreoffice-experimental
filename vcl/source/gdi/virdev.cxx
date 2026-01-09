@@ -26,6 +26,7 @@
 #include <vcl/pdfextoutdevdata.hxx>
 #include <vcl/virdev.hxx>
 
+#include <GraphicsState.hxx>
 #include <ImplOutDevData.hxx>
 #include <font/PhysicalFontCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
@@ -186,7 +187,7 @@ void VirtualDevice::ImplInitVirDev( const OutputDevice* pOutDev,
 
     if( GetTextColor() != pOutDev->GetTextColor() )
     {
-        maGraphicsState.maTextColor = pOutDev->GetTextColor();
+        mpGraphicsState->maTextColor = pOutDev->GetTextColor();
         mbInitTextColor = true;
     }
 

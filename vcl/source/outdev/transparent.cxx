@@ -33,6 +33,7 @@
 #include <vcl/BitmapWriteAccess.hxx>
 
 #include <CoordinateMapper.hxx>
+#include <GraphicsState.hxx>
 #include <pdf/pdfwriter_impl.hxx>
 #include <salgdi.hxx>
 
@@ -142,7 +143,7 @@ void OutputDevice::DrawTransparent(
 
         if (IsLineColor())
         {
-            const bool bPixelSnapHairline(maGraphicsState.mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+            const bool bPixelSnapHairline(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
 
             for(auto const& rPolygon : std::as_const(aB2DPolyPolygon))
             {
@@ -218,7 +219,7 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
         const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation());
 
         const double fTransparency = 0.01 * nTransparencePercent;
-        if( maGraphicsState.mbFillColor )
+        if( mpGraphicsState->mbFillColor )
         {
             // #i121591#
             // CAUTION: Only non printing (pixel-renderer) VCL commands from OutputDevices
@@ -237,13 +238,13 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
             bDrawn = true;
         }
 
-        if( maGraphicsState.mbLineColor )
+        if( mpGraphicsState->mbLineColor )
         {
             // disable the fill color for now
             mpGraphics->SetFillColor();
 
             // draw the border line
-            const bool bPixelSnapHairline(maGraphicsState.mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+            const bool bPixelSnapHairline(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
 
             for(auto const& rPolygon : std::as_const(aB2DPolyPolygon))
             {
@@ -261,7 +262,7 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
             }
 
             // prepare to restore the fill color
-            mbInitFillColor = maGraphicsState.mbFillColor;
+            mbInitFillColor = mpGraphicsState->mbFillColor;
         }
     }
 
@@ -411,7 +412,7 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
 
                     mpMapper->EnableMapMode( bOldMap );
 
-                    if( maGraphicsState.mbLineColor )
+                    if( mpGraphicsState->mbLineColor )
                     {
                         auto popIt = ScopedPush(vcl::PushFlags::FILLCOLOR);
                         SetFillColor();
@@ -435,14 +436,14 @@ void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
     assert(!is_double_buffered_window());
 
     // short circuit for drawing an opaque polygon
-    if( (nTransparencePercent < 1) || (maGraphicsState.mnDrawMode & DrawModeFlags::NoTransparency) )
+    if( (nTransparencePercent < 1) || (mpGraphicsState->mnDrawMode & DrawModeFlags::NoTransparency) )
     {
         DrawPolyPolygon( rPolyPoly );
         return;
     }
 
     // short circuit for drawing an invisible polygon
-    if( (!maGraphicsState.mbFillColor && !maGraphicsState.mbLineColor) || (nTransparencePercent >= 100) )
+    if( (!mpGraphicsState->mbFillColor && !mpGraphicsState->mbLineColor) || (nTransparencePercent >= 100) )
         return; // tdf#84294: do not record it in metafile
 
     // handle metafile recording
@@ -489,7 +490,7 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
         return;
 
     if( ( rTransparenceGradient.GetStartColor() == aBlack && rTransparenceGradient.GetEndColor() == aBlack ) ||
-        ( maGraphicsState.mnDrawMode & DrawModeFlags::NoTransparency ) )
+        ( mpGraphicsState->mnDrawMode & DrawModeFlags::NoTransparency ) )
     {
         const_cast<GDIMetaFile&>(rMtf).WindStart();
         const_cast<GDIMetaFile&>(rMtf).Play(*this, rMtfPos, rMtfSize);

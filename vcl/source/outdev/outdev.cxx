@@ -32,6 +32,7 @@
 #include <vcl/virdev.hxx>
 
 #include <CoordinateMapper.hxx>
+#include <GraphicsState.hxx>
 #include <ImplOutDevData.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <salgdi.hxx>
@@ -56,11 +57,12 @@ using namespace ::com::sun::star::uno;
 
 // Begin initializer and accessor public functions
 
-OutputDevice::OutputDevice(OutDevType eOutDevType) :
-    mpMapper(std::make_unique<CoordinateMapper>()),
-    meOutDevType(eOutDevType),
-    maRegion(true),
-    moSettings( Application::GetSettings() )
+OutputDevice::OutputDevice(OutDevType eOutDevType)
+    : mpMapper(std::make_unique<CoordinateMapper>())
+    , mpGraphicsState(std::make_unique<vcl::GraphicsState>())
+    , meOutDevType(eOutDevType)
+    , maRegion(true)
+    , moSettings(Application::GetSettings())
 {
     SetGraphics(nullptr);
     mpUnoGraphicsList               = nullptr;
@@ -275,9 +277,9 @@ void OutputDevice::SetRefPoint()
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaRefPointAction( Point(), false ) );
 
-    maGraphicsState.mbRefPoint = false;
-    maGraphicsState.maRefPoint.setX(0);
-    maGraphicsState.maRefPoint.setY(0);
+    mpGraphicsState->mbRefPoint = false;
+    mpGraphicsState->maRefPoint.setX(0);
+    mpGraphicsState->maRefPoint.setY(0);
 }
 
 void OutputDevice::SetRefPoint( const Point& rRefPoint )
@@ -285,8 +287,13 @@ void OutputDevice::SetRefPoint( const Point& rRefPoint )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaRefPointAction( rRefPoint, true ) );
 
-    maGraphicsState.mbRefPoint = true;
-    maGraphicsState.maRefPoint = rRefPoint;
+    mpGraphicsState->mbRefPoint = true;
+    mpGraphicsState->maRefPoint = rRefPoint;
+}
+
+RasterOp OutputDevice::GetRasterOp() const
+{
+    return mpGraphicsState->meRasterOp;
 }
 
 void OutputDevice::SetRasterOp( RasterOp eRasterOp )
@@ -294,15 +301,15 @@ void OutputDevice::SetRasterOp( RasterOp eRasterOp )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaRasterOpAction( eRasterOp ) );
 
-    if ( maGraphicsState.meRasterOp != eRasterOp )
+    if ( mpGraphicsState->meRasterOp != eRasterOp )
     {
-        maGraphicsState.meRasterOp = eRasterOp;
+        mpGraphicsState->meRasterOp = eRasterOp;
         mbInitLineColor = mbInitFillColor = true;
 
         if( mpGraphics || AcquireGraphics() )
         {
             assert(mpGraphics);
-            mpGraphics->SetXORMode( (RasterOp::Invert == maGraphicsState.meRasterOp) || (RasterOp::Xor == maGraphicsState.meRasterOp), RasterOp::Invert == maGraphicsState.meRasterOp );
+            mpGraphics->SetXORMode( (RasterOp::Invert == mpGraphicsState->meRasterOp) || (RasterOp::Xor == mpGraphicsState->meRasterOp), RasterOp::Invert == mpGraphicsState->meRasterOp );
         }
     }
 }
@@ -312,21 +319,31 @@ void OutputDevice::EnableOutput( bool bEnable )
     mbOutput = bEnable;
 }
 
+AntialiasingFlags OutputDevice::GetAntialiasing() const
+{
+    return mpGraphicsState->mnAntialiasing;
+}
+
 void OutputDevice::SetAntialiasing( AntialiasingFlags nMode )
 {
-    if (maGraphicsState.mnAntialiasing != nMode)
+    if (mpGraphicsState->mnAntialiasing != nMode)
     {
-        maGraphicsState.mnAntialiasing = nMode;
+        mpGraphicsState->mnAntialiasing = nMode;
         mbInitFont = true;
 
         if (mpGraphics)
-            mpGraphics->setAntiAlias(bool(maGraphicsState.mnAntialiasing & AntialiasingFlags::Enable));
+            mpGraphics->setAntiAlias(bool(mpGraphicsState->mnAntialiasing & AntialiasingFlags::Enable));
     }
+}
+
+DrawModeFlags OutputDevice::GetDrawMode() const
+{
+    return mpGraphicsState->mnDrawMode;
 }
 
 void OutputDevice::SetDrawMode(DrawModeFlags nDrawMode)
 {
-    maGraphicsState.mnDrawMode = nDrawMode;
+    mpGraphicsState->mnDrawMode = nDrawMode;
 }
 
 sal_uInt16 OutputDevice::GetBitCount() const
@@ -370,7 +387,7 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
     if( ImplIsRecordLayout() )
         return;
 
-    if ( RasterOp::Invert == maGraphicsState.meRasterOp )
+    if ( RasterOp::Invert == mpGraphicsState->meRasterOp )
     {
         DrawRect( tools::Rectangle( rDestPt, rDestSize ) );
         return;
@@ -421,7 +438,7 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
     if ( ImplIsRecordLayout() )
         return;
 
-    if ( RasterOp::Invert == maGraphicsState.meRasterOp )
+    if ( RasterOp::Invert == mpGraphicsState->meRasterOp )
     {
         DrawRect( tools::Rectangle( rDestPt, rDestSize ) );
         return;

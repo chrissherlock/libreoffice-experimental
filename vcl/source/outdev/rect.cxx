@@ -25,6 +25,7 @@
 #include <vcl/virdev.hxx>
 
 #include <CoordinateMapper.hxx>
+#include <GraphicsState.hxx>
 #include <salgdi.hxx>
 
 #include <cassert>
@@ -55,7 +56,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaRectAction( rRect ) );
 
-    if ( !IsDeviceOutputNecessary() || (!maGraphicsState.mbLineColor && !maGraphicsState.mbFillColor) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || (!mpGraphicsState->mbLineColor && !mpGraphicsState->mbFillColor) || ImplIsRecordLayout() )
         return;
 
     tools::Rectangle aRect(LogicToDevicePixel(rRect));
@@ -92,7 +93,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaRoundRectAction( rRect, nHorzRound, nVertRound ) );
 
-    if ( !IsDeviceOutputNecessary() || (!maGraphicsState.mbLineColor && !maGraphicsState.mbFillColor) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || (!mpGraphicsState->mbLineColor && !mpGraphicsState->mbFillColor) || ImplIsRecordLayout() )
         return;
 
     const tools::Rectangle aRect(LogicToDevicePixel(rRect));
@@ -132,7 +133,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
         {
             Point* pPtAry = aRoundRectPoly.GetPointAry();
 
-            if ( !maGraphicsState.mbFillColor )
+            if ( !mpGraphicsState->mbFillColor )
                 mpGraphics->DrawPolyLine( aRoundRectPoly.GetSize(), pPtAry, *this );
             else
                 mpGraphics->DrawPolygon( aRoundRectPoly.GetSize(), pPtAry, *this );
@@ -332,7 +333,7 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
 {
     assert(!is_double_buffered_window());
 
-    if (!maGraphicsState.mbLineColor || ImplIsRecordLayout())
+    if (!mpGraphicsState->mbLineColor || ImplIsRecordLayout())
     {
         return;
     }

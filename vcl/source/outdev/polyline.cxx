@@ -25,6 +25,7 @@
 #include <vcl/virdev.hxx>
 
 #include <CoordinateMapper.hxx>
+#include <GraphicsState.hxx>
 #include <salgdi.hxx>
 
 #include <cassert>
@@ -38,7 +39,7 @@ void OutputDevice::DrawPolyLine( const tools::Polygon& rPoly )
 
     sal_uInt16 nPoints = rPoly.GetSize();
 
-    if ( !IsDeviceOutputNecessary() || !maGraphicsState.mbLineColor || (nPoints < 2) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || !mpGraphicsState->mbLineColor || (nPoints < 2) || ImplIsRecordLayout() )
         return;
 
     // we need a graphics
@@ -65,7 +66,7 @@ void OutputDevice::DrawPolyLine( const tools::Polygon& rPoly )
 
     const basegfx::B2DPolygon aB2DPolyLine(rPoly.getB2DPolygon());
     const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation());
-    const bool bPixelSnapHairline(maGraphicsState.mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+    const bool bPixelSnapHairline(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
 
     bool bDrawn = mpGraphics->DrawPolyLine(
         aTransform,
@@ -210,8 +211,8 @@ void OutputDevice::DrawPolyLine( const basegfx::B2DPolygon& rB2DPolygon,
                                                     eLineJoin,
                                                     eLineCap,
                                                     fMiterMinimumAngle));
-        const Color aOldLineColor(maGraphicsState.maLineColor);
-        const Color aOldFillColor(maGraphicsState.maFillColor);
+        const Color aOldLineColor(mpGraphicsState->maLineColor);
+        const Color aOldFillColor(mpGraphicsState->maFillColor);
 
         SetLineColor();
         InitLineColor();
@@ -255,7 +256,7 @@ void OutputDevice::drawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
 {
     sal_uInt16 nPoints(rPoly.GetSize());
 
-    if ( !IsDeviceOutputNecessary() || !maGraphicsState.mbLineColor || ( nPoints < 2 ) || ( LineStyle::NONE == rLineInfo.GetStyle() ) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || !mpGraphicsState->mbLineColor || ( nPoints < 2 ) || ( LineStyle::NONE == rLineInfo.GetStyle() ) || ImplIsRecordLayout() )
         return;
 
     // we need a graphics
@@ -367,7 +368,7 @@ bool OutputDevice::DrawPolyLineDirectInternal(
     {
         // combine rObjectTransform with WorldToDevice
         const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation() * rObjectTransform);
-        const bool bPixelSnapHairline((maGraphicsState.mnAntialiasing & AntialiasingFlags::PixelSnapHairline) && rB2DPolygon.count() < 1000);
+        const bool bPixelSnapHairline((mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline) && rB2DPolygon.count() < 1000);
 
         // draw the polyline
         return mpGraphics->DrawPolyLine(
