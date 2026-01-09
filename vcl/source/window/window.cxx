@@ -827,9 +827,9 @@ bool WindowOutputDevice::AcquireGraphics() const
     if (mpGraphics)
         return true;
 
-    mbInitLineColor     = true;
-    mbInitFillColor     = true;
-    mbInitFont          = true;
+    mbLineColorDirty     = true;
+    mbFillColorDirty     = true;
+    mbFontDirty          = true;
     mbInitTextColor     = true;
     mbInitClipRegion    = true;
 

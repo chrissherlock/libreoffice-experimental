@@ -54,7 +54,7 @@ void OutputDevice::SetLineColor()
     // UPDATE: Access via maGraphicsState
     if (mpGraphicsState->mbLineColor)
     {
-        mbInitLineColor = true;
+        mbLineColorDirty = true;
         mpGraphicsState->mbLineColor = false;
         mpGraphicsState->maLineColor = COL_TRANSPARENT;
     }
@@ -69,7 +69,7 @@ void OutputDevice::SetLineColor(const Color& rColor)
 
     if (mpGraphicsState->maLineColor != aColor)
     {
-        mbInitLineColor = true;
+        mbLineColorDirty = true;
         mpGraphicsState->mbLineColor = true;
         mpGraphicsState->maLineColor = aColor;
     }
@@ -95,7 +95,7 @@ void OutputDevice::InitLineColor()
         mpGraphics->SetLineColor();
     }
 
-    mbInitLineColor = false;
+    mbLineColorDirty = false;
 }
 
 void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
@@ -131,7 +131,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
     const bool bDashUsed(LineStyle::Dash == aInfo.GetStyle());
     const bool bLineWidthUsed(aInfo.GetWidth() > 1);
 
-    if ( mbInitLineColor )
+    if ( mbLineColorDirty )
         InitLineColor();
 
     if(bDashUsed || bLineWidthUsed)
@@ -168,7 +168,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt )
     if ( mbOutputClipped )
         return;
 
-    if ( mbInitLineColor )
+    if ( mbLineColorDirty )
         InitLineColor();
 
     bool bDrawn = false;

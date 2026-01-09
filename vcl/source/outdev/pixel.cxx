@@ -68,7 +68,7 @@ void OutputDevice::DrawPixel( const Point& rPt )
     if ( mbOutputClipped )
         return;
 
-    if ( mbInitLineColor )
+    if ( mbLineColorDirty )
         InitLineColor();
 
     mpGraphics->DrawPixel( aPt.X(), aPt.Y(), *this );

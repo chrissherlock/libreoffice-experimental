@@ -87,8 +87,8 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mbDevOutput                     = false;
     mbOutputClipped                 = false;
     mpGraphicsState->meTextLanguage                  = LANGUAGE_SYSTEM;  // TODO: get default from configuration?
-    mbInitLineColor                 = true;
-    mbInitFont                      = true;
+    mbLineColorDirty                 = true;
+    mbFontDirty                      = true;
     mbInitTextColor                 = true;
     mbInitClipRegion                = true;
     mpGraphicsState->mbClipRegion                 = false;
@@ -302,7 +302,7 @@ void OutputDevice::SetRasterOp( RasterOp eRasterOp )
     if ( mpGraphicsState->meRasterOp != eRasterOp )
     {
         mpGraphicsState->meRasterOp = eRasterOp;
-        mbInitLineColor = mbInitFillColor = true;
+        mbLineColorDirty = mbFillColorDirty = true;
 
         if( mpGraphics || AcquireGraphics() )
         {
@@ -327,7 +327,7 @@ void OutputDevice::SetAntialiasing( AntialiasingFlags nMode )
     if (mpGraphicsState->mnAntialiasing != nMode)
     {
         mpGraphicsState->mnAntialiasing = nMode;
-        mbInitFont = true;
+        mbFontDirty = true;
 
         if (mpGraphics)
             mpGraphics->setAntiAlias(bool(mpGraphicsState->mnAntialiasing & AntialiasingFlags::Enable));

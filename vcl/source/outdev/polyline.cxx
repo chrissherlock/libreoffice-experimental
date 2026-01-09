@@ -53,7 +53,7 @@ void OutputDevice::DrawPolyLine( const tools::Polygon& rPoly )
     if ( mbOutputClipped )
         return;
 
-    if ( mbInitLineColor )
+    if ( mbLineColorDirty )
         InitLineColor();
 
     // use b2dpolygon drawing if possible
@@ -179,7 +179,7 @@ void OutputDevice::DrawPolyLine( const basegfx::B2DPolygon& rB2DPolygon,
     if( mbOutputClipped )
         return;
 
-    if( mbInitLineColor )
+    if( mbLineColorDirty )
         InitLineColor();
 
     // use b2dpolygon drawing if possible
@@ -270,7 +270,7 @@ void OutputDevice::drawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
     if ( mbOutputClipped )
         return;
 
-    if ( mbInitLineColor )
+    if ( mbLineColorDirty )
         InitLineColor();
 
     const LineInfo aInfo(mpMapper->LogicToDevicePixel(rLineInfo));
@@ -359,7 +359,7 @@ bool OutputDevice::DrawPolyLineDirectInternal(
     if( mbOutputClipped )
         return true;
 
-    if( mbInitLineColor )
+    if( mbLineColorDirty )
         InitLineColor();
 
     const bool bTryB2d(RasterOp::OverPaint == GetRasterOp() && IsLineColor());

@@ -76,10 +76,10 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect )
     if ( mbOutputClipped )
         return;
 
-    if ( mbInitLineColor )
+    if ( mbLineColorDirty )
         InitLineColor();
 
-    if ( mbInitFillColor )
+    if ( mbFillColorDirty )
         InitFillColor();
 
     mpGraphics->DrawRect( aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(), *this );
@@ -115,10 +115,10 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
     if ( mbOutputClipped )
         return;
 
-    if ( mbInitLineColor )
+    if ( mbLineColorDirty )
         InitLineColor();
 
-    if ( mbInitFillColor )
+    if ( mbFillColorDirty )
         InitFillColor();
 
     if ( !nHorzRound && !nVertRound )
@@ -285,10 +285,10 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
         }
     }
 
-    if( mbInitLineColor )
+    if( mbLineColorDirty )
         InitLineColor();
 
-    if( mbInitFillColor )
+    if( mbFillColorDirty )
         InitFillColor();
 
     const bool bOldMap = mpMapper->IsMapModeEnabled();
@@ -354,7 +354,7 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
         return;
     }
 
-    if (mbInitLineColor)
+    if (mbLineColorDirty)
     {
         InitLineColor();
     }

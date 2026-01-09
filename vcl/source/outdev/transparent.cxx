@@ -109,10 +109,10 @@ void OutputDevice::DrawTransparent(
     if( mbOutputClipped )
         return;
 
-    if( mbInitLineColor )
+    if( mbLineColorDirty )
         InitLineColor();
 
-    if( mbInitFillColor )
+    if( mbFillColorDirty )
         InitFillColor();
 
     if (RasterOp::OverPaint == GetRasterOp())
@@ -208,10 +208,10 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
         if( mbOutputClipped )
             return true;
 
-        if( mbInitLineColor )
+        if( mbLineColorDirty )
             InitLineColor();
 
-        if( mbInitFillColor )
+        if( mbFillColorDirty )
             InitFillColor();
 
         // get the polygon in device coordinates
@@ -262,7 +262,7 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
             }
 
             // prepare to restore the fill color
-            mbInitFillColor = mpGraphicsState->mbFillColor;
+            mbFillColorDirty = mpGraphicsState->mbFillColor;
         }
     }
 
@@ -296,10 +296,10 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
             if ( mbInitClipRegion )
                 InitClipRegion();
 
-            if ( mbInitLineColor )
+            if ( mbLineColorDirty )
                 InitLineColor();
 
-            if ( mbInitFillColor )
+            if ( mbFillColorDirty )
                 InitFillColor();
 
             tools::Rectangle aLogicPolyRect( rPolyPoly.GetBoundRect() );
