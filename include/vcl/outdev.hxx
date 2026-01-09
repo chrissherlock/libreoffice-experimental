@@ -204,7 +204,6 @@ private:
     const OutDevType                meOutDevType;
     OutDevViewType                  meOutDevViewType;
     vcl::Region                     maRegion;           // contains the clip region, see SetClipRegion(...)
-    vcl::Font                       maFont;
     Wallpaper                       maBackground;
     std::optional<AllSettings>      moSettings;
     LanguageType                    meTextLanguage;
@@ -512,7 +511,7 @@ public:
     bool                        IsBackground() const { return mbBackground; }
 
     void                        SetFont( const vcl::Font& rNewFont );
-    const vcl::Font&            GetFont() const { return maFont; }
+    const vcl::Font&            GetFont() const;
 
 protected:
 
@@ -1008,7 +1007,7 @@ public:
     void                        SetTextFillColor();
     void                        SetTextFillColor( const Color& rColor );
     Color                       GetTextFillColor() const;
-    bool                        IsTextFillColor() const { return !maFont.IsTransparent(); }
+    bool                        IsTextFillColor() const;
 
     void                        SetTextLineColor();
     void                        SetTextLineColor( const Color& rColor );
@@ -1021,7 +1020,7 @@ public:
     bool                        IsOverlineColor() const;
 
     void                        SetTextAlign( TextAlign eAlign );
-    TextAlign                   GetTextAlign() const { return maFont.GetAlignment(); }
+    TextAlign                   GetTextAlign() const;
 
     /** Width of the text.
 
