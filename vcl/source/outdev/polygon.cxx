@@ -86,7 +86,7 @@ void OutputDevice::DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly )
         bool bSuccess(true);
         if (IsLineColor())
         {
-            const bool bPixelSnapHairline(mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+            const bool bPixelSnapHairline(maGraphicsState.mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
 
             for(auto const& rPolygon : std::as_const(aB2DPolyPolygon))
             {
@@ -198,7 +198,7 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
         bool bSuccess(true);
         if (IsLineColor())
         {
-            const bool bPixelSnapHairline(mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+            const bool bPixelSnapHairline(maGraphicsState.mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
 
             bSuccess = mpGraphics->DrawPolyLine(
                 aTransform,
@@ -300,7 +300,7 @@ void OutputDevice::ImplDrawPolyPolygonWithB2DPolyPolygon(const basegfx::B2DPolyP
 
         if (IsLineColor())
         {
-            const bool bPixelSnapHairline(mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+            const bool bPixelSnapHairline(maGraphicsState.mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
 
             for(auto const& rPolygon : std::as_const(aB2DPolyPolygon))
             {

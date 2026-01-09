@@ -2181,6 +2181,23 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testRefPointLifecycle)
     CPPUNIT_ASSERT_MESSAGE("RefPoint flag should be active after Pop", pDev->IsRefPoint());
 }
 
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testRenderStateFlags)
+{
+    ScopedVclPtrInstance<VirtualDevice> pDev;
+
+    pDev->SetAntialiasing(AntialiasingFlags::Enable);
+    CPPUNIT_ASSERT_EQUAL(AntialiasingFlags::Enable, pDev->GetAntialiasing());
+
+    pDev->SetAntialiasing(AntialiasingFlags::PixelSnapHairline);
+    CPPUNIT_ASSERT_EQUAL(AntialiasingFlags::PixelSnapHairline, pDev->GetAntialiasing());
+
+    pDev->SetDrawMode(DrawModeFlags::BlackLine);
+    CPPUNIT_ASSERT_EQUAL(DrawModeFlags::BlackLine, pDev->GetDrawMode());
+
+    pDev->SetDrawMode(DrawModeFlags::GrayLine);
+    CPPUNIT_ASSERT_EQUAL(DrawModeFlags::GrayLine, pDev->GetDrawMode());
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

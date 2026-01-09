@@ -175,7 +175,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt )
         aB2DPolyLine.append(basegfx::B2DPoint(rEndPt.X(), rEndPt.Y()));
         aB2DPolyLine.transform( aTransform );
 
-        const bool bPixelSnapHairline(mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+        const bool bPixelSnapHairline(maGraphicsState.mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
 
         bDrawn = mpGraphics->DrawPolyLine(
             basegfx::B2DHomMatrix(),
@@ -262,7 +262,7 @@ void OutputDevice::drawLine( basegfx::B2DPolyPolygon aLinePolyPolygon, const Lin
     {
         for(auto const& rB2DPolygon : std::as_const(aLinePolyPolygon))
         {
-            const bool bPixelSnapHairline(mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+            const bool bPixelSnapHairline(maGraphicsState.mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
             bool bDone(false);
 
             if(bTryB2d)
