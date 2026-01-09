@@ -30,6 +30,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/BitmapWriteAccess.hxx>
 
+#include <GraphicsState.hxx>
 #include <bitmap/bmpfast.hxx>
 #include <drawmode.hxx>
 #include <salbmp.hxx>
@@ -87,17 +88,17 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
     if( ImplIsRecordLayout() )
         return;
 
-    if ( RasterOp::Invert == maGraphicsState.meRasterOp )
+    if ( RasterOp::Invert == mpGraphicsState->meRasterOp )
     {
         DrawRect( tools::Rectangle( rDestPt, rDestSize ) );
         return;
     }
 
-    if (maGraphicsState.mnDrawMode & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap))
+    if (mpGraphicsState->mnDrawMode & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap))
     {
         sal_uInt8 cCmpVal;
 
-        if (maGraphicsState.mnDrawMode & DrawModeFlags::BlackBitmap)
+        if (mpGraphicsState->mnDrawMode & DrawModeFlags::BlackBitmap)
             cCmpVal = 0;
         else
             cCmpVal = 255;
@@ -112,7 +113,7 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
 
     Bitmap aBmp(rBitmap);
 
-    if (maGraphicsState.mnDrawMode & DrawModeFlags::GrayBitmap && !aBmp.IsEmpty())
+    if (mpGraphicsState->mnDrawMode & DrawModeFlags::GrayBitmap && !aBmp.IsEmpty())
         aBmp.Convert(BmpConversion::N8BitGreys);
 
     if ( mpMetaFile )
@@ -205,7 +206,7 @@ void OutputDevice::DrawAlphaBitmap( const Point& rDestPt, const Size& rDestSize,
     if( ImplIsRecordLayout() )
         return;
 
-    if (RasterOp::Invert == maGraphicsState.meRasterOp)
+    if (RasterOp::Invert == mpGraphicsState->meRasterOp)
     {
         DrawRect(tools::Rectangle(rDestPt, rDestSize));
         return;

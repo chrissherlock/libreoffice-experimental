@@ -27,6 +27,7 @@
 #include <vcl/settings.hxx>
 
 #include <CoordinateMapper.hxx>
+#include <GraphicsState.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 
@@ -40,11 +41,11 @@ void OutputDevice::Push(vcl::PushFlags nFlags)
 
     rState.mnFlags = nFlags;
 
-    if (nFlags & vcl::PushFlags::LINECOLOR && maGraphicsState.mbLineColor)
-        rState.mpLineColor = maGraphicsState.maLineColor;
+    if (nFlags & vcl::PushFlags::LINECOLOR && mpGraphicsState->mbLineColor)
+        rState.mpLineColor = mpGraphicsState->maLineColor;
 
-    if (nFlags & vcl::PushFlags::FILLCOLOR && maGraphicsState.mbFillColor)
-        rState.mpFillColor = maGraphicsState.maFillColor;
+    if (nFlags & vcl::PushFlags::FILLCOLOR && mpGraphicsState->mbFillColor)
+        rState.mpFillColor = mpGraphicsState->maFillColor;
 
     if (nFlags & vcl::PushFlags::FONT)
         rState.mpFont = maFont;
@@ -82,8 +83,8 @@ void OutputDevice::Push(vcl::PushFlags nFlags)
     if (nFlags & vcl::PushFlags::CLIPREGION && mbClipRegion)
         rState.mpClipRegion.reset(new vcl::Region(maRegion));
 
-    if (nFlags & vcl::PushFlags::REFPOINT && maGraphicsState.mbRefPoint)
-        rState.mpRefPoint = maGraphicsState.maRefPoint;
+    if (nFlags & vcl::PushFlags::REFPOINT && mpGraphicsState->mbRefPoint)
+        rState.mpRefPoint = mpGraphicsState->maRefPoint;
 }
 
 void OutputDevice::Pop()

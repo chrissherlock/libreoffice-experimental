@@ -39,6 +39,7 @@
 #include <vcl/sysdata.hxx>
 
 #include <CoordinateMapper.hxx>
+#include <GraphicsState.hxx>
 #include <ImplLayoutArgs.hxx>
 #include <ImplOutDevData.hxx>
 #include <drawmode.hxx>
@@ -155,7 +156,7 @@ void OutputDevice::ImplDrawTextBackground( const SalLayout& rSalLayout )
     const tools::Long nX = aBase.getX();
     const tools::Long nY = aBase.getY();
 
-    if ( maGraphicsState.mbLineColor || mbInitLineColor )
+    if ( mpGraphicsState->mbLineColor || mbInitLineColor )
     {
         mpGraphics->SetLineColor();
         mbInitLineColor = true;
@@ -469,6 +470,11 @@ void OutputDevice::ImplDrawText( SalLayout& rSalLayout )
         ImplDrawTextDirect( rSalLayout, mbTextLines );
 }
 
+const Color& OutputDevice::GetTextColor() const
+{
+    return mpGraphicsState->maTextColor;
+}
+
 void OutputDevice::SetTextColor( const Color& rColor )
 {
 
@@ -477,9 +483,9 @@ void OutputDevice::SetTextColor( const Color& rColor )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaTextColorAction( aColor ) );
 
-    if ( maGraphicsState.maTextColor != aColor )
+    if ( mpGraphicsState->maTextColor != aColor )
     {
-        maGraphicsState.maTextColor = aColor;
+        mpGraphicsState->maTextColor = aColor;
         mbInitTextColor = true;
     }
 }

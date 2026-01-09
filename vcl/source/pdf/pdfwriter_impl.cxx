@@ -327,7 +327,7 @@ PDFWriterImpl::PDFWriterImpl( const PDFWriter::PDFWriterContext& rContext,
     // tdf#150786 use the same settings for widgets regardless of theme
     m_aWidgetStyleSettings.SetStandardStyles();
 
-    GraphicsState aState;
+    vcl::pdf::GraphicsState aState;
     aState.m_aMapMode       = m_aMapMode;
     aState.m_aFont.SetFamilyName( u"Times"_ustr );
     aState.m_aFont.SetFontSize( Size( 0, 12 ) );
@@ -9447,7 +9447,7 @@ void PDFWriterImpl::drawWallpaper( const tools::Rectangle& rRect, const Wallpape
 {
     OStringBuffer& rLine = updateGraphicsStateLine;
     rLine.setLength(0);
-    GraphicsState& rNewState = m_aGraphicsStack.front();
+    vcl::pdf::GraphicsState& rNewState = m_aGraphicsStack.front();
     // first set clip region since it might invalidate everything else
 
     if( rNewState.m_nUpdateFlags & GraphicsStateUpdateFlags::ClipRegion )
@@ -9461,7 +9461,7 @@ void PDFWriterImpl::drawWallpaper( const tools::Rectangle& rRect, const Wallpape
             {
                 rLine.append( "Q " );
                 // invalidate everything but the clip region
-                m_aCurrentPDFState = GraphicsState();
+                m_aCurrentPDFState = vcl::pdf::GraphicsState();
                 rNewState.m_nUpdateFlags = ~GraphicsStateUpdateFlags::ClipRegion;
             }
             if( rNewState.m_bClipRegion )
@@ -9581,9 +9581,9 @@ void PDFWriterImpl::pop()
     if( m_aGraphicsStack.size() < 2 )
         return;
 
-    GraphicsState aState = m_aGraphicsStack.front();
+    vcl::pdf::GraphicsState aState = m_aGraphicsStack.front();
     m_aGraphicsStack.pop_front();
-    GraphicsState& rOld = m_aGraphicsStack.front();
+    vcl::pdf::GraphicsState& rOld = m_aGraphicsStack.front();
 
     // move those parameters back that were not pushed
     // in the first place

@@ -847,8 +847,8 @@ private:
      */
     std::list< StreamRedirect >         m_aOutputStreams;
 
-    std::list< GraphicsState >              m_aGraphicsStack;
-    GraphicsState                           m_aCurrentPDFState;
+    std::list< vcl::pdf::GraphicsState >    m_aGraphicsStack;
+    vcl::pdf::GraphicsState                 m_aCurrentPDFState;
 
     std::unique_ptr<ZCodec>                 m_pCodec;
     std::unique_ptr<SvMemoryStream>         m_pMemStream;

@@ -20,6 +20,7 @@
 #include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
 
+#include <GraphicsState.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 
@@ -52,7 +53,7 @@ void OutputDevice::DrawPixel( const Point& rPt )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaPointAction( rPt ) );
 
-    if ( !IsDeviceOutputNecessary() || !maGraphicsState.mbLineColor || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || !mpGraphicsState->mbLineColor || ImplIsRecordLayout() )
         return;
 
     Point aPt = LogicToDevicePixel(rPt);

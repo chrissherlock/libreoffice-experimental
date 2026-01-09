@@ -32,6 +32,7 @@
 #include <vcl/wrkwin.hxx>
 
 #include <CoordinateMapper.hxx>
+#include <GraphicsState.hxx>
 #include <ImplOutDevData.hxx>
 #include <svdata.hxx>
 #include <window.h>
@@ -528,5 +529,9 @@ basegfx::B2DHomMatrix OutputDevice::GetInverseViewTransformation(const MapMode& 
 {
     return mpMapper->GetInverseViewTransformation(rMapMode);
 }
+
+const Point& OutputDevice::GetRefPoint() const { return mpGraphicsState->maRefPoint; }
+
+bool OutputDevice::IsRefPoint() const { return mpGraphicsState->mbRefPoint; }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

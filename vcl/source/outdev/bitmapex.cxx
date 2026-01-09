@@ -30,6 +30,7 @@
 #include <vcl/virdev.hxx>
 
 #include <CoordinateMapper.hxx>
+#include <GraphicsState.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 
@@ -234,8 +235,8 @@ void OutputDevice::DrawTransformedBitmapEx(
 
     Bitmap bitmap = rBitmap;
 
-    const bool bInvert(RasterOp::Invert == maGraphicsState.meRasterOp);
-    const bool bBitmapChangedColor(maGraphicsState.mnDrawMode & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap | DrawModeFlags::GrayBitmap ));
+    const bool bInvert(RasterOp::Invert == mpGraphicsState->meRasterOp);
+    const bool bBitmapChangedColor(mpGraphicsState->mnDrawMode & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap | DrawModeFlags::GrayBitmap ));
     const bool bTryDirectPaint(!bInvert && !bBitmapChangedColor && !mpMetaFile);
     // tdf#130768 CAUTION(!) using GetViewTransformation() is *not* enough here, it may
     // be that mnOutOffX/mnOutOffY is used - see AOO bug 75163, mentioned at

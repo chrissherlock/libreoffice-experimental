@@ -22,6 +22,7 @@
 #include <vcl/virdev.hxx>
 
 #include <CoordinateMapper.hxx>
+#include <GraphicsState.hxx>
 #include <salgdi.hxx>
 
 #include <cassert>
@@ -304,8 +305,8 @@ void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
 
             // if possible use accelerated path
             if( eStyle == WallpaperStyle::Tile
-                && (maGraphicsState.meRasterOp == RasterOp::OverPaint)
-                && (maGraphicsState.mnDrawMode == DrawModeFlags::Default)
+                && (mpGraphicsState->meRasterOp == RasterOp::OverPaint)
+                && (mpGraphicsState->mnDrawMode == DrawModeFlags::Default)
                 && nWidth > 0 && nHeight > 0 )
                 bDrawn = mpGraphics->DrawBitmapWallpaper(nStartX, nStartY, nRight, nBottom, nBmpWidth, nBmpHeight, *aBmp.ImplGetSalBitmap());
 

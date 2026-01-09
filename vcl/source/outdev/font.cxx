@@ -43,6 +43,7 @@
 #include <font/EmphasisMark.hxx>
 
 #include <CoordinateMapper.hxx>
+#include <GraphicsState.hxx>
 #include <ImplLayoutArgs.hxx>
 #include <drawmode.hxx>
 #include <impfontcache.hxx>
@@ -77,11 +78,11 @@ void OutputDevice::SetFont( const vcl::Font& rNewFont )
 
     // Optimization MT/HDU: COL_TRANSPARENT means SetFont should ignore the font color,
     // because SetTextColor() is used for this.
-    // #i28759# maGraphicsState.maTextColor might have been changed behind our back, commit then, too.
+    // #i28759# mpGraphicsState->maTextColor might have been changed behind our back, commit then, too.
     if( aFont.GetColor() != COL_TRANSPARENT
-    && (aFont.GetColor() != maFont.GetColor() || aFont.GetColor() != maGraphicsState.maTextColor ) )
+    && (aFont.GetColor() != maFont.GetColor() || aFont.GetColor() != mpGraphicsState->maTextColor ) )
     {
-        maGraphicsState.maTextColor = aFont.GetColor();
+        mpGraphicsState->maTextColor = aFont.GetColor();
         mbInitTextColor = true;
         if( mpMetaFile )
             mpMetaFile->AddAction( new MetaTextColorAction( aFont.GetColor() ) );
