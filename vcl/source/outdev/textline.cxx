@@ -32,6 +32,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/skia/SkiaHelper.hxx>
 
+#include <GraphicsState.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 #include <impglyphitem.hxx>
@@ -169,7 +170,7 @@ void OutputDevice::SetWaveLineColors(Color const& rColor, tools::Long nLineWidth
     // On printers that output pixel via DrawRect()
     if (nLineWidth > 1)
     {
-        if (maGraphicsState.mbLineColor || mbInitLineColor)
+        if (mpGraphicsState->mbLineColor || mbInitLineColor)
         {
             mpGraphics->SetLineColor();
             mbInitLineColor = true;
@@ -451,7 +452,7 @@ void OutputDevice::ImplDrawStraightTextLine( tools::Long nBaseX, tools::Long nBa
     if ( !nLineHeight )
         return;
 
-    if ( maGraphicsState.mbLineColor || mbInitLineColor )
+    if ( mpGraphicsState->mbLineColor || mbInitLineColor )
     {
         mpGraphics->SetLineColor();
         mbInitLineColor = true;
@@ -658,7 +659,7 @@ void OutputDevice::ImplDrawStrikeoutLine( tools::Long nBaseX, tools::Long nBaseY
     if ( !nLineHeight )
         return;
 
-    if ( maGraphicsState.mbLineColor || mbInitLineColor )
+    if ( mpGraphicsState->mbLineColor || mbInitLineColor )
     {
         mpGraphics->SetLineColor();
         mbInitLineColor = true;
@@ -917,12 +918,22 @@ void OutputDevice::ImplDrawMnemonicLine( tools::Long nX, tools::Long nY, tools::
     ImplDrawTextLine( nX, nY, 0, nWidth, nWidth, STRIKEOUT_NONE, LINESTYLE_SINGLE, LINESTYLE_NONE, false );
 }
 
+const Color& OutputDevice::GetTextLineColor() const
+{
+    return mpGraphicsState->maTextLineColor;
+}
+
+bool OutputDevice::IsTextLineColor() const
+{
+    return !mpGraphicsState->maTextLineColor.IsTransparent();
+}
+
 void OutputDevice::SetTextLineColor()
 {
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaTextLineColorAction( Color(), false ) );
 
-    maGraphicsState.maTextLineColor = COL_TRANSPARENT;
+    mpGraphicsState->maTextLineColor = COL_TRANSPARENT;
 }
 
 void OutputDevice::SetTextLineColor( const Color& rColor )
@@ -932,7 +943,17 @@ void OutputDevice::SetTextLineColor( const Color& rColor )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaTextLineColorAction( aColor, true ) );
 
-    maGraphicsState.maTextLineColor = aColor;
+    mpGraphicsState->maTextLineColor = aColor;
+}
+
+const Color& OutputDevice::GetOverlineColor() const
+{
+    return mpGraphicsState->maOverlineColor;
+}
+
+bool OutputDevice::IsOverlineColor() const
+{
+    return !mpGraphicsState->maOverlineColor.IsTransparent();
 }
 
 void OutputDevice::SetOverlineColor()
@@ -940,7 +961,7 @@ void OutputDevice::SetOverlineColor()
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaOverlineColorAction( Color(), false ) );
 
-    maGraphicsState.maOverlineColor = COL_TRANSPARENT;
+    mpGraphicsState->maOverlineColor = COL_TRANSPARENT;
 }
 
 void OutputDevice::SetOverlineColor( const Color& rColor )
@@ -950,7 +971,7 @@ void OutputDevice::SetOverlineColor( const Color& rColor )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaOverlineColorAction( aColor, true ) );
 
-    maGraphicsState.maOverlineColor = aColor;
+    mpGraphicsState->maOverlineColor = aColor;
 }
 
 void OutputDevice::DrawTextLine( const Point& rPos, tools::Long nWidth,
@@ -1109,7 +1130,7 @@ void OutputDevice::ImplDrawWaveLineBezier(tools::Long nStartX, tools::Long nStar
     const basegfx::B2DRectangle aWaveLineRectangle(nStartX, nStartY, nEndX, nEndY + nWaveHeight);
     const basegfx::B2DPolygon aWaveLinePolygon = basegfx::createWaveLinePolygon(aWaveLineRectangle);
     const basegfx::B2DHomMatrix aRotationMatrix = basegfx::utils::createRotateAroundPoint(nStartX, nStartY, basegfx::deg2rad(-fOrientation));
-    const bool bPixelSnapHairline(maGraphicsState.mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+    const bool bPixelSnapHairline(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
 
     mpGraphics->SetLineColor(GetLineColor());
     mpGraphics->DrawPolyLine(

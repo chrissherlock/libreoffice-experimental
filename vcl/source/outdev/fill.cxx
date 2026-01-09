@@ -18,24 +18,36 @@
  */
 
 #include <tools/debug.hxx>
+#include <tools/color.hxx>
 
 #include <vcl/metaact.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
 
+#include <GraphicsState.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
+
+const Color& OutputDevice::GetFillColor() const
+{
+    return mpGraphicsState->maFillColor;
+}
+
+bool OutputDevice::IsFillColor() const
+{
+    return mpGraphicsState->mbFillColor;
+}
 
 void OutputDevice::SetFillColor()
 {
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaFillColorAction( Color(), false ) );
 
-    if (maGraphicsState.mbFillColor)
+    if (mpGraphicsState->mbFillColor)
     {
         mbInitFillColor = true;
-        maGraphicsState.mbFillColor = false;
-        maGraphicsState.maFillColor = COL_TRANSPARENT;
+        mpGraphicsState->mbFillColor = false;
+        mpGraphicsState->maFillColor = COL_TRANSPARENT;
     }
 }
 
@@ -46,11 +58,11 @@ void OutputDevice::SetFillColor( const Color& rColor )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaFillColorAction( aColor, true ) );
 
-    if (maGraphicsState.maFillColor != aColor)
+    if (mpGraphicsState->maFillColor != aColor)
     {
         mbInitFillColor = true;
-        maGraphicsState.mbFillColor = true;
-        maGraphicsState.maFillColor = aColor;
+        mpGraphicsState->mbFillColor = true;
+        mpGraphicsState->maFillColor = aColor;
     }
 }
 
@@ -58,16 +70,16 @@ void OutputDevice::InitFillColor()
 {
     DBG_TESTSOLARMUTEX();
 
-    if (maGraphicsState.mbFillColor)
+    if (mpGraphicsState->mbFillColor)
     {
-        if( RasterOp::N0 == maGraphicsState.meRasterOp )
+        if( RasterOp::N0 == mpGraphicsState->meRasterOp )
             mpGraphics->SetROPFillColor( SalROPColor::N0 );
-        else if( RasterOp::N1 == maGraphicsState.meRasterOp )
+        else if( RasterOp::N1 == mpGraphicsState->meRasterOp )
             mpGraphics->SetROPFillColor( SalROPColor::N1 );
-        else if( RasterOp::Invert == maGraphicsState.meRasterOp )
+        else if( RasterOp::Invert == mpGraphicsState->meRasterOp )
             mpGraphics->SetROPFillColor( SalROPColor::Invert );
         else
-            mpGraphics->SetFillColor(maGraphicsState.maFillColor);
+            mpGraphics->SetFillColor(mpGraphicsState->maFillColor);
     }
     else
     {

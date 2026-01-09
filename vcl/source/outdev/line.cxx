@@ -30,11 +30,22 @@
 #include <vcl/virdev.hxx>
 
 #include <CoordinateMapper.hxx>
+#include <GraphicsState.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 
 #include <cassert>
 #include <numeric>
+
+const Color& OutputDevice::GetLineColor() const
+{
+    return mpGraphicsState->maLineColor;
+}
+
+bool OutputDevice::IsLineColor() const
+{
+    return mpGraphicsState->mbLineColor;
+}
 
 void OutputDevice::SetLineColor()
 {
@@ -42,11 +53,11 @@ void OutputDevice::SetLineColor()
         mpMetaFile->AddAction(new MetaLineColorAction(Color(), false));
 
     // UPDATE: Access via maGraphicsState
-    if (maGraphicsState.mbLineColor)
+    if (mpGraphicsState->mbLineColor)
     {
         mbInitLineColor = true;
-        maGraphicsState.mbLineColor = false;
-        maGraphicsState.maLineColor = COL_TRANSPARENT;
+        mpGraphicsState->mbLineColor = false;
+        mpGraphicsState->maLineColor = COL_TRANSPARENT;
     }
 }
 
@@ -57,11 +68,11 @@ void OutputDevice::SetLineColor(const Color& rColor)
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaLineColorAction(aColor, true));
 
-    if (maGraphicsState.maLineColor != aColor)
+    if (mpGraphicsState->maLineColor != aColor)
     {
         mbInitLineColor = true;
-        maGraphicsState.mbLineColor = true;
-        maGraphicsState.maLineColor = aColor;
+        mpGraphicsState->mbLineColor = true;
+        mpGraphicsState->maLineColor = aColor;
     }
 }
 
@@ -69,16 +80,16 @@ void OutputDevice::InitLineColor()
 {
     DBG_TESTSOLARMUTEX();
 
-    if( maGraphicsState.mbLineColor )
+    if( mpGraphicsState->mbLineColor )
     {
-        if( RasterOp::N0 == maGraphicsState.meRasterOp )
+        if( RasterOp::N0 == mpGraphicsState->meRasterOp )
             mpGraphics->SetROPLineColor( SalROPColor::N0 );
-        else if( RasterOp::N1 == maGraphicsState.meRasterOp )
+        else if( RasterOp::N1 == mpGraphicsState->meRasterOp )
             mpGraphics->SetROPLineColor( SalROPColor::N1 );
-        else if( RasterOp::Invert == maGraphicsState.meRasterOp )
+        else if( RasterOp::Invert == mpGraphicsState->meRasterOp )
             mpGraphics->SetROPLineColor( SalROPColor::Invert );
         else
-            mpGraphics->SetLineColor(maGraphicsState.maLineColor);
+            mpGraphics->SetLineColor(mpGraphicsState->maLineColor);
     }
     else
     {
@@ -102,7 +113,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaLineAction( rStartPt, rEndPt, rLineInfo ) );
 
-    if ( !IsDeviceOutputNecessary() || !maGraphicsState.mbLineColor || ( LineStyle::NONE == rLineInfo.GetStyle() ) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || !mpGraphicsState->mbLineColor || ( LineStyle::NONE == rLineInfo.GetStyle() ) || ImplIsRecordLayout() )
         return;
 
     if( !mpGraphics && !AcquireGraphics() )
@@ -145,7 +156,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaLineAction( rStartPt, rEndPt ) );
 
-    if ( !IsDeviceOutputNecessary() || !maGraphicsState.mbLineColor || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || !mpGraphicsState->mbLineColor || ImplIsRecordLayout() )
         return;
 
     if ( !mpGraphics && !AcquireGraphics() )
@@ -175,7 +186,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt )
         aB2DPolyLine.append(basegfx::B2DPoint(rEndPt.X(), rEndPt.Y()));
         aB2DPolyLine.transform( aTransform );
 
-        const bool bPixelSnapHairline(maGraphicsState.mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+        const bool bPixelSnapHairline(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
 
         bDrawn = mpGraphics->DrawPolyLine(
             basegfx::B2DHomMatrix(),
@@ -262,7 +273,7 @@ void OutputDevice::drawLine( basegfx::B2DPolyPolygon aLinePolyPolygon, const Lin
     {
         for(auto const& rB2DPolygon : std::as_const(aLinePolyPolygon))
         {
-            const bool bPixelSnapHairline(maGraphicsState.mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+            const bool bPixelSnapHairline(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
             bool bDone(false);
 
             if(bTryB2d)
@@ -293,8 +304,8 @@ void OutputDevice::drawLine( basegfx::B2DPolyPolygon aLinePolyPolygon, const Lin
 
     if(aFillPolyPolygon.count())
     {
-        const Color aOldLineColor(maGraphicsState.maLineColor);
-        const Color aOldFillColor(maGraphicsState.maFillColor);
+        const Color aOldLineColor(mpGraphicsState->maLineColor);
+        const Color aOldFillColor(mpGraphicsState->maFillColor);
 
         SetLineColor();
         InitLineColor();

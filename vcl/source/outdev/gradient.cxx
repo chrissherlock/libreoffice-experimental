@@ -27,6 +27,7 @@
 #include <vcl/window.hxx>
 
 #include <CoordinateMapper.hxx>
+#include <GraphicsState.hxx>
 #include <salgdi.hxx>
 
 #include <cassert>
@@ -58,7 +59,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
     if (!rPolyPoly.Count() || !rPolyPoly[0].GetSize())
         return;
 
-    if ( maGraphicsState.mnDrawMode & ( DrawModeFlags::WhiteGradient | DrawModeFlags::SettingsGradient) )
+    if ( mpGraphicsState->mnDrawMode & ( DrawModeFlags::WhiteGradient | DrawModeFlags::SettingsGradient) )
     {
         Color aColor = GetSingleColorGradientFill();
 
@@ -71,7 +72,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
 
     Gradient aGradient( rGradient );
 
-    if ( maGraphicsState.mnDrawMode & DrawModeFlags::GrayGradient )
+    if ( mpGraphicsState->mnDrawMode & DrawModeFlags::GrayGradient )
         aGradient.MakeGrayscale();
 
     DrawGradientToMetafile( rPolyPoly, rGradient );
@@ -114,7 +115,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
         return;
 
     // draw gradients without border
-    if( maGraphicsState.mbLineColor || mbInitLineColor )
+    if( mpGraphicsState->mbLineColor || mbInitLineColor )
     {
         mpGraphics->SetLineColor();
         mbInitLineColor = true;
@@ -175,7 +176,7 @@ void OutputDevice::DrawGradientToMetafile ( const tools::PolyPolygon& rPolyPoly,
 
     Gradient aGradient( rGradient );
 
-    if (maGraphicsState.mnDrawMode & DrawModeFlags::GrayGradient)
+    if (mpGraphicsState->mnDrawMode & DrawModeFlags::GrayGradient)
         aGradient.MakeGrayscale();
 
     if ( rPolyPoly.IsRect() )
@@ -595,13 +596,13 @@ Color OutputDevice::GetSingleColorGradientFill()
     Color aColor;
 
     // we should never call on this function if any of these aren't set!
-    assert( maGraphicsState.mnDrawMode & ( DrawModeFlags::WhiteGradient | DrawModeFlags::SettingsGradient) );
+    assert( mpGraphicsState->mnDrawMode & ( DrawModeFlags::WhiteGradient | DrawModeFlags::SettingsGradient) );
 
-    if ( maGraphicsState.mnDrawMode & DrawModeFlags::WhiteGradient )
+    if ( mpGraphicsState->mnDrawMode & DrawModeFlags::WhiteGradient )
         aColor = COL_WHITE;
-    else if ( maGraphicsState.mnDrawMode & DrawModeFlags::SettingsGradient )
+    else if ( mpGraphicsState->mnDrawMode & DrawModeFlags::SettingsGradient )
     {
-        if (maGraphicsState.mnDrawMode & DrawModeFlags::SettingsForSelection)
+        if (mpGraphicsState->mnDrawMode & DrawModeFlags::SettingsForSelection)
             aColor = GetSettings().GetStyleSettings().GetHighlightColor();
         else
             aColor = GetSettings().GetStyleSettings().GetWindowColor();

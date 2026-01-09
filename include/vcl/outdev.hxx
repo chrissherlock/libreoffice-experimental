@@ -105,6 +105,7 @@ enum class SystemTextColorFlags;
 
 namespace vcl
 {
+    struct GraphicsState;
     class ExtOutDevData;
     class TextLayoutCommon;
     struct FontCapabilities;
@@ -159,38 +160,6 @@ namespace vcl {
 
 VCL_DLLPUBLIC void InvertFocusRect(vcl::RenderContext& rRenderContext, const tools::Rectangle& rRect);
 
-struct GraphicsState
-{
-    Color maLineColor;
-    bool  mbLineColor;
-    Color maFillColor;
-    bool  mbFillColor;
-    Point maRefPoint;
-    bool  mbRefPoint;
-    RasterOp meRasterOp;
-
-    Color maTextColor;
-    Color maTextLineColor;
-    Color maOverlineColor;
-
-    AntialiasingFlags mnAntialiasing;
-    DrawModeFlags mnDrawMode;
-
-    GraphicsState()
-        : maLineColor(COL_BLACK)
-        , mbLineColor(true)
-        , maFillColor(COL_WHITE)
-        , mbFillColor(true)
-        , mbRefPoint(false)
-        , meRasterOp(RasterOp::OverPaint)
-        , maTextColor(COL_BLACK)
-        , maTextLineColor(COL_TRANSPARENT)
-        , maOverlineColor(COL_TRANSPARENT)
-        , mnAntialiasing(AntialiasingFlags::NONE)
-        , mnDrawMode(DrawModeFlags::Default)
-    {}
-};
-
 /**
 * Some things multiple-inherit from VclAbstractDialog and OutputDevice,
 * so we need to use virtual inheritance to keep the referencing counting
@@ -221,7 +190,7 @@ private:
     std::vector< VCLXGraphics* >*   mpUnoGraphicsList;
     vcl::ExtOutDevData*             mpExtOutDevData;
     mutable std::unique_ptr<CoordinateMapper> mpMapper;
-    GraphicsState maGraphicsState;
+    std::unique_ptr<vcl::GraphicsState> mpGraphicsState;
 
     // The canvas interface for this output device. Is persistent after the first GetCanvas() call
     mutable css::uno::WeakReference< css::rendering::XCanvas >    mxCanvas;
@@ -304,8 +273,8 @@ public:
 
     void                        SetRefPoint();
     void                        SetRefPoint( const Point& rRefPoint );
-    const Point&                GetRefPoint() const { return maGraphicsState.maRefPoint; }
-    bool                        IsRefPoint() const { return maGraphicsState.mbRefPoint; }
+    const Point&                GetRefPoint() const;
+    bool                        IsRefPoint() const;
 
     virtual bool                IsScreenComp() const { return true; }
 
@@ -498,10 +467,10 @@ public:
     bool                        IsDeviceOutputNecessary() const { return (mbOutput && mbDevOutput); }
 
     void                        SetAntialiasing( AntialiasingFlags nMode );
-    AntialiasingFlags           GetAntialiasing() const { return maGraphicsState.mnAntialiasing; }
+    AntialiasingFlags           GetAntialiasing() const;
 
     void                        SetDrawMode( DrawModeFlags nDrawMode );
-    DrawModeFlags               GetDrawMode() const { return maGraphicsState.mnDrawMode; }
+    DrawModeFlags               GetDrawMode() const;
 
     void                        SetLayoutMode( vcl::text::ComplexTextLayoutFlags nTextLayoutMode );
     vcl::text::ComplexTextLayoutFlags GetLayoutMode() const { return mnTextLayoutMode; }
@@ -510,7 +479,7 @@ public:
     LanguageType                GetDigitLanguage() const { return meTextLanguage; }
 
     void                        SetRasterOp( RasterOp eRasterOp );
-    RasterOp                    GetRasterOp() const { return maGraphicsState.meRasterOp; }
+    RasterOp                    GetRasterOp() const;
 
     /**
     If this OutputDevice is used for displaying a Print Preview
@@ -524,13 +493,13 @@ public:
 
     void                        SetLineColor();
     void                        SetLineColor( const Color& rColor );
-    const Color&                GetLineColor() const { return maGraphicsState.maLineColor; }
-    bool                        IsLineColor() const { return maGraphicsState.mbLineColor; }
+    const Color&                GetLineColor() const;
+    bool                        IsLineColor() const;
 
     void                        SetFillColor();
     void                        SetFillColor( const Color& rColor );
-    const Color&                GetFillColor() const { return maGraphicsState.maFillColor; }
-    bool                        IsFillColor() const { return maGraphicsState.mbFillColor; }
+    const Color&                GetFillColor() const;
+    bool                        IsFillColor() const;
 
     void                        SetBackground();
     void                        SetBackground( const Wallpaper& rBackground );
@@ -1034,7 +1003,7 @@ public:
 
     void                        SetTextColor( const Color& rColor );
     virtual void                SetSystemTextColor(SystemTextColorFlags nFlags, bool bEnabled);
-    const Color&                GetTextColor() const { return maGraphicsState.maTextColor; }
+    const Color&                GetTextColor() const;
 
     void                        SetTextFillColor();
     void                        SetTextFillColor( const Color& rColor );
@@ -1043,13 +1012,13 @@ public:
 
     void                        SetTextLineColor();
     void                        SetTextLineColor( const Color& rColor );
-    const Color&                GetTextLineColor() const { return maGraphicsState.maTextLineColor; }
-    bool                        IsTextLineColor() const { return !maGraphicsState.maTextLineColor.IsTransparent(); }
+    const Color&                GetTextLineColor() const;
+    bool                        IsTextLineColor() const;
 
     void                        SetOverlineColor();
     void                        SetOverlineColor( const Color& rColor );
-    const Color&                GetOverlineColor() const { return maGraphicsState.maOverlineColor; }
-    bool                        IsOverlineColor() const { return !maGraphicsState.maOverlineColor.IsTransparent(); }
+    const Color&                GetOverlineColor() const;
+    bool                        IsOverlineColor() const;
 
     void                        SetTextAlign( TextAlign eAlign );
     TextAlign                   GetTextAlign() const { return maFont.GetAlignment(); }
