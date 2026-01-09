@@ -2198,6 +2198,35 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testRenderStateFlags)
     CPPUNIT_ASSERT_EQUAL(DrawModeFlags::GrayLine, pDev->GetDrawMode());
 }
 
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testClipRegionPushPop)
+{
+    ScopedVclPtrInstance<VirtualDevice> pDev;
+    pDev->EnableOutput(true);
+    pDev->SetMapMode(MapMode(MapUnit::Map100thMM));
+
+    tools::Rectangle aRect1(Point(100, 100), Size(1000, 1000));
+    vcl::Region aRegion1(aRect1);
+
+    pDev->SetClipRegion(aRegion1);
+
+    // Read back the region immediately to get the "quantized" version.
+    // We assert that Push/Pop restores THIS value, not the original 'aRegion1'.
+    vcl::Region aEffectiveRegion = pDev->GetClipRegion();
+
+    pDev->Push(vcl::PushFlags::CLIPREGION);
+
+    tools::Rectangle aRect2(Point(500, 500), Size(200, 200));
+    vcl::Region aRegion2(aRect2);
+    pDev->SetClipRegion(aRegion2);
+
+    CPPUNIT_ASSERT(aEffectiveRegion != pDev->GetClipRegion());
+
+    pDev->Pop();
+
+    // Compare against the effective (quantized) region we saved earlier
+    CPPUNIT_ASSERT_EQUAL(aEffectiveRegion, pDev->GetClipRegion());
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
