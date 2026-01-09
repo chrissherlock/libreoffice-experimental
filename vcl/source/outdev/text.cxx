@@ -477,9 +477,9 @@ void OutputDevice::SetTextColor( const Color& rColor )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaTextColorAction( aColor ) );
 
-    if ( maTextColor != aColor )
+    if ( maGraphicsState.maTextColor != aColor )
     {
-        maTextColor = aColor;
+        maGraphicsState.maTextColor = aColor;
         mbInitTextColor = true;
     }
 }
