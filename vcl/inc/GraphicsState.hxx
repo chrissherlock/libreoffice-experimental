@@ -13,6 +13,7 @@
 #include <tools/gen.hxx>
 
 #include <vcl/font.hxx>
+#include <vcl/region.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/rendercontext/RasterOp.hxx>
@@ -38,6 +39,9 @@ struct GraphicsState
 
     vcl::Font maFont;
 
+    vcl::Region maClipRegion;
+    bool mbClipRegion;
+
     GraphicsState()
         : maLineColor(COL_BLACK)
         , mbLineColor(true)
@@ -51,6 +55,8 @@ struct GraphicsState
         , mnAntialiasing(AntialiasingFlags::NONE)
         , mnDrawMode(DrawModeFlags::Default)
         , maFont()
+        , maClipRegion(true)
+        , mbClipRegion(false)
     {
     }
 };
