@@ -921,7 +921,7 @@ void OutputDevice::SetTextLineColor()
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaTextLineColorAction( Color(), false ) );
 
-    maTextLineColor = COL_TRANSPARENT;
+    maGraphicsState.maTextLineColor = COL_TRANSPARENT;
 }
 
 void OutputDevice::SetTextLineColor( const Color& rColor )
@@ -931,7 +931,7 @@ void OutputDevice::SetTextLineColor( const Color& rColor )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaTextLineColorAction( aColor, true ) );
 
-    maTextLineColor = aColor;
+    maGraphicsState.maTextLineColor = aColor;
 }
 
 void OutputDevice::SetOverlineColor()
@@ -939,7 +939,7 @@ void OutputDevice::SetOverlineColor()
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaOverlineColorAction( Color(), false ) );
 
-    maOverlineColor = COL_TRANSPARENT;
+    maGraphicsState.maOverlineColor = COL_TRANSPARENT;
 }
 
 void OutputDevice::SetOverlineColor( const Color& rColor )
@@ -949,7 +949,7 @@ void OutputDevice::SetOverlineColor( const Color& rColor )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaOverlineColorAction( aColor, true ) );
 
-    maOverlineColor = aColor;
+    maGraphicsState.maOverlineColor = aColor;
 }
 
 void OutputDevice::DrawTextLine( const Point& rPos, tools::Long nWidth,

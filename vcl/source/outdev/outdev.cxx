@@ -60,7 +60,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mpMapper(std::make_unique<CoordinateMapper>()),
     meOutDevType(eOutDevType),
     maRegion(true),
-    maTextLineColor( COL_TRANSPARENT ),
     moSettings( Application::GetSettings() )
 {
     SetGraphics(nullptr);
@@ -88,8 +87,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mbOutput                        = true;
     mbDevOutput                     = false;
     mbOutputClipped                 = false;
-    maTextColor                     = COL_BLACK;
-    maOverlineColor                 = COL_TRANSPARENT;
     mnAntialiasing                  = AntialiasingFlags::NONE;
     meTextLanguage                  = LANGUAGE_SYSTEM;  // TODO: get default from configuration?
     mbInitLineColor                 = true;

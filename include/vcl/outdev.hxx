@@ -166,6 +166,10 @@ struct GraphicsState
     bool  mbRefPoint;
     RasterOp meRasterOp;
 
+    Color maTextColor;
+    Color maTextLineColor;
+    Color maOverlineColor;
+
     GraphicsState()
         : maLineColor(COL_BLACK)
         , mbLineColor(true)
@@ -173,6 +177,9 @@ struct GraphicsState
         , mbFillColor(true)
         , mbRefPoint(false)
         , meRasterOp(RasterOp::OverPaint)
+        , maTextColor(COL_BLACK)
+        , maTextLineColor(COL_TRANSPARENT)
+        , maOverlineColor(COL_TRANSPARENT)
     {}
 };
 
@@ -222,9 +229,6 @@ private:
     OutDevViewType                  meOutDevViewType;
     vcl::Region                     maRegion;           // contains the clip region, see SetClipRegion(...)
     vcl::Font                       maFont;
-    Color                           maTextColor;
-    Color                           maTextLineColor;
-    Color                           maOverlineColor;
     Wallpaper                       maBackground;
     std::optional<AllSettings>      moSettings;
     AntialiasingFlags               mnAntialiasing;
@@ -1025,7 +1029,7 @@ public:
 
     void                        SetTextColor( const Color& rColor );
     virtual void                SetSystemTextColor(SystemTextColorFlags nFlags, bool bEnabled);
-    const Color&                GetTextColor() const { return maTextColor; }
+    const Color&                GetTextColor() const { return maGraphicsState.maTextColor; }
 
     void                        SetTextFillColor();
     void                        SetTextFillColor( const Color& rColor );
@@ -1034,13 +1038,13 @@ public:
 
     void                        SetTextLineColor();
     void                        SetTextLineColor( const Color& rColor );
-    const Color&                GetTextLineColor() const { return maTextLineColor; }
-    bool                        IsTextLineColor() const { return !maTextLineColor.IsTransparent(); }
+    const Color&                GetTextLineColor() const { return maGraphicsState.maTextLineColor; }
+    bool                        IsTextLineColor() const { return !maGraphicsState.maTextLineColor.IsTransparent(); }
 
     void                        SetOverlineColor();
     void                        SetOverlineColor( const Color& rColor );
-    const Color&                GetOverlineColor() const { return maOverlineColor; }
-    bool                        IsOverlineColor() const { return !maOverlineColor.IsTransparent(); }
+    const Color&                GetOverlineColor() const { return maGraphicsState.maOverlineColor; }
+    bool                        IsOverlineColor() const { return !maGraphicsState.maOverlineColor.IsTransparent(); }
 
     void                        SetTextAlign( TextAlign eAlign );
     TextAlign                   GetTextAlign() const { return maFont.GetAlignment(); }
