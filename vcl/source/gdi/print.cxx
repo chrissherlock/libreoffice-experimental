@@ -37,6 +37,7 @@
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 
 #include <CoordinateMapper.hxx>
+#include <GraphicsState.hxx>
 #include <jobset.h>
 #include <print.h>
 #include <ImplOutDevData.hxx>
@@ -1673,7 +1674,7 @@ css::awt::DeviceInfo Printer::GetDeviceInfo() const
 
 void Printer::SetWaveLineColors(Color const& rColor, tools::Long)
 {
-    if (maGraphicsState.mbLineColor || mbInitLineColor)
+    if (mpGraphicsState->mbLineColor || mbInitLineColor)
     {
         mpGraphics->SetLineColor();
         mbInitLineColor = true;
