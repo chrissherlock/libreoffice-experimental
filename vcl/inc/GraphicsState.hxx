@@ -15,6 +15,8 @@
 #include <vcl/font.hxx>
 #include <vcl/region.hxx>
 #include <vcl/wall.hxx>
+#include <i18nlangtag/lang.h>
+#include <vcl/rendercontext/State.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/rendercontext/RasterOp.hxx>
@@ -47,6 +49,10 @@ struct GraphicsState
     Wallpaper maBackground;
     bool mbBackground;
 
+    // Text Layout State
+    LanguageType meTextLanguage;
+    vcl::text::ComplexTextLayoutFlags mnTextLayoutMode;
+
     GraphicsState()
         : maLineColor(COL_BLACK)
         , mbLineColor(true)
@@ -64,6 +70,8 @@ struct GraphicsState
         , mbClipRegion(false)
         , maBackground()
         , mbBackground(false)
+        , meTextLanguage(LANGUAGE_NONE)
+        , mnTextLayoutMode(vcl::text::ComplexTextLayoutFlags::Default)
     {
     }
 };

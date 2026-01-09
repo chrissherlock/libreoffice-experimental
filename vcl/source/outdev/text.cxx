@@ -56,12 +56,22 @@
 
 #define TEXT_DRAW_ELLIPSIS  (DrawTextFlags::EndEllipsis | DrawTextFlags::PathEllipsis | DrawTextFlags::NewsEllipsis)
 
+vcl::text::ComplexTextLayoutFlags OutputDevice::GetLayoutMode() const
+{
+    return mpGraphicsState->mnTextLayoutMode;
+}
+
 void OutputDevice::SetLayoutMode( vcl::text::ComplexTextLayoutFlags nTextLayoutMode )
 {
     if( mpMetaFile )
         mpMetaFile->AddAction( new MetaLayoutModeAction( nTextLayoutMode ) );
 
-    mnTextLayoutMode = nTextLayoutMode;
+    mpGraphicsState->mnTextLayoutMode = nTextLayoutMode;
+}
+
+LanguageType OutputDevice::GetDigitLanguage() const
+{
+    return mpGraphicsState->meTextLanguage;
 }
 
 void OutputDevice::SetDigitLanguage( LanguageType eTextLanguage )
@@ -69,7 +79,7 @@ void OutputDevice::SetDigitLanguage( LanguageType eTextLanguage )
     if( mpMetaFile )
         mpMetaFile->AddAction( new MetaTextLanguageAction( eTextLanguage ) );
 
-    meTextLanguage = eTextLanguage;
+    mpGraphicsState->meTextLanguage = eTextLanguage;
 }
 
 void OutputDevice::ImplInitTextColor()
@@ -1013,18 +1023,18 @@ vcl::text::ImplLayoutArgs OutputDevice::ImplPrepareLayoutArgs( OUString& rStr,
         ( mpFontInstance && mpFontInstance->GetFontSelectPattern().GetPitch() == PITCH_FIXED ) )
         nLayoutFlags |= SalLayoutFlags::DisableLigatures;
 
-    if( meTextLanguage ) //TODO: (mnTextLayoutMode & vcl::text::ComplexTextLayoutFlags::SubstituteDigits)
+    if (mpGraphicsState->meTextLanguage) //TODO: (mpGraphicsState->mnTextLayoutMode & vcl::text::ComplexTextLayoutFlags::SubstituteDigits)
     {
         sal_Int32 nSubstringLen = nEndIndex - nMinIndex;
-        rStr = LocalizeDigitsInString(rStr, meTextLanguage, nMinIndex, nSubstringLen);
+        rStr = LocalizeDigitsInString(rStr, mpGraphicsState->meTextLanguage, nMinIndex, nSubstringLen);
         nEndIndex = nMinIndex + nSubstringLen;
     }
 
     // right align for RTL text, DRAWPOS_REVERSED, RTL window style
-    bool bRightAlign = bool(mnTextLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiRtl);
-    if( mnTextLayoutMode & vcl::text::ComplexTextLayoutFlags::TextOriginLeft )
+    bool bRightAlign = bool(mpGraphicsState->mnTextLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiRtl);
+    if( mpGraphicsState->mnTextLayoutMode & vcl::text::ComplexTextLayoutFlags::TextOriginLeft )
         bRightAlign = false;
-    else if ( mnTextLayoutMode & vcl::text::ComplexTextLayoutFlags::TextOriginRight )
+    else if ( mpGraphicsState->mnTextLayoutMode & vcl::text::ComplexTextLayoutFlags::TextOriginRight )
         bRightAlign = true;
     // SSA: hack for western office, ie text get right aligned
     //      for debugging purposes of mirrored UI
@@ -1049,11 +1059,11 @@ SalLayoutFlags OutputDevice::GetBiDiLayoutFlags( std::u16string_view rStr,
                                                  const sal_Int32 nEndIndex ) const
 {
     SalLayoutFlags nLayoutFlags = SalLayoutFlags::NONE;
-    if( mnTextLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiRtl )
+    if( mpGraphicsState->mnTextLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiRtl )
         nLayoutFlags |= SalLayoutFlags::BiDiRtl;
-    if( mnTextLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiStrong )
+    if( mpGraphicsState->mnTextLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiStrong )
         nLayoutFlags |= SalLayoutFlags::BiDiStrong;
-    else if( !(mnTextLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiRtl) )
+    else if( !(mpGraphicsState->mnTextLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiRtl) )
     {
         // Disable Bidi if no RTL hint and only known LTR codes used.
         bool bAllLtr = true;

@@ -202,13 +202,11 @@ private:
     mutable tools::Long                    mnTextOffY;
     mutable tools::Long                    mnEmphasisAscent;
     mutable tools::Long                    mnEmphasisDescent;
-    vcl::text::ComplexTextLayoutFlags mnTextLayoutMode;
     const OutDevType                meOutDevType;
     OutDevViewType                  meOutDevViewType;
     vcl::Region                     maRegion;           // contains the clip region, see SetClipRegion(...)
     Wallpaper                       maBackground;
     std::optional<AllSettings>      moSettings;
-    LanguageType                    meTextLanguage;
 
     mutable bool                    mbClipRegion : 1;
     mutable bool                    mbBackground : 1;
@@ -474,10 +472,10 @@ public:
     DrawModeFlags               GetDrawMode() const;
 
     void                        SetLayoutMode( vcl::text::ComplexTextLayoutFlags nTextLayoutMode );
-    vcl::text::ComplexTextLayoutFlags GetLayoutMode() const { return mnTextLayoutMode; }
+    vcl::text::ComplexTextLayoutFlags GetLayoutMode() const;
 
     void                        SetDigitLanguage( LanguageType );
-    LanguageType                GetDigitLanguage() const { return meTextLanguage; }
+    LanguageType                GetDigitLanguage() const;
 
     void                        SetRasterOp( RasterOp eRasterOp );
     RasterOp                    GetRasterOp() const;

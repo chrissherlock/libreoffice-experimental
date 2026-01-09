@@ -81,16 +81,16 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mnTextOffY                      = 0;
     mnEmphasisAscent                = 0;
     mnEmphasisDescent               = 0;
-    mnTextLayoutMode                = vcl::text::ComplexTextLayoutFlags::Default;
+    mpGraphicsState->mnTextLayoutMode                = vcl::text::ComplexTextLayoutFlags::Default;
 
     if( AllSettings::GetLayoutRTL() ) //#i84553# tip BiDi preference to RTL
-        mnTextLayoutMode            = vcl::text::ComplexTextLayoutFlags::BiDiRtl | vcl::text::ComplexTextLayoutFlags::TextOriginLeft;
+        mpGraphicsState->mnTextLayoutMode            = vcl::text::ComplexTextLayoutFlags::BiDiRtl | vcl::text::ComplexTextLayoutFlags::TextOriginLeft;
 
     meOutDevViewType                = OutDevViewType::DontKnow;
     mbOutput                        = true;
     mbDevOutput                     = false;
     mbOutputClipped                 = false;
-    meTextLanguage                  = LANGUAGE_SYSTEM;  // TODO: get default from configuration?
+    mpGraphicsState->meTextLanguage                  = LANGUAGE_SYSTEM;  // TODO: get default from configuration?
     mbInitLineColor                 = true;
     mbInitFont                      = true;
     mbInitTextColor                 = true;
