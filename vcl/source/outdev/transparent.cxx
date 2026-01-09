@@ -142,7 +142,7 @@ void OutputDevice::DrawTransparent(
 
         if (IsLineColor())
         {
-            const bool bPixelSnapHairline(mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+            const bool bPixelSnapHairline(maGraphicsState.mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
 
             for(auto const& rPolygon : std::as_const(aB2DPolyPolygon))
             {
@@ -243,7 +243,7 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
             mpGraphics->SetFillColor();
 
             // draw the border line
-            const bool bPixelSnapHairline(mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+            const bool bPixelSnapHairline(maGraphicsState.mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
 
             for(auto const& rPolygon : std::as_const(aB2DPolyPolygon))
             {
@@ -435,7 +435,7 @@ void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
     assert(!is_double_buffered_window());
 
     // short circuit for drawing an opaque polygon
-    if( (nTransparencePercent < 1) || (mnDrawMode & DrawModeFlags::NoTransparency) )
+    if( (nTransparencePercent < 1) || (maGraphicsState.mnDrawMode & DrawModeFlags::NoTransparency) )
     {
         DrawPolyPolygon( rPolyPoly );
         return;
@@ -489,7 +489,7 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
         return;
 
     if( ( rTransparenceGradient.GetStartColor() == aBlack && rTransparenceGradient.GetEndColor() == aBlack ) ||
-        ( mnDrawMode & DrawModeFlags::NoTransparency ) )
+        ( maGraphicsState.mnDrawMode & DrawModeFlags::NoTransparency ) )
     {
         const_cast<GDIMetaFile&>(rMtf).WindStart();
         const_cast<GDIMetaFile&>(rMtf).Play(*this, rMtfPos, rMtfSize);
