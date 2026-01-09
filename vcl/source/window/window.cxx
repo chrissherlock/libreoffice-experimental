@@ -49,6 +49,7 @@
 
 #include <vcl/uitest/uiobject.hxx>
 
+#include <GraphicsState.hxx>
 #include <ImplOutDevData.hxx>
 #include <impfontcache.hxx>
 #include <salframe.hxx>
@@ -1162,7 +1163,7 @@ void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* p
     if (!comphelper::IsFuzzing())
     {
         const StyleSettings& rStyleSettings = mpWindowImpl->mxOutDev->moSettings->GetStyleSettings();
-        mpWindowImpl->mxOutDev->maFont = rStyleSettings.GetAppFont();
+        mpWindowImpl->mxOutDev->mpGraphicsState->maFont = rStyleSettings.GetAppFont();
 
         if ( nStyle & WB_3DLOOK )
         {
@@ -1177,10 +1178,10 @@ void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* p
     }
     else
     {
-        mpWindowImpl->mxOutDev->maFont = OutputDevice::GetDefaultFont( DefaultFontType::FIXED, LANGUAGE_ENGLISH_US, GetDefaultFontFlags::NONE );
+        mpWindowImpl->mxOutDev->mpGraphicsState->maFont = OutputDevice::GetDefaultFont( DefaultFontType::FIXED, LANGUAGE_ENGLISH_US, GetDefaultFontFlags::NONE );
     }
 
-    ImplPointToLogic(*GetOutDev(), mpWindowImpl->mxOutDev->maFont);
+    ImplPointToLogic(*GetOutDev(), mpWindowImpl->mxOutDev->mpGraphicsState->maFont);
 
     (void)ImplUpdatePos();
 

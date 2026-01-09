@@ -183,7 +183,7 @@ void VirtualDevice::ImplInitVirDev( const OutputDevice* pOutDev,
     SetDPIX(pOutDev->GetDPIX());
     SetDPIY(pOutDev->GetDPIY());
     SetDPIScalePercentage(pOutDev->GetDPIScalePercentage());
-    maFont          = pOutDev->maFont;
+    mpGraphicsState->maFont          = pOutDev->mpGraphicsState->maFont;
 
     if( GetTextColor() != pOutDev->GetTextColor() )
     {
