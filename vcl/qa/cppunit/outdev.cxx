@@ -2257,6 +2257,34 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testBackgroundAccess)
     CPPUNIT_ASSERT(aEmptyWall == pDev->GetBackground());
 }
 
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testTextLayoutAccess)
+{
+    ScopedVclPtrInstance<VirtualDevice> pDev;
+    pDev->EnableOutput(true);
+
+    // Test Digit Language
+    // Default is usually LANGUAGE_NONE or system default, so explicit set is required
+    LanguageType eLang1 = LANGUAGE_ENGLISH_US;
+    pDev->SetDigitLanguage(eLang1);
+    CPPUNIT_ASSERT(eLang1 == pDev->GetDigitLanguage());
+
+    LanguageType eLang2 = LANGUAGE_GERMAN;
+    pDev->SetDigitLanguage(eLang2);
+    CPPUNIT_ASSERT(eLang2 == pDev->GetDigitLanguage());
+    CPPUNIT_ASSERT(eLang1 != pDev->GetDigitLanguage());
+
+    // Test Complex Text Layout Flags
+    // Use valid flags: Default and BiDiRtl
+    vcl::text::ComplexTextLayoutFlags nMode1 = vcl::text::ComplexTextLayoutFlags::Default;
+    pDev->SetLayoutMode(nMode1);
+    CPPUNIT_ASSERT(nMode1 == pDev->GetLayoutMode());
+
+    vcl::text::ComplexTextLayoutFlags nMode2 = vcl::text::ComplexTextLayoutFlags::BiDiRtl;
+    pDev->SetLayoutMode(nMode2);
+    CPPUNIT_ASSERT(nMode2 == pDev->GetLayoutMode());
+    CPPUNIT_ASSERT(nMode1 != pDev->GetLayoutMode());
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
