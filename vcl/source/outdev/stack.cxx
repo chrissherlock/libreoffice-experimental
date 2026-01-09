@@ -48,7 +48,7 @@ void OutputDevice::Push(vcl::PushFlags nFlags)
         rState.mpFillColor = mpGraphicsState->maFillColor;
 
     if (nFlags & vcl::PushFlags::FONT)
-        rState.mpFont = maFont;
+        rState.mpFont = mpGraphicsState->maFont;
 
     if (nFlags & vcl::PushFlags::TEXTCOLOR)
         rState.mpTextColor = GetTextColor();
