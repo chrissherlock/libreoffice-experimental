@@ -87,7 +87,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
         mnTextLayoutMode            = vcl::text::ComplexTextLayoutFlags::BiDiRtl | vcl::text::ComplexTextLayoutFlags::TextOriginLeft;
 
     meOutDevViewType                = OutDevViewType::DontKnow;
-    mbBackground                    = false;
     mbOutput                        = true;
     mbDevOutput                     = false;
     mbOutputClipped                 = false;

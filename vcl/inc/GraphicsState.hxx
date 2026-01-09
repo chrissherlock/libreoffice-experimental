@@ -14,6 +14,7 @@
 
 #include <vcl/font.hxx>
 #include <vcl/region.hxx>
+#include <vcl/wall.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/rendercontext/RasterOp.hxx>
@@ -42,6 +43,10 @@ struct GraphicsState
     vcl::Region maClipRegion;
     bool mbClipRegion;
 
+    // Background State
+    Wallpaper maBackground;
+    bool mbBackground;
+
     GraphicsState()
         : maLineColor(COL_BLACK)
         , mbLineColor(true)
@@ -57,6 +62,8 @@ struct GraphicsState
         , maFont()
         , maClipRegion(true)
         , mbClipRegion(false)
+        , maBackground()
+        , mbBackground(false)
     {
     }
 };
