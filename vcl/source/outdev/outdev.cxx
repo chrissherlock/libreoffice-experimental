@@ -94,7 +94,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mbOutputClipped                 = false;
     maTextColor                     = COL_BLACK;
     maOverlineColor                 = COL_TRANSPARENT;
-    meRasterOp                      = RasterOp::OverPaint;
     mnAntialiasing                  = AntialiasingFlags::NONE;
     meTextLanguage                  = LANGUAGE_SYSTEM;  // TODO: get default from configuration?
     mbInitLineColor                 = true;
@@ -304,15 +303,15 @@ void OutputDevice::SetRasterOp( RasterOp eRasterOp )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaRasterOpAction( eRasterOp ) );
 
-    if ( meRasterOp != eRasterOp )
+    if ( maGraphicsState.meRasterOp != eRasterOp )
     {
-        meRasterOp = eRasterOp;
+        maGraphicsState.meRasterOp = eRasterOp;
         mbInitLineColor = mbInitFillColor = true;
 
         if( mpGraphics || AcquireGraphics() )
         {
             assert(mpGraphics);
-            mpGraphics->SetXORMode( (RasterOp::Invert == meRasterOp) || (RasterOp::Xor == meRasterOp), RasterOp::Invert == meRasterOp );
+            mpGraphics->SetXORMode( (RasterOp::Invert == maGraphicsState.meRasterOp) || (RasterOp::Xor == maGraphicsState.meRasterOp), RasterOp::Invert == maGraphicsState.meRasterOp );
         }
     }
 }
@@ -380,7 +379,7 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
     if( ImplIsRecordLayout() )
         return;
 
-    if ( RasterOp::Invert == meRasterOp )
+    if ( RasterOp::Invert == maGraphicsState.meRasterOp )
     {
         DrawRect( tools::Rectangle( rDestPt, rDestSize ) );
         return;
@@ -431,7 +430,7 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
     if ( ImplIsRecordLayout() )
         return;
 
-    if ( RasterOp::Invert == meRasterOp )
+    if ( RasterOp::Invert == maGraphicsState.meRasterOp )
     {
         DrawRect( tools::Rectangle( rDestPt, rDestSize ) );
         return;

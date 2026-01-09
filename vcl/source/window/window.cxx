@@ -880,7 +880,7 @@ bool WindowOutputDevice::AcquireGraphics() const
         if ( !pSVData->maGDIData.mpLastWinGraphics )
             pSVData->maGDIData.mpLastWinGraphics = const_cast<vcl::WindowOutputDevice*>(this);
 
-        mpGraphics->SetXORMode( (RasterOp::Invert == meRasterOp) || (RasterOp::Xor == meRasterOp), RasterOp::Invert == meRasterOp );
+        mpGraphics->SetXORMode((RasterOp::Invert == GetRasterOp()) || (RasterOp::Xor == GetRasterOp()), RasterOp::Invert == GetRasterOp());
         mpGraphics->setAntiAlias(bool(mnAntialiasing & AntialiasingFlags::Enable));
     }
 
@@ -3812,7 +3812,7 @@ bool Window::DeleteSurroundingText(const Selection& rSelection)
 
 bool WindowOutputDevice::UsePolyPolygonForComplexGradient()
 {
-    return meRasterOp != RasterOp::OverPaint;
+    return GetRasterOp() != RasterOp::OverPaint;
 }
 
 void Window::ApplySettings(vcl::RenderContext& /*rRenderContext*/)

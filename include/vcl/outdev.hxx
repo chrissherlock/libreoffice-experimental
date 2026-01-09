@@ -165,9 +165,9 @@ struct GraphicsState
     bool  mbLineColor;
     Color maFillColor;
     bool  mbFillColor;
-
     Point maRefPoint;
     bool  mbRefPoint;
+    RasterOp meRasterOp;
 
     GraphicsState()
         : maLineColor(COL_BLACK)
@@ -175,6 +175,7 @@ struct GraphicsState
         , maFillColor(COL_WHITE)
         , mbFillColor(true)
         , mbRefPoint(false)
+        , meRasterOp(RasterOp::OverPaint)
     {}
 };
 
@@ -227,7 +228,6 @@ private:
     Color                           maTextColor;
     Color                           maTextLineColor;
     Color                           maOverlineColor;
-    RasterOp                        meRasterOp;
     Wallpaper                       maBackground;
     std::optional<AllSettings>      moSettings;
     AntialiasingFlags               mnAntialiasing;
@@ -503,7 +503,7 @@ public:
     LanguageType                GetDigitLanguage() const { return meTextLanguage; }
 
     void                        SetRasterOp( RasterOp eRasterOp );
-    RasterOp                    GetRasterOp() const { return meRasterOp; }
+    RasterOp                    GetRasterOp() const { return maGraphicsState.meRasterOp; }
 
     /**
     If this OutputDevice is used for displaying a Print Preview
