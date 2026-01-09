@@ -2122,31 +2122,40 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawGradient_rect_complex)
 
 CPPUNIT_TEST_FIXTURE(VclOutdevTest, testGraphicStatePushPop)
 {
-    ScopedVclPtr<VirtualDevice> pDev(VclPtr<VirtualDevice>::Create());
+    ScopedVclPtrInstance<VirtualDevice> pDev;
+    pDev->EnableOutput(true);
 
     pDev->SetLineColor(COL_RED);
     pDev->SetFillColor(COL_GREEN);
     pDev->SetRasterOp(RasterOp::Xor);
+    pDev->SetTextColor(COL_BLACK);
+    pDev->SetTextLineColor(COL_TRANSPARENT);
+    pDev->SetOverlineColor(COL_TRANSPARENT);
 
-    CPPUNIT_ASSERT_EQUAL(COL_RED, pDev->GetLineColor());
-    CPPUNIT_ASSERT_EQUAL(COL_GREEN, pDev->GetFillColor());
-    CPPUNIT_ASSERT_EQUAL(RasterOp::Xor, pDev->GetRasterOp());
-
-    pDev->Push(vcl::PushFlags::LINECOLOR | vcl::PushFlags::FILLCOLOR | vcl::PushFlags::RASTEROP);
+    pDev->Push(vcl::PushFlags::ALL);
 
     pDev->SetLineColor(COL_BLUE);
     pDev->SetFillColor(COL_YELLOW);
     pDev->SetRasterOp(RasterOp::OverPaint);
+    pDev->SetTextColor(COL_CYAN);
+    pDev->SetTextLineColor(COL_MAGENTA);
+    pDev->SetOverlineColor(COL_LIGHTRED);
 
     CPPUNIT_ASSERT_EQUAL(COL_BLUE, pDev->GetLineColor());
     CPPUNIT_ASSERT_EQUAL(COL_YELLOW, pDev->GetFillColor());
     CPPUNIT_ASSERT_EQUAL(RasterOp::OverPaint, pDev->GetRasterOp());
+    CPPUNIT_ASSERT_EQUAL(COL_CYAN, pDev->GetTextColor());
+    CPPUNIT_ASSERT_EQUAL(COL_MAGENTA, pDev->GetTextLineColor());
+    CPPUNIT_ASSERT_EQUAL(COL_LIGHTRED, pDev->GetOverlineColor());
 
     pDev->Pop();
 
     CPPUNIT_ASSERT_EQUAL(COL_RED, pDev->GetLineColor());
     CPPUNIT_ASSERT_EQUAL(COL_GREEN, pDev->GetFillColor());
     CPPUNIT_ASSERT_EQUAL(RasterOp::Xor, pDev->GetRasterOp());
+    CPPUNIT_ASSERT_EQUAL(COL_BLACK, pDev->GetTextColor());
+    CPPUNIT_ASSERT_EQUAL(COL_TRANSPARENT, pDev->GetTextLineColor());
+    CPPUNIT_ASSERT_EQUAL(COL_TRANSPARENT, pDev->GetOverlineColor());
 }
 
 CPPUNIT_TEST_FIXTURE(VclOutdevTest, testRefPointLifecycle)
