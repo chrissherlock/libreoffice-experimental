@@ -86,7 +86,7 @@ bool VirtualDevice::AcquireGraphics() const
     if ( mpGraphics )
     {
         mpGraphics->SetXORMode( (RasterOp::Invert == GetRasterOp()) || (RasterOp::Xor == GetRasterOp()), RasterOp::Invert == GetRasterOp() );
-        mpGraphics->setAntiAlias(bool(mnAntialiasing & AntialiasingFlags::Enable));
+        mpGraphics->setAntiAlias(bool(GetAntialiasing() & AntialiasingFlags::Enable));
     }
 
     return mpGraphics != nullptr;
