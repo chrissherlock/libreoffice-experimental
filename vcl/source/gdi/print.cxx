@@ -514,7 +514,7 @@ bool Printer::AcquireGraphics() const
 
     if ( mpGraphics )
     {
-        mpGraphics->SetXORMode( (RasterOp::Invert == meRasterOp) || (RasterOp::Xor == meRasterOp), RasterOp::Invert == meRasterOp );
+        mpGraphics->SetXORMode( (RasterOp::Invert == GetRasterOp()) || (RasterOp::Xor == GetRasterOp()), RasterOp::Invert == GetRasterOp() );
         mpGraphics->setAntiAlias(bool(mnAntialiasing & AntialiasingFlags::Enable));
     }
 
