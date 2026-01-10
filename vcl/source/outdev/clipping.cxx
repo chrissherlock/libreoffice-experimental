@@ -87,7 +87,7 @@ bool OutputDevice::SelectClipRegion(const vcl::Region& rRegion, SalGraphics* pGr
     pGraphics->SetClipRegion(rRegion, *this);
 
     // Mark that the hardware is now in sync with this region
-    mpClippingController->SetInitClipRegion(false);
+    mpClippingController->SetDirty(false);
 
     return true;
 }
@@ -139,7 +139,7 @@ void OutputDevice::InitClipRegion()
 {
     DBG_TESTSOLARMUTEX();
 
-    if (!mpClippingController->NeedsInit())
+    if (!mpClippingController->IsDirty())
         return;
 
     if (mpClippingController->HasClipRegion())
@@ -171,7 +171,7 @@ void OutputDevice::InitClipRegion()
         mpClippingController->SetOutputClipped(false);
     }
 
-    mpClippingController->SetInitClipRegion(false);
+    mpClippingController->SetDirty(false);
 }
 
 vcl::Region OutputDevice::ClipToDeviceBounds(vcl::Region aRegion) const
