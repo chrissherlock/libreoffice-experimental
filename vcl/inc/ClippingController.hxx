@@ -19,7 +19,7 @@ class VCL_DLLPUBLIC ClippingController
 private:
     vcl::Region maClipRegion;
     bool mbClipRegion;
-    bool mbInitClipRegion;
+    bool mbDirty;
     bool mbOutputClipped;
 
 public:
