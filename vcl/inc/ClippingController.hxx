@@ -21,8 +21,9 @@ namespace vcl
 class VCL_DLLPUBLIC ClippingController
 {
 private:
-    vcl::Region maClipRegion;
-    bool mbClipRegion;
+    vcl::Region maLogicRegion;
+    bool mbHasClipRegion;
+
     bool mbDirty;
     bool mbOutputClipped;
     bool mbClipToDeviceBounds;
