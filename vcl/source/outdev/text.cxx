@@ -459,7 +459,7 @@ void OutputDevice::ImplDrawSpecialText( SalLayout& rSalLayout )
 
 void OutputDevice::ImplDrawText( SalLayout& rSalLayout )
 {
-    if (mpClippingController->NeedsInit())
+    if (mpClippingController->IsDirty())
         InitClipRegion();
 
     if (mpClippingController->IsOutputClipped())
