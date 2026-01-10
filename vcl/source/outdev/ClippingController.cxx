@@ -21,13 +21,13 @@ ClippingController::ClippingController()
 
 bool ClippingController::HasClipRegion() const { return mbClipRegion; }
 
-bool ClippingController::NeedsInit() const { return mbDirty; }
+bool ClippingController::IsDirty() const { return mbDirty; }
 
 bool ClippingController::IsOutputClipped() const { return mbOutputClipped; }
 
 const vcl::Region& ClippingController::GetClipRegion() const { return maClipRegion; }
 
-void ClippingController::SetInitClipRegion(bool bInit) { mbDirty = bInit; }
+void ClippingController::SetDirty(bool bDirty) { mbDirty = bDirty; }
 
 void ClippingController::SetOutputClipped(bool bClipped) { mbOutputClipped = bClipped; }
 

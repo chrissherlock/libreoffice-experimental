@@ -28,10 +28,11 @@ public:
     const vcl::Region& GetClipRegion() const;
     bool HasClipRegion() const;
     bool IsOutputClipped() const;
-    bool NeedsInit() const;
 
-    void SetInitClipRegion(bool bInit);
+    bool IsDirty() const;
+    void SetDirty(bool bDirty);
     void SetOutputClipped(bool bClipped);
+
     void SetClipRegion(const vcl::Region& rRegion);
     void SetNoClipRegion();
 
