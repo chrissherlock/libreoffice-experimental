@@ -33,6 +33,7 @@
 #include <vcl/print.hxx>
 #include <vcl/printer/Options.hxx>
 
+#include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
 #include <jobset.h>
@@ -458,7 +459,7 @@ bool Printer::AcquireGraphics() const
     mbFillColorDirty     = true;
     mbFontDirty          = true;
     mbInitTextColor     = true;
-    mbInitClipRegion    = true;
+    const_cast<Printer*>(this)->GetClippingController().SetDirty(true);
 
     ImplSVData* pSVData = ImplGetSVData();
 

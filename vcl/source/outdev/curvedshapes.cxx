@@ -20,6 +20,7 @@
 #include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
 
+#include <ClippingController.hxx>
 #include <GraphicsState.hxx>
 #include <salgdi.hxx>
 
@@ -44,9 +45,9 @@ void OutputDevice::DrawEllipse( const tools::Rectangle& rRect )
         return;
     assert(mpGraphics);
 
-    if ( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
-    if ( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     if ( mbLineColorDirty )
@@ -87,9 +88,9 @@ void OutputDevice::DrawArc( const tools::Rectangle& rRect,
         return;
     assert(mpGraphics);
 
-    if ( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
-    if ( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     if ( mbLineColorDirty )
@@ -126,9 +127,9 @@ void OutputDevice::DrawPie( const tools::Rectangle& rRect,
         return;
     assert(mpGraphics);
 
-    if ( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
-    if ( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     if ( mbLineColorDirty )
@@ -172,9 +173,9 @@ void OutputDevice::DrawChord( const tools::Rectangle& rRect,
         return;
     assert(mpGraphics);
 
-    if ( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
-    if ( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     if ( mbLineColorDirty )

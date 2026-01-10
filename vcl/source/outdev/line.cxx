@@ -28,6 +28,7 @@
 #include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
 
+#include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
 #include <drawmode.hxx>
@@ -119,10 +120,10 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
         return;
     assert(mpGraphics);
 
-    if ( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     const Point aStartPt(LogicToDevicePixel(rStartPt));
@@ -162,10 +163,10 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt )
         return;
     assert(mpGraphics);
 
-    if ( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     if ( mbLineColorDirty )

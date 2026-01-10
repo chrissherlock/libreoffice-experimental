@@ -24,6 +24,7 @@
 #include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
 
+#include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
 #include <salgdi.hxx>
@@ -47,10 +48,10 @@ void OutputDevice::DrawPolyLine( const tools::Polygon& rPoly )
         return;
     assert(mpGraphics);
 
-    if ( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     if ( mbLineColorDirty )
@@ -173,10 +174,10 @@ void OutputDevice::DrawPolyLine( const basegfx::B2DPolygon& rB2DPolygon,
         return;
     assert(mpGraphics);
 
-    if( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     if( mbLineColorDirty )
@@ -264,10 +265,10 @@ void OutputDevice::drawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
         return;
     assert(mpGraphics);
 
-    if ( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     if ( mbLineColorDirty )
@@ -353,10 +354,10 @@ bool OutputDevice::DrawPolyLineDirectInternal(
         return false;
     assert(mpGraphics);
 
-    if( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return true;
 
     if( mbLineColorDirty )

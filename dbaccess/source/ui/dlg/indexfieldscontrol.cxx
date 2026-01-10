@@ -134,7 +134,7 @@ constexpr auto BROWSER_STANDARD_FLAGS = BrowserMode::COLUMNSELECTION | BrowserMo
         if (!bEnabled)
             _rDev.SetTextColor(aOriginalColor);
 
-        if (_rDev.IsClipRegion())
+        if (_rDev.HasClipRegion())
             _rDev.SetClipRegion();
     }
 

@@ -878,7 +878,7 @@ bool ImpSdrGDIMetaFileImport::CheckLastPolyLineAndFillMerge(const basegfx::B2DPo
 
 void ImpSdrGDIMetaFileImport::checkClip()
 {
-    if(!mpVD->IsClipRegion())
+    if(!mpVD->HasClipRegion())
         return;
 
     maClip = mpVD->GetClipRegion().GetAsB2DPolyPolygon();

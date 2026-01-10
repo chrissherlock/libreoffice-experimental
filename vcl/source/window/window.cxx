@@ -49,6 +49,7 @@
 
 #include <vcl/uitest/uiobject.hxx>
 
+#include <ClippingController.hxx>
 #include <GraphicsState.hxx>
 #include <ImplOutDevData.hxx>
 #include <impfontcache.hxx>
@@ -831,7 +832,7 @@ bool WindowOutputDevice::AcquireGraphics() const
     mbFillColorDirty     = true;
     mbFontDirty          = true;
     mbInitTextColor     = true;
-    mbInitClipRegion    = true;
+    const_cast<WindowOutputDevice*>(this)->GetClippingController().SetDirty(true);
 
     ImplSVData* pSVData = ImplGetSVData();
 
@@ -1299,7 +1300,7 @@ SalGraphics* Window::ImplGetFrameGraphics() const
 {
     if ( mpWindowImpl->mpFrameWindow->GetOutDev()->mpGraphics )
     {
-        mpWindowImpl->mpFrameWindow->GetOutDev()->mbInitClipRegion = true;
+        mpWindowImpl->mpFrameWindow->GetOutDev()->GetClippingController().SetDirty(true);
     }
     else
     {
@@ -1688,7 +1689,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
                         {
 
                             OutputDevice *pOutDev = GetOutDev();
-                            const bool bSelectClipRegion = pOutDev->SelectClipRegion( aRegion, pGraphics );
+                            const bool bSelectClipRegion = pOutDev->SetGraphicsClip( aRegion, pGraphics );
                             if ( bSelectClipRegion )
                             {
                                 pGraphics->CopyArea(GetOutDev()->GetOutOffXPixel(), GetOutDev()->GetOutOffYPixel(),

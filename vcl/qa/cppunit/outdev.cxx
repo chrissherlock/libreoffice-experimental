@@ -2366,8 +2366,10 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testClipRegionStackPersistence)
         pVDev->IsOutputClipped());
 }
 
-CPPUNIT_TEST_FIXTURE(VclOutDevTest, testDisjointIntersectionEagerSync)
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDisjointIntersectionEagerSync)
 {
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+
     pVDev->SetClipRegion(vcl::Region(tools::Rectangle(0, 0, 10, 10)));
 
     pVDev->IntersectClipRegion(tools::Rectangle(20, 20, 30, 30));

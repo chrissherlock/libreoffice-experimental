@@ -53,7 +53,7 @@ void SwSaveClip::ChgClip_( const SwRect &rRect, const SwTextFrame* pFrame,
     if ( bVertical )
         pFrame->SwitchHorizontalToVertical( const_cast<SwRect&>(rRect) );
 
-    if ( !m_pOut || (!rRect.HasArea() && !m_pOut->IsClipRegion()) )
+    if ( !m_pOut || (!rRect.HasArea() && !m_pOut->HasClipRegion()) )
     {
         const_cast<SwRect&>(rRect) = aOldRect;
         return;
@@ -81,7 +81,7 @@ void SwSaveClip::ChgClip_( const SwRect &rRect, const SwTextFrame* pFrame,
             aRect.AdjustBottom( nEnlargeBottom );
 
         // If the ClipRect is identical, nothing will happen
-        if( m_pOut->IsClipRegion() ) // no && because of Mac
+        if( m_pOut->HasClipRegion() ) // no && because of Mac
         {
             if ( aRect == m_pOut->GetClipRegion().GetBoundRect() )
             {

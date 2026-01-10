@@ -31,6 +31,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/skia/SkiaHelper.hxx>
 
+#include <ClippingController.hxx>
 #include <GraphicsState.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
@@ -766,7 +767,7 @@ void OutputDevice::ImplDrawStrikeoutChar( tools::Long nBaseX, tools::Long nBaseY
 
     Push( vcl::PushFlags::CLIPREGION );
     IntersectClipRegion( PixelToLogic(aPixelRect) );
-    if( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
     pLayout->DrawText( *mpGraphics );
@@ -992,10 +993,10 @@ void OutputDevice::DrawTextLine( const Point& rPos, tools::Long nWidth,
     if ( !IsDeviceOutputNecessary() || ImplIsRecordLayout() )
         return;
 
-    if( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     // initialize font if needed to get text offsets
@@ -1021,10 +1022,10 @@ void OutputDevice::DrawWaveLine(const Point& rStartPos, const Point& rEndPos, to
         return;
     assert(mpGraphics);
 
-    if ( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     if (!InitFont())
@@ -1117,10 +1118,10 @@ void OutputDevice::ImplDrawWaveLineBezier(tools::Long nStartX, tools::Long nStar
         return;
     assert(mpGraphics);
 
-    if ( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     if (!InitFont())
