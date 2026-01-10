@@ -14,20 +14,20 @@ namespace vcl
 ClippingController::ClippingController()
     : maClipRegion(true)
     , mbClipRegion(false)
-    , mbInitClipRegion(true)
+    , mbDirty(true)
     , mbOutputClipped(false)
 {
 }
 
 bool ClippingController::HasClipRegion() const { return mbClipRegion; }
 
-bool ClippingController::NeedsInit() const { return mbInitClipRegion; }
+bool ClippingController::NeedsInit() const { return mbDirty; }
 
 bool ClippingController::IsOutputClipped() const { return mbOutputClipped; }
 
 const vcl::Region& ClippingController::GetClipRegion() const { return maClipRegion; }
 
-void ClippingController::SetInitClipRegion(bool bInit) { mbInitClipRegion = bInit; }
+void ClippingController::SetInitClipRegion(bool bInit) { mbDirty = bInit; }
 
 void ClippingController::SetOutputClipped(bool bClipped) { mbOutputClipped = bClipped; }
 
@@ -35,7 +35,7 @@ void ClippingController::SetClipRegion(const vcl::Region& rRegion)
 {
     maClipRegion = rRegion;
     mbClipRegion = true;
-    mbInitClipRegion = true;
+    mbDirty = true;
     mbOutputClipped = maClipRegion.IsEmpty();
 }
 
@@ -43,7 +43,7 @@ void ClippingController::SetNoClipRegion()
 {
     maClipRegion = vcl::Region(true);
     mbClipRegion = false;
-    mbInitClipRegion = true;
+    mbDirty = true;
     mbOutputClipped = false;
 }
 
@@ -59,7 +59,7 @@ void ClippingController::IntersectClipRegion(const vcl::Region& rRegion)
         mbClipRegion = true;
     }
 
-    mbInitClipRegion = true;
+    mbDirty = true;
     mbOutputClipped = maClipRegion.IsEmpty();
 }
 
