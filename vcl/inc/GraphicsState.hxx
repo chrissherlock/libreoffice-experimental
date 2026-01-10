@@ -42,9 +42,6 @@ struct GraphicsState
 
     vcl::Font maFont;
 
-    vcl::Region maClipRegion;
-    bool mbClipRegion;
-
     // Background State
     Wallpaper maBackground;
     bool mbBackground;
@@ -66,8 +63,6 @@ struct GraphicsState
         , mnAntialiasing(AntialiasingFlags::NONE)
         , mnDrawMode(DrawModeFlags::Default)
         , maFont()
-        , maClipRegion(true)
-        , mbClipRegion(false)
         , maBackground()
         , mbBackground(false)
         , meTextLanguage(LANGUAGE_NONE)

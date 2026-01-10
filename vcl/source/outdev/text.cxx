@@ -38,6 +38,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/sysdata.hxx>
 
+#include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
 #include <ImplLayoutArgs.hxx>
@@ -462,10 +463,12 @@ void OutputDevice::ImplDrawSpecialText( SalLayout& rSalLayout )
 
 void OutputDevice::ImplDrawText( SalLayout& rSalLayout )
 {
-    if( mbInitClipRegion )
+    if (mpClippingController->NeedsInit())
         InitClipRegion();
-    if( mbOutputClipped )
+
+    if (mpClippingController->IsOutputClipped())
         return;
+
     if( mbInitTextColor )
         ImplInitTextColor();
 
