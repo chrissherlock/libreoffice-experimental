@@ -2322,6 +2322,34 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testTextLayoutAccess)
     CPPUNIT_ASSERT(nMode1 != pDev->GetLayoutMode());
 }
 
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testClipRegionStackPersistence)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+
+    vcl::Region aUpperClip(tools::Rectangle(0, 0, 10, 10));
+    pVDev->SetClipRegion(aUpperClip);
+
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Initial clip should not result in empty output", false,
+                                 pVDev->IsOutputClipped());
+
+    pVDev->Push(vcl::PushFlags::CLIPREGION);
+
+    vcl::Region aDisjointClip(tools::Rectangle(50, 50, 60, 60));
+    pVDev->IntersectClipRegion(aDisjointClip);
+
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Disjoint intersection should result in clipped output", true,
+                                 pVDev->IsOutputClipped());
+
+    pVDev->Pop();
+
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Clip geometry was not restored after Pop", aUpperClip,
+                                 pVDev->GetClipRegion());
+
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(
+        "Output is still reported as clipped after Pop restored a valid region", false,
+        pVDev->IsOutputClipped());
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

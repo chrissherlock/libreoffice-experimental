@@ -26,6 +26,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/settings.hxx>
 
+#include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
 #include <drawmode.hxx>
@@ -80,8 +81,13 @@ void OutputDevice::Push(vcl::PushFlags nFlags)
         rState.mbMapActive = mpMapper->IsMapModeEnabled();
     }
 
-    if (nFlags & vcl::PushFlags::CLIPREGION && mpGraphicsState->mbClipRegion)
-        rState.mpClipRegion.reset(new vcl::Region(mpGraphicsState->maClipRegion));
+    if (nFlags & vcl::PushFlags::CLIPREGION)
+    {
+        if (mpClippingController->HasClipRegion())
+            rState.mpClipRegion.reset(new vcl::Region(mpClippingController->GetClipRegion()));
+        else
+            rState.mpClipRegion.reset();
+    }
 
     if (nFlags & vcl::PushFlags::REFPOINT && mpGraphicsState->mbRefPoint)
         rState.mpRefPoint = mpGraphicsState->maRefPoint;
@@ -170,8 +176,8 @@ void OutputDevice::Pop()
         mpMapper->EnableMapMode(rState.mbMapActive);
     }
 
-    if ( rState.mnFlags & vcl::PushFlags::CLIPREGION )
-        SetDeviceClipRegion( rState.mpClipRegion.get() );
+    if (rState.mnFlags & vcl::PushFlags::CLIPREGION)
+        SetDeviceClipRegion(rState.mpClipRegion.get());
 
     if ( rState.mnFlags & vcl::PushFlags::REFPOINT )
     {
