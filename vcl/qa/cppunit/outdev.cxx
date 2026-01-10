@@ -596,6 +596,24 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testLineColor)
     CPPUNIT_ASSERT_EQUAL(COL_RED, rColor);
 }
 
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testTextLanguageSync)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+
+    pVDev->SetDigitLanguage(LANGUAGE_ENGLISH_US);
+
+    CPPUNIT_ASSERT_EQUAL(LANGUAGE_ENGLISH_US, pVDev->GetDigitLanguage());
+
+    pVDev->Push(vcl::PushFlags::TEXTLANGUAGE);
+    pVDev->SetDigitLanguage(LANGUAGE_GERMAN);
+    CPPUNIT_ASSERT_EQUAL(LANGUAGE_GERMAN, pVDev->GetDigitLanguage());
+
+    pVDev->Pop();
+
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("TextLanguage was not restored correctly", LANGUAGE_ENGLISH_US,
+                                 pVDev->GetDigitLanguage());
+}
+
 CPPUNIT_TEST_FIXTURE(VclOutdevTest, testFont)
 {
     ScopedVclPtrInstance<VirtualDevice> pVDev;
