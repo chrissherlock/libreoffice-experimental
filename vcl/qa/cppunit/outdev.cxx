@@ -738,6 +738,25 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testRasterOp)
     CPPUNIT_ASSERT_EQUAL(RasterOp::Invert, pRasterOpAction->GetRasterOp());
 }
 
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testRasterOpStack)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+
+    pVDev->SetRasterOp(RasterOp::Invert);
+    CPPUNIT_ASSERT_EQUAL(RasterOp::Invert, pVDev->GetRasterOp());
+
+    pVDev->Push(vcl::PushFlags::RASTEROP);
+
+    pVDev->SetRasterOp(RasterOp::Xor);
+    CPPUNIT_ASSERT_EQUAL(RasterOp::Xor, pVDev->GetRasterOp());
+
+    pVDev->Pop();
+
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(
+        "RasterOp was not restored correctly from the GraphicsState snapshot", RasterOp::Invert,
+        pVDev->GetRasterOp());
+}
+
 CPPUNIT_TEST_FIXTURE(VclOutdevTest, testOutputFlag)
 {
     ScopedVclPtrInstance<VirtualDevice> pVDev;
