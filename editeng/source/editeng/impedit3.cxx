@@ -3363,7 +3363,7 @@ void ImpEditEngine::DrawText_ToPosition(
 
     drawinglayer::geometry::ViewInformation2D aViewInformation2D;
 
-    if (rOutDev.IsClipRegion())
+    if (rOutDev.HasClipRegion())
     {
         // tdf#167605 if a ClipRegion is set at the OutDev we have to take care of it for the
         // primitive way of rendering. get range and ClipRegion to do checks

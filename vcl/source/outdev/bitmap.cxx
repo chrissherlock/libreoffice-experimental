@@ -30,6 +30,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/BitmapWriteAccess.hxx>
 
+#include <ClippingController.hxx>
 #include <GraphicsState.hxx>
 #include <bitmap/bmpfast.hxx>
 #include <drawmode.hxx>
@@ -144,10 +145,10 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
         return;
     assert(mpGraphics);
 
-    if ( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     if (aBmp.IsEmpty())
@@ -242,10 +243,10 @@ void OutputDevice::DrawAlphaBitmap( const Point& rDestPt, const Size& rDestSize,
     if (!mpGraphics && !AcquireGraphics())
         return;
 
-    if (mbInitClipRegion)
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if (mbOutputClipped)
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     DrawDeviceBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp);

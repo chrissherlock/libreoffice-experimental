@@ -36,6 +36,7 @@
 #include <vcl/PrinterSupport.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 
+#include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
 #include <jobset.h>
@@ -458,7 +459,7 @@ bool Printer::AcquireGraphics() const
     mbFillColorDirty     = true;
     mbFontDirty          = true;
     mbInitTextColor     = true;
-    mbInitClipRegion    = true;
+    const_cast<Printer*>(this)->GetClippingController().SetDirty(true);
 
     ImplSVData* pSVData = ImplGetSVData();
 
@@ -833,6 +834,8 @@ Printer::Printer()
     }
     else
         ImplInitDisplay();
+
+    mpClippingController->EnableDeviceBoundsClipping(false);
 }
 
 Printer::Printer( const JobSetup& rJobSetup )
@@ -854,6 +857,8 @@ Printer::Printer( const JobSetup& rJobSetup )
         ImplInitDisplay();
         maJobSetup = JobSetup();
     }
+
+    mpClippingController->EnableDeviceBoundsClipping(false);
 }
 
 Printer::Printer( const QueueInfo& rQueueInfo )
@@ -866,6 +871,8 @@ Printer::Printer( const QueueInfo& rQueueInfo )
         ImplInit( pInfo );
     else
         ImplInitDisplay();
+
+    mpClippingController->EnableDeviceBoundsClipping(false);
 }
 
 Printer::Printer( const OUString& rPrinterName )
@@ -877,6 +884,8 @@ Printer::Printer( const OUString& rPrinterName )
         ImplInit( pInfo );
     else
         ImplInitDisplay();
+
+    mpClippingController->EnableDeviceBoundsClipping(false);
 }
 
 Printer::~Printer()

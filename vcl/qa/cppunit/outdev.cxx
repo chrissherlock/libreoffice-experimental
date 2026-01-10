@@ -28,6 +28,7 @@
 #include <vcl/rendercontext/SystemTextColorFlags.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/window.hxx>
+#include <vcl/wrkwin.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/metaactiontypes.hxx>
@@ -2350,8 +2351,10 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testClipRegionStackPersistence)
         pVDev->IsOutputClipped());
 }
 
-CPPUNIT_TEST_FIXTURE(VclOutDevTest, testDisjointIntersectionEagerSync)
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDisjointIntersectionEagerSync)
 {
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+
     pVDev->SetClipRegion(vcl::Region(tools::Rectangle(0, 0, 10, 10)));
 
     pVDev->IntersectClipRegion(tools::Rectangle(20, 20, 30, 30));
@@ -2359,6 +2362,40 @@ CPPUNIT_TEST_FIXTURE(VclOutDevTest, testDisjointIntersectionEagerSync)
     // The controller should immediately signal that output is clipped
     CPPUNIT_ASSERT_MESSAGE("Disjoint intersection must signal clipped output immediately",
                            pVDev->IsOutputClipped());
+}
+
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testWindowClipRegionOffset)
+{
+    // Regression test for: "vcl: move clipping state management..."
+    // Ensures WindowOutputDevice translates user clip regions (Relative)
+    // to Device coordinates (Absolute) before intersecting with the Window region.
+
+    // Create a Window positioned away from the origin (100, 100)
+    // We use WorkWindow to ensure it has a valid frame/parent structure
+    ScopedVclPtrInstance<WorkWindow> pWin(static_cast<vcl::Window*>(nullptr), WB_STDWORK);
+    pWin->SetPosSizePixel(Point(100, 100), Size(200, 200));
+    // Ensure the window is fully initialized/visible so it generates a valid window clip region
+    pWin->Show();
+
+    OutputDevice* pDev = pWin->GetOutDev();
+
+    // Define a User Clip Region in RELATIVE coordinates.
+    // Rect: (10, 10) to (60, 60).
+    // In Absolute Device coordinates, this is (110, 110) to (160, 160).
+    // This is strictly INSIDE the Window's bounds (100, 100) to (300, 300).
+    // If the fix is missing, the code might treat (10,10) as absolute,
+    // which would be outside the window (100,100), resulting in an empty intersection.
+    tools::Rectangle aUserRect(Point(10, 10), Size(50, 50));
+    pDev->SetClipRegion(vcl::Region(aUserRect));
+
+    // Trigger InitClipRegion via a draw command.
+    // This forces the WindowOutputDevice to intersect WindowRegion (Abs) with UserRegion (Rel).
+    pDev->DrawPixel(Point(20, 20));
+
+    CPPUNIT_ASSERT_MESSAGE("Output should not be fully clipped (User region is inside Window)",
+                           !pDev->IsOutputClipped());
+
+    CPPUNIT_ASSERT(pDev->HasClipRegion());
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();

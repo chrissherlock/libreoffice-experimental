@@ -733,10 +733,10 @@ void OutputDevice::DrawPartialTextArray(const Point& rStartPt, const OUString& r
         return;
 
     assert(mpGraphics);
-    if (mbInitClipRegion)
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if (mbOutputClipped)
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     // Adding the UnclusteredGlyphs flag during layout enables per-glyph styling.
@@ -773,9 +773,9 @@ void OutputDevice::DrawTextArray( const Point& rStartPt, const OUString& rStr,
     if( !mpGraphics && !AcquireGraphics() )
         return;
     assert(mpGraphics);
-    if( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
-    if( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     std::unique_ptr<SalLayout> pSalLayout = ImplLayout(rStr, nIndex, nLen, rStartPt, 0, pDXAry, pKashidaAry, flags, nullptr, pSalLayoutCache);
@@ -1733,7 +1733,7 @@ void OutputDevice::AddTextRectActions( const tools::Rectangle& rRect,
     if( !mpGraphics && !AcquireGraphics() )
         return;
     assert(mpGraphics);
-    if( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
     // temporarily swap in passed mtf for action generation, and
@@ -1777,9 +1777,9 @@ void OutputDevice::DrawText( const tools::Rectangle& rRect, const OUString& rOri
     if( !mpGraphics && !AcquireGraphics() )
         return;
     assert(mpGraphics);
-    if( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
-    if (mbOutputClipped && !bDecomposeTextRectAction && !pDisplayText)
+    if (mpClippingController->IsOutputClipped() && !bDecomposeTextRectAction && !pDisplayText)
         return;
 
     // temporarily disable mtf action generation (ImplDrawText _does_
@@ -1941,9 +1941,9 @@ void OutputDevice::DrawCtrlText( const Point& rPos, const OUString& rStr,
     if( !mpGraphics && !AcquireGraphics() )
         return;
     assert(mpGraphics);
-    if( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
-    if ( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     // nIndex and nLen must go to mpAlphaVDev->DrawCtrlText unchanged

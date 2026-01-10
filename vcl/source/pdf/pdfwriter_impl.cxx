@@ -109,6 +109,7 @@
 #include <frozen/bits/defines.h>
 #include <frozen/bits/elsa_std.h>
 #include <frozen/unordered_map.h>
+#include <ClippingController.hxx>
 
 #include "pdfwriter_utils.hxx"
 
@@ -424,6 +425,8 @@ PDFWriterImpl::PDFWriterImpl( const PDFWriter::PDFWriterContext& rContext,
 
     SetOutputSizePixel( Size( 640, 480 ) );
     SetMapMode(MapMode(MapUnit::MapMM));
+
+    mpClippingController->EnableDeviceBoundsClipping(false);
 }
 
 PDFWriterImpl::~PDFWriterImpl()

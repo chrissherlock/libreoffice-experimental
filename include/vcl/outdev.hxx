@@ -194,7 +194,6 @@ private:
     vcl::ExtOutDevData*             mpExtOutDevData;
     mutable std::unique_ptr<CoordinateMapper> mpMapper;
     std::unique_ptr<vcl::GraphicsState> mpGraphicsState;
-    std::unique_ptr<vcl::ClippingController> mpClippingController;
 
     // The canvas interface for this output device. Is persistent after the first GetCanvas() call
     mutable css::uno::WeakReference< css::rendering::XCanvas >    mxCanvas;
@@ -210,16 +209,13 @@ private:
     Wallpaper                       maBackground;
     std::optional<AllSettings>      moSettings;
 
-    mutable bool                    mbClipRegion : 1;
     mutable bool                    mbBackground : 1;
     mutable bool                    mbOutput : 1;
     mutable bool                    mbDevOutput : 1;
-    mutable bool                    mbOutputClipped : 1;
     mutable bool                    mbLineColorDirty : 1;
     mutable bool                    mbFillColorDirty : 1;
     mutable bool                    mbFontDirty : 1;
     mutable bool                    mbInitTextColor : 1;
-    mutable bool                    mbInitClipRegion : 1;
     mutable bool                    mbClipRegionSet : 1;
     mutable bool                    mbNewFont : 1;
     mutable bool                    mbTextLines : 1;
@@ -228,6 +224,7 @@ private:
     mutable bool                    mbSubpixelPositioning : 1;
 
 protected:
+    std::unique_ptr<vcl::ClippingController> mpClippingController;
     mutable std::shared_ptr<vcl::font::PhysicalFontCollection> mxFontCollection;
     mutable std::shared_ptr<ImplFontCache> mxFontCache;
 
@@ -533,14 +530,16 @@ private:
     ///@{
 
 public:
+    vcl::ClippingController& GetClippingController() { return *mpClippingController; }
+    const vcl::ClippingController& GetClippingController() const { return *mpClippingController; }
+
     bool IsOutputClipped() const;
     vcl::Region                 GetClipRegion() const;
     void                        SetClipRegion();
     void                        SetClipRegion( const vcl::Region& rRegion );
-    SAL_DLLPRIVATE bool         SelectClipRegion( const vcl::Region&, SalGraphics* pGraphics = nullptr );
+    SAL_DLLPRIVATE bool         SetGraphicsClip(const vcl::Region&, SalGraphics* pGraphics = nullptr);
 
-    bool                        IsClipRegion() const { return mbClipRegion; }
-
+    bool                        HasClipRegion() const;
     void                        MoveClipRegion( tools::Long nHorzMove, tools::Long nVertMove );
     void                        IntersectClipRegion( const tools::Rectangle& rRect );
     void                        IntersectClipRegion( const vcl::Region& rRegion );

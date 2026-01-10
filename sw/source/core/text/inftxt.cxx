@@ -960,7 +960,7 @@ void SwTextPaintInfo::CalcRect( const SwLinePortion& rPor,
     {
         ::SwAlignRect( aRect, GetVsh(), GetOut() );
 
-        if ( GetOut()->IsClipRegion() )
+        if ( GetOut()->HasClipRegion() )
         {
             SwRect aClip( GetOut()->GetClipRegion().GetBoundRect() );
             aRect.Intersection( aClip );

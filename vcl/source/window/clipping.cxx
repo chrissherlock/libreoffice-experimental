@@ -17,13 +17,25 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
+/*
+ * This file is part of the LibreOffice project.
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 #include <vcl/window.hxx>
 #include <vcl/virdev.hxx>
-
+#include <vcl/outdev.hxx>
 #include <tools/debug.hxx>
-
 #include <salobj.hxx>
 #include <window.h>
+
+#include <CoordinateMapper.hxx>
+#include <ClippingController.hxx>
+#include <salgdi.hxx>
 
 namespace vcl {
 
@@ -39,30 +51,41 @@ void WindowOutputDevice::InitClipRegion()
 {
     DBG_TESTSOLARMUTEX();
 
-    vcl::Region  aRegion;
+    vcl::Region aRegion;
 
     if ( mxOwnerWindow->mpWindowImpl->mbInPaint )
+    {
         aRegion = *(mxOwnerWindow->mpWindowImpl->mpPaintRegion);
+    }
     else
     {
         aRegion = mxOwnerWindow->ImplGetWinChildClipRegion();
-        // only this region is in frame coordinates, so re-mirror it
-        // the mpWindowImpl->mpPaintRegion above is already correct (see ImplCallPaint()) !
+
         if( ImplIsAntiparallel() )
             ReMirror ( aRegion );
     }
-    if ( mbClipRegion )
-        aRegion.Intersect( PixelToDevicePixel( maRegion ) );
+
+    if ( mpClippingController->HasClipRegion() )
+    {
+        // Convert User Clip from Relative to Absolute coordinates
+        // so it matches the coordinate space of the Window Region.
+        vcl::Region aUserClip = mpClippingController->GetClipRegion();
+        aUserClip.Move( GetOutOffXPixel(), GetOutOffYPixel() );
+
+        aRegion.Intersect( aUserClip );
+    }
+
     if ( aRegion.IsEmpty() )
-        mbOutputClipped = true;
+    {
+        mpClippingController->SetOutputClipped(true);
+    }
     else
     {
-        mbOutputClipped = false;
-        SelectClipRegion( aRegion );
+        mpClippingController->SetOutputClipped(false);
+        SetGraphicsClip( aRegion );
     }
-    mbClipRegionSet = true;
 
-    mbInitClipRegion = false;
+    mpClippingController->SetDirty(false);
 }
 
 void Window::SetParentClipMode( ParentClipMode nMode )
@@ -97,7 +120,6 @@ void Window::ExpandPaintClipRegion( const vcl::Region& rRegion )
     vcl::Region aDevPixRegion = GetOutDev()->PixelToDevicePixel( aPixRegion );
 
     vcl::Region aWinChildRegion = ImplGetWinChildClipRegion();
-    // only this region is in frame coordinates, so re-mirror it
     if( GetOutDev()->ImplIsAntiparallel() )
     {
         const OutputDevice *pOutDev = GetOutDev();
@@ -108,7 +130,8 @@ void Window::ExpandPaintClipRegion( const vcl::Region& rRegion )
     if( ! aDevPixRegion.IsEmpty() )
     {
         mpWindowImpl->mpPaintRegion->Union( aDevPixRegion );
-        GetOutDev()->mbInitClipRegion = true;
+
+        GetOutDev()->GetClippingController().SetDirty(true);
     }
 }
 
@@ -120,7 +143,7 @@ vcl::Region Window::GetWindowClipRegionPixel() const
         const_cast<vcl::Window*>(this)->ImplInitWinClipRegion();
     aWinClipRegion = mpWindowImpl->maWinClipRegion;
 
-    vcl::Region   aWinRegion( GetOutputRectPixel() );
+    vcl::Region aWinRegion( GetOutputRectPixel() );
 
     if ( aWinRegion == aWinClipRegion )
         aWinClipRegion.SetNull();
@@ -129,7 +152,6 @@ vcl::Region Window::GetWindowClipRegionPixel() const
 
     return aWinClipRegion;
 }
-
 
 vcl::Region WindowOutputDevice::GetActiveClipRegion() const
 {
@@ -141,10 +163,10 @@ vcl::Region WindowOutputDevice::GetActiveClipRegion() const
         aRegion.Move(-GetOutOffXPixel(), -GetOutOffYPixel());
     }
 
-    if ( mbClipRegion )
-        aRegion.Intersect( maRegion );
+    if ( mpClippingController->HasClipRegion() )
+        aRegion.Intersect( GetClipRegion() );
 
-    return PixelToLogic( aRegion );
+    return aRegion;
 }
 
 void WindowOutputDevice::ClipToPaintRegion(tools::Rectangle& rDstRect)
@@ -157,7 +179,6 @@ void WindowOutputDevice::ClipToPaintRegion(tools::Rectangle& rDstRect)
 
 void Window::EnableClipSiblings( bool bClipSiblings )
 {
-
     if ( mpWindowImpl->mpBorderWindow )
         mpWindowImpl->mpBorderWindow->EnableClipSiblings( bClipSiblings );
 
@@ -170,13 +191,11 @@ void Window::ImplClipBoundaries( vcl::Region& rRegion, bool bThis, bool bOverlap
         ImplIntersectWindowClipRegion( rRegion );
     else if ( ImplIsOverlapWindow() )
     {
-        // clip to frame if required
         if ( !mpWindowImpl->mbFrame )
             rRegion.Intersect( tools::Rectangle( Point( 0, 0 ), mpWindowImpl->mpFrameWindow->GetOutputSizePixel() ) );
 
         if ( bOverlaps && !rRegion.IsEmpty() )
         {
-            // Clip Overlap Siblings
             vcl::Window* pStartOverlapWindow = this;
             while ( !pStartOverlapWindow->mpWindowImpl->mbFrame )
             {
@@ -188,8 +207,6 @@ void Window::ImplClipBoundaries( vcl::Region& rRegion, bool bThis, bool bOverlap
                 }
                 pStartOverlapWindow = pStartOverlapWindow->mpWindowImpl->mpOverlapWindow;
             }
-
-            // Clip Child Overlap Windows
             ImplExcludeOverlapWindows( rRegion );
         }
     }
@@ -199,13 +216,12 @@ void Window::ImplClipBoundaries( vcl::Region& rRegion, bool bThis, bool bOverlap
 
 bool Window::ImplClipChildren( vcl::Region& rRegion ) const
 {
-    bool    bOtherClip = false;
+    bool bOtherClip = false;
     vcl::Window* pWindow = mpWindowImpl->mpFirstChild;
     while ( pWindow )
     {
         if ( pWindow->mpWindowImpl->mbReallyVisible )
         {
-            // read-out ParentClipMode-Flags
             ParentClipMode nClipMode = pWindow->GetParentClipMode();
             if ( !(nClipMode & ParentClipMode::NoClip) &&
                  ((nClipMode & ParentClipMode::Clip) || (GetStyle() & WB_CLIPCHILDREN)) )
@@ -213,10 +229,8 @@ bool Window::ImplClipChildren( vcl::Region& rRegion ) const
             else
                 bOtherClip = true;
         }
-
         pWindow = pWindow->mpWindowImpl->mpNext;
     }
-
     return bOtherClip;
 }
 
@@ -248,19 +262,15 @@ void Window::ImplClipSiblings( vcl::Region& rRegion ) const
 
 void Window::ImplInitWinClipRegion()
 {
-    // Build Window Region
     mpWindowImpl->maWinClipRegion = GetOutputRectPixel();
     if ( mpWindowImpl->mbWinRegion )
         mpWindowImpl->maWinClipRegion.Intersect( GetOutDev()->PixelToDevicePixel( mpWindowImpl->maWinRegion ) );
 
-    // ClipSiblings
     if ( mpWindowImpl->mbClipSiblings && !ImplIsOverlapWindow() )
         ImplClipSiblings( mpWindowImpl->maWinClipRegion );
 
-    // Clip Parent Boundaries
     ImplClipBoundaries( mpWindowImpl->maWinClipRegion, false, true );
 
-    // Clip Children
     if ( (GetStyle() & WB_CLIPCHILDREN) || mpWindowImpl->mbClipChildren )
         mpWindowImpl->mbInitChildRegion = true;
 
@@ -300,15 +310,12 @@ Region& Window::ImplGetWinChildClipRegion()
 bool Window::ImplSysObjClip( const vcl::Region* pOldRegion )
 {
     bool bUpdate = true;
-
     if ( mpWindowImpl->mpSysObj )
     {
         bool bVisibleState = mpWindowImpl->mbReallyVisible;
-
         if ( bVisibleState )
         {
             vcl::Region& rWinChildClipRegion = ImplGetWinChildClipRegion();
-
             if (!rWinChildClipRegion.IsEmpty())
             {
                 if ( pOldRegion )
@@ -318,40 +325,31 @@ bool Window::ImplSysObjClip( const vcl::Region* pOldRegion )
                     bUpdate = aNewRegion == rWinChildClipRegion;
                 }
 
-                vcl::Region      aRegion = rWinChildClipRegion;
-                vcl::Region      aWinRectRegion( GetOutputRectPixel() );
+                vcl::Region aRegion = rWinChildClipRegion;
+                vcl::Region aWinRectRegion( GetOutputRectPixel() );
 
                 if ( aRegion == aWinRectRegion )
                     mpWindowImpl->mpSysObj->ResetClipRegion();
                 else
                 {
                     aRegion.Move(-GetOutDev()->GetOutOffXPixel(), -GetOutDev()->GetOutOffYPixel());
-
-                    // set/update clip region
                     RectangleVector aRectangles;
                     aRegion.GetRegionRectangles(aRectangles);
                     mpWindowImpl->mpSysObj->BeginSetClipRegion(aRectangles.size());
-
                     for (auto const& rectangle : aRectangles)
                     {
                         mpWindowImpl->mpSysObj->UnionClipRegion(
-                            rectangle.Left(),
-                            rectangle.Top(),
-                            rectangle.GetWidth(),   // orig nWidth was ((R - L) + 1), same as GetWidth does
-                            rectangle.GetHeight()); // same for height
+                            rectangle.Left(), rectangle.Top(),
+                            rectangle.GetWidth(), rectangle.GetHeight());
                     }
-
                     mpWindowImpl->mpSysObj->EndSetClipRegion();
                 }
             }
             else
                 bVisibleState = false;
         }
-
-        // update visible status
         mpWindowImpl->mpSysObj->Show( bVisibleState );
     }
-
     return bUpdate;
 }
 
@@ -371,7 +369,6 @@ void Window::ImplUpdateSysObjChildrenClip()
 void Window::ImplUpdateSysObjOverlapsClip()
 {
     ImplUpdateSysObjChildrenClip();
-
     vcl::Window* pWindow = mpWindowImpl->mpFirstOverlap;
     while ( pWindow )
     {
@@ -385,8 +382,6 @@ void Window::ImplUpdateSysObjClip()
     if ( !ImplIsOverlapWindow() )
     {
         ImplUpdateSysObjChildrenClip();
-
-        // siblings should recalculate their clip region
         if ( mpWindowImpl->mbClipSiblings )
         {
             vcl::Window* pWindow = mpWindowImpl->mpNext;
@@ -410,7 +405,7 @@ bool Window::ImplSetClipFlagChildren( bool bSysObjOnlySmaller )
         if ( bSysObjOnlySmaller && !mpWindowImpl->mbInitWinClipRegion )
             pOldRegion.reset(new vcl::Region( mpWindowImpl->maWinClipRegion ));
 
-        GetOutDev()->mbInitClipRegion = true;
+        GetOutDev()->GetClippingController().SetDirty(true);
         mpWindowImpl->mbInitWinClipRegion = true;
 
         vcl::Window* pWindow = mpWindowImpl->mpFirstChild;
@@ -423,14 +418,14 @@ bool Window::ImplSetClipFlagChildren( bool bSysObjOnlySmaller )
 
         if ( !ImplSysObjClip( pOldRegion.get() ) )
         {
-            GetOutDev()->mbInitClipRegion = true;
+            GetOutDev()->GetClippingController().SetDirty(true);
             mpWindowImpl->mbInitWinClipRegion = true;
             bUpdate = false;
         }
     }
     else
     {
-        GetOutDev()->mbInitClipRegion = true;
+        GetOutDev()->GetClippingController().SetDirty(true);
         mpWindowImpl->mbInitWinClipRegion = true;
 
         vcl::Window* pWindow = mpWindowImpl->mpFirstChild;
@@ -447,7 +442,6 @@ bool Window::ImplSetClipFlagChildren( bool bSysObjOnlySmaller )
 bool Window::ImplSetClipFlagOverlapWindows( bool bSysObjOnlySmaller )
 {
     bool bUpdate = ImplSetClipFlagChildren( bSysObjOnlySmaller );
-
     vcl::Window* pWindow = mpWindowImpl->mpFirstOverlap;
     while ( pWindow )
     {
@@ -455,7 +449,6 @@ bool Window::ImplSetClipFlagOverlapWindows( bool bSysObjOnlySmaller )
             bUpdate = false;
         pWindow = pWindow->mpWindowImpl->mpNext;
     }
-
     return bUpdate;
 }
 
@@ -464,16 +457,14 @@ bool Window::ImplSetClipFlag( bool bSysObjOnlySmaller )
     if ( !ImplIsOverlapWindow() )
     {
         bool bUpdate = ImplSetClipFlagChildren( bSysObjOnlySmaller );
-
         vcl::Window* pParent = ImplGetParent();
         if ( pParent &&
              ((pParent->GetStyle() & WB_CLIPCHILDREN) || (mpWindowImpl->mnParentClipMode & ParentClipMode::Clip)) )
         {
-            pParent->GetOutDev()->mbInitClipRegion = true;
+            pParent->GetOutDev()->GetClippingController().SetDirty(true);
             pParent->mpWindowImpl->mbInitChildRegion = true;
         }
 
-        // siblings should recalculate their clip region
         if ( mpWindowImpl->mbClipSiblings )
         {
             vcl::Window* pWindow = mpWindowImpl->mpNext;
@@ -484,7 +475,6 @@ bool Window::ImplSetClipFlag( bool bSysObjOnlySmaller )
                 pWindow = pWindow->mpWindowImpl->mpNext;
             }
         }
-
         return bUpdate;
     }
     else
@@ -530,7 +520,6 @@ void Window::ImplExcludeOverlapWindows( vcl::Region& rRegion ) const
             pWindow->ImplExcludeWindowRegion( rRegion );
             pWindow->ImplExcludeOverlapWindows( rRegion );
         }
-
         pWindow = pWindow->mpWindowImpl->mpNext;
     }
 }
@@ -555,7 +544,6 @@ void Window::ImplIntersectAndUnionOverlapWindows( const vcl::Region& rInterRegio
             rRegion.Union( aTempRegion );
             pWindow->ImplIntersectAndUnionOverlapWindows( rInterRegion, rRegion );
         }
-
         pWindow = pWindow->mpWindowImpl->mpNext;
     }
 }
@@ -568,13 +556,11 @@ void Window::ImplIntersectAndUnionOverlapWindows2( const vcl::Region& rInterRegi
         ImplIntersectWindowRegion( aTempRegion );
         rRegion.Union( aTempRegion );
     }
-
     ImplIntersectAndUnionOverlapWindows( rInterRegion, rRegion );
 }
 
 void Window::ImplCalcOverlapRegionOverlaps( const vcl::Region& rInterRegion, vcl::Region& rRegion ) const
 {
-    // Clip Overlap Siblings
     vcl::Window const * pStartOverlapWindow;
     if ( !ImplIsOverlapWindow() )
         pStartOverlapWindow = mpWindowImpl->mpOverlapWindow;
@@ -591,7 +577,6 @@ void Window::ImplCalcOverlapRegionOverlaps( const vcl::Region& rInterRegion, vcl
         pStartOverlapWindow = pStartOverlapWindow->mpWindowImpl->mpOverlapWindow;
     }
 
-    // Clip Child Overlap Windows
     if ( !ImplIsOverlapWindow() )
         mpWindowImpl->mpOverlapWindow->ImplIntersectAndUnionOverlapWindows( rInterRegion, rRegion );
     else
@@ -601,15 +586,14 @@ void Window::ImplCalcOverlapRegionOverlaps( const vcl::Region& rInterRegion, vcl
 void Window::ImplCalcOverlapRegion( const tools::Rectangle& rSourceRect, vcl::Region& rRegion,
                                     bool bChildren, bool bSiblings )
 {
-    vcl::Region  aRegion( rSourceRect );
+    vcl::Region aRegion( rSourceRect );
     if ( mpWindowImpl->mbWinRegion )
         rRegion.Intersect( GetOutDev()->PixelToDevicePixel( mpWindowImpl->maWinRegion ) );
-    vcl::Region  aTempRegion;
+    vcl::Region aTempRegion;
     vcl::Window* pWindow;
 
     ImplCalcOverlapRegionOverlaps( aRegion, rRegion );
 
-    // Parent-Boundaries
     pWindow = this;
     if ( !ImplIsOverlapWindow() )
     {
@@ -632,7 +616,6 @@ void Window::ImplCalcOverlapRegion( const tools::Rectangle& rSourceRect, vcl::Re
         rRegion.Union( aTempRegion );
     }
 
-    // Siblings
     if ( bSiblings && !ImplIsOverlapWindow() )
     {
         pWindow = mpWindowImpl->mpParent->mpWindowImpl->mpFirstChild;
@@ -673,7 +656,7 @@ void WindowOutputDevice::SaveBackground(VirtualDevice& rSaveDevice, const Point&
 
     if ( mxOwnerWindow->mpWindowImpl->mpPaintRegion )
     {
-        vcl::Region      aClip( *mxOwnerWindow->mpWindowImpl->mpPaintRegion );
+        vcl::Region aClip( *mxOwnerWindow->mpWindowImpl->mpPaintRegion );
         const Point aPixPos( LogicToPixel( rPos ) );
 
         aClip.Move(-GetOutOffXPixel(), -GetOutOffYPixel());
@@ -681,14 +664,12 @@ void WindowOutputDevice::SaveBackground(VirtualDevice& rSaveDevice, const Point&
 
         if ( !aClip.IsEmpty() )
         {
-            const vcl::Region    aOldClip( rSaveDevice.GetClipRegion() );
-            const Point     aPixOffset( rSaveDevice.LogicToPixel( Point() ) );
-            const bool      bMap = rSaveDevice.IsMapModeEnabled();
+            const vcl::Region aOldClip( rSaveDevice.GetClipRegion() );
+            const Point aPixOffset( rSaveDevice.LogicToPixel( Point() ) );
+            const bool bMap = rSaveDevice.IsMapModeEnabled();
 
-            // move clip region to have the same distance to DestOffset
             aClip.Move( aPixOffset.X() - aPixPos.X(), aPixOffset.Y() - aPixPos.Y() );
 
-            // set pixel clip region
             rSaveDevice.EnableMapMode( false );
             rSaveDevice.SetClipRegion( aClip );
             rSaveDevice.EnableMapMode( bMap );
@@ -704,6 +685,6 @@ void WindowOutputDevice::SaveBackground(VirtualDevice& rSaveDevice, const Point&
     rSaveDevice.SetMapMode(MapMode());
 }
 
-} /* namespace vcl */
+} // namespace vcl
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

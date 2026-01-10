@@ -65,9 +65,9 @@ using namespace ::com::sun::star::uno;
 OutputDevice::OutputDevice(OutDevType eOutDevType)
     : mpMapper(std::make_unique<CoordinateMapper>())
     , mpGraphicsState(std::make_unique<vcl::GraphicsState>())
-    , mpClippingController(std::make_unique<vcl::ClippingController>())
     , meOutDevType(eOutDevType)
     , moSettings(Application::GetSettings())
+    , mpClippingController(std::make_unique<vcl::ClippingController>())
 {
     SetGraphics(nullptr);
     mpUnoGraphicsList               = nullptr;
@@ -90,12 +90,10 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     meOutDevViewType                = OutDevViewType::DontKnow;
     mbOutput                        = true;
     mbDevOutput                     = false;
-    mbOutputClipped                 = false;
     mpGraphicsState->meTextLanguage                  = LANGUAGE_SYSTEM;  // TODO: get default from configuration?
     mbLineColorDirty                 = true;
     mbFontDirty                      = true;
     mbInitTextColor                 = true;
-    mbInitClipRegion                = true;
     mpClippingController->SetNoClipRegion();
     mbNewFont                       = true;
     mbTextLines                     = false;
@@ -107,6 +105,9 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mpOutDevData.reset(new ImplOutDevData);
     mpOutDevData->mpRotateDev       = nullptr;
     mpOutDevData->mpRecordLayout    = nullptr;
+
+    mpClippingController = std::make_unique<vcl::ClippingController>();
+    mpClippingController->SetDirty(true);
 }
 
 OutputDevice::~OutputDevice()
@@ -409,10 +410,10 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
         return;
     assert(mpGraphics);
 
-    if ( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     tools::Long nSrcWidth = LogicWidthToDevicePixel(rSrcSize.Width());
@@ -460,10 +461,10 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
         return;
     assert(mpGraphics);
 
-    if ( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     SalTwoRect aPosAry(rOutDev.LogicXToDevicePixel(rSrcPt.X()),
@@ -495,10 +496,10 @@ void OutputDevice::CopyArea( const Point& rDestPt,
         return;
     assert(mpGraphics);
 
-    if ( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     tools::Long nSrcWidth = LogicWidthToDevicePixel(rSrcSize.Width());

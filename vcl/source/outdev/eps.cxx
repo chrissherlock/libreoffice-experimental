@@ -22,6 +22,7 @@
 #include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
 
+#include <ClippingController.hxx>
 #include <salgdi.hxx>
 
 bool OutputDevice::DrawEPS( const Point& rPoint, const Size& rSize,
@@ -40,7 +41,7 @@ bool OutputDevice::DrawEPS( const Point& rPoint, const Size& rSize,
     if ( !IsDeviceOutputNecessary() || ImplIsRecordLayout() )
         return true;
 
-    if( mbOutputClipped )
+    if( IsOutputClipped() )
         return true;
 
     tools::Rectangle aRect( LogicToDevicePixel( tools::Rectangle( rPoint, rSize ) ) );
@@ -57,7 +58,7 @@ bool OutputDevice::DrawEPS( const Point& rPoint, const Size& rSize,
             return bDrawn;
         assert(mpGraphics);
 
-        if( mbInitClipRegion )
+        if( GetClippingController().IsDirty() )
             InitClipRegion();
 
         aRect.Normalize();

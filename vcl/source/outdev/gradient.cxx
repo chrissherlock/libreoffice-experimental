@@ -26,6 +26,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/window.hxx>
 
+#include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
 #include <salgdi.hxx>
@@ -52,7 +53,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
 {
     assert(!is_double_buffered_window());
 
-    if (mbInitClipRegion)
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
     // don't return on mbOutputClipped here, as we may need to draw the clipped metafile, even if the output is clipped
 
@@ -104,14 +105,14 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
     auto popIt = ScopedPush(vcl::PushFlags::CLIPREGION);
     IntersectClipRegion( aBoundRect );
 
-    if (mbInitClipRegion)
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
     // try to draw gradient natively
-    if (!mbOutputClipped)
+    if (!mpClippingController->IsOutputClipped())
         bDrawn = mpGraphics->DrawGradient( aClixPolyPoly, aGradient, *this );
 
-    if (bDrawn || mbOutputClipped)
+    if (bDrawn || mpClippingController->IsOutputClipped())
         return;
 
     // draw gradients without border

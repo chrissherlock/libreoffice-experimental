@@ -316,7 +316,7 @@ void EditBrowseBox::PaintStatusCell(OutputDevice& rDev, const tools::Rectangle& 
         else
             rDev.DrawImage( aPos, aImage );
 
-        if (rDev.IsClipRegion())
+        if (rDev.HasClipRegion())
             rDev.SetClipRegion();
     }
 }

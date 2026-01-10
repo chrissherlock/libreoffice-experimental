@@ -2072,7 +2072,7 @@ void SwViewShell::Paint(vcl::RenderContext& rRenderContext, const tools::Rectang
             //The ClipRect is removed here once and not recovered, as externally
             //no one needs it anymore anyway.
             //Not when we paint a Metafile.
-            if( !GetOut()->GetConnectMetaFile() && GetOut()->IsClipRegion())
+            if( !GetOut()->GetConnectMetaFile() && GetOut()->HasClipRegion())
                 GetOut()->SetClipRegion();
 
             if ( IsPreview() )

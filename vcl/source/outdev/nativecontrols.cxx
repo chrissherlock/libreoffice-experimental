@@ -24,6 +24,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/window.hxx>
 
+#include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <salgdi.hxx>
 #include <toolbarvalue.hxx>
@@ -272,9 +273,9 @@ bool OutputDevice::DrawNativeControl( ControlType nType,
         return false;
     assert(mpGraphics);
 
-    if ( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
-    if ( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return true;
 
     if ( mbLineColorDirty )

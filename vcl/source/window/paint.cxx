@@ -39,6 +39,8 @@
 #include <vcl/opengl/OpenGLHelper.hxx>
 #endif
 
+#include <ClippingController.hxx>
+
 // PaintBufferGuard
 
 namespace vcl
@@ -84,7 +86,12 @@ PaintBufferGuard::PaintBufferGuard(ImplFrameData* pFrameData, vcl::Window* pWind
     nFlags |= vcl::PushFlags::TEXTLANGUAGE;
     pFrameData->mpBuffer->Push(nFlags);
     auto& rDev = *pWindow->GetOutDev();
-    pFrameData->mpBuffer->SetClipRegion(rDev.GetClipRegion());
+
+    if (rDev.HasClipRegion())
+        pFrameData->mpBuffer->SetClipRegion(rDev.GetClipRegion());
+    else
+        pFrameData->mpBuffer->SetClipRegion(); // Resets and dirties the buffer manager
+
     pFrameData->mpBuffer->SetFillColor(rDev.GetFillColor());
     pFrameData->mpBuffer->SetFont(pWindow->GetFont());
     if (!rDev.HasAlpha() && rDev.GetLineColor() == COL_TRANSPARENT)
@@ -332,7 +339,7 @@ void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderCo
     if ( mpWindowImpl->mpCursor )
         pHelper->SetRestoreCursor(mpWindowImpl->mpCursor->ImplSuspend());
 
-    GetOutDev()->mbInitClipRegion = true;
+    GetOutDev()->GetClippingController().SetDirty(true);
     mpWindowImpl->mbInPaint = true;
 
     // restore Paint-Region
@@ -352,7 +359,7 @@ void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderCo
 
     if ((pHelper->GetPaintFlags() & ImplPaintFlags::Erase) && rRenderContext.IsBackground())
     {
-        if (rRenderContext.IsClipRegion())
+        if (rRenderContext.HasClipRegion())
         {
             vcl::Region aOldRegion = rRenderContext.GetClipRegion();
             rRenderContext.SetClipRegion();
@@ -377,7 +384,7 @@ void Window::PopPaintHelper(PaintHelper const *pHelper)
             ImplInvertFocus(*mpWindowImpl->mpWinData->mpFocusRect);
     }
     mpWindowImpl->mbInPaint = false;
-    GetOutDev()->mbInitClipRegion = true;
+    GetOutDev()->GetClippingController().SetDirty(true);
     mpWindowImpl->mpPaintRegion = nullptr;
     if (mpWindowImpl->mpCursor)
         mpWindowImpl->mpCursor->ImplResume(pHelper->GetRestoreCursor());
@@ -1592,8 +1599,8 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
         else
             ImplClipChildren( aRegion );
     }
-    if ( GetOutDev()->mbClipRegion && (nFlags & ScrollFlags::UseClipRegion) )
-        aRegion.Intersect( GetOutDev()->maRegion );
+    if ( GetOutDev()->HasClipRegion() && (nFlags & ScrollFlags::UseClipRegion) )
+        aRegion.Intersect( GetOutDev()->GetClipRegion() );
     if ( !aRegion.IsEmpty() )
     {
         if ( mpWindowImpl->mpWinData )
@@ -1624,7 +1631,7 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
                 pOutDev->ReMirror( aRegion );
             }
 
-            pOutDev->SelectClipRegion( aRegion, pGraphics );
+            pOutDev->SetGraphicsClip( aRegion, pGraphics );
             pGraphics->CopyArea( rRect.Left()+nHorzScroll, rRect.Top()+nVertScroll,
                                  rRect.Left(), rRect.Top(),
                                  rRect.GetWidth(), rRect.GetHeight(),

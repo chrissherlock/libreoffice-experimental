@@ -12,6 +12,10 @@
 #include <vcl/region.hxx>
 #include <vcl/dllapi.h>
 
+#include <functional>
+
+class CoordinateMapper;
+
 namespace vcl
 {
 class VCL_DLLPUBLIC ClippingController
@@ -21,6 +25,7 @@ private:
     bool mbClipRegion;
     bool mbDirty;
     bool mbOutputClipped;
+    bool mbClipToDeviceBounds;
 
 public:
     ClippingController();
@@ -37,6 +42,15 @@ public:
     void SetNoClipRegion();
 
     void IntersectClipRegion(const vcl::Region& rRegion);
+    void IntersectLogicalClip(const vcl::Region& rRegion, const CoordinateMapper& rMapper);
+
+    void SetLogicalClip(const vcl::Region& rRegion, const CoordinateMapper& rMapper);
+
+    using HardwareSyncFunc = std::function<void(const vcl::Region&)>;
+    void Synchronize(const CoordinateMapper& rMapper,
+                     const std::function<void(const vcl::Region&)>& rSyncFunc);
+
+    void EnableDeviceBoundsClipping(bool bEnable) { mbClipToDeviceBounds = bEnable; }
 };
 } // namespace vcl
 
