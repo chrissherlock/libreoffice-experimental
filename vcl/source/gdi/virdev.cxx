@@ -27,6 +27,7 @@
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/virdev.hxx>
 
+#include <ClippingController.hxx>
 #include <GraphicsState.hxx>
 #include <ImplOutDevData.hxx>
 #include <font/PhysicalFontCollection.hxx>
@@ -57,7 +58,7 @@ bool VirtualDevice::AcquireGraphics() const
     mbFillColorDirty     = true;
     mbFontDirty          = true;
     mbInitTextColor     = true;
-    mbInitClipRegion    = true;
+    const_cast<VirtualDevice*>(this)->GetClippingController().SetDirty(true);
 
     ImplSVData* pSVData = ImplGetSVData();
 

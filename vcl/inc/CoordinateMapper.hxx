@@ -24,8 +24,10 @@
 #include <tools/fract.hxx>
 #include <tools/long.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
+#include <basegfx/range/b2drectangle.hxx>
 
 #include <vcl/dllapi.h>
+#include <vcl/lineinfo.hxx>
 #include <vcl/mapmod.hxx>
 #include <vcl/rendercontext/ImplMapRes.hxx>
 

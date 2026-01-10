@@ -21,6 +21,7 @@
 #include <vcl/metaactiontypes.hxx>
 #include <vcl/virdev.hxx>
 
+#include <ClippingController.hxx>
 #include <GraphicsState.hxx>
 #include <salgdi.hxx>
 #include <salbmp.hxx>
@@ -99,10 +100,10 @@ void OutputDevice::DrawMask( const Point& rDestPt, const Size& rDestSize,
     if ( !mpGraphics && !AcquireGraphics() )
         return;
 
-    if ( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     DrawDeviceMask( rBitmap, rMaskColor, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel );

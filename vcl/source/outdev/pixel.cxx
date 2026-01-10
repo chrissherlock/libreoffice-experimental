@@ -20,6 +20,7 @@
 #include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
 
+#include <ClippingController.hxx>
 #include <GraphicsState.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
@@ -33,10 +34,10 @@ Color OutputDevice::GetPixel(const Point& rPoint) const
     if (mpGraphics || AcquireGraphics())
     {
         assert(mpGraphics);
-        if (mbInitClipRegion)
+        if ( mpClippingController->IsDirty() )
             const_cast<OutputDevice*>(this)->InitClipRegion();
 
-        if (!mbOutputClipped)
+        if (!mpClippingController->IsOutputClipped())
         {
             const tools::Long nX = LogicXToDevicePixel(rPoint.X());
             const tools::Long nY = LogicYToDevicePixel(rPoint.Y());
@@ -62,10 +63,10 @@ void OutputDevice::DrawPixel( const Point& rPt )
         return;
     assert(mpGraphics);
 
-    if ( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     if ( mbLineColorDirty )
@@ -92,10 +93,10 @@ void OutputDevice::DrawPixel( const Point& rPt, const Color& rColor )
         return;
     assert(mpGraphics);
 
-    if ( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     mpGraphics->DrawPixel( aPt.X(), aPt.Y(), aColor, *this );

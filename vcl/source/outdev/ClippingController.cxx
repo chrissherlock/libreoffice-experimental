@@ -8,6 +8,7 @@
  */
 
 #include <ClippingController.hxx>
+#include <CoordinateMapper.hxx>
 
 namespace vcl
 {
@@ -56,6 +57,77 @@ void ClippingController::IntersectClipRegion(const vcl::Region& rRegion)
     else
     {
         maClipRegion = rRegion;
+        mbClipRegion = true;
+    }
+
+    mbDirty = true;
+    mbOutputClipped = maClipRegion.IsEmpty();
+}
+
+void ClippingController::Synchronize(const CoordinateMapper& rMapper,
+                                     const std::function<void(const vcl::Region&)>& rSyncFunc)
+{
+    if (!mbDirty)
+        return;
+
+    if (!mbClipRegion)
+        return;
+
+    if (maClipRegion.IsEmpty())
+    {
+        mbOutputClipped = true;
+    }
+    else
+    {
+        vcl::Region aEffectiveRegion = maClipRegion;
+
+        aEffectiveRegion.Intersect(
+            tools::Rectangle(rMapper.GetOutOffXPixel(), rMapper.GetOutOffYPixel(),
+                             rMapper.GetOutOffXPixel() + rMapper.GetOutputWidthPixel() - 1,
+                             rMapper.GetOutOffYPixel() + rMapper.GetOutputHeightPixel() - 1));
+
+        if (aEffectiveRegion.IsEmpty())
+        {
+            mbOutputClipped = true;
+        }
+        else
+        {
+            mbOutputClipped = false;
+            rSyncFunc(aEffectiveRegion); // Callback to SalGraphics
+        }
+    }
+
+    mbDirty = false;
+}
+
+void ClippingController::SetLogicalClip(const vcl::Region& rRegion, const CoordinateMapper& rMapper)
+{
+    if (rRegion.IsNull())
+    {
+        SetNoClipRegion();
+        return;
+    }
+
+    vcl::Region aPixelRegion = rMapper.LogicToPixel(rRegion);
+
+    maClipRegion = aPixelRegion;
+    mbClipRegion = true;
+    mbDirty = true;
+    mbOutputClipped = maClipRegion.IsEmpty();
+}
+
+void ClippingController::IntersectLogicalClip(const vcl::Region& rRegion,
+                                              const CoordinateMapper& rMapper)
+{
+    vcl::Region aPixelRegion = rMapper.LogicToPixel(rRegion);
+
+    if (mbClipRegion)
+    {
+        maClipRegion.Intersect(aPixelRegion);
+    }
+    else
+    {
+        maClipRegion = aPixelRegion;
         mbClipRegion = true;
     }
 

@@ -168,7 +168,7 @@ tools::Rectangle ImplCalcActionBounds(const MetaAction& rAct, const OutputDevice
     if (!aActionBounds.IsEmpty())
     {
         // fdo#40421 limit current action's output to clipped area
-        if (rOut.IsClipRegion())
+        if (rOut.HasClipRegion())
             return rOut.GetClipRegion().GetBoundRect().Intersection(aActionBounds);
         else
             return aActionBounds;
