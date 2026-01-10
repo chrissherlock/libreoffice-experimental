@@ -32,6 +32,7 @@
 #include <vcl/virdev.hxx>
 
 #include <CoordinateMapper.hxx>
+#include <ClippingController.hxx>
 #include <GraphicsState.hxx>
 #include <ImplOutDevData.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
@@ -60,8 +61,8 @@ using namespace ::com::sun::star::uno;
 OutputDevice::OutputDevice(OutDevType eOutDevType)
     : mpMapper(std::make_unique<CoordinateMapper>())
     , mpGraphicsState(std::make_unique<vcl::GraphicsState>())
+    , mpClippingController(std::make_unique<vcl::ClippingController>())
     , meOutDevType(eOutDevType)
-
     , moSettings(Application::GetSettings())
 {
     SetGraphics(nullptr);
@@ -91,7 +92,7 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mbFontDirty                      = true;
     mbInitTextColor                 = true;
     mbInitClipRegion                = true;
-    mpGraphicsState->mbClipRegion                 = false;
+    mpClippingController->SetNoClipRegion();
     mbNewFont                       = true;
     mbTextLines                     = false;
     mbTextSpecial                   = false;
