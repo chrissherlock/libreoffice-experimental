@@ -36,6 +36,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/BitmapWriteAccess.hxx>
 
+#include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
 #include <pdf/pdfwriter_impl.hxx>
@@ -107,10 +108,10 @@ void OutputDevice::DrawTransparent(
         return;
     assert(mpGraphics);
 
-    if( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     if( mbLineColorDirty )
@@ -206,10 +207,10 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
         )
     {
         // prepare the graphics device
-        if( mbInitClipRegion )
+        if ( mpClippingController->IsDirty() )
             InitClipRegion();
 
-        if( mbOutputClipped )
+        if ( mpClippingController->IsOutputClipped() )
             return true;
 
         if( mbLineColorDirty )
@@ -297,7 +298,7 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
         {
             // setup Graphics only here (other cases delegate
             // to basic OutDev methods)
-            if ( mbInitClipRegion )
+            if ( mpClippingController->IsDirty() )
                 InitClipRegion();
 
             if ( mbLineColorDirty )
@@ -309,7 +310,7 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
             tools::Rectangle aLogicPolyRect( rPolyPoly.GetBoundRect() );
             tools::Rectangle aPixelRect(LogicToDevicePixel(aLogicPolyRect));
 
-            if( !mbOutputClipped )
+            if( !mpClippingController->IsOutputClipped() )
             {
                 bDrawn = mpGraphics->DrawAlphaRect( aPixelRect.Left(), aPixelRect.Top(),
                     // #i98405# use methods with small g, else one pixel too much will be painted.
@@ -1187,7 +1188,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
     if( !aActionBounds.IsEmpty() )
     {
         // fdo#40421 limit current action's output to clipped area
-        if( rOut.IsClipRegion() )
+        if( rOut.HasClipRegion() )
             return rOut.LogicToPixel(
                 rOut.GetClipRegion().GetBoundRect().Intersection( aActionBounds ) );
         else

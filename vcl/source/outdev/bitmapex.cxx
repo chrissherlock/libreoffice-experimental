@@ -29,6 +29,7 @@
 #include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
 
+#include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
 #include <drawmode.hxx>
@@ -59,7 +60,7 @@ bool OutputDevice::TransformAndReduceBitmapExToTargetRange(
         GetOutputSizePixel().Width(),
         GetOutputSizePixel().Height());
 
-    if(IsClipRegion())
+    if(HasClipRegion())
     {
         tools::Rectangle aRegionRectangle(GetActiveClipRegion().GetBoundRect());
 
@@ -207,7 +208,7 @@ void OutputDevice::DrawTransformedBitmapEx(
     if ( !mpGraphics && !AcquireGraphics() )
         return;
 
-    if ( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
     /*
@@ -219,7 +220,7 @@ void OutputDevice::DrawTransformedBitmapEx(
        recording to a metafile. It's typical to record with a device of nominal
        size and play back later against something of a totally different size.
      */
-    if (mbOutputClipped && !mpMetaFile)
+    if (mpClippingController->IsOutputClipped() && !mpMetaFile)
         return;
 
 #ifdef DO_TIME_TEST

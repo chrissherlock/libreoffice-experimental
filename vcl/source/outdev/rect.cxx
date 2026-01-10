@@ -25,6 +25,7 @@
 #include <vcl/rendercontext/DrawGridFlags.hxx>
 #include <vcl/virdev.hxx>
 
+#include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
 #include <salgdi.hxx>
@@ -71,10 +72,10 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect )
         return;
     assert(mpGraphics);
 
-    if ( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     if ( mbLineColorDirty )
@@ -110,10 +111,10 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
         return;
     assert(mpGraphics);
 
-    if ( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     if ( mbLineColorDirty )
@@ -159,10 +160,10 @@ void OutputDevice::Invert( const tools::Rectangle& rRect, InvertFlags nFlags )
         return;
     assert(mpGraphics);
 
-    if ( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     SalInvert nSalFlags = SalInvert::NONE;
@@ -191,10 +192,10 @@ void OutputDevice::Invert( const tools::Polygon& rPoly, InvertFlags nFlags )
         return;
     assert(mpGraphics);
 
-    if ( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     SalInvert nSalFlags = SalInvert::NONE;
@@ -244,10 +245,10 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
         return;
     assert(mpGraphics);
 
-    if( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     const tools::Long nDistX = std::max( rDist.Width(), tools::Long(1) );
@@ -345,12 +346,12 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
     }
     assert(mpGraphics);
 
-    if (mbInitClipRegion)
+    if ( mpClippingController->IsDirty() )
     {
         InitClipRegion();
     }
 
-    if (mbOutputClipped)
+    if ( mpClippingController->IsOutputClipped() )
     {
         return;
     }

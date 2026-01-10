@@ -27,6 +27,7 @@
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
 
+#include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
@@ -68,10 +69,10 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
         return;
     assert(mpGraphics);
 
-    if( mbInitClipRegion )
+    if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if( mbOutputClipped )
+    if ( mpClippingController->IsOutputClipped() )
         return;
 
     if( rPolyPoly.Count() )

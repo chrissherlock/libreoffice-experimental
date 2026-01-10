@@ -38,6 +38,7 @@
 #include <vcl/builder.hxx>
 #include <o3tl/string_view.hxx>
 
+#include <ClippingController.hxx>
 #include <window.h>
 #include <svdata.hxx>
 #include <salgdi.hxx>
@@ -183,10 +184,10 @@ void Window::InvertTracking( const tools::Rectangle& rRect, ShowTrackFlags nFlag
                 return;
         }
 
-        if ( GetOutDev()->mbInitClipRegion )
+        if ( GetOutDev()->GetClippingController().IsDirty() )
             GetOutDev()->InitClipRegion();
 
-        if ( GetOutDev()->mbOutputClipped )
+        if ( GetOutDev()->IsOutputClipped() )
             return;
 
         pGraphics = GetOutDev()->mpGraphics;
@@ -199,7 +200,7 @@ void Window::InvertTracking( const tools::Rectangle& rRect, ShowTrackFlags nFlag
         {
             vcl::Region aRegion( GetOutputRectPixel() );
             ImplClipBoundaries( aRegion, false, false );
-            pOutDev->SelectClipRegion( aRegion, pGraphics );
+            pOutDev->SetGraphicsClip( aRegion, pGraphics );
         }
     }
 

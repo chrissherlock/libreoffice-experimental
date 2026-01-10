@@ -478,7 +478,7 @@ void SwTextFly::DrawTextOpaque( SwDrawTextInfo &rInf ) const
             aRect.Width( aRect.Width() - sal_Int32(nTmpLen) * rInf.GetSpace() );
     }
 
-    if( aClipSave.IsOn() && rInf.GetOut().IsClipRegion() )
+    if( aClipSave.IsOn() && rInf.GetOut().HasClipRegion() )
     {
         SwRect aClipRect( rInf.GetOut().GetClipRegion().GetBoundRect() );
         aRect.Intersection( aClipRect );
