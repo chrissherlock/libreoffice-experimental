@@ -2350,6 +2350,17 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testClipRegionStackPersistence)
         pVDev->IsOutputClipped());
 }
 
+CPPUNIT_TEST_FIXTURE(VclOutDevTest, testDisjointIntersectionEagerSync)
+{
+    pVDev->SetClipRegion(vcl::Region(tools::Rectangle(0, 0, 10, 10)));
+
+    pVDev->IntersectClipRegion(tools::Rectangle(20, 20, 30, 30));
+
+    // The controller should immediately signal that output is clipped
+    CPPUNIT_ASSERT_MESSAGE("Disjoint intersection must signal clipped output immediately",
+                           pVDev->IsOutputClipped());
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
