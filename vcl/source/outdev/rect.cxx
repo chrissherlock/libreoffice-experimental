@@ -74,7 +74,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect )
     if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mpClippingController->IsOutputClipped() )
+    if ( IsOutputCulled() )
         return;
 
     if ( mbLineColorDirty )
@@ -113,7 +113,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
     if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mpClippingController->IsOutputClipped() )
+    if ( IsOutputCulled() )
         return;
 
     if ( mbLineColorDirty )
@@ -162,7 +162,7 @@ void OutputDevice::Invert( const tools::Rectangle& rRect, InvertFlags nFlags )
     if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mpClippingController->IsOutputClipped() )
+    if ( IsOutputCulled() )
         return;
 
     SalInvert nSalFlags = SalInvert::NONE;
@@ -194,7 +194,7 @@ void OutputDevice::Invert( const tools::Polygon& rPoly, InvertFlags nFlags )
     if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mpClippingController->IsOutputClipped() )
+    if ( IsOutputCulled() )
         return;
 
     SalInvert nSalFlags = SalInvert::NONE;
@@ -247,7 +247,7 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
     if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mpClippingController->IsOutputClipped() )
+    if ( IsOutputCulled() )
         return;
 
     const tools::Long nDistX = std::max( rDist.Width(), tools::Long(1) );
@@ -350,7 +350,7 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
         InitClipRegion();
     }
 
-    if ( mpClippingController->IsOutputClipped() )
+    if ( IsOutputCulled() )
     {
         return;
     }

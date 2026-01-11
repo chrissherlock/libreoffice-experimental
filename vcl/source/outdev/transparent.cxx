@@ -107,7 +107,7 @@ void OutputDevice::DrawTransparent(
     if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mpClippingController->IsOutputClipped() )
+    if ( IsOutputCulled() )
         return;
 
     if( mbLineColorDirty )
@@ -206,7 +206,7 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
         if ( mpClippingController->IsDirty() )
             InitClipRegion();
 
-        if ( mpClippingController->IsOutputClipped() )
+        if ( IsOutputCulled() )
             return true;
 
         if( mbLineColorDirty )
@@ -306,7 +306,7 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
             tools::Rectangle aLogicPolyRect( rPolyPoly.GetBoundRect() );
             tools::Rectangle aPixelRect(LogicToDevicePixel(aLogicPolyRect));
 
-            if( !mpClippingController->IsOutputClipped() )
+            if( !IsOutputCulled() )
             {
                 bDrawn = mpGraphics->DrawAlphaRect( aPixelRect.Left(), aPixelRect.Top(),
                     // #i98405# use methods with small g, else one pixel too much will be painted.
