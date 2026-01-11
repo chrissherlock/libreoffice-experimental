@@ -26,6 +26,16 @@ bool ClippingController::IsDirty() const { return mbDirty; }
 
 bool ClippingController::IsOutputClipped() const { return mbOutputClipped; }
 
+bool ClippingController::IsOutputClipped(const CoordinateMapper& rMapper,
+                                         const tools::Rectangle& rRect) const
+{
+    vcl::Region aTemp = rMapper.LogicToPixel(maLogicRegion);
+
+    aTemp.Intersect(rRect);
+
+    return aTemp.IsEmpty();
+}
+
 const vcl::Region& ClippingController::GetClipRegion() const { return maLogicRegion; }
 
 void ClippingController::SetDirty(bool bDirty) { mbDirty = bDirty; }
@@ -65,6 +75,25 @@ void ClippingController::IntersectClipRegion(const vcl::Region& rRegion)
 }
 
 void ClippingController::Synchronize(const CoordinateMapper& rMapper,
+                                     const tools::Rectangle& rDeviceBounds,
+                                     const std::function<void(const vcl::Region&)>& rSyncFunc)
+{
+    vcl::Region aPixelRegion = rMapper.LogicToPixel(maLogicRegion);
+
+    // Clamp to Device Bounds (Hardware Reality)
+    // We MUST clamp here so the underlying graphics driver doesn't receive infinite coordinates.
+    aPixelRegion.Intersect(rDeviceBounds);
+
+    maEffectiveRegion = aPixelRegion;
+    mbOutputClipped = maEffectiveRegion.IsEmpty();
+
+    if (rSyncFunc)
+        rSyncFunc(maEffectiveRegion);
+
+    mbDirty = false;
+}
+
+void ClippingController::Synchronize(const CoordinateMapper& rMapper,
                                      const std::function<void(const vcl::Region&)>& rSyncFunc)
 {
     if (!mbDirty)
@@ -79,21 +108,21 @@ void ClippingController::Synchronize(const CoordinateMapper& rMapper,
     }
     else
     {
-        vcl::Region aEffectiveRegion = maLogicRegion;
+        maEffectiveRegion = maLogicRegion;
 
-        aEffectiveRegion.Intersect(
+        maEffectiveRegion.Intersect(
             tools::Rectangle(rMapper.GetOutOffXPixel(), rMapper.GetOutOffYPixel(),
                              rMapper.GetOutOffXPixel() + rMapper.GetOutputWidthPixel() - 1,
                              rMapper.GetOutOffYPixel() + rMapper.GetOutputHeightPixel() - 1));
 
-        if (aEffectiveRegion.IsEmpty())
+        if (maEffectiveRegion.IsEmpty())
         {
             mbOutputClipped = true;
         }
         else
         {
             mbOutputClipped = false;
-            rSyncFunc(aEffectiveRegion); // Callback to SalGraphics
+            rSyncFunc(maEffectiveRegion); // Callback to SalGraphics
         }
     }
 
