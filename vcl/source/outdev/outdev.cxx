@@ -36,6 +36,7 @@
 
 #include <CoordinateMapper.hxx>
 #include <ClippingController.hxx>
+#include <FontController.hxx>
 #include <GraphicsState.hxx>
 #include <ImplOutDevData.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
@@ -66,6 +67,7 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     : mpMapper(std::make_unique<CoordinateMapper>())
     , mpGraphicsState(std::make_unique<vcl::GraphicsState>())
     , mpClippingController(std::make_unique<vcl::ClippingController>())
+    , mpFontController(std::make_unique<vcl::font::FontController>())
     , meOutDevType(eOutDevType)
     , moSettings(Application::GetSettings())
 {
