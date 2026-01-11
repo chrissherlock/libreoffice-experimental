@@ -466,7 +466,7 @@ void OutputDevice::ImplDrawText( SalLayout& rSalLayout )
     if (mpClippingController->IsDirty())
         InitClipRegion();
 
-    if (mpClippingController->IsOutputClipped())
+    if (IsOutputCulled())
         return;
 
     if( mbInitTextColor )
@@ -736,7 +736,7 @@ void OutputDevice::DrawPartialTextArray(const Point& rStartPt, const OUString& r
     if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mpClippingController->IsOutputClipped() )
+    if ( IsOutputCulled() )
         return;
 
     // Adding the UnclusteredGlyphs flag during layout enables per-glyph styling.
@@ -775,7 +775,7 @@ void OutputDevice::DrawTextArray( const Point& rStartPt, const OUString& rStr,
     assert(mpGraphics);
     if ( mpClippingController->IsDirty() )
         InitClipRegion();
-    if ( mpClippingController->IsOutputClipped() )
+    if ( IsOutputCulled() )
         return;
 
     std::unique_ptr<SalLayout> pSalLayout = ImplLayout(rStr, nIndex, nLen, rStartPt, 0, pDXAry, pKashidaAry, flags, nullptr, pSalLayoutCache);
@@ -1779,7 +1779,7 @@ void OutputDevice::DrawText( const tools::Rectangle& rRect, const OUString& rOri
     assert(mpGraphics);
     if ( mpClippingController->IsDirty() )
         InitClipRegion();
-    if (mpClippingController->IsOutputClipped() && !bDecomposeTextRectAction && !pDisplayText)
+    if (IsOutputCulled() && !bDecomposeTextRectAction && !pDisplayText)
         return;
 
     // temporarily disable mtf action generation (ImplDrawText _does_
@@ -1943,7 +1943,7 @@ void OutputDevice::DrawCtrlText( const Point& rPos, const OUString& rStr,
     assert(mpGraphics);
     if ( mpClippingController->IsDirty() )
         InitClipRegion();
-    if ( mpClippingController->IsOutputClipped() )
+    if ( IsOutputCulled() )
         return;
 
     // nIndex and nLen must go to mpAlphaVDev->DrawCtrlText unchanged

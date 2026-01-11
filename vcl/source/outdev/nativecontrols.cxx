@@ -275,7 +275,7 @@ bool OutputDevice::DrawNativeControl( ControlType nType,
 
     if ( mpClippingController->IsDirty() )
         InitClipRegion();
-    if ( mpClippingController->IsOutputClipped() )
+    if ( IsOutputCulled() )
         return true;
 
     if ( mbLineColorDirty )
