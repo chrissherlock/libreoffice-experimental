@@ -413,7 +413,7 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
     if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mpClippingController->IsOutputClipped() )
+    if ( IsOutputCulled() )
         return;
 
     tools::Long nSrcWidth = LogicWidthToDevicePixel(rSrcSize.Width());
@@ -464,7 +464,7 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
     if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mpClippingController->IsOutputClipped() )
+    if ( IsOutputCulled() )
         return;
 
     SalTwoRect aPosAry(rOutDev.LogicXToDevicePixel(rSrcPt.X()),
@@ -499,7 +499,7 @@ void OutputDevice::CopyArea( const Point& rDestPt,
     if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mpClippingController->IsOutputClipped() )
+    if ( IsOutputCulled() )
         return;
 
     tools::Long nSrcWidth = LogicWidthToDevicePixel(rSrcSize.Width());

@@ -38,6 +38,16 @@ bool OutputDevice::IsOutputClipped() const
     return mpClippingController->IsOutputClipped();
 }
 
+bool OutputDevice::IsOutputCulled() const
+{
+    // If Recording (PDF), use Infinite Bounds so we don't cull off-screen objects.
+    // If Rendering (Screen), use Device Bounds so we don't blackout the screen.
+    tools::Rectangle aBounds = tools::Rectangle(Point(0, 0), GetOutputSizePixel());
+
+    return ((mpMetaFile && mpClippingController->IsOutputClipped())
+        || mpClippingController->IsOutputClipped(*mpMapper, aBounds));
+}
+
 void OutputDevice::SaveBackground(VirtualDevice& rSaveDevice,
                                   const Point& rPos, const Size& rSize, const Size& rBackgroundSize) const
 {

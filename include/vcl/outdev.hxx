@@ -563,6 +563,7 @@ protected:
 private:
 
     SAL_DLLPRIVATE void         SetDeviceClipRegion( const vcl::Region* pRegion );
+    SAL_DLLPRIVATE bool         IsOutputCulled() const;
     ///@}
 
 public:
