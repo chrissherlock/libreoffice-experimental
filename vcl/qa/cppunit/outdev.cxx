@@ -2400,32 +2400,52 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testWindowClipRegionOffset)
 
 CPPUNIT_TEST_FIXTURE(VclOutdevTest, testPDFClippingBehavior)
 {
-    // 1. Setup a tiny device (10x10 pixels)
     ScopedVclPtrInstance<VirtualDevice> pVDev;
     pVDev->SetOutputSizePixel(Size(10, 10));
 
-    // Ensure we start with a clean state (no clip)
     pVDev->SetClipRegion(vcl::Region(tools::Rectangle(0, 0, 10, 10)));
 
-    // 2. Simulate PDF Export Mode (Recording)
     GDIMetaFile aMtf;
     pVDev->SetConnectMetaFile(&aMtf);
 
-    // 3. Draw an object WAY outside the device bounds
+    // Draw an object WAY outside the device bounds
     // The device is 10x10. We draw at 1000x1000.
     tools::Rectangle aOutsideRect(Point(1000, 1000), Size(20, 20));
     pVDev->DrawRect(aOutsideRect);
 
-    // 4. Stop Recording
     pVDev->SetConnectMetaFile(nullptr);
 
-    // 5. ASSERTION:
     // If your Hybrid Fix is working, 'IsOutputClipped' saw 'mpMetaFile'
     // and used Infinite Bounds. Therefore, the action should be recorded.
     // If the fix is missing, it checked against the 10x10 device, saw it
     // was outside, and culled it (size would be 0).
     CPPUNIT_ASSERT_EQUAL_MESSAGE("PDF/Metafile recording should NOT cull off-screen objects",
                                  size_t(1), aMtf.GetActionSize());
+}
+
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testFontStateConsistency)
+{
+    ScopedVclPtr<VirtualDevice> pDev = VclPtr<VirtualDevice>::Create();
+
+    vcl::Font aDefFont = pDev->GetFont();
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Default font should be transparent", Color(COL_TRANSPARENT),
+                                 aDefFont.GetFillColor());
+
+    vcl::Font aTestFont(u"Liberation Sans"_ustr, Size(0, 12));
+    aTestFont.SetColor(COL_RED);
+    aTestFont.SetAlignment(ALIGN_BOTTOM);
+
+    pDev->SetFont(aTestFont);
+
+    vcl::Font aResultFont = pDev->GetFont();
+    CPPUNIT_ASSERT_EQUAL(u"Liberation Sans"_ustr, aResultFont.GetFamilyName());
+    CPPUNIT_ASSERT_EQUAL(COL_RED, aResultFont.GetColor());
+    CPPUNIT_ASSERT_EQUAL(ALIGN_BOTTOM, aResultFont.GetAlignment());
+
+    // Does the device actually "know" the font changed?
+    // GetTextHeight() depends on ImplNewFont() layout logic.
+    long nHeight = pDev->GetTextHeight();
+    CPPUNIT_ASSERT_MESSAGE("Text height must be > 0 for a valid font", nHeight > 0);
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();
