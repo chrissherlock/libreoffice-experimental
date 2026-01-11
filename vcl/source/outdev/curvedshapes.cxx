@@ -47,7 +47,7 @@ void OutputDevice::DrawEllipse( const tools::Rectangle& rRect )
 
     if ( mpClippingController->IsDirty() )
         InitClipRegion();
-    if ( mpClippingController->IsOutputClipped() )
+    if ( IsOutputCulled() )
         return;
 
     if ( mbLineColorDirty )
@@ -90,7 +90,7 @@ void OutputDevice::DrawArc( const tools::Rectangle& rRect,
 
     if ( mpClippingController->IsDirty() )
         InitClipRegion();
-    if ( mpClippingController->IsOutputClipped() )
+    if ( IsOutputCulled() )
         return;
 
     if ( mbLineColorDirty )
@@ -129,7 +129,7 @@ void OutputDevice::DrawPie( const tools::Rectangle& rRect,
 
     if ( mpClippingController->IsDirty() )
         InitClipRegion();
-    if ( mpClippingController->IsOutputClipped() )
+    if ( IsOutputCulled() )
         return;
 
     if ( mbLineColorDirty )
@@ -175,7 +175,7 @@ void OutputDevice::DrawChord( const tools::Rectangle& rRect,
 
     if ( mpClippingController->IsDirty() )
         InitClipRegion();
-    if ( mpClippingController->IsOutputClipped() )
+    if ( IsOutputCulled() )
         return;
 
     if ( mbLineColorDirty )

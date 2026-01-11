@@ -220,7 +220,7 @@ void OutputDevice::DrawTransformedBitmapEx(
        recording to a metafile. It's typical to record with a device of nominal
        size and play back later against something of a totally different size.
      */
-    if (mpClippingController->IsOutputClipped() && !mpMetaFile)
+    if (IsOutputCulled() && !mpMetaFile)
         return;
 
 #ifdef DO_TIME_TEST

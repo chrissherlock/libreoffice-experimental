@@ -37,7 +37,7 @@ Color OutputDevice::GetPixel(const Point& rPoint) const
         if ( mpClippingController->IsDirty() )
             const_cast<OutputDevice*>(this)->InitClipRegion();
 
-        if (!mpClippingController->IsOutputClipped())
+        if (!IsOutputCulled())
         {
             const tools::Long nX = LogicXToDevicePixel(rPoint.X());
             const tools::Long nY = LogicYToDevicePixel(rPoint.Y());
@@ -66,7 +66,7 @@ void OutputDevice::DrawPixel( const Point& rPt )
     if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mpClippingController->IsOutputClipped() )
+    if ( IsOutputCulled() )
         return;
 
     if ( mbLineColorDirty )
@@ -96,7 +96,7 @@ void OutputDevice::DrawPixel( const Point& rPt, const Color& rColor )
     if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mpClippingController->IsOutputClipped() )
+    if ( IsOutputCulled() )
         return;
 
     mpGraphics->DrawPixel( aPt.X(), aPt.Y(), aColor, *this );

@@ -109,10 +109,10 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
         InitClipRegion();
 
     // try to draw gradient natively
-    if (!mpClippingController->IsOutputClipped())
+    if (!IsOutputCulled())
         bDrawn = mpGraphics->DrawGradient( aClixPolyPoly, aGradient, *this );
 
-    if (bDrawn || mpClippingController->IsOutputClipped())
+    if (bDrawn || IsOutputCulled())
         return;
 
     // draw gradients without border

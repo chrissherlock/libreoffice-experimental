@@ -187,7 +187,7 @@ void Window::InvertTracking( const tools::Rectangle& rRect, ShowTrackFlags nFlag
         if ( GetOutDev()->GetClippingController().IsDirty() )
             GetOutDev()->InitClipRegion();
 
-        if ( GetOutDev()->IsOutputClipped() )
+        if ( GetOutDev()->IsOutputCulled() )
             return;
 
         pGraphics = GetOutDev()->mpGraphics;

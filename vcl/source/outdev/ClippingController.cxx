@@ -27,9 +27,32 @@ bool ClippingController::IsDirty() const { return mbDirty; }
 
 bool ClippingController::IsOutputClipped() const { return mbOutputClipped; }
 
+static bool IsInfinite(const tools::Rectangle& rRect)
+{
+    // Match the specific constants used in OutputDevice::IsOutputCulled
+    // (-0x7FFFFFFF and 0x7FFFFFFF).
+    return rRect.Left() <= -0x7FFFFFFF && rRect.Right() >= 0x7FFFFFFF;
+}
+
 bool ClippingController::IsOutputClipped(const CoordinateMapper& rMapper,
                                          const tools::Rectangle& rRect) const
 {
+    // If there is no user-defined clip region (Infinite), we don't need to transform it.
+    // We only care if the bounds (rRect) themselves are empty.
+    if (!mbHasClipRegion)
+        return rRect.IsEmpty();
+
+    if (IsInfinite(rRect))
+        return maLogicRegion.IsEmpty();
+
+    // Logic Region is "Infinite" (Null):
+    // Sometimes 'mbHasClipRegion' is true, but the region effectively covers everything
+    // (e.g., after SetClipRegion(Region(true))).
+    // We must NOT call LogicToPixel/Intersect on a Null Region, as it uses
+    // max-integer coordinates that cause overflows (Segfault 11) during math.
+    if (maLogicRegion.IsNull())
+        return rRect.IsEmpty();
+
     vcl::Region aTemp = rMapper.LogicToPixel(maLogicRegion);
 
     aTemp.Intersect(rRect);
