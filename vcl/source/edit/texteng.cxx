@@ -35,6 +35,8 @@
 #include <sal/log.hxx>
 #include <osl/diagnose.h>
 
+#include <GraphicsState.hxx>
+
 #include "TextLine.hxx"
 #include "IdleFormatter.hxx"
 
