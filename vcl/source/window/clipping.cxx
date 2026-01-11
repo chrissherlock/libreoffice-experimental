@@ -51,7 +51,10 @@ void WindowOutputDevice::InitClipRegion()
 {
     DBG_TESTSOLARMUTEX();
 
-    mpClippingController->Synchronize(*mpMapper, [this](const vcl::Region& rPixelRegion) {
+    tools::Rectangle aBounds(Point(0, 0), GetOutputSizePixel());
+
+    // Pass 'aBounds' as the second argument
+    mpClippingController->Synchronize(*mpMapper, aBounds, [this](const vcl::Region& rPixelRegion) {
         this->SetGraphicsClip(rPixelRegion);
     });
 }
