@@ -36,6 +36,7 @@
 
 #include <CoordinateMapper.hxx>
 #include <ClippingController.hxx>
+#include <FontController.hxx>
 #include <GraphicsState.hxx>
 #include <ImplOutDevData.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
@@ -65,6 +66,7 @@ using namespace ::com::sun::star::uno;
 OutputDevice::OutputDevice(OutDevType eOutDevType)
     : mpMapper(std::make_unique<CoordinateMapper>())
     , mpGraphicsState(std::make_unique<vcl::GraphicsState>())
+    , mpFontController(std::make_unique<vcl::font::FontController>())
     , meOutDevType(eOutDevType)
     , moSettings(Application::GetSettings())
     , mpClippingController(std::make_unique<vcl::ClippingController>())

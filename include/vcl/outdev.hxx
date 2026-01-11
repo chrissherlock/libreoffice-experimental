@@ -116,6 +116,7 @@ namespace vcl
     class WindowOutputDevice;
     namespace font {
         struct Feature;
+        class FontController;
         class PhysicalFontCollection;
         class PhysicalFontFaceCollection;
     }
@@ -194,6 +195,7 @@ private:
     vcl::ExtOutDevData*             mpExtOutDevData;
     mutable std::unique_ptr<CoordinateMapper> mpMapper;
     std::unique_ptr<vcl::GraphicsState> mpGraphicsState;
+    std::unique_ptr<vcl::font::FontController> mpFontController;
 
     // The canvas interface for this output device. Is persistent after the first GetCanvas() call
     mutable css::uno::WeakReference< css::rendering::XCanvas >    mxCanvas;
