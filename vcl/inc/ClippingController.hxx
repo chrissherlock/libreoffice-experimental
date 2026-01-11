@@ -22,6 +22,8 @@ class VCL_DLLPUBLIC ClippingController
 {
 private:
     vcl::Region maLogicRegion;
+    vcl::Region maEffectiveRegion;
+
     bool mbHasClipRegion;
 
     bool mbDirty;
@@ -34,6 +36,7 @@ public:
     const vcl::Region& GetClipRegion() const;
     bool HasClipRegion() const;
     bool IsOutputClipped() const;
+    bool IsOutputClipped(const CoordinateMapper& rMapper, const tools::Rectangle& rRect) const;
 
     bool IsDirty() const;
     void SetDirty(bool bDirty);
@@ -49,6 +52,9 @@ public:
 
     using HardwareSyncFunc = std::function<void(const vcl::Region&)>;
     void Synchronize(const CoordinateMapper& rMapper,
+                     const std::function<void(const vcl::Region&)>& rSyncFunc);
+
+    void Synchronize(const CoordinateMapper& rMapper, const tools::Rectangle& rDeviceBounds,
                      const std::function<void(const vcl::Region&)>& rSyncFunc);
 
     void EnableDeviceBoundsClipping(bool bEnable) { mbClipToDeviceBounds = bEnable; }

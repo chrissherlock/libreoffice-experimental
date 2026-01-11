@@ -27,6 +27,16 @@ bool ClippingController::IsDirty() const { return mbDirty; }
 
 bool ClippingController::IsOutputClipped() const { return mbOutputClipped; }
 
+bool ClippingController::IsOutputClipped(const CoordinateMapper& rMapper,
+                                         const tools::Rectangle& rRect) const
+{
+    vcl::Region aTemp = rMapper.LogicToPixel(maLogicRegion);
+
+    aTemp.Intersect(rRect);
+
+    return aTemp.IsEmpty();
+}
+
 const vcl::Region& ClippingController::GetClipRegion() const { return maLogicRegion; }
 
 void ClippingController::SetDirty(bool bDirty) { mbDirty = bDirty; }
@@ -66,6 +76,25 @@ void ClippingController::IntersectClipRegion(const vcl::Region& rRegion)
 }
 
 void ClippingController::Synchronize(const CoordinateMapper& rMapper,
+                                     const tools::Rectangle& rDeviceBounds,
+                                     const std::function<void(const vcl::Region&)>& rSyncFunc)
+{
+    vcl::Region aPixelRegion = rMapper.LogicToPixel(maLogicRegion);
+
+    // Clamp to Device Bounds (Hardware Reality)
+    // We MUST clamp here so the underlying graphics driver doesn't receive infinite coordinates.
+    aPixelRegion.Intersect(rDeviceBounds);
+
+    maEffectiveRegion = aPixelRegion;
+    mbOutputClipped = maEffectiveRegion.IsEmpty();
+
+    if (rSyncFunc)
+        rSyncFunc(maEffectiveRegion);
+
+    mbDirty = false;
+}
+
+void ClippingController::Synchronize(const CoordinateMapper& rMapper,
                                      const std::function<void(const vcl::Region&)>& rSyncFunc)
 {
     if (!mbDirty)
@@ -80,6 +109,9 @@ void ClippingController::Synchronize(const CoordinateMapper& rMapper,
     }
     else
     {
+        // NOTE: If maLogicRegion stores LOGICAL coordinates, you need
+        // rMapper.LogicToPixel(maLogicRegion) here, just like your 3-arg version!
+        // If it stores PIXEL coordinates, this is correct as-is.
         vcl::Region aEffectiveRegion = maLogicRegion;
 
         if (mbClipToDeviceBounds)
@@ -90,14 +122,17 @@ void ClippingController::Synchronize(const CoordinateMapper& rMapper,
                                  rMapper.GetOutOffYPixel() + rMapper.GetOutputHeightPixel() - 1));
         }
 
-        if (aEffectiveRegion.IsEmpty())
+        maEffectiveRegion = aEffectiveRegion;
+
+        if (maEffectiveRegion.IsEmpty())
         {
             mbOutputClipped = true;
         }
         else
         {
             mbOutputClipped = false;
-            rSyncFunc(aEffectiveRegion); // Callback to SalGraphics
+            if (rSyncFunc)
+                rSyncFunc(maEffectiveRegion); // Callback to SalGraphics
         }
     }
 
