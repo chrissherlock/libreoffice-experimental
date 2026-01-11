@@ -997,7 +997,7 @@ void OutputDevice::DrawTextLine( const Point& rPos, tools::Long nWidth,
     if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mpClippingController->IsOutputClipped() )
+    if ( IsOutputCulled() )
         return;
 
     // initialize font if needed to get text offsets
@@ -1026,7 +1026,7 @@ void OutputDevice::DrawWaveLine(const Point& rStartPos, const Point& rEndPos, to
     if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mpClippingController->IsOutputClipped() )
+    if ( IsOutputCulled() )
         return;
 
     if (!InitFont())
@@ -1122,7 +1122,7 @@ void OutputDevice::ImplDrawWaveLineBezier(tools::Long nStartX, tools::Long nStar
     if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mpClippingController->IsOutputClipped() )
+    if ( IsOutputCulled() )
         return;
 
     if (!InitFont())

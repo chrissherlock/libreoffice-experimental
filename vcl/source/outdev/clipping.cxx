@@ -44,7 +44,7 @@ bool OutputDevice::IsOutputCulled() const
     // If Rendering (Screen), use Device Bounds so we don't blackout the screen.
     tools::Rectangle aBounds = tools::Rectangle(Point(0, 0), GetOutputSizePixel());
 
-    return ((mpMetaFile && mpClippingController->IsOutputClipped())
+    return ((mpMetaFile && IsOutputClipped())
         || mpClippingController->IsOutputClipped(*mpMapper, aBounds));
 }
 

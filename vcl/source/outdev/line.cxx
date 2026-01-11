@@ -124,7 +124,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
     if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mpClippingController->IsOutputClipped() )
+    if ( IsOutputCulled() )
         return;
 
     const Point aStartPt(LogicToDevicePixel(rStartPt));
@@ -167,7 +167,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt )
     if ( mpClippingController->IsDirty() )
         InitClipRegion();
 
-    if ( mpClippingController->IsOutputClipped() )
+    if ( IsOutputCulled() )
         return;
 
     if ( mbLineColorDirty )

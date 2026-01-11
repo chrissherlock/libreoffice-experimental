@@ -528,6 +528,8 @@ private:
     ///@{
 
 public:
+    SAL_DLLPRIVATE bool         IsOutputCulled() const;
+
     vcl::ClippingController& GetClippingController() { return *mpClippingController; }
     const vcl::ClippingController& GetClippingController() const { return *mpClippingController; }
 
@@ -561,7 +563,6 @@ protected:
 private:
 
     SAL_DLLPRIVATE void         SetDeviceClipRegion( const vcl::Region* pRegion );
-    SAL_DLLPRIVATE bool         IsOutputCulled() const;
     ///@}
 
 public:
