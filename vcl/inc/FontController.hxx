@@ -9,29 +9,33 @@
 
 #pragma once
 
+#include <rtl/ref.hxx>
 #include <tools/color.hxx>
 
-#include <vcl/font.hxx>
 #include <vcl/vclenum.hxx>
 
-class ImplFontEntry;
-class ImplFontList;
+class ImplFontCache;
+class PhysicalFontCollection;
+class LogicalFontInstance;
 
 namespace vcl::font
 {
+class Font;
+
 class FontController
 {
 public:
-    ImplFontEntry* mpFontEntry;
-    ImplFontList* mpFontList;
+    rtl::Reference<LogicalFontInstance> mxFontInstance;
+    std::shared_ptr<PhysicalFontCollection> mxFontCollection;
+
     TextAlign meTextAlign;
 
-    FontController()
-        : mpFontEntry(nullptr)
-        , mpFontList(nullptr)
-        , meTextAlign(ALIGN_TOP)
-    {
-    }
+    FontController();
+
+    bool NeedsUpdate(const vcl::Font& rRequestedFont, bool bDeviceDirty) const;
+
+    void RealizeFont(ImplFontCache& rCache, const vcl::Font& rFont, const Size& rSize,
+                     float fExactHeight, bool bNonAntialiased);
 };
 
 } // namespace vcl
