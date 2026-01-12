@@ -724,14 +724,8 @@ bool OutputDevice::ImplNewFont() const
     if( (0 == aSize.Width()) && (0 != mpGraphicsState->maFont.GetFontSize().Width()) )
         aSize.setWidth( 1 );
 
-    // decide if antialiasing is appropriate
-    bool bNonAntialiased(GetAntialiasing() & AntialiasingFlags::DisableText);
-    if (!comphelper::IsFuzzing())
-    {
-        const StyleSettings& rStyleSettings = GetSettings().GetStyleSettings();
-        bNonAntialiased |= bool(rStyleSettings.GetDisplayOptions() & DisplayOptions::AADisable);
-        bNonAntialiased |= (int(rStyleSettings.GetAntialiasingMinPixelHeight()) > mpGraphicsState->maFont.GetFontSize().Height());
-    }
+    const bool bNonAntialiased = mpFontController->ShouldDisableAntialiasing(GetAntialiasing(), GetSettings().GetStyleSettings(),
+                                                                             mpGraphicsState->maFont.GetFontSize().Height());
 
     mpFontController->RealizeFont(*mxFontCache, mpGraphicsState->maFont, aSize, fExactHeight, bNonAntialiased);
 
