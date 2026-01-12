@@ -778,48 +778,8 @@ bool OutputDevice::ImplNewFont() const
         SetFontOrientation(mpFontInstance.get());
     }
 
-    // calculate EmphasisArea
-    mnEmphasisAscent = 0;
-    mnEmphasisDescent = 0;
-    if ( mpGraphicsState->maFont.GetEmphasisMark() & FontEmphasisMark::Style )
-    {
-        FontEmphasisMark nEmphasisMark = mpGraphicsState->maFont.GetEmphasisMarkStyle();
-        tools::Long                nEmphasisHeight = (pFontInstance->mnLineHeight*250)/1000;
-        if ( nEmphasisHeight < 1 )
-            nEmphasisHeight = 1;
-        if ( nEmphasisMark & FontEmphasisMark::PosBelow )
-            mnEmphasisDescent = nEmphasisHeight;
-        else
-            mnEmphasisAscent = nEmphasisHeight;
-    }
-
-    // calculate text offset depending on TextAlignment
-    TextAlign eAlign = mpGraphicsState->maFont.GetAlignment();
-    if ( eAlign == ALIGN_BASELINE )
-    {
-        mnTextOffX = 0;
-        mnTextOffY = 0;
-    }
-    else if ( eAlign == ALIGN_TOP )
-    {
-        mnTextOffX = 0;
-        mnTextOffY = +pFontInstance->mxFontMetric->GetAscent() + mnEmphasisAscent;
-        if ( pFontInstance->mnOrientation )
-        {
-            Point aOriginPt(0, 0);
-            aOriginPt.RotateAround( mnTextOffX, mnTextOffY, pFontInstance->mnOrientation );
-        }
-    }
-    else // eAlign == ALIGN_BOTTOM
-    {
-        mnTextOffX = 0;
-        mnTextOffY = -pFontInstance->mxFontMetric->GetDescent() + mnEmphasisDescent;
-        if ( pFontInstance->mnOrientation )
-        {
-            Point aOriginPt(0, 0);
-            aOriginPt.RotateAround( mnTextOffX, mnTextOffY, pFontInstance->mnOrientation );
-        }
-    }
+    std::tie(mnTextOffX, mnTextOffY, mnEmphasisAscent, mnEmphasisDescent) =
+    mpFontController->CalculateTextOffsets(mpGraphicsState->maFont, mpFontInstance.get());
 
     mbTextLines     = ((mpGraphicsState->maFont.GetUnderline() != LINESTYLE_NONE) && (mpGraphicsState->maFont.GetUnderline() != LINESTYLE_DONTKNOW)) ||
                       ((mpGraphicsState->maFont.GetOverline()  != LINESTYLE_NONE) && (mpGraphicsState->maFont.GetOverline()  != LINESTYLE_DONTKNOW)) ||
