@@ -74,6 +74,9 @@ public:
                             tools::Long nEmphasisDescent) const;
 
     double GetMinKashidaWidth(const LogicalFontInstance* pFontInstance) const;
+
+    bool GetFontCapabilities(SalGraphics* pGraphics,
+                             vcl::FontCapabilities& rFontCapabilities) const;
 };
 
 } // namespace vcl
