@@ -1105,7 +1105,8 @@ tools::Long OutputDevice::GetMinKashida() const
     if (!ImplNewFont())
         return 0;
 
-    auto nKashidaWidth = mpFontInstance->mxFontMetric->GetMinKashida();
+    double nKashidaWidth = mpFontController->GetMinKashidaWidth(mpFontInstance.get());
+
     if (!mpMapper->IsMapModeEnabled())
         nKashidaWidth = std::ceil(nKashidaWidth);
 

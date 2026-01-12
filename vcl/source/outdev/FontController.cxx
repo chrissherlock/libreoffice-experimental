@@ -250,6 +250,14 @@ void FontController::PopulateFontMetric(FontMetric& rMetric, const vcl::Font& rL
     rMetric.SetQuality(xFontMetric->GetQuality());
 }
 
+double FontController::GetMinKashidaWidth(const LogicalFontInstance* pFontInstance) const
+{
+    if (!pFontInstance || !pFontInstance->mxFontMetric)
+        return 0.0;
+
+    return pFontInstance->mxFontMetric->GetMinKashida();
+}
+
 } // end namespace vcl::font
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
