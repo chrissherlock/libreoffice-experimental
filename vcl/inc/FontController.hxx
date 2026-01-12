@@ -18,6 +18,8 @@ class ImplFontCache;
 class PhysicalFontCollection;
 class LogicalFontInstance;
 
+#include <tuple>
+
 namespace vcl::font
 {
 class Font;
@@ -38,6 +40,13 @@ public:
                      float fExactHeight, bool bNonAntialiased);
 
     void InitializeInstance(LogicalFontInstance* pFontInstance, SalGraphics* pGraphics);
+
+    /**
+     * Calculates vertical/horizontal offsets and emphasis metrics.
+     * Returns a tuple of: <nHorzOffset, nVertOffset, nEmphasisAscent, nEmphasisDescent>
+     */
+    std::tuple<tools::Long, tools::Long, tools::Long, tools::Long>
+    CalculateTextOffsets(const vcl::Font& rFont, const LogicalFontInstance* pFontInstance) const;
 };
 
 } // namespace vcl
