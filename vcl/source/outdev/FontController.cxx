@@ -69,6 +69,50 @@ void FontController::InitializeInstance(LogicalFontInstance* pFontInstance, SalG
     pGraphics->GetFontMetric(pFontInstance->mxFontMetric, 0);
 }
 
+std::tuple<tools::Long, tools::Long, tools::Long, tools::Long>
+FontController::CalculateTextOffsets(const vcl::Font& rFont,
+                                     const LogicalFontInstance* pFontInstance) const
+{
+    if (!pFontInstance)
+        return std::make_tuple(0, 0, 0, 0);
+
+    tools::Long nEmphasisAscent = 0;
+    tools::Long nEmphasisDescent = 0;
+    tools::Long nVerticalOffset = 0;
+    tools::Long nHorizontalOffset = 0;
+
+    if (rFont.GetEmphasisMark() & FontEmphasisMark::Style)
+    {
+        FontEmphasisMark nEmphasisMark = rFont.GetEmphasisMarkStyle();
+        tools::Long nEmphasisHeight = (pFontInstance->mnLineHeight * 250) / 1000;
+
+        if (nEmphasisHeight < 1)
+            nEmphasisHeight = 1;
+
+        if (nEmphasisMark & FontEmphasisMark::PosBelow)
+            nEmphasisDescent = nEmphasisHeight;
+        else
+            nEmphasisAscent = nEmphasisHeight;
+    }
+
+    TextAlign eAlign = rFont.GetAlignment();
+    if (eAlign == ALIGN_TOP)
+        nVerticalOffset = pFontInstance->mxFontMetric->GetAscent() + nEmphasisAscent;
+    else if (eAlign == ALIGN_BOTTOM)
+        nVerticalOffset = -pFontInstance->mxFontMetric->GetDescent() + nEmphasisDescent;
+
+    // ALIGN_BASELINE sets offsets to 0, which is our default
+
+    // 3. Handle Rotation/Orientation
+    if (pFontInstance->mnOrientation && (nHorizontalOffset || nVerticalOffset))
+    {
+        Point aOriginPt(0, 0);
+        aOriginPt.RotateAround(nHorizontalOffset, nVerticalOffset, pFontInstance->mnOrientation);
+    }
+
+    return std::make_tuple(nHorizontalOffset, nVerticalOffset, nEmphasisAscent, nEmphasisDescent);
+}
+
 } // end namespace vcl::font
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
