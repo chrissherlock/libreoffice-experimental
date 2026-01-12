@@ -767,19 +767,15 @@ bool OutputDevice::ImplNewFont() const
     // select font when it has not been initialized yet
     if (!pFontInstance->mbInit && InitFont())
     {
-        // get metric data from device layers
-        pFontInstance->mbInit = true;
+        mpFontController->InitializeInstance(mpFontInstance.get(), mpGraphics);
 
-        pFontInstance->mxFontMetric->SetOrientation( mpFontInstance->GetFontSelectPattern().mnOrientation );
-        mpGraphics->GetFontMetric( pFontInstance->mxFontMetric, 0 );
+        mpFontInstance->mxFontMetric->ImplInitTextLineSize( this );
+        mpFontInstance->mxFontMetric->ImplInitAboveTextLineSize( this );
+        mpFontInstance->mxFontMetric->ImplInitFlags( this );
 
-        pFontInstance->mxFontMetric->ImplInitTextLineSize( this );
-        pFontInstance->mxFontMetric->ImplInitAboveTextLineSize( this );
-        pFontInstance->mxFontMetric->ImplInitFlags( this );
+        mpFontInstance->mnLineHeight = mpFontInstance->mxFontMetric->GetAscent() + mpFontInstance->mxFontMetric->GetDescent();
 
-        pFontInstance->mnLineHeight = pFontInstance->mxFontMetric->GetAscent() + pFontInstance->mxFontMetric->GetDescent();
-
-        SetFontOrientation( pFontInstance );
+        SetFontOrientation(mpFontInstance.get());
     }
 
     // calculate EmphasisArea

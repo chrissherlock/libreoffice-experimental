@@ -36,6 +36,8 @@ public:
 
     void RealizeFont(ImplFontCache& rCache, const vcl::Font& rFont, const Size& rSize,
                      float fExactHeight, bool bNonAntialiased);
+
+    void InitializeInstance(LogicalFontInstance* pFontInstance, SalGraphics* pGraphics);
 };
 
 } // namespace vcl
