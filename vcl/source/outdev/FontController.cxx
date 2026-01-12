@@ -258,6 +258,16 @@ double FontController::GetMinKashidaWidth(const LogicalFontInstance* pFontInstan
     return pFontInstance->mxFontMetric->GetMinKashida();
 }
 
+bool FontController::GetFontCapabilities(SalGraphics* pGraphics,
+                                         vcl::FontCapabilities& rFontCapabilities) const
+{
+    if (!pGraphics)
+        return false;
+
+    // Delegate directly to the SalGraphics driver
+    return pGraphics->GetFontCapabilities(rFontCapabilities);
+}
+
 } // end namespace vcl::font
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
