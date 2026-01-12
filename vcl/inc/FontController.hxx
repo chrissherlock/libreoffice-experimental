@@ -48,6 +48,10 @@ public:
     std::tuple<tools::Long, tools::Long, tools::Long, tools::Long>
     CalculateTextOffsets(const vcl::Font& rFont, const LogicalFontInstance* pFontInstance) const;
 
+    std::pair<float, Size> CalculateDeviceSize(const vcl::Font& rFont,
+                                               const CoordinateMapper& rMapper,
+                                               tools::Long nDPIY) const;
+
     /**
      * Evaluates if the font requires special rendering for lines or effects.
      * Returns a tuple of: <bTextLines, bTextSpecial>

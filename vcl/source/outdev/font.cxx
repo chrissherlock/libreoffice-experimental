@@ -706,23 +706,8 @@ bool OutputDevice::ImplNewFont() const
 
     ImplInitFontList();
 
-    // convert to pixel height
-    // TODO: replace integer based aSize completely with subpixel accurate type
-    float fExactHeight = mpMapper->LogicHeightToDeviceSubPixel(mpGraphicsState->maFont.GetFontHeight());
-    Size aSize = mpMapper->LogicToDevicePixel( mpGraphicsState->maFont.GetFontSize() );
-    if ( !aSize.Height() )
-    {
-        // use default pixel height only when logical height is zero
-        if ( mpGraphicsState->maFont.GetFontSize().Height() )
-            aSize.setHeight( 1 );
-        else
-            aSize.setHeight( (12*GetDPIY())/72 );
-        fExactHeight =  static_cast<float>(aSize.Height());
-    }
-
-    // select the default width only when logical width is zero
-    if( (0 == aSize.Width()) && (0 != mpGraphicsState->maFont.GetFontSize().Width()) )
-        aSize.setWidth( 1 );
+    auto [fExactHeight, aSize] =
+        mpFontController->CalculateDeviceSize(mpGraphicsState->maFont, *mpMapper, GetDPIY());
 
     const bool bNonAntialiased = mpFontController->ShouldDisableAntialiasing(GetAntialiasing(), GetSettings().GetStyleSettings(),
                                                                              mpGraphicsState->maFont.GetFontSize().Height());
