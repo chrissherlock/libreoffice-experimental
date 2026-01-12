@@ -50,6 +50,25 @@ void FontController::RealizeFont(ImplFontCache& rCache, const vcl::Font& rFont, 
                                             bNonAntialiased);
 }
 
+void FontController::InitializeInstance(LogicalFontInstance* pFontInstance, SalGraphics* pGraphics)
+{
+    if (!pFontInstance || !pGraphics)
+        return;
+
+    // Guard: only initialize if not already done
+    if (pFontInstance->mbInit)
+        return;
+
+    pFontInstance->mbInit = true;
+
+    // Apply orientation from the selection pattern
+    pFontInstance->mxFontMetric->SetOrientation(
+        pFontInstance->GetFontSelectPattern().mnOrientation);
+
+    // Fetch physical metrics directly from the graphics driver
+    pGraphics->GetFontMetric(pFontInstance->mxFontMetric, 0);
+}
+
 } // end namespace vcl::font
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
