@@ -14,7 +14,9 @@
 #include <vcl/metric.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/settings.hxx>
+#include <vcl/svapp.hxx>
 
+#include <font/FeatureCollector.hxx>
 #include <font/LogicalFontInstance.hxx>
 #include <impfontcache.hxx>
 #include <salgdi.hxx>
@@ -279,6 +281,21 @@ FontCharMapRef FontController::GetFontCharMap(SalGraphics* pGraphics) const
         xFontCharMap = FontCharMapRef(new FontCharMap());
 
     return xFontCharMap;
+}
+
+void FontController::GetFontFeatures(const LogicalFontInstance* pFontInstance,
+                                     std::vector<vcl::font::Feature>& rFontFeatures) const
+{
+    if (!pFontInstance)
+        return;
+
+    // Determine the UI language for feature name localization
+    const LanguageTag& rOfficeLanguage = Application::GetSettings().GetUILanguageTag();
+
+    // Use the FeatureCollector to query the physical font face
+    vcl::font::FeatureCollector aFeatureCollector(pFontInstance->GetFontFace(), rFontFeatures,
+                                                  rOfficeLanguage);
+    aFeatureCollector.collect();
 }
 
 } // end namespace vcl::font

@@ -80,6 +80,9 @@ public:
                              vcl::FontCapabilities& rFontCapabilities) const;
 
     FontCharMapRef GetFontCharMap(SalGraphics* pGraphics) const;
+
+    void GetFontFeatures(const LogicalFontInstance* pFontInstance,
+                         std::vector<vcl::font::Feature>& rFontFeatures) const;
 };
 
 } // namespace vcl
