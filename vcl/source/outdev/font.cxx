@@ -236,7 +236,8 @@ bool OutputDevice::GetFontCapabilities( vcl::FontCapabilities& rFontCapabilities
 {
     if (!InitFont())
         return false;
-    return mpGraphics->GetFontCapabilities(rFontCapabilities);
+
+    return mpFontController->GetFontCapabilities(mpGraphics, rFontCapabilities);
 }
 
 tools::Long OutputDevice::GetFontExtLeading() const
