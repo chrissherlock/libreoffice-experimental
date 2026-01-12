@@ -801,19 +801,19 @@ bool OutputDevice::ImplNewFont() const
 
 bool OutputDevice::AttemptOLEFontScaleFix(vcl::Font& rFont, tools::Long nHeight) const
 {
-    const float fDenominator = static_cast<float>(mpMapper->GetMappingYNumerator()) * mpMapper->GetMappingXDenominator();
-    if (fDenominator == 0.0)
-        return false;
-    const float fNumerator = static_cast<float>(mpMapper->GetMappingXNumerator()) * mpMapper->GetMappingYDenominator();
-    const float fStretch = fNumerator / fDenominator;
-    const int nOrigWidth = mpFontInstance->mxFontMetric->GetWidth();
-    const int nNewWidth = static_cast<int>(nOrigWidth * fStretch + 0.5);
+    // Delegate the complex math to the controller
+    int nNewWidth = mpFontController->CalculateOLEStorageWidth(
+        mpFontInstance.get(),
+        mpMapper->GetMappingXNumerator(), mpMapper->GetMappingXDenominator(),
+        mpMapper->GetMappingYNumerator(), mpMapper->GetMappingYDenominator()
+    );
 
-    if (nNewWidth == nOrigWidth || nNewWidth == 0)
+    if (nNewWidth == 0)
         return true;
 
     Size aOrigSize = rFont.GetFontSize();
     rFont.SetFontSize(Size(nNewWidth, nHeight));
+
     mpMapper->EnableMapMode(false);
     mbNewFont = true;
 

@@ -11,6 +11,7 @@
 #include <cppunit/TestAssert.h>
 
 #include <tools/fract.hxx>
+#include <tools/mapunit.hxx>
 
 #include <vcl/metric.hxx>
 #include <vcl/virdev.hxx>
