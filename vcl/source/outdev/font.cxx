@@ -792,13 +792,11 @@ bool OutputDevice::ImplNewFont() const
     mbTextLines = bTextLines;
     mbTextSpecial = bTextSpecial;
 
-    bool bRet = true;
-
     // #95414# fix for OLE objects which use scale factors very creatively
     if (mpMapper->IsMapModeEnabled() && !aSize.Width())
-        bRet = AttemptOLEFontScaleFix(const_cast<vcl::Font&>(mpGraphicsState->maFont), aSize.Height());
+        return AttemptOLEFontScaleFix(const_cast<vcl::Font&>(mpGraphicsState->maFont), aSize.Height());
 
-    return bRet;
+    return true;
 }
 
 bool OutputDevice::AttemptOLEFontScaleFix(vcl::Font& rFont, tools::Long nHeight) const
