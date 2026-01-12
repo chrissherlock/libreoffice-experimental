@@ -747,13 +747,7 @@ bool OutputDevice::ImplNewFont() const
     if (!pFontInstance->mbInit && InitFont())
     {
         mpFontController->InitializeInstance(mpFontInstance.get(), mpGraphics);
-
-        mpFontInstance->mxFontMetric->ImplInitTextLineSize( this );
-        mpFontInstance->mxFontMetric->ImplInitAboveTextLineSize( this );
-        mpFontInstance->mxFontMetric->ImplInitFlags( this );
-
-        mpFontInstance->mnLineHeight = mpFontInstance->mxFontMetric->GetAscent() + mpFontInstance->mxFontMetric->GetDescent();
-
+        ImplInitFontMetrics(mpFontInstance.get());
         SetFontOrientation(mpFontInstance.get());
     }
 
@@ -776,6 +770,18 @@ bool OutputDevice::ImplNewFont() const
         return AttemptOLEFontScaleFix(const_cast<vcl::Font&>(mpGraphicsState->maFont), aSize.Height());
 
     return true;
+}
+
+void OutputDevice::ImplInitFontMetrics(LogicalFontInstance* pFontInstance) const
+{
+    // Initialize line sizes and internal flags using this device's context
+    pFontInstance->mxFontMetric->ImplInitTextLineSize(this);
+    pFontInstance->mxFontMetric->ImplInitAboveTextLineSize(this);
+    pFontInstance->mxFontMetric->ImplInitFlags(this);
+
+    // Cache the combined line height
+    pFontInstance->mnLineHeight = pFontInstance->mxFontMetric->GetAscent() +
+                                  pFontInstance->mxFontMetric->GetDescent();
 }
 
 bool OutputDevice::AttemptOLEFontScaleFix(vcl::Font& rFont, tools::Long nHeight) const
