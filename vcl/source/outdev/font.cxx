@@ -224,11 +224,7 @@ bool OutputDevice::GetFontCharMap( FontCharMapRef& rxFontCharMap ) const
     if (!InitFont())
         return false;
 
-    FontCharMapRef xFontCharMap ( mpGraphics->GetFontCharMap() );
-    if (!xFontCharMap.is())
-        rxFontCharMap = FontCharMapRef(new FontCharMap());
-    else
-        rxFontCharMap = std::move(xFontCharMap);
+    rxFontCharMap = mpFontController->GetFontCharMap(mpGraphics);
 
     return !rxFontCharMap->IsDefaultMap();
 }

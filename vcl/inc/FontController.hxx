@@ -12,6 +12,7 @@
 #include <rtl/ref.hxx>
 #include <tools/color.hxx>
 
+#include <vcl/fontcharmap.hxx>
 #include <vcl/vclenum.hxx>
 
 class ImplFontCache;
@@ -77,6 +78,8 @@ public:
 
     bool GetFontCapabilities(SalGraphics* pGraphics,
                              vcl::FontCapabilities& rFontCapabilities) const;
+
+    FontCharMapRef GetFontCharMap(SalGraphics* pGraphics) const;
 };
 
 } // namespace vcl

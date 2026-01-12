@@ -268,6 +268,19 @@ bool FontController::GetFontCapabilities(SalGraphics* pGraphics,
     return pGraphics->GetFontCapabilities(rFontCapabilities);
 }
 
+FontCharMapRef FontController::GetFontCharMap(SalGraphics* pGraphics) const
+{
+    if (!pGraphics)
+        return FontCharMapRef(new FontCharMap());
+
+    FontCharMapRef xFontCharMap(pGraphics->GetFontCharMap());
+
+    if (!xFontCharMap.is())
+        xFontCharMap = FontCharMapRef(new FontCharMap());
+
+    return xFontCharMap;
+}
+
 } // end namespace vcl::font
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
