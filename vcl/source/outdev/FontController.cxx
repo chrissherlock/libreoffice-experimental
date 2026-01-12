@@ -8,6 +8,7 @@
  */
 
 #include <vcl/font.hxx>
+#include <vcl/fntstyle.hxx>
 
 #include <font/LogicalFontInstance.hxx>
 #include <impfontcache.hxx>
@@ -111,6 +112,23 @@ FontController::CalculateTextOffsets(const vcl::Font& rFont,
     }
 
     return std::make_tuple(nHorizontalOffset, nVerticalOffset, nEmphasisAscent, nEmphasisDescent);
+}
+
+std::tuple<bool, bool> FontController::GetTextLayoutFlags(const vcl::Font& rFont) const
+{
+    // Determine if any text lines (underline, overline, strikeout) are active
+    bool bTextLines
+        = ((rFont.GetUnderline() != LINESTYLE_NONE) && (rFont.GetUnderline() != LINESTYLE_DONTKNOW))
+          || ((rFont.GetOverline() != LINESTYLE_NONE)
+              && (rFont.GetOverline() != LINESTYLE_DONTKNOW))
+          || ((rFont.GetStrikeout() != STRIKEOUT_NONE)
+              && (rFont.GetStrikeout() != STRIKEOUT_DONTKNOW));
+
+    // Determine if special effects (shadow, outline, relief) are active
+    bool bTextSpecial
+        = rFont.IsShadow() || rFont.IsOutline() || (rFont.GetRelief() != FontRelief::NONE);
+
+    return std::make_tuple(bTextLines, bTextSpecial);
 }
 
 } // end namespace vcl::font
