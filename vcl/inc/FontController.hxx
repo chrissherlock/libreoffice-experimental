@@ -53,6 +53,14 @@ public:
      * Returns a tuple of: <bTextLines, bTextSpecial>
      */
     std::tuple<bool, bool> GetTextLayoutFlags(const vcl::Font& rFont) const;
+
+    /**
+     * Calculates a stretched width for OLE font scaling fixes.
+     * Returns 0 if no fix is required or possible.
+     */
+    int CalculateOLEStorageWidth(const LogicalFontInstance* pFontInstance, tools::Long nMapXNum,
+                                 tools::Long nMapXDen, tools::Long nMapYNum,
+                                 tools::Long nMapYDen) const;
 };
 
 } // namespace vcl
