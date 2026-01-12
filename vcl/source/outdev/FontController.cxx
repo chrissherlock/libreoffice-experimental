@@ -7,8 +7,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include <comphelper/configuration.hxx>
+
 #include <vcl/font.hxx>
 #include <vcl/fntstyle.hxx>
+#include <vcl/rendercontext/AntialiasingFlags.hxx>
+#include <vcl/settings.hxx>
 
 #include <font/LogicalFontInstance.hxx>
 #include <impfontcache.hxx>
@@ -39,6 +43,22 @@ bool FontController::NeedsUpdate(const vcl::Font& rFont, bool bNewFont) const
         return true;
 
     return false;
+}
+
+bool FontController::ShouldDisableAntialiasing(AntialiasingFlags eAntialisingFlags,
+                                               const StyleSettings& rStyleSettings,
+                                               tools::Long nHeight) const
+{
+    // decide if antialiasing is appropriate
+    bool bNonAntialiased(eAntialisingFlags & AntialiasingFlags::DisableText);
+
+    if (!comphelper::IsFuzzing())
+    {
+        bNonAntialiased |= bool(rStyleSettings.GetDisplayOptions() & DisplayOptions::AADisable);
+        bNonAntialiased |= (int(rStyleSettings.GetAntialiasingMinPixelHeight()) > nHeight);
+    }
+
+    return bNonAntialiased;
 }
 
 void FontController::RealizeFont(ImplFontCache& rCache, const vcl::Font& rFont, const Size& rSize,

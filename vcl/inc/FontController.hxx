@@ -54,6 +54,9 @@ public:
      */
     std::tuple<bool, bool> GetTextLayoutFlags(const vcl::Font& rFont) const;
 
+    bool ShouldDisableAntialiasing(AntialiasingFlags eAntialisingFlags,
+                                   const StyleSettings& rStyleSettings, tools::Long nHeight) const;
+
     /**
      * Calculates a stretched width for OLE font scaling fixes.
      * Returns 0 if no fix is required or possible.
