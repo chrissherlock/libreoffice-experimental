@@ -108,7 +108,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mpOutDevData->mpRotateDev       = nullptr;
     mpOutDevData->mpRecordLayout    = nullptr;
 
-    mpClippingController = std::make_unique<vcl::ClippingController>();
     mpClippingController->SetDirty(true);
 }
 

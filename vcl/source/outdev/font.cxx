@@ -43,6 +43,7 @@
 #include <font/EmphasisMark.hxx>
 
 #include <CoordinateMapper.hxx>
+#include <FontController.hxx>
 #include <GraphicsState.hxx>
 #include <ImplLayoutArgs.hxx>
 #include <drawmode.hxx>
@@ -626,6 +627,7 @@ vcl::Font OutputDevice::GetDefaultFont( DefaultFontType nType, LanguageType eLan
     return aFont;
 }
 
+
 void OutputDevice::ImplInitFontList() const
 {
     if( mxFontCollection->Count() )
@@ -636,9 +638,13 @@ void OutputDevice::ImplInitFontList() const
     assert(mpGraphics);
 
     SAL_INFO( "vcl.gdi", "OutputDevice::ImplInitFontList()" );
+
     mpGraphics->GetDevFontList(mxFontCollection.get());
 
-    // There is absolutely no way there should be no fonts available on the device
+    if (mxFontCollection && mpFontController)
+        mpFontController->mxFontCollection = mxFontCollection;
+
+    // Abort if no fonts are found; VCL cannot function without a system font
     if( !mxFontCollection->Count() )
     {
         OUString aError( u"Application error: no fonts and no vcl resource found on your system"_ustr );
@@ -653,10 +659,15 @@ bool OutputDevice::InitFont() const
 {
     DBG_TESTSOLARMUTEX();
 
-    if (!ImplNewFont())
-        return false;
+    if (mpFontController->NeedsUpdate(mpGraphicsState->maFont, mbNewFont))
+    {
+        if (!ImplNewFont())
+            return false;
+    }
+
     if (!mpFontInstance)
         return false;
+
     if (!mpGraphics)
     {
         if (!AcquireGraphics())
@@ -721,6 +732,8 @@ bool OutputDevice::ImplNewFont() const
         bNonAntialiased |= bool(rStyleSettings.GetDisplayOptions() & DisplayOptions::AADisable);
         bNonAntialiased |= (int(rStyleSettings.GetAntialiasingMinPixelHeight()) > mpGraphicsState->maFont.GetFontSize().Height());
     }
+
+    mpFontController->RealizeFont(*mxFontCache, mpGraphicsState->maFont, aSize, fExactHeight, bNonAntialiased);
 
     // get font entry
     rtl::Reference<LogicalFontInstance> pOldFontInstance = mpFontInstance;
