@@ -181,49 +181,31 @@ FontMetric OutputDevice::GetFontMetric() const
     if (!ImplNewFont())
         return aMetric;
 
-    LogicalFontInstance* pFontInstance = mpFontInstance.get();
-    FontMetricDataRef xFontMetric = pFontInstance->mxFontMetric;
-
-    // prepare metric
+    // Initialize with device-specific logical font and alignment
     aMetric = mpGraphicsState->maFont;
-
-    // set aMetric with info from font
-    aMetric.SetFamilyName( mpGraphicsState->maFont.GetFamilyName() );
-    aMetric.SetStyleName( xFontMetric->GetStyleName() );
-    aMetric.SetFontSize( PixelToLogic( Size( xFontMetric->GetWidth(), xFontMetric->GetAscent() + xFontMetric->GetDescent() - xFontMetric->GetInternalLeading() ) ) );
-    aMetric.SetCharSet( xFontMetric->IsMicrosoftSymbolEncoded() ? RTL_TEXTENCODING_SYMBOL : RTL_TEXTENCODING_UNICODE );
-    aMetric.SetFamily( xFontMetric->GetFamilyType() );
-    aMetric.SetPitch( xFontMetric->GetPitch() );
-    aMetric.SetWeight( xFontMetric->GetWeight() );
-    aMetric.SetItalic( xFontMetric->GetItalic() );
     aMetric.SetAlignment( TextAlign::ALIGN_TOP );
-    aMetric.SetWidthType( xFontMetric->GetWidthType() );
-    if ( pFontInstance->mnOwnOrientation )
-        aMetric.SetOrientation( pFontInstance->mnOwnOrientation );
-    else
-        aMetric.SetOrientation( xFontMetric->GetOrientation() );
 
-    // set remaining metric fields
-    aMetric.SetFullstopCenteredFlag( xFontMetric->IsFullstopCentered() );
-    aMetric.SetBulletOffset( xFontMetric->GetBulletOffset() );
-    aMetric.SetAscent( DevicePixelToLogicHeight( xFontMetric->GetAscent() + mnEmphasisAscent ) );
-    aMetric.SetDescent( DevicePixelToLogicHeight( xFontMetric->GetDescent() + mnEmphasisDescent ) );
-    aMetric.SetInternalLeading( DevicePixelToLogicHeight( xFontMetric->GetInternalLeading() + mnEmphasisAscent ) );
-    // OutputDevice has its own external leading function due to #i60945#
+    // Delegate the complex data mapping to the controller
+    mpFontController->PopulateFontMetric(aMetric, mpGraphicsState->maFont, mpFontInstance.get(),
+                                         mnEmphasisAscent, mnEmphasisDescent);
+
+    // Convert metrics from pixels to logical units
+    aMetric.SetFontSize( PixelToLogic( aMetric.GetFontSize() ) );
+    aMetric.SetAscent( DevicePixelToLogicHeight( aMetric.GetAscent() ) );
+    aMetric.SetDescent( DevicePixelToLogicHeight( aMetric.GetDescent() ) );
+    aMetric.SetInternalLeading( DevicePixelToLogicHeight( aMetric.GetInternalLeading() ) );
+    aMetric.SetLineHeight( DevicePixelToLogicHeight( aMetric.GetLineHeight() ) );
+    aMetric.SetSlant( DevicePixelToLogicHeight( aMetric.GetSlant() ) );
+    aMetric.SetHangingBaseline( DevicePixelToLogicHeight( aMetric.GetHangingBaseline() ) );
+
+    aMetric.SetUnitEm( DevicePixelToLogicWidth( aMetric.GetUnitEm() ) );
+    aMetric.SetHorCJKAdvance( DevicePixelToLogicWidth( aMetric.GetHorCJKAdvance() ) );
+    aMetric.SetVertCJKAdvance( DevicePixelToLogicHeight( aMetric.GetVertCJKAdvance() ) );
+
+    // OutputDevice manages external leading separately due to legacy #i60945#
     aMetric.SetExternalLeading( DevicePixelToLogicHeight( GetFontExtLeading() ) );
-    aMetric.SetLineHeight( DevicePixelToLogicHeight( xFontMetric->GetAscent() + xFontMetric->GetDescent() + mnEmphasisAscent + mnEmphasisDescent ) );
-    aMetric.SetSlant( DevicePixelToLogicHeight( xFontMetric->GetSlant() ) );
-    aMetric.SetHangingBaseline( DevicePixelToLogicHeight( xFontMetric->GetHangingBaseline() ) );
-
-    aMetric.SetUnitEm(DevicePixelToLogicWidth(xFontMetric->GetUnitEm()));
-    aMetric.SetHorCJKAdvance(DevicePixelToLogicWidth(xFontMetric->GetHorCJKAdvance()));
-    aMetric.SetVertCJKAdvance(DevicePixelToLogicHeight(xFontMetric->GetVertCJKAdvance()));
-
-    // get miscellaneous data
-    aMetric.SetQuality( xFontMetric->GetQuality() );
 
     SAL_INFO("vcl.gdi.fontmetric", "OutputDevice::GetFontMetric:" << aMetric);
-
     return aMetric;
 }
 

@@ -11,6 +11,7 @@
 
 #include <vcl/font.hxx>
 #include <vcl/fntstyle.hxx>
+#include <vcl/metric.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/settings.hxx>
 
@@ -197,6 +198,56 @@ int FontController::CalculateOLEStorageWidth(const LogicalFontInstance* pFontIns
         return 0;
 
     return nNewWidth;
+}
+
+void FontController::PopulateFontMetric(FontMetric& rMetric, const vcl::Font& rLogicalFont,
+                                        const LogicalFontInstance* pFontInstance,
+                                        tools::Long nEmphasisAscent,
+                                        tools::Long nEmphasisDescent) const
+{
+    if (!pFontInstance)
+        return;
+
+    FontMetricDataRef xFontMetric = pFontInstance->mxFontMetric;
+
+    // Set basic font identity and style info
+    rMetric.SetFamilyName(rLogicalFont.GetFamilyName());
+    rMetric.SetStyleName(xFontMetric->GetStyleName());
+    rMetric.SetCharSet(xFontMetric->IsMicrosoftSymbolEncoded() ? RTL_TEXTENCODING_SYMBOL
+                                                               : RTL_TEXTENCODING_UNICODE);
+    rMetric.SetFamily(xFontMetric->GetFamilyType());
+    rMetric.SetPitch(xFontMetric->GetPitch());
+    rMetric.SetWeight(xFontMetric->GetWeight());
+    rMetric.SetItalic(xFontMetric->GetItalic());
+    rMetric.SetWidthType(xFontMetric->GetWidthType());
+
+    // Calculate logical pixel size
+    rMetric.SetFontSize(Size(xFontMetric->GetWidth(), xFontMetric->GetAscent()
+                                                          + xFontMetric->GetDescent()
+                                                          - xFontMetric->GetInternalLeading()));
+
+    // Handle orientation: own orientation takes precedence over metric orientation
+    if (pFontInstance->mnOwnOrientation)
+        rMetric.SetOrientation(pFontInstance->mnOwnOrientation);
+    else
+        rMetric.SetOrientation(xFontMetric->GetOrientation());
+
+    // Set core metrics including emphasis mark adjustments
+    rMetric.SetAscent(xFontMetric->GetAscent() + nEmphasisAscent);
+    rMetric.SetDescent(xFontMetric->GetDescent() + nEmphasisDescent);
+    rMetric.SetInternalLeading(xFontMetric->GetInternalLeading() + nEmphasisAscent);
+    rMetric.SetLineHeight(xFontMetric->GetAscent() + xFontMetric->GetDescent() + nEmphasisAscent
+                          + nEmphasisDescent);
+
+    // Miscellaneous metrics
+    rMetric.SetFullstopCenteredFlag(xFontMetric->IsFullstopCentered());
+    rMetric.SetBulletOffset(xFontMetric->GetBulletOffset());
+    rMetric.SetSlant(xFontMetric->GetSlant());
+    rMetric.SetHangingBaseline(xFontMetric->GetHangingBaseline());
+    rMetric.SetUnitEm(xFontMetric->GetUnitEm());
+    rMetric.SetHorCJKAdvance(xFontMetric->GetHorCJKAdvance());
+    rMetric.SetVertCJKAdvance(xFontMetric->GetVertCJKAdvance());
+    rMetric.SetQuality(xFontMetric->GetQuality());
 }
 
 } // end namespace vcl::font

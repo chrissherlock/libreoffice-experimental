@@ -68,6 +68,14 @@ public:
     int CalculateOLEStorageWidth(const LogicalFontInstance* pFontInstance, tools::Long nMapXNum,
                                  tools::Long nMapXDen, tools::Long nMapYNum,
                                  tools::Long nMapYDen) const;
+
+    /**
+     * Populates a FontMetric object with physical metrics and style info.
+     * Extracts logic from OutputDevice::GetFontMetric.
+     */
+    void PopulateFontMetric(FontMetric& rMetric, const vcl::Font& rLogicalFont,
+                            const LogicalFontInstance* pFontInstance, tools::Long nEmphasisAscent,
+                            tools::Long nEmphasisDescent) const;
 };
 
 } // namespace vcl
