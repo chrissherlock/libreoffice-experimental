@@ -164,13 +164,11 @@ bool OutputDevice::GetFontFeatures(std::vector<vcl::font::Feature>& rFontFeature
         return false;
 
     LogicalFontInstance* pFontInstance = mpFontInstance.get();
+
     if (!pFontInstance)
         return false;
 
-    const LanguageTag& rOfficeLanguage = Application::GetSettings().GetUILanguageTag();
-
-    vcl::font::FeatureCollector aFeatureCollector(pFontInstance->GetFontFace(), rFontFeatures, rOfficeLanguage);
-    aFeatureCollector.collect();
+    mpFontController->GetFontFeatures(pFontInstance, rFontFeatures);
 
     return true;
 }
