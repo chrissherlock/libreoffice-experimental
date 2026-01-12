@@ -17,6 +17,7 @@
 #include <font/LogicalFontInstance.hxx>
 #include <impfontcache.hxx>
 #include <salgdi.hxx>
+#include <CoordinateMapper.hxx>
 #include <FontController.hxx>
 
 #include <tuple>
@@ -59,6 +60,30 @@ bool FontController::ShouldDisableAntialiasing(AntialiasingFlags eAntialisingFla
     }
 
     return bNonAntialiased;
+}
+
+std::pair<float, Size> FontController::CalculateDeviceSize(const vcl::Font& rFont,
+                                                           const CoordinateMapper& rMapper,
+                                                           tools::Long nDPIY) const
+{
+    float fExactHeight = rMapper.LogicHeightToDeviceSubPixel(rFont.GetFontHeight());
+
+    Size aSize = rMapper.LogicToDevicePixel(rFont.GetFontSize());
+
+    if (!aSize.Height())
+    {
+        if (rFont.GetFontSize().Height())
+            aSize.setHeight(1);
+        else
+            aSize.setHeight((12 * nDPIY) / 72);
+
+        fExactHeight = static_cast<float>(aSize.Height());
+    }
+
+    if (aSize.Width() == 0 && rFont.GetFontSize().Width() != 0)
+        aSize.setWidth(1);
+
+    return std::make_pair(fExactHeight, aSize);
 }
 
 void FontController::RealizeFont(ImplFontCache& rCache, const vcl::Font& rFont, const Size& rSize,
