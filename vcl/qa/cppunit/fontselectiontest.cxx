@@ -10,6 +10,9 @@
 #include <test/bootstrapfixture.hxx>
 #include <cppunit/TestAssert.h>
 
+#include <tools/fract.hxx>
+
+#include <vcl/metric.hxx>
 #include <vcl/virdev.hxx>
 
 #include "fontmocks.hxx"
@@ -41,6 +44,32 @@ CPPUNIT_TEST_FIXTURE(VclFontSelectionTest, testFontRealizationCycle)
 
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Updated weight should be reflected in the device",
                                  FontWeight::WEIGHT_BOLD, pDev->GetFont().GetWeight());
+}
+
+CPPUNIT_TEST_FIXTURE(VclFontSelectionTest, testOleFontScaleFix)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+
+    MapMode aMapMode(MapUnit::Map100thMM);
+    aMapMode.SetScaleX(Fraction(2, 1)); // 2/1 = 2.0x stretch
+    aMapMode.SetScaleY(Fraction(1, 1)); // 1/1 = 1.0x
+    pVDev->SetMapMode(aMapMode);
+
+    // Request font with 0 width to trigger the OLE fix
+    vcl::Font aFont(u"Liberation Sans"_ustr, Size(0, 12));
+    pVDev->SetFont(aFont);
+
+    FontMetric aMetric = pVDev->GetFontMetric();
+
+    // Switch to pixels to get the "natural" width for comparison
+    pVDev->SetMapMode(MapMode(MapUnit::MapPixel));
+    vcl::Font aNormalFont(u"Liberation Sans"_ustr, Size(0, 12));
+    pVDev->SetFont(aNormalFont);
+    int nNaturalWidth = pVDev->GetFontMetric().GetFontSize().Width();
+
+    // Verify the fixed width is stretched
+    // The OLE fix calculates: nOrigWidth * (ScaleX / ScaleY)
+    CPPUNIT_ASSERT_GREATER(nNaturalWidth, static_cast<int>(aMetric.GetFontSize().Width()));
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();
