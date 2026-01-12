@@ -131,6 +131,29 @@ std::tuple<bool, bool> FontController::GetTextLayoutFlags(const vcl::Font& rFont
     return std::make_tuple(bTextLines, bTextSpecial);
 }
 
+int FontController::CalculateOLEStorageWidth(const LogicalFontInstance* pFontInstance,
+                                             tools::Long nMapXNum, tools::Long nMapXDen,
+                                             tools::Long nMapYNum, tools::Long nMapYDen) const
+{
+    if (!pFontInstance)
+        return 0;
+
+    const float fDenominator = static_cast<float>(nMapYNum) * nMapXDen;
+    if (fDenominator == 0.0)
+        return 0;
+
+    const float fNumerator = static_cast<float>(nMapXNum) * nMapYDen;
+    const float fStretch = fNumerator / fDenominator;
+
+    const int nOrigWidth = pFontInstance->mxFontMetric->GetWidth();
+    const int nNewWidth = static_cast<int>(nOrigWidth * fStretch + 0.5);
+
+    if (nNewWidth == nOrigWidth || nNewWidth == 0)
+        return 0;
+
+    return nNewWidth;
+}
+
 } // end namespace vcl::font
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
