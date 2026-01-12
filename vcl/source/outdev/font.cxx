@@ -781,12 +781,16 @@ bool OutputDevice::ImplNewFont() const
     std::tie(mnTextOffX, mnTextOffY, mnEmphasisAscent, mnEmphasisDescent) =
     mpFontController->CalculateTextOffsets(mpGraphicsState->maFont, mpFontInstance.get());
 
-    mbTextLines     = ((mpGraphicsState->maFont.GetUnderline() != LINESTYLE_NONE) && (mpGraphicsState->maFont.GetUnderline() != LINESTYLE_DONTKNOW)) ||
-                      ((mpGraphicsState->maFont.GetOverline()  != LINESTYLE_NONE) && (mpGraphicsState->maFont.GetOverline()  != LINESTYLE_DONTKNOW)) ||
-                      ((mpGraphicsState->maFont.GetStrikeout() != STRIKEOUT_NONE) && (mpGraphicsState->maFont.GetStrikeout() != STRIKEOUT_DONTKNOW));
-    mbTextSpecial   = mpGraphicsState->maFont.IsShadow() || mpGraphicsState->maFont.IsOutline() ||
-                      (mpGraphicsState->maFont.GetRelief() != FontRelief::NONE);
+    // Use local temporary variables to bypass the bit-field reference restriction
+    bool bTextLines = false;
+    bool bTextSpecial = false;
 
+    // Extract values from the tuple into local booleans
+    std::tie(bTextLines, bTextSpecial) = mpFontController->GetTextLayoutFlags(mpGraphicsState->maFont);
+
+    // Assign local values back to the bit-fields
+    mbTextLines = bTextLines;
+    mbTextSpecial = bTextSpecial;
 
     bool bRet = true;
 
