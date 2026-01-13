@@ -669,15 +669,18 @@ double OutputDevice::GetTextWidthDouble(const OUString& rStr, sal_Int32 nIndex, 
 
 tools::Long OutputDevice::GetTextHeight() const
 {
-    if (!InitFont())
+    if (!ImplNewFont())
         return 0;
 
-    tools::Long nHeight = mpFontRealization->mxFont->mnLineHeight + mnEmphasisAscent + mnEmphasisDescent;
+    if (mpFontRealization && mpFontRealization->mxFont)
+    {
+        tools::Long nPixelHeight = mpFontRealization->mxFont->mnLineHeight +
+                                   mpFontRealization->nEmphasisAscent +
+                                   mpFontRealization->nEmphasisDescent;
 
-    if (mpMapper->IsMapModeEnabled())
-        nHeight = mpMapper->DevicePixelToLogicHeight( nHeight );
-
-    return nHeight;
+        return DevicePixelToLogicHeight(nPixelHeight);
+    }
+    return 0;
 }
 
 double OutputDevice::GetTextHeightDouble() const
