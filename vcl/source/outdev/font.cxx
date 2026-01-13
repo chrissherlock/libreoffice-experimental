@@ -668,6 +668,7 @@ const LogicalFontInstance* OutputDevice::GetFontInstance() const
 
 
 
+
 bool OutputDevice::ImplNewFont() const
 {
     DBG_TESTSOLARMUTEX();
@@ -713,11 +714,10 @@ bool OutputDevice::ImplNewFont() const
     if (!mpFontInstance) {
         SAL_WARN("vcl.gdi", "ImplNewFont: !!! NO FONT INSTANCE FOUND for request !!!");
     } else {
-        // FIXED ACCESSOR: Use GetFontFace()->GetFamilyName()
+        // Safe accessor for logging
         OUString sName = "Unknown";
         if (mpFontInstance->GetFontFace())
             sName = mpFontInstance->GetFontFace()->GetFamilyName();
-
         SAL_INFO("vcl.gdi", "ImplNewFont: Success. Selected physical font: " << sName);
     }
 
@@ -771,15 +771,36 @@ bool OutputDevice::ImplNewFont() const
     mbTextLines = bTextLines;
     mbTextSpecial = bTextSpecial;
 
+    // Capture return result locally so we can Sync before returning
+    bool bRet = true;
+
     // #95414# fix for OLE objects which use scale factors very creatively
     if (mpMapper->IsMapModeEnabled() && !aSize.Width())
     {
         SAL_INFO("vcl.gdi", "ImplNewFont: Triggering OLE Font Scale Fix");
-        return AttemptOLEFontScaleFix(const_cast<vcl::Font&>(mpGraphicsState->maFont), aSize.Height());
+        bRet = AttemptOLEFontScaleFix(const_cast<vcl::Font&>(mpGraphicsState->maFont), aSize.Height());
     }
 
-    return true;
+    // [Step 4] SHADOW SYNC
+    // We copy the valid state (whether new or fallback) into the struct.
+    // This allows us to verify writing to the struct works before we start reading from it.
+    if (mpFontRealization)
+    {
+        mpFontRealization->mxFont = mpFontInstance;
+        mpFontRealization->nXOffset = mnTextOffX;
+        mpFontRealization->nYOffset = mnTextOffY;
+        mpFontRealization->nEmphasisAscent = mnEmphasisAscent;
+        mpFontRealization->nEmphasisDescent = mnEmphasisDescent;
+        mpFontRealization->bHasLineDecorations = mbTextLines;
+        mpFontRealization->bHasSpecialEffects = mbTextSpecial;
+        mpFontRealization->eLayoutMode = mpGraphicsState->mnTextLayoutMode;
+
+        SAL_INFO("vcl.gdi", "ImplNewFont: Shadow Sync complete. Struct Populated.");
+    }
+
+    return bRet;
 }
+
 
 
 
