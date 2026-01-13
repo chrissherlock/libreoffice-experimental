@@ -64,6 +64,7 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     , mpGraphicsState(std::make_unique<vcl::GraphicsState>())
     , mpClippingController(std::make_unique<vcl::ClippingController>())
     , mpFontController(std::make_unique<vcl::font::FontController>())
+    , mpFontRealization(std::make_unique<vcl::font::FontRealization>())
     , meOutDevType(eOutDevType)
     , moSettings(Application::GetSettings())
 {

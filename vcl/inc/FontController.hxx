@@ -25,6 +25,22 @@ namespace vcl::font
 {
 class Font;
 
+struct FontRealization
+{
+    rtl::Reference<LogicalFontInstance> mxFont;
+
+    tools::Long nXOffset = 0;
+    tools::Long nYOffset = 0;
+
+    tools::Long nEmphasisAscent = 0;
+    tools::Long nEmphasisDescent = 0;
+
+    bool bHasLineDecorations = false;
+    bool bHasSpecialEffects = false;
+
+    vcl::text::ComplexTextLayoutFlags eLayoutMode = vcl::text::ComplexTextLayoutFlags::Default;
+};
+
 class FontController
 {
 public:
