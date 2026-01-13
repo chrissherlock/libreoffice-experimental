@@ -158,14 +158,13 @@ bool OutputDevice::GetFontFeatures(std::vector<vcl::font::Feature>& rFontFeature
     if (!ImplNewFont())
         return false;
 
-    LogicalFontInstance* pFontInstance = mpFontInstance.get();
-
-    if (!pFontInstance)
-        return false;
-
-    mpFontController->GetFontFeatures(pFontInstance, rFontFeatures);
-
-    return true;
+    // [Step 9] Refactor: Use FontRealization
+    if (mpFontRealization && mpFontRealization->mxFont)
+    {
+        mpFontController->GetFontFeatures(mpFontRealization->mxFont.get(), rFontFeatures);
+        return true;
+    }
+    return false;
 }
 
 FontMetric OutputDevice::GetFontMetric() const
@@ -231,7 +230,10 @@ bool OutputDevice::GetFontCapabilities( vcl::FontCapabilities& rFontCapabilities
 
 tools::Long OutputDevice::GetFontExtLeading() const
 {
-    return mpFontInstance->mxFontMetric->GetExternalLeading();
+    // [Step 9] Refactor: Use FontRealization
+    if (mpFontRealization && mpFontRealization->mxFont)
+        return mpFontRealization->mxFont->mxFontMetric->GetExternalLeading();
+    return 0;
 }
 
 void OutputDevice::ImplClearFontData( const bool bNewFontLists )
@@ -902,6 +904,9 @@ void OutputDevice::ImplDrawEmphasisMark( tools::Long nBaseX, tools::Long nX, too
 
 void OutputDevice::ImplDrawEmphasisMarks( SalLayout& rSalLayout )
 {
+    vcl::font::FontRealization const* pRealization = mpFontRealization.get();
+    if (!pRealization || !pRealization->mxFont) return;
+
     auto popIt = ScopedPush(vcl::PushFlags::FILLCOLOR | vcl::PushFlags::LINECOLOR | vcl::PushFlags::MAPMODE);
     GDIMetaFile*        pOldMetaFile    = mpMetaFile;
     mpMetaFile = nullptr;
@@ -911,9 +916,9 @@ void OutputDevice::ImplDrawEmphasisMarks( SalLayout& rSalLayout )
     tools::Long nEmphasisHeight;
 
     if ( nEmphasisMark & FontEmphasisMark::PosBelow )
-        nEmphasisHeight = mnEmphasisDescent;
+        nEmphasisHeight = pRealization->nEmphasisDescent;
     else
-        nEmphasisHeight = mnEmphasisAscent;
+        nEmphasisHeight = pRealization->nEmphasisAscent;
 
     vcl::font::EmphasisMark aEmphasisMark(nEmphasisMark, nEmphasisHeight, GetDPIY());
 
@@ -933,15 +938,15 @@ void OutputDevice::ImplDrawEmphasisMarks( SalLayout& rSalLayout )
 
     if ( nEmphasisMark & FontEmphasisMark::PosBelow )
     {
-        aOffset.AdjustY(mpFontInstance->mxFontMetric->GetDescent() + aEmphasisMark.GetYOffset());
+        aOffset.AdjustY(pRealization->mxFont->mxFontMetric->GetDescent() + aEmphasisMark.GetYOffset());
         aOffsetVert = aOffset;
     }
     else
     {
-        aOffset.AdjustY(-(mpFontInstance->mxFontMetric->GetAscent() + aEmphasisMark.GetYOffset()));
+        aOffset.AdjustY(-(pRealization->mxFont->mxFontMetric->GetAscent() + aEmphasisMark.GetYOffset()));
         // Todo: use ideographic em-box or ideographic character face information.
-        aOffsetVert.AdjustY(-(mpFontInstance->mxFontMetric->GetAscent() +
-                    mpFontInstance->mxFontMetric->GetDescent() + aEmphasisMark.GetYOffset()));
+        aOffsetVert.AdjustY(-(pRealization->mxFont->mxFontMetric->GetAscent() +
+                    pRealization->mxFont->mxFontMetric->GetDescent() + aEmphasisMark.GetYOffset()));
     }
 
     tools::Long nEmphasisWidth2  = aEmphasisMark.GetWidth() / 2;
@@ -972,10 +977,10 @@ void OutputDevice::ImplDrawEmphasisMarks( SalLayout& rSalLayout )
                 aAdjPoint.AdjustX(aRectangle.getMinX() + (aRectangle.getWidth() - aEmphasisMark.GetWidth()) / 2 );
             }
 
-            if ( mpFontInstance->mnOrientation )
+            if ( pRealization->mxFont->mnOrientation )
             {
                 Point aOriginPt(0, 0);
-                aOriginPt.RotateAround( aAdjPoint, mpFontInstance->mnOrientation );
+                aOriginPt.RotateAround( aAdjPoint, pRealization->mxFont->mnOrientation );
             }
             aOutPoint.adjustX(aAdjPoint.X() - nEmphasisWidth2);
             aOutPoint.adjustY(aAdjPoint.Y() - nEmphasisHeight2);
