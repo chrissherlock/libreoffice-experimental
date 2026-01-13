@@ -1228,8 +1228,8 @@ public:
     bool ForceFallbackFont(vcl::Font const& rFallbackFont);
 
 protected:
-    SAL_DLLPRIVATE tools::Long GetEmphasisAscent() const { return mnEmphasisAscent; }
-    SAL_DLLPRIVATE tools::Long GetEmphasisDescent() const { return mnEmphasisDescent; }
+    SAL_DLLPRIVATE tools::Long GetEmphasisAscent() const;
+    SAL_DLLPRIVATE tools::Long GetEmphasisDescent() const;
 
     SAL_DLLPRIVATE bool InitFont() const;
     virtual void                SetFontOrientation( LogicalFontInstance* const pFontInstance ) const;
