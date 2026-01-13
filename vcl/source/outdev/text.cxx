@@ -40,6 +40,7 @@
 
 #include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
+#include <FontController.hxx>
 #include <GraphicsState.hxx>
 #include <ImplLayoutArgs.hxx>
 #include <ImplOutDevData.hxx>
@@ -671,7 +672,7 @@ tools::Long OutputDevice::GetTextHeight() const
     if (!InitFont())
         return 0;
 
-    tools::Long nHeight = mpFontInstance->mnLineHeight + mnEmphasisAscent + mnEmphasisDescent;
+    tools::Long nHeight = mpFontRealization->mxFont->mnLineHeight + mnEmphasisAscent + mnEmphasisDescent;
 
     if (mpMapper->IsMapModeEnabled())
         nHeight = mpMapper->DevicePixelToLogicHeight( nHeight );
