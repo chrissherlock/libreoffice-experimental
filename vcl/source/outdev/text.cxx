@@ -108,7 +108,7 @@ void OutputDevice::ImplDrawTextRect( tools::Long nBaseX, tools::Long nBaseY,
     tools::Long nX = nDistX;
     tools::Long nY = nDistY;
 
-    Degree10 nOrientation = mpFontInstance->mnOrientation;
+    Degree10 nOrientation = mpFontRealization->mxFont->mnOrientation;
     if ( nOrientation )
     {
         // Rotate rect without rounding problems for 90 degree rotations
@@ -149,7 +149,7 @@ void OutputDevice::ImplDrawTextRect( tools::Long nBaseX, tools::Long nBaseY,
             // inflate because polygons are drawn smaller
             tools::Rectangle aRect( Point( nX, nY ), Size( nWidth+1, nHeight+1 ) );
             tools::Polygon   aPoly( aRect );
-            aPoly.Rotate( Point( nBaseX, nBaseY ), mpFontInstance->mnOrientation );
+            aPoly.Rotate( Point( nBaseX, nBaseY ), mpFontRealization->mxFont->mnOrientation );
             ImplDrawPolygon( aPoly );
             return;
         }
@@ -176,9 +176,9 @@ void OutputDevice::ImplDrawTextBackground( const SalLayout& rSalLayout )
     mpGraphics->SetFillColor( GetTextFillColor() );
     mbFillColorDirty = true;
 
-    ImplDrawTextRect( nX, nY, 0, -(mpFontInstance->mxFontMetric->GetAscent() + mnEmphasisAscent),
+    ImplDrawTextRect( nX, nY, 0, -(mpFontRealization->mxFont->mxFontMetric->GetAscent() + mpFontRealization->nEmphasisAscent),
                       nWidth,
-                      mpFontInstance->mnLineHeight+mnEmphasisAscent+mnEmphasisDescent );
+                      mpFontRealization->mxFont->mnLineHeight+mpFontRealization->nEmphasisAscent+mpFontRealization->nEmphasisDescent );
 }
 
 tools::Rectangle OutputDevice::ImplGetTextBoundRect( const SalLayout& rSalLayout ) const
@@ -188,21 +188,21 @@ tools::Rectangle OutputDevice::ImplGetTextBoundRect( const SalLayout& rSalLayout
     tools::Long nY = aPoint.getY();
 
     double nWidth = rSalLayout.GetTextWidth();
-    tools::Long nHeight = mpFontInstance->mnLineHeight + mnEmphasisAscent + mnEmphasisDescent;
+    tools::Long nHeight = mpFontRealization->mxFont->mnLineHeight + mpFontRealization->nEmphasisAscent + mpFontRealization->nEmphasisDescent;
 
-    nY -= mpFontInstance->mxFontMetric->GetAscent() + mnEmphasisAscent;
+    nY -= mpFontRealization->mxFont->mxFontMetric->GetAscent() + mpFontRealization->nEmphasisAscent;
 
-    if ( mpFontInstance->mnOrientation )
+    if ( mpFontRealization->mxFont->mnOrientation )
     {
         tools::Long nBaseX = nX, nBaseY = nY;
-        if ( !(mpFontInstance->mnOrientation % 900_deg10) )
+        if ( !(mpFontRealization->mxFont->mnOrientation % 900_deg10) )
         {
             tools::Long nX2 = nX+nWidth;
             tools::Long nY2 = nY+nHeight;
 
             Point aBasePt( nBaseX, nBaseY );
-            aBasePt.RotateAround( nX, nY, mpFontInstance->mnOrientation );
-            aBasePt.RotateAround( nX2, nY2, mpFontInstance->mnOrientation );
+            aBasePt.RotateAround( nX, nY, mpFontRealization->mxFont->mnOrientation );
+            aBasePt.RotateAround( nX2, nY2, mpFontRealization->mxFont->mnOrientation );
             nWidth = nX2-nX;
             nHeight = nY2-nY;
         }
@@ -211,7 +211,7 @@ tools::Rectangle OutputDevice::ImplGetTextBoundRect( const SalLayout& rSalLayout
             // inflate by +1+1 because polygons are drawn smaller
             tools::Rectangle aRect( Point( nX, nY ), Size( nWidth+1, nHeight+1 ) );
             tools::Polygon   aPoly( aRect );
-            aPoly.Rotate( Point( nBaseX, nBaseY ), mpFontInstance->mnOrientation );
+            aPoly.Rotate( Point( nBaseX, nBaseY ), mpFontRealization->mxFont->mnOrientation );
             return aPoly.GetBoundRect();
         }
     }
@@ -235,8 +235,8 @@ bool OutputDevice::ImplDrawRotateText( SalLayout& rSalLayout )
     {
         // guess vertical text extents if GetBoundRect failed
         double nRight = rSalLayout.GetTextWidth();
-        tools::Long nTop = mpFontInstance->mxFontMetric->GetAscent() + mnEmphasisAscent;
-        tools::Long nHeight = mpFontInstance->mnLineHeight + mnEmphasisAscent + mnEmphasisDescent;
+        tools::Long nTop = mpFontRealization->mxFont->mxFontMetric->GetAscent() + mpFontRealization->nEmphasisAscent;
+        tools::Long nHeight = mpFontRealization->mxFont->mnLineHeight + mpFontRealization->nEmphasisAscent + mpFontRealization->nEmphasisDescent;
         aBoundRect = tools::Rectangle( 0, -nTop, nRight, nHeight - nTop );
     }
 
@@ -249,7 +249,7 @@ bool OutputDevice::ImplDrawRotateText( SalLayout& rSalLayout )
     if( !pVDev->SetOutputSizePixel( aBoundRect.GetSize() ) )
         return false;
 
-    const vcl::font::FontSelectPattern& rPattern = mpFontInstance->GetFontSelectPattern();
+    const vcl::font::FontSelectPattern& rPattern = mpFontRealization->mxFont->GetFontSelectPattern();
     vcl::Font aFont( GetFont() );
     aFont.SetOrientation( 0_deg10 );
     aFont.SetFontSize( Size( rPattern.mnWidth, rPattern.mnHeight ) );
@@ -266,12 +266,12 @@ bool OutputDevice::ImplDrawRotateText( SalLayout& rSalLayout )
     rSalLayout.DrawText( *pVDev->mpGraphics );
 
     Bitmap aBmp = pVDev->GetBitmap( Point(), aBoundRect.GetSize() );
-    if ( aBmp.IsEmpty() || !aBmp.Rotate( mpFontInstance->mnOwnOrientation, COL_WHITE ) )
+    if ( aBmp.IsEmpty() || !aBmp.Rotate( mpFontRealization->mxFont->mnOwnOrientation, COL_WHITE ) )
         return false;
 
     // calculate rotation offset
     tools::Polygon aPoly( aBoundRect );
-    aPoly.Rotate( Point(), mpFontInstance->mnOwnOrientation );
+    aPoly.Rotate( Point(), mpFontRealization->mxFont->mnOwnOrientation );
     Point aPoint = aPoly.GetBoundRect().TopLeft();
     aPoint += Point( nX, nY );
 
@@ -299,7 +299,7 @@ bool OutputDevice::ImplDrawRotateText( SalLayout& rSalLayout )
 void OutputDevice::ImplDrawTextDirect( SalLayout& rSalLayout,
                                        bool bTextLines)
 {
-    if( mpFontInstance->mnOwnOrientation )
+    if( mpFontRealization->mxFont->mnOwnOrientation )
         if( ImplDrawRotateText( rSalLayout ) )
             return;
 
@@ -384,14 +384,14 @@ void OutputDevice::ImplDrawSpecialText( SalLayout& rSalLayout )
         auto aPrevOffset = rSalLayout.DrawOffset();
         rSalLayout.DrawOffset()
             += basegfx::B2DPoint{ static_cast<double>(nOff), static_cast<double>(nOff) };
-        ImplDrawTextDirect(rSalLayout, mbTextLines);
+        ImplDrawTextDirect(rSalLayout, mpFontRealization->bHasLineDecorations);
         rSalLayout.DrawOffset() = aPrevOffset;
 
         SetTextLineColor( aTextLineColor );
         SetOverlineColor( aOverlineColor );
         SetTextColor( aTextColor );
         ImplInitTextColor();
-        ImplDrawTextDirect( rSalLayout, mbTextLines );
+        ImplDrawTextDirect( rSalLayout, mpFontRealization->bHasLineDecorations );
 
         SetTextLineColor( aOldTextLineColor );
         SetOverlineColor( aOldOverlineColor );
@@ -406,7 +406,7 @@ void OutputDevice::ImplDrawSpecialText( SalLayout& rSalLayout )
     {
         if ( mpGraphicsState->maFont.IsShadow() )
         {
-            tools::Long nOff = 1 + ((mpFontInstance->mnLineHeight-24)/24);
+            tools::Long nOff = 1 + ((mpFontRealization->mxFont->mnLineHeight-24)/24);
             if ( mpGraphicsState->maFont.IsOutline() )
                 nOff++;
             SetTextLineColor();
@@ -418,7 +418,7 @@ void OutputDevice::ImplDrawSpecialText( SalLayout& rSalLayout )
                 SetTextColor( COL_BLACK );
             ImplInitTextColor();
             rSalLayout.DrawBase() += basegfx::B2DPoint( nOff, nOff );
-            ImplDrawTextDirect( rSalLayout, mbTextLines );
+            ImplDrawTextDirect( rSalLayout, mpFontRealization->bHasLineDecorations );
             rSalLayout.DrawBase() -= basegfx::B2DPoint( nOff, nOff );
             SetTextColor( aOldColor );
             SetTextLineColor( aOldTextLineColor );
@@ -426,34 +426,34 @@ void OutputDevice::ImplDrawSpecialText( SalLayout& rSalLayout )
             ImplInitTextColor();
 
             if ( !mpGraphicsState->maFont.IsOutline() )
-                ImplDrawTextDirect( rSalLayout, mbTextLines );
+                ImplDrawTextDirect( rSalLayout, mpFontRealization->bHasLineDecorations );
         }
 
         if ( mpGraphicsState->maFont.IsOutline() )
         {
             rSalLayout.DrawBase() = aOrigPos + basegfx::B2DPoint(-1,-1);
-            ImplDrawTextDirect( rSalLayout, mbTextLines );
+            ImplDrawTextDirect( rSalLayout, mpFontRealization->bHasLineDecorations );
             rSalLayout.DrawBase() = aOrigPos + basegfx::B2DPoint(+1,+1);
-            ImplDrawTextDirect( rSalLayout, mbTextLines );
+            ImplDrawTextDirect( rSalLayout, mpFontRealization->bHasLineDecorations );
             rSalLayout.DrawBase() = aOrigPos + basegfx::B2DPoint(-1,+0);
-            ImplDrawTextDirect( rSalLayout, mbTextLines );
+            ImplDrawTextDirect( rSalLayout, mpFontRealization->bHasLineDecorations );
             rSalLayout.DrawBase() = aOrigPos + basegfx::B2DPoint(-1,+1);
-            ImplDrawTextDirect( rSalLayout, mbTextLines );
+            ImplDrawTextDirect( rSalLayout, mpFontRealization->bHasLineDecorations );
             rSalLayout.DrawBase() = aOrigPos + basegfx::B2DPoint(+0,+1);
-            ImplDrawTextDirect( rSalLayout, mbTextLines );
+            ImplDrawTextDirect( rSalLayout, mpFontRealization->bHasLineDecorations );
             rSalLayout.DrawBase() = aOrigPos + basegfx::B2DPoint(+0,-1);
-            ImplDrawTextDirect( rSalLayout, mbTextLines );
+            ImplDrawTextDirect( rSalLayout, mpFontRealization->bHasLineDecorations );
             rSalLayout.DrawBase() = aOrigPos + basegfx::B2DPoint(+1,-1);
-            ImplDrawTextDirect( rSalLayout, mbTextLines );
+            ImplDrawTextDirect( rSalLayout, mpFontRealization->bHasLineDecorations );
             rSalLayout.DrawBase() = aOrigPos + basegfx::B2DPoint(+1,+0);
-            ImplDrawTextDirect( rSalLayout, mbTextLines );
+            ImplDrawTextDirect( rSalLayout, mpFontRealization->bHasLineDecorations );
             rSalLayout.DrawBase() = aOrigPos;
 
             SetTextColor( COL_WHITE );
             SetTextLineColor( COL_WHITE );
             SetOverlineColor( COL_WHITE );
             ImplInitTextColor();
-            ImplDrawTextDirect( rSalLayout, mbTextLines );
+            ImplDrawTextDirect( rSalLayout, mpFontRealization->bHasLineDecorations );
             SetTextColor( aOldColor );
             SetTextLineColor( aOldTextLineColor );
             SetOverlineColor( aOldOverlineColor );
@@ -473,15 +473,15 @@ void OutputDevice::ImplDrawText( SalLayout& rSalLayout )
     if( mbInitTextColor )
         ImplInitTextColor();
 
-    rSalLayout.DrawBase() += basegfx::B2DPoint(mnTextOffX, mnTextOffY);
+    rSalLayout.DrawBase() += basegfx::B2DPoint(mpFontRealization->nXOffset, mpFontRealization->nYOffset);
 
     if( IsTextFillColor() )
         ImplDrawTextBackground( rSalLayout );
 
-    if( mbTextSpecial )
+    if( mpFontRealization->bHasSpecialEffects )
         ImplDrawSpecialText( rSalLayout );
     else
-        ImplDrawTextDirect( rSalLayout, mbTextLines );
+        ImplDrawTextDirect( rSalLayout, mpFontRealization->bHasLineDecorations );
 }
 
 const Color& OutputDevice::GetTextColor() const
@@ -642,7 +642,7 @@ void OutputDevice::DrawText( const Point& rStartPt, const OUString& rStr,
 
     if(mpFontInstance)
         // do not use cache with modified string
-        if(mpFontInstance->mpConversion)
+        if(mpFontRealization->mxFont->mpConversion)
             pLayoutCache = nullptr;
 
     std::unique_ptr<SalLayout> pSalLayout = ImplLayout(rStr, nIndex, nLen, rStartPt, 0, {}, {}, eDefaultLayout, nullptr, pLayoutCache);
@@ -688,7 +688,7 @@ double OutputDevice::GetTextHeightDouble() const
     if (!InitFont())
         return 0;
 
-    tools::Long nHeight = mpFontInstance->mnLineHeight + mnEmphasisAscent + mnEmphasisDescent;
+    tools::Long nHeight = mpFontRealization->mxFont->mnLineHeight + mpFontRealization->nEmphasisAscent + mpFontRealization->nEmphasisDescent;
 
     return mpMapper->DevicePixelToLogicHeightDouble(nHeight);
 }
@@ -1027,7 +1027,7 @@ vcl::text::ImplLayoutArgs OutputDevice::ImplPrepareLayoutArgs( OUString& rStr,
     if( mpGraphicsState->maFont.IsVertical() )
         nLayoutFlags |= SalLayoutFlags::Vertical;
     if( mpGraphicsState->maFont.IsFixKerning() ||
-        ( mpFontInstance && mpFontInstance->GetFontSelectPattern().GetPitch() == PITCH_FIXED ) )
+        ( mpFontInstance && mpFontRealization->mxFont->GetFontSelectPattern().GetPitch() == PITCH_FIXED ) )
         nLayoutFlags |= SalLayoutFlags::DisableLigatures;
 
     if (mpGraphicsState->meTextLanguage) //TODO: (mpGraphicsState->mnTextLayoutMode & vcl::text::ComplexTextLayoutFlags::SubstituteDigits)
@@ -1053,7 +1053,7 @@ vcl::text::ImplLayoutArgs OutputDevice::ImplPrepareLayoutArgs( OUString& rStr,
     // set layout options
     vcl::text::ImplLayoutArgs aLayoutArgs(rStr, nMinIndex, nEndIndex, nLayoutFlags, mpGraphicsState->maFont.GetLanguageTag(), pLayoutCache);
 
-    Degree10 nOrientation = mpFontInstance ? mpFontInstance->mnOrientation : 0_deg10;
+    Degree10 nOrientation = mpFontInstance ? mpFontRealization->mxFont->mnOrientation : 0_deg10;
     aLayoutArgs.SetOrientation( nOrientation );
 
     aLayoutArgs.SetLayoutWidth( nPixelWidth );
@@ -2118,7 +2118,7 @@ bool OutputDevice::GetTextBoundRect(basegfx::B2DRectangle& rRect, const OUString
         if( bRet )
         {
             basegfx::B2DPoint aPos = pSalLayout->GetDrawPosition(basegfx::B2DPoint(nXOffset, 0));
-            aPixelRect.translate(mnTextOffX - aPos.getX(), mnTextOffY - aPos.getY());
+            aPixelRect.translate(mpFontRealization->nXOffset - aPos.getX(), mpFontRealization->nYOffset - aPos.getY());
             rRect = PixelToLogic( aPixelRect );
             if (mpMapper->IsMapModeEnabled())
                 rRect.translate(mpMapper->GetMappingXOffset(), mpMapper->GetMappingYOffset());
@@ -2183,9 +2183,9 @@ bool OutputDevice::GetTextOutlines( basegfx::B2DPolyPolygonVector& rVector,
             // transform polygon to pixel units
             basegfx::B2DHomMatrix aMatrix;
 
-            if (nXOffset || mnTextOffX || mnTextOffY)
+            if (nXOffset || mpFontRealization->nXOffset || mpFontRealization->nYOffset)
             {
-                basegfx::B2DPoint aRotatedOfs(mnTextOffX, mnTextOffY);
+                basegfx::B2DPoint aRotatedOfs(mpFontRealization->nXOffset, mpFontRealization->nYOffset);
                 aRotatedOfs -= pSalLayout->GetDrawPosition(basegfx::B2DPoint(nXOffset, 0));
                 aMatrix.translate( aRotatedOfs.getX(), aRotatedOfs.getY() );
             }
