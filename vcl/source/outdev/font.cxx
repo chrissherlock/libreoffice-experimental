@@ -1059,10 +1059,10 @@ std::unique_ptr<SalLayout> OutputDevice::ImplGlyphFallbackLayout( std::unique_pt
     // This function relies on a valid mpFontInstance, if it doesn't exist bail out
     // - we'd have crashed later on anyway. At least here we can catch the error in debug
     // mode.
-    if ( !mpFontInstance )
+    if ( !mpFontRealization || !mpFontRealization->mxFont )
     {
         SAL_WARN ("vcl.gdi", "No font entry set in OutputDevice");
-        assert(mpFontInstance);
+        assert(mpFontRealization->mxFont);
         return nullptr;
     }
 
@@ -1081,7 +1081,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplGlyphFallbackLayout( std::unique_pt
     rLayoutArgs.ResetPos();
     OUString aMissingCodes = aMissingCodeBuf.makeStringAndClear();
 
-    vcl::font::FontSelectPattern aFontSelData(mpFontInstance->GetFontSelectPattern());
+    vcl::font::FontSelectPattern aFontSelData(mpFontRealization->mxFont->GetFontSelectPattern());
     SalLayoutGlyphsImpl* pGlyphsImpl = pGlyphs ? pGlyphs->Impl(1) : nullptr;
 
     bool bHasUsedFallback = false;
@@ -1106,7 +1106,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplGlyphFallbackLayout( std::unique_pt
         OUString oldMissingCodes = aMissingCodes;
         if( !pFallbackFont )
             pFallbackFont = mxFontCache->GetGlyphFallbackFont( mxFontCollection.get(),
-                aFontSelData, mpFontInstance.get(), nFallbackLevel, aMissingCodes );
+                aFontSelData, mpFontRealization->mxFont.get(), nFallbackLevel, aMissingCodes );
         if( !pFallbackFont )
             break;
 
@@ -1122,7 +1122,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplGlyphFallbackLayout( std::unique_pt
             // This will just loop repeatedly finding the same font (it used to remove
             // the found font from mxFontCache, but doesn't do that anymore and I don't
             // see how doing that would remove the font from consideration for fallback).
-            if( mpFontInstance->GetFontFace() == pFallbackFont->GetFontFace())
+            if( mpFontRealization->mxFont->GetFontFace() == pFallbackFont->GetFontFace())
             {
                 if(aMissingCodes != oldMissingCodes)
                 {
@@ -1178,7 +1178,7 @@ tools::Long OutputDevice::GetMinKashida() const
     if (!ImplNewFont())
         return 0;
 
-    double nKashidaWidth = mpFontController->GetMinKashidaWidth(mpFontInstance.get());
+    double nKashidaWidth = mpFontController->GetMinKashidaWidth(mpFontRealization->mxFont.get());
 
     if (!mpMapper->IsMapModeEnabled())
         nKashidaWidth = std::ceil(nKashidaWidth);
