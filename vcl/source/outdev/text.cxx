@@ -1149,6 +1149,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
     const SalLayoutGlyphs* pGlyphs, std::optional<sal_Int32> nDrawOriginCluster,
     std::optional<sal_Int32> nDrawMinCharPos, std::optional<sal_Int32> nDrawEndCharPos) const
 {
+    // [Step 10] Refactor: Use FontRealization
     if (pGlyphs && !pGlyphs->IsValid())
     {
         SAL_WARN("vcl", "Trying to setup invalid cached glyphs - falling back to relayout!");
@@ -1187,8 +1188,8 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
     OUString aStr = rOrigStr;
 
     // recode string if needed
-    if( mpFontInstance->mpConversion ) {
-        mpFontInstance->mpConversion->RecodeString( aStr, 0, aStr.getLength() );
+    if( mpFontRealization->mxFont->mpConversion ) {
+        mpFontRealization->mxFont->mpConversion->RecodeString( aStr, 0, aStr.getLength() );
         pLayoutCache = nullptr; // don't use cache with modified string!
         pGlyphs = nullptr;
     }
@@ -1309,7 +1310,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
 
     // do glyph fallback if needed
     // #105768# avoid fallback for very small font sizes
-    if (aLayoutArgs.HasFallbackRun() && mpFontInstance->GetFontSelectPattern().mnHeight >= 3)
+    if (aLayoutArgs.HasFallbackRun() && mpFontRealization->mxFont->GetFontSelectPattern().mnHeight >= 3)
         pSalLayout = ImplGlyphFallbackLayout(std::move(pSalLayout), aLayoutArgs, pGlyphs);
 
     if (flags & SalLayoutFlags::GlyphItemsOnly)
