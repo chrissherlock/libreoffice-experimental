@@ -183,8 +183,7 @@ FontMetric OutputDevice::GetFontMetric() const
     aMetric.SetAlignment( TextAlign::ALIGN_TOP );
 
     // Delegate the complex data mapping to the controller
-    mpFontController->PopulateFontMetric(aMetric, mpGraphicsState->maFont, mpFontInstance.get(),
-                                         mnEmphasisAscent, mnEmphasisDescent);
+    mpFontController->PopulateFontMetric(aMetric, mpGraphicsState->maFont, mpFontRealization->mxFont.get(), mpFontRealization->nEmphasisAscent, mpFontRealization->nEmphasisDescent);
 
     // Convert metrics from pixels to logical units
     aMetric.SetFontSize( PixelToLogic( aMetric.GetFontSize() ) );
@@ -1272,7 +1271,9 @@ void OutputDevice::ImplReleaseFonts()
 
 tools::Long OutputDevice::GetEmphasisAscent() const
 {
-    return mnEmphasisAscent;
+    if (mpFontRealization)
+        return mpFontRealization->nEmphasisAscent;
+    return 0;
 }
 
 tools::Long OutputDevice::GetEmphasisDescent() const
