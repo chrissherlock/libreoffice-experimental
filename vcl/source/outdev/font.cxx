@@ -666,14 +666,18 @@ const LogicalFontInstance* OutputDevice::GetFontInstance() const
     return mpFontInstance.get();
 }
 
+
+
 bool OutputDevice::ImplNewFont() const
 {
     DBG_TESTSOLARMUTEX();
 
+    // [Step 2] Instrumentation: Entry
+    SAL_INFO("vcl.gdi", "ImplNewFont: Start. Dirty=" << mbFontDirty << " New=" << mbNewFont);
+
     if ( !mbNewFont )
         return true;
 
-    // we need a graphics
     if ( !mpGraphics && !AcquireGraphics() )
     {
         SAL_WARN("vcl.gdi", "OutputDevice::ImplNewFont(): no Graphics, no Font");
@@ -683,8 +687,18 @@ bool OutputDevice::ImplNewFont() const
 
     ImplInitFontList();
 
+    // [Step 2] Instrumentation: Capture Request State
+    Size aReqSize = mpGraphicsState->maFont.GetFontSize();
+    SAL_INFO("vcl.gdi", "ImplNewFont: Requesting Family='" << mpGraphicsState->maFont.GetFamilyName()
+             << "' Size=" << aReqSize.Width() << "x" << aReqSize.Height()
+             << " MapMode=" << mpMapper->IsMapModeEnabled()
+             << " DPI=" << GetDPIY());
+
     auto [fExactHeight, aSize] =
         mpFontController->CalculateDeviceSize(mpGraphicsState->maFont, *mpMapper, GetDPIY());
+
+    // [Step 2] Instrumentation: Calculation Result
+    SAL_INFO("vcl.gdi", "ImplNewFont: Calculated Pixel Size=" << aSize.Width() << "x" << aSize.Height() << " ExactHeight=" << fExactHeight);
 
     const bool bNonAntialiased = mpFontController->ShouldDisableAntialiasing(GetAntialiasing(), GetSettings().GetStyleSettings(),
                                                                              mpGraphicsState->maFont.GetFontSize().Height());
@@ -694,6 +708,19 @@ bool OutputDevice::ImplNewFont() const
     // get font entry
     rtl::Reference<LogicalFontInstance> pOldFontInstance = mpFontInstance;
     mpFontInstance = mxFontCache->GetFontInstance(mxFontCollection.get(), mpGraphicsState->maFont, aSize, fExactHeight, bNonAntialiased);
+
+    // [Step 2] Instrumentation: Lookup Result
+    if (!mpFontInstance) {
+        SAL_WARN("vcl.gdi", "ImplNewFont: !!! NO FONT INSTANCE FOUND for request !!!");
+    } else {
+        // FIXED ACCESSOR: Use GetFontFace()->GetFamilyName()
+        OUString sName = "Unknown";
+        if (mpFontInstance->GetFontFace())
+            sName = mpFontInstance->GetFontFace()->GetFamilyName();
+
+        SAL_INFO("vcl.gdi", "ImplNewFont: Success. Selected physical font: " << sName);
+    }
+
     const bool bNewFontInstance = pOldFontInstance.get() != mpFontInstance.get();
     pOldFontInstance.clear();
 
@@ -723,13 +750,15 @@ bool OutputDevice::ImplNewFont() const
     // select font when it has not been initialized yet
     if (!pFontInstance->mbInit && InitFont())
     {
+        // [Step 2] Instrumentation: Hardware Init
+        SAL_INFO("vcl.gdi", "ImplNewFont: Triggering hardware initialization (InitFont)");
         mpFontController->InitializeInstance(mpFontInstance.get(), mpGraphics);
         ImplInitFontMetrics(mpFontInstance.get());
         SetFontOrientation(mpFontInstance.get());
     }
 
     std::tie(mnTextOffX, mnTextOffY, mnEmphasisAscent, mnEmphasisDescent) =
-    mpFontController->CalculateTextOffsets(mpGraphicsState->maFont, mpFontInstance.get());
+        mpFontController->CalculateTextOffsets(mpGraphicsState->maFont, mpFontInstance.get());
 
     // Use local temporary variables to bypass the bit-field reference restriction
     bool bTextLines = false;
@@ -744,10 +773,15 @@ bool OutputDevice::ImplNewFont() const
 
     // #95414# fix for OLE objects which use scale factors very creatively
     if (mpMapper->IsMapModeEnabled() && !aSize.Width())
+    {
+        SAL_INFO("vcl.gdi", "ImplNewFont: Triggering OLE Font Scale Fix");
         return AttemptOLEFontScaleFix(const_cast<vcl::Font&>(mpGraphicsState->maFont), aSize.Height());
+    }
 
     return true;
 }
+
+
 
 void OutputDevice::ImplInitFontMetrics(LogicalFontInstance* pFontInstance) const
 {
