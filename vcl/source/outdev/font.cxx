@@ -641,7 +641,14 @@ bool OutputDevice::InitFont() const
             return false;
     }
 
-    if (!mpFontInstance)
+    // [Step 7] Hybrid Check: Prefer FontRealization, fallback to mpFontInstance
+    LogicalFontInstance* pFontToUse = nullptr;
+    if (mpFontRealization && mpFontRealization->mxFont)
+        pFontToUse = mpFontRealization->mxFont.get();
+    else if (mpFontInstance)
+        pFontToUse = mpFontInstance.get();
+
+    if (!pFontToUse)
         return false;
 
     if (!mpGraphics)
@@ -653,7 +660,7 @@ bool OutputDevice::InitFont() const
         return true;
 
     assert(mpGraphics);
-    mpGraphics->SetFont(mpFontInstance.get(), 0);
+    mpGraphics->SetFont(pFontToUse, 0);
     mbFontDirty = false;
     return true;
 }
@@ -662,6 +669,11 @@ const LogicalFontInstance* OutputDevice::GetFontInstance() const
 {
     if (!InitFont())
         return nullptr;
+
+    // [Step 7] Hybrid Return
+    if (mpFontRealization && mpFontRealization->mxFont)
+        return mpFontRealization->mxFont.get();
+
     return mpFontInstance.get();
 }
 
@@ -719,6 +731,13 @@ bool OutputDevice::ImplNewFont() const
             sName = mpFontInstance->GetFontFace()->GetFamilyName();
         SAL_INFO("vcl.gdi", "ImplNewFont: Success. Selected physical font: " << sName);
     }
+
+    // [Step 8] EARLY SYNC: Critical for InitFont()
+    // We must update the struct *before* calling InitFont, because InitFont
+    // now prefers reading from mpFontRealization.
+    if (mpFontRealization)
+        mpFontRealization->mxFont = mpFontInstance;
+
 
     const bool bNewFontInstance = pOldFontInstance.get() != mpFontInstance.get();
     pOldFontInstance.clear();
