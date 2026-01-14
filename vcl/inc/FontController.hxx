@@ -12,6 +12,7 @@
 #include <rtl/ref.hxx>
 #include <tools/color.hxx>
 
+#include <vcl/dllapi.h>
 #include <vcl/fontcharmap.hxx>
 #include <vcl/vclenum.hxx>
 
@@ -41,7 +42,7 @@ struct FontRealization
     vcl::text::ComplexTextLayoutFlags eLayoutMode = vcl::text::ComplexTextLayoutFlags::Default;
 };
 
-class FontController
+class VCL_DLLPUBLIC FontController
 {
 public:
     rtl::Reference<LogicalFontInstance> mxFontInstance;
