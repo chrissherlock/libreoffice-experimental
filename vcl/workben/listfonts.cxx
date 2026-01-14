@@ -21,6 +21,7 @@
 #include <vcl/metric.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/wrkwin.hxx>
+#include <vcl/virdev.hxx>
 
 #include <com/sun/star/lang/XComponent.hpp>
 #include <com/sun/star/lang/XMultiServiceFactory.hpp>
@@ -327,6 +328,7 @@ private:
     css::uno::Reference<css::lang::XMultiServiceFactory> xServiceManager;
     bool mbStdOut = false;
     bool mbShowFeatures = false;
+    bool mbTraceFonts = false;
     OUString maFilename;
 };
 
@@ -334,6 +336,27 @@ int ListFonts::Main()
 {
     try
     {
+        if (mbTraceFonts)
+        {
+            std::cout << " --- Lifecycle Trace ---" << std::endl;
+            VclPtrInstance<VirtualDevice> pDiagVDev;
+            std::cout << "[1] Device Created. Font Count: "
+                      << pDiagVDev->GetFontFaceCollectionCount() << std::endl;
+            std::cout << "[2] Acquiring Graphics (GetGraphics)..." << std::endl;
+            pDiagVDev->GetGraphics();
+            std::cout << "    Font Count after Acquisition: "
+                      << pDiagVDev->GetFontFaceCollectionCount() << std::endl;
+            std::cout << "[3] Triggering Metric Init (GetTextHeight)..." << std::endl;
+            pDiagVDev->GetTextHeight();
+            std::cout << "    Final Font Count: " << pDiagVDev->GetFontFaceCollectionCount()
+                      << std::endl;
+            if (pDiagVDev->GetFontFaceCollectionCount() > 0)
+                std::cout << "--- Trace Success --- " << std::endl;
+            else
+                std::cout << "--- Trace Failure: Still 0 fonts --- " << std::endl;
+            std::exit(0);
+        }
+
         VclPtrInstance<ListFontsWin> pWin;
         OutputDevice* pOutDev = pWin->GetOutDev();
 
@@ -486,6 +509,11 @@ void ListFonts::Init()
 
             if (aArg == "--")
                 mbStdOut = true;
+        }
+        else if (aArg == "--tracefonts")
+        {
+            mbTraceFonts = true;
+            mbStdOut = true;
         }
         else if (nCmdParams == 1)
         {
