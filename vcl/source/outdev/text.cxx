@@ -65,6 +65,8 @@ void OutputDevice::SetLayoutMode( vcl::text::ComplexTextLayoutFlags nTextLayoutM
         mpMetaFile->AddAction( new MetaLayoutModeAction( nTextLayoutMode ) );
 
     mpGraphicsState->mnTextLayoutMode = nTextLayoutMode;
+    if (mpFontRealization)
+        mpFontRealization->eLayoutMode = nTextLayoutMode;
 }
 
 LanguageType OutputDevice::GetDigitLanguage() const
