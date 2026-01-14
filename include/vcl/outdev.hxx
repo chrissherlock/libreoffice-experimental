@@ -203,8 +203,6 @@ private:
     mutable css::uno::WeakReference< css::rendering::XCanvas >    mxCanvas;
 
     /// font specific text alignment offsets in pixel units
-    mutable tools::Long                    mnEmphasisAscent;
-    mutable tools::Long                    mnEmphasisDescent;
     const OutDevType                meOutDevType;
     OutDevViewType                  meOutDevViewType;
     vcl::Region                     maRegion;           // contains the clip region, see SetClipRegion(...)
