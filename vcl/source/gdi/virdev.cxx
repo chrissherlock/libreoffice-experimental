@@ -26,6 +26,7 @@
 #include <vcl/pdfextoutdevdata.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/virdev.hxx>
+#include <FontController.hxx>
 
 #include <ClippingController.hxx>
 #include <GraphicsState.hxx>
@@ -444,6 +445,8 @@ void VirtualDevice::ImplSetReferenceDevice( RefDevMode i_eRefDevMode, sal_Int32 
     // the reference device should have only scalable fonts
     // => clean up the original font lists before getting new ones
     mpFontInstance.clear();
+    if (mpFontRealization)
+        mpFontRealization->mxFont.clear();
     mpFontFaceCollection.reset();
 
     // preserve global font lists
@@ -482,7 +485,10 @@ tools::Long VirtualDevice::GetFontExtLeading() const
         return 0;
 #endif
 
-    return mpFontInstance->mxFontMetric->GetExternalLeading();
+    // [Refactor] Use FontRealization
+    if (mpFontRealization && mpFontRealization->mxFont)
+        return mpFontRealization->mxFont->mxFontMetric->GetExternalLeading();
+    return 0;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

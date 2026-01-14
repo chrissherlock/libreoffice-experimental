@@ -752,7 +752,6 @@ bool OutputDevice::ImplNewFont() const
         return false;
     }
 
-
     // Compute font size in points for optical sizing.
     if (!pFontInstance->GetPointSize())
     {
@@ -767,31 +766,23 @@ bool OutputDevice::ImplNewFont() const
     if( bNewFontInstance )
         mbFontDirty = true;
 
-    // select font when it has not been initialized yet
     if (!pFontInstance->mbInit && InitFont())
     {
-        // [Step 2] Instrumentation: Hardware Init
         SAL_INFO("vcl.gdi", "ImplNewFont: Triggering hardware initialization (InitFont)");
         mpFontController->InitializeInstance(mpFontInstance.get(), mpGraphics);
         ImplInitFontMetrics(mpFontInstance.get());
         SetFontOrientation(mpFontInstance.get());
     }
 
-    std::tie(mnTextOffX, mnTextOffY, mnEmphasisAscent, mnEmphasisDescent) =
+    std::tie(mpFontRealization->nXOffset, mpFontRealization->nYOffset, mnEmphasisAscent, mnEmphasisDescent) =
         mpFontController->CalculateTextOffsets(mpGraphicsState->maFont, mpFontInstance.get());
 
-    // Use local temporary variables to bypass the bit-field reference restriction
     bool bTextLines = false;
     bool bTextSpecial = false;
 
-    // Extract values from the tuple into local booleans
     std::tie(bTextLines, bTextSpecial) = mpFontController->GetTextLayoutFlags(mpGraphicsState->maFont);
 
-    // Assign local values back to the bit-fields
-    mbTextLines = bTextLines;
-    mbTextSpecial = bTextSpecial;
 
-    // Capture return result locally so we can Sync before returning
     bool bRet = true;
 
     // #95414# fix for OLE objects which use scale factors very creatively
@@ -801,18 +792,13 @@ bool OutputDevice::ImplNewFont() const
         bRet = AttemptOLEFontScaleFix(const_cast<vcl::Font&>(mpGraphicsState->maFont), aSize.Height());
     }
 
-    // [Step 4] SHADOW SYNC
-    // We copy the valid state (whether new or fallback) into the struct.
-    // This allows us to verify writing to the struct works before we start reading from it.
     if (mpFontRealization)
     {
         mpFontRealization->mxFont = mpFontInstance;
-        mpFontRealization->nXOffset = mnTextOffX;
-        mpFontRealization->nYOffset = mnTextOffY;
         mpFontRealization->nEmphasisAscent = mnEmphasisAscent;
         mpFontRealization->nEmphasisDescent = mnEmphasisDescent;
-        mpFontRealization->bHasLineDecorations = mbTextLines;
-        mpFontRealization->bHasSpecialEffects = mbTextSpecial;
+        mpFontRealization->bHasLineDecorations = bTextLines;
+        mpFontRealization->bHasSpecialEffects = bTextSpecial;
         mpFontRealization->eLayoutMode = mpGraphicsState->mnTextLayoutMode;
 
         SAL_INFO("vcl.gdi", "ImplNewFont: Shadow Sync complete. Struct Populated.");
@@ -820,9 +806,6 @@ bool OutputDevice::ImplNewFont() const
 
     return bRet;
 }
-
-
-
 
 void OutputDevice::ImplInitFontMetrics(LogicalFontInstance* pFontInstance) const
 {
