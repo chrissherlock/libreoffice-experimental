@@ -1302,5 +1302,7 @@ tools::Long OutputDevice::GetEmphasisAscent() const
 
 tools::Long OutputDevice::GetEmphasisDescent() const
 {
+    if (mpFontRealization)
+        return mpFontRealization->nEmphasisDescent;
     return mnEmphasisDescent;
 }
