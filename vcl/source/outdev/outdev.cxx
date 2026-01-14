@@ -81,8 +81,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mpForcedFallbackInstance        = nullptr;
     mpFontFaceCollection            = nullptr;
     mpExtOutDevData                 = nullptr;
-    mnTextOffX                      = 0;
-    mnTextOffY                      = 0;
     mnEmphasisAscent                = 0;
     mnEmphasisDescent               = 0;
     mpGraphicsState->mnTextLayoutMode                = vcl::text::ComplexTextLayoutFlags::Default;
@@ -99,8 +97,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mbInitTextColor                 = true;
     mpClippingController->SetNoClipRegion();
     mbNewFont                       = true;
-    mbTextLines                     = false;
-    mbTextSpecial                   = false;
     mbEnableRTL                     = false;    // mirroring must be explicitly allowed (typically for windows only)
     mbSubpixelPositioning           = false; // tdf#168002 allow SubpixelPositioning (default: false)
 
