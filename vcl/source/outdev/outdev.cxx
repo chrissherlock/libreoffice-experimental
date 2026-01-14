@@ -81,8 +81,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mpForcedFallbackInstance        = nullptr;
     mpFontFaceCollection            = nullptr;
     mpExtOutDevData                 = nullptr;
-    mnEmphasisAscent                = 0;
-    mnEmphasisDescent               = 0;
     mpGraphicsState->mnTextLayoutMode                = vcl::text::ComplexTextLayoutFlags::Default;
 
     if( AllSettings::GetLayoutRTL() ) //#i84553# tip BiDi preference to RTL

@@ -784,8 +784,8 @@ bool OutputDevice::ImplNewFont() const
     if (mpFontRealization)
     {
         mpFontRealization->mxFont = mpFontInstance;
-        mpFontRealization->nEmphasisAscent = mnEmphasisAscent;
-        mpFontRealization->nEmphasisDescent = mnEmphasisDescent;
+        mpFontRealization->nEmphasisAscent =  0 ;
+        mpFontRealization->nEmphasisDescent =  0 ;
         mpFontRealization->bHasLineDecorations = bTextLines;
         mpFontRealization->bHasSpecialEffects = bTextSpecial;
         mpFontRealization->eLayoutMode = mpGraphicsState->mnTextLayoutMode;
@@ -1287,5 +1287,5 @@ tools::Long OutputDevice::GetEmphasisDescent() const
 {
     if (mpFontRealization)
         return mpFontRealization->nEmphasisDescent;
-    return mnEmphasisDescent;
+    return 0;
 }
