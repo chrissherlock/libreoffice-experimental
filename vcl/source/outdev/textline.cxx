@@ -739,10 +739,10 @@ void OutputDevice::ImplDrawStrikeoutChar( tools::Long nBaseX, tools::Long nBaseY
     nBaseY += nDistY;
 
     // strikeout text has to be left aligned
-    vcl::text::ComplexTextLayoutFlags nOrigTLM = mpGraphicsState->mnTextLayoutMode;
-    mpGraphicsState->mnTextLayoutMode = vcl::text::ComplexTextLayoutFlags::BiDiStrong;
+    vcl::text::ComplexTextLayoutFlags nOrigTLM = GetLayoutMode();
+    SetLayoutMode(vcl::text::ComplexTextLayoutFlags::BiDiStrong);
     pLayout = ImplLayout( aStrikeoutText, 0, aStrikeoutText.getLength() );
-    mpGraphicsState->mnTextLayoutMode = nOrigTLM;
+    SetLayoutMode(nOrigTLM);
 
     if( !pLayout )
         return;
