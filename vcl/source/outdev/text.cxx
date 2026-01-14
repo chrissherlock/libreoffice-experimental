@@ -638,7 +638,7 @@ void OutputDevice::DrawText( const Point& rStartPt, const OUString& rStr,
     if ( !IsDeviceOutputNecessary() || pVector )
         return;
 
-    if(mpFontInstance)
+    if(mpFontRealization->mxFont)
         // do not use cache with modified string
         if(mpFontRealization->mxFont->mpConversion)
             pLayoutCache = nullptr;
@@ -1025,7 +1025,7 @@ vcl::text::ImplLayoutArgs OutputDevice::ImplPrepareLayoutArgs( OUString& rStr,
     if( mpGraphicsState->maFont.IsVertical() )
         nLayoutFlags |= SalLayoutFlags::Vertical;
     if( mpGraphicsState->maFont.IsFixKerning() ||
-        ( mpFontInstance && mpFontRealization->mxFont->GetFontSelectPattern().GetPitch() == PITCH_FIXED ) )
+        ( mpFontRealization->mxFont && mpFontRealization->mxFont->GetFontSelectPattern().GetPitch() == PITCH_FIXED ) )
         nLayoutFlags |= SalLayoutFlags::DisableLigatures;
 
     if (mpGraphicsState->meTextLanguage) //TODO: (mpFontRealization->eLayoutMode & vcl::text::ComplexTextLayoutFlags::SubstituteDigits)
@@ -1051,7 +1051,7 @@ vcl::text::ImplLayoutArgs OutputDevice::ImplPrepareLayoutArgs( OUString& rStr,
     // set layout options
     vcl::text::ImplLayoutArgs aLayoutArgs(rStr, nMinIndex, nEndIndex, nLayoutFlags, mpGraphicsState->maFont.GetLanguageTag(), pLayoutCache);
 
-    Degree10 nOrientation = mpFontInstance ? mpFontRealization->mxFont->mnOrientation : 0_deg10;
+    Degree10 nOrientation = mpFontRealization->mxFont ? mpFontRealization->mxFont->mnOrientation : 0_deg10;
     aLayoutArgs.SetOrientation( nOrientation );
 
     aLayoutArgs.SetLayoutWidth( nPixelWidth );
