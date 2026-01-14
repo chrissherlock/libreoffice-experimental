@@ -762,7 +762,7 @@ bool OutputDevice::ImplNewFont() const
         SetFontOrientation(mpFontInstance.get());
     }
 
-    std::tie(mpFontRealization->nXOffset, mpFontRealization->nYOffset, mnEmphasisAscent, mnEmphasisDescent) =
+    std::tie(mpFontRealization->nXOffset, mpFontRealization->nYOffset, mpFontRealization->nEmphasisAscent, mpFontRealization->nEmphasisDescent) =
         mpFontController->CalculateTextOffsets(mpGraphicsState->maFont, mpFontInstance.get());
 
     // Use local temporary variables to bypass the bit-field reference restriction
@@ -794,8 +794,8 @@ bool OutputDevice::ImplNewFont() const
         mpFontRealization->mxFont = mpFontInstance;
     // [Refactor] Direct write used above: nXOffset
     // [Refactor] Direct write used above: nYOffset
-        mpFontRealization->nEmphasisAscent = mnEmphasisAscent;
-        mpFontRealization->nEmphasisDescent = mnEmphasisDescent;
+    // [Refactor] Direct write used above: nEmphasisAscent
+    // [Refactor] Direct write used above: nEmphasisDescent
     // [Refactor] Direct write used above: bHasLineDecorations
     // [Refactor] Direct write used above: bHasSpecialEffects
         mpFontRealization->eLayoutMode = mpGraphicsState->mnTextLayoutMode;
