@@ -203,8 +203,6 @@ private:
     mutable css::uno::WeakReference< css::rendering::XCanvas >    mxCanvas;
 
     /// font specific text alignment offsets in pixel units
-    mutable tools::Long                    mnTextOffX;
-    mutable tools::Long                    mnTextOffY;
     mutable tools::Long                    mnEmphasisAscent;
     mutable tools::Long                    mnEmphasisDescent;
     const OutDevType                meOutDevType;
@@ -222,8 +220,6 @@ private:
     mutable bool                    mbInitTextColor : 1;
     mutable bool                    mbClipRegionSet : 1;
     mutable bool                    mbNewFont : 1;
-    mutable bool                    mbTextLines : 1;
-    mutable bool                    mbTextSpecial : 1;
     mutable bool                    mbEnableRTL : 1;
     mutable bool                    mbSubpixelPositioning : 1;
 
