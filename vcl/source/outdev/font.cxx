@@ -763,7 +763,7 @@ bool OutputDevice::ImplNewFont() const
         SetFontOrientation(mpFontInstance.get());
     }
 
-    std::tie(mpFontRealization->nXOffset, mpFontRealization->nYOffset, mnEmphasisAscent, mnEmphasisDescent) =
+    std::tie(mpFontRealization->nXOffset, mpFontRealization->nYOffset, mpFontRealization->nEmphasisAscent, mpFontRealization->nEmphasisDescent) =
         mpFontController->CalculateTextOffsets(mpGraphicsState->maFont, mpFontInstance.get());
 
     bool bTextLines = false;
@@ -771,9 +771,6 @@ bool OutputDevice::ImplNewFont() const
 
     std::tie(bTextLines, bTextSpecial) = mpFontController->GetTextLayoutFlags(mpGraphicsState->maFont);
 
-    if (mpFontRealization)
-    {
-    }
 
     bool bRet = true;
 
