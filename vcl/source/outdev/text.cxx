@@ -60,7 +60,7 @@
 
 vcl::text::ComplexTextLayoutFlags OutputDevice::GetLayoutMode() const
 {
-    return mpGraphicsState->mnTextLayoutMode;
+    return mpFontRealization ? mpFontRealization->eLayoutMode : mpGraphicsState->mnTextLayoutMode;
 }
 
 void OutputDevice::SetLayoutMode( vcl::text::ComplexTextLayoutFlags nTextLayoutMode )
@@ -1032,7 +1032,7 @@ vcl::text::ImplLayoutArgs OutputDevice::ImplPrepareLayoutArgs( OUString& rStr,
         ( mpFontInstance && mpFontRealization->mxFont->GetFontSelectPattern().GetPitch() == PITCH_FIXED ) )
         nLayoutFlags |= SalLayoutFlags::DisableLigatures;
 
-    if (mpGraphicsState->meTextLanguage) //TODO: (mpGraphicsState->mnTextLayoutMode & vcl::text::ComplexTextLayoutFlags::SubstituteDigits)
+    if (mpGraphicsState->meTextLanguage) //TODO: (mpFontRealization->eLayoutMode & vcl::text::ComplexTextLayoutFlags::SubstituteDigits)
     {
         sal_Int32 nSubstringLen = nEndIndex - nMinIndex;
         rStr = LocalizeDigitsInString(rStr, mpGraphicsState->meTextLanguage, nMinIndex, nSubstringLen);
@@ -1040,10 +1040,10 @@ vcl::text::ImplLayoutArgs OutputDevice::ImplPrepareLayoutArgs( OUString& rStr,
     }
 
     // right align for RTL text, DRAWPOS_REVERSED, RTL window style
-    bool bRightAlign = bool(mpGraphicsState->mnTextLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiRtl);
-    if( mpGraphicsState->mnTextLayoutMode & vcl::text::ComplexTextLayoutFlags::TextOriginLeft )
+    bool bRightAlign = bool(mpFontRealization->eLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiRtl);
+    if( mpFontRealization->eLayoutMode & vcl::text::ComplexTextLayoutFlags::TextOriginLeft )
         bRightAlign = false;
-    else if ( mpGraphicsState->mnTextLayoutMode & vcl::text::ComplexTextLayoutFlags::TextOriginRight )
+    else if ( mpFontRealization->eLayoutMode & vcl::text::ComplexTextLayoutFlags::TextOriginRight )
         bRightAlign = true;
     // SSA: hack for western office, ie text get right aligned
     //      for debugging purposes of mirrored UI
@@ -1068,11 +1068,11 @@ SalLayoutFlags OutputDevice::GetBiDiLayoutFlags( std::u16string_view rStr,
                                                  const sal_Int32 nEndIndex ) const
 {
     SalLayoutFlags nLayoutFlags = SalLayoutFlags::NONE;
-    if( mpGraphicsState->mnTextLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiRtl )
+    if( mpFontRealization->eLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiRtl )
         nLayoutFlags |= SalLayoutFlags::BiDiRtl;
-    if( mpGraphicsState->mnTextLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiStrong )
+    if( mpFontRealization->eLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiStrong )
         nLayoutFlags |= SalLayoutFlags::BiDiStrong;
-    else if( !(mpGraphicsState->mnTextLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiRtl) )
+    else if( !(mpFontRealization->eLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiRtl) )
     {
         // Disable Bidi if no RTL hint and only known LTR codes used.
         bool bAllLtr = true;
