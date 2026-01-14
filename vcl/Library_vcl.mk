@@ -288,7 +288,6 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/toolkit/morebtn \
     vcl/source/outdev/ClippingController \
     vcl/source/outdev/CoordinateMapper \
-    vcl/source/outdev/FontController \
     vcl/source/outdev/ImplMapRes \
     vcl/source/outdev/background \
     vcl/source/outdev/eps \
@@ -557,6 +556,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/font/Feature \
     vcl/source/font/FeatureCollector \
     vcl/source/font/FeatureParser \
+    vcl/source/font/FontController \
     vcl/source/font/FontSelectPattern \
     vcl/source/font/LogicalFontInstance \
     vcl/source/font/OpenTypeFeatureDefinitionList \
