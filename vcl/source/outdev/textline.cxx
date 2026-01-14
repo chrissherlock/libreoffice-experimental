@@ -29,6 +29,7 @@
 #include <vcl/metaact.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
+#include <FontController.hxx>
 #include <vcl/skia/SkiaHelper.hxx>
 
 #include <ClippingController.hxx>
@@ -750,10 +751,10 @@ void OutputDevice::ImplDrawStrikeoutChar( tools::Long nBaseX, tools::Long nBaseY
     SetTextColor( aColor );
     ImplInitTextColor();
 
-    pLayout->DrawBase() = basegfx::B2DPoint(nBaseX + mnTextOffX, nBaseY + mnTextOffY);
+    pLayout->DrawBase() = basegfx::B2DPoint(nBaseX + mpFontRealization->nXOffset, nBaseY + mpFontRealization->nYOffset);
 
     tools::Rectangle aPixelRect;
-    aPixelRect.SetLeft( nBaseX+mnTextOffX );
+    aPixelRect.SetLeft( nBaseX+mpFontRealization->nXOffset );
     aPixelRect.SetRight( aPixelRect.Left()+nWidth );
     aPixelRect.SetBottom( nBaseY+mpFontInstance->mxFontMetric->GetDescent() );
     aPixelRect.SetTop( nBaseY-mpFontInstance->mxFontMetric->GetAscent() );
@@ -761,7 +762,7 @@ void OutputDevice::ImplDrawStrikeoutChar( tools::Long nBaseX, tools::Long nBaseY
     if (mpFontInstance->mnOrientation)
     {
         tools::Polygon aPoly( aPixelRect );
-        aPoly.Rotate( Point(nBaseX+mnTextOffX, nBaseY+mnTextOffY), mpFontInstance->mnOrientation);
+        aPoly.Rotate( Point(nBaseX+mpFontRealization->nXOffset, nBaseY+mpFontRealization->nYOffset), mpFontInstance->mnOrientation);
         aPixelRect = aPoly.GetBoundRect();
     }
 
@@ -1006,7 +1007,7 @@ void OutputDevice::DrawTextLine( const Point& rPos, tools::Long nWidth,
 
     Point aPos = LogicToDevicePixel(rPos);
     double fWidth = LogicWidthToDeviceSubPixel(nWidth);
-    aPos += Point( mnTextOffX, mnTextOffY );
+    aPos += Point( mpFontRealization->nXOffset, mpFontRealization->nYOffset );
     ImplDrawTextLine( aPos.X(), aPos.X(), 0, fWidth, fWidth, eStrikeout, eUnderline, eOverline, /*bUnderlineAbove*/false );
 }
 

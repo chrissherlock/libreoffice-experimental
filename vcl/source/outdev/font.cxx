@@ -762,7 +762,7 @@ bool OutputDevice::ImplNewFont() const
         SetFontOrientation(mpFontInstance.get());
     }
 
-    std::tie(mnTextOffX, mnTextOffY, mnEmphasisAscent, mnEmphasisDescent) =
+    std::tie(mpFontRealization->nXOffset, mpFontRealization->nYOffset, mnEmphasisAscent, mnEmphasisDescent) =
         mpFontController->CalculateTextOffsets(mpGraphicsState->maFont, mpFontInstance.get());
 
     // Use local temporary variables to bypass the bit-field reference restriction
@@ -773,8 +773,8 @@ bool OutputDevice::ImplNewFont() const
     std::tie(bTextLines, bTextSpecial) = mpFontController->GetTextLayoutFlags(mpGraphicsState->maFont);
 
     // Assign local values back to the bit-fields
-    mbTextLines = bTextLines;
-    mbTextSpecial = bTextSpecial;
+    // [Refactor] Direct write used above: bHasLineDecorations
+    // [Refactor] Direct write used above: bHasSpecialEffects
 
     // Capture return result locally so we can Sync before returning
     bool bRet = true;
@@ -792,12 +792,12 @@ bool OutputDevice::ImplNewFont() const
     if (mpFontRealization)
     {
         mpFontRealization->mxFont = mpFontInstance;
-        mpFontRealization->nXOffset = mnTextOffX;
-        mpFontRealization->nYOffset = mnTextOffY;
+    // [Refactor] Direct write used above: nXOffset
+    // [Refactor] Direct write used above: nYOffset
         mpFontRealization->nEmphasisAscent = mnEmphasisAscent;
         mpFontRealization->nEmphasisDescent = mnEmphasisDescent;
-        mpFontRealization->bHasLineDecorations = mbTextLines;
-        mpFontRealization->bHasSpecialEffects = mbTextSpecial;
+    // [Refactor] Direct write used above: bHasLineDecorations
+    // [Refactor] Direct write used above: bHasSpecialEffects
         mpFontRealization->eLayoutMode = mpGraphicsState->mnTextLayoutMode;
 
         SAL_INFO("vcl.gdi", "ImplNewFont: Shadow Sync complete. Struct Populated.");
