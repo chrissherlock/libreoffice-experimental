@@ -30,6 +30,7 @@ namespace vcl::font
 {
 FontController::FontController()
     : mxFontInstance(nullptr)
+    , mxFontCache(std::make_shared<ImplFontCache>())
     , meTextAlign(TextAlign::ALIGN_TOP)
 {
 }
