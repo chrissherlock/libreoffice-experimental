@@ -17,6 +17,7 @@
 
 #include <font/FeatureCollector.hxx>
 #include <font/LogicalFontInstance.hxx>
+#include <font/PhysicalFontCollection.hxx>
 #include <impfontcache.hxx>
 #include <salgdi.hxx>
 #include <CoordinateMapper.hxx>
@@ -30,6 +31,18 @@ FontController::FontController()
     : mxFontInstance(nullptr)
     , meTextAlign(TextAlign::ALIGN_TOP)
 {
+}
+
+void FontController::InitializeFonts(SalGraphics* pGraphics)
+{
+    if (!pGraphics)
+        return;
+
+    if (!mxFontCollection)
+        mxFontCollection = std::make_shared<PhysicalFontCollection>();
+
+    if (mxFontCollection->Count() == 0)
+        pGraphics->GetDevFontList(mxFontCollection.get());
 }
 
 bool FontController::NeedsUpdate(const vcl::Font& rFont, bool bNewFont) const
