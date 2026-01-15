@@ -1263,7 +1263,7 @@ sal_Int32 OutputDevice::HasGlyphs( const vcl::Font& rTempFont, std::u16string_vi
     return -1;
 }
 
-void OutputDevice::ReleaseFontCache() { mxFontCache.reset(); }
+void OutputDevice::ReleaseFontCache() { mpFontController->mxFontCache.reset(); }
 
 void OutputDevice::ReleaseFontCollection() { mxFontCollection.reset(); }
 
@@ -1274,7 +1274,7 @@ void OutputDevice::SetFontCollectionFromSVData()
 
 void OutputDevice::ResetNewFontCache()
 {
-    mxFontCache = std::make_shared<ImplFontCache>();
+    mpFontController->mxFontCache = std::make_shared<ImplFontCache>();
 }
 
 void OutputDevice::ImplReleaseFonts()
