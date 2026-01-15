@@ -21,6 +21,7 @@ class PhysicalFontCollection;
 class LogicalFontInstance;
 
 #include <tuple>
+#include <impfontcache.hxx>
 
 namespace vcl::font
 {
@@ -47,6 +48,7 @@ class VCL_DLLPUBLIC FontController
 public:
     rtl::Reference<LogicalFontInstance> mxFontInstance;
     std::shared_ptr<PhysicalFontCollection> mxFontCollection;
+    std::shared_ptr<ImplFontCache> mxFontCache;
 
     TextAlign meTextAlign;
 
