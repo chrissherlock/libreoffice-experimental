@@ -103,16 +103,6 @@ std::pair<float, Size> FontController::CalculateDeviceSize(const vcl::Font& rFon
     return std::make_pair(fExactHeight, aSize);
 }
 
-void FontController::RealizeFont(ImplFontCache& rCache, const vcl::Font& rFont, const Size& rSize,
-                                 float fExactHeight, bool bNonAntialiased)
-{
-    if (!mxFontCollection)
-        return; // Cannot realize without a collection
-
-    mxFontInstance = rCache.GetFontInstance(mxFontCollection.get(), rFont, rSize, fExactHeight,
-                                            bNonAntialiased);
-}
-
 void FontController::InitializeInstance(LogicalFontInstance* pFontInstance, SalGraphics* pGraphics)
 {
     if (!pFontInstance || !pGraphics)
@@ -310,6 +300,35 @@ void FontController::GetFontFeatures(const LogicalFontInstance* pFontInstance,
     vcl::font::FeatureCollector aFeatureCollector(pFontInstance->GetFontFace(), rFontFeatures,
                                                   rOfficeLanguage);
     aFeatureCollector.collect();
+}
+
+bool FontController::GetFontSubstitution(const SalGraphics* /*pGraphics*/, const vcl::Font& rFont,
+                                         OUString& /*rMissingCodes*/,
+                                         vcl::Font& /* rSubstFont */) const
+{
+    if (!mxFontCollection)
+        return false;
+
+    if (mxFontCollection->FindFontFamily(rFont.GetFamilyName()))
+        return false;
+
+    return false;
+}
+
+rtl::Reference<LogicalFontInstance>
+FontController::RealizeFont(vcl::font::PhysicalFontCollection* pColl, const vcl::Font& rFont,
+                            const Size& rSize, float fExactHeight, bool bNonAntialiased)
+{
+    // FIXME: needs to do font substitution here
+    if (!mxFontCache)
+        return nullptr;
+    return mxFontCache->GetFontInstance(pColl, rFont, rSize, fExactHeight, bNonAntialiased);
+}
+
+void FontController::InvalidateCache()
+{
+    if (mxFontCache)
+        mxFontCache->Invalidate();
 }
 
 } // end namespace vcl::font

@@ -46,6 +46,7 @@ struct FontRealization
 class VCL_DLLPUBLIC FontController
 {
 public:
+    void InvalidateCache();
     rtl::Reference<LogicalFontInstance> mxFontInstance;
     std::shared_ptr<PhysicalFontCollection> mxFontCollection;
     std::shared_ptr<ImplFontCache> mxFontCache;
@@ -58,8 +59,10 @@ public:
 
     bool NeedsUpdate(const vcl::Font& rRequestedFont, bool bDeviceDirty) const;
 
-    void RealizeFont(ImplFontCache& rCache, const vcl::Font& rFont, const Size& rSize,
-                     float fExactHeight, bool bNonAntialiased);
+    rtl::Reference<LogicalFontInstance> RealizeFont(vcl::font::PhysicalFontCollection* pColl,
+                                                    const vcl::Font& rFont, const Size& rSize,
+                                                    float fExactHeight,
+                                                    bool bNonAntialiased = false);
 
     void InitializeInstance(LogicalFontInstance* pFontInstance, SalGraphics* pGraphics);
 
@@ -104,6 +107,9 @@ public:
 
     void GetFontFeatures(const LogicalFontInstance* pFontInstance,
                          std::vector<vcl::font::Feature>& rFontFeatures) const;
+
+    bool GetFontSubstitution(const SalGraphics* pGraphics, const vcl::Font& rFont,
+                             OUString& rMissingCodes, vcl::Font& rSubstFont) const;
 };
 
 } // namespace vcl

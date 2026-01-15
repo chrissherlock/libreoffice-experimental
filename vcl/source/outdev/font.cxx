@@ -548,7 +548,7 @@ vcl::Font OutputDevice::GetDefaultFont( DefaultFontType nType, LanguageType eLan
 
                     // get the name of the first available font
                     float fExactHeight = static_cast<float>(aSize.Height());
-                    rtl::Reference<LogicalFontInstance> pFontInstance = pOutDev->mxFontCache->GetFontInstance( pOutDev->mxFontCollection.get(), aFont, aSize, fExactHeight );
+                    rtl::Reference<LogicalFontInstance> pFontInstance = pOutDev->mpFontController->RealizeFont( pOutDev->mxFontCollection.get(), aFont, aSize, fExactHeight );
                     if (pFontInstance)
                     {
                         assert(pFontInstance->GetFontFace());
@@ -721,11 +721,11 @@ bool OutputDevice::ImplNewFont() const
     const bool bNonAntialiased = mpFontController->ShouldDisableAntialiasing(GetAntialiasing(), GetSettings().GetStyleSettings(),
                                                                              mpGraphicsState->maFont.GetFontSize().Height());
 
-    mpFontController->RealizeFont(*mxFontCache, mpGraphicsState->maFont, aSize, fExactHeight, bNonAntialiased);
+    mpFontController->RealizeFont(mxFontCollection.get(), mpGraphicsState->maFont, aSize, fExactHeight, bNonAntialiased);
 
     // get font entry
     rtl::Reference<LogicalFontInstance> pOldFontInstance = mpFontInstance;
-    mpFontInstance = mxFontCache->GetFontInstance(mxFontCollection.get(), mpGraphicsState->maFont, aSize, fExactHeight, bNonAntialiased);
+    mpFontInstance = mpFontController->RealizeFont(mxFontCollection.get(), mpGraphicsState->maFont, aSize, fExactHeight, bNonAntialiased);
 
     // [Step 2] Instrumentation: Lookup Result
     if (!mpFontInstance) {
