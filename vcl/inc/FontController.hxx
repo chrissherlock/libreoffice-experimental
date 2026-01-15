@@ -52,6 +52,8 @@ public:
 
     FontController();
 
+    void InitializeFonts(SalGraphics* pGraphics);
+
     bool NeedsUpdate(const vcl::Font& rRequestedFont, bool bDeviceDirty) const;
 
     void RealizeFont(ImplFontCache& rCache, const vcl::Font& rFont, const Size& rSize,

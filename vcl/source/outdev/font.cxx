@@ -608,19 +608,23 @@ vcl::Font OutputDevice::GetDefaultFont( DefaultFontType nType, LanguageType eLan
 
 void OutputDevice::ImplInitFontList() const
 {
+    if (mpFontController)
+    {
+        if (!mpFontController->mxFontCollection)
+            mpFontController->mxFontCollection = mxFontCollection;
+
+        mpFontController->InitializeFonts(mpGraphics);
+    }
+
     if( mxFontCollection->Count() )
         return;
 
     if( !(mpGraphics || AcquireGraphics()) )
         return;
+
     assert(mpGraphics);
 
     SAL_INFO( "vcl.gdi", "OutputDevice::ImplInitFontList()" );
-
-    mpGraphics->GetDevFontList(mxFontCollection.get());
-
-    if (mxFontCollection && mpFontController)
-        mpFontController->mxFontCollection = mxFontCollection;
 
     // Abort if no fonts are found; VCL cannot function without a system font
     if( !mxFontCollection->Count() )
