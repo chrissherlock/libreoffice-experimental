@@ -260,8 +260,8 @@ void OutputDevice::ImplClearFontData( const bool bNewFontLists )
 
     ImplSVData* pSVData = ImplGetSVData();
 
-    if (mxFontCache && mxFontCache != pSVData->maGDIData.mxScreenFontCache)
-        mxFontCache->Invalidate();
+    if (true)
+        InvalidateFontCache();
 
     if (bNewFontLists && AcquireGraphics())
     {
@@ -1092,7 +1092,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplGlyphFallbackLayout( std::unique_pt
         // if the system-specific glyph fallback is active
         OUString oldMissingCodes = aMissingCodes;
         if( !pFallbackFont )
-            pFallbackFont = mxFontCache->GetGlyphFallbackFont( mxFontCollection.get(),
+            pFallbackFont = GetFontCache().GetGlyphFallbackFont( mxFontCollection.get(),
                 aFontSelData, mpFontRealization->mxFont.get(), nFallbackLevel, aMissingCodes );
         if( !pFallbackFont )
             break;
@@ -1305,5 +1305,39 @@ tools::Long OutputDevice::GetEmphasisDescent() const
     return mpFontRealization->nEmphasisDescent;
 }
 
-void OutputDevice::ClearFontCache() { if (mpFontController) mpFontController->ClearCache(); }
-void OutputDevice::ResetFontCache() { if (mpFontController) mpFontController->ResetCache(); }
+void OutputDevice::AdoptSharedFontCache(const std::shared_ptr<ImplFontCache>& pShared)
+{ if (mpFontController) mpFontController->AdoptCache(pShared); }
+
+void OutputDevice::InvalidateFontCache()
+{ if (mpFontController) mpFontController->InvalidateCache(); }
+
+void OutputDevice::ClearFontCache()
+{ if (mpFontController) mpFontController->ClearCache(); }
+
+void OutputDevice::ResetFontCache()
+{
+    if (!mpFontController) mpFontController = std::make_unique<vcl::font::FontController>();
+    mpFontController->ResetCache();
+}
+
+ImplFontCache& OutputDevice::GetFontCache() const
+{
+    if (!mpFontController) const_cast<OutputDevice*>(this)->mpFontController = std::make_unique<vcl::font::FontController>();
+    return mpFontController->GetCache();
+}
+
+rtl::Reference<LogicalFontInstance> OutputDevice::GetFontInstance(vcl::font::PhysicalFontCollection* pPFC, const vcl::Font& rFont, const Size& rSize, float fHeight) const
+{ return GetFontCache().GetFontInstance(pPFC, rFont, rSize, fHeight); }
+
+void OutputDevice::AcquireScreenFontCache()
+{
+    ImplSVData* pSVData = ImplGetSVData();
+    AdoptSharedFontCache(pSVData->maGDIData.mxScreenFontCache);
+}
+
+bool OutputDevice::IsScreenFontCache() const
+{
+    ImplSVData* pSVData = ImplGetSVData();
+    // Use the safe getter which handles lazy initialization
+    return &GetFontCache() == pSVData->maGDIData.mxScreenFontCache.get();
+}

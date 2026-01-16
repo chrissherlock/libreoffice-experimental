@@ -67,7 +67,7 @@ class ImplControlValue;
 struct ImplOutDevData;
 class LogicalFontInstance;
 struct SystemGraphicsData;
-class ImplFontCache;
+
 class SalGraphics;
 class Gradient;
 class Hatch;
@@ -90,6 +90,7 @@ class Printer;
 class VCLXGraphics;
 class SalLayoutGlyphs;
 class CoordinateMapper;
+class ImplFontCache;
 
 enum class AddFontSubstituteFlags;
 enum class AntialiasingFlags;
@@ -224,7 +225,7 @@ private:
 protected:
     std::unique_ptr<vcl::ClippingController> mpClippingController;
     mutable std::shared_ptr<vcl::font::PhysicalFontCollection> mxFontCollection;
-    mutable std::shared_ptr<ImplFontCache> mxFontCache;
+
 
     /** @name Initialization and accessor functions
      */
@@ -232,13 +233,23 @@ protected:
 
 protected:
     void ClearFontCache();
+
+    void InvalidateFontCache();
+    ImplFontCache& GetFontCache() const;
     void ResetFontCache();
+    void AcquireScreenFontCache();
 
                                 OutputDevice(OutDevType eOutDevType);
     virtual                     ~OutputDevice() override;
     virtual void                dispose() override;
 
 public:
+    bool IsScreenFontCache() const;
+    void AdoptSharedFontCache(const std::shared_ptr<ImplFontCache>& pShared);
+    rtl::Reference<LogicalFontInstance> GetFontInstance(
+        vcl::font::PhysicalFontCollection* pPFC, const vcl::Font& rFont,
+        const Size& rSize, float fHeight) const;
+
 
     /** Get the graphic context that the output device uses to draw on.
 

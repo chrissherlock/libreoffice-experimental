@@ -1090,7 +1090,7 @@ void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* p
 
     // #99318: make sure fontcache and list is available before call to SetSettings
     mpWindowImpl->mxOutDev->mxFontCollection = mpWindowImpl->mpFrameData->mxFontCollection;
-    mpWindowImpl->mxOutDev->mxFontCache = mpWindowImpl->mpFrameData->mxFontCache;
+    mpWindowImpl->mxOutDev->AdoptSharedFontCache(mpWindowImpl->mpFrameData->mxFontCache);
 
     if ( mpWindowImpl->mbFrame )
     {
@@ -1767,7 +1767,7 @@ void Window::ImplNewInputContext()
                 aSize.setHeight( (12*pFocusWin->GetOutDev()->GetDPIY())/72 );
         }
         aNewContext.mpFont =
-                        pFocusWin->GetOutDev()->mxFontCache->GetFontInstance(
+                        pFocusWin->GetOutDev()->GetFontInstance(
                             pFocusWin->GetOutDev()->mxFontCollection.get(),
                             rFont, aSize, static_cast<float>(aSize.Height()) );
     }
