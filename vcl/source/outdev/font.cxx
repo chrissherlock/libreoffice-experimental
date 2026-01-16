@@ -1304,3 +1304,6 @@ tools::Long OutputDevice::GetEmphasisDescent() const
         return mpFontRealization->nEmphasisDescent;
     return mpFontRealization->nEmphasisDescent;
 }
+
+void OutputDevice::ClearFontCache() { if (mpFontController) mpFontController->ClearCache(); }
+void OutputDevice::ResetFontCache() { if (mpFontController) mpFontController->ResetCache(); }
