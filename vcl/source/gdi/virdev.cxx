@@ -181,7 +181,7 @@ void VirtualDevice::ImplInitVirDev( const OutputDevice* pOutDev,
 
     mbDevOutput     = true;
     mxFontCollection = pSVData->maGDIData.mxScreenFontList;
-    mxFontCache     = pSVData->maGDIData.mxScreenFontCache;
+    AcquireScreenFontCache();
     SetDPIX(pOutDev->GetDPIX());
     SetDPIY(pOutDev->GetDPIY());
     SetDPIScalePercentage(pOutDev->GetDPIScalePercentage());
