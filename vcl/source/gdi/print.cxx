@@ -651,7 +651,7 @@ void Printer::ImplInitDisplay()
 
     mpDisplayDev = VclPtr<VirtualDevice>::Create();
     mxFontCollection    = pSVData->maGDIData.mxScreenFontList;
-    mxFontCache         = pSVData->maGDIData.mxScreenFontCache;
+    AcquireScreenFontCache();
     SetDPIX(mpDisplayDev->GetDPIX());
     SetDPIY(mpDisplayDev->GetDPIY());
 }
