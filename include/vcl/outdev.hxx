@@ -226,6 +226,9 @@ protected:
     ///@{
 
 protected:
+    void ClearFontCache();
+    void ResetFontCache();
+
                                 OutputDevice(OutDevType eOutDevType);
     virtual                     ~OutputDevice() override;
     virtual void                dispose() override;

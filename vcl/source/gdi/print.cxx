@@ -634,7 +634,7 @@ void Printer::ImplInit( SalPrinterQueueInfo* pInfo )
     // Init data
     ImplUpdatePageData();
     mxFontCollection = std::make_shared<vcl::font::PhysicalFontCollection>();
-    mxFontCache = std::make_shared<ImplFontCache>();
+    ResetFontCache();
     mpGraphics->GetDevFontList(mxFontCollection.get());
 }
 
@@ -904,7 +904,7 @@ void Printer::dispose()
         // TODO: consolidate duplicate cleanup by Printer and OutputDevice
         mpFontInstance.clear();
         mpFontFaceCollection.reset();
-        mxFontCache.reset();
+        ClearFontCache();
         // font list deleted by OutputDevice dtor
     }
 
@@ -1051,7 +1051,7 @@ bool Printer::SetPrinterProps( const Printer* pPrinter )
             mpFontInstance.clear();
             mpFontFaceCollection.reset();
             // clean up font list
-            mxFontCache.reset();
+            ClearFontCache();
             mxFontCollection.reset();
 
             mbFontDirty = true;
@@ -1078,7 +1078,7 @@ bool Printer::SetPrinterProps( const Printer* pPrinter )
 
             mpFontInstance.clear();
             mpFontFaceCollection.reset();
-            mxFontCache.reset();
+            ClearFontCache();
             mxFontCollection.reset();
             mbFontDirty = true;
             mbNewFont = true;
