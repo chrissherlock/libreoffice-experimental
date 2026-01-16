@@ -46,11 +46,13 @@ struct FontRealization
 class VCL_DLLPUBLIC FontController
 {
 public:
+    void AdoptCache(const std::shared_ptr<ImplFontCache>& pShared) { mxFontCache = pShared; }
     void ClearCache() { mxFontCache.reset(); }
+    void InvalidateCache();
+
     void ResetCache() { mxFontCache = std::make_shared<ImplFontCache>(); }
     ImplFontCache& GetCache() const { return *mxFontCache; }
 
-    void InvalidateCache();
     rtl::Reference<LogicalFontInstance> mxFontInstance;
     std::shared_ptr<PhysicalFontCollection> mxFontCollection;
     std::shared_ptr<ImplFontCache> mxFontCache;
