@@ -61,40 +61,71 @@
 
 #include <strings.hrc>
 
-const vcl::Font& OutputDevice::GetFont() const
-{
-    return mpGraphicsState->maFont;
-}
+const vcl::Font& OutputDevice::GetFont() const { return mpGraphicsState->maFont; }
 
-void OutputDevice::SetFont( const vcl::Font& rNewFont )
+void OutputDevice::SetFont(const vcl::Font& rNewFont)
 {
-    vcl::Font aFont = vcl::drawmode::GetFont(rNewFont, GetDrawMode(), GetSettings().GetStyleSettings());
+    vcl::Font aFont
+        = vcl::drawmode::GetFont(rNewFont, GetDrawMode(), GetSettings().GetStyleSettings());
 
-    if ( mpMetaFile )
+    if (mpMetaFile)
     {
-        mpMetaFile->AddAction( new MetaFontAction( aFont ) );
+        mpMetaFile->AddAction(new MetaFontAction(aFont));
         // the color and alignment actions don't belong here
         // TODO: get rid of them without breaking anything...
-        mpMetaFile->AddAction( new MetaTextAlignAction( aFont.GetAlignment() ) );
-        mpMetaFile->AddAction( new MetaTextFillColorAction( aFont.GetFillColor(), !aFont.IsTransparent() ) );
+        mpMetaFile->AddAction(new MetaTextAlignAction(aFont.GetAlignment()));
+        mpMetaFile->AddAction(
+            new MetaTextFillColorAction(aFont.GetFillColor(), !aFont.IsTransparent()));
     }
 
-    if ( mpGraphicsState->maFont.IsSameInstance( aFont ) )
+    if (mpGraphicsState->maFont.IsSameInstance(aFont))
         return;
 
     // Optimization MT/HDU: COL_TRANSPARENT means SetFont should ignore the font color,
     // because SetTextColor() is used for this.
     // #i28759# mpGraphicsState->maTextColor might have been changed behind our back, commit then, too.
-    if( aFont.GetColor() != COL_TRANSPARENT
-    && (aFont.GetColor() != mpGraphicsState->maFont.GetColor() || aFont.GetColor() != mpGraphicsState->maTextColor ) )
+    if (aFont.GetColor() != COL_TRANSPARENT
+        && (aFont.GetColor() != mpGraphicsState->maFont.GetColor()
+            || aFont.GetColor() != mpGraphicsState->maTextColor))
     {
         mpGraphicsState->maTextColor = aFont.GetColor();
         mbInitTextColor = true;
-        if( mpMetaFile )
-            mpMetaFile->AddAction( new MetaTextColorAction( aFont.GetColor() ) );
+        if (mpMetaFile)
+            mpMetaFile->AddAction(new MetaTextColorAction(aFont.GetColor()));
     }
     mpGraphicsState->maFont = aFont;
-    mbNewFont   = true;
+    mbNewFont = true;
+}
+
+void OutputDevice::SetFontCollection(const std::shared_ptr<vcl::font::PhysicalFontCollection>& pPFC)
+{
+    if (!mpFontController)
+        mpFontController = std::make_unique<vcl::font::FontController>();
+    mpFontController->SetFontCollection(pPFC);
+}
+
+
+
+vcl::font::PhysicalFontCollection* OutputDevice::GetFontCollection() const
+{
+    if (!mpFontController)
+        const_cast<OutputDevice*>(this)->mpFontController = std::make_unique<vcl::font::FontController>();
+    return mpFontController->GetFontCollection();
+}
+
+
+
+
+const std::shared_ptr<vcl::font::PhysicalFontCollection>&
+OutputDevice::GetSharedFontCollection() const
+{
+    static const std::shared_ptr<vcl::font::PhysicalFontCollection> pEmpty;
+    if (ImplGetSVData()->mbDeInit)
+        return pEmpty;
+
+    if (!mpFontController)
+        const_cast<OutputDevice*>(this)->mpFontController = std::make_unique<vcl::font::FontController>();
+    return mpFontController->GetSharedFontCollection();
 }
 
 FontMetric OutputDevice::GetFontMetricFromCollection(int nDevFontIndex) const
@@ -109,14 +140,14 @@ FontMetric OutputDevice::GetFontMetricFromCollection(int nDevFontIndex) const
 
 int OutputDevice::GetFontFaceCollectionCount() const
 {
-    if( !mpFontFaceCollection )
+    if (!mpFontFaceCollection)
     {
-        if (!mxFontCollection)
+        if (!GetSharedFontCollection())
         {
             return 0;
         }
 
-        mpFontFaceCollection = mxFontCollection->GetFontFaceCollection();
+        mpFontFaceCollection = GetSharedFontCollection()->GetFontFaceCollection();
 
         if (!mpFontFaceCollection->Count())
         {
@@ -127,23 +158,23 @@ int OutputDevice::GetFontFaceCollectionCount() const
     return mpFontFaceCollection->Count();
 }
 
-bool OutputDevice::IsFontAvailable( std::u16string_view rFontName ) const
+bool OutputDevice::IsFontAvailable(std::u16string_view rFontName) const
 {
     ImplInitFontList();
-    vcl::font::PhysicalFontFamily* pFound = mxFontCollection->FindFontFamily( rFontName );
+    vcl::font::PhysicalFontFamily* pFound = GetSharedFontCollection()->FindFontFamily(rFontName);
     return (pFound != nullptr);
 }
 
-bool OutputDevice::AddTempDevFont( const OUString& rFileURL, const OUString& rFontName ) const
+bool OutputDevice::AddTempDevFont(const OUString& rFileURL, const OUString& rFontName) const
 {
     ImplInitFontList();
 
-    if( !mpGraphics && !AcquireGraphics() )
+    if (!mpGraphics && !AcquireGraphics())
         return false;
     assert(mpGraphics);
 
-    bool bRC = mpGraphics->AddTempDevFont( mxFontCollection.get(), rFileURL, rFontName );
-    if( !bRC )
+    bool bRC = mpGraphics->AddTempDevFont(GetFontCollection(), rFileURL, rFontName);
+    if (!bRC)
         return false;
 
     return true;
@@ -151,7 +182,7 @@ bool OutputDevice::AddTempDevFont( const OUString& rFileURL, const OUString& rFo
 
 bool OutputDevice::RemoveTempDevFont(const OUString& rFileURL, const OUString& rFontName)
 {
-    if( !mpGraphics && !AcquireGraphics() )
+    if (!mpGraphics && !AcquireGraphics())
         return true; // No graphics -> no fonts used
     assert(mpGraphics);
 
@@ -180,42 +211,44 @@ FontMetric OutputDevice::GetFontMetric() const
 
     // Initialize with device-specific logical font and alignment
     aMetric = mpGraphicsState->maFont;
-    aMetric.SetAlignment( TextAlign::ALIGN_TOP );
+    aMetric.SetAlignment(TextAlign::ALIGN_TOP);
 
     // Delegate the complex data mapping to the controller
-    mpFontController->PopulateFontMetric(aMetric, mpGraphicsState->maFont, mpFontRealization->mxFont.get(), mpFontRealization->nEmphasisAscent, mpFontRealization->nEmphasisDescent);
+    mpFontController->PopulateFontMetric(
+        aMetric, mpGraphicsState->maFont, mpFontRealization->mxFont.get(),
+        mpFontRealization->nEmphasisAscent, mpFontRealization->nEmphasisDescent);
 
     // Convert metrics from pixels to logical units
-    aMetric.SetFontSize( PixelToLogic( aMetric.GetFontSize() ) );
-    aMetric.SetAscent( DevicePixelToLogicHeight( aMetric.GetAscent() ) );
-    aMetric.SetDescent( DevicePixelToLogicHeight( aMetric.GetDescent() ) );
-    aMetric.SetInternalLeading( DevicePixelToLogicHeight( aMetric.GetInternalLeading() ) );
-    aMetric.SetLineHeight( DevicePixelToLogicHeight( aMetric.GetLineHeight() ) );
-    aMetric.SetSlant( DevicePixelToLogicHeight( aMetric.GetSlant() ) );
-    aMetric.SetHangingBaseline( DevicePixelToLogicHeight( aMetric.GetHangingBaseline() ) );
+    aMetric.SetFontSize(PixelToLogic(aMetric.GetFontSize()));
+    aMetric.SetAscent(DevicePixelToLogicHeight(aMetric.GetAscent()));
+    aMetric.SetDescent(DevicePixelToLogicHeight(aMetric.GetDescent()));
+    aMetric.SetInternalLeading(DevicePixelToLogicHeight(aMetric.GetInternalLeading()));
+    aMetric.SetLineHeight(DevicePixelToLogicHeight(aMetric.GetLineHeight()));
+    aMetric.SetSlant(DevicePixelToLogicHeight(aMetric.GetSlant()));
+    aMetric.SetHangingBaseline(DevicePixelToLogicHeight(aMetric.GetHangingBaseline()));
 
-    aMetric.SetUnitEm( DevicePixelToLogicWidth( aMetric.GetUnitEm() ) );
-    aMetric.SetHorCJKAdvance( DevicePixelToLogicWidth( aMetric.GetHorCJKAdvance() ) );
-    aMetric.SetVertCJKAdvance( DevicePixelToLogicHeight( aMetric.GetVertCJKAdvance() ) );
+    aMetric.SetUnitEm(DevicePixelToLogicWidth(aMetric.GetUnitEm()));
+    aMetric.SetHorCJKAdvance(DevicePixelToLogicWidth(aMetric.GetHorCJKAdvance()));
+    aMetric.SetVertCJKAdvance(DevicePixelToLogicHeight(aMetric.GetVertCJKAdvance()));
 
     // OutputDevice manages external leading separately due to legacy #i60945#
-    aMetric.SetExternalLeading( DevicePixelToLogicHeight( GetFontExtLeading() ) );
+    aMetric.SetExternalLeading(DevicePixelToLogicHeight(GetFontExtLeading()));
 
     SAL_INFO("vcl.gdi.fontmetric", "OutputDevice::GetFontMetric:" << aMetric);
     return aMetric;
 }
 
-FontMetric OutputDevice::GetFontMetric( const vcl::Font& rFont ) const
+FontMetric OutputDevice::GetFontMetric(const vcl::Font& rFont) const
 {
     // select font, query metrics, select original font again
     vcl::Font aOldFont = GetFont();
-    const_cast<OutputDevice*>(this)->SetFont( rFont );
-    FontMetric aMetric( GetFontMetric() );
-    const_cast<OutputDevice*>(this)->SetFont( aOldFont );
+    const_cast<OutputDevice*>(this)->SetFont(rFont);
+    FontMetric aMetric(GetFontMetric());
+    const_cast<OutputDevice*>(this)->SetFont(aOldFont);
     return aMetric;
 }
 
-bool OutputDevice::GetFontCharMap( FontCharMapRef& rxFontCharMap ) const
+bool OutputDevice::GetFontCharMap(FontCharMapRef& rxFontCharMap) const
 {
     if (!InitFont())
         return false;
@@ -225,7 +258,7 @@ bool OutputDevice::GetFontCharMap( FontCharMapRef& rxFontCharMap ) const
     return !rxFontCharMap->IsDefaultMap();
 }
 
-bool OutputDevice::GetFontCapabilities( vcl::FontCapabilities& rFontCapabilities ) const
+bool OutputDevice::GetFontCapabilities(vcl::FontCapabilities& rFontCapabilities) const
 {
     if (!InitFont())
         return false;
@@ -241,7 +274,7 @@ tools::Long OutputDevice::GetFontExtLeading() const
     return 0;
 }
 
-void OutputDevice::ImplClearFontData( const bool bNewFontLists )
+void OutputDevice::ImplClearFontData(const bool bNewFontLists)
 {
     // the currently selected logical font is no longer needed
     mpFontInstance.clear();
@@ -249,12 +282,12 @@ void OutputDevice::ImplClearFontData( const bool bNewFontLists )
     mbFontDirty = true;
     mbNewFont = true;
 
-    if ( bNewFontLists )
+    if (bNewFontLists)
     {
         mpFontFaceCollection.reset();
 
         // release all physically selected fonts on this device
-        if( AcquireGraphics() )
+        if (AcquireGraphics())
             mpGraphics->ReleaseFonts();
     }
 
@@ -265,55 +298,54 @@ void OutputDevice::ImplClearFontData( const bool bNewFontLists )
 
     if (bNewFontLists && AcquireGraphics())
     {
-        if (mxFontCollection && mxFontCollection != pSVData->maGDIData.mxScreenFontList)
-            mxFontCollection->Clear();
+        if (GetSharedFontCollection()
+            && GetSharedFontCollection() != pSVData->maGDIData.mxScreenFontList)
+            GetSharedFontCollection()->Clear();
     }
 }
 
-void OutputDevice::RefreshFontData( const bool bNewFontLists )
-{
-    ImplRefreshFontData( bNewFontLists );
-}
+void OutputDevice::RefreshFontData(const bool bNewFontLists) { ImplRefreshFontData(bNewFontLists); }
 
-void OutputDevice::ImplRefreshFontData( const bool bNewFontLists )
+void OutputDevice::ImplRefreshFontData(const bool bNewFontLists)
 {
     if (bNewFontLists && AcquireGraphics())
-        mpGraphics->GetDevFontList( mxFontCollection.get() );
+        mpGraphics->GetDevFontList(GetFontCollection());
 }
 
 void OutputDevice::ImplUpdateFontData()
 {
-    ImplClearFontData( true/*bNewFontLists*/ );
-    ImplRefreshFontData( true/*bNewFontLists*/ );
+    ImplClearFontData(true /*bNewFontLists*/);
+    ImplRefreshFontData(true /*bNewFontLists*/);
 }
 
 void OutputDevice::ImplClearAllFontData(bool bNewFontLists)
 {
     ImplSVData* pSVData = ImplGetSVData();
 
-    ImplUpdateFontDataForAllFrames( &OutputDevice::ImplClearFontData, bNewFontLists );
+    ImplUpdateFontDataForAllFrames(&OutputDevice::ImplClearFontData, bNewFontLists);
 
     // clear global font lists to have them updated
     pSVData->maGDIData.mxScreenFontCache->Invalidate();
-    if ( !bNewFontLists )
+    if (!bNewFontLists)
         return;
 
     pSVData->maGDIData.mxScreenFontList->Clear();
-    vcl::Window * pFrame = pSVData->maFrameData.mpFirstFrame;
+    vcl::Window* pFrame = pSVData->maFrameData.mpFirstFrame;
     if (!pFrame)
         return;
 
-    if ( pFrame->GetOutDev()->AcquireGraphics() )
+    if (pFrame->GetOutDev()->AcquireGraphics())
     {
-        OutputDevice *pDevice = pFrame->GetOutDev();
+        OutputDevice* pDevice = pFrame->GetOutDev();
         pDevice->mpGraphics->ClearDevFontCache();
-        pDevice->mpGraphics->GetDevFontList(pFrame->mpWindowImpl->mpFrameData->mxFontCollection.get());
+        pDevice->mpGraphics->GetDevFontList(
+            pFrame->mpWindowImpl->mpFrameData->mxFontCollection.get());
     }
 }
 
 void OutputDevice::ImplRefreshAllFontData(bool bNewFontLists)
 {
-    ImplUpdateFontDataForAllFrames( &OutputDevice::ImplRefreshFontData, bNewFontLists );
+    ImplUpdateFontDataForAllFrames(&OutputDevice::ImplRefreshFontData, bNewFontLists);
 }
 
 void OutputDevice::ImplUpdateAllFontData(bool bNewFontLists)
@@ -322,20 +354,21 @@ void OutputDevice::ImplUpdateAllFontData(bool bNewFontLists)
     OutputDevice::ImplRefreshAllFontData(bNewFontLists);
 }
 
-void OutputDevice::ImplUpdateFontDataForAllFrames( const FontUpdateHandler_t pHdl, const bool bNewFontLists )
+void OutputDevice::ImplUpdateFontDataForAllFrames(const FontUpdateHandler_t pHdl,
+                                                  const bool bNewFontLists)
 {
     ImplSVData* const pSVData = ImplGetSVData();
 
     // update all windows
     vcl::Window* pFrame = pSVData->maFrameData.mpFirstFrame;
-    while ( pFrame )
+    while (pFrame)
     {
-        ( pFrame->GetOutDev()->*pHdl )( bNewFontLists );
+        (pFrame->GetOutDev()->*pHdl)(bNewFontLists);
 
         vcl::Window* pSysWin = pFrame->mpWindowImpl->mpFrameData->mpFirstOverlap;
-        while ( pSysWin )
+        while (pSysWin)
         {
-            ( pSysWin->GetOutDev()->*pHdl )( bNewFontLists );
+            (pSysWin->GetOutDev()->*pHdl)(bNewFontLists);
             pSysWin = pSysWin->mpWindowImpl->mpNextOverlap;
         }
 
@@ -344,17 +377,17 @@ void OutputDevice::ImplUpdateFontDataForAllFrames( const FontUpdateHandler_t pHd
 
     // update all virtual devices
     VirtualDevice* pVirDev = pSVData->maGDIData.mpFirstVirDev;
-    while ( pVirDev )
+    while (pVirDev)
     {
-        ( pVirDev->*pHdl )( bNewFontLists );
+        (pVirDev->*pHdl)(bNewFontLists);
         pVirDev = pVirDev->mpNext;
     }
 
     // update all printers
     Printer* pPrinter = pSVData->maGDIData.mpFirstPrinter;
-    while ( pPrinter )
+    while (pPrinter)
     {
-        ( pPrinter->*pHdl )( bNewFontLists );
+        (pPrinter->*pHdl)(bNewFontLists);
         pPrinter = pPrinter->mpNext;
     }
 }
@@ -368,38 +401,37 @@ void OutputDevice::BeginFontSubstitution()
 void OutputDevice::EndFontSubstitution()
 {
     ImplSVData* pSVData = ImplGetSVData();
-    if ( pSVData->maGDIData.mbFontSubChanged )
+    if (pSVData->maGDIData.mbFontSubChanged)
     {
-        ImplUpdateAllFontData( false );
+        ImplUpdateAllFontData(false);
 
-        DataChangedEvent aDCEvt( DataChangedEventType::FONTSUBSTITUTION );
+        DataChangedEvent aDCEvt(DataChangedEventType::FONTSUBSTITUTION);
         Application::ImplCallEventListenersApplicationDataChanged(&aDCEvt);
-        Application::NotifyAllWindows( aDCEvt );
+        Application::NotifyAllWindows(aDCEvt);
         pSVData->maGDIData.mbFontSubChanged = false;
     }
 }
 
-void OutputDevice::AddFontSubstitute( const OUString& rFontName,
-                                      const OUString& rReplaceFontName,
-                                      AddFontSubstituteFlags nFlags )
+void OutputDevice::AddFontSubstitute(const OUString& rFontName, const OUString& rReplaceFontName,
+                                     AddFontSubstituteFlags nFlags)
 {
     vcl::font::DirectFontSubstitution*& rpSubst = ImplGetSVData()->maGDIData.mpDirectFontSubst;
-    if( !rpSubst )
+    if (!rpSubst)
         rpSubst = new vcl::font::DirectFontSubstitution;
-    rpSubst->AddFontSubstitute( rFontName, rReplaceFontName, nFlags );
+    rpSubst->AddFontSubstitute(rFontName, rReplaceFontName, nFlags);
     ImplGetSVData()->maGDIData.mbFontSubChanged = true;
 }
 
 void OutputDevice::RemoveFontsSubstitute()
 {
     vcl::font::DirectFontSubstitution* pSubst = ImplGetSVData()->maGDIData.mpDirectFontSubst;
-    if( pSubst )
+    if (pSubst)
         pSubst->RemoveFontsSubstitute();
 }
 
 //hidpi TODO: This routine has hard-coded font-sizes that break places such as DialControl
-vcl::Font OutputDevice::GetDefaultFont( DefaultFontType nType, LanguageType eLang,
-                                        GetDefaultFontFlags nFlags, const OutputDevice* pOutDev )
+vcl::Font OutputDevice::GetDefaultFont(DefaultFontType nType, LanguageType eLang,
+                                       GetDefaultFontFlags nFlags, const OutputDevice* pOutDev)
 {
     static bool bFuzzing = comphelper::IsFuzzing();
     static bool bAbortOnFontSubstitute = [] {
@@ -414,17 +446,17 @@ vcl::Font OutputDevice::GetDefaultFont( DefaultFontType nType, LanguageType eLan
     if (!bFuzzing)
     {
         LanguageTag aLanguageTag(
-                ( eLang == LANGUAGE_NONE || eLang == LANGUAGE_SYSTEM || eLang == LANGUAGE_DONTKNOW ) ?
-                Application::GetSettings().GetUILanguageTag() :
-                LanguageTag( eLang ));
+            (eLang == LANGUAGE_NONE || eLang == LANGUAGE_SYSTEM || eLang == LANGUAGE_DONTKNOW)
+                ? Application::GetSettings().GetUILanguageTag()
+                : LanguageTag(eLang));
 
         utl::DefaultFontConfiguration& rDefaults = utl::DefaultFontConfiguration::get();
-        OUString aDefault = rDefaults.getDefaultFont( aLanguageTag, nType );
+        OUString aDefault = rDefaults.getDefaultFont(aLanguageTag, nType);
 
-        if( !aDefault.isEmpty() )
+        if (!aDefault.isEmpty())
             aSearch = aDefault;
         else
-            aSearch = rDefaults.getUserInterfaceFont( aLanguageTag ); // use the UI font as a fallback
+            aSearch = rDefaults.getUserInterfaceFont(aLanguageTag); // use the UI font as a fallback
 
         // during cppunit tests with SAL_NON_APPLICATION_FONT_USE set we don't have any bundled fonts
         // that support the default CTL and CJK languages of Hindi and Chinese, so just pick something
@@ -440,9 +472,9 @@ vcl::Font OutputDevice::GetDefaultFont( DefaultFontType nType, LanguageType eLan
         aSearch = "Liberation Serif";
 
     vcl::Font aFont;
-    aFont.SetPitch( PITCH_VARIABLE );
+    aFont.SetPitch(PITCH_VARIABLE);
 
-    switch ( nType )
+    switch (nType)
     {
         case DefaultFontType::SANS_UNICODE:
         case DefaultFontType::UI_SANS:
@@ -450,24 +482,24 @@ vcl::Font OutputDevice::GetDefaultFont( DefaultFontType nType, LanguageType eLan
         case DefaultFontType::LATIN_HEADING:
         case DefaultFontType::LATIN_SPREADSHEET:
         case DefaultFontType::LATIN_DISPLAY:
-            aFont.SetFamily( FAMILY_SWISS );
+            aFont.SetFamily(FAMILY_SWISS);
             break;
 
         case DefaultFontType::SERIF:
         case DefaultFontType::LATIN_TEXT:
         case DefaultFontType::LATIN_PRESENTATION:
-            aFont.SetFamily( FAMILY_ROMAN );
+            aFont.SetFamily(FAMILY_ROMAN);
             break;
 
         case DefaultFontType::FIXED:
         case DefaultFontType::LATIN_FIXED:
         case DefaultFontType::UI_FIXED:
-            aFont.SetPitch( PITCH_FIXED );
-            aFont.SetFamily( FAMILY_MODERN );
+            aFont.SetPitch(PITCH_FIXED);
+            aFont.SetFamily(FAMILY_MODERN);
             break;
 
         case DefaultFontType::SYMBOL:
-            aFont.SetCharSet( RTL_TEXTENCODING_SYMBOL );
+            aFont.SetCharSet(RTL_TEXTENCODING_SYMBOL);
             break;
 
         case DefaultFontType::CJK_TEXT:
@@ -480,75 +512,80 @@ vcl::Font OutputDevice::GetDefaultFont( DefaultFontType nType, LanguageType eLan
         case DefaultFontType::CTL_SPREADSHEET:
         case DefaultFontType::CTL_HEADING:
         case DefaultFontType::CTL_DISPLAY:
-            aFont.SetFamily( FAMILY_SYSTEM ); // don't care, but don't use font subst config later...
+            aFont.SetFamily(FAMILY_SYSTEM); // don't care, but don't use font subst config later...
             break;
     }
 
-    if ( !aSearch.isEmpty() )
+    if (!aSearch.isEmpty())
     {
-        aFont.SetFontHeight( 12 ); // corresponds to nDefaultHeight
-        aFont.SetWeight( WEIGHT_NORMAL );
-        aFont.SetLanguage( eLang );
+        aFont.SetFontHeight(12); // corresponds to nDefaultHeight
+        aFont.SetWeight(WEIGHT_NORMAL);
+        aFont.SetLanguage(eLang);
 
-        if ( aFont.GetCharSet() == RTL_TEXTENCODING_DONTKNOW )
-            aFont.SetCharSet( osl_getThreadTextEncoding() );
+        if (aFont.GetCharSet() == RTL_TEXTENCODING_DONTKNOW)
+            aFont.SetCharSet(osl_getThreadTextEncoding());
 
         // Should we only return available fonts on the given device
-        if ( pOutDev )
+        if (pOutDev)
         {
             pOutDev->ImplInitFontList();
 
             // Search Font in the FontList
-            OUString      aName;
-            sal_Int32     nIndex = 0;
+            OUString aName;
+            sal_Int32 nIndex = 0;
             do
             {
-                vcl::font::PhysicalFontFamily* pFontFamily = pOutDev->mxFontCollection->FindFontFamily( GetNextFontToken( aSearch, nIndex ) );
-                if( pFontFamily )
+                vcl::font::PhysicalFontFamily* pFontFamily
+                    = pOutDev->GetSharedFontCollection()->FindFontFamily(
+                        GetNextFontToken(aSearch, nIndex));
+                if (pFontFamily)
                 {
-                    AddTokenFontName( aName, pFontFamily->GetFamilyName() );
-                    if( nFlags & GetDefaultFontFlags::OnlyOne )
+                    AddTokenFontName(aName, pFontFamily->GetFamilyName());
+                    if (nFlags & GetDefaultFontFlags::OnlyOne)
                         break;
                 }
-            }
-            while ( nIndex != -1 );
-            aFont.SetFamilyName( aName );
+            } while (nIndex != -1);
+            aFont.SetFamilyName(aName);
         }
 
         // No Name, then set all names
-        if ( aFont.GetFamilyName().isEmpty() )
+        if (aFont.GetFamilyName().isEmpty())
         {
-            if ( nFlags & GetDefaultFontFlags::OnlyOne )
+            if (nFlags & GetDefaultFontFlags::OnlyOne)
             {
-                if( !pOutDev )
+                if (!pOutDev)
                 {
-                    SAL_WARN_IF(!comphelper::IsFuzzing(), "vcl.gdi", "No default window has been set for the application - we really shouldn't be able to get here");
-                    aFont.SetFamilyName( aSearch.getToken( 0, ';' ) );
+                    SAL_WARN_IF(!comphelper::IsFuzzing(), "vcl.gdi",
+                                "No default window has been set for the application - we really "
+                                "shouldn't be able to get here");
+                    aFont.SetFamilyName(aSearch.getToken(0, ';'));
                 }
                 else
                 {
                     pOutDev->ImplInitFontList();
 
-                    aFont.SetFamilyName( aSearch );
+                    aFont.SetFamilyName(aSearch);
 
                     // convert to pixel height
-                    Size aSize = pOutDev->LogicToDevicePixel( aFont.GetFontSize() );
-                    if ( !aSize.Height() )
+                    Size aSize = pOutDev->LogicToDevicePixel(aFont.GetFontSize());
+                    if (!aSize.Height())
                     {
                         // use default pixel height only when logical height is zero
-                        if ( aFont.GetFontHeight() )
-                            aSize.setHeight( 1 );
+                        if (aFont.GetFontHeight())
+                            aSize.setHeight(1);
                         else
-                            aSize.setHeight( (12*pOutDev->GetDPIY())/72 );
+                            aSize.setHeight((12 * pOutDev->GetDPIY()) / 72);
                     }
 
                     // use default width only when logical width is zero
-                    if( (0 == aSize.Width()) && (0 != aFont.GetFontSize().Width()) )
-                        aSize.setWidth( 1 );
+                    if ((0 == aSize.Width()) && (0 != aFont.GetFontSize().Width()))
+                        aSize.setWidth(1);
 
                     // get the name of the first available font
                     float fExactHeight = static_cast<float>(aSize.Height());
-                    rtl::Reference<LogicalFontInstance> pFontInstance = pOutDev->mpFontController->RealizeFont( pOutDev->mxFontCollection.get(), aFont, aSize, fExactHeight );
+                    rtl::Reference<LogicalFontInstance> pFontInstance
+                        = pOutDev->mpFontController->RealizeFont(pOutDev->GetFontCollection(),
+                                                                 aFont, aSize, fExactHeight);
                     if (pFontInstance)
                     {
                         assert(pFontInstance->GetFontFace());
@@ -557,79 +594,123 @@ vcl::Font OutputDevice::GetDefaultFont( DefaultFontType nType, LanguageType eLan
                 }
             }
             else
-                aFont.SetFamilyName( aSearch );
+                aFont.SetFamilyName(aSearch);
         }
     }
 
 #if OSL_DEBUG_LEVEL > 2
     const char* s = "SANS_UNKNOWN";
-    switch ( nType )
+    switch (nType)
     {
-    case DefaultFontType::SANS_UNICODE: s = "SANS_UNICODE"; break;
-    case DefaultFontType::UI_SANS: s = "UI_SANS"; break;
+        case DefaultFontType::SANS_UNICODE:
+            s = "SANS_UNICODE";
+            break;
+        case DefaultFontType::UI_SANS:
+            s = "UI_SANS";
+            break;
 
-    case DefaultFontType::SANS: s = "SANS"; break;
-    case DefaultFontType::LATIN_HEADING: s = "LATIN_HEADING"; break;
-    case DefaultFontType::LATIN_SPREADSHEET: s = "LATIN_SPREADSHEET"; break;
-    case DefaultFontType::LATIN_DISPLAY: s = "LATIN_DISPLAY"; break;
+        case DefaultFontType::SANS:
+            s = "SANS";
+            break;
+        case DefaultFontType::LATIN_HEADING:
+            s = "LATIN_HEADING";
+            break;
+        case DefaultFontType::LATIN_SPREADSHEET:
+            s = "LATIN_SPREADSHEET";
+            break;
+        case DefaultFontType::LATIN_DISPLAY:
+            s = "LATIN_DISPLAY";
+            break;
 
-    case DefaultFontType::SERIF: s = "SERIF"; break;
-    case DefaultFontType::LATIN_TEXT: s = "LATIN_TEXT"; break;
-    case DefaultFontType::LATIN_PRESENTATION: s = "LATIN_PRESENTATION"; break;
+        case DefaultFontType::SERIF:
+            s = "SERIF";
+            break;
+        case DefaultFontType::LATIN_TEXT:
+            s = "LATIN_TEXT";
+            break;
+        case DefaultFontType::LATIN_PRESENTATION:
+            s = "LATIN_PRESENTATION";
+            break;
 
-    case DefaultFontType::FIXED: s = "FIXED"; break;
-    case DefaultFontType::LATIN_FIXED: s = "LATIN_FIXED"; break;
-    case DefaultFontType::UI_FIXED: s = "UI_FIXED"; break;
+        case DefaultFontType::FIXED:
+            s = "FIXED";
+            break;
+        case DefaultFontType::LATIN_FIXED:
+            s = "LATIN_FIXED";
+            break;
+        case DefaultFontType::UI_FIXED:
+            s = "UI_FIXED";
+            break;
 
-    case DefaultFontType::SYMBOL: s = "SYMBOL"; break;
+        case DefaultFontType::SYMBOL:
+            s = "SYMBOL";
+            break;
 
-    case DefaultFontType::CJK_TEXT: s = "CJK_TEXT"; break;
-    case DefaultFontType::CJK_PRESENTATION: s = "CJK_PRESENTATION"; break;
-    case DefaultFontType::CJK_SPREADSHEET: s = "CJK_SPREADSHEET"; break;
-    case DefaultFontType::CJK_HEADING: s = "CJK_HEADING"; break;
-    case DefaultFontType::CJK_DISPLAY: s = "CJK_DISPLAY"; break;
+        case DefaultFontType::CJK_TEXT:
+            s = "CJK_TEXT";
+            break;
+        case DefaultFontType::CJK_PRESENTATION:
+            s = "CJK_PRESENTATION";
+            break;
+        case DefaultFontType::CJK_SPREADSHEET:
+            s = "CJK_SPREADSHEET";
+            break;
+        case DefaultFontType::CJK_HEADING:
+            s = "CJK_HEADING";
+            break;
+        case DefaultFontType::CJK_DISPLAY:
+            s = "CJK_DISPLAY";
+            break;
 
-    case DefaultFontType::CTL_TEXT: s = "CTL_TEXT"; break;
-    case DefaultFontType::CTL_PRESENTATION: s = "CTL_PRESENTATION"; break;
-    case DefaultFontType::CTL_SPREADSHEET: s = "CTL_SPREADSHEET"; break;
-    case DefaultFontType::CTL_HEADING: s = "CTL_HEADING"; break;
-    case DefaultFontType::CTL_DISPLAY: s = "CTL_DISPLAY"; break;
+        case DefaultFontType::CTL_TEXT:
+            s = "CTL_TEXT";
+            break;
+        case DefaultFontType::CTL_PRESENTATION:
+            s = "CTL_PRESENTATION";
+            break;
+        case DefaultFontType::CTL_SPREADSHEET:
+            s = "CTL_SPREADSHEET";
+            break;
+        case DefaultFontType::CTL_HEADING:
+            s = "CTL_HEADING";
+            break;
+        case DefaultFontType::CTL_DISPLAY:
+            s = "CTL_DISPLAY";
+            break;
     }
-    SAL_INFO("vcl.gdi",
-             "OutputDevice::GetDefaultFont() Type=" << s
-             << " lang=" << eLang
-             << " flags=" << static_cast<int>(nFlags)
-             << " family=\"" << aFont.GetFamilyName() << "\"");
+    SAL_INFO("vcl.gdi", "OutputDevice::GetDefaultFont() Type="
+                            << s << " lang=" << eLang << " flags=" << static_cast<int>(nFlags)
+                            << " family=\"" << aFont.GetFamilyName() << "\"");
 #endif
 
     return aFont;
 }
 
-
 void OutputDevice::ImplInitFontList() const
 {
     if (mpFontController)
     {
-        if (!mpFontController->mxFontCollection)
-            mpFontController->mxFontCollection = mxFontCollection;
+        if (!mpFontController->GetSharedFontCollection())
+            mpFontController->SetFontCollection(GetSharedFontCollection());
 
         mpFontController->InitializeFonts(mpGraphics);
     }
 
-    if( mxFontCollection->Count() )
+    if (GetSharedFontCollection()->Count())
         return;
 
-    if( !(mpGraphics || AcquireGraphics()) )
+    if (!(mpGraphics || AcquireGraphics()))
         return;
 
     assert(mpGraphics);
 
-    SAL_INFO( "vcl.gdi", "OutputDevice::ImplInitFontList()" );
+    SAL_INFO("vcl.gdi", "OutputDevice::ImplInitFontList()");
 
     // Abort if no fonts are found; VCL cannot function without a system font
-    if( !mxFontCollection->Count() )
+    if (!GetSharedFontCollection()->Count())
     {
-        OUString aError( u"Application error: no fonts and no vcl resource found on your system"_ustr );
+        OUString aError(
+            u"Application error: no fonts and no vcl resource found on your system"_ustr);
         OUString aResStr(VclResId(SV_ACCESSERROR_NO_FONTS));
         if (!aResStr.isEmpty())
             aError = aResStr;
@@ -683,20 +764,16 @@ const LogicalFontInstance* OutputDevice::GetFontInstance() const
     return mpFontInstance.get();
 }
 
-
-
-
 bool OutputDevice::ImplNewFont() const
 {
     DBG_TESTSOLARMUTEX();
 
-    // [Step 2] Instrumentation: Entry
     SAL_INFO("vcl.gdi", "ImplNewFont: Start. Dirty=" << mbFontDirty << " New=" << mbNewFont);
 
-    if ( !mbNewFont )
+    if (!mbNewFont)
         return true;
 
-    if ( !mpGraphics && !AcquireGraphics() )
+    if (!mpGraphics && !AcquireGraphics())
     {
         SAL_WARN("vcl.gdi", "OutputDevice::ImplNewFont(): no Graphics, no Font");
         return false;
@@ -705,45 +782,48 @@ bool OutputDevice::ImplNewFont() const
 
     ImplInitFontList();
 
-    // [Step 2] Instrumentation: Capture Request State
     Size aReqSize = mpGraphicsState->maFont.GetFontSize();
-    SAL_INFO("vcl.gdi", "ImplNewFont: Requesting Family='" << mpGraphicsState->maFont.GetFamilyName()
-             << "' Size=" << aReqSize.Width() << "x" << aReqSize.Height()
-             << " MapMode=" << mpMapper->IsMapModeEnabled()
-             << " DPI=" << GetDPIY());
+    SAL_INFO("vcl.gdi", "ImplNewFont: Requesting Family='"
+                            << mpGraphicsState->maFont.GetFamilyName()
+                            << "' Size=" << aReqSize.Width() << "x" << aReqSize.Height()
+                            << " MapMode=" << mpMapper->IsMapModeEnabled() << " DPI=" << GetDPIY());
 
-    auto [fExactHeight, aSize] =
-        mpFontController->CalculateDeviceSize(mpGraphicsState->maFont, *mpMapper, GetDPIY());
+    auto[fExactHeight, aSize]
+        = mpFontController->CalculateDeviceSize(mpGraphicsState->maFont, *mpMapper, GetDPIY());
 
-    // [Step 2] Instrumentation: Calculation Result
-    SAL_INFO("vcl.gdi", "ImplNewFont: Calculated Pixel Size=" << aSize.Width() << "x" << aSize.Height() << " ExactHeight=" << fExactHeight);
+    SAL_INFO("vcl.gdi", "ImplNewFont: Calculated Pixel Size=" << aSize.Width() << "x"
+                                                              << aSize.Height()
+                                                              << " ExactHeight=" << fExactHeight);
 
-    const bool bNonAntialiased = mpFontController->ShouldDisableAntialiasing(GetAntialiasing(), GetSettings().GetStyleSettings(),
-                                                                             mpGraphicsState->maFont.GetFontSize().Height());
+    const bool bNonAntialiased = mpFontController->ShouldDisableAntialiasing(
+        GetAntialiasing(), GetSettings().GetStyleSettings(),
+        mpGraphicsState->maFont.GetFontSize().Height());
 
-    mpFontController->RealizeFont(mxFontCollection.get(), mpGraphicsState->maFont, aSize, fExactHeight, bNonAntialiased);
+    mpFontController->RealizeFont(GetFontCollection(), mpGraphicsState->maFont, aSize, fExactHeight,
+                                  bNonAntialiased);
 
-    // get font entry
     rtl::Reference<LogicalFontInstance> pOldFontInstance = mpFontInstance;
-    mpFontInstance = mpFontController->RealizeFont(mxFontCollection.get(), mpGraphicsState->maFont, aSize, fExactHeight, bNonAntialiased);
+    mpFontInstance = mpFontController->RealizeFont(GetFontCollection(), mpGraphicsState->maFont,
+                                                   aSize, fExactHeight, bNonAntialiased);
 
-    // [Step 2] Instrumentation: Lookup Result
-    if (!mpFontInstance) {
+    if (!mpFontInstance)
+    {
         SAL_WARN("vcl.gdi", "ImplNewFont: !!! NO FONT INSTANCE FOUND for request !!!");
-    } else {
-        // Safe accessor for logging
+    }
+    else
+    {
         OUString sName = "Unknown";
+
         if (mpFontInstance->GetFontFace())
             sName = mpFontInstance->GetFontFace()->GetFamilyName();
+
         SAL_INFO("vcl.gdi", "ImplNewFont: Success. Selected physical font: " << sName);
     }
 
-    // [Step 8] EARLY SYNC: Critical for InitFont()
     // We must update the struct *before* calling InitFont, because InitFont
     // now prefers reading from mpFontRealization.
     if (mpFontRealization)
         mpFontRealization->mxFont = mpFontInstance;
-
 
     const bool bNewFontInstance = pOldFontInstance.get() != mpFontInstance.get();
     pOldFontInstance.clear();
@@ -767,7 +847,7 @@ bool OutputDevice::ImplNewFont() const
 
     // mark when lower layers need to get involved
     mbNewFont = false;
-    if( bNewFontInstance )
+    if (bNewFontInstance)
         mbFontDirty = true;
 
     if (!pFontInstance->mbInit && InitFont())
@@ -778,14 +858,16 @@ bool OutputDevice::ImplNewFont() const
         SetFontOrientation(mpFontInstance.get());
     }
 
-    std::tie(mpFontRealization->nXOffset, mpFontRealization->nYOffset, mpFontRealization->nEmphasisAscent, mpFontRealization->nEmphasisDescent) =
-        mpFontController->CalculateTextOffsets(mpGraphicsState->maFont, mpFontInstance.get());
+    std::tie(mpFontRealization->nXOffset, mpFontRealization->nYOffset,
+             mpFontRealization->nEmphasisAscent, mpFontRealization->nEmphasisDescent)
+        = mpFontController->CalculateTextOffsets(mpGraphicsState->maFont, mpFontInstance.get());
 
+    // Use local temporary variables to bypass the bit-field reference restriction
     bool bTextLines = false;
     bool bTextSpecial = false;
 
-    std::tie(bTextLines, bTextSpecial) = mpFontController->GetTextLayoutFlags(mpGraphicsState->maFont);
-
+    std::tie(bTextLines, bTextSpecial)
+        = mpFontController->GetTextLayoutFlags(mpGraphicsState->maFont);
 
     bool bRet = true;
 
@@ -793,19 +875,16 @@ bool OutputDevice::ImplNewFont() const
     if (mpMapper->IsMapModeEnabled() && !aSize.Width())
     {
         SAL_INFO("vcl.gdi", "ImplNewFont: Triggering OLE Font Scale Fix");
-        bRet = AttemptOLEFontScaleFix(const_cast<vcl::Font&>(mpGraphicsState->maFont), aSize.Height());
+        bRet = AttemptOLEFontScaleFix(const_cast<vcl::Font&>(mpGraphicsState->maFont),
+                                      aSize.Height());
     }
 
     if (mpFontRealization)
     {
         mpFontRealization->mxFont = mpFontInstance;
-        mpFontRealization->nEmphasisAscent =  0 ;
-        mpFontRealization->nEmphasisDescent =  0 ;
         mpFontRealization->bHasLineDecorations = bTextLines;
         mpFontRealization->bHasSpecialEffects = bTextSpecial;
         mpFontRealization->eLayoutMode = mpGraphicsState->mnTextLayoutMode;
-
-        SAL_INFO("vcl.gdi", "ImplNewFont: Shadow Sync complete. Struct Populated.");
     }
 
     return bRet;
@@ -813,24 +892,19 @@ bool OutputDevice::ImplNewFont() const
 
 void OutputDevice::ImplInitFontMetrics(LogicalFontInstance* pFontInstance) const
 {
-    // Initialize line sizes and internal flags using this device's context
     pFontInstance->mxFontMetric->ImplInitTextLineSize(this);
     pFontInstance->mxFontMetric->ImplInitAboveTextLineSize(this);
     pFontInstance->mxFontMetric->ImplInitFlags(this);
 
-    // Cache the combined line height
-    pFontInstance->mnLineHeight = pFontInstance->mxFontMetric->GetAscent() +
-                                  pFontInstance->mxFontMetric->GetDescent();
+    pFontInstance->mnLineHeight
+        = pFontInstance->mxFontMetric->GetAscent() + pFontInstance->mxFontMetric->GetDescent();
 }
 
 bool OutputDevice::AttemptOLEFontScaleFix(vcl::Font& rFont, tools::Long nHeight) const
 {
-    // Delegate the complex math to the controller
     int nNewWidth = mpFontController->CalculateOLEStorageWidth(
-        mpFontInstance.get(),
-        mpMapper->GetMappingXNumerator(), mpMapper->GetMappingXDenominator(),
-        mpMapper->GetMappingYNumerator(), mpMapper->GetMappingYDenominator()
-    );
+        mpFontInstance.get(), mpMapper->GetMappingXNumerator(), mpMapper->GetMappingXDenominator(),
+        mpMapper->GetMappingYNumerator(), mpMapper->GetMappingYDenominator());
 
     if (nNewWidth == 0)
         return true;
@@ -841,7 +915,7 @@ bool OutputDevice::AttemptOLEFontScaleFix(vcl::Font& rFont, tools::Long nHeight)
     mpMapper->EnableMapMode(false);
     mbNewFont = true;
 
-    const bool bRet = ImplNewFont();  // recurse once using stretched width
+    const bool bRet = ImplNewFont(); // recurse once using stretched width
 
     mpMapper->EnableMapMode();
     rFont.SetFontSize(aOrigSize);
@@ -849,9 +923,10 @@ bool OutputDevice::AttemptOLEFontScaleFix(vcl::Font& rFont, tools::Long nHeight)
     return bRet;
 }
 
-void OutputDevice::SetFontOrientation( LogicalFontInstance* const pFontInstance ) const
+void OutputDevice::SetFontOrientation(LogicalFontInstance* const pFontInstance) const
 {
-    if( pFontInstance->GetFontSelectPattern().mnOrientation && !pFontInstance->mxFontMetric->GetOrientation() )
+    if (pFontInstance->GetFontSelectPattern().mnOrientation
+        && !pFontInstance->mxFontMetric->GetOrientation())
     {
         pFontInstance->mnOwnOrientation = pFontInstance->GetFontSelectPattern().mnOrientation;
         pFontInstance->mnOrientation = pFontInstance->mnOwnOrientation;
@@ -862,62 +937,63 @@ void OutputDevice::SetFontOrientation( LogicalFontInstance* const pFontInstance 
     }
 }
 
-void OutputDevice::ImplDrawEmphasisMark( tools::Long nBaseX, tools::Long nX, tools::Long nY,
-                                         const tools::PolyPolygon& rPolyPoly, bool bPolyLine,
-                                         const tools::Rectangle& rRect1, const tools::Rectangle& rRect2 )
+void OutputDevice::ImplDrawEmphasisMark(tools::Long nBaseX, tools::Long nX, tools::Long nY,
+                                        const tools::PolyPolygon& rPolyPoly, bool bPolyLine,
+                                        const tools::Rectangle& rRect1,
+                                        const tools::Rectangle& rRect2)
 {
-    if( IsRTLEnabled() )
+    if (IsRTLEnabled())
         nX = nBaseX - (nX - nBaseX - 1);
 
     nX -= GetOutOffXPixel();
     nY -= GetOutOffYPixel();
 
-    if ( rPolyPoly.Count() )
+    if (rPolyPoly.Count())
     {
-        if ( bPolyLine )
+        if (bPolyLine)
         {
-            tools::Polygon aPoly = rPolyPoly.GetObject( 0 );
-            aPoly.Move( nX, nY );
-            DrawPolyLine( aPoly );
+            tools::Polygon aPoly = rPolyPoly.GetObject(0);
+            aPoly.Move(nX, nY);
+            DrawPolyLine(aPoly);
         }
         else
         {
             tools::PolyPolygon aPolyPoly = rPolyPoly;
-            aPolyPoly.Move( nX, nY );
-            DrawPolyPolygon( aPolyPoly );
+            aPolyPoly.Move(nX, nY);
+            DrawPolyPolygon(aPolyPoly);
         }
     }
 
-    if ( !rRect1.IsEmpty() )
+    if (!rRect1.IsEmpty())
     {
-        tools::Rectangle aRect( Point( nX+rRect1.Left(),
-                                nY+rRect1.Top() ), rRect1.GetSize() );
-        DrawRect( aRect );
+        tools::Rectangle aRect(Point(nX + rRect1.Left(), nY + rRect1.Top()), rRect1.GetSize());
+        DrawRect(aRect);
     }
 
-    if ( !rRect2.IsEmpty() )
+    if (!rRect2.IsEmpty())
     {
-        tools::Rectangle aRect( Point( nX+rRect2.Left(),
-                                nY+rRect2.Top() ), rRect2.GetSize() );
+        tools::Rectangle aRect(Point(nX + rRect2.Left(), nY + rRect2.Top()), rRect2.GetSize());
 
-        DrawRect( aRect );
+        DrawRect(aRect);
     }
 }
 
-void OutputDevice::ImplDrawEmphasisMarks( SalLayout& rSalLayout )
+void OutputDevice::ImplDrawEmphasisMarks(SalLayout& rSalLayout)
 {
     vcl::font::FontRealization const* pRealization = mpFontRealization.get();
-    if (!pRealization || !pRealization->mxFont) return;
+    if (!pRealization || !pRealization->mxFont)
+        return;
 
-    auto popIt = ScopedPush(vcl::PushFlags::FILLCOLOR | vcl::PushFlags::LINECOLOR | vcl::PushFlags::MAPMODE);
-    GDIMetaFile*        pOldMetaFile    = mpMetaFile;
+    auto popIt = ScopedPush(vcl::PushFlags::FILLCOLOR | vcl::PushFlags::LINECOLOR
+                            | vcl::PushFlags::MAPMODE);
+    GDIMetaFile* pOldMetaFile = mpMetaFile;
     mpMetaFile = nullptr;
-    mpMapper->EnableMapMode( false );
+    mpMapper->EnableMapMode(false);
 
     FontEmphasisMark nEmphasisMark = mpGraphicsState->maFont.GetEmphasisMarkStyle();
     tools::Long nEmphasisHeight;
 
-    if ( nEmphasisMark & FontEmphasisMark::PosBelow )
+    if (nEmphasisMark & FontEmphasisMark::PosBelow)
         nEmphasisHeight = pRealization->nEmphasisDescent;
     else
         nEmphasisHeight = pRealization->nEmphasisAscent;
@@ -926,34 +1002,37 @@ void OutputDevice::ImplDrawEmphasisMarks( SalLayout& rSalLayout )
 
     if (aEmphasisMark.IsShapePolyLine())
     {
-        SetLineColor( GetTextColor() );
+        SetLineColor(GetTextColor());
         SetFillColor();
     }
     else
     {
         SetLineColor();
-        SetFillColor( GetTextColor() );
+        SetFillColor(GetTextColor());
     }
 
-    Point aOffset(0,0);
-    Point aOffsetVert(0,0);
+    Point aOffset(0, 0);
+    Point aOffsetVert(0, 0);
 
-    if ( nEmphasisMark & FontEmphasisMark::PosBelow )
+    if (nEmphasisMark & FontEmphasisMark::PosBelow)
     {
-        aOffset.AdjustY(pRealization->mxFont->mxFontMetric->GetDescent() + aEmphasisMark.GetYOffset());
+        aOffset.AdjustY(pRealization->mxFont->mxFontMetric->GetDescent()
+                        + aEmphasisMark.GetYOffset());
         aOffsetVert = aOffset;
     }
     else
     {
-        aOffset.AdjustY(-(pRealization->mxFont->mxFontMetric->GetAscent() + aEmphasisMark.GetYOffset()));
+        aOffset.AdjustY(
+            -(pRealization->mxFont->mxFontMetric->GetAscent() + aEmphasisMark.GetYOffset()));
         // Todo: use ideographic em-box or ideographic character face information.
-        aOffsetVert.AdjustY(-(pRealization->mxFont->mxFontMetric->GetAscent() +
-                    pRealization->mxFont->mxFontMetric->GetDescent() + aEmphasisMark.GetYOffset()));
+        aOffsetVert.AdjustY(-(pRealization->mxFont->mxFontMetric->GetAscent()
+                              + pRealization->mxFont->mxFontMetric->GetDescent()
+                              + aEmphasisMark.GetYOffset()));
     }
 
-    tools::Long nEmphasisWidth2  = aEmphasisMark.GetWidth() / 2;
+    tools::Long nEmphasisWidth2 = aEmphasisMark.GetWidth() / 2;
     tools::Long nEmphasisHeight2 = nEmphasisHeight / 2;
-    aOffset += Point( nEmphasisWidth2, nEmphasisHeight2 );
+    aOffset += Point(nEmphasisWidth2, nEmphasisHeight2);
 
     basegfx::B2DPoint aOutPoint;
     basegfx::B2DRectangle aRectangle;
@@ -976,36 +1055,36 @@ void OutputDevice::ImplDrawEmphasisMarks( SalLayout& rSalLayout )
             else
             {
                 aAdjPoint = aOffset;
-                aAdjPoint.AdjustX(aRectangle.getMinX() + (aRectangle.getWidth() - aEmphasisMark.GetWidth()) / 2 );
+                aAdjPoint.AdjustX(aRectangle.getMinX()
+                                  + (aRectangle.getWidth() - aEmphasisMark.GetWidth()) / 2);
             }
 
-            if ( pRealization->mxFont->mnOrientation )
+            if (pRealization->mxFont->mnOrientation)
             {
                 Point aOriginPt(0, 0);
-                aOriginPt.RotateAround( aAdjPoint, pRealization->mxFont->mnOrientation );
+                aOriginPt.RotateAround(aAdjPoint, pRealization->mxFont->mnOrientation);
             }
             aOutPoint.adjustX(aAdjPoint.X() - nEmphasisWidth2);
             aOutPoint.adjustY(aAdjPoint.Y() - nEmphasisHeight2);
-            ImplDrawEmphasisMark( rSalLayout.DrawBase().getX(),
-                                  aOutPoint.getX(), aOutPoint.getY(),
-                                  aEmphasisMark.GetShape(), aEmphasisMark.IsShapePolyLine(),
-                                  aEmphasisMark.GetRect1(), aEmphasisMark.GetRect2() );
+            ImplDrawEmphasisMark(rSalLayout.DrawBase().getX(), aOutPoint.getX(), aOutPoint.getY(),
+                                 aEmphasisMark.GetShape(), aEmphasisMark.IsShapePolyLine(),
+                                 aEmphasisMark.GetRect1(), aEmphasisMark.GetRect2());
         }
     }
 
     mpMetaFile = pOldMetaFile;
 }
 
-std::unique_ptr<SalLayout> OutputDevice::getFallbackLayout(
-    LogicalFontInstance* pLogicalFont, int nFallbackLevel,
-    vcl::text::ImplLayoutArgs& rLayoutArgs, const SalLayoutGlyphs* pGlyphs) const
+std::unique_ptr<SalLayout> OutputDevice::getFallbackLayout(LogicalFontInstance* pLogicalFont,
+                                                           int nFallbackLevel,
+                                                           vcl::text::ImplLayoutArgs& rLayoutArgs,
+                                                           const SalLayoutGlyphs* pGlyphs) const
 {
-    // we need a graphics
     if (!mpGraphics && !AcquireGraphics())
         return nullptr;
 
     assert(mpGraphics != nullptr);
-    mpGraphics->SetFont( pLogicalFont, nFallbackLevel );
+    mpGraphics->SetFont(pLogicalFont, nFallbackLevel);
 
     rLayoutArgs.ResetPos();
     std::unique_ptr<GenericSalLayout> pFallback = mpGraphics->GetTextLayout(nFallbackLevel);
@@ -1040,15 +1119,17 @@ bool OutputDevice::ForceFallbackFont(vcl::Font const& rFallbackFont)
     return false;
 }
 
-std::unique_ptr<SalLayout> OutputDevice::ImplGlyphFallbackLayout( std::unique_ptr<SalLayout> pSalLayout,
-    vcl::text::ImplLayoutArgs& rLayoutArgs, const SalLayoutGlyphs* pGlyphs ) const
+std::unique_ptr<SalLayout>
+OutputDevice::ImplGlyphFallbackLayout(std::unique_ptr<SalLayout> pSalLayout,
+                                      vcl::text::ImplLayoutArgs& rLayoutArgs,
+                                      const SalLayoutGlyphs* pGlyphs) const
 {
     // This function relies on a valid mpFontInstance, if it doesn't exist bail out
     // - we'd have crashed later on anyway. At least here we can catch the error in debug
     // mode.
-    if ( !mpFontRealization || !mpFontRealization->mxFont )
+    if (!mpFontRealization || !mpFontRealization->mxFont)
     {
-        SAL_WARN ("vcl.gdi", "No font entry set in OutputDevice");
+        SAL_WARN("vcl.gdi", "No font entry set in OutputDevice");
         assert(mpFontRealization->mxFont);
         return nullptr;
     }
@@ -1074,7 +1155,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplGlyphFallbackLayout( std::unique_pt
     bool bHasUsedFallback = false;
 
     // try if fallback fonts support the missing code units
-    for( int nFallbackLevel = 1; nFallbackLevel < MAX_FALLBACK; ++nFallbackLevel )
+    for (int nFallbackLevel = 1; nFallbackLevel < MAX_FALLBACK; ++nFallbackLevel)
     {
         rtl::Reference<LogicalFontInstance> pFallbackFont;
         if (!bHasUsedFallback && mpForcedFallbackInstance)
@@ -1082,7 +1163,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplGlyphFallbackLayout( std::unique_pt
             pFallbackFont = mpForcedFallbackInstance;
             bHasUsedFallback = true;
         }
-        else if(pGlyphsImpl != nullptr)
+        else if (pGlyphsImpl != nullptr)
         {
             pFallbackFont = pGlyphsImpl->GetFont();
         }
@@ -1091,16 +1172,19 @@ std::unique_ptr<SalLayout> OutputDevice::ImplGlyphFallbackLayout( std::unique_pt
         // GetGlyphFallbackFont() needs a valid FontInstance
         // if the system-specific glyph fallback is active
         OUString oldMissingCodes = aMissingCodes;
-        if( !pFallbackFont )
-            pFallbackFont = GetFontCache().GetGlyphFallbackFont( mxFontCollection.get(),
-                aFontSelData, mpFontRealization->mxFont.get(), nFallbackLevel, aMissingCodes );
-        if( !pFallbackFont )
+        if (!pFallbackFont)
+            pFallbackFont = GetFontCache().GetGlyphFallbackFont(GetFontCollection(), aFontSelData,
+                                                                mpFontRealization->mxFont.get(),
+                                                                nFallbackLevel, aMissingCodes);
+        if (!pFallbackFont)
             break;
 
-        SAL_INFO("vcl", "Fallback font (level " << nFallbackLevel << "): family: " << pFallbackFont->GetFontFace()->GetFamilyName()
-                << ", style: " << pFallbackFont->GetFontFace()->GetStyleName());
+        SAL_INFO("vcl", "Fallback font (level "
+                            << nFallbackLevel
+                            << "): family: " << pFallbackFont->GetFontFace()->GetFamilyName()
+                            << ", style: " << pFallbackFont->GetFontFace()->GetStyleName());
 
-        if( nFallbackLevel < MAX_FALLBACK-1)
+        if (nFallbackLevel < MAX_FALLBACK - 1)
         {
             // ignore fallback font if it is the same as the original font
             // TODO: This seems broken. Either the font does not provide any of the missing
@@ -1109,9 +1193,9 @@ std::unique_ptr<SalLayout> OutputDevice::ImplGlyphFallbackLayout( std::unique_pt
             // This will just loop repeatedly finding the same font (it used to remove
             // the found font from mxFontCache, but doesn't do that anymore and I don't
             // see how doing that would remove the font from consideration for fallback).
-            if( mpFontRealization->mxFont->GetFontFace() == pFallbackFont->GetFontFace())
+            if (mpFontRealization->mxFont->GetFontFace() == pFallbackFont->GetFontFace())
             {
-                if(aMissingCodes != oldMissingCodes)
+                if (aMissingCodes != oldMissingCodes)
                 {
                     SAL_INFO("vcl.gdi", "Font fallback to the same font, but has missing codes");
                     // Restore the missing codes if we're not going to use this font.
@@ -1122,14 +1206,14 @@ std::unique_ptr<SalLayout> OutputDevice::ImplGlyphFallbackLayout( std::unique_pt
         }
 
         // create and add glyph fallback layout to multilayout
-        std::unique_ptr<SalLayout> pFallback = getFallbackLayout(pFallbackFont.get(),
-            nFallbackLevel, rLayoutArgs, pGlyphs);
+        std::unique_ptr<SalLayout> pFallback
+            = getFallbackLayout(pFallbackFont.get(), nFallbackLevel, rLayoutArgs, pGlyphs);
         if (pFallback)
         {
-            if( !pMultiSalLayout )
-                pMultiSalLayout.reset( new MultiSalLayout( std::move(pSalLayout) ) );
+            if (!pMultiSalLayout)
+                pMultiSalLayout.reset(new MultiSalLayout(std::move(pSalLayout)));
             pMultiSalLayout->AddFallback(std::move(pFallback), rLayoutArgs.maRuns);
-            if (nFallbackLevel == MAX_FALLBACK-1)
+            if (nFallbackLevel == MAX_FALLBACK - 1)
                 pMultiSalLayout->SetIncomplete(true);
         }
 
@@ -1137,7 +1221,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplGlyphFallbackLayout( std::unique_pt
             pGlyphsImpl = pGlyphs->Impl(nFallbackLevel + 1);
 
         // break when this fallback was sufficient
-        if( !rLayoutArgs.PrepareFallback(pGlyphsImpl) )
+        if (!rLayoutArgs.PrepareFallback(pGlyphsImpl))
             break;
     }
 
@@ -1174,14 +1258,12 @@ tools::Long OutputDevice::GetMinKashida() const
 }
 
 // tdf#163105: Get map of valid kashida positions for a single word
-void OutputDevice::GetWordKashidaPositions(const OUString& rText,
-                                           std::vector<bool>* pOutMap) const
+void OutputDevice::GetWordKashidaPositions(const OUString& rText, std::vector<bool>* pOutMap) const
 {
     pOutMap->clear();
 
     auto nEnd = rText.getLength();
 
-    // do layout
     std::unique_ptr<SalLayout> pSalLayout = ImplLayout(rText, 0, nEnd);
     if (!pSalLayout)
         return;
@@ -1206,58 +1288,58 @@ void OutputDevice::GetWordKashidaPositions(const OUString& rText,
     }
 }
 
-bool OutputDevice::GetGlyphBoundRects( const Point& rOrigin, const OUString& rStr,
-                                           int nIndex, int nLen, std::vector< tools::Rectangle >& rVector ) const
+bool OutputDevice::GetGlyphBoundRects(const Point& rOrigin, const OUString& rStr, int nIndex,
+                                      int nLen, std::vector<tools::Rectangle>& rVector) const
 {
     rVector.clear();
 
-    if( nIndex >= rStr.getLength() )
+    if (nIndex >= rStr.getLength())
         return false;
 
-    if( nLen < 0 || nIndex + nLen >= rStr.getLength() )
+    if (nLen < 0 || nIndex + nLen >= rStr.getLength())
     {
         nLen = rStr.getLength() - nIndex;
     }
 
     tools::Rectangle aRect;
-    for( int i = 0; i < nLen; i++ )
+    for (int i = 0; i < nLen; i++)
     {
-        if( !GetTextBoundRect( aRect, rStr, nIndex, nIndex + i, 1 ) )
+        if (!GetTextBoundRect(aRect, rStr, nIndex, nIndex + i, 1))
             break;
-        aRect.Move( rOrigin.X(), rOrigin.Y() );
-        rVector.push_back( aRect );
+        aRect.Move(rOrigin.X(), rOrigin.Y());
+        rVector.push_back(aRect);
     }
 
     return (nLen == static_cast<int>(rVector.size()));
 }
 
-sal_Int32 OutputDevice::HasGlyphs( const vcl::Font& rTempFont, std::u16string_view rStr,
-    sal_Int32 nIndex, sal_Int32 nLen ) const
+sal_Int32 OutputDevice::HasGlyphs(const vcl::Font& rTempFont, std::u16string_view rStr,
+                                  sal_Int32 nIndex, sal_Int32 nLen) const
 {
-    if( nIndex >= static_cast<sal_Int32>(rStr.size()) )
+    if (nIndex >= static_cast<sal_Int32>(rStr.size()))
         return nIndex;
     sal_Int32 nEnd;
-    if( nLen == -1 )
+    if (nLen == -1)
         nEnd = rStr.size();
     else
-        nEnd = std::min<sal_Int32>( rStr.size(), nIndex + nLen );
+        nEnd = std::min<sal_Int32>(rStr.size(), nIndex + nLen);
 
-    SAL_WARN_IF( nIndex >= nEnd, "vcl.gdi", "StartPos >= EndPos?" );
-    SAL_WARN_IF( nEnd > static_cast<sal_Int32>(rStr.size()), "vcl.gdi", "String too short" );
+    SAL_WARN_IF(nIndex >= nEnd, "vcl.gdi", "StartPos >= EndPos?");
+    SAL_WARN_IF(nEnd > static_cast<sal_Int32>(rStr.size()), "vcl.gdi", "String too short");
 
     // to get the map temporarily set font
     const vcl::Font aOrigFont = GetFont();
-    const_cast<OutputDevice&>(*this).SetFont( rTempFont );
+    const_cast<OutputDevice&>(*this).SetFont(rTempFont);
     FontCharMapRef xFontCharMap;
-    bool bRet = GetFontCharMap( xFontCharMap );
-    const_cast<OutputDevice&>(*this).SetFont( aOrigFont );
+    bool bRet = GetFontCharMap(xFontCharMap);
+    const_cast<OutputDevice&>(*this).SetFont(aOrigFont);
 
     // if fontmap is unknown assume it doesn't have the glyphs
-    if( !bRet )
+    if (!bRet)
         return nIndex;
 
-    for( sal_Int32 i = nIndex; nIndex < nEnd; ++i, ++nIndex )
-        if( ! xFontCharMap->HasChar( rStr[i] ) )
+    for (sal_Int32 i = nIndex; nIndex < nEnd; ++i, ++nIndex)
+        if (!xFontCharMap->HasChar(rStr[i]))
             return nIndex;
 
     return -1;
@@ -1265,11 +1347,11 @@ sal_Int32 OutputDevice::HasGlyphs( const vcl::Font& rTempFont, std::u16string_vi
 
 void OutputDevice::ReleaseFontCache() { mpFontController->mxFontCache.reset(); }
 
-void OutputDevice::ReleaseFontCollection() { mxFontCollection.reset(); }
+void OutputDevice::ReleaseFontCollection() { SetFontCollection(nullptr); }
 
 void OutputDevice::SetFontCollectionFromSVData()
 {
-    mxFontCollection = ImplGetSVData()->maGDIData.mxScreenFontList->Clone();
+    SetFontCollection(ImplGetSVData()->maGDIData.mxScreenFontList->Clone());
 }
 
 void OutputDevice::ResetNewFontCache()
@@ -1289,8 +1371,6 @@ void OutputDevice::ImplReleaseFonts()
     mpFontFaceCollection.reset();
 }
 
-/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
-
 tools::Long OutputDevice::GetEmphasisAscent() const
 {
     if (mpFontRealization)
@@ -1306,28 +1386,44 @@ tools::Long OutputDevice::GetEmphasisDescent() const
 }
 
 void OutputDevice::AdoptSharedFontCache(const std::shared_ptr<ImplFontCache>& pShared)
-{ if (mpFontController) mpFontController->AdoptCache(pShared); }
+{
+    if (mpFontController)
+        mpFontController->AdoptCache(pShared);
+}
 
 void OutputDevice::InvalidateFontCache()
-{ if (mpFontController) mpFontController->InvalidateCache(); }
+{
+    if (mpFontController)
+        mpFontController->InvalidateCache();
+}
 
 void OutputDevice::ClearFontCache()
-{ if (mpFontController) mpFontController->ClearCache(); }
+{
+    if (mpFontController)
+        mpFontController->ClearCache();
+}
 
 void OutputDevice::ResetFontCache()
 {
-    if (!mpFontController) mpFontController = std::make_unique<vcl::font::FontController>();
+    if (!mpFontController)
+        mpFontController = std::make_unique<vcl::font::FontController>();
     mpFontController->ResetCache();
 }
 
 ImplFontCache& OutputDevice::GetFontCache() const
 {
-    if (!mpFontController) const_cast<OutputDevice*>(this)->mpFontController = std::make_unique<vcl::font::FontController>();
+    if (!mpFontController)
+        const_cast<OutputDevice*>(this)->mpFontController
+            = std::make_unique<vcl::font::FontController>();
     return mpFontController->GetCache();
 }
 
-rtl::Reference<LogicalFontInstance> OutputDevice::GetFontInstance(vcl::font::PhysicalFontCollection* pPFC, const vcl::Font& rFont, const Size& rSize, float fHeight) const
-{ return GetFontCache().GetFontInstance(pPFC, rFont, rSize, fHeight); }
+rtl::Reference<LogicalFontInstance>
+OutputDevice::GetFontInstance(vcl::font::PhysicalFontCollection* pPFC, const vcl::Font& rFont,
+                              const Size& rSize, float fHeight) const
+{
+    return GetFontCache().GetFontInstance(pPFC, rFont, rSize, fHeight);
+}
 
 void OutputDevice::AcquireScreenFontCache()
 {
@@ -1341,3 +1437,5 @@ bool OutputDevice::IsScreenFontCache() const
     // Use the safe getter which handles lazy initialization
     return &GetFontCache() == pSVData->maGDIData.mxScreenFontCache.get();
 }
+
+/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

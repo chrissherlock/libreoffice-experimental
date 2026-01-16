@@ -779,7 +779,8 @@ ImplFrameData::ImplFrameData( vcl::Window *pWindow )
     mpMouseMoveWin     = nullptr;
     mpMouseDownWin     = nullptr;
     mpTrackWin         = nullptr;
-    mxFontCollection   = pSVData->maGDIData.mxScreenFontList;
+    mxFontCollection = pSVData->maGDIData.mxScreenFontList;
+
     mxFontCache        = pSVData->maGDIData.mxScreenFontCache;
     mnFocusId          = nullptr;
     mnMouseMoveId      = nullptr;
@@ -1089,7 +1090,7 @@ void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* p
     mpWindowImpl->mpRealParent = pRealParent;
 
     // #99318: make sure fontcache and list is available before call to SetSettings
-    mpWindowImpl->mxOutDev->mxFontCollection = mpWindowImpl->mpFrameData->mxFontCollection;
+    mpWindowImpl->mxOutDev->SetFontCollection(mpWindowImpl->mpFrameData->mxFontCollection);
     mpWindowImpl->mxOutDev->AdoptSharedFontCache(mpWindowImpl->mpFrameData->mxFontCache);
 
     if ( mpWindowImpl->mbFrame )
@@ -1768,7 +1769,7 @@ void Window::ImplNewInputContext()
         }
         aNewContext.mpFont =
                         pFocusWin->GetOutDev()->GetFontInstance(
-                            pFocusWin->GetOutDev()->mxFontCollection.get(),
+                            pFocusWin->GetOutDev()->GetFontCollection(),
                             rFont, aSize, static_cast<float>(aSize.Height()) );
     }
     aNewContext.mnOptions   = rInputContext.GetOptions();
