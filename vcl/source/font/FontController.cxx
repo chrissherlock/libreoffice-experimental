@@ -316,12 +316,21 @@ bool FontController::GetFontSubstitution(const SalGraphics* /*pGraphics*/, const
 
 rtl::Reference<LogicalFontInstance>
 FontController::RealizeFont(vcl::font::PhysicalFontCollection* pColl, const vcl::Font& rFont,
-                            const Size& rSize, float fExactHeight, bool bNonAntialiased)
+                            const SalGraphics* pGraphics, const Size& rSize, float fExactHeight,
+                            bool bNonAntialiased)
 {
-    // FIXME: needs to do font substitution here
+    vcl::Font aFontToUse = rFont;
+    vcl::Font aSubstFont;
+    OUString aMissingCodes;
+
+    // Restore the regression: Check for system font substitution
+    if (GetFontSubstitution(pGraphics, rFont, aMissingCodes, aSubstFont))
+        aFontToUse = aSubstFont;
+
     if (!mxFontCache)
         return nullptr;
-    return mxFontCache->GetFontInstance(pColl, rFont, rSize, fExactHeight, bNonAntialiased);
+
+    return mxFontCache->GetFontInstance(pColl, aFontToUse, rSize, fExactHeight, bNonAntialiased);
 }
 
 void FontController::InvalidateCache()
@@ -379,7 +388,7 @@ bool FontController::IsFontAvailable(const OUString& rFontName) const
     return mxFontCollection->FindFontFamily(rFontName) != nullptr;
 }
 
-bool FontController::GetFontSubstitution(SalGraphics* /*pGraphics*/, const vcl::Font& rFont,
+bool FontController::GetFontSubstitution(const SalGraphics* /*pGraphics*/, const vcl::Font& rFont,
                                          OUString& /*rMissingCodes*/,
                                          vcl::Font& /*rSubstFont*/) const
 {

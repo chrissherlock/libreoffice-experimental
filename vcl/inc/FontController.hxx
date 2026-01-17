@@ -57,7 +57,7 @@ public:
         return mxFontCollection;
     }
 
-    bool GetFontSubstitution(SalGraphics* pGraphics, const vcl::Font& rFont,
+    bool GetFontSubstitution(const SalGraphics* pGraphics, const vcl::Font& rFont,
                              OUString& rMissingCodes, vcl::Font& rSubstFont) const;
     bool IsFontAvailable(const OUString& rFontName) const;
 
@@ -81,9 +81,9 @@ public:
     bool NeedsUpdate(const vcl::Font& rRequestedFont, bool bDeviceDirty) const;
 
     rtl::Reference<LogicalFontInstance> RealizeFont(vcl::font::PhysicalFontCollection* pColl,
-                                                    const vcl::Font& rFont, const Size& rSize,
-                                                    float fExactHeight,
-                                                    bool bNonAntialiased = false);
+                                                    const vcl::Font& rFont,
+                                                    const SalGraphics* pGraphics, const Size& rSize,
+                                                    float fExactHeight, bool bNonAntialiased);
 
     void InitializeInstance(LogicalFontInstance* pFontInstance, SalGraphics* pGraphics);
 
