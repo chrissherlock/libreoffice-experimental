@@ -392,6 +392,22 @@ bool FontController::GetFontSubstitution(SalGraphics* /*pGraphics*/, const vcl::
     return false;
 }
 
+bool FontController::AddTempDevFont(SalGraphics* pGraphics, const OUString& rFileURL,
+                                    const OUString& rFontName)
+{
+    if (pGraphics && mxFontCollection)
+        return pGraphics->AddTempDevFont(mxFontCollection.get(), rFileURL, rFontName);
+    return false;
+}
+
+bool FontController::RemoveTempDevFont(SalGraphics* pGraphics, const OUString& rFileURL,
+                                       const OUString& rFontName)
+{
+    if (pGraphics)
+        return pGraphics->RemoveTempDevFont(rFileURL, rFontName);
+    return false;
+}
+
 } // end namespace vcl::font
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
