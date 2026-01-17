@@ -388,19 +388,6 @@ bool FontController::IsFontAvailable(const OUString& rFontName) const
     return mxFontCollection->FindFontFamily(rFontName) != nullptr;
 }
 
-bool FontController::GetFontSubstitution(const SalGraphics* /*pGraphics*/, const vcl::Font& rFont,
-                                         OUString& /*rMissingCodes*/,
-                                         vcl::Font& /*rSubstFont*/) const
-{
-    if (!mxFontCollection)
-        return false;
-
-    if (mxFontCollection->FindFontFamily(rFont.GetFamilyName()))
-        return false;
-
-    return false;
-}
-
 bool FontController::AddTempDevFont(SalGraphics* pGraphics, const OUString& rFileURL,
                                     const OUString& rFontName)
 {

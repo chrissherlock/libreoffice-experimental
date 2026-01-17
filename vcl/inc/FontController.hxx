@@ -57,8 +57,6 @@ public:
         return mxFontCollection;
     }
 
-    bool GetFontSubstitution(const SalGraphics* pGraphics, const vcl::Font& rFont,
-                             OUString& rMissingCodes, vcl::Font& rSubstFont) const;
     bool IsFontAvailable(const OUString& rFontName) const;
 
     void AdoptCache(const std::shared_ptr<ImplFontCache>& pShared) { mxFontCache = pShared; }
