@@ -375,7 +375,7 @@ int ListFonts::Main()
         }
 
         std::vector<int> aIndices;
-        for (int i = 0; i < pOutDev->GetFontFaceCollectionCount(); i++)
+        for (sal_uInt32 i = 0; i < pOutDev->GetFontFaceCollectionCount(); i++)
             aIndices.push_back(i);
 
         std::sort(aIndices.begin(), aIndices.end(), [&](int a, int b) {

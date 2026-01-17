@@ -1181,8 +1181,8 @@ private:
 
 public:
 
-    FontMetric                  GetFontMetricFromCollection( int nDevFontIndex ) const;
-    int                         GetFontFaceCollectionCount() const;
+    FontMetric                  GetFontMetricFromCollection(sal_uInt32 nDevFontIndex) const;
+    sal_uInt32                  GetFontFaceCollectionCount() const;
 
     bool                        IsFontAvailable( std::u16string_view rFontName ) const;
 

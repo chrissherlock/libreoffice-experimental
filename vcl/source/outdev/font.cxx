@@ -126,7 +126,7 @@ OutputDevice::GetSharedFontCollection() const
     return mpFontController->GetSharedFontCollection();
 }
 
-FontMetric OutputDevice::GetFontMetricFromCollection(int nDevFontIndex) const
+FontMetric OutputDevice::GetFontMetricFromCollection(sal_uInt32 nDevFontIndex) const
 {
     ImplInitFontList();
 
@@ -136,24 +136,12 @@ FontMetric OutputDevice::GetFontMetricFromCollection(int nDevFontIndex) const
     return FontMetric();
 }
 
-int OutputDevice::GetFontFaceCollectionCount() const
+sal_uInt32 OutputDevice::GetFontFaceCollectionCount() const
 {
-    if (!mpFontFaceCollection)
-    {
-        if (!GetSharedFontCollection())
-        {
-            return 0;
-        }
+    if (!mpFontController)
+        return 0;
 
-        mpFontFaceCollection = GetSharedFontCollection()->GetFontFaceCollection();
-
-        if (!mpFontFaceCollection->Count())
-        {
-            mpFontFaceCollection.reset();
-            return 0;
-        }
-    }
-    return mpFontFaceCollection->Count();
+    return mpFontController->GetFontFaceCollectionCount();
 }
 
 bool OutputDevice::IsFontAvailable(std::u16string_view rFontName) const

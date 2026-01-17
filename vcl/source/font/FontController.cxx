@@ -406,6 +406,14 @@ bool FontController::RemoveTempDevFont(SalGraphics* pGraphics, const OUString& r
     return false;
 }
 
+sal_uInt32 FontController::GetFontFaceCollectionCount() const
+{
+    if (!mxFontCollection)
+        return 0;
+
+    return mxFontCollection->Count();
+}
+
 } // end namespace vcl::font
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
