@@ -900,29 +900,6 @@ void OutputDevice::ImplInitFontMetrics(LogicalFontInstance* pFontInstance) const
         = pFontInstance->mxFontMetric->GetAscent() + pFontInstance->mxFontMetric->GetDescent();
 }
 
-bool OutputDevice::AttemptOLEFontScaleFix(vcl::Font& rFont, tools::Long nHeight) const
-{
-    int nNewWidth = mpFontController->CalculateOLEStorageWidth(
-        mpFontInstance.get(), mpMapper->GetMappingXNumerator(), mpMapper->GetMappingXDenominator(),
-        mpMapper->GetMappingYNumerator(), mpMapper->GetMappingYDenominator());
-
-    if (nNewWidth == 0)
-        return true;
-
-    Size aOrigSize = rFont.GetFontSize();
-    rFont.SetFontSize(Size(nNewWidth, nHeight));
-
-    mpMapper->EnableMapMode(false);
-    mbNewFont = true;
-
-    const bool bRet = ImplNewFont(); // recurse once using stretched width
-
-    mpMapper->EnableMapMode();
-    rFont.SetFontSize(aOrigSize);
-
-    return bRet;
-}
-
 void OutputDevice::SetFontOrientation(LogicalFontInstance* const pFontInstance) const
 {
     if (pFontInstance->GetFontSelectPattern().mnOrientation
