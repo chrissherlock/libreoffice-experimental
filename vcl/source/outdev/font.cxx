@@ -245,10 +245,8 @@ bool OutputDevice::GetFontCharMap(FontCharMapRef& rxFontCharMap) const
 
 bool OutputDevice::GetFontCapabilities(vcl::FontCapabilities& rFontCapabilities) const
 {
-    if (!InitFont())
-        return false;
-
-    return mpFontController->GetFontCapabilities(mpGraphics, rFontCapabilities);
+    // [Refactor] Delegate to Controller
+    return mpFontController && mpFontController->GetFontCapabilities(mpGraphics, rFontCapabilities);
 }
 
 tools::Long OutputDevice::GetFontExtLeading() const
