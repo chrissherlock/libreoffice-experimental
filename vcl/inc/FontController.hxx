@@ -57,7 +57,7 @@ public:
         return mxFontCollection;
     }
 
-    bool IsFontAvailable(const OUString& rFontName) const;
+    bool IsFontAvailable(std::u16string_view rFontName) const;
 
     void AdoptCache(const std::shared_ptr<ImplFontCache>& pShared) { mxFontCache = pShared; }
     void ClearCache() { mxFontCache.reset(); }

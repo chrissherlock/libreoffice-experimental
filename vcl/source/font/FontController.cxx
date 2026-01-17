@@ -369,10 +369,11 @@ Size FontController::GetOLECorrectedSize(const CoordinateMapper& rMapper, const 
     return aNewSize;
 }
 
-bool FontController::IsFontAvailable(const OUString& rFontName) const
+bool FontController::IsFontAvailable(std::u16string_view rFontName) const
 {
     if (!mxFontCollection)
         return false;
+
     return mxFontCollection->FindFontFamily(rFontName) != nullptr;
 }
 
