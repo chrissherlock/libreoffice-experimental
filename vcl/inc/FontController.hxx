@@ -46,6 +46,16 @@ struct FontRealization
 class VCL_DLLPUBLIC FontController
 {
 public:
+    void SetFontCollection(const std::shared_ptr<PhysicalFontCollection>& pPFC)
+    {
+        mxFontCollection = pPFC;
+    }
+    PhysicalFontCollection* GetFontCollection() const { return mxFontCollection.get(); }
+    const std::shared_ptr<PhysicalFontCollection>& GetSharedFontCollection() const
+    {
+        return mxFontCollection;
+    }
+
     void AdoptCache(const std::shared_ptr<ImplFontCache>& pShared) { mxFontCache = pShared; }
     void ClearCache() { mxFontCache.reset(); }
     void InvalidateCache();
