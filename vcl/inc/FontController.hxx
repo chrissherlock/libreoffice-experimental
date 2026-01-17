@@ -126,6 +126,10 @@ public:
 
     bool GetFontSubstitution(const SalGraphics* pGraphics, const vcl::Font& rFont,
                              OUString& rMissingCodes, vcl::Font& rSubstFont) const;
+
+    bool NeedsOLEFontScaleFix(const CoordinateMapper& rMapper, const Size& rSize) const;
+    Size GetOLECorrectedSize(const CoordinateMapper& rMapper, const Size& rSize,
+                             tools::Long nHeight) const;
 };
 
 } // namespace vcl
