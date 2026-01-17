@@ -373,6 +373,26 @@ Size FontController::GetOLECorrectedSize(const CoordinateMapper& rMapper, const 
     return aNewSize;
 }
 
+bool FontController::IsFontAvailable(const OUString& rFontName) const
+{
+    if (!mxFontCollection)
+        return false;
+    return mxFontCollection->FindFontFamily(rFontName) != nullptr;
+}
+
+bool FontController::GetFontSubstitution(SalGraphics* /*pGraphics*/, const vcl::Font& rFont,
+                                         OUString& /*rMissingCodes*/,
+                                         vcl::Font& /*rSubstFont*/) const
+{
+    if (!mxFontCollection)
+        return false;
+
+    if (mxFontCollection->FindFontFamily(rFont.GetFamilyName()))
+        return false;
+
+    return false;
+}
+
 } // end namespace vcl::font
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

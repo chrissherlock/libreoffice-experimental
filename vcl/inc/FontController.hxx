@@ -23,6 +23,7 @@ class LogicalFontInstance;
 #include <tuple>
 #include <impfontcache.hxx>
 
+class SalGraphics;
 namespace vcl::font
 {
 class Font;
@@ -55,6 +56,10 @@ public:
     {
         return mxFontCollection;
     }
+
+    bool GetFontSubstitution(SalGraphics* pGraphics, const vcl::Font& rFont,
+                             OUString& rMissingCodes, vcl::Font& rSubstFont) const;
+    bool IsFontAvailable(const OUString& rFontName) const;
 
     void AdoptCache(const std::shared_ptr<ImplFontCache>& pShared) { mxFontCache = pShared; }
     void ClearCache() { mxFontCache.reset(); }

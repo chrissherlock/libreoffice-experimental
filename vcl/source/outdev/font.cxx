@@ -108,9 +108,7 @@ void OutputDevice::SetFontCollection(const std::shared_ptr<vcl::font::PhysicalFo
 
 vcl::font::PhysicalFontCollection* OutputDevice::GetFontCollection() const
 {
-    if (!mpFontController)
-        const_cast<OutputDevice*>(this)->mpFontController = std::make_unique<vcl::font::FontController>();
-    return mpFontController->GetFontCollection();
+    return mpFontController ? mpFontController->GetFontCollection() : nullptr;
 }
 
 
