@@ -790,6 +790,13 @@ bool OutputDevice::ImplNewFont() const
 
     auto[fExactHeight, aSize]
         = mpFontController->CalculateDeviceSize(mpGraphicsState->maFont, *mpMapper, GetDPIY());
+    // [Refactor] Step 2: OLE Scaling delegated to FontController
+    if (mpFontController->NeedsOLEFontScaleFix(*mpMapper, aSize))
+    {
+        SAL_INFO("vcl.gdi", "ImplNewFont: Correcting OLE Font Scale");
+        aSize = mpFontController->GetOLECorrectedSize(*mpMapper, aSize, aSize.Height());
+    }
+
 
     SAL_INFO("vcl.gdi", "ImplNewFont: Calculated Pixel Size=" << aSize.Width() << "x"
                                                               << aSize.Height()
@@ -871,13 +878,6 @@ bool OutputDevice::ImplNewFont() const
 
     bool bRet = true;
 
-    // #95414# fix for OLE objects which use scale factors very creatively
-    if (mpMapper->IsMapModeEnabled() && !aSize.Width())
-    {
-        SAL_INFO("vcl.gdi", "ImplNewFont: Triggering OLE Font Scale Fix");
-        bRet = AttemptOLEFontScaleFix(const_cast<vcl::Font&>(mpGraphicsState->maFont),
-                                      aSize.Height());
-    }
 
     if (mpFontRealization)
     {
