@@ -159,8 +159,8 @@ int OutputDevice::GetFontFaceCollectionCount() const
 bool OutputDevice::IsFontAvailable(std::u16string_view rFontName) const
 {
     ImplInitFontList();
-    vcl::font::PhysicalFontFamily* pFound = GetSharedFontCollection()->FindFontFamily(rFontName);
-    return (pFound != nullptr);
+
+    return mpFontController && mpFontController->IsFontAvailable(rFontName);
 }
 
 bool OutputDevice::AddTempDevFont(const OUString& rFileURL, const OUString& rFontName) const
