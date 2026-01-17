@@ -302,27 +302,23 @@ void FontController::GetFontFeatures(const LogicalFontInstance* pFontInstance,
     aFeatureCollector.collect();
 }
 
-bool FontController::GetFontSubstitution(const SalGraphics* /*pGraphics*/, const vcl::Font& rFont,
-                                         OUString& /*rMissingCodes*/,
-                                         vcl::Font& /* rSubstFont */) const
-{
-    if (!mxFontCollection)
-        return false;
-
-    if (mxFontCollection->FindFontFamily(rFont.GetFamilyName()))
-        return false;
-
-    return false;
-}
-
 rtl::Reference<LogicalFontInstance>
 FontController::RealizeFont(vcl::font::PhysicalFontCollection* pColl, const vcl::Font& rFont,
-                            const Size& rSize, float fExactHeight, bool bNonAntialiased)
+                            const SalGraphics* pGraphics, const Size& rSize, float fExactHeight,
+                            bool bNonAntialiased)
 {
-    // FIXME: needs to do font substitution here
+    vcl::Font aFontToUse = rFont;
+    vcl::Font aSubstFont;
+    OUString aMissingCodes;
+
+    // Restore the regression: Check for system font substitution
+    if (GetFontSubstitution(pGraphics, rFont, aMissingCodes, aSubstFont))
+        aFontToUse = aSubstFont;
+
     if (!mxFontCache)
         return nullptr;
-    return mxFontCache->GetFontInstance(pColl, rFont, rSize, fExactHeight, bNonAntialiased);
+
+    return mxFontCache->GetFontInstance(pColl, aFontToUse, rSize, fExactHeight, bNonAntialiased);
 }
 
 void FontController::InvalidateCache()
@@ -380,7 +376,7 @@ bool FontController::IsFontAvailable(const OUString& rFontName) const
     return mxFontCollection->FindFontFamily(rFontName) != nullptr;
 }
 
-bool FontController::GetFontSubstitution(SalGraphics* /*pGraphics*/, const vcl::Font& rFont,
+bool FontController::GetFontSubstitution(const SalGraphics* /*pGraphics*/, const vcl::Font& rFont,
                                          OUString& /*rMissingCodes*/,
                                          vcl::Font& /*rSubstFont*/) const
 {
@@ -390,6 +386,22 @@ bool FontController::GetFontSubstitution(SalGraphics* /*pGraphics*/, const vcl::
     if (mxFontCollection->FindFontFamily(rFont.GetFamilyName()))
         return false;
 
+    return false;
+}
+
+bool FontController::AddTempDevFont(SalGraphics* pGraphics, const OUString& rFileURL,
+                                    const OUString& rFontName)
+{
+    if (pGraphics && mxFontCollection)
+        return pGraphics->AddTempDevFont(mxFontCollection.get(), rFileURL, rFontName);
+    return false;
+}
+
+bool FontController::RemoveTempDevFont(SalGraphics* pGraphics, const OUString& rFileURL,
+                                       const OUString& rFontName)
+{
+    if (pGraphics)
+        return pGraphics->RemoveTempDevFont(rFileURL, rFontName);
     return false;
 }
 

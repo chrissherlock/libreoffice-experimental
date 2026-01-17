@@ -57,8 +57,6 @@ public:
         return mxFontCollection;
     }
 
-    bool GetFontSubstitution(SalGraphics* pGraphics, const vcl::Font& rFont,
-                             OUString& rMissingCodes, vcl::Font& rSubstFont) const;
     bool IsFontAvailable(const OUString& rFontName) const;
 
     void AdoptCache(const std::shared_ptr<ImplFontCache>& pShared) { mxFontCache = pShared; }
@@ -81,9 +79,9 @@ public:
     bool NeedsUpdate(const vcl::Font& rRequestedFont, bool bDeviceDirty) const;
 
     rtl::Reference<LogicalFontInstance> RealizeFont(vcl::font::PhysicalFontCollection* pColl,
-                                                    const vcl::Font& rFont, const Size& rSize,
-                                                    float fExactHeight,
-                                                    bool bNonAntialiased = false);
+                                                    const vcl::Font& rFont,
+                                                    const SalGraphics* pGraphics, const Size& rSize,
+                                                    float fExactHeight, bool bNonAntialiased);
 
     void InitializeInstance(LogicalFontInstance* pFontInstance, SalGraphics* pGraphics);
 
@@ -135,6 +133,12 @@ public:
     bool NeedsOLEFontScaleFix(const CoordinateMapper& rMapper, const Size& rSize) const;
     Size GetOLECorrectedSize(const CoordinateMapper& rMapper, const Size& rSize,
                              tools::Long nHeight) const;
+
+    // [Refactor] Phase 3: Temp Fonts
+    bool AddTempDevFont(SalGraphics* pGraphics, const OUString& rFileURL,
+                        const OUString& rFontName);
+    bool RemoveTempDevFont(SalGraphics* pGraphics, const OUString& rFileURL,
+                           const OUString& rFontName);
 };
 
 } // namespace vcl
