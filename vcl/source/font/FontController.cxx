@@ -331,6 +331,48 @@ void FontController::InvalidateCache()
         mxFontCache->Invalidate();
 }
 
+bool FontController::NeedsOLEFontScaleFix(const CoordinateMapper& rMapper, const Size& rSize) const
+{
+    // #95414# Fix for OLE objects which use scale factors creatively
+    return rMapper.IsMapModeEnabled() && !rSize.Width();
+}
+
+Size FontController::GetOLECorrectedSize(const CoordinateMapper& rMapper, const Size& rSize,
+                                         tools::Long nHeight) const
+{
+    Size aNewSize = rSize;
+
+    // Formula: Width = Height * (ScaleX / ScaleY)
+    //        = Height * (XNum * YDen) / (XDen * YNum)
+
+    tools::Long nXNum = rMapper.GetMappingXNumerator();
+    tools::Long nXDen = rMapper.GetMappingXDenominator();
+    tools::Long nYNum = rMapper.GetMappingYNumerator();
+    tools::Long nYDen = rMapper.GetMappingYDenominator();
+
+    // Check if the aspect ratio is distorted (non-uniform scaling)
+    if ((nXNum * nYDen) != (nYNum * nXDen))
+    {
+        if (nXDen != 0 && nYNum != 0)
+        {
+            // Use long long to prevent overflow
+            double fScaleX = static_cast<double>(nXNum) / nXDen;
+            double fScaleY = static_cast<double>(nYNum) / nYDen;
+
+            // Calculate width based on the ratio of the scales to ensure precision
+            tools::Long nWidth
+                = static_cast<tools::Long>(std::round(nHeight * (fScaleX / fScaleY)));
+
+            // Safety clamp: if we have height, we must have width
+            if (nWidth == 0 && nHeight > 0)
+                nWidth = 1;
+
+            aNewSize.setWidth(nWidth);
+        }
+    }
+    return aNewSize;
+}
+
 } // end namespace vcl::font
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
