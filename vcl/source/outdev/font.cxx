@@ -164,26 +164,14 @@ bool OutputDevice::IsFontAvailable(std::u16string_view rFontName) const
 
 bool OutputDevice::AddTempDevFont(const OUString& rFileURL, const OUString& rFontName) const
 {
-    ImplInitFontList();
-
-    if (!mpGraphics && !AcquireGraphics())
-        return false;
-    assert(mpGraphics);
-
-    bool bRC = mpGraphics->AddTempDevFont(GetFontCollection(), rFileURL, rFontName);
-    if (!bRC)
-        return false;
-
-    return true;
+    // [Refactor] Delegate to Controller
+    return mpFontController && mpFontController->AddTempDevFont(mpGraphics, rFileURL, rFontName);
 }
 
 bool OutputDevice::RemoveTempDevFont(const OUString& rFileURL, const OUString& rFontName)
 {
-    if (!mpGraphics && !AcquireGraphics())
-        return true; // No graphics -> no fonts used
-    assert(mpGraphics);
-
-    return mpGraphics->RemoveTempDevFont(rFileURL, rFontName);
+    // [Refactor] Delegate to Controller
+    return mpFontController && mpFontController->RemoveTempDevFont(mpGraphics, rFileURL, rFontName);
 }
 
 bool OutputDevice::GetFontFeatures(std::vector<vcl::font::Feature>& rFontFeatures) const

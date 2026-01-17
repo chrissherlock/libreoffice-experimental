@@ -135,6 +135,12 @@ public:
     bool NeedsOLEFontScaleFix(const CoordinateMapper& rMapper, const Size& rSize) const;
     Size GetOLECorrectedSize(const CoordinateMapper& rMapper, const Size& rSize,
                              tools::Long nHeight) const;
+
+    // [Refactor] Phase 3: Temp Fonts
+    bool AddTempDevFont(SalGraphics* pGraphics, const OUString& rFileURL,
+                        const OUString& rFontName);
+    bool RemoveTempDevFont(SalGraphics* pGraphics, const OUString& rFileURL,
+                           const OUString& rFontName);
 };
 
 } // namespace vcl
