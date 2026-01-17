@@ -88,7 +88,7 @@ int ListGlyphs::Main()
 
         bool bFontExists = false;
 
-        for (sal_Int32 nFont = 0; nFont < pOutDev->GetFontFaceCollectionCount(); nFont++)
+        for (sal_uInt32 nFont = 0; nFont < pOutDev->GetFontFaceCollectionCount(); nFont++)
         {
             FontMetric aSystemFont = pOutDev->GetFontMetricFromCollection(nFont);
             if (aSystemFont.GetFamilyName() == maFontname)
