@@ -141,7 +141,7 @@ void OutputDevice::dispose()
     ClearFontCache();
 
     // release ImplFontList specific to this OutputDevice
-    mxFontCollection.reset();
+    SetFontCollection(nullptr);
 
     mpPrevGraphics.reset();
     mpNextGraphics.reset();

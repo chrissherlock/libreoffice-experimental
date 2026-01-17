@@ -219,7 +219,6 @@ private:
     mutable bool                    mbSubpixelPositioning : 1;
 
 protected:
-    mutable std::shared_ptr<vcl::font::PhysicalFontCollection> mxFontCollection;
 
 
     /** @name Initialization and accessor functions
@@ -239,6 +238,11 @@ protected:
     virtual void                dispose() override;
 
 public:
+    // Font Controller Delegation API
+    void SetFontCollection(const std::shared_ptr<vcl::font::PhysicalFontCollection>& pPFC);
+    vcl::font::PhysicalFontCollection* GetFontCollection() const;
+    const std::shared_ptr<vcl::font::PhysicalFontCollection>& GetSharedFontCollection() const;
+    SAL_DLLPRIVATE void SetFontCollectionFromSVData();
     bool IsScreenFontCache() const;
     void AdoptSharedFontCache(const std::shared_ptr<ImplFontCache>& pShared);
     rtl::Reference<LogicalFontInstance> GetFontInstance(
@@ -1209,7 +1213,6 @@ protected:
     virtual void ImplRefreshFontData(bool bNewFontLists);
     SAL_DLLPRIVATE void ReleaseFontCache();
     SAL_DLLPRIVATE void ReleaseFontCollection();
-    SAL_DLLPRIVATE void SetFontCollectionFromSVData();
     SAL_DLLPRIVATE void ResetNewFontCache();
 
     virtual bool ImplNewFont() const;
