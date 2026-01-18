@@ -130,7 +130,6 @@ FontMetric OutputDevice::GetFontMetricFromCollection(sal_uInt32 nDevFontIndex) c
     if (!mpGraphics)
         AcquireGraphics();
 
-    // Delegate to the controller, which should handle the collection lifecycle
     return mpFontController->GetFontMetricFromCollection(mpGraphics, nDevFontIndex);
 }
 
@@ -151,13 +150,11 @@ bool OutputDevice::IsFontAvailable(std::u16string_view rFontName) const
 
 bool OutputDevice::AddTempDevFont(const OUString& rFileURL, const OUString& rFontName) const
 {
-    // [Refactor] Delegate to Controller
     return mpFontController && mpFontController->AddTempDevFont(mpGraphics, rFileURL, rFontName);
 }
 
 bool OutputDevice::RemoveTempDevFont(const OUString& rFileURL, const OUString& rFontName)
 {
-    // [Refactor] Delegate to Controller
     return mpFontController && mpFontController->RemoveTempDevFont(mpGraphics, rFileURL, rFontName);
 }
 
@@ -166,31 +163,29 @@ bool OutputDevice::GetFontFeatures(std::vector<vcl::font::Feature>& rFontFeature
     if (!ImplNewFont())
         return false;
 
-    // [Step 9] Refactor: Use FontRealization
     if (mpFontRealization && mpFontRealization->mxFont)
     {
         mpFontController->GetFontFeatures(mpFontRealization->mxFont.get(), rFontFeatures);
         return true;
     }
+
     return false;
 }
 
 FontMetric OutputDevice::GetFontMetric() const
 {
     FontMetric aMetric;
+
     if (!ImplNewFont())
         return aMetric;
 
-    // Initialize with device-specific logical font and alignment
     aMetric = mpGraphicsState->maFont;
     aMetric.SetAlignment(TextAlign::ALIGN_TOP);
 
-    // Delegate the complex data mapping to the controller
     mpFontController->PopulateFontMetric(
         aMetric, mpGraphicsState->maFont, mpFontRealization->mxFont.get(),
         mpFontRealization->nEmphasisAscent, mpFontRealization->nEmphasisDescent);
 
-    // Convert metrics from pixels to logical units
     aMetric.SetFontSize(PixelToLogic(aMetric.GetFontSize()));
     aMetric.SetAscent(DevicePixelToLogicHeight(aMetric.GetAscent()));
     aMetric.SetDescent(DevicePixelToLogicHeight(aMetric.GetDescent()));
@@ -232,15 +227,14 @@ bool OutputDevice::GetFontCharMap(FontCharMapRef& rxFontCharMap) const
 
 bool OutputDevice::GetFontCapabilities(vcl::FontCapabilities& rFontCapabilities) const
 {
-    // [Refactor] Delegate to Controller
     return mpFontController && mpFontController->GetFontCapabilities(mpGraphics, rFontCapabilities);
 }
 
 tools::Long OutputDevice::GetFontExtLeading() const
 {
-    // [Step 9] Refactor: Use FontRealization
     if (mpFontRealization && mpFontRealization->mxFont)
         return mpFontRealization->mxFont->mxFontMetric->GetExternalLeading();
+
     return 0;
 }
 
