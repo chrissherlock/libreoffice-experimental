@@ -53,7 +53,7 @@ public:
     // fill the list with device font faces
     void                    Add( vcl::font::PhysicalFontFace* );
     SAL_DLLPRIVATE void     Clear();
-    int                     Count() const { return maPhysicalFontFamilies.size(); }
+    size_t                  Count() const { return maPhysicalFontFamilies.size(); }
 
     // find the device font family
     vcl::font::PhysicalFontFamily* FindFontFamily( std::u16string_view rFontName ) const;

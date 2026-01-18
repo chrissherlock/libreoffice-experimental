@@ -14,16 +14,17 @@
 
 #include <vcl/dllapi.h>
 #include <vcl/fontcharmap.hxx>
+#include <vcl/metric.hxx>
 #include <vcl/vclenum.hxx>
-
-class ImplFontCache;
-class PhysicalFontCollection;
-class LogicalFontInstance;
 
 #include <tuple>
 #include <impfontcache.hxx>
 
+class ImplFontCache;
+class PhysicalFontCollection;
+class LogicalFontInstance;
 class SalGraphics;
+
 namespace vcl::font
 {
 class Font;
@@ -51,7 +52,9 @@ public:
     {
         mxFontCollection = pPFC;
     }
+
     PhysicalFontCollection* GetFontCollection() const { return mxFontCollection.get(); }
+
     const std::shared_ptr<PhysicalFontCollection>& GetSharedFontCollection() const
     {
         return mxFontCollection;
@@ -136,11 +139,14 @@ public:
     Size GetOLECorrectedSize(const CoordinateMapper& rMapper, const Size& rSize,
                              tools::Long nHeight) const;
 
-    // [Refactor] Phase 3: Temp Fonts
     bool AddTempDevFont(SalGraphics* pGraphics, const OUString& rFileURL,
                         const OUString& rFontName);
     bool RemoveTempDevFont(SalGraphics* pGraphics, const OUString& rFileURL,
                            const OUString& rFontName);
+
+    bool ActivateFontOnDevice(SalGraphics* pGraphics, LogicalFontInstance* pFontInstance);
+
+    FontMetric GetFontMetricFromCollection(SalGraphics* pGraphics, size_t nDevFontIndex) const;
 };
 
 } // namespace vcl
