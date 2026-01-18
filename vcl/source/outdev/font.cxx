@@ -779,12 +779,7 @@ bool OutputDevice::ImplNewFont() const
     if (bNewFontInstance)
         mbFontDirty = true;
 
-    if (!pFontInstance->mbInit && InitFont())
-    {
-        mpFontController->InitializeInstance(mpFontInstance.get(), mpGraphics);
-        ImplInitFontMetrics(mpFontInstance.get());
-        SetFontOrientation(mpFontInstance.get());
-    }
+    ImplInitializeFontInstance(pFontInstance);
 
     std::tie(mpFontRealization->nXOffset, mpFontRealization->nYOffset,
              mpFontRealization->nEmphasisAscent, mpFontRealization->nEmphasisDescent)
@@ -806,6 +801,17 @@ bool OutputDevice::ImplNewFont() const
     }
 
     return true;
+}
+
+
+void OutputDevice::ImplInitializeFontInstance(LogicalFontInstance* pFontInstance) const
+{
+    if (!pFontInstance->mbInit && InitFont())
+    {
+        mpFontController->InitializeInstance(pFontInstance, mpGraphics);
+        ImplInitFontMetrics(pFontInstance);
+        SetFontOrientation(pFontInstance);
+    }
 }
 
 void OutputDevice::ImplInitFontMetrics(LogicalFontInstance* pFontInstance) const
