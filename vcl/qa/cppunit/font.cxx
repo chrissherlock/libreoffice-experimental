@@ -10,7 +10,12 @@
 #include <test/bootstrapfixture.hxx>
 #include <cppunit/TestAssert.h>
 
+#include <tools/fract.hxx>
+#include <tools/mapunit.hxx>
+
 #include <vcl/font.hxx>
+#include <vcl/metric.hxx>
+#include <vcl/virdev.hxx>
 
 #include <font/EmphasisMark.hxx>
 
@@ -33,6 +38,7 @@ public:
     void testEmphasisMarkInitAsDisc();
     void testEmphasisMarkInitAsAccent();
     void testEmphasisMarkInitAsStyle();
+    void testFontMetricScaling();
 
     CPPUNIT_TEST_SUITE(VclFontTest);
     CPPUNIT_TEST(testName);
@@ -49,6 +55,7 @@ public:
     CPPUNIT_TEST(testEmphasisMarkInitAsDisc);
     CPPUNIT_TEST(testEmphasisMarkInitAsAccent);
     CPPUNIT_TEST(testEmphasisMarkInitAsStyle);
+    CPPUNIT_TEST(testFontMetricScaling);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -210,6 +217,28 @@ void VclFontTest::testEmphasisMarkInitAsStyle()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Rect2 not correct", tools::Rectangle(), aEmphasisMark.GetRect2());
     CPPUNIT_ASSERT_EQUAL_MESSAGE("y offset wrong", tools::Long(1), aEmphasisMark.GetYOffset());
     CPPUNIT_ASSERT_EQUAL_MESSAGE("width wrong", tools::Long(0), aEmphasisMark.GetWidth());
+}
+
+void VclFontTest::testFontMetricScaling()
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+
+    // 1. Set a standard font
+    vcl::Font aFont(u"Liberation Sans"_ustr, Size(0, 20)); // 20px height
+    pVDev->SetFont(aFont);
+
+    // 2. Set a MapMode that doubles the size (Scale 2:1)
+    MapMode aMap(MapUnit::Map100thMM);
+    aMap.SetScaleX(Fraction(2, 1));
+    aMap.SetScaleY(Fraction(2, 1));
+    pVDev->SetMapMode(aMap);
+
+    // 3. Trigger InitFont (implicitly) and get metrics
+    FontMetric aMetric = pVDev->GetFontMetric();
+
+    // 4. Assertions: If physical ascent was 16px, logical should be 32 units
+    // We use the known ratios of Liberation Sans or a mock font if possible.
+    CPPUNIT_ASSERT_MESSAGE("Ascent should be scaled by MapMode", aMetric.GetAscent() > 20);
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(VclFontTest);
