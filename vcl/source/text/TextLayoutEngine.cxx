@@ -8,6 +8,9 @@
  */
 
 #include <text/TextLayoutEngine.hxx>
+#include <vcl/font.hxx>
+#include <i18nlangtag/mslangid.hxx>
+#include <font/LogicalFontInstance.hxx>
 #include <sallayout.hxx>
 #include <basegfx/point/b2dpoint.hxx>
 #include <unicode/uchar.h>
@@ -67,6 +70,39 @@ std::vector<Point> TextLayoutEngine::GetEmphasisMarkPositions(const SalLayout& r
     }
 
     return aPositions;
+}
+
+void TextLayoutEngine::InitializeFontMetrics(
+    LogicalFontInstance* pFontInstance, const vcl::Font& rFont, long nDPIY, long nPixelWidth,
+    std::function<long(const OUString&)> const& fnGetTextWidth,
+    std::function<void(tools::Rectangle&, const OUString&)> const& fnGetBoundRect)
+{
+    if (!pFontInstance)
+        return;
+
+    // 1. Calculate Bullet Offset
+    long nSpaceW = fnGetTextWidth(OUString(u' '));
+    long nBulletW = fnGetTextWidth(u"\x00b7"_ustr);
+    long nBulletOffset = (nSpaceW - nBulletW) >> 1;
+
+    pFontInstance->mxFontMetric->ImplInitTextLineSize(pFontInstance, nDPIY, rFont, nBulletOffset);
+
+    // 2. Set Above Text Line Size
+    pFontInstance->mxFontMetric->ImplInitAboveTextLineSize(nDPIY, nPixelWidth);
+
+    // 3. CJK Fullstop Centering
+    bool bCentered = true;
+    if (MsLangId::isCJK(rFont.GetLanguage()))
+    {
+        tools::Rectangle aRect;
+        fnGetBoundRect(aRect, u"\x3001"_ustr); // Fullwidth fullstop
+
+        const auto nH = rFont.GetFontSize().Height();
+        const auto nB = aRect.Left();
+
+        bCentered = nB > (((nH >> 1) + nH) >> 3);
+    }
+    pFontInstance->mxFontMetric->SetFullstopCenteredFlag(bCentered);
 }
 
 } // namespace vcl::text
