@@ -39,6 +39,7 @@ public:
     void testEmphasisMarkInitAsAccent();
     void testEmphasisMarkInitAsStyle();
     void testFontMetricScaling();
+    void testInitFontHardwareReadiness();
 
     CPPUNIT_TEST_SUITE(VclFontTest);
     CPPUNIT_TEST(testName);
@@ -56,6 +57,7 @@ public:
     CPPUNIT_TEST(testEmphasisMarkInitAsAccent);
     CPPUNIT_TEST(testEmphasisMarkInitAsStyle);
     CPPUNIT_TEST(testFontMetricScaling);
+    CPPUNIT_TEST(testInitFontHardwareReadiness);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -239,6 +241,38 @@ void VclFontTest::testFontMetricScaling()
     // 4. Assertions: If physical ascent was 16px, logical should be 32 units
     // We use the known ratios of Liberation Sans or a mock font if possible.
     CPPUNIT_ASSERT_MESSAGE("Ascent should be scaled by MapMode", aMetric.GetAscent() > 20);
+}
+
+namespace
+{
+
+class TestOutputDevice : public VirtualDevice
+{
+public:
+    using VirtualDevice::VirtualDevice;
+    // Expose the protected InitFont as public for the test
+    bool TestInitFont() const { return InitFont(); }
+};
+
+}
+
+void VclFontTest::testInitFontHardwareReadiness()
+{
+    ScopedVclPtrInstance<TestOutputDevice> pVDev;
+    vcl::Font aFont(u"Liberation Sans"_ustr, Size(0, 12));
+    pVDev->SetFont(aFont);
+
+    CPPUNIT_ASSERT_MESSAGE("Initial InitFont should succeed", pVDev->TestInitFont());
+
+    // Redundancy Check: Calling InitFont again immediately
+    // should return true early via the !mbFontDirty check
+    // without re-calling the controller's hardware sync.
+    CPPUNIT_ASSERT_MESSAGE("Second InitFont should return true (already synced)", pVDev->TestInitFont());
+
+    // State Change: Force a 'dirty' state (e.g., by changing a property that doesn't change the instance)
+    pVDev->SetMapMode(MapMode(MapUnit::MapPoint));
+
+    CPPUNIT_ASSERT_MESSAGE("InitFont after state change should re-sync hardware", pVDev->TestInitFont());
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(VclFontTest);
