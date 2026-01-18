@@ -15,6 +15,7 @@
 #include <vcl/dllapi.h>
 #include <vcl/fontcharmap.hxx>
 #include <vcl/metric.hxx>
+#include <vcl/rendercontext/AddFontSubstituteFlags.hxx>
 #include <vcl/vclenum.hxx>
 
 #include <impfontcache.hxx>
@@ -29,6 +30,7 @@ class SalGraphics;
 namespace vcl::font
 {
 class Font;
+struct Feature;
 
 struct FontRealization
 {
