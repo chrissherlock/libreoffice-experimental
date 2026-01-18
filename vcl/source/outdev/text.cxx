@@ -2268,4 +2268,27 @@ void OutputDevice::SetSystemTextColor(SystemTextColorFlags nFlags, bool bEnabled
     }
 }
 
+std::unique_ptr<SalLayout> OutputDevice::getFallbackLayout(LogicalFontInstance* pLogicalFont,
+                                                           int nFallbackLevel,
+                                                           vcl::text::ImplLayoutArgs& rLayoutArgs,
+                                                           const SalLayoutGlyphs* pGlyphs) const
+{
+    if (!mpGraphics && !AcquireGraphics())
+        return nullptr;
+
+    assert(mpGraphics != nullptr);
+    mpGraphics->SetFont(pLogicalFont, nFallbackLevel);
+
+    rLayoutArgs.ResetPos();
+    std::unique_ptr<GenericSalLayout> pFallback = mpGraphics->GetTextLayout(nFallbackLevel);
+
+    if (!pFallback)
+        return nullptr;
+
+    if (!pFallback->LayoutText(rLayoutArgs, pGlyphs ? pGlyphs->Impl(nFallbackLevel) : nullptr))
+        return nullptr;
+
+    return pFallback;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
