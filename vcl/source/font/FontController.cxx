@@ -484,6 +484,12 @@ void FontController::ClearFontResources(SalGraphics* pGraphics, bool bNewFontLis
     }
 }
 
+void FontController::UpdateFontData(SalGraphics* pGraphics, bool bNewFontLists)
+{
+    ClearFontResources(pGraphics, bNewFontLists);
+    RefreshFromGraphics(pGraphics);
+}
+
 } // end namespace vcl::font
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
