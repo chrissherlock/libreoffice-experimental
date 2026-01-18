@@ -19,47 +19,32 @@
 
 #include <sal/config.h>
 
-#include <rtl/ustrbuf.hxx>
 #include <sal/log.hxx>
 #include <tools/debug.hxx>
 #include <tools/mapunit.hxx>
 #include <i18nlangtag/mslangid.hxx>
-#include <i18nlangtag/lang.h>
-#include <comphelper/configuration.hxx>
+#include <unotools/fontdefs.hxx>
 
-#include <vcl/event.hxx>
-#include <vcl/fontcharmap.hxx>
-#include <vcl/fntstyle.hxx>
-#include <vcl/glyphitem.hxx>
+#include <vcl/fontcapabilities.hxx>
 #include <vcl/metaact.hxx>
-#include <vcl/metric.hxx>
-#include <vcl/print.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/rendercontext/GetDefaultFontFlags.hxx>
-#include <vcl/sysdata.hxx>
-#include <vcl/virdev.hxx>
+#include <vcl/settings.hxx>
 
 #include <window.h>
-#include <font/EmphasisMark.hxx>
-
 #include <CoordinateMapper.hxx>
 #include <FontController.hxx>
 #include <GraphicsState.hxx>
-#include <ImplLayoutArgs.hxx>
 #include <drawmode.hxx>
-#include <impfontcache.hxx>
-#include <font/DirectFontSubstitution.hxx>
-#include <font/PhysicalFontFaceCollection.hxx>
+#include <font/EmphasisMark.hxx>
+#include <font/LogicalFontInstance.hxx>
 #include <font/PhysicalFontCollection.hxx>
-#include <font/FeatureCollector.hxx>
-#include <impglyphitem.hxx>
+#include <font/PhysicalFontFaceCollection.hxx>
 #include <sallayout.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>
 
 #include <unicode/uchar.h>
-
-#include <strings.hrc>
 
 const vcl::Font& OutputDevice::GetFont() const { return mpGraphicsState->maFont; }
 

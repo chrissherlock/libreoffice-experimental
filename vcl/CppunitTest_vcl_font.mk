@@ -24,6 +24,7 @@ $(eval $(call gb_CppunitTest_add_exception_objects,vcl_font, \
 	vcl/qa/cppunit/font_refactor_test \
 	vcl/qa/cppunit/fontcontroller_test \
 	vcl/qa/cppunit/FontDelegationTest \
+	vcl/qa/cppunit/defaultfont \
 ))
 
 $(eval $(call gb_CppunitTest_use_externals,vcl_font,\
