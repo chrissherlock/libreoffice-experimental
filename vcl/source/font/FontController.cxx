@@ -717,6 +717,23 @@ void FontController::UpdateSystemFontList(SalGraphics* pGraphics)
     }
 }
 
+rtl::Reference<LogicalFontInstance>
+FontController::CreateFontInstance(PhysicalFontCollection* pFontCollection, const vcl::Font& rFont,
+                                   SalGraphics* pGraphics, const CoordinateMapper& rMapper,
+                                   long nDPIY, AntialiasingFlags eAAFlags,
+                                   const StyleSettings& rStyleSettings)
+{
+    auto[fExactHeight, aSize] = CalculateDeviceSize(rFont, rMapper, nDPIY);
+
+    if (NeedsOLEFontScaleFix(rMapper, aSize))
+        aSize = GetOLECorrectedSize(rMapper, aSize, aSize.Height());
+
+    const bool bNonAntialiased
+        = ShouldDisableAntialiasing(eAAFlags, rStyleSettings, rFont.GetFontSize().Height());
+
+    return RealizeFont(pFontCollection, rFont, pGraphics, aSize, fExactHeight, bNonAntialiased);
+}
+
 } // end namespace vcl::font
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

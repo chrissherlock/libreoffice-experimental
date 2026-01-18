@@ -24,6 +24,7 @@
 
 class ImplFontCache;
 class PhysicalFontCollection;
+class CoordinateMapper;
 class LogicalFontInstance;
 class SalGraphics;
 
@@ -87,6 +88,13 @@ public:
     void InitializeFonts(SalGraphics* pGraphics);
 
     bool NeedsUpdate(const vcl::Font& rRequestedFont, bool bDeviceDirty) const;
+
+    // New Helper: Consolidates logic for creating a font instance.
+    // Does not modify OutputDevice state.
+    rtl::Reference<LogicalFontInstance>
+    CreateFontInstance(PhysicalFontCollection* pFontCollection, const vcl::Font& rFont,
+                       SalGraphics* pGraphics, const CoordinateMapper& rMapper, long nDPIY,
+                       AntialiasingFlags eAAFlags, const StyleSettings& rStyleSettings);
 
     rtl::Reference<LogicalFontInstance> RealizeFont(vcl::font::PhysicalFontCollection* pColl,
                                                     const vcl::Font& rFont,
