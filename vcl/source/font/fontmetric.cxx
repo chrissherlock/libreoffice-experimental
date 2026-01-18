@@ -267,26 +267,19 @@ void FontMetricData::ImplInitStrikeoutHarfBuzz(double fScale, hb_position_t nStr
     mnDStrikeoutOffset2 = mnBStrikeoutOffset + mnDStrikeoutSize * 2;
 }
 
-void FontMetricData::ImplInitTextLineSize( const OutputDevice* pDev )
+void FontMetricData::ImplInitTextLineSize( LogicalFontInstance* pFontInstance, tools::Long nDPIY, const vcl::Font& rFont, tools::Long nBulletOffset )
 {
-    // Bridge: Extract data from OutputDevice and pass to decoupled helpers
-    tools::Long nBulletOffset = ( pDev->GetTextWidth( OUString( u' ' ) ) - pDev->GetTextWidth( OUString( u'\x00b7' ) ) ) >> 1 ;
     ImplInitBulletOffset( nBulletOffset );
 
-    if (ImplInitTextLineSizeHarfBuzz(const_cast<LogicalFontInstance*>(pDev->GetFontInstance())))
+    if (ImplInitTextLineSizeHarfBuzz(pFontInstance))
         return;
 
-    ImplInitTextLineSizeMeasurements( pDev->GetDPIY(), pDev->GetFont() );
+    ImplInitTextLineSizeMeasurements( nDPIY, rFont );
 }
 
-void FontMetricData::ImplInitAboveTextLineSize( const OutputDevice* pDev )
+void FontMetricData::ImplInitAboveTextLineSize( tools::Long nDPIY, tools::Long nSinglePixelWidth )
 {
-    ImplInitTextLineSize(pDev);
-
-    tools::Long nDPIY = pDev->GetDPIY();
-    tools::Long nPixelWidth = pDev->LogicToPixel(Size(1, 0)).Width();
-
-    ImplInitAboveTextLineSizeMeasurements( nDPIY, nPixelWidth );
+    ImplInitAboveTextLineSizeMeasurements( nDPIY, nSinglePixelWidth );
 }
 
 void FontMetricData::ImplInitFlags( const OutputDevice* pDev )
