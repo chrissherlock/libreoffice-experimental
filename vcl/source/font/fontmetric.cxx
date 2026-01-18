@@ -220,6 +220,14 @@ bool FontMetricData::ImplInitTextLineSizeHarfBuzz(LogicalFontInstance* pFont)
     double fScale = 0;
     pFont->GetScale(nullptr, &fScale);
 
+    ImplInitUnderlineHarfBuzz(fScale, nUnderlineSize, nUnderlineOffset);
+    ImplInitStrikeoutHarfBuzz(fScale, nStrikeoutSize, nStrikeoutOffset);
+
+    return true;
+}
+
+void FontMetricData::ImplInitUnderlineHarfBuzz(double fScale, hb_position_t nUnderlineSize, hb_position_t nUnderlineOffset)
+{
     double nOffset = -nUnderlineOffset * fScale;
     double nSize = nUnderlineSize * fScale;
     double nSize2 = nSize / 2.;
@@ -238,12 +246,15 @@ bool FontMetricData::ImplInitTextLineSizeHarfBuzz(LogicalFontInstance* pFont)
 
     mnWUnderlineSize = mnBUnderlineSize;
     mnWUnderlineOffset = std::ceil(nOffset + nSize);
+}
 
-    nOffset = -nStrikeoutOffset * fScale;
-    nSize = nStrikeoutSize * fScale;
-    nSize2 = nSize / 2.;
-    nBSize = nSize * 2.;
-    n2Size = nBSize / 3.;
+void FontMetricData::ImplInitStrikeoutHarfBuzz(double fScale, hb_position_t nStrikeoutSize, hb_position_t nStrikeoutOffset)
+{
+    double nOffset = -nStrikeoutOffset * fScale;
+    double nSize = nStrikeoutSize * fScale;
+    double nSize2 = nSize / 2.;
+    double nBSize = nSize * 2.;
+    double n2Size = nBSize / 3.;
 
     mnStrikeoutSize = std::ceil(nSize);
     mnStrikeoutOffset = std::ceil(nOffset);
@@ -254,8 +265,6 @@ bool FontMetricData::ImplInitTextLineSizeHarfBuzz(LogicalFontInstance* pFont)
     mnDStrikeoutSize = std::ceil(n2Size);
     mnDStrikeoutOffset1 = mnBStrikeoutOffset;
     mnDStrikeoutOffset2 = mnBStrikeoutOffset + mnDStrikeoutSize * 2;
-
-    return true;
 }
 
 void FontMetricData::ImplInitTextLineSize( const OutputDevice* pDev )

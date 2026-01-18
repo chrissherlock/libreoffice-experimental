@@ -27,6 +27,8 @@
 #include <tools/ref.hxx>
 #include <fontattributes.hxx>
 
+#include <hb-ot.h>
+
 class FontMetricData;
 typedef tools::SvRef<FontMetricData> FontMetricDataRef;
 
@@ -111,6 +113,9 @@ public:
     void            ImplInitBaselines(LogicalFontInstance *pFontInstance);
 
 private:
+    void ImplInitUnderlineHarfBuzz(double fScale, hb_position_t nUnderlineSize, hb_position_t nUnderlineOffset);
+    void ImplInitStrikeoutHarfBuzz(double fScale, hb_position_t nStrikeoutSize, hb_position_t nStrikeoutOffset);
+
     SAL_DLLPRIVATE bool ShouldNotUseUnderlineMetrics() const;
     SAL_DLLPRIVATE bool ImplInitTextLineSizeHarfBuzz(LogicalFontInstance *pFontInstance);
     SAL_DLLPRIVATE bool ShouldUseWinMetrics(int, int, int, int, int, int) const;
