@@ -103,8 +103,6 @@ void OutputDevice::SetFontCollection(const std::shared_ptr<vcl::font::PhysicalFo
     mpFontController->SetFontCollection(pPFC);
 }
 
-
-
 vcl::font::PhysicalFontCollection* OutputDevice::GetFontCollection() const
 {
     return mpFontController ? mpFontController->GetFontCollection() : nullptr;
@@ -119,6 +117,7 @@ OutputDevice::GetSharedFontCollection() const
 
     if (!mpFontController)
         const_cast<OutputDevice*>(this)->mpFontController = std::make_unique<vcl::font::FontController>();
+
     return mpFontController->GetSharedFontCollection();
 }
 
@@ -691,7 +690,6 @@ const LogicalFontInstance* OutputDevice::GetFontInstance() const
     if (!InitFont())
         return nullptr;
 
-    // [Step 7] Hybrid Return
     if (mpFontRealization && mpFontRealization->mxFont)
         return mpFontRealization->mxFont.get();
 
@@ -719,7 +717,6 @@ bool OutputDevice::ImplNewFont() const
     auto[fExactHeight, aSize]
         = mpFontController->CalculateDeviceSize(mpGraphicsState->maFont, *mpMapper, GetDPIY());
 
-    // [Refactor] Step 2: OLE Scaling delegated to FontController
     if (mpFontController->NeedsOLEFontScaleFix(*mpMapper, aSize))
     {
         aSize = mpFontController->GetOLECorrectedSize(*mpMapper, aSize, aSize.Height());
@@ -1071,3 +1068,5 @@ ImplFontCache& OutputDevice::GetFontCache() const { if (!mpFontController) const
 rtl::Reference<LogicalFontInstance> OutputDevice::GetFontInstance(vcl::font::PhysicalFontCollection* pPFC, const vcl::Font& rFont, const Size& rSize, float fHeight) const { return GetFontCache().GetFontInstance(pPFC, rFont, rSize, fHeight); }
 void OutputDevice::AcquireScreenFontCache() { AdoptSharedFontCache(ImplGetSVData()->maGDIData.mxScreenFontCache); }
 bool OutputDevice::IsScreenFontCache() const { return &GetFontCache() == ImplGetSVData()->maGDIData.mxScreenFontCache.get(); }
+
+/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
