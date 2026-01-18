@@ -104,8 +104,8 @@ public:
     tools::Long            GetDoubleStrikeoutOffset2() const                               { return mnDStrikeoutOffset2; }
 
     SAL_DLLPRIVATE void ImplInitTextLineSize( const OutputDevice* pDev );
-    void ImplInitBulletOffset( const OutputDevice* pDev );
-    void ImplInitTextLineSizeMeasurements( const OutputDevice* pDev );
+    void ImplInitBulletOffset( tools::Long nBulletOffset );
+    void ImplInitTextLineSizeMeasurements( tools::Long nDPIY, const vcl::Font& rFont );
 
     SAL_DLLPRIVATE void ImplInitAboveTextLineSize( const OutputDevice* pDev );
     SAL_DLLPRIVATE void ImplInitFlags( const OutputDevice* pDev );

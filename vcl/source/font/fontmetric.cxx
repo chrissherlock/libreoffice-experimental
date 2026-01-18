@@ -269,14 +269,15 @@ void FontMetricData::ImplInitStrikeoutHarfBuzz(double fScale, hb_position_t nStr
 
 void FontMetricData::ImplInitTextLineSize( const OutputDevice* pDev )
 {
-    ImplInitBulletOffset( pDev );
+    // Bridge: Extract data from OutputDevice and pass to decoupled helpers
+    tools::Long nBulletOffset = ( pDev->GetTextWidth( OUString( u' ' ) ) - pDev->GetTextWidth( OUString( u'\x00b7' ) ) ) >> 1 ;
+    ImplInitBulletOffset( nBulletOffset );
 
     if (ImplInitTextLineSizeHarfBuzz(const_cast<LogicalFontInstance*>(pDev->GetFontInstance())))
         return;
 
-    ImplInitTextLineSizeMeasurements( pDev );
+    ImplInitTextLineSizeMeasurements( pDev->GetDPIY(), pDev->GetFont() );
 }
-
 
 void FontMetricData::ImplInitAboveTextLineSize( const OutputDevice* pDev )
 {
@@ -514,13 +515,13 @@ void FontMetricData::ImplInitBaselines(LogicalFontInstance *pFontInstance)
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
 
 
-void FontMetricData::ImplInitBulletOffset( const OutputDevice* pDev )
+void FontMetricData::ImplInitBulletOffset( tools::Long nBulletOffset )
 {
-    mnBulletOffset = ( pDev->GetTextWidth( OUString( u' ' ) ) - pDev->GetTextWidth( OUString( u'\x00b7' ) ) ) >> 1 ;
+    mnBulletOffset = nBulletOffset;
 }
 
 
-void FontMetricData::ImplInitTextLineSizeMeasurements( const OutputDevice* pDev )
+void FontMetricData::ImplInitTextLineSizeMeasurements( tools::Long nDPIY, const vcl::Font& rFont )
 {
     tools::Long nDescent = mnDescent;
     if ( nDescent <= 0 )
@@ -557,14 +558,14 @@ void FontMetricData::ImplInitTextLineSizeMeasurements( const OutputDevice* pDev 
      /* #117909#
       * add some pixels to minimum double line distance on higher resolution devices
       */
-    tools::Long nMin2LineDY = 1 + pDev->GetDPIY()/150;
+    tools::Long nMin2LineDY = 1 + nDPIY/150;
     if ( n2LineDY < nMin2LineDY )
         n2LineDY = nMin2LineDY;
     tools::Long n2LineDY2 = n2LineDY/2;
     if ( !n2LineDY2 )
         n2LineDY2 = 1;
 
-    const vcl::Font& rFont ( pDev->GetFont() );
+    // rFont passed as argument
     bool bCJKVertical = MsLangId::isCJK(rFont.GetLanguage()) && rFont.IsVertical();
     tools::Long nUnderlineOffset = bCJKVertical ? mnDescent : (mnDescent/2 + 1);
     tools::Long nStrikeoutOffset = rFont.IsVertical() ? -((mnAscent - mnDescent) / 2) : -((mnAscent - mnIntLeading) / 3);
