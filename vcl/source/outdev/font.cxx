@@ -655,13 +655,9 @@ vcl::Font OutputDevice::GetDefaultFont(DefaultFontType nType, LanguageType eLang
 
 void OutputDevice::ImplInitFontList() const
 {
-    // [Refactor] Delegate to Controller
     if (mpFontController)
         mpFontController->InitializeFonts(mpGraphics);
 }
-
-
-// [Restored Functions]
 
 bool OutputDevice::InitFont() const
 {
