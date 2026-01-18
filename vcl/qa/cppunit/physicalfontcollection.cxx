@@ -94,20 +94,20 @@ public:
 void VclPhysicalFontCollectionTest::testShouldCreateAndAddFontFamilyToCollection()
 {
     vcl::font::PhysicalFontCollection aFontCollection;
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("Empty font collection", static_cast<int>(0),
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Empty font collection", static_cast<size_t>(0),
                                  aFontCollection.Count());
 
     // please note that fonts created this way are NOT normalized and will not be found if you search for them in the collection
     vcl::font::PhysicalFontFamily* pFontFamily
         = aFontCollection.FindOrCreateFontFamily(u"Test Font Family Name"_ustr);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Does not have only one font family in collection",
-                                 static_cast<int>(1), aFontCollection.Count());
+                                 static_cast<size_t>(1), aFontCollection.Count());
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Font family name not correct", u"Test Font Family Name"_ustr,
                                  pFontFamily->GetSearchName());
 
     vcl::font::PhysicalFontFamily* pFontFamily2
         = aFontCollection.FindOrCreateFontFamily(u"Test Font Family Name"_ustr);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("Still only one font family in collection", static_cast<int>(1),
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Still only one font family in collection", static_cast<size_t>(1),
                                  aFontCollection.Count());
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Font family name not correct", u"Test Font Family Name"_ustr,
                                  pFontFamily2->GetSearchName());

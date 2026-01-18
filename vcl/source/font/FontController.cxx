@@ -19,6 +19,8 @@
 #include <font/FeatureCollector.hxx>
 #include <font/LogicalFontInstance.hxx>
 #include <font/PhysicalFontCollection.hxx>
+#include <font/PhysicalFontFaceCollection.hxx>
+#include <font/PhysicalFontFace.hxx>
 #include <impfontcache.hxx>
 #include <salgdi.hxx>
 #include <CoordinateMapper.hxx>
@@ -412,6 +414,56 @@ sal_uInt32 FontController::GetFontFaceCollectionCount() const
         return 0;
 
     return mxFontCollection->Count();
+}
+
+bool FontController::ActivateFontOnDevice(SalGraphics* pGraphics,
+                                          LogicalFontInstance* pFontInstance)
+{
+    if (!pGraphics || !pFontInstance)
+        return false;
+
+    // The Controller now owns the hardware interaction
+    pGraphics->SetFont(pFontInstance, 0);
+    return true;
+}
+
+FontMetric FontController::GetFontMetricFromCollection(SalGraphics* pGraphics,
+                                                       size_t nDevFontIndex) const
+{
+    if (!mxFontCollection)
+        const_cast<FontController*>(this)->InitializeFonts(pGraphics);
+
+    if (mxFontCollection)
+    {
+        std::unique_ptr<vcl::font::PhysicalFontFaceCollection> pFaces
+            = mxFontCollection->GetFontFaceCollection();
+
+        if (pFaces && nDevFontIndex < static_cast<sal_uInt32>(pFaces->Count()))
+        {
+            const vcl::font::PhysicalFontFace* pFace = pFaces->Get(nDevFontIndex);
+
+            if (pFace)
+            {
+                FontMetric aMetric;
+
+                // Populate identity from PhysicalFontFace/FontAttributes
+                // Use the attributes provided by the face
+                aMetric.SetFamilyName(pFace->GetFamilyName());
+                aMetric.SetStyleName(pFace->GetStyleName());
+                aMetric.SetWeight(pFace->GetWeight());
+                aMetric.SetItalic(pFace->GetItalic());
+                aMetric.SetWidthType(pFace->GetWidthType());
+
+                // Since this is a "Face" in a collection without a specific size,
+                // height-based metrics (Ascent/Descent) are often 0 or
+                // default until a LogicalFontInstance is created.
+
+                return aMetric;
+            }
+        }
+    }
+
+    return FontMetric();
 }
 
 } // end namespace vcl::font

@@ -111,9 +111,6 @@ vcl::font::PhysicalFontCollection* OutputDevice::GetFontCollection() const
     return mpFontController ? mpFontController->GetFontCollection() : nullptr;
 }
 
-
-
-
 const std::shared_ptr<vcl::font::PhysicalFontCollection>&
 OutputDevice::GetSharedFontCollection() const
 {
@@ -128,12 +125,14 @@ OutputDevice::GetSharedFontCollection() const
 
 FontMetric OutputDevice::GetFontMetricFromCollection(sal_uInt32 nDevFontIndex) const
 {
-    ImplInitFontList();
+    if (!mpFontController)
+        const_cast<OutputDevice*>(this)->mpFontController = std::make_unique<vcl::font::FontController>();
 
-    if (nDevFontIndex < GetFontFaceCollectionCount())
-        return FontMetric(*mpFontFaceCollection->Get(nDevFontIndex));
+    if (!mpGraphics)
+        AcquireGraphics();
 
-    return FontMetric();
+    // Delegate to the controller, which should handle the collection lifecycle
+    return mpFontController->GetFontMetricFromCollection(mpGraphics, nDevFontIndex);
 }
 
 sal_uInt32 OutputDevice::GetFontFaceCollectionCount() const
@@ -665,14 +664,17 @@ bool OutputDevice::InitFont() const
 {
     DBG_TESTSOLARMUTEX();
 
+    if (!mpFontController)
+        const_cast<OutputDevice*>(this)->mpFontController = std::make_unique<vcl::font::FontController>();
+
     if (mpFontController->NeedsUpdate(mpGraphicsState->maFont, mbNewFont))
     {
-        if (!ImplNewFont())
+        if (!const_cast<OutputDevice*>(this)->ImplNewFont())
             return false;
     }
 
-    // [Step 7] Hybrid Check: Prefer FontRealization, fallback to mpFontInstance
     LogicalFontInstance* pFontToUse = nullptr;
+
     if (mpFontRealization && mpFontRealization->mxFont)
         pFontToUse = mpFontRealization->mxFont.get();
     else if (mpFontInstance)
@@ -683,16 +685,21 @@ bool OutputDevice::InitFont() const
 
     if (!mpGraphics)
     {
-        if (!AcquireGraphics())
+        if (!const_cast<OutputDevice*>(this)->AcquireGraphics())
             return false;
     }
     else if (!mbFontDirty)
+    {
         return true;
+    }
 
-    assert(mpGraphics);
-    mpGraphics->SetFont(pFontToUse, 0);
-    mbFontDirty = false;
-    return true;
+    if (mpGraphics && mpFontController->ActivateFontOnDevice(mpGraphics, pFontToUse))
+    {
+        mbFontDirty = false;
+        return true;
+    }
+
+    return false;
 }
 
 const LogicalFontInstance* OutputDevice::GetFontInstance() const
