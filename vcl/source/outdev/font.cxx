@@ -661,7 +661,6 @@ void OutputDevice::ImplInitFontList() const
         mpFontController->InitializeFonts(mpGraphics);
 }
 
-
 bool OutputDevice::InitFont() const
 {
     DBG_TESTSOLARMUTEX();
@@ -1156,10 +1155,6 @@ sal_Int32 OutputDevice::HasGlyphs(const vcl::Font& rTempFont, std::u16string_vie
     if (nIndex >= static_cast<sal_Int32>(rStr.size())) return nIndex;
     sal_Int32 nEnd = (nLen == -1) ? rStr.size() : std::min<sal_Int32>(rStr.size(), nIndex + nLen);
 
-    SAL_WARN_IF(nIndex >= nEnd, "vcl.gdi", "StartPos >= EndPos?");
-    SAL_WARN_IF(nEnd > static_cast<sal_Int32>(rStr.size()), "vcl.gdi", "String too short");
-
-    // to get the map temporarily set font
     const vcl::Font aOrigFont = GetFont();
     const_cast<OutputDevice&>(*this).SetFont(rTempFont);
     FontCharMapRef xFontCharMap;
@@ -1176,15 +1171,25 @@ sal_Int32 OutputDevice::HasGlyphs(const vcl::Font& rTempFont, std::u16string_vie
     return -1;
 }
 
-void OutputDevice::ReleaseFontCache() { if(mpFontController) mpFontController->mxFontCache.reset(); }
+void OutputDevice::ReleaseFontCache()
+{
+    if (mpFontController)
+        mpFontController->mxFontCache.reset();
+}
 
-void OutputDevice::ReleaseFontCollection() { SetFontCollection(nullptr); }
+void OutputDevice::ReleaseFontCollection()
+{
+    SetFontCollection(nullptr);
+}
 
-void OutputDevice::SetFontCollectionFromSVData() { SetFontCollection(ImplGetSVData()->maGDIData.mxScreenFontList->Clone()); }
+void OutputDevice::SetFontCollectionFromSVData()
+{
+    SetFontCollection(ImplGetSVData()->maGDIData.mxScreenFontList->Clone());
+}
 
 void OutputDevice::ResetNewFontCache()
 {
-    if(mpFontController)
+    if (mpFontController)
         mpFontController->mxFontCache = std::make_shared<ImplFontCache>();
 }
 
