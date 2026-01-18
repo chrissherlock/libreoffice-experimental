@@ -104,8 +104,6 @@ void OutputDevice::SetFontCollection(const std::shared_ptr<vcl::font::PhysicalFo
     mpFontController->SetFontCollection(pPFC);
 }
 
-
-
 vcl::font::PhysicalFontCollection* OutputDevice::GetFontCollection() const
 {
     return mpFontController ? mpFontController->GetFontCollection() : nullptr;
@@ -120,6 +118,7 @@ OutputDevice::GetSharedFontCollection() const
 
     if (!mpFontController)
         const_cast<OutputDevice*>(this)->mpFontController = std::make_unique<vcl::font::FontController>();
+
     return mpFontController->GetSharedFontCollection();
 }
 
@@ -692,7 +691,6 @@ const LogicalFontInstance* OutputDevice::GetFontInstance() const
     if (!InitFont())
         return nullptr;
 
-    // [Step 7] Hybrid Return
     if (mpFontRealization && mpFontRealization->mxFont)
         return mpFontRealization->mxFont.get();
 
@@ -720,11 +718,8 @@ bool OutputDevice::ImplNewFont() const
     auto[fExactHeight, aSize]
         = mpFontController->CalculateDeviceSize(mpGraphicsState->maFont, *mpMapper, GetDPIY());
 
-    // [Refactor] Step 2: OLE Scaling delegated to FontController
     if (mpFontController->NeedsOLEFontScaleFix(*mpMapper, aSize))
-    {
         aSize = mpFontController->GetOLECorrectedSize(*mpMapper, aSize, aSize.Height());
-    }
 
     const bool bNonAntialiased = mpFontController->ShouldDisableAntialiasing(
         GetAntialiasing(), GetSettings().GetStyleSettings(),
@@ -753,7 +748,7 @@ bool OutputDevice::ImplNewFont() const
     // Compute font size in points for optical sizing.
     if (!pFontInstance->GetPointSize())
     {
-        auto nHeight = mpGraphicsState->maFont.GetFontHeight();
+        auto nHeight = GetFont().GetFontHeight();
         auto eFrom = MapToO3tlLength(GetMapMode().GetMapUnit());
         float fPointSize = o3tl::convert(float(nHeight), eFrom, o3tl::Length::pt);
         pFontInstance->SetPointSize(fPointSize);
@@ -1098,10 +1093,8 @@ void OutputDevice::ResetNewFontCache()
 void OutputDevice::ImplReleaseFonts()
 {
     mpGraphics->ReleaseFonts();
-
     mbNewFont = true;
     mbFontDirty = true;
-
     mpFontInstance.clear();
     mpForcedFallbackInstance.clear();
     mpFontFaceCollection.reset();
