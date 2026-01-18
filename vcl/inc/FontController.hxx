@@ -147,6 +147,8 @@ public:
     bool ActivateFontOnDevice(SalGraphics* pGraphics, LogicalFontInstance* pFontInstance);
 
     FontMetric GetFontMetricFromCollection(SalGraphics* pGraphics, size_t nDevFontIndex) const;
+    void RefreshFromGraphics(SalGraphics* pGraphics);
+    void ClearFontResources(SalGraphics* pGraphics, bool bNewFontLists);
 };
 
 } // namespace vcl

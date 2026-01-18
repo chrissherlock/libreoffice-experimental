@@ -248,25 +248,13 @@ void OutputDevice::ImplClearFontData(const bool bNewFontLists)
     mbNewFont = true;
 
     if (bNewFontLists)
-    {
         mpFontFaceCollection.reset();
 
-        // release all physically selected fonts on this device
-        if (AcquireGraphics())
-            mpGraphics->ReleaseFonts();
-    }
+    SalGraphics* pGraphics = nullptr;
+    if (AcquireGraphics())
+        pGraphics = mpGraphics;
 
-    ImplSVData* pSVData = ImplGetSVData();
-
-    if (true)
-        InvalidateFontCache();
-
-    if (bNewFontLists && AcquireGraphics())
-    {
-        if (GetSharedFontCollection()
-            && GetSharedFontCollection() != pSVData->maGDIData.mxScreenFontList)
-            GetSharedFontCollection()->Clear();
-    }
+    mpFontController->ClearFontResources(pGraphics, bNewFontLists);
 }
 
 void OutputDevice::RefreshFontData(const bool bNewFontLists) { ImplRefreshFontData(bNewFontLists); }
@@ -274,7 +262,7 @@ void OutputDevice::RefreshFontData(const bool bNewFontLists) { ImplRefreshFontDa
 void OutputDevice::ImplRefreshFontData(const bool bNewFontLists)
 {
     if (bNewFontLists && AcquireGraphics())
-        mpGraphics->GetDevFontList(GetFontCollection());
+        mpFontController->RefreshFromGraphics(mpGraphics);
 }
 
 void OutputDevice::ImplUpdateFontData()

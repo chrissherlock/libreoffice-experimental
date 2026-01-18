@@ -15,6 +15,7 @@
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/svapp.hxx>
+#include <svdata.hxx>
 
 #include <font/FeatureCollector.hxx>
 #include <font/LogicalFontInstance.hxx>
@@ -464,6 +465,30 @@ FontMetric FontController::GetFontMetricFromCollection(SalGraphics* pGraphics,
     }
 
     return FontMetric();
+}
+
+void FontController::RefreshFromGraphics(SalGraphics* pGraphics)
+{
+    if (pGraphics)
+        pGraphics->GetDevFontList(GetFontCollection());
+}
+
+void FontController::ClearFontResources(SalGraphics* pGraphics, bool bNewFontLists)
+{
+    mxFontInstance.clear();
+
+    if (bNewFontLists && pGraphics)
+        pGraphics->ReleaseFonts();
+
+    InvalidateCache();
+
+    if (bNewFontLists && pGraphics)
+    {
+        ImplSVData* pSVData = ImplGetSVData();
+        if (GetSharedFontCollection()
+            && GetSharedFontCollection() != pSVData->maGDIData.mxScreenFontList)
+            GetSharedFontCollection()->Clear();
+    }
 }
 
 } // end namespace vcl::font
