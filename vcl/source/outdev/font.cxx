@@ -810,9 +810,18 @@ bool OutputDevice::ImplNewFont() const
 
 void OutputDevice::ImplInitFontMetrics(LogicalFontInstance* pFontInstance) const
 {
-    pFontInstance->mxFontMetric->ImplInitTextLineSize(this);
-    pFontInstance->mxFontMetric->ImplInitAboveTextLineSize(this);
-    pFontInstance->mxFontMetric->ImplInitFlags(this);
+    {
+        const vcl::Font& rFont = GetFont();
+        tools::Long nDPIY = GetDPIY();
+
+        tools::Long nBulletOffset = (GetTextWidth(OUString(u' ')) - GetTextWidth(u"\x00b7"_ustr)) >> 1;
+        pFontInstance->mxFontMetric->ImplInitTextLineSize(pFontInstance, nDPIY, rFont, nBulletOffset);
+
+        tools::Long nPixelWidth = LogicToPixel(Size(1, 0)).Width();
+        pFontInstance->mxFontMetric->ImplInitAboveTextLineSize(nDPIY, nPixelWidth);
+
+        pFontInstance->mxFontMetric->ImplInitFlags(this);
+    }
 
     pFontInstance->mnLineHeight
         = pFontInstance->mxFontMetric->GetAscent() + pFontInstance->mxFontMetric->GetDescent();
