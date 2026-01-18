@@ -260,94 +260,12 @@ bool FontMetricData::ImplInitTextLineSizeHarfBuzz(LogicalFontInstance* pFont)
 
 void FontMetricData::ImplInitTextLineSize( const OutputDevice* pDev )
 {
-    mnBulletOffset = ( pDev->GetTextWidth( OUString( u' ' ) ) - pDev->GetTextWidth( OUString( u'\x00b7' ) ) ) >> 1 ;
+    ImplInitBulletOffset( pDev );
 
     if (ImplInitTextLineSizeHarfBuzz(const_cast<LogicalFontInstance*>(pDev->GetFontInstance())))
         return;
 
-    tools::Long nDescent = mnDescent;
-    if ( nDescent <= 0 )
-    {
-        nDescent = mnAscent / 10;
-        if ( !nDescent )
-            nDescent = 1;
-    }
-
-    // #i55341# for some fonts it is not a good idea to calculate
-    // their text line metrics from the real font descent
-    // => work around this problem just for these fonts
-    if( 3*nDescent > mnAscent )
-        nDescent = mnAscent / 3;
-
-    tools::Long nLineHeight = ((nDescent*25)+50) / 100;
-    if ( !nLineHeight )
-        nLineHeight = 1;
-    tools::Long nLineHeight2 = nLineHeight / 2;
-    if ( !nLineHeight2 )
-        nLineHeight2 = 1;
-
-    tools::Long nBLineHeight = ((nDescent*50)+50) / 100;
-    if ( nBLineHeight == nLineHeight )
-        nBLineHeight++;
-    tools::Long nBLineHeight2 = nBLineHeight/2;
-    if ( !nBLineHeight2 )
-        nBLineHeight2 = 1;
-
-    tools::Long n2LineHeight = ((nDescent*16)+50) / 100;
-    if ( !n2LineHeight )
-        n2LineHeight = 1;
-    tools::Long n2LineDY = n2LineHeight;
-     /* #117909#
-      * add some pixels to minimum double line distance on higher resolution devices
-      */
-    tools::Long nMin2LineDY = 1 + pDev->GetDPIY()/150;
-    if ( n2LineDY < nMin2LineDY )
-        n2LineDY = nMin2LineDY;
-    tools::Long n2LineDY2 = n2LineDY/2;
-    if ( !n2LineDY2 )
-        n2LineDY2 = 1;
-
-    const vcl::Font& rFont ( pDev->GetFont() );
-    bool bCJKVertical = MsLangId::isCJK(rFont.GetLanguage()) && rFont.IsVertical();
-    tools::Long nUnderlineOffset = bCJKVertical ? mnDescent : (mnDescent/2 + 1);
-    tools::Long nStrikeoutOffset = rFont.IsVertical() ? -((mnAscent - mnDescent) / 2) : -((mnAscent - mnIntLeading) / 3);
-
-    mnUnderlineSize        = nLineHeight;
-    mnUnderlineOffset      = nUnderlineOffset - nLineHeight2;
-
-    mnBUnderlineSize       = nBLineHeight;
-    mnBUnderlineOffset     = nUnderlineOffset - nBLineHeight2;
-
-    mnDUnderlineSize       = n2LineHeight;
-    mnDUnderlineOffset1    = nUnderlineOffset - n2LineDY2 - n2LineHeight;
-    mnDUnderlineOffset2    = mnDUnderlineOffset1 + n2LineDY + n2LineHeight;
-
-    tools::Long nWCalcSize = mnDescent;
-    if ( nWCalcSize < 6 )
-    {
-        if ( (nWCalcSize == 1) || (nWCalcSize == 2) )
-            mnWUnderlineSize = nWCalcSize;
-        else
-            mnWUnderlineSize = 3;
-    }
-    else
-        mnWUnderlineSize = ((nWCalcSize*50)+50) / 100;
-
-
-    // Don't assume that wavelines are never placed below the descent, because for most fonts the waveline
-    // is drawn into the text
-    mnWUnderlineOffset     = nUnderlineOffset;
-
-    mnStrikeoutSize        = nLineHeight;
-    mnStrikeoutOffset      = nStrikeoutOffset - nLineHeight2;
-
-    mnBStrikeoutSize       = nBLineHeight;
-    mnBStrikeoutOffset     = nStrikeoutOffset - nBLineHeight2;
-
-    mnDStrikeoutSize       = n2LineHeight;
-    mnDStrikeoutOffset1    = nStrikeoutOffset - n2LineDY2 - n2LineHeight;
-    mnDStrikeoutOffset2    = mnDStrikeoutOffset1 + n2LineDY + n2LineHeight;
-
+    ImplInitTextLineSizeMeasurements( pDev );
 }
 
 
@@ -585,3 +503,96 @@ void FontMetricData::ImplInitBaselines(LogicalFontInstance *pFontInstance)
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
+
+
+void FontMetricData::ImplInitBulletOffset( const OutputDevice* pDev )
+{
+    mnBulletOffset = ( pDev->GetTextWidth( OUString( u' ' ) ) - pDev->GetTextWidth( OUString( u'\x00b7' ) ) ) >> 1 ;
+}
+
+
+void FontMetricData::ImplInitTextLineSizeMeasurements( const OutputDevice* pDev )
+{
+    tools::Long nDescent = mnDescent;
+    if ( nDescent <= 0 )
+    {
+        nDescent = mnAscent / 10;
+        if ( !nDescent )
+            nDescent = 1;
+    }
+
+    // #i55341# for some fonts it is not a good idea to calculate
+    // their text line metrics from the real font descent
+    // => work around this problem just for these fonts
+    if( 3*nDescent > mnAscent )
+        nDescent = mnAscent / 3;
+
+    tools::Long nLineHeight = ((nDescent*25)+50) / 100;
+    if ( !nLineHeight )
+        nLineHeight = 1;
+    tools::Long nLineHeight2 = nLineHeight / 2;
+    if ( !nLineHeight2 )
+        nLineHeight2 = 1;
+
+    tools::Long nBLineHeight = ((nDescent*50)+50) / 100;
+    if ( nBLineHeight == nLineHeight )
+        nBLineHeight++;
+    tools::Long nBLineHeight2 = nBLineHeight/2;
+    if ( !nBLineHeight2 )
+        nBLineHeight2 = 1;
+
+    tools::Long n2LineHeight = ((nDescent*16)+50) / 100;
+    if ( !n2LineHeight )
+        n2LineHeight = 1;
+    tools::Long n2LineDY = n2LineHeight;
+     /* #117909#
+      * add some pixels to minimum double line distance on higher resolution devices
+      */
+    tools::Long nMin2LineDY = 1 + pDev->GetDPIY()/150;
+    if ( n2LineDY < nMin2LineDY )
+        n2LineDY = nMin2LineDY;
+    tools::Long n2LineDY2 = n2LineDY/2;
+    if ( !n2LineDY2 )
+        n2LineDY2 = 1;
+
+    const vcl::Font& rFont ( pDev->GetFont() );
+    bool bCJKVertical = MsLangId::isCJK(rFont.GetLanguage()) && rFont.IsVertical();
+    tools::Long nUnderlineOffset = bCJKVertical ? mnDescent : (mnDescent/2 + 1);
+    tools::Long nStrikeoutOffset = rFont.IsVertical() ? -((mnAscent - mnDescent) / 2) : -((mnAscent - mnIntLeading) / 3);
+
+    mnUnderlineSize        = nLineHeight;
+    mnUnderlineOffset      = nUnderlineOffset - nLineHeight2;
+
+    mnBUnderlineSize       = nBLineHeight;
+    mnBUnderlineOffset     = nUnderlineOffset - nBLineHeight2;
+
+    mnDUnderlineSize       = n2LineHeight;
+    mnDUnderlineOffset1    = nUnderlineOffset - n2LineDY2 - n2LineHeight;
+    mnDUnderlineOffset2    = mnDUnderlineOffset1 + n2LineDY + n2LineHeight;
+
+    tools::Long nWCalcSize = mnDescent;
+    if ( nWCalcSize < 6 )
+    {
+        if ( (nWCalcSize == 1) || (nWCalcSize == 2) )
+            mnWUnderlineSize = nWCalcSize;
+        else
+            mnWUnderlineSize = 3;
+    }
+    else
+        mnWUnderlineSize = ((nWCalcSize*50)+50) / 100;
+
+
+    // Don't assume that wavelines are never placed below the descent, because for most fonts the waveline
+    // is drawn into the text
+    mnWUnderlineOffset     = nUnderlineOffset;
+
+    mnStrikeoutSize        = nLineHeight;
+    mnStrikeoutOffset      = nStrikeoutOffset - nLineHeight2;
+
+    mnBStrikeoutSize       = nBLineHeight;
+    mnBStrikeoutOffset     = nStrikeoutOffset - nBLineHeight2;
+
+    mnDStrikeoutSize       = n2LineHeight;
+    mnDStrikeoutOffset1    = nStrikeoutOffset - n2LineDY2 - n2LineHeight;
+    mnDStrikeoutOffset2    = mnDStrikeoutOffset1 + n2LineDY + n2LineHeight;
+}
