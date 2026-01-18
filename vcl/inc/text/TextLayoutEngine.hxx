@@ -9,11 +9,17 @@
 
 #include <vcl/dllapi.h>
 #include <vector>
+#include <functional>
 #include <tools/gen.hxx> // For global Point
 #include <tools/fontenum.hxx> // For FontEmphasisMark
 #include <rtl/ustring.hxx>
 
 class SalLayout;
+class LogicalFontInstance;
+namespace vcl
+{
+class Font;
+}
 
 namespace vcl::text
 {
@@ -29,6 +35,19 @@ public:
      */
     static std::vector<Point> GetEmphasisMarkPositions(const SalLayout& rLayout, long nAscent,
                                                        long nDescent, FontEmphasisMark nStyle);
+
+    /** Initializes font metrics (bullet offset, CJK centering) using callbacks.
+     * Independent of OutputDevice.
+     * @param pFontInstance   The font instance to update.
+     * @param nDPIY           Device vertical DPI.
+     * @param nPixelWidth     Width of 1 logical unit in pixels.
+     * @param fnGetTextWidth  Callback: Returns width of a string in logic units.
+     * @param fnGetBoundRect  Callback: Fills the bounding rectangle of a string.
+     */
+    static void InitializeFontMetrics(
+        LogicalFontInstance* pFontInstance, const vcl::Font& rFont, long nDPIY, long nPixelWidth,
+        std::function<long(const OUString&)> const& fnGetTextWidth,
+        std::function<void(tools::Rectangle&, const OUString&)> const& fnGetBoundRect);
 };
 
 } // namespace vcl::text
