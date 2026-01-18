@@ -2291,4 +2291,97 @@ std::unique_ptr<SalLayout> OutputDevice::getFallbackLayout(LogicalFontInstance* 
     return pFallback;
 }
 
+std::unique_ptr<SalLayout>
+OutputDevice::ImplGlyphFallbackLayout(std::unique_ptr<SalLayout> pSalLayout,
+                                      vcl::text::ImplLayoutArgs& rLayoutArgs,
+                                      const SalLayoutGlyphs* pGlyphs) const
+{
+    if (!mpFontRealization || !mpFontRealization->mxFont)
+    {
+        SAL_WARN("vcl.gdi", "No font entry set in OutputDevice");
+        assert(mpFontRealization->mxFont);
+        return nullptr;
+    }
+
+    std::unique_ptr<MultiSalLayout> pMultiSalLayout;
+    ImplLayoutRuns aLayoutRuns = rLayoutArgs.maRuns;
+    rLayoutArgs.PrepareFallback(nullptr);
+    rLayoutArgs.mnFlags |= SalLayoutFlags::ForFallback;
+
+    bool bRTL;
+    int nMinRunPos, nEndRunPos;
+    OUStringBuffer aMissingCodeBuf(512);
+    while (rLayoutArgs.GetNextRun(&nMinRunPos, &nEndRunPos, &bRTL))
+        aMissingCodeBuf.append(rLayoutArgs.mrStr.subView(nMinRunPos, nEndRunPos - nMinRunPos));
+    rLayoutArgs.ResetPos();
+    OUString aMissingCodes = aMissingCodeBuf.makeStringAndClear();
+
+    vcl::font::FontSelectPattern aFontSelData(mpFontRealization->mxFont->GetFontSelectPattern());
+    SalLayoutGlyphsImpl* pGlyphsImpl = pGlyphs ? pGlyphs->Impl(1) : nullptr;
+
+    bool bHasUsedFallback = false;
+
+    for (int nFallbackLevel = 1; nFallbackLevel < MAX_FALLBACK; ++nFallbackLevel)
+    {
+        rtl::Reference<LogicalFontInstance> pFallbackFont;
+        if (!bHasUsedFallback && mpForcedFallbackInstance)
+        {
+            pFallbackFont = mpForcedFallbackInstance;
+            bHasUsedFallback = true;
+        }
+        else if (pGlyphsImpl != nullptr)
+        {
+            pFallbackFont = pGlyphsImpl->GetFont();
+        }
+
+        OUString oldMissingCodes = aMissingCodes;
+        if (!pFallbackFont)
+            pFallbackFont = GetFontCache().GetGlyphFallbackFont(GetFontCollection(), aFontSelData,
+                                                                mpFontRealization->mxFont.get(),
+                                                                nFallbackLevel, aMissingCodes);
+        if (!pFallbackFont)
+            break;
+
+        SAL_INFO("vcl", "Fallback font (level " << nFallbackLevel << "): " << pFallbackFont->GetFontFace()->GetFamilyName());
+
+        if (nFallbackLevel < MAX_FALLBACK - 1)
+        {
+            if (mpFontRealization->mxFont->GetFontFace() == pFallbackFont->GetFontFace())
+            {
+                if (aMissingCodes != oldMissingCodes)
+                    aMissingCodes = oldMissingCodes;
+                continue;
+            }
+        }
+
+        std::unique_ptr<SalLayout> pFallback
+            = getFallbackLayout(pFallbackFont.get(), nFallbackLevel, rLayoutArgs, pGlyphs);
+        if (pFallback)
+        {
+            if (!pMultiSalLayout)
+                pMultiSalLayout.reset(new MultiSalLayout(std::move(pSalLayout)));
+            pMultiSalLayout->AddFallback(std::move(pFallback), rLayoutArgs.maRuns);
+            if (nFallbackLevel == MAX_FALLBACK - 1)
+                pMultiSalLayout->SetIncomplete(true);
+        }
+
+        if (pGlyphs != nullptr)
+            pGlyphsImpl = pGlyphs->Impl(nFallbackLevel + 1);
+
+        if (!rLayoutArgs.PrepareFallback(pGlyphsImpl))
+            break;
+    }
+
+    if (pMultiSalLayout)
+    {
+        if (pMultiSalLayout->LayoutText(rLayoutArgs, nullptr))
+            pSalLayout = std::move(pMultiSalLayout);
+        else
+            pSalLayout = pMultiSalLayout->ReleaseBaseLayout();
+    }
+
+    rLayoutArgs.maRuns = std::move(aLayoutRuns);
+    return pSalLayout;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
