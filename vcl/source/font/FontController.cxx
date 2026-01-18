@@ -70,7 +70,6 @@ bool FontController::ShouldDisableAntialiasing(AntialiasingFlags eAntialisingFla
                                                const StyleSettings& rStyleSettings,
                                                tools::Long nHeight) const
 {
-    // decide if antialiasing is appropriate
     bool bNonAntialiased(eAntialisingFlags & AntialiasingFlags::DisableText);
 
     if (!comphelper::IsFuzzing())
@@ -117,11 +116,9 @@ void FontController::InitializeInstance(LogicalFontInstance* pFontInstance, SalG
 
     pFontInstance->mbInit = true;
 
-    // Apply orientation from the selection pattern
     pFontInstance->mxFontMetric->SetOrientation(
         pFontInstance->GetFontSelectPattern().mnOrientation);
 
-    // Fetch physical metrics directly from the graphics driver
     pGraphics->GetFontMetric(pFontInstance->mxFontMetric, 0);
 }
 
@@ -152,14 +149,12 @@ FontController::CalculateTextOffsets(const vcl::Font& rFont,
     }
 
     TextAlign eAlign = rFont.GetAlignment();
+
     if (eAlign == ALIGN_TOP)
         nVerticalOffset = pFontInstance->mxFontMetric->GetAscent() + nEmphasisAscent;
     else if (eAlign == ALIGN_BOTTOM)
         nVerticalOffset = -pFontInstance->mxFontMetric->GetDescent() + nEmphasisDescent;
 
-    // ALIGN_BASELINE sets offsets to 0, which is our default
-
-    // 3. Handle Rotation/Orientation
     if (pFontInstance->mnOrientation && (nHorizontalOffset || nVerticalOffset))
     {
         Point aOriginPt(0, 0);
@@ -273,7 +268,6 @@ bool FontController::GetFontCapabilities(SalGraphics* pGraphics,
     if (!pGraphics)
         return false;
 
-    // Delegate directly to the SalGraphics driver
     return pGraphics->GetFontCapabilities(rFontCapabilities);
 }
 
@@ -314,7 +308,6 @@ FontController::RealizeFont(vcl::font::PhysicalFontCollection* pColl, const vcl:
     vcl::Font aSubstFont;
     OUString aMissingCodes;
 
-    // Restore the regression: Check for system font substitution
     if (GetFontSubstitution(pGraphics, rFont, aMissingCodes, aSubstFont))
         aFontToUse = aSubstFont;
 
