@@ -1241,7 +1241,7 @@ protected:
     SAL_DLLPRIVATE tools::Long GetEmphasisAscent() const;
     SAL_DLLPRIVATE tools::Long GetEmphasisDescent() const;
 
-    SAL_DLLPRIVATE bool InitFont() const;
+    bool InitFont() const;
     virtual void                SetFontOrientation( LogicalFontInstance* const pFontInstance ) const;
     virtual tools::Long                GetFontExtLeading() const;
 
