@@ -127,12 +127,21 @@ namespace {
 
 void OutputDevice::ImplInitTextLineSize()
 {
-    mpFontInstance->mxFontMetric->ImplInitTextLineSize( this );
+    {
+        const vcl::Font& rFont = GetFont();
+        tools::Long nDPIY = GetDPIY();
+        tools::Long nBulletOffset = (GetTextWidth(OUString(u' ')) - GetTextWidth(u"\x00b7"_ustr)) >> 1;
+        mpFontInstance->mxFontMetric->ImplInitTextLineSize(mpFontInstance.get(), nDPIY, rFont, nBulletOffset);
+    }
 }
 
 void OutputDevice::ImplInitAboveTextLineSize()
 {
-    mpFontInstance->mxFontMetric->ImplInitAboveTextLineSize( this );
+    {
+        tools::Long nDPIY = GetDPIY();
+        tools::Long nPixelWidth = LogicToPixel(Size(1, 0)).Width();
+        mpFontInstance->mxFontMetric->ImplInitAboveTextLineSize(nDPIY, nPixelWidth);
+    }
 }
 
 void OutputDevice::ImplDrawWavePixel( tools::Long nOriginX, tools::Long nOriginY,
