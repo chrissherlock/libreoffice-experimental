@@ -531,6 +531,32 @@ void FontController::RemoveFontsSubstitute()
         pSubst->RemoveFontsSubstitute();
 }
 
+void FontController::UpdateAllFontData(bool bNewFontLists)
+{
+    ClearAllFontData(bNewFontLists);
+    RefreshAllFontData(bNewFontLists);
+}
+
+void FontController::ClearAllFontData(bool bNewFontLists)
+{
+    OutputDevice::ImplClearFontsOnAllFrames(bNewFontLists);
+
+    // Clear global font lists
+    ImplSVData* pSVData = ImplGetSVData();
+    pSVData->maGDIData.mxScreenFontCache->Invalidate();
+    if (bNewFontLists && pSVData->maGDIData.mxScreenFontList)
+        pSVData->maGDIData.mxScreenFontList->Clear();
+
+    // Update first frame (fetch new list)
+    if (bNewFontLists)
+        OutputDevice::ImplUpdateFirstFrameGraphics();
+}
+
+void FontController::RefreshAllFontData(bool bNewFontLists)
+{
+    OutputDevice::ImplRefreshFontsOnAllFrames(bNewFontLists);
+}
+
 } // end namespace vcl::font
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

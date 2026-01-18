@@ -151,6 +151,10 @@ public:
     void ClearFontResources(SalGraphics* pGraphics, bool bNewFontLists);
     void UpdateFontData(SalGraphics* pGraphics, bool bNewFontLists);
 
+    // Global System Update
+    static void UpdateAllFontData(bool bNewFontLists);
+    static void ClearAllFontData(bool bNewFontLists);
+    static void RefreshAllFontData(bool bNewFontLists);
     // Global Font Substitution
     static void BeginFontSubstitution();
     static void EndFontSubstitution();

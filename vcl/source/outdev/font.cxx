@@ -273,18 +273,36 @@ void OutputDevice::ImplUpdateFontData()
     mpFontController->UpdateFontData(pGraphics, true);
 }
 
+void OutputDevice::ImplClearFontsOnAllFrames(bool bNewFontLists)
+{
+    ImplUpdateFontDataForAllFrames(&OutputDevice::ImplClearFontData, bNewFontLists);
+}
+
 void OutputDevice::ImplClearAllFontData(bool bNewFontLists)
 {
+    // Forwarding for legacy calls
+    vcl::font::FontController::ClearAllFontData(bNewFontLists);
+}
+
+
+void OutputDevice::ImplRefreshFontsOnAllFrames(bool bNewFontLists)
+{
+    ImplUpdateFontDataForAllFrames(&OutputDevice::ImplRefreshFontData, bNewFontLists);
+}
+
+void OutputDevice::ImplRefreshAllFontData(bool bNewFontLists)
+{
+     // Forwarding for legacy calls
+     vcl::font::FontController::RefreshAllFontData(bNewFontLists);
+}
+
+
+void OutputDevice::ImplUpdateAllFontData(bool bNewFontLists) { vcl::font::FontController::UpdateAllFontData(bNewFontLists); }
+
+
+void OutputDevice::ImplUpdateFirstFrameGraphics()
+{
     ImplSVData* pSVData = ImplGetSVData();
-
-    ImplUpdateFontDataForAllFrames(&OutputDevice::ImplClearFontData, bNewFontLists);
-
-    // clear global font lists to have them updated
-    pSVData->maGDIData.mxScreenFontCache->Invalidate();
-    if (!bNewFontLists)
-        return;
-
-    pSVData->maGDIData.mxScreenFontList->Clear();
     vcl::Window* pFrame = pSVData->maFrameData.mpFirstFrame;
     if (!pFrame)
         return;
@@ -296,17 +314,6 @@ void OutputDevice::ImplClearAllFontData(bool bNewFontLists)
         pDevice->mpGraphics->GetDevFontList(
             pFrame->mpWindowImpl->mpFrameData->mxFontCollection.get());
     }
-}
-
-void OutputDevice::ImplRefreshAllFontData(bool bNewFontLists)
-{
-    ImplUpdateFontDataForAllFrames(&OutputDevice::ImplRefreshFontData, bNewFontLists);
-}
-
-void OutputDevice::ImplUpdateAllFontData(bool bNewFontLists)
-{
-    OutputDevice::ImplClearAllFontData(bNewFontLists);
-    OutputDevice::ImplRefreshAllFontData(bNewFontLists);
 }
 
 void OutputDevice::ImplUpdateFontDataForAllFrames(const FontUpdateHandler_t pHdl,
