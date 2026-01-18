@@ -16,6 +16,10 @@
 #include <vcl/settings.hxx>
 #include <vcl/svapp.hxx>
 #include <svdata.hxx>
+#include <vcl/event.hxx>
+#include <vcl/outdev.hxx>
+#include <vcl/svapp.hxx>
+#include <font/DirectFontSubstitution.hxx>
 
 #include <font/FeatureCollector.hxx>
 #include <font/LogicalFontInstance.hxx>
@@ -488,6 +492,43 @@ void FontController::UpdateFontData(SalGraphics* pGraphics, bool bNewFontLists)
 {
     ClearFontResources(pGraphics, bNewFontLists);
     RefreshFromGraphics(pGraphics);
+}
+
+void FontController::BeginFontSubstitution()
+{
+    ImplSVData* pSVData = ImplGetSVData();
+    pSVData->maGDIData.mbFontSubChanged = false;
+}
+
+void FontController::EndFontSubstitution()
+{
+    ImplSVData* pSVData = ImplGetSVData();
+    if (pSVData->maGDIData.mbFontSubChanged)
+    {
+        OutputDevice::ImplUpdateAllFontData(false);
+
+        DataChangedEvent aDCEvt(DataChangedEventType::FONTSUBSTITUTION);
+        Application::ImplCallEventListenersApplicationDataChanged(&aDCEvt);
+        Application::NotifyAllWindows(aDCEvt);
+        pSVData->maGDIData.mbFontSubChanged = false;
+    }
+}
+
+void FontController::AddFontSubstitute(const OUString& rFontName, const OUString& rReplaceFontName,
+                                       AddFontSubstituteFlags nFlags)
+{
+    vcl::font::DirectFontSubstitution*& rpSubst = ImplGetSVData()->maGDIData.mpDirectFontSubst;
+    if (!rpSubst)
+        rpSubst = new vcl::font::DirectFontSubstitution;
+    rpSubst->AddFontSubstitute(rFontName, rReplaceFontName, nFlags);
+    ImplGetSVData()->maGDIData.mbFontSubChanged = true;
+}
+
+void FontController::RemoveFontsSubstitute()
+{
+    vcl::font::DirectFontSubstitution* pSubst = ImplGetSVData()->maGDIData.mpDirectFontSubst;
+    if (pSubst)
+        pSubst->RemoveFontsSubstitute();
 }
 
 } // end namespace vcl::font
