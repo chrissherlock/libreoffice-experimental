@@ -16,6 +16,7 @@ $(eval $(call gb_CppunitTest_set_include,vcl_textlayout,\
 
 $(eval $(call gb_CppunitTest_add_exception_objects,vcl_textlayout, \
 	vcl/qa/cppunit/textlayout \
+	vcl/qa/cppunit/textlayoutenginetest \
 ))
 
 $(eval $(call gb_CppunitTest_use_externals,vcl_textlayout,\
