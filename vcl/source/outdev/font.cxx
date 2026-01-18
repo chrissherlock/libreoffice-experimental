@@ -266,8 +266,11 @@ void OutputDevice::ImplRefreshFontData(const bool bNewFontLists)
 
 void OutputDevice::ImplUpdateFontData()
 {
-    ImplClearFontData(true /*bNewFontLists*/);
-    ImplRefreshFontData(true /*bNewFontLists*/);
+    SalGraphics* pGraphics = nullptr;
+    if (AcquireGraphics())
+        pGraphics = mpGraphics;
+
+    mpFontController->UpdateFontData(pGraphics, true);
 }
 
 void OutputDevice::ImplClearAllFontData(bool bNewFontLists)
@@ -1092,11 +1095,20 @@ void OutputDevice::ResetNewFontCache()
 
 void OutputDevice::ImplReleaseFonts()
 {
-    mpGraphics->ReleaseFonts();
+    // Delegate resource cleanup to controller
+    // Note: We pass nullptr for graphics because ReleaseGraphics calls this *after* // or *during* release, but mostly we want to clear the *cache* and *lists*.
+    // However, original code called mpGraphics->ReleaseFonts().
+    // If mpGraphics is valid here, we should pass it.
+    // Usually ImplReleaseFonts is called inside ReleaseGraphics(bool bRelease).
+
+    mpFontController->ClearFontResources(mpGraphics, true);
+
+    // OutputDevice state cleanup
     mbNewFont = true;
     mbFontDirty = true;
-    mpFontInstance.clear();
     mpForcedFallbackInstance.clear();
+
+    // Legacy member cleanup (if still used)
     mpFontFaceCollection.reset();
 }
 tools::Long OutputDevice::GetEmphasisAscent() const
