@@ -1258,6 +1258,7 @@ private:
     SAL_DLLPRIVATE void ImplInitializeFontInstance(LogicalFontInstance* pFontInstance) const;
 
     SAL_DLLPRIVATE void ImplInitFontMetrics(LogicalFontInstance* pFontInstance) const;
+    SAL_DLLPRIVATE void ImplScaleFontMetric(FontMetric& rMetric) const;
 
     typedef void ( OutputDevice::* FontUpdateHandler_t )( bool );
 
