@@ -528,33 +528,27 @@ void OutputDevice::ImplInitializeFontInstance(LogicalFontInstance* pFontInstance
 
 void OutputDevice::ImplInitFontMetrics(LogicalFontInstance* pFontInstance) const
 {
-    {
-        const vcl::Font& rFont = GetFont();
-        tools::Long nDPIY = GetDPIY();
+    // 1. Create secure callbacks to expose specific OutputDevice capabilities
+    auto fnMeasureWidth = [this](const OUString& rStr) -> long {
+        return GetTextWidth(rStr);
+    };
 
-        tools::Long nBulletOffset = (GetTextWidth(OUString(u' ')) - GetTextWidth(u"\x00b7"_ustr)) >> 1;
-        pFontInstance->mxFontMetric->ImplInitTextLineSize(pFontInstance, nDPIY, rFont, nBulletOffset);
+    auto fnMeasureRect = [this](tools::Rectangle& rRect, const OUString& rStr) {
+        GetTextBoundRect(rRect, rStr);
+    };
 
-        tools::Long nPixelWidth = LogicToPixel(Size(1, 0)).Width();
-        pFontInstance->mxFontMetric->ImplInitAboveTextLineSize(nDPIY, nPixelWidth);
+    long nDPIY = GetDPIY();
+    long nPixelWidth = LogicToPixel(Size(1, 0)).Width();
 
-        bool bCentered = true;
-        if (MsLangId::isCJK(rFont.GetLanguage()))
-        {
-            tools::Rectangle aRect;
-            GetTextBoundRect( aRect, u"\x3001"_ustr ); // Fullwidth fullstop
-            const auto nH = rFont.GetFontSize().Height();
-            const auto nB = aRect.Left();
-            // Use 18.75% as a threshold to define a centered fullwidth fullstop.
-            // In general, nB/nH < 5% for most Japanese fonts.
-            bCentered = nB > (((nH >> 1)+nH)>>3);
-        }
-        pFontInstance->mxFontMetric->SetFullstopCenteredFlag(bCentered);
-    }
+    // 2. Delegate to Engine (which knows NOTHING about OutputDevice)
+    vcl::text::TextLayoutEngine::InitializeFontMetrics(
+        pFontInstance, GetFont(), nDPIY, nPixelWidth, fnMeasureWidth, fnMeasureRect);
 
+    // 3. Finalize line height (simple arithmetic, can stay here)
     pFontInstance->mnLineHeight
         = pFontInstance->mxFontMetric->GetAscent() + pFontInstance->mxFontMetric->GetDescent();
 }
+
 
 void OutputDevice::SetFontOrientation(LogicalFontInstance* const pFontInstance) const
 {
