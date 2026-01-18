@@ -347,42 +347,16 @@ void OutputDevice::ImplUpdateFontDataForAllFrames(const FontUpdateHandler_t pHdl
     }
 }
 
-void OutputDevice::BeginFontSubstitution()
+void OutputDevice::BeginFontSubstitution() { vcl::font::FontController::BeginFontSubstitution(); }
+
+void OutputDevice::EndFontSubstitution() { vcl::font::FontController::EndFontSubstitution(); }
+
+void OutputDevice::AddFontSubstitute(const OUString& rFontName, const OUString& rReplaceFontName, AddFontSubstituteFlags nFlags)
 {
-    ImplSVData* pSVData = ImplGetSVData();
-    pSVData->maGDIData.mbFontSubChanged = false;
+    vcl::font::FontController::AddFontSubstitute(rFontName, rReplaceFontName, nFlags);
 }
 
-void OutputDevice::EndFontSubstitution()
-{
-    ImplSVData* pSVData = ImplGetSVData();
-    if (pSVData->maGDIData.mbFontSubChanged)
-    {
-        ImplUpdateAllFontData(false);
-
-        DataChangedEvent aDCEvt(DataChangedEventType::FONTSUBSTITUTION);
-        Application::ImplCallEventListenersApplicationDataChanged(&aDCEvt);
-        Application::NotifyAllWindows(aDCEvt);
-        pSVData->maGDIData.mbFontSubChanged = false;
-    }
-}
-
-void OutputDevice::AddFontSubstitute(const OUString& rFontName, const OUString& rReplaceFontName,
-                                     AddFontSubstituteFlags nFlags)
-{
-    vcl::font::DirectFontSubstitution*& rpSubst = ImplGetSVData()->maGDIData.mpDirectFontSubst;
-    if (!rpSubst)
-        rpSubst = new vcl::font::DirectFontSubstitution;
-    rpSubst->AddFontSubstitute(rFontName, rReplaceFontName, nFlags);
-    ImplGetSVData()->maGDIData.mbFontSubChanged = true;
-}
-
-void OutputDevice::RemoveFontsSubstitute()
-{
-    vcl::font::DirectFontSubstitution* pSubst = ImplGetSVData()->maGDIData.mpDirectFontSubst;
-    if (pSubst)
-        pSubst->RemoveFontsSubstitute();
-}
+void OutputDevice::RemoveFontsSubstitute() { vcl::font::FontController::RemoveFontsSubstitute(); }
 
 //hidpi TODO: This routine has hard-coded font-sizes that break places such as DialControl
 vcl::Font OutputDevice::GetDefaultFont(DefaultFontType nType, LanguageType eLang,

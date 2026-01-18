@@ -150,6 +150,13 @@ public:
     void RefreshFromGraphics(SalGraphics* pGraphics);
     void ClearFontResources(SalGraphics* pGraphics, bool bNewFontLists);
     void UpdateFontData(SalGraphics* pGraphics, bool bNewFontLists);
+
+    // Global Font Substitution
+    static void BeginFontSubstitution();
+    static void EndFontSubstitution();
+    static void AddFontSubstitute(const OUString& rFontName, const OUString& rReplaceFontName,
+                                  AddFontSubstituteFlags nFlags);
+    static void RemoveFontsSubstitute();
 };
 
 } // namespace vcl

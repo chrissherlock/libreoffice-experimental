@@ -174,6 +174,7 @@ VCL_DLLPUBLIC void InvertFocusRect(vcl::RenderContext& rRenderContext, const too
 class SAL_WARN_UNUSED VCL_DLLPUBLIC OutputDevice : public virtual VclReferenceBase
 {
     friend class Printer;
+    friend class vcl::font::FontController;
     friend class VirtualDevice;
     friend class vcl::Window;
     friend class vcl::WindowOutputDevice;
