@@ -153,6 +153,7 @@ public:
 
     FontMetric GetFontMetricFromCollection(SalGraphics* pGraphics, size_t nDevFontIndex) const;
     void RefreshFromGraphics(SalGraphics* pGraphics);
+    void UpdateSystemFontList(SalGraphics* pGraphics);
     void ClearFontResources(SalGraphics* pGraphics, bool bNewFontLists);
     void UpdateFontData(SalGraphics* pGraphics, bool bNewFontLists);
 

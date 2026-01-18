@@ -295,10 +295,8 @@ void OutputDevice::ImplUpdateFirstFrameGraphics()
     if (pFrame->GetOutDev()->AcquireGraphics())
     {
         OutputDevice* pDevice = pFrame->GetOutDev();
-        pDevice->mpGraphics->ClearDevFontCache();
-        pDevice->mpGraphics->GetDevFontList(
-            pFrame->mpWindowImpl->mpFrameData->mxFontCollection.get());
-    }
+
+        pDevice->mpFontController->UpdateSystemFontList(pDevice->mpGraphics);}
 }
 
 void OutputDevice::ImplUpdateFontDataForAllFrames(const FontUpdateHandler_t pHdl,

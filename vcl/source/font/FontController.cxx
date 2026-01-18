@@ -708,6 +708,15 @@ vcl::Font FontController::GetDefaultFont(DefaultFontType nType, LanguageType eLa
     return aFont;
 }
 
+void FontController::UpdateSystemFontList(SalGraphics* pGraphics)
+{
+    if (pGraphics)
+    {
+        pGraphics->ClearDevFontCache();
+        pGraphics->GetDevFontList(GetFontCollection());
+    }
+}
+
 } // end namespace vcl::font
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
