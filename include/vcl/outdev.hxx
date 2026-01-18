@@ -1217,6 +1217,7 @@ protected:
     virtual bool ImplNewFont() const;
 
 private:
+    SAL_DLLPRIVATE void ImplInitializeFontInstance(LogicalFontInstance* pFontInstance) const;
 
     SAL_DLLPRIVATE void ImplInitFontMetrics(LogicalFontInstance* pFontInstance) const;
 
