@@ -16,6 +16,7 @@ $(eval $(call gb_CppunitTest_set_include,vcl_fontmetric,\
 
 $(eval $(call gb_CppunitTest_add_exception_objects,vcl_fontmetric, \
 	vcl/qa/cppunit/fontmetric \
+	vcl/qa/cppunit/fontmetricdata \
 ))
 
 $(eval $(call gb_CppunitTest_use_externals,vcl_fontmetric,boost_headers))

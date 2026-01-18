@@ -40,7 +40,10 @@ class LogicalFontInstance;
 class VCL_DLLPUBLIC FontMetricData final : public FontAttributes, public SvRefBase
 {
 public:
-    SAL_DLLPRIVATE explicit FontMetricData( const vcl::font::FontSelectPattern& );
+    void            SetAscent(tools::Long nAscent) { mnAscent = nAscent; }
+    void            SetDescent(tools::Long nDescent) { mnDescent = nDescent; }
+
+    explicit FontMetricData( const vcl::font::FontSelectPattern& );
 
     // font instance attributes from the font request
     tools::Long            GetWidth() const                                                { return mnWidth; }
@@ -52,6 +55,7 @@ public:
     // font metrics measured for the font instance
     tools::Long            GetAscent() const                                               { return mnAscent; }
     tools::Long            GetDescent() const                                              { return mnDescent; }
+
     tools::Long            GetInternalLeading() const                                      { return mnIntLeading; }
     tools::Long            GetExternalLeading() const                                      { return mnExtLeading; }
     int             GetSlant() const                                                { return mnSlant; }
@@ -98,6 +102,9 @@ public:
     tools::Long            GetDoubleStrikeoutOffset2() const                               { return mnDStrikeoutOffset2; }
 
     SAL_DLLPRIVATE void ImplInitTextLineSize( const OutputDevice* pDev );
+    void ImplInitBulletOffset( const OutputDevice* pDev );
+    void ImplInitTextLineSizeMeasurements( const OutputDevice* pDev );
+
     SAL_DLLPRIVATE void ImplInitAboveTextLineSize( const OutputDevice* pDev );
     SAL_DLLPRIVATE void ImplInitFlags( const OutputDevice* pDev );
     void            ImplCalcLineSpacing(LogicalFontInstance *pFontInstance);
