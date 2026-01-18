@@ -40,6 +40,7 @@
 #include <font/LogicalFontInstance.hxx>
 #include <font/PhysicalFontCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
+#include <text/TextLayoutEngine.hxx>
 #include <sallayout.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>
@@ -448,7 +449,9 @@ bool OutputDevice::ImplNewFont() const
         = mpFontController->CalculateDeviceSize(mpGraphicsState->maFont, *mpMapper, GetDPIY());
 
     if (mpFontController->NeedsOLEFontScaleFix(*mpMapper, aSize))
+    {
         aSize = mpFontController->GetOLECorrectedSize(*mpMapper, aSize, aSize.Height());
+    }
 
     const bool bNonAntialiased = mpFontController->ShouldDisableAntialiasing(
         GetAntialiasing(), GetSettings().GetStyleSettings(),
@@ -730,26 +733,23 @@ tools::Long OutputDevice::GetMinKashida() const
     return mpMapper->DevicePixelToLogicWidth(nKashidaWidth);
 }
 
-// tdf#163105: Get map of valid kashida positions for a single word
 void OutputDevice::GetWordKashidaPositions(const OUString& rText, std::vector<bool>* pOutMap) const
 {
-    pOutMap->clear();
+    if (!pOutMap)
+        return;
+
     auto nEnd = rText.getLength();
     std::unique_ptr<SalLayout> pSalLayout = ImplLayout(rText, 0, nEnd);
     if (!pSalLayout || !pSalLayout->HasFontKashidaPositions())
         return;
 
-    pOutMap->resize(nEnd, false);
-    for (sal_Int32 i = 0; i < nEnd; ++i)
+    if (!pSalLayout)
     {
-        auto nNextPos = i + 1;
-        while (nNextPos < nEnd && u_getIntPropertyValue(rText[nNextPos], UCHAR_JOINING_TYPE) == U_JT_TRANSPARENT)
-        {
-            ++nNextPos;
-        }
-
-        pOutMap->at(i) = pSalLayout->IsKashidaPosValid(i, nNextPos);
+        pOutMap->clear();
+        return;
     }
+
+    vcl::text::TextLayoutEngine::GetWordKashidaPositions(*pSalLayout, rText, *pOutMap);
 }
 
 bool OutputDevice::GetGlyphBoundRects(const Point& rOrigin, const OUString& rStr, int nIndex,
