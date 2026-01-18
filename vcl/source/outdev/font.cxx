@@ -134,11 +134,15 @@ bool OutputDevice::IsFontAvailable(std::u16string_view rFontName) const
 
 bool OutputDevice::AddTempDevFont(const OUString& rFileURL, const OUString& rFontName) const
 {
+    if (!mpGraphics && !const_cast<OutputDevice*>(this)->AcquireGraphics())
+        return false;
     return mpFontController && mpFontController->AddTempDevFont(mpGraphics, rFileURL, rFontName);
 }
 
 bool OutputDevice::RemoveTempDevFont(const OUString& rFileURL, const OUString& rFontName)
 {
+    if (!mpGraphics && !AcquireGraphics())
+        return false;
     return mpFontController && mpFontController->RemoveTempDevFont(mpGraphics, rFileURL, rFontName);
 }
 
@@ -217,6 +221,8 @@ bool OutputDevice::GetFontCharMap(FontCharMapRef& rxFontCharMap) const
 
 bool OutputDevice::GetFontCapabilities(vcl::FontCapabilities& rFontCapabilities) const
 {
+    if (!mpGraphics && !const_cast<OutputDevice*>(this)->AcquireGraphics())
+        return false;
     return mpFontController && mpFontController->GetFontCapabilities(mpGraphics, rFontCapabilities);
 }
 
