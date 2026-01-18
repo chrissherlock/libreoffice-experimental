@@ -282,22 +282,7 @@ void FontMetricData::ImplInitAboveTextLineSize( tools::Long nDPIY, tools::Long n
     ImplInitAboveTextLineSizeMeasurements( nDPIY, nSinglePixelWidth );
 }
 
-void FontMetricData::ImplInitFlags( const OutputDevice* pDev )
-{
-    const vcl::Font& rFont ( pDev->GetFont() );
-    bool bCentered = true;
-    if (MsLangId::isCJK(rFont.GetLanguage()))
-    {
-        tools::Rectangle aRect;
-        pDev->GetTextBoundRect( aRect, u"\x3001"_ustr ); // Fullwidth fullstop
-        const auto nH = rFont.GetFontSize().Height();
-        const auto nB = aRect.Left();
-        // Use 18.75% as a threshold to define a centered fullwidth fullstop.
-        // In general, nB/nH < 5% for most Japanese fonts.
-        bCentered = nB > (((nH >> 1)+nH)>>3);
-    }
-    SetFullstopCenteredFlag( bCentered );
-}
+
 
 bool FontMetricData::ShouldUseWinMetrics(int nAscent, int nDescent, int nTypoAscent,
                                              int nTypoDescent, int nWinAscent,

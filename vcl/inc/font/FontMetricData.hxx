@@ -109,7 +109,6 @@ public:
 
     SAL_DLLPRIVATE void ImplInitAboveTextLineSize( tools::Long nDPIY, tools::Long nSinglePixelWidth );
     void ImplInitAboveTextLineSizeMeasurements( tools::Long nDPIY, tools::Long nSinglePixelWidth );
-    SAL_DLLPRIVATE void ImplInitFlags( const OutputDevice* pDev );
     void            ImplCalcLineSpacing(LogicalFontInstance *pFontInstance);
     void            ImplInitBaselines(LogicalFontInstance *pFontInstance);
 
