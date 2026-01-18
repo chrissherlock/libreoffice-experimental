@@ -283,30 +283,10 @@ void FontMetricData::ImplInitAboveTextLineSize( const OutputDevice* pDev )
 {
     ImplInitTextLineSize(pDev);
 
-    tools::Long nIntLeading = mnIntLeading;
-    // TODO: assess usage of nLeading below (changed in extleading CWS)
-    // if no leading is available, we assume 15% of the ascent
-    if ( nIntLeading <= 0 )
-    {
-        nIntLeading = mnAscent*15/100;
-        if ( !nIntLeading )
-            nIntLeading = 1;
-    }
+    tools::Long nDPIY = pDev->GetDPIY();
+    tools::Long nPixelWidth = pDev->LogicToPixel(Size(1, 0)).Width();
 
-    tools::Long nCeiling = -mnAscent;
-
-    mnAboveUnderlineSize       = mnUnderlineSize;
-    mnAboveUnderlineOffset     = nCeiling + (nIntLeading - mnUnderlineSize + 1) / 2;
-
-    mnAboveBUnderlineSize      = mnBUnderlineSize;
-    mnAboveBUnderlineOffset    = nCeiling + (nIntLeading - mnBUnderlineSize + 1) / 2;
-
-    mnAboveDUnderlineSize      = mnDUnderlineSize;
-    mnAboveDUnderlineOffset1   = nCeiling + (nIntLeading - 3*mnDUnderlineSize + 1) / 2;
-    mnAboveDUnderlineOffset2   = nCeiling + (nIntLeading +   mnDUnderlineSize + 1) / 2;
-
-    mnAboveWUnderlineSize = mnWUnderlineSize;
-    mnAboveWUnderlineOffset = nCeiling + (nIntLeading + 1) / 2;
+    ImplInitAboveTextLineSizeMeasurements( nDPIY, nPixelWidth );
 }
 
 void FontMetricData::ImplInitFlags( const OutputDevice* pDev )
@@ -605,4 +585,25 @@ void FontMetricData::ImplInitTextLineSizeMeasurements( tools::Long nDPIY, const 
     mnDStrikeoutSize       = n2LineHeight;
     mnDStrikeoutOffset1    = nStrikeoutOffset - n2LineDY2 - n2LineHeight;
     mnDStrikeoutOffset2    = mnDStrikeoutOffset1 + n2LineDY + n2LineHeight;
+}
+
+
+void FontMetricData::ImplInitAboveTextLineSizeMeasurements( tools::Long nDPIY, tools::Long nSinglePixelWidth )
+{
+    mnAboveUnderlineSize = nSinglePixelWidth;
+
+    if ( !mnAboveUnderlineSize )
+    {
+        if ( nDPIY > 150 )
+            mnAboveUnderlineSize = nDPIY / 150;
+
+        if ( mnAboveUnderlineSize < 1 )
+            mnAboveUnderlineSize = 1;
+    }
+
+    if ( mnAboveUnderlineSize == 1 )
+    {
+        if ( (nDPIY > 150) && (mnHeight > 24) )
+            mnAboveUnderlineSize = 2;
+    }
 }
