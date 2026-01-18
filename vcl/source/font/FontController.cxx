@@ -7,20 +7,24 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include <osl/thread.h>
+#include <unotools/fontdefs.hxx>
 #include <comphelper/configuration.hxx>
+#include <i18nlangtag/mslangid.hxx>
 
+#include <vcl/event.hxx>
 #include <vcl/font.hxx>
 #include <vcl/fntstyle.hxx>
 #include <vcl/metric.hxx>
+#include <vcl/outdev.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
+#include <vcl/rendercontext/GetDefaultFontFlags.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/svapp.hxx>
-#include <svdata.hxx>
-#include <vcl/event.hxx>
-#include <vcl/outdev.hxx>
-#include <vcl/svapp.hxx>
-#include <font/DirectFontSubstitution.hxx>
 
+#include <CoordinateMapper.hxx>
+#include <FontController.hxx>
+#include <font/DirectFontSubstitution.hxx>
 #include <font/FeatureCollector.hxx>
 #include <font/LogicalFontInstance.hxx>
 #include <font/PhysicalFontCollection.hxx>
@@ -28,8 +32,7 @@
 #include <font/PhysicalFontFace.hxx>
 #include <impfontcache.hxx>
 #include <salgdi.hxx>
-#include <CoordinateMapper.hxx>
-#include <FontController.hxx>
+#include <svdata.hxx>
 
 #include <tuple>
 
@@ -555,6 +558,154 @@ void FontController::ClearAllFontData(bool bNewFontLists)
 void FontController::RefreshAllFontData(bool bNewFontLists)
 {
     OutputDevice::ImplRefreshFontsOnAllFrames(bNewFontLists);
+}
+
+vcl::Font FontController::GetDefaultFont(DefaultFontType nType, LanguageType eLang,
+                                         GetDefaultFontFlags nFlags, const OutputDevice* pOutDev)
+{
+    // Implementation moved from OutputDevice
+    static bool bFuzzing = comphelper::IsFuzzing();
+    static bool bAbortOnFontSubstitute = [] {
+        const char* pEnv = getenv("SAL_NON_APPLICATION_FONT_USE");
+        return pEnv && strcmp(pEnv, "abort") == 0;
+    }();
+
+    if (!pOutDev && !bFuzzing)
+        pOutDev = Application::GetDefaultDevice();
+
+    OUString aSearch;
+    if (!bFuzzing)
+    {
+        LanguageTag aLanguageTag(
+            (eLang == LANGUAGE_NONE || eLang == LANGUAGE_SYSTEM || eLang == LANGUAGE_DONTKNOW)
+                ? Application::GetSettings().GetUILanguageTag()
+                : LanguageTag(eLang));
+
+        utl::DefaultFontConfiguration& rDefaults = utl::DefaultFontConfiguration::get();
+        OUString aDefault = rDefaults.getDefaultFont(aLanguageTag, nType);
+
+        if (!aDefault.isEmpty())
+            aSearch = aDefault;
+        else
+            aSearch = rDefaults.getUserInterfaceFont(aLanguageTag);
+
+        if (bAbortOnFontSubstitute)
+        {
+            if (eLang == LANGUAGE_HINDI || eLang == LANGUAGE_CHINESE_SIMPLIFIED)
+                aSearch = "DejaVu Sans";
+        }
+    }
+    else
+        aSearch = "Liberation Serif";
+
+    vcl::Font aFont;
+    aFont.SetPitch(PITCH_VARIABLE);
+
+    switch (nType)
+    {
+        case DefaultFontType::SANS_UNICODE:
+        case DefaultFontType::UI_SANS:
+        case DefaultFontType::SANS:
+        case DefaultFontType::LATIN_HEADING:
+        case DefaultFontType::LATIN_SPREADSHEET:
+        case DefaultFontType::LATIN_DISPLAY:
+            aFont.SetFamily(FAMILY_SWISS);
+            break;
+        case DefaultFontType::SERIF:
+        case DefaultFontType::LATIN_TEXT:
+        case DefaultFontType::LATIN_PRESENTATION:
+            aFont.SetFamily(FAMILY_ROMAN);
+            break;
+        case DefaultFontType::FIXED:
+        case DefaultFontType::LATIN_FIXED:
+        case DefaultFontType::UI_FIXED:
+            aFont.SetPitch(PITCH_FIXED);
+            aFont.SetFamily(FAMILY_MODERN);
+            break;
+        case DefaultFontType::SYMBOL:
+            aFont.SetCharSet(RTL_TEXTENCODING_SYMBOL);
+            break;
+        case DefaultFontType::CJK_TEXT:
+        case DefaultFontType::CJK_PRESENTATION:
+        case DefaultFontType::CJK_SPREADSHEET:
+        case DefaultFontType::CJK_HEADING:
+        case DefaultFontType::CJK_DISPLAY:
+        case DefaultFontType::CTL_TEXT:
+        case DefaultFontType::CTL_PRESENTATION:
+        case DefaultFontType::CTL_SPREADSHEET:
+        case DefaultFontType::CTL_HEADING:
+        case DefaultFontType::CTL_DISPLAY:
+            aFont.SetFamily(FAMILY_SYSTEM);
+            break;
+    }
+
+    if (!aSearch.isEmpty())
+    {
+        aFont.SetFontHeight(12);
+        aFont.SetWeight(WEIGHT_NORMAL);
+        aFont.SetLanguage(eLang);
+
+        if (aFont.GetCharSet() == RTL_TEXTENCODING_DONTKNOW)
+            aFont.SetCharSet(osl_getThreadTextEncoding());
+
+        if (pOutDev)
+        {
+            pOutDev->ImplInitFontList();
+            OUString aName;
+            sal_Int32 nIndex = 0;
+            do
+            {
+                vcl::font::PhysicalFontFamily* pFontFamily
+                    = pOutDev->GetSharedFontCollection()->FindFontFamily(
+                        GetNextFontToken(aSearch, nIndex));
+                if (pFontFamily)
+                {
+                    AddTokenFontName(aName, pFontFamily->GetFamilyName());
+                    if (nFlags & GetDefaultFontFlags::OnlyOne)
+                        break;
+                }
+            } while (nIndex != -1);
+            aFont.SetFamilyName(aName);
+        }
+
+        if (aFont.GetFamilyName().isEmpty())
+        {
+            if (nFlags & GetDefaultFontFlags::OnlyOne)
+            {
+                if (!pOutDev)
+                {
+                    SAL_WARN_IF(!comphelper::IsFuzzing(), "vcl.gdi", "No default window set");
+                    aFont.SetFamilyName(aSearch.getToken(0, ';'));
+                }
+                else
+                {
+                    pOutDev->ImplInitFontList();
+                    aFont.SetFamilyName(aSearch);
+                    Size aSize = pOutDev->LogicToDevicePixel(aFont.GetFontSize());
+                    if (!aSize.Height())
+                    {
+                        if (aFont.GetFontHeight())
+                            aSize.setHeight(1);
+                        else
+                            aSize.setHeight((12 * pOutDev->GetDPIY()) / 72);
+                    }
+                    if ((0 == aSize.Width()) && (0 != aFont.GetFontSize().Width()))
+                        aSize.setWidth(1);
+
+                    float fExactHeight = static_cast<float>(aSize.Height());
+                    rtl::Reference<LogicalFontInstance> pFontInstance
+                        = pOutDev->mpFontController->RealizeFont(pOutDev->GetFontCollection(),
+                                                                 aFont, pOutDev->GetGraphics(),
+                                                                 aSize, fExactHeight, false);
+                    if (pFontInstance)
+                        aFont.SetFamilyName(pFontInstance->GetFontFace()->GetFamilyName());
+                }
+            }
+            else
+                aFont.SetFamilyName(aSearch);
+        }
+    }
+    return aFont;
 }
 
 } // end namespace vcl::font

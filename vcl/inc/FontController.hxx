@@ -17,8 +17,9 @@
 #include <vcl/metric.hxx>
 #include <vcl/vclenum.hxx>
 
-#include <tuple>
 #include <impfontcache.hxx>
+
+#include <tuple>
 
 class ImplFontCache;
 class PhysicalFontCollection;
@@ -43,6 +44,8 @@ struct FontRealization
     bool bHasSpecialEffects = false;
 
     vcl::text::ComplexTextLayoutFlags eLayoutMode = vcl::text::ComplexTextLayoutFlags::Default;
+    static vcl::Font GetDefaultFont(DefaultFontType nType, LanguageType eLang,
+                                    GetDefaultFontFlags nFlags, const OutputDevice* pOutDev);
 };
 
 class VCL_DLLPUBLIC FontController
@@ -161,6 +164,8 @@ public:
     static void AddFontSubstitute(const OUString& rFontName, const OUString& rReplaceFontName,
                                   AddFontSubstituteFlags nFlags);
     static void RemoveFontsSubstitute();
+    static vcl::Font GetDefaultFont(DefaultFontType nType, LanguageType eLang,
+                                    GetDefaultFontFlags nFlags, const OutputDevice* pOutDev);
 };
 
 } // namespace vcl
