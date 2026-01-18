@@ -826,7 +826,18 @@ void OutputDevice::ImplInitFontMetrics(LogicalFontInstance* pFontInstance) const
         tools::Long nPixelWidth = LogicToPixel(Size(1, 0)).Width();
         pFontInstance->mxFontMetric->ImplInitAboveTextLineSize(nDPIY, nPixelWidth);
 
-        pFontInstance->mxFontMetric->ImplInitFlags(this);
+        bool bCentered = true;
+        if (MsLangId::isCJK(rFont.GetLanguage()))
+        {
+            tools::Rectangle aRect;
+            GetTextBoundRect( aRect, u"\x3001"_ustr ); // Fullwidth fullstop
+            const auto nH = rFont.GetFontSize().Height();
+            const auto nB = aRect.Left();
+            // Use 18.75% as a threshold to define a centered fullwidth fullstop.
+            // In general, nB/nH < 5% for most Japanese fonts.
+            bCentered = nB > (((nH >> 1)+nH)>>3);
+        }
+        pFontInstance->mxFontMetric->SetFullstopCenteredFlag(bCentered);
     }
 
     pFontInstance->mnLineHeight
