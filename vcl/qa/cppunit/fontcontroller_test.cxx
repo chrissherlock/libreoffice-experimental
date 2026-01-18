@@ -15,6 +15,7 @@
 
 #include <FontController.hxx>
 #include <font/LogicalFontInstance.hxx>
+#include <font/PhysicalFontCollection.hxx>
 
 using namespace vcl;
 using namespace vcl::font;
@@ -32,11 +33,13 @@ public:
     void testGetTextLayoutFlags();
     void testCalculateTextOffsets();
     void testNeedsUpdate();
+    void testCreateFontInstance();
 
     CPPUNIT_TEST_SUITE(VclFontControllerTest);
     CPPUNIT_TEST(testGetTextLayoutFlags);
     CPPUNIT_TEST(testCalculateTextOffsets);
     CPPUNIT_TEST(testNeedsUpdate);
+    CPPUNIT_TEST(testCreateFontInstance);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -83,6 +86,45 @@ void VclFontControllerTest::testNeedsUpdate()
     // Initially, there is no font instance, so an update is required
     CPPUNIT_ASSERT_EQUAL_MESSAGE("New controller must need update", true,
                                  aController.NeedsUpdate(aFont, false));
+}
+
+void VclFontControllerTest::testCreateFontInstance()
+{
+    ScopedVclPtr<VirtualDevice> pVDev = VclPtr<VirtualDevice>::Create();
+    CPPUNIT_ASSERT(pVDev);
+
+    FontController aController;
+
+    // We use the VirtualDevice to provide the FontCollection.
+    // In headless mode, this might rely on generic fallbacks, which is what we want to test.
+    vcl::font::PhysicalFontCollection* pPFC = pVDev->GetFontCollection();
+
+    // If pPFC is null (headless environment often has no fonts initially),
+    // we force an initialization via the device to trigger the fallback logic.
+    if (!pPFC)
+    {
+        // Trigger internal initialization by asking for a metric
+        pVDev->GetFontMetric(vcl::Font("Liberation Sans", Size(0, 12)));
+        pPFC = pVDev->GetFontCollection();
+    }
+
+    if (!pPFC)
+    {
+        printf("Skipping testCreateFontInstance: No PhysicalFontCollection available.\n");
+        return;
+    }
+
+    vcl::Font aFont("Liberation Sans", Size(0, 12));
+    SalGraphics* pGraphics = pVDev->GetGraphics();
+    CoordinateMapper aMapper(pVDev.get());
+    long nDPIY = 96;
+    AntialiasingFlags eAA = AntialiasingFlags::Enable;
+    StyleSettings aStyle;
+
+    rtl::Reference<LogicalFontInstance> pInstance
+        = aController.CreateFontInstance(pPFC, aFont, pGraphics, aMapper, nDPIY, eAA, aStyle);
+
+    CPPUNIT_ASSERT_MESSAGE("CreateFontInstance returned null", pInstance.is());
 }
 
 } // namespace
