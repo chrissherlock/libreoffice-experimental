@@ -20,6 +20,7 @@
 
 #include <font/LogicalFontInstance.hxx>
 #include <font/PhysicalFontCollection.hxx>
+
 #include <font/FontController.hxx>
 #include <CoordinateMapper.hxx>
 
@@ -38,17 +39,14 @@ public:
         ScopedVclPtr<VirtualDevice> pVDev = VclPtr<VirtualDevice>::Create();
         CPPUNIT_ASSERT(pVDev);
 
-        //  Discover a Valid Font Name via Metric Resolution
-        // Instead of iterating, we ask the device: "What would you use for 'Default'?"
+        // We ask the device to resolve "Default". If it has *any* fonts, it will give us a name.
         vcl::Font aRefFont("Default", Size(0, 12));
         FontMetric aMetric = pVDev->GetFontMetric(aRefFont);
 
         OUString sFontName = aMetric.GetFamilyName();
 
-        // obustness: If the system has NO fonts, it might return empty or "Default".
-        // In that case, we can't really test specific realization, so we check for basic sanity.
+        // Sanity Check: If the environment has absolutely NO fonts, we must skip.
         PhysicalFontCollection* pPFC = pVDev->GetFontCollection();
-
         if (!pPFC || pPFC->Count() == 0)
         {
             printf(
@@ -56,14 +54,14 @@ public:
             return;
         }
 
-        // If sFontName is empty, try a fallback like "Liberation Sans" or "Arial" just in case.
+        // If generic resolution failed but collection is not empty, pick a safe fallback
         if (sFontName.isEmpty())
             sFontName = "Liberation Sans";
 
         FontController aController;
         vcl::Font aFont(sFontName, Size(0, 12));
         SalGraphics* pGraphics = pVDev->GetGraphics();
-        CoordinateMapper aMapper; // Default identity map
+        CoordinateMapper aMapper; // Default constructor (Identity)
         long nDPIY = 96;
         AntialiasingFlags eAA = AntialiasingFlags::Enable;
         StyleSettings aStyle;
