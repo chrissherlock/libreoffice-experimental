@@ -1231,9 +1231,6 @@ public:
     //fetch font data for all outputdevices
     //If bNewFontLists is true then fetch lists of system fonts
     static void  ImplRefreshAllFontData( bool bNewFontLists );
-    //drop and fetch font data for all outputdevices
-    //If bNewFontLists is true then drop and refetch lists of system fonts
-    SAL_DLLPRIVATE static void  ImplUpdateAllFontData( bool bNewFontLists );
 
     LogicalFontInstance const* GetFontInstance() const;
     bool ForceFallbackFont(vcl::Font const& rFallbackFont);

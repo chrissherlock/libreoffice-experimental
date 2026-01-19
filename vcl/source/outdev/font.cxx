@@ -294,10 +294,6 @@ void OutputDevice::ImplRefreshAllFontData(bool bNewFontLists)
      vcl::font::FontController::RefreshAllFontData(bNewFontLists);
 }
 
-
-void OutputDevice::ImplUpdateAllFontData(bool bNewFontLists) { vcl::font::FontController::UpdateAllFontData(bNewFontLists); }
-
-
 void OutputDevice::ImplUpdateFirstFrameGraphics()
 {
     ImplSVData* pSVData = ImplGetSVData();

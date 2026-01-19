@@ -34,6 +34,7 @@
 #include <comphelper/storagehelper.hxx>
 #include <unotools/tempfile.hxx>
 
+#include <font/FontController.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <font/PhysicalFontCollection.hxx>
 #include <salgdi.hxx>
@@ -552,7 +553,7 @@ void EmbeddedFontsManager::releaseFonts(const std::vector<std::pair<OUString, OU
             osl::File::remove(url);
     }
 
-    OutputDevice::ImplUpdateAllFontData(true);
+    vcl::font::FontController::UpdateAllFontData(true);
 }
 
 // static
