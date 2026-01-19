@@ -8,6 +8,7 @@
  */
 
 #include <text/TextLayoutEngine.hxx>
+#include <vcl/outdev.hxx>
 #include <vcl/font.hxx>
 #include <i18nlangtag/mslangid.hxx>
 #include <font/LogicalFontInstance.hxx>
@@ -103,6 +104,35 @@ void TextLayoutEngine::InitializeFontMetrics(
         bCentered = nB > (((nH >> 1) + nH) >> 3);
     }
     pFontInstance->mxFontMetric->SetFullstopCenteredFlag(bCentered);
+}
+
+SalLayoutFlags TextLayoutEngine::GetBiDiLayoutFlags(vcl::text::ComplexTextLayoutFlags eLayoutMode,
+                                                    std::u16string_view rStr,
+                                                    const sal_Int32 nMinIndex,
+                                                    const sal_Int32 nEndIndex)
+{
+    SalLayoutFlags nLayoutFlags = SalLayoutFlags::NONE;
+    if (eLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiRtl)
+        nLayoutFlags |= SalLayoutFlags::BiDiRtl;
+    if (eLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiStrong)
+        nLayoutFlags |= SalLayoutFlags::BiDiStrong;
+    else if (!(eLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiRtl))
+    {
+        // Disable Bidi if no RTL hint and only known LTR codes used.
+        bool bAllLtr = true;
+        for (sal_Int32 i = nMinIndex; i < nEndIndex; i++)
+        {
+            // [0x0000, 0x052F] are Latin, Greek and Cyrillic.
+            if (rStr[i] > 0x052F)
+            {
+                bAllLtr = false;
+                break;
+            }
+        }
+        if (bAllLtr)
+            nLayoutFlags |= SalLayoutFlags::BiDiStrong;
+    }
+    return nLayoutFlags;
 }
 
 } // namespace vcl::text

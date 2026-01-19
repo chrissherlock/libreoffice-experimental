@@ -52,6 +52,7 @@
 #include <textlineinfo.hxx>
 #include <impglyphitem.hxx>
 #include <TextLayoutCache.hxx>
+#include <text/TextLayoutEngine.hxx>
 
 #include <memory>
 #include <optional>
@@ -1067,30 +1068,8 @@ SalLayoutFlags OutputDevice::GetBiDiLayoutFlags( std::u16string_view rStr,
                                                  const sal_Int32 nMinIndex,
                                                  const sal_Int32 nEndIndex ) const
 {
-    SalLayoutFlags nLayoutFlags = SalLayoutFlags::NONE;
-    if( mpFontRealization->eLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiRtl )
-        nLayoutFlags |= SalLayoutFlags::BiDiRtl;
-    if( mpFontRealization->eLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiStrong )
-        nLayoutFlags |= SalLayoutFlags::BiDiStrong;
-    else if( !(mpFontRealization->eLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiRtl) )
-    {
-        // Disable Bidi if no RTL hint and only known LTR codes used.
-        bool bAllLtr = true;
-        for (sal_Int32 i = nMinIndex; i < nEndIndex; i++)
-        {
-            // [0x0000, 0x052F] are Latin, Greek and Cyrillic.
-            // [0x0370, 0x03FF] has a few holes as if Unicode 10.0.0, but
-            //                  hopefully no RTL character will be encoded there.
-            if (rStr[i] > 0x052F)
-            {
-                bAllLtr = false;
-                break;
-            }
-        }
-        if (bAllLtr)
-            nLayoutFlags |= SalLayoutFlags::BiDiStrong;
-    }
-    return nLayoutFlags;
+    return vcl::text::TextLayoutEngine::GetBiDiLayoutFlags(
+        mpFontRealization->eLayoutMode, rStr, nMinIndex, nEndIndex);
 }
 
 static OutputDevice::FontMappingUseData* fontMappingUseData = nullptr;
