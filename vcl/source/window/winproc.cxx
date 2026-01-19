@@ -49,6 +49,7 @@
 #include <vcl/uitest/logger.hxx>
 #include <vcl/ptrstyle.hxx>
 
+#include <font/FontController.hxx>
 #include <svdata.hxx>
 #include <salwtype.hxx>
 #include <salframe.hxx>
@@ -2502,7 +2503,7 @@ static void ImplHandleSalSettings( SalEvent nEvent )
                 nType = DataChangedEventType::DISPLAY;
                 break;
             case SalEvent::FontChanged:
-                OutputDevice::ImplUpdateAllFontData( true );
+                vcl::font::FontController::UpdateAllFontData( true );
                 nType = DataChangedEventType::FONTS;
                 break;
             default:
