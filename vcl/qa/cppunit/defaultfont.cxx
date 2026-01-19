@@ -18,7 +18,7 @@
 #include <vcl/font.hxx>
 #include <vcl/svapp.hxx>
 
-#include <FontController.hxx>
+#include <font/FontController.hxx>
 
 using namespace vcl;
 

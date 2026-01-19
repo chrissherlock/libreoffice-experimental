@@ -28,8 +28,8 @@
 
 #include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
-#include <FontController.hxx>
 #include <GraphicsState.hxx>
+#include <font/FontController.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 

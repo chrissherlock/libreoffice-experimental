@@ -25,16 +25,17 @@
 #include <o3tl/lru_map.hxx>
 #include <comphelper/configuration.hxx>
 #include <tools/lazydelete.hxx>
+
 #include <vcl/dropcache.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
-#include <FontController.hxx>
 #include <vcl/skia/SkiaHelper.hxx>
 
 #include <ClippingController.hxx>
 #include <GraphicsState.hxx>
+#include <font/FontController.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 #include <impglyphitem.hxx>

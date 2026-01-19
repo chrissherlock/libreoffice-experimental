@@ -23,7 +23,6 @@
 #include <tuple>
 
 class ImplFontCache;
-class PhysicalFontCollection;
 class CoordinateMapper;
 class LogicalFontInstance;
 class SalGraphics;
@@ -31,6 +30,7 @@ class SalGraphics;
 namespace vcl::font
 {
 class Font;
+class PhysicalFontCollection;
 struct Feature;
 
 struct FontRealization

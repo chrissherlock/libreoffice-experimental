@@ -13,7 +13,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/svapp.hxx>
 
-#include <FontController.hxx>
+#include <font/FontController.hxx>
 #include <svdata.hxx>
 
 using namespace vcl;

@@ -36,7 +36,7 @@
 
 #include <CoordinateMapper.hxx>
 #include <ClippingController.hxx>
-#include <FontController.hxx>
+#include <font/FontController.hxx>
 #include <GraphicsState.hxx>
 #include <ImplOutDevData.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>

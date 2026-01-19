@@ -23,7 +23,7 @@
 #include <vcl/svapp.hxx>
 
 #include <CoordinateMapper.hxx>
-#include <FontController.hxx>
+#include <font/FontController.hxx>
 #include <font/DirectFontSubstitution.hxx>
 #include <font/FeatureCollector.hxx>
 #include <font/LogicalFontInstance.hxx>
