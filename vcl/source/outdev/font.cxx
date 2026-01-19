@@ -449,9 +449,7 @@ bool OutputDevice::ImplNewFont() const
         = mpFontController->CalculateDeviceSize(mpGraphicsState->maFont, *mpMapper, GetDPIY());
 
     if (mpFontController->NeedsOLEFontScaleFix(*mpMapper, aSize))
-    {
         aSize = mpFontController->GetOLECorrectedSize(*mpMapper, aSize, aSize.Height());
-    }
 
     const bool bNonAntialiased = mpFontController->ShouldDisableAntialiasing(
         GetAntialiasing(), GetSettings().GetStyleSettings(),
@@ -461,10 +459,7 @@ bool OutputDevice::ImplNewFont() const
     mpFontInstance = mpFontController->RealizeFont(GetFontCollection(), mpGraphicsState->maFont, mpGraphics,
                                                    aSize, fExactHeight, bNonAntialiased);
 
-    if (!mpFontInstance)
-    {
-        SAL_WARN("vcl.gdi", "ImplNewFont: !!! NO FONT INSTANCE FOUND for request !!!");
-    }
+    SAL_WARN_IF(!mpFontInstance, "vcl.gdi", "ImplNewFont: !!! NO FONT INSTANCE FOUND for request !!!");
 
     // We must update the struct *before* calling InitFont
     if (mpFontRealization)
