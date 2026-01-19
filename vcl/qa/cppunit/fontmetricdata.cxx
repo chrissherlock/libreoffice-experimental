@@ -4,8 +4,11 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/plugin/TestPlugIn.h>
 
+#include <tools/mapunit.hxx>
+
 #include <vcl/virdev.hxx>
 #include <vcl/font.hxx>
+
 #include <font/FontMetricData.hxx>
 #include <font/FontSelectPattern.hxx>
 

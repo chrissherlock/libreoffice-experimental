@@ -8,6 +8,8 @@
  */
 
 #include <vcl/dllapi.h>
+#include <sallayout.hxx>
+#include <vcl/outdev.hxx>
 #include <vector>
 #include <functional>
 #include <tools/gen.hxx> // For global Point
@@ -44,6 +46,12 @@ public:
      * @param fnGetTextWidth  Callback: Returns width of a string in logic units.
      * @param fnGetBoundRect  Callback: Fills the bounding rectangle of a string.
      */
+
+    /** Determines BiDi flags based on layout mode and string content. */
+    static SalLayoutFlags GetBiDiLayoutFlags(vcl::text::ComplexTextLayoutFlags eLayoutMode,
+                                             std::u16string_view rStr, sal_Int32 nMinIndex,
+                                             sal_Int32 nEndIndex);
+
     static void InitializeFontMetrics(
         LogicalFontInstance* pFontInstance, const vcl::Font& rFont, long nDPIY, long nPixelWidth,
         std::function<long(const OUString&)> const& fnGetTextWidth,
