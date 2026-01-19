@@ -32,7 +32,7 @@
 
 #include <window.h>
 #include <CoordinateMapper.hxx>
-#include <FontController.hxx>
+#include <font/FontController.hxx>
 #include <GraphicsState.hxx>
 #include <drawmode.hxx>
 #include <font/EmphasisMark.hxx>

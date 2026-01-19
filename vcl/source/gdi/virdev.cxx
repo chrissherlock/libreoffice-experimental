@@ -26,8 +26,8 @@
 #include <vcl/pdfextoutdevdata.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/virdev.hxx>
-#include <FontController.hxx>
 
+#include <font/FontController.hxx>
 #include <ClippingController.hxx>
 #include <GraphicsState.hxx>
 #include <ImplOutDevData.hxx>
