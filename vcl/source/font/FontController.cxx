@@ -508,7 +508,7 @@ void FontController::EndFontSubstitution()
     ImplSVData* pSVData = ImplGetSVData();
     if (pSVData->maGDIData.mbFontSubChanged)
     {
-        OutputDevice::ImplUpdateAllFontData(false);
+        FontController::UpdateAllFontData(false);
 
         DataChangedEvent aDCEvt(DataChangedEventType::FONTSUBSTITUTION);
         Application::ImplCallEventListenersApplicationDataChanged(&aDCEvt);

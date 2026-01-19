@@ -33,6 +33,7 @@
 class Size;
 namespace vcl { class Font; }
 namespace vcl::font { class PhysicalFontCollection; }
+class LogicalFontInstance;
 
 // TODO: closely couple with PhysicalFontCollection
 

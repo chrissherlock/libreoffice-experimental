@@ -11,11 +11,15 @@
 
 #include <rtl/ref.hxx>
 #include <tools/color.hxx>
+#include <unotools/fontcfg.hxx>
 
 #include <vcl/dllapi.h>
 #include <vcl/fontcharmap.hxx>
 #include <vcl/metric.hxx>
+#include <vcl/rendercontext/AntialiasingFlags.hxx>
+#include <vcl/rendercontext/GetDefaultFontFlags.hxx>
 #include <vcl/rendercontext/AddFontSubstituteFlags.hxx>
+#include <vcl/rendercontext/State.hxx>
 #include <vcl/vclenum.hxx>
 
 #include <impfontcache.hxx>
@@ -26,8 +30,13 @@ class ImplFontCache;
 class CoordinateMapper;
 class LogicalFontInstance;
 class SalGraphics;
+class StyleSettings;
 
-namespace vcl::font
+namespace vcl
+{
+struct FontCapabilities;
+
+namespace font
 {
 class Font;
 class PhysicalFontCollection;
@@ -179,6 +188,7 @@ public:
                                     GetDefaultFontFlags nFlags, const OutputDevice* pOutDev);
 };
 
+} // namespace font
 } // namespace vcl
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
