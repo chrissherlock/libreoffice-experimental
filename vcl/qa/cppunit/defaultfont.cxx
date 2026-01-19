@@ -14,7 +14,8 @@
 #include <vcl/outdev.hxx>
 #include <vcl/font.hxx>
 #include <vcl/svapp.hxx>
-#include <FontController.hxx>
+
+#include <font/FontController.hxx>
 #include <unotools/fontcfg.hxx>
 
 using namespace vcl;

@@ -19,8 +19,7 @@
 
 #include <font/LogicalFontInstance.hxx>
 #include <font/PhysicalFontCollection.hxx>
-
-#include <FontController.hxx>
+#include <font/FontController.hxx>
 #include <CoordinateMapper.hxx>
 
 using namespace vcl::font;

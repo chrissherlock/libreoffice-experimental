@@ -40,10 +40,11 @@
 
 #include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
-#include <FontController.hxx>
 #include <GraphicsState.hxx>
 #include <ImplLayoutArgs.hxx>
 #include <ImplOutDevData.hxx>
+#include <font/FontController.hxx>
+#include <font/PhysicalFontFace.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>
@@ -51,7 +52,6 @@
 #include <textlineinfo.hxx>
 #include <impglyphitem.hxx>
 #include <TextLayoutCache.hxx>
-#include <font/PhysicalFontFace.hxx>
 
 #include <memory>
 #include <optional>
