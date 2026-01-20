@@ -1004,58 +1004,6 @@ void OutputDevice::DrawStretchText( const Point& rStartPt, sal_Int32 nWidth,
 }
 
 
-static void lcl_applyDigitLocalization(const vcl::GraphicsState& rGraphicsState, OUString& rStr, sal_Int32 nMinIndex, sal_Int32& nEndIndex)
-{
-    if (!rGraphicsState.meTextLanguage)
-        return;
-
-    sal_Int32 nSubstringLen = nEndIndex - nMinIndex;
-    rStr = LocalizeDigitsInString(rStr, rGraphicsState.meTextLanguage, nMinIndex, nSubstringLen);
-    nEndIndex = nMinIndex + nSubstringLen;
-}
-
-static SalLayoutFlags lcl_calculateLayoutFlags(const OutputDevice& rOutDev,
-                                               const vcl::GraphicsState& rGraphicsState,
-                                               const vcl::font::FontRealization& rFontRealization,
-                                               std::u16string_view rStr,
-                                               sal_Int32 nMinIndex,
-                                               sal_Int32 nEndIndex,
-                                               SalLayoutFlags nExistingFlags)
-{
-    SalLayoutFlags nFlags = nExistingFlags;
-
-    nFlags |= rOutDev.GetBiDiLayoutFlags(rStr, nMinIndex, nEndIndex);
-
-    if (!rGraphicsState.maFont.IsKerning())
-        nFlags |= SalLayoutFlags::DisableKerning;
-
-    if (rGraphicsState.maFont.GetKerning() & FontKerning::Asian)
-        nFlags |= SalLayoutFlags::KerningAsian;
-
-    if (rGraphicsState.maFont.IsVertical())
-        nFlags |= SalLayoutFlags::Vertical;
-
-    if (rGraphicsState.maFont.IsFixKerning() ||
-        (rFontRealization.mxFont && rFontRealization.mxFont->GetFontSelectPattern().GetPitch() == PITCH_FIXED))
-    {
-        nFlags |= SalLayoutFlags::DisableLigatures;
-    }
-
-    bool bRightAlign = bool(rFontRealization.eLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiRtl);
-
-    if (rFontRealization.eLayoutMode & vcl::text::ComplexTextLayoutFlags::TextOriginLeft)
-        bRightAlign = false;
-    else if (rFontRealization.eLayoutMode & vcl::text::ComplexTextLayoutFlags::TextOriginRight)
-        bRightAlign = true;
-
-    bool bRTLWindow = rOutDev.IsRTLEnabled();
-    bRightAlign ^= bRTLWindow;
-
-    if (bRightAlign)
-        nFlags |= SalLayoutFlags::RightAlign;
-
-    return nFlags;
-}
 
 vcl::text::ImplLayoutArgs OutputDevice::ImplPrepareLayoutArgs( OUString& rStr,
                                                     const sal_Int32 nMinIndex, const sal_Int32 nLen,
@@ -1075,9 +1023,10 @@ vcl::text::ImplLayoutArgs OutputDevice::ImplPrepareLayoutArgs( OUString& rStr,
     if( nEndIndex < nMinIndex )
         nEndIndex = nMinIndex;
 
-    lcl_applyDigitLocalization(*mpGraphicsState, rStr, nMinIndex, nEndIndex);
+    vcl::text::TextLayoutEngine::ApplyDigitLocalization(*mpGraphicsState, rStr, nMinIndex, nEndIndex);
 
-    nLayoutFlags = lcl_calculateLayoutFlags(*this, *mpGraphicsState, *mpFontRealization, rStr, nMinIndex, nEndIndex, nLayoutFlags);
+    nLayoutFlags = vcl::text::TextLayoutEngine::CalculateLayoutFlags(
+        *mpGraphicsState, *mpFontRealization, IsRTLEnabled(), rStr, nMinIndex, nEndIndex, nLayoutFlags);
 
     vcl::text::ImplLayoutArgs aLayoutArgs(rStr, nMinIndex, nEndIndex, nLayoutFlags, mpGraphicsState->maFont.GetLanguageTag(), pLayoutCache);
 
