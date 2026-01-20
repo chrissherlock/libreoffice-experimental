@@ -11,6 +11,7 @@
 #include <sallayout.hxx>
 #include <vcl/outdev.hxx>
 #include <vector>
+#include <vcl/rendercontext/SalLayoutFlags.hxx>
 #include <functional>
 #include <tools/gen.hxx> // For global Point
 #include <tools/fontenum.hxx> // For FontEmphasisMark
@@ -20,6 +21,7 @@ class SalLayout;
 class LogicalFontInstance;
 namespace vcl
 {
+struct GraphicsState;
 class Font;
 }
 
@@ -56,6 +58,17 @@ public:
         LogicalFontInstance* pFontInstance, const vcl::Font& rFont, long nDPIY, long nPixelWidth,
         std::function<long(const OUString&)> const& fnGetTextWidth,
         std::function<void(tools::Rectangle&, const OUString&)> const& fnGetBoundRect);
+
+    /** Applies digit localization to the string if the language requires it. */
+    static void ApplyDigitLocalization(const vcl::GraphicsState& rGraphicsState, OUString& rStr,
+                                       sal_Int32 nMinIndex, sal_Int32& rEndIndex);
+
+    /** Calculates the Layout Flags based on the Graphics State and Font Realization. */
+    static SalLayoutFlags CalculateLayoutFlags(const vcl::GraphicsState& rGraphicsState,
+                                               const vcl::font::FontRealization& rFontRealization,
+                                               bool bRTLWindow, std::u16string_view rStr,
+                                               sal_Int32 nMinIndex, sal_Int32 nEndIndex,
+                                               SalLayoutFlags nExistingFlags);
 };
 
 } // namespace vcl::text
