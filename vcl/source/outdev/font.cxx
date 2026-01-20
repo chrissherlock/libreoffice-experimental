@@ -197,7 +197,6 @@ FontMetric OutputDevice::GetFontMetric() const
 
     ImplScaleFontMetric(aMetric);
 
-    SAL_INFO("vcl.gdi.fontmetric", "OutputDevice::GetFontMetric:" << aMetric);
     return aMetric;
 }
 
@@ -426,8 +425,6 @@ const LogicalFontInstance* OutputDevice::GetFontInstance() const
 bool OutputDevice::ImplNewFont() const
 {
     DBG_TESTSOLARMUTEX();
-
-    SAL_INFO("vcl.gdi", "ImplNewFont: Start. Dirty=" << mbFontDirty << " New=" << mbNewFont);
 
     if (!mbNewFont)
         return true;

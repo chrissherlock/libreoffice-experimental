@@ -189,11 +189,10 @@ bool FontMetricData::ShouldNotUseUnderlineMetrics() const
 
     css::uno::Sequence<OUString> rNoUnderlineMetricsList(
         officecfg::Office::Common::Misc::FontsDontUseUnderlineMetrics::get());
+
     if (comphelper::findValue(rNoUnderlineMetricsList, GetFamilyName()) != -1)
-    {
-        SAL_INFO("vcl.gdi.fontmetric", "Not using underline metrics for: " << GetFamilyName());
         return true;
-    }
+
     return false;
 }
 
