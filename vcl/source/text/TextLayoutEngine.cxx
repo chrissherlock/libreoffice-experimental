@@ -7,15 +7,25 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include <text/TextLayoutEngine.hxx>
-#include <vcl/outdev.hxx>
-#include <vcl/font.hxx>
-#include <i18nlangtag/mslangid.hxx>
-#include <font/LogicalFontInstance.hxx>
-#include <sallayout.hxx>
 #include <basegfx/point/b2dpoint.hxx>
-#include <unicode/uchar.h>
 #include <tools/gen.hxx>
+#include <i18nlangtag/mslangid.hxx>
+#include <i18nutil/unicode.hxx>
+
+#include <vcl/outdev.hxx>
+#include <vcl/fntstyle.hxx>
+#include <vcl/font.hxx>
+#include <vcl/vclenum.hxx>
+#include <vcl/svapp.hxx>
+
+#include <font/FontController.hxx>
+#include <font/LogicalFontInstance.hxx>
+#include <font/FontSelectPattern.hxx>
+#include <sallayout.hxx>
+#include <text/TextLayoutEngine.hxx>
+#include <GraphicsState.hxx>
+
+#include <unicode/uchar.h>
 
 namespace vcl::text
 {
@@ -112,10 +122,15 @@ SalLayoutFlags TextLayoutEngine::GetBiDiLayoutFlags(vcl::text::ComplexTextLayout
                                                     const sal_Int32 nEndIndex)
 {
     SalLayoutFlags nLayoutFlags = SalLayoutFlags::NONE;
+
     if (eLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiRtl)
+    {
         nLayoutFlags |= SalLayoutFlags::BiDiRtl;
+    }
     if (eLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiStrong)
+    {
         nLayoutFlags |= SalLayoutFlags::BiDiStrong;
+    }
     else if (!(eLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiRtl))
     {
         // Disable Bidi if no RTL hint and only known LTR codes used.
@@ -129,10 +144,67 @@ SalLayoutFlags TextLayoutEngine::GetBiDiLayoutFlags(vcl::text::ComplexTextLayout
                 break;
             }
         }
+
         if (bAllLtr)
             nLayoutFlags |= SalLayoutFlags::BiDiStrong;
     }
+
     return nLayoutFlags;
+}
+
+SalLayoutFlags TextLayoutEngine::CalculateLayoutFlags(
+    const vcl::GraphicsState& rGraphicsState, const vcl::font::FontRealization& rFontRealization,
+    bool bRTLWindow, std::u16string_view rStr, sal_Int32 nMinIndex, sal_Int32 nEndIndex,
+    SalLayoutFlags nExistingFlags)
+{
+    SalLayoutFlags nFlags = nExistingFlags;
+
+    nFlags |= TextLayoutEngine::GetBiDiLayoutFlags(rFontRealization.eLayoutMode, rStr, nMinIndex,
+                                                   nEndIndex);
+
+    if (!rGraphicsState.maFont.IsKerning())
+        nFlags |= SalLayoutFlags::DisableKerning;
+
+    if (rGraphicsState.maFont.GetKerning() & FontKerning::Asian)
+        nFlags |= SalLayoutFlags::KerningAsian;
+
+    if (rGraphicsState.maFont.IsVertical())
+        nFlags |= SalLayoutFlags::Vertical;
+
+    if (rGraphicsState.maFont.IsFixKerning()
+        || (rFontRealization.mxFont
+            && rFontRealization.mxFont->GetFontSelectPattern().GetPitch() == PITCH_FIXED))
+    {
+        nFlags |= SalLayoutFlags::DisableLigatures;
+    }
+
+    bool bRightAlign
+        = bool(rFontRealization.eLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiRtl);
+
+    if (rFontRealization.eLayoutMode & vcl::text::ComplexTextLayoutFlags::TextOriginLeft)
+        bRightAlign = false;
+    else if (rFontRealization.eLayoutMode & vcl::text::ComplexTextLayoutFlags::TextOriginRight)
+        bRightAlign = true;
+
+    bRightAlign ^= bRTLWindow;
+
+    if (bRightAlign)
+        nFlags |= SalLayoutFlags::RightAlign;
+
+    return nFlags;
+}
+
+void TextLayoutEngine::ApplyDigitLocalization(const vcl::GraphicsState& rGraphicsState,
+                                              OUString& rStr, sal_Int32 nMinIndex,
+                                              sal_Int32& rEndIndex)
+{
+    if (rGraphicsState.meTextLanguage)
+    {
+        sal_Int32 nSubstringLen = rEndIndex - nMinIndex;
+        rStr
+            = LocalizeDigitsInString(rStr, rGraphicsState.meTextLanguage, nMinIndex, nSubstringLen);
+        rEndIndex = nMinIndex + nSubstringLen;
+    }
 }
 
 } // namespace vcl::text
