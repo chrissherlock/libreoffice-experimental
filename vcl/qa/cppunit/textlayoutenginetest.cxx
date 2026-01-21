@@ -38,6 +38,7 @@ public:
     void testCreateLayoutRequest_OrientationAndWidth();
     void testCreateLayoutRequest_OutOfBounds();
     void testFindFallbackFont_ForcedFallbackPriority();
+    void testIdentifyMissingChars();
 
     CPPUNIT_TEST_SUITE(TextLayoutEngineTest);
     CPPUNIT_TEST(testBiDiLayoutFlags);
@@ -46,6 +47,7 @@ public:
     CPPUNIT_TEST(testCreateLayoutRequest_OrientationAndWidth);
     CPPUNIT_TEST(testCreateLayoutRequest_OutOfBounds);
     CPPUNIT_TEST(testFindFallbackFont_ForcedFallbackPriority);
+    CPPUNIT_TEST(testIdentifyMissingChars);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -220,6 +222,97 @@ void TextLayoutEngineTest::testFindFallbackFont_ForcedFallbackPriority()
     CPPUNIT_ASSERT_EQUAL(pForcedFont.get(), pResult.get());
 
     CPPUNIT_ASSERT_MESSAGE("Should mark forced fallback as used", bHasUsedForcedFallback);
+}
+
+void TextLayoutEngineTest::testIdentifyMissingChars()
+{
+    vcl::GraphicsState aState;
+    vcl::font::FontRealization aRealization;
+    aRealization.mxFont = nullptr;
+
+    // Empty Case (No runs)
+    {
+        OUString aInput = u"NothingMissing"_ustr;
+        vcl::text::ImplLayoutArgs aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
+            aInput, 0, aInput.getLength(), 100, SalLayoutFlags::NONE, nullptr, aState, aRealization,
+            false);
+
+        // Ensure runs are empty initially
+        aArgs.maRuns.Clear();
+
+        OUString aResult = vcl::text::TextLayoutEngine::IdentifyMissingChars(aArgs);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Should return empty string for empty runs", OUString(""),
+                                     aResult);
+    }
+
+    // Single Run Case
+    {
+        OUString aInput = u"Hello World"_ustr;
+        vcl::text::ImplLayoutArgs aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
+            aInput, 0, aInput.getLength(), 100, SalLayoutFlags::NONE, nullptr, aState, aRealization,
+            false);
+
+        aArgs.maRuns.Clear();
+        // Add run for "World" (Index 6 to 11)
+        aArgs.maRuns.AddRun(6, 11, false);
+
+        OUString aResult = vcl::text::TextLayoutEngine::IdentifyMissingChars(aArgs);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Should extract 'World'", OUString("World"), aResult);
+    }
+
+    // Multiple Disjoint Runs Case
+    {
+        OUString aInput = u"Missing Glyphs Here"_ustr;
+        vcl::text::ImplLayoutArgs aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
+            aInput, 0, aInput.getLength(), 100, SalLayoutFlags::NONE, nullptr, aState, aRealization,
+            false);
+
+        aArgs.maRuns.Clear();
+        // Run 1: "M" (0-1)
+        aArgs.maRuns.AddRun(0, 1, false);
+        // Run 2: "G" (8-9)
+        aArgs.maRuns.AddRun(8, 9, false);
+        // Run 3: "H" (15-16)
+        aArgs.maRuns.AddRun(15, 16, false);
+
+        OUString aResult = vcl::text::TextLayoutEngine::IdentifyMissingChars(aArgs);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Should concatenate missing parts 'MGH'", OUString("MGH"),
+                                     aResult);
+    }
+
+    // Adjacent/Split Runs Case
+    {
+        OUString aInput = u"SplitRun"_ustr;
+        vcl::text::ImplLayoutArgs aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
+            aInput, 0, aInput.getLength(), 100, SalLayoutFlags::NONE, nullptr, aState, aRealization,
+            false);
+
+        aArgs.maRuns.Clear();
+        // "Split" (0-5)
+        aArgs.maRuns.AddRun(0, 5, false);
+        // "Run" (5-8)
+        aArgs.maRuns.AddRun(5, 8, false);
+
+        OUString aResult = vcl::text::TextLayoutEngine::IdentifyMissingChars(aArgs);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Should stitch adjacent runs 'SplitRun'", OUString("SplitRun"),
+                                     aResult);
+    }
+
+    // The function blindly extracts [Start, End), the RTL flag in the run shouldn't change *which* characters are pulled.
+    {
+        OUString aInput = u"RTLTest"_ustr;
+        vcl::text::ImplLayoutArgs aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
+            aInput, 0, aInput.getLength(), 100, SalLayoutFlags::NONE, nullptr, aState, aRealization,
+            false);
+
+        aArgs.maRuns.Clear();
+        // "Test" (3-7) marked as RTL
+        aArgs.maRuns.AddRun(3, 7, true);
+
+        OUString aResult = vcl::text::TextLayoutEngine::IdentifyMissingChars(aArgs);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Should extract text regardless of RTL flag", OUString("Test"),
+                                     aResult);
+    }
 }
 
 } // namespace

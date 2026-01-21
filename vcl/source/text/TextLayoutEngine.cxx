@@ -272,6 +272,20 @@ rtl::Reference<LogicalFontInstance> TextLayoutEngine::FindFallbackFont(
     return pFallbackFont;
 }
 
+OUString TextLayoutEngine::IdentifyMissingChars(const vcl::text::ImplLayoutArgs& rArgs)
+{
+    OUStringBuffer aMissingCodeBuf;
+
+    for (const auto& rRun : rArgs.maRuns)
+    {
+        for (auto i = rRun.m_nMinRunPos; i < rRun.m_nEndRunPos; ++i)
+        {
+            aMissingCodeBuf.append(rArgs.mrStr[i]);
+        }
+    }
+
+    return aMissingCodeBuf.makeStringAndClear();
+}
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
