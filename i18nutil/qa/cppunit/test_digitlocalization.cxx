@@ -11,9 +11,10 @@
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include <cppunit/plugin/TestPlugIn.h>
+#include <i18nutil/digitlocalization.hxx>
 
-#include <vcl/svapp.hxx>
+using namespace i18nutil;
+#include <cppunit/plugin/TestPlugIn.h>
 
 namespace
 {
