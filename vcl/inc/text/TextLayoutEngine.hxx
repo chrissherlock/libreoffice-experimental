@@ -25,6 +25,13 @@ struct GraphicsState;
 class Font;
 }
 
+class GraphicsState;
+
+namespace vcl::font
+{
+struct FontRealization;
+}
+
 namespace vcl::text
 {
 class VCL_DLLPUBLIC TextLayoutEngine
@@ -69,6 +76,16 @@ public:
                                                bool bRTLWindow, std::u16string_view rStr,
                                                sal_Int32 nMinIndex, sal_Int32 nEndIndex,
                                                SalLayoutFlags nExistingFlags);
+
+    /**
+     * Creates and configures a LayoutRequest (ImplLayoutArgs) based on the current device state.
+     * This moves the "configuration" logic out of OutputDevice.
+     */
+    static vcl::text::ImplLayoutArgs
+    CreateLayoutRequest(OUString& rStr, sal_Int32 nMinIndex, sal_Int32 nLen, double nPixelWidth,
+                        SalLayoutFlags nFlags, const vcl::text::TextLayoutCache* pCache,
+                        const GraphicsState& rState, const font::FontRealization& rRealization,
+                        bool bRTL);
 };
 
 } // namespace vcl::text
