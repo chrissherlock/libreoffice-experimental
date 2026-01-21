@@ -2284,13 +2284,16 @@ OutputDevice::ImplGlyphFallbackLayout(std::unique_ptr<SalLayout> pSalLayout,
 
         std::unique_ptr<SalLayout> pFallback
             = getFallbackLayout(pFallbackFont.get(), nFallbackLevel, rLayoutArgs, pGlyphs);
+
         if (pFallback)
         {
-            if (!pMultiSalLayout)
-                pMultiSalLayout.reset(new MultiSalLayout(std::move(pSalLayout)));
-            pMultiSalLayout->AddFallback(std::move(pFallback), rLayoutArgs.maRuns);
-            if (nFallbackLevel == MAX_FALLBACK - 1)
-                pMultiSalLayout->SetIncomplete(true);
+            vcl::text::TextLayoutEngine::MergeFallback(
+                pMultiSalLayout,
+                pSalLayout,
+                std::move(pFallback),
+                rLayoutArgs.maRuns,
+                (nFallbackLevel == MAX_FALLBACK - 1)
+            );
         }
 
         if (pGlyphs != nullptr)
