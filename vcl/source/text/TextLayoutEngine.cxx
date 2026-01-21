@@ -304,18 +304,20 @@ void TextLayoutEngine::MergeFallback(std::unique_ptr<MultiSalLayout>& rMultiSalL
 
 std::unique_ptr<SalLayout> TextLayoutEngine::ResolveMissingGlyphs(
     std::unique_ptr<SalLayout> pBaseLayout, vcl::text::ImplLayoutArgs& rLayoutArgs,
-    const SalLayoutGlyphs* pGlyphs, ImplFontCache& rFontCache,
-    vcl::font::PhysicalFontCollection* pFontCollection,
-    const vcl::font::FontSelectPattern& rFontSelData, LogicalFontInstance* pBaseFont,
-    const rtl::Reference<LogicalFontInstance>& pForcedFallback, FallbackLayoutFactory rFactory)
+    const SalLayoutGlyphs* pGlyphs, const FontLookupCriteria& rCriteria,
+    FallbackLayoutFactory rFactory)
 {
+    ImplFontCache& rFontCache = rCriteria.rCache;
+    vcl::font::PhysicalFontCollection* pFontCollection = rCriteria.pFontCollection;
+    LogicalFontInstance* pBaseFont = rCriteria.pReferenceFont;
+    const rtl::Reference<LogicalFontInstance>& pForcedFallback = rCriteria.pPriorityFallback;
+
     std::unique_ptr<MultiSalLayout> pMultiSalLayout;
     ImplLayoutRuns aSavedRuns = rLayoutArgs.maRuns;
     rLayoutArgs.PrepareFallback(nullptr);
     rLayoutArgs.mnFlags |= SalLayoutFlags::ForFallback;
 
     OUString aMissingCodes = IdentifyMissingChars(rLayoutArgs);
-    vcl::font::FontSelectPattern aFontSelDataCopy(rFontSelData);
 
     SalLayoutGlyphsImpl* pGlyphsImpl = pGlyphs ? pGlyphs->Impl(1) : nullptr;
     bool bHasUsedFallback = false;
@@ -323,6 +325,8 @@ std::unique_ptr<SalLayout> TextLayoutEngine::ResolveMissingGlyphs(
     for (int nFallbackLevel = 1; nFallbackLevel < MAX_FALLBACK; ++nFallbackLevel)
     {
         OUString oldMissingCodes = aMissingCodes;
+
+        vcl::font::FontSelectPattern aFontSelDataCopy(pBaseFont->GetFontSelectPattern());
 
         rtl::Reference<LogicalFontInstance> pFallbackFont = FindFallbackFont(
             rFontCache, pFontCollection, aFontSelDataCopy, pBaseFont, nFallbackLevel, aMissingCodes,

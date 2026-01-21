@@ -1257,15 +1257,18 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
             return this->getFallbackLayout(pFont, nLevel, rArgs, pGlyphs);
         };
 
+        vcl::text::FontLookupCriteria aCriteria = {
+            GetFontCache(),
+            GetFontCollection(),
+            mpFontRealization->mxFont.get(),
+            mpForcedFallbackInstance
+        };
+
         pSalLayout = vcl::text::TextLayoutEngine::ResolveMissingGlyphs(
             std::move(pSalLayout),
             aLayoutArgs,
             pGlyphs,
-            GetFontCache(),
-            GetFontCollection(),
-            mpFontRealization->mxFont->GetFontSelectPattern(),
-            mpFontRealization->mxFont.get(),
-            mpForcedFallbackInstance,
+            aCriteria,
             fnFactory
         );
     }
