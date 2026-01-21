@@ -1304,11 +1304,7 @@ public:
                                                          double nPixelWidth,
                                                          SalLayoutFlags flags = SalLayoutFlags::NONE,
                                                          vcl::text::TextLayoutCache const* = nullptr) const;
-    SAL_DLLPRIVATE std::unique_ptr<SalLayout>
-                                ImplGlyphFallbackLayout( std::unique_ptr<SalLayout>,
-                                                         vcl::text::ImplLayoutArgs&,
-                                                         const SalLayoutGlyphs* ) const;
-    SAL_DLLPRIVATE std::unique_ptr<SalLayout>
+SAL_DLLPRIVATE std::unique_ptr<SalLayout>
                                 getFallbackLayout(
                                     LogicalFontInstance* pLogicalFont, int nFallbackLevel,
                                     vcl::text::ImplLayoutArgs& rLayoutArgs, const SalLayoutGlyphs* ) const;
