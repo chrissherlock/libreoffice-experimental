@@ -8,9 +8,18 @@
  */
 
 #include <test/bootstrapfixture.hxx>
+
+#include <tools/degree.hxx>
+#include <i18nlangtag/lang.h>
+
 #include <vcl/outdev.hxx>
+#include <vcl/font.hxx>
+
+#include <font/FontController.hxx>
 #include <text/TextLayoutEngine.hxx>
 #include <sallayout.hxx>
+#include <GraphicsState.hxx>
+#include <ImplLayoutArgs.hxx>
 
 namespace
 {
@@ -23,48 +32,151 @@ public:
     }
 
     void testBiDiLayoutFlags();
+    void testCreateLayoutRequest_Simple();
+    void testCreateLayoutRequest_DigitLocalization();
+    void testCreateLayoutRequest_OrientationAndWidth();
+    void testCreateLayoutRequest_OutOfBounds();
 
     CPPUNIT_TEST_SUITE(TextLayoutEngineTest);
     CPPUNIT_TEST(testBiDiLayoutFlags);
+    CPPUNIT_TEST(testCreateLayoutRequest_Simple);
+    CPPUNIT_TEST(testCreateLayoutRequest_DigitLocalization);
+    CPPUNIT_TEST(testCreateLayoutRequest_OrientationAndWidth);
+    CPPUNIT_TEST(testCreateLayoutRequest_OutOfBounds);
     CPPUNIT_TEST_SUITE_END();
 };
 
 void TextLayoutEngineTest::testBiDiLayoutFlags()
 {
     // Case 1: Pure Latin Text (LTR)
-    // "Hello World" contains only characters < 0x052F.
-    // The engine optimization (bAllLtr) should trigger and set BiDiStrong.
     OUString aLatin = u"Hello World"_ustr;
     SalLayoutFlags nFlags = vcl::text::TextLayoutEngine::GetBiDiLayoutFlags(
         vcl::text::ComplexTextLayoutFlags::Default, aLatin, 0, aLatin.getLength());
 
     // Verify that the LTR optimization flag (BiDiStrong) is set.
-    // We avoid checking !BiDiRtl specifically because in some VCL configurations
-    // flags might be aliased or interact unexpectedly. The presence of BiDiStrong
-    // confirms the engine took the "LTR optimization" path.
     bool bHasStrong = bool(nFlags & SalLayoutFlags::BiDiStrong);
     CPPUNIT_ASSERT_MESSAGE("Pure LTR text should trigger BiDiStrong optimization", bHasStrong);
 
     // Case 2: Arabic Text (RTL)
-    // Contains characters > 0x052F. bAllLtr will be false.
-    // The default loop should NOT set BiDiStrong (unless forced, but here it shouldn't).
-    // Wait - the logic is: if (bAllLtr) set BiDiStrong.
-    // If NOT bAllLtr (Arabic), we fall through and return NONE (or existing flags).
     OUString aArabic = u"مرحبا"_ustr;
     nFlags = vcl::text::TextLayoutEngine::GetBiDiLayoutFlags(
         vcl::text::ComplexTextLayoutFlags::Default, aArabic, 0, aArabic.getLength());
 
-    // For mixed/RTL content without a forcing flag, it returns NONE (letting the lower layers handle it)
-    // OR it might detect Strong RTL if we improved it, but the current logic only adds BiDiStrong for LTR.
+    // For mixed/RTL content without a forcing flag, it returns NONE
     CPPUNIT_ASSERT_EQUAL(SalLayoutFlags::NONE, nFlags);
 
     // Case 3: Forced RTL Mode
-    // Should have BiDiRtl flag regardless of content
     nFlags = vcl::text::TextLayoutEngine::GetBiDiLayoutFlags(
         vcl::text::ComplexTextLayoutFlags::BiDiRtl, aLatin, 0, aLatin.getLength());
 
     bool bHasRTL = bool(nFlags & SalLayoutFlags::BiDiRtl);
     CPPUNIT_ASSERT_MESSAGE("Forced RTL mode should set BiDiRtl flag", bHasRTL);
+}
+
+void TextLayoutEngineTest::testCreateLayoutRequest_Simple()
+{
+    // 1. Setup Mock State
+    vcl::GraphicsState aState;
+    vcl::font::FontRealization aRealization;
+
+    // Setup basic font
+    vcl::Font aFont("Arial", Size(0, 12));
+    aState.maFont = aFont;
+    aRealization.mxFont = nullptr;
+
+    OUString aInput = u"Hello World"_ustr;
+    sal_Int32 nMin = 0;
+    sal_Int32 nLen = 5; // "Hello"
+
+    // 2. Call the Engine
+    vcl::text::ImplLayoutArgs aArgs
+        = vcl::text::TextLayoutEngine::CreateLayoutRequest(aInput, nMin, nLen,
+                                                           100.0, // Pixel Width
+                                                           SalLayoutFlags::NONE,
+                                                           nullptr, // Cache
+                                                           aState, aRealization,
+                                                           false // bRTL
+        );
+
+    // 3. Verify
+    CPPUNIT_ASSERT_EQUAL(nMin, aArgs.mnMinCharPos);
+    CPPUNIT_ASSERT_EQUAL(nMin + nLen, aArgs.mnEndCharPos);
+    // Verify defaults
+    CPPUNIT_ASSERT_EQUAL((0_deg10).get(), aArgs.mnOrientation.get());
+}
+
+void TextLayoutEngineTest::testCreateLayoutRequest_DigitLocalization()
+{
+    // 1. Setup State: Language set to Arabic (Saudi Arabia)
+    vcl::GraphicsState aState;
+    aState.meTextLanguage = LANGUAGE_ARABIC_SAUDI_ARABIA;
+
+    vcl::font::FontRealization aRealization;
+    aRealization.mxFont = nullptr;
+
+    // 2. Input: "Year 2024"
+    // IMPORTANT: CreateLayoutRequest takes OUString& and modifies it in place!
+    OUString aInput = u"Year 2024"_ustr;
+
+    vcl::text::ImplLayoutArgs aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
+        aInput, 0, aInput.getLength(), 100.0, SalLayoutFlags::NONE, nullptr, aState, aRealization,
+        false);
+
+    // 3. Verify the SIDE EFFECT (String modification)
+    // 0x0660 is the zero digit for Arabic
+    sal_Unicode cZero = 0x0660;
+    // Construct expected string "Year ٢٠٢٤"
+    OUStringBuffer aBuf;
+    aBuf.append(u"Year ");
+    aBuf.append(static_cast<sal_Unicode>(cZero + 2));
+    aBuf.append(static_cast<sal_Unicode>(cZero + 0));
+    aBuf.append(static_cast<sal_Unicode>(cZero + 2));
+    aBuf.append(static_cast<sal_Unicode>(cZero + 4));
+    OUString aExpected = aBuf.makeStringAndClear();
+
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("String should contain localized Arabic digits", aExpected,
+                                 aInput);
+}
+
+void TextLayoutEngineTest::testCreateLayoutRequest_OrientationAndWidth()
+{
+    vcl::GraphicsState aState;
+    vcl::font::FontRealization aRealization;
+    aRealization.mxFont = nullptr; // Defaults to 0 orientation
+
+    OUString aInput = u"CheckWidth"_ustr;
+    double nTestWidth = 555.5;
+
+    vcl::text::ImplLayoutArgs aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
+        aInput, 0, aInput.getLength(), nTestWidth, SalLayoutFlags::NONE, nullptr, aState,
+        aRealization, false);
+
+    // Verify Width is correctly stored in the Request object
+    // ImplLayoutArgs typically truncates double to integer for layout width
+    CPPUNIT_ASSERT_EQUAL(static_cast<sal_Int32>(nTestWidth),
+                         static_cast<sal_Int32>(aArgs.mnLayoutWidth));
+
+    // Verify fallback orientation (nullptr font -> 0 degrees)
+    CPPUNIT_ASSERT_EQUAL((0_deg10).get(), aArgs.mnOrientation.get());
+}
+
+void TextLayoutEngineTest::testCreateLayoutRequest_OutOfBounds()
+{
+    // Test the safety clamping logic when MinIndex > StringLength
+    vcl::GraphicsState aState;
+    vcl::font::FontRealization aRealization;
+    aRealization.mxFont = nullptr;
+
+    OUString aInput = u"Hi"_ustr;
+    // Request start at 10, length 5 (Way out of bounds)
+    vcl::text::ImplLayoutArgs aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
+        aInput, 10, 5, 100.0, SalLayoutFlags::NONE, nullptr, aState, aRealization, false);
+
+    // Should clamp start/end to be safe (likely equal to MinIndex or StringLength)
+    // Based on logic: nEndIndex becomes nMinIndex (10).
+    // This ensures the engine doesn't crash on bad inputs.
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(10), aArgs.mnMinCharPos);
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(10), aArgs.mnEndCharPos);
 }
 
 } // namespace
