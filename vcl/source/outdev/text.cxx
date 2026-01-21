@@ -1011,31 +1011,17 @@ vcl::text::ImplLayoutArgs OutputDevice::ImplPrepareLayoutArgs( OUString& rStr,
                                                     SalLayoutFlags nLayoutFlags,
          vcl::text::TextLayoutCache const*const pLayoutCache) const
 {
-    assert(nMinIndex >= 0);
-    assert(nLen >= 0);
-
-    // get string length for calculating extents
-    sal_Int32 nEndIndex = rStr.getLength();
-    if( nMinIndex + nLen < nEndIndex )
-        nEndIndex = nMinIndex + nLen;
-
-    // don't bother if there is nothing to do
-    if( nEndIndex < nMinIndex )
-        nEndIndex = nMinIndex;
-
-    vcl::text::TextLayoutEngine::ApplyDigitLocalization(*mpGraphicsState, rStr, nMinIndex, nEndIndex);
-
-    nLayoutFlags = vcl::text::TextLayoutEngine::CalculateLayoutFlags(
-        *mpGraphicsState, *mpFontRealization, IsRTLEnabled(), rStr, nMinIndex, nEndIndex, nLayoutFlags);
-
-    vcl::text::ImplLayoutArgs aLayoutArgs(rStr, nMinIndex, nEndIndex, nLayoutFlags, mpGraphicsState->maFont.GetLanguageTag(), pLayoutCache);
-
-    Degree10 nOrientation = mpFontRealization->mxFont ? mpFontRealization->mxFont->mnOrientation : 0_deg10;
-    aLayoutArgs.SetOrientation( nOrientation );
-
-    aLayoutArgs.SetLayoutWidth( nPixelWidth );
-
-    return aLayoutArgs;
+    return vcl::text::TextLayoutEngine::CreateLayoutRequest(
+        rStr,
+        nMinIndex,
+        nLen,
+        nPixelWidth,
+        nLayoutFlags,
+        pLayoutCache,
+        *mpGraphicsState,
+        *mpFontRealization,
+        IsRTLEnabled()
+    );
 }
 
 SalLayoutFlags OutputDevice::GetBiDiLayoutFlags( std::u16string_view rStr,
