@@ -22,6 +22,7 @@
 #include <font/FontController.hxx>
 #include <font/LogicalFontInstance.hxx>
 #include <font/FontSelectPattern.hxx>
+#include <font/PhysicalFontFace.hxx>
 #include <sallayout.hxx>
 #include <text/TextLayoutEngine.hxx>
 #include <GraphicsState.hxx>
@@ -242,5 +243,35 @@ vcl::text::ImplLayoutArgs TextLayoutEngine::CreateLayoutRequest(
     return aLayoutArgs;
 }
 
+rtl::Reference<LogicalFontInstance> TextLayoutEngine::FindFallbackFont(
+    ImplFontCache& rFontCache, vcl::font::PhysicalFontCollection* pFontCollection,
+    vcl::font::FontSelectPattern& rPattern, LogicalFontInstance* pBaseFont, int nFallbackLevel,
+    OUString& rMissingCodes, const rtl::Reference<LogicalFontInstance>& pForcedFallback,
+    bool& bHasUsedForcedFallback, SalLayoutGlyphsImpl* pGlyphsImpl)
+{
+    rtl::Reference<LogicalFontInstance> pFallbackFont;
+
+    if (!bHasUsedForcedFallback && pForcedFallback)
+    {
+        pFallbackFont = pForcedFallback;
+        bHasUsedForcedFallback = true;
+    }
+    else if (pGlyphsImpl != nullptr)
+    {
+        pFallbackFont = pGlyphsImpl->GetFont();
+    }
+
+    if (!pFallbackFont)
+    {
+        pFallbackFont = rFontCache.GetGlyphFallbackFont(
+            pFontCollection, rPattern, pBaseFont, nFallbackLevel,
+            rMissingCodes // NOTE: This is modified by GetGlyphFallbackFont!
+        );
+    }
+
+    return pFallbackFont;
+}
+
 } // namespace vcl::text
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
