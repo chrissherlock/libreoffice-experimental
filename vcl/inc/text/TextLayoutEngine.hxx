@@ -42,6 +42,9 @@ class SalLayoutGlyphsImpl;
 
 namespace vcl::text
 {
+using FallbackLayoutFactory
+    = std::function<std::unique_ptr<SalLayout>(LogicalFontInstance*, int, ImplLayoutArgs&)>;
+
 class VCL_DLLPUBLIC TextLayoutEngine
 {
 public:
@@ -120,6 +123,17 @@ public:
                               std::unique_ptr<SalLayout>& rBaseLayout,
                               std::unique_ptr<SalLayout> pFallback, const ImplLayoutRuns& rRuns,
                               bool bIsLastLevel);
+
+    /**
+     * Iteratively finds fallback fonts and creates layouts to resolve characters
+     * missing from the base layout.
+     */
+    static std::unique_ptr<SalLayout> ResolveMissingGlyphs(
+        std::unique_ptr<SalLayout> pBaseLayout, vcl::text::ImplLayoutArgs& rLayoutArgs,
+        const SalLayoutGlyphs* pGlyphs, ImplFontCache& rFontCache,
+        vcl::font::PhysicalFontCollection* pFontCollection,
+        const vcl::font::FontSelectPattern& rFontSelData, LogicalFontInstance* pBaseFont,
+        const rtl::Reference<LogicalFontInstance>& pForcedFallback, FallbackLayoutFactory rFactory);
 };
 
 } // namespace vcl::text
