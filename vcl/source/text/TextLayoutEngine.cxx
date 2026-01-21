@@ -244,18 +244,36 @@ vcl::text::ImplLayoutArgs TextLayoutEngine::CreateLayoutRequest(
     return aLayoutArgs;
 }
 
-rtl::Reference<LogicalFontInstance> TextLayoutEngine::FindFallbackFont(
-    ImplFontCache& rFontCache, vcl::font::PhysicalFontCollection* pFontCollection,
-    vcl::font::FontSelectPattern& rPattern, LogicalFontInstance* pBaseFont, int nFallbackLevel,
-    OUString& rMissingCodes, const rtl::Reference<LogicalFontInstance>& pForcedFallback,
-    bool& bHasUsedForcedFallback, SalLayoutGlyphsImpl* pGlyphsImpl)
+rtl::Reference<LogicalFontInstance>
+TextLayoutEngine::FindFallbackFont(const FontLookupCriteria& rCriteria, int nFallbackLevel,
+                                   OUString& rMissingCodes, bool& rHasUsedFallback,
+                                   SalLayoutGlyphsImpl* pGlyphsImpl)
 {
+    ImplFontCache& rFontCache = rCriteria.rCache;
+    vcl::font::PhysicalFontCollection* pFontCollection = rCriteria.pFontCollection;
+    LogicalFontInstance* pBaseFont = rCriteria.pReferenceFont;
+    const rtl::Reference<LogicalFontInstance>& pForcedFallback = rCriteria.pPriorityFallback;
+
+    if (!pBaseFont)
+    {
+        // Without a reference font, we can only return the forced fallback if available.
+        // We cannot perform a frantic search for "similar" fonts without a reference pattern.
+        if (!rHasUsedFallback && pForcedFallback)
+        {
+            rHasUsedFallback = true;
+            return pForcedFallback;
+        }
+        return nullptr;
+    }
+
+    vcl::font::FontSelectPattern aFontSelData(pBaseFont->GetFontSelectPattern());
+
     rtl::Reference<LogicalFontInstance> pFallbackFont;
 
-    if (!bHasUsedForcedFallback && pForcedFallback)
+    if (!rHasUsedFallback && pForcedFallback)
     {
         pFallbackFont = pForcedFallback;
-        bHasUsedForcedFallback = true;
+        rHasUsedFallback = true;
     }
     else if (pGlyphsImpl != nullptr)
     {
@@ -265,7 +283,7 @@ rtl::Reference<LogicalFontInstance> TextLayoutEngine::FindFallbackFont(
     if (!pFallbackFont)
     {
         pFallbackFont = rFontCache.GetGlyphFallbackFont(
-            pFontCollection, rPattern, pBaseFont, nFallbackLevel,
+            pFontCollection, aFontSelData, pBaseFont, nFallbackLevel,
             rMissingCodes // NOTE: This is modified by GetGlyphFallbackFont!
         );
     }
@@ -307,10 +325,7 @@ std::unique_ptr<SalLayout> TextLayoutEngine::ResolveMissingGlyphs(
     const SalLayoutGlyphs* pGlyphs, const FontLookupCriteria& rCriteria,
     FallbackLayoutFactory rFactory)
 {
-    ImplFontCache& rFontCache = rCriteria.rCache;
-    vcl::font::PhysicalFontCollection* pFontCollection = rCriteria.pFontCollection;
     LogicalFontInstance* pBaseFont = rCriteria.pReferenceFont;
-    const rtl::Reference<LogicalFontInstance>& pForcedFallback = rCriteria.pPriorityFallback;
 
     std::unique_ptr<MultiSalLayout> pMultiSalLayout;
     ImplLayoutRuns aSavedRuns = rLayoutArgs.maRuns;
@@ -326,11 +341,8 @@ std::unique_ptr<SalLayout> TextLayoutEngine::ResolveMissingGlyphs(
     {
         OUString oldMissingCodes = aMissingCodes;
 
-        vcl::font::FontSelectPattern aFontSelDataCopy(pBaseFont->GetFontSelectPattern());
-
         rtl::Reference<LogicalFontInstance> pFallbackFont = FindFallbackFont(
-            rFontCache, pFontCollection, aFontSelDataCopy, pBaseFont, nFallbackLevel, aMissingCodes,
-            pForcedFallback, bHasUsedFallback, pGlyphsImpl);
+            rCriteria, nFallbackLevel, aMissingCodes, bHasUsedFallback, pGlyphsImpl);
 
         SAL_INFO("vcl",
                  "Fallback font (level "

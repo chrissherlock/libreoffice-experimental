@@ -110,12 +110,11 @@ public:
      * Finds a suitable fallback font for the given missing characters.
      * Considers forced fallbacks, cached glyphs, and system font fallback.
      */
-    static rtl::Reference<LogicalFontInstance>
-    FindFallbackFont(ImplFontCache& rFontCache, vcl::font::PhysicalFontCollection* pFontCollection,
-                     vcl::font::FontSelectPattern& rPattern, LogicalFontInstance* pBaseFont,
-                     int nFallbackLevel, OUString& rMissingCodes,
-                     const rtl::Reference<LogicalFontInstance>& pForcedFallback,
-                     bool& bHasUsedForcedFallback, SalLayoutGlyphsImpl* pGlyphsImpl);
+    static rtl::Reference<LogicalFontInstance> FindFallbackFont(const FontLookupCriteria& rCriteria,
+                                                                int nFallbackLevel,
+                                                                OUString& rMissingCodes,
+                                                                bool& rHasUsedFallback,
+                                                                SalLayoutGlyphsImpl* pGlyphsImpl);
 
     /**
      * Scans the layout arguments to identify which characters need fallback.

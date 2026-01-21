@@ -211,13 +211,19 @@ void TextLayoutEngineTest::testFindFallbackFont_ForcedFallbackPriority()
                                           Size(0, 10), 0.0, false);
 
     // This verifies that the engine prioritizes the forced fallback before hitting the cache.
-    rtl::Reference<LogicalFontInstance> pResult = vcl::text::TextLayoutEngine::FindFallbackFont(
-        *pDummyCache, pDummyCollection, aPattern,
-        nullptr, // pBaseFont
-        1, // Level
-        aMissingCodes, pForcedFont, bHasUsedForcedFallback,
-        nullptr // pGlyphsImpl
-    );
+    // Construct criteria for test
+    vcl::text::FontLookupCriteria aCriteria = {
+        *pDummyCache, pDummyCollection,
+        nullptr, // pReferenceFont (Base Font)
+        pForcedFont // pPriorityFallback
+    };
+
+    rtl::Reference<LogicalFontInstance> pResult
+        = vcl::text::TextLayoutEngine::FindFallbackFont(aCriteria,
+                                                        1, // Level
+                                                        aMissingCodes, bHasUsedForcedFallback,
+                                                        nullptr // pGlyphsImpl
+        );
 
     CPPUNIT_ASSERT_EQUAL(pForcedFont.get(), pResult.get());
 
