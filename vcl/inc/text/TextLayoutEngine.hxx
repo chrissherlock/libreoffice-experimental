@@ -32,6 +32,14 @@ namespace vcl::font
 struct FontRealization;
 }
 
+class ImplFontCache;
+namespace vcl::font
+{
+class PhysicalFontCollection;
+}
+class LogicalFontInstance;
+class SalLayoutGlyphsImpl;
+
 namespace vcl::text
 {
 class VCL_DLLPUBLIC TextLayoutEngine
@@ -86,6 +94,17 @@ public:
                         SalLayoutFlags nFlags, const vcl::text::TextLayoutCache* pCache,
                         const GraphicsState& rState, const font::FontRealization& rRealization,
                         bool bRTL);
+
+    /**
+     * Finds a suitable fallback font for the given missing characters.
+     * Considers forced fallbacks, cached glyphs, and system font fallback.
+     */
+    static rtl::Reference<LogicalFontInstance>
+    FindFallbackFont(ImplFontCache& rFontCache, vcl::font::PhysicalFontCollection* pFontCollection,
+                     vcl::font::FontSelectPattern& rPattern, LogicalFontInstance* pBaseFont,
+                     int nFallbackLevel, OUString& rMissingCodes,
+                     const rtl::Reference<LogicalFontInstance>& pForcedFallback,
+                     bool& bHasUsedForcedFallback, SalLayoutGlyphsImpl* pGlyphsImpl);
 };
 
 } // namespace vcl::text

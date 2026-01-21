@@ -9,6 +9,7 @@
 
 #include <test/bootstrapfixture.hxx>
 
+#include <salhelper/simplereferenceobject.hxx>
 #include <tools/degree.hxx>
 #include <i18nlangtag/lang.h>
 
@@ -36,6 +37,7 @@ public:
     void testCreateLayoutRequest_DigitLocalization();
     void testCreateLayoutRequest_OrientationAndWidth();
     void testCreateLayoutRequest_OutOfBounds();
+    void testFindFallbackFont_ForcedFallbackPriority();
 
     CPPUNIT_TEST_SUITE(TextLayoutEngineTest);
     CPPUNIT_TEST(testBiDiLayoutFlags);
@@ -43,6 +45,7 @@ public:
     CPPUNIT_TEST(testCreateLayoutRequest_DigitLocalization);
     CPPUNIT_TEST(testCreateLayoutRequest_OrientationAndWidth);
     CPPUNIT_TEST(testCreateLayoutRequest_OutOfBounds);
+    CPPUNIT_TEST(testFindFallbackFont_ForcedFallbackPriority);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -177,6 +180,46 @@ void TextLayoutEngineTest::testCreateLayoutRequest_OutOfBounds()
     // This ensures the engine doesn't crash on bad inputs.
     CPPUNIT_ASSERT_EQUAL(sal_Int32(10), aArgs.mnMinCharPos);
     CPPUNIT_ASSERT_EQUAL(sal_Int32(10), aArgs.mnEndCharPos);
+}
+
+namespace
+{
+struct MockFontInstance : public salhelper::SimpleReferenceObject
+{
+    MockFontInstance() {}
+};
+}
+
+void TextLayoutEngineTest::testFindFallbackFont_ForcedFallbackPriority()
+{
+    bool bHasUsedForcedFallback = false;
+
+    // Create a dummy "Forced Font"
+    // Use unsafe cast because we only need the pointer identity and ref-counting
+    rtl::Reference<LogicalFontInstance> pForcedFont(
+        reinterpret_cast<LogicalFontInstance*>(new MockFontInstance()));
+
+    // Create dummy dependencies (Safe because the Forced path DOES NOT dereference them)
+    // We pass 0xDEADBEEF to ensure that if it DOES try to access it, the test will crash hard.
+    ImplFontCache* pDummyCache = reinterpret_cast<ImplFontCache*>(0xDEADBEEF);
+    vcl::font::PhysicalFontCollection* pDummyCollection = nullptr;
+
+    OUString aMissingCodes = "A";
+    vcl::font::FontSelectPattern aPattern(vcl::Font("Arial", Size(0, 10)), u"Arial"_ustr,
+                                          Size(0, 10), 0.0, false);
+
+    // This verifies that the engine prioritizes the forced fallback before hitting the cache.
+    rtl::Reference<LogicalFontInstance> pResult = vcl::text::TextLayoutEngine::FindFallbackFont(
+        *pDummyCache, pDummyCollection, aPattern,
+        nullptr, // pBaseFont
+        1, // Level
+        aMissingCodes, pForcedFont, bHasUsedForcedFallback,
+        nullptr // pGlyphsImpl
+    );
+
+    CPPUNIT_ASSERT_EQUAL(pForcedFont.get(), pResult.get());
+
+    CPPUNIT_ASSERT_MESSAGE("Should mark forced fallback as used", bHasUsedForcedFallback);
 }
 
 } // namespace

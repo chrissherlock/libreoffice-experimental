@@ -40,6 +40,7 @@ $(eval $(call gb_CppunitTest_use_libraries,vcl_textlayout, \
 	cppuhelper \
 	i18nlangtag \
 	sal \
+	salhelper \
 	svt \
 	test \
 	tl \
