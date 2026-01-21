@@ -23,6 +23,7 @@
 #include <font/FontSelectPattern.hxx>
 #include <sallayout.hxx>
 #include <text/TextLayoutEngine.hxx>
+#include <i18nutil/digitlocalization.hxx>
 #include <GraphicsState.hxx>
 
 #include <unicode/uchar.h>
@@ -201,8 +202,8 @@ void TextLayoutEngine::ApplyDigitLocalization(const vcl::GraphicsState& rGraphic
     if (rGraphicsState.meTextLanguage)
     {
         sal_Int32 nSubstringLen = rEndIndex - nMinIndex;
-        rStr
-            = LocalizeDigitsInString(rStr, rGraphicsState.meTextLanguage, nMinIndex, nSubstringLen);
+        rStr = i18nutil::LocalizeDigitsInString(rStr, rGraphicsState.meTextLanguage, nMinIndex,
+                                                nSubstringLen);
         rEndIndex = nMinIndex + nSubstringLen;
     }
 }

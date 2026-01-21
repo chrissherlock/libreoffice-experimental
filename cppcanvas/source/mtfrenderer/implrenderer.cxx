@@ -20,6 +20,7 @@
 #include <comphelper/diagnose_ex.hxx>
 #include <tools/debug.hxx>
 #include <tools/mapunit.hxx>
+#include <i18nutil/digitlocalization.hxx>
 #include <utility>
 #include <vcl/svapp.hxx>
 #include <comphelper/propertysequence.hxx>
@@ -2426,7 +2427,7 @@ namespace cppcanvas::internal
                         OUString sText = pAct->GetText();
 
                         if (rVDev.GetDigitLanguage())
-                            sText = LocalizeDigitsInString(sText, rVDev.GetDigitLanguage());
+                            sText = i18nutil::LocalizeDigitsInString(sText, rVDev.GetDigitLanguage());
 
                         const sal_Int32 nLen = std::min(pAct->GetLen(), pAct->GetText().getLength() - pAct->GetIndex());
 
@@ -2448,7 +2449,7 @@ namespace cppcanvas::internal
                         OUString sText = pAct->GetText();
 
                         if (rVDev.GetDigitLanguage())
-                            sText = LocalizeDigitsInString(sText, rVDev.GetDigitLanguage());
+                            sText = i18nutil::LocalizeDigitsInString(sText, rVDev.GetDigitLanguage());
 
                         const sal_Int32 nLen = std::min(pAct->GetLen(), pAct->GetText().getLength() - pAct->GetIndex());
 
@@ -2528,7 +2529,7 @@ namespace cppcanvas::internal
                         OUString sText = pAct->GetText();
 
                         if (rVDev.GetDigitLanguage())
-                            sText = LocalizeDigitsInString(sText, rVDev.GetDigitLanguage());
+                            sText = i18nutil::LocalizeDigitsInString(sText, rVDev.GetDigitLanguage());
 
                         const sal_Int32 nLen = std::min(pAct->GetLen(), pAct->GetText().getLength() - pAct->GetIndex());
 

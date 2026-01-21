@@ -17,7 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-
+#include <i18nutil/digitlocalization.hxx>
 #include <vcl/fntstyle.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/settings.hxx>
@@ -3939,7 +3939,7 @@ void ImpEditEngine::StripAllPortions( OutputDevice& rOutDev, tools::Rectangle aC
                                 const Color aTextLineColor(rOutDev.GetTextLineColor());
 
                                 // Unicode code points conversion according to ctl text numeral setting
-                                aText = LocalizeDigitsInString(aText,
+                                aText = i18nutil::LocalizeDigitsInString(aText,
                                     ImplCalcDigitLang(aTmpFont.GetLanguage()),
                                     nTextStart, nTextLen);
 

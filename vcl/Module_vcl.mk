@@ -262,7 +262,6 @@ $(eval $(call gb_Module_add_check_targets,vcl,\
         CppunitTest_vcl_skia) \
     CppunitTest_vcl_filter_igif \
     CppunitTest_vcl_unit_conversion \
-    CppunitTest_vcl_localize_digits \
     CppunitTest_vcl_idle_task \
 ))
 

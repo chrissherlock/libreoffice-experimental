@@ -39,6 +39,7 @@ $(eval $(call gb_Library_use_libraries,cppcanvas,\
 	comphelper \
 	cppu \
 	cppuhelper \
+	i18nutil \
 	i18nlangtag \
 	sal \
 	salhelper \
