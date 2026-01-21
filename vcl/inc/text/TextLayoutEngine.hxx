@@ -105,6 +105,12 @@ public:
                      int nFallbackLevel, OUString& rMissingCodes,
                      const rtl::Reference<LogicalFontInstance>& pForcedFallback,
                      bool& bHasUsedForcedFallback, SalLayoutGlyphsImpl* pGlyphsImpl);
+
+    /**
+     * Scans the layout arguments to identify which characters need fallback.
+     * Returns a string containing all missing characters found in fallback runs.
+     */
+    static OUString IdentifyMissingChars(const vcl::text::ImplLayoutArgs& rArgs);
 };
 
 } // namespace vcl::text
