@@ -2247,13 +2247,7 @@ OutputDevice::ImplGlyphFallbackLayout(std::unique_ptr<SalLayout> pSalLayout,
     rLayoutArgs.PrepareFallback(nullptr);
     rLayoutArgs.mnFlags |= SalLayoutFlags::ForFallback;
 
-    bool bRTL;
-    int nMinRunPos, nEndRunPos;
-    OUStringBuffer aMissingCodeBuf(512);
-    while (rLayoutArgs.GetNextRun(&nMinRunPos, &nEndRunPos, &bRTL))
-        aMissingCodeBuf.append(rLayoutArgs.mrStr.subView(nMinRunPos, nEndRunPos - nMinRunPos));
-    rLayoutArgs.ResetPos();
-    OUString aMissingCodes = aMissingCodeBuf.makeStringAndClear();
+    OUString aMissingCodes = vcl::text::TextLayoutEngine::IdentifyMissingChars(rLayoutArgs);
 
     vcl::font::FontSelectPattern aFontSelData(mpFontRealization->mxFont->GetFontSelectPattern());
     SalLayoutGlyphsImpl* pGlyphsImpl = pGlyphs ? pGlyphs->Impl(1) : nullptr;
