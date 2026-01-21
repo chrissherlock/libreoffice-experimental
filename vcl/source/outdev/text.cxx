@@ -2262,24 +2262,19 @@ OutputDevice::ImplGlyphFallbackLayout(std::unique_ptr<SalLayout> pSalLayout,
 
     for (int nFallbackLevel = 1; nFallbackLevel < MAX_FALLBACK; ++nFallbackLevel)
     {
-        rtl::Reference<LogicalFontInstance> pFallbackFont;
-        if (!bHasUsedFallback && mpForcedFallbackInstance)
-        {
-            pFallbackFont = mpForcedFallbackInstance;
-            bHasUsedFallback = true;
-        }
-        else if (pGlyphsImpl != nullptr)
-        {
-            pFallbackFont = pGlyphsImpl->GetFont();
-        }
-
         OUString oldMissingCodes = aMissingCodes;
-        if (!pFallbackFont)
-            pFallbackFont = GetFontCache().GetGlyphFallbackFont(GetFontCollection(), aFontSelData,
-                                                                mpFontRealization->mxFont.get(),
-                                                                nFallbackLevel, aMissingCodes);
-        if (!pFallbackFont)
-            break;
+
+        rtl::Reference<LogicalFontInstance> pFallbackFont = vcl::text::TextLayoutEngine::FindFallbackFont(
+            GetFontCache(),
+            GetFontCollection(),
+            aFontSelData,
+            mpFontRealization->mxFont.get(),
+            nFallbackLevel,
+            aMissingCodes,
+            mpForcedFallbackInstance,
+            bHasUsedFallback,
+            pGlyphsImpl
+        );
 
         SAL_INFO("vcl", "Fallback font (level " << nFallbackLevel << "): " << pFallbackFont->GetFontFace()->GetFamilyName());
 
