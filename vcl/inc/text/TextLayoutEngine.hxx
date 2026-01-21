@@ -111,6 +111,15 @@ public:
      * Returns a string containing all missing characters found in fallback runs.
      */
     static OUString IdentifyMissingChars(const vcl::text::ImplLayoutArgs& rArgs);
+
+    /**
+     * Merges a fallback layout into the main layout container.
+     * Promotes the base layout to a MultiSalLayout if necessary.
+     */
+    static void MergeFallback(std::unique_ptr<MultiSalLayout>& rMultiSalLayout,
+                              std::unique_ptr<SalLayout>& rBaseLayout,
+                              std::unique_ptr<SalLayout> pFallback, const ImplLayoutRuns& rRuns,
+                              bool bIsLastLevel);
 };
 
 } // namespace vcl::text
