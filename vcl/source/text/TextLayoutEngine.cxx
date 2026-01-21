@@ -286,6 +286,21 @@ OUString TextLayoutEngine::IdentifyMissingChars(const vcl::text::ImplLayoutArgs&
 
     return aMissingCodeBuf.makeStringAndClear();
 }
+
+void TextLayoutEngine::MergeFallback(std::unique_ptr<MultiSalLayout>& rMultiSalLayout,
+                                     std::unique_ptr<SalLayout>& rBaseLayout,
+                                     std::unique_ptr<SalLayout> pFallback,
+                                     const ImplLayoutRuns& rRuns, bool bIsLastLevel)
+{
+    if (!rMultiSalLayout)
+        rMultiSalLayout.reset(new MultiSalLayout(std::move(rBaseLayout)));
+
+    rMultiSalLayout->AddFallback(std::move(pFallback), rRuns);
+
+    if (bIsLastLevel)
+        rMultiSalLayout->SetIncomplete(true);
+}
+
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
