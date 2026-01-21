@@ -10,6 +10,7 @@
 #include <basegfx/point/b2dpoint.hxx>
 #include <tools/gen.hxx>
 #include <i18nlangtag/mslangid.hxx>
+#include <i18nutil/digitlocalization.hxx>
 #include <i18nutil/unicode.hxx>
 
 #include <vcl/outdev.hxx>
@@ -23,8 +24,8 @@
 #include <font/FontSelectPattern.hxx>
 #include <sallayout.hxx>
 #include <text/TextLayoutEngine.hxx>
-#include <i18nutil/digitlocalization.hxx>
 #include <GraphicsState.hxx>
+#include <ImplLayoutArgs.hxx>
 
 #include <unicode/uchar.h>
 
@@ -206,6 +207,39 @@ void TextLayoutEngine::ApplyDigitLocalization(const vcl::GraphicsState& rGraphic
                                                 nSubstringLen);
         rEndIndex = nMinIndex + nSubstringLen;
     }
+}
+
+vcl::text::ImplLayoutArgs TextLayoutEngine::CreateLayoutRequest(
+    OUString& rStr, sal_Int32 nMinIndex, sal_Int32 nLen, double nPixelWidth, SalLayoutFlags nFlags,
+    const vcl::text::TextLayoutCache* pCache, const GraphicsState& rState,
+    const font::FontRealization& rRealization, bool bRTL)
+{
+    assert(nMinIndex >= 0);
+    assert(nLen >= 0);
+
+    // get string length for calculating extents
+    sal_Int32 nEndIndex = rStr.getLength();
+    if (nMinIndex + nLen < nEndIndex)
+        nEndIndex = nMinIndex + nLen;
+
+    // don't bother if there is nothing to do
+    if (nEndIndex < nMinIndex)
+        nEndIndex = nMinIndex;
+
+    vcl::text::TextLayoutEngine::ApplyDigitLocalization(rState, rStr, nMinIndex, nEndIndex);
+
+    nFlags = vcl::text::TextLayoutEngine::CalculateLayoutFlags(rState, rRealization, bRTL, rStr,
+                                                               nMinIndex, nEndIndex, nFlags);
+
+    vcl::text::ImplLayoutArgs aLayoutArgs(rStr, nMinIndex, nEndIndex, nFlags,
+                                          rState.maFont.GetLanguageTag(), pCache);
+
+    Degree10 nOrientation = rRealization.mxFont ? rRealization.mxFont->mnOrientation : 0_deg10;
+    aLayoutArgs.SetOrientation(nOrientation);
+
+    aLayoutArgs.SetLayoutWidth(nPixelWidth);
+
+    return aLayoutArgs;
 }
 
 } // namespace vcl::text
