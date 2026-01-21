@@ -1252,7 +1252,23 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
     // do glyph fallback if needed
     // #105768# avoid fallback for very small font sizes
     if (aLayoutArgs.HasFallbackRun() && mpFontRealization->mxFont->GetFontSelectPattern().mnHeight >= 3)
-        pSalLayout = ImplGlyphFallbackLayout(std::move(pSalLayout), aLayoutArgs, pGlyphs);
+    {
+        auto fnFactory = [this, pGlyphs](LogicalFontInstance* pFont, int nLevel, vcl::text::ImplLayoutArgs& rArgs) {
+            return this->getFallbackLayout(pFont, nLevel, rArgs, pGlyphs);
+        };
+
+        pSalLayout = vcl::text::TextLayoutEngine::ResolveMissingGlyphs(
+            std::move(pSalLayout),
+            aLayoutArgs,
+            pGlyphs,
+            GetFontCache(),
+            GetFontCollection(),
+            mpFontRealization->mxFont->GetFontSelectPattern(),
+            mpFontRealization->mxFont.get(),
+            mpForcedFallbackInstance,
+            fnFactory
+        );
+    }
 
     if (flags & SalLayoutFlags::GlyphItemsOnly)
         // Return glyph items only after fallback handling. Otherwise they may
@@ -2230,89 +2246,5 @@ std::unique_ptr<SalLayout> OutputDevice::getFallbackLayout(LogicalFontInstance* 
     return pFallback;
 }
 
-std::unique_ptr<SalLayout>
-OutputDevice::ImplGlyphFallbackLayout(std::unique_ptr<SalLayout> pSalLayout,
-                                      vcl::text::ImplLayoutArgs& rLayoutArgs,
-                                      const SalLayoutGlyphs* pGlyphs) const
-{
-    if (!mpFontRealization || !mpFontRealization->mxFont)
-    {
-        SAL_WARN("vcl.gdi", "No font entry set in OutputDevice");
-        assert(mpFontRealization->mxFont);
-        return nullptr;
-    }
-
-    std::unique_ptr<MultiSalLayout> pMultiSalLayout;
-    ImplLayoutRuns aLayoutRuns = rLayoutArgs.maRuns;
-    rLayoutArgs.PrepareFallback(nullptr);
-    rLayoutArgs.mnFlags |= SalLayoutFlags::ForFallback;
-
-    OUString aMissingCodes = vcl::text::TextLayoutEngine::IdentifyMissingChars(rLayoutArgs);
-
-    vcl::font::FontSelectPattern aFontSelData(mpFontRealization->mxFont->GetFontSelectPattern());
-    SalLayoutGlyphsImpl* pGlyphsImpl = pGlyphs ? pGlyphs->Impl(1) : nullptr;
-
-    bool bHasUsedFallback = false;
-
-    for (int nFallbackLevel = 1; nFallbackLevel < MAX_FALLBACK; ++nFallbackLevel)
-    {
-        OUString oldMissingCodes = aMissingCodes;
-
-        rtl::Reference<LogicalFontInstance> pFallbackFont = vcl::text::TextLayoutEngine::FindFallbackFont(
-            GetFontCache(),
-            GetFontCollection(),
-            aFontSelData,
-            mpFontRealization->mxFont.get(),
-            nFallbackLevel,
-            aMissingCodes,
-            mpForcedFallbackInstance,
-            bHasUsedFallback,
-            pGlyphsImpl
-        );
-
-        SAL_INFO("vcl", "Fallback font (level " << nFallbackLevel << "): " << pFallbackFont->GetFontFace()->GetFamilyName());
-
-        if (nFallbackLevel < MAX_FALLBACK - 1)
-        {
-            if (mpFontRealization->mxFont->GetFontFace() == pFallbackFont->GetFontFace())
-            {
-                if (aMissingCodes != oldMissingCodes)
-                    aMissingCodes = oldMissingCodes;
-                continue;
-            }
-        }
-
-        std::unique_ptr<SalLayout> pFallback
-            = getFallbackLayout(pFallbackFont.get(), nFallbackLevel, rLayoutArgs, pGlyphs);
-
-        if (pFallback)
-        {
-            vcl::text::TextLayoutEngine::MergeFallback(
-                pMultiSalLayout,
-                pSalLayout,
-                std::move(pFallback),
-                rLayoutArgs.maRuns,
-                (nFallbackLevel == MAX_FALLBACK - 1)
-            );
-        }
-
-        if (pGlyphs != nullptr)
-            pGlyphsImpl = pGlyphs->Impl(nFallbackLevel + 1);
-
-        if (!rLayoutArgs.PrepareFallback(pGlyphsImpl))
-            break;
-    }
-
-    if (pMultiSalLayout)
-    {
-        if (pMultiSalLayout->LayoutText(rLayoutArgs, nullptr))
-            pSalLayout = std::move(pMultiSalLayout);
-        else
-            pSalLayout = pMultiSalLayout->ReleaseBaseLayout();
-    }
-
-    rLayoutArgs.maRuns = std::move(aLayoutRuns);
-    return pSalLayout;
-}
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
