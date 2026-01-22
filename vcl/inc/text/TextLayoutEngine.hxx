@@ -16,6 +16,7 @@
 #include <tools/gen.hxx> // For global Point
 #include <tools/fontenum.hxx> // For FontEmphasisMark
 #include <rtl/ustring.hxx>
+#include <font/FontLookupCriteria.hxx>
 
 class SalLayout;
 class LogicalFontInstance;
@@ -44,14 +45,6 @@ namespace vcl::text
 {
 using FallbackLayoutFactory
     = std::function<std::unique_ptr<SalLayout>(LogicalFontInstance*, int, ImplLayoutArgs&)>;
-
-struct FontLookupCriteria
-{
-    ImplFontCache& rCache;
-    vcl::font::PhysicalFontCollection* pFontCollection;
-    LogicalFontInstance* pReferenceFont;
-    const rtl::Reference<LogicalFontInstance>& pPriorityFallback;
-};
 
 class VCL_DLLPUBLIC TextLayoutEngine
 {
