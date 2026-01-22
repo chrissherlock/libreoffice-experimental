@@ -178,11 +178,13 @@ void PhysicalFontCollection::ImplInitGenericGlyphFallback() const
     mpFallbackList  = std::move(pFallbackList);
 }
 
-PhysicalFontFamily* PhysicalFontCollection::GetGlyphFallbackFont(FontSelectPattern& rFontSelData,
-                                                                 LogicalFontInstance* pFontInstance,
+PhysicalFontFamily* PhysicalFontCollection::GetGlyphFallbackFont(const vcl::text::FontLookupCriteria& rCriteria,
+                                                                 FontSelectPattern& rFontSelData,
+
                                                                  OUString& rMissingCodes,
                                                                  int nFallbackLevel) const
 {
+    LogicalFontInstance* pFontInstance = rCriteria.pReferenceFont;
     PhysicalFontFamily* pFallbackData = nullptr;
 
     // find a matching font candidate for platform specific glyph fallback
