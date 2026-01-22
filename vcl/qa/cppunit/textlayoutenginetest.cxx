@@ -39,6 +39,9 @@ public:
     void testCreateLayoutRequest_OutOfBounds();
     void testFindFallbackFont_ForcedFallbackPriority();
     void testIdentifyMissingChars();
+    void testJustifyLayout();
+    void testSetAnchorPoint();
+    void testApplyHorizontalOffset();
 
     CPPUNIT_TEST_SUITE(TextLayoutEngineTest);
     CPPUNIT_TEST(testBiDiLayoutFlags);
@@ -48,6 +51,9 @@ public:
     CPPUNIT_TEST(testCreateLayoutRequest_OutOfBounds);
     CPPUNIT_TEST(testFindFallbackFont_ForcedFallbackPriority);
     CPPUNIT_TEST(testIdentifyMissingChars);
+    CPPUNIT_TEST(testJustifyLayout);
+    CPPUNIT_TEST(testSetAnchorPoint);
+    CPPUNIT_TEST(testApplyHorizontalOffset);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -319,6 +325,85 @@ void TextLayoutEngineTest::testIdentifyMissingChars()
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Should extract text regardless of RTL flag", OUString("Test"),
                                      aResult);
     }
+}
+
+class MockSalLayout : public SalLayout
+{
+public:
+    bool bAdjustCalled = false;
+
+    // SalLayout overrides
+    virtual void AdjustLayout(vcl::text::ImplLayoutArgs&) override { bAdjustCalled = true; }
+
+    // Abstract methods that must be implemented with exact signatures
+    virtual bool LayoutText(vcl::text::ImplLayoutArgs&, const SalLayoutGlyphsImpl*) override
+    {
+        return true;
+    }
+    virtual void DrawText(SalGraphics&) const override {}
+
+    virtual double GetTextWidth() const override { return 100.0; }
+    virtual sal_Int32 GetTextBreak(double, double, int) const override { return 0; }
+    virtual double FillDXArray(std::vector<double>*, const OUString&) const override { return 0; }
+    virtual double FillPartialDXArray(std::vector<double>*, const OUString&, int,
+                                      int) const override
+    {
+        return 0;
+    }
+    virtual void GetCaretPositions(std::vector<double>&, const OUString&) const override {}
+    virtual bool HasFontKashidaPositions() const override { return false; }
+    virtual bool IsKashidaPosValid(int, int) const override { return false; }
+
+    // Fixed signature: the 4th parameter is const LogicalFontInstance**
+    virtual bool GetNextGlyph(const GlyphItem** pGlyph, basegfx::B2DPoint& rPos, int& nStart,
+                              const LogicalFontInstance** ppFont) const override
+    {
+        (void)pGlyph;
+        (void)rPos;
+        (void)nStart;
+        (void)ppFont;
+        return false;
+    }
+};
+
+void TextLayoutEngineTest::testJustifyLayout()
+{
+    MockSalLayout aLayout;
+    vcl::text::ImplLayoutArgs aArgs(u"LibreOffice"_ustr, 0, 11, SalLayoutFlags::NONE,
+                                    LanguageTag(LANGUAGE_ENGLISH_US), nullptr);
+
+    vcl::text::TextLayoutEngine::JustifyLayout(aLayout, aArgs);
+    CPPUNIT_ASSERT_MESSAGE("JustifyLayout should call AdjustLayout on SalLayout",
+                           aLayout.bAdjustCalled);
+}
+
+void TextLayoutEngineTest::testSetAnchorPoint()
+{
+    MockSalLayout aLayout;
+    vcl::text::TextLayoutPositioning aPos;
+    aPos.aDrawBase = basegfx::B2DPoint(123.4, 567.8);
+
+    vcl::text::TextLayoutEngine::SetAnchorPoint(aLayout, aPos);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(123.4, aLayout.DrawBase().getX(), 0.001);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(567.8, aLayout.DrawBase().getY(), 0.001);
+}
+
+void TextLayoutEngineTest::testApplyHorizontalOffset()
+{
+    MockSalLayout aLayout;
+    vcl::text::ImplLayoutArgs aArgs(u"RTL_TEST"_ustr, 0, 8, SalLayoutFlags::RightAlign,
+                                    LanguageTag(LANGUAGE_ENGLISH_US), nullptr);
+    vcl::text::TextLayoutPositioning aPos;
+    aPos.bRightAlign = true;
+    aPos.nEndGlyphCoord = 0;
+    aArgs.mnLayoutWidth = 0;
+
+    vcl::text::TextLayoutEngine::ApplyHorizontalOffset(aLayout, aArgs, aPos);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-99.0, aLayout.DrawOffset().getX(), 0.001);
+
+    aArgs.mnLayoutWidth = 250;
+    vcl::text::TextLayoutEngine::ApplyHorizontalOffset(aLayout, aArgs, aPos);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-249.0, aLayout.DrawOffset().getX(), 0.001);
 }
 
 } // namespace
