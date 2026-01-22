@@ -1077,6 +1077,89 @@ static bool lcl_isSubpixelPositioningRequired(const OutputDevice& rDev)
     return rDev.IsMapModeEnabled() || rDev.isSubpixelPositioning();
 }
 
+static double lcl_applyDXArray(JustificationData& rJustification,
+                               const OutputDevice& rDev,
+                               KernArraySpan pDXArray,
+                               sal_Int32 nMinCluster,
+                               sal_Int32 nLen,
+                               std::function<double(tools::Long)> fnWidthConverter)
+{
+    if (pDXArray.empty())
+        return 0.0;
+
+    double nEndCoord = 0.0;
+
+    if (rDev.IsMapModeEnabled())
+    {
+        // convert from logical units to font units without rounding,
+        // keeping accuracy for lower levels
+        for (int i = 0; i < nLen; ++i)
+        {
+            rJustification.SetTotalAdvance(
+                nMinCluster + i,
+                fnWidthConverter(pDXArray[i]));
+        }
+
+        nEndCoord = rJustification.GetTotalAdvance(nMinCluster + nLen - 1);
+    }
+    else
+    {
+        for (int i = 0; i < nLen; ++i)
+        {
+            rJustification.SetTotalAdvance(nMinCluster + i, pDXArray[i]);
+        }
+
+        nEndCoord = std::round(rJustification.GetTotalAdvance(nMinCluster + nLen - 1));
+    }
+
+    return nEndCoord;
+}
+
+static void lcl_applyKashidaArray(JustificationData& rJustification,
+                                  std::span<const sal_Bool> pKashidaArray,
+                                  sal_Int32 nMinCluster)
+{
+    if (pKashidaArray.empty())
+        return;
+
+    for (sal_Int32 i = 0; i < static_cast<sal_Int32>(pKashidaArray.size()); ++i)
+    {
+        rJustification.SetKashidaPosition(nMinCluster + i,
+                                          static_cast<bool>(pKashidaArray[i]));
+    }
+}
+
+static void lcl_prepareJustification(const OutputDevice& rDev,
+                                     KernArraySpan pDXArray,
+                                     std::span<const sal_Bool> pKashidaArray,
+                                     sal_Int32 nMinIndex,
+                                     sal_Int32 nLen,
+                                     std::optional<sal_Int32> nDrawMinCharPos,
+                                     std::optional<sal_Int32> nDrawEndCharPos,
+                                     vcl::text::ImplLayoutArgs& rLayoutArgs,
+                                     double& rEndGlyphCoord,
+                                     std::function<double(tools::Long)> fnWidthConverter)
+{
+    if (pDXArray.empty() && pKashidaArray.empty())
+        return;
+
+    // The provided advance and kashida arrays are indexed relative to the first visible cluster
+    const auto nJustMinCluster = nDrawMinCharPos.value_or(nMinIndex);
+    auto nJustLen = nLen;
+
+    if (nDrawEndCharPos.has_value())
+        nJustLen = *nDrawEndCharPos - nJustMinCluster;
+
+    JustificationData aJustification{ nJustMinCluster, nJustLen };
+
+    if (!pDXArray.empty())
+        rEndGlyphCoord = lcl_applyDXArray(aJustification, rDev, pDXArray, nJustMinCluster, nJustLen, fnWidthConverter);
+
+    lcl_applyKashidaArray(aJustification, pKashidaArray, nJustMinCluster);
+
+    rLayoutArgs.SetJustificationData(std::move(aJustification));
+}
+
 static void lcl_fillAlignmentContext(vcl::text::TextLayoutPositioning& rPos,
                                      const vcl::text::ImplLayoutArgs& rArgs,
                                      double nEndGlyphCoord)
@@ -1171,53 +1254,11 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
     }
 
     double nEndGlyphCoord(0);
-    if (!pDXArray.empty() || !pKashidaArray.empty())
-    {
-        // The provided advance and kashida arrays are indexed relative to the first visible cluster
-        auto nJustMinCluster = nDrawMinCharPos.value_or(nMinIndex);
-        auto nJustLen = nLen;
-        if (nDrawEndCharPos.has_value())
-        {
-            nJustLen = *nDrawEndCharPos - nJustMinCluster;
-        }
 
-        JustificationData stJustification{ nJustMinCluster, nJustLen };
-
-        if (!pDXArray.empty() && mpMapper->IsMapModeEnabled())
-        {
-            // convert from logical units to font units without rounding,
-            // keeping accuracy for lower levels
-            for (int i = 0; i < nJustLen; ++i)
-            {
-                stJustification.SetTotalAdvance(
-                    nJustMinCluster + i,
-                    LogicWidthToDeviceSubPixel(pDXArray[i]));
-            }
-
-            nEndGlyphCoord = stJustification.GetTotalAdvance(nJustMinCluster + nJustLen - 1);
-        }
-        else if (!pDXArray.empty())
-        {
-            for (int i = 0; i < nJustLen; ++i)
-            {
-                stJustification.SetTotalAdvance(nJustMinCluster + i, pDXArray[i]);
-            }
-
-            nEndGlyphCoord
-                = std::round(stJustification.GetTotalAdvance(nJustMinCluster + nJustLen - 1));
-        }
-
-        if (!pKashidaArray.empty())
-        {
-            for (sal_Int32 i = 0; i < static_cast<sal_Int32>(pKashidaArray.size()); ++i)
-            {
-                stJustification.SetKashidaPosition(nJustMinCluster + i,
-                                                   static_cast<bool>(pKashidaArray[i]));
-            }
-        }
-
-        aLayoutArgs.SetJustificationData(std::move(stJustification));
-    }
+    auto fnWidthConverter = [this](tools::Long nWidth) { return LogicWidthToDeviceSubPixel(nWidth); };
+    lcl_prepareJustification(*this, pDXArray, pKashidaArray, nMinIndex, nLen,
+                             nDrawMinCharPos, nDrawEndCharPos, aLayoutArgs, nEndGlyphCoord,
+                             fnWidthConverter);
 
     // get matching layout object for base font
     SalGraphics& rFactory = lcl_getLayoutFactory(*this);
