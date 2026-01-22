@@ -46,6 +46,14 @@ namespace vcl::text
 using FallbackLayoutFactory
     = std::function<std::unique_ptr<SalLayout>(LogicalFontInstance*, int, ImplLayoutArgs&)>;
 
+class ILayoutFactory
+{
+public:
+    virtual ~ILayoutFactory() = default;
+    virtual std::unique_ptr<SalLayout> CreateLayout(int nFallbackLevel) = 0;
+    virtual void SetFont(LogicalFontInstance* pFont, int nFallbackLevel) = 0;
+};
+
 class VCL_DLLPUBLIC TextLayoutEngine
 {
 public:
@@ -132,7 +140,7 @@ public:
                                                            vcl::text::ImplLayoutArgs& rLayoutArgs,
                                                            const SalLayoutGlyphs* pGlyphs,
                                                            const FontLookupCriteria& rCriteria,
-                                                           FallbackLayoutFactory rFactory);
+                                                           ILayoutFactory& rFactory);
 };
 
 } // namespace vcl::text
