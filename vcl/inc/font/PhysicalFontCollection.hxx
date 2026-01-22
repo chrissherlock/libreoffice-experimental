@@ -24,6 +24,7 @@
 #include <vcl/dllapi.h>
 
 #include <font/LogicalFontInstance.hxx>
+#include <font/FontLookupCriteria.hxx>
 
 #include "PhysicalFontFamily.hxx"
 
@@ -64,8 +65,8 @@ public:
                                              FontItalic, std::u16string_view rSearchFamily) const;
 
     // suggest fonts for glyph fallback
-    SAL_DLLPRIVATE vcl::font::PhysicalFontFamily* GetGlyphFallbackFont( vcl::font::FontSelectPattern&,
-                                                  LogicalFontInstance* pLogicalFont,
+    SAL_DLLPRIVATE vcl::font::PhysicalFontFamily* GetGlyphFallbackFont( const vcl::text::FontLookupCriteria&,
+                                                  vcl::font::FontSelectPattern&,
                                                   OUString& rMissingCodes, int nFallbackLevel ) const;
 
     // prepare platform specific font substitutions
