@@ -290,7 +290,7 @@ TextLayoutEngine::FindFallbackFont(const FontLookupCriteria& rCriteria, int nFal
     return pFallbackFont;
 }
 
-OUString TextLayoutEngine::IdentifyMissingChars(const vcl::text::ImplLayoutArgs& rArgs)
+OUString TextLayoutEngine::IdentifyMissingChars(vcl::text::ImplLayoutArgs& rArgs)
 {
     OUStringBuffer aMissingCodeBuf;
 
@@ -384,6 +384,34 @@ std::unique_ptr<SalLayout> TextLayoutEngine::ResolveMissingGlyphs(
 
     rLayoutArgs.maRuns = std::move(aSavedRuns);
     return pBaseLayout;
+}
+
+void TextLayoutEngine::JustifyLayout(SalLayout& rLayout, vcl::text::ImplLayoutArgs& rArgs)
+{
+    rLayout.AdjustLayout(rArgs);
+}
+
+void TextLayoutEngine::ApplyHorizontalOffset(SalLayout& rLayout,
+                                             const vcl::text::ImplLayoutArgs& rArgs,
+                                             const TextLayoutPositioning& rPositioning)
+{
+    if (!rPositioning.bRightAlign)
+        return;
+
+    double nRTLOffset;
+    if (rPositioning.bHasDXArray)
+        nRTLOffset = rPositioning.nEndGlyphCoord;
+    else if (rArgs.mnLayoutWidth)
+        nRTLOffset = rArgs.mnLayoutWidth;
+    else
+        nRTLOffset = rLayout.GetTextWidth();
+
+    rLayout.DrawOffset().setX(1 - nRTLOffset);
+}
+
+void TextLayoutEngine::SetAnchorPoint(SalLayout& rLayout, const TextLayoutPositioning& rPositioning)
+{
+    rLayout.DrawBase() = rPositioning.aDrawBase;
 }
 
 } // namespace vcl::text
