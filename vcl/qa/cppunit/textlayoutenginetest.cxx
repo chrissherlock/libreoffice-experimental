@@ -42,6 +42,8 @@ public:
     void testJustifyLayout();
     void testSetAnchorPoint();
     void testApplyHorizontalOffset();
+    void testApplyHorizontalOffset_EndGlyph();
+    void testApplyHorizontalOffset_Disabled();
 
     CPPUNIT_TEST_SUITE(TextLayoutEngineTest);
     CPPUNIT_TEST(testBiDiLayoutFlags);
@@ -54,6 +56,8 @@ public:
     CPPUNIT_TEST(testJustifyLayout);
     CPPUNIT_TEST(testSetAnchorPoint);
     CPPUNIT_TEST(testApplyHorizontalOffset);
+    CPPUNIT_TEST(testApplyHorizontalOffset_EndGlyph);
+    CPPUNIT_TEST(testApplyHorizontalOffset_Disabled);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -406,6 +410,36 @@ void TextLayoutEngineTest::testApplyHorizontalOffset()
     CPPUNIT_ASSERT_DOUBLES_EQUAL(-249.0, aLayout.DrawOffset().getX(), 0.001);
 }
 
+void TextLayoutEngineTest::testApplyHorizontalOffset_EndGlyph()
+{
+    MockSalLayout aLayout;
+    vcl::text::ImplLayoutArgs aArgs(u"RTL"_ustr, 0, 3, SalLayoutFlags::RightAlign,
+                                    LanguageTag(LANGUAGE_ENGLISH_US), nullptr);
+    vcl::text::TextLayoutPositioning aPos;
+    aPos.bRightAlign = true;
+
+    // Tier 1: Explicit End Glyph Coordinate (150) should override LayoutWidth (200)
+    aPos.nEndGlyphCoord = 150.0;
+    aPos.bHasDXArray = true; // Required to trigger RTL offset logic
+    aArgs.mnLayoutWidth = 200;
+    vcl::text::TextLayoutEngine::ApplyHorizontalOffset(aLayout, aArgs, aPos);
+
+    // Formula: 1 - 150 = -149
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-149.0, aLayout.DrawOffset().getX(), 0.001);
+}
+
+void TextLayoutEngineTest::testApplyHorizontalOffset_Disabled()
+{
+    MockSalLayout aLayout;
+    vcl::text::ImplLayoutArgs aArgs(u"LTR"_ustr, 0, 3, SalLayoutFlags::NONE,
+                                    LanguageTag(LANGUAGE_ENGLISH_US), nullptr);
+    vcl::text::TextLayoutPositioning aPos;
+    aPos.bRightAlign = false; // Disabled
+
+    // Ensure the offset remains at its default (0,0)
+    vcl::text::TextLayoutEngine::ApplyHorizontalOffset(aLayout, aArgs, aPos);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, aLayout.DrawOffset().getX(), 0.001);
+}
 } // namespace
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TextLayoutEngineTest);
