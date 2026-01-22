@@ -1085,7 +1085,12 @@ static void lcl_fillAlignmentContext(vcl::text::TextLayoutPositioning& rPos,
     rPos.nEndGlyphCoord = nEndGlyphCoord;
 }
 
-
+static SalGraphics& lcl_getLayoutFactory(const OutputDevice& rDev)
+{
+    const SalGraphics* pGraphics = rDev.GetGraphics();
+    assert(pGraphics);
+    return const_cast<SalGraphics&>(*pGraphics);
+}
 
 std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
     const OUString& rOrigStr, sal_Int32 nMinIndex, sal_Int32 nLen, const Point& rLogicalPos,
@@ -1215,7 +1220,8 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
     }
 
     // get matching layout object for base font
-    std::unique_ptr<SalLayout> pSalLayout = mpGraphics->GetTextLayout(0);
+    SalGraphics& rFactory = lcl_getLayoutFactory(*this);
+    std::unique_ptr<SalLayout> pSalLayout = rFactory.GetTextLayout(0);
 
     if (pSalLayout)
     {
