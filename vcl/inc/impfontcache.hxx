@@ -20,6 +20,7 @@
 #pragma once
 
 #include <sal/config.h>
+#include <font/FontLookupCriteria.hxx>
 
 #include <basegfx/range/b2drectangle.hxx>
 #include <rtl/ref.hxx>
@@ -84,8 +85,9 @@ public:
 
     rtl::Reference<LogicalFontInstance> GetFontInstance(vcl::font::PhysicalFontCollection const *,
                              const vcl::Font&, const Size& rPixelSize, float fExactHeight, bool bNonAntialias = false);
-    rtl::Reference<LogicalFontInstance> GetGlyphFallbackFont( vcl::font::PhysicalFontCollection const *, vcl::font::FontSelectPattern&,
-                            LogicalFontInstance* pLogicalFont,
+    rtl::Reference<LogicalFontInstance> GetGlyphFallbackFont(
+                            const vcl::text::FontLookupCriteria& rCriteria,
+                            vcl::font::FontSelectPattern& rFontSelData,
                             int nFallbackLevel, OUString& rMissingCodes );
 
     bool GetCachedGlyphBoundRect(const LogicalFontInstance*, sal_GlyphId, basegfx::B2DRectangle&);
