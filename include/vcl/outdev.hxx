@@ -1299,11 +1299,6 @@ public:
         std::optional<sal_Int32> nDrawOriginCluster = std::nullopt,
         std::optional<sal_Int32> nDrawMinCharPos = std::nullopt,
         std::optional<sal_Int32> nDrawEndCharPos = std::nullopt) const;
-
-    SAL_DLLPRIVATE vcl::text::ImplLayoutArgs ImplPrepareLayoutArgs( OUString&, const sal_Int32 nIndex, const sal_Int32 nLen,
-                                                         double nPixelWidth,
-                                                         SalLayoutFlags flags = SalLayoutFlags::NONE,
-                                                         vcl::text::TextLayoutCache const* = nullptr) const;
 SAL_DLLPRIVATE std::unique_ptr<SalLayout>
                                 getFallbackLayout(
                                     LogicalFontInstance* pLogicalFont, int nFallbackLevel,

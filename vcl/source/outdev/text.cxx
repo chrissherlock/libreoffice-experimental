@@ -1003,27 +1003,6 @@ void OutputDevice::DrawStretchText( const Point& rStartPt, sal_Int32 nWidth,
     }
 }
 
-
-
-vcl::text::ImplLayoutArgs OutputDevice::ImplPrepareLayoutArgs( OUString& rStr,
-                                                    const sal_Int32 nMinIndex, const sal_Int32 nLen,
-                                                    double nPixelWidth,
-                                                    SalLayoutFlags nLayoutFlags,
-         vcl::text::TextLayoutCache const*const pLayoutCache) const
-{
-    return vcl::text::TextLayoutEngine::CreateLayoutRequest(
-        rStr,
-        nMinIndex,
-        nLen,
-        nPixelWidth,
-        nLayoutFlags,
-        pLayoutCache,
-        *mpGraphicsState,
-        *mpFontRealization,
-        IsRTLEnabled()
-    );
-}
-
 SalLayoutFlags OutputDevice::GetBiDiLayoutFlags( std::u16string_view rStr,
                                                  const sal_Int32 nMinIndex,
                                                  const sal_Int32 nEndIndex ) const
@@ -1142,8 +1121,9 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
         nPixelWidth = LogicWidthToDeviceSubPixel(nLogicalWidth);
     }
 
-    vcl::text::ImplLayoutArgs aLayoutArgs = ImplPrepareLayoutArgs( aStr, nMinIndex, nLen,
-            nPixelWidth, flags, pLayoutCache);
+    vcl::text::ImplLayoutArgs aLayoutArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
+            aStr, nMinIndex, nLen, nPixelWidth, flags, pLayoutCache,
+            *mpGraphicsState, *mpFontRealization, IsRTLEnabled());
 
     if (nDrawOriginCluster.has_value())
     {
@@ -1321,7 +1301,9 @@ std::shared_ptr<const vcl::text::TextLayoutCache> OutputDevice::CreateTextLayout
 bool OutputDevice::GetTextIsRTL( const OUString& rString, sal_Int32 nIndex, sal_Int32 nLen ) const
 {
     OUString aStr( rString );
-    vcl::text::ImplLayoutArgs aArgs = ImplPrepareLayoutArgs(aStr, nIndex, nLen, 0);
+    vcl::text::ImplLayoutArgs aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
+        aStr, nIndex, nLen, 0, SalLayoutFlags::NONE, nullptr,
+        *mpGraphicsState, *mpFontRealization, IsRTLEnabled());
     bool bRTL = false;
     int nCharPos = -1;
     if (!aArgs.GetNextPos(&nCharPos, &bRTL))
