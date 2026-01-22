@@ -24,7 +24,7 @@ namespace vcl::text
 struct FontLookupCriteria
 {
     ImplFontCache& rCache;
-    vcl::font::PhysicalFontCollection* pFontCollection;
+    const vcl::font::PhysicalFontCollection* pFontCollection;
     LogicalFontInstance* pReferenceFont;
     const rtl::Reference<LogicalFontInstance>& pPriorityFallback;
 };
