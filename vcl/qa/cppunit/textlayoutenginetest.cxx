@@ -397,7 +397,7 @@ void TextLayoutEngineTest::testApplyHorizontalOffset()
     MockSalLayout aLayout;
     vcl::text::ImplLayoutArgs aArgs(u"RTL_TEST"_ustr, 0, 8, SalLayoutFlags::RightAlign,
                                     LanguageTag(LANGUAGE_ENGLISH_US), nullptr);
-    vcl::text::TextLayoutPositioning aPos;
+    vcl::text::TextLayoutPositioning aPos{};
     aPos.bRightAlign = true;
     aPos.nEndGlyphCoord = 0;
     aArgs.mnLayoutWidth = 0;

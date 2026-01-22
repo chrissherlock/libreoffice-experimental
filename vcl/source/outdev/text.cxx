@@ -1062,6 +1062,16 @@ OutputDevice::FontMappingUseData OutputDevice::FinishTrackingFontMappingUse()
     return ret;
 }
 
+
+static basegfx::B2DPoint lcl_mapLogicalToDevicePos(const OutputDevice& rDev, const Point& rLogicalPos)
+{
+    if (rDev.IsMapModeEnabled() || rDev.GetOutDevType() == OUTDEV_PDF)
+        return rDev.LogicToDeviceSubPixel(rLogicalPos);
+
+    Point aDevicePos = rDev.LogicToDevicePixel(rLogicalPos);
+    return basegfx::B2DPoint(aDevicePos.X(), aDevicePos.Y());
+}
+
 std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
     const OUString& rOrigStr, sal_Int32 nMinIndex, sal_Int32 nLen, const Point& rLogicalPos,
     tools::Long nLogicalWidth, KernArraySpan pDXArray, std::span<const sal_Bool> pKashidaArray,
@@ -1284,13 +1294,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
     aPos.bHasDXArray = !pDXArray.empty();
     aPos.nEndGlyphCoord = nEndGlyphCoord;
 
-    if (mpMapper->IsMapModeEnabled() || meOutDevType == OUTDEV_PDF)
-        aPos.aDrawBase = LogicToDeviceSubPixel(rLogicalPos);
-    else
-    {
-        Point aDevicePos = LogicToDevicePixel(rLogicalPos);
-        aPos.aDrawBase = basegfx::B2DPoint(aDevicePos.X(), aDevicePos.Y());
-    }
+    aPos.aDrawBase = lcl_mapLogicalToDevicePos(*this, rLogicalPos);
 
     vcl::text::TextLayoutEngine::JustifyLayout(*pSalLayout, aLayoutArgs);
     vcl::text::TextLayoutEngine::ApplyHorizontalOffset(*pSalLayout, aLayoutArgs, aPos);
