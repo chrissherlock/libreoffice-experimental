@@ -1072,6 +1072,21 @@ static basegfx::B2DPoint lcl_mapLogicalToDevicePos(const OutputDevice& rDev, con
     return basegfx::B2DPoint(aDevicePos.X(), aDevicePos.Y());
 }
 
+static bool lcl_isSubpixelPositioningRequired(const OutputDevice& rDev)
+{
+    return rDev.IsMapModeEnabled() || rDev.isSubpixelPositioning();
+}
+
+static void lcl_fillAlignmentContext(vcl::text::TextLayoutPositioning& rPos,
+                                     const vcl::text::ImplLayoutArgs& rArgs,
+                                     double nEndGlyphCoord)
+{
+    rPos.bRightAlign = bool(rArgs.mnFlags & SalLayoutFlags::RightAlign);
+    rPos.nEndGlyphCoord = nEndGlyphCoord;
+}
+
+
+
 std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
     const OUString& rOrigStr, sal_Int32 nMinIndex, sal_Int32 nLen, const Point& rLogicalPos,
     tools::Long nLogicalWidth, KernArraySpan pDXArray, std::span<const sal_Bool> pKashidaArray,
@@ -1204,7 +1219,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
 
     if (pSalLayout)
     {
-        const bool bActivateSubpixelPositioning(mpMapper->IsMapModeEnabled() || isSubpixelPositioning());
+        const bool bActivateSubpixelPositioning(lcl_isSubpixelPositioningRequired(*this));
         // tdf#168002
         // SubpixelPositioning was until now activated when *any* MapMode was set, but
         // there is another case this is needed: When a TextSimplePortionPrimitive2D
@@ -1289,10 +1304,8 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
 
     // Prepare positioning data for the engine
     vcl::text::TextLayoutPositioning aPos;
-    aPos.bSubpixelPositioning = (mpMapper->IsMapModeEnabled() || isSubpixelPositioning());
-    aPos.bRightAlign = bool(aLayoutArgs.mnFlags & SalLayoutFlags::RightAlign);
-    aPos.bHasDXArray = !pDXArray.empty();
-    aPos.nEndGlyphCoord = nEndGlyphCoord;
+    aPos.bSubpixelPositioning = lcl_isSubpixelPositioningRequired(*this);
+    lcl_fillAlignmentContext(aPos, aLayoutArgs, nEndGlyphCoord);
 
     aPos.aDrawBase = lcl_mapLogicalToDevicePos(*this, rLogicalPos);
 
