@@ -54,6 +54,15 @@ public:
     virtual void SetFont(LogicalFontInstance* pFont, int nFallbackLevel) = 0;
 };
 
+struct TextLayoutPositioning
+{
+    basegfx::B2DPoint aDrawBase;
+    bool bSubpixelPositioning;
+    bool bRightAlign;
+    bool bHasDXArray;
+    double nEndGlyphCoord; // For RTL alignment (0 if unused)
+};
+
 class VCL_DLLPUBLIC TextLayoutEngine
 {
 public:
@@ -121,7 +130,7 @@ public:
      * Scans the layout arguments to identify which characters need fallback.
      * Returns a string containing all missing characters found in fallback runs.
      */
-    static OUString IdentifyMissingChars(const vcl::text::ImplLayoutArgs& rArgs);
+    static OUString IdentifyMissingChars(vcl::text::ImplLayoutArgs& rArgs);
 
     /**
      * Merges a fallback layout into the main layout container.
@@ -141,6 +150,11 @@ public:
                                                            const SalLayoutGlyphs* pGlyphs,
                                                            const FontLookupCriteria& rCriteria,
                                                            ILayoutFactory& rFactory);
+
+    static void JustifyLayout(SalLayout& rLayout, vcl::text::ImplLayoutArgs& rArgs);
+    static void ApplyHorizontalOffset(SalLayout& rLayout, const vcl::text::ImplLayoutArgs& rArgs,
+                                      const TextLayoutPositioning& rPositioning);
+    static void SetAnchorPoint(SalLayout& rLayout, const TextLayoutPositioning& rPositioning);
 };
 
 } // namespace vcl::text

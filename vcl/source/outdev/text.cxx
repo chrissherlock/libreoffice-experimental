@@ -1276,34 +1276,26 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
         return pSalLayout;
 
     // position, justify, etc. the layout
-    pSalLayout->AdjustLayout( aLayoutArgs );
 
-    // default to on for pdf export, which uses SubPixelToLogic to convert back to
-    // the logical coord space, of if we are scaling/mapping
+    // Prepare positioning data for the engine
+    vcl::text::TextLayoutPositioning aPos;
+    aPos.bSubpixelPositioning = (mpMapper->IsMapModeEnabled() || isSubpixelPositioning());
+    aPos.bRightAlign = bool(aLayoutArgs.mnFlags & SalLayoutFlags::RightAlign);
+    aPos.bHasDXArray = !pDXArray.empty();
+    aPos.nEndGlyphCoord = nEndGlyphCoord;
+
     if (mpMapper->IsMapModeEnabled() || meOutDevType == OUTDEV_PDF)
-    {
-        pSalLayout->DrawBase() = LogicToDeviceSubPixel(rLogicalPos);
-    }
+        aPos.aDrawBase = LogicToDeviceSubPixel(rLogicalPos);
     else
     {
         Point aDevicePos = LogicToDevicePixel(rLogicalPos);
-        pSalLayout->DrawBase() = basegfx::B2DPoint(aDevicePos.X(), aDevicePos.Y());
+        aPos.aDrawBase = basegfx::B2DPoint(aDevicePos.X(), aDevicePos.Y());
     }
 
-    // adjust to right alignment if necessary
-    if( aLayoutArgs.mnFlags & SalLayoutFlags::RightAlign )
-    {
-        double nRTLOffset;
-        if (!pDXArray.empty())
-            nRTLOffset = nEndGlyphCoord;
-        else if( nPixelWidth )
-            nRTLOffset = nPixelWidth;
-        else
-            nRTLOffset = pSalLayout->GetTextWidth();
-        pSalLayout->DrawOffset().setX( 1 - nRTLOffset );
-    }
-
-    if(IsTrackingFontMappingUse())
+    vcl::text::TextLayoutEngine::JustifyLayout(*pSalLayout, aLayoutArgs);
+    vcl::text::TextLayoutEngine::ApplyHorizontalOffset(*pSalLayout, aLayoutArgs, aPos);
+    vcl::text::TextLayoutEngine::SetAnchorPoint(*pSalLayout, aPos);
+    if (pSalLayout && IsTrackingFontMappingUse())
         TrackFontMappingUse(GetFont(), pSalLayout.get());
 
     return pSalLayout;
