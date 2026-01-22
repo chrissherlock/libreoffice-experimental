@@ -1231,11 +1231,34 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
 
     // do glyph fallback if needed
     // #105768# avoid fallback for very small font sizes
+
+    class OutputDeviceLayoutFactory : public vcl::text::ILayoutFactory
+    {
+        const OutputDevice& mrOutDev;
+    public:
+        OutputDeviceLayoutFactory(const OutputDevice& rOutDev)
+            : mrOutDev(rOutDev) {}
+
+        std::unique_ptr<SalLayout> CreateLayout(int nFallbackLevel) override
+        {
+            // Fix: Always acquire fresh graphics pointer to avoid stale nullptrs
+            mrOutDev.AcquireGraphics();
+            if (!mrOutDev.mpGraphics)
+                return nullptr;
+            return mrOutDev.mpGraphics->GetTextLayout(nFallbackLevel);
+        }
+
+        void SetFont(LogicalFontInstance* pFont, int nFallbackLevel) override
+        {
+            mrOutDev.AcquireGraphics();
+            if (mrOutDev.mpGraphics)
+                mrOutDev.mpGraphics->SetFont(pFont, nFallbackLevel);
+        }
+    };
+
+    OutputDeviceLayoutFactory aFactory(*this);
     if (aLayoutArgs.HasFallbackRun() && mpFontRealization->mxFont->GetFontSelectPattern().mnHeight >= 3)
     {
-        auto fnFactory = [this, pGlyphs](LogicalFontInstance* pFont, int nLevel, vcl::text::ImplLayoutArgs& rArgs) {
-            return this->getFallbackLayout(pFont, nLevel, rArgs, pGlyphs);
-        };
 
         vcl::text::FontLookupCriteria aCriteria = {
             GetFontCache(),
@@ -1244,13 +1267,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
             mpForcedFallbackInstance
         };
 
-        pSalLayout = vcl::text::TextLayoutEngine::ResolveMissingGlyphs(
-            std::move(pSalLayout),
-            aLayoutArgs,
-            pGlyphs,
-            aCriteria,
-            fnFactory
-        );
+    pSalLayout = vcl::text::TextLayoutEngine::ResolveMissingGlyphs(std::move(pSalLayout), aLayoutArgs, pGlyphs, aCriteria, aFactory);
     }
 
     if (flags & SalLayoutFlags::GlyphItemsOnly)

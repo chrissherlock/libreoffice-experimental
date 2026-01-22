@@ -321,8 +321,7 @@ void TextLayoutEngine::MergeFallback(std::unique_ptr<MultiSalLayout>& rMultiSalL
 
 std::unique_ptr<SalLayout> TextLayoutEngine::ResolveMissingGlyphs(
     std::unique_ptr<SalLayout> pBaseLayout, vcl::text::ImplLayoutArgs& rLayoutArgs,
-    const SalLayoutGlyphs* pGlyphs, const FontLookupCriteria& rCriteria,
-    FallbackLayoutFactory rFactory)
+    const SalLayoutGlyphs* pGlyphs, const FontLookupCriteria& rCriteria, ILayoutFactory& rFactory)
 {
     LogicalFontInstance* pBaseFont = rCriteria.pReferenceFont;
 
@@ -343,11 +342,6 @@ std::unique_ptr<SalLayout> TextLayoutEngine::ResolveMissingGlyphs(
         rtl::Reference<LogicalFontInstance> pFallbackFont = FindFallbackFont(
             rCriteria, nFallbackLevel, aMissingCodes, bHasUsedFallback, pGlyphsImpl);
 
-        SAL_INFO("vcl",
-                 "Fallback font (level "
-                     << nFallbackLevel << "): "
-                     << (pFallbackFont ? pFallbackFont->GetFontFace()->GetFamilyName() : "None"));
-
         if (!pFallbackFont)
             break;
 
@@ -361,13 +355,17 @@ std::unique_ptr<SalLayout> TextLayoutEngine::ResolveMissingGlyphs(
             }
         }
 
-        std::unique_ptr<SalLayout> pFallback
-            = rFactory(pFallbackFont.get(), nFallbackLevel, rLayoutArgs);
+        rFactory.SetFont(pFallbackFont.get(), nFallbackLevel);
+        std::unique_ptr<SalLayout> pFallback = rFactory.CreateLayout(nFallbackLevel);
 
         if (pFallback)
         {
-            MergeFallback(pMultiSalLayout, pBaseLayout, std::move(pFallback), rLayoutArgs.maRuns,
-                          (nFallbackLevel == MAX_FALLBACK - 1));
+            rLayoutArgs.ResetPos();
+            if (pFallback->LayoutText(rLayoutArgs, pGlyphsImpl))
+            {
+                MergeFallback(pMultiSalLayout, pBaseLayout, std::move(pFallback),
+                              rLayoutArgs.maRuns, (nFallbackLevel == MAX_FALLBACK - 1));
+            }
         }
 
         if (pGlyphs)
