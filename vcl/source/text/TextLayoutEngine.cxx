@@ -250,7 +250,6 @@ TextLayoutEngine::FindFallbackFont(const FontLookupCriteria& rCriteria, int nFal
                                    SalLayoutGlyphsImpl* pGlyphsImpl)
 {
     ImplFontCache& rFontCache = rCriteria.rCache;
-    vcl::font::PhysicalFontCollection* pFontCollection = rCriteria.pFontCollection;
     LogicalFontInstance* pBaseFont = rCriteria.pReferenceFont;
     const rtl::Reference<LogicalFontInstance>& pForcedFallback = rCriteria.pPriorityFallback;
 
@@ -283,7 +282,7 @@ TextLayoutEngine::FindFallbackFont(const FontLookupCriteria& rCriteria, int nFal
     if (!pFallbackFont)
     {
         pFallbackFont = rFontCache.GetGlyphFallbackFont(
-            pFontCollection, aFontSelData, pBaseFont, nFallbackLevel,
+            rCriteria, aFontSelData, nFallbackLevel,
             rMissingCodes // NOTE: This is modified by GetGlyphFallbackFont!
         );
     }

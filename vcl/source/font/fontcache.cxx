@@ -208,9 +208,14 @@ rtl::Reference<LogicalFontInstance> ImplFontCache::GetFontInstance( PhysicalFont
     return pFontInstance;
 }
 
-rtl::Reference<LogicalFontInstance> ImplFontCache::GetGlyphFallbackFont( PhysicalFontCollection const * pFontCollection,
-    vcl::font::FontSelectPattern& rFontSelData, LogicalFontInstance* pFontInstance, int nFallbackLevel, OUString& rMissingCodes )
+rtl::Reference<LogicalFontInstance> ImplFontCache::GetGlyphFallbackFont(
+    const vcl::text::FontLookupCriteria& rCriteria,
+    vcl::font::FontSelectPattern& rFontSelData,
+    int nFallbackLevel, OUString& rMissingCodes )
 {
+    vcl::font::PhysicalFontCollection const* pFontCollection = rCriteria.pFontCollection;
+    LogicalFontInstance* pFontInstance = rCriteria.pReferenceFont;
+
     // get a candidate font for glyph fallback
     // unless the previously selected font got a device specific substitution
     // e.g. PsPrint Arial->Helvetica for udiaeresis when Helvetica doesn't support it
