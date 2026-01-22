@@ -9,7 +9,7 @@
 
 $(eval $(call gb_CppunitTest_CppunitTest,vcl_textlayout))
 
-$(eval $(call gb_CppunitTest_set_include,vcl_textlayout,\
+$(eval $(call gb_CppunitTest_set_include,vcl_textlayout, \
     $$(INCLUDE) \
     -I$(SRCDIR)/vcl/inc \
 ))
@@ -19,17 +19,17 @@ $(eval $(call gb_CppunitTest_add_exception_objects,vcl_textlayout, \
 	vcl/qa/cppunit/textlayoutenginetest \
 ))
 
-$(eval $(call gb_CppunitTest_use_externals,vcl_textlayout,\
+$(eval $(call gb_CppunitTest_use_externals,vcl_textlayout, \
 	boost_headers \
 	harfbuzz \
 ))
 
 ifeq ($(SYSTEM_ICU),TRUE)
-$(eval $(call gb_CppunitTest_use_externals,vcl_textlayout,\
+$(eval $(call gb_CppunitTest_use_externals,vcl_textlayout, \
 	icuuc \
 ))
 else
-$(eval $(call gb_CppunitTest_use_externals,vcl_textlayout,\
+$(eval $(call gb_CppunitTest_use_externals,vcl_textlayout, \
         icu_headers \
 ))
 endif
@@ -53,7 +53,7 @@ $(eval $(call gb_CppunitTest_use_sdk_api,vcl_textlayout))
 $(eval $(call gb_CppunitTest_use_ure,vcl_textlayout))
 $(eval $(call gb_CppunitTest_use_vcl,vcl_textlayout))
 
-$(eval $(call gb_CppunitTest_use_components,vcl_textlayout,\
+$(eval $(call gb_CppunitTest_use_components,vcl_textlayout, \
 	configmgr/source/configmgr \
 	i18npool/util/i18npool \
 	ucb/source/core/ucb1 \
