@@ -206,6 +206,16 @@ public:
      * Returns nullptr if graphics acquisition fails.
      */
     static std::unique_ptr<SalLayout> CreateBaseLayout(const LayoutResources& rRes);
+
+    /** * Records font mapping usage for diagnostic purposes if tracking is enabled.
+     * This captures which fonts were actually used (including fallbacks) to satisfy the request.
+     */
+
+    // Diagnostic Font Tracking
+    static void StartTracking();
+    static OutputDevice::FontMappingUseData FinishTracking();
+    static bool IsTracking();
+    static void TrackLayoutFonts(const vcl::Font& rFont, const SalLayout* pLayout);
 };
 
 } // namespace vcl::text

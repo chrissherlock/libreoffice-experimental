@@ -1012,55 +1012,14 @@ SalLayoutFlags OutputDevice::GetBiDiLayoutFlags( std::u16string_view rStr,
         mpFontRealization->eLayoutMode, rStr, nMinIndex, nEndIndex);
 }
 
-static OutputDevice::FontMappingUseData* fontMappingUseData = nullptr;
-
-static inline bool IsTrackingFontMappingUse()
-{
-    return fontMappingUseData != nullptr;
-}
-
-static void TrackFontMappingUse( const vcl::Font& originalFont, const SalLayout* salLayout)
-{
-    assert(fontMappingUseData);
-    OUString originalName = originalFont.GetStyleName().isEmpty()
-        ? originalFont.GetFamilyName()
-        : originalFont.GetFamilyName() + "/" + originalFont.GetStyleName();
-    std::vector<OUString> usedFontNames;
-    SalLayoutGlyphs glyphs = salLayout->GetGlyphs(); // includes all font fallbacks
-    int level = 0;
-    while( const SalLayoutGlyphsImpl* impl = glyphs.Impl(level++))
-    {
-        const vcl::font::PhysicalFontFace* face = impl->GetFont()->GetFontFace();
-        OUString name = face->GetStyleName().isEmpty()
-            ? face->GetFamilyName()
-            : face->GetFamilyName() + "/" + face->GetStyleName();
-        usedFontNames.push_back( name );
-    }
-    for( OutputDevice::FontMappingUseItem& item : *fontMappingUseData )
-    {
-        if( item.mOriginalFont == originalName && item.mUsedFonts == usedFontNames )
-        {
-            ++item.mCount;
-            return;
-        }
-    }
-    fontMappingUseData->push_back( { originalName, std::move(usedFontNames), 1 } );
-}
-
 void OutputDevice::StartTrackingFontMappingUse()
 {
-    delete fontMappingUseData;
-    fontMappingUseData = new FontMappingUseData;
+    vcl::text::TextLayoutEngine::StartTracking();
 }
 
 OutputDevice::FontMappingUseData OutputDevice::FinishTrackingFontMappingUse()
 {
-    if(!fontMappingUseData)
-        return {};
-    FontMappingUseData ret = std::move( *fontMappingUseData );
-    delete fontMappingUseData;
-    fontMappingUseData = nullptr;
-    return ret;
+    return vcl::text::TextLayoutEngine::FinishTracking();
 }
 
 std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
@@ -1153,8 +1112,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
     vcl::text::TextLayoutEngine::ApplyHorizontalOffset(*pSalLayout, aLayoutArgs, aPos);
     vcl::text::TextLayoutEngine::SetAnchorPoint(*pSalLayout, aPos);
 
-    if (pSalLayout && IsTrackingFontMappingUse())
-        TrackFontMappingUse(GetFont(), pSalLayout.get());
+    vcl::text::TextLayoutEngine::TrackLayoutFonts(GetFont(), pSalLayout.get());
 
     return pSalLayout;
 }
