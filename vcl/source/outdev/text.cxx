@@ -1070,29 +1070,9 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
     const SalLayoutGlyphs* pGlyphs, std::optional<sal_Int32> nDrawOriginCluster,
     std::optional<sal_Int32> nDrawMinCharPos, std::optional<sal_Int32> nDrawEndCharPos) const
 {
+    vcl::text::TextLayoutEngine::ValidateGlyphCache(pGlyphs);
     if (pGlyphs && !pGlyphs->IsValid())
-    {
-        SAL_WARN("vcl", "Trying to setup invalid cached glyphs - falling back to relayout!");
         pGlyphs = nullptr;
-    }
-
-#ifdef DBG_UTIL
-    if (pGlyphs)
-    {
-        for(int level = 0;; ++level)
-        {
-            SalLayoutGlyphsImpl* glyphsImpl = pGlyphs->Impl(level);
-            // It is allowed to reuse only glyphs created with SalLayoutFlags::GlyphItemsOnly.
-            // If the glyphs have already been used, the AdjustLayout() call below might have
-            // altered them (MultiSalLayout::ImplAdjustMultiLayout() drops glyphs that need
-            // fallback from the base layout, but then GenericSalLayout::LayoutText()
-            // would not know to call SetNeedFallback()).
-            if (glyphsImpl == nullptr)
-                break;
-            assert(glyphsImpl->GetFlags() & SalLayoutFlags::GlyphItemsOnly);
-        }
-    }
-#endif
 
     if (!InitFont())
         return nullptr;
@@ -2125,6 +2105,5 @@ std::unique_ptr<SalLayout> OutputDevice::getFallbackLayout(LogicalFontInstance* 
 
     return pFallback;
 }
-
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

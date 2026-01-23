@@ -547,6 +547,31 @@ double TextLayoutEngine::CalculateLayoutWidth(const LayoutResources& rRes, tools
     return static_cast<double>(nLogicWidth);
 }
 
+void TextLayoutEngine::ValidateGlyphCache(const SalLayoutGlyphs* pGlyphs)
+{
+    if (!pGlyphs)
+        return;
+
+    if (!pGlyphs->IsValid())
+    {
+        SAL_WARN("vcl", "Trying to setup invalid cached glyphs - falling back to relayout!");
+        return;
+    }
+
+#ifdef DBG_UTIL
+    for (int level = 0;; ++level)
+    {
+        SalLayoutGlyphsImpl* glyphsImpl = pGlyphs->Impl(level);
+        if (glyphsImpl == nullptr)
+            break;
+
+        // Ensure only glyphs created with GlyphItemsOnly are reused to prevent
+        // inconsistencies after AdjustLayout() calls.
+        assert(glyphsImpl->GetFlags() & SalLayoutFlags::GlyphItemsOnly);
+    }
+#endif
+}
+
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
