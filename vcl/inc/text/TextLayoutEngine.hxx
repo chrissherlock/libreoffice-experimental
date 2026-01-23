@@ -200,6 +200,12 @@ public:
 
     /** Validates that cached glyphs are in a consistent state for layout reuse. */
     static void ValidateGlyphCache(const SalLayoutGlyphs* pGlyphs);
+
+    /**
+     * Acquires the SalGraphics and creates the initial SalLayout object.
+     * Returns nullptr if graphics acquisition fails.
+     */
+    static std::unique_ptr<SalLayout> CreateBaseLayout(const LayoutResources& rRes);
 };
 
 } // namespace vcl::text

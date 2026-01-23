@@ -1117,20 +1117,12 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
         aResources, pDXArray, pKashidaArray, nMinIndex, nLen,
         nDrawMinCharPos, nDrawEndCharPos, aLayoutArgs, nEndGlyphCoord);
 
-    SalGraphics* pGraphics = aResources.fnGetGraphics();
-    if (!pGraphics)
-        return nullptr;
+    std::unique_ptr<SalLayout> pSalLayout = vcl::text::TextLayoutEngine::CreateBaseLayout(aResources);
 
-    std::unique_ptr<SalLayout> pSalLayout = pGraphics->GetTextLayout(0);
-
-    // tdf#168002: Activate subpixel positioning if required
-    if (pSalLayout)
-        pSalLayout->SetSubpixelPositioning(aResources.bSubpixelPositioning);
-
-    if( pSalLayout && !pSalLayout->LayoutText( aLayoutArgs, pGlyphs ? pGlyphs->Impl(0) : nullptr ) )
+    if (pSalLayout && !pSalLayout->LayoutText(aLayoutArgs, pGlyphs ? pGlyphs->Impl(0) : nullptr))
         pSalLayout.reset();
 
-    if( !pSalLayout )
+    if (!pSalLayout)
         return nullptr;
 
     vcl::text::GraphicLayoutFactory aFactory(aResources.fnGetGraphics);
