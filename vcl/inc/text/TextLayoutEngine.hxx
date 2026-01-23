@@ -11,6 +11,16 @@
 #include <sallayout.hxx>
 #include <vcl/outdev.hxx>
 #include <vector>
+
+#include <memory>
+#include <functional>
+
+class CoordinateMapper;
+class ImplFontCache;
+class ImplFontList;
+class LogicalFontInstance;
+class SalGraphics;
+
 #include <vcl/rendercontext/SalLayoutFlags.hxx>
 #include <functional>
 #include <tools/gen.hxx> // For global Point
@@ -61,6 +71,17 @@ struct TextLayoutPositioning
     bool bRightAlign;
     bool bHasDXArray;
     double nEndGlyphCoord; // For RTL alignment (0 if unused)
+};
+
+struct LayoutResources
+{
+    const LogicalFontInstance* pFont;
+    const CoordinateMapper& rMapper;
+    ImplFontCache* pFontCache;
+    vcl::font::PhysicalFontCollection* pFontCollection;
+    const LogicalFontInstance* pForcedFallback;
+    std::function<SalGraphics*()> fnGetGraphics;
+    bool bRTLEnabled;
 };
 
 class VCL_DLLPUBLIC TextLayoutEngine
