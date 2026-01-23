@@ -696,7 +696,7 @@ double OutputDevice::GetTextHeightDouble() const
     if (!InitFont())
         return 0;
 
-    tools::Long nHeight = mpFontRealization->mxFont->mnLineHeight + mpFontRealization->nEmphasisAscent + mpFontRealization->nEmphasisDescent;
+    double nHeight = vcl::text::TextLayoutEngine::GetTextHeightPixel(*mpFontRealization);
 
     return mpMapper->DevicePixelToLogicHeightDouble(nHeight);
 }

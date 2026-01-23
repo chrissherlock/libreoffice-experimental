@@ -197,6 +197,9 @@ public:
                                              const vcl::text::TextLayoutCache*& rpLayoutCache,
                                              const SalLayoutGlyphs*& rpGlyphs);
 
+    /** Calculates the total height of the font in device pixels, including emphasis marks. */
+    static double GetTextHeightPixel(const vcl::font::FontRealization& rRealization);
+
     /** Calculates the subpixel layout width from logical units. */
     static double CalculateLayoutWidth(const LayoutResources& rRes, tools::Long nLogicWidth);
 
