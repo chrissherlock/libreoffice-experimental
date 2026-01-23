@@ -124,7 +124,7 @@ namespace vcl
     }
 
     namespace text {
-        class ImplLayoutArgs;
+        class TextLayoutRequest;
         class TextLayoutCache;
     }
 }
@@ -1334,7 +1334,7 @@ public:
     SAL_DLLPRIVATE std::unique_ptr<SalLayout>
                                 getFallbackLayout(
                                     LogicalFontInstance* pLogicalFont, int nFallbackLevel,
-                                    vcl::text::ImplLayoutArgs& rLayoutArgs, const SalLayoutGlyphs* ) const;
+                                    vcl::text::TextLayoutRequest& rLayoutArgs, const SalLayoutGlyphs* ) const;
 
     /*
      These functions allow collecting information on how fonts are mapped when used, such as what

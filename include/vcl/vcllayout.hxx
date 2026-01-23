@@ -28,7 +28,7 @@
 #include <vcl/dllapi.h>
 
 class LogicalFontInstance;
-namespace vcl::text { class ImplLayoutArgs; }
+namespace vcl::text { class TextLayoutRequest; }
 namespace basegfx { class BColor; }
 class SalGraphics;
 class GlyphItem;
@@ -54,14 +54,14 @@ namespace tools { class Rectangle; }
 // Functions that just return information like GetTexWidth() and
 // FillDXArray() are called after LayoutText() and before DrawText().
 
-// Another important questions is which parts of an ImplLayoutArgs can
+// Another important questions is which parts of an TextLayoutRequest can
 // be changed by callers between LayoutText() and AdjustLayout()
 // calls. It probably makes sense only if one assumes that the "string
 // related inputs" part are not changed after LayoutText().
 
-// But why use the same ImplLayoutArgs structure as parameter for both
+// But why use the same TextLayoutRequest structure as parameter for both
 // LayoutText() and AdjustLayout() in the first place? And why
-// duplicate some of the fields in both SalLayout and ImplLayoutArgs
+// duplicate some of the fields in both SalLayout and TextLayoutRequest
 // (mnMinCharPos, mnEndCharPos, mnLayoutFlags==mnFlags,
 // mnOrientation)? Lost in history...
 
@@ -76,8 +76,8 @@ public:
     const basegfx::B2DPoint& DrawOffset() const { return maDrawOffset; }
     basegfx::B2DPoint GetDrawPosition( const basegfx::B2DPoint& rRelative = basegfx::B2DPoint(0,0) ) const;
 
-    virtual bool    LayoutText( vcl::text::ImplLayoutArgs&, const SalLayoutGlyphsImpl* ) = 0;  // first step of layouting
-    virtual void    AdjustLayout( vcl::text::ImplLayoutArgs& );    // adjusting after fallback etc.
+    virtual bool    LayoutText( vcl::text::TextLayoutRequest&, const SalLayoutGlyphsImpl* ) = 0;  // first step of layouting
+    virtual void    AdjustLayout( vcl::text::TextLayoutRequest& );    // adjusting after fallback etc.
     virtual void    DrawText( SalGraphics& ) const = 0;
 
     Degree10        GetOrientation() const                  { return mnOrientation; }

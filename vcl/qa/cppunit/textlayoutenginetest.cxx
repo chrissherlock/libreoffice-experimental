@@ -20,7 +20,7 @@
 #include <text/TextLayoutEngine.hxx>
 #include <sallayout.hxx>
 #include <GraphicsState.hxx>
-#include <ImplLayoutArgs.hxx>
+#include <text/TextLayoutRequest.hxx>
 
 namespace
 {
@@ -104,7 +104,7 @@ void TextLayoutEngineTest::testCreateLayoutRequest_Simple()
     sal_Int32 nLen = 5; // "Hello"
 
     // 2. Call the Engine
-    vcl::text::ImplLayoutArgs aArgs
+    vcl::text::TextLayoutRequest aArgs
         = vcl::text::TextLayoutEngine::CreateLayoutRequest(aInput, nMin, nLen,
                                                            100.0, // Pixel Width
                                                            SalLayoutFlags::NONE,
@@ -133,7 +133,7 @@ void TextLayoutEngineTest::testCreateLayoutRequest_DigitLocalization()
     // IMPORTANT: CreateLayoutRequest takes OUString& and modifies it in place!
     OUString aInput = u"Year 2024"_ustr;
 
-    vcl::text::ImplLayoutArgs aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
+    vcl::text::TextLayoutRequest aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
         aInput, 0, aInput.getLength(), 100.0, SalLayoutFlags::NONE, nullptr, aState, aRealization,
         false);
 
@@ -162,12 +162,12 @@ void TextLayoutEngineTest::testCreateLayoutRequest_OrientationAndWidth()
     OUString aInput = u"CheckWidth"_ustr;
     double nTestWidth = 555.5;
 
-    vcl::text::ImplLayoutArgs aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
+    vcl::text::TextLayoutRequest aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
         aInput, 0, aInput.getLength(), nTestWidth, SalLayoutFlags::NONE, nullptr, aState,
         aRealization, false);
 
     // Verify Width is correctly stored in the Request object
-    // ImplLayoutArgs typically truncates double to integer for layout width
+    // TextLayoutRequest typically truncates double to integer for layout width
     CPPUNIT_ASSERT_EQUAL(static_cast<sal_Int32>(nTestWidth),
                          static_cast<sal_Int32>(aArgs.mnLayoutWidth));
 
@@ -184,7 +184,7 @@ void TextLayoutEngineTest::testCreateLayoutRequest_OutOfBounds()
 
     OUString aInput = u"Hi"_ustr;
     // Request start at 10, length 5 (Way out of bounds)
-    vcl::text::ImplLayoutArgs aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
+    vcl::text::TextLayoutRequest aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
         aInput, 10, 5, 100.0, SalLayoutFlags::NONE, nullptr, aState, aRealization, false);
 
     // Should clamp start/end to be safe (likely equal to MinIndex or StringLength)
@@ -249,7 +249,7 @@ void TextLayoutEngineTest::testIdentifyMissingChars()
     // Empty Case (No runs)
     {
         OUString aInput = u"NothingMissing"_ustr;
-        vcl::text::ImplLayoutArgs aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
+        vcl::text::TextLayoutRequest aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
             aInput, 0, aInput.getLength(), 100, SalLayoutFlags::NONE, nullptr, aState, aRealization,
             false);
 
@@ -264,7 +264,7 @@ void TextLayoutEngineTest::testIdentifyMissingChars()
     // Single Run Case
     {
         OUString aInput = u"Hello World"_ustr;
-        vcl::text::ImplLayoutArgs aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
+        vcl::text::TextLayoutRequest aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
             aInput, 0, aInput.getLength(), 100, SalLayoutFlags::NONE, nullptr, aState, aRealization,
             false);
 
@@ -279,7 +279,7 @@ void TextLayoutEngineTest::testIdentifyMissingChars()
     // Multiple Disjoint Runs Case
     {
         OUString aInput = u"Missing Glyphs Here"_ustr;
-        vcl::text::ImplLayoutArgs aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
+        vcl::text::TextLayoutRequest aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
             aInput, 0, aInput.getLength(), 100, SalLayoutFlags::NONE, nullptr, aState, aRealization,
             false);
 
@@ -299,7 +299,7 @@ void TextLayoutEngineTest::testIdentifyMissingChars()
     // Adjacent/Split Runs Case
     {
         OUString aInput = u"SplitRun"_ustr;
-        vcl::text::ImplLayoutArgs aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
+        vcl::text::TextLayoutRequest aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
             aInput, 0, aInput.getLength(), 100, SalLayoutFlags::NONE, nullptr, aState, aRealization,
             false);
 
@@ -317,7 +317,7 @@ void TextLayoutEngineTest::testIdentifyMissingChars()
     // The function blindly extracts [Start, End), the RTL flag in the run shouldn't change *which* characters are pulled.
     {
         OUString aInput = u"RTLTest"_ustr;
-        vcl::text::ImplLayoutArgs aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
+        vcl::text::TextLayoutRequest aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
             aInput, 0, aInput.getLength(), 100, SalLayoutFlags::NONE, nullptr, aState, aRealization,
             false);
 
@@ -337,10 +337,10 @@ public:
     bool bAdjustCalled = false;
 
     // SalLayout overrides
-    virtual void AdjustLayout(vcl::text::ImplLayoutArgs&) override { bAdjustCalled = true; }
+    virtual void AdjustLayout(vcl::text::TextLayoutRequest&) override { bAdjustCalled = true; }
 
     // Abstract methods that must be implemented with exact signatures
-    virtual bool LayoutText(vcl::text::ImplLayoutArgs&, const SalLayoutGlyphsImpl*) override
+    virtual bool LayoutText(vcl::text::TextLayoutRequest&, const SalLayoutGlyphsImpl*) override
     {
         return true;
     }
@@ -373,8 +373,8 @@ public:
 void TextLayoutEngineTest::testJustifyLayout()
 {
     MockSalLayout aLayout;
-    vcl::text::ImplLayoutArgs aArgs(u"LibreOffice"_ustr, 0, 11, SalLayoutFlags::NONE,
-                                    LanguageTag(LANGUAGE_ENGLISH_US), nullptr);
+    vcl::text::TextLayoutRequest aArgs(u"LibreOffice"_ustr, 0, 11, SalLayoutFlags::NONE,
+                                       LanguageTag(LANGUAGE_ENGLISH_US), nullptr);
 
     vcl::text::TextLayoutEngine::JustifyLayout(aLayout, aArgs);
     CPPUNIT_ASSERT_MESSAGE("JustifyLayout should call AdjustLayout on SalLayout",
@@ -395,8 +395,8 @@ void TextLayoutEngineTest::testSetAnchorPoint()
 void TextLayoutEngineTest::testApplyHorizontalOffset()
 {
     MockSalLayout aLayout;
-    vcl::text::ImplLayoutArgs aArgs(u"RTL_TEST"_ustr, 0, 8, SalLayoutFlags::RightAlign,
-                                    LanguageTag(LANGUAGE_ENGLISH_US), nullptr);
+    vcl::text::TextLayoutRequest aArgs(u"RTL_TEST"_ustr, 0, 8, SalLayoutFlags::RightAlign,
+                                       LanguageTag(LANGUAGE_ENGLISH_US), nullptr);
     vcl::text::TextLayoutPositioning aPos{};
     aPos.bRightAlign = true;
     aPos.nEndGlyphCoord = 0;
@@ -413,8 +413,8 @@ void TextLayoutEngineTest::testApplyHorizontalOffset()
 void TextLayoutEngineTest::testApplyHorizontalOffset_EndGlyph()
 {
     MockSalLayout aLayout;
-    vcl::text::ImplLayoutArgs aArgs(u"RTL"_ustr, 0, 3, SalLayoutFlags::RightAlign,
-                                    LanguageTag(LANGUAGE_ENGLISH_US), nullptr);
+    vcl::text::TextLayoutRequest aArgs(u"RTL"_ustr, 0, 3, SalLayoutFlags::RightAlign,
+                                       LanguageTag(LANGUAGE_ENGLISH_US), nullptr);
     vcl::text::TextLayoutPositioning aPos;
     aPos.bRightAlign = true;
 
@@ -431,8 +431,8 @@ void TextLayoutEngineTest::testApplyHorizontalOffset_EndGlyph()
 void TextLayoutEngineTest::testApplyHorizontalOffset_Disabled()
 {
     MockSalLayout aLayout;
-    vcl::text::ImplLayoutArgs aArgs(u"LTR"_ustr, 0, 3, SalLayoutFlags::NONE,
-                                    LanguageTag(LANGUAGE_ENGLISH_US), nullptr);
+    vcl::text::TextLayoutRequest aArgs(u"LTR"_ustr, 0, 3, SalLayoutFlags::NONE,
+                                       LanguageTag(LANGUAGE_ENGLISH_US), nullptr);
     vcl::text::TextLayoutPositioning aPos;
     aPos.bRightAlign = false; // Disabled
 

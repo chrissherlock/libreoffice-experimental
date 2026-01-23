@@ -21,7 +21,7 @@
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/virdev.hxx>
 
-#include <ImplLayoutArgs.hxx>
+#include <text/TextLayoutRequest.hxx>
 #include <TextLayoutCache.hxx>
 #include <salgdi.hxx>
 
@@ -694,13 +694,13 @@ CPPUNIT_TEST_FIXTURE(VclTextTest, testImplLayoutRuns_ReverseTail)
     CPPUNIT_ASSERT_EQUAL(ImplLayoutRuns::Run(50, 60, true), aRuns.at(4));
 }
 
-CPPUNIT_TEST_FIXTURE(VclTextTest, testImplLayoutArgsBiDiStrong)
+CPPUNIT_TEST_FIXTURE(VclTextTest, testTextLayoutRequestBiDiStrong)
 {
     OUString sTestString = u"The quick brown fox\n jumped over the lazy dog"
                            "العاشر"_ustr;
-    vcl::text::ImplLayoutArgs aArgs(sTestString, 0, sTestString.getLength(),
-                                    SalLayoutFlags::BiDiStrong, LanguageTag(LANGUAGE_NONE),
-                                    nullptr);
+    vcl::text::TextLayoutRequest aArgs(sTestString, 0, sTestString.getLength(),
+                                       SalLayoutFlags::BiDiStrong, LanguageTag(LANGUAGE_NONE),
+                                       nullptr);
 
     int nMinRunPos(0);
     int nEndRunPos(0);
@@ -721,12 +721,13 @@ CPPUNIT_TEST_FIXTURE(VclTextTest, testImplLayoutArgsBiDiStrong)
     CPPUNIT_ASSERT_EQUAL(51, nEndRunPos);
 }
 
-CPPUNIT_TEST_FIXTURE(VclTextTest, testImplLayoutArgsBiDiRtl)
+CPPUNIT_TEST_FIXTURE(VclTextTest, testTextLayoutRequestBiDiRtl)
 {
     OUString sTestString = u"The quick brown fox\n jumped over the lazy dog"
                            "العاشر"_ustr;
-    vcl::text::ImplLayoutArgs aArgs(sTestString, 0, sTestString.getLength(),
-                                    SalLayoutFlags::BiDiRtl, LanguageTag(LANGUAGE_NONE), nullptr);
+    vcl::text::TextLayoutRequest aArgs(sTestString, 0, sTestString.getLength(),
+                                       SalLayoutFlags::BiDiRtl, LanguageTag(LANGUAGE_NONE),
+                                       nullptr);
 
     int nMinRunPos(0);
     int nEndRunPos(0);
@@ -753,13 +754,13 @@ CPPUNIT_TEST_FIXTURE(VclTextTest, testImplLayoutArgsBiDiRtl)
     CPPUNIT_ASSERT(!bRTL);
 }
 
-CPPUNIT_TEST_FIXTURE(VclTextTest, testImplLayoutArgsRightAlign)
+CPPUNIT_TEST_FIXTURE(VclTextTest, testTextLayoutRequestRightAlign)
 {
     OUString sTestString = u"The quick brown fox\n jumped over the lazy dog"
                            "العاشر"_ustr;
-    vcl::text::ImplLayoutArgs aArgs(sTestString, 0, sTestString.getLength(),
-                                    SalLayoutFlags::RightAlign, LanguageTag(LANGUAGE_NONE),
-                                    nullptr);
+    vcl::text::TextLayoutRequest aArgs(sTestString, 0, sTestString.getLength(),
+                                       SalLayoutFlags::RightAlign, LanguageTag(LANGUAGE_NONE),
+                                       nullptr);
 
     int nMinRunPos(0);
     int nEndRunPos(0);
@@ -781,7 +782,7 @@ CPPUNIT_TEST_FIXTURE(VclTextTest, testImplLayoutArgsRightAlign)
     CPPUNIT_ASSERT(bRTL);
 }
 
-CPPUNIT_TEST_FIXTURE(VclTextTest, testImplLayoutArgs_PrepareFallback_precalculatedglyphs)
+CPPUNIT_TEST_FIXTURE(VclTextTest, testTextLayoutRequest_PrepareFallback_precalculatedglyphs)
 {
     // this font has no Cyrillic characters and thus needs fallback
     const vcl::Font aFont(u"Amiri"_ustr, Size(0, 36));
@@ -798,9 +799,9 @@ CPPUNIT_TEST_FIXTURE(VclTextTest, testImplLayoutArgs_PrepareFallback_precalculat
     SalLayoutGlyphs aGlyphs = pLayout->GetGlyphs();
     SalLayoutGlyphsImpl* pGlyphsImpl = aGlyphs.Impl(1);
 
-    vcl::text::ImplLayoutArgs aArgs(sTestString, 0, sTestString.getLength(),
-                                    SalLayoutFlags::BiDiRtl, LanguageTag(LANGUAGE_RUSSIAN),
-                                    nullptr);
+    vcl::text::TextLayoutRequest aArgs(sTestString, 0, sTestString.getLength(),
+                                       SalLayoutFlags::BiDiRtl, LanguageTag(LANGUAGE_RUSSIAN),
+                                       nullptr);
 
     aArgs.PrepareFallback(pGlyphsImpl);
 

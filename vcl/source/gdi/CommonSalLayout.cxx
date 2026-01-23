@@ -29,7 +29,7 @@
 #include <vcl/font/FeatureParser.hxx>
 #include <vcl/svapp.hxx>
 
-#include <ImplLayoutArgs.hxx>
+#include <text/TextLayoutRequest.hxx>
 #include <TextLayoutCache.hxx>
 #include <font/FontSelectPattern.hxx>
 #include <salgdi.hxx>
@@ -244,7 +244,7 @@ SalLayoutGlyphs GenericSalLayout::GetGlyphs() const
     return glyphs;
 }
 
-void GenericSalLayout::SetNeedFallback(vcl::text::ImplLayoutArgs& rArgs, sal_Int32 nCharPos,
+void GenericSalLayout::SetNeedFallback(vcl::text::TextLayoutRequest& rArgs, sal_Int32 nCharPos,
                                        sal_Int32 nCharEnd, bool bRightToLeft)
 {
     if (nCharPos < 0 || nCharPos == nCharEnd || mbFuzzing)
@@ -289,7 +289,7 @@ void GenericSalLayout::SetNeedFallback(vcl::text::ImplLayoutArgs& rArgs, sal_Int
     rArgs.AddFallbackRun(nGraphemeStartPos, nGraphemeEndPos, bRightToLeft);
 }
 
-void GenericSalLayout::AdjustLayout(vcl::text::ImplLayoutArgs& rArgs)
+void GenericSalLayout::AdjustLayout(vcl::text::TextLayoutRequest& rArgs)
 {
     SalLayout::AdjustLayout(rArgs);
 
@@ -356,7 +356,7 @@ bool GenericSalLayout::HasVerticalAlternate(sal_UCS4 aChar, sal_UCS4 aVariationS
     return hb_set_has(mpVertGlyphs, nGlyphIndex) != 0;
 }
 
-bool GenericSalLayout::LayoutText(vcl::text::ImplLayoutArgs& rArgs, const SalLayoutGlyphsImpl* pGlyphs)
+bool GenericSalLayout::LayoutText(vcl::text::TextLayoutRequest& rArgs, const SalLayoutGlyphsImpl* pGlyphs)
 {
     // No need to touch m_GlyphItems at all for an empty string.
     if (rArgs.mnEndCharPos - rArgs.mnMinCharPos <= 0)

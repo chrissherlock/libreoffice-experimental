@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#pragma once
+
 #include <i18nlangtag/languagetag.hxx>
 #include <vcl/outdev.hxx>
 
@@ -28,7 +30,7 @@
 
 namespace vcl::text
 {
-class VCL_DLLPUBLIC ImplLayoutArgs
+class VCL_DLLPUBLIC TextLayoutRequest
 {
 public:
     // string related inputs
@@ -53,8 +55,8 @@ public:
     ImplLayoutRuns maRuns;
     ImplLayoutRuns maFallbackRuns;
 
-    ImplLayoutArgs(OUString const& rStr, int nMinCharPos, int nEndCharPos, SalLayoutFlags nFlags,
-                   LanguageTag aLanguageTag, vcl::text::TextLayoutCache const* pLayoutCache);
+    TextLayoutRequest(OUString const& rStr, int nMinCharPos, int nEndCharPos, SalLayoutFlags nFlags,
+                      LanguageTag aLanguageTag, vcl::text::TextLayoutCache const* pLayoutCache);
 
     void SetLayoutWidth(double nWidth);
     void SetJustificationData(JustificationData stJustification);
@@ -74,7 +76,7 @@ private:
 };
 }
 
-// For nice SAL_INFO logging of ImplLayoutArgs values
-std::ostream& operator<<(std::ostream& s, vcl::text::ImplLayoutArgs const& rArgs);
+// For nice SAL_INFO logging of TextLayoutRequest values
+std::ostream& operator<<(std::ostream& s, vcl::text::TextLayoutRequest const& rArgs);
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
