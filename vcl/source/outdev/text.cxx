@@ -1079,16 +1079,16 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
 #ifdef DBG_UTIL
     if (pGlyphs)
     {
-        for( int level = 0;; ++level )
+        for(int level = 0;; ++level)
         {
             SalLayoutGlyphsImpl* glyphsImpl = pGlyphs->Impl(level);
-            if(glyphsImpl == nullptr)
-                break;
             // It is allowed to reuse only glyphs created with SalLayoutFlags::GlyphItemsOnly.
             // If the glyphs have already been used, the AdjustLayout() call below might have
             // altered them (MultiSalLayout::ImplAdjustMultiLayout() drops glyphs that need
             // fallback from the base layout, but then GenericSalLayout::LayoutText()
             // would not know to call SetNeedFallback()).
+            if (glyphsImpl == nullptr)
+                break;
             assert(glyphsImpl->GetFlags() & SalLayoutFlags::GlyphItemsOnly);
         }
     }
@@ -1098,29 +1098,11 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
         return nullptr;
 
     OUString aStr;
-    // Call the new Engine helper for pre-orchestration
     if (!vcl::text::TextLayoutEngine::PrepareNormalizedLayoutInput(
             rOrigStr, nMinIndex, nLen, aStr, *mpFontRealization, pLayoutCache, pGlyphs))
     {
         return nullptr;
     }
-
-    double nPixelWidth = nLogicalWidth;
-    if (nLogicalWidth && mpMapper->IsMapModeEnabled())
-        nPixelWidth = LogicWidthToDeviceSubPixel(nLogicalWidth);
-
-    vcl::text::ImplLayoutArgs aLayoutArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
-            aStr, nMinIndex, nLen, nPixelWidth, flags, pLayoutCache,
-            *mpGraphicsState, *mpFontRealization, IsRTLEnabled());
-
-    if (nDrawOriginCluster.has_value())
-        aLayoutArgs.mnDrawOriginCluster = *nDrawOriginCluster;
-
-    if (nDrawMinCharPos.has_value())
-        aLayoutArgs.mnDrawMinCharPos = *nDrawMinCharPos;
-
-    if (nDrawEndCharPos.has_value())
-        aLayoutArgs.mnDrawEndCharPos = *nDrawEndCharPos;
 
     bool bUseSubpixel = IsMapModeEnabled() || isSubpixelPositioning() || SupportsSubpixelPositioning();
 
@@ -1134,6 +1116,21 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
         IsRTLEnabled(),
         bUseSubpixel
     };
+
+    double nPixelWidth = vcl::text::TextLayoutEngine::CalculateLayoutWidth(aResources, nLogicalWidth);
+
+    vcl::text::ImplLayoutArgs aLayoutArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
+            aStr, nMinIndex, nLen, nPixelWidth, flags, pLayoutCache,
+            *mpGraphicsState, *mpFontRealization, IsRTLEnabled());
+
+    if (nDrawOriginCluster.has_value())
+        aLayoutArgs.mnDrawOriginCluster = *nDrawOriginCluster;
+
+    if (nDrawMinCharPos.has_value())
+        aLayoutArgs.mnDrawMinCharPos = *nDrawMinCharPos;
+
+    if (nDrawEndCharPos.has_value())
+        aLayoutArgs.mnDrawEndCharPos = *nDrawEndCharPos;
 
     double nEndGlyphCoord(0);
     vcl::text::TextLayoutEngine::PrepareJustification(

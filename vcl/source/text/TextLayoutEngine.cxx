@@ -539,6 +539,14 @@ bool TextLayoutEngine::PrepareNormalizedLayoutInput(
     return true;
 }
 
+double TextLayoutEngine::CalculateLayoutWidth(const LayoutResources& rRes, tools::Long nLogicWidth)
+{
+    if (nLogicWidth && rRes.rMapper.IsMapModeEnabled())
+        return rRes.rMapper.LogicWidthToDeviceSubPixel(nLogicWidth);
+
+    return static_cast<double>(nLogicWidth);
+}
+
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
