@@ -29,7 +29,7 @@
 #include <sallayout.hxx>
 #include <text/TextLayoutEngine.hxx>
 #include <GraphicsState.hxx>
-#include <ImplLayoutArgs.hxx>
+#include <text/TextLayoutRequest.hxx>
 
 #include <unicode/uchar.h>
 
@@ -213,7 +213,7 @@ void TextLayoutEngine::ApplyDigitLocalization(const vcl::GraphicsState& rGraphic
     }
 }
 
-vcl::text::ImplLayoutArgs TextLayoutEngine::CreateLayoutRequest(
+vcl::text::TextLayoutRequest TextLayoutEngine::CreateLayoutRequest(
     OUString& rStr, sal_Int32 nMinIndex, sal_Int32 nLen, double nPixelWidth, SalLayoutFlags nFlags,
     const vcl::text::TextLayoutCache* pCache, const GraphicsState& rState,
     const font::FontRealization& rRealization, bool bRTL)
@@ -235,8 +235,8 @@ vcl::text::ImplLayoutArgs TextLayoutEngine::CreateLayoutRequest(
     nFlags = vcl::text::TextLayoutEngine::CalculateLayoutFlags(rState, rRealization, bRTL, rStr,
                                                                nMinIndex, nEndIndex, nFlags);
 
-    vcl::text::ImplLayoutArgs aLayoutArgs(rStr, nMinIndex, nEndIndex, nFlags,
-                                          rState.maFont.GetLanguageTag(), pCache);
+    vcl::text::TextLayoutRequest aLayoutArgs(rStr, nMinIndex, nEndIndex, nFlags,
+                                             rState.maFont.GetLanguageTag(), pCache);
 
     Degree10 nOrientation = rRealization.mxFont ? rRealization.mxFont->mnOrientation : 0_deg10;
     aLayoutArgs.SetOrientation(nOrientation);
@@ -290,7 +290,7 @@ TextLayoutEngine::FindFallbackFont(const FontLookupCriteria& rCriteria, int nFal
     return pFallbackFont;
 }
 
-OUString TextLayoutEngine::IdentifyMissingChars(vcl::text::ImplLayoutArgs& rArgs)
+OUString TextLayoutEngine::IdentifyMissingChars(vcl::text::TextLayoutRequest& rArgs)
 {
     OUStringBuffer aMissingCodeBuf;
 
@@ -320,7 +320,7 @@ void TextLayoutEngine::MergeFallback(std::unique_ptr<MultiSalLayout>& rMultiSalL
 }
 
 std::unique_ptr<SalLayout> TextLayoutEngine::ResolveMissingGlyphs(
-    std::unique_ptr<SalLayout> pBaseLayout, vcl::text::ImplLayoutArgs& rLayoutArgs,
+    std::unique_ptr<SalLayout> pBaseLayout, vcl::text::TextLayoutRequest& rLayoutArgs,
     const SalLayoutGlyphs* pGlyphs, const FontLookupCriteria& rCriteria, ILayoutFactory& rFactory)
 {
     LogicalFontInstance* pBaseFont = rCriteria.pReferenceFont;
@@ -386,13 +386,13 @@ std::unique_ptr<SalLayout> TextLayoutEngine::ResolveMissingGlyphs(
     return pBaseLayout;
 }
 
-void TextLayoutEngine::JustifyLayout(SalLayout& rLayout, vcl::text::ImplLayoutArgs& rArgs)
+void TextLayoutEngine::JustifyLayout(SalLayout& rLayout, vcl::text::TextLayoutRequest& rArgs)
 {
     rLayout.AdjustLayout(rArgs);
 }
 
 void TextLayoutEngine::ApplyHorizontalOffset(SalLayout& rLayout,
-                                             const vcl::text::ImplLayoutArgs& rArgs,
+                                             const vcl::text::TextLayoutRequest& rArgs,
                                              const TextLayoutPositioning& rPositioning)
 {
     if (!rPositioning.bRightAlign)
@@ -466,7 +466,7 @@ void TextLayoutEngine::PrepareJustification(const LayoutResources& rRes, KernArr
                                             sal_Int32 nMinIndex, sal_Int32 nLen,
                                             std::optional<sal_Int32> nDrawMinCharPos,
                                             std::optional<sal_Int32> nDrawEndCharPos,
-                                            vcl::text::ImplLayoutArgs& rLayoutArgs,
+                                            vcl::text::TextLayoutRequest& rLayoutArgs,
                                             double& rEndGlyphCoord)
 {
     if (pDXArray.empty() && pKashidaArray.empty())
@@ -503,7 +503,7 @@ basegfx::B2DPoint TextLayoutEngine::MapLogicalToDevicePos(const LayoutResources&
 }
 
 void TextLayoutEngine::FillAlignmentContext(TextLayoutPositioning& rPos,
-                                            const vcl::text::ImplLayoutArgs& rArgs,
+                                            const vcl::text::TextLayoutRequest& rArgs,
                                             double nEndGlyphCoord)
 {
     rPos.bRightAlign = bool(rArgs.mnFlags & SalLayoutFlags::RightAlign);
@@ -666,7 +666,7 @@ public:
 
 std::unique_ptr<SalLayout> TextLayoutEngine::ResolveFallbacks(const LayoutResources& rRes,
                                                               std::unique_ptr<SalLayout> pLayout,
-                                                              vcl::text::ImplLayoutArgs& rArgs,
+                                                              vcl::text::TextLayoutRequest& rArgs,
                                                               const SalLayoutGlyphs* pGlyphs)
 {
     if (rArgs.HasFallbackRun() && rRes.pFont->GetFontSelectPattern().mnHeight >= 3)
@@ -685,8 +685,8 @@ std::unique_ptr<SalLayout> TextLayoutEngine::ResolveFallbacks(const LayoutResour
 }
 
 void TextLayoutEngine::ApplyPositioning(const LayoutResources& rRes, SalLayout& rLayout,
-                                        vcl::text::ImplLayoutArgs& rArgs, const Point& rLogicalPos,
-                                        double nEndGlyphCoord)
+                                        vcl::text::TextLayoutRequest& rArgs,
+                                        const Point& rLogicalPos, double nEndGlyphCoord)
 {
     TextLayoutPositioning aPos;
     aPos.bSubpixelPositioning = rRes.bSubpixelPositioning;
@@ -700,7 +700,7 @@ void TextLayoutEngine::ApplyPositioning(const LayoutResources& rRes, SalLayout& 
 }
 
 std::unique_ptr<SalLayout> TextLayoutEngine::PerformTextLayout(const LayoutResources& rRes,
-                                                               vcl::text::ImplLayoutArgs& rArgs,
+                                                               vcl::text::TextLayoutRequest& rArgs,
                                                                const SalLayoutGlyphs* pGlyphs)
 {
     // 1. Create Base Layout
@@ -756,7 +756,7 @@ TextLayoutEngine::Layout(const LayoutResources& rRes, const vcl::text::TextSpan&
 
     double nPixelWidth = CalculateLayoutWidth(rRes, rConstraints.LogicalWidth);
 
-    vcl::text::ImplLayoutArgs aLayoutArgs = CreateLayoutRequest(
+    vcl::text::TextLayoutRequest aLayoutArgs = CreateLayoutRequest(
         aStr, rSpan.Index, nLen, nPixelWidth, rConstraints.Flags, pLayoutCache, rRes.rGraphicsState,
         rRes.rFontRealization, rRes.bRTLEnabled);
 

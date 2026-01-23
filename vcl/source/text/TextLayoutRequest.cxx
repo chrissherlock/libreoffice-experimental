@@ -17,7 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <ImplLayoutArgs.hxx>
+#include <text/TextLayoutRequest.hxx>
 
 #include <unicode/ubidi.h>
 #include <unicode/uchar.h>
@@ -28,9 +28,9 @@
 
 namespace vcl::text
 {
-ImplLayoutArgs::ImplLayoutArgs(const OUString& rStr, int nMinCharPos, int nEndCharPos,
-                               SalLayoutFlags nFlags, LanguageTag aLanguageTag,
-                               vcl::text::TextLayoutCache const* const pLayoutCache)
+TextLayoutRequest::TextLayoutRequest(const OUString& rStr, int nMinCharPos, int nEndCharPos,
+                                     SalLayoutFlags nFlags, LanguageTag aLanguageTag,
+                                     vcl::text::TextLayoutCache const* const pLayoutCache)
     : maLanguageTag(std::move(aLanguageTag))
     , mnFlags(nFlags)
     , mrStr(rStr)
@@ -86,28 +86,28 @@ ImplLayoutArgs::ImplLayoutArgs(const OUString& rStr, int nMinCharPos, int nEndCh
     maRuns.ResetPos();
 }
 
-void ImplLayoutArgs::SetLayoutWidth(double nWidth) { mnLayoutWidth = nWidth; }
+void TextLayoutRequest::SetLayoutWidth(double nWidth) { mnLayoutWidth = nWidth; }
 
-void ImplLayoutArgs::SetJustificationData(JustificationData stJustification)
+void TextLayoutRequest::SetJustificationData(JustificationData stJustification)
 {
     mstJustification = std::move(stJustification);
 }
 
-void ImplLayoutArgs::SetOrientation(Degree10 nOrientation) { mnOrientation = nOrientation; }
+void TextLayoutRequest::SetOrientation(Degree10 nOrientation) { mnOrientation = nOrientation; }
 
-void ImplLayoutArgs::ResetPos() { maRuns.ResetPos(); }
+void TextLayoutRequest::ResetPos() { maRuns.ResetPos(); }
 
-bool ImplLayoutArgs::GetNextPos(int* nCharPos, bool* bRTL)
+bool TextLayoutRequest::GetNextPos(int* nCharPos, bool* bRTL)
 {
     return maRuns.GetNextPos(nCharPos, bRTL);
 }
 
-void ImplLayoutArgs::AddFallbackRun(int nMinRunPos, int nEndRunPos, bool bRTL)
+void TextLayoutRequest::AddFallbackRun(int nMinRunPos, int nEndRunPos, bool bRTL)
 {
     maFallbackRuns.AddRun(nMinRunPos, nEndRunPos, bRTL);
 }
 
-bool ImplLayoutArgs::HasFallbackRun() const { return !maFallbackRuns.IsEmpty(); }
+bool TextLayoutRequest::HasFallbackRun() const { return !maFallbackRuns.IsEmpty(); }
 
 static bool IsControlChar(sal_Unicode cChar)
 {
@@ -134,9 +134,9 @@ static bool IsControlChar(sal_Unicode cChar)
 }
 
 // add a run after splitting it up to get rid of control chars
-void ImplLayoutArgs::AddRun(int nCharPos0, int nCharPos1, bool bRTL)
+void TextLayoutRequest::AddRun(int nCharPos0, int nCharPos1, bool bRTL)
 {
-    SAL_WARN_IF(nCharPos0 > nCharPos1, "vcl", "ImplLayoutArgs::AddRun() nCharPos0>=nCharPos1");
+    SAL_WARN_IF(nCharPos0 > nCharPos1, "vcl", "TextLayoutRequest::AddRun() nCharPos0>=nCharPos1");
 
     // remove control characters from runs by splitting them up
     if (!bRTL)
@@ -164,7 +164,7 @@ void ImplLayoutArgs::AddRun(int nCharPos0, int nCharPos1, bool bRTL)
     maRuns.AddRun(nCharPos0, nCharPos1, bRTL);
 }
 
-bool ImplLayoutArgs::PrepareFallback(const SalLayoutGlyphsImpl* pGlyphsImpl)
+bool TextLayoutRequest::PrepareFallback(const SalLayoutGlyphsImpl* pGlyphsImpl)
 {
     // Generate runs with pre-calculated glyph items instead maFallbackRuns.
     if (pGlyphsImpl != nullptr)
@@ -194,7 +194,7 @@ bool ImplLayoutArgs::PrepareFallback(const SalLayoutGlyphsImpl* pGlyphsImpl)
     return true;
 }
 
-bool ImplLayoutArgs::GetNextRun(int* nMinRunPos, int* nEndRunPos, bool* bRTL)
+bool TextLayoutRequest::GetNextRun(int* nMinRunPos, int* nEndRunPos, bool* bRTL)
 {
     bool bValid = maRuns.GetRun(nMinRunPos, nEndRunPos, bRTL);
     maRuns.NextRun();
@@ -202,12 +202,12 @@ bool ImplLayoutArgs::GetNextRun(int* nMinRunPos, int* nEndRunPos, bool* bRTL)
 }
 }
 
-std::ostream& operator<<(std::ostream& s, vcl::text::ImplLayoutArgs const& rArgs)
+std::ostream& operator<<(std::ostream& s, vcl::text::TextLayoutRequest const& rArgs)
 {
 #ifndef SAL_LOG_INFO
     (void)rArgs;
 #else
-    s << "ImplLayoutArgs{";
+    s << "TextLayoutRequest{";
 
     s << "Flags=";
     if (rArgs.mnFlags == SalLayoutFlags::NONE)
