@@ -685,4 +685,19 @@ std::unique_ptr<SalLayout> TextLayoutEngine::ResolveFallbacks(const LayoutResour
     return pLayout;
 }
 
+void TextLayoutEngine::ApplyPositioning(const LayoutResources& rRes, SalLayout& rLayout,
+                                        vcl::text::ImplLayoutArgs& rArgs, const Point& rLogicalPos,
+                                        double nEndGlyphCoord)
+{
+    TextLayoutPositioning aPos;
+    aPos.bSubpixelPositioning = rRes.bSubpixelPositioning;
+
+    FillAlignmentContext(aPos, rArgs, nEndGlyphCoord);
+    aPos.aDrawBase = MapLogicalToDevicePos(rRes, rLogicalPos);
+
+    JustifyLayout(rLayout, rArgs);
+    ApplyHorizontalOffset(rLayout, rArgs, aPos);
+    SetAnchorPoint(rLayout, aPos);
+}
+
 } // namespace vcl::text

@@ -221,6 +221,10 @@ public:
                                                        std::unique_ptr<SalLayout> pLayout,
                                                        vcl::text::ImplLayoutArgs& rArgs,
                                                        const SalLayoutGlyphs* pGlyphs);
+
+    static void ApplyPositioning(const LayoutResources& rRes, SalLayout& rLayout,
+                                 vcl::text::ImplLayoutArgs& rArgs, const Point& rLogicalPos,
+                                 double nEndGlyphCoord);
 };
 
 } // namespace vcl::text
