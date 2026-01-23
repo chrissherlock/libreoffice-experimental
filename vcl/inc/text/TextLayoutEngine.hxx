@@ -53,6 +53,35 @@ class TextLayoutCache;
 
 namespace vcl::text
 {
+struct TextSpan
+{
+    const OUString& Text;
+    sal_Int32 Index;
+    sal_Int32 Length;
+};
+
+struct LayoutConstraints
+{
+    Point LogicalPos = Point(0, 0);
+    tools::Long LogicalWidth = 0;
+    KernArraySpan pDXArray = {};
+    std::span<const sal_Bool> pKashidaArray = {};
+    SalLayoutFlags Flags = SalLayoutFlags::NONE;
+};
+
+struct LayoutCacheData
+{
+    const TextLayoutCache* pCache = nullptr;
+    const SalLayoutGlyphs* pGlyphs = nullptr;
+};
+
+struct RenderSelection
+{
+    std::optional<sal_Int32> DrawOriginCluster;
+    std::optional<sal_Int32> DrawMinCharPos;
+    std::optional<sal_Int32> DrawEndCharPos;
+};
+
 using FallbackLayoutFactory
     = std::function<std::unique_ptr<SalLayout>(LogicalFontInstance*, int, ImplLayoutArgs&)>;
 

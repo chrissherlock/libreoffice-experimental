@@ -1023,22 +1023,31 @@ OutputDevice::FontMappingUseData OutputDevice::FinishTrackingFontMappingUse()
 }
 
 std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
-    const OUString& rOrigStr, sal_Int32 nMinIndex, sal_Int32 nLen, const Point& rLogicalPos,
-    tools::Long nLogicalWidth, KernArraySpan pDXArray, std::span<const sal_Bool> pKashidaArray,
-    SalLayoutFlags flags, vcl::text::TextLayoutCache const* pLayoutCache,
-    const SalLayoutGlyphs* pGlyphs, std::optional<sal_Int32> nDrawOriginCluster,
-    std::optional<sal_Int32> nDrawMinCharPos, std::optional<sal_Int32> nDrawEndCharPos) const
+    const vcl::text::TextSpan& rSpan,
+    const vcl::text::LayoutConstraints& rConstraints,
+    const vcl::text::LayoutCacheData& rCache,
+    const vcl::text::RenderSelection& rSelection) const
 {
+    // Unpack Semantic Clusters
+    const OUString& rOrigStr = rSpan.Text;
+    sal_Int32 nMinIndex = rSpan.Index;
+    sal_Int32 nLen = rSpan.Length;
+
+    // Create local copies of cache pointers because the engine might modify them (set to null)
+    const vcl::text::TextLayoutCache* pLayoutCache = rCache.pCache;
+    const SalLayoutGlyphs* pGlyphs = rCache.pGlyphs;
+
+    // Validate
     vcl::text::TextLayoutEngine::ValidateGlyphCache(pGlyphs);
-    if (pGlyphs && !pGlyphs->IsValid())
-        pGlyphs = nullptr;
+    const SalLayoutGlyphs* pEffectiveGlyphs = (pGlyphs && !pGlyphs->IsValid()) ? nullptr : pGlyphs;
 
     if (!InitFont())
         return nullptr;
 
     OUString aStr;
+    // Pass the LOCAL pLayoutCache, which can be modified by the ref argument
     if (!vcl::text::TextLayoutEngine::PrepareNormalizedLayoutInput(
-            rOrigStr, nMinIndex, nLen, aStr, *mpFontRealization, pLayoutCache, pGlyphs))
+            rOrigStr, nMinIndex, nLen, aStr, *mpFontRealization, pLayoutCache, pEffectiveGlyphs))
     {
         return nullptr;
     }
@@ -1056,42 +1065,58 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
         bUseSubpixel
     };
 
-    double nPixelWidth = vcl::text::TextLayoutEngine::CalculateLayoutWidth(aResources, nLogicalWidth);
+    double nPixelWidth = vcl::text::TextLayoutEngine::CalculateLayoutWidth(aResources, rConstraints.LogicalWidth);
 
     vcl::text::ImplLayoutArgs aLayoutArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
-            aStr, nMinIndex, nLen, nPixelWidth, flags, pLayoutCache,
+            aStr, nMinIndex, nLen, nPixelWidth, rConstraints.Flags, pLayoutCache,
             *mpGraphicsState, *mpFontRealization, IsRTLEnabled());
 
-    if (nDrawOriginCluster.has_value())
-        aLayoutArgs.mnDrawOriginCluster = *nDrawOriginCluster;
+    if (rSelection.DrawOriginCluster.has_value())
+        aLayoutArgs.mnDrawOriginCluster = *rSelection.DrawOriginCluster;
+    if (rSelection.DrawMinCharPos.has_value())
+        aLayoutArgs.mnDrawMinCharPos = *rSelection.DrawMinCharPos;
+    if (rSelection.DrawEndCharPos.has_value())
+        aLayoutArgs.mnDrawEndCharPos = *rSelection.DrawEndCharPos;
 
-    if (nDrawMinCharPos.has_value())
-        aLayoutArgs.mnDrawMinCharPos = *nDrawMinCharPos;
-
-    if (nDrawEndCharPos.has_value())
-        aLayoutArgs.mnDrawEndCharPos = *nDrawEndCharPos;
-
-    double nEndGlyphCoord(0);
+    double nEndGlyphCoord = 0.0;
     vcl::text::TextLayoutEngine::PrepareJustification(
-        aResources, pDXArray, pKashidaArray, nMinIndex, nLen,
-        nDrawMinCharPos, nDrawEndCharPos, aLayoutArgs, nEndGlyphCoord);
+        aResources, rConstraints.pDXArray, rConstraints.pKashidaArray, nMinIndex, nLen,
+        rSelection.DrawMinCharPos, rSelection.DrawEndCharPos, aLayoutArgs, nEndGlyphCoord);
 
     std::unique_ptr<SalLayout> pSalLayout = vcl::text::TextLayoutEngine::PerformTextLayout(
-        aResources, aLayoutArgs, pGlyphs);
+        aResources, aLayoutArgs, pEffectiveGlyphs);
 
     if (!pSalLayout)
         return nullptr;
 
-    if (flags & SalLayoutFlags::GlyphItemsOnly)
+    if (rConstraints.Flags & SalLayoutFlags::GlyphItemsOnly)
         return pSalLayout;
 
     vcl::text::TextLayoutEngine::ApplyPositioning(
-        aResources, *pSalLayout, aLayoutArgs, rLogicalPos, nEndGlyphCoord);
+        aResources, *pSalLayout, aLayoutArgs, rConstraints.LogicalPos, nEndGlyphCoord);
 
     vcl::text::TextLayoutEngine::TrackLayoutFonts(GetFont(), pSalLayout.get());
 
     return pSalLayout;
 }
+
+
+// Legacy Shim (Backward Compatibility)
+std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
+    const OUString& rOrigStr, sal_Int32 nMinIndex, sal_Int32 nLen, const Point& rLogicalPos,
+    tools::Long nLogicalWidth, KernArraySpan pDXArray, std::span<const sal_Bool> pKashidaArray,
+    SalLayoutFlags flags, vcl::text::TextLayoutCache const* pLayoutCache,
+    const SalLayoutGlyphs* pGlyphs, std::optional<sal_Int32> nDrawOriginCluster,
+    std::optional<sal_Int32> nDrawMinCharPos, std::optional<sal_Int32> nDrawEndCharPos) const
+{
+    return ImplLayout(
+        vcl::text::TextSpan{ rOrigStr, nMinIndex, nLen },
+        vcl::text::LayoutConstraints{ rLogicalPos, nLogicalWidth, pDXArray, pKashidaArray, flags },
+        vcl::text::LayoutCacheData{ pLayoutCache, pGlyphs },
+        vcl::text::RenderSelection{ nDrawOriginCluster, nDrawMinCharPos, nDrawEndCharPos }
+    );
+}
+
 
 std::shared_ptr<const vcl::text::TextLayoutCache> OutputDevice::CreateTextLayoutCache(
         OUString const& rString)

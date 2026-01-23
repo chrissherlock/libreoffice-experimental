@@ -171,6 +171,14 @@ VCL_DLLPUBLIC void InvertFocusRect(vcl::RenderContext& rRenderContext, const too
 * so we need to use virtual inheritance to keep the referencing counting
 * OK.
 */
+
+namespace vcl::text {
+    struct TextSpan;
+    struct LayoutConstraints;
+    struct LayoutCacheData;
+    struct RenderSelection;
+}
+
 class SAL_WARN_UNUSED VCL_DLLPUBLIC OutputDevice : public virtual VclReferenceBase
 {
     friend class Printer;
@@ -1295,6 +1303,12 @@ public:
     SAL_DLLPRIVATE void         ReMirror( vcl::Region &rRegion ) const;
     SAL_DLLPRIVATE bool         ImplIsRecordLayout() const;
     virtual bool                HasMirroredGraphics() const;
+
+    std::unique_ptr<SalLayout> ImplLayout(
+        const vcl::text::TextSpan& rSpan,
+        const vcl::text::LayoutConstraints& rConstraints,
+        const vcl::text::LayoutCacheData& rCache,
+        const vcl::text::RenderSelection& rSelection) const;
     std::unique_ptr<SalLayout> ImplLayout(
         const OUString&, sal_Int32 nIndex, sal_Int32 nLen, const Point& rLogicPos = Point(0, 0),
         tools::Long nLogicWidth = 0, KernArraySpan aKernArray = KernArraySpan(),
