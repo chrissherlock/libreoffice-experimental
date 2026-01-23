@@ -1062,27 +1062,9 @@ OutputDevice::FontMappingUseData OutputDevice::FinishTrackingFontMappingUse()
     return ret;
 }
 
-
-static basegfx::B2DPoint lcl_mapLogicalToDevicePos(const OutputDevice& rDev, const Point& rLogicalPos)
-{
-    if (rDev.IsMapModeEnabled() || rDev.GetOutDevType() == OUTDEV_PDF)
-        return rDev.LogicToDeviceSubPixel(rLogicalPos);
-
-    Point aDevicePos = rDev.LogicToDevicePixel(rLogicalPos);
-    return basegfx::B2DPoint(aDevicePos.X(), aDevicePos.Y());
-}
-
 static bool lcl_isSubpixelPositioningRequired(const OutputDevice& rDev)
 {
     return rDev.IsMapModeEnabled() || rDev.isSubpixelPositioning();
-}
-
-static void lcl_fillAlignmentContext(vcl::text::TextLayoutPositioning& rPos,
-                                     const vcl::text::ImplLayoutArgs& rArgs,
-                                     double nEndGlyphCoord)
-{
-    rPos.bRightAlign = bool(rArgs.mnFlags & SalLayoutFlags::RightAlign);
-    rPos.nEndGlyphCoord = nEndGlyphCoord;
 }
 
 static SalGraphics& lcl_getLayoutFactory(const OutputDevice& rDev)
@@ -1203,6 +1185,9 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
 
 
     // [Refactor] Prepare Layout Resources (Dependency Injection)
+    // Determine if we need subpixel precision (MapMode, explicit flag, or PDF export)
+    bool bUseSubpixel = IsMapModeEnabled() || isSubpixelPositioning() || GetOutDevType() == OUTDEV_PDF;
+
     vcl::text::LayoutResources aResources = {
         mpFontRealization->mxFont.get(),
         *mpMapper,
@@ -1211,7 +1196,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
         mpForcedFallbackInstance.get(),
         [this]() { const_cast<OutputDevice*>(this)->AcquireGraphics(); return mpGraphics; },
         IsRTLEnabled(),
-        isSubpixelPositioning()
+        bUseSubpixel
     };
 
     vcl::text::TextLayoutEngine::PrepareJustification(
@@ -1292,9 +1277,9 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
     // Prepare positioning data for the engine
     vcl::text::TextLayoutPositioning aPos;
     aPos.bSubpixelPositioning = lcl_isSubpixelPositioningRequired(*this);
-    lcl_fillAlignmentContext(aPos, aLayoutArgs, nEndGlyphCoord);
+    vcl::text::TextLayoutEngine::FillAlignmentContext(aPos, aLayoutArgs, nEndGlyphCoord);
 
-    aPos.aDrawBase = lcl_mapLogicalToDevicePos(*this, rLogicalPos);
+    aPos.aDrawBase = vcl::text::TextLayoutEngine::MapLogicalToDevicePos(aResources, rLogicalPos);
 
     vcl::text::TextLayoutEngine::JustifyLayout(*pSalLayout, aLayoutArgs);
     vcl::text::TextLayoutEngine::ApplyHorizontalOffset(*pSalLayout, aLayoutArgs, aPos);
