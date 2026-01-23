@@ -82,6 +82,7 @@ struct LayoutResources
     const LogicalFontInstance* pForcedFallback;
     std::function<SalGraphics*()> fnGetGraphics;
     bool bRTLEnabled;
+    bool bSubpixelPositioning;
 };
 
 class VCL_DLLPUBLIC TextLayoutEngine
@@ -172,6 +173,12 @@ public:
                                                            const FontLookupCriteria& rCriteria,
                                                            ILayoutFactory& rFactory);
 
+    static void PrepareJustification(const LayoutResources& rRes, KernArraySpan pDXArray,
+                                     std::span<const sal_Bool> pKashidaArray, sal_Int32 nMinIndex,
+                                     sal_Int32 nLen, std::optional<sal_Int32> nDrawMinCharPos,
+                                     std::optional<sal_Int32> nDrawEndCharPos,
+                                     vcl::text::ImplLayoutArgs& rLayoutArgs,
+                                     double& rEndGlyphCoord);
     static void JustifyLayout(SalLayout& rLayout, vcl::text::ImplLayoutArgs& rArgs);
     static void ApplyHorizontalOffset(SalLayout& rLayout, const vcl::text::ImplLayoutArgs& rArgs,
                                       const TextLayoutPositioning& rPositioning);
