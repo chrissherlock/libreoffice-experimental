@@ -179,6 +179,11 @@ public:
                                      std::optional<sal_Int32> nDrawEndCharPos,
                                      vcl::text::ImplLayoutArgs& rLayoutArgs,
                                      double& rEndGlyphCoord);
+
+    static basegfx::B2DPoint MapLogicalToDevicePos(const LayoutResources& rRes,
+                                                   const Point& rLogicalPos);
+    static void FillAlignmentContext(TextLayoutPositioning& rPos,
+                                     const vcl::text::ImplLayoutArgs& rArgs, double nEndGlyphCoord);
     static void JustifyLayout(SalLayout& rLayout, vcl::text::ImplLayoutArgs& rArgs);
     static void ApplyHorizontalOffset(SalLayout& rLayout, const vcl::text::ImplLayoutArgs& rArgs,
                                       const TextLayoutPositioning& rPositioning);
