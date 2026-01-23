@@ -1186,7 +1186,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
 
     // [Refactor] Prepare Layout Resources (Dependency Injection)
     // Determine if we need subpixel precision (MapMode, explicit flag, or PDF export)
-    bool bUseSubpixel = IsMapModeEnabled() || isSubpixelPositioning() || GetOutDevType() == OUTDEV_PDF;
+    bool bUseSubpixel = IsMapModeEnabled() || isSubpixelPositioning() || SupportsSubpixelPositioning();
 
     vcl::text::LayoutResources aResources = {
         mpFontRealization->mxFont.get(),
