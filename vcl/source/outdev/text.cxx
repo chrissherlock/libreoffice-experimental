@@ -1063,18 +1063,6 @@ OutputDevice::FontMappingUseData OutputDevice::FinishTrackingFontMappingUse()
     return ret;
 }
 
-static bool lcl_isSubpixelPositioningRequired(const OutputDevice& rDev)
-{
-    return rDev.IsMapModeEnabled() || rDev.isSubpixelPositioning();
-}
-
-static SalGraphics& lcl_getLayoutFactory(const OutputDevice& rDev)
-{
-    const SalGraphics* pGraphics = rDev.GetGraphics();
-    assert(pGraphics);
-    return const_cast<SalGraphics&>(*pGraphics);
-}
-
 std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
     const OUString& rOrigStr, sal_Int32 nMinIndex, sal_Int32 nLen, const Point& rLogicalPos,
     tools::Long nLogicalWidth, KernArraySpan pDXArray, std::span<const sal_Bool> pKashidaArray,
@@ -1082,12 +1070,12 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
     const SalLayoutGlyphs* pGlyphs, std::optional<sal_Int32> nDrawOriginCluster,
     std::optional<sal_Int32> nDrawMinCharPos, std::optional<sal_Int32> nDrawEndCharPos) const
 {
-    // [Step 10] Refactor: Use FontRealization
     if (pGlyphs && !pGlyphs->IsValid())
     {
         SAL_WARN("vcl", "Trying to setup invalid cached glyphs - falling back to relayout!");
         pGlyphs = nullptr;
     }
+
 #ifdef DBG_UTIL
     if (pGlyphs)
     {
@@ -1109,7 +1097,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
     if (!InitFont())
         return nullptr;
 
-    // check string index and length
+    // Check string index and length
     if( -1 == nLen || nMinIndex + nLen > rOrigStr.getLength() )
     {
         const sal_Int32 nNewLen = rOrigStr.getLength() - nMinIndex;
@@ -1120,44 +1108,31 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
 
     OUString aStr = rOrigStr;
 
-    // recode string if needed
-    if( mpFontRealization->mxFont->mpConversion ) {
+    // Recode string if needed
+    if (mpFontRealization->mxFont->mpConversion)
+    {
         mpFontRealization->mxFont->mpConversion->RecodeString( aStr, 0, aStr.getLength() );
-        pLayoutCache = nullptr; // don't use cache with modified string!
+        pLayoutCache = nullptr;
         pGlyphs = nullptr;
     }
 
     double nPixelWidth = nLogicalWidth;
     if (nLogicalWidth && mpMapper->IsMapModeEnabled())
-    {
-        // convert from logical units to physical units
         nPixelWidth = LogicWidthToDeviceSubPixel(nLogicalWidth);
-    }
 
     vcl::text::ImplLayoutArgs aLayoutArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
             aStr, nMinIndex, nLen, nPixelWidth, flags, pLayoutCache,
             *mpGraphicsState, *mpFontRealization, IsRTLEnabled());
 
     if (nDrawOriginCluster.has_value())
-    {
         aLayoutArgs.mnDrawOriginCluster = *nDrawOriginCluster;
-    }
 
     if (nDrawMinCharPos.has_value())
-    {
         aLayoutArgs.mnDrawMinCharPos = *nDrawMinCharPos;
-    }
 
     if (nDrawEndCharPos.has_value())
-    {
         aLayoutArgs.mnDrawEndCharPos = *nDrawEndCharPos;
-    }
 
-    double nEndGlyphCoord(0);
-
-
-    // [Refactor] Prepare Layout Resources (Dependency Injection)
-    // Determine if we need subpixel precision (MapMode, explicit flag, or PDF export)
     bool bUseSubpixel = IsMapModeEnabled() || isSubpixelPositioning() || SupportsSubpixelPositioning();
 
     vcl::text::LayoutResources aResources = {
@@ -1171,84 +1146,47 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
         bUseSubpixel
     };
 
+    double nEndGlyphCoord(0);
     vcl::text::TextLayoutEngine::PrepareJustification(
         aResources, pDXArray, pKashidaArray, nMinIndex, nLen,
         nDrawMinCharPos, nDrawEndCharPos, aLayoutArgs, nEndGlyphCoord);
 
-    // get matching layout object for base font
-    SalGraphics& rFactory = lcl_getLayoutFactory(*this);
-    std::unique_ptr<SalLayout> pSalLayout = rFactory.GetTextLayout(0);
+    SalGraphics* pGraphics = aResources.fnGetGraphics();
+    if (!pGraphics)
+        return nullptr;
 
+    std::unique_ptr<SalLayout> pSalLayout = pGraphics->GetTextLayout(0);
+
+    // tdf#168002: Activate subpixel positioning if required
     if (pSalLayout)
-    {
-        const bool bActivateSubpixelPositioning(lcl_isSubpixelPositioningRequired(*this));
-        // tdf#168002
-        // SubpixelPositioning was until now activated when *any* MapMode was set, but
-        // there is another case this is needed: When a TextSimplePortionPrimitive2D
-        // is rendered by a SDPR.
-        // In that case a TextLayouterDevice is used (to isolate all Text-related stuff
-        // that should not be at OutputDevice) combined with a 'empty' OutDev -> no
-        // MapMode used. It now gets SubpixelPositioning at it's OutDev to allow
-        // checking/usage here.
-        // The DXArray for Primitives (see that TextPrimitive) is defined in the
-        // Unit-Text_Coordinate-System, thus in (0..1) ranges. That allows to
-        // have the DXArray transformation-independent and thus re-usable and
-        // is used since the TextPrimitive was created.
-        // If there is a DXArray missing at the text Primitive (as is the case
-        // with SVG imported ones, but allowed in general) one gets automatically
-        // created during the SalLayout creation for rendering. Unfortunately there
-        // (see GenericSalLayout::LayoutText, usages of GetSubpixelPositioning) the
-        // coordinates get std::round'ed, so all up to that point correctly
-        // calculated metric information in that double-precision dependent coordinate
-        // space gets *shredded*.
-        // To avoid that, SubpixelPositioning  has to be activated. While this might
-        // be done in the future for all cases (SubpixelPositioning == true) for now
-        // just add this case with the Primitives to not break stuff.
-        pSalLayout->SetSubpixelPositioning(bActivateSubpixelPositioning);
-    }
+        pSalLayout->SetSubpixelPositioning(aResources.bSubpixelPositioning);
 
-    // layout text
     if( pSalLayout && !pSalLayout->LayoutText( aLayoutArgs, pGlyphs ? pGlyphs->Impl(0) : nullptr ) )
-    {
         pSalLayout.reset();
-    }
 
     if( !pSalLayout )
         return nullptr;
 
-    // do glyph fallback if needed
-    // #105768# avoid fallback for very small font sizes
-
-    auto fnGetGraphics = [this]() -> SalGraphics* {
-        // Fix: Always acquire fresh graphics pointer to avoid stale nullptrs
-        const_cast<OutputDevice*>(this)->AcquireGraphics();
-        return mpGraphics;
-    };
-    vcl::text::GraphicLayoutFactory aFactory(fnGetGraphics);
+    vcl::text::GraphicLayoutFactory aFactory(aResources.fnGetGraphics);
 
     if (aLayoutArgs.HasFallbackRun() && mpFontRealization->mxFont->GetFontSelectPattern().mnHeight >= 3)
     {
-
         vcl::text::FontLookupCriteria aCriteria = {
-            GetFontCache(),
-            GetFontCollection(),
-            mpFontRealization->mxFont.get(),
-            mpForcedFallbackInstance
+            *aResources.pFontCache,
+            aResources.pFontCollection,
+            const_cast<LogicalFontInstance*>(aResources.pFont),
+            rtl::Reference<LogicalFontInstance>(const_cast<LogicalFontInstance*>(aResources.pForcedFallback))
         };
 
-    pSalLayout = vcl::text::TextLayoutEngine::ResolveMissingGlyphs(std::move(pSalLayout), aLayoutArgs, pGlyphs, aCriteria, aFactory);
+        pSalLayout = vcl::text::TextLayoutEngine::ResolveMissingGlyphs(
+            std::move(pSalLayout), aLayoutArgs, pGlyphs, aCriteria, aFactory);
     }
 
     if (flags & SalLayoutFlags::GlyphItemsOnly)
-        // Return glyph items only after fallback handling. Otherwise they may
-        // contain invalid glyph IDs.
         return pSalLayout;
 
-    // position, justify, etc. the layout
-
-    // Prepare positioning data for the engine
     vcl::text::TextLayoutPositioning aPos;
-    aPos.bSubpixelPositioning = lcl_isSubpixelPositioningRequired(*this);
+    aPos.bSubpixelPositioning = aResources.bSubpixelPositioning;
     vcl::text::TextLayoutEngine::FillAlignmentContext(aPos, aLayoutArgs, nEndGlyphCoord);
 
     aPos.aDrawBase = vcl::text::TextLayoutEngine::MapLogicalToDevicePos(aResources, rLogicalPos);
@@ -1256,6 +1194,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
     vcl::text::TextLayoutEngine::JustifyLayout(*pSalLayout, aLayoutArgs);
     vcl::text::TextLayoutEngine::ApplyHorizontalOffset(*pSalLayout, aLayoutArgs, aPos);
     vcl::text::TextLayoutEngine::SetAnchorPoint(*pSalLayout, aPos);
+
     if (pSalLayout && IsTrackingFontMappingUse())
         TrackFontMappingUse(GetFont(), pSalLayout.get());
 
