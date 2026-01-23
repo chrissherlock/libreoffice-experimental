@@ -23,12 +23,15 @@
 #include <tools/gen.hxx>
 #include <tools/fract.hxx>
 #include <tools/long.hxx>
+#include <tools/poly.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <basegfx/range/b2drectangle.hxx>
+#include <basegfx/polygon/b2dpolygon.hxx>
 
 #include <vcl/dllapi.h>
 #include <vcl/lineinfo.hxx>
 #include <vcl/mapmod.hxx>
+#include <vcl/region.hxx>
 #include <vcl/rendercontext/ImplMapRes.hxx>
 
 class CoordinateMapper
