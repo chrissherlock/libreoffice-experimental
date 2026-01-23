@@ -1014,29 +1014,8 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
     const vcl::text::LayoutCacheData& rCache,
     const vcl::text::RenderSelection& rSelection) const
 {
-    // Unpack Semantic Clusters
-    const OUString& rOrigStr = rSpan.Text;
-    sal_Int32 nMinIndex = rSpan.Index;
-    sal_Int32 nLen = rSpan.Length;
-
-    // Create local copies of cache pointers because the engine might modify them (set to null)
-    const vcl::text::TextLayoutCache* pLayoutCache = rCache.pCache;
-    const SalLayoutGlyphs* pGlyphs = rCache.pGlyphs;
-
-    // Validate
-    vcl::text::TextLayoutEngine::ValidateGlyphCache(pGlyphs);
-    const SalLayoutGlyphs* pEffectiveGlyphs = (pGlyphs && !pGlyphs->IsValid()) ? nullptr : pGlyphs;
-
     if (!InitFont())
         return nullptr;
-
-    OUString aStr;
-    // Pass the LOCAL pLayoutCache, which can be modified by the ref argument
-    if (!vcl::text::TextLayoutEngine::PrepareNormalizedLayoutInput(
-            rOrigStr, nMinIndex, nLen, aStr, *mpFontRealization, pLayoutCache, pEffectiveGlyphs))
-    {
-        return nullptr;
-    }
 
     bool bUseSubpixel = IsMapModeEnabled() || isSubpixelPositioning() || SupportsSubpixelPositioning();
 
@@ -1048,42 +1027,12 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
         mpForcedFallbackInstance.get(),
         [this]() { const_cast<OutputDevice*>(this)->AcquireGraphics(); return mpGraphics; },
         IsRTLEnabled(),
-        bUseSubpixel
+        bUseSubpixel,
+        *mpGraphicsState,
+        *mpFontRealization
     };
 
-    double nPixelWidth = vcl::text::TextLayoutEngine::CalculateLayoutWidth(aResources, rConstraints.LogicalWidth);
-
-    vcl::text::ImplLayoutArgs aLayoutArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
-            aStr, nMinIndex, nLen, nPixelWidth, rConstraints.Flags, pLayoutCache,
-            *mpGraphicsState, *mpFontRealization, IsRTLEnabled());
-
-    if (rSelection.DrawOriginCluster.has_value())
-        aLayoutArgs.mnDrawOriginCluster = *rSelection.DrawOriginCluster;
-    if (rSelection.DrawMinCharPos.has_value())
-        aLayoutArgs.mnDrawMinCharPos = *rSelection.DrawMinCharPos;
-    if (rSelection.DrawEndCharPos.has_value())
-        aLayoutArgs.mnDrawEndCharPos = *rSelection.DrawEndCharPos;
-
-    double nEndGlyphCoord = 0.0;
-    vcl::text::TextLayoutEngine::PrepareJustification(
-        aResources, rConstraints.pDXArray, rConstraints.pKashidaArray, nMinIndex, nLen,
-        rSelection.DrawMinCharPos, rSelection.DrawEndCharPos, aLayoutArgs, nEndGlyphCoord);
-
-    std::unique_ptr<SalLayout> pSalLayout = vcl::text::TextLayoutEngine::PerformTextLayout(
-        aResources, aLayoutArgs, pEffectiveGlyphs);
-
-    if (!pSalLayout)
-        return nullptr;
-
-    if (rConstraints.Flags & SalLayoutFlags::GlyphItemsOnly)
-        return pSalLayout;
-
-    vcl::text::TextLayoutEngine::ApplyPositioning(
-        aResources, *pSalLayout, aLayoutArgs, rConstraints.LogicalPos, nEndGlyphCoord);
-
-    vcl::text::TextLayoutEngine::TrackLayoutFonts(GetFont(), pSalLayout.get());
-
-    return pSalLayout;
+    return vcl::text::TextLayoutEngine::Layout(aResources, rSpan, rConstraints, rCache, rSelection);
 }
 
 std::shared_ptr<const vcl::text::TextLayoutCache> OutputDevice::CreateTextLayoutCache(

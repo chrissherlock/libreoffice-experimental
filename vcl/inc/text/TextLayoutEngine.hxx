@@ -83,6 +83,8 @@ struct LayoutResources
     std::function<SalGraphics*()> fnGetGraphics;
     bool bRTLEnabled;
     bool bSubpixelPositioning;
+    const vcl::GraphicsState& rGraphicsState;
+    const vcl::font::FontRealization& rFontRealization;
 };
 
 class VCL_DLLPUBLIC TextLayoutEngine
@@ -230,6 +232,13 @@ public:
     static std::unique_ptr<SalLayout> PerformTextLayout(const LayoutResources& rRes,
                                                         vcl::text::ImplLayoutArgs& rArgs,
                                                         const SalLayoutGlyphs* pGlyphs);
+
+    /** Orchestrates the complete layout process. */
+    static std::unique_ptr<SalLayout> Layout(const LayoutResources& rRes,
+                                             const vcl::text::TextSpan& rSpan,
+                                             const vcl::text::LayoutConstraints& rConstraints,
+                                             const vcl::text::LayoutCacheData& rCache,
+                                             const vcl::text::RenderSelection& rSelection);
 };
 
 } // namespace vcl::text
