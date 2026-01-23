@@ -143,12 +143,12 @@ tools::Rectangle ImplCalcActionBounds(const MetaAction& rAct, const OutputDevice
             if (!aString.isEmpty())
             {
                 // #105987# ImplLayout takes everything in logical coordinates
-                std::unique_ptr<SalLayout> pSalLayout1 = rOut.ImplLayout(
+                std::unique_ptr<SalLayout> pSalLayout1 = rOut.LayoutText(
                     vcl::text::TextSpan{ aString, 0, nStrStartPos },
                     vcl::text::LayoutConstraints{
                         rTextAct.GetPoint(), 0, rTextAct.GetDXArray(), {}, SalLayoutFlags::NONE },
                     vcl::text::LayoutCacheData{}, vcl::text::RenderSelection{});
-                std::unique_ptr<SalLayout> pSalLayout2 = rOut.ImplLayout(
+                std::unique_ptr<SalLayout> pSalLayout2 = rOut.LayoutText(
                     vcl::text::TextSpan{ aString, 0, nStrEndPos },
                     vcl::text::LayoutConstraints{
                         rTextAct.GetPoint(), 0, rTextAct.GetDXArray(), {}, SalLayoutFlags::NONE },

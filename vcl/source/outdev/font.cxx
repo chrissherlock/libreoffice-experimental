@@ -710,7 +710,7 @@ void OutputDevice::GetWordKashidaPositions(const OUString& rText, std::vector<bo
         return;
 
     auto nEnd = rText.getLength();
-    std::unique_ptr<SalLayout> pSalLayout = ImplLayout(
+    std::unique_ptr<SalLayout> pSalLayout = LayoutText(
         vcl::text::TextSpan{rText, 0, nEnd},
         vcl::text::LayoutConstraints{Point(0,0), 0, {}, {}, SalLayoutFlags::NONE},
         vcl::text::LayoutCacheData{},

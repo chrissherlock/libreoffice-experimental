@@ -591,7 +591,7 @@ SalLayoutGlyphs* ImplEntryType::GetTextGlyphs(const OutputDevice* pOutputDevice)
         // Use pre-calculated result.
         return &maStrGlyphs;
 
-    std::unique_ptr<SalLayout> pLayout = pOutputDevice->ImplLayout(
+    std::unique_ptr<SalLayout> pLayout = pOutputDevice->LayoutText(
         vcl::text::TextSpan{maStr, 0, maStr.getLength()},
         vcl::text::LayoutConstraints{Point(0, 0), 0, {}, {}, SalLayoutFlags::GlyphItemsOnly},
         vcl::text::LayoutCacheData{},

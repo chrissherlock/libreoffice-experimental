@@ -720,7 +720,7 @@ void OutputDevice::ImplDrawStrikeoutChar( tools::Long nBaseX, tools::Long nBaseY
 
     // calculate approximation of strikeout atom size
     tools::Long nStrikeoutWidth = 0;
-    std::unique_ptr<SalLayout> pLayout = ImplLayout(
+    std::unique_ptr<SalLayout> pLayout = LayoutText(
         vcl::text::TextSpan{aStrikeoutTest, 0, nTestStrLen},
         vcl::text::LayoutConstraints{Point(0,0), 0, {}, {}, SalLayoutFlags::NONE},
         vcl::text::LayoutCacheData{},
@@ -756,7 +756,7 @@ void OutputDevice::ImplDrawStrikeoutChar( tools::Long nBaseX, tools::Long nBaseY
     // strikeout text has to be left aligned
     vcl::text::ComplexTextLayoutFlags nOrigTLM = GetLayoutMode();
     SetLayoutMode(vcl::text::ComplexTextLayoutFlags::BiDiStrong);
-    pLayout = ImplLayout(
+    pLayout = LayoutText(
         vcl::text::TextSpan{aStrikeoutText, 0, aStrikeoutText.getLength()},
         vcl::text::LayoutConstraints{Point(0,0), 0, {}, {}, SalLayoutFlags::NONE},
         vcl::text::LayoutCacheData{},
