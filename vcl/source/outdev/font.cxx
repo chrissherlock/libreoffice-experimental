@@ -39,12 +39,12 @@
 #include <font/LogicalFontInstance.hxx>
 #include <font/PhysicalFontCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
-#include <text/TextLayoutEngine.hxx>
 #include <sallayout.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>
 
 #include <unicode/uchar.h>
+#include <text/TextLayoutEngine.hxx>
 
 const vcl::Font& OutputDevice::GetFont() const { return mpGraphicsState->maFont; }
 
@@ -710,7 +710,11 @@ void OutputDevice::GetWordKashidaPositions(const OUString& rText, std::vector<bo
         return;
 
     auto nEnd = rText.getLength();
-    std::unique_ptr<SalLayout> pSalLayout = ImplLayout(rText, 0, nEnd);
+    std::unique_ptr<SalLayout> pSalLayout = ImplLayout(
+        vcl::text::TextSpan{rText, 0, nEnd},
+        vcl::text::LayoutConstraints{Point(0,0), 0, {}, {}, SalLayoutFlags::NONE},
+        vcl::text::LayoutCacheData{},
+        vcl::text::RenderSelection{});
 
     if (!pSalLayout)
     {

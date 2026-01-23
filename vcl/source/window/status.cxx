@@ -83,7 +83,10 @@ SalLayoutGlyphs* ImplStatusItem::GetTextGlyphs(const OutputDevice* outputDevice)
     if(!mLayoutGlyphsCache.has_value())
     {
         std::unique_ptr<SalLayout> pSalLayout = outputDevice->ImplLayout(
-            maText, 0, -1, Point(0, 0), 0, {}, {}, SalLayoutFlags::GlyphItemsOnly);
+        vcl::text::TextSpan{maText, 0, maText.getLength()},
+        vcl::text::LayoutConstraints{Point(0, 0), 0, {}, {}, SalLayoutFlags::GlyphItemsOnly},
+        vcl::text::LayoutCacheData{},
+        vcl::text::RenderSelection{});
         mLayoutGlyphsCache = pSalLayout ? pSalLayout->GetGlyphs() : SalLayoutGlyphs();
     }
     return mLayoutGlyphsCache->IsValid() ? &mLayoutGlyphsCache.value() : nullptr;

@@ -41,6 +41,7 @@
 #include <impglyphitem.hxx>
 
 #include <cassert>
+#include <text/TextLayoutEngine.hxx>
 
 #define UNDERLINE_LAST      LINESTYLE_BOLDWAVE
 #define STRIKEOUT_LAST      STRIKEOUT_X
@@ -719,7 +720,11 @@ void OutputDevice::ImplDrawStrikeoutChar( tools::Long nBaseX, tools::Long nBaseY
 
     // calculate approximation of strikeout atom size
     tools::Long nStrikeoutWidth = 0;
-    std::unique_ptr<SalLayout> pLayout = ImplLayout( aStrikeoutTest, 0, nTestStrLen );
+    std::unique_ptr<SalLayout> pLayout = ImplLayout(
+        vcl::text::TextSpan{aStrikeoutTest, 0, nTestStrLen},
+        vcl::text::LayoutConstraints{Point(0,0), 0, {}, {}, SalLayoutFlags::NONE},
+        vcl::text::LayoutCacheData{},
+        vcl::text::RenderSelection{});
     if( pLayout )
     {
         nStrikeoutWidth = pLayout->GetTextWidth() / nTestStrLen;
@@ -751,7 +756,11 @@ void OutputDevice::ImplDrawStrikeoutChar( tools::Long nBaseX, tools::Long nBaseY
     // strikeout text has to be left aligned
     vcl::text::ComplexTextLayoutFlags nOrigTLM = GetLayoutMode();
     SetLayoutMode(vcl::text::ComplexTextLayoutFlags::BiDiStrong);
-    pLayout = ImplLayout( aStrikeoutText, 0, aStrikeoutText.getLength() );
+    pLayout = ImplLayout(
+        vcl::text::TextSpan{aStrikeoutText, 0, aStrikeoutText.getLength()},
+        vcl::text::LayoutConstraints{Point(0,0), 0, {}, {}, SalLayoutFlags::NONE},
+        vcl::text::LayoutCacheData{},
+        vcl::text::RenderSelection{});
     SetLayoutMode(nOrigTLM);
 
     if( !pLayout )
