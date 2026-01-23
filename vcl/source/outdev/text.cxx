@@ -53,6 +53,7 @@
 #include <impglyphitem.hxx>
 #include <TextLayoutCache.hxx>
 #include <text/TextLayoutEngine.hxx>
+#include <text/GraphicLayoutFactory.hxx>
 
 #include <memory>
 #include <optional>
@@ -1074,35 +1075,6 @@ static SalGraphics& lcl_getLayoutFactory(const OutputDevice& rDev)
     return const_cast<SalGraphics&>(*pGraphics);
 }
 
-
-namespace {
-class GraphicLayoutFactory : public vcl::text::ILayoutFactory
-{
-    std::function<SalGraphics*()> m_fnGetGraphics;
-
-public:
-    explicit GraphicLayoutFactory(std::function<SalGraphics*()> fnGetGraphics)
-        : m_fnGetGraphics(std::move(fnGetGraphics))
-    {
-    }
-
-    std::unique_ptr<SalLayout> CreateLayout(int nFallbackLevel) override
-    {
-        SalGraphics* pGraphics = m_fnGetGraphics();
-        if (!pGraphics)
-            return nullptr;
-        return pGraphics->GetTextLayout(nFallbackLevel);
-    }
-
-    void SetFont(LogicalFontInstance* pFont, int nFallbackLevel) override
-    {
-        SalGraphics* pGraphics = m_fnGetGraphics();
-        if (pGraphics)
-            pGraphics->SetFont(pFont, nFallbackLevel);
-    }
-};
-}
-
 std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
     const OUString& rOrigStr, sal_Int32 nMinIndex, sal_Int32 nLen, const Point& rLogicalPos,
     tools::Long nLogicalWidth, KernArraySpan pDXArray, std::span<const sal_Bool> pKashidaArray,
@@ -1252,7 +1224,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
         const_cast<OutputDevice*>(this)->AcquireGraphics();
         return mpGraphics;
     };
-    GraphicLayoutFactory aFactory(fnGetGraphics);
+    vcl::text::GraphicLayoutFactory aFactory(fnGetGraphics);
 
     if (aLayoutArgs.HasFallbackRun() && mpFontRealization->mxFont->GetFontSelectPattern().mnHeight >= 3)
     {

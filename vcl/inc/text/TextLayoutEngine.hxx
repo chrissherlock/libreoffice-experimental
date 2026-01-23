@@ -7,49 +7,49 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include <vcl/dllapi.h>
-#include <sallayout.hxx>
-#include <vcl/outdev.hxx>
-#include <vector>
+#pragma once
 
+#include <rtl/ustring.hxx>
+#include <tools/gen.hxx>
+#include <tools/fontenum.hxx>
+
+#include <vcl/dllapi.h>
+#include <vcl/rendercontext/SalLayoutFlags.hxx>
+#include <vcl/outdev.hxx>
+
+#include <ImplLayoutRuns.hxx>
+#include <font/FontLookupCriteria.hxx>
+
+#include <vector>
 #include <memory>
 #include <functional>
+#include <optional>
+#include <span>
 
 class CoordinateMapper;
 class ImplFontCache;
 class ImplFontList;
 class LogicalFontInstance;
+class MultiSalLayout;
 class SalGraphics;
-
-#include <vcl/rendercontext/SalLayoutFlags.hxx>
-#include <functional>
-#include <tools/gen.hxx> // For global Point
-#include <tools/fontenum.hxx> // For FontEmphasisMark
-#include <rtl/ustring.hxx>
-#include <font/FontLookupCriteria.hxx>
-
 class SalLayout;
-class LogicalFontInstance;
+class SalLayoutGlyphsImpl;
+
 namespace vcl
 {
-struct GraphicsState;
 class Font;
-}
-
-class GraphicsState;
-
-namespace vcl::font
+struct GraphicsState;
+namespace font
 {
 struct FontRealization;
-}
-
-class ImplFontCache;
-namespace vcl::font
-{
 class PhysicalFontCollection;
 }
-class LogicalFontInstance;
-class SalLayoutGlyphsImpl;
+namespace text
+{
+class ImplLayoutArgs;
+class TextLayoutCache;
+}
+}
 
 namespace vcl::text
 {
@@ -100,22 +100,16 @@ public:
 
     /** Initializes font metrics (bullet offset, CJK centering) using callbacks.
      * Independent of OutputDevice.
-     * @param pFontInstance   The font instance to update.
-     * @param nDPIY           Device vertical DPI.
-     * @param nPixelWidth     Width of 1 logical unit in pixels.
-     * @param fnGetTextWidth  Callback: Returns width of a string in logic units.
-     * @param fnGetBoundRect  Callback: Fills the bounding rectangle of a string.
      */
+    static void InitializeFontMetrics(
+        LogicalFontInstance* pFontInstance, const vcl::Font& rFont, long nDPIY, long nPixelWidth,
+        std::function<long(const OUString&)> const& fnGetTextWidth,
+        std::function<void(tools::Rectangle&, const OUString&)> const& fnGetBoundRect);
 
     /** Determines BiDi flags based on layout mode and string content. */
     static SalLayoutFlags GetBiDiLayoutFlags(vcl::text::ComplexTextLayoutFlags eLayoutMode,
                                              std::u16string_view rStr, sal_Int32 nMinIndex,
                                              sal_Int32 nEndIndex);
-
-    static void InitializeFontMetrics(
-        LogicalFontInstance* pFontInstance, const vcl::Font& rFont, long nDPIY, long nPixelWidth,
-        std::function<long(const OUString&)> const& fnGetTextWidth,
-        std::function<void(tools::Rectangle&, const OUString&)> const& fnGetBoundRect);
 
     /** Applies digit localization to the string if the language requires it. */
     static void ApplyDigitLocalization(const vcl::GraphicsState& rGraphicsState, OUString& rStr,
@@ -135,8 +129,8 @@ public:
     static vcl::text::ImplLayoutArgs
     CreateLayoutRequest(OUString& rStr, sal_Int32 nMinIndex, sal_Int32 nLen, double nPixelWidth,
                         SalLayoutFlags nFlags, const vcl::text::TextLayoutCache* pCache,
-                        const GraphicsState& rState, const font::FontRealization& rRealization,
-                        bool bRTL);
+                        const vcl::GraphicsState& rState,
+                        const vcl::font::FontRealization& rRealization, bool bRTL);
 
     /**
      * Finds a suitable fallback font for the given missing characters.
@@ -188,7 +182,12 @@ public:
     static void ApplyHorizontalOffset(SalLayout& rLayout, const vcl::text::ImplLayoutArgs& rArgs,
                                       const TextLayoutPositioning& rPositioning);
     static void SetAnchorPoint(SalLayout& rLayout, const TextLayoutPositioning& rPositioning);
+
+    // Layout Orchestration
+    static std::unique_ptr<SalLayout>
+    Layout(const LayoutResources& rRes, vcl::text::ImplLayoutArgs& rArgs, KernArraySpan pDXArray,
+           std::span<const sal_Bool> pKashidaArray, const Point& rLogicalPos,
+           const SalLayoutGlyphs* pGlyphs = nullptr);
 };
 
 } // namespace vcl::text
-/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
