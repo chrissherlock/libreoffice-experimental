@@ -649,7 +649,7 @@ void OutputDevice::DrawText( const Point& rStartPt, const OUString& rStr,
         if(mpFontRealization->mxFont->mpConversion)
             pLayoutCache = nullptr;
 
-    std::unique_ptr<SalLayout> pSalLayout = ImplLayout(
+    std::unique_ptr<SalLayout> pSalLayout = LayoutText(
         vcl::text::TextSpan{rStr, nIndex, nLen},
         vcl::text::LayoutConstraints{rStartPt, 0, {}, {}, eDefaultLayout},
         vcl::text::LayoutCacheData{nullptr, pLayoutCache},
@@ -752,7 +752,7 @@ void OutputDevice::DrawPartialTextArray(const Point& rStartPt, const OUString& r
         return;
 
     // Adding the UnclusteredGlyphs flag during layout enables per-glyph styling.
-    std::unique_ptr<SalLayout> pSalLayout = ImplLayout(
+    std::unique_ptr<SalLayout> pSalLayout = LayoutText(
         vcl::text::TextSpan{rStr, nIndex, nLen},
         vcl::text::LayoutConstraints{rStartPt, 0, pDXArray, pKashidaArray, flags | SalLayoutFlags::UnclusteredGlyphs},
         vcl::text::LayoutCacheData{nullptr, pLayoutCache},
@@ -789,7 +789,7 @@ void OutputDevice::DrawTextArray( const Point& rStartPt, const OUString& rStr,
     if ( IsOutputCulled() )
         return;
 
-    std::unique_ptr<SalLayout> pSalLayout = ImplLayout(
+    std::unique_ptr<SalLayout> pSalLayout = LayoutText(
         vcl::text::TextSpan{rStr, nIndex, nLen},
         vcl::text::LayoutConstraints{rStartPt, 0, pDXArray, pKashidaArray, flags},
         vcl::text::LayoutCacheData{nullptr, pSalLayoutCache},
@@ -831,7 +831,7 @@ OutputDevice::GetPartialTextArray(const OUString& rStr, KernArray* pKernArray, s
 
     // do layout
     // Use Point(0,0) and no flags for simple measurement
-    std::unique_ptr<SalLayout> pSalLayout = ImplLayout(
+    std::unique_ptr<SalLayout> pSalLayout = LayoutText(
         vcl::text::TextSpan{rStr, nIndex, nLen},
         vcl::text::LayoutConstraints{Point(0,0), 0, {}, {}, SalLayoutFlags::NONE},
         vcl::text::LayoutCacheData{pLayoutCache, pSalLayoutCache},
@@ -916,7 +916,7 @@ void OutputDevice::GetCaretPositions( const OUString& rStr, KernArray& rCaretPos
     rCaretPos.resize(nCaretPos);
 
     // do layout
-    std::unique_ptr<SalLayout> pSalLayout = ImplLayout(
+    std::unique_ptr<SalLayout> pSalLayout = LayoutText(
         vcl::text::TextSpan{rStr, nIndex, nLen},
         vcl::text::LayoutConstraints{Point(0,0), 0, {}, {}, eDefaultLayout},
         vcl::text::LayoutCacheData{nullptr, pGlyphs},
@@ -980,7 +980,7 @@ void OutputDevice::DrawStretchText( const Point& rStartPt, sal_Int32 nWidth,
     if ( !IsDeviceOutputNecessary() )
         return;
 
-    std::unique_ptr<SalLayout> pSalLayout = ImplLayout(
+    std::unique_ptr<SalLayout> pSalLayout = LayoutText(
         vcl::text::TextSpan{rStr, nIndex, nLen},
         vcl::text::LayoutConstraints{rStartPt, static_cast<tools::Long>(nWidth)},
         vcl::text::LayoutCacheData{},
@@ -1008,7 +1008,7 @@ OutputDevice::FontMappingUseData OutputDevice::FinishTrackingFontMappingUse()
     return vcl::text::TextLayoutEngine::FinishTracking();
 }
 
-std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
+std::unique_ptr<SalLayout> OutputDevice::LayoutText(
     const vcl::text::TextSpan& rSpan,
     const vcl::text::LayoutConstraints& rConstraints,
     const vcl::text::LayoutCacheData& rCache,
@@ -1060,7 +1060,7 @@ sal_Int32 OutputDevice::GetTextBreak( const OUString& rStr, tools::Long nTextWid
          vcl::text::TextLayoutCache const*const pLayoutCache,
          const SalLayoutGlyphs* pGlyphs) const
 {
-    std::unique_ptr<SalLayout> pSalLayout = ImplLayout(
+    std::unique_ptr<SalLayout> pSalLayout = LayoutText(
         vcl::text::TextSpan{rStr, nIndex, nLen},
         vcl::text::LayoutConstraints{Point(0,0), 0, {}, {}, eDefaultLayout},
         vcl::text::LayoutCacheData{pLayoutCache, pGlyphs},
@@ -1098,7 +1098,7 @@ sal_Int32 OutputDevice::GetTextBreakArray(const OUString& rStr, tools::Long nTex
         **pHyphenPos = -1;
     }
 
-    std::unique_ptr<SalLayout> pSalLayout = ImplLayout(
+    std::unique_ptr<SalLayout> pSalLayout = LayoutText(
         vcl::text::TextSpan{rStr, nIndex, nLen},
         vcl::text::LayoutConstraints{Point(0,0), 0, aKernArray, {}, eDefaultLayout},
         vcl::text::LayoutCacheData{pLayoutCache, pGlyphs},
@@ -1124,7 +1124,7 @@ sal_Int32 OutputDevice::GetTextBreakArray(const OUString& rStr, tools::Long nTex
         {
             OUString aHyphenStr(*nHyphenChar);
             // Create layout for the single hyphen character
-            std::unique_ptr<SalLayout> pHyphenLayout = ImplLayout(
+            std::unique_ptr<SalLayout> pHyphenLayout = LayoutText(
                 vcl::text::TextSpan{aHyphenStr, 0, 1},
                 vcl::text::LayoutConstraints{Point(0,0), 0, {}, {}, eDefaultLayout},
                 vcl::text::LayoutCacheData{nullptr, nullptr},
@@ -1794,7 +1794,7 @@ bool OutputDevice::GetTextBoundRect(basegfx::B2DRectangle& rRect, const OUString
         sal_Int32 nOfsLen = std::max( nBase, nIndex ) - nStart;
 
         // Offset Layout: No glyphs (safe), no flags
-        pSalLayout = ImplLayout(
+        pSalLayout = LayoutText(
             vcl::text::TextSpan{rStr, nStart, nOfsLen},
             vcl::text::LayoutConstraints{Point(0,0), static_cast<tools::Long>(nLayoutWidth), pDXArray, pKashidaArray, eDefaultLayout},
             vcl::text::LayoutCacheData{nullptr, nullptr},
@@ -1810,7 +1810,7 @@ bool OutputDevice::GetTextBoundRect(basegfx::B2DRectangle& rRect, const OUString
     }
 
     // Main Layout: Use pGlyphs if provided
-    pSalLayout = ImplLayout(
+    pSalLayout = LayoutText(
         vcl::text::TextSpan{rStr, nIndex, nLen},
         vcl::text::LayoutConstraints{Point(0,0), static_cast<tools::Long>(nLayoutWidth), pDXArray, pKashidaArray, eDefaultLayout},
         vcl::text::LayoutCacheData{nullptr, pGlyphs},
@@ -1870,7 +1870,7 @@ bool OutputDevice::GetTextOutlines( basegfx::B2DPolyPolygonVector& rVector,
         sal_Int32 nStart = std::min( nBase, nIndex );
         sal_Int32 nOfsLen = std::max( nBase, nIndex ) - nStart;
 
-        pSalLayout = ImplLayout(
+        pSalLayout = LayoutText(
             vcl::text::TextSpan{rStr, nStart, nOfsLen},
             vcl::text::LayoutConstraints{Point(0,0), static_cast<tools::Long>(nLayoutWidth), pDXArray, pKashidaArray, eDefaultLayout},
             vcl::text::LayoutCacheData{nullptr, nullptr},
@@ -1886,7 +1886,7 @@ bool OutputDevice::GetTextOutlines( basegfx::B2DPolyPolygonVector& rVector,
         }
     }
 
-    pSalLayout = ImplLayout(
+    pSalLayout = LayoutText(
         vcl::text::TextSpan{rStr, nIndex, nLen},
         vcl::text::LayoutConstraints{Point(0,0), static_cast<tools::Long>(nLayoutWidth), pDXArray, pKashidaArray, eDefaultLayout},
         vcl::text::LayoutCacheData{nullptr, nullptr}, // No cache, no glyphs available here

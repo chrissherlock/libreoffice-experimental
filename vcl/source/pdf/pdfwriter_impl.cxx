@@ -6366,7 +6366,7 @@ void PDFWriterImpl::drawText( const Point& rPos, const OUString& rText, sal_Int3
     // this also enforces font substitution and sets the font on SalGraphics
     const SalLayoutGlyphs* layoutGlyphs = SalLayoutGlyphsCache::self()->
         GetLayoutGlyphs( this, rText, nIndex, nLen );
-    std::unique_ptr<SalLayout> pLayout = ImplLayout(
+    std::unique_ptr<SalLayout> pLayout = LayoutText(
         vcl::text::TextSpan{rText, nIndex, nLen},
         vcl::text::LayoutConstraints{rPos, 0, {}, {}, SalLayoutFlags::NONE},
         vcl::text::LayoutCacheData{nullptr, layoutGlyphs},
@@ -6393,7 +6393,7 @@ void PDFWriterImpl::drawTextArray(const Point& rPos, const OUString& rText, Kern
     {
         const auto* layoutGlyphs = SalLayoutGlyphsCache::self()->GetLayoutGlyphs(
             this, rText, nLayoutContextIndex, nLayoutContextLen, nIndex, nIndex + nLen);
-        pLayout = ImplLayout(
+        pLayout = LayoutText(
         vcl::text::TextSpan{rText, nLayoutContextIndex, nLayoutContextLen},
         vcl::text::LayoutConstraints{rPos, 0, pDXArray, pKashidaArray, SalLayoutFlags::UnclusteredGlyphs},
         vcl::text::LayoutCacheData{nullptr, layoutGlyphs},
@@ -6403,7 +6403,7 @@ void PDFWriterImpl::drawTextArray(const Point& rPos, const OUString& rText, Kern
     {
         const auto* layoutGlyphs
             = SalLayoutGlyphsCache::self()->GetLayoutGlyphs(this, rText, nIndex, nLen);
-        pLayout = ImplLayout(
+        pLayout = LayoutText(
         vcl::text::TextSpan{rText, nIndex, nLen},
         vcl::text::LayoutConstraints{rPos, 0, pDXArray, pKashidaArray, SalLayoutFlags::NONE},
         vcl::text::LayoutCacheData{nullptr, layoutGlyphs},
@@ -6426,7 +6426,7 @@ void PDFWriterImpl::drawStretchText( const Point& rPos, sal_Int32 nWidth, const 
     // this also enforces font substitution and sets the font on SalGraphics
     const SalLayoutGlyphs* layoutGlyphs = SalLayoutGlyphsCache::self()->
         GetLayoutGlyphs( this, rText, nIndex, nLen, nWidth );
-    std::unique_ptr<SalLayout> pLayout = ImplLayout(
+    std::unique_ptr<SalLayout> pLayout = LayoutText(
         vcl::text::TextSpan{rText, nIndex, nLen},
         vcl::text::LayoutConstraints{rPos, static_cast<tools::Long>(nWidth), {}, {}, SalLayoutFlags::NONE},
         vcl::text::LayoutCacheData{nullptr, layoutGlyphs},

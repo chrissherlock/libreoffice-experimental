@@ -82,7 +82,7 @@ SalLayoutGlyphs* ImplStatusItem::GetTextGlyphs(const OutputDevice* outputDevice)
 {
     if(!mLayoutGlyphsCache.has_value())
     {
-        std::unique_ptr<SalLayout> pSalLayout = outputDevice->ImplLayout(
+        std::unique_ptr<SalLayout> pSalLayout = outputDevice->LayoutText(
         vcl::text::TextSpan{maText, 0, maText.getLength()},
         vcl::text::LayoutConstraints{Point(0, 0), 0, {}, {}, SalLayoutFlags::GlyphItemsOnly},
         vcl::text::LayoutCacheData{},

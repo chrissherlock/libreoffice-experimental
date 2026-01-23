@@ -1325,7 +1325,7 @@ public:
     SAL_DLLPRIVATE bool         ImplIsRecordLayout() const;
     virtual bool                HasMirroredGraphics() const;
 
-    std::unique_ptr<SalLayout> ImplLayout(
+    std::unique_ptr<SalLayout> LayoutText(
         const vcl::text::TextSpan& rSpan,
         const vcl::text::LayoutConstraints& rConstraints,
         const vcl::text::LayoutCacheData& rCache,

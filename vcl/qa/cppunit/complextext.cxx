@@ -136,7 +136,7 @@ CPPUNIT_TEST_FIXTURE(VclComplexTextTest, testTdf95650)
         "\u030A\u0C0B\u20E0\u0A0D";
     ScopedVclPtrInstance<VirtualDevice> pOutDev;
     // Check that the following executes without failing assertion
-    pOutDev->ImplLayout(
+    pOutDev->LayoutText(
         vcl::text::TextSpan{aTxt, 9, 1},
         vcl::text::LayoutConstraints{Point(), 0, {}, {}, SalLayoutFlags::BiDiRtl},
         vcl::text::LayoutCacheData{nullptr, nullptr},
@@ -177,14 +177,14 @@ static void testCachedGlyphs( const OUString& aText, const OUString& aFontName )
     pOutputDevice->SetFont( aFont );
     SalLayoutGlyphsCache::self()->clear();
     // Get the glyphs for the text.
-    std::unique_ptr<SalLayout> pLayout1 = pOutputDevice->ImplLayout(
+    std::unique_ptr<SalLayout> pLayout1 = pOutputDevice->LayoutText(
         vcl::text::TextSpan{aText, 0, aText.getLength()},
         vcl::text::LayoutConstraints{Point(0, 0), 0, {}, {}, SalLayoutFlags::GlyphItemsOnly},
         vcl::text::LayoutCacheData{nullptr, nullptr},
         vcl::text::RenderSelection{});
     SalLayoutGlyphs aGlyphs1 = pLayout1->GetGlyphs();
     // Reuse the cached glyphs to get glyphs again.
-    std::unique_ptr<SalLayout> pLayout2 = pOutputDevice->ImplLayout(
+    std::unique_ptr<SalLayout> pLayout2 = pOutputDevice->LayoutText(
         vcl::text::TextSpan{aText, 0, aText.getLength()},
         vcl::text::LayoutConstraints{Point(0, 0), 0, {}, {}, SalLayoutFlags::GlyphItemsOnly},
         vcl::text::LayoutCacheData{nullptr, &aGlyphs1},
@@ -224,7 +224,7 @@ static void testCachedGlyphsSubstring( const OUString& aText, const OUString& aF
     SalLayoutGlyphsCache::self()->clear();
     std::shared_ptr<const vcl::text::TextLayoutCache> layoutCache = OutputDevice::CreateTextLayoutCache(aText);
     // Get the glyphs for the entire text once, to ensure the cache can built subsets from it.
-    pOutputDevice->ImplLayout(
+    pOutputDevice->LayoutText(
         vcl::text::TextSpan{aText, 0, aText.getLength()},
         vcl::text::LayoutConstraints{Point(0, 0), 0, {}, {}, SalLayoutFlags::GlyphItemsOnly},
         vcl::text::LayoutCacheData{layoutCache.get(), nullptr},
@@ -235,7 +235,7 @@ static void testCachedGlyphsSubstring( const OUString& aText, const OUString& aF
         for( sal_Int32 pos = 0; pos < aText.getLength() - len; ++pos )
         {
             std::string message = prefix + " (" + std::to_string(pos) + "/" + std::to_string(len) + ")";
-            std::unique_ptr<SalLayout> pLayout1 = pOutputDevice->ImplLayout(
+            std::unique_ptr<SalLayout> pLayout1 = pOutputDevice->LayoutText(
         vcl::text::TextSpan{aText, pos, len},
         vcl::text::LayoutConstraints{Point(0, 0), 0, {}, {}, SalLayoutFlags::GlyphItemsOnly},
         vcl::text::LayoutCacheData{layoutCache.get(), nullptr},
@@ -456,7 +456,7 @@ CPPUNIT_TEST_FIXTURE(VclComplexTextTest, testTdf152048)
     aCharWidths[3] += nKashida;
     aCharWidths[4] += nKashida;
     aCharWidths[5] += nKashida;
-    auto pLayout = pOutDev->ImplLayout(
+    auto pLayout = pOutDev->LayoutText(
         vcl::text::TextSpan{aText, 0, -1},
         vcl::text::LayoutConstraints{Point(0, 0), 0, aCharWidths, aKashidaArray, SalLayoutFlags::NONE},
         vcl::text::LayoutCacheData{nullptr, nullptr},
@@ -509,7 +509,7 @@ CPPUNIT_TEST_FIXTURE(VclComplexTextTest, testTdf153440)
         OUString aText(aString);
         bool bRTL = aText.startsWith(u"ع");
 
-        auto pLayout = pOutDev->ImplLayout(
+        auto pLayout = pOutDev->LayoutText(
         vcl::text::TextSpan{aText, 0, -1},
         vcl::text::LayoutConstraints{Point(0, 0), 0, {}, {}, SalLayoutFlags::NONE},
         vcl::text::LayoutCacheData{nullptr, nullptr},
@@ -578,7 +578,7 @@ CPPUNIT_TEST_FIXTURE(VclComplexTextTest, testTdf107718)
         aFont.SetVertical(bVertical);
         pOutDev->SetFont(aFont);
 
-        auto pLayout = pOutDev->ImplLayout(
+        auto pLayout = pOutDev->LayoutText(
         vcl::text::TextSpan{aText, 0, -1},
         vcl::text::LayoutConstraints{Point(0, 0), 0, {}, {}, SalLayoutFlags::NONE},
         vcl::text::LayoutCacheData{nullptr, nullptr},
@@ -626,7 +626,7 @@ CPPUNIT_TEST_FIXTURE(VclComplexTextTest, testTdf107612)
     ScopedVclPtrInstance<VirtualDevice> pOutDev;
     pOutDev->SetFont(aFont);
 
-    auto pLayout = pOutDev->ImplLayout(
+    auto pLayout = pOutDev->LayoutText(
         vcl::text::TextSpan{u"a\u202F\u1823"_ustr, 0, -1},
         vcl::text::LayoutConstraints{Point(0, 0), 0, {}, {}, SalLayoutFlags::NONE},
         vcl::text::LayoutCacheData{nullptr, nullptr},
@@ -734,7 +734,7 @@ CPPUNIT_TEST_FIXTURE(VclComplexTextTest, testTdf163215)
     pOutDev->SetFont(aFont);
 
     // Characteristic case with kashida position validation
-    auto pLayout1 = pOutDev->ImplLayout(
+    auto pLayout1 = pOutDev->LayoutText(
         vcl::text::TextSpan{aStr, 0, aStr.getLength()},
         vcl::text::LayoutConstraints{Point(), 0, {}, {}, SalLayoutFlags::GlyphItemsOnly},
         vcl::text::LayoutCacheData{nullptr, nullptr},
@@ -757,7 +757,7 @@ CPPUNIT_TEST_FIXTURE(VclComplexTextTest, testTdf163215)
     CPPUNIT_ASSERT(!aFoundPositions1.at(4));
 
     // Case with kashida position validation disabled
-    auto pLayout2 = pOutDev->ImplLayout(
+    auto pLayout2 = pOutDev->LayoutText(
         vcl::text::TextSpan{aStr, 0, aStr.getLength()},
         vcl::text::LayoutConstraints{Point(), 0, {}, {}, SalLayoutFlags::GlyphItemsOnly
                                             | SalLayoutFlags::DisableKashidaValidation},
@@ -793,7 +793,7 @@ CPPUNIT_TEST_FIXTURE(VclComplexTextTest, testTdf165510)
     pOutDev->ForceFallbackFont(aFallbackFont);
 
     auto aText = u"ab(ح)cd(د)ef"_ustr;
-    auto pLayout = pOutDev->ImplLayout(
+    auto pLayout = pOutDev->LayoutText(
         vcl::text::TextSpan{aText, /*nIndex*/ 0, /*nLen*/ aText.getLength()},
         vcl::text::LayoutConstraints{Point(0, 0), 0, {}, {}, SalLayoutFlags::NONE},
         vcl::text::LayoutCacheData{nullptr, nullptr},
@@ -840,7 +840,7 @@ CPPUNIT_TEST_FIXTURE(VclComplexTextTest, testTdf154104)
 
     auto aText = u"\u05D0\u05D0\u05D0\u0644\u0627"_ustr;
     KernArray aKernArray = { 100, 200, 300, 350, 400 };
-    auto pLayout = pOutDev->ImplLayout(
+    auto pLayout = pOutDev->LayoutText(
         vcl::text::TextSpan{aText, /*nIndex*/ 0, /*nLen*/ aText.getLength()},
         vcl::text::LayoutConstraints{/*rLogicPos*/ Point(0, 0), static_cast<tools::Long>(/*nLogicWidth*/ 0), aKernArray, {}, SalLayoutFlags::NONE},
         vcl::text::LayoutCacheData{nullptr, nullptr},
@@ -882,7 +882,7 @@ CPPUNIT_TEST_FIXTURE(VclComplexTextTest, testTdf163761)
     pOutDev->ForceFallbackFont(aFallbackFont);
 
     auto aText = u"\u05DC\u0020\u05E0\u05EA\u05D9\u05D1\u05D9\u05BE\u200F\u05E4"_ustr;
-    auto pLayout = pOutDev->ImplLayout(
+    auto pLayout = pOutDev->LayoutText(
         vcl::text::TextSpan{aText, /*nIndex*/ 0, /*nLen*/ aText.getLength()},
         vcl::text::LayoutConstraints{Point(0, 0), 0, {}, {}, SalLayoutFlags::NONE},
         vcl::text::LayoutCacheData{nullptr, nullptr},
@@ -934,7 +934,7 @@ CPPUNIT_TEST_FIXTURE(VclComplexTextTest, testOpticalSizing)
     aFont1.SetOpticalSizing(true);
     pOutDev->SetFont(aFont1);
 
-    auto pLayout1 = pOutDev->ImplLayout(
+    auto pLayout1 = pOutDev->LayoutText(
         vcl::text::TextSpan{aText, 0, aText.getLength()},
         vcl::text::LayoutConstraints{Point(0, 0), 0, {}, {}, SalLayoutFlags::NONE},
         vcl::text::LayoutCacheData{nullptr, nullptr},
@@ -952,7 +952,7 @@ CPPUNIT_TEST_FIXTURE(VclComplexTextTest, testOpticalSizing)
     aFont2.SetOpticalSizing(true);
     pOutDev->SetFont(aFont2);
 
-    auto pLayout2 = pOutDev->ImplLayout(
+    auto pLayout2 = pOutDev->LayoutText(
         vcl::text::TextSpan{aText, 0, aText.getLength()},
         vcl::text::LayoutConstraints{Point(0, 0), 0, {}, {}, SalLayoutFlags::NONE},
         vcl::text::LayoutCacheData{nullptr, nullptr},

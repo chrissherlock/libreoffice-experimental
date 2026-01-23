@@ -81,7 +81,7 @@ SalLayoutGlyphs* lcl_GetRulerTextGlyphs(const vcl::RenderContext& rRenderContext
 
     // Calculate glyph items.
 
-    std::unique_ptr<SalLayout> pLayout = rRenderContext.ImplLayout(
+    std::unique_ptr<SalLayout> pLayout = rRenderContext.LayoutText(
         vcl::text::TextSpan{rText, 0, rText.getLength()},
         vcl::text::LayoutConstraints{Point(0, 0), 0, {}, {}, SalLayoutFlags::GlyphItemsOnly},
         vcl::text::LayoutCacheData{},

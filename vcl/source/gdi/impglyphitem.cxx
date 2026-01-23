@@ -452,7 +452,7 @@ const SalLayoutGlyphs* SalLayoutGlyphsCache::GetLayoutGlyphs(
         tmpLayoutCache = vcl::text::TextLayoutCache::Create(text);
         layoutCache = tmpLayoutCache.get();
     }
-    std::unique_ptr<SalLayout> layout = outputDevice->ImplLayout(
+    std::unique_ptr<SalLayout> layout = outputDevice->LayoutText(
         vcl::text::TextSpan{ text, nIndex, nLen },
         vcl::text::LayoutConstraints{ Point(0, 0),
                                       static_cast<tools::Long>(nLogicWidth),
