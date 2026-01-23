@@ -1284,6 +1284,18 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
 
     double nEndGlyphCoord(0);
 
+
+    // [Refactor] Prepare Layout Resources (Dependency Injection)
+    vcl::text::LayoutResources aResources = {
+        mpFontRealization->mxFont.get(),
+        *mpMapper,
+        &GetFontCache(),
+        GetFontCollection(),
+        mpForcedFallbackInstance.get(),
+        [this]() { const_cast<OutputDevice*>(this)->AcquireGraphics(); return mpGraphics; },
+        IsRTLEnabled()
+    };
+
     auto fnWidthConverter = [this](tools::Long nWidth) { return LogicWidthToDeviceSubPixel(nWidth); };
     lcl_prepareJustification(*this, pDXArray, pKashidaArray, nMinIndex, nLen,
                              nDrawMinCharPos, nDrawEndCharPos, aLayoutArgs, nEndGlyphCoord,
