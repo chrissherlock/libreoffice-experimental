@@ -6366,8 +6366,11 @@ void PDFWriterImpl::drawText( const Point& rPos, const OUString& rText, sal_Int3
     // this also enforces font substitution and sets the font on SalGraphics
     const SalLayoutGlyphs* layoutGlyphs = SalLayoutGlyphsCache::self()->
         GetLayoutGlyphs( this, rText, nIndex, nLen );
-    std::unique_ptr<SalLayout> pLayout = ImplLayout( rText, nIndex, nLen, rPos,
-        0, {}, {}, SalLayoutFlags::NONE, nullptr, layoutGlyphs );
+    std::unique_ptr<SalLayout> pLayout = ImplLayout(
+        vcl::text::TextSpan{rText, nIndex, nLen},
+        vcl::text::LayoutConstraints{rPos, 0, {}, {}, SalLayoutFlags::NONE},
+        vcl::text::LayoutCacheData{nullptr, layoutGlyphs},
+        vcl::text::RenderSelection{});
     if( pLayout )
     {
         drawLayout( *pLayout, rText, bTextLines );
@@ -6390,17 +6393,21 @@ void PDFWriterImpl::drawTextArray(const Point& rPos, const OUString& rText, Kern
     {
         const auto* layoutGlyphs = SalLayoutGlyphsCache::self()->GetLayoutGlyphs(
             this, rText, nLayoutContextIndex, nLayoutContextLen, nIndex, nIndex + nLen);
-        pLayout = ImplLayout(rText, nLayoutContextIndex, nLayoutContextLen, rPos, 0, pDXArray,
-                             pKashidaArray, SalLayoutFlags::UnclusteredGlyphs, nullptr,
-                             layoutGlyphs, /*nDrawOriginCluster=*/nIndex,
-                             /*nDrawMinCharPos=*/nIndex, /*nDrawEndCharPos=*/nIndex + nLen);
+        pLayout = ImplLayout(
+        vcl::text::TextSpan{rText, nLayoutContextIndex, nLayoutContextLen},
+        vcl::text::LayoutConstraints{rPos, 0, pDXArray, pKashidaArray, SalLayoutFlags::UnclusteredGlyphs},
+        vcl::text::LayoutCacheData{nullptr, layoutGlyphs},
+        vcl::text::RenderSelection{/*nDrawOriginCluster=*/nIndex, /*nDrawMinCharPos=*/nIndex, /*nDrawEndCharPos=*/nIndex + nLen});
     }
     else
     {
         const auto* layoutGlyphs
             = SalLayoutGlyphsCache::self()->GetLayoutGlyphs(this, rText, nIndex, nLen);
-        pLayout = ImplLayout(rText, nIndex, nLen, rPos, 0, pDXArray, pKashidaArray,
-                             SalLayoutFlags::NONE, nullptr, layoutGlyphs);
+        pLayout = ImplLayout(
+        vcl::text::TextSpan{rText, nIndex, nLen},
+        vcl::text::LayoutConstraints{rPos, 0, pDXArray, pKashidaArray, SalLayoutFlags::NONE},
+        vcl::text::LayoutCacheData{nullptr, layoutGlyphs},
+        vcl::text::RenderSelection{});
     }
 
     if( pLayout )
@@ -6419,8 +6426,11 @@ void PDFWriterImpl::drawStretchText( const Point& rPos, sal_Int32 nWidth, const 
     // this also enforces font substitution and sets the font on SalGraphics
     const SalLayoutGlyphs* layoutGlyphs = SalLayoutGlyphsCache::self()->
         GetLayoutGlyphs( this, rText, nIndex, nLen, nWidth );
-    std::unique_ptr<SalLayout> pLayout = ImplLayout( rText, nIndex, nLen, rPos, nWidth,
-        {}, {}, SalLayoutFlags::NONE, nullptr, layoutGlyphs );
+    std::unique_ptr<SalLayout> pLayout = ImplLayout(
+        vcl::text::TextSpan{rText, nIndex, nLen},
+        vcl::text::LayoutConstraints{rPos, static_cast<tools::Long>(nWidth), {}, {}, SalLayoutFlags::NONE},
+        vcl::text::LayoutCacheData{nullptr, layoutGlyphs},
+        vcl::text::RenderSelection{});
     if( pLayout )
     {
         drawLayout( *pLayout, rText, true );

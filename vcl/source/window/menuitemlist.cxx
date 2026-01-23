@@ -49,8 +49,11 @@ SalLayoutGlyphs* MenuItemData::GetTextGlyphs(const OutputDevice* pOutputDevice)
 
     OUString aNonMnemonicString = removeMnemonicFromString(aText);
     std::unique_ptr<SalLayout> pLayout
-        = pOutputDevice->ImplLayout(aNonMnemonicString, 0, aNonMnemonicString.getLength(),
-                                    Point(0, 0), 0, {}, {}, SalLayoutFlags::GlyphItemsOnly);
+        = pOutputDevice->ImplLayout(
+        vcl::text::TextSpan{aNonMnemonicString, 0, aNonMnemonicString.getLength()},
+        vcl::text::LayoutConstraints{Point(0, 0), 0, {}, {}, SalLayoutFlags::GlyphItemsOnly},
+        vcl::text::LayoutCacheData{},
+        vcl::text::RenderSelection{});
     if (!pLayout)
         return nullptr;
 

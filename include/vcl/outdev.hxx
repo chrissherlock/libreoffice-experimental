@@ -173,10 +173,31 @@ VCL_DLLPUBLIC void InvertFocusRect(vcl::RenderContext& rRenderContext, const too
 */
 
 namespace vcl::text {
-    struct TextSpan;
-    struct LayoutConstraints;
-    struct LayoutCacheData;
-    struct RenderSelection;
+    struct TextSpan
+{
+    const OUString& Text;
+    sal_Int32 Index;
+    sal_Int32 Length;
+};
+    struct LayoutConstraints
+{
+    Point LogicalPos = Point(0, 0);
+    tools::Long LogicalWidth = 0;
+    KernArraySpan pDXArray = {};
+    std::span<const sal_Bool> pKashidaArray = {};
+    SalLayoutFlags Flags = SalLayoutFlags::NONE;
+};
+    struct LayoutCacheData
+{
+    const TextLayoutCache* pCache = nullptr;
+    const SalLayoutGlyphs* pGlyphs = nullptr;
+};
+    struct RenderSelection
+{
+    std::optional<sal_Int32> DrawOriginCluster;
+    std::optional<sal_Int32> DrawMinCharPos;
+    std::optional<sal_Int32> DrawEndCharPos;
+};
 }
 
 class SAL_WARN_UNUSED VCL_DLLPUBLIC OutputDevice : public virtual VclReferenceBase
@@ -1309,15 +1330,8 @@ public:
         const vcl::text::LayoutConstraints& rConstraints,
         const vcl::text::LayoutCacheData& rCache,
         const vcl::text::RenderSelection& rSelection) const;
-    std::unique_ptr<SalLayout> ImplLayout(
-        const OUString&, sal_Int32 nIndex, sal_Int32 nLen, const Point& rLogicPos = Point(0, 0),
-        tools::Long nLogicWidth = 0, KernArraySpan aKernArray = KernArraySpan(),
-        std::span<const sal_Bool> pKashidaArray = {}, SalLayoutFlags flags = SalLayoutFlags::NONE,
-        vcl::text::TextLayoutCache const* = nullptr, const SalLayoutGlyphs* pGlyphs = nullptr,
-        std::optional<sal_Int32> nDrawOriginCluster = std::nullopt,
-        std::optional<sal_Int32> nDrawMinCharPos = std::nullopt,
-        std::optional<sal_Int32> nDrawEndCharPos = std::nullopt) const;
-SAL_DLLPRIVATE std::unique_ptr<SalLayout>
+
+    SAL_DLLPRIVATE std::unique_ptr<SalLayout>
                                 getFallbackLayout(
                                     LogicalFontInstance* pLogicalFont, int nFallbackLevel,
                                     vcl::text::ImplLayoutArgs& rLayoutArgs, const SalLayoutGlyphs* ) const;

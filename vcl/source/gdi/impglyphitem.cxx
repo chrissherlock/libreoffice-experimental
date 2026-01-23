@@ -421,9 +421,15 @@ const SalLayoutGlyphs* SalLayoutGlyphsCache::GetLayoutGlyphs(
                 }
                 // Check if the subset result really matches what we would get normally,
                 // to make sure corner cases are handled well (see SalLayoutGlyphsImpl::cloneCharRange()).
-                std::unique_ptr<SalLayout> layout
-                    = outputDevice->ImplLayout(text, nIndex, nLen, Point(0, 0), nLogicWidth, {}, {},
-                                               SalLayoutFlags::GlyphItemsOnly, layoutCache);
+                std::unique_ptr<SalLayout> layout = outputDevice->ImplLayout(
+                    vcl::text::TextSpan{ text, nIndex, nLen },
+                    vcl::text::LayoutConstraints{ Point(0, 0),
+                                                  static_cast<tools::Long>(nLogicWidth),
+                                                  {},
+                                                  {},
+                                                  SalLayoutFlags::GlyphItemsOnly },
+                    vcl::text::LayoutCacheData{ layoutCache, nullptr },
+                    vcl::text::RenderSelection{});
                 assert(layout);
                 checkGlyphsEqual(mLastTemporaryGlyphs, layout->GetGlyphs());
 #endif
@@ -446,9 +452,14 @@ const SalLayoutGlyphs* SalLayoutGlyphsCache::GetLayoutGlyphs(
         tmpLayoutCache = vcl::text::TextLayoutCache::Create(text);
         layoutCache = tmpLayoutCache.get();
     }
-    std::unique_ptr<SalLayout> layout
-        = outputDevice->ImplLayout(text, nIndex, nLen, Point(0, 0), nLogicWidth, {}, {},
-                                   SalLayoutFlags::GlyphItemsOnly, layoutCache);
+    std::unique_ptr<SalLayout> layout = outputDevice->ImplLayout(
+        vcl::text::TextSpan{ text, nIndex, nLen },
+        vcl::text::LayoutConstraints{ Point(0, 0),
+                                      static_cast<tools::Long>(nLogicWidth),
+                                      {},
+                                      {},
+                                      SalLayoutFlags::GlyphItemsOnly },
+        vcl::text::LayoutCacheData{ layoutCache, nullptr }, vcl::text::RenderSelection{});
     if (layout)
     {
         SalLayoutGlyphs glyphs = layout->GetGlyphs();

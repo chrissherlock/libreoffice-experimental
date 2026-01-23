@@ -373,8 +373,11 @@ TextLayouterDevice::getSalLayout(const OUString& rText, sal_uInt32 nIndex, sal_u
         SalLayoutGlyphsCache::self()->GetLayoutGlyphs(&mrDevice, rText, nIndex, nLength));
     const Point aStartPoint(basegfx::fround<tools::Long>(rStartPoint.getX()),
                             basegfx::fround<tools::Long>(rStartPoint.getY()));
-    return mrDevice.ImplLayout(rText, nIndex, nLength, aStartPoint, 0, rDXArray, pKashidaAry,
-                               SalLayoutFlags::NONE, nullptr, pGlyphs);
+    return mrDevice.ImplLayout(
+        vcl::text::TextSpan{ rText, static_cast<sal_Int32>(nIndex),
+                             static_cast<sal_Int32>(nLength) },
+        vcl::text::LayoutConstraints{ aStartPoint, 0, rDXArray, pKashidaAry, SalLayoutFlags::NONE },
+        vcl::text::LayoutCacheData{ nullptr, pGlyphs }, vcl::text::RenderSelection{});
 }
 
 void TextLayouterDevice::createEmphasisMarks(

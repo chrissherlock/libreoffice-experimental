@@ -985,10 +985,9 @@ void OutputDevice::DrawStretchText( const Point& rStartPt, sal_Int32 nWidth,
         vcl::text::LayoutConstraints{rStartPt, static_cast<tools::Long>(nWidth)},
         vcl::text::LayoutCacheData{},
         vcl::text::RenderSelection{});
+
     if( pSalLayout )
-    {
         ImplDrawText( *pSalLayout );
-    }
 }
 
 SalLayoutFlags OutputDevice::GetBiDiLayoutFlags( std::u16string_view rStr,
@@ -1086,23 +1085,6 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
 
     return pSalLayout;
 }
-
-
-// Legacy Shim (Backward Compatibility)
-std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
-    const OUString& rOrigStr, sal_Int32 nMinIndex, sal_Int32 nLen, const Point& rLogicalPos,
-    tools::Long nLogicalWidth, KernArraySpan pDXArray, std::span<const sal_Bool> pKashidaArray,
-    SalLayoutFlags flags, vcl::text::TextLayoutCache const* pLayoutCache,
-    const SalLayoutGlyphs* pGlyphs, std::optional<sal_Int32> nDrawOriginCluster,
-    std::optional<sal_Int32> nDrawMinCharPos, std::optional<sal_Int32> nDrawEndCharPos) const
-{
-    return ImplLayout(
-        vcl::text::TextSpan{rOrigStr, nMinIndex, nLen},
-        vcl::text::LayoutConstraints{rLogicalPos, nLogicalWidth, pDXArray, pKashidaArray, flags},
-        vcl::text::LayoutCacheData{pLayoutCache, pGlyphs},
-        vcl::text::RenderSelection{nDrawOriginCluster, nDrawMinCharPos, nDrawEndCharPos});
-}
-
 
 std::shared_ptr<const vcl::text::TextLayoutCache> OutputDevice::CreateTextLayoutCache(
         OUString const& rString)
