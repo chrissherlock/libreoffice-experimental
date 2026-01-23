@@ -1102,15 +1102,9 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
     if (flags & SalLayoutFlags::GlyphItemsOnly)
         return pSalLayout;
 
-    vcl::text::TextLayoutPositioning aPos;
-    aPos.bSubpixelPositioning = aResources.bSubpixelPositioning;
-    vcl::text::TextLayoutEngine::FillAlignmentContext(aPos, aLayoutArgs, nEndGlyphCoord);
-
-    aPos.aDrawBase = vcl::text::TextLayoutEngine::MapLogicalToDevicePos(aResources, rLogicalPos);
-
-    vcl::text::TextLayoutEngine::JustifyLayout(*pSalLayout, aLayoutArgs);
-    vcl::text::TextLayoutEngine::ApplyHorizontalOffset(*pSalLayout, aLayoutArgs, aPos);
-    vcl::text::TextLayoutEngine::SetAnchorPoint(*pSalLayout, aPos);
+    // Delegate positioning to the engine
+    vcl::text::TextLayoutEngine::ApplyPositioning(
+        aResources, *pSalLayout, aLayoutArgs, rLogicalPos, nEndGlyphCoord);
 
     vcl::text::TextLayoutEngine::TrackLayoutFonts(GetFont(), pSalLayout.get());
 
