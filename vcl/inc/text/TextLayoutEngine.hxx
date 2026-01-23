@@ -197,6 +197,9 @@ public:
 
     /** Calculates the subpixel layout width from logical units. */
     static double CalculateLayoutWidth(const LayoutResources& rRes, tools::Long nLogicWidth);
+
+    /** Validates that cached glyphs are in a consistent state for layout reuse. */
+    static void ValidateGlyphCache(const SalLayoutGlyphs* pGlyphs);
 };
 
 } // namespace vcl::text
