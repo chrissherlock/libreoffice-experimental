@@ -2106,29 +2106,4 @@ std::unique_ptr<SalLayout> OutputDevice::getFallbackLayout(LogicalFontInstance* 
     return pFallback;
 }
 
-void TextLayoutEngine::ValidateGlyphCache(const SalLayoutGlyphs* pGlyphs)
-{
-    if (!pGlyphs)
-        return;
-
-    if (!pGlyphs->IsValid())
-    {
-        SAL_WARN("vcl", "Trying to setup invalid cached glyphs - falling back to relayout!");
-        return;
-    }
-
-#ifdef DBG_UTIL
-    for (int level = 0;; ++level)
-    {
-        SalLayoutGlyphsImpl* glyphsImpl = pGlyphs->Impl(level);
-        if (glyphsImpl == nullptr)
-            break;
-
-        // Ensure only glyphs created with GlyphItemsOnly are reused to prevent
-        // inconsistencies after AdjustLayout() calls.
-        assert(glyphsImpl->GetFlags() & SalLayoutFlags::GlyphItemsOnly);
-    }
-#endif
-}
-
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
