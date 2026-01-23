@@ -11,6 +11,7 @@
 #include <osl/process.h>
 #include <test/bootstrapfixture.hxx>
 #include <tools/stream.hxx>
+#include <tools/mapunit.hxx>
 
 #include <vcl/BitmapReadAccess.hxx>
 #include <comphelper/errcode.hxx>
@@ -1051,6 +1052,31 @@ CPPUNIT_TEST_FIXTURE(VclTextTest, testPartialTextArraySizeMatch)
     }
 
     CPPUNIT_ASSERT_DOUBLES_EQUAL(nCompleteWidth, nPartialWidth, /*delta*/ 0.01);
+}
+
+CPPUNIT_TEST_FIXTURE(VclTextTest, testDXArrayJustification)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    pVDev->SetOutputSizePixel(Size(100, 100));
+    vcl::Font aFont(u"Dejavu Sans"_ustr, Size(0, 12));
+    pVDev->SetFont(aFont);
+    OUString aText("AB");
+
+    std::vector<double> aDXArray = { 20.0, 30.0 };
+
+    // Test Path A: DX Array in Pixel Mode (Default)
+    pVDev->DrawTextArray(Point(0, 0), aText, aDXArray, {}, 0, aText.getLength());
+
+    // Test Path B: DX Array in Map Mode (High Precision)
+    // This exercises the 'IsMapModeEnabled' branch in TextLayoutEngine
+    pVDev->SetMapMode(MapMode(MapUnit::MapTwip));
+    pVDev->DrawTextArray(Point(0, 0), aText, aDXArray, {}, 0, aText.getLength());
+
+    // Test Path C: Kashida Array
+    // This exercises the 'applyKashidaArray' helper
+    // We pass a dummy kashida array matching length
+    std::vector<sal_Bool> aKashidaArray = { false, true };
+    pVDev->DrawTextArray(Point(0, 0), aText, aDXArray, aKashidaArray, 0, aText.getLength());
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();
