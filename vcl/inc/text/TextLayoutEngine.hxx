@@ -194,6 +194,9 @@ public:
                                              const vcl::font::FontRealization& rFontRealization,
                                              const vcl::text::TextLayoutCache*& rpLayoutCache,
                                              const SalLayoutGlyphs*& rpGlyphs);
+
+    /** Calculates the subpixel layout width from logical units. */
+    static double CalculateLayoutWidth(const LayoutResources& rRes, tools::Long nLogicWidth);
 };
 
 } // namespace vcl::text
