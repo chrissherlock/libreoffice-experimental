@@ -492,6 +492,25 @@ void TextLayoutEngine::PrepareJustification(const LayoutResources& rRes, KernArr
     rLayoutArgs.SetJustificationData(std::move(aJustification));
 }
 
+basegfx::B2DPoint TextLayoutEngine::MapLogicalToDevicePos(const LayoutResources& rRes,
+                                                          const Point& rLogicalPos)
+{
+    // Use subpixel precision if MapMode is on OR if we were explicitly told to (e.g. PDF/Subpixel flag)
+    if (rRes.rMapper.IsMapModeEnabled() || rRes.bSubpixelPositioning)
+        return rRes.rMapper.LogicToDeviceSubPixel(rLogicalPos);
+
+    Point aDevicePos = rRes.rMapper.LogicToDevicePixel(rLogicalPos);
+    return basegfx::B2DPoint(aDevicePos.X(), aDevicePos.Y());
+}
+
+void TextLayoutEngine::FillAlignmentContext(TextLayoutPositioning& rPos,
+                                            const vcl::text::ImplLayoutArgs& rArgs,
+                                            double nEndGlyphCoord)
+{
+    rPos.bRightAlign = bool(rArgs.mnFlags & SalLayoutFlags::RightAlign);
+    rPos.nEndGlyphCoord = nEndGlyphCoord;
+}
+
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
