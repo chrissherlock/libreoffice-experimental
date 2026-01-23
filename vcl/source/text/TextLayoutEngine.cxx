@@ -284,10 +284,8 @@ TextLayoutEngine::FindFallbackFont(const FontLookupCriteria& rCriteria, int nFal
 
     if (!pFallbackFont)
     {
-        pFallbackFont = rFontCache.GetGlyphFallbackFont(
-            rCriteria, aFontSelData, nFallbackLevel,
-            rMissingCodes // NOTE: This is modified by GetGlyphFallbackFont!
-        );
+        pFallbackFont = rFontCache.GetGlyphFallbackFont(rCriteria, aFontSelData, nFallbackLevel,
+                                                        rMissingCodes);
     }
 
     return pFallbackFont;
@@ -540,12 +538,61 @@ bool TextLayoutEngine::PrepareNormalizedLayoutInput(
     return true;
 }
 
-double TextLayoutEngine::CalculateLayoutWidth(const LayoutResources& rRes, tools::Long nLogicWidth)
+// Helper for Diagnostic Font Tracking
+namespace
 {
-    if (nLogicWidth && rRes.rMapper.IsMapModeEnabled())
-        return rRes.rMapper.LogicWidthToDeviceSubPixel(nLogicWidth);
+static OutputDevice::FontMappingUseData* g_pFontMappingUseData = nullptr;
+}
 
-    return static_cast<double>(nLogicWidth);
+void TextLayoutEngine::StartTracking()
+{
+    delete g_pFontMappingUseData;
+    g_pFontMappingUseData = new OutputDevice::FontMappingUseData;
+}
+
+OutputDevice::FontMappingUseData TextLayoutEngine::FinishTracking()
+{
+    if (!g_pFontMappingUseData)
+        return {};
+    OutputDevice::FontMappingUseData aRet = std::move(*g_pFontMappingUseData);
+    delete g_pFontMappingUseData;
+    g_pFontMappingUseData = nullptr;
+    return aRet;
+}
+
+bool TextLayoutEngine::IsTracking() { return g_pFontMappingUseData != nullptr; }
+
+void TextLayoutEngine::TrackLayoutFonts(const vcl::Font& rFont, const SalLayout* pLayout)
+{
+    if (!pLayout || !IsTracking())
+        return;
+
+    OUString aOriginalName = rFont.GetStyleName().isEmpty()
+                                 ? rFont.GetFamilyName()
+                                 : rFont.GetFamilyName() + "/" + rFont.GetStyleName();
+
+    std::vector<OUString> aUsedFontNames;
+    SalLayoutGlyphs aGlyphs = pLayout->GetGlyphs();
+    int nLevel = 0;
+    while (const SalLayoutGlyphsImpl* pImpl = aGlyphs.Impl(nLevel++))
+    {
+        const vcl::font::PhysicalFontFace* pFace = pImpl->GetFont()->GetFontFace();
+        OUString aName = pFace->GetStyleName().isEmpty()
+                             ? pFace->GetFamilyName()
+                             : pFace->GetFamilyName() + "/" + pFace->GetStyleName();
+        aUsedFontNames.push_back(aName);
+    }
+
+    for (auto& rItem : *g_pFontMappingUseData)
+    {
+        if (rItem.mOriginalFont == aOriginalName && rItem.mUsedFonts == aUsedFontNames)
+        {
+            ++rItem.mCount;
+            return;
+        }
+    }
+
+    g_pFontMappingUseData->push_back({ aOriginalName, std::move(aUsedFontNames), 1 });
 }
 
 void TextLayoutEngine::ValidateGlyphCache(const SalLayoutGlyphs* pGlyphs)
@@ -565,12 +612,17 @@ void TextLayoutEngine::ValidateGlyphCache(const SalLayoutGlyphs* pGlyphs)
         SalLayoutGlyphsImpl* glyphsImpl = pGlyphs->Impl(level);
         if (glyphsImpl == nullptr)
             break;
-
-        // Ensure only glyphs created with GlyphItemsOnly are reused to prevent
-        // inconsistencies after AdjustLayout() calls.
         assert(glyphsImpl->GetFlags() & SalLayoutFlags::GlyphItemsOnly);
     }
 #endif
+}
+
+double TextLayoutEngine::CalculateLayoutWidth(const LayoutResources& rRes, tools::Long nLogicWidth)
+{
+    if (nLogicWidth && rRes.rMapper.IsMapModeEnabled())
+        return rRes.rMapper.LogicWidthToDeviceSubPixel(nLogicWidth);
+
+    return static_cast<double>(nLogicWidth);
 }
 
 std::unique_ptr<SalLayout> TextLayoutEngine::CreateBaseLayout(const LayoutResources& rRes)
@@ -581,6 +633,7 @@ std::unique_ptr<SalLayout> TextLayoutEngine::CreateBaseLayout(const LayoutResour
 
     std::unique_ptr<SalLayout> pSalLayout = pGraphics->GetTextLayout(0);
 
+    // tdf#168002: Activate subpixel positioning if required
     if (pSalLayout)
         pSalLayout->SetSubpixelPositioning(rRes.bSubpixelPositioning);
 
@@ -588,5 +641,3 @@ std::unique_ptr<SalLayout> TextLayoutEngine::CreateBaseLayout(const LayoutResour
 }
 
 } // namespace vcl::text
-
-/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
