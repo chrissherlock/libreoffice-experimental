@@ -1076,33 +1076,15 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
         aResources, pDXArray, pKashidaArray, nMinIndex, nLen,
         nDrawMinCharPos, nDrawEndCharPos, aLayoutArgs, nEndGlyphCoord);
 
-    std::unique_ptr<SalLayout> pSalLayout = vcl::text::TextLayoutEngine::CreateBaseLayout(aResources);
-
-    if (pSalLayout && !pSalLayout->LayoutText(aLayoutArgs, pGlyphs ? pGlyphs->Impl(0) : nullptr))
-        pSalLayout.reset();
+    std::unique_ptr<SalLayout> pSalLayout = vcl::text::TextLayoutEngine::PerformTextLayout(
+        aResources, aLayoutArgs, pGlyphs);
 
     if (!pSalLayout)
         return nullptr;
 
-    vcl::text::GraphicLayoutFactory aFactory(aResources.fnGetGraphics);
-
-    if (aLayoutArgs.HasFallbackRun() && mpFontRealization->mxFont->GetFontSelectPattern().mnHeight >= 3)
-    {
-        vcl::text::FontLookupCriteria aCriteria = {
-            *aResources.pFontCache,
-            aResources.pFontCollection,
-            const_cast<LogicalFontInstance*>(aResources.pFont),
-            rtl::Reference<LogicalFontInstance>(const_cast<LogicalFontInstance*>(aResources.pForcedFallback))
-        };
-
-        pSalLayout = vcl::text::TextLayoutEngine::ResolveMissingGlyphs(
-            std::move(pSalLayout), aLayoutArgs, pGlyphs, aCriteria, aFactory);
-    }
-
     if (flags & SalLayoutFlags::GlyphItemsOnly)
         return pSalLayout;
 
-    // Delegate positioning to the engine
     vcl::text::TextLayoutEngine::ApplyPositioning(
         aResources, *pSalLayout, aLayoutArgs, rLogicalPos, nEndGlyphCoord);
 

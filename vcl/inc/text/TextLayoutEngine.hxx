@@ -225,6 +225,11 @@ public:
     static void ApplyPositioning(const LayoutResources& rRes, SalLayout& rLayout,
                                  vcl::text::ImplLayoutArgs& rArgs, const Point& rLogicalPos,
                                  double nEndGlyphCoord);
+
+    /** Executes the core layout loop: creates base layout, runs initial layout, and resolves fallbacks. */
+    static std::unique_ptr<SalLayout> PerformTextLayout(const LayoutResources& rRes,
+                                                        vcl::text::ImplLayoutArgs& rArgs,
+                                                        const SalLayoutGlyphs* pGlyphs);
 };
 
 } // namespace vcl::text

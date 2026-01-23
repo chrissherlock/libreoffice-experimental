@@ -700,4 +700,36 @@ void TextLayoutEngine::ApplyPositioning(const LayoutResources& rRes, SalLayout& 
     SetAnchorPoint(rLayout, aPos);
 }
 
+std::unique_ptr<SalLayout> TextLayoutEngine::PerformTextLayout(const LayoutResources& rRes,
+                                                               vcl::text::ImplLayoutArgs& rArgs,
+                                                               const SalLayoutGlyphs* pGlyphs)
+{
+    // 1. Create Base Layout
+    std::unique_ptr<SalLayout> pSalLayout = CreateBaseLayout(rRes);
+
+    // 2. Initial Layout Run
+    if (pSalLayout && !pSalLayout->LayoutText(rArgs, pGlyphs ? pGlyphs->Impl(0) : nullptr))
+        pSalLayout.reset();
+
+    if (!pSalLayout)
+        return nullptr;
+
+    // 3. Fallback Resolution
+    if (rArgs.HasFallbackRun() && rRes.pFont->GetFontSelectPattern().mnHeight >= 3)
+    {
+        GraphicLayoutFactory aFactory(rRes.fnGetGraphics);
+
+        FontLookupCriteria aCriteria
+            = { *rRes.pFontCache, rRes.pFontCollection,
+                const_cast<LogicalFontInstance*>(rRes.pFont),
+                rtl::Reference<LogicalFontInstance>(
+                    const_cast<LogicalFontInstance*>(rRes.pForcedFallback)) };
+
+        pSalLayout
+            = ResolveMissingGlyphs(std::move(pSalLayout), rArgs, pGlyphs, aCriteria, aFactory);
+    }
+
+    return pSalLayout;
+}
+
 } // namespace vcl::text
