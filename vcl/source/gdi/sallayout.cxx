@@ -28,7 +28,7 @@
 
 #include <math.h>
 
-#include <ImplLayoutArgs.hxx>
+#include <text/TextLayoutRequest.hxx>
 #include <salgdi.hxx>
 #include <sallayout.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
@@ -61,7 +61,7 @@ SalLayout::SalLayout()
 SalLayout::~SalLayout()
 {}
 
-void SalLayout::AdjustLayout( vcl::text::ImplLayoutArgs& rArgs )
+void SalLayout::AdjustLayout( vcl::text::TextLayoutRequest& rArgs )
 {
     mnMinCharPos  = rArgs.mnMinCharPos;
     mnEndCharPos  = rArgs.mnEndCharPos;
@@ -626,7 +626,7 @@ void MultiSalLayout::AddFallback( std::unique_ptr<SalLayout> pFallback,
     ++mnLevel;
 }
 
-bool MultiSalLayout::LayoutText( vcl::text::ImplLayoutArgs& rArgs, const SalLayoutGlyphsImpl* )
+bool MultiSalLayout::LayoutText( vcl::text::TextLayoutRequest& rArgs, const SalLayoutGlyphsImpl* )
 {
     if( mnLevel <= 1 )
         return false;
@@ -635,10 +635,10 @@ bool MultiSalLayout::LayoutText( vcl::text::ImplLayoutArgs& rArgs, const SalLayo
     return true;
 }
 
-void MultiSalLayout::AdjustLayout( vcl::text::ImplLayoutArgs& rArgs )
+void MultiSalLayout::AdjustLayout( vcl::text::TextLayoutRequest& rArgs )
 {
     SalLayout::AdjustLayout( rArgs );
-    vcl::text::ImplLayoutArgs aMultiArgs = rArgs;
+    vcl::text::TextLayoutRequest aMultiArgs = rArgs;
     std::vector<double> aJustificationArray;
 
     if (!rArgs.mstJustification.empty() && rArgs.mnLayoutWidth)
@@ -702,8 +702,8 @@ void MultiSalLayout::AdjustLayout( vcl::text::ImplLayoutArgs& rArgs )
     ImplAdjustMultiLayout(rArgs, aMultiArgs, aMultiArgs.mstJustification);
 }
 
-void MultiSalLayout::ImplAdjustMultiLayout(vcl::text::ImplLayoutArgs& rArgs,
-                                           vcl::text::ImplLayoutArgs& rMultiArgs,
+void MultiSalLayout::ImplAdjustMultiLayout(vcl::text::TextLayoutRequest& rArgs,
+                                           vcl::text::TextLayoutRequest& rMultiArgs,
                                            const JustificationData& rstJustification)
 {
     // Compute rtl flags, since in some scripts glyphs/char order can be

@@ -27,6 +27,7 @@
 #include <vcl/dllapi.h>
 #include <vcl/vclenum.hxx> // for typedef sal_UCS4
 #include <vcl/vcllayout.hxx>
+#include <text/TextLayoutRequest.hxx>
 
 #include "justificationdata.hxx"
 #include "ImplLayoutRuns.hxx"
@@ -67,13 +68,13 @@ public:
     SAL_DLLPRIVATE void            AddFallback(std::unique_ptr<SalLayout> pFallbackLayout, ImplLayoutRuns const &);
     // give up ownership of the initial pBaseLayout taken by the ctor
     SAL_DLLPRIVATE std::unique_ptr<SalLayout>  ReleaseBaseLayout();
-    SAL_DLLPRIVATE bool            LayoutText(vcl::text::ImplLayoutArgs&, const SalLayoutGlyphsImpl*) override;
-    SAL_DLLPRIVATE void            AdjustLayout(vcl::text::ImplLayoutArgs&) override;
+    SAL_DLLPRIVATE bool            LayoutText(vcl::text::TextLayoutRequest&, const SalLayoutGlyphsImpl*) override;
+    SAL_DLLPRIVATE void            AdjustLayout(vcl::text::TextLayoutRequest&) override;
 
     SAL_DLLPRIVATE void SetIncomplete(bool bIncomplete);
 
-    SAL_DLLPRIVATE void ImplAdjustMultiLayout(vcl::text::ImplLayoutArgs& rArgs,
-                                              vcl::text::ImplLayoutArgs& rMultiArgs,
+    SAL_DLLPRIVATE void ImplAdjustMultiLayout(vcl::text::TextLayoutRequest& rArgs,
+                                              vcl::text::TextLayoutRequest& rMultiArgs,
                                               const JustificationData& rstJustification);
 
     SAL_DLLPRIVATE ImplLayoutRuns* GetFallbackRuns() { return maFallbackRuns; }
@@ -94,16 +95,16 @@ private:
 
 class VCL_DLLPUBLIC GenericSalLayout : public SalLayout
 {
-    friend void MultiSalLayout::ImplAdjustMultiLayout(vcl::text::ImplLayoutArgs& rArgs,
-                                                      vcl::text::ImplLayoutArgs& rMultiArgs,
+    friend void MultiSalLayout::ImplAdjustMultiLayout(vcl::text::TextLayoutRequest& rArgs,
+                                                      vcl::text::TextLayoutRequest& rMultiArgs,
                                                       const JustificationData& rstJustification);
 
 public:
                     GenericSalLayout(LogicalFontInstance&);
                     ~GenericSalLayout() override;
 
-    void            AdjustLayout(vcl::text::ImplLayoutArgs&) final override;
-    bool            LayoutText(vcl::text::ImplLayoutArgs&, const SalLayoutGlyphsImpl*) final override;
+    void            AdjustLayout(vcl::text::TextLayoutRequest&) final override;
+    bool            LayoutText(vcl::text::TextLayoutRequest&, const SalLayoutGlyphsImpl*) final override;
     void            DrawText(SalGraphics&) const final override;
     SalLayoutGlyphs GetGlyphs() const final override;
 
@@ -146,7 +147,7 @@ private:
     SAL_DLLPRIVATE void GetCharWidths(std::vector<double>& rCharWidths,
                                   const OUString& rStr) const;
 
-    SAL_DLLPRIVATE void SetNeedFallback(vcl::text::ImplLayoutArgs& rArgs, sal_Int32 nCharPos,
+    SAL_DLLPRIVATE void SetNeedFallback(vcl::text::TextLayoutRequest& rArgs, sal_Int32 nCharPos,
                                         sal_Int32 nCharEnd, bool bRightToLeft);
 
     SAL_DLLPRIVATE bool HasVerticalAlternate(sal_UCS4 aChar, sal_UCS4 aNextChar);

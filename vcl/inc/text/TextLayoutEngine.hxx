@@ -46,7 +46,7 @@ class PhysicalFontCollection;
 }
 namespace text
 {
-class ImplLayoutArgs;
+class TextLayoutRequest;
 class TextLayoutCache;
 }
 }
@@ -54,7 +54,7 @@ class TextLayoutCache;
 namespace vcl::text
 {
 using FallbackLayoutFactory
-    = std::function<std::unique_ptr<SalLayout>(LogicalFontInstance*, int, ImplLayoutArgs&)>;
+    = std::function<std::unique_ptr<SalLayout>(LogicalFontInstance*, int, TextLayoutRequest&)>;
 
 class ILayoutFactory
 {
@@ -125,10 +125,10 @@ public:
                                                SalLayoutFlags nExistingFlags);
 
     /**
-     * Creates and configures a LayoutRequest (ImplLayoutArgs) based on the current device state.
+     * Creates and configures a LayoutRequest (TextLayoutRequest) based on the current device state.
      * This moves the "configuration" logic out of OutputDevice.
      */
-    static vcl::text::ImplLayoutArgs
+    static vcl::text::TextLayoutRequest
     CreateLayoutRequest(OUString& rStr, sal_Int32 nMinIndex, sal_Int32 nLen, double nPixelWidth,
                         SalLayoutFlags nFlags, const vcl::text::TextLayoutCache* pCache,
                         const vcl::GraphicsState& rState,
@@ -148,7 +148,7 @@ public:
      * Scans the layout arguments to identify which characters need fallback.
      * Returns a string containing all missing characters found in fallback runs.
      */
-    static OUString IdentifyMissingChars(vcl::text::ImplLayoutArgs& rArgs);
+    static OUString IdentifyMissingChars(vcl::text::TextLayoutRequest& rArgs);
 
     /**
      * Merges a fallback layout into the main layout container.
@@ -163,31 +163,31 @@ public:
      * Iteratively finds fallback fonts and creates layouts to resolve characters
      * missing from the base layout.
      */
-    static std::unique_ptr<SalLayout> ResolveMissingGlyphs(std::unique_ptr<SalLayout> pBaseLayout,
-                                                           vcl::text::ImplLayoutArgs& rLayoutArgs,
-                                                           const SalLayoutGlyphs* pGlyphs,
-                                                           const FontLookupCriteria& rCriteria,
-                                                           ILayoutFactory& rFactory);
+    static std::unique_ptr<SalLayout>
+    ResolveMissingGlyphs(std::unique_ptr<SalLayout> pBaseLayout,
+                         vcl::text::TextLayoutRequest& rLayoutArgs, const SalLayoutGlyphs* pGlyphs,
+                         const FontLookupCriteria& rCriteria, ILayoutFactory& rFactory);
 
     static void PrepareJustification(const LayoutResources& rRes, KernArraySpan pDXArray,
                                      std::span<const sal_Bool> pKashidaArray, sal_Int32 nMinIndex,
                                      sal_Int32 nLen, std::optional<sal_Int32> nDrawMinCharPos,
                                      std::optional<sal_Int32> nDrawEndCharPos,
-                                     vcl::text::ImplLayoutArgs& rLayoutArgs,
+                                     vcl::text::TextLayoutRequest& rLayoutArgs,
                                      double& rEndGlyphCoord);
 
     static basegfx::B2DPoint MapLogicalToDevicePos(const LayoutResources& rRes,
                                                    const Point& rLogicalPos);
     static void FillAlignmentContext(TextLayoutPositioning& rPos,
-                                     const vcl::text::ImplLayoutArgs& rArgs, double nEndGlyphCoord);
-    static void JustifyLayout(SalLayout& rLayout, vcl::text::ImplLayoutArgs& rArgs);
-    static void ApplyHorizontalOffset(SalLayout& rLayout, const vcl::text::ImplLayoutArgs& rArgs,
+                                     const vcl::text::TextLayoutRequest& rArgs,
+                                     double nEndGlyphCoord);
+    static void JustifyLayout(SalLayout& rLayout, vcl::text::TextLayoutRequest& rArgs);
+    static void ApplyHorizontalOffset(SalLayout& rLayout, const vcl::text::TextLayoutRequest& rArgs,
                                       const TextLayoutPositioning& rPositioning);
     static void SetAnchorPoint(SalLayout& rLayout, const TextLayoutPositioning& rPositioning);
 
     // Layout Orchestration
     static std::unique_ptr<SalLayout>
-    Layout(const LayoutResources& rRes, vcl::text::ImplLayoutArgs& rArgs, KernArraySpan pDXArray,
+    Layout(const LayoutResources& rRes, vcl::text::TextLayoutRequest& rArgs, KernArraySpan pDXArray,
            std::span<const sal_Bool> pKashidaArray, const Point& rLogicalPos,
            const SalLayoutGlyphs* pGlyphs = nullptr);
 
@@ -221,16 +221,16 @@ public:
 
     static std::unique_ptr<SalLayout> ResolveFallbacks(const LayoutResources& rRes,
                                                        std::unique_ptr<SalLayout> pLayout,
-                                                       vcl::text::ImplLayoutArgs& rArgs,
+                                                       vcl::text::TextLayoutRequest& rArgs,
                                                        const SalLayoutGlyphs* pGlyphs);
 
     static void ApplyPositioning(const LayoutResources& rRes, SalLayout& rLayout,
-                                 vcl::text::ImplLayoutArgs& rArgs, const Point& rLogicalPos,
+                                 vcl::text::TextLayoutRequest& rArgs, const Point& rLogicalPos,
                                  double nEndGlyphCoord);
 
     /** Executes the core layout loop: creates base layout, runs initial layout, and resolves fallbacks. */
     static std::unique_ptr<SalLayout> PerformTextLayout(const LayoutResources& rRes,
-                                                        vcl::text::ImplLayoutArgs& rArgs,
+                                                        vcl::text::TextLayoutRequest& rArgs,
                                                         const SalLayoutGlyphs* pGlyphs);
 
     /** Orchestrates the complete layout process. */

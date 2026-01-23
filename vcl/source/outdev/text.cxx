@@ -41,7 +41,7 @@
 #include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
-#include <ImplLayoutArgs.hxx>
+#include <text/TextLayoutRequest.hxx>
 #include <ImplOutDevData.hxx>
 #include <font/FontController.hxx>
 #include <font/PhysicalFontFace.hxx>
@@ -1044,7 +1044,7 @@ std::shared_ptr<const vcl::text::TextLayoutCache> OutputDevice::CreateTextLayout
 bool OutputDevice::GetTextIsRTL( const OUString& rString, sal_Int32 nIndex, sal_Int32 nLen ) const
 {
     OUString aStr( rString );
-    vcl::text::ImplLayoutArgs aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
+    vcl::text::TextLayoutRequest aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
         aStr, nIndex, nLen, 0, SalLayoutFlags::NONE, nullptr,
         *mpGraphicsState, *mpFontRealization, IsRTLEnabled());
     bool bRTL = false;
@@ -1985,7 +1985,7 @@ void OutputDevice::SetSystemTextColor(SystemTextColorFlags nFlags, bool bEnabled
 
 std::unique_ptr<SalLayout> OutputDevice::getFallbackLayout(LogicalFontInstance* pLogicalFont,
                                                            int nFallbackLevel,
-                                                           vcl::text::ImplLayoutArgs& rLayoutArgs,
+                                                           vcl::text::TextLayoutRequest& rLayoutArgs,
                                                            const SalLayoutGlyphs* pGlyphs) const
 {
     if (!mpGraphics && !AcquireGraphics())
