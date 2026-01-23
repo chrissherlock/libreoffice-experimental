@@ -26,6 +26,7 @@
 #include <font/LogicalFontInstance.hxx>
 #include <font/FontSelectPattern.hxx>
 #include <font/PhysicalFontFace.hxx>
+#include <salgdi.hxx>
 #include <sallayout.hxx>
 #include <text/TextLayoutEngine.hxx>
 #include <GraphicsState.hxx>
@@ -570,6 +571,20 @@ void TextLayoutEngine::ValidateGlyphCache(const SalLayoutGlyphs* pGlyphs)
         assert(glyphsImpl->GetFlags() & SalLayoutFlags::GlyphItemsOnly);
     }
 #endif
+}
+
+std::unique_ptr<SalLayout> TextLayoutEngine::CreateBaseLayout(const LayoutResources& rRes)
+{
+    SalGraphics* pGraphics = rRes.fnGetGraphics();
+    if (!pGraphics)
+        return nullptr;
+
+    std::unique_ptr<SalLayout> pSalLayout = pGraphics->GetTextLayout(0);
+
+    if (pSalLayout)
+        pSalLayout->SetSubpixelPositioning(rRes.bSubpixelPositioning);
+
+    return pSalLayout;
 }
 
 } // namespace vcl::text
