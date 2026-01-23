@@ -269,7 +269,11 @@ public:
     void                        SetConnectMetaFile( GDIMetaFile* pMtf );
     GDIMetaFile*                GetConnectMetaFile() const { return mpMetaFile; }
 
+
     virtual void                SetSettings( const AllSettings& rSettings );
+
+    /* tdf#74702: Query device capability instead of checking GetOutDevType() */
+    virtual bool                SupportsSubpixelPositioning() const { return false; }
     const AllSettings&          GetSettings() const { return *moSettings; }
 
     SystemGraphicsData          GetSystemGfxData() const;

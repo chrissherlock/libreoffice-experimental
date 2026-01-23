@@ -726,6 +726,8 @@ public:
 
     static void convertLineInfoToExtLineInfo( const LineInfo& rIn, PDFWriter::ExtLineInfo& rOut );
 
+    bool SupportsSubpixelPositioning() const override { return true; }
+
 private:
     bool ImplNewFont() const override;
     void ImplClearFontData(bool bNewFontLists) override;

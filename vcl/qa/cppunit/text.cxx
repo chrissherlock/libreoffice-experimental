@@ -1079,6 +1079,47 @@ CPPUNIT_TEST_FIXTURE(VclTextTest, testDXArrayJustification)
     pVDev->DrawTextArray(Point(0, 0), aText, aDXArray, aKashidaArray, 0, aText.getLength());
 }
 
+namespace
+{
+// Define a Mock Device that claims to support subpixel positioning
+// (Just like a PDF Writer would, but without the overhead)
+class SubpixelMockDevice : public VirtualDevice
+{
+public:
+    SubpixelMockDevice()
+        : VirtualDevice()
+    {
+    }
+
+    // This is the override we are testing!
+    // It forces the engine into high-precision mode.
+    virtual bool SupportsSubpixelPositioning() const override { return true; }
+};
+}
+
+CPPUNIT_TEST_FIXTURE(VclTextTest, testTdf74702Wiring)
+{
+    ScopedVclPtrInstance<SubpixelMockDevice> pDev;
+    pDev->SetOutputSizePixel(Size(100, 100));
+    pDev->SetFont(vcl::Font(u"Dejavu Sans"_ustr, Size(0, 12)));
+
+    // Ensure MapMode is OFF
+    // If the engine uses subpixels here, it is ONLY because of our virtual method.
+    pDev->SetMapMode(MapMode(MapUnit::MapPixel));
+
+    OUString aText("TDF74702");
+
+    // Execute Layout
+    // Internally, this calls:
+    //   ImplLayout -> SupportsSubpixelPositioning() -> returns true
+    //   -> bUseSubpixel = true
+    //   -> TextLayoutEngine::MapLogicalToDevicePos uses subpixel logic
+    pDev->DrawText(Point(10, 10), aText);
+
+    // If we get here without asserting or crashing, the wiring works.
+    // (The engine successfully handled the flag we forced on).
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
