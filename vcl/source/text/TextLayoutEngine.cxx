@@ -732,4 +732,59 @@ std::unique_ptr<SalLayout> TextLayoutEngine::PerformTextLayout(const LayoutResou
     return pSalLayout;
 }
 
+std::unique_ptr<SalLayout>
+TextLayoutEngine::Layout(const LayoutResources& rRes, const vcl::text::TextSpan& rSpan,
+                         const vcl::text::LayoutConstraints& rConstraints,
+                         const vcl::text::LayoutCacheData& rCache,
+                         const vcl::text::RenderSelection& rSelection)
+{
+    // Create local copies of cache pointers because the engine might modify them (set to null)
+    const vcl::text::TextLayoutCache* pLayoutCache = rCache.pCache;
+    const SalLayoutGlyphs* pGlyphs = rCache.pGlyphs;
+
+    // Validate
+    ValidateGlyphCache(pGlyphs);
+    const SalLayoutGlyphs* pEffectiveGlyphs = (pGlyphs && !pGlyphs->IsValid()) ? nullptr : pGlyphs;
+
+    OUString aStr;
+    // Normalize Input (Recode string if needed)
+    sal_Int32 nLen = rSpan.Length;
+    if (!PrepareNormalizedLayoutInput(rSpan.Text, rSpan.Index, nLen, aStr, rRes.rFontRealization,
+                                      pLayoutCache, pEffectiveGlyphs))
+    {
+        return nullptr;
+    }
+
+    double nPixelWidth = CalculateLayoutWidth(rRes, rConstraints.LogicalWidth);
+
+    vcl::text::ImplLayoutArgs aLayoutArgs = CreateLayoutRequest(
+        aStr, rSpan.Index, nLen, nPixelWidth, rConstraints.Flags, pLayoutCache, rRes.rGraphicsState,
+        rRes.rFontRealization, rRes.bRTLEnabled);
+
+    if (rSelection.DrawOriginCluster.has_value())
+        aLayoutArgs.mnDrawOriginCluster = *rSelection.DrawOriginCluster;
+    if (rSelection.DrawMinCharPos.has_value())
+        aLayoutArgs.mnDrawMinCharPos = *rSelection.DrawMinCharPos;
+    if (rSelection.DrawEndCharPos.has_value())
+        aLayoutArgs.mnDrawEndCharPos = *rSelection.DrawEndCharPos;
+
+    double nEndGlyphCoord = 0.0;
+    PrepareJustification(rRes, rConstraints.pDXArray, rConstraints.pKashidaArray, rSpan.Index, nLen,
+                         rSelection.DrawMinCharPos, rSelection.DrawEndCharPos, aLayoutArgs,
+                         nEndGlyphCoord);
+
+    std::unique_ptr<SalLayout> pSalLayout = PerformTextLayout(rRes, aLayoutArgs, pEffectiveGlyphs);
+
+    if (!pSalLayout)
+        return nullptr;
+
+    if (rConstraints.Flags & SalLayoutFlags::GlyphItemsOnly)
+        return pSalLayout;
+
+    ApplyPositioning(rRes, *pSalLayout, aLayoutArgs, rConstraints.LogicalPos, nEndGlyphCoord);
+
+    TrackLayoutFonts(rRes.rGraphicsState.maFont, pSalLayout.get());
+
+    return pSalLayout;
+}
 } // namespace vcl::text
