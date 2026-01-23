@@ -640,4 +640,49 @@ std::unique_ptr<SalLayout> TextLayoutEngine::CreateBaseLayout(const LayoutResour
     return pSalLayout;
 }
 
+// Local factory implementation for resolving fallbacks
+class GraphicLayoutFactory : public ILayoutFactory
+{
+    std::function<SalGraphics*()> m_fnGetGraphics;
+
+public:
+    GraphicLayoutFactory(std::function<SalGraphics*()> fn)
+        : m_fnGetGraphics(std::move(fn))
+    {
+    }
+
+    virtual std::unique_ptr<SalLayout> CreateLayout(int nFallbackLevel) override
+    {
+        SalGraphics* pGraphics = m_fnGetGraphics();
+        return pGraphics ? pGraphics->GetTextLayout(nFallbackLevel) : nullptr;
+    }
+
+    virtual void SetFont(LogicalFontInstance* pFont, int nFallbackLevel) override
+    {
+        SalGraphics* pGraphics = m_fnGetGraphics();
+        if (pGraphics)
+            pGraphics->SetFont(pFont, nFallbackLevel);
+    }
+};
+
+std::unique_ptr<SalLayout> TextLayoutEngine::ResolveFallbacks(const LayoutResources& rRes,
+                                                              std::unique_ptr<SalLayout> pLayout,
+                                                              vcl::text::ImplLayoutArgs& rArgs,
+                                                              const SalLayoutGlyphs* pGlyphs)
+{
+    if (rArgs.HasFallbackRun() && rRes.pFont->GetFontSelectPattern().mnHeight >= 3)
+    {
+        GraphicLayoutFactory aFactory(rRes.fnGetGraphics);
+
+        FontLookupCriteria aCriteria
+            = { *rRes.pFontCache, rRes.pFontCollection,
+                const_cast<LogicalFontInstance*>(rRes.pFont),
+                rtl::Reference<LogicalFontInstance>(
+                    const_cast<LogicalFontInstance*>(rRes.pForcedFallback)) };
+
+        return ResolveMissingGlyphs(std::move(pLayout), rArgs, pGlyphs, aCriteria, aFactory);
+    }
+    return pLayout;
+}
+
 } // namespace vcl::text
