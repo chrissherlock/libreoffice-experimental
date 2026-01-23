@@ -10,6 +10,7 @@
 
 #include <basegfx/point/b2dpoint.hxx>
 #include <tools/gen.hxx>
+#include <unotools/fontdefs.hxx>
 #include <i18nlangtag/mslangid.hxx>
 #include <i18nutil/digitlocalization.hxx>
 #include <i18nutil/unicode.hxx>
@@ -509,6 +510,33 @@ void TextLayoutEngine::FillAlignmentContext(TextLayoutPositioning& rPos,
 {
     rPos.bRightAlign = bool(rArgs.mnFlags & SalLayoutFlags::RightAlign);
     rPos.nEndGlyphCoord = nEndGlyphCoord;
+}
+
+bool TextLayoutEngine::PrepareNormalizedLayoutInput(
+    const OUString& rOrigStr, sal_Int32 nMinIndex, sal_Int32& rLen, OUString& rStr,
+    const vcl::font::FontRealization& rFontRealization,
+    const vcl::text::TextLayoutCache*& rpLayoutCache, const SalLayoutGlyphs*& rpGlyphs)
+{
+    // Check string index and length
+    if (rLen == -1 || nMinIndex + rLen > rOrigStr.getLength())
+    {
+        const sal_Int32 nNewLen = rOrigStr.getLength() - nMinIndex;
+        if (nNewLen <= 0)
+            return false;
+        rLen = nNewLen;
+    }
+
+    rStr = rOrigStr;
+
+    // Recode string if needed
+    if (rFontRealization.mxFont && rFontRealization.mxFont->mpConversion)
+    {
+        rFontRealization.mxFont->mpConversion->RecodeString(rStr, 0, rStr.getLength());
+        rpLayoutCache = nullptr; // don't use cache with modified string!
+        rpGlyphs = nullptr;
+    }
+
+    return true;
 }
 
 } // namespace vcl::text

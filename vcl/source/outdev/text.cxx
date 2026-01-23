@@ -1097,23 +1097,12 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
     if (!InitFont())
         return nullptr;
 
-    // Check string index and length
-    if( -1 == nLen || nMinIndex + nLen > rOrigStr.getLength() )
+    OUString aStr;
+    // Call the new Engine helper for pre-orchestration
+    if (!vcl::text::TextLayoutEngine::PrepareNormalizedLayoutInput(
+            rOrigStr, nMinIndex, nLen, aStr, *mpFontRealization, pLayoutCache, pGlyphs))
     {
-        const sal_Int32 nNewLen = rOrigStr.getLength() - nMinIndex;
-        if( nNewLen <= 0 )
-            return nullptr;
-        nLen = nNewLen;
-    }
-
-    OUString aStr = rOrigStr;
-
-    // Recode string if needed
-    if (mpFontRealization->mxFont->mpConversion)
-    {
-        mpFontRealization->mxFont->mpConversion->RecodeString( aStr, 0, aStr.getLength() );
-        pLayoutCache = nullptr;
-        pGlyphs = nullptr;
+        return nullptr;
     }
 
     double nPixelWidth = nLogicalWidth;

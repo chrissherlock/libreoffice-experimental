@@ -188,6 +188,12 @@ public:
     Layout(const LayoutResources& rRes, vcl::text::ImplLayoutArgs& rArgs, KernArraySpan pDXArray,
            std::span<const sal_Bool> pKashidaArray, const Point& rLogicalPos,
            const SalLayoutGlyphs* pGlyphs = nullptr);
+
+    static bool PrepareNormalizedLayoutInput(const OUString& rOrigStr, sal_Int32 nMinIndex,
+                                             sal_Int32& rLen, OUString& rStr,
+                                             const vcl::font::FontRealization& rFontRealization,
+                                             const vcl::text::TextLayoutCache*& rpLayoutCache,
+                                             const SalLayoutGlyphs*& rpGlyphs);
 };
 
 } // namespace vcl::text
