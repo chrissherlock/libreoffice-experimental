@@ -216,6 +216,11 @@ public:
     static OutputDevice::FontMappingUseData FinishTracking();
     static bool IsTracking();
     static void TrackLayoutFonts(const vcl::Font& rFont, const SalLayout* pLayout);
+
+    static std::unique_ptr<SalLayout> ResolveFallbacks(const LayoutResources& rRes,
+                                                       std::unique_ptr<SalLayout> pLayout,
+                                                       vcl::text::ImplLayoutArgs& rArgs,
+                                                       const SalLayoutGlyphs* pGlyphs);
 };
 
 } // namespace vcl::text
