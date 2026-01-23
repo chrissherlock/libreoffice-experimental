@@ -1122,7 +1122,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
                 std::unique_ptr<SalLayout> pSalLayout;
                 if (rTextAct.GetLayoutContextIndex() >= 0)
                 {
-                    pSalLayout = rOut.ImplLayout(
+                    pSalLayout = rOut.LayoutText(
         vcl::text::TextSpan{rTextAct.GetText(), rTextAct.GetLayoutContextIndex(), rTextAct.GetLayoutContextLen()},
         vcl::text::LayoutConstraints{rTextAct.GetPoint(), 0, rTextAct.GetDXArray(), rTextAct.GetKashidaArray(), SalLayoutFlags::NONE},
         vcl::text::LayoutCacheData{nullptr, nullptr},
@@ -1130,7 +1130,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
                 }
                 else
                 {
-                    pSalLayout = rOut.ImplLayout(
+                    pSalLayout = rOut.LayoutText(
         vcl::text::TextSpan{rTextAct.GetText(), rTextAct.GetIndex(), rTextAct.GetLen()},
         vcl::text::LayoutConstraints{rTextAct.GetPoint(), 0, rTextAct.GetDXArray(), rTextAct.GetKashidaArray(), SalLayoutFlags::NONE},
         vcl::text::LayoutCacheData{},
@@ -1163,7 +1163,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
             if( !aString.isEmpty() )
             {
                 // #105987# ImplLayout takes everything in logical coordinates
-                std::unique_ptr<SalLayout> pSalLayout = rOut.ImplLayout(
+                std::unique_ptr<SalLayout> pSalLayout = rOut.LayoutText(
         vcl::text::TextSpan{rTextAct.GetText(), rTextAct.GetIndex(), rTextAct.GetLen()},
         vcl::text::LayoutConstraints{rTextAct.GetPoint(), static_cast<tools::Long>(rTextAct.GetWidth())},
         vcl::text::LayoutCacheData{},

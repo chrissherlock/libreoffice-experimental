@@ -791,7 +791,7 @@ CPPUNIT_TEST_FIXTURE(VclTextTest, testImplLayoutArgs_PrepareFallback_precalculat
 
     static constexpr OStringLiteral sUTF8String(u8"Тхе яуицк\n ыумпед овер");
     const OUString sTestString(OUString::fromUtf8(sUTF8String));
-    std::unique_ptr<SalLayout> pLayout = pVirDev->ImplLayout(
+    std::unique_ptr<SalLayout> pLayout = pVirDev->LayoutText(
         vcl::text::TextSpan{ sTestString, 0, sTestString.getLength() },
         vcl::text::LayoutConstraints{ Point(0, 0), 0, {}, {}, SalLayoutFlags::GlyphItemsOnly },
         vcl::text::LayoutCacheData{ nullptr, nullptr }, vcl::text::RenderSelection{});
