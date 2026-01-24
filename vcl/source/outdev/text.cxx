@@ -1795,9 +1795,9 @@ std::unique_ptr<SalLayout> OutputDevice::getFallbackLayout(LogicalFontInstance* 
     return pFallback;
 }
 
-tools::Rectangle OutputDevice::ImplGetTextBoundRect(const SalLayout& rLayout) const
+tools::Rectangle OutputDevice::GetTextInkBounds(const SalLayout& rLayout) const
 {
-    return vcl::text::TextLayoutEngine::GetVisualLayoutBounds(rLayout, *mpFontRealization);
+    return vcl::text::TextLayoutEngine::GetTextInkBounds(rLayout, *mpFontRealization);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
