@@ -1140,7 +1140,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
 
                 if( pSalLayout )
                 {
-                    tools::Rectangle aBoundRect( vcl::text::TextLayoutEngine::GetVisualLayoutBounds(*pSalLayout, *rOut.GetFontRealization()) );
+                    tools::Rectangle aBoundRect( vcl::text::TextLayoutEngine::GetTextInkBounds(*pSalLayout, *rOut.GetFontRealization()) );
                     aActionBounds = rOut.PixelToLogic( aBoundRect );
                 }
             }
@@ -1171,7 +1171,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
         vcl::text::RenderSelection{});
                 if( pSalLayout )
                 {
-                    tools::Rectangle aBoundRect( vcl::text::TextLayoutEngine::GetVisualLayoutBounds(*pSalLayout, *rOut.GetFontRealization()) );
+                    tools::Rectangle aBoundRect( vcl::text::TextLayoutEngine::GetTextInkBounds(*pSalLayout, *rOut.GetFontRealization()) );
                     aActionBounds = rOut.PixelToLogic( aBoundRect );
                 }
             }

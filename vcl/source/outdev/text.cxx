@@ -167,7 +167,7 @@ void OutputDevice::ImplDrawTextRect( tools::Long nBaseX, tools::Long nBaseY,
 
 void OutputDevice::ImplDrawTextBackground( const SalLayout& rSalLayout )
 {
-    tools::Rectangle aRect = vcl::text::TextLayoutEngine::GetVisualLayoutBounds(
+    tools::Rectangle aRect = vcl::text::TextLayoutEngine::GetTextInkBounds(
                                 rSalLayout, *mpFontRealization);
 
     if (mpGraphicsState->mbLineColor || mbLineColorDirty)

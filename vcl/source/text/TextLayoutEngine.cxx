@@ -1149,8 +1149,8 @@ bool TextLayoutEngine::GetLogicalTextBoundRect(const LayoutResources& rRes,
 }
 
 tools::Rectangle
-TextLayoutEngine::GetVisualLayoutBounds(const SalLayout& rSalLayout,
-                                        const vcl::font::FontRealization& rFontRealization)
+TextLayoutEngine::GetTextInkBounds(const SalLayout& rSalLayout,
+                                   const vcl::font::FontRealization& rFontRealization)
 {
     const basegfx::B2DPoint aPoint = rSalLayout.GetDrawPosition();
     tools::Long nX = aPoint.getX();
