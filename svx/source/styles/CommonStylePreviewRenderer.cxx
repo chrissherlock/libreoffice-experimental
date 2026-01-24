@@ -267,7 +267,7 @@ void CommonStylePreviewRenderer::CalcRenderSize()
             nWidth = mrOutputDev.GetTextWidth(rText, nStart, nEnd - nStart);
 
         tools::Rectangle aRect;
-        mrOutputDev.GetTextBoundRect(aRect, rText, nStart, nStart, nEnd - nStart);
+        mrOutputDev.GetLogicalTextBoundRect(aRect, rText, nStart, nStart, nEnd - nStart);
 
         mrOutputDev.Pop();
 

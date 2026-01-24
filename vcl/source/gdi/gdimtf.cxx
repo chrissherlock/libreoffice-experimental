@@ -1437,7 +1437,7 @@ tools::Rectangle GDIMetaFile::GetBoundRect( OutputDevice& i_rReference ) const
             MetaTextAction* pAct = static_cast<MetaTextAction*>(pAction);
             tools::Rectangle aRect;
             // hdu said base = index
-            aMapVDev->GetTextBoundRect( aRect, pAct->GetText(), pAct->GetIndex(), pAct->GetIndex(), pAct->GetLen() );
+            aMapVDev->GetLogicalTextBoundRect( aRect, pAct->GetText(), pAct->GetIndex(), pAct->GetIndex(), pAct->GetLen() );
             Point aPt( pAct->GetPoint() );
             aRect.Move( aPt.X(), aPt.Y() );
             ImplActionBounds( aBound, ::LogicToLogic( aRect, aMapVDev->GetMapMode(), GetPrefMapMode() ), aClipStack );
@@ -1449,7 +1449,7 @@ tools::Rectangle GDIMetaFile::GetBoundRect( OutputDevice& i_rReference ) const
             MetaTextArrayAction* pAct = static_cast<MetaTextArrayAction*>(pAction);
             tools::Rectangle aRect;
             // hdu said base = index
-            aMapVDev->GetTextBoundRect( aRect, pAct->GetText(), pAct->GetIndex(), pAct->GetIndex(), pAct->GetLen(),
+            aMapVDev->GetLogicalTextBoundRect( aRect, pAct->GetText(), pAct->GetIndex(), pAct->GetIndex(), pAct->GetLen(),
                                        0, pAct->GetDXArray(), pAct->GetKashidaArray() );
             Point aPt( pAct->GetPoint() );
             aRect.Move( aPt.X(), aPt.Y() );
@@ -1462,7 +1462,7 @@ tools::Rectangle GDIMetaFile::GetBoundRect( OutputDevice& i_rReference ) const
             MetaStretchTextAction* pAct = static_cast<MetaStretchTextAction*>(pAction);
             tools::Rectangle aRect;
             // hdu said base = index
-            aMapVDev->GetTextBoundRect( aRect, pAct->GetText(), pAct->GetIndex(), pAct->GetIndex(), pAct->GetLen(),
+            aMapVDev->GetLogicalTextBoundRect( aRect, pAct->GetText(), pAct->GetIndex(), pAct->GetIndex(), pAct->GetLen(),
                                        pAct->GetWidth() );
             Point aPt( pAct->GetPoint() );
             aRect.Move( aPt.X(), aPt.Y() );
@@ -1478,7 +1478,7 @@ tools::Rectangle GDIMetaFile::GetBoundRect( OutputDevice& i_rReference ) const
             OUString aStr( pStr );
 
             tools::Rectangle aRect;
-            aMapVDev->GetTextBoundRect( aRect, aStr, 0, 0, aStr.getLength() );
+            aMapVDev->GetLogicalTextBoundRect( aRect, aStr, 0, 0, aStr.getLength() );
             Point aPt( pAct->GetStartPoint() );
             aRect.Move( aPt.X(), aPt.Y() );
             aRect.SetRight( aRect.Left() + pAct->GetWidth() );

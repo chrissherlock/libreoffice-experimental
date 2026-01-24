@@ -33,7 +33,7 @@ namespace {
 
 bool SmGetGlyphBoundRect(const vcl::RenderContext &rDev,
                          const OUString &rText, tools::Rectangle &rRect)
-    // basically the same as 'GetTextBoundRect' (in class 'OutputDevice')
+    // basically the same as 'GetLogicalTextBoundRect' (in class 'OutputDevice')
     // but with a string as argument.
 {
     // handle special case first
@@ -43,13 +43,13 @@ bool SmGetGlyphBoundRect(const vcl::RenderContext &rDev,
         return true;
     }
 
-    // get a device where 'OutputDevice::GetTextBoundRect' will be successful
+    // get a device where 'OutputDevice::GetLogicalTextBoundRect' will be successful
     OutputDevice *pGlyphDev;
     if (rDev.GetOutDevType() != OUTDEV_PRINTER)
         pGlyphDev = const_cast<OutputDevice *>(&rDev);
     else
     {
-        // since we format for the printer (where GetTextBoundRect will fail)
+        // since we format for the printer (where GetLogicalTextBoundRect will fail)
         // we need a virtual device here.
         pGlyphDev = &SmModule::get()->GetDefaultVirtualDev();
     }
@@ -60,7 +60,7 @@ bool SmGetGlyphBoundRect(const vcl::RenderContext &rDev,
     vcl::Font aFnt(rDev.GetFont());
     aFnt.SetAlignment(ALIGN_TOP);
 
-    // use scale factor when calling GetTextBoundRect to counter
+    // use scale factor when calling GetLogicalTextBoundRect to counter
     // negative effects from antialiasing which may otherwise result
     // in significant incorrect bounding rectangles for some characters.
     Size aFntSize = aFnt.GetFontSize();
@@ -77,8 +77,8 @@ bool SmGetGlyphBoundRect(const vcl::RenderContext &rDev,
     tools::Rectangle   aResult (Point(), Size(nTextWidth, rDev.GetTextHeight())),
                        aTmp;
 
-    bool bSuccess = pGlyphDev->GetTextBoundRect(aTmp, rText);
-    OSL_ENSURE( bSuccess, "GetTextBoundRect failed" );
+    bool bSuccess = pGlyphDev->GetLogicalTextBoundRect(aTmp, rText);
+    OSL_ENSURE( bSuccess, "GetLogicalTextBoundRect failed" );
 
 
     if (!aTmp.IsEmpty())
