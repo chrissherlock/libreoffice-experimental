@@ -1002,24 +1002,26 @@ sal_Int32 OutputDevice::GetTextBreak( const OUString& rStr, tools::Long nTextWid
         vcl::text::LayoutConstraints{Point(0,0), 0, {}, {}, eDefaultLayout},
         vcl::text::LayoutCacheData{pLayoutCache, pGlyphs},
         vcl::text::RenderSelection{});
-    sal_Int32 nRetVal = -1;
-    if( pSalLayout )
-    {
-        // convert logical widths into layout units
-        // NOTE: be very careful to avoid rounding errors for nCharExtra case
-        // problem with rounding errors especially for small nCharExtras
-        // TODO: remove when layout units have subpixel granularity
-        tools::Long nSubPixelFactor = 1;
-        if (!mpMapper->IsMapModeEnabled())
-            nSubPixelFactor = 64;
-        double nTextPixelWidth = LogicWidthToDeviceSubPixel(nTextWidth * nSubPixelFactor);
-        double nExtraPixelWidth = 0;
-        if( nCharExtra != 0 )
-            nExtraPixelWidth = LogicWidthToDeviceSubPixel(nCharExtra * nSubPixelFactor);
-        nRetVal = pSalLayout->GetTextBreak( nTextPixelWidth, nExtraPixelWidth, nSubPixelFactor );
-    }
 
-    return nRetVal;
+    if (!pSalLayout)
+        return -1;
+
+    // convert logical widths into layout units
+    // NOTE: be very careful to avoid rounding errors for nCharExtra case
+    // problem with rounding errors especially for small nCharExtras
+    // TODO: remove when layout units have subpixel granularity
+    tools::Long nSubPixelFactor = 1;
+
+    if (!mpMapper->IsMapModeEnabled())
+        nSubPixelFactor = 64;
+
+    double nTextPixelWidth = LogicWidthToDeviceSubPixel(nTextWidth * nSubPixelFactor);
+    double nExtraPixelWidth = 0;
+
+    if (nCharExtra != 0)
+        nExtraPixelWidth = LogicWidthToDeviceSubPixel(nCharExtra * nSubPixelFactor);
+
+    return pSalLayout->GetTextBreak(nTextPixelWidth, nExtraPixelWidth, nSubPixelFactor);
 }
 
 sal_Int32 OutputDevice::GetTextBreakArray(const OUString& rStr, tools::Long nTextWidth,
