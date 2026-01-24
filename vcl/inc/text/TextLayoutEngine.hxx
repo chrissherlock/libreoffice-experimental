@@ -259,6 +259,10 @@ public:
                                       const vcl::text::LayoutCacheData& rCache,
                                       std::optional<tools::Rectangle>* pBounds);
 
+    static void GetCaretPositions(const LayoutResources& rRes, const vcl::text::TextSpan& rSpan,
+                                  KernArray& rCaretPos, const vcl::text::LayoutCacheData& rCache);
+
+private:
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);
 
     /** Mirrors caret positions for Right-to-Left context based on total line width. */
@@ -267,9 +271,6 @@ public:
     /** Converts device pixel positions to logical units using the provided mapper. */
     static void ConvertPixelsToLogic(const CoordinateMapper& rMapper,
                                      std::vector<double>& rCaretPixelPos);
-
-    static void GetCaretPositions(const LayoutResources& rRes, const vcl::text::TextSpan& rSpan,
-                                  KernArray& rCaretPos, const vcl::text::LayoutCacheData& rCache);
 };
 
 } // namespace vcl::text
