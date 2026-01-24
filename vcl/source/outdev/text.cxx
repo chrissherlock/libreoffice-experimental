@@ -1624,7 +1624,7 @@ tools::Long OutputDevice::GetCtrlTextWidth( const OUString& rStr, const SalLayou
     return GetTextWidth( aStr, nIndex, nLen, nullptr, pGlyphs );
 }
 
-bool OutputDevice::GetTextBoundRect( tools::Rectangle& rRect,
+bool OutputDevice::GetLogicalTextBoundRect( tools::Rectangle& rRect,
                                          const OUString& rStr, sal_Int32 nBase,
                                          sal_Int32 nIndex, sal_Int32 nLen,
                                          sal_uLong nLayoutWidth, KernArraySpan pDXArray,
@@ -1632,69 +1632,36 @@ bool OutputDevice::GetTextBoundRect( tools::Rectangle& rRect,
                                          const SalLayoutGlyphs* pGlyphs ) const
 {
     basegfx::B2DRectangle aRect;
-    bool bRet = GetTextBoundRect(aRect, rStr, nBase, nIndex, nLen, static_cast<tools::Long>(nLayoutWidth), pDXArray,
+    bool bRet = GetLogicalTextBoundRect(aRect, rStr, nBase, nIndex, nLen, static_cast<tools::Long>(nLayoutWidth), pDXArray,
                                  pKashidaArray, pGlyphs);
     rRect = SalLayout::BoundRect2Rectangle(aRect);
     return bRet;
 }
 
-bool OutputDevice::GetTextBoundRect(basegfx::B2DRectangle& rRect, const OUString& rStr,
+bool OutputDevice::GetLogicalTextBoundRect(basegfx::B2DRectangle& rRect, const OUString& rStr,
                                     sal_Int32 nBase, sal_Int32 nIndex, sal_Int32 nLen,
                                     sal_uLong nLayoutWidth, KernArraySpan pDXArray,
                                     std::span<const sal_Bool> pKashidaArray,
                                     const SalLayoutGlyphs* pGlyphs) const
 {
-    bool bRet = false;
-    rRect.reset();
+    if (!InitFont())
+        return false;
 
-    std::unique_ptr<SalLayout> pSalLayout;
+    vcl::text::LayoutResources aResources = {
+        mpFontRealization->mxFont.get(),
+        *mpMapper,
+        &GetFontCache(),
+        GetFontCollection(),
+        mpForcedFallbackInstance.get(),
+        [this]() { const_cast<OutputDevice*>(this)->AcquireGraphics(); return mpGraphics; },
+        IsRTLEnabled(),
+        IsMapModeEnabled() || isSubpixelPositioning() || SupportsSubpixelPositioning(),
+        *mpGraphicsState,
+        *mpFontRealization
+    };
 
-    // calculate offset when nBase!=nIndex
-    double nXOffset = 0;
-    if( nBase != nIndex )
-    {
-        sal_Int32 nStart = std::min( nBase, nIndex );
-        sal_Int32 nOfsLen = std::max( nBase, nIndex ) - nStart;
-
-        // Offset Layout: No glyphs (safe), no flags
-        pSalLayout = LayoutText(
-            vcl::text::TextSpan{rStr, nStart, nOfsLen},
-            vcl::text::LayoutConstraints{Point(0,0), static_cast<tools::Long>(nLayoutWidth), pDXArray, pKashidaArray, eDefaultLayout},
-            vcl::text::LayoutCacheData{nullptr, nullptr},
-            vcl::text::RenderSelection{});
-
-        if( pSalLayout )
-        {
-            nXOffset = pSalLayout->GetTextWidth();
-            // TODO: fix offset calculation for Bidi case
-            if( nBase < nIndex)
-                nXOffset = -nXOffset;
-        }
-    }
-
-    // Main Layout: Use pGlyphs if provided
-    pSalLayout = LayoutText(
-        vcl::text::TextSpan{rStr, nIndex, nLen},
-        vcl::text::LayoutConstraints{Point(0,0), static_cast<tools::Long>(nLayoutWidth), pDXArray, pKashidaArray, eDefaultLayout},
-        vcl::text::LayoutCacheData{nullptr, pGlyphs},
-        vcl::text::RenderSelection{});
-
-    if( pSalLayout )
-    {
-        basegfx::B2DRectangle aPixelRect;
-        bRet = pSalLayout->GetBoundRect(aPixelRect);
-
-        if( bRet )
-        {
-            basegfx::B2DPoint aPos = pSalLayout->GetDrawPosition(basegfx::B2DPoint(nXOffset, 0));
-            aPixelRect.translate(mpFontRealization->nXOffset - aPos.getX(), mpFontRealization->nYOffset - aPos.getY());
-            rRect = PixelToLogic( aPixelRect );
-            if (mpMapper->IsMapModeEnabled())
-                rRect.translate(mpMapper->GetMappingXOffset(), mpMapper->GetMappingYOffset());
-        }
-    }
-
-    return bRet;
+    return vcl::text::TextLayoutEngine::GetLogicalTextBoundRect(
+        aResources, rRect, rStr, nBase, nIndex, nLen, nLayoutWidth, pDXArray, pKashidaArray, pGlyphs);
 }
 
 bool OutputDevice::GetTextOutlines( basegfx::B2DPolyPolygonVector& rVector,

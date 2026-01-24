@@ -112,7 +112,7 @@ ScopedVclPtr<VirtualDevice> SfxCharmapContainer::CreateIcon(const weld::IconView
 
     for (tools::Long nFontHeight = aFontSize.Height(); nFontHeight > 0; nFontHeight -= 1)
     {
-        if (!pDev->GetTextBoundRect(aBoundRect, rText) || aBoundRect.IsEmpty())
+        if (!pDev->GetLogicalTextBoundRect(aBoundRect, rText) || aBoundRect.IsEmpty())
         {
             bGotBoundary = false;
             break;

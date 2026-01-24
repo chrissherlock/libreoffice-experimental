@@ -392,7 +392,7 @@ void StyleItemController::DrawContentBackground(vcl::RenderContext& rRenderConte
 void StyleItemController::DrawHighlight(vcl::RenderContext& rRenderContext, Color aFontBack)
 {
     tools::Rectangle aTextRect;
-    rRenderContext.GetTextBoundRect(aTextRect, m_aStyleName.translatedName);
+    rRenderContext.GetLogicalTextBoundRect(aTextRect, m_aStyleName.translatedName);
 
     Size aSize = aTextRect.GetSize();
     aSize.AdjustHeight(aSize.getHeight());
@@ -414,8 +414,8 @@ void StyleItemController::DrawText(vcl::RenderContext& rRenderContext)
     const SalLayoutGlyphs* layoutGlyphs = SalLayoutGlyphsCache::self()->GetLayoutGlyphs(
         &rRenderContext, m_aStyleName.translatedName);
     tools::Rectangle aTextRect;
-    rRenderContext.GetTextBoundRect(aTextRect, m_aStyleName.translatedName, 0, 0, -1, 0, {}, {},
-                                    layoutGlyphs);
+    rRenderContext.GetLogicalTextBoundRect(aTextRect, m_aStyleName.translatedName, 0, 0, -1, 0, {},
+                                           {}, layoutGlyphs);
 
     Point aPos(0, 0);
     aPos.AdjustX(LEFT_MARGIN);

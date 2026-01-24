@@ -164,7 +164,7 @@ RehearseTimingsActivity::RehearseTimingsActivity( const SlideShowContext& rConte
     blackHole->SetMapMode(MapMode(MapUnit::MapPixel));
     tools::Rectangle rect;
     const FontMetric metric( blackHole->GetFontMetric() );
-    blackHole->GetTextBoundRect( rect, u"XX:XX:XX"_ustr );
+    blackHole->GetLogicalTextBoundRect( rect, u"XX:XX:XX"_ustr );
     maSpriteSizePixel.setX( rect.getOpenWidth() * 12 / 10 );
     maSpriteSizePixel.setY( metric.GetLineHeight() * 11 / 10 );
     mnYOffset = (metric.GetAscent() + (metric.GetLineHeight() / 20));
@@ -452,7 +452,7 @@ void RehearseTimingsActivity::paint( cppcanvas::CanvasSharedPtr const & canvas )
         blackHole->SetLineColor( COL_GRAY );
     }
     blackHole->DrawRect( rect );
-    blackHole->GetTextBoundRect( rect, time );
+    blackHole->GetLogicalTextBoundRect( rect, time );
     blackHole->DrawText(
         Point( (maSpriteSizePixel.getX() - rect.getOpenWidth()) / 2,
                mnYOffset ), time );

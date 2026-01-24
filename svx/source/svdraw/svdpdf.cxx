@@ -1918,7 +1918,7 @@ void ImpSdrPdfImport::InsertTextObject(const Point& rPos, const Size& /*rSize*/,
        the text at the same y position.
     */
     tools::Rectangle aOurRect;
-    (void)mpVD->GetTextBoundRect(aOurRect, rStr);
+    (void)mpVD->GetLogicalTextBoundRect(aOurRect, rStr);
 
     auto nXDiff = aOurRect.Left();
     auto nYDiff = aFontMetric.GetDescent() - aOurRect.Bottom();

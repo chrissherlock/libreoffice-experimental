@@ -539,7 +539,7 @@ void SvxShowCharSet::DrawChars_Impl(vcl::RenderContext& rRenderContext, int n1, 
         Point aPointTxTy(tx, ty);
 
         // adjust position before it gets out of bounds
-        if (rRenderContext.GetTextBoundRect(aBoundRect, aCharStr) && !aBoundRect.IsEmpty())
+        if (rRenderContext.GetLogicalTextBoundRect(aBoundRect, aCharStr) && !aBoundRect.IsEmpty())
         {
             // zero advance width => use ink width to center glyph
             if (!nTextWidth)

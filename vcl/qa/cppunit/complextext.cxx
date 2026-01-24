@@ -104,7 +104,7 @@ CPPUNIT_TEST_FIXTURE(VclComplexTextTest, testArabic)
 
     // exact bounding rectangle, not essentially the same as text width/height
     tools::Rectangle aBoundRect;
-    pOutDev->GetTextBoundRect(aBoundRect, aOneTwoThree);
+    pOutDev->GetLogicalTextBoundRect(aBoundRect, aOneTwoThree);
     CPPUNIT_ASSERT_EQUAL(tools::Long(145), aBoundRect.Left());
     CPPUNIT_ASSERT_EQUAL(tools::Long(212), aBoundRect.Top());
     CPPUNIT_ASSERT_EQUAL(tools::Long(12294), aBoundRect.GetWidth());

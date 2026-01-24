@@ -40,10 +40,10 @@
 #include <font/LogicalFontInstance.hxx>
 #include <font/PhysicalFontCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
-#include <text/TextLayoutEngine.hxx>
 #include <sallayout.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>
+#include <text/TextLayoutEngine.hxx>
 
 #include <unicode/uchar.h>
 
@@ -522,7 +522,7 @@ void OutputDevice::ImplInitFontMetrics(LogicalFontInstance* pFontInstance) const
     };
 
     auto fnMeasureRect = [this](tools::Rectangle& rRect, const OUString& rStr) {
-        GetTextBoundRect(rRect, rStr);
+        GetLogicalTextBoundRect(rRect, rStr);
     };
 
     long nDPIY = GetDPIY();
@@ -749,7 +749,7 @@ bool OutputDevice::GetGlyphBoundRects(const Point& rOrigin, const OUString& rStr
     tools::Rectangle aRect;
     for (int i = 0; i < nLen; i++)
     {
-        if (!GetTextBoundRect(aRect, rStr, nIndex, nIndex + i, 1))
+        if (!GetLogicalTextBoundRect(aRect, rStr, nIndex, nIndex + i, 1))
             break;
 
         aRect.Move(rOrigin.X(), rOrigin.Y());

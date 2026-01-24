@@ -308,7 +308,7 @@ basegfx::B2DRange TextLayouterDevice::getTextBoundRect(const OUString& rText, sa
     if (nTextLength)
     {
         basegfx::B2DRange aRect;
-        mrDevice.GetTextBoundRect(aRect, rText, nIndex, nIndex, nLength);
+        mrDevice.GetLogicalTextBoundRect(aRect, rText, nIndex, nIndex, nLength);
         if (!rtl_math_approxEqual(mnFontScalingFixY, 1.0)
             || !rtl_math_approxEqual(mnFontScalingFixX, 1.0))
         {

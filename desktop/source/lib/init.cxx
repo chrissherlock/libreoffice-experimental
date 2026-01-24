@@ -7292,7 +7292,7 @@ unsigned char* doc_renderFontOrientation(SAL_UNUSED_PARAMETER LibreOfficeKitDocu
     aFont.SetFontSize(Size(0, nDefaultFontSize));
     aFont.SetOrientation(Degree10(pOrientation));
     aDevice->SetFont(aFont);
-    aDevice->GetTextBoundRect(aRect, aText);
+    aDevice->GetLogicalTextBoundRect(aRect, aText);
     if (aRect.IsEmpty())
         return nullptr;
 

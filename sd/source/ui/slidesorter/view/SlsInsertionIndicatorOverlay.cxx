@@ -246,7 +246,7 @@ void InsertionIndicatorOverlay::PaintPageCount (
     // box that centers the text on the first preview.
     rDevice.SetFont(*pFont);
     ::tools::Rectangle aTextBox;
-    rDevice.GetTextBoundRect(aTextBox, sNumber);
+    rDevice.GetLogicalTextBoundRect(aTextBox, sNumber);
     Point aTextOffset (aTextBox.TopLeft());
     Size aTextSize (aTextBox.GetSize());
     // Place text inside the first page preview.

@@ -1571,7 +1571,7 @@ Size Menu::ImplCalcSize( vcl::Window* pWin )
 
         // Compute text bounding box
         tools::Rectangle aTextBoundRect;
-        pWin->GetOutDev()->GetTextBoundRect(aTextBoundRect, aTitleText);
+        pWin->GetOutDev()->GetLogicalTextBoundRect(aTextBoundRect, aTitleText);
 
         // Vertically, one height of char + extra space for decoration
         nTitleHeight =  aTextBoundRect.GetSize().Height() + 4 * SPACE_AROUND_TITLE ;
@@ -1714,7 +1714,7 @@ void Menu::ImplPaintMenuTitle(vcl::RenderContext& rRenderContext, const tools::R
     // Draw the text centered
     Point aTextTopLeft(aBgRect.TopLeft());
     tools::Rectangle aTextBoundRect;
-    rRenderContext.GetTextBoundRect( aTextBoundRect, aTitleText );
+    rRenderContext.GetLogicalTextBoundRect( aTextBoundRect, aTitleText );
     aTextTopLeft.AdjustX((aBgRect.getOpenWidth() - aTextBoundRect.GetSize().Width()) / 2 );
     aTextTopLeft.AdjustY((aBgRect.GetHeight() - aTextBoundRect.GetSize().Height()) / 2
                         - aTextBoundRect.Top() );

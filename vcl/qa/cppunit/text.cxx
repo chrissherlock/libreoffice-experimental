@@ -257,7 +257,7 @@ CPPUNIT_TEST_FIXTURE(VclTextTest, testSimpleTextFontSpecificKerning)
 
     // exact bounding rectangle, not essentially the same as text width/height
     tools::Rectangle aBoundRect;
-    pOutDev->GetTextBoundRect(aBoundRect, aAV);
+    pOutDev->GetLogicalTextBoundRect(aBoundRect, aAV);
     CPPUNIT_ASSERT_EQUAL(tools::Long(16), aBoundRect.Left());
     CPPUNIT_ASSERT_EQUAL(tools::Long(408), aBoundRect.Top());
     CPPUNIT_ASSERT_EQUAL(tools::Long(2639), aBoundRect.GetWidth());
@@ -306,7 +306,7 @@ CPPUNIT_TEST_FIXTURE(VclTextTest, testSimpleTextNoKerning)
 
     // exact bounding rectangle, not essentially the same as text width/height
     tools::Rectangle aBoundRect;
-    pOutDev->GetTextBoundRect(aBoundRect, aAV);
+    pOutDev->GetLogicalTextBoundRect(aBoundRect, aAV);
     CPPUNIT_ASSERT_EQUAL(tools::Long(16), aBoundRect.Left());
     CPPUNIT_ASSERT_EQUAL(tools::Long(408), aBoundRect.Top());
     CPPUNIT_ASSERT_EQUAL(tools::Long(2770), aBoundRect.GetWidth());

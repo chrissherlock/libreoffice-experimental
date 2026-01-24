@@ -531,7 +531,7 @@ public:
                 rDev.SetFont(aIndexFont);
                 OUString aText = OUString::number(i) + ".";
                 rDev.DrawText(aPos, aText);
-                if (rDev.GetTextBoundRect(aTextRect, aText))
+                if (rDev.GetLogicalTextBoundRect(aTextRect, aText))
                     aPos.Move(aTextRect.GetWidth() + 8, 0);
 
                 // Text
@@ -586,7 +586,7 @@ public:
 
                 rDev.DrawText(aPos,aText);
 
-                if (rDev.GetTextBoundRect(aTextRect, aText))
+                if (rDev.GetLogicalTextBoundRect(aTextRect, aText))
                 {
                     aTextRect.Move(aPos.X(), aPos.Y());
                     rDev.SetFillColor();
@@ -2065,7 +2065,7 @@ include/vcl/outdev.hxx:                                          MetricVector* p
 include/vcl/outdev.hxx:                                              MetricVector* pVector, OUString* pDisplayText, vcl::ITextLayout& _rLayout );
 include/vcl/outdev.hxx:                                              DrawTextFlags nStyle = DrawTextFlags::Mnemonic, MetricVector* pVector = nullp
 
-    bool                        GetTextBoundRect( Rectangle& rRect,
+    bool                        GetLogicalTextBoundRect( Rectangle& rRect,
                                                   const OUString& rStr, sal_Int32 nBase = 0, sal_Int32 nIndex = 0, sal_Int32 nLen = -1,
                                                   sal_uLong nLayoutWidth = 0, const long* pDXArray = nullptr ) const;
 

@@ -996,9 +996,9 @@ public:
         The text is then drawn exactly from rRect.TopLeft() to
         rRect.BottomRight(), don't assume that rRect.TopLeft() is [0, 0].
 
-        Please note that you don't always want to use GetTextBoundRect(); in
+        Please note that you don't always want to use GetLogicalTextBoundRect(); in
         many cases you actually want to use GetTextHeight(), because
-        GetTextBoundRect() gives you the exact bounding rectangle regardless
+        GetLogicalTextBoundRect() gives you the exact bounding rectangle regardless
         what is the baseline of the text.
 
         Code snippet to get just exactly the text (no filling around that) as
@@ -1013,7 +1013,7 @@ public:
         aDevice.Erase();
 
         tools::Rectangle aRect;
-        aDevice.GetTextBoundRect(aRect, aText);
+        aDevice.GetLogicalTextBoundRect(aRect, aText);
         aDevice.SetOutputSize(Size(aRect.Right() + 1, aRect.Bottom() + 1));
         aDevice.SetBackground(Wallpaper(COL_TRANSPARENT));
         aDevice.DrawText(Point(0,0), aText);
@@ -1040,12 +1040,12 @@ public:
         Bitmap aBitmap(aDevice.GetBitmap(Point(0, 0), aDevice.GetOutputSize()));
         </code>
     */
-    bool                        GetTextBoundRect( tools::Rectangle& rRect,
+    bool                        GetLogicalTextBoundRect( tools::Rectangle& rRect,
                                                   const OUString& rStr, sal_Int32 nBase = 0, sal_Int32 nIndex = 0, sal_Int32 nLen = -1,
                                                   sal_uLong nLayoutWidth = 0, KernArraySpan aDXArray = KernArraySpan(),
                                                   std::span<const sal_Bool> pKashidaArray = {},
                                                   const SalLayoutGlyphs* pGlyphs = nullptr ) const;
-    bool                        GetTextBoundRect( basegfx::B2DRectangle& rRect,
+    bool                        GetLogicalTextBoundRect( basegfx::B2DRectangle& rRect,
                                                   const OUString& rStr, sal_Int32 nBase = 0, sal_Int32 nIndex = 0, sal_Int32 nLen = -1,
                                                   sal_uLong nLayoutWidth = 0, KernArraySpan aDXArray = KernArraySpan(),
                                                   std::span<const sal_Bool> pKashidaArray = {},
@@ -1112,7 +1112,7 @@ public:
 
     /** Width of the text.
 
-        See also GetTextBoundRect() for more explanation + code examples.
+        See also GetLogicalTextBoundRect() for more explanation + code examples.
     */
     tools::Long                        GetTextWidth( const OUString& rStr, sal_Int32 nIndex = 0, sal_Int32 nLen = -1,
                                   vcl::text::TextLayoutCache const* = nullptr,
@@ -1123,7 +1123,7 @@ public:
 
     /** Height where any character of the current font fits; in logic coordinates.
 
-        See also GetTextBoundRect() for more explanation + code examples.
+        See also GetLogicalTextBoundRect() for more explanation + code examples.
     */
     tools::Long                        GetTextHeight() const;
     double GetTextHeightDouble() const;

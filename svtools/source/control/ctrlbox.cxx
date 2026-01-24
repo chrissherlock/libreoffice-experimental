@@ -598,7 +598,7 @@ namespace
         //Make sure it fits in the available height
         while (aSize.Height() > 0)
         {
-            if (!rDevice.GetTextBoundRect(rTextRect, rSampleText))
+            if (!rDevice.GetLogicalTextBoundRect(rTextRect, rSampleText))
                 break;
             if (rTextRect.GetHeight() <= nH)
             {
@@ -670,7 +670,7 @@ static void DrawPreview(const FontMetric& rFontMetric, const Point& rTopLeft, Ou
     if (!bUsingCorrectFont)
     {
         rDevice.SetFont(aOldFont);
-        rDevice.GetTextBoundRect(aTextRect, sFontName);
+        rDevice.GetLogicalTextBoundRect(aTextRect, sFontName);
     }
 
     tools::Long nTextHeight = aTextRect.GetHeight();
@@ -788,7 +788,7 @@ static void DrawPreview(const FontMetric& rFontMetric, const Point& rTopLeft, Ou
             while (nWidth > nSpace || nWidth > gUserItemSz.Width())
             {
                 sSampleText = sSampleText.copy(0, sSampleText.getLength()-1);
-                nWidth = rDevice.GetTextBoundRect(aTextRect, sSampleText) ?
+                nWidth = rDevice.GetLogicalTextBoundRect(aTextRect, sSampleText) ?
                          aTextRect.GetWidth() : 0;
             }
 

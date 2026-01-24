@@ -259,7 +259,7 @@ void SVGFontExport::implEmbedGlyph( OutputDevice const & rOut, const OUString& r
 
     aPolyPoly.Scale( 1.0, -1.0 );
 
-    if (rCellStr == " " || !rOut.GetTextBoundRect(aBoundRect, rCellStr))
+    if (rCellStr == " " || !rOut.GetLogicalTextBoundRect(aBoundRect, rCellStr))
         aBoundRect = tools::Rectangle( Point( 0, 0 ), Size( rOut.GetTextWidth( rCellStr ), 0 ) );
 
     mrExport.AddAttribute(u"unicode"_ustr, rCellStr);

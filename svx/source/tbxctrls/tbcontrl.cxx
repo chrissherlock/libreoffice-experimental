@@ -1212,7 +1212,7 @@ tools::Rectangle SvxStyleBox_Base::CalcBoundRect(vcl::RenderContext& rRenderCont
         }
 
         tools::Rectangle aRect;
-        rRenderContext.GetTextBoundRect(aRect, rStyleName, nStart, nStart, nEnd - nStart);
+        rRenderContext.GetLogicalTextBoundRect(aRect, rStyleName, nStart, nStart, nEnd - nStart);
         aTextRect = aTextRect.Union(aRect);
 
         tools::Long nWidth = rRenderContext.GetTextWidth(rStyleName, nStart, nEnd - nStart);
@@ -1565,7 +1565,7 @@ void SvxStyleBox_Base::CalcOptimalExtraUserWidth(vcl::RenderContext& rRenderCont
     {
         OUString sStyleName(get_text(i));
         tools::Rectangle aTextRectForDefaultFont;
-        rRenderContext.GetTextBoundRect(aTextRectForDefaultFont, sStyleName);
+        rRenderContext.GetLogicalTextBoundRect(aTextRectForDefaultFont, sStyleName);
 
         const tools::Long nWidth = aTextRectForDefaultFont.GetWidth();
 

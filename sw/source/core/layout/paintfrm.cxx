@@ -3956,7 +3956,7 @@ void SwColumnFrame::PaintBreak( ) const
             aFontSize, aFont, IsRightToLeft(), false );
 
     tools::Rectangle aTextRect;
-    pOut->GetTextBoundRect( aTextRect, aBreakText );
+    pOut->GetLogicalTextBoundRect( aTextRect, aBreakText );
     tools::Long nTextOff = ( nWidth - aTextRect.GetWidth() ) / 2;
 
     basegfx::B2DHomMatrix aTextMatrix( basegfx::utils::createScaleTranslateB2DHomMatrix(

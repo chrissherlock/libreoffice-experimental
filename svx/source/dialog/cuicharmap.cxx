@@ -806,7 +806,7 @@ void SvxShowText::Paint(vcl::RenderContext& rRenderContext, const tools::Rectang
 
     for (tools::Long nFontHeight = aFontSize.Height(); nFontHeight > 0; nFontHeight -= 5)
     {
-        if (!rRenderContext.GetTextBoundRect( aBoundRect, aText ) || aBoundRect.IsEmpty())
+        if (!rRenderContext.GetLogicalTextBoundRect( aBoundRect, aText ) || aBoundRect.IsEmpty())
         {
             bGotBoundary = false;
             break;

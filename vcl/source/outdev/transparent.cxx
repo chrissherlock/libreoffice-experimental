@@ -1104,7 +1104,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
 
                 // #105987# Use API method instead of Impl* methods
                 // #107490# Set base parameter equal to index parameter
-                rOut.GetTextBoundRect( aActionBounds, rTextAct.GetText(), rTextAct.GetIndex(),
+                rOut.GetLogicalTextBoundRect( aActionBounds, rTextAct.GetText(), rTextAct.GetIndex(),
                                        rTextAct.GetIndex(), rTextAct.GetLen() );
                 aActionBounds.Move( aPtLog.X(), aPtLog.Y() );
             }

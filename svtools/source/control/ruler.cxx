@@ -236,7 +236,7 @@ void Ruler::ImplInit( WinBits nWinBits )
 
     // Setup the default size
     tools::Rectangle aRect;
-    GetOutDev()->GetTextBoundRect( aRect, u"0123456789"_ustr );
+    GetOutDev()->GetLogicalTextBoundRect( aRect, u"0123456789"_ustr );
     tools::Long nDefHeight = aRect.GetHeight() + RULER_OFF * 2 + ruler_tab.textoff * 2 + mnBorderWidth;
 
     Size aDefSize;
@@ -344,7 +344,7 @@ void Ruler::ImplVDrawText(vcl::RenderContext& rRenderContext, tools::Long nX, to
     tools::Rectangle aRect;
     SalLayoutGlyphs* pTextLayout
         = lcl_GetRulerTextGlyphs(rRenderContext, rText, maTextGlyphs[rText]);
-    rRenderContext.GetTextBoundRect(aRect, rText, 0, 0, -1, 0, {}, {}, pTextLayout);
+    rRenderContext.GetLogicalTextBoundRect(aRect, rText, 0, 0, -1, 0, {}, {}, pTextLayout);
 
     tools::Long nShiftX = ( aRect.GetWidth() / 2 ) + aRect.Left();
     tools::Long nShiftY = ( aRect.GetHeight() / 2 ) + aRect.Top();

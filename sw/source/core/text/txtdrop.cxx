@@ -828,7 +828,7 @@ void SwDropCapCache::CalcFontSize( SwDropPortion* pDrop, SwTextFormatInfo &rInf 
                 nAscent = rFnt.GetAscent( rInf.GetVsh(), *pOut );
 
                 // we get the rectangle that covers all chars
-                bool bHaveGlyphRect = pOut->GetTextBoundRect( aRect, rInf.GetText(), 0,
+                bool bHaveGlyphRect = pOut->GetLogicalTextBoundRect( aRect, rInf.GetText(), 0,
                             sal_Int32(nIdx), sal_Int32(pCurrPart->GetLen()))
                     && ! aRect.IsEmpty();
 
@@ -847,7 +847,7 @@ void SwDropCapCache::CalcFontSize( SwDropPortion* pDrop, SwTextFormatInfo &rInf 
                         }
                         pWin->SetFont( rFnt.GetActualFont() );
 
-                        bHaveGlyphRect = pWin->GetTextBoundRect( aRect, rInf.GetText(), 0,
+                        bHaveGlyphRect = pWin->GetLogicalTextBoundRect( aRect, rInf.GetText(), 0,
                                 sal_Int32(nIdx), sal_Int32(pCurrPart->GetLen()))
                             && ! aRect.IsEmpty();
                     }
