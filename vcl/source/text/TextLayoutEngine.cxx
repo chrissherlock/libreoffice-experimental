@@ -1183,4 +1183,23 @@ void TextLayoutEngine::GetEmphasisMarkPositions(const SalLayout& rSalLayout,
     }
 }
 
+basegfx::B2DHomMatrix TextLayoutEngine::CalculateOutlineTransform(
+    const SalLayout& rLayout, const vcl::font::FontRealization& rRealization, double nXOffset)
+{
+    basegfx::B2DHomMatrix aMatrix;
+
+    // This matches the logic in OutputDevice::GetTextOutlines
+    if (nXOffset != 0 || rRealization.nXOffset != 0 || rRealization.nYOffset != 0)
+    {
+        basegfx::B2DPoint aRotatedOfs(rRealization.nXOffset, rRealization.nYOffset);
+
+        // Calculate the relative draw position for the given offset
+        // This handles cases where text is drawn at an X-offset (e.g. for bold simulation or composition)
+        aRotatedOfs -= rLayout.GetDrawPosition(basegfx::B2DPoint(nXOffset, 0));
+
+        aMatrix.translate(aRotatedOfs.getX(), aRotatedOfs.getY());
+    }
+    return aMatrix;
+}
+
 } // namespace vcl::text
