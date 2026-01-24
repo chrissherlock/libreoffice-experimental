@@ -839,46 +839,29 @@ OutputDevice::GetPartialTextArray(const OUString& rStr, KernArray* pKernArray, s
         vcl::text::LayoutCacheData{pLayoutCache, pSalLayoutCache}, pBounds);
 }
 
-void OutputDevice::GetCaretPositions( const OUString& rStr, KernArray& rCaretPos,
-                                      sal_Int32 nIndex, sal_Int32 nLen,
-                                      const SalLayoutGlyphs* pGlyphs ) const
+void OutputDevice::GetCaretPositions(const OUString& rStr, KernArray& rCaretPos,
+                                     sal_Int32 nIndex, sal_Int32 nLen,
+                                     const SalLayoutGlyphs* pGlyphs) const
 {
-
-    if( nIndex >= rStr.getLength() )
+    if (!InitFont())
         return;
 
-    nLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nIndex, nLen);
+    vcl::text::LayoutResources aResources = {
+        mpFontRealization->mxFont.get(),
+        *mpMapper,
+        &GetFontCache(),
+        GetFontCollection(),
+        mpForcedFallbackInstance.get(),
+        [this]() { const_cast<OutputDevice*>(this)->AcquireGraphics(); return mpGraphics; },
+        IsRTLEnabled(),
+        IsMapModeEnabled() || isSubpixelPositioning() || SupportsSubpixelPositioning(),
+        *mpGraphicsState,
+        *mpFontRealization
+    };
 
-    const sal_Int32 nCaretPos = nLen * 2;
-    rCaretPos.resize(nCaretPos);
-
-    const vcl::text::TextSpan aTextSpan {rStr, nIndex, nLen};
-    const vcl::text::LayoutConstraints aConstraints {Point(0,0), 0, {}, {}, eDefaultLayout};
-    const vcl::text::LayoutCacheData aCacheData {nullptr, pGlyphs};
-
-    std::unique_ptr<SalLayout> pSalLayout
-        = LayoutText(aTextSpan, aConstraints, aCacheData, vcl::text::RenderSelection{});
-
-    if (!pSalLayout)
-    {
-        std::fill(rCaretPos.begin(), rCaretPos.end(), -1);
-        return;
-    }
-
-    std::vector<double> aCaretPixelPos;
-    pSalLayout->GetCaretPositions(aCaretPixelPos, rStr);
-
-    vcl::text::TextLayoutEngine::FixupCaretPositions(aCaretPixelPos);
-
-    if (IsRTLEnabled())
-        vcl::text::TextLayoutEngine::MirrorCaretPositions(aCaretPixelPos, pSalLayout->GetTextWidth());
-
-    vcl::text::TextLayoutEngine::ConvertPixelsToLogic(*mpMapper, aCaretPixelPos);
-
-    for (int i = 0; i < nCaretPos; ++i)
-    {
-        rCaretPos[i] = aCaretPixelPos[i];
-    }
+    vcl::text::TextLayoutEngine::GetCaretPositions(
+        aResources, vcl::text::TextSpan{rStr, nIndex, nLen}, rCaretPos,
+        vcl::text::LayoutCacheData{nullptr, pGlyphs});
 }
 
 void OutputDevice::DrawStretchText( const Point& rStartPt, sal_Int32 nWidth,
