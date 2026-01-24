@@ -1721,12 +1721,16 @@ bool OutputDevice::GetTextOutlines( PolyPolyVector& rResultVector,
     basegfx::B2DPolyPolygonVector aB2DPolyPolyVector;
     if( !GetTextOutlines( aB2DPolyPolyVector, rStr, nBase, nIndex, nLen,
                          nLayoutWidth, pDXArray, pKashidaArray ) )
+    {
         return false;
+    }
 
     // convert to a tool polypolygon vector
     rResultVector.reserve( aB2DPolyPolyVector.size() );
     for (auto const& elem : aB2DPolyPolyVector)
+    {
         rResultVector.emplace_back(elem); // #i76339#
+    }
 
     return true;
 }
@@ -1739,12 +1743,18 @@ bool OutputDevice::GetTextOutline( tools::PolyPolygon& rPolyPoly, const OUString
     basegfx::B2DPolyPolygonVector aB2DPolyPolyVector;
     if( !GetTextOutlines( aB2DPolyPolyVector, rStr, 0/*nBase*/, 0/*nIndex*/, /*nLen*/-1,
                          /*nLayoutWidth*/0, /*pDXArray*/{} ) )
+    {
         return false;
+    }
 
     // convert and merge into a tool polypolygon
     for (auto const& elem : aB2DPolyPolyVector)
+    {
         for(auto const& rB2DPolygon : elem)
+        {
             rPolyPoly.Insert(tools::Polygon(rB2DPolygon)); // #i76339#
+        }
+    }
 
     return true;
 }
