@@ -858,7 +858,8 @@ void OutputDevice::GetCaretPositions( const OUString& rStr, KernArray& rCaretPos
         vcl::text::LayoutConstraints{Point(0,0), 0, {}, {}, eDefaultLayout},
         vcl::text::LayoutCacheData{nullptr, pGlyphs},
         vcl::text::RenderSelection{});
-    if( !pSalLayout )
+
+    if (!pSalLayout)
     {
         std::fill(rCaretPos.begin(), rCaretPos.end(), -1);
         return;
@@ -867,27 +868,7 @@ void OutputDevice::GetCaretPositions( const OUString& rStr, KernArray& rCaretPos
     std::vector<double> aCaretPixelPos;
     pSalLayout->GetCaretPositions(aCaretPixelPos, rStr);
 
-    int nFirstValidIndex = 0;
-
-    // fixup unknown caret positions
-    for (int i = 0; i < nCaretPos; ++i)
-    {
-        if (aCaretPixelPos[i] >= 0)
-        {
-            nFirstValidIndex = i;
-            break;
-        }
-    }
-
-    double nXPos = (nFirstValidIndex < nCaretPos) ? aCaretPixelPos[nFirstValidIndex] : -1;
-
-    for (int i = 0; i < nCaretPos; ++i)
-    {
-        if (aCaretPixelPos[i] >= 0)
-            nXPos = aCaretPixelPos[i];
-        else
-            aCaretPixelPos[i] = nXPos;
-    }
+    vcl::text::TextLayoutEngine::FixupCaretPositions(aCaretPixelPos);
 
     // handle window mirroring
     if( IsRTLEnabled() )
