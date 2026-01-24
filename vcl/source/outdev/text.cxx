@@ -944,15 +944,23 @@ std::shared_ptr<const vcl::text::TextLayoutCache> OutputDevice::CreateTextLayout
 
 bool OutputDevice::GetTextIsRTL( const OUString& rString, sal_Int32 nIndex, sal_Int32 nLen ) const
 {
-    OUString aStr( rString );
-    vcl::text::TextLayoutRequest aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
-        aStr, nIndex, nLen, 0, SalLayoutFlags::NONE, nullptr,
-        *mpGraphicsState, *mpFontRealization, IsRTLEnabled());
-    bool bRTL = false;
-    int nCharPos = -1;
-    if (!aArgs.GetNextPos(&nCharPos, &bRTL))
+    if (!InitFont())
         return false;
-    return (nCharPos != nIndex);
+
+    vcl::text::LayoutResources aResources = {
+        mpFontRealization->mxFont.get(),
+        *mpMapper,
+        &GetFontCache(),
+        GetFontCollection(),
+        mpForcedFallbackInstance.get(),
+        [this]() { const_cast<OutputDevice*>(this)->AcquireGraphics(); return mpGraphics; },
+        IsRTLEnabled(),
+        IsMapModeEnabled() || isSubpixelPositioning() || SupportsSubpixelPositioning(),
+        *mpGraphicsState,
+        *mpFontRealization
+    };
+
+    return vcl::text::TextLayoutEngine::GetTextIsRTL(aResources, rString, nIndex, nLen);
 }
 
 sal_Int32 OutputDevice::GetTextBreak(const OUString& rStr, tools::Long nTextWidth,
