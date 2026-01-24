@@ -828,6 +828,12 @@ static sal_Int32 lcl_getNormalizedPartLength(const OUString& rStr, sal_Int32 nPa
     return nPartLen;
 }
 
+static void lcl_zeroFillKernArray(KernArray* pKernArray, sal_Int32 nLen)
+{
+    if (pKernArray)
+        pKernArray->assign(std::max<sal_Int32>(0, nLen), 0.0);
+}
+
 double
 OutputDevice::GetPartialTextArray(const OUString& rStr, KernArray* pKernArray, sal_Int32 nIndex,
                                   sal_Int32 nLen, sal_Int32 nPartIndex, sal_Int32 nPartLen,
@@ -850,13 +856,9 @@ OutputDevice::GetPartialTextArray(const OUString& rStr, KernArray* pKernArray, s
 
     std::unique_ptr<SalLayout> pSalLayout = LayoutText(aTextSpan, aConstraints, aCacheData, aSelection);
 
-    if( !pSalLayout )
+    if (!pSalLayout)
     {
-        if (pKernArray)
-        {
-            pKernArray->resize(nPartLen);
-            std::fill(pKernArray->begin(), pKernArray->end(), 0);
-        }
+        lcl_zeroFillKernArray(pKernArray, nPartLen);
         return 0.0;
     }
 
