@@ -867,13 +867,21 @@ void OutputDevice::GetCaretPositions( const OUString& rStr, KernArray& rCaretPos
     std::vector<double> aCaretPixelPos;
     pSalLayout->GetCaretPositions(aCaretPixelPos, rStr);
 
+    int nFirstValidIndex = 0;
+
     // fixup unknown caret positions
-    int i;
-    for (i = 0; i < nCaretPos; ++i)
+    for (int i = 0; i < nCaretPos; ++i)
+    {
         if (aCaretPixelPos[i] >= 0)
+        {
+            nFirstValidIndex = i;
             break;
-    double nXPos = (i < nCaretPos) ? aCaretPixelPos[i] : -1;
-    for (i = 0; i < nCaretPos; ++i)
+        }
+    }
+
+    double nXPos = (nFirstValidIndex < nCaretPos) ? aCaretPixelPos[nFirstValidIndex] : -1;
+
+    for (int i = 0; i < nCaretPos; ++i)
     {
         if (aCaretPixelPos[i] >= 0)
             nXPos = aCaretPixelPos[i];
@@ -885,19 +893,26 @@ void OutputDevice::GetCaretPositions( const OUString& rStr, KernArray& rCaretPos
     if( IsRTLEnabled() )
     {
         double nWidth = pSalLayout->GetTextWidth();
-        for (i = 0; i < nCaretPos; ++i)
+
+        for (int i = 0; i < nCaretPos; ++i)
+        {
             aCaretPixelPos[i] = nWidth - aCaretPixelPos[i] - 1;
+        }
     }
 
     // convert from font units to logical units
     if (mpMapper->IsMapModeEnabled())
     {
-        for (i = 0; i < nCaretPos; ++i)
+        for (int i = 0; i < nCaretPos; ++i)
+        {
             aCaretPixelPos[i] = mpMapper->DevicePixelToLogicWidthDouble(aCaretPixelPos[i]);
+        }
     }
 
-    for (i = 0; i < nCaretPos; ++i)
+    for (int i = 0; i < nCaretPos; ++i)
+    {
         rCaretPos[i] = aCaretPixelPos[i];
+    }
 }
 
 void OutputDevice::DrawStretchText( const Point& rStartPt, sal_Int32 nWidth,
