@@ -808,69 +808,15 @@ OutputDevice::GetTextArray(const OUString& rStr, KernArray* pKernArray, sal_Int3
                                pSalLayoutCache, pBounds);
 }
 
-/**
- * Normalizes text length to ensure it stays within string bounds.
- */
-static sal_Int32 lcl_getNormalizedTextLength(const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen)
-{
-    if (nLen < 0 || (nIndex + nLen) > rStr.getLength())
-        return std::max<sal_Int32>(0, rStr.getLength() - nIndex);
-
-    return nLen;
-}
-
-static sal_Int32 lcl_getNormalizedPartLength(const OUString& rStr, sal_Int32 nPartIndex, sal_Int32 nPartLen)
-{
-    if (nPartLen < 0 || (nPartIndex + nPartLen) > rStr.getLength())
-    {
-        return std::max<sal_Int32>(0, rStr.getLength() - nPartIndex);
-    }
-    return nPartLen;
-}
-
-static void lcl_zeroFillKernArray(KernArray* pKernArray, sal_Int32 nLen)
-{
-    if (pKernArray)
-        pKernArray->assign(std::max<sal_Int32>(0, nLen), 0.0);
-}
-
-static void lcl_convertBoundRectToLogic(const SalLayout& rLayout,
-                                        const CoordinateMapper& rMapper,
-                                        std::optional<tools::Rectangle>* pBounds)
-{
-    if (!pBounds)
-        return;
-
-    basegfx::B2DRectangle aB2DRect;
-
-    if (rLayout.GetBoundRect(aB2DRect))
-    {
-        tools::Rectangle aRect = SalLayout::BoundRect2Rectangle(aB2DRect);
-        *pBounds = rMapper.DevicePixelToLogic(aRect);
-    }
-}
-
 double
 OutputDevice::GetPartialTextArray(const OUString& rStr, KernArray* pKernArray, sal_Int32 nIndex,
                                   sal_Int32 nLen, sal_Int32 nPartIndex, sal_Int32 nPartLen,
                                   bool bCaret, const vcl::text::TextLayoutCache* pLayoutCache,
                                   const SalLayoutGlyphs* pSalLayoutCache, std::optional<tools::Rectangle>* pBounds) const
 {
-    if (nIndex >= rStr.getLength())
-        return 0.0;
-
-    nLen = lcl_getNormalizedTextLength(rStr, nIndex, nLen);
-    nPartLen = lcl_getNormalizedPartLength(rStr, nPartIndex, nPartLen);
-
-    vcl::text::TextSpan aTextSpan {rStr, nIndex, nLen};
-    vcl::text::LayoutConstraints aConstraints {Point(0, 0), 0, {}, {}, SalLayoutFlags::NONE};
-    vcl::text::LayoutCacheData aCacheData {pLayoutCache, pSalLayoutCache};
-
-    std::unique_ptr<SalLayout> pSalLayout = LayoutText(aTextSpan, aConstraints, aCacheData, vcl::text::RenderSelection{});
-
-    if (!pSalLayout)
+    if (!InitFont())
     {
-        lcl_zeroFillKernArray(pKernArray, nPartLen);
+        vcl::text::TextLayoutEngine::ZeroFillKernArray(pKernArray, nPartLen); // Use the part length requested
         return 0.0;
     }
 
@@ -887,11 +833,10 @@ OutputDevice::GetPartialTextArray(const OUString& rStr, KernArray* pKernArray, s
         *mpFontRealization
     };
 
-    lcl_convertBoundRectToLogic(*pSalLayout, *mpMapper, pBounds);
-
-    return vcl::text::TextLayoutEngine::FillPartialTextArray(
-        aResources, *pSalLayout, pKernArray, nIndex, nLen, nPartIndex, nPartLen,
-        bCaret ? rStr : OUString());
+    return vcl::text::TextLayoutEngine::GetPartialTextArray(
+        aResources, vcl::text::TextSpan{rStr, nIndex, nLen}, pKernArray,
+        nPartIndex, nPartLen, bCaret,
+        vcl::text::LayoutCacheData{pLayoutCache, pSalLayoutCache}, pBounds);
 }
 
 void OutputDevice::GetCaretPositions( const OUString& rStr, KernArray& rCaretPos,
