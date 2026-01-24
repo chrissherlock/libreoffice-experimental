@@ -849,15 +849,15 @@ void OutputDevice::GetCaretPositions( const OUString& rStr, KernArray& rCaretPos
 
     nLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nIndex, nLen);
 
-    sal_Int32 nCaretPos = nLen * 2;
+    const sal_Int32 nCaretPos = nLen * 2;
     rCaretPos.resize(nCaretPos);
 
-    // do layout
-    std::unique_ptr<SalLayout> pSalLayout = LayoutText(
-        vcl::text::TextSpan{rStr, nIndex, nLen},
-        vcl::text::LayoutConstraints{Point(0,0), 0, {}, {}, eDefaultLayout},
-        vcl::text::LayoutCacheData{nullptr, pGlyphs},
-        vcl::text::RenderSelection{});
+    const vcl::text::TextSpan aTextSpan {rStr, nIndex, nLen};
+    const vcl::text::LayoutConstraints aConstraints {Point(0,0), 0, {}, {}, eDefaultLayout};
+    const vcl::text::LayoutCacheData aCacheData {nullptr, pGlyphs};
+
+    std::unique_ptr<SalLayout> pSalLayout
+        = LayoutText(aTextSpan, aConstraints, aCacheData, vcl::text::RenderSelection{});
 
     if (!pSalLayout)
     {
