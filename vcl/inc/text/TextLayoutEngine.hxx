@@ -251,6 +251,8 @@ public:
 
     static void ZeroFillKernArray(KernArray* pKernArray, sal_Int32 nLen);
 
+    static sal_Int32 GetNormalizedLength(const OUString& rStr, sal_Int32 nIdx, sal_Int32 nLen);
+
     static double GetPartialTextArray(const LayoutResources& rRes, const vcl::text::TextSpan& rSpan,
                                       KernArray* pKernArray, sal_Int32 nPartIndex,
                                       sal_Int32 nPartLen, bool bCaret,
