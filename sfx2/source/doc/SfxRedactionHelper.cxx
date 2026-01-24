@@ -155,12 +155,12 @@ tools::Rectangle ImplCalcActionBounds(const MetaAction& rAct, const OutputDevice
                     vcl::text::LayoutCacheData{}, vcl::text::RenderSelection{});
                 if (pSalLayout2)
                 {
-                    tools::Rectangle aBoundRect2(rOut.ImplGetTextBoundRect(*pSalLayout2));
+                    tools::Rectangle aBoundRect2(rOut.GetTextInkBounds(*pSalLayout2));
                     aActionBounds = rOut.PixelToLogic(aBoundRect2);
                 }
                 if (pSalLayout1 && nStrStartPos > 0)
                 {
-                    tools::Rectangle aBoundRect1(rOut.ImplGetTextBoundRect(*pSalLayout1));
+                    tools::Rectangle aBoundRect1(rOut.GetTextInkBounds(*pSalLayout1));
                     aActionBounds.SetLeft(rOut.PixelToLogic(aBoundRect1).Right());
                 }
             }

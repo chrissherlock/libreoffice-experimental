@@ -1052,7 +1052,7 @@ public:
                                                   std::span<const sal_Bool> pKashidaArray = {},
                                                   const SalLayoutGlyphs* pGlyphs = nullptr ) const;
 
-    tools::Rectangle            ImplGetTextBoundRect(const SalLayout& rLayout) const;
+    tools::Rectangle            GetTextInkBounds(const SalLayout& rLayout) const;
 
     bool                        GetTextOutline( tools::PolyPolygon&,
                                                 const OUString& rStr ) const;
