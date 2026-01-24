@@ -1624,7 +1624,7 @@ tools::Long OutputDevice::GetCtrlTextWidth( const OUString& rStr, const SalLayou
     return GetTextWidth( aStr, nIndex, nLen, nullptr, pGlyphs );
 }
 
-bool OutputDevice::GetTextBoundRect( tools::Rectangle& rRect,
+bool OutputDevice::GetLogicalTextBoundRect( tools::Rectangle& rRect,
                                          const OUString& rStr, sal_Int32 nBase,
                                          sal_Int32 nIndex, sal_Int32 nLen,
                                          sal_uLong nLayoutWidth, KernArraySpan pDXArray,
@@ -1632,13 +1632,13 @@ bool OutputDevice::GetTextBoundRect( tools::Rectangle& rRect,
                                          const SalLayoutGlyphs* pGlyphs ) const
 {
     basegfx::B2DRectangle aRect;
-    bool bRet = GetTextBoundRect(aRect, rStr, nBase, nIndex, nLen, static_cast<tools::Long>(nLayoutWidth), pDXArray,
+    bool bRet = GetLogicalTextBoundRect(aRect, rStr, nBase, nIndex, nLen, static_cast<tools::Long>(nLayoutWidth), pDXArray,
                                  pKashidaArray, pGlyphs);
     rRect = SalLayout::BoundRect2Rectangle(aRect);
     return bRet;
 }
 
-bool OutputDevice::GetTextBoundRect(basegfx::B2DRectangle& rRect, const OUString& rStr,
+bool OutputDevice::GetLogicalTextBoundRect(basegfx::B2DRectangle& rRect, const OUString& rStr,
                                     sal_Int32 nBase, sal_Int32 nIndex, sal_Int32 nLen,
                                     sal_uLong nLayoutWidth, KernArraySpan pDXArray,
                                     std::span<const sal_Bool> pKashidaArray,
