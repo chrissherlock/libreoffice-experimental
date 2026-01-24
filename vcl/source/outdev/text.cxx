@@ -1033,9 +1033,7 @@ sal_Int32 OutputDevice::GetTextBreakArray(const OUString& rStr, tools::Long nTex
                                           const SalLayoutGlyphs* pGlyphs) const
 {
     if (pHyphenPos.has_value())
-    {
         **pHyphenPos = -1;
-    }
 
     std::unique_ptr<SalLayout> pSalLayout = LayoutText(
         vcl::text::TextSpan{rStr, nIndex, nLen},
@@ -1043,55 +1041,53 @@ sal_Int32 OutputDevice::GetTextBreakArray(const OUString& rStr, tools::Long nTex
         vcl::text::LayoutCacheData{pLayoutCache, pGlyphs},
         vcl::text::RenderSelection{});
 
-    sal_Int32 nRetVal = -1;
-    if( pSalLayout )
-    {
-        tools::Long nSubPixelFactor = 1;
-        if (!mpMapper->IsMapModeEnabled())
-            nSubPixelFactor = 64;
+    if (!pSalLayout)
+        return -1;
 
-        double nTextPixelWidth = LogicWidthToDeviceSubPixel(nTextWidth * nSubPixelFactor);
-        double nExtraPixelWidth = 0;
-        if( nCharExtra != 0 )
-            nExtraPixelWidth = LogicWidthToDeviceSubPixel(nCharExtra * nSubPixelFactor);
+    tools::Long nSubPixelFactor = 1;
+    if (!mpMapper->IsMapModeEnabled())
+        nSubPixelFactor = 64;
 
-        // calculate un-hyphenated break position
-        nRetVal = pSalLayout->GetTextBreak( nTextPixelWidth, nExtraPixelWidth, nSubPixelFactor );
+    double nTextPixelWidth = LogicWidthToDeviceSubPixel(nTextWidth * nSubPixelFactor);
+    double nExtraPixelWidth = 0;
+    if( nCharExtra != 0 )
+        nExtraPixelWidth = LogicWidthToDeviceSubPixel(nCharExtra * nSubPixelFactor);
 
-        // calculate hyphenated break position
-        if (nHyphenChar.has_value())
-        {
-            OUString aHyphenStr(*nHyphenChar);
-            // Create layout for the single hyphen character
-            std::unique_ptr<SalLayout> pHyphenLayout = LayoutText(
-                vcl::text::TextSpan{aHyphenStr, 0, 1},
-                vcl::text::LayoutConstraints{Point(0,0), 0, {}, {}, eDefaultLayout},
-                vcl::text::LayoutCacheData{nullptr, nullptr},
-                vcl::text::RenderSelection{});
+    // calculate un-hyphenated break position
+    sal_Int32 nRetVal = pSalLayout->GetTextBreak( nTextPixelWidth, nExtraPixelWidth, nSubPixelFactor );
 
-            if (pHyphenLayout)
-            {
-                // calculate subpixel width of hyphenation character
-                double nHyphenPixelWidth = pHyphenLayout->GetTextWidth() * nSubPixelFactor;
+    // calculate hyphenated break position
+    if (!nHyphenChar.has_value())
+        return nRetVal;
 
-                // calculate hyphenated break position
-                nTextPixelWidth -= nHyphenPixelWidth;
-                if (nExtraPixelWidth > 0)
-                    nTextPixelWidth -= nExtraPixelWidth;
+    OUString aHyphenStr(*nHyphenChar);
 
-                if (pHyphenPos.has_value())
-                {
-                    **pHyphenPos = pSalLayout->GetTextBreak(nTextPixelWidth, nExtraPixelWidth,
-                                                            nSubPixelFactor);
+    // Create layout for the single hyphen character
+    std::unique_ptr<SalLayout> pHyphenLayout = LayoutText(
+        vcl::text::TextSpan{aHyphenStr, 0, 1},
+        vcl::text::LayoutConstraints{Point(0,0), 0, {}, {}, eDefaultLayout},
+        vcl::text::LayoutCacheData{nullptr, nullptr},
+        vcl::text::RenderSelection{});
 
-                    if (**pHyphenPos > nRetVal)
-                    {
-                        **pHyphenPos = nRetVal;
-                    }
-                }
-            }
-        }
-    }
+    if (!pHyphenLayout)
+        return nRetVal;
+
+    // calculate subpixel width of hyphenation character
+    double nHyphenPixelWidth = pHyphenLayout->GetTextWidth() * nSubPixelFactor;
+
+    // calculate hyphenated break position
+    nTextPixelWidth -= nHyphenPixelWidth;
+    if (nExtraPixelWidth > 0)
+        nTextPixelWidth -= nExtraPixelWidth;
+
+    if (!pHyphenPos.has_value())
+        return nRetVal;
+
+    **pHyphenPos = pSalLayout->GetTextBreak(nTextPixelWidth, nExtraPixelWidth,
+                                            nSubPixelFactor);
+
+    if (**pHyphenPos > nRetVal)
+        **pHyphenPos = nRetVal;
 
     return nRetVal;
 }
