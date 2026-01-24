@@ -843,7 +843,8 @@ void TextLayoutEngine::ZeroFillKernArray(KernArray* pKernArray, sal_Int32 nLen)
         pKernArray->assign(std::max<sal_Int32>(0, nLen), 0.0);
 }
 
-static sal_Int32 lcl_getNormalizedLength(const OUString& rStr, sal_Int32 nIdx, sal_Int32 nLen)
+sal_Int32 TextLayoutEngine::GetNormalizedLength(const OUString& rStr, sal_Int32 nIdx,
+                                                sal_Int32 nLen)
 {
     if (nLen < 0 || (nIdx + nLen) > rStr.getLength())
         return std::max<sal_Int32>(0, rStr.getLength() - nIdx);
@@ -877,8 +878,8 @@ double TextLayoutEngine::GetPartialTextArray(const LayoutResources& rRes,
         return 0.0;
 
     // Normalize lengths
-    sal_Int32 nLen = lcl_getNormalizedLength(rSpan.Text, rSpan.Index, rSpan.Length);
-    sal_Int32 nNormalizedPartLen = lcl_getNormalizedLength(rSpan.Text, nPartIndex, nPartLen);
+    sal_Int32 nLen = GetNormalizedLength(rSpan.Text, rSpan.Index, rSpan.Length);
+    sal_Int32 nNormalizedPartLen = GetNormalizedLength(rSpan.Text, nPartIndex, nPartLen);
 
     vcl::text::TextSpan aNormalizedSpan{ rSpan.Text, rSpan.Index, nLen };
     vcl::text::LayoutConstraints aConstraints{ Point(0, 0), 0, {}, {}, SalLayoutFlags::NONE };

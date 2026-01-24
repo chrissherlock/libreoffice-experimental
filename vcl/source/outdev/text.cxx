@@ -846,8 +846,8 @@ void OutputDevice::GetCaretPositions( const OUString& rStr, KernArray& rCaretPos
 
     if( nIndex >= rStr.getLength() )
         return;
-    if( nIndex+nLen >= rStr.getLength() )
-        nLen = rStr.getLength() - nIndex;
+
+    nLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nIndex, nLen);
 
     sal_Int32 nCaretPos = nLen * 2;
     rCaretPos.resize(nCaretPos);
