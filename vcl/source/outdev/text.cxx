@@ -810,7 +810,6 @@ OutputDevice::GetTextArray(const OUString& rStr, KernArray* pKernArray, sal_Int3
 
 /**
  * Normalizes text length to ensure it stays within string bounds.
- * Follows VCL static local naming convention: lcl_ + lowercase.
  */
 static sal_Int32 lcl_getNormalizedTextLength(const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen)
 {
@@ -818,6 +817,15 @@ static sal_Int32 lcl_getNormalizedTextLength(const OUString& rStr, sal_Int32 nIn
         return std::max<sal_Int32>(0, rStr.getLength() - nIndex);
 
     return nLen;
+}
+
+static sal_Int32 lcl_getNormalizedPartLength(const OUString& rStr, sal_Int32 nPartIndex, sal_Int32 nPartLen)
+{
+    if (nPartLen < 0 || (nPartIndex + nPartLen) > rStr.getLength())
+    {
+        return std::max<sal_Int32>(0, rStr.getLength() - nPartIndex);
+    }
+    return nPartLen;
 }
 
 double
@@ -830,9 +838,7 @@ OutputDevice::GetPartialTextArray(const OUString& rStr, KernArray* pKernArray, s
         return 0.0;
 
     nLen = lcl_getNormalizedTextLength(rStr, nIndex, nLen);
-
-    if (nPartLen < 0 || nPartIndex + nPartLen >= rStr.getLength())
-        nPartLen = rStr.getLength() - nPartIndex;
+    nPartLen = lcl_getNormalizedPartLength(rStr, nPartIndex, nPartLen);
 
     vcl::text::TextSpan aTextSpan {rStr, nIndex, nLen};
     vcl::text::LayoutConstraints aConstraints {Point(0, 0), 0, {}, {}, SalLayoutFlags::NONE};
