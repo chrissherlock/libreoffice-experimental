@@ -682,7 +682,7 @@ tools::Long OutputDevice::GetTextHeight() const
 
     if (mpFontRealization && mpFontRealization->mxFont)
     {
-        double nPixelHeight = vcl::text::TextLayoutEngine::GetTextHeightPixel(*mpFontRealization);
+        const double nPixelHeight = vcl::text::TextLayoutEngine::GetTextHeightPixel(*mpFontRealization);
 
         return DevicePixelToLogicHeight(static_cast<tools::Long>(nPixelHeight));
     }
@@ -694,7 +694,7 @@ double OutputDevice::GetTextHeightDouble() const
     if (!InitFont())
         return 0;
 
-    double nHeight = vcl::text::TextLayoutEngine::GetTextHeightPixel(*mpFontRealization);
+    const double nHeight = vcl::text::TextLayoutEngine::GetTextHeightPixel(*mpFontRealization);
 
     return mpMapper->DevicePixelToLogicHeightDouble(nHeight);
 }
