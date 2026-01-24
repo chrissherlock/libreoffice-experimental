@@ -258,6 +258,8 @@ public:
                                       sal_Int32 nPartLen, bool bCaret,
                                       const vcl::text::LayoutCacheData& rCache,
                                       std::optional<tools::Rectangle>* pBounds);
+
+    static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);
 };
 
 } // namespace vcl::text
