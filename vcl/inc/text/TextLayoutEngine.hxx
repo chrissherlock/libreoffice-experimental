@@ -271,6 +271,13 @@ public:
     static bool GetTextIsRTL(const LayoutResources& rRes, const OUString& rString, sal_Int32 nIndex,
                              sal_Int32 nLen);
 
+    static sal_Int32 GetTextBreakArray(const LayoutResources& rRes,
+                                       const vcl::text::TextSpan& rSpan, tools::Long nTextWidth,
+                                       std::optional<sal_Unicode> nHyphenChar,
+                                       std::optional<sal_Int32*> pHyphenPos, tools::Long nCharExtra,
+                                       KernArraySpan aKernArray,
+                                       const vcl::text::LayoutCacheData& rCache);
+
 private:
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);
 
