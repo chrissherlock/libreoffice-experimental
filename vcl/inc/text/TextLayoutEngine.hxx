@@ -262,6 +262,11 @@ public:
     static void GetCaretPositions(const LayoutResources& rRes, const vcl::text::TextSpan& rSpan,
                                   KernArray& rCaretPos, const vcl::text::LayoutCacheData& rCache);
 
+    /** Orchestrates finding the character index where text must break for a given width. */
+    static sal_Int32 GetTextBreak(const LayoutResources& rRes, const vcl::text::TextSpan& rSpan,
+                                  tools::Long nMaxLineWidth, tools::Long nCharExtra,
+                                  const vcl::text::LayoutCacheData& rCache);
+
 private:
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);
 
@@ -271,6 +276,13 @@ private:
     /** Converts device pixel positions to logical units using the provided mapper. */
     static void ConvertPixelsToLogic(const CoordinateMapper& rMapper,
                                      std::vector<double>& rCaretPixelPos);
+
+    /** Calculates the subpixel factor (1 or 64) based on the mapping state. */
+    static tools::Long GetSubPixelFactor(const CoordinateMapper& rMapper);
+
+    /** Converts logical widths to layout units, accounting for subpixel scaling. */
+    static double GetLayoutPixelWidth(const CoordinateMapper& rMapper, tools::Long nLogicWidth,
+                                      tools::Long nSubPixelFactor);
 };
 
 } // namespace vcl::text

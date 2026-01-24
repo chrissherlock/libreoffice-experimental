@@ -955,37 +955,31 @@ bool OutputDevice::GetTextIsRTL( const OUString& rString, sal_Int32 nIndex, sal_
     return (nCharPos != nIndex);
 }
 
-sal_Int32 OutputDevice::GetTextBreak( const OUString& rStr, tools::Long nTextWidth,
-                                       sal_Int32 nIndex, sal_Int32 nLen,
-                                       tools::Long nCharExtra,
-         vcl::text::TextLayoutCache const*const pLayoutCache,
-         const SalLayoutGlyphs* pGlyphs) const
+sal_Int32 OutputDevice::GetTextBreak(const OUString& rStr, tools::Long nTextWidth,
+                                     sal_Int32 nIndex, sal_Int32 nLen,
+                                     tools::Long nCharExtra,
+                                     const vcl::text::TextLayoutCache* pLayoutCache,
+                                     const SalLayoutGlyphs* pGlyphs) const
 {
-    std::unique_ptr<SalLayout> pSalLayout = LayoutText(
-        vcl::text::TextSpan{rStr, nIndex, nLen},
-        vcl::text::LayoutConstraints{Point(0,0), 0, {}, {}, eDefaultLayout},
-        vcl::text::LayoutCacheData{pLayoutCache, pGlyphs},
-        vcl::text::RenderSelection{});
-
-    if (!pSalLayout)
+    if (!InitFont())
         return -1;
 
-    // convert logical widths into layout units
-    // NOTE: be very careful to avoid rounding errors for nCharExtra case
-    // problem with rounding errors especially for small nCharExtras
-    // TODO: remove when layout units have subpixel granularity
-    tools::Long nSubPixelFactor = 1;
+    vcl::text::LayoutResources aResources = {
+        mpFontRealization->mxFont.get(),
+        *mpMapper,
+        &GetFontCache(),
+        GetFontCollection(),
+        mpForcedFallbackInstance.get(),
+        [this]() { const_cast<OutputDevice*>(this)->AcquireGraphics(); return mpGraphics; },
+        IsRTLEnabled(),
+        IsMapModeEnabled() || isSubpixelPositioning() || SupportsSubpixelPositioning(),
+        *mpGraphicsState,
+        *mpFontRealization
+    };
 
-    if (!mpMapper->IsMapModeEnabled())
-        nSubPixelFactor = 64;
-
-    double nTextPixelWidth = LogicWidthToDeviceSubPixel(nTextWidth * nSubPixelFactor);
-    double nExtraPixelWidth = 0;
-
-    if (nCharExtra != 0)
-        nExtraPixelWidth = LogicWidthToDeviceSubPixel(nCharExtra * nSubPixelFactor);
-
-    return pSalLayout->GetTextBreak(nTextPixelWidth, nExtraPixelWidth, nSubPixelFactor);
+    return vcl::text::TextLayoutEngine::GetTextBreak(
+        aResources, vcl::text::TextSpan{rStr, nIndex, nLen},
+        nTextWidth, nCharExtra, vcl::text::LayoutCacheData{pLayoutCache, pGlyphs});
 }
 
 sal_Int32 OutputDevice::GetTextBreakArray(const OUString& rStr, tools::Long nTextWidth,

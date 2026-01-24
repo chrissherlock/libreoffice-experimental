@@ -988,4 +988,39 @@ void TextLayoutEngine::GetCaretPositions(const LayoutResources& rRes,
     }
 }
 
+tools::Long TextLayoutEngine::GetSubPixelFactor(const CoordinateMapper& rMapper)
+{
+    // Use 64 as a factor when MapMode is disabled to maintain subpixel granularity
+    return rMapper.IsMapModeEnabled() ? 1 : 64;
+}
+
+double TextLayoutEngine::GetLayoutPixelWidth(const CoordinateMapper& rMapper,
+                                             tools::Long nLogicWidth, tools::Long nSubPixelFactor)
+{
+    // High-precision conversion from logical units to device subpixels
+    return rMapper.LogicWidthToDeviceSubPixel(nLogicWidth * nSubPixelFactor);
+}
+
+sal_Int32 TextLayoutEngine::GetTextBreak(const LayoutResources& rRes,
+                                         const vcl::text::TextSpan& rSpan,
+                                         tools::Long nMaxLineWidth, tools::Long nCharExtra,
+                                         const vcl::text::LayoutCacheData& rCache)
+{
+    const vcl::text::LayoutConstraints aConstraints{ Point(0, 0), 0, {}, {}, SalLayoutFlags::NONE };
+    std::unique_ptr<SalLayout> pSalLayout = Layout(rRes, rSpan, aConstraints, rCache, {});
+
+    if (!pSalLayout)
+        return -1;
+
+    const tools::Long nSubPixelFactor = GetSubPixelFactor(rRes.rMapper);
+    const double nTextPixelWidth
+        = GetLayoutPixelWidth(rRes.rMapper, nMaxLineWidth, nSubPixelFactor);
+
+    double nExtraPixelWidth = 0;
+    if (nCharExtra != 0)
+        nExtraPixelWidth = GetLayoutPixelWidth(rRes.rMapper, nCharExtra, nSubPixelFactor);
+
+    return pSalLayout->GetTextBreak(nTextPixelWidth, nExtraPixelWidth, nSubPixelFactor);
+}
+
 } // namespace vcl::text
