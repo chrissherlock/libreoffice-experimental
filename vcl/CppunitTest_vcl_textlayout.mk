@@ -35,6 +35,7 @@ $(eval $(call gb_CppunitTest_use_externals,vcl_textlayout, \
 endif
 
 $(eval $(call gb_CppunitTest_use_libraries,vcl_textlayout, \
+	basegfx \
 	comphelper \
 	cppu \
 	cppuhelper \

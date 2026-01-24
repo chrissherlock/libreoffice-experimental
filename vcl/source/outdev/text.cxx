@@ -1686,15 +1686,8 @@ bool OutputDevice::GetTextOutlines( basegfx::B2DPolyPolygonVector& rVector,
         bRet = pSalLayout->GetOutline(rVector);
         if( bRet )
         {
-            // transform polygon to pixel units
-            basegfx::B2DHomMatrix aMatrix;
-
-            if (nXOffset || mpFontRealization->nXOffset || mpFontRealization->nYOffset)
-            {
-                basegfx::B2DPoint aRotatedOfs(mpFontRealization->nXOffset, mpFontRealization->nYOffset);
-                aRotatedOfs -= pSalLayout->GetDrawPosition(basegfx::B2DPoint(nXOffset, 0));
-                aMatrix.translate( aRotatedOfs.getX(), aRotatedOfs.getY() );
-            }
+            basegfx::B2DHomMatrix aMatrix = vcl::text::TextLayoutEngine::CalculateOutlineTransform(
+                *pSalLayout, *mpFontRealization, nXOffset);
 
             if( !aMatrix.isIdentity() )
             {

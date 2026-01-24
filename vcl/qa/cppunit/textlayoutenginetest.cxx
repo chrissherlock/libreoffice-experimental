@@ -14,6 +14,7 @@
 #include <i18nlangtag/lang.h>
 
 #include <vcl/outdev.hxx>
+#include <basegfx/matrix/b2dhommatrix.hxx>
 #include <vcl/glyphitem.hxx>
 #include <vcl/font.hxx>
 
@@ -30,6 +31,7 @@ class TextLayoutEngineTest : public test::BootstrapFixture
 public:
     void testGetTextHeightPixel();
     void testEmphasisMarkPositions();
+    void testCalculateOutlineTransform();
     void testFillPartialTextArray();
 
     TextLayoutEngineTest()
@@ -65,6 +67,7 @@ public:
     CPPUNIT_TEST(testApplyHorizontalOffset_Disabled);
     CPPUNIT_TEST(testGetTextHeightPixel);
     CPPUNIT_TEST(testEmphasisMarkPositions);
+    CPPUNIT_TEST(testCalculateOutlineTransform);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -528,6 +531,59 @@ void TextLayoutEngineTest::testEmphasisMarkPositions()
 
         CPPUNIT_ASSERT_EQUAL(size_t(1), aPoints.size());
         CPPUNIT_ASSERT_EQUAL(tools::Long(50), aPoints[0].Y());
+    }
+}
+
+void TextLayoutEngineTest::testCalculateOutlineTransform()
+{
+    // 1. Setup Mock Layout
+    MockSalLayout aLayout;
+    aLayout.DrawBase() = basegfx::B2DPoint(100.0, 200.0); // Draw Base at (100, 200)
+
+    // 2. Setup FontRealization (simulating a shadow or bold offset)
+    vcl::font::FontRealization aRealization;
+    aRealization.nXOffset = 5.0;
+    aRealization.nYOffset = 5.0;
+
+    // 3. Test Case A: No Extra X Offset (Normal text)
+    {
+        // Logic:
+        // RotatedOfs = (5, 5)
+        // DrawPos(0) = DrawBase + (0,0) = (100, 200)
+        // Translation = (5,5) - (100,200) = (-95, -195)
+
+        basegfx::B2DHomMatrix aMat
+            = vcl::text::TextLayoutEngine::CalculateOutlineTransform(aLayout, aRealization, 0.0);
+
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(-95.0, aMat.get(0, 2), 0.001); // Translate X
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(-195.0, aMat.get(1, 2), 0.001); // Translate Y
+    }
+
+    // 4. Test Case B: With Extra X Offset (e.g. part of a run)
+    {
+        double nXOffset = 10.0;
+        // Logic:
+        // RotatedOfs = (5, 5)
+        // DrawPos(10) = DrawBase + (10, 0) = (110, 200)
+        // Translation = (5,5) - (110,200) = (-105, -195)
+
+        basegfx::B2DHomMatrix aMat = vcl::text::TextLayoutEngine::CalculateOutlineTransform(
+            aLayout, aRealization, nXOffset);
+
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(-105.0, aMat.get(0, 2), 0.001);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(-195.0, aMat.get(1, 2), 0.001);
+    }
+
+    // 5. Test Case C: Identity (No Offsets)
+    {
+        aRealization.nXOffset = 0;
+        aRealization.nYOffset = 0;
+        aLayout.DrawBase() = basegfx::B2DPoint(0, 0);
+
+        basegfx::B2DHomMatrix aMat
+            = vcl::text::TextLayoutEngine::CalculateOutlineTransform(aLayout, aRealization, 0.0);
+
+        CPPUNIT_ASSERT_MESSAGE("Should be identity", aMat.isIdentity());
     }
 }
 

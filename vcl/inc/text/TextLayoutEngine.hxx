@@ -325,6 +325,10 @@ public:
                                          const vcl::font::FontRealization& rFontRealization,
                                          bool bEmphasisBelow, std::vector<Point>& rPoints);
 
+    static basegfx::B2DHomMatrix
+    CalculateOutlineTransform(const SalLayout& rLayout,
+                              const vcl::font::FontRealization& rRealization, double nXOffset);
+
 private:
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);
 
