@@ -845,47 +845,18 @@ OutputDevice::GetPartialTextArray(const OUString& rStr, KernArray* pKernArray, s
         return 0.0;
     }
 
-    std::vector<double> aDXPixelArray;
-    std::vector<double>* pDXPixelArray = nullptr;
-    if(pKernArray)
-    {
-        aDXPixelArray.resize(nPartLen);
-        pDXPixelArray = &aDXPixelArray;
-    }
-
-    double nWidth = 0.0;
-
-    if (nIndex == nPartIndex && nLen == nPartLen)
-    {
-        nWidth = pSalLayout->FillDXArray(pDXPixelArray, bCaret ? rStr : OUString());
-    }
-    else
-    {
-        nWidth = pSalLayout->FillPartialDXArray(pDXPixelArray, bCaret ? rStr : OUString(),
-                                                nPartIndex - nIndex, nPartLen);
-    }
-
-    if( pDXPixelArray )
-    {
-        for (int i = 1; i < nPartLen; ++i)
-            (*pDXPixelArray)[i] += (*pDXPixelArray)[i - 1];
-    }
-
-    if (pDXPixelArray)
-    {
-        if (mpMapper->IsMapModeEnabled())
-        {
-            for (int i = 0; i < nPartLen; ++i)
-                (*pDXPixelArray)[i] = mpMapper->DevicePixelToLogicWidthDouble((*pDXPixelArray)[i]);
-        }
-    }
-
-    if (pKernArray)
-    {
-        pKernArray->resize(nPartLen);
-        for (int i = 0; i < nPartLen; ++i)
-            (*pKernArray)[i] = (*pDXPixelArray)[i];
-    }
+    vcl::text::LayoutResources aResources = {
+        mpFontRealization->mxFont.get(),
+        *mpMapper,
+        &GetFontCache(),
+        GetFontCollection(),
+        mpForcedFallbackInstance.get(),
+        [this]() { const_cast<OutputDevice*>(this)->AcquireGraphics(); return mpGraphics; },
+        IsRTLEnabled(),
+        IsMapModeEnabled() || isSubpixelPositioning() || SupportsSubpixelPositioning(),
+        *mpGraphicsState,
+        *mpFontRealization
+    };
 
     if (pBounds)
     {
@@ -897,7 +868,9 @@ OutputDevice::GetPartialTextArray(const OUString& rStr, KernArray* pKernArray, s
         }
     }
 
-    return mpMapper->DevicePixelToLogicWidthDouble(nWidth);
+    return vcl::text::TextLayoutEngine::FillPartialTextArray(
+        aResources, *pSalLayout, pKernArray, nIndex, nLen, nPartIndex, nPartLen,
+        bCaret ? rStr : OUString());
 }
 
 void OutputDevice::GetCaretPositions( const OUString& rStr, KernArray& rCaretPos,
