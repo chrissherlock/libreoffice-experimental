@@ -278,6 +278,14 @@ public:
                                        KernArraySpan aKernArray,
                                        const vcl::text::LayoutCacheData& rCache);
 
+    /** Orchestrates the calculation of text bounding rectangles in logical units. */
+    static bool GetLogicalTextBoundRect(const LayoutResources& rRes, basegfx::B2DRectangle& rRect,
+                                        const OUString& rStr, sal_Int32 nBase, sal_Int32 nIndex,
+                                        sal_Int32 nLen, sal_uLong nLayoutWidth,
+                                        KernArraySpan pDXArray,
+                                        std::span<const sal_Bool> pKashidaArray,
+                                        const SalLayoutGlyphs* pGlyphs);
+
 private:
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);
 
