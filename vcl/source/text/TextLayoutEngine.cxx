@@ -958,4 +958,34 @@ void TextLayoutEngine::ConvertPixelsToLogic(const CoordinateMapper& rMapper,
     }
 }
 
+void TextLayoutEngine::GetCaretPositions(const LayoutResources& rRes,
+                                         const vcl::text::TextSpan& rSpan, KernArray& rCaretPos,
+                                         const vcl::text::LayoutCacheData& rCache)
+{
+    sal_Int32 nLen = GetNormalizedLength(rSpan.Text, rSpan.Index, rSpan.Length);
+    rCaretPos.assign(nLen * 2, -1);
+
+    const vcl::text::LayoutConstraints aConstraints{ Point(0, 0), 0, {}, {}, SalLayoutFlags::NONE };
+    std::unique_ptr<SalLayout> pSalLayout = Layout(rRes, rSpan, aConstraints, rCache, {});
+
+    if (!pSalLayout)
+        return;
+
+    // Measure Carets
+    std::vector<double> aCaretPixelPos;
+    pSalLayout->GetCaretPositions(aCaretPixelPos, rSpan.Text);
+
+    FixupCaretPositions(aCaretPixelPos);
+
+    if (rRes.bRTLEnabled)
+        MirrorCaretPositions(aCaretPixelPos, pSalLayout->GetTextWidth());
+
+    ConvertPixelsToLogic(rRes.rMapper, aCaretPixelPos);
+
+    for (size_t i = 0; i < aCaretPixelPos.size(); ++i)
+    {
+        rCaretPos[i] = aCaretPixelPos[i];
+    }
+}
+
 } // namespace vcl::text
