@@ -14,6 +14,7 @@
 #include <i18nlangtag/lang.h>
 
 #include <vcl/outdev.hxx>
+#include <vcl/glyphitem.hxx>
 #include <vcl/font.hxx>
 
 #include <font/FontController.hxx>
@@ -28,7 +29,7 @@ class TextLayoutEngineTest : public test::BootstrapFixture
 {
 public:
     void testGetTextHeightPixel();
-    void testCalculateLayoutWidth();
+    void testEmphasisMarkPositions();
     void testFillPartialTextArray();
 
     TextLayoutEngineTest()
@@ -63,8 +64,7 @@ public:
     CPPUNIT_TEST(testApplyHorizontalOffset_EndGlyph);
     CPPUNIT_TEST(testApplyHorizontalOffset_Disabled);
     CPPUNIT_TEST(testGetTextHeightPixel);
-    CPPUNIT_TEST(testCalculateLayoutWidth);
-    CPPUNIT_TEST(testFillPartialTextArray);
+    CPPUNIT_TEST(testEmphasisMarkPositions);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -387,6 +387,26 @@ public:
     }
 };
 
+class MockEmphasisLayout : public MockSalLayout
+{
+public:
+    virtual bool GetNextGlyph(const GlyphItem** pGlyph, basegfx::B2DPoint& rPos, int& nStart,
+                              const LogicalFontInstance**) const override
+    {
+        // Return one dummy glyph at position (100, 200)
+        if (nStart == 0)
+        {
+            // We use a dummy pointer because the Engine check checks for nullptr
+            // but doesn't dereference it for simple emphasis marks.
+            *pGlyph = reinterpret_cast<const GlyphItem*>(0xDEADBEEF);
+            rPos = basegfx::B2DPoint(100.0, 200.0);
+            nStart++;
+            return true;
+        }
+        return false;
+    }
+};
+
 void TextLayoutEngineTest::testJustifyLayout()
 {
     MockSalLayout aLayout;
@@ -457,11 +477,6 @@ void TextLayoutEngineTest::testApplyHorizontalOffset_Disabled()
     vcl::text::TextLayoutEngine::ApplyHorizontalOffset(aLayout, aArgs, aPos);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, aLayout.DrawOffset().getX(), 0.001);
 }
-} // namespace
-
-CPPUNIT_TEST_SUITE_REGISTRATION(TextLayoutEngineTest);
-
-/* vim:set shiftwidth=4 softtabstop=4 expandtab: */
 
 void TextLayoutEngineTest::testGetTextHeightPixel()
 {
@@ -480,14 +495,44 @@ void TextLayoutEngineTest::testGetTextHeightPixel()
                                  0.001);
 }
 
-void TextLayoutEngineTest::testCalculateLayoutWidth()
+void TextLayoutEngineTest::testEmphasisMarkPositions()
 {
-    // This tests the logic-to-subpixel conversion
-    // requires a valid LayoutResources setup which is complex in a snippet,
-    // but verifies the engine uses the mapper correctly.
+    MockEmphasisLayout aLayout;
+    aLayout.DrawBase() = basegfx::B2DPoint(10.0, 100.0); // Baseline Y = 100
+
+    vcl::font::FontRealization aRealization;
+    aRealization.nEmphasisAscent = 50;
+    aRealization.nEmphasisDescent = 20;
+
+    // Test "Below" (Descent)
+    // Logic: Y = DrawBase.Y + nEmphasisDescent
+    // Y = 100 + 20 = 120
+    {
+        std::vector<Point> aPoints;
+        vcl::text::TextLayoutEngine::GetEmphasisMarkPositions(aLayout, aRealization,
+                                                              true /*bBelow*/, aPoints);
+
+        CPPUNIT_ASSERT_EQUAL(size_t(1), aPoints.size());
+        CPPUNIT_ASSERT_EQUAL(tools::Long(120), aPoints[0].Y());
+        // X Position = Glyph Pos (100) from MockEmphasisLayout
+        CPPUNIT_ASSERT_EQUAL(tools::Long(100), aPoints[0].X());
+    }
+
+    // Test "Above" (Ascent)
+    // Logic: Y = DrawBase.Y - nEmphasisAscent
+    // Y = 100 - 50 = 50
+    {
+        std::vector<Point> aPoints;
+        vcl::text::TextLayoutEngine::GetEmphasisMarkPositions(aLayout, aRealization,
+                                                              false /*bBelow*/, aPoints);
+
+        CPPUNIT_ASSERT_EQUAL(size_t(1), aPoints.size());
+        CPPUNIT_ASSERT_EQUAL(tools::Long(50), aPoints[0].Y());
+    }
 }
 
-void TextLayoutEngineTest::testFillPartialTextArray()
-{
-    // This verifies the KernArray population and coordinate mapping
-}
+} // namespace
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TextLayoutEngineTest);
+
+/* vim:set shiftwidth=4 softtabstop=4 expandtab: */

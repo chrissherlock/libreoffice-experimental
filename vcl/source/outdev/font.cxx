@@ -516,7 +516,6 @@ void OutputDevice::ImplInitializeFontInstance(LogicalFontInstance* pFontInstance
 
 void OutputDevice::ImplInitFontMetrics(LogicalFontInstance* pFontInstance) const
 {
-    // 1. Create secure callbacks to expose specific OutputDevice capabilities
     auto fnMeasureWidth = [this](const OUString& rStr) -> long {
         return GetTextWidth(rStr);
     };
@@ -528,11 +527,9 @@ void OutputDevice::ImplInitFontMetrics(LogicalFontInstance* pFontInstance) const
     long nDPIY = GetDPIY();
     long nPixelWidth = LogicToPixel(Size(1, 0)).Width();
 
-    // 2. Delegate to Engine (which knows NOTHING about OutputDevice)
     vcl::text::TextLayoutEngine::InitializeFontMetrics(
         pFontInstance, GetFont(), nDPIY, nPixelWidth, fnMeasureWidth, fnMeasureRect);
 
-    // 3. Finalize line height (simple arithmetic, can stay here)
     pFontInstance->mnLineHeight
         = pFontInstance->mxFontMetric->GetAscent() + pFontInstance->mxFontMetric->GetDescent();
 }
@@ -604,13 +601,9 @@ void OutputDevice::ImplDrawEmphasisMarks(SalLayout& rSalLayout)
     mpMapper->EnableMapMode(false);
 
     FontEmphasisMark nEmphasisMark = mpGraphicsState->maFont.GetEmphasisMarkStyle();
-    tools::Long nEmphasisHeight;
+    const bool bBelow = bool(nEmphasisMark & FontEmphasisMark::PosBelow);
 
-    if (nEmphasisMark & FontEmphasisMark::PosBelow)
-        nEmphasisHeight = pRealization->nEmphasisDescent;
-    else
-        nEmphasisHeight = pRealization->nEmphasisAscent;
-
+    tools::Long nEmphasisHeight = bBelow ? pRealization->nEmphasisDescent : pRealization->nEmphasisAscent;
     vcl::font::EmphasisMark aEmphasisMark(nEmphasisMark, nEmphasisHeight, GetDPIY());
 
     if (aEmphasisMark.IsShapePolyLine())
@@ -624,61 +617,35 @@ void OutputDevice::ImplDrawEmphasisMarks(SalLayout& rSalLayout)
         SetFillColor(GetTextColor());
     }
 
-    Point aOffset(0, 0);
-    Point aOffsetVert(0, 0);
-
-    if (nEmphasisMark & FontEmphasisMark::PosBelow)
-    {
-        aOffset.AdjustY(pRealization->mxFont->mxFontMetric->GetDescent() + aEmphasisMark.GetYOffset());
-        aOffsetVert = aOffset;
-    }
-    else
-    {
-        aOffset.AdjustY(-(pRealization->mxFont->mxFontMetric->GetAscent() + aEmphasisMark.GetYOffset()));
-        aOffsetVert.AdjustY(-(pRealization->mxFont->mxFontMetric->GetAscent()
-                              + pRealization->mxFont->mxFontMetric->GetDescent()
-                              + aEmphasisMark.GetYOffset()));
-    }
+    std::vector<Point> aPositions;
+    vcl::text::TextLayoutEngine::GetEmphasisMarkPositions(rSalLayout, *pRealization, bBelow, aPositions);
 
     tools::Long nEmphasisWidth2 = aEmphasisMark.GetWidth() / 2;
     tools::Long nEmphasisHeight2 = nEmphasisHeight / 2;
-    aOffset += Point(nEmphasisWidth2, nEmphasisHeight2);
 
-    basegfx::B2DPoint aOutPoint;
-    basegfx::B2DRectangle aRectangle;
-    const GlyphItem* pGlyph;
-    const LogicalFontInstance* pGlyphFont;
-    int nStart = 0;
-    while (rSalLayout.GetNextGlyph(&pGlyph, aOutPoint, nStart, &pGlyphFont))
+    // The engine returns the "visual anchor" on the font (Ascent or Descent line).
+    // We now apply the specific visual offsets for the Mark shape itself.
+    tools::Long nYAdjustment = aEmphasisMark.GetYOffset();
+
+    // Draw the marks at the calculated positions
+    for (const Point& rPos : aPositions)
     {
-        if (!pGlyph->GetGlyphBoundRect(pGlyphFont, aRectangle))
-            continue;
+        Point aOutPoint = rPos;
 
-        if (!pGlyph->IsSpacing())
-        {
-            Point aAdjPoint;
-            if (pGlyph->IsVertical())
-            {
-                aAdjPoint = aOffsetVert;
-                aAdjPoint.AdjustX((-pGlyph->origWidth() + aEmphasisMark.GetWidth()) / 2);
-            }
-            else
-            {
-                aAdjPoint = aOffset;
-                aAdjPoint.AdjustX(aRectangle.getMinX() + (aRectangle.getWidth() - aEmphasisMark.GetWidth()) / 2);
-            }
+        // Apply visual adjustment relative to the anchor line
+        if (bBelow)
+            aOutPoint.AdjustY(nYAdjustment);
+        else
+            aOutPoint.AdjustY(-(nYAdjustment));
 
-            if (pRealization->mxFont->mnOrientation)
-            {
-                Point aOriginPt(0, 0);
-                aOriginPt.RotateAround(aAdjPoint, pRealization->mxFont->mnOrientation);
-            }
-            aOutPoint.adjustX(aAdjPoint.X() - nEmphasisWidth2);
-            aOutPoint.adjustY(aAdjPoint.Y() - nEmphasisHeight2);
-            ImplDrawEmphasisMark(rSalLayout.DrawBase().getX(), aOutPoint.getX(), aOutPoint.getY(),
-                                 aEmphasisMark.GetShape(), aEmphasisMark.IsShapePolyLine(),
-                                 aEmphasisMark.GetRect1(), aEmphasisMark.GetRect2());
-        }
+        // Center the mark shape
+        aOutPoint.AdjustX(-nEmphasisWidth2);
+        aOutPoint.AdjustY(-nEmphasisHeight2);
+
+        // Call the singular drawing helper
+        ImplDrawEmphasisMark(rSalLayout.DrawBase().getX(), aOutPoint.X(), aOutPoint.Y(),
+                             aEmphasisMark.GetShape(), aEmphasisMark.IsShapePolyLine(),
+                             aEmphasisMark.GetRect1(), aEmphasisMark.GetRect2());
     }
 
     mpMetaFile = pOldMetaFile;
