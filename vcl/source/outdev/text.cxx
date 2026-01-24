@@ -998,64 +998,26 @@ sal_Int32 OutputDevice::GetTextBreakArray(const OUString& rStr, tools::Long nTex
                                           vcl::text::TextLayoutCache const* const pLayoutCache,
                                           const SalLayoutGlyphs* pGlyphs) const
 {
-    if (pHyphenPos.has_value())
-        **pHyphenPos = -1;
-
-    std::unique_ptr<SalLayout> pSalLayout = LayoutText(
-        vcl::text::TextSpan{rStr, nIndex, nLen},
-        vcl::text::LayoutConstraints{Point(0,0), 0, aKernArray, {}, eDefaultLayout},
-        vcl::text::LayoutCacheData{pLayoutCache, pGlyphs},
-        vcl::text::RenderSelection{});
-
-    if (!pSalLayout)
+    if (!InitFont())
         return -1;
 
-    tools::Long nSubPixelFactor = 1;
-    if (!mpMapper->IsMapModeEnabled())
-        nSubPixelFactor = 64;
+    vcl::text::LayoutResources aResources = {
+        mpFontRealization->mxFont.get(),
+        *mpMapper,
+        &GetFontCache(),
+        GetFontCollection(),
+        mpForcedFallbackInstance.get(),
+        [this]() { const_cast<OutputDevice*>(this)->AcquireGraphics(); return mpGraphics; },
+        IsRTLEnabled(),
+        IsMapModeEnabled() || isSubpixelPositioning() || SupportsSubpixelPositioning(),
+        *mpGraphicsState,
+        *mpFontRealization
+    };
 
-    double nTextPixelWidth = LogicWidthToDeviceSubPixel(nTextWidth * nSubPixelFactor);
-    double nExtraPixelWidth = 0;
-    if( nCharExtra != 0 )
-        nExtraPixelWidth = LogicWidthToDeviceSubPixel(nCharExtra * nSubPixelFactor);
-
-    // calculate un-hyphenated break position
-    sal_Int32 nRetVal = pSalLayout->GetTextBreak( nTextPixelWidth, nExtraPixelWidth, nSubPixelFactor );
-
-    // calculate hyphenated break position
-    if (!nHyphenChar.has_value())
-        return nRetVal;
-
-    OUString aHyphenStr(*nHyphenChar);
-
-    // Create layout for the single hyphen character
-    std::unique_ptr<SalLayout> pHyphenLayout = LayoutText(
-        vcl::text::TextSpan{aHyphenStr, 0, 1},
-        vcl::text::LayoutConstraints{Point(0,0), 0, {}, {}, eDefaultLayout},
-        vcl::text::LayoutCacheData{nullptr, nullptr},
-        vcl::text::RenderSelection{});
-
-    if (!pHyphenLayout)
-        return nRetVal;
-
-    // calculate subpixel width of hyphenation character
-    double nHyphenPixelWidth = pHyphenLayout->GetTextWidth() * nSubPixelFactor;
-
-    // calculate hyphenated break position
-    nTextPixelWidth -= nHyphenPixelWidth;
-    if (nExtraPixelWidth > 0)
-        nTextPixelWidth -= nExtraPixelWidth;
-
-    if (!pHyphenPos.has_value())
-        return nRetVal;
-
-    **pHyphenPos = pSalLayout->GetTextBreak(nTextPixelWidth, nExtraPixelWidth,
-                                            nSubPixelFactor);
-
-    if (**pHyphenPos > nRetVal)
-        **pHyphenPos = nRetVal;
-
-    return nRetVal;
+    return vcl::text::TextLayoutEngine::GetTextBreakArray(
+        aResources, vcl::text::TextSpan{rStr, nIndex, nLen},
+        nTextWidth, nHyphenChar, pHyphenPos, nCharExtra, aKernArray,
+        vcl::text::LayoutCacheData{pLayoutCache, pGlyphs});
 }
 
 void OutputDevice::ImplDrawText( OutputDevice& rTargetDevice, const tools::Rectangle& rRect,

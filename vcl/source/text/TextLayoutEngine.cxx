@@ -1039,4 +1039,53 @@ bool TextLayoutEngine::GetTextIsRTL(const LayoutResources& rRes, const OUString&
     return (nCharPos != nIndex);
 }
 
+sal_Int32 TextLayoutEngine::GetTextBreakArray(
+    const LayoutResources& rRes, const vcl::text::TextSpan& rSpan, tools::Long nTextWidth,
+    std::optional<sal_Unicode> nHyphenChar, std::optional<sal_Int32*> pHyphenPos,
+    tools::Long nCharExtra, KernArraySpan aKernArray, const vcl::text::LayoutCacheData& rCache)
+{
+    if (pHyphenPos.has_value())
+        **pHyphenPos = -1;
+
+    const vcl::text::LayoutConstraints aConstraints{
+        Point(0, 0), 0, aKernArray, {}, SalLayoutFlags::NONE
+    };
+    std::unique_ptr<SalLayout> pSalLayout = Layout(rRes, rSpan, aConstraints, rCache, {});
+
+    if (!pSalLayout)
+        return -1;
+
+    const tools::Long nSubPixelFactor = GetSubPixelFactor(rRes.rMapper);
+    double nTextPixelWidth = GetLayoutPixelWidth(rRes.rMapper, nTextWidth, nSubPixelFactor);
+    double nExtraPixelWidth
+        = (nCharExtra != 0) ? GetLayoutPixelWidth(rRes.rMapper, nCharExtra, nSubPixelFactor) : 0;
+
+    sal_Int32 nRetVal
+        = pSalLayout->GetTextBreak(nTextPixelWidth, nExtraPixelWidth, nSubPixelFactor);
+
+    if (!nHyphenChar.has_value())
+        return nRetVal;
+
+    OUString aHyphenStr(*nHyphenChar);
+    vcl::text::TextSpan aHyphenSpan{ aHyphenStr, 0, 1 };
+    std::unique_ptr<SalLayout> pHyphenLayout = Layout(rRes, aHyphenSpan, {}, {}, {});
+
+    if (!pHyphenLayout)
+        return nRetVal;
+
+    double nHyphenPixelWidth = pHyphenLayout->GetTextWidth() * nSubPixelFactor;
+    nTextPixelWidth -= nHyphenPixelWidth;
+    if (nExtraPixelWidth > 0)
+        nTextPixelWidth -= nExtraPixelWidth;
+
+    if (pHyphenPos.has_value())
+    {
+        **pHyphenPos = pSalLayout->GetTextBreak(nTextPixelWidth, nExtraPixelWidth, nSubPixelFactor);
+        if (**pHyphenPos > nRetVal)
+            **pHyphenPos = nRetVal;
+    }
+
+    return nRetVal;
+}
+
 } // namespace vcl::text
