@@ -511,6 +511,46 @@ void TextLayoutEngine::FillAlignmentContext(TextLayoutPositioning& rPos,
     rPos.nEndGlyphCoord = nEndGlyphCoord;
 }
 
+double TextLayoutEngine::FillPartialTextArray(const LayoutResources& rRes, const SalLayout& rLayout,
+                                              KernArray* pKernArray, sal_Int32 nIndex,
+                                              sal_Int32 nLen, sal_Int32 nPartIndex,
+                                              sal_Int32 nPartLen, const OUString& rCaretStr)
+{
+    std::vector<double> aDXPixelArray;
+    std::vector<double>* pDXPixelArray = nullptr;
+    if (pKernArray)
+    {
+        aDXPixelArray.resize(nPartLen);
+        pDXPixelArray = &aDXPixelArray;
+    }
+
+    double nWidth = 0.0;
+    if (nIndex == nPartIndex && nLen == nPartLen)
+        nWidth = rLayout.FillDXArray(pDXPixelArray, rCaretStr);
+    else
+        nWidth
+            = rLayout.FillPartialDXArray(pDXPixelArray, rCaretStr, nPartIndex - nIndex, nPartLen);
+
+    if (pDXPixelArray)
+    {
+        for (int i = 1; i < nPartLen; ++i)
+            (*pDXPixelArray)[i] += (*pDXPixelArray)[i - 1];
+
+        if (rRes.rMapper.IsMapModeEnabled())
+        {
+            for (int i = 0; i < nPartLen; ++i)
+                (*pDXPixelArray)[i]
+                    = rRes.rMapper.DevicePixelToLogicWidthDouble((*pDXPixelArray)[i]);
+        }
+
+        pKernArray->resize(nPartLen);
+        for (int i = 0; i < nPartLen; ++i)
+            (*pKernArray)[i] = (*pDXPixelArray)[i];
+    }
+
+    return rRes.rMapper.DevicePixelToLogicWidthDouble(nWidth);
+}
+
 bool TextLayoutEngine::PrepareNormalizedLayoutInput(
     const OUString& rOrigStr, sal_Int32 nMinIndex, sal_Int32& rLen, OUString& rStr,
     const vcl::font::FontRealization& rFontRealization,

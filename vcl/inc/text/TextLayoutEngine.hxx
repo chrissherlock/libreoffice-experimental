@@ -191,6 +191,12 @@ public:
            std::span<const sal_Bool> pKashidaArray, const Point& rLogicalPos,
            const SalLayoutGlyphs* pGlyphs = nullptr);
 
+    /** Fills a KernArray with logical widths and returns the total width. */
+    static double FillPartialTextArray(const LayoutResources& rRes, const SalLayout& rLayout,
+                                       KernArray* pKernArray, sal_Int32 nIndex, sal_Int32 nLen,
+                                       sal_Int32 nPartIndex, sal_Int32 nPartLen,
+                                       const OUString& rCaretStr);
+
     static bool PrepareNormalizedLayoutInput(const OUString& rOrigStr, sal_Int32 nMinIndex,
                                              sal_Int32& rLen, OUString& rStr,
                                              const vcl::font::FontRealization& rFontRealization,
