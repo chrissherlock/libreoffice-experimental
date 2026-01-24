@@ -834,6 +834,22 @@ static void lcl_zeroFillKernArray(KernArray* pKernArray, sal_Int32 nLen)
         pKernArray->assign(std::max<sal_Int32>(0, nLen), 0.0);
 }
 
+static void lcl_convertBoundRectToLogic(const SalLayout& rLayout,
+                                        const CoordinateMapper& rMapper,
+                                        std::optional<tools::Rectangle>* pBounds)
+{
+    if (!pBounds)
+        return;
+
+    basegfx::B2DRectangle aB2DRect;
+
+    if (rLayout.GetBoundRect(aB2DRect))
+    {
+        tools::Rectangle aRect = SalLayout::BoundRect2Rectangle(aB2DRect);
+        *pBounds = rMapper.DevicePixelToLogic(aRect);
+    }
+}
+
 double
 OutputDevice::GetPartialTextArray(const OUString& rStr, KernArray* pKernArray, sal_Int32 nIndex,
                                   sal_Int32 nLen, sal_Int32 nPartIndex, sal_Int32 nPartLen,
@@ -871,15 +887,7 @@ OutputDevice::GetPartialTextArray(const OUString& rStr, KernArray* pKernArray, s
         *mpFontRealization
     };
 
-    if (pBounds)
-    {
-        basegfx::B2DRectangle stRect;
-        if (pSalLayout->GetBoundRect(stRect))
-        {
-            auto stRect2 = SalLayout::BoundRect2Rectangle(stRect);
-            *pBounds = mpMapper->DevicePixelToLogic(stRect2);
-        }
-    }
+    lcl_convertBoundRectToLogic(*pSalLayout, *mpMapper, pBounds);
 
     return vcl::text::TextLayoutEngine::FillPartialTextArray(
         aResources, *pSalLayout, pKernArray, nIndex, nLen, nPartIndex, nPartLen,
