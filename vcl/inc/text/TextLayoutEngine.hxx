@@ -260,6 +260,13 @@ public:
                                       std::optional<tools::Rectangle>* pBounds);
 
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);
+
+    /** Mirrors caret positions for Right-to-Left context based on total line width. */
+    static void MirrorCaretPositions(std::vector<double>& rCaretPixelPos, double nWidth);
+
+    /** Converts device pixel positions to logical units using the provided mapper. */
+    static void ConvertPixelsToLogic(const CoordinateMapper& rMapper,
+                                     std::vector<double>& rCaretPixelPos);
 };
 
 } // namespace vcl::text
