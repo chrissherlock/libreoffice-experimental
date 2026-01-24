@@ -836,4 +836,74 @@ TextLayoutEngine::Layout(const LayoutResources& rRes, const vcl::text::TextSpan&
 
     return pSalLayout;
 }
+
+void TextLayoutEngine::ZeroFillKernArray(KernArray* pKernArray, sal_Int32 nLen)
+{
+    if (pKernArray)
+        pKernArray->assign(std::max<sal_Int32>(0, nLen), 0.0);
+}
+
+static sal_Int32 lcl_getNormalizedLength(const OUString& rStr, sal_Int32 nIdx, sal_Int32 nLen)
+{
+    if (nLen < 0 || (nIdx + nLen) > rStr.getLength())
+        return std::max<sal_Int32>(0, rStr.getLength() - nIdx);
+
+    return nLen;
+}
+
+static void lcl_convertBoundRectToLogic(const SalLayout& rLayout, const CoordinateMapper& rMapper,
+                                        std::optional<tools::Rectangle>* pBounds)
+{
+    if (!pBounds)
+        return;
+
+    basegfx::B2DRectangle aB2DRect;
+
+    if (rLayout.GetBoundRect(aB2DRect))
+    {
+        tools::Rectangle aRect = SalLayout::BoundRect2Rectangle(aB2DRect);
+        *pBounds = rMapper.DevicePixelToLogic(aRect);
+    }
+}
+
+double TextLayoutEngine::GetPartialTextArray(const LayoutResources& rRes,
+                                             const vcl::text::TextSpan& rSpan,
+                                             KernArray* pKernArray, sal_Int32 nPartIndex,
+                                             sal_Int32 nPartLen, bool bCaret,
+                                             const vcl::text::LayoutCacheData& rCache,
+                                             std::optional<tools::Rectangle>* pBounds)
+{
+    if (rSpan.Index >= rSpan.Text.getLength())
+        return 0.0;
+
+    // Normalize lengths
+    sal_Int32 nLen = lcl_getNormalizedLength(rSpan.Text, rSpan.Index, rSpan.Length);
+    sal_Int32 nNormalizedPartLen = lcl_getNormalizedLength(rSpan.Text, nPartIndex, nPartLen);
+
+    vcl::text::TextSpan aNormalizedSpan{ rSpan.Text, rSpan.Index, nLen };
+    vcl::text::LayoutConstraints aConstraints{ Point(0, 0), 0, {}, {}, SalLayoutFlags::NONE };
+
+    vcl::text::RenderSelection aSelection;
+    if (rSpan.Index != nPartIndex || nLen != nNormalizedPartLen)
+    {
+        // If we are measuring a subset, tell the layout engine about the range
+        aSelection
+            = vcl::text::RenderSelection{ nPartIndex, nPartIndex, nPartIndex + nNormalizedPartLen };
+    }
+
+    std::unique_ptr<SalLayout> pSalLayout
+        = Layout(rRes, aNormalizedSpan, aConstraints, rCache, aSelection);
+
+    if (!pSalLayout)
+    {
+        ZeroFillKernArray(pKernArray, nNormalizedPartLen);
+        return 0.0;
+    }
+
+    lcl_convertBoundRectToLogic(*pSalLayout, rRes.rMapper, pBounds);
+
+    return FillPartialTextArray(rRes, *pSalLayout, pKernArray, rSpan.Index, nLen, nPartIndex,
+                                nNormalizedPartLen, bCaret ? rSpan.Text : OUString());
+}
+
 } // namespace vcl::text

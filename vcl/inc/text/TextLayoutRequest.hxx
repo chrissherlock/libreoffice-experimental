@@ -30,6 +30,8 @@
 
 namespace vcl::text
 {
+struct LayoutResources;
+
 class VCL_DLLPUBLIC TextLayoutRequest
 {
 public:

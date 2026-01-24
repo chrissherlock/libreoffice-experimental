@@ -248,6 +248,14 @@ public:
                                              const vcl::text::LayoutConstraints& rConstraints,
                                              const vcl::text::LayoutCacheData& rCache,
                                              const vcl::text::RenderSelection& rSelection);
+
+    static void ZeroFillKernArray(KernArray* pKernArray, sal_Int32 nLen);
+
+    static double GetPartialTextArray(const LayoutResources& rRes, const vcl::text::TextSpan& rSpan,
+                                      KernArray* pKernArray, sal_Int32 nPartIndex,
+                                      sal_Int32 nPartLen, bool bCaret,
+                                      const vcl::text::LayoutCacheData& rCache,
+                                      std::optional<tools::Rectangle>* pBounds);
 };
 
 } // namespace vcl::text
