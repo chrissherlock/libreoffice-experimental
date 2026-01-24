@@ -267,6 +267,10 @@ public:
                                   tools::Long nMaxLineWidth, tools::Long nCharExtra,
                                   const vcl::text::LayoutCacheData& rCache);
 
+    /** Determines if the text at the specified index and length is Right-to-Left (RTL). */
+    static bool GetTextIsRTL(const LayoutResources& rRes, const OUString& rString, sal_Int32 nIndex,
+                             sal_Int32 nLen);
+
 private:
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);
 
