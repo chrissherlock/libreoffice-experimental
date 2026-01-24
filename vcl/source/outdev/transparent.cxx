@@ -40,6 +40,7 @@
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
 #include <pdf/pdfwriter_impl.hxx>
+#include <text/TextLayoutEngine.hxx>
 #include <salgdi.hxx>
 
 #include <list>
@@ -1139,7 +1140,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
 
                 if( pSalLayout )
                 {
-                    tools::Rectangle aBoundRect( rOut.ImplGetTextBoundRect( *pSalLayout ) );
+                    tools::Rectangle aBoundRect( vcl::text::TextLayoutEngine::GetVisualLayoutBounds(*pSalLayout, *rOut.GetFontRealization()) );
                     aActionBounds = rOut.PixelToLogic( aBoundRect );
                 }
             }
@@ -1170,7 +1171,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
         vcl::text::RenderSelection{});
                 if( pSalLayout )
                 {
-                    tools::Rectangle aBoundRect( rOut.ImplGetTextBoundRect( *pSalLayout ) );
+                    tools::Rectangle aBoundRect( vcl::text::TextLayoutEngine::GetVisualLayoutBounds(*pSalLayout, *rOut.GetFontRealization()) );
                     aActionBounds = rOut.PixelToLogic( aBoundRect );
                 }
             }

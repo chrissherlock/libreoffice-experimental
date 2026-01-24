@@ -277,6 +277,7 @@ public:
     // Font Controller Delegation API
     void SetFontCollection(const std::shared_ptr<vcl::font::PhysicalFontCollection>& pPFC);
     vcl::font::PhysicalFontCollection* GetFontCollection() const;
+    const vcl::font::FontRealization* GetFontRealization() const { return mpFontRealization.get(); }
     const std::shared_ptr<vcl::font::PhysicalFontCollection>& GetSharedFontCollection() const;
     SAL_DLLPRIVATE void SetFontCollectionFromSVData();
     bool IsScreenFontCache() const;
@@ -1051,7 +1052,7 @@ public:
                                                   std::span<const sal_Bool> pKashidaArray = {},
                                                   const SalLayoutGlyphs* pGlyphs = nullptr ) const;
 
-    tools::Rectangle            ImplGetTextBoundRect( const SalLayout& ) const;
+    tools::Rectangle            ImplGetTextBoundRect(const SalLayout& rLayout) const;
 
     bool                        GetTextOutline( tools::PolyPolygon&,
                                                 const OUString& rStr ) const;

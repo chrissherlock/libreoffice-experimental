@@ -167,60 +167,19 @@ void OutputDevice::ImplDrawTextRect( tools::Long nBaseX, tools::Long nBaseY,
 
 void OutputDevice::ImplDrawTextBackground( const SalLayout& rSalLayout )
 {
-    const double nWidth = rSalLayout.GetTextWidth();
-    const basegfx::B2DPoint aBase = rSalLayout.DrawBase();
-    const tools::Long nX = aBase.getX();
-    const tools::Long nY = aBase.getY();
+    tools::Rectangle aRect = vcl::text::TextLayoutEngine::GetVisualLayoutBounds(
+                                rSalLayout, *mpFontRealization);
 
-    if ( mpGraphicsState->mbLineColor || mbLineColorDirty )
+    if (mpGraphicsState->mbLineColor || mbLineColorDirty)
     {
         mpGraphics->SetLineColor();
         mbLineColorDirty = true;
     }
-    mpGraphics->SetFillColor( GetTextFillColor() );
+
+    mpGraphics->SetFillColor(GetTextFillColor());
     mbFillColorDirty = true;
 
-    ImplDrawTextRect( nX, nY, 0, -(mpFontRealization->mxFont->mxFontMetric->GetAscent() + mpFontRealization->nEmphasisAscent),
-                      nWidth,
-                      mpFontRealization->mxFont->mnLineHeight+mpFontRealization->nEmphasisAscent+mpFontRealization->nEmphasisDescent );
-}
-
-tools::Rectangle OutputDevice::ImplGetTextBoundRect( const SalLayout& rSalLayout ) const
-{
-    basegfx::B2DPoint aPoint = rSalLayout.GetDrawPosition();
-    tools::Long nX = aPoint.getX();
-    tools::Long nY = aPoint.getY();
-
-    double nWidth = rSalLayout.GetTextWidth();
-    tools::Long nHeight = mpFontRealization->mxFont->mnLineHeight + mpFontRealization->nEmphasisAscent + mpFontRealization->nEmphasisDescent;
-
-    nY -= mpFontRealization->mxFont->mxFontMetric->GetAscent() + mpFontRealization->nEmphasisAscent;
-
-    if ( mpFontRealization->mxFont->mnOrientation )
-    {
-        tools::Long nBaseX = nX, nBaseY = nY;
-        if ( !(mpFontRealization->mxFont->mnOrientation % 900_deg10) )
-        {
-            tools::Long nX2 = nX+nWidth;
-            tools::Long nY2 = nY+nHeight;
-
-            Point aBasePt( nBaseX, nBaseY );
-            aBasePt.RotateAround( nX, nY, mpFontRealization->mxFont->mnOrientation );
-            aBasePt.RotateAround( nX2, nY2, mpFontRealization->mxFont->mnOrientation );
-            nWidth = nX2-nX;
-            nHeight = nY2-nY;
-        }
-        else
-        {
-            // inflate by +1+1 because polygons are drawn smaller
-            tools::Rectangle aRect( Point( nX, nY ), Size( nWidth+1, nHeight+1 ) );
-            tools::Polygon   aPoly( aRect );
-            aPoly.Rotate( Point( nBaseX, nBaseY ), mpFontRealization->mxFont->mnOrientation );
-            return aPoly.GetBoundRect();
-        }
-    }
-
-    return tools::Rectangle( Point( nX, nY ), Size( nWidth, nHeight ) );
+    ImplDrawTextRect(aRect.Left(), aRect.Top(), 0, 0, aRect.GetWidth(), aRect.GetHeight());
 }
 
 bool OutputDevice::ImplDrawRotateText( SalLayout& rSalLayout )
@@ -1834,6 +1793,11 @@ std::unique_ptr<SalLayout> OutputDevice::getFallbackLayout(LogicalFontInstance* 
         return nullptr;
 
     return pFallback;
+}
+
+tools::Rectangle OutputDevice::ImplGetTextBoundRect(const SalLayout& rLayout) const
+{
+    return vcl::text::TextLayoutEngine::GetVisualLayoutBounds(rLayout, *mpFontRealization);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

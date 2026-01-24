@@ -243,8 +243,7 @@ public:
                                                         const SalLayoutGlyphs* pGlyphs);
 
     /** Orchestrates the complete layout process. */
-    static std::unique_ptr<SalLayout> Layout(const LayoutResources& rRes,
-                                             const vcl::text::TextSpan& rSpan,
+    static std::unique_ptr<SalLayout> Layout(const LayoutResources& rRes, const TextSpan& rSpan,
                                              const vcl::text::LayoutConstraints& rConstraints,
                                              const vcl::text::LayoutCacheData& rCache,
                                              const vcl::text::RenderSelection& rSelection);
@@ -253,17 +252,17 @@ public:
 
     static sal_Int32 GetNormalizedLength(const OUString& rStr, sal_Int32 nIdx, sal_Int32 nLen);
 
-    static double GetPartialTextArray(const LayoutResources& rRes, const vcl::text::TextSpan& rSpan,
+    static double GetPartialTextArray(const LayoutResources& rRes, const TextSpan& rSpan,
                                       KernArray* pKernArray, sal_Int32 nPartIndex,
                                       sal_Int32 nPartLen, bool bCaret,
                                       const vcl::text::LayoutCacheData& rCache,
                                       std::optional<tools::Rectangle>* pBounds);
 
-    static void GetCaretPositions(const LayoutResources& rRes, const vcl::text::TextSpan& rSpan,
+    static void GetCaretPositions(const LayoutResources& rRes, const TextSpan& rSpan,
                                   KernArray& rCaretPos, const vcl::text::LayoutCacheData& rCache);
 
     /** Orchestrates finding the character index where text must break for a given width. */
-    static sal_Int32 GetTextBreak(const LayoutResources& rRes, const vcl::text::TextSpan& rSpan,
+    static sal_Int32 GetTextBreak(const LayoutResources& rRes, const TextSpan& rSpan,
                                   tools::Long nMaxLineWidth, tools::Long nCharExtra,
                                   const vcl::text::LayoutCacheData& rCache);
 
@@ -271,8 +270,8 @@ public:
     static bool GetTextIsRTL(const LayoutResources& rRes, const OUString& rString, sal_Int32 nIndex,
                              sal_Int32 nLen);
 
-    static sal_Int32 GetTextBreakArray(const LayoutResources& rRes,
-                                       const vcl::text::TextSpan& rSpan, tools::Long nTextWidth,
+    static sal_Int32 GetTextBreakArray(const LayoutResources& rRes, const TextSpan& rSpan,
+                                       tools::Long nTextWidth,
                                        std::optional<sal_Unicode> nHyphenChar,
                                        std::optional<sal_Int32*> pHyphenPos, tools::Long nCharExtra,
                                        KernArraySpan aKernArray,
@@ -285,6 +284,11 @@ public:
                                         KernArraySpan pDXArray,
                                         std::span<const sal_Bool> pKashidaArray,
                                         const SalLayoutGlyphs* pGlyphs);
+
+    /** Calculates raw visual bounds in device pixels for a given layout. */
+    static tools::Rectangle
+    GetVisualLayoutBounds(const SalLayout& rSalLayout,
+                          const vcl::font::FontRealization& rFontRealization);
 
 private:
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);
