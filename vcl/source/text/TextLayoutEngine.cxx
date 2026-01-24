@@ -933,4 +933,29 @@ void TextLayoutEngine::FixupCaretPositions(std::vector<double>& rCaretPixelPos)
     }
 }
 
+static double lcl_mirrorCoord(double nTotalWidth, double nOldPos)
+{
+    return nTotalWidth - nOldPos - 1.0;
+}
+
+void TextLayoutEngine::MirrorCaretPositions(std::vector<double>& rCaretPixelPos, double nWidth)
+{
+    for (double& rPos : rCaretPixelPos)
+    {
+        rPos = lcl_mirrorCoord(nWidth, rPos);
+    }
+}
+
+void TextLayoutEngine::ConvertPixelsToLogic(const CoordinateMapper& rMapper,
+                                            std::vector<double>& rCaretPixelPos)
+{
+    if (!rMapper.IsMapModeEnabled())
+        return;
+
+    for (double& rPos : rCaretPixelPos)
+    {
+        rPos = rMapper.DevicePixelToLogicWidthDouble(rPos);
+    }
+}
+
 } // namespace vcl::text

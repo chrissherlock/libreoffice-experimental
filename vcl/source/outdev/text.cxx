@@ -870,25 +870,10 @@ void OutputDevice::GetCaretPositions( const OUString& rStr, KernArray& rCaretPos
 
     vcl::text::TextLayoutEngine::FixupCaretPositions(aCaretPixelPos);
 
-    // handle window mirroring
-    if( IsRTLEnabled() )
-    {
-        double nWidth = pSalLayout->GetTextWidth();
+    if (IsRTLEnabled())
+        vcl::text::TextLayoutEngine::MirrorCaretPositions(aCaretPixelPos, pSalLayout->GetTextWidth());
 
-        for (int i = 0; i < nCaretPos; ++i)
-        {
-            aCaretPixelPos[i] = nWidth - aCaretPixelPos[i] - 1;
-        }
-    }
-
-    // convert from font units to logical units
-    if (mpMapper->IsMapModeEnabled())
-    {
-        for (int i = 0; i < nCaretPos; ++i)
-        {
-            aCaretPixelPos[i] = mpMapper->DevicePixelToLogicWidthDouble(aCaretPixelPos[i]);
-        }
-    }
+    vcl::text::TextLayoutEngine::ConvertPixelsToLogic(*mpMapper, aCaretPixelPos);
 
     for (int i = 0; i < nCaretPos; ++i)
     {
