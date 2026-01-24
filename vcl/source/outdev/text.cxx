@@ -823,17 +823,15 @@ OutputDevice::GetPartialTextArray(const OUString& rStr, KernArray* pKernArray, s
     if (nPartLen < 0 || nPartIndex + nPartLen >= rStr.getLength())
         nPartLen = rStr.getLength() - nPartIndex;
 
+    vcl::text::TextSpan aTextSpan {rStr, nIndex, nLen};
+    vcl::text::LayoutConstraints aConstraints {Point(0, 0), 0, {}, {}, SalLayoutFlags::NONE};
+    vcl::text::LayoutCacheData aCacheData {pLayoutCache, pSalLayoutCache};
     vcl::text::RenderSelection aSelection;
+
     if (nIndex != nPartIndex || nLen != nPartLen)
         aSelection = vcl::text::RenderSelection{nPartIndex, nPartIndex, nPartIndex + nPartLen};
 
-    // do layout
-    // Use Point(0,0) and no flags for simple measurement
-    std::unique_ptr<SalLayout> pSalLayout = LayoutText(
-        vcl::text::TextSpan{rStr, nIndex, nLen},
-        vcl::text::LayoutConstraints{Point(0,0), 0, {}, {}, SalLayoutFlags::NONE},
-        vcl::text::LayoutCacheData{pLayoutCache, pSalLayoutCache},
-        aSelection);
+    std::unique_ptr<SalLayout> pSalLayout = LayoutText(aTextSpan, aConstraints, aCacheData, aSelection);
 
     if( !pSalLayout )
     {
