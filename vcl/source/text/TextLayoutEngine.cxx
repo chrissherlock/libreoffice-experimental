@@ -907,4 +907,30 @@ double TextLayoutEngine::GetPartialTextArray(const LayoutResources& rRes,
                                 nNormalizedPartLen, bCaret ? rSpan.Text : OUString());
 }
 
+void TextLayoutEngine::FixupCaretPositions(std::vector<double>& rCaretPixelPos)
+{
+    const int nCaretPos = static_cast<int>(rCaretPixelPos.size());
+    int nFirstValidIndex = nCaretPos; // Initialize to "not found" state
+
+    // Find first valid coordinate
+    for (int i = 0; i < nCaretPos; ++i)
+    {
+        if (rCaretPixelPos[i] >= 0)
+        {
+            nFirstValidIndex = i;
+            break;
+        }
+    }
+
+    // Propagate coordinates
+    double nXPos = (nFirstValidIndex < nCaretPos) ? rCaretPixelPos[nFirstValidIndex] : -1.0;
+    for (int i = 0; i < nCaretPos; ++i)
+    {
+        if (rCaretPixelPos[i] >= 0)
+            nXPos = rCaretPixelPos[i];
+        else
+            rCaretPixelPos[i] = nXPos;
+    }
+}
+
 } // namespace vcl::text
