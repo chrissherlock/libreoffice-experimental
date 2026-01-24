@@ -319,7 +319,8 @@ public:
      * the ink.
      */
     static tools::Rectangle GetTextInkBounds(const SalLayout& rSalLayout,
-                                             const vcl::font::FontRealization& rFontRealization);
+                                             const vcl::font::FontRealization& rFontRealization,
+                                             bool bApplyRotation = true);
 
     static void GetEmphasisMarkPositions(const SalLayout& rSalLayout,
                                          const vcl::font::FontRealization& rFontRealization,

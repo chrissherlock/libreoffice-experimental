@@ -1118,7 +1118,8 @@ bool TextLayoutEngine::GetLogicalTextBoundRect(const LayoutResources& rRes,
 
 tools::Rectangle
 TextLayoutEngine::GetTextInkBounds(const SalLayout& rSalLayout,
-                                   const vcl::font::FontRealization& rFontRealization)
+                                   const vcl::font::FontRealization& rFontRealization,
+                                   bool bApplyRotation)
 {
     const basegfx::B2DPoint aPoint = rSalLayout.GetDrawPosition();
     tools::Long nX = aPoint.getX();
@@ -1134,7 +1135,7 @@ TextLayoutEngine::GetTextInkBounds(const SalLayout& rSalLayout,
     if (rSalLayout.GetBoundRect(aBoundRect))
         return SalLayout::BoundRect2Rectangle(aBoundRect);
 
-    if (rFontRealization.mxFont->mnOrientation)
+    if (bApplyRotation && rFontRealization.mxFont->mnOrientation)
     {
         const tools::Long nBaseX = nX;
         const tools::Long nBaseY = nY;
