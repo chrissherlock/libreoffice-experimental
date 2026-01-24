@@ -267,6 +267,9 @@ public:
     /** Converts device pixel positions to logical units using the provided mapper. */
     static void ConvertPixelsToLogic(const CoordinateMapper& rMapper,
                                      std::vector<double>& rCaretPixelPos);
+
+    static void GetCaretPositions(const LayoutResources& rRes, const vcl::text::TextSpan& rSpan,
+                                  KernArray& rCaretPos, const vcl::text::LayoutCacheData& rCache);
 };
 
 } // namespace vcl::text
