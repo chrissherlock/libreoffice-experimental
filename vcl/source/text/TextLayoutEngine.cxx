@@ -1,3 +1,4 @@
+#include <salgdi.hxx>
 #include <CoordinateMapper.hxx>
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; fill-column: 100 -*- */
 /*
@@ -55,39 +56,6 @@ void TextLayoutEngine::GetWordKashidaPositions(const SalLayout& rLayout, std::u1
 
         rOutMap[i] = rLayout.IsKashidaPosValid(i, nNextPos);
     }
-}
-
-std::vector<Point> TextLayoutEngine::GetEmphasisMarkPositions(const SalLayout& rLayout,
-                                                              long nAscent, long nDescent,
-                                                              FontEmphasisMark nStyle)
-{
-    std::vector<Point> aPositions;
-
-    // Explicit bool cast for o3tl flags
-    bool bBelow = bool(nStyle & FontEmphasisMark::PosBelow);
-    long nYOffset = bBelow ? nDescent : -nAscent;
-
-    // Empirical visual centering logic
-    long nSpacing = (nAscent + nDescent) / 4;
-    nYOffset += bBelow ? (nSpacing / 2) : -(nSpacing / 2);
-
-    int nIterator = 0;
-    const GlyphItem* pGlyph = nullptr;
-    basegfx::B2DPoint aPos;
-
-    while (rLayout.GetNextGlyph(&pGlyph, aPos, nIterator))
-    {
-        if (!pGlyph)
-            continue;
-
-        // Convert floating point positions to integer Device Pixels
-        long nX = static_cast<long>(aPos.getX()) + (pGlyph->origWidth() / 2);
-        long nY = static_cast<long>(aPos.getY()) + nYOffset;
-
-        aPositions.emplace_back(nX, nY);
-    }
-
-    return aPositions;
 }
 
 void TextLayoutEngine::InitializeFontMetrics(
@@ -1189,6 +1157,30 @@ TextLayoutEngine::GetTextInkBounds(const SalLayout& rSalLayout,
         }
     }
     return tools::Rectangle(Point(nX, nY), Size(nWidth, nHeight));
+}
+
+void TextLayoutEngine::GetEmphasisMarkPositions(const SalLayout& rSalLayout,
+                                                const vcl::font::FontRealization& rFontRealization,
+                                                bool bEmphasisBelow, std::vector<Point>& rPoints)
+{
+    rPoints.clear();
+
+    const tools::Long nEmphasisOffset
+        = bEmphasisBelow ? rFontRealization.nEmphasisDescent : -rFontRealization.nEmphasisAscent;
+
+    const basegfx::B2DPoint aDrawPos = rSalLayout.GetDrawPosition();
+    const tools::Long nY = aDrawPos.getY() + nEmphasisOffset;
+
+    int nStart = 0;
+    const GlyphItem* pGlyph = nullptr;
+    basegfx::B2DPoint aPos;
+
+    while (rSalLayout.GetNextGlyph(&pGlyph, aPos, nStart))
+    {
+        if (!pGlyph)
+            continue;
+        rPoints.emplace_back(aPos.getX(), nY);
+    }
 }
 
 } // namespace vcl::text

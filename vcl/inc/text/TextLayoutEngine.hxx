@@ -321,6 +321,10 @@ public:
     static tools::Rectangle GetTextInkBounds(const SalLayout& rSalLayout,
                                              const vcl::font::FontRealization& rFontRealization);
 
+    static void GetEmphasisMarkPositions(const SalLayout& rSalLayout,
+                                         const vcl::font::FontRealization& rFontRealization,
+                                         bool bEmphasisBelow, std::vector<Point>& rPoints);
+
 private:
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);
 
