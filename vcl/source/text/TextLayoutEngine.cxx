@@ -1242,5 +1242,6 @@ void TextLayoutEngine::GetWordLineSegments(const SalLayout& rSalLayout,
     if (nWidth > 0)
         rSegments.push_back({ nDist, nWidth });
 }
-
 } // namespace vcl::text
+
+/* vim:set shiftwidth=4 softtabstop=4 expandtab: */
