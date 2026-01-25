@@ -131,11 +131,11 @@ namespace {
 
 void OutputDevice::ImplInitAboveTextLineSize()
 {
-    {
-        tools::Long nDPIY = GetDPIY();
-        tools::Long nPixelWidth = LogicToPixel(Size(1, 0)).Width();
-        mpFontInstance->mxFontMetric->ImplInitAboveTextLineSize(nDPIY, nPixelWidth);
-    }
+    vcl::text::TextLayoutEngine::InitializeAboveTextLineMetrics(
+        GetFontInstance(),
+        GetDPIY(),
+        GetFontMetric().GetUnderline()
+    );
 }
 
 void OutputDevice::ImplDrawWavePixel( tools::Long nOriginX, tools::Long nOriginY,

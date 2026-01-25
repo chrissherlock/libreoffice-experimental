@@ -1270,6 +1270,15 @@ void TextLayoutEngine::InitializeTextLineMetrics(const LogicalFontInstance* pFon
     pFontInstance->mxFontMetric->ImplInitTextLineSize(pFontInstance, nDPIY, rFont, nBulletOffset);
 }
 
+void TextLayoutEngine::InitializeAboveTextLineMetrics(const LogicalFontInstance* pFontInstance,
+                                                      tools::Long nDPIY, tools::Long nPixelWidth)
+{
+    if (!pFontInstance || !pFontInstance->mxFontMetric)
+        return;
+
+    pFontInstance->mxFontMetric->ImplInitAboveTextLineSize(nDPIY, nPixelWidth);
+}
+
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
