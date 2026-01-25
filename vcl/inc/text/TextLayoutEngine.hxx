@@ -374,6 +374,11 @@ public:
                                               Degree10 nOrientation // The angle
     );
 
+    // Calculates the top-left draw position for a bitmap generated from a rotated rectangle.
+    // Used when emulating text rotation via bitmaps.
+    static Point GetRotatedImageOrigin(const Point& rBase, const tools::Rectangle& rLocalBounds,
+                                       Degree10 nOrientation);
+
 private:
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);
 

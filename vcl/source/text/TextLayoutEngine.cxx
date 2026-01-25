@@ -1530,6 +1530,15 @@ RotatedGeometry TextLayoutEngine::GetRotatedGeometry(const Point& rBase,
     return aGeo;
 }
 
+Point TextLayoutEngine::GetRotatedImageOrigin(const Point& rBase,
+                                              const tools::Rectangle& rLocalBounds,
+                                              Degree10 nOrientation)
+{
+    tools::Polygon aPoly(rLocalBounds);
+    aPoly.Rotate(Point(0, 0), nOrientation);
+    return rBase + aPoly.GetBoundRect().TopLeft();
+}
+
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
