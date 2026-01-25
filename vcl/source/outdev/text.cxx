@@ -57,6 +57,7 @@
 #include <text/GraphicLayoutFactory.hxx>
 
 #include <memory>
+#include <comphelper/scopeguard.hxx>
 #include <optional>
 
 #define TEXT_DRAW_ELLIPSIS                                                                         \
@@ -139,6 +140,15 @@ void OutputDevice::ImplDrawTextBackground(const SalLayout& rSalLayout)
 
 bool OutputDevice::ImplDrawRotateText(SalLayout& rSalLayout)
 {
+    // Capture original state to ensure restoration on exit (success or failure)
+    basegfx::B2DPoint aOrigBase = rSalLayout.DrawBase();
+    basegfx::B2DPoint aOrigOffset = rSalLayout.DrawOffset();
+
+    comphelper::ScopeGuard aRestoreGuard([&]() {
+        rSalLayout.DrawBase() = aOrigBase;
+        rSalLayout.DrawOffset() = aOrigOffset;
+    });
+
     tools::Long nX = rSalLayout.DrawBase().getX();
     tools::Long nY = rSalLayout.DrawBase().getY();
 
@@ -154,6 +164,7 @@ bool OutputDevice::ImplDrawRotateText(SalLayout& rSalLayout)
     // cache virtual device for rotation
     if (!mpOutDevData->mpRotateDev)
         mpOutDevData->mpRotateDev = VclPtr<VirtualDevice>::Create(*this);
+
     VirtualDevice* pVDev = mpOutDevData->mpRotateDev;
 
     // size it accordingly
@@ -162,14 +173,18 @@ bool OutputDevice::ImplDrawRotateText(SalLayout& rSalLayout)
 
     const vcl::font::FontSelectPattern& rPattern
         = mpFontRealization->mxFont->GetFontSelectPattern();
+
     vcl::Font aFont(GetFont());
     aFont.SetOrientation(0_deg10);
     aFont.SetFontSize(Size(rPattern.mnWidth, rPattern.mnHeight));
+
     pVDev->SetFont(aFont);
     pVDev->SetTextColor(COL_BLACK);
     pVDev->SetTextFillColor();
+
     if (!pVDev->InitFont())
         return false;
+
     pVDev->ImplInitTextColor();
 
     // draw text into upper left corner
@@ -178,6 +193,7 @@ bool OutputDevice::ImplDrawRotateText(SalLayout& rSalLayout)
     rSalLayout.DrawText(*pVDev->mpGraphics);
 
     Bitmap aBmp = pVDev->GetBitmap(Point(), aBoundRect.GetSize());
+
     if (aBmp.IsEmpty() || !aBmp.Rotate(mpFontRealization->mxFont->mnOwnOrientation, COL_WHITE))
         return false;
 
@@ -192,6 +208,7 @@ bool OutputDevice::ImplDrawRotateText(SalLayout& rSalLayout)
 
     SetDeviceOriginX(0);
     SetDeviceOriginY(0);
+
     mpMetaFile = nullptr;
     mpMapper->EnableMapMode(false);
 
