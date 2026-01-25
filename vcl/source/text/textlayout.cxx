@@ -28,20 +28,9 @@
 #include <vcl/svapp.hxx>
 #include <vcl/unohelp.hxx>
 
+#include <text/TextLayoutEngine.hxx>
 #include <textlayout.hxx>
 #include <textlineinfo.hxx>
-
-static bool lcl_IsCharIn(sal_Unicode c, const char* pStr)
-{
-    while ( *pStr )
-    {
-        if ( *pStr == c )
-            return true;
-        pStr++;
-    }
-
-    return false;
-}
 
 ImplMultiTextLineInfo::ImplMultiTextLineInfo()
 {
@@ -66,160 +55,12 @@ namespace vcl
     TextLayoutCommon::~TextLayoutCommon()
     {}
 
-    OUString TextLayoutCommon::GetCenterEllipsisString(std::u16string_view rOrigStr, sal_Int32 nIndex, tools::Long nMaxWidth)
-    {
-        OUStringBuffer aTmpStr(rOrigStr);
-
-        // speed it up by removing all but 1.33x as many as the break pos.
-        sal_Int32 nEraseChars = std::max<sal_Int32>(4, rOrigStr.size() - (nIndex*4)/3);
-        while(nEraseChars < static_cast<sal_Int32>(rOrigStr.size()) && GetTextWidth(aTmpStr.toString(), 0, aTmpStr.getLength()) > nMaxWidth)
-        {
-            aTmpStr = rOrigStr;
-            sal_Int32 i = (aTmpStr.getLength() - nEraseChars)/2;
-            aTmpStr.remove(i, nEraseChars++);
-            aTmpStr.insert(i, "...");
-        }
-
-        return aTmpStr.makeStringAndClear();
-    }
-
-    OUString TextLayoutCommon::GetEndEllipsisString(OUString const& rOrigStr, sal_Int32 nIndex, tools::Long nMaxWidth, bool bClipText)
-    {
-        OUString aStr = rOrigStr;
-        aStr = aStr.copy(0, nIndex);
-
-        if (nIndex > 1)
-        {
-            aStr += "...";
-            while (!aStr.isEmpty() && (GetTextWidth(aStr, 0, aStr.getLength()) > nMaxWidth))
-            {
-                if ((nIndex > 1) || (nIndex == aStr.getLength()))
-                    nIndex--;
-
-                aStr = aStr.replaceAt(nIndex, 1, u"");
-            }
-        }
-
-        if (aStr.isEmpty() && bClipText)
-            aStr += OUStringChar(rOrigStr[0]);
-
-        return aStr;
-    }
-
-    namespace
-    {
-        OUString lcl_GetPathEllipsisString(OUString const& rOrigStr, sal_Int32 nIndex)
-        {
-            OUString aPath(rOrigStr);
-            OUString aAbbreviatedPath;
-            osl_abbreviateSystemPath(aPath.pData, &aAbbreviatedPath.pData, nIndex, nullptr);
-            return aAbbreviatedPath;
-        }
-    }
-
-    OUString TextLayoutCommon::GetNewsEllipsisString(OUString const& rOrigStr, tools::Long nMaxWidth, DrawTextFlags nStyle)
-    {
-        OUString aStr = rOrigStr;
-        static char const pSepChars[] = ".";
-
-        // Determine last section
-        sal_Int32 nLastContent = aStr.getLength();
-        while (nLastContent)
-        {
-            nLastContent--;
-
-            if (lcl_IsCharIn(aStr[nLastContent], pSepChars))
-                break;
-        }
-
-        while (nLastContent && lcl_IsCharIn(aStr[nLastContent-1], pSepChars))
-        {
-            nLastContent--;
-        }
-
-        OUString aLastStr = aStr.copy(nLastContent);
-        OUString aTempLastStr1 = "..." + aLastStr;
-
-        if (GetTextWidth(aTempLastStr1, 0, aTempLastStr1.getLength()) > nMaxWidth)
-            return GetEllipsisString(aStr, nMaxWidth, DrawTextFlags::EndEllipsis);
-
-        sal_Int32 nFirstContent = 0;
-        while (nFirstContent < nLastContent)
-        {
-            nFirstContent++;
-            if (lcl_IsCharIn(aStr[nFirstContent], pSepChars))
-                break;
-        }
-
-        while ((nFirstContent < nLastContent) && lcl_IsCharIn(aStr[nFirstContent], pSepChars))
-        {
-            nFirstContent++;
-        }
-
-        if (nFirstContent >= nLastContent)
-            return GetEllipsisString(aStr, nMaxWidth, nStyle | DrawTextFlags::EndEllipsis);
-
-        if (nFirstContent > 4)
-            nFirstContent = 4;
-
-        OUString aFirstStr = OUString::Concat(aStr.subView(0, nFirstContent)) + "...";
-        OUString aTempStr = aFirstStr + aLastStr;
-
-        if (GetTextWidth(aTempStr, 0, aTempStr.getLength() ) > nMaxWidth)
-            return GetEllipsisString(aStr, nMaxWidth, nStyle | DrawTextFlags::EndEllipsis);
-
-        do
-        {
-            aStr = aTempStr;
-
-            if (nLastContent > aStr.getLength())
-                nLastContent = aStr.getLength();
-
-            while (nFirstContent < nLastContent)
-            {
-                nLastContent--;
-                if (lcl_IsCharIn(aStr[nLastContent], pSepChars))
-                    break;
-
-            }
-
-            while ((nFirstContent < nLastContent) && lcl_IsCharIn(aStr[nLastContent-1], pSepChars))
-            {
-                nLastContent--;
-            }
-
-            if (nFirstContent < nLastContent)
-            {
-                std::u16string_view aTempLastStr = aStr.subView(nLastContent);
-                aTempStr = aFirstStr + aTempLastStr;
-
-                if (GetTextWidth(aTempStr, 0, aTempStr.getLength()) > nMaxWidth)
-                    break;
-            }
-        }
-        while (nFirstContent < nLastContent);
-
-        return aStr;
-    }
-
     OUString TextLayoutCommon::GetEllipsisString(OUString const& rOrigStr, tools::Long nMaxWidth, DrawTextFlags nStyle)
     {
-        OUString aStr = rOrigStr;
-        sal_Int32 nIndex = GetTextBreak( aStr, nMaxWidth, 0, aStr.getLength() );
-
-        if (nIndex == -1)
-            return aStr;
-
-        if ((nStyle & DrawTextFlags::CenterEllipsis) == DrawTextFlags::CenterEllipsis)
-            aStr = GetCenterEllipsisString(rOrigStr, nIndex, nMaxWidth);
-        else if (nStyle & DrawTextFlags::EndEllipsis)
-            aStr = GetEndEllipsisString(rOrigStr, nIndex, nMaxWidth, (nStyle & DrawTextFlags::Clip) == DrawTextFlags::Clip);
-        else if (nStyle & DrawTextFlags::PathEllipsis)
-            aStr = lcl_GetPathEllipsisString(rOrigStr, nIndex);
-        else if ( nStyle & DrawTextFlags::NewsEllipsis )
-            aStr = GetNewsEllipsisString(rOrigStr, nMaxWidth, nStyle);
-
-        return aStr;
+        return vcl::text::TextLayoutEngine::GetEllipsisString(
+            rOrigStr, nMaxWidth, nStyle,
+            [this](const OUString& s) { return this->GetTextWidth(s, 0, s.getLength()); }
+        );
     }
 
     std::tuple<sal_Int32, sal_Int32> TextLayoutCommon::BreakLine(const tools::Long nWidth, OUString const& rStr,
