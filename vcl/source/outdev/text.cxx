@@ -1024,13 +1024,15 @@ void OutputDevice::ImplDrawText(OutputDevice& rTargetDevice, const tools::Rectan
 
     if (nStyle & DrawTextFlags::MultiLine)
     {
-        rTargetDevice.ImplDrawTextMultiLine(rTargetDevice, rRect, aStr, nStyle, pVector, pDisplayText,
-                              _rLayout, nTextHeight, eAlign, nMnemonicPos, bDrawMnemonics);
+        rTargetDevice.ImplDrawTextMultiLine(rTargetDevice, rRect, aStr, nStyle, pVector,
+                                            pDisplayText, _rLayout, nTextHeight, eAlign,
+                                            nMnemonicPos, bDrawMnemonics);
     }
     else
     {
-        rTargetDevice.ImplDrawTextSingleLine(rTargetDevice, rRect, aStr, nStyle, pVector, pDisplayText,
-                               _rLayout, nTextHeight, eAlign, nMnemonicPos, bDrawMnemonics);
+        rTargetDevice.ImplDrawTextSingleLine(rTargetDevice, rRect, aStr, nStyle, pVector,
+                                             pDisplayText, _rLayout, nTextHeight, eAlign,
+                                             nMnemonicPos, bDrawMnemonics);
     }
 
     // Restore Disabled Text Colors
@@ -1043,11 +1045,13 @@ void OutputDevice::ImplDrawText(OutputDevice& rTargetDevice, const tools::Rectan
     }
 }
 
-void OutputDevice::ImplDrawTextSingleLine(OutputDevice& rTargetDevice, const tools::Rectangle& rRect,
-                                          const OUString& rStr, DrawTextFlags nStyle,
-                                          std::vector<tools::Rectangle>* pVector, OUString* pDisplayText,
-                                          vcl::TextLayoutCommon& _rLayout, tools::Long nTextHeight,
-                                          TextAlign eAlign, sal_Int32 nMnemonicPos, bool bDrawMnemonics)
+void OutputDevice::ImplDrawTextSingleLine(OutputDevice& rTargetDevice,
+                                          const tools::Rectangle& rRect, const OUString& rStr,
+                                          DrawTextFlags nStyle,
+                                          std::vector<tools::Rectangle>* pVector,
+                                          OUString* pDisplayText, vcl::TextLayoutCommon& _rLayout,
+                                          tools::Long nTextHeight, TextAlign eAlign,
+                                          sal_Int32 nMnemonicPos, bool bDrawMnemonics)
 {
     tools::Long nWidth = rRect.GetWidth();
     tools::Long nHeight = rRect.GetHeight();
@@ -1105,9 +1109,9 @@ void OutputDevice::ImplDrawTextSingleLine(OutputDevice& rTargetDevice, const too
         Point aTempPos = rTargetDevice.LogicToPixel(aPos);
         nMnemonicX = rTargetDevice.GetOutOffXPixel() + aTempPos.X()
                      + rTargetDevice.LogicWidthToDevicePixel(std::min(lc_x1, lc_x2));
-        nMnemonicY = rTargetDevice.GetOutOffYPixel() + aTempPos.Y()
-                     + rTargetDevice.LogicWidthToDevicePixel(
-                           rTargetDevice.GetFontMetric().GetAscent());
+        nMnemonicY
+            = rTargetDevice.GetOutOffYPixel() + aTempPos.Y()
+              + rTargetDevice.LogicWidthToDevicePixel(rTargetDevice.GetFontMetric().GetAscent());
     }
 
     if (nStyle & DrawTextFlags::Clip)
@@ -1130,9 +1134,10 @@ void OutputDevice::ImplDrawTextSingleLine(OutputDevice& rTargetDevice, const too
 
 void OutputDevice::ImplDrawTextMultiLine(OutputDevice& rTargetDevice, const tools::Rectangle& rRect,
                                          const OUString& rStr, DrawTextFlags nStyle,
-                                         std::vector<tools::Rectangle>* pVector, OUString* pDisplayText,
-                                         vcl::TextLayoutCommon& _rLayout, tools::Long nTextHeight,
-                                         TextAlign eAlign, sal_Int32 nMnemonicPos, bool bDrawMnemonics)
+                                         std::vector<tools::Rectangle>* pVector,
+                                         OUString* pDisplayText, vcl::TextLayoutCommon& _rLayout,
+                                         tools::Long nTextHeight, TextAlign eAlign,
+                                         sal_Int32 nMnemonicPos, bool bDrawMnemonics)
 {
     tools::Long nWidth = rRect.GetWidth();
     tools::Long nHeight = rRect.GetHeight();
@@ -1238,9 +1243,8 @@ void OutputDevice::ImplDrawTextMultiLine(OutputDevice& rTargetDevice, const tool
                         = rTargetDevice.LogicWidthToDeviceSubPixel(std::abs(lc_x1 - lc_x2));
 
                     Point aTempPos = rTargetDevice.LogicToPixel(aPos);
-                    nMnemonicX
-                        = rTargetDevice.GetOutOffXPixel() + aTempPos.X()
-                          + rTargetDevice.LogicWidthToDevicePixel(std::min(lc_x1, lc_x2));
+                    nMnemonicX = rTargetDevice.GetOutOffXPixel() + aTempPos.X()
+                                 + rTargetDevice.LogicWidthToDevicePixel(std::min(lc_x1, lc_x2));
                     nMnemonicY = rTargetDevice.GetOutOffYPixel() + aTempPos.Y()
                                  + rTargetDevice.LogicWidthToDevicePixel(
                                        rTargetDevice.GetFontMetric().GetAscent());
@@ -1495,6 +1499,7 @@ tools::Rectangle OutputDevice::GetTextRect(const tools::Rectangle& rRect, const 
         tools::Polygon aRotatedPolygon(aRect);
         aRotatedPolygon.Rotate(Point(aRect.GetWidth() / 2, aRect.GetHeight() / 2),
                                mpGraphicsState->maFont.GetOrientation());
+
         return aRotatedPolygon.GetBoundRect();
     }
 
@@ -1528,7 +1533,8 @@ void OutputDevice::DrawCtrlText(const Point& rPos, const OUString& rStr, const s
     sal_Int32 nCorrectedIndex = nIndex;
     sal_Int32 nCorrectedLen = nLen;
 
-    nCorrectedLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nCorrectedIndex, nCorrectedLen);
+    nCorrectedLen
+        = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nCorrectedIndex, nCorrectedLen);
 
     sal_Int32 nMnemonicPos = -1;
 

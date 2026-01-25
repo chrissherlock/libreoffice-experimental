@@ -1654,6 +1654,62 @@ bool TextLayoutEngine::GetTextOutlines(const LayoutResources& rResources,
     return bRet;
 }
 
+tools::Rectangle TextLayoutEngine::AlignAndRotateTextRect(
+    const tools::Rectangle& rTargetRect, // The original layout area
+    tools::Long nContentWidth, // Calculated max width of text
+    tools::Long nContentHeight, // Calculated total height of text
+    DrawTextFlags nStyle, // Alignment flags
+    Degree10 nOrientation) // Font orientation
+{
+    tools::Rectangle aRect = rTargetRect;
+
+    // Horizontal Alignment
+    if (nStyle & DrawTextFlags::Right)
+    {
+        aRect.SetLeft(aRect.Right() - nContentWidth + 1);
+    }
+    else if (nStyle & DrawTextFlags::Center)
+    {
+        aRect.AdjustLeft((rTargetRect.GetWidth() - nContentWidth) / 2);
+        aRect.SetRight(aRect.Left() + nContentWidth - 1);
+    }
+    else
+    {
+        aRect.SetRight(aRect.Left() + nContentWidth - 1);
+    }
+
+    // Vertical Alignment
+    if (nStyle & DrawTextFlags::Bottom)
+    {
+        aRect.SetTop(aRect.Bottom() - nContentHeight + 1);
+    }
+    else if (nStyle & DrawTextFlags::VCenter)
+    {
+        aRect.AdjustTop((aRect.GetHeight() - nContentHeight) / 2);
+        aRect.SetBottom(aRect.Top() + nContentHeight - 1);
+    }
+    else
+    {
+        aRect.SetBottom(aRect.Top() + nContentHeight - 1);
+    }
+
+    // Rounding adjustment (legacy behavior from OutputDevice::GetTextRect)
+    if (nStyle & DrawTextFlags::Right)
+        aRect.AdjustLeft(-1);
+    else
+        aRect.AdjustRight(1);
+
+    // Rotation
+    if (nOrientation != 0_deg10)
+    {
+        tools::Polygon aRotatedPolygon(aRect);
+        aRotatedPolygon.Rotate(Point(aRect.GetWidth() / 2, aRect.GetHeight() / 2), nOrientation);
+        return aRotatedPolygon.GetBoundRect();
+    }
+
+    return aRect;
+}
+
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
