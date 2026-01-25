@@ -346,6 +346,9 @@ public:
                                           const vcl::Font& rFont, tools::Long nDPIY,
                                           tools::Long nSpaceWidth, tools::Long nBulletWidth);
 
+    static void InitializeAboveTextLineMetrics(const LogicalFontInstance* pFontInstance,
+                                               tools::Long nDPIY, tools::Long nUnderlineSize);
+
 private:
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);
 
