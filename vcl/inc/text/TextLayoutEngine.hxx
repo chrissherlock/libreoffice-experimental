@@ -409,6 +409,27 @@ public:
                                                    tools::Long nContentHeight, DrawTextFlags nStyle,
                                                    Degree10 nOrientation);
 
+    struct MnemonicDeviceParams
+    {
+        tools::Long nLogicalAscent;
+        tools::Long nOutOffX;
+        tools::Long nOutOffY;
+    };
+
+    struct MnemonicGeometry
+    {
+        tools::Long nX;
+        tools::Long nY;
+        tools::Long nWidth;
+    };
+
+    static MnemonicGeometry
+    GetMnemonicGeometry(std::function<double(tools::Long)> const& fnLogicWidthToDeviceSubPixel,
+                        std::function<tools::Long(tools::Long)> const& fnLogicWidthToDevicePixel,
+                        std::function<Point(const Point&)> const& fnLogicToPixel,
+                        const MnemonicDeviceParams& rParams, KernArraySpan aDXArray,
+                        sal_Int32 nRelPos, const Point& rLinePos, bool bTrailing = false);
+
 private:
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);
 
