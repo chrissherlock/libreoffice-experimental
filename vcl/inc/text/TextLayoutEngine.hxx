@@ -404,6 +404,11 @@ public:
                                 sal_uLong nLayoutWidth, KernArraySpan pDXArray,
                                 std::span<const sal_Bool> pKashidaArray);
 
+    static tools::Rectangle AlignAndRotateTextRect(const tools::Rectangle& rTargetRect,
+                                                   tools::Long nContentWidth,
+                                                   tools::Long nContentHeight, DrawTextFlags nStyle,
+                                                   Degree10 nOrientation);
+
 private:
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);
 
