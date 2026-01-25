@@ -225,6 +225,7 @@ public:
     void testGetRotatedGeometry_180_Degrees();
     void testGetRotatedGeometry_270_Degrees();
     void testGetRotatedGeometry_Arbitrary_Angle();
+    void testGetRotatedImageOrigin();
 
     CPPUNIT_TEST_SUITE(TextLayoutEngineTest);
     CPPUNIT_TEST(testBiDiLayoutFlags);
@@ -253,6 +254,7 @@ public:
     CPPUNIT_TEST(testGetRotatedGeometry_180_Degrees);
     CPPUNIT_TEST(testGetRotatedGeometry_270_Degrees);
     CPPUNIT_TEST(testGetRotatedGeometry_Arbitrary_Angle);
+    CPPUNIT_TEST(testGetRotatedImageOrigin);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -824,6 +826,46 @@ void TextLayoutEngineTest::testGetRotatedGeometry_Arbitrary_Angle()
     tools::Rectangle aBound = aGeo.maPoly.GetBoundRect();
     CPPUNIT_ASSERT(aBound.GetWidth() > 100);
     CPPUNIT_ASSERT(aBound.GetHeight() > 100);
+}
+
+void TextLayoutEngineTest::testGetRotatedImageOrigin()
+{
+    Point aBase(100, 100);
+    // Local bounds: 10x20 rectangle at (0,0)
+    // Note: VCL Rect of size 10x20 spans 0..9 in X and 0..19 in Y.
+    tools::Rectangle aLocal(Point(0, 0), Size(10, 20));
+
+    // Case 1: 0 Degrees
+    // Should be Base + Local.TopLeft (100, 100)
+    Point aPos = vcl::text::TextLayoutEngine::GetRotatedImageOrigin(aBase, aLocal, 0_deg10);
+    CPPUNIT_ASSERT_EQUAL(tools::Long(100), aPos.X());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(100), aPos.Y());
+
+    // Case 2: 90 Degrees
+    // Rotates (x,y) -> (y, -x).
+    // X range [0..9] becomes Y range [0..-9]. Min Y is -9.
+    // Base(100,100) + (0, -9) = (100, 91).
+    aPos = vcl::text::TextLayoutEngine::GetRotatedImageOrigin(aBase, aLocal, 900_deg10);
+    CPPUNIT_ASSERT_EQUAL(tools::Long(100), aPos.X());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(91), aPos.Y());
+
+    // Case 3: 180 Degrees
+    // Rotates (x,y) -> (-x, -y).
+    // X range [0..9] -> [-9..0]. Min X is -9.
+    // Y range [0..19] -> [-19..0]. Min Y is -19.
+    // Base(100,100) + (-9, -19) = (91, 81).
+    aPos = vcl::text::TextLayoutEngine::GetRotatedImageOrigin(aBase, aLocal, 1800_deg10);
+    CPPUNIT_ASSERT_EQUAL(tools::Long(91), aPos.X());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(81), aPos.Y());
+
+    // Case 4: 270 Degrees
+    // Rotates (x,y) -> (-y, x).
+    // Y range [0..19] -> X range [0..-19]. Min X is -19.
+    // X range [0..9] -> Y range [0..9]. Min Y is 0.
+    // Base(100,100) + (-19, 0) = (81, 100).
+    aPos = vcl::text::TextLayoutEngine::GetRotatedImageOrigin(aBase, aLocal, 2700_deg10);
+    CPPUNIT_ASSERT_EQUAL(tools::Long(81), aPos.X());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(100), aPos.Y());
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TextLayoutEngineTest);
