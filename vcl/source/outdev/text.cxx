@@ -181,11 +181,8 @@ bool OutputDevice::ImplDrawRotateText(SalLayout& rSalLayout)
     if (aBmp.IsEmpty() || !aBmp.Rotate(mpFontRealization->mxFont->mnOwnOrientation, COL_WHITE))
         return false;
 
-    // calculate rotation offset
-    tools::Polygon aPoly(aBoundRect);
-    aPoly.Rotate(Point(), mpFontRealization->mxFont->mnOwnOrientation);
-    Point aPoint = aPoly.GetBoundRect().TopLeft();
-    aPoint += Point(nX, nY);
+    Point aPoint = vcl::text::TextLayoutEngine::GetRotatedImageOrigin(
+        Point(nX, nY), aBoundRect, mpFontRealization->mxFont->mnOwnOrientation);
 
     // mask output with text colored bitmap
     GDIMetaFile* pOldMetaFile = mpMetaFile;
