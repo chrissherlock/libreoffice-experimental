@@ -1184,7 +1184,6 @@ public:
                                                       const sal_Int32 nEndIndex ) const;
 
 protected:
-    SAL_DLLPRIVATE void         ImplInitAboveTextLineSize();
     SAL_DLLPRIVATE float        approximate_char_width() const;
 
     virtual bool shouldDrawWavePixelAsRect(tools::Long nLineWidth) const;

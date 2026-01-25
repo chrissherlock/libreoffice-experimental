@@ -129,14 +129,6 @@ namespace {
     };
 }
 
-void OutputDevice::ImplInitAboveTextLineSize()
-{
-    vcl::text::TextLayoutEngine::InitializeAboveTextLineMetrics(
-        GetFontInstance(),
-        GetDPIY(),
-        GetFontMetric().GetUnderline()
-    );
-}
 
 void OutputDevice::ImplDrawWavePixel( tools::Long nOriginX, tools::Long nOriginY,
                                       tools::Long nCurX, tools::Long nCurY,
