@@ -222,7 +222,7 @@ bool OutputDevice::ImplDrawRotateText(SalLayout& rSalLayout)
     return true;
 }
 
-void OutputDevice::ImplDrawTextDirect(SalLayout& rSalLayout, bool bTextLines)
+void OutputDevice::ImplRenderLayout(SalLayout& rSalLayout, bool bTextLines)
 {
     if (mpFontRealization->mxFont->mnOwnOrientation)
         if (ImplDrawRotateText(rSalLayout))
@@ -314,14 +314,14 @@ void OutputDevice::ImplDrawSpecialText(SalLayout& rSalLayout)
         auto aPrevOffset = rSalLayout.DrawOffset();
         rSalLayout.DrawOffset()
             += basegfx::B2DPoint{ static_cast<double>(nOff), static_cast<double>(nOff) };
-        ImplDrawTextDirect(rSalLayout, mpFontRealization->bHasLineDecorations);
+        ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
         rSalLayout.DrawOffset() = aPrevOffset;
 
         SetTextLineColor(aTextLineColor);
         SetOverlineColor(aOverlineColor);
         SetTextColor(aTextColor);
         ImplInitTextColor();
-        ImplDrawTextDirect(rSalLayout, mpFontRealization->bHasLineDecorations);
+        ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
 
         SetTextLineColor(aOldTextLineColor);
         SetOverlineColor(aOldOverlineColor);
@@ -347,7 +347,7 @@ void OutputDevice::ImplDrawSpecialText(SalLayout& rSalLayout)
                 SetTextColor(COL_BLACK);
             ImplInitTextColor();
             rSalLayout.DrawBase() += basegfx::B2DPoint(nOff, nOff);
-            ImplDrawTextDirect(rSalLayout, mpFontRealization->bHasLineDecorations);
+            ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
             rSalLayout.DrawBase() -= basegfx::B2DPoint(nOff, nOff);
             SetTextColor(aOldColor);
             SetTextLineColor(aOldTextLineColor);
@@ -355,34 +355,34 @@ void OutputDevice::ImplDrawSpecialText(SalLayout& rSalLayout)
             ImplInitTextColor();
 
             if (!mpGraphicsState->maFont.IsOutline())
-                ImplDrawTextDirect(rSalLayout, mpFontRealization->bHasLineDecorations);
+                ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
         }
 
         if (mpGraphicsState->maFont.IsOutline())
         {
             rSalLayout.DrawBase() = aOrigPos + basegfx::B2DPoint(-1, -1);
-            ImplDrawTextDirect(rSalLayout, mpFontRealization->bHasLineDecorations);
+            ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
             rSalLayout.DrawBase() = aOrigPos + basegfx::B2DPoint(+1, +1);
-            ImplDrawTextDirect(rSalLayout, mpFontRealization->bHasLineDecorations);
+            ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
             rSalLayout.DrawBase() = aOrigPos + basegfx::B2DPoint(-1, +0);
-            ImplDrawTextDirect(rSalLayout, mpFontRealization->bHasLineDecorations);
+            ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
             rSalLayout.DrawBase() = aOrigPos + basegfx::B2DPoint(-1, +1);
-            ImplDrawTextDirect(rSalLayout, mpFontRealization->bHasLineDecorations);
+            ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
             rSalLayout.DrawBase() = aOrigPos + basegfx::B2DPoint(+0, +1);
-            ImplDrawTextDirect(rSalLayout, mpFontRealization->bHasLineDecorations);
+            ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
             rSalLayout.DrawBase() = aOrigPos + basegfx::B2DPoint(+0, -1);
-            ImplDrawTextDirect(rSalLayout, mpFontRealization->bHasLineDecorations);
+            ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
             rSalLayout.DrawBase() = aOrigPos + basegfx::B2DPoint(+1, -1);
-            ImplDrawTextDirect(rSalLayout, mpFontRealization->bHasLineDecorations);
+            ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
             rSalLayout.DrawBase() = aOrigPos + basegfx::B2DPoint(+1, +0);
-            ImplDrawTextDirect(rSalLayout, mpFontRealization->bHasLineDecorations);
+            ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
             rSalLayout.DrawBase() = aOrigPos;
 
             SetTextColor(COL_WHITE);
             SetTextLineColor(COL_WHITE);
             SetOverlineColor(COL_WHITE);
             ImplInitTextColor();
-            ImplDrawTextDirect(rSalLayout, mpFontRealization->bHasLineDecorations);
+            ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
             SetTextColor(aOldColor);
             SetTextLineColor(aOldTextLineColor);
             SetOverlineColor(aOldOverlineColor);
@@ -411,7 +411,7 @@ void OutputDevice::ImplDrawText(SalLayout& rSalLayout)
     if (mpFontRealization->bHasSpecialEffects)
         ImplDrawSpecialText(rSalLayout);
     else
-        ImplDrawTextDirect(rSalLayout, mpFontRealization->bHasLineDecorations);
+        ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
 }
 
 const Color& OutputDevice::GetTextColor() const { return mpGraphicsState->maTextColor; }
