@@ -1,4 +1,3 @@
-#include <string>
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 /*
  * This file is part of the LibreOffice project.
@@ -13,6 +12,7 @@
 #include <salhelper/simplereferenceobject.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <tools/degree.hxx>
+#include <tools/mapunit.hxx>
 #include <i18nlangtag/lang.h>
 
 #include <vcl/fntstyle.hxx>
@@ -21,6 +21,7 @@
 #include <vcl/glyphitem.hxx>
 #include <vcl/font.hxx>
 
+#include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
 #include <font/FontController.hxx>
 #include <font/LogicalFontInstance.hxx>
@@ -31,6 +32,7 @@
 #include <text/TextLayoutEngine.hxx>
 #include <text/TextLayoutRequest.hxx>
 
+#include <string>
 #include <unicode/uchar.h>
 
 namespace
@@ -234,6 +236,7 @@ public:
     void testGetOutlineOffsets();
     void testGetTextOutlines();
     void testAlignAndRotateTextRect();
+    void testGetMnemonicGeometry();
 
     CPPUNIT_TEST_SUITE(TextLayoutEngineTest);
     CPPUNIT_TEST(testBiDiLayoutFlags);
@@ -269,6 +272,7 @@ public:
     CPPUNIT_TEST(testGetOutlineOffsets);
     CPPUNIT_TEST(testGetTextOutlines);
     CPPUNIT_TEST(testAlignAndRotateTextRect);
+    CPPUNIT_TEST(testGetMnemonicGeometry);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -1128,6 +1132,28 @@ void TextLayoutEngineTest::testAlignAndRotateTextRect()
         // Ensure it moved (rotation around near-origin pivot usually shifts it)
         CPPUNIT_ASSERT(aRes.Left() != 10);
     }
+}
+
+void TextLayoutEngineTest::testGetMnemonicGeometry()
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    pVDev->SetOutputSizePixel(Size(100, 100));
+    pVDev->SetMapMode(MapMode(MapUnit::MapPixel));
+
+    std::vector<double> aDXArray = { 10.0, 25.0, 40.0 };
+    Point aLinePos(10, 20);
+    vcl::text::TextLayoutEngine::MnemonicDeviceParams aParams{ 12, 0, 0 };
+
+    auto aGeo = vcl::text::TextLayoutEngine::GetMnemonicGeometry(
+        // Use plain lambdas to avoid linking against SAL_DLLPRIVATE LogicWidthToDevicePixel
+        // In MapPixel mode, 1 logical unit = 1 device pixel
+        [](tools::Long w) { return static_cast<double>(w); }, [](tools::Long w) { return w; },
+        [&](const Point& p) { return pVDev->LogicToPixel(p); }, // LogicToPixel is public
+        aParams, aDXArray, 1, aLinePos, false);
+
+    CPPUNIT_ASSERT_EQUAL(tools::Long(15), aGeo.nWidth);
+    CPPUNIT_ASSERT_EQUAL(tools::Long(20), aGeo.nX);
+    CPPUNIT_ASSERT_EQUAL(tools::Long(32), aGeo.nY);
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TextLayoutEngineTest);

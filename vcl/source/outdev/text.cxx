@@ -1077,13 +1077,13 @@ void OutputDevice::ImplDrawTextSingleLine(OutputDevice& rTargetDevice,
             nStyle &= ~DrawTextFlags::Clip;
     }
 
-    // horizontal text alignment
+    // Horizontal text alignment
     if (nStyle & DrawTextFlags::Right)
         aPos.AdjustX(nWidth - nTextWidth);
     else if (nStyle & DrawTextFlags::Center)
         aPos.AdjustX((nWidth - nTextWidth) / 2);
 
-    // vertical font alignment
+    // Vertical font alignment
     if (eAlign == ALIGN_BOTTOM)
         aPos.AdjustY(nTextHeight);
     else if (eAlign == ALIGN_BASELINE)
@@ -1094,41 +1094,51 @@ void OutputDevice::ImplDrawTextSingleLine(OutputDevice& rTargetDevice,
     else if (nStyle & DrawTextFlags::VCenter)
         aPos.AdjustY((nHeight - nTextHeight) / 2);
 
-    tools::Long nMnemonicX = 0;
-    tools::Long nMnemonicY = 0;
-    double nMnemonicWidth = 0;
+    // Mnemonic Geometry Calculation
+    vcl::text::TextLayoutEngine::MnemonicGeometry aMnemonicGeo{ 0, 0, 0 };
+    bool bHasMnemonic = false;
 
     if (nMnemonicPos != -1 && nMnemonicPos < aDrawStr.getLength())
     {
         KernArray aDXArray;
         _rLayout.GetTextArray(aDrawStr, &aDXArray, 0, aDrawStr.getLength(), true);
-        tools::Long lc_x1 = nMnemonicPos ? aDXArray[nMnemonicPos - 1] : 0;
-        tools::Long lc_x2 = aDXArray[nMnemonicPos];
-        nMnemonicWidth = rTargetDevice.LogicWidthToDeviceSubPixel(std::abs(lc_x1 - lc_x2));
 
-        Point aTempPos = rTargetDevice.LogicToPixel(aPos);
-        nMnemonicX = rTargetDevice.GetOutOffXPixel() + aTempPos.X()
-                     + rTargetDevice.LogicWidthToDevicePixel(std::min(lc_x1, lc_x2));
-        nMnemonicY
-            = rTargetDevice.GetOutOffYPixel() + aTempPos.Y()
-              + rTargetDevice.LogicWidthToDevicePixel(rTargetDevice.GetFontMetric().GetAscent());
+        vcl::text::TextLayoutEngine::MnemonicDeviceParams aParams{
+            rTargetDevice.GetFontMetric().GetAscent(), rTargetDevice.GetOutOffXPixel(),
+            rTargetDevice.GetOutOffYPixel()
+        };
+
+        auto aGeo = vcl::text::TextLayoutEngine::GetMnemonicGeometry(
+            [&](tools::Long w) { return rTargetDevice.LogicWidthToDeviceSubPixel(w); },
+            [&](tools::Long w) { return rTargetDevice.LogicWidthToDevicePixel(w); },
+            [&](const Point& p) { return rTargetDevice.LogicToPixel(p); }, aParams, aDXArray,
+            nMnemonicPos, aPos);
+
+        rTargetDevice.ImplDrawMnemonicLine(aGeo.nX, aGeo.nY, static_cast<double>(aGeo.nWidth));
     }
 
+    // Drawing
     if (nStyle & DrawTextFlags::Clip)
     {
         auto popIt = rTargetDevice.ScopedPush(vcl::PushFlags::CLIPREGION);
         rTargetDevice.IntersectClipRegion(rRect);
         _rLayout.DrawText(aPos, aDrawStr, 0, aDrawStr.getLength(), pVector, pDisplayText);
 
-        if (bDrawMnemonics && nMnemonicPos != -1)
-            rTargetDevice.ImplDrawMnemonicLine(nMnemonicX, nMnemonicY, nMnemonicWidth);
+        if (bDrawMnemonics && bHasMnemonic)
+        {
+            rTargetDevice.ImplDrawMnemonicLine(aMnemonicGeo.nX, aMnemonicGeo.nY,
+                                               static_cast<double>(aMnemonicGeo.nWidth));
+        }
     }
     else
     {
         _rLayout.DrawText(aPos, aDrawStr, 0, aDrawStr.getLength(), pVector, pDisplayText);
 
-        if (bDrawMnemonics && nMnemonicPos != -1)
-            rTargetDevice.ImplDrawMnemonicLine(nMnemonicX, nMnemonicY, nMnemonicWidth);
+        if (bDrawMnemonics && bHasMnemonic)
+        {
+            rTargetDevice.ImplDrawMnemonicLine(aMnemonicGeo.nX, aMnemonicGeo.nY,
+                                               static_cast<double>(aMnemonicGeo.nWidth));
+        }
     }
 }
 

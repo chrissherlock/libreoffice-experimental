@@ -1710,6 +1710,30 @@ tools::Rectangle TextLayoutEngine::AlignAndRotateTextRect(
     return aRect;
 }
 
+TextLayoutEngine::MnemonicGeometry TextLayoutEngine::GetMnemonicGeometry(
+    std::function<double(tools::Long)> const& fnLogicWidthToDeviceSubPixel,
+    std::function<tools::Long(tools::Long)> const& fnLogicWidthToDevicePixel,
+    std::function<Point(const Point&)> const& fnLogicToPixel, const MnemonicDeviceParams& rParams,
+    KernArraySpan aDXArray, sal_Int32 nRelPos, const Point& rLinePos, bool bTrailing)
+{
+    MnemonicGeometry aGeo;
+
+    sal_Int32 lc_x1 = nRelPos ? static_cast<sal_Int32>(aDXArray[nRelPos - 1]) : 0;
+    sal_Int32 lc_x2 = static_cast<sal_Int32>(aDXArray[nRelPos]);
+
+    aGeo.nWidth = static_cast<tools::Long>(fnLogicWidthToDeviceSubPixel(std::abs(lc_x1 - lc_x2)));
+
+    Point aTempPos = fnLogicToPixel(rLinePos);
+
+    aGeo.nY = rParams.nOutOffY + aTempPos.Y() + fnLogicWidthToDevicePixel(rParams.nLogicalAscent);
+
+    sal_Int32 nCharOffset = bTrailing ? std::max(lc_x1, lc_x2) : std::min(lc_x1, lc_x2);
+
+    aGeo.nX = rParams.nOutOffX + aTempPos.X() + fnLogicWidthToDevicePixel(nCharOffset);
+
+    return aGeo;
+}
+
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
