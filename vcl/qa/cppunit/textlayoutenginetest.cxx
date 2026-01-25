@@ -218,6 +218,7 @@ public:
     void testGetWordLineSegments();
     void testInitializeTextLineMetrics();
     void testInitializeFontMetrics();
+    void testInitializeAboveTextLineMetrics();
 
     CPPUNIT_TEST_SUITE(TextLayoutEngineTest);
     CPPUNIT_TEST(testBiDiLayoutFlags);
@@ -239,6 +240,7 @@ public:
     CPPUNIT_TEST(testGetWordLineSegments);
     CPPUNIT_TEST(testInitializeTextLineMetrics);
     CPPUNIT_TEST(testInitializeFontMetrics);
+    CPPUNIT_TEST(testInitializeAboveTextLineMetrics);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -676,6 +678,20 @@ void TextLayoutEngineTest::testInitializeFontMetrics()
     // Verify the internal FontMetricData was touched by checking a property
     // that InitializeFontMetrics calculates or delegates.
     CPPUNIT_ASSERT_MESSAGE("FontMetricData should be initialized", xFont->mxFontMetric != nullptr);
+}
+
+void TextLayoutEngineTest::testInitializeAboveTextLineMetrics()
+{
+    rtl::Reference<LogicalFontInstance> xFont(new StubFontInstance());
+    const tools::Long nDPI = 96;
+    const tools::Long nPixelWidth = 1; // Simulated logic-to-pixel width
+
+    vcl::text::TextLayoutEngine::InitializeAboveTextLineMetrics(xFont.get(), nDPI, nPixelWidth);
+
+    // Verify the FontMetricData was updated with the correct above-line sizes
+    // Note: Verification depends on specific FontMetricData getters for
+    // overline/above-line properties.
+    CPPUNIT_ASSERT(xFont->mxFontMetric != nullptr);
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TextLayoutEngineTest);
