@@ -1153,15 +1153,25 @@ TextLayoutEngine::GetTextInkBounds(const SalLayout& rSalLayout,
 
 void TextLayoutEngine::GetEmphasisMarkPositions(const SalLayout& rSalLayout,
                                                 const vcl::font::FontRealization& rFontRealization,
+                                                const vcl::font::EmphasisMark& rMark,
                                                 bool bEmphasisBelow, std::vector<Point>& rPoints)
 {
     rPoints.clear();
+    if (!rFontRealization.mxFont)
+        return;
 
-    const tools::Long nEmphasisOffset
+    // Calculate base anchor (Ascent or Descent line)
+    const tools::Long nBaseOffset
         = bEmphasisBelow ? rFontRealization.nEmphasisDescent : -rFontRealization.nEmphasisAscent;
-
     const basegfx::B2DPoint aDrawPos = rSalLayout.GetDrawPosition();
-    const tools::Long nY = aDrawPos.getY() + nEmphasisOffset;
+    const tools::Long nAnchorY = aDrawPos.getY() + nBaseOffset;
+
+    // Prepare visual adjustments (centering and mark-specific offset)
+    const tools::Long nXCenterOff = rMark.GetWidth() / 2;
+    const tools::Long nYCenterOff
+        = (bEmphasisBelow ? rFontRealization.nEmphasisDescent : rFontRealization.nEmphasisAscent)
+          / 2;
+    const tools::Long nShapeAdj = bEmphasisBelow ? rMark.GetYOffset() : -rMark.GetYOffset();
 
     int nStart = 0;
     const GlyphItem* pGlyph = nullptr;
@@ -1171,7 +1181,11 @@ void TextLayoutEngine::GetEmphasisMarkPositions(const SalLayout& rSalLayout,
     {
         if (!pGlyph)
             continue;
-        rPoints.emplace_back(aPos.getX(), nY);
+
+        Point aMarkPt(static_cast<tools::Long>(aPos.getX()) - nXCenterOff,
+                      nAnchorY + nShapeAdj - nYCenterOff);
+
+        rPoints.push_back(aMarkPt);
     }
 }
 

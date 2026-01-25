@@ -1201,32 +1201,12 @@ void OutputDevice::ImplDrawEmphasisMarks(SalLayout& rSalLayout)
     }
 
     std::vector<Point> aPositions;
-    vcl::text::TextLayoutEngine::GetEmphasisMarkPositions(rSalLayout, *pRealization, bBelow, aPositions);
+    vcl::text::TextLayoutEngine::GetEmphasisMarkPositions(rSalLayout, *pRealization, aEmphasisMark, bBelow, aPositions);
 
-    tools::Long nEmphasisWidth2 = aEmphasisMark.GetWidth() / 2;
-    tools::Long nEmphasisHeight2 = nEmphasisHeight / 2;
-
-    // The engine returns the "visual anchor" on the font (Ascent or Descent line).
-    // We now apply the specific visual offsets for the Mark shape itself.
-    tools::Long nYAdjustment = aEmphasisMark.GetYOffset();
-
-    // Draw the marks at the calculated positions
+    // Draw the marks at the final calculated positions
     for (const Point& rPos : aPositions)
     {
-        Point aOutPoint = rPos;
-
-        // Apply visual adjustment relative to the anchor line
-        if (bBelow)
-            aOutPoint.AdjustY(nYAdjustment);
-        else
-            aOutPoint.AdjustY(-(nYAdjustment));
-
-        // Center the mark shape
-        aOutPoint.AdjustX(-nEmphasisWidth2);
-        aOutPoint.AdjustY(-nEmphasisHeight2);
-
-        // Call the singular drawing helper
-        ImplDrawEmphasisMark(rSalLayout.DrawBase().getX(), aOutPoint.X(), aOutPoint.Y(),
+        ImplDrawEmphasisMark(rSalLayout.DrawBase().getX(), rPos.X(), rPos.Y(),
                              aEmphasisMark.GetShape(), aEmphasisMark.IsShapePolyLine(),
                              aEmphasisMark.GetRect1(), aEmphasisMark.GetRect2());
     }

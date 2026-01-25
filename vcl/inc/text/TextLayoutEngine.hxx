@@ -18,6 +18,7 @@
 #include <vcl/outdev.hxx>
 
 #include <ImplLayoutRuns.hxx>
+#include <font/EmphasisMark.hxx>
 #include <font/FontLookupCriteria.hxx>
 
 #include <vector>
@@ -97,8 +98,10 @@ public:
     /** Calculates the device-pixel positions for emphasis marks.
      * @return A vector of global Points (in device pixels).
      */
-    static std::vector<Point> GetEmphasisMarkPositions(const SalLayout& rLayout, long nAscent,
-                                                       long nDescent, FontEmphasisMark nStyle);
+    static void GetEmphasisMarkPositions(const SalLayout& rSalLayout,
+                                         const font::FontRealization& rFontRealization,
+                                         const font::EmphasisMark& rMark, bool bEmphasisBelow,
+                                         std::vector<Point>& rPoints);
 
     /** Initializes font metrics (bullet offset, CJK centering) using callbacks.
      * Independent of OutputDevice.
