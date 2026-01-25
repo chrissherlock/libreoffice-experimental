@@ -392,6 +392,12 @@ public:
     // Calculates the mirrored X-coordinate for RTL or mirrored graphics contexts.
     static tools::Long GetMirroredX(const MirroringContext& rCtx);
 
+    static tools::Long GetReliefOffset(sal_Int32 nDPIX, FontRelief eRelief);
+    static tools::Long GetShadowOffset(tools::Long nLineHeight, bool bIsOutline);
+
+    // Returns the 8 surrounding offsets for simulating an outline
+    static const std::vector<basegfx::B2DPoint>& GetOutlineOffsets();
+
 private:
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);
 

@@ -1565,6 +1565,31 @@ tools::Long TextLayoutEngine::GetMirroredX(const MirroringContext& rCtx)
     return nMirroredX;
 }
 
+tools::Long TextLayoutEngine::GetReliefOffset(sal_Int32 nDPIX, FontRelief eRelief)
+{
+    const tools::Long nOff = 1 + (nDPIX / 300);
+    return (eRelief == FontRelief::Engraved) ? -nOff : nOff;
+}
+
+tools::Long TextLayoutEngine::GetShadowOffset(tools::Long nLineHeight, bool bIsOutline)
+{
+    tools::Long nOff = 1 + ((nLineHeight - 24) / 24);
+
+    if (bIsOutline)
+        nOff++;
+
+    return nOff;
+}
+
+const std::vector<basegfx::B2DPoint>& TextLayoutEngine::GetOutlineOffsets()
+{
+    static const std::vector<basegfx::B2DPoint> aOffsets{ { -1, -1 }, { +1, +1 }, { -1, 0 },
+                                                          { -1, +1 }, { +0, +1 }, { +0, -1 },
+                                                          { +1, -1 }, { +1, +0 } };
+
+    return aOffsets;
+}
+
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
