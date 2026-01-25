@@ -1193,7 +1193,7 @@ protected:
 private:
     SAL_DLLPRIVATE void         ImplInitTextColor();
 
-    SAL_DLLPRIVATE void         ImplDrawTextDirect( SalLayout&, bool bTextLines);
+    SAL_DLLPRIVATE void         ImplRenderLayout(SalLayout&, bool bTextLines);
     SAL_DLLPRIVATE void         ImplDrawSpecialText( SalLayout& );
     SAL_DLLPRIVATE void         ImplDrawTextRect( tools::Long nBaseX, tools::Long nBaseY, tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight );
 
