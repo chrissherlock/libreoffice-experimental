@@ -349,6 +349,9 @@ public:
     static void InitializeAboveTextLineMetrics(const LogicalFontInstance* pFontInstance,
                                                tools::Long nDPIY, tools::Long nUnderlineSize);
 
+    static tools::Long GetAlignmentOffset(TextAlign eAlign, tools::Long nAscent,
+                                          tools::Long nDescent);
+
 private:
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);
 

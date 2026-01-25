@@ -6105,13 +6105,11 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
         pop();
     }
 
-    Point aAlignOffset;
-    if ( eAlign == ALIGN_BOTTOM )
-        aAlignOffset.AdjustY( -(aRefDevFontMetric.GetDescent()) );
-    else if ( eAlign == ALIGN_TOP )
-        aAlignOffset.AdjustY(aRefDevFontMetric.GetAscent() );
-    if( aAlignOffset.X() || aAlignOffset.Y() )
-        aAlignOffset = aRotScale.transform( aAlignOffset );
+    Point eAlignOffset(0, vcl::text::TextLayoutEngine::GetAlignmentOffset(
+        eAlign, aRefDevFontMetric.GetAscent(), aRefDevFontMetric.GetDescent()));
+
+    if( eAlignOffset.X() || eAlignOffset.Y() )
+        eAlignOffset = aRotScale.transform( eAlignOffset );
 
     /* #159153# do not emit an empty glyph vector; this can happen if e.g. the original
        string contained only one of the UTF16 BOMs
@@ -6152,9 +6150,9 @@ void PDFWriterImpl::drawLayout( SalLayout& rLayout, const OUString& rText, bool 
             }
 
             if (bVertical)
-                drawVerticalGlyphs(aRun, aLine, aAlignOffset, aRotScale, fAngle, fXScale, nFontHeight);
+                drawVerticalGlyphs(aRun, aLine, eAlignOffset, aRotScale, fAngle, fXScale, nFontHeight);
             else
-                drawHorizontalGlyphs(aRun, aLine, aAlignOffset, nStart == 0, fAngle, fXScale, nFontHeight, nPixelFontHeight);
+                drawHorizontalGlyphs(aRun, aLine, eAlignOffset, nStart == 0, fAngle, fXScale, nFontHeight, nPixelFontHeight);
 
             if (nCharPos >= 0 && nCharCount)
                 aLine.append( "EMC\n" );
