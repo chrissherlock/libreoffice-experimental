@@ -100,11 +100,12 @@ void OutputDevice::ImplInitTextColor()
     }
 }
 
-OUString OutputDevice::GetEllipsisString( const OUString& rOrigStr, tools::Long nMaxWidth,
-                                        DrawTextFlags nStyle ) const
+OUString OutputDevice::GetEllipsisString(const OUString& rStr, tools::Long nMaxWidth, DrawTextFlags nStyle) const
 {
-    vcl::DefaultTextLayout aTextLayout(*const_cast< OutputDevice* >(this));
-    return aTextLayout.GetEllipsisString(rOrigStr, nMaxWidth, nStyle);
+    return vcl::text::TextLayoutEngine::GetEllipsisString(
+        rStr, nMaxWidth, nStyle,
+        [this](const OUString& s) { return GetTextWidth(s); }
+    );
 }
 
 void OutputDevice::ImplDrawTextRect( tools::Long nBaseX, tools::Long nBaseY,
