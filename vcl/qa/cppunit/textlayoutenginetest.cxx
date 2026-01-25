@@ -220,6 +220,11 @@ public:
     void testInitializeFontMetrics();
     void testInitializeAboveTextLineMetrics();
     void testGetAlignmentOffset();
+    void testGetRotatedGeometry_0_Degrees();
+    void testGetRotatedGeometry_90_Degrees();
+    void testGetRotatedGeometry_180_Degrees();
+    void testGetRotatedGeometry_270_Degrees();
+    void testGetRotatedGeometry_Arbitrary_Angle();
 
     CPPUNIT_TEST_SUITE(TextLayoutEngineTest);
     CPPUNIT_TEST(testBiDiLayoutFlags);
@@ -243,6 +248,11 @@ public:
     CPPUNIT_TEST(testInitializeFontMetrics);
     CPPUNIT_TEST(testInitializeAboveTextLineMetrics);
     CPPUNIT_TEST(testGetAlignmentOffset);
+    CPPUNIT_TEST(testGetRotatedGeometry_0_Degrees);
+    CPPUNIT_TEST(testGetRotatedGeometry_90_Degrees);
+    CPPUNIT_TEST(testGetRotatedGeometry_180_Degrees);
+    CPPUNIT_TEST(testGetRotatedGeometry_270_Degrees);
+    CPPUNIT_TEST(testGetRotatedGeometry_Arbitrary_Angle);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -715,6 +725,105 @@ void TextLayoutEngineTest::testGetAlignmentOffset()
     CPPUNIT_ASSERT_EQUAL_MESSAGE(
         "ALIGN_BASELINE offset should be zero", tools::Long(0),
         vcl::text::TextLayoutEngine::GetAlignmentOffset(ALIGN_BASELINE, nAscent, nDescent));
+}
+
+void TextLayoutEngineTest::testGetRotatedGeometry_0_Degrees()
+{
+    Point aBase(100, 100);
+    tools::Rectangle aLocal(Point(10, 20), Size(30, 40));
+    Degree10 nAngle = 0_deg10;
+
+    vcl::text::RotatedGeometry aGeo
+        = vcl::text::TextLayoutEngine::GetRotatedGeometry(aBase, aLocal, nAngle);
+
+    CPPUNIT_ASSERT_EQUAL(false, aGeo.mbIsPolygon);
+    // X = BaseX(100) + DistX(10) = 110
+    // Y = BaseY(100) + DistY(20) = 120
+    CPPUNIT_ASSERT_EQUAL(tools::Long(110), aGeo.maRect.Left());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(120), aGeo.maRect.Top());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(30), aGeo.maRect.GetWidth());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(40), aGeo.maRect.GetHeight());
+}
+
+void TextLayoutEngineTest::testGetRotatedGeometry_90_Degrees()
+{
+    Point aBase(100, 100);
+    tools::Rectangle aLocal(Point(10, 20), Size(30, 40));
+    Degree10 nAngle = 900_deg10;
+
+    vcl::text::RotatedGeometry aGeo
+        = vcl::text::TextLayoutEngine::GetRotatedGeometry(aBase, aLocal, nAngle);
+
+    CPPUNIT_ASSERT_EQUAL(false, aGeo.mbIsPolygon);
+    // 90 deg rotation logic (Clockwise):
+    // NewX = OldY(20); NewY = -OldX(-10) - NewHeight(30) = -40
+    // Base(100,100) + (20, -40) = (120, 60)
+    CPPUNIT_ASSERT_EQUAL(tools::Long(120), aGeo.maRect.Left());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(60), aGeo.maRect.Top());
+    // Dimensions swapped
+    CPPUNIT_ASSERT_EQUAL(tools::Long(40), aGeo.maRect.GetWidth());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(30), aGeo.maRect.GetHeight());
+}
+
+void TextLayoutEngineTest::testGetRotatedGeometry_180_Degrees()
+{
+    Point aBase(100, 100);
+    tools::Rectangle aLocal(Point(10, 20), Size(30, 40));
+    Degree10 nAngle = 1800_deg10;
+
+    vcl::text::RotatedGeometry aGeo
+        = vcl::text::TextLayoutEngine::GetRotatedGeometry(aBase, aLocal, nAngle);
+
+    CPPUNIT_ASSERT_EQUAL(false, aGeo.mbIsPolygon);
+    // 180 deg rotation logic:
+    // NewX = -OldX(-10) - Width(30) = -40
+    // NewY = -OldY(-20) - Height(40) = -60
+    // Base(100,100) + (-40, -60) = (60, 40)
+    CPPUNIT_ASSERT_EQUAL(tools::Long(60), aGeo.maRect.Left());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(40), aGeo.maRect.Top());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(30), aGeo.maRect.GetWidth());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(40), aGeo.maRect.GetHeight());
+}
+
+void TextLayoutEngineTest::testGetRotatedGeometry_270_Degrees()
+{
+    Point aBase(100, 100);
+    tools::Rectangle aLocal(Point(10, 20), Size(30, 40));
+    Degree10 nAngle = 2700_deg10;
+
+    vcl::text::RotatedGeometry aGeo
+        = vcl::text::TextLayoutEngine::GetRotatedGeometry(aBase, aLocal, nAngle);
+
+    CPPUNIT_ASSERT_EQUAL(false, aGeo.mbIsPolygon);
+    // 270 deg rotation logic (Clockwise):
+    // NewX = -OldY(-20) - NewWidth(40) = -60
+    // NewY = OldX(10)
+    // Base(100,100) + (-60, 10) = (40, 110)
+    CPPUNIT_ASSERT_EQUAL(tools::Long(40), aGeo.maRect.Left());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(110), aGeo.maRect.Top());
+    // Dimensions swapped
+    CPPUNIT_ASSERT_EQUAL(tools::Long(40), aGeo.maRect.GetWidth());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(30), aGeo.maRect.GetHeight());
+}
+
+void TextLayoutEngineTest::testGetRotatedGeometry_Arbitrary_Angle()
+{
+    Point aBase(100, 100);
+    tools::Rectangle aLocal(Point(0, 0), Size(100, 100));
+    Degree10 nAngle = 450_deg10; // 45 degrees
+
+    vcl::text::RotatedGeometry aGeo
+        = vcl::text::TextLayoutEngine::GetRotatedGeometry(aBase, aLocal, nAngle);
+
+    // Expect Polygon fallback
+    CPPUNIT_ASSERT_EQUAL(true, aGeo.mbIsPolygon);
+    CPPUNIT_ASSERT(aGeo.maPoly.GetSize() > 0);
+
+    // Bounds Check: A 100x100 box rotated 45 degrees should have a bounding box
+    // larger than 100x100 (approx 141x141)
+    tools::Rectangle aBound = aGeo.maPoly.GetBoundRect();
+    CPPUNIT_ASSERT(aBound.GetWidth() > 100);
+    CPPUNIT_ASSERT(aBound.GetHeight() > 100);
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TextLayoutEngineTest);
