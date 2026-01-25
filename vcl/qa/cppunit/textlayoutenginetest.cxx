@@ -14,6 +14,7 @@
 #include <tools/degree.hxx>
 #include <i18nlangtag/lang.h>
 
+#include <vcl/fntstyle.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/glyphitem.hxx>
@@ -227,6 +228,9 @@ public:
     void testGetRotatedGeometry_Arbitrary_Angle();
     void testGetRotatedImageOrigin();
     void testGetMirroredX();
+    void testGetReliefOffset();
+    void testGetShadowOffset();
+    void testGetOutlineOffsets();
 
     CPPUNIT_TEST_SUITE(TextLayoutEngineTest);
     CPPUNIT_TEST(testBiDiLayoutFlags);
@@ -257,6 +261,9 @@ public:
     CPPUNIT_TEST(testGetRotatedGeometry_Arbitrary_Angle);
     CPPUNIT_TEST(testGetRotatedImageOrigin);
     CPPUNIT_TEST(testGetMirroredX);
+    CPPUNIT_TEST(testGetReliefOffset);
+    CPPUNIT_TEST(testGetShadowOffset);
+    CPPUNIT_TEST(testGetOutlineOffsets);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -905,6 +912,80 @@ void TextLayoutEngineTest::testGetMirroredX()
     aCtx.bHasMirroredGraphics = false;
     aCtx.bIsRTL = true;
     CPPUNIT_ASSERT_EQUAL(tools::Long(289), vcl::text::TextLayoutEngine::GetMirroredX(aCtx));
+}
+
+void TextLayoutEngineTest::testGetReliefOffset()
+{
+    // Case 1: Standard DPI (96), Embossed (Standard)
+    // Calculation: 1 + (96 / 300) = 1 + 0 = 1
+    tools::Long nOff = vcl::text::TextLayoutEngine::GetReliefOffset(96, FontRelief::Embossed);
+    CPPUNIT_ASSERT_EQUAL(tools::Long(1), nOff);
+
+    // Case 2: Standard DPI (96), Engraved (Negative Offset)
+    // Calculation: -(1 + 0) = -1
+    nOff = vcl::text::TextLayoutEngine::GetReliefOffset(96, FontRelief::Engraved);
+    CPPUNIT_ASSERT_EQUAL(tools::Long(-1), nOff);
+
+    // Case 3: High DPI (600), Embossed
+    // Calculation: 1 + (600 / 300) = 1 + 2 = 3
+    nOff = vcl::text::TextLayoutEngine::GetReliefOffset(600, FontRelief::Embossed);
+    CPPUNIT_ASSERT_EQUAL(tools::Long(3), nOff);
+
+    // Case 4: High DPI (600), Engraved
+    // Calculation: -(1 + 2) = -3
+    nOff = vcl::text::TextLayoutEngine::GetReliefOffset(600, FontRelief::Engraved);
+    CPPUNIT_ASSERT_EQUAL(tools::Long(-3), nOff);
+}
+
+void TextLayoutEngineTest::testGetShadowOffset()
+{
+    // Formula: 1 + ((LineHeight - 24) / 24)
+    // If Outline is true, add 1.
+
+    // Case 1: Small Font (Height 20), Not Outline
+    // 1 + ((20 - 24) / 24) = 1 + (-4/24) = 1 + 0 = 1
+    tools::Long nOff = vcl::text::TextLayoutEngine::GetShadowOffset(20, false);
+    CPPUNIT_ASSERT_EQUAL(tools::Long(1), nOff);
+
+    // Case 2: Standard Font (Height 24), Not Outline
+    // 1 + ((24 - 24) / 24) = 1 + 0 = 1
+    nOff = vcl::text::TextLayoutEngine::GetShadowOffset(24, false);
+    CPPUNIT_ASSERT_EQUAL(tools::Long(1), nOff);
+
+    // Case 3: Large Font (Height 48), Not Outline
+    // 1 + ((48 - 24) / 24) = 1 + 1 = 2
+    nOff = vcl::text::TextLayoutEngine::GetShadowOffset(48, false);
+    CPPUNIT_ASSERT_EQUAL(tools::Long(2), nOff);
+
+    // Case 4: Large Font (Height 48), Is Outline
+    // Calculation from Case 3 (2) + 1 (Outline Bonus) = 3
+    nOff = vcl::text::TextLayoutEngine::GetShadowOffset(48, true);
+    CPPUNIT_ASSERT_EQUAL(tools::Long(3), nOff);
+}
+
+void TextLayoutEngineTest::testGetOutlineOffsets()
+{
+    const std::vector<basegfx::B2DPoint>& rOffsets
+        = vcl::text::TextLayoutEngine::GetOutlineOffsets();
+
+    // Must return exactly 8 points (surrounding pixels)
+    CPPUNIT_ASSERT_EQUAL(size_t(8), rOffsets.size());
+
+    // Verify specific key points verify the pattern
+    // Top-Left
+    CPPUNIT_ASSERT_EQUAL(1.0, std::abs(rOffsets[0].getX()));
+    CPPUNIT_ASSERT_EQUAL(1.0, std::abs(rOffsets[0].getY()));
+
+    // Verify uniqueness (basic check)
+    std::set<std::pair<double, double>> aUniquePoints;
+    for (const auto& rPoint : rOffsets)
+    {
+        aUniquePoints.insert({ rPoint.getX(), rPoint.getY() });
+    }
+    CPPUNIT_ASSERT_EQUAL(size_t(8), aUniquePoints.size());
+
+    // Ensure (0,0) is NOT in the list (we don't draw over the center)
+    CPPUNIT_ASSERT(aUniquePoints.find({ 0.0, 0.0 }) == aUniquePoints.end());
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TextLayoutEngineTest);
