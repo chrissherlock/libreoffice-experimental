@@ -25,6 +25,7 @@
 #include <tools/lineend.hxx>
 #include <tools/debug.hxx>
 #include <unotools/fontdefs.hxx>
+#include <tools/fontenum.hxx>
 #include <comphelper/configuration.hxx>
 
 #include <vcl/ctrl.hxx>
@@ -190,18 +191,11 @@ bool OutputDevice::ImplDrawRotateText( SalLayout& rSalLayout )
     tools::Rectangle aBoundRect;
     rSalLayout.DrawBase() = basegfx::B2DPoint( 0, 0 );
     rSalLayout.DrawOffset() = basegfx::B2DPoint{ 0, 0 };
-    if (basegfx::B2DRectangle r; rSalLayout.GetBoundRect(r))
-    {
-        aBoundRect = SalLayout::BoundRect2Rectangle(r);
-    }
-    else
-    {
-        // guess vertical text extents if GetBoundRect failed
-        double nRight = rSalLayout.GetTextWidth();
-        tools::Long nTop = mpFontRealization->mxFont->mxFontMetric->GetAscent() + mpFontRealization->nEmphasisAscent;
-        tools::Long nHeight = mpFontRealization->mxFont->mnLineHeight + mpFontRealization->nEmphasisAscent + mpFontRealization->nEmphasisDescent;
-        aBoundRect = tools::Rectangle( 0, -nTop, nRight, nHeight - nTop );
-    }
+
+    // Get unrotated bounds (pass false for bApplyRotation) to size the virtual device.
+    // This removes the need for manual heuristics if the layout fails to report bounds.
+    aBoundRect = vcl::text::TextLayoutEngine::GetTextInkBounds(
+        rSalLayout, *mpFontRealization, false);
 
     // cache virtual device for rotation
     if (!mpOutDevData->mpRotateDev)
@@ -1801,6 +1795,44 @@ std::unique_ptr<SalLayout> OutputDevice::getFallbackLayout(LogicalFontInstance* 
 tools::Rectangle OutputDevice::GetTextInkBounds(const SalLayout& rLayout) const
 {
     return vcl::text::TextLayoutEngine::GetTextInkBounds(rLayout, *mpFontRealization);
+}
+
+void OutputDevice::GetWordKashidaPositions(const OUString& rText, std::vector<bool>* pOutMap) const
+{
+    if (!pOutMap)
+        return;
+
+    auto nEnd = rText.getLength();
+    std::unique_ptr<SalLayout> pSalLayout = LayoutText(
+        vcl::text::TextSpan{rText, 0, nEnd},
+        vcl::text::LayoutConstraints{Point(0,0), 0, {}, {}, SalLayoutFlags::NONE},
+        vcl::text::LayoutCacheData{},
+        vcl::text::RenderSelection{});
+
+    if (!pSalLayout)
+    {
+        pOutMap->clear();
+        return;
+    }
+
+    vcl::text::TextLayoutEngine::GetWordKashidaPositions(*pSalLayout, rText, *pOutMap);
+}
+
+bool OutputDevice::GetGlyphBoundRects(const Point& rOrigin, const OUString& rStr, int nIndex,
+                                      int nLen, std::vector<tools::Rectangle>& rVector) const
+{
+    rVector.clear();
+    if (nIndex >= rStr.getLength()) return false;
+    if (nLen < 0 || nIndex + nLen >= rStr.getLength()) nLen = rStr.getLength() - nIndex;
+
+    tools::Rectangle aRect;
+    for (int i = 0; i < nLen; i++)
+    {
+        if (!GetLogicalTextBoundRect(aRect, rStr, nIndex, nIndex + i, 1)) break;
+        aRect.Move(rOrigin.X(), rOrigin.Y());
+        rVector.push_back(aRect);
+    }
+    return (nLen == static_cast<int>(rVector.size()));
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
