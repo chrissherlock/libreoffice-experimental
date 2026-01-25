@@ -1291,6 +1291,75 @@ tools::Long TextLayoutEngine::GetAlignmentOffset(TextAlign eAlign, tools::Long n
     return 0;
 }
 
+OUString TextLayoutEngine::GetEllipsisString(
+    const OUString& rStr, tools::Long nMaxWidth, DrawTextFlags nStyle,
+    const std::function<tools::Long(const OUString&)>& rfnGetTextWidth)
+{
+    if (rStr.isEmpty() || rfnGetTextWidth(rStr) <= nMaxWidth)
+        return rStr;
+
+    const OUString aEllipsisStr = "...";
+    const tools::Long nEllipsisWidth = rfnGetTextWidth(aEllipsisStr);
+
+    if (nMaxWidth < nEllipsisWidth)
+        return OUString();
+
+    tools::Long nTargetWidth = nMaxWidth - nEllipsisWidth;
+    sal_Int32 nLen = rStr.getLength();
+
+    // Path Ellipsis (Middle Truncation preserving file names)
+    if (nStyle & DrawTextFlags::PathEllipsis)
+    {
+        sal_Int32 nLastSep = rStr.lastIndexOf('/');
+        if (nLastSep == -1)
+            nLastSep = rStr.lastIndexOf('\\');
+
+        if (nLastSep != -1 && nLastSep > 0)
+        {
+            // Keep the beginning and the end, remove from the middle
+            for (sal_Int32 i = 1; i < nLen - (nLen - nLastSep); ++i)
+            {
+                OUString aTest = rStr.copy(0, i) + aEllipsisStr + rStr.copy(nLastSep);
+                if (rfnGetTextWidth(aTest) > nMaxWidth)
+                {
+                    return (i > 1)
+                               ? OUString(rStr.copy(0, i - 1) + aEllipsisStr + rStr.copy(nLastSep))
+                               : OUString(aEllipsisStr + rStr.copy(nLastSep));
+                }
+            }
+        }
+    }
+
+    // News/Reporter Ellipsis (Smart punctuation handling)
+    if (nStyle & DrawTextFlags::NewsEllipsis)
+    {
+        // Iteratively shorten from the end, but avoid leaving
+        // trailing punctuation like 'Sentence ends here....'
+        for (sal_Int32 i = nLen - 1; i > 0; --i)
+        {
+            OUString aSub = rStr.copy(0, i);
+            if (rfnGetTextWidth(aSub) <= nTargetWidth)
+            {
+                // Check if last char is punctuation that should be removed
+                sal_Unicode c = aSub[i - 1];
+                if (c == '.' || c == ',' || c == ';' || c == '!' || c == '?')
+                    return aSub.copy(0, i - 1) + aEllipsisStr;
+                return aSub + aEllipsisStr;
+            }
+        }
+    }
+
+    // Default End Ellipsis (Standard truncation)
+    for (sal_Int32 i = nLen - 1; i > 0; --i)
+    {
+        OUString aSub = rStr.copy(0, i);
+        if (rfnGetTextWidth(aSub) <= nTargetWidth)
+            return aSub + aEllipsisStr;
+    }
+
+    return aEllipsisStr;
+}
+
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
