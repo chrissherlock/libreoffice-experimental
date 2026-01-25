@@ -6616,7 +6616,11 @@ void PDFWriterImpl::drawWaveTextLine( OStringBuffer& aLine, tools::Long nWidth, 
     if ( bIsAbove )
     {
         if ( !pFontInstance->mxFontMetric->GetAboveWavelineUnderlineSize() )
-            ImplInitAboveTextLineSize();
+        {
+            vcl::text::TextLayoutEngine::InitializeAboveTextLineMetrics(
+                GetFontInstance(), GetDPIY(), GetFontMetric().GetUnderline());
+        }
+
         nLineHeight = HCONV( pFontInstance->mxFontMetric->GetAboveWavelineUnderlineSize() );
         nLinePos = HCONV( pFontInstance->mxFontMetric->GetAboveWavelineUnderlineOffset() );
     }
@@ -6697,7 +6701,11 @@ void PDFWriterImpl::drawStraightTextLine( OStringBuffer& aLine, tools::Long nWid
             if ( bIsAbove )
             {
                 if ( !pFontInstance->mxFontMetric->GetAboveUnderlineSize() )
-                    ImplInitAboveTextLineSize();
+                {
+                    vcl::text::TextLayoutEngine::InitializeAboveTextLineMetrics(
+                        GetFontInstance(), GetDPIY(), GetFontMetric().GetUnderline());
+                }
+
                 nLineHeight = pFontInstance->mxFontMetric->GetAboveUnderlineSize();
                 nLinePos    = pFontInstance->mxFontMetric->GetAboveUnderlineOffset();
             }
@@ -6720,16 +6728,23 @@ void PDFWriterImpl::drawStraightTextLine( OStringBuffer& aLine, tools::Long nWid
             if ( bIsAbove )
             {
                 if ( !pFontInstance->mxFontMetric->GetAboveBoldUnderlineSize() )
-                    ImplInitAboveTextLineSize();
+                {
+                    vcl::text::TextLayoutEngine::InitializeAboveTextLineMetrics(
+                        GetFontInstance(), GetDPIY(), GetFontMetric().GetUnderline());
+                }
+
                 nLineHeight = pFontInstance->mxFontMetric->GetAboveBoldUnderlineSize();
                 nLinePos    = pFontInstance->mxFontMetric->GetAboveBoldUnderlineOffset();
             }
             else
             {
                 if ( !pFontInstance->mxFontMetric->GetBoldUnderlineSize() )
+                {
                     vcl::text::TextLayoutEngine::InitializeTextLineMetrics(
-                GetFontInstance(), GetFont(), GetDPIY(),
-                GetTextWidth(OUString(u' ')), GetTextWidth(u"\x00b7"_ustr));
+                        GetFontInstance(), GetFont(), GetDPIY(),
+                        GetTextWidth(OUString(u' ')), GetTextWidth(u"\x00b7"_ustr));
+                }
+
                 nLineHeight = pFontInstance->mxFontMetric->GetBoldUnderlineSize();
                 nLinePos    = pFontInstance->mxFontMetric->GetBoldUnderlineOffset();
             }
@@ -6738,7 +6753,11 @@ void PDFWriterImpl::drawStraightTextLine( OStringBuffer& aLine, tools::Long nWid
             if ( bIsAbove )
             {
                 if ( !pFontInstance->mxFontMetric->GetAboveDoubleUnderlineSize() )
-                    ImplInitAboveTextLineSize();
+                {
+                    vcl::text::TextLayoutEngine::InitializeAboveTextLineMetrics(
+                        GetFontInstance(), GetDPIY(), GetFontMetric().GetUnderline());
+                }
+
                 nLineHeight = pFontInstance->mxFontMetric->GetAboveDoubleUnderlineSize();
                 nLinePos    = pFontInstance->mxFontMetric->GetAboveDoubleUnderlineOffset1();
                 nLinePos2   = pFontInstance->mxFontMetric->GetAboveDoubleUnderlineOffset2();
@@ -6746,9 +6765,12 @@ void PDFWriterImpl::drawStraightTextLine( OStringBuffer& aLine, tools::Long nWid
             else
             {
                 if ( !pFontInstance->mxFontMetric->GetDoubleUnderlineSize() )
+                {
                     vcl::text::TextLayoutEngine::InitializeTextLineMetrics(
-                GetFontInstance(), GetFont(), GetDPIY(),
-                GetTextWidth(OUString(u' ')), GetTextWidth(u"\x00b7"_ustr));
+                        GetFontInstance(), GetFont(), GetDPIY(),
+                        GetTextWidth(OUString(u' ')), GetTextWidth(u"\x00b7"_ustr));
+                }
+
                 nLineHeight = pFontInstance->mxFontMetric->GetDoubleUnderlineSize();
                 nLinePos    = pFontInstance->mxFontMetric->GetDoubleUnderlineOffset1();
                 nLinePos2   = pFontInstance->mxFontMetric->GetDoubleUnderlineOffset2();
