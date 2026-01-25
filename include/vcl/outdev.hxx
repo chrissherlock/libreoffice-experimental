@@ -1195,6 +1195,10 @@ private:
 
     SAL_DLLPRIVATE void         ImplRenderLayout(SalLayout&, bool bTextLines);
     SAL_DLLPRIVATE void         ImplDrawSpecialText( SalLayout& );
+    SAL_DLLPRIVATE void         ImplDrawReliefText(SalLayout& rSalLayout);
+    SAL_DLLPRIVATE void         ImplDrawShadowText(SalLayout& rSalLayout);
+    SAL_DLLPRIVATE void         ImplDrawOutlineText(SalLayout& rSalLayout);
+
     SAL_DLLPRIVATE void         ImplDrawTextRect( tools::Long nBaseX, tools::Long nBaseY, tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight );
 
     SAL_DLLPRIVATE void  ImplDrawWavePixel( tools::Long nOriginX, tools::Long nOriginY, tools::Long nCurX, tools::Long nCurY, tools::Long nWidth, Degree10 nOrientation, SalGraphics* pGraphics, const OutputDevice& rOutDev, tools::Long nPixWidth, tools::Long nPixHeight );
