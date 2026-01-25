@@ -301,12 +301,15 @@ void OutputDevice::ImplDrawReliefText(SalLayout& rSalLayout)
     Color aTextColor(aOldColor);
 
     // Black text is always drawn on white in VCL logic
-    if (aTextColor == COL_BLACK) aTextColor = COL_WHITE;
+    if (aTextColor == COL_BLACK)
+        aTextColor = COL_WHITE;
     Color aEffectiveLineColor = (aOldTextLineColor == COL_BLACK) ? COL_WHITE : aOldTextLineColor;
-    Color aEffectiveOverlineColor = (aOldOverlineColor == COL_BLACK) ? COL_WHITE : aOldOverlineColor;
+    Color aEffectiveOverlineColor
+        = (aOldOverlineColor == COL_BLACK) ? COL_WHITE : aOldOverlineColor;
 
     // Relief color is black for white text
-    if (aTextColor == COL_WHITE) aReliefColor = COL_BLACK;
+    if (aTextColor == COL_WHITE)
+        aReliefColor = COL_BLACK;
 
     // Draw Relief Shadow
     SetTextColor(aReliefColor);
@@ -314,7 +317,8 @@ void OutputDevice::ImplDrawReliefText(SalLayout& rSalLayout)
     SetOverlineColor(aReliefColor);
     ImplInitTextColor();
 
-    tools::Long nOff = vcl::text::TextLayoutEngine::GetReliefOffset(GetDPIX(), mpGraphicsState->maFont.GetRelief());
+    tools::Long nOff = vcl::text::TextLayoutEngine::GetReliefOffset(
+        GetDPIX(), mpGraphicsState->maFont.GetRelief());
     rSalLayout.DrawOffset() += basegfx::B2DPoint(nOff, nOff);
 
     ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
@@ -354,9 +358,7 @@ void OutputDevice::ImplDrawShadowText(SalLayout& rSalLayout)
 
     // Draw Shadow
     tools::Long nOff = vcl::text::TextLayoutEngine::GetShadowOffset(
-        mpFontRealization->mxFont->mnLineHeight,
-        mpGraphicsState->maFont.IsOutline()
-    );
+        mpFontRealization->mxFont->mnLineHeight, mpGraphicsState->maFont.IsOutline());
 
     rSalLayout.DrawBase() += basegfx::B2DPoint(nOff, nOff);
     ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
@@ -1524,7 +1526,7 @@ void OutputDevice::DrawCtrlText(const Point& rPos, const OUString& rStr, const s
     tools::Long nMnemonicY = 0;
     tools::Long nMnemonicWidth = 0;
     const OUString aStr = removeMnemonicFromString(rStr, nMnemonicPos); // Strip mnemonics always
-                                                                        //
+
     if (nMnemonicPos != -1)
     {
         if (nMnemonicPos < nCorrectedIndex)
@@ -1693,82 +1695,38 @@ bool OutputDevice::GetTextOutlines(basegfx::B2DPolyPolygonVector& rVector, const
     if (!InitFont())
         return false;
 
-    bool bRet = false;
-
-    rVector.clear();
-
-    if (nLen < 0)
-        nLen = rStr.getLength() - nIndex;
-
-    rVector.reserve(nLen);
-
-    // we want to get the Rectangle in logical units, so to
-    // avoid rounding errors we just size the font in logical units
+    // We disable MapMode on the device to ensure logical units are used.
+    // The Engine doesn't control the device, so we prepare the state here.
     bool bOldMap = mpMapper->IsMapModeEnabled();
 
     if (bOldMap)
     {
         mpMapper->EnableMapMode(false);
         const_cast<OutputDevice&>(*this).mbNewFont = true;
+
+        InitFont();
     }
 
-    std::unique_ptr<SalLayout> pSalLayout;
+    // Prepare resources *after* MapMode might have changed
+    vcl::text::LayoutResources aResources
+        = { mpFontRealization->mxFont.get(), *mpMapper, &GetFontCache(), GetFontCollection(),
+            mpForcedFallbackInstance.get(),
+            [this]() {
+                const_cast<OutputDevice*>(this)->AcquireGraphics();
+                return mpGraphics;
+            },
+            IsRTLEnabled(),
+            // MapMode is explicitly disabled above, so Subpixel might be false depending on config
+            IsMapModeEnabled() || isSubpixelPositioning() || SupportsSubpixelPositioning(),
+            *mpGraphicsState, *mpFontRealization };
 
-    // calculate offset when nBase!=nIndex
-    double nXOffset = 0;
+    // Delegate to Engine
+    bool bRet = vcl::text::TextLayoutEngine::GetTextOutlines(
+        aResources, rVector, rStr, nBase, nIndex, nLen, nLayoutWidth, pDXArray, pKashidaArray);
 
-    if (nBase != nIndex)
-    {
-        sal_Int32 nStart = std::min(nBase, nIndex);
-        sal_Int32 nOfsLen = std::max(nBase, nIndex) - nStart;
-
-        pSalLayout = LayoutText(
-            vcl::text::TextSpan{ rStr, nStart, nOfsLen },
-            vcl::text::LayoutConstraints{ Point(0, 0), static_cast<tools::Long>(nLayoutWidth),
-                                          pDXArray, pKashidaArray, eDefaultLayout },
-            vcl::text::LayoutCacheData{ nullptr, nullptr }, vcl::text::RenderSelection{});
-
-        if (pSalLayout)
-        {
-            nXOffset = pSalLayout->GetTextWidth();
-            pSalLayout.reset();
-            // TODO: fix offset calculation for Bidi case
-            if (nBase > nIndex)
-                nXOffset = -nXOffset;
-        }
-    }
-
-    pSalLayout = LayoutText(
-        vcl::text::TextSpan{ rStr, nIndex, nLen },
-        vcl::text::LayoutConstraints{ Point(0, 0), static_cast<tools::Long>(nLayoutWidth), pDXArray,
-                                      pKashidaArray, eDefaultLayout },
-        vcl::text::LayoutCacheData{ nullptr, nullptr }, // No cache, no glyphs available here
-        vcl::text::RenderSelection{});
-
-    if (pSalLayout)
-    {
-        bRet = pSalLayout->GetOutline(rVector);
-
-        if (bRet)
-        {
-            basegfx::B2DHomMatrix aMatrix = vcl::text::TextLayoutEngine::CalculateOutlineTransform(
-                *pSalLayout, *mpFontRealization, nXOffset);
-
-            if (!aMatrix.isIdentity())
-            {
-                for (auto& elem : rVector)
-                {
-                    elem.transform(aMatrix);
-                }
-            }
-        }
-
-        pSalLayout.reset();
-    }
-
+    // Restore MapMode
     if (bOldMap)
     {
-        // restore original font size and map mode
         mpMapper->EnableMapMode(bOldMap);
         const_cast<OutputDevice&>(*this).mbNewFont = true;
     }

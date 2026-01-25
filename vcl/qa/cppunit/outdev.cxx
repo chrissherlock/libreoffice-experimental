@@ -2448,6 +2448,39 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testFontStateConsistency)
     CPPUNIT_ASSERT_MESSAGE("Text height must be > 0 for a valid font", nHeight > 0);
 }
 
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testGetTextOutlinesMapModeSync)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+
+    pVDev->SetMapMode(MapMode(MapUnit::Map100thMM));
+
+    // Set a font size that is large in logical units (1000 100thMM = 10mm)
+    // On a standard 96 DPI screen, this realizes to roughly ~38 device pixels.
+    pVDev->SetFont(vcl::Font(u"DejaVu Sans"_ustr, Size(0, 1000)));
+
+    // Force OutputDevice to realize the font in the current MapMode!
+    // This primes the mpFontRealization cache with the scaled-down (~38px) font.
+    pVDev->GetTextWidth(u"A"_ustr);
+
+    // Extract Outlines
+    // GetTextOutlines temporarily disables the MapMode to process purely in 1:1 logical units.
+    // The logical height of 1000 should now be treated strictly as 1000 pixels.
+    basegfx::B2DPolyPolygonVector aVector;
+    bool bRet = pVDev->GetTextOutlines(aVector, u"A"_ustr, 0);
+
+    CPPUNIT_ASSERT_MESSAGE("GetTextOutlines should succeed", bRet);
+    CPPUNIT_ASSERT_MESSAGE("Should return outlines for 'A'", !aVector.empty());
+
+    double nHeight = aVector[0].getB2DRange().getHeight();
+
+    // If there is a stale font cache, the engine uses the ~38px realization. If not,
+    // the font is re-realized at 1000px, so the outline height will be roughly 700-1000
+    // depending on the font's internal ascender metrics.
+    CPPUNIT_ASSERT_MESSAGE("GetTextOutlines failed to sync font with disabled MapMode! "
+                           "The geometry was extracted using a stale font cache.",
+                           nHeight > 500.0);
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

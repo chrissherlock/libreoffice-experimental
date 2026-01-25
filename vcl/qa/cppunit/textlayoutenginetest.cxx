@@ -1,3 +1,4 @@
+#include <string>
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 /*
  * This file is part of the LibreOffice project.
@@ -231,6 +232,7 @@ public:
     void testGetReliefOffset();
     void testGetShadowOffset();
     void testGetOutlineOffsets();
+    void testGetTextOutlines();
 
     CPPUNIT_TEST_SUITE(TextLayoutEngineTest);
     CPPUNIT_TEST(testBiDiLayoutFlags);
@@ -264,6 +266,7 @@ public:
     CPPUNIT_TEST(testGetReliefOffset);
     CPPUNIT_TEST(testGetShadowOffset);
     CPPUNIT_TEST(testGetOutlineOffsets);
+    CPPUNIT_TEST(testGetTextOutlines);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -986,6 +989,53 @@ void TextLayoutEngineTest::testGetOutlineOffsets()
 
     // Ensure (0,0) is NOT in the list (we don't draw over the center)
     CPPUNIT_ASSERT(aUniquePoints.find({ 0.0, 0.0 }) == aUniquePoints.end());
+}
+
+void TextLayoutEngineTest::testGetTextOutlines()
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    pVDev->SetFont(vcl::Font("DejaVu Sans", Size(0, 20)));
+    pVDev->SetOutputSizePixel(Size(100, 100));
+
+    basegfx::B2DPolyPolygonVector aVector;
+
+    // We use "AV" because they often have kerning, making the layout logic relevant
+    OUString aText("AV");
+
+    // Case 1: Simple Extraction (nBase == nIndex == 0) -> "A"
+    bool bRet = pVDev->GetTextOutlines(aVector, aText, 0, 0, 1);
+    CPPUNIT_ASSERT_MESSAGE("GetTextOutlines should succeed for valid text", bRet);
+    CPPUNIT_ASSERT_MESSAGE("Should return outlines for 'A'", !aVector.empty());
+
+    // Calculate geometric properties of 'A'
+    double nWidthA = aVector[0].getB2DRange().getWidth();
+
+    // Case 2: Isolated Extraction (nBase=1, nIndex=1) -> "V" at 0
+    // We do this BEFORE the shifted check so we have a baseline comparison
+    aVector.clear();
+    bRet = pVDev->GetTextOutlines(aVector, aText, 1, 1, 1);
+    CPPUNIT_ASSERT(bRet);
+
+    double nX_V_Zero = aVector[0].getB2DRange().getMinX();
+
+    // Case 3: Offset Extraction (nBase=0, nIndex=1) -> "V" shifted by "A"
+    // Extract "V", but tell the engine it is part of "AV".
+    aVector.clear();
+    bRet = pVDev->GetTextOutlines(aVector, aText, 0, 1, 1);
+    CPPUNIT_ASSERT(bRet);
+
+    double nX_V_Shifted = aVector[0].getB2DRange().getMinX();
+
+    // The shifted V must be to the right of the unshifted V
+    std::string sMsg = "V should be shifted right. Shifted: " + std::to_string(nX_V_Shifted)
+                       + " Zero: " + std::to_string(nX_V_Zero);
+    CPPUNIT_ASSERT_MESSAGE(sMsg, nX_V_Shifted > nX_V_Zero);
+
+    // The shift amount should roughly match the width of A
+    // (We use a tolerance of 5.0 to account for specific font metrics/bearings)
+    double nDiff = nX_V_Shifted - nX_V_Zero;
+    CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("Offset should roughly match width of preceding character",
+                                         nWidthA, nDiff, 5.0);
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TextLayoutEngineTest);

@@ -398,6 +398,12 @@ public:
     // Returns the 8 surrounding offsets for simulating an outline
     static const std::vector<basegfx::B2DPoint>& GetOutlineOffsets();
 
+    static bool GetTextOutlines(const LayoutResources& rResources,
+                                basegfx::B2DPolyPolygonVector& rVector, const OUString& rStr,
+                                sal_Int32 nBase, sal_Int32 nIndex, sal_Int32 nLen,
+                                sal_uLong nLayoutWidth, KernArraySpan pDXArray,
+                                std::span<const sal_Bool> pKashidaArray);
+
 private:
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);
 

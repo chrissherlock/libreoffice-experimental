@@ -1590,6 +1590,70 @@ const std::vector<basegfx::B2DPoint>& TextLayoutEngine::GetOutlineOffsets()
     return aOffsets;
 }
 
+bool TextLayoutEngine::GetTextOutlines(const LayoutResources& rResources,
+                                       basegfx::B2DPolyPolygonVector& rVector, const OUString& rStr,
+                                       sal_Int32 nBase, sal_Int32 nIndex, sal_Int32 nLen,
+                                       sal_uLong nLayoutWidth, KernArraySpan pDXArray,
+                                       std::span<const sal_Bool> pKashidaArray)
+{
+    bool bRet = false;
+    rVector.clear();
+
+    if (nLen < 0)
+        nLen = rStr.getLength() - nIndex;
+
+    rVector.reserve(nLen);
+
+    std::unique_ptr<SalLayout> pSalLayout;
+    double nXOffset = 0;
+
+    if (nBase != nIndex)
+    {
+        sal_Int32 nStart = std::min(nBase, nIndex);
+        sal_Int32 nOfsLen = std::max(nBase, nIndex) - nStart;
+
+        pSalLayout = Layout(rResources, TextSpan{ rStr, nStart, nOfsLen },
+                            LayoutConstraints{ Point(0, 0), static_cast<tools::Long>(nLayoutWidth),
+                                               pDXArray, pKashidaArray, SalLayoutFlags::NONE },
+                            LayoutCacheData{ nullptr, nullptr }, RenderSelection{});
+
+        if (pSalLayout)
+        {
+            nXOffset = pSalLayout->GetTextWidth();
+            pSalLayout.reset();
+            if (nBase < nIndex)
+                nXOffset = -nXOffset;
+        }
+    }
+
+    pSalLayout = Layout(rResources, TextSpan{ rStr, nIndex, nLen },
+                        LayoutConstraints{ Point(0, 0), static_cast<tools::Long>(nLayoutWidth),
+                                           pDXArray, pKashidaArray, SalLayoutFlags::NONE },
+                        LayoutCacheData{ nullptr, nullptr }, RenderSelection{});
+
+    if (pSalLayout)
+    {
+        bRet = pSalLayout->GetOutline(rVector);
+
+        if (bRet)
+        {
+            // We are already in TextLayoutEngine, so just call the sibling function
+            basegfx::B2DHomMatrix aMatrix
+                = CalculateOutlineTransform(*pSalLayout, rResources.rFontRealization, nXOffset);
+
+            if (!aMatrix.isIdentity())
+            {
+                for (auto& elem : rVector)
+                {
+                    elem.transform(aMatrix);
+                }
+            }
+        }
+    }
+
+    return bRet;
+}
+
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
