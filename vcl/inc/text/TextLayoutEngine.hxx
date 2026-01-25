@@ -352,6 +352,10 @@ public:
     static tools::Long GetAlignmentOffset(TextAlign eAlign, tools::Long nAscent,
                                           tools::Long nDescent);
 
+    static OUString
+    GetEllipsisString(const OUString& rStr, tools::Long nMaxWidth, DrawTextFlags nStyle,
+                      const std::function<tools::Long(const OUString&)>& rfnGetTextWidth);
+
 private:
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);
 
