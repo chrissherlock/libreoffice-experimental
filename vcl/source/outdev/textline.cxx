@@ -873,58 +873,22 @@ void OutputDevice::ImplDrawTextLines( SalLayout& rSalLayout, FontStrikeout eStri
                                       bool bWordLine, bool bUnderlineAbove )
 {
     double nLayoutWidth = rSalLayout.GetTextWidth();
+
     if( bWordLine )
     {
-        // draw everything relative to the layout base point
         const basegfx::B2DPoint aStartPt = rSalLayout.DrawBase();
-
-        // calculate distance of each word from the base point
-        basegfx::B2DPoint aPos;
-        double nDist = 0;
-        double nWidth = 0;
-        const GlyphItem* pGlyph;
-        int nStart = 0;
-        while (rSalLayout.GetNextGlyph(&pGlyph, aPos, nStart))
+        std::vector<std::pair<double, double>> aSegments;
+        vcl::text::TextLayoutEngine::GetWordLineSegments(rSalLayout, *mpFontRealization, aSegments);
+        for (const auto& rSeg : aSegments)
         {
-            // calculate the boundaries of each word
-            if (!pGlyph->IsSpacing())
-            {
-                if( !nWidth )
-                {
-                    // get the distance to the base point (as projected to baseline)
-                    nDist = aPos.getX() - aStartPt.getX();
-                    if( mpFontInstance->mnOrientation )
-                    {
-                        const double nDY = aPos.getY() - aStartPt.getY();
-                        const double fRad = toRadians(mpFontInstance->mnOrientation);
-                        nDist = basegfx::fround<tools::Long>(nDist * cos(fRad) - nDY * sin(fRad));
-                    }
-                }
-
-                // update the length of the textline
-                nWidth += pGlyph->newWidth();
-            }
-            else if( nWidth > 0 )
-            {
-                // draw the textline for each word
-                ImplDrawTextLine( aStartPt.getX(), aStartPt.getY(), nDist, nWidth, nLayoutWidth,
-                                  eStrikeout, eUnderline, eOverline, bUnderlineAbove );
-                nWidth = 0;
-            }
-        }
-
-        // draw textline for the last word
-        if( nWidth > 0 )
-        {
-            ImplDrawTextLine( aStartPt.getX(), aStartPt.getY(), nDist, nWidth, nLayoutWidth,
-                              eStrikeout, eUnderline, eOverline, bUnderlineAbove );
+            ImplDrawTextLine( aStartPt.getX(), aStartPt.getY(), static_cast<tools::Long>(rSeg.first),
+                              rSeg.second, nLayoutWidth, eStrikeout, eUnderline, eOverline, bUnderlineAbove );
         }
     }
     else
     {
         basegfx::B2DPoint aStartPt = rSalLayout.GetDrawPosition();
-        ImplDrawTextLine( aStartPt.getX(), aStartPt.getY(), 0,
-                          nLayoutWidth, nLayoutWidth,
+        ImplDrawTextLine( aStartPt.getX(), aStartPt.getY(), 0, nLayoutWidth, nLayoutWidth,
                           eStrikeout, eUnderline, eOverline, bUnderlineAbove );
     }
 }
