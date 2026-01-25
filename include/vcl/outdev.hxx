@@ -961,6 +961,18 @@ public:
                                               const OUString& rOrigStr, DrawTextFlags nStyle,
                                               std::vector< tools::Rectangle >* pVector, OUString* pDisplayText, vcl::TextLayoutCommon& _rLayout );
 
+    SAL_DLLPRIVATE void ImplDrawTextMultiLine(OutputDevice& rTargetDevice, const tools::Rectangle& rRect,
+                                              const OUString& rStr, DrawTextFlags nStyle,
+                                              std::vector<tools::Rectangle>* pVector, OUString* pDisplayText,
+                                              vcl::TextLayoutCommon& _rLayout, tools::Long nTextHeight,
+                                              TextAlign eAlign, sal_Int32 nMnemonicPos, bool bDrawMnemonics);
+
+    SAL_DLLPRIVATE void ImplDrawTextSingleLine(OutputDevice& rTargetDevice, const tools::Rectangle& rRect,
+                                               const OUString& rStr, DrawTextFlags nStyle,
+                                               std::vector<tools::Rectangle>* pVector, OUString* pDisplayText,
+                                               vcl::TextLayoutCommon& _rLayout, tools::Long nTextHeight,
+                                               TextAlign eAlign, sal_Int32 nMnemonicPos, bool bDrawMnemonics);
+
     SAL_DLLPRIVATE void         ImplDrawText( SalLayout& );
 
     SAL_DLLPRIVATE void         ImplDrawTextBackground( const SalLayout& );
