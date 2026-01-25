@@ -129,17 +129,6 @@ namespace {
     };
 }
 
-void OutputDevice::ImplInitTextLineSize()
-{
-    vcl::text::TextLayoutEngine::InitializeTextLineMetrics(
-        mpFontInstance.get(),
-        GetFont(),
-        GetDPIY(),
-        GetTextWidth(OUString(u' ')),
-        GetTextWidth(u"\x00b7"_ustr)
-    );
-}
-
 void OutputDevice::ImplInitAboveTextLineSize()
 {
     {
