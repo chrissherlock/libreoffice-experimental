@@ -101,6 +101,16 @@ struct RotatedGeometry
     tools::Polygon maPoly; // Fallback for arbitrary angles
 };
 
+struct MirroringContext
+{
+    tools::Long nX; // The original X coordinate
+    tools::Long nGraphicsWidth; // Width of the underlying graphics (or VDev output width)
+    tools::Long nOutputWidth; // Width of the OutputDevice
+    tools::Long nOutOffX; // X Offset of the OutputDevice
+    bool bHasMirroredGraphics;
+    bool bIsRTL;
+};
+
 class VCL_DLLPUBLIC TextLayoutEngine
 {
 public:
@@ -378,6 +388,9 @@ public:
     // Used when emulating text rotation via bitmaps.
     static Point GetRotatedImageOrigin(const Point& rBase, const tools::Rectangle& rLocalBounds,
                                        Degree10 nOrientation);
+
+    // Calculates the mirrored X-coordinate for RTL or mirrored graphics contexts.
+    static tools::Long GetMirroredX(const MirroringContext& rCtx);
 
 private:
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);

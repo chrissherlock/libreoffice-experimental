@@ -1539,6 +1539,32 @@ Point TextLayoutEngine::GetRotatedImageOrigin(const Point& rBase,
     return rBase + aPoly.GetBoundRect().TopLeft();
 }
 
+tools::Long TextLayoutEngine::GetMirroredX(const MirroringContext& rCtx)
+{
+    tools::Long nMirroredX = rCtx.nX;
+
+    if (rCtx.bHasMirroredGraphics)
+    {
+        // Mirror against the full graphics width
+        nMirroredX = rCtx.nGraphicsWidth - 1 - rCtx.nX;
+
+        // If not RTL, re-mirror the window back
+        if (!rCtx.bIsRTL)
+        {
+            tools::Long nDevX = rCtx.nGraphicsWidth - rCtx.nOutputWidth - rCtx.nOutOffX;
+            nMirroredX = nDevX + (rCtx.nOutputWidth - 1 - (nMirroredX - nDevX));
+        }
+    }
+    else if (rCtx.bIsRTL)
+    {
+        // Mirror against the output width (standard RTL)
+        tools::Long nDevX = rCtx.nOutOffX;
+        nMirroredX = rCtx.nOutputWidth - 1 - (rCtx.nX - nDevX) + nDevX;
+    }
+
+    return nMirroredX;
+}
+
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
