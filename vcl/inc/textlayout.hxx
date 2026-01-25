@@ -64,9 +64,6 @@ namespace vcl
         SAL_DLLPRIVATE ~TextLayoutCommon();
 
     private:
-        SAL_DLLPRIVATE OUString GetCenterEllipsisString(std::u16string_view rOrigStr, sal_Int32 nIndex, tools::Long nMaxWidth);
-        SAL_DLLPRIVATE OUString GetEndEllipsisString(OUString const& rOrigStr, sal_Int32 nIndex, tools::Long nMaxWidth, bool bClipText);
-        SAL_DLLPRIVATE OUString GetNewsEllipsisString(OUString const& rOrigStr, tools::Long nMaxWidth, DrawTextFlags nStyle);
     };
 
     /** is an implementation of TextLayoutCommon which simply delegates its calls to the respective

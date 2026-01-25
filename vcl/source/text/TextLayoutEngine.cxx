@@ -1295,19 +1295,35 @@ OUString TextLayoutEngine::GetEllipsisString(
     const OUString& rStr, tools::Long nMaxWidth, DrawTextFlags nStyle,
     const std::function<tools::Long(const OUString&)>& rfnGetTextWidth)
 {
+    // Trivial Case
     if (rStr.isEmpty() || rfnGetTextWidth(rStr) <= nMaxWidth)
         return rStr;
 
     const OUString aEllipsisStr = "...";
-    const tools::Long nEllipsisWidth = rfnGetTextWidth(aEllipsisStr);
-
-    if (nMaxWidth < nEllipsisWidth)
-        return OUString();
-
-    tools::Long nTargetWidth = nMaxWidth - nEllipsisWidth;
+    const bool bClipText = bool(nStyle & DrawTextFlags::Clip);
     sal_Int32 nLen = rStr.getLength();
 
-    // Path Ellipsis (Middle Truncation preserving file names)
+    // Center Ellipsis (Balanced Truncation)
+    if (nStyle & DrawTextFlags::CenterEllipsis)
+    {
+        sal_Int32 nIndex = nLen / 2;
+        sal_Int32 nEraseChars = std::max<sal_Int32>(4, nLen - (nIndex * 4) / 3);
+
+        while (nEraseChars < nLen)
+        {
+            sal_Int32 i = (nLen - nEraseChars) / 2;
+            OUString aTmpStr = rStr.copy(0, i) + aEllipsisStr + rStr.copy(i + nEraseChars);
+
+            if (rfnGetTextWidth(aTmpStr) <= nMaxWidth)
+                return aTmpStr;
+
+            nEraseChars++;
+        }
+
+        return aEllipsisStr;
+    }
+
+    // Path Ellipsis
     if (nStyle & DrawTextFlags::PathEllipsis)
     {
         sal_Int32 nLastSep = rStr.lastIndexOf('/');
@@ -1316,10 +1332,10 @@ OUString TextLayoutEngine::GetEllipsisString(
 
         if (nLastSep != -1 && nLastSep > 0)
         {
-            // Keep the beginning and the end, remove from the middle
-            for (sal_Int32 i = 1; i < nLen - (nLen - nLastSep); ++i)
+            for (sal_Int32 i = 1; i < nLastSep; ++i)
             {
                 OUString aTest = rStr.copy(0, i) + aEllipsisStr + rStr.copy(nLastSep);
+
                 if (rfnGetTextWidth(aTest) > nMaxWidth)
                 {
                     return (i > 1)
@@ -1330,33 +1346,116 @@ OUString TextLayoutEngine::GetEllipsisString(
         }
     }
 
-    // News/Reporter Ellipsis (Smart punctuation handling)
+    // News Ellipsis (Structure Preserving)
     if (nStyle & DrawTextFlags::NewsEllipsis)
     {
-        // Iteratively shorten from the end, but avoid leaving
-        // trailing punctuation like 'Sentence ends here....'
-        for (sal_Int32 i = nLen - 1; i > 0; --i)
+        OUString aCurrentStr = rStr;
+        auto lcl_IsSep = [](sal_Unicode c) { return c == '.'; };
+        sal_Int32 nLastContent = nLen;
+
+        while (nLastContent > 0)
         {
-            OUString aSub = rStr.copy(0, i);
-            if (rfnGetTextWidth(aSub) <= nTargetWidth)
+            nLastContent--;
+            if (lcl_IsSep(aCurrentStr[nLastContent]))
+                break;
+        }
+
+        while (nLastContent > 0 && lcl_IsSep(aCurrentStr[nLastContent - 1]))
+        {
+            nLastContent--;
+        }
+
+        OUString aLastStr = aCurrentStr.copy(nLastContent);
+
+        if (rfnGetTextWidth(aEllipsisStr + aLastStr) <= nMaxWidth)
+        {
+            sal_Int32 nFirstContent = 0;
+
+            while (nFirstContent < nLastContent)
             {
-                // Check if last char is punctuation that should be removed
-                sal_Unicode c = aSub[i - 1];
-                if (c == '.' || c == ',' || c == ';' || c == '!' || c == '?')
-                    return aSub.copy(0, i - 1) + aEllipsisStr;
-                return aSub + aEllipsisStr;
+                nFirstContent++;
+                if (lcl_IsSep(aCurrentStr[nFirstContent]))
+                    break;
             }
+
+            while (nFirstContent < nLastContent && lcl_IsSep(aCurrentStr[nFirstContent]))
+            {
+                nFirstContent++;
+            }
+
+            if (nFirstContent < nLastContent)
+            {
+                if (nFirstContent > 4)
+                    nFirstContent = 4;
+
+                OUString aFirstStr = aCurrentStr.copy(0, nFirstContent) + aEllipsisStr;
+                OUString aTempStr = aFirstStr + aLastStr;
+
+                if (rfnGetTextWidth(aTempStr) <= nMaxWidth)
+                {
+                    do
+                    {
+                        aCurrentStr = aTempStr;
+                        if (nLastContent > aCurrentStr.getLength())
+                            nLastContent = aCurrentStr.getLength();
+
+                        while (nFirstContent < nLastContent)
+                        {
+                            nLastContent--;
+                            if (lcl_IsSep(aCurrentStr[nLastContent]))
+                                break;
+                        }
+
+                        while (nFirstContent < nLastContent
+                               && lcl_IsSep(aCurrentStr[nLastContent - 1]))
+                        {
+                            nLastContent--;
+                        }
+
+                        if (nFirstContent < nLastContent)
+                        {
+                            aTempStr = aFirstStr + aCurrentStr.copy(nLastContent);
+
+                            if (rfnGetTextWidth(aTempStr) > nMaxWidth)
+                                break;
+                        }
+                    } while (nFirstContent < nLastContent);
+
+                    return aCurrentStr;
+                }
+            }
+        }
+        // If News logic fails to find a fit, it falls through to End Ellipsis below.
+    }
+
+    // End Ellipsis (Priority: Text+Dots > Text(1) > Dots)
+    // Iterate from full length down to 1 char.
+    for (sal_Int32 i = nLen - 1; i >= 1; --i)
+    {
+        // Case A: Try fitting "Text..."
+        // We only try this if i > 1.
+        // Parity Rule: If i == 1 ("a"), we NEVER add dots, we just return "a" if it fits.
+        if (i > 1)
+        {
+            OUString aWithDots = rStr.copy(0, i) + aEllipsisStr;
+            if (rfnGetTextWidth(aWithDots) <= nMaxWidth)
+                return aWithDots;
+        }
+        else
+        {
+            // Case B: i == 1. Check if "a" fits without dots.
+            OUString aFirstChar = rStr.copy(0, 1);
+            if (rfnGetTextWidth(aFirstChar) <= nMaxWidth)
+                return aFirstChar;
         }
     }
 
-    // Default End Ellipsis (Standard truncation)
-    for (sal_Int32 i = nLen - 1; i > 0; --i)
-    {
-        OUString aSub = rStr.copy(0, i);
-        if (rfnGetTextWidth(aSub) <= nTargetWidth)
-            return aSub + aEllipsisStr;
-    }
+    // Ultimate Fallback
+    // If nothing above fit, and Clip is requested, return "a" (even if it's too wide).
+    if (bClipText)
+        return rStr.copy(0, 1);
 
+    // Otherwise, return "..."
     return aEllipsisStr;
 }
 
