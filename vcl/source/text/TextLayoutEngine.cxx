@@ -1459,6 +1459,87 @@ OUString TextLayoutEngine::GetEllipsisString(
     return aEllipsisStr;
 }
 
+RotatedGeometry TextLayoutEngine::GetRotatedGeometry(const Point& rBase,
+                                                     const tools::Rectangle& rLocalRect,
+                                                     Degree10 nOrientation)
+{
+    RotatedGeometry aGeo;
+    aGeo.mbIsPolygon = false;
+
+    // Unpack local rectangle dimensions relative to the base
+    tools::Long nX = rLocalRect.Left();
+    tools::Long nY = rLocalRect.Top();
+    tools::Long nW = rLocalRect.GetWidth();
+    tools::Long nH = rLocalRect.GetHeight();
+
+    if (nOrientation)
+    {
+        // 90-degree optimization logic to prevent rounding errors
+        if (!(nOrientation % 900_deg10))
+        {
+            if (nOrientation == 900_deg10)
+            {
+                // Rotate 90 degrees clockwise
+                tools::Long nTemp = nX;
+                nX = nY;
+                nY = -nTemp;
+
+                nTemp = nW;
+                nW = nH;
+                nH = nTemp;
+
+                nY -= nH;
+            }
+            else if (nOrientation == 1800_deg10)
+            {
+                // Rotate 180 degrees
+                nX = -nX;
+                nY = -nY;
+
+                nX -= nW;
+                nY -= nH;
+            }
+            else /* ( nOrientation == 2700_deg10 ) */
+            {
+                // Rotate 270 degrees clockwise (or 90 counter-clockwise)
+                tools::Long nTemp = nX;
+                nX = -nY;
+                nY = nTemp;
+
+                nTemp = nW;
+                nW = nH;
+                nH = nTemp;
+
+                nX -= nW;
+            }
+        }
+        else
+        {
+            // Fallback: Arbitrary rotation requires a Polygon
+            // We must apply the base offset before creating the polygon to rotate it around rBase.
+            nX += rBase.X();
+            nY += rBase.Y();
+
+            // Inflate by 1 to match legacy behavior for polygons
+            tools::Rectangle aRotRect(Point(nX, nY), Size(nW + 1, nH + 1));
+
+            aGeo.maPoly = tools::Polygon(aRotRect);
+            aGeo.maPoly.Rotate(rBase, nOrientation);
+            aGeo.mbIsPolygon = true;
+
+            return aGeo;
+        }
+    }
+
+    // Apply the Base translation for axis-aligned results (0, 90, 180, 270)
+    nX += rBase.X();
+    nY += rBase.Y();
+
+    aGeo.maRect = tools::Rectangle(Point(nX, nY), Size(nW, nH));
+
+    return aGeo;
+}
+
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

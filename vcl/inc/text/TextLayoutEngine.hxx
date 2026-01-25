@@ -27,6 +27,12 @@
 #include <optional>
 #include <span>
 
+class Point;
+namespace tools
+{
+class Rectangle;
+}
+
 class CoordinateMapper;
 class ImplFontCache;
 class ImplFontList;
@@ -86,6 +92,13 @@ struct LayoutResources
     bool bSubpixelPositioning;
     const vcl::GraphicsState& rGraphicsState;
     const vcl::font::FontRealization& rFontRealization;
+};
+
+struct RotatedGeometry
+{
+    bool mbIsPolygon;
+    tools::Rectangle maRect; // Optimization for 0, 90, 180, 270 deg
+    tools::Polygon maPoly; // Fallback for arbitrary angles
 };
 
 class VCL_DLLPUBLIC TextLayoutEngine
@@ -355,6 +368,11 @@ public:
     static OUString
     GetEllipsisString(const OUString& rStr, tools::Long nMaxWidth, DrawTextFlags nStyle,
                       const std::function<tools::Long(const OUString&)>& rfnGetTextWidth);
+
+    static RotatedGeometry GetRotatedGeometry(const Point& rBase, // The pivot point
+                                              const tools::Rectangle& rRect, // The local rectangle
+                                              Degree10 nOrientation // The angle
+    );
 
 private:
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);
