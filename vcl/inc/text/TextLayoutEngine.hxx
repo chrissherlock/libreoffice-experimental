@@ -330,6 +330,10 @@ public:
     CalculateOutlineTransform(const SalLayout& rLayout,
                               const vcl::font::FontRealization& rRealization, double nXOffset);
 
+    static void GetWordLineSegments(const SalLayout& rSalLayout,
+                                    const vcl::font::FontRealization& rFontRealization,
+                                    std::vector<std::pair<double, double>>& rSegments);
+
 private:
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);
 
