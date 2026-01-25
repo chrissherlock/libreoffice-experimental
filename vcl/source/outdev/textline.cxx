@@ -873,7 +873,6 @@ void OutputDevice::ImplDrawTextLines( SalLayout& rSalLayout, FontStrikeout eStri
                                       bool bWordLine, bool bUnderlineAbove )
 {
     double nLayoutWidth = rSalLayout.GetTextWidth();
-
     if( bWordLine )
     {
         const basegfx::B2DPoint aStartPt = rSalLayout.DrawBase();
