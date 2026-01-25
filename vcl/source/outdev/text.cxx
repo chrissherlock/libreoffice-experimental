@@ -507,8 +507,7 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
 {
     assert(!is_double_buffered_window());
 
-    if ((nLen < 0) || (nIndex + nLen > rStr.getLength()))
-        nLen = rStr.getLength() - nIndex;
+    nLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nIndex, nLen);
 
     if (mpOutDevData->mpRecordLayout)
     {
@@ -658,11 +657,9 @@ void OutputDevice::DrawPartialTextArray(const Point& rStartPt, const OUString& r
 {
     assert(!is_double_buffered_window());
 
-    if (nLen < 0 || nIndex + nLen >= rStr.getLength())
-        nLen = rStr.getLength() - nIndex;
+    nLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nIndex, nLen);
 
-    if (nPartLen < 0 || nPartIndex + nPartLen >= rStr.getLength())
-        nPartLen = rStr.getLength() - nPartIndex;
+    nPartLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nPartIndex, nPartLen);
 
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaTextArrayAction(rStartPt, rStr, pDXArray, pKashidaArray,
@@ -700,8 +697,7 @@ void OutputDevice::DrawTextArray(const Point& rStartPt, const OUString& rStr,
 {
     assert(!is_double_buffered_window());
 
-    if (nLen < 0 || nIndex + nLen >= rStr.getLength())
-        nLen = rStr.getLength() - nIndex;
+    nLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nIndex, nLen);
 
     if (mpMetaFile)
         mpMetaFile->AddAction(
@@ -805,8 +801,7 @@ void OutputDevice::DrawStretchText(const Point& rStartPt, sal_Int32 nWidth, cons
 {
     assert(!is_double_buffered_window());
 
-    if ((nLen < 0) || (nIndex + nLen >= rStr.getLength()))
-        nLen = rStr.getLength() - nIndex;
+    nLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nIndex, nLen);
 
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaStretchTextAction(rStartPt, nWidth, rStr, nIndex, nLen));
@@ -1533,8 +1528,7 @@ void OutputDevice::DrawCtrlText(const Point& rPos, const OUString& rStr, const s
     sal_Int32 nCorrectedIndex = nIndex;
     sal_Int32 nCorrectedLen = nLen;
 
-    if ((nCorrectedLen < 0) || (nCorrectedIndex + nCorrectedLen >= rStr.getLength()))
-        nCorrectedLen = rStr.getLength() - nCorrectedIndex;
+    nCorrectedLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nCorrectedIndex, nCorrectedLen);
 
     sal_Int32 nMnemonicPos = -1;
 
@@ -1874,8 +1868,7 @@ bool OutputDevice::GetGlyphBoundRects(const Point& rOrigin, const OUString& rStr
     if (nIndex >= rStr.getLength())
         return false;
 
-    if (nLen < 0 || nIndex + nLen >= rStr.getLength())
-        nLen = rStr.getLength() - nIndex;
+    nLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nIndex, nLen);
 
     tools::Rectangle aRect;
 
