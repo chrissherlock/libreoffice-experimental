@@ -219,6 +219,7 @@ public:
     void testInitializeTextLineMetrics();
     void testInitializeFontMetrics();
     void testInitializeAboveTextLineMetrics();
+    void testGetAlignmentOffset();
 
     CPPUNIT_TEST_SUITE(TextLayoutEngineTest);
     CPPUNIT_TEST(testBiDiLayoutFlags);
@@ -241,6 +242,7 @@ public:
     CPPUNIT_TEST(testInitializeTextLineMetrics);
     CPPUNIT_TEST(testInitializeFontMetrics);
     CPPUNIT_TEST(testInitializeAboveTextLineMetrics);
+    CPPUNIT_TEST(testGetAlignmentOffset);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -692,6 +694,27 @@ void TextLayoutEngineTest::testInitializeAboveTextLineMetrics()
     // Note: Verification depends on specific FontMetricData getters for
     // overline/above-line properties.
     CPPUNIT_ASSERT(xFont->mxFontMetric != nullptr);
+}
+
+void TextLayoutEngineTest::testGetAlignmentOffset()
+{
+    const tools::Long nAscent = 80;
+    const tools::Long nDescent = 20;
+
+    // Test ALIGN_TOP: Should return the positive ascent value to shift text down
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(
+        "ALIGN_TOP offset is incorrect", nAscent,
+        vcl::text::TextLayoutEngine::GetAlignmentOffset(ALIGN_TOP, nAscent, nDescent));
+
+    // Test ALIGN_BOTTOM: Should return the negative descent value to shift text up
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(
+        "ALIGN_BOTTOM offset is incorrect", -nDescent,
+        vcl::text::TextLayoutEngine::GetAlignmentOffset(ALIGN_BOTTOM, nAscent, nDescent));
+
+    // Test ALIGN_BASELINE: Should return 0 (no shift)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(
+        "ALIGN_BASELINE offset should be zero", tools::Long(0),
+        vcl::text::TextLayoutEngine::GetAlignmentOffset(ALIGN_BASELINE, nAscent, nDescent));
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TextLayoutEngineTest);
