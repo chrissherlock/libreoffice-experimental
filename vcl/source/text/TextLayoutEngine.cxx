@@ -58,7 +58,7 @@ void TextLayoutEngine::GetWordKashidaPositions(const SalLayout& rLayout, std::u1
 }
 
 void TextLayoutEngine::InitializeFontMetrics(
-    LogicalFontInstance* pFontInstance, const vcl::Font& rFont, long nDPIY, long nPixelWidth,
+    const LogicalFontInstance* pFontInstance, const vcl::Font& rFont, long nDPIY, long nPixelWidth,
     std::function<long(const OUString&)> const& fnGetTextWidth,
     std::function<void(tools::Rectangle&, const OUString&)> const& fnGetBoundRect)
 {
@@ -1257,7 +1257,7 @@ void TextLayoutEngine::GetWordLineSegments(const SalLayout& rSalLayout,
         rSegments.push_back({ nDist, nWidth });
 }
 
-void TextLayoutEngine::InitializeTextLineMetrics(LogicalFontInstance* pFontInstance,
+void TextLayoutEngine::InitializeTextLineMetrics(const LogicalFontInstance* pFontInstance,
                                                  const vcl::Font& rFont, tools::Long nDPIY,
                                                  tools::Long nSpaceWidth, tools::Long nBulletWidth)
 {

@@ -95,6 +95,10 @@ public: // TODO: make data members private
     SAL_DLLPRIVATE void IgnoreFallbackForUnicode(sal_UCS4, FontWeight eWeight,
                                                  std::u16string_view rFontName);
 
+    inline hb_font_t* GetHbFont() const
+    {
+        return const_cast<LogicalFontInstance*>(this)->GetHbFont();
+    }
     inline hb_font_t* GetHbFont();
     SAL_DLLPRIVATE bool IsGraphiteFont();
     void SetAverageWidthFactor(double nFactor) { m_nAveWidthFactor = std::abs(nFactor); }

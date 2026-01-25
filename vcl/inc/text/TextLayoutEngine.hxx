@@ -107,8 +107,8 @@ public:
      * Independent of OutputDevice.
      */
     static void InitializeFontMetrics(
-        LogicalFontInstance* pFontInstance, const vcl::Font& rFont, long nDPIY, long nPixelWidth,
-        std::function<long(const OUString&)> const& fnGetTextWidth,
+        const LogicalFontInstance* pFontInstance, const vcl::Font& rFont, long nDPIY,
+        long nPixelWidth, std::function<long(const OUString&)> const& fnGetTextWidth,
         std::function<void(tools::Rectangle&, const OUString&)> const& fnGetBoundRect);
 
     /** Determines BiDi flags based on layout mode and string content. */
@@ -342,7 +342,7 @@ public:
                            const CoordinateMapper& rMapper, tools::Long nTargetWidth,
                            FontStrikeout eStrikeout);
 
-    static void InitializeTextLineMetrics(LogicalFontInstance* pFontInstance,
+    static void InitializeTextLineMetrics(const LogicalFontInstance* pFontInstance,
                                           const vcl::Font& rFont, tools::Long nDPIY,
                                           tools::Long nSpaceWidth, tools::Long nBulletWidth);
 

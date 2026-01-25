@@ -621,23 +621,26 @@ void TextLayoutEngineTest::testEmphasisMarkPositions()
 
 void TextLayoutEngineTest::testInitializeTextLineMetrics()
 {
-    StubFontInstance* pFont = new StubFontInstance();
-    rtl::Reference<LogicalFontInstance> xFont(pFont);
-    vcl::Font aFont;
+    rtl::Reference<LogicalFontInstance> xFont(new StubFontInstance());
+    const LogicalFontInstance* pConstFont = xFont.get(); // Test const-correctness
 
+    vcl::Font aFont;
     const tools::Long nDPI = 96;
     const tools::Long nSpaceW = 10;
     const tools::Long nBulletW = 4;
 
-    vcl::text::TextLayoutEngine::InitializeTextLineMetrics(xFont.get(), aFont, nDPI, nSpaceW,
+    vcl::text::TextLayoutEngine::InitializeTextLineMetrics(pConstFont, aFont, nDPI, nSpaceW,
                                                            nBulletW);
 
-    // Assertions: Check that FontMetricData was updated correctly
-    // Calculation: (10 - 4) >> 1 = 3
-    // Note: You may need to expose a getter for nBulletOffset in FontMetricData
-    // or verify the downstream line height/ascent effects.
+    // Assertions: Verify Bullet Offset calculation
+    // Logic: (nSpaceWidth - nBulletWidth) >> 1 => (10 - 4) >> 1 = 3
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Bullet offset calculation is incorrect", tools::Long(3),
                                  xFont->mxFontMetric->GetBulletOffset());
+
+    // Verify Line Height population
+    // In our StubFontInstance, Ascent=10 and Descent=10, so LineHeight should be 20
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Line height was not initialized correctly", tools::Long(20),
+                                 xFont->mnLineHeight);
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TextLayoutEngineTest);

@@ -201,7 +201,7 @@ bool FontMetricData::ImplInitTextLineSizeHarfBuzz(LogicalFontInstance* pFont)
     if (ShouldNotUseUnderlineMetrics())
         return false;
 
-    auto* pHbFont = pFont->GetHbFont();
+    auto* pHbFont = const_cast<hb_font_t*>(pFont->GetHbFont());
 
     hb_position_t nUnderlineSize;
     if (!hb_ot_metrics_get_position(pHbFont, HB_OT_METRICS_TAG_UNDERLINE_SIZE, &nUnderlineSize))
@@ -266,11 +266,11 @@ void FontMetricData::ImplInitStrikeoutHarfBuzz(double fScale, hb_position_t nStr
     mnDStrikeoutOffset2 = mnBStrikeoutOffset + mnDStrikeoutSize * 2;
 }
 
-void FontMetricData::ImplInitTextLineSize( LogicalFontInstance* pFontInstance, tools::Long nDPIY, const vcl::Font& rFont, tools::Long nBulletOffset )
+void FontMetricData::ImplInitTextLineSize(const LogicalFontInstance* pFontInstance, tools::Long nDPIY, const vcl::Font& rFont, tools::Long nBulletOffset)
 {
     ImplInitBulletOffset( nBulletOffset );
 
-    if (ImplInitTextLineSizeHarfBuzz(pFontInstance))
+    if (ImplInitTextLineSizeHarfBuzz(const_cast<LogicalFontInstance*>(pFontInstance)))
         return;
 
     ImplInitTextLineSizeMeasurements( nDPIY, rFont );

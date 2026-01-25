@@ -89,6 +89,7 @@
 #include <comphelper/hash.hxx>
 #include <vcl/pdf/PDFNote.hxx>
 
+#include <text/TextLayoutEngine.hxx>
 #include <svdata.hxx>
 #include <vcl/BitmapWriteAccess.hxx>
 #include <pdf/COSWriter.hxx>
@@ -6642,7 +6643,9 @@ void PDFWriterImpl::drawWaveTextLine( OStringBuffer& aLine, tools::Long nWidth, 
     else
     {
         if ( !pFontInstance->mxFontMetric->GetWavelineUnderlineSize() )
-            ImplInitTextLineSize();
+            vcl::text::TextLayoutEngine::InitializeTextLineMetrics(
+                GetFontInstance(), GetFont(), GetDPIY(),
+                GetTextWidth(OUString(u' ')), GetTextWidth(u"\x00b7"_ustr));
         nLineHeight = HCONV( pFontInstance->mxFontMetric->GetWavelineUnderlineSize() );
         nLinePos = HCONV( pFontInstance->mxFontMetric->GetWavelineUnderlineOffset() );
     }
@@ -6721,7 +6724,9 @@ void PDFWriterImpl::drawStraightTextLine( OStringBuffer& aLine, tools::Long nWid
             else
             {
                 if ( !pFontInstance->mxFontMetric->GetUnderlineSize() )
-                    ImplInitTextLineSize();
+                    vcl::text::TextLayoutEngine::InitializeTextLineMetrics(
+                GetFontInstance(), GetFont(), GetDPIY(),
+                GetTextWidth(OUString(u' ')), GetTextWidth(u"\x00b7"_ustr));
                 nLineHeight = pFontInstance->mxFontMetric->GetUnderlineSize();
                 nLinePos    = pFontInstance->mxFontMetric->GetUnderlineOffset();
             }
@@ -6742,7 +6747,9 @@ void PDFWriterImpl::drawStraightTextLine( OStringBuffer& aLine, tools::Long nWid
             else
             {
                 if ( !pFontInstance->mxFontMetric->GetBoldUnderlineSize() )
-                    ImplInitTextLineSize();
+                    vcl::text::TextLayoutEngine::InitializeTextLineMetrics(
+                GetFontInstance(), GetFont(), GetDPIY(),
+                GetTextWidth(OUString(u' ')), GetTextWidth(u"\x00b7"_ustr));
                 nLineHeight = pFontInstance->mxFontMetric->GetBoldUnderlineSize();
                 nLinePos    = pFontInstance->mxFontMetric->GetBoldUnderlineOffset();
             }
@@ -6759,7 +6766,9 @@ void PDFWriterImpl::drawStraightTextLine( OStringBuffer& aLine, tools::Long nWid
             else
             {
                 if ( !pFontInstance->mxFontMetric->GetDoubleUnderlineSize() )
-                    ImplInitTextLineSize();
+                    vcl::text::TextLayoutEngine::InitializeTextLineMetrics(
+                GetFontInstance(), GetFont(), GetDPIY(),
+                GetTextWidth(OUString(u' ')), GetTextWidth(u"\x00b7"_ustr));
                 nLineHeight = pFontInstance->mxFontMetric->GetDoubleUnderlineSize();
                 nLinePos    = pFontInstance->mxFontMetric->GetDoubleUnderlineOffset1();
                 nLinePos2   = pFontInstance->mxFontMetric->GetDoubleUnderlineOffset2();
@@ -6915,19 +6924,25 @@ void PDFWriterImpl::drawStrikeoutLine( OStringBuffer& aLine, tools::Long nWidth,
     {
         case STRIKEOUT_SINGLE:
             if ( !pFontInstance->mxFontMetric->GetStrikeoutSize() )
-                ImplInitTextLineSize();
+                vcl::text::TextLayoutEngine::InitializeTextLineMetrics(
+                GetFontInstance(), GetFont(), GetDPIY(),
+                GetTextWidth(OUString(u' ')), GetTextWidth(u"\x00b7"_ustr));
             nLineHeight = pFontInstance->mxFontMetric->GetStrikeoutSize();
             nLinePos    = pFontInstance->mxFontMetric->GetStrikeoutOffset();
             break;
         case STRIKEOUT_BOLD:
             if ( !pFontInstance->mxFontMetric->GetBoldStrikeoutSize() )
-                ImplInitTextLineSize();
+                vcl::text::TextLayoutEngine::InitializeTextLineMetrics(
+                GetFontInstance(), GetFont(), GetDPIY(),
+                GetTextWidth(OUString(u' ')), GetTextWidth(u"\x00b7"_ustr));
             nLineHeight = pFontInstance->mxFontMetric->GetBoldStrikeoutSize();
             nLinePos    = pFontInstance->mxFontMetric->GetBoldStrikeoutOffset();
             break;
         case STRIKEOUT_DOUBLE:
             if ( !pFontInstance->mxFontMetric->GetDoubleStrikeoutSize() )
-                ImplInitTextLineSize();
+                vcl::text::TextLayoutEngine::InitializeTextLineMetrics(
+                GetFontInstance(), GetFont(), GetDPIY(),
+                GetTextWidth(OUString(u' ')), GetTextWidth(u"\x00b7"_ustr));
             nLineHeight = pFontInstance->mxFontMetric->GetDoubleStrikeoutSize();
             nLinePos    = pFontInstance->mxFontMetric->GetDoubleStrikeoutOffset1();
             nLinePos2   = pFontInstance->mxFontMetric->GetDoubleStrikeoutOffset2();
