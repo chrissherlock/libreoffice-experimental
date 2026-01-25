@@ -1256,6 +1256,20 @@ void TextLayoutEngine::GetWordLineSegments(const SalLayout& rSalLayout,
     if (nWidth > 0)
         rSegments.push_back({ nDist, nWidth });
 }
+
+void TextLayoutEngine::InitializeTextLineMetrics(LogicalFontInstance* pFontInstance,
+                                                 const vcl::Font& rFont, tools::Long nDPIY,
+                                                 tools::Long nSpaceWidth, tools::Long nBulletWidth)
+{
+    if (!pFontInstance || !pFontInstance->mxFontMetric)
+        return;
+
+    // Logic migrated from OutputDevice::ImplInitTextLineSize
+    tools::Long nBulletOffset = (nSpaceWidth - nBulletWidth) >> 1;
+
+    pFontInstance->mxFontMetric->ImplInitTextLineSize(pFontInstance, nDPIY, rFont, nBulletOffset);
+}
+
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

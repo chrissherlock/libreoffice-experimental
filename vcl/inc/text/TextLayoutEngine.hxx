@@ -342,6 +342,10 @@ public:
                            const CoordinateMapper& rMapper, tools::Long nTargetWidth,
                            FontStrikeout eStrikeout);
 
+    static void InitializeTextLineMetrics(LogicalFontInstance* pFontInstance,
+                                          const vcl::Font& rFont, tools::Long nDPIY,
+                                          tools::Long nSpaceWidth, tools::Long nBulletWidth);
+
 private:
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);
 

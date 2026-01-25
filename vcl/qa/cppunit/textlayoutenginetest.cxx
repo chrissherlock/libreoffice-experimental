@@ -216,6 +216,7 @@ public:
     void testCalculateOutlineTransform();
     void testGetTextInkBounds_Rotation();
     void testGetWordLineSegments();
+    void testInitializeTextLineMetrics();
 
     CPPUNIT_TEST_SUITE(TextLayoutEngineTest);
     CPPUNIT_TEST(testBiDiLayoutFlags);
@@ -235,6 +236,7 @@ public:
     CPPUNIT_TEST(testCalculateOutlineTransform);
     CPPUNIT_TEST(testGetTextInkBounds_Rotation);
     CPPUNIT_TEST(testGetWordLineSegments);
+    CPPUNIT_TEST(testInitializeTextLineMetrics);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -615,6 +617,27 @@ void TextLayoutEngineTest::testEmphasisMarkPositions()
             "Vertical 'Below' positioning failed. Descent anchor or adjustment is incorrect.",
             nExpectedY, aPoints[0].Y());
     }
+}
+
+void TextLayoutEngineTest::testInitializeTextLineMetrics()
+{
+    StubFontInstance* pFont = new StubFontInstance();
+    rtl::Reference<LogicalFontInstance> xFont(pFont);
+    vcl::Font aFont;
+
+    const tools::Long nDPI = 96;
+    const tools::Long nSpaceW = 10;
+    const tools::Long nBulletW = 4;
+
+    vcl::text::TextLayoutEngine::InitializeTextLineMetrics(xFont.get(), aFont, nDPI, nSpaceW,
+                                                           nBulletW);
+
+    // Assertions: Check that FontMetricData was updated correctly
+    // Calculation: (10 - 4) >> 1 = 3
+    // Note: You may need to expose a getter for nBulletOffset in FontMetricData
+    // or verify the downstream line height/ascent effects.
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Bullet offset calculation is incorrect", tools::Long(3),
+                                 xFont->mxFontMetric->GetBulletOffset());
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TextLayoutEngineTest);

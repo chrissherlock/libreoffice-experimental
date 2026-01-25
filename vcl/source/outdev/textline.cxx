@@ -131,12 +131,13 @@ namespace {
 
 void OutputDevice::ImplInitTextLineSize()
 {
-    {
-        const vcl::Font& rFont = GetFont();
-        tools::Long nDPIY = GetDPIY();
-        tools::Long nBulletOffset = (GetTextWidth(OUString(u' ')) - GetTextWidth(u"\x00b7"_ustr)) >> 1;
-        mpFontInstance->mxFontMetric->ImplInitTextLineSize(mpFontInstance.get(), nDPIY, rFont, nBulletOffset);
-    }
+    vcl::text::TextLayoutEngine::InitializeTextLineMetrics(
+        mpFontInstance.get(),
+        GetFont(),
+        GetDPIY(),
+        GetTextWidth(OUString(u' ')),
+        GetTextWidth(u"\x00b7"_ustr)
+    );
 }
 
 void OutputDevice::ImplInitAboveTextLineSize()
