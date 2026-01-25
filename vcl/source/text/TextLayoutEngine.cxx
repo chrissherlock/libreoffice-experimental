@@ -1271,6 +1271,18 @@ void TextLayoutEngine::InitializeAboveTextLineMetrics(const LogicalFontInstance*
     pFontInstance->mxFontMetric->ImplInitAboveTextLineSize(nDPIY, nPixelWidth);
 }
 
+tools::Long TextLayoutEngine::GetAlignmentOffset(TextAlign eAlign, tools::Long nAscent,
+                                                 tools::Long nDescent)
+{
+    if (eAlign == ALIGN_BOTTOM)
+        return -nDescent;
+
+    if (eAlign == ALIGN_TOP)
+        return nAscent;
+
+    return 0;
+}
+
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
