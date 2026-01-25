@@ -1,5 +1,3 @@
-#include <salgdi.hxx>
-#include <CoordinateMapper.hxx>
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; fill-column: 100 -*- */
 /*
  * This file is part of the LibreOffice project.
@@ -11,6 +9,7 @@
 
 #include <basegfx/point/b2dpoint.hxx>
 #include <tools/gen.hxx>
+#include <unotools/fontdefs.hxx>
 #include <i18nlangtag/mslangid.hxx>
 #include <i18nutil/digitlocalization.hxx>
 #include <i18nutil/unicode.hxx>
@@ -29,6 +28,7 @@
 #include <salgdi.hxx>
 #include <sallayout.hxx>
 #include <text/TextLayoutEngine.hxx>
+#include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
 #include <text/TextLayoutRequest.hxx>
 
