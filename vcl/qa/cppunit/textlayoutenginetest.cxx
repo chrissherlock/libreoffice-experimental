@@ -137,8 +137,6 @@ public:
     }
 };
 
-} // end anonymous namespace
-
 class MockEmphasisLayout : public MockSalLayout
 {
 public:
@@ -148,7 +146,7 @@ public:
         if (nStart == 0)
         {
             *pGlyph = reinterpret_cast<const GlyphItem*>(0xDEADBEEF);
-            rPos = basegfx::B2DPoint(100.0, 200.0);
+            rPos = basegfx::B2DPoint(100.0, 0); // Glyph is relative to baseline
             nStart++;
             return true;
         }
@@ -190,6 +188,8 @@ public:
         return false;
     }
 };
+
+} // end anonymous namespace
 
 class TextLayoutEngineTest : public test::BootstrapFixture
 {
@@ -527,19 +527,6 @@ void TextLayoutEngineTest::testGetTextHeightPixel()
                                  0.001);
 }
 
-void TextLayoutEngineTest::testEmphasisMarkPositions()
-{
-    MockEmphasisLayout aLayout;
-    aLayout.DrawBase() = basegfx::B2DPoint(10.0, 100.0);
-    vcl::font::FontRealization aRealization;
-    aRealization.nEmphasisAscent = 50;
-    aRealization.nEmphasisDescent = 20;
-    std::vector<Point> aPoints;
-    vcl::text::TextLayoutEngine::GetEmphasisMarkPositions(aLayout, aRealization, true, aPoints);
-    CPPUNIT_ASSERT_EQUAL(size_t(1), aPoints.size());
-    CPPUNIT_ASSERT_EQUAL(tools::Long(120), aPoints[0].Y());
-}
-
 void TextLayoutEngineTest::testCalculateOutlineTransform()
 {
     MockSalLayout aLayout;
@@ -565,6 +552,69 @@ void TextLayoutEngineTest::testGetTextInkBounds_Rotation()
         = vcl::text::TextLayoutEngine::GetTextInkBounds(aLayout, aRealization, false);
     CPPUNIT_ASSERT_EQUAL(tools::Long(20), aRect.GetHeight());
     CPPUNIT_ASSERT_EQUAL(tools::Long(100), aRect.GetWidth());
+}
+
+void TextLayoutEngineTest::testEmphasisMarkPositions()
+{
+    // Setup Font and Realization
+    StubFontInstance* pFont = new StubFontInstance();
+    rtl::Reference<LogicalFontInstance> xFont(pFont);
+    vcl::font::FontRealization aRealization;
+    aRealization.mxFont = xFont;
+    aRealization.nEmphasisAscent = 50;
+    aRealization.nEmphasisDescent = 20;
+
+    // Setup Mock Layout with a single glyph at (100, 200)
+    MockEmphasisLayout aLayout;
+    const tools::Long nBaseline = 200;
+    // Ensure the layout's global draw position matches the glyph's baseline
+    aLayout.DrawBase() = basegfx::B2DPoint(0, nBaseline);
+
+    // Test "Above" Mark
+    {
+        vcl::font::EmphasisMark aMark(FontEmphasisMark::Disc, 50, 96);
+        const long nMarkWidth = aMark.GetWidth();
+        const long nYAdj = aMark.GetYOffset();
+
+        std::vector<Point> aPoints;
+        vcl::text::TextLayoutEngine::GetEmphasisMarkPositions(aLayout, aRealization, aMark, false,
+                                                              aPoints);
+
+        CPPUNIT_ASSERT_EQUAL(size_t(1), aPoints.size());
+
+        // Horizontal Centering Check
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(
+            "Horizontal centering failed: X should be (GlyphX - MarkWidth/2)",
+            tools::Long(100 - (nMarkWidth / 2)), aPoints[0].X());
+
+        // Vertical Positioning Check
+        // nAnchorY(200) + nShapeAdj(-nYAdj) - nYCenterOff(Ascent/2) - FontAscent(50)
+        tools::Long nExpectedY
+            = nBaseline - aRealization.nEmphasisAscent - nYAdj - (aRealization.nEmphasisAscent / 2);
+
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(
+            "Vertical 'Above' positioning failed. Check nAnchorY vs nShapeAdj math.", nExpectedY,
+            aPoints[0].Y());
+    }
+
+    // Test "Below" Mark
+    {
+        vcl::font::EmphasisMark aMark(FontEmphasisMark::Disc | FontEmphasisMark::PosBelow, 20, 96);
+        const long nYAdj = aMark.GetYOffset();
+
+        std::vector<Point> aPoints;
+        vcl::text::TextLayoutEngine::GetEmphasisMarkPositions(aLayout, aRealization, aMark, true,
+                                                              aPoints);
+
+        // Vertical Positioning Check
+        // nAnchorY(200) + nBaseOffset(Descent:20) + nShapeAdj(nYAdj) - nYCenterOff(Descent/2)
+        tools::Long nExpectedY = nBaseline + aRealization.nEmphasisDescent + nYAdj
+                                 - (aRealization.nEmphasisDescent / 2);
+
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(
+            "Vertical 'Below' positioning failed. Descent anchor or adjustment is incorrect.",
+            nExpectedY, aPoints[0].Y());
+    }
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TextLayoutEngineTest);
