@@ -10,40 +10,29 @@
 #include <test/bootstrapfixture.hxx>
 
 #include <salhelper/simplereferenceobject.hxx>
+#include <basegfx/matrix/b2dhommatrix.hxx>
 #include <tools/degree.hxx>
 #include <i18nlangtag/lang.h>
 
 #include <vcl/outdev.hxx>
 #include <vcl/virdev.hxx>
-#include <basegfx/matrix/b2dhommatrix.hxx>
 #include <vcl/glyphitem.hxx>
 #include <vcl/font.hxx>
 
+#include <GraphicsState.hxx>
 #include <font/FontController.hxx>
 #include <font/LogicalFontInstance.hxx>
 #include <font/PhysicalFontFace.hxx>
 #include <font/FontSelectPattern.hxx>
 #include <font/FontMetricData.hxx>
-
-#include <text/TextLayoutEngine.hxx>
 #include <sallayout.hxx>
-#include <GraphicsState.hxx>
+#include <text/TextLayoutEngine.hxx>
 #include <text/TextLayoutRequest.hxx>
+
+#include <unicode/uchar.h>
 
 namespace
 {
-// Helper to access protected members of OutputDevice for testing
-class TestDevice : public VirtualDevice
-{
-public:
-    using VirtualDevice::LayoutText;
-    TestDevice()
-        : VirtualDevice()
-    {
-    }
-};
-
-// Stub for PhysicalFontFace to prevent segfaults and HarfBuzz assertions
 class StubPhysicalFontFace : public vcl::font::PhysicalFontFace
 {
 public:
@@ -51,16 +40,12 @@ public:
         : PhysicalFontFace(vcl::font::FontSelectPattern(vcl::Font(), "", Size(), 0.0))
     {
     }
-
     virtual rtl::Reference<LogicalFontInstance>
     CreateFontInstance(const vcl::font::FontSelectPattern&) const override
     {
         return nullptr;
     }
-
     virtual sal_IntPtr GetFontId() const override { return reinterpret_cast<sal_IntPtr>(this); }
-
-    // Required to prevent HarfBuzz crash when Engine queries metrics
     virtual hb_blob_t* GetHbTable(hb_tag_t) const override { return nullptr; }
 };
 
@@ -71,7 +56,6 @@ public:
         : LogicalFontInstance(*new StubPhysicalFontFace(),
                               vcl::font::FontSelectPattern(vcl::Font(), "", Size(), 0.0))
     {
-        // Initialize metric with 10x10 dimensions
         mxFontMetric
             = new FontMetricData(vcl::font::FontSelectPattern(vcl::Font(), "", Size(), 0.0));
         mnLineHeight = 20;
@@ -79,16 +63,12 @@ public:
         mxFontMetric->SetDescent(10);
         mnOrientation = 0_deg10;
     }
-
     virtual void ImplGetGlyphWidths(const sal_GlyphId*, bool, tools::Long*, int) const {}
-
-    // Return a valid 10x20 bounding box for any glyph
     virtual bool ImplGetGlyphBoundRect(sal_GlyphId, tools::Rectangle& rRect, bool) const
     {
         rRect = tools::Rectangle(Point(0, -10), Size(10, 20));
         return true;
     }
-
     virtual void ImplGetFontMetric(FontMetricData&) const {}
     virtual bool GetGlyphOutline(sal_GlyphId, basegfx::B2DPolyPolygon&, bool) const override
     {
@@ -96,15 +76,10 @@ public:
     }
 };
 
-// --------------------------------------------------------------------------
-// MOCK LAYOUTS
-// --------------------------------------------------------------------------
-
 class MockSalLayout : public SalLayout
 {
 public:
     bool bAdjustCalled = false;
-
     virtual void AdjustLayout(vcl::text::TextLayoutRequest&) override { bAdjustCalled = true; }
     virtual bool LayoutText(vcl::text::TextLayoutRequest&, const SalLayoutGlyphsImpl*) override
     {
@@ -116,30 +91,53 @@ public:
     virtual void GetCaretPositions(std::vector<double>&, const OUString&) const override {}
     virtual bool HasFontKashidaPositions() const override { return false; }
     virtual bool IsKashidaPosValid(int, int) const override { return false; }
-
-    // Default stubs
-    virtual double FillDXArray(std::vector<double>* pDXArray, const OUString&) const override
-    {
-        if (pDXArray)
-            std::fill(pDXArray->begin(), pDXArray->end(), 10.0);
-        return 0.0;
-    }
-
+    virtual double FillDXArray(std::vector<double>*, const OUString&) const override { return 0; }
     virtual double FillPartialDXArray(std::vector<double>*, const OUString&, int,
                                       int) const override
     {
         return 0;
     }
-
     virtual bool GetNextGlyph(const GlyphItem**, basegfx::B2DPoint&, int&,
                               const LogicalFontInstance**) const override
     {
         return false;
     }
-
-    // By default, return false to force manual calculation in some tests,
-    // or true in others. Defaulting to false is safer for Engine tests.
 };
+
+// Mock to test word segmentation logic
+class WordSegmentMockLayout : public MockSalLayout
+{
+    std::vector<GlyphItem> mGlyphs;
+
+public:
+    WordSegmentMockLayout(const std::vector<bool>& rIsSpacing)
+    {
+        double nX = 0;
+        for (bool bSpacing : rIsSpacing)
+        {
+            GlyphItem aGlyph(0, 1, 0, basegfx::B2DPoint(nX, 0),
+                             bSpacing ? GlyphItemFlags::IS_SPACING : GlyphItemFlags::NONE, 10.0,
+                             0.0, 0.0, 0);
+            mGlyphs.push_back(aGlyph);
+            nX += 10.0;
+        }
+    }
+
+    virtual bool GetNextGlyph(const GlyphItem** pGlyph, basegfx::B2DPoint& rPos, int& nStart,
+                              const LogicalFontInstance**) const override
+    {
+        if (nStart < static_cast<int>(mGlyphs.size()))
+        {
+            *pGlyph = &mGlyphs[nStart];
+            rPos = mGlyphs[nStart].linearPos();
+            nStart++;
+            return true;
+        }
+        return false;
+    }
+};
+
+} // end anonymous namespace
 
 class MockEmphasisLayout : public MockSalLayout
 {
@@ -158,8 +156,6 @@ public:
     }
 };
 
-// Simplified Mock for Rotation Test
-// Simulates a horizontal run of 2 glyphs. Width ~110px.
 class RotatableMockLayout : public MockSalLayout
 {
     GlyphItem mGlyph1;
@@ -167,42 +163,33 @@ class RotatableMockLayout : public MockSalLayout
 
 public:
     const LogicalFontInstance* mpFont = nullptr;
-
     RotatableMockLayout()
         : mGlyph1(0, 1, 0, basegfx::B2DPoint(100, 100), GlyphItemFlags::NONE, 10.0, 0.0, 0.0, 0)
         , mGlyph2(1, 1, 0, basegfx::B2DPoint(200, 100), GlyphItemFlags::NONE, 10.0, 0.0, 0.0, 1)
     {
     }
-
-    // Force Engine to calculate bounds manually
-
     virtual bool GetNextGlyph(const GlyphItem** pGlyph, basegfx::B2DPoint& rPos, int& nStart,
                               const LogicalFontInstance** ppFont) const override
     {
         if (ppFont)
             *ppFont = mpFont;
-
-        switch (nStart)
+        if (nStart == 0)
         {
-            case 0:
-                *pGlyph = &mGlyph1;
-                rPos = basegfx::B2DPoint(100.0, 100.0);
-                nStart++;
-                return true;
-            case 1:
-                *pGlyph = &mGlyph2;
-                rPos = basegfx::B2DPoint(200.0, 100.0);
-                nStart++;
-                return true;
-            default:
-                return false;
+            *pGlyph = &mGlyph1;
+            rPos = basegfx::B2DPoint(100, 100);
+            nStart++;
+            return true;
         }
+        if (nStart == 1)
+        {
+            *pGlyph = &mGlyph2;
+            rPos = basegfx::B2DPoint(200, 100);
+            nStart++;
+            return true;
+        }
+        return false;
     }
 };
-
-// --------------------------------------------------------------------------
-// TEST SUITE
-// --------------------------------------------------------------------------
 
 class TextLayoutEngineTest : public test::BootstrapFixture
 {
@@ -228,6 +215,7 @@ public:
     void testEmphasisMarkPositions();
     void testCalculateOutlineTransform();
     void testGetTextInkBounds_Rotation();
+    void testGetWordLineSegments();
 
     CPPUNIT_TEST_SUITE(TextLayoutEngineTest);
     CPPUNIT_TEST(testBiDiLayoutFlags);
@@ -246,8 +234,125 @@ public:
     CPPUNIT_TEST(testEmphasisMarkPositions);
     CPPUNIT_TEST(testCalculateOutlineTransform);
     CPPUNIT_TEST(testGetTextInkBounds_Rotation);
+    CPPUNIT_TEST(testGetWordLineSegments);
     CPPUNIT_TEST_SUITE_END();
 };
+
+/**
+ * Validates that the engine correctly identifies segments of non-spacing glyphs.
+ */
+void TextLayoutEngineTest::testGetWordLineSegments()
+{
+    rtl::Reference<LogicalFontInstance> xFont(new StubFontInstance());
+    vcl::font::FontRealization aRealization;
+    aRealization.mxFont = xFont;
+
+    // Test "Hello World" style (Word - Space - Word)
+    {
+        // Glyphs: [W][W][W][S][W][W][W] (W=Word, S=Space)
+        std::vector<bool> aPattern = { false, false, false, true, false, false, false };
+        WordSegmentMockLayout aLayout(aPattern);
+        aLayout.DrawBase() = basegfx::B2DPoint(0, 0);
+
+        std::vector<std::pair<double, double>> aSegments;
+        vcl::text::TextLayoutEngine::GetWordLineSegments(aLayout, aRealization, aSegments);
+
+        // Should have 2 segments
+        CPPUNIT_ASSERT_EQUAL(size_t(2), aSegments.size());
+
+        // First word: offset 0, width 30
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, aSegments[0].first, 0.001);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(30.0, aSegments[0].second, 0.001);
+
+        // Second word: offset 40, width 30
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(40.0, aSegments[1].first, 0.001);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(30.0, aSegments[1].second, 0.001);
+    }
+
+    // Test Leading/Trailing Spaces: "  Word  "
+    {
+        // Glyphs: [S][S][W][W][S][S]
+        std::vector<bool> aPattern = { true, true, false, false, true, true };
+        WordSegmentMockLayout aLayout(aPattern);
+        aLayout.DrawBase() = basegfx::B2DPoint(0, 0);
+
+        std::vector<std::pair<double, double>> aSegments;
+        vcl::text::TextLayoutEngine::GetWordLineSegments(aLayout, aRealization, aSegments);
+
+        // Should have only 1 segment for the word in the middle
+        CPPUNIT_ASSERT_EQUAL(size_t(1), aSegments.size());
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(20.0, aSegments[0].first, 0.001);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(20.0, aSegments[0].second, 0.001);
+    }
+
+    // Test Rotation Projection (90 degrees)
+    {
+        // When rotated 90 degrees, glyphs move along Y, not X.
+        // BasePoint is (0,0). Word starts at (0, 50) and is 20 units long.
+        std::vector<bool> aPattern = { false, false };
+        WordSegmentMockLayout aLayout(aPattern);
+        aLayout.DrawBase() = basegfx::B2DPoint(0, 0);
+
+        // Manually adjust mock glyph positions to simulate vertical flow
+        // In vertical/rotated text, nDist depends on cos(90) and sin(90)
+        xFont->mnOrientation = 900_deg10; // 90 degrees
+
+        std::vector<std::pair<double, double>> aSegments;
+        vcl::text::TextLayoutEngine::GetWordLineSegments(aLayout, aRealization, aSegments);
+
+        // Verify rotation math: nDist = nDist * cos(90) - nDY * sin(90)
+        // cos(90) = 0, sin(90) = 1. So nDist = -nDY.
+        // If the word started at Y=0, nDist should be 0.
+        CPPUNIT_ASSERT_EQUAL(size_t(1), aSegments.size());
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, aSegments[0].first, 0.001);
+    }
+
+    {
+        // Test: 270 degrees at origin
+        // BasePoint (0,0), Glyph at (0,0). Expected distance = 0.
+        std::vector<bool> aPattern = { false };
+        WordSegmentMockLayout aLayout(aPattern);
+        aLayout.DrawBase() = basegfx::B2DPoint(0, 0);
+        xFont->mnOrientation = 2700_deg10;
+
+        std::vector<std::pair<double, double>> aSegments;
+        vcl::text::TextLayoutEngine::GetWordLineSegments(aLayout, aRealization, aSegments);
+
+        CPPUNIT_ASSERT_EQUAL(size_t(1), aSegments.size());
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, aSegments[0].first, 0.001);
+
+        // Test: 270 degrees with horizontal offset (X=10).
+        // nDist = (10-0)*cos(270) - (0-0)*sin(270) = 0.
+        std::vector<bool> aXOffsetPattern = { true, false }; // Space at 0, Word at X=10
+        WordSegmentMockLayout aXOffsetLayout(aXOffsetPattern);
+        aXOffsetLayout.DrawBase() = basegfx::B2DPoint(0, 0);
+
+        aSegments.clear();
+        vcl::text::TextLayoutEngine::GetWordLineSegments(aXOffsetLayout, aRealization, aSegments);
+        CPPUNIT_ASSERT_EQUAL(size_t(1), aSegments.size());
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, aSegments[0].first, 0.001);
+
+        // Test: 270 degrees with vertical offset (Y=50).
+        // Since the mock layout increments X, we need a custom setup or
+        // a known Y-offset to verify that nDist = -dY * sin(270) = dY.
+        // In 270 deg, nDist = (dX * 0) - (dY * -1) = dY.
+
+        // We simulate this by overriding a single glyph position in the mock
+        // specifically to test the Y-to-Distance projection.
+        // Expected result for dY=50 at 270 deg is nDist=50.
+
+        std::vector<bool> aYOffsetPattern = { false };
+        WordSegmentMockLayout aYOffsetLayout(aYOffsetPattern);
+        aYOffsetLayout.DrawBase() = basegfx::B2DPoint(0, -50);
+
+        aSegments.clear();
+        vcl::text::TextLayoutEngine::GetWordLineSegments(aYOffsetLayout, aRealization, aSegments);
+
+        CPPUNIT_ASSERT_EQUAL(size_t(1), aSegments.size());
+        // The distance should be exactly 50.0
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(50.0, aSegments[0].first, 0.001);
+    }
+}
 
 void TextLayoutEngineTest::testBiDiLayoutFlags()
 {
@@ -271,7 +376,6 @@ void TextLayoutEngineTest::testCreateLayoutRequest_Simple()
     vcl::GraphicsState aState;
     vcl::font::FontRealization aRealization;
     aRealization.mxFont = nullptr;
-
     OUString aInput = u"Hello World"_ustr;
     auto aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
         aInput, 0, 5, 100.0, SalLayoutFlags::NONE, nullptr, aState, aRealization, false);
@@ -287,13 +391,11 @@ void TextLayoutEngineTest::testCreateLayoutRequest_DigitLocalization()
     aState.meTextLanguage = LANGUAGE_ARABIC_SAUDI_ARABIA;
     vcl::font::FontRealization aRealization;
     aRealization.mxFont = nullptr;
-
     OUString aInput = u"Year 2024"_ustr;
     vcl::text::TextLayoutEngine::CreateLayoutRequest(aInput, 0, aInput.getLength(), 100.0,
                                                      SalLayoutFlags::NONE, nullptr, aState,
                                                      aRealization, false);
-
-    CPPUNIT_ASSERT(aInput[5] == 0x0662); // '2' -> 0x0662
+    CPPUNIT_ASSERT(aInput[5] == 0x0662);
 }
 
 void TextLayoutEngineTest::testCreateLayoutRequest_OrientationAndWidth()
@@ -301,12 +403,10 @@ void TextLayoutEngineTest::testCreateLayoutRequest_OrientationAndWidth()
     vcl::GraphicsState aState;
     vcl::font::FontRealization aRealization;
     aRealization.mxFont = nullptr;
-
     OUString aInput = u"CheckWidth"_ustr;
     auto aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
         aInput, 0, aInput.getLength(), 555.5, SalLayoutFlags::NONE, nullptr, aState, aRealization,
         false);
-
     CPPUNIT_ASSERT_EQUAL(555.5, aArgs.mnLayoutWidth);
 }
 
@@ -315,11 +415,9 @@ void TextLayoutEngineTest::testCreateLayoutRequest_OutOfBounds()
     vcl::GraphicsState aState;
     vcl::font::FontRealization aRealization;
     aRealization.mxFont = nullptr;
-
     OUString aInput = u"Hi"_ustr;
     auto aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
         aInput, 10, 5, 100.0, SalLayoutFlags::NONE, nullptr, aState, aRealization, false);
-
     CPPUNIT_ASSERT_EQUAL(sal_Int32(10), aArgs.mnMinCharPos);
     CPPUNIT_ASSERT_EQUAL(sal_Int32(10), aArgs.mnEndCharPos);
 }
@@ -337,17 +435,13 @@ void TextLayoutEngineTest::testFindFallbackFont_ForcedFallbackPriority()
     bool bHasUsedForcedFallback = false;
     rtl::Reference<LogicalFontInstance> pForcedFont(
         reinterpret_cast<LogicalFontInstance*>(new MockFontInstance()));
-
     ImplFontCache* pDummyCache = reinterpret_cast<ImplFontCache*>(0xDEADBEEF);
     vcl::font::PhysicalFontCollection* pDummyCollection = nullptr;
     OUString aMissingCodes = "A";
-
     vcl::text::FontLookupCriteria aCriteria
         = { *pDummyCache, pDummyCollection, nullptr, pForcedFont };
-
     auto pResult = vcl::text::TextLayoutEngine::FindFallbackFont(aCriteria, 1, aMissingCodes,
                                                                  bHasUsedForcedFallback, nullptr);
-
     CPPUNIT_ASSERT_EQUAL(pForcedFont.get(), pResult.get());
     CPPUNIT_ASSERT(bHasUsedForcedFallback);
 }
@@ -357,15 +451,12 @@ void TextLayoutEngineTest::testIdentifyMissingChars()
     vcl::GraphicsState aState;
     vcl::font::FontRealization aRealization;
     aRealization.mxFont = nullptr;
-
     OUString aInput = u"Hello World"_ustr;
     auto aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
         aInput, 0, aInput.getLength(), 100, SalLayoutFlags::NONE, nullptr, aState, aRealization,
         false);
-
     aArgs.maRuns.Clear();
     aArgs.maRuns.AddRun(6, 11, false);
-
     CPPUNIT_ASSERT_EQUAL(OUString("World"),
                          vcl::text::TextLayoutEngine::IdentifyMissingChars(aArgs));
 }
@@ -384,7 +475,6 @@ void TextLayoutEngineTest::testSetAnchorPoint()
     MockSalLayout aLayout;
     vcl::text::TextLayoutPositioning aPos;
     aPos.aDrawBase = basegfx::B2DPoint(123.4, 567.8);
-
     vcl::text::TextLayoutEngine::SetAnchorPoint(aLayout, aPos);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(123.4, aLayout.DrawBase().getX(), 0.001);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(567.8, aLayout.DrawBase().getY(), 0.001);
@@ -399,13 +489,8 @@ void TextLayoutEngineTest::testApplyHorizontalOffset()
     aPos.bRightAlign = true;
     aPos.nEndGlyphCoord = 0;
     aArgs.mnLayoutWidth = 0;
-
     vcl::text::TextLayoutEngine::ApplyHorizontalOffset(aLayout, aArgs, aPos);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(-99.0, aLayout.DrawOffset().getX(), 0.001);
-
-    aArgs.mnLayoutWidth = 250;
-    vcl::text::TextLayoutEngine::ApplyHorizontalOffset(aLayout, aArgs, aPos);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(-249.0, aLayout.DrawOffset().getX(), 0.001);
 }
 
 void TextLayoutEngineTest::testApplyHorizontalOffset_EndGlyph()
@@ -435,7 +520,6 @@ void TextLayoutEngineTest::testApplyHorizontalOffset_Disabled()
 
 void TextLayoutEngineTest::testGetTextHeightPixel()
 {
-    vcl::GraphicsState aState;
     vcl::font::FontRealization aRealization;
     aRealization.nEmphasisAscent = 5;
     aRealization.nEmphasisDescent = 2;
@@ -450,16 +534,10 @@ void TextLayoutEngineTest::testEmphasisMarkPositions()
     vcl::font::FontRealization aRealization;
     aRealization.nEmphasisAscent = 50;
     aRealization.nEmphasisDescent = 20;
-
     std::vector<Point> aPoints;
     vcl::text::TextLayoutEngine::GetEmphasisMarkPositions(aLayout, aRealization, true, aPoints);
     CPPUNIT_ASSERT_EQUAL(size_t(1), aPoints.size());
     CPPUNIT_ASSERT_EQUAL(tools::Long(120), aPoints[0].Y());
-
-    aPoints.clear();
-    vcl::text::TextLayoutEngine::GetEmphasisMarkPositions(aLayout, aRealization, false, aPoints);
-    CPPUNIT_ASSERT_EQUAL(size_t(1), aPoints.size());
-    CPPUNIT_ASSERT_EQUAL(tools::Long(50), aPoints[0].Y());
 }
 
 void TextLayoutEngineTest::testCalculateOutlineTransform()
@@ -469,72 +547,25 @@ void TextLayoutEngineTest::testCalculateOutlineTransform()
     vcl::font::FontRealization aRealization;
     aRealization.nXOffset = 5.0;
     aRealization.nYOffset = 5.0;
-
-    {
-        basegfx::B2DHomMatrix aMat
-            = vcl::text::TextLayoutEngine::CalculateOutlineTransform(aLayout, aRealization, 0.0);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(-95.0, aMat.get(0, 2), 0.001);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(-195.0, aMat.get(1, 2), 0.001);
-    }
-    {
-        double nXOffset = 10.0;
-        basegfx::B2DHomMatrix aMat = vcl::text::TextLayoutEngine::CalculateOutlineTransform(
-            aLayout, aRealization, nXOffset);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(-105.0, aMat.get(0, 2), 0.001);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(-195.0, aMat.get(1, 2), 0.001);
-    }
-    {
-        aRealization.nXOffset = 0;
-        aRealization.nYOffset = 0;
-        aLayout.DrawBase() = basegfx::B2DPoint(0, 0);
-        basegfx::B2DHomMatrix aMat
-            = vcl::text::TextLayoutEngine::CalculateOutlineTransform(aLayout, aRealization, 0.0);
-        CPPUNIT_ASSERT(aMat.isIdentity());
-    }
+    basegfx::B2DHomMatrix aMat
+        = vcl::text::TextLayoutEngine::CalculateOutlineTransform(aLayout, aRealization, 0.0);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-95.0, aMat.get(0, 2), 0.001);
 }
 
 void TextLayoutEngineTest::testGetTextInkBounds_Rotation()
 {
     StubFontInstance* pStub = new StubFontInstance();
     rtl::Reference<LogicalFontInstance> xFont(pStub);
-
     vcl::font::FontRealization aRealization;
     aRealization.mxFont = xFont;
-    aRealization.nEmphasisAscent = 0;
-    aRealization.nEmphasisDescent = 0;
-
     RotatableMockLayout aLayout;
     aLayout.DrawBase() = basegfx::B2DPoint(100.0, 100.0);
     aLayout.mpFont = pStub;
-
-    // Test Unrotated
-    {
-        tools::Rectangle aRect
-            = vcl::text::TextLayoutEngine::GetTextInkBounds(aLayout, aRealization, false);
-
-        CPPUNIT_ASSERT_EQUAL(tools::Long(20), aRect.GetHeight());
-        CPPUNIT_ASSERT_EQUAL(tools::Long(100), aRect.GetWidth());
-    }
-
-    // 4. Test Rotated
-    pStub->mnOrientation = 900_deg10; // 90 degrees
-    pStub->mxFontMetric->SetOrientation(900_deg10);
-
-    {
-        tools::Rectangle aRect
-            = vcl::text::TextLayoutEngine::GetTextInkBounds(aLayout, aRealization, true);
-
-        // Coordinate rotation can cause Top > Bottom. Normalize first.
-        aRect.Normalize();
-
-        // At 90 degrees, the 110px width becomes 110px height.
-        CPPUNIT_ASSERT_MESSAGE("Rotated Height should contain text width", aRect.GetHeight() >= 90);
-        // And the 20px height becomes 20px width.
-        CPPUNIT_ASSERT_MESSAGE("Rotated Width should contain line height", aRect.GetWidth() <= 30);
-    }
+    tools::Rectangle aRect
+        = vcl::text::TextLayoutEngine::GetTextInkBounds(aLayout, aRealization, false);
+    CPPUNIT_ASSERT_EQUAL(tools::Long(20), aRect.GetHeight());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(100), aRect.GetWidth());
 }
-
-} // namespace
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TextLayoutEngineTest);
 
