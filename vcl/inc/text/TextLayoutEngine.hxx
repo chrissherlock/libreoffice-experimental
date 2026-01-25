@@ -334,6 +334,11 @@ public:
                                     const vcl::font::FontRealization& rFontRealization,
                                     std::vector<std::pair<double, double>>& rSegments);
 
+    static std::unique_ptr<SalLayout>
+    GetStrikeoutCharLayout(const vcl::font::FontRealization& rFontRealization,
+                           const CoordinateMapper& rMapper, tools::Long nTargetWidth,
+                           FontStrikeout eStrikeout);
+
 private:
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);
 
