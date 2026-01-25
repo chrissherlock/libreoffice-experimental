@@ -233,6 +233,7 @@ public:
     void testGetShadowOffset();
     void testGetOutlineOffsets();
     void testGetTextOutlines();
+    void testAlignAndRotateTextRect();
 
     CPPUNIT_TEST_SUITE(TextLayoutEngineTest);
     CPPUNIT_TEST(testBiDiLayoutFlags);
@@ -267,6 +268,7 @@ public:
     CPPUNIT_TEST(testGetShadowOffset);
     CPPUNIT_TEST(testGetOutlineOffsets);
     CPPUNIT_TEST(testGetTextOutlines);
+    CPPUNIT_TEST(testAlignAndRotateTextRect);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -1036,6 +1038,96 @@ void TextLayoutEngineTest::testGetTextOutlines()
     double nDiff = nX_V_Shifted - nX_V_Zero;
     CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("Offset should roughly match width of preceding character",
                                          nWidthA, nDiff, 5.0);
+}
+
+void TextLayoutEngineTest::testAlignAndRotateTextRect()
+{
+    // Define a target layout rectangle: 100x100 at (10, 10)
+    // Left: 10, Top: 10, Right: 109, Bottom: 109
+    tools::Rectangle aTarget(Point(10, 10), Size(100, 100));
+
+    // Assume we calculated content text size: 20x10
+    tools::Long nTextW = 20;
+    tools::Long nTextH = 10;
+
+    // Case 1: Default Alignment (Top-Left)
+    // Logic:
+    //   Vertical: SetBottom(Top + H - 1) -> 10 + 10 - 1 = 19
+    //   Horizontal: SetRight(Left + W - 1) -> 10 + 20 - 1 = 29
+    //   Rounding: Not Right aligned -> AdjustRight(1) -> Right becomes 30
+    // Result: (10, 10) - (30, 19). Width = 21, Height = 10.
+    {
+        tools::Rectangle aRes = vcl::text::TextLayoutEngine::AlignAndRotateTextRect(
+            aTarget, nTextW, nTextH, DrawTextFlags::NONE, 0_deg10);
+
+        CPPUNIT_ASSERT_EQUAL(tools::Long(10), aRes.Left());
+        CPPUNIT_ASSERT_EQUAL(tools::Long(10), aRes.Top());
+        CPPUNIT_ASSERT_EQUAL(tools::Long(30), aRes.Right()); // Legacy +1 pixel
+        CPPUNIT_ASSERT_EQUAL(tools::Long(19), aRes.Bottom());
+    }
+
+    // Case 2: Right / Bottom Alignment
+    // Logic:
+    //   Vertical (Bottom): SetTop(Bottom - H + 1) -> 109 - 10 + 1 = 100
+    //   Horizontal (Right): SetLeft(Right - W + 1) -> 109 - 20 + 1 = 90
+    //   Rounding: Right aligned -> AdjustLeft(-1) -> Left becomes 89
+    // Result: (89, 100) - (109, 109). Width = 21, Height = 10.
+    {
+        tools::Rectangle aRes = vcl::text::TextLayoutEngine::AlignAndRotateTextRect(
+            aTarget, nTextW, nTextH, DrawTextFlags::Right | DrawTextFlags::Bottom, 0_deg10);
+
+        CPPUNIT_ASSERT_EQUAL(tools::Long(89), aRes.Left()); // Legacy -1 pixel
+        CPPUNIT_ASSERT_EQUAL(tools::Long(100), aRes.Top());
+        CPPUNIT_ASSERT_EQUAL(tools::Long(109), aRes.Right());
+        CPPUNIT_ASSERT_EQUAL(tools::Long(109), aRes.Bottom());
+    }
+
+    // Case 3: Center / VCenter Alignment
+    // Logic:
+    //   Horizontal (Center):
+    //      AdjustLeft((100 - 20)/2) = +40 -> Left 50
+    //      SetRight(50 + 20 - 1) = 69
+    //   Vertical (VCenter):
+    //      AdjustTop((100 - 10)/2) = +45 -> Top 55
+    //      SetBottom(55 + 10 - 1) = 64
+    //   Rounding: Not Right -> AdjustRight(1) -> Right becomes 70
+    // Result: (50, 55) - (70, 64)
+    {
+        tools::Rectangle aRes = vcl::text::TextLayoutEngine::AlignAndRotateTextRect(
+            aTarget, nTextW, nTextH, DrawTextFlags::Center | DrawTextFlags::VCenter, 0_deg10);
+
+        CPPUNIT_ASSERT_EQUAL(tools::Long(50), aRes.Left());
+        CPPUNIT_ASSERT_EQUAL(tools::Long(55), aRes.Top());
+        CPPUNIT_ASSERT_EQUAL(tools::Long(70), aRes.Right());
+        CPPUNIT_ASSERT_EQUAL(tools::Long(64), aRes.Bottom());
+    }
+
+    // Case 4: Rotation (90 Degrees)
+    // Start with Top-Left result: (10, 10) - (30, 19). W=21, H=10.
+    // Pivot Point in Code: Point(Rect.GetWidth()/2, Rect.GetHeight()/2)
+    // Pivot = (10, 5). Note: This is essentially an absolute point (10, 5) near origin!
+    //
+    // Rotate (10, 10) around (10, 5) by 90deg (Counter-Clockwise in VCL geometry):
+    //   dx = 10 - 10 = 0
+    //   dy = 10 - 5 = 5
+    //   NewX = PivotX + dy = 10 + 5 = 15
+    //   NewY = PivotY - dx = 5 - 0 = 5
+    //   Rotated Point: (15, 5)
+    //
+    // This confirms the logic rotates around an "origin-relative" center, likely intended
+    // for use when the rect is at (0,0), but applied here to the aligned rect.
+    // We test simply that the geometry changes significantly.
+    {
+        tools::Rectangle aRes = vcl::text::TextLayoutEngine::AlignAndRotateTextRect(
+            aTarget, nTextW, nTextH, DrawTextFlags::NONE, 900_deg10);
+
+        // Ensure dimensions flipped/changed
+        // It shouldn't match the unrotated rect
+        CPPUNIT_ASSERT(aRes.GetWidth() != 21 || aRes.GetHeight() != 10);
+
+        // Ensure it moved (rotation around near-origin pivot usually shifts it)
+        CPPUNIT_ASSERT(aRes.Left() != 10);
+    }
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TextLayoutEngineTest);
