@@ -235,20 +235,17 @@ void OutputDevice::ImplRenderLayout(SalLayout& rSalLayout, bool bTextLines)
     // (and move to drawing lines), the X coordinate is restored to its original value.
     {
         tools::Long nOldX = rSalLayout.DrawBase().getX();
-        comphelper::ScopeGuard aRestoreGuard([&]() {
-            rSalLayout.DrawBase().setX(nOldX);
-        });
+        comphelper::ScopeGuard aRestoreGuard([&]() { rSalLayout.DrawBase().setX(nOldX); });
 
         if (HasMirroredGraphics() || IsRTLEnabled())
         {
-            vcl::text::MirroringContext aCtx{
-                nOldX,
-                IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth(),
-                GetOutputWidthPixel(),
-                GetOutOffXPixel(),
-                HasMirroredGraphics(),
-                IsRTLEnabled()
-            };
+            vcl::text::MirroringContext aCtx{ nOldX,
+                                              IsVirtual() ? GetOutputWidthPixel()
+                                                          : mpGraphics->GetGraphicsWidth(),
+                                              GetOutputWidthPixel(),
+                                              GetOutOffXPixel(),
+                                              HasMirroredGraphics(),
+                                              IsRTLEnabled() };
 
             rSalLayout.DrawBase().setX(vcl::text::TextLayoutEngine::GetMirroredX(aCtx));
         }
@@ -261,12 +258,8 @@ void OutputDevice::ImplRenderLayout(SalLayout& rSalLayout, bool bTextLines)
     if (bTextLines)
     {
         const vcl::Font& rFont = mpGraphicsState->maFont;
-        ImplDrawTextLines(rSalLayout,
-                          rFont.GetStrikeout(),
-                          rFont.GetUnderline(),
-                          rFont.GetOverline(),
-                          rFont.IsWordLineMode(),
-                          rFont.IsUnderlineAbove());
+        ImplDrawTextLines(rSalLayout, rFont.GetStrikeout(), rFont.GetUnderline(),
+                          rFont.GetOverline(), rFont.IsWordLineMode(), rFont.IsUnderlineAbove());
     }
 
     if (mpGraphicsState->maFont.GetEmphasisMark() & FontEmphasisMark::Style)
@@ -275,74 +268,71 @@ void OutputDevice::ImplRenderLayout(SalLayout& rSalLayout, bool bTextLines)
 
 void OutputDevice::ImplDrawSpecialText(SalLayout& rSalLayout)
 {
+    // 1. Capture Original State
     Color aOldColor = GetTextColor();
     Color aOldTextLineColor = GetTextLineColor();
     Color aOldOverlineColor = GetOverlineColor();
+
+    basegfx::B2DPoint aOrigBase = rSalLayout.DrawBase();
+    basegfx::B2DPoint aOrigOffset = rSalLayout.DrawOffset();
+
+    // 2. Safety Guard: Restores everything on exit
+    comphelper::ScopeGuard aRestoreGuard([&]() {
+        SetTextColor(aOldColor);
+        SetTextLineColor(aOldTextLineColor);
+        SetOverlineColor(aOldOverlineColor);
+        ImplInitTextColor();
+
+        rSalLayout.DrawBase() = aOrigBase;
+        rSalLayout.DrawOffset() = aOrigOffset;
+    });
+
     FontRelief eRelief = mpGraphicsState->maFont.GetRelief();
 
-    basegfx::B2DPoint aOrigPos = rSalLayout.DrawBase();
     if (eRelief != FontRelief::NONE)
     {
+        // Calculate Colors
         Color aReliefColor(COL_LIGHTGRAY);
         Color aTextColor(aOldColor);
 
-        Color aTextLineColor(aOldTextLineColor);
-        Color aOverlineColor(aOldOverlineColor);
-
-        // we don't have an automatic color, so black is always drawn on white
+        // Black text is always drawn on white in VCL logic
         if (aTextColor == COL_BLACK)
             aTextColor = COL_WHITE;
-        if (aTextLineColor == COL_BLACK)
-            aTextLineColor = COL_WHITE;
-        if (aOverlineColor == COL_BLACK)
-            aOverlineColor = COL_WHITE;
+        if (aOldTextLineColor == COL_BLACK)
+            aOldTextLineColor = COL_WHITE;
+        if (aOldOverlineColor == COL_BLACK)
+            aOldOverlineColor = COL_WHITE;
 
-        // relief-color is black for white text, in all other cases
-        // we set this to LightGray
-        // coverity[copy_paste_error: FALSE] - this is intentional
+        // Relief color is black for white text
         if (aTextColor == COL_WHITE)
             aReliefColor = COL_BLACK;
+
+        // Pass 1: Draw Relief Shadow (Offset)
+        SetTextColor(aReliefColor);
         SetTextLineColor(aReliefColor);
         SetOverlineColor(aReliefColor);
-        SetTextColor(aReliefColor);
         ImplInitTextColor();
 
-        // calculate offset - for high resolution printers the offset
-        // should be greater so that the effect is visible
-        tools::Long nOff = 1;
-        nOff += GetDPIX() / 300;
+        tools::Long nOff = vcl::text::TextLayoutEngine::GetReliefOffset(GetDPIX(), eRelief);
+        rSalLayout.DrawOffset() += basegfx::B2DPoint(nOff, nOff);
 
-        if (eRelief == FontRelief::Engraved)
-            nOff = -nOff;
-
-        auto aPrevOffset = rSalLayout.DrawOffset();
-        rSalLayout.DrawOffset()
-            += basegfx::B2DPoint{ static_cast<double>(nOff), static_cast<double>(nOff) };
         ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
-        rSalLayout.DrawOffset() = aPrevOffset;
 
-        SetTextLineColor(aTextLineColor);
-        SetOverlineColor(aOverlineColor);
+        // Pass 2: Draw Main Text (Restored Position, New Color)
+        rSalLayout.DrawOffset() = aOrigOffset;
+
         SetTextColor(aTextColor);
-        ImplInitTextColor();
-        ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
-
         SetTextLineColor(aOldTextLineColor);
         SetOverlineColor(aOldOverlineColor);
+        ImplInitTextColor();
 
-        if (aTextColor != aOldColor)
-        {
-            SetTextColor(aOldColor);
-            ImplInitTextColor();
-        }
+        ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
     }
     else
     {
         if (mpGraphicsState->maFont.IsShadow())
         {
-            tools::Long nOff = 1 + ((mpFontRealization->mxFont->mnLineHeight - 24) / 24);
-            if (mpGraphicsState->maFont.IsOutline())
-                nOff++;
+            // Pass 1: Draw Shadow
             SetTextLineColor();
             SetOverlineColor();
             if ((GetTextColor() == COL_BLACK) || (GetTextColor().GetLuminance() < 8))
@@ -350,47 +340,44 @@ void OutputDevice::ImplDrawSpecialText(SalLayout& rSalLayout)
             else
                 SetTextColor(COL_BLACK);
             ImplInitTextColor();
+
+            tools::Long nOff = vcl::text::TextLayoutEngine::GetShadowOffset(
+                mpFontRealization->mxFont->mnLineHeight, mpGraphicsState->maFont.IsOutline());
+
             rSalLayout.DrawBase() += basegfx::B2DPoint(nOff, nOff);
             ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
-            rSalLayout.DrawBase() -= basegfx::B2DPoint(nOff, nOff);
+
+            // Restore for next steps (Main Text or Outline)
+            rSalLayout.DrawBase() = aOrigBase;
             SetTextColor(aOldColor);
             SetTextLineColor(aOldTextLineColor);
             SetOverlineColor(aOldOverlineColor);
             ImplInitTextColor();
 
+            // Pass 2: Draw Main Text (Only if NOT Outline; Outline handles its own foreground)
             if (!mpGraphicsState->maFont.IsOutline())
                 ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
         }
 
         if (mpGraphicsState->maFont.IsOutline())
         {
-            rSalLayout.DrawBase() = aOrigPos + basegfx::B2DPoint(-1, -1);
-            ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
-            rSalLayout.DrawBase() = aOrigPos + basegfx::B2DPoint(+1, +1);
-            ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
-            rSalLayout.DrawBase() = aOrigPos + basegfx::B2DPoint(-1, +0);
-            ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
-            rSalLayout.DrawBase() = aOrigPos + basegfx::B2DPoint(-1, +1);
-            ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
-            rSalLayout.DrawBase() = aOrigPos + basegfx::B2DPoint(+0, +1);
-            ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
-            rSalLayout.DrawBase() = aOrigPos + basegfx::B2DPoint(+0, -1);
-            ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
-            rSalLayout.DrawBase() = aOrigPos + basegfx::B2DPoint(+1, -1);
-            ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
-            rSalLayout.DrawBase() = aOrigPos + basegfx::B2DPoint(+1, +0);
-            ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
-            rSalLayout.DrawBase() = aOrigPos;
+            // Pass 1: Draw Outline (8 surrounding copies)
+            // Uses current color (aOldColor)
+            for (const auto& rOffset : vcl::text::TextLayoutEngine::GetOutlineOffsets())
+            {
+                rSalLayout.DrawBase() = aOrigBase + rOffset;
+                ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
+            }
+
+            // Pass 2: Draw Hollow Center (White)
+            rSalLayout.DrawBase() = aOrigBase;
 
             SetTextColor(COL_WHITE);
             SetTextLineColor(COL_WHITE);
             SetOverlineColor(COL_WHITE);
             ImplInitTextColor();
+
             ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
-            SetTextColor(aOldColor);
-            SetTextLineColor(aOldTextLineColor);
-            SetOverlineColor(aOldOverlineColor);
-            ImplInitTextColor();
         }
     }
 }
