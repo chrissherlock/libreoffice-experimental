@@ -217,6 +217,7 @@ public:
     void testGetTextInkBounds_Rotation();
     void testGetWordLineSegments();
     void testInitializeTextLineMetrics();
+    void testInitializeFontMetrics();
 
     CPPUNIT_TEST_SUITE(TextLayoutEngineTest);
     CPPUNIT_TEST(testBiDiLayoutFlags);
@@ -237,6 +238,7 @@ public:
     CPPUNIT_TEST(testGetTextInkBounds_Rotation);
     CPPUNIT_TEST(testGetWordLineSegments);
     CPPUNIT_TEST(testInitializeTextLineMetrics);
+    CPPUNIT_TEST(testInitializeFontMetrics);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -641,6 +643,39 @@ void TextLayoutEngineTest::testInitializeTextLineMetrics()
     // In our StubFontInstance, Ascent=10 and Descent=10, so LineHeight should be 20
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Line height was not initialized correctly", tools::Long(20),
                                  xFont->mnLineHeight);
+}
+
+void TextLayoutEngineTest::testInitializeFontMetrics()
+{
+    rtl::Reference<LogicalFontInstance> xFont(new StubFontInstance());
+    vcl::Font aFont;
+    const long nDPI = 96;
+    const long nPixelWidth = 1;
+
+    // Define Callbacks
+    // These replace the OutputDevice::GetTextWidth and GetLogicalTextBoundRect calls
+    auto fnWidth = [](const OUString& rStr) -> long {
+        return rStr.getLength() * 10; // Mock: each char is 10 units wide
+    };
+
+    auto fnRect = [](tools::Rectangle& rRect, const OUString& rStr) {
+        // Mock: set a deterministic bounding box
+        rRect = tools::Rectangle(Point(0, 0), Size(rStr.getLength() * 10, 20));
+    };
+
+    // Execute Engine Logic
+    // Using the const pointer to verify the signature update from your previous refactor
+    vcl::text::TextLayoutEngine::InitializeFontMetrics(xFont.get(), aFont, nDPI, nPixelWidth,
+                                                       fnWidth, fnRect);
+
+    // Assertions
+    // Verify that mnLineHeight was set (Ascent + Descent from StubFontInstance)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Line height should be initialized from metrics", tools::Long(20),
+                                 xFont->mnLineHeight);
+
+    // Verify the internal FontMetricData was touched by checking a property
+    // that InitializeFontMetrics calculates or delegates.
+    CPPUNIT_ASSERT_MESSAGE("FontMetricData should be initialized", xFont->mxFontMetric != nullptr);
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TextLayoutEngineTest);
