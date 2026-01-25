@@ -225,46 +225,50 @@ bool OutputDevice::ImplDrawRotateText(SalLayout& rSalLayout)
 void OutputDevice::ImplRenderLayout(SalLayout& rSalLayout, bool bTextLines)
 {
     if (mpFontRealization->mxFont->mnOwnOrientation)
+    {
         if (ImplDrawRotateText(rSalLayout))
             return;
+    }
 
-    auto nOldX = rSalLayout.DrawBase().getX();
-    if (HasMirroredGraphics())
+    // Render Glyphs (with potential Mirroring/RTL)
+    // We wrap this in a scope. The ScopeGuard ensures that when we leave this block
+    // (and move to drawing lines), the X coordinate is restored to its original value.
     {
-        tools::Long w = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
-        auto x = rSalLayout.DrawBase().getX();
-        rSalLayout.DrawBase().setX(w - 1 - x);
-        if (!IsRTLEnabled())
+        tools::Long nOldX = rSalLayout.DrawBase().getX();
+        comphelper::ScopeGuard aRestoreGuard([&]() {
+            rSalLayout.DrawBase().setX(nOldX);
+        });
+
+        if (HasMirroredGraphics() || IsRTLEnabled())
         {
-            OutputDevice* pOutDevRef = this;
-            // mirror this window back
-            tools::Long devX = w - pOutDevRef->GetOutputWidthPixel()
-                               - pOutDevRef->GetOutOffXPixel(); // re-mirrored GetOutOffXPixel()
-            rSalLayout.DrawBase().setX(
-                devX
-                + (pOutDevRef->GetOutputWidthPixel() - 1 - (rSalLayout.DrawBase().getX() - devX)));
+            vcl::text::MirroringContext aCtx{
+                nOldX,
+                IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth(),
+                GetOutputWidthPixel(),
+                GetOutOffXPixel(),
+                HasMirroredGraphics(),
+                IsRTLEnabled()
+            };
+
+            rSalLayout.DrawBase().setX(vcl::text::TextLayoutEngine::GetMirroredX(aCtx));
         }
-    }
-    else if (IsRTLEnabled())
-    {
-        OutputDevice* pOutDevRef = this;
 
-        // mirror this window back
-        tools::Long devX = pOutDevRef->GetOutOffXPixel(); // re-mirrored GetOutOffXPixel()
-        rSalLayout.DrawBase().setX(pOutDevRef->GetOutputWidthPixel() - 1
-                                   - (rSalLayout.DrawBase().getX() - devX) + devX);
+        rSalLayout.DrawText(*mpGraphics);
     }
 
-    rSalLayout.DrawText(*mpGraphics);
-    rSalLayout.DrawBase().setX(nOldX);
-
+    // Render Decorations
+    // X is now restored, so lines are drawn in the correct logical position.
     if (bTextLines)
-        ImplDrawTextLines(
-            rSalLayout, mpGraphicsState->maFont.GetStrikeout(),
-            mpGraphicsState->maFont.GetUnderline(), mpGraphicsState->maFont.GetOverline(),
-            mpGraphicsState->maFont.IsWordLineMode(), mpGraphicsState->maFont.IsUnderlineAbove());
+    {
+        const vcl::Font& rFont = mpGraphicsState->maFont;
+        ImplDrawTextLines(rSalLayout,
+                          rFont.GetStrikeout(),
+                          rFont.GetUnderline(),
+                          rFont.GetOverline(),
+                          rFont.IsWordLineMode(),
+                          rFont.IsUnderlineAbove());
+    }
 
-    // emphasis marks
     if (mpGraphicsState->maFont.GetEmphasisMark() & FontEmphasisMark::Style)
         ImplDrawEmphasisMarks(rSalLayout);
 }
