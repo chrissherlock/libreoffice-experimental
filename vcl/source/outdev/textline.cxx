@@ -33,8 +33,10 @@
 #include <vcl/virdev.hxx>
 #include <vcl/skia/SkiaHelper.hxx>
 
+#include <CoordinateMapper.hxx>
 #include <ClippingController.hxx>
 #include <GraphicsState.hxx>
+#include <font/EmphasisMark.hxx>
 #include <font/FontController.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
@@ -1165,6 +1167,108 @@ void OutputDevice::ImplDrawWaveLineBezier(tools::Long nStartX, tools::Long nStar
             basegfx::deg2rad(15.0),
             bPixelSnapHairline,
             *this);
+}
+
+void OutputDevice::ImplDrawEmphasisMark(tools::Long nBaseX, tools::Long nX, tools::Long nY,
+                                        const tools::PolyPolygon& rPolyPoly, bool bPolyLine,
+                                        const tools::Rectangle& rRect1,
+                                        const tools::Rectangle& rRect2)
+{
+    if (IsRTLEnabled())
+        nX = nBaseX - (nX - nBaseX - 1);
+
+    nX -= GetOutOffXPixel();
+    nY -= GetOutOffYPixel();
+
+    if (rPolyPoly.Count())
+    {
+        if (bPolyLine)
+        {
+            tools::Polygon aPoly = rPolyPoly.GetObject(0);
+            aPoly.Move(nX, nY);
+            DrawPolyLine(aPoly);
+        }
+        else
+        {
+            tools::PolyPolygon aPolyPoly = rPolyPoly;
+            aPolyPoly.Move(nX, nY);
+            DrawPolyPolygon(aPolyPoly);
+        }
+    }
+
+    if (!rRect1.IsEmpty())
+    {
+        tools::Rectangle aRect(Point(nX + rRect1.Left(), nY + rRect1.Top()), rRect1.GetSize());
+        DrawRect(aRect);
+    }
+
+    if (!rRect2.IsEmpty())
+    {
+        tools::Rectangle aRect(Point(nX + rRect2.Left(), nY + rRect2.Top()), rRect2.GetSize());
+        DrawRect(aRect);
+    }
+}
+
+void OutputDevice::ImplDrawEmphasisMarks(SalLayout& rSalLayout)
+{
+    vcl::font::FontRealization const* pRealization = mpFontRealization.get();
+    if (!pRealization || !pRealization->mxFont)
+        return;
+
+    auto popIt = ScopedPush(vcl::PushFlags::FILLCOLOR | vcl::PushFlags::LINECOLOR | vcl::PushFlags::MAPMODE);
+    GDIMetaFile* pOldMetaFile = mpMetaFile;
+    mpMetaFile = nullptr;
+    mpMapper->EnableMapMode(false);
+
+    FontEmphasisMark nEmphasisMark = mpGraphicsState->maFont.GetEmphasisMarkStyle();
+    const bool bBelow = bool(nEmphasisMark & FontEmphasisMark::PosBelow);
+
+    tools::Long nEmphasisHeight = bBelow ? pRealization->nEmphasisDescent : pRealization->nEmphasisAscent;
+    vcl::font::EmphasisMark aEmphasisMark(nEmphasisMark, nEmphasisHeight, GetDPIY());
+
+    if (aEmphasisMark.IsShapePolyLine())
+    {
+        SetLineColor(GetTextColor());
+        SetFillColor();
+    }
+    else
+    {
+        SetLineColor();
+        SetFillColor(GetTextColor());
+    }
+
+    std::vector<Point> aPositions;
+    vcl::text::TextLayoutEngine::GetEmphasisMarkPositions(rSalLayout, *pRealization, bBelow, aPositions);
+
+    tools::Long nEmphasisWidth2 = aEmphasisMark.GetWidth() / 2;
+    tools::Long nEmphasisHeight2 = nEmphasisHeight / 2;
+
+    // The engine returns the "visual anchor" on the font (Ascent or Descent line).
+    // We now apply the specific visual offsets for the Mark shape itself.
+    tools::Long nYAdjustment = aEmphasisMark.GetYOffset();
+
+    // Draw the marks at the calculated positions
+    for (const Point& rPos : aPositions)
+    {
+        Point aOutPoint = rPos;
+
+        // Apply visual adjustment relative to the anchor line
+        if (bBelow)
+            aOutPoint.AdjustY(nYAdjustment);
+        else
+            aOutPoint.AdjustY(-(nYAdjustment));
+
+        // Center the mark shape
+        aOutPoint.AdjustX(-nEmphasisWidth2);
+        aOutPoint.AdjustY(-nEmphasisHeight2);
+
+        // Call the singular drawing helper
+        ImplDrawEmphasisMark(rSalLayout.DrawBase().getX(), aOutPoint.X(), aOutPoint.Y(),
+                             aEmphasisMark.GetShape(), aEmphasisMark.IsShapePolyLine(),
+                             aEmphasisMark.GetRect1(), aEmphasisMark.GetRect2());
+    }
+
+    mpMetaFile = pOldMetaFile;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
