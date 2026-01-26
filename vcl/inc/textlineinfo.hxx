@@ -23,7 +23,7 @@
 
 #include <vector>
 
-class ImplTextLineInfo
+class VCL_DLLPUBLIC ImplTextLineInfo
 {
 private:
     tools::Long        mnWidth;
@@ -44,7 +44,7 @@ public:
 };
 
 
-class ImplMultiTextLineInfo
+class VCL_DLLPUBLIC ImplMultiTextLineInfo
 {
 public:
                 ImplMultiTextLineInfo();

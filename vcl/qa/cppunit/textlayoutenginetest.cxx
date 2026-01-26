@@ -194,6 +194,61 @@ public:
     }
 };
 
+class MockTextLayoutCommon : public vcl::TextLayoutCommon
+{
+public:
+    sal_Int32 mnSimulatedLines = 1;
+    tools::Long mnSimulatedMaxLineWidth = 100;
+    OUString msEllipsisResult = "ELLIPSIS_APPLIED";
+
+    // --- Pure Virtual Implementations ---
+    virtual tools::Long GetTextWidth(const OUString&, sal_Int32, sal_Int32) const override
+    {
+        return 10;
+    }
+
+    virtual void DrawText(const Point&, const OUString&, sal_Int32, sal_Int32,
+                          std::vector<tools::Rectangle>*, OUString*) override
+    {
+    }
+
+    virtual tools::Long GetTextArray(const OUString&, KernArray*, sal_Int32, sal_Int32,
+                                     bool) const override
+    {
+        return 100;
+    }
+
+    virtual sal_Int32 GetTextBreak(const OUString&, tools::Long, sal_Int32,
+                                   sal_Int32) const override
+    {
+        return 0;
+    }
+
+    virtual bool DecomposeTextRectAction() const override { return false; }
+
+    // --- Non-Virtual Methods (Shadowing Base) ---
+    // Note: These do not override the base implementation because the base methods are not virtual.
+    // They are kept here to match the test logic, but 'override' is removed to fix compilation.
+
+    virtual tools::Long GetTextLines(const tools::Rectangle&, tools::Long,
+                                     ImplMultiTextLineInfo& rLineInfo, tools::Long, const OUString&,
+                                     DrawTextFlags) const override
+    {
+        rLineInfo.Clear();
+        for (sal_Int32 i = 0; i < mnSimulatedLines; ++i)
+        {
+            // Fixed: Constructor takes 3 arguments (Width, Index, Len)
+            rLineInfo.AddLine(ImplTextLineInfo(i * 10, i, 1));
+        }
+        return mnSimulatedMaxLineWidth;
+    }
+
+    virtual OUString GetEllipsisString(const OUString&, tools::Long, DrawTextFlags) const override
+    {
+        return msEllipsisResult;
+    }
+};
+
 } // end anonymous namespace
 
 class TextLayoutEngineTest : public test::BootstrapFixture
@@ -241,6 +296,8 @@ public:
     void testCalculateLayoutPass();
     void testTextLineGeometry();
     void testGetRotationOrigin();
+    void testCalculateLayoutOrigin();
+    void testCalculateMultiLineLayout();
 
     CPPUNIT_TEST_SUITE(TextLayoutEngineTest);
     CPPUNIT_TEST(testBiDiLayoutFlags);
@@ -280,6 +337,8 @@ public:
     CPPUNIT_TEST(testCalculateLayoutPass);
     CPPUNIT_TEST(testTextLineGeometry);
     CPPUNIT_TEST(testGetRotationOrigin);
+    CPPUNIT_TEST(testCalculateLayoutOrigin);
+    CPPUNIT_TEST(testCalculateMultiLineLayout);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -1411,6 +1470,128 @@ void TextLayoutEngineTest::testGetRotationOrigin()
                                              (double)aResult.X(), 0.5);
         CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("45 deg Y coordinate mismatch", 114.0,
                                              (double)aResult.Y(), 0.5);
+    }
+}
+
+void TextLayoutEngineTest::testCalculateLayoutOrigin()
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    pVDev->SetOutputSizePixel(Size(1000, 1000));
+
+    // Setup: A 100x100 rectangle at (10, 10)
+    tools::Rectangle aRect(Point(10, 10), Size(100, 100));
+    tools::Long nTxtW = 20;
+    tools::Long nTxtH = 10;
+
+    // 1. Default (Top-Left)
+    // X = 10, Y = 10
+    Point aPos = vcl::text::TextLayoutEngine::CalculateLayoutOrigin(*pVDev, aRect, nTxtW, nTxtH,
+                                                                    DrawTextFlags::NONE, ALIGN_TOP);
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(10), aPos.X());
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(10), aPos.Y());
+
+    // 2. Center-Center
+    // X = 10 + (100 - 20)/2 = 50
+    // Y = 10 + (100 - 10)/2 = 55
+    aPos = vcl::text::TextLayoutEngine::CalculateLayoutOrigin(
+        *pVDev, aRect, nTxtW, nTxtH, DrawTextFlags::Center | DrawTextFlags::VCenter, ALIGN_TOP);
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(50), aPos.X());
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(55), aPos.Y());
+
+    // 3. Right-Bottom
+    // X = 10 + (100 - 20) = 90
+    // Y = 10 + (100 - 10) = 100
+    aPos = vcl::text::TextLayoutEngine::CalculateLayoutOrigin(
+        *pVDev, aRect, nTxtW, nTxtH, DrawTextFlags::Right | DrawTextFlags::Bottom, ALIGN_TOP);
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(90), aPos.X());
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(100), aPos.Y());
+
+    // 4. Font Alignment (ALIGN_BOTTOM)
+    // Adds nTxtH to Y.
+    // Y = 10 (RectTop) + 10 (TextHeight) = 20
+    aPos = vcl::text::TextLayoutEngine::CalculateLayoutOrigin(*pVDev, aRect, nTxtW, nTxtH,
+                                                              DrawTextFlags::NONE, ALIGN_BOTTOM);
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(20), aPos.Y());
+
+    // 5. Font Alignment (ALIGN_BASELINE)
+    // Adds Ascent to Y.
+    long nAscent = pVDev->GetFontMetric().GetAscent();
+    aPos = vcl::text::TextLayoutEngine::CalculateLayoutOrigin(*pVDev, aRect, nTxtW, nTxtH,
+                                                              DrawTextFlags::NONE, ALIGN_BASELINE);
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(10 + nAscent), aPos.Y());
+}
+
+void TextLayoutEngineTest::testCalculateMultiLineLayout()
+{
+    MockTextLayoutCommon aMock;
+    tools::Rectangle aRect(Point(0, 0), Size(100, 100)); // 100px high
+    tools::Long nTxtH = 10; // 10px per line
+    OUString aText = "Line1\nLine2";
+
+    // Test 1: Simple Fit
+    {
+        aMock.mnSimulatedLines = 2;
+        aMock.mnSimulatedMaxLineWidth = 50;
+
+        vcl::text::MultiLineLayout aRes;
+        vcl::text::TextLayoutEngine::CalculateMultiLineLayout(aMock, aRes, aRect, nTxtH, 100, 100,
+                                                              aText, DrawTextFlags::MultiLine);
+
+        CPPUNIT_ASSERT_EQUAL(static_cast<sal_Int32>(2), aRes.nFormatLines);
+        CPPUNIT_ASSERT(!(aRes.nResultStyle & DrawTextFlags::Clip));
+        CPPUNIT_ASSERT(aRes.aLastLine.isEmpty());
+    }
+
+    // Test 2: Height Clipping
+    {
+        tools::Rectangle aSmallRect(Point(0, 0), Size(100, 50));
+        aMock.mnSimulatedLines = 10;
+
+        vcl::text::MultiLineLayout aRes;
+        vcl::text::TextLayoutEngine::CalculateMultiLineLayout(
+            aMock, aRes, aSmallRect, nTxtH, 100, 50, "Content", DrawTextFlags::MultiLine);
+
+        CPPUNIT_ASSERT_EQUAL(static_cast<sal_Int32>(10), aRes.nFormatLines);
+        CPPUNIT_ASSERT(bool(aRes.nResultStyle & DrawTextFlags::Clip));
+    }
+
+    // Test 3: Ellipsis
+    {
+        tools::Rectangle aTinyRect(Point(0, 0), Size(100, 30));
+        aMock.mnSimulatedLines = 5;
+
+        vcl::text::MultiLineLayout aRes;
+        vcl::text::TextLayoutEngine::CalculateMultiLineLayout(
+            aMock, aRes, aTinyRect, nTxtH, 100, 30, "Content",
+            DrawTextFlags::MultiLine | DrawTextFlags::EndEllipsis | DrawTextFlags::VCenter);
+
+        CPPUNIT_ASSERT_EQUAL(static_cast<sal_Int32>(2), aRes.nFormatLines);
+        CPPUNIT_ASSERT_EQUAL(OUString("ELLIPSIS_APPLIED"), aRes.aLastLine);
+
+        CPPUNIT_ASSERT(!(aRes.nResultStyle & DrawTextFlags::VCenter));
+        CPPUNIT_ASSERT(bool(aRes.nResultStyle & DrawTextFlags::Top));
+    }
+
+    // Test 4: Width Clipping logic
+    {
+        tools::Rectangle aSquareRect(Point(0, 0), Size(100, 100));
+        aMock.mnSimulatedLines = 1;
+        aMock.mnSimulatedMaxLineWidth = 200;
+
+        vcl::text::MultiLineLayout aRes;
+        vcl::text::TextLayoutEngine::CalculateMultiLineLayout(
+            aMock, aRes, aSquareRect, 10, 100, 100, "Wide",
+            DrawTextFlags::MultiLine | DrawTextFlags::Clip);
+
+        CPPUNIT_ASSERT(bool(aRes.nResultStyle & DrawTextFlags::Clip));
+
+        aMock.mnSimulatedMaxLineWidth = 50;
+        vcl::text::MultiLineLayout aRes2;
+        vcl::text::TextLayoutEngine::CalculateMultiLineLayout(
+            aMock, aRes2, aSquareRect, 10, 100, 100, "Fits",
+            DrawTextFlags::MultiLine | DrawTextFlags::Clip);
+
+        CPPUNIT_ASSERT(!(aRes2.nResultStyle & DrawTextFlags::Clip));
     }
 }
 
