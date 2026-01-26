@@ -20,6 +20,7 @@
 #include <ImplLayoutRuns.hxx>
 #include <font/EmphasisMark.hxx>
 #include <font/FontLookupCriteria.hxx>
+#include <textlineinfo.hxx>
 
 #include <vector>
 #include <memory>
@@ -115,6 +116,14 @@ struct MirroringContext
     tools::Long nOutOffX; // X Offset of the OutputDevice
     bool bHasMirroredGraphics;
     bool bIsRTL;
+};
+
+struct SAL_DLLPUBLIC MultiLineLayout
+{
+    ImplMultiTextLineInfo aLineInfo;
+    OUString aLastLine;
+    sal_Int32 nFormatLines = 0;
+    DrawTextFlags nResultStyle = DrawTextFlags::NONE;
 };
 
 class VCL_DLLPUBLIC TextLayoutEngine
@@ -512,6 +521,15 @@ public:
                                     const std::vector<tools::Rectangle>& rGlyphRects,
                                     std::vector<tools::Rectangle>& rOutVisibleRects,
                                     OUString* pOutVisibleText);
+
+    static Point CalculateLayoutOrigin(const OutputDevice& rDev, const tools::Rectangle& rRect,
+                                       tools::Long nTextWidth, tools::Long nTextHeight,
+                                       DrawTextFlags nStyle, TextAlign eAlign);
+
+    static void CalculateMultiLineLayout(vcl::TextLayoutCommon& rLayout, MultiLineLayout& rRes,
+                                         const tools::Rectangle& rRect, tools::Long nTextHeight,
+                                         tools::Long nWidth, tools::Long nHeight,
+                                         const OUString& rStr, DrawTextFlags nStyle);
 
 private:
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);

@@ -10,6 +10,7 @@
 #include <basegfx/point/b2dpoint.hxx>
 #include <tools/gen.hxx>
 #include <unotools/fontdefs.hxx>
+#include <tools/lineend.hxx>
 #include <i18nlangtag/mslangid.hxx>
 #include <i18nutil/digitlocalization.hxx>
 #include <i18nutil/unicode.hxx>
@@ -1966,6 +1967,87 @@ void TextLayoutEngine::FilterVisibleGlyphs(const OUString& rStr, sal_Int32 nInde
             bInserted = true;
         }
     }
+}
+
+Point TextLayoutEngine::CalculateLayoutOrigin(const OutputDevice& rDev,
+                                              const tools::Rectangle& rRect, tools::Long nTextWidth,
+                                              tools::Long nTextHeight, DrawTextFlags nStyle,
+                                              TextAlign eAlign)
+{
+    Point aPos = rRect.TopLeft();
+    tools::Long nWidth = rRect.GetWidth();
+    tools::Long nHeight = rRect.GetHeight();
+
+    // Horizontal text alignment
+    if (nStyle & DrawTextFlags::Right)
+        aPos.AdjustX(nWidth - nTextWidth);
+    else if (nStyle & DrawTextFlags::Center)
+        aPos.AdjustX((nWidth - nTextWidth) / 2);
+
+    // Vertical font alignment
+    if (eAlign == ALIGN_BOTTOM)
+        aPos.AdjustY(nTextHeight);
+    else if (eAlign == ALIGN_BASELINE)
+        aPos.AdjustY(rDev.GetFontMetric().GetAscent());
+
+    if (nStyle & DrawTextFlags::Bottom)
+        aPos.AdjustY(nHeight - nTextHeight);
+    else if (nStyle & DrawTextFlags::VCenter)
+        aPos.AdjustY((nHeight - nTextHeight) / 2);
+
+    return aPos;
+}
+
+const LogicalFontInstance* pForcedFallback;
+void TextLayoutEngine::CalculateMultiLineLayout(vcl::TextLayoutCommon& rLayout,
+                                                MultiLineLayout& rRes,
+                                                const tools::Rectangle& rRect,
+                                                tools::Long nTextHeight, tools::Long nWidth,
+                                                tools::Long nHeight, const OUString& rStr,
+                                                DrawTextFlags nStyle)
+{
+    rRes.nResultStyle = nStyle;
+
+    tools::Long nMaxTextWidth
+        = rLayout.GetTextLines(rRect, nTextHeight, rRes.aLineInfo, nWidth, rStr, nStyle);
+    sal_Int32 nLines = static_cast<sal_Int32>(nHeight / nTextHeight);
+    rRes.nFormatLines = rRes.aLineInfo.Count();
+
+    if (nLines <= 0)
+        nLines = 1;
+
+    if (rRes.nFormatLines > nLines)
+    {
+        if (nStyle & DrawTextFlags::EndEllipsis)
+        {
+            rRes.nFormatLines = nLines - 1;
+
+            ImplTextLineInfo& rLineInfo = rRes.aLineInfo.GetLine(rRes.nFormatLines);
+            OUString aLastLine = convertLineEnd(rStr.copy(rLineInfo.GetIndex()), LINEEND_LF);
+
+            OUStringBuffer aLastLineBuffer(aLastLine);
+            sal_Int32 nLastLineLen = aLastLineBuffer.getLength();
+            for (sal_Int32 i = 0; i < nLastLineLen; i++)
+            {
+                if (aLastLineBuffer[i] == '\n')
+                    aLastLineBuffer[i] = ' ';
+            }
+            aLastLine = aLastLineBuffer.makeStringAndClear();
+
+            rRes.aLastLine = rLayout.GetEllipsisString(aLastLine, nWidth, nStyle);
+
+            rRes.nResultStyle &= ~DrawTextFlags(DrawTextFlags::VCenter | DrawTextFlags::Bottom);
+            rRes.nResultStyle |= DrawTextFlags::Top;
+        }
+    }
+    else
+    {
+        if (nMaxTextWidth <= nWidth)
+            rRes.nResultStyle &= ~DrawTextFlags::Clip;
+    }
+
+    if (rRes.nFormatLines * nTextHeight > nHeight)
+        rRes.nResultStyle |= DrawTextFlags::Clip;
 }
 
 } // namespace vcl::text
