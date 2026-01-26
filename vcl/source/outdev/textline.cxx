@@ -837,7 +837,7 @@ void OutputDevice::ImplDrawTextLine(tools::Long nX, tools::Long nY,
         bOverlineDone = true;
     }
 
-    if (eStrikeout == STRIKEOUT_SLASH || eStrikeout == STRIKEOUT_X)
+    if (aGeo.bStrikeoutIsChar)
     {
         ImplDrawStrikeoutChar(nX, nY, nDistX, 0, nWidth, eStrikeout, aStrikeoutColor);
         bStrikeoutDone = true;
