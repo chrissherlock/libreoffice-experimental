@@ -1904,6 +1904,31 @@ TextLayoutEngine::GetTextLineGeometry(const TextLineRequest& rReq, const FontMet
     return aGeo;
 }
 
+Point TextLayoutEngine::GetRotationOrigin(const Point& rPos, const Size& rTextSize,
+                                          Degree10 nOrientation, TextAlign eAlign)
+{
+    if (nOrientation == 0_deg10)
+        return rPos;
+
+    tools::Long nX = rPos.X();
+    tools::Long nY = rPos.Y();
+    tools::Long nAlignOfs = 0;
+
+    if (eAlign == ALIGN_BOTTOM)
+        nAlignOfs = -rTextSize.Height();
+    else if (eAlign == ALIGN_TOP)
+        nAlignOfs = rTextSize.Height(); // Simplified logic for cleanup phase
+
+    double fRad = toRadians(nOrientation);
+    double fCos = cos(fRad);
+    double fSin = sin(fRad);
+
+    nX += basegfx::fround<tools::Long>(-nAlignOfs * fSin);
+    nY += basegfx::fround<tools::Long>(nAlignOfs * fCos);
+
+    return Point(nX, nY);
+}
+
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
