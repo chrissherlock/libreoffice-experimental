@@ -298,6 +298,7 @@ public:
     void testGetRotationOrigin();
     void testCalculateLayoutOrigin();
     void testCalculateMultiLineLayout();
+    void testCalculateTextLineSegments();
     void testPrepareMnemonicText();
 
     CPPUNIT_TEST_SUITE(TextLayoutEngineTest);
@@ -340,6 +341,7 @@ public:
     CPPUNIT_TEST(testGetRotationOrigin);
     CPPUNIT_TEST(testCalculateLayoutOrigin);
     CPPUNIT_TEST(testCalculateMultiLineLayout);
+    CPPUNIT_TEST(testCalculateTextLineSegments);
     CPPUNIT_TEST(testPrepareMnemonicText);
     CPPUNIT_TEST_SUITE_END();
 };
@@ -1663,6 +1665,119 @@ void TextLayoutEngineTest::testPrepareMnemonicText()
         CPPUNIT_ASSERT_EQUAL_MESSAGE(
             "nLen should be decremented when mnemonic is removed inside range", sal_Int32(4),
             res.nLen);
+    }
+}
+
+void TextLayoutEngineTest::testCalculateTextLineSegments()
+{
+    // 1. Dotted Line
+    // Setup: LineHeight=10, DPI=96.
+    // DotWidth = (10 * 96 + 48) / 96 = 10.
+    // Pattern: Segment(10) -> Gap(10) -> Repeat
+    {
+        auto aSegs = vcl::text::TextLayoutEngine::CalculateTextLineSegments(50, LINESTYLE_DOTTED,
+                                                                            10, 96, 96);
+
+        // Expected Segments: [0, 10], [20, 10], [40, 10]
+        // The last segment ends exactly at 50.
+        CPPUNIT_ASSERT_EQUAL(size_t(3), aSegs.size());
+
+        CPPUNIT_ASSERT_EQUAL(tools::Long(0), aSegs[0].nX);
+        CPPUNIT_ASSERT_EQUAL(tools::Long(10), aSegs[0].nWidth);
+
+        CPPUNIT_ASSERT_EQUAL(tools::Long(20), aSegs[1].nX);
+        CPPUNIT_ASSERT_EQUAL(tools::Long(10), aSegs[1].nWidth);
+
+        CPPUNIT_ASSERT_EQUAL(tools::Long(40), aSegs[2].nX);
+        CPPUNIT_ASSERT_EQUAL(tools::Long(10), aSegs[2].nWidth);
+    }
+
+    // 2. Dotted Line Clipping
+    // Setup: Width 45. Last segment (starting at 40) should be clipped to width 5.
+    {
+        auto aSegs = vcl::text::TextLayoutEngine::CalculateTextLineSegments(45, LINESTYLE_DOTTED,
+                                                                            10, 96, 96);
+
+        CPPUNIT_ASSERT_EQUAL(size_t(3), aSegs.size());
+        CPPUNIT_ASSERT_EQUAL(tools::Long(40), aSegs[2].nX);
+        CPPUNIT_ASSERT_EQUAL(tools::Long(5), aSegs[2].nWidth);
+    }
+
+    // 3. Dash Line
+    // Setup: LineHeight=10, DPI=96. DotWidth=10.
+    // MinDash = 4 * 10 = 40. MinSpace = 1.5 * 10 = 15.
+    // BaseDash (100) -> Converted (approx 3) < MinDash (40) -> Clamped to 40.
+    // BaseSpace (50) -> Converted (approx 1) < MinSpace (15) -> Clamped to 15.
+    // Pattern: Segment(40) -> Gap(15) -> Repeat. Next start: 40+15=55.
+    {
+        auto aSegs = vcl::text::TextLayoutEngine::CalculateTextLineSegments(100, LINESTYLE_DASH, 10,
+                                                                            96, 96);
+
+        CPPUNIT_ASSERT_EQUAL(size_t(2), aSegs.size());
+
+        // Segment 1
+        CPPUNIT_ASSERT_EQUAL(tools::Long(0), aSegs[0].nX);
+        CPPUNIT_ASSERT_EQUAL(tools::Long(40), aSegs[0].nWidth);
+
+        // Segment 2
+        CPPUNIT_ASSERT_EQUAL(tools::Long(55), aSegs[1].nX);
+        // Space remaining: 100 - 55 = 45. Width 40 fits.
+        CPPUNIT_ASSERT_EQUAL(tools::Long(40), aSegs[1].nWidth);
+    }
+
+    // 4. Dash Dot
+    // Setup: DotWidth=10, DashWidth=40.
+    // Pattern: Dot(10) -> Gap(10) -> Dash(40) -> Gap(10) -> Repeat
+    // Note: The implementation generates Dot THEN Dash.
+    {
+        auto aSegs = vcl::text::TextLayoutEngine::CalculateTextLineSegments(100, LINESTYLE_DASHDOT,
+                                                                            10, 96, 96);
+
+        // Seg 1: Dot
+        // Start: 0
+        CPPUNIT_ASSERT_EQUAL(tools::Long(0), aSegs[0].nX);
+        CPPUNIT_ASSERT_EQUAL(tools::Long(10), aSegs[0].nWidth);
+
+        // Seg 2: Dash
+        // Start: 0 + Dot(10) + Gap(10) = 20
+        CPPUNIT_ASSERT_EQUAL(tools::Long(20), aSegs[1].nX);
+        CPPUNIT_ASSERT_EQUAL(tools::Long(40), aSegs[1].nWidth);
+
+        // Seg 3: Dot
+        // Start: 20 + Dash(40) + Gap(10) = 70
+        CPPUNIT_ASSERT_EQUAL(tools::Long(70), aSegs[2].nX);
+        CPPUNIT_ASSERT_EQUAL(tools::Long(10), aSegs[2].nWidth);
+
+        // Seg 4: Dash (Clipped)
+        // Start: 70 + Dot(10) + Gap(10) = 90
+        // Remaining: 100 - 90 = 10.
+        CPPUNIT_ASSERT_EQUAL(tools::Long(90), aSegs[3].nX);
+        CPPUNIT_ASSERT_EQUAL(tools::Long(10), aSegs[3].nWidth);
+    }
+
+    // 5. Dash Dot Dot
+    // Setup: DotWidth=10, DashWidth=40.
+    // Pattern: Dot(10) -> Gap(10) -> Dot(10) -> Gap(10) -> Dash(40) -> Gap(10)
+    {
+        auto aSegs = vcl::text::TextLayoutEngine::CalculateTextLineSegments(
+            100, LINESTYLE_DASHDOTDOT, 10, 96, 96);
+
+        // Seg 1: Dot (0, 10)
+        CPPUNIT_ASSERT_EQUAL(tools::Long(0), aSegs[0].nX);
+
+        // Seg 2: Dot
+        // Start: 0 + 10 + 10 = 20
+        CPPUNIT_ASSERT_EQUAL(tools::Long(20), aSegs[1].nX);
+        CPPUNIT_ASSERT_EQUAL(tools::Long(10), aSegs[1].nWidth);
+
+        // Seg 3: Dash
+        // Start: 20 + 10 + 10 = 40
+        CPPUNIT_ASSERT_EQUAL(tools::Long(40), aSegs[2].nX);
+        CPPUNIT_ASSERT_EQUAL(tools::Long(40), aSegs[2].nWidth);
+
+        // Seg 4: Dot
+        // Start: 40 + 40 + 10 = 90
+        CPPUNIT_ASSERT_EQUAL(tools::Long(90), aSegs[3].nX);
     }
 }
 
