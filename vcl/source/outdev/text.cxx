@@ -583,8 +583,7 @@ void OutputDevice::ImplRecordLayoutData(const Point& rStartPt, const OUString& r
     vcl::Region aClip(GetOutputBoundsClipRegion());
     aClip.Intersect(mpOutDevData->maRecordRect);
 
-    ImplFilterAndRecordGlyphs(rStartPt, rStr, nIndex, nLen, aClip,
-                              rRecord.m_aUnicodeBoundRects,
+    ImplFilterAndRecordGlyphs(rStartPt, rStr, nIndex, nLen, aClip, rRecord.m_aUnicodeBoundRects,
                               &rRecord.m_aDisplayText);
 }
 
@@ -607,8 +606,8 @@ void OutputDevice::ImplFilterAndRecordGlyphs(const Point& rStartPt, const OUStri
     std::vector<tools::Rectangle> aGlyphRects;
     GetGlyphBoundRects(rStartPt, rStr, nIndex, nLen, aGlyphRects);
 
-    vcl::text::TextLayoutEngine::FilterVisibleGlyphs(
-        rStr, nIndex, rClip, aGlyphRects, rVector, pDisplayText);
+    vcl::text::TextLayoutEngine::FilterVisibleGlyphs(rStr, nIndex, rClip, aGlyphRects, rVector,
+                                                     pDisplayText);
 }
 
 tools::Long OutputDevice::GetTextWidth(const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen,
@@ -705,25 +704,24 @@ void OutputDevice::DrawPartialTextArray(const Point& rStartPt, const OUString& r
         ImplDrawText(*pSalLayout);
 }
 
-void OutputDevice::DrawTextArray( const Point& rStartPt, const OUString& rStr,
-                                  KernArraySpan aKernArray,
-                                  std::span<const sal_Bool> pKashidaAry,
-                                  sal_Int32 nIndex, sal_Int32 nLen,
-                                  SalLayoutFlags nFlags,
-                                  const SalLayoutGlyphs* pLayoutCache )
+void OutputDevice::DrawTextArray(const Point& rStartPt, const OUString& rStr,
+                                 KernArraySpan aKernArray, std::span<const sal_Bool> pKashidaAry,
+                                 sal_Int32 nIndex, sal_Int32 nLen, SalLayoutFlags nFlags,
+                                 const SalLayoutGlyphs* pLayoutCache)
 {
     assert(!is_double_buffered_window());
     nLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nIndex, nLen);
 
     if (mpMetaFile)
-        mpMetaFile->AddAction( new MetaTextArrayAction( rStartPt, rStr, aKernArray, pKashidaAry, nIndex, nLen ) );
+        mpMetaFile->AddAction(
+            new MetaTextArrayAction(rStartPt, rStr, aKernArray, pKashidaAry, nIndex, nLen));
 
     ImplRecordLayoutData(rStartPt, rStr, nIndex, nLen);
 
-    if ( !IsDeviceOutputNecessary() || mpOutDevData->mpRecordLayout )
+    if (!IsDeviceOutputNecessary() || mpOutDevData->mpRecordLayout)
         return;
 
-    if( mpFontRealization->mxFont && mpFontRealization->mxFont->mpConversion )
+    if (mpFontRealization->mxFont && mpFontRealization->mxFont->mpConversion)
         pLayoutCache = nullptr;
 
     auto pSalLayout = LayoutText(
@@ -731,8 +729,8 @@ void OutputDevice::DrawTextArray( const Point& rStartPt, const OUString& rStr,
         vcl::text::LayoutConstraints{ rStartPt, 0, aKernArray, pKashidaAry, nFlags },
         vcl::text::LayoutCacheData{ nullptr, pLayoutCache }, vcl::text::RenderSelection{});
 
-    if ( pSalLayout )
-        ImplRenderTextLayout( *pSalLayout );
+    if (pSalLayout)
+        ImplRenderTextLayout(*pSalLayout);
 }
 
 double OutputDevice::GetTextArray(const OUString& rStr, KernArray* pKernArray, sal_Int32 nIndex,
@@ -979,119 +977,29 @@ static Color lcl_getDisabledTextColor(const OutputDevice& rTargetDevice)
     return rStyleSettings.GetDisableColor();
 }
 
-static Point lcl_GetLayoutStartPoint(const OutputDevice& rDev, const tools::Rectangle& rRect,
-                              tools::Long nTextWidth, tools::Long nTextHeight,
-                              DrawTextFlags nStyle, TextAlign eAlign)
-{
-    Point aPos = rRect.TopLeft();
-    tools::Long nWidth = rRect.GetWidth();
-    tools::Long nHeight = rRect.GetHeight();
-
-    // Horizontal text alignment
-    if (nStyle & DrawTextFlags::Right)
-        aPos.AdjustX(nWidth - nTextWidth);
-    else if (nStyle & DrawTextFlags::Center)
-        aPos.AdjustX((nWidth - nTextWidth) / 2);
-
-    // Vertical font alignment
-    if (eAlign == ALIGN_BOTTOM)
-        aPos.AdjustY(nTextHeight);
-    else if (eAlign == ALIGN_BASELINE)
-        aPos.AdjustY(rDev.GetFontMetric().GetAscent());
-
-    if (nStyle & DrawTextFlags::Bottom)
-        aPos.AdjustY(nHeight - nTextHeight);
-    else if (nStyle & DrawTextFlags::VCenter)
-        aPos.AdjustY((nHeight - nTextHeight) / 2);
-
-    return aPos;
-}
-
-struct MultiLineLayoutResult
-{
-    ImplMultiTextLineInfo aLineInfo;
-    OUString aLastLine;
-    sal_Int32 nFormatLines = 0;
-    DrawTextFlags nResultStyle = DrawTextFlags::NONE;
-};
-
-static void lcl_GetMultiLineLayout(vcl::TextLayoutCommon& rLayout,
-                            MultiLineLayoutResult& rRes,
-                            const tools::Rectangle& rRect,
-                            tools::Long nTextHeight, tools::Long nWidth,
-                            tools::Long nHeight, const OUString& rStr,
-                            DrawTextFlags nStyle)
-{
-    rRes.nResultStyle = nStyle;
-
-    tools::Long nMaxTextWidth = rLayout.GetTextLines(rRect, nTextHeight, rRes.aLineInfo,
-                                                     nWidth, rStr, nStyle);
-    sal_Int32 nLines = static_cast<sal_Int32>(nHeight / nTextHeight);
-    rRes.nFormatLines = rRes.aLineInfo.Count();
-
-    if (nLines <= 0)
-        nLines = 1;
-
-    if (rRes.nFormatLines > nLines)
-    {
-        if (nStyle & DrawTextFlags::EndEllipsis)
-        {
-            rRes.nFormatLines = nLines - 1;
-
-            ImplTextLineInfo& rLineInfo = rRes.aLineInfo.GetLine(rRes.nFormatLines);
-            OUString aLastLine = convertLineEnd(rStr.copy(rLineInfo.GetIndex()), LINEEND_LF);
-
-            OUStringBuffer aLastLineBuffer(aLastLine);
-            sal_Int32 nLastLineLen = aLastLineBuffer.getLength();
-            for (sal_Int32 i = 0; i < nLastLineLen; i++)
-            {
-                if (aLastLineBuffer[i] == '\n')
-                    aLastLineBuffer[i] = ' ';
-            }
-            aLastLine = aLastLineBuffer.makeStringAndClear();
-
-            rRes.aLastLine = rLayout.GetEllipsisString(aLastLine, nWidth, nStyle);
-
-            rRes.nResultStyle &= ~DrawTextFlags(DrawTextFlags::VCenter | DrawTextFlags::Bottom);
-            rRes.nResultStyle |= DrawTextFlags::Top;
-        }
-    }
-    else
-    {
-        if (nMaxTextWidth <= nWidth)
-            rRes.nResultStyle &= ~DrawTextFlags::Clip;
-    }
-
-    if (rRes.nFormatLines * nTextHeight > nHeight)
-        rRes.nResultStyle |= DrawTextFlags::Clip;
-}
-
 void OutputDevice::ImplDrawMnemonic(vcl::TextLayoutCommon& rLayout, const OUString& rStr,
-                                    sal_Int32 nIndex, sal_Int32 nLen,
-                                    sal_Int32 nRelMnemonicPos, const Point& rPos)
+                                    sal_Int32 nIndex, sal_Int32 nLen, sal_Int32 nRelMnemonicPos,
+                                    const Point& rPos)
 {
     KernArray aDXArray;
     rLayout.GetTextArray(rStr, &aDXArray, nIndex, nLen, true);
 
-    vcl::text::TextLayoutEngine::MnemonicDeviceParams aParams{
-        GetFontMetric().GetAscent(), GetOutOffXPixel(),
-        GetOutOffYPixel()
-    };
+    vcl::text::TextLayoutEngine::MnemonicDeviceParams aParams{ GetFontMetric().GetAscent(),
+                                                               GetOutOffXPixel(),
+                                                               GetOutOffYPixel() };
 
     auto aGeo = vcl::text::TextLayoutEngine::GetMnemonicGeometry(
         [&](tools::Long w) { return LogicWidthToDeviceSubPixel(w); },
         [&](tools::Long w) { return LogicWidthToDevicePixel(w); },
-        [&](const Point& p) { return LogicToPixel(p); }, aParams, aDXArray,
-        nRelMnemonicPos, rPos);
+        [&](const Point& p) { return LogicToPixel(p); }, aParams, aDXArray, nRelMnemonicPos, rPos);
 
     ImplDrawMnemonicLine(aGeo.nX, aGeo.nY, static_cast<double>(aGeo.nWidth));
 }
 
-
-void OutputDevice::ImplDrawText( OutputDevice& rTargetDevice, const tools::Rectangle& rRect,
-                                 const OUString& rOrigStr, DrawTextFlags nStyle,
-                                 std::vector< tools::Rectangle >* pVector, OUString* pDisplayText,
-                                 vcl::TextLayoutCommon& rLayout )
+void OutputDevice::ImplDrawText(OutputDevice& rTargetDevice, const tools::Rectangle& rRect,
+                                const OUString& rOrigStr, DrawTextFlags nStyle,
+                                std::vector<tools::Rectangle>* pVector, OUString* pDisplayText,
+                                vcl::TextLayoutCommon& rLayout)
 {
     bool bDisabled = (nStyle & DrawTextFlags::Disable) && !pVector;
 
@@ -1175,14 +1083,14 @@ void OutputDevice::ImplDrawTextSingleLine(OutputDevice& rTargetDevice,
             nStyle &= ~DrawTextFlags::Clip;
     }
 
-    Point aPos = lcl_GetLayoutStartPoint(rTargetDevice, rRect, nTextWidth, nTextHeight,
-                                         nStyle, eAlign);
+    Point aPos = vcl::text::TextLayoutEngine::CalculateLayoutOrigin(
+        rTargetDevice, rRect, nTextWidth, nTextHeight, nStyle, eAlign);
 
     auto fnDrawMnemonic = [&]() {
         if (bDrawMnemonics && nMnemonicPos != -1 && nMnemonicPos < aDrawStr.getLength())
         {
-            rTargetDevice.ImplDrawMnemonic(rLayout, aDrawStr, 0, aDrawStr.getLength(),
-                                           nMnemonicPos, aPos);
+            rTargetDevice.ImplDrawMnemonic(rLayout, aDrawStr, 0, aDrawStr.getLength(), nMnemonicPos,
+                                           aPos);
         }
     };
 
@@ -1200,7 +1108,6 @@ void OutputDevice::ImplDrawTextSingleLine(OutputDevice& rTargetDevice,
     }
 }
 
-
 void OutputDevice::ImplDrawTextMultiLine(OutputDevice& rTargetDevice, const tools::Rectangle& rRect,
                                          const OUString& rStr, DrawTextFlags nStyle,
                                          std::vector<tools::Rectangle>* pVector,
@@ -1215,9 +1122,9 @@ void OutputDevice::ImplDrawTextMultiLine(OutputDevice& rTargetDevice, const tool
     if (!nTextHeight)
         return;
 
-    MultiLineLayoutResult aLayout;
-    lcl_GetMultiLineLayout(rLayout, aLayout, rRect, nTextHeight, nWidth,
-                           nHeight, rStr, nStyle);
+    vcl::text::MultiLineLayout aLayout;
+    vcl::text::TextLayoutEngine::CalculateMultiLineLayout(rLayout, aLayout, rRect, nTextHeight,
+                                                          nWidth, nHeight, rStr, nStyle);
     nStyle = aLayout.nResultStyle;
 
     if (nStyle & DrawTextFlags::Clip)
@@ -1259,8 +1166,8 @@ void OutputDevice::ImplDrawTextMultiLine(OutputDevice& rTargetDevice, const tool
         if (bDrawMnemonics
             && vcl::text::TextLayoutEngine::IsMnemonicInRange(nMnemonicPos, nIndex, nLineLen))
         {
-            rTargetDevice.ImplDrawMnemonic(rLayout, rStr, nIndex, nLineLen,
-                                           nMnemonicPos - nIndex, aPos);
+            rTargetDevice.ImplDrawMnemonic(rLayout, rStr, nIndex, nLineLen, nMnemonicPos - nIndex,
+                                           aPos);
         }
 
         aPos.AdjustY(nTextHeight);
@@ -1269,11 +1176,10 @@ void OutputDevice::ImplDrawTextMultiLine(OutputDevice& rTargetDevice, const tool
 
     if (!aLayout.aLastLine.isEmpty())
     {
-        rLayout.DrawText(aPos, aLayout.aLastLine, 0, aLayout.aLastLine.getLength(),
-                         pVector, pDisplayText);
+        rLayout.DrawText(aPos, aLayout.aLastLine, 0, aLayout.aLastLine.getLength(), pVector,
+                         pDisplayText);
     }
 }
-
 
 void OutputDevice::AddTextRectActions(const tools::Rectangle& rRect, const OUString& rOrigStr,
                                       DrawTextFlags nStyle, GDIMetaFile& rMtf)
