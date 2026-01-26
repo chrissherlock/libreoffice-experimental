@@ -957,56 +957,45 @@ sal_Int32 OutputDevice::GetTextBreakArray(const OUString& rStr, tools::Long nTex
         nCharExtra, aKernArray, vcl::text::LayoutCacheData{ pLayoutCache, pGlyphs });
 }
 
-void OutputDevice::ImplDrawText(OutputDevice& rTargetDevice, const tools::Rectangle& rRect,
-                                const OUString& rOrigStr, DrawTextFlags nStyle,
-                                std::vector<tools::Rectangle>* pVector, OUString* pDisplayText,
-                                vcl::TextLayoutCommon& _rLayout)
+static Color lcl_getDisabledTextColor(const OutputDevice& rTargetDevice)
 {
-    Color aOldTextColor;
-    Color aOldTextFillColor;
-    bool bRestoreFillColor = false;
+    const StyleSettings& rStyleSettings = rTargetDevice.GetSettings().GetStyleSettings();
 
-    // Setup Disabled Text Colors
-    if ((nStyle & DrawTextFlags::Disable) && !pVector)
+    if (rStyleSettings.GetHighContrastMode())
     {
-        bool bHighContrastBlack = false;
-        bool bHighContrastWhite = false;
-        const StyleSettings& rStyleSettings(rTargetDevice.GetSettings().GetStyleSettings());
-
-        if (rStyleSettings.GetHighContrastMode())
-        {
-            Color aCol;
-            if (rTargetDevice.IsBackground())
-                aCol = rTargetDevice.GetBackground().GetColor();
-            else
-                aCol = rStyleSettings.GetFaceColor();
-
-            bHighContrastBlack = aCol.IsDark();
-            bHighContrastWhite = aCol.IsBright();
-        }
-
-        aOldTextColor = rTargetDevice.GetTextColor();
-
-        if (rTargetDevice.IsTextFillColor())
-        {
-            bRestoreFillColor = true;
-            aOldTextFillColor = rTargetDevice.GetTextFillColor();
-        }
-
-        if (bHighContrastBlack)
-        {
-            rTargetDevice.SetTextColor(COL_GREEN);
-        }
-        else if (bHighContrastWhite)
-        {
-            rTargetDevice.SetTextColor(COL_LIGHTGREEN);
-        }
+        Color aCol;
+        if (rTargetDevice.IsBackground())
+            aCol = rTargetDevice.GetBackground().GetColor();
         else
-        {
-            rTargetDevice.SetTextColor(
-                rTargetDevice.GetSettings().GetStyleSettings().GetDisableColor());
-        }
+            aCol = rStyleSettings.GetFaceColor();
+
+        if (aCol.IsDark())
+            return COL_GREEN;
+
+        if (aCol.IsBright())
+            return COL_LIGHTGREEN;
     }
+
+    return rStyleSettings.GetDisableColor();
+}
+
+void OutputDevice::ImplDrawText( OutputDevice& rTargetDevice, const tools::Rectangle& rRect,
+                                 const OUString& rOrigStr, DrawTextFlags nStyle,
+                                 std::vector< tools::Rectangle >* pVector, OUString* pDisplayText,
+                                 vcl::TextLayoutCommon& rLayout )
+{
+    bool bDisabled = (nStyle & DrawTextFlags::Disable) && !pVector;
+
+    if (bDisabled)
+        rTargetDevice.Push(vcl::PushFlags::TEXTCOLOR | vcl::PushFlags::TEXTFILLCOLOR);
+
+    comphelper::ScopeGuard aStateGuard([&rTargetDevice, bDisabled]() {
+        if (bDisabled)
+            rTargetDevice.Pop();
+    });
+
+    if (bDisabled)
+        rTargetDevice.SetTextColor(lcl_getDisabledTextColor(rTargetDevice));
 
     if (rRect.GetWidth() <= 0 || rRect.GetHeight() <= 0)
     {
@@ -1014,7 +1003,9 @@ void OutputDevice::ImplDrawText(OutputDevice& rTargetDevice, const tools::Rectan
             return;
 
         static bool bFuzzing = comphelper::IsFuzzing();
+
         SAL_WARN_IF(bFuzzing, "vcl", "skipping negative rectangle");
+
         if (bFuzzing)
             return;
     }
@@ -1034,23 +1025,14 @@ void OutputDevice::ImplDrawText(OutputDevice& rTargetDevice, const tools::Rectan
     if (nStyle & DrawTextFlags::MultiLine)
     {
         rTargetDevice.ImplDrawTextMultiLine(rTargetDevice, rRect, aStr, nStyle, pVector,
-                                            pDisplayText, _rLayout, nTextHeight, eAlign,
+                                            pDisplayText, rLayout, nTextHeight, eAlign,
                                             nMnemonicPos, bDrawMnemonics);
     }
     else
     {
         rTargetDevice.ImplDrawTextSingleLine(rTargetDevice, rRect, aStr, nStyle, pVector,
-                                             pDisplayText, _rLayout, nTextHeight, eAlign,
+                                             pDisplayText, rLayout, nTextHeight, eAlign,
                                              nMnemonicPos, bDrawMnemonics);
-    }
-
-    // Restore Disabled Text Colors
-    if (nStyle & DrawTextFlags::Disable && !pVector)
-    {
-        rTargetDevice.SetTextColor(aOldTextColor);
-
-        if (bRestoreFillColor)
-            rTargetDevice.SetTextFillColor(aOldTextFillColor);
     }
 }
 
