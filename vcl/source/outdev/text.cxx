@@ -135,44 +135,67 @@ void OutputDevice::ImplDrawTextBackground(const SalLayout& rSalLayout)
     ImplDrawTextRect(aRect.Left(), aRect.Top(), 0, 0, aRect.GetWidth(), aRect.GetHeight());
 }
 
+
 bool OutputDevice::ImplDrawRotateText(SalLayout& rSalLayout)
 {
-    // Capture original state to ensure restoration on exit (success or failure)
     basegfx::B2DPoint aOrigBase = rSalLayout.DrawBase();
     basegfx::B2DPoint aOrigOffset = rSalLayout.DrawOffset();
-
     comphelper::ScopeGuard aRestoreGuard([&]() {
         rSalLayout.DrawBase() = aOrigBase;
         rSalLayout.DrawOffset() = aOrigOffset;
     });
 
-    tools::Long nX = rSalLayout.DrawBase().getX();
-    tools::Long nY = rSalLayout.DrawBase().getY();
+    tools::Long nX = aOrigBase.getX();
+    tools::Long nY = aOrigBase.getY();
 
-    tools::Rectangle aBoundRect;
-    rSalLayout.DrawBase() = basegfx::B2DPoint(0, 0);
-    rSalLayout.DrawOffset() = basegfx::B2DPoint{ 0, 0 };
+    tools::Rectangle aBoundRect = vcl::text::TextLayoutEngine::GetTextInkBounds(rSalLayout, *mpFontRealization, false);
 
-    // Get unrotated bounds (pass false for bApplyRotation) to size the virtual device.
-    // This removes the need for manual heuristics if the layout fails to report bounds.
-    aBoundRect
-        = vcl::text::TextLayoutEngine::GetTextInkBounds(rSalLayout, *mpFontRealization, false);
+    Bitmap aBmp = ImplCreateRotatedTextBitmap(rSalLayout, aBoundRect);
 
-    // cache virtual device for rotation
+    if (aBmp.IsEmpty())
+        return false;
+
+    Point aPoint = vcl::text::TextLayoutEngine::GetRotatedImageOrigin(
+        Point(nX, nY), aBoundRect, mpFontRealization->mxFont->mnOwnOrientation);
+
+    ImplDrawRotatedTextMask(aPoint, aBmp);
+
+    return true;
+}
+
+Bitmap OutputDevice::ImplCreateRotatedTextBitmap(SalLayout& rSalLayout, const tools::Rectangle& rBoundRect)
+{
+    VirtualDevice* pVDev = ImplPrepareRotateDevice(rBoundRect.GetSize());
+
+    if (!pVDev)
+        return Bitmap();
+
+    // Adjust layout to draw into the buffer's upper-left corner
+    rSalLayout.DrawBase() = basegfx::B2DPoint(-rBoundRect.Left(), -rBoundRect.Top());
+    rSalLayout.DrawOffset() = basegfx::B2DPoint(0, 0);
+    rSalLayout.DrawText(*pVDev->mpGraphics);
+
+    // Extract the buffer and apply the rotation
+    Bitmap aBmp = pVDev->GetBitmap(Point(), rBoundRect.GetSize());
+
+    if (!aBmp.IsEmpty())
+        aBmp.Rotate(mpFontRealization->mxFont->mnOwnOrientation, COL_WHITE);
+
+    return aBmp;
+}
+
+VirtualDevice* OutputDevice::ImplPrepareRotateDevice(const Size& rSize)
+{
     if (!mpOutDevData->mpRotateDev)
         mpOutDevData->mpRotateDev = VclPtr<VirtualDevice>::Create(*this);
 
     VirtualDevice* pVDev = mpOutDevData->mpRotateDev;
+    if (!pVDev->SetOutputSizePixel(rSize))
+        return nullptr;
 
-    // size it accordingly
-    if (!pVDev->SetOutputSizePixel(aBoundRect.GetSize()))
-        return false;
-
-    const vcl::font::FontSelectPattern& rPattern
-        = mpFontRealization->mxFont->GetFontSelectPattern();
-
+    const vcl::font::FontSelectPattern& rPattern = mpFontRealization->mxFont->GetFontSelectPattern();
     vcl::Font aFont(GetFont());
-    aFont.SetOrientation(0_deg10);
+    aFont.SetOrientation(0_deg10); // Draw horizontal first
     aFont.SetFontSize(Size(rPattern.mnWidth, rPattern.mnHeight));
 
     pVDev->SetFont(aFont);
@@ -180,44 +203,34 @@ bool OutputDevice::ImplDrawRotateText(SalLayout& rSalLayout)
     pVDev->SetTextFillColor();
 
     if (!pVDev->InitFont())
-        return false;
+        return nullptr;
 
     pVDev->ImplInitTextColor();
+    return pVDev;
+}
 
-    // draw text into upper left corner
-    rSalLayout.DrawBase().adjustX(-aBoundRect.Left());
-    rSalLayout.DrawBase().adjustY(-aBoundRect.Top());
-    rSalLayout.DrawText(*pVDev->mpGraphics);
-
-    Bitmap aBmp = pVDev->GetBitmap(Point(), aBoundRect.GetSize());
-
-    if (aBmp.IsEmpty() || !aBmp.Rotate(mpFontRealization->mxFont->mnOwnOrientation, COL_WHITE))
-        return false;
-
-    Point aPoint = vcl::text::TextLayoutEngine::GetRotatedImageOrigin(
-        Point(nX, nY), aBoundRect, mpFontRealization->mxFont->mnOwnOrientation);
-
-    // mask output with text colored bitmap
+void OutputDevice::ImplDrawRotatedTextMask(const Point& rPoint, const Bitmap& rBmp)
+{
     GDIMetaFile* pOldMetaFile = mpMetaFile;
     tools::Long nOldOffX = GetOutOffXPixel();
     tools::Long nOldOffY = GetOutOffYPixel();
     bool bOldMap = mpMapper->IsMapModeEnabled();
 
+    comphelper::ScopeGuard aRestoreGuard([&]() {
+        mpMapper->EnableMapMode(bOldMap);
+        SetDeviceOriginX(nOldOffX);
+        SetDeviceOriginY(nOldOffY);
+        mpMetaFile = pOldMetaFile;
+    });
+
     SetDeviceOriginX(0);
     SetDeviceOriginY(0);
-
     mpMetaFile = nullptr;
     mpMapper->EnableMapMode(false);
 
-    DrawMask(aPoint, aBmp, GetTextColor());
-
-    mpMapper->EnableMapMode(bOldMap);
-    SetDeviceOriginX(nOldOffX);
-    SetDeviceOriginY(nOldOffY);
-    mpMetaFile = pOldMetaFile;
-
-    return true;
+    DrawMask(rPoint, rBmp, GetTextColor());
 }
+
 
 void OutputDevice::ImplRenderLayout(SalLayout& rSalLayout, bool bTextLines)
 {
