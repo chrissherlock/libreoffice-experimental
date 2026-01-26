@@ -44,21 +44,21 @@ namespace vcl
         virtual sal_Int32   GetTextBreak( const OUString& _rText, tools::Long _nMaxTextWidth, sal_Int32 _nStartIndex, sal_Int32 _nLength ) const = 0;
         virtual bool        DecomposeTextRectAction() const = 0;
 
-        SAL_DLLPRIVATE OUString GetEllipsisString(OUString const& rOrigStr, tools::Long nMaxWidth, DrawTextFlags nStyle);
+        SAL_DLLPRIVATE OUString GetEllipsisString(OUString const& rOrigStr, tools::Long nMaxWidth, DrawTextFlags nStyle) const;
 
         std::tuple<sal_Int32, sal_Int32> BreakLine(const tools::Long nWidth, OUString const& rStr,
                         css::uno::Reference< css::linguistic2::XHyphenator > const& xHyph,
                         css::uno::Reference<css::i18n::XBreakIterator>& xBI,
                         const bool bHyphenate, const tools::Long nOrigLineWidth,
-                        const sal_Int32 nPos, const sal_Int32 nLen);
+                        const sal_Int32 nPos, const sal_Int32 nLen) const;
 
         SAL_DLLPRIVATE std::tuple<sal_Int32, sal_Int32> BreakLineSimple(const tools::Long nWidth, OUString const& rStr,
-                                  const sal_Int32 nPos, sal_Int32 nBreakPos, const tools::Long nOrigLineWidth);
+                                  const sal_Int32 nPos, sal_Int32 nBreakPos, const tools::Long nOrigLineWidth) const;
 
         SAL_DLLPRIVATE tools::Long GetTextLines(tools::Rectangle const& rRect, const tools::Long nTextHeight,
                                  ImplMultiTextLineInfo& rLineInfo,
                                  tools::Long nWidth, OUString const& rStr,
-                                 DrawTextFlags nStyle);
+                                 DrawTextFlags nStyle) const;
 
     protected:
         SAL_DLLPRIVATE ~TextLayoutCommon();

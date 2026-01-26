@@ -60,9 +60,6 @@
 #include <comphelper/scopeguard.hxx>
 #include <optional>
 
-#define TEXT_DRAW_ELLIPSIS                                                                         \
-    (DrawTextFlags::EndEllipsis | DrawTextFlags::PathEllipsis | DrawTextFlags::NewsEllipsis)
-
 vcl::text::ComplexTextLayoutFlags OutputDevice::GetLayoutMode() const
 {
     return mpFontRealization ? mpFontRealization->eLayoutMode : mpGraphicsState->mnTextLayoutMode;
@@ -1142,11 +1139,6 @@ void OutputDevice::ImplDrawTextSingleLine(OutputDevice& rTargetDevice,
     }
 }
 
-static bool lcl_isMnemonicInRange(sal_Int32 nMnemonicPos, sal_Int32 nIndex, sal_Int32 nLen)
-{
-    return nMnemonicPos >= nIndex && nMnemonicPos < nIndex + nLen;
-}
-
 void OutputDevice::ImplDrawTextMultiLine(OutputDevice& rTargetDevice, const tools::Rectangle& rRect,
                                          const OUString& rStr, DrawTextFlags nStyle,
                                          std::vector<tools::Rectangle>* pVector,
@@ -1242,24 +1234,25 @@ void OutputDevice::ImplDrawTextMultiLine(OutputDevice& rTargetDevice, const tool
             sal_Int32 nLineLen = rLineInfo.GetLen();
             _rLayout.DrawText(aPos, rStr, nIndex, nLineLen, pVector, pDisplayText);
 
-            if (bDrawMnemonics && lcl_isMnemonicInRange(nMnemonicPos, nIndex, nLineLen))
+            if (bDrawMnemonics
+                && vcl::text::TextLayoutEngine::IsMnemonicInRange(nMnemonicPos, nIndex, nLineLen))
             {
                 KernArray aDXArray;
                 _rLayout.GetTextArray(rStr, &aDXArray, nIndex, nLineLen, true);
 
                 vcl::text::TextLayoutEngine::MnemonicDeviceParams aParams{
-                    rTargetDevice.GetFontMetric().GetAscent(),
-                    rTargetDevice.GetOutOffXPixel(),
+                    rTargetDevice.GetFontMetric().GetAscent(), rTargetDevice.GetOutOffXPixel(),
                     rTargetDevice.GetOutOffYPixel()
                 };
 
                 auto aGeo = vcl::text::TextLayoutEngine::GetMnemonicGeometry(
                     [&](tools::Long w) { return rTargetDevice.LogicWidthToDeviceSubPixel(w); },
                     [&](tools::Long w) { return rTargetDevice.LogicWidthToDevicePixel(w); },
-                    [&](const Point& p) { return rTargetDevice.LogicToPixel(p); },
-                    aParams, aDXArray, nMnemonicPos - nIndex, aPos);
+                    [&](const Point& p) { return rTargetDevice.LogicToPixel(p); }, aParams,
+                    aDXArray, nMnemonicPos - nIndex, aPos);
 
-                rTargetDevice.ImplDrawMnemonicLine(aGeo.nX, aGeo.nY, static_cast<double>(aGeo.nWidth));
+                rTargetDevice.ImplDrawMnemonicLine(aGeo.nX, aGeo.nY,
+                                                   static_cast<double>(aGeo.nWidth));
             }
 
             aPos.AdjustY(nTextHeight);
@@ -1362,158 +1355,46 @@ void OutputDevice::DrawText(const tools::Rectangle& rRect, const OUString& rOrig
 
 tools::Rectangle OutputDevice::GetTextRect(const tools::Rectangle& rRect, const OUString& rStr,
                                            DrawTextFlags nStyle, TextRectInfo* pInfo,
-                                           const vcl::TextLayoutCommon* _pTextLayout) const
+                                           const vcl::TextLayoutCommon* pTextLayout) const
 {
-    tools::Rectangle aRect = rRect;
-    sal_Int32 nLines;
-    tools::Long nWidth = rRect.GetWidth();
-    tools::Long nMaxWidth;
-    tools::Long nTextHeight = GetTextHeight();
+    // Fix: Explicitly initialize all fields to satisfy -Werror
+    vcl::text::TextLayoutEngine::LayoutRequest aReq;
+    aReq.aText = rStr;
+    aReq.aTargetRect = rRect;
+    aReq.nStyle = nStyle;
+    aReq.nMnemonicPos = -1;
+    aReq.nFontOrientation = mpGraphicsState->maFont.GetOrientation();
+    aReq.nFontAscent = GetFontMetric().GetAscent();
+    aReq.nFontHeight = GetTextHeight();
 
-    OUString aStr = rStr;
+    const vcl::TextLayoutCommon* pLayout = pTextLayout;
 
-    if (nStyle & DrawTextFlags::Mnemonic)
-        aStr = removeMnemonicFromString(aStr);
-
-    if (nStyle & DrawTextFlags::MultiLine)
+    // If no layout is provided, we use the device's default.
+    // We use a local instance to avoid 'delete' on abstract types.
+    if (!pLayout)
     {
-        ImplMultiTextLineInfo aMultiLineInfo;
-        sal_Int32 nFormatLines;
-        sal_Int32 i;
-
-        nMaxWidth = 0;
-        vcl::DefaultTextLayout aDefaultLayout(*const_cast<OutputDevice*>(this));
-
-        if (_pTextLayout)
-            const_cast<vcl::TextLayoutCommon*>(_pTextLayout)
-                ->GetTextLines(rRect, nTextHeight, aMultiLineInfo, nWidth, aStr, nStyle);
-        else
-            aDefaultLayout.GetTextLines(rRect, nTextHeight, aMultiLineInfo, nWidth, aStr, nStyle);
-
-        nFormatLines = aMultiLineInfo.Count();
-
-        if (!nTextHeight)
-            nTextHeight = 1;
-
-        nLines = static_cast<sal_uInt16>(aRect.GetHeight() / nTextHeight);
-
-        if (pInfo)
-            pInfo->mnLineCount = nFormatLines;
-
-        if (!nLines)
-            nLines = 1;
-
-        if (nFormatLines <= nLines)
-        {
-            nLines = nFormatLines;
-        }
-        else
-        {
-            if (!(nStyle & DrawTextFlags::EndEllipsis))
-            {
-                nLines = nFormatLines;
-            }
-            else
-            {
-                if (pInfo)
-                    pInfo->mbEllipsis = true;
-
-                nMaxWidth = nWidth;
-            }
-        }
+        vcl::DefaultTextLayout aDefault(const_cast<OutputDevice&>(*this));
+        auto aResult = vcl::text::TextLayoutEngine::CalculateLayout(*mpMapper, aReq, aDefault);
 
         if (pInfo)
         {
-            bool bMaxWidth = nMaxWidth == 0;
-            pInfo->mnMaxWidth = 0;
-
-            for (i = 0; i < nLines; i++)
-            {
-                ImplTextLineInfo& rLineInfo = aMultiLineInfo.GetLine(i);
-
-                if (bMaxWidth && (rLineInfo.GetWidth() > nMaxWidth))
-                    nMaxWidth = rLineInfo.GetWidth();
-
-                if (rLineInfo.GetWidth() > pInfo->mnMaxWidth)
-                    pInfo->mnMaxWidth = rLineInfo.GetWidth();
-            }
+            pInfo->mnLineCount = aResult.nLineCount;
+            pInfo->mnMaxWidth = aResult.nMaxWidth;
+            pInfo->mbEllipsis = aResult.bEllipsisGenerated;
         }
-        else if (!nMaxWidth)
-        {
-            for (i = 0; i < nLines; i++)
-            {
-                ImplTextLineInfo& rLineInfo = aMultiLineInfo.GetLine(i);
-
-                if (rLineInfo.GetWidth() > nMaxWidth)
-                    nMaxWidth = rLineInfo.GetWidth();
-            }
-        }
+        return aResult.aTextRect;
     }
-    else
+
+    auto aResult = vcl::text::TextLayoutEngine::CalculateLayout(*mpMapper, aReq, *pLayout);
+
+    if (pInfo)
     {
-        nLines = 1;
-        nMaxWidth = _pTextLayout ? _pTextLayout->GetTextWidth(aStr, 0, aStr.getLength())
-                                 : GetTextWidth(aStr);
-
-        if (pInfo)
-        {
-            pInfo->mnLineCount = 1;
-            pInfo->mnMaxWidth = nMaxWidth;
-        }
-
-        if ((nMaxWidth > nWidth) && (nStyle & TEXT_DRAW_ELLIPSIS))
-        {
-            if (pInfo)
-                pInfo->mbEllipsis = true;
-
-            nMaxWidth = nWidth;
-        }
+        pInfo->mnLineCount = aResult.nLineCount;
+        pInfo->mnMaxWidth = aResult.nMaxWidth;
+        pInfo->mbEllipsis = aResult.bEllipsisGenerated;
     }
 
-    if (nStyle & DrawTextFlags::Right)
-    {
-        aRect.SetLeft(aRect.Right() - nMaxWidth + 1);
-    }
-    else if (nStyle & DrawTextFlags::Center)
-    {
-        aRect.AdjustLeft((nWidth - nMaxWidth) / 2);
-        aRect.SetRight(aRect.Left() + nMaxWidth - 1);
-    }
-    else
-    {
-        aRect.SetRight(aRect.Left() + nMaxWidth - 1);
-    }
-
-    if (nStyle & DrawTextFlags::Bottom)
-    {
-        aRect.SetTop(aRect.Bottom() - (nTextHeight * nLines) + 1);
-    }
-    else if (nStyle & DrawTextFlags::VCenter)
-    {
-        aRect.AdjustTop((aRect.GetHeight() - (nTextHeight * nLines)) / 2);
-        aRect.SetBottom(aRect.Top() + (nTextHeight * nLines) - 1);
-    }
-    else
-    {
-        aRect.SetBottom(aRect.Top() + (nTextHeight * nLines) - 1);
-    }
-
-    // #99188# get rid of rounding problems when using this rect later
-    if (nStyle & DrawTextFlags::Right)
-        aRect.AdjustLeft(-1);
-    else
-        aRect.AdjustRight(1);
-
-    if (mpGraphicsState->maFont.GetOrientation() != 0_deg10)
-    {
-        tools::Polygon aRotatedPolygon(aRect);
-        aRotatedPolygon.Rotate(Point(aRect.GetWidth() / 2, aRect.GetHeight() / 2),
-                               mpGraphicsState->maFont.GetOrientation());
-
-        return aRotatedPolygon.GetBoundRect();
-    }
-
-    return aRect;
+    return aResult.aTextRect;
 }
 
 void OutputDevice::DrawCtrlText(const Point& rPos, const OUString& rStr, const sal_Int32 nIndex,
@@ -1579,16 +1460,16 @@ void OutputDevice::DrawCtrlText(const Point& rPos, const OUString& rStr, const s
             KernArray aDXArray;
             GetTextArray(aStr, &aDXArray, nCorrectedIndex, nCorrectedLen, true, nullptr, pGlyphs);
 
-            vcl::text::TextLayoutEngine::MnemonicDeviceParams aParams{
-                GetFontMetric().GetAscent(), GetOutOffXPixel(), GetOutOffYPixel()
-            };
+            vcl::text::TextLayoutEngine::MnemonicDeviceParams aParams{ GetFontMetric().GetAscent(),
+                                                                       GetOutOffXPixel(),
+                                                                       GetOutOffYPixel() };
 
             // Pass bInvalidPos to bTrailing to handle BiDi edge cases
             const auto aGeo = vcl::text::TextLayoutEngine::GetMnemonicGeometry(
                 [&](tools::Long w) { return LogicWidthToDeviceSubPixel(w); },
                 [&](tools::Long w) { return LogicWidthToDevicePixel(w); },
-                [&](const Point& p) { return LogicToPixel(p); },
-                aParams, aDXArray, nMnemonicPos - nCorrectedIndex, rPos, bInvalidPos);
+                [&](const Point& p) { return LogicToPixel(p); }, aParams, aDXArray,
+                nMnemonicPos - nCorrectedIndex, rPos, bInvalidPos);
 
             nMnemonicX = aGeo.nX;
             nMnemonicY = aGeo.nY;

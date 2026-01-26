@@ -55,7 +55,7 @@ namespace vcl
     TextLayoutCommon::~TextLayoutCommon()
     {}
 
-    OUString TextLayoutCommon::GetEllipsisString(OUString const& rOrigStr, tools::Long nMaxWidth, DrawTextFlags nStyle)
+    OUString TextLayoutCommon::GetEllipsisString(OUString const& rOrigStr, tools::Long nMaxWidth, DrawTextFlags nStyle) const
     {
         return vcl::text::TextLayoutEngine::GetEllipsisString(
             rOrigStr, nMaxWidth, nStyle,
@@ -67,7 +67,7 @@ namespace vcl
                         css::uno::Reference< css::linguistic2::XHyphenator > const& xHyph,
                         css::uno::Reference<css::i18n::XBreakIterator>& xBI,
                         const bool bHyphenate, const tools::Long nOrigLineWidth,
-                        const sal_Int32 nPos, const sal_Int32 nLen)
+                        const sal_Int32 nPos, const sal_Int32 nLen) const
     {
         if (!xBI.is())
             xBI = vcl::unohelper::CreateBreakIterator();
@@ -184,7 +184,7 @@ namespace vcl
     }
 
     std::tuple<sal_Int32, sal_Int32> TextLayoutCommon::BreakLineSimple(const tools::Long nWidth, OUString const& rStr,
-                                                 const sal_Int32 nPos, const sal_Int32 nLen, const tools::Long nOrigLineWidth)
+                                                 const sal_Int32 nPos, const sal_Int32 nLen, const tools::Long nOrigLineWidth) const
     {
         sal_Int32 nBreakPos = nLen;
         tools::Long nLineWidth = nOrigLineWidth;
@@ -236,7 +236,7 @@ namespace vcl
     tools::Long TextLayoutCommon::GetTextLines(tools::Rectangle const& rRect, const tools::Long nTextHeight,
                                                ImplMultiTextLineInfo& rLineInfo,
                                                tools::Long nWidth, OUString const& rStr,
-                                               DrawTextFlags nStyle)
+                                               DrawTextFlags nStyle) const
     {
         SAL_WARN_IF( nWidth <= 0, "vcl", "ImplGetTextLines: nWidth <= 0!" );
 

@@ -27,6 +27,9 @@
 #include <optional>
 #include <span>
 
+#define TEXT_DRAW_ELLIPSIS                                                                         \
+    (DrawTextFlags::EndEllipsis | DrawTextFlags::PathEllipsis | DrawTextFlags::NewsEllipsis)
+
 class Point;
 namespace tools
 {
@@ -423,12 +426,41 @@ public:
         tools::Long nWidth;
     };
 
+    struct LayoutRequest
+    {
+        OUString aText;
+        tools::Rectangle aTargetRect;
+        DrawTextFlags nStyle;
+        sal_Int32 nMnemonicPos;
+        Degree10 nFontOrientation;
+        tools::Long nFontAscent;
+        tools::Long nFontHeight;
+    };
+
+    struct LayoutResult
+    {
+        OUString aDisplayText; // Could be truncated with ellipsis
+        tools::Rectangle aTextRect; // Final aligned and rotated bounds
+        Point aDrawPosition; // Where to call _rLayout.DrawText
+        MnemonicGeometry aMnemonic; // Coordinates for the underline
+        bool bHasMnemonic;
+
+        sal_Int32 nLineCount = 1;
+        tools::Long nMaxWidth = 0;
+        bool bEllipsisGenerated = false;
+    };
+
     static MnemonicGeometry
     GetMnemonicGeometry(std::function<double(tools::Long)> const& fnLogicWidthToDeviceSubPixel,
                         std::function<tools::Long(tools::Long)> const& fnLogicWidthToDevicePixel,
                         std::function<Point(const Point&)> const& fnLogicToPixel,
                         const MnemonicDeviceParams& rParams, KernArraySpan aDXArray,
                         sal_Int32 nRelPos, const Point& rLinePos, bool bTrailing = false);
+
+    static LayoutResult CalculateLayout(const CoordinateMapper& rMapper, const LayoutRequest& rReq,
+                                        const vcl::TextLayoutCommon& rLayout);
+
+    static bool IsMnemonicInRange(sal_Int32 nMnemonicPos, sal_Int32 nIndex, sal_Int32 nLen);
 
 private:
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);
