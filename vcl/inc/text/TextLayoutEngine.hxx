@@ -483,13 +483,13 @@ public:
     {
         // Calculated Y-offsets relative to the baseline
         tools::Long nUnderlinePos1 = 0;
-        tools::Long nUnderlinePos2 = 0; // For LINESTYLE_DOUBLE
+        tools::Long nUnderlinePos2 = 0;
 
         tools::Long nOverlinePos1 = 0;
-        tools::Long nOverlinePos2 = 0; // For double overlines
+        tools::Long nOverlinePos2 = 0;
 
         tools::Long nStrikeoutPos1 = 0;
-        tools::Long nStrikeoutPos2 = 0; // For STRIKEOUT_DOUBLE
+        tools::Long nStrikeoutPos2 = 0;
 
         tools::Long nLineWidth = 0;
         tools::Long nUnderlineWaveHeight = 0;
@@ -497,6 +497,7 @@ public:
 
         bool bUnderlineIsWave = false;
         bool bOverlineIsWave = false;
+        bool bStrikeoutIsChar = false;
     };
 
     static TextLineGeometry GetTextLineGeometry(const TextLineRequest& rReq,
