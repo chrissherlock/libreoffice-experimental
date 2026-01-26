@@ -2297,6 +2297,49 @@ WaveLineGeometry TextLayoutEngine::CalculateWaveLineGeometry(const FontMetricDat
     return aGeo;
 }
 
+StrikeoutGeometry TextLayoutEngine::CalculateStrikeoutGeometry(const FontMetricData& rMetric,
+                                                               FontStrikeout eStrikeout,
+                                                               tools::Long nDistY)
+{
+    StrikeoutGeometry aGeo;
+    tools::Long nLineHeight = 0;
+    tools::Long nLinePos = 0;
+    tools::Long nLinePos2 = 0;
+
+    if (eStrikeout > STRIKEOUT_X)
+        eStrikeout = STRIKEOUT_SINGLE;
+
+    switch (eStrikeout)
+    {
+        case STRIKEOUT_SINGLE:
+            nLineHeight = rMetric.GetStrikeoutSize();
+            nLinePos = nDistY + rMetric.GetStrikeoutOffset();
+            if (nLineHeight > 0)
+                aGeo.aSegments.push_back({ nLinePos, nLineHeight });
+            break;
+        case STRIKEOUT_BOLD:
+            nLineHeight = rMetric.GetBoldStrikeoutSize();
+            nLinePos = nDistY + rMetric.GetBoldStrikeoutOffset();
+            if (nLineHeight > 0)
+                aGeo.aSegments.push_back({ nLinePos, nLineHeight });
+            break;
+        case STRIKEOUT_DOUBLE:
+            nLineHeight = rMetric.GetDoubleStrikeoutSize();
+            nLinePos = nDistY + rMetric.GetDoubleStrikeoutOffset1();
+            nLinePos2 = nDistY + rMetric.GetDoubleStrikeoutOffset2();
+            if (nLineHeight > 0)
+            {
+                aGeo.aSegments.push_back({ nLinePos, nLineHeight });
+                aGeo.aSegments.push_back({ nLinePos2, nLineHeight });
+            }
+            break;
+        default:
+            break;
+    }
+
+    return aGeo;
+}
+
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

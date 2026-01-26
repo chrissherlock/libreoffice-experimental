@@ -80,6 +80,17 @@ struct SAL_DLLPUBLIC WaveLineGeometry
     std::vector<WaveLineSegment> aSegments;
 };
 
+struct SAL_DLLPUBLIC StrikeoutSegment
+{
+    tools::Long nYOffset;
+    tools::Long nHeight;
+};
+
+struct SAL_DLLPUBLIC StrikeoutGeometry
+{
+    std::vector<StrikeoutSegment> aSegments;
+};
+
 class ILayoutFactory
 {
 public:
@@ -157,6 +168,9 @@ public:
                                                       FontLineStyle eStyle, bool bIsAbove,
                                                       tools::Long nDistY, tools::Long nDPIX,
                                                       tools::Long nDPIY);
+    static StrikeoutGeometry CalculateStrikeoutGeometry(const FontMetricData& rMetric,
+                                                        FontStrikeout eStrikeout,
+                                                        tools::Long nDistY);
     static constexpr tools::Long nMaxSmallWavelineHeight = 3;
 
     /** Analyzes a layout to find valid Kashida insertion points. */
