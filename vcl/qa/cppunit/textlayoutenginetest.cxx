@@ -1330,6 +1330,25 @@ void TextLayoutEngineTest::testTextLineGeometry()
         CPPUNIT_ASSERT_EQUAL_MESSAGE("High DPI (600) line width should be 2", tools::Long(2),
                                      aGeo.nLineWidth);
     }
+
+    // Test Character-based Strikeout Styles
+    {
+        aReq.eStrikeout = STRIKEOUT_SLASH;
+        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        CPPUNIT_ASSERT_MESSAGE("bStrikeoutIsChar should be true for STRIKEOUT_SLASH",
+                               aGeo.bStrikeoutIsChar);
+
+        aReq.eStrikeout = STRIKEOUT_X;
+        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        CPPUNIT_ASSERT_MESSAGE("bStrikeoutIsChar should be true for STRIKEOUT_X",
+                               aGeo.bStrikeoutIsChar);
+
+        // Negative test: verify standard bold strikeout does NOT trigger the char flag
+        aReq.eStrikeout = STRIKEOUT_BOLD;
+        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        CPPUNIT_ASSERT_MESSAGE("bStrikeoutIsChar should be false for STRIKEOUT_BOLD",
+                               !aGeo.bStrikeoutIsChar);
+    }
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TextLayoutEngineTest);

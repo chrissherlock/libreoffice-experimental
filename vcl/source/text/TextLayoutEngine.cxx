@@ -1874,7 +1874,11 @@ TextLayoutEngine::GetTextLineGeometry(const TextLineRequest& rReq, const FontMet
 
     if (rReq.eStrikeout != STRIKEOUT_NONE)
     {
-        if (rReq.eStrikeout == STRIKEOUT_DOUBLE)
+        if (rReq.eStrikeout == STRIKEOUT_SLASH || rReq.eStrikeout == STRIKEOUT_X)
+        {
+            aGeo.bStrikeoutIsChar = true;
+        }
+        else if (rReq.eStrikeout == STRIKEOUT_DOUBLE)
         {
             aGeo.nStrikeoutPos1 = rMetric.GetDoubleStrikeoutOffset1();
             aGeo.nStrikeoutPos2 = rMetric.GetDoubleStrikeoutOffset2();
