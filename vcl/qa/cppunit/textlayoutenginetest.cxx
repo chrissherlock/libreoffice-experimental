@@ -239,6 +239,7 @@ public:
     void testAlignAndRotateTextRect();
     void testGetMnemonicGeometry();
     void testCalculateLayoutPass();
+    void testTextLineGeometry();
 
     CPPUNIT_TEST_SUITE(TextLayoutEngineTest);
     CPPUNIT_TEST(testBiDiLayoutFlags);
@@ -276,6 +277,7 @@ public:
     CPPUNIT_TEST(testAlignAndRotateTextRect);
     CPPUNIT_TEST(testGetMnemonicGeometry);
     CPPUNIT_TEST(testCalculateLayoutPass);
+    CPPUNIT_TEST(testTextLineGeometry);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -1190,6 +1192,144 @@ void TextLayoutEngineTest::testCalculateLayoutPass()
     // Mnemonic should be active and have a valid position
     CPPUNIT_ASSERT(aResult.bHasMnemonic);
     CPPUNIT_ASSERT_EQUAL(tools::Long(15 + 8), aResult.aMnemonic.nY); // Y + Ascent
+}
+
+void TextLayoutEngineTest::testTextLineGeometry()
+{
+    vcl::Font aFont;
+    vcl::font::FontSelectPattern aSelPat(aFont, OUString(), Size(0, 20), 20.0);
+    FontMetricData aMetric(aSelPat);
+
+    aMetric.SetUnderlineOffset(2);
+    aMetric.SetBoldUnderlineOffset(3);
+    aMetric.SetDoubleUnderlineOffset1(1);
+    aMetric.SetDoubleUnderlineOffset2(4);
+    aMetric.SetWavelineUnderlineSize(5); // This will be capped to 3 for SMALLWAVE
+
+    aMetric.SetAboveUnderlineOffset(-10);
+    aMetric.SetAboveBoldUnderlineOffset(-11);
+    aMetric.SetAboveDoubleUnderlineOffset1(-12);
+    aMetric.SetAboveDoubleUnderlineOffset2(-15);
+    aMetric.SetAboveWavelineUnderlineSize(6);
+
+    aMetric.SetStrikeoutOffset(-5);
+    aMetric.SetBoldStrikeoutOffset(-6);
+    aMetric.SetDoubleStrikeoutOffset1(-7);
+    aMetric.SetDoubleStrikeoutOffset2(-9);
+
+    vcl::text::TextLayoutEngine::TextLineRequest aReq;
+    vcl::text::TextLayoutEngine::TextLineGeometry aGeo;
+    aReq.nDPIX = 96;
+    aReq.nDPIY = 96;
+    aReq.bUnderlineAbove = false;
+
+    // Test Standard Underline Paths
+    {
+        aReq.eUnderline = LINESTYLE_SINGLE;
+        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Single underline offset mismatch", tools::Long(2),
+                                     aGeo.nUnderlinePos1);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Base line width (96 DPI) should be 1", tools::Long(1),
+                                     aGeo.nLineWidth);
+
+        aReq.eUnderline = LINESTYLE_BOLD;
+        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Bold underline offset mismatch", tools::Long(3),
+                                     aGeo.nUnderlinePos1);
+
+        aReq.eUnderline = LINESTYLE_DOUBLE;
+        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Double underline offset 1 mismatch", tools::Long(1),
+                                     aGeo.nUnderlinePos1);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Double underline offset 2 mismatch", tools::Long(4),
+                                     aGeo.nUnderlinePos2);
+    }
+
+    // Test Underline Above (Vertical/Overline metrics)
+    {
+        aReq.bUnderlineAbove = true;
+        aReq.eUnderline = LINESTYLE_SINGLE;
+        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Above underline offset mismatch", tools::Long(-10),
+                                     aGeo.nUnderlinePos1);
+
+        aReq.eUnderline = LINESTYLE_DOUBLE;
+        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Above double underline offset 1 mismatch", tools::Long(-12),
+                                     aGeo.nUnderlinePos1);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Above double underline offset 2 mismatch", tools::Long(-15),
+                                     aGeo.nUnderlinePos2);
+        aReq.bUnderlineAbove = false;
+    }
+
+    // Test Wave Line Logic & Constraints
+    {
+        aReq.eUnderline = LINESTYLE_WAVE;
+        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        CPPUNIT_ASSERT_MESSAGE("UnderlineIsWave flag not set for LINESTYLE_WAVE",
+                               aGeo.bUnderlineIsWave);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Standard wave height should return the full metric value",
+                                     tools::Long(5), aGeo.nUnderlineWaveHeight);
+
+        // Test SMALLWAVE 3px cap
+        aReq.eUnderline = LINESTYLE_SMALLWAVE;
+        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Small wave height should be capped at 3px", tools::Long(3),
+                                     aGeo.nUnderlineWaveHeight);
+
+        // Test BOLDWAVE Width Doubling
+        aReq.eUnderline = LINESTYLE_BOLDWAVE;
+        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Bold wave width should be double standard width",
+                                     tools::Long(2), aGeo.nLineWidth);
+    }
+
+    // Test Overline Paths
+    {
+        aReq.eUnderline = LINESTYLE_NONE;
+        aReq.bUnderlineAbove = true;
+        aReq.eUnderline = LINESTYLE_NONE;
+        aReq.eOverline = LINESTYLE_SINGLE;
+        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Overline offset mismatch", tools::Long(-10),
+                                     aGeo.nOverlinePos1);
+
+        aReq.eOverline = LINESTYLE_WAVE;
+        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        CPPUNIT_ASSERT_MESSAGE("OverlineIsWave flag not set for LINESTYLE_WAVE",
+                               aGeo.bOverlineIsWave);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Overline wave height mismatch", tools::Long(6),
+                                     aGeo.nOverlineWaveHeight);
+    }
+
+    // Test Strikeout Paths
+    {
+        aReq.eStrikeout = STRIKEOUT_SINGLE;
+        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Single strikeout offset mismatch", tools::Long(-5),
+                                     aGeo.nStrikeoutPos1);
+
+        aReq.eStrikeout = STRIKEOUT_BOLD;
+        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Bold strikeout offset mismatch", tools::Long(-6),
+                                     aGeo.nStrikeoutPos1);
+
+        aReq.eStrikeout = STRIKEOUT_DOUBLE;
+        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Double strikeout offset 1 mismatch", tools::Long(-7),
+                                     aGeo.nStrikeoutPos1);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Double strikeout offset 2 mismatch", tools::Long(-9),
+                                     aGeo.nStrikeoutPos2);
+    }
+
+    // Test DPI Scaling
+    {
+        aReq.nDPIX = 600; // 600 / 300 = 2
+        aReq.eUnderline = LINESTYLE_SINGLE;
+        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("High DPI (600) line width should be 2", tools::Long(2),
+                                     aGeo.nLineWidth);
+    }
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TextLayoutEngineTest);

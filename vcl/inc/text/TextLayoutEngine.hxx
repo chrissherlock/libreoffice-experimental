@@ -37,6 +37,7 @@ class Rectangle;
 }
 
 class CoordinateMapper;
+class FontMetricData;
 class ImplFontCache;
 class ImplFontList;
 class LogicalFontInstance;
@@ -69,6 +70,8 @@ using FallbackLayoutFactory
 class ILayoutFactory
 {
 public:
+    static constexpr tools::Long nMaxSmallWavelineHeight = 3;
+
     virtual ~ILayoutFactory() = default;
     virtual std::unique_ptr<SalLayout> CreateLayout(int nFallbackLevel) = 0;
     virtual void SetFont(LogicalFontInstance* pFont, int nFallbackLevel) = 0;
@@ -117,6 +120,8 @@ struct MirroringContext
 class VCL_DLLPUBLIC TextLayoutEngine
 {
 public:
+    static constexpr tools::Long nMaxSmallWavelineHeight = 3;
+
     /** Analyzes a layout to find valid Kashida insertion points. */
     static void GetWordKashidaPositions(const SalLayout& rLayout, std::u16string_view rText,
                                         std::vector<bool>& rOutMap);
@@ -461,6 +466,41 @@ public:
                                         const vcl::TextLayoutCommon& rLayout);
 
     static bool IsMnemonicInRange(sal_Int32 nMnemonicPos, sal_Int32 nIndex, sal_Int32 nLen);
+
+    struct TextLineRequest
+    {
+        FontLineStyle eUnderline;
+        FontLineStyle eOverline;
+        FontStrikeout eStrikeout;
+
+        bool bUnderlineAbove;
+
+        sal_Int32 nDPIX;
+        sal_Int32 nDPIY;
+    };
+
+    struct TextLineGeometry
+    {
+        // Calculated Y-offsets relative to the baseline
+        tools::Long nUnderlinePos1 = 0;
+        tools::Long nUnderlinePos2 = 0; // For LINESTYLE_DOUBLE
+
+        tools::Long nOverlinePos1 = 0;
+        tools::Long nOverlinePos2 = 0; // For double overlines
+
+        tools::Long nStrikeoutPos1 = 0;
+        tools::Long nStrikeoutPos2 = 0; // For STRIKEOUT_DOUBLE
+
+        tools::Long nLineWidth = 0;
+        tools::Long nUnderlineWaveHeight = 0;
+        tools::Long nOverlineWaveHeight = 0;
+
+        bool bUnderlineIsWave = false;
+        bool bOverlineIsWave = false;
+    };
+
+    static TextLineGeometry GetTextLineGeometry(const TextLineRequest& rReq,
+                                                const FontMetricData& rMetric);
 
 private:
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);

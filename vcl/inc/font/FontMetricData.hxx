@@ -42,6 +42,7 @@ class LogicalFontInstance;
 class VCL_DLLPUBLIC FontMetricData final : public FontAttributes, public SvRefBase
 {
 public:
+
     void            SetAscent(tools::Long nAscent) { mnAscent = nAscent; }
     void            SetDescent(tools::Long nDescent) { mnDescent = nDescent; }
 
@@ -53,6 +54,24 @@ public:
 
     void            SetWidth(tools::Long nWidth)                                           { mnWidth=nWidth; }
     void            SetOrientation(Degree10 nOrientation)                               { mnOrientation=nOrientation; }
+    // Setters for unit testing and metric initialization
+    void SetUnderlineOffset(tools::Long n) { mnUnderlineOffset = n; }
+    void SetBoldUnderlineOffset(tools::Long n) { mnBUnderlineOffset = n; }
+    void SetDoubleUnderlineOffset1(tools::Long n) { mnDUnderlineOffset1 = n; }
+    void SetDoubleUnderlineOffset2(tools::Long n) { mnDUnderlineOffset2 = n; }
+    void SetWavelineUnderlineSize(tools::Long n) { mnWUnderlineSize = n; }
+    void SetAboveUnderlineOffset(tools::Long n) { mnAboveUnderlineOffset = n; }
+    void SetAboveBoldUnderlineOffset(tools::Long n) { mnAboveBUnderlineOffset = n; }
+    void SetAboveDoubleUnderlineOffset1(tools::Long n) { mnAboveDUnderlineOffset1 = n; }
+    void SetAboveDoubleUnderlineOffset2(tools::Long n) { mnAboveDUnderlineOffset2 = n; }
+    void SetAboveWavelineUnderlineSize(tools::Long n) { mnAboveWUnderlineSize = n; }
+    void SetStrikeoutOffset(tools::Long n) { mnStrikeoutOffset = n; }
+    void SetBoldStrikeoutOffset(tools::Long n) { mnBStrikeoutOffset = n; }
+    void SetDoubleStrikeoutOffset1(tools::Long n) { mnDStrikeoutOffset1 = n; }
+    void SetDoubleStrikeoutOffset2(tools::Long n) { mnDStrikeoutOffset2 = n; }
+
+    // Setters for unit testing and initialization
+
 
     // font metrics measured for the font instance
     tools::Long            GetAscent() const                                               { return mnAscent; }
