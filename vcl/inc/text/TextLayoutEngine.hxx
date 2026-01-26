@@ -126,6 +126,14 @@ struct SAL_DLLPUBLIC MultiLineLayout
     DrawTextFlags nResultStyle = DrawTextFlags::NONE;
 };
 
+struct SAL_DLLPUBLIC MnemonicText
+{
+    OUString aText;
+    sal_Int32 nIndex;
+    sal_Int32 nLen;
+    sal_Int32 nMnemonicPos;
+};
+
 class VCL_DLLPUBLIC TextLayoutEngine
 {
 public:
@@ -521,6 +529,8 @@ public:
                                     const std::vector<tools::Rectangle>& rGlyphRects,
                                     std::vector<tools::Rectangle>& rOutVisibleRects,
                                     OUString* pOutVisibleText);
+
+    static MnemonicText PrepareMnemonicText(const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen);
 
     static Point CalculateLayoutOrigin(const OutputDevice& rDev, const tools::Rectangle& rRect,
                                        tools::Long nTextWidth, tools::Long nTextHeight,

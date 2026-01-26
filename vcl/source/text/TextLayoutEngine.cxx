@@ -2050,6 +2050,22 @@ void TextLayoutEngine::CalculateMultiLineLayout(vcl::TextLayoutCommon& rLayout,
         rRes.nResultStyle |= DrawTextFlags::Clip;
 }
 
+MnemonicText TextLayoutEngine::PrepareMnemonicText(const OUString& rStr, sal_Int32 nIndex,
+                                                   sal_Int32 nLen)
+{
+    sal_Int32 nMnemonicPos = -1;
+    OUString aStr = removeMnemonicFromString(rStr, nMnemonicPos);
+
+    if (nMnemonicPos != -1)
+    {
+        if (nMnemonicPos < nIndex)
+            nIndex--;
+        else if (nMnemonicPos < nIndex + nLen)
+            nLen--;
+    }
+    return { aStr, nIndex, nLen, nMnemonicPos };
+}
+
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
