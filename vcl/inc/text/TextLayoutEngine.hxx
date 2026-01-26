@@ -164,6 +164,9 @@ struct SAL_DLLPUBLIC TextLineSegment
 class VCL_DLLPUBLIC TextLayoutEngine
 {
 public:
+    static std::unique_ptr<SalLayout> GetStrikeoutCharLayout(const LayoutResources& rRes,
+                                                             tools::Long nTargetWidth,
+                                                             FontStrikeout eStrikeout);
     static WaveLineGeometry CalculateWaveLineGeometry(const FontMetricData& rMetric,
                                                       FontLineStyle eStyle, bool bIsAbove,
                                                       tools::Long nDistY, tools::Long nDPIX,
@@ -418,10 +421,6 @@ public:
     static void GetWordLineSegments(const SalLayout& rSalLayout,
                                     const vcl::font::FontRealization& rFontRealization,
                                     std::vector<std::pair<double, double>>& rSegments);
-
-    static std::unique_ptr<SalLayout> GetStrikeoutCharLayout(const LayoutResources& rRes,
-                                                             tools::Long nTargetWidth,
-                                                             FontStrikeout eStrikeout);
 
     static void InitializeTextLineMetrics(const LogicalFontInstance* pFontInstance,
                                           const vcl::Font& rFont, tools::Long nDPIY,

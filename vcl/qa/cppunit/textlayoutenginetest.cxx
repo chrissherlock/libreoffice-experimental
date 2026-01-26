@@ -38,7 +38,6 @@
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/BitmapReadAccess.hxx>
-#include <iostream>
 
 namespace
 {
@@ -350,9 +349,9 @@ public:
     CPPUNIT_TEST(testCalculateMultiLineLayout);
     CPPUNIT_TEST(testCalculateWaveLineGeometry);
     CPPUNIT_TEST(testCalculateStrikeoutGeometry);
-    CPPUNIT_TEST(testDrawStrikeoutChar);
     CPPUNIT_TEST(testCalculateTextLineSegments);
     CPPUNIT_TEST(testPrepareMnemonicText);
+    CPPUNIT_TEST(testDrawStrikeoutChar);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -1967,6 +1966,7 @@ void TextLayoutEngineTest::testDrawStrikeoutChar()
     tools::Long nWidth = 100;
 
     // 1. Test Slash Strikeout (STRIKEOUT_SLASH)
+    // Expectation: GetStrikeoutCharLayout returns a layout, which is drawn as black pixels.
     {
         pDev->Erase();
         pDev->DrawTextLine(aPos, nWidth, STRIKEOUT_SLASH, LINESTYLE_NONE, LINESTYLE_NONE);
@@ -1975,6 +1975,7 @@ void TextLayoutEngineTest::testDrawStrikeoutChar()
         BitmapReadAccess aAccess(aBmp);
         bool bFoundBlack = false;
 
+        // Scan for ANY black pixel drawn by the strikeout
         for (tools::Long y = 0; y < 20 && !bFoundBlack; ++y)
         {
             for (tools::Long x = 0; x < 100; ++x)
@@ -2015,6 +2016,7 @@ void TextLayoutEngineTest::testDrawStrikeoutChar()
     }
 
     // 3. Test Zero Width (Should remain white)
+    // Expectation: GetStrikeoutCharLayout returns nullptr, nothing is drawn.
     {
         pDev->Erase();
         pDev->DrawTextLine(aPos, 0, STRIKEOUT_SLASH, LINESTYLE_NONE, LINESTYLE_NONE);
