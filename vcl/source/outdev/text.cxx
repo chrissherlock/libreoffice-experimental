@@ -135,7 +135,6 @@ void OutputDevice::ImplDrawTextBackground(const SalLayout& rSalLayout)
     ImplDrawTextRect(aRect.Left(), aRect.Top(), 0, 0, aRect.GetWidth(), aRect.GetHeight());
 }
 
-
 bool OutputDevice::ImplDrawRotateText(SalLayout& rSalLayout)
 {
     basegfx::B2DPoint aOrigBase = rSalLayout.DrawBase();
@@ -148,7 +147,8 @@ bool OutputDevice::ImplDrawRotateText(SalLayout& rSalLayout)
     tools::Long nX = aOrigBase.getX();
     tools::Long nY = aOrigBase.getY();
 
-    tools::Rectangle aBoundRect = vcl::text::TextLayoutEngine::GetTextInkBounds(rSalLayout, *mpFontRealization, false);
+    tools::Rectangle aBoundRect
+        = vcl::text::TextLayoutEngine::GetTextInkBounds(rSalLayout, *mpFontRealization, false);
 
     Bitmap aBmp = ImplCreateRotatedTextBitmap(rSalLayout, aBoundRect);
 
@@ -163,7 +163,8 @@ bool OutputDevice::ImplDrawRotateText(SalLayout& rSalLayout)
     return true;
 }
 
-Bitmap OutputDevice::ImplCreateRotatedTextBitmap(SalLayout& rSalLayout, const tools::Rectangle& rBoundRect)
+Bitmap OutputDevice::ImplCreateRotatedTextBitmap(SalLayout& rSalLayout,
+                                                 const tools::Rectangle& rBoundRect)
 {
     VirtualDevice* pVDev = ImplPrepareRotateDevice(rBoundRect.GetSize());
 
@@ -193,7 +194,8 @@ VirtualDevice* OutputDevice::ImplPrepareRotateDevice(const Size& rSize)
     if (!pVDev->SetOutputSizePixel(rSize))
         return nullptr;
 
-    const vcl::font::FontSelectPattern& rPattern = mpFontRealization->mxFont->GetFontSelectPattern();
+    const vcl::font::FontSelectPattern& rPattern
+        = mpFontRealization->mxFont->GetFontSelectPattern();
     vcl::Font aFont(GetFont());
     aFont.SetOrientation(0_deg10); // Draw horizontal first
     aFont.SetFontSize(Size(rPattern.mnWidth, rPattern.mnHeight));
@@ -230,7 +232,6 @@ void OutputDevice::ImplDrawRotatedTextMask(const Point& rPoint, const Bitmap& rB
 
     DrawMask(rPoint, rBmp, GetTextColor());
 }
-
 
 void OutputDevice::ImplRenderLayout(SalLayout& rSalLayout, bool bTextLines)
 {
@@ -323,7 +324,8 @@ void OutputDevice::ImplDrawReliefText(SalLayout& rSalLayout)
         aTextColor = COL_WHITE;
 
     Color aEffectiveLineColor = (aOldTextLineColor == COL_BLACK) ? COL_WHITE : aOldTextLineColor;
-    Color aEffectiveOverlineColor = (aOldOverlineColor == COL_BLACK) ? COL_WHITE : aOldOverlineColor;
+    Color aEffectiveOverlineColor
+        = (aOldOverlineColor == COL_BLACK) ? COL_WHITE : aOldOverlineColor;
 
     // Relief color is black for white text
     if (aTextColor == COL_WHITE)
@@ -537,13 +539,10 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
         pDisplayText = &mpOutDevData->mpRecordLayout->m_aDisplayText;
     }
 
-#if OSL_DEBUG_LEVEL > 2
-    SAL_INFO("vcl.gdi", "OutputDevice::DrawText(\"" << rStr << "\")");
-#endif
-
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaTextAction(rStartPt, rStr, nIndex, nLen));
 
+    // Recording and Visibility Filtering Logic
     if (pVector)
     {
         vcl::Region aClip(GetOutputBoundsClipRegion());
@@ -557,38 +556,11 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
 
         if (!aClip.IsNull())
         {
-            std::vector<tools::Rectangle> aTmp;
-            GetGlyphBoundRects(rStartPt, rStr, nIndex, nLen, aTmp);
+            std::vector<tools::Rectangle> aGlyphRects;
+            GetGlyphBoundRects(rStartPt, rStr, nIndex, nLen, aGlyphRects);
 
-            bool bInserted = false;
-            for (std::vector<tools::Rectangle>::const_iterator it = aTmp.begin(); it != aTmp.end();
-                 ++it, nIndex++)
-            {
-                bool bAppend = false;
-
-                if (aClip.Overlaps(*it))
-                {
-                    bAppend = true;
-                }
-                else if (rStr[nIndex] == ' ' && bInserted)
-                {
-                    std::vector<tools::Rectangle>::const_iterator next = it;
-                    ++next;
-
-                    if (next != aTmp.end() && aClip.Overlaps(*next))
-                        bAppend = true;
-                }
-
-                if (bAppend)
-                {
-                    pVector->push_back(*it);
-
-                    if (pDisplayText)
-                        *pDisplayText += OUStringChar(rStr[nIndex]);
-
-                    bInserted = true;
-                }
-            }
+            vcl::text::TextLayoutEngine::FilterVisibleGlyphs(rStr, nIndex, aClip, aGlyphRects,
+                                                             *pVector, pDisplayText);
         }
         else
         {
@@ -604,7 +576,6 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
 
     if (mpFontRealization->mxFont)
     {
-        // do not use cache with modified string
         if (mpFontRealization->mxFont->mpConversion)
             pLayoutCache = nullptr;
     }
