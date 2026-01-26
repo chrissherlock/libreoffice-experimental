@@ -783,15 +783,15 @@ void OutputDevice::ImplDrawStrikeoutChar( tools::Long nBaseX, tools::Long nBaseY
     ImplInitTextColor();
 }
 
-void OutputDevice::ImplDrawTextLine( tools::Long nX, tools::Long nY,
+void OutputDevice::ImplDrawTextLine(tools::Long nX, tools::Long nY,
                                      tools::Long nDistX, double nWidth,
                                      double nLayoutWidth,
                                      FontStrikeout eStrikeout,
                                      FontLineStyle eUnderline,
                                      FontLineStyle eOverline,
-                                     bool bUnderlineAbove )
+                                     bool bUnderlineAbove)
 {
-    if ( !nWidth )
+    if (!nWidth)
         return;
 
     Color aStrikeoutColor = GetTextColor();
@@ -801,53 +801,58 @@ void OutputDevice::ImplDrawTextLine( tools::Long nX, tools::Long nY,
     bool bUnderlineDone = false;
     bool bOverlineDone  = false;
 
-    if ( IsRTLEnabled() )
+    if (IsRTLEnabled())
     {
         tools::Long nXAdd = nWidth - nDistX;
-        if( mpFontInstance->mnOrientation )
-            nXAdd = basegfx::fround<tools::Long>( nXAdd * cos( toRadians(mpFontInstance->mnOrientation) ) );
-
+        if (mpFontInstance->mnOrientation)
+            nXAdd = basegfx::fround<tools::Long>(nXAdd * cos(toRadians(mpFontInstance->mnOrientation)));
         nX += nXAdd - 1;
     }
 
-    if ( !IsTextLineColor() )
+    if (!IsTextLineColor())
         aUnderlineColor = GetTextColor();
 
-    if ( !IsOverlineColor() )
+    if (!IsOverlineColor())
         aOverlineColor = GetTextColor();
 
-    if ( (eUnderline == LINESTYLE_SMALLWAVE) ||
-         (eUnderline == LINESTYLE_WAVE) ||
-         (eUnderline == LINESTYLE_DOUBLEWAVE) ||
-         (eUnderline == LINESTYLE_BOLDWAVE) )
+    vcl::text::TextLayoutEngine::TextLineRequest aReq;
+    aReq.eUnderline = eUnderline;
+    aReq.eOverline = eOverline;
+    aReq.eStrikeout = eStrikeout;
+    aReq.bUnderlineAbove = bUnderlineAbove;
+    aReq.nDPIX = GetDPIX();
+    aReq.nDPIY = GetDPIY();
+
+    auto aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, *mpFontInstance->mxFontMetric);
+
+    if (aGeo.bUnderlineIsWave)
     {
-        ImplDrawWaveTextLine( nX, nY, nDistX, 0, nWidth, nLayoutWidth, eUnderline, aUnderlineColor, bUnderlineAbove );
+        ImplDrawWaveTextLine(nX, nY, nDistX, aGeo.nUnderlineWaveHeight, nWidth, nLayoutWidth, eUnderline, aUnderlineColor, bUnderlineAbove);
         bUnderlineDone = true;
     }
-    if ( (eOverline == LINESTYLE_SMALLWAVE) ||
-         (eOverline == LINESTYLE_WAVE) ||
-         (eOverline == LINESTYLE_DOUBLEWAVE) ||
-         (eOverline == LINESTYLE_BOLDWAVE) )
+
+    if (aGeo.bOverlineIsWave)
     {
-        ImplDrawWaveTextLine( nX, nY, nDistX, 0, nWidth, nLayoutWidth, eOverline, aOverlineColor, true );
+        ImplDrawWaveTextLine(nX, nY, nDistX, aGeo.nOverlineWaveHeight, nWidth, nLayoutWidth, eOverline, aOverlineColor, true);
         bOverlineDone = true;
     }
 
-    if ( (eStrikeout == STRIKEOUT_SLASH) ||
-         (eStrikeout == STRIKEOUT_X) )
+    if (eStrikeout == STRIKEOUT_SLASH || eStrikeout == STRIKEOUT_X)
     {
-        ImplDrawStrikeoutChar( nX, nY, nDistX, 0, nWidth, eStrikeout, aStrikeoutColor );
+        ImplDrawStrikeoutChar(nX, nY, nDistX, 0, nWidth, eStrikeout, aStrikeoutColor);
         bStrikeoutDone = true;
     }
 
-    if ( !bUnderlineDone )
-        ImplDrawStraightTextLine( nX, nY, nDistX, 0, nWidth, eUnderline, aUnderlineColor, bUnderlineAbove );
+    // Execute Straight Line Drawing
+    // These only run if the engine determined the style was NOT a wave
+    if (!bUnderlineDone)
+        ImplDrawStraightTextLine(nX, nY, nDistX, 0, nWidth, eUnderline, aUnderlineColor, bUnderlineAbove);
 
-    if ( !bOverlineDone )
-        ImplDrawStraightTextLine( nX, nY, nDistX, 0, nWidth, eOverline, aOverlineColor, true );
+    if (!bOverlineDone)
+        ImplDrawStraightTextLine(nX, nY, nDistX, 0, nWidth, eOverline, aOverlineColor, true);
 
-    if ( !bStrikeoutDone )
-        ImplDrawStrikeoutLine( nX, nY, nDistX, 0, nWidth, eStrikeout, aStrikeoutColor );
+    if (!bStrikeoutDone)
+        ImplDrawStrikeoutLine(nX, nY, nDistX, 0, nWidth, eStrikeout, aStrikeoutColor);
 }
 
 void OutputDevice::ImplDrawTextLines( SalLayout& rSalLayout, FontStrikeout eStrikeout,

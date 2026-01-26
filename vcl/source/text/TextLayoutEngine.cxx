@@ -22,6 +22,7 @@
 #include <vcl/svapp.hxx>
 #include <vcl/mnemonic.hxx>
 
+#include <font/FontMetricData.hxx>
 #include <font/FontController.hxx>
 #include <font/LogicalFontInstance.hxx>
 #include <font/FontSelectPattern.hxx>
@@ -1815,6 +1816,88 @@ TextLayoutEngine::CalculateLayout(const CoordinateMapper& rMapper, const LayoutR
     }
 
     return aRes;
+}
+
+TextLayoutEngine::TextLineGeometry
+TextLayoutEngine::GetTextLineGeometry(const TextLineRequest& rReq, const FontMetricData& rMetric)
+{
+    TextLineGeometry aGeo;
+
+    // Calculate Standard Pen Width (DPI / 300)
+    aGeo.nLineWidth = rReq.nDPIX / 300;
+    if (aGeo.nLineWidth < 1)
+        aGeo.nLineWidth = 1;
+
+    if (rReq.eUnderline != LINESTYLE_NONE)
+    {
+        if (rReq.eUnderline == LINESTYLE_DOUBLE || rReq.eUnderline == LINESTYLE_DOUBLEWAVE)
+        {
+            aGeo.nUnderlinePos1 = rReq.bUnderlineAbove ? rMetric.GetAboveDoubleUnderlineOffset1()
+                                                       : rMetric.GetDoubleUnderlineOffset1();
+            aGeo.nUnderlinePos2 = rReq.bUnderlineAbove ? rMetric.GetAboveDoubleUnderlineOffset2()
+                                                       : rMetric.GetDoubleUnderlineOffset2();
+        }
+        else if (rReq.eUnderline >= LINESTYLE_BOLD && rReq.eUnderline <= LINESTYLE_BOLDDASHDOTDOT)
+        {
+            aGeo.nUnderlinePos1 = rReq.bUnderlineAbove ? rMetric.GetAboveBoldUnderlineOffset()
+                                                       : rMetric.GetBoldUnderlineOffset();
+        }
+        else
+        {
+            aGeo.nUnderlinePos1 = rReq.bUnderlineAbove ? rMetric.GetAboveUnderlineOffset()
+                                                       : rMetric.GetUnderlineOffset();
+        }
+
+        if (rReq.eUnderline == LINESTYLE_WAVE || rReq.eUnderline == LINESTYLE_BOLDWAVE
+            || rReq.eUnderline == LINESTYLE_SMALLWAVE || rReq.eUnderline == LINESTYLE_DOUBLEWAVE)
+        {
+            aGeo.bUnderlineIsWave = true;
+            tools::Long nHeight = rReq.bUnderlineAbove ? rMetric.GetAboveWavelineUnderlineSize()
+                                                       : rMetric.GetWavelineUnderlineSize();
+
+            // Apply the 3-pixel cap for small waves
+            if (rReq.eUnderline == LINESTYLE_SMALLWAVE && nHeight > 3)
+                nHeight = 3;
+
+            aGeo.nUnderlineWaveHeight = nHeight;
+
+            // Bold waves use double the line width
+            if (rReq.eUnderline == LINESTYLE_BOLDWAVE)
+                aGeo.nLineWidth *= 2;
+        }
+    }
+
+    if (rReq.eOverline != LINESTYLE_NONE)
+    {
+        // Overlines always use the "Above" metrics in the current VCL implementation
+        aGeo.nOverlinePos1 = rMetric.GetAboveUnderlineOffset();
+
+        if (rReq.eOverline == LINESTYLE_WAVE || rReq.eOverline == LINESTYLE_BOLDWAVE
+            || rReq.eOverline == LINESTYLE_SMALLWAVE || rReq.eOverline == LINESTYLE_DOUBLEWAVE)
+        {
+            aGeo.bOverlineIsWave = true;
+            aGeo.nOverlineWaveHeight = rMetric.GetAboveWavelineUnderlineSize();
+        }
+    }
+
+    if (rReq.eStrikeout != STRIKEOUT_NONE)
+    {
+        if (rReq.eStrikeout == STRIKEOUT_DOUBLE)
+        {
+            aGeo.nStrikeoutPos1 = rMetric.GetDoubleStrikeoutOffset1();
+            aGeo.nStrikeoutPos2 = rMetric.GetDoubleStrikeoutOffset2();
+        }
+        else if (rReq.eStrikeout == STRIKEOUT_BOLD)
+        {
+            aGeo.nStrikeoutPos1 = rMetric.GetBoldStrikeoutOffset();
+        }
+        else
+        {
+            aGeo.nStrikeoutPos1 = rMetric.GetStrikeoutOffset();
+        }
+    }
+
+    return aGeo;
 }
 
 } // namespace vcl::text
