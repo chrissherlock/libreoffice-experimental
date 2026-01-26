@@ -315,6 +315,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/outdev/vclreferencebase \
     vcl/source/outdev/nativecontrols \
     vcl/source/outdev/map \
+    vcl/source/text/LayoutRecorder \
     vcl/source/text/TextLayoutRequest \
     vcl/source/text/ImplLayoutRuns \
     vcl/source/text/mnemonic \

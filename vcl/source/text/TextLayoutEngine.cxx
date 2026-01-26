@@ -727,17 +727,14 @@ std::unique_ptr<SalLayout> TextLayoutEngine::PerformTextLayout(const LayoutResou
                                                                vcl::text::TextLayoutRequest& rArgs,
                                                                const SalLayoutGlyphs* pGlyphs)
 {
-    // 1. Create Base Layout
     std::unique_ptr<SalLayout> pSalLayout = CreateBaseLayout(rRes);
 
-    // 2. Initial Layout Run
     if (pSalLayout && !pSalLayout->LayoutText(rArgs, pGlyphs ? pGlyphs->Impl(0) : nullptr))
         pSalLayout.reset();
 
     if (!pSalLayout)
         return nullptr;
 
-    // 3. Fallback Resolution
     if (rArgs.HasFallbackRun() && rRes.pFont->GetFontSelectPattern().mnHeight >= 3)
     {
         GraphicLayoutFactory aFactory(rRes.fnGetGraphics);

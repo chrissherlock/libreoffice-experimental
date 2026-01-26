@@ -977,15 +977,6 @@ public:
 
     SAL_DLLPRIVATE void ImplRenderTextLayout(SalLayout& rSalLayout);
 
-    SAL_DLLPRIVATE void ImplRecordLayoutData(const Point& rStartPt, const OUString& rStr,
-                                             sal_Int32 nIndex, sal_Int32 nLen);
-
-    SAL_DLLPRIVATE void ImplFilterAndRecordGlyphs(const Point& rStartPt, const OUString& rStr,
-                                                  sal_Int32 nIndex, sal_Int32 nLen,
-                                                  const vcl::Region& rClip,
-                                                  std::vector<tools::Rectangle>& rVector,
-                                                  OUString* pDisplayText);
-
     SAL_DLLPRIVATE void         ImplDrawTextBackground( const SalLayout& );
 
     void                        DrawCtrlText( const Point& rPos, const OUString& rStr,
