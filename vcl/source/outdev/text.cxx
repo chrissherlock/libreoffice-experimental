@@ -542,33 +542,14 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaTextAction(rStartPt, rStr, nIndex, nLen));
 
-    // Recording and Visibility Filtering Logic
     if (pVector)
     {
         vcl::Region aClip(GetOutputBoundsClipRegion());
-
-        if (mpOutDevData->mpRecordLayout)
-        {
-            mpOutDevData->mpRecordLayout->m_aLineIndices.push_back(
-                mpOutDevData->mpRecordLayout->m_aDisplayText.getLength());
-            aClip.Intersect(mpOutDevData->maRecordRect);
-        }
-
-        if (!aClip.IsNull())
-        {
-            std::vector<tools::Rectangle> aGlyphRects;
-            GetGlyphBoundRects(rStartPt, rStr, nIndex, nLen, aGlyphRects);
-
-            vcl::text::TextLayoutEngine::FilterVisibleGlyphs(rStr, nIndex, aClip, aGlyphRects,
-                                                             *pVector, pDisplayText);
-        }
-        else
-        {
-            GetGlyphBoundRects(rStartPt, rStr, nIndex, nLen, *pVector);
-
-            if (pDisplayText)
-                *pDisplayText += rStr.subView(nIndex, nLen);
-        }
+        ImplFilterAndRecordGlyphs(rStartPt, rStr, nIndex, nLen, aClip, *pVector, pDisplayText);
+    }
+    else
+    {
+        ImplRecordLayoutData(rStartPt, rStr, nIndex, nLen);
     }
 
     if (!IsDeviceOutputNecessary() || pVector)
@@ -576,6 +557,7 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
 
     if (mpFontRealization->mxFont)
     {
+        // Cache is invalidated if a font conversion is active
         if (mpFontRealization->mxFont->mpConversion)
             pLayoutCache = nullptr;
     }
@@ -587,6 +569,46 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
 
     if (pSalLayout)
         ImplDrawText(*pSalLayout);
+}
+
+void OutputDevice::ImplRecordLayoutData(const Point& rStartPt, const OUString& rStr,
+                                        sal_Int32 nIndex, sal_Int32 nLen)
+{
+    if (!mpOutDevData->mpRecordLayout)
+        return;
+
+    auto& rRecord = *mpOutDevData->mpRecordLayout;
+    rRecord.m_aLineIndices.push_back(rRecord.m_aDisplayText.getLength());
+
+    vcl::Region aClip(GetOutputBoundsClipRegion());
+    aClip.Intersect(mpOutDevData->maRecordRect);
+
+    ImplFilterAndRecordGlyphs(rStartPt, rStr, nIndex, nLen, aClip,
+                              rRecord.m_aUnicodeBoundRects,
+                              &rRecord.m_aDisplayText);
+}
+
+void OutputDevice::ImplFilterAndRecordGlyphs(const Point& rStartPt, const OUString& rStr,
+                                             sal_Int32 nIndex, sal_Int32 nLen,
+                                             const vcl::Region& rClip,
+                                             std::vector<tools::Rectangle>& rVector,
+                                             OUString* pDisplayText)
+{
+    if (rClip.IsNull())
+    {
+        GetGlyphBoundRects(rStartPt, rStr, nIndex, nLen, rVector);
+
+        if (pDisplayText)
+            *pDisplayText += rStr.subView(nIndex, nLen);
+
+        return;
+    }
+
+    std::vector<tools::Rectangle> aGlyphRects;
+    GetGlyphBoundRects(rStartPt, rStr, nIndex, nLen, aGlyphRects);
+
+    vcl::text::TextLayoutEngine::FilterVisibleGlyphs(
+        rStr, nIndex, rClip, aGlyphRects, rVector, pDisplayText);
 }
 
 tools::Long OutputDevice::GetTextWidth(const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen,
@@ -683,40 +705,34 @@ void OutputDevice::DrawPartialTextArray(const Point& rStartPt, const OUString& r
         ImplDrawText(*pSalLayout);
 }
 
-void OutputDevice::DrawTextArray(const Point& rStartPt, const OUString& rStr,
-                                 KernArraySpan pDXArray, std::span<const sal_Bool> pKashidaArray,
-                                 sal_Int32 nIndex, sal_Int32 nLen, SalLayoutFlags flags,
-                                 const SalLayoutGlyphs* pSalLayoutCache)
+void OutputDevice::DrawTextArray( const Point& rStartPt, const OUString& rStr,
+                                  KernArraySpan aKernArray,
+                                  std::span<const sal_Bool> pKashidaAry,
+                                  sal_Int32 nIndex, sal_Int32 nLen,
+                                  SalLayoutFlags nFlags,
+                                  const SalLayoutGlyphs* pLayoutCache )
 {
     assert(!is_double_buffered_window());
-
     nLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nIndex, nLen);
 
     if (mpMetaFile)
-        mpMetaFile->AddAction(
-            new MetaTextArrayAction(rStartPt, rStr, pDXArray, pKashidaArray, nIndex, nLen));
+        mpMetaFile->AddAction( new MetaTextArrayAction( rStartPt, rStr, aKernArray, pKashidaAry, nIndex, nLen ) );
 
-    if (!IsDeviceOutputNecessary())
+    ImplRecordLayoutData(rStartPt, rStr, nIndex, nLen);
+
+    if ( !IsDeviceOutputNecessary() || mpOutDevData->mpRecordLayout )
         return;
 
-    if (!mpGraphics && !AcquireGraphics())
-        return;
+    if( mpFontRealization->mxFont && mpFontRealization->mxFont->mpConversion )
+        pLayoutCache = nullptr;
 
-    assert(mpGraphics);
-
-    if (mpClippingController->IsDirty())
-        InitClipRegion();
-
-    if (IsOutputCulled())
-        return;
-
-    std::unique_ptr<SalLayout> pSalLayout = LayoutText(
+    auto pSalLayout = LayoutText(
         vcl::text::TextSpan{ rStr, nIndex, nLen },
-        vcl::text::LayoutConstraints{ rStartPt, 0, pDXArray, pKashidaArray, flags },
-        vcl::text::LayoutCacheData{ nullptr, pSalLayoutCache }, vcl::text::RenderSelection{});
+        vcl::text::LayoutConstraints{ rStartPt, 0, aKernArray, pKashidaAry, nFlags },
+        vcl::text::LayoutCacheData{ nullptr, pLayoutCache }, vcl::text::RenderSelection{});
 
-    if (pSalLayout)
-        ImplDrawText(*pSalLayout);
+    if ( pSalLayout )
+        ImplRenderTextLayout( *pSalLayout );
 }
 
 double OutputDevice::GetTextArray(const OUString& rStr, KernArray* pKernArray, sal_Int32 nIndex,
@@ -1771,6 +1787,14 @@ bool OutputDevice::GetGlyphBoundRects(const Point& rOrigin, const OUString& rStr
     }
 
     return (nLen == static_cast<int>(rVector.size()));
+}
+
+void OutputDevice::ImplRenderTextLayout(SalLayout& rSalLayout)
+{
+    if (!IsDeviceOutputNecessary())
+        return;
+
+    ImplDrawText(rSalLayout);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
