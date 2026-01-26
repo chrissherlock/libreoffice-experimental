@@ -2066,6 +2066,169 @@ MnemonicText TextLayoutEngine::PrepareMnemonicText(const OUString& rStr, sal_Int
     return { aStr, nIndex, nLen, nMnemonicPos };
 }
 
+#include <o3tl/unit_conversion.hxx>
+#include <vcl/fntstyle.hxx>
+
+std::vector<TextLineSegment> TextLayoutEngine::CalculateTextLineSegments(tools::Long nWidth,
+                                                                         FontLineStyle eStyle,
+                                                                         tools::Long nLineHeight,
+                                                                         tools::Long nDPIX,
+                                                                         tools::Long nDPIY)
+{
+    std::vector<TextLineSegment> aSegments;
+    tools::Long nLeft = 0;
+
+    switch (eStyle)
+    {
+        case LINESTYLE_DOTTED:
+        case LINESTYLE_BOLDDOTTED:
+        {
+            tools::Long nDotWidth = nLineHeight * nDPIY;
+            nDotWidth += nDPIY / 2;
+            nDotWidth /= nDPIY;
+
+            tools::Long nTempWidth = nDotWidth;
+            tools::Long nEnd = nWidth;
+            while (nLeft < nEnd)
+            {
+                if (nLeft + nTempWidth > nEnd)
+                    nTempWidth = nEnd - nLeft;
+
+                aSegments.push_back({ nLeft, nTempWidth });
+                nLeft += nDotWidth * 2;
+            }
+        }
+        break;
+        case LINESTYLE_DASH:
+        case LINESTYLE_LONGDASH:
+        case LINESTYLE_BOLDDASH:
+        case LINESTYLE_BOLDLONGDASH:
+        {
+            tools::Long nDotWidth = nLineHeight * nDPIY;
+            nDotWidth += nDPIY / 2;
+            nDotWidth /= nDPIY;
+
+            tools::Long nMinDashWidth;
+            tools::Long nMinSpaceWidth;
+            tools::Long nSpaceWidth;
+            tools::Long nDashWidth;
+            if ((eStyle == LINESTYLE_LONGDASH) || (eStyle == LINESTYLE_BOLDLONGDASH))
+            {
+                nMinDashWidth = nDotWidth * 6;
+                nMinSpaceWidth = nDotWidth * 2;
+                nDashWidth = 200;
+                nSpaceWidth = 100;
+            }
+            else
+            {
+                nMinDashWidth = nDotWidth * 4;
+                nMinSpaceWidth = (nDotWidth * 150) / 100;
+                nDashWidth = 100;
+                nSpaceWidth = 50;
+            }
+            nDashWidth = o3tl::convert(nDashWidth * nDPIX, o3tl::Length::mm100, o3tl::Length::in);
+            nSpaceWidth = o3tl::convert(nSpaceWidth * nDPIX, o3tl::Length::mm100, o3tl::Length::in);
+
+            if (nDashWidth < nMinDashWidth)
+                nDashWidth = nMinDashWidth;
+            if (nSpaceWidth < nMinSpaceWidth)
+                nSpaceWidth = nMinSpaceWidth;
+
+            tools::Long nTempWidth = nDashWidth;
+            tools::Long nEnd = nWidth;
+            while (nLeft < nEnd)
+            {
+                if (nLeft + nTempWidth > nEnd)
+                    nTempWidth = nEnd - nLeft;
+                aSegments.push_back({ nLeft, nTempWidth });
+                nLeft += nDashWidth + nSpaceWidth;
+            }
+        }
+        break;
+        case LINESTYLE_DASHDOT:
+        case LINESTYLE_BOLDDASHDOT:
+        {
+            tools::Long nDotWidth = nLineHeight * nDPIY;
+            nDotWidth += nDPIY / 2;
+            nDotWidth /= nDPIY;
+
+            tools::Long nDashWidth
+                = o3tl::convert(100 * nDPIX, o3tl::Length::mm100, o3tl::Length::in);
+            tools::Long nMinDashWidth = nDotWidth * 4;
+
+            if (nDashWidth < nMinDashWidth)
+                nDashWidth = nMinDashWidth;
+
+            tools::Long nTempDotWidth = nDotWidth;
+            tools::Long nTempDashWidth = nDashWidth;
+            tools::Long nEnd = nWidth;
+            while (nLeft < nEnd)
+            {
+                if (nLeft + nTempDotWidth > nEnd)
+                    nTempDotWidth = nEnd - nLeft;
+
+                aSegments.push_back({ nLeft, nTempDotWidth });
+                nLeft += nDotWidth * 2;
+                if (nLeft > nEnd)
+                    break;
+
+                if (nLeft + nTempDashWidth > nEnd)
+                    nTempDashWidth = nEnd - nLeft;
+
+                aSegments.push_back({ nLeft, nTempDashWidth });
+                nLeft += nDashWidth + nDotWidth;
+            }
+        }
+        break;
+        case LINESTYLE_DASHDOTDOT:
+        case LINESTYLE_BOLDDASHDOTDOT:
+        {
+            tools::Long nDotWidth = nLineHeight * nDPIY;
+            nDotWidth += nDPIY / 2;
+            nDotWidth /= nDPIY;
+
+            tools::Long nDashWidth
+                = o3tl::convert(100 * nDPIX, o3tl::Length::mm100, o3tl::Length::in);
+            tools::Long nMinDashWidth = nDotWidth * 4;
+
+            if (nDashWidth < nMinDashWidth)
+                nDashWidth = nMinDashWidth;
+
+            tools::Long nTempDotWidth = nDotWidth;
+            tools::Long nTempDashWidth = nDashWidth;
+            tools::Long nEnd = nWidth;
+            while (nLeft < nEnd)
+            {
+                if (nLeft + nTempDotWidth > nEnd)
+                    nTempDotWidth = nEnd - nLeft;
+
+                aSegments.push_back({ nLeft, nTempDotWidth });
+                nLeft += nDotWidth * 2;
+                if (nLeft > nEnd)
+                    break;
+
+                if (nLeft + nTempDotWidth > nEnd)
+                    nTempDotWidth = nEnd - nLeft;
+
+                aSegments.push_back({ nLeft, nTempDotWidth });
+                nLeft += nDotWidth * 2;
+                if (nLeft > nEnd)
+                    break;
+
+                if (nLeft + nTempDashWidth > nEnd)
+                    nTempDashWidth = nEnd - nLeft;
+
+                aSegments.push_back({ nLeft, nTempDashWidth });
+                nLeft += nDashWidth + nDotWidth;
+            }
+        }
+        break;
+        default:
+            break;
+    }
+    return aSegments;
+}
+
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

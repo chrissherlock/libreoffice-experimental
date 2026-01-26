@@ -134,6 +134,12 @@ struct SAL_DLLPUBLIC MnemonicText
     sal_Int32 nMnemonicPos;
 };
 
+struct SAL_DLLPUBLIC TextLineSegment
+{
+    tools::Long nX;
+    tools::Long nWidth;
+};
+
 class VCL_DLLPUBLIC TextLayoutEngine
 {
 public:
@@ -529,6 +535,10 @@ public:
                                     const std::vector<tools::Rectangle>& rGlyphRects,
                                     std::vector<tools::Rectangle>& rOutVisibleRects,
                                     OUString* pOutVisibleText);
+
+    static std::vector<TextLineSegment>
+    CalculateTextLineSegments(tools::Long nWidth, FontLineStyle eStyle, tools::Long nLineHeight,
+                              tools::Long nDPIX, tools::Long nDPIY);
 
     static MnemonicText PrepareMnemonicText(const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen);
 

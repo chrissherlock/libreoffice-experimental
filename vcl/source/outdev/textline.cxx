@@ -392,7 +392,7 @@ void OutputDevice::ImplDrawStraightTextLine( tools::Long nBaseX, tools::Long nBa
     if ( eTextLine > UNDERLINE_LAST )
         eTextLine = LINESTYLE_SINGLE;
 
-    switch ( eTextLine )
+            switch ( eTextLine )
     {
     case LINESTYLE_SINGLE:
     case LINESTYLE_DOTTED:
@@ -459,7 +459,7 @@ void OutputDevice::ImplDrawStraightTextLine( tools::Long nBaseX, tools::Long nBa
 
     tools::Long nLeft = nDistX;
 
-    switch ( eTextLine )
+        switch ( eTextLine )
     {
     case LINESTYLE_SINGLE:
     case LINESTYLE_BOLD:
@@ -469,152 +469,16 @@ void OutputDevice::ImplDrawStraightTextLine( tools::Long nBaseX, tools::Long nBa
         ImplDrawTextRect( nBaseX, nBaseY, nLeft, nLinePos,  nWidth, nLineHeight );
         ImplDrawTextRect( nBaseX, nBaseY, nLeft, nLinePos2, nWidth, nLineHeight );
         break;
-    case LINESTYLE_DOTTED:
-    case LINESTYLE_BOLDDOTTED:
-        {
-            tools::Long nDotWidth = nLineHeight*GetDPIY();
-            nDotWidth += GetDPIY()/2;
-            nDotWidth /= GetDPIY();
-
-            tools::Long nTempWidth = nDotWidth;
-            tools::Long nEnd = nLeft+nWidth;
-            while ( nLeft < nEnd )
-            {
-                if ( nLeft+nTempWidth > nEnd )
-                    nTempWidth = nEnd-nLeft;
-
-                ImplDrawTextRect( nBaseX, nBaseY, nLeft, nLinePos, nTempWidth, nLineHeight );
-                nLeft += nDotWidth*2;
-            }
-        }
-        break;
-    case LINESTYLE_DASH:
-    case LINESTYLE_LONGDASH:
-    case LINESTYLE_BOLDDASH:
-    case LINESTYLE_BOLDLONGDASH:
-        {
-            tools::Long nDotWidth = nLineHeight*GetDPIY();
-            nDotWidth += GetDPIY()/2;
-            nDotWidth /= GetDPIY();
-
-            tools::Long nMinDashWidth;
-            tools::Long nMinSpaceWidth;
-            tools::Long nSpaceWidth;
-            tools::Long nDashWidth;
-            if ( (eTextLine == LINESTYLE_LONGDASH) ||
-                 (eTextLine == LINESTYLE_BOLDLONGDASH) )
-            {
-                nMinDashWidth = nDotWidth*6;
-                nMinSpaceWidth = nDotWidth*2;
-                nDashWidth = 200;
-                nSpaceWidth = 100;
-            }
-            else
-            {
-                nMinDashWidth = nDotWidth*4;
-                nMinSpaceWidth = (nDotWidth*150)/100;
-                nDashWidth = 100;
-                nSpaceWidth = 50;
-            }
-            nDashWidth = o3tl::convert(nDashWidth * GetDPIX(), o3tl::Length::mm100, o3tl::Length::in);
-            nSpaceWidth = o3tl::convert(nSpaceWidth * GetDPIX(), o3tl::Length::mm100, o3tl::Length::in);
-            // DashWidth will be increased if the line is getting too thick
-            // in proportion to the line's length
-            if ( nDashWidth < nMinDashWidth )
-                nDashWidth = nMinDashWidth;
-            if ( nSpaceWidth < nMinSpaceWidth )
-                nSpaceWidth = nMinSpaceWidth;
-
-            tools::Long nTempWidth = nDashWidth;
-            tools::Long nEnd = nLeft+nWidth;
-            while ( nLeft < nEnd )
-            {
-                if ( nLeft+nTempWidth > nEnd )
-                    nTempWidth = nEnd-nLeft;
-                ImplDrawTextRect( nBaseX, nBaseY, nLeft, nLinePos, nTempWidth, nLineHeight );
-                nLeft += nDashWidth+nSpaceWidth;
-            }
-        }
-        break;
-    case LINESTYLE_DASHDOT:
-    case LINESTYLE_BOLDDASHDOT:
-        {
-            tools::Long nDotWidth = nLineHeight*GetDPIY();
-            nDotWidth += GetDPIY()/2;
-            nDotWidth /= GetDPIY();
-
-            tools::Long nDashWidth = o3tl::convert(100 * GetDPIX(), o3tl::Length::mm100, o3tl::Length::in);
-            tools::Long nMinDashWidth = nDotWidth*4;
-            // DashWidth will be increased if the line is getting too thick
-            // in proportion to the line's length
-            if ( nDashWidth < nMinDashWidth )
-                nDashWidth = nMinDashWidth;
-
-            tools::Long nTempDotWidth = nDotWidth;
-            tools::Long nTempDashWidth = nDashWidth;
-            tools::Long nEnd = nLeft+nWidth;
-            while ( nLeft < nEnd )
-            {
-                if ( nLeft+nTempDotWidth > nEnd )
-                    nTempDotWidth = nEnd-nLeft;
-
-                ImplDrawTextRect( nBaseX, nBaseY, nLeft, nLinePos, nTempDotWidth, nLineHeight );
-                nLeft += nDotWidth*2;
-                if ( nLeft > nEnd )
-                    break;
-
-                if ( nLeft+nTempDashWidth > nEnd )
-                    nTempDashWidth = nEnd-nLeft;
-
-                ImplDrawTextRect( nBaseX, nBaseY, nLeft, nLinePos, nTempDashWidth, nLineHeight );
-                nLeft += nDashWidth+nDotWidth;
-            }
-        }
-        break;
-    case LINESTYLE_DASHDOTDOT:
-    case LINESTYLE_BOLDDASHDOTDOT:
-        {
-            tools::Long nDotWidth = nLineHeight*GetDPIY();
-            nDotWidth += GetDPIY()/2;
-            nDotWidth /= GetDPIY();
-
-            tools::Long nDashWidth = o3tl::convert(100 * GetDPIX(), o3tl::Length::mm100, o3tl::Length::in);
-            tools::Long nMinDashWidth = nDotWidth*4;
-            // DashWidth will be increased if the line is getting too thick
-            // in proportion to the line's length
-            if ( nDashWidth < nMinDashWidth )
-                nDashWidth = nMinDashWidth;
-
-            tools::Long nTempDotWidth = nDotWidth;
-            tools::Long nTempDashWidth = nDashWidth;
-            tools::Long nEnd = nLeft+nWidth;
-            while ( nLeft < nEnd )
-            {
-                if ( nLeft+nTempDotWidth > nEnd )
-                    nTempDotWidth = nEnd-nLeft;
-
-                ImplDrawTextRect( nBaseX, nBaseY, nLeft, nLinePos, nTempDotWidth, nLineHeight );
-                nLeft += nDotWidth*2;
-                if ( nLeft > nEnd )
-                    break;
-
-                if ( nLeft+nTempDotWidth > nEnd )
-                    nTempDotWidth = nEnd-nLeft;
-
-                ImplDrawTextRect( nBaseX, nBaseY, nLeft, nLinePos, nTempDotWidth, nLineHeight );
-                nLeft += nDotWidth*2;
-                if ( nLeft > nEnd )
-                    break;
-
-                if ( nLeft+nTempDashWidth > nEnd )
-                    nTempDashWidth = nEnd-nLeft;
-
-                ImplDrawTextRect( nBaseX, nBaseY, nLeft, nLinePos, nTempDashWidth, nLineHeight );
-                nLeft += nDashWidth+nDotWidth;
-            }
-        }
-        break;
     default:
+        {
+            std::vector<vcl::text::TextLineSegment> aSegments =
+                vcl::text::TextLayoutEngine::CalculateTextLineSegments(nWidth, eTextLine, nLineHeight, GetDPIX(), GetDPIY());
+
+            for (const auto& rSeg : aSegments)
+            {
+                ImplDrawTextRect(nBaseX, nBaseY, nLeft + rSeg.nX, nLinePos, rSeg.nWidth, nLineHeight);
+            }
+        }
         break;
     }
 }
