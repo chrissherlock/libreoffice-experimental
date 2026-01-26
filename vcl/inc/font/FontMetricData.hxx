@@ -60,11 +60,13 @@ public:
     void SetDoubleUnderlineOffset1(tools::Long n) { mnDUnderlineOffset1 = n; }
     void SetDoubleUnderlineOffset2(tools::Long n) { mnDUnderlineOffset2 = n; }
     void SetWavelineUnderlineSize(tools::Long n) { mnWUnderlineSize = n; }
+    void SetWavelineUnderlineOffset(tools::Long n) { mnWUnderlineOffset = n; }
     void SetAboveUnderlineOffset(tools::Long n) { mnAboveUnderlineOffset = n; }
     void SetAboveBoldUnderlineOffset(tools::Long n) { mnAboveBUnderlineOffset = n; }
     void SetAboveDoubleUnderlineOffset1(tools::Long n) { mnAboveDUnderlineOffset1 = n; }
     void SetAboveDoubleUnderlineOffset2(tools::Long n) { mnAboveDUnderlineOffset2 = n; }
     void SetAboveWavelineUnderlineSize(tools::Long n) { mnAboveWUnderlineSize = n; }
+    void SetAboveWavelineUnderlineOffset(tools::Long n) { mnAboveWUnderlineOffset = n; }
     void SetStrikeoutOffset(tools::Long n) { mnStrikeoutOffset = n; }
     void SetBoldStrikeoutOffset(tools::Long n) { mnBStrikeoutOffset = n; }
     void SetDoubleStrikeoutOffset1(tools::Long n) { mnDStrikeoutOffset1 = n; }

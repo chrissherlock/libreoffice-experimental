@@ -2229,6 +2229,74 @@ std::vector<TextLineSegment> TextLayoutEngine::CalculateTextLineSegments(tools::
     return aSegments;
 }
 
+WaveLineGeometry TextLayoutEngine::CalculateWaveLineGeometry(const FontMetricData& rMetric,
+                                                             FontLineStyle eStyle, bool bIsAbove,
+                                                             tools::Long nDistY, tools::Long nDPIX,
+                                                             tools::Long nDPIY)
+{
+    WaveLineGeometry aGeo;
+    tools::Long nLineHeight;
+    tools::Long nLinePos;
+
+    if (bIsAbove)
+    {
+        nLineHeight = rMetric.GetAboveWavelineUnderlineSize();
+        nLinePos = rMetric.GetAboveWavelineUnderlineOffset();
+    }
+    else
+    {
+        nLineHeight = rMetric.GetWavelineUnderlineSize();
+        nLinePos = rMetric.GetWavelineUnderlineOffset();
+    }
+
+    if ((eStyle == LINESTYLE_SMALLWAVE) && (nLineHeight > 3))
+        nLineHeight = 3;
+
+    tools::Long nLineWidth = nDPIX / 300;
+    if (!nLineWidth)
+        nLineWidth = 1;
+
+    if (eStyle == LINESTYLE_BOLDWAVE)
+        nLineWidth *= 2;
+
+    nLinePos += nDistY - (nLineHeight / 2);
+
+    tools::Long nLineWidthHeight = ((nLineWidth * nDPIX) + (nDPIY / 2)) / nDPIY;
+
+    if (eStyle == LINESTYLE_DOUBLEWAVE)
+    {
+        tools::Long nOrgLineHeight = nLineHeight;
+        nLineHeight /= 3;
+        if (nLineHeight < 2)
+        {
+            if (nOrgLineHeight > 1)
+                nLineHeight = 2;
+            else
+                nLineHeight = 1;
+        }
+
+        tools::Long nLineDY = nOrgLineHeight - (nLineHeight * 2);
+        if (nLineDY < nLineWidthHeight)
+            nLineDY = nLineWidthHeight;
+
+        tools::Long nLineDY2 = nLineDY / 2;
+        if (!nLineDY2)
+            nLineDY2 = 1;
+
+        aGeo.aSegments.push_back({ nLinePos - (nLineWidthHeight - nLineDY2), nLineHeight });
+        aGeo.aSegments.push_back(
+            { nLinePos + (nLineWidthHeight - nLineDY2) + (nLineWidthHeight + nLineDY),
+              nLineHeight });
+    }
+    else
+    {
+        aGeo.aSegments.push_back({ nLinePos - (nLineWidthHeight / 2), nLineHeight });
+    }
+
+    aGeo.nLineWidth = nLineWidth;
+    return aGeo;
+}
+
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

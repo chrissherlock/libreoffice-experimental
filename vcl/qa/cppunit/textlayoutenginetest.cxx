@@ -35,6 +35,7 @@
 
 #include <string>
 #include <unicode/uchar.h>
+#include <iostream>
 
 namespace
 {
@@ -298,6 +299,7 @@ public:
     void testGetRotationOrigin();
     void testCalculateLayoutOrigin();
     void testCalculateMultiLineLayout();
+    void testCalculateWaveLineGeometry();
     void testCalculateTextLineSegments();
     void testPrepareMnemonicText();
 
@@ -341,6 +343,7 @@ public:
     CPPUNIT_TEST(testGetRotationOrigin);
     CPPUNIT_TEST(testCalculateLayoutOrigin);
     CPPUNIT_TEST(testCalculateMultiLineLayout);
+    CPPUNIT_TEST(testCalculateWaveLineGeometry);
     CPPUNIT_TEST(testCalculateTextLineSegments);
     CPPUNIT_TEST(testPrepareMnemonicText);
     CPPUNIT_TEST_SUITE_END();
@@ -1778,6 +1781,83 @@ void TextLayoutEngineTest::testCalculateTextLineSegments()
         // Seg 4: Dot
         // Start: 40 + 40 + 10 = 90
         CPPUNIT_ASSERT_EQUAL(tools::Long(90), aSegs[3].nX);
+    }
+}
+
+void TextLayoutEngineTest::testCalculateWaveLineGeometry()
+{
+    // Setup Metrics
+    vcl::Font aFont;
+    vcl::font::FontSelectPattern aSelPat(aFont, OUString(), Size(0, 20), 20.0);
+    FontMetricData aMetric(aSelPat);
+
+    // Standard Metrics
+    aMetric.SetWavelineUnderlineSize(6);
+    aMetric.SetWavelineUnderlineOffset(10); // Baseline + 10
+
+    // Above Metrics
+    aMetric.SetAboveWavelineUnderlineSize(4);
+    aMetric.SetAboveWavelineUnderlineOffset(-5); // Baseline - 5
+
+    // 1. Standard Single Wave (Below)
+    {
+        auto aGeo = vcl::text::TextLayoutEngine::CalculateWaveLineGeometry(aMetric, LINESTYLE_WAVE,
+                                                                           false, 0, 96, 96);
+
+        CPPUNIT_ASSERT_EQUAL(tools::Long(1), aGeo.nLineWidth);
+        CPPUNIT_ASSERT_EQUAL(size_t(1), aGeo.aSegments.size());
+        CPPUNIT_ASSERT_EQUAL(tools::Long(7), aGeo.aSegments[0].nYOffset);
+        CPPUNIT_ASSERT_EQUAL(tools::Long(6), aGeo.aSegments[0].nHeight);
+    }
+
+    // 2. Above Wave
+    {
+        auto aGeo = vcl::text::TextLayoutEngine::CalculateWaveLineGeometry(aMetric, LINESTYLE_WAVE,
+                                                                           true, 0, 96, 96);
+
+        CPPUNIT_ASSERT_EQUAL(size_t(1), aGeo.aSegments.size());
+        CPPUNIT_ASSERT_EQUAL(tools::Long(-7), aGeo.aSegments[0].nYOffset);
+        CPPUNIT_ASSERT_EQUAL(tools::Long(4), aGeo.aSegments[0].nHeight);
+    }
+
+    // 3. Small Wave Cap
+    // Metric 6 -> Cap 3.
+    // Pos = 10 + 0 - (3/2) = 9.
+    {
+        auto aGeo = vcl::text::TextLayoutEngine::CalculateWaveLineGeometry(
+            aMetric, LINESTYLE_SMALLWAVE, false, 0, 96, 96);
+
+        CPPUNIT_ASSERT_EQUAL(tools::Long(3), aGeo.aSegments[0].nHeight);
+        CPPUNIT_ASSERT_EQUAL(tools::Long(9), aGeo.aSegments[0].nYOffset);
+    }
+
+    // 4. Bold Wave
+    {
+        auto aGeo = vcl::text::TextLayoutEngine::CalculateWaveLineGeometry(
+            aMetric, LINESTYLE_BOLDWAVE, false, 0, 96, 96);
+
+        CPPUNIT_ASSERT_EQUAL(tools::Long(2), aGeo.nLineWidth);
+    }
+
+    // 5. Double Wave
+    // Height = 6. Centered as block of 6.
+    // Pos = 10 + 0 - (6/2) = 7.
+    // Split Logic:
+    //   Seg1 Y = 7 - (1 - 1) = 7.
+    //   Seg2 Y = 7 + (1 - 1) + (1 + 2) = 10.
+    {
+        auto aGeo = vcl::text::TextLayoutEngine::CalculateWaveLineGeometry(
+            aMetric, LINESTYLE_DOUBLEWAVE, false, 0, 96, 96);
+
+        CPPUNIT_ASSERT_EQUAL(size_t(2), aGeo.aSegments.size());
+
+        // Segment 1
+        CPPUNIT_ASSERT_EQUAL(tools::Long(7), aGeo.aSegments[0].nYOffset);
+        CPPUNIT_ASSERT_EQUAL(tools::Long(2), aGeo.aSegments[0].nHeight);
+
+        // Segment 2
+        CPPUNIT_ASSERT_EQUAL(tools::Long(10), aGeo.aSegments[1].nYOffset);
+        CPPUNIT_ASSERT_EQUAL(tools::Long(2), aGeo.aSegments[1].nHeight);
     }
 }
 
