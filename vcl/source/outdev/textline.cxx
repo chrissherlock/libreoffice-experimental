@@ -46,7 +46,6 @@
 #include <text/TextLayoutEngine.hxx>
 
 #define UNDERLINE_LAST      LINESTYLE_BOLDWAVE
-#define STRIKEOUT_LAST      STRIKEOUT_X
 
 namespace {
     struct WavyLineCache final : public CacheOwner
@@ -436,36 +435,10 @@ void OutputDevice::ImplDrawStrikeoutLine( tools::Long nBaseX, tools::Long nBaseY
                                           FontStrikeout eStrikeout,
                                           Color aColor )
 {
-    LogicalFontInstance*  pFontInstance = mpFontInstance.get();
-    tools::Long            nLineHeight = 0;
-    tools::Long            nLinePos  = 0;
-    tools::Long            nLinePos2 = 0;
+    vcl::text::StrikeoutGeometry aGeo = vcl::text::TextLayoutEngine::CalculateStrikeoutGeometry(
+        *mpFontInstance->mxFontMetric, eStrikeout, nDistY);
 
-    tools::Long nY = nDistY;
-
-    if ( eStrikeout > STRIKEOUT_LAST )
-        eStrikeout = STRIKEOUT_SINGLE;
-
-    switch ( eStrikeout )
-    {
-    case STRIKEOUT_SINGLE:
-        nLineHeight = pFontInstance->mxFontMetric->GetStrikeoutSize();
-        nLinePos    = nY + pFontInstance->mxFontMetric->GetStrikeoutOffset();
-        break;
-    case STRIKEOUT_BOLD:
-        nLineHeight = pFontInstance->mxFontMetric->GetBoldStrikeoutSize();
-        nLinePos    = nY + pFontInstance->mxFontMetric->GetBoldStrikeoutOffset();
-        break;
-    case STRIKEOUT_DOUBLE:
-        nLineHeight = pFontInstance->mxFontMetric->GetDoubleStrikeoutSize();
-        nLinePos    = nY + pFontInstance->mxFontMetric->GetDoubleStrikeoutOffset1();
-        nLinePos2   = nY + pFontInstance->mxFontMetric->GetDoubleStrikeoutOffset2();
-        break;
-    default:
-        break;
-    }
-
-    if ( !nLineHeight )
+    if (aGeo.aSegments.empty())
         return;
 
     if ( mpGraphicsState->mbLineColor || mbLineColorDirty )
@@ -476,20 +449,9 @@ void OutputDevice::ImplDrawStrikeoutLine( tools::Long nBaseX, tools::Long nBaseY
     mpGraphics->SetFillColor( aColor );
     mbFillColorDirty = true;
 
-    const tools::Long& nLeft = nDistX;
-
-    switch ( eStrikeout )
+    for (const auto& rSeg : aGeo.aSegments)
     {
-    case STRIKEOUT_SINGLE:
-    case STRIKEOUT_BOLD:
-        ImplDrawTextRect( nBaseX, nBaseY, nLeft, nLinePos, nWidth, nLineHeight );
-        break;
-    case STRIKEOUT_DOUBLE:
-        ImplDrawTextRect( nBaseX, nBaseY, nLeft, nLinePos, nWidth, nLineHeight );
-        ImplDrawTextRect( nBaseX, nBaseY, nLeft, nLinePos2, nWidth, nLineHeight );
-        break;
-    default:
-        break;
+        ImplDrawTextRect(nBaseX, nBaseY, nDistX, rSeg.nYOffset, nWidth, rSeg.nHeight);
     }
 }
 

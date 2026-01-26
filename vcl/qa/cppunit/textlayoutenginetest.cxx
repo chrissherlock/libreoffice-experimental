@@ -300,6 +300,7 @@ public:
     void testCalculateLayoutOrigin();
     void testCalculateMultiLineLayout();
     void testCalculateWaveLineGeometry();
+    void testCalculateStrikeoutGeometry();
     void testCalculateTextLineSegments();
     void testPrepareMnemonicText();
 
@@ -344,6 +345,7 @@ public:
     CPPUNIT_TEST(testCalculateLayoutOrigin);
     CPPUNIT_TEST(testCalculateMultiLineLayout);
     CPPUNIT_TEST(testCalculateWaveLineGeometry);
+    CPPUNIT_TEST(testCalculateStrikeoutGeometry);
     CPPUNIT_TEST(testCalculateTextLineSegments);
     CPPUNIT_TEST(testPrepareMnemonicText);
     CPPUNIT_TEST_SUITE_END();
@@ -1858,6 +1860,90 @@ void TextLayoutEngineTest::testCalculateWaveLineGeometry()
         // Segment 2
         CPPUNIT_ASSERT_EQUAL(tools::Long(10), aGeo.aSegments[1].nYOffset);
         CPPUNIT_ASSERT_EQUAL(tools::Long(2), aGeo.aSegments[1].nHeight);
+    }
+}
+
+void TextLayoutEngineTest::testCalculateStrikeoutGeometry()
+{
+    // Setup Metrics
+    vcl::Font aFont;
+    vcl::font::FontSelectPattern aSelPat(aFont, OUString(), Size(0, 20), 20.0);
+    FontMetricData aMetric(aSelPat);
+
+    // Standard Strikeout Metrics
+    aMetric.SetStrikeoutSize(1);
+    aMetric.SetStrikeoutOffset(-10); // 10px above baseline
+
+    // Bold Strikeout Metrics
+    aMetric.SetBoldStrikeoutSize(2);
+    aMetric.SetBoldStrikeoutOffset(-11);
+
+    // Double Strikeout Metrics
+    aMetric.SetDoubleStrikeoutSize(1);
+    aMetric.SetDoubleStrikeoutOffset1(-9);
+    aMetric.SetDoubleStrikeoutOffset2(-12);
+
+    tools::Long nDistY = 100; // Base Y position
+
+    // 1. Single Strikeout
+    {
+        auto aGeo = vcl::text::TextLayoutEngine::CalculateStrikeoutGeometry(
+            aMetric, STRIKEOUT_SINGLE, nDistY);
+
+        CPPUNIT_ASSERT_EQUAL(size_t(1), aGeo.aSegments.size());
+        // Pos = DistY + Offset = 100 + (-10) = 90
+        CPPUNIT_ASSERT_EQUAL(tools::Long(90), aGeo.aSegments[0].nYOffset);
+        CPPUNIT_ASSERT_EQUAL(tools::Long(1), aGeo.aSegments[0].nHeight);
+    }
+
+    // 2. Bold Strikeout
+    {
+        auto aGeo = vcl::text::TextLayoutEngine::CalculateStrikeoutGeometry(aMetric, STRIKEOUT_BOLD,
+                                                                            nDistY);
+
+        CPPUNIT_ASSERT_EQUAL(size_t(1), aGeo.aSegments.size());
+        // Pos = DistY + Offset = 100 + (-11) = 89
+        CPPUNIT_ASSERT_EQUAL(tools::Long(89), aGeo.aSegments[0].nYOffset);
+        CPPUNIT_ASSERT_EQUAL(tools::Long(2), aGeo.aSegments[0].nHeight);
+    }
+
+    // 3. Double Strikeout
+    {
+        auto aGeo = vcl::text::TextLayoutEngine::CalculateStrikeoutGeometry(
+            aMetric, STRIKEOUT_DOUBLE, nDistY);
+
+        CPPUNIT_ASSERT_EQUAL(size_t(2), aGeo.aSegments.size());
+
+        // Line 1: 100 + (-9) = 91
+        CPPUNIT_ASSERT_EQUAL(tools::Long(91), aGeo.aSegments[0].nYOffset);
+        CPPUNIT_ASSERT_EQUAL(tools::Long(1), aGeo.aSegments[0].nHeight);
+
+        // Line 2: 100 + (-12) = 88
+        CPPUNIT_ASSERT_EQUAL(tools::Long(88), aGeo.aSegments[1].nYOffset);
+        CPPUNIT_ASSERT_EQUAL(tools::Long(1), aGeo.aSegments[1].nHeight);
+    }
+
+    // 4. Invalid/None Strikeout (Should fallback to Single if > LAST, or empty if NONE?)
+    // The implementation logic for > LAST is fallback to SINGLE.
+    {
+        // Cast to invalid enum value
+        auto aGeo = vcl::text::TextLayoutEngine::CalculateStrikeoutGeometry(
+            aMetric, static_cast<FontStrikeout>(100), nDistY);
+
+        // Expect fallback to SINGLE
+        CPPUNIT_ASSERT_EQUAL(size_t(1), aGeo.aSegments.size());
+        CPPUNIT_ASSERT_EQUAL(tools::Long(90), aGeo.aSegments[0].nYOffset);
+    }
+
+    // 5. Zero Height (Should produce no segments)
+    {
+        FontMetricData aZeroMetric(aSelPat);
+        aZeroMetric.SetStrikeoutSize(0);
+
+        auto aGeo = vcl::text::TextLayoutEngine::CalculateStrikeoutGeometry(
+            aZeroMetric, STRIKEOUT_SINGLE, nDistY);
+
+        CPPUNIT_ASSERT_EQUAL(size_t(0), aGeo.aSegments.size());
     }
 }
 
