@@ -500,6 +500,8 @@ public:
         bool bStrikeoutIsChar = false;
     };
 
+    static Point GetRotationOrigin(const Point& rPos, const Size& rTextSize, Degree10 nOrientation,
+                                   TextAlign eAlign);
     static TextLineGeometry GetTextLineGeometry(const TextLineRequest& rReq,
                                                 const FontMetricData& rMetric);
 
