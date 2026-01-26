@@ -306,65 +306,13 @@ void OutputDevice::ImplDrawWaveTextLine( tools::Long nBaseX, tools::Long nBaseY,
         return;
     }
 
-    LogicalFontInstance* pFontInstance = mpFontInstance.get();
-    tools::Long            nLineHeight;
-    tools::Long            nLinePos;
+    vcl::text::WaveLineGeometry aGeo = vcl::text::TextLayoutEngine::CalculateWaveLineGeometry(
+        *mpFontInstance->mxFontMetric, eTextLine, bIsAbove, nDistY, GetDPIX(), GetDPIY());
 
-    if ( bIsAbove )
+    for (const auto& rSeg : aGeo.aSegments)
     {
-        nLineHeight = pFontInstance->mxFontMetric->GetAboveWavelineUnderlineSize();
-        nLinePos = pFontInstance->mxFontMetric->GetAboveWavelineUnderlineOffset();
-    }
-    else
-    {
-        nLineHeight = pFontInstance->mxFontMetric->GetWavelineUnderlineSize();
-        nLinePos = pFontInstance->mxFontMetric->GetWavelineUnderlineOffset();
-    }
-    if ( (eTextLine == LINESTYLE_SMALLWAVE) && (nLineHeight > 3) )
-        nLineHeight = 3;
-
-    tools::Long nLineWidth = GetDPIX() / 300;
-    if ( !nLineWidth )
-        nLineWidth = 1;
-
-    if ( eTextLine == LINESTYLE_BOLDWAVE )
-        nLineWidth *= 2;
-
-    nLinePos += nDistY - (nLineHeight / 2);
-
-    tools::Long nLineWidthHeight = ((nLineWidth * GetDPIX()) + (GetDPIY() / 2)) / GetDPIY();
-    if ( eTextLine == LINESTYLE_DOUBLEWAVE )
-    {
-        tools::Long nOrgLineHeight = nLineHeight;
-        nLineHeight /= 3;
-        if ( nLineHeight < 2 )
-        {
-            if ( nOrgLineHeight > 1 )
-                nLineHeight = 2;
-            else
-                nLineHeight = 1;
-        }
-
-        tools::Long nLineDY = nOrgLineHeight-(nLineHeight*2);
-        if ( nLineDY < nLineWidthHeight )
-            nLineDY = nLineWidthHeight;
-
-        tools::Long nLineDY2 = nLineDY/2;
-        if ( !nLineDY2 )
-            nLineDY2 = 1;
-
-        nLinePos -= nLineWidthHeight-nLineDY2;
-        ImplDrawWaveLine( nBaseX, nBaseY, nDistX, nLinePos, nWidth, nLineHeight,
-                          nLineWidth, mpFontInstance->mnOrientation, aColor );
-        nLinePos += nLineWidthHeight+nLineDY;
-        ImplDrawWaveLine( nBaseX, nBaseY, nDistX, nLinePos, nWidth, nLineHeight,
-                          nLineWidth, mpFontInstance->mnOrientation, aColor );
-    }
-    else
-    {
-        nLinePos -= nLineWidthHeight/2;
-        ImplDrawWaveLine( nBaseX, nBaseY, nDistX, nLinePos, nWidth, nLineHeight,
-                          nLineWidth, mpFontInstance->mnOrientation, aColor );
+        ImplDrawWaveLine(nBaseX, nBaseY, nDistX, rSeg.nYOffset, nWidth, rSeg.nHeight,
+                         aGeo.nLineWidth, mpFontInstance->mnOrientation, aColor);
     }
 }
 

@@ -68,9 +68,25 @@ namespace vcl::text
 using FallbackLayoutFactory
     = std::function<std::unique_ptr<SalLayout>(LogicalFontInstance*, int, TextLayoutRequest&)>;
 
+struct SAL_DLLPUBLIC WaveLineSegment
+{
+    tools::Long nYOffset;
+    tools::Long nHeight;
+};
+
+struct SAL_DLLPUBLIC WaveLineGeometry
+{
+    tools::Long nLineWidth;
+    std::vector<WaveLineSegment> aSegments;
+};
+
 class ILayoutFactory
 {
 public:
+    static WaveLineGeometry CalculateWaveLineGeometry(const FontMetricData& rMetric,
+                                                      FontLineStyle eStyle, bool bIsAbove,
+                                                      tools::Long nDistY, tools::Long nDPIX,
+                                                      tools::Long nDPIY);
     static constexpr tools::Long nMaxSmallWavelineHeight = 3;
 
     virtual ~ILayoutFactory() = default;
@@ -143,6 +159,10 @@ struct SAL_DLLPUBLIC TextLineSegment
 class VCL_DLLPUBLIC TextLayoutEngine
 {
 public:
+    static WaveLineGeometry CalculateWaveLineGeometry(const FontMetricData& rMetric,
+                                                      FontLineStyle eStyle, bool bIsAbove,
+                                                      tools::Long nDistY, tools::Long nDPIX,
+                                                      tools::Long nDPIY);
     static constexpr tools::Long nMaxSmallWavelineHeight = 3;
 
     /** Analyzes a layout to find valid Kashida insertion points. */
