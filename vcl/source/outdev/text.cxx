@@ -307,15 +307,23 @@ void OutputDevice::ImplDrawReliefText(SalLayout& rSalLayout)
     Color aOldOverlineColor = GetOverlineColor();
     basegfx::B2DPoint aOrigOffset = rSalLayout.DrawOffset();
 
+    comphelper::ScopeGuard aRestoreGuard([&]() {
+        SetTextColor(aOldColor);
+        SetTextLineColor(aOldTextLineColor);
+        SetOverlineColor(aOldOverlineColor);
+        rSalLayout.DrawOffset() = aOrigOffset;
+        ImplInitTextColor();
+    });
+
     Color aReliefColor(COL_LIGHTGRAY);
     Color aTextColor(aOldColor);
 
     // Black text is always drawn on white in VCL logic
     if (aTextColor == COL_BLACK)
         aTextColor = COL_WHITE;
+
     Color aEffectiveLineColor = (aOldTextLineColor == COL_BLACK) ? COL_WHITE : aOldTextLineColor;
-    Color aEffectiveOverlineColor
-        = (aOldOverlineColor == COL_BLACK) ? COL_WHITE : aOldOverlineColor;
+    Color aEffectiveOverlineColor = (aOldOverlineColor == COL_BLACK) ? COL_WHITE : aOldOverlineColor;
 
     // Relief color is black for white text
     if (aTextColor == COL_WHITE)
@@ -334,7 +342,7 @@ void OutputDevice::ImplDrawReliefText(SalLayout& rSalLayout)
     ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
 
     // Draw Main Text
-    rSalLayout.DrawOffset() = aOrigOffset;
+    rSalLayout.DrawOffset() = aOrigOffset; // Reset offset for main draw
 
     SetTextColor(aTextColor);
     SetTextLineColor(aEffectiveLineColor);
@@ -342,11 +350,6 @@ void OutputDevice::ImplDrawReliefText(SalLayout& rSalLayout)
     ImplInitTextColor();
 
     ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
-
-    SetTextColor(aOldColor);
-    SetTextLineColor(aOldTextLineColor);
-    SetOverlineColor(aOldOverlineColor);
-    ImplInitTextColor();
 }
 
 void OutputDevice::ImplDrawShadowText(SalLayout& rSalLayout)
@@ -355,6 +358,14 @@ void OutputDevice::ImplDrawShadowText(SalLayout& rSalLayout)
     Color aOldTextLineColor = GetTextLineColor();
     Color aOldOverlineColor = GetOverlineColor();
     basegfx::B2DPoint aOrigBase = rSalLayout.DrawBase();
+
+    comphelper::ScopeGuard aRestoreGuard([&]() {
+        rSalLayout.DrawBase() = aOrigBase;
+        SetTextColor(aOldColor);
+        SetTextLineColor(aOldTextLineColor);
+        SetOverlineColor(aOldOverlineColor);
+        ImplInitTextColor();
+    });
 
     // Setup Shadow Colors
     SetTextLineColor();
@@ -392,8 +403,14 @@ void OutputDevice::ImplDrawOutlineText(SalLayout& rSalLayout)
     Color aOldOverlineColor = GetOverlineColor();
     basegfx::B2DPoint aOrigBase = rSalLayout.DrawBase();
 
-    // Draw Outline (8 surrounding copies)
-    // Uses current color (aOldColor)
+    comphelper::ScopeGuard aRestoreGuard([&]() {
+        rSalLayout.DrawBase() = aOrigBase;
+        SetTextColor(aOldColor);
+        SetTextLineColor(aOldTextLineColor);
+        SetOverlineColor(aOldOverlineColor);
+        ImplInitTextColor();
+    });
+
     for (const auto& rOffset : vcl::text::TextLayoutEngine::GetOutlineOffsets())
     {
         rSalLayout.DrawBase() = aOrigBase + rOffset;
@@ -409,11 +426,6 @@ void OutputDevice::ImplDrawOutlineText(SalLayout& rSalLayout)
     ImplInitTextColor();
 
     ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
-
-    SetTextColor(aOldColor);
-    SetTextLineColor(aOldTextLineColor);
-    SetOverlineColor(aOldOverlineColor);
-    ImplInitTextColor();
 }
 
 void OutputDevice::ImplDrawText(SalLayout& rSalLayout)
