@@ -1339,25 +1339,19 @@ void OutputDevice::DrawCtrlText(const Point& rPos, const OUString& rStr, const s
     nCorrectedLen
         = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nCorrectedIndex, nCorrectedLen);
 
-    sal_Int32 nMnemonicPos = -1;
+    auto aMnemonicText
+        = vcl::text::TextLayoutEngine::PrepareMnemonicText(rStr, nCorrectedIndex, nCorrectedLen);
+    const OUString& aStr = aMnemonicText.aText;
+    nCorrectedIndex = aMnemonicText.nIndex;
+    nCorrectedLen = aMnemonicText.nLen;
+    sal_Int32 nMnemonicPos = aMnemonicText.nMnemonicPos;
 
     tools::Long nMnemonicX = 0;
     tools::Long nMnemonicY = 0;
     tools::Long nMnemonicWidth = 0;
-    const OUString aStr = removeMnemonicFromString(rStr, nMnemonicPos); // Strip mnemonics always
 
     if (nMnemonicPos != -1)
     {
-        if (nMnemonicPos < nCorrectedIndex)
-        {
-            --nCorrectedIndex;
-        }
-        else
-        {
-            if (nMnemonicPos < (nCorrectedIndex + nCorrectedLen))
-                --nCorrectedLen;
-        }
-
         if (nStyle & DrawTextFlags::Mnemonic && !pVector
             && !(GetSettings().GetStyleSettings().GetOptions() & StyleSettingsOptions::NoMnemonics))
         {
@@ -1441,18 +1435,11 @@ void OutputDevice::DrawCtrlText(const Point& rPos, const OUString& rStr, const s
 tools::Long OutputDevice::GetCtrlTextWidth(const OUString& rStr,
                                            const SalLayoutGlyphs* pGlyphs) const
 {
-    sal_Int32 nLen = rStr.getLength();
-    sal_Int32 nIndex = 0;
-    sal_Int32 nMnemonicPos;
-    OUString aStr = removeMnemonicFromString(rStr, nMnemonicPos);
-
-    if (nMnemonicPos != -1)
-    {
-        if (nMnemonicPos < nIndex)
-            nIndex--;
-        else if (static_cast<sal_uLong>(nMnemonicPos) < static_cast<sal_uLong>(nIndex + nLen))
-            nLen--;
-    }
+    auto aMnemonicText
+        = vcl::text::TextLayoutEngine::PrepareMnemonicText(rStr, 0, rStr.getLength());
+    const OUString& aStr = aMnemonicText.aText;
+    sal_Int32 nIndex = aMnemonicText.nIndex;
+    sal_Int32 nLen = aMnemonicText.nLen;
 
     return GetTextWidth(aStr, nIndex, nLen, nullptr, pGlyphs);
 }
