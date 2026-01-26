@@ -1142,6 +1142,11 @@ void OutputDevice::ImplDrawTextSingleLine(OutputDevice& rTargetDevice,
     }
 }
 
+static bool lcl_isMnemonicInRange(sal_Int32 nMnemonicPos, sal_Int32 nIndex, sal_Int32 nLen)
+{
+    return nMnemonicPos >= nIndex && nMnemonicPos < nIndex + nLen;
+}
+
 void OutputDevice::ImplDrawTextMultiLine(OutputDevice& rTargetDevice, const tools::Rectangle& rRect,
                                          const OUString& rStr, DrawTextFlags nStyle,
                                          std::vector<tools::Rectangle>* pVector,
@@ -1237,29 +1242,24 @@ void OutputDevice::ImplDrawTextMultiLine(OutputDevice& rTargetDevice, const tool
             sal_Int32 nLineLen = rLineInfo.GetLen();
             _rLayout.DrawText(aPos, rStr, nIndex, nLineLen, pVector, pDisplayText);
 
-            if (bDrawMnemonics)
+            if (bDrawMnemonics && lcl_isMnemonicInRange(nMnemonicPos, nIndex, nLineLen))
             {
-                if ((nMnemonicPos >= nIndex) && (nMnemonicPos < nIndex + nLineLen))
-                {
-                    tools::Long nMnemonicX;
-                    tools::Long nMnemonicY;
+                KernArray aDXArray;
+                _rLayout.GetTextArray(rStr, &aDXArray, nIndex, nLineLen, true);
 
-                    KernArray aDXArray;
-                    _rLayout.GetTextArray(rStr, &aDXArray, nIndex, nLineLen, true);
-                    sal_Int32 nPos = nMnemonicPos - nIndex;
-                    sal_Int32 lc_x1 = nPos ? aDXArray[nPos - 1] : 0;
-                    sal_Int32 lc_x2 = aDXArray[nPos];
-                    double nMnemonicWidth
-                        = rTargetDevice.LogicWidthToDeviceSubPixel(std::abs(lc_x1 - lc_x2));
+                vcl::text::TextLayoutEngine::MnemonicDeviceParams aParams{
+                    rTargetDevice.GetFontMetric().GetAscent(),
+                    rTargetDevice.GetOutOffXPixel(),
+                    rTargetDevice.GetOutOffYPixel()
+                };
 
-                    Point aTempPos = rTargetDevice.LogicToPixel(aPos);
-                    nMnemonicX = rTargetDevice.GetOutOffXPixel() + aTempPos.X()
-                                 + rTargetDevice.LogicWidthToDevicePixel(std::min(lc_x1, lc_x2));
-                    nMnemonicY = rTargetDevice.GetOutOffYPixel() + aTempPos.Y()
-                                 + rTargetDevice.LogicWidthToDevicePixel(
-                                       rTargetDevice.GetFontMetric().GetAscent());
-                    rTargetDevice.ImplDrawMnemonicLine(nMnemonicX, nMnemonicY, nMnemonicWidth);
-                }
+                auto aGeo = vcl::text::TextLayoutEngine::GetMnemonicGeometry(
+                    [&](tools::Long w) { return rTargetDevice.LogicWidthToDeviceSubPixel(w); },
+                    [&](tools::Long w) { return rTargetDevice.LogicWidthToDevicePixel(w); },
+                    [&](const Point& p) { return rTargetDevice.LogicToPixel(p); },
+                    aParams, aDXArray, nMnemonicPos - nIndex, aPos);
+
+                rTargetDevice.ImplDrawMnemonicLine(aGeo.nX, aGeo.nY, static_cast<double>(aGeo.nWidth));
             }
 
             aPos.AdjustY(nTextHeight);
@@ -1570,33 +1570,29 @@ void OutputDevice::DrawCtrlText(const Point& rPos, const OUString& rStr, const s
         {
             SAL_WARN_IF(nMnemonicPos >= (nCorrectedIndex + nCorrectedLen), "vcl",
                         "Mnemonic underline marker after last character");
-            bool bInvalidPos = false;
 
-            if (nMnemonicPos >= nCorrectedLen)
-            {
-                // may occur in BiDi-Strings: the '~' is sometimes found behind the last char
-                // due to some strange BiDi text editors
-                // -> place the underline behind the string to indicate a failure
-                bInvalidPos = true;
+            const bool bInvalidPos = (nMnemonicPos >= nCorrectedLen);
+
+            if (bInvalidPos)
                 nMnemonicPos = nCorrectedLen - 1;
-            }
 
             KernArray aDXArray;
             GetTextArray(aStr, &aDXArray, nCorrectedIndex, nCorrectedLen, true, nullptr, pGlyphs);
-            sal_Int32 nPos = nMnemonicPos - nCorrectedIndex;
-            sal_Int32 lc_x1 = nPos ? aDXArray[nPos - 1] : 0;
-            sal_Int32 lc_x2 = aDXArray[nPos];
-            nMnemonicWidth = std::abs(lc_x1 - lc_x2);
 
-            Point aTempPos(std::min(lc_x1, lc_x2), GetFontMetric().GetAscent());
+            vcl::text::TextLayoutEngine::MnemonicDeviceParams aParams{
+                GetFontMetric().GetAscent(), GetOutOffXPixel(), GetOutOffYPixel()
+            };
 
-            if (bInvalidPos) // #106952#, place behind the (last) character
-                aTempPos = Point(std::max(lc_x1, lc_x2), GetFontMetric().GetAscent());
+            // Pass bInvalidPos to bTrailing to handle BiDi edge cases
+            const auto aGeo = vcl::text::TextLayoutEngine::GetMnemonicGeometry(
+                [&](tools::Long w) { return LogicWidthToDeviceSubPixel(w); },
+                [&](tools::Long w) { return LogicWidthToDevicePixel(w); },
+                [&](const Point& p) { return LogicToPixel(p); },
+                aParams, aDXArray, nMnemonicPos - nCorrectedIndex, rPos, bInvalidPos);
 
-            aTempPos += rPos;
-            aTempPos = LogicToPixel(aTempPos);
-            nMnemonicX = GetOutOffXPixel() + aTempPos.X();
-            nMnemonicY = GetOutOffYPixel() + aTempPos.Y();
+            nMnemonicX = aGeo.nX;
+            nMnemonicY = aGeo.nY;
+            nMnemonicWidth = aGeo.nWidth;
         }
         else
         {
