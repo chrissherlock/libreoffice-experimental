@@ -505,6 +505,14 @@ public:
     static TextLineGeometry GetTextLineGeometry(const TextLineRequest& rReq,
                                                 const FontMetricData& rMetric);
 
+    /** * Filters glyphs based on a clip region, preserving spaces between visible characters.
+     */
+    static void FilterVisibleGlyphs(const OUString& rStr, sal_Int32 nIndex,
+                                    const vcl::Region& rClip,
+                                    const std::vector<tools::Rectangle>& rGlyphRects,
+                                    std::vector<tools::Rectangle>& rOutVisibleRects,
+                                    OUString* pOutVisibleText);
+
 private:
     static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);
 

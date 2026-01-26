@@ -1929,6 +1929,45 @@ Point TextLayoutEngine::GetRotationOrigin(const Point& rPos, const Size& rTextSi
     return Point(nX, nY);
 }
 
+void TextLayoutEngine::FilterVisibleGlyphs(const OUString& rStr, sal_Int32 nIndex,
+                                           const vcl::Region& rClip,
+                                           const std::vector<tools::Rectangle>& rGlyphRects,
+                                           std::vector<tools::Rectangle>& rOutVisibleRects,
+                                           OUString* pOutVisibleText)
+{
+    bool bInserted = false;
+    sal_Int32 nCurrentIdx = nIndex;
+
+    for (auto it = rGlyphRects.begin(); it != rGlyphRects.end(); ++it, ++nCurrentIdx)
+    {
+        bool bAppend = false;
+
+        // Standard visibility check: does the glyph ink overlap the clip?
+        if (rClip.Overlaps(*it))
+        {
+            bAppend = true;
+        }
+        // Heuristic: Keep a space if it follows a visible character AND the next character is visible.
+        // This prevents "floating" spaces while maintaining word separation.
+        else if (rStr[nCurrentIdx] == ' ' && bInserted)
+        {
+            auto next = it;
+            if (++next != rGlyphRects.end() && rClip.Overlaps(*next))
+                bAppend = true;
+        }
+
+        if (bAppend)
+        {
+            rOutVisibleRects.push_back(*it);
+
+            if (pOutVisibleText)
+                *pOutVisibleText += OUStringChar(rStr[nCurrentIdx]);
+
+            bInserted = true;
+        }
+    }
+}
+
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
