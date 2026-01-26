@@ -1302,7 +1302,7 @@ void TextLayoutEngineTest::testTextLineGeometry()
                                      aGeo.nOverlineWaveHeight);
     }
 
-    // Test Strikeout Paths
+    // Test Strikeout Paths (Verifying independent dual-offset capture)
     {
         aReq.eStrikeout = STRIKEOUT_SINGLE;
         aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
