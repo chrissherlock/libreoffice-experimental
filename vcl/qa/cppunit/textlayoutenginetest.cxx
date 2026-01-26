@@ -298,6 +298,7 @@ public:
     void testGetRotationOrigin();
     void testCalculateLayoutOrigin();
     void testCalculateMultiLineLayout();
+    void testPrepareMnemonicText();
 
     CPPUNIT_TEST_SUITE(TextLayoutEngineTest);
     CPPUNIT_TEST(testBiDiLayoutFlags);
@@ -339,6 +340,7 @@ public:
     CPPUNIT_TEST(testGetRotationOrigin);
     CPPUNIT_TEST(testCalculateLayoutOrigin);
     CPPUNIT_TEST(testCalculateMultiLineLayout);
+    CPPUNIT_TEST(testPrepareMnemonicText);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -1592,6 +1594,75 @@ void TextLayoutEngineTest::testCalculateMultiLineLayout()
             DrawTextFlags::MultiLine | DrawTextFlags::Clip);
 
         CPPUNIT_ASSERT(!(aRes2.nResultStyle & DrawTextFlags::Clip));
+    }
+}
+
+void TextLayoutEngineTest::testPrepareMnemonicText()
+{
+    // Case 1: No Mnemonic
+    {
+        OUString aInput = "Hello";
+        auto res = vcl::text::TextLayoutEngine::PrepareMnemonicText(aInput, 0, 5);
+        CPPUNIT_ASSERT_EQUAL(OUString("Hello"), res.aText);
+        CPPUNIT_ASSERT_EQUAL(sal_Int32(0), res.nIndex);
+        CPPUNIT_ASSERT_EQUAL(sal_Int32(5), res.nLen);
+        CPPUNIT_ASSERT_EQUAL(sal_Int32(-1), res.nMnemonicPos);
+    }
+
+    // Case 2: Mnemonic Inside Range
+    {
+        OUString aInput = "H~ello"; // ~ is at index 1
+        auto res = vcl::text::TextLayoutEngine::PrepareMnemonicText(aInput, 0, 6);
+        CPPUNIT_ASSERT_EQUAL(OUString("Hello"), res.aText);
+        CPPUNIT_ASSERT_EQUAL(sal_Int32(0), res.nIndex);
+        CPPUNIT_ASSERT_EQUAL(sal_Int32(5), res.nLen); // Length decremented
+        CPPUNIT_ASSERT_EQUAL(sal_Int32(1), res.nMnemonicPos);
+    }
+
+    // Case 3: Mnemonic Before Range
+    {
+        OUString aInput = "A~BC"; // ~ at 1.
+        auto res = vcl::text::TextLayoutEngine::PrepareMnemonicText(aInput, 2, 2); // Select "BC"
+        CPPUNIT_ASSERT_EQUAL(OUString("ABC"), res.aText);
+        CPPUNIT_ASSERT_EQUAL(sal_Int32(1), res.nIndex); // Shifted down
+        CPPUNIT_ASSERT_EQUAL(sal_Int32(2), res.nLen);
+        CPPUNIT_ASSERT_EQUAL(sal_Int32(1), res.nMnemonicPos);
+    }
+
+    // Case 4: Mnemonic After Range
+    {
+        OUString aInput = "AB~C"; // ~ at 2.
+        auto res = vcl::text::TextLayoutEngine::PrepareMnemonicText(aInput, 0, 2); // Select "AB"
+        CPPUNIT_ASSERT_EQUAL(OUString("ABC"), res.aText);
+        CPPUNIT_ASSERT_EQUAL(sal_Int32(0), res.nIndex);
+        CPPUNIT_ASSERT_EQUAL(sal_Int32(2), res.nLen);
+        CPPUNIT_ASSERT_EQUAL(sal_Int32(2), res.nMnemonicPos);
+    }
+
+    // Case 5: Mnemonic at Start
+    {
+        OUString aInput = "~A";
+        auto res = vcl::text::TextLayoutEngine::PrepareMnemonicText(aInput, 0, 2);
+        CPPUNIT_ASSERT_EQUAL(OUString("A"), res.aText);
+        CPPUNIT_ASSERT_EQUAL(sal_Int32(0), res.nIndex);
+        CPPUNIT_ASSERT_EQUAL(sal_Int32(1), res.nLen);
+        CPPUNIT_ASSERT_EQUAL(sal_Int32(0), res.nMnemonicPos);
+    }
+
+    // Case 6: Multiple Mnemonics (Debug Case)
+    {
+        OUString aInput = "A~B~C";
+        auto res = vcl::text::TextLayoutEngine::PrepareMnemonicText(aInput, 0, 5);
+
+        CPPUNIT_ASSERT_EQUAL(OUString("ABC"), res.aText);
+        CPPUNIT_ASSERT_EQUAL(sal_Int32(1), res.nMnemonicPos);
+
+        // Debugging Failure: Expected 4, got 5 previously.
+        // If this fails, the logic (nMnemonicPos < nIndex + nLen) is evaluating to false
+        // or nLen isn't being updated.
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(
+            "nLen should be decremented when mnemonic is removed inside range", sal_Int32(4),
+            res.nLen);
     }
 }
 
