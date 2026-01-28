@@ -17,6 +17,7 @@ class OutputDevice;
 struct ImplOutDevData;
 
 class Point;
+class SalLayout;
 namespace tools
 {
 class Rectangle;
@@ -58,7 +59,7 @@ public:
     // bStartVisualLine: Set to true if this text operation represents the start of a new line
     //                   (e.g., DrawTextArray). Defaults to false (e.g., DrawText).
     void Record(OutputDevice& rDev, const Point& rStartPt, const OUString& rStr, sal_Int32 nIndex,
-                sal_Int32 nLen, bool bStartVisualLine = false);
+                sal_Int32 nLen, const SalLayout* pLayout = nullptr, bool bStartVisualLine = false);
 
 private:
     // Private helper: pushes the line index. Only allowed via Record(..., true).
@@ -66,8 +67,9 @@ private:
 
     // Private helper: core filtering logic
     void FilterAndAppend(OutputDevice& rDev, const Point& rStartPt, const OUString& rStr,
-                         sal_Int32 nIndex, sal_Int32 nLen, const vcl::Region& rClip,
-                         std::vector<tools::Rectangle>& rOutRects, OUString* pOutText);
+                         sal_Int32 nIndex, sal_Int32 nLen, const SalLayout* pLayout,
+                         const vcl::Region& rClip, std::vector<tools::Rectangle>& rOutRects,
+                         OUString* pOutText);
 };
 
 } // namespace vcl::text
