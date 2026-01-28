@@ -37,7 +37,7 @@
 #include <CoordinateMapper.hxx>
 #include <ClippingController.hxx>
 #include <font/FontController.hxx>
-#include <text/TextRecordingState.hxx>
+#include <vcl/text/TextRecordingState.hxx>
 #include <GraphicsState.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <salgdi.hxx>

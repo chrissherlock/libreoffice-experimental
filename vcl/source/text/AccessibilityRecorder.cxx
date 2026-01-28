@@ -11,7 +11,7 @@
 #include <vcl/ctrl.hxx>
 
 #include <text/AccessibilityRecorder.hxx>
-#include <text/TextRecordingState.hxx>
+#include <vcl/text/TextRecordingState.hxx>
 #include <text/layoutrecording.hxx>
 
 namespace vcl::text
