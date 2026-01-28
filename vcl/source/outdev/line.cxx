@@ -114,7 +114,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaLineAction( rStartPt, rEndPt, rLineInfo ) );
 
-    if ( !IsDeviceOutputNecessary() || !mpGraphicsState->mbLineColor || ( LineStyle::NONE == rLineInfo.GetStyle() ) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || !mpGraphicsState->mbLineColor || ( LineStyle::NONE == rLineInfo.GetStyle() ) || IsLayoutCalculationNecessary() )
         return;
 
     if( !mpGraphics && !AcquireGraphics() )
@@ -157,7 +157,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaLineAction( rStartPt, rEndPt ) );
 
-    if ( !IsDeviceOutputNecessary() || !mpGraphicsState->mbLineColor || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || !mpGraphicsState->mbLineColor || IsLayoutCalculationNecessary() )
         return;
 
     if ( !mpGraphics && !AcquireGraphics() )

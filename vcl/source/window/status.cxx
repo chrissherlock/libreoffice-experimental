@@ -474,7 +474,7 @@ void StatusBar::ImplDrawItem(vcl::RenderContext& rRenderContext, bool bOffScreen
         aDecoView.DrawSeparator(aFrom, aTo);
     }
 
-    if (!rRenderContext.ImplIsRecordLayout())
+    if (!rRenderContext.IsLayoutCalculationNecessary())
         CallEventListeners(VclEventId::StatusbarDrawItem, reinterpret_cast<void*>(pItem->mnId));
 }
 
@@ -740,7 +740,7 @@ void StatusBar::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle
         // draw items
 
         // Do offscreen only when we are not recording layout...
-        bool bOffscreen = !rRenderContext.ImplIsRecordLayout();
+        bool bOffscreen = !rRenderContext.IsLayoutCalculationNecessary();
 
         if (!bOffscreen)
             rRenderContext.Erase(rRect);

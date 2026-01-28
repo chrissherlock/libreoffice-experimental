@@ -40,6 +40,7 @@
 #endif
 
 #include <ClippingController.hxx>
+#include <text/TextRecordingState.hxx>
 
 // PaintBufferGuard
 
@@ -1479,7 +1480,7 @@ void Window::PaintToDevice(OutputDevice* pDev, const Point& rPos)
 
 void Window::Erase(vcl::RenderContext& rRenderContext)
 {
-    if (!GetOutDev()->IsDeviceOutputNecessary() || GetOutDev()->ImplIsRecordLayout())
+    if (!GetOutDev()->IsDeviceOutputNecessary() || GetOutDev()->IsLayoutCalculationNecessary())
         return;
 
     bool bNativeOK = false;

@@ -62,7 +62,7 @@ void OutputDevice::DrawMask( const Point& rDestPt, const Size& rDestSize,
 {
     assert(!is_double_buffered_window());
 
-    if( ImplIsRecordLayout() )
+    if( IsLayoutCalculationNecessary() )
         return;
 
     if( RasterOp::Invert == mpGraphicsState->meRasterOp )

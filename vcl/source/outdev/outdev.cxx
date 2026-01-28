@@ -37,6 +37,7 @@
 #include <CoordinateMapper.hxx>
 #include <ClippingController.hxx>
 #include <font/FontController.hxx>
+#include <text/TextRecordingState.hxx>
 #include <GraphicsState.hxx>
 #include <ImplOutDevData.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
@@ -101,7 +102,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     // struct ImplOutDevData- see #i82615#
     mpOutDevData.reset(new ImplOutDevData);
     mpOutDevData->mpRotateDev       = nullptr;
-    mpOutDevData->mpRecordLayout    = nullptr;
 
     mpClippingController->SetDirty(true);
 }
@@ -384,7 +384,7 @@ bool OutputDevice::SupportsOperation( OutDevSupportType eType ) const
 void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
                                const Point& rSrcPt,  const Size& rSrcSize )
 {
-    if( ImplIsRecordLayout() )
+    if( IsLayoutCalculationNecessary() )
         return;
 
     if ( RasterOp::Invert == mpGraphicsState->meRasterOp )
@@ -435,7 +435,7 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
                                const Point& rSrcPt,  const Size& rSrcSize,
                                const OutputDevice& rOutDev )
 {
-    if ( ImplIsRecordLayout() )
+    if ( IsLayoutCalculationNecessary() )
         return;
 
     if ( RasterOp::Invert == mpGraphicsState->meRasterOp )
@@ -479,7 +479,7 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
 void OutputDevice::CopyArea( const Point& rDestPt,
                              const Point& rSrcPt,  const Size& rSrcSize )
 {
-    if ( ImplIsRecordLayout() )
+    if ( IsLayoutCalculationNecessary() )
         return;
 
     RasterOp eOldRop = GetRasterOp();
@@ -643,13 +643,6 @@ bool OutputDevice::HasMirroredGraphics() const
    return ( AcquireGraphics() && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl) );
 }
 
-bool OutputDevice::ImplIsRecordLayout() const
-{
-    if (!mpOutDevData)
-        return false;
-
-    return mpOutDevData->mpRecordLayout;
-}
 
 css::awt::DeviceInfo OutputDevice::GetCommonDeviceInfo(Size const& rDevSz) const
 {

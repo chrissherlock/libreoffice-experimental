@@ -456,7 +456,7 @@ void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
     if( mpMetaFile )
         mpMetaFile->AddAction( new MetaTransparentAction( rPolyPoly, nTransparencePercent ) );
 
-    bool bDrawn = !IsDeviceOutputNecessary() || ImplIsRecordLayout();
+    bool bDrawn = !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary();
     if( bDrawn )
         return;
 

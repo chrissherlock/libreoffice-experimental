@@ -54,7 +54,7 @@ void OutputDevice::DrawPixel( const Point& rPt )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaPointAction( rPt ) );
 
-    if ( !IsDeviceOutputNecessary() || !mpGraphicsState->mbLineColor || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || !mpGraphicsState->mbLineColor || IsLayoutCalculationNecessary() )
         return;
 
     Point aPt = LogicToDevicePixel(rPt);
@@ -84,7 +84,7 @@ void OutputDevice::DrawPixel( const Point& rPt, const Color& rColor )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaPixelAction( rPt, aColor ) );
 
-    if ( !IsDeviceOutputNecessary() || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary() )
         return;
 
     Point aPt = LogicToDevicePixel(rPt);

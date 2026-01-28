@@ -62,7 +62,7 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
     if( mpMetaFile )
         mpMetaFile->AddAction( new MetaHatchAction( rPolyPoly, aHatch ) );
 
-    if( !IsDeviceOutputNecessary() || ImplIsRecordLayout() )
+    if( !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary() )
         return;
 
     if( !mpGraphics && !AcquireGraphics() )

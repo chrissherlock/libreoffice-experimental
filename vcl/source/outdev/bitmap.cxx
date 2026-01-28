@@ -86,7 +86,7 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
 {
     assert(!is_double_buffered_window());
 
-    if( ImplIsRecordLayout() )
+    if( IsLayoutCalculationNecessary() )
         return;
 
     if ( RasterOp::Invert == mpGraphicsState->meRasterOp )
@@ -204,7 +204,7 @@ void OutputDevice::DrawAlphaBitmap( const Point& rDestPt, const Size& rDestSize,
     assert(!is_double_buffered_window());
     assert(rBitmap.HasAlpha());
 
-    if( ImplIsRecordLayout() )
+    if( IsLayoutCalculationNecessary() )
         return;
 
     if (RasterOp::Invert == mpGraphicsState->meRasterOp)
@@ -433,7 +433,7 @@ void OutputDevice::DrawDeviceAlphaBitmap( const Bitmap& rBmp,
 
 bool OutputDevice::HasFastDrawTransformedBitmap() const
 {
-    if( ImplIsRecordLayout() )
+    if( IsLayoutCalculationNecessary() )
         return false;
 
     if (!mpGraphics && !AcquireGraphics())
@@ -477,7 +477,7 @@ void OutputDevice::DrawImage( const Point& rPos, const Size& rSize,
 {
     assert(!is_double_buffered_window());
 
-    if (!ImplIsRecordLayout())
+    if (!IsLayoutCalculationNecessary())
     {
         if (!rSize.IsEmpty())
             rImage.Draw(this, rPos, nStyle, &rSize);

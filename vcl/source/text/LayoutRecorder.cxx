@@ -12,12 +12,13 @@
 #include <vcl/ctrl.hxx>
 #include <text/LayoutRecorder.hxx>
 #include <text/TextLayoutEngine.hxx>
-#include <ImplOutDevData.hxx>
+#include <text/TextRecordingState.hxx>
+#include <vcl/layout.hxx>
 
 namespace vcl::text
 {
-LayoutRecorder::LayoutRecorder(ImplOutDevData* pData)
-    : mpOutDevData(pData)
+LayoutRecorder::LayoutRecorder(vcl::text::TextRecordingState* pState)
+    : mpRecordingState(pState)
 {
 }
 
@@ -33,15 +34,15 @@ bool LayoutRecorder::IsActive() const
 {
     if (mpVector)
         return true;
-    return mpOutDevData && mpOutDevData->mpRecordLayout;
+    return mpRecordingState && mpRecordingState->IsActive();
 }
 
 void LayoutRecorder::RecordLineStart()
 {
     // Safety check: Line indices only exist in Internal Mode
-    if (mpOutDevData && mpOutDevData->mpRecordLayout)
+    if (mpRecordingState && mpRecordingState->IsActive())
     {
-        auto& rRecord = *mpOutDevData->mpRecordLayout;
+        auto& rRecord = *mpRecordingState->mpLayoutData;
         rRecord.m_aLineIndices.push_back(rRecord.m_aDisplayText.getLength());
     }
 }
@@ -63,16 +64,16 @@ void LayoutRecorder::Record(OutputDevice& rDev, const Point& rStartPt, const OUS
     }
 
     // --- Mode 2: Internal Recording (Accessibility) ---
-    if (mpOutDevData && mpOutDevData->mpRecordLayout)
+    if (mpRecordingState && mpRecordingState->IsActive())
     {
         // 1. Handle Line Start (Controlled safely here)
         if (bStartVisualLine)
             RecordLineStart();
 
         // 2. Prepare Clip
-        auto& rRecord = *mpOutDevData->mpRecordLayout;
+        auto& rRecord = *mpRecordingState->mpLayoutData;
         vcl::Region aClip(rDev.GetOutputBoundsClipRegion());
-        aClip.Intersect(mpOutDevData->maRecordRect);
+        aClip.Intersect(mpRecordingState->maRecordRect);
 
         // 3. Record Glyphs
         FilterAndAppend(rDev, rStartPt, rStr, nIndex, nLen, pLayout, aClip,

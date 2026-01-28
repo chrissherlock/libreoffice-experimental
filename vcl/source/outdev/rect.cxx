@@ -58,7 +58,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaRectAction( rRect ) );
 
-    if ( !IsDeviceOutputNecessary() || (!mpGraphicsState->mbLineColor && !mpGraphicsState->mbFillColor) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || (!mpGraphicsState->mbLineColor && !mpGraphicsState->mbFillColor) || IsLayoutCalculationNecessary() )
         return;
 
     tools::Rectangle aRect(LogicToDevicePixel(rRect));
@@ -95,7 +95,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaRoundRectAction( rRect, nHorzRound, nVertRound ) );
 
-    if ( !IsDeviceOutputNecessary() || (!mpGraphicsState->mbLineColor && !mpGraphicsState->mbFillColor) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || (!mpGraphicsState->mbLineColor && !mpGraphicsState->mbFillColor) || IsLayoutCalculationNecessary() )
         return;
 
     const tools::Rectangle aRect(LogicToDevicePixel(rRect));
@@ -238,7 +238,7 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
     tools::Rectangle aDstRect( PixelToLogic( Point() ), GetOutputSize() );
     aDstRect.Intersection( rRect );
 
-    if( aDstRect.IsEmpty() || ImplIsRecordLayout() )
+    if( aDstRect.IsEmpty() || IsLayoutCalculationNecessary() )
         return;
 
     if( !mpGraphics && !AcquireGraphics() )
@@ -335,7 +335,7 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
 {
     assert(!is_double_buffered_window());
 
-    if (!mpGraphicsState->mbLineColor || ImplIsRecordLayout())
+    if (!mpGraphicsState->mbLineColor || IsLayoutCalculationNecessary())
     {
         return;
     }

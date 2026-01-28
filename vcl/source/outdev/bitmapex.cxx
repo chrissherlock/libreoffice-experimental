@@ -194,7 +194,7 @@ void OutputDevice::DrawTransformedBitmapEx(
 {
     assert(!is_double_buffered_window());
 
-    if( ImplIsRecordLayout() )
+    if( IsLayoutCalculationNecessary() )
         return;
 
     if(rBitmap.IsEmpty())

@@ -14,10 +14,8 @@
 #include <vector>
 
 class OutputDevice;
-struct ImplOutDevData;
-
-class Point;
 class SalLayout;
+class Point;
 namespace tools
 {
 class Rectangle;
@@ -25,6 +23,12 @@ class Rectangle;
 namespace vcl
 {
 class Region;
+}
+
+// Forward declaration for state
+namespace vcl::text
+{
+class TextRecordingState;
 }
 
 namespace vcl::text
@@ -35,7 +39,8 @@ class VCL_DLLPUBLIC LayoutRecorder
 {
 private:
     // Internal Mode State (Accessibility)
-    ImplOutDevData* mpOutDevData = nullptr;
+    // We use fully qualified name to avoid ambiguity
+    vcl::text::TextRecordingState* mpRecordingState = nullptr;
 
     // External Mode State (Measurement/GetTextRect)
     std::vector<tools::Rectangle>* mpVector = nullptr;
@@ -44,11 +49,9 @@ private:
 
 public:
     // Constructor for Internal Mode
-    // Records to mpOutDevData buffers and manages line indices.
-    explicit LayoutRecorder(ImplOutDevData* pData);
+    explicit LayoutRecorder(vcl::text::TextRecordingState* pState);
 
     // Constructor for External Mode
-    // Records directly to the provided vector and string using the provided clip.
     LayoutRecorder(std::vector<tools::Rectangle>& rRects, OUString* pDisplayText,
                    const vcl::Region& rClip);
 
@@ -56,8 +59,6 @@ public:
     bool IsActive() const;
 
     // The single public API for recording.
-    // bStartVisualLine: Set to true if this text operation represents the start of a new line
-    //                   (e.g., DrawTextArray). Defaults to false (e.g., DrawText).
     void Record(OutputDevice& rDev, const Point& rStartPt, const OUString& rStr, sal_Int32 nIndex,
                 sal_Int32 nLen, const SalLayout* pLayout = nullptr, bool bStartVisualLine = false);
 
