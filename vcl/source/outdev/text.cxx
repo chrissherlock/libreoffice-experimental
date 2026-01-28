@@ -34,6 +34,7 @@
 #include <vcl/metaact.hxx>
 #include <vcl/metric.hxx>
 #include <vcl/mnemonic.hxx>
+#include <vcl/rendercontext/SalLayoutFlags.hxx>
 #include <vcl/rendercontext/SystemTextColorFlags.hxx>
 #include <vcl/textrectinfo.hxx>
 #include <vcl/virdev.hxx>
@@ -43,6 +44,8 @@
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
 #include <text/TextLayoutRequest.hxx>
+#include <text/AccessibilityRecorder.hxx>
+#include <text/MeasurementRecorder.hxx>
 #include <font/FontController.hxx>
 #include <font/PhysicalFontFace.hxx>
 #include <drawmode.hxx>
@@ -52,7 +55,7 @@
 #include <textlineinfo.hxx>
 #include <impglyphitem.hxx>
 #include <TextLayoutCache.hxx>
-#include <text/LayoutRecorder.hxx>
+
 #include <text/TextRecordingState.hxx>
 #include <text/TextLayoutEngine.hxx>
 #include <text/GraphicLayoutFactory.hxx>
@@ -546,8 +549,16 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
     if (pVector)
     {
         vcl::Region aClip(GetOutputBoundsClipRegion());
-        vcl::text::LayoutRecorder aRecorder(*pVector, pDisplayText, aClip);
-        aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen); // Default: No line start
+        // Create layout for recording
+        std::unique_ptr<SalLayout> pSalLayout = LayoutText(
+            vcl::text::TextSpan{rStr, nIndex, nLen},
+            vcl::text::LayoutConstraints{rStartPt, 0, {}, {}, SalLayoutFlags::NONE},
+            vcl::text::LayoutCacheData{nullptr, pLayoutCache},
+            vcl::text::RenderSelection{}
+        );
+
+        vcl::text::MeasurementRecorder aRecorder(*pVector, pDisplayText, aClip);
+        aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get()); // Default: No line start
     }
 
     // If pVector is set, we handled it above (External Recording).
@@ -571,7 +582,7 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
         // Internal Recording: Use the actual layout to ensure accessibility bounds match visual bounds (e.g. justification)
 
         {
-            vcl::text::LayoutRecorder aRecorder(mpRecordingState.get());
+            vcl::text::AccessibilityRecorder aRecorder(mpRecordingState.get());
             if (aRecorder.IsActive())
                 aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
         }
@@ -675,7 +686,7 @@ void OutputDevice::DrawPartialTextArray(const Point& rStartPt, const OUString& r
     if (pSalLayout)
     {
         {
-            vcl::text::LayoutRecorder aRecorder(mpRecordingState.get());
+            vcl::text::AccessibilityRecorder aRecorder(mpRecordingState.get());
             if (aRecorder.IsActive())
                 aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
         }
@@ -713,7 +724,7 @@ void OutputDevice::DrawTextArray(const Point& rStartPt, const OUString& rStr,
     {
         // Internal Recording: Explicitly signal new line and pass the layout for accuracy
         {
-            vcl::text::LayoutRecorder aRecorder(mpRecordingState.get());
+            vcl::text::AccessibilityRecorder aRecorder(mpRecordingState.get());
             if (aRecorder.IsActive())
                 aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get(), true);
         }
@@ -815,7 +826,7 @@ void OutputDevice::DrawStretchText(const Point& rStartPt, sal_Int32 nWidth, cons
         // Internal Recording: Use the actual layout to ensure accessibility bounds match visual bounds (e.g. justification)
 
         {
-            vcl::text::LayoutRecorder aRecorder(mpRecordingState.get());
+            vcl::text::AccessibilityRecorder aRecorder(mpRecordingState.get());
             if (aRecorder.IsActive())
                 aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
         }
@@ -1154,13 +1165,13 @@ void OutputDevice::ImplDrawTextMultiLine(OutputDevice& rTargetDevice, const tool
     {
         // Signal start of a new visual line for accessibility
         {
-            vcl::text::LayoutRecorder aRecorder(mpRecordingState.get());
+            vcl::text::AccessibilityRecorder aRecorder(mpRecordingState.get());
             if (aRecorder.IsActive())
                 aRecorder.Record(*this, aPos, rStr, aLayout.aLineInfo.GetLine(i).GetIndex(), 0, nullptr, true);
         }
         // Signal start of a new visual line for accessibility
         {
-            vcl::text::LayoutRecorder aRecorder(mpRecordingState.get());
+            vcl::text::AccessibilityRecorder aRecorder(mpRecordingState.get());
             if (aRecorder.IsActive())
                 aRecorder.Record(*this, aPos, rStr, aLayout.aLineInfo.GetLine(i).GetIndex(), 0, nullptr, true);
         }
