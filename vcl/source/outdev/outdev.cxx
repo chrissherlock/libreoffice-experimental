@@ -39,7 +39,6 @@
 #include <font/FontController.hxx>
 #include <text/TextRecordingState.hxx>
 #include <GraphicsState.hxx>
-#include <ImplOutDevData.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <salgdi.hxx>
 #include <window.h>
@@ -100,8 +99,7 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mbSubpixelPositioning           = false; // tdf#168002 allow SubpixelPositioning (default: false)
 
     // struct ImplOutDevData- see #i82615#
-    mpOutDevData.reset(new ImplOutDevData);
-    mpOutDevData->mpRotateDev       = nullptr;
+    mpRotateDev       = nullptr;
 
     mpClippingController->SetDirty(true);
 }
@@ -122,12 +120,11 @@ void OutputDevice::dispose()
         mpUnoGraphicsList = nullptr;
     }
 
-    mpOutDevData->mpRotateDev.disposeAndClear();
+    mpRotateDev.disposeAndClear();
 
     // #i75163#
     mpMapper->InvalidateViewTransform();
 
-    mpOutDevData.reset();
 
     // for some reason, we haven't removed state from the stack properly
     if ( !maOutDevStateStack.empty() )

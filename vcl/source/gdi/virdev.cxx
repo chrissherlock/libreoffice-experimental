@@ -30,7 +30,6 @@
 #include <font/FontController.hxx>
 #include <ClippingController.hxx>
 #include <GraphicsState.hxx>
-#include <ImplOutDevData.hxx>
 #include <font/PhysicalFontCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <impfontcache.hxx>

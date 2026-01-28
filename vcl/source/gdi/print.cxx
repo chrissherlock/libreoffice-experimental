@@ -41,7 +41,6 @@
 #include <GraphicsState.hxx>
 #include <jobset.h>
 #include <print.h>
-#include <ImplOutDevData.hxx>
 #include <font/PhysicalFontCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <font/fontsubstitution.hxx>

@@ -223,7 +223,7 @@ private:
     rtl::Reference<LogicalFontInstance> mpForcedFallbackInstance;
     mutable std::unique_ptr<vcl::font::PhysicalFontFaceCollection>  mpFontFaceCollection;
     std::vector<vcl::State>        maOutDevStateStack;
-    std::unique_ptr<ImplOutDevData> mpOutDevData;
+    VclPtr<VirtualDevice> mpRotateDev;
     std::unique_ptr<vcl::text::TextRecordingState> mpRecordingState;
     std::vector< VCLXGraphics* >*   mpUnoGraphicsList;
     vcl::ExtOutDevData*             mpExtOutDevData;

@@ -33,7 +33,6 @@
 
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
-#include <ImplOutDevData.hxx>
 #include <svdata.hxx>
 #include <window.h>
 
