@@ -53,7 +53,6 @@
 
 #include <ClippingController.hxx>
 #include <GraphicsState.hxx>
-#include <ImplOutDevData.hxx>
 #include <impfontcache.hxx>
 #include <salframe.hxx>
 #include <salobj.hxx>

@@ -43,7 +43,6 @@
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
 #include <text/TextLayoutRequest.hxx>
-#include <ImplOutDevData.hxx>
 #include <font/FontController.hxx>
 #include <font/PhysicalFontFace.hxx>
 #include <drawmode.hxx>
@@ -189,10 +188,10 @@ Bitmap OutputDevice::ImplCreateRotatedTextBitmap(SalLayout& rSalLayout,
 
 VirtualDevice* OutputDevice::ImplPrepareRotateDevice(const Size& rSize)
 {
-    if (!mpOutDevData->mpRotateDev)
-        mpOutDevData->mpRotateDev = VclPtr<VirtualDevice>::Create(*this);
+    if (!mpRotateDev)
+        mpRotateDev = VclPtr<VirtualDevice>::Create(*this);
 
-    VirtualDevice* pVDev = mpOutDevData->mpRotateDev;
+    VirtualDevice* pVDev = mpRotateDev;
     if (!pVDev->SetOutputSizePixel(rSize))
         return nullptr;
 
