@@ -28,29 +28,46 @@ class Region;
 
 namespace vcl::text
 {
+// A unified recorder that handles both internal (accessibility) and external (measurement)
+// layout recording scenarios.
 class VCL_DLLPUBLIC LayoutRecorder
 {
-    ImplOutDevData* mpOutDevData;
+private:
+    // Internal Mode State (Accessibility)
+    ImplOutDevData* mpOutDevData = nullptr;
+
+    // External Mode State (Measurement/GetTextRect)
+    std::vector<tools::Rectangle>* mpVector = nullptr;
+    OUString* mpDisplayText = nullptr;
+    const vcl::Region* mpClip = nullptr;
 
 public:
-    LayoutRecorder(ImplOutDevData* pData)
-        : mpOutDevData(pData)
-    {
-    }
+    // Constructor for Internal Mode
+    // Records to mpOutDevData buffers and manages line indices.
+    explicit LayoutRecorder(ImplOutDevData* pData);
 
+    // Constructor for External Mode
+    // Records directly to the provided vector and string using the provided clip.
+    LayoutRecorder(std::vector<tools::Rectangle>& rRects, OUString* pDisplayText,
+                   const vcl::Region& rClip);
+
+    // Returns true if a valid recording target exists.
     bool IsActive() const;
 
-    // Instance method: Uses mpOutDevData to record to internal buffers
-    void RecordLayoutData(OutputDevice& rDev, const Point& rStartPt, const OUString& rStr,
-                          sal_Int32 nIndex, sal_Int32 nLen);
+    // The single public API for recording.
+    // bStartVisualLine: Set to true if this text operation represents the start of a new line
+    //                   (e.g., DrawTextArray). Defaults to false (e.g., DrawText).
+    void Record(OutputDevice& rDev, const Point& rStartPt, const OUString& rStr, sal_Int32 nIndex,
+                sal_Int32 nLen, bool bStartVisualLine = false);
 
-    // Static method: Pure logic, no internal state dependency.
-    // Mirrors the legacy OutputDevice::ImplFilterAndRecordGlyphs exactly.
-    static void FilterAndRecordGlyphs(OutputDevice& rDev, const Point& rStartPt,
-                                      const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen,
-                                      const vcl::Region& rClip,
-                                      std::vector<tools::Rectangle>& rVector,
-                                      OUString* pDisplayText);
+private:
+    // Private helper: pushes the line index. Only allowed via Record(..., true).
+    void RecordLineStart();
+
+    // Private helper: core filtering logic
+    void FilterAndAppend(OutputDevice& rDev, const Point& rStartPt, const OUString& rStr,
+                         sal_Int32 nIndex, sal_Int32 nLen, const vcl::Region& rClip,
+                         std::vector<tools::Rectangle>& rOutRects, OUString* pOutText);
 };
 
 } // namespace vcl::text
