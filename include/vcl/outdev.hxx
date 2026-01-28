@@ -1293,6 +1293,8 @@ SAL_DLLPRIVATE static void  ImplUpdateFontDataForAllFrames( FontUpdateHandler_t 
     ///@{
 
 public:
+    bool IsLayoutCalculationNecessary() const;
+
     /// tooling method to be able to access EmphasisMark data when needed
     void  createEmphasisMarks(
         FontEmphasisMark nFontEmphasisMark,

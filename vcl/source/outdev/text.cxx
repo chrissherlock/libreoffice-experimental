@@ -526,6 +526,12 @@ vcl::Region OutputDevice::GetOutputBoundsClipRegion() const { return GetClipRegi
 
 const SalLayoutFlags eDefaultLayout = SalLayoutFlags::NONE;
 
+
+bool OutputDevice::IsLayoutCalculationNecessary() const
+{
+    return IsDeviceOutputNecessary() || ImplIsRecordLayout();
+}
+
 void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int32 nIndex,
                             sal_Int32 nLen, std::vector<tools::Rectangle>* pVector,
                             OUString* pDisplayText, const SalLayoutGlyphs* pLayoutCache)
@@ -537,21 +543,16 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaTextAction(rStartPt, rStr, nIndex, nLen));
 
-    // --- REFACTOR START: LayoutRecorder Migration ---
     if (pVector)
     {
-        // External Mode: Used by GetTextRect
         vcl::Region aClip(GetOutputBoundsClipRegion());
         vcl::text::LayoutRecorder aRecorder(*pVector, pDisplayText, aClip);
         aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen); // Default: No line start
     }
-    else
-    {
-        // Internal Mode: Defer to after LayoutText to capture exact bounds
-    }
-    // --- REFACTOR END ---
 
-    if (!IsDeviceOutputNecessary() || pVector)
+    // If pVector is set, we handled it above (External Recording).
+    // If mpRecordLayout is set, we proceed to LayoutText to get accurate bounds.
+    if (!IsLayoutCalculationNecessary() || pVector)
         return;
 
     if (mpFontRealization->mxFont)
@@ -575,7 +576,9 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
                 aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
         }
 
-        ImplDrawText(*pSalLayout);
+
+        if (!mpOutDevData->mpRecordLayout)
+            ImplDrawText(*pSalLayout);
     }
 }
 
@@ -648,7 +651,7 @@ void OutputDevice::DrawPartialTextArray(const Point& rStartPt, const OUString& r
         mpMetaFile->AddAction(new MetaTextArrayAction(rStartPt, rStr, pDXArray, pKashidaArray,
                                                       nPartIndex, nPartLen, nIndex, nLen));
 
-    if (!IsDeviceOutputNecessary())
+    if (!IsLayoutCalculationNecessary())
         return;
 
     if (!mpGraphics && !AcquireGraphics())
@@ -671,15 +674,14 @@ void OutputDevice::DrawPartialTextArray(const Point& rStartPt, const OUString& r
 
     if (pSalLayout)
     {
-        // Internal Recording: Use the actual layout to ensure accessibility bounds match visual bounds (e.g. justification)
-
         {
             vcl::text::LayoutRecorder aRecorder(mpOutDevData.get());
             if (aRecorder.IsActive())
                 aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
         }
 
-        ImplDrawText(*pSalLayout);
+        if (!mpOutDevData->mpRecordLayout)
+            ImplDrawText(*pSalLayout);
     }
 }
 
@@ -695,16 +697,8 @@ void OutputDevice::DrawTextArray(const Point& rStartPt, const OUString& rStr,
         mpMetaFile->AddAction(
             new MetaTextArrayAction(rStartPt, rStr, aKernArray, pKashidaAry, nIndex, nLen));
 
-    // --- REFACTOR: Explicit New Line Recording ---
-    vcl::text::LayoutRecorder aRecorder(mpOutDevData.get());
-    if (aRecorder.IsActive())
-    {
-        // Explicitly signal the start of a new visual line
-        aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, nullptr, true);
-    }
-    // ---------------------------------------------
-
-    if (!IsDeviceOutputNecessary() || mpOutDevData->mpRecordLayout)
+    // Allow layout calculation to proceed if we are recording (to get accurate bounds)
+    if (!IsLayoutCalculationNecessary())
         return;
 
     if (mpFontRealization->mxFont && mpFontRealization->mxFont->mpConversion)
@@ -716,7 +710,16 @@ void OutputDevice::DrawTextArray(const Point& rStartPt, const OUString& rStr,
         vcl::text::LayoutCacheData{ nullptr, pLayoutCache }, vcl::text::RenderSelection{});
 
     if (pSalLayout)
+    {
+        // Internal Recording: Explicitly signal new line and pass the layout for accuracy
+        {
+            vcl::text::LayoutRecorder aRecorder(mpOutDevData.get());
+            if (aRecorder.IsActive())
+                aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get(), true);
+        }
+
         ImplRenderTextLayout(*pSalLayout);
+    }
 }
 
 double OutputDevice::GetTextArray(const OUString& rStr, KernArray* pKernArray, sal_Int32 nIndex,
@@ -799,7 +802,7 @@ void OutputDevice::DrawStretchText(const Point& rStartPt, sal_Int32 nWidth, cons
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaStretchTextAction(rStartPt, nWidth, rStr, nIndex, nLen));
 
-    if (!IsDeviceOutputNecessary())
+    if (!IsLayoutCalculationNecessary())
         return;
 
     std::unique_ptr<SalLayout> pSalLayout
@@ -817,7 +820,9 @@ void OutputDevice::DrawStretchText(const Point& rStartPt, sal_Int32 nWidth, cons
                 aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
         }
 
-        ImplDrawText(*pSalLayout);
+
+        if (!mpOutDevData->mpRecordLayout)
+            ImplDrawText(*pSalLayout);
     }
 }
 
@@ -1147,6 +1152,18 @@ void OutputDevice::ImplDrawTextMultiLine(OutputDevice& rTargetDevice, const tool
 
     for (sal_Int32 i = 0; i < aLayout.nFormatLines; i++)
     {
+        // Signal start of a new visual line for accessibility
+        {
+            vcl::text::LayoutRecorder aRecorder(mpOutDevData.get());
+            if (aRecorder.IsActive())
+                aRecorder.Record(*this, aPos, rStr, aLayout.aLineInfo.GetLine(i).GetIndex(), 0, nullptr, true);
+        }
+        // Signal start of a new visual line for accessibility
+        {
+            vcl::text::LayoutRecorder aRecorder(mpOutDevData.get());
+            if (aRecorder.IsActive())
+                aRecorder.Record(*this, aPos, rStr, aLayout.aLineInfo.GetLine(i).GetIndex(), 0, nullptr, true);
+        }
         ImplTextLineInfo& rLineInfo = aLayout.aLineInfo.GetLine(i);
 
         if (nStyle & DrawTextFlags::Right)
