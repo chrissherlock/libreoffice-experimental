@@ -1333,7 +1333,10 @@ SAL_DLLPRIVATE static void  ImplUpdateFontDataForAllFrames( FontUpdateHandler_t 
     ///@{
 
 public:
-    bool IsLayoutCalculationNecessary() const;
+    /** Internal VCL hook for accessibility layout recording.
+        @internal Not to be used by external modules (Writer, Calc, etc.).
+    */
+    SAL_DLLPRIVATE bool IsLayoutCalculationNecessary() const;
 
     /// tooling method to be able to access EmphasisMark data when needed
     void  createEmphasisMarks(
