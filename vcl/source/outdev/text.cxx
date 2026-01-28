@@ -547,14 +547,9 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
     }
     else
     {
-        // Internal Mode: Accessibility
-        vcl::text::LayoutRecorder aRecorder(mpOutDevData.get());
-        if (aRecorder.IsActive())
-            aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen); // Default: No line start
+        // Internal Mode: Defer to after LayoutText to capture exact bounds
     }
     // --- REFACTOR END ---
-
-
 
     if (!IsDeviceOutputNecessary() || pVector)
         return;
@@ -571,7 +566,17 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
         vcl::text::LayoutCacheData{ nullptr, pLayoutCache }, vcl::text::RenderSelection{});
 
     if (pSalLayout)
+    {
+        // Internal Recording: Use the actual layout to ensure accessibility bounds match visual bounds (e.g. justification)
+
+        {
+            vcl::text::LayoutRecorder aRecorder(mpOutDevData.get());
+            if (aRecorder.IsActive())
+                aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
+        }
+
         ImplDrawText(*pSalLayout);
+    }
 }
 
 tools::Long OutputDevice::GetTextWidth(const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen,
@@ -665,7 +670,17 @@ void OutputDevice::DrawPartialTextArray(const Point& rStartPt, const OUString& r
                      vcl::text::RenderSelection{ nPartIndex, nPartIndex, nPartIndex + nPartLen });
 
     if (pSalLayout)
+    {
+        // Internal Recording: Use the actual layout to ensure accessibility bounds match visual bounds (e.g. justification)
+
+        {
+            vcl::text::LayoutRecorder aRecorder(mpOutDevData.get());
+            if (aRecorder.IsActive())
+                aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
+        }
+
         ImplDrawText(*pSalLayout);
+    }
 }
 
 void OutputDevice::DrawTextArray(const Point& rStartPt, const OUString& rStr,
@@ -685,10 +700,9 @@ void OutputDevice::DrawTextArray(const Point& rStartPt, const OUString& rStr,
     if (aRecorder.IsActive())
     {
         // Explicitly signal the start of a new visual line
-        aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, true);
+        aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, nullptr, true);
     }
     // ---------------------------------------------
-
 
     if (!IsDeviceOutputNecessary() || mpOutDevData->mpRecordLayout)
         return;
@@ -794,7 +808,17 @@ void OutputDevice::DrawStretchText(const Point& rStartPt, sal_Int32 nWidth, cons
                      vcl::text::LayoutCacheData{}, vcl::text::RenderSelection{});
 
     if (pSalLayout)
+    {
+        // Internal Recording: Use the actual layout to ensure accessibility bounds match visual bounds (e.g. justification)
+
+        {
+            vcl::text::LayoutRecorder aRecorder(mpOutDevData.get());
+            if (aRecorder.IsActive())
+                aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
+        }
+
         ImplDrawText(*pSalLayout);
+    }
 }
 
 SalLayoutFlags OutputDevice::GetBiDiLayoutFlags(std::u16string_view rStr, const sal_Int32 nMinIndex,

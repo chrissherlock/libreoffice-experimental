@@ -504,6 +504,10 @@ public:
         bool bEllipsisGenerated = false;
     };
 
+    static void GetGlyphRectsFromLayout(const SalLayout& rLayout, const Point& rStartPt,
+                                        const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen,
+                                        std::vector<tools::Rectangle>& rRects);
+
     static MnemonicGeometry
     GetMnemonicGeometry(std::function<double(tools::Long)> const& fnLogicWidthToDeviceSubPixel,
                         std::function<tools::Long(tools::Long)> const& fnLogicWidthToDevicePixel,

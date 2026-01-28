@@ -47,7 +47,8 @@ void LayoutRecorder::RecordLineStart()
 }
 
 void LayoutRecorder::Record(OutputDevice& rDev, const Point& rStartPt, const OUString& rStr,
-                            sal_Int32 nIndex, sal_Int32 nLen, bool bStartVisualLine)
+                            sal_Int32 nIndex, sal_Int32 nLen, const SalLayout* pLayout,
+                            bool bStartVisualLine)
 {
     if (!IsActive())
         return;
@@ -56,7 +57,8 @@ void LayoutRecorder::Record(OutputDevice& rDev, const Point& rStartPt, const OUS
     // Note: Line indices are irrelevant for GetTextRect, so bStartVisualLine is ignored.
     if (mpVector)
     {
-        FilterAndAppend(rDev, rStartPt, rStr, nIndex, nLen, *mpClip, *mpVector, mpDisplayText);
+        FilterAndAppend(rDev, rStartPt, rStr, nIndex, nLen, pLayout, *mpClip, *mpVector,
+                        mpDisplayText);
         return;
     }
 
@@ -73,26 +75,45 @@ void LayoutRecorder::Record(OutputDevice& rDev, const Point& rStartPt, const OUS
         aClip.Intersect(mpOutDevData->maRecordRect);
 
         // 3. Record Glyphs
-        FilterAndAppend(rDev, rStartPt, rStr, nIndex, nLen, aClip, rRecord.m_aUnicodeBoundRects,
-                        &rRecord.m_aDisplayText);
+        FilterAndAppend(rDev, rStartPt, rStr, nIndex, nLen, pLayout, aClip,
+                        rRecord.m_aUnicodeBoundRects, &rRecord.m_aDisplayText);
     }
 }
 
 void LayoutRecorder::FilterAndAppend(OutputDevice& rDev, const Point& rStartPt,
                                      const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen,
-                                     const vcl::Region& rClip,
+                                     const SalLayout* pLayout, const vcl::Region& rClip,
                                      std::vector<tools::Rectangle>& rOutRects, OUString* pOutText)
 {
     if (rClip.IsNull())
     {
-        rDev.GetGlyphBoundRects(rStartPt, rStr, nIndex, nLen, rOutRects);
+        if (pLayout)
+        {
+            // Optimization: Extract directly from the layout used for drawing.
+            // This ensures accessibility bounds match justified/kerned text exactly.
+            std::vector<tools::Rectangle> aLayoutRects;
+            TextLayoutEngine::GetGlyphRectsFromLayout(*pLayout, rStartPt, rStr, nIndex, nLen,
+                                                      aLayoutRects);
+            rOutRects.insert(rOutRects.end(), aLayoutRects.begin(), aLayoutRects.end());
+        }
+        else
+        {
+            // Fallback: Re-measure (slower, ignores specific justification if not passed)
+            rDev.GetGlyphBoundRects(rStartPt, rStr, nIndex, nLen, rOutRects);
+        }
+
         if (pOutText)
             *pOutText += rStr.subView(nIndex, nLen);
         return;
     }
 
+    // Complex path: Filter glyphs against clip
     std::vector<tools::Rectangle> aGlyphRects;
-    rDev.GetGlyphBoundRects(rStartPt, rStr, nIndex, nLen, aGlyphRects);
+    if (pLayout)
+        TextLayoutEngine::GetGlyphRectsFromLayout(*pLayout, rStartPt, rStr, nIndex, nLen,
+                                                  aGlyphRects);
+    else
+        rDev.GetGlyphBoundRects(rStartPt, rStr, nIndex, nLen, aGlyphRects);
 
     vcl::text::TextLayoutEngine::FilterVisibleGlyphs(rStr, nIndex, rClip, aGlyphRects, rOutRects,
                                                      pOutText);
