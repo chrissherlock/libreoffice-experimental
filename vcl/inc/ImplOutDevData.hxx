@@ -38,8 +38,6 @@ class B2DHomMatrix;
 struct ImplOutDevData
 {
     VclPtr<VirtualDevice> mpRotateDev;
-    vcl::ControlLayoutData* mpRecordLayout;
-    tools::Rectangle maRecordRect;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

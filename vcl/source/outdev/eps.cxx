@@ -38,7 +38,7 @@ bool OutputDevice::DrawEPS( const Point& rPoint, const Size& rSize,
         mpMetaFile->AddAction( new MetaEPSAction( rPoint, rSize, rGfxLink, aSubst ) );
     }
 
-    if ( !IsDeviceOutputNecessary() || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary() )
         return true;
 
     if( IsOutputClipped() )

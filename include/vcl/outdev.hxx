@@ -122,6 +122,7 @@ namespace vcl
     }
 
     namespace text {
+        class TextRecordingState;
         class TextLayoutRequest;
         class TextLayoutCache;
     }
@@ -221,6 +222,7 @@ private:
     mutable std::unique_ptr<vcl::font::PhysicalFontFaceCollection>  mpFontFaceCollection;
     std::vector<vcl::State>        maOutDevStateStack;
     std::unique_ptr<ImplOutDevData> mpOutDevData;
+    std::unique_ptr<vcl::text::TextRecordingState> mpRecordingState;
     std::vector< VCLXGraphics* >*   mpUnoGraphicsList;
     vcl::ExtOutDevData*             mpExtOutDevData;
     mutable std::unique_ptr<CoordinateMapper> mpMapper;
@@ -1308,7 +1310,6 @@ public:
                    void         ReMirror( Point &rPoint ) const;
                    void         ReMirror( tools::Rectangle &rRect ) const;
     SAL_DLLPRIVATE void         ReMirror( vcl::Region &rRegion ) const;
-    SAL_DLLPRIVATE bool         ImplIsRecordLayout() const;
     virtual bool                HasMirroredGraphics() const;
 
     std::unique_ptr<SalLayout> LayoutText(

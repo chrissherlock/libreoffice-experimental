@@ -45,7 +45,7 @@ void OutputDevice::DrawWallpaper( const tools::Rectangle& rRect,
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaWallpaperAction( rRect, rWallpaper ) );
 
-    if ( !IsDeviceOutputNecessary() || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary() )
         return;
 
     if ( rWallpaper.GetStyle() != WallpaperStyle::NONE )
@@ -107,7 +107,7 @@ void OutputDevice::DrawColorWallpaper( tools::Long nX, tools::Long nY,
 
 void OutputDevice::Erase()
 {
-    if ( !IsDeviceOutputNecessary() || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary() )
         return;
 
     if ( mbBackground )
@@ -137,7 +137,7 @@ void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
 {
     assert(!is_double_buffered_window());
 
-    if( ImplIsRecordLayout() )
+    if( IsLayoutCalculationNecessary() )
         return;
 
     const Bitmap* pCached = rWallpaper.ImplGetCachedBitmap();

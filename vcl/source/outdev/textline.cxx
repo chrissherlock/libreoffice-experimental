@@ -707,7 +707,7 @@ void OutputDevice::DrawTextLine( const Point& rPos, tools::Long nWidth,
     {
         return;
     }
-    if ( !IsDeviceOutputNecessary() || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary() )
         return;
 
     if ( mpClippingController->IsDirty() )
@@ -731,7 +731,7 @@ void OutputDevice::DrawWaveLine(const Point& rStartPos, const Point& rEndPos, to
 {
     assert(!is_double_buffered_window());
 
-    if ( !IsDeviceOutputNecessary() || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary() )
         return;
 
     // we need a graphics

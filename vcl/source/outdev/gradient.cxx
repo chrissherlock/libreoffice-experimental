@@ -78,7 +78,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
 
     DrawGradientToMetafile( rPolyPoly, rGradient );
 
-    if( !IsDeviceOutputNecessary() || ImplIsRecordLayout() )
+    if( !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary() )
         return;
 
     // Clip and then draw the gradient
