@@ -58,7 +58,7 @@
 #include <salobj.hxx>
 #include <salinst.hxx>
 #include <salgdi.hxx>
-#include <text/TextRecordingState.hxx>
+#include <vcl/text/TextRecordingState.hxx>
 #include <svdata.hxx>
 #include <window.h>
 #include <toolbox.h>
@@ -3506,23 +3506,23 @@ void Window::RecordLayoutData( vcl::ControlLayoutData* pLayout, const tools::Rec
     if (pLayout)
     {
         // Ensure the state container exists
-        if (!pOutDev->mpRecordingState)
-            pOutDev->mpRecordingState = std::make_unique<vcl::text::TextRecordingState>();
+        if (!pOutDev->moRecordingState)
+            pOutDev->moRecordingState.emplace();
 
         // Set the current recording targets
         // Note: we use a raw pointer here because pLayout is owned by the caller (Accessibility impl)
         // and should not be deleted by OutputDevice.
-        pOutDev->mpRecordingState->mpLayoutData = pLayout;
-        pOutDev->mpRecordingState->maRecordRect = rRect;
+        pOutDev->moRecordingState->mpLayoutData = pLayout;
+        pOutDev->moRecordingState->maRecordRect = rRect;
     }
 
     // Trigger the paint, which will be intercepted by LayoutRecorder
     Paint(*pOutDev, rRect);
 
     // Teardown: Clear the pointer to avoid holding stale references.
-    if (pOutDev->mpRecordingState)
+    if (pOutDev->moRecordingState)
     {
-        pOutDev->mpRecordingState->mpLayoutData = nullptr;
+        pOutDev->moRecordingState->mpLayoutData = nullptr;
     }
 }
 

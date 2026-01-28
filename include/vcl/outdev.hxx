@@ -45,6 +45,7 @@
 #include <vcl/settings.hxx>
 #include <vcl/vclptr.hxx>
 #include <vcl/vclreferencebase.hxx>
+#include <vcl/text/TextRecordingState.hxx>
 
 #include <basegfx/range/b2drectangle.hxx>
 #include <basegfx/numeric/ftools.hxx>
@@ -224,7 +225,7 @@ private:
     mutable std::unique_ptr<vcl::font::PhysicalFontFaceCollection>  mpFontFaceCollection;
     std::vector<vcl::State>        maOutDevStateStack;
     VclPtr<VirtualDevice> mpRotateDev;
-    std::unique_ptr<vcl::text::TextRecordingState> mpRecordingState;
+    std::optional<vcl::text::TextRecordingState> moRecordingState;
     std::vector< VCLXGraphics* >*   mpUnoGraphicsList;
     vcl::ExtOutDevData*             mpExtOutDevData;
     mutable std::unique_ptr<CoordinateMapper> mpMapper;

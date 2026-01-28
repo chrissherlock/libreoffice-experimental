@@ -40,7 +40,7 @@
 #endif
 
 #include <ClippingController.hxx>
-#include <text/TextRecordingState.hxx>
+#include <vcl/text/TextRecordingState.hxx>
 
 // PaintBufferGuard
 
