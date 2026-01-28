@@ -537,16 +537,24 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaTextAction(rStartPt, rStr, nIndex, nLen));
 
+    // --- REFACTOR START: LayoutRecorder Migration ---
     if (pVector)
     {
+        // External Mode: Used by GetTextRect
         vcl::Region aClip(GetOutputBoundsClipRegion());
-        vcl::text::LayoutRecorder::FilterAndRecordGlyphs(*this, rStartPt, rStr, nIndex, nLen, aClip, *pVector, pDisplayText);
+        vcl::text::LayoutRecorder aRecorder(*pVector, pDisplayText, aClip);
+        aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen); // Default: No line start
     }
     else
     {
+        // Internal Mode: Accessibility
         vcl::text::LayoutRecorder aRecorder(mpOutDevData.get());
-        aRecorder.RecordLayoutData(*this, rStartPt, rStr, nIndex, nLen);
+        if (aRecorder.IsActive())
+            aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen); // Default: No line start
     }
+    // --- REFACTOR END ---
+
+
 
     if (!IsDeviceOutputNecessary() || pVector)
         return;
@@ -665,14 +673,22 @@ void OutputDevice::DrawTextArray(const Point& rStartPt, const OUString& rStr,
                                  sal_Int32 nIndex, sal_Int32 nLen, SalLayoutFlags nFlags,
                                  const SalLayoutGlyphs* pLayoutCache)
 {
-    assert(!is_double_buffered_window());
     nLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nIndex, nLen);
+    assert(!is_double_buffered_window());
 
     if (mpMetaFile)
         mpMetaFile->AddAction(
             new MetaTextArrayAction(rStartPt, rStr, aKernArray, pKashidaAry, nIndex, nLen));
+
+    // --- REFACTOR: Explicit New Line Recording ---
     vcl::text::LayoutRecorder aRecorder(mpOutDevData.get());
-    aRecorder.RecordLayoutData(*this, rStartPt, rStr, nIndex, nLen);
+    if (aRecorder.IsActive())
+    {
+        // Explicitly signal the start of a new visual line
+        aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, true);
+    }
+    // ---------------------------------------------
+
 
     if (!IsDeviceOutputNecessary() || mpOutDevData->mpRecordLayout)
         return;

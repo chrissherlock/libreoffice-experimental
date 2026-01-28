@@ -1639,7 +1639,6 @@ bool TextLayoutEngine::GetTextOutlines(const LayoutResources& rResources,
 
         if (bRet)
         {
-            // We are already in TextLayoutEngine, so just call the sibling function
             basegfx::B2DHomMatrix aMatrix
                 = CalculateOutlineTransform(*pSalLayout, rResources.rFontRealization, nXOffset);
 

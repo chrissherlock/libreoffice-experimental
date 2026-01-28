@@ -16,51 +16,86 @@
 
 namespace vcl::text
 {
-bool LayoutRecorder::IsActive() const { return mpOutDevData && mpOutDevData->mpRecordLayout; }
+LayoutRecorder::LayoutRecorder(ImplOutDevData* pData)
+    : mpOutDevData(pData)
+{
+}
 
-void LayoutRecorder::RecordLayoutData(OutputDevice& rDev, const Point& rStartPt,
-                                      const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen)
+LayoutRecorder::LayoutRecorder(std::vector<tools::Rectangle>& rRects, OUString* pDisplayText,
+                               const vcl::Region& rClip)
+    : mpVector(&rRects)
+    , mpDisplayText(pDisplayText)
+    , mpClip(&rClip)
+{
+}
+
+bool LayoutRecorder::IsActive() const
+{
+    if (mpVector)
+        return true;
+    return mpOutDevData && mpOutDevData->mpRecordLayout;
+}
+
+void LayoutRecorder::RecordLineStart()
+{
+    // Safety check: Line indices only exist in Internal Mode
+    if (mpOutDevData && mpOutDevData->mpRecordLayout)
+    {
+        auto& rRecord = *mpOutDevData->mpRecordLayout;
+        rRecord.m_aLineIndices.push_back(rRecord.m_aDisplayText.getLength());
+    }
+}
+
+void LayoutRecorder::Record(OutputDevice& rDev, const Point& rStartPt, const OUString& rStr,
+                            sal_Int32 nIndex, sal_Int32 nLen, bool bStartVisualLine)
 {
     if (!IsActive())
         return;
 
-    auto& rRecord = *mpOutDevData->mpRecordLayout;
-    rRecord.m_aLineIndices.push_back(rRecord.m_aDisplayText.getLength());
-
-    vcl::Region aClip(rDev.GetOutputBoundsClipRegion());
-    aClip.Intersect(mpOutDevData->maRecordRect);
-
-    // Call the static helper for the actual filtering logic
-    FilterAndRecordGlyphs(rDev, rStartPt, rStr, nIndex, nLen, aClip, rRecord.m_aUnicodeBoundRects,
-                          &rRecord.m_aDisplayText);
-}
-
-void LayoutRecorder::FilterAndRecordGlyphs(OutputDevice& rDev, const Point& rStartPt,
-                                           const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen,
-                                           const vcl::Region& rClip,
-                                           std::vector<tools::Rectangle>& rVector,
-                                           OUString* pDisplayText)
-{
-    // DIRECT MIGRATION of logic from OutputDevice::ImplFilterAndRecordGlyphs
-    // This preserves the "Dry Run" optimization used by GetTextRect (pVector path).
-
-    if (rClip.IsNull())
+    // --- Mode 1: External Recording (Direct) ---
+    // Note: Line indices are irrelevant for GetTextRect, so bStartVisualLine is ignored.
+    if (mpVector)
     {
-        // Optimization: No clip means we write directly to the output vector
-        rDev.GetGlyphBoundRects(rStartPt, rStr, nIndex, nLen, rVector);
-
-        if (pDisplayText)
-            *pDisplayText += rStr.subView(nIndex, nLen);
-
+        FilterAndAppend(rDev, rStartPt, rStr, nIndex, nLen, *mpClip, *mpVector, mpDisplayText);
         return;
     }
 
-    // Complex path: We need to filter the glyphs against the clip region
+    // --- Mode 2: Internal Recording (Accessibility) ---
+    if (mpOutDevData && mpOutDevData->mpRecordLayout)
+    {
+        // 1. Handle Line Start (Controlled safely here)
+        if (bStartVisualLine)
+            RecordLineStart();
+
+        // 2. Prepare Clip
+        auto& rRecord = *mpOutDevData->mpRecordLayout;
+        vcl::Region aClip(rDev.GetOutputBoundsClipRegion());
+        aClip.Intersect(mpOutDevData->maRecordRect);
+
+        // 3. Record Glyphs
+        FilterAndAppend(rDev, rStartPt, rStr, nIndex, nLen, aClip, rRecord.m_aUnicodeBoundRects,
+                        &rRecord.m_aDisplayText);
+    }
+}
+
+void LayoutRecorder::FilterAndAppend(OutputDevice& rDev, const Point& rStartPt,
+                                     const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen,
+                                     const vcl::Region& rClip,
+                                     std::vector<tools::Rectangle>& rOutRects, OUString* pOutText)
+{
+    if (rClip.IsNull())
+    {
+        rDev.GetGlyphBoundRects(rStartPt, rStr, nIndex, nLen, rOutRects);
+        if (pOutText)
+            *pOutText += rStr.subView(nIndex, nLen);
+        return;
+    }
+
     std::vector<tools::Rectangle> aGlyphRects;
     rDev.GetGlyphBoundRects(rStartPt, rStr, nIndex, nLen, aGlyphRects);
 
-    vcl::text::TextLayoutEngine::FilterVisibleGlyphs(rStr, nIndex, rClip, aGlyphRects, rVector,
-                                                     pDisplayText);
+    vcl::text::TextLayoutEngine::FilterVisibleGlyphs(rStr, nIndex, rClip, aGlyphRects, rOutRects,
+                                                     pOutText);
 }
 
 } // namespace vcl::text
