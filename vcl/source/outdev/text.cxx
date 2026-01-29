@@ -546,61 +546,64 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaTextAction(rStartPt, rStr, nIndex, nLen));
 
+    // --- Unified Layout Recording ---
+    // 1. Determine active state (Persistent vs Temporary)
+    vcl::text::TextRecordingState* pStateToUse = nullptr;
+    std::optional<vcl::text::TextRecordingState> oTempState;
+
+    if (moRecordingState)
+        pStateToUse = &*moRecordingState;
+    else if (pVector)
+    {
+        oTempState.emplace();
+        pStateToUse = &*oTempState;
+    }
+
+    // 2. Setup Measurement Targets (if applicable)
+    if (pStateToUse && pVector)
+    {
+        pStateToUse->mpMeasurementVector = pVector;
+        pStateToUse->mpMeasurementString = pDisplayText;
+        // Clip is transient, we calculate it here
+        vcl::Region aClip(GetOutputBoundsClipRegion());
+        pStateToUse->mpMeasurementClip = &aClip; // Note: risky if aClip dies, but Record() is immediate
+    }
+
+    // Note: For pVector (Measurement), we need a layout *now* to record it.
+    // For normal drawing, we create layout later.
+    // To solve this overlap, we create the layout once if possible, or create a temp one for pVector.
+
     if (pVector)
     {
-        vcl::Region aClip(GetOutputBoundsClipRegion());
-        // Create layout for recording
-        std::unique_ptr<SalLayout> pSalLayout = LayoutText(
+         vcl::Region aClip(GetOutputBoundsClipRegion());
+         if (pStateToUse) pStateToUse->mpMeasurementClip = &aClip;
+
+         std::unique_ptr<SalLayout> pSalLayout = LayoutText(
             vcl::text::TextSpan{rStr, nIndex, nLen},
             vcl::text::LayoutConstraints{rStartPt, 0, {}, {}, SalLayoutFlags::NONE},
             vcl::text::LayoutCacheData{nullptr, pLayoutCache},
             vcl::text::RenderSelection{}
         );
 
-        // Prepare temp state for measurement
-
-
-        // --- Unified Layout Recording ---
-        // 1. Determine active state (Persistent vs Temporary)
-        vcl::text::TextRecordingState* pStateToUse = nullptr;
-        std::optional<vcl::text::TextRecordingState> oTempState;
-
-        if (moRecordingState)
-            pStateToUse = &*moRecordingState;
-        else if (pVector)
-        {
-            oTempState.emplace();
-            pStateToUse = &*oTempState;
-        }
-
         if (pStateToUse)
         {
-            // 2. Configure Measurement targets (transient)
-            if (pVector)
-            {
-                pStateToUse->mpMeasurementVector = pVector;
-                pStateToUse->mpMeasurementString = pDisplayText;
-                pStateToUse->mpMeasurementClip = &aClip;
-            }
+             // Measurement
+             vcl::text::MeasurementRecorder aMeasRecorder(*pStateToUse);
+             if (aMeasRecorder.IsActive())
+                 aMeasRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
 
-            // 3. Run Recorders
-            // Measurement (if active)
-            vcl::text::MeasurementRecorder aMeasRecorder(*pStateToUse);
-            if (aMeasRecorder.IsActive())
-                aMeasRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
+             // Accessibility (if valid)
+             vcl::text::AccessibilityRecorder aAccRecorder(*pStateToUse);
+             if (aAccRecorder.IsActive())
+                 aAccRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
+        }
 
-            // Accessibility (if active)
-            vcl::text::AccessibilityRecorder aAccRecorder(*pStateToUse);
-            if (aAccRecorder.IsActive())
-                aAccRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
-
-            // 4. Cleanup transient pointers from persistent state
-            if (moRecordingState && pVector)
-            {
-                moRecordingState->mpMeasurementVector = nullptr;
-                moRecordingState->mpMeasurementString = nullptr;
-                moRecordingState->mpMeasurementClip = nullptr;
-            }
+        // Cleanup
+        if (pStateToUse && moRecordingState)
+        {
+             pStateToUse->mpMeasurementVector = nullptr;
+             pStateToUse->mpMeasurementString = nullptr;
+             pStateToUse->mpMeasurementClip = nullptr;
         }
     }
 
@@ -622,17 +625,13 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
 
     if (pSalLayout)
     {
-        // Internal Recording: Use the actual layout to ensure accessibility bounds match visual bounds (e.g. justification)
-
+        // Internal Recording: Use the actual layout to ensure accessibility bounds match visual bounds
+        if (moRecordingState)
         {
-            if (moRecordingState)
-            {
-                vcl::text::AccessibilityRecorder aRecorder(*moRecordingState);
-                if (aRecorder.IsActive())
-                    aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
-            }
+             vcl::text::AccessibilityRecorder aRecorder(*moRecordingState);
+             if (aRecorder.IsActive())
+                 aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
         }
-
 
         if ((!moRecordingState || !moRecordingState->IsActive()))
             ImplDrawText(*pSalLayout);
@@ -1354,7 +1353,6 @@ tools::Rectangle OutputDevice::GetTextRect(const tools::Rectangle& rRect, const 
                                            DrawTextFlags nStyle, TextRectInfo* pInfo,
                                            const vcl::TextLayoutCommon* pTextLayout) const
 {
-    // Fix: Explicitly initialize all fields to satisfy -Werror
     vcl::text::TextLayoutEngine::LayoutRequest aReq;
     aReq.aText = rStr;
     aReq.aTargetRect = rRect;
@@ -1366,8 +1364,6 @@ tools::Rectangle OutputDevice::GetTextRect(const tools::Rectangle& rRect, const 
 
     const vcl::TextLayoutCommon* pLayout = pTextLayout;
 
-    // If no layout is provided, we use the device's default.
-    // We use a local instance to avoid 'delete' on abstract types.
     if (!pLayout)
     {
         vcl::DefaultTextLayout aDefault(const_cast<OutputDevice&>(*this));
@@ -1404,8 +1400,6 @@ void OutputDevice::DrawCtrlText(const Point& rPos, const OUString& rStr, const s
     if (!IsDeviceOutputNecessary() || (nIndex >= rStr.getLength()))
         return;
 
-    // better get graphics here because ImplDrawMnemonicLine() will not
-    // we need a graphics
     if (!mpGraphics && !AcquireGraphics())
         return;
 
@@ -1417,7 +1411,6 @@ void OutputDevice::DrawCtrlText(const Point& rPos, const OUString& rStr, const s
     if (IsOutputCulled())
         return;
 
-    // nIndex and nLen must go to mpAlphaVDev->DrawCtrlText unchanged
     sal_Int32 nCorrectedIndex = nIndex;
     sal_Int32 nCorrectedLen = nLen;
 
@@ -1582,8 +1575,6 @@ bool OutputDevice::GetTextOutlines(basegfx::B2DPolyPolygonVector& rVector, const
     if (!InitFont())
         return false;
 
-    // We disable MapMode on the device to ensure logical units are used.
-    // The Engine doesn't control the device, so we prepare the state here.
     bool bOldMap = mpMapper->IsMapModeEnabled();
 
     if (bOldMap)
@@ -1594,7 +1585,6 @@ bool OutputDevice::GetTextOutlines(basegfx::B2DPolyPolygonVector& rVector, const
         InitFont();
     }
 
-    // Prepare resources *after* MapMode might have changed
     vcl::text::LayoutResources aResources
         = { mpFontRealization->mxFont.get(), *mpMapper, &GetFontCache(), GetFontCollection(),
             mpForcedFallbackInstance.get(),
@@ -1607,11 +1597,9 @@ bool OutputDevice::GetTextOutlines(basegfx::B2DPolyPolygonVector& rVector, const
             IsMapModeEnabled() || isSubpixelPositioning() || SupportsSubpixelPositioning(),
             *mpGraphicsState, *mpFontRealization };
 
-    // Delegate to Engine
     bool bRet = vcl::text::TextLayoutEngine::GetTextOutlines(
         aResources, rVector, rStr, nBase, nIndex, nLen, nLayoutWidth, pDXArray, pKashidaArray);
 
-    // Restore MapMode
     if (bOldMap)
     {
         mpMapper->EnableMapMode(bOldMap);
@@ -1628,7 +1616,6 @@ bool OutputDevice::GetTextOutlines(PolyPolyVector& rResultVector, const OUString
 {
     rResultVector.clear();
 
-    // get the basegfx polypolygon vector
     basegfx::B2DPolyPolygonVector aB2DPolyPolyVector;
 
     if (!GetTextOutlines(aB2DPolyPolyVector, rStr, nBase, nIndex, nLen, nLayoutWidth, pDXArray,
@@ -1637,7 +1624,6 @@ bool OutputDevice::GetTextOutlines(PolyPolyVector& rResultVector, const OUString
         return false;
     }
 
-    // convert to a tool polypolygon vector
     rResultVector.reserve(aB2DPolyPolyVector.size());
 
     for (auto const& elem : aB2DPolyPolyVector)
@@ -1652,7 +1638,6 @@ bool OutputDevice::GetTextOutline(tools::PolyPolygon& rPolyPoly, const OUString&
 {
     rPolyPoly.Clear();
 
-    // get the basegfx polypolygon vector
     basegfx::B2DPolyPolygonVector aB2DPolyPolyVector;
 
     if (!GetTextOutlines(aB2DPolyPolyVector, rStr, 0 /*nBase*/, 0 /*nIndex*/, /*nLen*/ -1,
@@ -1661,7 +1646,6 @@ bool OutputDevice::GetTextOutline(tools::PolyPolygon& rPolyPoly, const OUString&
         return false;
     }
 
-    // convert and merge into a tool polypolygon
     for (auto const& elem : aB2DPolyPolyVector)
     {
         for (auto const& rB2DPolygon : elem)
