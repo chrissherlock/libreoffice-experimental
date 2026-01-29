@@ -98,15 +98,6 @@ void Control::SetText( const OUString& rStr )
     Window::SetText( rStr );
 }
 
-ControlLayoutData::ControlLayoutData() : m_pParent( nullptr )
-{
-}
-
-tools::Rectangle ControlLayoutData::GetCharacterBounds( tools::Long nIndex ) const
-{
-    return (nIndex >= 0 && o3tl::make_unsigned(nIndex) < m_aUnicodeBoundRects.size()) ? m_aUnicodeBoundRects[ nIndex ] : tools::Rectangle();
-}
-
 tools::Rectangle Control::GetCharacterBounds( tools::Long nIndex ) const
 {
     if( !HasLayoutData() )
@@ -114,7 +105,33 @@ tools::Rectangle Control::GetCharacterBounds( tools::Long nIndex ) const
     return mxLayoutData ? mxLayoutData->GetCharacterBounds( nIndex ) : tools::Rectangle();
 }
 
-tools::Long ControlLayoutData::GetIndexForPoint( const Point& rPoint ) const
+tools::Long Control::GetIndexForPoint( const Point& rPoint ) const
+{
+    if( ! HasLayoutData() )
+        FillLayoutData();
+    return mxLayoutData ? mxLayoutData->GetIndexForPoint( rPoint ) : -1;
+}
+
+Pair Control::GetLineStartEnd( tools::Long nLine ) const
+{
+    if( !HasLayoutData() )
+        FillLayoutData();
+    return mxLayoutData ? mxLayoutData->GetLineStartEnd( nLine ) : Pair( -1, -1 );
+}
+
+namespace vcl::text
+{
+
+TextLayoutData::TextLayoutData() : m_pParent( nullptr )
+{
+}
+
+tools::Rectangle TextLayoutData::GetCharacterBounds( tools::Long nIndex ) const
+{
+    return (nIndex >= 0 && o3tl::make_unsigned(nIndex) < m_aUnicodeBoundRects.size()) ? m_aUnicodeBoundRects[ nIndex ] : tools::Rectangle();
+}
+
+tools::Long TextLayoutData::GetIndexForPoint( const Point& rPoint ) const
 {
     tools::Long nIndex = -1;
     for( tools::Long i = m_aUnicodeBoundRects.size()-1; i >= 0; i-- )
@@ -131,14 +148,7 @@ tools::Long ControlLayoutData::GetIndexForPoint( const Point& rPoint ) const
     return nIndex;
 }
 
-tools::Long Control::GetIndexForPoint( const Point& rPoint ) const
-{
-    if( ! HasLayoutData() )
-        FillLayoutData();
-    return mxLayoutData ? mxLayoutData->GetIndexForPoint( rPoint ) : -1;
-}
-
-Pair ControlLayoutData::GetLineStartEnd( tools::Long nLine ) const
+Pair TextLayoutData::GetLineStartEnd( tools::Long nLine ) const
 {
     Pair aPair( -1, -1 );
 
@@ -161,14 +171,7 @@ Pair ControlLayoutData::GetLineStartEnd( tools::Long nLine ) const
     return aPair;
 }
 
-Pair Control::GetLineStartEnd( tools::Long nLine ) const
-{
-    if( !HasLayoutData() )
-        FillLayoutData();
-    return mxLayoutData ? mxLayoutData->GetLineStartEnd( nLine ) : Pair( -1, -1 );
-}
-
-tools::Long ControlLayoutData::ToRelativeLineIndex( tools::Long nIndex ) const
+tools::Long TextLayoutData::ToRelativeLineIndex( tools::Long nIndex ) const
 {
     // is the index sensible at all ?
     if( nIndex >= 0 && nIndex < m_aDisplayText.getLength() )
@@ -199,6 +202,14 @@ tools::Long ControlLayoutData::ToRelativeLineIndex( tools::Long nIndex ) const
 
     return nIndex;
 }
+
+TextLayoutData::~TextLayoutData()
+{
+    if( m_pParent )
+        m_pParent->ImplClearLayoutData();
+}
+
+} // end vcl::text namespace
 
 tools::Long Control::ToRelativeLineIndex( tools::Long nIndex ) const
 {
@@ -356,12 +367,6 @@ void Control::SetShowAccelerator(bool bVal)
 {
     mbShowAccelerator = bVal;
 };
-
-ControlLayoutData::~ControlLayoutData()
-{
-    if( m_pParent )
-        m_pParent->ImplClearLayoutData();
-}
 
 Size Control::GetOptimalSize() const
 {
