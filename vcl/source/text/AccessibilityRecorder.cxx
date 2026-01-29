@@ -9,19 +9,18 @@
 
 #include <vcl/outdev.hxx>
 #include <vcl/ctrl.hxx>
-
 #include <text/AccessibilityRecorder.hxx>
 #include <vcl/text/TextRecordingState.hxx>
 #include <text/layoutrecording.hxx>
 
 namespace vcl::text
 {
-AccessibilityRecorder::AccessibilityRecorder(vcl::text::TextRecordingState* pState)
-    : mpState(pState)
+AccessibilityRecorder::AccessibilityRecorder(const vcl::text::TextRecordingState& rState)
+    : mrState(rState)
 {
 }
 
-bool AccessibilityRecorder::IsActive() const { return mpState && mpState->IsActive(); }
+bool AccessibilityRecorder::IsActive() const { return mrState.mpLayoutData != nullptr; }
 
 void AccessibilityRecorder::Record(OutputDevice& rDev, const Point& /*rStartPt*/,
                                    const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen,
@@ -30,13 +29,13 @@ void AccessibilityRecorder::Record(OutputDevice& rDev, const Point& /*rStartPt*/
     if (!IsActive())
         return;
 
-    auto& rData = *mpState->mpLayoutData;
+    auto& rData = *mrState.mpLayoutData;
 
     if (bStartVisualLine)
         rData.m_aLineIndices.push_back(rData.m_aDisplayText.getLength());
 
     vcl::Region aClip(rDev.GetOutputBoundsClipRegion());
-    aClip.Intersect(mpState->maRecordRect);
+    aClip.Intersect(mrState.maRecordRect);
 
     // Delegate to shared free function
     FilterAndAppend(pLayout, rStr, nIndex, nLen, aClip, rData.m_aUnicodeBoundRects,
@@ -44,5 +43,4 @@ void AccessibilityRecorder::Record(OutputDevice& rDev, const Point& /*rStartPt*/
 }
 
 } // namespace vcl::text
-
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
