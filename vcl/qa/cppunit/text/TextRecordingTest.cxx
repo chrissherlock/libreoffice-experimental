@@ -139,4 +139,51 @@ CPPUNIT_TEST_FIXTURE(VclTextRecordingTest, testAccessibilityClipping)
     CPPUNIT_ASSERT(!aData.m_aUnicodeBoundRects.empty());
 }
 
+CPPUNIT_TEST_FIXTURE(VclTextRecordingTest, testMeasurementDataPayload)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    TextRecordingState aState;
+    std::vector<tools::Rectangle> aRects;
+    OUString aDisplayText;
+    vcl::Region aClip(tools::Rectangle(Point(0, 0), Size(1000, 1000)));
+
+    // Link the state to our local targets
+    aState.mpMeasurementVector = &aRects;
+    aState.mpMeasurementString = &aDisplayText;
+    aState.mpMeasurementClip = &aClip;
+
+    MeasurementRecorder aMeas(aState);
+    OUString aText("Measure Me");
+
+    std::unique_ptr<SalLayout> pLayout = pVDev->LayoutText(
+        vcl::text::TextSpan{ aText, 0, aText.getLength() },
+        vcl::text::LayoutConstraints{ Point(0, 0), 0, {}, {}, SalLayoutFlags::NONE },
+        vcl::text::LayoutCacheData{ nullptr, nullptr }, vcl::text::RenderSelection{});
+
+    CPPUNIT_ASSERT(pLayout);
+
+    // Execute the recording
+    aMeas.Record(*pVDev, Point(0, 0), aText, 0, aText.getLength(), pLayout.get());
+
+    // Verify the data was captured through the state pointers
+    CPPUNIT_ASSERT_EQUAL(aText, aDisplayText);
+    CPPUNIT_ASSERT_MESSAGE("Measurement rects should be populated", !aRects.empty());
+    CPPUNIT_ASSERT_EQUAL(size_t(aText.getLength()), aRects.size());
+}
+
+CPPUNIT_TEST_FIXTURE(VclTextRecordingTest, testMeasurementInactiveHandling)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    TextRecordingState aState; // No vector linked, IsActive() will be false
+
+    MeasurementRecorder aMeas(aState);
+    OUString aText("Should Not Record");
+
+    // Attempt to record with an inactive state
+    aMeas.Record(*pVDev, Point(0, 0), aText, 0, aText.getLength(), nullptr);
+
+    // If active check works, no crash occurs even with null layout
+    CPPUNIT_ASSERT(!aMeas.IsActive());
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
