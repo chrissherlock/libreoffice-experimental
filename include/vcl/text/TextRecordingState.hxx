@@ -9,8 +9,13 @@
 
 #pragma once
 
-#include <vcl/dllapi.h>
+#include <rtl/ustring.hxx>
 #include <tools/gen.hxx>
+
+#include <vcl/dllapi.h>
+
+class SalLayout;
+class OutputDevice;
 
 namespace vcl
 {

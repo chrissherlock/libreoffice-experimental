@@ -30,6 +30,7 @@
 #include <vcl/mnemonic.hxx>
 #include <vcl/rendercontext/SystemTextColorFlags.hxx>
 #include <vcl/text/TextLayoutData.hxx>
+#include <vcl/text/TextRecordingDispatcher.hxx>
 #include <vcl/textrectinfo.hxx>
 #include <vcl/virdev.hxx>
 
@@ -574,15 +575,7 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
         );
 
         if (pSalLayout)
-        {
-            vcl::text::MeasurementRecorder aMeasRecorder(*pStateToUse);
-            if (aMeasRecorder.IsActive())
-                aMeasRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
-
-            vcl::text::AccessibilityRecorder aAccRecorder(*pStateToUse);
-            if (aAccRecorder.IsActive())
-                aAccRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
-        }
+            vcl::text::TextRecordingDispatcher::Dispatch(*pStateToUse, *this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
     }
 
     // If pVector is set, we handled it above (External Recording).
@@ -605,11 +598,7 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
     {
         // Internal Recording: Use the actual layout to ensure accessibility bounds match visual bounds
         if (moRecordingState)
-        {
-             vcl::text::AccessibilityRecorder aRecorder(*moRecordingState);
-             if (aRecorder.IsActive())
-                 aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
-        }
+             vcl::text::TextRecordingDispatcher::Dispatch(*moRecordingState, *this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
 
         if ((!moRecordingState || !moRecordingState->IsActive()))
             ImplDrawText(*pSalLayout);
@@ -708,14 +697,8 @@ void OutputDevice::DrawPartialTextArray(const Point& rStartPt, const OUString& r
 
     if (pSalLayout)
     {
-        {
-            if (moRecordingState)
-            {
-                vcl::text::AccessibilityRecorder aRecorder(*moRecordingState);
-                if (aRecorder.IsActive())
-                    aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
-            }
-        }
+        if (moRecordingState)
+            vcl::text::TextRecordingDispatcher::Dispatch(*moRecordingState, *this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
 
         if ((!moRecordingState || !moRecordingState->IsActive()))
             ImplDrawText(*pSalLayout);
@@ -748,15 +731,8 @@ void OutputDevice::DrawTextArray(const Point& rStartPt, const OUString& rStr,
 
     if (pSalLayout)
     {
-        // Internal Recording: Explicitly signal new line and pass the layout for accuracy
-        {
-            if (moRecordingState)
-            {
-                vcl::text::AccessibilityRecorder aRecorder(*moRecordingState);
-                if (aRecorder.IsActive())
-                    aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get(), true);
-            }
-        }
+        if (moRecordingState)
+            vcl::text::TextRecordingDispatcher::Dispatch(*moRecordingState, *this, rStartPt, rStr, nIndex, nLen, pSalLayout.get(), true);
 
         ImplRenderTextLayout(*pSalLayout);
     }
@@ -852,17 +828,8 @@ void OutputDevice::DrawStretchText(const Point& rStartPt, sal_Int32 nWidth, cons
 
     if (pSalLayout)
     {
-        // Internal Recording: Use the actual layout to ensure accessibility bounds match visual bounds (e.g. justification)
-
-        {
-            if (moRecordingState)
-            {
-                vcl::text::AccessibilityRecorder aRecorder(*moRecordingState);
-                if (aRecorder.IsActive())
-                    aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
-            }
-        }
-
+        if (moRecordingState)
+            vcl::text::TextRecordingDispatcher::Dispatch(*moRecordingState, *this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
 
         if ((!moRecordingState || !moRecordingState->IsActive()))
             ImplDrawText(*pSalLayout);
@@ -1006,6 +973,7 @@ static Color lcl_getDisabledTextColor(const OutputDevice& rTargetDevice)
     if (rStyleSettings.GetHighContrastMode())
     {
         Color aCol;
+
         if (rTargetDevice.IsBackground())
             aCol = rTargetDevice.GetBackground().GetColor();
         else
@@ -1195,24 +1163,22 @@ void OutputDevice::ImplDrawTextMultiLine(OutputDevice& rTargetDevice, const tool
 
     for (sal_Int32 i = 0; i < aLayout.nFormatLines; i++)
     {
-        // Signal start of a new visual line for accessibility
+        if (moRecordingState)
         {
-            if (moRecordingState)
-            {
-                vcl::text::AccessibilityRecorder aRecorder(*moRecordingState);
-                if (aRecorder.IsActive())
-                    aRecorder.Record(*this, aPos, rStr, aLayout.aLineInfo.GetLine(i).GetIndex(), 0, nullptr, true);
-            }
+            vcl::text::AccessibilityRecorder aRecorder(*moRecordingState);
+
+            if (aRecorder.IsActive())
+                aRecorder.Record(*this, aPos, rStr, aLayout.aLineInfo.GetLine(i).GetIndex(), 0, nullptr, true);
         }
-        // Signal start of a new visual line for accessibility
+
+        if (moRecordingState)
         {
-            if (moRecordingState)
-            {
-                vcl::text::AccessibilityRecorder aRecorder(*moRecordingState);
-                if (aRecorder.IsActive())
-                    aRecorder.Record(*this, aPos, rStr, aLayout.aLineInfo.GetLine(i).GetIndex(), 0, nullptr, true);
-            }
+            vcl::text::AccessibilityRecorder aRecorder(*moRecordingState);
+
+            if (aRecorder.IsActive())
+                aRecorder.Record(*this, aPos, rStr, aLayout.aLineInfo.GetLine(i).GetIndex(), 0, nullptr, true);
         }
+
         ImplTextLineInfo& rLineInfo = aLayout.aLineInfo.GetLine(i);
 
         if (nStyle & DrawTextFlags::Right)
