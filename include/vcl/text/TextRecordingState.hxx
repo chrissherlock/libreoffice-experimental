@@ -12,10 +12,14 @@
 #include <vcl/dllapi.h>
 #include <tools/gen.hxx>
 
-// Forward declaration - MUST BE STRUCT to match definition in vcl/ctrl.hxx
-namespace vcl::text
+namespace vcl
+{
+class Region;
+
+namespace text
 {
 struct TextLayoutData;
+}
 }
 
 namespace vcl::text
@@ -30,6 +34,12 @@ public:
     tools::Rectangle maRecordRect;
 
     bool IsActive() const { return mpLayoutData != nullptr; }
+
+    // --- Measurement / External Recording Targets ---
+    // These are transient targets usually passed from DrawText
+    std::vector<tools::Rectangle>* mpMeasurementVector = nullptr;
+    OUString* mpMeasurementString = nullptr;
+    const vcl::Region* mpMeasurementClip = nullptr;
 };
 
 } // namespace vcl::text
