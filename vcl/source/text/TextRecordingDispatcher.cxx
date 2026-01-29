@@ -7,9 +7,8 @@
 namespace vcl::text
 {
 void TextRecordingDispatcher::Dispatch(const TextRecordingState& rState, OutputDevice& rDev,
-                                       const Point& rStartPt, const OUString& rStr,
-                                       sal_Int32 nIndex, sal_Int32 nLen, const SalLayout* pLayout,
-                                       bool bLineStart)
+                                       const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen,
+                                       const SalLayout* pLayout, bool bLineStart)
 {
     if (!pLayout)
         return;
@@ -17,11 +16,11 @@ void TextRecordingDispatcher::Dispatch(const TextRecordingState& rState, OutputD
     // Dispatch to Measurement
     vcl::text::MeasurementRecorder aMeas(rState);
     if (aMeas.IsActive())
-        aMeas.Record(rDev, rStartPt, rStr, nIndex, nLen, pLayout);
+        aMeas.Record(rDev, Point(), rStr, nIndex, nLen, pLayout);
 
     // Dispatch to Accessibility
     vcl::text::AccessibilityRecorder aAcc(rState);
     if (aAcc.IsActive())
-        aAcc.Record(rDev, rStartPt, rStr, nIndex, nLen, pLayout, bLineStart);
+        aAcc.Record(rDev, Point(), rStr, nIndex, nLen, pLayout, bLineStart);
 }
 }

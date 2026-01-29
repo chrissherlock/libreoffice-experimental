@@ -49,8 +49,7 @@ CPPUNIT_TEST_FIXTURE(VclTextRecordingDispatcherTest, testDispatcherRouting)
 
     CPPUNIT_ASSERT_MESSAGE("Layout creation failed", pLayout);
 
-    TextRecordingDispatcher::Dispatch(aState, *pVDev, Point(0, 0), aText, 0, aText.getLength(),
-                                      pLayout.get());
+    TextRecordingDispatcher::Dispatch(aState, *pVDev, aText, 0, aText.getLength(), pLayout.get());
 
     CPPUNIT_ASSERT_MESSAGE("Dispatcher failed to route to MeasurementRecorder",
                            !aMeasuredRects.empty());
@@ -66,8 +65,7 @@ CPPUNIT_TEST_FIXTURE(VclTextRecordingDispatcherTest, testDispatcherSafetyWithNul
     ScopedVclPtrInstance<VirtualDevice> pVDev;
     OUString aText(u"Safety Test"_ustr);
 
-    TextRecordingDispatcher::Dispatch(aState, *pVDev, Point(0, 0), aText, 0, aText.getLength(),
-                                      nullptr);
+    TextRecordingDispatcher::Dispatch(aState, *pVDev, aText, 0, aText.getLength(), nullptr);
 
     CPPUNIT_ASSERT_MESSAGE("Dispatcher should imply no-op on null layout", aMeasuredRects.empty());
 }
@@ -87,8 +85,8 @@ CPPUNIT_TEST_FIXTURE(VclTextRecordingDispatcherTest, testDispatcherAccessibility
         vcl::text::LayoutConstraints{ Point(0, 0), 0, {}, {}, SalLayoutFlags::NONE },
         vcl::text::LayoutCacheData{ nullptr, nullptr }, vcl::text::RenderSelection{});
 
-    TextRecordingDispatcher::Dispatch(aState, *pVDev, Point(0, 0), aText, 0, aText.getLength(),
-                                      pLayout.get(), true);
+    TextRecordingDispatcher::Dispatch(aState, *pVDev, aText, 0, aText.getLength(), pLayout.get(),
+                                      true);
 
     CPPUNIT_ASSERT_MESSAGE("Dispatcher failed to route to AccessibilityRecorder",
                            !aData.m_aUnicodeBoundRects.empty());

@@ -25,9 +25,9 @@ class VCL_DLLPUBLIC TextRecordingDispatcher
 {
 public:
     // Static dispatcher to decouple 'How' from 'What'
-    static void Dispatch(const TextRecordingState& rState, OutputDevice& rDev,
-                         const Point& rStartPt, const OUString& rStr, sal_Int32 nIndex,
-                         sal_Int32 nLen, const SalLayout* pLayout, bool bLineStart = false);
+    static void Dispatch(const TextRecordingState& rState, OutputDevice& rDev, const OUString& rStr,
+                         sal_Int32 nIndex, sal_Int32 nLen, const SalLayout* pLayout,
+                         bool bLineStart = false);
 };
 }
 

@@ -575,7 +575,7 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
         );
 
         if (pSalLayout)
-            vcl::text::TextRecordingDispatcher::Dispatch(*pStateToUse, *this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
+            vcl::text::TextRecordingDispatcher::Dispatch(*pStateToUse, *this, rStr, nIndex, nLen, pSalLayout.get());
     }
 
     // If pVector is set, we handled it above (External Recording).
@@ -598,7 +598,7 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
     {
         // Internal Recording: Use the actual layout to ensure accessibility bounds match visual bounds
         if (moRecordingState)
-             vcl::text::TextRecordingDispatcher::Dispatch(*moRecordingState, *this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
+             vcl::text::TextRecordingDispatcher::Dispatch(*moRecordingState, *this, rStr, nIndex, nLen, pSalLayout.get());
 
         if ((!moRecordingState || !moRecordingState->IsActive()))
             ImplDrawText(*pSalLayout);
@@ -698,7 +698,7 @@ void OutputDevice::DrawPartialTextArray(const Point& rStartPt, const OUString& r
     if (pSalLayout)
     {
         if (moRecordingState)
-            vcl::text::TextRecordingDispatcher::Dispatch(*moRecordingState, *this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
+            vcl::text::TextRecordingDispatcher::Dispatch(*moRecordingState, *this, rStr, nIndex, nLen, pSalLayout.get());
 
         if ((!moRecordingState || !moRecordingState->IsActive()))
             ImplDrawText(*pSalLayout);
@@ -732,7 +732,7 @@ void OutputDevice::DrawTextArray(const Point& rStartPt, const OUString& rStr,
     if (pSalLayout)
     {
         if (moRecordingState)
-            vcl::text::TextRecordingDispatcher::Dispatch(*moRecordingState, *this, rStartPt, rStr, nIndex, nLen, pSalLayout.get(), true);
+            vcl::text::TextRecordingDispatcher::Dispatch(*moRecordingState, *this, rStr, nIndex, nLen, pSalLayout.get(), true);
 
         ImplRenderTextLayout(*pSalLayout);
     }
@@ -829,7 +829,7 @@ void OutputDevice::DrawStretchText(const Point& rStartPt, sal_Int32 nWidth, cons
     if (pSalLayout)
     {
         if (moRecordingState)
-            vcl::text::TextRecordingDispatcher::Dispatch(*moRecordingState, *this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
+            vcl::text::TextRecordingDispatcher::Dispatch(*moRecordingState, *this, rStr, nIndex, nLen, pSalLayout.get());
 
         if ((!moRecordingState || !moRecordingState->IsActive()))
             ImplDrawText(*pSalLayout);
