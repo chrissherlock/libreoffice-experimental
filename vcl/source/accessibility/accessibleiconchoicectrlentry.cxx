@@ -18,6 +18,7 @@
  */
 
 #include <accessibility/accessibleiconchoicectrlentry.hxx>
+#include <vcl/text/TextRecordingState.hxx>
 #include <vcl/toolkit/ivctrl.hxx>
 #include <com/sun/star/awt/Rectangle.hpp>
 #include <com/sun/star/accessibility/AccessibleRole.hpp>
@@ -371,7 +372,10 @@ sal_Int32 SAL_CALL AccessibleIconChoiceCtrlEntry::getIndexAtPoint( const awt::Po
     {
         vcl::text::TextLayoutData aLayoutData;
         tools::Rectangle aItemRect = GetBoundingBox_Impl();
-        m_pIconCtrl->RecordLayoutData( &aLayoutData, aItemRect );
+        vcl::text::TextRecordingState aState;
+        aState.mpLayoutData = &aLayoutData;
+        aState.maRecordRect = aItemRect;
+        m_pIconCtrl->RecordLayoutData(aState);
         Point aPnt(vcl::unohelper::ConvertToVCLPoint(aPoint));
         aPnt += aItemRect.TopLeft();
         nIndex = aLayoutData.GetIndexForPoint( aPnt );

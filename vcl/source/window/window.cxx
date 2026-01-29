@@ -3496,34 +3496,20 @@ Reference< XClipboard > Window::GetClipboard()
     return mpWindowImpl->mpFrameData->mxClipboard;
 }
 
-void Window::RecordLayoutData( vcl::text::TextLayoutData* pLayout, const tools::Rectangle& rRect )
+void Window::RecordLayoutData( const vcl::text::TextRecordingState& rState )
 {
     OutputDevice* pOutDev = GetOutDev();
     if (!pOutDev)
         return;
 
-    // Set up the recording state on the OutputDevice
-    if (pLayout)
-    {
-        // Ensure the state container exists
-        if (!pOutDev->moRecordingState)
-            pOutDev->moRecordingState.emplace();
-
-        // Set the current recording targets
-        // Note: we use a raw pointer here because pLayout is owned by the caller (Accessibility impl)
-        // and should not be deleted by OutputDevice.
-        pOutDev->moRecordingState->mpLayoutData = pLayout;
-        pOutDev->moRecordingState->maRecordRect = rRect;
-    }
+    // Set the recording state (using std::optional assignment)
+    pOutDev->moRecordingState = rState;
 
     // Trigger the paint, which will be intercepted by LayoutRecorder
-    Paint(*pOutDev, rRect);
+    Paint(*pOutDev, rState.maRecordRect);
 
-    // Teardown: Clear the pointer to avoid holding stale references.
-    if (pOutDev->moRecordingState)
-    {
-        pOutDev->moRecordingState->mpLayoutData = nullptr;
-    }
+    // Teardown: Reset the optional to clear state
+    pOutDev->moRecordingState.reset();
 }
 
 bool Window::IsScrollable() const

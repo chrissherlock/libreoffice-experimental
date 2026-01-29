@@ -1192,7 +1192,7 @@ public:
     /*  records all DrawText operations within the passed rectangle;
      *  a synchronous paint is sent to achieve this
      */
-    void                                RecordLayoutData( vcl::text::TextLayoutData* pLayout, const tools::Rectangle& rRect );
+    void RecordLayoutData( const vcl::text::TextRecordingState& rState );
 
     // set and retrieve for Toolkit
     VCLXWindow*                         GetWindowPeer() const;

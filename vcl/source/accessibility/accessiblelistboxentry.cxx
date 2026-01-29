@@ -18,6 +18,7 @@
  */
 
 #include <accessibility/accessiblelistboxentry.hxx>
+#include <vcl/text/TextRecordingState.hxx>
 #include <accessibility/accessiblelistbox.hxx>
 #include <vcl/toolkit/treelistbox.hxx>
 #include <vcl/toolkit/viewdataentry.hxx>
@@ -541,7 +542,10 @@ awt::Rectangle SAL_CALL AccessibleListBoxEntry::getCharacterBounds( sal_Int32 nI
     {
         vcl::text::TextLayoutData aLayoutData;
         tools::Rectangle aItemRect = GetBoundingBox_Impl();
-        m_pTreeListBox->RecordLayoutData( &aLayoutData, aItemRect );
+        vcl::text::TextRecordingState aState;
+        aState.mpLayoutData = &aLayoutData;
+        aState.maRecordRect = aItemRect;
+        m_pTreeListBox->RecordLayoutData(aState);
         tools::Rectangle aCharRect = aLayoutData.GetCharacterBounds( nIndex );
         aCharRect.Move( -aItemRect.Left(), -aItemRect.Top() );
         aBounds = vcl::unohelper::ConvertToAWTRect(aCharRect);
@@ -563,7 +567,10 @@ sal_Int32 SAL_CALL AccessibleListBoxEntry::getIndexAtPoint( const awt::Point& aP
     {
         vcl::text::TextLayoutData aLayoutData;
         tools::Rectangle aItemRect = GetBoundingBox_Impl();
-        m_pTreeListBox->RecordLayoutData( &aLayoutData, aItemRect );
+        vcl::text::TextRecordingState aState;
+        aState.mpLayoutData = &aLayoutData;
+        aState.maRecordRect = aItemRect;
+        m_pTreeListBox->RecordLayoutData(aState);
         Point aPnt(vcl::unohelper::ConvertToVCLPoint(aPoint));
         aPnt += aItemRect.TopLeft();
         nIndex = aLayoutData.GetIndexForPoint( aPnt );
