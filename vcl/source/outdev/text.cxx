@@ -20,48 +20,31 @@
 #include <sal/config.h>
 
 #include <sal/log.hxx>
-#include <basegfx/matrix/b2dhommatrix.hxx>
-#include <basegfx/matrix/b2dhommatrixtools.hxx>
-#include <tools/lineend.hxx>
 #include <tools/debug.hxx>
-#include <unotools/fontdefs.hxx>
-#include <tools/fontenum.hxx>
 #include <comphelper/configuration.hxx>
+#include <comphelper/scopeguard.hxx>
 
-#include <vcl/ctrl.hxx>
 #include <vcl/fntstyle.hxx>
 #include <vcl/glyphitem.hxx>
 #include <vcl/metaact.hxx>
-#include <vcl/metric.hxx>
 #include <vcl/mnemonic.hxx>
-#include <vcl/rendercontext/SalLayoutFlags.hxx>
 #include <vcl/rendercontext/SystemTextColorFlags.hxx>
+#include <vcl/text/TextLayoutData.hxx>
 #include <vcl/textrectinfo.hxx>
 #include <vcl/virdev.hxx>
-#include <vcl/sysdata.hxx>
 
 #include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
-#include <text/TextLayoutRequest.hxx>
 #include <text/AccessibilityRecorder.hxx>
 #include <text/MeasurementRecorder.hxx>
 #include <font/FontController.hxx>
-#include <font/PhysicalFontFace.hxx>
+#include <text/GraphicLayoutFactory.hxx>
 #include <drawmode.hxx>
-#include <salgdi.hxx>
-#include <svdata.hxx>
 #include <textlayout.hxx>
-#include <textlineinfo.hxx>
-#include <impglyphitem.hxx>
 #include <TextLayoutCache.hxx>
 
-#include <vcl/text/TextRecordingState.hxx>
-#include <text/TextLayoutEngine.hxx>
-#include <text/GraphicLayoutFactory.hxx>
-
 #include <memory>
-#include <comphelper/scopeguard.hxx>
 #include <optional>
 
 vcl::text::ComplexTextLayoutFlags OutputDevice::GetLayoutMode() const
