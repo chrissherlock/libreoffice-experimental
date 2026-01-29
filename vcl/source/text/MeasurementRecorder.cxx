@@ -13,18 +13,25 @@
 
 namespace vcl::text
 {
-MeasurementRecorder::MeasurementRecorder(std::vector<tools::Rectangle>& rRects,
-                                         OUString* pDisplayText, const vcl::Region& rClip)
-    : mrRects(rRects)
-    , mpDisplayText(pDisplayText)
-    , mrClip(rClip)
+MeasurementRecorder::MeasurementRecorder(const vcl::text::TextRecordingState& rState)
+    : mrState(rState)
 {
 }
+
+bool MeasurementRecorder::IsActive() const { return mrState.mpMeasurementVector != nullptr; }
 
 void MeasurementRecorder::Record(OutputDevice& /*rDev*/, const Point& /*rStartPt*/,
                                  const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen,
                                  const SalLayout* pLayout)
 {
+    if (!IsActive())
+        return;
+
+    // Local aliases to maintain compatibility with existing logic
+    std::vector<tools::Rectangle>& mrRects = *mrState.mpMeasurementVector;
+    OUString* mpDisplayText = mrState.mpMeasurementString;
+    const vcl::Region& mrClip = *mrState.mpMeasurementClip;
+
     // Delegate to shared free function, passing mpDisplayText to avoid unused warning
     FilterAndAppend(pLayout, rStr, nIndex, nLen, mrClip, mrRects, mpDisplayText);
 }
