@@ -557,7 +557,22 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
             vcl::text::RenderSelection{}
         );
 
-        vcl::text::MeasurementRecorder aRecorder(*pVector, pDisplayText, aClip);
+        // Prepare temp state for measurement
+
+
+        vcl::text::TextRecordingState aTempState;
+
+
+        aTempState.mpMeasurementVector = pVector;
+
+
+        aTempState.mpMeasurementString = pDisplayText;
+
+
+        aTempState.mpMeasurementClip = &aClip;
+
+
+        vcl::text::MeasurementRecorder aRecorder(aTempState);
         aRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get()); // Default: No line start
     }
 

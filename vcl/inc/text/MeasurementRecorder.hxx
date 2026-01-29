@@ -27,20 +27,22 @@ class Region;
 
 namespace vcl::text
 {
+class TextRecordingState;
+}
+
+namespace vcl::text
+{
 // Records layout data for external measurement (e.g. GetTextRect).
-// Writes bounding boxes into the provided vector.
+// Writes bounding boxes into the provided vector via TextRecordingState.
 class VCL_DLLPUBLIC MeasurementRecorder
 {
 private:
-    std::vector<tools::Rectangle>& mrRects;
-    OUString* mpDisplayText;
-    const vcl::Region& mrClip;
+    const vcl::text::TextRecordingState& mrState;
 
 public:
-    MeasurementRecorder(std::vector<tools::Rectangle>& rRects, OUString* pDisplayText,
-                        const vcl::Region& rClip);
+    explicit MeasurementRecorder(const vcl::text::TextRecordingState& rState);
 
-    bool IsActive() const { return true; } // Always active if created
+    bool IsActive() const;
 
     void Record(OutputDevice& rDev, const Point& rStartPt, const OUString& rStr, sal_Int32 nIndex,
                 sal_Int32 nLen, const SalLayout* pLayout);
