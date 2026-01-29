@@ -529,8 +529,6 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaTextAction(rStartPt, rStr, nIndex, nLen));
 
-    // --- Unified Layout Recording ---
-    // 1. Determine active state (Persistent vs Temporary)
     vcl::text::TextRecordingState* pStateToUse = nullptr;
     std::optional<vcl::text::TextRecordingState> oTempState;
 
@@ -542,7 +540,6 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
         pStateToUse = &*oTempState;
     }
 
-    // 2. Setup Measurement Targets (if applicable)
     if (pStateToUse && pVector)
     {
         pStateToUse->mpMeasurementVector = pVector;
@@ -555,38 +552,36 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
     // Note: For pVector (Measurement), we need a layout *now* to record it.
     // For normal drawing, we create layout later.
     // To solve this overlap, we create the layout once if possible, or create a temp one for pVector.
-
-    if (pVector)
+    if (pVector && pStateToUse)
     {
-         vcl::Region aClip(GetOutputBoundsClipRegion());
-         if (pStateToUse) pStateToUse->mpMeasurementClip = &aClip;
+        vcl::Region aClip(GetOutputBoundsClipRegion());
 
-         std::unique_ptr<SalLayout> pSalLayout = LayoutText(
+        pStateToUse->mpMeasurementVector = pVector;
+        pStateToUse->mpMeasurementString = pDisplayText;
+        pStateToUse->mpMeasurementClip = &aClip;
+
+        comphelper::ScopeGuard aCleanupGuard([&]() {
+            pStateToUse->mpMeasurementVector = nullptr;
+            pStateToUse->mpMeasurementString = nullptr;
+            pStateToUse->mpMeasurementClip = nullptr;
+        });
+
+        std::unique_ptr<SalLayout> pSalLayout = LayoutText(
             vcl::text::TextSpan{rStr, nIndex, nLen},
             vcl::text::LayoutConstraints{rStartPt, 0, {}, {}, SalLayoutFlags::NONE},
             vcl::text::LayoutCacheData{nullptr, pLayoutCache},
             vcl::text::RenderSelection{}
         );
 
-        if (pStateToUse)
+        if (pSalLayout)
         {
-             // Measurement
-             vcl::text::MeasurementRecorder aMeasRecorder(*pStateToUse);
-             if (aMeasRecorder.IsActive())
-                 aMeasRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
+            vcl::text::MeasurementRecorder aMeasRecorder(*pStateToUse);
+            if (aMeasRecorder.IsActive())
+                aMeasRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
 
-             // Accessibility (if valid)
-             vcl::text::AccessibilityRecorder aAccRecorder(*pStateToUse);
-             if (aAccRecorder.IsActive())
-                 aAccRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
-        }
-
-        // Cleanup
-        if (pStateToUse && moRecordingState)
-        {
-             pStateToUse->mpMeasurementVector = nullptr;
-             pStateToUse->mpMeasurementString = nullptr;
-             pStateToUse->mpMeasurementClip = nullptr;
+            vcl::text::AccessibilityRecorder aAccRecorder(*pStateToUse);
+            if (aAccRecorder.IsActive())
+                aAccRecorder.Record(*this, rStartPt, rStr, nIndex, nLen, pSalLayout.get());
         }
     }
 
