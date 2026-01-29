@@ -12,6 +12,7 @@
 #include <vcl/svapp.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/virdev.hxx>
+#include <vcl/vcllayout.hxx>
 #include <vcl/text/TextRecordingState.hxx>
 #include <vcl/text/TextLayoutData.hxx>
 
@@ -35,7 +36,6 @@ CPPUNIT_TEST_FIXTURE(VclTextRecordingTest, testMeasurementLogic)
     std::vector<tools::Rectangle> aRects;
     aState.mpMeasurementVector = &aRects;
 
-    // Verify IsActive logic uses the state pointers
     MeasurementRecorder aMeas(aState);
     CPPUNIT_ASSERT_MESSAGE("MeasurementRecorder should be active", aMeas.IsActive());
 
@@ -53,7 +53,6 @@ CPPUNIT_TEST_FIXTURE(VclTextRecordingTest, testAccessibilityLogic)
     AccessibilityRecorder aAcc(aState);
     CPPUNIT_ASSERT(aAcc.IsActive());
 
-    // Verify line index tracking
     OUString aText("Visual Line Test");
     aData.m_aDisplayText = aText;
 
@@ -64,14 +63,41 @@ CPPUNIT_TEST_FIXTURE(VclTextRecordingTest, testAccessibilityLogic)
     CPPUNIT_ASSERT_EQUAL(size_t(1), aData.m_aLineIndices.size());
 }
 
+CPPUNIT_TEST_FIXTURE(VclTextRecordingTest, testAccessibilityDataPayload)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    TextRecordingState aState;
+    vcl::text::TextLayoutData aData;
+    aState.mpLayoutData = &aData;
+    aState.maRecordRect = tools::Rectangle(Point(0, 0), Size(1000, 1000));
+
+    AccessibilityRecorder aAcc(aState);
+    OUString aText("Test Payload");
+
+    // Layout the text to get real glyph positions
+    std::unique_ptr<SalLayout> pLayout = pVDev->LayoutText(
+        vcl::text::TextSpan{ aText, 0, aText.getLength() },
+        vcl::text::LayoutConstraints{ Point(0, 0), 0, {}, {}, SalLayoutFlags::NONE },
+        vcl::text::LayoutCacheData{ nullptr, nullptr }, vcl::text::RenderSelection{});
+
+    CPPUNIT_ASSERT(pLayout);
+
+    aAcc.Record(*pVDev, Point(0, 0), aText, 0, aText.getLength(), pLayout.get(), true);
+
+    // Verify coordinates and text were actually captured
+    CPPUNIT_ASSERT_EQUAL(aText, aData.m_aDisplayText);
+    CPPUNIT_ASSERT_MESSAGE("Unicode bound rects should be populated",
+                           !aData.m_aUnicodeBoundRects.empty());
+    CPPUNIT_ASSERT_EQUAL(size_t(aText.getLength()), aData.m_aUnicodeBoundRects.size());
+}
+
 CPPUNIT_TEST_FIXTURE(VclTextRecordingTest, testOutputDeviceIntegration)
 {
-    // Test the unified logic inside OutputDevice::DrawText
     ScopedVclPtrInstance<VirtualDevice> pVDev;
     std::vector<tools::Rectangle> aRects;
     OUString aText("Integration Test");
 
-    // This triggers the temporary state logic we refactored
+    // Triggers the temporary state logic in DrawText
     pVDev->DrawText(Point(0, 0), aText, 0, aText.getLength(), &aRects);
 
     CPPUNIT_ASSERT_MESSAGE("Unified DrawText should have populated rectangles", !aRects.empty());
