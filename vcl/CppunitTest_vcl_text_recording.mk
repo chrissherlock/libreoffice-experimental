@@ -16,6 +16,7 @@ $(eval $(call gb_CppunitTest_set_include,vcl_text_recording,\
 
 $(eval $(call gb_CppunitTest_add_exception_objects,vcl_text_recording, \
 	vcl/qa/cppunit/text/TextRecordingTest \
+	vcl/qa/cppunit/text/TextRecordingDispatcherTest \
 ))
 
 $(eval $(call gb_CppunitTest_use_externals,vcl_text_recording,\
