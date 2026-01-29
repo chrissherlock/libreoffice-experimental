@@ -105,4 +105,38 @@ CPPUNIT_TEST_FIXTURE(VclTextRecordingTest, testOutputDeviceIntegration)
 
 CPPUNIT_PLUGIN_IMPLEMENT();
 
+CPPUNIT_TEST_FIXTURE(VclTextRecordingTest, testAccessibilityClipping)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    TextRecordingState aState;
+    vcl::text::TextLayoutData aData;
+    aState.mpLayoutData = &aData;
+
+    // Define a recording area that only covers the first few characters
+    // Assuming standard font width, a 20x1000 rect should clip most of "Test Payload"
+    aState.maRecordRect = tools::Rectangle(Point(0, 0), Size(20, 1000));
+
+    AccessibilityRecorder aAcc(aState);
+    OUString aText("Test Payload");
+
+    std::unique_ptr<SalLayout> pLayout = pVDev->LayoutText(
+        vcl::text::TextSpan{ aText, 0, aText.getLength() },
+        vcl::text::LayoutConstraints{ Point(0, 0), 0, {}, {}, SalLayoutFlags::NONE },
+        vcl::text::LayoutCacheData{ nullptr, nullptr }, vcl::text::RenderSelection{});
+
+    CPPUNIT_ASSERT(pLayout);
+
+    // Record with the restrictive maRecordRect
+    aAcc.Record(*pVDev, Point(0, 0), aText, 0, aText.getLength(), pLayout.get(), false);
+
+    // Verify that clipping occurred
+    // Since the rect is small, we expect fewer rectangles than the total length of the string
+    CPPUNIT_ASSERT_MESSAGE("Unicode bound rects should be clipped/filtered",
+                           aData.m_aUnicodeBoundRects.size()
+                               < static_cast<size_t>(aText.getLength()));
+
+    // Ensure we didn't lose everything; at least the first 'T' should be there
+    CPPUNIT_ASSERT(!aData.m_aUnicodeBoundRects.empty());
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
