@@ -28,10 +28,10 @@ namespace vcl::text
 class VCL_DLLPUBLIC AccessibilityRecorder
 {
 private:
-    vcl::text::TextRecordingState* mpState;
+    const vcl::text::TextRecordingState& mrState;
 
 public:
-    explicit AccessibilityRecorder(vcl::text::TextRecordingState* pState);
+    explicit AccessibilityRecorder(const vcl::text::TextRecordingState& rState);
 
     bool IsActive() const;
 
@@ -40,5 +40,4 @@ public:
 };
 
 } // namespace vcl::text
-
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
