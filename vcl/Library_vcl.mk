@@ -318,6 +318,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/text/layoutrecording \
     vcl/source/text/AccessibilityRecorder \
     vcl/source/text/MeasurementRecorder \
+    vcl/source/text/TextLayoutData \
     vcl/source/text/TextLayoutRequest \
     vcl/source/text/ImplLayoutRuns \
     vcl/source/text/mnemonic \
