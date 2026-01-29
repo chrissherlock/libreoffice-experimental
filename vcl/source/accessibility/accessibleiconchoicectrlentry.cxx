@@ -369,7 +369,7 @@ sal_Int32 SAL_CALL AccessibleIconChoiceCtrlEntry::getIndexAtPoint( const awt::Po
     sal_Int32 nIndex = -1;
     if ( m_pIconCtrl )
     {
-        vcl::ControlLayoutData aLayoutData;
+        vcl::text::TextLayoutData aLayoutData;
         tools::Rectangle aItemRect = GetBoundingBox_Impl();
         m_pIconCtrl->RecordLayoutData( &aLayoutData, aItemRect );
         Point aPnt(vcl::unohelper::ConvertToVCLPoint(aPoint));

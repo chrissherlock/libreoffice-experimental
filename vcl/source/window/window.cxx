@@ -3496,7 +3496,7 @@ Reference< XClipboard > Window::GetClipboard()
     return mpWindowImpl->mpFrameData->mxClipboard;
 }
 
-void Window::RecordLayoutData( vcl::ControlLayoutData* pLayout, const tools::Rectangle& rRect )
+void Window::RecordLayoutData( vcl::text::TextLayoutData* pLayout, const tools::Rectangle& rRect )
 {
     OutputDevice* pOutDev = GetOutDev();
     if (!pOutDev)

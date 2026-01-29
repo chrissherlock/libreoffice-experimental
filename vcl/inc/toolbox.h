@@ -103,7 +103,7 @@ private:
 namespace vcl
 {
 
-struct ToolBoxLayoutData : public ControlLayoutData
+struct ToolBoxLayoutData : public text::TextLayoutData
 {
     std::vector< ToolBoxItemId >               m_aLineItemIds;
 };

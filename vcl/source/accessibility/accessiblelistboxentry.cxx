@@ -539,7 +539,7 @@ awt::Rectangle SAL_CALL AccessibleListBoxEntry::getCharacterBounds( sal_Int32 nI
     SvTreeListEntry* pEntry = m_pTreeListBox->GetEntryFromPath( m_aEntryPath );
     if ( pEntry )
     {
-        vcl::ControlLayoutData aLayoutData;
+        vcl::text::TextLayoutData aLayoutData;
         tools::Rectangle aItemRect = GetBoundingBox_Impl();
         m_pTreeListBox->RecordLayoutData( &aLayoutData, aItemRect );
         tools::Rectangle aCharRect = aLayoutData.GetCharacterBounds( nIndex );
@@ -561,7 +561,7 @@ sal_Int32 SAL_CALL AccessibleListBoxEntry::getIndexAtPoint( const awt::Point& aP
     SvTreeListEntry* pEntry = m_pTreeListBox->GetEntryFromPath( m_aEntryPath );
     if ( pEntry )
     {
-        vcl::ControlLayoutData aLayoutData;
+        vcl::text::TextLayoutData aLayoutData;
         tools::Rectangle aItemRect = GetBoundingBox_Impl();
         m_pTreeListBox->RecordLayoutData( &aLayoutData, aItemRect );
         Point aPnt(vcl::unohelper::ConvertToVCLPoint(aPoint));

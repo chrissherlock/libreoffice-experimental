@@ -13,9 +13,9 @@
 #include <tools/gen.hxx>
 
 // Forward declaration - MUST BE STRUCT to match definition in vcl/ctrl.hxx
-namespace vcl
+namespace vcl::text
 {
-struct ControlLayoutData;
+struct TextLayoutData;
 }
 
 namespace vcl::text
@@ -24,7 +24,7 @@ class VCL_DLLPUBLIC TextRecordingState
 {
 public:
     // The data being recorded (Observer pointer, does not own memory)
-    vcl::ControlLayoutData* mpLayoutData = nullptr;
+    vcl::text::TextLayoutData* mpLayoutData = nullptr;
 
     // The filter: only record glyphs intersecting this rect
     tools::Rectangle maRecordRect;

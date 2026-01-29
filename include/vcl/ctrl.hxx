@@ -36,10 +36,10 @@ class Size;
 
 namespace tools { class Rectangle; }
 
-namespace vcl
+namespace vcl::text
 {
 
-struct UNLESS_MERGELIBS_MORE(VCL_DLLPUBLIC) ControlLayoutData
+struct UNLESS_MERGELIBS_MORE(VCL_DLLPUBLIC) TextLayoutData
 {
     // contains the string really displayed
     // there must be exactly one bounding rectangle in m_aUnicodeBoundRects
@@ -53,8 +53,8 @@ struct UNLESS_MERGELIBS_MORE(VCL_DLLPUBLIC) ControlLayoutData
     // notify parent control on destruction
     VclPtr<const Control>               m_pParent;
 
-    ControlLayoutData();
-    ~ControlLayoutData();
+    TextLayoutData();
+    ~TextLayoutData();
 
     tools::Rectangle GetCharacterBounds( tools::Long nIndex ) const;
     // returns the character index for corresponding to rPoint (in control coordinates)
@@ -78,12 +78,12 @@ struct UNLESS_MERGELIBS_MORE(VCL_DLLPUBLIC) ControlLayoutData
     tools::Long ToRelativeLineIndex( tools::Long nIndex ) const;
 };
 
-} // namespace vcl
+} // namespace vcl::text
 
 class VCL_DLLPUBLIC Control : public vcl::Window
 {
 protected:
-    mutable std::optional<vcl::ControlLayoutData>  mxLayoutData;
+    mutable std::optional<vcl::text::TextLayoutData>  mxLayoutData;
     VclPtr<OutputDevice>        mpReferenceDevice;
 
 private:

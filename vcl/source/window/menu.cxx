@@ -68,7 +68,7 @@
 namespace vcl
 {
 
-struct MenuLayoutData : public ControlLayoutData
+struct MenuLayoutData : public text::TextLayoutData
 {
     std::vector< sal_uInt16 >               m_aLineItemIds;
     std::map< sal_uInt16, tools::Rectangle >       m_aVisibleItemBoundRects;

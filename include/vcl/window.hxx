@@ -85,8 +85,11 @@ class OAccessible;
 namespace rtl { template <class reference_type> class Reference; }
 
 namespace vcl {
-    class Region;
-    struct ControlLayoutData;
+class Region;
+namespace text
+{
+    struct TextLayoutData;
+}
 }
 
 namespace svt { class PopupWindowControllerImpl; }
@@ -1189,7 +1192,7 @@ public:
     /*  records all DrawText operations within the passed rectangle;
      *  a synchronous paint is sent to achieve this
      */
-    void                                RecordLayoutData( vcl::ControlLayoutData* pLayout, const tools::Rectangle& rRect );
+    void                                RecordLayoutData( vcl::text::TextLayoutData* pLayout, const tools::Rectangle& rRect );
 
     // set and retrieve for Toolkit
     VCLXWindow*                         GetWindowPeer() const;

@@ -450,7 +450,7 @@ awt::Rectangle VCLXAccessibleStatusBarItem::getCharacterBounds( sal_Int32 nIndex
     awt::Rectangle aBounds( 0, 0, 0, 0 );
     if ( m_pStatusBar )
     {
-        vcl::ControlLayoutData aLayoutData;
+        vcl::text::TextLayoutData aLayoutData;
         tools::Rectangle aItemRect = m_pStatusBar->GetItemRect( m_nItemId );
         m_pStatusBar->RecordLayoutData( &aLayoutData, aItemRect );
         tools::Rectangle aCharRect = aLayoutData.GetCharacterBounds( nIndex );
@@ -469,7 +469,7 @@ sal_Int32 VCLXAccessibleStatusBarItem::getIndexAtPoint( const awt::Point& aPoint
     sal_Int32 nIndex = -1;
     if ( m_pStatusBar )
     {
-        vcl::ControlLayoutData aLayoutData;
+        vcl::text::TextLayoutData aLayoutData;
         tools::Rectangle aItemRect = m_pStatusBar->GetItemRect( m_nItemId );
         m_pStatusBar->RecordLayoutData( &aLayoutData, aItemRect );
         Point aPnt(vcl::unohelper::ConvertToVCLPoint(aPoint));
