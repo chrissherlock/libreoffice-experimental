@@ -57,8 +57,7 @@ CPPUNIT_TEST_FIXTURE(VclTextRecordingTest, testAccessibilityLogic)
     aData.m_aDisplayText = aText;
 
     // bStartVisualLine = true should push current length
-    aAcc.Record(*Application::GetDefaultDevice(), Point(0, 0), aText, 0, aText.getLength(), nullptr,
-                true);
+    aAcc.Record(*Application::GetDefaultDevice(), aText, 0, aText.getLength(), nullptr, true);
 
     CPPUNIT_ASSERT_EQUAL(size_t(1), aData.m_aLineIndices.size());
 }
@@ -82,7 +81,7 @@ CPPUNIT_TEST_FIXTURE(VclTextRecordingTest, testAccessibilityDataPayload)
 
     CPPUNIT_ASSERT(pLayout);
 
-    aAcc.Record(*pVDev, Point(0, 0), aText, 0, aText.getLength(), pLayout.get(), true);
+    aAcc.Record(*pVDev, aText, 0, aText.getLength(), pLayout.get(), true);
 
     // Verify coordinates and text were actually captured
     CPPUNIT_ASSERT_EQUAL(aText, aData.m_aDisplayText);
@@ -127,7 +126,7 @@ CPPUNIT_TEST_FIXTURE(VclTextRecordingTest, testAccessibilityClipping)
     CPPUNIT_ASSERT(pLayout);
 
     // Record with the restrictive maRecordRect
-    aAcc.Record(*pVDev, Point(0, 0), aText, 0, aText.getLength(), pLayout.get(), false);
+    aAcc.Record(*pVDev, aText, 0, aText.getLength(), pLayout.get(), false);
 
     // Verify that clipping occurred
     // Since the rect is small, we expect fewer rectangles than the total length of the string
@@ -163,7 +162,7 @@ CPPUNIT_TEST_FIXTURE(VclTextRecordingTest, testMeasurementDataPayload)
     CPPUNIT_ASSERT(pLayout);
 
     // Execute the recording
-    aMeas.Record(*pVDev, Point(0, 0), aText, 0, aText.getLength(), pLayout.get());
+    aMeas.Record(*pVDev, aText, 0, aText.getLength(), pLayout.get());
 
     // Verify the data was captured through the state pointers
     CPPUNIT_ASSERT_EQUAL(aText, aDisplayText);
@@ -180,7 +179,7 @@ CPPUNIT_TEST_FIXTURE(VclTextRecordingTest, testMeasurementInactiveHandling)
     OUString aText("Should Not Record");
 
     // Attempt to record with an inactive state
-    aMeas.Record(*pVDev, Point(0, 0), aText, 0, aText.getLength(), nullptr);
+    aMeas.Record(*pVDev, aText, 0, aText.getLength(), nullptr);
 
     // If active check works, no crash occurs even with null layout
     CPPUNIT_ASSERT(!aMeas.IsActive());

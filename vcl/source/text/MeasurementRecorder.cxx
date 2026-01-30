@@ -13,16 +13,10 @@
 
 namespace vcl::text
 {
-MeasurementRecorder::MeasurementRecorder(const vcl::text::TextRecordingState& rState)
-    : mrState(rState)
-{
-}
-
 bool MeasurementRecorder::IsActive() const { return mrState.mpMeasurementVector != nullptr; }
 
-void MeasurementRecorder::Record(OutputDevice& /*rDev*/, const Point& /*rStartPt*/,
-                                 const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen,
-                                 const SalLayout* pLayout)
+void MeasurementRecorder::Record(OutputDevice& /*rDev*/, const OUString& rStr, sal_Int32 nIndex,
+                                 sal_Int32 nLen, const SalLayout* pLayout)
 {
     if (!IsActive())
         return;

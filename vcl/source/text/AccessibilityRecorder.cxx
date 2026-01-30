@@ -15,16 +15,10 @@
 
 namespace vcl::text
 {
-AccessibilityRecorder::AccessibilityRecorder(const vcl::text::TextRecordingState& rState)
-    : mrState(rState)
-{
-}
-
 bool AccessibilityRecorder::IsActive() const { return mrState.mpLayoutData != nullptr; }
 
-void AccessibilityRecorder::Record(OutputDevice& rDev, const Point& /*rStartPt*/,
-                                   const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen,
-                                   const SalLayout* pLayout, bool bStartVisualLine)
+void AccessibilityRecorder::Record(OutputDevice& rDev, const OUString& rStr, sal_Int32 nIndex,
+                                   sal_Int32 nLen, const SalLayout* pLayout, bool bStartVisualLine)
 {
     if (!IsActive())
         return;

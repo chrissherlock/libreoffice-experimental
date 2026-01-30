@@ -1168,7 +1168,7 @@ void OutputDevice::ImplDrawTextMultiLine(OutputDevice& rTargetDevice, const tool
             vcl::text::AccessibilityRecorder aRecorder(*moRecordingState);
 
             if (aRecorder.IsActive())
-                aRecorder.Record(*this, aPos, rStr, aLayout.aLineInfo.GetLine(i).GetIndex(), 0, nullptr, true);
+                vcl::text::TextRecordingDispatcher::Dispatch(*moRecordingState, *this, rStr, aLayout.aLineInfo.GetLine(i).GetIndex(), 0, nullptr, true);
         }
 
         if (moRecordingState)
@@ -1176,7 +1176,7 @@ void OutputDevice::ImplDrawTextMultiLine(OutputDevice& rTargetDevice, const tool
             vcl::text::AccessibilityRecorder aRecorder(*moRecordingState);
 
             if (aRecorder.IsActive())
-                aRecorder.Record(*this, aPos, rStr, aLayout.aLineInfo.GetLine(i).GetIndex(), 0, nullptr, true);
+                vcl::text::TextRecordingDispatcher::Dispatch(*moRecordingState, *this, rStr, aLayout.aLineInfo.GetLine(i).GetIndex(), 0, nullptr, true);
         }
 
         ImplTextLineInfo& rLineInfo = aLayout.aLineInfo.GetLine(i);
