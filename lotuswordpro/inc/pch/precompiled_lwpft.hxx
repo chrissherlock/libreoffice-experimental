@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-04-08 13:50:51 using:
+ Generated on 2026-02-01 14:42:44 using:
  ./bin/update_pch lotuswordpro lwpft --cutoff=2 --exclude:system --exclude:module --exclude:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -25,16 +25,18 @@
 #include <algorithm>
 #include <assert.h>
 #include <cassert>
+#include <cmath>
+#include <concepts>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
 #include <limits>
+#include <math.h>
 #include <memory>
 #include <new>
 #include <ostream>
 #include <stddef.h>
 #include <stdexcept>
-#include <stdio.h>
 #include <string.h>
 #include <string_view>
 #include <type_traits>
@@ -53,6 +55,8 @@
 #include <osl/thread.hxx>
 #include <osl/time.h>
 #include <rtl/alloc.h>
+#include <rtl/character.hxx>
+#include <rtl/math.h>
 #include <rtl/ref.hxx>
 #include <rtl/string.hxx>
 #include <rtl/stringconcat.hxx>
@@ -73,14 +77,18 @@
 #include <com/sun/star/io/XOutputStream.hpp>
 #include <com/sun/star/uno/Reference.h>
 #include <com/sun/star/xml/sax/XDocumentHandler.hpp>
+#include <comphelper/comphelperdllapi.h>
+#include <comphelper/configuration.hxx>
 #include <cppuhelper/cppuhelperdllapi.h>
 #include <cppuhelper/implbase.hxx>
+#include <o3tl/intcmp.hxx>
 #include <o3tl/numeric.hxx>
+#include <o3tl/safeint.hxx>
 #include <o3tl/sorted_vector.hxx>
+#include <o3tl/sprintf.hxx>
 #include <o3tl/typed_flags_set.hxx>
-#include <tools/color.hxx>
 #include <tools/gen.hxx>
-#include <tools/solar.h>
+#include <tools/long.hxx>
 #include <tools/stream.hxx>
 #endif // PCH_LEVEL >= 3
 #if PCH_LEVEL >= 4

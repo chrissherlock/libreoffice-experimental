@@ -34,7 +34,7 @@
 #include <o3tl/any.hxx>
 #include <o3tl/safeint.hxx>
 #include <vcl/svapp.hxx>
-#include <vcl/wmf.hxx>
+#include <vcl/metafile/wmf.hxx>
 #include <vcl/cvtgrf.hxx>
 #include <vcl/graphic/BitmapHelper.hxx>
 #include <vcl/GraphicLoader.hxx>

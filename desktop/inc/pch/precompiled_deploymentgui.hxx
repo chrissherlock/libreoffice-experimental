@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-03-08 13:13:39 using:
+ Generated on 2026-02-01 14:42:50 using:
  ./bin/update_pch desktop deploymentgui --cutoff=3 --exclude:system --exclude:module --exclude:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -37,6 +37,7 @@
 #include <stddef.h>
 #include <string>
 #include <string_view>
+#include <type_traits>
 #include <utility>
 #include <vector>
 #endif // PCH_LEVEL >= 1
@@ -45,11 +46,10 @@
 #include <osl/diagnose.h>
 #include <osl/file.hxx>
 #include <osl/interlck.h>
-#include <osl/mutex.hxx>
-#include <osl/time.h>
 #include <rtl/alloc.h>
 #include <rtl/locale.h>
 #include <rtl/ref.hxx>
+#include <rtl/textenc.h>
 #include <rtl/ustrbuf.hxx>
 #include <rtl/ustring.hxx>
 #include <sal/detail/log.h>
@@ -88,12 +88,12 @@
 #include <cppuhelper/implbase.hxx>
 #include <cppuhelper/supportsservice.hxx>
 #include <o3tl/typed_flags_set.hxx>
+#include <o3tl/unit_conversion.hxx>
 #include <salhelper/thread.hxx>
 #include <tools/degree.hxx>
 #include <tools/gen.hxx>
 #include <tools/link.hxx>
 #include <tools/long.hxx>
-#include <tools/solar.h>
 #include <tools/toolsdllapi.h>
 #include <typelib/typedescription.h>
 #include <uno/data.h>

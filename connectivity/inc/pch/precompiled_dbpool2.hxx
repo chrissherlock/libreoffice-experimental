@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-03-08 13:12:45 using:
+ Generated on 2026-02-01 14:42:48 using:
  ./bin/update_pch connectivity dbpool2 --cutoff=5 --exclude:system --include:module --exclude:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -24,12 +24,16 @@
 #if PCH_LEVEL >= 1
 #include <algorithm>
 #include <cassert>
+#include <concepts>
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <functional>
 #include <initializer_list>
 #include <iomanip>
 #include <limits>
+#include <memory>
 #include <new>
 #include <ostream>
 #include <stddef.h>
@@ -38,13 +42,18 @@
 #include <string_view>
 #include <type_traits>
 #include <utility>
+#include <vector>
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
 #include <osl/diagnose.h>
+#include <osl/doublecheckedlocking.h>
+#include <osl/getglobalmutex.hxx>
 #include <osl/interlck.h>
 #include <osl/mutex.h>
 #include <osl/mutex.hxx>
 #include <rtl/alloc.h>
+#include <rtl/character.hxx>
+#include <rtl/math.h>
 #include <rtl/ref.hxx>
 #include <rtl/string.h>
 #include <rtl/string.hxx>
@@ -56,6 +65,7 @@
 #include <rtl/ustrbuf.hxx>
 #include <rtl/ustring.h>
 #include <rtl/ustring.hxx>
+#include <sal/detail/log.h>
 #include <sal/log.hxx>
 #include <sal/macros.h>
 #include <sal/saldllapi.h>
@@ -63,14 +73,20 @@
 #include <sal/typesizes.h>
 #endif // PCH_LEVEL >= 2
 #if PCH_LEVEL >= 3
+#include <com/sun/star/lang/DisposedException.hpp>
+#include <com/sun/star/lang/EventObject.hpp>
+#include <com/sun/star/lang/XComponent.hpp>
 #include <com/sun/star/uno/Any.h>
 #include <com/sun/star/uno/Any.hxx>
 #include <com/sun/star/uno/Reference.h>
 #include <com/sun/star/uno/Reference.hxx>
 #include <com/sun/star/uno/RuntimeException.hpp>
+#include <com/sun/star/uno/Sequence.h>
+#include <com/sun/star/uno/Sequence.hxx>
 #include <com/sun/star/uno/Type.h>
 #include <com/sun/star/uno/Type.hxx>
 #include <com/sun/star/uno/TypeClass.hdl>
+#include <com/sun/star/uno/XAggregation.hpp>
 #include <com/sun/star/uno/XInterface.hpp>
 #include <com/sun/star/uno/XWeak.hpp>
 #include <com/sun/star/uno/genfunc.h>
@@ -78,7 +94,12 @@
 #include <cppu/cppudllapi.h>
 #include <cppu/unotype.hxx>
 #include <cppuhelper/cppuhelperdllapi.h>
+#include <cppuhelper/implbase_ex_post.hxx>
+#include <cppuhelper/implbase_ex_pre.hxx>
+#include <cppuhelper/weak.hxx>
 #include <cppuhelper/weakref.hxx>
+#include <o3tl/intcmp.hxx>
+#include <o3tl/safeint.hxx>
 #include <salhelper/simplereferenceobject.hxx>
 #include <typelib/typeclass.h>
 #include <typelib/typedescription.h>

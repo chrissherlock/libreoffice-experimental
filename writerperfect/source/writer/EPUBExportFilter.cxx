@@ -26,7 +26,7 @@
 #include <cppuhelper/supportsservice.hxx>
 #include <svtools/DocumentToGraphicRenderer.hxx>
 #include <vcl/filter/SvmWriter.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/graph.hxx>
 #include <tools/color.hxx>
 #include <tools/mapunit.hxx>

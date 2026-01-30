@@ -17,18 +17,18 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#ifndef INCLUDED_VCL_METAACT_HXX
-#define INCLUDED_VCL_METAACT_HXX
+#pragma once
 
 #include <sal/config.h>
 
 #include <salhelper/simplereferenceobject.hxx>
 #include <tools/poly.hxx>
+#include <basegfx/utils/bgradient.hxx>
 
 #include <vcl/dllapi.h>
 #include <vcl/bitmap.hxx>
 #include <vcl/font.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/gfxlink.hxx>
 #include <vcl/gradient.hxx>
 #include <vcl/hatch.hxx>
@@ -36,7 +36,6 @@
 #include <vcl/lineinfo.hxx>
 #include <vcl/region.hxx>
 #include <vcl/wall.hxx>
-#include <basegfx/utils/bgradient.hxx>
 
 #include <memory>
 #include <span>
@@ -1572,7 +1571,5 @@ public:
 
     LanguageType        GetTextLanguage() const { return meTextLanguage; }
 };
-
-#endif // INCLUDED_VCL_METAACT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

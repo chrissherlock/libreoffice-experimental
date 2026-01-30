@@ -7,8 +7,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#ifndef INCLUDED_TEST_XMLTESTTOOLS_HXX
-#define INCLUDED_TEST_XMLTESTTOOLS_HXX
+#pragma once
 
 #include <sal/config.h>
 #include <test/testdllapi.hxx>
@@ -18,7 +17,7 @@
 #include <rtl/string.hxx>
 #include <rtl/ustring.hxx>
 #include <unotools/tempfile.hxx>
-#include <vcl/mtfxmldump.hxx>
+#include <vcl/metafile/mtfxmldump.hxx>
 #include <test/xmldocptr.hxx>
 
 #include <string_view>
@@ -195,7 +194,5 @@ protected:
     static void registerODFNamespaces(xmlXPathContextPtr& pXmlXpathCtx);
     static void registerOOXMLNamespaces(xmlXPathContextPtr& pXmlXpathCtx);
 };
-
-#endif
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

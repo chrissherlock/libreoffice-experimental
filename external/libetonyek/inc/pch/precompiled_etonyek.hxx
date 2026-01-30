@@ -13,18 +13,20 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2019-05-18 15:09:41 using:
+ Generated on 2026-02-01 14:42:53 using:
  ./bin/update_pch external/libetonyek etonyek --cutoff=1 --exclude:system --include:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
  ./bin/update_pch_bisect ./external/libetonyek/inc/pch/precompiled_etonyek.hxx "make external/libetonyek.build" --find-conflicts
 */
 
+#include <sal/config.h>
 #if PCH_LEVEL >= 1
 #include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstdarg>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -32,6 +34,7 @@
 #include <deque>
 #include <functional>
 #include <iomanip>
+#include <iostream>
 #include <iterator>
 #include <libetonyek_utils.h>
 #include <libetonyek_xml.h>
@@ -54,7 +57,7 @@
 #include <boost/none.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 #include <boost/optional.hpp>
-#include <boost/spirit/include/phoenix.hpp>
+#include <boost/phoenix.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/qi_attr.hpp>
 #include <boost/spirit/include/qi_lit.hpp>

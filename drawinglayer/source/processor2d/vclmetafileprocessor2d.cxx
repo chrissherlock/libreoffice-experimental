@@ -32,11 +32,11 @@
 #include <basegfx/polygon/b2dpolygontools.hxx>
 #include <basegfx/polygon/b2dlinegeometry.hxx>
 #include <vcl/virdev.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/gradient.hxx>
 #include <vcl/graphictools.hxx>
 #include <tools/lazydelete.hxx>
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/graph.hxx> // for PDFExtOutDevData Graphic support
 #include <vcl/formpdfexport.hxx> // for PDFExtOutDevData Graphic support
@@ -561,7 +561,7 @@ VclMetafileProcessor2D::~VclMetafileProcessor2D()
 
     XPATHFILL_SEQ_BEGIN, XPATHFILL_SEQ_END:
 
-    Two producers, one is vcl/source/gdi/gdimtf.cxx, line 1273. There, it is transformed
+    Two producers, one is vcl/source/gdi/metafile/GDIMetaFile.cxx, line 1273. There, it is transformed
     inside GDIMetaFile::Rotate, nothing to take care of here.
     The second producer is in graphics/svx/source/svdraw/impgrfll.cxx, line 374. This is used
     with each incarnation of Imp_GraphicFill when a metafile is recorded, fillstyle is not

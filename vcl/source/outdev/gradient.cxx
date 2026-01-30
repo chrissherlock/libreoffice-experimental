@@ -20,7 +20,7 @@
 #include <tools/poly.hxx>
 
 #include <vcl/gradient.hxx>
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>

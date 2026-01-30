@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2025-07-15 11:31:34 using:
+ Generated on 2026-02-01 14:42:50 using:
  ./bin/update_pch reportdesign rpt --cutoff=9 --exclude:system --include:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -31,6 +31,7 @@
 #include <compare>
 #include <concepts>
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <deque>
@@ -82,7 +83,6 @@
 #include <rtl/math.hxx>
 #include <rtl/ref.hxx>
 #include <rtl/strbuf.h>
-#include <rtl/strbuf.hxx>
 #include <rtl/string.h>
 #include <rtl/string.hxx>
 #include <rtl/stringconcat.hxx>
@@ -102,56 +102,36 @@
 #include <sal/saldllapi.h>
 #include <sal/types.h>
 #include <sal/typesizes.h>
-#include <vcl/BinaryDataContainer.hxx>
-#include <vcl/GraphicExternalLink.hxx>
-#include <vcl/Scanline.hxx>
-#include <vcl/alpha.hxx>
-#include <vcl/animate/Animation.hxx>
-#include <vcl/animate/AnimationFrame.hxx>
 #include <vcl/bitmap.hxx>
 #include <vcl/bitmap/BitmapTypes.hxx>
 #include <vcl/cairo.hxx>
 #include <vcl/checksum.hxx>
 #include <vcl/dllapi.h>
-#include <vcl/fntstyle.hxx>
 #include <vcl/font.hxx>
-#include <vcl/gfxlink.hxx>
 #include <vcl/gradient.hxx>
 #include <vcl/graph.hxx>
 #include <vcl/kernarray.hxx>
 #include <vcl/mapmod.hxx>
-#include <vcl/metaactiontypes.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/region.hxx>
-#include <vcl/rendercontext/AddFontSubstituteFlags.hxx>
-#include <vcl/rendercontext/AntialiasingFlags.hxx>
-#include <vcl/rendercontext/DrawGridFlags.hxx>
 #include <vcl/rendercontext/DrawImageFlags.hxx>
-#include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/rendercontext/DrawTextFlags.hxx>
-#include <vcl/rendercontext/GetDefaultFontFlags.hxx>
 #include <vcl/rendercontext/ImplMapRes.hxx>
 #include <vcl/rendercontext/InvertFlags.hxx>
 #include <vcl/rendercontext/RasterOp.hxx>
 #include <vcl/rendercontext/SalLayoutFlags.hxx>
 #include <vcl/rendercontext/State.hxx>
-#include <vcl/rendercontext/SystemTextColorFlags.hxx>
-#include <vcl/salnativewidgets.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/task.hxx>
-#include <vcl/themecolors.hxx>
+#include <vcl/text/TextRecordingState.hxx>
 #include <vcl/timer.hxx>
-#include <vcl/vclenum.hxx>
-#include <vcl/vclevent.hxx>
 #include <vcl/vclptr.hxx>
 #include <vcl/vclreferencebase.hxx>
-#include <vcl/vectorgraphicdata.hxx>
 #include <vcl/wall.hxx>
 #endif // PCH_LEVEL >= 2
 #if PCH_LEVEL >= 3
 #include <basegfx/basegfxdllapi.h>
 #include <basegfx/color/bcolor.hxx>
-#include <basegfx/matrix/b2dhommatrix.hxx>
 #include <basegfx/numeric/ftools.hxx>
 #include <basegfx/point/b2dpoint.hxx>
 #include <basegfx/point/b2ipoint.hxx>
@@ -169,21 +149,21 @@
 #include <basegfx/tuple/b3dtuple.hxx>
 #include <basegfx/utils/common.hxx>
 #include <basegfx/utils/systemdependentdata.hxx>
-#include <basegfx/vector/b2dsize.hxx>
 #include <basegfx/vector/b2dvector.hxx>
 #include <basegfx/vector/b2enums.hxx>
-#include <basegfx/vector/b2isize.hxx>
 #include <basegfx/vector/b2ivector.hxx>
-#include <com/sun/star/awt/DeviceInfo.hpp>
-#include <com/sun/star/awt/GradientStyle.hpp>
+#include <com/sun/star/awt/FontDescriptor.hpp>
 #include <com/sun/star/beans/XFastPropertySet.hpp>
 #include <com/sun/star/beans/XMultiPropertySet.hpp>
+#include <com/sun/star/beans/XPropertyAccess.hpp>
 #include <com/sun/star/beans/XPropertySet.hpp>
+#include <com/sun/star/container/XChild.hpp>
+#include <com/sun/star/container/XContainer.hpp>
 #include <com/sun/star/drawing/LineCap.hpp>
 #include <com/sun/star/drawing/TextFitToSizeType.hpp>
+#include <com/sun/star/drawing/XShape.hpp>
 #include <com/sun/star/form/FormComponentType.hpp>
 #include <com/sun/star/graphic/XPrimitive2D.hpp>
-#include <com/sun/star/io/XInputStream.hpp>
 #include <com/sun/star/lang/DisposedException.hpp>
 #include <com/sun/star/lang/EventObject.hpp>
 #include <com/sun/star/lang/Locale.hpp>
@@ -221,6 +201,7 @@
 #include <comphelper/errcode.hxx>
 #include <comphelper/interfacecontainer3.hxx>
 #include <comphelper/interfacecontainer4.hxx>
+#include <comphelper/scopeguard.hxx>
 #include <comphelper/sequence.hxx>
 #include <comphelper/uno3.hxx>
 #include <comphelper/unoimplbase.hxx>
@@ -235,6 +216,7 @@
 #include <cppuhelper/implbase_ex_post.hxx>
 #include <cppuhelper/implbase_ex_pre.hxx>
 #include <cppuhelper/interfacecontainer.h>
+#include <cppuhelper/propertysetmixin.hxx>
 #include <cppuhelper/supportsservice.hxx>
 #include <cppuhelper/weak.hxx>
 #include <cppuhelper/weakagg.hxx>
@@ -253,6 +235,8 @@
 #include <i18nlangtag/lang.h>
 #include <o3tl/concepts.hxx>
 #include <o3tl/cow_wrapper.hxx>
+#include <o3tl/deleter.hxx>
+#include <o3tl/intcmp.hxx>
 #include <o3tl/safeint.hxx>
 #include <o3tl/strong_int.hxx>
 #include <o3tl/typed_flags_set.hxx>
@@ -274,8 +258,6 @@
 #include <svl/svldllapi.h>
 #include <svl/typedwhich.hxx>
 #include <svl/whichranges.hxx>
-#include <svtools/colorcfg.hxx>
-#include <svtools/svtdllapi.h>
 #include <svx/itextprovider.hxx>
 #include <svx/sdr/properties/defaultproperties.hxx>
 #include <svx/sdr/properties/properties.hxx>
@@ -311,7 +293,6 @@
 #include <tools/poly.hxx>
 #include <tools/ref.hxx>
 #include <tools/solar.h>
-#include <tools/stream.hxx>
 #include <tools/time.hxx>
 #include <tools/toolsdllapi.h>
 #include <typelib/typeclass.h>
@@ -320,13 +301,13 @@
 #include <uno/any2.h>
 #include <uno/data.h>
 #include <uno/sequence2.h>
-#include <unotools/fontdefs.hxx>
-#include <unotools/options.hxx>
 #include <unotools/resmgr.hxx>
+#include <unotools/saveopt.hxx>
 #include <unotools/syslocale.hxx>
 #include <unotools/unotoolsdllapi.h>
 #include <xmloff/ProgressBarHelper.hxx>
 #include <xmloff/dllapi.h>
+#include <xmloff/families.hxx>
 #include <xmloff/namespacemap.hxx>
 #include <xmloff/xmlictxt.hxx>
 #include <xmloff/xmlnamespace.hxx>
@@ -334,6 +315,7 @@
 #include <xmloff/xmluconv.hxx>
 #endif // PCH_LEVEL >= 3
 #if PCH_LEVEL >= 4
+#include <ReportHelperDefines.hxx>
 #include <RptModel.hxx>
 #include <Tools.hxx>
 #include <core_resource.hxx>

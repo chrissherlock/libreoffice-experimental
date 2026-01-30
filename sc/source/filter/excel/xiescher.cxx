@@ -47,9 +47,9 @@
 #include <unotools/moduleoptions.hxx>
 #include <comphelper/configuration.hxx>
 #include <vcl/dibtools.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/outdev.hxx>
-#include <vcl/wmf.hxx>
+#include <vcl/metafile/wmf.hxx>
 #include <comphelper/classids.hxx>
 #include <comphelper/documentinfo.hxx>
 #include <o3tl/safeint.hxx>

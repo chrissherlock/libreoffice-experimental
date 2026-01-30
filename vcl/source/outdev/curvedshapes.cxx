@@ -17,7 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/virdev.hxx>
 
 #include <ClippingController.hxx>

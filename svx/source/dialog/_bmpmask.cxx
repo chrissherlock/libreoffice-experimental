@@ -21,8 +21,8 @@
 #include <vcl/alpha.hxx>
 #include <vcl/animate/AnimationFrame.hxx>
 #include <vcl/event.hxx>
-#include <vcl/metaact.hxx>
-#include <vcl/metaactiontypes.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <vcl/metafile/MetaActionType.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/weld/Builder.hxx>
 #include <vcl/weld/ScrolledWindow.hxx>

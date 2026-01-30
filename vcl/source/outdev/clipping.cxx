@@ -21,7 +21,7 @@
 #include <osl/diagnose.h>
 #include <tools/debug.hxx>
 
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/virdev.hxx>
 
 #include <ClippingController.hxx>

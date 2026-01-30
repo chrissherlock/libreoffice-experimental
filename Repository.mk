@@ -83,6 +83,7 @@ $(eval $(call gb_Helper_register_executables,NONE, \
 	visualbackendtest \
 	listfonts \
 	listglyphs \
+	showmetafile \
 	$(if $(and $(ENABLE_GTK3), $(filter LINUX %BSD SOLARIS,$(OS))), gtktiledviewer) \
 	$(if $(and $(ENABLE_GTKTILEDVIEWER), $(filter WNT,$(OS))), gtktiledviewer) \
 	$(if $(filter MACOSX,$(OS)),QuickLookPreview) \

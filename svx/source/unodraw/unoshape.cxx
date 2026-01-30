@@ -84,8 +84,8 @@
 #include <drawinglayer/geometry/viewinformation2d.hxx>
 #include <drawinglayer/primitive2d/transformprimitive2d.hxx>
 
-#include <vcl/gdimtf.hxx>
-#include <vcl/wmf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
+#include <vcl/metafile/wmf.hxx>
 #include <svx/sdtfsitm.hxx>
 #include <svx/svdopath.hxx>
 #include <svx/SvxXTextColumns.hxx>

@@ -7,13 +7,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include <tools/stream.hxx>
-#include <vcl/gdimtf.hxx>
-#include <vcl/wmf.hxx>
-#include "commonfuzzer.hxx"
-
 #include <config_features.h>
+
 #include <osl/detail/component-mapping.h>
+#include <tools/stream.hxx>
+
+#include <vcl/metafile/GDIMetaFile.hxx>
+#include <vcl/wmf.hxx>
+
+#include "commonfuzzer.hxx"
 
 extern "C" {
 void com_sun_star_i18n_LocaleDataImpl_get_implementation( void );

@@ -14,7 +14,7 @@
 #include <comphelper/propertyvalue.hxx>
 #include <com/sun/star/text/XTextTable.hpp>
 #include <sfx2/viewsh.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/scheduler.hxx>
 #include <sfx2/lokhelper.hxx>
 #include <test/lokcallback.hxx>

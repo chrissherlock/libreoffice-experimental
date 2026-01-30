@@ -23,7 +23,7 @@
 #include <com/sun/star/embed/ElementModes.hpp>
 #include <sal/log.hxx>
 #include <vcl/graphicfilter.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <svl/itemiter.hxx>
 #include <tools/UnitConversion.hxx>
 

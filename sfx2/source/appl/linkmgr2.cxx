@@ -39,7 +39,7 @@
 #include <vcl/vclenum.hxx>
 #include <vcl/weld/MessageDialog.hxx>
 #include <vcl/weld/weld.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <sfx2/lnkbase.hxx>
 #include <sfx2/app.hxx>
 #include <vcl/graph.hxx>

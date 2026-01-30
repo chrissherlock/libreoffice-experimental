@@ -22,7 +22,7 @@
 #include <svtools/embedhlp.hxx>
 #include <vcl/graph.hxx>
 #include <vcl/graphicfilter.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/gfxlink.hxx>
 #include <vcl/TypeSerializer.hxx>

@@ -11,8 +11,8 @@
 
 #include <o3tl/string_view.hxx>
 #include <svtools/DocumentToGraphicRenderer.hxx>
-#include <vcl/gdimtf.hxx>
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 
 #include <docsh.hxx>
 #include <unotxdoc.hxx>

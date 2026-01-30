@@ -22,9 +22,9 @@
 #include <tools/mapunit.hxx>
 #include <tools/stream.hxx>
 #include <vcl/svapp.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/graph.hxx>
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/cvtgrf.hxx>
 #include <vcl/BitmapTools.hxx>

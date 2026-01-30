@@ -26,14 +26,15 @@
 
 #include <svl/itemset.hxx>
 #include <tools/fract.hxx>
-#include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <svx/svdobj.hxx>
 #include <svx/xdash.hxx>
 
 // Forward Declarations
 
 
+class MetaAction;
 class SdrObjList;
 class SdrModel;
 class SvdProgressInfo;

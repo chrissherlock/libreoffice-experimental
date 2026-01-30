@@ -17,8 +17,6 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <cstdlib>
-#include <memory>
 #include <sal/log.hxx>
 #include <osl/diagnose.h>
 #include <comphelper/diagnose_ex.hxx>
@@ -27,21 +25,21 @@
 #include <tools/vcompat.hxx>
 #include <tools/fract.hxx>
 #include <tools/mapunit.hxx>
+#include <basegfx/polygon/b2dpolygon.hxx>
+
 #include <vcl/alpha.hxx>
 #include <vcl/BitmapColor.hxx>
 #include <vcl/BitmapPalette.hxx>
-#include <vcl/metaact.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/window.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/svapp.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <vcl/metafile/mtfxmldump.hxx>
 #include <vcl/graphictools.hxx>
-#include <basegfx/polygon/b2dpolygon.hxx>
 #include <vcl/canvastools.hxx>
-#include <vcl/mtfxmldump.hxx>
-
 #include <vcl/TypeSerializer.hxx>
 
 #include <com/sun/star/beans/XFastPropertySet.hpp>
@@ -49,6 +47,9 @@
 #include <com/sun/star/rendering/XBitmapCanvas.hpp>
 #include <com/sun/star/rendering/XCanvas.hpp>
 #include <comphelper/processfactory.hxx>
+
+#include <cstdlib>
+#include <memory>
 
 using namespace com::sun::star;
 

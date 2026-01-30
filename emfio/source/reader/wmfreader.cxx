@@ -31,7 +31,7 @@
 #include <sal/log.hxx>
 #include <tools/mapunit.hxx>
 #include <osl/endian.h>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/dibtools.hxx>
 #include <vcl/outdev.hxx>

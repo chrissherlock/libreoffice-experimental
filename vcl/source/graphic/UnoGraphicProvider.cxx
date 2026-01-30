@@ -21,8 +21,8 @@
 #include <o3tl/temporary.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/image.hxx>
-#include <vcl/metaact.hxx>
-#include <vcl/metaactiontypes.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <vcl/metafile/MetaActionType.hxx>
 #include <imagerepository.hxx>
 #include <tools/fract.hxx>
 #include <tools/mapunit.hxx>

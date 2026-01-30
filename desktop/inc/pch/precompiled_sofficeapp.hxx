@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-04-08 13:55:49 using:
+ Generated on 2026-02-01 18:49:44 using:
  ./bin/update_pch desktop sofficeapp --cutoff=6 --exclude:system --include:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -23,13 +23,18 @@
 #include <sal/config.h>
 #if PCH_LEVEL >= 1
 #include <algorithm>
+#include <array>
+#include <atomic>
 #include <cassert>
 #include <chrono>
+#include <climits>
 #include <cmath>
+#include <compare>
+#include <concepts>
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <deque>
 #include <float.h>
 #include <functional>
 #include <initializer_list>
@@ -39,14 +44,19 @@
 #include <map>
 #include <math.h>
 #include <memory>
+#include <mutex>
 #include <new>
+#include <numeric>
 #include <optional>
 #include <ostream>
 #include <stddef.h>
 #include <string.h>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <type_traits>
+#include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 #include <boost/property_tree/ptree_fwd.hpp>
@@ -56,6 +66,7 @@
 #include <osl/diagnose.h>
 #include <osl/doublecheckedlocking.h>
 #include <osl/endian.h>
+#include <osl/file.h>
 #include <osl/file.hxx>
 #include <osl/getglobalmutex.hxx>
 #include <osl/interlck.h>
@@ -71,8 +82,8 @@
 #include <rtl/bootstrap.hxx>
 #include <rtl/byteseq.hxx>
 #include <rtl/character.hxx>
-#include <rtl/digest.h>
 #include <rtl/instance.hxx>
+#include <rtl/locale.h>
 #include <rtl/math.h>
 #include <rtl/process.h>
 #include <rtl/ref.hxx>
@@ -95,19 +106,12 @@
 #include <sal/saldllapi.h>
 #include <sal/types.h>
 #include <sal/typesizes.h>
-#include <vcl/Scanline.hxx>
-#include <vcl/alpha.hxx>
 #include <vcl/bitmap.hxx>
 #include <vcl/bitmap/BitmapTypes.hxx>
 #include <vcl/checksum.hxx>
 #include <vcl/dllapi.h>
-#include <comphelper/errcode.hxx>
-#include <vcl/fntstyle.hxx>
 #include <vcl/font.hxx>
 #include <vcl/mapmod.hxx>
-#include <vcl/region.hxx>
-#include <vcl/vclenum.hxx>
-#include <vcl/vclptr.hxx>
 #endif // PCH_LEVEL >= 2
 #if PCH_LEVEL >= 3
 #include <basegfx/basegfxdllapi.h>
@@ -117,20 +121,46 @@
 #include <basegfx/point/b2ipoint.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
+#include <basegfx/range/Range2D.hxx>
 #include <basegfx/range/b2drange.hxx>
 #include <basegfx/range/basicrange.hxx>
+#include <basegfx/tuple/Size2D.hxx>
+#include <basegfx/tuple/Tuple2D.hxx>
+#include <basegfx/tuple/Tuple3D.hxx>
 #include <basegfx/tuple/b2dtuple.hxx>
 #include <basegfx/tuple/b2ituple.hxx>
 #include <basegfx/tuple/b3dtuple.hxx>
 #include <basegfx/utils/common.hxx>
+#include <basegfx/utils/systemdependentdata.hxx>
 #include <basegfx/vector/b2dvector.hxx>
-#include <basegfx/vector/b2enums.hxx>
 #include <basegfx/vector/b2ivector.hxx>
 #include <basic/basicdllapi.h>
 #include <basic/sbxcore.hxx>
 #include <basic/sbxdef.hxx>
+#include <com/sun/star/awt/XActionListener.hpp>
+#include <com/sun/star/awt/XAdjustmentListener.hpp>
+#include <com/sun/star/awt/XFocusListener.hpp>
+#include <com/sun/star/awt/XItemListener.hpp>
+#include <com/sun/star/awt/XKeyListener.hpp>
+#include <com/sun/star/awt/XMenuListener.hpp>
+#include <com/sun/star/awt/XMouseListener.hpp>
+#include <com/sun/star/awt/XMouseMotionListener.hpp>
+#include <com/sun/star/awt/XPaintListener.hpp>
+#include <com/sun/star/awt/XSpinListener.hpp>
+#include <com/sun/star/awt/XTabListener.hpp>
+#include <com/sun/star/awt/XTextListener.hpp>
+#include <com/sun/star/awt/XTopWindowListener.hpp>
+#include <com/sun/star/awt/XVclContainerListener.hpp>
+#include <com/sun/star/awt/XWindowListener.hpp>
+#include <com/sun/star/awt/grid/XGridSelectionListener.hpp>
+#include <com/sun/star/awt/tab/XTabPageContainerListener.hpp>
+#include <com/sun/star/awt/tree/XTreeEditListener.hpp>
+#include <com/sun/star/awt/tree/XTreeExpansionListener.hpp>
+#include <com/sun/star/container/XContainerListener.hpp>
 #include <com/sun/star/lang/DisposedException.hpp>
 #include <com/sun/star/lang/EventObject.hpp>
+#include <com/sun/star/lang/XEventListener.hpp>
+#include <com/sun/star/lang/XServiceInfo.hpp>
 #include <com/sun/star/lang/XTypeProvider.hpp>
 #include <com/sun/star/uno/Any.h>
 #include <com/sun/star/uno/Any.hxx>
@@ -142,11 +172,16 @@
 #include <com/sun/star/uno/Type.h>
 #include <com/sun/star/uno/Type.hxx>
 #include <com/sun/star/uno/TypeClass.hdl>
+#include <com/sun/star/uno/XAggregation.hpp>
 #include <com/sun/star/uno/XInterface.hpp>
 #include <com/sun/star/uno/XWeak.hpp>
 #include <com/sun/star/uno/genfunc.h>
 #include <com/sun/star/uno/genfunc.hxx>
+#include <com/sun/star/util/Date.hpp>
+#include <com/sun/star/view/XSelectionChangeListener.hpp>
 #include <comphelper/comphelperdllapi.h>
+#include <comphelper/diagnose_ex.hxx>
+#include <comphelper/interfacecontainer4.hxx>
 #include <comphelper/processfactory.hxx>
 #include <cppu/cppudllapi.h>
 #include <cppu/unotype.hxx>
@@ -155,22 +190,29 @@
 #include <cppuhelper/implbase_ex.hxx>
 #include <cppuhelper/implbase_ex_post.hxx>
 #include <cppuhelper/implbase_ex_pre.hxx>
+#include <cppuhelper/queryinterface.hxx>
 #include <cppuhelper/weak.hxx>
+#include <cppuhelper/weakagg.hxx>
+#include <cppuhelper/weakref.hxx>
 #include <i18nlangtag/lang.h>
+#include <o3tl/concepts.hxx>
 #include <o3tl/cow_wrapper.hxx>
+#include <o3tl/intcmp.hxx>
+#include <o3tl/safeint.hxx>
 #include <o3tl/strong_int.hxx>
 #include <o3tl/typed_flags_set.hxx>
 #include <o3tl/underlyingenumvalue.hxx>
+#include <o3tl/unit_conversion.hxx>
 #include <salhelper/thread.hxx>
 #include <sfx2/dllapi.h>
 #include <svl/hint.hxx>
-#include <svl/poolitem.hxx>
 #include <svl/svldllapi.h>
 #include <svl/typedwhich.hxx>
 #include <svtools/svtdllapi.h>
+#include <toolkit/dllapi.h>
+#include <toolkit/helper/macros.hxx>
 #include <tools/color.hxx>
 #include <tools/degree.hxx>
-#include <comphelper/diagnose_ex.hxx>
 #include <tools/fontenum.hxx>
 #include <tools/gen.hxx>
 #include <tools/link.hxx>
@@ -178,7 +220,6 @@
 #include <tools/mapunit.hxx>
 #include <tools/poly.hxx>
 #include <tools/ref.hxx>
-#include <tools/solar.h>
 #include <tools/toolsdllapi.h>
 #include <typelib/typeclass.h>
 #include <typelib/typedescription.h>

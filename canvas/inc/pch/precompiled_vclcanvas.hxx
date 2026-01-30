@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2024-10-12 02:56:17 using:
+ Generated on 2026-02-01 14:42:51 using:
  ./bin/update_pch canvas vclcanvas --cutoff=1 --exclude:system --include:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -35,13 +35,16 @@
 #include <vcl/BitmapReadAccess.hxx>
 #include <vcl/BitmapTools.hxx>
 #include <vcl/alpha.hxx>
+#include <vcl/bitmap.hxx>
 #include <vcl/bitmap/BitmapAlphaClampFilter.hxx>
+#include <vcl/bitmap/BitmapFilter.hxx>
 #include <vcl/canvastools.hxx>
 #include <vcl/dibtools.hxx>
 #include <vcl/gradient.hxx>
 #include <vcl/kernarray.hxx>
 #include <vcl/metric.hxx>
 #include <vcl/outdev.hxx>
+#include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/skia/SkiaHelper.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/virdev.hxx>
@@ -62,6 +65,7 @@
 #include <basegfx/utils/tools.hxx>
 #include <basegfx/utils/unopolypolygon.hxx>
 #include <basegfx/vector/b2dsize.hxx>
+#include <com/sun/star/awt/GradientStyle.hpp>
 #include <com/sun/star/awt/XTopWindow.hpp>
 #include <com/sun/star/drawing/LineCap.hpp>
 #include <com/sun/star/lang/NoSupportException.hpp>
@@ -80,6 +84,7 @@
 #include <cppuhelper/supportsservice.hxx>
 #include <i18nlangtag/languagetag.hxx>
 #include <toolkit/helper/vclunohelper.hxx>
+#include <tools/mapunit.hxx>
 #include <tools/poly.hxx>
 #include <tools/stream.hxx>
 #endif // PCH_LEVEL >= 3

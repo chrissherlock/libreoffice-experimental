@@ -17,13 +17,14 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-
 #include <comphelper/configuration.hxx>
-#include <vcl/gdimtf.hxx>
-#include <vcl/metaact.hxx>
-#include <vcl/virdev.hxx>
 #include <tools/mapunit.hxx>
 #include <tools/poly.hxx>
+
+#include <vcl/metafile/GDIMetaFile.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <vcl/virdev.hxx>
+
 #include "dxf2mtf.hxx"
 
 #include <math.h>

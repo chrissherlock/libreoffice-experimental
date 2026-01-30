@@ -46,7 +46,7 @@
 #include <osl/file.hxx>
 
 #include <utility>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/idle.hxx>
 #include <vcl/printer/Options.hxx>
 #include <vcl/print.hxx>

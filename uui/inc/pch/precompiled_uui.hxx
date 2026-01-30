@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-04-11 19:48:51 using:
+ Generated on 2026-02-01 14:42:52 using:
  ./bin/update_pch uui uui --cutoff=4 --exclude:system --exclude:module --exclude:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -26,6 +26,9 @@
 #include <cstddef>
 #include <memory>
 #include <ostream>
+#include <string>
+#include <string_view>
+#include <unordered_map>
 #include <vector>
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
@@ -34,20 +37,23 @@
 #include <osl/file.hxx>
 #include <osl/interlck.h>
 #include <rtl/alloc.h>
+#include <rtl/character.hxx>
 #include <rtl/digest.h>
 #include <rtl/instance.hxx>
+#include <rtl/math.h>
 #include <rtl/strbuf.hxx>
 #include <rtl/textenc.h>
-#include <rtl/unload.h>
 #include <rtl/ustrbuf.hxx>
 #include <rtl/ustring.h>
 #include <rtl/ustring.hxx>
 #include <sal/detail/log.h>
 #include <sal/saldllapi.h>
 #include <sal/types.h>
+#include <vcl/dllapi.h>
 #include <vcl/stdtext.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/weld/weld.hxx>
+#include <vcl/wintypes.hxx>
 #endif // PCH_LEVEL >= 2
 #if PCH_LEVEL >= 3
 #include <com/sun/star/task/XInteractionAbort.hpp>
@@ -64,11 +70,12 @@
 #include <comphelper/comphelperdllapi.h>
 #include <cppu/cppudllapi.h>
 #include <cppu/unotype.hxx>
-#include <cppuhelper/cppuhelperdllapi.h>
 #include <o3tl/typed_flags_set.hxx>
+#include <officecfg/Office/Common.hxx>
 #include <typelib/typedescription.h>
 #include <uno/data.h>
 #include <unotools/resmgr.hxx>
+#include <unotools/unotoolsdllapi.h>
 #endif // PCH_LEVEL >= 3
 #if PCH_LEVEL >= 4
 #endif // PCH_LEVEL >= 4

@@ -32,8 +32,8 @@
 #include <vcl/alpha.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/dibtools.hxx>
-#include <vcl/metaact.hxx>
-#include <vcl/metaactiontypes.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <vcl/metafile/MetaActionType.hxx>
 #include <memory>
 
 #define WIN_EMR_POLYGON                     3

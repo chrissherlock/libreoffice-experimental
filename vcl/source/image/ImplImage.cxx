@@ -22,7 +22,7 @@
 
 #include <vcl/svapp.hxx>
 #include <vcl/bitmap/BitmapFilter.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/ImageTree.hxx>

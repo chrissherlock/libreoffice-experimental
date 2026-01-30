@@ -11,7 +11,7 @@
 
 #include <memory>
 
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 
 #include <docsh.hxx>
 #include <wrtsh.hxx>

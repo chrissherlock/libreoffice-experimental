@@ -20,8 +20,8 @@
 #pragma once
 
 #include <vcl/bitmap.hxx>
-#include <vcl/gdimtf.hxx>
 
+class GDIMetaFile;
 class SalGraphics;
 
 class ImplImage

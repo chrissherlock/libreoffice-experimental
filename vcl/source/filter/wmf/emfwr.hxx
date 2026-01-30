@@ -19,9 +19,9 @@
 
 #pragma once
 
-#include <vcl/gdimtf.hxx>
 #include <vcl/virdev.hxx>
 
+class GDIMetaFile;
 class LineInfo;
 namespace basegfx { class B2DPolygon; }
 enum class EmfPlusRecordType;

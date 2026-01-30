@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2022-08-13 18:00:53 using:
+ Generated on 2026-02-01 14:42:45 using:
  ./bin/update_pch comphelper comphelper --cutoff=4 --exclude:system --include:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -24,14 +24,15 @@
 #if PCH_LEVEL >= 1
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <cassert>
 #include <chrono>
 #include <cmath>
+#include <compare>
+#include <concepts>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
-#include <deque>
-#include <float.h>
 #include <functional>
 #include <initializer_list>
 #include <iomanip>
@@ -55,6 +56,7 @@
 #include <vector>
 #include <boost/core/noinit_adaptor.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/ptree_fwd.hpp>
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
 #include <osl/diagnose.h>
@@ -98,45 +100,10 @@
 #include <sal/saldllapi.h>
 #include <sal/types.h>
 #include <sal/typesizes.h>
-#include <vcl/BinaryDataContainer.hxx>
-#include <vcl/GraphicExternalLink.hxx>
-#include <vcl/Scanline.hxx>
-#include <vcl/alpha.hxx>
-#include <vcl/animate/Animation.hxx>
-#include <vcl/animate/AnimationFrame.hxx>
-#include <vcl/bitmap.hxx>
-#include <vcl/bitmap/BitmapTypes.hxx>
-#include <vcl/checksum.hxx>
-#include <vcl/dllapi.h>
-#include <vcl/gfxlink.hxx>
-#include <vcl/mapmod.hxx>
-#include <vcl/region.hxx>
-#include <vcl/task.hxx>
-#include <vcl/timer.hxx>
-#include <vcl/vectorgraphicdata.hxx>
 #endif // PCH_LEVEL >= 2
 #if PCH_LEVEL >= 3
 #include <basegfx/basegfxdllapi.h>
-#include <basegfx/color/bcolor.hxx>
 #include <basegfx/numeric/ftools.hxx>
-#include <basegfx/point/b2dpoint.hxx>
-#include <basegfx/point/b2ipoint.hxx>
-#include <basegfx/polygon/b2dpolygon.hxx>
-#include <basegfx/polygon/b2dpolypolygon.hxx>
-#include <basegfx/range/Range2D.hxx>
-#include <basegfx/range/b2drange.hxx>
-#include <basegfx/range/basicrange.hxx>
-#include <basegfx/tuple/Tuple2D.hxx>
-#include <basegfx/tuple/Tuple3D.hxx>
-#include <basegfx/tuple/b2dtuple.hxx>
-#include <basegfx/tuple/b2ituple.hxx>
-#include <basegfx/tuple/b3dtuple.hxx>
-#include <basegfx/utils/common.hxx>
-#include <basegfx/vector/b2dsize.hxx>
-#include <basegfx/vector/b2dvector.hxx>
-#include <basegfx/vector/b2enums.hxx>
-#include <basegfx/vector/b2ivector.hxx>
-#include <com/sun/star/accessibility/XAccessibleComponent.hpp>
 #include <com/sun/star/accessibility/XAccessibleContext2.hpp>
 #include <com/sun/star/accessibility/XAccessibleEventBroadcaster.hpp>
 #include <com/sun/star/accessibility/XAccessibleExtendedComponent.hpp>
@@ -158,13 +125,13 @@
 #include <com/sun/star/lang/DisposedException.hpp>
 #include <com/sun/star/lang/EventObject.hpp>
 #include <com/sun/star/lang/IllegalArgumentException.hpp>
+#include <com/sun/star/lang/WrappedTargetRuntimeException.hpp>
 #include <com/sun/star/lang/XComponent.hpp>
 #include <com/sun/star/lang/XEventListener.hpp>
 #include <com/sun/star/lang/XInitialization.hpp>
 #include <com/sun/star/lang/XServiceInfo.hpp>
 #include <com/sun/star/lang/XTypeProvider.hpp>
 #include <com/sun/star/task/XInteractionHandler.hpp>
-#include <com/sun/star/task/XInteractionRequest.hpp>
 #include <com/sun/star/uno/Any.h>
 #include <com/sun/star/uno/Any.hxx>
 #include <com/sun/star/uno/Reference.h>
@@ -184,22 +151,21 @@
 #include <cppu/cppudllapi.h>
 #include <cppu/unotype.hxx>
 #include <cppuhelper/basemutex.hxx>
-#include <cppuhelper/compbase2.hxx>
+#include <cppuhelper/compbase.hxx>
 #include <cppuhelper/compbase_ex.hxx>
 #include <cppuhelper/cppuhelperdllapi.h>
 #include <cppuhelper/exc_hlp.hxx>
 #include <cppuhelper/implbase.hxx>
-#include <cppuhelper/implbase1.hxx>
-#include <cppuhelper/implbase2.hxx>
-#include <cppuhelper/implbase_ex.hxx>
 #include <cppuhelper/implbase_ex_post.hxx>
 #include <cppuhelper/implbase_ex_pre.hxx>
 #include <cppuhelper/interfacecontainer.h>
 #include <cppuhelper/propshlp.hxx>
+#include <cppuhelper/queryinterface.hxx>
 #include <cppuhelper/supportsservice.hxx>
 #include <cppuhelper/weak.hxx>
 #include <cppuhelper/weakagg.hxx>
 #include <cppuhelper/weakref.hxx>
+#include <o3tl/concepts.hxx>
 #include <o3tl/cow_wrapper.hxx>
 #include <o3tl/safeint.hxx>
 #include <o3tl/string_view.hxx>
@@ -210,14 +176,8 @@
 #include <salhelper/salhelperdllapi.h>
 #include <salhelper/simplereferenceobject.hxx>
 #include <salhelper/thread.hxx>
-#include <tools/color.hxx>
 #include <tools/degree.hxx>
-#include <tools/gen.hxx>
-#include <tools/link.hxx>
 #include <tools/long.hxx>
-#include <tools/mapunit.hxx>
-#include <tools/poly.hxx>
-#include <tools/solar.h>
 #include <tools/toolsdllapi.h>
 #include <typelib/typeclass.h>
 #include <typelib/typedescription.h>
@@ -229,9 +189,11 @@
 #include <uno/sequence2.h>
 #endif // PCH_LEVEL >= 3
 #if PCH_LEVEL >= 4
-#include <comphelper/accessiblecontexthelper.hxx>
+#include <comphelper/OAccessible.hxx>
 #include <comphelper/accessibleeventnotifier.hxx>
 #include <comphelper/comphelperdllapi.h>
+#include <comphelper/diagnose_ex.hxx>
+#include <comphelper/interfacecontainer4.hxx>
 #include <comphelper/processfactory.hxx>
 #include <comphelper/propertycontainerhelper.hxx>
 #include <comphelper/propertyvalue.hxx>
@@ -239,6 +201,7 @@
 #include <comphelper/sequence.hxx>
 #include <comphelper/solarmutex.hxx>
 #include <comphelper/uno3.hxx>
+#include <comphelper/unoimplbase.hxx>
 #endif // PCH_LEVEL >= 4
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -20,7 +20,7 @@
 
 #include <rtl/ustrbuf.hxx>
 #include <vcl/svapp.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/metric.hxx>
 #include <vcl/settings.hxx>

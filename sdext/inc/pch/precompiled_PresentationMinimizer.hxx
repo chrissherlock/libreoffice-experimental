@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-04-08 13:56:34 using:
+ Generated on 2026-02-01 14:42:56 using:
  ./bin/update_pch sdext PresentationMinimizer --cutoff=2 --exclude:system --include:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -23,12 +23,17 @@
 #include <sal/config.h>
 #if PCH_LEVEL >= 1
 #include <algorithm>
+#include <array>
 #include <assert.h>
 #include <atomic>
 #include <cassert>
 #include <chrono>
+#include <climits>
 #include <cmath>
+#include <compare>
+#include <concepts>
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 #include <float.h>
 #include <functional>
@@ -40,6 +45,8 @@
 #include <math.h>
 #include <memory>
 #include <new>
+#include <numeric>
+#include <optional>
 #include <ostream>
 #include <stddef.h>
 #include <string.h>
@@ -55,9 +62,6 @@
 #include <osl/file.h>
 #include <osl/file.hxx>
 #include <osl/interlck.h>
-#include <osl/mutex.h>
-#include <osl/mutex.hxx>
-#include <osl/thread.h>
 #include <osl/time.h>
 #include <rtl/alloc.h>
 #include <rtl/math.h>
@@ -77,30 +81,29 @@
 #include <sal/saldllapi.h>
 #include <sal/types.h>
 #include <sal/typesizes.h>
-#include <vcl/IDialogRenderable.hxx>
+#include <vcl/WindowPosSize.hxx>
 #include <vcl/dllapi.h>
-#include <comphelper/errcode.hxx>
 #include <vcl/errinf.hxx>
-#include <vcl/exceptiontypes.hxx>
-#include <vcl/fntstyle.hxx>
 #include <vcl/font.hxx>
-#include <vcl/inputtypes.hxx>
-#include <vcl/uitest/factory.hxx>
+#include <vcl/svapp.hxx>
 #include <vcl/vclenum.hxx>
-#include <vcl/vclevent.hxx>
 #include <vcl/vclptr.hxx>
+#include <vcl/windowstate.hxx>
 #endif // PCH_LEVEL >= 2
 #if PCH_LEVEL >= 3
 #include <basegfx/basegfxdllapi.h>
 #include <basegfx/color/bcolor.hxx>
 #include <basegfx/numeric/ftools.hxx>
 #include <basegfx/point/b2ipoint.hxx>
+#include <basegfx/range/Range2D.hxx>
 #include <basegfx/range/b2irange.hxx>
 #include <basegfx/range/basicrange.hxx>
+#include <basegfx/tuple/Tuple2D.hxx>
+#include <basegfx/tuple/Tuple3D.hxx>
 #include <basegfx/tuple/b2i64tuple.hxx>
 #include <basegfx/tuple/b2ituple.hxx>
 #include <basegfx/tuple/b3dtuple.hxx>
-#include <com/sun/star/accessibility/XAccessible.hpp>
+#include <basegfx/utils/common.hxx>
 #include <com/sun/star/accessibility/XAccessibleRelationSet.hpp>
 #include <com/sun/star/awt/PushButtonType.hpp>
 #include <com/sun/star/awt/Size.hpp>
@@ -135,22 +138,27 @@
 #include <com/sun/star/util/URLTransformer.hpp>
 #include <com/sun/star/util/XURLTransformer.hpp>
 #include <comphelper/comphelperdllapi.h>
-#include <comphelper/solarmutex.hxx>
+#include <comphelper/errcode.hxx>
+#include <comphelper/propertyvalue.hxx>
 #include <cppu/cppudllapi.h>
 #include <cppu/unotype.hxx>
 #include <cppuhelper/cppuhelperdllapi.h>
 #include <cppuhelper/exc_hlp.hxx>
 #include <i18nlangtag/lang.h>
+#include <o3tl/concepts.hxx>
 #include <o3tl/cow_wrapper.hxx>
+#include <o3tl/intcmp.hxx>
+#include <o3tl/safeint.hxx>
+#include <o3tl/string_view.hxx>
 #include <o3tl/strong_int.hxx>
 #include <o3tl/typed_flags_set.hxx>
 #include <o3tl/underlyingenumvalue.hxx>
+#include <o3tl/unit_conversion.hxx>
 #include <svtools/svtdllapi.h>
 #include <svtools/svtresid.hxx>
 #include <tools/color.hxx>
 #include <tools/date.hxx>
 #include <tools/degree.hxx>
-#include <tools/fldunit.hxx>
 #include <tools/fontenum.hxx>
 #include <tools/gen.hxx>
 #include <tools/link.hxx>
@@ -162,8 +170,12 @@
 #include <uno/any2.h>
 #include <uno/data.h>
 #include <uno/sequence2.h>
+#include <unotools/resmgr.hxx>
+#include <unotools/syslocale.hxx>
+#include <unotools/unotoolsdllapi.h>
 #endif // PCH_LEVEL >= 3
 #if PCH_LEVEL >= 4
+#include <sdextresid.hxx>
 #endif // PCH_LEVEL >= 4
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

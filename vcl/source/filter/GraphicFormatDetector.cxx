@@ -18,20 +18,23 @@
  */
 
 #include <sal/config.h>
-
-#include <algorithm>
-
-#include <vcl/filter/PngImageReader.hxx>
-#include <graphic/GraphicFormatDetector.hxx>
-#include <graphic/DetectorTools.hxx>
 #include <tools/solar.h>
 #include <tools/zcodec.hxx>
 #include <tools/fract.hxx>
 #include <tools/mapunit.hxx>
-#include <filter/WebpReader.hxx>
-#include "igif/gifread.hxx"
-#include <vcl/TypeSerializer.hxx>
+
+#include <vcl/filter/PngImageReader.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/outdev.hxx>
+#include <vcl/TypeSerializer.hxx>
+
+#include <filter/WebpReader.hxx>
+#include <graphic/GraphicFormatDetector.hxx>
+#include <graphic/DetectorTools.hxx>
+
+#include "igif/gifread.hxx"
+
+#include <algorithm>
 #include <utility>
 
 constexpr sal_uInt32 SVG_CHECK_SIZE = 8192;

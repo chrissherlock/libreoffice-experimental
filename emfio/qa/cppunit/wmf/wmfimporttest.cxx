@@ -24,8 +24,8 @@
 #include <test/xmltesttools.hxx>
 #include <test/bootstrapfixture.hxx>
 #include <tools/stream.hxx>
-#include <vcl/gdimtf.hxx>
-#include <vcl/wmf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
+#include <vcl/metafile/wmf.hxx>
 #include <mtftools.hxx>
 
 using namespace css;

@@ -26,7 +26,7 @@
 
 #include <vcl/graph.hxx>
 #include <tools/lazydelete.hxx>
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/toolkit/unowrap.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>

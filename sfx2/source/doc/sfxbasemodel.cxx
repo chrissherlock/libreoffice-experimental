@@ -92,7 +92,7 @@
 #include <comphelper/errcode.hxx>
 #include <vcl/filter/SvmWriter.hxx>
 #include <vcl/salctype.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <comphelper/fileformat.h>
 #include <comphelper/servicehelper.hxx>
 #include <comphelper/storagehelper.hxx>

@@ -6062,7 +6062,6 @@ include/vcl/font.hxx
 include/vcl/fontcapabilities.hxx
 include/vcl/fontcharmap.hxx
 include/vcl/formpdfexport.hxx
-include/vcl/gdimtf.hxx
 include/vcl/gfxlink.hxx
 include/vcl/gradient.hxx
 include/vcl/graph.hxx
@@ -6089,8 +6088,10 @@ include/vcl/layout.hxx
 include/vcl/lineinfo.hxx
 include/vcl/mapmod.hxx
 include/vcl/menu.hxx
-include/vcl/metaact.hxx
-include/vcl/metaactiontypes.hxx
+include/vcl/metafile/wmf.hxx
+include/vcl/metafile/GDIMetaFile.hxx
+include/vcl/metafile/MetaAction.hxx
+include/vcl/metafile/MetaActionType.hxx
 include/vcl/metric.hxx
 include/vcl/mnemonic.hxx
 include/vcl/notebookbar/notebookbar.hxx
@@ -6180,7 +6181,6 @@ include/vcl/wall.hxx
 include/vcl/window.hxx
 include/vcl/wintypes.hxx
 include/vcl/wizardmachine.hxx
-include/vcl/wmf.hxx
 include/vcl/wrkwin.hxx
 include/vcl/xtextedt.hxx
 include/xmloff/DashStyle.hxx
@@ -14517,8 +14517,6 @@ vcl/source/gdi/CommonSalLayout.cxx
 vcl/source/gdi/cvtgrf.cxx
 vcl/source/gdi/embeddedfontsmanager.cxx
 vcl/source/gdi/formpdfexport.cxx
-vcl/source/gdi/gdimetafiletools.cxx
-vcl/source/gdi/gdimtf.cxx
 vcl/source/gdi/gfxlink.cxx
 vcl/source/gdi/gradient.cxx
 vcl/source/gdi/graph.cxx
@@ -14528,8 +14526,6 @@ vcl/source/gdi/impgraph.cxx
 vcl/source/gdi/jobset.cxx
 vcl/source/gdi/lineinfo.cxx
 vcl/source/gdi/mapmod.cxx
-vcl/source/gdi/metaact.cxx
-vcl/source/gdi/mtfxmldump.cxx
 vcl/source/gdi/oldprintadaptor.cxx
 vcl/source/gdi/print.cxx
 vcl/source/gdi/print2.cxx
@@ -14561,6 +14557,10 @@ vcl/source/image/ImageRepository.cxx
 vcl/source/image/ImageTree.cxx
 vcl/source/image/ImplImage.cxx
 vcl/source/image/ImplImageTree.cxx
+vcl/source/metafile/metafiletools.cxx
+vcl/source/metafile/mtfxmldump.cxx
+vcl/source/metafile/GDIMetaFile.cxx
+vcl/source/metafile/MetaAction.cxx
 vcl/source/opengl/OpenGLContext.cxx
 vcl/source/opengl/OpenGLHelper.cxx
 vcl/source/opengl/win/WinDeviceInfo.cxx
@@ -15651,4 +15651,4 @@ xmlsecurity/source/xmlsec/xmldocumentwrapper_xmlsecimpl.cxx
 xmlsecurity/source/xmlsec/xmlelementwrapper_xmlsecimpl.cxx
 xmlsecurity/source/xmlsec/xmlelementwrapper_xmlsecimpl.hxx
 xmlsecurity/source/xmlsec/xmlsec_init.cxx
-xmlsecurity/source/xmlsec/xmlstreamio.cxx
+

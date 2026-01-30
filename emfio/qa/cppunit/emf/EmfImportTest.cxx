@@ -24,9 +24,9 @@
 #include <drawinglayer/tools/primitive2dxmldump.hxx>
 #include <tools/color.hxx>
 #include <vcl/filter/PDFiumLibrary.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/vectorgraphicdata.hxx>
-#include <vcl/wmf.hxx>
+#include <vcl/metafile/wmf.hxx>
 
 #include <memory>
 #include <string_view>

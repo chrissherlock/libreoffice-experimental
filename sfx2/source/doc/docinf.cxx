@@ -31,7 +31,7 @@
 #include <comphelper/string.hxx>
 #include <sot/storage.hxx>
 #include <vcl/bitmap.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/dibtools.hxx>
 #include "oleprops.hxx"
 

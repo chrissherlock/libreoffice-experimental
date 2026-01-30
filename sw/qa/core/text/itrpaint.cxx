@@ -13,8 +13,8 @@
 
 #include <o3tl/string_view.hxx>
 #include <svtools/colorcfg.hxx>
-#include <vcl/gdimtf.hxx>
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/BitmapReadAccess.hxx>
 
 #include <docsh.hxx>

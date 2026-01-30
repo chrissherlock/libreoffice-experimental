@@ -23,7 +23,7 @@
 #include <config_options.h>
 #include <tools/urlobj.hxx>
 #include <vcl/graph.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <svx/galmisc.hxx>
 
 #define S_THUMB 80

@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2023-07-19 09:27:50 using:
+ Generated on 2026-02-01 18:49:49 using:
  ./bin/update_pch slideshow slideshow --cutoff=4 --exclude:system --include:module --exclude:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -24,9 +24,12 @@
 #if PCH_LEVEL >= 1
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <cassert>
 #include <chrono>
 #include <cmath>
+#include <compare>
+#include <concepts>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
@@ -35,10 +38,10 @@
 #include <functional>
 #include <initializer_list>
 #include <iomanip>
+#include <iterator>
 #include <limits.h>
 #include <limits>
 #include <map>
-#include <math.h>
 #include <memory>
 #include <mutex>
 #include <new>
@@ -53,6 +56,7 @@
 #include <string_view>
 #include <type_traits>
 #include <typeinfo>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -92,50 +96,36 @@
 #include <sal/saldllapi.h>
 #include <sal/types.h>
 #include <sal/typesizes.h>
-#include <vcl/BinaryDataContainer.hxx>
-#include <vcl/GraphicExternalLink.hxx>
 #include <vcl/IDialogRenderable.hxx>
-#include <vcl/Scanline.hxx>
-#include <vcl/alpha.hxx>
-#include <vcl/animate/Animation.hxx>
-#include <vcl/animate/AnimationFrame.hxx>
 #include <vcl/bitmap.hxx>
 #include <vcl/bitmap/BitmapTypes.hxx>
 #include <vcl/cairo.hxx>
+#include <vcl/canvastools.hxx>
 #include <vcl/checksum.hxx>
 #include <vcl/dllapi.h>
-#include <vcl/fntstyle.hxx>
 #include <vcl/font.hxx>
-#include <vcl/gdimtf.hxx>
-#include <vcl/gfxlink.hxx>
 #include <vcl/gradient.hxx>
 #include <vcl/graph.hxx>
 #include <vcl/kernarray.hxx>
 #include <vcl/mapmod.hxx>
-#include <vcl/metaactiontypes.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/region.hxx>
-#include <vcl/rendercontext/AddFontSubstituteFlags.hxx>
-#include <vcl/rendercontext/AntialiasingFlags.hxx>
-#include <vcl/rendercontext/DrawGridFlags.hxx>
 #include <vcl/rendercontext/DrawImageFlags.hxx>
-#include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/rendercontext/DrawTextFlags.hxx>
-#include <vcl/rendercontext/GetDefaultFontFlags.hxx>
 #include <vcl/rendercontext/ImplMapRes.hxx>
 #include <vcl/rendercontext/InvertFlags.hxx>
 #include <vcl/rendercontext/RasterOp.hxx>
 #include <vcl/rendercontext/SalLayoutFlags.hxx>
 #include <vcl/rendercontext/State.hxx>
-#include <vcl/rendercontext/SystemTextColorFlags.hxx>
-#include <vcl/salnativewidgets.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/task.hxx>
+#include <vcl/text/TextRecordingState.hxx>
 #include <vcl/timer.hxx>
 #include <vcl/vclenum.hxx>
 #include <vcl/vclptr.hxx>
 #include <vcl/vclreferencebase.hxx>
-#include <vcl/vectorgraphicdata.hxx>
+#include <vcl/virdev.hxx>
 #include <vcl/wall.hxx>
 #endif // PCH_LEVEL >= 2
 #if PCH_LEVEL >= 3
@@ -146,18 +136,15 @@
 #include <basegfx/matrix/b2dhommatrixtools.hxx>
 #include <basegfx/numeric/ftools.hxx>
 #include <basegfx/point/b2dpoint.hxx>
-#include <basegfx/point/b2ipoint.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
 #include <basegfx/polygon/b2dpolygontools.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <basegfx/polygon/b2dpolypolygontools.hxx>
-#include <basegfx/range/Range2D.hxx>
 #include <basegfx/range/b2drange.hxx>
+#include <basegfx/range/b2drectangle.hxx>
 #include <basegfx/range/basicrange.hxx>
-#include <basegfx/tuple/Size2D.hxx>
 #include <basegfx/tuple/Tuple2D.hxx>
 #include <basegfx/tuple/Tuple3D.hxx>
-#include <basegfx/tuple/b2i64tuple.hxx>
 #include <basegfx/tuple/b2ituple.hxx>
 #include <basegfx/tuple/b3dtuple.hxx>
 #include <basegfx/utils/canvastools.hxx>
@@ -165,17 +152,12 @@
 #include <basegfx/vector/b2dsize.hxx>
 #include <basegfx/vector/b2dvector.hxx>
 #include <basegfx/vector/b2enums.hxx>
-#include <basegfx/vector/b2isize.hxx>
 #include <canvas/canvastools.hxx>
 #include <com/sun/star/animations/Timing.hpp>
 #include <com/sun/star/animations/TransitionSubType.hpp>
 #include <com/sun/star/animations/TransitionType.hpp>
 #include <com/sun/star/animations/XAnimationNode.hpp>
-#include <com/sun/star/awt/DeviceInfo.hpp>
 #include <com/sun/star/awt/FontSlant.hpp>
-#include <com/sun/star/awt/GradientStyle.hpp>
-#include <com/sun/star/awt/Key.hpp>
-#include <com/sun/star/awt/KeyGroup.hpp>
 #include <com/sun/star/awt/MouseButton.hpp>
 #include <com/sun/star/awt/SystemPointer.hpp>
 #include <com/sun/star/beans/XPropertySet.hpp>
@@ -187,17 +169,11 @@
 #include <com/sun/star/drawing/XShape.hpp>
 #include <com/sun/star/form/FormComponentType.hpp>
 #include <com/sun/star/graphic/XPrimitive2D.hpp>
-#include <com/sun/star/io/XInputStream.hpp>
-#include <com/sun/star/io/XOutputStream.hpp>
-#include <com/sun/star/io/XSeekable.hpp>
-#include <com/sun/star/io/XStream.hpp>
-#include <com/sun/star/io/XTruncate.hpp>
 #include <com/sun/star/lang/DisposedException.hpp>
 #include <com/sun/star/lang/EventObject.hpp>
 #include <com/sun/star/lang/NoSupportException.hpp>
 #include <com/sun/star/lang/XComponent.hpp>
 #include <com/sun/star/lang/XTypeProvider.hpp>
-#include <com/sun/star/media/ZoomLevel.hpp>
 #include <com/sun/star/presentation/ParagraphTarget.hpp>
 #include <com/sun/star/presentation/XSlideShowView.hpp>
 #include <com/sun/star/rendering/XCanvas.hpp>
@@ -224,8 +200,8 @@
 #include <comphelper/compbase.hxx>
 #include <comphelper/comphelperdllapi.h>
 #include <comphelper/diagnose_ex.hxx>
-#include <comphelper/errcode.hxx>
 #include <comphelper/interfacecontainer4.hxx>
+#include <comphelper/scopeguard.hxx>
 #include <comphelper/unoimplbase.hxx>
 #include <cppcanvas/basegfxfactory.hxx>
 #include <cppcanvas/bitmapcanvas.hxx>
@@ -241,10 +217,7 @@
 #include <cppuhelper/implbase_ex.hxx>
 #include <cppuhelper/implbase_ex_post.hxx>
 #include <cppuhelper/implbase_ex_pre.hxx>
-#include <cppuhelper/interfacecontainer.h>
-#include <cppuhelper/queryinterface.hxx>
 #include <cppuhelper/weak.hxx>
-#include <cppuhelper/weakagg.hxx>
 #include <cppuhelper/weakref.hxx>
 #include <drawinglayer/drawinglayerdllapi.h>
 #include <drawinglayer/geometry/viewinformation2d.hxx>
@@ -256,8 +229,11 @@
 #include <editeng/outlobj.hxx>
 #include <editeng/paragraphdata.hxx>
 #include <i18nlangtag/lang.h>
+#include <o3tl/concepts.hxx>
 #include <o3tl/cow_wrapper.hxx>
+#include <o3tl/deleter.hxx>
 #include <o3tl/safeint.hxx>
+#include <o3tl/sorted_vector.hxx>
 #include <o3tl/strong_int.hxx>
 #include <o3tl/typed_flags_set.hxx>
 #include <o3tl/underlyingenumvalue.hxx>
@@ -286,6 +262,7 @@
 #include <svx/sdtaitm.hxx>
 #include <svx/sdtakitm.hxx>
 #include <svx/svddef.hxx>
+#include <svx/svdgeodata.hxx>
 #include <svx/svdglue.hxx>
 #include <svx/svdoattr.hxx>
 #include <svx/svdobj.hxx>
@@ -297,6 +274,7 @@
 #include <svx/svxdllapi.h>
 #include <svx/xdef.hxx>
 #include <svx/xpoly.hxx>
+#include <tools/UniqueID.hxx>
 #include <tools/color.hxx>
 #include <tools/date.hxx>
 #include <tools/datetime.hxx>
@@ -306,14 +284,12 @@
 #include <tools/fract.hxx>
 #include <tools/gen.hxx>
 #include <tools/helpers.hxx>
-#include <tools/lineend.hxx>
 #include <tools/link.hxx>
 #include <tools/long.hxx>
 #include <tools/mapunit.hxx>
 #include <tools/poly.hxx>
 #include <tools/ref.hxx>
 #include <tools/solar.h>
-#include <tools/stream.hxx>
 #include <tools/time.hxx>
 #include <tools/toolsdllapi.h>
 #include <typelib/typeclass.h>
@@ -322,12 +298,9 @@
 #include <uno/any2.h>
 #include <uno/data.h>
 #include <uno/sequence2.h>
-#include <unotools/fontdefs.hxx>
 #include <unotools/resmgr.hxx>
 #include <unotools/syslocale.hxx>
-#include <unotools/tempfile.hxx>
 #include <unotools/unotoolsdllapi.h>
-#include <unotools/weakref.hxx>
 #endif // PCH_LEVEL >= 3
 #if PCH_LEVEL >= 4
 #include <activitiesfactory.hxx>

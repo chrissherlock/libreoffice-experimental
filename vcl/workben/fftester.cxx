@@ -47,7 +47,7 @@
 #include <vcl/filter/PngImageReader.hxx>
 #include <vcl/font/EOTConverter.hxx>
 #include <vcl/svapp.hxx>
-#include <vcl/wmf.hxx>
+#include <vcl/metafile/wmf.hxx>
 #include <filter/TiffReader.hxx>
 #include <filter/TgaReader.hxx>
 #include <filter/PictReader.hxx>
@@ -66,7 +66,7 @@
 #include <osl/process.h>
 #include <rtl/bootstrap.hxx>
 #include <tools/stream.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <fontsubset.hxx>
 
 #include "../source/filter/igif/gifread.hxx"

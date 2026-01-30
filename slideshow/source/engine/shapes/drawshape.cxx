@@ -25,9 +25,9 @@
 
 #include <utility>
 #include <vcl/animate/Animation.hxx>
-#include <vcl/metaact.hxx>
-#include <vcl/metaactiontypes.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <vcl/metafile/MetaActionType.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/graph.hxx>
 
 #include <basegfx/numeric/ftools.hxx>

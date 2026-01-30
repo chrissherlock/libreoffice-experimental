@@ -27,7 +27,7 @@
 #include <vcl/metric.hxx>
 #include <vcl/graphictools.hxx>
 #include <vcl/BitmapTools.hxx>
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/canvastools.hxx>
 #include <vcl/svapp.hxx>
 #include <tools/stream.hxx>
@@ -2622,7 +2622,7 @@ namespace emfio
         one = 1;
         zero = 0;
 
-        // add transformation matrix to be used in vcl's metaact.cxx for
+        // add transformation matrix to be used in vcl's metafile/MetaAction.cxx for
         // rotate and scale operations
         mem.WriteFloat( one ).WriteFloat( zero ).WriteFloat( zero ).WriteFloat( one ).WriteFloat( zero ).WriteFloat( zero );
 

@@ -27,7 +27,7 @@
 #include <editeng/protitem.hxx>
 #include <svx/svdpage.hxx>
 #include <vcl/canvastools.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/ptrstyle.hxx>
 

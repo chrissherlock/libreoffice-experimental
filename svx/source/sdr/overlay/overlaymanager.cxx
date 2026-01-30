@@ -25,7 +25,7 @@
 #include <vcl/outdev.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/window.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <svx/sdr/overlay/overlayobject.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <drawinglayer/processor2d/baseprocessor2d.hxx>

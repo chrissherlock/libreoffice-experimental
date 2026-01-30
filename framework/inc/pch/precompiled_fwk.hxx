@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2023-07-19 09:22:12 using:
+ Generated on 2026-02-01 18:49:43 using:
  ./bin/update_pch framework fwk --cutoff=7 --exclude:system --include:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -24,19 +24,21 @@
 #if PCH_LEVEL >= 1
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <cassert>
 #include <chrono>
 #include <cmath>
+#include <compare>
+#include <concepts>
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
-#include <cstring>
 #include <float.h>
 #include <functional>
 #include <initializer_list>
 #include <iomanip>
 #include <limits.h>
 #include <limits>
-#include <list>
 #include <map>
 #include <math.h>
 #include <memory>
@@ -45,11 +47,11 @@
 #include <numeric>
 #include <optional>
 #include <ostream>
-#include <span>
 #include <stddef.h>
 #include <string.h>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
@@ -57,6 +59,7 @@
 #include <boost/property_tree/ptree_fwd.hpp>
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
+#include <osl/conditn.h>
 #include <osl/conditn.hxx>
 #include <osl/diagnose.h>
 #include <osl/endian.h>
@@ -64,8 +67,8 @@
 #include <osl/interlck.h>
 #include <osl/mutex.hxx>
 #include <osl/process.h>
+#include <osl/security.h>
 #include <osl/security.hxx>
-#include <osl/thread.h>
 #include <osl/time.h>
 #include <rtl/alloc.h>
 #include <rtl/bootstrap.hxx>
@@ -73,7 +76,6 @@
 #include <rtl/locale.h>
 #include <rtl/math.h>
 #include <rtl/ref.hxx>
-#include <rtl/strbuf.h>
 #include <rtl/strbuf.hxx>
 #include <rtl/string.h>
 #include <rtl/string.hxx>
@@ -91,23 +93,13 @@
 #include <sal/saldllapi.h>
 #include <sal/types.h>
 #include <sal/typesizes.h>
-#include <vcl/Scanline.hxx>
-#include <vcl/WindowPosSize.hxx>
-#include <vcl/alpha.hxx>
-#include <vcl/bitmap.hxx>
-#include <vcl/bitmap/BitmapTypes.hxx>
-#include <vcl/checksum.hxx>
 #include <vcl/commandinfoprovider.hxx>
 #include <vcl/dllapi.h>
-#include <vcl/fntstyle.hxx>
 #include <vcl/font.hxx>
-#include <vcl/gradient.hxx>
 #include <vcl/graph.hxx>
-#include <vcl/keycod.hxx>
+#include <vcl/image.hxx>
 #include <vcl/keycodes.hxx>
 #include <vcl/mapmod.hxx>
-#include <vcl/region.hxx>
-#include <vcl/rendercontext/RasterOp.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/task.hxx>
@@ -116,19 +108,16 @@
 #include <vcl/vclenum.hxx>
 #include <vcl/vclptr.hxx>
 #include <vcl/vclreferencebase.hxx>
+#include <vcl/weld/weld.hxx>
 #include <vcl/window.hxx>
-#include <vcl/windowstate.hxx>
 #endif // PCH_LEVEL >= 2
 #if PCH_LEVEL >= 3
 #include <basegfx/basegfxdllapi.h>
 #include <basegfx/color/bcolor.hxx>
-#include <basegfx/matrix/b2dhommatrix.hxx>
-#include <basegfx/matrix/hommatrixtemplate.hxx>
 #include <basegfx/numeric/ftools.hxx>
 #include <basegfx/point/b2dpoint.hxx>
 #include <basegfx/point/b2ipoint.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
-#include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <basegfx/range/Range2D.hxx>
 #include <basegfx/range/b2drange.hxx>
 #include <basegfx/range/basicrange.hxx>
@@ -136,17 +125,13 @@
 #include <basegfx/tuple/Tuple2D.hxx>
 #include <basegfx/tuple/Tuple3D.hxx>
 #include <basegfx/tuple/b2dtuple.hxx>
-#include <basegfx/tuple/b2i64tuple.hxx>
 #include <basegfx/tuple/b2ituple.hxx>
 #include <basegfx/tuple/b3dtuple.hxx>
 #include <basegfx/utils/common.hxx>
-#include <basegfx/vector/b2dsize.hxx>
+#include <basegfx/utils/systemdependentdata.hxx>
 #include <basegfx/vector/b2dvector.hxx>
-#include <basegfx/vector/b2enums.hxx>
-#include <basegfx/vector/b2isize.hxx>
 #include <basegfx/vector/b2ivector.hxx>
 #include <classes/fwkresid.hxx>
-#include <com/sun/star/awt/GradientStyle.hpp>
 #include <com/sun/star/awt/Key.hpp>
 #include <com/sun/star/awt/KeyEvent.hpp>
 #include <com/sun/star/awt/KeyGroup.hpp>
@@ -159,7 +144,6 @@
 #include <com/sun/star/beans/XPropertySet.hpp>
 #include <com/sun/star/beans/XPropertySetOption.hpp>
 #include <com/sun/star/configuration/theDefaultProvider.hpp>
-#include <com/sun/star/container/XIndexAccess.hpp>
 #include <com/sun/star/container/XIndexContainer.hpp>
 #include <com/sun/star/container/XNameAccess.hpp>
 #include <com/sun/star/embed/ElementModes.hpp>
@@ -178,8 +162,6 @@
 #include <com/sun/star/frame/XStatusListener.hpp>
 #include <com/sun/star/frame/XUIControllerFactory.hpp>
 #include <com/sun/star/io/IOException.hpp>
-#include <com/sun/star/io/XInputStream.hpp>
-#include <com/sun/star/io/XOutputStream.hpp>
 #include <com/sun/star/lang/DisposedException.hpp>
 #include <com/sun/star/lang/EventObject.hpp>
 #include <com/sun/star/lang/IllegalArgumentException.hpp>
@@ -189,7 +171,6 @@
 #include <com/sun/star/lang/XInitialization.hpp>
 #include <com/sun/star/lang/XServiceInfo.hpp>
 #include <com/sun/star/lang/XTypeProvider.hpp>
-#include <com/sun/star/task/XInteractionRequest.hpp>
 #include <com/sun/star/ui/ItemStyle.hpp>
 #include <com/sun/star/ui/UIElementType.hpp>
 #include <com/sun/star/ui/XUIConfigurationListener.hpp>
@@ -213,7 +194,6 @@
 #include <com/sun/star/uno/XWeak.hpp>
 #include <com/sun/star/uno/genfunc.h>
 #include <com/sun/star/uno/genfunc.hxx>
-#include <com/sun/star/util/Date.hpp>
 #include <com/sun/star/util/URL.hpp>
 #include <com/sun/star/util/URLTransformer.hpp>
 #include <com/sun/star/util/XURLTransformer.hpp>
@@ -223,8 +203,8 @@
 #include <comphelper/compbase.hxx>
 #include <comphelper/comphelperdllapi.h>
 #include <comphelper/diagnose_ex.hxx>
-#include <comphelper/errcode.hxx>
 #include <comphelper/interfacecontainer2.hxx>
+#include <comphelper/interfacecontainer4.hxx>
 #include <comphelper/lok.hxx>
 #include <comphelper/multicontainer2.hxx>
 #include <comphelper/processfactory.hxx>
@@ -247,7 +227,10 @@
 #include <i18nlangtag/i18nlangtagdllapi.h>
 #include <i18nlangtag/lang.h>
 #include <i18nlangtag/languagetag.hxx>
+#include <o3tl/concepts.hxx>
 #include <o3tl/cow_wrapper.hxx>
+#include <o3tl/deleter.hxx>
+#include <o3tl/intcmp.hxx>
 #include <o3tl/safeint.hxx>
 #include <o3tl/string_view.hxx>
 #include <o3tl/strong_int.hxx>
@@ -255,7 +238,6 @@
 #include <o3tl/underlyingenumvalue.hxx>
 #include <o3tl/unit_conversion.hxx>
 #include <officecfg/Office/Common.hxx>
-#include <salhelper/salhelperdllapi.h>
 #include <salhelper/thread.hxx>
 #include <svl/svldllapi.h>
 #include <svtools/popupmenucontrollerbase.hxx>
@@ -264,18 +246,13 @@
 #include <toolkit/awt/vclxmenu.hxx>
 #include <toolkit/helper/vclunohelper.hxx>
 #include <tools/color.hxx>
-#include <tools/date.hxx>
 #include <tools/degree.hxx>
 #include <tools/fontenum.hxx>
 #include <tools/gen.hxx>
-#include <tools/lineend.hxx>
 #include <tools/link.hxx>
 #include <tools/long.hxx>
-#include <tools/mapunit.hxx>
-#include <tools/poly.hxx>
 #include <tools/ref.hxx>
 #include <tools/solar.h>
-#include <tools/stream.hxx>
 #include <tools/toolsdllapi.h>
 #include <tools/urlobj.hxx>
 #include <typelib/typeclass.h>
@@ -285,7 +262,6 @@
 #include <uno/any2.h>
 #include <uno/data.h>
 #include <uno/sequence2.h>
-#include <unotools/configmgr.hxx>
 #include <unotools/options.hxx>
 #include <unotools/unotoolsdllapi.h>
 #endif // PCH_LEVEL >= 3

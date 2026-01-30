@@ -28,7 +28,7 @@
 #include <vcl/dibtools.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/lineinfo.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <filter/MetReader.hxx>
 #include <basegfx/numeric/ftools.hxx>
 

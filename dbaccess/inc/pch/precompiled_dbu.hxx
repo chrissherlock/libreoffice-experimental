@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2023-07-19 09:21:53 using:
+ Generated on 2026-02-01 14:42:57 using:
  ./bin/update_pch dbaccess dbu --cutoff=12 --exclude:system --exclude:module --exclude:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -40,6 +40,7 @@
 #include <string_view>
 #include <type_traits>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 #include <boost/property_tree/ptree_fwd.hpp>
@@ -49,7 +50,6 @@
 #include <osl/endian.h>
 #include <osl/file.hxx>
 #include <osl/interlck.h>
-#include <osl/mutex.h>
 #include <osl/mutex.hxx>
 #include <osl/process.h>
 #include <osl/thread.hxx>
@@ -74,10 +74,10 @@
 #include <sal/types.h>
 #include <vcl/IDialogRenderable.hxx>
 #include <vcl/InterimItemWindow.hxx>
-#include <vcl/Scanline.hxx>
-#include <vcl/alpha.hxx>
 #include <vcl/bitmap.hxx>
+#include <vcl/bitmap/BitmapTypes.hxx>
 #include <vcl/cairo.hxx>
+#include <vcl/checksum.hxx>
 #include <vcl/ctrl.hxx>
 #include <vcl/dllapi.h>
 #include <vcl/event.hxx>
@@ -85,27 +85,18 @@
 #include <vcl/gradient.hxx>
 #include <vcl/idle.hxx>
 #include <vcl/kernarray.hxx>
-#include <vcl/keycodes.hxx>
 #include <vcl/mapmod.hxx>
-#include <vcl/metaactiontypes.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/region.hxx>
-#include <vcl/rendercontext/AddFontSubstituteFlags.hxx>
-#include <vcl/rendercontext/AntialiasingFlags.hxx>
-#include <vcl/rendercontext/DrawGridFlags.hxx>
 #include <vcl/rendercontext/DrawImageFlags.hxx>
-#include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/rendercontext/DrawTextFlags.hxx>
-#include <vcl/rendercontext/GetDefaultFontFlags.hxx>
 #include <vcl/rendercontext/ImplMapRes.hxx>
 #include <vcl/rendercontext/InvertFlags.hxx>
-#include <vcl/rendercontext/RasterOp.hxx>
 #include <vcl/rendercontext/SalLayoutFlags.hxx>
 #include <vcl/rendercontext/State.hxx>
-#include <vcl/rendercontext/SystemTextColorFlags.hxx>
-#include <vcl/salnativewidgets.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/svapp.hxx>
+#include <vcl/text/TextRecordingState.hxx>
 #include <vcl/timer.hxx>
 #include <vcl/transfer.hxx>
 #include <vcl/uitest/factory.hxx>
@@ -113,6 +104,12 @@
 #include <vcl/vclptr.hxx>
 #include <vcl/vclreferencebase.hxx>
 #include <vcl/wall.hxx>
+#include <vcl/weld/Builder.hxx>
+#include <vcl/weld/ComboBox.hxx>
+#include <vcl/weld/DialogController.hxx>
+#include <vcl/weld/Entry.hxx>
+#include <vcl/weld/ItemView.hxx>
+#include <vcl/weld/TreeView.hxx>
 #include <vcl/weld/weld.hxx>
 #include <vcl/window.hxx>
 #include <vcl/wintypes.hxx>
@@ -120,10 +117,9 @@
 #if PCH_LEVEL >= 3
 #include <basegfx/color/bcolor.hxx>
 #include <basegfx/numeric/ftools.hxx>
-#include <basegfx/point/b2dpoint.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
+#include <basegfx/range/b2drectangle.hxx>
 #include <basegfx/vector/b2enums.hxx>
-#include <com/sun/star/awt/DeviceInfo.hpp>
 #include <com/sun/star/beans/NamedValue.hpp>
 #include <com/sun/star/beans/PropertyValue.hpp>
 #include <com/sun/star/beans/XPropertySet.hpp>
@@ -131,7 +127,6 @@
 #include <com/sun/star/container/XNameAccess.hpp>
 #include <com/sun/star/datatransfer/DataFlavor.hpp>
 #include <com/sun/star/datatransfer/XTransferable2.hpp>
-#include <com/sun/star/datatransfer/clipboard/XClipboard.hpp>
 #include <com/sun/star/datatransfer/clipboard/XClipboardOwner.hpp>
 #include <com/sun/star/datatransfer/dnd/DNDConstants.hpp>
 #include <com/sun/star/datatransfer/dnd/DropTargetDragEvent.hpp>
@@ -144,13 +139,11 @@
 #include <com/sun/star/frame/FrameAction.hpp>
 #include <com/sun/star/frame/XController2.hpp>
 #include <com/sun/star/frame/XDispatch.hpp>
-#include <com/sun/star/frame/XFrame.hpp>
 #include <com/sun/star/frame/XLayoutManager.hpp>
 #include <com/sun/star/frame/XStatusListener.hpp>
 #include <com/sun/star/frame/XTerminateListener.hpp>
 #include <com/sun/star/frame/XTitle.hpp>
 #include <com/sun/star/frame/XTitleChangeBroadcaster.hpp>
-#include <com/sun/star/lang/EventObject.hpp>
 #include <com/sun/star/lang/Locale.hpp>
 #include <com/sun/star/lang/XInitialization.hpp>
 #include <com/sun/star/lang/XServiceInfo.hpp>
@@ -179,6 +172,7 @@
 #include <comphelper/comphelperdllapi.h>
 #include <comphelper/diagnose_ex.hxx>
 #include <comphelper/namedvaluecollection.hxx>
+#include <comphelper/scopeguard.hxx>
 #include <comphelper/sequence.hxx>
 #include <comphelper/types.hxx>
 #include <comphelper/uno3.hxx>
@@ -193,6 +187,7 @@
 #include <cppuhelper/weakref.hxx>
 #include <o3tl/safeint.hxx>
 #include <o3tl/typed_flags_set.hxx>
+#include <o3tl/unit_conversion.hxx>
 #include <salhelper/simplereferenceobject.hxx>
 #include <sfx2/dllapi.h>
 #include <sot/exchange.hxx>
@@ -209,6 +204,7 @@
 #include <toolkit/helper/vclunohelper.hxx>
 #include <tools/color.hxx>
 #include <tools/degree.hxx>
+#include <tools/fldunit.hxx>
 #include <tools/gen.hxx>
 #include <tools/globname.hxx>
 #include <tools/lineend.hxx>
@@ -222,7 +218,6 @@
 #include <typelib/typedescription.h>
 #include <uno/data.h>
 #include <unotools/eventlisteneradapter.hxx>
-#include <unotools/fontdefs.hxx>
 #include <unotools/resmgr.hxx>
 #include <unotools/sharedunocomponent.hxx>
 #include <unotools/unotoolsdllapi.h>

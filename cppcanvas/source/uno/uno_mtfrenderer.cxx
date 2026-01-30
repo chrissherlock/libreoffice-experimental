@@ -14,7 +14,7 @@
 #include <com/sun/star/uno/XComponentContext.hpp>
 #include <com/sun/star/beans/XFastPropertySet.hpp>
 #include <comphelper/compbase.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 
 using namespace ::com::sun::star;
 

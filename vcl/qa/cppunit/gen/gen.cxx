@@ -14,7 +14,7 @@
 #include <sfx2/sfxbasemodel.hxx>
 #include <tools/mapunit.hxx>
 #include <vcl/BitmapReadAccess.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/virdev.hxx>
 

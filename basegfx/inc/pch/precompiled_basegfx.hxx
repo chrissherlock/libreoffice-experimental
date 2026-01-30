@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-03-08 13:11:34 using:
+ Generated on 2026-02-01 14:42:49 using:
  ./bin/update_pch basegfx basegfx --cutoff=3 --exclude:system --exclude:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -30,10 +30,15 @@
 #include <numeric>
 #include <ostream>
 #include <string_view>
+#include <type_traits>
+#include <utility>
 #include <vector>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/ptree_fwd.hpp>
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
 #include <osl/diagnose.h>
+#include <osl/endian.h>
 #include <osl/interlck.h>
 #include <rtl/character.hxx>
 #include <rtl/math.hxx>
@@ -43,10 +48,11 @@
 #include <rtl/stringutils.hxx>
 #include <rtl/ustring.hxx>
 #include <sal/log.hxx>
+#include <sal/mathconf.h>
 #include <sal/types.h>
 #endif // PCH_LEVEL >= 2
 #if PCH_LEVEL >= 3
-#include <o3tl/cow_wrapper.hxx>
+#include <o3tl/safeint.hxx>
 #endif // PCH_LEVEL >= 3
 #if PCH_LEVEL >= 4
 #include <basegfx/basegfxdllapi.h>
@@ -69,12 +75,13 @@
 #include <basegfx/range/b2drange.hxx>
 #include <basegfx/range/b2irange.hxx>
 #include <basegfx/range/b3drange.hxx>
-#include <basegfx/tuple/b2dtuple.hxx>
+#include <basegfx/tuple/Tuple2D.hxx>
+#include <basegfx/tuple/Tuple3D.hxx>
 #include <basegfx/tuple/b2ituple.hxx>
 #include <basegfx/tuple/b3dtuple.hxx>
 #include <basegfx/utils/systemdependentdata.hxx>
 #include <basegfx/vector/b2dvector.hxx>
-#include <basegfx/vector/b3dvector.hxx>
+#include <basegfx/vector/b2enums.hxx>
 #endif // PCH_LEVEL >= 4
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

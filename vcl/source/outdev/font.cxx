@@ -26,7 +26,7 @@
 #include <unotools/fontdefs.hxx>
 
 #include <vcl/fontcapabilities.hxx>
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/rendercontext/GetDefaultFontFlags.hxx>
 #include <vcl/settings.hxx>

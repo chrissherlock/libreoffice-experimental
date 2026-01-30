@@ -71,7 +71,7 @@
 #include <docsh.hxx>
 #include <strings.hrc>
 #include <o3tl/deleter.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/gradient.hxx>
 #include <i18nlangtag/mslangid.hxx>

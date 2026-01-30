@@ -60,7 +60,7 @@
 #include <unotools/saveopt.hxx>
 #include <unotools/securityoptions.hxx>
 #include <svtools/DocumentToGraphicRenderer.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/weld/MessageDialog.hxx>
 #include <vcl/weld/weld.hxx>

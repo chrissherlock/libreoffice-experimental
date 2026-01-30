@@ -18,8 +18,9 @@
  */
 
 #include <config_features.h>
-#include <vcl/gdimtf.hxx>
 #include <tools/mapunit.hxx>
+
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/window.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/cursor.hxx>

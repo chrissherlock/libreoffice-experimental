@@ -21,7 +21,7 @@
 #include <tools/poly.hxx>
 #include <tools/helpers.hxx>
 
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/rendercontext/DrawGridFlags.hxx>
 #include <vcl/virdev.hxx>
 

@@ -35,7 +35,7 @@
 
 #include <comphelper/errcode.hxx>
 #include <editeng/flditem.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/svapp.hxx>
 #include <svx/unoapi.hxx>
 #include <xmloff/xmlexp.hxx>
@@ -58,6 +58,8 @@ namespace com::sun::star::frame { class XController; }
 inline constexpr OUString sPlaceholderTag = u"<[:isPlaceholder:]>"_ustr;
 // This tag is used for exporting a slide background made of tiled bitmaps
 inline constexpr OString sTiledBackgroundTag = "SLIDE_BACKGROUND"_ostr;
+
+class GDIMetaFile;
 
 class SVGExport : public SvXMLExport
 {

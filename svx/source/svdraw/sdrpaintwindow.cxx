@@ -22,7 +22,7 @@
 #include <svx/sdrpaintwindow.hxx>
 #include <sdr/overlay/overlaymanagerbuffered.hxx>
 #include <svx/svdpntv.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/vclevent.hxx>

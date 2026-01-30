@@ -29,8 +29,8 @@
 #include <vcl/filter/SvmReader.hxx>
 #include <vcl/filter/SvmWriter.hxx>
 #include <vcl/outdev.hxx>
-#include <vcl/metaact.hxx>
-#include <vcl/metaactiontypes.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <vcl/metafile/MetaActionType.hxx>
 #include <vcl/graphictools.hxx>
 #include <comphelper/configuration.hxx>
 #include <unotools/fontdefs.hxx>

@@ -22,7 +22,7 @@
 #include <tools/poly.hxx>
 
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/virdev.hxx>
 
 #include <ClippingController.hxx>

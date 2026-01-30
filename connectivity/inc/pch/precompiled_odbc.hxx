@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-03-08 13:12:40 using:
+ Generated on 2026-02-01 14:42:47 using:
  ./bin/update_pch connectivity odbc --cutoff=2 --exclude:system --exclude:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -22,17 +22,28 @@
 
 #include <sal/config.h>
 #if PCH_LEVEL >= 1
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <memory>
 #include <string.h>
+#include <string>
+#include <string_view>
+#include <type_traits>
+#include <utility>
 #include <vector>
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
 #include <osl/diagnose.h>
 #include <osl/endian.h>
+#include <osl/module.h>
+#include <rtl/character.hxx>
+#include <rtl/math.h>
 #include <rtl/ref.hxx>
-#include <rtl/strbuf.hxx>
 #include <rtl/tencinfo.h>
 #include <rtl/textenc.h>
 #include <rtl/ustrbuf.hxx>
+#include <rtl/ustring.h>
 #include <rtl/ustring.hxx>
 #include <sal/log.hxx>
 #include <sal/types.h>
@@ -49,22 +60,18 @@
 #include <com/sun/star/sdbc/XResultSetMetaDataSupplier.hpp>
 #include <com/sun/star/sdbc/XRow.hpp>
 #include <com/sun/star/sdbc/XWarningsSupplier.hpp>
-#include <com/sun/star/uno/Any.hxx>
-#include <com/sun/star/uno/Sequence.hxx>
-#include <com/sun/star/util/Date.hpp>
-#include <com/sun/star/util/DateTime.hpp>
-#include <com/sun/star/util/Time.hpp>
 #include <com/sun/star/util/XCancellable.hpp>
+#include <comphelper/compbase.hxx>
 #include <comphelper/proparrhlp.hxx>
 #include <comphelper/property.hxx>
-#include <comphelper/propertycontainer.hxx>
+#include <comphelper/propertycontainer2.hxx>
 #include <comphelper/sequence.hxx>
 #include <comphelper/types.hxx>
-#include <cppuhelper/basemutex.hxx>
-#include <cppuhelper/compbase.hxx>
 #include <cppuhelper/supportsservice.hxx>
 #include <cppuhelper/typeprovider.hxx>
+#include <o3tl/intcmp.hxx>
 #include <o3tl/safeint.hxx>
+#include <o3tl/string_view.hxx>
 #include <odbc/OConnection.hxx>
 #include <odbc/ODatabaseMetaData.hxx>
 #include <odbc/ODatabaseMetaDataResultSet.hxx>
@@ -77,6 +84,7 @@
 #include <odbc/OTools.hxx>
 #include <resource/sharedresources.hxx>
 #include <salhelper/simplereferenceobject.hxx>
+#include <unotools/resmgr.hxx>
 #endif // PCH_LEVEL >= 3
 #if PCH_LEVEL >= 4
 #include <FDatabaseMetaDataResultSet.hxx>

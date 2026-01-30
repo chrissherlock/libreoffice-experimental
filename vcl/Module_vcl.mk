@@ -50,6 +50,7 @@ $(eval $(call gb_Module_add_targets,vcl,\
                 Executable_icontest \
                 Executable_visualbackendtest \
                 Executable_mtfdemo \
+                Executable_showmetafile \
             ) \
     )) \
 ))

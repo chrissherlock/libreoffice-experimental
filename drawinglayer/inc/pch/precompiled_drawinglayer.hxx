@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-12-23 08:55:28 using:
+ Generated on 2026-02-01 18:49:40 using:
  ./bin/update_pch drawinglayer drawinglayer --cutoff=4 --exclude:system --exclude:module --exclude:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <concepts>
 #include <cstddef>
 #include <cstdlib>
 #include <deque>
@@ -42,11 +43,12 @@
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
 #include <osl/diagnose.h>
+#include <osl/endian.h>
 #include <osl/interlck.h>
-#include <osl/mutex.hxx>
-#include <rtl/instance.hxx>
+#include <rtl/math.h>
 #include <rtl/math.hxx>
 #include <rtl/ref.hxx>
+#include <rtl/strbuf.h>
 #include <rtl/string.h>
 #include <rtl/string.hxx>
 #include <rtl/stringconcat.hxx>
@@ -58,13 +60,15 @@
 #include <sal/detail/log.h>
 #include <sal/log.hxx>
 #include <sal/types.h>
+#include <vcl/alpha.hxx>
 #include <vcl/bitmap.hxx>
 #include <vcl/canvastools.hxx>
 #include <vcl/dllapi.h>
+#include <vcl/font.hxx>
 #include <vcl/graph.hxx>
-#include <vcl/outdev.hxx>
+#include <vcl/mapmod.hxx>
+#include <vcl/skia/SkiaHelper.hxx>
 #include <vcl/svapp.hxx>
-#include <vcl/vclenum.hxx>
 #include <vcl/virdev.hxx>
 #endif // PCH_LEVEL >= 2
 #if PCH_LEVEL >= 3
@@ -75,7 +79,6 @@
 #include <basegfx/matrix/b3dhommatrix.hxx>
 #include <basegfx/numeric/ftools.hxx>
 #include <basegfx/point/b2dpoint.hxx>
-#include <basegfx/point/b2ipoint.hxx>
 #include <basegfx/point/b3dpoint.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
 #include <basegfx/polygon/b2dpolygonclipper.hxx>
@@ -87,47 +90,48 @@
 #include <basegfx/polygon/b3dpolypolygon.hxx>
 #include <basegfx/polygon/b3dpolypolygontools.hxx>
 #include <basegfx/range/b2drange.hxx>
+#include <basegfx/range/b2drectangle.hxx>
 #include <basegfx/range/b3drange.hxx>
 #include <basegfx/range/basicrange.hxx>
 #include <basegfx/tuple/b2dtuple.hxx>
 #include <basegfx/tuple/b3dtuple.hxx>
+#include <basegfx/utils/bgradient.hxx>
 #include <basegfx/vector/b2dvector.hxx>
-#include <basegfx/vector/b2enums.hxx>
 #include <basegfx/vector/b2ivector.hxx>
 #include <basegfx/vector/b3dvector.hxx>
+#include <com/sun/star/awt/GradientStyle.hpp>
 #include <com/sun/star/beans/XPropertySet.hpp>
-#include <com/sun/star/drawing/LineCap.hpp>
 #include <com/sun/star/drawing/NormalsKind.hpp>
 #include <com/sun/star/drawing/TextureKind2.hpp>
 #include <com/sun/star/drawing/TextureMode.hpp>
 #include <com/sun/star/drawing/TextureProjectionMode.hpp>
 #include <com/sun/star/graphic/XPrimitive3D.hpp>
-#include <com/sun/star/uno/Sequence.h>
-#include <comphelper/comphelperdllapi.h>
+#include <comphelper/compbase.hxx>
+#include <comphelper/diagnose_ex.hxx>
+#include <comphelper/lok.hxx>
 #include <comphelper/processfactory.hxx>
-#include <comphelper/sequence.hxx>
-#include <cppuhelper/basemutex.hxx>
-#include <cppuhelper/compbase.hxx>
 #include <i18nlangtag/lang.h>
 #include <i18nlangtag/languagetag.hxx>
 #include <o3tl/cow_wrapper.hxx>
+#include <o3tl/environment.hxx>
+#include <o3tl/intcmp.hxx>
+#include <o3tl/safeint.hxx>
 #include <o3tl/strong_int.hxx>
 #include <o3tl/typed_flags_set.hxx>
 #include <o3tl/unit_conversion.hxx>
 #include <salhelper/simplereferenceobject.hxx>
-#include <svtools/optionsdrawinglayer.hxx>
-#include <toolkit/helper/vclunohelper.hxx>
 #include <tools/color.hxx>
 #include <tools/degree.hxx>
 #include <tools/fontenum.hxx>
 #include <tools/gen.hxx>
 #include <tools/long.hxx>
+#include <tools/mapunit.hxx>
+#include <tools/poly.hxx>
 #include <tools/stream.hxx>
 #include <tools/toolsdllapi.h>
 #endif // PCH_LEVEL >= 3
 #if PCH_LEVEL >= 4
 #include <drawinglayer/attribute/fillgradientattribute.hxx>
-#include <drawinglayer/attribute/fillgraphicattribute.hxx>
 #include <drawinglayer/attribute/fontattribute.hxx>
 #include <drawinglayer/attribute/lineattribute.hxx>
 #include <drawinglayer/attribute/materialattribute3d.hxx>
@@ -139,20 +143,22 @@
 #include <drawinglayer/attribute/sdrlinestartendattribute.hxx>
 #include <drawinglayer/attribute/sdrobjectattribute3d.hxx>
 #include <drawinglayer/attribute/sdrshadowattribute.hxx>
+#include <drawinglayer/converters.hxx>
 #include <drawinglayer/drawinglayerdllapi.h>
 #include <drawinglayer/geometry/viewinformation2d.hxx>
 #include <drawinglayer/geometry/viewinformation3d.hxx>
 #include <drawinglayer/primitive2d/BufferedDecompositionPrimitive2D.hxx>
+#include <drawinglayer/primitive2d/CommonTypes.hxx>
 #include <drawinglayer/primitive2d/PolyPolygonColorPrimitive2D.hxx>
 #include <drawinglayer/primitive2d/PolyPolygonGradientPrimitive2D.hxx>
 #include <drawinglayer/primitive2d/PolyPolygonGraphicPrimitive2D.hxx>
 #include <drawinglayer/primitive2d/PolyPolygonHairlinePrimitive2D.hxx>
+#include <drawinglayer/primitive2d/PolyPolygonRGBAPrimitive2D.hxx>
 #include <drawinglayer/primitive2d/PolyPolygonStrokePrimitive2D.hxx>
 #include <drawinglayer/primitive2d/PolygonHairlinePrimitive2D.hxx>
 #include <drawinglayer/primitive2d/PolygonMarkerPrimitive2D.hxx>
 #include <drawinglayer/primitive2d/PolygonStrokeArrowPrimitive2D.hxx>
-#include <drawinglayer/primitive2d/PolygonWavePrimitive2D.hxx>
-#include <drawinglayer/primitive2d/Primitive2DContainer.hxx>
+#include <drawinglayer/primitive2d/PolygonStrokePrimitive2D.hxx>
 #include <drawinglayer/primitive2d/Primitive2DVisitor.hxx>
 #include <drawinglayer/primitive2d/baseprimitive2d.hxx>
 #include <drawinglayer/primitive2d/bitmapprimitive2d.hxx>
@@ -161,6 +167,7 @@
 #include <drawinglayer/primitive2d/fillgradientprimitive2d.hxx>
 #include <drawinglayer/primitive2d/fillgraphicprimitive2d.hxx>
 #include <drawinglayer/primitive2d/fillhatchprimitive2d.hxx>
+#include <drawinglayer/primitive2d/graphicprimitivehelper2d.hxx>
 #include <drawinglayer/primitive2d/groupprimitive2d.hxx>
 #include <drawinglayer/primitive2d/hiddengeometryprimitive2d.hxx>
 #include <drawinglayer/primitive2d/markerarrayprimitive2d.hxx>
@@ -175,6 +182,7 @@
 #include <drawinglayer/primitive2d/shadowprimitive2d.hxx>
 #include <drawinglayer/primitive2d/svggradientprimitive2d.hxx>
 #include <drawinglayer/primitive2d/textdecoratedprimitive2d.hxx>
+#include <drawinglayer/primitive2d/texthierarchyprimitive2d.hxx>
 #include <drawinglayer/primitive2d/textlayoutdevice.hxx>
 #include <drawinglayer/primitive2d/textprimitive2d.hxx>
 #include <drawinglayer/primitive2d/transformprimitive2d.hxx>

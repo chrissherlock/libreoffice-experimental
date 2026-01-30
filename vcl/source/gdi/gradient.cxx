@@ -20,7 +20,7 @@
 #include <tools/gen.hxx>
 
 #include <vcl/gradient.hxx>
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/rendercontext/State.hxx>
 #include <cmath>
 

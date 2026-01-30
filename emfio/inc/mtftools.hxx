@@ -24,8 +24,8 @@
 #include <vcl/font.hxx>
 #include <vcl/bitmap.hxx>
 #include <vcl/lineinfo.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/rendercontext/State.hxx>
-#include <vcl/metaact.hxx>
 #include <rtl/ref.hxx>
 
 #include <com/sun/star/drawing/LineCap.hpp>

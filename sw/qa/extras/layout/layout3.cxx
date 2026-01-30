@@ -9,7 +9,7 @@
 
 #include <swmodeltestbase.hxx>
 #include <com/sun/star/linguistic2/XHyphenator.hpp>
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <editeng/unolingu.hxx>
 
 #include <wrtsh.hxx>

@@ -20,7 +20,7 @@
 #pragma once
 
 #include <vcl/dllapi.h>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 
 #define GDI_PIXEL_ACTION                1
 #define GDI_POINT_ACTION                2

@@ -40,8 +40,8 @@
 #include <unotools/saveopt.hxx>
 #include <vcl/filter/SvmWriter.hxx>
 #include <vcl/gfxlink.hxx>
-#include <vcl/metaact.hxx>
-#include <vcl/metaactiontypes.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <vcl/metafile/MetaActionType.hxx>
 #include <tools/debug.hxx>
 #include <tools/zcodec.hxx>
 #include <comphelper/diagnose_ex.hxx>

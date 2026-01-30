@@ -26,7 +26,7 @@
 
 #include <vcl/alpha.hxx>
 #include <vcl/canvastools.hxx>
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/virdev.hxx>
 
 #include <ClippingController.hxx>

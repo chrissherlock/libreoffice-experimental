@@ -19,7 +19,7 @@
 
 #include <officecfg/Office/Common.hxx>
 
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/print.hxx>
 #include <sal/macros.h>
 #include <osl/diagnose.h>

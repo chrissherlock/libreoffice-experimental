@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-04-08 13:55:35 using:
+ Generated on 2026-02-01 18:49:49 using:
  ./bin/update_pch configmgr configmgr --cutoff=6 --exclude:system --include:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -22,14 +22,18 @@
 
 #include <sal/config.h>
 #if PCH_LEVEL >= 1
+#include <algorithm>
 #include <cassert>
 #include <chrono>
+#include <concepts>
 #include <cstddef>
+#include <cstdint>
 #include <limits>
+#include <memory>
 #include <new>
 #include <ostream>
-#include <set>
 #include <string.h>
+#include <string>
 #include <string_view>
 #include <type_traits>
 #include <utility>
@@ -50,18 +54,18 @@
 #include <rtl/ref.hxx>
 #include <rtl/strbuf.hxx>
 #include <rtl/string.h>
+#include <rtl/stringutils.hxx>
 #include <rtl/textcvt.h>
 #include <rtl/textenc.h>
 #include <rtl/ustrbuf.hxx>
 #include <rtl/ustring.h>
 #include <rtl/ustring.hxx>
-#include <rtl/uuid.h>
-#include <sal/detail/log.h>
 #include <sal/log.hxx>
 #include <sal/saldllapi.h>
 #include <sal/types.h>
 #endif // PCH_LEVEL >= 2
 #if PCH_LEVEL >= 3
+#include <com/sun/star/lang/XServiceInfo.hpp>
 #include <com/sun/star/uno/Any.hxx>
 #include <com/sun/star/uno/Reference.hxx>
 #include <com/sun/star/uno/RuntimeException.hpp>
@@ -69,10 +73,14 @@
 #include <com/sun/star/uno/Type.h>
 #include <com/sun/star/uno/TypeClass.hdl>
 #include <com/sun/star/uno/XInterface.hpp>
+#include <comphelper/comphelperdllapi.h>
 #include <cppu/cppudllapi.h>
 #include <cppu/unotype.hxx>
 #include <cppuhelper/cppuhelperdllapi.h>
+#include <cppuhelper/supportsservice.hxx>
 #include <cppuhelper/weak.hxx>
+#include <o3tl/intcmp.hxx>
+#include <o3tl/safeint.hxx>
 #include <salhelper/thread.hxx>
 #include <typelib/typeclass.h>
 #include <typelib/typedescription.h>

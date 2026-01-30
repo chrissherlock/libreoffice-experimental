@@ -27,9 +27,9 @@
 #include <vcl/rendercontext/DrawTextFlags.hxx>
 #include <vcl/TypeSerializer.hxx>
 #include <vcl/dibtools.hxx>
-#include <vcl/gdimtf.hxx>
-#include <vcl/metaact.hxx>
-#include <vcl/metaactiontypes.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <vcl/metafile/MetaActionType.hxx>
 
 #include "SvmConverter.hxx"
 

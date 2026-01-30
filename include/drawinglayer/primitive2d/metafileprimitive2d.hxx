@@ -23,8 +23,8 @@
 
 #include <drawinglayer/primitive2d/BufferedDecompositionPrimitive2D.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
-#include <vcl/gdimtf.hxx>
-#include <vcl/gdimetafiletools.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
+#include <vcl/metafile/metafiletools.hxx>
 
 
 // MetafilePrimitive2D class

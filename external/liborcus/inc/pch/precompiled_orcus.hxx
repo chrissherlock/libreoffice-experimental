@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2023-01-24 17:20:59 using:
+ Generated on 2026-02-01 14:42:54 using:
  ./bin/update_pch external/liborcus orcus --cutoff=1 --exclude:system --include:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -31,6 +31,7 @@
 #include <deque>
 #include <fstream>
 #include <functional>
+#include <iomanip>
 #include <iostream>
 #include <iterator>
 #include <limits>
@@ -47,9 +48,9 @@
 #include <unordered_set>
 #include <vector>
 #include <boost/current_function.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
+#include <boost/numeric/conversion/cast.hpp>
 #include <boost/pool/object_pool.hpp>
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
@@ -89,8 +90,12 @@
 #include <orcus/sax_token_parser.hpp>
 #include <orcus/spreadsheet/export_interface.hpp>
 #include <orcus/spreadsheet/import_interface.hpp>
+#include <orcus/spreadsheet/import_interface_auto_filter.hpp>
 #include <orcus/spreadsheet/import_interface_pivot.hpp>
+#include <orcus/spreadsheet/import_interface_pivot_table_def.hpp>
+#include <orcus/spreadsheet/import_interface_strikethrough.hpp>
 #include <orcus/spreadsheet/import_interface_styles.hpp>
+#include <orcus/spreadsheet/import_interface_underline.hpp>
 #include <orcus/spreadsheet/import_interface_view.hpp>
 #include <orcus/spreadsheet/styles.hpp>
 #include <orcus/spreadsheet/types.hpp>

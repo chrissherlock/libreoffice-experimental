@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-08-22 14:51:13 using:
+ Generated on 2026-02-01 14:42:53 using:
  ./bin/update_pch vbahelper vbahelper --cutoff=3 --exclude:system --exclude:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -22,31 +22,38 @@
 
 #include <sal/config.h>
 #if PCH_LEVEL >= 1
+#include <algorithm>
 #include <cassert>
+#include <concepts>
 #include <cstddef>
 #include <deque>
-#include <exception>
 #include <functional>
 #include <limits>
 #include <memory>
 #include <string_view>
+#include <type_traits>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 #include <boost/property_tree/ptree_fwd.hpp>
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
+#include <osl/diagnose.h>
 #include <osl/file.hxx>
+#include <rtl/character.hxx>
 #include <rtl/instance.hxx>
+#include <rtl/math.h>
 #include <rtl/ref.hxx>
 #include <rtl/textenc.h>
 #include <rtl/ustrbuf.hxx>
+#include <rtl/ustring.h>
 #include <rtl/ustring.hxx>
+#include <rtl/uuid.h>
 #include <sal/log.hxx>
 #include <sal/macros.h>
 #include <sal/types.h>
 #include <vcl/IDialogRenderable.hxx>
-#include <comphelper/errcode.hxx>
-#include <vcl/region.hxx>
+#include <vcl/bitmap.hxx>
 #include <vcl/svapp.hxx>
 #endif // PCH_LEVEL >= 2
 #if PCH_LEVEL >= 3
@@ -57,6 +64,8 @@
 #include <basic/sbx.hxx>
 #include <basic/sbxdef.hxx>
 #include <basic/sbxobj.hxx>
+#include <basic/sbxvar.hxx>
+#include <com/sun/star/beans/PropertyValue.hpp>
 #include <com/sun/star/beans/XPropertySet.hpp>
 #include <com/sun/star/drawing/XDrawPage.hpp>
 #include <com/sun/star/drawing/XShape.hpp>
@@ -64,30 +73,31 @@
 #include <com/sun/star/frame/XModel.hpp>
 #include <com/sun/star/lang/XServiceInfo.hpp>
 #include <com/sun/star/lang/XTypeProvider.hpp>
+#include <com/sun/star/script/ModuleType.hpp>
 #include <com/sun/star/uno/Any.h>
 #include <com/sun/star/uno/Any.hxx>
 #include <com/sun/star/uno/Reference.h>
 #include <com/sun/star/uno/Reference.hxx>
-#include <com/sun/star/uno/RuntimeException.hpp>
 #include <com/sun/star/uno/Sequence.hxx>
 #include <com/sun/star/uno/Type.h>
-#include <com/sun/star/uno/Type.hxx>
 #include <com/sun/star/uno/XComponentContext.hpp>
 #include <com/sun/star/view/XSelectionSupplier.hpp>
 #include <comphelper/comphelperdllapi.h>
+#include <comphelper/errcode.hxx>
 #include <comphelper/sequence.hxx>
 #include <cppuhelper/cppuhelperdllapi.h>
 #include <cppuhelper/implbase.hxx>
 #include <cppuhelper/implbase_ex.hxx>
 #include <cppuhelper/weak.hxx>
 #include <filter/msfilter/msvbahelper.hxx>
+#include <o3tl/intcmp.hxx>
+#include <o3tl/safeint.hxx>
 #include <o3tl/typed_flags_set.hxx>
 #include <sfx2/dllapi.h>
 #include <sfx2/shell.hxx>
 #include <svl/poolitem.hxx>
 #include <svl/svldllapi.h>
 #include <tools/link.hxx>
-#include <tools/toolsdllapi.h>
 #endif // PCH_LEVEL >= 3
 #if PCH_LEVEL >= 4
 #include <vbahelper/vbadllapi.h>

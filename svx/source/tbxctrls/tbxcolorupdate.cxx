@@ -29,7 +29,7 @@
 
 #include <utility>
 #include <vcl/commandinfoprovider.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/image.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/toolbox.hxx>

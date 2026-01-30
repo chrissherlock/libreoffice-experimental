@@ -28,7 +28,7 @@
 #include <tools/mapunit.hxx>
 #include <vcl/transfer.hxx>
 #include <vcl/outdev.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 
 using namespace ::com::sun::star;
 

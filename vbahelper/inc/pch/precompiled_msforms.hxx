@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2023-07-19 09:24:46 using:
+ Generated on 2026-02-01 14:42:53 using:
  ./bin/update_pch vbahelper msforms --cutoff=3 --exclude:system --include:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -24,9 +24,14 @@
 #if PCH_LEVEL >= 1
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <cassert>
+#include <climits>
 #include <cmath>
+#include <compare>
+#include <concepts>
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <float.h>
@@ -38,6 +43,7 @@
 #include <map>
 #include <math.h>
 #include <memory>
+#include <mutex>
 #include <new>
 #include <numeric>
 #include <optional>
@@ -47,17 +53,25 @@
 #include <string.h>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <type_traits>
+#include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 #include <boost/property_tree/ptree_fwd.hpp>
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
 #include <osl/diagnose.h>
+#include <osl/doublecheckedlocking.h>
 #include <osl/endian.h>
+#include <osl/getglobalmutex.hxx>
 #include <osl/interlck.h>
+#include <osl/mutex.h>
+#include <osl/mutex.hxx>
 #include <rtl/alloc.h>
 #include <rtl/character.hxx>
+#include <rtl/instance.hxx>
 #include <rtl/math.h>
 #include <rtl/ref.hxx>
 #include <rtl/string.h>
@@ -76,37 +90,26 @@
 #include <sal/saldllapi.h>
 #include <sal/types.h>
 #include <sal/typesizes.h>
-#include <vcl/Scanline.hxx>
-#include <vcl/alpha.hxx>
 #include <vcl/bitmap.hxx>
 #include <vcl/bitmap/BitmapTypes.hxx>
 #include <vcl/cairo.hxx>
 #include <vcl/checksum.hxx>
 #include <vcl/dllapi.h>
-#include <vcl/fntstyle.hxx>
 #include <vcl/font.hxx>
 #include <vcl/gradient.hxx>
 #include <vcl/kernarray.hxx>
 #include <vcl/mapmod.hxx>
-#include <vcl/metaactiontypes.hxx>
 #include <vcl/ptrstyle.hxx>
 #include <vcl/region.hxx>
-#include <vcl/rendercontext/AddFontSubstituteFlags.hxx>
-#include <vcl/rendercontext/AntialiasingFlags.hxx>
-#include <vcl/rendercontext/DrawGridFlags.hxx>
 #include <vcl/rendercontext/DrawImageFlags.hxx>
-#include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/rendercontext/DrawTextFlags.hxx>
-#include <vcl/rendercontext/GetDefaultFontFlags.hxx>
 #include <vcl/rendercontext/ImplMapRes.hxx>
 #include <vcl/rendercontext/InvertFlags.hxx>
 #include <vcl/rendercontext/RasterOp.hxx>
 #include <vcl/rendercontext/SalLayoutFlags.hxx>
 #include <vcl/rendercontext/State.hxx>
-#include <vcl/rendercontext/SystemTextColorFlags.hxx>
-#include <vcl/salnativewidgets.hxx>
 #include <vcl/settings.hxx>
-#include <vcl/vclenum.hxx>
+#include <vcl/text/TextRecordingState.hxx>
 #include <vcl/vclptr.hxx>
 #include <vcl/vclreferencebase.hxx>
 #include <vcl/wall.hxx>
@@ -114,8 +117,6 @@
 #if PCH_LEVEL >= 3
 #include <basegfx/basegfxdllapi.h>
 #include <basegfx/color/bcolor.hxx>
-#include <basegfx/matrix/b2dhommatrix.hxx>
-#include <basegfx/matrix/hommatrixtemplate.hxx>
 #include <basegfx/numeric/ftools.hxx>
 #include <basegfx/point/b2dpoint.hxx>
 #include <basegfx/point/b2ipoint.hxx>
@@ -123,6 +124,7 @@
 #include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <basegfx/range/Range2D.hxx>
 #include <basegfx/range/b2drange.hxx>
+#include <basegfx/range/b2drectangle.hxx>
 #include <basegfx/range/basicrange.hxx>
 #include <basegfx/tuple/Size2D.hxx>
 #include <basegfx/tuple/Tuple2D.hxx>
@@ -131,24 +133,56 @@
 #include <basegfx/tuple/b2ituple.hxx>
 #include <basegfx/tuple/b3dtuple.hxx>
 #include <basegfx/utils/common.hxx>
-#include <basegfx/vector/b2dsize.hxx>
+#include <basegfx/utils/systemdependentdata.hxx>
 #include <basegfx/vector/b2dvector.hxx>
 #include <basegfx/vector/b2enums.hxx>
-#include <basegfx/vector/b2isize.hxx>
 #include <basegfx/vector/b2ivector.hxx>
 #include <basic/basicdllapi.h>
 #include <basic/sbxcore.hxx>
 #include <basic/sbxdef.hxx>
-#include <basic/sbxmeth.hxx>
 #include <basic/sbxvar.hxx>
-#include <com/sun/star/awt/DeviceInfo.hpp>
-#include <com/sun/star/awt/GradientStyle.hpp>
+#include <com/sun/star/accessibility/XAccessible.hpp>
+#include <com/sun/star/awt/Size.hpp>
 #include <com/sun/star/awt/SystemPointer.hpp>
+#include <com/sun/star/awt/XActionListener.hpp>
+#include <com/sun/star/awt/XAdjustmentListener.hpp>
 #include <com/sun/star/awt/XControl.hpp>
+#include <com/sun/star/awt/XControlContainer.hpp>
+#include <com/sun/star/awt/XFocusListener.hpp>
+#include <com/sun/star/awt/XItemListener.hpp>
+#include <com/sun/star/awt/XKeyListener.hpp>
+#include <com/sun/star/awt/XMenuListener.hpp>
+#include <com/sun/star/awt/XMouseListener.hpp>
+#include <com/sun/star/awt/XMouseMotionListener.hpp>
+#include <com/sun/star/awt/XPaintListener.hpp>
+#include <com/sun/star/awt/XSpinListener.hpp>
+#include <com/sun/star/awt/XStyleSettingsSupplier.hpp>
+#include <com/sun/star/awt/XTabListener.hpp>
+#include <com/sun/star/awt/XTextListener.hpp>
+#include <com/sun/star/awt/XTopWindowListener.hpp>
+#include <com/sun/star/awt/XUnitConversion.hpp>
+#include <com/sun/star/awt/XUnoControlContainer.hpp>
+#include <com/sun/star/awt/XVclContainerListener.hpp>
+#include <com/sun/star/awt/XVclWindowPeer.hpp>
+#include <com/sun/star/awt/XView.hpp>
+#include <com/sun/star/awt/XWindow2.hpp>
+#include <com/sun/star/awt/XWindowListener.hpp>
+#include <com/sun/star/awt/grid/XGridSelectionListener.hpp>
+#include <com/sun/star/awt/tab/XTabPageContainerListener.hpp>
+#include <com/sun/star/awt/tree/XTreeEditListener.hpp>
+#include <com/sun/star/awt/tree/XTreeExpansionListener.hpp>
+#include <com/sun/star/beans/XPropertiesChangeListener.hpp>
+#include <com/sun/star/container/XContainer.hpp>
+#include <com/sun/star/container/XContainerListener.hpp>
+#include <com/sun/star/container/XIdentifierContainer.hpp>
 #include <com/sun/star/container/XNameContainer.hpp>
 #include <com/sun/star/drawing/LineCap.hpp>
 #include <com/sun/star/form/FormComponentType.hpp>
+#include <com/sun/star/lang/DisposedException.hpp>
 #include <com/sun/star/lang/IllegalArgumentException.hpp>
+#include <com/sun/star/lang/XEventListener.hpp>
+#include <com/sun/star/lang/XServiceInfo.hpp>
+#include <com/sun/star/lang/XTypeProvider.hpp>
 #include <com/sun/star/uno/Any.h>
 #include <com/sun/star/uno/Any.hxx>
 #include <com/sun/star/uno/Reference.h>
@@ -159,21 +193,41 @@
 #include <com/sun/star/uno/Type.h>
 #include <com/sun/star/uno/Type.hxx>
 #include <com/sun/star/uno/TypeClass.hdl>
+#include <com/sun/star/uno/XAggregation.hpp>
 #include <com/sun/star/uno/XInterface.hpp>
 #include <com/sun/star/uno/XWeak.hpp>
 #include <com/sun/star/uno/genfunc.h>
 #include <com/sun/star/uno/genfunc.hxx>
+#include <com/sun/star/util/Date.hpp>
+#include <com/sun/star/util/Time.hpp>
+#include <com/sun/star/util/XModeChangeBroadcaster.hpp>
+#include <com/sun/star/view/XSelectionChangeListener.hpp>
 #include <comphelper/comphelperdllapi.h>
+#include <comphelper/diagnose_ex.hxx>
 #include <comphelper/errcode.hxx>
+#include <comphelper/interfacecontainer3.hxx>
+#include <comphelper/interfacecontainer4.hxx>
+#include <comphelper/scopeguard.hxx>
 #include <comphelper/sequence.hxx>
 #include <cppu/cppudllapi.h>
 #include <cppu/unotype.hxx>
 #include <cppuhelper/cppuhelperdllapi.h>
+#include <cppuhelper/exc_hlp.hxx>
 #include <cppuhelper/implbase.hxx>
+#include <cppuhelper/implbase4.hxx>
+#include <cppuhelper/implbase9.hxx>
+#include <cppuhelper/implbase_ex.hxx>
+#include <cppuhelper/implbase_ex_post.hxx>
+#include <cppuhelper/implbase_ex_pre.hxx>
+#include <cppuhelper/queryinterface.hxx>
 #include <cppuhelper/weak.hxx>
+#include <cppuhelper/weakagg.hxx>
 #include <cppuhelper/weakref.hxx>
 #include <i18nlangtag/lang.h>
+#include <o3tl/concepts.hxx>
 #include <o3tl/cow_wrapper.hxx>
+#include <o3tl/deleter.hxx>
+#include <o3tl/intcmp.hxx>
 #include <o3tl/safeint.hxx>
 #include <o3tl/strong_int.hxx>
 #include <o3tl/typed_flags_set.hxx>
@@ -182,6 +236,11 @@
 #include <svl/hint.hxx>
 #include <svl/svldllapi.h>
 #include <svl/typedwhich.hxx>
+#include <toolkit/controls/unocontrol.hxx>
+#include <toolkit/controls/unocontrolbase.hxx>
+#include <toolkit/dllapi.h>
+#include <toolkit/helper/listenermultiplexer.hxx>
+#include <toolkit/helper/macros.hxx>
 #include <tools/color.hxx>
 #include <tools/degree.hxx>
 #include <tools/fontenum.hxx>
@@ -198,7 +257,6 @@
 #include <uno/any2.h>
 #include <uno/data.h>
 #include <uno/sequence2.h>
-#include <unotools/fontdefs.hxx>
 #include <unotools/syslocale.hxx>
 #include <unotools/unotoolsdllapi.h>
 #endif // PCH_LEVEL >= 3

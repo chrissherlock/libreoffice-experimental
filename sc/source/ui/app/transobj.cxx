@@ -34,7 +34,7 @@
 #include <comphelper/servicehelper.hxx>
 #include <sot/storage.hxx>
 #include <utility>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/jobset.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/virdev.hxx>

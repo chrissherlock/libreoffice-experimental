@@ -93,7 +93,7 @@
 #include <editeng/ulspitem.hxx>
 #include <editeng/lrspitem.hxx>
 #include <editeng/numitem.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/BitmapReadAccess.hxx>
 #include <svx/svditer.hxx>
 #include <editeng/flditem.hxx>

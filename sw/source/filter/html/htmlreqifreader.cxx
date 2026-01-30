@@ -23,7 +23,7 @@
 #include <ndole.hxx>
 #include <sal/log.hxx>
 #include <vcl/FilterConfigItem.hxx>
-#include <vcl/wmf.hxx>
+#include <vcl/metafile/wmf.hxx>
 #include <comphelper/propertyvalue.hxx>
 #include <fmtfsize.hxx>
 #include <frmfmt.hxx>

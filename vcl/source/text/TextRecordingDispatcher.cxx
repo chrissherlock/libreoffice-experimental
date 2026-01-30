@@ -14,13 +14,14 @@ void TextRecordingDispatcher::Dispatch(const TextRecordingState& rState, OutputD
         return;
 
     // Dispatch to Measurement
-    vcl::text::MeasurementRecorder aMeas(rState);
+    vcl::text::MeasurementRecorder aMeas(const_cast<TextRecordingState&>(rState));
     if (aMeas.IsActive())
-        aMeas.Record(rDev, Point(), rStr, nIndex, nLen, pLayout);
+        aMeas.Record(rDev, rStr, nIndex, nLen, pLayout);
 
     // Dispatch to Accessibility
-    vcl::text::AccessibilityRecorder aAcc(rState);
+    vcl::text::AccessibilityRecorder aAcc(const_cast<TextRecordingState&>(rState));
     if (aAcc.IsActive())
-        aAcc.Record(rDev, Point(), rStr, nIndex, nLen, pLayout, bLineStart);
+        aAcc.Record(rDev, rStr, nIndex, nLen, pLayout, bLineStart);
 }
 }
+/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

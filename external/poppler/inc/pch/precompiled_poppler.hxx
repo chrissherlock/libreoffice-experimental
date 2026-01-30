@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2025-02-25 16:55:58 using:
+ Generated on 2026-02-01 14:42:54 using:
  ./bin/update_pch ./external/poppler poppler --cutoff=1 --exclude:system --include:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -22,7 +22,6 @@
 
 #include <sal/config.h>
 #if PCH_LEVEL >= 1
-#include <Object.h> // Please include this header file to avoid error LNK2019.
 #include <algorithm>
 #include <annot_stamp_approved.h>
 #include <annot_stamp_as_is.h>
@@ -66,13 +65,13 @@
 #include <grandom.h>
 #include <gstrtod.h>
 #include <iomanip>
-#include <iostream>
 #include <limits>
 #include <memory>
 #include <numbers>
 #include <optional>
 #include <poppler-config.h>
 #include <random>
+#include <ranges>
 #include <regex>
 #include <set>
 #include <sstream>
@@ -114,7 +113,6 @@
 #include <splash/SplashMath.h>
 #include <splash/SplashPath.h>
 #include <splash/SplashPattern.h>
-#include <splash/SplashScreen.h>
 #include <splash/SplashState.h>
 #include <splash/SplashTypes.h>
 #include <sys/stat.h>

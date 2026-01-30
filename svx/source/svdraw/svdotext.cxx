@@ -47,7 +47,7 @@
 #include <sdr/contact/viewcontactoftextobj.hxx>
 #include <basegfx/tuple/b2dtuple.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/rendercontext/GetDefaultFontFlags.hxx>
 #include <vcl/virdev.hxx>
 #include <basegfx/matrix/b2dhommatrixtools.hxx>

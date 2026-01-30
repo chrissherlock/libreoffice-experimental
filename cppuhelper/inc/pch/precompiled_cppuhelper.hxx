@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-04-08 13:50:34 using:
+ Generated on 2026-02-01 18:49:47 using:
  ./bin/update_pch cppuhelper cppuhelper --cutoff=3 --exclude:system --exclude:module --exclude:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -27,12 +27,16 @@
 #include <cstddef>
 #include <cstdlib>
 #include <memory>
+#include <mutex>
 #include <new>
+#include <string_view>
 #include <type_traits>
+#include <utility>
 #include <vector>
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
 #include <osl/diagnose.h>
+#include <osl/file.h>
 #include <osl/file.hxx>
 #include <osl/interlck.h>
 #include <osl/module.h>
@@ -56,7 +60,6 @@
 #include <rtl/ustring.hxx>
 #include <rtl/uuid.h>
 #include <sal/log.hxx>
-#include <sal/macros.h>
 #include <sal/saldllapi.h>
 #include <sal/types.h>
 #endif // PCH_LEVEL >= 2
@@ -85,6 +88,7 @@
 #include <com/sun/star/uno/XComponentContext.hpp>
 #include <comphelper/sequence.hxx>
 #include <cppu/cppudllapi.h>
+#include <o3tl/string_view.hxx>
 #include <salhelper/simplereferenceobject.hxx>
 #include <typelib/typeclass.h>
 #include <typelib/typedescription.h>

@@ -46,7 +46,8 @@
 #include <sot/exchange.hxx>
 #include <sot/storinfo.hxx>
 #include <vcl/cvtgrf.hxx>
-#include <vcl/wmf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
+#include <vcl/metafile/wmf.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/vclptr.hxx>
 #include <vcl/BitmapTools.hxx>

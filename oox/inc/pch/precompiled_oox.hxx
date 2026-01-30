@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2023-07-19 09:28:54 using:
+ Generated on 2026-02-01 14:42:50 using:
  ./bin/update_pch oox oox --cutoff=6 --exclude:system --exclude:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -26,31 +26,31 @@
 #include <array>
 #include <cassert>
 #include <cmath>
+#include <concepts>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
-#include <functional>
 #include <iomanip>
 #include <limits.h>
 #include <limits>
 #include <map>
-#include <math.h>
 #include <memory>
 #include <new>
 #include <numeric>
 #include <optional>
 #include <ostream>
 #include <set>
-#include <span>
 #include <stack>
 #include <string.h>
+#include <string>
 #include <string_view>
+#include <tuple>
 #include <type_traits>
 #include <unordered_map>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 #include <boost/algorithm/string.hpp>
+#include <boost/core/noinit_adaptor.hpp>
 #include <boost/property_tree/ptree_fwd.hpp>
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
@@ -83,59 +83,26 @@
 #include <rtl/ustring.h>
 #include <rtl/ustring.hxx>
 #include <sal/log.hxx>
-#include <sal/macros.h>
 #include <sal/saldllapi.h>
 #include <sal/types.h>
-#include <vcl/GraphicExternalLink.hxx>
-#include <vcl/animate/Animation.hxx>
-#include <vcl/bitmap.hxx>
-#include <vcl/cairo.hxx>
+#include <vcl/checksum.hxx>
 #include <vcl/dllapi.h>
-#include <vcl/fntstyle.hxx>
-#include <vcl/font.hxx>
-#include <vcl/gfxlink.hxx>
 #include <vcl/graph.hxx>
-#include <vcl/kernarray.hxx>
 #include <vcl/mapmod.hxx>
-#include <vcl/metaactiontypes.hxx>
-#include <vcl/outdev.hxx>
-#include <vcl/region.hxx>
-#include <vcl/rendercontext/AddFontSubstituteFlags.hxx>
-#include <vcl/rendercontext/AntialiasingFlags.hxx>
-#include <vcl/rendercontext/DrawGridFlags.hxx>
-#include <vcl/rendercontext/DrawImageFlags.hxx>
-#include <vcl/rendercontext/DrawModeFlags.hxx>
-#include <vcl/rendercontext/DrawTextFlags.hxx>
-#include <vcl/rendercontext/GetDefaultFontFlags.hxx>
-#include <vcl/rendercontext/ImplMapRes.hxx>
-#include <vcl/rendercontext/InvertFlags.hxx>
-#include <vcl/rendercontext/RasterOp.hxx>
-#include <vcl/rendercontext/SalLayoutFlags.hxx>
-#include <vcl/rendercontext/State.hxx>
-#include <vcl/rendercontext/SystemTextColorFlags.hxx>
-#include <vcl/salnativewidgets.hxx>
-#include <vcl/settings.hxx>
-#include <vcl/vclreferencebase.hxx>
-#include <vcl/vectorgraphicdata.hxx>
-#include <vcl/wall.hxx>
 #endif // PCH_LEVEL >= 2
 #if PCH_LEVEL >= 3
 #include <basegfx/basegfxdllapi.h>
 #include <basegfx/color/bcolor.hxx>
+#include <basegfx/color/bcolortools.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
-#include <basegfx/numeric/ftools.hxx>
 #include <basegfx/point/b2dpoint.hxx>
 #include <basegfx/point/b2ipoint.hxx>
-#include <basegfx/polygon/b2dpolypolygon.hxx>
+#include <basegfx/tuple/Size2D.hxx>
 #include <basegfx/tuple/Tuple2D.hxx>
 #include <basegfx/tuple/b2dtuple.hxx>
 #include <basegfx/tuple/b3dtuple.hxx>
 #include <basegfx/utils/bgradient.hxx>
-#include <basegfx/vector/b2dsize.hxx>
-#include <basegfx/vector/b2enums.hxx>
-#include <com/sun/star/awt/DeviceInfo.hpp>
 #include <com/sun/star/awt/FontWeight.hpp>
-#include <com/sun/star/awt/Gradient2.hpp>
 #include <com/sun/star/awt/GradientStyle.hpp>
 #include <com/sun/star/awt/Size.hpp>
 #include <com/sun/star/beans/NamedValue.hpp>
@@ -146,12 +113,12 @@
 #include <com/sun/star/container/XNameContainer.hpp>
 #include <com/sun/star/container/XNamed.hpp>
 #include <com/sun/star/drawing/EnhancedCustomShapeAdjustmentValue.hpp>
+#include <com/sun/star/drawing/EnhancedCustomShapeParameter.hpp>
 #include <com/sun/star/drawing/EnhancedCustomShapeParameterPair.hpp>
 #include <com/sun/star/drawing/EnhancedCustomShapeSegment.hpp>
 #include <com/sun/star/drawing/EnhancedCustomShapeTextFrame.hpp>
 #include <com/sun/star/drawing/FillStyle.hpp>
 #include <com/sun/star/drawing/Hatch.hpp>
-#include <com/sun/star/drawing/LineCap.hpp>
 #include <com/sun/star/drawing/LineStyle.hpp>
 #include <com/sun/star/drawing/TextFitToSizeType.hpp>
 #include <com/sun/star/drawing/TextHorizontalAdjust.hpp>
@@ -187,7 +154,6 @@
 #include <com/sun/star/uno/genfunc.hxx>
 #include <com/sun/star/util/DateTime.hpp>
 #include <com/sun/star/xml/sax/FastToken.hpp>
-#include <com/sun/star/xml/sax/XFastAttributeList.hpp>
 #include <com/sun/star/xml/sax/XFastContextHandler.hpp>
 #include <com/sun/star/xml/sax/XFastDocumentHandler.hpp>
 #include <com/sun/star/xml/sax/XFastSAXSerializable.hpp>
@@ -206,12 +172,14 @@
 #include <cppuhelper/weak.hxx>
 #include <cppuhelper/weakref.hxx>
 #include <docmodel/color/ComplexColor.hxx>
+#include <docmodel/color/Transformation.hxx>
 #include <docmodel/dllapi.h>
 #include <docmodel/theme/ColorSet.hxx>
 #include <docmodel/theme/ThemeColorType.hxx>
 #include <drawinglayer/primitive2d/Primitive2DContainer.hxx>
 #include <drawingml/colorchoicecontext.hxx>
 #include <drawingml/customshapeproperties.hxx>
+#include <drawingml/effectpropertiescontext.hxx>
 #include <drawingml/fillproperties.hxx>
 #include <drawingml/lineproperties.hxx>
 #include <drawingml/linepropertiescontext.hxx>
@@ -230,10 +198,12 @@
 #include <frozen/unordered_map.h>
 #include <i18nlangtag/lang.h>
 #include <o3tl/cow_wrapper.hxx>
+#include <o3tl/hash_combine.hxx>
 #include <o3tl/safeint.hxx>
 #include <o3tl/string_view.hxx>
 #include <o3tl/typed_flags_set.hxx>
 #include <o3tl/unit_conversion.hxx>
+#include <salhelper/simplereferenceobject.hxx>
 #include <sax/fastattribs.hxx>
 #include <sax/fshelper.hxx>
 #include <sax/saxdllapi.h>
@@ -250,35 +220,29 @@
 #include <svx/sdtaitm.hxx>
 #include <svx/sdtakitm.hxx>
 #include <svx/svddef.hxx>
+#include <svx/svdgeodata.hxx>
 #include <svx/svdoattr.hxx>
-#include <svx/svdobjkind.hxx>
+#include <svx/svdobj.hxx>
 #include <svx/svdotext.hxx>
 #include <svx/svdtext.hxx>
 #include <svx/svdtrans.hxx>
-#include <svx/svdtypes.hxx>
 #include <svx/svxdllapi.h>
 #include <tools/color.hxx>
 #include <tools/datetime.hxx>
 #include <tools/degree.hxx>
 #include <tools/fldunit.hxx>
-#include <tools/fontenum.hxx>
 #include <tools/fract.hxx>
 #include <tools/gen.hxx>
 #include <tools/helpers.hxx>
-#include <tools/link.hxx>
 #include <tools/long.hxx>
 #include <tools/mapunit.hxx>
 #include <tools/poly.hxx>
-#include <tools/ref.hxx>
 #include <tools/solar.h>
 #include <tools/stream.hxx>
 #include <tools/toolsdllapi.h>
 #include <typelib/typedescription.h>
 #include <uno/data.h>
 #include <uno/sequence2.h>
-#include <unotools/fontdefs.hxx>
-#include <unotools/resmgr.hxx>
-#include <unotools/syslocale.hxx>
 #include <unotools/unotoolsdllapi.h>
 #endif // PCH_LEVEL >= 3
 #if PCH_LEVEL >= 4
@@ -291,9 +255,10 @@
 #include <oox/dllapi.h>
 #include <oox/drawingml/clrscheme.hxx>
 #include <oox/drawingml/color.hxx>
+#include <oox/drawingml/connectorshapecontext.hxx>
 #include <oox/drawingml/drawingmltypes.hxx>
+#include <oox/drawingml/graphicshapecontext.hxx>
 #include <oox/drawingml/shape.hxx>
-#include <oox/drawingml/shapecontext.hxx>
 #include <oox/drawingml/shapepropertymap.hxx>
 #include <oox/drawingml/theme.hxx>
 #include <oox/export/utils.hxx>

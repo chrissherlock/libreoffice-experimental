@@ -13,7 +13,7 @@
 #include <com/sun/star/graphic/XGraphic.hpp>
 #include <com/sun/star/text/XDependentTextField.hpp>
 
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 
 #include <comphelper/propertyvalue.hxx>
 #include <docsh.hxx>

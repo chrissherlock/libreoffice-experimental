@@ -29,9 +29,9 @@
 #include <vcl/virdev.hxx>
 #include <vcl/window.hxx>
 #include <vcl/wrkwin.hxx>
-#include <vcl/gdimtf.hxx>
-#include <vcl/metaact.hxx>
-#include <vcl/metaactiontypes.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <vcl/metafile/MetaActionType.hxx>
 
 #include <vcl/BitmapWriteAccess.hxx>
 #include <bufferdevice.hxx>

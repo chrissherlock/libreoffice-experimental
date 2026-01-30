@@ -11,7 +11,7 @@
 
 #include <com/sun/star/style/PageStyleLayout.hpp>
 
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <svx/svdpage.hxx>
 #include <o3tl/string_view.hxx>
 #include <sfx2/viewfrm.hxx>

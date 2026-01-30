@@ -36,7 +36,7 @@
 #include <tools/urlobj.hxx>
 #include <vcl/graphicfilter.hxx>
 #include <vcl/cvtgrf.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/svapp.hxx>
 
 #include <UnoGraphicExporter.hxx>

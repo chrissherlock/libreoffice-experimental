@@ -24,9 +24,9 @@
 
 #include <sal/log.hxx>
 #include <utility>
-#include <vcl/metaact.hxx>
-#include <vcl/metaactiontypes.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <vcl/metafile/MetaActionType.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 
 #include "drawshapesubsetting.hxx"
 #include "gdimtftools.hxx"

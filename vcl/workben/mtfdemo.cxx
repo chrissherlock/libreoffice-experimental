@@ -14,8 +14,8 @@
 #include <com/sun/star/uno/XComponentContext.hpp>
 
 #include <vcl/vclmain.hxx>
-#include <vcl/gdimtf.hxx>
-#include <vcl/wmf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
+#include <vcl/metafile/wmf.hxx>
 
 #include <comphelper/diagnose_ex.hxx>
 #include <tools/stream.hxx>

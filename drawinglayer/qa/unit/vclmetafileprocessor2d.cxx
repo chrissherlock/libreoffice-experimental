@@ -13,9 +13,9 @@
 #include <vcl/virdev.hxx>
 #include <vcl/BitmapReadAccess.hxx>
 #include <vcl/graphicfilter.hxx>
-#include <vcl/metaact.hxx>
-#include <vcl/metaactiontypes.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <vcl/metafile/MetaActionType.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <tools/mapunit.hxx>
 #include <tools/stream.hxx>
 #include <drawinglayer/geometry/viewinformation2d.hxx>

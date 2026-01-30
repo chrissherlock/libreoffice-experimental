@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-04-08 13:50:44 using:
+ Generated on 2026-02-01 14:42:46 using:
  ./bin/update_pch forms frm --cutoff=2 --exclude:system --exclude:module --exclude:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -33,10 +33,10 @@
 #include <limits>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <new>
 #include <optional>
 #include <ostream>
-#include <set>
 #include <string.h>
 #include <string_view>
 #include <type_traits>
@@ -69,10 +69,7 @@
 #include <sal/macros.h>
 #include <sal/types.h>
 #include <vcl/dllapi.h>
-#include <comphelper/errcode.hxx>
 #include <vcl/graph.hxx>
-#include <vcl/image.hxx>
-#include <vcl/keycod.hxx>
 #include <vcl/keycodes.hxx>
 #include <vcl/mapmod.hxx>
 #include <vcl/outdev.hxx>
@@ -80,11 +77,12 @@
 #include <vcl/svapp.hxx>
 #include <vcl/vclenum.hxx>
 #include <vcl/vclptr.hxx>
+#include <vcl/weld/weld.hxx>
+#include <vcl/wintypes.hxx>
 #endif // PCH_LEVEL >= 2
 #if PCH_LEVEL >= 3
 #include <basegfx/color/bcolor.hxx>
 #include <com/sun/star/awt/FontDescriptor.hpp>
-#include <com/sun/star/awt/FontSlant.hpp>
 #include <com/sun/star/awt/MouseButton.hpp>
 #include <com/sun/star/awt/PosSize.hpp>
 #include <com/sun/star/awt/XControlModel.hpp>
@@ -93,6 +91,7 @@
 #include <com/sun/star/awt/XWindow.hpp>
 #include <com/sun/star/beans/NamedValue.hpp>
 #include <com/sun/star/beans/Property.hpp>
+#include <com/sun/star/beans/PropertyAttribute.hpp>
 #include <com/sun/star/beans/PropertyValue.hpp>
 #include <com/sun/star/beans/XFastPropertySet.hpp>
 #include <com/sun/star/beans/XMultiPropertySet.hpp>
@@ -103,7 +102,6 @@
 #include <com/sun/star/form/FormComponentType.hpp>
 #include <com/sun/star/form/XForm.hpp>
 #include <com/sun/star/form/XFormComponent.hpp>
-#include <com/sun/star/form/XResetListener.hpp>
 #include <com/sun/star/form/XSubmit.hpp>
 #include <com/sun/star/form/binding/IncompatibleTypesException.hpp>
 #include <com/sun/star/form/runtime/FormFeature.hpp>
@@ -115,17 +113,14 @@
 #include <com/sun/star/frame/XModel.hpp>
 #include <com/sun/star/graphic/GraphicObject.hpp>
 #include <com/sun/star/graphic/XGraphic.hpp>
-#include <com/sun/star/i18n/ForbiddenCharacters.hpp>
-#include <com/sun/star/i18n/LanguageCountryInfo.hpp>
-#include <com/sun/star/i18n/LocaleDataItem2.hpp>
-#include <com/sun/star/i18n/LocaleItem.hpp>
-#include <com/sun/star/i18n/reservedWords.hpp>
 #include <com/sun/star/io/Pipe.hpp>
 #include <com/sun/star/io/XInputStream.hpp>
 #include <com/sun/star/io/XMarkableStream.hpp>
+#include <com/sun/star/io/XOutputStream.hpp>
 #include <com/sun/star/io/XPersistObject.hpp>
 #include <com/sun/star/io/XSeekable.hpp>
 #include <com/sun/star/lang/DisposedException.hpp>
+#include <com/sun/star/lang/IllegalArgumentException.hpp>
 #include <com/sun/star/lang/IndexOutOfBoundsException.hpp>
 #include <com/sun/star/lang/Locale.hpp>
 #include <com/sun/star/lang/WrappedTargetRuntimeException.hpp>
@@ -159,6 +154,8 @@
 #include <com/sun/star/util/Date.hpp>
 #include <com/sun/star/util/DateTime.hpp>
 #include <com/sun/star/util/NumberFormat.hpp>
+#include <com/sun/star/util/NumberFormatter.hpp>
+#include <com/sun/star/util/SearchAlgorithms2.hpp>
 #include <com/sun/star/util/Time.hpp>
 #include <com/sun/star/util/URLTransformer.hpp>
 #include <com/sun/star/util/VetoException.hpp>
@@ -177,12 +174,17 @@
 #include <com/sun/star/xml/xpath/XXPathObject.hpp>
 #include <com/sun/star/xsd/DataTypeClass.hpp>
 #include <comphelper/basicio.hxx>
+#include <comphelper/bytereader.hxx>
 #include <comphelper/comphelperdllapi.h>
+#include <comphelper/diagnose_ex.hxx>
 #include <comphelper/enumhelper.hxx>
+#include <comphelper/errcode.hxx>
 #include <comphelper/guarding.hxx>
-#include <comphelper/interfacecontainer2.hxx>
+#include <comphelper/interfacecontainer3.hxx>
+#include <comphelper/numbers.hxx>
 #include <comphelper/processfactory.hxx>
 #include <comphelper/property.hxx>
+#include <comphelper/propertyvalue.hxx>
 #include <comphelper/sequence.hxx>
 #include <comphelper/servicehelper.hxx>
 #include <comphelper/streamsection.hxx>
@@ -195,11 +197,11 @@
 #include <cppuhelper/cppuhelperdllapi.h>
 #include <cppuhelper/exc_hlp.hxx>
 #include <cppuhelper/implbase.hxx>
+#include <cppuhelper/implbase1.hxx>
 #include <cppuhelper/implbase2.hxx>
 #include <cppuhelper/implbase_ex.hxx>
 #include <cppuhelper/queryinterface.hxx>
 #include <cppuhelper/supportsservice.hxx>
-#include <cppuhelper/typeprovider.hxx>
 #include <cppuhelper/weak.hxx>
 #include <cppuhelper/weakref.hxx>
 #include <editeng/editeng.hxx>
@@ -213,30 +215,32 @@
 #include <i18nlangtag/lang.h>
 #include <i18nlangtag/languagetag.hxx>
 #include <o3tl/any.hxx>
+#include <o3tl/cow_wrapper.hxx>
 #include <o3tl/safeint.hxx>
+#include <o3tl/string_view.hxx>
 #include <o3tl/typed_flags_set.hxx>
+#include <o3tl/unit_conversion.hxx>
 #include <sfx2/dllapi.h>
 #include <sfx2/filedlghelper.hxx>
 #include <sfx2/groupid.hxx>
 #include <sfx2/shell.hxx>
 #include <sfx2/signaturestate.hxx>
-#include <sot/formats.hxx>
-#include <svl/cenumitm.hxx>
 #include <svl/eitem.hxx>
 #include <svl/itempool.hxx>
 #include <svl/itemset.hxx>
+#include <svl/numformat.hxx>
 #include <svl/poolitem.hxx>
 #include <svl/svldllapi.h>
 #include <svl/typedwhich.hxx>
 #include <svtools/imageresourceaccess.hxx>
 #include <svx/svxdllapi.h>
+#include <toolkit/dllapi.h>
 #include <toolkit/helper/vclunohelper.hxx>
 #include <tools/color.hxx>
 #include <tools/date.hxx>
 #include <tools/datetime.hxx>
 #include <tools/debug.hxx>
 #include <tools/degree.hxx>
-#include <comphelper/diagnose_ex.hxx>
 #include <tools/fontenum.hxx>
 #include <tools/gen.hxx>
 #include <tools/inetmime.hxx>
@@ -251,9 +255,8 @@
 #include <tools/toolsdllapi.h>
 #include <tools/urlobj.hxx>
 #include <ucbhelper/content.hxx>
-#include <unotools/localedatawrapper.hxx>
+#include <unotools/securityoptions.hxx>
 #include <unotools/sharedunocomponent.hxx>
-#include <unotools/syslocale.hxx>
 #include <unotools/ucbstreamhelper.hxx>
 #include <unotools/unotoolsdllapi.h>
 #endif // PCH_LEVEL >= 3

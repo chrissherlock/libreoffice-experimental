@@ -25,7 +25,7 @@
 #include <tools/stream.hxx>
 #include <utility>
 #include <vcl/kernarray.hxx>
-#include <vcl/metaactiontypes.hxx>
+#include <vcl/metafile/MetaActionType.hxx>
 #include <cppcanvas/renderer.hxx>
 #include <cppcanvas/canvas.hxx>
 

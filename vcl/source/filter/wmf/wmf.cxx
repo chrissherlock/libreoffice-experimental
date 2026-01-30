@@ -17,13 +17,15 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include "emfwr.hxx"
-#include "wmfwr.hxx"
-#include <vcl/wmf.hxx>
-#include <vcl/gdimetafiletools.hxx>
 #include <vcl/gfxlink.hxx>
 #include <vcl/graph.hxx>
+#include <vcl/metafile/metafiletools.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
+#include <vcl/metafile/wmf.hxx>
 #include <vcl/vectorgraphicdata.hxx>
+
+#include "emfwr.hxx"
+#include "wmfwr.hxx"
 
 using namespace com::sun::star;
 

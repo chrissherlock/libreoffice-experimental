@@ -18,15 +18,17 @@
  */
 
 #include <sal/log.hxx>
-#include <vcl/BitmapReadAccess.hxx>
 #include <tools/link.hxx>
 #include <tools/poly.hxx>
 #include <tools/helpers.hxx>
 #include <tools/mapunit.hxx>
-#include <vcl/gdimtf.hxx>
-#include <vcl/metaact.hxx>
+
+#include <vcl/metafile/GDIMetaFile.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/bitmap/Vectorizer.hxx>
+#include <vcl/BitmapReadAccess.hxx>
+
 #include <array>
 #include <memory>
 
