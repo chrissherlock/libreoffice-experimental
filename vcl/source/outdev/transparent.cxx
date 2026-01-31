@@ -26,8 +26,8 @@
 #include <officecfg/Office/Common.hxx>
 
 #include <vcl/BitmapTools.hxx>
-#include <vcl/metaact.hxx>
-#include <vcl/metaactiontypes.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <vcl/metafile/MetaActionType.hxx>
 #include <vcl/print.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
@@ -1249,11 +1249,11 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
         // iteratively add metafile actions from the original metafile
         // to this connected components list (aCCList), by checking
         // each element's bounding box against intersection with the
-        // metaaction at hand.
+        // metafile/MetaAction at hand.
         // All those intersecting elements are removed from aCCList
         // and collected in a temporary list (aCCMergeList). After all
         // elements have been checked, the aCCMergeList elements are
-        // merged with the metaaction at hand into one resulting
+        // merged with the metafile/MetaAction at hand into one resulting
         // connected component, with one big bounding box, and
         // inserted into aCCList again.
         // The time complexity of this algorithm is O(n^3), where n is
@@ -1531,9 +1531,9 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
             // works without alpha compositing (you just calculate the
             // color). Note that for the test "all objects before me
             // are transparent" no sorting is necessary, since the
-            // added metaaction pCurrAct is always in the order the
+            // added metafile/MetaAction pCurrAct is always in the order the
             // metafile is painted. Generally, the order of the
-            // metaactions in the ConnectedComponents are not
+            // metafile/MetaAction in the ConnectedComponents are not
             // guaranteed to be the same as in the metafile.
             if( bTreatSpecial )
             {
@@ -1607,7 +1607,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
         // well now, we've got the list of disjunct connected
         // components. Now we've got to create a map, which contains
         // the corresponding aCCList element for every
-        // metaaction. Later on, we always process the complete
+        // metafile/MetaAction. Later on, we always process the complete
         // metafile for each bitmap to be generated, but switch on
         // output only for actions contained in the then current
         // aCCList element. This ensures correct mapmode and attribute
@@ -1616,7 +1616,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
         // maps mtf actions to CC list entries
         ::std::vector< const ConnectedComponents* > aCCList_MemberMap( rInMtf.GetActionSize() );
 
-        // iterate over all aCCList members and their contained metaactions
+        // iterate over all aCCList members and their contained metafile/MetaAction
         for (auto const& currentItem : aCCList)
         {
             for (auto const& currentAction : currentItem.aComponentList)

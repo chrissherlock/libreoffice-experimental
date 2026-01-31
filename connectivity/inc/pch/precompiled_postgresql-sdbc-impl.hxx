@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-03-08 13:12:50 using:
+ Generated on 2026-02-01 14:42:47 using:
  ./bin/update_pch connectivity postgresql-sdbc-impl --cutoff=3 --exclude:system --exclude:module --exclude:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -24,8 +24,10 @@
 #if PCH_LEVEL >= 1
 #include <string.h>
 #include <string_view>
+#include <utility>
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
+#include <osl/diagnose.h>
 #include <osl/time.h>
 #include <rtl/instance.hxx>
 #include <rtl/ref.hxx>
@@ -53,6 +55,8 @@
 #include <cppuhelper/exc_hlp.hxx>
 #include <cppuhelper/queryinterface.hxx>
 #include <cppuhelper/typeprovider.hxx>
+#include <o3tl/safeint.hxx>
+#include <o3tl/string_view.hxx>
 #endif // PCH_LEVEL >= 3
 #if PCH_LEVEL >= 4
 #include <connectivity/dbconversion.hxx>

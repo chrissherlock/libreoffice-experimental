@@ -21,14 +21,16 @@
 
 #include <vcl/dllapi.h>
 #include <vcl/GraphicExternalLink.hxx>
-#include <vcl/gdimtf.hxx>
 #include <vcl/graph.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
+
 #include "graphic/Manager.hxx"
 #include "graphic/MemoryManaged.hxx"
 #include "graphic/GraphicID.hxx"
 #include "graphic/BitmapContainer.hxx"
 #include "graphic/AnimationContainer.hxx"
 #include "graphic/SwapInfo.hxx"
+
 #include <optional>
 
 class OutputDevice;

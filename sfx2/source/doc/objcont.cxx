@@ -46,7 +46,7 @@
 #include <unotools/useroptions.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/settings.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 
 #include <sfx2/app.hxx>
 #include <sfx2/dinfdlg.hxx>

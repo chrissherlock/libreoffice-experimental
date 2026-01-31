@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-04-11 19:47:44 using:
+ Generated on 2026-02-01 18:49:42 using:
  ./bin/update_pch connectivity ado --cutoff=2 --exclude:system --exclude:module --exclude:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -32,6 +32,7 @@
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
@@ -77,7 +78,6 @@
 #include <com/sun/star/sdbcx/KeyType.hpp>
 #include <com/sun/star/sdbcx/PrivilegeObject.hpp>
 #include <com/sun/star/uno/Sequence.hxx>
-#include <com/sun/star/util/Date.hpp>
 #include <com/sun/star/util/XCancellable.hpp>
 #include <comphelper/proparrhlp.hxx>
 #include <comphelper/property.hxx>
@@ -91,8 +91,10 @@
 #include <cppuhelper/queryinterface.hxx>
 #include <cppuhelper/supportsservice.hxx>
 #include <cppuhelper/typeprovider.hxx>
+#include <o3tl/string_view.hxx>
 #include <resource/sharedresources.hxx>
-#include <salhelper/singletonref.hxx>
+#include <systools/win32/oleauto.hxx>
+#include <unotools/weakref.hxx>
 #endif // PCH_LEVEL >= 3
 #if PCH_LEVEL >= 4
 #include <OColumn.hxx>

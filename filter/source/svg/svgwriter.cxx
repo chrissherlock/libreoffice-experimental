@@ -26,13 +26,15 @@
 #include <sal/log.hxx>
 #include <vcl/unohelp.hxx>
 #include <vcl/cvtgrf.hxx>
-#include <vcl/metaactiontypes.hxx>
+#include <vcl/metafile/MetaActionType.hxx>
 #include <vcl/metric.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/filter/SvmReader.hxx>
 #include <vcl/filter/SvmWriter.hxx>
 #include <vcl/fntstyle.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <tools/fract.hxx>
 #include <tools/helpers.hxx>
 #include <tools/stream.hxx>

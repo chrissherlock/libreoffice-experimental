@@ -29,7 +29,7 @@
 #include <com/sun/star/graphic/XGraphic.hpp>
 
 
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/graph.hxx>
 #include <vcl/cvtgrf.hxx>
 #include <vcl/bitmap.hxx>

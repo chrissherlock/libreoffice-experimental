@@ -48,13 +48,13 @@
 #include <tools/stream.hxx>
 #include <comphelper/diagnose_ex.hxx>
 
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/graph.hxx>
 #include <sal/log.hxx>
 
-#include <vcl/wmf.hxx>
-#include <vcl/metaact.hxx>
-#include <vcl/metaactiontypes.hxx>
+#include <vcl/metafile/wmf.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <vcl/metafile/MetaActionType.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/vcllayout.hxx>
 #include <o3tl/string_view.hxx>

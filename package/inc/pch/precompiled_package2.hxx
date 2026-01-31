@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-04-08 13:55:58 using:
+ Generated on 2026-02-01 14:42:56 using:
  ./bin/update_pch package package2 --cutoff=3 --exclude:system --include:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -23,18 +23,23 @@
 #include <sal/config.h>
 #if PCH_LEVEL >= 1
 #include <algorithm>
+#include <atomic>
 #include <cassert>
 #include <chrono>
-#include <cmath>
+#include <climits>
+#include <concepts>
+#include <condition_variable>
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <initializer_list>
 #include <iomanip>
 #include <limits>
-#include <math.h>
 #include <memory>
+#include <mutex>
 #include <new>
+#include <optional>
 #include <ostream>
 #include <stddef.h>
 #include <string.h>
@@ -45,13 +50,11 @@
 #include <utility>
 #include <vector>
 #include <zlib.h>
+#include <zstd.h>
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
 #include <osl/diagnose.h>
-#include <osl/diagnose.hxx>
 #include <osl/doublecheckedlocking.h>
-#include <osl/endian.h>
-#include <osl/file.h>
 #include <osl/getglobalmutex.hxx>
 #include <osl/interlck.h>
 #include <osl/mutex.h>
@@ -59,6 +62,7 @@
 #include <osl/thread.hxx>
 #include <osl/time.h>
 #include <rtl/alloc.h>
+#include <rtl/character.hxx>
 #include <rtl/cipher.h>
 #include <rtl/crc.h>
 #include <rtl/digest.h>
@@ -74,6 +78,7 @@
 #include <rtl/stringutils.hxx>
 #include <rtl/textcvt.h>
 #include <rtl/textenc.h>
+#include <rtl/unload.h>
 #include <rtl/uri.hxx>
 #include <rtl/ustrbuf.h>
 #include <rtl/ustrbuf.hxx>
@@ -86,45 +91,47 @@
 #include <sal/typesizes.h>
 #endif // PCH_LEVEL >= 2
 #if PCH_LEVEL >= 3
-#include <basegfx/basegfxdllapi.h>
-#include <basegfx/color/bcolor.hxx>
-#include <basegfx/numeric/ftools.hxx>
-#include <basegfx/tuple/b3dtuple.hxx>
 #include <com/sun/star/beans/NamedValue.hpp>
 #include <com/sun/star/beans/PropertyValue.hpp>
 #include <com/sun/star/beans/XPropertySet.hpp>
 #include <com/sun/star/embed/StorageFormats.hpp>
+#include <com/sun/star/io/IOException.hpp>
 #include <com/sun/star/io/TempFile.hpp>
 #include <com/sun/star/io/XInputStream.hpp>
 #include <com/sun/star/io/XOutputStream.hpp>
 #include <com/sun/star/io/XSeekable.hpp>
 #include <com/sun/star/io/XStream.hpp>
+#include <com/sun/star/io/XTruncate.hpp>
 #include <com/sun/star/lang/DisposedException.hpp>
-#include <com/sun/star/lang/EventObject.hpp>
 #include <com/sun/star/lang/IllegalArgumentException.hpp>
 #include <com/sun/star/lang/XInitialization.hpp>
-#include <com/sun/star/lang/XMultiServiceFactory.hpp>
 #include <com/sun/star/lang/XServiceInfo.hpp>
 #include <com/sun/star/lang/XTypeProvider.hpp>
-#include <com/sun/star/lang/XUnoTunnel.hpp>
 #include <com/sun/star/packages/zip/ZipConstants.hpp>
+#include <com/sun/star/packages/zip/ZipException.hpp>
 #include <com/sun/star/packages/zip/ZipIOException.hpp>
 #include <com/sun/star/uno/Any.h>
 #include <com/sun/star/uno/Any.hxx>
 #include <com/sun/star/uno/Reference.h>
+#include <com/sun/star/uno/Reference.hxx>
 #include <com/sun/star/uno/RuntimeException.hpp>
 #include <com/sun/star/uno/Sequence.h>
 #include <com/sun/star/uno/Sequence.hxx>
 #include <com/sun/star/uno/Type.h>
 #include <com/sun/star/uno/Type.hxx>
 #include <com/sun/star/uno/TypeClass.hdl>
+#include <com/sun/star/uno/XAggregation.hpp>
 #include <com/sun/star/uno/XInterface.hpp>
 #include <com/sun/star/uno/XWeak.hpp>
 #include <com/sun/star/uno/genfunc.h>
 #include <com/sun/star/uno/genfunc.hxx>
 #include <com/sun/star/xml/crypto/CipherID.hpp>
 #include <com/sun/star/xml/crypto/DigestID.hpp>
+#include <com/sun/star/xml/crypto/KDFID.hpp>
+#include <comphelper/bytereader.hxx>
 #include <comphelper/comphelperdllapi.h>
+#include <comphelper/diagnose_ex.hxx>
+#include <comphelper/errcode.hxx>
 #include <comphelper/processfactory.hxx>
 #include <comphelper/refcountedmutex.hxx>
 #include <comphelper/sequence.hxx>
@@ -134,19 +141,24 @@
 #include <cppu/unotype.hxx>
 #include <cppuhelper/cppuhelperdllapi.h>
 #include <cppuhelper/exc_hlp.hxx>
-#include <cppuhelper/factory.hxx>
 #include <cppuhelper/implbase.hxx>
 #include <cppuhelper/implbase_ex.hxx>
 #include <cppuhelper/implbase_ex_post.hxx>
 #include <cppuhelper/implbase_ex_pre.hxx>
 #include <cppuhelper/supportsservice.hxx>
-#include <cppuhelper/typeprovider.hxx>
 #include <cppuhelper/weak.hxx>
+#include <cppuhelper/weakagg.hxx>
+#include <cppuhelper/weakref.hxx>
+#include <o3tl/cow_wrapper.hxx>
+#include <o3tl/intcmp.hxx>
+#include <o3tl/safeint.hxx>
 #include <o3tl/typed_flags_set.hxx>
 #include <o3tl/underlyingenumvalue.hxx>
 #include <salhelper/salhelperdllapi.h>
 #include <salhelper/simplereferenceobject.hxx>
-#include <comphelper/diagnose_ex.hxx>
+#include <tools/lineend.hxx>
+#include <tools/long.hxx>
+#include <tools/ref.hxx>
 #include <tools/toolsdllapi.h>
 #include <typelib/typeclass.h>
 #include <typelib/typedescription.h>
@@ -154,24 +166,22 @@
 #include <uno/any2.h>
 #include <uno/data.h>
 #include <uno/sequence2.h>
-#include <unotools/options.hxx>
 #include <unotools/unotoolsdllapi.h>
 #endif // PCH_LEVEL >= 3
 #if PCH_LEVEL >= 4
 #include <CRC32.hxx>
 #include <EncryptedDataHeader.hxx>
 #include <EncryptionData.hxx>
-#include <HashMaps.hxx>
 #include <PackageConstants.hxx>
-#include <ThreadedDeflater.hxx>
 #include <ZipEntry.hxx>
 #include <ZipEnumeration.hxx>
 #include <ZipFile.hxx>
 #include <ZipOutputEntry.hxx>
 #include <ZipOutputStream.hxx>
-#include <ZipPackageBuffer.hxx>
 #include <ZipPackageFolder.hxx>
 #include <ZipPackageStream.hxx>
+#include <package/InflateZlib.hxx>
+#include <package/Inflater.hxx>
 #include <package/packagedllapi.hxx>
 #endif // PCH_LEVEL >= 4
 

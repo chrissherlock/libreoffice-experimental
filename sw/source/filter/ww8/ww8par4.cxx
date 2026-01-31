@@ -44,8 +44,8 @@
 #include <fltshell.hxx>
 #include <shellio.hxx>
 
-#include <vcl/wmf.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/wmf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 
 #include "ww8scan.hxx"
 #include "ww8par.hxx"

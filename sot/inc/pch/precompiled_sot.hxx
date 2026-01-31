@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-04-11 19:48:19 using:
+ Generated on 2026-02-01 14:42:54 using:
  ./bin/update_pch sot sot --cutoff=5 --exclude:system --exclude:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -22,23 +22,30 @@
 
 #include <sal/config.h>
 #if PCH_LEVEL >= 1
+#include <algorithm>
 #include <cassert>
+#include <climits>
 #include <cstddef>
 #include <cstdlib>
 #include <limits>
 #include <memory>
 #include <new>
+#include <optional>
 #include <ostream>
 #include <string_view>
 #include <type_traits>
 #include <utility>
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
+#include <osl/diagnose.h>
 #include <osl/endian.h>
 #include <osl/file.hxx>
-#include <osl/mutex.hxx>
 #include <rtl/alloc.h>
+#include <rtl/character.hxx>
+#include <rtl/instance.hxx>
+#include <rtl/math.h>
 #include <rtl/ref.hxx>
+#include <rtl/strbuf.hxx>
 #include <rtl/string.hxx>
 #include <rtl/stringconcat.hxx>
 #include <rtl/stringutils.hxx>
@@ -46,15 +53,18 @@
 #include <rtl/ustrbuf.hxx>
 #include <rtl/ustring.h>
 #include <rtl/ustring.hxx>
+#include <sal/detail/log.h>
 #include <sal/log.hxx>
 #include <sal/types.h>
-#include <vcl/dllapi.h>
-#include <comphelper/errcode.hxx>
 #endif // PCH_LEVEL >= 2
 #if PCH_LEVEL >= 3
-#include <com/sun/star/uno/Reference.hxx>
+#include <com/sun/star/uno/Reference.h>
 #include <com/sun/star/uno/Sequence.hxx>
 #include <com/sun/star/uno/Type.h>
+#include <comphelper/comphelperdllapi.h>
+#include <comphelper/errcode.hxx>
+#include <cppuhelper/weak.hxx>
+#include <o3tl/safeint.hxx>
 #include <o3tl/typed_flags_set.hxx>
 #include <tools/ref.hxx>
 #include <tools/toolsdllapi.h>

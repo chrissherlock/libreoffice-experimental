@@ -11,7 +11,7 @@
 
 #include <memory>
 
-#include <vcl/mtfxmldump.hxx>
+#include <vcl/metafile/mtfxmldump.hxx>
 #include <sal/log.hxx>
 #include <tools/stream.hxx>
 #include <test/cppunitasserthelper.hxx>

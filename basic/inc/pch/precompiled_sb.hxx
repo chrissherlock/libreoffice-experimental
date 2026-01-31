@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2022-06-27 18:57:27 using:
+ Generated on 2026-02-01 14:42:50 using:
  ./bin/update_pch basic sb --cutoff=2 --exclude:system --exclude:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -22,73 +22,94 @@
 
 #include <sal/config.h>
 #if PCH_LEVEL >= 1
+#include <algorithm>
+#include <cassert>
 #include <chrono>
 #include <cstddef>
-#include <limits>
+#include <cstdlib>
+#include <iomanip>
 #include <math.h>
 #include <memory>
+#include <optional>
 #include <ostream>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string_view>
 #include <type_traits>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
+#include <osl/diagnose.h>
 #include <osl/endian.h>
+#include <osl/file.h>
 #include <osl/file.hxx>
 #include <osl/process.h>
+#include <osl/security.h>
 #include <osl/time.h>
 #include <rtl/character.hxx>
+#include <rtl/locale.h>
 #include <rtl/math.h>
 #include <rtl/math.hxx>
+#include <rtl/ref.hxx>
 #include <rtl/string.hxx>
 #include <rtl/textenc.h>
 #include <rtl/ustrbuf.hxx>
 #include <rtl/ustring.h>
 #include <rtl/ustring.hxx>
+#include <sal/detail/log.h>
 #include <sal/log.hxx>
 #include <sal/saldllapi.h>
 #include <sal/types.h>
 #include <vcl/dllapi.h>
-#include <comphelper/errcode.hxx>
-#include <vcl/graph.hxx>
 #include <vcl/mapmod.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/weld/weld.hxx>
-#include <vcl/wintypes.hxx>
 #endif // PCH_LEVEL >= 2
 #if PCH_LEVEL >= 3
 #include <basegfx/color/bcolor.hxx>
+#include <basegfx/numeric/ftools.hxx>
 #include <com/sun/star/i18n/TransliterationModules.hpp>
 #include <com/sun/star/i18n/TransliterationModulesExtra.hpp>
 #include <com/sun/star/lang/Locale.hpp>
+#include <com/sun/star/uno/Any.h>
 #include <com/sun/star/uno/Any.hxx>
 #include <com/sun/star/uno/Reference.h>
+#include <com/sun/star/uno/RuntimeException.hpp>
 #include <com/sun/star/uno/Sequence.hxx>
+#include <com/sun/star/uno/Type.hxx>
+#include <com/sun/star/uno/genfunc.hxx>
+#include <com/sun/star/util/SearchAlgorithms2.hpp>
+#include <comphelper/comphelperdllapi.h>
+#include <comphelper/errcode.hxx>
 #include <comphelper/processfactory.hxx>
 #include <comphelper/string.hxx>
+#include <cppu/cppudllapi.h>
+#include <cppu/unotype.hxx>
 #include <i18nlangtag/lang.h>
 #include <i18nutil/transliteration.hxx>
 #include <o3tl/cow_wrapper.hxx>
 #include <o3tl/safeint.hxx>
 #include <o3tl/string_view.hxx>
+#include <o3tl/temporary.hxx>
 #include <o3tl/typed_flags_set.hxx>
 #include <svl/SfxBroadcaster.hxx>
 #include <svl/numformat.hxx>
 #include <svl/zforlist.hxx>
 #include <tools/color.hxx>
 #include <tools/debug.hxx>
+#include <tools/gen.hxx>
 #include <tools/link.hxx>
-#include <tools/mapunit.hxx>
 #include <tools/ref.hxx>
 #include <tools/stream.hxx>
 #include <tools/toolsdllapi.h>
 #include <tools/urlobj.hxx>
+#include <tools/wldcrd.hxx>
+#include <uno/data.h>
+#include <uno/sequence2.h>
 #include <unotools/charclass.hxx>
-#include <unotools/syslocale.hxx>
+#include <unotools/resmgr.hxx>
 #include <unotools/transliterationwrapper.hxx>
 #include <unotools/unotoolsdllapi.h>
 #endif // PCH_LEVEL >= 3
@@ -104,9 +125,14 @@
 #include <basic/sbxmeth.hxx>
 #include <basic/sbxobj.hxx>
 #include <basic/sbxvar.hxx>
+#include <basiccharclass.hxx>
 #include <date.hxx>
+#include <errobject.hxx>
+#include <filefmt.hxx>
 #include <global.hxx>
+#include <image.hxx>
 #include <iosys.hxx>
+#include <opcodes.hxx>
 #include <rtlproto.hxx>
 #include <runtime.hxx>
 #include <sbintern.hxx>

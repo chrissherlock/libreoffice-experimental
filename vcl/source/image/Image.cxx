@@ -17,16 +17,18 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <sal/types.h>
+
 #include <vcl/alpha.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/graph.hxx>
 #include <vcl/graphicfilter.hxx>
 #include <vcl/image.hxx>
-#include <sal/types.h>
-#include <image.h>
 
 #include <bitmap/BitmapColorizeFilter.hxx>
+#include <image.h>
 
 using namespace css;
 

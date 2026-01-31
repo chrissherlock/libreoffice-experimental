@@ -16,7 +16,7 @@
 #include <test/bootstrapfixture.hxx>
 #include <test/xmltesttools.hxx>
 #include <vcl/alpha.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/gradient.hxx>
 #include <vcl/hatch.hxx>
 #include <vcl/lineinfo.hxx>
@@ -25,7 +25,7 @@
 #include <tools/fract.hxx>
 #include <tools/mapunit.hxx>
 #include <tools/stream.hxx>
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/filter/SvmReader.hxx>
 #include <vcl/filter/SvmWriter.hxx>
 #include <sal/log.hxx>

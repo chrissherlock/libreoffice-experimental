@@ -20,7 +20,7 @@
 #include <osl/file.hxx>
 #include <sfx2/new.hxx>
 #include <vcl/idle.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/outdev.hxx>
 #include <svl/itemset.hxx>
 #include <svl/eitem.hxx>

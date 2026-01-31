@@ -11,9 +11,9 @@
 #include <test/bootstrapfixture.hxx>
 #include <test/xmltesttools.hxx>
 #include <tools/stream.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/graph.hxx>
-#include <vcl/metaactiontypes.hxx>
+#include <vcl/metafile/MetaActionType.hxx>
 
 #include <filter/PictReader.hxx>
 

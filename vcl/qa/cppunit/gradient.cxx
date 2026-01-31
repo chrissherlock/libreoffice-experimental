@@ -10,9 +10,9 @@
 #include <test/bootstrapfixture.hxx>
 
 #include <vcl/gradient.hxx>
-#include <vcl/gdimtf.hxx>
-#include <vcl/metaact.hxx>
-#include <vcl/metaactiontypes.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <vcl/metafile/MetaActionType.hxx>
 
 class VclGradientTest : public test::BootstrapFixture
 {

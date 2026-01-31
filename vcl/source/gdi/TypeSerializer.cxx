@@ -30,7 +30,7 @@
 #include <vcl/filter/SvmReader.hxx>
 #include <vcl/filter/SvmWriter.hxx>
 #include <vcl/graph.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/dibtools.hxx>
 #include <vcl/gradient.hxx>
 #include <vcl/gfxlink.hxx>

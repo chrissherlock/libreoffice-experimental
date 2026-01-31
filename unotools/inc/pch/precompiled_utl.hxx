@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-03-08 13:22:27 using:
+ Generated on 2026-02-01 14:42:56 using:
  ./bin/update_pch unotools utl --cutoff=3 --exclude:system --exclude:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -25,15 +25,18 @@
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
+#include <cstdlib>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <ostream>
-#include <stddef.h>
 #include <string_view>
-#include <type_traits>
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <boost/locale.hpp>
+#include <boost/locale/gnu_gettext.hpp>
+#include <boost/version.hpp>
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
 #include <osl/detail/file.h>
@@ -43,17 +46,16 @@
 #include <osl/mutex.hxx>
 #include <osl/nlsupport.h>
 #include <osl/process.h>
-#include <osl/thread.h>
 #include <osl/thread.hxx>
 #include <osl/time.h>
 #include <rtl/alloc.h>
 #include <rtl/bootstrap.hxx>
 #include <rtl/character.hxx>
-#include <rtl/instance.hxx>
+#include <rtl/crc.h>
 #include <rtl/locale.h>
 #include <rtl/math.hxx>
 #include <rtl/ref.hxx>
-#include <rtl/string.h>
+#include <rtl/strbuf.hxx>
 #include <rtl/string.hxx>
 #include <rtl/tencinfo.h>
 #include <rtl/textenc.h>
@@ -61,12 +63,11 @@
 #include <rtl/ustrbuf.hxx>
 #include <rtl/ustring.h>
 #include <rtl/ustring.hxx>
+#include <rtl/uuid.h>
 #include <sal/log.hxx>
 #include <sal/macros.h>
 #include <sal/saldllapi.h>
 #include <sal/types.h>
-#include <sal/typesizes.h>
-#include <comphelper/errcode.hxx>
 #endif // PCH_LEVEL >= 2
 #if PCH_LEVEL >= 3
 #include <com/sun/star/beans/NamedValue.hpp>
@@ -80,6 +81,7 @@
 #include <com/sun/star/io/BufferSizeExceededException.hpp>
 #include <com/sun/star/io/NotConnectedException.hpp>
 #include <com/sun/star/io/XActiveDataSink.hpp>
+#include <com/sun/star/lang/IllegalArgumentException.hpp>
 #include <com/sun/star/lang/Locale.hpp>
 #include <com/sun/star/lang/XComponent.hpp>
 #include <com/sun/star/lang/XServiceInfo.hpp>
@@ -91,15 +93,16 @@
 #include <com/sun/star/uno/Reference.h>
 #include <com/sun/star/uno/Reference.hxx>
 #include <com/sun/star/uno/RuntimeException.hpp>
-#include <com/sun/star/uno/Sequence.h>
 #include <com/sun/star/uno/Sequence.hxx>
 #include <com/sun/star/uno/XInterface.hpp>
 #include <com/sun/star/util/Date.hpp>
-#include <com/sun/star/util/Time.hpp>
 #include <com/sun/star/util/XChangesBatch.hpp>
 #include <comphelper/comphelperdllapi.h>
+#include <comphelper/configuration.hxx>
 #include <comphelper/configurationhelper.hxx>
+#include <comphelper/diagnose_ex.hxx>
 #include <comphelper/processfactory.hxx>
+#include <comphelper/propertyvalue.hxx>
 #include <comphelper/sequence.hxx>
 #include <cppu/cppudllapi.h>
 #include <cppu/unotype.hxx>
@@ -111,16 +114,13 @@
 #include <i18nutil/transliteration.hxx>
 #include <o3tl/enumarray.hxx>
 #include <o3tl/safeint.hxx>
+#include <o3tl/string_view.hxx>
 #include <o3tl/typed_flags_set.hxx>
-#include <o3tl/underlyingenumvalue.hxx>
+#include <officecfg/Office/Common.hxx>
+#include <officecfg/Setup.hxx>
 #include <salhelper/condition.hxx>
 #include <tools/date.hxx>
 #include <tools/debug.hxx>
-#include <comphelper/diagnose_ex.hxx>
-#include <tools/lineend.hxx>
-#include <tools/long.hxx>
-#include <tools/ref.hxx>
-#include <tools/stream.hxx>
 #include <tools/time.hxx>
 #include <tools/toolsdllapi.h>
 #include <tools/urlobj.hxx>
@@ -136,10 +136,10 @@
 #include <unotools/localedatawrapper.hxx>
 #include <unotools/options.hxx>
 #include <unotools/pathoptions.hxx>
-#include <unotools/securityoptions.hxx>
 #include <unotools/streamwrap.hxx>
 #include <unotools/syslocale.hxx>
 #include <unotools/syslocaleoptions.hxx>
+#include <unotools/tempfile.hxx>
 #include <unotools/ucbhelper.hxx>
 #include <unotools/unotoolsdllapi.h>
 #endif // PCH_LEVEL >= 4

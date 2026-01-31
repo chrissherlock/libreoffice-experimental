@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2023-10-28 10:48:29 using:
+ Generated on 2026-02-12 22:45:46 using:
  ./bin/update_pch connectivity firebird_sdbc --cutoff=2 --exclude:system --exclude:module --exclude:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -26,6 +26,7 @@
 #include <cstddef>
 #include <memory>
 #include <string_view>
+#include <type_traits>
 #include <vector>
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
@@ -58,7 +59,6 @@
 #include <com/sun/star/sdbc/TransactionIsolation.hpp>
 #include <com/sun/star/sdbc/XRow.hpp>
 #include <com/sun/star/sdbcx/XColumnsSupplier.hpp>
-#include <com/sun/star/uno/Reference.hxx>
 #include <comphelper/comphelperdllapi.h>
 #include <comphelper/sequence.hxx>
 #include <comphelper/servicehelper.hxx>

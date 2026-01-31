@@ -25,10 +25,10 @@
 #include <unotest/directories.hxx>
 #include <comphelper/hash.hxx>
 #include <unotools/tempfile.hxx>
-#include <vcl/metaact.hxx>
-#include <vcl/metaactiontypes.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <vcl/metafile/MetaActionType.hxx>
 #include <vcl/vectorgraphicdata.hxx>
-#include <vcl/wmf.hxx>
+#include <vcl/metafile/wmf.hxx>
 #include "CommonTools.hxx"
 
 #include <impgraph.hxx>

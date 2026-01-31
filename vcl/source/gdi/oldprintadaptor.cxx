@@ -21,8 +21,9 @@
 
 #include <comphelper/propertyvalue.hxx>
 #include <tools/mapunit.hxx>
+
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/oldprintadaptor.hxx>
-#include <vcl/gdimtf.hxx>
 
 #include <com/sun/star/awt/Size.hpp>
 

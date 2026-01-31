@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-04-06 09:21:31 using:
+ Generated on 2026-02-01 18:49:40 using:
  ./bin/update_pch tools tl --cutoff=5 --exclude:system --exclude:module --exclude:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -24,6 +24,7 @@
 #if PCH_LEVEL >= 1
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
@@ -43,19 +44,21 @@
 #include <osl/diagnose.h>
 #include <osl/endian.h>
 #include <osl/file.hxx>
+#include <osl/interlck.h>
 #include <osl/process.h>
 #include <osl/thread.h>
 #include <rtl/bootstrap.hxx>
 #include <rtl/character.hxx>
+#include <rtl/math.h>
 #include <rtl/math.hxx>
-#include <rtl/strbuf.hxx>
+#include <rtl/ref.hxx>
 #include <rtl/string.h>
 #include <rtl/string.hxx>
 #include <rtl/stringconcat.hxx>
 #include <rtl/stringutils.hxx>
 #include <rtl/tencinfo.h>
+#include <rtl/textcvt.h>
 #include <rtl/textenc.h>
-#include <rtl/ustrbuf.h>
 #include <rtl/ustrbuf.hxx>
 #include <rtl/ustring.h>
 #include <rtl/ustring.hxx>
@@ -67,8 +70,10 @@
 #endif // PCH_LEVEL >= 2
 #if PCH_LEVEL >= 3
 #include <basegfx/basegfxdllapi.h>
-#include <basegfx/vector/b2enums.hxx>
-#include <o3tl/cow_wrapper.hxx>
+#include <com/sun/star/uno/Any.hxx>
+#include <comphelper/comphelperdllapi.h>
+#include <o3tl/concepts.hxx>
+#include <o3tl/safeint.hxx>
 #endif // PCH_LEVEL >= 3
 #if PCH_LEVEL >= 4
 #include <tools/debug.hxx>

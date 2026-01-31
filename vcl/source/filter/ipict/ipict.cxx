@@ -24,7 +24,7 @@
 #include <vcl/BitmapTools.hxx>
 #include <vcl/RawBitmap.hxx>
 #include <vcl/graph.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <tools/mapunit.hxx>
 #include <tools/poly.hxx>
 #include <tools/fract.hxx>

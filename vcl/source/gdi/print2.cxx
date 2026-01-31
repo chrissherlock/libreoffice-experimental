@@ -19,7 +19,7 @@
 
 #include <sal/log.hxx>
 
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/print.hxx>
 #include <vcl/printer/Options.hxx>
 

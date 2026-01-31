@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-03-08 13:22:28 using:
+ Generated on 2026-02-01 14:42:52 using:
  ./bin/update_pch unoxml unoxml --cutoff=1 --exclude:system --exclude:module --exclude:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -27,11 +27,12 @@
 #include <stdarg.h>
 #include <string.h>
 #include <string_view>
+#include <utility>
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
 #include <osl/diagnose.h>
 #include <osl/mutex.hxx>
-#include <rtl/instance.hxx>
+#include <rtl/ref.hxx>
 #include <rtl/ustrbuf.hxx>
 #include <sal/log.hxx>
 #endif // PCH_LEVEL >= 2
@@ -50,20 +51,24 @@
 #include <com/sun/star/xml/sax/XExtendedDocumentHandler.hpp>
 #include <com/sun/star/xml/xpath/XPathException.hpp>
 #include <comphelper/attributelist.hxx>
+#include <comphelper/diagnose_ex.hxx>
 #include <comphelper/processfactory.hxx>
 #include <comphelper/servicehelper.hxx>
 #include <cppuhelper/implbase.hxx>
 #include <cppuhelper/supportsservice.hxx>
+#include <libxml/entities.h>
+#include <libxml/parser.h>
 #include <libxml/tree.h>
+#include <libxml/xmlIO.h>
 #include <libxml/xmlerror.h>
 #include <libxml/xmlstring.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 #include <o3tl/safeint.hxx>
 #include <sax/fastattribs.hxx>
-#include <comphelper/diagnose_ex.hxx>
 #include <ucbhelper/commandenvironment.hxx>
 #include <ucbhelper/content.hxx>
+#include <unotools/weakref.hxx>
 #include <xmloff/xmlimp.hxx>
 #endif // PCH_LEVEL >= 3
 #if PCH_LEVEL >= 4

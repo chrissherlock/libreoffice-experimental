@@ -17,21 +17,22 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <vcl/alpha.hxx>
-#include <vcl/gdimetafiletools.hxx>
-#include <vcl/metaact.hxx>
-#include <vcl/metaactiontypes.hxx>
-#include <vcl/canvastools.hxx>
+#include <osl/diagnose.h>
+#include <tools/stream.hxx>
+#include <tools/mapunit.hxx>
 #include <basegfx/polygon/b2dpolygonclipper.hxx>
 #include <basegfx/matrix/b2dhommatrixtools.hxx>
 #include <basegfx/polygon/b2dpolypolygontools.hxx>
 #include <basegfx/polygon/b2dpolygontools.hxx>
-#include <vcl/virdev.hxx>
-#include <vcl/svapp.hxx>
+
+#include <vcl/alpha.hxx>
+#include <vcl/canvastools.hxx>
 #include <vcl/graphictools.hxx>
-#include <osl/diagnose.h>
-#include <tools/stream.hxx>
-#include <tools/mapunit.hxx>
+#include <vcl/metafile/metafiletools.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <vcl/metafile/MetaActionType.hxx>
+#include <vcl/svapp.hxx>
+#include <vcl/virdev.hxx>
 
 // helpers
 

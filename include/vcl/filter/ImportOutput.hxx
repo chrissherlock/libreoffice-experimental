@@ -12,7 +12,7 @@
 #include <vcl/dllapi.h>
 #include <vcl/bitmap.hxx>
 #include <vcl/animate/Animation.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 
 class VCL_DLLPUBLIC ImportOutput
 {

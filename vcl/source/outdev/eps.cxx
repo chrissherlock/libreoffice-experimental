@@ -19,7 +19,7 @@
 
 #include <vcl/gfxlink.hxx>
 #include <vcl/graph.hxx>
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/virdev.hxx>
 
 #include <ClippingController.hxx>

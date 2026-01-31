@@ -39,9 +39,9 @@
 #include "ww8par.hxx"
 #include "ww8par2.hxx"
 #include "ww8graf.hxx"
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/graphicfilter.hxx>
-#include <vcl/wmf.hxx>
+#include <vcl/metafile/wmf.hxx>
 
 using namespace ::com::sun::star;
 using namespace sw::types;

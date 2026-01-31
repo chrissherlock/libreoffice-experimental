@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-03-08 13:11:37 using:
+ Generated on 2026-02-01 14:42:51 using:
  ./bin/update_pch canvas cairocanvas --cutoff=1 --exclude:system --include:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -25,19 +25,21 @@
 #include <algorithm>
 #include <cairo.h>
 #include <math.h>
-#include <memory>
+#include <pixman.h>
 #include <tuple>
+#include <utility>
 #include <boost/cast.hpp>
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
 #include <osl/mutex.hxx>
-#include <rtl/instance.hxx>
 #include <rtl/math.hxx>
 #include <sal/log.hxx>
 #include <vcl/BitmapTools.hxx>
+#include <vcl/bitmap.hxx>
 #include <vcl/cairo.hxx>
 #include <vcl/canvastools.hxx>
 #include <vcl/dibtools.hxx>
+#include <vcl/kernarray.hxx>
 #include <vcl/metric.hxx>
 #include <vcl/skia/SkiaHelper.hxx>
 #include <vcl/sysdata.hxx>
@@ -71,12 +73,13 @@
 #include <com/sun/star/rendering/XCanvas.hpp>
 #include <com/sun/star/rendering/XIntegerBitmapColorSpace.hpp>
 #include <com/sun/star/util/Endianness.hpp>
+#include <comphelper/diagnose_ex.hxx>
 #include <comphelper/sequence.hxx>
 #include <cppuhelper/implbase.hxx>
 #include <cppuhelper/supportsservice.hxx>
 #include <i18nlangtag/languagetag.hxx>
 #include <toolkit/helper/vclunohelper.hxx>
-#include <comphelper/diagnose_ex.hxx>
+#include <tools/mapunit.hxx>
 #include <tools/stream.hxx>
 #endif // PCH_LEVEL >= 3
 #if PCH_LEVEL >= 4

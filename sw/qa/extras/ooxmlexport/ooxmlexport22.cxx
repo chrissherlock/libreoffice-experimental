@@ -22,7 +22,7 @@
 #include <unotxdoc.hxx>
 #include <docsh.hxx>
 #include <IDocumentSettingAccess.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 
 #include <set>
 

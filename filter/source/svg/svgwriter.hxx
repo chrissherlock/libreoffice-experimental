@@ -22,8 +22,6 @@
 #include <cppuhelper/implbase.hxx>
 #include <rtl/ustring.hxx>
 #include <osl/diagnose.h>
-#include <vcl/gdimtf.hxx>
-#include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/graphictools.hxx>
 #include <xmloff/xmlexp.hxx>
@@ -40,6 +38,9 @@
 #include <memory>
 #include <stack>
 #include <unordered_map>
+
+class GDIMetaFile;
+class MetaAction;
 
 namespace basegfx { class BColorStops; }
 

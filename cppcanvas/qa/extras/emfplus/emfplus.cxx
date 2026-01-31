@@ -13,7 +13,7 @@
 #include <sfx2/sfxbasemodel.hxx>
 #include <vcl/BitmapReadAccess.hxx>
 #include <vcl/filter/PngImageWriter.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <tools/stream.hxx>
 
 using namespace com::sun::star;

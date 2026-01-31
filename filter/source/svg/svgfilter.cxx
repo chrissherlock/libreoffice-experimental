@@ -48,6 +48,7 @@
 #include "svgfilter.hxx"
 
 #include <svx/unopage.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/graphicfilter.hxx>
 #include <vcl/vectorgraphicdata.hxx>
 #include <vcl/window.hxx>

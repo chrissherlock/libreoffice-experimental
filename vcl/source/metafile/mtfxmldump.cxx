@@ -7,12 +7,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include <vcl/mtfxmldump.hxx>
 #include <tools/XmlWriter.hxx>
 #include <tools/fract.hxx>
 #include <tools/mapunit.hxx>
 
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <vcl/metafile/mtfxmldump.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/bitmap.hxx>
 #include <vcl/BitmapReadAccess.hxx>

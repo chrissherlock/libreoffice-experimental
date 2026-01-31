@@ -27,8 +27,8 @@
 #include <unotools/resmgr.hxx>
 #include <vcl/alpha.hxx>
 #include <vcl/svapp.hxx>
-#include <vcl/metaact.hxx>
-#include <vcl/metaactiontypes.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <vcl/metafile/MetaActionType.hxx>
 #include <vcl/graph.hxx>
 #include <vcl/BitmapReadAccess.hxx>
 #include <vcl/region.hxx>

@@ -37,7 +37,7 @@
 #include <rtl/ustrbuf.hxx>
 #include <vcl/bitmap.hxx>
 #include <vcl/filter/SvmWriter.hxx>
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <toolkit/helper/vclunohelper.hxx>
 #include <comphelper/diagnose_ex.hxx>
 #include <vcl/svapp.hxx>
@@ -58,7 +58,7 @@
 #include <comphelper/extract.hxx>
 #include <comphelper/sequence.hxx>
 #include <svx/svditer.hxx>
-#include <vcl/wmf.hxx>
+#include <vcl/metafile/wmf.hxx>
 #include <svx/svdoole2.hxx>
 #include <svx/svdpool.hxx>
 #include <svx/svdview.hxx>

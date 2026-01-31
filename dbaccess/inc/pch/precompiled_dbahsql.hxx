@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-03-08 13:13:00 using:
+ Generated on 2026-02-01 14:42:58 using:
  ./bin/update_pch dbaccess dbahsql --cutoff=1 --exclude:system --include:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -23,6 +23,7 @@
 #include <sal/config.h>
 #if PCH_LEVEL >= 1
 #include <string_view>
+#include <utility>
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
 #include <rtl/ustrbuf.hxx>
@@ -46,7 +47,12 @@
 #include <comphelper/string.hxx>
 #include <connectivity/dbexception.hxx>
 #include <connectivity/dbtools.hxx>
+#include <o3tl/numeric.hxx>
+#include <o3tl/string_view.hxx>
+#include <tools/datetime.hxx>
+#include <tools/duration.hxx>
 #include <tools/stream.hxx>
+#include <tools/time.hxx>
 #include <unotools/ucbstreamhelper.hxx>
 #endif // PCH_LEVEL >= 3
 #if PCH_LEVEL >= 4

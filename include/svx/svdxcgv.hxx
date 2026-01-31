@@ -21,7 +21,7 @@
 
 #include <svx/svdedxv.hxx>
 
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <svx/svxdllapi.h>
 
 class SVXCORE_DLLPUBLIC SdrExchangeView : public SdrObjEditView

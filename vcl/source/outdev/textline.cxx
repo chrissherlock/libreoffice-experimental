@@ -27,7 +27,7 @@
 #include <tools/lazydelete.hxx>
 
 #include <vcl/dropcache.hxx>
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>

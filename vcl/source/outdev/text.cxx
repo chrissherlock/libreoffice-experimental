@@ -26,7 +26,8 @@
 
 #include <vcl/fntstyle.hxx>
 #include <vcl/glyphitem.hxx>
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <vcl/metafile/ScopedMetaGroup.hxx>
 #include <vcl/mnemonic.hxx>
 #include <vcl/rendercontext/SystemTextColorFlags.hxx>
 #include <vcl/text/TextLayoutData.hxx>
@@ -1257,8 +1258,15 @@ void OutputDevice::DrawText(const tools::Rectangle& rRect, const OUString& rOrig
     bool bDecomposeTextRectAction
         = (_pTextLayout != nullptr) && _pTextLayout->DecomposeTextRectAction();
 
-    if (mpMetaFile && !bDecomposeTextRectAction)
-        mpMetaFile->AddAction(new MetaTextRectAction(rRect, rOrigStr, nStyle));
+    // Semantic Tagging: Group decomposed actions or record atomic action
+    std::optional<vcl::ScopedMetaGroup> oMetaGroup;
+    if (mpMetaFile)
+    {
+        if (!bDecomposeTextRectAction)
+            mpMetaFile->AddAction(new MetaTextRectAction(rRect, rOrigStr, nStyle));
+        else
+            oMetaGroup.emplace(mpMetaFile, "DrawTextRect Decomposed");
+    }
 
     if ((!IsDeviceOutputNecessary() && !pVector && !bDecomposeTextRectAction) || rOrigStr.isEmpty()
         || rRect.IsEmpty())

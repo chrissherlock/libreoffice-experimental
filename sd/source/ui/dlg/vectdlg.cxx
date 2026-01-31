@@ -23,7 +23,7 @@
 #include <vcl/BitmapReadAccess.hxx>
 #include <vcl/bitmap/BitmapSimpleColorQuantizationFilter.hxx>
 #include <vcl/bitmap/Vectorizer.hxx>
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/weld/Builder.hxx>
 #include <vcl/weld/Dialog.hxx>

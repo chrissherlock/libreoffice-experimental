@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-03-08 13:13:45 using:
+ Generated on 2026-02-01 18:49:40 using:
  ./bin/update_pch emfio emfio --cutoff=8 --exclude:system --exclude:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -23,27 +23,35 @@
 #include <sal/config.h>
 #if PCH_LEVEL >= 1
 #include <memory>
+#include <utility>
 #include <vector>
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
 #include <osl/diagnose.h>
 #include <osl/endian.h>
 #include <osl/mutex.hxx>
+#include <osl/process.h>
 #include <osl/thread.h>
 #include <rtl/bootstrap.hxx>
 #include <rtl/crc.h>
 #include <rtl/instance.hxx>
 #include <rtl/ref.hxx>
+#include <rtl/strbuf.hxx>
 #include <rtl/string.hxx>
 #include <rtl/tencinfo.h>
+#include <rtl/ustrbuf.hxx>
+#include <rtl/ustring.hxx>
 #include <sal/log.hxx>
-#include <sal/macros.h>
 #include <sal/types.h>
+#include <vcl/bitmap.hxx>
 #include <vcl/dllapi.h>
+#include <vcl/mapmod.hxx>
+#include <vcl/vclptr.hxx>
 #endif // PCH_LEVEL >= 2
 #if PCH_LEVEL >= 3
 #include <salhelper/simplereferenceobject.hxx>
 #include <tools/gen.hxx>
+#include <tools/long.hxx>
 #endif // PCH_LEVEL >= 3
 #if PCH_LEVEL >= 4
 #endif // PCH_LEVEL >= 4

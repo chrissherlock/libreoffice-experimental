@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-03-08 13:12:43 using:
+ Generated on 2026-02-01 14:42:48 using:
  ./bin/update_pch connectivity calc --cutoff=2 --exclude:system --exclude:module --exclude:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -23,15 +23,14 @@
 #include <sal/config.h>
 #if PCH_LEVEL >= 1
 #include <cassert>
-#include <cstddef>
 #include <cstring>
 #include <limits>
 #include <new>
 #include <string_view>
+#include <type_traits>
+#include <utility>
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
-#include <rtl/alloc.h>
-#include <rtl/instance.hxx>
 #include <rtl/math.hxx>
 #include <rtl/stringconcat.hxx>
 #include <rtl/stringutils.hxx>
@@ -39,7 +38,6 @@
 #include <rtl/ustrbuf.h>
 #include <rtl/ustrbuf.hxx>
 #include <rtl/ustring.hxx>
-#include <rtl/uuid.h>
 #include <sal/log.hxx>
 #include <sal/types.h>
 #endif // PCH_LEVEL >= 2
@@ -59,16 +57,11 @@
 #include <com/sun/star/sheet/XDatabaseRanges.hpp>
 #include <com/sun/star/sheet/XSpreadsheet.hpp>
 #include <com/sun/star/sheet/XSpreadsheetDocument.hpp>
-#include <com/sun/star/uno/Sequence.hxx>
-#include <cppuhelper/basemutex.hxx>
-#include <cppuhelper/compbase.hxx>
-#include <cppuhelper/cppuhelperdllapi.h>
-#include <file/filedllapi.hxx>
+#include <o3tl/safeint.hxx>
 #include <resource/sharedresources.hxx>
 #include <tools/toolsdllapi.h>
 #endif // PCH_LEVEL >= 3
 #if PCH_LEVEL >= 4
-#include <connectivity/CommonTools.hxx>
 #include <connectivity/dbexception.hxx>
 #include <connectivity/dbtoolsdllapi.hxx>
 #endif // PCH_LEVEL >= 4

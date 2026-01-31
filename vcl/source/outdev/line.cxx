@@ -25,7 +25,7 @@
 #include <comphelper/configuration.hxx>
 
 #include <vcl/lineinfo.hxx>
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/virdev.hxx>
 

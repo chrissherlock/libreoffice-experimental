@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-03-08 13:13:03 using:
+ Generated on 2026-02-01 14:42:58 using:
  ./bin/update_pch dbaccess dbaxml --cutoff=2 --exclude:system --exclude:module --exclude:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -25,10 +25,10 @@
 #include <cassert>
 #include <cstddef>
 #include <cstring>
-#include <functional>
 #include <limits>
 #include <memory>
 #include <new>
+#include <optional>
 #include <string_view>
 #include <type_traits>
 #include <utility>
@@ -49,12 +49,14 @@
 #include <sal/types.h>
 #include <vcl/dllapi.h>
 #include <vcl/svapp.hxx>
+#include <vcl/vclenum.hxx>
 #endif // PCH_LEVEL >= 2
 #if PCH_LEVEL >= 3
-#include <com/sun/star/awt/TextAlign.hpp>
 #include <com/sun/star/beans/XPropertySet.hpp>
 #include <com/sun/star/container/XNameContainer.hpp>
 #include <com/sun/star/embed/ElementModes.hpp>
+#include <com/sun/star/frame/XController2.hpp>
+#include <com/sun/star/frame/XFrame.hpp>
 #include <com/sun/star/frame/XModel.hpp>
 #include <com/sun/star/io/XInputStream.hpp>
 #include <com/sun/star/lang/XMultiServiceFactory.hpp>
@@ -67,13 +69,12 @@
 #include <com/sun/star/sdbcx/XDataDescriptorFactory.hpp>
 #include <com/sun/star/sdbcx/XTablesSupplier.hpp>
 #include <com/sun/star/uno/Any.h>
-#include <com/sun/star/uno/Reference.h>
 #include <com/sun/star/uno/Reference.hxx>
-#include <com/sun/star/uno/Sequence.h>
 #include <com/sun/star/uno/Sequence.hxx>
 #include <com/sun/star/uno/Type.h>
 #include <com/sun/star/util/XNumberFormatsSupplier.hpp>
 #include <comphelper/comphelperdllapi.h>
+#include <comphelper/diagnose_ex.hxx>
 #include <comphelper/namedvaluecollection.hxx>
 #include <comphelper/propertysequence.hxx>
 #include <comphelper/sequence.hxx>
@@ -84,12 +85,11 @@
 #include <cppuhelper/implbase.hxx>
 #include <cppuhelper/implbase_ex.hxx>
 #include <cppuhelper/weak.hxx>
+#include <o3tl/safeint.hxx>
 #include <o3tl/typed_flags_set.hxx>
-#include <salhelper/simplereferenceobject.hxx>
 #include <sax/tools/converter.hxx>
 #include <sfx2/docfile.hxx>
 #include <svl/filenotation.hxx>
-#include <comphelper/diagnose_ex.hxx>
 #include <unotools/pathoptions.hxx>
 #include <xmloff/ProgressBarHelper.hxx>
 #include <xmloff/dllapi.h>

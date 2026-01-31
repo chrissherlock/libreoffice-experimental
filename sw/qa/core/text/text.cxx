@@ -17,8 +17,8 @@
 #include <com/sun/star/text/WritingMode2.hpp>
 #include <com/sun/star/text/XDocumentIndex.hpp>
 
-#include <vcl/gdimtf.hxx>
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/filter/PDFiumLibrary.hxx>
 #include <vcl/pdf/PDFAnnotAActionType.hxx>
 #include <vcl/pdf/PDFAnnotationSubType.hxx>

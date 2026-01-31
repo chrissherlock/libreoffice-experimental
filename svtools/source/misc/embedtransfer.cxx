@@ -29,7 +29,7 @@
 #include <tools/stream.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/filter/SvmWriter.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <comphelper/fileformat.h>
 #include <comphelper/propertysequence.hxx>
 #include <comphelper/storagehelper.hxx>

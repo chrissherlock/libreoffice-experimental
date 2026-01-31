@@ -17,7 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 #include <drawinglayer/processor2d/processor2dtools.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include "vclpixelprocessor2d.hxx"
 #include "vclmetafileprocessor2d.hxx"
 #include <config_vclplug.h>

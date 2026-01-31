@@ -43,7 +43,7 @@
 #include <osl/file.hxx>
 #include <vcl/graphicfilter.hxx>
 #include <vcl/FilterConfigItem.hxx>
-#include <vcl/wmf.hxx>
+#include <vcl/metafile/wmf.hxx>
 #include "igif/gifread.hxx"
 #include <vcl/pdfread.hxx>
 #include "jpeg/jpeg.hxx"

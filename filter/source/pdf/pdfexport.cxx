@@ -27,7 +27,7 @@
 #include <utility>
 #include <vcl/canvastools.hxx>
 #include <vcl/mapmod.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/graph.hxx>
 #include <vcl/graphic/GraphicMetadata.hxx>
 #include <vcl/pdf/PDFEncryptionInitialization.hxx>

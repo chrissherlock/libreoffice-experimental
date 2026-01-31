@@ -27,7 +27,7 @@
 
 #include <vcl/cursor.hxx>
 #include <vcl/lineinfo.hxx>
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/wrkwin.hxx>
 

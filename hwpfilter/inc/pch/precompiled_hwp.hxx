@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-03-08 13:13:58 using:
+ Generated on 2026-02-01 14:42:53 using:
  ./bin/update_pch hwpfilter hwp --cutoff=3 --exclude:system --include:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -25,55 +25,96 @@
 #include <algorithm>
 #include <assert.h>
 #include <cassert>
+#include <climits>
+#include <cmath>
+#include <concepts>
 #include <cstddef>
 #include <cstdlib>
+#include <cstring>
 #include <errno.h>
+#include <initializer_list>
 #include <iomanip>
 #include <limits>
 #include <math.h>
 #include <memory>
 #include <new>
+#include <optional>
 #include <ostream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <string>
 #include <string_view>
 #include <type_traits>
 #include <utility>
+#include <vector>
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
 #include <osl/diagnose.h>
+#include <osl/doublecheckedlocking.h>
+#include <osl/getglobalmutex.hxx>
 #include <osl/interlck.h>
+#include <osl/mutex.h>
+#include <osl/mutex.hxx>
 #include <rtl/alloc.h>
 #include <rtl/character.hxx>
+#include <rtl/instance.hxx>
+#include <rtl/math.h>
+#include <rtl/strbuf.h>
+#include <rtl/strbuf.hxx>
 #include <rtl/string.h>
 #include <rtl/string.hxx>
 #include <rtl/stringconcat.hxx>
 #include <rtl/stringutils.hxx>
 #include <rtl/textcvt.h>
 #include <rtl/textenc.h>
+#include <rtl/ustrbuf.h>
 #include <rtl/ustrbuf.hxx>
 #include <rtl/ustring.h>
 #include <rtl/ustring.hxx>
+#include <sal/detail/log.h>
+#include <sal/log.hxx>
 #include <sal/macros.h>
 #include <sal/saldllapi.h>
 #include <sal/types.h>
-#include <vcl/dllapi.h>
 #endif // PCH_LEVEL >= 2
 #if PCH_LEVEL >= 3
+#include <basegfx/basegfxdllapi.h>
+#include <basegfx/numeric/ftools.hxx>
+#include <basegfx/tuple/Tuple2D.hxx>
+#include <basegfx/tuple/b2ituple.hxx>
+#include <basegfx/utils/common.hxx>
+#include <com/sun/star/lang/XTypeProvider.hpp>
 #include <com/sun/star/uno/Any.h>
 #include <com/sun/star/uno/Any.hxx>
 #include <com/sun/star/uno/Reference.h>
 #include <com/sun/star/uno/RuntimeException.hpp>
+#include <com/sun/star/uno/Sequence.h>
+#include <com/sun/star/uno/Sequence.hxx>
 #include <com/sun/star/uno/Type.h>
 #include <com/sun/star/uno/Type.hxx>
 #include <com/sun/star/uno/TypeClass.hdl>
 #include <com/sun/star/uno/XInterface.hpp>
+#include <com/sun/star/uno/XWeak.hpp>
 #include <com/sun/star/uno/genfunc.h>
 #include <com/sun/star/uno/genfunc.hxx>
+#include <comphelper/comphelperdllapi.h>
+#include <comphelper/errcode.hxx>
 #include <cppu/cppudllapi.h>
 #include <cppu/unotype.hxx>
+#include <cppuhelper/cppuhelperdllapi.h>
+#include <cppuhelper/implbase_ex.hxx>
+#include <cppuhelper/implbase_ex_post.hxx>
+#include <cppuhelper/implbase_ex_pre.hxx>
+#include <cppuhelper/weak.hxx>
+#include <o3tl/concepts.hxx>
+#include <o3tl/safeint.hxx>
+#include <o3tl/sprintf.hxx>
+#include <o3tl/typed_flags_set.hxx>
 #include <o3tl/underlyingenumvalue.hxx>
+#include <tools/lineend.hxx>
+#include <tools/long.hxx>
+#include <tools/ref.hxx>
 #include <tools/toolsdllapi.h>
 #include <typelib/typeclass.h>
 #include <typelib/typedescription.h>

@@ -13,15 +13,17 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2019-05-18 14:55:22 using:
+ Generated on 2026-02-01 14:42:54 using:
  ./bin/update_pch external/libcmis libcmis --cutoff=1 --exclude:system --include:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
  ./bin/update_pch_bisect ./external/libcmis/inc/pch/precompiled_libcmis.hxx "make external/libcmis.build" --find-conflicts
 */
 
+#include <sal/config.h>
 #if PCH_LEVEL >= 1
 #include <algorithm>
+#include <assert.h>
 #include <cctype>
 #include <errno.h>
 #include <locale>

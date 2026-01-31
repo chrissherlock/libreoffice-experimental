@@ -30,7 +30,7 @@
 #include <tools/urlobj.hxx>
 
 #include <utility>
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/print.hxx>
 #include <vcl/printer/Options.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>

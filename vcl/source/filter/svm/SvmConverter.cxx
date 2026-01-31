@@ -29,7 +29,8 @@
 #include <vcl/dibtools.hxx>
 #include <vcl/filter/SvmReader.hxx>
 #include <vcl/lineinfo.hxx>
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/virdev.hxx>
 
 #include "SvmConverter.hxx"

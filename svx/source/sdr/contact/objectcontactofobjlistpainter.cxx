@@ -28,7 +28,7 @@
 #include <drawinglayer/processor2d/processor2dtools.hxx>
 #include <svx/unoapi.hxx>
 #include <tools/debug.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/pdfextoutdevdata.hxx>
 #include <memory>
 

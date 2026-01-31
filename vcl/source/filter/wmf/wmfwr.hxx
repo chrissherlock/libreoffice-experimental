@@ -19,7 +19,6 @@
 
 #pragma once
 
-#include <vcl/gdimtf.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/FilterConfigItem.hxx>
@@ -44,6 +43,8 @@ struct WMFWriterAttrStackMember
 };
 
 namespace basegfx { class B2DPolygon; }
+
+class GDIMetaFile;
 
 class WMFWriter
 {

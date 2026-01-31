@@ -21,7 +21,7 @@
 #include <sal/log.hxx>
 #include <tools/debug.hxx>
 
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/rendercontext/State.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/settings.hxx>

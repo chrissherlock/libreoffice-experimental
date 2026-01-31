@@ -13,7 +13,7 @@
  manual changes will be rewritten by the next run of update_pch.sh (which presumably
  also fixes all possible problems, so it's usually better to use it).
 
- Generated on 2021-04-11 19:48:19 using:
+ Generated on 2026-02-01 14:42:30 using:
  ./bin/update_pch svgio svgio --cutoff=8 --exclude:system --exclude:module --include:local
 
  If after updating build fails, use the following command to locate conflicting headers:
@@ -22,9 +22,15 @@
 
 #include <sal/config.h>
 #if PCH_LEVEL >= 1
+#include <array>
+#include <cassert>
+#include <cstddef>
+#include <deque>
+#include <functional>
 #include <memory>
 #include <ostream>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 #endif // PCH_LEVEL >= 1
 #if PCH_LEVEL >= 2
@@ -34,36 +40,51 @@
 #include <rtl/math.hxx>
 #include <rtl/ref.hxx>
 #include <rtl/uri.hxx>
+#include <rtl/ustrbuf.hxx>
 #include <rtl/ustring.hxx>
 #include <sal/log.hxx>
 #include <sal/types.h>
+#include <vcl/bitmap.hxx>
+#include <vcl/bitmap/BitmapTypes.hxx>
+#include <vcl/checksum.hxx>
+#include <vcl/dllapi.h>
+#include <vcl/mapmod.hxx>
 #endif // PCH_LEVEL >= 2
 #if PCH_LEVEL >= 3
 #include <basegfx/basegfxdllapi.h>
 #include <basegfx/color/bcolor.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
-#include <basegfx/point/b2dpoint.hxx>
+#include <basegfx/matrix/b2dhommatrixtools.hxx>
+#include <basegfx/numeric/ftools.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
 #include <basegfx/polygon/b2dpolygontools.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <basegfx/polygon/b2dpolypolygontools.hxx>
-#include <basegfx/polygon/b3dpolypolygon.hxx>
 #include <basegfx/range/b2drange.hxx>
+#include <basegfx/vector/b2ivector.hxx>
 #include <com/sun/star/drawing/PointSequenceSequence.hpp>
 #include <drawinglayer/drawinglayerdllapi.h>
+#include <drawinglayer/primitive2d/CommonTypes.hxx>
 #include <drawinglayer/primitive2d/Primitive2DContainer.hxx>
+#include <drawinglayer/primitive2d/Primitive2DVisitor.hxx>
 #include <drawinglayer/primitive2d/baseprimitive2d.hxx>
-#include <drawinglayer/primitive2d/groupprimitive2d.hxx>
+#include <drawinglayer/primitive2d/transformprimitive2d.hxx>
 #include <o3tl/cow_wrapper.hxx>
 #include <o3tl/sorted_vector.hxx>
+#include <o3tl/string_view.hxx>
+#include <o3tl/typed_flags_set.hxx>
+#include <tools/degree.hxx>
 #include <tools/fontenum.hxx>
-#include <tools/toolsdllapi.h>
+#include <tools/gen.hxx>
 #endif // PCH_LEVEL >= 3
 #if PCH_LEVEL >= 4
+#include <SvgNumber.hxx>
 #include <svgdocument.hxx>
+#include <svgfilternode.hxx>
 #include <svgnode.hxx>
 #include <svgpaint.hxx>
 #include <svgstyleattributes.hxx>
+#include <svgtools.hxx>
 #endif // PCH_LEVEL >= 4
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

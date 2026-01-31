@@ -35,8 +35,8 @@
 
 #include <string>
 #include <unicode/uchar.h>
-#include <vcl/gdimtf.hxx>
-#include <vcl/metaact.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
+#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/BitmapReadAccess.hxx>
 
 namespace

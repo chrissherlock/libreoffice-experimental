@@ -19,8 +19,8 @@
 #include <drawinglayer/processor2d/processor2dtools.hxx>
 #include <rtl/ref.hxx>
 #include <test/bootstrapfixture.hxx>
-#include <vcl/metaact.hxx>
-#include <vcl/metaactiontypes.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <vcl/metafile/MetaActionType.hxx>
 #include <vcl/vclptr.hxx>
 #include <vcl/virdev.hxx>
 #include <editeng/borderline.hxx>

@@ -36,7 +36,7 @@
 #include <vcl/bitmap.hxx>
 #include <vcl/filter/SvmReader.hxx>
 #include <vcl/filter/SvmWriter.hxx>
-#include <vcl/gdimtf.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/graph.hxx>
 #include <vcl/cvtgrf.hxx>
 #include <vcl/svapp.hxx>
@@ -60,7 +60,7 @@
 
 #include <svl/urlbmk.hxx>
 #include <vcl/inetimg.hxx>
-#include <vcl/wmf.hxx>
+#include <vcl/metafile/wmf.hxx>
 #include <vcl/imap.hxx>
 #include <vcl/transfer.hxx>
 #include <rtl/strbuf.hxx>
