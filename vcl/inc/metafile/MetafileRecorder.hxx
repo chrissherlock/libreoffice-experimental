@@ -51,6 +51,12 @@ public:
     void RecordMoveClipRegion(long nHorzMove, long nVertMove);
     void RecordIntersectClipRegion(const tools::Rectangle& rRect);
     void RecordIntersectClipRegion(const vcl::Region& rRegion);
+
+    // --- Geometric Shape Actions ---
+    void RecordEllipse(const tools::Rectangle& rRect);
+    void RecordArc(const tools::Rectangle& rRect, const Point& rStartPt, const Point& rEndPt);
+    void RecordPie(const tools::Rectangle& rRect, const Point& rStartPt, const Point& rEndPt);
+    void RecordChord(const tools::Rectangle& rRect, const Point& rStartPt, const Point& rEndPt);
 };
 
 } // namespace vcl

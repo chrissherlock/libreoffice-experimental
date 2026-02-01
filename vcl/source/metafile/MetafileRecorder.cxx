@@ -87,5 +87,32 @@ void MetafileRecorder::RecordIntersectClipRegion(const vcl::Region& rRegion)
     if (IsActive())
         mpMetaFile->AddAction(new MetaISectRegionClipRegionAction(rRegion));
 }
+
+void MetafileRecorder::RecordEllipse(const tools::Rectangle& rRect)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaEllipseAction(rRect));
+}
+
+void MetafileRecorder::RecordArc(const tools::Rectangle& rRect, const Point& rStartPt,
+                                 const Point& rEndPt)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaArcAction(rRect, rStartPt, rEndPt));
+}
+
+void MetafileRecorder::RecordPie(const tools::Rectangle& rRect, const Point& rStartPt,
+                                 const Point& rEndPt)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaPieAction(rRect, rStartPt, rEndPt));
+}
+
+void MetafileRecorder::RecordChord(const tools::Rectangle& rRect, const Point& rStartPt,
+                                   const Point& rEndPt)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaChordAction(rRect, rStartPt, rEndPt));
+}
 } // namespace vcl
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
