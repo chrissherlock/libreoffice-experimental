@@ -64,5 +64,28 @@ void MetafileRecorder::RecordBitmapExScalePart(const Point& rDestPos, const Size
             new MetaBmpExScalePartAction(rDestPos, rDestSz, rSrcPos, rSrcSz, rBitmap));
 }
 
+void MetafileRecorder::RecordClipRegion(const vcl::Region& rRegion, bool bClip)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaClipRegionAction(rRegion, bClip));
+}
+
+void MetafileRecorder::RecordMoveClipRegion(long nHorzMove, long nVertMove)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaMoveClipRegionAction(nHorzMove, nVertMove));
+}
+
+void MetafileRecorder::RecordIntersectClipRegion(const tools::Rectangle& rRect)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaISectRectClipRegionAction(rRect));
+}
+
+void MetafileRecorder::RecordIntersectClipRegion(const vcl::Region& rRegion)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaISectRegionClipRegionAction(rRegion));
+}
 } // namespace vcl
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
