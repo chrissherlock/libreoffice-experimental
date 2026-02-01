@@ -20,7 +20,7 @@
 #include <tools/debug.hxx>
 #include <tools/color.hxx>
 
-#include <vcl/metafile/MetaAction.hxx>
+#include <metafile/MetafileRecorder.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
 
@@ -40,8 +40,7 @@ bool OutputDevice::IsFillColor() const
 
 void OutputDevice::SetFillColor()
 {
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaFillColorAction( Color(), false ) );
+    vcl::MetafileRecorder(*this).RecordFillColor( Color(), false );
 
     if (mpGraphicsState->mbFillColor)
     {
@@ -55,8 +54,7 @@ void OutputDevice::SetFillColor( const Color& rColor )
 {
     Color aColor(vcl::drawmode::GetFillColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings()));
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaFillColorAction( aColor, true ) );
+    vcl::MetafileRecorder(*this).RecordFillColor( aColor, true );
 
     if (mpGraphicsState->maFillColor != aColor)
     {

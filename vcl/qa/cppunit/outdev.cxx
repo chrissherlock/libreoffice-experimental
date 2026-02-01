@@ -2679,6 +2679,32 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testEPSRecording)
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), pEPS->GetSubstitute().GetActionSize());
 }
 
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testFillColorRecording)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    GDIMetaFile aMtf;
+    pVDev->SetConnectMetaFile(&aMtf);
+
+    // 1. Set specific color
+    pVDev->SetFillColor(COL_RED);
+
+    // 2. Clear color (transparent)
+    pVDev->SetFillColor();
+
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), aMtf.GetActionSize());
+
+    MetaAction* pAction = aMtf.GetAction(0);
+    CPPUNIT_ASSERT_EQUAL(MetaActionType::FILLCOLOR, pAction->GetType());
+    auto pFill = static_cast<MetaFillColorAction*>(pAction);
+    CPPUNIT_ASSERT_EQUAL(COL_RED, pFill->GetColor());
+    CPPUNIT_ASSERT(pFill->IsSetting());
+
+    pAction = aMtf.GetAction(1);
+    CPPUNIT_ASSERT_EQUAL(MetaActionType::FILLCOLOR, pAction->GetType());
+    pFill = static_cast<MetaFillColorAction*>(pAction);
+    CPPUNIT_ASSERT(!pFill->IsSetting());
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -121,5 +121,11 @@ void MetafileRecorder::RecordEPS(const Point& rPoint, const Size& rSize, const G
     if (IsActive())
         mpMetaFile->AddAction(new MetaEPSAction(rPoint, rSize, rGfxLink, rSubst));
 }
+
+void MetafileRecorder::RecordFillColor(const Color& rColor, bool bSet)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaFillColorAction(rColor, bSet));
+}
 } // namespace vcl
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
