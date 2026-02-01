@@ -527,6 +527,7 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
     assert(!is_double_buffered_window());
 
     nLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nIndex, nLen);
+    assert(nLen >= 0 && "DrawTextArray: Length must be non-negative after normalization");
 
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaTextAction(rStartPt, rStr, nIndex, nLen));
