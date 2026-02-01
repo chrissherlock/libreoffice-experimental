@@ -2481,6 +2481,84 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testGetTextOutlinesMapModeSync)
                            nHeight > 500.0);
 }
 
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawBitmapRecording)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    GDIMetaFile aMtf;
+    pVDev->SetConnectMetaFile(&aMtf);
+
+    // Opaque Bitmap
+    // Use N8_BPP to force opaque palette (avoids implicit alpha promotion on some backends)
+    Bitmap aBmpOpaque(Size(10, 10), vcl::PixelFormat::N8_BPP);
+    aBmpOpaque.Erase(COL_RED);
+
+    CPPUNIT_ASSERT_MESSAGE("Setup Error: Opaque bitmap has alpha", !aBmpOpaque.HasAlpha());
+
+    // Alpha Bitmap
+    // MUST use DeviceFormat::WITH_ALPHA to ensure the resulting bitmap carries an alpha channel
+    ScopedVclPtrInstance<VirtualDevice> pAlphaDev(DeviceFormat::WITH_ALPHA);
+    pAlphaDev->SetOutputSizePixel(Size(10, 10));
+    pAlphaDev->SetBackground(Wallpaper(COL_TRANSPARENT));
+    pAlphaDev->Erase();
+    Bitmap aBmpAlpha = pAlphaDev->GetBitmap(Point(0, 0), Size(10, 10));
+
+    // If this fails, the backend is not supporting alpha VDevs correctly in this environment
+    CPPUNIT_ASSERT_MESSAGE("Setup Error: Alpha bitmap is opaque", aBmpAlpha.HasAlpha());
+
+    Point aPos(10, 10);
+    Size aSz(20, 20);
+    Point aSrcPos(5, 5);
+    Size aSrcSz(5, 5);
+
+    // --- Group A: Opaque (Should generate BMP actions) ---
+    pVDev->DrawBitmap(aPos, aBmpOpaque);
+    pVDev->DrawBitmap(aPos, aSz, aBmpOpaque);
+    pVDev->DrawBitmap(aPos, aSz, aSrcPos, aSrcSz, aBmpOpaque);
+
+    // --- Group B: Alpha (Should generate BMPEX actions) ---
+    pVDev->DrawBitmap(aPos, aBmpAlpha);
+    pVDev->DrawBitmap(aPos, aSz, aBmpAlpha);
+    pVDev->DrawBitmap(aPos, aSz, aSrcPos, aSrcSz, aBmpAlpha);
+
+    // Verify we got 6 actions
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(6), aMtf.GetActionSize());
+
+    // Verify Opaque Actions (BMP)
+    MetaAction* pAction = aMtf.GetAction(0);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Action 0 should be BMP", MetaActionType::BMP, pAction->GetType());
+    CPPUNIT_ASSERT_EQUAL(aPos, static_cast<MetaBmpAction*>(pAction)->GetPoint());
+
+    pAction = aMtf.GetAction(1);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Action 1 should be BMPSCALE", MetaActionType::BMPSCALE,
+                                 pAction->GetType());
+    CPPUNIT_ASSERT_EQUAL(aSz, static_cast<MetaBmpScaleAction*>(pAction)->GetSize());
+
+    pAction = aMtf.GetAction(2);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Action 2 should be BMPSCALEPART", MetaActionType::BMPSCALEPART,
+                                 pAction->GetType());
+    auto pScalePart = static_cast<MetaBmpScalePartAction*>(pAction);
+    CPPUNIT_ASSERT_EQUAL(aPos, pScalePart->GetDestPoint());
+    CPPUNIT_ASSERT_EQUAL(aSrcPos, pScalePart->GetSrcPoint());
+
+    // Verify Alpha Actions (BMPEX)
+    pAction = aMtf.GetAction(3);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Action 3 should be BMPEX", MetaActionType::BMPEX,
+                                 pAction->GetType());
+    CPPUNIT_ASSERT_EQUAL(aPos, static_cast<MetaBmpExAction*>(pAction)->GetPoint());
+
+    pAction = aMtf.GetAction(4);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Action 4 should be BMPEXSCALE", MetaActionType::BMPEXSCALE,
+                                 pAction->GetType());
+    CPPUNIT_ASSERT_EQUAL(aSz, static_cast<MetaBmpExScaleAction*>(pAction)->GetSize());
+
+    pAction = aMtf.GetAction(5);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Action 5 should be BMPEXSCALEPART",
+                                 MetaActionType::BMPEXSCALEPART, pAction->GetType());
+    auto pExScalePart = static_cast<MetaBmpExScalePartAction*>(pAction);
+    CPPUNIT_ASSERT_EQUAL(aPos, pExScalePart->GetDestPoint());
+    CPPUNIT_ASSERT_EQUAL(aSrcPos, pExScalePart->GetSrcPoint());
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
