@@ -114,5 +114,12 @@ void MetafileRecorder::RecordChord(const tools::Rectangle& rRect, const Point& r
     if (IsActive())
         mpMetaFile->AddAction(new MetaChordAction(rRect, rStartPt, rEndPt));
 }
+
+void MetafileRecorder::RecordEPS(const Point& rPoint, const Size& rSize, const GfxLink& rGfxLink,
+                                 const GDIMetaFile& rSubst)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaEPSAction(rPoint, rSize, rGfxLink, rSubst));
+}
 } // namespace vcl
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
