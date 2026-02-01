@@ -17,25 +17,26 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/gfxlink.hxx>
 #include <vcl/graph.hxx>
-#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/virdev.hxx>
 
+#include <metafile/MetafileRecorder.hxx>
 #include <ClippingController.hxx>
 #include <salgdi.hxx>
 
 bool OutputDevice::DrawEPS( const Point& rPoint, const Size& rSize,
                             const GfxLink& rGfxLink, const GDIMetaFile* pSubst )
 {
-    if ( mpMetaFile )
+    if ( vcl::MetafileRecorder(*this).IsActive() )
     {
         GDIMetaFile aSubst;
 
         if( pSubst )
             aSubst = *pSubst;
 
-        mpMetaFile->AddAction( new MetaEPSAction( rPoint, rSize, rGfxLink, aSubst ) );
+        vcl::MetafileRecorder(*this).RecordEPS( rPoint, rSize, rGfxLink, aSubst );
     }
 
     if ( !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary() )

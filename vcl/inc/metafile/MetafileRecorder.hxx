@@ -16,6 +16,7 @@
 
 class OutputDevice;
 class GDIMetaFile;
+class GfxLink;
 class Point;
 class Size;
 
@@ -57,6 +58,10 @@ public:
     void RecordArc(const tools::Rectangle& rRect, const Point& rStartPt, const Point& rEndPt);
     void RecordPie(const tools::Rectangle& rRect, const Point& rStartPt, const Point& rEndPt);
     void RecordChord(const tools::Rectangle& rRect, const Point& rStartPt, const Point& rEndPt);
+
+    // --- EPS Actions ---
+    void RecordEPS(const Point& rPoint, const Size& rSize, const GfxLink& rGfxLink,
+                   const GDIMetaFile& rSubst);
 };
 
 } // namespace vcl

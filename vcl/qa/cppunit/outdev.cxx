@@ -18,6 +18,7 @@
 #include <basegfx/vector/b2enums.hxx>
 #include <basegfx/matrix/b2dhommatrixtools.hxx>
 #include <tools/mapunit.hxx>
+#include <tools/stream.hxx>
 
 #include <vcl/gradient.hxx>
 #include <vcl/lineinfo.hxx>
@@ -32,8 +33,10 @@
 #include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/metafile/MetaActionType.hxx>
-
 #include <vcl/BitmapWriteAccess.hxx>
+#include <vcl/gfxlink.hxx>
+#include <vcl/BinaryDataContainer.hxx>
+
 #include <bufferdevice.hxx>
 #include <window.h>
 
@@ -2637,6 +2640,43 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testCurvedShapesRecording)
     CPPUNIT_ASSERT_EQUAL(aRect, pChord->GetRect());
     CPPUNIT_ASSERT_EQUAL(aStart, pChord->GetStartPoint());
     CPPUNIT_ASSERT_EQUAL(aEnd, pChord->GetEndPoint());
+}
+
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testEPSRecording)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    GDIMetaFile aMtf;
+    pVDev->SetConnectMetaFile(&aMtf);
+
+    Point aPt(10, 10);
+    Size aSz(100, 100);
+
+    // Create dummy GfxLink
+    // BinaryDataContainer requires an SvStream, so we wrap the data in a memory stream.
+    sal_uInt8 pData[] = { 0x00, 0x01, 0x02 };
+    SvMemoryStream aStream(pData, sizeof(pData), StreamMode::READ);
+    BinaryDataContainer aDataContainer(aStream, sizeof(pData));
+
+    // Use NativeJpg as a placeholder since NativeEps is missing in this VCL version.
+    // The recorder just stores the link type, so the specific enum doesn't affect the recording logic test.
+    GfxLink aLink(aDataContainer, GfxLinkType::NativeJpg);
+
+    // Create dummy substitution
+    GDIMetaFile aSubst;
+    aSubst.AddAction(new MetaCommentAction("Subst"));
+
+    pVDev->DrawEPS(aPt, aSz, aLink, &aSubst);
+
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), aMtf.GetActionSize());
+
+    MetaAction* pAction = aMtf.GetAction(0);
+    CPPUNIT_ASSERT_EQUAL(MetaActionType::EPS, pAction->GetType());
+
+    auto pEPS = static_cast<MetaEPSAction*>(pAction);
+    CPPUNIT_ASSERT_EQUAL(aPt, pEPS->GetPoint());
+    CPPUNIT_ASSERT_EQUAL(aSz, pEPS->GetSize());
+    // Verify subst present
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), pEPS->GetSubstitute().GetActionSize());
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();
