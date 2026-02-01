@@ -26,7 +26,6 @@
 
 #include <vcl/alpha.hxx>
 #include <vcl/canvastools.hxx>
-#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/virdev.hxx>
 
 #include <ClippingController.hxx>
@@ -229,7 +228,7 @@ void OutputDevice::DrawTransformedBitmapEx(
     static const char* pEnableBitmapDrawTimerTimer(getenv("SAL_ENABLE_TIMER_BITMAPDRAW"));
     static bool bUseTimer(nullptr != pEnableBitmapDrawTimerTimer);
     std::unique_ptr<LocalTimeTest> aTimeTest(
-        bUseTimer && rBitmapEx.GetSizeBytes() > 10000
+        bUseTimer && rBitmap.GetSizeBytes() > 10000
         ? new LocalTimeTest()
         : nullptr);
 #endif
