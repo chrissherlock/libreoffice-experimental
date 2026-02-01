@@ -17,7 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <vcl/metafile/MetaAction.hxx>
+#include <metafile/MetafileRecorder.hxx>
 #include <vcl/virdev.hxx>
 
 #include <ClippingController.hxx>
@@ -30,8 +30,7 @@ void OutputDevice::DrawEllipse( const tools::Rectangle& rRect )
 {
     assert(!is_double_buffered_window());
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaEllipseAction( rRect ) );
+    vcl::MetafileRecorder(*this).RecordEllipse( rRect );
 
     if  ( !IsDeviceOutputNecessary() || (!mpGraphicsState->mbLineColor && !mpGraphicsState->mbFillColor) || IsLayoutCalculationNecessary() )
         return;
@@ -73,8 +72,7 @@ void OutputDevice::DrawArc( const tools::Rectangle& rRect,
 {
     assert(!is_double_buffered_window());
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaArcAction( rRect, rStartPt, rEndPt ) );
+    vcl::MetafileRecorder(*this).RecordArc( rRect, rStartPt, rEndPt );
 
     if ( !IsDeviceOutputNecessary() || !mpGraphicsState->mbLineColor || IsLayoutCalculationNecessary() )
         return;
@@ -112,8 +110,7 @@ void OutputDevice::DrawPie( const tools::Rectangle& rRect,
 {
     assert(!is_double_buffered_window());
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaPieAction( rRect, rStartPt, rEndPt ) );
+    vcl::MetafileRecorder(*this).RecordPie( rRect, rStartPt, rEndPt );
 
     if ( !IsDeviceOutputNecessary() || (!mpGraphicsState->mbLineColor && !mpGraphicsState->mbFillColor) || IsLayoutCalculationNecessary() )
         return;
@@ -158,8 +155,7 @@ void OutputDevice::DrawChord( const tools::Rectangle& rRect,
 {
     assert(!is_double_buffered_window());
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaChordAction( rRect, rStartPt, rEndPt ) );
+    vcl::MetafileRecorder(*this).RecordChord( rRect, rStartPt, rEndPt );
 
     if ( !IsDeviceOutputNecessary() || (!mpGraphicsState->mbLineColor && !mpGraphicsState->mbFillColor) || IsLayoutCalculationNecessary() )
         return;

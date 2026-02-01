@@ -2596,6 +2596,49 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testClippingRecording)
     CPPUNIT_ASSERT(!pClipAction->IsClipping());
 }
 
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testCurvedShapesRecording)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    GDIMetaFile aMtf;
+    pVDev->SetConnectMetaFile(&aMtf);
+
+    tools::Rectangle aRect(10, 10, 50, 50);
+    Point aStart(10, 10);
+    Point aEnd(50, 50);
+
+    pVDev->DrawEllipse(aRect);
+    pVDev->DrawArc(aRect, aStart, aEnd);
+    pVDev->DrawPie(aRect, aStart, aEnd);
+    pVDev->DrawChord(aRect, aStart, aEnd);
+
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(4), aMtf.GetActionSize());
+
+    MetaAction* pAction = aMtf.GetAction(0);
+    CPPUNIT_ASSERT_EQUAL(MetaActionType::ELLIPSE, pAction->GetType());
+    CPPUNIT_ASSERT_EQUAL(aRect, static_cast<MetaEllipseAction*>(pAction)->GetRect());
+
+    pAction = aMtf.GetAction(1);
+    CPPUNIT_ASSERT_EQUAL(MetaActionType::ARC, pAction->GetType());
+    auto pArc = static_cast<MetaArcAction*>(pAction);
+    CPPUNIT_ASSERT_EQUAL(aRect, pArc->GetRect());
+    CPPUNIT_ASSERT_EQUAL(aStart, pArc->GetStartPoint());
+    CPPUNIT_ASSERT_EQUAL(aEnd, pArc->GetEndPoint());
+
+    pAction = aMtf.GetAction(2);
+    CPPUNIT_ASSERT_EQUAL(MetaActionType::PIE, pAction->GetType());
+    auto pPie = static_cast<MetaPieAction*>(pAction);
+    CPPUNIT_ASSERT_EQUAL(aRect, pPie->GetRect());
+    CPPUNIT_ASSERT_EQUAL(aStart, pPie->GetStartPoint());
+    CPPUNIT_ASSERT_EQUAL(aEnd, pPie->GetEndPoint());
+
+    pAction = aMtf.GetAction(3);
+    CPPUNIT_ASSERT_EQUAL(MetaActionType::CHORD, pAction->GetType());
+    auto pChord = static_cast<MetaChordAction*>(pAction);
+    CPPUNIT_ASSERT_EQUAL(aRect, pChord->GetRect());
+    CPPUNIT_ASSERT_EQUAL(aStart, pChord->GetStartPoint());
+    CPPUNIT_ASSERT_EQUAL(aEnd, pChord->GetEndPoint());
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
