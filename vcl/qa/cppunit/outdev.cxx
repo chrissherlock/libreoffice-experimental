@@ -2559,6 +2559,43 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawBitmapRecording)
     CPPUNIT_ASSERT_EQUAL(aSrcPos, pExScalePart->GetSrcPoint());
 }
 
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testClippingRecording)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    GDIMetaFile aMtf;
+    pVDev->SetConnectMetaFile(&aMtf);
+
+    vcl::Region aReg(tools::Rectangle(0, 0, 10, 10));
+    tools::Rectangle aRect(10, 10, 20, 20);
+
+    pVDev->SetClipRegion(aReg);
+    pVDev->MoveClipRegion(5, 5);
+    pVDev->IntersectClipRegion(aRect);
+    pVDev->IntersectClipRegion(aReg);
+    pVDev->SetClipRegion();
+
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(5), aMtf.GetActionSize());
+
+    MetaAction* pAction = aMtf.GetAction(0);
+    CPPUNIT_ASSERT_EQUAL(MetaActionType::CLIPREGION, pAction->GetType());
+    auto pClipAction = static_cast<MetaClipRegionAction*>(pAction);
+    CPPUNIT_ASSERT(pClipAction->IsClipping());
+
+    pAction = aMtf.GetAction(1);
+    CPPUNIT_ASSERT_EQUAL(MetaActionType::MOVECLIPREGION, pAction->GetType());
+
+    pAction = aMtf.GetAction(2);
+    CPPUNIT_ASSERT_EQUAL(MetaActionType::ISECTRECTCLIPREGION, pAction->GetType());
+
+    pAction = aMtf.GetAction(3);
+    CPPUNIT_ASSERT_EQUAL(MetaActionType::ISECTREGIONCLIPREGION, pAction->GetType());
+
+    pAction = aMtf.GetAction(4);
+    CPPUNIT_ASSERT_EQUAL(MetaActionType::CLIPREGION, pAction->GetType());
+    pClipAction = static_cast<MetaClipRegionAction*>(pAction);
+    CPPUNIT_ASSERT(!pClipAction->IsClipping());
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

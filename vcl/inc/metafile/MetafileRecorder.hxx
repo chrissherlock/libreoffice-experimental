@@ -11,6 +11,8 @@
 
 #include <vcl/dllapi.h>
 #include <vcl/bitmap.hxx>
+#include <vcl/region.hxx>
+#include <tools/gen.hxx>
 
 class OutputDevice;
 class GDIMetaFile;
@@ -43,6 +45,12 @@ public:
     void RecordBitmapExScale(const Point& rPos, const Size& rSz, const Bitmap& rBitmap);
     void RecordBitmapExScalePart(const Point& rDestPos, const Size& rDestSz, const Point& rSrcPos,
                                  const Size& rSrcSz, const Bitmap& rBitmap);
+
+    // --- Clipping Actions ---
+    void RecordClipRegion(const vcl::Region& rRegion, bool bClip);
+    void RecordMoveClipRegion(long nHorzMove, long nVertMove);
+    void RecordIntersectClipRegion(const tools::Rectangle& rRect);
+    void RecordIntersectClipRegion(const vcl::Region& rRegion);
 };
 
 } // namespace vcl
