@@ -25,6 +25,7 @@
 
 #include <vcl/image.hxx>
 #include <vcl/metafile/MetaAction.hxx>
+#include <metafile/MetafileRecorder.hxx>
 #include <vcl/metafile/MetaActionType.hxx>
 #include <vcl/skia/SkiaHelper.hxx>
 #include <vcl/virdev.hxx>
@@ -122,16 +123,16 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
         switch( nAction )
         {
             case MetaActionType::BMP:
-                mpMetaFile->AddAction( new MetaBmpAction( rDestPt, aBmp ) );
+                vcl::MetafileRecorder(*this).RecordBitmap( rDestPt, aBmp );
             break;
 
             case MetaActionType::BMPSCALE:
-                mpMetaFile->AddAction( new MetaBmpScaleAction( rDestPt, rDestSize, aBmp ) );
+                vcl::MetafileRecorder(*this).RecordBitmapScale( rDestPt, rDestSize, aBmp );
             break;
 
             case MetaActionType::BMPSCALEPART:
-                mpMetaFile->AddAction( new MetaBmpScalePartAction(
-                    rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp ) );
+                vcl::MetafileRecorder(*this).RecordBitmapScalePart(
+                    rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp );
             break;
 
             default: break;
@@ -220,16 +221,16 @@ void OutputDevice::DrawAlphaBitmap( const Point& rDestPt, const Size& rDestSize,
         switch(nAction)
         {
             case MetaActionType::BMPEX:
-                mpMetaFile->AddAction(new MetaBmpExAction(rDestPt, aBmp));
+                vcl::MetafileRecorder(*this).RecordBitmapEx(rDestPt, aBmp);
                 break;
 
             case MetaActionType::BMPEXSCALE:
-                mpMetaFile->AddAction(new MetaBmpExScaleAction(rDestPt, rDestSize, aBmp));
+                vcl::MetafileRecorder(*this).RecordBitmapExScale(rDestPt, rDestSize, aBmp);
                 break;
 
             case MetaActionType::BMPEXSCALEPART:
-                mpMetaFile->AddAction(new MetaBmpExScalePartAction(rDestPt, rDestSize,
-                                                                   rSrcPtPixel, rSrcSizePixel, aBmp));
+                vcl::MetafileRecorder(*this).RecordBitmapExScalePart(rDestPt, rDestSize,
+                                                                   rSrcPtPixel, rSrcSizePixel, aBmp);
                 break;
 
             default:
