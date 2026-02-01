@@ -62,6 +62,9 @@ public:
     // --- EPS Actions ---
     void RecordEPS(const Point& rPoint, const Size& rSize, const GfxLink& rGfxLink,
                    const GDIMetaFile& rSubst);
+
+    // --- State Actions ---
+    void RecordFillColor(const Color& rColor, bool bSet);
 };
 
 } // namespace vcl
