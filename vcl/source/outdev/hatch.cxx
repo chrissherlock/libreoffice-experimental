@@ -23,7 +23,8 @@
 #include <comphelper/configuration.hxx>
 
 #include <vcl/hatch.hxx>
-#include <vcl/metafile/MetaAction.hxx>
+#include <metafile/MetafileRecorder.hxx>
+#include <vcl/metafile/ScopedMetaGroup.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
 
@@ -59,8 +60,7 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
     Hatch aHatch( rHatch );
     aHatch.SetColor(vcl::drawmode::GetHatchColor(rHatch.GetColor(), GetDrawMode(), GetSettings().GetStyleSettings()));
 
-    if( mpMetaFile )
-        mpMetaFile->AddAction( new MetaHatchAction( rPolyPoly, aHatch ) );
+    vcl::MetafileRecorder(*this).RecordHatch( rPolyPoly, aHatch );
 
     if( !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary() )
         return;
@@ -108,10 +108,14 @@ void OutputDevice::AddHatchActions( const tools::PolyPolygon& rPolyPoly, const H
         GDIMetaFile* pOldMtf = mpMetaFile;
 
         mpMetaFile = &rMtf;
-        mpMetaFile->AddAction( new MetaPushAction( vcl::PushFlags::ALL ) );
-        mpMetaFile->AddAction( new MetaLineColorAction( rHatch.GetColor(), true ) );
-        DrawHatch( aPolyPoly, rHatch, true );
-        mpMetaFile->AddAction( new MetaPopAction() );
+        {
+            vcl::ScopedMetaGroup aGroup(&rMtf, "DecomposedHatch");
+            vcl::MetafileRecorder aRecorder(*this);
+            aRecorder.RecordPush( vcl::PushFlags::ALL );
+            aRecorder.RecordLineColor( rHatch.GetColor(), true );
+            DrawHatch( aPolyPoly, rHatch, true );
+            aRecorder.RecordPop();
+        }
         mpMetaFile = pOldMtf;
     }
 }
@@ -420,8 +424,9 @@ void OutputDevice::DrawHatchLine( const tools::Line& rLine, const tools::PolyPol
 
     if( bMtf )
     {
+        vcl::MetafileRecorder aRecorder(*this);
         for( tools::Long i = 0; i < nPCounter; i += 2 )
-            mpMetaFile->AddAction( new MetaLineAction( pPtBuffer[ i ], pPtBuffer[ i + 1 ] ) );
+            aRecorder.RecordLine( pPtBuffer[ i ], pPtBuffer[ i + 1 ] );
     }
     else
     {
