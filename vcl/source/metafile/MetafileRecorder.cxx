@@ -10,6 +10,7 @@
 #include <tools/poly.hxx>
 
 #include <vcl/gradient.hxx>
+#include <vcl/hatch.hxx>
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/metafile/ScopedMetaGroup.hxx>
@@ -209,6 +210,18 @@ void MetafileRecorder::RecordComment(const rtl::OString& rComment)
 {
     if (IsActive())
         mpMetaFile->AddAction(new MetaCommentAction(rComment));
+}
+
+void MetafileRecorder::RecordLine(const Point& rStart, const Point& rEnd)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaLineAction(rStart, rEnd));
+}
+
+void MetafileRecorder::RecordHatch(const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaHatchAction(rPolyPoly, rHatch));
 }
 } // namespace vcl
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

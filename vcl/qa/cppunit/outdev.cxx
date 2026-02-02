@@ -21,6 +21,7 @@
 #include <tools/stream.hxx>
 
 #include <vcl/gradient.hxx>
+#include <vcl/hatch.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/print.hxx>
 #include <tools/poly.hxx>
@@ -2813,6 +2814,85 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testGradientRecording)
     CPPUNIT_ASSERT_EQUAL(MetaActionType::COMMENT, pAction->GetType());
     CPPUNIT_ASSERT_EQUAL("XGRAD_SEQ_END"_ostr,
                          static_cast<MetaCommentAction*>(pAction)->GetComment());
+}
+
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testHatchRecording)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    GDIMetaFile aMtf;
+    pVDev->SetConnectMetaFile(&aMtf);
+
+    tools::Polygon aPoly(tools::Rectangle(0, 0, 10, 10));
+    tools::PolyPolygon aPolyPoly(aPoly);
+    Hatch aHatch(HatchStyle::Single, COL_RED, 10, 100_deg10);
+
+    pVDev->DrawHatch(aPolyPoly, aHatch);
+
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), aMtf.GetActionSize());
+    MetaAction* pAction = aMtf.GetAction(0);
+    CPPUNIT_ASSERT_EQUAL(MetaActionType::HATCH, pAction->GetType());
+
+    auto pHatchAction = static_cast<MetaHatchAction*>(pAction);
+    CPPUNIT_ASSERT_EQUAL(COL_RED, pHatchAction->GetHatch().GetColor());
+}
+
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testHatchDecomposition)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    // We don't attach the metafile to the device, we pass it to AddHatchActions
+    GDIMetaFile aMtf;
+
+    tools::Polygon aPoly(tools::Rectangle(0, 0, 20, 20));
+    tools::PolyPolygon aPolyPoly(aPoly);
+
+    // Single Hatch, Red, 5 units distance, 45 degrees
+    Hatch aHatch(HatchStyle::Single, COL_RED, 5, 450_deg10);
+
+    // This triggers the decomposition logic (AddHatchActions -> DrawHatch(..., true))
+    pVDev->AddHatchActions(aPolyPoly, aHatch, aMtf);
+
+    // We expect a sequence:
+    // 1. BeginGroup Comment (ScopedMetaGroup)
+    // 2. Push (Recorder)
+    // 3. LineColor (Recorder)
+    // 4..N. Line Actions (Decomposed primitives)
+    // N+1. Pop (Recorder)
+    // N+2. EndGroup Comment (ScopedMetaGroup)
+
+    CPPUNIT_ASSERT_GREATEREQUAL(static_cast<size_t>(6), aMtf.GetActionSize());
+
+    // 1. Check ScopedMetaGroup Start
+    MetaAction* pAction = aMtf.GetAction(0);
+    CPPUNIT_ASSERT_EQUAL(MetaActionType::COMMENT, pAction->GetType());
+    auto pComment = static_cast<MetaCommentAction*>(pAction);
+    CPPUNIT_ASSERT_EQUAL("BeginGroup: DecomposedHatch"_ostr, pComment->GetComment());
+
+    // 2. Check Push
+    pAction = aMtf.GetAction(1);
+    CPPUNIT_ASSERT_EQUAL(MetaActionType::PUSH, pAction->GetType());
+
+    // 3. Check LineColor
+    pAction = aMtf.GetAction(2);
+    CPPUNIT_ASSERT_EQUAL(MetaActionType::LINECOLOR, pAction->GetType());
+    auto pLineColor = static_cast<MetaLineColorAction*>(pAction);
+    CPPUNIT_ASSERT_EQUAL(COL_RED, pLineColor->GetColor());
+
+    // 4. Check that we have at least one line (Decomposition happened)
+    pAction = aMtf.GetAction(3);
+    CPPUNIT_ASSERT_EQUAL(MetaActionType::LINE, pAction->GetType());
+
+    // Check the end sequence (Pop -> EndGroup)
+    size_t nLast = aMtf.GetActionSize() - 1;
+
+    // Last action should be EndGroup
+    pAction = aMtf.GetAction(nLast);
+    CPPUNIT_ASSERT_EQUAL(MetaActionType::COMMENT, pAction->GetType());
+    pComment = static_cast<MetaCommentAction*>(pAction);
+    CPPUNIT_ASSERT_EQUAL("EndGroup"_ostr, pComment->GetComment());
+
+    // Second to last should be Pop
+    pAction = aMtf.GetAction(nLast - 1);
+    CPPUNIT_ASSERT_EQUAL(MetaActionType::POP, pAction->GetType());
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();

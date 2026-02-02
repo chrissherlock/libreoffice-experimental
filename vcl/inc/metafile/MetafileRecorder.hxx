@@ -21,6 +21,7 @@ class GfxLink;
 class Point;
 class Size;
 class Gradient;
+class Hatch;
 namespace tools
 {
 class PolyPolygon;
@@ -85,6 +86,10 @@ public:
     // --- Gradient Actions ---
     void RecordGradient(const tools::Rectangle& rRect, const Gradient& rGradient);
     void RecordGradient(const tools::PolyPolygon& rPolyPoly, const Gradient& rGradient);
+
+    // --- Drawing Actions ---
+    void RecordLine(const Point& rStart, const Point& rEnd);
+    void RecordHatch(const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch);
 
     // --- Comment Actions ---
     void RecordComment(const rtl::OString& rComment);
