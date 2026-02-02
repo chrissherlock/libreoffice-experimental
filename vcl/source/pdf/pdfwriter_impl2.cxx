@@ -1054,7 +1054,7 @@ void PDFWriterImpl::enableStringEncryption(sal_Int32 nObject)
 
 
 
-void PDFWriterImpl::DrawHatchLine_DrawLine(const Point& rStartPoint, const Point& rEndPoint)
+void PDFWriterImpl::DrawHatchLine(const Point& rStartPoint, const Point& rEndPoint)
 {
     drawLine(rStartPoint, rEndPoint);
 }
