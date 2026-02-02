@@ -353,6 +353,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/gdi/embeddedfontsmanager \
     vcl/source/gdi/embeddedfontsafdko \
     vcl/source/gdi/FileDefinitionWidgetDraw \
+    vcl/source/gdi/HatchProcessor \
     vcl/source/gdi/WidgetDefinitionReader \
     vcl/source/gdi/WidgetDefinition \
     vcl/source/gdi/extoutdevdata \
