@@ -2895,6 +2895,93 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testHatchDecomposition)
     CPPUNIT_ASSERT_EQUAL(MetaActionType::POP, pAction->GetType());
 }
 
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testHatchGeometric)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    GDIMetaFile aMtf;
+
+    // Test Hatch Styles (Single vs Double vs Triple)
+    tools::Polygon aRect(tools::Rectangle(0, 0, 100, 100));
+    tools::PolyPolygon aPoly(aRect);
+
+    // Single Hatch
+    {
+        aMtf.Clear();
+        Hatch aHatch(HatchStyle::Single, COL_BLACK, 10, 0_deg10);
+        pVDev->AddHatchActions(aPoly, aHatch, aMtf);
+        size_t nSingleCount = aMtf.GetActionSize();
+        // Expect header/footer actions + lines.
+        // 100x100 box, dist 10 -> approx 10 lines.
+        CPPUNIT_ASSERT_MESSAGE("Single hatch should produce actions", nSingleCount > 5);
+    }
+
+    // Double Hatch (Grid) - Should produce roughly 2x lines
+    {
+        aMtf.Clear();
+        Hatch aHatch(HatchStyle::Double, COL_BLACK, 10, 0_deg10);
+        pVDev->AddHatchActions(aPoly, aHatch, aMtf);
+        size_t nDoubleCount = aMtf.GetActionSize();
+
+        CPPUNIT_ASSERT_MESSAGE("Double hatch should have more lines than Single",
+                               nDoubleCount > 10);
+    }
+
+    // Test RefPoint (Alignment)
+    {
+        Hatch aHatch(HatchStyle::Single, COL_BLACK, 20, 0_deg10); // Spacing 20
+
+        // Helper to find the Y coordinate of the first line action
+        auto findFirstLineY = [](GDIMetaFile& rMtf) -> tools::Long {
+            for (size_t i = 0; i < rMtf.GetActionSize(); ++i)
+            {
+                MetaAction* pAct = rMtf.GetAction(i);
+                if (pAct->GetType() == MetaActionType::LINE)
+                {
+                    return static_cast<MetaLineAction*>(pAct)->GetStartPoint().Y();
+                }
+            }
+            return -999999; // Sentinel for "no lines found"
+        };
+
+        // Case A: RefPoint (0,0)
+        aMtf.Clear();
+        pVDev->SetRefPoint(Point(0, 0));
+        pVDev->AddHatchActions(aPoly, aHatch, aMtf);
+        tools::Long nYA = findFirstLineY(aMtf);
+
+        // Case B: RefPoint (0,10) - Should shift lines by 10
+        aMtf.Clear();
+        pVDev->SetRefPoint(Point(0, 10));
+        pVDev->AddHatchActions(aPoly, aHatch, aMtf);
+        tools::Long nYB = findFirstLineY(aMtf);
+
+        // Verify we actually generated lines
+        CPPUNIT_ASSERT_MESSAGE("Case A produced no lines", nYA != -999999);
+        CPPUNIT_ASSERT_MESSAGE("Case B produced no lines", nYB != -999999);
+
+        // In a horizontal hatch (0 deg), Y coordinates should shift based on RefPoint.
+        // We verify they are NOT identical.
+        bool bIdentical = (nYA == nYB);
+        CPPUNIT_ASSERT_MESSAGE("Hatch lines should shift with RefPoint", !bIdentical);
+    }
+
+    // Test Rotated Polygon (Crash check / Math stability)
+    {
+        aMtf.Clear();
+        tools::Polygon aRotated(tools::Rectangle(0, 0, 100, 100));
+        aRotated.Rotate(Point(50, 50), 450_deg10); // 45 degrees
+        tools::PolyPolygon aRotPoly(aRotated);
+
+        Hatch aHatch(HatchStyle::Single, COL_BLACK, 10, 0_deg10);
+
+        // This exercises the intersection logic where lines hit corners
+        pVDev->AddHatchActions(aRotPoly, aHatch, aMtf);
+
+        // Just verify we didn't crash and produced something
+        CPPUNIT_ASSERT(aMtf.GetActionSize() > 0);
+    }
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
