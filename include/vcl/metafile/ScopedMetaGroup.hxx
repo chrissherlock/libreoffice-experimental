@@ -14,24 +14,35 @@
 
 namespace vcl
 {
-// RAII helper to wrap a sequence of meta-actions in a Semantic Group
-//
+// RAII helper to wrap a sequence of meta-actions in a Group
 class ScopedMetaGroup
 {
     GDIMetaFile* mpMetaFile;
+    OString maEndComment;
 
 public:
+    // Semantic Tagging (Legacy behavior: "BeginGroup: Name" ... "EndGroup")
     ScopedMetaGroup(GDIMetaFile* pMetaFile, const OString& rGroupName)
         : mpMetaFile(pMetaFile)
+        , maEndComment("EndGroup")
     {
         if (mpMetaFile)
             mpMetaFile->AddAction(new MetaCommentAction("BeginGroup: " + rGroupName));
     }
 
+    // Explicit Tagging (New: "START_TAG" ... "END_TAG")
+    ScopedMetaGroup(GDIMetaFile* pMetaFile, const OString& rStart, const OString& rEnd)
+        : mpMetaFile(pMetaFile)
+        , maEndComment(rEnd)
+    {
+        if (mpMetaFile)
+            mpMetaFile->AddAction(new MetaCommentAction(rStart));
+    }
+
     ~ScopedMetaGroup()
     {
         if (mpMetaFile)
-            mpMetaFile->AddAction(new MetaCommentAction("EndGroup"));
+            mpMetaFile->AddAction(new MetaCommentAction(maEndComment));
     }
 
     ScopedMetaGroup(const ScopedMetaGroup&) = delete;
@@ -39,5 +50,4 @@ public:
 };
 
 } // namespace vcl
-
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

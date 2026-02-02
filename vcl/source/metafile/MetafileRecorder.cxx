@@ -7,15 +7,22 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include <metafile/MetafileRecorder.hxx>
+#include <tools/poly.hxx>
+
+#include <vcl/gradient.hxx>
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/metafile/GDIMetaFile.hxx>
+#include <vcl/metafile/ScopedMetaGroup.hxx>
 #include <vcl/outdev.hxx>
+#include <vcl/rendercontext/DrawModeFlags.hxx>
+
+#include <metafile/MetafileRecorder.hxx>
 
 namespace vcl
 {
 MetafileRecorder::MetafileRecorder(OutputDevice& rDev)
     : mpMetaFile(rDev.GetConnectMetaFile())
+    , mrOutDev(rDev)
 {
 }
 
@@ -144,6 +151,64 @@ void MetafileRecorder::RecordPop()
 {
     if (IsActive())
         mpMetaFile->AddAction(new MetaPopAction());
+}
+
+void MetafileRecorder::RecordGradient(const tools::Rectangle& rRect, const Gradient& rGradient)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaGradientAction(rRect, rGradient));
+}
+
+void MetafileRecorder::RecordGradient(const tools::PolyPolygon& rPolyPoly,
+                                      const Gradient& rGradient)
+{
+    if (!IsActive())
+        return;
+
+    if (!rPolyPoly.Count() || !rPolyPoly[0].GetSize())
+        return;
+
+    tools::Rectangle aBoundRect(rPolyPoly.GetBoundRect());
+    if (aBoundRect.IsEmpty())
+        return;
+
+    Gradient aGradient(rGradient);
+    if (mrOutDev.GetDrawMode() & DrawModeFlags::GrayGradient)
+        aGradient.MakeGrayscale();
+
+    if (rPolyPoly.IsRect())
+    {
+        mpMetaFile->AddAction(new MetaGradientAction(aBoundRect, aGradient));
+    }
+    else
+    {
+        // Complex Gradient "Sandwich"
+        // 1. Start Tag
+        ScopedMetaGroup aGroup(mpMetaFile, "XGRAD_SEQ_BEGIN"_ostr, "XGRAD_SEQ_END"_ostr);
+
+        // 2. The Modern Action
+        mpMetaFile->AddAction(new MetaGradientExAction(rPolyPoly, aGradient));
+
+        // 3. The Fallback
+        mpMetaFile->AddAction(new MetaPushAction(vcl::PushFlags::CLIPREGION));
+
+        // UNIFIED BEHAVIOR:
+        // Always use IntersectClipRegion. This is safe for both Screen and Printer.
+        // It respects existing clips (like Printer margins) while applying the new gradient shape.
+        mpMetaFile->AddAction(new MetaISectRegionClipRegionAction(vcl::Region(rPolyPoly)));
+
+        // GRADIENT(Rect) - The bounding box
+        mpMetaFile->AddAction(new MetaGradientAction(aBoundRect, aGradient));
+
+        // POP()
+        mpMetaFile->AddAction(new MetaPopAction());
+    }
+}
+
+void MetafileRecorder::RecordComment(const rtl::OString& rComment)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaCommentAction(rComment));
 }
 } // namespace vcl
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

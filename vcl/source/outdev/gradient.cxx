@@ -20,7 +20,7 @@
 #include <tools/poly.hxx>
 
 #include <vcl/gradient.hxx>
-#include <vcl/metafile/MetaAction.hxx>
+#include <metafile/MetafileRecorder.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
@@ -30,6 +30,8 @@
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
 #include <salgdi.hxx>
+
+#include <com/sun/star/awt/GradientStyle.hpp>
 
 #include <cassert>
 #include <memory>
@@ -76,7 +78,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
     if ( mpGraphicsState->mnDrawMode & DrawModeFlags::GrayGradient )
         aGradient.MakeGrayscale();
 
-    DrawGradientToMetafile( rPolyPoly, rGradient );
+    vcl::MetafileRecorder(*this).RecordGradient( rPolyPoly, rGradient );
 
     if( !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary() )
         return;
@@ -144,55 +146,6 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
         DrawLinearGradient( aRect, aGradient, aClixPolyPoly.IsRect() ? nullptr : &aClixPolyPoly );
     else
         DrawComplexGradient( aRect, aGradient, aClixPolyPoly.IsRect() ? nullptr : &aClixPolyPoly );
-}
-
-void OutputDevice::ClipAndDrawGradientMetafile ( const Gradient &rGradient, const tools::PolyPolygon &rPolyPoly )
-{
-    const bool  bOldOutput = IsOutputEnabled();
-    EnableOutput( false );
-
-    Push( vcl::PushFlags::CLIPREGION );
-    SetClipRegion( vcl::Region( rPolyPoly ) );
-    DrawGradient( rPolyPoly.GetBoundRect(), rGradient );
-    Pop();
-
-    EnableOutput( bOldOutput );
-}
-
-void OutputDevice::DrawGradientToMetafile ( const tools::PolyPolygon& rPolyPoly,
-                                            const Gradient& rGradient )
-{
-    assert(!is_double_buffered_window());
-
-    if ( !mpMetaFile )
-        return;
-
-    if ( !(rPolyPoly.Count() && rPolyPoly[ 0 ].GetSize()) )
-        return;
-
-    const tools::Rectangle aBoundRect( rPolyPoly.GetBoundRect() );
-
-    if (aBoundRect.IsEmpty())
-        return;
-
-    Gradient aGradient( rGradient );
-
-    if (mpGraphicsState->mnDrawMode & DrawModeFlags::GrayGradient)
-        aGradient.MakeGrayscale();
-
-    if ( rPolyPoly.IsRect() )
-    {
-        mpMetaFile->AddAction( new MetaGradientAction( aBoundRect, std::move(aGradient) ) );
-    }
-    else
-    {
-        mpMetaFile->AddAction( new MetaCommentAction( "XGRAD_SEQ_BEGIN"_ostr ) );
-        mpMetaFile->AddAction( new MetaGradientExAction( rPolyPoly, rGradient ) );
-
-        ClipAndDrawGradientMetafile ( rGradient, rPolyPoly );
-
-        mpMetaFile->AddAction( new MetaCommentAction( "XGRAD_SEQ_END"_ostr ) );
-    }
 }
 
 namespace
