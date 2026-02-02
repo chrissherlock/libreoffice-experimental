@@ -20,6 +20,15 @@ class GDIMetaFile;
 class GfxLink;
 class Point;
 class Size;
+class Gradient;
+namespace tools
+{
+class PolyPolygon;
+}
+namespace rtl
+{
+class OString;
+}
 
 namespace vcl
 {
@@ -29,6 +38,7 @@ class MetafileRecorder
 {
 private:
     GDIMetaFile* mpMetaFile;
+    OutputDevice& mrOutDev;
 
 public:
     explicit MetafileRecorder(OutputDevice& rDev);
@@ -71,6 +81,13 @@ public:
     // --- State Stack Actions ---
     void RecordPush(vcl::PushFlags nFlags);
     void RecordPop();
+
+    // --- Gradient Actions ---
+    void RecordGradient(const tools::Rectangle& rRect, const Gradient& rGradient);
+    void RecordGradient(const tools::PolyPolygon& rPolyPoly, const Gradient& rGradient);
+
+    // --- Comment Actions ---
+    void RecordComment(const rtl::OString& rComment);
 };
 
 } // namespace vcl

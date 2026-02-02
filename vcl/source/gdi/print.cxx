@@ -1631,15 +1631,6 @@ bool Printer::UsePolyPolygonForComplexGradient()
     return true;
 }
 
-void Printer::ClipAndDrawGradientMetafile ( const Gradient &rGradient, const tools::PolyPolygon &rPolyPoly )
-{
-    const tools::Rectangle aBoundRect( rPolyPoly.GetBoundRect() );
-
-    auto popIt = ScopedPush(vcl::PushFlags::CLIPREGION);
-    IntersectClipRegion(vcl::Region(rPolyPoly));
-    DrawGradient( aBoundRect, rGradient );
-}
-
 void Printer::SetFontOrientation( LogicalFontInstance* const pFontEntry ) const
 {
     pFontEntry->mnOrientation = pFontEntry->mxFontMetric->GetOrientation();
