@@ -21,7 +21,7 @@
 #include <sal/log.hxx>
 #include <tools/debug.hxx>
 
-#include <vcl/metafile/MetaAction.hxx>
+#include <metafile/MetafileRecorder.hxx>
 #include <vcl/rendercontext/State.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/settings.hxx>
@@ -35,8 +35,7 @@
 
 void OutputDevice::Push(vcl::PushFlags nFlags)
 {
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaPushAction(nFlags));
+    vcl::MetafileRecorder(*this).RecordPush(nFlags);
 
     maOutDevStateStack.emplace_back();
     vcl::State& rState = maOutDevStateStack.back();
@@ -96,8 +95,7 @@ void OutputDevice::Push(vcl::PushFlags nFlags)
 
 void OutputDevice::Pop()
 {
-    if( mpMetaFile )
-        mpMetaFile->AddAction( new MetaPopAction() );
+    vcl::MetafileRecorder(*this).RecordPop();
 
     GDIMetaFile* pOldMetaFile = mpMetaFile;
     mpMetaFile = nullptr;

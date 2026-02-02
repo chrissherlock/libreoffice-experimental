@@ -23,6 +23,7 @@
 #include <vcl/gradient.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/print.hxx>
+#include <vcl/rendercontext/State.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/rendercontext/RasterOp.hxx>
@@ -2726,6 +2727,27 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testLineColorRecording)
     CPPUNIT_ASSERT_EQUAL(MetaActionType::LINECOLOR, pAction->GetType());
     pLine = static_cast<MetaLineColorAction*>(pAction);
     CPPUNIT_ASSERT(!pLine->IsSetting());
+}
+
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testPushPopRecording)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    GDIMetaFile aMtf;
+    pVDev->SetConnectMetaFile(&aMtf);
+
+    pVDev->Push(vcl::PushFlags::CLIPREGION | vcl::PushFlags::LINECOLOR);
+    pVDev->Pop();
+
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), aMtf.GetActionSize());
+
+    MetaAction* pAction = aMtf.GetAction(0);
+    CPPUNIT_ASSERT_EQUAL(MetaActionType::PUSH, pAction->GetType());
+    auto pPush = static_cast<MetaPushAction*>(pAction);
+    CPPUNIT_ASSERT(bool(pPush->GetFlags() & vcl::PushFlags::CLIPREGION));
+    CPPUNIT_ASSERT(bool(pPush->GetFlags() & vcl::PushFlags::LINECOLOR));
+
+    pAction = aMtf.GetAction(1);
+    CPPUNIT_ASSERT_EQUAL(MetaActionType::POP, pAction->GetType());
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();
