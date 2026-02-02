@@ -65,6 +65,7 @@ public:
 
     // --- State Actions ---
     void RecordFillColor(const Color& rColor, bool bSet);
+    void RecordLineColor(const Color& rColor, bool bSet);
 };
 
 } // namespace vcl

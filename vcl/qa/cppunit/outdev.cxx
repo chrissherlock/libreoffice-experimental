@@ -2705,6 +2705,29 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testFillColorRecording)
     CPPUNIT_ASSERT(!pFill->IsSetting());
 }
 
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testLineColorRecording)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    GDIMetaFile aMtf;
+    pVDev->SetConnectMetaFile(&aMtf);
+
+    pVDev->SetLineColor(COL_BLUE);
+    pVDev->SetLineColor();
+
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), aMtf.GetActionSize());
+
+    MetaAction* pAction = aMtf.GetAction(0);
+    CPPUNIT_ASSERT_EQUAL(MetaActionType::LINECOLOR, pAction->GetType());
+    auto pLine = static_cast<MetaLineColorAction*>(pAction);
+    CPPUNIT_ASSERT_EQUAL(COL_BLUE, pLine->GetColor());
+    CPPUNIT_ASSERT(pLine->IsSetting());
+
+    pAction = aMtf.GetAction(1);
+    CPPUNIT_ASSERT_EQUAL(MetaActionType::LINECOLOR, pAction->GetType());
+    pLine = static_cast<MetaLineColorAction*>(pAction);
+    CPPUNIT_ASSERT(!pLine->IsSetting());
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

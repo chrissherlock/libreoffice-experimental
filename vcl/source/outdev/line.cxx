@@ -25,10 +25,12 @@
 #include <comphelper/configuration.hxx>
 
 #include <vcl/lineinfo.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/virdev.hxx>
 
+#include <metafile/MetafileRecorder.hxx>
 #include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
@@ -50,8 +52,7 @@ bool OutputDevice::IsLineColor() const
 
 void OutputDevice::SetLineColor()
 {
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaLineColorAction(Color(), false));
+    vcl::MetafileRecorder(*this).RecordLineColor( Color(), false );
 
     // UPDATE: Access via maGraphicsState
     if (mpGraphicsState->mbLineColor)
@@ -66,8 +67,7 @@ void OutputDevice::SetLineColor(const Color& rColor)
 {
     Color aColor = vcl::drawmode::GetLineColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings());
 
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaLineColorAction(aColor, true));
+    vcl::MetafileRecorder(*this).RecordLineColor( aColor, true );
 
     if (mpGraphicsState->maLineColor != aColor)
     {
