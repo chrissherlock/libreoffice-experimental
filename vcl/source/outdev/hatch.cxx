@@ -250,6 +250,22 @@ static void lcl_DecomposeHatch( const tools::PolyPolygon& rPolyPoly, const Hatch
                                 const tools::Rectangle& rRect, const Point& rRefPoint,
                                 tools::Long nLogPixelWidth, tools::Long nWidth, Callback callback )
 {
+    // #i115630# DecomposeHatch does not work with beziers included in the polypolygon
+    bool bIsCurve = false;
+    for (sal_uInt16 a(0); !bIsCurve && a < rPolyPoly.Count(); a++)
+    {
+        if (rPolyPoly[a].HasFlags())
+            bIsCurve = true;
+    }
+
+    if (bIsCurve)
+    {
+        tools::PolyPolygon aPolyPoly;
+        rPolyPoly.AdaptiveSubdivide(aPolyPoly);
+        lcl_DecomposeHatch(aPolyPoly, rHatch, rRect, rRefPoint, nLogPixelWidth, nWidth, callback);
+        return;
+    }
+
     // Single hatch
     tools::Rectangle aRect(rRect);
     aRect.AdjustLeft( -nLogPixelWidth ); aRect.AdjustTop( -nLogPixelWidth ); aRect.AdjustRight(nLogPixelWidth ); aRect.AdjustBottom(nLogPixelWidth );
@@ -412,28 +428,6 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
 
     if(!rPolyPoly.Count())
         return;
-
-    // #i115630# DrawHatch does not work with beziers included in the polypolygon, take care of that
-    bool bIsCurve(false);
-
-    for(sal_uInt16 a(0); !bIsCurve && a < rPolyPoly.Count(); a++)
-    {
-        if(rPolyPoly[a].HasFlags())
-        {
-            bIsCurve = true;
-        }
-    }
-
-    if(bIsCurve)
-    {
-        OSL_ENSURE(false, "DrawHatch does *not* support curves, falling back to AdaptiveSubdivide()...");
-        tools::PolyPolygon aPolyPoly;
-
-        rPolyPoly.AdaptiveSubdivide(aPolyPoly);
-        DrawHatch(aPolyPoly, rHatch, bMtf);
-
-        return;
-    }
 
     tools::Rectangle   aRect( rPolyPoly.GetBoundRect() );
     const tools::Long  nLogPixelWidth = mpMapper->DevicePixelToLogicWidth(1);
