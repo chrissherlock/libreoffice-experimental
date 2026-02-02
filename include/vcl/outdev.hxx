@@ -881,7 +881,6 @@ public:
 
 private:
 
-    SAL_DLLPRIVATE void         DrawHatchLines( const tools::Line& rLine, const tools::PolyPolygon& rPolyPoly, std::vector<Point>& rPtBuffer, bool bMtf );
     ///@}
 
 
