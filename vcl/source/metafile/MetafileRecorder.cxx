@@ -133,5 +133,17 @@ void MetafileRecorder::RecordLineColor(const Color& rColor, bool bSet)
     if (IsActive())
         mpMetaFile->AddAction(new MetaLineColorAction(rColor, bSet));
 }
+
+void MetafileRecorder::RecordPush(vcl::PushFlags nFlags)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaPushAction(nFlags));
+}
+
+void MetafileRecorder::RecordPop()
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaPopAction());
+}
 } // namespace vcl
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
