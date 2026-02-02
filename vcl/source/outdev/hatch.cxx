@@ -39,6 +39,184 @@
 #include <algorithm>
 #include <memory>
 
+
+static void lcl_CalcHatchValues( const tools::Rectangle& rRect, tools::Long nDist, Degree10 nAngle10,
+                          const Point& rRefPoint, Point& rPt1, Point& rPt2, Size& rInc, Point& rEndPt1 )
+{
+    Degree10    nAngle = nAngle10 % 1800_deg10;
+    tools::Long nOffset = 0;
+
+    if( nAngle > 900_deg10 )
+        nAngle -= 1800_deg10;
+
+    if( 0_deg10 == nAngle )
+    {
+        rInc = Size( 0, nDist );
+        rPt1 = rRect.TopLeft();
+        rPt2 = rRect.TopRight();
+        rEndPt1 = rRect.BottomLeft();
+
+        if( rRefPoint.Y() <= rRect.Top() )
+            nOffset = ( ( rRect.Top() - rRefPoint.Y() ) % nDist );
+        else
+            nOffset = ( nDist - ( ( rRefPoint.Y() - rRect.Top() ) % nDist ) );
+
+        rPt1.AdjustY( -nOffset );
+        rPt2.AdjustY( -nOffset );
+    }
+    else if( 900_deg10 == nAngle )
+    {
+        rInc = Size( nDist, 0 );
+        rPt1 = rRect.TopLeft();
+        rPt2 = rRect.BottomLeft();
+        rEndPt1 = rRect.TopRight();
+
+        if( rRefPoint.X() <= rRect.Left() )
+            nOffset = ( rRect.Left() - rRefPoint.X() ) % nDist;
+        else
+            nOffset = nDist - ( ( rRefPoint.X() - rRect.Left() ) % nDist );
+
+        rPt1.AdjustX( -nOffset );
+        rPt2.AdjustX( -nOffset );
+    }
+    else if( nAngle >= Degree10(-450) && nAngle <= 450_deg10 )
+    {
+        const double    fAngle = std::abs( toRadians(nAngle) );
+        const double    fTan = tan( fAngle );
+        const tools::Long      nYOff = basegfx::fround<tools::Long>( ( rRect.Right() - rRect.Left() ) * fTan );
+        tools::Long            nPY;
+
+        nDist = basegfx::fround<tools::Long>(nDist / cos(fAngle));
+        rInc = Size( 0, nDist );
+
+        if( nAngle > 0_deg10 )
+        {
+            rPt1 = rRect.TopLeft();
+            rPt2 = Point( rRect.Right(), rRect.Top() - nYOff );
+            rEndPt1 = Point( rRect.Left(), rRect.Bottom() + nYOff );
+            nPY = basegfx::fround<tools::Long>(rRefPoint.Y() - ((rPt1.X() - rRefPoint.X()) * fTan));
+        }
+        else
+        {
+            rPt1 = rRect.TopRight();
+            rPt2 = Point( rRect.Left(), rRect.Top() - nYOff );
+            rEndPt1 = Point( rRect.Right(), rRect.Bottom() + nYOff );
+            nPY = basegfx::fround<tools::Long>(rRefPoint.Y() + ((rPt1.X() - rRefPoint.X()) * fTan));
+        }
+
+        if( nPY <= rPt1.Y() )
+            nOffset = ( rPt1.Y() - nPY ) % nDist;
+        else
+            nOffset = nDist - ( ( nPY - rPt1.Y() ) % nDist );
+
+        rPt1.AdjustY( -nOffset );
+        rPt2.AdjustY( -nOffset );
+    }
+    else
+    {
+        const double fAngle = std::abs( toRadians(nAngle) );
+        const double fTan = tan( fAngle );
+        const tools::Long   nXOff = basegfx::fround<tools::Long>( (static_cast<double>(rRect.Bottom()) - rRect.Top()) / fTan );
+        tools::Long         nPX;
+
+        nDist = basegfx::fround<tools::Long>(nDist / sin(fAngle));
+        rInc = Size( nDist, 0 );
+
+        if( nAngle > 0_deg10 )
+        {
+            rPt1 = rRect.TopLeft();
+            rPt2 = Point( rRect.Left() - nXOff, rRect.Bottom() );
+            rEndPt1 = Point( rRect.Right() + nXOff, rRect.Top() );
+            nPX = basegfx::fround<tools::Long>( rRefPoint.X() - ( (static_cast<double>(rPt1.Y()) - rRefPoint.Y()) / fTan ) );
+        }
+        else
+        {
+            rPt1 = rRect.BottomLeft();
+            rPt2 = Point( rRect.Left() - nXOff, rRect.Top() );
+            rEndPt1 = Point( rRect.Right() + nXOff, rRect.Bottom() );
+            nPX = basegfx::fround<tools::Long>( rRefPoint.X() + ( (static_cast<double>(rPt1.Y()) - rRefPoint.Y()) / fTan ) );
+        }
+
+        if( nPX <= rPt1.X() )
+            nOffset = ( rPt1.X() - nPX ) % nDist;
+        else
+            nOffset = nDist - ( ( nPX - rPt1.X() ) % nDist );
+
+        rPt1.AdjustX( -nOffset );
+        rPt2.AdjustX( -nOffset );
+    }
+}
+
+static void lcl_CollectHatchIntersections( const tools::Line& rLine, const tools::PolyPolygon& rPolyPoly, std::vector<Point>& rPtBuffer )
+{
+    double  fX, fY;
+    rPtBuffer.clear();
+    tools::Long nAdd;
+
+    for( tools::Long nPoly = 0, nPolyCount = rPolyPoly.Count(); nPoly < nPolyCount; nPoly++ )
+    {
+        const tools::Polygon& rPoly = rPolyPoly[ static_cast<sal_uInt16>(nPoly) ];
+
+        if( rPoly.GetSize() > 1 )
+        {
+            tools::Line aCurSegment( rPoly[ 0 ], Point() );
+
+            for( tools::Long i = 1, nCount = rPoly.GetSize(); i <= nCount; i++ )
+            {
+                aCurSegment.SetEnd( rPoly[ static_cast<sal_uInt16>( i % nCount ) ] );
+                nAdd = 0;
+
+                if( rLine.Intersection( aCurSegment, fX, fY ) )
+                {
+                    if( ( fabs( fX - aCurSegment.GetStart().X() ) <= 0.0000001 ) &&
+                        ( fabs( fY - aCurSegment.GetStart().Y() ) <= 0.0000001 ) )
+                    {
+                        const tools::Line aPrevSegment( rPoly[ static_cast<sal_uInt16>( ( i > 1 ) ? ( i - 2 ) : ( nCount - 1 ) ) ], aCurSegment.GetStart() );
+                        const double    fPrevDistance = rLine.GetDistance( aPrevSegment.GetStart() );
+                        const double    fCurDistance = rLine.GetDistance( aCurSegment.GetEnd() );
+
+                        if( ( fPrevDistance <= 0.0 && fCurDistance > 0.0 ) ||
+                            ( fPrevDistance > 0.0 && fCurDistance < 0.0 ) )
+                        {
+                            nAdd = 1;
+                        }
+                    }
+                    else if( ( fabs( fX - aCurSegment.GetEnd().X() ) <= 0.0000001 ) &&
+                             ( fabs( fY - aCurSegment.GetEnd().Y() ) <= 0.0000001 ) )
+                    {
+                        const tools::Line aNextSegment( aCurSegment.GetEnd(), rPoly[ static_cast<sal_uInt16>( ( i + 1 ) % nCount ) ] );
+
+                        if( ( fabs( rLine.GetDistance( aNextSegment.GetEnd() ) ) <= 0.0000001 ) &&
+                            ( rLine.GetDistance( aCurSegment.GetStart() ) > 0.0 ) )
+                        {
+                            nAdd = 1;
+                        }
+                    }
+                    else
+                        nAdd = 1;
+
+                    if( nAdd )
+                    {
+                        rPtBuffer.emplace_back(basegfx::fround<tools::Long>(fX),
+                                                       basegfx::fround<tools::Long>(fY));
+                    }
+                }
+
+                aCurSegment.SetStart( aCurSegment.GetEnd() );
+            }
+        }
+    }
+
+    if (rPtBuffer.size() <= 1)
+        return;
+
+    std::sort(rPtBuffer.begin(), rPtBuffer.end(), [](const Point& rA, const Point& rB) {
+        if (rA.X() != rB.X())
+            return rA.X() < rB.X();
+        return rA.Y() < rB.Y();
+    });
+}
+
 void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch )
 {
     assert(!is_double_buffered_window());
@@ -172,9 +350,11 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
     Point       aPt1, aPt2, aEndPt1;
     Size        aInc;
 
+    Point aRefPoint = IsRefPoint() ? GetRefPoint() : aRect.TopLeft();
+
     // Single hatch
     aRect.AdjustLeft( -nLogPixelWidth ); aRect.AdjustTop( -nLogPixelWidth ); aRect.AdjustRight(nLogPixelWidth ); aRect.AdjustBottom(nLogPixelWidth );
-    CalcHatchValues( aRect, nWidth, rHatch.GetAngle(), aPt1, aPt2, aInc, aEndPt1 );
+    lcl_CalcHatchValues( aRect, nWidth, rHatch.GetAngle(), aRefPoint, aPt1, aPt2, aInc, aEndPt1 );
     if (comphelper::IsFuzzing() && !HasSaneNSteps(aPt1, aEndPt1, aInc))
         return;
 
@@ -195,7 +375,7 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
         return;
 
     // Double hatch
-    CalcHatchValues( aRect, nWidth, rHatch.GetAngle() + 900_deg10, aPt1, aPt2, aInc, aEndPt1 );
+    lcl_CalcHatchValues( aRect, nWidth, rHatch.GetAngle() + 900_deg10, aRefPoint, aPt1, aPt2, aInc, aEndPt1 );
     if (comphelper::IsFuzzing() && !HasSaneNSteps(aPt1, aEndPt1, aInc))
         return;
 
@@ -210,7 +390,7 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
     if( rHatch.GetStyle() == HatchStyle::Triple )
     {
         // Triple hatch
-        CalcHatchValues( aRect, nWidth, rHatch.GetAngle() + 450_deg10, aPt1, aPt2, aInc, aEndPt1 );
+        lcl_CalcHatchValues( aRect, nWidth, rHatch.GetAngle() + 450_deg10, aRefPoint, aPt1, aPt2, aInc, aEndPt1 );
         if (comphelper::IsFuzzing() && !HasSaneNSteps(aPt1, aEndPt1, aInc))
             return;
 
@@ -224,179 +404,15 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
     }
 }
 
-void OutputDevice::CalcHatchValues( const tools::Rectangle& rRect, tools::Long nDist, Degree10 nAngle10,
-                                    Point& rPt1, Point& rPt2, Size& rInc, Point& rEndPt1 )
-{
-    Point   aRef;
-    Degree10    nAngle = nAngle10 % 1800_deg10;
-    tools::Long    nOffset = 0;
 
-    if( nAngle > 900_deg10 )
-        nAngle -= 1800_deg10;
-
-    aRef = ( !IsRefPoint() ? rRect.TopLeft() : GetRefPoint() );
-
-    if( 0_deg10 == nAngle )
-    {
-        rInc = Size( 0, nDist );
-        rPt1 = rRect.TopLeft();
-        rPt2 = rRect.TopRight();
-        rEndPt1 = rRect.BottomLeft();
-
-        if( aRef.Y() <= rRect.Top() )
-            nOffset = ( ( rRect.Top() - aRef.Y() ) % nDist );
-        else
-            nOffset = ( nDist - ( ( aRef.Y() - rRect.Top() ) % nDist ) );
-
-        rPt1.AdjustY( -nOffset );
-        rPt2.AdjustY( -nOffset );
-    }
-    else if( 900_deg10 == nAngle )
-    {
-        rInc = Size( nDist, 0 );
-        rPt1 = rRect.TopLeft();
-        rPt2 = rRect.BottomLeft();
-        rEndPt1 = rRect.TopRight();
-
-        if( aRef.X() <= rRect.Left() )
-            nOffset = ( rRect.Left() - aRef.X() ) % nDist;
-        else
-            nOffset = nDist - ( ( aRef.X() - rRect.Left() ) % nDist );
-
-        rPt1.AdjustX( -nOffset );
-        rPt2.AdjustX( -nOffset );
-    }
-    else if( nAngle >= Degree10(-450) && nAngle <= 450_deg10 )
-    {
-        const double    fAngle = std::abs( toRadians(nAngle) );
-        const double    fTan = tan( fAngle );
-        const tools::Long      nYOff = basegfx::fround<tools::Long>( ( rRect.Right() - rRect.Left() ) * fTan );
-        tools::Long            nPY;
-
-        nDist = basegfx::fround<tools::Long>(nDist / cos(fAngle));
-        rInc = Size( 0, nDist );
-
-        if( nAngle > 0_deg10 )
-        {
-            rPt1 = rRect.TopLeft();
-            rPt2 = Point( rRect.Right(), rRect.Top() - nYOff );
-            rEndPt1 = Point( rRect.Left(), rRect.Bottom() + nYOff );
-            nPY = basegfx::fround<tools::Long>(aRef.Y() - ((rPt1.X() - aRef.X()) * fTan));
-        }
-        else
-        {
-            rPt1 = rRect.TopRight();
-            rPt2 = Point( rRect.Left(), rRect.Top() - nYOff );
-            rEndPt1 = Point( rRect.Right(), rRect.Bottom() + nYOff );
-            nPY = basegfx::fround<tools::Long>(aRef.Y() + ((rPt1.X() - aRef.X()) * fTan));
-        }
-
-        if( nPY <= rPt1.Y() )
-            nOffset = ( rPt1.Y() - nPY ) % nDist;
-        else
-            nOffset = nDist - ( ( nPY - rPt1.Y() ) % nDist );
-
-        rPt1.AdjustY( -nOffset );
-        rPt2.AdjustY( -nOffset );
-    }
-    else
-    {
-        const double fAngle = std::abs( toRadians(nAngle) );
-        const double fTan = tan( fAngle );
-        const tools::Long   nXOff = basegfx::fround<tools::Long>( (static_cast<double>(rRect.Bottom()) - rRect.Top()) / fTan );
-        tools::Long         nPX;
-
-        nDist = basegfx::fround<tools::Long>(nDist / sin(fAngle));
-        rInc = Size( nDist, 0 );
-
-        if( nAngle > 0_deg10 )
-        {
-            rPt1 = rRect.TopLeft();
-            rPt2 = Point( rRect.Left() - nXOff, rRect.Bottom() );
-            rEndPt1 = Point( rRect.Right() + nXOff, rRect.Top() );
-            nPX = basegfx::fround<tools::Long>( aRef.X() - ( (static_cast<double>(rPt1.Y()) - aRef.Y()) / fTan ) );
-        }
-        else
-        {
-            rPt1 = rRect.BottomLeft();
-            rPt2 = Point( rRect.Left() - nXOff, rRect.Top() );
-            rEndPt1 = Point( rRect.Right() + nXOff, rRect.Bottom() );
-            nPX = basegfx::fround<tools::Long>( aRef.X() + ( (static_cast<double>(rPt1.Y()) - aRef.Y()) / fTan ) );
-        }
-
-        if( nPX <= rPt1.X() )
-            nOffset = ( rPt1.X() - nPX ) % nDist;
-        else
-            nOffset = nDist - ( ( nPX - rPt1.X() ) % nDist );
-
-        rPt1.AdjustX( -nOffset );
-        rPt2.AdjustX( -nOffset );
-    }
-}
 
 void OutputDevice::DrawHatchLines( const tools::Line& rLine, const tools::PolyPolygon& rPolyPoly,
                                       std::vector<Point>& rPtBuffer, bool bMtf )
+
 {
     assert(!is_double_buffered_window());
 
-    double  fX, fY;
-    rPtBuffer.clear();
-    tools::Long nAdd;
-
-    for( tools::Long nPoly = 0, nPolyCount = rPolyPoly.Count(); nPoly < nPolyCount; nPoly++ )
-    {
-        const tools::Polygon& rPoly = rPolyPoly[ static_cast<sal_uInt16>(nPoly) ];
-
-        if( rPoly.GetSize() > 1 )
-        {
-            tools::Line aCurSegment( rPoly[ 0 ], Point() );
-
-            for( tools::Long i = 1, nCount = rPoly.GetSize(); i <= nCount; i++ )
-            {
-                aCurSegment.SetEnd( rPoly[ static_cast<sal_uInt16>( i % nCount ) ] );
-                nAdd = 0;
-
-                if( rLine.Intersection( aCurSegment, fX, fY ) )
-                {
-                    if( ( fabs( fX - aCurSegment.GetStart().X() ) <= 0.0000001 ) &&
-                        ( fabs( fY - aCurSegment.GetStart().Y() ) <= 0.0000001 ) )
-                    {
-                        const tools::Line aPrevSegment( rPoly[ static_cast<sal_uInt16>( ( i > 1 ) ? ( i - 2 ) : ( nCount - 1 ) ) ], aCurSegment.GetStart() );
-                        const double    fPrevDistance = rLine.GetDistance( aPrevSegment.GetStart() );
-                        const double    fCurDistance = rLine.GetDistance( aCurSegment.GetEnd() );
-
-                        if( ( fPrevDistance <= 0.0 && fCurDistance > 0.0 ) ||
-                            ( fPrevDistance > 0.0 && fCurDistance < 0.0 ) )
-                        {
-                            nAdd = 1;
-                        }
-                    }
-                    else if( ( fabs( fX - aCurSegment.GetEnd().X() ) <= 0.0000001 ) &&
-                             ( fabs( fY - aCurSegment.GetEnd().Y() ) <= 0.0000001 ) )
-                    {
-                        const tools::Line aNextSegment( aCurSegment.GetEnd(), rPoly[ static_cast<sal_uInt16>( ( i + 1 ) % nCount ) ] );
-
-                        if( ( fabs( rLine.GetDistance( aNextSegment.GetEnd() ) ) <= 0.0000001 ) &&
-                            ( rLine.GetDistance( aCurSegment.GetStart() ) > 0.0 ) )
-                        {
-                            nAdd = 1;
-                        }
-                    }
-                    else
-                        nAdd = 1;
-
-                    if( nAdd )
-                    {
-
-                        rPtBuffer.emplace_back(basegfx::fround<tools::Long>(fX),
-                                                       basegfx::fround<tools::Long>(fY));
-                    }
-                }
-
-                aCurSegment.SetStart( aCurSegment.GetEnd() );
-            }
-        }
-    }
+    lcl_CollectHatchIntersections(rLine, rPolyPoly, rPtBuffer);
 
     if (rPtBuffer.size() <= 1)
         return;
@@ -404,14 +420,6 @@ void OutputDevice::DrawHatchLines( const tools::Line& rLine, const tools::PolyPo
     tools::Long nSize = static_cast<tools::Long>(rPtBuffer.size());
     if (nSize & 1)
         nSize--;
-
-    std::sort(rPtBuffer.begin(), rPtBuffer.end(), [](const Point& rA, const Point& rB) {
-        if (rA.X() != rB.X())
-            return rA.X() < rB.X();
-        return rA.Y() < rB.Y();
-    });
-
-
 
     if( bMtf )
     {
