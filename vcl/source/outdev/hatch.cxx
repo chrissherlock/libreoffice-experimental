@@ -35,23 +35,9 @@
 
 #include <cassert>
 #include <cstdlib>
+#include <vector>
+#include <algorithm>
 #include <memory>
-
-#define HATCH_MAXPOINTS             1024
-
-extern "C" {
-
-static int HatchCmpFnc( const void* p1, const void* p2 )
-{
-    const tools::Long nX1 = static_cast<Point const *>(p1)->X();
-    const tools::Long nX2 = static_cast<Point const *>(p2)->X();
-    const tools::Long nY1 = static_cast<Point const *>(p1)->Y();
-    const tools::Long nY2 = static_cast<Point const *>(p2)->Y();
-
-    return ( nX1 > nX2 ? 1 : nX1 == nX2 ? nY1 > nY2 ? 1: nY1 == nY2 ? 0 : -1 : -1 );
-}
-
-}
 
 void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch )
 {
@@ -181,7 +167,8 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
     tools::Rectangle   aRect( rPolyPoly.GetBoundRect() );
     const tools::Long  nLogPixelWidth = mpMapper->DevicePixelToLogicWidth(1);
     const tools::Long nWidth = mpMapper->DevicePixelToLogicWidth(std::max(LogicWidthToDevicePixel(rHatch.GetDistance()), tools::Long(3)));
-    std::unique_ptr<Point[]> pPtBuffer(new Point[ HATCH_MAXPOINTS ]);
+    std::vector<Point> aPtBuffer;
+    aPtBuffer.reserve(1024);
     Point       aPt1, aPt2, aEndPt1;
     Size        aInc;
 
@@ -197,7 +184,7 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
     {
         do
         {
-            DrawHatchLine( tools::Line( aPt1, aPt2 ), rPolyPoly, pPtBuffer.get(), bMtf );
+            DrawHatchLines( tools::Line( aPt1, aPt2 ), rPolyPoly, aPtBuffer, bMtf );
             aPt1.AdjustX(aInc.Width() ); aPt1.AdjustY(aInc.Height() );
             aPt2.AdjustX(aInc.Width() ); aPt2.AdjustY(aInc.Height() );
         }
@@ -214,7 +201,7 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
 
     do
     {
-        DrawHatchLine( tools::Line( aPt1, aPt2 ), rPolyPoly, pPtBuffer.get(), bMtf );
+        DrawHatchLines( tools::Line( aPt1, aPt2 ), rPolyPoly, aPtBuffer, bMtf );
         aPt1.AdjustX(aInc.Width() ); aPt1.AdjustY(aInc.Height() );
         aPt2.AdjustX(aInc.Width() ); aPt2.AdjustY(aInc.Height() );
     }
@@ -229,7 +216,7 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
 
         do
         {
-            DrawHatchLine( tools::Line( aPt1, aPt2 ), rPolyPoly, pPtBuffer.get(), bMtf );
+            DrawHatchLines( tools::Line( aPt1, aPt2 ), rPolyPoly, aPtBuffer, bMtf );
             aPt1.AdjustX(aInc.Width() ); aPt1.AdjustY(aInc.Height() );
             aPt2.AdjustX(aInc.Width() ); aPt2.AdjustY(aInc.Height() );
         }
@@ -347,13 +334,14 @@ void OutputDevice::CalcHatchValues( const tools::Rectangle& rRect, tools::Long n
     }
 }
 
-void OutputDevice::DrawHatchLine( const tools::Line& rLine, const tools::PolyPolygon& rPolyPoly,
-                                      Point* pPtBuffer, bool bMtf )
+void OutputDevice::DrawHatchLines( const tools::Line& rLine, const tools::PolyPolygon& rPolyPoly,
+                                      std::vector<Point>& rPtBuffer, bool bMtf )
 {
     assert(!is_double_buffered_window());
 
     double  fX, fY;
-    tools::Long    nAdd, nPCounter = 0;
+    rPtBuffer.clear();
+    tools::Long nAdd;
 
     for( tools::Long nPoly = 0, nPolyCount = rPolyPoly.Count(); nPoly < nPolyCount; nPoly++ )
     {
@@ -399,12 +387,8 @@ void OutputDevice::DrawHatchLine( const tools::Line& rLine, const tools::PolyPol
 
                     if( nAdd )
                     {
-                        if (nPCounter == HATCH_MAXPOINTS)
-                        {
-                            SAL_WARN("vcl.gdi", "too many hatch points");
-                            return;
-                        }
-                        pPtBuffer[nPCounter++] = Point(basegfx::fround<tools::Long>(fX),
+
+                        rPtBuffer.emplace_back(basegfx::fround<tools::Long>(fX),
                                                        basegfx::fround<tools::Long>(fY));
                     }
                 }
@@ -414,28 +398,35 @@ void OutputDevice::DrawHatchLine( const tools::Line& rLine, const tools::PolyPol
         }
     }
 
-    if( nPCounter <= 1 )
+    if (rPtBuffer.size() <= 1)
         return;
 
-    qsort( pPtBuffer, nPCounter, sizeof( Point ), HatchCmpFnc );
+    tools::Long nSize = static_cast<tools::Long>(rPtBuffer.size());
+    if (nSize & 1)
+        nSize--;
 
-    if( nPCounter & 1 )
-        nPCounter--;
+    std::sort(rPtBuffer.begin(), rPtBuffer.end(), [](const Point& rA, const Point& rB) {
+        if (rA.X() != rB.X())
+            return rA.X() < rB.X();
+        return rA.Y() < rB.Y();
+    });
+
+
 
     if( bMtf )
     {
         vcl::MetafileRecorder aRecorder(*this);
-        for( tools::Long i = 0; i < nPCounter; i += 2 )
-            aRecorder.RecordLine( pPtBuffer[ i ], pPtBuffer[ i + 1 ] );
+        for( tools::Long i = 0; i < nSize; i += 2 )
+            aRecorder.RecordLine( rPtBuffer[i], rPtBuffer[i + 1] );
     }
     else
     {
-        for( tools::Long i = 0; i < nPCounter; i += 2 )
-            DrawHatchLine_DrawLine(pPtBuffer[i], pPtBuffer[i+1]);
+        for( tools::Long i = 0; i < nSize; i += 2 )
+            DrawHatchLine(rPtBuffer[i], rPtBuffer[i+1]);
     }
 }
 
-void OutputDevice::DrawHatchLine_DrawLine(const Point& rStartPoint, const Point& rEndPoint)
+void OutputDevice::DrawHatchLine(const Point& rStartPoint, const Point& rEndPoint)
 {
     Point aPt1{LogicToDevicePixel(rStartPoint)}, aPt2{LogicToDevicePixel(rEndPoint)};
     mpGraphics->DrawLine(aPt1.X(), aPt1.Y(), aPt2.X(), aPt2.Y(), *this);
