@@ -212,12 +212,40 @@ static void lcl_SortIntersections(std::vector<Point>& rPtBuffer)
     });
 }
 
+namespace
+{
+struct Bounds
+{
+    tools::Long nMinX;
+    tools::Long nMaxX;
+    tools::Long nMinY;
+    tools::Long nMaxY;
+
+    explicit Bounds(const tools::Line& rLine)
+    {
+        nMinX = std::min(rLine.GetStart().X(), rLine.GetEnd().X());
+        nMaxX = std::max(rLine.GetStart().X(), rLine.GetEnd().X());
+        nMinY = std::min(rLine.GetStart().Y(), rLine.GetEnd().Y());
+        nMaxY = std::max(rLine.GetStart().Y(), rLine.GetEnd().Y());
+    }
+
+    bool Overlaps(const Bounds& rOther) const
+    {
+        return (nMaxX >= rOther.nMinX) && (nMinX <= rOther.nMaxX) && (nMaxY >= rOther.nMinY)
+               && (nMinY <= rOther.nMaxY);
+    }
+};
+}
+
 static void lcl_CollectPolygonIntersections(const tools::Line& rHatchLine,
                                             const tools::Polygon& rPoly,
                                             std::vector<Point>& rPtBuffer)
 {
     if (rPoly.GetSize() <= 1)
         return;
+
+    // OPTIMIZATION: Pre-calculate hatch line bounds to enable fast rejection.
+    Bounds aHatchBounds(rHatchLine);
 
     double fX, fY;
     tools::Line aCurSegment(rPoly[0], Point());
@@ -226,7 +254,10 @@ static void lcl_CollectPolygonIntersections(const tools::Line& rHatchLine,
     {
         aCurSegment.SetEnd(rPoly[static_cast<sal_uInt16>(i % nCount)]);
 
-        if (rHatchLine.Intersection(aCurSegment, fX, fY))
+        // Fast Segment Rejection (AABB check)
+        Bounds aSegBounds(aCurSegment);
+
+        if (aHatchBounds.Overlaps(aSegBounds) && rHatchLine.Intersection(aCurSegment, fX, fY))
         {
             if (lcl_IsValidIntersection(rHatchLine, aCurSegment, rPoly, i, nCount, fX, fY))
             {
