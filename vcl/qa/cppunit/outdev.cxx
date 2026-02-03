@@ -44,6 +44,9 @@
 #include <bufferdevice.hxx>
 #include <window.h>
 
+#include <vcl/HatchProcessor.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <tools/line.hxx>
 const size_t INITIAL_SETUP_ACTION_COUNT = 5;
 
 class VclOutdevTest : public test::BootstrapFixture
@@ -2850,7 +2853,7 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testHatchDecomposition)
     Hatch aHatch(HatchStyle::Single, COL_RED, 5, 450_deg10);
 
     // This triggers the decomposition logic (AddHatchActions -> DrawHatch(..., true))
-    pVDev->AddHatchActions(aPolyPoly, aHatch, aMtf);
+    vcl::HatchProcessor::DecomposeToMetaFile(aPolyPoly, aHatch, aMtf, pVDev.get());
 
     // We expect a sequence:
     // 1. BeginGroup Comment (ScopedMetaGroup)
@@ -2909,7 +2912,8 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testHatchGeometric)
     {
         aMtf.Clear();
         Hatch aHatch(HatchStyle::Single, COL_BLACK, 10, 0_deg10);
-        pVDev->AddHatchActions(aPoly, aHatch, aMtf);
+        vcl::HatchProcessor::DecomposeToMetaFile(aPoly, aHatch, aMtf, pVDev.get());
+
         size_t nSingleCount = aMtf.GetActionSize();
         // Expect header/footer actions + lines.
         // 100x100 box, dist 10 -> approx 10 lines.
@@ -2920,7 +2924,8 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testHatchGeometric)
     {
         aMtf.Clear();
         Hatch aHatch(HatchStyle::Double, COL_BLACK, 10, 0_deg10);
-        pVDev->AddHatchActions(aPoly, aHatch, aMtf);
+        vcl::HatchProcessor::DecomposeToMetaFile(aPoly, aHatch, aMtf, pVDev.get());
+
         size_t nDoubleCount = aMtf.GetActionSize();
 
         CPPUNIT_ASSERT_MESSAGE("Double hatch should have more lines than Single",
@@ -2947,13 +2952,15 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testHatchGeometric)
         // Case A: RefPoint (0,0)
         aMtf.Clear();
         pVDev->SetRefPoint(Point(0, 0));
-        pVDev->AddHatchActions(aPoly, aHatch, aMtf);
+        vcl::HatchProcessor::DecomposeToMetaFile(aPoly, aHatch, aMtf, pVDev.get());
+
         tools::Long nYA = findFirstLineY(aMtf);
 
         // Case B: RefPoint (0,10) - Should shift lines by 10
         aMtf.Clear();
         pVDev->SetRefPoint(Point(0, 10));
-        pVDev->AddHatchActions(aPoly, aHatch, aMtf);
+        vcl::HatchProcessor::DecomposeToMetaFile(aPoly, aHatch, aMtf, pVDev.get());
+
         tools::Long nYB = findFirstLineY(aMtf);
 
         // Verify we actually generated lines
@@ -2976,7 +2983,7 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testHatchGeometric)
         Hatch aHatch(HatchStyle::Single, COL_BLACK, 10, 0_deg10);
 
         // This exercises the intersection logic where lines hit corners
-        pVDev->AddHatchActions(aRotPoly, aHatch, aMtf);
+        vcl::HatchProcessor::DecomposeToMetaFile(aRotPoly, aHatch, aMtf, pVDev.get());
 
         // Just verify we didn't crash and produced something
         CPPUNIT_ASSERT(aMtf.GetActionSize() > 0);

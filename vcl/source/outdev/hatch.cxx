@@ -91,9 +91,6 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
         SetLineColor( aHatch.GetColor() );
         InitLineColor();
 
-        // --- Inlined Hatch Processing ---
-        // Note: Curve handling is now done inside HatchProcessor
-
         tools::Rectangle aRect( aPolyPoly.GetBoundRect() );
         const tools::Long nLogPixelWidth = mpMapper->DevicePixelToLogicWidth(1);
         const tools::Long nWidth = mpMapper->DevicePixelToLogicWidth(std::max(aHatch.GetDistance(), tools::Long(3)));

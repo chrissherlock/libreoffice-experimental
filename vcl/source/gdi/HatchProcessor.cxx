@@ -18,6 +18,10 @@
 
 #include <vcl/vclenum.hxx>
 #include <vcl/hatch.hxx>
+#include <vcl/metafile/ScopedMetaGroup.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <vcl/outdev.hxx>
+#include <tools/line.hxx>
 
 #include <vcl/HatchProcessor.hxx>
 
@@ -425,6 +429,31 @@ void HatchProcessor::Process(const tools::PolyPolygon& rPolyPoly, const Hatch& r
     // Triple Hatch (Additional 45 degrees)
     lcl_ProcessSingleDirection(rPolyPoly, aRect, rHatch.GetAngle() + 450_deg10, nWidth, rRefPoint,
                                callback);
+}
+
+void HatchProcessor::DecomposeToMetaFile(const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch,
+                                         GDIMetaFile& rMtf, const OutputDevice* pDev)
+{
+    if (!pDev)
+        return;
+
+    vcl::ScopedMetaGroup aGroup(&rMtf, "DecomposedHatch");
+    rMtf.AddAction(new MetaPushAction(vcl::PushFlags::ALL));
+    rMtf.AddAction(new MetaLineColorAction(rHatch.GetColor(), true));
+
+    // Calculate logical widths based on the device settings
+    tools::Long nOnePixel = pDev->PixelToLogic(Size(1, 0)).Width();
+    tools::Long nDist = rHatch.GetDistance();
+    tools::Long nMinDist = pDev->PixelToLogic(Size(3, 0)).Width();
+    if (nDist < nMinDist)
+        nDist = nMinDist;
+
+    HatchProcessor::Process(rPolyPoly, rHatch, rPolyPoly.GetBoundRect(), pDev->GetRefPoint(),
+                            nOnePixel, nDist, [&](const Point& p1, const Point& p2) {
+                                rMtf.AddAction(new MetaLineAction(p1, p2, LineInfo()));
+                            });
+
+    rMtf.AddAction(new MetaPopAction());
 }
 
 } // namespace vcl
