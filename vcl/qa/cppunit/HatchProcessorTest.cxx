@@ -17,7 +17,7 @@
 #include <vcl/hatch.hxx>
 #include <vcl/vclenum.hxx>
 
-#include <HatchProcessor.hxx>
+#include <vcl/HatchProcessor.hxx>
 
 using namespace vcl;
 

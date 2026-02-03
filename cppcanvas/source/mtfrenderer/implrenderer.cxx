@@ -76,6 +76,10 @@
 #include <string_view>
 #include "mtftools.hxx"
 
+#include <vcl/HatchProcessor.hxx>
+#include <tools/line.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+
 using namespace ::com::sun::star;
 
 
@@ -1542,9 +1546,27 @@ namespace cppcanvas::internal
                         // TODO(F2): use native Canvas hatches here
                         GDIMetaFile aTmpMtf;
 
-                        rVDev.AddHatchActions( static_cast<MetaHatchAction*>(pCurrAct)->GetPolyPolygon(),
-                                               static_cast<MetaHatchAction*>(pCurrAct)->GetHatch(),
-                                               aTmpMtf );
+                        {
+                            // Direct Hatch Processing (replaced AddHatchActions)
+                            aTmpMtf.AddAction(new MetaPushAction(vcl::PushFlags::ALL));
+                            aTmpMtf.AddAction(new MetaLineColorAction(static_cast<MetaHatchAction*>(pCurrAct)->GetHatch().GetColor(), true));
+
+                            // Calculate logical widths based on the device settings
+                            tools::Long nOnePixel = (&rVDev)->PixelToLogic(Size(1, 0)).Width();
+                            tools::Long nDist = static_cast<MetaHatchAction*>(pCurrAct)->GetHatch().GetDistance();
+                            tools::Long nMinDist = (&rVDev)->PixelToLogic(Size(3, 0)).Width();
+                            if (nDist < nMinDist) nDist = nMinDist;
+
+                            vcl::HatchProcessor::Process(static_cast<MetaHatchAction*>(pCurrAct)->GetPolyPolygon(),
+                                                         static_cast<MetaHatchAction*>(pCurrAct)->GetHatch(),
+                                                         static_cast<MetaHatchAction*>(pCurrAct)->GetPolyPolygon().GetBoundRect(),
+                                                         (&rVDev)->GetRefPoint(), nOnePixel, nDist,
+                                                         [&](const Point& p1, const Point& p2) {
+                                                             aTmpMtf.AddAction(new MetaLineAction(p1, p2, LineInfo()));
+                                                         });
+
+                            aTmpMtf.AddAction(new MetaPopAction());
+                        }
                         createActions( aTmpMtf, rFactoryParms,
                                        bSubsettableActions );
                     }

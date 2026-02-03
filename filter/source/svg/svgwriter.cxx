@@ -56,6 +56,13 @@
 
 #include <memory>
 
+#include <vcl/HatchProcessor.hxx>
+#include <tools/line.hxx>
+
+#include <vcl/HatchProcessor.hxx>
+#include <tools/line.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+
 using namespace ::com::sun::star::style;
 
 constexpr OUString aPrefixClipPathId = u"clip_path_"_ustr;
@@ -2360,7 +2367,25 @@ void SVGActionWriter::ImplWritePattern( const tools::PolyPolygon& rPolyPoly,
                 GDIMetaFile aTmpMtf;
                 if( pHatch )
                 {
-                    mpVDev->AddHatchActions( rPolyPoly, *pHatch, aTmpMtf );
+                    {
+                        // Direct Hatch Processing (replaced AddHatchActions)
+                        aTmpMtf.AddAction(new MetaPushAction(vcl::PushFlags::ALL));
+                        aTmpMtf.AddAction(new MetaLineColorAction(pHatch->GetColor(), true));
+
+                        // Calculate logical widths based on the device settings
+                        tools::Long nOnePixel = mpVDev->PixelToLogic(Size(1, 0)).Width();
+                        tools::Long nDist = pHatch->GetDistance();
+                        tools::Long nMinDist = mpVDev->PixelToLogic(Size(3, 0)).Width();
+                        if (nDist < nMinDist) nDist = nMinDist;
+
+                        vcl::HatchProcessor::Process(rPolyPoly, *pHatch, rPolyPoly.GetBoundRect(),
+                            mpVDev->GetRefPoint(), nOnePixel, nDist,
+                            [&](const Point& p1, const Point& p2) {
+                                aTmpMtf.AddAction(new MetaLineAction(p1, p2, LineInfo()));
+                            });
+
+                        aTmpMtf.AddAction(new MetaPopAction());
+                    }
                 }
                 else if ( pGradient )
                 {

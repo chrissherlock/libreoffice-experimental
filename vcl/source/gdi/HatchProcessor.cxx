@@ -19,7 +19,7 @@
 #include <vcl/vclenum.hxx>
 #include <vcl/hatch.hxx>
 
-#include <HatchProcessor.hxx>
+#include <vcl/HatchProcessor.hxx>
 
 #include <algorithm>
 #include <cmath>

@@ -84,6 +84,7 @@
 #include <vcl/svapp.hxx>
 #include <vcl/vectorgraphicdata.hxx>
 #include <vcl/virdev.hxx>
+#include <vcl/HatchProcessor.hxx>
 #include <vcl/filter/pdfdocument.hxx>
 #include <vcl/filter/PngImageReader.hxx>
 #include <comphelper/hash.hxx>
@@ -9292,12 +9293,30 @@ void PDFWriterImpl::drawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch&
 
     if( rPolyPoly.Count() )
     {
-        tools::PolyPolygon     aPolyPoly( rPolyPoly );
-
+        tools::PolyPolygon aPolyPoly( rPolyPoly );
         aPolyPoly.Optimize( PolyOptimizeFlags::NO_SAME );
+
         push( PushFlags::LINECOLOR );
         setLineColor( rHatch.GetColor() );
-        DrawHatch( aPolyPoly, rHatch, false );
+
+        // Calculate logical widths using the device context
+        // Ensure distance is at least 3 device pixels
+        tools::Long nPixelDist = LogicToPixel(Size(rHatch.GetDistance(), 0)).Width();
+        if (nPixelDist < 3)
+            nPixelDist = 3;
+        tools::Long nDist = PixelToLogic(Size(nPixelDist, 0)).Width();
+        tools::Long nOnePixel = PixelToLogic(Size(1, 0)).Width();
+
+        tools::Rectangle aRect( aPolyPoly.GetBoundRect() );
+
+        // PDFWriterImpl usually acts as a Reference Device
+        Point aRefPoint = IsRefPoint() ? GetRefPoint() : aRect.TopLeft();
+
+        vcl::HatchProcessor::Process(aPolyPoly, rHatch, aRect, aRefPoint, nOnePixel, nDist,
+            [&](const Point& p1, const Point& p2) {
+                drawLine(p1, p2);
+            });
+
         pop();
     }
 }
