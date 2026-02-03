@@ -231,5 +231,29 @@ void MetafileRecorder::RecordLine(const Point& rStart, const Point& rEnd, const 
         mpMetaFile->AddAction(new MetaLineAction(rStart, rEnd, rLineInfo));
 }
 
+void MetafileRecorder::RecordFont(const vcl::Font& rFont)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaFontAction(rFont));
+}
+
+void MetafileRecorder::RecordTextAlign(TextAlign eAlign)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaTextAlignAction(eAlign));
+}
+
+void MetafileRecorder::RecordTextColor(const Color& rColor)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaTextColorAction(rColor));
+}
+
+void MetafileRecorder::RecordTextFillColor(const Color& rColor, bool bSet)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaTextFillColorAction(rColor, bSet));
+}
+
 } // namespace vcl
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
