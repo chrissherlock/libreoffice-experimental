@@ -63,100 +63,96 @@ static void lcl_CalcVerticalHatch(const tools::Rectangle& rRect, tools::Long nDi
     rPt2.AdjustX(-nOffset);
 }
 
+static void lcl_CalcDiagonalHatchHorizontalScan(const tools::Rectangle& rRect, tools::Long nDist,
+                                                Degree10 nAngle, const Point& rRefPoint,
+                                                Point& rPt1, Point& rPt2, Size& rInc,
+                                                Point& rEndPt1)
+{
+    // "Horizontal-ish" diagonals
+    const double fAngle = std::abs(toRadians(nAngle));
+    const double fTan = std::tan(fAngle);
+    const tools::Long nYOff = basegfx::fround<tools::Long>((rRect.Right() - rRect.Left()) * fTan);
+
+    nDist = basegfx::fround<tools::Long>(nDist / std::cos(fAngle));
+    rInc = Size(0, nDist);
+
+    tools::Long nPY;
+    if (nAngle > 0_deg10)
+    {
+        rPt1 = rRect.TopLeft();
+        rPt2 = Point(rRect.Right(), rRect.Top() - nYOff);
+        rEndPt1 = Point(rRect.Left(), rRect.Bottom() + nYOff);
+        nPY = basegfx::fround<tools::Long>(rRefPoint.Y() - ((rPt1.X() - rRefPoint.X()) * fTan));
+    }
+    else
+    {
+        rPt1 = rRect.TopRight();
+        rPt2 = Point(rRect.Left(), rRect.Top() - nYOff);
+        rEndPt1 = Point(rRect.Right(), rRect.Bottom() + nYOff);
+        nPY = basegfx::fround<tools::Long>(rRefPoint.Y() + ((rPt1.X() - rRefPoint.X()) * fTan));
+    }
+
+    tools::Long nOffset;
+    if (nPY <= rPt1.Y())
+        nOffset = (rPt1.Y() - nPY) % nDist;
+    else
+        nOffset = nDist - ((nPY - rPt1.Y()) % nDist);
+
+    rPt1.AdjustY(-nOffset);
+    rPt2.AdjustY(-nOffset);
+}
+
+static void lcl_CalcDiagonalHatchVerticalScan(const tools::Rectangle& rRect, tools::Long nDist,
+                                              Degree10 nAngle, const Point& rRefPoint, Point& rPt1,
+                                              Point& rPt2, Size& rInc, Point& rEndPt1)
+{
+    // "Vertical-ish" diagonals
+    const double fAngle = std::abs(toRadians(nAngle));
+    const double fTan = std::tan(fAngle);
+    const tools::Long nXOff
+        = basegfx::fround<tools::Long>((static_cast<double>(rRect.Bottom()) - rRect.Top()) / fTan);
+
+    nDist = basegfx::fround<tools::Long>(nDist / std::sin(fAngle));
+    rInc = Size(nDist, 0);
+
+    tools::Long nPX;
+    if (nAngle > 0_deg10)
+    {
+        rPt1 = rRect.TopLeft();
+        rPt2 = Point(rRect.Left() - nXOff, rRect.Bottom());
+        rEndPt1 = Point(rRect.Right() + nXOff, rRect.Top());
+        nPX = basegfx::fround<tools::Long>(
+            rRefPoint.X() - ((static_cast<double>(rPt1.Y()) - rRefPoint.Y()) / fTan));
+    }
+    else
+    {
+        rPt1 = rRect.BottomLeft();
+        rPt2 = Point(rRect.Left() - nXOff, rRect.Top());
+        rEndPt1 = Point(rRect.Right() + nXOff, rRect.Bottom());
+        nPX = basegfx::fround<tools::Long>(
+            rRefPoint.X() + ((static_cast<double>(rPt1.Y()) - rRefPoint.Y()) / fTan));
+    }
+
+    tools::Long nOffset;
+    if (nPX <= rPt1.X())
+        nOffset = (rPt1.X() - nPX) % nDist;
+    else
+        nOffset = nDist - ((nPX - rPt1.X()) % nDist);
+
+    rPt1.AdjustX(-nOffset);
+    rPt2.AdjustX(-nOffset);
+}
+
 static void lcl_CalcDiagonalHatch(const tools::Rectangle& rRect, tools::Long nDist, Degree10 nAngle,
                                   const Point& rRefPoint, Point& rPt1, Point& rPt2, Size& rInc,
                                   Point& rEndPt1)
 {
-    // Handle angles > 90 differently than <= 90 (quadrant logic)
-    // Angles are normalized to [-450, 450] or handled by quadrant math
-
-    // We can reuse the logic from the original monolithic function.
-    // The original split was:
-    // 1. [-45 .. 45] degrees (closer to horizontal scan)
-    // 2. Others (closer to vertical scan)
-
-    // NOTE: The caller normalizes nAngle to 0..1800 before calling,
-    // but the sub-logic specifically checks for -450 to 450 range logic.
-    // We must respect the condition:
-    // if (nAngle >= Degree10(-450) && nAngle <= 450_deg10)
-
-    // However, since nAngle comes in normalized % 1800, we need to handle the wrapping
-    // exactly as the original function did if we want to preserve exact behavior.
-
     if (nAngle >= Degree10(-450) && nAngle <= 450_deg10)
-    {
-        // "Horizontal-ish" diagonals
-        const double fAngle = std::abs(toRadians(nAngle));
-        const double fTan = std::tan(fAngle);
-        const tools::Long nYOff
-            = basegfx::fround<tools::Long>((rRect.Right() - rRect.Left()) * fTan);
-
-        nDist = basegfx::fround<tools::Long>(nDist / std::cos(fAngle));
-        rInc = Size(0, nDist);
-
-        tools::Long nPY;
-        if (nAngle > 0_deg10)
-        {
-            rPt1 = rRect.TopLeft();
-            rPt2 = Point(rRect.Right(), rRect.Top() - nYOff);
-            rEndPt1 = Point(rRect.Left(), rRect.Bottom() + nYOff);
-            nPY = basegfx::fround<tools::Long>(rRefPoint.Y() - ((rPt1.X() - rRefPoint.X()) * fTan));
-        }
-        else
-        {
-            rPt1 = rRect.TopRight();
-            rPt2 = Point(rRect.Left(), rRect.Top() - nYOff);
-            rEndPt1 = Point(rRect.Right(), rRect.Bottom() + nYOff);
-            nPY = basegfx::fround<tools::Long>(rRefPoint.Y() + ((rPt1.X() - rRefPoint.X()) * fTan));
-        }
-
-        tools::Long nOffset;
-        if (nPY <= rPt1.Y())
-            nOffset = (rPt1.Y() - nPY) % nDist;
-        else
-            nOffset = nDist - ((nPY - rPt1.Y()) % nDist);
-
-        rPt1.AdjustY(-nOffset);
-        rPt2.AdjustY(-nOffset);
-    }
+        lcl_CalcDiagonalHatchHorizontalScan(rRect, nDist, nAngle, rRefPoint, rPt1, rPt2, rInc,
+                                            rEndPt1);
     else
-    {
-        // "Vertical-ish" diagonals
-        const double fAngle = std::abs(toRadians(nAngle));
-        const double fTan = std::tan(fAngle);
-        const tools::Long nXOff = basegfx::fround<tools::Long>(
-            (static_cast<double>(rRect.Bottom()) - rRect.Top()) / fTan);
-
-        nDist = basegfx::fround<tools::Long>(nDist / std::sin(fAngle));
-        rInc = Size(nDist, 0);
-
-        tools::Long nPX;
-        if (nAngle > 0_deg10)
-        {
-            rPt1 = rRect.TopLeft();
-            rPt2 = Point(rRect.Left() - nXOff, rRect.Bottom());
-            rEndPt1 = Point(rRect.Right() + nXOff, rRect.Top());
-            nPX = basegfx::fround<tools::Long>(
-                rRefPoint.X() - ((static_cast<double>(rPt1.Y()) - rRefPoint.Y()) / fTan));
-        }
-        else
-        {
-            rPt1 = rRect.BottomLeft();
-            rPt2 = Point(rRect.Left() - nXOff, rRect.Top());
-            rEndPt1 = Point(rRect.Right() + nXOff, rRect.Bottom());
-            nPX = basegfx::fround<tools::Long>(
-                rRefPoint.X() + ((static_cast<double>(rPt1.Y()) - rRefPoint.Y()) / fTan));
-        }
-
-        tools::Long nOffset;
-        if (nPX <= rPt1.X())
-            nOffset = (rPt1.X() - nPX) % nDist;
-        else
-            nOffset = nDist - ((nPX - rPt1.X()) % nDist);
-
-        rPt1.AdjustX(-nOffset);
-        rPt2.AdjustX(-nOffset);
-    }
+        lcl_CalcDiagonalHatchVerticalScan(rRect, nDist, nAngle, rRefPoint, rPt1, rPt2, rInc,
+                                          rEndPt1);
 }
 
 namespace vcl
