@@ -25,59 +25,76 @@
 #include <cmath>
 #include <limits>
 
-namespace vcl
+static void lcl_CalcHorizontalHatch(const tools::Rectangle& rRect, tools::Long nDist,
+                                    const Point& rRefPoint, Point& rPt1, Point& rPt2, Size& rInc,
+                                    Point& rEndPt1)
 {
-void HatchProcessor::calcHatchValues(const tools::Rectangle& rRect, tools::Long nDist,
-                                     Degree10 nAngle10, const Point& rRefPoint, Point& rPt1,
-                                     Point& rPt2, Size& rInc, Point& rEndPt1)
+    rInc = Size(0, nDist);
+    rPt1 = rRect.TopLeft();
+    rPt2 = rRect.TopRight();
+    rEndPt1 = rRect.BottomLeft();
+
+    tools::Long nOffset;
+    if (rRefPoint.Y() <= rRect.Top())
+        nOffset = ((rRect.Top() - rRefPoint.Y()) % nDist);
+    else
+        nOffset = (nDist - ((rRefPoint.Y() - rRect.Top()) % nDist));
+
+    rPt1.AdjustY(-nOffset);
+    rPt2.AdjustY(-nOffset);
+}
+
+static void lcl_CalcVerticalHatch(const tools::Rectangle& rRect, tools::Long nDist,
+                                  const Point& rRefPoint, Point& rPt1, Point& rPt2, Size& rInc,
+                                  Point& rEndPt1)
 {
-    Degree10 nAngle = nAngle10 % 1800_deg10;
-    tools::Long nOffset = 0;
+    rInc = Size(nDist, 0);
+    rPt1 = rRect.TopLeft();
+    rPt2 = rRect.BottomLeft();
+    rEndPt1 = rRect.TopRight();
 
-    if (nAngle > 900_deg10)
-        nAngle -= 1800_deg10;
+    tools::Long nOffset;
+    if (rRefPoint.X() <= rRect.Left())
+        nOffset = (rRect.Left() - rRefPoint.X()) % nDist;
+    else
+        nOffset = nDist - ((rRefPoint.X() - rRect.Left()) % nDist);
 
-    if (0_deg10 == nAngle)
+    rPt1.AdjustX(-nOffset);
+    rPt2.AdjustX(-nOffset);
+}
+
+static void lcl_CalcDiagonalHatch(const tools::Rectangle& rRect, tools::Long nDist, Degree10 nAngle,
+                                  const Point& rRefPoint, Point& rPt1, Point& rPt2, Size& rInc,
+                                  Point& rEndPt1)
+{
+    // Handle angles > 90 differently than <= 90 (quadrant logic)
+    // Angles are normalized to [-450, 450] or handled by quadrant math
+
+    // We can reuse the logic from the original monolithic function.
+    // The original split was:
+    // 1. [-45 .. 45] degrees (closer to horizontal scan)
+    // 2. Others (closer to vertical scan)
+
+    // NOTE: The caller normalizes nAngle to 0..1800 before calling,
+    // but the sub-logic specifically checks for -450 to 450 range logic.
+    // We must respect the condition:
+    // if (nAngle >= Degree10(-450) && nAngle <= 450_deg10)
+
+    // However, since nAngle comes in normalized % 1800, we need to handle the wrapping
+    // exactly as the original function did if we want to preserve exact behavior.
+
+    if (nAngle >= Degree10(-450) && nAngle <= 450_deg10)
     {
-        rInc = Size(0, nDist);
-        rPt1 = rRect.TopLeft();
-        rPt2 = rRect.TopRight();
-        rEndPt1 = rRect.BottomLeft();
-
-        if (rRefPoint.Y() <= rRect.Top())
-            nOffset = ((rRect.Top() - rRefPoint.Y()) % nDist);
-        else
-            nOffset = (nDist - ((rRefPoint.Y() - rRect.Top()) % nDist));
-
-        rPt1.AdjustY(-nOffset);
-        rPt2.AdjustY(-nOffset);
-    }
-    else if (900_deg10 == nAngle)
-    {
-        rInc = Size(nDist, 0);
-        rPt1 = rRect.TopLeft();
-        rPt2 = rRect.BottomLeft();
-        rEndPt1 = rRect.TopRight();
-
-        if (rRefPoint.X() <= rRect.Left())
-            nOffset = (rRect.Left() - rRefPoint.X()) % nDist;
-        else
-            nOffset = nDist - ((rRefPoint.X() - rRect.Left()) % nDist);
-
-        rPt1.AdjustX(-nOffset);
-        rPt2.AdjustX(-nOffset);
-    }
-    else if (nAngle >= Degree10(-450) && nAngle <= 450_deg10)
-    {
+        // "Horizontal-ish" diagonals
         const double fAngle = std::abs(toRadians(nAngle));
         const double fTan = std::tan(fAngle);
         const tools::Long nYOff
             = basegfx::fround<tools::Long>((rRect.Right() - rRect.Left()) * fTan);
-        tools::Long nPY;
 
         nDist = basegfx::fround<tools::Long>(nDist / std::cos(fAngle));
         rInc = Size(0, nDist);
 
+        tools::Long nPY;
         if (nAngle > 0_deg10)
         {
             rPt1 = rRect.TopLeft();
@@ -93,6 +110,7 @@ void HatchProcessor::calcHatchValues(const tools::Rectangle& rRect, tools::Long 
             nPY = basegfx::fround<tools::Long>(rRefPoint.Y() + ((rPt1.X() - rRefPoint.X()) * fTan));
         }
 
+        tools::Long nOffset;
         if (nPY <= rPt1.Y())
             nOffset = (rPt1.Y() - nPY) % nDist;
         else
@@ -103,15 +121,16 @@ void HatchProcessor::calcHatchValues(const tools::Rectangle& rRect, tools::Long 
     }
     else
     {
+        // "Vertical-ish" diagonals
         const double fAngle = std::abs(toRadians(nAngle));
         const double fTan = std::tan(fAngle);
         const tools::Long nXOff = basegfx::fround<tools::Long>(
             (static_cast<double>(rRect.Bottom()) - rRect.Top()) / fTan);
-        tools::Long nPX;
 
         nDist = basegfx::fround<tools::Long>(nDist / std::sin(fAngle));
         rInc = Size(nDist, 0);
 
+        tools::Long nPX;
         if (nAngle > 0_deg10)
         {
             rPt1 = rRect.TopLeft();
@@ -129,6 +148,7 @@ void HatchProcessor::calcHatchValues(const tools::Rectangle& rRect, tools::Long 
                 rRefPoint.X() + ((static_cast<double>(rPt1.Y()) - rRefPoint.Y()) / fTan));
         }
 
+        tools::Long nOffset;
         if (nPX <= rPt1.X())
             nOffset = (rPt1.X() - nPX) % nDist;
         else
@@ -137,6 +157,25 @@ void HatchProcessor::calcHatchValues(const tools::Rectangle& rRect, tools::Long 
         rPt1.AdjustX(-nOffset);
         rPt2.AdjustX(-nOffset);
     }
+}
+
+namespace vcl
+{
+void HatchProcessor::calcHatchValues(const tools::Rectangle& rRect, tools::Long nDist,
+                                     Degree10 nAngle10, const Point& rRefPoint, Point& rPt1,
+                                     Point& rPt2, Size& rInc, Point& rEndPt1)
+{
+    Degree10 nAngle = nAngle10 % 1800_deg10;
+
+    if (nAngle > 900_deg10)
+        nAngle -= 1800_deg10;
+
+    if (nAngle == 0_deg10)
+        lcl_CalcHorizontalHatch(rRect, nDist, rRefPoint, rPt1, rPt2, rInc, rEndPt1);
+    else if (nAngle == 900_deg10)
+        lcl_CalcVerticalHatch(rRect, nDist, rRefPoint, rPt1, rPt2, rInc, rEndPt1);
+    else
+        lcl_CalcDiagonalHatch(rRect, nDist, nAngle, rRefPoint, rPt1, rPt2, rInc, rEndPt1);
 }
 
 void HatchProcessor::collectHatchIntersections(const tools::Line& rLine,
