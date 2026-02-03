@@ -155,6 +155,90 @@ static void lcl_CalcDiagonalHatch(const tools::Rectangle& rRect, tools::Long nDi
                                           rEndPt1);
 }
 
+static bool lcl_IsPointAtVertex(double fX, double fY, const Point& rPt)
+{
+    return (std::abs(fX - rPt.X()) <= 0.0000001) && (std::abs(fY - rPt.Y()) <= 0.0000001);
+}
+
+static bool lcl_IsCrossingAtStart(const tools::Line& rHatchLine, const tools::Line& rSegment,
+                                  const tools::Polygon& rPoly, tools::Long nIndex,
+                                  tools::Long nCount)
+{
+    // Check previous segment to see if we are crossing the boundary or just grazing it
+    const tools::Line aPrevSegment(
+        rPoly[static_cast<sal_uInt16>((nIndex > 1) ? (nIndex - 2) : (nCount - 1))],
+        rSegment.GetStart());
+    const double fPrevDistance = rHatchLine.GetDistance(aPrevSegment.GetStart());
+    const double fCurDistance = rHatchLine.GetDistance(rSegment.GetEnd());
+
+    // Valid if the polygon sides are on opposite sides of the hatch line
+    return (fPrevDistance <= 0.0 && fCurDistance > 0.0)
+           || (fPrevDistance > 0.0 && fCurDistance < 0.0);
+}
+
+static bool lcl_IsCrossingAtEnd(const tools::Line& rHatchLine, const tools::Line& rSegment,
+                                const tools::Polygon& rPoly, tools::Long nIndex, tools::Long nCount)
+{
+    // Check next segment
+    const tools::Line aNextSegment(rSegment.GetEnd(),
+                                   rPoly[static_cast<sal_uInt16>((nIndex + 1) % nCount)]);
+
+    return (std::abs(rHatchLine.GetDistance(aNextSegment.GetEnd())) <= 0.0000001)
+           && (rHatchLine.GetDistance(rSegment.GetStart()) > 0.0);
+}
+
+static bool lcl_IsValidIntersection(const tools::Line& rHatchLine, const tools::Line& rSegment,
+                                    const tools::Polygon& rPoly, tools::Long nIndex,
+                                    tools::Long nCount, double fX, double fY)
+{
+    if (lcl_IsPointAtVertex(fX, fY, rSegment.GetStart()))
+        return lcl_IsCrossingAtStart(rHatchLine, rSegment, rPoly, nIndex, nCount);
+
+    if (lcl_IsPointAtVertex(fX, fY, rSegment.GetEnd()))
+        return lcl_IsCrossingAtEnd(rHatchLine, rSegment, rPoly, nIndex, nCount);
+
+    return true;
+}
+
+static void lcl_SortIntersections(std::vector<Point>& rPtBuffer)
+{
+    if (rPtBuffer.size() <= 1)
+        return;
+
+    std::sort(rPtBuffer.begin(), rPtBuffer.end(), [](const Point& rA, const Point& rB) {
+        if (rA.X() != rB.X())
+            return rA.X() < rB.X();
+        return rA.Y() < rB.Y();
+    });
+}
+
+static void lcl_CollectPolygonIntersections(const tools::Line& rHatchLine,
+                                            const tools::Polygon& rPoly,
+                                            std::vector<Point>& rPtBuffer)
+{
+    if (rPoly.GetSize() <= 1)
+        return;
+
+    double fX, fY;
+    tools::Line aCurSegment(rPoly[0], Point());
+
+    for (tools::Long i = 1, nCount = rPoly.GetSize(); i <= nCount; i++)
+    {
+        aCurSegment.SetEnd(rPoly[static_cast<sal_uInt16>(i % nCount)]);
+
+        if (rHatchLine.Intersection(aCurSegment, fX, fY))
+        {
+            if (lcl_IsValidIntersection(rHatchLine, aCurSegment, rPoly, i, nCount, fX, fY))
+            {
+                rPtBuffer.emplace_back(basegfx::fround<tools::Long>(fX),
+                                       basegfx::fround<tools::Long>(fY));
+            }
+        }
+
+        aCurSegment.SetStart(aCurSegment.GetEnd());
+    }
+}
+
 namespace vcl
 {
 void HatchProcessor::calcHatchValues(const tools::Rectangle& rRect, tools::Long nDist,
@@ -178,75 +262,15 @@ void HatchProcessor::collectHatchIntersections(const tools::Line& rLine,
                                                const tools::PolyPolygon& rPolyPoly,
                                                std::vector<Point>& rPtBuffer)
 {
-    double fX, fY;
     rPtBuffer.clear();
-    tools::Long nAdd;
 
     for (tools::Long nPoly = 0, nPolyCount = rPolyPoly.Count(); nPoly < nPolyCount; nPoly++)
     {
-        const tools::Polygon& rPoly = rPolyPoly[static_cast<sal_uInt16>(nPoly)];
-
-        if (rPoly.GetSize() > 1)
-        {
-            tools::Line aCurSegment(rPoly[0], Point());
-
-            for (tools::Long i = 1, nCount = rPoly.GetSize(); i <= nCount; i++)
-            {
-                aCurSegment.SetEnd(rPoly[static_cast<sal_uInt16>(i % nCount)]);
-                nAdd = 0;
-
-                if (rLine.Intersection(aCurSegment, fX, fY))
-                {
-                    if ((std::abs(fX - aCurSegment.GetStart().X()) <= 0.0000001)
-                        && (std::abs(fY - aCurSegment.GetStart().Y()) <= 0.0000001))
-                    {
-                        const tools::Line aPrevSegment(
-                            rPoly[static_cast<sal_uInt16>((i > 1) ? (i - 2) : (nCount - 1))],
-                            aCurSegment.GetStart());
-                        const double fPrevDistance = rLine.GetDistance(aPrevSegment.GetStart());
-                        const double fCurDistance = rLine.GetDistance(aCurSegment.GetEnd());
-
-                        if ((fPrevDistance <= 0.0 && fCurDistance > 0.0)
-                            || (fPrevDistance > 0.0 && fCurDistance < 0.0))
-                        {
-                            nAdd = 1;
-                        }
-                    }
-                    else if ((std::abs(fX - aCurSegment.GetEnd().X()) <= 0.0000001)
-                             && (std::abs(fY - aCurSegment.GetEnd().Y()) <= 0.0000001))
-                    {
-                        const tools::Line aNextSegment(
-                            aCurSegment.GetEnd(), rPoly[static_cast<sal_uInt16>((i + 1) % nCount)]);
-
-                        if ((std::abs(rLine.GetDistance(aNextSegment.GetEnd())) <= 0.0000001)
-                            && (rLine.GetDistance(aCurSegment.GetStart()) > 0.0))
-                        {
-                            nAdd = 1;
-                        }
-                    }
-                    else
-                        nAdd = 1;
-
-                    if (nAdd)
-                    {
-                        rPtBuffer.emplace_back(basegfx::fround<tools::Long>(fX),
-                                               basegfx::fround<tools::Long>(fY));
-                    }
-                }
-
-                aCurSegment.SetStart(aCurSegment.GetEnd());
-            }
-        }
+        lcl_CollectPolygonIntersections(rLine, rPolyPoly[static_cast<sal_uInt16>(nPoly)],
+                                        rPtBuffer);
     }
 
-    if (rPtBuffer.size() <= 1)
-        return;
-
-    std::sort(rPtBuffer.begin(), rPtBuffer.end(), [](const Point& rA, const Point& rB) {
-        if (rA.X() != rB.X())
-            return rA.X() < rB.X();
-        return rA.Y() < rB.Y();
-    });
+    lcl_SortIntersections(rPtBuffer);
 }
 
 bool HatchProcessor::hasSaneNSteps(const Point& rPt1, const Point& rEndPt1, const Size& rInc)
