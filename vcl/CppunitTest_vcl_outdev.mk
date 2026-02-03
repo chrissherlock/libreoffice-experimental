@@ -34,6 +34,7 @@ $(eval $(call gb_CppunitTest_use_libraries,vcl_outdev, \
 	tl \
 	unotest \
 	vcl \
+	emfio \
 ))
 
 $(eval $(call gb_CppunitTest_use_sdk_api,vcl_outdev))
@@ -44,6 +45,7 @@ $(eval $(call gb_CppunitTest_use_vcl,vcl_outdev))
 $(eval $(call gb_CppunitTest_use_externals,vcl_outdev,harfbuzz))
 
 $(eval $(call gb_CppunitTest_use_components,vcl_outdev,\
+	emfio/emfio \
 	configmgr/source/configmgr \
 	i18npool/util/i18npool \
 	ucb/source/core/ucb1 \
