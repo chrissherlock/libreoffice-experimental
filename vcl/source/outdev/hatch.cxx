@@ -21,6 +21,7 @@
 #include <tools/line.hxx>
 #include <tools/helpers.hxx>
 #include <comphelper/configuration.hxx>
+#include <comphelper/scopeguard.hxx>
 
 #include <vcl/hatch.hxx>
 #include <metafile/MetafileRecorder.hxx>
@@ -63,22 +64,33 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
 
     if( rPolyPoly.Count() )
     {
-        tools::PolyPolygon     aPolyPoly( LogicToPixel( rPolyPoly ) );
-        GDIMetaFile* pOldMetaFile = mpMetaFile;
-        bool bOldMap = mpMapper->IsMapModeEnabled();
-
+        tools::PolyPolygon aPolyPoly( LogicToPixel( rPolyPoly ) );
         aPolyPoly.Optimize( PolyOptimizeFlags::NO_SAME );
-        aHatch.SetDistance(LogicWidthToDevicePixel(aHatch.GetDistance()));
 
+        // Guard MetaFile
+        GDIMetaFile* pOldMetaFile = mpMetaFile;
         mpMetaFile = nullptr;
+        comphelper::ScopeGuard aMetaFileGuard([this, pOldMetaFile]() {
+            mpMetaFile = pOldMetaFile;
+        });
+
+        // Guard MapMode
+        bool bOldMap = mpMapper->IsMapModeEnabled();
         mpMapper->EnableMapMode( false );
+        comphelper::ScopeGuard aMapModeGuard([this, bOldMap]() {
+            mpMapper->EnableMapMode( bOldMap );
+        });
+
+        // Guard Push/Pop
         Push( vcl::PushFlags::LINECOLOR );
+        comphelper::ScopeGuard aPopGuard([this]() {
+            Pop();
+        });
+
+        aHatch.SetDistance(LogicWidthToDevicePixel(aHatch.GetDistance()));
         SetLineColor( aHatch.GetColor() );
         InitLineColor();
         DrawHatch( aPolyPoly, aHatch, false );
-        Pop();
-        mpMapper->EnableMapMode( bOldMap );
-        mpMetaFile = pOldMetaFile;
     }
 }
 
@@ -91,18 +103,19 @@ void OutputDevice::AddHatchActions( const tools::PolyPolygon& rPolyPoly, const H
 
     if( aPolyPoly.Count() )
     {
+        // Guard MetaFile
         GDIMetaFile* pOldMtf = mpMetaFile;
-
         mpMetaFile = &rMtf;
-        {
-            vcl::ScopedMetaGroup aGroup(&rMtf, "DecomposedHatch");
-            vcl::MetafileRecorder aRecorder(*this);
-            aRecorder.RecordPush( vcl::PushFlags::ALL );
-            aRecorder.RecordLineColor( rHatch.GetColor(), true );
-            DrawHatch( aPolyPoly, rHatch, true );
-            aRecorder.RecordPop();
-        }
-        mpMetaFile = pOldMtf;
+        comphelper::ScopeGuard aMetaFileGuard([this, pOldMtf]() {
+            mpMetaFile = pOldMtf;
+        });
+
+        vcl::ScopedMetaGroup aGroup(&rMtf, "DecomposedHatch");
+        vcl::MetafileRecorder aRecorder(*this);
+        aRecorder.RecordPush( vcl::PushFlags::ALL );
+        aRecorder.RecordLineColor( rHatch.GetColor(), true );
+        DrawHatch( aPolyPoly, rHatch, true );
+        aRecorder.RecordPop();
     }
 }
 
