@@ -353,6 +353,11 @@ static void lcl_ProcessSingleDirection(const tools::PolyPolygon& rPolyPoly,
         return;
     }
 
+    // TODO: This loop is currently Scanline-Centric O(M*N).
+    // For high-complexity polygons with dense hatching, consider rewriting
+    // to an Edge-Centric algorithm (projecting edges onto the normal vector)
+    // to achieve O(N + M log M)
+
     do
     {
         collectHatchIntersections(tools::Line(aPt1, aPt2), rPolyPoly, aPtBuffer);
