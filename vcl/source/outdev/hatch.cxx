@@ -24,16 +24,16 @@
 #include <comphelper/scopeguard.hxx>
 
 #include <vcl/hatch.hxx>
-#include <metafile/MetafileRecorder.hxx>
 #include <vcl/metafile/ScopedMetaGroup.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
+#include <vcl/HatchProcessor.hxx>
 
 #include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
-#include <HatchProcessor.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
+#include <metafile/MetafileRecorder.hxx>
 
 #include <cassert>
 #include <cstdlib>
@@ -90,59 +90,24 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
         aHatch.SetDistance(LogicWidthToDevicePixel(aHatch.GetDistance()));
         SetLineColor( aHatch.GetColor() );
         InitLineColor();
-        DrawHatch( aPolyPoly, aHatch, false );
-    }
-}
 
-void OutputDevice::AddHatchActions( const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch,
-                                    GDIMetaFile& rMtf )
-{
+        // --- Inlined Hatch Processing ---
+        // Note: Curve handling is now done inside HatchProcessor
 
-    tools::PolyPolygon aPolyPoly( rPolyPoly );
-    aPolyPoly.Optimize( PolyOptimizeFlags::NO_SAME | PolyOptimizeFlags::CLOSE );
+        tools::Rectangle aRect( aPolyPoly.GetBoundRect() );
+        const tools::Long nLogPixelWidth = mpMapper->DevicePixelToLogicWidth(1);
+        const tools::Long nWidth = mpMapper->DevicePixelToLogicWidth(std::max(aHatch.GetDistance(), tools::Long(3)));
 
-    if( aPolyPoly.Count() )
-    {
-        // Guard MetaFile
-        GDIMetaFile* pOldMtf = mpMetaFile;
-        mpMetaFile = &rMtf;
-        comphelper::ScopeGuard aMetaFileGuard([this, pOldMtf]() {
-            mpMetaFile = pOldMtf;
-        });
+        Point aRefPoint = IsRefPoint() ? GetRefPoint() : aRect.TopLeft();
+        if (IsRefPoint())
+             aRefPoint = LogicToPixel(GetRefPoint());
 
-        vcl::ScopedMetaGroup aGroup(&rMtf, "DecomposedHatch");
-        vcl::MetafileRecorder aRecorder(*this);
-        aRecorder.RecordPush( vcl::PushFlags::ALL );
-        aRecorder.RecordLineColor( rHatch.GetColor(), true );
-        DrawHatch( aPolyPoly, rHatch, true );
-        aRecorder.RecordPop();
-    }
-}
-
-void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch, bool bMtf )
-{
-    assert(!is_double_buffered_window());
-
-    if(!rPolyPoly.Count())
-        return;
-
-    // Note: Curve handling is now done inside HatchProcessor
-
-    tools::Rectangle   aRect( rPolyPoly.GetBoundRect() );
-    const tools::Long  nLogPixelWidth = mpMapper->DevicePixelToLogicWidth(1);
-    const tools::Long nWidth = mpMapper->DevicePixelToLogicWidth(std::max(LogicWidthToDevicePixel(rHatch.GetDistance()), tools::Long(3)));
-
-    Point aRefPoint = IsRefPoint() ? GetRefPoint() : aRect.TopLeft();
-
-    vcl::HatchProcessor::Process(rPolyPoly, rHatch, aRect, aRefPoint, nLogPixelWidth, nWidth,
-        [&](const Point& p1, const Point& p2) {
-            if (bMtf) {
-                vcl::MetafileRecorder aRecorder(*this);
-                aRecorder.RecordLine(p1, p2);
-            } else {
+        vcl::HatchProcessor::Process(aPolyPoly, aHatch, aRect, aRefPoint, nLogPixelWidth, nWidth,
+            [&](const Point& p1, const Point& p2) {
+                // We keep calling DrawHatchLine to maintain consistent behavior
                 DrawHatchLine(p1, p2);
-            }
-        });
+            });
+    }
 }
 
 void OutputDevice::DrawHatchLine(const Point& rStartPoint, const Point& rEndPoint)

@@ -10,23 +10,20 @@
 #pragma once
 
 #include <vcl/dllapi.h>
-
 #include <tools/degree.hxx>
 #include <tools/long.hxx>
-
 #include <functional>
-#include <vector>
 
 namespace tools
 {
 class PolyPolygon;
-class Rect;
-class Line;
+class Rectangle;
 }
 
 class Point;
-class Size;
 class Hatch;
+class GDIMetaFile;
+class OutputDevice;
 
 namespace vcl
 {
@@ -42,6 +39,13 @@ public:
     static void Process(const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch,
                         const tools::Rectangle& rRect, const Point& rRefPoint,
                         tools::Long nLogPixelWidth, tools::Long nWidth, Callback callback);
+
+    /**
+     * Helper to decompose a hatch into a GDIMetaFile with standard grouping and state setup.
+     * Encapsulates ScopedMetaGroup, Push/Pop, and LineColor actions.
+     */
+    static void DecomposeToMetaFile(const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch,
+                                    GDIMetaFile& rMtf, const OutputDevice* pDev);
 };
 
 } // namespace vcl

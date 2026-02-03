@@ -19,21 +19,25 @@
 
 #include <sal/config.h>
 #include <sal/log.hxx>
-
-#include <algorithm>
-
-#include "emfwr.hxx"
 #include <tools/helpers.hxx>
 #include <tools/fract.hxx>
 #include <tools/mapunit.hxx>
 #include <tools/stream.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
+
 #include <vcl/alpha.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/dibtools.hxx>
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/metafile/MetaActionType.hxx>
+
+#include <vcl/HatchProcessor.hxx>
+#include <tools/line.hxx>
+
+#include "emfwr.hxx"
+
+#include <algorithm>
 #include <memory>
 
 #define WIN_EMR_POLYGON                     3
@@ -1179,7 +1183,25 @@ void EMFWriter::ImplWrite( const GDIMetaFile& rMtf )
                 const MetaHatchAction*  pA = static_cast<const MetaHatchAction*>(pAction);
                 GDIMetaFile             aTmpMtf;
 
-                maVDev->AddHatchActions( pA->GetPolyPolygon(), pA->GetHatch(), aTmpMtf );
+                {
+                    aTmpMtf.AddAction(new MetaPushAction(vcl::PushFlags::ALL));
+                    aTmpMtf.AddAction(new MetaLineColorAction(pA->GetHatch().GetColor(), true));
+
+                    // Calculate logical widths based on the device settings
+                    tools::Long nOnePixel = maVDev->PixelToLogic(Size(1, 0)).Width();
+                    tools::Long nDist = pA->GetHatch().GetDistance();
+                    tools::Long nMinDist = maVDev->PixelToLogic(Size(3, 0)).Width();
+                    if (nDist < nMinDist) nDist = nMinDist;
+
+                    vcl::HatchProcessor::Process(pA->GetPolyPolygon(), pA->GetHatch(), pA->GetPolyPolygon().GetBoundRect(),
+                        maVDev->GetRefPoint(), nOnePixel, nDist,
+                        [&](const Point& p1, const Point& p2) {
+                            aTmpMtf.AddAction(new MetaLineAction(p1, p2, LineInfo()));
+                        });
+
+                    aTmpMtf.AddAction(new MetaPopAction());
+                }
+
                 ImplWrite( aTmpMtf );
             }
             break;

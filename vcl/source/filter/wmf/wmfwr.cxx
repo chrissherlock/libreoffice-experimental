@@ -19,11 +19,6 @@
 
 #include <sal/config.h>
 #include <osl/diagnose.h>
-
-#include <algorithm>
-
-#include "wmfwr.hxx"
-#include "emfwr.hxx"
 #include <rtl/crc.h>
 #include <rtl/tencinfo.h>
 #include <tools/bigint.hxx>
@@ -33,16 +28,26 @@
 #include <tools/fract.hxx>
 #include <tools/stream.hxx>
 #include <unotools/fontdefs.hxx>
+#include <basegfx/polygon/b2dpolygon.hxx>
+#include <basegfx/polygon/b2dpolypolygon.hxx>
+#include <comphelper/sequenceashashmap.hxx>
+
 #include <vcl/alpha.hxx>
 #include <vcl/dibtools.hxx>
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/metafile/MetaActionType.hxx>
 #include <vcl/FilterConfigItem.hxx>
-#include <basegfx/polygon/b2dpolygon.hxx>
-#include <basegfx/polygon/b2dpolypolygon.hxx>
-#include <memory>
 #include <vcl/fontcharmap.hxx>
-#include <comphelper/sequenceashashmap.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+
+#include <vcl/HatchProcessor.hxx>
+#include <tools/line.hxx>
+
+#include "wmfwr.hxx"
+#include "emfwr.hxx"
+
+#include <memory>
+#include <algorithm>
 
 // MS Windows defines
 
@@ -1314,7 +1319,25 @@ void WMFWriter::WriteRecords( const GDIMetaFile & rMTF )
                 const MetaHatchAction*  pA = static_cast<const MetaHatchAction*>(pMA);
                 GDIMetaFile             aTmpMtf;
 
-                pVirDev->AddHatchActions( pA->GetPolyPolygon(), pA->GetHatch(), aTmpMtf );
+                {
+                    aTmpMtf.AddAction(new MetaPushAction(vcl::PushFlags::ALL));
+                    aTmpMtf.AddAction(new MetaLineColorAction(pA->GetHatch().GetColor(), true));
+
+                    // Calculate logical widths based on the device settings
+                    tools::Long nOnePixel = pVirDev->PixelToLogic(Size(1, 0)).Width();
+                    tools::Long nDist = pA->GetHatch().GetDistance();
+                    tools::Long nMinDist = pVirDev->PixelToLogic(Size(3, 0)).Width();
+                    if (nDist < nMinDist) nDist = nMinDist;
+
+                    vcl::HatchProcessor::Process(pA->GetPolyPolygon(), pA->GetHatch(), pA->GetPolyPolygon().GetBoundRect(),
+                        pVirDev->GetRefPoint(), nOnePixel, nDist,
+                        [&](const Point& p1, const Point& p2) {
+                            aTmpMtf.AddAction(new MetaLineAction(p1, p2, LineInfo()));
+                        });
+
+                    aTmpMtf.AddAction(new MetaPopAction());
+                }
+
                 WriteRecords( aTmpMtf );
             }
             break;
