@@ -270,11 +270,9 @@ static void lcl_CollectPolygonIntersections(const tools::Line& rHatchLine,
     }
 }
 
-namespace vcl
-{
-void HatchProcessor::calcHatchValues(const tools::Rectangle& rRect, tools::Long nDist,
-                                     Degree10 nAngle10, const Point& rRefPoint, Point& rPt1,
-                                     Point& rPt2, Size& rInc, Point& rEndPt1)
+static void lcl_CalcHatchValues(const tools::Rectangle& rRect, tools::Long nDist, Degree10 nAngle10,
+                                const Point& rRefPoint, Point& rPt1, Point& rPt2, Size& rInc,
+                                Point& rEndPt1)
 {
     Degree10 nAngle = nAngle10 % 1800_deg10;
 
@@ -289,9 +287,8 @@ void HatchProcessor::calcHatchValues(const tools::Rectangle& rRect, tools::Long 
         lcl_CalcDiagonalHatch(rRect, nDist, nAngle, rRefPoint, rPt1, rPt2, rInc, rEndPt1);
 }
 
-void HatchProcessor::collectHatchIntersections(const tools::Line& rLine,
-                                               const tools::PolyPolygon& rPolyPoly,
-                                               std::vector<Point>& rPtBuffer)
+static void collectHatchIntersections(const tools::Line& rLine, const tools::PolyPolygon& rPolyPoly,
+                                      std::vector<Point>& rPtBuffer)
 {
     rPtBuffer.clear();
 
@@ -304,7 +301,7 @@ void HatchProcessor::collectHatchIntersections(const tools::Line& rLine,
     lcl_SortIntersections(rPtBuffer);
 }
 
-bool HatchProcessor::hasSaneNSteps(const Point& rPt1, const Point& rEndPt1, const Size& rInc)
+static bool lcl_HasSaneNSteps(const Point& rPt1, const Point& rEndPt1, const Size& rInc)
 {
     tools::Long nVertSteps = -1;
     if (rInc.Height())
@@ -324,15 +321,62 @@ bool HatchProcessor::hasSaneNSteps(const Point& rPt1, const Point& rEndPt1, cons
         else
             nHorzSteps = nHorzSteps / rInc.Width();
     }
+
     auto nSteps = std::max(nVertSteps, nHorzSteps);
     if (nSteps > 1024)
     {
         SAL_WARN("vcl.gdi", "skipping slow hatch with " << nSteps << " steps");
         return false;
     }
+
     return true;
 }
 
+static void lcl_ProcessSingleDirection(const tools::PolyPolygon& rPolyPoly,
+                                       const tools::Rectangle& rRect, Degree10 nAngle,
+                                       tools::Long nDist, const Point& rRefPoint,
+                                       vcl::HatchProcessor::Callback& callback)
+{
+    Point aPt1, aPt2, aEndPt1;
+    Size aInc;
+    std::vector<Point> aPtBuffer;
+    aPtBuffer.reserve(1024);
+
+    lcl_CalcHatchValues(rRect, nDist, nAngle, rRefPoint, aPt1, aPt2, aInc, aEndPt1);
+
+    if (comphelper::IsFuzzing() && !lcl_HasSaneNSteps(aPt1, aEndPt1, aInc))
+        return;
+
+    if (aInc.Width() <= 0 && aInc.Height() <= 0)
+    {
+        SAL_WARN("vcl.gdi", "invalid increment");
+        return;
+    }
+
+    do
+    {
+        collectHatchIntersections(tools::Line(aPt1, aPt2), rPolyPoly, aPtBuffer);
+
+        if (aPtBuffer.size() > 1)
+        {
+            tools::Long nSize = static_cast<tools::Long>(aPtBuffer.size());
+            if (nSize & 1)
+                nSize--;
+
+            for (tools::Long i = 0; i < nSize; i += 2)
+                callback(aPtBuffer[i], aPtBuffer[i + 1]);
+        }
+
+        aPt1.AdjustX(aInc.Width());
+        aPt1.AdjustY(aInc.Height());
+        aPt2.AdjustX(aInc.Width());
+        aPt2.AdjustY(aInc.Height());
+
+    } while ((aPt1.X() <= aEndPt1.X()) && (aPt1.Y() <= aEndPt1.Y()));
+}
+
+namespace vcl
+{
 void HatchProcessor::Process(const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch,
                              const tools::Rectangle& rRect, const Point& rRefPoint,
                              tools::Long nLogPixelWidth, tools::Long nWidth, Callback callback)
@@ -353,104 +397,29 @@ void HatchProcessor::Process(const tools::PolyPolygon& rPolyPoly, const Hatch& r
         return;
     }
 
-    // Single hatch
+    // Expand rect by line width to ensure we cover boundaries
     tools::Rectangle aRect(rRect);
     aRect.AdjustLeft(-nLogPixelWidth);
     aRect.AdjustTop(-nLogPixelWidth);
     aRect.AdjustRight(nLogPixelWidth);
     aRect.AdjustBottom(nLogPixelWidth);
 
-    Point aPt1, aPt2, aEndPt1;
-    Size aInc;
-    std::vector<Point> aPtBuffer;
-    aPtBuffer.reserve(1024);
+    // Single Hatch
+    lcl_ProcessSingleDirection(rPolyPoly, aRect, rHatch.GetAngle(), nWidth, rRefPoint, callback);
 
-    calcHatchValues(aRect, nWidth, rHatch.GetAngle(), rRefPoint, aPt1, aPt2, aInc, aEndPt1);
-    if (comphelper::IsFuzzing() && !hasSaneNSteps(aPt1, aEndPt1, aInc))
+    if (rHatch.GetStyle() == HatchStyle::Single)
         return;
 
-    if (aInc.Width() <= 0 && aInc.Height() <= 0)
-        SAL_WARN("vcl.gdi", "invalid increment");
-    else
-    {
-        do
-        {
-            collectHatchIntersections(tools::Line(aPt1, aPt2), rPolyPoly, aPtBuffer);
+    // Double Hatch (Additional 90 degrees)
+    lcl_ProcessSingleDirection(rPolyPoly, aRect, rHatch.GetAngle() + 900_deg10, nWidth, rRefPoint,
+                               callback);
 
-            if (aPtBuffer.size() > 1)
-            {
-                tools::Long nSize = static_cast<tools::Long>(aPtBuffer.size());
-                if (nSize & 1)
-                    nSize--;
-
-                for (tools::Long i = 0; i < nSize; i += 2)
-                    callback(aPtBuffer[i], aPtBuffer[i + 1]);
-            }
-
-            aPt1.AdjustX(aInc.Width());
-            aPt1.AdjustY(aInc.Height());
-            aPt2.AdjustX(aInc.Width());
-            aPt2.AdjustY(aInc.Height());
-        } while ((aPt1.X() <= aEndPt1.X()) && (aPt1.Y() <= aEndPt1.Y()));
-    }
-
-    if (rHatch.GetStyle() != HatchStyle::Double && rHatch.GetStyle() != HatchStyle::Triple)
+    if (rHatch.GetStyle() == HatchStyle::Double)
         return;
 
-    // Double hatch
-    calcHatchValues(aRect, nWidth, rHatch.GetAngle() + 900_deg10, rRefPoint, aPt1, aPt2, aInc,
-                    aEndPt1);
-    if (comphelper::IsFuzzing() && !hasSaneNSteps(aPt1, aEndPt1, aInc))
-        return;
-
-    do
-    {
-        collectHatchIntersections(tools::Line(aPt1, aPt2), rPolyPoly, aPtBuffer);
-
-        if (aPtBuffer.size() > 1)
-        {
-            tools::Long nSize = static_cast<tools::Long>(aPtBuffer.size());
-            if (nSize & 1)
-                nSize--;
-
-            for (tools::Long i = 0; i < nSize; i += 2)
-                callback(aPtBuffer[i], aPtBuffer[i + 1]);
-        }
-
-        aPt1.AdjustX(aInc.Width());
-        aPt1.AdjustY(aInc.Height());
-        aPt2.AdjustX(aInc.Width());
-        aPt2.AdjustY(aInc.Height());
-    } while ((aPt1.X() <= aEndPt1.X()) && (aPt1.Y() <= aEndPt1.Y()));
-
-    if (rHatch.GetStyle() == HatchStyle::Triple)
-    {
-        // Triple hatch
-        calcHatchValues(aRect, nWidth, rHatch.GetAngle() + 450_deg10, rRefPoint, aPt1, aPt2, aInc,
-                        aEndPt1);
-        if (comphelper::IsFuzzing() && !hasSaneNSteps(aPt1, aEndPt1, aInc))
-            return;
-
-        do
-        {
-            collectHatchIntersections(tools::Line(aPt1, aPt2), rPolyPoly, aPtBuffer);
-
-            if (aPtBuffer.size() > 1)
-            {
-                tools::Long nSize = static_cast<tools::Long>(aPtBuffer.size());
-                if (nSize & 1)
-                    nSize--;
-
-                for (tools::Long i = 0; i < nSize; i += 2)
-                    callback(aPtBuffer[i], aPtBuffer[i + 1]);
-            }
-
-            aPt1.AdjustX(aInc.Width());
-            aPt1.AdjustY(aInc.Height());
-            aPt2.AdjustX(aInc.Width());
-            aPt2.AdjustY(aInc.Height());
-        } while ((aPt1.X() <= aEndPt1.X()) && (aPt1.Y() <= aEndPt1.Y()));
-    }
+    // Triple Hatch (Additional 45 degrees)
+    lcl_ProcessSingleDirection(rPolyPoly, aRect, rHatch.GetAngle() + 450_deg10, nWidth, rRefPoint,
+                               callback);
 }
 
 } // namespace vcl
