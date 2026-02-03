@@ -23,6 +23,7 @@
 #include <basegfx/polygon/b2dlinegeometry.hxx>
 #include <tools/debug.hxx>
 #include <comphelper/configuration.hxx>
+#include <comphelper/scopeguard.hxx>
 
 #include <vcl/lineinfo.hxx>
 #include <vcl/metafile/GDIMetaFile.hxx>
@@ -54,7 +55,6 @@ void OutputDevice::SetLineColor()
 {
     vcl::MetafileRecorder(*this).RecordLineColor( Color(), false );
 
-    // UPDATE: Access via maGraphicsState
     if (mpGraphicsState->mbLineColor)
     {
         mbLineColorDirty = true;
@@ -111,8 +111,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
         return;
     }
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaLineAction( rStartPt, rEndPt, rLineInfo ) );
+    vcl::MetafileRecorder(*this).RecordLine( rStartPt, rEndPt, rLineInfo );
 
     if ( !IsDeviceOutputNecessary() || !mpGraphicsState->mbLineColor || ( LineStyle::NONE == rLineInfo.GetStyle() ) || IsLayoutCalculationNecessary() )
         return;
@@ -154,8 +153,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt )
 {
     assert(!is_double_buffered_window());
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaLineAction( rStartPt, rEndPt ) );
+    vcl::MetafileRecorder(*this).RecordLine( rStartPt, rEndPt );
 
     if ( !IsDeviceOutputNecessary() || !mpGraphicsState->mbLineColor || IsLayoutCalculationNecessary() )
         return;
@@ -269,6 +267,9 @@ void OutputDevice::drawLine( basegfx::B2DPolyPolygon aLinePolyPolygon, const Lin
 
     GDIMetaFile* pOldMetaFile = mpMetaFile;
     mpMetaFile = nullptr;
+    comphelper::ScopeGuard aMetaFileGuard([this, pOldMetaFile]() {
+        mpMetaFile = pOldMetaFile;
+    });
 
     if(aLinePolyPolygon.count())
     {
@@ -352,8 +353,6 @@ void OutputDevice::drawLine( basegfx::B2DPolyPolygon aLinePolyPolygon, const Lin
         SetFillColor( aOldFillColor );
         SetLineColor( aOldLineColor );
     }
-
-    mpMetaFile = pOldMetaFile;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

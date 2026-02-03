@@ -15,6 +15,7 @@
 #include <tools/gen.hxx>
 #include <vcl/rendercontext/State.hxx>
 
+class LineInfo;
 class OutputDevice;
 class GDIMetaFile;
 class GfxLink;
@@ -89,6 +90,7 @@ public:
 
     // --- Drawing Actions ---
     void RecordLine(const Point& rStart, const Point& rEnd);
+    void RecordLine(const Point& rStart, const Point& rEnd, const LineInfo& rLineInfo);
     void RecordHatch(const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch);
 
     // --- Comment Actions ---

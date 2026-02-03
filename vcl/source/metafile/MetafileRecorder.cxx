@@ -1,3 +1,4 @@
+#include <vcl/lineinfo.hxx>
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; fill-column: 100 -*- */
 /*
  * This file is part of the LibreOffice project.
@@ -223,5 +224,12 @@ void MetafileRecorder::RecordHatch(const tools::PolyPolygon& rPolyPoly, const Ha
     if (IsActive())
         mpMetaFile->AddAction(new MetaHatchAction(rPolyPoly, rHatch));
 }
+
+void MetafileRecorder::RecordLine(const Point& rStart, const Point& rEnd, const LineInfo& rLineInfo)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaLineAction(rStart, rEnd, rLineInfo));
+}
+
 } // namespace vcl
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
