@@ -217,4 +217,30 @@ CPPUNIT_TEST_FIXTURE(HatchProcessorTest, testGapCalculations)
     CPPUNIT_ASSERT_EQUAL(1, nCallbacks);
 }
 
+CPPUNIT_TEST_FIXTURE(HatchProcessorTest, testSingleHatchSteepDiagonal)
+{
+    // Test for 'Steep' diagonals (e.g. 80 degrees) which trigger the Vertical Scan logic
+    // inside lcl_CalcDiagonalHatchVerticalScan.
+
+    tools::Rectangle aRect(0, 0, 100, 100);
+    tools::PolyPolygon aPoly(aRect);
+
+    // 80 degrees, spacing 20
+    Hatch aHatch(HatchStyle::Single, COL_BLACK, 20, 800_deg10);
+
+    std::vector<tools::Line> aLines;
+    HatchProcessor::Process(aPoly, aHatch, aRect, Point(0, 0), 1, 20,
+                            [&](const Point& p1, const Point& p2) { aLines.emplace_back(p1, p2); });
+
+    CPPUNIT_ASSERT_MESSAGE("Should produce lines for steep diagonal", !aLines.empty());
+
+    // Verify slope is steep (dy > dx)
+    const auto& l = aLines[aLines.size() / 2];
+    double dx = std::abs(l.GetEnd().X() - l.GetStart().X());
+    double dy = std::abs(l.GetEnd().Y() - l.GetStart().Y());
+
+    // For 80 degrees, tan(80) ~= 5.67, so dy should be > dx
+    CPPUNIT_ASSERT_MESSAGE("Steep diagonal should have dy > dx", dy > dx);
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
