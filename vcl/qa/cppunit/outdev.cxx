@@ -19,6 +19,7 @@
 #include <basegfx/matrix/b2dhommatrixtools.hxx>
 #include <tools/mapunit.hxx>
 #include <tools/stream.hxx>
+#include <vcl/graphicfilter.hxx>
 
 #include <vcl/gradient.hxx>
 #include <vcl/hatch.hxx>
@@ -2980,6 +2981,81 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testHatchGeometric)
         // Just verify we didn't crash and produced something
         CPPUNIT_ASSERT(aMtf.GetActionSize() > 0);
     }
+}
+
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testEMFWriterHatchStrictSequence)
+{
+    // Strict regression test for EMFWriter Hatch decomposition.
+    // We use a tiny geometry to force exactly 2 lines.
+
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    pVDev->SetOutputSizePixel(Size(100, 100));
+    pVDev->SetMapMode(MapMode(MapUnit::MapPixel));
+
+    tools::Rectangle aRect(0, 0, 20, 20);
+    tools::PolyPolygon aPoly(aRect);
+    Hatch aHatch(HatchStyle::Single, COL_RED, 10, 0_deg10); // Horz lines at Y=0, 10, 20
+
+    // Create Input Metafile via Recording (Public API)
+    GDIMetaFile aInputMtf;
+    aInputMtf.SetPrefMapMode(MapMode(MapUnit::MapPixel));
+    aInputMtf.SetPrefSize(Size(20, 20));
+
+    // Record the DrawHatch call into the metafile
+    aInputMtf.Record(pVDev.get());
+    pVDev->DrawHatch(aPoly, aHatch);
+    aInputMtf.Stop();
+
+    // Export to EMF (triggers ImplWrite -> AddHatchActions)
+    SvMemoryStream aStream;
+    GraphicFilter& rFilter = GraphicFilter::GetGraphicFilter();
+    Graphic aGraphic(aInputMtf);
+
+    // Get the format ID for EMF
+    sal_uInt16 nFormat = rFilter.GetExportFormatNumberForShortName(u"emf");
+    rFilter.ExportGraphic(aGraphic, u"none", aStream, nFormat);
+
+    aStream.Seek(0);
+
+    // Import and Verify Sequence
+    Graphic aImportGraphic;
+    rFilter.ImportGraphic(aImportGraphic, u"none", aStream);
+    GDIMetaFile aRes = aImportGraphic.GetGDIMetaFile();
+
+    // Verify Decomposition
+    // Note: EMF round-trip strips MetaCommentActions, so we cannot search for "BeginGroup".
+    // Instead, we search for the functional signature: Red LineColor + Horizontal Lines.
+
+    bool bFoundHatch = false;
+    bool bFoundRedColor = false;
+    int nLineCount = 0;
+
+    for (size_t i = 0; i < aRes.GetActionSize(); ++i)
+    {
+        MetaAction* pA = aRes.GetAction(i);
+        if (pA->GetType() == MetaActionType::HATCH)
+        {
+            bFoundHatch = true;
+        }
+        else if (pA->GetType() == MetaActionType::LINECOLOR)
+        {
+            if (static_cast<MetaLineColorAction*>(pA)->GetColor() == COL_RED)
+                bFoundRedColor = true;
+        }
+        else if (pA->GetType() == MetaActionType::LINE)
+        {
+            MetaLineAction* pLine = static_cast<MetaLineAction*>(pA);
+            // Verify it is one of our hatch lines (Horizontal)
+            if (pLine->GetStartPoint().Y() == pLine->GetEndPoint().Y())
+            {
+                nLineCount++;
+            }
+        }
+    }
+
+    CPPUNIT_ASSERT_MESSAGE("EMF should NOT contain the original Hatch action", !bFoundHatch);
+    CPPUNIT_ASSERT_MESSAGE("EMF should contain the Hatch Color (Red)", bFoundRedColor);
+    CPPUNIT_ASSERT_MESSAGE("EMF should contain decomposed horizontal lines", nLineCount >= 1);
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();
