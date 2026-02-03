@@ -42,17 +42,6 @@ public:
     static void Process(const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch,
                         const tools::Rectangle& rRect, const Point& rRefPoint,
                         tools::Long nLogPixelWidth, tools::Long nWidth, Callback callback);
-
-private:
-    static void calcHatchValues(const tools::Rectangle& rRect, tools::Long nDist, Degree10 nAngle10,
-                                const Point& rRefPoint, Point& rPt1, Point& rPt2, Size& rInc,
-                                Point& rEndPt1);
-
-    static void collectHatchIntersections(const tools::Line& rLine,
-                                          const tools::PolyPolygon& rPolyPoly,
-                                          std::vector<Point>& rPtBuffer);
-
-    static bool hasSaneNSteps(const Point& rPt1, const Point& rEndPt1, const Size& rInc);
 };
 
 } // namespace vcl
