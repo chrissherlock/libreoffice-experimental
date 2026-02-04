@@ -20,6 +20,7 @@
 #include <sal/config.h>
 #include <sal/log.hxx>
 #include <tools/debug.hxx>
+#include <comphelper/scopeguard.hxx>
 
 #include <metafile/MetafileRecorder.hxx>
 #include <vcl/rendercontext/State.hxx>
@@ -99,6 +100,9 @@ void OutputDevice::Pop()
 
     GDIMetaFile* pOldMetaFile = mpMetaFile;
     mpMetaFile = nullptr;
+    comphelper::ScopeGuard aMetaFileGuard([this, pOldMetaFile]() {
+        mpMetaFile = pOldMetaFile;
+    });
 
     if ( maOutDevStateStack.empty() )
     {
@@ -187,8 +191,6 @@ void OutputDevice::Pop()
     }
 
     maOutDevStateStack.pop_back();
-
-    mpMetaFile = pOldMetaFile;
 }
 
 void OutputDevice::ClearStack()
