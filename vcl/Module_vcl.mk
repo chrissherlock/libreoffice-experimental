@@ -244,6 +244,7 @@ $(eval $(call gb_Module_add_check_targets,vcl,\
     CppunitTest_vcl_filters_test \
     CppunitTest_vcl_mnemonic \
     CppunitTest_vcl_outdev \
+    CppunitTest_vcl_metafile_recorder \
     CppunitTest_vcl_clippingcontrollertest \
     CppunitTest_vcl_gradient \
     CppunitTest_vcl_app_test \
