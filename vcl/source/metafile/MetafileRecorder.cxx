@@ -501,5 +501,18 @@ void MetafileRecorder::RecordTextLine(const Point& rPos, long nWidth, FontStrike
             new MetaTextLineAction(rPos, nWidth, eStrikeout, eUnderline, eOverline));
 }
 
+MetafileRecorder::ScopedSuspend::ScopedSuspend(OutputDevice& rOutDev)
+    : mrOutDev(rOutDev)
+    , mpOldMetaFile(rOutDev.GetConnectMetaFile())
+{
+    if (mpOldMetaFile)
+        mrOutDev.SetConnectMetaFile(nullptr);
+}
+
+MetafileRecorder::ScopedSuspend::~ScopedSuspend()
+{
+    if (mpOldMetaFile)
+        mrOutDev.SetConnectMetaFile(mpOldMetaFile);
+}
 } // namespace vcl
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

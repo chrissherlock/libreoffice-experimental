@@ -171,6 +171,18 @@ public:
     void RecordOverlineColor(const Color& rColor, bool bSet);
     void RecordTextLine(const Point& rPos, long nWidth, FontStrikeout eStrikeout,
                         FontLineStyle eUnderline, FontLineStyle eOverline);
+
+    // RAII helper to temporarily suspend recording on an OutputDevice
+    class ScopedSuspend
+    {
+    private:
+        OutputDevice& mrOutDev;
+        GDIMetaFile* mpOldMetaFile;
+
+    public:
+        ScopedSuspend(OutputDevice& rOutDev);
+        ~ScopedSuspend();
+    };
 };
 
 } // namespace vcl
