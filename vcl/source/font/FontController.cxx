@@ -650,7 +650,7 @@ vcl::Font FontController::GetDefaultFont(DefaultFontType nType, LanguageType eLa
 
         if (pOutDev)
         {
-            pOutDev->ImplInitFontList();
+            pOutDev->InitializeFonts();
             OUString aName;
             sal_Int32 nIndex = 0;
             do
@@ -679,7 +679,7 @@ vcl::Font FontController::GetDefaultFont(DefaultFontType nType, LanguageType eLa
                 }
                 else
                 {
-                    pOutDev->ImplInitFontList();
+                    pOutDev->InitializeFonts();
                     aFont.SetFamilyName(aSearch);
                     Size aSize = pOutDev->LogicToDevicePixel(aFont.GetFontSize());
                     if (!aSize.Height())

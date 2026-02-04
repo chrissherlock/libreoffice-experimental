@@ -127,7 +127,7 @@ sal_uInt32 OutputDevice::GetFontFaceCollectionCount() const
 
 bool OutputDevice::IsFontAvailable(std::u16string_view rFontName) const
 {
-    ImplInitFontList();
+    InitializeFonts();
 
     return mpFontController && mpFontController->IsFontAvailable(rFontName);
 }
@@ -361,7 +361,7 @@ vcl::Font OutputDevice::GetDefaultFont(DefaultFontType nType, LanguageType eLang
     return vcl::font::FontController::GetDefaultFont(nType, eLang, nFlags, pOutDev);
 }
 
-void OutputDevice::ImplInitFontList() const
+void OutputDevice::InitializeFonts() const
 {
     if (mpFontController)
         mpFontController->InitializeFonts(mpGraphics);
@@ -434,7 +434,7 @@ bool OutputDevice::ImplNewFont() const
     }
     assert(mpGraphics);
 
-    ImplInitFontList();
+    InitializeFonts();
 
     auto[fExactHeight, aSize]
         = mpFontController->CalculateDeviceSize(mpGraphicsState->maFont, *mpMapper, GetDPIY());
