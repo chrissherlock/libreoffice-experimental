@@ -53,7 +53,7 @@ namespace vcl
 {
 // Facade class for recording high-level OutputDevice operations
 // into a GDIMetaFile. Hides the complexity of MetaAction construction.
-class MetafileRecorder
+class VCL_DLLPUBLIC MetafileRecorder
 {
 private:
     GDIMetaFile* mpMetaFile;
