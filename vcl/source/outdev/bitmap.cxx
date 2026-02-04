@@ -118,23 +118,7 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
     if (mpGraphicsState->mnDrawMode & DrawModeFlags::GrayBitmap && !aBmp.IsEmpty())
         aBmp.Convert(BmpConversion::N8BitGreys);
 
-    switch( nAction )
-    {
-        case MetaActionType::BMP:
-            vcl::MetafileRecorder(*this).RecordBitmap( rDestPt, aBmp );
-        break;
-
-        case MetaActionType::BMPSCALE:
-            vcl::MetafileRecorder(*this).RecordBitmapScale( rDestPt, rDestSize, aBmp );
-        break;
-
-        case MetaActionType::BMPSCALEPART:
-            vcl::MetafileRecorder(*this).RecordBitmapScalePart(
-                rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp );
-        break;
-
-        default: break;
-    }
+    vcl::MetafileRecorder(*this).RecordBitmapAction(nAction, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp);
 
     if ( !IsDeviceOutputNecessary() )
         return;
@@ -213,27 +197,7 @@ void OutputDevice::DrawAlphaBitmap( const Point& rDestPt, const Size& rDestSize,
 
     Bitmap aBmp(vcl::drawmode::GetBitmap(rBitmap, GetDrawMode()));
 
-    if (mpMetaFile)
-    {
-        switch(nAction)
-        {
-            case MetaActionType::BMPEX:
-                vcl::MetafileRecorder(*this).RecordBitmapEx(rDestPt, aBmp);
-                break;
-
-            case MetaActionType::BMPEXSCALE:
-                vcl::MetafileRecorder(*this).RecordBitmapExScale(rDestPt, rDestSize, aBmp);
-                break;
-
-            case MetaActionType::BMPEXSCALEPART:
-                vcl::MetafileRecorder(*this).RecordBitmapExScalePart(rDestPt, rDestSize,
-                                                                   rSrcPtPixel, rSrcSizePixel, aBmp);
-                break;
-
-            default:
-                break;
-        }
-    }
+    vcl::MetafileRecorder(*this).RecordBitmapAction(nAction, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp);
 
     if (!IsDeviceOutputNecessary())
         return;

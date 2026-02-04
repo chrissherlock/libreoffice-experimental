@@ -446,5 +446,39 @@ std::unique_ptr<vcl::ScopedMetaGroup> MetafileRecorder::CreateScopedGroup(const 
         return std::make_unique<vcl::ScopedMetaGroup>(mpMetaFile, rName);
     return nullptr;
 }
+
+void MetafileRecorder::RecordBitmapAction(MetaActionType nAction, const Point& rDestPt,
+                                          const Size& rDestSize, const Point& rSrcPt,
+                                          const Size& rSrcSize, const Bitmap& rBitmap)
+{
+    if (!IsActive())
+        return;
+
+    switch (nAction)
+    {
+        case MetaActionType::BMP:
+            mpMetaFile->AddAction(new MetaBmpAction(rDestPt, rBitmap));
+            break;
+        case MetaActionType::BMPSCALE:
+            mpMetaFile->AddAction(new MetaBmpScaleAction(rDestPt, rDestSize, rBitmap));
+            break;
+        case MetaActionType::BMPSCALEPART:
+            mpMetaFile->AddAction(
+                new MetaBmpScalePartAction(rDestPt, rDestSize, rSrcPt, rSrcSize, rBitmap));
+            break;
+        case MetaActionType::BMPEX:
+            mpMetaFile->AddAction(new MetaBmpExAction(rDestPt, rBitmap));
+            break;
+        case MetaActionType::BMPEXSCALE:
+            mpMetaFile->AddAction(new MetaBmpExScaleAction(rDestPt, rDestSize, rBitmap));
+            break;
+        case MetaActionType::BMPEXSCALEPART:
+            mpMetaFile->AddAction(
+                new MetaBmpExScalePartAction(rDestPt, rDestSize, rSrcPt, rSrcSize, rBitmap));
+            break;
+        default:
+            break;
+    }
+}
 } // namespace vcl
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
