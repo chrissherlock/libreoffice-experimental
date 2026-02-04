@@ -514,5 +514,15 @@ MetafileRecorder::ScopedSuspend::~ScopedSuspend()
     if (mpOldMetaFile)
         mrOutDev.SetConnectMetaFile(mpOldMetaFile);
 }
+
+MetafileRecorder::ScopedSwitch::ScopedSwitch(OutputDevice& rOutDev, GDIMetaFile* pNewMetaFile)
+    : mrOutDev(rOutDev)
+    , mpOldMetaFile(rOutDev.GetConnectMetaFile())
+{
+    // Always switch, even if pNewMetaFile is null (though ScopedSuspend is preferred for that)
+    mrOutDev.SetConnectMetaFile(pNewMetaFile);
+}
+
+MetafileRecorder::ScopedSwitch::~ScopedSwitch() { mrOutDev.SetConnectMetaFile(mpOldMetaFile); }
 } // namespace vcl
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

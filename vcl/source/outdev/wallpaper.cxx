@@ -142,7 +142,7 @@ void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
 
     const Bitmap* pCached = rWallpaper.ImplGetCachedBitmap();
 
-    GDIMetaFile* pOldMetaFile = mpMetaFile;
+
     const bool bOldMap = mpMapper->IsMapModeEnabled();
 
     Bitmap aBmp;
@@ -214,7 +214,7 @@ void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
         aSize = Size( nWidth, nHeight );
     }
 
-    mpMetaFile = nullptr;
+    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(*this);
     mpMapper->EnableMapMode(false);
     Push( vcl::PushFlags::CLIPREGION );
     IntersectClipRegion( tools::Rectangle( Point( nX, nY ), Size( nWidth, nHeight ) ) );
@@ -385,7 +385,7 @@ void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
 
     Pop();
     mpMapper->EnableMapMode(bOldMap);
-    mpMetaFile = pOldMetaFile;
+
 }
 
 void OutputDevice::DrawGradientWallpaper( tools::Long nX, tools::Long nY,
@@ -395,12 +395,12 @@ void OutputDevice::DrawGradientWallpaper( tools::Long nX, tools::Long nY,
     assert(!is_double_buffered_window());
 
     tools::Rectangle aBound;
-    GDIMetaFile* pOldMetaFile = mpMetaFile;
+
     const bool bOldMap = mpMapper->IsMapModeEnabled();
 
     aBound = tools::Rectangle( Point( nX, nY ), Size( nWidth, nHeight ) );
 
-    mpMetaFile = nullptr;
+    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(*this);
     mpMapper->EnableMapMode(false);
     Push( vcl::PushFlags::CLIPREGION );
     IntersectClipRegion( tools::Rectangle( Point( nX, nY ), Size( nWidth, nHeight ) ) );
@@ -409,7 +409,7 @@ void OutputDevice::DrawGradientWallpaper( tools::Long nX, tools::Long nY,
 
     Pop();
     mpMapper->EnableMapMode(bOldMap);
-    mpMetaFile = pOldMetaFile;
+
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

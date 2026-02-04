@@ -265,11 +265,8 @@ void OutputDevice::drawLine( basegfx::B2DPolyPolygon aLinePolyPolygon, const Lin
         aLinePolyPolygon.clear();
     }
 
-    GDIMetaFile* pOldMetaFile = mpMetaFile;
-    mpMetaFile = nullptr;
-    comphelper::ScopeGuard aMetaFileGuard([this, pOldMetaFile]() {
-        mpMetaFile = pOldMetaFile;
-    });
+    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(*this);
+
 
     if(aLinePolyPolygon.count())
     {
