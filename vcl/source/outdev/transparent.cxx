@@ -27,6 +27,7 @@
 
 #include <vcl/BitmapTools.hxx>
 #include <vcl/metafile/MetaAction.hxx>
+#include <metafile/MetafileRecorder.hxx>
 #include <vcl/metafile/MetaActionType.hxx>
 #include <vcl/print.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
@@ -43,6 +44,7 @@
 #include <text/TextLayoutEngine.hxx>
 #include <salgdi.hxx>
 
+#include <comphelper/scopeguard.hxx>
 #include <list>
 #include <memory>
 
@@ -280,6 +282,9 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
 {
     GDIMetaFile* pOldMetaFile = mpMetaFile;
     mpMetaFile = nullptr;
+    comphelper::ScopeGuard aMetaFileGuard([this, pOldMetaFile]() {
+        mpMetaFile = pOldMetaFile;
+    });
 
     tools::PolyPolygon aPolyPoly( LogicToPixel( rPolyPoly ) );
     tools::Rectangle aPolyRect( aPolyPoly.GetBoundRect() );
@@ -433,7 +438,6 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
         }
     }
 
-    mpMetaFile = pOldMetaFile;
 }
 
 void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
@@ -453,8 +457,7 @@ void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
         return; // tdf#84294: do not record it in metafile
 
     // handle metafile recording
-    if( mpMetaFile )
-        mpMetaFile->AddAction( new MetaTransparentAction( rPolyPoly, nTransparencePercent ) );
+    vcl::MetafileRecorder(*this).RecordTransparent(rPolyPoly, nTransparencePercent);
 
     bool bDrawn = !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary();
     if( bDrawn )
@@ -486,11 +489,7 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
 
     const Color aBlack( COL_BLACK );
 
-    if( mpMetaFile )
-    {
-         // missing here is to map the data using the DeviceTransformation
-        mpMetaFile->AddAction( new MetaFloatTransparentAction( rMtf, rPos, rSize, rTransparenceGradient ) );
-    }
+    vcl::MetafileRecorder(*this).RecordFloatTransparent(rMtf, rPos, rSize, rTransparenceGradient);
 
     if ( !IsDeviceOutputNecessary() )
         return;
@@ -505,11 +504,14 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
     else
     {
         GDIMetaFile* pOldMetaFile = mpMetaFile;
+        mpMetaFile = nullptr;
+        comphelper::ScopeGuard aMetaFileGuard([this, pOldMetaFile]() {
+            mpMetaFile = pOldMetaFile;
+        });
+
         tools::Rectangle aOutRect( LogicToPixel( tools::Rectangle(rPos, rSize) ) );
         Point aPoint;
         tools::Rectangle aDstRect( aPoint, GetOutputSizePixel() );
-
-        mpMetaFile = nullptr;
         aDstRect.Intersection( aOutRect );
 
         ClipToPaintRegion( aDstRect );
@@ -634,7 +636,6 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
             }
         }
 
-        mpMetaFile = pOldMetaFile;
     }
 }
 

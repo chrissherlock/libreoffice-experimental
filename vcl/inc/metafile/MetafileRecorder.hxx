@@ -18,6 +18,12 @@
 #include <vcl/region.hxx>
 #include <vcl/rendercontext/State.hxx>
 
+namespace basegfx
+{
+class B2DHomMatrix;
+class B2DPolyPolygon;
+}
+
 class LineInfo;
 class OutputDevice;
 class GDIMetaFile;
@@ -121,6 +127,12 @@ public:
     void RecordMaskScalePart(const Point& rDestPt, const Size& rDestSize, const Point& rSrcPtPixel,
                              const Size& rSrcSizePixel, const Bitmap& rBitmap,
                              const Color& rMaskColor);
+
+    void RecordTransparent(const tools::PolyPolygon& rPolyPoly, sal_uInt16 nTransparencePercent);
+    void RecordTransparent(const basegfx::B2DHomMatrix& rObjectTransform,
+                           const basegfx::B2DPolyPolygon& rB2DPolyPoly, double fTransparency);
+    void RecordFloatTransparent(const GDIMetaFile& rMtf, const Point& rPos, const Size& rSize,
+                                const Gradient& rTransparenceGradient);
 
     // --- Comment Actions ---
     void RecordComment(const rtl::OString& rComment);

@@ -1,3 +1,5 @@
+#include <basegfx/polygon/b2dpolypolygon.hxx>
+#include <basegfx/matrix/b2dhommatrix.hxx>
 #include <vcl/lineinfo.hxx>
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; fill-column: 100 -*- */
 /*
@@ -343,6 +345,39 @@ void MetafileRecorder::RecordRoundRect(const tools::Rectangle& rRect, sal_uLong 
 {
     if (IsActive())
         mpMetaFile->AddAction(new MetaRoundRectAction(rRect, nHorzRound, nVertRound));
+}
+
+void MetafileRecorder::RecordTransparent(const tools::PolyPolygon& rPolyPoly,
+                                         sal_uInt16 nTransparencePercent)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaTransparentAction(rPolyPoly, nTransparencePercent));
+}
+
+void MetafileRecorder::RecordTransparent(const basegfx::B2DHomMatrix& rObjectTransform,
+                                         const basegfx::B2DPolyPolygon& rB2DPolyPoly,
+                                         double fTransparency)
+{
+    if (IsActive())
+    {
+        // tdf#119843 need transformed Polygon here
+        basegfx::B2DPolyPolygon aB2DPolyPoly(rB2DPolyPoly);
+        aB2DPolyPoly.transform(rObjectTransform);
+        mpMetaFile->AddAction(new MetaTransparentAction(
+            tools::PolyPolygon(aB2DPolyPoly), static_cast<sal_uInt16>(fTransparency * 100.0)));
+    }
+}
+
+void MetafileRecorder::RecordFloatTransparent(const GDIMetaFile& rMtf, const Point& rPos,
+                                              const Size& rSize,
+                                              const Gradient& rTransparenceGradient)
+{
+    if (IsActive())
+    {
+        // missing here is to map the data using the DeviceTransformation
+        mpMetaFile->AddAction(
+            new MetaFloatTransparentAction(rMtf, rPos, rSize, rTransparenceGradient));
+    }
 }
 
 } // namespace vcl
