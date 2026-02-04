@@ -95,12 +95,67 @@ namespace
 // void OutputDevice::DrawPolyPolygon( const basegfx::B2DPolyPolygon& rB2DPolyPoly )
 // so when changes are made here do not forget to make changes there, too
 
+
+
+void OutputDevice::DrawTransparentWithRasterOp( const basegfx::B2DHomMatrix& rObjectTransform,
+                                                const basegfx::B2DPolyPolygon& rB2DPolyPoly,
+                                                double fTransparency,
+                                                RasterOp eRasterOp )
+{
+    // Convert B2D geometry to legacy tools::PolyPolygon and delegate
+    basegfx::B2DPolyPolygon aTransformed(rB2DPolyPoly);
+    aTransformed.transform(rObjectTransform);
+    DrawTransparentWithRasterOp(toPolyPolygon(aTransformed),
+                                static_cast<sal_uInt16>(fTransparency * 100.0),
+                                eRasterOp);
+}
+void OutputDevice::DrawTransparentWithRasterOp( const tools::PolyPolygon& rPolyPoly,
+                                                sal_uInt16 nTransparencePercent,
+                                                RasterOp eRasterOp )
+{
+    // 1. Transaction Setup: Only change state if necessary
+    RasterOp eOldRasterOp = GetRasterOp();
+    bool bChanged = (eOldRasterOp != eRasterOp);
+
+    if (bChanged)
+        SetRasterOp(eRasterOp); // This also records the state change to the metafile
+
+    // 2. Transaction Teardown: Restore state automatically on exit
+    comphelper::ScopeGuard aRasterOpGuard([this, bChanged, eOldRasterOp]() {
+        if (bChanged)
+            SetRasterOp(eOldRasterOp); // Restore previous op
+    });
+
+    // 3. Record the Action
+    // We record *after* SetRasterOp so the playback sequence is correct:
+    // [SetRasterOp -> DrawTransparent -> RestoreRasterOp]
+    vcl::MetafileRecorder(*this).RecordTransparent(rPolyPoly, nTransparencePercent);
+
+    // 4. Perform Drawing
+    // We use Emulate because hardware (B2D) paths generally don't support XOR/Invert combined with alpha
+    EmulateDrawTransparent(rPolyPoly, nTransparencePercent);
+}
+
 void OutputDevice::DrawTransparent(
     const basegfx::B2DHomMatrix& rObjectTransform,
     const basegfx::B2DPolyPolygon& rB2DPolyPoly,
     double fTransparency)
 {
     assert(!is_double_buffered_window());
+
+    // 1. Dispatch legacy/exotic RasterOps (The "Third Case")
+    if (GetRasterOp() != RasterOp::OverPaint)
+    {
+        // tdf#119843 need transformed Polygon here
+        basegfx::B2DPolyPolygon aTransformed(rB2DPolyPoly);
+        aTransformed.transform(rObjectTransform);
+        DrawTransparentWithRasterOp(toPolyPolygon(aTransformed),
+                                    static_cast<sal_uInt16>(fTransparency * 100.0),
+                                    GetRasterOp());
+        return;
+    }
+
+    // --- From here on, we assume RasterOp::OverPaint ---
 
     // AW: Do NOT paint empty PolyPolygons
     if(!rB2DPolyPoly.count())
@@ -123,65 +178,57 @@ void OutputDevice::DrawTransparent(
     if( mbFillColorDirty )
         InitFillColor();
 
-    if (RasterOp::OverPaint == GetRasterOp())
+    // b2dpolygon support not implemented yet on non-UNX platforms
+    basegfx::B2DPolyPolygon aB2DPolyPolygon(rB2DPolyPoly);
+
+    // ensure it is closed
+    if(!aB2DPolyPolygon.isClosed())
     {
-        // b2dpolygon support not implemented yet on non-UNX platforms
-        basegfx::B2DPolyPolygon aB2DPolyPolygon(rB2DPolyPoly);
-
-        // ensure it is closed
-        if(!aB2DPolyPolygon.isClosed())
-        {
-            // maybe assert, prevents buffering due to making a copy
-            aB2DPolyPolygon.setClosed( true );
-        }
-
-        // create ObjectToDevice transformation
-        const basegfx::B2DHomMatrix aFullTransform(mpMapper->GetDeviceTransformation() * rObjectTransform);
-        // TODO: this must not drop transparency for mpAlphaVDev case, but instead use premultiplied
-        // alpha... but that requires using premultiplied alpha also for already drawn data
-
-        if (IsFillColor())
-        {
-            mpGraphics->DrawPolyPolygon(
-                aFullTransform,
-                aB2DPolyPolygon,
-                fTransparency,
-                *this);
-        }
-
-        if (IsLineColor())
-        {
-            const bool bPixelSnapHairline(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
-
-            for(auto const& rPolygon : std::as_const(aB2DPolyPolygon))
-            {
-                mpGraphics->DrawPolyLine(
-                    aFullTransform,
-                    rPolygon,
-                    fTransparency,
-                    0.0, // tdf#124848 hairline
-                    nullptr, // MM01
-                    basegfx::B2DLineJoin::NONE,
-                    css::drawing::LineCap_BUTT,
-                    basegfx::deg2rad(15.0), // not used with B2DLineJoin::NONE, but the correct default
-                    bPixelSnapHairline,
-                    *this );
-            }
-        }
-
-        vcl::MetafileRecorder(*this).RecordTransparent(rObjectTransform, rB2DPolyPoly, fTransparency);
-
-        return;
+        // maybe assert, prevents buffering due to making a copy
+        aB2DPolyPolygon.setClosed( true );
     }
 
-    // fallback to old polygon drawing if needed
-    // tdf#119843 need transformed Polygon here
-    basegfx::B2DPolyPolygon aB2DPolyPoly(rB2DPolyPoly);
-    aB2DPolyPoly.transform(rObjectTransform);
-    DrawTransparent(
-        toPolyPolygon(aB2DPolyPoly),
-        static_cast<sal_uInt16>(fTransparency * 100.0));
+    // create ObjectToDevice transformation
+    const basegfx::B2DHomMatrix aFullTransform(mpMapper->GetDeviceTransformation() * rObjectTransform);
+    // TODO: this must not drop transparency for mpAlphaVDev case, but instead use premultiplied
+    // alpha... but that requires using premultiplied alpha also for already drawn data
+
+    if (IsFillColor())
+    {
+        mpGraphics->DrawPolyPolygon(
+            aFullTransform,
+            aB2DPolyPolygon,
+            fTransparency,
+            *this);
+    }
+
+    if (IsLineColor())
+    {
+        const bool bPixelSnapHairline(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+
+        for(auto const& rPolygon : std::as_const(aB2DPolyPolygon))
+        {
+            mpGraphics->DrawPolyLine(
+                aFullTransform,
+                rPolygon,
+                fTransparency,
+                0.0, // tdf#124848 hairline
+                nullptr, // MM01
+                basegfx::B2DLineJoin::NONE,
+                css::drawing::LineCap_BUTT,
+                basegfx::deg2rad(15.0), // not used with B2DLineJoin::NONE, but the correct default
+                bPixelSnapHairline,
+                *this );
+        }
+    }
+
+    vcl::MetafileRecorder(*this).RecordTransparent(rObjectTransform, rB2DPolyPoly, fTransparency);
 }
+
+// fallback to old polygon drawing if needed
+// tdf#119843 need transformed Polygon here
+// [Note: This logic was moved inside the function in the refactor]
+// We remove the old fallback wrapper that used to be here.
 
 bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly,
                                              sal_uInt16 nTransparencePercent )
@@ -435,6 +482,13 @@ void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
                                     sal_uInt16 nTransparencePercent )
 {
     assert(!is_double_buffered_window());
+
+    // 1. Dispatch legacy/exotic RasterOps (The "Third Case")
+    if (GetRasterOp() != RasterOp::OverPaint)
+    {
+        DrawTransparentWithRasterOp(rPolyPoly, nTransparencePercent, GetRasterOp());
+        return;
+    }
 
     // short circuit for drawing an opaque polygon
     if( (nTransparencePercent < 1) || (mpGraphicsState->mnDrawMode & DrawModeFlags::NoTransparency) )

@@ -1530,6 +1530,8 @@ public:
                                     const Color& rBackground = COL_TRANSPARENT );
 
     void                        DrawTransparent( const tools::PolyPolygon& rPolyPoly, sal_uInt16 nTransparencePercent );
+    SAL_DLLPUBLIC void              DrawTransparentWithRasterOp( const tools::PolyPolygon& rPolyPoly, sal_uInt16 nTransparencePercent, RasterOp eRasterOp );
+    SAL_DLLPUBLIC void              DrawTransparentWithRasterOp( const basegfx::B2DHomMatrix& rObjectTransform, const basegfx::B2DPolyPolygon& rB2DPolyPoly, double fTransparency, RasterOp eRasterOp );
 
     void                        DrawTransparent(
                                     const basegfx::B2DHomMatrix& rObjectTransform,
