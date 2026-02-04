@@ -1273,10 +1273,9 @@ void OutputDevice::DrawText(const tools::Rectangle& rRect, const OUString& rOrig
 
     // temporarily disable mtf action generation (ImplDrawText _does_
     // create MetaActionType::TEXTs otherwise)
-    GDIMetaFile* pMtf = mpMetaFile;
-
+    std::optional<vcl::MetafileRecorder::ScopedSuspend> xMetaFileSuspend;
     if (!bDecomposeTextRectAction)
-        mpMetaFile = nullptr;
+        xMetaFileSuspend.emplace(*this);
 
     // #i47157# Factored out to ImplDrawText(), to be used also
     // from AddTextRectActions()
@@ -1285,7 +1284,7 @@ void OutputDevice::DrawText(const tools::Rectangle& rRect, const OUString& rOrig
                  _pTextLayout ? *_pTextLayout : aDefaultLayout);
 
     // and enable again
-    mpMetaFile = pMtf;
+
 }
 
 tools::Rectangle OutputDevice::GetTextRect(const tools::Rectangle& rRect, const OUString& rStr,
