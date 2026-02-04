@@ -308,5 +308,17 @@ void MetafileRecorder::RecordPixel(const Point& rPt, const Color& rColor)
         mpMetaFile->AddAction(new MetaPixelAction(rPt, rColor));
 }
 
+void MetafileRecorder::RecordPolygon(const tools::Polygon& rPoly)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaPolygonAction(rPoly));
+}
+
+void MetafileRecorder::RecordPolyPolygon(const tools::PolyPolygon& rPolyPoly)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaPolyPolygonAction(rPolyPoly));
+}
+
 } // namespace vcl
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
