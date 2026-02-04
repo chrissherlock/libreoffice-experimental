@@ -18,7 +18,7 @@
  */
 
 #include <vcl/metafile/MetaAction.hxx>
-#include <metafile/MetafileRecorder.hxx>
+#include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/metafile/MetaActionType.hxx>
 #include <vcl/virdev.hxx>
 
@@ -75,15 +75,15 @@ void OutputDevice::DrawMask( const Point& rDestPt, const Size& rDestSize,
     switch( nAction )
     {
         case MetaActionType::MASK:
-            vcl::MetafileRecorder(*this).RecordMask(rDestPt, rBitmap, rMaskColor);
+            maRecorder.RecordMask(rDestPt, rBitmap, rMaskColor);
         break;
 
         case MetaActionType::MASKSCALE:
-            vcl::MetafileRecorder(*this).RecordMaskScale(rDestPt, rDestSize, rBitmap, rMaskColor);
+            maRecorder.RecordMaskScale(rDestPt, rDestSize, rBitmap, rMaskColor);
         break;
 
         case MetaActionType::MASKSCALEPART:
-            vcl::MetafileRecorder(*this).RecordMaskScalePart(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmap, rMaskColor);
+            maRecorder.RecordMaskScalePart(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmap, rMaskColor);
         break;
 
         default: break;

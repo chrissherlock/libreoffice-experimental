@@ -25,7 +25,7 @@
 #include <unotools/fontdefs.hxx>
 
 #include <vcl/fontcapabilities.hxx>
-#include <metafile/MetafileRecorder.hxx>
+#include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/rendercontext/GetDefaultFontFlags.hxx>
@@ -55,12 +55,11 @@ void OutputDevice::SetFont(const vcl::Font& rNewFont)
         = vcl::drawmode::GetFont(rNewFont, GetDrawMode(), GetSettings().GetStyleSettings());
 
     {
-        vcl::MetafileRecorder aRecorder(*this);
-        aRecorder.RecordFont(aFont);
+        maRecorder.RecordFont(aFont);
         // the color and alignment actions don't belong here
         // TODO: get rid of them without breaking anything...
-        aRecorder.RecordTextAlign(aFont.GetAlignment());
-        aRecorder.RecordTextFillColor(aFont.GetFillColor(), !aFont.IsTransparent());
+        maRecorder.RecordTextAlign(aFont.GetAlignment());
+        maRecorder.RecordTextFillColor(aFont.GetFillColor(), !aFont.IsTransparent());
     }
 
     if (mpGraphicsState->maFont.IsSameInstance(aFont))
@@ -75,7 +74,7 @@ void OutputDevice::SetFont(const vcl::Font& rNewFont)
     {
         mpGraphicsState->maTextColor = aFont.GetColor();
         mbInitTextColor = true;
-        vcl::MetafileRecorder(*this).RecordTextColor(aFont.GetColor());
+        maRecorder.RecordTextColor(aFont.GetColor());
     }
     mpGraphicsState->maFont = aFont;
     mbNewFont = true;

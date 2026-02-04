@@ -17,7 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <metafile/MetafileRecorder.hxx>
+#include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/virdev.hxx>
 
 #include <ClippingController.hxx>
@@ -30,7 +30,7 @@ void OutputDevice::DrawEllipse( const tools::Rectangle& rRect )
 {
     assert(!is_double_buffered_window());
 
-    vcl::MetafileRecorder(*this).RecordEllipse( rRect );
+    maRecorder.RecordEllipse( rRect );
 
     if  ( !IsDeviceOutputNecessary() || (!mpGraphicsState->mbLineColor && !mpGraphicsState->mbFillColor) || IsLayoutCalculationNecessary() )
         return;
@@ -72,7 +72,7 @@ void OutputDevice::DrawArc( const tools::Rectangle& rRect,
 {
     assert(!is_double_buffered_window());
 
-    vcl::MetafileRecorder(*this).RecordArc( rRect, rStartPt, rEndPt );
+    maRecorder.RecordArc( rRect, rStartPt, rEndPt );
 
     if ( !IsDeviceOutputNecessary() || !mpGraphicsState->mbLineColor || IsLayoutCalculationNecessary() )
         return;
@@ -110,7 +110,7 @@ void OutputDevice::DrawPie( const tools::Rectangle& rRect,
 {
     assert(!is_double_buffered_window());
 
-    vcl::MetafileRecorder(*this).RecordPie( rRect, rStartPt, rEndPt );
+    maRecorder.RecordPie( rRect, rStartPt, rEndPt );
 
     if ( !IsDeviceOutputNecessary() || (!mpGraphicsState->mbLineColor && !mpGraphicsState->mbFillColor) || IsLayoutCalculationNecessary() )
         return;
@@ -155,7 +155,7 @@ void OutputDevice::DrawChord( const tools::Rectangle& rRect,
 {
     assert(!is_double_buffered_window());
 
-    vcl::MetafileRecorder(*this).RecordChord( rRect, rStartPt, rEndPt );
+    maRecorder.RecordChord( rRect, rStartPt, rEndPt );
 
     if ( !IsDeviceOutputNecessary() || (!mpGraphicsState->mbLineColor && !mpGraphicsState->mbFillColor) || IsLayoutCalculationNecessary() )
         return;

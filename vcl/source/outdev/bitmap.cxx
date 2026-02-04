@@ -25,7 +25,7 @@
 
 #include <vcl/image.hxx>
 #include <vcl/metafile/MetaAction.hxx>
-#include <metafile/MetafileRecorder.hxx>
+#include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/metafile/MetaActionType.hxx>
 #include <vcl/skia/SkiaHelper.hxx>
 #include <vcl/virdev.hxx>
@@ -118,7 +118,7 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
     if (mpGraphicsState->mnDrawMode & DrawModeFlags::GrayBitmap && !aBmp.IsEmpty())
         aBmp.Convert(BmpConversion::N8BitGreys);
 
-    vcl::MetafileRecorder(*this).RecordBitmapAction(nAction, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp);
+    maRecorder.RecordBitmapAction(nAction, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp);
 
     if ( !IsDeviceOutputNecessary() )
         return;
@@ -197,7 +197,7 @@ void OutputDevice::DrawAlphaBitmap( const Point& rDestPt, const Size& rDestSize,
 
     Bitmap aBmp(vcl::drawmode::GetBitmap(rBitmap, GetDrawMode()));
 
-    vcl::MetafileRecorder(*this).RecordBitmapAction(nAction, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp);
+    maRecorder.RecordBitmapAction(nAction, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp);
 
     if (!IsDeviceOutputNecessary())
         return;

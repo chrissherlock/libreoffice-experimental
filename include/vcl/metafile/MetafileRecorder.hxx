@@ -13,12 +13,14 @@
 #include <tools/gen.hxx>
 #include <tools/solar.h>
 
+#include <tools/fontenum.hxx>
+#include <vcl/mapmod.hxx>
 #include <vcl/dllapi.h>
+
 #include <vcl/bitmap.hxx>
 #include <vcl/vclenum.hxx>
 #include <vcl/metafile/MetaActionType.hxx>
 #include <vcl/kernarray.hxx>
-#include <vcl/metafile/ScopedMetaGroup.hxx>
 #include <vcl/region.hxx>
 #include <vcl/rendercontext/DrawTextFlags.hxx>
 #include <vcl/rendercontext/State.hxx>
@@ -51,20 +53,51 @@ class OString;
 
 namespace vcl
 {
+class ScopedMetaGroup;
+}
+class GDIMetaFile;
+class Gradient;
+class Hatch;
+class LineInfo;
+class Bitmap;
+class Point;
+class Size;
+class Color;
+namespace tools
+{
+class Rectangle;
+class Polygon;
+class PolyPolygon;
+}
+namespace basegfx
+{
+class B2DHomMatrix;
+class B2DPolyPolygon;
+}
+class GfxLink;
+enum class MetaActionType;
+
+enum class RasterOp;
+namespace vcl
+{
 // Facade class for recording high-level OutputDevice operations
 // into a GDIMetaFile. Hides the complexity of MetaAction construction.
 class VCL_DLLPUBLIC MetafileRecorder
 {
 private:
     GDIMetaFile* mpMetaFile;
-    OutputDevice& mrOutDev;
 
 public:
-    explicit MetafileRecorder(OutputDevice& rDev);
+    explicit MetafileRecorder();
 
     bool IsActive() const;
 
     // --- Bitmap Actions (MetaBmpAction) ---
+
+    void SetConnectMetaFile(GDIMetaFile* pMetaFile) { mpMetaFile = pMetaFile; }
+    GDIMetaFile* GetConnectMetaFile() const { return mpMetaFile; }
+    bool IsRecording() const { return mpMetaFile != nullptr; }
+
     void RecordBitmap(const Point& rPos, const Bitmap& rBitmap);
     void RecordBitmapScale(const Point& rPos, const Size& rSz, const Bitmap& rBitmap);
     void RecordBitmapScalePart(const Point& rDestPos, const Size& rDestSz, const Point& rSrcPos,
@@ -176,11 +209,11 @@ public:
     class ScopedSuspend
     {
     private:
-        OutputDevice& mrOutDev;
+        MetafileRecorder& mrRecorder;
         GDIMetaFile* mpOldMetaFile;
 
     public:
-        ScopedSuspend(OutputDevice& rOutDev);
+        ScopedSuspend(MetafileRecorder& rRecorder);
         ~ScopedSuspend();
     };
 
@@ -188,11 +221,11 @@ public:
     class ScopedSwitch
     {
     private:
-        OutputDevice& mrOutDev;
+        MetafileRecorder& mrRecorder;
         GDIMetaFile* mpOldMetaFile;
 
     public:
-        ScopedSwitch(OutputDevice& rOutDev, GDIMetaFile* pNewMetaFile);
+        ScopedSwitch(MetafileRecorder& rRecorder, GDIMetaFile* pNewMetaFile);
         ~ScopedSwitch();
     };
 };

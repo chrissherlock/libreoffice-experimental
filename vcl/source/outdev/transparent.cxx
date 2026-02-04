@@ -27,7 +27,7 @@
 
 #include <vcl/BitmapTools.hxx>
 #include <vcl/metafile/MetaAction.hxx>
-#include <metafile/MetafileRecorder.hxx>
+#include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/metafile/MetaActionType.hxx>
 #include <vcl/print.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
@@ -129,7 +129,7 @@ void OutputDevice::DrawTransparentWithRasterOp( const tools::PolyPolygon& rPolyP
     // 3. Record the Action
     // We record *after* SetRasterOp so the playback sequence is correct:
     // [SetRasterOp -> DrawTransparent -> RestoreRasterOp]
-    vcl::MetafileRecorder(*this).RecordTransparent(rPolyPoly, nTransparencePercent);
+    maRecorder.RecordTransparent(rPolyPoly, nTransparencePercent);
 
     // 4. Perform Drawing
     // We use Emulate because hardware (B2D) paths generally don't support XOR/Invert combined with alpha
@@ -222,7 +222,7 @@ void OutputDevice::DrawTransparent(
         }
     }
 
-    vcl::MetafileRecorder(*this).RecordTransparent(rObjectTransform, rB2DPolyPoly, fTransparency);
+    maRecorder.RecordTransparent(rObjectTransform, rB2DPolyPoly, fTransparency);
 }
 
 // fallback to old polygon drawing if needed
@@ -318,7 +318,7 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
 void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
                                             sal_uInt16 nTransparencePercent )
 {
-    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(*this);
+    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
 
     tools::PolyPolygon aPolyPoly( LogicToPixel( rPolyPoly ) );
     tools::Rectangle aPolyRect( aPolyPoly.GetBoundRect() );
@@ -498,7 +498,7 @@ void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
         return; // tdf#84294: do not record it in metafile
 
     // handle metafile recording
-    vcl::MetafileRecorder(*this).RecordTransparent(rPolyPoly, nTransparencePercent);
+    maRecorder.RecordTransparent(rPolyPoly, nTransparencePercent);
 
     bool bDrawn = !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary();
     if( bDrawn )
@@ -530,7 +530,7 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
 
     const Color aBlack( COL_BLACK );
 
-    vcl::MetafileRecorder(*this).RecordFloatTransparent(rMtf, rPos, rSize, rTransparenceGradient);
+    maRecorder.RecordFloatTransparent(rMtf, rPos, rSize, rTransparenceGradient);
 
     if ( !IsDeviceOutputNecessary() )
         return;
@@ -544,7 +544,7 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
     }
     else
     {
-        vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(*this);
+        vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
 
         tools::Rectangle aOutRect( LogicToPixel( tools::Rectangle(rPos, rSize) ) );
         Point aPoint;

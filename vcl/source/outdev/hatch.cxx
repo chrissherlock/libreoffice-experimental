@@ -33,7 +33,7 @@
 #include <CoordinateMapper.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
-#include <metafile/MetafileRecorder.hxx>
+#include <vcl/metafile/MetafileRecorder.hxx>
 
 #include <cassert>
 #include <cstdlib>
@@ -47,7 +47,7 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
     Hatch aHatch( rHatch );
     aHatch.SetColor(vcl::drawmode::GetHatchColor(rHatch.GetColor(), GetDrawMode(), GetSettings().GetStyleSettings()));
 
-    vcl::MetafileRecorder(*this).RecordHatch( rPolyPoly, aHatch );
+    maRecorder.RecordHatch( rPolyPoly, aHatch );
 
     if( !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary() )
         return;
@@ -68,11 +68,8 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
         aPolyPoly.Optimize( PolyOptimizeFlags::NO_SAME );
 
         // Guard MetaFile
-        GDIMetaFile* pOldMetaFile = mpMetaFile;
-        mpMetaFile = nullptr;
-        comphelper::ScopeGuard aMetaFileGuard([this, pOldMetaFile]() {
-            mpMetaFile = pOldMetaFile;
-        });
+        vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
+
 
         // Guard MapMode
         bool bOldMap = mpMapper->IsMapModeEnabled();

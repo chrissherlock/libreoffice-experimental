@@ -19,7 +19,7 @@
 
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/virdev.hxx>
-#include <metafile/MetafileRecorder.hxx>
+#include <vcl/metafile/MetafileRecorder.hxx>
 
 #include <ClippingController.hxx>
 #include <GraphicsState.hxx>
@@ -52,7 +52,7 @@ void OutputDevice::DrawPixel( const Point& rPt )
 {
     assert(!is_double_buffered_window());
 
-    vcl::MetafileRecorder(*this).RecordPixel(rPt);
+    maRecorder.RecordPixel(rPt);
 
     if ( !IsDeviceOutputNecessary() || !mpGraphicsState->mbLineColor || IsLayoutCalculationNecessary() )
         return;
@@ -81,7 +81,7 @@ void OutputDevice::DrawPixel( const Point& rPt, const Color& rColor )
 
     Color aColor = vcl::drawmode::GetLineColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings());
 
-    vcl::MetafileRecorder(*this).RecordPixel(rPt, aColor);
+    maRecorder.RecordPixel(rPt, aColor);
 
     if ( !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary() )
         return;
