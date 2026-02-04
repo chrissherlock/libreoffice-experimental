@@ -480,5 +480,26 @@ void MetafileRecorder::RecordBitmapAction(MetaActionType nAction, const Point& r
             break;
     }
 }
+
+void MetafileRecorder::RecordTextLineColor(const Color& rColor, bool bSet)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaTextLineColorAction(rColor, bSet));
+}
+
+void MetafileRecorder::RecordOverlineColor(const Color& rColor, bool bSet)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaOverlineColorAction(rColor, bSet));
+}
+
+void MetafileRecorder::RecordTextLine(const Point& rPos, long nWidth, FontStrikeout eStrikeout,
+                                      FontLineStyle eUnderline, FontLineStyle eOverline)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(
+            new MetaTextLineAction(rPos, nWidth, eStrikeout, eUnderline, eOverline));
+}
+
 } // namespace vcl
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
