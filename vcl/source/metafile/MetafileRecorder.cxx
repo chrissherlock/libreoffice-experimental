@@ -332,5 +332,18 @@ void MetafileRecorder::RecordPolyLine(const tools::Polygon& rPoly, const LineInf
         mpMetaFile->AddAction(new MetaPolyLineAction(rPoly, rLineInfo));
 }
 
+void MetafileRecorder::RecordRect(const tools::Rectangle& rRect)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaRectAction(rRect));
+}
+
+void MetafileRecorder::RecordRoundRect(const tools::Rectangle& rRect, sal_uLong nHorzRound,
+                                       sal_uLong nVertRound)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaRoundRectAction(rRect, nHorzRound, nVertRound));
+}
+
 } // namespace vcl
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
