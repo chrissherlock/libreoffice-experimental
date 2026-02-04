@@ -23,6 +23,7 @@
 
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/metafile/MetaAction.hxx>
+#include <metafile/MetafileRecorder.hxx>
 #include <vcl/virdev.hxx>
 
 #include <ClippingController.hxx>
@@ -36,8 +37,7 @@ void OutputDevice::DrawPolyLine( const tools::Polygon& rPoly )
 {
     assert(!is_double_buffered_window());
 
-    if( mpMetaFile )
-        mpMetaFile->AddAction( new MetaPolyLineAction( rPoly ) );
+    vcl::MetafileRecorder(*this).RecordPolyLine(rPoly);
 
     sal_uInt16 nPoints = rPoly.GetSize();
 
@@ -139,8 +139,7 @@ void OutputDevice::DrawPolyLine( const tools::Polygon& rPoly, const LineInfo& rL
         }
     }
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaPolyLineAction( rPoly, rLineInfo ) );
+    vcl::MetafileRecorder(*this).RecordPolyLine(rPoly, rLineInfo);
 
     drawPolyLine(rPoly, rLineInfo);
 }
@@ -153,7 +152,8 @@ void OutputDevice::DrawPolyLine( const basegfx::B2DPolygon& rB2DPolygon,
 {
     assert(!is_double_buffered_window());
 
-    if( mpMetaFile )
+    vcl::MetafileRecorder aRecorder(*this);
+    if( aRecorder.IsActive() )
     {
         LineInfo aLineInfo;
         if( fLineWidth != 0.0 )
@@ -163,7 +163,7 @@ void OutputDevice::DrawPolyLine( const basegfx::B2DPolygon& rB2DPolygon,
         aLineInfo.SetLineCap(eLineCap);
 
         tools::Polygon aToolsPolygon( rB2DPolygon );
-        mpMetaFile->AddAction( new MetaPolyLineAction( std::move(aToolsPolygon), std::move(aLineInfo) ) );
+        aRecorder.RecordPolyLine( aToolsPolygon, aLineInfo );
     }
 
     // Do not paint empty PolyPolygons
@@ -317,7 +317,8 @@ bool OutputDevice::DrawPolyLineDirect(
         // Worked, add metafile action (if recorded). This is done only here,
         // because this function is public, other OutDev functions already add metafile
         // actions, so they call the internal function directly.
-        if( mpMetaFile )
+        vcl::MetafileRecorder aRecorder(*this);
+        if( aRecorder.IsActive() )
         {
             LineInfo aLineInfo;
             if( fLineWidth != 0.0 )
@@ -327,7 +328,7 @@ bool OutputDevice::DrawPolyLineDirect(
             aLineInfo.SetLineCap(eLineCap);
             // MiterMinimumAngle does not exist yet in LineInfo
             tools::Polygon aToolsPolygon( rB2DPolygon );
-            mpMetaFile->AddAction( new MetaPolyLineAction( std::move(aToolsPolygon), std::move(aLineInfo) ) );
+            aRecorder.RecordPolyLine( aToolsPolygon, aLineInfo );
         }
         return true;
     }

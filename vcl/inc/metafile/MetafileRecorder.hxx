@@ -92,6 +92,9 @@ public:
     // --- Drawing Actions ---
     void RecordLine(const Point& rStart, const Point& rEnd);
     void RecordPolygon(const tools::Polygon& rPoly);
+    void RecordPolyLine(const tools::Polygon& rPoly);
+    void RecordPolyLine(const tools::Polygon& rPoly, const LineInfo& rLineInfo);
+
     void RecordPolyPolygon(const tools::PolyPolygon& rPolyPoly);
 
     void RecordPixel(const Point& rPt);

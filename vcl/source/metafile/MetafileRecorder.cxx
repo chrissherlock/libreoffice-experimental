@@ -320,5 +320,17 @@ void MetafileRecorder::RecordPolyPolygon(const tools::PolyPolygon& rPolyPoly)
         mpMetaFile->AddAction(new MetaPolyPolygonAction(rPolyPoly));
 }
 
+void MetafileRecorder::RecordPolyLine(const tools::Polygon& rPoly)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaPolyLineAction(rPoly));
+}
+
+void MetafileRecorder::RecordPolyLine(const tools::Polygon& rPoly, const LineInfo& rLineInfo)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaPolyLineAction(rPoly, rLineInfo));
+}
+
 } // namespace vcl
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
