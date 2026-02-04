@@ -27,6 +27,7 @@
 #include <vcl/graph.hxx>
 #include <tools/lazydelete.hxx>
 #include <vcl/metafile/MetaAction.hxx>
+#include <metafile/MetafileRecorder.hxx>
 #include <vcl/toolkit/unowrap.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
@@ -271,8 +272,7 @@ css::uno::Any OutputDevice::GetSystemGfxDataAny() const
 
 void OutputDevice::SetRefPoint()
 {
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaRefPointAction( Point(), false ) );
+    vcl::MetafileRecorder(*this).RecordRefPoint(Point(), false);
 
     mpGraphicsState->mbRefPoint = false;
     mpGraphicsState->maRefPoint.setX(0);
@@ -281,8 +281,7 @@ void OutputDevice::SetRefPoint()
 
 void OutputDevice::SetRefPoint( const Point& rRefPoint )
 {
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaRefPointAction( rRefPoint, true ) );
+    vcl::MetafileRecorder(*this).RecordRefPoint(rRefPoint, true);
 
     mpGraphicsState->mbRefPoint = true;
     mpGraphicsState->maRefPoint = rRefPoint;
@@ -295,8 +294,7 @@ RasterOp OutputDevice::GetRasterOp() const
 
 void OutputDevice::SetRasterOp( RasterOp eRasterOp )
 {
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaRasterOpAction( eRasterOp ) );
+    vcl::MetafileRecorder(*this).RecordRasterOp(eRasterOp);
 
     if ( mpGraphicsState->meRasterOp != eRasterOp )
     {
@@ -390,10 +388,11 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
         return;
     }
 
-    if ( mpMetaFile )
+    vcl::MetafileRecorder aRecorder(*this);
+    if ( aRecorder.IsActive() )
     {
         const Bitmap aBmp( GetBitmap( rSrcPt, rSrcSize ) );
-        mpMetaFile->AddAction( new MetaBmpScaleAction( rDestPt, rDestSize, aBmp ) );
+        aRecorder.RecordBitmapScale( rDestPt, rDestSize, aBmp );
     }
 
     if ( !IsDeviceOutputNecessary() )
@@ -441,10 +440,11 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
         return;
     }
 
-    if ( mpMetaFile )
+    vcl::MetafileRecorder aRecorder(*this);
+    if ( aRecorder.IsActive() )
     {
         const Bitmap aBmp(rOutDev.GetBitmap(rSrcPt, rSrcSize));
-        mpMetaFile->AddAction(new MetaBmpExScaleAction(rDestPt, rDestSize, aBmp));
+        aRecorder.RecordBitmapExScale(rDestPt, rDestSize, aBmp);
     }
 
     if ( !IsDeviceOutputNecessary() )
