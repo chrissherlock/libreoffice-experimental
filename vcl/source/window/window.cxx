@@ -835,7 +835,7 @@ bool WindowOutputDevice::AcquireGraphics() const
 
     mbLineColorDirty     = true;
     mbFillColorDirty     = true;
-    mbFontDirty          = true;
+// mbFontDirty          = true; // Removed
     mbInitTextColor     = true;
     const_cast<WindowOutputDevice*>(this)->GetClippingController().SetDirty(true);
 

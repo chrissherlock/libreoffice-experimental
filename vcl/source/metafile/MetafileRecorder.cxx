@@ -20,13 +20,12 @@
 #include <vcl/outdev.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
 
-#include <metafile/MetafileRecorder.hxx>
+#include <vcl/metafile/MetafileRecorder.hxx>
 
 namespace vcl
 {
-MetafileRecorder::MetafileRecorder(OutputDevice& rDev)
-    : mpMetaFile(rDev.GetConnectMetaFile())
-    , mrOutDev(rDev)
+MetafileRecorder::MetafileRecorder()
+    : mpMetaFile(nullptr)
 {
 }
 
@@ -177,8 +176,6 @@ void MetafileRecorder::RecordGradient(const tools::PolyPolygon& rPolyPoly,
         return;
 
     Gradient aGradient(rGradient);
-    if (mrOutDev.GetDrawMode() & DrawModeFlags::GrayGradient)
-        aGradient.MakeGrayscale();
 
     if (rPolyPoly.IsRect())
     {
@@ -501,28 +498,28 @@ void MetafileRecorder::RecordTextLine(const Point& rPos, long nWidth, FontStrike
             new MetaTextLineAction(rPos, nWidth, eStrikeout, eUnderline, eOverline));
 }
 
-MetafileRecorder::ScopedSuspend::ScopedSuspend(OutputDevice& rOutDev)
-    : mrOutDev(rOutDev)
-    , mpOldMetaFile(rOutDev.GetConnectMetaFile())
+MetafileRecorder::ScopedSuspend::ScopedSuspend(MetafileRecorder& rRecorder)
+    : mrRecorder(rRecorder)
+    , mpOldMetaFile(rRecorder.GetConnectMetaFile())
 {
     if (mpOldMetaFile)
-        mrOutDev.SetConnectMetaFile(nullptr);
+        mrRecorder.SetConnectMetaFile(nullptr);
 }
 
 MetafileRecorder::ScopedSuspend::~ScopedSuspend()
 {
     if (mpOldMetaFile)
-        mrOutDev.SetConnectMetaFile(mpOldMetaFile);
+        mrRecorder.SetConnectMetaFile(mpOldMetaFile);
 }
 
-MetafileRecorder::ScopedSwitch::ScopedSwitch(OutputDevice& rOutDev, GDIMetaFile* pNewMetaFile)
-    : mrOutDev(rOutDev)
-    , mpOldMetaFile(rOutDev.GetConnectMetaFile())
+MetafileRecorder::ScopedSwitch::ScopedSwitch(MetafileRecorder& rRecorder, GDIMetaFile* pNewMetaFile)
+    : mrRecorder(rRecorder)
+    , mpOldMetaFile(rRecorder.GetConnectMetaFile())
 {
     // Always switch, even if pNewMetaFile is null (though ScopedSuspend is preferred for that)
-    mrOutDev.SetConnectMetaFile(pNewMetaFile);
+    mrRecorder.SetConnectMetaFile(pNewMetaFile);
 }
 
-MetafileRecorder::ScopedSwitch::~ScopedSwitch() { mrOutDev.SetConnectMetaFile(mpOldMetaFile); }
+MetafileRecorder::ScopedSwitch::~ScopedSwitch() { mrRecorder.SetConnectMetaFile(mpOldMetaFile); }
 } // namespace vcl
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

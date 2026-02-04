@@ -27,7 +27,7 @@
 #include <vcl/graph.hxx>
 #include <tools/lazydelete.hxx>
 #include <vcl/metafile/MetaAction.hxx>
-#include <metafile/MetafileRecorder.hxx>
+#include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/toolkit/unowrap.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
@@ -77,7 +77,7 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mpUnoGraphicsList               = nullptr;
     mpPrevGraphics                  = nullptr;
     mpNextGraphics                  = nullptr;
-    mpMetaFile                      = nullptr;
+
     mpFontInstance                  = nullptr;
     mpForcedFallbackInstance        = nullptr;
     mpFontFaceCollection            = nullptr;
@@ -92,10 +92,9 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mbDevOutput                     = false;
     mpGraphicsState->meTextLanguage                  = LANGUAGE_SYSTEM;  // TODO: get default from configuration?
     mbLineColorDirty                 = true;
-    mbFontDirty                      = true;
+// mbFontDirty                      = true; // Removed
     mbInitTextColor                 = true;
     mpClippingController->SetNoClipRegion();
-    mbNewFont                       = true;
     mbEnableRTL                     = false;    // mirroring must be explicitly allowed (typically for windows only)
     mbSubpixelPositioning           = false; // tdf#168002 allow SubpixelPositioning (default: false)
 
@@ -185,7 +184,7 @@ SalGraphics const *OutputDevice::GetGraphics() const
 
 void OutputDevice::SetConnectMetaFile( GDIMetaFile* pMtf )
 {
-    mpMetaFile = pMtf;
+    maRecorder.SetConnectMetaFile(pMtf);
 }
 
 void OutputDevice::SetSettings( const AllSettings& rSettings )
@@ -272,7 +271,7 @@ css::uno::Any OutputDevice::GetSystemGfxDataAny() const
 
 void OutputDevice::SetRefPoint()
 {
-    vcl::MetafileRecorder(*this).RecordRefPoint(Point(), false);
+    maRecorder.RecordRefPoint(Point(), false);
 
     mpGraphicsState->mbRefPoint = false;
     mpGraphicsState->maRefPoint.setX(0);
@@ -281,7 +280,7 @@ void OutputDevice::SetRefPoint()
 
 void OutputDevice::SetRefPoint( const Point& rRefPoint )
 {
-    vcl::MetafileRecorder(*this).RecordRefPoint(rRefPoint, true);
+    maRecorder.RecordRefPoint(rRefPoint, true);
 
     mpGraphicsState->mbRefPoint = true;
     mpGraphicsState->maRefPoint = rRefPoint;
@@ -294,7 +293,7 @@ RasterOp OutputDevice::GetRasterOp() const
 
 void OutputDevice::SetRasterOp( RasterOp eRasterOp )
 {
-    vcl::MetafileRecorder(*this).RecordRasterOp(eRasterOp);
+    maRecorder.RecordRasterOp(eRasterOp);
 
     if ( mpGraphicsState->meRasterOp != eRasterOp )
     {
@@ -324,7 +323,7 @@ void OutputDevice::SetAntialiasing( AntialiasingFlags nMode )
     if (mpGraphicsState->mnAntialiasing != nMode)
     {
         mpGraphicsState->mnAntialiasing = nMode;
-        mbFontDirty = true;
+// mbFontDirty = true; // Removed
 
         if (mpGraphics)
             mpGraphics->setAntiAlias(bool(mpGraphicsState->mnAntialiasing & AntialiasingFlags::Enable));
@@ -388,11 +387,10 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
         return;
     }
 
-    vcl::MetafileRecorder aRecorder(*this);
-    if ( aRecorder.IsActive() )
+    if ( maRecorder.IsActive() )
     {
         const Bitmap aBmp( GetBitmap( rSrcPt, rSrcSize ) );
-        aRecorder.RecordBitmapScale( rDestPt, rDestSize, aBmp );
+        maRecorder.RecordBitmapScale( rDestPt, rDestSize, aBmp );
     }
 
     if ( !IsDeviceOutputNecessary() )
@@ -440,11 +438,10 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
         return;
     }
 
-    vcl::MetafileRecorder aRecorder(*this);
-    if ( aRecorder.IsActive() )
+    if ( maRecorder.IsActive() )
     {
         const Bitmap aBmp(rOutDev.GetBitmap(rSrcPt, rSrcSize));
-        aRecorder.RecordBitmapExScale(rDestPt, rDestSize, aBmp);
+        maRecorder.RecordBitmapExScale(rDestPt, rDestSize, aBmp);
     }
 
     if ( !IsDeviceOutputNecessary() )

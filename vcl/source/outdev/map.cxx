@@ -28,7 +28,7 @@
 #include <vcl/cursor.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/metafile/MetaAction.hxx>
-#include <metafile/MetafileRecorder.hxx>
+#include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/wrkwin.hxx>
 
@@ -84,7 +84,7 @@ const MapMode& OutputDevice::GetMapMode() const { return mpMapper->GetMapMode();
 
 void OutputDevice::SetMapMode()
 {
-    vcl::MetafileRecorder(*this).RecordMapMode(MapMode());
+    maRecorder.RecordMapMode(MapMode());
 
     if (!mpMapper->IsMapModeEnabled() && mpMapper->IsDefaultMapMode())
         return;
@@ -93,8 +93,7 @@ void OutputDevice::SetMapMode()
     mpMapper->ResetMapMode();
 
     // create new objects (clip region are not re-scaled)
-    mbNewFont = true;
-    mbFontDirty = true;
+// mbFontDirty = true; // Removed
     ImplInitMapModeObjects();
 
     // #106426# Adapt logical offset when changing mapmode
@@ -130,7 +129,7 @@ static tools::Long lcl_pixelToLogic(tools::Long n, tools::Long nDPI, tools::Long
 
 void OutputDevice::SetMapMode(const MapMode& rNewMapMode)
 {
-    vcl::MetafileRecorder(*this).RecordMapMode(rNewMapMode);
+    maRecorder.RecordMapMode(rNewMapMode);
 
     bool bRelMap = (rNewMapMode.GetMapUnit() == MapUnit::MapRelative);
 
@@ -192,8 +191,7 @@ void OutputDevice::SetMapMode(const MapMode& rNewMapMode)
     }
 
     // create new objects (clip region are not re-scaled)
-    mbNewFont = true;
-    mbFontDirty = true;
+// mbFontDirty = true; // Removed
     ImplInitMapModeObjects();
 
     // #106426# Adapt logical offset when changing mapmode

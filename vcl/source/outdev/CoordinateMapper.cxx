@@ -30,6 +30,27 @@
 
 #include <CoordinateMapper.hxx>
 
+void CoordinateMapper::EnableMapMode(bool bEnable)
+{
+    if (mbMap != bEnable)
+    {
+        IncreaseGenerationID();
+        mbMap = bEnable;
+    }
+}
+
+void CoordinateMapper::ResetMapMode()
+{
+    IncreaseGenerationID();
+    maMapMode = MapMode();
+}
+
+void CoordinateMapper::ResetMapMode(const MapMode& rMapMode)
+{
+    IncreaseGenerationID();
+    maMapMode = rMapMode;
+}
+
 sal_Int32 CoordinateMapper::GetDPIX() const { return mnDPIX; }
 
 sal_Int32 CoordinateMapper::GetDPIY() const { return mnDPIY; }
@@ -93,6 +114,8 @@ void CoordinateMapper::SetLogicalOffset(const Size& rSize)
 
 void CoordinateMapper::SetOffset(const Size& rOffset)
 {
+    IncreaseGenerationID();
+
     SetPixelOffset(rOffset);
     // Recalculate logical offset based on the new pixel offset
     SetLogicalOffset(Size(lcl_pixelToLogic(GetPixelXOffset(), GetDPIX(), GetMappingXNumerator(),

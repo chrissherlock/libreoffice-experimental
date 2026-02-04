@@ -25,6 +25,7 @@
 #include <impfontcache.hxx>
 
 #include <tuple>
+#include <functional>
 
 class ImplFontCache;
 class CoordinateMapper;
@@ -63,6 +64,22 @@ struct FontRealization
 class VCL_DLLPUBLIC FontController
 {
 public:
+    using FontInitCallback = std::function<void(LogicalFontInstance*)>;
+
+private:
+    sal_uInt64 mnLastMapperID = 0;
+    vcl::Font maLastRequestedFont;
+    SalGraphics* mpLastGraphics = nullptr;
+    const LogicalFontInstance* mpLastActiveInstance = nullptr;
+
+public:
+    void ResetGraphicsState()
+    {
+        mpLastGraphics = nullptr;
+        mpLastActiveInstance = nullptr;
+    }
+
+public:
     void SetFontCollection(const std::shared_ptr<PhysicalFontCollection>& pPFC)
     {
         mxFontCollection = pPFC;
@@ -96,10 +113,20 @@ public:
 
     void InitializeFonts(SalGraphics* pGraphics);
 
-    bool NeedsUpdate(const vcl::Font& rRequestedFont, bool bDeviceDirty) const;
+    bool NeedsUpdate(const vcl::Font& rRequestedFont, const CoordinateMapper& rMapper);
 
     // New Helper: Consolidates logic for creating a font instance.
     // Does not modify OutputDevice state.
+
+    // Orchestrates the update. Uses a callback for the initialization step
+    // to avoid coupling to OutputDevice.
+    bool UpdateFontInstanceState(SalGraphics* pGraphics, const CoordinateMapper& rMapper,
+                                 const vcl::Font& rLogicalFont,
+                                 const std::unique_ptr<FontRealization>& pFontRealization,
+                                 rtl::Reference<LogicalFontInstance>& rOutFontInstance, long nDPIY,
+                                 AntialiasingFlags eAAFlags, const StyleSettings& rStyleSettings,
+                                 FontInitCallback fnInit);
+
     rtl::Reference<LogicalFontInstance>
     CreateFontInstance(PhysicalFontCollection* pFontCollection, const vcl::Font& rFont,
                        SalGraphics* pGraphics, const CoordinateMapper& rMapper, long nDPIY,

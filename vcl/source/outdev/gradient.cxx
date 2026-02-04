@@ -20,7 +20,7 @@
 #include <tools/poly.hxx>
 
 #include <vcl/gradient.hxx>
-#include <metafile/MetafileRecorder.hxx>
+#include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
@@ -78,7 +78,17 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
     if ( mpGraphicsState->mnDrawMode & DrawModeFlags::GrayGradient )
         aGradient.MakeGrayscale();
 
-    vcl::MetafileRecorder(*this).RecordGradient( rPolyPoly, rGradient );
+
+    if ( GetDrawMode() & DrawModeFlags::GrayGradient )
+    {
+        Gradient aGrayGrad( rGradient );
+        aGrayGrad.MakeGrayscale();
+        maRecorder.RecordGradient( rPolyPoly, aGrayGrad );
+    }
+    else
+    {
+        maRecorder.RecordGradient( rPolyPoly, rGradient );
+    }
 
     if( !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary() )
         return;

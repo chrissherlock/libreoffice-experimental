@@ -27,7 +27,7 @@
 #include <vcl/fntstyle.hxx>
 #include <vcl/glyphitem.hxx>
 #include <vcl/metafile/MetaAction.hxx>
-#include <metafile/MetafileRecorder.hxx>
+#include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/metafile/ScopedMetaGroup.hxx>
 #include <vcl/mnemonic.hxx>
 #include <vcl/rendercontext/SystemTextColorFlags.hxx>
@@ -57,7 +57,7 @@ vcl::text::ComplexTextLayoutFlags OutputDevice::GetLayoutMode() const
 
 void OutputDevice::SetLayoutMode(vcl::text::ComplexTextLayoutFlags nTextLayoutMode)
 {
-    vcl::MetafileRecorder(*this).RecordLayoutMode(nTextLayoutMode);
+    maRecorder.RecordLayoutMode(nTextLayoutMode);
 
     mpGraphicsState->mnTextLayoutMode = nTextLayoutMode;
     if (mpFontRealization)
@@ -68,7 +68,7 @@ LanguageType OutputDevice::GetDigitLanguage() const { return mpGraphicsState->me
 
 void OutputDevice::SetDigitLanguage(LanguageType eTextLanguage)
 {
-    vcl::MetafileRecorder(*this).RecordTextLanguage(eTextLanguage);
+    maRecorder.RecordTextLanguage(eTextLanguage);
 
     mpGraphicsState->meTextLanguage = eTextLanguage;
 }
@@ -206,7 +206,7 @@ void OutputDevice::ImplDrawRotatedTextMask(const Point& rPoint, const Bitmap& rB
     bool bOldMap = mpMapper->IsMapModeEnabled();
 
     // Suspend recording for mask drawing
-    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(*this);
+    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
 
     comphelper::ScopeGuard aRestoreGuard([&]() {
         mpMapper->EnableMapMode(bOldMap);
@@ -448,7 +448,7 @@ void OutputDevice::SetTextColor(const Color& rColor)
     Color aColor(
         vcl::drawmode::GetTextColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings()));
 
-    vcl::MetafileRecorder(*this).RecordTextColor(aColor);
+    maRecorder.RecordTextColor(aColor);
 
     if (mpGraphicsState->maTextColor != aColor)
     {
@@ -461,7 +461,7 @@ bool OutputDevice::IsTextFillColor() const { return !mpGraphicsState->maFont.IsT
 
 void OutputDevice::SetTextFillColor()
 {
-    vcl::MetafileRecorder(*this).RecordTextFillColor(Color(), false);
+    maRecorder.RecordTextFillColor(Color(), false);
 
     if (mpGraphicsState->maFont.GetColor() != COL_TRANSPARENT)
         mpGraphicsState->maFont.SetFillColor(COL_TRANSPARENT);
@@ -475,7 +475,7 @@ void OutputDevice::SetTextFillColor(const Color& rColor)
     Color aColor(
         vcl::drawmode::GetFillColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings()));
 
-    vcl::MetafileRecorder(*this).RecordTextFillColor(aColor, true);
+    maRecorder.RecordTextFillColor(aColor, true);
 
     if (mpGraphicsState->maFont.GetFillColor() != aColor)
         mpGraphicsState->maFont.SetFillColor(aColor);
@@ -496,12 +496,11 @@ TextAlign OutputDevice::GetTextAlign() const { return mpGraphicsState->maFont.Ge
 
 void OutputDevice::SetTextAlign(TextAlign eAlign)
 {
-    vcl::MetafileRecorder(*this).RecordTextAlign(eAlign);
+    maRecorder.RecordTextAlign(eAlign);
 
     if (mpGraphicsState->maFont.GetAlignment() != eAlign)
     {
         mpGraphicsState->maFont.SetAlignment(eAlign);
-        mbNewFont = true;
     }
 }
 
@@ -524,7 +523,7 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
     nLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nIndex, nLen);
     assert(nLen >= 0 && "DrawTextArray: Length must be non-negative after normalization");
 
-    vcl::MetafileRecorder(*this).RecordDrawText(rStartPt, rStr, nIndex, nLen);
+    maRecorder.RecordDrawText(rStartPt, rStr, nIndex, nLen);
 
     vcl::text::TextRecordingState* pStateToUse = nullptr;
     std::optional<vcl::text::TextRecordingState> oTempState;
@@ -618,7 +617,7 @@ double OutputDevice::GetTextWidthDouble(const OUString& rStr, sal_Int32 nIndex, 
 
 tools::Long OutputDevice::GetTextHeight() const
 {
-    if (!ImplNewFont())
+    if (!ImplUpdateFontInstance())
         return 0;
 
     if (mpFontRealization && mpFontRealization->mxFont)
@@ -666,7 +665,7 @@ void OutputDevice::DrawPartialTextArray(const Point& rStartPt, const OUString& r
 
     nPartLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nPartIndex, nPartLen);
 
-    vcl::MetafileRecorder(*this).RecordDrawPartialTextArray(rStartPt, rStr, pDXArray, pKashidaArray, nPartIndex, nPartLen, nIndex, nLen);
+    maRecorder.RecordDrawPartialTextArray(rStartPt, rStr, pDXArray, pKashidaArray, nPartIndex, nPartLen, nIndex, nLen);
 
     if (!IsDeviceOutputNecessary() && !IsLayoutCalculationNecessary())
         return;
@@ -707,7 +706,7 @@ void OutputDevice::DrawTextArray(const Point& rStartPt, const OUString& rStr,
     nLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nIndex, nLen);
     assert(!is_double_buffered_window());
 
-    vcl::MetafileRecorder(*this).RecordDrawTextArray(rStartPt, rStr, aKernArray, pKashidaAry, nIndex, nLen);
+    maRecorder.RecordDrawTextArray(rStartPt, rStr, aKernArray, pKashidaAry, nIndex, nLen);
 
     // Allow layout calculation to proceed if we are recording (to get accurate bounds)
     if (!IsDeviceOutputNecessary() && !IsLayoutCalculationNecessary())
@@ -807,7 +806,7 @@ void OutputDevice::DrawStretchText(const Point& rStartPt, sal_Int32 nWidth, cons
 
     nLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nIndex, nLen);
 
-    vcl::MetafileRecorder(*this).RecordDrawStretchText(rStartPt, nWidth, rStr, nIndex, nLen);
+    maRecorder.RecordDrawStretchText(rStartPt, nWidth, rStr, nIndex, nLen);
 
     if (!IsDeviceOutputNecessary() && !IsLayoutCalculationNecessary())
         return;
@@ -1220,7 +1219,7 @@ void OutputDevice::AddTextRectActions(const tools::Rectangle& rRect, const OUStr
     const bool bOutputEnabled(IsOutputEnabled());
 
     // Redirect recording to rMtf
-    vcl::MetafileRecorder::ScopedSwitch aMetaFileSwitch(*this, &rMtf);
+    vcl::MetafileRecorder::ScopedSwitch aMetaFileSwitch(maRecorder, &rMtf);
 
     EnableOutput(false);
 
@@ -1251,9 +1250,9 @@ void OutputDevice::DrawText(const tools::Rectangle& rRect, const OUString& rOrig
     // Semantic Tagging: Group decomposed actions or record atomic action
     std::unique_ptr<vcl::ScopedMetaGroup> oMetaGroup;
     if (bDecomposeTextRectAction)
-        oMetaGroup = vcl::MetafileRecorder(*this).CreateScopedGroup("DrawTextRect Decomposed");
+        oMetaGroup = maRecorder.CreateScopedGroup("DrawTextRect Decomposed");
     if (!bDecomposeTextRectAction)
-        vcl::MetafileRecorder(*this).RecordDrawTextRect(rRect, rOrigStr, nStyle);
+        maRecorder.RecordDrawTextRect(rRect, rOrigStr, nStyle);
 
     if ((!IsDeviceOutputNecessary() && !pVector && !bDecomposeTextRectAction) || rOrigStr.isEmpty()
         || rRect.IsEmpty())
@@ -1275,7 +1274,7 @@ void OutputDevice::DrawText(const tools::Rectangle& rRect, const OUString& rOrig
     // create MetaActionType::TEXTs otherwise)
     std::optional<vcl::MetafileRecorder::ScopedSuspend> xMetaFileSuspend;
     if (!bDecomposeTextRectAction)
-        xMetaFileSuspend.emplace(*this);
+        xMetaFileSuspend.emplace(maRecorder);
 
     // #i47157# Factored out to ImplDrawText(), to be used also
     // from AddTextRectActions()
@@ -1518,7 +1517,6 @@ bool OutputDevice::GetTextOutlines(basegfx::B2DPolyPolygonVector& rVector, const
     if (bOldMap)
     {
         mpMapper->EnableMapMode(false);
-        const_cast<OutputDevice&>(*this).mbNewFont = true;
 
         InitFont();
     }
@@ -1541,7 +1539,6 @@ bool OutputDevice::GetTextOutlines(basegfx::B2DPolyPolygonVector& rVector, const
     if (bOldMap)
     {
         mpMapper->EnableMapMode(bOldMap);
-        const_cast<OutputDevice&>(*this).mbNewFont = true;
     }
 
     return bRet;

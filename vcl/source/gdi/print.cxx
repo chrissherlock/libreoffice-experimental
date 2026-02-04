@@ -213,8 +213,7 @@ void Printer::DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize,
 void Printer::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
                                        sal_uInt16 nTransparencePercent )
 {
-    GDIMetaFile* pOldMetaFile = mpMetaFile;
-    mpMetaFile = nullptr;
+    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
 
     tools::Rectangle       aPolyRect( LogicToPixel( rPolyPoly ).GetBoundRect() );
     const Size      aDPISize( LogicToPixel(Size(1, 1), MapMode(MapUnit::MapInch)) );
@@ -268,8 +267,6 @@ void Printer::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
 
     mpMapper->EnableMapMode( bOldMap );
     Pop();
-
-    mpMetaFile = pOldMetaFile;
 }
 
 void Printer::DrawOutDev( const Point& /*rDestPt*/, const Size& /*rDestSize*/,
@@ -456,7 +453,7 @@ bool Printer::AcquireGraphics() const
 
     mbLineColorDirty     = true;
     mbFillColorDirty     = true;
-    mbFontDirty          = true;
+// mbFontDirty          = true; // Removed
     mbInitTextColor     = true;
     const_cast<Printer*>(this)->GetClippingController().SetDirty(true);
 
@@ -522,8 +519,7 @@ bool Printer::AcquireGraphics() const
 void Printer::ImplReleaseFonts()
 {
     mpGraphics->ReleaseFonts();
-    mbNewFont = true;
-    mbFontDirty = true;
+// mbFontDirty = true; // Removed
 
     mpFontInstance.clear();
     mpFontFaceCollection.reset();
@@ -700,10 +696,10 @@ void Printer::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
     tools::Long            nX, nY; //, nWorkX, nWorkY, nWorkWidth, nWorkHeight;
     std::unique_ptr<tools::Long[]> pMapX( new tools::Long[ nSrcWidth + 1 ] );
     std::unique_ptr<tools::Long[]> pMapY( new tools::Long[ nSrcHeight + 1 ] );
-    GDIMetaFile*    pOldMetaFile = mpMetaFile;
+    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
     const bool bOldMap = mpMapper->IsMapModeEnabled();
 
-    mpMetaFile = nullptr;
+    // mpMetaFile = nullptr; // Handled by ScopedSuspend
     mpMapper->EnableMapMode(false);
     Push( vcl::PushFlags::FILLCOLOR | vcl::PushFlags::LINECOLOR );
     SetLineColor( rMaskColor );
@@ -735,7 +731,6 @@ void Printer::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
 
     Pop();
     mpMapper->EnableMapMode(bOldMap);
-    mpMetaFile = pOldMetaFile;
 }
 
 SalPrinterQueueInfo* Printer::ImplGetQueueInfo( const OUString& rPrinterName,
@@ -1059,8 +1054,7 @@ bool Printer::SetPrinterProps( const Printer* pPrinter )
             ClearFontCache();
             SetFontCollection(nullptr);
 
-            mbFontDirty = true;
-            mbNewFont = true;
+// mbFontDirty = true; // Removed
             mpInfoPrinter = nullptr;
         }
 
@@ -1085,8 +1079,7 @@ bool Printer::SetPrinterProps( const Printer* pPrinter )
             mpFontFaceCollection.reset();
             ClearFontCache();
             SetFontCollection(nullptr);
-            mbFontDirty = true;
-            mbNewFont = true;
+// mbFontDirty = true; // Removed
             mpInfoPrinter = nullptr;
         }
 

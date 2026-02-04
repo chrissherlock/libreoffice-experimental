@@ -18,7 +18,7 @@
  */
 
 #include <vcl/metafile/MetaAction.hxx>
-#include <metafile/MetafileRecorder.hxx>
+#include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/virdev.hxx>
 
@@ -43,7 +43,7 @@ void OutputDevice::DrawWallpaper( const tools::Rectangle& rRect,
 {
     assert(!is_double_buffered_window());
 
-    vcl::MetafileRecorder(*this).RecordWallpaper(rRect, rWallpaper);
+    maRecorder.RecordWallpaper(rRect, rWallpaper);
 
     if ( !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary() )
         return;
@@ -214,7 +214,7 @@ void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
         aSize = Size( nWidth, nHeight );
     }
 
-    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(*this);
+    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
     mpMapper->EnableMapMode(false);
     Push( vcl::PushFlags::CLIPREGION );
     IntersectClipRegion( tools::Rectangle( Point( nX, nY ), Size( nWidth, nHeight ) ) );
@@ -400,7 +400,7 @@ void OutputDevice::DrawGradientWallpaper( tools::Long nX, tools::Long nY,
 
     aBound = tools::Rectangle( Point( nX, nY ), Size( nWidth, nHeight ) );
 
-    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(*this);
+    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
     mpMapper->EnableMapMode(false);
     Push( vcl::PushFlags::CLIPREGION );
     IntersectClipRegion( tools::Rectangle( Point( nX, nY ), Size( nWidth, nHeight ) ) );

@@ -56,7 +56,7 @@ bool VirtualDevice::AcquireGraphics() const
 
     mbLineColorDirty     = true;
     mbFillColorDirty     = true;
-    mbFontDirty          = true;
+// mbFontDirty          = true; // Removed
     mbInitTextColor     = true;
     const_cast<VirtualDevice*>(this)->GetClippingController().SetDirty(true);
 
@@ -432,8 +432,7 @@ void VirtualDevice::ImplSetReferenceDevice( RefDevMode i_eRefDevMode, sal_Int32 
     mbScreenComp = false;
 
     // invalidate currently selected fonts
-    mbFontDirty = true;
-    mbNewFont = true;
+// mbFontDirty = true; // Removed
 
     // avoid adjusting font lists when already in refdev mode
     RefDevMode nOldRefDevMode = meRefDevMode;

@@ -24,7 +24,7 @@
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/rendercontext/DrawGridFlags.hxx>
 #include <vcl/virdev.hxx>
-#include <metafile/MetafileRecorder.hxx>
+#include <vcl/metafile/MetafileRecorder.hxx>
 
 #include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
@@ -56,7 +56,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect )
 {
     assert(!is_double_buffered_window());
 
-    vcl::MetafileRecorder(*this).RecordRect(rRect);
+    maRecorder.RecordRect(rRect);
 
     if ( !IsDeviceOutputNecessary() || (!mpGraphicsState->mbLineColor && !mpGraphicsState->mbFillColor) || IsLayoutCalculationNecessary() )
         return;
@@ -92,7 +92,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
 {
     assert(!is_double_buffered_window());
 
-    vcl::MetafileRecorder(*this).RecordRoundRect(rRect, nHorzRound, nVertRound);
+    maRecorder.RecordRoundRect(rRect, nHorzRound, nVertRound);
 
     if ( !IsDeviceOutputNecessary() || (!mpGraphicsState->mbLineColor && !mpGraphicsState->mbFillColor) || IsLayoutCalculationNecessary() )
         return;

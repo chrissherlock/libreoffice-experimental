@@ -29,6 +29,7 @@
 #include <tools/poly.hxx>
 #include <vcl/cairo.hxx>
 #include <vcl/dllapi.h>
+#include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/font.hxx>
 #include <vcl/kernarray.hxx>
 #include <vcl/region.hxx>
@@ -219,7 +220,7 @@ private:
     mutable SalGraphics*            mpGraphics;         ///< Graphics context to draw on
     mutable VclPtr<OutputDevice>    mpPrevGraphics;     ///< Previous output device in list
     mutable VclPtr<OutputDevice>    mpNextGraphics;     ///< Next output device in list
-    GDIMetaFile*                    mpMetaFile;
+    vcl::MetafileRecorder           maRecorder;
     mutable rtl::Reference<LogicalFontInstance> mpFontInstance;
     rtl::Reference<LogicalFontInstance> mpForcedFallbackInstance;
     mutable std::unique_ptr<vcl::font::PhysicalFontFaceCollection>  mpFontFaceCollection;
@@ -248,10 +249,8 @@ private:
     mutable bool                    mbDevOutput : 1;
     mutable bool                    mbLineColorDirty : 1;
     mutable bool                    mbFillColorDirty : 1;
-    mutable bool                    mbFontDirty : 1;
     mutable bool                    mbInitTextColor : 1;
     mutable bool                    mbClipRegionSet : 1;
-    mutable bool                    mbNewFont : 1;
     mutable bool                    mbEnableRTL : 1;
     mutable bool                    mbSubpixelPositioning : 1;
 
@@ -300,7 +299,7 @@ public:
     SalGraphics*                GetGraphics();
 
     void                        SetConnectMetaFile( GDIMetaFile* pMtf );
-    GDIMetaFile*                GetConnectMetaFile() const { return mpMetaFile; }
+    GDIMetaFile*                GetConnectMetaFile() const { return maRecorder.GetConnectMetaFile(); }
 
 
     virtual void                SetSettings( const AllSettings& rSettings );
@@ -1303,7 +1302,7 @@ protected:
     SAL_DLLPRIVATE void ReleaseFontCollection();
     SAL_DLLPRIVATE void ResetNewFontCache();
 
-    virtual bool ImplNewFont() const;
+    virtual bool ImplUpdateFontInstance() const;
 
 private:
     SAL_DLLPRIVATE void ImplInitializeFontInstance(LogicalFontInstance* pFontInstance) const;

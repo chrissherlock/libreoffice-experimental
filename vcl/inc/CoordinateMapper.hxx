@@ -37,6 +37,7 @@
 class CoordinateMapper
 {
 private:
+    sal_uInt64 mnGenerationID = 1; // Start at 1 to force initial mismatch
     bool mbMap;
     MapMode maMapMode;
     ImplMapRes maMapRes;
@@ -68,20 +69,32 @@ private:
     tools::Long mnOutOffLogicY;
 
 public:
+    // Generation ID for Lazy Evaluation
+    SAL_DLLPRIVATE sal_uInt64 GetGenerationID() const { return mnGenerationID; }
+    SAL_DLLPRIVATE void IncreaseGenerationID() { mnGenerationID++; }
+
     SAL_DLLPRIVATE bool IsMapModeEnabled() const { return mbMap; }
-    SAL_DLLPRIVATE void EnableMapMode(bool bEnable = true) { mbMap = bEnable; }
+    SAL_DLLPRIVATE void EnableMapMode(bool bEnable = true);
     SAL_DLLPRIVATE void SetOffset(const Size& rOffset);
 
     SAL_DLLPRIVATE const MapMode& GetMapMode() const { return maMapMode; }
     SAL_DLLPRIVATE bool IsDefaultMapMode() const { return maMapMode.IsDefault(); }
-    SAL_DLLPRIVATE void ResetMapMode() { maMapMode = MapMode(); }
-    SAL_DLLPRIVATE void ResetMapMode(const MapMode& rMapMode) { maMapMode = rMapMode; }
+    SAL_DLLPRIVATE void ResetMapMode();
+    SAL_DLLPRIVATE void ResetMapMode(const MapMode& rMapMode);
     SAL_DLLPRIVATE MapUnit GetMapUnit() const { return maMapMode.GetMapUnit(); }
 
     SAL_DLLPRIVATE const Fraction& GetScaleX() const { return maMapMode.GetScaleX(); }
     SAL_DLLPRIVATE const Fraction& GetScaleY() const { return maMapMode.GetScaleY(); }
-    SAL_DLLPRIVATE void SetScaleX(const Fraction& rScale) { maMapMode.SetScaleX(rScale); }
-    SAL_DLLPRIVATE void SetScaleY(const Fraction& rScale) { maMapMode.SetScaleY(rScale); }
+    SAL_DLLPRIVATE void SetScaleX(const Fraction& rScale)
+    {
+        IncreaseGenerationID();
+        maMapMode.SetScaleX(rScale);
+    }
+    SAL_DLLPRIVATE void SetScaleY(const Fraction& rScale)
+    {
+        IncreaseGenerationID();
+        maMapMode.SetScaleY(rScale);
+    }
 
     SAL_DLLPRIVATE tools::Long GetMappingXOffset() const { return maMapRes.mnMapOfsX; }
     SAL_DLLPRIVATE tools::Long GetMappingYOffset() const { return maMapRes.mnMapOfsY; }
@@ -90,20 +103,42 @@ public:
     SAL_DLLPRIVATE tools::Long GetMappingXDenominator() const { return maMapRes.mnMapScDenomX; }
     SAL_DLLPRIVATE tools::Long GetMappingYDenominator() const { return maMapRes.mnMapScDenomY; }
 
-    SAL_DLLPRIVATE void SetMappingXOffset(tools::Long nOffset) { maMapRes.mnMapOfsX = nOffset; }
-    SAL_DLLPRIVATE void SetMappingYOffset(tools::Long nOffset) { maMapRes.mnMapOfsY = nOffset; }
-    SAL_DLLPRIVATE void SetMappingXNumerator(tools::Long nNum) { maMapRes.mnMapScNumX = nNum; }
-    SAL_DLLPRIVATE void SetMappingYNumerator(tools::Long nNum) { maMapRes.mnMapScNumY = nNum; }
+    SAL_DLLPRIVATE void SetMappingXOffset(tools::Long nOffset)
+    {
+        IncreaseGenerationID();
+        maMapRes.mnMapOfsX = nOffset;
+    }
+    SAL_DLLPRIVATE void SetMappingYOffset(tools::Long nOffset)
+    {
+        IncreaseGenerationID();
+        maMapRes.mnMapOfsY = nOffset;
+    }
+    SAL_DLLPRIVATE void SetMappingXNumerator(tools::Long nNum)
+    {
+        IncreaseGenerationID();
+        maMapRes.mnMapScNumX = nNum;
+    }
+    SAL_DLLPRIVATE void SetMappingYNumerator(tools::Long nNum)
+    {
+        IncreaseGenerationID();
+        maMapRes.mnMapScNumY = nNum;
+    }
     SAL_DLLPRIVATE void SetMappingXDenominator(tools::Long nDenom)
     {
+        IncreaseGenerationID();
         maMapRes.mnMapScDenomX = nDenom;
     }
     SAL_DLLPRIVATE void SetMappingYDenominator(tools::Long nDenom)
     {
+        IncreaseGenerationID();
         maMapRes.mnMapScDenomY = nDenom;
     }
 
-    SAL_DLLPRIVATE void SetOrigin(const Point& rPt) { maMapMode.SetOrigin(rPt); }
+    SAL_DLLPRIVATE void SetOrigin(const Point& rPt)
+    {
+        IncreaseGenerationID();
+        maMapMode.SetOrigin(rPt);
+    }
 
     SAL_DLLPRIVATE sal_Int32 GetDPIX() const;
     SAL_DLLPRIVATE sal_Int32 GetDPIY() const;

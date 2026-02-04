@@ -8,7 +8,6 @@
  */
 
 #include <test/bootstrapfixture.hxx>
-
 #include <tools/color.hxx>
 
 #include <vcl/virdev.hxx>
@@ -16,8 +15,7 @@
 #include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/metafile/MetaActionType.hxx>
-
-#include <metafile/MetafileRecorder.hxx>
+#include <vcl/metafile/MetafileRecorder.hxx>
 
 using namespace ::com::sun::star;
 
@@ -32,11 +30,10 @@ public:
 
 CPPUNIT_TEST_FIXTURE(MetafileRecorderTest, testBitmapActionDispatch)
 {
-    ScopedVclPtrInstance<VirtualDevice> pDev;
+    // Standalone recorder test - no VirtualDevice needed for logic check
     GDIMetaFile aMtf;
-    pDev->SetConnectMetaFile(&aMtf);
-
-    vcl::MetafileRecorder aRecorder(*pDev);
+    vcl::MetafileRecorder aRecorder;
+    aRecorder.SetConnectMetaFile(&aMtf);
 
     Point aPt(10, 10);
     Size aSz(50, 50);
@@ -60,14 +57,11 @@ CPPUNIT_TEST_FIXTURE(MetafileRecorderTest, testBitmapActionDispatch)
 
 CPPUNIT_TEST_FIXTURE(MetafileRecorderTest, testTextLineAction)
 {
-    ScopedVclPtrInstance<VirtualDevice> pDev;
     GDIMetaFile aMtf;
-    pDev->SetConnectMetaFile(&aMtf);
-
-    vcl::MetafileRecorder aRecorder(*pDev);
+    vcl::MetafileRecorder aRecorder;
+    aRecorder.SetConnectMetaFile(&aMtf);
 
     Point aPt(10, 10);
-    // Use LINESTYLE_SINGLE instead of LINESTYLE_SOLID
     aRecorder.RecordTextLine(aPt, 100, STRIKEOUT_SINGLE, LINESTYLE_SINGLE, LINESTYLE_NONE);
 
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), aMtf.GetActionSize());
@@ -76,31 +70,30 @@ CPPUNIT_TEST_FIXTURE(MetafileRecorderTest, testTextLineAction)
 
     auto* pTextLine = static_cast<MetaTextLineAction*>(pAction);
     CPPUNIT_ASSERT_EQUAL(STRIKEOUT_SINGLE, pTextLine->GetStrikeout());
-    // Use GetUnderline() instead of GetUnderlineStyle()
     CPPUNIT_ASSERT_EQUAL(LINESTYLE_SINGLE, pTextLine->GetUnderline());
 }
 
 CPPUNIT_TEST_FIXTURE(MetafileRecorderTest, testScopedSuspend)
 {
-    ScopedVclPtrInstance<VirtualDevice> pDev;
     GDIMetaFile aMtf;
-    pDev->SetConnectMetaFile(&aMtf); // Start Recording
+    vcl::MetafileRecorder aRecorder;
+    aRecorder.SetConnectMetaFile(&aMtf); // Start Recording
 
     // 1. Record initial action
     {
-        vcl::MetafileRecorder(*pDev).RecordComment("Start");
+        aRecorder.RecordComment("Start");
         CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), aMtf.GetActionSize());
     }
 
     // 2. Activate ScopedSuspend
     {
-        vcl::MetafileRecorder::ScopedSuspend aSuspend(*pDev);
+        vcl::MetafileRecorder::ScopedSuspend aSuspend(aRecorder);
 
         // Try to record - should be ignored
-        vcl::MetafileRecorder(*pDev).RecordComment("Ignored");
+        aRecorder.RecordComment("Ignored");
 
-        // Verify underlying device state
-        CPPUNIT_ASSERT(pDev->GetConnectMetaFile() == nullptr);
+        // Verify recorder state
+        CPPUNIT_ASSERT(aRecorder.GetConnectMetaFile() == nullptr);
 
         // Assert nothing added to original mtf
         CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), aMtf.GetActionSize());
@@ -108,35 +101,34 @@ CPPUNIT_TEST_FIXTURE(MetafileRecorderTest, testScopedSuspend)
     // Destructor of ScopedSuspend runs here
 
     // 3. Verify Restoration
-    CPPUNIT_ASSERT(pDev->GetConnectMetaFile() == &aMtf);
+    CPPUNIT_ASSERT(aRecorder.GetConnectMetaFile() == &aMtf);
 
     // 4. Record again
-    vcl::MetafileRecorder(*pDev).RecordComment("End");
+    aRecorder.RecordComment("End");
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), aMtf.GetActionSize());
 }
 
 CPPUNIT_TEST_FIXTURE(MetafileRecorderTest, testScopedSwitch)
 {
-    ScopedVclPtrInstance<VirtualDevice> pDev;
-
     GDIMetaFile aPrimaryMtf;
     GDIMetaFile aSecondaryMtf;
 
-    pDev->SetConnectMetaFile(&aPrimaryMtf);
+    vcl::MetafileRecorder aRecorder;
+    aRecorder.SetConnectMetaFile(&aPrimaryMtf);
 
     // 1. Record to Primary
-    vcl::MetafileRecorder(*pDev).RecordComment("Primary1");
+    aRecorder.RecordComment("Primary1");
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), aPrimaryMtf.GetActionSize());
 
     // 2. Switch to Secondary
     {
-        vcl::MetafileRecorder::ScopedSwitch aSwitch(*pDev, &aSecondaryMtf);
+        vcl::MetafileRecorder::ScopedSwitch aSwitch(aRecorder, &aSecondaryMtf);
 
-        // Assert OutputDevice points to secondary
-        CPPUNIT_ASSERT(pDev->GetConnectMetaFile() == &aSecondaryMtf);
+        // Assert Recorder points to secondary
+        CPPUNIT_ASSERT(aRecorder.GetConnectMetaFile() == &aSecondaryMtf);
 
         // Record - should go to secondary
-        vcl::MetafileRecorder(*pDev).RecordComment("Secondary1");
+        aRecorder.RecordComment("Secondary1");
 
         CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1),
                              aPrimaryMtf.GetActionSize()); // Primary unchanged
@@ -146,20 +138,19 @@ CPPUNIT_TEST_FIXTURE(MetafileRecorderTest, testScopedSwitch)
     // Destructor of ScopedSwitch runs here
 
     // 3. Verify Restoration
-    CPPUNIT_ASSERT(pDev->GetConnectMetaFile() == &aPrimaryMtf);
+    CPPUNIT_ASSERT(aRecorder.GetConnectMetaFile() == &aPrimaryMtf);
 
     // 4. Record to Primary again
-    vcl::MetafileRecorder(*pDev).RecordComment("Primary2");
+    aRecorder.RecordComment("Primary2");
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), aPrimaryMtf.GetActionSize());
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), aSecondaryMtf.GetActionSize());
 }
 
 CPPUNIT_TEST_FIXTURE(MetafileRecorderTest, testSimpleWrappers)
 {
-    ScopedVclPtrInstance<VirtualDevice> pDev;
     GDIMetaFile aMtf;
-    pDev->SetConnectMetaFile(&aMtf);
-    vcl::MetafileRecorder aRecorder(*pDev);
+    vcl::MetafileRecorder aRecorder;
+    aRecorder.SetConnectMetaFile(&aMtf);
 
     // 1. LineColor
     aRecorder.RecordLineColor(COL_RED, true);

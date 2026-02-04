@@ -22,21 +22,21 @@
 #include <vcl/graph.hxx>
 #include <vcl/virdev.hxx>
 
-#include <metafile/MetafileRecorder.hxx>
+#include <vcl/metafile/MetafileRecorder.hxx>
 #include <ClippingController.hxx>
 #include <salgdi.hxx>
 
 bool OutputDevice::DrawEPS( const Point& rPoint, const Size& rSize,
                             const GfxLink& rGfxLink, const GDIMetaFile* pSubst )
 {
-    if ( vcl::MetafileRecorder(*this).IsActive() )
+    if ( maRecorder.IsActive() )
     {
         GDIMetaFile aSubst;
 
         if( pSubst )
             aSubst = *pSubst;
 
-        vcl::MetafileRecorder(*this).RecordEPS( rPoint, rSize, rGfxLink, aSubst );
+        maRecorder.RecordEPS( rPoint, rSize, rGfxLink, aSubst );
     }
 
     if ( !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary() )
@@ -70,11 +70,9 @@ bool OutputDevice::DrawEPS( const Point& rPoint, const Size& rSize,
     // else draw the substitution graphics
     if( !bDrawn && pSubst )
     {
-        GDIMetaFile* pOldMetaFile = mpMetaFile;
-
-        mpMetaFile = nullptr;
+        vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
         Graphic(*pSubst).Draw(*this, rPoint, rSize);
-        mpMetaFile = pOldMetaFile;
+
     }
 
     return bDrawn;

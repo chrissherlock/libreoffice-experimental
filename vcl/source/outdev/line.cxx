@@ -31,7 +31,7 @@
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/virdev.hxx>
 
-#include <metafile/MetafileRecorder.hxx>
+#include <vcl/metafile/MetafileRecorder.hxx>
 #include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
@@ -53,7 +53,7 @@ bool OutputDevice::IsLineColor() const
 
 void OutputDevice::SetLineColor()
 {
-    vcl::MetafileRecorder(*this).RecordLineColor( Color(), false );
+    maRecorder.RecordLineColor( Color(), false );
 
     if (mpGraphicsState->mbLineColor)
     {
@@ -67,7 +67,7 @@ void OutputDevice::SetLineColor(const Color& rColor)
 {
     Color aColor = vcl::drawmode::GetLineColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings());
 
-    vcl::MetafileRecorder(*this).RecordLineColor( aColor, true );
+    maRecorder.RecordLineColor( aColor, true );
 
     if (mpGraphicsState->maLineColor != aColor)
     {
@@ -111,7 +111,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
         return;
     }
 
-    vcl::MetafileRecorder(*this).RecordLine( rStartPt, rEndPt, rLineInfo );
+    maRecorder.RecordLine( rStartPt, rEndPt, rLineInfo );
 
     if ( !IsDeviceOutputNecessary() || !mpGraphicsState->mbLineColor || ( LineStyle::NONE == rLineInfo.GetStyle() ) || IsLayoutCalculationNecessary() )
         return;
@@ -153,7 +153,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt )
 {
     assert(!is_double_buffered_window());
 
-    vcl::MetafileRecorder(*this).RecordLine( rStartPt, rEndPt );
+    maRecorder.RecordLine( rStartPt, rEndPt );
 
     if ( !IsDeviceOutputNecessary() || !mpGraphicsState->mbLineColor || IsLayoutCalculationNecessary() )
         return;
@@ -265,7 +265,7 @@ void OutputDevice::drawLine( basegfx::B2DPolyPolygon aLinePolyPolygon, const Lin
         aLinePolyPolygon.clear();
     }
 
-    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(*this);
+    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
 
 
     if(aLinePolyPolygon.count())

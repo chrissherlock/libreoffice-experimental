@@ -24,9 +24,10 @@
 #include <tools/mapunit.hxx>
 #include <i18nlangtag/mslangid.hxx>
 #include <unotools/fontdefs.hxx>
+#include <o3tl/unit_conversion.hxx>
 
 #include <vcl/fontcapabilities.hxx>
-#include <metafile/MetafileRecorder.hxx>
+#include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/rendercontext/GetDefaultFontFlags.hxx>
@@ -56,12 +57,11 @@ void OutputDevice::SetFont(const vcl::Font& rNewFont)
         = vcl::drawmode::GetFont(rNewFont, GetDrawMode(), GetSettings().GetStyleSettings());
 
     {
-        vcl::MetafileRecorder aRecorder(*this);
-        aRecorder.RecordFont(aFont);
+        maRecorder.RecordFont(aFont);
         // the color and alignment actions don't belong here
         // TODO: get rid of them without breaking anything...
-        aRecorder.RecordTextAlign(aFont.GetAlignment());
-        aRecorder.RecordTextFillColor(aFont.GetFillColor(), !aFont.IsTransparent());
+        maRecorder.RecordTextAlign(aFont.GetAlignment());
+        maRecorder.RecordTextFillColor(aFont.GetFillColor(), !aFont.IsTransparent());
     }
 
     if (mpGraphicsState->maFont.IsSameInstance(aFont))
@@ -76,10 +76,9 @@ void OutputDevice::SetFont(const vcl::Font& rNewFont)
     {
         mpGraphicsState->maTextColor = aFont.GetColor();
         mbInitTextColor = true;
-        vcl::MetafileRecorder(*this).RecordTextColor(aFont.GetColor());
+        maRecorder.RecordTextColor(aFont.GetColor());
     }
     mpGraphicsState->maFont = aFont;
-    mbNewFont = true;
 }
 
 void OutputDevice::SetFontCollection(const std::shared_ptr<vcl::font::PhysicalFontCollection>& pPFC)
@@ -149,7 +148,7 @@ bool OutputDevice::RemoveTempDevFont(const OUString& rFileURL, const OUString& r
 
 bool OutputDevice::GetFontFeatures(std::vector<vcl::font::Feature>& rFontFeatures) const
 {
-    if (!ImplNewFont())
+    if (!ImplUpdateFontInstance())
         return false;
 
     if (mpFontRealization && mpFontRealization->mxFont)
@@ -184,7 +183,7 @@ FontMetric OutputDevice::GetFontMetric() const
 {
     FontMetric aMetric;
 
-    if (!ImplNewFont())
+    if (!ImplUpdateFontInstance())
         return aMetric;
 
     aMetric = mpGraphicsState->maFont;
@@ -239,8 +238,8 @@ void OutputDevice::ImplClearFontData(const bool bNewFontLists)
     // the currently selected logical font is no longer needed
     mpFontInstance.clear();
 
-    mbFontDirty = true;
-    mbNewFont = true;
+    if (mpFontController)
+        mpFontController->ResetGraphicsState();
 
     if (bNewFontLists)
         mpFontFaceCollection.reset();
@@ -279,7 +278,6 @@ void OutputDevice::ImplClearAllFontData(bool bNewFontLists)
     // Forwarding for legacy calls
     vcl::font::FontController::ClearAllFontData(bNewFontLists);
 }
-
 
 void OutputDevice::ImplRefreshFontsOnAllFrames(bool bNewFontLists)
 {
@@ -375,9 +373,9 @@ bool OutputDevice::InitFont() const
     if (!mpFontController)
         const_cast<OutputDevice*>(this)->mpFontController = std::make_unique<vcl::font::FontController>();
 
-    if (mpFontController->NeedsUpdate(mpGraphicsState->maFont, mbNewFont))
+    if (mpFontController->NeedsUpdate(mpGraphicsState->maFont, *mpMapper))
     {
-        if (!const_cast<OutputDevice*>(this)->ImplNewFont())
+        if (!const_cast<OutputDevice*>(this)->ImplUpdateFontInstance())
             return false;
     }
 
@@ -396,16 +394,9 @@ bool OutputDevice::InitFont() const
         if (!const_cast<OutputDevice*>(this)->AcquireGraphics())
             return false;
     }
-    else if (!mbFontDirty)
-    {
-        return true;
-    }
 
     if (mpGraphics && mpFontController->ActivateFontOnDevice(mpGraphics, pFontToUse))
-    {
-        mbFontDirty = false;
         return true;
-    }
 
     return false;
 }
@@ -421,85 +412,48 @@ const LogicalFontInstance* OutputDevice::GetFontInstance() const
     return mpFontInstance.get();
 }
 
-bool OutputDevice::ImplNewFont() const
+bool OutputDevice::ImplUpdateFontInstance() const
 {
     DBG_TESTSOLARMUTEX();
 
-    if (!mbNewFont)
-        return true;
-
-    if (!mpGraphics && !AcquireGraphics())
+    if (!mpGraphics && !const_cast<OutputDevice*>(this)->AcquireGraphics())
     {
-        SAL_WARN("vcl.gdi", "OutputDevice::ImplNewFont(): no Graphics, no Font");
+        SAL_WARN("vcl.gdi", "ImplUpdateFontInstance: no Graphics, no Font");
         return false;
     }
     assert(mpGraphics);
 
-    InitializeFonts();
+    // Create the callback to handle the initialization step
+    // This captures 'this' safely because ImplUpdateFontInstance is a member function
+    auto fnInit = [this](LogicalFontInstance* pInstance) {
+        // Compute font size in points for optical sizing before HarfBuzz initialization
+        if (!pInstance->GetPointSize())
+        {
+            auto nHeight = mpGraphicsState->maFont.GetFontHeight();
+            auto eFrom = MapToO3tlLength(GetMapMode().GetMapUnit());
+            float fPointSize = o3tl::convert(float(nHeight), eFrom, o3tl::Length::pt);
+            pInstance->SetPointSize(fPointSize);
+        }
 
-    auto[fExactHeight, aSize]
-        = mpFontController->CalculateDeviceSize(mpGraphicsState->maFont, *mpMapper, GetDPIY());
+        this->ImplInitializeFontInstance(pInstance);
+    };
 
-    if (mpFontController->NeedsOLEFontScaleFix(*mpMapper, aSize))
-        aSize = mpFontController->GetOLECorrectedSize(*mpMapper, aSize, aSize.Height());
+    bool bRet = mpFontController->UpdateFontInstanceState(
+        mpGraphics,
+        *mpMapper,
+        mpGraphicsState->maFont,
+        mpFontRealization,
+        mpFontInstance,
+        GetDPIY(),
+        GetAntialiasing(),
+        GetSettings().GetStyleSettings(),
+        fnInit
+    );
 
-    const bool bNonAntialiased = mpFontController->ShouldDisableAntialiasing(
-        GetAntialiasing(), GetSettings().GetStyleSettings(),
-        mpGraphicsState->maFont.GetFontSize().Height());
-
-    rtl::Reference<LogicalFontInstance> pOldFontInstance = mpFontInstance;
-    mpFontInstance = mpFontController->RealizeFont(GetFontCollection(), mpGraphicsState->maFont, mpGraphics,
-                                                   aSize, fExactHeight, bNonAntialiased);
-
-    SAL_WARN_IF(!mpFontInstance, "vcl.gdi", "ImplNewFont: !!! NO FONT INSTANCE FOUND for request !!!");
-
-    // We must update the struct *before* calling InitFont
-    if (mpFontRealization)
-        mpFontRealization->mxFont = mpFontInstance;
-
-    const bool bNewFontInstance = pOldFontInstance.get() != mpFontInstance.get();
-    pOldFontInstance.clear();
-
-    LogicalFontInstance* pFontInstance = mpFontInstance.get();
-    if (!pFontInstance)
-        return false;
-
-    // Compute font size in points for optical sizing.
-    if (!pFontInstance->GetPointSize())
-    {
-        auto nHeight = GetFont().GetFontHeight();
-        auto eFrom = MapToO3tlLength(GetMapMode().GetMapUnit());
-        float fPointSize = o3tl::convert(float(nHeight), eFrom, o3tl::Length::pt);
-        pFontInstance->SetPointSize(fPointSize);
-    }
-
-    // mark when lower layers need to get involved
-    mbNewFont = false;
-    if (bNewFontInstance)
-        mbFontDirty = true;
-
-    ImplInitializeFontInstance(pFontInstance);
-
-    std::tie(mpFontRealization->nXOffset, mpFontRealization->nYOffset,
-             mpFontRealization->nEmphasisAscent, mpFontRealization->nEmphasisDescent)
-        = mpFontController->CalculateTextOffsets(mpGraphicsState->maFont, mpFontInstance.get());
-
-    // Use local temporary variables to bypass the bit-field reference restriction
-    bool bTextLines = false;
-    bool bTextSpecial = false;
-
-    std::tie(bTextLines, bTextSpecial)
-        = mpFontController->GetTextLayoutFlags(mpGraphicsState->maFont);
-
-    if (mpFontRealization)
-    {
-        mpFontRealization->mxFont = mpFontInstance;
-        mpFontRealization->bHasLineDecorations = bTextLines;
-        mpFontRealization->bHasSpecialEffects = bTextSpecial;
+    if (bRet && mpFontRealization)
         mpFontRealization->eLayoutMode = mpGraphicsState->mnTextLayoutMode;
-    }
 
-    return true;
+    return bRet;
 }
 
 
@@ -568,7 +522,7 @@ bool OutputDevice::ForceFallbackFont(vcl::Font const& rFallbackFont)
 
 tools::Long OutputDevice::GetMinKashida() const
 {
-    if (!ImplNewFont())
+    if (!ImplUpdateFontInstance())
         return 0;
 
     double nKashidaWidth = mpFontController->GetMinKashidaWidth(mpFontRealization->mxFont.get());
@@ -633,12 +587,11 @@ void OutputDevice::ImplReleaseFonts()
 
     mpFontController->ClearFontResources(mpGraphics, true);
 
-    // OutputDevice state cleanup
-    mbNewFont = true;
-    mbFontDirty = true;
+    if (mpFontController)
+        mpFontController->ResetGraphicsState();
+
     mpForcedFallbackInstance.clear();
 
-    // Legacy member cleanup (if still used)
     mpFontFaceCollection.reset();
 }
 tools::Long OutputDevice::GetEmphasisAscent() const

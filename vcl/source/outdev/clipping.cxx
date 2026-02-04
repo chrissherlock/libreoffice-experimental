@@ -21,7 +21,7 @@
 #include <osl/diagnose.h>
 #include <tools/debug.hxx>
 
-#include <metafile/MetafileRecorder.hxx>
+#include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/virdev.hxx>
 
 #include <ClippingController.hxx>
@@ -44,7 +44,7 @@ bool OutputDevice::IsOutputCulled() const
     // If Rendering (Screen), use Device Bounds so we don't blackout the screen.
     tools::Rectangle aBounds = tools::Rectangle(Point(0, 0), GetOutputSizePixel());
 
-    return ((mpMetaFile && IsOutputClipped())
+    return ((maRecorder.IsRecording() && IsOutputClipped())
         || mpClippingController->IsOutputClipped(*mpMapper, aBounds));
 }
 
@@ -61,7 +61,7 @@ vcl::Region OutputDevice::GetClipRegion() const
 
 void OutputDevice::SetClipRegion()
 {
-    vcl::MetafileRecorder(*this).RecordClipRegion(vcl::Region(), false);
+    maRecorder.RecordClipRegion(vcl::Region(), false);
 
     // Centralize state in the controller
     mpClippingController->SetNoClipRegion();
@@ -69,7 +69,7 @@ void OutputDevice::SetClipRegion()
 
 void OutputDevice::SetClipRegion(const vcl::Region& rRegion)
 {
-    vcl::MetafileRecorder(*this).RecordClipRegion(rRegion, !rRegion.IsNull());
+    maRecorder.RecordClipRegion(rRegion, !rRegion.IsNull());
 
     mpClippingController->SetLogicalClip(rRegion, *mpMapper);
 }
@@ -98,7 +98,7 @@ bool OutputDevice::SetGraphicsClip(const vcl::Region& rRegion, SalGraphics* pGra
 
 void OutputDevice::MoveClipRegion(long nHorzMove, long nVertMove)
 {
-    vcl::MetafileRecorder(*this).RecordMoveClipRegion(nHorzMove, nVertMove);
+    maRecorder.RecordMoveClipRegion(nHorzMove, nVertMove);
 
     if (mpClippingController->HasClipRegion())
     {
@@ -114,7 +114,7 @@ void OutputDevice::MoveClipRegion(long nHorzMove, long nVertMove)
 
 void OutputDevice::IntersectClipRegion(const tools::Rectangle& rRect)
 {
-    vcl::MetafileRecorder(*this).RecordIntersectClipRegion(rRect);
+    maRecorder.RecordIntersectClipRegion(rRect);
 
     tools::Rectangle aRect = LogicToPixel(rRect);
 
@@ -123,7 +123,7 @@ void OutputDevice::IntersectClipRegion(const tools::Rectangle& rRect)
 
 void OutputDevice::IntersectClipRegion(const vcl::Region& rRegion)
 {
-    vcl::MetafileRecorder(*this).RecordIntersectClipRegion(rRegion);
+    maRecorder.RecordIntersectClipRegion(rRegion);
 
     mpClippingController->IntersectLogicalClip(rRegion, *mpMapper);
 }

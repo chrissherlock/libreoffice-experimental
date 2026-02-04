@@ -28,7 +28,7 @@
 
 #include <vcl/dropcache.hxx>
 #include <vcl/metafile/MetaAction.hxx>
-#include <metafile/MetafileRecorder.hxx>
+#include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
@@ -648,7 +648,7 @@ bool OutputDevice::IsTextLineColor() const
 
 void OutputDevice::SetTextLineColor()
 {
-    vcl::MetafileRecorder(*this).RecordTextLineColor(Color(), false);
+    maRecorder.RecordTextLineColor(Color(), false);
 
     mpGraphicsState->maTextLineColor = COL_TRANSPARENT;
 }
@@ -657,7 +657,7 @@ void OutputDevice::SetTextLineColor( const Color& rColor )
 {
     Color aColor(vcl::drawmode::GetTextColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings()));
 
-    vcl::MetafileRecorder(*this).RecordTextLineColor(aColor, true);
+    maRecorder.RecordTextLineColor(aColor, true);
 
     mpGraphicsState->maTextLineColor = aColor;
 }
@@ -674,7 +674,7 @@ bool OutputDevice::IsOverlineColor() const
 
 void OutputDevice::SetOverlineColor()
 {
-    vcl::MetafileRecorder(*this).RecordOverlineColor(Color(), false);
+    maRecorder.RecordOverlineColor(Color(), false);
 
     mpGraphicsState->maOverlineColor = COL_TRANSPARENT;
 }
@@ -683,7 +683,7 @@ void OutputDevice::SetOverlineColor( const Color& rColor )
 {
     Color aColor(vcl::drawmode::GetTextColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings()));
 
-    vcl::MetafileRecorder(*this).RecordOverlineColor(aColor, true);
+    maRecorder.RecordOverlineColor(aColor, true);
 
     mpGraphicsState->maOverlineColor = aColor;
 }
@@ -695,7 +695,7 @@ void OutputDevice::DrawTextLine( const Point& rPos, tools::Long nWidth,
 {
     assert(!is_double_buffered_window());
 
-    vcl::MetafileRecorder(*this).RecordTextLine( rPos, nWidth, eStrikeout, eUnderline, eOverline );
+    maRecorder.RecordTextLine( rPos, nWidth, eStrikeout, eUnderline, eOverline );
 
     if ( ((eUnderline == LINESTYLE_NONE) || (eUnderline == LINESTYLE_DONTKNOW)) &&
          ((eOverline  == LINESTYLE_NONE) || (eOverline  == LINESTYLE_DONTKNOW)) &&
@@ -906,7 +906,7 @@ void OutputDevice::ImplDrawEmphasisMarks(SalLayout& rSalLayout)
         return;
 
     auto popIt = ScopedPush(vcl::PushFlags::FILLCOLOR | vcl::PushFlags::LINECOLOR | vcl::PushFlags::MAPMODE);
-    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(*this);
+    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
     mpMapper->EnableMapMode(false);
 
     FontEmphasisMark nEmphasisMark = mpGraphicsState->maFont.GetEmphasisMarkStyle();
