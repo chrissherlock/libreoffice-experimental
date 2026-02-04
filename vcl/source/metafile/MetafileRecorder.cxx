@@ -296,5 +296,17 @@ void MetafileRecorder::RecordRasterOp(RasterOp eRasterOp)
         mpMetaFile->AddAction(new MetaRasterOpAction(eRasterOp));
 }
 
+void MetafileRecorder::RecordPixel(const Point& rPt)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaPointAction(rPt));
+}
+
+void MetafileRecorder::RecordPixel(const Point& rPt, const Color& rColor)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaPixelAction(rPt, rColor));
+}
+
 } // namespace vcl
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
