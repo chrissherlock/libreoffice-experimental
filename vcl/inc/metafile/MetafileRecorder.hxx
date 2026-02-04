@@ -24,6 +24,7 @@ class B2DHomMatrix;
 class B2DPolyPolygon;
 }
 
+class Wallpaper;
 class LineInfo;
 class OutputDevice;
 class GDIMetaFile;
@@ -131,6 +132,7 @@ public:
     void RecordTransparent(const tools::PolyPolygon& rPolyPoly, sal_uInt16 nTransparencePercent);
     void RecordTransparent(const basegfx::B2DHomMatrix& rObjectTransform,
                            const basegfx::B2DPolyPolygon& rB2DPolyPoly, double fTransparency);
+    void RecordWallpaper(const tools::Rectangle& rRect, const Wallpaper& rWallpaper);
     void RecordFloatTransparent(const GDIMetaFile& rMtf, const Point& rPos, const Size& rSize,
                                 const Gradient& rTransparenceGradient);
 
