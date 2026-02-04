@@ -169,16 +169,7 @@ void OutputDevice::DrawTransparent(
             }
         }
 
-        if( mpMetaFile )
-        {
-            // tdf#119843 need transformed Polygon here
-            basegfx::B2DPolyPolygon aB2DPolyPoly(rB2DPolyPoly);
-            aB2DPolyPoly.transform(rObjectTransform);
-            mpMetaFile->AddAction(
-                new MetaTransparentAction(
-                    tools::PolyPolygon(aB2DPolyPoly),
-                    static_cast< sal_uInt16 >(fTransparency * 100.0)));
-        }
+        vcl::MetafileRecorder(*this).RecordTransparent(rObjectTransform, rB2DPolyPoly, fTransparency);
 
         return;
     }
