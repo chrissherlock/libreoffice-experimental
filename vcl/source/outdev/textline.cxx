@@ -28,6 +28,7 @@
 
 #include <vcl/dropcache.hxx>
 #include <vcl/metafile/MetaAction.hxx>
+#include <metafile/MetafileRecorder.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
@@ -647,8 +648,7 @@ bool OutputDevice::IsTextLineColor() const
 
 void OutputDevice::SetTextLineColor()
 {
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaTextLineColorAction( Color(), false ) );
+    vcl::MetafileRecorder(*this).RecordTextLineColor(Color(), false);
 
     mpGraphicsState->maTextLineColor = COL_TRANSPARENT;
 }
@@ -657,8 +657,7 @@ void OutputDevice::SetTextLineColor( const Color& rColor )
 {
     Color aColor(vcl::drawmode::GetTextColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings()));
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaTextLineColorAction( aColor, true ) );
+    vcl::MetafileRecorder(*this).RecordTextLineColor(aColor, true);
 
     mpGraphicsState->maTextLineColor = aColor;
 }
@@ -675,8 +674,7 @@ bool OutputDevice::IsOverlineColor() const
 
 void OutputDevice::SetOverlineColor()
 {
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaOverlineColorAction( Color(), false ) );
+    vcl::MetafileRecorder(*this).RecordOverlineColor(Color(), false);
 
     mpGraphicsState->maOverlineColor = COL_TRANSPARENT;
 }
@@ -685,8 +683,7 @@ void OutputDevice::SetOverlineColor( const Color& rColor )
 {
     Color aColor(vcl::drawmode::GetTextColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings()));
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaOverlineColorAction( aColor, true ) );
+    vcl::MetafileRecorder(*this).RecordOverlineColor(aColor, true);
 
     mpGraphicsState->maOverlineColor = aColor;
 }
@@ -698,8 +695,7 @@ void OutputDevice::DrawTextLine( const Point& rPos, tools::Long nWidth,
 {
     assert(!is_double_buffered_window());
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaTextLineAction( rPos, nWidth, eStrikeout, eUnderline, eOverline ) );
+    vcl::MetafileRecorder(*this).RecordTextLine( rPos, nWidth, eStrikeout, eUnderline, eOverline );
 
     if ( ((eUnderline == LINESTYLE_NONE) || (eUnderline == LINESTYLE_DONTKNOW)) &&
          ((eOverline  == LINESTYLE_NONE) || (eOverline  == LINESTYLE_DONTKNOW)) &&
