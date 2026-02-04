@@ -16,6 +16,7 @@
 #include <vcl/dllapi.h>
 #include <vcl/bitmap.hxx>
 #include <vcl/vclenum.hxx>
+#include <vcl/metafile/MetaActionType.hxx>
 #include <vcl/kernarray.hxx>
 #include <vcl/metafile/ScopedMetaGroup.hxx>
 #include <vcl/region.hxx>
@@ -163,6 +164,8 @@ public:
     void RecordComment(const rtl::OString& rComment);
 
     std::unique_ptr<ScopedMetaGroup> CreateScopedGroup(const OString& rName);
+    void RecordBitmapAction(MetaActionType nAction, const Point& rDestPt, const Size& rDestSize,
+                            const Point& rSrcPt, const Size& rSrcSize, const Bitmap& rBitmap);
 };
 
 } // namespace vcl
