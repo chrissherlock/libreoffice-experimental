@@ -201,21 +201,21 @@ VirtualDevice* OutputDevice::ImplPrepareRotateDevice(const Size& rSize)
 
 void OutputDevice::ImplDrawRotatedTextMask(const Point& rPoint, const Bitmap& rBmp)
 {
-    GDIMetaFile* pOldMetaFile = mpMetaFile;
     tools::Long nOldOffX = GetOutOffXPixel();
     tools::Long nOldOffY = GetOutOffYPixel();
     bool bOldMap = mpMapper->IsMapModeEnabled();
+
+    // Suspend recording for mask drawing
+    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(*this);
 
     comphelper::ScopeGuard aRestoreGuard([&]() {
         mpMapper->EnableMapMode(bOldMap);
         SetDeviceOriginX(nOldOffX);
         SetDeviceOriginY(nOldOffY);
-        mpMetaFile = pOldMetaFile;
     });
 
     SetDeviceOriginX(0);
     SetDeviceOriginY(0);
-    mpMetaFile = nullptr;
     mpMapper->EnableMapMode(false);
 
     DrawMask(rPoint, rBmp, GetTextColor());
@@ -1218,9 +1218,10 @@ void OutputDevice::AddTextRectActions(const tools::Rectangle& rRect, const OUStr
     // temporarily swap in passed mtf for action generation, and
     // disable output generation.
     const bool bOutputEnabled(IsOutputEnabled());
-    GDIMetaFile* pMtf = mpMetaFile;
 
-    mpMetaFile = &rMtf;
+    // Redirect recording to rMtf
+    vcl::MetafileRecorder::ScopedSwitch aMetaFileSwitch(*this, &rMtf);
+
     EnableOutput(false);
 
     // #i47157# Factored out to ImplDrawTextRect(), to be shared
@@ -1230,7 +1231,6 @@ void OutputDevice::AddTextRectActions(const tools::Rectangle& rRect, const OUStr
 
     // and restore again
     EnableOutput(bOutputEnabled);
-    mpMetaFile = pMtf;
 }
 
 void OutputDevice::DrawText(const tools::Rectangle& rRect, const OUString& rOrigStr,

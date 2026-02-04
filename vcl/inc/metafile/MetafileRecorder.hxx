@@ -183,6 +183,18 @@ public:
         ScopedSuspend(OutputDevice& rOutDev);
         ~ScopedSuspend();
     };
+
+    // RAII helper to temporarily switch recording to a specific metafile
+    class ScopedSwitch
+    {
+    private:
+        OutputDevice& mrOutDev;
+        GDIMetaFile* mpOldMetaFile;
+
+    public:
+        ScopedSwitch(OutputDevice& rOutDev, GDIMetaFile* pNewMetaFile);
+        ~ScopedSwitch();
+    };
 };
 
 } // namespace vcl

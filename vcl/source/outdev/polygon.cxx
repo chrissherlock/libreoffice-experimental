@@ -118,12 +118,11 @@ void OutputDevice::DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly )
         const tools::Polygon& aPoly = rPolyPoly.GetObject( 0 );
         if( aPoly.GetSize() >= 2 )
         {
-            GDIMetaFile* pOldMF = mpMetaFile;
-            mpMetaFile = nullptr;
+            vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(*this);
 
             DrawPolygon( aPoly );
 
-            mpMetaFile = pOldMF;
+
         }
     }
     else
