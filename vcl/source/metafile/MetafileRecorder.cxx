@@ -261,5 +261,28 @@ void MetafileRecorder::RecordMapMode(const MapMode& rMapMode)
         mpMetaFile->AddAction(new MetaMapModeAction(rMapMode));
 }
 
+void MetafileRecorder::RecordMask(const Point& rDestPt, const Bitmap& rBitmap,
+                                  const Color& rMaskColor)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaMaskAction(rDestPt, rBitmap, rMaskColor));
+}
+
+void MetafileRecorder::RecordMaskScale(const Point& rDestPt, const Size& rDestSize,
+                                       const Bitmap& rBitmap, const Color& rMaskColor)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaMaskScaleAction(rDestPt, rDestSize, rBitmap, rMaskColor));
+}
+
+void MetafileRecorder::RecordMaskScalePart(const Point& rDestPt, const Size& rDestSize,
+                                           const Point& rSrcPtPixel, const Size& rSrcSizePixel,
+                                           const Bitmap& rBitmap, const Color& rMaskColor)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaMaskScalePartAction(rDestPt, rDestSize, rSrcPtPixel,
+                                                          rSrcSizePixel, rBitmap, rMaskColor));
+}
+
 } // namespace vcl
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

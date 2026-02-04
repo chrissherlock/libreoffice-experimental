@@ -99,6 +99,12 @@ public:
     void RecordTextAlign(TextAlign eAlign);
     void RecordTextColor(const Color& rColor);
     void RecordTextFillColor(const Color& rColor, bool bSet);
+    void RecordMask(const Point& rDestPt, const Bitmap& rBitmap, const Color& rMaskColor);
+    void RecordMaskScale(const Point& rDestPt, const Size& rDestSize, const Bitmap& rBitmap,
+                         const Color& rMaskColor);
+    void RecordMaskScalePart(const Point& rDestPt, const Size& rDestSize, const Point& rSrcPtPixel,
+                             const Size& rSrcSizePixel, const Bitmap& rBitmap,
+                             const Color& rMaskColor);
 
     // --- Comment Actions ---
     void RecordComment(const rtl::OString& rComment);
