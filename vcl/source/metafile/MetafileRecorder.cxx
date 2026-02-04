@@ -255,5 +255,11 @@ void MetafileRecorder::RecordTextFillColor(const Color& rColor, bool bSet)
         mpMetaFile->AddAction(new MetaTextFillColorAction(rColor, bSet));
 }
 
+void MetafileRecorder::RecordMapMode(const MapMode& rMapMode)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaMapModeAction(rMapMode));
+}
+
 } // namespace vcl
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
