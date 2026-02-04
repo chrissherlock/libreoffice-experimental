@@ -23,6 +23,7 @@
 
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/metafile/MetaAction.hxx>
+#include <metafile/MetafileRecorder.hxx>
 #include <vcl/virdev.hxx>
 
 #include <ClippingController.hxx>
@@ -39,8 +40,7 @@ void OutputDevice::DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly )
 {
     assert(!is_double_buffered_window());
 
-    if( mpMetaFile )
-        mpMetaFile->AddAction( new MetaPolyPolygonAction( rPolyPoly ) );
+    vcl::MetafileRecorder(*this).RecordPolyPolygon(rPolyPoly);
 
     sal_uInt16 nPoly = rPolyPoly.Count();
 
@@ -151,8 +151,7 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
 {
     assert(!is_double_buffered_window());
 
-    if( mpMetaFile )
-        mpMetaFile->AddAction( new MetaPolygonAction( rPoly ) );
+    vcl::MetafileRecorder(*this).RecordPolygon(rPoly);
 
     sal_uInt16 nPoints = rPoly.GetSize();
 
@@ -247,8 +246,7 @@ void OutputDevice::DrawPolyPolygon( const basegfx::B2DPolyPolygon& rB2DPolyPoly 
 {
     assert(!is_double_buffered_window());
 
-    if( mpMetaFile )
-        mpMetaFile->AddAction( new MetaPolyPolygonAction( tools::PolyPolygon( rB2DPolyPoly ) ) );
+    vcl::MetafileRecorder(*this).RecordPolyPolygon(tools::PolyPolygon(rB2DPolyPoly));
 
     // call helper
     ImplDrawPolyPolygonWithB2DPolyPolygon(rB2DPolyPoly);
