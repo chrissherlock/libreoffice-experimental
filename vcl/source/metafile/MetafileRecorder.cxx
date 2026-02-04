@@ -1,6 +1,3 @@
-#include <basegfx/polygon/b2dpolypolygon.hxx>
-#include <basegfx/matrix/b2dhommatrix.hxx>
-#include <vcl/lineinfo.hxx>
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; fill-column: 100 -*- */
 /*
  * This file is part of the LibreOffice project.
@@ -11,9 +8,12 @@
  */
 
 #include <tools/poly.hxx>
+#include <basegfx/polygon/b2dpolypolygon.hxx>
+#include <basegfx/matrix/b2dhommatrix.hxx>
 
 #include <vcl/gradient.hxx>
 #include <vcl/hatch.hxx>
+#include <vcl/lineinfo.hxx>
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/metafile/ScopedMetaGroup.hxx>
@@ -380,5 +380,10 @@ void MetafileRecorder::RecordFloatTransparent(const GDIMetaFile& rMtf, const Poi
     }
 }
 
+void MetafileRecorder::RecordWallpaper(const tools::Rectangle& rRect, const Wallpaper& rWallpaper)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaWallpaperAction(rRect, rWallpaper));
+}
 } // namespace vcl
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

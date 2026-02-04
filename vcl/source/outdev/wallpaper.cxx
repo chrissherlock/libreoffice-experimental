@@ -18,6 +18,7 @@
  */
 
 #include <vcl/metafile/MetaAction.hxx>
+#include <metafile/MetafileRecorder.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/virdev.hxx>
 
@@ -42,8 +43,7 @@ void OutputDevice::DrawWallpaper( const tools::Rectangle& rRect,
 {
     assert(!is_double_buffered_window());
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaWallpaperAction( rRect, rWallpaper ) );
+    vcl::MetafileRecorder(*this).RecordWallpaper(rRect, rWallpaper);
 
     if ( !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary() )
         return;
