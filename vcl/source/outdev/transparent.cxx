@@ -318,11 +318,7 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
 void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
                                             sal_uInt16 nTransparencePercent )
 {
-    GDIMetaFile* pOldMetaFile = mpMetaFile;
-    mpMetaFile = nullptr;
-    comphelper::ScopeGuard aMetaFileGuard([this, pOldMetaFile]() {
-        mpMetaFile = pOldMetaFile;
-    });
+    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(*this);
 
     tools::PolyPolygon aPolyPoly( LogicToPixel( rPolyPoly ) );
     tools::Rectangle aPolyRect( aPolyPoly.GetBoundRect() );
@@ -548,11 +544,7 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
     }
     else
     {
-        GDIMetaFile* pOldMetaFile = mpMetaFile;
-        mpMetaFile = nullptr;
-        comphelper::ScopeGuard aMetaFileGuard([this, pOldMetaFile]() {
-            mpMetaFile = pOldMetaFile;
-        });
+        vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(*this);
 
         tools::Rectangle aOutRect( LogicToPixel( tools::Rectangle(rPos, rSize) ) );
         Point aPoint;

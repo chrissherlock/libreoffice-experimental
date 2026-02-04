@@ -906,8 +906,7 @@ void OutputDevice::ImplDrawEmphasisMarks(SalLayout& rSalLayout)
         return;
 
     auto popIt = ScopedPush(vcl::PushFlags::FILLCOLOR | vcl::PushFlags::LINECOLOR | vcl::PushFlags::MAPMODE);
-    GDIMetaFile* pOldMetaFile = mpMetaFile;
-    mpMetaFile = nullptr;
+    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(*this);
     mpMapper->EnableMapMode(false);
 
     FontEmphasisMark nEmphasisMark = mpGraphicsState->maFont.GetEmphasisMarkStyle();
@@ -938,7 +937,7 @@ void OutputDevice::ImplDrawEmphasisMarks(SalLayout& rSalLayout)
                              aEmphasisMark.GetRect1(), aEmphasisMark.GetRect2());
     }
 
-    mpMetaFile = pOldMetaFile;
+
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
