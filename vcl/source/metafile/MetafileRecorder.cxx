@@ -284,5 +284,17 @@ void MetafileRecorder::RecordMaskScalePart(const Point& rDestPt, const Size& rDe
                                                           rSrcSizePixel, rBitmap, rMaskColor));
 }
 
+void MetafileRecorder::RecordRefPoint(const Point& rRefPoint, bool bSet)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaRefPointAction(rRefPoint, bSet));
+}
+
+void MetafileRecorder::RecordRasterOp(RasterOp eRasterOp)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaRasterOpAction(eRasterOp));
+}
+
 } // namespace vcl
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
