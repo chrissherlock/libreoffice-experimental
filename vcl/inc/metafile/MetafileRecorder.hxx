@@ -10,10 +10,12 @@
 
 #pragma once
 
+#include <tools/gen.hxx>
+#include <tools/solar.h>
+
 #include <vcl/dllapi.h>
 #include <vcl/bitmap.hxx>
 #include <vcl/region.hxx>
-#include <tools/gen.hxx>
 #include <vcl/rendercontext/State.hxx>
 
 class LineInfo;
@@ -93,6 +95,9 @@ public:
     void RecordLine(const Point& rStart, const Point& rEnd);
     void RecordPolygon(const tools::Polygon& rPoly);
     void RecordPolyLine(const tools::Polygon& rPoly);
+    void RecordRect(const tools::Rectangle& rRect);
+    void RecordRoundRect(const tools::Rectangle& rRect, sal_uLong nHorzRound, sal_uLong nVertRound);
+
     void RecordPolyLine(const tools::Polygon& rPoly, const LineInfo& rLineInfo);
 
     void RecordPolyPolygon(const tools::PolyPolygon& rPolyPoly);
