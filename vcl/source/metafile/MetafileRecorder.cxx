@@ -385,5 +385,59 @@ void MetafileRecorder::RecordWallpaper(const tools::Rectangle& rRect, const Wall
     if (IsActive())
         mpMetaFile->AddAction(new MetaWallpaperAction(rRect, rWallpaper));
 }
+
+void MetafileRecorder::RecordLayoutMode(vcl::text::ComplexTextLayoutFlags nLayoutMode)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaLayoutModeAction(nLayoutMode));
+}
+
+void MetafileRecorder::RecordTextLanguage(LanguageType eTextLanguage)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaTextLanguageAction(eTextLanguage));
+}
+
+void MetafileRecorder::RecordDrawText(const Point& rStartPt, const OUString& rStr, sal_Int32 nIndex,
+                                      sal_Int32 nLen)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaTextAction(rStartPt, rStr, nIndex, nLen));
+}
+
+void MetafileRecorder::RecordDrawTextArray(const Point& rStartPt, const OUString& rStr,
+                                           KernArraySpan aKernArray,
+                                           std::span<const sal_Bool> pKashidaAry, sal_Int32 nIndex,
+                                           sal_Int32 nLen)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(
+            new MetaTextArrayAction(rStartPt, rStr, aKernArray, pKashidaAry, nIndex, nLen));
+}
+
+void MetafileRecorder::RecordDrawPartialTextArray(const Point& rStartPt, const OUString& rStr,
+                                                  KernArraySpan aKernArray,
+                                                  std::span<const sal_Bool> pKashidaAry,
+                                                  sal_Int32 nPartIndex, sal_Int32 nPartLen,
+                                                  sal_Int32 nIndex, sal_Int32 nLen)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaTextArrayAction(rStartPt, rStr, aKernArray, pKashidaAry,
+                                                      nPartIndex, nPartLen, nIndex, nLen));
+}
+
+void MetafileRecorder::RecordDrawStretchText(const Point& rStartPt, sal_Int32 nWidth,
+                                             const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaStretchTextAction(rStartPt, nWidth, rStr, nIndex, nLen));
+}
+
+void MetafileRecorder::RecordDrawTextRect(const tools::Rectangle& rRect, const OUString& rStr,
+                                          DrawTextFlags nStyle)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaTextRectAction(rRect, rStr, nStyle));
+}
 } // namespace vcl
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

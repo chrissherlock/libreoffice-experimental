@@ -27,6 +27,7 @@
 #include <vcl/fntstyle.hxx>
 #include <vcl/glyphitem.hxx>
 #include <vcl/metafile/MetaAction.hxx>
+#include <metafile/MetafileRecorder.hxx>
 #include <vcl/metafile/ScopedMetaGroup.hxx>
 #include <vcl/mnemonic.hxx>
 #include <vcl/rendercontext/SystemTextColorFlags.hxx>
@@ -56,8 +57,7 @@ vcl::text::ComplexTextLayoutFlags OutputDevice::GetLayoutMode() const
 
 void OutputDevice::SetLayoutMode(vcl::text::ComplexTextLayoutFlags nTextLayoutMode)
 {
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaLayoutModeAction(nTextLayoutMode));
+    vcl::MetafileRecorder(*this).RecordLayoutMode(nTextLayoutMode);
 
     mpGraphicsState->mnTextLayoutMode = nTextLayoutMode;
     if (mpFontRealization)
@@ -68,8 +68,7 @@ LanguageType OutputDevice::GetDigitLanguage() const { return mpGraphicsState->me
 
 void OutputDevice::SetDigitLanguage(LanguageType eTextLanguage)
 {
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaTextLanguageAction(eTextLanguage));
+    vcl::MetafileRecorder(*this).RecordTextLanguage(eTextLanguage);
 
     mpGraphicsState->meTextLanguage = eTextLanguage;
 }
@@ -449,8 +448,7 @@ void OutputDevice::SetTextColor(const Color& rColor)
     Color aColor(
         vcl::drawmode::GetTextColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings()));
 
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaTextColorAction(aColor));
+    vcl::MetafileRecorder(*this).RecordTextColor(aColor);
 
     if (mpGraphicsState->maTextColor != aColor)
     {
@@ -463,8 +461,7 @@ bool OutputDevice::IsTextFillColor() const { return !mpGraphicsState->maFont.IsT
 
 void OutputDevice::SetTextFillColor()
 {
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaTextFillColorAction(Color(), false));
+    vcl::MetafileRecorder(*this).RecordTextFillColor(Color(), false);
 
     if (mpGraphicsState->maFont.GetColor() != COL_TRANSPARENT)
         mpGraphicsState->maFont.SetFillColor(COL_TRANSPARENT);
@@ -478,8 +475,7 @@ void OutputDevice::SetTextFillColor(const Color& rColor)
     Color aColor(
         vcl::drawmode::GetFillColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings()));
 
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaTextFillColorAction(aColor, true));
+    vcl::MetafileRecorder(*this).RecordTextFillColor(aColor, true);
 
     if (mpGraphicsState->maFont.GetFillColor() != aColor)
         mpGraphicsState->maFont.SetFillColor(aColor);
@@ -500,8 +496,7 @@ TextAlign OutputDevice::GetTextAlign() const { return mpGraphicsState->maFont.Ge
 
 void OutputDevice::SetTextAlign(TextAlign eAlign)
 {
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaTextAlignAction(eAlign));
+    vcl::MetafileRecorder(*this).RecordTextAlign(eAlign);
 
     if (mpGraphicsState->maFont.GetAlignment() != eAlign)
     {
@@ -529,8 +524,7 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
     nLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nIndex, nLen);
     assert(nLen >= 0 && "DrawTextArray: Length must be non-negative after normalization");
 
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaTextAction(rStartPt, rStr, nIndex, nLen));
+    vcl::MetafileRecorder(*this).RecordDrawText(rStartPt, rStr, nIndex, nLen);
 
     vcl::text::TextRecordingState* pStateToUse = nullptr;
     std::optional<vcl::text::TextRecordingState> oTempState;
@@ -672,9 +666,7 @@ void OutputDevice::DrawPartialTextArray(const Point& rStartPt, const OUString& r
 
     nPartLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nPartIndex, nPartLen);
 
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaTextArrayAction(rStartPt, rStr, pDXArray, pKashidaArray,
-                                                      nPartIndex, nPartLen, nIndex, nLen));
+    vcl::MetafileRecorder(*this).RecordDrawPartialTextArray(rStartPt, rStr, pDXArray, pKashidaArray, nPartIndex, nPartLen, nIndex, nLen);
 
     if (!IsDeviceOutputNecessary() && !IsLayoutCalculationNecessary())
         return;
@@ -715,9 +707,7 @@ void OutputDevice::DrawTextArray(const Point& rStartPt, const OUString& rStr,
     nLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nIndex, nLen);
     assert(!is_double_buffered_window());
 
-    if (mpMetaFile)
-        mpMetaFile->AddAction(
-            new MetaTextArrayAction(rStartPt, rStr, aKernArray, pKashidaAry, nIndex, nLen));
+    vcl::MetafileRecorder(*this).RecordDrawTextArray(rStartPt, rStr, aKernArray, pKashidaAry, nIndex, nLen);
 
     // Allow layout calculation to proceed if we are recording (to get accurate bounds)
     if (!IsDeviceOutputNecessary() && !IsLayoutCalculationNecessary())
@@ -817,8 +807,7 @@ void OutputDevice::DrawStretchText(const Point& rStartPt, sal_Int32 nWidth, cons
 
     nLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nIndex, nLen);
 
-    if (mpMetaFile)
-        mpMetaFile->AddAction(new MetaStretchTextAction(rStartPt, nWidth, rStr, nIndex, nLen));
+    vcl::MetafileRecorder(*this).RecordDrawStretchText(rStartPt, nWidth, rStr, nIndex, nLen);
 
     if (!IsDeviceOutputNecessary() && !IsLayoutCalculationNecessary())
         return;
@@ -1263,11 +1252,11 @@ void OutputDevice::DrawText(const tools::Rectangle& rRect, const OUString& rOrig
     std::optional<vcl::ScopedMetaGroup> oMetaGroup;
     if (mpMetaFile)
     {
-        if (!bDecomposeTextRectAction)
-            mpMetaFile->AddAction(new MetaTextRectAction(rRect, rOrigStr, nStyle));
-        else
+        if (bDecomposeTextRectAction)
             oMetaGroup.emplace(mpMetaFile, "DrawTextRect Decomposed");
     }
+    if (!bDecomposeTextRectAction)
+        vcl::MetafileRecorder(*this).RecordDrawTextRect(rRect, rOrigStr, nStyle);
 
     if ((!IsDeviceOutputNecessary() && !pVector && !bDecomposeTextRectAction) || rOrigStr.isEmpty()
         || rRect.IsEmpty())
