@@ -1249,12 +1249,9 @@ void OutputDevice::DrawText(const tools::Rectangle& rRect, const OUString& rOrig
         = (_pTextLayout != nullptr) && _pTextLayout->DecomposeTextRectAction();
 
     // Semantic Tagging: Group decomposed actions or record atomic action
-    std::optional<vcl::ScopedMetaGroup> oMetaGroup;
-    if (mpMetaFile)
-    {
-        if (bDecomposeTextRectAction)
-            oMetaGroup.emplace(mpMetaFile, "DrawTextRect Decomposed");
-    }
+    std::unique_ptr<vcl::ScopedMetaGroup> oMetaGroup;
+    if (bDecomposeTextRectAction)
+        oMetaGroup = vcl::MetafileRecorder(*this).CreateScopedGroup("DrawTextRect Decomposed");
     if (!bDecomposeTextRectAction)
         vcl::MetafileRecorder(*this).RecordDrawTextRect(rRect, rOrigStr, nStyle);
 

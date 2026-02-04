@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <rtl/string.hxx>
 #include <tools/gen.hxx>
 #include <tools/solar.h>
 
@@ -16,9 +17,12 @@
 #include <vcl/bitmap.hxx>
 #include <vcl/vclenum.hxx>
 #include <vcl/kernarray.hxx>
+#include <vcl/metafile/ScopedMetaGroup.hxx>
 #include <vcl/region.hxx>
 #include <vcl/rendercontext/DrawTextFlags.hxx>
 #include <vcl/rendercontext/State.hxx>
+
+#include <memory>
 
 namespace basegfx
 {
@@ -157,6 +161,8 @@ public:
 
     // --- Comment Actions ---
     void RecordComment(const rtl::OString& rComment);
+
+    std::unique_ptr<ScopedMetaGroup> CreateScopedGroup(const OString& rName);
 };
 
 } // namespace vcl
