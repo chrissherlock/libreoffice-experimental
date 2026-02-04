@@ -1276,7 +1276,7 @@ public:
                                                 GetDefaultFontFlags nFlags,
                                                 const OutputDevice* pOutDev = nullptr );
 
-    SAL_DLLPRIVATE void         ImplInitFontList() const;
+    SAL_DLLPRIVATE void         InitializeFonts() const;
     SAL_DLLPRIVATE void         ImplUpdateFontData();
 
     //drop font data for all outputdevices.
