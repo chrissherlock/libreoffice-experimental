@@ -439,5 +439,12 @@ void MetafileRecorder::RecordDrawTextRect(const tools::Rectangle& rRect, const O
     if (IsActive())
         mpMetaFile->AddAction(new MetaTextRectAction(rRect, rStr, nStyle));
 }
+
+std::unique_ptr<vcl::ScopedMetaGroup> MetafileRecorder::CreateScopedGroup(const OString& rName)
+{
+    if (IsActive())
+        return std::make_unique<vcl::ScopedMetaGroup>(mpMetaFile, rName);
+    return nullptr;
+}
 } // namespace vcl
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
