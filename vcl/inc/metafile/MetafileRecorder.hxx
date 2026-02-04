@@ -1,4 +1,3 @@
-#include <vcl/vclenum.hxx>
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; fill-column: 100 -*- */
 /*
  * This file is part of the LibreOffice project.
@@ -15,7 +14,10 @@
 
 #include <vcl/dllapi.h>
 #include <vcl/bitmap.hxx>
+#include <vcl/vclenum.hxx>
+#include <vcl/kernarray.hxx>
 #include <vcl/region.hxx>
+#include <vcl/rendercontext/DrawTextFlags.hxx>
 #include <vcl/rendercontext/State.hxx>
 
 namespace basegfx
@@ -132,6 +134,23 @@ public:
     void RecordTransparent(const tools::PolyPolygon& rPolyPoly, sal_uInt16 nTransparencePercent);
     void RecordTransparent(const basegfx::B2DHomMatrix& rObjectTransform,
                            const basegfx::B2DPolyPolygon& rB2DPolyPoly, double fTransparency);
+
+    void RecordLayoutMode(vcl::text::ComplexTextLayoutFlags nLayoutMode);
+    void RecordTextLanguage(LanguageType eTextLanguage);
+    void RecordDrawText(const Point& rStartPt, const OUString& rStr, sal_Int32 nIndex,
+                        sal_Int32 nLen);
+    void RecordDrawTextArray(const Point& rStartPt, const OUString& rStr, KernArraySpan aKernArray,
+                             std::span<const sal_Bool> pKashidaAry, sal_Int32 nIndex,
+                             sal_Int32 nLen);
+    void RecordDrawPartialTextArray(const Point& rStartPt, const OUString& rStr,
+                                    KernArraySpan aKernArray, std::span<const sal_Bool> pKashidaAry,
+                                    sal_Int32 nPartIndex, sal_Int32 nPartLen, sal_Int32 nIndex,
+                                    sal_Int32 nLen);
+    void RecordDrawStretchText(const Point& rStartPt, sal_Int32 nWidth, const OUString& rStr,
+                               sal_Int32 nIndex, sal_Int32 nLen);
+    void RecordDrawTextRect(const tools::Rectangle& rRect, const OUString& rStr,
+                            DrawTextFlags nStyle);
+
     void RecordWallpaper(const tools::Rectangle& rRect, const Wallpaper& rWallpaper);
     void RecordFloatTransparent(const GDIMetaFile& rMtf, const Point& rPos, const Size& rSize,
                                 const Gradient& rTransparenceGradient);
