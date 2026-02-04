@@ -91,6 +91,9 @@ public:
 
     // --- Drawing Actions ---
     void RecordLine(const Point& rStart, const Point& rEnd);
+    void RecordPixel(const Point& rPt);
+    void RecordPixel(const Point& rPt, const Color& rColor);
+
     void RecordMapMode(const MapMode& rMapMode);
     void RecordRefPoint(const Point& rRefPoint, bool bSet);
     void RecordRasterOp(RasterOp eRasterOp);
