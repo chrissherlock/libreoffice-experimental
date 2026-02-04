@@ -91,6 +91,8 @@ public:
 
     // --- Drawing Actions ---
     void RecordLine(const Point& rStart, const Point& rEnd);
+    void RecordMapMode(const MapMode& rMapMode);
+
     void RecordLine(const Point& rStart, const Point& rEnd, const LineInfo& rLineInfo);
     void RecordHatch(const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch);
     void RecordFont(const vcl::Font& rFont);
