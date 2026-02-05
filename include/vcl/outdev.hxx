@@ -251,7 +251,6 @@ private:
     mutable bool                    mbFontDirty : 1;
     mutable bool                    mbInitTextColor : 1;
     mutable bool                    mbClipRegionSet : 1;
-    mutable bool                    mbNewFont : 1;
     mutable bool                    mbEnableRTL : 1;
     mutable bool                    mbSubpixelPositioning : 1;
 

@@ -93,7 +93,6 @@ void OutputDevice::SetMapMode()
     mpMapper->ResetMapMode();
 
     // create new objects (clip region are not re-scaled)
-    mbNewFont = true;
     mbFontDirty = true;
     ImplInitMapModeObjects();
 
@@ -192,7 +191,6 @@ void OutputDevice::SetMapMode(const MapMode& rNewMapMode)
     }
 
     // create new objects (clip region are not re-scaled)
-    mbNewFont = true;
     mbFontDirty = true;
     ImplInitMapModeObjects();
 

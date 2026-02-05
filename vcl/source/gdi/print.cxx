@@ -522,7 +522,6 @@ bool Printer::AcquireGraphics() const
 void Printer::ImplReleaseFonts()
 {
     mpGraphics->ReleaseFonts();
-    mbNewFont = true;
     mbFontDirty = true;
 
     mpFontInstance.clear();
@@ -1053,7 +1052,6 @@ bool Printer::SetPrinterProps( const Printer* pPrinter )
             SetFontCollection(nullptr);
 
             mbFontDirty = true;
-            mbNewFont = true;
             mpInfoPrinter = nullptr;
         }
 
@@ -1079,7 +1077,6 @@ bool Printer::SetPrinterProps( const Printer* pPrinter )
             ClearFontCache();
             SetFontCollection(nullptr);
             mbFontDirty = true;
-            mbNewFont = true;
             mpInfoPrinter = nullptr;
         }
 

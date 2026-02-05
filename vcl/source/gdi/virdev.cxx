@@ -439,7 +439,6 @@ void VirtualDevice::ImplSetReferenceDevice( RefDevMode i_eRefDevMode, sal_Int32 
 
     // invalidate currently selected fonts
     mbFontDirty = true;
-    mbNewFont = true;
 
     // avoid adjusting font lists when already in refdev mode
     RefDevMode nOldRefDevMode = meRefDevMode;

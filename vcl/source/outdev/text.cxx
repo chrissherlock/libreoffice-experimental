@@ -501,7 +501,6 @@ void OutputDevice::SetTextAlign(TextAlign eAlign)
     if (mpGraphicsState->maFont.GetAlignment() != eAlign)
     {
         mpGraphicsState->maFont.SetAlignment(eAlign);
-        mbNewFont = true;
     }
 }
 
@@ -1518,7 +1517,6 @@ bool OutputDevice::GetTextOutlines(basegfx::B2DPolyPolygonVector& rVector, const
     if (bOldMap)
     {
         mpMapper->EnableMapMode(false);
-        const_cast<OutputDevice&>(*this).mbNewFont = true;
     }
 
     vcl::text::LayoutResources aResources
@@ -1539,7 +1537,6 @@ bool OutputDevice::GetTextOutlines(basegfx::B2DPolyPolygonVector& rVector, const
     if (bOldMap)
     {
         mpMapper->EnableMapMode(bOldMap);
-        const_cast<OutputDevice&>(*this).mbNewFont = true;
     }
 
     return bRet;

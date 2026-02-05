@@ -57,17 +57,20 @@ void FontController::InitializeFonts(SalGraphics* pGraphics)
         pGraphics->GetDevFontList(mxFontCollection.get());
 }
 
-bool FontController::NeedsUpdate(const vcl::Font& rFont, bool bNewFont) const
+bool FontController::NeedsUpdate(const vcl::Font& rFont, const CoordinateMapper& rMapper)
 {
-    if (bNewFont || !mxFontInstance)
+    // 1. Check Geometry (Generation ID)
+    if (rMapper.GetGenerationID() != mnLastMapperID)
         return true;
 
-    const vcl::font::FontSelectPattern& rCurrentPattern = mxFontInstance->GetFontSelectPattern();
-
-    if (rCurrentPattern.maTargetName != rFont.GetFamilyName())
+    // 2. Check Instance existence
+    if (!mxFontInstance)
         return true;
 
-    if (rCurrentPattern.mnHeight != rFont.GetFontHeight())
+    // 3. Check Requested Attributes (The Fix)
+    // We compare against the *request* that created the current instance,
+    // ignoring what the physical font actually ended up being (substitution).
+    if (rFont != maLastRequestedFont)
         return true;
 
     return false;
@@ -731,6 +734,9 @@ FontController::CreateFontInstance(PhysicalFontCollection* pFontCollection, cons
     const bool bNonAntialiased
         = ShouldDisableAntialiasing(eAAFlags, rStyleSettings, rFont.GetFontSize().Height());
 
+    mnLastMapperID = rMapper.GetGenerationID();
+    maLastRequestedFont
+        = rFont; // Save request to handle substitution checks // Synced to this geometry version
     return RealizeFont(pFontCollection, rFont, pGraphics, aSize, fExactHeight, bNonAntialiased);
 }
 

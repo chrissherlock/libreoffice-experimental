@@ -62,6 +62,11 @@ struct FontRealization
 
 class VCL_DLLPUBLIC FontController
 {
+private:
+    sal_uInt64 mnLastMapperID = 0;
+    vcl::Font maLastRequestedFont;
+
+public:
 public:
     void SetFontCollection(const std::shared_ptr<PhysicalFontCollection>& pPFC)
     {
@@ -96,7 +101,7 @@ public:
 
     void InitializeFonts(SalGraphics* pGraphics);
 
-    bool NeedsUpdate(const vcl::Font& rRequestedFont, bool bDeviceDirty) const;
+    bool NeedsUpdate(const vcl::Font& rRequestedFont, const CoordinateMapper& rMapper);
 
     // New Helper: Consolidates logic for creating a font instance.
     // Does not modify OutputDevice state.

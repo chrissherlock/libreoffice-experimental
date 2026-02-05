@@ -77,7 +77,6 @@ void OutputDevice::SetFont(const vcl::Font& rNewFont)
         maRecorder.RecordTextColor(aFont.GetColor());
     }
     mpGraphicsState->maFont = aFont;
-    mbNewFont = true;
 }
 
 void OutputDevice::SetFontCollection(const std::shared_ptr<vcl::font::PhysicalFontCollection>& pPFC)
@@ -238,7 +237,6 @@ void OutputDevice::ImplClearFontData(const bool bNewFontLists)
     mpFontInstance.clear();
 
     mbFontDirty = true;
-    mbNewFont = true;
 
     if (bNewFontLists)
         mpFontFaceCollection.reset();
@@ -373,7 +371,7 @@ bool OutputDevice::InitFont() const
     if (!mpFontController)
         const_cast<OutputDevice*>(this)->mpFontController = std::make_unique<vcl::font::FontController>();
 
-    if (mpFontController->NeedsUpdate(mpGraphicsState->maFont, mbNewFont))
+    if (mpFontController->NeedsUpdate(mpGraphicsState->maFont, *mpMapper))
     {
         if (!const_cast<OutputDevice*>(this)->ImplNewFont())
             return false;
@@ -423,10 +421,9 @@ bool OutputDevice::ImplNewFont() const
 {
     DBG_TESTSOLARMUTEX();
 
-    if (!mbNewFont)
-        return true;
+    // Pull Model: Guard removed. We rely on FontController::NeedsUpdate inside InitFont.
 
-    if (!mpGraphics && !AcquireGraphics())
+    if (!mpGraphics && !const_cast<OutputDevice*>(this)->AcquireGraphics())
     {
         SAL_WARN("vcl.gdi", "OutputDevice::ImplNewFont(): no Graphics, no Font");
         return false;
@@ -435,53 +432,56 @@ bool OutputDevice::ImplNewFont() const
 
     InitializeFonts();
 
-    auto[fExactHeight, aSize]
-        = mpFontController->CalculateDeviceSize(mpGraphicsState->maFont, *mpMapper, GetDPIY());
+    // FIX: Delegate ALL geometry and creation logic to CreateFontInstance.
+    // This function updates the mnLastMapperID in the controller, which stops the
+    // infinite recursion loop in InitFont().
+    rtl::Reference<LogicalFontInstance> pNewInstance = mpFontController->CreateFontInstance(
+        GetFontCollection(),
+        mpGraphicsState->maFont,
+        mpGraphics,
+        *mpMapper,
+        GetDPIY(),
+        GetAntialiasing(),
+        GetSettings().GetStyleSettings()
+    );
 
-    if (mpFontController->NeedsOLEFontScaleFix(*mpMapper, aSize))
-        aSize = mpFontController->GetOLECorrectedSize(*mpMapper, aSize, aSize.Height());
-
-    const bool bNonAntialiased = mpFontController->ShouldDisableAntialiasing(
-        GetAntialiasing(), GetSettings().GetStyleSettings(),
-        mpGraphicsState->maFont.GetFontSize().Height());
+    if (!pNewInstance)
+    {
+        SAL_WARN("vcl.gdi", "ImplNewFont: !!! NO FONT INSTANCE FOUND for request !!!");
+        return false;
+    }
 
     rtl::Reference<LogicalFontInstance> pOldFontInstance = mpFontInstance;
-    mpFontInstance = mpFontController->RealizeFont(GetFontCollection(), mpGraphicsState->maFont, mpGraphics,
-                                                   aSize, fExactHeight, bNonAntialiased);
+    mpFontInstance = pNewInstance;
+    mpFontController->mxFontInstance = mpFontInstance; // Sync Controller to stop recursion
 
-    SAL_WARN_IF(!mpFontInstance, "vcl.gdi", "ImplNewFont: !!! NO FONT INSTANCE FOUND for request !!!");
-
-    // We must update the struct *before* calling InitFont
+    // Update the FontRealization struct
     if (mpFontRealization)
         mpFontRealization->mxFont = mpFontInstance;
 
-    const bool bNewFontInstance = pOldFontInstance.get() != mpFontInstance.get();
-    pOldFontInstance.clear();
+    // Pull Model: Flag is no longer used/cleared here.
 
-    LogicalFontInstance* pFontInstance = mpFontInstance.get();
-    if (!pFontInstance)
-        return false;
-
-    mbNewFont = false;
-    if (bNewFontInstance)
+    if (pOldFontInstance.get() != mpFontInstance.get())
         mbFontDirty = true;
 
-    ImplInitializeFontInstance(pFontInstance);
+    // Initialize metrics and orientation
+    // This calls InitFont(), but since CreateFontInstance updated the ID,
+    // NeedsUpdate() will return false, preventing recursion.
+    ImplInitializeFontInstance(mpFontInstance.get());
 
+    // Calculate offsets (delegated to controller)
     std::tie(mpFontRealization->nXOffset, mpFontRealization->nYOffset,
              mpFontRealization->nEmphasisAscent, mpFontRealization->nEmphasisDescent)
         = mpFontController->CalculateTextOffsets(mpGraphicsState->maFont, mpFontInstance.get());
 
-    // Use local temporary variables to bypass the bit-field reference restriction
+    // Calculate layout flags (delegated to controller)
     bool bTextLines = false;
     bool bTextSpecial = false;
-
     std::tie(bTextLines, bTextSpecial)
         = mpFontController->GetTextLayoutFlags(mpGraphicsState->maFont);
 
     if (mpFontRealization)
     {
-        mpFontRealization->mxFont = mpFontInstance;
         mpFontRealization->bHasLineDecorations = bTextLines;
         mpFontRealization->bHasSpecialEffects = bTextSpecial;
         mpFontRealization->eLayoutMode = mpGraphicsState->mnTextLayoutMode;
@@ -600,7 +600,6 @@ void OutputDevice::ImplReleaseFonts()
     mpFontController->ClearFontResources(mpGraphics, true);
 
     // OutputDevice state cleanup
-    mbNewFont = true;
     mbFontDirty = true;
     mpForcedFallbackInstance.clear();
 

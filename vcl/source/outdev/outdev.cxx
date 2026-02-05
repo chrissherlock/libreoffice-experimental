@@ -95,7 +95,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mbFontDirty                      = true;
     mbInitTextColor                 = true;
     mpClippingController->SetNoClipRegion();
-    mbNewFont                       = true;
     mbEnableRTL                     = false;    // mirroring must be explicitly allowed (typically for windows only)
     mbSubpixelPositioning           = false; // tdf#168002 allow SubpixelPositioning (default: false)
 
