@@ -456,7 +456,7 @@ bool Printer::AcquireGraphics() const
 
     mbLineColorDirty     = true;
     mbFillColorDirty     = true;
-    mbFontDirty          = true;
+// mbFontDirty          = true; // Removed
     mbInitTextColor     = true;
     const_cast<Printer*>(this)->GetClippingController().SetDirty(true);
 
@@ -522,7 +522,7 @@ bool Printer::AcquireGraphics() const
 void Printer::ImplReleaseFonts()
 {
     mpGraphics->ReleaseFonts();
-    mbFontDirty = true;
+// mbFontDirty = true; // Removed
 
     mpFontInstance.clear();
     mpFontFaceCollection.reset();
@@ -1051,7 +1051,7 @@ bool Printer::SetPrinterProps( const Printer* pPrinter )
             ClearFontCache();
             SetFontCollection(nullptr);
 
-            mbFontDirty = true;
+// mbFontDirty = true; // Removed
             mpInfoPrinter = nullptr;
         }
 
@@ -1076,7 +1076,7 @@ bool Printer::SetPrinterProps( const Printer* pPrinter )
             mpFontFaceCollection.reset();
             ClearFontCache();
             SetFontCollection(nullptr);
-            mbFontDirty = true;
+// mbFontDirty = true; // Removed
             mpInfoPrinter = nullptr;
         }
 

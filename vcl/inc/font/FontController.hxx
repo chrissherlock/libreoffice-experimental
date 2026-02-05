@@ -65,8 +65,16 @@ class VCL_DLLPUBLIC FontController
 private:
     sal_uInt64 mnLastMapperID = 0;
     vcl::Font maLastRequestedFont;
+    SalGraphics* mpLastGraphics = nullptr;
+    const LogicalFontInstance* mpLastActiveInstance = nullptr;
 
 public:
+    void ResetGraphicsState()
+    {
+        mpLastGraphics = nullptr;
+        mpLastActiveInstance = nullptr;
+    }
+
 public:
     void SetFontCollection(const std::shared_ptr<PhysicalFontCollection>& pPFC)
     {

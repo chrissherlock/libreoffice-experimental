@@ -248,7 +248,6 @@ private:
     mutable bool                    mbDevOutput : 1;
     mutable bool                    mbLineColorDirty : 1;
     mutable bool                    mbFillColorDirty : 1;
-    mutable bool                    mbFontDirty : 1;
     mutable bool                    mbInitTextColor : 1;
     mutable bool                    mbClipRegionSet : 1;
     mutable bool                    mbEnableRTL : 1;

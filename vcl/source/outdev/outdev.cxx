@@ -92,7 +92,7 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mbDevOutput                     = false;
     mpGraphicsState->meTextLanguage                  = LANGUAGE_SYSTEM;  // TODO: get default from configuration?
     mbLineColorDirty                 = true;
-    mbFontDirty                      = true;
+// mbFontDirty                      = true; // Removed
     mbInitTextColor                 = true;
     mpClippingController->SetNoClipRegion();
     mbEnableRTL                     = false;    // mirroring must be explicitly allowed (typically for windows only)
@@ -323,7 +323,7 @@ void OutputDevice::SetAntialiasing( AntialiasingFlags nMode )
     if (mpGraphicsState->mnAntialiasing != nMode)
     {
         mpGraphicsState->mnAntialiasing = nMode;
-        mbFontDirty = true;
+// mbFontDirty = true; // Removed
 
         if (mpGraphics)
             mpGraphics->setAntiAlias(bool(mpGraphicsState->mnAntialiasing & AntialiasingFlags::Enable));

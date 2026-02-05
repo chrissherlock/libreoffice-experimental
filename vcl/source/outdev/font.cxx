@@ -236,7 +236,7 @@ void OutputDevice::ImplClearFontData(const bool bNewFontLists)
     // the currently selected logical font is no longer needed
     mpFontInstance.clear();
 
-    mbFontDirty = true;
+    if (mpFontController) mpFontController->ResetGraphicsState();
 
     if (bNewFontLists)
         mpFontFaceCollection.reset();
@@ -392,14 +392,11 @@ bool OutputDevice::InitFont() const
         if (!const_cast<OutputDevice*>(this)->AcquireGraphics())
             return false;
     }
-    else if (!mbFontDirty)
-    {
-        return true;
-    }
+
 
     if (mpGraphics && mpFontController->ActivateFontOnDevice(mpGraphics, pFontToUse))
     {
-        mbFontDirty = false;
+        // // mbFontDirty removed // Removed
         return true;
     }
 
@@ -462,7 +459,7 @@ bool OutputDevice::ImplNewFont() const
     // Pull Model: Flag is no longer used/cleared here.
 
     if (pOldFontInstance.get() != mpFontInstance.get())
-        mbFontDirty = true;
+        if (mpFontController) mpFontController->ResetGraphicsState();
 
     // Initialize metrics and orientation
     // This calls InitFont(), but since CreateFontInstance updated the ID,
@@ -600,7 +597,7 @@ void OutputDevice::ImplReleaseFonts()
     mpFontController->ClearFontResources(mpGraphics, true);
 
     // OutputDevice state cleanup
-    mbFontDirty = true;
+    if (mpFontController) mpFontController->ResetGraphicsState();
     mpForcedFallbackInstance.clear();
 
     // Legacy member cleanup (if still used)
