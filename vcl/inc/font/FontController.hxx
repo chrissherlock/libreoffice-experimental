@@ -25,6 +25,7 @@
 #include <impfontcache.hxx>
 
 #include <tuple>
+#include <functional>
 
 class ImplFontCache;
 class CoordinateMapper;
@@ -62,6 +63,9 @@ struct FontRealization
 
 class VCL_DLLPUBLIC FontController
 {
+public:
+    using FontInitCallback = std::function<void(LogicalFontInstance*)>;
+
 private:
     sal_uInt64 mnLastMapperID = 0;
     vcl::Font maLastRequestedFont;
@@ -113,6 +117,16 @@ public:
 
     // New Helper: Consolidates logic for creating a font instance.
     // Does not modify OutputDevice state.
+
+    // Orchestrates the update. Uses a callback for the initialization step
+    // to avoid coupling to OutputDevice.
+    bool UpdateFontInstanceState(SalGraphics* pGraphics, const CoordinateMapper& rMapper,
+                                 const vcl::Font& rLogicalFont,
+                                 const std::unique_ptr<FontRealization>& pFontRealization,
+                                 rtl::Reference<LogicalFontInstance>& rOutFontInstance, long nDPIY,
+                                 AntialiasingFlags eAAFlags, const StyleSettings& rStyleSettings,
+                                 FontInitCallback fnInit);
+
     rtl::Reference<LogicalFontInstance>
     CreateFontInstance(PhysicalFontCollection* pFontCollection, const vcl::Font& rFont,
                        SalGraphics* pGraphics, const CoordinateMapper& rMapper, long nDPIY,

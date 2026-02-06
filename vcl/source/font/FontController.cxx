@@ -740,6 +740,58 @@ FontController::CreateFontInstance(PhysicalFontCollection* pFontCollection, cons
     return RealizeFont(pFontCollection, rFont, pGraphics, aSize, fExactHeight, bNonAntialiased);
 }
 
+bool FontController::UpdateFontInstanceState(
+    SalGraphics* pGraphics, const CoordinateMapper& rMapper, const vcl::Font& rLogicalFont,
+    const std::unique_ptr<FontRealization>& pFontRealization,
+    rtl::Reference<LogicalFontInstance>& rOutFontInstance, long nDPIY, AntialiasingFlags eAAFlags,
+    const StyleSettings& rStyleSettings, FontInitCallback fnInit)
+{
+    InitializeFonts(pGraphics);
+
+    rtl::Reference<LogicalFontInstance> pNewInstance = CreateFontInstance(
+        GetFontCollection(), rLogicalFont, pGraphics, rMapper, nDPIY, eAAFlags, rStyleSettings);
+
+    if (!pNewInstance)
+        return false;
+
+    rtl::Reference<LogicalFontInstance> pOldFontInstance = rOutFontInstance;
+    rOutFontInstance = pNewInstance;
+    mxFontInstance = pNewInstance; // Sync internal cache
+
+    if (pFontRealization)
+        pFontRealization->mxFont = pNewInstance;
+
+    if (pOldFontInstance.get() != pNewInstance.get())
+        ResetGraphicsState();
+
+    if (fnInit)
+        fnInit(pNewInstance.get());
+
+    tools::Long nXOffset(0), nYOffset(0), nAsc(0), nDesc(0);
+    std::tie(nXOffset, nYOffset, nAsc, nDesc)
+        = CalculateTextOffsets(rLogicalFont, pNewInstance.get());
+
+    if (pFontRealization)
+    {
+        pFontRealization->nXOffset = nXOffset;
+        pFontRealization->nYOffset = nYOffset;
+        pFontRealization->nEmphasisAscent = nAsc;
+        pFontRealization->nEmphasisDescent = nDesc;
+    }
+
+    bool bTextLines = false;
+    bool bTextSpecial = false;
+    std::tie(bTextLines, bTextSpecial) = GetTextLayoutFlags(rLogicalFont);
+
+    if (pFontRealization)
+    {
+        pFontRealization->bHasLineDecorations = bTextLines;
+        pFontRealization->bHasSpecialEffects = bTextSpecial;
+    }
+
+    return true;
+}
+
 } // end namespace vcl::font
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

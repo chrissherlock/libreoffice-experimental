@@ -276,7 +276,6 @@ void OutputDevice::ImplClearAllFontData(bool bNewFontLists)
     vcl::font::FontController::ClearAllFontData(bNewFontLists);
 }
 
-
 void OutputDevice::ImplRefreshFontsOnAllFrames(bool bNewFontLists)
 {
     ImplUpdateFontDataForAllFrames(&OutputDevice::ImplRefreshFontData, bNewFontLists);
@@ -418,73 +417,37 @@ bool OutputDevice::ImplUpdateFontInstance() const
 {
     DBG_TESTSOLARMUTEX();
 
-    // Pull Model: Guard removed. We rely on FontController::NeedsUpdate inside InitFont.
-
     if (!mpGraphics && !const_cast<OutputDevice*>(this)->AcquireGraphics())
     {
-        SAL_WARN("vcl.gdi", "OutputDevice::ImplUpdateFontInstance(): no Graphics, no Font");
+        SAL_WARN("vcl.gdi", "ImplUpdateFontInstance: no Graphics, no Font");
         return false;
     }
     assert(mpGraphics);
 
-    InitializeFonts();
+    // Create the callback to handle the initialization step
+    // This captures 'this' safely because ImplUpdateFontInstance is a member function
+    auto fnInit = [this](LogicalFontInstance* pInstance) {
+        this->ImplInitializeFontInstance(pInstance);
+    };
 
-    // FIX: Delegate ALL geometry and creation logic to CreateFontInstance.
-    // This function updates the mnLastMapperID in the controller, which stops the
-    // infinite recursion loop in InitFont().
-    rtl::Reference<LogicalFontInstance> pNewInstance = mpFontController->CreateFontInstance(
-        GetFontCollection(),
-        mpGraphicsState->maFont,
+    // Delegate Logic to Controller
+    bool bRet = mpFontController->UpdateFontInstanceState(
         mpGraphics,
         *mpMapper,
+        mpGraphicsState->maFont,
+        mpFontRealization,
+        mpFontInstance,
         GetDPIY(),
         GetAntialiasing(),
-        GetSettings().GetStyleSettings()
+        GetSettings().GetStyleSettings(),
+        fnInit
     );
 
-    if (!pNewInstance)
-    {
-        SAL_WARN("vcl.gdi", "ImplUpdateFontInstance: !!! NO FONT INSTANCE FOUND for request !!!");
-        return false;
-    }
-
-    rtl::Reference<LogicalFontInstance> pOldFontInstance = mpFontInstance;
-    mpFontInstance = pNewInstance;
-    mpFontController->mxFontInstance = mpFontInstance; // Sync Controller to stop recursion
-
-    // Update the FontRealization struct
-    if (mpFontRealization)
-        mpFontRealization->mxFont = mpFontInstance;
-
-    // Pull Model: Flag is no longer used/cleared here.
-
-    if (pOldFontInstance.get() != mpFontInstance.get())
-        if (mpFontController) mpFontController->ResetGraphicsState();
-
-    // Initialize metrics and orientation
-    // This calls InitFont(), but since CreateFontInstance updated the ID,
-    // NeedsUpdate() will return false, preventing recursion.
-    ImplInitializeFontInstance(mpFontInstance.get());
-
-    // Calculate offsets (delegated to controller)
-    std::tie(mpFontRealization->nXOffset, mpFontRealization->nYOffset,
-             mpFontRealization->nEmphasisAscent, mpFontRealization->nEmphasisDescent)
-        = mpFontController->CalculateTextOffsets(mpGraphicsState->maFont, mpFontInstance.get());
-
-    // Calculate layout flags (delegated to controller)
-    bool bTextLines = false;
-    bool bTextSpecial = false;
-    std::tie(bTextLines, bTextSpecial)
-        = mpFontController->GetTextLayoutFlags(mpGraphicsState->maFont);
-
-    if (mpFontRealization)
-    {
-        mpFontRealization->bHasLineDecorations = bTextLines;
-        mpFontRealization->bHasSpecialEffects = bTextSpecial;
+    // Sync Layout Mode (which lives in GraphicsState, not accessible to Controller easily)
+    if (bRet && mpFontRealization)
         mpFontRealization->eLayoutMode = mpGraphicsState->mnTextLayoutMode;
-    }
 
-    return true;
+    return bRet;
 }
 
 
