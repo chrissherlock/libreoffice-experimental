@@ -146,7 +146,7 @@ bool OutputDevice::RemoveTempDevFont(const OUString& rFileURL, const OUString& r
 
 bool OutputDevice::GetFontFeatures(std::vector<vcl::font::Feature>& rFontFeatures) const
 {
-    if (!ImplNewFont())
+    if (!ImplUpdateFontInstance())
         return false;
 
     if (mpFontRealization && mpFontRealization->mxFont)
@@ -181,7 +181,7 @@ FontMetric OutputDevice::GetFontMetric() const
 {
     FontMetric aMetric;
 
-    if (!ImplNewFont())
+    if (!ImplUpdateFontInstance())
         return aMetric;
 
     aMetric = mpGraphicsState->maFont;
@@ -373,7 +373,7 @@ bool OutputDevice::InitFont() const
 
     if (mpFontController->NeedsUpdate(mpGraphicsState->maFont, *mpMapper))
     {
-        if (!const_cast<OutputDevice*>(this)->ImplNewFont())
+        if (!const_cast<OutputDevice*>(this)->ImplUpdateFontInstance())
             return false;
     }
 
@@ -414,7 +414,7 @@ const LogicalFontInstance* OutputDevice::GetFontInstance() const
     return mpFontInstance.get();
 }
 
-bool OutputDevice::ImplNewFont() const
+bool OutputDevice::ImplUpdateFontInstance() const
 {
     DBG_TESTSOLARMUTEX();
 
@@ -422,7 +422,7 @@ bool OutputDevice::ImplNewFont() const
 
     if (!mpGraphics && !const_cast<OutputDevice*>(this)->AcquireGraphics())
     {
-        SAL_WARN("vcl.gdi", "OutputDevice::ImplNewFont(): no Graphics, no Font");
+        SAL_WARN("vcl.gdi", "OutputDevice::ImplUpdateFontInstance(): no Graphics, no Font");
         return false;
     }
     assert(mpGraphics);
@@ -444,7 +444,7 @@ bool OutputDevice::ImplNewFont() const
 
     if (!pNewInstance)
     {
-        SAL_WARN("vcl.gdi", "ImplNewFont: !!! NO FONT INSTANCE FOUND for request !!!");
+        SAL_WARN("vcl.gdi", "ImplUpdateFontInstance: !!! NO FONT INSTANCE FOUND for request !!!");
         return false;
     }
 
@@ -553,7 +553,7 @@ bool OutputDevice::ForceFallbackFont(vcl::Font const& rFallbackFont)
 
 tools::Long OutputDevice::GetMinKashida() const
 {
-    if (!ImplNewFont())
+    if (!ImplUpdateFontInstance())
         return 0;
 
     double nKashidaWidth = mpFontController->GetMinKashidaWidth(mpFontRealization->mxFont.get());

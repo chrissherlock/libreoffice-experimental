@@ -617,7 +617,7 @@ double OutputDevice::GetTextWidthDouble(const OUString& rStr, sal_Int32 nIndex, 
 
 tools::Long OutputDevice::GetTextHeight() const
 {
-    if (!ImplNewFont())
+    if (!ImplUpdateFontInstance())
         return 0;
 
     if (mpFontRealization && mpFontRealization->mxFont)

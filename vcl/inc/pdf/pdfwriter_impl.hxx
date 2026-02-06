@@ -702,7 +702,7 @@ public:
     bool SupportsSubpixelPositioning() const override { return true; }
 
 private:
-    bool ImplNewFont() const override;
+    bool ImplUpdateFontInstance() const override;
     void ImplClearFontData(bool bNewFontLists) override;
     void ImplRefreshFontData(bool bNewFontLists) override;
     vcl::Region ClipToDeviceBounds(vcl::Region aRegion) const override;

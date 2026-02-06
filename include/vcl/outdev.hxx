@@ -1265,7 +1265,7 @@ protected:
     SAL_DLLPRIVATE void ReleaseFontCollection();
     SAL_DLLPRIVATE void ResetNewFontCache();
 
-    virtual bool ImplNewFont() const;
+    virtual bool ImplUpdateFontInstance() const;
 
 private:
     SAL_DLLPRIVATE void ImplInitializeFontInstance(LogicalFontInstance* pFontInstance) const;
