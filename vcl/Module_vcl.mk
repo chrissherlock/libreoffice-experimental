@@ -267,6 +267,7 @@ $(eval $(call gb_Module_add_check_targets,vcl,\
     CppunitTest_vcl_unit_conversion \
     CppunitTest_vcl_idle_task \
     CppunitTest_vcl_text_recording \
+    CppunitTest_vcl_text_analyzer \
 ))
 
 ifeq ($(USING_X11),TRUE)

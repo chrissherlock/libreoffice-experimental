@@ -231,8 +231,6 @@ public:
 
     static void ZeroFillKernArray(KernArray* pKernArray, sal_Int32 nLen);
 
-    static sal_Int32 GetNormalizedLength(const OUString& rStr, sal_Int32 nIdx, sal_Int32 nLen);
-
     static double GetPartialTextArray(const LayoutResources& rRes, const TextSpan& rSpan,
                                       KernArray* pKernArray, sal_Int32 nPartIndex,
                                       sal_Int32 nPartLen, bool bCaret,
@@ -387,7 +385,6 @@ public:
     static LayoutResult CalculateLayout(const CoordinateMapper& rMapper, const LayoutRequest& rReq,
                                         const vcl::TextLayoutCommon& rLayout);
 
-    static bool IsMnemonicInRange(sal_Int32 nMnemonicPos, sal_Int32 nIndex, sal_Int32 nLen);
 
     /** * Filters glyphs based on a clip region, preserving spaces between visible characters.
      */
@@ -396,8 +393,6 @@ public:
                                     const std::vector<tools::Rectangle>& rGlyphRects,
                                     std::vector<tools::Rectangle>& rOutVisibleRects,
                                     OUString* pOutVisibleText);
-
-    static MnemonicText PrepareMnemonicText(const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen);
 
     static Point CalculateLayoutOrigin(const OutputDevice& rDev, const tools::Rectangle& rRect,
                                        tools::Long nTextWidth, tools::Long nTextHeight,

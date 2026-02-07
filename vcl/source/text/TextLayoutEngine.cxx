@@ -33,6 +33,7 @@
 #include <textlayout.hxx>
 #include <textlineinfo.hxx>
 #include <text/TextLayoutEngine.hxx>
+#include <text/TextAnalyzer.hxx>
 #include <vcl/text/DefaultFallbackStrategy.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
@@ -99,97 +100,6 @@ void TextLayoutEngine::InitializeFontMetrics(
     pFontInstance->mxFontMetric->SetFullstopCenteredFlag(bCentered);
 }
 
-SalLayoutFlags TextLayoutEngine::GetBiDiLayoutFlags(vcl::text::ComplexTextLayoutFlags eLayoutMode,
-                                                    std::u16string_view rStr,
-                                                    const sal_Int32 nMinIndex,
-                                                    const sal_Int32 nEndIndex)
-{
-    SalLayoutFlags nLayoutFlags = SalLayoutFlags::NONE;
-
-    if (eLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiRtl)
-    {
-        nLayoutFlags |= SalLayoutFlags::BiDiRtl;
-    }
-    if (eLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiStrong)
-    {
-        nLayoutFlags |= SalLayoutFlags::BiDiStrong;
-    }
-    else if (!(eLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiRtl))
-    {
-        // Disable Bidi if no RTL hint and only known LTR codes used.
-        bool bAllLtr = true;
-        for (sal_Int32 i = nMinIndex; i < nEndIndex; i++)
-        {
-            // [0x0000, 0x052F] are Latin, Greek and Cyrillic.
-            if (rStr[i] > 0x052F)
-            {
-                bAllLtr = false;
-                break;
-            }
-        }
-
-        if (bAllLtr)
-            nLayoutFlags |= SalLayoutFlags::BiDiStrong;
-    }
-
-    return nLayoutFlags;
-}
-
-SalLayoutFlags TextLayoutEngine::CalculateLayoutFlags(
-    const vcl::GraphicsState& rGraphicsState, const vcl::font::FontRealization& rFontRealization,
-    bool bRTLWindow, std::u16string_view rStr, sal_Int32 nMinIndex, sal_Int32 nEndIndex,
-    SalLayoutFlags nExistingFlags)
-{
-    SalLayoutFlags nFlags = nExistingFlags;
-
-    nFlags |= TextLayoutEngine::GetBiDiLayoutFlags(rFontRealization.eLayoutMode, rStr, nMinIndex,
-                                                   nEndIndex);
-
-    if (!rGraphicsState.maFont.IsKerning())
-        nFlags |= SalLayoutFlags::DisableKerning;
-
-    if (rGraphicsState.maFont.GetKerning() & FontKerning::Asian)
-        nFlags |= SalLayoutFlags::KerningAsian;
-
-    if (rGraphicsState.maFont.IsVertical())
-        nFlags |= SalLayoutFlags::Vertical;
-
-    if (rGraphicsState.maFont.IsFixKerning()
-        || (rFontRealization.mxFont
-            && rFontRealization.mxFont->GetFontSelectPattern().GetPitch() == PITCH_FIXED))
-    {
-        nFlags |= SalLayoutFlags::DisableLigatures;
-    }
-
-    bool bRightAlign
-        = bool(rFontRealization.eLayoutMode & vcl::text::ComplexTextLayoutFlags::BiDiRtl);
-
-    if (rFontRealization.eLayoutMode & vcl::text::ComplexTextLayoutFlags::TextOriginLeft)
-        bRightAlign = false;
-    else if (rFontRealization.eLayoutMode & vcl::text::ComplexTextLayoutFlags::TextOriginRight)
-        bRightAlign = true;
-
-    bRightAlign ^= bRTLWindow;
-
-    if (bRightAlign)
-        nFlags |= SalLayoutFlags::RightAlign;
-
-    return nFlags;
-}
-
-void TextLayoutEngine::ApplyDigitLocalization(const vcl::GraphicsState& rGraphicsState,
-                                              OUString& rStr, sal_Int32 nMinIndex,
-                                              sal_Int32& rEndIndex)
-{
-    if (rGraphicsState.meTextLanguage)
-    {
-        sal_Int32 nSubstringLen = rEndIndex - nMinIndex;
-        rStr = i18nutil::LocalizeDigitsInString(rStr, rGraphicsState.meTextLanguage, nMinIndex,
-                                                nSubstringLen);
-        rEndIndex = nMinIndex + nSubstringLen;
-    }
-}
-
 vcl::text::TextLayoutRequest TextLayoutEngine::CreateLayoutRequest(
     OUString& rStr, sal_Int32 nMinIndex, sal_Int32 nLen, double nPixelWidth, SalLayoutFlags nFlags,
     const vcl::text::TextLayoutCache* pCache, const GraphicsState& rState,
@@ -207,10 +117,10 @@ vcl::text::TextLayoutRequest TextLayoutEngine::CreateLayoutRequest(
     if (nEndIndex < nMinIndex)
         nEndIndex = nMinIndex;
 
-    vcl::text::TextLayoutEngine::ApplyDigitLocalization(rState, rStr, nMinIndex, nEndIndex);
+    TextAnalyzer::ApplyDigitLocalization(rState, rStr, nMinIndex, nEndIndex);
 
-    nFlags = vcl::text::TextLayoutEngine::CalculateLayoutFlags(rState, rRealization, bRTL, rStr,
-                                                               nMinIndex, nEndIndex, nFlags);
+    nFlags = TextAnalyzer::CalculateLayoutFlags(rState, rRealization, bRTL, rStr, nMinIndex,
+                                                nEndIndex, nFlags);
 
     vcl::text::TextLayoutRequest aLayoutArgs(rStr, nMinIndex, nEndIndex, nFlags,
                                              rState.maFont.GetLanguageTag(), pCache);
@@ -619,15 +529,6 @@ void TextLayoutEngine::ZeroFillKernArray(KernArray* pKernArray, sal_Int32 nLen)
         pKernArray->assign(std::max<sal_Int32>(0, nLen), 0.0);
 }
 
-sal_Int32 TextLayoutEngine::GetNormalizedLength(const OUString& rStr, sal_Int32 nIdx,
-                                                sal_Int32 nLen)
-{
-    if (nLen < 0 || (nIdx + nLen) > rStr.getLength())
-        return std::max<sal_Int32>(0, rStr.getLength() - nIdx);
-
-    return nLen;
-}
-
 static void lcl_convertBoundRectToLogic(const SalLayout& rLayout, const CoordinateMapper& rMapper,
                                         std::optional<tools::Rectangle>* pBounds)
 {
@@ -654,8 +555,9 @@ double TextLayoutEngine::GetPartialTextArray(const LayoutResources& rRes,
         return 0.0;
 
     // Normalize lengths
-    sal_Int32 nLen = GetNormalizedLength(rSpan.Text, rSpan.Index, rSpan.Length);
-    sal_Int32 nNormalizedPartLen = GetNormalizedLength(rSpan.Text, nPartIndex, nPartLen);
+    sal_Int32 nLen = TextAnalyzer::GetNormalizedLength(rSpan.Text, rSpan.Index, rSpan.Length);
+    sal_Int32 nNormalizedPartLen
+        = TextAnalyzer::GetNormalizedLength(rSpan.Text, nPartIndex, nPartLen);
 
     vcl::text::TextSpan aNormalizedSpan{ rSpan.Text, rSpan.Index, nLen };
     vcl::text::LayoutConstraints aConstraints{ Point(0, 0), 0, {}, {}, SalLayoutFlags::NONE };
@@ -738,7 +640,7 @@ void TextLayoutEngine::GetCaretPositions(const LayoutResources& rRes,
                                          const vcl::text::TextSpan& rSpan, KernArray& rCaretPos,
                                          const vcl::text::LayoutCacheData& rCache)
 {
-    sal_Int32 nLen = GetNormalizedLength(rSpan.Text, rSpan.Index, rSpan.Length);
+    sal_Int32 nLen = TextAnalyzer::GetNormalizedLength(rSpan.Text, rSpan.Index, rSpan.Length);
     rCaretPos.assign(nLen * 2, -1);
 
     const vcl::text::LayoutConstraints aConstraints{ Point(0, 0), 0, {}, {}, SalLayoutFlags::NONE };
@@ -1355,11 +1257,6 @@ TextLayoutEngine::MnemonicGeometry TextLayoutEngine::GetMnemonicGeometry(
     return aGeo;
 }
 
-bool TextLayoutEngine::IsMnemonicInRange(sal_Int32 nMnemonicPos, sal_Int32 nIndex, sal_Int32 nLen)
-{
-    return nMnemonicPos >= nIndex && nMnemonicPos < nIndex + nLen;
-}
-
 TextLayoutEngine::LayoutResult
 TextLayoutEngine::CalculateLayout(const CoordinateMapper& rMapper, const LayoutRequest& rReq,
                                   const vcl::TextLayoutCommon& rLayout)
@@ -1418,7 +1315,7 @@ TextLayoutEngine::CalculateLayout(const CoordinateMapper& rMapper, const LayoutR
 
     // Mnemonic Geometry
     if (rReq.nMnemonicPos != -1
-        && IsMnemonicInRange(rReq.nMnemonicPos, 0, aRes.aDisplayText.getLength()))
+        && TextAnalyzer::IsMnemonicInRange(rReq.nMnemonicPos, 0, aRes.aDisplayText.getLength()))
     {
         MnemonicDeviceParams aParams{ rReq.nFontAscent, 0, 0 };
         KernArray aDXArray;
@@ -1554,25 +1451,6 @@ void TextLayoutEngine::CalculateMultiLineLayout(vcl::TextLayoutCommon& rLayout,
     if (rRes.nFormatLines * nTextHeight > nHeight)
         rRes.nResultStyle |= DrawTextFlags::Clip;
 }
-
-MnemonicText TextLayoutEngine::PrepareMnemonicText(const OUString& rStr, sal_Int32 nIndex,
-                                                   sal_Int32 nLen)
-{
-    sal_Int32 nMnemonicPos = -1;
-    OUString aStr = removeMnemonicFromString(rStr, nMnemonicPos);
-
-    if (nMnemonicPos != -1)
-    {
-        if (nMnemonicPos < nIndex)
-            nIndex--;
-        else if (nMnemonicPos < nIndex + nLen)
-            nLen--;
-    }
-    return { aStr, nIndex, nLen, nMnemonicPos };
-}
-
-#include <o3tl/unit_conversion.hxx>
-#include <vcl/fntstyle.hxx>
 
 std::unique_ptr<SalLayout> TextLayoutEngine::GetStrikeoutCharLayout(const LayoutResources& rRes,
                                                                     tools::Long nTargetWidth,

@@ -40,6 +40,7 @@
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
 #include <text/TextLayoutEngine.hxx>
+#include <text/TextAnalyzer.hxx>
 #include <text/AccessibilityRecorder.hxx>
 #include <text/MeasurementRecorder.hxx>
 #include <font/FontController.hxx>
@@ -521,7 +522,7 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
 {
     assert(!is_double_buffered_window());
 
-    nLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nIndex, nLen);
+    nLen = vcl::text::TextAnalyzer::GetNormalizedLength(rStr, nIndex, nLen);
     assert(nLen >= 0 && "DrawTextArray: Length must be non-negative after normalization");
 
     maRecorder.RecordDrawText(rStartPt, rStr, nIndex, nLen);
@@ -662,9 +663,9 @@ void OutputDevice::DrawPartialTextArray(const Point& rStartPt, const OUString& r
 {
     assert(!is_double_buffered_window());
 
-    nLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nIndex, nLen);
+    nLen = vcl::text::TextAnalyzer::GetNormalizedLength(rStr, nIndex, nLen);
 
-    nPartLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nPartIndex, nPartLen);
+    nPartLen = vcl::text::TextAnalyzer::GetNormalizedLength(rStr, nPartIndex, nPartLen);
 
     maRecorder.RecordDrawPartialTextArray(rStartPt, rStr, pDXArray, pKashidaArray, nPartIndex, nPartLen, nIndex, nLen);
 
@@ -704,7 +705,7 @@ void OutputDevice::DrawTextArray(const Point& rStartPt, const OUString& rStr,
                                  sal_Int32 nIndex, sal_Int32 nLen, SalLayoutFlags nFlags,
                                  const SalLayoutGlyphs* pLayoutCache)
 {
-    nLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nIndex, nLen);
+    nLen = vcl::text::TextAnalyzer::GetNormalizedLength(rStr, nIndex, nLen);
     assert(!is_double_buffered_window());
 
     maRecorder.RecordDrawTextArray(rStartPt, rStr, aKernArray, pKashidaAry, nIndex, nLen);
@@ -798,7 +799,7 @@ void OutputDevice::DrawStretchText(const Point& rStartPt, sal_Int32 nWidth, cons
 {
     assert(!is_double_buffered_window());
 
-    nLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nIndex, nLen);
+    nLen = vcl::text::TextAnalyzer::GetNormalizedLength(rStr, nIndex, nLen);
 
     maRecorder.RecordDrawStretchText(rStartPt, nWidth, rStr, nIndex, nLen);
 
@@ -823,7 +824,7 @@ void OutputDevice::DrawStretchText(const Point& rStartPt, sal_Int32 nWidth, cons
 SalLayoutFlags OutputDevice::GetBiDiLayoutFlags(std::u16string_view rStr, const sal_Int32 nMinIndex,
                                                 const sal_Int32 nEndIndex) const
 {
-    return vcl::text::TextLayoutEngine::GetBiDiLayoutFlags(mpFontRealization->eLayoutMode, rStr,
+    return vcl::text::TextAnalyzer::GetBiDiLayoutFlags(mpFontRealization->eLayoutMode, rStr,
                                                            nMinIndex, nEndIndex);
 }
 
@@ -1169,7 +1170,7 @@ void OutputDevice::ImplDrawTextMultiLine(OutputDevice& rTargetDevice, const tool
         rLayout.DrawText(aPos, rStr, nIndex, nLineLen, pVector, pDisplayText);
 
         if (bDrawMnemonics
-            && vcl::text::TextLayoutEngine::IsMnemonicInRange(nMnemonicPos, nIndex, nLineLen))
+            && vcl::text::TextAnalyzer::IsMnemonicInRange(nMnemonicPos, nIndex, nLineLen))
         {
             rTargetDevice.ImplDrawMnemonic(rLayout, rStr, nIndex, nLineLen, nMnemonicPos - nIndex,
                                            aPos);
@@ -1339,10 +1340,10 @@ void OutputDevice::DrawCtrlText(const Point& rPos, const OUString& rStr, const s
     sal_Int32 nCorrectedLen = nLen;
 
     nCorrectedLen
-        = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nCorrectedIndex, nCorrectedLen);
+        = vcl::text::TextAnalyzer::GetNormalizedLength(rStr, nCorrectedIndex, nCorrectedLen);
 
     auto aMnemonicText
-        = vcl::text::TextLayoutEngine::PrepareMnemonicText(rStr, nCorrectedIndex, nCorrectedLen);
+        = vcl::text::TextAnalyzer::PrepareMnemonicText(rStr, nCorrectedIndex, nCorrectedLen);
     const OUString& aStr = aMnemonicText.aText;
     nCorrectedIndex = aMnemonicText.nIndex;
     nCorrectedLen = aMnemonicText.nLen;
@@ -1438,7 +1439,7 @@ tools::Long OutputDevice::GetCtrlTextWidth(const OUString& rStr,
                                            const SalLayoutGlyphs* pGlyphs) const
 {
     auto aMnemonicText
-        = vcl::text::TextLayoutEngine::PrepareMnemonicText(rStr, 0, rStr.getLength());
+        = vcl::text::TextAnalyzer::PrepareMnemonicText(rStr, 0, rStr.getLength());
     const OUString& aStr = aMnemonicText.aText;
     sal_Int32 nIndex = aMnemonicText.nIndex;
     sal_Int32 nLen = aMnemonicText.nLen;
@@ -1638,7 +1639,7 @@ bool OutputDevice::GetGlyphBoundRects(const Point& rOrigin, const OUString& rStr
     if (nIndex >= rStr.getLength())
         return false;
 
-    nLen = vcl::text::TextLayoutEngine::GetNormalizedLength(rStr, nIndex, nLen);
+    nLen = vcl::text::TextAnalyzer::GetNormalizedLength(rStr, nIndex, nLen);
 
     tools::Rectangle aRect;
 
