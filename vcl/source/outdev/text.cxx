@@ -96,7 +96,7 @@ void OutputDevice::ImplDrawTextRect(tools::Long nBaseX, tools::Long nBaseY, tool
 {
     tools::Rectangle aLocalRect(Point(nDistX, nDistY), Size(nWidth, nHeight));
 
-    auto aGeo = vcl::text::TextLayoutEngine::GetRotatedGeometry(
+    auto aGeo = vcl::text::TextGeometry::GetRotatedGeometry(
         Point(nBaseX, nBaseY), aLocalRect, mpFontRealization->mxFont->mnOrientation);
 
     if (aGeo.mbIsPolygon)
@@ -143,7 +143,7 @@ bool OutputDevice::ImplDrawRotateText(SalLayout& rSalLayout)
     if (aBmp.IsEmpty())
         return false;
 
-    Point aPoint = vcl::text::TextLayoutEngine::GetRotatedImageOrigin(
+    Point aPoint = vcl::text::TextGeometry::GetRotatedImageOrigin(
         Point(nX, nY), aBoundRect, mpFontRealization->mxFont->mnOwnOrientation);
 
     ImplDrawRotatedTextMask(aPoint, aBmp);
@@ -246,7 +246,7 @@ void OutputDevice::ImplRenderLayout(SalLayout& rSalLayout, bool bTextLines)
                                               HasMirroredGraphics(),
                                               IsRTLEnabled() };
 
-            rSalLayout.DrawBase().setX(vcl::text::TextLayoutEngine::GetMirroredX(aCtx));
+            rSalLayout.DrawBase().setX(vcl::text::TextGeometry::GetMirroredX(aCtx));
         }
 
         rSalLayout.DrawText(*mpGraphics);
@@ -325,7 +325,7 @@ void OutputDevice::ImplDrawReliefText(SalLayout& rSalLayout)
     SetOverlineColor(aReliefColor);
     ImplInitTextColor();
 
-    tools::Long nOff = vcl::text::TextLayoutEngine::GetReliefOffset(
+    tools::Long nOff = vcl::text::TextGeometry::GetReliefOffset(
         GetDPIX(), mpGraphicsState->maFont.GetRelief());
     rSalLayout.DrawOffset() += basegfx::B2DPoint(nOff, nOff);
 
@@ -368,7 +368,7 @@ void OutputDevice::ImplDrawShadowText(SalLayout& rSalLayout)
     ImplInitTextColor();
 
     // Draw Shadow
-    tools::Long nOff = vcl::text::TextLayoutEngine::GetShadowOffset(
+    tools::Long nOff = vcl::text::TextGeometry::GetShadowOffset(
         mpFontRealization->mxFont->mnLineHeight, mpGraphicsState->maFont.IsOutline());
 
     rSalLayout.DrawBase() += basegfx::B2DPoint(nOff, nOff);
@@ -401,7 +401,7 @@ void OutputDevice::ImplDrawOutlineText(SalLayout& rSalLayout)
         ImplInitTextColor();
     });
 
-    for (const auto& rOffset : vcl::text::TextLayoutEngine::GetOutlineOffsets())
+    for (const auto& rOffset : vcl::text::TextGeometry::GetOutlineOffsets())
     {
         rSalLayout.DrawBase() = aOrigBase + rOffset;
         ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);

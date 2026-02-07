@@ -23,6 +23,8 @@
 #include <textlineinfo.hxx>
 
 #include <vector>
+#include <vcl/text/TextGeometry.hxx>
+#include <vcl/text/TextDecorator.hxx>
 #include <memory>
 #include <functional>
 #include <optional>
@@ -68,29 +70,6 @@ namespace vcl::text
 using FallbackLayoutFactory
     = std::function<std::unique_ptr<SalLayout>(LogicalFontInstance*, int, TextLayoutRequest&)>;
 
-struct SAL_DLLPUBLIC WaveLineSegment
-{
-    tools::Long nYOffset;
-    tools::Long nHeight;
-};
-
-struct SAL_DLLPUBLIC WaveLineGeometry
-{
-    tools::Long nLineWidth;
-    std::vector<WaveLineSegment> aSegments;
-};
-
-struct SAL_DLLPUBLIC StrikeoutSegment
-{
-    tools::Long nYOffset;
-    tools::Long nHeight;
-};
-
-struct SAL_DLLPUBLIC StrikeoutGeometry
-{
-    std::vector<StrikeoutSegment> aSegments;
-};
-
 class ILayoutFactory
 {
 public:
@@ -122,23 +101,6 @@ struct LayoutResources
     const vcl::font::FontRealization& rFontRealization;
 };
 
-struct RotatedGeometry
-{
-    bool mbIsPolygon;
-    tools::Rectangle maRect; // Optimization for 0, 90, 180, 270 deg
-    tools::Polygon maPoly; // Fallback for arbitrary angles
-};
-
-struct MirroringContext
-{
-    tools::Long nX; // The original X coordinate
-    tools::Long nGraphicsWidth; // Width of the underlying graphics (or VDev output width)
-    tools::Long nOutputWidth; // Width of the OutputDevice
-    tools::Long nOutOffX; // X Offset of the OutputDevice
-    bool bHasMirroredGraphics;
-    bool bIsRTL;
-};
-
 struct SAL_DLLPUBLIC MultiLineLayout
 {
     ImplMultiTextLineInfo aLineInfo;
@@ -155,26 +117,12 @@ struct SAL_DLLPUBLIC MnemonicText
     sal_Int32 nMnemonicPos;
 };
 
-struct SAL_DLLPUBLIC TextLineSegment
-{
-    tools::Long nX;
-    tools::Long nWidth;
-};
-
 class VCL_DLLPUBLIC TextLayoutEngine
 {
 public:
     static std::unique_ptr<SalLayout> GetStrikeoutCharLayout(const LayoutResources& rRes,
                                                              tools::Long nTargetWidth,
                                                              FontStrikeout eStrikeout);
-    static WaveLineGeometry CalculateWaveLineGeometry(const FontMetricData& rMetric,
-                                                      FontLineStyle eStyle, bool bIsAbove,
-                                                      tools::Long nDistY, tools::Long nDPIX,
-                                                      tools::Long nDPIY);
-    static StrikeoutGeometry CalculateStrikeoutGeometry(const FontMetricData& rMetric,
-                                                        FontStrikeout eStrikeout,
-                                                        tools::Long nDistY);
-    static constexpr tools::Long nMaxSmallWavelineHeight = 3;
 
     /** Analyzes a layout to find valid Kashida insertion points. */
     static void GetWordKashidaPositions(const SalLayout& rLayout, std::u16string_view rText,
@@ -436,35 +384,11 @@ public:
     GetEllipsisString(const OUString& rStr, tools::Long nMaxWidth, DrawTextFlags nStyle,
                       const std::function<tools::Long(const OUString&)>& rfnGetTextWidth);
 
-    static RotatedGeometry GetRotatedGeometry(const Point& rBase, // The pivot point
-                                              const tools::Rectangle& rRect, // The local rectangle
-                                              Degree10 nOrientation // The angle
-    );
-
-    // Calculates the top-left draw position for a bitmap generated from a rotated rectangle.
-    // Used when emulating text rotation via bitmaps.
-    static Point GetRotatedImageOrigin(const Point& rBase, const tools::Rectangle& rLocalBounds,
-                                       Degree10 nOrientation);
-
-    // Calculates the mirrored X-coordinate for RTL or mirrored graphics contexts.
-    static tools::Long GetMirroredX(const MirroringContext& rCtx);
-
-    static tools::Long GetReliefOffset(sal_Int32 nDPIX, FontRelief eRelief);
-    static tools::Long GetShadowOffset(tools::Long nLineHeight, bool bIsOutline);
-
-    // Returns the 8 surrounding offsets for simulating an outline
-    static const std::vector<basegfx::B2DPoint>& GetOutlineOffsets();
-
     static bool GetTextOutlines(const LayoutResources& rResources,
                                 basegfx::B2DPolyPolygonVector& rVector, const OUString& rStr,
                                 sal_Int32 nBase, sal_Int32 nIndex, sal_Int32 nLen,
                                 sal_uLong nLayoutWidth, KernArraySpan pDXArray,
                                 std::span<const sal_Bool> pKashidaArray);
-
-    static tools::Rectangle AlignAndRotateTextRect(const tools::Rectangle& rTargetRect,
-                                                   tools::Long nContentWidth,
-                                                   tools::Long nContentHeight, DrawTextFlags nStyle,
-                                                   Degree10 nOrientation);
 
     struct MnemonicDeviceParams
     {
@@ -520,44 +444,6 @@ public:
 
     static bool IsMnemonicInRange(sal_Int32 nMnemonicPos, sal_Int32 nIndex, sal_Int32 nLen);
 
-    struct TextLineRequest
-    {
-        FontLineStyle eUnderline;
-        FontLineStyle eOverline;
-        FontStrikeout eStrikeout;
-
-        bool bUnderlineAbove;
-
-        sal_Int32 nDPIX;
-        sal_Int32 nDPIY;
-    };
-
-    struct TextLineGeometry
-    {
-        // Calculated Y-offsets relative to the baseline
-        tools::Long nUnderlinePos1 = 0;
-        tools::Long nUnderlinePos2 = 0;
-
-        tools::Long nOverlinePos1 = 0;
-        tools::Long nOverlinePos2 = 0;
-
-        tools::Long nStrikeoutPos1 = 0;
-        tools::Long nStrikeoutPos2 = 0;
-
-        tools::Long nLineWidth = 0;
-        tools::Long nUnderlineWaveHeight = 0;
-        tools::Long nOverlineWaveHeight = 0;
-
-        bool bUnderlineIsWave = false;
-        bool bOverlineIsWave = false;
-        bool bStrikeoutIsChar = false;
-    };
-
-    static Point GetRotationOrigin(const Point& rPos, const Size& rTextSize, Degree10 nOrientation,
-                                   TextAlign eAlign);
-    static TextLineGeometry GetTextLineGeometry(const TextLineRequest& rReq,
-                                                const FontMetricData& rMetric);
-
     /** * Filters glyphs based on a clip region, preserving spaces between visible characters.
      */
     static void FilterVisibleGlyphs(const OUString& rStr, sal_Int32 nIndex,
@@ -565,10 +451,6 @@ public:
                                     const std::vector<tools::Rectangle>& rGlyphRects,
                                     std::vector<tools::Rectangle>& rOutVisibleRects,
                                     OUString* pOutVisibleText);
-
-    static std::vector<TextLineSegment>
-    CalculateTextLineSegments(tools::Long nWidth, FontLineStyle eStyle, tools::Long nLineHeight,
-                              tools::Long nDPIX, tools::Long nDPIY);
 
     static MnemonicText PrepareMnemonicText(const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen);
 
