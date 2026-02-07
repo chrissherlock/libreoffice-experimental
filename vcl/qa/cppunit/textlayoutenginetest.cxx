@@ -15,6 +15,8 @@
 #include <tools/mapunit.hxx>
 #include <i18nlangtag/lang.h>
 
+#include <vcl/text/TextGeometry.hxx>
+#include <vcl/text/TextDecorator.hxx>
 #include <vcl/fntstyle.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/virdev.hxx>
@@ -835,7 +837,7 @@ void TextLayoutEngineTest::testGetRotatedGeometry_0_Degrees()
     Degree10 nAngle = 0_deg10;
 
     vcl::text::RotatedGeometry aGeo
-        = vcl::text::TextLayoutEngine::GetRotatedGeometry(aBase, aLocal, nAngle);
+        = vcl::text::TextGeometry::GetRotatedGeometry(aBase, aLocal, nAngle);
 
     CPPUNIT_ASSERT_EQUAL(false, aGeo.mbIsPolygon);
     // X = BaseX(100) + DistX(10) = 110
@@ -853,7 +855,7 @@ void TextLayoutEngineTest::testGetRotatedGeometry_90_Degrees()
     Degree10 nAngle = 900_deg10;
 
     vcl::text::RotatedGeometry aGeo
-        = vcl::text::TextLayoutEngine::GetRotatedGeometry(aBase, aLocal, nAngle);
+        = vcl::text::TextGeometry::GetRotatedGeometry(aBase, aLocal, nAngle);
 
     CPPUNIT_ASSERT_EQUAL(false, aGeo.mbIsPolygon);
     // 90 deg rotation logic (Clockwise):
@@ -873,7 +875,7 @@ void TextLayoutEngineTest::testGetRotatedGeometry_180_Degrees()
     Degree10 nAngle = 1800_deg10;
 
     vcl::text::RotatedGeometry aGeo
-        = vcl::text::TextLayoutEngine::GetRotatedGeometry(aBase, aLocal, nAngle);
+        = vcl::text::TextGeometry::GetRotatedGeometry(aBase, aLocal, nAngle);
 
     CPPUNIT_ASSERT_EQUAL(false, aGeo.mbIsPolygon);
     // 180 deg rotation logic:
@@ -893,7 +895,7 @@ void TextLayoutEngineTest::testGetRotatedGeometry_270_Degrees()
     Degree10 nAngle = 2700_deg10;
 
     vcl::text::RotatedGeometry aGeo
-        = vcl::text::TextLayoutEngine::GetRotatedGeometry(aBase, aLocal, nAngle);
+        = vcl::text::TextGeometry::GetRotatedGeometry(aBase, aLocal, nAngle);
 
     CPPUNIT_ASSERT_EQUAL(false, aGeo.mbIsPolygon);
     // 270 deg rotation logic (Clockwise):
@@ -914,7 +916,7 @@ void TextLayoutEngineTest::testGetRotatedGeometry_Arbitrary_Angle()
     Degree10 nAngle = 450_deg10; // 45 degrees
 
     vcl::text::RotatedGeometry aGeo
-        = vcl::text::TextLayoutEngine::GetRotatedGeometry(aBase, aLocal, nAngle);
+        = vcl::text::TextGeometry::GetRotatedGeometry(aBase, aLocal, nAngle);
 
     // Expect Polygon fallback
     CPPUNIT_ASSERT_EQUAL(true, aGeo.mbIsPolygon);
@@ -936,7 +938,7 @@ void TextLayoutEngineTest::testGetRotatedImageOrigin()
 
     // Case 1: 0 Degrees
     // Should be Base + Local.TopLeft (100, 100)
-    Point aPos = vcl::text::TextLayoutEngine::GetRotatedImageOrigin(aBase, aLocal, 0_deg10);
+    Point aPos = vcl::text::TextGeometry::GetRotatedImageOrigin(aBase, aLocal, 0_deg10);
     CPPUNIT_ASSERT_EQUAL(tools::Long(100), aPos.X());
     CPPUNIT_ASSERT_EQUAL(tools::Long(100), aPos.Y());
 
@@ -944,7 +946,7 @@ void TextLayoutEngineTest::testGetRotatedImageOrigin()
     // Rotates (x,y) -> (y, -x).
     // X range [0..9] becomes Y range [0..-9]. Min Y is -9.
     // Base(100,100) + (0, -9) = (100, 91).
-    aPos = vcl::text::TextLayoutEngine::GetRotatedImageOrigin(aBase, aLocal, 900_deg10);
+    aPos = vcl::text::TextGeometry::GetRotatedImageOrigin(aBase, aLocal, 900_deg10);
     CPPUNIT_ASSERT_EQUAL(tools::Long(100), aPos.X());
     CPPUNIT_ASSERT_EQUAL(tools::Long(91), aPos.Y());
 
@@ -953,7 +955,7 @@ void TextLayoutEngineTest::testGetRotatedImageOrigin()
     // X range [0..9] -> [-9..0]. Min X is -9.
     // Y range [0..19] -> [-19..0]. Min Y is -19.
     // Base(100,100) + (-9, -19) = (91, 81).
-    aPos = vcl::text::TextLayoutEngine::GetRotatedImageOrigin(aBase, aLocal, 1800_deg10);
+    aPos = vcl::text::TextGeometry::GetRotatedImageOrigin(aBase, aLocal, 1800_deg10);
     CPPUNIT_ASSERT_EQUAL(tools::Long(91), aPos.X());
     CPPUNIT_ASSERT_EQUAL(tools::Long(81), aPos.Y());
 
@@ -962,7 +964,7 @@ void TextLayoutEngineTest::testGetRotatedImageOrigin()
     // Y range [0..19] -> X range [0..-19]. Min X is -19.
     // X range [0..9] -> Y range [0..9]. Min Y is 0.
     // Base(100,100) + (-19, 0) = (81, 100).
-    aPos = vcl::text::TextLayoutEngine::GetRotatedImageOrigin(aBase, aLocal, 2700_deg10);
+    aPos = vcl::text::TextGeometry::GetRotatedImageOrigin(aBase, aLocal, 2700_deg10);
     CPPUNIT_ASSERT_EQUAL(tools::Long(81), aPos.X());
     CPPUNIT_ASSERT_EQUAL(tools::Long(100), aPos.Y());
 }
@@ -978,7 +980,7 @@ void TextLayoutEngineTest::testGetMirroredX()
     // Case 1: No Mirroring, No RTL -> Identity
     aCtx.bHasMirroredGraphics = false;
     aCtx.bIsRTL = false;
-    CPPUNIT_ASSERT_EQUAL(tools::Long(10), vcl::text::TextLayoutEngine::GetMirroredX(aCtx));
+    CPPUNIT_ASSERT_EQUAL(tools::Long(10), vcl::text::TextGeometry::GetMirroredX(aCtx));
 
     // Case 2: Mirrored Graphics Only (HasMirrored=True, IsRTL=False)
     // Step 1: x' = 1000 - 1 - 10 = 989
@@ -987,13 +989,13 @@ void TextLayoutEngineTest::testGetMirroredX()
     //             = 750 + (199 - 239) = 750 - 40 = 710
     aCtx.bHasMirroredGraphics = true;
     aCtx.bIsRTL = false;
-    CPPUNIT_ASSERT_EQUAL(tools::Long(710), vcl::text::TextLayoutEngine::GetMirroredX(aCtx));
+    CPPUNIT_ASSERT_EQUAL(tools::Long(710), vcl::text::TextGeometry::GetMirroredX(aCtx));
 
     // Case 3: Mirrored Graphics + RTL (HasMirrored=True, IsRTL=True)
     // Only Step 1 applies: x' = 1000 - 1 - 10 = 989
     aCtx.bHasMirroredGraphics = true;
     aCtx.bIsRTL = true;
-    CPPUNIT_ASSERT_EQUAL(tools::Long(989), vcl::text::TextLayoutEngine::GetMirroredX(aCtx));
+    CPPUNIT_ASSERT_EQUAL(tools::Long(989), vcl::text::TextGeometry::GetMirroredX(aCtx));
 
     // Case 4: RTL Only (HasMirrored=False, IsRTL=True)
     // devX = 50
@@ -1001,29 +1003,29 @@ void TextLayoutEngineTest::testGetMirroredX()
     //    = 199 - (-40) + 50 = 199 + 40 + 50 = 289
     aCtx.bHasMirroredGraphics = false;
     aCtx.bIsRTL = true;
-    CPPUNIT_ASSERT_EQUAL(tools::Long(289), vcl::text::TextLayoutEngine::GetMirroredX(aCtx));
+    CPPUNIT_ASSERT_EQUAL(tools::Long(289), vcl::text::TextGeometry::GetMirroredX(aCtx));
 }
 
 void TextLayoutEngineTest::testGetReliefOffset()
 {
     // Case 1: Standard DPI (96), Embossed (Standard)
     // Calculation: 1 + (96 / 300) = 1 + 0 = 1
-    tools::Long nOff = vcl::text::TextLayoutEngine::GetReliefOffset(96, FontRelief::Embossed);
+    tools::Long nOff = vcl::text::TextGeometry::GetReliefOffset(96, FontRelief::Embossed);
     CPPUNIT_ASSERT_EQUAL(tools::Long(1), nOff);
 
     // Case 2: Standard DPI (96), Engraved (Negative Offset)
     // Calculation: -(1 + 0) = -1
-    nOff = vcl::text::TextLayoutEngine::GetReliefOffset(96, FontRelief::Engraved);
+    nOff = vcl::text::TextGeometry::GetReliefOffset(96, FontRelief::Engraved);
     CPPUNIT_ASSERT_EQUAL(tools::Long(-1), nOff);
 
     // Case 3: High DPI (600), Embossed
     // Calculation: 1 + (600 / 300) = 1 + 2 = 3
-    nOff = vcl::text::TextLayoutEngine::GetReliefOffset(600, FontRelief::Embossed);
+    nOff = vcl::text::TextGeometry::GetReliefOffset(600, FontRelief::Embossed);
     CPPUNIT_ASSERT_EQUAL(tools::Long(3), nOff);
 
     // Case 4: High DPI (600), Engraved
     // Calculation: -(1 + 2) = -3
-    nOff = vcl::text::TextLayoutEngine::GetReliefOffset(600, FontRelief::Engraved);
+    nOff = vcl::text::TextGeometry::GetReliefOffset(600, FontRelief::Engraved);
     CPPUNIT_ASSERT_EQUAL(tools::Long(-3), nOff);
 }
 
@@ -1034,29 +1036,28 @@ void TextLayoutEngineTest::testGetShadowOffset()
 
     // Case 1: Small Font (Height 20), Not Outline
     // 1 + ((20 - 24) / 24) = 1 + (-4/24) = 1 + 0 = 1
-    tools::Long nOff = vcl::text::TextLayoutEngine::GetShadowOffset(20, false);
+    tools::Long nOff = vcl::text::TextGeometry::GetShadowOffset(20, false);
     CPPUNIT_ASSERT_EQUAL(tools::Long(1), nOff);
 
     // Case 2: Standard Font (Height 24), Not Outline
     // 1 + ((24 - 24) / 24) = 1 + 0 = 1
-    nOff = vcl::text::TextLayoutEngine::GetShadowOffset(24, false);
+    nOff = vcl::text::TextGeometry::GetShadowOffset(24, false);
     CPPUNIT_ASSERT_EQUAL(tools::Long(1), nOff);
 
     // Case 3: Large Font (Height 48), Not Outline
     // 1 + ((48 - 24) / 24) = 1 + 1 = 2
-    nOff = vcl::text::TextLayoutEngine::GetShadowOffset(48, false);
+    nOff = vcl::text::TextGeometry::GetShadowOffset(48, false);
     CPPUNIT_ASSERT_EQUAL(tools::Long(2), nOff);
 
     // Case 4: Large Font (Height 48), Is Outline
     // Calculation from Case 3 (2) + 1 (Outline Bonus) = 3
-    nOff = vcl::text::TextLayoutEngine::GetShadowOffset(48, true);
+    nOff = vcl::text::TextGeometry::GetShadowOffset(48, true);
     CPPUNIT_ASSERT_EQUAL(tools::Long(3), nOff);
 }
 
 void TextLayoutEngineTest::testGetOutlineOffsets()
 {
-    const std::vector<basegfx::B2DPoint>& rOffsets
-        = vcl::text::TextLayoutEngine::GetOutlineOffsets();
+    const std::vector<basegfx::B2DPoint>& rOffsets = vcl::text::TextGeometry::GetOutlineOffsets();
 
     // Must return exactly 8 points (surrounding pixels)
     CPPUNIT_ASSERT_EQUAL(size_t(8), rOffsets.size());
@@ -1142,7 +1143,7 @@ void TextLayoutEngineTest::testAlignAndRotateTextRect()
     //   Rounding: Not Right aligned -> AdjustRight(1) -> Right becomes 30
     // Result: (10, 10) - (30, 19). Width = 21, Height = 10.
     {
-        tools::Rectangle aRes = vcl::text::TextLayoutEngine::AlignAndRotateTextRect(
+        tools::Rectangle aRes = vcl::text::TextGeometry::AlignAndRotateTextRect(
             aTarget, nTextW, nTextH, DrawTextFlags::NONE, 0_deg10);
 
         CPPUNIT_ASSERT_EQUAL(tools::Long(10), aRes.Left());
@@ -1158,7 +1159,7 @@ void TextLayoutEngineTest::testAlignAndRotateTextRect()
     //   Rounding: Right aligned -> AdjustLeft(-1) -> Left becomes 89
     // Result: (89, 100) - (109, 109). Width = 21, Height = 10.
     {
-        tools::Rectangle aRes = vcl::text::TextLayoutEngine::AlignAndRotateTextRect(
+        tools::Rectangle aRes = vcl::text::TextGeometry::AlignAndRotateTextRect(
             aTarget, nTextW, nTextH, DrawTextFlags::Right | DrawTextFlags::Bottom, 0_deg10);
 
         CPPUNIT_ASSERT_EQUAL(tools::Long(89), aRes.Left()); // Legacy -1 pixel
@@ -1178,7 +1179,7 @@ void TextLayoutEngineTest::testAlignAndRotateTextRect()
     //   Rounding: Not Right -> AdjustRight(1) -> Right becomes 70
     // Result: (50, 55) - (70, 64)
     {
-        tools::Rectangle aRes = vcl::text::TextLayoutEngine::AlignAndRotateTextRect(
+        tools::Rectangle aRes = vcl::text::TextGeometry::AlignAndRotateTextRect(
             aTarget, nTextW, nTextH, DrawTextFlags::Center | DrawTextFlags::VCenter, 0_deg10);
 
         CPPUNIT_ASSERT_EQUAL(tools::Long(50), aRes.Left());
@@ -1203,7 +1204,7 @@ void TextLayoutEngineTest::testAlignAndRotateTextRect()
     // for use when the rect is at (0,0), but applied here to the aligned rect.
     // We test simply that the geometry changes significantly.
     {
-        tools::Rectangle aRes = vcl::text::TextLayoutEngine::AlignAndRotateTextRect(
+        tools::Rectangle aRes = vcl::text::TextGeometry::AlignAndRotateTextRect(
             aTarget, nTextW, nTextH, DrawTextFlags::NONE, 900_deg10);
 
         // Ensure dimensions flipped/changed
@@ -1293,8 +1294,8 @@ void TextLayoutEngineTest::testTextLineGeometry()
     aMetric.SetDoubleStrikeoutOffset1(-7);
     aMetric.SetDoubleStrikeoutOffset2(-9);
 
-    vcl::text::TextLayoutEngine::TextLineRequest aReq;
-    vcl::text::TextLayoutEngine::TextLineGeometry aGeo;
+    vcl::text::TextLineRequest aReq;
+    vcl::text::TextLineGeometry aGeo;
     aReq.nDPIX = 96;
     aReq.nDPIY = 96;
     aReq.bUnderlineAbove = false;
@@ -1302,19 +1303,19 @@ void TextLayoutEngineTest::testTextLineGeometry()
     // Test Standard Underline Paths
     {
         aReq.eUnderline = LINESTYLE_SINGLE;
-        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Single underline offset mismatch", tools::Long(2),
                                      aGeo.nUnderlinePos1);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Base line width (96 DPI) should be 1", tools::Long(1),
                                      aGeo.nLineWidth);
 
         aReq.eUnderline = LINESTYLE_BOLD;
-        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Bold underline offset mismatch", tools::Long(3),
                                      aGeo.nUnderlinePos1);
 
         aReq.eUnderline = LINESTYLE_DOUBLE;
-        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Double underline offset 1 mismatch", tools::Long(1),
                                      aGeo.nUnderlinePos1);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Double underline offset 2 mismatch", tools::Long(4),
@@ -1325,12 +1326,12 @@ void TextLayoutEngineTest::testTextLineGeometry()
     {
         aReq.bUnderlineAbove = true;
         aReq.eUnderline = LINESTYLE_SINGLE;
-        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Above underline offset mismatch", tools::Long(-10),
                                      aGeo.nUnderlinePos1);
 
         aReq.eUnderline = LINESTYLE_DOUBLE;
-        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Above double underline offset 1 mismatch", tools::Long(-12),
                                      aGeo.nUnderlinePos1);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Above double underline offset 2 mismatch", tools::Long(-15),
@@ -1341,7 +1342,7 @@ void TextLayoutEngineTest::testTextLineGeometry()
     // Test Wave Line Logic & Constraints
     {
         aReq.eUnderline = LINESTYLE_WAVE;
-        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
         CPPUNIT_ASSERT_MESSAGE("UnderlineIsWave flag not set for LINESTYLE_WAVE",
                                aGeo.bUnderlineIsWave);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Standard wave height should return the full metric value",
@@ -1349,13 +1350,13 @@ void TextLayoutEngineTest::testTextLineGeometry()
 
         // Test SMALLWAVE 3px cap
         aReq.eUnderline = LINESTYLE_SMALLWAVE;
-        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Small wave height should be capped at 3px", tools::Long(3),
                                      aGeo.nUnderlineWaveHeight);
 
         // Test BOLDWAVE Width Doubling
         aReq.eUnderline = LINESTYLE_BOLDWAVE;
-        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Bold wave width should be double standard width",
                                      tools::Long(2), aGeo.nLineWidth);
     }
@@ -1366,12 +1367,12 @@ void TextLayoutEngineTest::testTextLineGeometry()
         aReq.bUnderlineAbove = true;
         aReq.eUnderline = LINESTYLE_NONE;
         aReq.eOverline = LINESTYLE_SINGLE;
-        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Overline offset mismatch", tools::Long(-10),
                                      aGeo.nOverlinePos1);
 
         aReq.eOverline = LINESTYLE_WAVE;
-        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
         CPPUNIT_ASSERT_MESSAGE("OverlineIsWave flag not set for LINESTYLE_WAVE",
                                aGeo.bOverlineIsWave);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Overline wave height mismatch", tools::Long(6),
@@ -1381,17 +1382,17 @@ void TextLayoutEngineTest::testTextLineGeometry()
     // Test Strikeout Paths (Verifying independent dual-offset capture)
     {
         aReq.eStrikeout = STRIKEOUT_SINGLE;
-        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Single strikeout offset mismatch", tools::Long(-5),
                                      aGeo.nStrikeoutPos1);
 
         aReq.eStrikeout = STRIKEOUT_BOLD;
-        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Bold strikeout offset mismatch", tools::Long(-6),
                                      aGeo.nStrikeoutPos1);
 
         aReq.eStrikeout = STRIKEOUT_DOUBLE;
-        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Double strikeout offset 1 mismatch", tools::Long(-7),
                                      aGeo.nStrikeoutPos1);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Double strikeout offset 2 mismatch", tools::Long(-9),
@@ -1402,7 +1403,7 @@ void TextLayoutEngineTest::testTextLineGeometry()
     {
         aReq.nDPIX = 600; // 600 / 300 = 2
         aReq.eUnderline = LINESTYLE_SINGLE;
-        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("High DPI (600) line width should be 2", tools::Long(2),
                                      aGeo.nLineWidth);
     }
@@ -1410,18 +1411,18 @@ void TextLayoutEngineTest::testTextLineGeometry()
     // Test Character-based Strikeout Styles
     {
         aReq.eStrikeout = STRIKEOUT_SLASH;
-        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
         CPPUNIT_ASSERT_MESSAGE("bStrikeoutIsChar should be true for STRIKEOUT_SLASH",
                                aGeo.bStrikeoutIsChar);
 
         aReq.eStrikeout = STRIKEOUT_X;
-        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
         CPPUNIT_ASSERT_MESSAGE("bStrikeoutIsChar should be true for STRIKEOUT_X",
                                aGeo.bStrikeoutIsChar);
 
         // Negative test: verify standard bold strikeout does NOT trigger the char flag
         aReq.eStrikeout = STRIKEOUT_BOLD;
-        aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, aMetric);
+        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
         CPPUNIT_ASSERT_MESSAGE("bStrikeoutIsChar should be false for STRIKEOUT_BOLD",
                                !aGeo.bStrikeoutIsChar);
     }
@@ -1434,8 +1435,8 @@ void TextLayoutEngineTest::testGetRotationOrigin()
 
     // Test 0 degrees (Identity) - Origin should not change
     {
-        Point aResult = vcl::text::TextLayoutEngine::GetRotationOrigin(aPos, aTextSize, 0_deg10,
-                                                                       ALIGN_BASELINE);
+        Point aResult
+            = vcl::text::TextGeometry::GetRotationOrigin(aPos, aTextSize, 0_deg10, ALIGN_BASELINE);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("0 deg rotation should be identity", aPos, aResult);
     }
 
@@ -1443,8 +1444,8 @@ void TextLayoutEngineTest::testGetRotationOrigin()
     // x' = x - (0 * sin(90)) = 100
     // y' = y + (0 * cos(90)) = 100
     {
-        Point aResult = vcl::text::TextLayoutEngine::GetRotationOrigin(aPos, aTextSize, 900_deg10,
-                                                                       ALIGN_BASELINE);
+        Point aResult = vcl::text::TextGeometry::GetRotationOrigin(aPos, aTextSize, 900_deg10,
+                                                                   ALIGN_BASELINE);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("90 deg baseline should match pos", aPos, aResult);
     }
 
@@ -1454,7 +1455,7 @@ void TextLayoutEngineTest::testGetRotationOrigin()
     // nY = 100 + (20 * cos(90)) = 100 + 0 = 100
     {
         Point aResult
-            = vcl::text::TextLayoutEngine::GetRotationOrigin(aPos, aTextSize, 900_deg10, ALIGN_TOP);
+            = vcl::text::TextGeometry::GetRotationOrigin(aPos, aTextSize, 900_deg10, ALIGN_TOP);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("90 deg top alignment X mismatch", tools::Long(80),
                                      aResult.X());
         CPPUNIT_ASSERT_EQUAL_MESSAGE("90 deg top alignment Y mismatch", tools::Long(100),
@@ -1466,8 +1467,8 @@ void TextLayoutEngineTest::testGetRotationOrigin()
     // nX = 100 + (-(-20) * sin(180)) = 100 + 0 = 100
     // nY = 100 + (-20 * cos(180)) = 100 + (-20 * -1) = 120
     {
-        Point aResult = vcl::text::TextLayoutEngine::GetRotationOrigin(aPos, aTextSize, 1800_deg10,
-                                                                       ALIGN_BOTTOM);
+        Point aResult
+            = vcl::text::TextGeometry::GetRotationOrigin(aPos, aTextSize, 1800_deg10, ALIGN_BOTTOM);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("180 deg bottom alignment X mismatch", tools::Long(100),
                                      aResult.X());
         CPPUNIT_ASSERT_EQUAL_MESSAGE("180 deg bottom alignment Y mismatch", tools::Long(120),
@@ -1480,7 +1481,7 @@ void TextLayoutEngineTest::testGetRotationOrigin()
     // nY = 100 + (20 * 0.7071) = 100 + 14.14 = 114
     {
         Point aResult
-            = vcl::text::TextLayoutEngine::GetRotationOrigin(aPos, aTextSize, 450_deg10, ALIGN_TOP);
+            = vcl::text::TextGeometry::GetRotationOrigin(aPos, aTextSize, 450_deg10, ALIGN_TOP);
         CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("45 deg X coordinate mismatch", 86.0,
                                              (double)aResult.X(), 0.5);
         CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("45 deg Y coordinate mismatch", 114.0,
@@ -1686,8 +1687,8 @@ void TextLayoutEngineTest::testCalculateTextLineSegments()
     // DotWidth = (10 * 96 + 48) / 96 = 10.
     // Pattern: Segment(10) -> Gap(10) -> Repeat
     {
-        auto aSegs = vcl::text::TextLayoutEngine::CalculateTextLineSegments(50, LINESTYLE_DOTTED,
-                                                                            10, 96, 96);
+        auto aSegs
+            = vcl::text::TextDecorator::CalculateTextLineSegments(50, LINESTYLE_DOTTED, 10, 96, 96);
 
         // Expected Segments: [0, 10], [20, 10], [40, 10]
         // The last segment ends exactly at 50.
@@ -1706,8 +1707,8 @@ void TextLayoutEngineTest::testCalculateTextLineSegments()
     // 2. Dotted Line Clipping
     // Setup: Width 45. Last segment (starting at 40) should be clipped to width 5.
     {
-        auto aSegs = vcl::text::TextLayoutEngine::CalculateTextLineSegments(45, LINESTYLE_DOTTED,
-                                                                            10, 96, 96);
+        auto aSegs
+            = vcl::text::TextDecorator::CalculateTextLineSegments(45, LINESTYLE_DOTTED, 10, 96, 96);
 
         CPPUNIT_ASSERT_EQUAL(size_t(3), aSegs.size());
         CPPUNIT_ASSERT_EQUAL(tools::Long(40), aSegs[2].nX);
@@ -1721,8 +1722,8 @@ void TextLayoutEngineTest::testCalculateTextLineSegments()
     // BaseSpace (50) -> Converted (approx 1) < MinSpace (15) -> Clamped to 15.
     // Pattern: Segment(40) -> Gap(15) -> Repeat. Next start: 40+15=55.
     {
-        auto aSegs = vcl::text::TextLayoutEngine::CalculateTextLineSegments(100, LINESTYLE_DASH, 10,
-                                                                            96, 96);
+        auto aSegs
+            = vcl::text::TextDecorator::CalculateTextLineSegments(100, LINESTYLE_DASH, 10, 96, 96);
 
         CPPUNIT_ASSERT_EQUAL(size_t(2), aSegs.size());
 
@@ -1741,8 +1742,8 @@ void TextLayoutEngineTest::testCalculateTextLineSegments()
     // Pattern: Dot(10) -> Gap(10) -> Dash(40) -> Gap(10) -> Repeat
     // Note: The implementation generates Dot THEN Dash.
     {
-        auto aSegs = vcl::text::TextLayoutEngine::CalculateTextLineSegments(100, LINESTYLE_DASHDOT,
-                                                                            10, 96, 96);
+        auto aSegs = vcl::text::TextDecorator::CalculateTextLineSegments(100, LINESTYLE_DASHDOT, 10,
+                                                                         96, 96);
 
         // Seg 1: Dot
         // Start: 0
@@ -1770,8 +1771,8 @@ void TextLayoutEngineTest::testCalculateTextLineSegments()
     // Setup: DotWidth=10, DashWidth=40.
     // Pattern: Dot(10) -> Gap(10) -> Dot(10) -> Gap(10) -> Dash(40) -> Gap(10)
     {
-        auto aSegs = vcl::text::TextLayoutEngine::CalculateTextLineSegments(
-            100, LINESTYLE_DASHDOTDOT, 10, 96, 96);
+        auto aSegs = vcl::text::TextDecorator::CalculateTextLineSegments(100, LINESTYLE_DASHDOTDOT,
+                                                                         10, 96, 96);
 
         // Seg 1: Dot (0, 10)
         CPPUNIT_ASSERT_EQUAL(tools::Long(0), aSegs[0].nX);
@@ -1809,8 +1810,8 @@ void TextLayoutEngineTest::testCalculateWaveLineGeometry()
 
     // 1. Standard Single Wave (Below)
     {
-        auto aGeo = vcl::text::TextLayoutEngine::CalculateWaveLineGeometry(aMetric, LINESTYLE_WAVE,
-                                                                           false, 0, 96, 96);
+        auto aGeo = vcl::text::TextDecorator::CalculateWaveLineGeometry(aMetric, LINESTYLE_WAVE,
+                                                                        false, 0, 96, 96);
 
         CPPUNIT_ASSERT_EQUAL(tools::Long(1), aGeo.nLineWidth);
         CPPUNIT_ASSERT_EQUAL(size_t(1), aGeo.aSegments.size());
@@ -1820,8 +1821,8 @@ void TextLayoutEngineTest::testCalculateWaveLineGeometry()
 
     // 2. Above Wave
     {
-        auto aGeo = vcl::text::TextLayoutEngine::CalculateWaveLineGeometry(aMetric, LINESTYLE_WAVE,
-                                                                           true, 0, 96, 96);
+        auto aGeo = vcl::text::TextDecorator::CalculateWaveLineGeometry(aMetric, LINESTYLE_WAVE,
+                                                                        true, 0, 96, 96);
 
         CPPUNIT_ASSERT_EQUAL(size_t(1), aGeo.aSegments.size());
         CPPUNIT_ASSERT_EQUAL(tools::Long(-7), aGeo.aSegments[0].nYOffset);
@@ -1832,7 +1833,7 @@ void TextLayoutEngineTest::testCalculateWaveLineGeometry()
     // Metric 6 -> Cap 3.
     // Pos = 10 + 0 - (3/2) = 9.
     {
-        auto aGeo = vcl::text::TextLayoutEngine::CalculateWaveLineGeometry(
+        auto aGeo = vcl::text::TextDecorator::CalculateWaveLineGeometry(
             aMetric, LINESTYLE_SMALLWAVE, false, 0, 96, 96);
 
         CPPUNIT_ASSERT_EQUAL(tools::Long(3), aGeo.aSegments[0].nHeight);
@@ -1841,8 +1842,8 @@ void TextLayoutEngineTest::testCalculateWaveLineGeometry()
 
     // 4. Bold Wave
     {
-        auto aGeo = vcl::text::TextLayoutEngine::CalculateWaveLineGeometry(
-            aMetric, LINESTYLE_BOLDWAVE, false, 0, 96, 96);
+        auto aGeo = vcl::text::TextDecorator::CalculateWaveLineGeometry(aMetric, LINESTYLE_BOLDWAVE,
+                                                                        false, 0, 96, 96);
 
         CPPUNIT_ASSERT_EQUAL(tools::Long(2), aGeo.nLineWidth);
     }
@@ -1854,7 +1855,7 @@ void TextLayoutEngineTest::testCalculateWaveLineGeometry()
     //   Seg1 Y = 7 - (1 - 1) = 7.
     //   Seg2 Y = 7 + (1 - 1) + (1 + 2) = 10.
     {
-        auto aGeo = vcl::text::TextLayoutEngine::CalculateWaveLineGeometry(
+        auto aGeo = vcl::text::TextDecorator::CalculateWaveLineGeometry(
             aMetric, LINESTYLE_DOUBLEWAVE, false, 0, 96, 96);
 
         CPPUNIT_ASSERT_EQUAL(size_t(2), aGeo.aSegments.size());
@@ -1893,8 +1894,8 @@ void TextLayoutEngineTest::testCalculateStrikeoutGeometry()
 
     // 1. Single Strikeout
     {
-        auto aGeo = vcl::text::TextLayoutEngine::CalculateStrikeoutGeometry(
-            aMetric, STRIKEOUT_SINGLE, nDistY);
+        auto aGeo = vcl::text::TextDecorator::CalculateStrikeoutGeometry(aMetric, STRIKEOUT_SINGLE,
+                                                                         nDistY);
 
         CPPUNIT_ASSERT_EQUAL(size_t(1), aGeo.aSegments.size());
         // Pos = DistY + Offset = 100 + (-10) = 90
@@ -1904,8 +1905,8 @@ void TextLayoutEngineTest::testCalculateStrikeoutGeometry()
 
     // 2. Bold Strikeout
     {
-        auto aGeo = vcl::text::TextLayoutEngine::CalculateStrikeoutGeometry(aMetric, STRIKEOUT_BOLD,
-                                                                            nDistY);
+        auto aGeo
+            = vcl::text::TextDecorator::CalculateStrikeoutGeometry(aMetric, STRIKEOUT_BOLD, nDistY);
 
         CPPUNIT_ASSERT_EQUAL(size_t(1), aGeo.aSegments.size());
         // Pos = DistY + Offset = 100 + (-11) = 89
@@ -1915,8 +1916,8 @@ void TextLayoutEngineTest::testCalculateStrikeoutGeometry()
 
     // 3. Double Strikeout
     {
-        auto aGeo = vcl::text::TextLayoutEngine::CalculateStrikeoutGeometry(
-            aMetric, STRIKEOUT_DOUBLE, nDistY);
+        auto aGeo = vcl::text::TextDecorator::CalculateStrikeoutGeometry(aMetric, STRIKEOUT_DOUBLE,
+                                                                         nDistY);
 
         CPPUNIT_ASSERT_EQUAL(size_t(2), aGeo.aSegments.size());
 
@@ -1933,7 +1934,7 @@ void TextLayoutEngineTest::testCalculateStrikeoutGeometry()
     // The implementation logic for > LAST is fallback to SINGLE.
     {
         // Cast to invalid enum value
-        auto aGeo = vcl::text::TextLayoutEngine::CalculateStrikeoutGeometry(
+        auto aGeo = vcl::text::TextDecorator::CalculateStrikeoutGeometry(
             aMetric, static_cast<FontStrikeout>(100), nDistY);
 
         // Expect fallback to SINGLE
@@ -1946,8 +1947,8 @@ void TextLayoutEngineTest::testCalculateStrikeoutGeometry()
         FontMetricData aZeroMetric(aSelPat);
         aZeroMetric.SetStrikeoutSize(0);
 
-        auto aGeo = vcl::text::TextLayoutEngine::CalculateStrikeoutGeometry(
-            aZeroMetric, STRIKEOUT_SINGLE, nDistY);
+        auto aGeo = vcl::text::TextDecorator::CalculateStrikeoutGeometry(aZeroMetric,
+                                                                         STRIKEOUT_SINGLE, nDistY);
 
         CPPUNIT_ASSERT_EQUAL(size_t(0), aGeo.aSegments.size());
     }

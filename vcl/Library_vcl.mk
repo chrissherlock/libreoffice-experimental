@@ -326,6 +326,8 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/text/TextLayoutData \
     vcl/source/text/TextLayoutRequest \
     vcl/source/text/TextRecordingDispatcher \
+    vcl/source/text/TextGeometry \
+    vcl/source/text/TextDecorator \
     vcl/source/text/ImplLayoutRuns \
     vcl/source/text/mnemonic \
     vcl/source/text/TextLayoutEngine \

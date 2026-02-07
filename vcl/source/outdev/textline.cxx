@@ -306,7 +306,7 @@ void OutputDevice::ImplDrawWaveTextLine( tools::Long nBaseX, tools::Long nBaseY,
         return;
     }
 
-    vcl::text::WaveLineGeometry aGeo = vcl::text::TextLayoutEngine::CalculateWaveLineGeometry(
+    vcl::text::WaveLineGeometry aGeo = vcl::text::TextDecorator::CalculateWaveLineGeometry(
         *mpFontInstance->mxFontMetric, eTextLine, bIsAbove, nDistY, GetDPIX(), GetDPIY());
 
     for (const auto& rSeg : aGeo.aSegments)
@@ -420,7 +420,7 @@ void OutputDevice::ImplDrawStraightTextLine( tools::Long nBaseX, tools::Long nBa
     default:
         {
             std::vector<vcl::text::TextLineSegment> aSegments =
-                vcl::text::TextLayoutEngine::CalculateTextLineSegments(nWidth, eTextLine, nLineHeight, GetDPIX(), GetDPIY());
+                vcl::text::TextDecorator::CalculateTextLineSegments(nWidth, eTextLine, nLineHeight, GetDPIX(), GetDPIY());
 
             for (const auto& rSeg : aSegments)
             {
@@ -436,7 +436,7 @@ void OutputDevice::ImplDrawStrikeoutLine( tools::Long nBaseX, tools::Long nBaseY
                                           FontStrikeout eStrikeout,
                                           Color aColor )
 {
-    vcl::text::StrikeoutGeometry aGeo = vcl::text::TextLayoutEngine::CalculateStrikeoutGeometry(
+    vcl::text::StrikeoutGeometry aGeo = vcl::text::TextDecorator::CalculateStrikeoutGeometry(
         *mpFontInstance->mxFontMetric, eStrikeout, nDistY);
 
     if (aGeo.aSegments.empty())
@@ -560,7 +560,7 @@ void OutputDevice::ImplDrawTextLine(tools::Long nX, tools::Long nY,
     if (!IsOverlineColor())
         aOverlineColor = GetTextColor();
 
-    vcl::text::TextLayoutEngine::TextLineRequest aReq;
+    vcl::text::TextLineRequest aReq;
     aReq.eUnderline = eUnderline;
     aReq.eOverline = eOverline;
     aReq.eStrikeout = eStrikeout;
@@ -568,7 +568,7 @@ void OutputDevice::ImplDrawTextLine(tools::Long nX, tools::Long nY,
     aReq.nDPIX = GetDPIX();
     aReq.nDPIY = GetDPIY();
 
-    auto aGeo = vcl::text::TextLayoutEngine::GetTextLineGeometry(aReq, *mpFontInstance->mxFontMetric);
+    auto aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, *mpFontInstance->mxFontMetric);
 
     if (aGeo.bUnderlineIsWave)
     {
