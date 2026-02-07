@@ -36,7 +36,7 @@
 #include <sallayout.hxx>
 #include <textlayout.hxx>
 #include <textlineinfo.hxx>
-#include <text/GraphicLayoutFactory.hxx>
+#include <text/SalLayoutFactory.hxx>
 #include <text/TextLayoutRequest.hxx>
 #include <text/TextLayoutEngine.hxx>
 #include <CoordinateMapper.hxx>
@@ -62,7 +62,8 @@ std::unique_ptr<SalLayout> DefaultFallbackStrategy::ResolveFallbacks(
                     const_cast<LogicalFontInstance*>(rRes.pForcedFallback)) };
 
         // FIX: Pass 'rRes' directly. The function will create the factory internally.
-        return ResolveMissingGlyphs(std::move(pLayout), rArgs, pGlyphs, aCriteria, rRes);
+        SalLayoutFactory aFactory(rRes.fnGetGraphics);
+        return ResolveMissingGlyphs(std::move(pLayout), rArgs, pGlyphs, aCriteria, &aFactory);
     }
     return pLayout;
 }
@@ -70,10 +71,9 @@ std::unique_ptr<SalLayout> DefaultFallbackStrategy::ResolveFallbacks(
 std::unique_ptr<SalLayout> DefaultFallbackStrategy::ResolveMissingGlyphs(
     std::unique_ptr<SalLayout> pBaseLayout, vcl::text::TextLayoutRequest& rLayoutArgs,
     const SalLayoutGlyphs* pGlyphs, const FontLookupCriteria& rCriteria,
-    const LayoutResources& rRes) // FIX: Match header signature
+    ILayoutFactory* pFactory) // FIX: Match header signature
 {
     // FIX: Create the factory here using the resources
-    GraphicLayoutFactory rFactory(rRes.fnGetGraphics);
 
     LogicalFontInstance* pBaseFont = rCriteria.pReferenceFont;
 
@@ -111,15 +111,14 @@ std::unique_ptr<SalLayout> DefaultFallbackStrategy::ResolveMissingGlyphs(
         }
 
         // rFactory logic adapted
-        // rFactory.SetFont(pFallbackFont.get(), nFallbackLevel);
+        //
         // Note: The original ILayoutFactory::SetFont didn't exist in the simple wrapper,
         // but CreateLayout needs the font.
         // We might need to construct a new LayoutResources or Factory if the font changes.
         // However, GetLayout usually uses the font passed to it.
         // Let's assume the factory needs a slight tweak or we use the collection directly.
-
-        rFactory.SetFont(pFallbackFont.get(), nFallbackLevel);
-        std::unique_ptr<SalLayout> pFallback = rFactory.CreateLayout(nFallbackLevel);
+        std::unique_ptr<SalLayout> pFallback
+            = pFactory->CreateLayout(pFallbackFont.get(), nFallbackLevel);
 
         if (pFallback)
         {

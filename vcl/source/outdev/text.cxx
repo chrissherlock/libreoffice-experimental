@@ -39,10 +39,11 @@
 #include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
+#include <text/TextLayoutEngine.hxx>
 #include <text/AccessibilityRecorder.hxx>
 #include <text/MeasurementRecorder.hxx>
 #include <font/FontController.hxx>
-#include <text/GraphicLayoutFactory.hxx>
+#include <text/SalLayoutFactory.hxx>
 #include <drawmode.hxx>
 #include <textlayout.hxx>
 #include <TextLayoutCache.hxx>

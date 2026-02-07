@@ -40,6 +40,7 @@
 
 #include <unicode/uchar.h>
 
+#include <cstdio>
 #include <utility>
 
 namespace vcl::text
@@ -222,14 +223,6 @@ vcl::text::TextLayoutRequest TextLayoutEngine::CreateLayoutRequest(
     return aLayoutArgs;
 }
 
-// Moved to DefaultFallbackStrategy::FindFallbackFont
-
-// Moved to DefaultFallbackStrategy::IdentifyMissingChars
-
-// Moved to DefaultFallbackStrategy::MergeFallback
-
-// Moved to DefaultFallbackStrategy::ResolveMissingGlyphs
-
 void TextLayoutEngine::JustifyLayout(SalLayout& rLayout, vcl::text::TextLayoutRequest& rArgs)
 {
     rLayout.AdjustLayout(rArgs);
@@ -258,8 +251,6 @@ void TextLayoutEngine::SetAnchorPoint(SalLayout& rLayout, const TextLayoutPositi
     rLayout.DrawBase() = rPositioning.aDrawBase;
 }
 
-namespace
-{
 static double lcl_applyDXArray(JustificationData& rJustification, const LayoutResources& rRes,
                                KernArraySpan pDXArray, sal_Int32 nMinCluster, sal_Int32 nLen)
 {
@@ -302,8 +293,6 @@ static void lcl_applyKashidaArray(JustificationData& rJustification,
         rJustification.SetKashidaPosition(nMinCluster + i, static_cast<bool>(pKashidaArray[i]));
     }
 }
-
-} // end anonymous namespace
 
 void TextLayoutEngine::PrepareJustification(const LayoutResources& rRes, KernArraySpan pDXArray,
                                             std::span<const sal_Bool> pKashidaArray,
@@ -531,33 +520,6 @@ std::unique_ptr<SalLayout> TextLayoutEngine::CreateBaseLayout(const LayoutResour
 
     return pSalLayout;
 }
-
-// Local factory implementation for resolving fallbacks
-class GraphicLayoutFactory : public ILayoutFactory
-{
-    std::function<SalGraphics*()> m_fnGetGraphics;
-
-public:
-    GraphicLayoutFactory(std::function<SalGraphics*()> fn)
-        : m_fnGetGraphics(std::move(fn))
-    {
-    }
-
-    virtual std::unique_ptr<SalLayout> CreateLayout(int nFallbackLevel) override
-    {
-        SalGraphics* pGraphics = m_fnGetGraphics();
-        return pGraphics ? pGraphics->GetTextLayout(nFallbackLevel) : nullptr;
-    }
-
-    virtual void SetFont(LogicalFontInstance* pFont, int nFallbackLevel) override
-    {
-        SalGraphics* pGraphics = m_fnGetGraphics();
-        if (pGraphics)
-            pGraphics->SetFont(pFont, nFallbackLevel);
-    }
-};
-
-// Moved to DefaultFallbackStrategy::ResolveFallbacks
 
 void TextLayoutEngine::ApplyPositioning(const LayoutResources& rRes, SalLayout& rLayout,
                                         vcl::text::TextLayoutRequest& rArgs,

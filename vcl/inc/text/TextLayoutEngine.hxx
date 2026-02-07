@@ -30,7 +30,7 @@
 #include <functional>
 #include <optional>
 #include <span>
-
+#include <text/ILayoutFactory.hxx>
 #define TEXT_DRAW_ELLIPSIS                                                                         \
     (DrawTextFlags::EndEllipsis | DrawTextFlags::PathEllipsis | DrawTextFlags::NewsEllipsis)
 
@@ -70,14 +70,6 @@ namespace vcl::text
 {
 using FallbackLayoutFactory
     = std::function<std::unique_ptr<SalLayout>(LogicalFontInstance*, int, TextLayoutRequest&)>;
-
-class ILayoutFactory
-{
-public:
-    virtual ~ILayoutFactory() = default;
-    virtual std::unique_ptr<SalLayout> CreateLayout(int nFallbackLevel) = 0;
-    virtual void SetFont(LogicalFontInstance* pFont, int nFallbackLevel) = 0;
-};
 
 struct TextLayoutPositioning
 {
@@ -129,22 +121,22 @@ public:
      * Independent of OutputDevice.
      */
     static void InitializeFontMetrics(
-        const LogicalFontInstance* pFontInstance, const vcl::Font& rFont, long nDPIY,
+        const LogicalFontInstance* pFontInstance, const ::vcl::Font& rFont, long nDPIY,
         long nPixelWidth, std::function<long(const OUString&)> const& fnGetTextWidth,
         std::function<void(tools::Rectangle&, const OUString&)> const& fnGetBoundRect);
 
     /** Determines BiDi flags based on layout mode and string content. */
-    static SalLayoutFlags GetBiDiLayoutFlags(vcl::text::ComplexTextLayoutFlags eLayoutMode,
+    static SalLayoutFlags GetBiDiLayoutFlags(::vcl::text::ComplexTextLayoutFlags eLayoutMode,
                                              std::u16string_view rStr, sal_Int32 nMinIndex,
                                              sal_Int32 nEndIndex);
 
     /** Applies digit localization to the string if the language requires it. */
-    static void ApplyDigitLocalization(const vcl::GraphicsState& rGraphicsState, OUString& rStr,
+    static void ApplyDigitLocalization(const ::vcl::GraphicsState& rGraphicsState, OUString& rStr,
                                        sal_Int32 nMinIndex, sal_Int32& rEndIndex);
 
     /** Calculates the Layout Flags based on the Graphics State and Font Realization. */
-    static SalLayoutFlags CalculateLayoutFlags(const vcl::GraphicsState& rGraphicsState,
-                                               const vcl::font::FontRealization& rFontRealization,
+    static SalLayoutFlags CalculateLayoutFlags(const ::vcl::GraphicsState& rGraphicsState,
+                                               const ::vcl::font::FontRealization& rFontRealization,
                                                bool bRTLWindow, std::u16string_view rStr,
                                                sal_Int32 nMinIndex, sal_Int32 nEndIndex,
                                                SalLayoutFlags nExistingFlags);
@@ -153,34 +145,35 @@ public:
      * Creates and configures a LayoutRequest (TextLayoutRequest) based on the current device state.
      * This moves the "configuration" logic out of OutputDevice.
      */
-    static vcl::text::TextLayoutRequest
+    static ::vcl::text::TextLayoutRequest
     CreateLayoutRequest(OUString& rStr, sal_Int32 nMinIndex, sal_Int32 nLen, double nPixelWidth,
                         SalLayoutFlags nFlags, const vcl::text::TextLayoutCache* pCache,
-                        const vcl::GraphicsState& rState,
-                        const vcl::font::FontRealization& rRealization, bool bRTL);
+                        const ::vcl::GraphicsState& rState,
+                        const ::vcl::font::FontRealization& rRealization, bool bRTL);
 
     static void PrepareJustification(const LayoutResources& rRes, KernArraySpan pDXArray,
                                      std::span<const sal_Bool> pKashidaArray, sal_Int32 nMinIndex,
                                      sal_Int32 nLen, std::optional<sal_Int32> nDrawMinCharPos,
                                      std::optional<sal_Int32> nDrawEndCharPos,
-                                     vcl::text::TextLayoutRequest& rLayoutArgs,
+                                     ::vcl::text::TextLayoutRequest& rLayoutArgs,
                                      double& rEndGlyphCoord);
 
     static basegfx::B2DPoint MapLogicalToDevicePos(const LayoutResources& rRes,
                                                    const Point& rLogicalPos);
     static void FillAlignmentContext(TextLayoutPositioning& rPos,
-                                     const vcl::text::TextLayoutRequest& rArgs,
+                                     const ::vcl::text::TextLayoutRequest& rArgs,
                                      double nEndGlyphCoord);
-    static void JustifyLayout(SalLayout& rLayout, vcl::text::TextLayoutRequest& rArgs);
-    static void ApplyHorizontalOffset(SalLayout& rLayout, const vcl::text::TextLayoutRequest& rArgs,
+    static void JustifyLayout(SalLayout& rLayout, ::vcl::text::TextLayoutRequest& rArgs);
+    static void ApplyHorizontalOffset(SalLayout& rLayout,
+                                      const ::vcl::text::TextLayoutRequest& rArgs,
                                       const TextLayoutPositioning& rPositioning);
     static void SetAnchorPoint(SalLayout& rLayout, const TextLayoutPositioning& rPositioning);
 
     // Layout Orchestration
     static std::unique_ptr<SalLayout>
-    Layout(const LayoutResources& rRes, vcl::text::TextLayoutRequest& rArgs, KernArraySpan pDXArray,
-           std::span<const sal_Bool> pKashidaArray, const Point& rLogicalPos,
-           const SalLayoutGlyphs* pGlyphs = nullptr);
+    Layout(const LayoutResources& rRes, ::vcl::text::TextLayoutRequest& rArgs,
+           KernArraySpan pDXArray, std::span<const sal_Bool> pKashidaArray,
+           const Point& rLogicalPos, const SalLayoutGlyphs* pGlyphs = nullptr);
 
     /** Fills a KernArray with logical widths and returns the total width. */
     static double FillPartialTextArray(const LayoutResources& rRes, const SalLayout& rLayout,
@@ -190,12 +183,12 @@ public:
 
     static bool PrepareNormalizedLayoutInput(const OUString& rOrigStr, sal_Int32 nMinIndex,
                                              sal_Int32& rLen, OUString& rStr,
-                                             const vcl::font::FontRealization& rFontRealization,
+                                             const ::vcl::font::FontRealization& rFontRealization,
                                              const vcl::text::TextLayoutCache*& rpLayoutCache,
                                              const SalLayoutGlyphs*& rpGlyphs);
 
     /** Calculates the total height of the font in device pixels, including emphasis marks. */
-    static double GetTextHeightPixel(const vcl::font::FontRealization& rRealization);
+    static double GetTextHeightPixel(const ::vcl::font::FontRealization& rRealization);
 
     /** Calculates the subpixel layout width from logical units. */
     static double CalculateLayoutWidth(const LayoutResources& rRes, tools::Long nLogicWidth);
@@ -217,17 +210,17 @@ public:
     static void StartTracking();
     static OutputDevice::FontMappingUseData FinishTracking();
     static bool IsTracking();
-    static void TrackLayoutFonts(const vcl::Font& rFont, const SalLayout* pLayout);
+    static void TrackLayoutFonts(const ::vcl::Font& rFont, const SalLayout* pLayout);
 
     // ResolveFallbacks moved to DefaultFallbackStrategy
 
     static void ApplyPositioning(const LayoutResources& rRes, SalLayout& rLayout,
-                                 vcl::text::TextLayoutRequest& rArgs, const Point& rLogicalPos,
+                                 ::vcl::text::TextLayoutRequest& rArgs, const Point& rLogicalPos,
                                  double nEndGlyphCoord);
 
     /** Executes the core layout loop: creates base layout, runs initial layout, and resolves fallbacks. */
     static std::unique_ptr<SalLayout> PerformTextLayout(const LayoutResources& rRes,
-                                                        vcl::text::TextLayoutRequest& rArgs,
+                                                        ::vcl::text::TextLayoutRequest& rArgs,
                                                         const SalLayoutGlyphs* pGlyphs);
 
     /** Orchestrates the complete layout process. */
@@ -307,23 +300,23 @@ public:
      * the ink.
      */
     static tools::Rectangle GetTextInkBounds(const SalLayout& rSalLayout,
-                                             const vcl::font::FontRealization& rFontRealization,
+                                             const ::vcl::font::FontRealization& rFontRealization,
                                              bool bApplyRotation = true);
 
     static void GetEmphasisMarkPositions(const SalLayout& rSalLayout,
-                                         const vcl::font::FontRealization& rFontRealization,
+                                         const ::vcl::font::FontRealization& rFontRealization,
                                          bool bEmphasisBelow, std::vector<Point>& rPoints);
 
     static basegfx::B2DHomMatrix
     CalculateOutlineTransform(const SalLayout& rLayout,
-                              const vcl::font::FontRealization& rRealization, double nXOffset);
+                              const ::vcl::font::FontRealization& rRealization, double nXOffset);
 
     static void GetWordLineSegments(const SalLayout& rSalLayout,
-                                    const vcl::font::FontRealization& rFontRealization,
+                                    const ::vcl::font::FontRealization& rFontRealization,
                                     std::vector<std::pair<double, double>>& rSegments);
 
     static void InitializeTextLineMetrics(const LogicalFontInstance* pFontInstance,
-                                          const vcl::Font& rFont, tools::Long nDPIY,
+                                          const ::vcl::Font& rFont, tools::Long nDPIY,
                                           tools::Long nSpaceWidth, tools::Long nBulletWidth);
 
     static void InitializeAboveTextLineMetrics(const LogicalFontInstance* pFontInstance,

@@ -8,38 +8,33 @@
  */
 
 #pragma once
-
-#include <text/TextLayoutEngine.hxx>
+#include <text/ILayoutFactory.hxx>
 #include <salgdi.hxx>
 #include <functional>
-#include <memory>
 
 namespace vcl::text
 {
-class GraphicLayoutFactory : public ILayoutFactory
+class SalLayoutFactory : public ILayoutFactory
 {
     std::function<SalGraphics*()> m_fnGetGraphics;
 
 public:
-    explicit GraphicLayoutFactory(std::function<SalGraphics*()> fnGetGraphics)
-        : m_fnGetGraphics(std::move(fnGetGraphics))
+    explicit SalLayoutFactory(std::function<SalGraphics*()> fn)
+        : m_fnGetGraphics(std::move(fn))
     {
     }
 
-    std::unique_ptr<SalLayout> CreateLayout(int nFallbackLevel) override
-    {
-        SalGraphics* pGraphics = m_fnGetGraphics();
-        if (!pGraphics)
-            return nullptr;
-        return pGraphics->GetTextLayout(nFallbackLevel);
-    }
-
-    void SetFont(LogicalFontInstance* pFont, int nFallbackLevel) override
+    std::unique_ptr<SalLayout> CreateLayout(LogicalFontInstance* pFont, int nFallbackLevel) override
     {
         SalGraphics* pGraphics = m_fnGetGraphics();
         if (pGraphics)
+        {
             pGraphics->SetFont(pFont, nFallbackLevel);
+            return pGraphics->GetTextLayout(nFallbackLevel);
+        }
+        return nullptr;
     }
 };
 
 } // namespace vcl::text
+/* vim:set shiftwidth=4 softtabstop=4 expandtab: */
