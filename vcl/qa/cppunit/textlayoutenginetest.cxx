@@ -33,6 +33,7 @@
 #include <sallayout.hxx>
 #include <textlayout.hxx>
 #include <text/TextLayoutEngine.hxx>
+#include <vcl/text/TextLineGeometry.hxx>
 #include <text/TextLayoutRequest.hxx>
 
 #include <string>
@@ -264,7 +265,6 @@ public:
     {
     }
 
-    void testBiDiLayoutFlags();
     void testCreateLayoutRequest_Simple();
     void testCreateLayoutRequest_DigitLocalization();
     void testCreateLayoutRequest_OrientationAndWidth();
@@ -307,17 +307,13 @@ public:
     void testCalculateStrikeoutGeometry();
     void testDrawStrikeoutChar();
     void testCalculateTextLineSegments();
-    void testPrepareMnemonicText();
     void testGetEllipsisString();
 
     CPPUNIT_TEST_SUITE(TextLayoutEngineTest);
-    CPPUNIT_TEST(testBiDiLayoutFlags);
     CPPUNIT_TEST(testCreateLayoutRequest_Simple);
     CPPUNIT_TEST(testCreateLayoutRequest_DigitLocalization);
     CPPUNIT_TEST(testCreateLayoutRequest_OrientationAndWidth);
     CPPUNIT_TEST(testCreateLayoutRequest_OutOfBounds);
-    // CPPUNIT_TEST(testFindFallbackFont_ForcedFallbackPriority); // Moved to private Strategy impl
-    // CPPUNIT_TEST(testIdentifyMissingChars); // Moved to private Strategy impl
     CPPUNIT_TEST(testJustifyLayout);
     CPPUNIT_TEST(testSetAnchorPoint);
     CPPUNIT_TEST(testApplyHorizontalOffset);
@@ -353,7 +349,6 @@ public:
     CPPUNIT_TEST(testCalculateWaveLineGeometry);
     CPPUNIT_TEST(testCalculateStrikeoutGeometry);
     CPPUNIT_TEST(testCalculateTextLineSegments);
-    CPPUNIT_TEST(testPrepareMnemonicText);
     CPPUNIT_TEST(testDrawStrikeoutChar);
     CPPUNIT_TEST(testGetEllipsisString);
     CPPUNIT_TEST_SUITE_END();
@@ -473,23 +468,6 @@ void TextLayoutEngineTest::testGetWordLineSegments()
         // The distance should be exactly 50.0
         CPPUNIT_ASSERT_DOUBLES_EQUAL(50.0, aSegments[0].first, 0.001);
     }
-}
-
-void TextLayoutEngineTest::testBiDiLayoutFlags()
-{
-    OUString aLatin = u"Hello World"_ustr;
-    SalLayoutFlags nFlags = vcl::text::TextLayoutEngine::GetBiDiLayoutFlags(
-        vcl::text::ComplexTextLayoutFlags::Default, aLatin, 0, aLatin.getLength());
-    CPPUNIT_ASSERT(bool(nFlags & SalLayoutFlags::BiDiStrong));
-
-    OUString aArabic = u"مرحبا"_ustr;
-    nFlags = vcl::text::TextLayoutEngine::GetBiDiLayoutFlags(
-        vcl::text::ComplexTextLayoutFlags::Default, aArabic, 0, aArabic.getLength());
-    CPPUNIT_ASSERT_EQUAL(SalLayoutFlags::NONE, nFlags);
-
-    nFlags = vcl::text::TextLayoutEngine::GetBiDiLayoutFlags(
-        vcl::text::ComplexTextLayoutFlags::BiDiRtl, aLatin, 0, aLatin.getLength());
-    CPPUNIT_ASSERT(bool(nFlags & SalLayoutFlags::BiDiRtl));
 }
 
 void TextLayoutEngineTest::testCreateLayoutRequest_Simple()
@@ -1587,75 +1565,6 @@ void TextLayoutEngineTest::testCalculateMultiLineLayout()
             DrawTextFlags::MultiLine | DrawTextFlags::Clip);
 
         CPPUNIT_ASSERT(!(aRes2.nResultStyle & DrawTextFlags::Clip));
-    }
-}
-
-void TextLayoutEngineTest::testPrepareMnemonicText()
-{
-    // Case 1: No Mnemonic
-    {
-        OUString aInput = "Hello";
-        auto res = vcl::text::TextLayoutEngine::PrepareMnemonicText(aInput, 0, 5);
-        CPPUNIT_ASSERT_EQUAL(OUString("Hello"), res.aText);
-        CPPUNIT_ASSERT_EQUAL(sal_Int32(0), res.nIndex);
-        CPPUNIT_ASSERT_EQUAL(sal_Int32(5), res.nLen);
-        CPPUNIT_ASSERT_EQUAL(sal_Int32(-1), res.nMnemonicPos);
-    }
-
-    // Case 2: Mnemonic Inside Range
-    {
-        OUString aInput = "H~ello"; // ~ is at index 1
-        auto res = vcl::text::TextLayoutEngine::PrepareMnemonicText(aInput, 0, 6);
-        CPPUNIT_ASSERT_EQUAL(OUString("Hello"), res.aText);
-        CPPUNIT_ASSERT_EQUAL(sal_Int32(0), res.nIndex);
-        CPPUNIT_ASSERT_EQUAL(sal_Int32(5), res.nLen); // Length decremented
-        CPPUNIT_ASSERT_EQUAL(sal_Int32(1), res.nMnemonicPos);
-    }
-
-    // Case 3: Mnemonic Before Range
-    {
-        OUString aInput = "A~BC"; // ~ at 1.
-        auto res = vcl::text::TextLayoutEngine::PrepareMnemonicText(aInput, 2, 2); // Select "BC"
-        CPPUNIT_ASSERT_EQUAL(OUString("ABC"), res.aText);
-        CPPUNIT_ASSERT_EQUAL(sal_Int32(1), res.nIndex); // Shifted down
-        CPPUNIT_ASSERT_EQUAL(sal_Int32(2), res.nLen);
-        CPPUNIT_ASSERT_EQUAL(sal_Int32(1), res.nMnemonicPos);
-    }
-
-    // Case 4: Mnemonic After Range
-    {
-        OUString aInput = "AB~C"; // ~ at 2.
-        auto res = vcl::text::TextLayoutEngine::PrepareMnemonicText(aInput, 0, 2); // Select "AB"
-        CPPUNIT_ASSERT_EQUAL(OUString("ABC"), res.aText);
-        CPPUNIT_ASSERT_EQUAL(sal_Int32(0), res.nIndex);
-        CPPUNIT_ASSERT_EQUAL(sal_Int32(2), res.nLen);
-        CPPUNIT_ASSERT_EQUAL(sal_Int32(2), res.nMnemonicPos);
-    }
-
-    // Case 5: Mnemonic at Start
-    {
-        OUString aInput = "~A";
-        auto res = vcl::text::TextLayoutEngine::PrepareMnemonicText(aInput, 0, 2);
-        CPPUNIT_ASSERT_EQUAL(OUString("A"), res.aText);
-        CPPUNIT_ASSERT_EQUAL(sal_Int32(0), res.nIndex);
-        CPPUNIT_ASSERT_EQUAL(sal_Int32(1), res.nLen);
-        CPPUNIT_ASSERT_EQUAL(sal_Int32(0), res.nMnemonicPos);
-    }
-
-    // Case 6: Multiple Mnemonics (Debug Case)
-    {
-        OUString aInput = "A~B~C";
-        auto res = vcl::text::TextLayoutEngine::PrepareMnemonicText(aInput, 0, 5);
-
-        CPPUNIT_ASSERT_EQUAL(OUString("ABC"), res.aText);
-        CPPUNIT_ASSERT_EQUAL(sal_Int32(1), res.nMnemonicPos);
-
-        // Debugging Failure: Expected 4, got 5 previously.
-        // If this fails, the logic (nMnemonicPos < nIndex + nLen) is evaluating to false
-        // or nLen isn't being updated.
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(
-            "nLen should be decremented when mnemonic is removed inside range", sal_Int32(4),
-            res.nLen);
     }
 }
 

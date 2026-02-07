@@ -14,6 +14,7 @@
 
 #include <vcl/dllapi.h>
 #include <vcl/fntstyle.hxx>
+#include <vcl/text/TextLineGeometry.hxx>
 
 #include <vector>
 
@@ -27,53 +28,10 @@ struct SAL_DLLPUBLIC WaveLineSegment
     tools::Long nHeight;
 };
 
-struct SAL_DLLPUBLIC WaveLineGeometry
-{
-    tools::Long nLineWidth;
-    std::vector<WaveLineSegment> aSegments;
-};
-
 struct SAL_DLLPUBLIC StrikeoutSegment
 {
     tools::Long nYOffset;
     tools::Long nHeight;
-};
-
-struct SAL_DLLPUBLIC StrikeoutGeometry
-{
-    std::vector<StrikeoutSegment> aSegments;
-};
-
-struct SAL_DLLPUBLIC TextLineSegment
-{
-    tools::Long nX;
-    tools::Long nWidth;
-};
-
-struct TextLineRequest
-{
-    FontLineStyle eUnderline;
-    FontLineStyle eOverline;
-    FontStrikeout eStrikeout;
-    bool bUnderlineAbove;
-    sal_Int32 nDPIX;
-    sal_Int32 nDPIY;
-};
-
-struct TextLineGeometry
-{
-    tools::Long nUnderlinePos1 = 0;
-    tools::Long nUnderlinePos2 = 0;
-    tools::Long nOverlinePos1 = 0;
-    tools::Long nOverlinePos2 = 0;
-    tools::Long nStrikeoutPos1 = 0;
-    tools::Long nStrikeoutPos2 = 0;
-    tools::Long nLineWidth = 0;
-    tools::Long nUnderlineWaveHeight = 0;
-    tools::Long nOverlineWaveHeight = 0;
-    bool bUnderlineIsWave = false;
-    bool bOverlineIsWave = false;
-    bool bStrikeoutIsChar = false;
 };
 
 class VCL_DLLPUBLIC TextDecorator
