@@ -306,6 +306,7 @@ public:
     void testDrawStrikeoutChar();
     void testCalculateTextLineSegments();
     void testPrepareMnemonicText();
+    void testGetEllipsisString();
 
     CPPUNIT_TEST_SUITE(TextLayoutEngineTest);
     CPPUNIT_TEST(testBiDiLayoutFlags);
@@ -352,6 +353,7 @@ public:
     CPPUNIT_TEST(testCalculateTextLineSegments);
     CPPUNIT_TEST(testPrepareMnemonicText);
     CPPUNIT_TEST(testDrawStrikeoutChar);
+    CPPUNIT_TEST(testGetEllipsisString);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -2038,6 +2040,27 @@ void TextLayoutEngineTest::testDrawStrikeoutChar()
         }
         CPPUNIT_ASSERT_MESSAGE("Zero width should NOT draw pixels", !bFoundBlack);
     }
+}
+
+void TextLayoutEngineTest::testGetEllipsisString()
+{
+    // A simple width calculator: 1 char = 10 units.
+    auto fnWidth = [](const OUString& s) { return s.getLength() * 10; };
+
+    OUString aText = "HelloWorld"; // 10 chars = 100 units.
+
+    // 1. Fits exactly
+    OUString sRes = vcl::text::TextLayoutEngine::GetEllipsisString(
+        aText, 100, DrawTextFlags::EndEllipsis, fnWidth);
+    CPPUNIT_ASSERT_EQUAL(aText, sRes);
+
+    // 2. Too small (Max 50 units -> 5 chars).
+    // Should return something like "H..." (4 chars = 40 units) or "He..." (50 units)
+    sRes = vcl::text::TextLayoutEngine::GetEllipsisString(aText, 50, DrawTextFlags::EndEllipsis,
+                                                          fnWidth);
+
+    CPPUNIT_ASSERT(sRes.endsWith("..."));
+    CPPUNIT_ASSERT(sRes.getLength() <= 5);
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TextLayoutEngineTest);
