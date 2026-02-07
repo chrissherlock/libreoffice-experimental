@@ -33,6 +33,7 @@
 #include <textlayout.hxx>
 #include <textlineinfo.hxx>
 #include <text/TextLayoutEngine.hxx>
+#include <vcl/text/DefaultFallbackStrategy.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
 #include <text/TextLayoutRequest.hxx>
@@ -221,145 +222,13 @@ vcl::text::TextLayoutRequest TextLayoutEngine::CreateLayoutRequest(
     return aLayoutArgs;
 }
 
-rtl::Reference<LogicalFontInstance>
-TextLayoutEngine::FindFallbackFont(const FontLookupCriteria& rCriteria, int nFallbackLevel,
-                                   OUString& rMissingCodes, bool& rHasUsedFallback,
-                                   SalLayoutGlyphsImpl* pGlyphsImpl)
-{
-    ImplFontCache& rFontCache = rCriteria.rCache;
-    LogicalFontInstance* pBaseFont = rCriteria.pReferenceFont;
-    const rtl::Reference<LogicalFontInstance>& pForcedFallback = rCriteria.pPriorityFallback;
+// Moved to DefaultFallbackStrategy::FindFallbackFont
 
-    if (!pBaseFont)
-    {
-        // Without a reference font, we can only return the forced fallback if available.
-        // We cannot perform a frantic search for "similar" fonts without a reference pattern.
-        if (!rHasUsedFallback && pForcedFallback)
-        {
-            rHasUsedFallback = true;
-            return pForcedFallback;
-        }
-        return nullptr;
-    }
+// Moved to DefaultFallbackStrategy::IdentifyMissingChars
 
-    vcl::font::FontSelectPattern aFontSelData(pBaseFont->GetFontSelectPattern());
+// Moved to DefaultFallbackStrategy::MergeFallback
 
-    rtl::Reference<LogicalFontInstance> pFallbackFont;
-
-    if (!rHasUsedFallback && pForcedFallback)
-    {
-        pFallbackFont = pForcedFallback;
-        rHasUsedFallback = true;
-    }
-    else if (pGlyphsImpl != nullptr)
-    {
-        pFallbackFont = pGlyphsImpl->GetFont();
-    }
-
-    if (!pFallbackFont)
-    {
-        pFallbackFont = rFontCache.GetGlyphFallbackFont(rCriteria, aFontSelData, nFallbackLevel,
-                                                        rMissingCodes);
-    }
-
-    return pFallbackFont;
-}
-
-OUString TextLayoutEngine::IdentifyMissingChars(vcl::text::TextLayoutRequest& rArgs)
-{
-    OUStringBuffer aMissingCodeBuf;
-
-    for (const auto& rRun : rArgs.maRuns)
-    {
-        for (auto i = rRun.m_nMinRunPos; i < rRun.m_nEndRunPos; ++i)
-        {
-            aMissingCodeBuf.append(rArgs.mrStr[i]);
-        }
-    }
-
-    return aMissingCodeBuf.makeStringAndClear();
-}
-
-void TextLayoutEngine::MergeFallback(std::unique_ptr<MultiSalLayout>& rMultiSalLayout,
-                                     std::unique_ptr<SalLayout>& rBaseLayout,
-                                     std::unique_ptr<SalLayout> pFallback,
-                                     const ImplLayoutRuns& rRuns, bool bIsLastLevel)
-{
-    if (!rMultiSalLayout)
-        rMultiSalLayout.reset(new MultiSalLayout(std::move(rBaseLayout)));
-
-    rMultiSalLayout->AddFallback(std::move(pFallback), rRuns);
-
-    if (bIsLastLevel)
-        rMultiSalLayout->SetIncomplete(true);
-}
-
-std::unique_ptr<SalLayout> TextLayoutEngine::ResolveMissingGlyphs(
-    std::unique_ptr<SalLayout> pBaseLayout, vcl::text::TextLayoutRequest& rLayoutArgs,
-    const SalLayoutGlyphs* pGlyphs, const FontLookupCriteria& rCriteria, ILayoutFactory& rFactory)
-{
-    LogicalFontInstance* pBaseFont = rCriteria.pReferenceFont;
-
-    std::unique_ptr<MultiSalLayout> pMultiSalLayout;
-    ImplLayoutRuns aSavedRuns = rLayoutArgs.maRuns;
-    rLayoutArgs.PrepareFallback(nullptr);
-    rLayoutArgs.mnFlags |= SalLayoutFlags::ForFallback;
-
-    OUString aMissingCodes = IdentifyMissingChars(rLayoutArgs);
-
-    SalLayoutGlyphsImpl* pGlyphsImpl = pGlyphs ? pGlyphs->Impl(1) : nullptr;
-    bool bHasUsedFallback = false;
-
-    for (int nFallbackLevel = 1; nFallbackLevel < MAX_FALLBACK; ++nFallbackLevel)
-    {
-        OUString oldMissingCodes = aMissingCodes;
-
-        rtl::Reference<LogicalFontInstance> pFallbackFont = FindFallbackFont(
-            rCriteria, nFallbackLevel, aMissingCodes, bHasUsedFallback, pGlyphsImpl);
-
-        if (!pFallbackFont)
-            break;
-
-        if (nFallbackLevel < MAX_FALLBACK - 1)
-        {
-            if (pBaseFont->GetFontFace() == pFallbackFont->GetFontFace())
-            {
-                if (aMissingCodes != oldMissingCodes)
-                    aMissingCodes = oldMissingCodes;
-                continue;
-            }
-        }
-
-        rFactory.SetFont(pFallbackFont.get(), nFallbackLevel);
-        std::unique_ptr<SalLayout> pFallback = rFactory.CreateLayout(nFallbackLevel);
-
-        if (pFallback)
-        {
-            rLayoutArgs.ResetPos();
-            if (pFallback->LayoutText(rLayoutArgs, pGlyphsImpl))
-            {
-                MergeFallback(pMultiSalLayout, pBaseLayout, std::move(pFallback),
-                              rLayoutArgs.maRuns, (nFallbackLevel == MAX_FALLBACK - 1));
-            }
-        }
-
-        if (pGlyphs)
-            pGlyphsImpl = pGlyphs->Impl(nFallbackLevel + 1);
-        if (!rLayoutArgs.PrepareFallback(pGlyphsImpl))
-            break;
-    }
-
-    if (pMultiSalLayout)
-    {
-        if (pMultiSalLayout->LayoutText(rLayoutArgs, nullptr))
-            pBaseLayout = std::move(pMultiSalLayout);
-        else
-            pBaseLayout = pMultiSalLayout->ReleaseBaseLayout();
-    }
-
-    rLayoutArgs.maRuns = std::move(aSavedRuns);
-    return pBaseLayout;
-}
+// Moved to DefaultFallbackStrategy::ResolveMissingGlyphs
 
 void TextLayoutEngine::JustifyLayout(SalLayout& rLayout, vcl::text::TextLayoutRequest& rArgs)
 {
@@ -688,25 +557,7 @@ public:
     }
 };
 
-std::unique_ptr<SalLayout> TextLayoutEngine::ResolveFallbacks(const LayoutResources& rRes,
-                                                              std::unique_ptr<SalLayout> pLayout,
-                                                              vcl::text::TextLayoutRequest& rArgs,
-                                                              const SalLayoutGlyphs* pGlyphs)
-{
-    if (rArgs.HasFallbackRun() && rRes.pFont->GetFontSelectPattern().mnHeight >= 3)
-    {
-        GraphicLayoutFactory aFactory(rRes.fnGetGraphics);
-
-        FontLookupCriteria aCriteria
-            = { *rRes.pFontCache, rRes.pFontCollection,
-                const_cast<LogicalFontInstance*>(rRes.pFont),
-                rtl::Reference<LogicalFontInstance>(
-                    const_cast<LogicalFontInstance*>(rRes.pForcedFallback)) };
-
-        return ResolveMissingGlyphs(std::move(pLayout), rArgs, pGlyphs, aCriteria, aFactory);
-    }
-    return pLayout;
-}
+// Moved to DefaultFallbackStrategy::ResolveFallbacks
 
 void TextLayoutEngine::ApplyPositioning(const LayoutResources& rRes, SalLayout& rLayout,
                                         vcl::text::TextLayoutRequest& rArgs,
@@ -737,16 +588,8 @@ std::unique_ptr<SalLayout> TextLayoutEngine::PerformTextLayout(const LayoutResou
 
     if (rArgs.HasFallbackRun() && rRes.pFont->GetFontSelectPattern().mnHeight >= 3)
     {
-        GraphicLayoutFactory aFactory(rRes.fnGetGraphics);
-
-        FontLookupCriteria aCriteria
-            = { *rRes.pFontCache, rRes.pFontCollection,
-                const_cast<LogicalFontInstance*>(rRes.pFont),
-                rtl::Reference<LogicalFontInstance>(
-                    const_cast<LogicalFontInstance*>(rRes.pForcedFallback)) };
-
-        pSalLayout
-            = ResolveMissingGlyphs(std::move(pSalLayout), rArgs, pGlyphs, aCriteria, aFactory);
+        pSalLayout = DefaultFallbackStrategy().ResolveFallbacks(rRes, std::move(pSalLayout), rArgs,
+                                                                pGlyphs);
     }
 
     return pSalLayout;

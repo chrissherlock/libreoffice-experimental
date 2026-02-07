@@ -23,6 +23,7 @@
 #include <textlineinfo.hxx>
 
 #include <vector>
+#include <vcl/text/LayoutResources.hxx>
 #include <vcl/text/TextGeometry.hxx>
 #include <vcl/text/TextDecorator.hxx>
 #include <memory>
@@ -87,19 +88,7 @@ struct TextLayoutPositioning
     double nEndGlyphCoord; // For RTL alignment (0 if unused)
 };
 
-struct LayoutResources
-{
-    const LogicalFontInstance* pFont;
-    const CoordinateMapper& rMapper;
-    ImplFontCache* pFontCache;
-    vcl::font::PhysicalFontCollection* pFontCollection;
-    const LogicalFontInstance* pForcedFallback;
-    std::function<SalGraphics*()> fnGetGraphics;
-    bool bRTLEnabled;
-    bool bSubpixelPositioning;
-    const vcl::GraphicsState& rGraphicsState;
-    const vcl::font::FontRealization& rFontRealization;
-};
+// LayoutResources moved to vcl/text/LayoutResources.hxx
 
 struct SAL_DLLPUBLIC MultiLineLayout
 {
@@ -170,40 +159,6 @@ public:
                         const vcl::GraphicsState& rState,
                         const vcl::font::FontRealization& rRealization, bool bRTL);
 
-    /**
-     * Finds a suitable fallback font for the given missing characters.
-     * Considers forced fallbacks, cached glyphs, and system font fallback.
-     */
-    static rtl::Reference<LogicalFontInstance> FindFallbackFont(const FontLookupCriteria& rCriteria,
-                                                                int nFallbackLevel,
-                                                                OUString& rMissingCodes,
-                                                                bool& rHasUsedFallback,
-                                                                SalLayoutGlyphsImpl* pGlyphsImpl);
-
-    /**
-     * Scans the layout arguments to identify which characters need fallback.
-     * Returns a string containing all missing characters found in fallback runs.
-     */
-    static OUString IdentifyMissingChars(vcl::text::TextLayoutRequest& rArgs);
-
-    /**
-     * Merges a fallback layout into the main layout container.
-     * Promotes the base layout to a MultiSalLayout if necessary.
-     */
-    static void MergeFallback(std::unique_ptr<MultiSalLayout>& rMultiSalLayout,
-                              std::unique_ptr<SalLayout>& rBaseLayout,
-                              std::unique_ptr<SalLayout> pFallback, const ImplLayoutRuns& rRuns,
-                              bool bIsLastLevel);
-
-    /**
-     * Iteratively finds fallback fonts and creates layouts to resolve characters
-     * missing from the base layout.
-     */
-    static std::unique_ptr<SalLayout>
-    ResolveMissingGlyphs(std::unique_ptr<SalLayout> pBaseLayout,
-                         vcl::text::TextLayoutRequest& rLayoutArgs, const SalLayoutGlyphs* pGlyphs,
-                         const FontLookupCriteria& rCriteria, ILayoutFactory& rFactory);
-
     static void PrepareJustification(const LayoutResources& rRes, KernArraySpan pDXArray,
                                      std::span<const sal_Bool> pKashidaArray, sal_Int32 nMinIndex,
                                      sal_Int32 nLen, std::optional<sal_Int32> nDrawMinCharPos,
@@ -264,10 +219,7 @@ public:
     static bool IsTracking();
     static void TrackLayoutFonts(const vcl::Font& rFont, const SalLayout* pLayout);
 
-    static std::unique_ptr<SalLayout> ResolveFallbacks(const LayoutResources& rRes,
-                                                       std::unique_ptr<SalLayout> pLayout,
-                                                       vcl::text::TextLayoutRequest& rArgs,
-                                                       const SalLayoutGlyphs* pGlyphs);
+    // ResolveFallbacks moved to DefaultFallbackStrategy
 
     static void ApplyPositioning(const LayoutResources& rRes, SalLayout& rLayout,
                                  vcl::text::TextLayoutRequest& rArgs, const Point& rLogicalPos,
