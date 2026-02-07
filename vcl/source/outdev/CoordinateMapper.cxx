@@ -25,6 +25,7 @@
 
 #include <vcl/rendercontext/ImplMapRes.hxx>
 #include <vcl/lineinfo.hxx>
+#include <vcl/mapmod.hxx>
 #include <vcl/region.hxx>
 #include <vcl/outdev.hxx>
 
