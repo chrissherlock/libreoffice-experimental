@@ -374,7 +374,7 @@ public:
     };
 
     static void GetGlyphRectsFromLayout(const SalLayout& rLayout, const Point& rStartPt,
-                                        const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen,
+                                        const OUString& rStr, sal_Int32 nLen,
                                         std::vector<tools::Rectangle>& rRects);
 
     static MnemonicGeometry

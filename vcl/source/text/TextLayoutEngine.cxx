@@ -1631,8 +1631,7 @@ std::unique_ptr<SalLayout> TextLayoutEngine::GetStrikeoutCharLayout(const Layout
 }
 
 void TextLayoutEngine::GetGlyphRectsFromLayout(const SalLayout& rLayout, const Point& rStartPt,
-                                               const OUString& rStr, sal_Int32 nIndex,
-                                               sal_Int32 nLen,
+                                               const OUString& rStr, sal_Int32 nLen,
                                                std::vector<tools::Rectangle>& rRects)
 {
     rRects.clear();
@@ -1677,9 +1676,6 @@ void TextLayoutEngine::GetGlyphRectsFromLayout(const SalLayout& rLayout, const P
 
         nPrevX = nCurrX;
     }
-
-    // Fix 3: Suppress unused parameter warnings
-    (void)nIndex;
 }
 } // namespace vcl::text
 
