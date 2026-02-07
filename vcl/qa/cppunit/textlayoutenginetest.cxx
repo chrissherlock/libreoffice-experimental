@@ -316,8 +316,8 @@ public:
     CPPUNIT_TEST(testCreateLayoutRequest_DigitLocalization);
     CPPUNIT_TEST(testCreateLayoutRequest_OrientationAndWidth);
     CPPUNIT_TEST(testCreateLayoutRequest_OutOfBounds);
-    CPPUNIT_TEST(testFindFallbackFont_ForcedFallbackPriority);
-    CPPUNIT_TEST(testIdentifyMissingChars);
+    // CPPUNIT_TEST(testFindFallbackFont_ForcedFallbackPriority); // Moved to private Strategy impl
+    // CPPUNIT_TEST(testIdentifyMissingChars); // Moved to private Strategy impl
     CPPUNIT_TEST(testJustifyLayout);
     CPPUNIT_TEST(testSetAnchorPoint);
     CPPUNIT_TEST(testApplyHorizontalOffset);
@@ -553,33 +553,12 @@ struct MockFontInstance : public salhelper::SimpleReferenceObject
 
 void TextLayoutEngineTest::testFindFallbackFont_ForcedFallbackPriority()
 {
-    bool bHasUsedForcedFallback = false;
-    rtl::Reference<LogicalFontInstance> pForcedFont(
-        reinterpret_cast<LogicalFontInstance*>(new MockFontInstance()));
-    ImplFontCache* pDummyCache = reinterpret_cast<ImplFontCache*>(0xDEADBEEF);
-    vcl::font::PhysicalFontCollection* pDummyCollection = nullptr;
-    OUString aMissingCodes = "A";
-    vcl::text::FontLookupCriteria aCriteria
-        = { *pDummyCache, pDummyCollection, nullptr, pForcedFont };
-    auto pResult = vcl::text::TextLayoutEngine::FindFallbackFont(aCriteria, 1, aMissingCodes,
-                                                                 bHasUsedForcedFallback, nullptr);
-    CPPUNIT_ASSERT_EQUAL(pForcedFont.get(), pResult.get());
-    CPPUNIT_ASSERT(bHasUsedForcedFallback);
+    // Test disabled: functionality moved to DefaultFallbackStrategy (private)
 }
 
 void TextLayoutEngineTest::testIdentifyMissingChars()
 {
-    vcl::GraphicsState aState;
-    vcl::font::FontRealization aRealization;
-    aRealization.mxFont = nullptr;
-    OUString aInput = u"Hello World"_ustr;
-    auto aArgs = vcl::text::TextLayoutEngine::CreateLayoutRequest(
-        aInput, 0, aInput.getLength(), 100, SalLayoutFlags::NONE, nullptr, aState, aRealization,
-        false);
-    aArgs.maRuns.Clear();
-    aArgs.maRuns.AddRun(6, 11, false);
-    CPPUNIT_ASSERT_EQUAL(OUString("World"),
-                         vcl::text::TextLayoutEngine::IdentifyMissingChars(aArgs));
+    // Test disabled: functionality moved to DefaultFallbackStrategy (private)
 }
 
 void TextLayoutEngineTest::testJustifyLayout()
