@@ -27,6 +27,7 @@ class PhysicalFontCollection;
 
 namespace vcl::text
 {
+class ILayoutFactory;
 struct FontLookupCriteria;
 
 class VCL_DLLPUBLIC DefaultFallbackStrategy : public IFontFallbackStrategy
@@ -39,12 +40,10 @@ public:
 
 private:
     // Helper methods moved from TextLayoutEngine
-    static std::unique_ptr<SalLayout>
-    ResolveMissingGlyphs(std::unique_ptr<SalLayout> pBaseLayout,
-                         vcl::text::TextLayoutRequest& rLayoutArgs, const SalLayoutGlyphs* pGlyphs,
-                         const FontLookupCriteria& rCriteria,
-                         const LayoutResources&
-                             rRes); // Note: Signature might need adjustment to match extracted code
+    static std::unique_ptr<SalLayout> ResolveMissingGlyphs(
+        std::unique_ptr<SalLayout> pBaseLayout, vcl::text::TextLayoutRequest& rLayoutArgs,
+        const SalLayoutGlyphs* pGlyphs, const FontLookupCriteria& rCriteria,
+        ILayoutFactory* pFactory); // Note: Signature might need adjustment to match extracted code
 
     static void MergeFallback(std::unique_ptr<MultiSalLayout>& rMultiSalLayout,
                               std::unique_ptr<SalLayout>& rBaseLayout,
