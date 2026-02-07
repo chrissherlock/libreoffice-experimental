@@ -776,23 +776,16 @@ double OutputDevice::GetPartialTextArray(const OUString& rStr, KernArray* pKernA
 void OutputDevice::GetCaretPositions(const OUString& rStr, KernArray& rCaretPos, sal_Int32 nIndex,
                                      sal_Int32 nLen, const SalLayoutGlyphs* pGlyphs) const
 {
-    if (!InitFont())
-        return;
+    if (!InitFont()) return;
 
-    vcl::text::LayoutResources aResources
-        = { mpFontRealization->mxFont.get(),
-            *mpMapper,
-            &GetFontCache(),
-            GetFontCollection(),
-            mpForcedFallbackInstance.get(),
-            [this]() {
-                const_cast<OutputDevice*>(this)->AcquireGraphics();
-                return mpGraphics;
-            },
-            IsRTLEnabled(),
-            IsMapModeEnabled() || isSubpixelPositioning() || SupportsSubpixelPositioning(),
-            *mpGraphicsState,
-            *mpFontRealization };
+    vcl::text::LayoutResources aResources = {
+        mpFontRealization->mxFont.get(), *mpMapper, &GetFontCache(), GetFontCollection(),
+        mpForcedFallbackInstance.get(),
+        [this]() { const_cast<OutputDevice*>(this)->AcquireGraphics(); return mpGraphics; },
+        IsRTLEnabled(),
+        IsMapModeEnabled() || isSubpixelPositioning() || SupportsSubpixelPositioning(),
+        *mpGraphicsState, *mpFontRealization
+    };
 
     vcl::text::TextLayoutEngine::GetCaretPositions(
         aResources, vcl::text::TextSpan{ rStr, nIndex, nLen }, rCaretPos,
@@ -902,23 +895,16 @@ sal_Int32 OutputDevice::GetTextBreak(const OUString& rStr, tools::Long nTextWidt
                                      const vcl::text::TextLayoutCache* pLayoutCache,
                                      const SalLayoutGlyphs* pGlyphs) const
 {
-    if (!InitFont())
-        return -1;
+    if (!InitFont()) return -1;
 
-    vcl::text::LayoutResources aResources
-        = { mpFontRealization->mxFont.get(),
-            *mpMapper,
-            &GetFontCache(),
-            GetFontCollection(),
-            mpForcedFallbackInstance.get(),
-            [this]() {
-                const_cast<OutputDevice*>(this)->AcquireGraphics();
-                return mpGraphics;
-            },
-            IsRTLEnabled(),
-            IsMapModeEnabled() || isSubpixelPositioning() || SupportsSubpixelPositioning(),
-            *mpGraphicsState,
-            *mpFontRealization };
+    vcl::text::LayoutResources aResources = {
+        mpFontRealization->mxFont.get(), *mpMapper, &GetFontCache(), GetFontCollection(),
+        mpForcedFallbackInstance.get(),
+        [this]() { const_cast<OutputDevice*>(this)->AcquireGraphics(); return mpGraphics; },
+        IsRTLEnabled(),
+        IsMapModeEnabled() || isSubpixelPositioning() || SupportsSubpixelPositioning(),
+        *mpGraphicsState, *mpFontRealization
+    };
 
     return vcl::text::TextLayoutEngine::GetTextBreak(
         aResources, vcl::text::TextSpan{ rStr, nIndex, nLen }, nTextWidth, nCharExtra,
@@ -1509,36 +1495,25 @@ bool OutputDevice::GetTextOutlines(basegfx::B2DPolyPolygonVector& rVector, const
                                    sal_uLong nLayoutWidth, KernArraySpan pDXArray,
                                    std::span<const sal_Bool> pKashidaArray) const
 {
-    if (!InitFont())
-        return false;
+    if (!InitFont()) return false;
 
+    // Temporarily disable MapMode to get raw pixel outlines (legacy behavior)
     bool bOldMap = mpMapper->IsMapModeEnabled();
+    if (bOldMap) mpMapper->EnableMapMode(false);
 
-    if (bOldMap)
-    {
-        mpMapper->EnableMapMode(false);
-    }
-
-    vcl::text::LayoutResources aResources
-        = { mpFontRealization->mxFont.get(), *mpMapper, &GetFontCache(), GetFontCollection(),
-            mpForcedFallbackInstance.get(),
-            [this]() {
-                const_cast<OutputDevice*>(this)->AcquireGraphics();
-                return mpGraphics;
-            },
-            IsRTLEnabled(),
-            // MapMode is explicitly disabled above, so Subpixel might be false depending on config
-            IsMapModeEnabled() || isSubpixelPositioning() || SupportsSubpixelPositioning(),
-            *mpGraphicsState, *mpFontRealization };
+    vcl::text::LayoutResources aResources = {
+        mpFontRealization->mxFont.get(), *mpMapper, &GetFontCache(), GetFontCollection(),
+        mpForcedFallbackInstance.get(),
+        [this]() { const_cast<OutputDevice*>(this)->AcquireGraphics(); return mpGraphics; },
+        IsRTLEnabled(),
+        IsMapModeEnabled() || isSubpixelPositioning() || SupportsSubpixelPositioning(),
+        *mpGraphicsState, *mpFontRealization
+    };
 
     bool bRet = vcl::text::TextLayoutEngine::GetTextOutlines(
         aResources, rVector, rStr, nBase, nIndex, nLen, nLayoutWidth, pDXArray, pKashidaArray);
 
-    if (bOldMap)
-    {
-        mpMapper->EnableMapMode(bOldMap);
-    }
-
+    if (bOldMap) mpMapper->EnableMapMode(bOldMap);
     return bRet;
 }
 
