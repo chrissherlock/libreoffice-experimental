@@ -13,6 +13,8 @@
 #include <vector>
 #include <tools/long.hxx>
 #include <vcl/glyphitemcache.hxx>
+#include <vcl/text/TextSpan.hxx>
+#include <vcl/text/LayoutCacheData.hxx>
 
 #if HAVE_MORE_FONTS
 // must be declared before inclusion of test/bootstrapfixture.hxx

@@ -13,6 +13,8 @@
 #include <vcl/outdev.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/vcllayout.hxx>
+#include <vcl/text/LayoutCacheData.hxx>
+#include <vcl/text/TextSpan.hxx>
 #include <vcl/text/TextRecordingState.hxx>
 #include <vcl/text/TextLayoutData.hxx>
 

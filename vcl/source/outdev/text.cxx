@@ -31,6 +31,8 @@
 #include <vcl/metafile/ScopedMetaGroup.hxx>
 #include <vcl/mnemonic.hxx>
 #include <vcl/rendercontext/SystemTextColorFlags.hxx>
+#include <vcl/text/LayoutCacheData.hxx>
+#include <vcl/text/TextSpan.hxx>
 #include <vcl/text/TextLayoutData.hxx>
 #include <vcl/text/TextRecordingDispatcher.hxx>
 #include <vcl/textrectinfo.hxx>
@@ -43,6 +45,7 @@
 #include <drawmode.hxx>
 #include <font/FontController.hxx>
 #include <text/TextLayoutEngine.hxx>
+#include <vcl/text/MultiLineEngine.hxx>
 #include <text/TextAnalyzer.hxx>
 #include <text/AccessibilityRecorder.hxx>
 #include <text/MeasurementRecorder.hxx>
@@ -90,7 +93,7 @@ void OutputDevice::ImplInitTextColor()
 OUString OutputDevice::GetEllipsisString(const OUString& rStr, tools::Long nMaxWidth,
                                          DrawTextFlags nStyle) const
 {
-    return vcl::text::TextLayoutEngine::GetEllipsisString(
+    return vcl::text::MultiLineEngine::GetEllipsisString(
         rStr, nMaxWidth, nStyle, [this](const OUString& s) { return GetTextWidth(s); });
 }
 

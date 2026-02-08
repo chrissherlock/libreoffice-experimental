@@ -80,6 +80,8 @@
 #include <vcl/pdfread.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/settings.hxx>
+#include <vcl/text/TextSpan.hxx>
+#include <vcl/text/LayoutCacheData.hxx>
 #include <strhelper.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/vectorgraphicdata.hxx>

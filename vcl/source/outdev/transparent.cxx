@@ -34,6 +34,8 @@
 #include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/svapp.hxx>
+#include <vcl/text/TextSpan.hxx>
+#include <vcl/text/LayoutCacheData.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/BitmapWriteAccess.hxx>
 

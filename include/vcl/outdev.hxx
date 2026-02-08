@@ -175,14 +175,11 @@ VCL_DLLPUBLIC void InvertFocusRect(vcl::RenderContext& rRenderContext, const too
 * OK.
 */
 
-namespace vcl::text {
-    struct TextSpan
+namespace vcl::text
 {
-    const OUString& Text;
-    sal_Int32 Index;
-    sal_Int32 Length;
-};
-    struct LayoutConstraints
+struct TextSpan;
+
+struct LayoutConstraints
 {
     Point LogicalPos = Point(0, 0);
     tools::Long LogicalWidth = 0;
@@ -190,12 +187,10 @@ namespace vcl::text {
     std::span<const sal_Bool> pKashidaArray = {};
     SalLayoutFlags Flags = SalLayoutFlags::NONE;
 };
-    struct LayoutCacheData
-{
-    const TextLayoutCache* pCache = nullptr;
-    const SalLayoutGlyphs* pGlyphs = nullptr;
-};
-    struct RenderSelection
+
+struct LayoutCacheData;
+
+struct RenderSelection
 {
     std::optional<sal_Int32> DrawOriginCluster;
     std::optional<sal_Int32> DrawMinCharPos;

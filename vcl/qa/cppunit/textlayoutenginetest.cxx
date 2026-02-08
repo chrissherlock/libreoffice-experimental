@@ -37,6 +37,7 @@
 #include <sallayout.hxx>
 #include <textlayout.hxx>
 #include <text/TextLayoutEngine.hxx>
+#include <vcl/text/MultiLineEngine.hxx>
 #include <vcl/text/TextLineGeometry.hxx>
 #include <text/TextLayoutRequest.hxx>
 
@@ -1535,14 +1536,14 @@ void TextLayoutEngineTest::testGetEllipsisString()
     OUString aText = "HelloWorld"; // 10 chars = 100 units.
 
     // 1. Fits exactly
-    OUString sRes = vcl::text::TextLayoutEngine::GetEllipsisString(
+    OUString sRes = vcl::text::MultiLineEngine::GetEllipsisString(
         aText, 100, DrawTextFlags::EndEllipsis, fnWidth);
     CPPUNIT_ASSERT_EQUAL(aText, sRes);
 
     // 2. Too small (Max 50 units -> 5 chars).
     // Should return something like "H..." (4 chars = 40 units) or "He..." (50 units)
-    sRes = vcl::text::TextLayoutEngine::GetEllipsisString(aText, 50, DrawTextFlags::EndEllipsis,
-                                                          fnWidth);
+    sRes = vcl::text::MultiLineEngine::GetEllipsisString(aText, 50, DrawTextFlags::EndEllipsis,
+                                                         fnWidth);
 
     CPPUNIT_ASSERT(sRes.endsWith("..."));
     CPPUNIT_ASSERT(sRes.getLength() <= 5);

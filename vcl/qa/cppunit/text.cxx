@@ -14,6 +14,8 @@
 #include <tools/mapunit.hxx>
 
 #include <vcl/BitmapReadAccess.hxx>
+#include <vcl/text/TextSpan.hxx>
+#include <vcl/text/LayoutCacheData.hxx>
 #include <comphelper/errcode.hxx>
 #include <vcl/fntstyle.hxx>
 #include <vcl/glyphitem.hxx>

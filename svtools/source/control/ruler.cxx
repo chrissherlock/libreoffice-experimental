@@ -27,6 +27,8 @@
 #include <vcl/vcllayout.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/ptrstyle.hxx>
+#include <vcl/text/TextSpan.hxx>
+#include <vcl/text/LayoutCacheData.hxx>
 #include <sal/log.hxx>
 
 #include <svtools/ruler.hxx>
