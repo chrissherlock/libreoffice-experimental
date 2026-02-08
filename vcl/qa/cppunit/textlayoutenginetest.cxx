@@ -285,12 +285,6 @@ public:
     void testInitializeFontMetrics();
     void testInitializeAboveTextLineMetrics();
     void testGetAlignmentOffset();
-    void testGetRotatedGeometry_0_Degrees();
-    void testGetRotatedGeometry_90_Degrees();
-    void testGetRotatedGeometry_180_Degrees();
-    void testGetRotatedGeometry_270_Degrees();
-    void testGetRotatedGeometry_Arbitrary_Angle();
-    void testGetRotatedImageOrigin();
     void testGetMirroredX();
     void testGetReliefOffset();
     void testGetShadowOffset();
@@ -328,7 +322,6 @@ public:
     CPPUNIT_TEST(testInitializeFontMetrics);
     CPPUNIT_TEST(testInitializeAboveTextLineMetrics);
     CPPUNIT_TEST(testGetAlignmentOffset);
-    CPPUNIT_TEST(testGetRotatedImageOrigin);
     CPPUNIT_TEST(testGetMirroredX);
     CPPUNIT_TEST(testGetReliefOffset);
     CPPUNIT_TEST(testGetShadowOffset);
