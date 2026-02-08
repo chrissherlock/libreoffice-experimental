@@ -82,15 +82,7 @@ struct TextLayoutPositioning
     double nEndGlyphCoord; // For RTL alignment (0 if unused)
 };
 
-// LayoutResources moved to vcl/text/LayoutResources.hxx
-
-struct SAL_DLLPUBLIC MultiLineLayout
-{
-    ImplMultiTextLineInfo aLineInfo;
-    OUString aLastLine;
-    sal_Int32 nFormatLines = 0;
-    DrawTextFlags nResultStyle = DrawTextFlags::NONE;
-};
+struct MultiLineLayout;
 
 class VCL_DLLPUBLIC TextLayoutEngine
 {
@@ -235,21 +227,9 @@ public:
                                   KernArray& rCaretPos, const vcl::text::LayoutCacheData& rCache);
 
     /** Orchestrates finding the character index where text must break for a given width. */
-    static sal_Int32 GetTextBreak(const LayoutResources& rRes, const TextSpan& rSpan,
-                                  tools::Long nMaxLineWidth, tools::Long nCharExtra,
-                                  const vcl::text::LayoutCacheData& rCache);
-
     /** Determines if the text at the specified index and length is Right-to-Left (RTL). */
     static bool GetTextIsRTL(const LayoutResources& rRes, const OUString& rString, sal_Int32 nIndex,
                              sal_Int32 nLen);
-
-    static sal_Int32 GetTextBreakArray(const LayoutResources& rRes, const TextSpan& rSpan,
-                                       tools::Long nTextWidth,
-                                       std::optional<sal_Unicode> nHyphenChar,
-                                       std::optional<sal_Int32*> pHyphenPos, tools::Long nCharExtra,
-                                       KernArraySpan aKernArray,
-                                       const vcl::text::LayoutCacheData& rCache);
-
     /** Orchestrates the calculation of text bounding rectangles in logical units. */
     static bool GetLogicalTextBoundRect(const LayoutResources& rRes, basegfx::B2DRectangle& rRect,
                                         const OUString& rStr, sal_Int32 nBase, sal_Int32 nIndex,

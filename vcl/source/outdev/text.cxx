@@ -912,7 +912,7 @@ sal_Int32 OutputDevice::GetTextBreak(const OUString& rStr, tools::Long nTextWidt
         *mpGraphicsState, *mpFontRealization
     };
 
-    return vcl::text::TextLayoutEngine::GetTextBreak(
+    return vcl::text::MultiLineEngine::GetTextBreak(
         aResources, vcl::text::TextSpan{ rStr, nIndex, nLen }, nTextWidth, nCharExtra,
         vcl::text::LayoutCacheData{ pLayoutCache, pGlyphs });
 }
@@ -943,7 +943,7 @@ sal_Int32 OutputDevice::GetTextBreakArray(const OUString& rStr, tools::Long nTex
             *mpGraphicsState,
             *mpFontRealization };
 
-    return vcl::text::TextLayoutEngine::GetTextBreakArray(
+    return vcl::text::MultiLineEngine::GetTextBreakArray(
         aResources, vcl::text::TextSpan{ rStr, nIndex, nLen }, nTextWidth, nHyphenChar, pHyphenPos,
         nCharExtra, aKernArray, vcl::text::LayoutCacheData{ pLayoutCache, pGlyphs });
 }
@@ -1117,7 +1117,7 @@ void OutputDevice::ImplDrawTextMultiLine(OutputDevice& rTargetDevice, const tool
         return;
 
     vcl::text::MultiLineLayout aLayout;
-    vcl::text::TextLayoutEngine::CalculateMultiLineLayout(rLayout, aLayout, rRect, nTextHeight,
+    vcl::text::MultiLineEngine::CalculateMultiLineLayout(rLayout, aLayout, rRect, nTextHeight,
                                                           nWidth, nHeight, rStr, nStyle);
     nStyle = aLayout.nResultStyle;
 

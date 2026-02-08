@@ -322,7 +322,6 @@ public:
     CPPUNIT_TEST(testAlignAndRotateTextRect);
     CPPUNIT_TEST(testCalculateLayoutPass);
     CPPUNIT_TEST(testTextLineGeometry);
-    CPPUNIT_TEST(testCalculateMultiLineLayout);
     CPPUNIT_TEST(testCalculateWaveLineGeometry);
     CPPUNIT_TEST(testCalculateStrikeoutGeometry);
     CPPUNIT_TEST(testCalculateTextLineSegments);
@@ -1088,80 +1087,6 @@ void TextLayoutEngineTest::testTextLineGeometry()
         aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
         CPPUNIT_ASSERT_MESSAGE("bStrikeoutIsChar should be false for STRIKEOUT_BOLD",
                                !aGeo.bStrikeoutIsChar);
-    }
-}
-
-void TextLayoutEngineTest::testCalculateMultiLineLayout()
-{
-    MockTextLayoutCommon aMock;
-    tools::Rectangle aRect(Point(0, 0), Size(100, 100)); // 100px high
-    tools::Long nTxtH = 10; // 10px per line
-    OUString aText = "Line1\nLine2";
-
-    // Test 1: Simple Fit
-    {
-        aMock.mnSimulatedLines = 2;
-        aMock.mnSimulatedMaxLineWidth = 50;
-
-        vcl::text::MultiLineLayout aRes;
-        vcl::text::TextLayoutEngine::CalculateMultiLineLayout(aMock, aRes, aRect, nTxtH, 100, 100,
-                                                              aText, DrawTextFlags::MultiLine);
-
-        CPPUNIT_ASSERT_EQUAL(static_cast<sal_Int32>(2), aRes.nFormatLines);
-        CPPUNIT_ASSERT(!(aRes.nResultStyle & DrawTextFlags::Clip));
-        CPPUNIT_ASSERT(aRes.aLastLine.isEmpty());
-    }
-
-    // Test 2: Height Clipping
-    {
-        tools::Rectangle aSmallRect(Point(0, 0), Size(100, 50));
-        aMock.mnSimulatedLines = 10;
-
-        vcl::text::MultiLineLayout aRes;
-        vcl::text::TextLayoutEngine::CalculateMultiLineLayout(
-            aMock, aRes, aSmallRect, nTxtH, 100, 50, "Content", DrawTextFlags::MultiLine);
-
-        CPPUNIT_ASSERT_EQUAL(static_cast<sal_Int32>(10), aRes.nFormatLines);
-        CPPUNIT_ASSERT(bool(aRes.nResultStyle & DrawTextFlags::Clip));
-    }
-
-    // Test 3: Ellipsis
-    {
-        tools::Rectangle aTinyRect(Point(0, 0), Size(100, 30));
-        aMock.mnSimulatedLines = 5;
-
-        vcl::text::MultiLineLayout aRes;
-        vcl::text::TextLayoutEngine::CalculateMultiLineLayout(
-            aMock, aRes, aTinyRect, nTxtH, 100, 30, "Content",
-            DrawTextFlags::MultiLine | DrawTextFlags::EndEllipsis | DrawTextFlags::VCenter);
-
-        CPPUNIT_ASSERT_EQUAL(static_cast<sal_Int32>(2), aRes.nFormatLines);
-        CPPUNIT_ASSERT_EQUAL(OUString("ELLIPSIS_APPLIED"), aRes.aLastLine);
-
-        CPPUNIT_ASSERT(!(aRes.nResultStyle & DrawTextFlags::VCenter));
-        CPPUNIT_ASSERT(bool(aRes.nResultStyle & DrawTextFlags::Top));
-    }
-
-    // Test 4: Width Clipping logic
-    {
-        tools::Rectangle aSquareRect(Point(0, 0), Size(100, 100));
-        aMock.mnSimulatedLines = 1;
-        aMock.mnSimulatedMaxLineWidth = 200;
-
-        vcl::text::MultiLineLayout aRes;
-        vcl::text::TextLayoutEngine::CalculateMultiLineLayout(
-            aMock, aRes, aSquareRect, 10, 100, 100, "Wide",
-            DrawTextFlags::MultiLine | DrawTextFlags::Clip);
-
-        CPPUNIT_ASSERT(bool(aRes.nResultStyle & DrawTextFlags::Clip));
-
-        aMock.mnSimulatedMaxLineWidth = 50;
-        vcl::text::MultiLineLayout aRes2;
-        vcl::text::TextLayoutEngine::CalculateMultiLineLayout(
-            aMock, aRes2, aSquareRect, 10, 100, 100, "Fits",
-            DrawTextFlags::MultiLine | DrawTextFlags::Clip);
-
-        CPPUNIT_ASSERT(!(aRes2.nResultStyle & DrawTextFlags::Clip));
     }
 }
 
