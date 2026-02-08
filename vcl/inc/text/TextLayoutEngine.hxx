@@ -326,7 +326,6 @@ public:
     static OUString
     GetEllipsisString(const OUString& rStr, tools::Long nMaxWidth, DrawTextFlags nStyle,
                       const std::function<tools::Long(const OUString&)>& rfnGetTextWidth);
-
     static bool GetTextOutlines(const LayoutResources& rResources,
                                 basegfx::B2DPolyPolygonVector& rVector, const OUString& rStr,
                                 sal_Int32 nBase, sal_Int32 nIndex, sal_Int32 nLen,
