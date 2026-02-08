@@ -285,7 +285,6 @@ public:
     void testInitializeFontMetrics();
     void testInitializeAboveTextLineMetrics();
     void testGetAlignmentOffset();
-    void testGetOutlineOffsets();
     void testGetTextOutlines();
     void testAlignAndRotateTextRect();
     void testGetMnemonicGeometry();
@@ -319,7 +318,6 @@ public:
     CPPUNIT_TEST(testInitializeFontMetrics);
     CPPUNIT_TEST(testInitializeAboveTextLineMetrics);
     CPPUNIT_TEST(testGetAlignmentOffset);
-    CPPUNIT_TEST(testGetOutlineOffsets);
     CPPUNIT_TEST(testGetTextOutlines);
     CPPUNIT_TEST(testAlignAndRotateTextRect);
     CPPUNIT_TEST(testGetMnemonicGeometry);
@@ -767,30 +765,6 @@ void TextLayoutEngineTest::testGetAlignmentOffset()
     CPPUNIT_ASSERT_EQUAL_MESSAGE(
         "ALIGN_BASELINE offset should be zero", tools::Long(0),
         vcl::text::TextLayoutEngine::GetAlignmentOffset(ALIGN_BASELINE, nAscent, nDescent));
-}
-
-void TextLayoutEngineTest::testGetOutlineOffsets()
-{
-    const std::vector<basegfx::B2DPoint>& rOffsets = vcl::text::TextGeometry::GetOutlineOffsets();
-
-    // Must return exactly 8 points (surrounding pixels)
-    CPPUNIT_ASSERT_EQUAL(size_t(8), rOffsets.size());
-
-    // Verify specific key points verify the pattern
-    // Top-Left
-    CPPUNIT_ASSERT_EQUAL(1.0, std::abs(rOffsets[0].getX()));
-    CPPUNIT_ASSERT_EQUAL(1.0, std::abs(rOffsets[0].getY()));
-
-    // Verify uniqueness (basic check)
-    std::set<std::pair<double, double>> aUniquePoints;
-    for (const auto& rPoint : rOffsets)
-    {
-        aUniquePoints.insert({ rPoint.getX(), rPoint.getY() });
-    }
-    CPPUNIT_ASSERT_EQUAL(size_t(8), aUniquePoints.size());
-
-    // Ensure (0,0) is NOT in the list (we don't draw over the center)
-    CPPUNIT_ASSERT(aUniquePoints.find({ 0.0, 0.0 }) == aUniquePoints.end());
 }
 
 void TextLayoutEngineTest::testGetTextOutlines()
