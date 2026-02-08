@@ -14,8 +14,9 @@
 
 #include <tools/mapunit.hxx>
 
-#include <vcl/virdev.hxx>
+#include <vcl/metric.hxx>
 #include <vcl/text/TextGeometry.hxx>
+#include <vcl/virdev.hxx>
 
 #include <text/MnemonicGeometry.hxx>
 
@@ -361,6 +362,53 @@ CPPUNIT_TEST_FIXTURE(TextGeometryTest, testGetRotationOrigin)
     }
 }
 
+CPPUNIT_TEST_FIXTURE(TextGeometryTest, testCalculateLayoutOrigin)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    pVDev->SetOutputSizePixel(Size(1000, 1000));
+
+    // Setup: A 100x100 rectangle at (10, 10)
+    tools::Rectangle aRect(Point(10, 10), Size(100, 100));
+    tools::Long nTxtW = 20;
+    tools::Long nTxtH = 10;
+
+    // 1. Default (Top-Left)
+    // X = 10, Y = 10
+    Point aPos = vcl::text::TextGeometry::CalculateLayoutOrigin(*pVDev, aRect, nTxtW, nTxtH,
+                                                                DrawTextFlags::NONE, ALIGN_TOP);
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(10), aPos.X());
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(10), aPos.Y());
+
+    // 2. Center-Center
+    // X = 10 + (100 - 20)/2 = 50
+    // Y = 10 + (100 - 10)/2 = 55
+    aPos = vcl::text::TextGeometry::CalculateLayoutOrigin(
+        *pVDev, aRect, nTxtW, nTxtH, DrawTextFlags::Center | DrawTextFlags::VCenter, ALIGN_TOP);
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(50), aPos.X());
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(55), aPos.Y());
+
+    // 3. Right-Bottom
+    // X = 10 + (100 - 20) = 90
+    // Y = 10 + (100 - 10) = 100
+    aPos = vcl::text::TextGeometry::CalculateLayoutOrigin(
+        *pVDev, aRect, nTxtW, nTxtH, DrawTextFlags::Right | DrawTextFlags::Bottom, ALIGN_TOP);
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(90), aPos.X());
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(100), aPos.Y());
+
+    // 4. Font Alignment (ALIGN_BOTTOM)
+    // Adds nTxtH to Y.
+    // Y = 10 (RectTop) + 10 (TextHeight) = 20
+    aPos = vcl::text::TextGeometry::CalculateLayoutOrigin(*pVDev, aRect, nTxtW, nTxtH,
+                                                          DrawTextFlags::NONE, ALIGN_BOTTOM);
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(20), aPos.Y());
+
+    // 5. Font Alignment (ALIGN_BASELINE)
+    // Adds Ascent to Y.
+    long nAscent = pVDev->GetFontMetric().GetAscent();
+    aPos = vcl::text::TextGeometry::CalculateLayoutOrigin(*pVDev, aRect, nTxtW, nTxtH,
+                                                          DrawTextFlags::NONE, ALIGN_BASELINE);
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(10 + nAscent), aPos.Y());
+}
 } // namespace
 
 CPPUNIT_PLUGIN_IMPLEMENT();

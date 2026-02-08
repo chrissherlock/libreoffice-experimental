@@ -27,6 +27,7 @@
 #include <vector>
 
 class Point;
+class OutputDevice;
 
 namespace vcl::text
 {
@@ -77,6 +78,10 @@ public:
                         std::function<Point(const Point&)> const& fnLogicToPixel,
                         const MnemonicDeviceParams& rParams, KernArraySpan aDXArray,
                         sal_Int32 nRelPos, const Point& rLinePos, bool bTrailing = false);
+
+    static Point CalculateLayoutOrigin(const OutputDevice& rDev, const tools::Rectangle& rRect,
+                                       tools::Long nTextWidth, tools::Long nTextHeight,
+                                       DrawTextFlags nStyle, TextAlign eAlign);
 };
 
 } // namespace vcl::text

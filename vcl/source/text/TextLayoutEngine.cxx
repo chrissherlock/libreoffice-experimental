@@ -1348,35 +1348,6 @@ void TextLayoutEngine::FilterVisibleGlyphs(const OUString& rStr, sal_Int32 nInde
     }
 }
 
-Point TextLayoutEngine::CalculateLayoutOrigin(const OutputDevice& rDev,
-                                              const tools::Rectangle& rRect, tools::Long nTextWidth,
-                                              tools::Long nTextHeight, DrawTextFlags nStyle,
-                                              TextAlign eAlign)
-{
-    Point aPos = rRect.TopLeft();
-    tools::Long nWidth = rRect.GetWidth();
-    tools::Long nHeight = rRect.GetHeight();
-
-    // Horizontal text alignment
-    if (nStyle & DrawTextFlags::Right)
-        aPos.AdjustX(nWidth - nTextWidth);
-    else if (nStyle & DrawTextFlags::Center)
-        aPos.AdjustX((nWidth - nTextWidth) / 2);
-
-    // Vertical font alignment
-    if (eAlign == ALIGN_BOTTOM)
-        aPos.AdjustY(nTextHeight);
-    else if (eAlign == ALIGN_BASELINE)
-        aPos.AdjustY(rDev.GetFontMetric().GetAscent());
-
-    if (nStyle & DrawTextFlags::Bottom)
-        aPos.AdjustY(nHeight - nTextHeight);
-    else if (nStyle & DrawTextFlags::VCenter)
-        aPos.AdjustY((nHeight - nTextHeight) / 2);
-
-    return aPos;
-}
-
 const LogicalFontInstance* pForcedFallback;
 void TextLayoutEngine::CalculateMultiLineLayout(vcl::TextLayoutCommon& rLayout,
                                                 MultiLineLayout& rRes,
