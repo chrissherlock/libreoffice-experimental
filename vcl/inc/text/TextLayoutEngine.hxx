@@ -16,21 +16,23 @@
 #include <vcl/dllapi.h>
 #include <vcl/rendercontext/SalLayoutFlags.hxx>
 #include <vcl/outdev.hxx>
+#include <vcl/text/LayoutResources.hxx>
+#include <vcl/text/TextGeometry.hxx>
+#include <vcl/text/TextDecorator.hxx>
 
 #include <ImplLayoutRuns.hxx>
 #include <font/EmphasisMark.hxx>
 #include <font/FontLookupCriteria.hxx>
 #include <textlineinfo.hxx>
+#include <text/ILayoutFactory.hxx>
+#include <text/MnemonicGeometry.hxx>
 
 #include <vector>
-#include <vcl/text/LayoutResources.hxx>
-#include <vcl/text/TextGeometry.hxx>
-#include <vcl/text/TextDecorator.hxx>
 #include <memory>
 #include <functional>
 #include <optional>
 #include <span>
-#include <text/ILayoutFactory.hxx>
+
 #define TEXT_DRAW_ELLIPSIS                                                                         \
     (DrawTextFlags::EndEllipsis | DrawTextFlags::PathEllipsis | DrawTextFlags::NewsEllipsis)
 
@@ -88,14 +90,6 @@ struct SAL_DLLPUBLIC MultiLineLayout
     OUString aLastLine;
     sal_Int32 nFormatLines = 0;
     DrawTextFlags nResultStyle = DrawTextFlags::NONE;
-};
-
-struct SAL_DLLPUBLIC MnemonicText
-{
-    OUString aText;
-    sal_Int32 nIndex;
-    sal_Int32 nLen;
-    sal_Int32 nMnemonicPos;
 };
 
 class VCL_DLLPUBLIC TextLayoutEngine
@@ -326,25 +320,12 @@ public:
     static OUString
     GetEllipsisString(const OUString& rStr, tools::Long nMaxWidth, DrawTextFlags nStyle,
                       const std::function<tools::Long(const OUString&)>& rfnGetTextWidth);
+
     static bool GetTextOutlines(const LayoutResources& rResources,
                                 basegfx::B2DPolyPolygonVector& rVector, const OUString& rStr,
                                 sal_Int32 nBase, sal_Int32 nIndex, sal_Int32 nLen,
                                 sal_uLong nLayoutWidth, KernArraySpan pDXArray,
                                 std::span<const sal_Bool> pKashidaArray);
-
-    struct MnemonicDeviceParams
-    {
-        tools::Long nLogicalAscent;
-        tools::Long nOutOffX;
-        tools::Long nOutOffY;
-    };
-
-    struct MnemonicGeometry
-    {
-        tools::Long nX;
-        tools::Long nY;
-        tools::Long nWidth;
-    };
 
     struct LayoutRequest
     {
@@ -373,13 +354,6 @@ public:
     static void GetGlyphRectsFromLayout(const SalLayout& rLayout, const Point& rStartPt,
                                         const OUString& rStr, sal_Int32 nLen,
                                         std::vector<tools::Rectangle>& rRects);
-
-    static MnemonicGeometry
-    GetMnemonicGeometry(std::function<double(tools::Long)> const& fnLogicWidthToDeviceSubPixel,
-                        std::function<tools::Long(tools::Long)> const& fnLogicWidthToDevicePixel,
-                        std::function<Point(const Point&)> const& fnLogicToPixel,
-                        const MnemonicDeviceParams& rParams, KernArraySpan aDXArray,
-                        sal_Int32 nRelPos, const Point& rLinePos, bool bTrailing = false);
 
     static LayoutResult CalculateLayout(const CoordinateMapper& rMapper, const LayoutRequest& rReq,
                                         const vcl::TextLayoutCommon& rLayout);

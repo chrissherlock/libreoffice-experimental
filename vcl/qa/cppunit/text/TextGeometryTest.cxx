@@ -12,7 +12,14 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/plugin/TestPlugIn.h>
 
+#include <tools/mapunit.hxx>
+
+#include <vcl/virdev.hxx>
 #include <vcl/text/TextGeometry.hxx>
+
+#include <text/MnemonicGeometry.hxx>
+
+#include <vector>
 
 using namespace vcl::text;
 
@@ -269,6 +276,28 @@ CPPUNIT_TEST_FIXTURE(TextGeometryTest, testGetOutlineOffsets)
 
     // Ensure (0,0) is NOT in the list (we don't draw over the center)
     CPPUNIT_ASSERT(aUniquePoints.find({ 0.0, 0.0 }) == aUniquePoints.end());
+}
+
+CPPUNIT_TEST_FIXTURE(TextGeometryTest, testGetMnemonicGeometry)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    pVDev->SetOutputSizePixel(Size(100, 100));
+    pVDev->SetMapMode(MapMode(MapUnit::MapPixel));
+
+    std::vector<double> aDXArray = { 10.0, 25.0, 40.0 };
+    Point aLinePos(10, 20);
+    vcl::text::MnemonicDeviceParams aParams{ 12, 0, 0 };
+
+    auto aGeo = vcl::text::TextGeometry::GetMnemonicGeometry(
+        // Use plain lambdas to avoid linking against SAL_DLLPRIVATE LogicWidthToDevicePixel
+        // In MapPixel mode, 1 logical unit = 1 device pixel
+        [](tools::Long w) { return static_cast<double>(w); }, [](tools::Long w) { return w; },
+        [&](const Point& p) { return pVDev->LogicToPixel(p); }, // LogicToPixel is public
+        aParams, aDXArray, 1, aLinePos, false);
+
+    CPPUNIT_ASSERT_EQUAL(tools::Long(15), aGeo.nWidth);
+    CPPUNIT_ASSERT_EQUAL(tools::Long(20), aGeo.nX);
+    CPPUNIT_ASSERT_EQUAL(tools::Long(32), aGeo.nY);
 }
 
 } // namespace

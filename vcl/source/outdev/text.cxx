@@ -39,15 +39,16 @@
 #include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
+#include <TextLayoutCache.hxx>
+#include <drawmode.hxx>
+#include <font/FontController.hxx>
 #include <text/TextLayoutEngine.hxx>
 #include <text/TextAnalyzer.hxx>
 #include <text/AccessibilityRecorder.hxx>
 #include <text/MeasurementRecorder.hxx>
-#include <font/FontController.hxx>
 #include <text/SalLayoutFactory.hxx>
-#include <drawmode.hxx>
+#include <text/MnemonicGeometry.hxx>
 #include <textlayout.hxx>
-#include <TextLayoutCache.hxx>
 
 #include <memory>
 #include <optional>
@@ -974,11 +975,11 @@ void OutputDevice::ImplDrawMnemonic(vcl::TextLayoutCommon& rLayout, const OUStri
     KernArray aDXArray;
     rLayout.GetTextArray(rStr, &aDXArray, nIndex, nLen, true);
 
-    vcl::text::TextLayoutEngine::MnemonicDeviceParams aParams{ GetFontMetric().GetAscent(),
+    vcl::text::MnemonicDeviceParams aParams{ GetFontMetric().GetAscent(),
                                                                GetOutOffXPixel(),
                                                                GetOutOffYPixel() };
 
-    auto aGeo = vcl::text::TextLayoutEngine::GetMnemonicGeometry(
+    auto aGeo = vcl::text::TextGeometry::GetMnemonicGeometry(
         [&](tools::Long w) { return LogicWidthToDeviceSubPixel(w); },
         [&](tools::Long w) { return LogicWidthToDevicePixel(w); },
         [&](const Point& p) { return LogicToPixel(p); }, aParams, aDXArray, nRelMnemonicPos, rPos);
@@ -1369,12 +1370,12 @@ void OutputDevice::DrawCtrlText(const Point& rPos, const OUString& rStr, const s
             KernArray aDXArray;
             GetTextArray(aStr, &aDXArray, nCorrectedIndex, nCorrectedLen, true, nullptr, pGlyphs);
 
-            vcl::text::TextLayoutEngine::MnemonicDeviceParams aParams{ GetFontMetric().GetAscent(),
-                                                                       GetOutOffXPixel(),
-                                                                       GetOutOffYPixel() };
+            vcl::text::MnemonicDeviceParams aParams{ GetFontMetric().GetAscent(),
+                                                     GetOutOffXPixel(),
+                                                     GetOutOffYPixel() };
 
             // Pass bInvalidPos to bTrailing to handle BiDi edge cases
-            const auto aGeo = vcl::text::TextLayoutEngine::GetMnemonicGeometry(
+            const auto aGeo = vcl::text::TextGeometry::GetMnemonicGeometry(
                 [&](tools::Long w) { return LogicWidthToDeviceSubPixel(w); },
                 [&](tools::Long w) { return LogicWidthToDevicePixel(w); },
                 [&](const Point& p) { return LogicToPixel(p); }, aParams, aDXArray,
