@@ -23,6 +23,9 @@
 #include <vcl/vclenum.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/mnemonic.hxx>
+#include <vcl/text/TextSpan.hxx>
+#include <vcl/text/LayoutCacheData.hxx>
+#include <vcl/text/CaretManager.hxx>
 
 #include <font/FontMetricData.hxx>
 #include <font/FontController.hxx>
@@ -586,85 +589,35 @@ double TextLayoutEngine::GetPartialTextArray(const LayoutResources& rRes,
                                 nNormalizedPartLen, bCaret ? rSpan.Text : OUString());
 }
 
-void TextLayoutEngine::FixupCaretPositions(std::vector<double>& rCaretPixelPos)
-{
-    const int nCaretPos = static_cast<int>(rCaretPixelPos.size());
-    int nFirstValidIndex = nCaretPos; // Initialize to "not found" state
-
-    // Find first valid coordinate
-    for (int i = 0; i < nCaretPos; ++i)
-    {
-        if (rCaretPixelPos[i] >= 0)
-        {
-            nFirstValidIndex = i;
-            break;
-        }
-    }
-
-    // Propagate coordinates
-    double nXPos = (nFirstValidIndex < nCaretPos) ? rCaretPixelPos[nFirstValidIndex] : -1.0;
-    for (int i = 0; i < nCaretPos; ++i)
-    {
-        if (rCaretPixelPos[i] >= 0)
-            nXPos = rCaretPixelPos[i];
-        else
-            rCaretPixelPos[i] = nXPos;
-    }
-}
-
-static double lcl_mirrorCoord(double nTotalWidth, double nOldPos)
-{
-    return nTotalWidth - nOldPos - 1.0;
-}
-
-void TextLayoutEngine::MirrorCaretPositions(std::vector<double>& rCaretPixelPos, double nWidth)
-{
-    for (double& rPos : rCaretPixelPos)
-    {
-        rPos = lcl_mirrorCoord(nWidth, rPos);
-    }
-}
-
-void TextLayoutEngine::ConvertPixelsToLogic(const CoordinateMapper& rMapper,
-                                            std::vector<double>& rCaretPixelPos)
-{
-    if (!rMapper.IsMapModeEnabled())
-        return;
-
-    for (double& rPos : rCaretPixelPos)
-    {
-        rPos = rMapper.DevicePixelToLogicWidthDouble(rPos);
-    }
-}
-
 void TextLayoutEngine::GetCaretPositions(const LayoutResources& rRes,
-                                         const vcl::text::TextSpan& rSpan, KernArray& rCaretPos,
-                                         const vcl::text::LayoutCacheData& rCache)
+                                         const vcl::text::TextSpan& rSpan,
+                                         std::vector<double>& rCaretPositions,
+                                         const LayoutCacheData& rCache)
 {
-    sal_Int32 nLen = TextAnalyzer::GetNormalizedLength(rSpan.Text, rSpan.Index, rSpan.Length);
-    rCaretPos.assign(nLen * 2, -1);
+    std::unique_ptr<SalLayout> pGeneratedLayout;
+    const SalLayout* pLayout = nullptr;
 
-    const vcl::text::LayoutConstraints aConstraints{ Point(0, 0), 0, {}, {}, SalLayoutFlags::NONE };
-    std::unique_ptr<SalLayout> pSalLayout = Layout(rRes, rSpan, aConstraints, rCache, {});
+    // Prepare default arguments for Layout()
+    vcl::text::LayoutConstraints aConstraints;
+    vcl::text::RenderSelection aSelection;
 
-    if (!pSalLayout)
+    // Use the passed rSpan directly
+    if (rCache.pGlyphs)
+    {
+        pGeneratedLayout = Layout(rRes, rSpan, aConstraints, rCache, aSelection);
+        pLayout = pGeneratedLayout.get();
+    }
+    else
+    {
+        pGeneratedLayout = Layout(rRes, rSpan, aConstraints, rCache, aSelection);
+        pLayout = pGeneratedLayout.get();
+    }
+
+    if (!pLayout)
         return;
 
-    // Measure Carets
-    std::vector<double> aCaretPixelPos;
-    pSalLayout->GetCaretPositions(aCaretPixelPos, rSpan.Text);
-
-    FixupCaretPositions(aCaretPixelPos);
-
-    if (rRes.bRTLEnabled)
-        MirrorCaretPositions(aCaretPixelPos, pSalLayout->GetTextWidth());
-
-    ConvertPixelsToLogic(rRes.rMapper, aCaretPixelPos);
-
-    for (size_t i = 0; i < aCaretPixelPos.size(); ++i)
-    {
-        rCaretPos[i] = aCaretPixelPos[i];
-    }
+    // Delegate to the component
+    CaretManager::GetCaretPositions(rRes, rSpan, rCaretPositions, *pLayout);
 }
 
 tools::Long TextLayoutEngine::GetSubPixelFactor(const CoordinateMapper& rMapper)
@@ -1001,174 +954,6 @@ tools::Long TextLayoutEngine::GetAlignmentOffset(TextAlign eAlign, tools::Long n
         return nAscent;
 
     return 0;
-}
-
-OUString TextLayoutEngine::GetEllipsisString(
-    const OUString& rStr, tools::Long nMaxWidth, DrawTextFlags nStyle,
-    const std::function<tools::Long(const OUString&)>& rfnGetTextWidth)
-{
-    // Trivial Case
-    if (rStr.isEmpty() || rfnGetTextWidth(rStr) <= nMaxWidth)
-        return rStr;
-
-    const OUString aEllipsisStr = "...";
-    const bool bClipText = bool(nStyle & DrawTextFlags::Clip);
-    sal_Int32 nLen = rStr.getLength();
-
-    // Center Ellipsis (Balanced Truncation)
-    if (nStyle & DrawTextFlags::CenterEllipsis)
-    {
-        sal_Int32 nIndex = nLen / 2;
-        sal_Int32 nEraseChars = std::max<sal_Int32>(4, nLen - (nIndex * 4) / 3);
-
-        while (nEraseChars < nLen)
-        {
-            sal_Int32 i = (nLen - nEraseChars) / 2;
-            OUString aTmpStr = rStr.copy(0, i) + aEllipsisStr + rStr.copy(i + nEraseChars);
-
-            if (rfnGetTextWidth(aTmpStr) <= nMaxWidth)
-                return aTmpStr;
-
-            nEraseChars++;
-        }
-
-        return aEllipsisStr;
-    }
-
-    // Path Ellipsis
-    if (nStyle & DrawTextFlags::PathEllipsis)
-    {
-        sal_Int32 nLastSep = rStr.lastIndexOf('/');
-        if (nLastSep == -1)
-            nLastSep = rStr.lastIndexOf('\\');
-
-        if (nLastSep != -1 && nLastSep > 0)
-        {
-            for (sal_Int32 i = 1; i < nLastSep; ++i)
-            {
-                OUString aTest = rStr.copy(0, i) + aEllipsisStr + rStr.copy(nLastSep);
-
-                if (rfnGetTextWidth(aTest) > nMaxWidth)
-                {
-                    return (i > 1)
-                               ? OUString(rStr.copy(0, i - 1) + aEllipsisStr + rStr.copy(nLastSep))
-                               : OUString(aEllipsisStr + rStr.copy(nLastSep));
-                }
-            }
-        }
-    }
-
-    // News Ellipsis (Structure Preserving)
-    if (nStyle & DrawTextFlags::NewsEllipsis)
-    {
-        OUString aCurrentStr = rStr;
-        auto lcl_IsSep = [](sal_Unicode c) { return c == '.'; };
-        sal_Int32 nLastContent = nLen;
-
-        while (nLastContent > 0)
-        {
-            nLastContent--;
-            if (lcl_IsSep(aCurrentStr[nLastContent]))
-                break;
-        }
-
-        while (nLastContent > 0 && lcl_IsSep(aCurrentStr[nLastContent - 1]))
-        {
-            nLastContent--;
-        }
-
-        OUString aLastStr = aCurrentStr.copy(nLastContent);
-
-        if (rfnGetTextWidth(aEllipsisStr + aLastStr) <= nMaxWidth)
-        {
-            sal_Int32 nFirstContent = 0;
-
-            while (nFirstContent < nLastContent)
-            {
-                nFirstContent++;
-                if (lcl_IsSep(aCurrentStr[nFirstContent]))
-                    break;
-            }
-
-            while (nFirstContent < nLastContent && lcl_IsSep(aCurrentStr[nFirstContent]))
-            {
-                nFirstContent++;
-            }
-
-            if (nFirstContent < nLastContent)
-            {
-                if (nFirstContent > 4)
-                    nFirstContent = 4;
-
-                OUString aFirstStr = aCurrentStr.copy(0, nFirstContent) + aEllipsisStr;
-                OUString aTempStr = aFirstStr + aLastStr;
-
-                if (rfnGetTextWidth(aTempStr) <= nMaxWidth)
-                {
-                    do
-                    {
-                        aCurrentStr = aTempStr;
-                        if (nLastContent > aCurrentStr.getLength())
-                            nLastContent = aCurrentStr.getLength();
-
-                        while (nFirstContent < nLastContent)
-                        {
-                            nLastContent--;
-                            if (lcl_IsSep(aCurrentStr[nLastContent]))
-                                break;
-                        }
-
-                        while (nFirstContent < nLastContent
-                               && lcl_IsSep(aCurrentStr[nLastContent - 1]))
-                        {
-                            nLastContent--;
-                        }
-
-                        if (nFirstContent < nLastContent)
-                        {
-                            aTempStr = aFirstStr + aCurrentStr.copy(nLastContent);
-
-                            if (rfnGetTextWidth(aTempStr) > nMaxWidth)
-                                break;
-                        }
-                    } while (nFirstContent < nLastContent);
-
-                    return aCurrentStr;
-                }
-            }
-        }
-        // If News logic fails to find a fit, it falls through to End Ellipsis below.
-    }
-
-    // End Ellipsis (Priority: Text+Dots > Text(1) > Dots)
-    // Iterate from full length down to 1 char.
-    for (sal_Int32 i = nLen - 1; i >= 1; --i)
-    {
-        // Case A: Try fitting "Text..."
-        // We only try this if i > 1.
-        // Parity Rule: If i == 1 ("a"), we NEVER add dots, we just return "a" if it fits.
-        if (i > 1)
-        {
-            OUString aWithDots = rStr.copy(0, i) + aEllipsisStr;
-            if (rfnGetTextWidth(aWithDots) <= nMaxWidth)
-                return aWithDots;
-        }
-        else
-        {
-            // Case B: i == 1. Check if "a" fits without dots.
-            OUString aFirstChar = rStr.copy(0, 1);
-            if (rfnGetTextWidth(aFirstChar) <= nMaxWidth)
-                return aFirstChar;
-        }
-    }
-
-    // Ultimate Fallback
-    // If nothing above fit, and Clip is requested, return "a" (even if it's too wide).
-    if (bClipText)
-        return rStr.copy(0, 1);
-
-    // Otherwise, return "..."
-    return aEllipsisStr;
 }
 
 bool TextLayoutEngine::GetTextOutlines(const LayoutResources& rResources,

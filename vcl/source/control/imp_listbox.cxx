@@ -26,6 +26,8 @@
 #include <vcl/i18nhelp.hxx>
 #include <vcl/naturalsort.hxx>
 #include <vcl/vcllayout.hxx>
+#include <vcl/text/TextSpan.hxx>
+#include <vcl/text/LayoutCacheData.hxx>
 #include <vcl/toolkit/lstbox.hxx>
 #include <vcl/toolkit/scrbar.hxx>
 

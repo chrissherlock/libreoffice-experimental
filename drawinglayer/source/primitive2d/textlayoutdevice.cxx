@@ -39,6 +39,8 @@
 #include <vcl/svapp.hxx>
 #include <vcl/vcllayout.hxx>
 #include <vcl/glyphitemcache.hxx>
+#include <vcl/text/TextSpan.hxx>
+#include <vcl/text/LayoutCacheData.hxx>
 
 namespace drawinglayer::primitive2d
 {

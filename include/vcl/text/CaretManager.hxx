@@ -10,16 +10,26 @@
 #pragma once
 
 #include <vcl/dllapi.h>
-#include <vcl/kernarray.hxx>
-#include <tools/gen.hxx>
 #include <vector>
+#include <vcl/text/LayoutResources.hxx>
+#include <vcl/text/TextSpan.hxx>
+#include <vcl/text/LayoutCacheData.hxx>
+
+class SalLayout;
+class CoordinateMapper;
 
 namespace vcl::text
 {
 class VCL_DLLPUBLIC CaretManager
 {
 public:
-    // We will migrate these one by one
+    static void GetCaretPositions(const LayoutResources& rRes, const TextSpan& rSpan,
+                                  std::vector<double>& rCaretPositions, const SalLayout& rLayout);
+
+    static void MirrorCaretPositions(std::vector<double>& rCaretPixelPos, double nWidth);
+
+    static void ConvertPixelsToLogic(const CoordinateMapper& rMapper,
+                                     std::vector<double>& rCaretPixelPos);
 };
 
 } // namespace vcl::text

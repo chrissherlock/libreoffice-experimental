@@ -27,6 +27,8 @@
 #include <vcl/i18nhelp.hxx>
 #include <vcl/mnemonic.hxx>
 #include <vcl/settings.hxx>
+#include <vcl/text/TextSpan.hxx>
+#include <vcl/text/LayoutCacheData.hxx>
 #include <vcl/vcllayout.hxx>
 #include <vcl/window.hxx>
 

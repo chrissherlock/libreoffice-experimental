@@ -29,6 +29,7 @@
 #include <vcl/unohelp.hxx>
 
 #include <text/TextLayoutEngine.hxx>
+#include <vcl/text/MultiLineEngine.hxx>
 #include <textlayout.hxx>
 #include <textlineinfo.hxx>
 
@@ -57,7 +58,7 @@ namespace vcl
 
     OUString TextLayoutCommon::GetEllipsisString(OUString const& rOrigStr, tools::Long nMaxWidth, DrawTextFlags nStyle) const
     {
-        return vcl::text::TextLayoutEngine::GetEllipsisString(
+        return vcl::text::MultiLineEngine::GetEllipsisString(
             rOrigStr, nMaxWidth, nStyle,
             [this](const OUString& s) { return this->GetTextWidth(s, 0, s.getLength()); }
         );

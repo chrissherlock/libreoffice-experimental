@@ -317,10 +317,6 @@ public:
     static tools::Long GetAlignmentOffset(TextAlign eAlign, tools::Long nAscent,
                                           tools::Long nDescent);
 
-    static OUString
-    GetEllipsisString(const OUString& rStr, tools::Long nMaxWidth, DrawTextFlags nStyle,
-                      const std::function<tools::Long(const OUString&)>& rfnGetTextWidth);
-
     static bool GetTextOutlines(const LayoutResources& rResources,
                                 basegfx::B2DPolyPolygonVector& rVector, const OUString& rStr,
                                 sal_Int32 nBase, sal_Int32 nIndex, sal_Int32 nLen,
@@ -358,7 +354,6 @@ public:
     static LayoutResult CalculateLayout(const CoordinateMapper& rMapper, const LayoutRequest& rReq,
                                         const vcl::TextLayoutCommon& rLayout);
 
-
     /** * Filters glyphs based on a clip region, preserving spaces between visible characters.
      */
     static void FilterVisibleGlyphs(const OUString& rStr, sal_Int32 nIndex,
@@ -367,22 +362,12 @@ public:
                                     std::vector<tools::Rectangle>& rOutVisibleRects,
                                     OUString* pOutVisibleText);
 
-
     static void CalculateMultiLineLayout(vcl::TextLayoutCommon& rLayout, MultiLineLayout& rRes,
                                          const tools::Rectangle& rRect, tools::Long nTextHeight,
                                          tools::Long nWidth, tools::Long nHeight,
                                          const OUString& rStr, DrawTextFlags nStyle);
 
 private:
-    static void FixupCaretPositions(std::vector<double>& rCaretPixelPos);
-
-    /** Mirrors caret positions for Right-to-Left context based on total line width. */
-    static void MirrorCaretPositions(std::vector<double>& rCaretPixelPos, double nWidth);
-
-    /** Converts device pixel positions to logical units using the provided mapper. */
-    static void ConvertPixelsToLogic(const CoordinateMapper& rMapper,
-                                     std::vector<double>& rCaretPixelPos);
-
     /** Calculates the subpixel factor (1 or 64) based on the mapping state. */
     static tools::Long GetSubPixelFactor(const CoordinateMapper& rMapper);
 
