@@ -9,6 +9,7 @@
 
 #include <vcl/dllapi.h>
 
+#include <tools/degree.hxx>
 #include <basegfx/numeric/ftools.hxx>
 
 #include <vcl/fntstyle.hxx>

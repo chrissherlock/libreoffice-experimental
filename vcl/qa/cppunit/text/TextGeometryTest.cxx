@@ -300,6 +300,67 @@ CPPUNIT_TEST_FIXTURE(TextGeometryTest, testGetMnemonicGeometry)
     CPPUNIT_ASSERT_EQUAL(tools::Long(32), aGeo.nY);
 }
 
+CPPUNIT_TEST_FIXTURE(TextGeometryTest, testGetRotationOrigin)
+{
+    Point aPos(100, 100);
+    Size aTextSize(50, 20); // Width 50, Height 20
+
+    // Test 0 degrees (Identity) - Origin should not change
+    {
+        Point aResult
+            = vcl::text::TextGeometry::GetRotationOrigin(aPos, aTextSize, 0_deg10, ALIGN_BASELINE);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("0 deg rotation should be identity", aPos, aResult);
+    }
+
+    // Test 90 degrees - ALIGN_BASELINE
+    // x' = x - (0 * sin(90)) = 100
+    // y' = y + (0 * cos(90)) = 100
+    {
+        Point aResult = vcl::text::TextGeometry::GetRotationOrigin(aPos, aTextSize, 900_deg10,
+                                                                   ALIGN_BASELINE);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("90 deg baseline should match pos", aPos, aResult);
+    }
+
+    // Test 90 degrees - ALIGN_TOP (Height = 20)
+    // nAlignOfs = 20
+    // nX = 100 + (-20 * sin(90)) = 100 - 20 = 80
+    // nY = 100 + (20 * cos(90)) = 100 + 0 = 100
+    {
+        Point aResult
+            = vcl::text::TextGeometry::GetRotationOrigin(aPos, aTextSize, 900_deg10, ALIGN_TOP);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("90 deg top alignment X mismatch", tools::Long(80),
+                                     aResult.X());
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("90 deg top alignment Y mismatch", tools::Long(100),
+                                     aResult.Y());
+    }
+
+    // Test 180 degrees - ALIGN_BOTTOM (Height = 20)
+    // nAlignOfs = -20
+    // nX = 100 + (-(-20) * sin(180)) = 100 + 0 = 100
+    // nY = 100 + (-20 * cos(180)) = 100 + (-20 * -1) = 120
+    {
+        Point aResult
+            = vcl::text::TextGeometry::GetRotationOrigin(aPos, aTextSize, 1800_deg10, ALIGN_BOTTOM);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("180 deg bottom alignment X mismatch", tools::Long(100),
+                                     aResult.X());
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("180 deg bottom alignment Y mismatch", tools::Long(120),
+                                     aResult.Y());
+    }
+
+    // Test 45 degrees - ALIGN_TOP (Diagonal coverage)
+    // sin(45) approx 0.707, cos(45) approx 0.707
+    // nX = 100 + (-20 * 0.7071) = 100 - 14.14 = 86
+    // nY = 100 + (20 * 0.7071) = 100 + 14.14 = 114
+    {
+        Point aResult
+            = vcl::text::TextGeometry::GetRotationOrigin(aPos, aTextSize, 450_deg10, ALIGN_TOP);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("45 deg X coordinate mismatch", 86.0,
+                                             (double)aResult.X(), 0.5);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("45 deg Y coordinate mismatch", 114.0,
+                                             (double)aResult.Y(), 0.5);
+    }
+}
+
 } // namespace
 
 CPPUNIT_PLUGIN_IMPLEMENT();
