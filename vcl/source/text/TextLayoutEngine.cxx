@@ -14,6 +14,7 @@
 #include <i18nlangtag/mslangid.hxx>
 #include <i18nutil/digitlocalization.hxx>
 #include <i18nutil/unicode.hxx>
+#include <o3tl/unit_conversion.hxx>
 
 #include <vcl/outdev.hxx>
 #include <vcl/fntstyle.hxx>
