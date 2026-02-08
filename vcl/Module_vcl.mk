@@ -268,6 +268,7 @@ $(eval $(call gb_Module_add_check_targets,vcl,\
     CppunitTest_vcl_text_recording \
     CppunitTest_vcl_text_analyzer \
     CppunitTest_vcl_text_geometry \
+    CppunitTest_vcl_text_caret_manager \
 ))
 
 ifeq ($(USING_X11),TRUE)
