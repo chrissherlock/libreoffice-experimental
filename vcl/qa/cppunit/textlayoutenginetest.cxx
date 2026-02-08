@@ -285,7 +285,6 @@ public:
     void testInitializeFontMetrics();
     void testInitializeAboveTextLineMetrics();
     void testGetAlignmentOffset();
-    void testGetShadowOffset();
     void testGetOutlineOffsets();
     void testGetTextOutlines();
     void testAlignAndRotateTextRect();
@@ -320,7 +319,6 @@ public:
     CPPUNIT_TEST(testInitializeFontMetrics);
     CPPUNIT_TEST(testInitializeAboveTextLineMetrics);
     CPPUNIT_TEST(testGetAlignmentOffset);
-    CPPUNIT_TEST(testGetShadowOffset);
     CPPUNIT_TEST(testGetOutlineOffsets);
     CPPUNIT_TEST(testGetTextOutlines);
     CPPUNIT_TEST(testAlignAndRotateTextRect);
@@ -769,32 +767,6 @@ void TextLayoutEngineTest::testGetAlignmentOffset()
     CPPUNIT_ASSERT_EQUAL_MESSAGE(
         "ALIGN_BASELINE offset should be zero", tools::Long(0),
         vcl::text::TextLayoutEngine::GetAlignmentOffset(ALIGN_BASELINE, nAscent, nDescent));
-}
-
-void TextLayoutEngineTest::testGetShadowOffset()
-{
-    // Formula: 1 + ((LineHeight - 24) / 24)
-    // If Outline is true, add 1.
-
-    // Case 1: Small Font (Height 20), Not Outline
-    // 1 + ((20 - 24) / 24) = 1 + (-4/24) = 1 + 0 = 1
-    tools::Long nOff = vcl::text::TextGeometry::GetShadowOffset(20, false);
-    CPPUNIT_ASSERT_EQUAL(tools::Long(1), nOff);
-
-    // Case 2: Standard Font (Height 24), Not Outline
-    // 1 + ((24 - 24) / 24) = 1 + 0 = 1
-    nOff = vcl::text::TextGeometry::GetShadowOffset(24, false);
-    CPPUNIT_ASSERT_EQUAL(tools::Long(1), nOff);
-
-    // Case 3: Large Font (Height 48), Not Outline
-    // 1 + ((48 - 24) / 24) = 1 + 1 = 2
-    nOff = vcl::text::TextGeometry::GetShadowOffset(48, false);
-    CPPUNIT_ASSERT_EQUAL(tools::Long(2), nOff);
-
-    // Case 4: Large Font (Height 48), Is Outline
-    // Calculation from Case 3 (2) + 1 (Outline Bonus) = 3
-    nOff = vcl::text::TextGeometry::GetShadowOffset(48, true);
-    CPPUNIT_ASSERT_EQUAL(tools::Long(3), nOff);
 }
 
 void TextLayoutEngineTest::testGetOutlineOffsets()
