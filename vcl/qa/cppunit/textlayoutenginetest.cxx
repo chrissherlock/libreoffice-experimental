@@ -285,7 +285,6 @@ public:
     void testInitializeFontMetrics();
     void testInitializeAboveTextLineMetrics();
     void testGetAlignmentOffset();
-    void testGetReliefOffset();
     void testGetShadowOffset();
     void testGetOutlineOffsets();
     void testGetTextOutlines();
@@ -321,7 +320,6 @@ public:
     CPPUNIT_TEST(testInitializeFontMetrics);
     CPPUNIT_TEST(testInitializeAboveTextLineMetrics);
     CPPUNIT_TEST(testGetAlignmentOffset);
-    CPPUNIT_TEST(testGetReliefOffset);
     CPPUNIT_TEST(testGetShadowOffset);
     CPPUNIT_TEST(testGetOutlineOffsets);
     CPPUNIT_TEST(testGetTextOutlines);
@@ -771,29 +769,6 @@ void TextLayoutEngineTest::testGetAlignmentOffset()
     CPPUNIT_ASSERT_EQUAL_MESSAGE(
         "ALIGN_BASELINE offset should be zero", tools::Long(0),
         vcl::text::TextLayoutEngine::GetAlignmentOffset(ALIGN_BASELINE, nAscent, nDescent));
-}
-
-void TextLayoutEngineTest::testGetReliefOffset()
-{
-    // Case 1: Standard DPI (96), Embossed (Standard)
-    // Calculation: 1 + (96 / 300) = 1 + 0 = 1
-    tools::Long nOff = vcl::text::TextGeometry::GetReliefOffset(96, FontRelief::Embossed);
-    CPPUNIT_ASSERT_EQUAL(tools::Long(1), nOff);
-
-    // Case 2: Standard DPI (96), Engraved (Negative Offset)
-    // Calculation: -(1 + 0) = -1
-    nOff = vcl::text::TextGeometry::GetReliefOffset(96, FontRelief::Engraved);
-    CPPUNIT_ASSERT_EQUAL(tools::Long(-1), nOff);
-
-    // Case 3: High DPI (600), Embossed
-    // Calculation: 1 + (600 / 300) = 1 + 2 = 3
-    nOff = vcl::text::TextGeometry::GetReliefOffset(600, FontRelief::Embossed);
-    CPPUNIT_ASSERT_EQUAL(tools::Long(3), nOff);
-
-    // Case 4: High DPI (600), Engraved
-    // Calculation: -(1 + 2) = -3
-    nOff = vcl::text::TextGeometry::GetReliefOffset(600, FontRelief::Engraved);
-    CPPUNIT_ASSERT_EQUAL(tools::Long(-3), nOff);
 }
 
 void TextLayoutEngineTest::testGetShadowOffset()

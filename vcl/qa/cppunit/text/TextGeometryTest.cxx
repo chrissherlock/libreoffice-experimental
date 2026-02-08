@@ -198,6 +198,29 @@ CPPUNIT_TEST_FIXTURE(TextGeometryTest, testGetMirroredX)
     CPPUNIT_ASSERT_EQUAL(tools::Long(289), vcl::text::TextGeometry::GetMirroredX(aCtx));
 }
 
+CPPUNIT_TEST_FIXTURE(TextGeometryTest, testGetReliefOffset)
+{
+    // Case 1: Standard DPI (96), Embossed (Standard)
+    // Calculation: 1 + (96 / 300) = 1 + 0 = 1
+    tools::Long nOff = vcl::text::TextGeometry::GetReliefOffset(96, FontRelief::Embossed);
+    CPPUNIT_ASSERT_EQUAL(tools::Long(1), nOff);
+
+    // Case 2: Standard DPI (96), Engraved (Negative Offset)
+    // Calculation: -(1 + 0) = -1
+    nOff = vcl::text::TextGeometry::GetReliefOffset(96, FontRelief::Engraved);
+    CPPUNIT_ASSERT_EQUAL(tools::Long(-1), nOff);
+
+    // Case 3: High DPI (600), Embossed
+    // Calculation: 1 + (600 / 300) = 1 + 2 = 3
+    nOff = vcl::text::TextGeometry::GetReliefOffset(600, FontRelief::Embossed);
+    CPPUNIT_ASSERT_EQUAL(tools::Long(3), nOff);
+
+    // Case 4: High DPI (600), Engraved
+    // Calculation: -(1 + 2) = -3
+    nOff = vcl::text::TextGeometry::GetReliefOffset(600, FontRelief::Engraved);
+    CPPUNIT_ASSERT_EQUAL(tools::Long(-3), nOff);
+}
+
 } // namespace
 
 CPPUNIT_PLUGIN_IMPLEMENT();
