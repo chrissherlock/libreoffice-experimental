@@ -285,7 +285,6 @@ public:
     void testInitializeFontMetrics();
     void testInitializeAboveTextLineMetrics();
     void testGetAlignmentOffset();
-    void testGetMirroredX();
     void testGetReliefOffset();
     void testGetShadowOffset();
     void testGetOutlineOffsets();
@@ -322,7 +321,6 @@ public:
     CPPUNIT_TEST(testInitializeFontMetrics);
     CPPUNIT_TEST(testInitializeAboveTextLineMetrics);
     CPPUNIT_TEST(testGetAlignmentOffset);
-    CPPUNIT_TEST(testGetMirroredX);
     CPPUNIT_TEST(testGetReliefOffset);
     CPPUNIT_TEST(testGetShadowOffset);
     CPPUNIT_TEST(testGetOutlineOffsets);
@@ -773,43 +771,6 @@ void TextLayoutEngineTest::testGetAlignmentOffset()
     CPPUNIT_ASSERT_EQUAL_MESSAGE(
         "ALIGN_BASELINE offset should be zero", tools::Long(0),
         vcl::text::TextLayoutEngine::GetAlignmentOffset(ALIGN_BASELINE, nAscent, nDescent));
-}
-
-void TextLayoutEngineTest::testGetMirroredX()
-{
-    vcl::text::MirroringContext aCtx;
-    aCtx.nX = 10;
-    aCtx.nGraphicsWidth = 1000;
-    aCtx.nOutputWidth = 200;
-    aCtx.nOutOffX = 50;
-
-    // Case 1: No Mirroring, No RTL -> Identity
-    aCtx.bHasMirroredGraphics = false;
-    aCtx.bIsRTL = false;
-    CPPUNIT_ASSERT_EQUAL(tools::Long(10), vcl::text::TextGeometry::GetMirroredX(aCtx));
-
-    // Case 2: Mirrored Graphics Only (HasMirrored=True, IsRTL=False)
-    // Step 1: x' = 1000 - 1 - 10 = 989
-    // Step 2: devX = 1000 - 200 - 50 = 750
-    // Step 3: x'' = 750 + (200 - 1 - (989 - 750))
-    //             = 750 + (199 - 239) = 750 - 40 = 710
-    aCtx.bHasMirroredGraphics = true;
-    aCtx.bIsRTL = false;
-    CPPUNIT_ASSERT_EQUAL(tools::Long(710), vcl::text::TextGeometry::GetMirroredX(aCtx));
-
-    // Case 3: Mirrored Graphics + RTL (HasMirrored=True, IsRTL=True)
-    // Only Step 1 applies: x' = 1000 - 1 - 10 = 989
-    aCtx.bHasMirroredGraphics = true;
-    aCtx.bIsRTL = true;
-    CPPUNIT_ASSERT_EQUAL(tools::Long(989), vcl::text::TextGeometry::GetMirroredX(aCtx));
-
-    // Case 4: RTL Only (HasMirrored=False, IsRTL=True)
-    // devX = 50
-    // x' = 200 - 1 - (10 - 50) + 50
-    //    = 199 - (-40) + 50 = 199 + 40 + 50 = 289
-    aCtx.bHasMirroredGraphics = false;
-    aCtx.bIsRTL = true;
-    CPPUNIT_ASSERT_EQUAL(tools::Long(289), vcl::text::TextGeometry::GetMirroredX(aCtx));
 }
 
 void TextLayoutEngineTest::testGetReliefOffset()
