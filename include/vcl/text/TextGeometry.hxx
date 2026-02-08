@@ -11,6 +11,7 @@
 
 #include <tools/fontenum.hxx>
 #include <tools/gen.hxx>
+#include <tools/long.hxx>
 #include <tools/poly.hxx>
 #include <basegfx/point/b2dpoint.hxx>
 
@@ -18,8 +19,14 @@
 #include <vcl/fntstyle.hxx>
 #include <vcl/vclenum.hxx>
 #include <vcl/rendercontext/DrawTextFlags.hxx>
+#include <vcl/kernarray.hxx>
 
+#include <text/MnemonicGeometry.hxx>
+
+#include <functional>
 #include <vector>
+
+class Point;
 
 namespace vcl::text
 {
@@ -63,6 +70,13 @@ public:
     static tools::Long GetShadowOffset(tools::Long nLineHeight, bool bIsOutline);
 
     static const std::vector<basegfx::B2DPoint>& GetOutlineOffsets();
+
+    static MnemonicGeometry
+    GetMnemonicGeometry(std::function<double(tools::Long)> const& fnLogicWidthToDeviceSubPixel,
+                        std::function<tools::Long(tools::Long)> const& fnLogicWidthToDevicePixel,
+                        std::function<Point(const Point&)> const& fnLogicToPixel,
+                        const MnemonicDeviceParams& rParams, KernArraySpan aDXArray,
+                        sal_Int32 nRelPos, const Point& rLinePos, bool bTrailing = false);
 };
 
 } // namespace vcl::text
