@@ -1074,7 +1074,7 @@ void OutputDevice::ImplDrawTextSingleLine(OutputDevice& rTargetDevice,
             nStyle &= ~DrawTextFlags::Clip;
     }
 
-    Point aPos = vcl::text::TextLayoutEngine::CalculateLayoutOrigin(
+    Point aPos = vcl::text::TextGeometry::CalculateLayoutOrigin(
         rTargetDevice, rRect, nTextWidth, nTextHeight, nStyle, eAlign);
 
     auto fnDrawMnemonic = [&]() {

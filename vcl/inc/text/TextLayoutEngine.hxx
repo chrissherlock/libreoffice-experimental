@@ -367,9 +367,6 @@ public:
                                     std::vector<tools::Rectangle>& rOutVisibleRects,
                                     OUString* pOutVisibleText);
 
-    static Point CalculateLayoutOrigin(const OutputDevice& rDev, const tools::Rectangle& rRect,
-                                       tools::Long nTextWidth, tools::Long nTextHeight,
-                                       DrawTextFlags nStyle, TextAlign eAlign);
 
     static void CalculateMultiLineLayout(vcl::TextLayoutCommon& rLayout, MultiLineLayout& rRes,
                                          const tools::Rectangle& rRect, tools::Long nTextHeight,

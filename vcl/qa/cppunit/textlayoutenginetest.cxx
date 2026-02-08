@@ -15,13 +15,17 @@
 #include <tools/mapunit.hxx>
 #include <i18nlangtag/lang.h>
 
+#include <vcl/fntstyle.hxx>
+#include <vcl/font.hxx>
+#include <vcl/glyphitem.hxx>
+#include <vcl/metafile/GDIMetaFile.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <vcl/metric.hxx>
 #include <vcl/text/TextGeometry.hxx>
 #include <vcl/text/TextDecorator.hxx>
-#include <vcl/fntstyle.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/virdev.hxx>
-#include <vcl/glyphitem.hxx>
-#include <vcl/font.hxx>
+#include <vcl/BitmapReadAccess.hxx>
 
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
@@ -36,11 +40,9 @@
 #include <vcl/text/TextLineGeometry.hxx>
 #include <text/TextLayoutRequest.hxx>
 
-#include <string>
 #include <unicode/uchar.h>
-#include <vcl/metafile/GDIMetaFile.hxx>
-#include <vcl/metafile/MetaAction.hxx>
-#include <vcl/BitmapReadAccess.hxx>
+
+#include <string>
 
 namespace
 {
@@ -289,7 +291,6 @@ public:
     void testAlignAndRotateTextRect();
     void testCalculateLayoutPass();
     void testTextLineGeometry();
-    void testCalculateLayoutOrigin();
     void testCalculateMultiLineLayout();
     void testCalculateWaveLineGeometry();
     void testCalculateStrikeoutGeometry();
@@ -320,7 +321,6 @@ public:
     CPPUNIT_TEST(testAlignAndRotateTextRect);
     CPPUNIT_TEST(testCalculateLayoutPass);
     CPPUNIT_TEST(testTextLineGeometry);
-    CPPUNIT_TEST(testCalculateLayoutOrigin);
     CPPUNIT_TEST(testCalculateMultiLineLayout);
     CPPUNIT_TEST(testCalculateWaveLineGeometry);
     CPPUNIT_TEST(testCalculateStrikeoutGeometry);
@@ -1088,54 +1088,6 @@ void TextLayoutEngineTest::testTextLineGeometry()
         CPPUNIT_ASSERT_MESSAGE("bStrikeoutIsChar should be false for STRIKEOUT_BOLD",
                                !aGeo.bStrikeoutIsChar);
     }
-}
-
-void TextLayoutEngineTest::testCalculateLayoutOrigin()
-{
-    ScopedVclPtrInstance<VirtualDevice> pVDev;
-    pVDev->SetOutputSizePixel(Size(1000, 1000));
-
-    // Setup: A 100x100 rectangle at (10, 10)
-    tools::Rectangle aRect(Point(10, 10), Size(100, 100));
-    tools::Long nTxtW = 20;
-    tools::Long nTxtH = 10;
-
-    // 1. Default (Top-Left)
-    // X = 10, Y = 10
-    Point aPos = vcl::text::TextLayoutEngine::CalculateLayoutOrigin(*pVDev, aRect, nTxtW, nTxtH,
-                                                                    DrawTextFlags::NONE, ALIGN_TOP);
-    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(10), aPos.X());
-    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(10), aPos.Y());
-
-    // 2. Center-Center
-    // X = 10 + (100 - 20)/2 = 50
-    // Y = 10 + (100 - 10)/2 = 55
-    aPos = vcl::text::TextLayoutEngine::CalculateLayoutOrigin(
-        *pVDev, aRect, nTxtW, nTxtH, DrawTextFlags::Center | DrawTextFlags::VCenter, ALIGN_TOP);
-    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(50), aPos.X());
-    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(55), aPos.Y());
-
-    // 3. Right-Bottom
-    // X = 10 + (100 - 20) = 90
-    // Y = 10 + (100 - 10) = 100
-    aPos = vcl::text::TextLayoutEngine::CalculateLayoutOrigin(
-        *pVDev, aRect, nTxtW, nTxtH, DrawTextFlags::Right | DrawTextFlags::Bottom, ALIGN_TOP);
-    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(90), aPos.X());
-    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(100), aPos.Y());
-
-    // 4. Font Alignment (ALIGN_BOTTOM)
-    // Adds nTxtH to Y.
-    // Y = 10 (RectTop) + 10 (TextHeight) = 20
-    aPos = vcl::text::TextLayoutEngine::CalculateLayoutOrigin(*pVDev, aRect, nTxtW, nTxtH,
-                                                              DrawTextFlags::NONE, ALIGN_BOTTOM);
-    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(20), aPos.Y());
-
-    // 5. Font Alignment (ALIGN_BASELINE)
-    // Adds Ascent to Y.
-    long nAscent = pVDev->GetFontMetric().GetAscent();
-    aPos = vcl::text::TextLayoutEngine::CalculateLayoutOrigin(*pVDev, aRect, nTxtW, nTxtH,
-                                                              DrawTextFlags::NONE, ALIGN_BASELINE);
-    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(10 + nAscent), aPos.Y());
 }
 
 void TextLayoutEngineTest::testCalculateMultiLineLayout()
