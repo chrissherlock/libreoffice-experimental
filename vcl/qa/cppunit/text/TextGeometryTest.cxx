@@ -247,6 +247,30 @@ CPPUNIT_TEST_FIXTURE(TextGeometryTest, testGetShadowOffset)
     CPPUNIT_ASSERT_EQUAL(tools::Long(3), nOff);
 }
 
+CPPUNIT_TEST_FIXTURE(TextGeometryTest, testGetOutlineOffsets)
+{
+    const std::vector<basegfx::B2DPoint>& rOffsets = vcl::text::TextGeometry::GetOutlineOffsets();
+
+    // Must return exactly 8 points (surrounding pixels)
+    CPPUNIT_ASSERT_EQUAL(size_t(8), rOffsets.size());
+
+    // Verify specific key points verify the pattern
+    // Top-Left
+    CPPUNIT_ASSERT_EQUAL(1.0, std::abs(rOffsets[0].getX()));
+    CPPUNIT_ASSERT_EQUAL(1.0, std::abs(rOffsets[0].getY()));
+
+    // Verify uniqueness (basic check)
+    std::set<std::pair<double, double>> aUniquePoints;
+    for (const auto& rPoint : rOffsets)
+    {
+        aUniquePoints.insert({ rPoint.getX(), rPoint.getY() });
+    }
+    CPPUNIT_ASSERT_EQUAL(size_t(8), aUniquePoints.size());
+
+    // Ensure (0,0) is NOT in the list (we don't draw over the center)
+    CPPUNIT_ASSERT(aUniquePoints.find({ 0.0, 0.0 }) == aUniquePoints.end());
+}
+
 } // namespace
 
 CPPUNIT_PLUGIN_IMPLEMENT();
