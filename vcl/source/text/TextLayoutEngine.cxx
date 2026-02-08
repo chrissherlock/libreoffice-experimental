@@ -633,28 +633,6 @@ double TextLayoutEngine::GetLayoutPixelWidth(const CoordinateMapper& rMapper,
     return rMapper.LogicWidthToDeviceSubPixel(nLogicWidth * nSubPixelFactor);
 }
 
-sal_Int32 TextLayoutEngine::GetTextBreak(const LayoutResources& rRes,
-                                         const vcl::text::TextSpan& rSpan,
-                                         tools::Long nMaxLineWidth, tools::Long nCharExtra,
-                                         const vcl::text::LayoutCacheData& rCache)
-{
-    const vcl::text::LayoutConstraints aConstraints{ Point(0, 0), 0, {}, {}, SalLayoutFlags::NONE };
-    std::unique_ptr<SalLayout> pSalLayout = Layout(rRes, rSpan, aConstraints, rCache, {});
-
-    if (!pSalLayout)
-        return -1;
-
-    const tools::Long nSubPixelFactor = GetSubPixelFactor(rRes.rMapper);
-    const double nTextPixelWidth
-        = GetLayoutPixelWidth(rRes.rMapper, nMaxLineWidth, nSubPixelFactor);
-
-    double nExtraPixelWidth = 0;
-    if (nCharExtra != 0)
-        nExtraPixelWidth = GetLayoutPixelWidth(rRes.rMapper, nCharExtra, nSubPixelFactor);
-
-    return pSalLayout->GetTextBreak(nTextPixelWidth, nExtraPixelWidth, nSubPixelFactor);
-}
-
 bool TextLayoutEngine::GetTextIsRTL(const LayoutResources& rRes, const OUString& rString,
                                     sal_Int32 nIndex, sal_Int32 nLen)
 {
@@ -669,55 +647,6 @@ bool TextLayoutEngine::GetTextIsRTL(const LayoutResources& rRes, const OUString&
         return false;
 
     return (nCharPos != nIndex);
-}
-
-sal_Int32 TextLayoutEngine::GetTextBreakArray(
-    const LayoutResources& rRes, const vcl::text::TextSpan& rSpan, tools::Long nTextWidth,
-    std::optional<sal_Unicode> nHyphenChar, std::optional<sal_Int32*> pHyphenPos,
-    tools::Long nCharExtra, KernArraySpan aKernArray, const vcl::text::LayoutCacheData& rCache)
-{
-    if (pHyphenPos.has_value())
-        **pHyphenPos = -1;
-
-    const vcl::text::LayoutConstraints aConstraints{
-        Point(0, 0), 0, aKernArray, {}, SalLayoutFlags::NONE
-    };
-    std::unique_ptr<SalLayout> pSalLayout = Layout(rRes, rSpan, aConstraints, rCache, {});
-
-    if (!pSalLayout)
-        return -1;
-
-    const tools::Long nSubPixelFactor = GetSubPixelFactor(rRes.rMapper);
-    double nTextPixelWidth = GetLayoutPixelWidth(rRes.rMapper, nTextWidth, nSubPixelFactor);
-    double nExtraPixelWidth
-        = (nCharExtra != 0) ? GetLayoutPixelWidth(rRes.rMapper, nCharExtra, nSubPixelFactor) : 0;
-
-    sal_Int32 nRetVal
-        = pSalLayout->GetTextBreak(nTextPixelWidth, nExtraPixelWidth, nSubPixelFactor);
-
-    if (!nHyphenChar.has_value())
-        return nRetVal;
-
-    OUString aHyphenStr(*nHyphenChar);
-    vcl::text::TextSpan aHyphenSpan{ aHyphenStr, 0, 1 };
-    std::unique_ptr<SalLayout> pHyphenLayout = Layout(rRes, aHyphenSpan, {}, {}, {});
-
-    if (!pHyphenLayout)
-        return nRetVal;
-
-    double nHyphenPixelWidth = pHyphenLayout->GetTextWidth() * nSubPixelFactor;
-    nTextPixelWidth -= nHyphenPixelWidth;
-    if (nExtraPixelWidth > 0)
-        nTextPixelWidth -= nExtraPixelWidth;
-
-    if (pHyphenPos.has_value())
-    {
-        **pHyphenPos = pSalLayout->GetTextBreak(nTextPixelWidth, nExtraPixelWidth, nSubPixelFactor);
-        if (**pHyphenPos > nRetVal)
-            **pHyphenPos = nRetVal;
-    }
-
-    return nRetVal;
 }
 
 bool TextLayoutEngine::GetLogicalTextBoundRect(const LayoutResources& rRes,
@@ -1134,56 +1063,6 @@ void TextLayoutEngine::FilterVisibleGlyphs(const OUString& rStr, sal_Int32 nInde
 }
 
 const LogicalFontInstance* pForcedFallback;
-void TextLayoutEngine::CalculateMultiLineLayout(vcl::TextLayoutCommon& rLayout,
-                                                MultiLineLayout& rRes,
-                                                const tools::Rectangle& rRect,
-                                                tools::Long nTextHeight, tools::Long nWidth,
-                                                tools::Long nHeight, const OUString& rStr,
-                                                DrawTextFlags nStyle)
-{
-    rRes.nResultStyle = nStyle;
-
-    tools::Long nMaxTextWidth
-        = rLayout.GetTextLines(rRect, nTextHeight, rRes.aLineInfo, nWidth, rStr, nStyle);
-    sal_Int32 nLines = static_cast<sal_Int32>(nHeight / nTextHeight);
-    rRes.nFormatLines = rRes.aLineInfo.Count();
-
-    if (nLines <= 0)
-        nLines = 1;
-
-    if (rRes.nFormatLines > nLines)
-    {
-        if (nStyle & DrawTextFlags::EndEllipsis)
-        {
-            rRes.nFormatLines = nLines - 1;
-
-            ImplTextLineInfo& rLineInfo = rRes.aLineInfo.GetLine(rRes.nFormatLines);
-            OUString aLastLine = convertLineEnd(rStr.copy(rLineInfo.GetIndex()), LINEEND_LF);
-
-            OUStringBuffer aLastLineBuffer(aLastLine);
-            sal_Int32 nLastLineLen = aLastLineBuffer.getLength();
-            for (sal_Int32 i = 0; i < nLastLineLen; i++)
-            {
-                if (aLastLineBuffer[i] == '\n')
-                    aLastLineBuffer[i] = ' ';
-            }
-            aLastLine = aLastLineBuffer.makeStringAndClear();
-
-            rRes.aLastLine = rLayout.GetEllipsisString(aLastLine, nWidth, nStyle);
-
-            rRes.nResultStyle &= ~DrawTextFlags(DrawTextFlags::VCenter | DrawTextFlags::Bottom);
-            rRes.nResultStyle |= DrawTextFlags::Top;
-        }
-    }
-    else
-    {
-        if (nMaxTextWidth <= nWidth)
-            rRes.nResultStyle &= ~DrawTextFlags::Clip;
-    }
-
-    if (rRes.nFormatLines * nTextHeight > nHeight)
-        rRes.nResultStyle |= DrawTextFlags::Clip;
-}
 
 std::unique_ptr<SalLayout> TextLayoutEngine::GetStrikeoutCharLayout(const LayoutResources& rRes,
                                                                     tools::Long nTargetWidth,
