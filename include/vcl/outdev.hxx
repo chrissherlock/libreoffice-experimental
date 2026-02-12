@@ -313,8 +313,8 @@ public:
     tools::Long                        GetOutputHeightPixel() const { return mnOutHeight; }
     tools::Long                        GetOutOffXPixel() const { return mnOutOffX; }
     tools::Long                        GetOutOffYPixel() const { return mnOutOffY; }
-    SAL_DLLPRIVATE void         SetOutOffXPixel(tools::Long nOutOffX);
-    SAL_DLLPRIVATE void         SetOutOffYPixel(tools::Long nOutOffY);
+    void         SetOutOffXPixel(tools::Long nOutOffX);
+    void         SetOutOffYPixel(tools::Long nOutOffY);
     Point                       GetOutputOffPixel() const
                                     { return Point( mnOutOffX, mnOutOffY ); }
     tools::Rectangle            GetOutputRectPixel() const
@@ -1733,7 +1733,7 @@ public:
 
      @returns Height in units of device pixels.
      */
-    SAL_DLLPRIVATE tools::Long         ImplLogicHeightToDevicePixel( tools::Long nHeight ) const;
+    tools::Long         ImplLogicHeightToDevicePixel( tools::Long nHeight ) const;
     SAL_DLLPRIVATE double              ImplLogicHeightToDeviceSubPixel(tools::Long nHeight) const;
 
     SAL_DLLPRIVATE Point               SubPixelToLogic(const basegfx::B2DPoint& rDevicePt) const;

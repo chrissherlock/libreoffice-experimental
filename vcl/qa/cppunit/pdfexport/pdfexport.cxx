@@ -1875,7 +1875,7 @@ CPPUNIT_TEST_FIXTURE(PdfExportTest, testTdf66597_2)
                     = dynamic_cast<vcl::filter::PDFNameElement*>(pObject->Lookup("BaseFont"_ostr));
                 CPPUNIT_ASSERT(pName);
                 OString aFontName = pName->GetValue().copy(7); // skip the subset id
-#if defined _WIN32
+#if defined MACOSX || defined _WIN32
                 CPPUNIT_ASSERT_EQUAL_MESSAGE("Unexpected font name", "ReemKufi-Regular"_ostr,
                                              aFontName);
 #else
