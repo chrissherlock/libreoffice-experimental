@@ -10,6 +10,11 @@
 #include <text/TextJustifier.hxx>
 #include <sallayout.hxx>
 #include <unicode/uchar.h>
+#include <vcl/text/LayoutResources.hxx>
+#include <text/TextLayoutRequest.hxx>
+#include <CoordinateMapper.hxx>
+#include <justificationdata.hxx>
+#include <cmath>
 
 namespace vcl::text
 {
@@ -38,4 +43,80 @@ void TextJustifier::GetWordKashidaPositions(const SalLayout& rLayout, std::u16st
     }
 }
 
+namespace
+{
+double lcl_applyDXArray(JustificationData& rJustification, const LayoutResources& rRes,
+                        std::span<const double> pDXArray, sal_Int32 nMinCluster, sal_Int32 nLen)
+{
+    if (pDXArray.empty())
+        return 0.0;
+
+    double nEndCoord = 0.0;
+
+    if (rRes.rMapper.IsMapModeEnabled())
+    {
+        for (int i = 0; i < nLen; ++i)
+        {
+            rJustification.SetTotalAdvance(nMinCluster + i,
+                                           rRes.rMapper.LogicWidthToDeviceSubPixel(pDXArray[i]));
+        }
+
+        nEndCoord = rJustification.GetTotalAdvance(nMinCluster + nLen - 1);
+    }
+    else
+    {
+        for (int i = 0; i < nLen; ++i)
+        {
+            rJustification.SetTotalAdvance(nMinCluster + i, pDXArray[i]);
+        }
+
+        nEndCoord = std::round(rJustification.GetTotalAdvance(nMinCluster + nLen - 1));
+    }
+
+    return nEndCoord;
+}
+
+void lcl_applyKashidaArray(JustificationData& rJustification,
+                           std::span<const sal_Bool> pKashidaArray, sal_Int32 nMinCluster)
+{
+    if (pKashidaArray.empty())
+        return;
+
+    for (sal_Int32 i = 0; i < static_cast<sal_Int32>(pKashidaArray.size()); ++i)
+    {
+        rJustification.SetKashidaPosition(nMinCluster + i, static_cast<bool>(pKashidaArray[i]));
+    }
+}
+
+} // namespace
+
+void TextJustifier::PrepareJustification(const LayoutResources& rRes,
+                                         std::span<const double> pDXArray,
+                                         std::span<const sal_Bool> pKashidaArray,
+                                         sal_Int32 nMinIndex, sal_Int32 nLen,
+                                         std::optional<sal_Int32> nDrawMinCharPos,
+                                         std::optional<sal_Int32> nDrawEndCharPos,
+                                         TextLayoutRequest& rLayoutArgs, double& rEndGlyphCoord)
+{
+    if (pDXArray.empty() && pKashidaArray.empty())
+        return;
+
+    const auto nJustMinCluster = nDrawMinCharPos.value_or(nMinIndex);
+    auto nJustLen = nLen;
+
+    if (nDrawEndCharPos.has_value())
+        nJustLen = *nDrawEndCharPos - nJustMinCluster;
+
+    JustificationData aJustification{ nJustMinCluster, nJustLen };
+
+    if (!pDXArray.empty())
+    {
+        rEndGlyphCoord
+            = lcl_applyDXArray(aJustification, rRes, pDXArray, nJustMinCluster, nJustLen);
+    }
+
+    lcl_applyKashidaArray(aJustification, pKashidaArray, nJustMinCluster);
+
+    rLayoutArgs.SetJustificationData(std::move(aJustification));
+}
 } // namespace vcl::text

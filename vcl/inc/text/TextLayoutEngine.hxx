@@ -135,13 +135,6 @@ public:
                         const ::vcl::GraphicsState& rState,
                         const ::vcl::font::FontRealization& rRealization, bool bRTL);
 
-    static void PrepareJustification(const LayoutResources& rRes, KernArraySpan pDXArray,
-                                     std::span<const sal_Bool> pKashidaArray, sal_Int32 nMinIndex,
-                                     sal_Int32 nLen, std::optional<sal_Int32> nDrawMinCharPos,
-                                     std::optional<sal_Int32> nDrawEndCharPos,
-                                     ::vcl::text::TextLayoutRequest& rLayoutArgs,
-                                     double& rEndGlyphCoord);
-
     static basegfx::B2DPoint MapLogicalToDevicePos(const LayoutResources& rRes,
                                                    const Point& rLogicalPos);
     static void FillAlignmentContext(TextLayoutPositioning& rPos,

@@ -14,6 +14,13 @@
 
 #include <text/TextJustifier.hxx>
 #include <sallayout.hxx>
+#include <vcl/text/LayoutResources.hxx>
+#include <text/TextLayoutRequest.hxx>
+#include <CoordinateMapper.hxx>
+#include <GraphicsState.hxx>
+#include <font/FontController.hxx>
+
+#include <sallayout.hxx>
 
 using namespace vcl::text;
 
@@ -76,6 +83,46 @@ CPPUNIT_TEST_FIXTURE(TextJustifierTest, testGetWordKashidaPositions)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Index 0 (Even) should be valid", true, bool(aResult[0]));
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Index 1 (Odd) should be invalid", false, bool(aResult[1]));
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Index 2 (Even) should be valid", true, bool(aResult[2]));
+}
+
+CPPUNIT_TEST_FIXTURE(TextJustifierTest, testPrepareJustification)
+{
+    CoordinateMapper aMapper; // Default is pixel mode (Identity)
+    vcl::GraphicsState aState;
+    vcl::font::FontRealization aRealization;
+    vcl::text::LayoutResources aRes{ nullptr, aMapper, nullptr, nullptr, nullptr,
+                                     nullptr, false,   false,   aState,  aRealization };
+
+    OUString aText = u"ABCD"_ustr;
+    std::vector<double> aDX = { 10.0, 20.0, 30.0, 40.0 }; // Cumulative widths
+    std::vector<sal_Bool> aKashida = { 0, 1, 0, 0 }; // Kashida at index 1 ('B')
+
+    vcl::text::TextLayoutRequest aReq(aText, 0, 4, SalLayoutFlags::NONE,
+                                      LanguageTag(LANGUAGE_ENGLISH), nullptr);
+    double nEndCoord = 0.0;
+
+    TextJustifier::PrepareJustification(aRes, aDX, aKashida, 0, 4, std::nullopt, std::nullopt, aReq,
+                                        nEndCoord);
+
+    // Assert End Coordinate
+    // Since Mapper is Identity, last DX is 40.0. round(40.0) -> 40.0
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(40.0, nEndCoord, 0.001);
+
+    // Assert Justification Data
+    const JustificationData& rData = aReq.mstJustification;
+    CPPUNIT_ASSERT_MESSAGE("Justification data should not be empty", !rData.empty());
+
+    // Check DX array values (TotalAdvance)
+    // Index 0: 10
+    // Index 1: 20
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(10.0, rData.GetTotalAdvance(0), 0.001);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(20.0, rData.GetTotalAdvance(1), 0.001);
+
+    // Check Kashida
+    // Index 1 should have kashida
+    CPPUNIT_ASSERT_EQUAL(true, bool(rData.GetPositionHasKashida(1).value_or(false)));
+    // Index 0 should not
+    CPPUNIT_ASSERT_EQUAL(false, bool(rData.GetPositionHasKashida(0).value_or(false)));
 }
 
 } // namespace
