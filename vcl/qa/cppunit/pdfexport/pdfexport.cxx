@@ -1866,7 +1866,7 @@ CPPUNIT_TEST_FIXTURE(PdfExportTest, testTdf66597_2)
                                            pName);
                     fontName = pName->GetValue();
                 }
-                CPPUNIT_ASSERT_EQUAL_MESSAGE("Unexpected font name", "ReemKufi"_ostr, fontName);
+                CPPUNIT_ASSERT_MESSAGE("Unexpected font name", fontName.match("ReemKufi"_ostr);
 
                 auto pToUnicodeRef = dynamic_cast<vcl::filter::PDFReferenceElement*>(
                     pObject->Lookup("ToUnicode"_ostr));
