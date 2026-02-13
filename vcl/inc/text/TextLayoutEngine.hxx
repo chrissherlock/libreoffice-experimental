@@ -19,13 +19,13 @@
 #include <vcl/text/LayoutResources.hxx>
 #include <vcl/text/TextGeometry.hxx>
 #include <vcl/text/TextDecorator.hxx>
+#include <vcl/text/MnemonicGeometry.hxx>
 
 #include <ImplLayoutRuns.hxx>
 #include <font/EmphasisMark.hxx>
 #include <font/FontLookupCriteria.hxx>
 #include <textlineinfo.hxx>
 #include <text/ILayoutFactory.hxx>
-#include <text/MnemonicGeometry.hxx>
 
 #include <vector>
 #include <memory>
@@ -206,12 +206,6 @@ public:
     static bool GetTextIsRTL(const LayoutResources& rRes, const OUString& rString, sal_Int32 nIndex,
                              sal_Int32 nLen);
     /** Orchestrates the calculation of text bounding rectangles in logical units. */
-    static bool GetLogicalTextBoundRect(const LayoutResources& rRes, basegfx::B2DRectangle& rRect,
-                                        const OUString& rStr, sal_Int32 nBase, sal_Int32 nIndex,
-                                        sal_Int32 nLen, sal_uLong nLayoutWidth,
-                                        KernArraySpan pDXArray,
-                                        std::span<const sal_Bool> pKashidaArray,
-                                        const SalLayoutGlyphs* pGlyphs);
 
     /**
      * Calculates the visual bounding box of the rendered text in device pixels.

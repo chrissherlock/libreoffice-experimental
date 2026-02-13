@@ -7,15 +7,22 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include <vcl/dllapi.h>
-
 #include <tools/degree.hxx>
 #include <basegfx/numeric/ftools.hxx>
+#include <o3tl/unit_conversion.hxx>
 
 #include <vcl/outdev.hxx>
 #include <vcl/fntstyle.hxx>
-#include <vcl/text/TextGeometry.hxx>
 #include <vcl/metric.hxx>
+#include <vcl/text/TextGeometry.hxx>
+#include <vcl/text/LayoutResources.hxx>
+#include <vcl/text/TextSpan.hxx>
+#include <vcl/text/LayoutCacheData.hxx>
+
+#include <font/FontController.hxx>
+#include <sallayout.hxx>
+#include <text/TextLayoutEngine.hxx>
+#include <CoordinateMapper.hxx>
 
 #include <cmath>
 
@@ -265,6 +272,126 @@ Point TextGeometry::CalculateLayoutOrigin(const OutputDevice& rDev, const tools:
     return aPos;
 }
 
-} // namespace vcl::text
+bool TextGeometry::GetTextOutlines(const LayoutResources& rResources,
+                                   basegfx::B2DPolyPolygonVector& rVector, const OUString& rStr,
+                                   sal_Int32 nBase, sal_Int32 nIndex, sal_Int32 nLen,
+                                   sal_uLong nLayoutWidth, std::span<const double> pDXArray,
+                                   std::span<const sal_Bool> pKashidaArray)
+{
+    bool bRet = false;
+    rVector.clear();
 
-/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
+    if (nLen < 0)
+        nLen = rStr.getLength() - nIndex;
+
+    rVector.reserve(nLen);
+
+    std::unique_ptr<SalLayout> pSalLayout;
+    double nXOffset = 0;
+
+    if (nBase != nIndex)
+    {
+        sal_Int32 nStart = std::min(nBase, nIndex);
+        sal_Int32 nOfsLen = std::max(nBase, nIndex) - nStart;
+
+        pSalLayout = TextLayoutEngine::Layout(
+            rResources, vcl::text::TextSpan{ rStr, nStart, nOfsLen },
+            vcl::text::LayoutConstraints{ Point(0, 0), static_cast<tools::Long>(nLayoutWidth),
+                                          pDXArray, pKashidaArray, SalLayoutFlags::NONE },
+            vcl::text::LayoutCacheData{ nullptr, nullptr }, {});
+
+        if (pSalLayout)
+        {
+            nXOffset = pSalLayout->GetTextWidth();
+            pSalLayout.reset();
+            if (nBase < nIndex)
+                nXOffset = -nXOffset;
+        }
+    }
+
+    pSalLayout = TextLayoutEngine::Layout(
+        rResources, vcl::text::TextSpan{ rStr, nIndex, nLen },
+        vcl::text::LayoutConstraints{ Point(0, 0), static_cast<tools::Long>(nLayoutWidth), pDXArray,
+                                      pKashidaArray, SalLayoutFlags::NONE },
+        vcl::text::LayoutCacheData{ nullptr, nullptr }, {});
+
+    if (pSalLayout)
+    {
+        bRet = pSalLayout->GetOutline(rVector);
+
+        if (bRet)
+        {
+            basegfx::B2DHomMatrix aMatrix = TextLayoutEngine::CalculateOutlineTransform(
+                *pSalLayout, rResources.rFontRealization, nXOffset);
+
+            if (!aMatrix.isIdentity())
+            {
+                for (auto& elem : rVector)
+                {
+                    elem.transform(aMatrix);
+                }
+            }
+        }
+    }
+
+    return bRet;
+}
+
+bool TextGeometry::GetLogicalTextBoundRect(const LayoutResources& rRes,
+                                           basegfx::B2DRectangle& rRect, const OUString& rStr,
+                                           sal_Int32 nBase, sal_Int32 nIndex, sal_Int32 nLen,
+                                           sal_uLong nLayoutWidth, std::span<const double> pDXArray,
+                                           std::span<const sal_Bool> pKashidaArray,
+                                           const SalLayoutGlyphs* pGlyphs)
+{
+    bool bRet = false;
+    rRect.reset();
+
+    double nXOffset = 0;
+    if (nBase != nIndex)
+    {
+        sal_Int32 nStart = std::min(nBase, nIndex);
+        sal_Int32 nOfsLen = std::max(nBase, nIndex) - nStart;
+
+        std::unique_ptr<SalLayout> pOfsLayout = TextLayoutEngine::Layout(
+            rRes, vcl::text::TextSpan{ rStr, nStart, nOfsLen },
+            vcl::text::LayoutConstraints{ Point(0, 0), static_cast<tools::Long>(nLayoutWidth),
+                                          pDXArray, pKashidaArray, SalLayoutFlags::NONE },
+            vcl::text::LayoutCacheData{ nullptr, nullptr }, {});
+
+        if (pOfsLayout)
+        {
+            nXOffset = pOfsLayout->GetTextWidth();
+
+            if (nBase < nIndex)
+                nXOffset = -nXOffset;
+        }
+    }
+
+    std::unique_ptr<SalLayout> pSalLayout = TextLayoutEngine::Layout(
+        rRes, vcl::text::TextSpan{ rStr, nIndex, nLen },
+        vcl::text::LayoutConstraints{ Point(0, 0), static_cast<tools::Long>(nLayoutWidth), pDXArray,
+                                      pKashidaArray, SalLayoutFlags::NONE },
+        vcl::text::LayoutCacheData{ nullptr, pGlyphs }, {});
+
+    if (pSalLayout)
+    {
+        basegfx::B2DRectangle aPixelRect;
+        bRet = pSalLayout->GetBoundRect(aPixelRect);
+
+        if (bRet)
+        {
+            basegfx::B2DPoint aPos = pSalLayout->GetDrawPosition(basegfx::B2DPoint(nXOffset, 0));
+            aPixelRect.translate(rRes.rFontRealization.nXOffset - aPos.getX(),
+                                 rRes.rFontRealization.nYOffset - aPos.getY());
+            rRect = rRes.rMapper.PixelToLogic(aPixelRect);
+
+            if (rRes.rMapper.IsMapModeEnabled())
+                rRect.translate(rRes.rMapper.GetMappingXOffset(), rRes.rMapper.GetMappingYOffset());
+        }
+    }
+
+    return bRet;
+}
+
+} // namespace vcl::text

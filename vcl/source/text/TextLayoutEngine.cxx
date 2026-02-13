@@ -523,66 +523,6 @@ bool TextLayoutEngine::GetTextIsRTL(const LayoutResources& rRes, const OUString&
     return (nCharPos != nIndex);
 }
 
-bool TextLayoutEngine::GetLogicalTextBoundRect(const LayoutResources& rRes,
-                                               basegfx::B2DRectangle& rRect, const OUString& rStr,
-                                               sal_Int32 nBase, sal_Int32 nIndex, sal_Int32 nLen,
-                                               sal_uLong nLayoutWidth, KernArraySpan pDXArray,
-                                               std::span<const sal_Bool> pKashidaArray,
-                                               const SalLayoutGlyphs* pGlyphs)
-{
-    bool bRet = false;
-    rRect.reset();
-
-    // calculate offset when nBase!=nIndex
-    double nXOffset = 0;
-    if (nBase != nIndex)
-    {
-        sal_Int32 nStart = std::min(nBase, nIndex);
-        sal_Int32 nOfsLen = std::max(nBase, nIndex) - nStart;
-
-        std::unique_ptr<SalLayout> pOfsLayout = Layout(
-            rRes, vcl::text::TextSpan{ rStr, nStart, nOfsLen },
-            vcl::text::LayoutConstraints{ Point(0, 0), static_cast<tools::Long>(nLayoutWidth),
-                                          pDXArray, pKashidaArray, SalLayoutFlags::NONE },
-            {}, {});
-
-        if (pOfsLayout)
-        {
-            nXOffset = pOfsLayout->GetTextWidth();
-
-            if (nBase < nIndex)
-                nXOffset = -nXOffset;
-        }
-    }
-
-    // Main Layout
-    std::unique_ptr<SalLayout> pSalLayout
-        = Layout(rRes, vcl::text::TextSpan{ rStr, nIndex, nLen },
-                 vcl::text::LayoutConstraints{ Point(0, 0), static_cast<tools::Long>(nLayoutWidth),
-                                               pDXArray, pKashidaArray, SalLayoutFlags::NONE },
-                 vcl::text::LayoutCacheData{ nullptr, pGlyphs }, {});
-
-    if (pSalLayout)
-    {
-        basegfx::B2DRectangle aPixelRect;
-        bRet = pSalLayout->GetBoundRect(aPixelRect);
-
-        if (bRet)
-        {
-            basegfx::B2DPoint aPos = pSalLayout->GetDrawPosition(basegfx::B2DPoint(nXOffset, 0));
-            // Apply font offsets and transform to logical units
-            aPixelRect.translate(rRes.rFontRealization.nXOffset - aPos.getX(),
-                                 rRes.rFontRealization.nYOffset - aPos.getY());
-            rRect = rRes.rMapper.PixelToLogic(aPixelRect);
-
-            if (rRes.rMapper.IsMapModeEnabled())
-                rRect.translate(rRes.rMapper.GetMappingXOffset(), rRes.rMapper.GetMappingYOffset());
-        }
-    }
-
-    return bRet;
-}
-
 tools::Rectangle
 TextLayoutEngine::GetTextInkBounds(const SalLayout& rSalLayout,
                                    const vcl::font::FontRealization& rFontRealization,

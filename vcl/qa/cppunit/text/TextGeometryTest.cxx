@@ -15,10 +15,9 @@
 #include <tools/mapunit.hxx>
 
 #include <vcl/metric.hxx>
+#include <vcl/text/MnemonicGeometry.hxx>
 #include <vcl/text/TextGeometry.hxx>
 #include <vcl/virdev.hxx>
-
-#include <text/MnemonicGeometry.hxx>
 
 #include <vector>
 
