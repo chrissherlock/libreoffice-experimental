@@ -92,8 +92,6 @@ public:
                                                              FontStrikeout eStrikeout);
 
     /** Analyzes a layout to find valid Kashida insertion points. */
-    static void GetWordKashidaPositions(const SalLayout& rLayout, std::u16string_view rText,
-                                        std::vector<bool>& rOutMap);
 
     /** Calculates the device-pixel positions for emphasis marks.
      * @return A vector of global Points (in device pixels).
@@ -341,11 +339,6 @@ public:
                                     const std::vector<tools::Rectangle>& rGlyphRects,
                                     std::vector<tools::Rectangle>& rOutVisibleRects,
                                     OUString* pOutVisibleText);
-
-    static void CalculateMultiLineLayout(vcl::TextLayoutCommon& rLayout, MultiLineLayout& rRes,
-                                         const tools::Rectangle& rRect, tools::Long nTextHeight,
-                                         tools::Long nWidth, tools::Long nHeight,
-                                         const OUString& rStr, DrawTextFlags nStyle);
 
 private:
     /** Calculates the subpixel factor (1 or 64) based on the mapping state. */

@@ -50,27 +50,6 @@
 
 namespace vcl::text
 {
-void TextLayoutEngine::GetWordKashidaPositions(const SalLayout& rLayout, std::u16string_view rText,
-                                               std::vector<bool>& rOutMap)
-{
-    rOutMap.clear();
-    if (!rLayout.HasFontKashidaPositions())
-        return;
-
-    size_t nEnd = rText.length();
-    rOutMap.resize(nEnd, false);
-
-    for (size_t i = 0; i < nEnd; ++i)
-    {
-        size_t nNextPos = i + 1;
-        while (nNextPos < nEnd
-               && u_getIntPropertyValue(rText[nNextPos], UCHAR_JOINING_TYPE) == U_JT_TRANSPARENT)
-            ++nNextPos;
-
-        rOutMap[i] = rLayout.IsKashidaPosValid(i, nNextPos);
-    }
-}
-
 void TextLayoutEngine::InitializeFontMetrics(
     const LogicalFontInstance* pFontInstance, const vcl::Font& rFont, long nDPIY, long nPixelWidth,
     std::function<long(const OUString&)> const& fnGetTextWidth,

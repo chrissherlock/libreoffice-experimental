@@ -271,6 +271,7 @@ $(eval $(call gb_Module_add_check_targets,vcl,\
     CppunitTest_vcl_text_geometry \
     CppunitTest_vcl_text_caret_manager \
     CppunitTest_vcl_text_multiline \
+    CppunitTest_vcl_text_justifier \
 ))
 
 ifeq ($(USING_X11),TRUE)
