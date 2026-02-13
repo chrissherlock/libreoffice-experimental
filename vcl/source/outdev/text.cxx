@@ -45,6 +45,7 @@
 #include <drawmode.hxx>
 #include <font/FontController.hxx>
 #include <text/TextLayoutEngine.hxx>
+#include <text/TextJustifier.hxx>
 #include <vcl/text/MultiLineEngine.hxx>
 #include <text/TextAnalyzer.hxx>
 #include <text/AccessibilityRecorder.hxx>
@@ -1640,7 +1641,7 @@ void OutputDevice::GetWordKashidaPositions(const OUString& rText, std::vector<bo
         return;
     }
 
-    vcl::text::TextLayoutEngine::GetWordKashidaPositions(*pSalLayout, rText, *pOutMap);
+    vcl::text::TextJustifier::GetWordKashidaPositions(*pSalLayout, rText, *pOutMap);
 }
 
 bool OutputDevice::GetGlyphBoundRects(const Point& rOrigin, const OUString& rStr, int nIndex,
