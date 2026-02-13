@@ -256,6 +256,24 @@ CPPUNIT_TEST_FIXTURE(TextJustifierTest, testSetAnchorPoint)
     CPPUNIT_ASSERT_DOUBLES_EQUAL(200.5, aResult.getY(), 0.001);
 }
 
+CPPUNIT_TEST_FIXTURE(TextJustifierTest, testZeroFillKernArray)
+{
+    std::vector<double> aArray;
+
+    // Case 1: Fill 5 zeros
+    TextJustifier::ZeroFillKernArray(&aArray, 5);
+    CPPUNIT_ASSERT_EQUAL(size_t(5), aArray.size());
+    for (double val : aArray)
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, val, 0.001);
+
+    // Case 2: Negative length (Should result in 0)
+    TextJustifier::ZeroFillKernArray(&aArray, -5);
+    CPPUNIT_ASSERT_EQUAL(size_t(0), aArray.size());
+
+    // Case 3: Null pointer (Should not crash)
+    TextJustifier::ZeroFillKernArray(nullptr, 10);
+}
+
 } // namespace
 
 CPPUNIT_PLUGIN_IMPLEMENT();

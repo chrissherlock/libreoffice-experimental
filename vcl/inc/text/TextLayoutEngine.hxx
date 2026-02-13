@@ -192,8 +192,6 @@ public:
                                              const vcl::text::LayoutCacheData& rCache,
                                              const vcl::text::RenderSelection& rSelection);
 
-    static void ZeroFillKernArray(KernArray* pKernArray, sal_Int32 nLen);
-
     static double GetPartialTextArray(const LayoutResources& rRes, const TextSpan& rSpan,
                                       KernArray* pKernArray, sal_Int32 nPartIndex,
                                       sal_Int32 nPartLen, bool bCaret,

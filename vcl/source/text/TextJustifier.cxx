@@ -8,6 +8,7 @@
  */
 
 #include <vcl/text/LayoutResources.hxx>
+#include <algorithm>
 
 #include <sallayout.hxx>
 #include <text/TextJustifier.hxx>
@@ -150,5 +151,11 @@ void TextJustifier::ApplyHorizontalOffset(SalLayout& rLayout, const TextLayoutRe
 void TextJustifier::SetAnchorPoint(SalLayout& rLayout, const TextLayoutPositioning& rPositioning)
 {
     rLayout.DrawBase() = rPositioning.aDrawBase;
+}
+
+void TextJustifier::ZeroFillKernArray(std::vector<double>* pKernArray, sal_Int32 nLen)
+{
+    if (pKernArray)
+        pKernArray->assign(std::max<sal_Int32>(0, nLen), 0.0);
 }
 } // namespace vcl::text
