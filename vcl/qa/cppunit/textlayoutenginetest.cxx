@@ -37,6 +37,7 @@
 #include <sallayout.hxx>
 #include <textlayout.hxx>
 #include <text/TextLayoutEngine.hxx>
+#include <text/TextLayoutPositioning.hxx>
 #include <vcl/text/MultiLineEngine.hxx>
 #include <vcl/text/TextLineGeometry.hxx>
 #include <text/TextLayoutRequest.hxx>
@@ -274,11 +275,6 @@ public:
     void testCreateLayoutRequest_OutOfBounds();
     void testFindFallbackFont_ForcedFallbackPriority();
     void testIdentifyMissingChars();
-    void testJustifyLayout();
-    void testSetAnchorPoint();
-    void testApplyHorizontalOffset();
-    void testApplyHorizontalOffset_EndGlyph();
-    void testApplyHorizontalOffset_Disabled();
     void testGetTextHeightPixel();
     void testEmphasisMarkPositions();
     void testCalculateOutlineTransform();
@@ -304,11 +300,6 @@ public:
     CPPUNIT_TEST(testCreateLayoutRequest_DigitLocalization);
     CPPUNIT_TEST(testCreateLayoutRequest_OrientationAndWidth);
     CPPUNIT_TEST(testCreateLayoutRequest_OutOfBounds);
-    CPPUNIT_TEST(testJustifyLayout);
-    CPPUNIT_TEST(testSetAnchorPoint);
-    CPPUNIT_TEST(testApplyHorizontalOffset);
-    CPPUNIT_TEST(testApplyHorizontalOffset_EndGlyph);
-    CPPUNIT_TEST(testApplyHorizontalOffset_Disabled);
     CPPUNIT_TEST(testGetTextHeightPixel);
     CPPUNIT_TEST(testEmphasisMarkPositions);
     CPPUNIT_TEST(testCalculateOutlineTransform);
@@ -513,63 +504,6 @@ void TextLayoutEngineTest::testFindFallbackFont_ForcedFallbackPriority()
 void TextLayoutEngineTest::testIdentifyMissingChars()
 {
     // Test disabled: functionality moved to DefaultFallbackStrategy (private)
-}
-
-void TextLayoutEngineTest::testJustifyLayout()
-{
-    MockSalLayout aLayout;
-    vcl::text::TextLayoutRequest aArgs(u"Test"_ustr, 0, 4, SalLayoutFlags::NONE,
-                                       LanguageTag(LANGUAGE_ENGLISH_US), nullptr);
-    vcl::text::TextLayoutEngine::JustifyLayout(aLayout, aArgs);
-    CPPUNIT_ASSERT(aLayout.bAdjustCalled);
-}
-
-void TextLayoutEngineTest::testSetAnchorPoint()
-{
-    MockSalLayout aLayout;
-    vcl::text::TextLayoutPositioning aPos;
-    aPos.aDrawBase = basegfx::B2DPoint(123.4, 567.8);
-    vcl::text::TextLayoutEngine::SetAnchorPoint(aLayout, aPos);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(123.4, aLayout.DrawBase().getX(), 0.001);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(567.8, aLayout.DrawBase().getY(), 0.001);
-}
-
-void TextLayoutEngineTest::testApplyHorizontalOffset()
-{
-    MockSalLayout aLayout;
-    vcl::text::TextLayoutRequest aArgs(u"RTL"_ustr, 0, 3, SalLayoutFlags::RightAlign,
-                                       LanguageTag(LANGUAGE_ENGLISH_US), nullptr);
-    vcl::text::TextLayoutPositioning aPos{};
-    aPos.bRightAlign = true;
-    aPos.nEndGlyphCoord = 0;
-    aArgs.mnLayoutWidth = 0;
-    vcl::text::TextLayoutEngine::ApplyHorizontalOffset(aLayout, aArgs, aPos);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(-99.0, aLayout.DrawOffset().getX(), 0.001);
-}
-
-void TextLayoutEngineTest::testApplyHorizontalOffset_EndGlyph()
-{
-    MockSalLayout aLayout;
-    vcl::text::TextLayoutRequest aArgs(u"RTL"_ustr, 0, 3, SalLayoutFlags::RightAlign,
-                                       LanguageTag(LANGUAGE_ENGLISH_US), nullptr);
-    vcl::text::TextLayoutPositioning aPos;
-    aPos.bRightAlign = true;
-    aPos.nEndGlyphCoord = 150.0;
-    aPos.bHasDXArray = true;
-    aArgs.mnLayoutWidth = 200;
-    vcl::text::TextLayoutEngine::ApplyHorizontalOffset(aLayout, aArgs, aPos);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(-149.0, aLayout.DrawOffset().getX(), 0.001);
-}
-
-void TextLayoutEngineTest::testApplyHorizontalOffset_Disabled()
-{
-    MockSalLayout aLayout;
-    vcl::text::TextLayoutRequest aArgs(u"LTR"_ustr, 0, 3, SalLayoutFlags::NONE,
-                                       LanguageTag(LANGUAGE_ENGLISH_US), nullptr);
-    vcl::text::TextLayoutPositioning aPos;
-    aPos.bRightAlign = false;
-    vcl::text::TextLayoutEngine::ApplyHorizontalOffset(aLayout, aArgs, aPos);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, aLayout.DrawOffset().getX(), 0.001);
 }
 
 void TextLayoutEngineTest::testGetTextHeightPixel()

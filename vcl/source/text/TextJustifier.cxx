@@ -7,13 +7,18 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include <text/TextJustifier.hxx>
-#include <sallayout.hxx>
-#include <unicode/uchar.h>
 #include <vcl/text/LayoutResources.hxx>
+
+#include <sallayout.hxx>
+#include <text/TextJustifier.hxx>
+#include <text/TextLayoutEngine.hxx>
 #include <text/TextLayoutRequest.hxx>
+#include <text/TextLayoutPositioning.hxx>
 #include <CoordinateMapper.hxx>
 #include <justificationdata.hxx>
+
+#include <unicode/uchar.h>
+
 #include <cmath>
 
 namespace vcl::text
@@ -118,5 +123,32 @@ void TextJustifier::PrepareJustification(const LayoutResources& rRes,
     lcl_applyKashidaArray(aJustification, pKashidaArray, nJustMinCluster);
 
     rLayoutArgs.SetJustificationData(std::move(aJustification));
+}
+
+void TextJustifier::JustifyLayout(SalLayout& rLayout, TextLayoutRequest& rArgs)
+{
+    rLayout.AdjustLayout(rArgs);
+}
+
+void TextJustifier::ApplyHorizontalOffset(SalLayout& rLayout, const TextLayoutRequest& rArgs,
+                                          const TextLayoutPositioning& rPositioning)
+{
+    if (!rPositioning.bRightAlign)
+        return;
+
+    double nRTLOffset;
+    if (rPositioning.bHasDXArray)
+        nRTLOffset = rPositioning.nEndGlyphCoord;
+    else if (rArgs.mnLayoutWidth)
+        nRTLOffset = rArgs.mnLayoutWidth;
+    else
+        nRTLOffset = rLayout.GetTextWidth();
+
+    rLayout.DrawOffset().setX(1 - nRTLOffset);
+}
+
+void TextJustifier::SetAnchorPoint(SalLayout& rLayout, const TextLayoutPositioning& rPositioning)
+{
+    rLayout.DrawBase() = rPositioning.aDrawBase;
 }
 } // namespace vcl::text
