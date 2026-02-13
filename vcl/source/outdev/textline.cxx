@@ -419,7 +419,7 @@ void OutputDevice::ImplDrawStraightTextLine( tools::Long nBaseX, tools::Long nBa
         break;
     default:
         {
-            std::vector<vcl::text::TextLineSegment> aSegments =
+            std::vector<vcl::text::TextDashSegment> aSegments =
                 vcl::text::TextDecorator::CalculateTextLineSegments(nWidth, eTextLine, nLineHeight, GetDPIX(), GetDPIY());
 
             for (const auto& rSeg : aSegments)

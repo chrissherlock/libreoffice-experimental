@@ -1,44 +1,39 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; fill-column: 100 -*- */
-/*
- * This file is part of the LibreOffice project.
- *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
-
 #pragma once
 
 #include <sal/types.h>
 #include <tools/fontenum.hxx>
 #include <tools/long.hxx>
-
 #include <vcl/dllapi.h>
 #include <vcl/vclenum.hxx>
 #include <vcl/fntstyle.hxx>
-
 #include <vector>
 
 namespace vcl::text
 {
-// Structure representing a segment of a line (decoration)
-struct TextLineSegment
+// For Dashed/Dotted lines (X-axis segments)
+struct TextDashSegment
 {
     tools::Long nX;
     tools::Long nWidth;
-    tools::Long nYOffset = 0;
-    tools::Long nHeight = 0;
+};
+
+// For Strikeout/Wave lines (Y-axis stacking)
+struct TextDecorationSegment
+{
+    tools::Long nYOffset;
+    tools::Long nHeight;
 };
 
 struct WaveLineGeometry
 {
-    std::vector<TextLineSegment> aSegments;
+    std::vector<TextDecorationSegment> aSegments;
     tools::Long nLineWidth;
 };
 
 struct StrikeoutGeometry
 {
-    std::vector<TextLineSegment> aSegments;
+    std::vector<TextDecorationSegment> aSegments;
 };
 
 struct TextLineGeometry
@@ -56,7 +51,6 @@ struct TextLineGeometry
     bool bStrikeoutIsChar = false;
 };
 
-// Request structure specifically for line decorations (underline, etc.)
 class VCL_DLLPUBLIC TextLineRequest
 {
 public:

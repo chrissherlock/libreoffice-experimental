@@ -48,7 +48,7 @@ public:
                                                         FontStrikeout eStrikeout,
                                                         tools::Long nDistY);
 
-    static std::vector<TextLineSegment>
+    static std::vector<TextDashSegment>
     CalculateTextLineSegments(tools::Long nWidth, FontLineStyle eStyle, tools::Long nLineHeight,
                               tools::Long nDPIX, tools::Long nDPIY);
 

@@ -13,13 +13,13 @@
 
 namespace vcl::text
 {
-std::vector<TextLineSegment> TextDecorator::CalculateTextLineSegments(tools::Long nWidth,
+std::vector<TextDashSegment> TextDecorator::CalculateTextLineSegments(tools::Long nWidth,
                                                                       FontLineStyle eStyle,
                                                                       tools::Long nLineHeight,
                                                                       tools::Long nDPIX,
                                                                       tools::Long nDPIY)
 {
-    std::vector<TextLineSegment> aSegments;
+    std::vector<TextDashSegment> aSegments;
     tools::Long nLeft = 0;
 
     switch (eStyle)
@@ -227,14 +227,14 @@ WaveLineGeometry TextDecorator::CalculateWaveLineGeometry(const FontMetricData& 
         if (!nLineDY2)
             nLineDY2 = 1;
 
-        aGeo.aSegments.push_back({ 0, 0, nLinePos - (nLineWidthHeight - nLineDY2), nLineHeight });
+        aGeo.aSegments.push_back({ nLinePos - (nLineWidthHeight - nLineDY2), nLineHeight });
         aGeo.aSegments.push_back(
-            { 0, 0, nLinePos + (nLineWidthHeight - nLineDY2) + (nLineWidthHeight + nLineDY),
+            { nLinePos + (nLineWidthHeight - nLineDY2) + (nLineWidthHeight + nLineDY),
               nLineHeight });
     }
     else
     {
-        aGeo.aSegments.push_back({ 0, 0, nLinePos - (nLineWidthHeight / 2), nLineHeight });
+        aGeo.aSegments.push_back({ nLinePos - (nLineWidthHeight / 2), nLineHeight });
     }
 
     aGeo.nLineWidth = nLineWidth;
@@ -259,13 +259,13 @@ StrikeoutGeometry TextDecorator::CalculateStrikeoutGeometry(const FontMetricData
             nLineHeight = rMetric.GetStrikeoutSize();
             nLinePos = nDistY + rMetric.GetStrikeoutOffset();
             if (nLineHeight > 0)
-                aGeo.aSegments.push_back({ 0, 0, nLinePos, nLineHeight });
+                aGeo.aSegments.push_back({ nLinePos, nLineHeight });
             break;
         case STRIKEOUT_BOLD:
             nLineHeight = rMetric.GetBoldStrikeoutSize();
             nLinePos = nDistY + rMetric.GetBoldStrikeoutOffset();
             if (nLineHeight > 0)
-                aGeo.aSegments.push_back({ 0, 0, nLinePos, nLineHeight });
+                aGeo.aSegments.push_back({ nLinePos, nLineHeight });
             break;
         case STRIKEOUT_DOUBLE:
             nLineHeight = rMetric.GetDoubleStrikeoutSize();
@@ -273,8 +273,8 @@ StrikeoutGeometry TextDecorator::CalculateStrikeoutGeometry(const FontMetricData
             nLinePos2 = nDistY + rMetric.GetDoubleStrikeoutOffset2();
             if (nLineHeight > 0)
             {
-                aGeo.aSegments.push_back({ 0, 0, nLinePos, nLineHeight });
-                aGeo.aSegments.push_back({ 0, 0, nLinePos2, nLineHeight });
+                aGeo.aSegments.push_back({ nLinePos, nLineHeight });
+                aGeo.aSegments.push_back({ nLinePos2, nLineHeight });
             }
             break;
         default:
