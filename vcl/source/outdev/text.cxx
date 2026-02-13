@@ -35,6 +35,9 @@
 #include <vcl/text/TextSpan.hxx>
 #include <vcl/text/TextLayoutData.hxx>
 #include <vcl/text/TextRecordingDispatcher.hxx>
+#include <vcl/text/MultiLineEngine.hxx>
+#include <vcl/text/MnemonicGeometry.hxx>
+#include <vcl/text/MultiLineEngine.hxx>
 #include <vcl/textrectinfo.hxx>
 #include <vcl/virdev.hxx>
 
@@ -45,13 +48,12 @@
 #include <drawmode.hxx>
 #include <font/FontController.hxx>
 #include <text/TextLayoutEngine.hxx>
+#include <vcl/text/TextGeometry.hxx>
 #include <text/TextJustifier.hxx>
-#include <vcl/text/MultiLineEngine.hxx>
 #include <text/TextAnalyzer.hxx>
 #include <text/AccessibilityRecorder.hxx>
 #include <text/MeasurementRecorder.hxx>
 #include <text/SalLayoutFactory.hxx>
-#include <text/MnemonicGeometry.hxx>
 #include <textlayout.hxx>
 
 #include <memory>
@@ -1492,7 +1494,7 @@ bool OutputDevice::GetLogicalTextBoundRect(basegfx::B2DRectangle& rRect, const O
             *mpGraphicsState,
             *mpFontRealization };
 
-    return vcl::text::TextLayoutEngine::GetLogicalTextBoundRect(aResources, rRect, rStr, nBase,
+    return vcl::text::TextGeometry::GetLogicalTextBoundRect(aResources, rRect, rStr, nBase,
                                                                 nIndex, nLen, nLayoutWidth,
                                                                 pDXArray, pKashidaArray, pGlyphs);
 }

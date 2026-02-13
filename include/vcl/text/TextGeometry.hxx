@@ -1,42 +1,37 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; fill-column: 100 -*- */
-/*
- * This file is part of the LibreOffice project.
- *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
-
 #pragma once
 
+#include <sal/types.h>
+#include <tools/solar.h>
 #include <tools/fontenum.hxx>
 #include <tools/gen.hxx>
 #include <tools/long.hxx>
 #include <tools/poly.hxx>
 #include <basegfx/point/b2dpoint.hxx>
+#include <basegfx/polygon/b2dpolygon.hxx>
+#include <basegfx/polygon/b2dpolypolygon.hxx>
+#include <basegfx/range/b2drectangle.hxx>
 
 #include <vcl/dllapi.h>
-#include <vcl/fntstyle.hxx>
-#include <vcl/vclenum.hxx>
 #include <vcl/rendercontext/DrawTextFlags.hxx>
 #include <vcl/kernarray.hxx>
-
-#include <text/MnemonicGeometry.hxx>
+#include <vcl/vclenum.hxx>
+#include <vcl/fntstyle.hxx>
+#include <vcl/text/MnemonicGeometry.hxx>
 
 #include <functional>
 #include <vector>
+#include <span>
+#include <optional>
 
 class Point;
 class OutputDevice;
+class SalLayoutGlyphs;
 
 namespace vcl::text
 {
-struct RotatedGeometry
-{
-    bool mbIsPolygon;
-    tools::Rectangle maRect; // Optimization for 0, 90, 180, 270 deg
-    tools::Polygon maPoly; // Fallback for arbitrary angles
-};
+struct MirroringContext;
+struct LayoutResources;
 
 struct MirroringContext
 {
@@ -46,6 +41,13 @@ struct MirroringContext
     tools::Long nOutOffX; // X Offset of the OutputDevice
     bool bHasMirroredGraphics;
     bool bIsRTL;
+};
+
+struct SAL_DLLPUBLIC RotatedGeometry
+{
+    bool mbIsPolygon;
+    tools::Rectangle maRect; // Optimization for 0, 90, 180, 270 deg
+    tools::Polygon maPoly; // Fallback for arbitrary angles
 };
 
 class VCL_DLLPUBLIC TextGeometry
@@ -82,8 +84,20 @@ public:
     static Point CalculateLayoutOrigin(const OutputDevice& rDev, const tools::Rectangle& rRect,
                                        tools::Long nTextWidth, tools::Long nTextHeight,
                                        DrawTextFlags nStyle, TextAlign eAlign);
+
+    static bool GetTextOutlines(const LayoutResources& rResources,
+                                basegfx::B2DPolyPolygonVector& rVector, const OUString& rStr,
+                                sal_Int32 nBase, sal_Int32 nIndex, sal_Int32 nLen,
+                                sal_uLong nLayoutWidth, std::span<const double> pDXArray,
+                                std::span<const sal_Bool> pKashidaArray);
+
+    /** Orchestrates the calculation of text bounding rectangles in logical units. */
+    static bool GetLogicalTextBoundRect(const LayoutResources& rRes, basegfx::B2DRectangle& rRect,
+                                        const OUString& rStr, sal_Int32 nBase, sal_Int32 nIndex,
+                                        sal_Int32 nLen, sal_uLong nLayoutWidth,
+                                        std::span<const double> pDXArray,
+                                        std::span<const sal_Bool> pKashidaArray,
+                                        const SalLayoutGlyphs* pGlyphs);
 };
 
 } // namespace vcl::text
-
-/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
