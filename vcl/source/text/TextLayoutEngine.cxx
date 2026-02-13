@@ -407,12 +407,6 @@ TextLayoutEngine::Layout(const LayoutResources& rRes, const vcl::text::TextSpan&
     return pSalLayout;
 }
 
-void TextLayoutEngine::ZeroFillKernArray(KernArray* pKernArray, sal_Int32 nLen)
-{
-    if (pKernArray)
-        pKernArray->assign(std::max<sal_Int32>(0, nLen), 0.0);
-}
-
 static void lcl_convertBoundRectToLogic(const SalLayout& rLayout, const CoordinateMapper& rMapper,
                                         std::optional<tools::Rectangle>* pBounds)
 {
@@ -459,7 +453,7 @@ double TextLayoutEngine::GetPartialTextArray(const LayoutResources& rRes,
 
     if (!pSalLayout)
     {
-        ZeroFillKernArray(pKernArray, nNormalizedPartLen);
+        TextJustifier::ZeroFillKernArray(pKernArray, nNormalizedPartLen);
         return 0.0;
     }
 

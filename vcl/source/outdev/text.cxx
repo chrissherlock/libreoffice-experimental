@@ -755,8 +755,8 @@ double OutputDevice::GetPartialTextArray(const OUString& rStr, KernArray* pKernA
 {
     if (!InitFont())
     {
-        vcl::text::TextLayoutEngine::ZeroFillKernArray(pKernArray,
-                                                       nPartLen); // Use the part length requested
+        vcl::text::TextJustifier::ZeroFillKernArray(pKernArray,
+                                                    nPartLen); // Use the part length requested
         return 0.0;
     }
 

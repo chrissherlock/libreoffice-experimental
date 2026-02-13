@@ -50,6 +50,9 @@ public:
 
     /** Sets the base drawing point for the layout. */
     static void SetAnchorPoint(SalLayout& rLayout, const TextLayoutPositioning& rPositioning);
+
+    /** Fills the kernel array with zeros up to the specified length. */
+    static void ZeroFillKernArray(std::vector<double>* pKernArray, sal_Int32 nLen);
 };
 
 } // namespace vcl::text
