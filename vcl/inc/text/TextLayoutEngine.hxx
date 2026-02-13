@@ -73,16 +73,7 @@ namespace vcl::text
 using FallbackLayoutFactory
     = std::function<std::unique_ptr<SalLayout>(LogicalFontInstance*, int, TextLayoutRequest&)>;
 
-struct TextLayoutPositioning
-{
-    basegfx::B2DPoint aDrawBase;
-    bool bSubpixelPositioning;
-    bool bRightAlign;
-    bool bHasDXArray;
-    double nEndGlyphCoord; // For RTL alignment (0 if unused)
-};
-
-struct MultiLineLayout;
+struct TextLayoutPositioning;
 
 class VCL_DLLPUBLIC TextLayoutEngine
 {
@@ -140,11 +131,6 @@ public:
     static void FillAlignmentContext(TextLayoutPositioning& rPos,
                                      const ::vcl::text::TextLayoutRequest& rArgs,
                                      double nEndGlyphCoord);
-    static void JustifyLayout(SalLayout& rLayout, ::vcl::text::TextLayoutRequest& rArgs);
-    static void ApplyHorizontalOffset(SalLayout& rLayout,
-                                      const ::vcl::text::TextLayoutRequest& rArgs,
-                                      const TextLayoutPositioning& rPositioning);
-    static void SetAnchorPoint(SalLayout& rLayout, const TextLayoutPositioning& rPositioning);
 
     // Layout Orchestration
     static std::unique_ptr<SalLayout>

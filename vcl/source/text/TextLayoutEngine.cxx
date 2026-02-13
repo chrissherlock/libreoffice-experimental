@@ -39,6 +39,7 @@
 #include <text/TextLayoutEngine.hxx>
 #include <text/TextJustifier.hxx>
 #include <text/TextAnalyzer.hxx>
+#include <text/TextLayoutPositioning.hxx>
 #include <vcl/text/DefaultFallbackStrategy.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
@@ -115,34 +116,6 @@ vcl::text::TextLayoutRequest TextLayoutEngine::CreateLayoutRequest(
     aLayoutArgs.SetLayoutWidth(nPixelWidth);
 
     return aLayoutArgs;
-}
-
-void TextLayoutEngine::JustifyLayout(SalLayout& rLayout, vcl::text::TextLayoutRequest& rArgs)
-{
-    rLayout.AdjustLayout(rArgs);
-}
-
-void TextLayoutEngine::ApplyHorizontalOffset(SalLayout& rLayout,
-                                             const vcl::text::TextLayoutRequest& rArgs,
-                                             const TextLayoutPositioning& rPositioning)
-{
-    if (!rPositioning.bRightAlign)
-        return;
-
-    double nRTLOffset;
-    if (rPositioning.bHasDXArray)
-        nRTLOffset = rPositioning.nEndGlyphCoord;
-    else if (rArgs.mnLayoutWidth)
-        nRTLOffset = rArgs.mnLayoutWidth;
-    else
-        nRTLOffset = rLayout.GetTextWidth();
-
-    rLayout.DrawOffset().setX(1 - nRTLOffset);
-}
-
-void TextLayoutEngine::SetAnchorPoint(SalLayout& rLayout, const TextLayoutPositioning& rPositioning)
-{
-    rLayout.DrawBase() = rPositioning.aDrawBase;
 }
 
 basegfx::B2DPoint TextLayoutEngine::MapLogicalToDevicePos(const LayoutResources& rRes,
@@ -352,9 +325,9 @@ void TextLayoutEngine::ApplyPositioning(const LayoutResources& rRes, SalLayout& 
     FillAlignmentContext(aPos, rArgs, nEndGlyphCoord);
     aPos.aDrawBase = MapLogicalToDevicePos(rRes, rLogicalPos);
 
-    JustifyLayout(rLayout, rArgs);
-    ApplyHorizontalOffset(rLayout, rArgs, aPos);
-    SetAnchorPoint(rLayout, aPos);
+    TextJustifier::JustifyLayout(rLayout, rArgs);
+    TextJustifier::ApplyHorizontalOffset(rLayout, rArgs, aPos);
+    TextJustifier::SetAnchorPoint(rLayout, aPos);
 }
 
 std::unique_ptr<SalLayout> TextLayoutEngine::PerformTextLayout(const LayoutResources& rRes,

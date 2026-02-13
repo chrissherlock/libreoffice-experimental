@@ -21,6 +21,7 @@ class SalLayout;
 
 namespace vcl::text
 {
+struct TextLayoutPositioning;
 struct LayoutResources;
 class TextLayoutRequest;
 class VCL_DLLPUBLIC TextJustifier
@@ -39,6 +40,16 @@ public:
                                      sal_Int32 nLen, std::optional<sal_Int32> nDrawMinCharPos,
                                      std::optional<sal_Int32> nDrawEndCharPos,
                                      TextLayoutRequest& rLayoutArgs, double& rEndGlyphCoord);
+
+    /** Applies justification adjustments to the layout. */
+    static void JustifyLayout(SalLayout& rLayout, TextLayoutRequest& rArgs);
+
+    /** Applies horizontal offsets for RTL alignment. */
+    static void ApplyHorizontalOffset(SalLayout& rLayout, const TextLayoutRequest& rArgs,
+                                      const TextLayoutPositioning& rPositioning);
+
+    /** Sets the base drawing point for the layout. */
+    static void SetAnchorPoint(SalLayout& rLayout, const TextLayoutPositioning& rPositioning);
 };
 
 } // namespace vcl::text

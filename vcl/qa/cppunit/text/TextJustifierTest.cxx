@@ -12,15 +12,15 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/plugin/TestPlugIn.h>
 
-#include <text/TextJustifier.hxx>
-#include <sallayout.hxx>
 #include <vcl/text/LayoutResources.hxx>
+
+#include <font/FontController.hxx>
+#include <sallayout.hxx>
+#include <text/TextJustifier.hxx>
 #include <text/TextLayoutRequest.hxx>
+#include <text/TextLayoutPositioning.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
-#include <font/FontController.hxx>
-
-#include <sallayout.hxx>
 
 using namespace vcl::text;
 
@@ -29,12 +29,18 @@ namespace
 class MockKashidaLayout : public SalLayout
 {
 public:
+    double mnWidth = 0.0;
+
+public:
+    bool m_bAdjustCalled = false;
+
+public:
     virtual void DrawText(SalGraphics&) const override {}
     virtual bool LayoutText(vcl::text::TextLayoutRequest&, const SalLayoutGlyphsImpl*) override
     {
         return true;
     }
-    virtual void AdjustLayout(vcl::text::TextLayoutRequest&) override {}
+    virtual void AdjustLayout(vcl::text::TextLayoutRequest&) override { m_bAdjustCalled = true; }
 
     // Test Hooks
     virtual bool HasFontKashidaPositions() const override { return true; }
@@ -47,7 +53,7 @@ public:
     // Required stubs
 
     virtual void GetCaretPositions(std::vector<double>&, const OUString&) const override {}
-    virtual double GetTextWidth() const override { return 0; }
+    virtual double GetTextWidth() const override { return mnWidth; }
     virtual double FillDXArray(std::vector<double>*, const OUString&) const override { return 0; }
     virtual sal_Int32 GetTextBreak(double, double, int) const override { return 0; }
     virtual double FillPartialDXArray(std::vector<double>*, const OUString&, sal_Int32,
@@ -123,6 +129,131 @@ CPPUNIT_TEST_FIXTURE(TextJustifierTest, testPrepareJustification)
     CPPUNIT_ASSERT_EQUAL(true, bool(rData.GetPositionHasKashida(1).value_or(false)));
     // Index 0 should not
     CPPUNIT_ASSERT_EQUAL(false, bool(rData.GetPositionHasKashida(0).value_or(false)));
+}
+
+CPPUNIT_TEST_FIXTURE(TextJustifierTest, testJustifyLayout)
+{
+    MockKashidaLayout aLayout;
+    OUString aText = u"Justify"_ustr;
+    vcl::text::TextLayoutRequest aReq(aText, 0, 7, SalLayoutFlags::NONE,
+                                      LanguageTag(LANGUAGE_ENGLISH), nullptr);
+
+    // Act
+    TextJustifier::JustifyLayout(aLayout, aReq);
+
+    // Assert that the layout's AdjustLayout method was triggered
+    CPPUNIT_ASSERT_MESSAGE("JustifyLayout should call SalLayout::AdjustLayout",
+                           aLayout.m_bAdjustCalled);
+}
+
+CPPUNIT_TEST_FIXTURE(TextJustifierTest, testApplyHorizontalOffset)
+{
+    MockKashidaLayout aLayout;
+    OUString aText = u"RTL"_ustr;
+    vcl::text::TextLayoutRequest aReq(aText, 0, 3, SalLayoutFlags::RightAlign,
+                                      LanguageTag(LANGUAGE_ENGLISH), nullptr);
+
+    vcl::text::TextLayoutPositioning aPos;
+    aPos.bRightAlign = true;
+    aPos.bHasDXArray = false;
+    aPos.nEndGlyphCoord = 0;
+
+    // Case 1: Use Layout Width (Mocked at 50)
+    aLayout.mnWidth = 50.0;
+
+    TextJustifier::ApplyHorizontalOffset(aLayout, aReq, aPos);
+
+    // Expected: 1 - 50 = -49
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-49.0, aLayout.DrawOffset().getX(), 0.001);
+
+    // Case 2: Disabled RightAlign
+    aPos.bRightAlign = false;
+    aLayout.DrawOffset().setX(0); // Reset
+
+    TextJustifier::ApplyHorizontalOffset(aLayout, aReq, aPos);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, aLayout.DrawOffset().getX(), 0.001);
+}
+
+class MockSalLayout : public SalLayout
+{
+public:
+    bool bAdjustCalled = false;
+    virtual void AdjustLayout(vcl::text::TextLayoutRequest&) override { bAdjustCalled = true; }
+    virtual bool LayoutText(vcl::text::TextLayoutRequest&, const SalLayoutGlyphsImpl*) override
+    {
+        return true;
+    }
+    virtual void DrawText(SalGraphics&) const override {}
+    virtual double GetTextWidth() const override { return 100.0; }
+    virtual sal_Int32 GetTextBreak(double, double, int) const override { return 0; }
+    virtual void GetCaretPositions(std::vector<double>&, const OUString&) const override {}
+    virtual bool HasFontKashidaPositions() const override { return false; }
+    virtual bool IsKashidaPosValid(int, int) const override { return false; }
+    virtual double FillDXArray(std::vector<double>*, const OUString&) const override { return 0; }
+    virtual double FillPartialDXArray(std::vector<double>*, const OUString&, int,
+                                      int) const override
+    {
+        return 0;
+    }
+    virtual bool GetNextGlyph(const GlyphItem**, basegfx::B2DPoint&, int&,
+                              const LogicalFontInstance**) const override
+    {
+        return false;
+    }
+};
+
+CPPUNIT_TEST_FIXTURE(TextJustifierTest, testApplyHorizontalOffsetFromZero)
+{
+    MockSalLayout aLayout;
+    vcl::text::TextLayoutRequest aArgs(u"RTL"_ustr, 0, 3, SalLayoutFlags::RightAlign,
+                                       LanguageTag(LANGUAGE_ENGLISH_US), nullptr);
+    vcl::text::TextLayoutPositioning aPos{};
+    aPos.bRightAlign = true;
+    aPos.nEndGlyphCoord = 0;
+    aArgs.mnLayoutWidth = 0;
+    vcl::text::TextJustifier::ApplyHorizontalOffset(aLayout, aArgs, aPos);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-99.0, aLayout.DrawOffset().getX(), 0.001);
+}
+
+CPPUNIT_TEST_FIXTURE(TextJustifierTest, testApplyHorizontalOffset_EndGlyph)
+{
+    MockSalLayout aLayout;
+    vcl::text::TextLayoutRequest aArgs(u"RTL"_ustr, 0, 3, SalLayoutFlags::RightAlign,
+                                       LanguageTag(LANGUAGE_ENGLISH_US), nullptr);
+    vcl::text::TextLayoutPositioning aPos;
+    aPos.bRightAlign = true;
+    aPos.nEndGlyphCoord = 150.0;
+    aPos.bHasDXArray = true;
+    aArgs.mnLayoutWidth = 200;
+    vcl::text::TextJustifier::ApplyHorizontalOffset(aLayout, aArgs, aPos);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-149.0, aLayout.DrawOffset().getX(), 0.001);
+}
+
+CPPUNIT_TEST_FIXTURE(TextJustifierTest, testApplyHorizontalOffset_Disabled)
+{
+    MockSalLayout aLayout;
+    vcl::text::TextLayoutRequest aArgs(u"LTR"_ustr, 0, 3, SalLayoutFlags::NONE,
+                                       LanguageTag(LANGUAGE_ENGLISH_US), nullptr);
+    vcl::text::TextLayoutPositioning aPos;
+    aPos.bRightAlign = false;
+    vcl::text::TextJustifier::ApplyHorizontalOffset(aLayout, aArgs, aPos);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, aLayout.DrawOffset().getX(), 0.001);
+}
+
+CPPUNIT_TEST_FIXTURE(TextJustifierTest, testSetAnchorPoint)
+{
+    MockKashidaLayout aLayout;
+
+    vcl::text::TextLayoutPositioning aPos;
+    aPos.aDrawBase = basegfx::B2DPoint(100.5, 200.5);
+
+    // Act
+    TextJustifier::SetAnchorPoint(aLayout, aPos);
+
+    // Assert
+    basegfx::B2DPoint aResult = aLayout.DrawBase();
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(100.5, aResult.getX(), 0.001);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(200.5, aResult.getY(), 0.001);
 }
 
 } // namespace

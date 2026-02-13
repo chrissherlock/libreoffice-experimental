@@ -409,6 +409,7 @@ CPPUNIT_TEST_FIXTURE(TextGeometryTest, testCalculateLayoutOrigin)
                                                           DrawTextFlags::NONE, ALIGN_BASELINE);
     CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(10 + nAscent), aPos.Y());
 }
+
 } // namespace
 
 CPPUNIT_PLUGIN_IMPLEMENT();
