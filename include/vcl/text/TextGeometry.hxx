@@ -143,6 +143,10 @@ public:
     static void GetGlyphRectsFromLayout(const SalLayout& rLayout, const Point& rStartPt,
                                         const OUString& rStr, sal_Int32 nLen,
                                         std::vector<tools::Rectangle>& rRects);
+
+    static std::unique_ptr<SalLayout> GetStrikeoutCharLayout(const LayoutResources& rRes,
+                                                             tools::Long nTargetWidth,
+                                                             FontStrikeout eStrikeout);
 };
 
 } // namespace vcl::text

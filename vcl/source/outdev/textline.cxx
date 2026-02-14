@@ -478,7 +478,7 @@ void OutputDevice::ImplDrawStrikeoutChar( tools::Long nBaseX, tools::Long nBaseY
         *mpFontRealization
     };
 
-    std::unique_ptr<SalLayout> pLayout = vcl::text::TextLayoutEngine::GetStrikeoutCharLayout(
+    std::unique_ptr<SalLayout> pLayout = vcl::text::TextGeometry::GetStrikeoutCharLayout(
         aRes, nWidth, eStrikeout);
 
     if (!pLayout)

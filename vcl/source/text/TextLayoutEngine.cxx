@@ -658,62 +658,6 @@ tools::Long TextLayoutEngine::GetAlignmentOffset(TextAlign eAlign, tools::Long n
     return 0;
 }
 
-std::unique_ptr<SalLayout> TextLayoutEngine::GetStrikeoutCharLayout(const LayoutResources& rRes,
-                                                                    tools::Long nTargetWidth,
-                                                                    FontStrikeout eStrikeout)
-{
-    if (nTargetWidth <= 0)
-        return nullptr;
-
-    const char cStrikeoutChar = (eStrikeout == STRIKEOUT_SLASH) ? '/' : 'X';
-    static const int nTestStrLen = 4;
-    static const int nMaxStrikeStrLen = 2048;
-
-    sal_Unicode aChars[nMaxStrikeStrLen + 1]; // +1 for safety
-    for (int i = 0; i < nTestStrLen; ++i)
-        aChars[i] = cStrikeoutChar;
-
-    OUString aStrikeoutTest(aChars, nTestStrLen);
-
-    // Measure the width of the strikeout character
-    vcl::text::TextSpan aSpan(aStrikeoutTest, 0, nTestStrLen);
-    vcl::text::LayoutConstraints aConstraints(Point(0, 0), 0, {}, {}, SalLayoutFlags::NONE);
-    vcl::text::LayoutCacheData aCache;
-    vcl::text::RenderSelection aSel;
-
-    std::unique_ptr<SalLayout> pLayout
-        = TextLayoutEngine::Layout(rRes, aSpan, aConstraints, aCache, aSel);
-
-    tools::Long nStrikeoutWidth = 0;
-    if (pLayout)
-    {
-        nStrikeoutWidth = pLayout->GetTextWidth() / nTestStrLen;
-    }
-
-    if (nStrikeoutWidth <= 0)
-        return nullptr;
-
-    int nStrikeStrLen = (nTargetWidth + (nStrikeoutWidth - 1)) / nStrikeoutWidth;
-
-    if (nStrikeStrLen > nMaxStrikeStrLen)
-        nStrikeStrLen = nMaxStrikeStrLen;
-    else if (nStrikeStrLen < 0)
-        nStrikeStrLen = 0;
-
-    // Build the full strikeout string
-    for (int i = nTestStrLen; i < nStrikeStrLen; ++i)
-        aChars[i] = cStrikeoutChar;
-
-    const OUString aStrikeoutText(aChars, nStrikeStrLen);
-    vcl::text::TextSpan aFinalSpan(aStrikeoutText, 0, nStrikeStrLen);
-
-    // Create the final layout with BiDiStrong forced
-    vcl::text::LayoutConstraints aFinalConstraints(Point(0, 0), 0, {}, {},
-                                                   SalLayoutFlags::BiDiStrong);
-
-    return TextLayoutEngine::Layout(rRes, aFinalSpan, aFinalConstraints, aCache, aSel);
-}
-
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
