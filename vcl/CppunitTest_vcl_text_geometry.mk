@@ -40,6 +40,7 @@ $(eval $(call gb_CppunitTest_use_libraries,vcl_text_geometry, \
     i18nlangtag \
     i18nutil \
     sal \
+    salhelper \
     svt \
     test \
     tl \

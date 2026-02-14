@@ -19,6 +19,11 @@
 #include <vcl/text/TextGeometry.hxx>
 #include <vcl/virdev.hxx>
 
+#include <font/FontController.hxx>
+#include <font/PhysicalFontFace.hxx>
+#include <sallayout.hxx>
+#include <textlayout.hxx>
+
 #include <vector>
 
 using namespace vcl::text;
@@ -407,6 +412,226 @@ CPPUNIT_TEST_FIXTURE(TextGeometryTest, testCalculateLayoutOrigin)
     aPos = vcl::text::TextGeometry::CalculateLayoutOrigin(*pVDev, aRect, nTxtW, nTxtH,
                                                           DrawTextFlags::NONE, ALIGN_BASELINE);
     CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(10 + nAscent), aPos.Y());
+}
+
+class StubPhysicalFontFace : public vcl::font::PhysicalFontFace
+{
+public:
+    StubPhysicalFontFace()
+        : PhysicalFontFace(vcl::font::FontSelectPattern(vcl::Font(), "", Size(), 0.0))
+    {
+    }
+    virtual rtl::Reference<LogicalFontInstance>
+    CreateFontInstance(const vcl::font::FontSelectPattern&) const override
+    {
+        return nullptr;
+    }
+    virtual sal_IntPtr GetFontId() const override { return reinterpret_cast<sal_IntPtr>(this); }
+    virtual hb_blob_t* GetHbTable(hb_tag_t) const override { return nullptr; }
+};
+
+class StubFontInstance : public LogicalFontInstance
+{
+public:
+    StubFontInstance()
+        : LogicalFontInstance(*new StubPhysicalFontFace(),
+                              vcl::font::FontSelectPattern(vcl::Font(), "", Size(), 0.0))
+    {
+        mxFontMetric
+            = new FontMetricData(vcl::font::FontSelectPattern(vcl::Font(), "", Size(), 0.0));
+        mnLineHeight = 20;
+        mxFontMetric->SetAscent(10);
+        mxFontMetric->SetDescent(10);
+        mnOrientation = 0_deg10;
+    }
+    virtual void ImplGetGlyphWidths(const sal_GlyphId*, bool, tools::Long*, int) const {}
+    virtual bool ImplGetGlyphBoundRect(sal_GlyphId, tools::Rectangle& rRect, bool) const
+    {
+        rRect = tools::Rectangle(Point(0, -10), Size(10, 20));
+        return true;
+    }
+    virtual void ImplGetFontMetric(FontMetricData&) const {}
+    virtual bool GetGlyphOutline(sal_GlyphId, basegfx::B2DPolyPolygon&, bool) const override
+    {
+        return false;
+    }
+};
+
+class MockSalLayout : public SalLayout
+{
+public:
+    bool bAdjustCalled = false;
+    virtual void AdjustLayout(vcl::text::TextLayoutRequest&) override { bAdjustCalled = true; }
+    virtual bool LayoutText(vcl::text::TextLayoutRequest&, const SalLayoutGlyphsImpl*) override
+    {
+        return true;
+    }
+    virtual void DrawText(SalGraphics&) const override {}
+    virtual double GetTextWidth() const override { return 100.0; }
+    virtual sal_Int32 GetTextBreak(double, double, int) const override { return 0; }
+    virtual void GetCaretPositions(std::vector<double>&, const OUString&) const override {}
+    virtual bool HasFontKashidaPositions() const override { return false; }
+    virtual bool IsKashidaPosValid(int, int) const override { return false; }
+    virtual double FillDXArray(std::vector<double>*, const OUString&) const override { return 0; }
+    virtual double FillPartialDXArray(std::vector<double>*, const OUString&, int,
+                                      int) const override
+    {
+        return 0;
+    }
+    virtual bool GetNextGlyph(const GlyphItem**, basegfx::B2DPoint&, int&,
+                              const LogicalFontInstance**) const override
+    {
+        return false;
+    }
+};
+
+// Mock to test word segmentation logic
+class WordSegmentMockLayout : public MockSalLayout
+{
+    std::vector<GlyphItem> mGlyphs;
+
+public:
+    WordSegmentMockLayout(const std::vector<bool>& rIsSpacing)
+    {
+        double nX = 0;
+        for (bool bSpacing : rIsSpacing)
+        {
+            GlyphItem aGlyph(0, 1, 0, basegfx::B2DPoint(nX, 0),
+                             bSpacing ? GlyphItemFlags::IS_SPACING : GlyphItemFlags::NONE, 10.0,
+                             0.0, 0.0, 0);
+            mGlyphs.push_back(aGlyph);
+            nX += 10.0;
+        }
+    }
+
+    virtual bool GetNextGlyph(const GlyphItem** pGlyph, basegfx::B2DPoint& rPos, int& nStart,
+                              const LogicalFontInstance**) const override
+    {
+        if (nStart < static_cast<int>(mGlyphs.size()))
+        {
+            *pGlyph = &mGlyphs[nStart];
+            rPos = mGlyphs[nStart].linearPos();
+            nStart++;
+            return true;
+        }
+        return false;
+    }
+};
+
+/**
+ * Validates that the engine correctly identifies segments of non-spacing glyphs.
+ */
+CPPUNIT_TEST_FIXTURE(TextGeometryTest, testGetWordLineSegments)
+{
+    rtl::Reference<LogicalFontInstance> xFont(new StubFontInstance());
+    vcl::font::FontRealization aRealization;
+    aRealization.mxFont = xFont;
+
+    // Test "Hello World" style (Word - Space - Word)
+    {
+        // Glyphs: [W][W][W][S][W][W][W] (W=Word, S=Space)
+        std::vector<bool> aPattern = { false, false, false, true, false, false, false };
+        WordSegmentMockLayout aLayout(aPattern);
+        aLayout.DrawBase() = basegfx::B2DPoint(0, 0);
+
+        std::vector<std::pair<double, double>> aSegments;
+        vcl::text::TextGeometry::GetWordLineSegments(aLayout, aRealization, aSegments);
+
+        // Should have 2 segments
+        CPPUNIT_ASSERT_EQUAL(size_t(2), aSegments.size());
+
+        // First word: offset 0, width 30
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, aSegments[0].first, 0.001);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(30.0, aSegments[0].second, 0.001);
+
+        // Second word: offset 40, width 30
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(40.0, aSegments[1].first, 0.001);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(30.0, aSegments[1].second, 0.001);
+    }
+
+    // Test Leading/Trailing Spaces: "  Word  "
+    {
+        // Glyphs: [S][S][W][W][S][S]
+        std::vector<bool> aPattern = { true, true, false, false, true, true };
+        WordSegmentMockLayout aLayout(aPattern);
+        aLayout.DrawBase() = basegfx::B2DPoint(0, 0);
+
+        std::vector<std::pair<double, double>> aSegments;
+        vcl::text::TextGeometry::GetWordLineSegments(aLayout, aRealization, aSegments);
+
+        // Should have only 1 segment for the word in the middle
+        CPPUNIT_ASSERT_EQUAL(size_t(1), aSegments.size());
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(20.0, aSegments[0].first, 0.001);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(20.0, aSegments[0].second, 0.001);
+    }
+
+    // Test Rotation Projection (90 degrees)
+    {
+        // When rotated 90 degrees, glyphs move along Y, not X.
+        // BasePoint is (0,0). Word starts at (0, 50) and is 20 units long.
+        std::vector<bool> aPattern = { false, false };
+        WordSegmentMockLayout aLayout(aPattern);
+        aLayout.DrawBase() = basegfx::B2DPoint(0, 0);
+
+        // Manually adjust mock glyph positions to simulate vertical flow
+        // In vertical/rotated text, nDist depends on cos(90) and sin(90)
+        xFont->mnOrientation = 900_deg10; // 90 degrees
+
+        std::vector<std::pair<double, double>> aSegments;
+        vcl::text::TextGeometry::GetWordLineSegments(aLayout, aRealization, aSegments);
+
+        // Verify rotation math: nDist = nDist * cos(90) - nDY * sin(90)
+        // cos(90) = 0, sin(90) = 1. So nDist = -nDY.
+        // If the word started at Y=0, nDist should be 0.
+        CPPUNIT_ASSERT_EQUAL(size_t(1), aSegments.size());
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, aSegments[0].first, 0.001);
+    }
+
+    {
+        // Test: 270 degrees at origin
+        // BasePoint (0,0), Glyph at (0,0). Expected distance = 0.
+        std::vector<bool> aPattern = { false };
+        WordSegmentMockLayout aLayout(aPattern);
+        aLayout.DrawBase() = basegfx::B2DPoint(0, 0);
+        xFont->mnOrientation = 2700_deg10;
+
+        std::vector<std::pair<double, double>> aSegments;
+        vcl::text::TextGeometry::GetWordLineSegments(aLayout, aRealization, aSegments);
+
+        CPPUNIT_ASSERT_EQUAL(size_t(1), aSegments.size());
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, aSegments[0].first, 0.001);
+
+        // Test: 270 degrees with horizontal offset (X=10).
+        // nDist = (10-0)*cos(270) - (0-0)*sin(270) = 0.
+        std::vector<bool> aXOffsetPattern = { true, false }; // Space at 0, Word at X=10
+        WordSegmentMockLayout aXOffsetLayout(aXOffsetPattern);
+        aXOffsetLayout.DrawBase() = basegfx::B2DPoint(0, 0);
+
+        aSegments.clear();
+        vcl::text::TextGeometry::GetWordLineSegments(aXOffsetLayout, aRealization, aSegments);
+        CPPUNIT_ASSERT_EQUAL(size_t(1), aSegments.size());
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, aSegments[0].first, 0.001);
+
+        // Test: 270 degrees with vertical offset (Y=50).
+        // Since the mock layout increments X, we need a custom setup or
+        // a known Y-offset to verify that nDist = -dY * sin(270) = dY.
+        // In 270 deg, nDist = (dX * 0) - (dY * -1) = dY.
+
+        // We simulate this by overriding a single glyph position in the mock
+        // specifically to test the Y-to-Distance projection.
+        // Expected result for dY=50 at 270 deg is nDist=50.
+
+        std::vector<bool> aYOffsetPattern = { false };
+        WordSegmentMockLayout aYOffsetLayout(aYOffsetPattern);
+        aYOffsetLayout.DrawBase() = basegfx::B2DPoint(0, -50);
+
+        aSegments.clear();
+        vcl::text::TextGeometry::GetWordLineSegments(aYOffsetLayout, aRealization, aSegments);
+
+        CPPUNIT_ASSERT_EQUAL(size_t(1), aSegments.size());
+        // The distance should be exactly 50.0
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(50.0, aSegments[0].first, 0.001);
+    }
 }
 
 } // namespace

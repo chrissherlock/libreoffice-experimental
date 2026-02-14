@@ -624,47 +624,6 @@ basegfx::B2DHomMatrix TextLayoutEngine::CalculateOutlineTransform(
     return aMatrix;
 }
 
-void TextLayoutEngine::GetWordLineSegments(const SalLayout& rSalLayout,
-                                           const vcl::font::FontRealization& rRealization,
-                                           std::vector<std::pair<double, double>>& rSegments)
-{
-    rSegments.clear();
-    const basegfx::B2DPoint aStartPt = rSalLayout.DrawBase();
-    const LogicalFontInstance* pFont = rRealization.mxFont.get();
-    const Degree10 nOrientation = pFont ? pFont->mnOrientation : 0_deg10;
-
-    basegfx::B2DPoint aPos;
-    double nDist = 0;
-    double nWidth = 0;
-    const GlyphItem* pGlyph = nullptr;
-    int nStart = 0;
-
-    while (rSalLayout.GetNextGlyph(&pGlyph, aPos, nStart))
-    {
-        if (!pGlyph->IsSpacing())
-        {
-            if (nWidth == 0)
-            {
-                nDist = aPos.getX() - aStartPt.getX();
-                if (nOrientation)
-                {
-                    const double nDY = aPos.getY() - aStartPt.getY();
-                    const double fRad = toRadians(nOrientation);
-                    nDist = nDist * cos(fRad) - nDY * sin(fRad);
-                }
-            }
-            nWidth += pGlyph->newWidth();
-        }
-        else if (nWidth > 0)
-        {
-            rSegments.push_back({ nDist, nWidth });
-            nWidth = 0;
-        }
-    }
-    if (nWidth > 0)
-        rSegments.push_back({ nDist, nWidth });
-}
-
 void TextLayoutEngine::InitializeTextLineMetrics(const LogicalFontInstance* pFontInstance,
                                                  const vcl::Font& rFont, tools::Long nDPIY,
                                                  tools::Long nSpaceWidth, tools::Long nBulletWidth)
@@ -672,7 +631,6 @@ void TextLayoutEngine::InitializeTextLineMetrics(const LogicalFontInstance* pFon
     if (!pFontInstance || !pFontInstance->mxFontMetric)
         return;
 
-    // Logic migrated from OutputDevice::ImplInitTextLineSize
     tools::Long nBulletOffset = (nSpaceWidth - nBulletWidth) >> 1;
 
     pFontInstance->mxFontMetric->ImplInitTextLineSize(pFontInstance, nDPIY, rFont, nBulletOffset);

@@ -609,7 +609,7 @@ void OutputDevice::ImplDrawTextLines( SalLayout& rSalLayout, FontStrikeout eStri
     {
         const basegfx::B2DPoint aStartPt = rSalLayout.DrawBase();
         std::vector<std::pair<double, double>> aSegments;
-        vcl::text::TextLayoutEngine::GetWordLineSegments(rSalLayout, *mpFontRealization, aSegments);
+        vcl::text::TextGeometry::GetWordLineSegments(rSalLayout, *mpFontRealization, aSegments);
         for (const auto& rSeg : aSegments)
         {
             ImplDrawTextLine( aStartPt.getX(), aStartPt.getY(), static_cast<tools::Long>(rSeg.first),

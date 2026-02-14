@@ -26,8 +26,13 @@
 
 class Point;
 class OutputDevice;
+class SalLayout;
 class SalLayoutGlyphs;
 
+namespace vcl::font
+{
+struct FontRealization;
+}
 namespace vcl::text
 {
 struct MirroringContext;
@@ -98,6 +103,9 @@ public:
                                         std::span<const double> pDXArray,
                                         std::span<const sal_Bool> pKashidaArray,
                                         const SalLayoutGlyphs* pGlyphs);
+    static void GetWordLineSegments(const SalLayout& rSalLayout,
+                                    const ::vcl::font::FontRealization& rFontRealization,
+                                    std::vector<std::pair<double, double>>& rSegments);
 };
 
 } // namespace vcl::text
