@@ -78,12 +78,6 @@ struct TextLayoutPositioning;
 class VCL_DLLPUBLIC TextLayoutEngine
 {
 public:
-    static std::unique_ptr<SalLayout> GetStrikeoutCharLayout(const LayoutResources& rRes,
-                                                             tools::Long nTargetWidth,
-                                                             FontStrikeout eStrikeout);
-
-    /** Analyzes a layout to find valid Kashida insertion points. */
-
     /** Calculates the device-pixel positions for emphasis marks.
      * @return A vector of global Points (in device pixels).
      */

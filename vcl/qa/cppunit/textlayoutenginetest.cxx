@@ -287,7 +287,7 @@ public:
     void testCalculateMultiLineLayout();
     void testCalculateWaveLineGeometry();
     void testCalculateStrikeoutGeometry();
-    void testDrawStrikeoutChar();
+    void testGetStrikeoutCharLayout();
     void testCalculateTextLineSegments();
     void testGetEllipsisString();
 
@@ -308,7 +308,7 @@ public:
     CPPUNIT_TEST(testCalculateWaveLineGeometry);
     CPPUNIT_TEST(testCalculateStrikeoutGeometry);
     CPPUNIT_TEST(testCalculateTextLineSegments);
-    CPPUNIT_TEST(testDrawStrikeoutChar);
+    CPPUNIT_TEST(testGetStrikeoutCharLayout);
     CPPUNIT_TEST(testGetEllipsisString);
     CPPUNIT_TEST_SUITE_END();
 };
@@ -1004,10 +1004,13 @@ void TextLayoutEngineTest::testCalculateStrikeoutGeometry()
     }
 }
 
-void TextLayoutEngineTest::testDrawStrikeoutChar()
+void TextLayoutEngineTest::testGetStrikeoutCharLayout()
 {
     // SETUP: Use a VirtualDevice to render pixels.
-    // We verify GetStrikeoutCharLayout() by checking if it produced pixels.
+    // NOTE: We test GetStrikeoutCharLayout indirectly via VirtualDevice because
+    // constructing a LayoutResources struct requires VCL-internal classes (like CoordinateMapper)
+    // that are not exported to the CppunitTest binary.
+    // By drawing a strikeout line, we verify that the engine successfully generated the layout.
     ScopedVclPtrInstance<VirtualDevice> pDev;
     pDev->SetOutputSizePixel(Size(100, 20)); // Ensure size > 0 to prevent culling
     pDev->SetFont(vcl::Font(OUString("DejaVu Sans"), Size(0, 12)));
