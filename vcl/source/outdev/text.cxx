@@ -1525,7 +1525,7 @@ bool OutputDevice::GetTextOutlines(basegfx::B2DPolyPolygonVector& rVector, const
         *mpGraphicsState, *mpFontRealization
     };
 
-    bool bRet = vcl::text::TextLayoutEngine::GetTextOutlines(
+    bool bRet = vcl::text::TextGeometry::GetTextOutlines(
         aResources, rVector, rStr, nBase, nIndex, nLen, nLayoutWidth, pDXArray, pKashidaArray);
 
     if (bOldMap)
