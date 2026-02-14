@@ -279,7 +279,6 @@ public:
     void testEmphasisMarkPositions();
     void testCalculateOutlineTransform();
     void testGetTextInkBounds_Rotation();
-    void testGetWordLineSegments();
     void testInitializeTextLineMetrics();
     void testInitializeFontMetrics();
     void testInitializeAboveTextLineMetrics();
@@ -304,7 +303,6 @@ public:
     CPPUNIT_TEST(testEmphasisMarkPositions);
     CPPUNIT_TEST(testCalculateOutlineTransform);
     CPPUNIT_TEST(testGetTextInkBounds_Rotation);
-    CPPUNIT_TEST(testGetWordLineSegments);
     CPPUNIT_TEST(testInitializeTextLineMetrics);
     CPPUNIT_TEST(testInitializeFontMetrics);
     CPPUNIT_TEST(testInitializeAboveTextLineMetrics);
@@ -320,122 +318,6 @@ public:
     CPPUNIT_TEST(testGetEllipsisString);
     CPPUNIT_TEST_SUITE_END();
 };
-
-/**
- * Validates that the engine correctly identifies segments of non-spacing glyphs.
- */
-void TextLayoutEngineTest::testGetWordLineSegments()
-{
-    rtl::Reference<LogicalFontInstance> xFont(new StubFontInstance());
-    vcl::font::FontRealization aRealization;
-    aRealization.mxFont = xFont;
-
-    // Test "Hello World" style (Word - Space - Word)
-    {
-        // Glyphs: [W][W][W][S][W][W][W] (W=Word, S=Space)
-        std::vector<bool> aPattern = { false, false, false, true, false, false, false };
-        WordSegmentMockLayout aLayout(aPattern);
-        aLayout.DrawBase() = basegfx::B2DPoint(0, 0);
-
-        std::vector<std::pair<double, double>> aSegments;
-        vcl::text::TextLayoutEngine::GetWordLineSegments(aLayout, aRealization, aSegments);
-
-        // Should have 2 segments
-        CPPUNIT_ASSERT_EQUAL(size_t(2), aSegments.size());
-
-        // First word: offset 0, width 30
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, aSegments[0].first, 0.001);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(30.0, aSegments[0].second, 0.001);
-
-        // Second word: offset 40, width 30
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(40.0, aSegments[1].first, 0.001);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(30.0, aSegments[1].second, 0.001);
-    }
-
-    // Test Leading/Trailing Spaces: "  Word  "
-    {
-        // Glyphs: [S][S][W][W][S][S]
-        std::vector<bool> aPattern = { true, true, false, false, true, true };
-        WordSegmentMockLayout aLayout(aPattern);
-        aLayout.DrawBase() = basegfx::B2DPoint(0, 0);
-
-        std::vector<std::pair<double, double>> aSegments;
-        vcl::text::TextLayoutEngine::GetWordLineSegments(aLayout, aRealization, aSegments);
-
-        // Should have only 1 segment for the word in the middle
-        CPPUNIT_ASSERT_EQUAL(size_t(1), aSegments.size());
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(20.0, aSegments[0].first, 0.001);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(20.0, aSegments[0].second, 0.001);
-    }
-
-    // Test Rotation Projection (90 degrees)
-    {
-        // When rotated 90 degrees, glyphs move along Y, not X.
-        // BasePoint is (0,0). Word starts at (0, 50) and is 20 units long.
-        std::vector<bool> aPattern = { false, false };
-        WordSegmentMockLayout aLayout(aPattern);
-        aLayout.DrawBase() = basegfx::B2DPoint(0, 0);
-
-        // Manually adjust mock glyph positions to simulate vertical flow
-        // In vertical/rotated text, nDist depends on cos(90) and sin(90)
-        xFont->mnOrientation = 900_deg10; // 90 degrees
-
-        std::vector<std::pair<double, double>> aSegments;
-        vcl::text::TextLayoutEngine::GetWordLineSegments(aLayout, aRealization, aSegments);
-
-        // Verify rotation math: nDist = nDist * cos(90) - nDY * sin(90)
-        // cos(90) = 0, sin(90) = 1. So nDist = -nDY.
-        // If the word started at Y=0, nDist should be 0.
-        CPPUNIT_ASSERT_EQUAL(size_t(1), aSegments.size());
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, aSegments[0].first, 0.001);
-    }
-
-    {
-        // Test: 270 degrees at origin
-        // BasePoint (0,0), Glyph at (0,0). Expected distance = 0.
-        std::vector<bool> aPattern = { false };
-        WordSegmentMockLayout aLayout(aPattern);
-        aLayout.DrawBase() = basegfx::B2DPoint(0, 0);
-        xFont->mnOrientation = 2700_deg10;
-
-        std::vector<std::pair<double, double>> aSegments;
-        vcl::text::TextLayoutEngine::GetWordLineSegments(aLayout, aRealization, aSegments);
-
-        CPPUNIT_ASSERT_EQUAL(size_t(1), aSegments.size());
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, aSegments[0].first, 0.001);
-
-        // Test: 270 degrees with horizontal offset (X=10).
-        // nDist = (10-0)*cos(270) - (0-0)*sin(270) = 0.
-        std::vector<bool> aXOffsetPattern = { true, false }; // Space at 0, Word at X=10
-        WordSegmentMockLayout aXOffsetLayout(aXOffsetPattern);
-        aXOffsetLayout.DrawBase() = basegfx::B2DPoint(0, 0);
-
-        aSegments.clear();
-        vcl::text::TextLayoutEngine::GetWordLineSegments(aXOffsetLayout, aRealization, aSegments);
-        CPPUNIT_ASSERT_EQUAL(size_t(1), aSegments.size());
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, aSegments[0].first, 0.001);
-
-        // Test: 270 degrees with vertical offset (Y=50).
-        // Since the mock layout increments X, we need a custom setup or
-        // a known Y-offset to verify that nDist = -dY * sin(270) = dY.
-        // In 270 deg, nDist = (dX * 0) - (dY * -1) = dY.
-
-        // We simulate this by overriding a single glyph position in the mock
-        // specifically to test the Y-to-Distance projection.
-        // Expected result for dY=50 at 270 deg is nDist=50.
-
-        std::vector<bool> aYOffsetPattern = { false };
-        WordSegmentMockLayout aYOffsetLayout(aYOffsetPattern);
-        aYOffsetLayout.DrawBase() = basegfx::B2DPoint(0, -50);
-
-        aSegments.clear();
-        vcl::text::TextLayoutEngine::GetWordLineSegments(aYOffsetLayout, aRealization, aSegments);
-
-        CPPUNIT_ASSERT_EQUAL(size_t(1), aSegments.size());
-        // The distance should be exactly 50.0
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(50.0, aSegments[0].first, 0.001);
-    }
-}
 
 void TextLayoutEngineTest::testCreateLayoutRequest_Simple()
 {

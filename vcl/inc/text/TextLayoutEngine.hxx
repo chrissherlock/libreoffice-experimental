@@ -252,10 +252,6 @@ public:
     CalculateOutlineTransform(const SalLayout& rLayout,
                               const ::vcl::font::FontRealization& rRealization, double nXOffset);
 
-    static void GetWordLineSegments(const SalLayout& rSalLayout,
-                                    const ::vcl::font::FontRealization& rFontRealization,
-                                    std::vector<std::pair<double, double>>& rSegments);
-
     static void InitializeTextLineMetrics(const LogicalFontInstance* pFontInstance,
                                           const ::vcl::Font& rFont, tools::Long nDPIY,
                                           tools::Long nSpaceWidth, tools::Long nBulletWidth);
