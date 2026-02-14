@@ -286,10 +286,6 @@ public:
         bool bEllipsisGenerated = false;
     };
 
-    static void GetGlyphRectsFromLayout(const SalLayout& rLayout, const Point& rStartPt,
-                                        const OUString& rStr, sal_Int32 nLen,
-                                        std::vector<tools::Rectangle>& rRects);
-
     static LayoutResult CalculateLayout(const CoordinateMapper& rMapper, const LayoutRequest& rReq,
                                         const vcl::TextLayoutCommon& rLayout);
 

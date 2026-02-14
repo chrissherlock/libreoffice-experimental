@@ -829,53 +829,6 @@ std::unique_ptr<SalLayout> TextLayoutEngine::GetStrikeoutCharLayout(const Layout
     return TextLayoutEngine::Layout(rRes, aFinalSpan, aFinalConstraints, aCache, aSel);
 }
 
-void TextLayoutEngine::GetGlyphRectsFromLayout(const SalLayout& rLayout, const Point& rStartPt,
-                                               const OUString& rStr, sal_Int32 nLen,
-                                               std::vector<tools::Rectangle>& rRects)
-{
-    rRects.clear();
-    rRects.reserve(nLen);
-
-    if (nLen <= 0)
-        return;
-
-    // Fix 1: Use double vector (as per vcllayout.hxx) and pass string
-    std::vector<double> aDXArray;
-    rLayout.FillDXArray(&aDXArray, rStr);
-
-    tools::Long nX = rStartPt.X();
-
-    // Fix 2: GetBoundRect returns bool and takes B2DRectangle ref
-    basegfx::B2DRectangle aBounds;
-    rLayout.GetBoundRect(aBounds);
-
-    // Convert B2DRectangle to integers relative to start point
-    tools::Long nTop = rStartPt.Y() + static_cast<tools::Long>(aBounds.getMinY());
-    tools::Long nBottom = rStartPt.Y() + static_cast<tools::Long>(aBounds.getMaxY());
-
-    // Safety check for empty bounds
-    if (aBounds.isEmpty())
-    {
-        nTop = rStartPt.Y();
-        nBottom = rStartPt.Y() + 10; // Fallback height
-    }
-
-    tools::Long nPrevX = 0;
-    size_t nArraySize = aDXArray.size();
-
-    for (int i = 0; i < nLen; ++i)
-    {
-        if (static_cast<size_t>(i) >= nArraySize)
-            break;
-
-        // FillDXArray returns absolute positions
-        tools::Long nCurrX = static_cast<tools::Long>(aDXArray[i]);
-
-        rRects.emplace_back(nX + nPrevX, nTop, nX + nCurrX, nBottom);
-
-        nPrevX = nCurrX;
-    }
-}
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

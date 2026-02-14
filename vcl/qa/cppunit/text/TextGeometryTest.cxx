@@ -771,6 +771,58 @@ CPPUNIT_TEST_FIXTURE(TextGeometryTest, testAlignAndRotateTextRect)
     }
 }
 
+// Mock for testing GetGlyphRectsFromLayout
+class GlyphRectMockLayout : public MockSalLayout
+{
+public:
+    GlyphRectMockLayout() {}
+
+    virtual double FillDXArray(std::vector<double>* pArray, const OUString&) const override
+    {
+        if (pArray)
+        {
+            // Simulate 3 characters with accumulated widths: 10, 25, 45.
+            pArray->push_back(10.0);
+            pArray->push_back(25.0);
+            pArray->push_back(45.0);
+        }
+        return 45.0;
+    }
+};
+
+CPPUNIT_TEST_FIXTURE(TextGeometryTest, testGetGlyphRectsFromLayout)
+{
+    // Setup
+    GlyphRectMockLayout aLayout;
+    Point aStartPt(50, 100);
+    OUString aStr(u"ABC"_ustr);
+    std::vector<tools::Rectangle> aRects;
+
+    // Execute
+    vcl::text::TextGeometry::GetGlyphRectsFromLayout(aLayout, aStartPt, aStr, aStr.getLength(),
+                                                     aRects);
+
+    // Verify Calculation
+    // Since we didn't mock GetNextGlyph to return valid glyphs, the real SalLayout::GetBoundRect
+    // will return an empty bounding box, correctly triggering the fallback Y-coordinates.
+    // Fallback: nTop = StartY(100), nBottom = StartY(100) + 10 = 110
+    CPPUNIT_ASSERT_EQUAL(size_t(3), aRects.size());
+
+    // Char 1: prevX = 0, currX = 10 -> (50+0, 100) to (50+10, 110)
+    CPPUNIT_ASSERT_EQUAL(tools::Long(50), aRects[0].Left());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(60), aRects[0].Right());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(100), aRects[0].Top());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(110), aRects[0].Bottom());
+
+    // Char 2: prevX = 10, currX = 25 -> (50+10, 100) to (50+25, 110)
+    CPPUNIT_ASSERT_EQUAL(tools::Long(60), aRects[1].Left());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(75), aRects[1].Right());
+
+    // Char 3: prevX = 25, currX = 45 -> (50+25, 100) to (50+45, 110)
+    CPPUNIT_ASSERT_EQUAL(tools::Long(75), aRects[2].Left());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(95), aRects[2].Right());
+}
+
 } // namespace
 
 CPPUNIT_PLUGIN_IMPLEMENT();

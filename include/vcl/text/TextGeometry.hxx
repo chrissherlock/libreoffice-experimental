@@ -106,6 +106,10 @@ public:
     static void GetWordLineSegments(const SalLayout& rSalLayout,
                                     const ::vcl::font::FontRealization& rFontRealization,
                                     std::vector<std::pair<double, double>>& rSegments);
+
+    static void GetGlyphRectsFromLayout(const SalLayout& rLayout, const Point& rStartPt,
+                                        const OUString& rStr, sal_Int32 nLen,
+                                        std::vector<tools::Rectangle>& rRects);
 };
 
 } // namespace vcl::text
