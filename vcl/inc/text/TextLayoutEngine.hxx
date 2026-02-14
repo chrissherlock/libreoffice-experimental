@@ -419,10 +419,9 @@ public:
                                     const vcl::font::FontRealization& rFontRealization,
                                     std::vector<std::pair<double, double>>& rSegments);
 
-    static std::unique_ptr<SalLayout>
-    GetStrikeoutCharLayout(const vcl::font::FontRealization& rFontRealization,
-                           const CoordinateMapper& rMapper, tools::Long nTargetWidth,
-                           FontStrikeout eStrikeout);
+    static std::unique_ptr<SalLayout> GetStrikeoutCharLayout(const LayoutResources& rRes,
+                                                             tools::Long nTargetWidth,
+                                                             FontStrikeout eStrikeout);
 
     static void InitializeTextLineMetrics(const LogicalFontInstance* pFontInstance,
                                           const vcl::Font& rFont, tools::Long nDPIY,

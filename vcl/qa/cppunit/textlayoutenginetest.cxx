@@ -35,6 +35,9 @@
 
 #include <string>
 #include <unicode/uchar.h>
+#include <vcl/gdimtf.hxx>
+#include <vcl/metaact.hxx>
+#include <vcl/BitmapReadAccess.hxx>
 #include <iostream>
 
 namespace
@@ -301,6 +304,7 @@ public:
     void testCalculateMultiLineLayout();
     void testCalculateWaveLineGeometry();
     void testCalculateStrikeoutGeometry();
+    void testDrawStrikeoutChar();
     void testCalculateTextLineSegments();
     void testPrepareMnemonicText();
 
@@ -346,6 +350,7 @@ public:
     CPPUNIT_TEST(testCalculateMultiLineLayout);
     CPPUNIT_TEST(testCalculateWaveLineGeometry);
     CPPUNIT_TEST(testCalculateStrikeoutGeometry);
+    CPPUNIT_TEST(testDrawStrikeoutChar);
     CPPUNIT_TEST(testCalculateTextLineSegments);
     CPPUNIT_TEST(testPrepareMnemonicText);
     CPPUNIT_TEST_SUITE_END();
@@ -1944,6 +1949,92 @@ void TextLayoutEngineTest::testCalculateStrikeoutGeometry()
             aZeroMetric, STRIKEOUT_SINGLE, nDistY);
 
         CPPUNIT_ASSERT_EQUAL(size_t(0), aGeo.aSegments.size());
+    }
+}
+
+void TextLayoutEngineTest::testDrawStrikeoutChar()
+{
+    // SETUP: Use a VirtualDevice to render pixels.
+    // We verify GetStrikeoutCharLayout() by checking if it produced pixels.
+    ScopedVclPtrInstance<VirtualDevice> pDev;
+    pDev->SetOutputSizePixel(Size(100, 20)); // Ensure size > 0 to prevent culling
+    pDev->SetFont(vcl::Font(OUString("DejaVu Sans"), Size(0, 12)));
+    pDev->SetBackground(Wallpaper(COL_WHITE));
+    pDev->SetTextColor(COL_BLACK);
+    pDev->EnableOutput(true);
+
+    Point aPos(0, 10); // Center Y roughly
+    tools::Long nWidth = 100;
+
+    // 1. Test Slash Strikeout (STRIKEOUT_SLASH)
+    {
+        pDev->Erase();
+        pDev->DrawTextLine(aPos, nWidth, STRIKEOUT_SLASH, LINESTYLE_NONE, LINESTYLE_NONE);
+
+        Bitmap aBmp = pDev->GetBitmap(Point(0, 0), Size(100, 20));
+        BitmapReadAccess aAccess(aBmp);
+        bool bFoundBlack = false;
+
+        for (tools::Long y = 0; y < 20 && !bFoundBlack; ++y)
+        {
+            for (tools::Long x = 0; x < 100; ++x)
+            {
+                if (aAccess.GetPixel(y, x) != COL_WHITE)
+                {
+                    bFoundBlack = true;
+                    break;
+                }
+            }
+        }
+        CPPUNIT_ASSERT_MESSAGE("STRIKEOUT_SLASH should draw pixels (Engine layout success)",
+                               bFoundBlack);
+    }
+
+    // 2. Test X Strikeout (STRIKEOUT_X)
+    {
+        pDev->Erase();
+        pDev->DrawTextLine(aPos, nWidth, STRIKEOUT_X, LINESTYLE_NONE, LINESTYLE_NONE);
+
+        Bitmap aBmp = pDev->GetBitmap(Point(0, 0), Size(100, 20));
+        BitmapReadAccess aAccess(aBmp);
+        bool bFoundBlack = false;
+
+        for (tools::Long y = 0; y < 20 && !bFoundBlack; ++y)
+        {
+            for (tools::Long x = 0; x < 100; ++x)
+            {
+                if (aAccess.GetPixel(y, x) != COL_WHITE)
+                {
+                    bFoundBlack = true;
+                    break;
+                }
+            }
+        }
+        CPPUNIT_ASSERT_MESSAGE("STRIKEOUT_X should draw pixels (Engine layout success)",
+                               bFoundBlack);
+    }
+
+    // 3. Test Zero Width (Should remain white)
+    {
+        pDev->Erase();
+        pDev->DrawTextLine(aPos, 0, STRIKEOUT_SLASH, LINESTYLE_NONE, LINESTYLE_NONE);
+
+        Bitmap aBmp = pDev->GetBitmap(Point(0, 0), Size(100, 20));
+        BitmapReadAccess aAccess(aBmp);
+        bool bFoundBlack = false;
+
+        for (tools::Long y = 0; y < 20 && !bFoundBlack; ++y)
+        {
+            for (tools::Long x = 0; x < 100; ++x)
+            {
+                if (aAccess.GetPixel(y, x) != COL_WHITE)
+                {
+                    bFoundBlack = true;
+                    break;
+                }
+            }
+        }
+        CPPUNIT_ASSERT_MESSAGE("Zero width should NOT draw pixels", !bFoundBlack);
     }
 }
 
