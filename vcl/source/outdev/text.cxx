@@ -1285,7 +1285,7 @@ tools::Rectangle OutputDevice::GetTextRect(const tools::Rectangle& rRect, const 
                                            DrawTextFlags nStyle, TextRectInfo* pInfo,
                                            const vcl::TextLayoutCommon* pTextLayout) const
 {
-    vcl::text::TextLayoutEngine::LayoutRequest aReq;
+    vcl::text::TextGeometry::LayoutRequest aReq;
     aReq.aText = rStr;
     aReq.aTargetRect = rRect;
     aReq.nStyle = nStyle;
@@ -1299,7 +1299,7 @@ tools::Rectangle OutputDevice::GetTextRect(const tools::Rectangle& rRect, const 
     if (!pLayout)
     {
         vcl::DefaultTextLayout aDefault(const_cast<OutputDevice&>(*this));
-        auto aResult = vcl::text::TextLayoutEngine::CalculateLayout(*mpMapper, aReq, aDefault);
+        auto aResult = vcl::text::TextGeometry::CalculateLayout(*mpMapper, aReq, aDefault);
 
         if (pInfo)
         {
@@ -1310,7 +1310,7 @@ tools::Rectangle OutputDevice::GetTextRect(const tools::Rectangle& rRect, const 
         return aResult.aTextRect;
     }
 
-    auto aResult = vcl::text::TextLayoutEngine::CalculateLayout(*mpMapper, aReq, *pLayout);
+    auto aResult = vcl::text::TextGeometry::CalculateLayout(*mpMapper, aReq, *pLayout);
 
     if (pInfo)
     {

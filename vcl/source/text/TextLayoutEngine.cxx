@@ -37,6 +37,7 @@
 #include <textlayout.hxx>
 #include <textlineinfo.hxx>
 #include <text/TextLayoutEngine.hxx>
+#include <vcl/text/TextGeometry.hxx>
 #include <text/TextJustifier.hxx>
 #include <text/TextAnalyzer.hxx>
 #include <text/TextLayoutPositioning.hxx>
@@ -656,122 +657,6 @@ tools::Long TextLayoutEngine::GetAlignmentOffset(TextAlign eAlign, tools::Long n
 
     return 0;
 }
-
-TextLayoutEngine::LayoutResult
-TextLayoutEngine::CalculateLayout(const CoordinateMapper& rMapper, const LayoutRequest& rReq,
-                                  const vcl::TextLayoutCommon& rLayout)
-{
-    LayoutResult aRes;
-    OUString aCleanText = rReq.aText;
-
-    if (rReq.nStyle & DrawTextFlags::Mnemonic)
-        aCleanText = removeMnemonicFromString(aCleanText);
-
-    aRes.aDisplayText = aCleanText;
-    tools::Long nAvailableWidth = rReq.aTargetRect.GetWidth();
-    tools::Long nLineHeight = rReq.nFontHeight ? rReq.nFontHeight : 1;
-
-    if (rReq.nStyle & DrawTextFlags::MultiLine)
-    {
-        ImplMultiTextLineInfo aMultiLineInfo;
-        // rLayout.GetTextLines must be marked const in TextLayoutCommon
-        rLayout.GetTextLines(rReq.aTargetRect, nLineHeight, aMultiLineInfo, nAvailableWidth,
-                             aCleanText, rReq.nStyle);
-
-        aRes.nLineCount = aMultiLineInfo.Count();
-        for (sal_Int32 i = 0; i < aRes.nLineCount; ++i)
-        {
-            aRes.nMaxWidth = std::max(aRes.nMaxWidth, aMultiLineInfo.GetLine(i).GetWidth());
-        }
-
-        // Multi-line Ellipsis Check
-        sal_Int32 nMaxLines = static_cast<sal_Int32>(rReq.aTargetRect.GetHeight() / nLineHeight);
-        if (nMaxLines > 0 && aRes.nLineCount > nMaxLines
-            && (rReq.nStyle & DrawTextFlags::EndEllipsis))
-        {
-            aRes.bEllipsisGenerated = true;
-            aRes.nLineCount = nMaxLines; // Clamp height to visible area
-        }
-    }
-    else
-    {
-        aRes.nMaxWidth = rLayout.GetTextWidth(aCleanText, 0, -1);
-
-        if (aRes.nMaxWidth > nAvailableWidth && (rReq.nStyle & TEXT_DRAW_ELLIPSIS))
-        {
-            aRes.aDisplayText = rLayout.GetEllipsisString(aCleanText, nAvailableWidth, rReq.nStyle);
-            aRes.nMaxWidth = nAvailableWidth;
-            aRes.bEllipsisGenerated = true;
-        }
-    }
-
-    // Coordinate Calculation (Alignment & Rotation)
-    // Account for the full block height in multi-line scenarios
-    aRes.aTextRect = TextGeometry::AlignAndRotateTextRect(rReq.aTargetRect, aRes.nMaxWidth,
-                                                          nLineHeight * aRes.nLineCount,
-                                                          rReq.nStyle, rReq.nFontOrientation);
-
-    aRes.aDrawPosition = aRes.aTextRect.TopLeft();
-
-    // Mnemonic Geometry
-    if (rReq.nMnemonicPos != -1
-        && TextAnalyzer::IsMnemonicInRange(rReq.nMnemonicPos, 0, aRes.aDisplayText.getLength()))
-    {
-        MnemonicDeviceParams aParams{ rReq.nFontAscent, 0, 0 };
-        KernArray aDXArray;
-        rLayout.GetTextArray(aRes.aDisplayText, &aDXArray, 0, -1, true);
-
-        aRes.aMnemonic = vcl::text::TextGeometry::GetMnemonicGeometry(
-            [&](tools::Long w) { return rMapper.LogicWidthToDeviceSubPixel(w); },
-            [&](tools::Long w) { return rMapper.LogicWidthToDevicePixel(w); },
-            [&](const Point& p) { return rMapper.LogicToPixel(p); }, aParams, aDXArray,
-            rReq.nMnemonicPos, aRes.aDrawPosition);
-        aRes.bHasMnemonic = true;
-    }
-
-    return aRes;
-}
-
-void TextLayoutEngine::FilterVisibleGlyphs(const OUString& rStr, sal_Int32 nIndex,
-                                           const vcl::Region& rClip,
-                                           const std::vector<tools::Rectangle>& rGlyphRects,
-                                           std::vector<tools::Rectangle>& rOutVisibleRects,
-                                           OUString* pOutVisibleText)
-{
-    bool bInserted = false;
-    sal_Int32 nCurrentIdx = nIndex;
-
-    for (auto it = rGlyphRects.begin(); it != rGlyphRects.end(); ++it, ++nCurrentIdx)
-    {
-        bool bAppend = false;
-
-        // Standard visibility check: does the glyph ink overlap the clip?
-        if (rClip.Overlaps(*it))
-        {
-            bAppend = true;
-        }
-        // Heuristic: Keep a space if it follows a visible character AND the next character is visible.
-        // This prevents "floating" spaces while maintaining word separation.
-        else if (rStr[nCurrentIdx] == ' ' && bInserted)
-        {
-            auto next = it;
-            if (++next != rGlyphRects.end() && rClip.Overlaps(*next))
-                bAppend = true;
-        }
-
-        if (bAppend)
-        {
-            rOutVisibleRects.push_back(*it);
-
-            if (pOutVisibleText)
-                *pOutVisibleText += OUStringChar(rStr[nCurrentIdx]);
-
-            bInserted = true;
-        }
-    }
-}
-
-const LogicalFontInstance* pForcedFallback;
 
 std::unique_ptr<SalLayout> TextLayoutEngine::GetStrikeoutCharLayout(const LayoutResources& rRes,
                                                                     tools::Long nTargetWidth,

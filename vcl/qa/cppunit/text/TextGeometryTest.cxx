@@ -18,6 +18,7 @@
 #include <vcl/text/MnemonicGeometry.hxx>
 #include <vcl/text/TextGeometry.hxx>
 #include <vcl/virdev.hxx>
+#include <CoordinateMapper.hxx>
 
 #include <font/FontController.hxx>
 #include <font/PhysicalFontFace.hxx>
@@ -821,6 +822,39 @@ CPPUNIT_TEST_FIXTURE(TextGeometryTest, testGetGlyphRectsFromLayout)
     // Char 3: prevX = 25, currX = 45 -> (50+25, 100) to (50+45, 110)
     CPPUNIT_ASSERT_EQUAL(tools::Long(75), aRects[2].Left());
     CPPUNIT_ASSERT_EQUAL(tools::Long(95), aRects[2].Right());
+}
+
+CPPUNIT_TEST_FIXTURE(TextGeometryTest, testCalculateLayoutPass)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    pVDev->SetOutputSizePixel(Size(100, 100));
+    pVDev->SetMapMode(MapMode(MapUnit::MapPixel));
+
+    vcl::text::TextGeometry::LayoutRequest aReq;
+    aReq.aText = "Line One\nLine Two";
+    aReq.aTargetRect = tools::Rectangle(Point(0, 0), Size(100, 50));
+    aReq.nStyle = DrawTextFlags::MultiLine | DrawTextFlags::Center | DrawTextFlags::VCenter;
+    aReq.nMnemonicPos = 0; // Underline 'L'
+    aReq.nFontOrientation = 0_deg10;
+    aReq.nFontHeight = 10;
+    aReq.nFontAscent = 8;
+
+    vcl::DefaultTextLayout aLayout(*pVDev);
+
+    CoordinateMapper aMapper;
+    aMapper.ResetMapMode(pVDev->GetMapMode());
+
+    auto aResult = vcl::text::TextGeometry::CalculateLayout(aMapper, aReq, aLayout);
+
+    // In MultiLine, we expect 2 lines of height 10 each
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(2), aResult.nLineCount);
+
+    // The height is 20, target is 50. VCenter should offset Y by (50-20)/2 = 15
+    CPPUNIT_ASSERT_EQUAL(tools::Long(15), aResult.aTextRect.Top());
+
+    // Mnemonic should be active and have a valid position
+    CPPUNIT_ASSERT(aResult.bHasMnemonic);
+    CPPUNIT_ASSERT_EQUAL(tools::Long(15 + 8), aResult.aMnemonic.nY); // Y + Ascent
 }
 
 } // namespace

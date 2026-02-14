@@ -15,6 +15,11 @@
 #include <vcl/fntstyle.hxx>
 #include <vcl/metric.hxx>
 #include <vcl/text/TextGeometry.hxx>
+#include <vcl/mnemonic.hxx>
+#include <textlineinfo.hxx>
+#include <text/TextAnalyzer.hxx>
+#include <textlayout.hxx>
+
 #include <vcl/text/LayoutResources.hxx>
 #include <vcl/text/TextSpan.hxx>
 #include <vcl/text/LayoutCacheData.hxx>
@@ -481,6 +486,80 @@ void TextGeometry::GetGlyphRectsFromLayout(const SalLayout& rLayout, const Point
 
         nPrevX = nCurrX;
     }
+}
+
+TextGeometry::LayoutResult TextGeometry::CalculateLayout(const CoordinateMapper& rMapper,
+                                                         const LayoutRequest& rReq,
+                                                         const vcl::TextLayoutCommon& rLayout)
+{
+    LayoutResult aRes;
+    OUString aCleanText = rReq.aText;
+
+    if (rReq.nStyle & DrawTextFlags::Mnemonic)
+        aCleanText = removeMnemonicFromString(aCleanText);
+
+    aRes.aDisplayText = aCleanText;
+    tools::Long nAvailableWidth = rReq.aTargetRect.GetWidth();
+    tools::Long nLineHeight = rReq.nFontHeight ? rReq.nFontHeight : 1;
+
+    if (rReq.nStyle & DrawTextFlags::MultiLine)
+    {
+        ImplMultiTextLineInfo aMultiLineInfo;
+        rLayout.GetTextLines(rReq.aTargetRect, nLineHeight, aMultiLineInfo, nAvailableWidth,
+                             aCleanText, rReq.nStyle);
+
+        aRes.nLineCount = aMultiLineInfo.Count();
+        for (sal_Int32 i = 0; i < aRes.nLineCount; ++i)
+        {
+            aRes.nMaxWidth = std::max(aRes.nMaxWidth, aMultiLineInfo.GetLine(i).GetWidth());
+        }
+
+        // Multi-line Ellipsis Check
+        sal_Int32 nMaxLines = static_cast<sal_Int32>(rReq.aTargetRect.GetHeight() / nLineHeight);
+        if (nMaxLines > 0 && aRes.nLineCount > nMaxLines
+            && (rReq.nStyle & DrawTextFlags::EndEllipsis))
+        {
+            aRes.bEllipsisGenerated = true;
+            aRes.nLineCount = nMaxLines; // Clamp height to visible area
+        }
+    }
+    else
+    {
+        aRes.nMaxWidth = rLayout.GetTextWidth(aCleanText, 0, -1);
+
+        if (aRes.nMaxWidth > nAvailableWidth && (rReq.nStyle & TEXT_DRAW_ELLIPSIS))
+        {
+            aRes.aDisplayText = rLayout.GetEllipsisString(aCleanText, nAvailableWidth, rReq.nStyle);
+            aRes.nMaxWidth = nAvailableWidth;
+            aRes.bEllipsisGenerated = true;
+        }
+    }
+
+    // Coordinate Calculation (Alignment & Rotation)
+    // Account for the full block height in multi-line scenarios
+    aRes.aTextRect = TextGeometry::AlignAndRotateTextRect(rReq.aTargetRect, aRes.nMaxWidth,
+                                                          nLineHeight * aRes.nLineCount,
+                                                          rReq.nStyle, rReq.nFontOrientation);
+
+    aRes.aDrawPosition = aRes.aTextRect.TopLeft();
+
+    // Mnemonic Geometry
+    if (rReq.nMnemonicPos != -1
+        && TextAnalyzer::IsMnemonicInRange(rReq.nMnemonicPos, 0, aRes.aDisplayText.getLength()))
+    {
+        MnemonicDeviceParams aParams{ rReq.nFontAscent, 0, 0 };
+        KernArray aDXArray;
+        rLayout.GetTextArray(aRes.aDisplayText, &aDXArray, 0, -1, true);
+
+        aRes.aMnemonic = vcl::text::TextGeometry::GetMnemonicGeometry(
+            [&](tools::Long w) { return rMapper.LogicWidthToDeviceSubPixel(w); },
+            [&](tools::Long w) { return rMapper.LogicWidthToDevicePixel(w); },
+            [&](const Point& p) { return rMapper.LogicToPixel(p); }, aParams, aDXArray,
+            rReq.nMnemonicPos, aRes.aDrawPosition);
+        aRes.bHasMnemonic = true;
+    }
+
+    return aRes;
 }
 
 } // namespace vcl::text
