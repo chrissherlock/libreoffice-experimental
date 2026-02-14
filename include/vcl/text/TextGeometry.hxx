@@ -33,6 +33,12 @@ namespace vcl::font
 {
 struct FontRealization;
 }
+class CoordinateMapper;
+namespace vcl
+{
+class TextLayoutCommon;
+}
+
 namespace vcl::text
 {
 struct MirroringContext;
@@ -58,6 +64,33 @@ struct SAL_DLLPUBLIC RotatedGeometry
 class VCL_DLLPUBLIC TextGeometry
 {
 public:
+    struct LayoutRequest
+    {
+        OUString aText;
+        tools::Rectangle aTargetRect;
+        DrawTextFlags nStyle;
+        sal_Int32 nMnemonicPos;
+        Degree10 nFontOrientation;
+        tools::Long nFontAscent;
+        tools::Long nFontHeight;
+    };
+
+    struct LayoutResult
+    {
+        OUString aDisplayText; // Could be truncated with ellipsis
+        tools::Rectangle aTextRect; // Final aligned and rotated bounds
+        Point aDrawPosition; // Where to call _rLayout.DrawText
+        MnemonicGeometry aMnemonic; // Coordinates for the underline
+        bool bHasMnemonic;
+
+        sal_Int32 nLineCount = 1;
+        tools::Long nMaxWidth = 0;
+        bool bEllipsisGenerated = false;
+    };
+
+    static LayoutResult CalculateLayout(const CoordinateMapper& rMapper, const LayoutRequest& rReq,
+                                        const vcl::TextLayoutCommon& rLayout);
+
     static tools::Rectangle AlignAndRotateTextRect(const tools::Rectangle& rTargetRect,
                                                    tools::Long nContentWidth,
                                                    tools::Long nContentHeight, DrawTextFlags nStyle,

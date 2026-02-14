@@ -262,41 +262,6 @@ public:
     static tools::Long GetAlignmentOffset(TextAlign eAlign, tools::Long nAscent,
                                           tools::Long nDescent);
 
-    struct LayoutRequest
-    {
-        OUString aText;
-        tools::Rectangle aTargetRect;
-        DrawTextFlags nStyle;
-        sal_Int32 nMnemonicPos;
-        Degree10 nFontOrientation;
-        tools::Long nFontAscent;
-        tools::Long nFontHeight;
-    };
-
-    struct LayoutResult
-    {
-        OUString aDisplayText; // Could be truncated with ellipsis
-        tools::Rectangle aTextRect; // Final aligned and rotated bounds
-        Point aDrawPosition; // Where to call _rLayout.DrawText
-        MnemonicGeometry aMnemonic; // Coordinates for the underline
-        bool bHasMnemonic;
-
-        sal_Int32 nLineCount = 1;
-        tools::Long nMaxWidth = 0;
-        bool bEllipsisGenerated = false;
-    };
-
-    static LayoutResult CalculateLayout(const CoordinateMapper& rMapper, const LayoutRequest& rReq,
-                                        const vcl::TextLayoutCommon& rLayout);
-
-    /** * Filters glyphs based on a clip region, preserving spaces between visible characters.
-     */
-    static void FilterVisibleGlyphs(const OUString& rStr, sal_Int32 nIndex,
-                                    const vcl::Region& rClip,
-                                    const std::vector<tools::Rectangle>& rGlyphRects,
-                                    std::vector<tools::Rectangle>& rOutVisibleRects,
-                                    OUString* pOutVisibleText);
-
 private:
     /** Calculates the subpixel factor (1 or 64) based on the mapping state. */
     static tools::Long GetSubPixelFactor(const CoordinateMapper& rMapper);

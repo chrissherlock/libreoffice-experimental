@@ -283,7 +283,6 @@ public:
     void testInitializeFontMetrics();
     void testInitializeAboveTextLineMetrics();
     void testGetAlignmentOffset();
-    void testCalculateLayoutPass();
     void testTextLineGeometry();
     void testCalculateMultiLineLayout();
     void testCalculateWaveLineGeometry();
@@ -305,7 +304,6 @@ public:
     CPPUNIT_TEST(testInitializeFontMetrics);
     CPPUNIT_TEST(testInitializeAboveTextLineMetrics);
     CPPUNIT_TEST(testGetAlignmentOffset);
-    CPPUNIT_TEST(testCalculateLayoutPass);
     CPPUNIT_TEST(testTextLineGeometry);
     CPPUNIT_TEST(testCalculateWaveLineGeometry);
     CPPUNIT_TEST(testCalculateStrikeoutGeometry);
@@ -573,39 +571,6 @@ void TextLayoutEngineTest::testGetAlignmentOffset()
     CPPUNIT_ASSERT_EQUAL_MESSAGE(
         "ALIGN_BASELINE offset should be zero", tools::Long(0),
         vcl::text::TextLayoutEngine::GetAlignmentOffset(ALIGN_BASELINE, nAscent, nDescent));
-}
-
-void TextLayoutEngineTest::testCalculateLayoutPass()
-{
-    ScopedVclPtrInstance<VirtualDevice> pVDev;
-    pVDev->SetOutputSizePixel(Size(100, 100));
-    pVDev->SetMapMode(MapMode(MapUnit::MapPixel));
-
-    vcl::text::TextLayoutEngine::LayoutRequest aReq;
-    aReq.aText = "Line One\nLine Two";
-    aReq.aTargetRect = tools::Rectangle(Point(0, 0), Size(100, 50));
-    aReq.nStyle = DrawTextFlags::MultiLine | DrawTextFlags::Center | DrawTextFlags::VCenter;
-    aReq.nMnemonicPos = 0; // Underline 'L'
-    aReq.nFontOrientation = 0_deg10;
-    aReq.nFontHeight = 10;
-    aReq.nFontAscent = 8;
-
-    vcl::DefaultTextLayout aLayout(*pVDev);
-
-    CoordinateMapper aMapper;
-    aMapper.ResetMapMode(pVDev->GetMapMode());
-
-    auto aResult = vcl::text::TextLayoutEngine::CalculateLayout(aMapper, aReq, aLayout);
-
-    // In MultiLine, we expect 2 lines of height 10 each
-    CPPUNIT_ASSERT_EQUAL(sal_Int32(2), aResult.nLineCount);
-
-    // The height is 20, target is 50. VCenter should offset Y by (50-20)/2 = 15
-    CPPUNIT_ASSERT_EQUAL(tools::Long(15), aResult.aTextRect.Top());
-
-    // Mnemonic should be active and have a valid position
-    CPPUNIT_ASSERT(aResult.bHasMnemonic);
-    CPPUNIT_ASSERT_EQUAL(tools::Long(15 + 8), aResult.aMnemonic.nY); // Y + Ascent
 }
 
 void TextLayoutEngineTest::testTextLineGeometry()
