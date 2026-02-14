@@ -456,104 +456,74 @@ void OutputDevice::ImplDrawStrikeoutLine( tools::Long nBaseX, tools::Long nBaseY
 }
 
 void OutputDevice::ImplDrawStrikeoutChar( tools::Long nBaseX, tools::Long nBaseY,
-                                          tools::Long nDistX, tools::Long nDistY, tools::Long nWidth,
-                                          FontStrikeout eStrikeout,
-                                          Color aColor )
+                                      tools::Long nDistX, tools::Long nDistY,
+                                      tools::Long nWidth,
+                                      FontStrikeout eStrikeout,
+                                      Color aColor )
 {
-    // See qadevOOo/testdocs/StrikeThrough.odt for examples if you need
-    // to tweak this
     if (!nWidth)
         return;
 
-    // prepare string for strikeout measurement
-    const char cStrikeoutChar =  eStrikeout == STRIKEOUT_SLASH ? '/' : 'X';
-    static const int nTestStrLen = 4;
-    static const int nMaxStrikeStrLen = 2048;
-    sal_Unicode aChars[nMaxStrikeStrLen+1]; // +1 for valgrind...
+    vcl::text::LayoutResources aRes{
+        mpFontInstance.get(),
+        *mpMapper,
+        &GetFontCache(),
+        GetFontCollection(),
+        nullptr, // pForcedFallback
+        [&]() { return mpGraphics; },
+        IsRTLEnabled(),
+        false, // bSubpixelPositioning
+        *mpGraphicsState,
+        *mpFontRealization
+    };
 
-    for( int i = 0; i < nTestStrLen; ++i)
-        aChars[i] = cStrikeoutChar;
+    std::unique_ptr<SalLayout> pLayout = vcl::text::TextLayoutEngine::GetStrikeoutCharLayout(
+        aRes, nWidth, eStrikeout);
 
-    const OUString aStrikeoutTest(aChars, nTestStrLen);
-
-    // calculate approximation of strikeout atom size
-    tools::Long nStrikeoutWidth = 0;
-    std::unique_ptr<SalLayout> pLayout = LayoutText(
-        vcl::text::TextSpan{aStrikeoutTest, 0, nTestStrLen},
-        vcl::text::LayoutConstraints{Point(0,0), 0, {}, {}, SalLayoutFlags::NONE},
-        vcl::text::LayoutCacheData{},
-        vcl::text::RenderSelection{});
-    if( pLayout )
-    {
-        nStrikeoutWidth = pLayout->GetTextWidth() / nTestStrLen;
-    }
-    if( nStrikeoutWidth <= 0 ) // sanity check
+    if (!pLayout)
         return;
 
-    int nStrikeStrLen = (nWidth+(nStrikeoutWidth-1)) / nStrikeoutWidth;
-    if( nStrikeStrLen > nMaxStrikeStrLen )
-        nStrikeStrLen = nMaxStrikeStrLen;
-    else if (nStrikeStrLen < 0)
-        nStrikeStrLen = 0;
-
-    // build the strikeout string
-    for( int i = nTestStrLen; i < nStrikeStrLen; ++i)
-        aChars[i] = cStrikeoutChar;
-
-    const OUString aStrikeoutText(aChars, nStrikeStrLen);
-
-    if( mpFontInstance->mnOrientation )
+    if (mpFontInstance->mnOrientation)
     {
         Point aOriginPt(0, 0);
-        aOriginPt.RotateAround( nDistX, nDistY, mpFontInstance->mnOrientation );
+        aOriginPt.RotateAround(nDistX, nDistY, mpFontInstance->mnOrientation);
     }
 
     nBaseX += nDistX;
     nBaseY += nDistY;
 
-    // strikeout text has to be left aligned
-    vcl::text::ComplexTextLayoutFlags nOrigTLM = GetLayoutMode();
-    SetLayoutMode(vcl::text::ComplexTextLayoutFlags::BiDiStrong);
-    pLayout = LayoutText(
-        vcl::text::TextSpan{aStrikeoutText, 0, aStrikeoutText.getLength()},
-        vcl::text::LayoutConstraints{Point(0,0), 0, {}, {}, SalLayoutFlags::NONE},
-        vcl::text::LayoutCacheData{},
-        vcl::text::RenderSelection{});
-    SetLayoutMode(nOrigTLM);
-
-    if( !pLayout )
-        return;
-
-    // draw the strikeout text
     const Color aOldColor = GetTextColor();
-    SetTextColor( aColor );
+    SetTextColor(aColor);
     ImplInitTextColor();
 
-    pLayout->DrawBase() = basegfx::B2DPoint(nBaseX + mpFontRealization->nXOffset, nBaseY + mpFontRealization->nYOffset);
+    pLayout->DrawBase() = basegfx::B2DPoint(nBaseX + mpFontRealization->nXOffset,
+                                            nBaseY + mpFontRealization->nYOffset);
 
     tools::Rectangle aPixelRect;
-    aPixelRect.SetLeft( nBaseX+mpFontRealization->nXOffset );
-    aPixelRect.SetRight( aPixelRect.Left()+nWidth );
-    aPixelRect.SetBottom( nBaseY+mpFontInstance->mxFontMetric->GetDescent() );
-    aPixelRect.SetTop( nBaseY-mpFontInstance->mxFontMetric->GetAscent() );
+    aPixelRect.SetLeft(nBaseX + mpFontRealization->nXOffset);
+    aPixelRect.SetRight(aPixelRect.Left() + nWidth);
+    aPixelRect.SetBottom(nBaseY + mpFontInstance->mxFontMetric->GetDescent());
+    aPixelRect.SetTop(nBaseY - mpFontInstance->mxFontMetric->GetAscent());
 
     if (mpFontInstance->mnOrientation)
     {
-        tools::Polygon aPoly( aPixelRect );
-        aPoly.Rotate( Point(nBaseX+mpFontRealization->nXOffset, nBaseY+mpFontRealization->nYOffset), mpFontInstance->mnOrientation);
+        tools::Polygon aPoly(aPixelRect);
+        aPoly.Rotate(Point(nBaseX + mpFontRealization->nXOffset,
+                           nBaseY + mpFontRealization->nYOffset),
+                     mpFontInstance->mnOrientation);
         aPixelRect = aPoly.GetBoundRect();
     }
 
-    Push( vcl::PushFlags::CLIPREGION );
-    IntersectClipRegion( PixelToLogic(aPixelRect) );
-    if ( mpClippingController->IsDirty() )
+    Push(vcl::PushFlags::CLIPREGION);
+    IntersectClipRegion(PixelToLogic(aPixelRect));
+    if (mpClippingController->IsDirty())
         InitClipRegion();
 
-    pLayout->DrawText( *mpGraphics );
+    pLayout->DrawText(*mpGraphics);
 
     Pop();
 
-    SetTextColor( aOldColor );
+    SetTextColor(aOldColor);
     ImplInitTextColor();
 }
 
