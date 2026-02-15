@@ -44,16 +44,30 @@ tools::Rectangle getInkBounds(const Bitmap& rBmp)
     }
     if (minX > maxX)
         return tools::Rectangle(); // Empty
+
     return tools::Rectangle(minX, minY, maxX, maxY);
+}
+
+tools::Long countInkPixels(const Bitmap& rBmp)
+{
+    BitmapReadAccess aAccess(const_cast<Bitmap&>(rBmp));
+    tools::Long nPixels = 0;
+
+    for (tools::Long y = 0; y < rBmp.GetSizePixel().Height(); ++y)
+    {
+        for (tools::Long x = 0; x < rBmp.GetSizePixel().Width(); ++x)
+        {
+            if (aAccess.GetPixel(y, x) != COL_WHITE)
+            {
+                nPixels++;
+            }
+        }
+    }
+    return nPixels;
 }
 
 CPPUNIT_TEST_FIXTURE(TextDecoratorTest, testEmphasisMarkPositions)
 {
-    // NOTE: We test GetEmphasisMarkPositions indirectly via VirtualDevice.
-    // Applying an emphasis mark causes VCL to dynamically scale down the base font
-    // to fit the mark within the standard line height.
-    // We verify the decorator succeeds by ensuring the visual footprint changes.
-
     ScopedVclPtrInstance<VirtualDevice> pDev;
     pDev->SetOutputSizePixel(Size(100, 100));
     pDev->SetBackground(Wallpaper(COL_WHITE));
@@ -82,9 +96,160 @@ CPPUNIT_TEST_FIXTURE(TextDecoratorTest, testEmphasisMarkPositions)
     CPPUNIT_ASSERT_MESSAGE("Text should render ink", !aBoundsNoMark.IsEmpty());
     CPPUNIT_ASSERT_MESSAGE("Text with mark should render ink", !aBoundsWithMark.IsEmpty());
 
-    // The emphasis mark radically alters the visual footprint (adds the dot, scales the text)
     CPPUNIT_ASSERT_MESSAGE("Emphasis mark must alter the visual bounding box",
                            aBoundsNoMark != aBoundsWithMark);
+}
+
+CPPUNIT_TEST_FIXTURE(TextDecoratorTest, testUnderline)
+{
+    ScopedVclPtrInstance<VirtualDevice> pDev;
+    pDev->SetOutputSizePixel(Size(200, 100));
+    pDev->SetBackground(Wallpaper(COL_WHITE));
+    pDev->SetTextColor(COL_BLACK);
+
+    // Set the line color on the device!
+    pDev->SetTextLineColor(COL_BLACK);
+    pDev->EnableOutput(true);
+
+    vcl::Font aFont(u"DejaVu Sans"_ustr, Size(0, 40));
+    Point aPos(20, 50);
+    OUString aText(u"LibreOffice"_ustr);
+
+    // Base Text
+    pDev->SetFont(aFont);
+    pDev->Erase();
+    pDev->DrawText(aPos, aText);
+    Bitmap aBmpBase = pDev->GetBitmap(Point(0, 0), Size(200, 100));
+    tools::Rectangle aBoundsBase = getInkBounds(aBmpBase);
+    tools::Long nPixelsBase = countInkPixels(aBmpBase);
+
+    // Underlined Text
+    aFont.SetUnderline(LINESTYLE_SINGLE);
+    pDev->SetFont(aFont);
+    pDev->Erase();
+    pDev->DrawText(aPos, aText);
+    Bitmap aBmpUnderline = pDev->GetBitmap(Point(0, 0), Size(200, 100));
+    tools::Rectangle aBoundsUnderline = getInkBounds(aBmpUnderline);
+    tools::Long nPixelsUnderline = countInkPixels(aBmpUnderline);
+
+    CPPUNIT_ASSERT_MESSAGE("Underline must add ink pixels to the image",
+                           nPixelsUnderline > nPixelsBase);
+    CPPUNIT_ASSERT_MESSAGE("Underline must extend the bottom visual bounds",
+                           aBoundsUnderline.Bottom() > aBoundsBase.Bottom());
+}
+
+CPPUNIT_TEST_FIXTURE(TextDecoratorTest, testWaveUnderline)
+{
+    ScopedVclPtrInstance<VirtualDevice> pDev;
+    pDev->SetOutputSizePixel(Size(200, 100));
+    pDev->SetBackground(Wallpaper(COL_WHITE));
+    pDev->SetTextColor(COL_BLACK);
+    pDev->SetTextLineColor(COL_BLACK);
+    pDev->EnableOutput(true);
+
+    vcl::Font aFont(u"DejaVu Sans"_ustr, Size(0, 40));
+    Point aPos(20, 50);
+    OUString aText(u"Geometry"_ustr);
+
+    // Single Underline
+    aFont.SetUnderline(LINESTYLE_SINGLE);
+    pDev->SetFont(aFont);
+    pDev->Erase();
+    pDev->DrawText(aPos, aText);
+    tools::Long nPixelsSingle = countInkPixels(pDev->GetBitmap(Point(0, 0), Size(200, 100)));
+
+    // Wave Underline
+    aFont.SetUnderline(LINESTYLE_WAVE);
+    pDev->SetFont(aFont);
+    pDev->Erase();
+    pDev->DrawText(aPos, aText);
+    tools::Long nPixelsWave = countInkPixels(pDev->GetBitmap(Point(0, 0), Size(200, 100)));
+
+    CPPUNIT_ASSERT_MESSAGE("Wave underline should have a different pixel density than single",
+                           nPixelsWave != nPixelsSingle);
+    CPPUNIT_ASSERT_MESSAGE("Wave underline must render pixels", nPixelsWave > 0);
+}
+
+CPPUNIT_TEST_FIXTURE(TextDecoratorTest, testStrikeout)
+{
+    ScopedVclPtrInstance<VirtualDevice> pDev;
+    pDev->SetOutputSizePixel(Size(200, 100));
+    pDev->SetBackground(Wallpaper(COL_WHITE));
+    pDev->SetTextColor(COL_BLACK);
+    pDev->SetTextLineColor(COL_BLACK);
+    pDev->EnableOutput(true);
+
+    vcl::Font aFont(u"DejaVu Sans"_ustr, Size(0, 40));
+    Point aPos(20, 50);
+    OUString aText(u"Strike"_ustr);
+
+    // Base Text
+    pDev->SetFont(aFont);
+    pDev->Erase();
+    pDev->DrawText(aPos, aText);
+    Bitmap aBmpBase = pDev->GetBitmap(Point(0, 0), Size(200, 100));
+    tools::Rectangle aBoundsBase = getInkBounds(aBmpBase);
+    tools::Long nPixelsBase = countInkPixels(aBmpBase);
+
+    // Strikeout Text
+    aFont.SetStrikeout(STRIKEOUT_SINGLE);
+    pDev->SetFont(aFont);
+    pDev->Erase();
+    pDev->DrawText(aPos, aText);
+    Bitmap aBmpStrike = pDev->GetBitmap(Point(0, 0), Size(200, 100));
+    tools::Rectangle aBoundsStrike = getInkBounds(aBmpStrike);
+    tools::Long nPixelsStrike = countInkPixels(aBmpStrike);
+
+    CPPUNIT_ASSERT_MESSAGE("Strikeout must add ink pixels to the image",
+                           nPixelsStrike > nPixelsBase);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Strikeout should not drastically alter top bound",
+                                 aBoundsBase.Top(), aBoundsStrike.Top());
+}
+
+CPPUNIT_TEST_FIXTURE(TextDecoratorTest, testOverline)
+{
+    ScopedVclPtrInstance<VirtualDevice> pDev;
+    pDev->SetOutputSizePixel(Size(200, 100));
+    pDev->SetBackground(Wallpaper(COL_WHITE));
+    pDev->SetTextColor(COL_BLACK);
+
+    // Set the Overline color on the device!
+    pDev->SetOverlineColor(COL_BLACK);
+    pDev->EnableOutput(true);
+
+    vcl::Font aFont(u"DejaVu Sans"_ustr, Size(0, 40));
+    Point aPos(20, 50);
+
+    // Use an underscore. It renders entirely on the baseline.
+    // This guarantees the base text's Top() is mathematically far away from the ascender line.
+    OUString aText(u"_"_ustr);
+
+    // Base Text
+    pDev->SetFont(aFont);
+    pDev->Erase();
+    pDev->DrawText(aPos, aText);
+    Bitmap aBmpBase = pDev->GetBitmap(Point(0, 0), Size(200, 100));
+    tools::Rectangle aBoundsBase = getInkBounds(aBmpBase);
+    tools::Long nPixelsBase = countInkPixels(aBmpBase);
+
+    // Overlined Text
+    aFont.SetOverline(LINESTYLE_SINGLE);
+    pDev->SetFont(aFont);
+    pDev->Erase();
+    pDev->DrawText(aPos, aText);
+    Bitmap aBmpOverline = pDev->GetBitmap(Point(0, 0), Size(200, 100));
+    tools::Rectangle aBoundsOverline = getInkBounds(aBmpOverline);
+    tools::Long nPixelsOverline = countInkPixels(aBmpOverline);
+
+    CPPUNIT_ASSERT_MESSAGE("Overline must add ink pixels to the image",
+                           nPixelsOverline > nPixelsBase);
+
+    // Create a dynamic error message so we can see the exact pixel coordinates if it ever fails
+    OString aMsg = "Overline top (" + OString::number(aBoundsOverline.Top())
+                   + ") must be higher (less than) base top (" + OString::number(aBoundsBase.Top())
+                   + ")";
+
+    CPPUNIT_ASSERT_MESSAGE(aMsg.getStr(), aBoundsOverline.Top() < aBoundsBase.Top());
 }
 
 } // namespace
