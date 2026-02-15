@@ -105,10 +105,6 @@ public:
                                              const vcl::text::LayoutCacheData& rCache,
                                              const vcl::text::RenderSelection& rSelection);
 
-    static void FillAlignmentContext(TextLayoutPositioning& rPos,
-                                     const ::vcl::text::TextLayoutRequest& rArgs,
-                                     double nEndGlyphCoord);
-
     static bool PrepareNormalizedLayoutInput(const OUString& rOrigStr, sal_Int32 nMinIndex,
                                              sal_Int32& rLen, OUString& rStr,
                                              const ::vcl::font::FontRealization& rFontRealization,
