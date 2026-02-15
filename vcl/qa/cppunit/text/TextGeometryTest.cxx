@@ -922,6 +922,15 @@ CPPUNIT_TEST_FIXTURE(TextGeometryTest, testCalculateOutlineTransform)
     CPPUNIT_ASSERT_DOUBLES_EQUAL(-95.0, aMat.get(0, 2), 0.001);
 }
 
+CPPUNIT_TEST_FIXTURE(TextGeometryTest, testGetTextHeightPixel)
+{
+    vcl::font::FontRealization aRealization;
+    aRealization.nEmphasisAscent = 5;
+    aRealization.nEmphasisDescent = 2;
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, vcl::text::TextGeometry::GetTextHeightPixel(aRealization),
+                                 0.001);
+}
+
 } // namespace
 
 CPPUNIT_PLUGIN_IMPLEMENT();

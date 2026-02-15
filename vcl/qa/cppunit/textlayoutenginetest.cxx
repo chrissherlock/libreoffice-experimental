@@ -239,11 +239,8 @@ public:
     void testCreateLayoutRequest_OrientationAndWidth();
     void testCreateLayoutRequest_OutOfBounds();
     void testFindFallbackFont_ForcedFallbackPriority();
-    void testIdentifyMissingChars();
-    void testGetTextHeightPixel();
     void testEmphasisMarkPositions();
     void testTextLineGeometry();
-    void testCalculateMultiLineLayout();
     void testCalculateWaveLineGeometry();
     void testCalculateStrikeoutGeometry();
     void testGetStrikeoutCharLayout();
@@ -255,7 +252,6 @@ public:
     CPPUNIT_TEST(testCreateLayoutRequest_DigitLocalization);
     CPPUNIT_TEST(testCreateLayoutRequest_OrientationAndWidth);
     CPPUNIT_TEST(testCreateLayoutRequest_OutOfBounds);
-    CPPUNIT_TEST(testGetTextHeightPixel);
     CPPUNIT_TEST(testEmphasisMarkPositions);
     CPPUNIT_TEST(testTextLineGeometry);
     CPPUNIT_TEST(testCalculateWaveLineGeometry);
@@ -323,25 +319,6 @@ struct MockFontInstance : public salhelper::SimpleReferenceObject
 {
     MockFontInstance() {}
 };
-}
-
-void TextLayoutEngineTest::testFindFallbackFont_ForcedFallbackPriority()
-{
-    // Test disabled: functionality moved to DefaultFallbackStrategy (private)
-}
-
-void TextLayoutEngineTest::testIdentifyMissingChars()
-{
-    // Test disabled: functionality moved to DefaultFallbackStrategy (private)
-}
-
-void TextLayoutEngineTest::testGetTextHeightPixel()
-{
-    vcl::font::FontRealization aRealization;
-    aRealization.nEmphasisAscent = 5;
-    aRealization.nEmphasisDescent = 2;
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, vcl::text::TextLayoutEngine::GetTextHeightPixel(aRealization),
-                                 0.001);
 }
 
 void TextLayoutEngineTest::testEmphasisMarkPositions()

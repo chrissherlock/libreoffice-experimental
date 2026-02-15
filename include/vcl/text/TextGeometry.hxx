@@ -220,6 +220,9 @@ public:
 
     static basegfx::B2DPoint MapLogicalToDevicePos(const LayoutResources& rRes,
                                                    const Point& rLogicalPos);
+
+    /** Calculates the total height of the font in device pixels, including emphasis marks. */
+    static double GetTextHeightPixel(const ::vcl::font::FontRealization& rRealization);
 };
 
 } // namespace vcl::text

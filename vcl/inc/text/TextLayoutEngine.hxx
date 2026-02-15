@@ -111,9 +111,6 @@ public:
                                              const vcl::text::TextLayoutCache*& rpLayoutCache,
                                              const SalLayoutGlyphs*& rpGlyphs);
 
-    /** Calculates the total height of the font in device pixels, including emphasis marks. */
-    static double GetTextHeightPixel(const ::vcl::font::FontRealization& rRealization);
-
     /** Validates that cached glyphs are in a consistent state for layout reuse. */
     static void ValidateGlyphCache(const SalLayoutGlyphs* pGlyphs);
 };

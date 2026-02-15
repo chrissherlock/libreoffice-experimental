@@ -818,4 +818,13 @@ void TextGeometry::ApplyPositioning(const LayoutResources& rRes, SalLayout& rLay
     TextJustifier::SetAnchorPoint(rLayout, aPos);
 }
 
+double TextGeometry::GetTextHeightPixel(const vcl::font::FontRealization& rRealization)
+{
+    if (!rRealization.mxFont)
+        return 0.0;
+
+    return static_cast<double>(rRealization.mxFont->mnLineHeight + rRealization.nEmphasisAscent
+                               + rRealization.nEmphasisDescent);
+}
+
 } // namespace vcl::text
