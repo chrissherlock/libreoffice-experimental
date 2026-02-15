@@ -1,3 +1,4 @@
+#include <text/FontMappingTracker.hxx>
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 /*
  * This file is part of the LibreOffice project.
@@ -118,7 +119,7 @@ void OutputDevice::ImplDrawTextRect(tools::Long nBaseX, tools::Long nBaseY, tool
 void OutputDevice::ImplDrawTextBackground(const SalLayout& rSalLayout)
 {
     tools::Rectangle aRect
-        = vcl::text::TextLayoutEngine::GetTextInkBounds(rSalLayout, *mpFontRealization);
+        = vcl::text::TextGeometry::GetTextInkBounds(rSalLayout, *mpFontRealization);
 
     if (mpGraphicsState->mbLineColor || mbLineColorDirty)
     {
@@ -145,7 +146,7 @@ bool OutputDevice::ImplDrawRotateText(SalLayout& rSalLayout)
     tools::Long nY = aOrigBase.getY();
 
     tools::Rectangle aBoundRect
-        = vcl::text::TextLayoutEngine::GetTextInkBounds(rSalLayout, *mpFontRealization, false);
+        = vcl::text::TextGeometry::GetTextInkBounds(rSalLayout, *mpFontRealization, false);
 
     Bitmap aBmp = ImplCreateRotatedTextBitmap(rSalLayout, aBoundRect);
 
@@ -835,11 +836,11 @@ SalLayoutFlags OutputDevice::GetBiDiLayoutFlags(std::u16string_view rStr, const 
                                                            nMinIndex, nEndIndex);
 }
 
-void OutputDevice::StartTrackingFontMappingUse() { vcl::text::TextLayoutEngine::StartTracking(); }
+void OutputDevice::StartTrackingFontMappingUse() { vcl::text::FontMappingTracker::StartTracking(); }
 
 OutputDevice::FontMappingUseData OutputDevice::FinishTrackingFontMappingUse()
 {
-    return vcl::text::TextLayoutEngine::FinishTracking();
+    return vcl::text::FontMappingTracker::FinishTracking();
 }
 
 std::unique_ptr<SalLayout> OutputDevice::LayoutText(
@@ -1615,7 +1616,7 @@ OutputDevice::getFallbackLayout(LogicalFontInstance* pLogicalFont, int nFallback
 
 tools::Rectangle OutputDevice::GetTextInkBounds(const SalLayout& rLayout) const
 {
-    return vcl::text::TextLayoutEngine::GetTextInkBounds(rLayout, *mpFontRealization);
+    return vcl::text::TextGeometry::GetTextInkBounds(rLayout, *mpFontRealization);
 }
 
 void OutputDevice::GetWordKashidaPositions(const OUString& rText, std::vector<bool>* pOutMap) const

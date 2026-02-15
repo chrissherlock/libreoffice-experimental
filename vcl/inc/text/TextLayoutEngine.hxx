@@ -78,14 +78,6 @@ struct TextLayoutPositioning;
 class VCL_DLLPUBLIC TextLayoutEngine
 {
 public:
-    /** Calculates the device-pixel positions for emphasis marks.
-     * @return A vector of global Points (in device pixels).
-     */
-    static void GetEmphasisMarkPositions(const SalLayout& rSalLayout,
-                                         const font::FontRealization& rFontRealization,
-                                         const font::EmphasisMark& rMark, bool bEmphasisBelow,
-                                         std::vector<Point>& rPoints);
-
     /** Initializes font metrics (bullet offset, CJK centering) using callbacks.
      * Independent of OutputDevice.
      */
@@ -163,14 +155,6 @@ public:
      * This captures which fonts were actually used (including fallbacks) to satisfy the request.
      */
 
-    // Diagnostic Font Tracking
-    static void StartTracking();
-    static OutputDevice::FontMappingUseData FinishTracking();
-    static bool IsTracking();
-    static void TrackLayoutFonts(const ::vcl::Font& rFont, const SalLayout* pLayout);
-
-    // ResolveFallbacks moved to DefaultFallbackStrategy
-
     static void ApplyPositioning(const LayoutResources& rRes, SalLayout& rLayout,
                                  ::vcl::text::TextLayoutRequest& rArgs, const Point& rLogicalPos,
                                  double nEndGlyphCoord);
@@ -199,48 +183,6 @@ public:
     /** Determines if the text at the specified index and length is Right-to-Left (RTL). */
     static bool GetTextIsRTL(const LayoutResources& rRes, const OUString& rString, sal_Int32 nIndex,
                              sal_Int32 nLen);
-    /** Orchestrates the calculation of text bounding rectangles in logical units. */
-
-    /**
-     * Calculates the visual bounding box of the rendered text in device pixels.
-     *
-     * Unlike logical bounds (which represent the theoretical advance width and line height),
-     * this method calculates the "Ink Bounds"—the actual area where pixels are colored on
-     * the device.
-     *
-     * The primary driver of this function is the transformation from a baseline-relative
-     * coordinate system to an ink-relative coordinate system. In standard layout, 'nY'
-     * represents the baseline; here, 'nY' is initialized to the "Top of the Ink":
-     * * nY = Baseline - (FontAscent + EmphasisAscent)
-     *
-     * This "Top of the Ink" coordinate represents the true upper visual boundary of the
-     * renderable area.
-     *
-     * Consolidating this calculation within the engine serves several critical purposes:
-     * 1. Geometric Integrity: By establishing the ink-top immediately, subsequent
-     * transformations—particularly rotation fallbacks—operate on a coherent
-     * rectangle rather than floating offsets. This prevents "double-offset" bugs
-     * where metrics are applied at the wrong stage of a transformation.
-     * 2. Rendering Alignment: Provides a "ready-to-use" rectangle for callers like
-     * OutputDevice::ImplDrawTextBackground and transparency alpha-masking,
-     * ensuring visual elements are never clipped.
-     * 3. Architectural Decoupling: Encapsulates the complexity of combining standard
-     * font metrics with emphasis mark offsets, allowing OutputDevice to function
-     * purely as a resource provider.
-     *
-     * @param rSalLayout       The specific layout instance containing glyph positions.
-     * @param rFontRealization The font metrics and emphasis mark data for the current
-     * rendering state.
-     * @return tools::Rectangle The bounding box representing the visual extent of
-     * the ink.
-     */
-    static tools::Rectangle GetTextInkBounds(const SalLayout& rSalLayout,
-                                             const ::vcl::font::FontRealization& rFontRealization,
-                                             bool bApplyRotation = true);
-
-    static void GetEmphasisMarkPositions(const SalLayout& rSalLayout,
-                                         const ::vcl::font::FontRealization& rFontRealization,
-                                         bool bEmphasisBelow, std::vector<Point>& rPoints);
 
     static basegfx::B2DHomMatrix
     CalculateOutlineTransform(const SalLayout& rLayout,

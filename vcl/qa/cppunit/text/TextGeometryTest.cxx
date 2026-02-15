@@ -857,6 +857,59 @@ CPPUNIT_TEST_FIXTURE(TextGeometryTest, testCalculateLayoutPass)
     CPPUNIT_ASSERT_EQUAL(tools::Long(15 + 8), aResult.aMnemonic.nY); // Y + Ascent
 }
 
+class RotatableMockLayout : public MockSalLayout
+{
+    GlyphItem mGlyph1;
+    GlyphItem mGlyph2;
+
+public:
+    const LogicalFontInstance* mpFont = nullptr;
+    RotatableMockLayout()
+        : mGlyph1(0, 1, 0, basegfx::B2DPoint(100, 100), GlyphItemFlags::NONE, 10.0, 0.0, 0.0, 0)
+        , mGlyph2(1, 1, 0, basegfx::B2DPoint(200, 100), GlyphItemFlags::NONE, 10.0, 0.0, 0.0, 1)
+    {
+    }
+    virtual bool GetNextGlyph(const GlyphItem** pGlyph, basegfx::B2DPoint& rPos, int& nStart,
+                              const LogicalFontInstance** ppFont) const override
+    {
+        if (ppFont)
+            *ppFont = mpFont;
+        if (nStart == 0)
+        {
+            *pGlyph = &mGlyph1;
+            rPos = basegfx::B2DPoint(100, 100);
+            nStart++;
+            return true;
+        }
+        if (nStart == 1)
+        {
+            *pGlyph = &mGlyph2;
+            rPos = basegfx::B2DPoint(200, 100);
+            nStart++;
+            return true;
+        }
+        return false;
+    }
+};
+
+CPPUNIT_TEST_FIXTURE(TextGeometryTest, testGetTextInkBounds_Rotation)
+{
+    StubFontInstance* pStub = new StubFontInstance();
+    rtl::Reference<LogicalFontInstance> xFont(pStub);
+    vcl::font::FontRealization aRealization;
+
+    aRealization.mxFont = xFont;
+    RotatableMockLayout aLayout;
+    aLayout.DrawBase() = basegfx::B2DPoint(100.0, 100.0);
+    aLayout.mpFont = pStub;
+
+    tools::Rectangle aRect
+        = vcl::text::TextGeometry::GetTextInkBounds(aLayout, aRealization, false);
+
+    CPPUNIT_ASSERT_EQUAL(tools::Long(20), aRect.GetHeight());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(100), aRect.GetWidth());
+}
+
 } // namespace
 
 CPPUNIT_PLUGIN_IMPLEMENT();

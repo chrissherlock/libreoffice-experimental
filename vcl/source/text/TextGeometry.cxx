@@ -617,4 +617,47 @@ std::unique_ptr<SalLayout> TextGeometry::GetStrikeoutCharLayout(const LayoutReso
     return TextLayoutEngine::Layout(rRes, aFinalSpan, aFinalConstraints, aCache, aSel);
 }
 
+tools::Rectangle TextGeometry::GetTextInkBounds(const SalLayout& rSalLayout,
+                                                const vcl::font::FontRealization& rFontRealization,
+                                                bool bApplyRotation)
+{
+    const basegfx::B2DPoint aPoint = rSalLayout.GetDrawPosition();
+    tools::Long nX = aPoint.getX();
+    tools::Long nY
+        = aPoint.getY()
+          - (rFontRealization.mxFont->mxFontMetric->GetAscent() + rFontRealization.nEmphasisAscent);
+
+    double nWidth = rSalLayout.GetTextWidth();
+    tools::Long nHeight = rFontRealization.mxFont->mnLineHeight + rFontRealization.nEmphasisAscent
+                          + rFontRealization.nEmphasisDescent;
+
+    basegfx::B2DRectangle aBoundRect;
+    if (rSalLayout.GetBoundRect(aBoundRect))
+        return SalLayout::BoundRect2Rectangle(aBoundRect);
+
+    if (bApplyRotation && rFontRealization.mxFont->mnOrientation)
+    {
+        const tools::Long nBaseX = nX;
+        const tools::Long nBaseY = nY;
+        if (!(rFontRealization.mxFont->mnOrientation % 900_deg10))
+        {
+            tools::Long nX2 = nX + nWidth;
+            tools::Long nY2 = nY + nHeight;
+            Point aBasePt(nBaseX, nBaseY);
+            aBasePt.RotateAround(nX, nY, rFontRealization.mxFont->mnOrientation);
+            aBasePt.RotateAround(nX2, nY2, rFontRealization.mxFont->mnOrientation);
+            nWidth = nX2 - nX;
+            nHeight = nY2 - nY;
+        }
+        else
+        {
+            tools::Rectangle aRect(Point(nX, nY), Size(nWidth + 1, nHeight + 1));
+            tools::Polygon aPoly(aRect);
+            aPoly.Rotate(Point(nBaseX, nBaseY), rFontRealization.mxFont->mnOrientation);
+            return aPoly.GetBoundRect();
+        }
+    }
+    return tools::Rectangle(Point(nX, nY), Size(nWidth, nHeight));
+}
+
 } // namespace vcl::text

@@ -37,6 +37,7 @@
 #include <textlayout.hxx>
 #include <textlineinfo.hxx>
 #include <text/TextLayoutEngine.hxx>
+#include <text/FontMappingTracker.hxx>
 #include <vcl/text/TextGeometry.hxx>
 #include <text/TextJustifier.hxx>
 #include <text/TextAnalyzer.hxx>
@@ -205,63 +206,6 @@ bool TextLayoutEngine::PrepareNormalizedLayoutInput(
     return true;
 }
 
-// Helper for Diagnostic Font Tracking
-namespace
-{
-static OutputDevice::FontMappingUseData* g_pFontMappingUseData = nullptr;
-}
-
-void TextLayoutEngine::StartTracking()
-{
-    delete g_pFontMappingUseData;
-    g_pFontMappingUseData = new OutputDevice::FontMappingUseData;
-}
-
-OutputDevice::FontMappingUseData TextLayoutEngine::FinishTracking()
-{
-    if (!g_pFontMappingUseData)
-        return {};
-    OutputDevice::FontMappingUseData aRet = std::move(*g_pFontMappingUseData);
-    delete g_pFontMappingUseData;
-    g_pFontMappingUseData = nullptr;
-    return aRet;
-}
-
-bool TextLayoutEngine::IsTracking() { return g_pFontMappingUseData != nullptr; }
-
-void TextLayoutEngine::TrackLayoutFonts(const vcl::Font& rFont, const SalLayout* pLayout)
-{
-    if (!pLayout || !IsTracking())
-        return;
-
-    OUString aOriginalName = rFont.GetStyleName().isEmpty()
-                                 ? rFont.GetFamilyName()
-                                 : rFont.GetFamilyName() + "/" + rFont.GetStyleName();
-
-    std::vector<OUString> aUsedFontNames;
-    SalLayoutGlyphs aGlyphs = pLayout->GetGlyphs();
-    int nLevel = 0;
-    while (const SalLayoutGlyphsImpl* pImpl = aGlyphs.Impl(nLevel++))
-    {
-        const vcl::font::PhysicalFontFace* pFace = pImpl->GetFont()->GetFontFace();
-        OUString aName = pFace->GetStyleName().isEmpty()
-                             ? pFace->GetFamilyName()
-                             : pFace->GetFamilyName() + "/" + pFace->GetStyleName();
-        aUsedFontNames.push_back(aName);
-    }
-
-    for (auto& rItem : *g_pFontMappingUseData)
-    {
-        if (rItem.mOriginalFont == aOriginalName && rItem.mUsedFonts == aUsedFontNames)
-        {
-            ++rItem.mCount;
-            return;
-        }
-    }
-
-    g_pFontMappingUseData->push_back({ aOriginalName, std::move(aUsedFontNames), 1 });
-}
-
 void TextLayoutEngine::ValidateGlyphCache(const SalLayoutGlyphs* pGlyphs)
 {
     if (!pGlyphs)
@@ -403,7 +347,7 @@ TextLayoutEngine::Layout(const LayoutResources& rRes, const vcl::text::TextSpan&
 
     ApplyPositioning(rRes, *pSalLayout, aLayoutArgs, rConstraints.LogicalPos, nEndGlyphCoord);
 
-    TrackLayoutFonts(rRes.rGraphicsState.maFont, pSalLayout.get());
+    FontMappingTracker::TrackLayoutFonts(rRes.rGraphicsState.maFont, pSalLayout.get());
 
     return pSalLayout;
 }
@@ -522,88 +466,6 @@ bool TextLayoutEngine::GetTextIsRTL(const LayoutResources& rRes, const OUString&
         return false;
 
     return (nCharPos != nIndex);
-}
-
-tools::Rectangle
-TextLayoutEngine::GetTextInkBounds(const SalLayout& rSalLayout,
-                                   const vcl::font::FontRealization& rFontRealization,
-                                   bool bApplyRotation)
-{
-    const basegfx::B2DPoint aPoint = rSalLayout.GetDrawPosition();
-    tools::Long nX = aPoint.getX();
-    tools::Long nY
-        = aPoint.getY()
-          - (rFontRealization.mxFont->mxFontMetric->GetAscent() + rFontRealization.nEmphasisAscent);
-
-    double nWidth = rSalLayout.GetTextWidth();
-    tools::Long nHeight = rFontRealization.mxFont->mnLineHeight + rFontRealization.nEmphasisAscent
-                          + rFontRealization.nEmphasisDescent;
-
-    basegfx::B2DRectangle aBoundRect;
-    if (rSalLayout.GetBoundRect(aBoundRect))
-        return SalLayout::BoundRect2Rectangle(aBoundRect);
-
-    if (bApplyRotation && rFontRealization.mxFont->mnOrientation)
-    {
-        const tools::Long nBaseX = nX;
-        const tools::Long nBaseY = nY;
-        if (!(rFontRealization.mxFont->mnOrientation % 900_deg10))
-        {
-            tools::Long nX2 = nX + nWidth;
-            tools::Long nY2 = nY + nHeight;
-            Point aBasePt(nBaseX, nBaseY);
-            aBasePt.RotateAround(nX, nY, rFontRealization.mxFont->mnOrientation);
-            aBasePt.RotateAround(nX2, nY2, rFontRealization.mxFont->mnOrientation);
-            nWidth = nX2 - nX;
-            nHeight = nY2 - nY;
-        }
-        else
-        {
-            tools::Rectangle aRect(Point(nX, nY), Size(nWidth + 1, nHeight + 1));
-            tools::Polygon aPoly(aRect);
-            aPoly.Rotate(Point(nBaseX, nBaseY), rFontRealization.mxFont->mnOrientation);
-            return aPoly.GetBoundRect();
-        }
-    }
-    return tools::Rectangle(Point(nX, nY), Size(nWidth, nHeight));
-}
-
-void TextLayoutEngine::GetEmphasisMarkPositions(const SalLayout& rSalLayout,
-                                                const vcl::font::FontRealization& rFontRealization,
-                                                const vcl::font::EmphasisMark& rMark,
-                                                bool bEmphasisBelow, std::vector<Point>& rPoints)
-{
-    rPoints.clear();
-    if (!rFontRealization.mxFont)
-        return;
-
-    // Calculate base anchor (Ascent or Descent line)
-    const tools::Long nBaseOffset
-        = bEmphasisBelow ? rFontRealization.nEmphasisDescent : -rFontRealization.nEmphasisAscent;
-    const basegfx::B2DPoint aDrawPos = rSalLayout.GetDrawPosition();
-    const tools::Long nAnchorY = aDrawPos.getY() + nBaseOffset;
-
-    // Prepare visual adjustments (centering and mark-specific offset)
-    const tools::Long nXCenterOff = rMark.GetWidth() / 2;
-    const tools::Long nYCenterOff
-        = (bEmphasisBelow ? rFontRealization.nEmphasisDescent : rFontRealization.nEmphasisAscent)
-          / 2;
-    const tools::Long nShapeAdj = bEmphasisBelow ? rMark.GetYOffset() : -rMark.GetYOffset();
-
-    int nStart = 0;
-    const GlyphItem* pGlyph = nullptr;
-    basegfx::B2DPoint aPos;
-
-    while (rSalLayout.GetNextGlyph(&pGlyph, aPos, nStart))
-    {
-        if (!pGlyph)
-            continue;
-
-        Point aMarkPt(static_cast<tools::Long>(aPos.getX()) - nXCenterOff,
-                      nAnchorY + nShapeAdj - nYCenterOff);
-
-        rPoints.push_back(aMarkPt);
-    }
 }
 
 basegfx::B2DHomMatrix TextLayoutEngine::CalculateOutlineTransform(
