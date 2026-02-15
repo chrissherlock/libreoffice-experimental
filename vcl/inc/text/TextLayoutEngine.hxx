@@ -110,9 +110,6 @@ public:
                                              const ::vcl::font::FontRealization& rFontRealization,
                                              const vcl::text::TextLayoutCache*& rpLayoutCache,
                                              const SalLayoutGlyphs*& rpGlyphs);
-
-    /** Validates that cached glyphs are in a consistent state for layout reuse. */
-    static void ValidateGlyphCache(const SalLayoutGlyphs* pGlyphs);
 };
 
 } // namespace vcl::text
