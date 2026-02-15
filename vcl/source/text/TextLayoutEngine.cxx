@@ -87,14 +87,6 @@ vcl::text::TextLayoutRequest TextLayoutEngine::CreateLayoutRequest(
     return aLayoutArgs;
 }
 
-void TextLayoutEngine::FillAlignmentContext(TextLayoutPositioning& rPos,
-                                            const vcl::text::TextLayoutRequest& rArgs,
-                                            double nEndGlyphCoord)
-{
-    rPos.bRightAlign = bool(rArgs.mnFlags & SalLayoutFlags::RightAlign);
-    rPos.nEndGlyphCoord = nEndGlyphCoord;
-}
-
 bool TextLayoutEngine::PrepareNormalizedLayoutInput(
     const OUString& rOrigStr, sal_Int32 nMinIndex, sal_Int32& rLen, OUString& rStr,
     const vcl::font::FontRealization& rFontRealization,

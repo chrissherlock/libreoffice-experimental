@@ -809,7 +809,8 @@ void TextGeometry::ApplyPositioning(const LayoutResources& rRes, SalLayout& rLay
     TextLayoutPositioning aPos;
     aPos.bSubpixelPositioning = rRes.bSubpixelPositioning;
 
-    TextLayoutEngine::FillAlignmentContext(aPos, rArgs, nEndGlyphCoord);
+    aPos.bRightAlign = bool(rArgs.mnFlags & SalLayoutFlags::RightAlign);
+    aPos.nEndGlyphCoord = nEndGlyphCoord;
     aPos.aDrawBase = MapLogicalToDevicePos(rRes, rLogicalPos);
 
     TextJustifier::JustifyLayout(rLayout, rArgs);
