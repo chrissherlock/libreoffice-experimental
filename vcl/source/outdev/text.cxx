@@ -778,7 +778,7 @@ double OutputDevice::GetPartialTextArray(const OUString& rStr, KernArray* pKernA
             *mpGraphicsState,
             *mpFontRealization };
 
-    return vcl::text::TextLayoutEngine::GetPartialTextArray(
+    return vcl::text::TextGeometry::GetPartialTextArray(
         aResources, vcl::text::TextSpan{ rStr, nIndex, nLen }, pKernArray, nPartIndex, nPartLen,
         bCaret, vcl::text::LayoutCacheData{ pLayoutCache, pSalLayoutCache }, pBounds);
 }
@@ -797,7 +797,7 @@ void OutputDevice::GetCaretPositions(const OUString& rStr, KernArray& rCaretPos,
         *mpGraphicsState, *mpFontRealization
     };
 
-    vcl::text::TextLayoutEngine::GetCaretPositions(
+    vcl::text::TextGeometry::GetCaretPositions(
         aResources, vcl::text::TextSpan{ rStr, nIndex, nLen }, rCaretPos,
         vcl::text::LayoutCacheData{ nullptr, pGlyphs });
 }

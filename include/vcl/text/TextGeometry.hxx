@@ -33,7 +33,9 @@ namespace vcl::font
 {
 struct FontRealization;
 }
+
 class CoordinateMapper;
+
 namespace vcl
 {
 class TextLayoutCommon;
@@ -41,7 +43,9 @@ class TextLayoutCommon;
 
 namespace vcl::text
 {
+struct TextSpan;
 struct MirroringContext;
+struct LayoutCacheData;
 struct LayoutResources;
 
 struct MirroringContext
@@ -184,6 +188,25 @@ public:
     static tools::Rectangle GetTextInkBounds(const SalLayout& rSalLayout,
                                              const ::vcl::font::FontRealization& rFontRealization,
                                              bool bApplyRotation = true);
+
+    static double FillPartialTextArray(const LayoutResources& rRes, const SalLayout& rLayout,
+                                       KernArray* pKernArray, sal_Int32 nIndex, sal_Int32 nLen,
+                                       sal_Int32 nPartIndex, sal_Int32 nPartLen,
+                                       const OUString& rCaretStr);
+
+    static double GetPartialTextArray(const LayoutResources& rRes, const TextSpan& rSpan,
+                                      KernArray* pKernArray, sal_Int32 nPartIndex,
+                                      sal_Int32 nPartLen, bool bCaret,
+                                      const vcl::text::LayoutCacheData& rCache,
+                                      std::optional<tools::Rectangle>* pBounds);
+
+    static void GetCaretPositions(const LayoutResources& rRes, const TextSpan& rSpan,
+                                  std::vector<double>& rCaretPositions,
+                                  const LayoutCacheData& rCache);
+
+    static basegfx::B2DHomMatrix
+    CalculateOutlineTransform(const SalLayout& rLayout,
+                              const vcl::font::FontRealization& rRealization, double nXOffset);
 };
 
 } // namespace vcl::text
