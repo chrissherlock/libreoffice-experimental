@@ -242,7 +242,6 @@ public:
     void testIdentifyMissingChars();
     void testGetTextHeightPixel();
     void testEmphasisMarkPositions();
-    void testCalculateOutlineTransform();
     void testInitializeTextLineMetrics();
     void testInitializeFontMetrics();
     void testInitializeAboveTextLineMetrics();
@@ -262,7 +261,6 @@ public:
     CPPUNIT_TEST(testCreateLayoutRequest_OutOfBounds);
     CPPUNIT_TEST(testGetTextHeightPixel);
     CPPUNIT_TEST(testEmphasisMarkPositions);
-    CPPUNIT_TEST(testCalculateOutlineTransform);
     CPPUNIT_TEST(testInitializeTextLineMetrics);
     CPPUNIT_TEST(testInitializeFontMetrics);
     CPPUNIT_TEST(testInitializeAboveTextLineMetrics);
@@ -352,18 +350,6 @@ void TextLayoutEngineTest::testGetTextHeightPixel()
     aRealization.nEmphasisDescent = 2;
     CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, vcl::text::TextLayoutEngine::GetTextHeightPixel(aRealization),
                                  0.001);
-}
-
-void TextLayoutEngineTest::testCalculateOutlineTransform()
-{
-    MockSalLayout aLayout;
-    aLayout.DrawBase() = basegfx::B2DPoint(100.0, 200.0);
-    vcl::font::FontRealization aRealization;
-    aRealization.nXOffset = 5.0;
-    aRealization.nYOffset = 5.0;
-    basegfx::B2DHomMatrix aMat
-        = vcl::text::TextLayoutEngine::CalculateOutlineTransform(aLayout, aRealization, 0.0);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(-95.0, aMat.get(0, 2), 0.001);
 }
 
 void TextLayoutEngineTest::testEmphasisMarkPositions()

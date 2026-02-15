@@ -124,12 +124,6 @@ public:
            KernArraySpan pDXArray, std::span<const sal_Bool> pKashidaArray,
            const Point& rLogicalPos, const SalLayoutGlyphs* pGlyphs = nullptr);
 
-    /** Fills a KernArray with logical widths and returns the total width. */
-    static double FillPartialTextArray(const LayoutResources& rRes, const SalLayout& rLayout,
-                                       KernArray* pKernArray, sal_Int32 nIndex, sal_Int32 nLen,
-                                       sal_Int32 nPartIndex, sal_Int32 nPartLen,
-                                       const OUString& rCaretStr);
-
     static bool PrepareNormalizedLayoutInput(const OUString& rOrigStr, sal_Int32 nMinIndex,
                                              sal_Int32& rLen, OUString& rStr,
                                              const ::vcl::font::FontRealization& rFontRealization,
@@ -170,23 +164,10 @@ public:
                                              const vcl::text::LayoutCacheData& rCache,
                                              const vcl::text::RenderSelection& rSelection);
 
-    static double GetPartialTextArray(const LayoutResources& rRes, const TextSpan& rSpan,
-                                      KernArray* pKernArray, sal_Int32 nPartIndex,
-                                      sal_Int32 nPartLen, bool bCaret,
-                                      const vcl::text::LayoutCacheData& rCache,
-                                      std::optional<tools::Rectangle>* pBounds);
-
-    static void GetCaretPositions(const LayoutResources& rRes, const TextSpan& rSpan,
-                                  KernArray& rCaretPos, const vcl::text::LayoutCacheData& rCache);
-
     /** Orchestrates finding the character index where text must break for a given width. */
     /** Determines if the text at the specified index and length is Right-to-Left (RTL). */
     static bool GetTextIsRTL(const LayoutResources& rRes, const OUString& rString, sal_Int32 nIndex,
                              sal_Int32 nLen);
-
-    static basegfx::B2DHomMatrix
-    CalculateOutlineTransform(const SalLayout& rLayout,
-                              const ::vcl::font::FontRealization& rRealization, double nXOffset);
 
     static void InitializeTextLineMetrics(const LogicalFontInstance* pFontInstance,
                                           const ::vcl::Font& rFont, tools::Long nDPIY,

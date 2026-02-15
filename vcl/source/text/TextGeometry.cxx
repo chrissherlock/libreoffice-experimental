@@ -20,12 +20,14 @@
 #include <text/TextAnalyzer.hxx>
 #include <textlayout.hxx>
 
+#include <vcl/text/CaretManager.hxx>
 #include <vcl/text/LayoutResources.hxx>
-#include <vcl/text/TextSpan.hxx>
 #include <vcl/text/LayoutCacheData.hxx>
+#include <vcl/text/TextSpan.hxx>
 
 #include <font/FontController.hxx>
 #include <sallayout.hxx>
+#include <text/TextJustifier.hxx>
 #include <text/TextLayoutEngine.hxx>
 #include <CoordinateMapper.hxx>
 
@@ -326,7 +328,7 @@ bool TextGeometry::GetTextOutlines(const LayoutResources& rResources,
 
         if (bRet)
         {
-            basegfx::B2DHomMatrix aMatrix = TextLayoutEngine::CalculateOutlineTransform(
+            basegfx::B2DHomMatrix aMatrix = TextGeometry::CalculateOutlineTransform(
                 *pSalLayout, rResources.rFontRealization, nXOffset);
 
             if (!aMatrix.isIdentity())
@@ -658,6 +660,135 @@ tools::Rectangle TextGeometry::GetTextInkBounds(const SalLayout& rSalLayout,
         }
     }
     return tools::Rectangle(Point(nX, nY), Size(nWidth, nHeight));
+}
+
+static void lcl_convertBoundRectToLogic(const SalLayout& rLayout, const CoordinateMapper& rMapper,
+                                        std::optional<tools::Rectangle>* pBounds)
+{
+    if (!pBounds)
+        return;
+
+    basegfx::B2DRectangle aB2DRect;
+
+    if (rLayout.GetBoundRect(aB2DRect))
+    {
+        tools::Rectangle aRect = SalLayout::BoundRect2Rectangle(aB2DRect);
+        *pBounds = rMapper.DevicePixelToLogic(aRect);
+    }
+}
+
+double TextGeometry::FillPartialTextArray(const LayoutResources& rRes, const SalLayout& rLayout,
+                                          KernArray* pKernArray, sal_Int32 nIndex, sal_Int32 nLen,
+                                          sal_Int32 nPartIndex, sal_Int32 nPartLen,
+                                          const OUString& rCaretStr)
+{
+    std::vector<double> aDXPixelArray;
+    std::vector<double>* pDXPixelArray = nullptr;
+
+    if (pKernArray)
+    {
+        aDXPixelArray.resize(nPartLen);
+        pDXPixelArray = &aDXPixelArray;
+    }
+
+    double nWidth = 0.0;
+
+    if (nIndex == nPartIndex && nLen == nPartLen)
+        nWidth = rLayout.FillDXArray(pDXPixelArray, rCaretStr);
+    else
+        nWidth
+            = rLayout.FillPartialDXArray(pDXPixelArray, rCaretStr, nPartIndex - nIndex, nPartLen);
+
+    if (pDXPixelArray)
+    {
+        for (int i = 1; i < nPartLen; ++i)
+            (*pDXPixelArray)[i] += (*pDXPixelArray)[i - 1];
+
+        if (rRes.rMapper.IsMapModeEnabled())
+        {
+            for (int i = 0; i < nPartLen; ++i)
+            {
+                (*pDXPixelArray)[i]
+                    = rRes.rMapper.DevicePixelToLogicWidthDouble((*pDXPixelArray)[i]);
+            }
+        }
+
+        pKernArray->resize(nPartLen);
+
+        for (int i = 0; i < nPartLen; ++i)
+        {
+            (*pKernArray)[i] = (*pDXPixelArray)[i];
+        }
+    }
+
+    return rRes.rMapper.DevicePixelToLogicWidthDouble(nWidth);
+}
+
+double TextGeometry::GetPartialTextArray(const LayoutResources& rRes,
+                                         const vcl::text::TextSpan& rSpan, KernArray* pKernArray,
+                                         sal_Int32 nPartIndex, sal_Int32 nPartLen, bool bCaret,
+                                         const vcl::text::LayoutCacheData& rCache,
+                                         std::optional<tools::Rectangle>* pBounds)
+{
+    if (rSpan.Index >= rSpan.Text.getLength())
+        return 0.0;
+
+    sal_Int32 nLen = TextAnalyzer::GetNormalizedLength(rSpan.Text, rSpan.Index, rSpan.Length);
+    sal_Int32 nNormalizedPartLen
+        = TextAnalyzer::GetNormalizedLength(rSpan.Text, nPartIndex, nPartLen);
+
+    vcl::text::TextSpan aNormalizedSpan{ rSpan.Text, rSpan.Index, nLen };
+    vcl::text::LayoutConstraints aConstraints{ Point(0, 0), 0, {}, {}, SalLayoutFlags::NONE };
+
+    vcl::text::RenderSelection aSelection;
+
+    if (rSpan.Index != nPartIndex || nLen != nNormalizedPartLen)
+    {
+        aSelection
+            = vcl::text::RenderSelection{ nPartIndex, nPartIndex, nPartIndex + nNormalizedPartLen };
+    }
+
+    std::unique_ptr<SalLayout> pSalLayout
+        = TextLayoutEngine::Layout(rRes, aNormalizedSpan, aConstraints, rCache, aSelection);
+
+    if (!pSalLayout)
+    {
+        TextJustifier::ZeroFillKernArray(pKernArray, nNormalizedPartLen);
+        return 0.0;
+    }
+
+    lcl_convertBoundRectToLogic(*pSalLayout, rRes.rMapper, pBounds);
+
+    return FillPartialTextArray(rRes, *pSalLayout, pKernArray, rSpan.Index, nLen, nPartIndex,
+                                nNormalizedPartLen, bCaret ? rSpan.Text : OUString());
+}
+
+void TextGeometry::GetCaretPositions(const LayoutResources& rRes, const vcl::text::TextSpan& rSpan,
+                                     std::vector<double>& rCaretPositions,
+                                     const LayoutCacheData& rCache)
+{
+    vcl::text::LayoutConstraints aConstraints;
+    vcl::text::RenderSelection aSelection;
+    std::unique_ptr<SalLayout> pLayout
+        = TextLayoutEngine::Layout(rRes, rSpan, aConstraints, rCache, aSelection);
+
+    if (pLayout)
+        CaretManager::GetCaretPositions(rRes, rSpan, rCaretPositions, *pLayout);
+}
+
+basegfx::B2DHomMatrix TextGeometry::CalculateOutlineTransform(
+    const SalLayout& rLayout, const vcl::font::FontRealization& rRealization, double nXOffset)
+{
+    basegfx::B2DHomMatrix aMatrix;
+
+    if (nXOffset != 0 || rRealization.nXOffset != 0 || rRealization.nYOffset != 0)
+    {
+        basegfx::B2DPoint aRotatedOfs(rRealization.nXOffset, rRealization.nYOffset);
+        aRotatedOfs -= rLayout.GetDrawPosition(basegfx::B2DPoint(nXOffset, 0));
+        aMatrix.translate(aRotatedOfs.getX(), aRotatedOfs.getY());
+    }
+
+    return aMatrix;
 }
 
 } // namespace vcl::text

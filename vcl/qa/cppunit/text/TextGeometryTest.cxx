@@ -910,6 +910,18 @@ CPPUNIT_TEST_FIXTURE(TextGeometryTest, testGetTextInkBounds_Rotation)
     CPPUNIT_ASSERT_EQUAL(tools::Long(100), aRect.GetWidth());
 }
 
+CPPUNIT_TEST_FIXTURE(TextGeometryTest, testCalculateOutlineTransform)
+{
+    MockSalLayout aLayout;
+    aLayout.DrawBase() = basegfx::B2DPoint(100.0, 200.0);
+    vcl::font::FontRealization aRealization;
+    aRealization.nXOffset = 5.0;
+    aRealization.nYOffset = 5.0;
+    basegfx::B2DHomMatrix aMat
+        = vcl::text::TextGeometry::CalculateOutlineTransform(aLayout, aRealization, 0.0);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-95.0, aMat.get(0, 2), 0.001);
+}
+
 } // namespace
 
 CPPUNIT_PLUGIN_IMPLEMENT();
