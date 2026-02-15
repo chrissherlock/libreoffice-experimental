@@ -29,6 +29,7 @@
 #include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
+#include <vcl/rendercontext/PrimitiveRenderer.hxx>
 #include <vcl/virdev.hxx>
 
 #include <vcl/metafile/MetafileRecorder.hxx>
@@ -126,8 +127,6 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
     if ( IsOutputCulled() )
         return;
 
-    const Point aStartPt(LogicToDevicePixel(rStartPt));
-    const Point aEndPt(LogicToDevicePixel(rEndPt));
     const LineInfo aInfo(mpMapper->LogicToDevicePixel(rLineInfo));
     const bool bDashUsed(LineStyle::Dash == aInfo.GetStyle());
     const bool bLineWidthUsed(aInfo.GetWidth() > 1);
@@ -137,6 +136,10 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
 
     if(bDashUsed || bLineWidthUsed)
     {
+        // Only map coordinates if we are inflating the polygon for dashing/width
+        const Point aStartPt(LogicToDevicePixel(rStartPt));
+        const Point aEndPt(LogicToDevicePixel(rEndPt));
+
         basegfx::B2DPolygon aLinePolygon;
         aLinePolygon.append(basegfx::B2DPoint(aStartPt.X(), aStartPt.Y()));
         aLinePolygon.append(basegfx::B2DPoint(aEndPt.X(), aEndPt.Y()));
@@ -145,7 +148,8 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
     }
     else
     {
-        mpGraphics->DrawLine( aStartPt.X(), aStartPt.Y(), aEndPt.X(), aEndPt.Y(), *this );
+        // Simple solid hairline
+        vcl::rendercontext::PrimitiveRenderer::DrawLine(*mpGraphics, *mpMapper, this, rStartPt, rEndPt, false, false);
     }
 }
 
@@ -171,40 +175,14 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt )
     if ( mbLineColorDirty )
         InitLineColor();
 
-    bool bDrawn = false;
+    // Determine state for Anti-Aliasing
+    const bool bTryAA = (RasterOp::OverPaint == GetRasterOp() && IsLineColor());
 
-    // #i101598# support AA and snap for lines, too
-    if (RasterOp::OverPaint == GetRasterOp() && IsLineColor())
-    {
-        // at least transform with double precision to device coordinates; this will
-        // avoid pixel snap of single, appended lines
-        const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation());
-        basegfx::B2DPolygon aB2DPolyLine;
+    const bool bPixelSnapHairline = (mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline) == AntialiasingFlags::PixelSnapHairline;
 
-        aB2DPolyLine.append(basegfx::B2DPoint(rStartPt.X(), rStartPt.Y()));
-        aB2DPolyLine.append(basegfx::B2DPoint(rEndPt.X(), rEndPt.Y()));
-        aB2DPolyLine.transform( aTransform );
-
-        const bool bPixelSnapHairline(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
-
-        bDrawn = mpGraphics->DrawPolyLine(
-            basegfx::B2DHomMatrix(),
-            aB2DPolyLine,
-            0.0,
-            0.0, // tdf#124848 hairline
-            nullptr, // MM01
-            basegfx::B2DLineJoin::NONE,
-            css::drawing::LineCap_BUTT,
-            basegfx::deg2rad(15.0), // not used with B2DLineJoin::NONE, but the correct default
-            bPixelSnapHairline,
-            *this);
-    }
-    if(!bDrawn)
-    {
-        const Point aStartPt(LogicToDevicePixel(rStartPt));
-        const Point aEndPt(LogicToDevicePixel(rEndPt));
-        mpGraphics->DrawLine( aStartPt.X(), aStartPt.Y(), aEndPt.X(), aEndPt.Y(), *this );
-    }
+    // Hand off the math and low-level dispatch to the facade
+    vcl::rendercontext::PrimitiveRenderer::DrawLine(*mpGraphics, *mpMapper, this,
+                                                    rStartPt, rEndPt, bTryAA, bPixelSnapHairline);
 }
 
 void OutputDevice::drawLine( basegfx::B2DPolyPolygon aLinePolyPolygon, const LineInfo& rInfo )

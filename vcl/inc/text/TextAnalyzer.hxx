@@ -18,6 +18,8 @@
 
 #include <text/TextLayoutEngine.hxx>
 
+class SalLayoutGlyphs;
+
 namespace vcl
 {
 struct GraphicsState;
@@ -29,6 +31,8 @@ struct FontRealization;
 
 namespace vcl::text
 {
+class TextLayoutCache;
+
 /**
  * TextAnalyzer handles pure string analysis, linguistic processing,
  * and flag calculation. It is stateless and does not depend on SalLayout.
@@ -57,6 +61,12 @@ public:
 
     static bool GetTextIsRTL(const LayoutResources& rRes, const OUString& rString, sal_Int32 nIndex,
                              sal_Int32 nLen);
+
+    static bool PrepareNormalizedLayoutInput(const OUString& rOrigStr, sal_Int32 nMinIndex,
+                                             sal_Int32& rLen, OUString& rStr,
+                                             const ::vcl::font::FontRealization& rFontRealization,
+                                             const vcl::text::TextLayoutCache*& rpLayoutCache,
+                                             const SalLayoutGlyphs*& rpGlyphs);
 };
 
 } // namespace vcl::text

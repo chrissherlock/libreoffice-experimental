@@ -8,18 +8,19 @@
  *
  * This file incorporates work covered by the following license notice:
  *
- *   Licensed to the Apache Software Foundation (ASF) under one or more
- *   contributor license agreements. See the NOTICE file distributed
- *   with this work for additional information regarding copyright
- *   ownership. The ASF licenses this file to you under the Apache
- *   License, Version 2.0 (the "License"); you may not use this file
- *   except in compliance with the License. You may obtain a copy of
- *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed
+ * with this work for additional information regarding copyright
+ * ownership. The ASF licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of
+ * the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/metafile/MetafileRecorder.hxx>
+#include <vcl/rendercontext/PrimitiveRenderer.hxx>
 
 #include <ClippingController.hxx>
 #include <GraphicsState.hxx>
@@ -57,8 +58,6 @@ void OutputDevice::DrawPixel( const Point& rPt )
     if ( !IsDeviceOutputNecessary() || !mpGraphicsState->mbLineColor || IsLayoutCalculationNecessary() )
         return;
 
-    Point aPt = LogicToDevicePixel(rPt);
-
     if ( !mpGraphics && !AcquireGraphics() )
         return;
     assert(mpGraphics);
@@ -72,7 +71,7 @@ void OutputDevice::DrawPixel( const Point& rPt )
     if ( mbLineColorDirty )
         InitLineColor();
 
-    mpGraphics->DrawPixel( aPt.X(), aPt.Y(), *this );
+    vcl::rendercontext::PrimitiveRenderer::DrawPixel(*mpGraphics, *mpMapper, this, rPt);
 }
 
 void OutputDevice::DrawPixel( const Point& rPt, const Color& rColor )
@@ -86,8 +85,6 @@ void OutputDevice::DrawPixel( const Point& rPt, const Color& rColor )
     if ( !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary() )
         return;
 
-    Point aPt = LogicToDevicePixel(rPt);
-
     if ( !mpGraphics && !AcquireGraphics() )
         return;
     assert(mpGraphics);
@@ -98,7 +95,7 @@ void OutputDevice::DrawPixel( const Point& rPt, const Color& rColor )
     if ( IsOutputCulled() )
         return;
 
-    mpGraphics->DrawPixel( aPt.X(), aPt.Y(), aColor, *this );
+    vcl::rendercontext::PrimitiveRenderer::DrawPixel(*mpGraphics, *mpMapper, this, rPt, aColor);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

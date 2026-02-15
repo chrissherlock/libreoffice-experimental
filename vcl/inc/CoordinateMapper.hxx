@@ -82,7 +82,6 @@ private:
 
 public:
     // Generation ID for Lazy Evaluation
-    // Generation ID for Lazy Evaluation
     sal_uInt64 GetGenerationID() const { return mnGenerationID; }
     void IncreaseGenerationID() { mnGenerationID++; }
 

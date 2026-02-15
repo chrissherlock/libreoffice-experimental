@@ -274,6 +274,7 @@ $(eval $(call gb_Module_add_check_targets,vcl,\
     CppunitTest_vcl_text_justifier \
     CppunitTest_vcl_text_decorator \
     CppunitTest_vcl_font_metric_engine \
+    CppunitTest_vcl_primitive_renderer \
 ))
 
 ifeq ($(USING_X11),TRUE)

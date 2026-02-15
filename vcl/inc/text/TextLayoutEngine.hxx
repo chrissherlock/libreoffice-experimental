@@ -104,12 +104,6 @@ public:
                                              const vcl::text::LayoutConstraints& rConstraints,
                                              const vcl::text::LayoutCacheData& rCache,
                                              const vcl::text::RenderSelection& rSelection);
-
-    static bool PrepareNormalizedLayoutInput(const OUString& rOrigStr, sal_Int32 nMinIndex,
-                                             sal_Int32& rLen, OUString& rStr,
-                                             const ::vcl::font::FontRealization& rFontRealization,
-                                             const vcl::text::TextLayoutCache*& rpLayoutCache,
-                                             const SalLayoutGlyphs*& rpGlyphs);
 };
 
 } // namespace vcl::text

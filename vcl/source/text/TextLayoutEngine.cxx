@@ -87,33 +87,6 @@ vcl::text::TextLayoutRequest TextLayoutEngine::CreateLayoutRequest(
     return aLayoutArgs;
 }
 
-bool TextLayoutEngine::PrepareNormalizedLayoutInput(
-    const OUString& rOrigStr, sal_Int32 nMinIndex, sal_Int32& rLen, OUString& rStr,
-    const vcl::font::FontRealization& rFontRealization,
-    const vcl::text::TextLayoutCache*& rpLayoutCache, const SalLayoutGlyphs*& rpGlyphs)
-{
-    // Check string index and length
-    if (rLen == -1 || nMinIndex + rLen > rOrigStr.getLength())
-    {
-        const sal_Int32 nNewLen = rOrigStr.getLength() - nMinIndex;
-        if (nNewLen <= 0)
-            return false;
-        rLen = nNewLen;
-    }
-
-    rStr = rOrigStr;
-
-    // Recode string if needed
-    if (rFontRealization.mxFont && rFontRealization.mxFont->mpConversion)
-    {
-        rFontRealization.mxFont->mpConversion->RecodeString(rStr, 0, rStr.getLength());
-        rpLayoutCache = nullptr; // don't use cache with modified string!
-        rpGlyphs = nullptr;
-    }
-
-    return true;
-}
-
 std::unique_ptr<SalLayout> TextLayoutEngine::CreateBaseLayout(const LayoutResources& rRes)
 {
     SalGraphics* pGraphics = rRes.fnGetGraphics();
@@ -167,8 +140,9 @@ TextLayoutEngine::Layout(const LayoutResources& rRes, const vcl::text::TextSpan&
     OUString aStr;
     // Normalize Input (Recode string if needed)
     sal_Int32 nLen = rSpan.Length;
-    if (!PrepareNormalizedLayoutInput(rSpan.Text, rSpan.Index, nLen, aStr, rRes.rFontRealization,
-                                      pLayoutCache, pEffectiveGlyphs))
+    if (!TextAnalyzer::PrepareNormalizedLayoutInput(rSpan.Text, rSpan.Index, nLen, aStr,
+                                                    rRes.rFontRealization, pLayoutCache,
+                                                    pEffectiveGlyphs))
     {
         return nullptr;
     }
