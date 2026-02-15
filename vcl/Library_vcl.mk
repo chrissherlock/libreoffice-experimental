@@ -323,6 +323,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/text/layoutrecording \
     vcl/source/text/AccessibilityRecorder \
     vcl/source/text/CaretManager \
+    vcl/source/text/FontMetricEngine \
     vcl/source/text/MeasurementRecorder \
     vcl/source/text/TextAnalyzer \
     vcl/source/text/TextLayoutData \
