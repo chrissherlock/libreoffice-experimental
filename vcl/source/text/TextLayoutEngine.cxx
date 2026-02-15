@@ -153,14 +153,6 @@ double TextLayoutEngine::GetTextHeightPixel(const vcl::font::FontRealization& rR
                                + rRealization.nEmphasisDescent);
 }
 
-double TextLayoutEngine::CalculateLayoutWidth(const LayoutResources& rRes, tools::Long nLogicWidth)
-{
-    if (nLogicWidth && rRes.rMapper.IsMapModeEnabled())
-        return rRes.rMapper.LogicWidthToDeviceSubPixel(nLogicWidth);
-
-    return static_cast<double>(nLogicWidth);
-}
-
 std::unique_ptr<SalLayout> TextLayoutEngine::CreateBaseLayout(const LayoutResources& rRes)
 {
     SalGraphics* pGraphics = rRes.fnGetGraphics();
@@ -220,7 +212,7 @@ TextLayoutEngine::Layout(const LayoutResources& rRes, const vcl::text::TextSpan&
         return nullptr;
     }
 
-    double nPixelWidth = CalculateLayoutWidth(rRes, rConstraints.LogicalWidth);
+    double nPixelWidth = CoordinateMapper::CalculateLayoutWidth(rRes, rConstraints.LogicalWidth);
 
     vcl::text::TextLayoutRequest aLayoutArgs = CreateLayoutRequest(
         aStr, rSpan.Index, nLen, nPixelWidth, rConstraints.Flags, pLayoutCache, rRes.rGraphicsState,
@@ -252,19 +244,6 @@ TextLayoutEngine::Layout(const LayoutResources& rRes, const vcl::text::TextSpan&
     FontMappingTracker::TrackLayoutFonts(rRes.rGraphicsState.maFont, pSalLayout.get());
 
     return pSalLayout;
-}
-
-tools::Long TextLayoutEngine::GetSubPixelFactor(const CoordinateMapper& rMapper)
-{
-    // Use 64 as a factor when MapMode is disabled to maintain subpixel granularity
-    return rMapper.IsMapModeEnabled() ? 1 : 64;
-}
-
-double TextLayoutEngine::GetLayoutPixelWidth(const CoordinateMapper& rMapper,
-                                             tools::Long nLogicWidth, tools::Long nSubPixelFactor)
-{
-    // High-precision conversion from logical units to device subpixels
-    return rMapper.LogicWidthToDeviceSubPixel(nLogicWidth * nSubPixelFactor);
 }
 
 } // namespace vcl::text

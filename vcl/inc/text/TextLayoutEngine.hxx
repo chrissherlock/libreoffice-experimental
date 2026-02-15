@@ -80,6 +80,12 @@ class VCL_DLLPUBLIC TextLayoutEngine
 {
 public:
     /**
+     * Acquires the SalGraphics and creates the initial SalLayout object.
+     * Returns nullptr if graphics acquisition fails.
+     */
+    static std::unique_ptr<SalLayout> CreateBaseLayout(const LayoutResources& rRes);
+
+    /**
      * Creates and configures a LayoutRequest (TextLayoutRequest) based on the current device state.
      * This moves the "configuration" logic out of OutputDevice.
      */
@@ -99,9 +105,6 @@ public:
                                              const vcl::text::LayoutCacheData& rCache,
                                              const vcl::text::RenderSelection& rSelection);
 
-    /** Calculates the subpixel layout width from logical units. */
-    static double CalculateLayoutWidth(const LayoutResources& rRes, tools::Long nLogicWidth);
-
     static void FillAlignmentContext(TextLayoutPositioning& rPos,
                                      const ::vcl::text::TextLayoutRequest& rArgs,
                                      double nEndGlyphCoord);
@@ -117,20 +120,6 @@ public:
 
     /** Validates that cached glyphs are in a consistent state for layout reuse. */
     static void ValidateGlyphCache(const SalLayoutGlyphs* pGlyphs);
-
-    /**
-     * Acquires the SalGraphics and creates the initial SalLayout object.
-     * Returns nullptr if graphics acquisition fails.
-     */
-    static std::unique_ptr<SalLayout> CreateBaseLayout(const LayoutResources& rRes);
-
-private:
-    /** Calculates the subpixel factor (1 or 64) based on the mapping state. */
-    static tools::Long GetSubPixelFactor(const CoordinateMapper& rMapper);
-
-    /** Converts logical widths to layout units, accounting for subpixel scaling. */
-    static double GetLayoutPixelWidth(const CoordinateMapper& rMapper, tools::Long nLogicWidth,
-                                      tools::Long nSubPixelFactor);
 };
 
 } // namespace vcl::text
