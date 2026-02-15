@@ -78,22 +78,6 @@ struct TextLayoutPositioning;
 class VCL_DLLPUBLIC TextLayoutEngine
 {
 public:
-    /** Determines BiDi flags based on layout mode and string content. */
-    static SalLayoutFlags GetBiDiLayoutFlags(::vcl::text::ComplexTextLayoutFlags eLayoutMode,
-                                             std::u16string_view rStr, sal_Int32 nMinIndex,
-                                             sal_Int32 nEndIndex);
-
-    /** Applies digit localization to the string if the language requires it. */
-    static void ApplyDigitLocalization(const ::vcl::GraphicsState& rGraphicsState, OUString& rStr,
-                                       sal_Int32 nMinIndex, sal_Int32& rEndIndex);
-
-    /** Calculates the Layout Flags based on the Graphics State and Font Realization. */
-    static SalLayoutFlags CalculateLayoutFlags(const ::vcl::GraphicsState& rGraphicsState,
-                                               const ::vcl::font::FontRealization& rFontRealization,
-                                               bool bRTLWindow, std::u16string_view rStr,
-                                               sal_Int32 nMinIndex, sal_Int32 nEndIndex,
-                                               SalLayoutFlags nExistingFlags);
-
     /**
      * Creates and configures a LayoutRequest (TextLayoutRequest) based on the current device state.
      * This moves the "configuration" logic out of OutputDevice.
@@ -155,11 +139,6 @@ public:
                                              const vcl::text::LayoutConstraints& rConstraints,
                                              const vcl::text::LayoutCacheData& rCache,
                                              const vcl::text::RenderSelection& rSelection);
-
-    /** Orchestrates finding the character index where text must break for a given width. */
-    /** Determines if the text at the specified index and length is Right-to-Left (RTL). */
-    static bool GetTextIsRTL(const LayoutResources& rRes, const OUString& rString, sal_Int32 nIndex,
-                             sal_Int32 nLen);
 
 private:
     /** Calculates the subpixel factor (1 or 64) based on the mapping state. */

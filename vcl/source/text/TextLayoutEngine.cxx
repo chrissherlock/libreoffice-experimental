@@ -292,22 +292,6 @@ double TextLayoutEngine::GetLayoutPixelWidth(const CoordinateMapper& rMapper,
     return rMapper.LogicWidthToDeviceSubPixel(nLogicWidth * nSubPixelFactor);
 }
 
-bool TextLayoutEngine::GetTextIsRTL(const LayoutResources& rRes, const OUString& rString,
-                                    sal_Int32 nIndex, sal_Int32 nLen)
-{
-    OUString aStr(rString);
-    vcl::text::TextLayoutRequest aArgs
-        = CreateLayoutRequest(aStr, nIndex, nLen, 0, SalLayoutFlags::NONE, nullptr,
-                              rRes.rGraphicsState, rRes.rFontRealization, rRes.bRTLEnabled);
-
-    bool bRTL = false;
-    int nCharPos = -1;
-    if (!aArgs.GetNextPos(&nCharPos, &bRTL))
-        return false;
-
-    return (nCharPos != nIndex);
-}
-
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -18,6 +18,7 @@
 #include <font/FontController.hxx>
 #include <font/FontSelectPattern.hxx>
 #include <text/TextAnalyzer.hxx>
+#include <text/TextLayoutRequest.hxx>
 
 #include <unicode/uchar.h>
 
@@ -141,6 +142,22 @@ sal_Int32 TextAnalyzer::GetNormalizedLength(const OUString& rStr, sal_Int32 nIdx
         return std::max<sal_Int32>(0, rStr.getLength() - nIdx);
 
     return nLen;
+}
+
+bool TextAnalyzer::GetTextIsRTL(const LayoutResources& rRes, const OUString& rString,
+                                sal_Int32 nIndex, sal_Int32 nLen)
+{
+    OUString aStr(rString);
+    TextLayoutRequest aArgs = TextLayoutEngine::CreateLayoutRequest(
+        aStr, nIndex, nLen, 0, SalLayoutFlags::NONE, nullptr, rRes.rGraphicsState,
+        rRes.rFontRealization, rRes.bRTLEnabled);
+
+    bool bRTL = false;
+    int nCharPos = -1;
+    if (!aArgs.GetNextPos(&nCharPos, &bRTL))
+        return false;
+
+    return (nCharPos != nIndex);
 }
 
 } // namespace vcl::text
