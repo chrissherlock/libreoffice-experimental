@@ -54,39 +54,6 @@
 
 namespace vcl::text
 {
-void TextLayoutEngine::InitializeFontMetrics(
-    const LogicalFontInstance* pFontInstance, const vcl::Font& rFont, long nDPIY, long nPixelWidth,
-    std::function<long(const OUString&)> const& fnGetTextWidth,
-    std::function<void(tools::Rectangle&, const OUString&)> const& fnGetBoundRect)
-{
-    if (!pFontInstance)
-        return;
-
-    // 1. Calculate Bullet Offset
-    long nSpaceW = fnGetTextWidth(OUString(u' '));
-    long nBulletW = fnGetTextWidth(u"\x00b7"_ustr);
-    long nBulletOffset = (nSpaceW - nBulletW) >> 1;
-
-    pFontInstance->mxFontMetric->ImplInitTextLineSize(pFontInstance, nDPIY, rFont, nBulletOffset);
-
-    // 2. Set Above Text Line Size
-    pFontInstance->mxFontMetric->ImplInitAboveTextLineSize(nDPIY, nPixelWidth);
-
-    // 3. CJK Fullstop Centering
-    bool bCentered = true;
-    if (MsLangId::isCJK(rFont.GetLanguage()))
-    {
-        tools::Rectangle aRect;
-        fnGetBoundRect(aRect, u"\x3001"_ustr); // Fullwidth fullstop
-
-        const auto nH = rFont.GetFontSize().Height();
-        const auto nB = aRect.Left();
-
-        bCentered = nB > (((nH >> 1) + nH) >> 3);
-    }
-    pFontInstance->mxFontMetric->SetFullstopCenteredFlag(bCentered);
-}
-
 vcl::text::TextLayoutRequest TextLayoutEngine::CreateLayoutRequest(
     OUString& rStr, sal_Int32 nMinIndex, sal_Int32 nLen, double nPixelWidth, SalLayoutFlags nFlags,
     const vcl::text::TextLayoutCache* pCache, const GraphicsState& rState,
@@ -339,39 +306,6 @@ bool TextLayoutEngine::GetTextIsRTL(const LayoutResources& rRes, const OUString&
         return false;
 
     return (nCharPos != nIndex);
-}
-
-void TextLayoutEngine::InitializeTextLineMetrics(const LogicalFontInstance* pFontInstance,
-                                                 const vcl::Font& rFont, tools::Long nDPIY,
-                                                 tools::Long nSpaceWidth, tools::Long nBulletWidth)
-{
-    if (!pFontInstance || !pFontInstance->mxFontMetric)
-        return;
-
-    tools::Long nBulletOffset = (nSpaceWidth - nBulletWidth) >> 1;
-
-    pFontInstance->mxFontMetric->ImplInitTextLineSize(pFontInstance, nDPIY, rFont, nBulletOffset);
-}
-
-void TextLayoutEngine::InitializeAboveTextLineMetrics(const LogicalFontInstance* pFontInstance,
-                                                      tools::Long nDPIY, tools::Long nPixelWidth)
-{
-    if (!pFontInstance || !pFontInstance->mxFontMetric)
-        return;
-
-    pFontInstance->mxFontMetric->ImplInitAboveTextLineSize(nDPIY, nPixelWidth);
-}
-
-tools::Long TextLayoutEngine::GetAlignmentOffset(TextAlign eAlign, tools::Long nAscent,
-                                                 tools::Long nDescent)
-{
-    if (eAlign == ALIGN_BOTTOM)
-        return -nDescent;
-
-    if (eAlign == ALIGN_TOP)
-        return nAscent;
-
-    return 0;
 }
 
 } // namespace vcl::text

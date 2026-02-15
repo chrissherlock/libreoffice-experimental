@@ -242,10 +242,6 @@ public:
     void testIdentifyMissingChars();
     void testGetTextHeightPixel();
     void testEmphasisMarkPositions();
-    void testInitializeTextLineMetrics();
-    void testInitializeFontMetrics();
-    void testInitializeAboveTextLineMetrics();
-    void testGetAlignmentOffset();
     void testTextLineGeometry();
     void testCalculateMultiLineLayout();
     void testCalculateWaveLineGeometry();
@@ -261,10 +257,6 @@ public:
     CPPUNIT_TEST(testCreateLayoutRequest_OutOfBounds);
     CPPUNIT_TEST(testGetTextHeightPixel);
     CPPUNIT_TEST(testEmphasisMarkPositions);
-    CPPUNIT_TEST(testInitializeTextLineMetrics);
-    CPPUNIT_TEST(testInitializeFontMetrics);
-    CPPUNIT_TEST(testInitializeAboveTextLineMetrics);
-    CPPUNIT_TEST(testGetAlignmentOffset);
     CPPUNIT_TEST(testTextLineGeometry);
     CPPUNIT_TEST(testCalculateWaveLineGeometry);
     CPPUNIT_TEST(testCalculateStrikeoutGeometry);
@@ -413,98 +405,6 @@ void TextLayoutEngineTest::testEmphasisMarkPositions()
             "Vertical 'Below' positioning failed. Descent anchor or adjustment is incorrect.",
             nExpectedY, aPoints[0].Y());
     }
-}
-
-void TextLayoutEngineTest::testInitializeTextLineMetrics()
-{
-    rtl::Reference<LogicalFontInstance> xFont(new StubFontInstance());
-    const LogicalFontInstance* pConstFont = xFont.get(); // Test const-correctness
-
-    vcl::Font aFont;
-    const tools::Long nDPI = 96;
-    const tools::Long nSpaceW = 10;
-    const tools::Long nBulletW = 4;
-
-    vcl::text::TextLayoutEngine::InitializeTextLineMetrics(pConstFont, aFont, nDPI, nSpaceW,
-                                                           nBulletW);
-
-    // Assertions: Verify Bullet Offset calculation
-    // Logic: (nSpaceWidth - nBulletWidth) >> 1 => (10 - 4) >> 1 = 3
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("Bullet offset calculation is incorrect", tools::Long(3),
-                                 xFont->mxFontMetric->GetBulletOffset());
-
-    // Verify Line Height population
-    // In our StubFontInstance, Ascent=10 and Descent=10, so LineHeight should be 20
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("Line height was not initialized correctly", tools::Long(20),
-                                 xFont->mnLineHeight);
-}
-
-void TextLayoutEngineTest::testInitializeFontMetrics()
-{
-    rtl::Reference<LogicalFontInstance> xFont(new StubFontInstance());
-    vcl::Font aFont;
-    const long nDPI = 96;
-    const long nPixelWidth = 1;
-
-    // Define Callbacks
-    // These replace the OutputDevice::GetTextWidth and GetLogicalTextBoundRect calls
-    auto fnWidth = [](const OUString& rStr) -> long {
-        return rStr.getLength() * 10; // Mock: each char is 10 units wide
-    };
-
-    auto fnRect = [](tools::Rectangle& rRect, const OUString& rStr) {
-        // Mock: set a deterministic bounding box
-        rRect = tools::Rectangle(Point(0, 0), Size(rStr.getLength() * 10, 20));
-    };
-
-    // Execute Engine Logic
-    // Using the const pointer to verify the signature update from your previous refactor
-    vcl::text::TextLayoutEngine::InitializeFontMetrics(xFont.get(), aFont, nDPI, nPixelWidth,
-                                                       fnWidth, fnRect);
-
-    // Assertions
-    // Verify that mnLineHeight was set (Ascent + Descent from StubFontInstance)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("Line height should be initialized from metrics", tools::Long(20),
-                                 xFont->mnLineHeight);
-
-    // Verify the internal FontMetricData was touched by checking a property
-    // that InitializeFontMetrics calculates or delegates.
-    CPPUNIT_ASSERT_MESSAGE("FontMetricData should be initialized", xFont->mxFontMetric != nullptr);
-}
-
-void TextLayoutEngineTest::testInitializeAboveTextLineMetrics()
-{
-    rtl::Reference<LogicalFontInstance> xFont(new StubFontInstance());
-    const tools::Long nDPI = 96;
-    const tools::Long nPixelWidth = 1; // Simulated logic-to-pixel width
-
-    vcl::text::TextLayoutEngine::InitializeAboveTextLineMetrics(xFont.get(), nDPI, nPixelWidth);
-
-    // Verify the FontMetricData was updated with the correct above-line sizes
-    // Note: Verification depends on specific FontMetricData getters for
-    // overline/above-line properties.
-    CPPUNIT_ASSERT(xFont->mxFontMetric != nullptr);
-}
-
-void TextLayoutEngineTest::testGetAlignmentOffset()
-{
-    const tools::Long nAscent = 80;
-    const tools::Long nDescent = 20;
-
-    // Test ALIGN_TOP: Should return the positive ascent value to shift text down
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(
-        "ALIGN_TOP offset is incorrect", nAscent,
-        vcl::text::TextLayoutEngine::GetAlignmentOffset(ALIGN_TOP, nAscent, nDescent));
-
-    // Test ALIGN_BOTTOM: Should return the negative descent value to shift text up
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(
-        "ALIGN_BOTTOM offset is incorrect", -nDescent,
-        vcl::text::TextLayoutEngine::GetAlignmentOffset(ALIGN_BOTTOM, nAscent, nDescent));
-
-    // Test ALIGN_BASELINE: Should return 0 (no shift)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(
-        "ALIGN_BASELINE offset should be zero", tools::Long(0),
-        vcl::text::TextLayoutEngine::GetAlignmentOffset(ALIGN_BASELINE, nAscent, nDescent));
 }
 
 void TextLayoutEngineTest::testTextLineGeometry()

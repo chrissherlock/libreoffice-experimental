@@ -78,14 +78,6 @@ struct TextLayoutPositioning;
 class VCL_DLLPUBLIC TextLayoutEngine
 {
 public:
-    /** Initializes font metrics (bullet offset, CJK centering) using callbacks.
-     * Independent of OutputDevice.
-     */
-    static void InitializeFontMetrics(
-        const LogicalFontInstance* pFontInstance, const ::vcl::Font& rFont, long nDPIY,
-        long nPixelWidth, std::function<long(const OUString&)> const& fnGetTextWidth,
-        std::function<void(tools::Rectangle&, const OUString&)> const& fnGetBoundRect);
-
     /** Determines BiDi flags based on layout mode and string content. */
     static SalLayoutFlags GetBiDiLayoutFlags(::vcl::text::ComplexTextLayoutFlags eLayoutMode,
                                              std::u16string_view rStr, sal_Int32 nMinIndex,
@@ -168,16 +160,6 @@ public:
     /** Determines if the text at the specified index and length is Right-to-Left (RTL). */
     static bool GetTextIsRTL(const LayoutResources& rRes, const OUString& rString, sal_Int32 nIndex,
                              sal_Int32 nLen);
-
-    static void InitializeTextLineMetrics(const LogicalFontInstance* pFontInstance,
-                                          const ::vcl::Font& rFont, tools::Long nDPIY,
-                                          tools::Long nSpaceWidth, tools::Long nBulletWidth);
-
-    static void InitializeAboveTextLineMetrics(const LogicalFontInstance* pFontInstance,
-                                               tools::Long nDPIY, tools::Long nUnderlineSize);
-
-    static tools::Long GetAlignmentOffset(TextAlign eAlign, tools::Long nAscent,
-                                          tools::Long nDescent);
 
 private:
     /** Calculates the subpixel factor (1 or 64) based on the mapping state. */

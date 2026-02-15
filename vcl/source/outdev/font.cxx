@@ -43,9 +43,10 @@
 #include <sallayout.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>
+#include <text/FontMetricEngine.hxx>
+#include <text/TextLayoutEngine.hxx>
 
 #include <unicode/uchar.h>
-#include <text/TextLayoutEngine.hxx>
 
 const vcl::Font& OutputDevice::GetFont() const { return mpGraphicsState->maFont; }
 
@@ -474,7 +475,7 @@ void OutputDevice::ImplInitFontMetrics(LogicalFontInstance* pFontInstance) const
     long nDPIY = GetDPIY();
     long nPixelWidth = LogicToPixel(Size(1, 0)).Width();
 
-    vcl::text::TextLayoutEngine::InitializeFontMetrics(
+    vcl::text::FontMetricEngine::InitializeFontMetrics(
         pFontInstance, GetFont(), nDPIY, nPixelWidth, fnMeasureWidth, fnMeasureRect);
 
     pFontInstance->mnLineHeight
