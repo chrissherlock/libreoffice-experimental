@@ -23,6 +23,8 @@
 #include <vcl/vclenum.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/mnemonic.hxx>
+#include <vcl/text/DefaultFallbackStrategy.hxx>
+#include <vcl/text/TextGeometry.hxx>
 #include <vcl/text/TextSpan.hxx>
 #include <vcl/text/LayoutCacheData.hxx>
 #include <vcl/text/CaretManager.hxx>
@@ -36,16 +38,14 @@
 #include <sallayout.hxx>
 #include <textlayout.hxx>
 #include <textlineinfo.hxx>
-#include <text/TextLayoutEngine.hxx>
 #include <text/FontMappingTracker.hxx>
-#include <vcl/text/TextGeometry.hxx>
-#include <text/TextJustifier.hxx>
 #include <text/TextAnalyzer.hxx>
+#include <text/TextLayoutEngine.hxx>
 #include <text/TextLayoutPositioning.hxx>
-#include <vcl/text/DefaultFallbackStrategy.hxx>
+#include <text/TextLayoutRequest.hxx>
+#include <text/TextJustifier.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
-#include <text/TextLayoutRequest.hxx>
 
 #include <unicode/uchar.h>
 
@@ -114,28 +114,6 @@ bool TextLayoutEngine::PrepareNormalizedLayoutInput(
     return true;
 }
 
-void TextLayoutEngine::ValidateGlyphCache(const SalLayoutGlyphs* pGlyphs)
-{
-    if (!pGlyphs)
-        return;
-
-    if (!pGlyphs->IsValid())
-    {
-        SAL_WARN("vcl", "Trying to setup invalid cached glyphs - falling back to relayout!");
-        return;
-    }
-
-#ifdef DBG_UTIL
-    for (int level = 0;; ++level)
-    {
-        SalLayoutGlyphsImpl* glyphsImpl = pGlyphs->Impl(level);
-        if (glyphsImpl == nullptr)
-            break;
-        assert(glyphsImpl->GetFlags() & SalLayoutFlags::GlyphItemsOnly);
-    }
-#endif
-}
-
 std::unique_ptr<SalLayout> TextLayoutEngine::CreateBaseLayout(const LayoutResources& rRes)
 {
     SalGraphics* pGraphics = rRes.fnGetGraphics();
@@ -183,7 +161,7 @@ TextLayoutEngine::Layout(const LayoutResources& rRes, const vcl::text::TextSpan&
     const SalLayoutGlyphs* pGlyphs = rCache.pGlyphs;
 
     // Validate
-    ValidateGlyphCache(pGlyphs);
+    rCache.ValidateGlyphCache(pGlyphs);
     const SalLayoutGlyphs* pEffectiveGlyphs = (pGlyphs && !pGlyphs->IsValid()) ? nullptr : pGlyphs;
 
     OUString aStr;

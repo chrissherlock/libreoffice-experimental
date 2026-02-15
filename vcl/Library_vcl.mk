@@ -340,6 +340,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/text/MultiLineEngine \
     vcl/source/text/TextLayoutCache \
     vcl/source/text/textlayout \
+    vcl/source/text/LayoutCacheData \
     vcl/source/treelist/headbar \
     vcl/source/treelist/iconview \
     vcl/source/treelist/iconviewimpl \
