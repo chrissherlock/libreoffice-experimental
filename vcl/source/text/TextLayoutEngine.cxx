@@ -136,15 +136,6 @@ void TextLayoutEngine::ValidateGlyphCache(const SalLayoutGlyphs* pGlyphs)
 #endif
 }
 
-double TextLayoutEngine::GetTextHeightPixel(const vcl::font::FontRealization& rRealization)
-{
-    if (!rRealization.mxFont)
-        return 0.0;
-
-    return static_cast<double>(rRealization.mxFont->mnLineHeight + rRealization.nEmphasisAscent
-                               + rRealization.nEmphasisDescent);
-}
-
 std::unique_ptr<SalLayout> TextLayoutEngine::CreateBaseLayout(const LayoutResources& rRes)
 {
     SalGraphics* pGraphics = rRes.fnGetGraphics();
