@@ -169,41 +169,6 @@ public:
     }
 };
 
-class RotatableMockLayout : public MockSalLayout
-{
-    GlyphItem mGlyph1;
-    GlyphItem mGlyph2;
-
-public:
-    const LogicalFontInstance* mpFont = nullptr;
-    RotatableMockLayout()
-        : mGlyph1(0, 1, 0, basegfx::B2DPoint(100, 100), GlyphItemFlags::NONE, 10.0, 0.0, 0.0, 0)
-        , mGlyph2(1, 1, 0, basegfx::B2DPoint(200, 100), GlyphItemFlags::NONE, 10.0, 0.0, 0.0, 1)
-    {
-    }
-    virtual bool GetNextGlyph(const GlyphItem** pGlyph, basegfx::B2DPoint& rPos, int& nStart,
-                              const LogicalFontInstance** ppFont) const override
-    {
-        if (ppFont)
-            *ppFont = mpFont;
-        if (nStart == 0)
-        {
-            *pGlyph = &mGlyph1;
-            rPos = basegfx::B2DPoint(100, 100);
-            nStart++;
-            return true;
-        }
-        if (nStart == 1)
-        {
-            *pGlyph = &mGlyph2;
-            rPos = basegfx::B2DPoint(200, 100);
-            nStart++;
-            return true;
-        }
-        return false;
-    }
-};
-
 class MockTextLayoutCommon : public vcl::TextLayoutCommon
 {
 public:
@@ -278,7 +243,6 @@ public:
     void testGetTextHeightPixel();
     void testEmphasisMarkPositions();
     void testCalculateOutlineTransform();
-    void testGetTextInkBounds_Rotation();
     void testInitializeTextLineMetrics();
     void testInitializeFontMetrics();
     void testInitializeAboveTextLineMetrics();
@@ -299,7 +263,6 @@ public:
     CPPUNIT_TEST(testGetTextHeightPixel);
     CPPUNIT_TEST(testEmphasisMarkPositions);
     CPPUNIT_TEST(testCalculateOutlineTransform);
-    CPPUNIT_TEST(testGetTextInkBounds_Rotation);
     CPPUNIT_TEST(testInitializeTextLineMetrics);
     CPPUNIT_TEST(testInitializeFontMetrics);
     CPPUNIT_TEST(testInitializeAboveTextLineMetrics);
@@ -403,21 +366,6 @@ void TextLayoutEngineTest::testCalculateOutlineTransform()
     CPPUNIT_ASSERT_DOUBLES_EQUAL(-95.0, aMat.get(0, 2), 0.001);
 }
 
-void TextLayoutEngineTest::testGetTextInkBounds_Rotation()
-{
-    StubFontInstance* pStub = new StubFontInstance();
-    rtl::Reference<LogicalFontInstance> xFont(pStub);
-    vcl::font::FontRealization aRealization;
-    aRealization.mxFont = xFont;
-    RotatableMockLayout aLayout;
-    aLayout.DrawBase() = basegfx::B2DPoint(100.0, 100.0);
-    aLayout.mpFont = pStub;
-    tools::Rectangle aRect
-        = vcl::text::TextLayoutEngine::GetTextInkBounds(aLayout, aRealization, false);
-    CPPUNIT_ASSERT_EQUAL(tools::Long(20), aRect.GetHeight());
-    CPPUNIT_ASSERT_EQUAL(tools::Long(100), aRect.GetWidth());
-}
-
 void TextLayoutEngineTest::testEmphasisMarkPositions()
 {
     // Setup Font and Realization
@@ -441,8 +389,8 @@ void TextLayoutEngineTest::testEmphasisMarkPositions()
         const long nYAdj = aMark.GetYOffset();
 
         std::vector<Point> aPoints;
-        vcl::text::TextLayoutEngine::GetEmphasisMarkPositions(aLayout, aRealization, aMark, false,
-                                                              aPoints);
+        vcl::text::TextDecorator::GetEmphasisMarkPositions(aLayout, aRealization, aMark, false,
+                                                           aPoints);
 
         CPPUNIT_ASSERT_EQUAL(size_t(1), aPoints.size());
 
@@ -467,8 +415,8 @@ void TextLayoutEngineTest::testEmphasisMarkPositions()
         const long nYAdj = aMark.GetYOffset();
 
         std::vector<Point> aPoints;
-        vcl::text::TextLayoutEngine::GetEmphasisMarkPositions(aLayout, aRealization, aMark, true,
-                                                              aPoints);
+        vcl::text::TextDecorator::GetEmphasisMarkPositions(aLayout, aRealization, aMark, true,
+                                                           aPoints);
 
         // Vertical Positioning Check
         // nAnchorY(200) + nBaseOffset(Descent:20) + nShapeAdj(nYAdj) - nYCenterOff(Descent/2)

@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <font/EmphasisMark.hxx>
+
 #include <tools/gen.hxx>
 #include <tools/fontenum.hxx>
 
@@ -19,6 +21,12 @@
 #include <vector>
 
 class FontMetricData;
+class SalLayout;
+
+namespace vcl::font
+{
+struct FontRealization;
+}
 
 namespace vcl::text
 {
@@ -37,6 +45,18 @@ struct SAL_DLLPUBLIC StrikeoutSegment
 class VCL_DLLPUBLIC TextDecorator
 {
 public:
+    /** Calculates the device-pixel positions for emphasis marks.
+     * @return A vector of global Points (in device pixels).
+     */
+    static void GetEmphasisMarkPositions(const SalLayout& rSalLayout,
+                                         const vcl::font::FontRealization& rFontRealization,
+                                         const font::EmphasisMark& rMark, bool bEmphasisBelow,
+                                         std::vector<Point>& rPoints);
+
+    static void GetEmphasisMarkPositions(const SalLayout& rSalLayout,
+                                         const vcl::font::FontRealization& rFontRealization,
+                                         bool bEmphasisBelow, std::vector<Point>& rPoints);
+
     static constexpr tools::Long nMaxSmallWavelineHeight = 3;
 
     static WaveLineGeometry CalculateWaveLineGeometry(const FontMetricData& rMetric,

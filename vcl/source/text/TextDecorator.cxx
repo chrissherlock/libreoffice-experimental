@@ -6,10 +6,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-#include <vcl/text/TextDecorator.hxx>
-#include <vcl/font.hxx> // <--- ADDED: Required by FontMetricData.hxx
-#include <font/FontMetricData.hxx>
+
 #include <o3tl/unit_conversion.hxx>
+
+#include <vcl/font.hxx>
+#include <vcl/text/TextDecorator.hxx>
+#include <vcl/vcllayout.hxx>
+
+#include <font/FontController.hxx>
+#include <font/FontMetricData.hxx>
 
 namespace vcl::text
 {
@@ -365,6 +370,44 @@ TextLineGeometry TextDecorator::GetTextLineGeometry(const TextLineRequest& rReq,
     }
 
     return aGeo;
+}
+
+void TextDecorator::GetEmphasisMarkPositions(const SalLayout& rSalLayout,
+                                             const vcl::font::FontRealization& rFontRealization,
+                                             const vcl::font::EmphasisMark& rMark,
+                                             bool bEmphasisBelow, std::vector<Point>& rPoints)
+{
+    rPoints.clear();
+    if (!rFontRealization.mxFont)
+        return;
+
+    // Calculate base anchor (Ascent or Descent line)
+    const tools::Long nBaseOffset
+        = bEmphasisBelow ? rFontRealization.nEmphasisDescent : -rFontRealization.nEmphasisAscent;
+    const basegfx::B2DPoint aDrawPos = rSalLayout.GetDrawPosition();
+    const tools::Long nAnchorY = aDrawPos.getY() + nBaseOffset;
+
+    // Prepare visual adjustments (centering and mark-specific offset)
+    const tools::Long nXCenterOff = rMark.GetWidth() / 2;
+    const tools::Long nYCenterOff
+        = (bEmphasisBelow ? rFontRealization.nEmphasisDescent : rFontRealization.nEmphasisAscent)
+          / 2;
+    const tools::Long nShapeAdj = bEmphasisBelow ? rMark.GetYOffset() : -rMark.GetYOffset();
+
+    int nStart = 0;
+    const GlyphItem* pGlyph = nullptr;
+    basegfx::B2DPoint aPos;
+
+    while (rSalLayout.GetNextGlyph(&pGlyph, aPos, nStart))
+    {
+        if (!pGlyph)
+            continue;
+
+        Point aMarkPt(static_cast<tools::Long>(aPos.getX()) - nXCenterOff,
+                      nAnchorY + nShapeAdj - nYCenterOff);
+
+        rPoints.push_back(aMarkPt);
+    }
 }
 
 } // namespace vcl::text

@@ -26,6 +26,7 @@ $(eval $(call gb_Module_add_targets,vcl,\
 endif
 
 $(eval $(call gb_Module_add_targets,vcl,\
+    Executable_asciiart \
     Library_vcl \
     Package_theme_definitions \
     Package_toolbarmode \
@@ -271,6 +272,7 @@ $(eval $(call gb_Module_add_check_targets,vcl,\
     CppunitTest_vcl_text_caret_manager \
     CppunitTest_vcl_text_multiline \
     CppunitTest_vcl_text_justifier \
+    CppunitTest_vcl_text_decorator \
 ))
 
 ifeq ($(USING_X11),TRUE)

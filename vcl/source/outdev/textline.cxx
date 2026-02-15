@@ -927,7 +927,7 @@ void OutputDevice::ImplDrawEmphasisMarks(SalLayout& rSalLayout)
     }
 
     std::vector<Point> aPositions;
-    vcl::text::TextLayoutEngine::GetEmphasisMarkPositions(rSalLayout, *pRealization, aEmphasisMark, bBelow, aPositions);
+    vcl::text::TextDecorator::GetEmphasisMarkPositions(rSalLayout, *pRealization, aEmphasisMark, bBelow, aPositions);
 
     // Draw the marks at the final calculated positions
     for (const Point& rPos : aPositions)

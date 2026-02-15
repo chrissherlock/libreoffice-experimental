@@ -19,6 +19,7 @@
 
 ifneq ($(ENABLE_WASM_STRIP_CANVAS),TRUE)
 $(eval $(call gb_Helper_register_executables,NONE, \
+	asciiart \
 	canvasdemo \
 ))
 endif
