@@ -897,7 +897,7 @@ bool OutputDevice::GetTextIsRTL(const OUString& rString, sal_Int32 nIndex, sal_I
             *mpGraphicsState,
             *mpFontRealization };
 
-    return vcl::text::TextLayoutEngine::GetTextIsRTL(aResources, rString, nIndex, nLen);
+    return vcl::text::TextAnalyzer::GetTextIsRTL(aResources, rString, nIndex, nLen);
 }
 
 sal_Int32 OutputDevice::GetTextBreak(const OUString& rStr, tools::Long nTextWidth, sal_Int32 nIndex,

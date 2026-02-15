@@ -54,6 +54,9 @@ public:
     static bool IsMnemonicInRange(sal_Int32 nMnemonicPos, sal_Int32 nIndex, sal_Int32 nLen);
 
     static sal_Int32 GetNormalizedLength(const OUString& rStr, sal_Int32 nIdx, sal_Int32 nLen);
+
+    static bool GetTextIsRTL(const LayoutResources& rRes, const OUString& rString, sal_Int32 nIndex,
+                             sal_Int32 nLen);
 };
 
 } // namespace vcl::text
