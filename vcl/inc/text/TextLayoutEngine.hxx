@@ -74,6 +74,7 @@ using FallbackLayoutFactory
     = std::function<std::unique_ptr<SalLayout>(LogicalFontInstance*, int, TextLayoutRequest&)>;
 
 struct TextLayoutPositioning;
+class TextLayoutRequest;
 
 class VCL_DLLPUBLIC TextLayoutEngine
 {
@@ -88,17 +89,22 @@ public:
                         const ::vcl::GraphicsState& rState,
                         const ::vcl::font::FontRealization& rRealization, bool bRTL);
 
-    static basegfx::B2DPoint MapLogicalToDevicePos(const LayoutResources& rRes,
-                                                   const Point& rLogicalPos);
+    static std::unique_ptr<SalLayout> PerformTextLayout(const LayoutResources& rRes,
+                                                        ::vcl::text::TextLayoutRequest& rArgs,
+                                                        const SalLayoutGlyphs* pGlyphs);
+
+    /** Orchestrates the complete layout process. */
+    static std::unique_ptr<SalLayout> Layout(const LayoutResources& rRes, const TextSpan& rSpan,
+                                             const vcl::text::LayoutConstraints& rConstraints,
+                                             const vcl::text::LayoutCacheData& rCache,
+                                             const vcl::text::RenderSelection& rSelection);
+
+    /** Calculates the subpixel layout width from logical units. */
+    static double CalculateLayoutWidth(const LayoutResources& rRes, tools::Long nLogicWidth);
+
     static void FillAlignmentContext(TextLayoutPositioning& rPos,
                                      const ::vcl::text::TextLayoutRequest& rArgs,
                                      double nEndGlyphCoord);
-
-    // Layout Orchestration
-    static std::unique_ptr<SalLayout>
-    Layout(const LayoutResources& rRes, ::vcl::text::TextLayoutRequest& rArgs,
-           KernArraySpan pDXArray, std::span<const sal_Bool> pKashidaArray,
-           const Point& rLogicalPos, const SalLayoutGlyphs* pGlyphs = nullptr);
 
     static bool PrepareNormalizedLayoutInput(const OUString& rOrigStr, sal_Int32 nMinIndex,
                                              sal_Int32& rLen, OUString& rStr,
@@ -109,9 +115,6 @@ public:
     /** Calculates the total height of the font in device pixels, including emphasis marks. */
     static double GetTextHeightPixel(const ::vcl::font::FontRealization& rRealization);
 
-    /** Calculates the subpixel layout width from logical units. */
-    static double CalculateLayoutWidth(const LayoutResources& rRes, tools::Long nLogicWidth);
-
     /** Validates that cached glyphs are in a consistent state for layout reuse. */
     static void ValidateGlyphCache(const SalLayoutGlyphs* pGlyphs);
 
@@ -120,25 +123,6 @@ public:
      * Returns nullptr if graphics acquisition fails.
      */
     static std::unique_ptr<SalLayout> CreateBaseLayout(const LayoutResources& rRes);
-
-    /** * Records font mapping usage for diagnostic purposes if tracking is enabled.
-     * This captures which fonts were actually used (including fallbacks) to satisfy the request.
-     */
-
-    static void ApplyPositioning(const LayoutResources& rRes, SalLayout& rLayout,
-                                 ::vcl::text::TextLayoutRequest& rArgs, const Point& rLogicalPos,
-                                 double nEndGlyphCoord);
-
-    /** Executes the core layout loop: creates base layout, runs initial layout, and resolves fallbacks. */
-    static std::unique_ptr<SalLayout> PerformTextLayout(const LayoutResources& rRes,
-                                                        ::vcl::text::TextLayoutRequest& rArgs,
-                                                        const SalLayoutGlyphs* pGlyphs);
-
-    /** Orchestrates the complete layout process. */
-    static std::unique_ptr<SalLayout> Layout(const LayoutResources& rRes, const TextSpan& rSpan,
-                                             const vcl::text::LayoutConstraints& rConstraints,
-                                             const vcl::text::LayoutCacheData& rCache,
-                                             const vcl::text::RenderSelection& rSelection);
 
 private:
     /** Calculates the subpixel factor (1 or 64) based on the mapping state. */

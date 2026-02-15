@@ -87,17 +87,6 @@ vcl::text::TextLayoutRequest TextLayoutEngine::CreateLayoutRequest(
     return aLayoutArgs;
 }
 
-basegfx::B2DPoint TextLayoutEngine::MapLogicalToDevicePos(const LayoutResources& rRes,
-                                                          const Point& rLogicalPos)
-{
-    // Use subpixel precision if MapMode is on OR if we were explicitly told to (e.g. PDF/Subpixel flag)
-    if (rRes.rMapper.IsMapModeEnabled() || rRes.bSubpixelPositioning)
-        return rRes.rMapper.LogicToDeviceSubPixel(rLogicalPos);
-
-    Point aDevicePos = rRes.rMapper.LogicToDevicePixel(rLogicalPos);
-    return basegfx::B2DPoint(aDevicePos.X(), aDevicePos.Y());
-}
-
 void TextLayoutEngine::FillAlignmentContext(TextLayoutPositioning& rPos,
                                             const vcl::text::TextLayoutRequest& rArgs,
                                             double nEndGlyphCoord)
@@ -187,21 +176,6 @@ std::unique_ptr<SalLayout> TextLayoutEngine::CreateBaseLayout(const LayoutResour
     return pSalLayout;
 }
 
-void TextLayoutEngine::ApplyPositioning(const LayoutResources& rRes, SalLayout& rLayout,
-                                        vcl::text::TextLayoutRequest& rArgs,
-                                        const Point& rLogicalPos, double nEndGlyphCoord)
-{
-    TextLayoutPositioning aPos;
-    aPos.bSubpixelPositioning = rRes.bSubpixelPositioning;
-
-    FillAlignmentContext(aPos, rArgs, nEndGlyphCoord);
-    aPos.aDrawBase = MapLogicalToDevicePos(rRes, rLogicalPos);
-
-    TextJustifier::JustifyLayout(rLayout, rArgs);
-    TextJustifier::ApplyHorizontalOffset(rLayout, rArgs, aPos);
-    TextJustifier::SetAnchorPoint(rLayout, aPos);
-}
-
 std::unique_ptr<SalLayout> TextLayoutEngine::PerformTextLayout(const LayoutResources& rRes,
                                                                vcl::text::TextLayoutRequest& rArgs,
                                                                const SalLayoutGlyphs* pGlyphs)
@@ -272,7 +246,8 @@ TextLayoutEngine::Layout(const LayoutResources& rRes, const vcl::text::TextSpan&
     if (rConstraints.Flags & SalLayoutFlags::GlyphItemsOnly)
         return pSalLayout;
 
-    ApplyPositioning(rRes, *pSalLayout, aLayoutArgs, rConstraints.LogicalPos, nEndGlyphCoord);
+    TextGeometry::ApplyPositioning(rRes, *pSalLayout, aLayoutArgs, rConstraints.LogicalPos,
+                                   nEndGlyphCoord);
 
     FontMappingTracker::TrackLayoutFonts(rRes.rGraphicsState.maFont, pSalLayout.get());
 
