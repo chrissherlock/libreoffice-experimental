@@ -14,12 +14,8 @@
 #include <vcl/outdev.hxx>
 #include <vcl/fntstyle.hxx>
 #include <vcl/metric.hxx>
-#include <vcl/text/TextGeometry.hxx>
 #include <vcl/mnemonic.hxx>
-#include <textlineinfo.hxx>
-#include <text/TextAnalyzer.hxx>
-#include <textlayout.hxx>
-
+#include <vcl/text/TextGeometry.hxx>
 #include <vcl/text/CaretManager.hxx>
 #include <vcl/text/LayoutResources.hxx>
 #include <vcl/text/LayoutCacheData.hxx>
@@ -27,6 +23,10 @@
 
 #include <font/FontController.hxx>
 #include <sallayout.hxx>
+#include <textlineinfo.hxx>
+#include <textlayout.hxx>
+#include <text/TextAnalyzer.hxx>
+#include <text/TextLayoutPositioning.hxx>
 #include <text/TextJustifier.hxx>
 #include <text/TextLayoutEngine.hxx>
 #include <CoordinateMapper.hxx>
@@ -789,6 +789,32 @@ basegfx::B2DHomMatrix TextGeometry::CalculateOutlineTransform(
     }
 
     return aMatrix;
+}
+
+basegfx::B2DPoint TextGeometry::MapLogicalToDevicePos(const LayoutResources& rRes,
+                                                      const Point& rLogicalPos)
+{
+    // Use subpixel precision if MapMode is on OR if we were explicitly told to (e.g. PDF/Subpixel flag)
+    if (rRes.rMapper.IsMapModeEnabled() || rRes.bSubpixelPositioning)
+        return rRes.rMapper.LogicToDeviceSubPixel(rLogicalPos);
+
+    Point aDevicePos = rRes.rMapper.LogicToDevicePixel(rLogicalPos);
+    return basegfx::B2DPoint(aDevicePos.X(), aDevicePos.Y());
+}
+
+void TextGeometry::ApplyPositioning(const LayoutResources& rRes, SalLayout& rLayout,
+                                    vcl::text::TextLayoutRequest& rArgs, const Point& rLogicalPos,
+                                    double nEndGlyphCoord)
+{
+    TextLayoutPositioning aPos;
+    aPos.bSubpixelPositioning = rRes.bSubpixelPositioning;
+
+    TextLayoutEngine::FillAlignmentContext(aPos, rArgs, nEndGlyphCoord);
+    aPos.aDrawBase = MapLogicalToDevicePos(rRes, rLogicalPos);
+
+    TextJustifier::JustifyLayout(rLayout, rArgs);
+    TextJustifier::ApplyHorizontalOffset(rLayout, rArgs, aPos);
+    TextJustifier::SetAnchorPoint(rLayout, aPos);
 }
 
 } // namespace vcl::text

@@ -34,6 +34,11 @@
 #include <vcl/region.hxx>
 #include <vcl/rendercontext/ImplMapRes.hxx>
 
+namespace vcl::text
+{
+struct LayoutResources;
+}
+
 class VCL_DLLPUBLIC CoordinateMapper
 {
 private:
@@ -68,7 +73,15 @@ private:
     /// Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
     tools::Long mnOutOffLogicY;
 
+    /** Calculates the subpixel factor (1 or 64) based on the mapping state. */
+    static tools::Long GetSubPixelFactor(const CoordinateMapper& rMapper);
+
+    /** Converts logical widths to layout units, accounting for subpixel scaling. */
+    static double GetLayoutPixelWidth(const CoordinateMapper& rMapper, tools::Long nLogicWidth,
+                                      tools::Long nSubPixelFactor);
+
 public:
+    // Generation ID for Lazy Evaluation
     // Generation ID for Lazy Evaluation
     sal_uInt64 GetGenerationID() const { return mnGenerationID; }
     void IncreaseGenerationID() { mnGenerationID++; }
@@ -337,6 +350,10 @@ public:
 
     double DevicePixelToLogicWidthDouble(double nWidth) const;
     double DevicePixelToLogicHeightDouble(double nHeight) const;
+
+    /** Calculates the subpixel layout width from logical units. */
+    static double CalculateLayoutWidth(const vcl::text::LayoutResources& rRes,
+                                       tools::Long nLogicWidth);
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

@@ -28,6 +28,7 @@
 #include <vcl/mapmod.hxx>
 #include <vcl/region.hxx>
 #include <vcl/outdev.hxx>
+#include <vcl/text/LayoutResources.hxx>
 
 #include <CoordinateMapper.hxx>
 
@@ -1737,6 +1738,28 @@ Point CoordinateMapper::SubPixelToLogic(const basegfx::B2DPoint& rDevicePt) cons
                  lcl_subPixelToLogic(rDevicePt.getY(), GetDPIY(), GetMappingYNumerator(),
                                      GetMappingYDenominator())
                      - GetMappingYOffset() - GetLogicalYOffset());
+}
+
+double CoordinateMapper::CalculateLayoutWidth(const vcl::text::LayoutResources& rRes,
+                                              tools::Long nLogicWidth)
+{
+    if (nLogicWidth && rRes.rMapper.IsMapModeEnabled())
+        return rRes.rMapper.LogicWidthToDeviceSubPixel(nLogicWidth);
+
+    return static_cast<double>(nLogicWidth);
+}
+
+tools::Long CoordinateMapper::GetSubPixelFactor(const CoordinateMapper& rMapper)
+{
+    // Use 64 as a factor when MapMode is disabled to maintain subpixel granularity
+    return rMapper.IsMapModeEnabled() ? 1 : 64;
+}
+
+double CoordinateMapper::GetLayoutPixelWidth(const CoordinateMapper& rMapper,
+                                             tools::Long nLogicWidth, tools::Long nSubPixelFactor)
+{
+    // High-precision conversion from logical units to device subpixels
+    return rMapper.LogicWidthToDeviceSubPixel(nLogicWidth * nSubPixelFactor);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

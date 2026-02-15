@@ -47,6 +47,9 @@ struct TextSpan;
 struct MirroringContext;
 struct LayoutCacheData;
 struct LayoutResources;
+struct LayoutRequest;
+class TextLayoutGeometry;
+class TextLayoutRequest;
 
 struct MirroringContext
 {
@@ -207,6 +210,16 @@ public:
     static basegfx::B2DHomMatrix
     CalculateOutlineTransform(const SalLayout& rLayout,
                               const vcl::font::FontRealization& rRealization, double nXOffset);
+
+    /** Records font mapping usage for diagnostic purposes if tracking is enabled.
+     * This captures which fonts were actually used (including fallbacks) to satisfy the request.
+     */
+    static void ApplyPositioning(const LayoutResources& rRes, SalLayout& rLayout,
+                                 TextLayoutRequest& rArgs, const Point& rLogicalPos,
+                                 double nEndGlyphCoord);
+
+    static basegfx::B2DPoint MapLogicalToDevicePos(const LayoutResources& rRes,
+                                                   const Point& rLogicalPos);
 };
 
 } // namespace vcl::text

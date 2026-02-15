@@ -87,17 +87,6 @@ vcl::text::TextLayoutRequest TextLayoutEngine::CreateLayoutRequest(
     return aLayoutArgs;
 }
 
-basegfx::B2DPoint TextLayoutEngine::MapLogicalToDevicePos(const LayoutResources& rRes,
-                                                          const Point& rLogicalPos)
-{
-    // Use subpixel precision if MapMode is on OR if we were explicitly told to (e.g. PDF/Subpixel flag)
-    if (rRes.rMapper.IsMapModeEnabled() || rRes.bSubpixelPositioning)
-        return rRes.rMapper.LogicToDeviceSubPixel(rLogicalPos);
-
-    Point aDevicePos = rRes.rMapper.LogicToDevicePixel(rLogicalPos);
-    return basegfx::B2DPoint(aDevicePos.X(), aDevicePos.Y());
-}
-
 void TextLayoutEngine::FillAlignmentContext(TextLayoutPositioning& rPos,
                                             const vcl::text::TextLayoutRequest& rArgs,
                                             double nEndGlyphCoord)
@@ -164,14 +153,6 @@ double TextLayoutEngine::GetTextHeightPixel(const vcl::font::FontRealization& rR
                                + rRealization.nEmphasisDescent);
 }
 
-double TextLayoutEngine::CalculateLayoutWidth(const LayoutResources& rRes, tools::Long nLogicWidth)
-{
-    if (nLogicWidth && rRes.rMapper.IsMapModeEnabled())
-        return rRes.rMapper.LogicWidthToDeviceSubPixel(nLogicWidth);
-
-    return static_cast<double>(nLogicWidth);
-}
-
 std::unique_ptr<SalLayout> TextLayoutEngine::CreateBaseLayout(const LayoutResources& rRes)
 {
     SalGraphics* pGraphics = rRes.fnGetGraphics();
@@ -185,21 +166,6 @@ std::unique_ptr<SalLayout> TextLayoutEngine::CreateBaseLayout(const LayoutResour
         pSalLayout->SetSubpixelPositioning(rRes.bSubpixelPositioning);
 
     return pSalLayout;
-}
-
-void TextLayoutEngine::ApplyPositioning(const LayoutResources& rRes, SalLayout& rLayout,
-                                        vcl::text::TextLayoutRequest& rArgs,
-                                        const Point& rLogicalPos, double nEndGlyphCoord)
-{
-    TextLayoutPositioning aPos;
-    aPos.bSubpixelPositioning = rRes.bSubpixelPositioning;
-
-    FillAlignmentContext(aPos, rArgs, nEndGlyphCoord);
-    aPos.aDrawBase = MapLogicalToDevicePos(rRes, rLogicalPos);
-
-    TextJustifier::JustifyLayout(rLayout, rArgs);
-    TextJustifier::ApplyHorizontalOffset(rLayout, rArgs, aPos);
-    TextJustifier::SetAnchorPoint(rLayout, aPos);
 }
 
 std::unique_ptr<SalLayout> TextLayoutEngine::PerformTextLayout(const LayoutResources& rRes,
@@ -246,7 +212,7 @@ TextLayoutEngine::Layout(const LayoutResources& rRes, const vcl::text::TextSpan&
         return nullptr;
     }
 
-    double nPixelWidth = CalculateLayoutWidth(rRes, rConstraints.LogicalWidth);
+    double nPixelWidth = CoordinateMapper::CalculateLayoutWidth(rRes, rConstraints.LogicalWidth);
 
     vcl::text::TextLayoutRequest aLayoutArgs = CreateLayoutRequest(
         aStr, rSpan.Index, nLen, nPixelWidth, rConstraints.Flags, pLayoutCache, rRes.rGraphicsState,
@@ -272,24 +238,12 @@ TextLayoutEngine::Layout(const LayoutResources& rRes, const vcl::text::TextSpan&
     if (rConstraints.Flags & SalLayoutFlags::GlyphItemsOnly)
         return pSalLayout;
 
-    ApplyPositioning(rRes, *pSalLayout, aLayoutArgs, rConstraints.LogicalPos, nEndGlyphCoord);
+    TextGeometry::ApplyPositioning(rRes, *pSalLayout, aLayoutArgs, rConstraints.LogicalPos,
+                                   nEndGlyphCoord);
 
     FontMappingTracker::TrackLayoutFonts(rRes.rGraphicsState.maFont, pSalLayout.get());
 
     return pSalLayout;
-}
-
-tools::Long TextLayoutEngine::GetSubPixelFactor(const CoordinateMapper& rMapper)
-{
-    // Use 64 as a factor when MapMode is disabled to maintain subpixel granularity
-    return rMapper.IsMapModeEnabled() ? 1 : 64;
-}
-
-double TextLayoutEngine::GetLayoutPixelWidth(const CoordinateMapper& rMapper,
-                                             tools::Long nLogicWidth, tools::Long nSubPixelFactor)
-{
-    // High-precision conversion from logical units to device subpixels
-    return rMapper.LogicWidthToDeviceSubPixel(nLogicWidth * nSubPixelFactor);
 }
 
 } // namespace vcl::text
