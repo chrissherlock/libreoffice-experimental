@@ -44,25 +44,8 @@ void OutputDevice::DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly )
 
     sal_uInt16 nPoly = rPolyPoly.Count();
 
-    if ( !IsDeviceOutputNecessary() || (!mpGraphicsState->mbLineColor && !mpGraphicsState->mbFillColor) || !nPoly || IsLayoutCalculationNecessary() )
+    if (!nPoly || !PrepareGraphicsOutput() || !mpGraphics)
         return;
-
-    // we need a graphics
-    if ( !mpGraphics && !AcquireGraphics() )
-        return;
-    assert(mpGraphics);
-
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
-
-    if ( IsOutputCulled() )
-        return;
-
-    if ( mbLineColorDirty )
-        InitLineColor();
-
-    if ( mbFillColorDirty )
-        InitFillColor();
 
     // use b2dpolygon drawing if possible
     if (RasterOp::OverPaint == GetRasterOp() && (IsLineColor() || IsFillColor()))
@@ -154,25 +137,8 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
 
     sal_uInt16 nPoints = rPoly.GetSize();
 
-    if ( !IsDeviceOutputNecessary() || (!mpGraphicsState->mbLineColor && !mpGraphicsState->mbFillColor) || (nPoints < 2) || IsLayoutCalculationNecessary() )
+    if (nPoints < 2 || !PrepareGraphicsOutput() || !mpGraphics)
         return;
-
-    // we need a graphics
-    if ( !mpGraphics && !AcquireGraphics() )
-        return;
-    assert(mpGraphics);
-
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
-
-    if ( IsOutputCulled() )
-        return;
-
-    if ( mbLineColorDirty )
-        InitLineColor();
-
-    if ( mbFillColorDirty )
-        InitFillColor();
 
     // use b2dpolygon drawing if possible
     if (RasterOp::OverPaint == GetRasterOp() && (IsLineColor() || IsFillColor()))
@@ -257,22 +223,8 @@ void OutputDevice::ImplDrawPolyPolygonWithB2DPolyPolygon(const basegfx::B2DPolyP
     if(!rB2DPolyPoly.count() || !IsDeviceOutputNecessary())
         return;
 
-    // we need a graphics
-    if( !mpGraphics && !AcquireGraphics() )
+    if (!FlushGraphicsState())
         return;
-    assert(mpGraphics);
-
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
-
-    if ( IsOutputCulled() )
-        return;
-
-    if( mbLineColorDirty )
-        InitLineColor();
-
-    if( mbFillColorDirty )
-        InitFillColor();
 
     bool bSuccess(false);
 

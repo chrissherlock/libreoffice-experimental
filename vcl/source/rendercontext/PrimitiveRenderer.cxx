@@ -87,6 +87,18 @@ void PrimitiveRenderer::DrawLine(SalGraphics& rGraphics, const CoordinateMapper&
                        *pOutDev);
 }
 
+void PrimitiveRenderer::DrawRect(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+                                 const OutputDevice* pOutDev, const tools::Rectangle& rLogicalRect)
+{
+    const tools::Rectangle aDeviceRect(rMapper.LogicToDevicePixel(rLogicalRect));
+
+    if (!aDeviceRect.IsEmpty())
+    {
+        rGraphics.DrawRect(aDeviceRect.Left(), aDeviceRect.Top(), aDeviceRect.GetWidth(),
+                           aDeviceRect.GetHeight(), *pOutDev);
+    }
+}
+
 } // namespace vcl::rendercontext
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

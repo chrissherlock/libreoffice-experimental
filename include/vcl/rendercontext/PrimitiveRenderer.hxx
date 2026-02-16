@@ -17,6 +17,11 @@ class Point;
 class Color;
 class OutputDevice;
 
+namespace tools
+{
+class Rectangle;
+}
+
 namespace vcl::rendercontext
 {
 class VCL_DLLPUBLIC PrimitiveRenderer
@@ -39,6 +44,10 @@ public:
     static void DrawLine(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                          const OutputDevice* pOutDev, const Point& rLogicalStart,
                          const Point& rLogicalEnd, bool bTryAA, bool bPixelSnapHairline);
+
+    /** Renders a rectangle using the current line and fill colors. */
+    static void DrawRect(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+                         const OutputDevice* pOutDev, const tools::Rectangle& rLogicalRect);
 };
 
 } // namespace vcl::rendercontext

@@ -101,40 +101,51 @@ void OutputDevice::InitLineColor()
     mbLineColorDirty = false;
 }
 
+void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt )
+{
+    assert(!is_double_buffered_window());
+
+    maRecorder.RecordLine(rStartPt, rEndPt);
+
+    // Unified state flush (passing false because standard lines don't use FillColor)
+    if ( !FlushGraphicsState(false) )
+        return;
+
+    // Determine state for Anti-Aliasing
+    const bool bTryAA = (RasterOp::OverPaint == GetRasterOp() && IsLineColor());
+    const bool bPixelSnapHairline = (mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline) == AntialiasingFlags::PixelSnapHairline;
+
+    // Hand off the math and low-level dispatch to the facade
+    vcl::rendercontext::PrimitiveRenderer::DrawLine(*mpGraphics, *mpMapper, this,
+                                                    rStartPt, rEndPt, bTryAA, bPixelSnapHairline);
+}
+
 void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
                              const LineInfo& rLineInfo )
 {
     assert(!is_double_buffered_window());
 
-    if ( rLineInfo.IsDefault() )
+    // Fallback for default lines
+    if (rLineInfo.IsDefault())
     {
         DrawLine( rStartPt, rEndPt );
         return;
     }
 
-    maRecorder.RecordLine( rStartPt, rEndPt, rLineInfo );
+    maRecorder.RecordLine(rStartPt, rEndPt, rLineInfo);
 
-    if ( !IsDeviceOutputNecessary() || !mpGraphicsState->mbLineColor || ( LineStyle::NONE == rLineInfo.GetStyle() ) || IsLayoutCalculationNecessary() )
+    if (rLineInfo.GetStyle() == LineStyle::NONE)
         return;
 
-    if( !mpGraphics && !AcquireGraphics() )
-        return;
-    assert(mpGraphics);
-
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
-
-    if ( IsOutputCulled() )
+    // Unified state flush!
+    if ( !FlushGraphicsState(false) )
         return;
 
     const LineInfo aInfo(mpMapper->LogicToDevicePixel(rLineInfo));
     const bool bDashUsed(LineStyle::Dash == aInfo.GetStyle());
     const bool bLineWidthUsed(aInfo.GetWidth() > 1);
 
-    if ( mbLineColorDirty )
-        InitLineColor();
-
-    if(bDashUsed || bLineWidthUsed)
+    if (bDashUsed || bLineWidthUsed)
     {
         // Only map coordinates if we are inflating the polygon for dashing/width
         const Point aStartPt(LogicToDevicePixel(rStartPt));
@@ -144,45 +155,13 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
         aLinePolygon.append(basegfx::B2DPoint(aStartPt.X(), aStartPt.Y()));
         aLinePolygon.append(basegfx::B2DPoint(aEndPt.X(), aEndPt.Y()));
 
-        drawLine( basegfx::B2DPolyPolygon(aLinePolygon), aInfo );
+        drawLine(basegfx::B2DPolyPolygon(aLinePolygon), aInfo);
     }
     else
     {
         // Simple solid hairline
         vcl::rendercontext::PrimitiveRenderer::DrawLine(*mpGraphics, *mpMapper, this, rStartPt, rEndPt, false, false);
     }
-}
-
-void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt )
-{
-    assert(!is_double_buffered_window());
-
-    maRecorder.RecordLine( rStartPt, rEndPt );
-
-    if ( !IsDeviceOutputNecessary() || !mpGraphicsState->mbLineColor || IsLayoutCalculationNecessary() )
-        return;
-
-    if ( !mpGraphics && !AcquireGraphics() )
-        return;
-    assert(mpGraphics);
-
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
-
-    if ( IsOutputCulled() )
-        return;
-
-    if ( mbLineColorDirty )
-        InitLineColor();
-
-    // Determine state for Anti-Aliasing
-    const bool bTryAA = (RasterOp::OverPaint == GetRasterOp() && IsLineColor());
-
-    const bool bPixelSnapHairline = (mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline) == AntialiasingFlags::PixelSnapHairline;
-
-    // Hand off the math and low-level dispatch to the facade
-    vcl::rendercontext::PrimitiveRenderer::DrawLine(*mpGraphics, *mpMapper, this,
-                                                    rStartPt, rEndPt, bTryAA, bPixelSnapHairline);
 }
 
 void OutputDevice::drawLine( basegfx::B2DPolyPolygon aLinePolyPolygon, const LineInfo& rInfo )

@@ -358,6 +358,11 @@ public:
 
     virtual bool CanAnimate() const = 0;
 
+    bool PrepareGraphicsOutput(bool bCheckFill = true);
+
+    /** Flushes all pending dirty state flags and pushes them to the SalGraphics hardware backend. */
+    bool FlushGraphicsState(bool bCheckFill = true);
+
 protected:
 
     /**

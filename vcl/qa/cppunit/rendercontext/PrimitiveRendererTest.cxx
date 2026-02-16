@@ -146,6 +146,48 @@ CPPUNIT_TEST_FIXTURE(PrimitiveRendererTest, testDrawLine)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Offset failed", COL_WHITE, xVDev->GetPixel(Point(1, 1)));
 }
 
+CPPUNIT_TEST_FIXTURE(PrimitiveRendererTest, testDrawRect)
+{
+    ScopedVclPtrInstance<VirtualDevice> xVDev;
+    xVDev->SetOutputSizePixel(Size(15, 15));
+    xVDev->SetBackground(Wallpaper(COL_WHITE));
+
+    xVDev->SetAntialiasing(AntialiasingFlags::PixelSnapHairline);
+    xVDev->Erase();
+
+    xVDev->SetLineColor(COL_RED);
+    xVDev->SetFillColor(COL_BLUE);
+
+    // Set the offset natively so the hardware backend matrix
+    // stays in perfect sync with the CoordinateMapper math.
+    xVDev->SetMapMode(MapMode(MapUnit::MapPixel));
+    xVDev->SetDeviceOriginX(2);
+    xVDev->SetDeviceOriginY(2);
+
+    // A logical 4x4 square starting at (1, 1)
+    tools::Rectangle aLogicRect(Point(1, 1), Size(4, 4));
+
+    // This now routes through OutputDevice::DrawRect ->
+    // FlushGraphicsState() -> PrimitiveRenderer::DrawRect!
+    xVDev->DrawRect(aLogicRect);
+
+    // Read exact device pixels by resetting the origin
+    xVDev->SetDeviceOriginX(0);
+    xVDev->SetDeviceOriginY(0);
+
+    // Expected Device coordinates: TopLeft (3, 3), Size 4x4 -> BottomRight (6, 6)
+
+    // Check interior fill first (Center pixel)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Fill mapping failed", COL_BLUE, xVDev->GetPixel(Point(4, 4)));
+
+    // Check border (Top Left corner)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Border mapping failed", COL_RED, xVDev->GetPixel(Point(3, 3)));
+
+    // Ensure offsets worked and nothing drew outside the mapped area
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Offset failed", COL_WHITE, xVDev->GetPixel(Point(1, 1)));
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Boundary leak", COL_WHITE, xVDev->GetPixel(Point(7, 7)));
+}
+
 } // namespace
 
 CPPUNIT_PLUGIN_IMPLEMENT();

@@ -23,6 +23,7 @@
 
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/rendercontext/DrawGridFlags.hxx>
+#include <vcl/rendercontext/PrimitiveRenderer.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/metafile/MetafileRecorder.hxx>
 
@@ -52,39 +53,17 @@ void OutputDevice::DrawBorder(tools::Rectangle aBorderRect)
     DrawRect(aBorderRect);
 }
 
-void OutputDevice::DrawRect( const tools::Rectangle& rRect )
+void OutputDevice::DrawRect(const tools::Rectangle& rRect)
 {
     assert(!is_double_buffered_window());
 
+    if (rRect.IsEmpty())
+        return;
+
     maRecorder.RecordRect(rRect);
 
-    if ( !IsDeviceOutputNecessary() || (!mpGraphicsState->mbLineColor && !mpGraphicsState->mbFillColor) || IsLayoutCalculationNecessary() )
-        return;
-
-    tools::Rectangle aRect(LogicToDevicePixel(rRect));
-
-    if ( aRect.IsEmpty() )
-        return;
-
-    aRect.Normalize();
-
-    if ( !mpGraphics && !AcquireGraphics() )
-        return;
-    assert(mpGraphics);
-
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
-
-    if ( IsOutputCulled() )
-        return;
-
-    if ( mbLineColorDirty )
-        InitLineColor();
-
-    if ( mbFillColorDirty )
-        InitFillColor();
-
-    mpGraphics->DrawRect( aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(), *this );
+    if (PrepareGraphicsOutput() && mpGraphics)
+        vcl::rendercontext::PrimitiveRenderer::DrawRect(*mpGraphics, *mpMapper, this, rRect);
 }
 
 void OutputDevice::DrawRect( const tools::Rectangle& rRect,

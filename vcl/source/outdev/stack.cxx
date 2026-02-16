@@ -34,6 +34,43 @@
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 
+bool OutputDevice::PrepareGraphicsOutput(bool bCheckFill /* = true */)
+{
+    // High-level software visibility and layout checks
+    if (!IsDeviceOutputNecessary() || IsLayoutCalculationNecessary())
+        return false;
+
+    // Geometry-specific color checks
+    // If bCheckFill is false (lines, pixels), we only require mbLineColor.
+    // If bCheckFill is true (rects, polys), we require either mbLineColor OR mbFillColor.
+    if (!mpGraphicsState->mbLineColor && (!bCheckFill || !mpGraphicsState->mbFillColor))
+        return false;
+
+    return FlushGraphicsState(bCheckFill);
+}
+
+bool OutputDevice::FlushGraphicsState(bool bCheckFill /* = true */)
+{
+    if (!mpGraphics && !AcquireGraphics())
+        return false;
+
+    assert(mpGraphics);
+
+    if (mpClippingController->IsDirty())
+        InitClipRegion();
+
+    if (IsOutputCulled())
+        return false;
+
+    if (mbLineColorDirty)
+        InitLineColor();
+
+    if (mbFillColorDirty && bCheckFill)
+        InitFillColor();
+
+    return true;
+}
+
 void OutputDevice::Push(vcl::PushFlags nFlags)
 {
     maRecorder.RecordPush(nFlags);

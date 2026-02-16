@@ -46,56 +46,24 @@ Color OutputDevice::GetPixel(const Point& rPoint) const
             aColor = mpGraphics->GetPixel(nX, nY, *this);
         }
     }
+
     return aColor;
 }
 
-void OutputDevice::DrawPixel( const Point& rPt )
+void OutputDevice::DrawPixel(const Point& rPt)
 {
-    assert(!is_double_buffered_window());
-
     maRecorder.RecordPixel(rPt);
 
-    if ( !IsDeviceOutputNecessary() || !mpGraphicsState->mbLineColor || IsLayoutCalculationNecessary() )
-        return;
-
-    if ( !mpGraphics && !AcquireGraphics() )
-        return;
-    assert(mpGraphics);
-
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
-
-    if ( IsOutputCulled() )
-        return;
-
-    if ( mbLineColorDirty )
-        InitLineColor();
-
-    vcl::rendercontext::PrimitiveRenderer::DrawPixel(*mpGraphics, *mpMapper, this, rPt);
+    if (PrepareGraphicsOutput(false) && mpGraphics)
+        vcl::rendercontext::PrimitiveRenderer::DrawPixel(*mpGraphics, *mpMapper, this, rPt);
 }
 
-void OutputDevice::DrawPixel( const Point& rPt, const Color& rColor )
+void OutputDevice::DrawPixel(const Point& rPt, const Color& rColor)
 {
-    assert(!is_double_buffered_window());
+    maRecorder.RecordPixel( rPt, rColor );
 
-    Color aColor = vcl::drawmode::GetLineColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings());
-
-    maRecorder.RecordPixel(rPt, aColor);
-
-    if ( !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary() )
-        return;
-
-    if ( !mpGraphics && !AcquireGraphics() )
-        return;
-    assert(mpGraphics);
-
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
-
-    if ( IsOutputCulled() )
-        return;
-
-    vcl::rendercontext::PrimitiveRenderer::DrawPixel(*mpGraphics, *mpMapper, this, rPt, aColor);
+    if (PrepareGraphicsOutput(false) && mpGraphics)
+        vcl::rendercontext::PrimitiveRenderer::DrawPixel(*mpGraphics, *mpMapper, this, rPt, rColor);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
