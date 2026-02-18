@@ -111,11 +111,9 @@ void OutputDevice::DrawLine(const Point& rStartPt, const Point& rEndPt)
     if (!PrepareGraphicsOutput(false) || !mpGraphics)
         return;
 
-    // Determine state for Anti-Aliasing
     const bool bTryAA = (RasterOp::OverPaint == GetRasterOp() && IsLineColor());
     const bool bPixelSnapHairline = bool(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
 
-    // Hand off the math and low-level dispatch to the facade
     vcl::rendercontext::PrimitiveRenderer::DrawLine(*mpGraphics, *mpMapper, this,
                                                     rStartPt, rEndPt, bTryAA, bPixelSnapHairline);
 }
@@ -141,7 +139,7 @@ void OutputDevice::DrawLine(const Point& rStartPt, const Point& rEndPt, const Li
     if (aInfo.GetStyle() != LineStyle::Dash && aInfo.GetWidth() <= 1)
     {
         // Simple solid hairline
-        vcl::rendercontext::PrimitiveRenderer::DrawLine(*mpGraphics, *mpMapper, this, rStartPt, rEndPt, false, false);
+        vcl::rendercontext::PrimitiveRenderer::DrawLine(*mpGraphics, *mpMapper, this, rStartPt, rEndPt);
         return;
     }
 

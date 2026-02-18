@@ -43,7 +43,8 @@ public:
     /** Renders a line between two logical points, with optional Anti-Aliasing. */
     static void DrawLine(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                          const OutputDevice* pOutDev, const Point& rLogicalStart,
-                         const Point& rLogicalEnd, bool bTryAA, bool bPixelSnapHairline);
+                         const Point& rLogicalEnd, bool bTryAA = false,
+                         bool bPixelSnapHairline = false);
 
     /** Renders a rectangle using the current line and fill colors. */
     static void DrawRect(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
