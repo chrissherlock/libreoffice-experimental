@@ -1148,7 +1148,7 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawRect)
         aMtf.Record(pVDev.get());
 
         pVDev->SetOutputSizePixel(Size(100, 100));
-        pVDev->DrawRect(tools::Rectangle(Point(0, 0), Size(50, 60)), 5, 10);
+        pVDev->DrawRoundedRect(tools::Rectangle(Point(0, 0), Size(50, 60)), 5, 10);
 
         MetaAction* pAction = aMtf.GetAction(INITIAL_SETUP_ACTION_COUNT);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Not a rect action", MetaActionType::ROUNDRECT,

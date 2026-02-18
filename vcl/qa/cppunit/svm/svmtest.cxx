@@ -542,7 +542,7 @@ void SvmTest::testRoundRect()
     pVirtualDev->SetLineColor(Color(0x123456));
     pVirtualDev->SetFillColor(Color(0x654321));
 
-    pVirtualDev->DrawRect(tools::Rectangle(Point(1, 2), Size(4, 4)), 1, 2);
+    pVirtualDev->DrawRoundedRect(tools::Rectangle(Point(1, 2), Size(4, 4)), 1, 2);
 
     checkRoundRect(writeAndReadStream(aGDIMetaFile));
     checkRoundRect(readFile(u"roundrect.svm"));

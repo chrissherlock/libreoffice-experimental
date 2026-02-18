@@ -295,7 +295,7 @@ void MetaRoundRectAction::Execute( OutputDevice* pOut )
     if (!AllowRect(pOut->LogicToPixel(maRect)))
         return;
 
-    pOut->DrawRect( maRect, mnHorzRound, mnVertRound );
+    pOut->DrawRoundedRect( maRect, mnHorzRound, mnVertRound );
 }
 
 rtl::Reference<MetaAction> MetaRoundRectAction::Clone() const

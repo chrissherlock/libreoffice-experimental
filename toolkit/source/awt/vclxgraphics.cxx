@@ -339,7 +339,7 @@ void VCLXGraphics::drawRoundedRect( sal_Int32 x, sal_Int32 y, sal_Int32 width, s
     if( mpOutputDevice )
     {
         InitOutputDevice( InitOutDevFlags::COLORS );
-        mpOutputDevice->DrawRect( tools::Rectangle( Point( x, y ), Size( width, height ) ), nHorzRound, nVertRound );
+        mpOutputDevice->DrawRoundedRect( tools::Rectangle( Point( x, y ), Size( width, height ) ), nHorzRound, nVertRound );
     }
 }
 

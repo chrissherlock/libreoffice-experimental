@@ -645,7 +645,7 @@ public:
 public:
 
     void                        DrawRect( const tools::Rectangle& rRect );
-    void                        DrawRect( const tools::Rectangle& rRect,
+    void                        DrawRoundedRect( const tools::Rectangle& rRect,
                                           sal_uLong nHorzRound, sal_uLong nVertRound );
 
     /// Fill the given rectangle with checkered rectangles of size nLen x nLen using the colors aStart and aEnd

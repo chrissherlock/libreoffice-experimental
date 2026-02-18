@@ -992,12 +992,12 @@ void OS2METReader::ReadBox(bool bGivenPos)
             {
                 auto popIt = pVirDev->ScopedPush(vcl::PushFlags::LINECOLOR);
                 pVirDev->SetLineColor( COL_TRANSPARENT );
-                pVirDev->DrawRect( aBoxRect, nHRound, nVRound );
+                pVirDev->DrawRoundedRect( aBoxRect, nHRound, nVRound );
             }
             pVirDev->DrawPolyLine( aPolygon, aLineInfo );
         }
         else
-            pVirDev->DrawRect( aBoxRect, nHRound, nVRound );
+            pVirDev->DrawRoundedRect( aBoxRect, nHRound, nVRound );
     }
 }
 

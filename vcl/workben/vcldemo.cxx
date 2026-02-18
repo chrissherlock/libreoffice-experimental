@@ -217,7 +217,7 @@ public:
             if (i % 2)
             {
                 int nBorderSize = rRects[i].GetWidth() / 5;
-                rDev.DrawRect(rRects[i], nBorderSize, nBorderSize);
+                rDev.DrawRoundedRect(rRects[i], nBorderSize, nBorderSize);
             }
             else
                 rDev.DrawRect(rRects[i]);

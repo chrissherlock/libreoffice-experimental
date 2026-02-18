@@ -25,8 +25,8 @@
 #include <tools/color.hxx>
 #include <vcl/filter/PDFiumLibrary.hxx>
 #include <vcl/metafile/GDIMetaFile.hxx>
-#include <vcl/vectorgraphicdata.hxx>
 #include <vcl/metafile/wmf.hxx>
+#include <vcl/vectorgraphicdata.hxx>
 
 #include <memory>
 #include <string_view>

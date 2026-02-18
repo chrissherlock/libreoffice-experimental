@@ -573,9 +573,9 @@ void SvxShowCharSet::DrawChars_Impl(vcl::RenderContext& rRenderContext, int n1, 
             rRenderContext.SetLineColor(aHighlightColor);
             rRenderContext.SetFillColor();
             // Outer border
-            rRenderContext.DrawRect(tools::Rectangle(Point(x - 1, y - 1), Size(mnX + 3, mnY + 3)), 1, 1);
+            rRenderContext.DrawRoundedRect(tools::Rectangle(Point(x - 1, y - 1), Size(mnX + 3, mnY + 3)), 1, 1);
             // Inner border
-            rRenderContext.DrawRect(tools::Rectangle(Point(x, y), Size(mnX + 1, mnY + 1)), 1, 1);
+            rRenderContext.DrawRoundedRect(tools::Rectangle(Point(x, y), Size(mnX + 1, mnY + 1)), 1, 1);
             rRenderContext.SetLineColor(aLineCol);
         }
 

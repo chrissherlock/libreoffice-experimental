@@ -379,7 +379,7 @@ IMPL_LINK(QuickFindPanel, SearchFindsListRender, weld::TreeView::render_args, aP
     if (!bPageEntry)
     {
         aRect.AdjustRight(-3);
-        rRenderContext.DrawRect(aRect, 6, 6);
+        rRenderContext.DrawRoundedRect(aRect, 6, 6);
 
         aRect.AdjustLeft(+6);
         rRenderContext.DrawText(aRect, aEntry,

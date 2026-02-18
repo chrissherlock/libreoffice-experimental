@@ -66,7 +66,7 @@ void OutputDevice::DrawRect(const tools::Rectangle& rRect)
         vcl::rendercontext::PrimitiveRenderer::DrawRect(*mpGraphics, *mpMapper, this, rRect);
 }
 
-void OutputDevice::DrawRect( const tools::Rectangle& rRect,
+void OutputDevice::DrawRoundedRect( const tools::Rectangle& rRect,
                              sal_uLong nHorzRound, sal_uLong nVertRound )
 {
     assert(!is_double_buffered_window());
