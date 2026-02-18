@@ -20,6 +20,8 @@
 #include <sal/types.h>
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <basegfx/polygon/b2dlinegeometry.hxx>
+#include <basegfx/polygon/b2dpolypolygontools.hxx>
+#include <comphelper/configuration.hxx>
 
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/metafile/MetaAction.hxx>
@@ -275,13 +277,11 @@ void OutputDevice::drawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
         InitLineColor();
 
     const LineInfo aInfo(mpMapper->LogicToDevicePixel(rLineInfo));
-    const bool bDashUsed(LineStyle::Dash == aInfo.GetStyle());
-    const bool bLineWidthUsed(aInfo.GetWidth() > 1);
 
-    if (bDashUsed || bLineWidthUsed)
+    if (aInfo.GetStyle() == LineStyle::Dash || aInfo.GetWidth() > 1)
     {
         basegfx::B2DPolygon aPoly = mpMapper->LogicToDevicePixel(rPoly.getB2DPolygon());
-        drawLine(basegfx::B2DPolyPolygon(aPoly), aInfo);
+        DrawPolyLineGeometry(basegfx::B2DPolyPolygon(aPoly), aInfo);
     }
     else
     {
@@ -385,6 +385,203 @@ bool OutputDevice::DrawPolyLineDirectInternal(
             *this);
     }
     return false;
+}
+
+static basegfx::B2DPolyPolygon lcl_ApplyLineDashing(const basegfx::B2DPolyPolygon& rLinePolyPolygon, const LineInfo& rInfo)
+{
+    if (!rLinePolyPolygon.count())
+        return rLinePolyPolygon;
+
+    std::vector<double> fDotDashArray = rInfo.GetDotDashArray();
+    const double fAccumulated = std::accumulate(fDotDashArray.begin(), fDotDashArray.end(), 0.0);
+
+    if (fAccumulated <= 0.0)
+        return rLinePolyPolygon;
+
+    basegfx::B2DPolyPolygon aResult;
+    for (auto const& rPolygon : rLinePolyPolygon)
+    {
+        basegfx::B2DPolyPolygon aLineTarget;
+        basegfx::utils::applyLineDashing(basegfx::B2DPolyPolygon(rPolygon), fDotDashArray, &aLineTarget);
+        aResult.append(aLineTarget);
+    }
+
+    return aResult;
+}
+
+static basegfx::B2DPolyPolygon lcl_CreateAreaGeometryForLine(basegfx::B2DPolyPolygon aLinePolyPolygon, const LineInfo& rInfo)
+{
+    basegfx::B2DPolyPolygon aFillPolyPolygon;
+
+    if (!aLinePolyPolygon.count())
+        return aFillPolyPolygon;
+
+    const double fHalfLineWidth((rInfo.GetWidth() * 0.5) + 0.5);
+
+    if (aLinePolyPolygon.areControlPointsUsed())
+    {
+        // #i110768# When area geometry has to be created, do not
+        // use the fallback bezier decomposition inside createAreaGeometry,
+        // but one that is at least as good as ImplSubdivideBezier was.
+        // There, Polygon::AdaptiveSubdivide was used with default parameter
+        // 1.0 as quality index.
+        static int nRecurseLimit = comphelper::IsFuzzing() ? 10 : 30;
+        aLinePolyPolygon = basegfx::utils::adaptiveSubdivideByDistance(aLinePolyPolygon, 1.0, nRecurseLimit);
+    }
+
+    for (auto const& rPolygon : std::as_const(aLinePolyPolygon))
+    {
+        aFillPolyPolygon.append(basegfx::utils::createAreaGeometry(
+            rPolygon,
+            fHalfLineWidth,
+            rInfo.GetLineJoin(),
+            rInfo.GetLineCap()));
+    }
+
+    return aFillPolyPolygon;
+}
+
+static void lcl_DrawHairlinePolyPolygon(SalGraphics& rGraphics, OutputDevice& rOutDev,
+                                        const basegfx::B2DPolyPolygon& rLinePolyPolygon,
+                                        bool bTryB2d, bool bPixelSnapHairline)
+{
+    if (!rLinePolyPolygon.count())
+        return;
+
+    for (auto const& rB2DPolygon : std::as_const(rLinePolyPolygon))
+    {
+        bool bDone = false;
+
+        if (bTryB2d)
+        {
+            bDone = rGraphics.DrawPolyLine(
+                basegfx::B2DHomMatrix(),
+                rB2DPolygon,
+                0.0,
+                0.0, // tdf#124848 hairline
+                nullptr, // MM01
+                basegfx::B2DLineJoin::NONE,
+                css::drawing::LineCap_BUTT,
+                basegfx::deg2rad(15.0), // not used with B2DLineJoin::NONE, but the correct default
+                bPixelSnapHairline,
+                rOutDev);
+        }
+
+        if (!bDone)
+        {
+            tools::Polygon aPolygon(rB2DPolygon);
+            rGraphics.DrawPolyLine(
+                aPolygon.GetSize(),
+                aPolygon.GetConstPointAry(), // Bypasses Copy-On-Write clone!
+                rOutDev);
+        }
+    }
+}
+
+static bool lcl_TryDrawB2DAreaGeometry(SalGraphics& rGraphics, OutputDevice& rOutDev,
+                                       const basegfx::B2DPolyPolygon& rFillPolyPolygon,
+                                       bool bFuzzing, bool bTryB2d)
+{
+    if (bFuzzing)
+    {
+        const basegfx::B2DRange aRange(rFillPolyPolygon.getB2DRange());
+        if (aRange.getMaxX() - aRange.getMinX() > 0x10000000
+            || aRange.getMaxY() - aRange.getMinY() > 0x10000000)
+        {
+            SAL_WARN("vcl.gdi", "drawLine, skipping suspicious range of: "
+                                    << aRange << " for fuzzing performance");
+            return true;
+        }
+    }
+
+    if (!bTryB2d)
+        return false;
+
+    rGraphics.DrawPolyPolygon(basegfx::B2DHomMatrix(), rFillPolyPolygon, 0.0, rOutDev);
+    return true;
+}
+
+static void lcl_DrawSubdividedAreaGeometry(SalGraphics& rGraphics, OutputDevice& rOutDev,
+                                           const basegfx::B2DPolyPolygon& rFillPolyPolygon)
+{
+    for (auto const& rB2DPolygon : rFillPolyPolygon)
+    {
+        tools::Polygon aPolygon(rB2DPolygon);
+
+        // need to subdivide, mpGraphics->DrawPolygon ignores curves
+        aPolygon.AdaptiveSubdivide(aPolygon);
+        rGraphics.DrawPolygon(aPolygon.GetSize(), aPolygon.GetConstPointAry(), rOutDev);
+    }
+}
+
+static void lcl_DrawAreaGeometry(SalGraphics& rGraphics, OutputDevice& rOutDev,
+                                 const basegfx::B2DPolyPolygon& rFillPolyPolygon,
+                                 bool bFuzzing, bool bTryB2d)
+{
+    if (!rFillPolyPolygon.count())
+        return;
+
+    // Use public accessors since mpGraphicsState is protected
+    const Color aOldLineColor(rOutDev.GetLineColor());
+    const Color aOldFillColor(rOutDev.GetFillColor());
+
+    comphelper::ScopeGuard aColorGuard([&rOutDev, aOldLineColor, aOldFillColor]() {
+        rOutDev.SetFillColor(aOldFillColor);
+        rOutDev.SetLineColor(aOldLineColor);
+    });
+
+    // Set temporary colors for the thick line/area fill
+    rOutDev.SetLineColor();
+    rOutDev.SetFillColor(aOldLineColor);
+
+    // Push the temporary colors to the hardware backend
+    rOutDev.FlushGraphicsState();
+
+    if (lcl_TryDrawB2DAreaGeometry(rGraphics, rOutDev, rFillPolyPolygon, bFuzzing, bTryB2d))
+        return;
+
+    // If B2D rendering failed or wasn't attempted, fallback to subdivided polygons
+    lcl_DrawSubdividedAreaGeometry(rGraphics, rOutDev, rFillPolyPolygon);
+}
+
+/**
+ * Processes line geometry based on dashing and width.
+ * Returns a pair: first = remaining hairline geometry, second = generated area geometry.
+ */
+static std::pair<basegfx::B2DPolyPolygon, basegfx::B2DPolyPolygon>
+lcl_ProcessLineGeometry(basegfx::B2DPolyPolygon aLinePolyPolygon, const LineInfo& rInfo)
+{
+    static const bool bFuzzing = comphelper::IsFuzzing();
+
+    // 1. Apply Dashing
+    if (!bFuzzing && rInfo.GetStyle() == LineStyle::Dash)
+        aLinePolyPolygon = lcl_ApplyLineDashing(aLinePolyPolygon, rInfo);
+
+    basegfx::B2DPolyPolygon aFillPolyPolygon;
+
+    // 2. Convert thick lines to area geometry
+    if (rInfo.GetWidth() > 1 && aLinePolyPolygon.count())
+    {
+        aFillPolyPolygon.append(lcl_CreateAreaGeometryForLine(aLinePolyPolygon, rInfo));
+        aLinePolyPolygon.clear();
+    }
+
+    return { std::move(aLinePolyPolygon), std::move(aFillPolyPolygon) };
+}
+
+void OutputDevice::DrawPolyLineGeometry(const basegfx::B2DPolyPolygon& rPolyPolygon,
+                                        const LineInfo& rLineInfo)
+{
+    auto [aHairlines, aFillGeometry] = lcl_ProcessLineGeometry(rPolyPolygon, rLineInfo);
+
+    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
+
+    const bool bTryB2d = (GetRasterOp() == RasterOp::OverPaint && IsLineColor());
+    const bool bPixelSnapHairline = bool(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+    static const bool bFuzzing = comphelper::IsFuzzing();
+
+    lcl_DrawHairlinePolyPolygon(*mpGraphics, *this, aHairlines, bTryB2d, bPixelSnapHairline);
+    lcl_DrawAreaGeometry(*mpGraphics, *this, aFillGeometry, bFuzzing, bTryB2d);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

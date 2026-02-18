@@ -31,23 +31,21 @@
 
 Color OutputDevice::GetPixel(const Point& rPoint) const
 {
-    Color aColor;
+    if (!mpGraphics && !AcquireGraphics())
+        return Color();
 
-    if (mpGraphics || AcquireGraphics())
-    {
-        assert(mpGraphics);
-        if ( mpClippingController->IsDirty() )
-            const_cast<OutputDevice*>(this)->InitClipRegion();
+    assert(mpGraphics);
 
-        if (!IsOutputCulled())
-        {
-            const tools::Long nX = LogicXToDevicePixel(rPoint.X());
-            const tools::Long nY = LogicYToDevicePixel(rPoint.Y());
-            aColor = mpGraphics->GetPixel(nX, nY, *this);
-        }
-    }
+    if (mpClippingController->IsDirty())
+        const_cast<OutputDevice*>(this)->InitClipRegion();
 
-    return aColor;
+    if (IsOutputCulled())
+        return Color();
+
+    const tools::Long nX = LogicXToDevicePixel(rPoint.X());
+    const tools::Long nY = LogicYToDevicePixel(rPoint.Y());
+
+    return mpGraphics->GetPixel(nX, nY, *this);
 }
 
 void OutputDevice::DrawPixel(const Point& rPt)
