@@ -71,22 +71,18 @@ void OutputDevice::DrawRoundedRect( const tools::Rectangle& rRect,
 {
     assert(!is_double_buffered_window());
 
+    if (rRect.IsEmpty())
+        return;
+
     maRecorder.RecordRoundRect(rRect, nHorzRound, nVertRound);
 
     if ( !IsDeviceOutputNecessary() || (!mpGraphicsState->mbLineColor && !mpGraphicsState->mbFillColor) || IsLayoutCalculationNecessary() )
         return;
 
-    const tools::Rectangle aRect(LogicToDevicePixel(rRect));
-
-    if ( aRect.IsEmpty() )
-        return;
-
-    nHorzRound = LogicWidthToDevicePixel(nHorzRound);
-    nVertRound = LogicHeightToDevicePixel( nVertRound );
-
     // we need a graphics
     if ( !mpGraphics && !AcquireGraphics() )
         return;
+
     assert(mpGraphics);
 
     if ( mpClippingController->IsDirty() )
@@ -100,6 +96,11 @@ void OutputDevice::DrawRoundedRect( const tools::Rectangle& rRect,
 
     if ( mbFillColorDirty )
         InitFillColor();
+
+    const tools::Rectangle aRect(LogicToDevicePixel(rRect));
+
+    nHorzRound = LogicWidthToDevicePixel(nHorzRound);
+    nVertRound = LogicHeightToDevicePixel( nVertRound );
 
     if ( !nHorzRound && !nVertRound )
     {
