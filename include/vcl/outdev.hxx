@@ -785,14 +785,6 @@ public:
                                     double fMiterMinimumAngle = basegfx::deg2rad(15.0));
 
 private:
-
-    // #i101491#
-    // Helper which holds the old line geometry creation and is extended to use AA when
-    // switched on. Advantage is that line geometry is only temporarily used for paint
-    SAL_DLLPRIVATE void         drawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLineInfo);
-
-    ///@}
-
     SAL_DLLPRIVATE bool         DrawPolyLineDirectInternal(
                                     const basegfx::B2DHomMatrix& rObjectTransform,
                                     const basegfx::B2DPolygon& rB2DPolygon,
@@ -802,6 +794,7 @@ private:
                                     basegfx::B2DLineJoin eLineJoin = basegfx::B2DLineJoin::NONE,
                                     css::drawing::LineCap eLineCap = css::drawing::LineCap_BUTT,
                                     double fMiterMinimumAngle = basegfx::deg2rad(15.0));
+    ///@}
 
     /** @name Polygon functions
      */
