@@ -35,76 +35,67 @@
 
 #include <cassert>
 
-void OutputDevice::DrawPolyLine( const tools::Polygon& rPoly )
+static void lcl_DrawHairlineToolsPolygon(SalGraphics& rGraphics, OutputDevice& rOutDev,
+                                         const tools::Polygon& rPoly)
+{
+    sal_uInt16 nPoints = rPoly.GetSize();
+    const Point* pPtAry = rPoly.GetConstPointAry();
+
+    // #100127# Forward beziers to sal, if any
+    if (rPoly.HasFlags())
+    {
+        const PolyFlags* pFlgAry = rPoly.GetConstFlagAry();
+        if (!rGraphics.DrawPolyLineBezier(nPoints, pPtAry, pFlgAry, rOutDev))
+        {
+            tools::Polygon aSubdivided = tools::Polygon::SubdivideBezier(rPoly);
+            rGraphics.DrawPolyLine(aSubdivided.GetSize(), aSubdivided.GetConstPointAry(), rOutDev);
+        }
+    }
+    else
+    {
+        rGraphics.DrawPolyLine(nPoints, pPtAry, rOutDev);
+    }
+}
+
+static bool lcl_TryDirectHairline(SalGraphics& rGraphics, OutputDevice& rOutDev,
+                                  const basegfx::B2DPolygon& rB2DPoly,
+                                  const basegfx::B2DHomMatrix& rTransform,
+                                  bool bPixelSnap)
+{
+    return rGraphics.DrawPolyLine(
+        rTransform,
+        rB2DPoly,
+        0.0,
+        0.0, // hairline
+        nullptr,
+        basegfx::B2DLineJoin::NONE,
+        css::drawing::LineCap_BUTT,
+        basegfx::deg2rad(15.0),
+        bPixelSnap,
+        rOutDev);
+}
+
+void OutputDevice::DrawPolyLine(const tools::Polygon& rPoly)
 {
     assert(!is_double_buffered_window());
 
     maRecorder.RecordPolyLine(rPoly);
 
-    sal_uInt16 nPoints = rPoly.GetSize();
-
-    if ( !IsDeviceOutputNecessary() || !mpGraphicsState->mbLineColor || (nPoints < 2) || IsLayoutCalculationNecessary() )
+    if (!PrepareGraphicsOutput(false) || !mpGraphics || rPoly.GetSize() < 2)
         return;
 
-    // we need a graphics
-    if ( !mpGraphics && !AcquireGraphics() )
+    if (DrawPolyLineDirectInternal(basegfx::B2DHomMatrix(), rPoly.getB2DPolygon()))
         return;
-    assert(mpGraphics);
-
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
-
-    if ( IsOutputCulled() )
-        return;
-
-    if ( mbLineColorDirty )
-        InitLineColor();
-
-    // use b2dpolygon drawing if possible
-    if(DrawPolyLineDirectInternal(
-        basegfx::B2DHomMatrix(),
-        rPoly.getB2DPolygon()))
-    {
-        return;
-    }
 
     const basegfx::B2DPolygon aB2DPolyLine(rPoly.getB2DPolygon());
     const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation());
-    const bool bPixelSnapHairline(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+    const bool bPixelSnap = bool(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
 
-    bool bDrawn = mpGraphics->DrawPolyLine(
-        aTransform,
-        aB2DPolyLine,
-        0.0,
-        0.0, // tdf#124848 hairline
-        nullptr, // MM01
-        basegfx::B2DLineJoin::NONE,
-        css::drawing::LineCap_BUTT,
-        basegfx::deg2rad(15.0) /*default fMiterMinimumAngle, not used*/,
-        bPixelSnapHairline,
-        *this);
+    if (lcl_TryDirectHairline(*mpGraphics, *this, aB2DPolyLine, aTransform, bPixelSnap))
+        return;
 
-    if(!bDrawn)
-    {
-        tools::Polygon aPoly = mpMapper->LogicToDevicePixel(rPoly);
-        Point* pPtAry = aPoly.GetPointAry();
-
-        // #100127# Forward beziers to sal, if any
-        if( aPoly.HasFlags() )
-        {
-            const PolyFlags* pFlgAry = aPoly.GetConstFlagAry();
-            if( !mpGraphics->DrawPolyLineBezier( nPoints, pPtAry, pFlgAry, *this ) )
-            {
-                aPoly = tools::Polygon::SubdivideBezier(aPoly);
-                pPtAry = aPoly.GetPointAry();
-                mpGraphics->DrawPolyLine( aPoly.GetSize(), pPtAry, *this );
-            }
-        }
-        else
-        {
-            mpGraphics->DrawPolyLine( nPoints, pPtAry, *this );
-        }
-    }
+    tools::Polygon aDevicePoly = mpMapper->LogicToDevicePixel(rPoly);
+    lcl_DrawHairlineToolsPolygon(*mpGraphics, *this, aDevicePoly);
 }
 
 void OutputDevice::DrawPolyLine( const tools::Polygon& rPoly, const LineInfo& rLineInfo )
