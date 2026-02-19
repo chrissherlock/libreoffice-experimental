@@ -40,24 +40,22 @@ void OutputDevice::DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly )
 {
     assert(!is_double_buffered_window());
 
-    maRecorder.RecordPolyPolygon(rPolyPoly);
+    if (maRecorder.IsActive())
+        maRecorder.RecordPolyPolygon(rPolyPoly);
 
     sal_uInt16 nPoly = rPolyPoly.Count();
-
     if (!nPoly || !PrepareGraphicsOutput() || !mpGraphics)
         return;
 
     // use b2dpolygon drawing if possible
-    if (RasterOp::OverPaint == GetRasterOp() && (IsLineColor() || IsFillColor()))
+    if (CanDrawPolygon())
     {
         const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation());
         basegfx::B2DPolyPolygon aB2DPolyPolygon(rPolyPoly.getB2DPolyPolygon());
 
         // ensure closed - may be asserted, will prevent buffering
         if(!aB2DPolyPolygon.isClosed())
-        {
             aB2DPolyPolygon.setClosed(true);
-        }
 
         if (IsFillColor())
         {
@@ -133,24 +131,22 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
 {
     assert(!is_double_buffered_window());
 
-    maRecorder.RecordPolygon(rPoly);
+    if (maRecorder.IsActive())
+        maRecorder.RecordPolygon(rPoly);
 
     sal_uInt16 nPoints = rPoly.GetSize();
-
     if (nPoints < 2 || !PrepareGraphicsOutput() || !mpGraphics)
         return;
 
     // use b2dpolygon drawing if possible
-    if (RasterOp::OverPaint == GetRasterOp() && (IsLineColor() || IsFillColor()))
+    if (CanDrawPolygon())
     {
         const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation());
         basegfx::B2DPolygon aB2DPolygon(rPoly.getB2DPolygon());
 
         // ensure closed - maybe assert, hinders buffering
-        if(!aB2DPolygon.isClosed())
-        {
+        if (!aB2DPolygon.isClosed())
             aB2DPolygon.setClosed(true);
-        }
 
         if (IsFillColor())
         {
@@ -207,85 +203,69 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
 // OutputDevice::DrawTransparent( const basegfx::B2DPolyPolygon& rB2DPolyPoly, double fTransparency),
 // so when changes are made here do not forget to make changes there, too
 
-void OutputDevice::DrawPolyPolygon( const basegfx::B2DPolyPolygon& rB2DPolyPoly )
+void OutputDevice::DrawPolyPolygon(const basegfx::B2DPolyPolygon& rB2DPolyPoly)
 {
     assert(!is_double_buffered_window());
 
-    maRecorder.RecordPolyPolygon(tools::PolyPolygon(rB2DPolyPoly));
+    if (maRecorder.IsActive())
+        maRecorder.RecordPolyPolygon(tools::PolyPolygon(rB2DPolyPoly));
 
-    // call helper
-    ImplDrawPolyPolygonWithB2DPolyPolygon(rB2DPolyPoly);
-}
-
-void OutputDevice::ImplDrawPolyPolygonWithB2DPolyPolygon(const basegfx::B2DPolyPolygon& rB2DPolyPoly)
-{
-    // Do not paint empty PolyPolygons
-    if(!rB2DPolyPoly.count() || !IsDeviceOutputNecessary())
+    if (!rB2DPolyPoly.count() || !IsDeviceOutputNecessary())
         return;
 
-    if (!FlushGraphicsState())
+    if (!PrepareGraphicsOutput() || !mpGraphics)
         return;
 
-    bool bSuccess(false);
-
-    if (RasterOp::OverPaint == GetRasterOp() && (IsLineColor() || IsFillColor()))
+    auto drawB2DPolyPolygon = [&]() -> bool
     {
+        if (!CanDrawPolygon())
+            return false;
+
         const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation());
         basegfx::B2DPolyPolygon aB2DPolyPolygon(rB2DPolyPoly);
-        bSuccess = true;
 
-        // ensure closed - maybe assert, hinders buffering
+        // ensure closed - hinders buffering if left unclosed
         if(!aB2DPolyPolygon.isClosed())
-        {
             aB2DPolyPolygon.setClosed(true);
-        }
 
         if (IsFillColor())
         {
-            mpGraphics->DrawPolyPolygon(
-                aTransform,
-                aB2DPolyPolygon,
-                0.0,
-                *this);
+            mpGraphics->DrawPolyPolygon(aTransform, aB2DPolyPolygon, 0.0, *this);
         }
 
         if (IsLineColor())
         {
             const bool bPixelSnapHairline(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
 
-            for(auto const& rPolygon : std::as_const(aB2DPolyPolygon))
+            for (auto const& rPolygon : std::as_const(aB2DPolyPolygon))
             {
-                bSuccess = mpGraphics->DrawPolyLine(
-                    aTransform,
-                    rPolygon,
-                    (255 - GetLineColor().GetAlpha()) / 255.0,
-                    0.0, // tdf#124848 hairline
-                    nullptr, // MM01
-                    basegfx::B2DLineJoin::NONE,
-                    css::drawing::LineCap_BUTT,
-                    basegfx::deg2rad(15.0), // not used with B2DLineJoin::NONE, but the correct default
-                    bPixelSnapHairline,
-                    *this);
-                if (!bSuccess)
-                    break;
+                if (!mpGraphics->DrawPolyLine(
+                        aTransform, rPolygon, (255 - GetLineColor().GetAlpha()) / 255.0,
+                        0.0, nullptr, basegfx::B2DLineJoin::NONE,
+                        css::drawing::LineCap_BUTT, basegfx::deg2rad(15.0),
+                        bPixelSnapHairline, *this))
+                {
+                    return false; // Hardware failed mid-draw
+                }
             }
         }
-    }
+        return true;
+    };
 
-    if (!bSuccess)
-    {
-        // fallback to old polygon drawing if needed
-        const tools::PolyPolygon aToolsPolyPolygon(rB2DPolyPoly);
-        const tools::PolyPolygon aPixelPolyPolygon = mpMapper->LogicToDevicePixel(aToolsPolyPolygon);
-        ImplDrawPolyPolygon(aPixelPolyPolygon.Count(), aPixelPolyPolygon);
-    }
+    if (drawB2DPolyPolygon())
+        return;
+
+    // Fallback to legacy tools::PolyPolygon rasterizer
+    const tools::PolyPolygon aToolsPolyPolygon(rB2DPolyPoly);
+    const tools::PolyPolygon aPixelPolyPolygon = mpMapper->LogicToDevicePixel(aToolsPolyPolygon);
+    ImplDrawPolyPolygon(aPixelPolyPolygon.Count(), aPixelPolyPolygon);
 }
 
 // #100127# Extracted from OutputDevice::DrawPolyPolygon()
 void OutputDevice::ImplDrawPolyPolygon( sal_uInt16 nPoly, const tools::PolyPolygon& rPolyPoly )
 {
     // AW: This crashes on empty PolyPolygons, avoid that
-    if(!nPoly)
+    if (!nPoly)
         return;
 
     sal_uInt32 aStackAry1[OUTDEV_POLYPOLY_STACKBUF];

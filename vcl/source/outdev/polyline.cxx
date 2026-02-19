@@ -61,14 +61,13 @@ void OutputDevice::DrawPolyLine(const tools::Polygon& rPoly)
 {
     assert(!is_double_buffered_window());
 
-    if (rPoly.GetSize() == 0)
-        return;
-
     if (maRecorder.IsActive())
         maRecorder.RecordPolyLine(rPoly);
 
-    if (!mpGraphics && !AcquireGraphics())
+    if (rPoly.GetSize() < 2)
         return;
+
+
 
     if (!CanDrawPolyline())
         return;
@@ -419,13 +418,11 @@ lcl_ProcessLineGeometry(basegfx::B2DPolyPolygon aLinePolyPolygon, const LineInfo
 {
     static const bool bFuzzing = comphelper::IsFuzzing();
 
-    // 1. Apply Dashing
     if (!bFuzzing && rInfo.GetStyle() == LineStyle::Dash)
         aLinePolyPolygon = lcl_ApplyLineDashing(aLinePolyPolygon, rInfo);
 
     basegfx::B2DPolyPolygon aFillPolyPolygon;
 
-    // 2. Convert thick lines to area geometry
     if (rInfo.GetWidth() > 1 && aLinePolyPolygon.count())
     {
         aFillPolyPolygon.append(lcl_CreateAreaGeometryForLine(aLinePolyPolygon, rInfo));
