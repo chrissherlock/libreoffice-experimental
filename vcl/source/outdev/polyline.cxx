@@ -57,42 +57,35 @@ static void lcl_DrawHairlineToolsPolygon(SalGraphics& rGraphics, OutputDevice& r
     }
 }
 
-static bool lcl_TryDirectHairline(SalGraphics& rGraphics, OutputDevice& rOutDev,
-                                  const basegfx::B2DPolygon& rB2DPoly,
-                                  const basegfx::B2DHomMatrix& rTransform,
-                                  bool bPixelSnap)
-{
-    return rGraphics.DrawPolyLine(
-        rTransform,
-        rB2DPoly,
-        0.0,
-        0.0, // hairline
-        nullptr,
-        basegfx::B2DLineJoin::NONE,
-        css::drawing::LineCap_BUTT,
-        basegfx::deg2rad(15.0),
-        bPixelSnap,
-        rOutDev);
-}
-
 void OutputDevice::DrawPolyLine(const tools::Polygon& rPoly)
 {
     assert(!is_double_buffered_window());
 
-    maRecorder.RecordPolyLine(rPoly);
-
-    if (!PrepareGraphicsOutput(false) || !mpGraphics || rPoly.GetSize() < 2)
+    if (rPoly.GetSize() == 0)
         return;
 
-    if (DrawPolyLineDirectInternal(basegfx::B2DHomMatrix(), rPoly.getB2DPolygon()))
+    if (maRecorder.IsActive())
+        maRecorder.RecordPolyLine(rPoly);
+
+    if (!mpGraphics && !AcquireGraphics())
         return;
 
-    const basegfx::B2DPolygon aB2DPolyLine(rPoly.getB2DPolygon());
-    const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation());
-    const bool bPixelSnap = bool(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
-
-    if (lcl_TryDirectHairline(*mpGraphics, *this, aB2DPolyLine, aTransform, bPixelSnap))
+    if (!CanDrawPolyline())
         return;
+
+    if (RasterOp::OverPaint == GetRasterOp() && IsLineColor())
+    {
+        basegfx::B2DPolygon aB2DPoly(rPoly.getB2DPolygon());
+        const bool bPixelSnapHairline = (mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline)
+                                        && aB2DPoly.count() < 1000;
+
+        if (mpGraphics->DrawPolyLine(mpMapper->GetDeviceTransformation(), aB2DPoly, 0.0, 0.0, nullptr,
+                                     basegfx::B2DLineJoin::Miter, css::drawing::LineCap::LineCap_BUTT, 15.0,
+                                     bPixelSnapHairline, *this))
+        {
+            return;
+        }
+    }
 
     tools::Polygon aDevicePoly = mpMapper->LogicToDevicePixel(rPoly);
     lcl_DrawHairlineToolsPolygon(*mpGraphics, *this, aDevicePoly);
@@ -151,77 +144,14 @@ void OutputDevice::DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
 }
 
 void OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2DPolygon,
-                                 double fLineWidth,
-                                 basegfx::B2DLineJoin eLineJoin,
-                                 css::drawing::LineCap eLineCap,
-                                 double fMiterMinimumAngle)
+                                double fLineWidth,
+                                basegfx::B2DLineJoin eLineJoin,
+                                css::drawing::LineCap eLineCap,
+                                double fMiterMinimumAngle)
 {
-    assert(!is_double_buffered_window());
-
-    if (maRecorder.IsActive())
-    {
-        LineInfo aLineInfo;
-        if (fLineWidth != 0.0)
-            aLineInfo.SetWidth(std::round(fLineWidth));
-
-        aLineInfo.SetLineJoin(eLineJoin);
-        aLineInfo.SetLineCap(eLineCap);
-
-        tools::Polygon aToolsPolygon(rB2DPolygon);
-        maRecorder.RecordPolyLine(aToolsPolygon, aLineInfo);
-    }
-
-    if (!rB2DPolygon.count() || !IsDeviceOutputNecessary())
-        return;
-
-    if (!PrepareGraphicsOutput(false) || !mpGraphics)
-        return;
-
-    if (DrawPolyLineDirectInternal(basegfx::B2DHomMatrix(), rB2DPolygon, fLineWidth, 0.0,
-                                   nullptr, eLineJoin, eLineCap, fMiterMinimumAngle))
-    {
-        return;
-    }
-
-    LineInfo aInfo;
-    aInfo.SetWidth(std::round(fLineWidth));
-    aInfo.SetLineJoin(eLineJoin);
-    aInfo.SetLineCap(eLineCap);
-
-    DrawPolyLineGeometry(basegfx::B2DPolyPolygon(rB2DPolygon), aInfo);
-}
-
-bool OutputDevice::DrawPolyLineDirect(
-    const basegfx::B2DHomMatrix& rObjectTransform,
-    const basegfx::B2DPolygon& rB2DPolygon,
-    double fLineWidth,
-    double fTransparency,
-    const std::vector< double >* pStroke, // MM01
-    basegfx::B2DLineJoin eLineJoin,
-    css::drawing::LineCap eLineCap,
-    double fMiterMinimumAngle)
-{
-    if(DrawPolyLineDirectInternal(rObjectTransform, rB2DPolygon, fLineWidth, fTransparency,
-        pStroke, eLineJoin, eLineCap, fMiterMinimumAngle))
-    {
-        // Worked, add metafile action (if recorded). This is done only here,
-        // because this function is public, other OutDev functions already add metafile
-        // actions, so they call the internal function directly.
-        if( maRecorder.IsActive() )
-        {
-            LineInfo aLineInfo;
-            if( fLineWidth != 0.0 )
-                aLineInfo.SetWidth( fLineWidth );
-            // Transport known information, might be needed
-            aLineInfo.SetLineJoin(eLineJoin);
-            aLineInfo.SetLineCap(eLineCap);
-            // MiterMinimumAngle does not exist yet in LineInfo
-            tools::Polygon aToolsPolygon( rB2DPolygon );
-            maRecorder.RecordPolyLine( aToolsPolygon, aLineInfo );
-        }
-        return true;
-    }
-    return false;
+    // Delegate entirely to our new master pipeline!
+    DrawPolyLineDirect(basegfx::B2DHomMatrix(), rB2DPolygon, fLineWidth, 0.0,
+                       nullptr, eLineJoin, eLineCap, fMiterMinimumAngle);
 }
 
 static std::pair<basegfx::B2DPolyPolygon, LineInfo>
@@ -250,53 +180,77 @@ lcl_SetupStrokeAndLineInfo(const basegfx::B2DPolygon& rDevicePoly,
     return { std::move(aPolyPolygon), aInfo };
 }
 
-bool OutputDevice::DrawPolyLineDirectInternal(
+bool OutputDevice::DrawPolyLineDirect(
     const basegfx::B2DHomMatrix& rObjectTransform,
     const basegfx::B2DPolygon& rB2DPolygon,
     double fLineWidth,
     double fTransparency,
-    const std::vector<double>* pStroke,
+    const std::vector< double >* pStroke, // MM01
     basegfx::B2DLineJoin eLineJoin,
     css::drawing::LineCap eLineCap,
     double fMiterMinimumAngle)
 {
-    assert(!is_double_buffered_window());
+    auto drawB2DPolyline = [&]() -> bool
+    {
+        assert(!is_double_buffered_window());
 
-    if (!rB2DPolygon.count())
+        if (!rB2DPolygon.count())
+            return true;
+
+        if ((!mpGraphics && !AcquireGraphics()) || !CanDrawPolyline())
+            return false;
+
+        const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation() * rObjectTransform);
+
+        if (GetRasterOp() == RasterOp::OverPaint && IsLineColor())
+        {
+            const bool bPixelSnapHairline = (mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline)
+                                            && rB2DPolygon.count() < 1000;
+
+            bool bDone = mpGraphics->DrawPolyLine(
+                aTransform,
+                rB2DPolygon,
+                fTransparency,
+                fLineWidth,
+                pStroke,
+                eLineJoin,
+                eLineCap,
+                fMiterMinimumAngle,
+                bPixelSnapHairline,
+                *this);
+
+            if (bDone)
+                return true;
+        }
+
+        basegfx::B2DPolygon aDevicePoly(rB2DPolygon);
+        aDevicePoly.transform(aTransform);
+
+        auto [aFallbackPolyPoly, aInfo] = lcl_SetupStrokeAndLineInfo(
+            aDevicePoly, pStroke, fLineWidth, eLineJoin, eLineCap);
+
+        DrawPolyLineGeometry(aFallbackPolyPoly, aInfo);
+
         return true;
+    };
 
-    if (!CanDrawPolyline())
-        return false;
+    bool bSuccess = drawB2DPolyline();
 
-    const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation() * rObjectTransform);
+    if (bSuccess && maRecorder.IsActive())
+    {
+        LineInfo aLineInfo;
+        if (fLineWidth != 0.0)
+            aLineInfo.SetWidth(std::round(fLineWidth));
 
-    const bool bPixelSnapHairline = (mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline)
-                                    && rB2DPolygon.count() < 1000;
+        aLineInfo.SetLineJoin(eLineJoin);
+        aLineInfo.SetLineCap(eLineCap);
 
-    bool bDone = mpGraphics->DrawPolyLine(
-        aTransform,
-        rB2DPolygon,
-        fTransparency,
-        fLineWidth,
-        pStroke,
-        eLineJoin,
-        eLineCap,
-        fMiterMinimumAngle,
-        bPixelSnapHairline,
-        *this);
+        // Note: We don't record the dashing/stroke here because DrawPolyLineDirect
+        // historically records the logical path, but you can adjust this if needed!
+        maRecorder.RecordPolyLine(tools::Polygon(rB2DPolygon), aLineInfo);
+    }
 
-    if (bDone)
-        return true;
-
-    basegfx::B2DPolygon aDevicePoly(rB2DPolygon);
-    aDevicePoly.transform(aTransform);
-
-    auto [aFallbackPolyPoly, aInfo] = lcl_SetupStrokeAndLineInfo(
-        aDevicePoly, pStroke, fLineWidth, eLineJoin, eLineCap);
-
-    DrawPolyLineGeometry(aFallbackPolyPoly, aInfo);
-
-    return true;
+    return bSuccess;
 }
 
 static basegfx::B2DPolyPolygon lcl_ApplyLineDashing(const basegfx::B2DPolyPolygon& rLinePolyPolygon, const LineInfo& rInfo)
