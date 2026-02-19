@@ -293,6 +293,8 @@ public:
     SalGraphics const           *GetGraphics() const;
     SalGraphics*                GetGraphics();
 
+    bool CanDrawPolyline();
+
     void                        SetConnectMetaFile( GDIMetaFile* pMtf );
     GDIMetaFile*                GetConnectMetaFile() const { return maRecorder.GetConnectMetaFile(); }
 

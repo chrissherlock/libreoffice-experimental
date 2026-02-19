@@ -742,4 +742,14 @@ void OutputDevice::ImplDisposeCanvas()
     }
 }
 
+bool OutputDevice::CanDrawPolyline()
+{
+    // If we can use the B2D fast-path, we have what we need to proceed
+    if (GetRasterOp() == RasterOp::OverPaint && IsLineColor())
+        return true;
+
+    // Otherwise, we strictly require the legacy graphics to be prepared and available
+    return PrepareGraphicsOutput(false) && mpGraphics != nullptr;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
