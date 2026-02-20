@@ -34,7 +34,7 @@
 #include <cassert>
 #include <memory>
 
-#define OUTDEV_POLYPOLY_STACKBUF        32
+constexpr sal_uInt16 OUTDEV_POLYPOLY_STACKBUF = 32;
 
 void OutputDevice::DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly )
 {
