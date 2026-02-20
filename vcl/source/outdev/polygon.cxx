@@ -256,95 +256,123 @@ void OutputDevice::DrawPolyPolygon(const basegfx::B2DPolyPolygon& rB2DPolyPoly)
     ImplDrawPolyPolygon(aPixelPolyPolygon.Count(), aPixelPolyPolygon);
 }
 
-// #100127# Extracted from OutputDevice::DrawPolyPolygon()
-void OutputDevice::ImplDrawPolyPolygon( sal_uInt16 nPoly, const tools::PolyPolygon& rPolyPoly )
+namespace
 {
-    // AW: This crashes on empty PolyPolygons, avoid that
-    if (!nPoly)
-        return;
-
+struct PolyPolyBuffer
+{
+    // The fast stack buffers
     sal_uInt32 aStackAry1[OUTDEV_POLYPOLY_STACKBUF];
     const Point* aStackAry2[OUTDEV_POLYPOLY_STACKBUF];
     const PolyFlags* aStackAry3[OUTDEV_POLYPOLY_STACKBUF];
+
+    // The active pointers (will point to stack OR heap)
     sal_uInt32* pPointAry;
-    const Point**    pPointAryAry;
-    const PolyFlags**  pFlagAryAry;
-    sal_uInt16 i = 0;
-    sal_uInt16 j = 0;
-    sal_uInt16 last = 0;
-    bool bHaveBezier = false;
-    if ( nPoly > OUTDEV_POLYPOLY_STACKBUF )
-    {
-        pPointAry       = new sal_uInt32[nPoly];
-        pPointAryAry    = new const Point*[nPoly];
-        pFlagAryAry     = new const PolyFlags*[nPoly];
-    }
-    else
-    {
-        pPointAry       = aStackAry1;
-        pPointAryAry    = aStackAry2;
-        pFlagAryAry     = aStackAry3;
-    }
+    const Point** pPointAryAry;
+    const PolyFlags** pFlagAryAry;
 
-    do
+    bool bUseHeap;
+
+    // Extracted state variables
+    sal_uInt16 mnValidCount = 0;
+    sal_uInt16 mnLastIndex = 0;
+    bool mbHaveBezier = false;
+
+    explicit PolyPolyBuffer(const tools::PolyPolygon& rPolyPoly)
+        : bUseHeap(rPolyPoly.Count() > OUTDEV_POLYPOLY_STACKBUF)
     {
-        const tools::Polygon& rPoly = rPolyPoly.GetObject( i );
-        sal_uInt16 nSize = rPoly.GetSize();
-        if ( nSize )
+        sal_uInt16 nPoly = rPolyPoly.Count();
+
+        if (bUseHeap)
         {
-            pPointAry[j] = nSize;
-            pPointAryAry[j] = rPoly.GetConstPointAry();
-            pFlagAryAry[j] = rPoly.GetConstFlagAry();
-            last = i;
-
-            if( pFlagAryAry[j] )
-                bHaveBezier = true;
-
-            ++j;
-        }
-        ++i;
-    }
-    while ( i < nPoly );
-
-    if ( j == 1 )
-    {
-        // #100127# Forward beziers to sal, if any
-        if( bHaveBezier )
-        {
-            if( !mpGraphics->DrawPolygonBezier( *pPointAry, *pPointAryAry, *pFlagAryAry, *this ) )
-            {
-                tools::Polygon aPoly = tools::Polygon::SubdivideBezier( rPolyPoly.GetObject( last ) );
-                mpGraphics->DrawPolygon( aPoly.GetSize(), aPoly.GetConstPointAry(), *this );
-            }
+            pPointAry    = new sal_uInt32[nPoly];
+            pPointAryAry = new const Point*[nPoly];
+            pFlagAryAry  = new const PolyFlags*[nPoly];
         }
         else
         {
-            mpGraphics->DrawPolygon( *pPointAry, *pPointAryAry, *this );
+            pPointAry    = aStackAry1;
+            pPointAryAry = aStackAry2;
+            pFlagAryAry  = aStackAry3;
         }
-    }
-    else
-    {
-        // #100127# Forward beziers to sal, if any
-        if( bHaveBezier )
+
+        // Flattens valid sub-polygons into parallel C-arrays for the graphics
+        // backend and detects Bézier curves.
+
+        for (sal_uInt16 i = 0; i < nPoly; ++i)
         {
-            if (!mpGraphics->DrawPolyPolygonBezier(j, pPointAry, pPointAryAry, pFlagAryAry, *this))
+            const tools::Polygon& rPoly = rPolyPoly.GetObject(i);
+            sal_uInt16 nSize = rPoly.GetSize();
+
+            if (nSize)
             {
-                tools::PolyPolygon aPolyPoly = tools::PolyPolygon::SubdivideBezier( rPolyPoly );
-                ImplDrawPolyPolygon( aPolyPoly.Count(), aPolyPoly );
+                pPointAry[mnValidCount] = nSize;
+                pPointAryAry[mnValidCount] = rPoly.GetConstPointAry();
+                pFlagAryAry[mnValidCount] = rPoly.GetConstFlagAry();
+                mnLastIndex = i;
+
+                if (pFlagAryAry[mnValidCount])
+                    mbHaveBezier = true;
+
+                ++mnValidCount;
             }
-        }
-        else
-        {
-            mpGraphics->DrawPolyPolygon( j, pPointAry, pPointAryAry, *this );
         }
     }
 
-    if ( pPointAry != aStackAry1 )
+    ~PolyPolyBuffer()
     {
-        delete[] pPointAry;
-        delete[] pPointAryAry;
-        delete[] pFlagAryAry;
+        if (bUseHeap)
+        {
+            delete[] pPointAry;
+            delete[] pPointAryAry;
+            delete[] pFlagAryAry;
+        }
     }
+};
+
+} // end anonymous namespace
+
+void OutputDevice::ImplDrawPolyPolygon( sal_uInt16 nPoly, const tools::PolyPolygon& rPolyPoly )
+{
+    if (!nPoly)
+        return;
+
+    PolyPolyBuffer aBuffer(rPolyPoly);
+
+    if (aBuffer.mnValidCount == 0)
+        return;
+
+    if (aBuffer.mnValidCount == 1)
+    {
+        // Only one valid polygon, fallback to singular draw
+        const tools::Polygon& rPoly = rPolyPoly.GetObject(aBuffer.mnLastIndex);
+        ImplDrawPolygon(rPoly);
+
+        return;
+    }
+
+    // Draw the full PolyPolygon
+    if (aBuffer.mbHaveBezier)
+    {
+        if (!mpGraphics->DrawPolyPolygonBezier(
+                aBuffer.mnValidCount,
+                aBuffer.pPointAry,
+                aBuffer.pPointAryAry,
+                aBuffer.pFlagAryAry,
+                *this))
+        {
+            // Backend doesn't support beziers natively, subdivide and retry
+            tools::PolyPolygon aPolyPoly = tools::PolyPolygon::SubdivideBezier(rPolyPoly);
+            ImplDrawPolyPolygon(aPolyPoly.Count(), aPolyPoly);
+        }
+
+        return;
+    }
+
+    mpGraphics->DrawPolyPolygon(
+        aBuffer.mnValidCount,
+        aBuffer.pPointAry,
+        aBuffer.pPointAryAry,
+        *this);
 }
 
 void OutputDevice::ImplDrawPolygon( const tools::Polygon& rPoly, const tools::PolyPolygon* pClipPolyPoly )
