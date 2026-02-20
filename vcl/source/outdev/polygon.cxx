@@ -393,22 +393,37 @@ void OutputDevice::ImplDrawPolygon( const tools::Polygon& rPoly, const tools::Po
     }
 }
 
-void OutputDevice::ImplDrawPolyPolygon( const tools::PolyPolygon& rPolyPoly, const tools::PolyPolygon* pClipPolyPoly )
+namespace
 {
-    std::unique_ptr<tools::PolyPolygon> pAllocatedPolyPoly;
+struct ClippedPolygonData
+{
+    std::unique_ptr<tools::PolyPolygon> pAllocated;
+    tools::PolyPolygon* pActive = nullptr;
+};
+}
 
-    tools::PolyPolygon* pPolyPoly;
+static ClippedPolygonData lcl_GetClippedPolyPolygon(const tools::PolyPolygon& rPolyPoly, const tools::PolyPolygon* pClipPolyPoly)
+{
+    ClippedPolygonData aData;
 
-    if( pClipPolyPoly )
+    if (pClipPolyPoly)
     {
-        pAllocatedPolyPoly = std::make_unique<tools::PolyPolygon>();
-        pPolyPoly = pAllocatedPolyPoly.get();
-        rPolyPoly.GetIntersection( *pClipPolyPoly, *pPolyPoly );
+        aData.pAllocated = std::make_unique<tools::PolyPolygon>();
+        aData.pActive = aData.pAllocated.get();
+        rPolyPoly.GetIntersection(*pClipPolyPoly, *aData.pActive);
     }
     else
     {
-        pPolyPoly = const_cast<tools::PolyPolygon*>(&rPolyPoly);
+        aData.pActive = const_cast<tools::PolyPolygon*>(&rPolyPoly);
     }
+
+    return aData;
+}
+
+void OutputDevice::ImplDrawPolyPolygon(const tools::PolyPolygon& rPolyPoly, const tools::PolyPolygon* pClipPolyPoly)
+{
+    auto aClippedData = lcl_GetClippedPolyPolygon(rPolyPoly, pClipPolyPoly);
+    tools::PolyPolygon* pPolyPoly = aClippedData.pActive;
 
     if( pPolyPoly->Count() == 1 )
     {
