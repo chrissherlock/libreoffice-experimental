@@ -1406,10 +1406,10 @@ void VclProcessor2D::RenderPolygonStrokePrimitive2D(
                 // for very complex polygons, too
                 for (sal_uInt32 a(0); a < nCount; a++)
                 {
-                    mpOutputDevice->DrawPolyLine(aHairlinePolyPolygon.getB2DPolygon(a),
-                                                 fDiscreteLineWidth, rLineAttribute.getLineJoin(),
-                                                 rLineAttribute.getLineCap(),
-                                                 rLineAttribute.getMiterMinimumAngle());
+                    mpOutputDevice->DrawPolyLine(
+                        aHairlinePolyPolygon.getB2DPolygon(a), fDiscreteLineWidth,
+                        rLineAttribute.getLineJoin(), rLineAttribute.getLineCap(),
+                        basegfx::B2DHomMatrix(), rLineAttribute.getMiterMinimumAngle());
                 }
 
                 bDone = true;

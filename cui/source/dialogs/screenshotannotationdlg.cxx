@@ -470,14 +470,23 @@ void ScreenshotAnnotationDlg_Impl::PaintScreenShotEntry(
 
     mxVirtualBufferDevice->SetLineColor(rColor);
 
+    bool                        DrawPolyLine(
+                                    const basegfx::B2DPolygon&,
+                                    double fLineWidth = 0.0,
+                                    basegfx::B2DLineJoin eLineJoin = basegfx::B2DLineJoin::Round,
+                                    css::drawing::LineCap eLineCap = css::drawing::LineCap_BUTT,
+                                    const basegfx::B2DHomMatrix& rObjectTransform = basegfx::B2DHomMatrix(),
+                                    double fMiterMinimumAngle = basegfx::deg2rad(15.0),
+                                    double fTransparency = 0.0,
+                                    const std::vector<double>* pStroke = nullptr); // MM01
     // try to use transparency
-    if (!mxVirtualBufferDevice->DrawPolyLineDirect(
-        basegfx::B2DHomMatrix(),
+    if (!mxVirtualBufferDevice->DrawPolyLine(
         aPolygon,
         fLineWidth,
-        fTransparency,
-        nullptr, // MM01
-        basegfx::B2DLineJoin::Round))
+        basegfx::B2DLineJoin::Round,
+        css::drawing::LineCap_BUTT,
+        basegfx::B2DHomMatrix(),
+        basegfx::deg2rad(15.0), fTransparency))
     {
         // no transparency, draw without
         mxVirtualBufferDevice->DrawPolyLine(

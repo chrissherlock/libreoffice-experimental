@@ -342,7 +342,9 @@ private:
                 aAxisPolygon.append({ x2, y });
 
                 rRenderContext.SetLineColor(rAttributes.getColorAxis().getFinalColor());
-                rRenderContext.DrawPolyLineDirect(aMatrix, aAxisPolygon, 0.2 * mfScaleX);
+                rRenderContext.DrawPolyLine(aAxisPolygon, 0.2 * mfScaleX,
+                                            basegfx::B2DLineJoin::Round, css::drawing::LineCap_BUTT,
+                                            aMatrix);
             }
         }
 
@@ -350,9 +352,9 @@ private:
 
         for (auto& rPolygon : aPolygons)
         {
-            rRenderContext.DrawPolyLineDirect(aMatrix, rPolygon,
-                                              rAttributes.getLineWeight() * mfScaleX, 0.0, nullptr,
-                                              basegfx::B2DLineJoin::Round);
+            rRenderContext.DrawPolyLine(rPolygon, rAttributes.getLineWeight() * mfScaleX,
+                                        basegfx::B2DLineJoin::Round, css::drawing::LineCap_BUTT,
+                                        aMatrix);
         }
 
         for (auto& rMarker : aMarkers)
@@ -442,7 +444,9 @@ private:
                 aAxisPolygon.append({ x2, nZeroPosition });
 
                 rRenderContext.SetLineColor(rAttributes.getColorAxis().getFinalColor());
-                rRenderContext.DrawPolyLineDirect(aMatrix, aAxisPolygon, 0.2 * mfScaleX);
+                rRenderContext.DrawPolyLine(aAxisPolygon, 0.2 * mfScaleX,
+                                            basegfx::B2DLineJoin::Round, css::drawing::LineCap_BUTT,
+                                            aMatrix);
             }
         }
         else

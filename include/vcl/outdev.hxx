@@ -52,6 +52,7 @@
 #include <basegfx/numeric/ftools.hxx>
 #include <basegfx/vector/b2enums.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
+#include <basegfx/matrix/b2dhommatrix.hxx>
 
 #include <comphelper/scopeguard.hxx>
 #include <cppuhelper/weakref.hxx>
@@ -133,7 +134,6 @@ namespace vcl
 }
 
 namespace basegfx {
-    class B2DHomMatrix;
     class B2DPoint;
     class B2ISize;
 }
@@ -754,12 +754,15 @@ public:
      */
     void                        DrawPolyLine( const tools::Polygon& rPoly );
 
-    void                        DrawPolyLine(
+    bool                        DrawPolyLine(
                                     const basegfx::B2DPolygon&,
                                     double fLineWidth = 0.0,
                                     basegfx::B2DLineJoin eLineJoin = basegfx::B2DLineJoin::Round,
                                     css::drawing::LineCap eLineCap = css::drawing::LineCap_BUTT,
-                                    double fMiterMinimumAngle = basegfx::deg2rad(15.0));
+                                    const basegfx::B2DHomMatrix& rObjectTransform = basegfx::B2DHomMatrix(),
+                                    double fMiterMinimumAngle = basegfx::deg2rad(15.0),
+                                    double fTransparency = 0.0,
+                                    const std::vector<double>* pStroke = nullptr); // MM01
 
     /** Render the given polygon as a line stroke
 
@@ -774,17 +777,6 @@ public:
     void                        DrawPolyLine( const tools::Polygon& rPoly,
                                               const LineInfo& rLineInfo );
 
-    // #i101491#
-    // Helper who tries to use SalGDI's DrawPolyLine direct and returns it's bool.
-    bool                        DrawPolyLineDirect(
-                                    const basegfx::B2DHomMatrix& rObjectTransform,
-                                    const basegfx::B2DPolygon& rB2DPolygon,
-                                    double fLineWidth = 0.0,
-                                    double fTransparency = 0.0,
-                                    const std::vector< double >* = nullptr, // MM01
-                                    basegfx::B2DLineJoin eLineJoin = basegfx::B2DLineJoin::NONE,
-                                    css::drawing::LineCap eLineCap = css::drawing::LineCap_BUTT,
-                                    double fMiterMinimumAngle = basegfx::deg2rad(15.0));
     ///@}
 
     /** @name Polygon functions

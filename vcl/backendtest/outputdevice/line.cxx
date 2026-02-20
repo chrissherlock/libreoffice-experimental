@@ -153,14 +153,15 @@ Bitmap OutputDeviceTestLine::setupDashedLine()
     rectangle.shrink(2);
 
     std::vector<double> stroke({ 2.0, 1.0 });
-    mpVirtualDevice->DrawPolyLineDirect( basegfx::B2DHomMatrix(),
+    mpVirtualDevice->DrawPolyLine(
         basegfx::B2DPolygon{
             basegfx::B2DPoint(rectangle.Left(), rectangle.Top()),
             basegfx::B2DPoint(rectangle.Left(), rectangle.Bottom()),
             basegfx::B2DPoint(rectangle.Right(), rectangle.Bottom()),
             basegfx::B2DPoint(rectangle.Right(), rectangle.Top()),
             basegfx::B2DPoint(rectangle.Left(), rectangle.Top())},
-        1, 0, &stroke, basegfx::B2DLineJoin::NONE );
+        1, basegfx::B2DLineJoin::NONE, css::drawing::LineCap_BUTT, basegfx::B2DHomMatrix(),
+        basegfx::deg2rad(15.0), 0.0, &stroke);
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
 }
@@ -239,12 +240,10 @@ Bitmap OutputDeviceTestLine::setupLineCap( css::drawing::LineCap lineCap )
         basegfx::B2DPoint(rectangle.LeftCenter().getX(), rectangle.LeftCenter().getY()),
         basegfx::B2DPoint(rectangle.RightCenter().getX(), rectangle.RightCenter().getY())};
 
-    mpVirtualDevice->DrawPolyLineDirect( basegfx::B2DHomMatrix(),poly,
-        CAPWIDTH, 0, nullptr, basegfx::B2DLineJoin::NONE, lineCap );
+    mpVirtualDevice->DrawPolyLine(poly, CAPWIDTH, basegfx::B2DLineJoin::NONE, lineCap);
 
     mpVirtualDevice->SetLineColor(constFillColor);
-    mpVirtualDevice->DrawPolyLineDirect( basegfx::B2DHomMatrix(), poly,
-        0, 0, nullptr, basegfx::B2DLineJoin::NONE );
+    mpVirtualDevice->DrawPolyLine(poly, 0, basegfx::B2DLineJoin::NONE);
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
 }
@@ -264,12 +263,10 @@ Bitmap OutputDeviceTestLine::setupLineJoin( basegfx::B2DLineJoin lineJoin )
         basegfx::B2DPoint(rectangle.TopRight().getX(), rectangle.TopRight().getY()),
         basegfx::B2DPoint(rectangle.BottomRight().getX(), rectangle.BottomRight().getY())};
 
-    mpVirtualDevice->DrawPolyLineDirect( basegfx::B2DHomMatrix(), poly,
-        CAPWIDTH, 0, nullptr, lineJoin );
+    mpVirtualDevice->DrawPolyLine(poly, CAPWIDTH, lineJoin);
 
     mpVirtualDevice->SetLineColor(constFillColor);
-    mpVirtualDevice->DrawPolyLineDirect( basegfx::B2DHomMatrix(), poly,
-        0, 0, nullptr, lineJoin );
+    mpVirtualDevice->DrawPolyLine(poly, 0, lineJoin);
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
 }

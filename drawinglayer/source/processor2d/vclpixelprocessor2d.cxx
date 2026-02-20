@@ -142,8 +142,9 @@ bool VclPixelProcessor2D::tryDrawPolygonHairlinePrimitive2DDirect(
     //aLocalPolygon.transform(maCurrentTransformation);
 
     // try drawing; if it did not work, use standard fallback
-    return mpOutputDevice->DrawPolyLineDirect(maCurrentTransformation, rLocalPolygon, 0.0,
-                                              fTransparency);
+    return mpOutputDevice->DrawPolyLine(rLocalPolygon, 0.0, basegfx::B2DLineJoin::Round,
+                                        css::drawing::LineCap_BUTT, maCurrentTransformation,
+                                        basegfx::deg2rad(15.0), fTransparency);
 }
 
 bool VclPixelProcessor2D::tryDrawPolygonStrokePrimitive2DDirect(
@@ -179,13 +180,13 @@ bool VclPixelProcessor2D::tryDrawPolygonStrokePrimitive2DDirect(
     mpOutputDevice->SetLineColor(Color(aLineColor));
 
     // MM01 draw direct, hand over dash data if available
-    return mpOutputDevice->DrawPolyLineDirect(
-        maCurrentTransformation, rLocalPolygon,
+    return mpOutputDevice->DrawPolyLine(
+        rLocalPolygon,
         // tdf#124848 use LineWidth direct, do not try to solve for zero-case (aka hairline)
-        rSource.getLineAttribute().getWidth(), fTransparency,
-        bStrokeAttributeNotUsed ? nullptr : &rSource.getStrokeAttribute().getDotDashArray(),
-        rSource.getLineAttribute().getLineJoin(), rSource.getLineAttribute().getLineCap(),
-        rSource.getLineAttribute().getMiterMinimumAngle());
+        rSource.getLineAttribute().getWidth(), rSource.getLineAttribute().getLineJoin(),
+        rSource.getLineAttribute().getLineCap(), maCurrentTransformation,
+        rSource.getLineAttribute().getMiterMinimumAngle(), 0.0,
+        bStrokeAttributeNotUsed ? nullptr : &rSource.getStrokeAttribute().getDotDashArray());
 }
 
 void VclPixelProcessor2D::processBasePrimitive2D(const primitive2d::BasePrimitive2D& rCandidate)

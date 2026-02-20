@@ -1815,7 +1815,7 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawPolyLine)
         aLineInfo.SetLineCap(css::drawing::LineCap_BUTT);
 
         pVDev->DrawPolyLine(aPolygon, 3, basegfx::B2DLineJoin::Bevel, css::drawing::LineCap_BUTT,
-                            basegfx::deg2rad(15.0));
+                            basegfx::B2DHomMatrix(), basegfx::deg2rad(15.0));
 
         MetaAction* pAction = aMtf.GetAction(INITIAL_SETUP_ACTION_COUNT);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Not a polygon action", MetaActionType::POLYLINE,

@@ -67,8 +67,6 @@ void OutputDevice::DrawPolyLine(const tools::Polygon& rPoly)
     if (rPoly.GetSize() < 2)
         return;
 
-
-
     if (!CanDrawPolyline())
         return;
 
@@ -114,8 +112,7 @@ void OutputDevice::DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
                     rPoly.getB2DPolygon(),
                     rLineInfo.GetWidth(),
                     rLineInfo.GetLineJoin(),
-                    rLineInfo.GetLineCap(),
-                    basegfx::deg2rad(15.0) /* default fMiterMinimumAngle, value not available in LineInfo */);
+                    rLineInfo.GetLineCap());
                 return;
             default:
                 SAL_WARN("vcl.gdi", "Unknown LineStyle: " << static_cast<int>(eLineStyle));
@@ -140,17 +137,6 @@ void OutputDevice::DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
         tools::Polygon aDevicePoly = mpMapper->LogicToDevicePixel(rPoly);
         lcl_DrawHairlineToolsPolygon(*mpGraphics, *this, aDevicePoly);
     }
-}
-
-void OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2DPolygon,
-                                double fLineWidth,
-                                basegfx::B2DLineJoin eLineJoin,
-                                css::drawing::LineCap eLineCap,
-                                double fMiterMinimumAngle)
-{
-    // Delegate entirely to our new master pipeline!
-    DrawPolyLineDirect(basegfx::B2DHomMatrix(), rB2DPolygon, fLineWidth, 0.0,
-                       nullptr, eLineJoin, eLineCap, fMiterMinimumAngle);
 }
 
 static std::pair<basegfx::B2DPolyPolygon, LineInfo>
@@ -179,15 +165,14 @@ lcl_SetupStrokeAndLineInfo(const basegfx::B2DPolygon& rDevicePoly,
     return { std::move(aPolyPolygon), aInfo };
 }
 
-bool OutputDevice::DrawPolyLineDirect(
-    const basegfx::B2DHomMatrix& rObjectTransform,
-    const basegfx::B2DPolygon& rB2DPolygon,
-    double fLineWidth,
-    double fTransparency,
-    const std::vector< double >* pStroke, // MM01
-    basegfx::B2DLineJoin eLineJoin,
-    css::drawing::LineCap eLineCap,
-    double fMiterMinimumAngle)
+bool OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2DPolygon,
+                                double fLineWidth,
+                                basegfx::B2DLineJoin eLineJoin,
+                                css::drawing::LineCap eLineCap,
+                                const basegfx::B2DHomMatrix& rObjectTransform,
+                                double fMiterMinimumAngle,
+                                double fTransparency,
+                                const std::vector<double>* pStroke) // MM01
 {
     auto drawB2DPolyline = [&]() -> bool
     {

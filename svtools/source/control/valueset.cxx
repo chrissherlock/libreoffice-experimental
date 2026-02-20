@@ -1342,12 +1342,13 @@ void ValueSet::ImplDrawSelect(vcl::RenderContext& rRenderContext,
 
                 const int nThickness = nAdjust * 2;
 
-                if (!rRenderContext.DrawPolyLineDirect(basegfx::B2DHomMatrix(),
-                                                       aRectPoly,
-                                                       nThickness,
-                                                       nTransparencePercent / 100.0,
-                                                       nullptr,
-                                                       basegfx::B2DLineJoin::Miter))
+                if (!rRenderContext.DrawPolyLine(aRectPoly,
+                                                 nThickness,
+                                                 basegfx::B2DLineJoin::Miter,
+                                                 css::drawing::LineCap_BUTT,
+                                                 basegfx::B2DHomMatrix(),
+                                                 basegfx::deg2rad(15.0),
+                                                 nTransparencePercent / 100.0))
                 {
                     SAL_WARN("svtools", "presumably impossible in practice, but fallback to see something");
                     rRenderContext.DrawPolyLine(aRectPoly, nThickness, basegfx::B2DLineJoin::Miter);
