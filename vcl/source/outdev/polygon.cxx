@@ -43,7 +43,7 @@ void OutputDevice::DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly )
     if (maRecorder.IsActive())
         maRecorder.RecordPolyPolygon(rPolyPoly);
 
-    sal_uInt16 nPoly = rPolyPoly.Count();
+    const sal_uInt16 nPoly = rPolyPoly.Count();
     if (!nPoly || !PrepareGraphicsOutput() || !mpGraphics)
         return;
 
@@ -66,52 +66,62 @@ void OutputDevice::DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly )
                 *this);
         }
 
-        bool bSuccess(true);
-        if (IsLineColor())
-        {
-            const bool bPixelSnapHairline(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
-
-            for(auto const& rPolygon : std::as_const(aB2DPolyPolygon))
-            {
-                bSuccess = mpGraphics->DrawPolyLine(
-                    aTransform,
-                    rPolygon,
-                    0.0,
-                    0.0, // tdf#124848 hairline
-                    nullptr, // MM01
-                    basegfx::B2DLineJoin::NONE,
-                    css::drawing::LineCap_BUTT,
-                    basegfx::deg2rad(15.0), // not used with B2DLineJoin::NONE, but the correct default
-                    bPixelSnapHairline,
-                    *this);
-                if (!bSuccess)
-                    break;
-            }
-        }
-
-        if(bSuccess)
+        if (ImplDrawPolyPolygonOutlines(aTransform, aB2DPolyPolygon))
             return;
     }
 
-    if ( nPoly == 1 )
+    ImplDrawPolyPolygonFallback(nPoly, rPolyPoly);
+}
+
+bool OutputDevice::ImplDrawPolyPolygonOutlines(
+    const basegfx::B2DHomMatrix& rTransform,
+    const basegfx::B2DPolyPolygon& rB2DPolyPolygon,
+    double fTransparency)
+{
+    if (!IsLineColor())
+        return true;
+
+    const bool bPixelSnapHairline(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+
+    for (auto const& rPolygon : std::as_const(rB2DPolyPolygon))
+    {
+        bool bSuccess = mpGraphics->DrawPolyLine(
+            rTransform,
+            rPolygon,
+            fTransparency,
+            0.0, // tdf#124848 hairline
+            nullptr, // MM01
+            basegfx::B2DLineJoin::NONE,
+            css::drawing::LineCap_BUTT,
+            basegfx::deg2rad(15.0), // not used with B2DLineJoin::NONE, but the correct default
+            bPixelSnapHairline,
+            *this);
+
+        if (!bSuccess)
+            return false;
+    }
+
+    return true;
+}
+
+void OutputDevice::ImplDrawPolyPolygonFallback(sal_uInt16 nPoly, const tools::PolyPolygon& rPolyPoly)
+{
+    if (nPoly == 1)
     {
         // #100127# Map to DrawPolygon
-        const tools::Polygon& aPoly = rPolyPoly.GetObject( 0 );
-        if( aPoly.GetSize() >= 2 )
+        const tools::Polygon& aPoly = rPolyPoly.GetObject(0);
+        if (aPoly.GetSize() >= 2)
         {
             vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
-
-            DrawPolygon( aPoly );
-
-
+            DrawPolygon(aPoly);
         }
     }
-    else
+    else if (nPoly > 1)
     {
         // #100127# moved real tools::PolyPolygon draw to separate method,
         // have to call recursively, avoiding duplicate
         // ImplLogicToDevicePixel calls
-        ImplDrawPolyPolygon( nPoly, mpMapper->LogicToDevicePixel(rPolyPoly));
+        ImplDrawPolyPolygon(nPoly, mpMapper->LogicToDevicePixel(rPolyPoly));
     }
 }
 
@@ -157,7 +167,7 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
                 *this);
         }
 
-        bool bSuccess(true);
+        bool bSuccess = true;
         if (IsLineColor())
         {
             const bool bPixelSnapHairline(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
@@ -175,7 +185,7 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
                 *this);
         }
 
-        if(bSuccess)
+        if (bSuccess)
             return;
     }
 
@@ -229,26 +239,11 @@ void OutputDevice::DrawPolyPolygon(const basegfx::B2DPolyPolygon& rB2DPolyPoly)
             aB2DPolyPolygon.setClosed(true);
 
         if (IsFillColor())
-        {
             mpGraphics->DrawPolyPolygon(aTransform, aB2DPolyPolygon, 0.0, *this);
-        }
 
-        if (IsLineColor())
-        {
-            const bool bPixelSnapHairline(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+        if (!ImplDrawPolyPolygonOutlines(aTransform, aB2DPolyPolygon, (255 - GetLineColor().GetAlpha()) / 255.0))
+            return false;
 
-            for (auto const& rPolygon : std::as_const(aB2DPolyPolygon))
-            {
-                if (!mpGraphics->DrawPolyLine(
-                        aTransform, rPolygon, (255 - GetLineColor().GetAlpha()) / 255.0,
-                        0.0, nullptr, basegfx::B2DLineJoin::NONE,
-                        css::drawing::LineCap_BUTT, basegfx::deg2rad(15.0),
-                        bPixelSnapHairline, *this))
-                {
-                    return false; // Hardware failed mid-draw
-                }
-            }
-        }
         return true;
     };
 
