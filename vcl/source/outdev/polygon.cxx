@@ -395,17 +395,21 @@ void OutputDevice::ImplDrawPolygon( const tools::Polygon& rPoly, const tools::Po
 
 void OutputDevice::ImplDrawPolyPolygon( const tools::PolyPolygon& rPolyPoly, const tools::PolyPolygon* pClipPolyPoly )
 {
+    std::unique_ptr<tools::PolyPolygon> pAllocatedPolyPoly;
+
     tools::PolyPolygon* pPolyPoly;
 
     if( pClipPolyPoly )
     {
-        pPolyPoly = new tools::PolyPolygon;
+        pAllocatedPolyPoly = std::make_unique<tools::PolyPolygon>();
+        pPolyPoly = pAllocatedPolyPoly.get();
         rPolyPoly.GetIntersection( *pClipPolyPoly, *pPolyPoly );
     }
     else
     {
         pPolyPoly = const_cast<tools::PolyPolygon*>(&rPolyPoly);
     }
+
     if( pPolyPoly->Count() == 1 )
     {
         const tools::Polygon& rPoly = pPolyPoly->GetObject( 0 );
@@ -443,9 +447,6 @@ void OutputDevice::ImplDrawPolyPolygon( const tools::PolyPolygon& rPolyPoly, con
         else
             mpGraphics->DrawPolyPolygon( nCount, pPointAry.get(), pPointAryAry.get(), *this );
     }
-
-    if( pClipPolyPoly )
-        delete pPolyPoly;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
