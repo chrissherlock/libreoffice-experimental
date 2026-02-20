@@ -425,42 +425,74 @@ void OutputDevice::ImplDrawPolyPolygon(const tools::PolyPolygon& rPolyPoly, cons
     auto aClippedData = lcl_GetClippedPolyPolygon(rPolyPoly, pClipPolyPoly);
     tools::PolyPolygon* pPolyPoly = aClippedData.pActive;
 
-    if( pPolyPoly->Count() == 1 )
-    {
-        const tools::Polygon& rPoly = pPolyPoly->GetObject( 0 );
-        sal_uInt16 nSize = rPoly.GetSize();
+    if (pPolyPoly->Count() == 1)
+        ImplDrawSinglePolygon(pPolyPoly->GetObject(0));
+    else if (pPolyPoly->Count())
+        ImplDrawMultiplePolygons(*pPolyPoly);
+}
 
-        if( nSize >= 2 )
+void OutputDevice::ImplDrawSinglePolygon(const tools::Polygon& rPoly)
+{
+    sal_uInt16 nSize = rPoly.GetSize();
+
+    if (nSize >= 2)
+    {
+        const Point* pPtAry = rPoly.GetConstPointAry();
+        mpGraphics->DrawPolygon(nSize, pPtAry, *this);
+    }
+}
+
+namespace
+{
+struct PolygonRenderBuffer
+{
+    std::unique_ptr<sal_uInt32[]> pPointAry;
+    std::unique_ptr<const Point*[]> pPointAryAry;
+    sal_uInt16 nValidCount = 0;
+
+    explicit PolygonRenderBuffer(const tools::PolyPolygon& rPolyPoly)
+    {
+        sal_uInt16 nTotalCount = rPolyPoly.Count();
+
+        // Allocate the arrays based on the total possible size
+        pPointAry.reset(new sal_uInt32[nTotalCount]);
+        pPointAryAry.reset(new const Point*[nTotalCount]);
+
+        // Unpack and filter the polygons
+        for (sal_uInt16 i = 0; i < nTotalCount; ++i)
         {
-            const Point* pPtAry = rPoly.GetConstPointAry();
-            mpGraphics->DrawPolygon( nSize, pPtAry, *this );
+            const tools::Polygon& rPoly = rPolyPoly.GetObject(i);
+            sal_uInt16 nSize = rPoly.GetSize();
+
+            if (nSize >= 2)
+            {
+                pPointAry[nValidCount] = nSize;
+                pPointAryAry[nValidCount] = rPoly.GetConstPointAry();
+                nValidCount++;
+            }
         }
     }
-    else if( pPolyPoly->Count() )
-    {
-        sal_uInt16 nCount = pPolyPoly->Count();
-        std::unique_ptr<sal_uInt32[]> pPointAry(new sal_uInt32[nCount]);
-        std::unique_ptr<const Point*[]> pPointAryAry(new const Point*[nCount]);
-        sal_uInt16 i = 0;
-        do
-        {
-            const tools::Polygon& rPoly = pPolyPoly->GetObject( i );
-            sal_uInt16 nSize = rPoly.GetSize();
-            if ( nSize )
-            {
-                pPointAry[i] = nSize;
-                pPointAryAry[i] = rPoly.GetConstPointAry();
-                i++;
-            }
-            else
-                nCount--;
-        }
-        while( i < nCount );
+};
+}
 
-        if( nCount == 1 )
-            mpGraphics->DrawPolygon( pPointAry[0], pPointAryAry[0], *this );
-        else
-            mpGraphics->DrawPolyPolygon( nCount, pPointAry.get(), pPointAryAry.get(), *this );
+void OutputDevice::ImplDrawMultiplePolygons(const tools::PolyPolygon& rPolyPoly)
+{
+    if (!rPolyPoly.Count())
+        return;
+
+    PolygonRenderBuffer aBuffer(rPolyPoly);
+
+    if (aBuffer.nValidCount == 1)
+    {
+        mpGraphics->DrawPolygon(aBuffer.pPointAry[0], aBuffer.pPointAryAry[0], *this);
+    }
+    else if (aBuffer.nValidCount > 1)
+    {
+        mpGraphics->DrawPolyPolygon(
+            aBuffer.nValidCount,
+            aBuffer.pPointAry.get(),
+            aBuffer.pPointAryAry.get(),
+            *this);
     }
 }
 

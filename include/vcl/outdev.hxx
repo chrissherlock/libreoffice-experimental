@@ -830,6 +830,10 @@ private:
     SAL_DLLPRIVATE bool ImplDrawPolyPolygonOutlines(const basegfx::B2DHomMatrix& rTransform,
                                                     const basegfx::B2DPolyPolygon& rB2DPolyPolygon,
                                                     double fTransparency = 0.0);
+
+    SAL_DLLPRIVATE void ImplDrawSinglePolygon(const tools::Polygon& rPoly);
+    SAL_DLLPRIVATE void ImplDrawMultiplePolygons(const tools::PolyPolygon& rPolyPoly);
+
     ///@}
 
     SAL_DLLPRIVATE void         ImplDrawWaveLineBezier(tools::Long nStartX, tools::Long nStartY, tools::Long nEndX, tools::Long nEndY, tools::Long nWaveHeight, double fOrientation, tools::Long nLineWidth);
