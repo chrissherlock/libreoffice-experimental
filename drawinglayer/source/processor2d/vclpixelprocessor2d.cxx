@@ -23,6 +23,7 @@
 
 #include <sal/log.hxx>
 #include <vcl/outdev.hxx>
+#include <vcl/rendercontext/PrimitiveRenderer.hxx>
 #include <vcl/hatch.hxx>
 #include <vcl/canvastools.hxx>
 #include <vcl/vclenum.hxx>
@@ -142,9 +143,9 @@ bool VclPixelProcessor2D::tryDrawPolygonHairlinePrimitive2DDirect(
     //aLocalPolygon.transform(maCurrentTransformation);
 
     // try drawing; if it did not work, use standard fallback
-    return mpOutputDevice->DrawPolyLine(rLocalPolygon, 0.0, basegfx::B2DLineJoin::Round,
-                                        css::drawing::LineCap_BUTT, maCurrentTransformation,
-                                        basegfx::deg2rad(15.0), fTransparency);
+    return vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+        *mpOutputDevice, rLocalPolygon, 0.0, basegfx::B2DLineJoin::Round,
+        css::drawing::LineCap_BUTT, maCurrentTransformation, basegfx::deg2rad(15.0), fTransparency);
 }
 
 bool VclPixelProcessor2D::tryDrawPolygonStrokePrimitive2DDirect(
@@ -180,8 +181,8 @@ bool VclPixelProcessor2D::tryDrawPolygonStrokePrimitive2DDirect(
     mpOutputDevice->SetLineColor(Color(aLineColor));
 
     // MM01 draw direct, hand over dash data if available
-    return mpOutputDevice->DrawPolyLine(
-        rLocalPolygon,
+    return vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+        *mpOutputDevice, rLocalPolygon,
         // tdf#124848 use LineWidth direct, do not try to solve for zero-case (aka hairline)
         rSource.getLineAttribute().getWidth(), rSource.getLineAttribute().getLineJoin(),
         rSource.getLineAttribute().getLineCap(), maCurrentTransformation,
@@ -529,7 +530,8 @@ void VclPixelProcessor2D::processPolyPolygonColorPrimitive2D(
 
     for (sal_uInt32 a(0); a < nCount; a++)
     {
-        mpOutputDevice->DrawPolyLine(aLocalPolyPolygon.getB2DPolygon(a), 0.0);
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+            *mpOutputDevice, aLocalPolyPolygon.getB2DPolygon(a), 0.0);
     }
 }
 

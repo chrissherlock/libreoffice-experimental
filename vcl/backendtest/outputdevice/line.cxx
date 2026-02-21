@@ -11,7 +11,9 @@
 #include <test/outputdevice.hxx>
 
 #include <basegfx/matrix/b2dhommatrix.hxx>
+
 #include <vcl/BitmapReadAccess.hxx>
+#include <vcl/rendercontext/PrimitiveRenderer.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 
 #include <list>
@@ -153,7 +155,7 @@ Bitmap OutputDeviceTestLine::setupDashedLine()
     rectangle.shrink(2);
 
     std::vector<double> stroke({ 2.0, 1.0 });
-    mpVirtualDevice->DrawPolyLine(
+    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpVirtualDevice,
         basegfx::B2DPolygon{
             basegfx::B2DPoint(rectangle.Left(), rectangle.Top()),
             basegfx::B2DPoint(rectangle.Left(), rectangle.Bottom()),
@@ -240,10 +242,10 @@ Bitmap OutputDeviceTestLine::setupLineCap( css::drawing::LineCap lineCap )
         basegfx::B2DPoint(rectangle.LeftCenter().getX(), rectangle.LeftCenter().getY()),
         basegfx::B2DPoint(rectangle.RightCenter().getX(), rectangle.RightCenter().getY())};
 
-    mpVirtualDevice->DrawPolyLine(poly, CAPWIDTH, basegfx::B2DLineJoin::NONE, lineCap);
+    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpVirtualDevice, poly, CAPWIDTH, basegfx::B2DLineJoin::NONE, lineCap);
 
     mpVirtualDevice->SetLineColor(constFillColor);
-    mpVirtualDevice->DrawPolyLine(poly, 0, basegfx::B2DLineJoin::NONE);
+    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpVirtualDevice, poly, 0, basegfx::B2DLineJoin::NONE);
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
 }
@@ -263,10 +265,10 @@ Bitmap OutputDeviceTestLine::setupLineJoin( basegfx::B2DLineJoin lineJoin )
         basegfx::B2DPoint(rectangle.TopRight().getX(), rectangle.TopRight().getY()),
         basegfx::B2DPoint(rectangle.BottomRight().getX(), rectangle.BottomRight().getY())};
 
-    mpVirtualDevice->DrawPolyLine(poly, CAPWIDTH, lineJoin);
+    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpVirtualDevice, poly, CAPWIDTH, lineJoin);
 
     mpVirtualDevice->SetLineColor(constFillColor);
-    mpVirtualDevice->DrawPolyLine(poly, 0, lineJoin);
+    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpVirtualDevice, poly, 0, lineJoin);
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
 }

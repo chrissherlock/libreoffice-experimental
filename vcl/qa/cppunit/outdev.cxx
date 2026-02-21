@@ -32,6 +32,7 @@
 #include <vcl/rendercontext/RasterOp.hxx>
 #include <vcl/rendercontext/SystemTextColorFlags.hxx>
 #include <vcl/virdev.hxx>
+#include <vcl/rendercontext/PrimitiveRenderer.hxx>
 #include <vcl/window.hxx>
 #include <vcl/wrkwin.hxx>
 #include <vcl/metafile/GDIMetaFile.hxx>
@@ -1814,8 +1815,9 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawPolyLine)
         aLineInfo.SetLineJoin(basegfx::B2DLineJoin::Bevel);
         aLineInfo.SetLineCap(css::drawing::LineCap_BUTT);
 
-        pVDev->DrawPolyLine(aPolygon, 3, basegfx::B2DLineJoin::Bevel, css::drawing::LineCap_BUTT,
-                            basegfx::B2DHomMatrix(), basegfx::deg2rad(15.0));
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+            *pVDev, aPolygon, 3, basegfx::B2DLineJoin::Bevel, css::drawing::LineCap_BUTT,
+            basegfx::B2DHomMatrix(), basegfx::deg2rad(15.0));
 
         MetaAction* pAction = aMtf.GetAction(INITIAL_SETUP_ACTION_COUNT);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Not a polygon action", MetaActionType::POLYLINE,

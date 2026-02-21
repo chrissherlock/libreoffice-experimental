@@ -34,6 +34,7 @@
 #include <strings.hrc>
 #include <vcl/fieldvalues.hxx>
 #include <vcl/outdev.hxx>
+#include <vcl/rendercontext/PrimitiveRenderer.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/svapp.hxx>
@@ -801,12 +802,12 @@ void SvxCropExample::Paint(vcl::RenderContext& rRenderContext, const ::tools::Re
         [&aColA,&rRenderContext](const basegfx::B2DPolygon& rSnippet)
         {
             rRenderContext.SetLineColor(aColA);
-            rRenderContext.DrawPolyLine(rSnippet);
+            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, rSnippet);
         },
         [&aColB,&rRenderContext](const basegfx::B2DPolygon& rSnippet)
         {
             rRenderContext.SetLineColor(aColB);
-            rRenderContext.DrawPolyLine(rSnippet);
+            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, rSnippet);
         },
         2.0 * fLogicDashLength);
 }

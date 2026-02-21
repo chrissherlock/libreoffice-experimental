@@ -32,6 +32,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/weld/ScrolledWindow.hxx>
+#include <vcl/rendercontext/PrimitiveRenderer.hxx>
 
 #include <com/sun/star/accessibility/AccessibleEventId.hpp>
 #include <com/sun/star/accessibility/AccessibleStateType.hpp>
@@ -1342,7 +1343,7 @@ void ValueSet::ImplDrawSelect(vcl::RenderContext& rRenderContext,
 
                 const int nThickness = nAdjust * 2;
 
-                if (!rRenderContext.DrawPolyLine(aRectPoly,
+                if (!vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, aRectPoly,
                                                  nThickness,
                                                  basegfx::B2DLineJoin::Miter,
                                                  css::drawing::LineCap_BUTT,
@@ -1351,7 +1352,7 @@ void ValueSet::ImplDrawSelect(vcl::RenderContext& rRenderContext,
                                                  nTransparencePercent / 100.0))
                 {
                     SAL_WARN("svtools", "presumably impossible in practice, but fallback to see something");
-                    rRenderContext.DrawPolyLine(aRectPoly, nThickness, basegfx::B2DLineJoin::Miter);
+                    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, aRectPoly, nThickness, basegfx::B2DLineJoin::Miter);
                 }
             }
 

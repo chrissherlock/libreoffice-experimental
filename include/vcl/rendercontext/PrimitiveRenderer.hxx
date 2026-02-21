@@ -9,7 +9,16 @@
 
 #pragma once
 
+#include <basegfx/polygon/b2dpolygon.hxx>
+#include <basegfx/matrix/b2dhommatrix.hxx>
+#include <basegfx/vector/b2enums.hxx>
+#include <basegfx/numeric/ftools.hxx>
+
 #include <vcl/dllapi.h>
+
+#include <com/sun/star/drawing/LineCap.hpp>
+
+#include <vector>
 
 class SalGraphics;
 class CoordinateMapper;
@@ -49,6 +58,15 @@ public:
     /** Renders a rectangle using the current line and fill colors. */
     static void DrawRect(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                          const OutputDevice* pOutDev, const tools::Rectangle& rLogicalRect);
+
+    static bool
+    DrawPolyLine(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
+                 double fLineWidth = 0.0,
+                 basegfx::B2DLineJoin eLineJoin = basegfx::B2DLineJoin::Round,
+                 css::drawing::LineCap eLineCap = css::drawing::LineCap_BUTT,
+                 const basegfx::B2DHomMatrix& rObjectTransform = basegfx::B2DHomMatrix(),
+                 double fMiterMinimumAngle = basegfx::deg2rad(15.0), double fTransparency = 0.0,
+                 const std::vector<double>* pStroke = nullptr);
 };
 
 } // namespace vcl::rendercontext

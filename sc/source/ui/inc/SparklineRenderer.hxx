@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include <vcl/rendercontext/PrimitiveRenderer.hxx>
+
 #include <document.hxx>
 
 #include <basegfx/polygon/b2dpolygon.hxx>
@@ -342,9 +344,9 @@ private:
                 aAxisPolygon.append({ x2, y });
 
                 rRenderContext.SetLineColor(rAttributes.getColorAxis().getFinalColor());
-                rRenderContext.DrawPolyLine(aAxisPolygon, 0.2 * mfScaleX,
-                                            basegfx::B2DLineJoin::Round, css::drawing::LineCap_BUTT,
-                                            aMatrix);
+                vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+                    rRenderContext, aAxisPolygon, 0.2 * mfScaleX, basegfx::B2DLineJoin::Round,
+                    css::drawing::LineCap_BUTT, aMatrix);
             }
         }
 
@@ -352,9 +354,9 @@ private:
 
         for (auto& rPolygon : aPolygons)
         {
-            rRenderContext.DrawPolyLine(rPolygon, rAttributes.getLineWeight() * mfScaleX,
-                                        basegfx::B2DLineJoin::Round, css::drawing::LineCap_BUTT,
-                                        aMatrix);
+            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+                rRenderContext, rPolygon, rAttributes.getLineWeight() * mfScaleX,
+                basegfx::B2DLineJoin::Round, css::drawing::LineCap_BUTT, aMatrix);
         }
 
         for (auto& rMarker : aMarkers)
@@ -444,9 +446,9 @@ private:
                 aAxisPolygon.append({ x2, nZeroPosition });
 
                 rRenderContext.SetLineColor(rAttributes.getColorAxis().getFinalColor());
-                rRenderContext.DrawPolyLine(aAxisPolygon, 0.2 * mfScaleX,
-                                            basegfx::B2DLineJoin::Round, css::drawing::LineCap_BUTT,
-                                            aMatrix);
+                vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+                    rRenderContext, aAxisPolygon, 0.2 * mfScaleX, basegfx::B2DLineJoin::Round,
+                    css::drawing::LineCap_BUTT, aMatrix);
             }
         }
         else

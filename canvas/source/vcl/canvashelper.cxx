@@ -18,6 +18,7 @@
  */
 
 #include <sal/config.h>
+#include <vcl/rendercontext/PrimitiveRenderer.hxx>
 
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <basegfx/numeric/ftools.hxx>
@@ -408,9 +409,9 @@ namespace vclcanvas
                     if( mp2ndOutDevProvider )
                         mp2ndOutDevProvider->getOutDev().DrawPolygon( polygon );
                 } else {
-                    mpOutDevProvider->getOutDev().DrawPolyLine( polygon );
+                    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(mpOutDevProvider->getOutDev(), polygon);
                     if( mp2ndOutDevProvider )
-                        mp2ndOutDevProvider->getOutDev().DrawPolyLine( polygon );
+                        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(mp2ndOutDevProvider->getOutDev(), polygon);
                 }
             }
         }

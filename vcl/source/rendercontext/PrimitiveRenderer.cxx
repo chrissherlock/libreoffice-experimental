@@ -12,6 +12,10 @@
 #include <tools/color.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
+#include <basegfx/polygon/b2dpolypolygontools.hxx>
+#include <vcl/metafile/MetafileRecorder.hxx>
+#include <vcl/rendercontext/AntialiasingFlags.hxx>
+#include <GraphicsState.hxx>
 
 #include <vcl/rendercontext/PrimitiveRenderer.hxx>
 #include <vcl/outdev.hxx>
@@ -97,6 +101,97 @@ void PrimitiveRenderer::DrawRect(SalGraphics& rGraphics, const CoordinateMapper&
         rGraphics.DrawRect(aDeviceRect.Left(), aDeviceRect.Top(), aDeviceRect.GetWidth(),
                            aDeviceRect.GetHeight(), *pOutDev);
     }
+}
+
+namespace
+{
+static std::pair<basegfx::B2DPolyPolygon, LineInfo>
+lcl_SetupStrokeAndLineInfo(const basegfx::B2DPolygon& rDevicePoly,
+                           const std::vector<double>* pStroke, double fLineWidth,
+                           basegfx::B2DLineJoin eLineJoin, css::drawing::LineCap eLineCap)
+{
+    basegfx::B2DPolyPolygon aPolyPolygon(rDevicePoly);
+
+    // Handle Custom Dashing directly using basegfx
+    if (pStroke && !pStroke->empty())
+    {
+        basegfx::B2DPolyPolygon aDashedPolyPoly;
+        basegfx::utils::applyLineDashing(basegfx::B2DPolyPolygon(rDevicePoly), *pStroke,
+                                         &aDashedPolyPoly);
+        aPolyPolygon = aDashedPolyPoly;
+    }
+
+    // Package the remaining attributes into VCL's legacy struct
+    LineInfo aInfo;
+    aInfo.SetWidth(std::round(fLineWidth));
+    aInfo.SetLineJoin(eLineJoin);
+    aInfo.SetLineCap(eLineCap);
+
+    return { std::move(aPolyPolygon), aInfo };
+}
+}
+
+bool PrimitiveRenderer::DrawPolyLine(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
+                                     double fLineWidth, basegfx::B2DLineJoin eLineJoin,
+                                     css::drawing::LineCap eLineCap,
+                                     const basegfx::B2DHomMatrix& rObjectTransform,
+                                     double fMiterMinimumAngle, double fTransparency,
+                                     const std::vector<double>* pStroke) // MM01
+{
+    auto drawB2DPolyline = [&]() -> bool {
+        assert(!rOutDev.is_double_buffered_window());
+
+        if (!rB2DPolygon.count())
+            return true;
+
+        if ((!rOutDev.mpGraphics && !rOutDev.AcquireGraphics()) || !rOutDev.CanDrawPolyline())
+            return false;
+
+        const basegfx::B2DHomMatrix aTransform(rOutDev.mpMapper->GetDeviceTransformation()
+                                               * rObjectTransform);
+
+        if (rOutDev.GetRasterOp() == RasterOp::OverPaint && rOutDev.IsLineColor())
+        {
+            const bool bPixelSnapHairline
+                = (rOutDev.mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline)
+                  && rB2DPolygon.count() < 1000;
+
+            bool bDone = rOutDev.mpGraphics->DrawPolyLine(
+                aTransform, rB2DPolygon, fTransparency, fLineWidth, pStroke, eLineJoin, eLineCap,
+                fMiterMinimumAngle, bPixelSnapHairline, rOutDev);
+
+            if (bDone)
+                return true;
+        }
+
+        basegfx::B2DPolygon aDevicePoly(rB2DPolygon);
+        aDevicePoly.transform(aTransform);
+
+        auto[aFallbackPolyPoly, aInfo]
+            = lcl_SetupStrokeAndLineInfo(aDevicePoly, pStroke, fLineWidth, eLineJoin, eLineCap);
+
+        rOutDev.DrawPolyLineGeometry(aFallbackPolyPoly, aInfo);
+
+        return true;
+    };
+
+    bool bSuccess = drawB2DPolyline();
+
+    if (bSuccess && rOutDev.maRecorder.IsActive())
+    {
+        LineInfo aLineInfo;
+        if (fLineWidth != 0.0)
+            aLineInfo.SetWidth(std::round(fLineWidth));
+
+        aLineInfo.SetLineJoin(eLineJoin);
+        aLineInfo.SetLineCap(eLineCap);
+
+        // Note: We don't record the dashing/stroke here because DrawPolyLineDirect
+        // historically records the logical path, but you can adjust this if needed!
+        rOutDev.maRecorder.RecordPolyLine(tools::Polygon(rB2DPolygon), aLineInfo);
+    }
+
+    return bSuccess;
 }
 
 } // namespace vcl::rendercontext

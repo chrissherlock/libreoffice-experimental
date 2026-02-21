@@ -43,6 +43,7 @@
 #include <vcl/filter/PngImageWriter.hxx>
 #include <vcl/graph.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
+#include <vcl/rendercontext/PrimitiveRenderer.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/salgtype.hxx>
 #include <vcl/virdev.hxx>
@@ -480,7 +481,7 @@ void ScreenshotAnnotationDlg_Impl::PaintScreenShotEntry(
                                     double fTransparency = 0.0,
                                     const std::vector<double>* pStroke = nullptr); // MM01
     // try to use transparency
-    if (!mxVirtualBufferDevice->DrawPolyLine(
+    if (!vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mxVirtualBufferDevice,
         aPolygon,
         fLineWidth,
         basegfx::B2DLineJoin::Round,
@@ -489,7 +490,7 @@ void ScreenshotAnnotationDlg_Impl::PaintScreenShotEntry(
         basegfx::deg2rad(15.0), fTransparency))
     {
         // no transparency, draw without
-        mxVirtualBufferDevice->DrawPolyLine(
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mxVirtualBufferDevice,
             aPolygon,
             fLineWidth);
     }

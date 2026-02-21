@@ -18,6 +18,7 @@
  */
 
 #include <editeng/eeitem.hxx>
+#include <vcl/rendercontext/PrimitiveRenderer.hxx>
 #include <editeng/flditem.hxx>
 #include <editeng/langitem.hxx>
 #include <svx/langbox.hxx>
@@ -700,7 +701,7 @@ void PresLayoutPreview::Paint(vcl::RenderContext& rRenderContext, SdrTextObj con
 
     for (sal_uInt32 a(0); a < aGeometry.count(); a++)
     {
-        rRenderContext.DrawPolyLine(aGeometry.getB2DPolygon(a));
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, aGeometry.getB2DPolygon(a));
     }
 }
 

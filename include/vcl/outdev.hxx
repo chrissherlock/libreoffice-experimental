@@ -198,8 +198,14 @@ struct RenderSelection
 };
 }
 
+namespace vcl::rendercontext
+{
+class PrimitiveRenderer;
+}
+
 class SAL_WARN_UNUSED VCL_DLLPUBLIC OutputDevice : public virtual VclReferenceBase
 {
+    friend class vcl::rendercontext::PrimitiveRenderer;
     friend class Printer;
     friend class vcl::font::FontController;
     friend class VirtualDevice;
@@ -754,15 +760,6 @@ public:
      */
     void                        DrawPolyLine( const tools::Polygon& rPoly );
 
-    bool                        DrawPolyLine(
-                                    const basegfx::B2DPolygon&,
-                                    double fLineWidth = 0.0,
-                                    basegfx::B2DLineJoin eLineJoin = basegfx::B2DLineJoin::Round,
-                                    css::drawing::LineCap eLineCap = css::drawing::LineCap_BUTT,
-                                    const basegfx::B2DHomMatrix& rObjectTransform = basegfx::B2DHomMatrix(),
-                                    double fMiterMinimumAngle = basegfx::deg2rad(15.0),
-                                    double fTransparency = 0.0,
-                                    const std::vector<double>* pStroke = nullptr); // MM01
 
     /** Render the given polygon as a line stroke
 

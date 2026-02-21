@@ -33,6 +33,7 @@
 #include <salhelper/thread.hxx>
 
 #include <comphelper/diagnose_ex.hxx>
+#include <vcl/rendercontext/PrimitiveRenderer.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/wrkwin.hxx>
@@ -293,7 +294,7 @@ public:
                         aPoly.append(basegfx::B2DPoint(aSub.Left() + aSub.GetWidth() * rPoint.nX,
                                                        aSub.Top()  + aSub.GetHeight() * rPoint.nY));
                     }
-                    rDev.DrawPolyLine(aPoly, aLineWidths[i], eJoins[i], eLineCaps[i]);
+                    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rDev, aPoly, aLineWidths[i], eJoins[i], eLineCaps[i]);
                 }
             }
             else

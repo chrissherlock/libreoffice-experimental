@@ -18,6 +18,7 @@
  */
 
 #include <svx/svdobj.hxx>
+#include <vcl/rendercontext/PrimitiveRenderer.hxx>
 #include <config_features.h>
 
 #include <sal/config.h>
@@ -2011,7 +2012,7 @@ void SdrObject::PaintMacro(OutputDevice& rOut, const tools::Rectangle& , const S
 
     for(auto const& rPolygon : aPolyPolygon)
     {
-        rOut.DrawPolyLine(rPolygon);
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rOut, rPolygon);
     }
 
     rOut.SetRasterOp(eRop);

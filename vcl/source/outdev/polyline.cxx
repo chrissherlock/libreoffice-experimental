@@ -27,6 +27,7 @@
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/virdev.hxx>
+#include <vcl/rendercontext/PrimitiveRenderer.hxx>
 
 #include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
@@ -108,7 +109,8 @@ void OutputDevice::DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
                 break;
             case LineStyle::Solid:
                 // #i101491# Try direct Fallback to B2D-Version of DrawPolyLine
-                DrawPolyLine(
+                vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+                    *this,
                     rPoly.getB2DPolygon(),
                     rLineInfo.GetWidth(),
                     rLineInfo.GetLineJoin(),
@@ -137,104 +139,6 @@ void OutputDevice::DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
         tools::Polygon aDevicePoly = mpMapper->LogicToDevicePixel(rPoly);
         lcl_DrawHairlineToolsPolygon(*mpGraphics, *this, aDevicePoly);
     }
-}
-
-static std::pair<basegfx::B2DPolyPolygon, LineInfo>
-lcl_SetupStrokeAndLineInfo(const basegfx::B2DPolygon& rDevicePoly,
-                           const std::vector<double>* pStroke,
-                           double fLineWidth,
-                           basegfx::B2DLineJoin eLineJoin,
-                           css::drawing::LineCap eLineCap)
-{
-    basegfx::B2DPolyPolygon aPolyPolygon(rDevicePoly);
-
-    // Handle Custom Dashing directly using basegfx
-    if (pStroke && !pStroke->empty())
-    {
-        basegfx::B2DPolyPolygon aDashedPolyPoly;
-        basegfx::utils::applyLineDashing(basegfx::B2DPolyPolygon(rDevicePoly), *pStroke, &aDashedPolyPoly);
-        aPolyPolygon = aDashedPolyPoly;
-    }
-
-    // Package the remaining attributes into VCL's legacy struct
-    LineInfo aInfo;
-    aInfo.SetWidth(std::round(fLineWidth));
-    aInfo.SetLineJoin(eLineJoin);
-    aInfo.SetLineCap(eLineCap);
-
-    return { std::move(aPolyPolygon), aInfo };
-}
-
-bool OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2DPolygon,
-                                double fLineWidth,
-                                basegfx::B2DLineJoin eLineJoin,
-                                css::drawing::LineCap eLineCap,
-                                const basegfx::B2DHomMatrix& rObjectTransform,
-                                double fMiterMinimumAngle,
-                                double fTransparency,
-                                const std::vector<double>* pStroke) // MM01
-{
-    auto drawB2DPolyline = [&]() -> bool
-    {
-        assert(!is_double_buffered_window());
-
-        if (!rB2DPolygon.count())
-            return true;
-
-        if ((!mpGraphics && !AcquireGraphics()) || !CanDrawPolyline())
-            return false;
-
-        const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation() * rObjectTransform);
-
-        if (GetRasterOp() == RasterOp::OverPaint && IsLineColor())
-        {
-            const bool bPixelSnapHairline = (mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline)
-                                            && rB2DPolygon.count() < 1000;
-
-            bool bDone = mpGraphics->DrawPolyLine(
-                aTransform,
-                rB2DPolygon,
-                fTransparency,
-                fLineWidth,
-                pStroke,
-                eLineJoin,
-                eLineCap,
-                fMiterMinimumAngle,
-                bPixelSnapHairline,
-                *this);
-
-            if (bDone)
-                return true;
-        }
-
-        basegfx::B2DPolygon aDevicePoly(rB2DPolygon);
-        aDevicePoly.transform(aTransform);
-
-        auto [aFallbackPolyPoly, aInfo] = lcl_SetupStrokeAndLineInfo(
-            aDevicePoly, pStroke, fLineWidth, eLineJoin, eLineCap);
-
-        DrawPolyLineGeometry(aFallbackPolyPoly, aInfo);
-
-        return true;
-    };
-
-    bool bSuccess = drawB2DPolyline();
-
-    if (bSuccess && maRecorder.IsActive())
-    {
-        LineInfo aLineInfo;
-        if (fLineWidth != 0.0)
-            aLineInfo.SetWidth(std::round(fLineWidth));
-
-        aLineInfo.SetLineJoin(eLineJoin);
-        aLineInfo.SetLineCap(eLineCap);
-
-        // Note: We don't record the dashing/stroke here because DrawPolyLineDirect
-        // historically records the logical path, but you can adjust this if needed!
-        maRecorder.RecordPolyLine(tools::Polygon(rB2DPolygon), aLineInfo);
-    }
-
-    return bSuccess;
 }
 
 static basegfx::B2DPolyPolygon lcl_ApplyLineDashing(const basegfx::B2DPolyPolygon& rLinePolyPolygon, const LineInfo& rInfo)
