@@ -1821,11 +1821,12 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawPolyLine)
             aStroke.eJoin = basegfx::B2DLineJoin::Bevel;
             aStroke.eCap = css::drawing::LineCap_BUTT;
             aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
-            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-                *pVDev, aPolygon, aStroke, basegfx::B2DHomMatrix(), basegfx::deg2rad(15.0));
+            pVDev->DrawPolyLine(aPolygon, aStroke.fWidth, aStroke.eJoin, aStroke.eCap,
+                                basegfx::B2DHomMatrix(), aStroke.fMiterMinimumAngle);
         }
 
-        MetaAction* pAction = aMtf.GetAction(INITIAL_SETUP_ACTION_COUNT);
+        // B2DPolyLine recordings wrap the fallback in comments. Grab index + 1.
+        MetaAction* pAction = aMtf.GetAction(INITIAL_SETUP_ACTION_COUNT + 1);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Not a polygon action", MetaActionType::POLYLINE,
                                      pAction->GetType());
         MetaPolyLineAction* pPolyLineAction = dynamic_cast<MetaPolyLineAction*>(pAction);

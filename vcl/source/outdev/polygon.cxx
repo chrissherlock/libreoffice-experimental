@@ -45,64 +45,26 @@ void OutputDevice::DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly )
         maRecorder.RecordPolyPolygon(rPolyPoly);
 
     const sal_uInt16 nPoly = rPolyPoly.Count();
-    if (!nPoly || !PrepareGraphicsOutput() || !mpGraphics)
+    if (!nPoly || !IsDeviceOutputNecessary())
         return;
 
-    // use b2dpolygon drawing if possible
-    if (CanDrawPolygon())
+    bool bFill = IsFillColor();
+    vcl::rendercontext::StrokeAttributes aStroke;
+    vcl::rendercontext::StrokeAttributes* pStroke = nullptr;
+    double fLineTransparency = 0.0;
+
+    if (IsLineColor())
     {
-        const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation());
-        basegfx::B2DPolyPolygon aB2DPolyPolygon(rPolyPoly.getB2DPolyPolygon());
-
-        // ensure closed - may be asserted, will prevent buffering
-        if(!aB2DPolyPolygon.isClosed())
-            aB2DPolyPolygon.setClosed(true);
-
-        if (IsFillColor())
-        {
-            mpGraphics->DrawPolyPolygon(
-                aTransform,
-                aB2DPolyPolygon,
-                0.0,
-                *this);
-        }
-
-        if (ImplDrawPolyPolygonOutlines(aTransform, aB2DPolyPolygon))
-            return;
+        aStroke.fWidth = 0.0; // Hairline fallback
+        aStroke.eJoin = basegfx::B2DLineJoin::NONE;
+        aStroke.eCap = css::drawing::LineCap_BUTT;
+        aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
+        fLineTransparency = (255.0 - GetLineColor().GetAlpha()) / 255.0;
+        pStroke = &aStroke;
     }
 
-    ImplDrawPolyPolygonFallback(nPoly, rPolyPoly);
-}
-
-bool OutputDevice::ImplDrawPolyPolygonOutlines(
-    const basegfx::B2DHomMatrix& rTransform,
-    const basegfx::B2DPolyPolygon& rB2DPolyPolygon,
-    double fTransparency)
-{
-    if (!IsLineColor())
-        return true;
-
-    const bool bPixelSnapHairline(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
-
-    for (auto const& rPolygon : std::as_const(rB2DPolyPolygon))
-    {
-        bool bSuccess = mpGraphics->DrawPolyLine(
-            rTransform,
-            rPolygon,
-            fTransparency,
-            0.0, // tdf#124848 hairline
-            nullptr, // MM01
-            basegfx::B2DLineJoin::NONE,
-            css::drawing::LineCap_BUTT,
-            basegfx::deg2rad(15.0), // not used with B2DLineJoin::NONE, but the correct default
-            bPixelSnapHairline,
-            *this);
-
-        if (!bSuccess)
-            return false;
-    }
-
-    return true;
+    if (!vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygon(*this, rPolyPoly, bFill, pStroke, fLineTransparency))
+        ImplDrawPolyPolygonFallback(nPoly, rPolyPoly);
 }
 
 void OutputDevice::ImplDrawPolyPolygonFallback(sal_uInt16 nPoly, const tools::PolyPolygon& rPolyPoly)
@@ -148,8 +110,23 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
     if (rPoly.GetSize() < 2 || !IsDeviceOutputNecessary())
         return;
 
+    bool bFill = IsFillColor();
+    vcl::rendercontext::StrokeAttributes aStroke;
+    vcl::rendercontext::StrokeAttributes* pStroke = nullptr;
+    double fLineTransparency = 0.0;
+
+    if (IsLineColor())
+    {
+        aStroke.fWidth = 0.0; // Hairline fallback
+        aStroke.eJoin = basegfx::B2DLineJoin::NONE;
+        aStroke.eCap = css::drawing::LineCap_BUTT;
+        aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
+        fLineTransparency = (255.0 - GetLineColor().GetAlpha()) / 255.0;
+        pStroke = &aStroke;
+    }
+
     // Delegate to PrimitiveRenderer. If hardware rendering fails, utilize the legacy fallback.
-    if (!vcl::rendercontext::PrimitiveRenderer::DrawPolygon(*this, rPoly))
+    if (!vcl::rendercontext::PrimitiveRenderer::DrawPolygon(*this, rPoly, bFill, pStroke, fLineTransparency))
         ImplDrawPolygon(rPoly, nullptr);
 }
 
@@ -167,37 +144,28 @@ void OutputDevice::DrawPolyPolygon(const basegfx::B2DPolyPolygon& rB2DPolyPoly)
     if (!rB2DPolyPoly.count() || !IsDeviceOutputNecessary())
         return;
 
-    if (!PrepareGraphicsOutput() || !mpGraphics)
-        return;
+    bool bFill = IsFillColor();
+    vcl::rendercontext::StrokeAttributes aStroke;
+    vcl::rendercontext::StrokeAttributes* pStroke = nullptr;
+    double fLineTransparency = 0.0;
 
-    auto drawB2DPolyPolygon = [&]() -> bool
+    if (IsLineColor())
     {
-        if (!CanDrawPolygon())
-            return false;
+        aStroke.fWidth = 0.0; // Hairline fallback
+        aStroke.eJoin = basegfx::B2DLineJoin::NONE;
+        aStroke.eCap = css::drawing::LineCap_BUTT;
+        aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
+        fLineTransparency = (255.0 - GetLineColor().GetAlpha()) / 255.0;
+        pStroke = &aStroke;
+    }
 
-        const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation());
-        basegfx::B2DPolyPolygon aB2DPolyPolygon(rB2DPolyPoly);
-
-        // ensure closed - hinders buffering if left unclosed
-        if(!aB2DPolyPolygon.isClosed())
-            aB2DPolyPolygon.setClosed(true);
-
-        if (IsFillColor())
-            mpGraphics->DrawPolyPolygon(aTransform, aB2DPolyPolygon, 0.0, *this);
-
-        if (!ImplDrawPolyPolygonOutlines(aTransform, aB2DPolyPolygon, (255 - GetLineColor().GetAlpha()) / 255.0))
-            return false;
-
-        return true;
-    };
-
-    if (drawB2DPolyPolygon())
-        return;
-
-    // Fallback to legacy tools::PolyPolygon rasterizer
-    const tools::PolyPolygon aToolsPolyPolygon(rB2DPolyPoly);
-    const tools::PolyPolygon aPixelPolyPolygon = mpMapper->LogicToDevicePixel(aToolsPolyPolygon);
-    ImplDrawPolyPolygon(aPixelPolyPolygon.Count(), aPixelPolyPolygon);
+    if (!vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygon(*this, rB2DPolyPoly, bFill, pStroke, fLineTransparency))
+    {
+        // Fallback to legacy tools::PolyPolygon rasterizer
+        const tools::PolyPolygon aToolsPolyPolygon(rB2DPolyPoly);
+        const tools::PolyPolygon aPixelPolyPolygon = mpMapper->LogicToDevicePixel(aToolsPolyPolygon);
+        ImplDrawPolyPolygon(aPixelPolyPolygon.Count(), aPixelPolyPolygon);
+    }
 }
 
 namespace

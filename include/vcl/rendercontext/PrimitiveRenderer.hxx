@@ -30,6 +30,7 @@ class LineInfo;
 namespace tools
 {
 class Polygon;
+class PolyPolygon;
 }
 
 namespace tools
@@ -76,6 +77,20 @@ public:
                          const OutputDevice* pOutDev, const tools::Rectangle& rLogicalRect);
 
     static bool DrawPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly);
+    static bool DrawPolygon(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
+                            bool bFill, const StrokeAttributes* pStroke, double fLineTransparency);
+
+    static bool DrawPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly, bool bFill,
+                            const StrokeAttributes* pStroke, double fLineTransparency);
+
+    static bool DrawPolyPolygon(OutputDevice& rOutDev, const basegfx::B2DPolyPolygon& rB2DPolyPoly,
+                                bool bFill, const StrokeAttributes* pStroke,
+                                double fLineTransparency);
+
+    static bool DrawPolyPolygon(OutputDevice& rOutDev, const tools::PolyPolygon& rPolyPoly,
+                                bool bFill, const StrokeAttributes* pStroke,
+                                double fLineTransparency);
+
     static void DrawPolyLine(OutputDevice& rOutDev, const tools::Polygon& rPoly);
     static void DrawPolyLine(OutputDevice& rOutDev, const tools::Polygon& rPoly,
                              const LineInfo& rLineInfo);

@@ -7,26 +7,28 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include <sal/log.hxx>
 #include <tools/gen.hxx>
 #include <iostream>
 #include <tools/color.hxx>
+#include <tools/poly.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
-#include <sal/log.hxx>
-#include <comphelper/scopeguard.hxx>
 #include <basegfx/polygon/b2dlinegeometry.hxx>
+#include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <basegfx/polygon/b2dpolypolygontools.hxx>
-#include <vcl/metafile/MetafileRecorder.hxx>
-#include <vcl/rendercontext/AntialiasingFlags.hxx>
-#include <GraphicsState.hxx>
 #include <comphelper/configuration.hxx>
-#include <vcl/lineinfo.hxx>
+#include <comphelper/scopeguard.hxx>
 
-#include <vcl/rendercontext/PrimitiveRenderer.hxx>
+#include <vcl/lineinfo.hxx>
+#include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/outdev.hxx>
+#include <vcl/rendercontext/AntialiasingFlags.hxx>
+#include <vcl/rendercontext/PrimitiveRenderer.hxx>
 
 #include <salgdi.hxx>
 #include <CoordinateMapper.hxx>
+#include <GraphicsState.hxx>
 
 #include <com/sun/star/drawing/LineCap.hpp>
 
@@ -304,6 +306,65 @@ bool PrimitiveRenderer::DrawPolygon(OutputDevice& rOutDev, const tools::Polygon&
     return true;
 }
 
+bool PrimitiveRenderer::DrawPolyPolygon(OutputDevice& rOutDev,
+                                        const basegfx::B2DPolyPolygon& rB2DPolyPoly, bool bFill,
+                                        const StrokeAttributes* pStroke, double fLineTransparency)
+{
+    if (!rOutDev.CanDrawPolygon())
+        return false;
+
+    if (!rOutDev.GetGraphics() && !rOutDev.AcquireGraphics())
+        return false;
+
+    rOutDev.FlushGraphicsState();
+
+    const basegfx::B2DHomMatrix aTransform(rOutDev.GetViewTransformation());
+    basegfx::B2DPolyPolygon aB2DPolyPolygon(rB2DPolyPoly);
+
+    if (!aB2DPolyPolygon.isClosed())
+        aB2DPolyPolygon.setClosed(true);
+
+    if (bFill)
+        rOutDev.GetGraphics()->DrawPolyPolygon(aTransform, aB2DPolyPolygon, 0.0, rOutDev);
+
+    if (pStroke)
+    {
+        for (auto const& rPolygon : std::as_const(aB2DPolyPolygon))
+        {
+            if (!PrimitiveRenderer::DrawPolyLine(rOutDev, rPolygon, *pStroke,
+                                                 basegfx::B2DHomMatrix(), fLineTransparency))
+                return false;
+        }
+    }
+
+    return true;
+}
+
+bool PrimitiveRenderer::DrawPolyPolygon(OutputDevice& rOutDev, const tools::PolyPolygon& rPolyPoly,
+                                        bool bFill, const StrokeAttributes* pStroke,
+                                        double fLineTransparency)
+{
+    if (!rOutDev.CanDrawPolygon())
+        return false;
+    return DrawPolyPolygon(rOutDev, rPolyPoly.getB2DPolyPolygon(), bFill, pStroke,
+                           fLineTransparency);
+}
+
+bool PrimitiveRenderer::DrawPolygon(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
+                                    bool bFill, const StrokeAttributes* pStroke,
+                                    double fLineTransparency)
+{
+    basegfx::B2DPolyPolygon aPP(rB2DPolygon);
+    return DrawPolyPolygon(rOutDev, aPP, bFill, pStroke, fLineTransparency);
+}
+
+bool PrimitiveRenderer::DrawPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly, bool bFill,
+                                    const StrokeAttributes* pStroke, double fLineTransparency)
+{
+    basegfx::B2DPolygon aB2D(rPoly.getB2DPolygon());
+    return DrawPolygon(rOutDev, aB2D, bFill, pStroke, fLineTransparency);
+}
+
 bool PrimitiveRenderer::DrawPolyLine(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2D,
                                      const StrokeAttributes& rStroke,
                                      const basegfx::B2DHomMatrix& rObjectTransform,
@@ -312,24 +373,25 @@ bool PrimitiveRenderer::DrawPolyLine(OutputDevice& rOutDev, const basegfx::B2DPo
     if (!rB2D.count() || !rOutDev.CanDrawPolyline())
         return true;
 
-    if (!rOutDev.mpGraphics && !rOutDev.AcquireGraphics())
+    if (!rOutDev.GetGraphics() && !rOutDev.AcquireGraphics())
         return false;
 
     rOutDev.FlushGraphicsState();
 
-    const basegfx::B2DHomMatrix aTransform(rOutDev.mpMapper->GetDeviceTransformation()
-                                           * rObjectTransform);
+    const basegfx::B2DHomMatrix aTransform(rOutDev.GetViewTransformation() * rObjectTransform);
     bool bSuccess = false;
 
     if (rOutDev.GetRasterOp() == RasterOp::OverPaint && rOutDev.IsLineColor())
     {
         const bool bPixelSnapHairline
-            = (rOutDev.mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline)
+            = (rOutDev.GetAntialiasing() & AntialiasingFlags::PixelSnapHairline)
               && rB2D.count() < 1000;
 
-        if (rOutDev.mpGraphics->DrawPolyLine(
-                aTransform, rB2D, fTransparency, rStroke.fWidth, rStroke.pDashArray, rStroke.eJoin,
-                rStroke.eCap, rStroke.fMiterMinimumAngle, bPixelSnapHairline, rOutDev))
+        SalGraphics* pGraphics = rOutDev.GetGraphics();
+        if (pGraphics
+            && pGraphics->DrawPolyLine(aTransform, rB2D, fTransparency, rStroke.fWidth,
+                                       rStroke.pDashArray, rStroke.eJoin, rStroke.eCap,
+                                       rStroke.fMiterMinimumAngle, bPixelSnapHairline, rOutDev))
         {
             bSuccess = true;
         }
@@ -345,19 +407,6 @@ bool PrimitiveRenderer::DrawPolyLine(OutputDevice& rOutDev, const basegfx::B2DPo
 
         PrimitiveRenderer::DrawPolyLineGeometry(rOutDev, aFallbackPolyPoly, aInfo);
         bSuccess = true;
-    }
-
-    // THIS IS WHAT WAS MISSING: Restored Metafile Recording
-    if (bSuccess && rOutDev.maRecorder.IsActive())
-    {
-        LineInfo aLineInfo;
-        if (rStroke.fWidth != 0.0)
-            aLineInfo.SetWidth(std::round(rStroke.fWidth));
-
-        aLineInfo.SetLineJoin(rStroke.eJoin);
-        aLineInfo.SetLineCap(rStroke.eCap);
-
-        rOutDev.maRecorder.RecordPolyLine(tools::Polygon(rB2D), aLineInfo);
     }
 
     return bSuccess;
@@ -426,3 +475,5 @@ void PrimitiveRenderer::DrawPolyLineGeometry(OutputDevice& rOutDev,
 }
 
 } // namespace vcl::rendercontext
+
+/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
