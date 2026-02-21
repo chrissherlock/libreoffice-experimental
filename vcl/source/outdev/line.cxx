@@ -156,7 +156,7 @@ void OutputDevice::DrawLineGeometry(const Point& rStartPt, const Point& rEndPt,
     aLine.append(basegfx::B2DPoint(aStartPt.X(), aStartPt.Y()));
     aLine.append(basegfx::B2DPoint(aEndPt.X(), aEndPt.Y()));
 
-    DrawPolyLineGeometry(basegfx::B2DPolyPolygon(aLine), rLineInfo);
+    vcl::rendercontext::PrimitiveRenderer::DrawPolyLineGeometry(*this, basegfx::B2DPolyPolygon(aLine), rLineInfo);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

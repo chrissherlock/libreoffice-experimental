@@ -10,6 +10,7 @@
 #pragma once
 
 #include <basegfx/polygon/b2dpolygon.hxx>
+#include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <basegfx/vector/b2enums.hxx>
 #include <basegfx/numeric/ftools.hxx>
@@ -25,6 +26,11 @@ class CoordinateMapper;
 class Point;
 class Color;
 class OutputDevice;
+class LineInfo;
+namespace tools
+{
+class Polygon;
+}
 
 namespace tools
 {
@@ -59,6 +65,12 @@ public:
     static void DrawRect(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                          const OutputDevice* pOutDev, const tools::Rectangle& rLogicalRect);
 
+    static void DrawPolyLine(OutputDevice& rOutDev, const tools::Polygon& rPoly);
+    static void DrawPolyLine(OutputDevice& rOutDev, const tools::Polygon& rPoly,
+                             const LineInfo& rLineInfo);
+    static void DrawPolyLineGeometry(OutputDevice& rOutDev,
+                                     const basegfx::B2DPolyPolygon& rPolyPolygon,
+                                     const LineInfo& rLineInfo);
     static bool
     DrawPolyLine(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
                  double fLineWidth = 0.0,
