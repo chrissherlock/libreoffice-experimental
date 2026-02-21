@@ -8,22 +8,26 @@
  */
 
 #include <tools/poly.hxx>
-#include <basegfx/polygon/b2dpolypolygon.hxx>
+#include <tools/stream.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
+#include <basegfx/polygon/b2dpolypolygon.hxx>
 
 #include <vcl/gradient.hxx>
 #include <vcl/hatch.hxx>
 #include <vcl/lineinfo.hxx>
-#include <vcl/metafile/MetaAction.hxx>
 #include <vcl/metafile/GDIMetaFile.hxx>
+#include <vcl/metafile/MetaAction.hxx>
+#include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/metafile/ScopedMetaGroup.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
 
-#include <vcl/metafile/MetafileRecorder.hxx>
+#include <cmath>
 
 namespace vcl
 {
+MetafileRecorder::ScopedSwitch::~ScopedSwitch() { mrRecorder.SetConnectMetaFile(mpOldMetaFile); }
+
 MetafileRecorder::MetafileRecorder()
     : mpMetaFile(nullptr)
 {
@@ -210,6 +214,13 @@ void MetafileRecorder::RecordComment(const rtl::OString& rComment)
 {
     if (IsActive())
         mpMetaFile->AddAction(new MetaCommentAction(rComment));
+}
+
+void MetafileRecorder::RecordComment(const rtl::OString& rComment, sal_uInt32 nVal,
+                                     const sal_uInt8* pData)
+{
+    if (IsActive())
+        mpMetaFile->AddAction(new MetaCommentAction(rComment, nVal, pData));
 }
 
 void MetafileRecorder::RecordLine(const Point& rStart, const Point& rEnd)
@@ -520,6 +531,45 @@ MetafileRecorder::ScopedSwitch::ScopedSwitch(MetafileRecorder& rRecorder, GDIMet
     mrRecorder.SetConnectMetaFile(pNewMetaFile);
 }
 
-MetafileRecorder::ScopedSwitch::~ScopedSwitch() { mrRecorder.SetConnectMetaFile(mpOldMetaFile); }
+void vcl::MetafileRecorder::RecordB2DPolyLine(const basegfx::B2DPolygon& rB2D, double fLineWidth,
+                                              basegfx::B2DLineJoin eLineJoin,
+                                              css::drawing::LineCap eLineCap,
+                                              const basegfx::B2DHomMatrix& /*rObjectTransform*/,
+                                              double fMiterMinimumAngle, double fTransparency,
+                                              const std::vector<double>* pStroke)
+{
+    // Serialize the high-fidelity parameters into a memory stream
+    SvMemoryStream aStream;
+    aStream.WriteUInt16(1); // Format Version
+    aStream.WriteDouble(fLineWidth);
+    aStream.WriteUInt16(static_cast<sal_uInt16>(eLineJoin));
+    aStream.WriteUInt16(static_cast<sal_uInt16>(eLineCap));
+    aStream.WriteDouble(fMiterMinimumAngle);
+    aStream.WriteDouble(fTransparency);
+
+    sal_uInt32 nStrokeCount = pStroke ? pStroke->size() : 0;
+    aStream.WriteUInt32(nStrokeCount);
+    if (pStroke)
+    {
+        for (double fVal : *pStroke)
+            aStream.WriteDouble(fVal);
+    }
+
+    // Tagged Metafile Begin
+    RecordComment("XB2DPOLYLINE_SEQ_BEGIN", static_cast<sal_uInt32>(aStream.Tell()),
+                  reinterpret_cast<const sal_uInt8*>(aStream.GetData()));
+
+    // Fallback for backwards compatibility / legacy renderers
+    LineInfo aLineInfo;
+    if (fLineWidth != 0.0)
+        aLineInfo.SetWidth(std::round(fLineWidth));
+    aLineInfo.SetLineJoin(eLineJoin);
+    aLineInfo.SetLineCap(eLineCap);
+    RecordPolyLine(tools::Polygon(rB2D), aLineInfo);
+
+    // Tagged Metafile End
+    RecordComment("XB2DPOLYLINE_SEQ_END", 0, nullptr);
+}
 } // namespace vcl
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

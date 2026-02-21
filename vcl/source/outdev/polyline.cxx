@@ -37,15 +37,9 @@ bool OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2D, double fLineWid
 {
     if (maRecorder.IsActive())
     {
-        LineInfo aLineInfo;
-
-        if (fLineWidth != 0.0)
-            aLineInfo.SetWidth(std::round(fLineWidth));
-
-        aLineInfo.SetLineJoin(eLineJoin);
-        aLineInfo.SetLineCap(eLineCap);
-
-        maRecorder.RecordPolyLine(tools::Polygon(rB2D), aLineInfo);
+        maRecorder.RecordB2DPolyLine(rB2D, fLineWidth, eLineJoin, eLineCap,
+                                     rObjectTransform, fMiterMinimumAngle,
+                                     fTransparency, pStroke);
     }
 
     if (!IsDeviceOutputNecessary())

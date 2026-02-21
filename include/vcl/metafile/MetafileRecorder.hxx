@@ -12,20 +12,25 @@
 #include <rtl/string.hxx>
 #include <tools/gen.hxx>
 #include <tools/solar.h>
-
 #include <tools/fontenum.hxx>
-#include <vcl/mapmod.hxx>
-#include <vcl/dllapi.h>
+#include <basegfx/polygon/b2dpolygon.hxx>
+#include <basegfx/matrix/b2dhommatrix.hxx>
+#include <basegfx/vector/b2enums.hxx>
 
+#include <vcl/dllapi.h>
 #include <vcl/bitmap.hxx>
-#include <vcl/vclenum.hxx>
-#include <vcl/metafile/MetaActionType.hxx>
 #include <vcl/kernarray.hxx>
+#include <vcl/mapmod.hxx>
+#include <vcl/metafile/MetaActionType.hxx>
 #include <vcl/region.hxx>
 #include <vcl/rendercontext/DrawTextFlags.hxx>
 #include <vcl/rendercontext/State.hxx>
+#include <vcl/vclenum.hxx>
 
+#include <vector>
 #include <memory>
+
+#include <com/sun/star/drawing/LineCap.hpp>
 
 namespace basegfx
 {
@@ -142,6 +147,15 @@ public:
     void RecordLine(const Point& rStart, const Point& rEnd);
     void RecordPolygon(const tools::Polygon& rPoly);
     void RecordPolyLine(const tools::Polygon& rPoly);
+
+    void RecordB2DPolyLine(const basegfx::B2DPolygon& rB2D, double fLineWidth = 0.0,
+                           basegfx::B2DLineJoin eLineJoin = basegfx::B2DLineJoin::Round,
+                           css::drawing::LineCap eLineCap = css::drawing::LineCap_BUTT,
+                           const basegfx::B2DHomMatrix& rObjectTransform = basegfx::B2DHomMatrix(),
+                           double fMiterMinimumAngle = basegfx::deg2rad(15.0),
+                           double fTransparency = 0.0,
+                           const std::vector<double>* pStroke = nullptr);
+
     void RecordRect(const tools::Rectangle& rRect);
     void RecordRoundRect(const tools::Rectangle& rRect, sal_uLong nHorzRound, sal_uLong nVertRound);
 
@@ -195,6 +209,7 @@ public:
 
     // --- Comment Actions ---
     void RecordComment(const rtl::OString& rComment);
+    void RecordComment(const rtl::OString& rComment, sal_uInt32 nVal, const sal_uInt8* pData);
 
     std::unique_ptr<ScopedMetaGroup> CreateScopedGroup(const OString& rName);
     void RecordBitmapAction(MetaActionType nAction, const Point& rDestPt, const Size& rDestSize,
