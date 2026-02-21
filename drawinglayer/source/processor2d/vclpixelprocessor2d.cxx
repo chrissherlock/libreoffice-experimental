@@ -140,12 +140,17 @@ bool VclPixelProcessor2D::tryDrawPolygonHairlinePrimitive2DDirect(
 
     mpOutputDevice->SetFillColor();
     mpOutputDevice->SetLineColor(Color(aLineColor));
-    //aLocalPolygon.transform(maCurrentTransformation);
 
     // try drawing; if it did not work, use standard fallback
+    // Pack attributes into the semantic StrokeAttributes struct
+    vcl::rendercontext::StrokeAttributes aStroke;
+    aStroke.fWidth = 0.0; // Hairline
+    aStroke.eJoin = basegfx::B2DLineJoin::Round;
+    aStroke.eCap = css::drawing::LineCap_BUTT;
+    aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
+
     return vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-        *mpOutputDevice, rLocalPolygon, 0.0, basegfx::B2DLineJoin::Round,
-        css::drawing::LineCap_BUTT, maCurrentTransformation, basegfx::deg2rad(15.0), fTransparency);
+        *mpOutputDevice, rLocalPolygon, aStroke, maCurrentTransformation, fTransparency);
 }
 
 bool VclPixelProcessor2D::tryDrawPolygonStrokePrimitive2DDirect(
@@ -169,8 +174,6 @@ bool VclPixelProcessor2D::tryDrawPolygonStrokePrimitive2DDirect(
 
     // MM01: Radically change here - no dismantle/applyLineDashing,
     // let that happen low-level at DrawPolyLineDirect implementations
-    // to open up for buffering and evtl. direct draw with sys-dep
-    // graphic systems. Check for stroke is in use
     const bool bStrokeAttributeNotUsed(rSource.getStrokeAttribute().isDefault()
                                        || 0.0 == rSource.getStrokeAttribute().getFullDotDashLen());
 
@@ -180,14 +183,18 @@ bool VclPixelProcessor2D::tryDrawPolygonStrokePrimitive2DDirect(
     mpOutputDevice->SetFillColor();
     mpOutputDevice->SetLineColor(Color(aLineColor));
 
-    // MM01 draw direct, hand over dash data if available
+    // Pack the geometric attributes into our new semantic structure
+    vcl::rendercontext::StrokeAttributes aStroke;
+    aStroke.fWidth = rSource.getLineAttribute().getWidth();
+    aStroke.eJoin = rSource.getLineAttribute().getLineJoin();
+    aStroke.eCap = rSource.getLineAttribute().getLineCap();
+    aStroke.fMiterMinimumAngle = rSource.getLineAttribute().getMiterMinimumAngle();
+    aStroke.pDashArray
+        = bStrokeAttributeNotUsed ? nullptr : &rSource.getStrokeAttribute().getDotDashArray();
+
+    // Call the updated DrawPolyLine API
     return vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-        *mpOutputDevice, rLocalPolygon,
-        // tdf#124848 use LineWidth direct, do not try to solve for zero-case (aka hairline)
-        rSource.getLineAttribute().getWidth(), rSource.getLineAttribute().getLineJoin(),
-        rSource.getLineAttribute().getLineCap(), maCurrentTransformation,
-        rSource.getLineAttribute().getMiterMinimumAngle(), 0.0,
-        bStrokeAttributeNotUsed ? nullptr : &rSource.getStrokeAttribute().getDotDashArray());
+        *mpOutputDevice, rLocalPolygon, aStroke, maCurrentTransformation, fTransparency);
 }
 
 void VclPixelProcessor2D::processBasePrimitive2D(const primitive2d::BasePrimitive2D& rCandidate)
@@ -504,12 +511,11 @@ void VclPixelProcessor2D::processPolyPolygonColorPrimitive2D(
     // try to use directly
     basegfx::B2DPolyPolygon aLocalPolyPolygon;
 
+    // Direct draw (already handled in your existing tryDraw call)
     tryDrawPolyPolygonColorPrimitive2DDirect(rPolyPolygonColorPrimitive2D, 0.0);
-    // okay, done. In this case no gaps should have to be repaired, too
 
-    // when AA is on and this filled polygons are the result of stroked line geometry,
+    // when AA is on and these filled polygons are the result of stroked line geometry,
     // draw the geometry once extra as lines to avoid AA 'gaps' between partial polygons
-    // Caution: This is needed in both cases (!)
     if (!(mnPolygonStrokePrimitive2D && getViewInformation2D().getUseAntiAliasing()
           && (mpOutputDevice->GetAntialiasing() & AntialiasingFlags::Enable)))
         return;
@@ -528,10 +534,16 @@ void VclPixelProcessor2D::processPolyPolygonColorPrimitive2D(
     mpOutputDevice->SetFillColor();
     mpOutputDevice->SetLineColor(Color(aPolygonColor));
 
+    // Prepare semantic stroke attributes for the gap-repair hairlines
+    vcl::rendercontext::StrokeAttributes aStroke;
+    aStroke.fWidth = 0.0; // Hairline
+
     for (sal_uInt32 a(0); a < nCount; a++)
     {
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-            *mpOutputDevice, aLocalPolyPolygon.getB2DPolygon(a), 0.0);
+        // Align with the new 5-parameter PrimitiveRenderer API
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpOutputDevice,
+                                                            aLocalPolyPolygon.getB2DPolygon(a),
+                                                            aStroke, basegfx::B2DHomMatrix(), 0.0);
     }
 }
 

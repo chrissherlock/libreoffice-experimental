@@ -39,6 +39,16 @@ class Rectangle;
 
 namespace vcl::rendercontext
 {
+/** Encapsulates the geometric properties required to expand a polyline into a stroked area */
+struct StrokeAttributes
+{
+    double fWidth = 0.0;
+    basegfx::B2DLineJoin eJoin = basegfx::B2DLineJoin::Round;
+    css::drawing::LineCap eCap = css::drawing::LineCap_BUTT;
+    double fMiterMinimumAngle = basegfx::deg2rad(15.0);
+    const std::vector<double>* pDashArray = nullptr;
+};
+
 class VCL_DLLPUBLIC PrimitiveRenderer
 {
 public:
@@ -65,20 +75,16 @@ public:
     static void DrawRect(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                          const OutputDevice* pOutDev, const tools::Rectangle& rLogicalRect);
 
+    static bool DrawPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly);
     static void DrawPolyLine(OutputDevice& rOutDev, const tools::Polygon& rPoly);
     static void DrawPolyLine(OutputDevice& rOutDev, const tools::Polygon& rPoly,
                              const LineInfo& rLineInfo);
     static void DrawPolyLineGeometry(OutputDevice& rOutDev,
                                      const basegfx::B2DPolyPolygon& rPolyPolygon,
                                      const LineInfo& rLineInfo);
-    static bool
-    DrawPolyLine(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
-                 double fLineWidth = 0.0,
-                 basegfx::B2DLineJoin eLineJoin = basegfx::B2DLineJoin::Round,
-                 css::drawing::LineCap eLineCap = css::drawing::LineCap_BUTT,
-                 const basegfx::B2DHomMatrix& rObjectTransform = basegfx::B2DHomMatrix(),
-                 double fMiterMinimumAngle = basegfx::deg2rad(15.0), double fTransparency = 0.0,
-                 const std::vector<double>* pStroke = nullptr);
+    static bool DrawPolyLine(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
+                             const StrokeAttributes& rStroke,
+                             const basegfx::B2DHomMatrix& rObjectTransform, double fTransparency);
 };
 
 } // namespace vcl::rendercontext

@@ -300,8 +300,7 @@ namespace vclcanvas
         return uno::Reference< rendering::XCachedPrimitive >(nullptr);
     }
 
-    uno::Reference< rendering::XCachedPrimitive > CanvasHelper::strokePolyPolygon( const rendering::XCanvas*                            ,
-                                                                                   const uno::Reference< rendering::XPolyPolygon2D >&   xPolyPolygon,
+    uno::Reference< rendering::XCachedPrimitive > CanvasHelper::strokePolyPolygon( const rendering::XCanvas* ,                                                                                   const uno::Reference< rendering::XPolyPolygon2D >&   xPolyPolygon,
                                                                                    const rendering::ViewState&                          viewState,
                                                                                    const rendering::RenderState&                        renderState,
                                                                                    const rendering::StrokeAttributes&                   strokeAttributes )
@@ -405,13 +404,17 @@ namespace vclcanvas
             {
                 const basegfx::B2DPolygon& polygon = aStrokedPolyPoly.getB2DPolygon( i );
                 if( polygon.isClosed()) {
-                    mpOutDevProvider->getOutDev().DrawPolygon( polygon );
+                    vcl::rendercontext::PrimitiveRenderer::DrawPolygon( mpOutDevProvider->getOutDev(), tools::Polygon(polygon) );
                     if( mp2ndOutDevProvider )
-                        mp2ndOutDevProvider->getOutDev().DrawPolygon( polygon );
+                        vcl::rendercontext::PrimitiveRenderer::DrawPolygon( mp2ndOutDevProvider->getOutDev(), tools::Polygon(polygon) );
                 } else {
-                    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(mpOutDevProvider->getOutDev(), polygon);
+                    vcl::rendercontext::StrokeAttributes aStroke;
+                    aStroke.fWidth = 0.0;
+                    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+                        mpOutDevProvider->getOutDev(), polygon, aStroke, basegfx::B2DHomMatrix(), 0.0 );
                     if( mp2ndOutDevProvider )
-                        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(mp2ndOutDevProvider->getOutDev(), polygon);
+                        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+                            mp2ndOutDevProvider->getOutDev(), polygon, aStroke, basegfx::B2DHomMatrix(), 0.0 );
                 }
             }
         }

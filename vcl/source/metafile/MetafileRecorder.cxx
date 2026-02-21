@@ -18,6 +18,7 @@
 #include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/metafile/MetafileRecorder.hxx>
+#include <vcl/rendercontext/PrimitiveRenderer.hxx>
 #include <vcl/metafile/ScopedMetaGroup.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
@@ -531,43 +532,38 @@ MetafileRecorder::ScopedSwitch::ScopedSwitch(MetafileRecorder& rRecorder, GDIMet
     mrRecorder.SetConnectMetaFile(pNewMetaFile);
 }
 
-void vcl::MetafileRecorder::RecordB2DPolyLine(const basegfx::B2DPolygon& rB2D, double fLineWidth,
-                                              basegfx::B2DLineJoin eLineJoin,
-                                              css::drawing::LineCap eLineCap,
-                                              const basegfx::B2DHomMatrix& /*rObjectTransform*/,
-                                              double fMiterMinimumAngle, double fTransparency,
-                                              const std::vector<double>* pStroke)
+void vcl::MetafileRecorder::RecordB2DPolyLine(const basegfx::B2DPolygon& rB2D,
+                                              const vcl::rendercontext::StrokeAttributes& rStroke,
+                                              const basegfx::B2DHomMatrix& rObjectTransform,
+                                              double fTransparency)
 {
-    // Serialize the high-fidelity parameters into a memory stream
+    (void)rObjectTransform; // Suppress -Werror for unused parameter
     SvMemoryStream aStream;
     aStream.WriteUInt16(1); // Format Version
-    aStream.WriteDouble(fLineWidth);
-    aStream.WriteUInt16(static_cast<sal_uInt16>(eLineJoin));
-    aStream.WriteUInt16(static_cast<sal_uInt16>(eLineCap));
-    aStream.WriteDouble(fMiterMinimumAngle);
+    aStream.WriteDouble(rStroke.fWidth);
+    aStream.WriteUInt16(static_cast<sal_uInt16>(rStroke.eJoin));
+    aStream.WriteUInt16(static_cast<sal_uInt16>(rStroke.eCap));
+    aStream.WriteDouble(rStroke.fMiterMinimumAngle);
     aStream.WriteDouble(fTransparency);
 
-    sal_uInt32 nStrokeCount = pStroke ? pStroke->size() : 0;
+    sal_uInt32 nStrokeCount = rStroke.pDashArray ? rStroke.pDashArray->size() : 0;
     aStream.WriteUInt32(nStrokeCount);
-    if (pStroke)
+    if (rStroke.pDashArray)
     {
-        for (double fVal : *pStroke)
+        for (double fVal : *rStroke.pDashArray)
             aStream.WriteDouble(fVal);
     }
 
-    // Tagged Metafile Begin
     RecordComment("XB2DPOLYLINE_SEQ_BEGIN", static_cast<sal_uInt32>(aStream.Tell()),
                   reinterpret_cast<const sal_uInt8*>(aStream.GetData()));
 
-    // Fallback for backwards compatibility / legacy renderers
     LineInfo aLineInfo;
-    if (fLineWidth != 0.0)
-        aLineInfo.SetWidth(std::round(fLineWidth));
-    aLineInfo.SetLineJoin(eLineJoin);
-    aLineInfo.SetLineCap(eLineCap);
+    if (rStroke.fWidth != 0.0)
+        aLineInfo.SetWidth(std::round(rStroke.fWidth));
+    aLineInfo.SetLineJoin(rStroke.eJoin);
+    aLineInfo.SetLineCap(rStroke.eCap);
     RecordPolyLine(tools::Polygon(rB2D), aLineInfo);
 
-    // Tagged Metafile End
     RecordComment("XB2DPOLYLINE_SEQ_END", 0, nullptr);
 }
 } // namespace vcl

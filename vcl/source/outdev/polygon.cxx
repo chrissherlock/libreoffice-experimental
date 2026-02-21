@@ -18,6 +18,7 @@
  */
 
 #include <sal/types.h>
+#include <vcl/rendercontext/PrimitiveRenderer.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <tools/poly.hxx>
 
@@ -144,69 +145,12 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
     if (maRecorder.IsActive())
         maRecorder.RecordPolygon(rPoly);
 
-    sal_uInt16 nPoints = rPoly.GetSize();
-    if (nPoints < 2 || !PrepareGraphicsOutput() || !mpGraphics)
+    if (rPoly.GetSize() < 2 || !IsDeviceOutputNecessary())
         return;
 
-    // use b2dpolygon drawing if possible
-    if (CanDrawPolygon())
-    {
-        const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation());
-        basegfx::B2DPolygon aB2DPolygon(rPoly.getB2DPolygon());
-
-        // ensure closed - maybe assert, hinders buffering
-        if (!aB2DPolygon.isClosed())
-            aB2DPolygon.setClosed(true);
-
-        if (IsFillColor())
-        {
-            mpGraphics->DrawPolyPolygon(
-                aTransform,
-                basegfx::B2DPolyPolygon(aB2DPolygon),
-                0.0,
-                *this);
-        }
-
-        bool bSuccess = true;
-        if (IsLineColor())
-        {
-            const bool bPixelSnapHairline(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
-
-            bSuccess = mpGraphics->DrawPolyLine(
-                aTransform,
-                aB2DPolygon,
-                0.0,
-                0.0, // tdf#124848 hairline
-                nullptr, // MM01
-                basegfx::B2DLineJoin::NONE,
-                css::drawing::LineCap_BUTT,
-                basegfx::deg2rad(15.0), // not used with B2DLineJoin::NONE, but the correct default
-                bPixelSnapHairline,
-                *this);
-        }
-
-        if (bSuccess)
-            return;
-    }
-
-    tools::Polygon aPoly = mpMapper->LogicToDevicePixel(rPoly);
-    const Point* pPtAry = aPoly.GetConstPointAry();
-
-    // #100127# Forward beziers to sal, if any
-    if( aPoly.HasFlags() )
-    {
-        const PolyFlags* pFlgAry = aPoly.GetConstFlagAry();
-        if( !mpGraphics->DrawPolygonBezier( nPoints, pPtAry, pFlgAry, *this ) )
-        {
-            aPoly = tools::Polygon::SubdivideBezier(aPoly);
-            pPtAry = aPoly.GetConstPointAry();
-            mpGraphics->DrawPolygon( aPoly.GetSize(), pPtAry, *this );
-        }
-    }
-    else
-    {
-        mpGraphics->DrawPolygon( nPoints, pPtAry, *this );
-    }
+    // Delegate to PrimitiveRenderer. If hardware rendering fails, utilize the legacy fallback.
+    if (!vcl::rendercontext::PrimitiveRenderer::DrawPolygon(*this, rPoly))
+        ImplDrawPolygon(rPoly, nullptr);
 }
 
 // Caution: This method is nearly the same as

@@ -56,7 +56,7 @@ void collectUIInformation( const OUString& aID , const OUString& aParentID , con
 {
     EventDescription aDescription;
     aDescription.aID = aID ;
-    aDescription.aParameters = {{"POS", aPos }};
+    aDescription.aParameters = {{"POS", aPos }};;;;;
     aDescription.aAction = "SELECT";
     aDescription.aKeyWord = "ValueSet";
     aDescription.aParent = aParentID;
@@ -1343,16 +1343,20 @@ void ValueSet::ImplDrawSelect(vcl::RenderContext& rRenderContext,
 
                 const int nThickness = nAdjust * 2;
 
-                if (!vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, aRectPoly,
-                                                 nThickness,
-                                                 basegfx::B2DLineJoin::Miter,
-                                                 css::drawing::LineCap_BUTT,
-                                                 basegfx::B2DHomMatrix(),
-                                                 basegfx::deg2rad(15.0),
-                                                 nTransparencePercent / 100.0))
+                vcl::rendercontext::StrokeAttributes aStroke;
+                aStroke.fWidth = nThickness;
+                aStroke.eJoin = basegfx::B2DLineJoin::Miter;
+                aStroke.eCap = css::drawing::LineCap_BUTT;
+                aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
+
+                if (!vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, aRectPoly, aStroke, basegfx::B2DHomMatrix(), nTransparencePercent / 100.0))
                 {
                     SAL_WARN("svtools", "presumably impossible in practice, but fallback to see something");
-                    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, aRectPoly, nThickness, basegfx::B2DLineJoin::Miter);
+                    {
+                        aStroke.fWidth = nThickness;
+                        aStroke.eJoin = basegfx::B2DLineJoin::Miter;
+                        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, aRectPoly, aStroke, basegfx::B2DHomMatrix(), 0.0);
+                    }
                 }
             }
 

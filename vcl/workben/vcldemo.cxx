@@ -294,7 +294,13 @@ public:
                         aPoly.append(basegfx::B2DPoint(aSub.Left() + aSub.GetWidth() * rPoint.nX,
                                                        aSub.Top()  + aSub.GetHeight() * rPoint.nY));
                     }
-                    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rDev, aPoly, aLineWidths[i], eJoins[i], eLineCaps[i]);
+                    {
+                    vcl::rendercontext::StrokeAttributes aStroke;
+                    aStroke.fWidth = aLineWidths[i];
+                    aStroke.eJoin = eJoins[i];
+                    aStroke.eCap = eLineCaps[i];
+                    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rDev, aPoly, aStroke, basegfx::B2DHomMatrix(), 0.0);
+                }
                 }
             }
             else

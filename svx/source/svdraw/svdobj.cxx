@@ -2010,9 +2010,19 @@ void SdrObject::PaintMacro(OutputDevice& rOut, const tools::Rectangle& , const S
     rOut.SetFillColor();
     rOut.SetRasterOp(RasterOp::Invert);
 
+    // Prepare semantic stroke attributes for the macro display (default hairline)
+    vcl::rendercontext::StrokeAttributes aStroke;
+    aStroke.fWidth = 0.0;
+
     for(auto const& rPolygon : aPolyPolygon)
     {
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rOut, rPolygon);
+        // Align with the new 5-parameter PrimitiveRenderer API
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+            rOut,
+            rPolygon,
+            aStroke,
+            basegfx::B2DHomMatrix(),
+            0.0);
     }
 
     rOut.SetRasterOp(eRop);

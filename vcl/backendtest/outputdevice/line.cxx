@@ -155,15 +155,24 @@ Bitmap OutputDeviceTestLine::setupDashedLine()
     rectangle.shrink(2);
 
     std::vector<double> stroke({ 2.0, 1.0 });
-    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpVirtualDevice,
+
+    // Pack the geometry-generation attributes into our semantic struct
+    vcl::rendercontext::StrokeAttributes aStroke;
+    aStroke.fWidth = 1.0;
+    aStroke.eJoin = basegfx::B2DLineJoin::NONE;
+    aStroke.eCap = css::drawing::LineCap_BUTT;
+    aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
+    aStroke.pDashArray = &stroke;
+
+    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+        *mpVirtualDevice,
         basegfx::B2DPolygon{
             basegfx::B2DPoint(rectangle.Left(), rectangle.Top()),
             basegfx::B2DPoint(rectangle.Left(), rectangle.Bottom()),
             basegfx::B2DPoint(rectangle.Right(), rectangle.Bottom()),
             basegfx::B2DPoint(rectangle.Right(), rectangle.Top()),
             basegfx::B2DPoint(rectangle.Left(), rectangle.Top())},
-        1, basegfx::B2DLineJoin::NONE, css::drawing::LineCap_BUTT, basegfx::B2DHomMatrix(),
-        basegfx::deg2rad(15.0), 0.0, &stroke);
+        aStroke, basegfx::B2DHomMatrix(), 0.0);
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
 }
@@ -242,10 +251,16 @@ Bitmap OutputDeviceTestLine::setupLineCap( css::drawing::LineCap lineCap )
         basegfx::B2DPoint(rectangle.LeftCenter().getX(), rectangle.LeftCenter().getY()),
         basegfx::B2DPoint(rectangle.RightCenter().getX(), rectangle.RightCenter().getY())};
 
-    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpVirtualDevice, poly, CAPWIDTH, basegfx::B2DLineJoin::NONE, lineCap);
+    {
+        vcl::rendercontext::StrokeAttributes aStroke; aStroke.fWidth = CAPWIDTH; aStroke.eCap = lineCap; aStroke.eJoin = basegfx::B2DLineJoin::NONE;
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpVirtualDevice, poly, aStroke, basegfx::B2DHomMatrix(), 0.0);
+    }
 
     mpVirtualDevice->SetLineColor(constFillColor);
-    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpVirtualDevice, poly, 0, basegfx::B2DLineJoin::NONE);
+    {
+        vcl::rendercontext::StrokeAttributes aStroke; aStroke.fWidth = 0.0; aStroke.eJoin = basegfx::B2DLineJoin::NONE;
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpVirtualDevice, poly, aStroke, basegfx::B2DHomMatrix(), 0.0);
+    }
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
 }
@@ -265,10 +280,16 @@ Bitmap OutputDeviceTestLine::setupLineJoin( basegfx::B2DLineJoin lineJoin )
         basegfx::B2DPoint(rectangle.TopRight().getX(), rectangle.TopRight().getY()),
         basegfx::B2DPoint(rectangle.BottomRight().getX(), rectangle.BottomRight().getY())};
 
-    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpVirtualDevice, poly, CAPWIDTH, lineJoin);
+    {
+        vcl::rendercontext::StrokeAttributes aStroke; aStroke.fWidth = CAPWIDTH; aStroke.eJoin = lineJoin;
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpVirtualDevice, poly, aStroke, basegfx::B2DHomMatrix(), 0.0);
+    }
 
     mpVirtualDevice->SetLineColor(constFillColor);
-    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpVirtualDevice, poly, 0, lineJoin);
+    {
+        vcl::rendercontext::StrokeAttributes aStroke; aStroke.fWidth = 0; aStroke.eJoin = lineJoin;
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpVirtualDevice, poly, aStroke, basegfx::B2DHomMatrix(), 0.0);
+    }
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
 }

@@ -35,19 +35,16 @@ bool OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2D, double fLineWid
                                double fMiterMinimumAngle, double fTransparency,
                                const std::vector<double>* pStroke)
 {
+    // Semantically pack the geometry-generation attributes
+    vcl::rendercontext::StrokeAttributes aStroke{fLineWidth, eLineJoin, eLineCap, fMiterMinimumAngle, pStroke};
+
     if (maRecorder.IsActive())
-    {
-        maRecorder.RecordB2DPolyLine(rB2D, fLineWidth, eLineJoin, eLineCap,
-                                     rObjectTransform, fMiterMinimumAngle,
-                                     fTransparency, pStroke);
-    }
+        maRecorder.RecordB2DPolyLine(rB2D, aStroke, rObjectTransform, fTransparency);
 
     if (!IsDeviceOutputNecessary())
         return true;
 
-    return vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-        *this, rB2D, fLineWidth, eLineJoin, eLineCap,
-        rObjectTransform, fMiterMinimumAngle, fTransparency, pStroke);
+    return vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*this, rB2D, aStroke, rObjectTransform, fTransparency);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

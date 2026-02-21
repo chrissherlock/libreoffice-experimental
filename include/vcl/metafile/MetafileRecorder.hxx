@@ -56,6 +56,11 @@ namespace rtl
 class OString;
 }
 
+namespace vcl::rendercontext
+{
+struct StrokeAttributes;
+}
+
 namespace vcl
 {
 class ScopedMetaGroup;
@@ -83,6 +88,11 @@ class GfxLink;
 enum class MetaActionType;
 
 enum class RasterOp;
+namespace vcl::rendercontext
+{
+struct StrokeAttributes;
+}
+
 namespace vcl
 {
 // Facade class for recording high-level OutputDevice operations
@@ -148,13 +158,9 @@ public:
     void RecordPolygon(const tools::Polygon& rPoly);
     void RecordPolyLine(const tools::Polygon& rPoly);
 
-    void RecordB2DPolyLine(const basegfx::B2DPolygon& rB2D, double fLineWidth = 0.0,
-                           basegfx::B2DLineJoin eLineJoin = basegfx::B2DLineJoin::Round,
-                           css::drawing::LineCap eLineCap = css::drawing::LineCap_BUTT,
-                           const basegfx::B2DHomMatrix& rObjectTransform = basegfx::B2DHomMatrix(),
-                           double fMiterMinimumAngle = basegfx::deg2rad(15.0),
-                           double fTransparency = 0.0,
-                           const std::vector<double>* pStroke = nullptr);
+    void RecordB2DPolyLine(const basegfx::B2DPolygon& rB2D,
+                           const vcl::rendercontext::StrokeAttributes& rStroke,
+                           const basegfx::B2DHomMatrix& rObjectTransform, double fTransparency);
 
     void RecordRect(const tools::Rectangle& rRect);
     void RecordRoundRect(const tools::Rectangle& rRect, sal_uLong nHorzRound, sal_uLong nVertRound);

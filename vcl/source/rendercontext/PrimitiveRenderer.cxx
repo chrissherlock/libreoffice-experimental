@@ -264,64 +264,100 @@ lcl_SetupStrokeAndLineInfo(const basegfx::B2DPolygon& rDevicePoly,
 }
 }
 
-bool PrimitiveRenderer::DrawPolyLine(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
-                                     double fLineWidth, basegfx::B2DLineJoin eLineJoin,
-                                     css::drawing::LineCap eLineCap,
-                                     const basegfx::B2DHomMatrix& rObjectTransform,
-                                     double fMiterMinimumAngle, double fTransparency,
-                                     const std::vector<double>* pStroke) // MM01
+bool PrimitiveRenderer::DrawPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly)
 {
-    auto drawB2DPolyline = [&]() -> bool {
-        assert(!rOutDev.is_double_buffered_window());
+    if (!rOutDev.CanDrawPolygon())
+        return false;
 
-        if (!rB2DPolygon.count())
-            return true;
+    // In headless tests, AcquireGraphics might fail or return a null mpGraphics.
+    // If we can't get a graphics context, we must bail out immediately.
+    if (!rOutDev.GetGraphics() && !rOutDev.AcquireGraphics())
+        return false;
 
-        if ((!rOutDev.mpGraphics && !rOutDev.AcquireGraphics()) || !rOutDev.CanDrawPolyline())
-            return false;
+    // Safety check for the internal mapper
+    if (!rOutDev.GetGraphics())
+        return false;
 
-        const basegfx::B2DHomMatrix aTransform(rOutDev.mpMapper->GetDeviceTransformation()
-                                               * rObjectTransform);
+    rOutDev.FlushGraphicsState();
 
-        if (rOutDev.GetRasterOp() == RasterOp::OverPaint && rOutDev.IsLineColor())
+    // Now it is safe to ask for the transformation
+    const basegfx::B2DHomMatrix aTransform(rOutDev.GetViewTransformation());
+    basegfx::B2DPolygon aB2DPolygon(rPoly.getB2DPolygon());
+
+    if (!aB2DPolygon.isClosed())
+        aB2DPolygon.setClosed(true);
+
+    if (rOutDev.IsFillColor())
+    {
+        rOutDev.GetGraphics()->DrawPolyPolygon(aTransform, basegfx::B2DPolyPolygon(aB2DPolygon),
+                                               0.0, rOutDev);
+    }
+
+    if (rOutDev.IsLineColor())
+    {
+        vcl::rendercontext::StrokeAttributes aStroke;
+        aStroke.eJoin = basegfx::B2DLineJoin::NONE;
+        PrimitiveRenderer::DrawPolyLine(rOutDev, aB2DPolygon, aStroke, basegfx::B2DHomMatrix(),
+                                        0.0);
+    }
+
+    return true;
+}
+
+bool PrimitiveRenderer::DrawPolyLine(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2D,
+                                     const StrokeAttributes& rStroke,
+                                     const basegfx::B2DHomMatrix& rObjectTransform,
+                                     double fTransparency)
+{
+    if (!rB2D.count() || !rOutDev.CanDrawPolyline())
+        return true;
+
+    if (!rOutDev.mpGraphics && !rOutDev.AcquireGraphics())
+        return false;
+
+    rOutDev.FlushGraphicsState();
+
+    const basegfx::B2DHomMatrix aTransform(rOutDev.mpMapper->GetDeviceTransformation()
+                                           * rObjectTransform);
+    bool bSuccess = false;
+
+    if (rOutDev.GetRasterOp() == RasterOp::OverPaint && rOutDev.IsLineColor())
+    {
+        const bool bPixelSnapHairline
+            = (rOutDev.mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline)
+              && rB2D.count() < 1000;
+
+        if (rOutDev.mpGraphics->DrawPolyLine(
+                aTransform, rB2D, fTransparency, rStroke.fWidth, rStroke.pDashArray, rStroke.eJoin,
+                rStroke.eCap, rStroke.fMiterMinimumAngle, bPixelSnapHairline, rOutDev))
         {
-            const bool bPixelSnapHairline
-                = (rOutDev.mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline)
-                  && rB2DPolygon.count() < 1000;
-
-            bool bDone = rOutDev.mpGraphics->DrawPolyLine(
-                aTransform, rB2DPolygon, fTransparency, fLineWidth, pStroke, eLineJoin, eLineCap,
-                fMiterMinimumAngle, bPixelSnapHairline, rOutDev);
-
-            if (bDone)
-                return true;
+            bSuccess = true;
         }
+    }
 
-        basegfx::B2DPolygon aDevicePoly(rB2DPolygon);
+    if (!bSuccess)
+    {
+        basegfx::B2DPolygon aDevicePoly(rB2D);
         aDevicePoly.transform(aTransform);
 
-        auto[aFallbackPolyPoly, aInfo]
-            = lcl_SetupStrokeAndLineInfo(aDevicePoly, pStroke, fLineWidth, eLineJoin, eLineCap);
+        auto[aFallbackPolyPoly, aInfo] = lcl_SetupStrokeAndLineInfo(
+            aDevicePoly, rStroke.pDashArray, rStroke.fWidth, rStroke.eJoin, rStroke.eCap);
 
         PrimitiveRenderer::DrawPolyLineGeometry(rOutDev, aFallbackPolyPoly, aInfo);
+        bSuccess = true;
+    }
 
-        return true;
-    };
-
-    bool bSuccess = drawB2DPolyline();
-
+    // THIS IS WHAT WAS MISSING: Restored Metafile Recording
     if (bSuccess && rOutDev.maRecorder.IsActive())
     {
         LineInfo aLineInfo;
-        if (fLineWidth != 0.0)
-            aLineInfo.SetWidth(std::round(fLineWidth));
+        if (rStroke.fWidth != 0.0)
+            aLineInfo.SetWidth(std::round(rStroke.fWidth));
 
-        aLineInfo.SetLineJoin(eLineJoin);
-        aLineInfo.SetLineCap(eLineCap);
+        aLineInfo.SetLineJoin(rStroke.eJoin);
+        aLineInfo.SetLineCap(rStroke.eCap);
 
-        // Note: We don't record the dashing/stroke here because DrawPolyLineDirect
-        // historically records the logical path, but you can adjust this if needed!
-        rOutDev.maRecorder.RecordPolyLine(tools::Polygon(rB2DPolygon), aLineInfo);
+        rOutDev.maRecorder.RecordPolyLine(tools::Polygon(rB2D), aLineInfo);
     }
 
     return bSuccess;

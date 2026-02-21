@@ -802,12 +802,20 @@ void SvxCropExample::Paint(vcl::RenderContext& rRenderContext, const ::tools::Re
         [&aColA,&rRenderContext](const basegfx::B2DPolygon& rSnippet)
         {
             rRenderContext.SetLineColor(aColA);
-            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, rSnippet);
+            {
+            vcl::rendercontext::StrokeAttributes aStroke;
+            aStroke.fWidth = 0.0; // Default hairline for preview
+            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, rSnippet, aStroke, basegfx::B2DHomMatrix(), 0.0);
+        }
         },
         [&aColB,&rRenderContext](const basegfx::B2DPolygon& rSnippet)
         {
             rRenderContext.SetLineColor(aColB);
-            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, rSnippet);
+            {
+            vcl::rendercontext::StrokeAttributes aStroke;
+            aStroke.fWidth = 0.0; // Default hairline for preview
+            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, rSnippet, aStroke, basegfx::B2DHomMatrix(), 0.0);
+        }
         },
         2.0 * fLogicDashLength);
 }

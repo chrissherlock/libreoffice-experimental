@@ -1815,9 +1815,15 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawPolyLine)
         aLineInfo.SetLineJoin(basegfx::B2DLineJoin::Bevel);
         aLineInfo.SetLineCap(css::drawing::LineCap_BUTT);
 
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-            *pVDev, aPolygon, 3, basegfx::B2DLineJoin::Bevel, css::drawing::LineCap_BUTT,
-            basegfx::B2DHomMatrix(), basegfx::deg2rad(15.0));
+        {
+            vcl::rendercontext::StrokeAttributes aStroke;
+            aStroke.fWidth = 3;
+            aStroke.eJoin = basegfx::B2DLineJoin::Bevel;
+            aStroke.eCap = css::drawing::LineCap_BUTT;
+            aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
+            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+                *pVDev, aPolygon, aStroke, basegfx::B2DHomMatrix(), basegfx::deg2rad(15.0));
+        }
 
         MetaAction* pAction = aMtf.GetAction(INITIAL_SETUP_ACTION_COUNT);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Not a polygon action", MetaActionType::POLYLINE,

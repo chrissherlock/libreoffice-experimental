@@ -122,7 +122,12 @@ namespace PictReaderShape {
     B2DPolygon poly;
     poly.append(B2DPoint(double(orig.X()+decal[0]), double(orig.Y()+decal[1])));
     poly.append(B2DPoint(double(dest.X()+decal[0]), double(dest.Y()+decal[1])));
-    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*dev, poly, double(penSize), basegfx::B2DLineJoin::NONE);
+    {
+        vcl::rendercontext::StrokeAttributes aStroke;
+        aStroke.fWidth = double(penSize);
+        aStroke.eJoin = basegfx::B2DLineJoin::NONE;
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*dev, poly, aStroke, basegfx::B2DHomMatrix(), 0.0);
+    }
   }
 
   //--------------------  draws a rectangle --------------------
@@ -142,7 +147,12 @@ namespace PictReaderShape {
     poly.append(B2DPoint(X[0], Y[0]));
 
     if (drawFrame)
-      vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*dev, poly, double(penSize), basegfx::B2DLineJoin::NONE);
+      {
+        vcl::rendercontext::StrokeAttributes aStroke;
+        aStroke.fWidth = double(penSize);
+        aStroke.eJoin = basegfx::B2DLineJoin::NONE;
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*dev, poly, aStroke, basegfx::B2DHomMatrix(), 0.0);
+    }
     else
       dev->DrawPolygon(poly);
   }
@@ -157,7 +167,12 @@ namespace PictReaderShape {
     B2DPoint center(0.5*(X[1]+X[0]), 0.5*(Y[1]+Y[0]));
     B2DPolygon poly = basegfx::utils::createPolygonFromEllipse(center, 0.5*(X[1]-X[0]), 0.5*(Y[1]-Y[0]));
     if (drawFrame)
-      vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*dev, poly, double(penSize), basegfx::B2DLineJoin::NONE);
+      {
+        vcl::rendercontext::StrokeAttributes aStroke;
+        aStroke.fWidth = double(penSize);
+        aStroke.eJoin = basegfx::B2DLineJoin::NONE;
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*dev, poly, aStroke, basegfx::B2DHomMatrix(), 0.0);
+    }
     else
       dev->DrawPolygon(poly);
   }
@@ -189,7 +204,12 @@ namespace PictReaderShape {
 
     B2DPolygon poly = basegfx::utils::createPolygonFromEllipseSegment(center, 0.5*(X[1]-X[0]), 0.5*(Y[1]-Y[0]), angl1, angl2);
     if (drawFrame)
-      vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*dev, poly, double(penSize), basegfx::B2DLineJoin::NONE);
+      {
+        vcl::rendercontext::StrokeAttributes aStroke;
+        aStroke.fWidth = double(penSize);
+        aStroke.eJoin = basegfx::B2DLineJoin::NONE;
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*dev, poly, aStroke, basegfx::B2DHomMatrix(), 0.0);
+    }
     else {
       // adds circle's center
       poly.append(center);
@@ -213,7 +233,12 @@ namespace PictReaderShape {
     B2DPolygon poly = basegfx::utils::createPolygonFromRect(rect, (width != 0.0) ? ovalW/width : 0.0, (height != 0.0) ? ovalH/height : 0.0);
 
     if (drawFrame)
-      vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*dev, poly, double(penSize), basegfx::B2DLineJoin::NONE);
+      {
+        vcl::rendercontext::StrokeAttributes aStroke;
+        aStroke.fWidth = double(penSize);
+        aStroke.eJoin = basegfx::B2DLineJoin::NONE;
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*dev, poly, aStroke, basegfx::B2DHomMatrix(), 0.0);
+    }
     else
       dev->DrawPolygon(poly);
   }
@@ -252,7 +277,12 @@ void drawPolygon(VirtualDevice *dev, bool drawFrame, tools::Polygon const &orig,
       poly.append(B2DPoint(x, y));
     }
     if (drawFrame)
-      vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*dev, poly, double(penSize), basegfx::B2DLineJoin::NONE);
+      {
+        vcl::rendercontext::StrokeAttributes aStroke;
+        aStroke.fWidth = double(penSize);
+        aStroke.eJoin = basegfx::B2DLineJoin::NONE;
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*dev, poly, aStroke, basegfx::B2DHomMatrix(), 0.0);
+    }
     else
       dev->DrawPolygon(poly);
   }

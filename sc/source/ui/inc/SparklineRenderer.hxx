@@ -344,9 +344,17 @@ private:
                 aAxisPolygon.append({ x2, y });
 
                 rRenderContext.SetLineColor(rAttributes.getColorAxis().getFinalColor());
-                vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-                    rRenderContext, aAxisPolygon, 0.2 * mfScaleX, basegfx::B2DLineJoin::Round,
-                    css::drawing::LineCap_BUTT, aMatrix);
+                {
+                    vcl::rendercontext::StrokeAttributes aStroke;
+                    aStroke.fWidth = 0.2 * mfScaleX;
+                    aStroke.eJoin = basegfx::B2DLineJoin::Round;
+                    aStroke.eCap = css::drawing::LineCap_BUTT;
+                    aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0); // Use a double here
+
+                    // Pass aMatrix as the 4th argument (rObjectTransform)
+                    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+                        rRenderContext, aAxisPolygon, aStroke, aMatrix, 0.0);
+                }
             }
         }
 
@@ -354,9 +362,17 @@ private:
 
         for (auto& rPolygon : aPolygons)
         {
-            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-                rRenderContext, rPolygon, rAttributes.getLineWeight() * mfScaleX,
-                basegfx::B2DLineJoin::Round, css::drawing::LineCap_BUTT, aMatrix);
+            {
+                vcl::rendercontext::StrokeAttributes aStroke;
+                aStroke.fWidth = rAttributes.getLineWeight() * mfScaleX;
+                aStroke.eJoin = basegfx::B2DLineJoin::Round;
+                aStroke.eCap = css::drawing::LineCap_BUTT;
+                aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0); // Set to default double value
+
+                // Pass aMatrix as the 4th argument (rObjectTransform)
+                vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, rPolygon,
+                                                                    aStroke, aMatrix, 0.0);
+            }
         }
 
         for (auto& rMarker : aMarkers)
@@ -446,9 +462,18 @@ private:
                 aAxisPolygon.append({ x2, nZeroPosition });
 
                 rRenderContext.SetLineColor(rAttributes.getColorAxis().getFinalColor());
-                vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-                    rRenderContext, aAxisPolygon, 0.2 * mfScaleX, basegfx::B2DLineJoin::Round,
-                    css::drawing::LineCap_BUTT, aMatrix);
+                {
+                    vcl::rendercontext::StrokeAttributes aStroke;
+                    aStroke.fWidth = 0.2 * mfScaleX;
+                    aStroke.eJoin = basegfx::B2DLineJoin::Round;
+                    aStroke.eCap = css::drawing::LineCap_BUTT;
+                    // Fix: assign a numeric double value, not a matrix
+                    aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
+
+                    // Fix: Pass aMatrix as the 4th argument (rObjectTransform)
+                    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+                        rRenderContext, aAxisPolygon, aStroke, aMatrix, 0.0);
+                }
             }
         }
         else

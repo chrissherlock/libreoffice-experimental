@@ -575,7 +575,12 @@ void VclProcessor2D::RenderPolygonHairlinePrimitive2D(
         aLocalPolygon = basegfx::utils::snapPointsOfHorizontalOrVerticalEdges(aLocalPolygon);
     }
 
-    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpOutputDevice, aLocalPolygon, 0.0);
+    {
+        vcl::rendercontext::StrokeAttributes aStroke;
+        aStroke.fWidth = 0.0;
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpOutputDevice, aLocalPolygon, aStroke,
+                                                            basegfx::B2DHomMatrix(), 0.0);
+    }
 }
 
 // direct draw of transformed Bitmap primitive
@@ -1268,8 +1273,13 @@ void VclProcessor2D::RenderPolygonStrokePrimitive2D(
                     // paint as simple hairline
                     for (sal_uInt32 a(0); a < nCount; a++)
                     {
-                        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-                            *mpOutputDevice, aHairlinePolyPolygon.getB2DPolygon(a), 0.0);
+                        {
+                            vcl::rendercontext::StrokeAttributes aStroke;
+                            aStroke.fWidth = 0.0;
+                            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+                                *mpOutputDevice, aHairlinePolyPolygon.getB2DPolygon(a), aStroke,
+                                basegfx::B2DHomMatrix(), 0.0);
+                        }
                     }
 
                     bDone = true;
@@ -1289,26 +1299,42 @@ void VclProcessor2D::RenderPolygonStrokePrimitive2D(
                         aMat.set(0, 2, -fHalfDistance);
                         aMat.set(1, 2, -fHalfDistance);
                         aCandidate.transform(aMat);
-                        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpOutputDevice,
-                                                                            aCandidate, 0.0);
+                        {
+                            vcl::rendercontext::StrokeAttributes aStroke;
+                            aStroke.fWidth = 0.0;
+                            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+                                *mpOutputDevice, aCandidate, aStroke, basegfx::B2DHomMatrix(), 0.0);
+                        }
 
                         aMat.set(0, 2, fDistance);
                         aMat.set(1, 2, 0.0);
                         aCandidate.transform(aMat);
-                        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpOutputDevice,
-                                                                            aCandidate, 0.0);
+                        {
+                            vcl::rendercontext::StrokeAttributes aStroke;
+                            aStroke.fWidth = 0.0;
+                            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+                                *mpOutputDevice, aCandidate, aStroke, basegfx::B2DHomMatrix(), 0.0);
+                        }
 
                         aMat.set(0, 2, 0.0);
                         aMat.set(1, 2, fDistance);
                         aCandidate.transform(aMat);
-                        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpOutputDevice,
-                                                                            aCandidate, 0.0);
+                        {
+                            vcl::rendercontext::StrokeAttributes aStroke;
+                            aStroke.fWidth = 0.0;
+                            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+                                *mpOutputDevice, aCandidate, aStroke, basegfx::B2DHomMatrix(), 0.0);
+                        }
 
                         aMat.set(0, 2, -fDistance);
                         aMat.set(1, 2, 0.0);
                         aCandidate.transform(aMat);
-                        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpOutputDevice,
-                                                                            aCandidate, 0.0);
+                        {
+                            vcl::rendercontext::StrokeAttributes aStroke;
+                            aStroke.fWidth = 0.0;
+                            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+                                *mpOutputDevice, aCandidate, aStroke, basegfx::B2DHomMatrix(), 0.0);
+                        }
                     }
 
                     bDone = true;
@@ -1324,32 +1350,52 @@ void VclProcessor2D::RenderPolygonStrokePrimitive2D(
                     {
                         basegfx::B2DPolygon aCandidate(aHairlinePolyPolygon.getB2DPolygon(a));
 
-                        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpOutputDevice,
-                                                                            aCandidate, 0.0);
+                        {
+                            vcl::rendercontext::StrokeAttributes aStroke;
+                            aStroke.fWidth = 0.0;
+                            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+                                *mpOutputDevice, aCandidate, aStroke, basegfx::B2DHomMatrix(), 0.0);
+                        }
 
                         aMat.set(0, 2, -fDistance);
                         aMat.set(1, 2, 0.0);
                         aCandidate.transform(aMat);
-                        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpOutputDevice,
-                                                                            aCandidate, 0.0);
+                        {
+                            vcl::rendercontext::StrokeAttributes aStroke;
+                            aStroke.fWidth = 0.0;
+                            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+                                *mpOutputDevice, aCandidate, aStroke, basegfx::B2DHomMatrix(), 0.0);
+                        }
 
                         aMat.set(0, 2, fDistance);
                         aMat.set(1, 2, -fDistance);
                         aCandidate.transform(aMat);
-                        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpOutputDevice,
-                                                                            aCandidate, 0.0);
+                        {
+                            vcl::rendercontext::StrokeAttributes aStroke;
+                            aStroke.fWidth = 0.0;
+                            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+                                *mpOutputDevice, aCandidate, aStroke, basegfx::B2DHomMatrix(), 0.0);
+                        }
 
                         aMat.set(0, 2, fDistance);
                         aMat.set(1, 2, fDistance);
                         aCandidate.transform(aMat);
-                        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpOutputDevice,
-                                                                            aCandidate, 0.0);
+                        {
+                            vcl::rendercontext::StrokeAttributes aStroke;
+                            aStroke.fWidth = 0.0;
+                            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+                                *mpOutputDevice, aCandidate, aStroke, basegfx::B2DHomMatrix(), 0.0);
+                        }
 
                         aMat.set(0, 2, -fDistance);
                         aMat.set(1, 2, fDistance);
                         aCandidate.transform(aMat);
-                        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpOutputDevice,
-                                                                            aCandidate, 0.0);
+                        {
+                            vcl::rendercontext::StrokeAttributes aStroke;
+                            aStroke.fWidth = 0.0;
+                            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+                                *mpOutputDevice, aCandidate, aStroke, basegfx::B2DHomMatrix(), 0.0);
+                        }
                     }
 
                     bDone = true;
@@ -1366,8 +1412,13 @@ void VclProcessor2D::RenderPolygonStrokePrimitive2D(
                     // line width below 1.5, draw the basic hairline polygon
                     for (sal_uInt32 a(0); a < nCount; a++)
                     {
-                        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-                            *mpOutputDevice, aHairlinePolyPolygon.getB2DPolygon(a), 0.0);
+                        {
+                            vcl::rendercontext::StrokeAttributes aStroke;
+                            aStroke.fWidth = 0.0;
+                            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+                                *mpOutputDevice, aHairlinePolyPolygon.getB2DPolygon(a), aStroke,
+                                basegfx::B2DHomMatrix(), 0.0);
+                        }
                     }
 
                     bDone = true;
@@ -1381,29 +1432,45 @@ void VclProcessor2D::RenderPolygonStrokePrimitive2D(
                         basegfx::B2DPolygon aCandidate(aHairlinePolyPolygon.getB2DPolygon(a));
                         basegfx::B2DHomMatrix aMat;
 
-                        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpOutputDevice,
-                                                                            aCandidate, 0.0);
+                        {
+                            vcl::rendercontext::StrokeAttributes aStroke;
+                            aStroke.fWidth = 0.0;
+                            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+                                *mpOutputDevice, aCandidate, aStroke, basegfx::B2DHomMatrix(), 0.0);
+                        }
 
                         aMat.set(0, 2, 1.0);
                         aMat.set(1, 2, 0.0);
                         aCandidate.transform(aMat);
 
-                        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpOutputDevice,
-                                                                            aCandidate, 0.0);
+                        {
+                            vcl::rendercontext::StrokeAttributes aStroke;
+                            aStroke.fWidth = 0.0;
+                            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+                                *mpOutputDevice, aCandidate, aStroke, basegfx::B2DHomMatrix(), 0.0);
+                        }
 
                         aMat.set(0, 2, 0.0);
                         aMat.set(1, 2, 1.0);
                         aCandidate.transform(aMat);
 
-                        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpOutputDevice,
-                                                                            aCandidate, 0.0);
+                        {
+                            vcl::rendercontext::StrokeAttributes aStroke;
+                            aStroke.fWidth = 0.0;
+                            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+                                *mpOutputDevice, aCandidate, aStroke, basegfx::B2DHomMatrix(), 0.0);
+                        }
 
                         aMat.set(0, 2, -1.0);
                         aMat.set(1, 2, 0.0);
                         aCandidate.transform(aMat);
 
-                        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpOutputDevice,
-                                                                            aCandidate, 0.0);
+                        {
+                            vcl::rendercontext::StrokeAttributes aStroke;
+                            aStroke.fWidth = 0.0;
+                            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+                                *mpOutputDevice, aCandidate, aStroke, basegfx::B2DHomMatrix(), 0.0);
+                        }
                     }
 
                     bDone = true;
@@ -1422,10 +1489,14 @@ void VclProcessor2D::RenderPolygonStrokePrimitive2D(
                 // for very complex polygons, too
                 for (sal_uInt32 a(0); a < nCount; a++)
                 {
+                    vcl::rendercontext::StrokeAttributes aStroke;
+                    aStroke.fWidth = fDiscreteLineWidth;
+                    aStroke.eJoin = rLineAttribute.getLineJoin();
+                    aStroke.eCap = rLineAttribute.getLineCap();
+                    aStroke.fMiterMinimumAngle = rLineAttribute.getMiterMinimumAngle();
                     vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-                        *mpOutputDevice, aHairlinePolyPolygon.getB2DPolygon(a), fDiscreteLineWidth,
-                        rLineAttribute.getLineJoin(), rLineAttribute.getLineCap(),
-                        basegfx::B2DHomMatrix(), rLineAttribute.getMiterMinimumAngle());
+                        *mpOutputDevice, aHairlinePolyPolygon.getB2DPolygon(a), aStroke,
+                        basegfx::B2DHomMatrix(), 0.0);
                 }
 
                 bDone = true;

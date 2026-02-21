@@ -471,28 +471,28 @@ void ScreenshotAnnotationDlg_Impl::PaintScreenShotEntry(
 
     mxVirtualBufferDevice->SetLineColor(rColor);
 
-    bool                        DrawPolyLine(
-                                    const basegfx::B2DPolygon&,
-                                    double fLineWidth = 0.0,
-                                    basegfx::B2DLineJoin eLineJoin = basegfx::B2DLineJoin::Round,
-                                    css::drawing::LineCap eLineCap = css::drawing::LineCap_BUTT,
-                                    const basegfx::B2DHomMatrix& rObjectTransform = basegfx::B2DHomMatrix(),
-                                    double fMiterMinimumAngle = basegfx::deg2rad(15.0),
-                                    double fTransparency = 0.0,
-                                    const std::vector<double>* pStroke = nullptr); // MM01
+    // Pack attributes into our new semantic structure
+    vcl::rendercontext::StrokeAttributes aStroke;
+    aStroke.fWidth = fLineWidth;
+    aStroke.eJoin = basegfx::B2DLineJoin::Round;
+    aStroke.eCap = css::drawing::LineCap_BUTT;
+    aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
+
     // try to use transparency
-    if (!vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mxVirtualBufferDevice,
-        aPolygon,
-        fLineWidth,
-        basegfx::B2DLineJoin::Round,
-        css::drawing::LineCap_BUTT,
-        basegfx::B2DHomMatrix(),
-        basegfx::deg2rad(15.0), fTransparency))
-    {
-        // no transparency, draw without
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mxVirtualBufferDevice,
+    if (!vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+            *mxVirtualBufferDevice,
             aPolygon,
-            fLineWidth);
+            aStroke,
+            basegfx::B2DHomMatrix(),
+            fTransparency))
+    {
+        // no transparency, draw without (fTransparency = 0.0)
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+            *mxVirtualBufferDevice,
+            aPolygon,
+            aStroke,
+            basegfx::B2DHomMatrix(),
+            0.0);
     }
 }
 
