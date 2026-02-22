@@ -755,6 +755,16 @@ void PrimitiveRenderer::DrawMultiplePolygons(OutputDevice& rOutDev,
     }
 }
 
+void PrimitiveRenderer::DrawClippedPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly,
+                                           const tools::PolyPolygon& rClipPolyPoly)
+{
+    // Handle clipping via intersection then dispatch
+    tools::PolyPolygon aClipped;
+    tools::PolyPolygon(rPoly).GetIntersection(rClipPolyPoly, aClipped);
+
+    vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygonGeometry(rOutDev, aClipped);
+}
+
 } // namespace vcl::rendercontext
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

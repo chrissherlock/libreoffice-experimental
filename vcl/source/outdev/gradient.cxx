@@ -249,7 +249,7 @@ void OutputDevice::DrawLinearGradient( const tools::Rectangle& rRect,
         aPoly.Rotate( aCenter, nAngle );
 
         if (pClixPolyPoly)
-            ImplDrawClippedPolygon(aPoly, *pClixPolyPoly);
+            vcl::rendercontext::PrimitiveRenderer::DrawClippedPolygon(*this, aPoly, *pClixPolyPoly);
         else
             vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*this, aPoly);
 
@@ -265,7 +265,7 @@ void OutputDevice::DrawLinearGradient( const tools::Rectangle& rRect,
             aPoly.Rotate( aCenter, nAngle );
 
             if (pClixPolyPoly)
-                ImplDrawClippedPolygon(aPoly, *pClixPolyPoly);
+                vcl::rendercontext::PrimitiveRenderer::DrawClippedPolygon(*this, aPoly, *pClixPolyPoly);
             else
                 vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*this, aPoly);
         }
@@ -319,7 +319,7 @@ void OutputDevice::DrawLinearGradient( const tools::Rectangle& rRect,
         aPoly.Rotate( aCenter, nAngle );
 
         if (pClixPolyPoly)
-            ImplDrawClippedPolygon(aPoly, *pClixPolyPoly);
+            vcl::rendercontext::PrimitiveRenderer::DrawClippedPolygon(*this, aPoly, *pClixPolyPoly);
         else
             vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*this, aPoly);
 
@@ -334,7 +334,7 @@ void OutputDevice::DrawLinearGradient( const tools::Rectangle& rRect,
             aPoly.Rotate( aCenter, nAngle );
 
             if (pClixPolyPoly)
-                ImplDrawClippedPolygon(aPoly, *pClixPolyPoly);
+                vcl::rendercontext::PrimitiveRenderer::DrawClippedPolygon(*this, aPoly, *pClixPolyPoly);
             else
                 vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*this, aPoly);
         }
@@ -358,7 +358,7 @@ void OutputDevice::DrawLinearGradient( const tools::Rectangle& rRect,
     aPoly.Rotate( aCenter, nAngle );
 
     if (pClixPolyPoly)
-        ImplDrawClippedPolygon(aPoly, *pClixPolyPoly);
+        vcl::rendercontext::PrimitiveRenderer::DrawClippedPolygon(*this, aPoly, *pClixPolyPoly);
     else
         vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*this, aPoly);
 
@@ -459,7 +459,7 @@ void OutputDevice::DrawComplexGradient( const tools::Rectangle& rRect,
 
         aPoly = tools::Polygon(aExtRect);
         if (pClixPolyPoly)
-            ImplDrawClippedPolygon(aPoly, *pClixPolyPoly);
+            vcl::rendercontext::PrimitiveRenderer::DrawClippedPolygon(*this, aPoly, *pClixPolyPoly);
         else
             vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*this, aPoly);
     }
@@ -518,7 +518,7 @@ void OutputDevice::DrawComplexGradient( const tools::Rectangle& rRect,
             mpGraphics->SetFillColor( Color( nRed, nGreen, nBlue ) );
 
             if (pClixPolyPoly)
-                ImplDrawClippedPolygon(aPoly, *pClixPolyPoly);
+                vcl::rendercontext::PrimitiveRenderer::DrawClippedPolygon(*this, aPoly, *pClixPolyPoly);
             else
                 vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*this, aPoly);
         }
@@ -546,7 +546,7 @@ void OutputDevice::DrawComplexGradient( const tools::Rectangle& rRect,
     mpGraphics->SetFillColor( Color( nRed, nGreen, nBlue ) );
 
     if (pClixPolyPoly)
-        ImplDrawClippedPolygon(aPoly, *pClixPolyPoly);
+        vcl::rendercontext::PrimitiveRenderer::DrawClippedPolygon(*this, aPoly, *pClixPolyPoly);
     else
         vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*this, aPoly);
 }

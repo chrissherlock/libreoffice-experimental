@@ -812,17 +812,9 @@ public:
      */
     void                        DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly );
     void                        DrawPolyPolygon( const basegfx::B2DPolyPolygon& );
-
-private:
-
-    SAL_DLLPRIVATE void ImplDrawClippedPolygon(const tools::Polygon& rPoly, const tools::PolyPolygon& rClipPolyPoly);
-    SAL_DLLPRIVATE void ImplDrawPolyPolygon(const tools::PolyPolygon& rPolyPoly, const tools::PolyPolygon* pClipPolyPoly);
-
-    SAL_DLLPRIVATE void ImplDrawSinglePolygon(const tools::Polygon& rPoly);
-    SAL_DLLPRIVATE void ImplDrawMultiplePolygons(const tools::PolyPolygon& rPolyPoly);
-
     ///@}
 
+private:
     SAL_DLLPRIVATE void         ImplDrawWaveLineBezier(tools::Long nStartX, tools::Long nStartY, tools::Long nEndX, tools::Long nEndY, tools::Long nWaveHeight, double fOrientation, tools::Long nLineWidth);
 
 

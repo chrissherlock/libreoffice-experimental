@@ -106,6 +106,9 @@ public:
                                      const basegfx::B2DPolyPolygon& rPolyPolygon,
                                      const LineInfo& rLineInfo);
 
+    static void DrawClippedPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly,
+                                   const tools::PolyPolygon& rClipPolyPoly);
+
 private:
     static void DrawSinglePolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly);
 
