@@ -90,7 +90,7 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
 
     // Delegate to PrimitiveRenderer. If hardware rendering fails, utilize the legacy fallback.
     if (!vcl::rendercontext::PrimitiveRenderer::DrawPolygon(*this, rPoly, bFill, pStroke, fLineTransparency))
-        ImplDrawPolygon(rPoly, nullptr);
+        vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*this, rPoly);
 }
 
 void OutputDevice::ImplDrawPolygon(const tools::Polygon& rPoly, const tools::PolyPolygon* pClipPolyPoly)
