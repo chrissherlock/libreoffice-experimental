@@ -501,7 +501,7 @@ void OutputDevice::DrawComplexGradient( const tools::Rectangle& rRect,
             xPolyPoly->Replace( xPolyPoly->GetObject( 1 ), 0 );
             xPolyPoly->Replace( aPoly, 1 );
 
-            ImplDrawPolyPolygon( *xPolyPoly, pClixPolyPoly );
+            vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygon(*this, *xPolyPoly, pClixPolyPoly);
 
             // #107349# Set fill color _after_ geometry painting:
             // xPolyPoly's geometry is the band from last iteration's

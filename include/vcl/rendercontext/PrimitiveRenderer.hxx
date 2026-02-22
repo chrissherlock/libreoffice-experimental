@@ -82,6 +82,9 @@ public:
     static bool DrawPolyPolygon(OutputDevice& rOutDev, const tools::PolyPolygon& rPolyPoly,
                                 bool bFill, const StrokeAttributes* pStroke);
 
+    static void DrawPolyPolygon(OutputDevice& rOutDev, const tools::PolyPolygon& rPolyPoly,
+                                const tools::PolyPolygon* pClipPolyPoly);
+
     static void DrawPolyPolygonFallback(OutputDevice& rOutDev, const tools::PolyPolygon& rPolyPoly);
 
     static void DrawPolyPolygonGeometry(OutputDevice& rOutDev,
@@ -102,6 +105,11 @@ public:
     static void DrawPolyLineGeometry(OutputDevice& rOutDev,
                                      const basegfx::B2DPolyPolygon& rPolyPolygon,
                                      const LineInfo& rLineInfo);
+
+private:
+    static void DrawSinglePolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly);
+
+    static void DrawMultiplePolygons(OutputDevice& rOutDev, const tools::PolyPolygon& rPolyPoly);
 };
 
 } // namespace vcl::rendercontext

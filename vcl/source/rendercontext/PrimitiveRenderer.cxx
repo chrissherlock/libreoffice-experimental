@@ -654,6 +654,107 @@ void PrimitiveRenderer::DrawPolygonGeometry(OutputDevice& rOutDev, const tools::
     }
 }
 
+namespace
+{
+struct ClippedPolygonData
+{
+    std::unique_ptr<tools::PolyPolygon> pAllocated;
+    tools::PolyPolygon* pActive = nullptr;
+};
+}
+
+static ClippedPolygonData lcl_GetClippedPolyPolygon(const tools::PolyPolygon& rPolyPoly,
+                                                    const tools::PolyPolygon* pClipPolyPoly)
+{
+    ClippedPolygonData aData;
+
+    if (pClipPolyPoly)
+    {
+        aData.pAllocated = std::make_unique<tools::PolyPolygon>();
+        aData.pActive = aData.pAllocated.get();
+        rPolyPoly.GetIntersection(*pClipPolyPoly, *aData.pActive);
+    }
+    else
+    {
+        aData.pActive = const_cast<tools::PolyPolygon*>(&rPolyPoly);
+    }
+
+    return aData;
+}
+
+void PrimitiveRenderer::DrawPolyPolygon(OutputDevice& rOutDev, const tools::PolyPolygon& rPolyPoly,
+                                        const tools::PolyPolygon* pClipPolyPoly)
+{
+    auto aClippedData = lcl_GetClippedPolyPolygon(rPolyPoly, pClipPolyPoly);
+    tools::PolyPolygon* pPolyPoly = aClippedData.pActive;
+
+    if (pPolyPoly->Count() == 1)
+        PrimitiveRenderer::DrawSinglePolygon(rOutDev, pPolyPoly->GetObject(0));
+    else if (pPolyPoly->Count())
+        PrimitiveRenderer::DrawMultiplePolygons(rOutDev, *pPolyPoly);
+}
+
+void PrimitiveRenderer::DrawSinglePolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly)
+{
+    const sal_uInt16 nSize = rPoly.GetSize();
+
+    if (nSize >= 2)
+    {
+        const Point* pPtAry = rPoly.GetConstPointAry();
+        rOutDev.mpGraphics->DrawPolygon(nSize, pPtAry, rOutDev);
+    }
+}
+
+namespace
+{
+struct PolygonRenderBuffer
+{
+    std::unique_ptr<sal_uInt32[]> pPointAry;
+    std::unique_ptr<const Point* []> pPointAryAry;
+    sal_uInt16 nValidCount = 0;
+
+    explicit PolygonRenderBuffer(const tools::PolyPolygon& rPolyPoly)
+    {
+        sal_uInt16 nTotalCount = rPolyPoly.Count();
+
+        pPointAry.reset(new sal_uInt32[nTotalCount]);
+        pPointAryAry.reset(new const Point*[nTotalCount]);
+
+        for (sal_uInt16 i = 0; i < nTotalCount; ++i)
+        {
+            const tools::Polygon& rPoly = rPolyPoly.GetObject(i);
+            sal_uInt16 nSize = rPoly.GetSize();
+
+            if (nSize >= 2)
+            {
+                pPointAry[nValidCount] = nSize;
+                pPointAryAry[nValidCount] = rPoly.GetConstPointAry();
+                nValidCount++;
+            }
+        }
+    }
+};
+}
+
+void PrimitiveRenderer::DrawMultiplePolygons(OutputDevice& rOutDev,
+                                             const tools::PolyPolygon& rPolyPoly)
+{
+    if (!rPolyPoly.Count())
+        return;
+
+    PolygonRenderBuffer aBuffer(rPolyPoly);
+
+    if (aBuffer.nValidCount == 1)
+    {
+        rOutDev.mpGraphics->DrawPolygon(aBuffer.pPointAry[0], aBuffer.pPointAryAry[0], rOutDev);
+    }
+    else if (aBuffer.nValidCount > 1)
+    {
+        rOutDev.mpGraphics->DrawPolyPolygon(aBuffer.nValidCount, aBuffer.pPointAry.get(),
+                                            aBuffer.pPointAryAry.get(), rOutDev);
+    }
+}
+
 } // namespace vcl::rendercontext
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
