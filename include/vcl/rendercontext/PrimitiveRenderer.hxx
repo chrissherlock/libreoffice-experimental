@@ -96,11 +96,8 @@ public:
 
     static bool DrawPolyLine(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
                              const StrokeAttributes& rStroke,
-                             const basegfx::B2DHomMatrix& rObjectTransform);
-
-    static bool DrawPolyLine(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
-                             const StrokeAttributes& rStroke,
-                             const basegfx::B2DHomMatrix& rObjectTransform, double fTransparency);
+                             const basegfx::B2DHomMatrix& rObjectTransform
+                             = basegfx::B2DHomMatrix());
 
     static void DrawPolyLineGeometry(OutputDevice& rOutDev,
                                      const basegfx::B2DPolyPolygon& rPolyPolygon,

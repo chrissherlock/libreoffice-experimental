@@ -371,7 +371,7 @@ private:
 
                 // Pass aMatrix as the 4th argument (rObjectTransform)
                 vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, rPolygon,
-                                                                    aStroke, aMatrix, 0.0);
+                                                                    aStroke, aMatrix);
             }
         }
 

@@ -2017,12 +2017,7 @@ void SdrObject::PaintMacro(OutputDevice& rOut, const tools::Rectangle& , const S
     for(auto const& rPolygon : aPolyPolygon)
     {
         // Align with the new 5-parameter PrimitiveRenderer API
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-            rOut,
-            rPolygon,
-            aStroke,
-            basegfx::B2DHomMatrix(),
-            0.0);
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rOut, rPolygon, aStroke);
     }
 
     rOut.SetRasterOp(eRop);

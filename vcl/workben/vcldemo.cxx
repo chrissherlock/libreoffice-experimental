@@ -299,7 +299,7 @@ public:
                     aStroke.fWidth = aLineWidths[i];
                     aStroke.eJoin = eJoins[i];
                     aStroke.eCap = eLineCaps[i];
-                    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rDev, aPoly, aStroke, basegfx::B2DHomMatrix(), 0.0);
+                    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rDev, aPoly, aStroke);
                 }
                 }
             }

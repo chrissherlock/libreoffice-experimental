@@ -31,8 +31,7 @@ void drawPolyLineOffset(OutputDevice& rDevice, tools::Rectangle const& rRect, in
     {
         vcl::rendercontext::StrokeAttributes aStroke;
         aStroke.fWidth = 0.0;
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rDevice, aPolygon, aStroke,
-                                                            basegfx::B2DHomMatrix(), 0.0);
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rDevice, aPolygon, aStroke);
     } // draw hairline
 }
 
@@ -76,8 +75,7 @@ Bitmap OutputDeviceTestPolyLineB2D::setupDiamond()
 
     {
         vcl::rendercontext::StrokeAttributes aStroke;
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpVirtualDevice, aPolygon, aStroke,
-                                                            basegfx::B2DHomMatrix(), 0.0);
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpVirtualDevice, aPolygon, aStroke);
     }
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
@@ -106,8 +104,7 @@ Bitmap OutputDeviceTestPolyLineB2D::setupBezier()
 
     {
         vcl::rendercontext::StrokeAttributes aStroke;
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpVirtualDevice, aPolygon, aStroke,
-                                                            basegfx::B2DHomMatrix(), 0.0);
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpVirtualDevice, aPolygon, aStroke);
     }
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
@@ -136,8 +133,7 @@ Bitmap OutputDeviceTestPolyLineB2D::setupAABezier()
 
     {
         vcl::rendercontext::StrokeAttributes aStroke;
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpVirtualDevice, aPolygon, aStroke,
-                                                            basegfx::B2DHomMatrix(), 0.0);
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpVirtualDevice, aPolygon, aStroke);
     }
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
@@ -153,8 +149,7 @@ Bitmap OutputDeviceTestPolyLineB2D::setupHalfEllipse(bool aEnableAA)
     {
         vcl::rendercontext::StrokeAttributes aStroke;
         vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-            *mpVirtualDevice, OutputDeviceTestCommon::createHalfEllipsePolygon(), aStroke,
-            basegfx::B2DHomMatrix(), 0.0);
+            *mpVirtualDevice, OutputDeviceTestCommon::createHalfEllipsePolygon(), aStroke);
     }
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
@@ -198,7 +193,7 @@ Bitmap OutputDeviceTestPolyLineB2D::setupOpenPolygon()
         vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
             *mpVirtualDevice,
             OutputDeviceTestCommon::createOpenPolygon(maVDRectangle), // Already a B2DPolygon
-            aStroke, basegfx::B2DHomMatrix(), 0.0);
+            aStroke);
     }
 
     {
@@ -206,7 +201,7 @@ Bitmap OutputDeviceTestPolyLineB2D::setupOpenPolygon()
         vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
             *mpVirtualDevice,
             OutputDeviceTestCommon::createOpenPolygon(maVDRectangle, 7), // Already a B2DPolygon
-            aStroke, basegfx::B2DHomMatrix(), 0.0);
+            aStroke);
     }
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
@@ -222,8 +217,7 @@ Bitmap OutputDeviceTestPolyLineB2D::setupOpenBezier()
     {
         vcl::rendercontext::StrokeAttributes aStroke;
         vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-            *mpVirtualDevice, OutputDeviceTestCommon::createOpenBezier(), aStroke,
-            basegfx::B2DHomMatrix(), 0.0);
+            *mpVirtualDevice, OutputDeviceTestCommon::createOpenBezier(), aStroke);
     }
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());

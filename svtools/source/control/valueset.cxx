@@ -1348,14 +1348,15 @@ void ValueSet::ImplDrawSelect(vcl::RenderContext& rRenderContext,
                 aStroke.eJoin = basegfx::B2DLineJoin::Miter;
                 aStroke.eCap = css::drawing::LineCap_BUTT;
                 aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
+                aStroke.fTransparency = nTransparencePercent / 100.0;
 
-                if (!vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, aRectPoly, aStroke, basegfx::B2DHomMatrix(), nTransparencePercent / 100.0))
+                if (!vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, aRectPoly, aStroke))
                 {
                     SAL_WARN("svtools", "presumably impossible in practice, but fallback to see something");
                     {
                         aStroke.fWidth = nThickness;
                         aStroke.eJoin = basegfx::B2DLineJoin::Miter;
-                        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, aRectPoly, aStroke, basegfx::B2DHomMatrix(), 0.0);
+                        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, aRectPoly, aStroke);
                     }
                 }
             }

@@ -290,8 +290,7 @@ void PrimitiveRenderer::DrawPolygon(OutputDevice& rOutDev, const tools::Polygon&
     {
         vcl::rendercontext::StrokeAttributes aStroke;
         aStroke.eJoin = basegfx::B2DLineJoin::NONE;
-        PrimitiveRenderer::DrawPolyLine(rOutDev, aB2DPolygon, aStroke, basegfx::B2DHomMatrix(),
-                                        0.0);
+        PrimitiveRenderer::DrawPolyLine(rOutDev, aB2DPolygon, aStroke, basegfx::B2DHomMatrix());
     }
 }
 
@@ -320,8 +319,11 @@ bool PrimitiveRenderer::DrawPolyPolygon(OutputDevice& rOutDev,
     {
         for (auto const& rPolygon : std::as_const(aB2DPolyPolygon))
         {
-            if (!PrimitiveRenderer::DrawPolyLine(rOutDev, rPolygon, *pStroke,
-                                                 basegfx::B2DHomMatrix(), fLineTransparency))
+            StrokeAttributes aStrokeCopy(*pStroke);
+            aStrokeCopy.fTransparency = fLineTransparency;
+
+            if (!PrimitiveRenderer::DrawPolyLine(rOutDev, rPolygon, aStrokeCopy,
+                                                 basegfx::B2DHomMatrix()))
                 return false;
         }
     }
@@ -405,53 +407,6 @@ bool PrimitiveRenderer::DrawPolyLine(OutputDevice& rOutDev, const basegfx::B2DPo
     if (!bSuccess)
     {
         basegfx::B2DPolygon aDevicePoly(rB2DPolygon);
-        aDevicePoly.transform(aTransform);
-
-        auto[aFallbackPolyPoly, aInfo] = lcl_SetupStrokeAndLineInfo(
-            aDevicePoly, rStroke.pDashArray, rStroke.fWidth, rStroke.eJoin, rStroke.eCap);
-
-        PrimitiveRenderer::DrawPolyLineGeometry(rOutDev, aFallbackPolyPoly, aInfo);
-        bSuccess = true;
-    }
-
-    return bSuccess;
-}
-
-bool PrimitiveRenderer::DrawPolyLine(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2D,
-                                     const StrokeAttributes& rStroke,
-                                     const basegfx::B2DHomMatrix& rObjectTransform,
-                                     double fTransparency)
-{
-    if (!rB2D.count() || !rOutDev.CanDrawPolyline())
-        return true;
-
-    if (!rOutDev.GetGraphics() && !rOutDev.AcquireGraphics())
-        return false;
-
-    rOutDev.FlushGraphicsState();
-
-    const basegfx::B2DHomMatrix aTransform(rOutDev.GetViewTransformation() * rObjectTransform);
-    bool bSuccess = false;
-
-    if (rOutDev.GetRasterOp() == RasterOp::OverPaint && rOutDev.IsLineColor())
-    {
-        const bool bPixelSnapHairline
-            = (rOutDev.GetAntialiasing() & AntialiasingFlags::PixelSnapHairline)
-              && rB2D.count() < 1000;
-
-        SalGraphics* pGraphics = rOutDev.GetGraphics();
-        if (pGraphics
-            && pGraphics->DrawPolyLine(aTransform, rB2D, fTransparency, rStroke.fWidth,
-                                       rStroke.pDashArray, rStroke.eJoin, rStroke.eCap,
-                                       rStroke.fMiterMinimumAngle, bPixelSnapHairline, rOutDev))
-        {
-            bSuccess = true;
-        }
-    }
-
-    if (!bSuccess)
-    {
-        basegfx::B2DPolygon aDevicePoly(rB2D);
         aDevicePoly.transform(aTransform);
 
         auto[aFallbackPolyPoly, aInfo] = lcl_SetupStrokeAndLineInfo(
