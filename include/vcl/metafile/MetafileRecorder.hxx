@@ -160,7 +160,7 @@ public:
 
     void RecordB2DPolyLine(const basegfx::B2DPolygon& rB2D,
                            const vcl::rendercontext::StrokeAttributes& rStroke,
-                           const basegfx::B2DHomMatrix& rObjectTransform, double fTransparency);
+                           double fTransparency);
 
     void RecordRect(const tools::Rectangle& rRect);
     void RecordRoundRect(const tools::Rectangle& rRect, sal_uLong nHorzRound, sal_uLong nVertRound);

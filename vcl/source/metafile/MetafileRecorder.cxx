@@ -534,10 +534,8 @@ MetafileRecorder::ScopedSwitch::ScopedSwitch(MetafileRecorder& rRecorder, GDIMet
 
 void vcl::MetafileRecorder::RecordB2DPolyLine(const basegfx::B2DPolygon& rB2D,
                                               const vcl::rendercontext::StrokeAttributes& rStroke,
-                                              const basegfx::B2DHomMatrix& rObjectTransform,
                                               double fTransparency)
 {
-    (void)rObjectTransform; // Suppress -Werror for unused parameter
     SvMemoryStream aStream;
     aStream.WriteUInt16(1); // Format Version
     aStream.WriteDouble(rStroke.fWidth);

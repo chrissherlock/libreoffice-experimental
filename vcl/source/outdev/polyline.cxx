@@ -39,7 +39,12 @@ bool OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2D, double fLineWid
     vcl::rendercontext::StrokeAttributes aStroke{fLineWidth, eLineJoin, eLineCap, fMiterMinimumAngle, pStroke};
 
     if (maRecorder.IsActive())
-        maRecorder.RecordB2DPolyLine(rB2D, aStroke, rObjectTransform, fTransparency);
+    {
+        basegfx::B2DPolygon aRecordPoly(rB2D);
+        if (!rObjectTransform.isIdentity())
+            aRecordPoly.transform(rObjectTransform);
+        maRecorder.RecordB2DPolyLine(aRecordPoly, aStroke, fTransparency);
+    }
 
     if (!IsDeviceOutputNecessary())
         return true;
