@@ -3086,6 +3086,47 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testEMFWriterHatchStrictSequence)
     CPPUNIT_ASSERT_MESSAGE("EMF should contain decomposed horizontal lines", nLineCount >= 1);
 }
 
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawPolyLineStrokeAttributes)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    pVDev->SetOutputSizePixel(Size(100, 100));
+    pVDev->EnableOutput();
+
+    GDIMetaFile aMtf;
+    aMtf.Record(pVDev.get());
+
+    basegfx::B2DPolygon aPolygon;
+    aPolygon.append(basegfx::B2DPoint(10, 10));
+    aPolygon.append(basegfx::B2DPoint(90, 90));
+
+    // 1. Setup our new encapsulated struct
+    vcl::rendercontext::StrokeAttributes aStroke;
+    aStroke.fWidth = 2.0;
+    aStroke.eJoin = basegfx::B2DLineJoin::Miter;
+    aStroke.eCap = css::drawing::LineCap_ROUND;
+
+    // 2. Call the NEW 3-parameter wrapper API
+    pVDev->DrawPolyLine(aPolygon, aStroke, basegfx::B2DHomMatrix());
+
+    aMtf.Stop();
+    aMtf.WindStart();
+
+    // 3. Verify the metafile recorded the action correctly
+    size_t nActionCount = aMtf.GetActionSize();
+    CPPUNIT_ASSERT_MESSAGE("No actions recorded", nActionCount > 0);
+
+    // B2D geometry with advanced strokes are recorded as COMMENT actions
+    MetaAction* pAction = aMtf.GetAction(nActionCount - 1);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Expected a comment record for B2DPolyLine",
+                                 MetaActionType::COMMENT, pAction->GetType());
+
+    auto pCommentAction = static_cast<MetaCommentAction*>(pAction);
+
+    // Depending on exactly how MetafileRecorder::RecordB2DPolyLine is implemented,
+    // it usually tags the comment. You can assert the identifier like this:
+    CPPUNIT_ASSERT_EQUAL(OString("XB2DPOLYLINE_SEQ_END"), pCommentAction->GetComment());
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
