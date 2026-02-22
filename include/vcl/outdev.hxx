@@ -818,7 +818,7 @@ public:
 
 private:
 
-    SAL_DLLPRIVATE void         ImplDrawClippedPolygon(const tools::Polygon& rPoly, const tools::PolyPolygon* pClipPolyPoly);
+    SAL_DLLPRIVATE void ImplDrawClippedPolygon(const tools::Polygon& rPoly, const tools::PolyPolygon& rClipPolyPoly);
     SAL_DLLPRIVATE void         ImplDrawPolyPolygon( const tools::PolyPolygon& rPolyPoly, const tools::PolyPolygon* pClipPolyPoly );
     SAL_DLLPRIVATE void         ImplDrawPolyPolygon( sal_uInt16 nPoly, const tools::PolyPolygon& rPolyPoly );
     SAL_DLLPRIVATE void ImplDrawPolyPolygonFallback(sal_uInt16 nPoly, const tools::PolyPolygon& rPolyPoly);

@@ -93,19 +93,13 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
         vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*this, rPoly);
 }
 
-void OutputDevice::ImplDrawClippedPolygon(const tools::Polygon& rPoly, const tools::PolyPolygon* pClipPolyPoly)
+void OutputDevice::ImplDrawClippedPolygon(const tools::Polygon& rPoly, const tools::PolyPolygon& rClipPolyPoly)
 {
-    if (pClipPolyPoly)
-    {
-        // Handle clipping via intersection then dispatch
-        tools::PolyPolygon aClipped;
-        tools::PolyPolygon(rPoly).GetIntersection(*pClipPolyPoly, aClipped);
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygonGeometry(*this, aClipped);
-    }
-    else
-    {
-        vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*this, rPoly);
-    }
+    // Handle clipping via intersection then dispatch
+    tools::PolyPolygon aClipped;
+    tools::PolyPolygon(rPoly).GetIntersection(rClipPolyPoly, aClipped);
+
+    vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygonGeometry(*this, aClipped);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
