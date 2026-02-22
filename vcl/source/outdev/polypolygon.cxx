@@ -84,10 +84,6 @@ void OutputDevice::ImplDrawPolyPolygonFallback(sal_uInt16 nPoly,
     }
 }
 
-// Caution: This method is nearly the same as
-// OutputDevice::DrawTransparent( const basegfx::B2DPolyPolygon& rB2DPolyPoly, double fTransparency),
-// so when changes are made here do not forget to make changes there, too
-
 void OutputDevice::DrawPolyPolygon(const basegfx::B2DPolyPolygon& rB2DPolyPoly)
 {
     assert(!is_double_buffered_window());
@@ -104,24 +100,11 @@ void OutputDevice::DrawPolyPolygon(const basegfx::B2DPolyPolygon& rB2DPolyPoly)
 
     if (IsLineColor())
     {
-        aStroke.fWidth = 0.0; // Hairline fallback
-        aStroke.eJoin = basegfx::B2DLineJoin::NONE;
-        aStroke.eCap = css::drawing::LineCap_BUTT;
-        aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
         aStroke.fTransparency = (255.0 - GetLineColor().GetAlpha()) / 255.0;
         pStroke = &aStroke;
     }
 
-    if (!vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygon(*this, rB2DPolyPoly, bFill,
-                                                                pStroke))
-    {
-        // Fallback to legacy tools::PolyPolygon rasterizer
-        const tools::PolyPolygon aToolsPolyPolygon(rB2DPolyPoly);
-        const tools::PolyPolygon aPixelPolyPolygon
-            = mpMapper->LogicToDevicePixel(aToolsPolyPolygon);
-
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygonGeometry(*this, aPixelPolyPolygon);
-    }
+    vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygon(*this, rB2DPolyPoly, bFill, pStroke);
 }
 
 namespace

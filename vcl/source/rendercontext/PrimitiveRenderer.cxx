@@ -298,8 +298,8 @@ bool PrimitiveRenderer::DrawPolyPolygon(OutputDevice& rOutDev,
                                         const basegfx::B2DPolyPolygon& rB2DPolyPoly, bool bFill,
                                         const StrokeAttributes* pStroke)
 {
-    if (!rOutDev.CanDrawPolygon())
-        return false;
+    if (!rB2DPolyPoly.count() || !rOutDev.CanDrawPolygon())
+        return true;
 
     if (!rOutDev.GetGraphics() && !rOutDev.AcquireGraphics())
         return false;
@@ -315,16 +315,26 @@ bool PrimitiveRenderer::DrawPolyPolygon(OutputDevice& rOutDev,
     if (bFill)
         rOutDev.GetGraphics()->DrawPolyPolygon(aTransform, aB2DPolyPolygon, 0.0, rOutDev);
 
+    bool bSuccess = true;
+
     if (pStroke)
     {
         for (auto const& rPolygon : std::as_const(aB2DPolyPolygon))
         {
-            if (!PrimitiveRenderer::DrawPolyLine(rOutDev, rPolygon, *pStroke,
-                                                 basegfx::B2DHomMatrix()))
+            if (!PrimitiveRenderer::DrawPolyLine(rOutDev, rPolygon, *pStroke))
             {
-                return false;
+                bSuccess = false;
+                break;
             }
         }
+    }
+
+    if (!bSuccess)
+    {
+        const tools::PolyPolygon aToolsPolyPolygon(rB2DPolyPoly);
+        const tools::PolyPolygon aPixelPolyPolygon
+            = rOutDev.mpMapper->LogicToDevicePixel(aToolsPolyPolygon);
+        PrimitiveRenderer::DrawPolyPolygonGeometry(rOutDev, aPixelPolyPolygon);
     }
 
     return true;
