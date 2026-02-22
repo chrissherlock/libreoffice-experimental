@@ -1821,8 +1821,7 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawPolyLine)
             aStroke.eJoin = basegfx::B2DLineJoin::Bevel;
             aStroke.eCap = css::drawing::LineCap_BUTT;
             aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
-            pVDev->DrawPolyLine(aPolygon, aStroke.fWidth, aStroke.eJoin, aStroke.eCap,
-                                basegfx::B2DHomMatrix(), aStroke.fMiterMinimumAngle);
+            pVDev->DrawPolyLine(aPolygon, aStroke, basegfx::B2DHomMatrix());
         }
 
         // B2DPolyLine recordings wrap the fallback in comments. Grab index + 1.

@@ -797,16 +797,6 @@ public:
                       const vcl::rendercontext::StrokeAttributes& rStroke,
                       const basegfx::B2DHomMatrix& rObjectTransform);
 
-bool                        DrawPolyLine(
-                                    const basegfx::B2DPolygon& rB2D,
-                                    double fLineWidth = 0.0,
-                                    basegfx::B2DLineJoin eLineJoin = basegfx::B2DLineJoin::Round,
-                                    css::drawing::LineCap eLineCap = css::drawing::LineCap_BUTT,
-                                    const basegfx::B2DHomMatrix& rObjectTransform = basegfx::B2DHomMatrix(),
-                                    double fMiterMinimumAngle = basegfx::deg2rad(15.0),
-                                    double fTransparency = 0.0,
-                                    const std::vector<double>* pStroke = nullptr);
-
     void                        DrawPolygon( const tools::Polygon& rPoly );
     void                        DrawPolygon( const basegfx::B2DPolygon& );
 

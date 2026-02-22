@@ -29,38 +29,17 @@ void OutputDevice::DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
         vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*this, rPoly, rLineInfo);
 }
 
-bool OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2D, double fLineWidth,
-                               basegfx::B2DLineJoin eLineJoin, css::drawing::LineCap eLineCap,
-                               const basegfx::B2DHomMatrix& rObjectTransform,
-                               double fMiterMinimumAngle, double fTransparency,
-                               const std::vector<double>* pStroke)
-{
-    // Semantically pack the geometry-generation attributes
-    vcl::rendercontext::StrokeAttributes aStroke{fLineWidth, eLineJoin, eLineCap, fMiterMinimumAngle, pStroke};
-
-    if (maRecorder.IsActive())
-    {
-        basegfx::B2DPolygon aRecordPoly(rB2D);
-        if (!rObjectTransform.isIdentity())
-            aRecordPoly.transform(rObjectTransform);
-        maRecorder.RecordB2DPolyLine(aRecordPoly, aStroke, fTransparency);
-    }
-
-    if (!IsDeviceOutputNecessary())
-        return true;
-
-    return vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*this, rB2D, aStroke, rObjectTransform, fTransparency);
-}
-
-/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
-
 bool OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2D,
                                 const vcl::rendercontext::StrokeAttributes& rStroke,
                                 const basegfx::B2DHomMatrix& rObjectTransform)
 {
-    // Phase 1: Safely unpack the struct and route to the legacy 8-arg implementation
-    return DrawPolyLine(rB2D, rStroke.fWidth, rStroke.eJoin, rStroke.eCap,
-                        rObjectTransform, rStroke.fMiterMinimumAngle,
-                        rStroke.fTransparency, rStroke.pDashArray);
+    if (rB2D.count() == 0 || !CanDrawPolyline())
+        return true;
+
+    if (!mpGraphics && !AcquireGraphics())
+        return false;
+
+    return vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*this, rB2D, rStroke, rObjectTransform);
 }
 
+/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
