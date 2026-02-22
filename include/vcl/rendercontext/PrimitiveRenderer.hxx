@@ -76,7 +76,7 @@ public:
     static void DrawRect(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                          const OutputDevice* pOutDev, const tools::Rectangle& rLogicalRect);
 
-    static bool DrawPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly);
+    static void DrawPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly);
     static bool DrawPolygon(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
                             bool bFill, const StrokeAttributes* pStroke, double fLineTransparency);
 

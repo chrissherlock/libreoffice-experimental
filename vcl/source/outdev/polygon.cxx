@@ -85,12 +85,8 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
     auto oStroke = lcl_CreateDefaultHairline(IsLineColor());
     vcl::rendercontext::StrokeAttributes* pStroke = oStroke ? &*oStroke : nullptr;
 
-    double fLineTransparency = lcl_GetLineTransparency(IsLineColor(), GetLineColor());
-    bool bFill = IsFillColor();
-
-    // Delegate to PrimitiveRenderer. If hardware rendering fails, utilize the legacy fallback.
-    if (!vcl::rendercontext::PrimitiveRenderer::DrawPolygon(*this, rPoly, bFill, pStroke, fLineTransparency))
-        vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*this, rPoly);
+    const double fLineTransparency = lcl_GetLineTransparency(IsLineColor(), GetLineColor());
+    vcl::rendercontext::PrimitiveRenderer::DrawPolygon(*this, rPoly, IsFillColor(), pStroke, fLineTransparency);
 }
 
 void OutputDevice::ImplDrawClippedPolygon(const tools::Polygon& rPoly, const tools::PolyPolygon& rClipPolyPoly)

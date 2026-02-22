@@ -266,19 +266,10 @@ lcl_SetupStrokeAndLineInfo(const basegfx::B2DPolygon& rDevicePoly,
 }
 }
 
-bool PrimitiveRenderer::DrawPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly)
+void PrimitiveRenderer::DrawPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly)
 {
     if (!rOutDev.CanDrawPolygon())
-        return false;
-
-    // In headless tests, AcquireGraphics might fail or return a null mpGraphics.
-    // If we can't get a graphics context, we must bail out immediately.
-    if (!rOutDev.GetGraphics() && !rOutDev.AcquireGraphics())
-        return false;
-
-    // Safety check for the internal mapper
-    if (!rOutDev.GetGraphics())
-        return false;
+        vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(rOutDev, rPoly);
 
     rOutDev.FlushGraphicsState();
 
@@ -302,8 +293,6 @@ bool PrimitiveRenderer::DrawPolygon(OutputDevice& rOutDev, const tools::Polygon&
         PrimitiveRenderer::DrawPolyLine(rOutDev, aB2DPolygon, aStroke, basegfx::B2DHomMatrix(),
                                         0.0);
     }
-
-    return true;
 }
 
 bool PrimitiveRenderer::DrawPolyPolygon(OutputDevice& rOutDev,
