@@ -479,20 +479,20 @@ void ScreenshotAnnotationDlg_Impl::PaintScreenShotEntry(
     aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
 
     // try to use transparency
+    aStroke.fTransparency = fTransparency;
     if (!vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
             *mxVirtualBufferDevice,
             aPolygon,
             aStroke,
-            basegfx::B2DHomMatrix(),
-            fTransparency))
+            basegfx::B2DHomMatrix()))
     {
         // no transparency, draw without (fTransparency = 0.0)
+        aStroke.fTransparency = 0.0;
         vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
             *mxVirtualBufferDevice,
             aPolygon,
             aStroke,
-            basegfx::B2DHomMatrix(),
-            0.0);
+            basegfx::B2DHomMatrix());
     }
 }
 

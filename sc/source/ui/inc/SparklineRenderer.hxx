@@ -353,7 +353,7 @@ private:
 
                     // Pass aMatrix as the 4th argument (rObjectTransform)
                     vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-                        rRenderContext, aAxisPolygon, aStroke, aMatrix, 0.0);
+                        rRenderContext, aAxisPolygon, aStroke, aMatrix);
                 }
             }
         }
@@ -472,7 +472,7 @@ private:
 
                     // Fix: Pass aMatrix as the 4th argument (rObjectTransform)
                     vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-                        rRenderContext, aAxisPolygon, aStroke, aMatrix, 0.0);
+                        rRenderContext, aAxisPolygon, aStroke, aMatrix);
                 }
             }
         }

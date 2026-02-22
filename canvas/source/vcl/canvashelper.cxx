@@ -411,10 +411,10 @@ namespace vclcanvas
                     vcl::rendercontext::StrokeAttributes aStroke;
                     aStroke.fWidth = 0.0;
                     vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-                        mpOutDevProvider->getOutDev(), polygon, aStroke, basegfx::B2DHomMatrix(), 0.0 );
+                        mpOutDevProvider->getOutDev(), polygon, aStroke, basegfx::B2DHomMatrix());
                     if( mp2ndOutDevProvider )
                         vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-                            mp2ndOutDevProvider->getOutDev(), polygon, aStroke, basegfx::B2DHomMatrix(), 0.0 );
+                            mp2ndOutDevProvider->getOutDev(), polygon, aStroke, basegfx::B2DHomMatrix());
                 }
             }
         }

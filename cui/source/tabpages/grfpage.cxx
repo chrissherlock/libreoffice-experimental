@@ -805,7 +805,7 @@ void SvxCropExample::Paint(vcl::RenderContext& rRenderContext, const ::tools::Re
             {
             vcl::rendercontext::StrokeAttributes aStroke;
             aStroke.fWidth = 0.0; // Default hairline for preview
-            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, rSnippet, aStroke, basegfx::B2DHomMatrix(), 0.0);
+            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, rSnippet, aStroke, basegfx::B2DHomMatrix());
         }
         },
         [&aColB,&rRenderContext](const basegfx::B2DPolygon& rSnippet)
@@ -814,7 +814,7 @@ void SvxCropExample::Paint(vcl::RenderContext& rRenderContext, const ::tools::Re
             {
             vcl::rendercontext::StrokeAttributes aStroke;
             aStroke.fWidth = 0.0; // Default hairline for preview
-            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, rSnippet, aStroke, basegfx::B2DHomMatrix(), 0.0);
+            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, rSnippet, aStroke, basegfx::B2DHomMatrix());
         }
         },
         2.0 * fLogicDashLength);
