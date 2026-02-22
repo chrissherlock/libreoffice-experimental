@@ -40,15 +40,7 @@ class Rectangle;
 
 namespace vcl::rendercontext
 {
-/** Encapsulates the geometric properties required to expand a polyline into a stroked area */
-struct StrokeAttributes
-{
-    double fWidth = 0.0;
-    basegfx::B2DLineJoin eJoin = basegfx::B2DLineJoin::Round;
-    css::drawing::LineCap eCap = css::drawing::LineCap_BUTT;
-    double fMiterMinimumAngle = basegfx::deg2rad(15.0);
-    const std::vector<double>* pDashArray = nullptr;
-};
+struct StrokeAttributes;
 
 class VCL_DLLPUBLIC PrimitiveRenderer
 {

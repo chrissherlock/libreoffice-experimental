@@ -29,6 +29,7 @@
 #include <tools/poly.hxx>
 #include <vcl/cairo.hxx>
 #include <vcl/dllapi.h>
+#include <vcl/rendercontext/StrokeAttributes.hxx>
 #include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/font.hxx>
 #include <vcl/kernarray.hxx>
@@ -790,7 +791,13 @@ public:
 
         @see DrawPolyLine
      */
-    bool                        DrawPolyLine(
+
+    // NEW WRAPPER API: Encapsulated stroke attributes
+    bool DrawPolyLine(const basegfx::B2DPolygon& rB2D,
+                      const vcl::rendercontext::StrokeAttributes& rStroke,
+                      const basegfx::B2DHomMatrix& rObjectTransform);
+
+bool                        DrawPolyLine(
                                     const basegfx::B2DPolygon& rB2D,
                                     double fLineWidth = 0.0,
                                     basegfx::B2DLineJoin eLineJoin = basegfx::B2DLineJoin::Round,

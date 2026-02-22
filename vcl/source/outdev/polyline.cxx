@@ -53,3 +53,14 @@ bool OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2D, double fLineWid
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
+
+bool OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2D,
+                                const vcl::rendercontext::StrokeAttributes& rStroke,
+                                const basegfx::B2DHomMatrix& rObjectTransform)
+{
+    // Phase 1: Safely unpack the struct and route to the legacy 8-arg implementation
+    return DrawPolyLine(rB2D, rStroke.fWidth, rStroke.eJoin, rStroke.eCap,
+                        rObjectTransform, rStroke.fMiterMinimumAngle,
+                        rStroke.fTransparency, rStroke.pDashArray);
+}
+
