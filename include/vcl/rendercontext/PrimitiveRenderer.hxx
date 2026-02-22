@@ -69,6 +69,7 @@ public:
                          const OutputDevice* pOutDev, const tools::Rectangle& rLogicalRect);
 
     static void DrawPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly);
+
     static bool DrawPolygon(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
                             bool bFill, const StrokeAttributes* pStroke, double fLineTransparency);
 
@@ -85,17 +86,25 @@ public:
 
     static void DrawPolyPolygonGeometry(OutputDevice& rOutDev,
                                         const tools::PolyPolygon& rPolyPolygon);
+
     static void DrawPolygonGeometry(OutputDevice& rOutDev, const tools::Polygon& rPoly);
 
     static void DrawPolyLine(OutputDevice& rOutDev, const tools::Polygon& rPoly);
+
     static void DrawPolyLine(OutputDevice& rOutDev, const tools::Polygon& rPoly,
                              const LineInfo& rLineInfo);
-    static void DrawPolyLineGeometry(OutputDevice& rOutDev,
-                                     const basegfx::B2DPolyPolygon& rPolyPolygon,
-                                     const LineInfo& rLineInfo);
+
+    static bool DrawPolyLine(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
+                             const StrokeAttributes& rStroke,
+                             const basegfx::B2DHomMatrix& rObjectTransform);
+
     static bool DrawPolyLine(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
                              const StrokeAttributes& rStroke,
                              const basegfx::B2DHomMatrix& rObjectTransform, double fTransparency);
+
+    static void DrawPolyLineGeometry(OutputDevice& rOutDev,
+                                     const basegfx::B2DPolyPolygon& rPolyPolygon,
+                                     const LineInfo& rLineInfo);
 };
 
 } // namespace vcl::rendercontext

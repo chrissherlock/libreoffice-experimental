@@ -354,6 +354,15 @@ bool PrimitiveRenderer::DrawPolygon(OutputDevice& rOutDev, const tools::Polygon&
     return DrawPolygon(rOutDev, aB2D, bFill, pStroke, fLineTransparency);
 }
 
+// NEW WRAPPER API: Encapsulated stroke attributes
+bool PrimitiveRenderer::DrawPolyLine(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
+                                     const StrokeAttributes& rStroke,
+                                     const basegfx::B2DHomMatrix& rObjectTransform)
+{
+    // Phase 1: Route to legacy 5-argument implementation using the encapsulated transparency
+    return DrawPolyLine(rOutDev, rB2DPolygon, rStroke, rObjectTransform, rStroke.fTransparency);
+}
+
 bool PrimitiveRenderer::DrawPolyLine(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2D,
                                      const StrokeAttributes& rStroke,
                                      const basegfx::B2DHomMatrix& rObjectTransform,
