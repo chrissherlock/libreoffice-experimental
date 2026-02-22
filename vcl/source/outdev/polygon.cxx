@@ -47,6 +47,31 @@ void OutputDevice::DrawPolygon( const basegfx::B2DPolygon& rB2DPolygon)
     }
 }
 
+/** * Creates a StrokeAttributes object for a default hairline.
+ * Returns a std::optional to handle the "pStroke = nullptr" logic
+ * without manual pointer management in the caller.
+ */
+static std::optional<vcl::rendercontext::StrokeAttributes> lcl_CreateDefaultHairline(bool bIsLineColor)
+{
+    if (!bIsLineColor)
+        return std::nullopt;
+
+    vcl::rendercontext::StrokeAttributes aStroke;
+    aStroke.fWidth = 0.0; // Hairline fallback
+    aStroke.eJoin = basegfx::B2DLineJoin::NONE;
+    aStroke.eCap = css::drawing::LineCap_BUTT;
+    aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
+    return aStroke;
+}
+
+static double lcl_GetLineTransparency(bool bIsLineColor, const Color& rColor)
+{
+    if (!bIsLineColor)
+        return 0.0;
+
+    return (255.0 - rColor.GetAlpha()) / 255.0;
+}
+
 void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
 {
     assert(!is_double_buffered_window());
@@ -57,20 +82,11 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
     if (rPoly.GetSize() < 2 || !IsDeviceOutputNecessary())
         return;
 
-    bool bFill = IsFillColor();
-    vcl::rendercontext::StrokeAttributes aStroke;
-    vcl::rendercontext::StrokeAttributes* pStroke = nullptr;
-    double fLineTransparency = 0.0;
+    auto oStroke = lcl_CreateDefaultHairline(IsLineColor());
+    vcl::rendercontext::StrokeAttributes* pStroke = oStroke ? &*oStroke : nullptr;
 
-    if (IsLineColor())
-    {
-        aStroke.fWidth = 0.0; // Hairline fallback
-        aStroke.eJoin = basegfx::B2DLineJoin::NONE;
-        aStroke.eCap = css::drawing::LineCap_BUTT;
-        aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
-        fLineTransparency = (255.0 - GetLineColor().GetAlpha()) / 255.0;
-        pStroke = &aStroke;
-    }
+    double fLineTransparency = lcl_GetLineTransparency(IsLineColor(), GetLineColor());
+    bool bFill = IsFillColor();
 
     // Delegate to PrimitiveRenderer. If hardware rendering fails, utilize the legacy fallback.
     if (!vcl::rendercontext::PrimitiveRenderer::DrawPolygon(*this, rPoly, bFill, pStroke, fLineTransparency))
