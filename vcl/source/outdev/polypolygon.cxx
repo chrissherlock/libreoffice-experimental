@@ -79,10 +79,8 @@ void OutputDevice::ImplDrawPolyPolygonFallback(sal_uInt16 nPoly,
     }
     else if (nPoly > 1)
     {
-        // #100127# moved real tools::PolyPolygon draw to separate method,
-        // have to call recursively, avoiding duplicate
-        // ImplLogicToDevicePixel calls
-        ImplDrawPolyPolygon(nPoly, mpMapper->LogicToDevicePixel(rPolyPoly));
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygonGeometry(
+            *this, mpMapper->LogicToDevicePixel(rPolyPoly));
     }
 }
 
@@ -121,13 +119,9 @@ void OutputDevice::DrawPolyPolygon(const basegfx::B2DPolyPolygon& rB2DPolyPoly)
         const tools::PolyPolygon aToolsPolyPolygon(rB2DPolyPoly);
         const tools::PolyPolygon aPixelPolyPolygon
             = mpMapper->LogicToDevicePixel(aToolsPolyPolygon);
-        ImplDrawPolyPolygon(aPixelPolyPolygon.Count(), aPixelPolyPolygon);
-    }
-}
 
-void OutputDevice::ImplDrawPolyPolygon(sal_uInt16 /*nPoly*/, const tools::PolyPolygon& rPolyPoly)
-{
-    vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygonGeometry(*this, rPolyPoly);
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygonGeometry(*this, aPixelPolyPolygon);
+    }
 }
 
 namespace
