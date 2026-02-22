@@ -159,8 +159,7 @@ public:
     void RecordPolyLine(const tools::Polygon& rPoly);
 
     void RecordB2DPolyLine(const basegfx::B2DPolygon& rB2D,
-                           const vcl::rendercontext::StrokeAttributes& rStroke,
-                           double fTransparency);
+                           const vcl::rendercontext::StrokeAttributes& rStroke);
 
     void RecordRect(const tools::Rectangle& rRect);
     void RecordRoundRect(const tools::Rectangle& rRect, sal_uLong nHorzRound, sal_uLong nVertRound);

@@ -47,23 +47,6 @@ void OutputDevice::DrawPolygon( const basegfx::B2DPolygon& rB2DPolygon)
     }
 }
 
-/** * Creates a StrokeAttributes object for a default hairline.
- * Returns a std::optional to handle the "pStroke = nullptr" logic
- * without manual pointer management in the caller.
- */
-static std::optional<vcl::rendercontext::StrokeAttributes> lcl_CreateDefaultHairline(bool bIsLineColor)
-{
-    if (!bIsLineColor)
-        return std::nullopt;
-
-    vcl::rendercontext::StrokeAttributes aStroke;
-    aStroke.fWidth = 0.0; // Hairline fallback
-    aStroke.eJoin = basegfx::B2DLineJoin::NONE;
-    aStroke.eCap = css::drawing::LineCap_BUTT;
-    aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
-    return aStroke;
-}
-
 static double lcl_GetLineTransparency(bool bIsLineColor, const Color& rColor)
 {
     if (!bIsLineColor)
@@ -72,7 +55,22 @@ static double lcl_GetLineTransparency(bool bIsLineColor, const Color& rColor)
     return (255.0 - rColor.GetAlpha()) / 255.0;
 }
 
-void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
+/** * Creates a StrokeAttributes object for a default hairline.
+ * Returns a std::optional to handle the "pStroke = nullptr" logic
+ * without manual pointer management in the caller.
+ */
+static std::optional<vcl::rendercontext::StrokeAttributes> lcl_CreateDefaultHairline(bool bIsLineColor, const Color& rColor)
+{
+    if (!bIsLineColor)
+        return std::nullopt;
+
+    vcl::rendercontext::StrokeAttributes aStroke;
+    aStroke.fTransparency = lcl_GetLineTransparency(bIsLineColor, rColor);
+
+    return aStroke;
+}
+
+void OutputDevice::DrawPolygon(const tools::Polygon& rPoly)
 {
     assert(!is_double_buffered_window());
 
@@ -82,11 +80,10 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
     if (rPoly.GetSize() < 2 || !IsDeviceOutputNecessary())
         return;
 
-    auto oStroke = lcl_CreateDefaultHairline(IsLineColor());
+    auto oStroke = lcl_CreateDefaultHairline(IsLineColor(), GetLineColor());
     vcl::rendercontext::StrokeAttributes* pStroke = oStroke ? &*oStroke : nullptr;
 
-    const double fLineTransparency = lcl_GetLineTransparency(IsLineColor(), GetLineColor());
-    vcl::rendercontext::PrimitiveRenderer::DrawPolygon(*this, rPoly, IsFillColor(), pStroke, fLineTransparency);
+    vcl::rendercontext::PrimitiveRenderer::DrawPolygon(*this, rPoly, IsFillColor(), pStroke);
 }
 
 void OutputDevice::ImplDrawClippedPolygon(const tools::Polygon& rPoly, const tools::PolyPolygon& rClipPolyPoly)

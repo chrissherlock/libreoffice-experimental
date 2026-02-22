@@ -533,8 +533,7 @@ MetafileRecorder::ScopedSwitch::ScopedSwitch(MetafileRecorder& rRecorder, GDIMet
 }
 
 void vcl::MetafileRecorder::RecordB2DPolyLine(const basegfx::B2DPolygon& rB2D,
-                                              const vcl::rendercontext::StrokeAttributes& rStroke,
-                                              double fTransparency)
+                                              const vcl::rendercontext::StrokeAttributes& rStroke)
 {
     SvMemoryStream aStream;
     aStream.WriteUInt16(1); // Format Version
@@ -542,7 +541,7 @@ void vcl::MetafileRecorder::RecordB2DPolyLine(const basegfx::B2DPolygon& rB2D,
     aStream.WriteUInt16(static_cast<sal_uInt16>(rStroke.eJoin));
     aStream.WriteUInt16(static_cast<sal_uInt16>(rStroke.eCap));
     aStream.WriteDouble(rStroke.fMiterMinimumAngle);
-    aStream.WriteDouble(fTransparency);
+    aStream.WriteDouble(rStroke.fTransparency);
 
     sal_uInt32 nStrokeCount = rStroke.pDashArray ? rStroke.pDashArray->size() : 0;
     aStream.WriteUInt32(nStrokeCount);

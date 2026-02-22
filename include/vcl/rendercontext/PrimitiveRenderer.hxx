@@ -71,18 +71,16 @@ public:
     static void DrawPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly);
 
     static bool DrawPolygon(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
-                            bool bFill, const StrokeAttributes* pStroke, double fLineTransparency);
+                            bool bFill, const StrokeAttributes* pStroke);
 
     static bool DrawPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly, bool bFill,
-                            const StrokeAttributes* pStroke, double fLineTransparency);
+                            const StrokeAttributes* pStroke);
 
     static bool DrawPolyPolygon(OutputDevice& rOutDev, const basegfx::B2DPolyPolygon& rB2DPolyPoly,
-                                bool bFill, const StrokeAttributes* pStroke,
-                                double fLineTransparency);
+                                bool bFill, const StrokeAttributes* pStroke);
 
     static bool DrawPolyPolygon(OutputDevice& rOutDev, const tools::PolyPolygon& rPolyPoly,
-                                bool bFill, const StrokeAttributes* pStroke,
-                                double fLineTransparency);
+                                bool bFill, const StrokeAttributes* pStroke);
 
     static void DrawPolyPolygonGeometry(OutputDevice& rOutDev,
                                         const tools::PolyPolygon& rPolyPolygon);

@@ -296,7 +296,7 @@ void PrimitiveRenderer::DrawPolygon(OutputDevice& rOutDev, const tools::Polygon&
 
 bool PrimitiveRenderer::DrawPolyPolygon(OutputDevice& rOutDev,
                                         const basegfx::B2DPolyPolygon& rB2DPolyPoly, bool bFill,
-                                        const StrokeAttributes* pStroke, double fLineTransparency)
+                                        const StrokeAttributes* pStroke)
 {
     if (!rOutDev.CanDrawPolygon())
         return false;
@@ -319,12 +319,11 @@ bool PrimitiveRenderer::DrawPolyPolygon(OutputDevice& rOutDev,
     {
         for (auto const& rPolygon : std::as_const(aB2DPolyPolygon))
         {
-            StrokeAttributes aStrokeCopy(*pStroke);
-            aStrokeCopy.fTransparency = fLineTransparency;
-
-            if (!PrimitiveRenderer::DrawPolyLine(rOutDev, rPolygon, aStrokeCopy,
+            if (!PrimitiveRenderer::DrawPolyLine(rOutDev, rPolygon, *pStroke,
                                                  basegfx::B2DHomMatrix()))
+            {
                 return false;
+            }
         }
     }
 
@@ -332,28 +331,25 @@ bool PrimitiveRenderer::DrawPolyPolygon(OutputDevice& rOutDev,
 }
 
 bool PrimitiveRenderer::DrawPolyPolygon(OutputDevice& rOutDev, const tools::PolyPolygon& rPolyPoly,
-                                        bool bFill, const StrokeAttributes* pStroke,
-                                        double fLineTransparency)
+                                        bool bFill, const StrokeAttributes* pStroke)
 {
     if (!rOutDev.CanDrawPolygon())
         return false;
-    return DrawPolyPolygon(rOutDev, rPolyPoly.getB2DPolyPolygon(), bFill, pStroke,
-                           fLineTransparency);
+    return DrawPolyPolygon(rOutDev, rPolyPoly.getB2DPolyPolygon(), bFill, pStroke);
 }
 
 bool PrimitiveRenderer::DrawPolygon(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
-                                    bool bFill, const StrokeAttributes* pStroke,
-                                    double fLineTransparency)
+                                    bool bFill, const StrokeAttributes* pStroke)
 {
     basegfx::B2DPolyPolygon aPP(rB2DPolygon);
-    return DrawPolyPolygon(rOutDev, aPP, bFill, pStroke, fLineTransparency);
+    return DrawPolyPolygon(rOutDev, aPP, bFill, pStroke);
 }
 
 bool PrimitiveRenderer::DrawPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly, bool bFill,
-                                    const StrokeAttributes* pStroke, double fLineTransparency)
+                                    const StrokeAttributes* pStroke)
 {
     basegfx::B2DPolygon aB2D(rPoly.getB2DPolygon());
-    return DrawPolygon(rOutDev, aB2D, bFill, pStroke, fLineTransparency);
+    return DrawPolygon(rOutDev, aB2D, bFill, pStroke);
 }
 
 bool PrimitiveRenderer::DrawPolyLine(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
@@ -370,7 +366,7 @@ bool PrimitiveRenderer::DrawPolyLine(OutputDevice& rOutDev, const basegfx::B2DPo
         if (!rObjectTransform.isIdentity())
             aRecordPoly.transform(rObjectTransform);
 
-        rOutDev.maRecorder.RecordB2DPolyLine(aRecordPoly, rStroke, rStroke.fTransparency);
+        rOutDev.maRecorder.RecordB2DPolyLine(aRecordPoly, rStroke);
     }
 
     if (!rOutDev.IsDeviceOutputNecessary())

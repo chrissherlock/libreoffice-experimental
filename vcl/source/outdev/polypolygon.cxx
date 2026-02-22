@@ -49,7 +49,6 @@ void OutputDevice::DrawPolyPolygon(const tools::PolyPolygon& rPolyPoly)
     bool bFill = IsFillColor();
     vcl::rendercontext::StrokeAttributes aStroke;
     vcl::rendercontext::StrokeAttributes* pStroke = nullptr;
-    double fLineTransparency = 0.0;
 
     if (IsLineColor())
     {
@@ -57,15 +56,12 @@ void OutputDevice::DrawPolyPolygon(const tools::PolyPolygon& rPolyPoly)
         aStroke.eJoin = basegfx::B2DLineJoin::NONE;
         aStroke.eCap = css::drawing::LineCap_BUTT;
         aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
-        fLineTransparency = (255.0 - GetLineColor().GetAlpha()) / 255.0;
+        aStroke.fTransparency = (255.0 - GetLineColor().GetAlpha()) / 255.0;
         pStroke = &aStroke;
     }
 
-    if (!vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygon(*this, rPolyPoly, bFill, pStroke,
-                                                                fLineTransparency))
-    {
+    if (!vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygon(*this, rPolyPoly, bFill, pStroke))
         ImplDrawPolyPolygonFallback(nPoly, rPolyPoly);
-    }
 }
 
 void OutputDevice::ImplDrawPolyPolygonFallback(sal_uInt16 nPoly,
@@ -107,7 +103,6 @@ void OutputDevice::DrawPolyPolygon(const basegfx::B2DPolyPolygon& rB2DPolyPoly)
     bool bFill = IsFillColor();
     vcl::rendercontext::StrokeAttributes aStroke;
     vcl::rendercontext::StrokeAttributes* pStroke = nullptr;
-    double fLineTransparency = 0.0;
 
     if (IsLineColor())
     {
@@ -115,12 +110,12 @@ void OutputDevice::DrawPolyPolygon(const basegfx::B2DPolyPolygon& rB2DPolyPoly)
         aStroke.eJoin = basegfx::B2DLineJoin::NONE;
         aStroke.eCap = css::drawing::LineCap_BUTT;
         aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
-        fLineTransparency = (255.0 - GetLineColor().GetAlpha()) / 255.0;
+        aStroke.fTransparency = (255.0 - GetLineColor().GetAlpha()) / 255.0;
         pStroke = &aStroke;
     }
 
-    if (!vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygon(*this, rB2DPolyPoly, bFill, pStroke,
-                                                                fLineTransparency))
+    if (!vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygon(*this, rB2DPolyPoly, bFill,
+                                                                pStroke))
     {
         // Fallback to legacy tools::PolyPolygon rasterizer
         const tools::PolyPolygon aToolsPolyPolygon(rB2DPolyPoly);
