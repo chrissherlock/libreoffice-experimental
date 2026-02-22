@@ -474,6 +474,150 @@ void PrimitiveRenderer::DrawPolyLineGeometry(OutputDevice& rOutDev,
     lcl_DrawAreaGeometry(*rOutDev.mpGraphics, rOutDev, aFillGeometry, bFuzzing, bTryB2d);
 }
 
+namespace
+{
+constexpr sal_uInt16 OUTDEV_POLYPOLY_STACKBUF = 32;
+
+struct PolyPolyBuffer
+{
+    // The fast stack buffers
+    sal_uInt32 aStackAry1[OUTDEV_POLYPOLY_STACKBUF];
+    const Point* aStackAry2[OUTDEV_POLYPOLY_STACKBUF];
+    const PolyFlags* aStackAry3[OUTDEV_POLYPOLY_STACKBUF];
+
+    // The active pointers (will point to stack OR heap)
+    sal_uInt32* pPointAry;
+    const Point** pPointAryAry;
+    const PolyFlags** pFlagAryAry;
+
+    bool bUseHeap;
+
+    // Extracted state variables
+    sal_uInt16 mnValidCount = 0;
+    sal_uInt16 mnLastIndex = 0;
+    bool mbHaveBezier = false;
+
+    explicit PolyPolyBuffer(const tools::PolyPolygon& rPolyPoly)
+        : bUseHeap(rPolyPoly.Count() > OUTDEV_POLYPOLY_STACKBUF)
+    {
+        sal_uInt16 nPoly = rPolyPoly.Count();
+
+        if (bUseHeap)
+        {
+            pPointAry = new sal_uInt32[nPoly];
+            pPointAryAry = new const Point*[nPoly];
+            pFlagAryAry = new const PolyFlags*[nPoly];
+        }
+        else
+        {
+            pPointAry = aStackAry1;
+            pPointAryAry = aStackAry2;
+            pFlagAryAry = aStackAry3;
+        }
+
+        // Flattens valid sub-polygons into parallel C-arrays for the graphics
+        // backend and detects Bézier curves.
+
+        for (sal_uInt16 i = 0; i < nPoly; ++i)
+        {
+            const tools::Polygon& rPoly = rPolyPoly.GetObject(i);
+            sal_uInt16 nSize = rPoly.GetSize();
+
+            if (nSize)
+            {
+                pPointAry[mnValidCount] = nSize;
+                pPointAryAry[mnValidCount] = rPoly.GetConstPointAry();
+                pFlagAryAry[mnValidCount] = rPoly.GetConstFlagAry();
+                mnLastIndex = i;
+
+                if (pFlagAryAry[mnValidCount])
+                    mbHaveBezier = true;
+
+                ++mnValidCount;
+            }
+        }
+    }
+
+    ~PolyPolyBuffer()
+    {
+        if (bUseHeap)
+        {
+            delete[] pPointAry;
+            delete[] pPointAryAry;
+            delete[] pFlagAryAry;
+        }
+    }
+};
+
+} // end anonymous namespace
+
+void PrimitiveRenderer::DrawPolyPolygonGeometry(OutputDevice& rOutDev,
+                                                const tools::PolyPolygon& rPolyPoly)
+{
+    if (!rPolyPoly.Count())
+        return;
+
+    SalGraphics* pGraphics = rOutDev.GetGraphics();
+    if (!pGraphics && !rOutDev.AcquireGraphics())
+        return;
+    pGraphics = rOutDev.GetGraphics();
+
+    PolyPolyBuffer aBuffer(rPolyPoly);
+    if (aBuffer.mnValidCount == 0)
+        return;
+
+    // Single polygon optimization
+    if (aBuffer.mnValidCount == 1)
+    {
+        const tools::Polygon& rPoly = rPolyPoly.GetObject(aBuffer.mnLastIndex);
+        DrawPolygonGeometry(rOutDev, rPoly);
+        return;
+    }
+
+    // Hardware dispatch with Bézier support check
+    if (aBuffer.mbHaveBezier)
+    {
+        if (!pGraphics->DrawPolyPolygonBezier(aBuffer.mnValidCount, aBuffer.pPointAry,
+                                              aBuffer.pPointAryAry, aBuffer.pFlagAryAry, rOutDev))
+        {
+            tools::PolyPolygon aSub = tools::PolyPolygon::SubdivideBezier(rPolyPoly);
+            DrawPolyPolygonGeometry(rOutDev, aSub);
+        }
+        return;
+    }
+
+    pGraphics->DrawPolyPolygon(aBuffer.mnValidCount, aBuffer.pPointAry, aBuffer.pPointAryAry,
+                               rOutDev);
+}
+
+void PrimitiveRenderer::DrawPolygonGeometry(OutputDevice& rOutDev, const tools::Polygon& rPoly)
+{
+    sal_uInt16 nPoints = rPoly.GetSize();
+    if (nPoints < 2)
+        return;
+
+    SalGraphics* pGraphics = rOutDev.GetGraphics();
+    if (!pGraphics && !rOutDev.AcquireGraphics())
+        return;
+    pGraphics = rOutDev.GetGraphics();
+
+    const Point* pPtAry = rPoly.GetConstPointAry();
+
+    if (rPoly.HasFlags())
+    {
+        const PolyFlags* pFlgAry = rPoly.GetConstFlagAry();
+        if (!pGraphics->DrawPolygonBezier(nPoints, pPtAry, pFlgAry, rOutDev))
+        {
+            tools::Polygon aSub = tools::Polygon::SubdivideBezier(rPoly);
+            pGraphics->DrawPolygon(aSub.GetSize(), aSub.GetConstPointAry(), rOutDev);
+        }
+    }
+    else
+    {
+        pGraphics->DrawPolygon(nPoints, pPtAry, rOutDev);
+    }
+}
+
 } // namespace vcl::rendercontext
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

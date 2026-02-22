@@ -91,6 +91,10 @@ public:
                                 bool bFill, const StrokeAttributes* pStroke,
                                 double fLineTransparency);
 
+    static void DrawPolyPolygonGeometry(OutputDevice& rOutDev,
+                                        const tools::PolyPolygon& rPolyPolygon);
+    static void DrawPolygonGeometry(OutputDevice& rOutDev, const tools::Polygon& rPoly);
+
     static void DrawPolyLine(OutputDevice& rOutDev, const tools::Polygon& rPoly);
     static void DrawPolyLine(OutputDevice& rOutDev, const tools::Polygon& rPoly,
                              const LineInfo& rLineInfo);

@@ -77,21 +77,18 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
         ImplDrawPolygon(rPoly, nullptr);
 }
 
-void OutputDevice::ImplDrawPolygon( const tools::Polygon& rPoly, const tools::PolyPolygon* pClipPolyPoly )
+void OutputDevice::ImplDrawPolygon(const tools::Polygon& rPoly, const tools::PolyPolygon* pClipPolyPoly)
 {
-    if( pClipPolyPoly )
+    if (pClipPolyPoly)
     {
-        ImplDrawPolyPolygon( tools::PolyPolygon(rPoly), pClipPolyPoly );
+        // Handle clipping via intersection then dispatch
+        tools::PolyPolygon aClipped;
+        tools::PolyPolygon(rPoly).GetIntersection(*pClipPolyPoly, aClipped);
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygonGeometry(*this, aClipped);
     }
     else
     {
-        sal_uInt16 nPoints = rPoly.GetSize();
-
-        if ( nPoints < 2 )
-            return;
-
-        const Point* pPtAry = rPoly.GetConstPointAry();
-        mpGraphics->DrawPolygon( nPoints, pPtAry, *this );
+        vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*this, rPoly);
     }
 }
 
