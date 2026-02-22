@@ -247,7 +247,7 @@ void OutputDevice::DrawLinearGradient( const tools::Rectangle& rRect,
         aPoly[3] = aBorderRect.BottomLeft();
         aPoly.Rotate( aCenter, nAngle );
 
-        ImplDrawPolygon( aPoly, pClixPolyPoly );
+        ImplDrawClippedPolygon( aPoly, pClixPolyPoly );
 
         if ( !bLinear)
         {
@@ -260,7 +260,7 @@ void OutputDevice::DrawLinearGradient( const tools::Rectangle& rRect,
             aPoly[3] = aBorderRect.BottomLeft();
             aPoly.Rotate( aCenter, nAngle );
 
-            ImplDrawPolygon( aPoly, pClixPolyPoly );
+            ImplDrawClippedPolygon( aPoly, pClixPolyPoly );
         }
     }
 
@@ -311,7 +311,7 @@ void OutputDevice::DrawLinearGradient( const tools::Rectangle& rRect,
         aPoly[3] = aRect.BottomLeft();
         aPoly.Rotate( aCenter, nAngle );
 
-        ImplDrawPolygon( aPoly, pClixPolyPoly );
+        ImplDrawClippedPolygon( aPoly, pClixPolyPoly );
 
         if ( !bLinear )
         {
@@ -323,7 +323,7 @@ void OutputDevice::DrawLinearGradient( const tools::Rectangle& rRect,
             aPoly[3] = aMirrorRect.BottomLeft();
             aPoly.Rotate( aCenter, nAngle );
 
-            ImplDrawPolygon( aPoly, pClixPolyPoly );
+            ImplDrawClippedPolygon( aPoly, pClixPolyPoly );
         }
     }
     if ( bLinear)
@@ -344,7 +344,7 @@ void OutputDevice::DrawLinearGradient( const tools::Rectangle& rRect,
     aPoly[3] = aRect.BottomLeft();
     aPoly.Rotate( aCenter, nAngle );
 
-    ImplDrawPolygon( aPoly, pClixPolyPoly );
+    ImplDrawClippedPolygon( aPoly, pClixPolyPoly );
 
 }
 
@@ -442,7 +442,7 @@ void OutputDevice::DrawComplexGradient( const tools::Rectangle& rRect,
         aExtRect.AdjustBottom(1 );
 
         aPoly = tools::Polygon(aExtRect);
-        ImplDrawPolygon( aPoly, pClixPolyPoly );
+        ImplDrawClippedPolygon( aPoly, pClixPolyPoly );
     }
 
     // loop to output Polygon/PolyPolygon sequentially
@@ -498,7 +498,7 @@ void OutputDevice::DrawComplexGradient( const tools::Rectangle& rRect,
             // #107349# Set fill color _before_ geometry painting
             mpGraphics->SetFillColor( Color( nRed, nGreen, nBlue ) );
 
-            ImplDrawPolygon( aPoly, pClixPolyPoly );
+            ImplDrawClippedPolygon( aPoly, pClixPolyPoly );
         }
     }
 
@@ -522,7 +522,7 @@ void OutputDevice::DrawComplexGradient( const tools::Rectangle& rRect,
     }
 
     mpGraphics->SetFillColor( Color( nRed, nGreen, nBlue ) );
-    ImplDrawPolygon( rPoly, pClixPolyPoly );
+    ImplDrawClippedPolygon( rPoly, pClixPolyPoly );
 }
 
 tools::Long OutputDevice::GetGradientStepCount( tools::Long nMinRect )

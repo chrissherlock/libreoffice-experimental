@@ -1,4 +1,3 @@
-#include <text/FontMappingTracker.hxx>
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 /*
  * This file is part of the LibreOffice project.
@@ -32,10 +31,12 @@
 #include <vcl/metafile/ScopedMetaGroup.hxx>
 #include <vcl/mnemonic.hxx>
 #include <vcl/rendercontext/SystemTextColorFlags.hxx>
-#include <vcl/text/LayoutCacheData.hxx>
+#include <vcl/rendercontext/PrimitiveRenderer.hxx>
+#include <vcl/text/TextGeometry.hxx>
 #include <vcl/text/TextSpan.hxx>
 #include <vcl/text/TextLayoutData.hxx>
 #include <vcl/text/TextRecordingDispatcher.hxx>
+#include <vcl/text/LayoutCacheData.hxx>
 #include <vcl/text/MultiLineEngine.hxx>
 #include <vcl/text/MnemonicGeometry.hxx>
 #include <vcl/text/MultiLineEngine.hxx>
@@ -48,8 +49,8 @@
 #include <TextLayoutCache.hxx>
 #include <drawmode.hxx>
 #include <font/FontController.hxx>
+#include <text/FontMappingTracker.hxx>
 #include <text/TextLayoutEngine.hxx>
-#include <vcl/text/TextGeometry.hxx>
 #include <text/TextJustifier.hxx>
 #include <text/TextAnalyzer.hxx>
 #include <text/AccessibilityRecorder.hxx>
@@ -110,7 +111,7 @@ void OutputDevice::ImplDrawTextRect(tools::Long nBaseX, tools::Long nBaseY, tool
         Point(nBaseX, nBaseY), aLocalRect, mpFontRealization->mxFont->mnOrientation);
 
     if (aGeo.mbIsPolygon)
-        ImplDrawPolygon(aGeo.maPoly);
+        vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*this, aGeo.maPoly);
     else
         mpGraphics->DrawRect(aGeo.maRect.Left(), aGeo.maRect.Top(), aGeo.maRect.GetWidth(),
                              aGeo.maRect.GetHeight(), *this);

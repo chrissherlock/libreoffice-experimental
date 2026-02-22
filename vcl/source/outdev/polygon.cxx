@@ -93,7 +93,7 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
         vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*this, rPoly);
 }
 
-void OutputDevice::ImplDrawPolygon(const tools::Polygon& rPoly, const tools::PolyPolygon* pClipPolyPoly)
+void OutputDevice::ImplDrawClippedPolygon(const tools::Polygon& rPoly, const tools::PolyPolygon* pClipPolyPoly)
 {
     if (pClipPolyPoly)
     {
