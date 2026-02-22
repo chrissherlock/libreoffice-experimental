@@ -52,36 +52,12 @@ void OutputDevice::DrawPolyPolygon(const tools::PolyPolygon& rPolyPoly)
 
     if (IsLineColor())
     {
-        aStroke.fWidth = 0.0; // Hairline fallback
-        aStroke.eJoin = basegfx::B2DLineJoin::NONE;
-        aStroke.eCap = css::drawing::LineCap_BUTT;
-        aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
         aStroke.fTransparency = (255.0 - GetLineColor().GetAlpha()) / 255.0;
         pStroke = &aStroke;
     }
 
     if (!vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygon(*this, rPolyPoly, bFill, pStroke))
-        ImplDrawPolyPolygonFallback(nPoly, rPolyPoly);
-}
-
-void OutputDevice::ImplDrawPolyPolygonFallback(sal_uInt16 nPoly,
-                                               const tools::PolyPolygon& rPolyPoly)
-{
-    if (nPoly == 1)
-    {
-        // #100127# Map to DrawPolygon
-        const tools::Polygon& aPoly = rPolyPoly.GetObject(0);
-        if (aPoly.GetSize() >= 2)
-        {
-            vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
-            DrawPolygon(aPoly);
-        }
-    }
-    else if (nPoly > 1)
-    {
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygonGeometry(
-            *this, mpMapper->LogicToDevicePixel(rPolyPoly));
-    }
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygonFallback(*this, rPolyPoly);
 }
 
 void OutputDevice::DrawPolyPolygon(const basegfx::B2DPolyPolygon& rB2DPolyPoly)

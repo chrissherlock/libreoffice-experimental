@@ -340,6 +340,29 @@ bool PrimitiveRenderer::DrawPolyPolygon(OutputDevice& rOutDev,
     return true;
 }
 
+void PrimitiveRenderer::DrawPolyPolygonFallback(OutputDevice& rOutDev,
+                                                const tools::PolyPolygon& rPolyPoly)
+{
+    const sal_uInt16 nPoly = rPolyPoly.Count();
+    if (nPoly == 1)
+    {
+        const tools::Polygon& rPoly = rPolyPoly.GetObject(0);
+        if (rPoly.GetSize() >= 2)
+        {
+            // We draw the single polygon. Since recording is handled in the
+            // high-level OutputDevice::DrawPolygon, we don't need ScopedSuspend here
+            // if we are already inside a renderer call.
+            rOutDev.DrawPolygon(rPoly);
+        }
+    }
+    else if (nPoly > 1)
+    {
+        // Direct pixel-based geometry rendering
+        PrimitiveRenderer::DrawPolyPolygonGeometry(rOutDev,
+                                                   rOutDev.mpMapper->LogicToDevicePixel(rPolyPoly));
+    }
+}
+
 bool PrimitiveRenderer::DrawPolyPolygon(OutputDevice& rOutDev, const tools::PolyPolygon& rPolyPoly,
                                         bool bFill, const StrokeAttributes* pStroke)
 {

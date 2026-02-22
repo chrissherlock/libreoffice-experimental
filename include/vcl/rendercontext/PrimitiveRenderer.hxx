@@ -82,6 +82,8 @@ public:
     static bool DrawPolyPolygon(OutputDevice& rOutDev, const tools::PolyPolygon& rPolyPoly,
                                 bool bFill, const StrokeAttributes* pStroke);
 
+    static void DrawPolyPolygonFallback(OutputDevice& rOutDev, const tools::PolyPolygon& rPolyPoly);
+
     static void DrawPolyPolygonGeometry(OutputDevice& rOutDev,
                                         const tools::PolyPolygon& rPolyPolygon);
 
