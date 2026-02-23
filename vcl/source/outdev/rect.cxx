@@ -76,50 +76,9 @@ void OutputDevice::DrawRoundedRect( const tools::Rectangle& rRect,
 
     maRecorder.RecordRoundRect(rRect, nHorzRound, nVertRound);
 
-    if ( !IsDeviceOutputNecessary() || (!mpGraphicsState->mbLineColor && !mpGraphicsState->mbFillColor) || IsLayoutCalculationNecessary() )
-        return;
-
-    // we need a graphics
-    if ( !mpGraphics && !AcquireGraphics() )
-        return;
-
-    assert(mpGraphics);
-
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
-
-    if ( IsOutputCulled() )
-        return;
-
-    if ( mbLineColorDirty )
-        InitLineColor();
-
-    if ( mbFillColorDirty )
-        InitFillColor();
-
-    const tools::Rectangle aRect(LogicToDevicePixel(rRect));
-
-    nHorzRound = LogicWidthToDevicePixel(nHorzRound);
-    nVertRound = LogicHeightToDevicePixel( nVertRound );
-
-    if ( !nHorzRound && !nVertRound )
-    {
-        mpGraphics->DrawRect( aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(), *this );
-    }
-    else
-    {
-        tools::Polygon aRoundRectPoly( aRect, nHorzRound, nVertRound );
-
-        if ( aRoundRectPoly.GetSize() >= 2 )
-        {
-            Point* pPtAry = aRoundRectPoly.GetPointAry();
-
-            if ( !mpGraphicsState->mbFillColor )
-                mpGraphics->DrawPolyLine( aRoundRectPoly.GetSize(), pPtAry, *this );
-            else
-                mpGraphics->DrawPolygon( aRoundRectPoly.GetSize(), pPtAry, *this );
-        }
-    }
+    if (PrepareGraphicsOutput() && mpGraphics)
+        vcl::rendercontext::PrimitiveRenderer::DrawRoundedRect(*mpGraphics, *mpMapper, this, rRect,
+                                                               nHorzRound, nVertRound, mpGraphicsState->mbFillColor);
 }
 
 void OutputDevice::Invert( const tools::Rectangle& rRect, InvertFlags nFlags )

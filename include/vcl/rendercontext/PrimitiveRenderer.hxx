@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <tools/solar.h>
 #include <basegfx/polygon/b2dpolygon.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
@@ -67,6 +68,10 @@ public:
     /** Renders a rectangle using the current line and fill colors. */
     static void DrawRect(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                          const OutputDevice* pOutDev, const tools::Rectangle& rLogicalRect);
+
+    static void DrawRoundedRect(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+                                const OutputDevice* pOutDev, const tools::Rectangle& rLogicalRect,
+                                sal_uLong nHorzRound, sal_uLong nVertRound, bool bFillColor);
 
     static void DrawPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly);
 
