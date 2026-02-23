@@ -765,6 +765,68 @@ void PrimitiveRenderer::DrawClippedPolygon(OutputDevice& rOutDev, const tools::P
     vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygonGeometry(rOutDev, aClipped);
 }
 
+void PrimitiveRenderer::DrawEllipse(OutputDevice& rOutDev, const tools::Rectangle& rPixelRect,
+                                    bool bFill)
+{
+    tools::Polygon aRectPoly(rPixelRect.Center(), rPixelRect.GetWidth() >> 1,
+                             rPixelRect.GetHeight() >> 1);
+    const sal_uInt16 nSize = aRectPoly.GetSize();
+
+    if (nSize >= 2)
+    {
+        const Point* pPtAry = aRectPoly.GetConstPointAry();
+        if (!bFill)
+            rOutDev.mpGraphics->DrawPolyLine(nSize, pPtAry, rOutDev);
+        else
+            rOutDev.mpGraphics->DrawPolygon(nSize, pPtAry, rOutDev);
+    }
+}
+
+void PrimitiveRenderer::DrawArc(OutputDevice& rOutDev, const tools::Rectangle& rPixelRect,
+                                const Point& rPixelStart, const Point& rPixelEnd)
+{
+    tools::Polygon aArcPoly(rPixelRect, rPixelStart, rPixelEnd, PolyStyle::Arc);
+    const sal_uInt16 nSize = aArcPoly.GetSize();
+
+    if (nSize >= 2)
+    {
+        // Arcs are never filled
+        rOutDev.mpGraphics->DrawPolyLine(nSize, aArcPoly.GetConstPointAry(), rOutDev);
+    }
+}
+
+void PrimitiveRenderer::DrawPie(OutputDevice& rOutDev, const tools::Rectangle& rPixelRect,
+                                const Point& rPixelStart, const Point& rPixelEnd, bool bFill)
+{
+    tools::Polygon aPiePoly(rPixelRect, rPixelStart, rPixelEnd, PolyStyle::Pie);
+    const sal_uInt16 nSize = aPiePoly.GetSize();
+
+    if (nSize >= 2)
+    {
+        const Point* pPtAry = aPiePoly.GetConstPointAry();
+        if (!bFill)
+            rOutDev.mpGraphics->DrawPolyLine(nSize, pPtAry, rOutDev);
+        else
+            rOutDev.mpGraphics->DrawPolygon(nSize, pPtAry, rOutDev);
+    }
+}
+
+void PrimitiveRenderer::DrawChord(OutputDevice& rOutDev, const tools::Rectangle& rPixelRect,
+                                  const Point& rPixelStart, const Point& rPixelEnd, bool bFill)
+{
+    tools::Polygon aChordPoly(rPixelRect, rPixelStart, rPixelEnd, PolyStyle::Chord);
+    const sal_uInt16 nSize = aChordPoly.GetSize();
+
+    if (nSize >= 2)
+    {
+        const Point* pPtAry = aChordPoly.GetConstPointAry();
+        if (!bFill)
+            rOutDev.mpGraphics->DrawPolyLine(nSize, pPtAry, rOutDev);
+        else
+            rOutDev.mpGraphics->DrawPolygon(nSize, pPtAry, rOutDev);
+    }
+}
+
 } // namespace vcl::rendercontext
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

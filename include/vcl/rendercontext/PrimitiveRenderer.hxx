@@ -109,6 +109,17 @@ public:
     static void DrawClippedPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly,
                                    const tools::PolyPolygon& rClipPolyPoly);
 
+    static void DrawEllipse(OutputDevice& rOutDev, const tools::Rectangle& rPixelRect, bool bFill);
+
+    static void DrawArc(OutputDevice& rOutDev, const tools::Rectangle& rPixelRect,
+                        const Point& rPixelStart, const Point& rPixelEnd);
+
+    static void DrawPie(OutputDevice& rOutDev, const tools::Rectangle& rPixelRect,
+                        const Point& rPixelStart, const Point& rPixelEnd, bool bFill);
+
+    static void DrawChord(OutputDevice& rOutDev, const tools::Rectangle& rPixelRect,
+                          const Point& rPixelStart, const Point& rPixelEnd, bool bFill);
+
 private:
     static void DrawSinglePolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly);
 

@@ -18,6 +18,7 @@ $(eval $(call gb_CppunitTest_set_include,vcl_outdev,\
 $(eval $(call gb_CppunitTest_add_exception_objects,vcl_outdev, \
 	vcl/qa/cppunit/outdev \
 	vcl/qa/cppunit/HatchProcessorTest \
+	vcl/qa/cppunit/curvedshapes \
 ))
 
 $(eval $(call gb_CppunitTest_use_externals,vcl_outdev,boost_headers))

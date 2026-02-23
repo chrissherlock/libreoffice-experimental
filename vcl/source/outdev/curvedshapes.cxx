@@ -18,6 +18,7 @@
  */
 
 #include <vcl/metafile/MetafileRecorder.hxx>
+#include <vcl/rendercontext/PrimitiveRenderer.hxx>
 #include <vcl/virdev.hxx>
 
 #include <ClippingController.hxx>
@@ -26,10 +27,9 @@
 
 #include <cassert>
 
-void OutputDevice::DrawEllipse( const tools::Rectangle& rRect )
+void OutputDevice::DrawEllipse(const tools::Rectangle& rRect)
 {
     assert(!is_double_buffered_window());
-
     maRecorder.RecordEllipse(rRect);
 
     if (!PrepareGraphicsOutput())
@@ -39,26 +39,13 @@ void OutputDevice::DrawEllipse( const tools::Rectangle& rRect )
     if (aRect.IsEmpty())
         return;
 
-    tools::Polygon aRectPoly( aRect.Center(), aRect.GetWidth() >> 1, aRect.GetHeight() >> 1 );
-    if ( aRectPoly.GetSize() >= 2 )
-    {
-        Point* pPtAry = aRectPoly.GetPointAry();
-        if ( !mpGraphicsState->mbFillColor )
-            mpGraphics->DrawPolyLine( aRectPoly.GetSize(), pPtAry, *this );
-        else
-        {
-            if ( mbFillColorDirty )
-                InitFillColor();
-            mpGraphics->DrawPolygon( aRectPoly.GetSize(), pPtAry, *this );
-        }
-    }
+    vcl::rendercontext::PrimitiveRenderer::DrawEllipse(*this, aRect, mpGraphicsState->mbFillColor);
 }
 
-void OutputDevice::DrawArc( const tools::Rectangle& rRect,
-                            const Point& rStartPt, const Point& rEndPt )
+void OutputDevice::DrawArc(const tools::Rectangle& rRect, const Point& rStartPt,
+                           const Point& rEndPt)
 {
     assert(!is_double_buffered_window());
-
     maRecorder.RecordArc(rRect, rStartPt, rEndPt);
 
     if (!PrepareGraphicsOutput(false))
@@ -70,20 +57,14 @@ void OutputDevice::DrawArc( const tools::Rectangle& rRect,
 
     const Point aStart(LogicToDevicePixel(rStartPt));
     const Point aEnd(LogicToDevicePixel(rEndPt));
-    tools::Polygon aArcPoly( aRect, aStart, aEnd, PolyStyle::Arc );
 
-    if ( aArcPoly.GetSize() >= 2 )
-    {
-        Point* pPtAry = aArcPoly.GetPointAry();
-        mpGraphics->DrawPolyLine( aArcPoly.GetSize(), pPtAry, *this );
-    }
+    vcl::rendercontext::PrimitiveRenderer::DrawArc(*this, aRect, aStart, aEnd);
 }
 
-void OutputDevice::DrawPie( const tools::Rectangle& rRect,
-                            const Point& rStartPt, const Point& rEndPt )
+void OutputDevice::DrawPie(const tools::Rectangle& rRect, const Point& rStartPt,
+                           const Point& rEndPt)
 {
     assert(!is_double_buffered_window());
-
     maRecorder.RecordPie(rRect, rStartPt, rEndPt);
 
     if (!PrepareGraphicsOutput())
@@ -95,27 +76,15 @@ void OutputDevice::DrawPie( const tools::Rectangle& rRect,
 
     const Point aStart(LogicToDevicePixel(rStartPt));
     const Point aEnd(LogicToDevicePixel(rEndPt));
-    tools::Polygon aPiePoly( aRect, aStart, aEnd, PolyStyle::Pie );
 
-    if ( aPiePoly.GetSize() >= 2 )
-    {
-        Point* pPtAry = aPiePoly.GetPointAry();
-        if ( !mpGraphicsState->mbFillColor )
-            mpGraphics->DrawPolyLine( aPiePoly.GetSize(), pPtAry, *this );
-        else
-        {
-            if ( mbFillColorDirty )
-                InitFillColor();
-            mpGraphics->DrawPolygon( aPiePoly.GetSize(), pPtAry, *this );
-        }
-    }
+    vcl::rendercontext::PrimitiveRenderer::DrawPie(*this, aRect, aStart, aEnd,
+                                                   mpGraphicsState->mbFillColor);
 }
 
-void OutputDevice::DrawChord( const tools::Rectangle& rRect,
-                              const Point& rStartPt, const Point& rEndPt )
+void OutputDevice::DrawChord(const tools::Rectangle& rRect, const Point& rStartPt,
+                             const Point& rEndPt)
 {
     assert(!is_double_buffered_window());
-
     maRecorder.RecordChord(rRect, rStartPt, rEndPt);
 
     if (!PrepareGraphicsOutput())
@@ -127,20 +96,9 @@ void OutputDevice::DrawChord( const tools::Rectangle& rRect,
 
     const Point aStart(LogicToDevicePixel(rStartPt));
     const Point aEnd(LogicToDevicePixel(rEndPt));
-    tools::Polygon aChordPoly( aRect, aStart, aEnd, PolyStyle::Chord );
 
-    if ( aChordPoly.GetSize() >= 2 )
-    {
-        Point* pPtAry = aChordPoly.GetPointAry();
-        if ( !mpGraphicsState->mbFillColor )
-            mpGraphics->DrawPolyLine( aChordPoly.GetSize(), pPtAry, *this );
-        else
-        {
-            if ( mbFillColorDirty )
-                InitFillColor();
-            mpGraphics->DrawPolygon( aChordPoly.GetSize(), pPtAry, *this );
-        }
-    }
+    vcl::rendercontext::PrimitiveRenderer::DrawChord(*this, aRect, aStart, aEnd,
+                                                     mpGraphicsState->mbFillColor);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
