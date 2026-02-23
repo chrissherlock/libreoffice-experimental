@@ -108,7 +108,7 @@ void OutputDevice::DrawLine(const Point& rStartPt, const Point& rEndPt)
 
     maRecorder.RecordLine(rStartPt, rEndPt);
 
-    if (!PrepareGraphicsOutput(false) || !mpGraphics)
+    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line) || !mpGraphics)
         return;
 
     const bool bTryAA = (RasterOp::OverPaint == GetRasterOp() && IsLineColor());
@@ -131,7 +131,7 @@ void OutputDevice::DrawLine(const Point& rStartPt, const Point& rEndPt, const Li
 
     maRecorder.RecordLine(rStartPt, rEndPt, rLineInfo);
 
-    if (!PrepareGraphicsOutput(false) || !mpGraphics || rLineInfo.GetStyle() == LineStyle::NONE)
+    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line) || !mpGraphics || rLineInfo.GetStyle() == LineStyle::NONE)
         return;
 
     const LineInfo aInfo(mpMapper->LogicToDevicePixel(rLineInfo));

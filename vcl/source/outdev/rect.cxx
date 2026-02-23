@@ -84,38 +84,33 @@ void OutputDevice::DrawRoundedRect( const tools::Rectangle& rRect,
 void OutputDevice::Invert( const tools::Rectangle& rRect, InvertFlags nFlags )
 {
     assert(!is_double_buffered_window());
-    if ( !IsDeviceOutputNecessary() )
+
+    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip))
         return;
 
     tools::Rectangle aRect(LogicToDevicePixel(rRect));
 
-    if ( aRect.IsEmpty() )
+    if (aRect.IsEmpty())
         return;
+
     aRect.Normalize();
 
-    // we need a graphics
-    if ( !mpGraphics && !AcquireGraphics() )
-        return;
-    assert(mpGraphics);
-
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
-
-    if ( IsOutputCulled() )
-        return;
-
     SalInvert nSalFlags = SalInvert::NONE;
+
     if ( nFlags & InvertFlags::N50 )
         nSalFlags |= SalInvert::N50;
+
     if ( nFlags & InvertFlags::TrackFrame )
         nSalFlags |= SalInvert::TrackFrame;
+
     mpGraphics->Invert( aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(), nSalFlags, *this );
 }
 
 void OutputDevice::Invert( const tools::Polygon& rPoly, InvertFlags nFlags )
 {
     assert(!is_double_buffered_window());
-    if ( !IsDeviceOutputNecessary() )
+
+    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip))
         return;
 
     sal_uInt16 nPoints = rPoly.GetSize();
@@ -125,23 +120,16 @@ void OutputDevice::Invert( const tools::Polygon& rPoly, InvertFlags nFlags )
 
     tools::Polygon aPoly( mpMapper->LogicToDevicePixel( rPoly ) );
 
-    // we need a graphics
-    if ( !mpGraphics && !AcquireGraphics() )
-        return;
-    assert(mpGraphics);
-
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
-
-    if ( IsOutputCulled() )
-        return;
-
     SalInvert nSalFlags = SalInvert::NONE;
+
     if ( nFlags & InvertFlags::N50 )
         nSalFlags |= SalInvert::N50;
+
     if ( nFlags & InvertFlags::TrackFrame )
         nSalFlags |= SalInvert::TrackFrame;
+
     const Point* pPtAry = aPoly.GetConstPointAry();
+
     mpGraphics->Invert( nPoints, pPtAry, nSalFlags, *this );
 }
 

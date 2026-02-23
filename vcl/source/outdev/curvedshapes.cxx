@@ -48,7 +48,7 @@ void OutputDevice::DrawArc(const tools::Rectangle& rRect, const Point& rStartPt,
     assert(!is_double_buffered_window());
     maRecorder.RecordArc(rRect, rStartPt, rEndPt);
 
-    if (!PrepareGraphicsOutput(false))
+    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line))
         return;
 
     tools::Rectangle aRect(LogicToDevicePixel(rRect));

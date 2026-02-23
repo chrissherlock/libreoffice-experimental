@@ -52,7 +52,7 @@ void OutputDevice::DrawPixel(const Point& rPt)
 {
     maRecorder.RecordPixel(rPt);
 
-    if (PrepareGraphicsOutput(false) && mpGraphics)
+    if (PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line) && mpGraphics)
         vcl::rendercontext::PrimitiveRenderer::DrawPixel(*mpGraphics, *mpMapper, this, rPt);
 }
 
@@ -60,7 +60,7 @@ void OutputDevice::DrawPixel(const Point& rPt, const Color& rColor)
 {
     maRecorder.RecordPixel( rPt, rColor );
 
-    if (PrepareGraphicsOutput(false) && mpGraphics)
+    if (PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line) && mpGraphics)
         vcl::rendercontext::PrimitiveRenderer::DrawPixel(*mpGraphics, *mpMapper, this, rPt, rColor);
 }
 

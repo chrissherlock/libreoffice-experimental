@@ -199,6 +199,23 @@ struct RenderSelection
 };
 }
 
+namespace vcl
+{
+    enum class PrepareOutputFlags
+    {
+        None = 0x00,
+        Clip = 0x01,
+        Line = 0x02,
+        Fill = 0x04,
+        All  = Clip | Line | Fill
+    };
+}
+
+// Enable bitwise operators for the enum
+namespace o3tl {
+    template<> struct typed_flags<vcl::PrepareOutputFlags> : is_typed_flags<vcl::PrepareOutputFlags, 0x07> {};
+}
+
 namespace vcl::rendercontext
 {
 class PrimitiveRenderer;
@@ -367,10 +384,8 @@ public:
 
     virtual bool CanAnimate() const = 0;
 
-    bool PrepareGraphicsOutput(bool bCheckFill = true);
-
-    /** Flushes all pending dirty state flags and pushes them to the SalGraphics hardware backend. */
-    bool FlushGraphicsState(bool bCheckFill = true);
+    bool PrepareGraphicsOutput(vcl::PrepareOutputFlags nFlags = vcl::PrepareOutputFlags::All);
+    bool FlushGraphicsState(vcl::PrepareOutputFlags nFlags = vcl::PrepareOutputFlags::All);
 
 protected:
 

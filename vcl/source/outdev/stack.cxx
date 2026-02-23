@@ -34,38 +34,46 @@
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 
-bool OutputDevice::PrepareGraphicsOutput(bool bCheckFill /* = true */)
+bool OutputDevice::PrepareGraphicsOutput(vcl::PrepareOutputFlags nFlags)
 {
     // High-level software visibility and layout checks
     if (!IsDeviceOutputNecessary() || IsLayoutCalculationNecessary())
         return false;
 
-    // Geometry-specific color checks
-    // If bCheckFill is false (lines, pixels), we only require mbLineColor.
-    // If bCheckFill is true (rects, polys), we require either mbLineColor OR mbFillColor.
-    if (!mpGraphicsState->mbLineColor && (!bCheckFill || !mpGraphicsState->mbFillColor))
-        return false;
+    // Evaluate which colors actually have drawing intent based on the flags requested
+    bool bWillDrawLine = (nFlags & vcl::PrepareOutputFlags::Line) && mpGraphicsState->mbLineColor;
+    bool bWillDrawFill = (nFlags & vcl::PrepareOutputFlags::Fill) && mpGraphicsState->mbFillColor;
 
-    return FlushGraphicsState(bCheckFill);
+    // If color checks are requested, ensure at least one active color exists to draw with
+    if (nFlags & (vcl::PrepareOutputFlags::Line | vcl::PrepareOutputFlags::Fill))
+    {
+        if (!bWillDrawLine && !bWillDrawFill)
+            return false;
+    }
+
+    return FlushGraphicsState(nFlags);
 }
 
-bool OutputDevice::FlushGraphicsState(bool bCheckFill /* = true */)
+bool OutputDevice::FlushGraphicsState(vcl::PrepareOutputFlags nFlags)
 {
     if (!mpGraphics && !AcquireGraphics())
         return false;
 
     assert(mpGraphics);
 
-    if (mpClippingController->IsDirty())
-        InitClipRegion();
+    if (nFlags & vcl::PrepareOutputFlags::Clip)
+    {
+        if (mpClippingController->IsDirty())
+            InitClipRegion();
 
-    if (IsOutputCulled())
-        return false;
+        if (IsOutputCulled())
+            return false;
+    }
 
-    if (mbLineColorDirty)
+    if ((nFlags & vcl::PrepareOutputFlags::Line) && mbLineColorDirty)
         InitLineColor();
 
-    if (mbFillColorDirty && bCheckFill)
+    if ((nFlags & vcl::PrepareOutputFlags::Fill) && mbFillColorDirty)
         InitFillColor();
 
     return true;

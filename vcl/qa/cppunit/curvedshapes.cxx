@@ -73,7 +73,7 @@ CPPUNIT_TEST_FIXTURE(VclCurvedShapesTest, testArcLineColorState)
     auto pVDev = createVDev();
     pushTrapState(pVDev.get());
 
-    // Arcs are lines only. We test that PrepareGraphicsOutput(false) correctly flushes line state.
+    // Arcs are lines only. We test that PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line) correctly flushes line state.
     pVDev->SetLineColor(COL_LIGHTBLUE);
     pVDev->SetFillColor(COL_TRANSPARENT);
 
