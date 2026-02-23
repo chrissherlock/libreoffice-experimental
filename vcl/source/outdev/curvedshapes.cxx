@@ -30,27 +30,14 @@ void OutputDevice::DrawEllipse( const tools::Rectangle& rRect )
 {
     assert(!is_double_buffered_window());
 
-    maRecorder.RecordEllipse( rRect );
+    maRecorder.RecordEllipse(rRect);
 
-    if  ( !IsDeviceOutputNecessary() || (!mpGraphicsState->mbLineColor && !mpGraphicsState->mbFillColor) || IsLayoutCalculationNecessary() )
+    if (!PrepareGraphicsOutput())
         return;
 
     tools::Rectangle aRect(LogicToDevicePixel(rRect));
-    if ( aRect.IsEmpty() )
+    if (aRect.IsEmpty())
         return;
-
-    // we need a graphics
-    if ( !mpGraphics && !AcquireGraphics() )
-        return;
-    assert(mpGraphics);
-
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
-    if ( IsOutputCulled() )
-        return;
-
-    if ( mbLineColorDirty )
-        InitLineColor();
 
     tools::Polygon aRectPoly( aRect.Center(), aRect.GetWidth() >> 1, aRect.GetHeight() >> 1 );
     if ( aRectPoly.GetSize() >= 2 )
@@ -72,27 +59,14 @@ void OutputDevice::DrawArc( const tools::Rectangle& rRect,
 {
     assert(!is_double_buffered_window());
 
-    maRecorder.RecordArc( rRect, rStartPt, rEndPt );
+    maRecorder.RecordArc(rRect, rStartPt, rEndPt);
 
-    if ( !IsDeviceOutputNecessary() || !mpGraphicsState->mbLineColor || IsLayoutCalculationNecessary() )
+    if (!PrepareGraphicsOutput(false))
         return;
 
     tools::Rectangle aRect(LogicToDevicePixel(rRect));
-    if ( aRect.IsEmpty() )
+    if (aRect.IsEmpty())
         return;
-
-    // we need a graphics
-    if ( !mpGraphics && !AcquireGraphics() )
-        return;
-    assert(mpGraphics);
-
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
-    if ( IsOutputCulled() )
-        return;
-
-    if ( mbLineColorDirty )
-        InitLineColor();
 
     const Point aStart(LogicToDevicePixel(rStartPt));
     const Point aEnd(LogicToDevicePixel(rEndPt));
@@ -110,27 +84,14 @@ void OutputDevice::DrawPie( const tools::Rectangle& rRect,
 {
     assert(!is_double_buffered_window());
 
-    maRecorder.RecordPie( rRect, rStartPt, rEndPt );
+    maRecorder.RecordPie(rRect, rStartPt, rEndPt);
 
-    if ( !IsDeviceOutputNecessary() || (!mpGraphicsState->mbLineColor && !mpGraphicsState->mbFillColor) || IsLayoutCalculationNecessary() )
+    if (!PrepareGraphicsOutput())
         return;
 
     tools::Rectangle aRect(LogicToDevicePixel(rRect));
-    if ( aRect.IsEmpty() )
+    if (aRect.IsEmpty())
         return;
-
-    // we need a graphics
-    if ( !mpGraphics && !AcquireGraphics() )
-        return;
-    assert(mpGraphics);
-
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
-    if ( IsOutputCulled() )
-        return;
-
-    if ( mbLineColorDirty )
-        InitLineColor();
 
     const Point aStart(LogicToDevicePixel(rStartPt));
     const Point aEnd(LogicToDevicePixel(rEndPt));
@@ -155,27 +116,14 @@ void OutputDevice::DrawChord( const tools::Rectangle& rRect,
 {
     assert(!is_double_buffered_window());
 
-    maRecorder.RecordChord( rRect, rStartPt, rEndPt );
+    maRecorder.RecordChord(rRect, rStartPt, rEndPt);
 
-    if ( !IsDeviceOutputNecessary() || (!mpGraphicsState->mbLineColor && !mpGraphicsState->mbFillColor) || IsLayoutCalculationNecessary() )
+    if (!PrepareGraphicsOutput())
         return;
 
     tools::Rectangle aRect(LogicToDevicePixel(rRect));
-    if ( aRect.IsEmpty() )
+    if (aRect.IsEmpty())
         return;
-
-    // we need a graphics
-    if ( !mpGraphics && !AcquireGraphics() )
-        return;
-    assert(mpGraphics);
-
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
-    if ( IsOutputCulled() )
-        return;
-
-    if ( mbLineColorDirty )
-        InitLineColor();
 
     const Point aStart(LogicToDevicePixel(rStartPt));
     const Point aEnd(LogicToDevicePixel(rEndPt));
