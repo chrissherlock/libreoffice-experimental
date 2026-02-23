@@ -18,6 +18,7 @@
 
 #include <vcl/dllapi.h>
 #include <vcl/rendercontext/InvertFlags.hxx>
+#include <vcl/rendercontext/DrawGridFlags.hxx>
 
 #include <com/sun/star/drawing/LineCap.hpp>
 
@@ -26,6 +27,7 @@
 class SalGraphics;
 class CoordinateMapper;
 class Point;
+class Size;
 class Color;
 class OutputDevice;
 class LineInfo;
@@ -133,6 +135,10 @@ public:
     static void Invert(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                        const OutputDevice* pOutDev, const tools::Polygon& rLogicalPoly,
                        InvertFlags nFlags);
+
+    static void DrawGrid(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+                         const OutputDevice* pOutDev, const tools::Rectangle& rRect,
+                         const tools::Rectangle& rDstRect, const Size& rDist, DrawGridFlags nFlags);
 
 private:
     static void DrawSinglePolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly);
