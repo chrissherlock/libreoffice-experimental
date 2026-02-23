@@ -66,8 +66,8 @@ void OutputDevice::DrawRect(const tools::Rectangle& rRect)
         vcl::rendercontext::PrimitiveRenderer::DrawRect(*mpGraphics, *mpMapper, this, rRect);
 }
 
-void OutputDevice::DrawRoundedRect( const tools::Rectangle& rRect,
-                             sal_uLong nHorzRound, sal_uLong nVertRound )
+void OutputDevice::DrawRoundedRect(const tools::Rectangle& rRect,
+                                   sal_uLong nHorzRound, sal_uLong nVertRound)
 {
     assert(!is_double_buffered_window());
 
@@ -81,56 +81,26 @@ void OutputDevice::DrawRoundedRect( const tools::Rectangle& rRect,
                                                                nHorzRound, nVertRound, mpGraphicsState->mbFillColor);
 }
 
-void OutputDevice::Invert( const tools::Rectangle& rRect, InvertFlags nFlags )
+void OutputDevice::Invert(const tools::Rectangle& rRect, InvertFlags nFlags)
 {
     assert(!is_double_buffered_window());
 
-    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip))
+    if (rRect.IsEmpty())
         return;
 
-    tools::Rectangle aRect(LogicToDevicePixel(rRect));
-
-    if (aRect.IsEmpty())
-        return;
-
-    aRect.Normalize();
-
-    SalInvert nSalFlags = SalInvert::NONE;
-
-    if ( nFlags & InvertFlags::N50 )
-        nSalFlags |= SalInvert::N50;
-
-    if ( nFlags & InvertFlags::TrackFrame )
-        nSalFlags |= SalInvert::TrackFrame;
-
-    mpGraphics->Invert( aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(), nSalFlags, *this );
+    if (PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip) && mpGraphics)
+        vcl::rendercontext::PrimitiveRenderer::Invert(*mpGraphics, *mpMapper, this, rRect, nFlags);
 }
 
-void OutputDevice::Invert( const tools::Polygon& rPoly, InvertFlags nFlags )
+void OutputDevice::Invert(const tools::Polygon& rPoly, InvertFlags nFlags)
 {
     assert(!is_double_buffered_window());
 
-    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip))
+    if (!rPoly.GetSize())
         return;
 
-    sal_uInt16 nPoints = rPoly.GetSize();
-
-    if ( nPoints < 2 )
-        return;
-
-    tools::Polygon aPoly( mpMapper->LogicToDevicePixel( rPoly ) );
-
-    SalInvert nSalFlags = SalInvert::NONE;
-
-    if ( nFlags & InvertFlags::N50 )
-        nSalFlags |= SalInvert::N50;
-
-    if ( nFlags & InvertFlags::TrackFrame )
-        nSalFlags |= SalInvert::TrackFrame;
-
-    const Point* pPtAry = aPoly.GetConstPointAry();
-
-    mpGraphics->Invert( nPoints, pPtAry, nSalFlags, *this );
+    if (PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip) && mpGraphics)
+        vcl::rendercontext::PrimitiveRenderer::Invert(*mpGraphics, *mpMapper, this, rPoly, nFlags);
 }
 
 void OutputDevice::DrawCheckered(const Point& rPos, const Size& rSize, sal_uInt32 nLen, Color aStart, Color aEnd)

@@ -857,6 +857,51 @@ void PrimitiveRenderer::DrawChord(OutputDevice& rOutDev, const tools::Rectangle&
     }
 }
 
+void PrimitiveRenderer::Invert(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+                               const OutputDevice* pOutDev, const tools::Rectangle& rLogicalRect,
+                               InvertFlags nFlags)
+{
+    tools::Rectangle aDeviceRect(rMapper.LogicToDevicePixel(rLogicalRect));
+
+    if (aDeviceRect.IsEmpty())
+        return;
+
+    aDeviceRect.Normalize();
+
+    SalInvert nSalFlags = SalInvert::NONE;
+
+    if (nFlags & InvertFlags::N50)
+        nSalFlags |= SalInvert::N50;
+
+    if (nFlags & InvertFlags::TrackFrame)
+        nSalFlags |= SalInvert::TrackFrame;
+
+    rGraphics.Invert(aDeviceRect.Left(), aDeviceRect.Top(), aDeviceRect.GetWidth(),
+                     aDeviceRect.GetHeight(), nSalFlags, *pOutDev);
+}
+
+void PrimitiveRenderer::Invert(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+                               const OutputDevice* pOutDev, const tools::Polygon& rLogicalPoly,
+                               InvertFlags nFlags)
+{
+    sal_uInt16 nPoints = rLogicalPoly.GetSize();
+    if (nPoints < 2)
+        return;
+
+    tools::Polygon aDevicePoly(rMapper.LogicToDevicePixel(rLogicalPoly));
+
+    SalInvert nSalFlags = SalInvert::NONE;
+
+    if (nFlags & InvertFlags::N50)
+        nSalFlags |= SalInvert::N50;
+
+    if (nFlags & InvertFlags::TrackFrame)
+        nSalFlags |= SalInvert::TrackFrame;
+
+    const Point* pPtAry = aDevicePoly.GetConstPointAry();
+    rGraphics.Invert(nPoints, pPtAry, nSalFlags, *pOutDev);
+}
+
 } // namespace vcl::rendercontext
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

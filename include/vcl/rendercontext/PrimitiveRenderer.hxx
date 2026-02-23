@@ -17,6 +17,7 @@
 #include <basegfx/numeric/ftools.hxx>
 
 #include <vcl/dllapi.h>
+#include <vcl/rendercontext/InvertFlags.hxx>
 
 #include <com/sun/star/drawing/LineCap.hpp>
 
@@ -124,6 +125,14 @@ public:
 
     static void DrawChord(OutputDevice& rOutDev, const tools::Rectangle& rPixelRect,
                           const Point& rPixelStart, const Point& rPixelEnd, bool bFill);
+
+    static void Invert(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+                       const OutputDevice* pOutDev, const tools::Rectangle& rLogicalRect,
+                       InvertFlags nFlags);
+
+    static void Invert(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+                       const OutputDevice* pOutDev, const tools::Polygon& rLogicalPoly,
+                       InvertFlags nFlags);
 
 private:
     static void DrawSinglePolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly);
