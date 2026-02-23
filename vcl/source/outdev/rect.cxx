@@ -20,6 +20,7 @@
 #include <sal/types.h>
 #include <tools/poly.hxx>
 #include <tools/helpers.hxx>
+#include <comphelper/scopeguard.hxx>
 
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/rendercontext/DrawGridFlags.hxx>
@@ -131,20 +132,22 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
 {
     assert(!is_double_buffered_window());
 
-    tools::Rectangle aDstRect( PixelToLogic( Point() ), GetOutputSize() );
-    aDstRect.Intersection( rRect );
-
-    if( aDstRect.IsEmpty() || IsLayoutCalculationNecessary() )
+    if (rRect.IsEmpty())
         return;
 
-    if( !mpGraphics && !AcquireGraphics() )
+    tools::Rectangle aDstRect(PixelToLogic(Point() ), GetOutputSize());
+    aDstRect.Intersection(rRect);
+
+    if (aDstRect.IsEmpty())
         return;
-    assert(mpGraphics);
 
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
+    const bool bOldMap = mpMapper->IsMapModeEnabled();
 
-    if ( IsOutputCulled() )
+    comphelper::ScopeGuard aMapGuard([this, bOldMap]() {
+        this->EnableMapMode(bOldMap);
+    });
+
+    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::All, vcl::MapModePolicy::ForcePixel))
         return;
 
     const tools::Long nDistX = std::max( rDist.Width(), tools::Long(1) );
@@ -183,15 +186,6 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
         }
     }
 
-    if( mbLineColorDirty )
-        InitLineColor();
-
-    if( mbFillColorDirty )
-        InitFillColor();
-
-    const bool bOldMap = mpMapper->IsMapModeEnabled();
-    mpMapper->EnableMapMode( false );
-
     if( nFlags & DrawGridFlags::Dots )
     {
         for( tools::Long i = 0; i < nVertCount; i++ )
@@ -222,8 +216,6 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
             }
         }
     }
-
-    mpMapper->EnableMapMode( bOldMap );
 }
 
 void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Size& rGridDistance,

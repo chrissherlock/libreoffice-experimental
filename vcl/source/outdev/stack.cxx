@@ -34,17 +34,19 @@
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 
-bool OutputDevice::PrepareGraphicsOutput(vcl::PrepareOutputFlags nFlags)
+bool OutputDevice::PrepareGraphicsOutput(vcl::PrepareOutputFlags nFlags, vcl::MapModePolicy eMapPolicy)
 {
-    // High-level software visibility and layout checks
     if (!IsDeviceOutputNecessary() || IsLayoutCalculationNecessary())
         return false;
 
-    // Evaluate which colors actually have drawing intent based on the flags requested
+    if (eMapPolicy == vcl::MapModePolicy::ForcePixel && mpMapper->IsMapModeEnabled())
+        EnableMapMode(false);
+    else if (eMapPolicy == vcl::MapModePolicy::ForceLogic && !mpMapper->IsMapModeEnabled())
+        EnableMapMode(true);
+
     bool bWillDrawLine = (nFlags & vcl::PrepareOutputFlags::Line) && mpGraphicsState->mbLineColor;
     bool bWillDrawFill = (nFlags & vcl::PrepareOutputFlags::Fill) && mpGraphicsState->mbFillColor;
 
-    // If color checks are requested, ensure at least one active color exists to draw with
     if (nFlags & (vcl::PrepareOutputFlags::Line | vcl::PrepareOutputFlags::Fill))
     {
         if (!bWillDrawLine && !bWillDrawFill)

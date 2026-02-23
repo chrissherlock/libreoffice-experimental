@@ -216,6 +216,16 @@ namespace o3tl {
     template<> struct typed_flags<vcl::PrepareOutputFlags> : is_typed_flags<vcl::PrepareOutputFlags, 0x07> {};
 }
 
+namespace vcl
+{
+    enum class MapModePolicy
+    {
+        Keep,       // Maintain current state (default)
+        ForcePixel, // Ensure MapMode is disabled (1:1 pixels)
+        ForceLogic  // Ensure MapMode is enabled (Coordinate scaling)
+    };
+}
+
 namespace vcl::rendercontext
 {
 class PrimitiveRenderer;
@@ -384,7 +394,7 @@ public:
 
     virtual bool CanAnimate() const = 0;
 
-    bool PrepareGraphicsOutput(vcl::PrepareOutputFlags nFlags = vcl::PrepareOutputFlags::All);
+    bool PrepareGraphicsOutput(vcl::PrepareOutputFlags nFlags = vcl::PrepareOutputFlags::All, vcl::MapModePolicy eMapPolicy = vcl::MapModePolicy::Keep);
     bool FlushGraphicsState(vcl::PrepareOutputFlags nFlags = vcl::PrepareOutputFlags::All);
 
 protected:
