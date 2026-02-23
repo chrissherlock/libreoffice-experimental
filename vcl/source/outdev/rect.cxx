@@ -223,36 +223,11 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
 {
     assert(!is_double_buffered_window());
 
-    if (!mpGraphicsState->mbLineColor || IsLayoutCalculationNecessary())
-    {
-        return;
-    }
-
-    if (!mpGraphics && !AcquireGraphics())
-    {
-        return;
-    }
-    assert(mpGraphics);
-
-    if ( mpClippingController->IsDirty() )
-    {
-        InitClipRegion();
-    }
-
-    if ( IsOutputCulled() )
-    {
-        return;
-    }
-
-    if (mbLineColorDirty)
-    {
-        InitLineColor();
-    }
-
     if (rDrawingArea.IsEmpty())
-    {
         return;
-    }
+
+    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line))
+        return;
 
     const tools::Long nDistanceX = rGridDistance.Width();
     const tools::Long nDistanceY = rGridDistance.Height();
