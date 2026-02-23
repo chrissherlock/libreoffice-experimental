@@ -161,21 +161,88 @@ static std::vector<sal_Int32> lcl_CalculateGridOffsets(
     return aBuf;
 }
 
-void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, DrawGridFlags nFlags )
+namespace
+{
+struct GridGeometry
+{
+    tools::Long nDistX;
+    tools::Long nDistY;
+    tools::Long nLogStartX;
+    tools::Long nLogStartY;
+    tools::Long nLogRight;
+    tools::Long nLogBottom;
+
+    // Device Pixel boundaries for the lines
+    tools::Long nPixStartX;
+    tools::Long nPixStartY;
+    tools::Long nPixRight;
+    tools::Long nPixBottom;
+
+    GridGeometry(const vcl::rendercontext::CoordinateMapper& rMapper,
+                 const tools::Rectangle& rRect,
+                 const tools::Rectangle& aDstRect,
+                 const Size& rDist)
+    {
+        nDistX = std::max(rDist.Width(), tools::Long(1));
+        nDistY = std::max(rDist.Height(), tools::Long(1));
+
+        // Logical alignment logic
+        nLogStartX = (rRect.Left() >= aDstRect.Left()) ? rRect.Left() :
+                     (rRect.Left() + ((aDstRect.Left() - rRect.Left()) / nDistX) * nDistX);
+        nLogStartY = (rRect.Top() >= aDstRect.Top()) ? rRect.Top() :
+                     (rRect.Top() + ((aDstRect.Top() - rRect.Top()) / nDistY) * nDistY);
+
+        nLogRight = aDstRect.Right();
+        nLogBottom = aDstRect.Bottom();
+
+        // Pre-cache the device pixel boundaries
+        nPixStartX = rMapper.LogicXToDevicePixel(nLogStartX);
+        nPixStartY = rMapper.LogicYToDevicePixel(nLogStartY);
+        nPixRight = rMapper.LogicXToDevicePixel(nLogRight);
+        nPixBottom = rMapper.LogicYToDevicePixel(nLogBottom);
+    }
+
+    std::vector<sal_Int32> CalculateOffsets(
+        const vcl::rendercontext::CoordinateMapper& rMapper,
+        bool bIsVertical) const
+    {
+        std::vector<sal_Int32> aBuf;
+        const tools::Long nStart = bIsVertical ? nLogStartY : nLogStartX;
+        const tools::Long nEnd = bIsVertical ? nLogBottom : nLogRight;
+        const tools::Long nDist = bIsVertical ? nDistY : nDistX;
+
+        // reserve capacity: (distance / step) + 2 for safety
+        aBuf.reserve(((nEnd - nStart) / nDist) + 2);
+
+        tools::Long nPos = nStart;
+        auto fnMap = [&rMapper, bIsVertical](tools::Long v) {
+            return bIsVertical ? rMapper.LogicYToDevicePixel(v) : rMapper.LogicXToDevicePixel(v);
+        };
+
+        aBuf.push_back(fnMap(nPos));
+        while ((nPos += nDist) <= nEnd)
+        {
+            aBuf.push_back(fnMap(nPos));
+        }
+        return aBuf;
+    }
+};
+}
+
+void OutputDevice::DrawGrid(const tools::Rectangle& rRect, const Size& rDist, DrawGridFlags nFlags)
 {
     assert(!is_double_buffered_window());
 
     if (rRect.IsEmpty())
         return;
 
-    tools::Rectangle aDstRect(PixelToLogic(Point() ), GetOutputSize());
+    tools::Rectangle aDstRect(PixelToLogic(Point()), GetOutputSize());
     aDstRect.Intersection(rRect);
 
     if (aDstRect.IsEmpty())
         return;
 
     const bool bOldMap = mpMapper->IsMapModeEnabled();
-
     comphelper::ScopeGuard aMapGuard([this, bOldMap]() {
         this->EnableMapMode(bOldMap);
     });
@@ -183,24 +250,15 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
     if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::All, vcl::MapModePolicy::ForcePixel))
         return;
 
-    const tools::Long nDistX = std::max( rDist.Width(), tools::Long(1) );
-    const tools::Long nDistY = std::max( rDist.Height(), tools::Long(1) );
-    tools::Long nX = ( rRect.Left() >= aDstRect.Left() ) ? rRect.Left() : ( rRect.Left() + ( ( aDstRect.Left() - rRect.Left() ) / nDistX ) * nDistX );
-    tools::Long nY = ( rRect.Top() >= aDstRect.Top() ) ? rRect.Top() : ( rRect.Top() + ( ( aDstRect.Top() - rRect.Top() ) / nDistY ) * nDistY );
-    const tools::Long nRight = aDstRect.Right();
-    const tools::Long nBottom = aDstRect.Bottom();
-    const tools::Long nStartX = LogicXToDevicePixel( nX );
-    const tools::Long nStartY = LogicYToDevicePixel( nY );
+    const GridGeometry aGrid(*mpMapper, rRect, aDstRect, rDist);
 
     std::vector<sal_Int32> aVertBuf;
-
     if (nFlags & (DrawGridFlags::Dots | DrawGridFlags::HorzLines))
-        aVertBuf = lcl_CalculateGridOffsets(*mpMapper, nStartY, nBottom, nDistY, true);
+        aVertBuf = aGrid.CalculateOffsets(*mpMapper, true);
 
     std::vector<sal_Int32> aHorzBuf;
-
     if (nFlags & (DrawGridFlags::Dots | DrawGridFlags::VertLines))
-        aHorzBuf = lcl_CalculateGridOffsets(*mpMapper, nStartX, nRight, nDistX, false);
+        aHorzBuf = aGrid.CalculateOffsets(*mpMapper, false);
 
     if (nFlags & DrawGridFlags::Dots)
     {
@@ -215,21 +273,17 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
 
     if (nFlags & DrawGridFlags::HorzLines)
     {
-        const tools::Long nDeviceRight = LogicXToDevicePixel(nRight);
-
         for (const auto& rY : aVertBuf)
         {
-            mpGraphics->DrawLine(nStartX, rY, nDeviceRight, rY, *this);
+            mpGraphics->DrawLine(aGrid.nPixStartX, rY, aGrid.nPixRight, rY, *this);
         }
     }
 
     if (nFlags & DrawGridFlags::VertLines)
     {
-        const tools::Long nDeviceBottom = LogicYToDevicePixel(nBottom);
-
         for (const auto& rX : aHorzBuf)
         {
-            mpGraphics->DrawLine(rX, nStartY, rX, nDeviceBottom, *this);
+            mpGraphics->DrawLine(rX, aGrid.nPixStartY, rX, aGrid.nPixBottom, *this);
         }
     }
 }
