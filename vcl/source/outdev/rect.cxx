@@ -128,6 +128,39 @@ void OutputDevice::DrawCheckered(const Point& rPos, const Size& rSize, sal_uInt3
     }
 }
 
+/** * Local helper to generate device-pixel coordinates for a grid axis.
+ * Using CoordinateMapper directly makes this utility stateless and testable.
+ */
+static std::vector<sal_Int32> lcl_CalculateGridOffsets(
+    const CoordinateMapper& rMapper,
+    tools::Long nStart,
+    tools::Long nEnd,
+    tools::Long nDist,
+    bool bIsVertical) // To decide between LogicY vs LogicX
+{
+    std::vector<sal_Int32> aBuf;
+    if (nDist <= 0)
+        return aBuf;
+
+    aBuf.reserve(((nEnd - nStart) / nDist) + 2);
+
+    tools::Long nPos = nStart;
+
+    auto fnMap = [&rMapper, bIsVertical](tools::Long nVal) {
+        return bIsVertical ? rMapper.LogicYToDevicePixel(nVal)
+                           : rMapper.LogicXToDevicePixel(nVal);
+    };
+
+    aBuf.push_back(fnMap(nPos));
+
+    while ((nPos += nDist) <= nEnd)
+    {
+        aBuf.push_back(fnMap(nPos));
+    }
+
+    return aBuf;
+}
+
 void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, DrawGridFlags nFlags )
 {
     assert(!is_double_buffered_window());
@@ -157,63 +190,46 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
     const tools::Long nRight = aDstRect.Right();
     const tools::Long nBottom = aDstRect.Bottom();
     const tools::Long nStartX = LogicXToDevicePixel( nX );
-    const tools::Long nEndX = LogicXToDevicePixel( nRight );
     const tools::Long nStartY = LogicYToDevicePixel( nY );
-    const tools::Long nEndY = LogicYToDevicePixel( nBottom );
-    tools::Long nHorzCount = 0;
-    tools::Long nVertCount = 0;
 
-    std::vector< sal_Int32 > aVertBuf;
-    std::vector< sal_Int32 > aHorzBuf;
+    std::vector<sal_Int32> aVertBuf;
 
-    if( ( nFlags & DrawGridFlags::Dots ) || ( nFlags & DrawGridFlags::HorzLines ) )
+    if (nFlags & (DrawGridFlags::Dots | DrawGridFlags::HorzLines))
+        aVertBuf = lcl_CalculateGridOffsets(*mpMapper, nStartY, nBottom, nDistY, true);
+
+    std::vector<sal_Int32> aHorzBuf;
+
+    if (nFlags & (DrawGridFlags::Dots | DrawGridFlags::VertLines))
+        aHorzBuf = lcl_CalculateGridOffsets(*mpMapper, nStartX, nRight, nDistX, false);
+
+    if (nFlags & DrawGridFlags::Dots)
     {
-        aVertBuf.resize( aDstRect.GetHeight() / nDistY + 2 );
-        aVertBuf[ nVertCount++ ] = nStartY;
-        while( ( nY += nDistY ) <= nBottom )
+        for (const auto& rY : aVertBuf)
         {
-            aVertBuf[ nVertCount++ ] = LogicYToDevicePixel( nY );
-        }
-    }
-
-    if( ( nFlags & DrawGridFlags::Dots ) || ( nFlags & DrawGridFlags::VertLines ) )
-    {
-        aHorzBuf.resize( aDstRect.GetWidth() / nDistX + 2 );
-        aHorzBuf[ nHorzCount++ ] = nStartX;
-        while( ( nX += nDistX ) <= nRight )
-        {
-            aHorzBuf[ nHorzCount++ ] = LogicXToDevicePixel( nX );
-        }
-    }
-
-    if( nFlags & DrawGridFlags::Dots )
-    {
-        for( tools::Long i = 0; i < nVertCount; i++ )
-        {
-            for( tools::Long j = 0, Y = aVertBuf[ i ]; j < nHorzCount; j++ )
+            for (const auto& rX : aHorzBuf)
             {
-                mpGraphics->DrawPixel( aHorzBuf[ j ], Y, *this );
+                mpGraphics->DrawPixel(rX, rY, *this);
             }
         }
     }
-    else
-    {
-        if( nFlags & DrawGridFlags::HorzLines )
-        {
-            for( tools::Long i = 0; i < nVertCount; i++ )
-            {
-                nY = aVertBuf[ i ];
-                mpGraphics->DrawLine( nStartX, nY, nEndX, nY, *this );
-            }
-        }
 
-        if( nFlags & DrawGridFlags::VertLines )
+    if (nFlags & DrawGridFlags::HorzLines)
+    {
+        const tools::Long nDeviceRight = LogicXToDevicePixel(nRight);
+
+        for (const auto& rY : aVertBuf)
         {
-            for( tools::Long i = 0; i < nHorzCount; i++ )
-            {
-                nX = aHorzBuf[ i ];
-                mpGraphics->DrawLine( nX, nStartY, nX, nEndY, *this );
-            }
+            mpGraphics->DrawLine(nStartX, rY, nDeviceRight, rY, *this);
+        }
+    }
+
+    if (nFlags & DrawGridFlags::VertLines)
+    {
+        const tools::Long nDeviceBottom = LogicYToDevicePixel(nBottom);
+
+        for (const auto& rX : aHorzBuf)
+        {
+            mpGraphics->DrawLine(rX, nStartY, rX, nDeviceBottom, *this);
         }
     }
 }
