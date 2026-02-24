@@ -1011,6 +1011,82 @@ void PrimitiveRenderer::DrawGrid(SalGraphics& rGraphics, const CoordinateMapper&
     }
 }
 
+namespace
+{
+struct CrossGridGeometry
+{
+    std::vector<tools::Long> aHorzBuffer;
+    std::vector<tools::Long> aVertBuffer;
+
+    // Drawing area boundaries in device pixels
+    tools::Long nPixTop;
+    tools::Long nPixBottom;
+    tools::Long nPixLeft;
+    tools::Long nPixRight;
+
+    CrossGridGeometry(const CoordinateMapper& rMapper, const tools::Rectangle& rGridArea,
+                      const Size& rGridDistance, const tools::Rectangle& rDrawingArea)
+    {
+        const tools::Long nDistanceX = std::max(rGridDistance.Width(), tools::Long(1));
+        const tools::Long nDistanceY = std::max(rGridDistance.Height(), tools::Long(1));
+
+        // Generate logical horizontal positions
+        aHorzBuffer.reserve(rGridArea.GetWidth() / nDistanceX + 1);
+        tools::Long nX = rGridArea.Left();
+        while (nX <= rGridArea.Right())
+        {
+            aHorzBuffer.push_back(nX);
+            nX += nDistanceX;
+        }
+
+        // Generate logical vertical positions
+        aVertBuffer.reserve(rGridArea.GetHeight() / nDistanceY + 1);
+        tools::Long nY = rGridArea.Top();
+        while (nY <= rGridArea.Bottom())
+        {
+            aVertBuffer.push_back(nY);
+            nY += nDistanceY;
+        }
+
+        // Map drawing area to device pixels
+        nPixTop = rMapper.LogicYToDevicePixel(rDrawingArea.Top());
+        nPixBottom = rMapper.LogicYToDevicePixel(rDrawingArea.Bottom());
+        nPixLeft = rMapper.LogicXToDevicePixel(rDrawingArea.Left());
+        nPixRight = rMapper.LogicXToDevicePixel(rDrawingArea.Right());
+    }
+};
+}
+
+void PrimitiveRenderer::DrawGridOfCrosses(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+                                          const OutputDevice* pOutDev,
+                                          const tools::Rectangle& rGridArea,
+                                          const Size& rGridDistance,
+                                          const tools::Rectangle& rDrawingArea)
+{
+    const CrossGridGeometry aGrid(rMapper, rGridArea, rGridDistance, rDrawingArea);
+
+    for (const auto& rLogY : aGrid.aVertBuffer)
+    {
+        const tools::Long nY = rMapper.LogicYToDevicePixel(rLogY);
+        if (nY < aGrid.nPixTop || nY > aGrid.nPixBottom)
+            continue;
+
+        for (const auto& rLogX : aGrid.aHorzBuffer)
+        {
+            const tools::Long nX = rMapper.LogicXToDevicePixel(rLogX);
+            if (nX < aGrid.nPixLeft || nX > aGrid.nPixRight)
+                continue;
+
+            // Draw a 3x3 cross centered at (nX, nY)
+            rGraphics.DrawPixel(nX, nY, *pOutDev);
+            rGraphics.DrawPixel(nX - 1, nY, *pOutDev);
+            rGraphics.DrawPixel(nX + 1, nY, *pOutDev);
+            rGraphics.DrawPixel(nX, nY - 1, *pOutDev);
+            rGraphics.DrawPixel(nX, nY + 1, *pOutDev);
+        }
+    }
+}
+
 } // namespace vcl::rendercontext
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

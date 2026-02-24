@@ -14370,6 +14370,7 @@ vcl/source/bitmap/BitmapScaleConvolutionFilter.cxx
 vcl/source/bitmap/BitmapScaleSuperFilter.cxx
 vcl/source/bitmap/BitmapSymmetryCheck.cxx
 vcl/source/bitmap/BitmapTools.cxx
+vcl/source/bitmap/SalTwoRect.cxx
 vcl/source/bitmap/alpha.cxx
 vcl/source/bitmap/bitmap.cxx
 vcl/source/bitmap/bmpfast.cxx

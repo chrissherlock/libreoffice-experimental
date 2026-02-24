@@ -150,194 +150,20 @@ void OutputDevice::DrawGrid(const tools::Rectangle& rRect, const Size& rDist, Dr
     vcl::rendercontext::PrimitiveRenderer::DrawGrid(*mpGraphics, *mpMapper, this, rRect, aDstRect, rDist, nFlags);
 }
 
-void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Size& rGridDistance,
+void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea,
+                                     const Size& rGridDistance,
                                      const tools::Rectangle& rDrawingArea)
 {
     assert(!is_double_buffered_window());
 
-    if (rDrawingArea.IsEmpty())
+    if (rDrawingArea.IsEmpty() || rGridArea.IsEmpty())
         return;
 
     if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line))
         return;
 
-    const tools::Long nDistanceX = rGridDistance.Width();
-    const tools::Long nDistanceY = rGridDistance.Height();
-    tools::Long nX = rGridArea.Left();
-    tools::Long nY = rGridArea.Top();
-
-    // Collect horizontal positions of the grid points
-    std::vector<tools::Long> aHorzBuffer;
-    aHorzBuffer.reserve(rGridArea.GetWidth() / nDistanceX + 1);
-    while (nX <= rGridArea.Right())
-    {
-        aHorzBuffer.push_back(nX);
-        nX += nDistanceX;
-    }
-
-    // Collect vertical positions of the grid points
-    std::vector<tools::Long> aVertBuffer;
-    aVertBuffer.reserve(rGridArea.GetHeight() / nDistanceY + 1);
-    while (nY <= rGridArea.Bottom())
-    {
-        aVertBuffer.push_back(nY);
-        nY += nDistanceY;
-    }
-
-    const tools::Long nTopPixel = LogicYToDevicePixel(rDrawingArea.Top());
-    const tools::Long nBottomPixel = LogicYToDevicePixel(rDrawingArea.Bottom());
-    const tools::Long nLeftPixel = LogicXToDevicePixel(rDrawingArea.Left());
-    const tools::Long nRightPixel = LogicXToDevicePixel(rDrawingArea.Right());
-
-    // Draw 3x3 pixel crosses within the drawing area
-    const tools::Long nHalfCrossSize = 1;
-    for (const tools::Long nPositionX : aHorzBuffer)
-    {
-        const tools::Long nPositionXPixel = LogicXToDevicePixel(nPositionX);
-        for (const tools::Long nPositionY : aVertBuffer)
-        {
-            const tools::Long nPositionYPixel = LogicYToDevicePixel(nPositionY);
-            const tools::Long nStartXPixel = std::max(nPositionXPixel - nHalfCrossSize, nLeftPixel);
-            if (nStartXPixel > nRightPixel)
-            {
-                continue;
-            }
-            const tools::Long nEndXPixel
-                = std::min(nPositionXPixel + nHalfCrossSize + 1, nRightPixel);
-            if (nEndXPixel < nLeftPixel)
-            {
-                continue;
-            }
-            const tools::Long nStartYPixel = std::max(nPositionYPixel - nHalfCrossSize, nTopPixel);
-            if (nStartYPixel > nBottomPixel)
-            {
-                continue;
-            }
-            const tools::Long nEndYPixel
-                = std::min(nPositionYPixel + nHalfCrossSize + 1, nBottomPixel);
-            if (nEndYPixel < nTopPixel)
-            {
-                continue;
-            }
-
-            const bool bOldMap = mpMapper->IsMapModeEnabled();
-            mpMapper->EnableMapMode(false);
-
-            // Draw horizontal line if visible
-            if (nPositionY >= rDrawingArea.Top() && nPositionY <= rDrawingArea.Bottom())
-            {
-                mpGraphics->DrawLine(nStartXPixel, nPositionYPixel, nEndXPixel, nPositionYPixel,
-                                     *this);
-            }
-
-            // Draw vertical line if visible
-            if (nPositionX >= rDrawingArea.Left() && nPositionX <= rDrawingArea.Right())
-            {
-                mpGraphics->DrawLine(nPositionXPixel, nStartYPixel, nPositionXPixel, nEndYPixel,
-                                     *this);
-            }
-
-            mpMapper->EnableMapMode(bOldMap);
-        }
-    }
-}
-
-BmpMirrorFlags AdjustTwoRect( SalTwoRect& rTwoRect, const Size& rSizePix )
-{
-    BmpMirrorFlags nMirrFlags = BmpMirrorFlags::NONE;
-
-    if ( rTwoRect.mnDestWidth < 0 )
-    {
-        rTwoRect.mnSrcX = rSizePix.Width() - rTwoRect.mnSrcX - rTwoRect.mnSrcWidth;
-        rTwoRect.mnDestWidth = -rTwoRect.mnDestWidth;
-        rTwoRect.mnDestX -= rTwoRect.mnDestWidth-1;
-        nMirrFlags |= BmpMirrorFlags::Horizontal;
-    }
-
-    if ( rTwoRect.mnDestHeight < 0 )
-    {
-        rTwoRect.mnSrcY = rSizePix.Height() - rTwoRect.mnSrcY - rTwoRect.mnSrcHeight;
-        rTwoRect.mnDestHeight = -rTwoRect.mnDestHeight;
-        rTwoRect.mnDestY -= rTwoRect.mnDestHeight-1;
-        nMirrFlags |= BmpMirrorFlags::Vertical;
-    }
-
-    if( ( rTwoRect.mnSrcX < 0 ) || ( rTwoRect.mnSrcX >= rSizePix.Width() ) ||
-        ( rTwoRect.mnSrcY < 0 ) || ( rTwoRect.mnSrcY >= rSizePix.Height() ) ||
-        ( ( rTwoRect.mnSrcX + rTwoRect.mnSrcWidth ) > rSizePix.Width() ) ||
-        ( ( rTwoRect.mnSrcY + rTwoRect.mnSrcHeight ) > rSizePix.Height() ) )
-    {
-        const tools::Rectangle aSourceRect( Point( rTwoRect.mnSrcX, rTwoRect.mnSrcY ),
-                                     Size( rTwoRect.mnSrcWidth, rTwoRect.mnSrcHeight ) );
-        tools::Rectangle aCropRect( aSourceRect );
-
-        aCropRect.Intersection( tools::Rectangle( Point(), rSizePix ) );
-
-        if( aCropRect.IsEmpty() )
-        {
-            rTwoRect.mnSrcWidth = rTwoRect.mnSrcHeight = rTwoRect.mnDestWidth = rTwoRect.mnDestHeight = 0;
-        }
-        else
-        {
-            const double fFactorX = ( rTwoRect.mnSrcWidth > 1 ) ? static_cast<double>( rTwoRect.mnDestWidth - 1 ) / ( rTwoRect.mnSrcWidth - 1 ) : 0.0;
-            const double fFactorY = ( rTwoRect.mnSrcHeight > 1 ) ? static_cast<double>( rTwoRect.mnDestHeight - 1 ) / ( rTwoRect.mnSrcHeight - 1 ) : 0.0;
-
-            const tools::Long nDstX1 = rTwoRect.mnDestX + basegfx::fround<tools::Long>( fFactorX * ( aCropRect.Left() - rTwoRect.mnSrcX ) );
-            const tools::Long nDstY1 = rTwoRect.mnDestY + basegfx::fround<tools::Long>( fFactorY * ( aCropRect.Top() - rTwoRect.mnSrcY ) );
-            const tools::Long nDstX2 = rTwoRect.mnDestX + basegfx::fround<tools::Long>( fFactorX * ( aCropRect.Right() - rTwoRect.mnSrcX ) );
-            const tools::Long nDstY2 = rTwoRect.mnDestY + basegfx::fround<tools::Long>( fFactorY * ( aCropRect.Bottom() - rTwoRect.mnSrcY ) );
-
-            rTwoRect.mnSrcX = aCropRect.Left();
-            rTwoRect.mnSrcY = aCropRect.Top();
-            rTwoRect.mnSrcWidth = aCropRect.GetWidth();
-            rTwoRect.mnSrcHeight = aCropRect.GetHeight();
-            rTwoRect.mnDestX = nDstX1;
-            rTwoRect.mnDestY = nDstY1;
-            rTwoRect.mnDestWidth = nDstX2 - nDstX1 + 1;
-            rTwoRect.mnDestHeight = nDstY2 - nDstY1 + 1;
-        }
-    }
-
-    return nMirrFlags;
-}
-
-void AdjustTwoRect( SalTwoRect& rTwoRect, const tools::Rectangle& rValidSrcRect )
-{
-    if( !(( rTwoRect.mnSrcX < rValidSrcRect.Left() ) || ( rTwoRect.mnSrcX >= rValidSrcRect.Right() ) ||
-        ( rTwoRect.mnSrcY < rValidSrcRect.Top() ) || ( rTwoRect.mnSrcY >= rValidSrcRect.Bottom() ) ||
-        ( ( rTwoRect.mnSrcX + rTwoRect.mnSrcWidth ) > rValidSrcRect.Right() ) ||
-        ( ( rTwoRect.mnSrcY + rTwoRect.mnSrcHeight ) > rValidSrcRect.Bottom() )) )
-        return;
-
-    const tools::Rectangle aSourceRect( Point( rTwoRect.mnSrcX, rTwoRect.mnSrcY ),
-                                 Size( rTwoRect.mnSrcWidth, rTwoRect.mnSrcHeight ) );
-    tools::Rectangle aCropRect( aSourceRect );
-
-    aCropRect.Intersection( rValidSrcRect );
-
-    if( aCropRect.IsEmpty() )
-    {
-        rTwoRect.mnSrcWidth = rTwoRect.mnSrcHeight = rTwoRect.mnDestWidth = rTwoRect.mnDestHeight = 0;
-    }
-    else
-    {
-        const double fFactorX = ( rTwoRect.mnSrcWidth > 1 ) ? static_cast<double>( rTwoRect.mnDestWidth - 1 ) / ( rTwoRect.mnSrcWidth - 1 ) : 0.0;
-        const double fFactorY = ( rTwoRect.mnSrcHeight > 1 ) ? static_cast<double>( rTwoRect.mnDestHeight - 1 ) / ( rTwoRect.mnSrcHeight - 1 ) : 0.0;
-
-        const tools::Long nDstX1 = rTwoRect.mnDestX + basegfx::fround<tools::Long>( fFactorX * ( aCropRect.Left() - rTwoRect.mnSrcX ) );
-        const tools::Long nDstY1 = rTwoRect.mnDestY + basegfx::fround<tools::Long>( fFactorY * ( aCropRect.Top() - rTwoRect.mnSrcY ) );
-        const tools::Long nDstX2 = rTwoRect.mnDestX + basegfx::fround<tools::Long>( fFactorX * ( aCropRect.Right() - rTwoRect.mnSrcX ) );
-        const tools::Long nDstY2 = rTwoRect.mnDestY + basegfx::fround<tools::Long>( fFactorY * ( aCropRect.Bottom() - rTwoRect.mnSrcY ) );
-
-        rTwoRect.mnSrcX = aCropRect.Left();
-        rTwoRect.mnSrcY = aCropRect.Top();
-        rTwoRect.mnSrcWidth = aCropRect.GetWidth();
-        rTwoRect.mnSrcHeight = aCropRect.GetHeight();
-        rTwoRect.mnDestX = nDstX1;
-        rTwoRect.mnDestY = nDstY1;
-        rTwoRect.mnDestWidth = nDstX2 - nDstX1 + 1;
-        rTwoRect.mnDestHeight = nDstY2 - nDstY1 + 1;
-    }
+    vcl::rendercontext::PrimitiveRenderer::DrawGridOfCrosses(
+        *mpGraphics, *mpMapper, this, rGridArea, rGridDistance, rDrawingArea);
 }
 
 Color OutputDevice::DrawSelectionBackground(const tools::Rectangle& rRect,
