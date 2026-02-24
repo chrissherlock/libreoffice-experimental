@@ -191,102 +191,81 @@ Size OutputDevice::GetWaveLineSize(tools::Long nLineWidth) const
     return Size(1, 1);
 }
 
-void OutputDevice::ImplDrawWaveLine( tools::Long nBaseX, tools::Long nBaseY,
+void OutputDevice::ImplDrawWaveLine(tools::Long nBaseX, tools::Long nBaseY,
                                      tools::Long nDistX, tools::Long nDistY,
                                      tools::Long nWidth, tools::Long nHeight,
                                      tools::Long nLineWidth, Degree10 nOrientation,
-                                     const Color& rColor )
+                                     const Color& rColor)
 {
-    if ( !nHeight )
+    if (!nHeight)
         return;
 
-    tools::Long nStartX = nBaseX + nDistX;
-    tools::Long nStartY = nBaseY + nDistY;
+    const tools::Long nStartX = nBaseX + nDistX;
+    const tools::Long nStartY = nBaseY + nDistY;
 
-    // If the height is 1 pixel, it's enough output a line
-    if ( (nLineWidth == 1) && (nHeight == 1) )
+    // Simple Hairline (Optimization)
+    if (nLineWidth == 1 && nHeight == 1)
     {
-        mpGraphics->SetLineColor( rColor );
+        mpGraphics->SetLineColor(rColor);
         mbLineColorDirty = true;
 
-        tools::Long nEndX = nStartX+nWidth;
+        tools::Long nEndX = nStartX + nWidth;
         tools::Long nEndY = nStartY;
-        if ( nOrientation )
+
+        mpGraphics->DrawLine(nStartX, nStartY, nEndX, nEndY, *this);
+        return;
+    }
+
+    // Multi-pixel Wavy Line
+    SetWaveLineColors(rColor, nLineWidth);
+    const Size aWaveSize = GetWaveLineSize(nLineWidth);
+    const tools::Long nPixWidth = aWaveSize.Width();
+    const tools::Long nPixHeight = aWaveSize.Height();
+
+    tools::Long nCurX = nStartX;
+    tools::Long nCurY = nStartY;
+    const tools::Long nDiffX = 2;
+    const tools::Long nDiffY = nHeight - 1;
+
+    // Vertical oscillation variables
+    tools::Long nOffY = -1;
+    tools::Long nRemainingWidth = nWidth;
+
+    if (!nDiffY) // Flat wave fallback
+    {
+        for (; nRemainingWidth > 0; --nRemainingWidth, ++nCurX)
         {
-            Point aOriginPt( nBaseX, nBaseY );
-            aOriginPt.RotateAround( nStartX, nStartY, nOrientation );
-            aOriginPt.RotateAround( nEndX, nEndY, nOrientation );
+            ImplDrawWavePixel(nBaseX, nBaseY, nCurX, nCurY, nLineWidth, nOrientation,
+                              mpGraphics, *this, nPixWidth, nPixHeight);
         }
-        mpGraphics->DrawLine( nStartX, nStartY, nEndX, nEndY, *this );
     }
     else
     {
-        tools::Long    nCurX = nStartX;
-        tools::Long    nCurY = nStartY;
-        tools::Long    nDiffX = 2;
-        tools::Long    nDiffY = nHeight-1;
-        tools::Long    nCount = nWidth;
-        tools::Long    nOffY = -1;
+        nCurY += nDiffY;
 
-        SetWaveLineColors(rColor, nLineWidth);
-        Size aSize(GetWaveLineSize(nLineWidth));
-
-        tools::Long nPixWidth = aSize.Width();
-        tools::Long nPixHeight = aSize.Height();
-
-        if ( !nDiffY )
+        while (nRemainingWidth > 0)
         {
-            while ( nWidth )
+            // Draw the Slant (Vertical/Diagonal component)
+            for (tools::Long i = 0; i < nDiffY && nRemainingWidth > 0; ++i)
             {
-                ImplDrawWavePixel( nBaseX, nBaseY, nCurX, nCurY, nLineWidth, nOrientation,
-                                   mpGraphics, *this,
-                                   nPixWidth, nPixHeight );
+                ImplDrawWavePixel(nBaseX, nBaseY, nCurX, nCurY, nLineWidth, nOrientation,
+                                  mpGraphics, *this, nPixWidth, nPixHeight);
                 nCurX++;
-                nWidth--;
+                nCurY += nOffY;
+                nRemainingWidth--;
             }
-        }
-        else
-        {
-            nCurY += nDiffY;
-            for (tools::Long nFreq = nCount / (nDiffX+nDiffY); nFreq > 0; --nFreq)
-            {
-                for( tools::Long i = nDiffY; i; --i )
-                {
-                    ImplDrawWavePixel( nBaseX, nBaseY, nCurX, nCurY, nLineWidth, nOrientation,
-                                       mpGraphics, *this,
-                                       nPixWidth, nPixHeight );
-                    nCurX++;
-                    nCurY += nOffY;
-                }
-                for( tools::Long i = nDiffX; i; --i )
-                {
-                    ImplDrawWavePixel( nBaseX, nBaseY, nCurX, nCurY, nLineWidth, nOrientation,
-                                       mpGraphics, *this,
-                                       nPixWidth, nPixHeight );
-                    nCurX++;
-                }
-                nOffY = -nOffY;
-            }
-            tools::Long nFreq = nCount % (nDiffX+nDiffY);
-            if (nFreq > 0)
-            {
-                for( tools::Long i = nDiffY; i && nFreq; --i, --nFreq )
-                {
-                    ImplDrawWavePixel( nBaseX, nBaseY, nCurX, nCurY, nLineWidth, nOrientation,
-                                       mpGraphics, *this,
-                                       nPixWidth, nPixHeight );
-                    nCurX++;
-                    nCurY += nOffY;
 
-                }
-                for( tools::Long i = nDiffX; i && nFreq; --i, --nFreq )
-                {
-                    ImplDrawWavePixel( nBaseX, nBaseY, nCurX, nCurY, nLineWidth, nOrientation,
-                                       mpGraphics, *this,
-                                       nPixWidth, nPixHeight );
-                    nCurX++;
-                }
+            // Draw the Peak/Trough (Horizontal component)
+            for (tools::Long i = 0; i < nDiffX && nRemainingWidth > 0; ++i)
+            {
+                ImplDrawWavePixel(nBaseX, nBaseY, nCurX, nCurY, nLineWidth, nOrientation,
+                                  mpGraphics, *this, nPixWidth, nPixHeight);
+                nCurX++;
+                nRemainingWidth--;
             }
+
+            // Flip direction for the next half-period
+            nOffY = -nOffY;
         }
     }
 }
