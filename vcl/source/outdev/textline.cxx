@@ -336,19 +336,9 @@ void OutputDevice::ImplDrawWaveLine(const WaveLineGeometry& rGeo, const Color& r
 
 void OutputDevice::ImplDrawWaveTextLine(tools::Long nBaseX, tools::Long nBaseY,
                                         tools::Long nDistX, tools::Long nDistY,
-                                        tools::Long nWidth, tools::Long nLayoutWidth,
-                                        FontLineStyle eTextLine,
-                                        Color aColor,
-                                        bool bIsAbove)
+                                        tools::Long nWidth, FontLineStyle eTextLine,
+                                        Color aColor, bool bIsAbove)
 {
-    static bool bFuzzing = comphelper::IsFuzzing();
-    if (bFuzzing && nLayoutWidth > 10000)
-    {
-        SAL_WARN("vcl.gdi", "drawLine, skipping suspicious WaveTextLine of length: "
-                            << nLayoutWidth << " for fuzzing performance");
-        return;
-    }
-
     vcl::text::WaveLineGeometry aWaveStyle = vcl::text::TextDecorator::CalculateWaveLineGeometry(
         *mpFontInstance->mxFontMetric, eTextLine, bIsAbove, nDistY, GetDPIX(), GetDPIY());
 
@@ -580,7 +570,6 @@ void OutputDevice::ImplDrawStrikeoutChar( tools::Long nBaseX, tools::Long nBaseY
 
 void OutputDevice::ImplDrawTextLine(tools::Long nX, tools::Long nY,
                                      tools::Long nDistX, double nWidth,
-                                     double nLayoutWidth,
                                      FontStrikeout eStrikeout,
                                      FontLineStyle eUnderline,
                                      FontLineStyle eOverline,
@@ -622,13 +611,13 @@ void OutputDevice::ImplDrawTextLine(tools::Long nX, tools::Long nY,
 
     if (aGeo.bUnderlineIsWave)
     {
-        ImplDrawWaveTextLine(nX, nY, nDistX, aGeo.nUnderlineWaveHeight, nWidth, nLayoutWidth, eUnderline, aUnderlineColor, bUnderlineAbove);
+        ImplDrawWaveTextLine(nX, nY, nDistX, aGeo.nUnderlineWaveHeight, nWidth, eUnderline, aUnderlineColor, bUnderlineAbove);
         bUnderlineDone = true;
     }
 
     if (aGeo.bOverlineIsWave)
     {
-        ImplDrawWaveTextLine(nX, nY, nDistX, aGeo.nOverlineWaveHeight, nWidth, nLayoutWidth, eOverline, aOverlineColor, true);
+        ImplDrawWaveTextLine(nX, nY, nDistX, aGeo.nOverlineWaveHeight, nWidth, eOverline, aOverlineColor, true);
         bOverlineDone = true;
     }
 
@@ -654,7 +643,6 @@ void OutputDevice::ImplDrawTextLines( SalLayout& rSalLayout, FontStrikeout eStri
                                       FontLineStyle eUnderline, FontLineStyle eOverline,
                                       bool bWordLine, bool bUnderlineAbove )
 {
-    double nLayoutWidth = rSalLayout.GetTextWidth();
     if( bWordLine )
     {
         const basegfx::B2DPoint aStartPt = rSalLayout.DrawBase();
@@ -663,13 +651,13 @@ void OutputDevice::ImplDrawTextLines( SalLayout& rSalLayout, FontStrikeout eStri
         for (const auto& rSeg : aSegments)
         {
             ImplDrawTextLine( aStartPt.getX(), aStartPt.getY(), static_cast<tools::Long>(rSeg.first),
-                              rSeg.second, nLayoutWidth, eStrikeout, eUnderline, eOverline, bUnderlineAbove );
+                              rSeg.second, eStrikeout, eUnderline, eOverline, bUnderlineAbove );
         }
     }
     else
     {
         basegfx::B2DPoint aStartPt = rSalLayout.GetDrawPosition();
-        ImplDrawTextLine( aStartPt.getX(), aStartPt.getY(), 0, nLayoutWidth, nLayoutWidth,
+        ImplDrawTextLine( aStartPt.getX(), aStartPt.getY(), 0, rSalLayout.GetTextWidth(),
                           eStrikeout, eUnderline, eOverline, bUnderlineAbove );
     }
 }
@@ -683,7 +671,7 @@ void OutputDevice::ImplDrawMnemonicLine( tools::Long nX, tools::Long nY, tools::
         nX = nBaseX - nWidth - (nX - nBaseX - 1);
     }
 
-    ImplDrawTextLine( nX, nY, 0, nWidth, nWidth, STRIKEOUT_NONE, LINESTYLE_SINGLE, LINESTYLE_NONE, false );
+    ImplDrawTextLine( nX, nY, 0, nWidth, STRIKEOUT_NONE, LINESTYLE_SINGLE, LINESTYLE_NONE, false );
 }
 
 const Color& OutputDevice::GetTextLineColor() const
@@ -770,7 +758,7 @@ void OutputDevice::DrawTextLine( const Point& rPos, tools::Long nWidth,
     Point aPos = LogicToDevicePixel(rPos);
     double fWidth = LogicWidthToDeviceSubPixel(nWidth);
     aPos += Point( mpFontRealization->nXOffset, mpFontRealization->nYOffset );
-    ImplDrawTextLine( aPos.X(), aPos.X(), 0, fWidth, fWidth, eStrikeout, eUnderline, eOverline, /*bUnderlineAbove*/false );
+    ImplDrawTextLine( aPos.X(), aPos.X(), 0, fWidth, eStrikeout, eUnderline, eOverline, /*bUnderlineAbove*/false );
 }
 
 void OutputDevice::DrawWaveLine(const Point& rStartPos, const Point& rEndPos, tools::Long nLineWidth, tools::Long nWaveHeight)

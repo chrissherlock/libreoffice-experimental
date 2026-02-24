@@ -985,8 +985,7 @@ public:
                                               FontLineStyle eOverline );
 
     SAL_DLLPRIVATE void         ImplDrawTextLine( tools::Long nBaseX, tools::Long nX, tools::Long nY, double nWidth,
-                                                  double nLayoutWidth, FontStrikeout eStrikeout,
-                                                  FontLineStyle eUnderline, FontLineStyle eOverline,
+                                                  FontStrikeout eStrikeout, FontLineStyle eUnderline, FontLineStyle eOverline,
                                                   bool bUnderlineAbove );
 
     SAL_DLLPRIVATE void         ImplDrawTextLines( SalLayout&, FontStrikeout eStrikeout, FontLineStyle eUnderline,
@@ -1214,7 +1213,7 @@ private:
     SAL_DLLPRIVATE void         ImplDrawTextRect( tools::Long nBaseX, tools::Long nBaseY, tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight );
 
     SAL_DLLPRIVATE void         ImplDrawWaveLine(const WaveLineGeometry& rGeo, const Color& rColor);
-    SAL_DLLPRIVATE void         ImplDrawWaveTextLine( tools::Long nBaseX, tools::Long nBaseY, tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nLayoutWidth, FontLineStyle eTextLine, Color aColor, bool bIsAbove );
+    SAL_DLLPRIVATE void         ImplDrawWaveTextLine( tools::Long nBaseX, tools::Long nBaseY, tools::Long nX, tools::Long nY, tools::Long nWidth, FontLineStyle eTextLine, Color aColor, bool bIsAbove );
     SAL_DLLPRIVATE void         ImplDrawStraightTextLine( tools::Long nBaseX, tools::Long nBaseY, tools::Long nX, tools::Long nY, tools::Long nWidth, FontLineStyle eTextLine, Color aColor, bool bIsAbove );
     SAL_DLLPRIVATE void         ImplDrawStrikeoutLine( tools::Long nBaseX, tools::Long nBaseY, tools::Long nX, tools::Long nY, tools::Long nWidth, FontStrikeout eStrikeout, Color aColor );
     SAL_DLLPRIVATE void         ImplDrawStrikeoutChar( tools::Long nBaseX, tools::Long nBaseY, tools::Long nX, tools::Long nY, tools::Long nWidth, FontStrikeout eStrikeout, Color aColor );
