@@ -258,6 +258,7 @@ public:
 private:
     tools::Long m_nStartX, m_nStartY, m_nWidth, m_nHeight;
 };
+} // anonymous namespace
 
 struct WaveLineGeometry
 {
@@ -289,57 +290,41 @@ struct WaveLineGeometry
         return WavePixelRegion(maStart.X(), maStart.Y(), maSize.Width(), maSize.Height());
     }
 };
-} // anonymous namespace
 
-void OutputDevice::ImplDrawWaveLine(tools::Long nBaseX, tools::Long nBaseY,
-                                    tools::Long nDistX, tools::Long nDistY,
-                                    tools::Long nWidth, tools::Long nHeight,
-                                    tools::Long nLineWidth, Degree10 nOrientation,
-                                    const Color& rColor)
+void OutputDevice::ImplDrawWaveLine(const WaveLineGeometry& rGeo, const Color& rColor)
 {
-    if (!nHeight)
-        return;
-
-    const Size aWavePixelSize = GetWaveLineSize(nLineWidth);
-    const bool bDrawAsRect = shouldDrawWavePixelAsRect(nLineWidth);
-
-    const WaveLineGeometry aGeo(nBaseX, nBaseY, nDistX, nDistY, nWidth, nHeight,
-                                nOrientation, aWavePixelSize, bDrawAsRect);
-
     // Simple Hairline Optimization (Flat line fallback)
-    if (nLineWidth == 1 && nHeight == 1)
+    if (rGeo.maWavePixelSize.Height() == 1 && rGeo.maSize.Height() == 1)
     {
         mpGraphics->SetLineColor(rColor);
         mbLineColorDirty = true;
 
-        Point aLineStart = aGeo.maStart;
-        Point aLineEnd(aGeo.maStart.X() + aGeo.maSize.Width(), aGeo.maStart.Y());
+        Point aLineStart = rGeo.maStart;
+        Point aLineEnd(rGeo.maStart.X() + rGeo.maSize.Width(), rGeo.maStart.Y());
 
-        if (aGeo.mnOrientation)
+        if (rGeo.mnOrientation)
         {
-            aGeo.maBase.RotateAround(aLineStart, aGeo.mnOrientation);
-            aGeo.maBase.RotateAround(aLineEnd, aGeo.mnOrientation);
+            rGeo.maBase.RotateAround(aLineStart, rGeo.mnOrientation);
+            rGeo.maBase.RotateAround(aLineEnd, rGeo.mnOrientation);
         }
 
-        mpGraphics->DrawLine(aLineStart.X(), aLineStart.Y(),
-                             aLineEnd.X(), aLineEnd.Y(),
-                             *this);
+        mpGraphics->DrawLine(aLineStart.X(), aLineStart.Y(), aLineEnd.X(), aLineEnd.Y(), *this);
         return;
     }
 
     // Multi-pixel Wavy Line
-    SetWaveLineColors(rColor, nLineWidth);
+    SetWaveLineColors(rColor, rGeo.maWavePixelSize.Height());
 
-    for (Point aDrawPt : aGeo.GetRegion())
+    for (Point aDrawPt : rGeo.GetRegion())
     {
-        if (aGeo.mnOrientation)
-            aGeo.maBase.RotateAround(aDrawPt, aGeo.mnOrientation);
+        if (rGeo.mnOrientation)
+            rGeo.maBase.RotateAround(aDrawPt, rGeo.mnOrientation);
 
-        if (aGeo.mbDrawAsRect)
+        if (rGeo.mbDrawAsRect)
         {
             mpGraphics->DrawRect(aDrawPt.X(), aDrawPt.Y(),
-                                 aGeo.maWavePixelSize.Width(),
-                                 aGeo.maWavePixelSize.Height(),
+                                 rGeo.maWavePixelSize.Width(),
+                                 rGeo.maWavePixelSize.Height(),
                                  *this);
         }
         else
@@ -349,28 +334,35 @@ void OutputDevice::ImplDrawWaveLine(tools::Long nBaseX, tools::Long nBaseY,
     }
 }
 
-void OutputDevice::ImplDrawWaveTextLine( tools::Long nBaseX, tools::Long nBaseY,
-                                         tools::Long nDistX, tools::Long nDistY,
-                                         tools::Long nWidth, tools::Long nLayoutWidth,
-                                         FontLineStyle eTextLine,
-                                         Color aColor,
-                                         bool bIsAbove )
+void OutputDevice::ImplDrawWaveTextLine(tools::Long nBaseX, tools::Long nBaseY,
+                                        tools::Long nDistX, tools::Long nDistY,
+                                        tools::Long nWidth, tools::Long nLayoutWidth,
+                                        FontLineStyle eTextLine,
+                                        Color aColor,
+                                        bool bIsAbove)
 {
     static bool bFuzzing = comphelper::IsFuzzing();
     if (bFuzzing && nLayoutWidth > 10000)
     {
         SAL_WARN("vcl.gdi", "drawLine, skipping suspicious WaveTextLine of length: "
-                                << nLayoutWidth << " for fuzzing performance");
+                            << nLayoutWidth << " for fuzzing performance");
         return;
     }
 
-    vcl::text::WaveLineGeometry aGeo = vcl::text::TextDecorator::CalculateWaveLineGeometry(
+    vcl::text::WaveLineGeometry aWaveStyle = vcl::text::TextDecorator::CalculateWaveLineGeometry(
         *mpFontInstance->mxFontMetric, eTextLine, bIsAbove, nDistY, GetDPIX(), GetDPIY());
 
-    for (const auto& rSeg : aGeo.aSegments)
+    const Size aWavePixelSize = GetWaveLineSize(aWaveStyle.nLineWidth);
+    const bool bDrawAsRect = shouldDrawWavePixelAsRect(aWaveStyle.nLineWidth);
+    const Degree10 nOrientation = mpFontInstance->mnOrientation;
+
+    for (const auto& rSeg : aWaveStyle.aSegments)
     {
-        ImplDrawWaveLine(nBaseX, nBaseY, nDistX, rSeg.nYOffset, nWidth, rSeg.nHeight,
-                         aGeo.nLineWidth, mpFontInstance->mnOrientation, aColor);
+        WaveLineGeometry aWaveGeo(nBaseX, nBaseY, nDistX, rSeg.nYOffset,
+                                  nWidth, rSeg.nHeight,
+                                  nOrientation, aWavePixelSize, bDrawAsRect);
+
+        ImplDrawWaveLine(aWaveGeo, aColor);
     }
 }
 

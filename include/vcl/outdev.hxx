@@ -231,6 +231,8 @@ namespace vcl::rendercontext
 class PrimitiveRenderer;
 }
 
+struct WaveLineGeometry;
+
 class SAL_WARN_UNUSED VCL_DLLPUBLIC OutputDevice : public virtual VclReferenceBase
 {
     friend class vcl::rendercontext::PrimitiveRenderer;
@@ -1211,7 +1213,7 @@ private:
 
     SAL_DLLPRIVATE void         ImplDrawTextRect( tools::Long nBaseX, tools::Long nBaseY, tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight );
 
-    SAL_DLLPRIVATE void         ImplDrawWaveLine( tools::Long nBaseX, tools::Long nBaseY, tools::Long nStartX, tools::Long nStartY, tools::Long nWidth, tools::Long nHeight, tools::Long nLineWidth, Degree10 nOrientation, const Color& rColor );
+    SAL_DLLPRIVATE void         ImplDrawWaveLine(const WaveLineGeometry& rGeo, const Color& rColor);
     SAL_DLLPRIVATE void         ImplDrawWaveTextLine( tools::Long nBaseX, tools::Long nBaseY, tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nLayoutWidth, FontLineStyle eTextLine, Color aColor, bool bIsAbove );
     SAL_DLLPRIVATE void         ImplDrawStraightTextLine( tools::Long nBaseX, tools::Long nBaseY, tools::Long nX, tools::Long nY, tools::Long nWidth, FontLineStyle eTextLine, Color aColor, bool bIsAbove );
     SAL_DLLPRIVATE void         ImplDrawStrikeoutLine( tools::Long nBaseX, tools::Long nBaseY, tools::Long nX, tools::Long nY, tools::Long nWidth, FontStrikeout eStrikeout, Color aColor );
