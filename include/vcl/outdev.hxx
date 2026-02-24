@@ -232,6 +232,7 @@ class PrimitiveRenderer;
 }
 
 struct WaveLineGeometry;
+struct TextLineGeometry;
 
 class SAL_WARN_UNUSED VCL_DLLPUBLIC OutputDevice : public virtual VclReferenceBase
 {
@@ -984,9 +985,7 @@ public:
                                               FontLineStyle eUnderline,
                                               FontLineStyle eOverline );
 
-    SAL_DLLPRIVATE void         ImplDrawTextLine( tools::Long nBaseX, tools::Long nX, tools::Long nY, double nWidth,
-                                                  FontStrikeout eStrikeout, FontLineStyle eUnderline, FontLineStyle eOverline,
-                                                  bool bUnderlineAbove );
+    SAL_DLLPRIVATE void ImplDrawTextLine(const TextLineGeometry& rGeo);
 
     SAL_DLLPRIVATE void         ImplDrawTextLines( SalLayout&, FontStrikeout eStrikeout, FontLineStyle eUnderline,
                                                    FontLineStyle eOverline, bool bWordLine, bool bUnderlineAbove );
@@ -1213,10 +1212,10 @@ private:
     SAL_DLLPRIVATE void         ImplDrawTextRect( tools::Long nBaseX, tools::Long nBaseY, tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight );
 
     SAL_DLLPRIVATE void         ImplDrawWaveLine(const WaveLineGeometry& rGeo, const Color& rColor);
-    SAL_DLLPRIVATE void         ImplDrawWaveTextLine( tools::Long nBaseX, tools::Long nBaseY, tools::Long nX, tools::Long nY, tools::Long nWidth, FontLineStyle eTextLine, Color aColor, bool bIsAbove );
-    SAL_DLLPRIVATE void         ImplDrawStraightTextLine( tools::Long nBaseX, tools::Long nBaseY, tools::Long nX, tools::Long nY, tools::Long nWidth, FontLineStyle eTextLine, Color aColor, bool bIsAbove );
-    SAL_DLLPRIVATE void         ImplDrawStrikeoutLine( tools::Long nBaseX, tools::Long nBaseY, tools::Long nX, tools::Long nY, tools::Long nWidth, FontStrikeout eStrikeout, Color aColor );
-    SAL_DLLPRIVATE void         ImplDrawStrikeoutChar( tools::Long nBaseX, tools::Long nBaseY, tools::Long nX, tools::Long nY, tools::Long nWidth, FontStrikeout eStrikeout, Color aColor );
+    SAL_DLLPRIVATE void ImplDrawWaveTextLine(const TextLineGeometry& rGeo, tools::Long nDistY, Color aColor, bool bIsAbove);
+    SAL_DLLPRIVATE void ImplDrawStraightTextLine(const TextLineGeometry& rGeo, tools::Long nY, Color aColor, bool bIsAbove);
+    SAL_DLLPRIVATE void ImplDrawStrikeoutLine(const TextLineGeometry& rGeo, tools::Long nY, Color aColor);
+    SAL_DLLPRIVATE void ImplDrawStrikeoutChar(const TextLineGeometry& rGeo, tools::Long nY, Color aColor);
     SAL_DLLPRIVATE void         ImplDrawMnemonicLine( tools::Long nX, tools::Long nY, tools::Long nWidth );
     SAL_DLLPRIVATE void         ImplDrawMnemonic( vcl::TextLayoutCommon& rLayout, const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen, sal_Int32 nRelMnemonicPos, const Point& rPos );
     ///@}
