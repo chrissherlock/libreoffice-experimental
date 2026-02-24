@@ -698,6 +698,13 @@ void OutputDevice::SetOverlineColor( const Color& rColor )
     mpGraphicsState->maOverlineColor = aColor;
 }
 
+static constexpr bool lcl_HasNoTextDecoration(FontLineStyle eUnderline, FontLineStyle eOverline, FontStrikeout eStrikeout)
+{
+    return (eUnderline == LINESTYLE_NONE || eUnderline == LINESTYLE_DONTKNOW) &&
+           (eOverline  == LINESTYLE_NONE || eOverline  == LINESTYLE_DONTKNOW) &&
+           (eStrikeout == STRIKEOUT_NONE || eStrikeout == STRIKEOUT_DONTKNOW);
+}
+
 void OutputDevice::DrawTextLine( const Point& rPos, tools::Long nWidth,
                                  FontStrikeout eStrikeout,
                                  FontLineStyle eUnderline,
@@ -705,14 +712,11 @@ void OutputDevice::DrawTextLine( const Point& rPos, tools::Long nWidth,
 {
     assert(!is_double_buffered_window());
 
-    maRecorder.RecordTextLine( rPos, nWidth, eStrikeout, eUnderline, eOverline );
-
-    if ( ((eUnderline == LINESTYLE_NONE) || (eUnderline == LINESTYLE_DONTKNOW)) &&
-         ((eOverline  == LINESTYLE_NONE) || (eOverline  == LINESTYLE_DONTKNOW)) &&
-         ((eStrikeout == STRIKEOUT_NONE) || (eStrikeout == STRIKEOUT_DONTKNOW)) )
-    {
+    if (lcl_HasNoTextDecoration(eUnderline, eOverline, eStrikeout))
         return;
-    }
+
+    maRecorder.RecordTextLine(rPos, nWidth, eStrikeout, eUnderline, eOverline);
+
     if ( !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary() )
         return;
 
