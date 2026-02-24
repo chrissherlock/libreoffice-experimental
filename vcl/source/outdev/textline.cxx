@@ -292,6 +292,26 @@ struct WaveLineGeometry
     {
         return WavePixelRegion(maStart.X(), maStart.Y(), maSize.Width(), maSize.Height());
     }
+
+    Point GetLineStart() const
+    {
+        Point aLineStart = maStart;
+
+        if (mnOrientation)
+            maBase.RotateAround(aLineStart, mnOrientation);
+
+        return aLineStart;
+    }
+
+    Point GetLineEnd() const
+    {
+        Point aLineEnd(maStart.X() + maSize.Width(), maStart.Y());
+
+        if (mnOrientation)
+            maBase.RotateAround(aLineEnd, mnOrientation);
+
+        return aLineEnd;
+    }
 };
 
 
@@ -352,14 +372,8 @@ void OutputDevice::ImplDrawWaveLine(const WaveLineGeometry& rGeo, const Color& r
         mpGraphics->SetLineColor(rColor);
         mbLineColorDirty = true;
 
-        Point aLineStart = rGeo.maStart;
-        Point aLineEnd(rGeo.maStart.X() + rGeo.maSize.Width(), rGeo.maStart.Y());
-
-        if (rGeo.mnOrientation)
-        {
-            rGeo.maBase.RotateAround(aLineStart, rGeo.mnOrientation);
-            rGeo.maBase.RotateAround(aLineEnd, rGeo.mnOrientation);
-        }
+        const Point aLineStart = rGeo.GetLineStart();
+        const Point aLineEnd = rGeo.GetLineEnd();
 
         mpGraphics->DrawLine(aLineStart.X(), aLineStart.Y(), aLineEnd.X(), aLineEnd.Y(), *this);
         return;
