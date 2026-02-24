@@ -37,14 +37,15 @@
 #include <CoordinateMapper.hxx>
 #include <ClippingController.hxx>
 #include <GraphicsState.hxx>
+#include <drawmode.hxx>
 #include <font/EmphasisMark.hxx>
 #include <font/FontController.hxx>
-#include <drawmode.hxx>
-#include <salgdi.hxx>
 #include <impglyphitem.hxx>
+#include <salgdi.hxx>
+#include <text/TextLayoutEngine.hxx>
 
 #include <cassert>
-#include <text/TextLayoutEngine.hxx>
+#include <iterator>
 
 #define UNDERLINE_LAST      LINESTYLE_BOLDWAVE
 
@@ -191,17 +192,110 @@ Size OutputDevice::GetWaveLineSize(tools::Long nLineWidth) const
     return Size(1, 1);
 }
 
+namespace
+{
+
+class WavePixelRegion
+{
+public:
+    // VCL's standard wavy line has a 2-pixel flat top/bottom
+    static constexpr tools::Long WAVE_PEAK_WIDTH = 2;
+    // Screen coordinates: -1 moves UP towards the top of the screen
+    static constexpr tools::Long DIRECTION_UP = -1;
+
+    class iterator
+    {
+    public:
+        using iterator_category = std::forward_iterator_tag;
+        using value_type = Point;
+        using difference_type = std::ptrdiff_t;
+        using pointer = Point*;
+        using reference = Point&;
+
+        iterator(tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight, bool bIsEnd)
+            : m_nX(nX)
+            , m_nY(nY + std::max<tools::Long>(nHeight - 1, 0)) // Start at the bottom of the bounding box
+            , m_nRemainingWidth(bIsEnd ? 0 : nWidth)
+            , m_nDiffX(WAVE_PEAK_WIDTH)
+            , m_nDiffY(std::max<tools::Long>(nHeight - 1, 0))
+            , m_nOffY(DIRECTION_UP)
+            , m_nPhaseStep(0)
+            , m_bInSlant(nHeight > 1) // If height > 1, we have a vertical span to slant through
+        {}
+
+        Point operator*() const { return Point(m_nX, m_nY); }
+
+        iterator& operator++()
+        {
+            if (m_nRemainingWidth <= 0) return *this;
+
+            m_nX++;
+            m_nRemainingWidth--;
+
+            if (m_nDiffY == 0)
+                return *this; // Flat wave fallback
+
+            // State machine to alternate between slanting and flat peaks
+            if (m_bInSlant)
+            {
+                m_nY += m_nOffY;
+                m_nPhaseStep++;
+                if (m_nPhaseStep >= m_nDiffY)
+                {
+                    m_bInSlant = false;
+                    m_nPhaseStep = 0;
+                }
+            }
+            else
+            {
+                m_nPhaseStep++;
+                if (m_nPhaseStep >= m_nDiffX)
+                {
+                    m_bInSlant = true;
+                    m_nPhaseStep = 0;
+                    m_nOffY = -m_nOffY; // Flip vertical direction for next slant
+                }
+            }
+            return *this;
+        }
+
+        bool operator!=(const iterator& rOther) const
+        {
+            return m_nRemainingWidth != rOther.m_nRemainingWidth;
+        }
+
+    private:
+        tools::Long m_nX, m_nY;
+        tools::Long m_nRemainingWidth;
+        tools::Long m_nDiffX, m_nDiffY;
+        tools::Long m_nOffY;
+        tools::Long m_nPhaseStep;
+        bool m_bInSlant;
+    };
+
+    WavePixelRegion(tools::Long nStartX, tools::Long nStartY, tools::Long nWidth, tools::Long nHeight)
+        : m_nStartX(nStartX), m_nStartY(nStartY), m_nWidth(nWidth), m_nHeight(nHeight)
+    {}
+
+    iterator begin() const { return iterator(m_nStartX, m_nStartY, m_nWidth, m_nHeight, false); }
+    iterator end() const { return iterator(m_nStartX, m_nStartY, m_nWidth, m_nHeight, true); }
+
+private:
+    tools::Long m_nStartX, m_nStartY, m_nWidth, m_nHeight;
+};
+} // anonymous namespace
+
 void OutputDevice::ImplDrawWaveLine(tools::Long nBaseX, tools::Long nBaseY,
-                                     tools::Long nDistX, tools::Long nDistY,
-                                     tools::Long nWidth, tools::Long nHeight,
-                                     tools::Long nLineWidth, Degree10 nOrientation,
-                                     const Color& rColor)
+                                    tools::Long nDistX, tools::Long nDistY,
+                                    tools::Long nWidth, tools::Long nHeight,
+                                    tools::Long nLineWidth, Degree10 nOrientation,
+                                    const Color& rColor)
 {
     if (!nHeight)
         return;
 
-    const tools::Long nStartX = nBaseX + nDistX;
-    const tools::Long nStartY = nBaseY + nDistY;
+    tools::Long nStartX = nBaseX + nDistX;
+    tools::Long nStartY = nBaseY + nDistY;
 
     // Simple Hairline (Optimization)
     if (nLineWidth == 1 && nHeight == 1)
@@ -211,6 +305,13 @@ void OutputDevice::ImplDrawWaveLine(tools::Long nBaseX, tools::Long nBaseY,
 
         tools::Long nEndX = nStartX + nWidth;
         tools::Long nEndY = nStartY;
+
+        if (nOrientation)
+        {
+            Point aOriginPt(nBaseX, nBaseY);
+            aOriginPt.RotateAround(nStartX, nStartY, nOrientation);
+            aOriginPt.RotateAround(nEndX, nEndY, nOrientation);
+        }
 
         mpGraphics->DrawLine(nStartX, nStartY, nEndX, nEndY, *this);
         return;
@@ -222,51 +323,10 @@ void OutputDevice::ImplDrawWaveLine(tools::Long nBaseX, tools::Long nBaseY,
     const tools::Long nPixWidth = aWaveSize.Width();
     const tools::Long nPixHeight = aWaveSize.Height();
 
-    tools::Long nCurX = nStartX;
-    tools::Long nCurY = nStartY;
-    const tools::Long nDiffX = 2;
-    const tools::Long nDiffY = nHeight - 1;
-
-    // Vertical oscillation variables
-    tools::Long nOffY = -1;
-    tools::Long nRemainingWidth = nWidth;
-
-    if (!nDiffY) // Flat wave fallback
+    for (const auto aPt : WavePixelRegion(nStartX, nStartY, nWidth, nHeight))
     {
-        for (; nRemainingWidth > 0; --nRemainingWidth, ++nCurX)
-        {
-            ImplDrawWavePixel(nBaseX, nBaseY, nCurX, nCurY, nLineWidth, nOrientation,
-                              mpGraphics, *this, nPixWidth, nPixHeight);
-        }
-    }
-    else
-    {
-        nCurY += nDiffY;
-
-        while (nRemainingWidth > 0)
-        {
-            // Draw the Slant (Vertical/Diagonal component)
-            for (tools::Long i = 0; i < nDiffY && nRemainingWidth > 0; ++i)
-            {
-                ImplDrawWavePixel(nBaseX, nBaseY, nCurX, nCurY, nLineWidth, nOrientation,
-                                  mpGraphics, *this, nPixWidth, nPixHeight);
-                nCurX++;
-                nCurY += nOffY;
-                nRemainingWidth--;
-            }
-
-            // Draw the Peak/Trough (Horizontal component)
-            for (tools::Long i = 0; i < nDiffX && nRemainingWidth > 0; ++i)
-            {
-                ImplDrawWavePixel(nBaseX, nBaseY, nCurX, nCurY, nLineWidth, nOrientation,
-                                  mpGraphics, *this, nPixWidth, nPixHeight);
-                nCurX++;
-                nRemainingWidth--;
-            }
-
-            // Flip direction for the next half-period
-            nOffY = -nOffY;
-        }
+        ImplDrawWavePixel(nBaseX, nBaseY, aPt.X(), aPt.Y(), nLineWidth, nOrientation,
+                          mpGraphics, *this, nPixWidth, nPixHeight);
     }
 }
 
