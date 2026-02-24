@@ -1211,8 +1211,11 @@ private:
 
     SAL_DLLPRIVATE void         ImplDrawTextRect( tools::Long nBaseX, tools::Long nBaseY, tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight );
 
-    SAL_DLLPRIVATE void         ImplDrawWaveLine(const WaveLineGeometry& rGeo, const Color& rColor);
+    SAL_DLLPRIVATE void ImplDrawWaveLine(const WaveLineGeometry& rGeo, const Color& rColor);
+    SAL_DLLPRIVATE void ImplDrawWaveLineHairline(const WaveLineGeometry& rGeo, const Color& rColor);
+    SAL_DLLPRIVATE void ImplDrawWaveLineRasterized(const WaveLineGeometry& rGeo, const Color& rColor);
     SAL_DLLPRIVATE void ImplDrawWaveTextLine(const TextLineGeometry& rGeo, tools::Long nDistY, Color aColor, bool bIsAbove);
+
     SAL_DLLPRIVATE void ImplDrawStraightTextLine(const TextLineGeometry& rGeo, tools::Long nY, Color aColor, bool bIsAbove);
     SAL_DLLPRIVATE void ImplDrawStrikeoutLine(const TextLineGeometry& rGeo, tools::Long nY, Color aColor);
     SAL_DLLPRIVATE void ImplDrawStrikeoutChar(const TextLineGeometry& rGeo, tools::Long nY, Color aColor);

@@ -364,22 +364,19 @@ struct TextLineOffsetInfo
 };
 }
 
-void OutputDevice::ImplDrawWaveLine(const WaveLineGeometry& rGeo, const Color& rColor)
+void OutputDevice::ImplDrawWaveLineHairline(const WaveLineGeometry& rGeo, const Color& rColor)
 {
-    // Simple Hairline Optimization (Flat line fallback)
-    if (rGeo.maWavePixelSize.Height() == 1 && rGeo.maSize.Height() == 1)
-    {
-        mpGraphics->SetLineColor(rColor);
-        mbLineColorDirty = true;
+    mpGraphics->SetLineColor(rColor);
+    mbLineColorDirty = true;
 
-        const Point aLineStart = rGeo.GetLineStart();
-        const Point aLineEnd = rGeo.GetLineEnd();
+    const Point aLineStart = rGeo.GetLineStart();
+    const Point aLineEnd = rGeo.GetLineEnd();
 
-        mpGraphics->DrawLine(aLineStart.X(), aLineStart.Y(), aLineEnd.X(), aLineEnd.Y(), *this);
-        return;
-    }
+    mpGraphics->DrawLine(aLineStart.X(), aLineStart.Y(), aLineEnd.X(), aLineEnd.Y(), *this);
+}
 
-    // Multi-pixel Wavy Line
+void OutputDevice::ImplDrawWaveLineRasterized(const WaveLineGeometry& rGeo, const Color& rColor)
+{
     SetWaveLineColors(rColor, rGeo.maWavePixelSize.Height());
 
     for (Point aDrawPt : rGeo.GetRegion())
@@ -399,6 +396,17 @@ void OutputDevice::ImplDrawWaveLine(const WaveLineGeometry& rGeo, const Color& r
             mpGraphics->DrawPixel(aDrawPt.X(), aDrawPt.Y(), *this);
         }
     }
+}
+
+void OutputDevice::ImplDrawWaveLine(const WaveLineGeometry& rGeo, const Color& rColor)
+{
+    if (rGeo.maWavePixelSize.Height() == 1 && rGeo.maSize.Height() == 1)
+    {
+        ImplDrawWaveLineHairline(rGeo, rColor);
+        return;
+    }
+
+    ImplDrawWaveLineRasterized(rGeo, rColor);
 }
 
 void OutputDevice::ImplDrawWaveTextLine(const TextLineGeometry& rGeo, tools::Long nY, Color aColor, bool bIsAbove)
