@@ -130,31 +130,6 @@ namespace {
     };
 }
 
-
-void OutputDevice::ImplDrawWavePixel( tools::Long nOriginX, tools::Long nOriginY,
-                                      tools::Long nCurX, tools::Long nCurY,
-                                      tools::Long nWidth,
-                                      Degree10 nOrientation,
-                                      SalGraphics* pGraphics,
-                                      const OutputDevice& rOutDev,
-                                      tools::Long nPixWidth, tools::Long nPixHeight )
-{
-    if (nOrientation)
-    {
-        Point aPoint( nOriginX, nOriginY );
-        aPoint.RotateAround( nCurX, nCurY, nOrientation );
-    }
-
-    if (shouldDrawWavePixelAsRect(nWidth))
-    {
-        pGraphics->DrawRect( nCurX, nCurY, nPixWidth, nPixHeight, rOutDev );
-    }
-    else
-    {
-        pGraphics->DrawPixel( nCurX, nCurY, rOutDev );
-    }
-}
-
 bool OutputDevice::shouldDrawWavePixelAsRect(tools::Long nLineWidth) const
 {
     if (nLineWidth > 1)
@@ -283,6 +258,37 @@ public:
 private:
     tools::Long m_nStartX, m_nStartY, m_nWidth, m_nHeight;
 };
+
+struct WaveLineGeometry
+{
+    Point maBase;           // The layout origin (used as the center of rotation)
+    Point maStart;          // The actual start of the wave (Base + Dist)
+    Size maSize;            // The Width and Height bounds of the wave
+
+    Size maWavePixelSize;   // The physical width/height of the "brush"
+    bool mbDrawAsRect;      // Respects the virtual shouldDrawWavePixelAsRect()
+    Degree10 mnOrientation;
+
+    WaveLineGeometry(tools::Long nBaseX, tools::Long nBaseY,
+                     tools::Long nDistX, tools::Long nDistY,
+                     tools::Long nWidth, tools::Long nHeight,
+                     Degree10 nOrientation,
+                     const Size& rWavePixelSize,
+                     bool bDrawAsRect)
+        : maBase(nBaseX, nBaseY)
+        , maStart(nBaseX + nDistX, nBaseY + nDistY)
+        , maSize(nWidth, nHeight)
+        , maWavePixelSize(rWavePixelSize)
+        , mbDrawAsRect(bDrawAsRect)
+        , mnOrientation(nOrientation)
+    {}
+
+    // Factory method to generate the iterator range
+    WavePixelRegion GetRegion() const
+    {
+        return WavePixelRegion(maStart.X(), maStart.Y(), maSize.Width(), maSize.Height());
+    }
+};
 } // anonymous namespace
 
 void OutputDevice::ImplDrawWaveLine(tools::Long nBaseX, tools::Long nBaseY,
@@ -294,39 +300,52 @@ void OutputDevice::ImplDrawWaveLine(tools::Long nBaseX, tools::Long nBaseY,
     if (!nHeight)
         return;
 
-    tools::Long nStartX = nBaseX + nDistX;
-    tools::Long nStartY = nBaseY + nDistY;
+    const Size aWavePixelSize = GetWaveLineSize(nLineWidth);
+    const bool bDrawAsRect = shouldDrawWavePixelAsRect(nLineWidth);
 
-    // Simple Hairline (Optimization)
+    const WaveLineGeometry aGeo(nBaseX, nBaseY, nDistX, nDistY, nWidth, nHeight,
+                                nOrientation, aWavePixelSize, bDrawAsRect);
+
+    // Simple Hairline Optimization (Flat line fallback)
     if (nLineWidth == 1 && nHeight == 1)
     {
         mpGraphics->SetLineColor(rColor);
         mbLineColorDirty = true;
 
-        tools::Long nEndX = nStartX + nWidth;
-        tools::Long nEndY = nStartY;
+        Point aLineStart = aGeo.maStart;
+        Point aLineEnd(aGeo.maStart.X() + aGeo.maSize.Width(), aGeo.maStart.Y());
 
-        if (nOrientation)
+        if (aGeo.mnOrientation)
         {
-            Point aOriginPt(nBaseX, nBaseY);
-            aOriginPt.RotateAround(nStartX, nStartY, nOrientation);
-            aOriginPt.RotateAround(nEndX, nEndY, nOrientation);
+            aGeo.maBase.RotateAround(aLineStart, aGeo.mnOrientation);
+            aGeo.maBase.RotateAround(aLineEnd, aGeo.mnOrientation);
         }
 
-        mpGraphics->DrawLine(nStartX, nStartY, nEndX, nEndY, *this);
+        mpGraphics->DrawLine(aLineStart.X(), aLineStart.Y(),
+                             aLineEnd.X(), aLineEnd.Y(),
+                             *this);
         return;
     }
 
     // Multi-pixel Wavy Line
     SetWaveLineColors(rColor, nLineWidth);
-    const Size aWaveSize = GetWaveLineSize(nLineWidth);
-    const tools::Long nPixWidth = aWaveSize.Width();
-    const tools::Long nPixHeight = aWaveSize.Height();
 
-    for (const auto aPt : WavePixelRegion(nStartX, nStartY, nWidth, nHeight))
+    for (Point aDrawPt : aGeo.GetRegion())
     {
-        ImplDrawWavePixel(nBaseX, nBaseY, aPt.X(), aPt.Y(), nLineWidth, nOrientation,
-                          mpGraphics, *this, nPixWidth, nPixHeight);
+        if (aGeo.mnOrientation)
+            aGeo.maBase.RotateAround(aDrawPt, aGeo.mnOrientation);
+
+        if (aGeo.mbDrawAsRect)
+        {
+            mpGraphics->DrawRect(aDrawPt.X(), aDrawPt.Y(),
+                                 aGeo.maWavePixelSize.Width(),
+                                 aGeo.maWavePixelSize.Height(),
+                                 *this);
+        }
+        else
+        {
+            mpGraphics->DrawPixel(aDrawPt.X(), aDrawPt.Y(), *this);
+        }
     }
 }
 
