@@ -34,6 +34,7 @@
 #include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/settings.hxx>
+#include <vcl/text/TextDecorator.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/skia/SkiaHelper.hxx>
 
@@ -49,8 +50,6 @@
 
 #include <cassert>
 #include <iterator>
-
-#define UNDERLINE_LAST      LINESTYLE_BOLDWAVE
 
 namespace {
     struct WavyLineCache final : public CacheOwner
@@ -314,7 +313,6 @@ struct WaveLineGeometry
     }
 };
 
-
 struct TextLineGeometry
 {
     Point maOrigin;
@@ -336,33 +334,6 @@ struct TextLineGeometry
         , meOverline(eOverline), mbUnderlineAbove(bUnderlineAbove)
     {}
 };
-
-namespace
-{
-struct TextLineOffsetInfo
-{
-    tools::Long nUnderlineOffset = 0;
-    tools::Long nOverlineOffset = 0;
-    tools::Long nStrikeoutOffset = 0;
-    bool bUnderlineIsWave = false;
-    bool bOverlineIsWave = false;
-
-    TextLineOffsetInfo(const FontMetric& rMetric, const TextLineGeometry& rGeo)
-    {
-        bUnderlineIsWave = (rGeo.meUnderline == LINESTYLE_WAVE ||
-                            rGeo.meUnderline == LINESTYLE_BOLDWAVE ||
-                            rGeo.meUnderline == LINESTYLE_DOUBLEWAVE);
-        nUnderlineOffset = rGeo.mbUnderlineAbove ? rMetric.GetAscent() : rMetric.GetDescent();
-
-        bOverlineIsWave = (rGeo.meOverline == LINESTYLE_WAVE ||
-                           rGeo.meOverline == LINESTYLE_BOLDWAVE ||
-                           rGeo.meOverline == LINESTYLE_DOUBLEWAVE);
-        nOverlineOffset = rMetric.GetAscent();
-
-        nStrikeoutOffset = rMetric.GetAscent() / 2;
-    }
-};
-}
 
 void OutputDevice::ImplDrawWaveLineHairline(const WaveLineGeometry& rGeo, const Color& rColor)
 {
@@ -429,78 +400,6 @@ void OutputDevice::ImplDrawWaveTextLine(const TextLineGeometry& rGeo, tools::Lon
     }
 }
 
-namespace
-{
-struct StraightLineMetrics
-{
-    tools::Long nLineHeight = 0;
-    tools::Long nLinePos = 0;
-    tools::Long nLinePos2 = 0;
-    FontLineStyle eUnderline;
-
-    StraightLineMetrics(const LogicalFontInstance* pFontInstance, FontLineStyle eInUnderline, tools::Long nY, bool bIsAbove)
-    {
-        eUnderline = eInUnderline;
-        if (eUnderline > UNDERLINE_LAST)
-            eUnderline = LINESTYLE_SINGLE;
-
-        switch (eUnderline)
-        {
-        case LINESTYLE_SINGLE:
-        case LINESTYLE_DOTTED:
-        case LINESTYLE_DASH:
-        case LINESTYLE_LONGDASH:
-        case LINESTYLE_DASHDOT:
-        case LINESTYLE_DASHDOTDOT:
-            if (bIsAbove)
-            {
-                nLineHeight = pFontInstance->mxFontMetric->GetAboveUnderlineSize();
-                nLinePos    = nY + pFontInstance->mxFontMetric->GetAboveUnderlineOffset();
-            }
-            else
-            {
-                nLineHeight = pFontInstance->mxFontMetric->GetUnderlineSize();
-                nLinePos    = nY + pFontInstance->mxFontMetric->GetUnderlineOffset();
-            }
-            break;
-        case LINESTYLE_BOLD:
-        case LINESTYLE_BOLDDOTTED:
-        case LINESTYLE_BOLDDASH:
-        case LINESTYLE_BOLDLONGDASH:
-        case LINESTYLE_BOLDDASHDOT:
-        case LINESTYLE_BOLDDASHDOTDOT:
-            if (bIsAbove)
-            {
-                nLineHeight = pFontInstance->mxFontMetric->GetAboveBoldUnderlineSize();
-                nLinePos    = nY + pFontInstance->mxFontMetric->GetAboveBoldUnderlineOffset();
-            }
-            else
-            {
-                nLineHeight = pFontInstance->mxFontMetric->GetBoldUnderlineSize();
-                nLinePos    = nY + pFontInstance->mxFontMetric->GetBoldUnderlineOffset();
-            }
-            break;
-        case LINESTYLE_DOUBLE:
-            if (bIsAbove)
-            {
-                nLineHeight = pFontInstance->mxFontMetric->GetAboveDoubleUnderlineSize();
-                nLinePos    = nY + pFontInstance->mxFontMetric->GetAboveDoubleUnderlineOffset1();
-                nLinePos2   = nY + pFontInstance->mxFontMetric->GetAboveDoubleUnderlineOffset2();
-            }
-            else
-            {
-                nLineHeight = pFontInstance->mxFontMetric->GetDoubleUnderlineSize();
-                nLinePos    = nY + pFontInstance->mxFontMetric->GetDoubleUnderlineOffset1();
-                nLinePos2   = nY + pFontInstance->mxFontMetric->GetDoubleUnderlineOffset2();
-            }
-            break;
-        default:
-            break;
-        }
-    }
-};
-}
-
 void OutputDevice::ImplDrawStraightTextLine(const TextLineGeometry& rGeo, tools::Long nY, Color aColor, bool bIsAbove)
 {
     static bool bFuzzing = comphelper::IsFuzzing();
@@ -511,7 +410,8 @@ void OutputDevice::ImplDrawStraightTextLine(const TextLineGeometry& rGeo, tools:
         return;
     }
 
-    StraightLineMetrics aMetrics(mpFontInstance.get(), rGeo.meUnderline, nY, bIsAbove);
+    // Ask TextDecorator to calculate the metrics based on the font data
+    vcl::text::StraightLineMetrics aMetrics(*mpFontInstance->mxFontMetric, rGeo.meUnderline, nY, bIsAbove);
 
     if (!aMetrics.nLineHeight)
         return;
@@ -648,8 +548,8 @@ void OutputDevice::ImplDrawStrikeoutChar(const TextLineGeometry& rGeo, tools::Lo
 
 void OutputDevice::ImplDrawTextLine(const TextLineGeometry& rGeo)
 {
-    const FontMetric& rMetric = GetFontMetric();
-    TextLineOffsetInfo aInfo(rMetric, rGeo);
+    // Ask TextDecorator to calculate the vertical offsets based on the font data
+    vcl::text::TextLineOffsetInfo aInfo(*mpFontInstance->mxFontMetric, rGeo.meUnderline, rGeo.meOverline, rGeo.mbUnderlineAbove);
 
     Color aStrikeoutColor = GetTextColor();
     Color aUnderlineColor = GetTextLineColor();
@@ -1050,8 +950,6 @@ void OutputDevice::ImplDrawEmphasisMarks(SalLayout& rSalLayout)
                              aEmphasisMark.GetShape(), aEmphasisMark.IsShapePolyLine(),
                              aEmphasisMark.GetRect1(), aEmphasisMark.GetRect2());
     }
-
-
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

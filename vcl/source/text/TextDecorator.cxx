@@ -16,8 +16,86 @@
 #include <font/FontController.hxx>
 #include <font/FontMetricData.hxx>
 
+#define UNDERLINE_LAST LINESTYLE_BOLDWAVE
+
 namespace vcl::text
 {
+TextLineOffsetInfo::TextLineOffsetInfo(const FontMetricData& rMetric, FontLineStyle eUnderline,
+                                       FontLineStyle eOverline, bool bUnderlineAbove)
+{
+    bUnderlineIsWave = (eUnderline == LINESTYLE_WAVE || eUnderline == LINESTYLE_BOLDWAVE
+                        || eUnderline == LINESTYLE_DOUBLEWAVE);
+    nUnderlineOffset = bUnderlineAbove ? rMetric.GetAscent() : rMetric.GetDescent();
+
+    bOverlineIsWave = (eOverline == LINESTYLE_WAVE || eOverline == LINESTYLE_BOLDWAVE
+                       || eOverline == LINESTYLE_DOUBLEWAVE);
+    nOverlineOffset = rMetric.GetAscent();
+
+    nStrikeoutOffset = rMetric.GetAscent() / 2;
+}
+
+StraightLineMetrics::StraightLineMetrics(const FontMetricData& rMetric, FontLineStyle eInUnderline,
+                                         tools::Long nY, bool bIsAbove)
+{
+    eUnderline = eInUnderline;
+    if (eUnderline > UNDERLINE_LAST)
+        eUnderline = LINESTYLE_SINGLE;
+
+    switch (eUnderline)
+    {
+        case LINESTYLE_SINGLE:
+        case LINESTYLE_DOTTED:
+        case LINESTYLE_DASH:
+        case LINESTYLE_LONGDASH:
+        case LINESTYLE_DASHDOT:
+        case LINESTYLE_DASHDOTDOT:
+            if (bIsAbove)
+            {
+                nLineHeight = rMetric.GetAboveUnderlineSize();
+                nLinePos = nY + rMetric.GetAboveUnderlineOffset();
+            }
+            else
+            {
+                nLineHeight = rMetric.GetUnderlineSize();
+                nLinePos = nY + rMetric.GetUnderlineOffset();
+            }
+            break;
+        case LINESTYLE_BOLD:
+        case LINESTYLE_BOLDDOTTED:
+        case LINESTYLE_BOLDDASH:
+        case LINESTYLE_BOLDLONGDASH:
+        case LINESTYLE_BOLDDASHDOT:
+        case LINESTYLE_BOLDDASHDOTDOT:
+            if (bIsAbove)
+            {
+                nLineHeight = rMetric.GetAboveBoldUnderlineSize();
+                nLinePos = nY + rMetric.GetAboveBoldUnderlineOffset();
+            }
+            else
+            {
+                nLineHeight = rMetric.GetBoldUnderlineSize();
+                nLinePos = nY + rMetric.GetBoldUnderlineOffset();
+            }
+            break;
+        case LINESTYLE_DOUBLE:
+            if (bIsAbove)
+            {
+                nLineHeight = rMetric.GetAboveDoubleUnderlineSize();
+                nLinePos = nY + rMetric.GetAboveDoubleUnderlineOffset1();
+                nLinePos2 = nY + rMetric.GetAboveDoubleUnderlineOffset2();
+            }
+            else
+            {
+                nLineHeight = rMetric.GetDoubleUnderlineSize();
+                nLinePos = nY + rMetric.GetDoubleUnderlineOffset1();
+                nLinePos2 = nY + rMetric.GetDoubleUnderlineOffset2();
+            }
+            break;
+        default:
+            break;
+    }
+}
+
 std::vector<TextDashSegment> TextDecorator::CalculateTextLineSegments(tools::Long nWidth,
                                                                       FontLineStyle eStyle,
                                                                       tools::Long nLineHeight,

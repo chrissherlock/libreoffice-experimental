@@ -42,6 +42,29 @@ struct SAL_DLLPUBLIC StrikeoutSegment
     tools::Long nHeight;
 };
 
+struct TextLineOffsetInfo
+{
+    tools::Long nUnderlineOffset = 0;
+    tools::Long nOverlineOffset = 0;
+    tools::Long nStrikeoutOffset = 0;
+    bool bUnderlineIsWave = false;
+    bool bOverlineIsWave = false;
+
+    TextLineOffsetInfo(const FontMetricData& rMetric, FontLineStyle eUnderline,
+                       FontLineStyle eOverline, bool bUnderlineAbove);
+};
+
+struct StraightLineMetrics
+{
+    tools::Long nLineHeight = 0;
+    tools::Long nLinePos = 0;
+    tools::Long nLinePos2 = 0;
+    FontLineStyle eUnderline;
+
+    StraightLineMetrics(const FontMetricData& rMetric, FontLineStyle eInUnderline, tools::Long nY,
+                        bool bIsAbove);
+};
+
 class VCL_DLLPUBLIC TextDecorator
 {
 public:
