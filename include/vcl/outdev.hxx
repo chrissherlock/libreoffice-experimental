@@ -1298,10 +1298,7 @@ private:
     SAL_DLLPRIVATE static void ImplClearFontsOnAllFrames(bool bNewFontLists);
     SAL_DLLPRIVATE static void ImplRefreshFontsOnAllFrames(bool bNewFontLists);
     SAL_DLLPRIVATE static void ImplUpdateFirstFrameGraphics();
-SAL_DLLPRIVATE static void  ImplUpdateFontDataForAllFrames( FontUpdateHandler_t pHdl, bool bNewFontLists );
-
-    SAL_DLLPRIVATE void         ImplDrawEmphasisMark( tools::Long nBaseX, tools::Long nX, tools::Long nY, const tools::PolyPolygon& rPolyPoly, bool bPolyLine, const tools::Rectangle& rRect1, const tools::Rectangle& rRect2 );
-    SAL_DLLPRIVATE void         ImplDrawEmphasisMarks( SalLayout& );
+    SAL_DLLPRIVATE static void  ImplUpdateFontDataForAllFrames( FontUpdateHandler_t pHdl, bool bNewFontLists );
 
     ///@}
 

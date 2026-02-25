@@ -98,7 +98,7 @@ public:
                                 bool bFill, const StrokeAttributes* pStroke);
 
     static void DrawPolyPolygon(OutputDevice& rOutDev, const tools::PolyPolygon& rPolyPoly,
-                                const tools::PolyPolygon* pClipPolyPoly);
+                                const tools::PolyPolygon* pClipPolyPoly = nullptr);
 
     static void DrawPolyPolygonFallback(OutputDevice& rOutDev, const tools::PolyPolygon& rPolyPoly);
 
@@ -157,6 +157,11 @@ public:
                               FontStrikeout eStrikeout, FontLineStyle eUnderline,
                               FontLineStyle eOverline, bool bWordLine, bool bUnderlineAbove);
     static void DrawTextLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo);
+    static void DrawEmphasisMark(OutputDevice& rOutDev, SalGraphics& rGraphics, tools::Long nBaseX,
+                                 tools::Long nX, tools::Long nY,
+                                 const tools::PolyPolygon& rPolyPoly, bool bPolyLine,
+                                 const tools::Rectangle& rRect1, const tools::Rectangle& rRect2);
+    static void DrawEmphasisMarks(OutputDevice& rOutDev, SalLayout& rSalLayout);
     static void DrawMnemonicLine(OutputDevice& rOutDev, tools::Long nX, tools::Long nY,
                                  tools::Long nWidth);
 

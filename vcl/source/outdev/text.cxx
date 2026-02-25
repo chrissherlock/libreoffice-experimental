@@ -258,7 +258,7 @@ void OutputDevice::ImplRenderLayout(SalLayout& rSalLayout, bool bTextLines)
     }
 
     if (mpGraphicsState->maFont.GetEmphasisMark() & FontEmphasisMark::Style)
-        ImplDrawEmphasisMarks(rSalLayout);
+        vcl::rendercontext::PrimitiveRenderer::DrawEmphasisMarks(*this, rSalLayout);
 }
 
 void OutputDevice::ImplDrawSpecialText(SalLayout& rSalLayout)

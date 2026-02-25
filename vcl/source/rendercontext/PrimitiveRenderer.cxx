@@ -27,8 +27,11 @@
 #include <vcl/outdev.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/rendercontext/PrimitiveRenderer.hxx>
+#include <vcl/text/TextDecorator.hxx>
+
 #include <vcl/rendercontext/WaveLineGeometry.hxx>
 
+#include <font/EmphasisMark.hxx>
 #include <font/FontController.hxx>
 #include <salgdi.hxx>
 #include <text/TextLayoutEngine.hxx>
@@ -1480,6 +1483,93 @@ void PrimitiveRenderer::DrawMnemonicLine(OutputDevice& rOutDev, tools::Long nX, 
         PrimitiveRenderer::DrawTextLine(rOutDev, aLineGeo);
     }
 }
+
+void PrimitiveRenderer::DrawEmphasisMark(OutputDevice& rOutDev, SalGraphics& rGraphics,
+                                         tools::Long nBaseX, tools::Long nX, tools::Long nY,
+                                         const tools::PolyPolygon& rPolyPoly, bool bPolyLine,
+                                         const tools::Rectangle& rRect1,
+                                         const tools::Rectangle& rRect2)
+{
+    if (rOutDev.IsRTLEnabled())
+        nX = nBaseX - (nX - nBaseX - 1);
+
+    nX -= rOutDev.GetOutOffXPixel();
+    nY -= rOutDev.GetOutOffYPixel();
+
+    if (rPolyPoly.Count())
+    {
+        if (bPolyLine)
+        {
+            tools::Polygon aPoly = rPolyPoly.GetObject(0);
+            aPoly.Move(nX, nY);
+            PrimitiveRenderer::DrawPolyLine(rOutDev, aPoly);
+        }
+        else
+        {
+            tools::PolyPolygon aPolyPoly = rPolyPoly;
+            aPolyPoly.Move(nX, nY);
+            PrimitiveRenderer::DrawPolyPolygon(rOutDev, aPolyPoly);
+        }
+    }
+
+    if (!rRect1.IsEmpty())
+    {
+        tools::Rectangle aRect(Point(nX + rRect1.Left(), nY + rRect1.Top()), rRect1.GetSize());
+        PrimitiveRenderer::DrawRect(rGraphics, *rOutDev.mpMapper, &rOutDev, aRect);
+    }
+
+    if (!rRect2.IsEmpty())
+    {
+        tools::Rectangle aRect(Point(nX + rRect2.Left(), nY + rRect2.Top()), rRect2.GetSize());
+        PrimitiveRenderer::DrawRect(rGraphics, *rOutDev.mpMapper, &rOutDev, aRect);
+    }
+}
+
+void PrimitiveRenderer::DrawEmphasisMarks(OutputDevice& rOutDev, SalLayout& rSalLayout)
+{
+    vcl::font::FontRealization const* pRealization = rOutDev.mpFontRealization.get();
+    if (!pRealization || !pRealization->mxFont)
+        return;
+
+    auto popIt = rOutDev.ScopedPush(vcl::PushFlags::FILLCOLOR | vcl::PushFlags::LINECOLOR
+                                    | vcl::PushFlags::MAPMODE);
+    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(rOutDev.maRecorder);
+    rOutDev.mpMapper->EnableMapMode(false);
+
+    FontEmphasisMark nEmphasisMark = rOutDev.mpGraphicsState->maFont.GetEmphasisMarkStyle();
+    const bool bBelow = bool(nEmphasisMark & FontEmphasisMark::PosBelow);
+
+    tools::Long nEmphasisHeight
+        = bBelow ? pRealization->nEmphasisDescent : pRealization->nEmphasisAscent;
+    vcl::font::EmphasisMark aEmphasisMark(nEmphasisMark, nEmphasisHeight, rOutDev.GetDPIY());
+
+    if (aEmphasisMark.IsShapePolyLine())
+    {
+        rOutDev.SetLineColor(rOutDev.GetTextColor());
+        rOutDev.SetFillColor();
+    }
+    else
+    {
+        rOutDev.SetLineColor();
+        rOutDev.SetFillColor(rOutDev.GetTextColor());
+    }
+
+    if (!rOutDev.mpGraphics && !rOutDev.AcquireGraphics())
+        return;
+
+    std::vector<Point> aPositions;
+    vcl::text::TextDecorator::GetEmphasisMarkPositions(rSalLayout, *pRealization, aEmphasisMark,
+                                                       bBelow, aPositions);
+
+    for (const Point& rPos : aPositions)
+    {
+        PrimitiveRenderer::DrawEmphasisMark(
+            rOutDev, *rOutDev.mpGraphics, rSalLayout.DrawBase().getX(), rPos.X(), rPos.Y(),
+            aEmphasisMark.GetShape(), aEmphasisMark.IsShapePolyLine(), aEmphasisMark.GetRect1(),
+            aEmphasisMark.GetRect2());
+    }
+}
+
 } // namespace vcl::rendercontext
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
