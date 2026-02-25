@@ -402,7 +402,7 @@ void OutputDevice::ImplDrawWaveTextLine(const TextLineGeometry& rGeo, tools::Lon
     }
 }
 
-void OutputDevice::ImplDrawStraightTextLine(const TextLineGeometry& rGeo, tools::Long nY, Color aColor, bool bIsAbove)
+void vcl::rendercontext::PrimitiveRenderer::DrawStraightTextLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo, tools::Long nY, Color aColor, bool bIsAbove)
 {
     static bool bFuzzing = comphelper::IsFuzzing();
     if (bFuzzing && rGeo.mfWidth > 25000)
@@ -413,19 +413,19 @@ void OutputDevice::ImplDrawStraightTextLine(const TextLineGeometry& rGeo, tools:
     }
 
     // Ask TextDecorator to calculate the metrics based on the font data
-    vcl::text::StraightLineMetrics aMetrics(*mpFontInstance->mxFontMetric, rGeo.meUnderline, nY, bIsAbove);
+    vcl::text::StraightLineMetrics aMetrics(*rOutDev.mpFontInstance->mxFontMetric, rGeo.meUnderline, nY, bIsAbove);
 
     if (!aMetrics.nLineHeight)
         return;
 
-    if (mpGraphicsState->mbLineColor || mbLineColorDirty)
+    if (rOutDev.mpGraphicsState->mbLineColor || rOutDev.mbLineColorDirty)
     {
-        mpGraphics->SetLineColor();
-        mbLineColorDirty = true;
+        rOutDev.mpGraphics->SetLineColor();
+        rOutDev.mbLineColorDirty = true;
     }
 
-    mpGraphics->SetFillColor(aColor);
-    mbFillColorDirty = true;
+    rOutDev.mpGraphics->SetFillColor(aColor);
+    rOutDev.mbFillColorDirty = true;
 
     tools::Long nLeft = rGeo.mnDistX;
 
@@ -434,20 +434,20 @@ void OutputDevice::ImplDrawStraightTextLine(const TextLineGeometry& rGeo, tools:
     {
     case LINESTYLE_SINGLE:
     case LINESTYLE_BOLD:
-        vcl::rendercontext::PrimitiveRenderer::DrawTextRect(*mpGraphics, this, rGeo.maOrigin, tools::Rectangle(Point(nLeft, aMetrics.nLinePos), Size(rGeo.mfWidth, aMetrics.nLineHeight)), mpFontRealization->mxFont->mnOrientation);
+        vcl::rendercontext::PrimitiveRenderer::DrawTextRect(*rOutDev.mpGraphics, &rOutDev, rGeo.maOrigin, tools::Rectangle(Point(nLeft, aMetrics.nLinePos), Size(rGeo.mfWidth, aMetrics.nLineHeight)), rOutDev.mpFontRealization->mxFont->mnOrientation);
         break;
     case LINESTYLE_DOUBLE:
-        vcl::rendercontext::PrimitiveRenderer::DrawTextRect(*mpGraphics, this, rGeo.maOrigin, tools::Rectangle(Point(nLeft, aMetrics.nLinePos), Size(rGeo.mfWidth, aMetrics.nLineHeight)), mpFontRealization->mxFont->mnOrientation);
-        vcl::rendercontext::PrimitiveRenderer::DrawTextRect(*mpGraphics, this, rGeo.maOrigin, tools::Rectangle(Point(nLeft, aMetrics.nLinePos2), Size(rGeo.mfWidth, aMetrics.nLineHeight)), mpFontRealization->mxFont->mnOrientation);
+        vcl::rendercontext::PrimitiveRenderer::DrawTextRect(*rOutDev.mpGraphics, &rOutDev, rGeo.maOrigin, tools::Rectangle(Point(nLeft, aMetrics.nLinePos), Size(rGeo.mfWidth, aMetrics.nLineHeight)), rOutDev.mpFontRealization->mxFont->mnOrientation);
+        vcl::rendercontext::PrimitiveRenderer::DrawTextRect(*rOutDev.mpGraphics, &rOutDev, rGeo.maOrigin, tools::Rectangle(Point(nLeft, aMetrics.nLinePos2), Size(rGeo.mfWidth, aMetrics.nLineHeight)), rOutDev.mpFontRealization->mxFont->mnOrientation);
         break;
     default:
         {
             std::vector<vcl::text::TextDashSegment> aSegments =
-                vcl::text::TextDecorator::CalculateTextLineSegments(rGeo.mfWidth, aMetrics.eUnderline, aMetrics.nLineHeight, GetDPIX(), GetDPIY());
+                vcl::text::TextDecorator::CalculateTextLineSegments(rGeo.mfWidth, aMetrics.eUnderline, aMetrics.nLineHeight, rOutDev.GetDPIX(), rOutDev.GetDPIY());
 
             for (const auto& rSeg : aSegments)
             {
-                vcl::rendercontext::PrimitiveRenderer::DrawTextRect(*mpGraphics, this, rGeo.maOrigin, tools::Rectangle(Point(nLeft + rSeg.nX, aMetrics.nLinePos), Size(rSeg.nWidth, aMetrics.nLineHeight)), mpFontRealization->mxFont->mnOrientation);
+                vcl::rendercontext::PrimitiveRenderer::DrawTextRect(*rOutDev.mpGraphics, &rOutDev, rGeo.maOrigin, tools::Rectangle(Point(nLeft + rSeg.nX, aMetrics.nLinePos), Size(rSeg.nWidth, aMetrics.nLineHeight)), rOutDev.mpFontRealization->mxFont->mnOrientation);
 
             }
         }
@@ -579,7 +579,7 @@ void OutputDevice::ImplDrawTextLine(const TextLineGeometry& rGeo)
             ImplDrawWaveTextLine(aDrawGeo, aInfo.nUnderlineOffset, aUnderlineColor, aDrawGeo.mbUnderlineAbove);
         else
             // Straight lines manage their own offsets mathematically; pass 0
-            ImplDrawStraightTextLine(aDrawGeo, 0, aUnderlineColor, aDrawGeo.mbUnderlineAbove);
+            vcl::rendercontext::PrimitiveRenderer::DrawStraightTextLine(*this, aDrawGeo, 0, aUnderlineColor, aDrawGeo.mbUnderlineAbove);
     }
 
     if (aDrawGeo.meOverline != LINESTYLE_NONE)
@@ -592,7 +592,7 @@ void OutputDevice::ImplDrawTextLine(const TextLineGeometry& rGeo)
             ImplDrawWaveTextLine(aOverlineGeo, aInfo.nOverlineOffset, aOverlineColor, true);
         else
             // Straight lines manage their own offsets mathematically; pass 0
-            ImplDrawStraightTextLine(aOverlineGeo, 0, aOverlineColor, true);
+            vcl::rendercontext::PrimitiveRenderer::DrawStraightTextLine(*this, aOverlineGeo, 0, aOverlineColor, true);
     }
 
     if (aDrawGeo.meStrikeout != STRIKEOUT_NONE)

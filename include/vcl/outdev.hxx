@@ -1215,7 +1215,6 @@ private:
     SAL_DLLPRIVATE void ImplDrawWaveLineRasterized(const WaveLineGeometry& rGeo, const Color& rColor);
     SAL_DLLPRIVATE void ImplDrawWaveTextLine(const TextLineGeometry& rGeo, tools::Long nDistY, Color aColor, bool bIsAbove);
 
-    SAL_DLLPRIVATE void ImplDrawStraightTextLine(const TextLineGeometry& rGeo, tools::Long nY, Color aColor, bool bIsAbove);
     SAL_DLLPRIVATE void         ImplDrawMnemonicLine( tools::Long nX, tools::Long nY, tools::Long nWidth );
     SAL_DLLPRIVATE void         ImplDrawMnemonic( vcl::TextLayoutCommon& rLayout, const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen, sal_Int32 nRelMnemonicPos, const Point& rPos );
     ///@}

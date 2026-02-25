@@ -152,6 +152,8 @@ public:
                              const tools::Rectangle& rRect, Degree10 nOrientation);
 
     // change to private after full migration
+    static void DrawStraightTextLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo,
+                                     tools::Long nY, Color aColor, bool bIsAbove);
     static void DrawStrikeoutLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo,
                                   tools::Long nY, Color aColor);
     static void DrawStrikeoutChar(OutputDevice& rOutDev, const TextLineGeometry& rGeo,
