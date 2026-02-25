@@ -13,10 +13,12 @@
 #include <tools/color.hxx>
 #include <tools/poly.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
+#include <basegfx/matrix/b2dhommatrixtools.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
 #include <basegfx/polygon/b2dlinegeometry.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <basegfx/polygon/b2dpolypolygontools.hxx>
+#include <basegfx/polygon/WaveLine.hxx>
 #include <comphelper/configuration.hxx>
 #include <comphelper/scopeguard.hxx>
 
@@ -1100,6 +1102,27 @@ void PrimitiveRenderer::DrawTextRect(SalGraphics& rGraphics, OutputDevice* pOutD
         rGraphics.DrawRect(aGeo.maRect.Left(), aGeo.maRect.Top(), aGeo.maRect.GetWidth(),
                            aGeo.maRect.GetHeight(), *pOutDev);
 }
+
+void PrimitiveRenderer::DrawWaveLineBezier(OutputDevice& rOutDev, SalGraphics& rGraphics,
+                                           tools::Long nStartX, tools::Long nStartY,
+                                           tools::Long nEndX, tools::Long nEndY,
+                                           tools::Long nWaveHeight, double fOrientation,
+                                           tools::Long nLineWidth)
+{
+    const basegfx::B2DRectangle aWaveLineRectangle(nStartX, nStartY, nEndX, nEndY + nWaveHeight);
+    const basegfx::B2DPolygon aWaveLinePolygon = basegfx::createWaveLinePolygon(aWaveLineRectangle);
+    const basegfx::B2DHomMatrix aRotationMatrix = basegfx::utils::createRotateAroundPoint(
+        nStartX, nStartY, basegfx::deg2rad(-fOrientation));
+    const bool bPixelSnapHairline(rOutDev.mpGraphicsState->mnAntialiasing
+                                  & AntialiasingFlags::PixelSnapHairline);
+
+    rGraphics.SetLineColor(rOutDev.GetLineColor());
+    rGraphics.DrawPolyLine(aRotationMatrix, aWaveLinePolygon, 0.0, nLineWidth,
+                           nullptr, // MM01
+                           basegfx::B2DLineJoin::NONE, css::drawing::LineCap_BUTT,
+                           basegfx::deg2rad(15.0), bPixelSnapHairline, rOutDev);
+}
+
 } // namespace vcl::rendercontext
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

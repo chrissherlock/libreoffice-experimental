@@ -207,13 +207,14 @@ namespace vcl
         Clip = 0x01,
         Line = 0x02,
         Fill = 0x04,
+        Font = 0x08,
         All  = Clip | Line | Fill
     };
 }
 
 // Enable bitwise operators for the enum
 namespace o3tl {
-    template<> struct typed_flags<vcl::PrepareOutputFlags> : is_typed_flags<vcl::PrepareOutputFlags, 0x07> {};
+    template<> struct typed_flags<vcl::PrepareOutputFlags> : is_typed_flags<vcl::PrepareOutputFlags, 0x0f> {};
 }
 
 namespace vcl

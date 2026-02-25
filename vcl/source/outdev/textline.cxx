@@ -720,49 +720,24 @@ void OutputDevice::DrawTextLine( const Point& rPos, tools::Long nWidth,
 
     maRecorder.RecordTextLine(rPos, nWidth, eStrikeout, eUnderline, eOverline);
 
-    if ( !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary() )
-        return;
-
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
-
-    if ( IsOutputCulled() )
-        return;
-
-    // initialize font if needed to get text offsets
-    // TODO: only needed for mnTextOff!=(0,0)
-    if (!InitFont())
+    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Font))
         return;
 
     Point aPos = LogicToDevicePixel(rPos);
     double fWidth = LogicWidthToDeviceSubPixel(nWidth);
     aPos += Point( mpFontRealization->nXOffset, mpFontRealization->nYOffset );
-    {
-        TextLineGeometry aLineGeo(aPos, 0, fWidth, eStrikeout, eUnderline, eOverline, false);
-        aLineGeo.maUnderlineColor = GetTextLineColor();
-        vcl::rendercontext::PrimitiveRenderer::DrawTextLine(*this, aLineGeo);
-    }
+
+    TextLineGeometry aLineGeo(aPos, 0, fWidth, eStrikeout, eUnderline, eOverline, false);
+    aLineGeo.maUnderlineColor = GetTextLineColor();
+
+    vcl::rendercontext::PrimitiveRenderer::DrawTextLine(*this, aLineGeo);
 }
 
 void OutputDevice::DrawWaveLine(const Point& rStartPos, const Point& rEndPos, tools::Long nLineWidth, tools::Long nWaveHeight)
 {
     assert(!is_double_buffered_window());
 
-    if ( !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary() )
-        return;
-
-    // we need a graphics
-    if( !mpGraphics && !AcquireGraphics() )
-        return;
-    assert(mpGraphics);
-
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
-
-    if ( IsOutputCulled() )
-        return;
-
-    if (!InitFont())
+    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Font))
         return;
 
     Point aStartPt = LogicToDevicePixel(rStartPos);
@@ -829,7 +804,7 @@ void OutputDevice::DrawWaveLine(const Point& rStartPos, const Point& rEndPos, to
             pVirtDev->SetBackground( Wallpaper( COL_TRANSPARENT ) );
             pVirtDev->Erase();
             pVirtDev->SetAntialiasing( AntialiasingFlags::Enable );
-            vcl::rendercontext::PrimitiveRenderer::DrawWaveLineBezier(*pVirtDev, 0, 0, nWordLength, 0, nWaveHeight, fOrientation, nLineWidth);
+            vcl::rendercontext::PrimitiveRenderer::DrawWaveLineBezier(*pVirtDev, *pVirtDev->GetGraphics(), 0, 0, nWordLength, 0, nWaveHeight, fOrientation, nLineWidth);
             Bitmap aBitmap(pVirtDev->GetBitmap(Point(0, 0), pVirtDev->GetOutputSize()));
 
             rLineCache.insert( aBitmap, GetLineColor(), nLineWidth, nWaveHeight, nWordLength, aWavylinebmp );
@@ -842,42 +817,7 @@ void OutputDevice::DrawWaveLine(const Point& rStartPos, const Point& rEndPos, to
         return;
     }
 
-    vcl::rendercontext::PrimitiveRenderer::DrawWaveLineBezier(*this, nStartX, nStartY, nEndX, nEndY, nWaveHeight, fOrientation, nLineWidth);
-}
-
-void vcl::rendercontext::PrimitiveRenderer::DrawWaveLineBezier(OutputDevice& rOutDev, tools::Long nStartX, tools::Long nStartY, tools::Long nEndX, tools::Long nEndY, tools::Long nWaveHeight, double fOrientation, tools::Long nLineWidth)
-{
-    // we need a graphics
-    if( !rOutDev.mpGraphics && !rOutDev.AcquireGraphics() )
-        return;
-    assert(rOutDev.mpGraphics);
-
-    if ( rOutDev.mpClippingController->IsDirty() )
-        rOutDev.InitClipRegion();
-
-    if ( rOutDev.IsOutputCulled() )
-        return;
-
-    if (!rOutDev.InitFont())
-        return;
-
-    const basegfx::B2DRectangle aWaveLineRectangle(nStartX, nStartY, nEndX, nEndY + nWaveHeight);
-    const basegfx::B2DPolygon aWaveLinePolygon = basegfx::createWaveLinePolygon(aWaveLineRectangle);
-    const basegfx::B2DHomMatrix aRotationMatrix = basegfx::utils::createRotateAroundPoint(nStartX, nStartY, basegfx::deg2rad(-fOrientation));
-    const bool bPixelSnapHairline(rOutDev.mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
-
-    rOutDev.mpGraphics->SetLineColor(rOutDev.GetLineColor());
-    rOutDev.mpGraphics->DrawPolyLine(
-            aRotationMatrix,
-            aWaveLinePolygon,
-            0.0,
-            nLineWidth,
-            nullptr, // MM01
-            basegfx::B2DLineJoin::NONE,
-            css::drawing::LineCap_BUTT,
-            basegfx::deg2rad(15.0),
-            bPixelSnapHairline,
-            rOutDev);
+    vcl::rendercontext::PrimitiveRenderer::DrawWaveLineBezier(*this, *mpGraphics, nStartX, nStartY, nEndX, nEndY, nWaveHeight, fOrientation, nLineWidth);
 }
 
 void OutputDevice::ImplDrawEmphasisMark(tools::Long nBaseX, tools::Long nX, tools::Long nY,

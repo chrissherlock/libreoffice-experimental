@@ -78,6 +78,9 @@ bool OutputDevice::FlushGraphicsState(vcl::PrepareOutputFlags nFlags)
     if ((nFlags & vcl::PrepareOutputFlags::Fill) && mbFillColorDirty)
         InitFillColor();
 
+    if ((nFlags & vcl::PrepareOutputFlags::Font) && !InitFont())
+        return false;
+
     return true;
 }
 
