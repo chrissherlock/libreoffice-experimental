@@ -27,7 +27,9 @@
 #include <vcl/outdev.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/rendercontext/PrimitiveRenderer.hxx>
+#include <vcl/rendercontext/WaveLineGeometry.hxx>
 
+#include <font/FontController.hxx>
 #include <salgdi.hxx>
 #include <text/TextLayoutEngine.hxx>
 #include <CoordinateMapper.hxx>
@@ -302,7 +304,7 @@ lcl_SetupStrokeAndLineInfo(const basegfx::B2DPolygon& rDevicePoly,
 void PrimitiveRenderer::DrawPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly)
 {
     if (!rOutDev.CanDrawPolygon())
-        vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(rOutDev, rPoly);
+        PrimitiveRenderer::DrawPolygonGeometry(rOutDev, rPoly);
 
     rOutDev.FlushGraphicsState();
 
@@ -795,7 +797,7 @@ void PrimitiveRenderer::DrawClippedPolygon(OutputDevice& rOutDev, const tools::P
     tools::PolyPolygon aClipped;
     tools::PolyPolygon(rPoly).GetIntersection(rClipPolyPoly, aClipped);
 
-    vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygonGeometry(rOutDev, aClipped);
+    PrimitiveRenderer::DrawPolyPolygonGeometry(rOutDev, aClipped);
 }
 
 void PrimitiveRenderer::DrawEllipse(OutputDevice& rOutDev, const tools::Rectangle& rPixelRect,
@@ -1097,7 +1099,7 @@ void PrimitiveRenderer::DrawTextRect(SalGraphics& rGraphics, OutputDevice* pOutD
     auto aGeo = vcl::text::TextGeometry::GetRotatedGeometry(rBasePt, rRect, nOrientation);
 
     if (aGeo.mbIsPolygon)
-        vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*pOutDev, aGeo.maPoly);
+        PrimitiveRenderer::DrawPolygonGeometry(*pOutDev, aGeo.maPoly);
     else
         rGraphics.DrawRect(aGeo.maRect.Left(), aGeo.maRect.Top(), aGeo.maRect.GetWidth(),
                            aGeo.maRect.GetHeight(), *pOutDev);
@@ -1123,6 +1125,361 @@ void PrimitiveRenderer::DrawWaveLineBezier(OutputDevice& rOutDev, SalGraphics& r
                            basegfx::deg2rad(15.0), bPixelSnapHairline, rOutDev);
 }
 
+void PrimitiveRenderer::DrawWaveLineHairline(OutputDevice& rOutDev, const WaveLineGeometry& rGeo,
+                                             const Color& rColor)
+{
+    rOutDev.mpGraphics->SetLineColor(rColor);
+    rOutDev.mbLineColorDirty = true;
+
+    const Point aLineStart = rGeo.GetLineStart();
+    const Point aLineEnd = rGeo.GetLineEnd();
+
+    rOutDev.mpGraphics->DrawLine(aLineStart.X(), aLineStart.Y(), aLineEnd.X(), aLineEnd.Y(),
+                                 rOutDev);
+}
+
+void PrimitiveRenderer::DrawWaveLineRasterized(OutputDevice& rOutDev, const WaveLineGeometry& rGeo,
+                                               const Color& rColor)
+{
+    rOutDev.SetWaveLineColors(rColor, rGeo.maWavePixelSize.Height());
+
+    for (Point aDrawPt : rGeo.GetRegion())
+    {
+        if (rGeo.mnOrientation)
+            rGeo.maBase.RotateAround(aDrawPt, rGeo.mnOrientation);
+
+        if (rGeo.mbDrawAsRect)
+        {
+            rOutDev.mpGraphics->DrawRect(aDrawPt.X(), aDrawPt.Y(), rGeo.maWavePixelSize.Width(),
+                                         rGeo.maWavePixelSize.Height(), rOutDev);
+        }
+        else
+        {
+            rOutDev.mpGraphics->DrawPixel(aDrawPt.X(), aDrawPt.Y(), rOutDev);
+        }
+    }
+}
+
+void PrimitiveRenderer::DrawWaveLine(OutputDevice& rOutDev, const WaveLineGeometry& rGeo,
+                                     const Color& rColor)
+{
+    if (rGeo.maWavePixelSize.Height() == 1 && rGeo.maSize.Height() == 1)
+    {
+        PrimitiveRenderer::DrawWaveLineHairline(rOutDev, rGeo, rColor);
+        return;
+    }
+
+    PrimitiveRenderer::DrawWaveLineRasterized(rOutDev, rGeo, rColor);
+}
+
+void PrimitiveRenderer::DrawWaveTextLine(OutputDevice& rOutDev,
+                                         const vcl::rendercontext::TextLineGeometry& rGeo,
+                                         tools::Long nY, Color aColor, bool bIsAbove)
+{
+    vcl::text::WaveLineGeometry aWaveStyle = vcl::text::TextDecorator::CalculateWaveLineGeometry(
+        *rOutDev.mpFontInstance->mxFontMetric, rGeo.meUnderline, bIsAbove, nY, rOutDev.GetDPIX(),
+        rOutDev.GetDPIY());
+
+    const Size aWavePixelSize = rOutDev.GetWaveLineSize(aWaveStyle.nLineWidth);
+    const bool bDrawAsRect = rOutDev.shouldDrawWavePixelAsRect(aWaveStyle.nLineWidth);
+
+    Degree10 nOrientation = rOutDev.mpFontInstance->mnOrientation;
+
+    for (const auto& rSeg : aWaveStyle.aSegments)
+    {
+        WaveLineGeometry aWaveGeo(rGeo.maOrigin.X(), rGeo.maOrigin.Y(), rGeo.mnDistX, rSeg.nYOffset,
+                                  rGeo.mfWidth, rSeg.nHeight, nOrientation, aWavePixelSize,
+                                  bDrawAsRect);
+
+        PrimitiveRenderer::DrawWaveLine(rOutDev, aWaveGeo, aColor);
+    }
+}
+
+void PrimitiveRenderer::DrawStraightTextLine(OutputDevice& rOutDev,
+                                             const vcl::rendercontext::TextLineGeometry& rGeo,
+                                             tools::Long nY, Color aColor, bool bIsAbove)
+{
+    static bool bFuzzing = comphelper::IsFuzzing();
+    if (bFuzzing && rGeo.mfWidth > 25000)
+    {
+        SAL_WARN("vcl.gdi", "drawLine, skipping suspicious TextLine of length: "
+                                << rGeo.mfWidth << " for fuzzing performance");
+        return;
+    }
+
+    // Ask TextDecorator to calculate the metrics based on the font data
+    vcl::text::StraightLineMetrics aMetrics(*rOutDev.mpFontInstance->mxFontMetric, rGeo.meUnderline,
+                                            nY, bIsAbove);
+
+    if (!aMetrics.nLineHeight)
+        return;
+
+    if (rOutDev.mpGraphicsState->mbLineColor || rOutDev.mbLineColorDirty)
+    {
+        rOutDev.mpGraphics->SetLineColor();
+        rOutDev.mbLineColorDirty = true;
+    }
+
+    rOutDev.mpGraphics->SetFillColor(aColor);
+    rOutDev.mbFillColorDirty = true;
+
+    tools::Long nLeft = rGeo.mnDistX;
+
+    // Dispatch to the actual rendering calls using the sanitized metrics
+    switch (aMetrics.eUnderline)
+    {
+        case LINESTYLE_SINGLE:
+        case LINESTYLE_BOLD:
+            PrimitiveRenderer::DrawTextRect(
+                *rOutDev.mpGraphics, &rOutDev, rGeo.maOrigin,
+                tools::Rectangle(Point(nLeft, aMetrics.nLinePos),
+                                 Size(rGeo.mfWidth, aMetrics.nLineHeight)),
+                rOutDev.mpFontRealization->mxFont->mnOrientation);
+            break;
+        case LINESTYLE_DOUBLE:
+            PrimitiveRenderer::DrawTextRect(
+                *rOutDev.mpGraphics, &rOutDev, rGeo.maOrigin,
+                tools::Rectangle(Point(nLeft, aMetrics.nLinePos),
+                                 Size(rGeo.mfWidth, aMetrics.nLineHeight)),
+                rOutDev.mpFontRealization->mxFont->mnOrientation);
+            PrimitiveRenderer::DrawTextRect(
+                *rOutDev.mpGraphics, &rOutDev, rGeo.maOrigin,
+                tools::Rectangle(Point(nLeft, aMetrics.nLinePos2),
+                                 Size(rGeo.mfWidth, aMetrics.nLineHeight)),
+                rOutDev.mpFontRealization->mxFont->mnOrientation);
+            break;
+        default:
+        {
+            std::vector<vcl::text::TextDashSegment> aSegments
+                = vcl::text::TextDecorator::CalculateTextLineSegments(
+                    rGeo.mfWidth, aMetrics.eUnderline, aMetrics.nLineHeight, rOutDev.GetDPIX(),
+                    rOutDev.GetDPIY());
+
+            for (const auto& rSeg : aSegments)
+            {
+                PrimitiveRenderer::DrawTextRect(
+                    *rOutDev.mpGraphics, &rOutDev, rGeo.maOrigin,
+                    tools::Rectangle(Point(nLeft + rSeg.nX, aMetrics.nLinePos),
+                                     Size(rSeg.nWidth, aMetrics.nLineHeight)),
+                    rOutDev.mpFontRealization->mxFont->mnOrientation);
+            }
+        }
+        break;
+    }
+}
+
+void PrimitiveRenderer::DrawStrikeoutLine(OutputDevice& rOutDev,
+                                          const vcl::rendercontext::TextLineGeometry& rGeo,
+                                          tools::Long nY, Color aColor)
+{
+    if (!rGeo.mfWidth)
+        return;
+
+    vcl::text::StrikeoutGeometry aGeo = vcl::text::TextDecorator::CalculateStrikeoutGeometry(
+        *rOutDev.mpFontInstance->mxFontMetric, rGeo.meStrikeout, nY);
+
+    if (aGeo.aSegments.empty())
+        return;
+
+    if (rOutDev.mpGraphicsState->mbLineColor || rOutDev.mbLineColorDirty)
+    {
+        rOutDev.mpGraphics->SetLineColor();
+        rOutDev.mbLineColorDirty = true;
+    }
+
+    rOutDev.mpGraphics->SetFillColor(aColor);
+    rOutDev.mbFillColorDirty = true;
+
+    for (const auto& rSeg : aGeo.aSegments)
+    {
+        PrimitiveRenderer::DrawTextRect(
+            *rOutDev.mpGraphics, &rOutDev, rGeo.maOrigin,
+            tools::Rectangle(Point(rGeo.mnDistX, rSeg.nYOffset), Size(rGeo.mfWidth, rSeg.nHeight)),
+            rOutDev.mpFontRealization->mxFont->mnOrientation);
+    }
+}
+
+void PrimitiveRenderer::DrawStrikeoutChar(OutputDevice& rOutDev,
+                                          const vcl::rendercontext::TextLineGeometry& rGeo,
+                                          tools::Long nY, Color aColor)
+{
+    if (!rGeo.mfWidth)
+        return;
+
+    vcl::text::LayoutResources aRes{ rOutDev.mpFontInstance.get(),
+                                     *rOutDev.mpMapper,
+                                     &rOutDev.GetFontCache(),
+                                     rOutDev.GetFontCollection(),
+                                     nullptr, // pForcedFallback
+                                     [&]() { return rOutDev.mpGraphics; },
+                                     rOutDev.IsRTLEnabled(),
+                                     false, // bSubpixelPositioning
+                                     *rOutDev.mpGraphicsState,
+                                     *rOutDev.mpFontRealization };
+
+    std::unique_ptr<SalLayout> pLayout
+        = vcl::text::TextGeometry::GetStrikeoutCharLayout(aRes, rGeo.mfWidth, rGeo.meStrikeout);
+
+    if (!pLayout)
+        return;
+
+    Point aOriginPt = rGeo.maOrigin;
+    if (rGeo.mnDistX || nY)
+    {
+        tools::Long nTmpX = rGeo.mnDistX;
+        tools::Long nTmpY = nY;
+
+        if (rOutDev.mpFontInstance->mnOrientation)
+        {
+            Point aPivot(0, 0);
+            aPivot.RotateAround(nTmpX, nTmpY, rOutDev.mpFontInstance->mnOrientation);
+        }
+
+        aOriginPt.AdjustX(nTmpX);
+        aOriginPt.AdjustY(nTmpY);
+    }
+
+    const Color aOldColor = rOutDev.GetTextColor();
+    rOutDev.SetTextColor(aColor);
+    rOutDev.ImplInitTextColor();
+
+    // CRITICAL FIX: rGeo.maOrigin already contains rOutDev.mpFontRealization offsets!
+    // Do not add them again here, otherwise strikeout characters render completely out of bounds.
+    pLayout->DrawBase() = basegfx::B2DPoint(aOriginPt.X(), aOriginPt.Y());
+
+    // Fix the clipping rectangle to also use the un-shifted origin
+    tools::Rectangle aPixelRect;
+    aPixelRect.SetLeft(aOriginPt.X());
+    aPixelRect.SetRight(aPixelRect.Left() + rGeo.mfWidth);
+    aPixelRect.SetBottom(aOriginPt.Y() + rOutDev.mpFontInstance->mxFontMetric->GetDescent());
+    aPixelRect.SetTop(aOriginPt.Y() - rOutDev.mpFontInstance->mxFontMetric->GetAscent());
+
+    if (rOutDev.mpFontInstance->mnOrientation)
+    {
+        tools::Polygon aPoly(aPixelRect);
+        aPoly.Rotate(aOriginPt, rOutDev.mpFontInstance->mnOrientation);
+        aPixelRect = aPoly.GetBoundRect();
+    }
+
+    pLayout->DrawText(*rOutDev.mpGraphics);
+
+    rOutDev.SetTextColor(aOldColor);
+    rOutDev.ImplInitTextColor();
+}
+
+void PrimitiveRenderer::DrawTextLine(OutputDevice& rOutDev,
+                                     const vcl::rendercontext::TextLineGeometry& rGeo)
+{
+    // Ask TextDecorator to calculate the vertical offsets based on the font data
+    vcl::text::TextLineOffsetInfo aInfo(*rOutDev.mpFontInstance->mxFontMetric, rGeo.meUnderline,
+                                        rGeo.meOverline, rGeo.mbUnderlineAbove);
+
+    Color aStrikeoutColor = rOutDev.GetTextColor();
+    Color aUnderlineColor = rOutDev.GetTextLineColor();
+    Color aOverlineColor = rOutDev.GetOverlineColor();
+
+    if (!rOutDev.IsTextLineColor())
+        aUnderlineColor = rOutDev.GetTextColor();
+
+    if (!rOutDev.IsOverlineColor())
+        aOverlineColor = rOutDev.GetTextColor();
+
+    vcl::rendercontext::TextLineGeometry aDrawGeo = rGeo;
+    if (rOutDev.IsRTLEnabled())
+    {
+        tools::Long nXAdd = aDrawGeo.mfWidth - aDrawGeo.mnDistX;
+        if (rOutDev.mpFontInstance->mnOrientation)
+            nXAdd = basegfx::fround<tools::Long>(
+                nXAdd * cos(toRadians(rOutDev.mpFontInstance->mnOrientation)));
+        aDrawGeo.maOrigin.AdjustX(nXAdd - 1);
+    }
+
+    if (aDrawGeo.meUnderline != LINESTYLE_NONE)
+    {
+        if (aInfo.bUnderlineIsWave)
+            PrimitiveRenderer::DrawWaveTextLine(rOutDev, aDrawGeo, aInfo.nUnderlineOffset,
+                                                aUnderlineColor, aDrawGeo.mbUnderlineAbove);
+        else
+            // Straight lines manage their own offsets mathematically; pass 0
+            PrimitiveRenderer::DrawStraightTextLine(rOutDev, aDrawGeo, 0, aUnderlineColor,
+                                                    aDrawGeo.mbUnderlineAbove);
+    }
+
+    if (aDrawGeo.meOverline != LINESTYLE_NONE)
+    {
+        // Trick the sub-routines into rendering the overline
+        vcl::rendercontext::TextLineGeometry aOverlineGeo = aDrawGeo;
+        aOverlineGeo.meUnderline = aDrawGeo.meOverline;
+
+        if (aInfo.bOverlineIsWave)
+            PrimitiveRenderer::DrawWaveTextLine(rOutDev, aOverlineGeo, aInfo.nOverlineOffset,
+                                                aOverlineColor, true);
+        else
+            // Straight lines manage their own offsets mathematically; pass 0
+            PrimitiveRenderer::DrawStraightTextLine(rOutDev, aOverlineGeo, 0, aOverlineColor, true);
+    }
+
+    if (aDrawGeo.meStrikeout != STRIKEOUT_NONE)
+    {
+        if (aDrawGeo.meStrikeout == STRIKEOUT_SLASH || aDrawGeo.meStrikeout == STRIKEOUT_X)
+            PrimitiveRenderer::DrawStrikeoutChar(rOutDev, aDrawGeo, 0, aStrikeoutColor);
+        else
+            PrimitiveRenderer::DrawStrikeoutLine(rOutDev, aDrawGeo, aInfo.nStrikeoutOffset,
+                                                 aStrikeoutColor);
+    }
+}
+
+void PrimitiveRenderer::DrawTextLines(OutputDevice& rOutDev, SalLayout& rSalLayout,
+                                      FontStrikeout eStrikeout, FontLineStyle eUnderline,
+                                      FontLineStyle eOverline, bool bWordLine, bool bUnderlineAbove)
+{
+    if (bWordLine)
+    {
+        const basegfx::B2DPoint aStartPt = rSalLayout.DrawBase();
+        std::vector<std::pair<double, double>> aSegments;
+        vcl::text::TextGeometry::GetWordLineSegments(rSalLayout, *rOutDev.mpFontRealization,
+                                                     aSegments);
+        for (const auto& rSeg : aSegments)
+        {
+            {
+                vcl::rendercontext::TextLineGeometry aLineGeo(
+                    Point(aStartPt.getX(), aStartPt.getY()), static_cast<tools::Long>(rSeg.first),
+                    rSeg.second, eStrikeout, eUnderline, eOverline, bUnderlineAbove);
+                aLineGeo.maUnderlineColor = rOutDev.GetTextLineColor();
+                PrimitiveRenderer::DrawTextLine(rOutDev, aLineGeo);
+            }
+        }
+    }
+    else
+    {
+        basegfx::B2DPoint aStartPt = rSalLayout.GetDrawPosition();
+        {
+            vcl::rendercontext::TextLineGeometry aLineGeo(Point(aStartPt.getX(), aStartPt.getY()),
+                                                          0, rSalLayout.GetTextWidth(), eStrikeout,
+                                                          eUnderline, eOverline, bUnderlineAbove);
+            aLineGeo.maUnderlineColor = rOutDev.GetTextLineColor();
+            PrimitiveRenderer::DrawTextLine(rOutDev, aLineGeo);
+        }
+    }
+}
+
+void PrimitiveRenderer::DrawMnemonicLine(OutputDevice& rOutDev, tools::Long nX, tools::Long nY,
+                                         tools::Long nWidth)
+{
+    tools::Long nBaseX = nX;
+    if (/*HasMirroredGraphics() &&*/ rOutDev.IsRTLEnabled())
+    {
+        // revert the hack that will be done later in ImplDrawTextLine
+        nX = nBaseX - nWidth - (nX - nBaseX - 1);
+    }
+
+    {
+        vcl::rendercontext::TextLineGeometry aLineGeo(Point(nX, nY), 0, nWidth, STRIKEOUT_NONE,
+                                                      LINESTYLE_SINGLE, LINESTYLE_NONE, false);
+        aLineGeo.maUnderlineColor = rOutDev.GetTextLineColor();
+        PrimitiveRenderer::DrawTextLine(rOutDev, aLineGeo);
+    }
+}
 } // namespace vcl::rendercontext
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
