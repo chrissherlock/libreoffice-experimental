@@ -293,7 +293,6 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/outdev/background \
     vcl/source/outdev/eps \
     vcl/source/outdev/outdev \
-    vcl/source/outdev/EmphasisMarks \
     vcl/source/outdev/stack \
     vcl/source/outdev/clipping \
     vcl/source/outdev/fill \
@@ -574,6 +573,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/filter/webp/writer \
     vcl/source/font/DirectFontSubstitution \
     vcl/source/font/EmphasisMark \
+    vcl/source/font/EmphasisMarks \
     vcl/source/font/Feature \
     vcl/source/font/FeatureCollector \
     vcl/source/font/FeatureParser \
