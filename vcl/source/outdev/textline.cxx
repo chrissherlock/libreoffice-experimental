@@ -371,26 +371,26 @@ void vcl::rendercontext::PrimitiveRenderer::DrawWaveLineRasterized(OutputDevice&
     }
 }
 
-void OutputDevice::ImplDrawWaveLine(const WaveLineGeometry& rGeo, const Color& rColor)
+void vcl::rendercontext::PrimitiveRenderer::DrawWaveLine(OutputDevice& rOutDev, const WaveLineGeometry& rGeo, const Color& rColor)
 {
     if (rGeo.maWavePixelSize.Height() == 1 && rGeo.maSize.Height() == 1)
     {
-        vcl::rendercontext::PrimitiveRenderer::DrawWaveLineHairline(*this, rGeo, rColor);
+        vcl::rendercontext::PrimitiveRenderer::DrawWaveLineHairline(rOutDev, rGeo, rColor);
         return;
     }
 
-    vcl::rendercontext::PrimitiveRenderer::DrawWaveLineRasterized(*this, rGeo, rColor);
+    vcl::rendercontext::PrimitiveRenderer::DrawWaveLineRasterized(rOutDev, rGeo, rColor);
 }
 
-void OutputDevice::ImplDrawWaveTextLine(const TextLineGeometry& rGeo, tools::Long nY, Color aColor, bool bIsAbove)
+void vcl::rendercontext::PrimitiveRenderer::DrawWaveTextLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo, tools::Long nY, Color aColor, bool bIsAbove)
 {
     vcl::text::WaveLineGeometry aWaveStyle = vcl::text::TextDecorator::CalculateWaveLineGeometry(
-        *mpFontInstance->mxFontMetric, rGeo.meUnderline, bIsAbove, nY, GetDPIX(), GetDPIY());
+        *rOutDev.mpFontInstance->mxFontMetric, rGeo.meUnderline, bIsAbove, nY, rOutDev.GetDPIX(), rOutDev.GetDPIY());
 
-    const Size aWavePixelSize = GetWaveLineSize(aWaveStyle.nLineWidth);
-    const bool bDrawAsRect = shouldDrawWavePixelAsRect(aWaveStyle.nLineWidth);
+    const Size aWavePixelSize = rOutDev.GetWaveLineSize(aWaveStyle.nLineWidth);
+    const bool bDrawAsRect = rOutDev.shouldDrawWavePixelAsRect(aWaveStyle.nLineWidth);
 
-    Degree10 nOrientation = mpFontInstance->mnOrientation;
+    Degree10 nOrientation = rOutDev.mpFontInstance->mnOrientation;
 
     for (const auto& rSeg : aWaveStyle.aSegments)
     {
@@ -398,7 +398,7 @@ void OutputDevice::ImplDrawWaveTextLine(const TextLineGeometry& rGeo, tools::Lon
                                   rGeo.mfWidth, rSeg.nHeight,
                                   nOrientation, aWavePixelSize, bDrawAsRect);
 
-        ImplDrawWaveLine(aWaveGeo, aColor);
+        PrimitiveRenderer::DrawWaveLine(rOutDev, aWaveGeo, aColor);
     }
 }
 
@@ -576,7 +576,7 @@ void OutputDevice::ImplDrawTextLine(const TextLineGeometry& rGeo)
     if (aDrawGeo.meUnderline != LINESTYLE_NONE)
     {
         if (aInfo.bUnderlineIsWave)
-            ImplDrawWaveTextLine(aDrawGeo, aInfo.nUnderlineOffset, aUnderlineColor, aDrawGeo.mbUnderlineAbove);
+            vcl::rendercontext::PrimitiveRenderer::DrawWaveTextLine(*this, aDrawGeo, aInfo.nUnderlineOffset, aUnderlineColor, aDrawGeo.mbUnderlineAbove);
         else
             // Straight lines manage their own offsets mathematically; pass 0
             vcl::rendercontext::PrimitiveRenderer::DrawStraightTextLine(*this, aDrawGeo, 0, aUnderlineColor, aDrawGeo.mbUnderlineAbove);
@@ -589,7 +589,7 @@ void OutputDevice::ImplDrawTextLine(const TextLineGeometry& rGeo)
         aOverlineGeo.meUnderline = aDrawGeo.meOverline;
 
         if (aInfo.bOverlineIsWave)
-            ImplDrawWaveTextLine(aOverlineGeo, aInfo.nOverlineOffset, aOverlineColor, true);
+            vcl::rendercontext::PrimitiveRenderer::DrawWaveTextLine(*this, aOverlineGeo, aInfo.nOverlineOffset, aOverlineColor, true);
         else
             // Straight lines manage their own offsets mathematically; pass 0
             vcl::rendercontext::PrimitiveRenderer::DrawStraightTextLine(*this, aOverlineGeo, 0, aOverlineColor, true);

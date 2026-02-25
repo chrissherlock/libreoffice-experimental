@@ -155,6 +155,10 @@ public:
     // change to private after full migration
     static void DrawStraightTextLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo,
                                      tools::Long nY, Color aColor, bool bIsAbove);
+    static void DrawWaveLine(OutputDevice& rOutDev, const WaveLineGeometry& rGeo,
+                             const Color& rColor);
+    static void DrawWaveTextLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo,
+                                 tools::Long nDistY, Color aColor, bool bIsAbove);
     static void DrawWaveLineHairline(OutputDevice& rOutDev, const WaveLineGeometry& rGeo,
                                      const Color& rColor);
     static void DrawWaveLineRasterized(OutputDevice& rOutDev, const WaveLineGeometry& rGeo,
