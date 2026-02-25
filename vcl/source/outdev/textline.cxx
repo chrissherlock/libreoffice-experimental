@@ -481,22 +481,22 @@ void vcl::rendercontext::PrimitiveRenderer::DrawStrikeoutLine(OutputDevice& rOut
     }
 }
 
-void OutputDevice::ImplDrawStrikeoutChar(const TextLineGeometry& rGeo, tools::Long nY, Color aColor)
+void vcl::rendercontext::PrimitiveRenderer::DrawStrikeoutChar(OutputDevice& rOutDev, const TextLineGeometry& rGeo, tools::Long nY, Color aColor)
 {
     if (!rGeo.mfWidth)
         return;
 
     vcl::text::LayoutResources aRes{
-        mpFontInstance.get(),
-        *mpMapper,
-        &GetFontCache(),
-        GetFontCollection(),
+        rOutDev.mpFontInstance.get(),
+        *rOutDev.mpMapper,
+        &rOutDev.GetFontCache(),
+        rOutDev.GetFontCollection(),
         nullptr, // pForcedFallback
-        [&]() { return mpGraphics; },
-        IsRTLEnabled(),
+        [&]() { return rOutDev.mpGraphics; },
+        rOutDev.IsRTLEnabled(),
         false, // bSubpixelPositioning
-        *mpGraphicsState,
-        *mpFontRealization
+        *rOutDev.mpGraphicsState,
+        *rOutDev.mpFontRealization
     };
 
     std::unique_ptr<SalLayout> pLayout = vcl::text::TextGeometry::GetStrikeoutCharLayout(
@@ -511,21 +511,21 @@ void OutputDevice::ImplDrawStrikeoutChar(const TextLineGeometry& rGeo, tools::Lo
         tools::Long nTmpX = rGeo.mnDistX;
         tools::Long nTmpY = nY;
 
-        if (mpFontInstance->mnOrientation)
+        if (rOutDev.mpFontInstance->mnOrientation)
         {
             Point aPivot(0, 0);
-            aPivot.RotateAround(nTmpX, nTmpY, mpFontInstance->mnOrientation);
+            aPivot.RotateAround(nTmpX, nTmpY, rOutDev.mpFontInstance->mnOrientation);
         }
 
         aOriginPt.AdjustX(nTmpX);
         aOriginPt.AdjustY(nTmpY);
     }
 
-    const Color aOldColor = GetTextColor();
-    SetTextColor(aColor);
-    ImplInitTextColor();
+    const Color aOldColor = rOutDev.GetTextColor();
+    rOutDev.SetTextColor(aColor);
+    rOutDev.ImplInitTextColor();
 
-    // CRITICAL FIX: rGeo.maOrigin already contains mpFontRealization offsets!
+    // CRITICAL FIX: rGeo.maOrigin already contains rOutDev.mpFontRealization offsets!
     // Do not add them again here, otherwise strikeout characters render completely out of bounds.
     pLayout->DrawBase() = basegfx::B2DPoint(aOriginPt.X(), aOriginPt.Y());
 
@@ -533,20 +533,20 @@ void OutputDevice::ImplDrawStrikeoutChar(const TextLineGeometry& rGeo, tools::Lo
     tools::Rectangle aPixelRect;
     aPixelRect.SetLeft(aOriginPt.X());
     aPixelRect.SetRight(aPixelRect.Left() + rGeo.mfWidth);
-    aPixelRect.SetBottom(aOriginPt.Y() + mpFontInstance->mxFontMetric->GetDescent());
-    aPixelRect.SetTop(aOriginPt.Y() - mpFontInstance->mxFontMetric->GetAscent());
+    aPixelRect.SetBottom(aOriginPt.Y() + rOutDev.mpFontInstance->mxFontMetric->GetDescent());
+    aPixelRect.SetTop(aOriginPt.Y() - rOutDev.mpFontInstance->mxFontMetric->GetAscent());
 
-    if (mpFontInstance->mnOrientation)
+    if (rOutDev.mpFontInstance->mnOrientation)
     {
         tools::Polygon aPoly(aPixelRect);
-        aPoly.Rotate(aOriginPt, mpFontInstance->mnOrientation);
+        aPoly.Rotate(aOriginPt, rOutDev.mpFontInstance->mnOrientation);
         aPixelRect = aPoly.GetBoundRect();
     }
 
-    pLayout->DrawText(*mpGraphics);
+    pLayout->DrawText(*rOutDev.mpGraphics);
 
-    SetTextColor(aOldColor);
-    ImplInitTextColor();
+    rOutDev.SetTextColor(aOldColor);
+    rOutDev.ImplInitTextColor();
 }
 
 void OutputDevice::ImplDrawTextLine(const TextLineGeometry& rGeo)
@@ -598,7 +598,7 @@ void OutputDevice::ImplDrawTextLine(const TextLineGeometry& rGeo)
     if (aDrawGeo.meStrikeout != STRIKEOUT_NONE)
     {
         if (aDrawGeo.meStrikeout == STRIKEOUT_SLASH || aDrawGeo.meStrikeout == STRIKEOUT_X)
-            ImplDrawStrikeoutChar(aDrawGeo, 0, aStrikeoutColor);
+            vcl::rendercontext::PrimitiveRenderer::DrawStrikeoutChar(*this, aDrawGeo, 0, aStrikeoutColor);
         else
             vcl::rendercontext::PrimitiveRenderer::DrawStrikeoutLine(*this, aDrawGeo, aInfo.nStrikeoutOffset, aStrikeoutColor);
     }

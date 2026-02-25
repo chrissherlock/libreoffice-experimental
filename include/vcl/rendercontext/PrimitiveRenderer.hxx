@@ -154,6 +154,8 @@ public:
     // change to private after full migration
     static void DrawStrikeoutLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo,
                                   tools::Long nY, Color aColor);
+    static void DrawStrikeoutChar(OutputDevice& rOutDev, const TextLineGeometry& rGeo,
+                                  tools::Long nY, Color aColor);
 
 private:
     static void DrawSinglePolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly);
