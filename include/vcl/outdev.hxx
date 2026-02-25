@@ -843,7 +843,6 @@ public:
     ///@}
 
 private:
-    SAL_DLLPRIVATE void         ImplDrawWaveLineBezier(tools::Long nStartX, tools::Long nStartY, tools::Long nEndX, tools::Long nEndY, tools::Long nWaveHeight, double fOrientation, tools::Long nLineWidth);
 
 
     /** @name Curved shape functions
@@ -1211,8 +1210,6 @@ private:
 
 
     SAL_DLLPRIVATE void ImplDrawWaveLine(const WaveLineGeometry& rGeo, const Color& rColor);
-    SAL_DLLPRIVATE void ImplDrawWaveLineHairline(const WaveLineGeometry& rGeo, const Color& rColor);
-    SAL_DLLPRIVATE void ImplDrawWaveLineRasterized(const WaveLineGeometry& rGeo, const Color& rColor);
     SAL_DLLPRIVATE void ImplDrawWaveTextLine(const TextLineGeometry& rGeo, tools::Long nDistY, Color aColor, bool bIsAbove);
 
     SAL_DLLPRIVATE void         ImplDrawMnemonicLine( tools::Long nX, tools::Long nY, tools::Long nWidth );

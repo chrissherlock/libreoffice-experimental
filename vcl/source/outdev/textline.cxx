@@ -337,20 +337,20 @@ struct TextLineGeometry
     {}
 };
 
-void OutputDevice::ImplDrawWaveLineHairline(const WaveLineGeometry& rGeo, const Color& rColor)
+void vcl::rendercontext::PrimitiveRenderer::DrawWaveLineHairline(OutputDevice& rOutDev, const WaveLineGeometry& rGeo, const Color& rColor)
 {
-    mpGraphics->SetLineColor(rColor);
-    mbLineColorDirty = true;
+    rOutDev.mpGraphics->SetLineColor(rColor);
+    rOutDev.mbLineColorDirty = true;
 
     const Point aLineStart = rGeo.GetLineStart();
     const Point aLineEnd = rGeo.GetLineEnd();
 
-    mpGraphics->DrawLine(aLineStart.X(), aLineStart.Y(), aLineEnd.X(), aLineEnd.Y(), *this);
+    rOutDev.mpGraphics->DrawLine(aLineStart.X(), aLineStart.Y(), aLineEnd.X(), aLineEnd.Y(), rOutDev);
 }
 
-void OutputDevice::ImplDrawWaveLineRasterized(const WaveLineGeometry& rGeo, const Color& rColor)
+void vcl::rendercontext::PrimitiveRenderer::DrawWaveLineRasterized(OutputDevice& rOutDev, const WaveLineGeometry& rGeo, const Color& rColor)
 {
-    SetWaveLineColors(rColor, rGeo.maWavePixelSize.Height());
+    rOutDev.SetWaveLineColors(rColor, rGeo.maWavePixelSize.Height());
 
     for (Point aDrawPt : rGeo.GetRegion())
     {
@@ -359,14 +359,14 @@ void OutputDevice::ImplDrawWaveLineRasterized(const WaveLineGeometry& rGeo, cons
 
         if (rGeo.mbDrawAsRect)
         {
-            mpGraphics->DrawRect(aDrawPt.X(), aDrawPt.Y(),
+            rOutDev.mpGraphics->DrawRect(aDrawPt.X(), aDrawPt.Y(),
                                  rGeo.maWavePixelSize.Width(),
                                  rGeo.maWavePixelSize.Height(),
-                                 *this);
+                                 rOutDev);
         }
         else
         {
-            mpGraphics->DrawPixel(aDrawPt.X(), aDrawPt.Y(), *this);
+            rOutDev.mpGraphics->DrawPixel(aDrawPt.X(), aDrawPt.Y(), rOutDev);
         }
     }
 }
@@ -375,11 +375,11 @@ void OutputDevice::ImplDrawWaveLine(const WaveLineGeometry& rGeo, const Color& r
 {
     if (rGeo.maWavePixelSize.Height() == 1 && rGeo.maSize.Height() == 1)
     {
-        ImplDrawWaveLineHairline(rGeo, rColor);
+        vcl::rendercontext::PrimitiveRenderer::DrawWaveLineHairline(*this, rGeo, rColor);
         return;
     }
 
-    ImplDrawWaveLineRasterized(rGeo, rColor);
+    vcl::rendercontext::PrimitiveRenderer::DrawWaveLineRasterized(*this, rGeo, rColor);
 }
 
 void OutputDevice::ImplDrawWaveTextLine(const TextLineGeometry& rGeo, tools::Long nY, Color aColor, bool bIsAbove)
@@ -829,7 +829,7 @@ void OutputDevice::DrawWaveLine(const Point& rStartPos, const Point& rEndPos, to
             pVirtDev->SetBackground( Wallpaper( COL_TRANSPARENT ) );
             pVirtDev->Erase();
             pVirtDev->SetAntialiasing( AntialiasingFlags::Enable );
-            pVirtDev->ImplDrawWaveLineBezier( 0, 0, nWordLength, 0, nWaveHeight, fOrientation, nLineWidth );
+            vcl::rendercontext::PrimitiveRenderer::DrawWaveLineBezier(*pVirtDev, 0, 0, nWordLength, 0, nWaveHeight, fOrientation, nLineWidth);
             Bitmap aBitmap(pVirtDev->GetBitmap(Point(0, 0), pVirtDev->GetOutputSize()));
 
             rLineCache.insert( aBitmap, GetLineColor(), nLineWidth, nWaveHeight, nWordLength, aWavylinebmp );
@@ -842,32 +842,32 @@ void OutputDevice::DrawWaveLine(const Point& rStartPos, const Point& rEndPos, to
         return;
     }
 
-    ImplDrawWaveLineBezier( nStartX, nStartY, nEndX, nEndY, nWaveHeight, fOrientation, nLineWidth );
+    vcl::rendercontext::PrimitiveRenderer::DrawWaveLineBezier(*this, nStartX, nStartY, nEndX, nEndY, nWaveHeight, fOrientation, nLineWidth);
 }
 
-void OutputDevice::ImplDrawWaveLineBezier(tools::Long nStartX, tools::Long nStartY, tools::Long nEndX, tools::Long nEndY, tools::Long nWaveHeight, double fOrientation, tools::Long nLineWidth)
+void vcl::rendercontext::PrimitiveRenderer::DrawWaveLineBezier(OutputDevice& rOutDev, tools::Long nStartX, tools::Long nStartY, tools::Long nEndX, tools::Long nEndY, tools::Long nWaveHeight, double fOrientation, tools::Long nLineWidth)
 {
     // we need a graphics
-    if( !mpGraphics && !AcquireGraphics() )
+    if( !rOutDev.mpGraphics && !rOutDev.AcquireGraphics() )
         return;
-    assert(mpGraphics);
+    assert(rOutDev.mpGraphics);
 
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
+    if ( rOutDev.mpClippingController->IsDirty() )
+        rOutDev.InitClipRegion();
 
-    if ( IsOutputCulled() )
+    if ( rOutDev.IsOutputCulled() )
         return;
 
-    if (!InitFont())
+    if (!rOutDev.InitFont())
         return;
 
     const basegfx::B2DRectangle aWaveLineRectangle(nStartX, nStartY, nEndX, nEndY + nWaveHeight);
     const basegfx::B2DPolygon aWaveLinePolygon = basegfx::createWaveLinePolygon(aWaveLineRectangle);
     const basegfx::B2DHomMatrix aRotationMatrix = basegfx::utils::createRotateAroundPoint(nStartX, nStartY, basegfx::deg2rad(-fOrientation));
-    const bool bPixelSnapHairline(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+    const bool bPixelSnapHairline(rOutDev.mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
 
-    mpGraphics->SetLineColor(GetLineColor());
-    mpGraphics->DrawPolyLine(
+    rOutDev.mpGraphics->SetLineColor(rOutDev.GetLineColor());
+    rOutDev.mpGraphics->DrawPolyLine(
             aRotationMatrix,
             aWaveLinePolygon,
             0.0,
@@ -877,7 +877,7 @@ void OutputDevice::ImplDrawWaveLineBezier(tools::Long nStartX, tools::Long nStar
             css::drawing::LineCap_BUTT,
             basegfx::deg2rad(15.0),
             bPixelSnapHairline,
-            *this);
+            rOutDev);
 }
 
 void OutputDevice::ImplDrawEmphasisMark(tools::Long nBaseX, tools::Long nX, tools::Long nY,

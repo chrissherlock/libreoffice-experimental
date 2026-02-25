@@ -44,6 +44,7 @@ namespace tools
 class Rectangle;
 }
 
+struct WaveLineGeometry;
 struct TextLineGeometry;
 
 namespace vcl::rendercontext
@@ -154,6 +155,13 @@ public:
     // change to private after full migration
     static void DrawStraightTextLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo,
                                      tools::Long nY, Color aColor, bool bIsAbove);
+    static void DrawWaveLineHairline(OutputDevice& rOutDev, const WaveLineGeometry& rGeo,
+                                     const Color& rColor);
+    static void DrawWaveLineRasterized(OutputDevice& rOutDev, const WaveLineGeometry& rGeo,
+                                       const Color& rColor);
+    static void DrawWaveLineBezier(OutputDevice& rOutDev, tools::Long nStartX, tools::Long nStartY,
+                                   tools::Long nEndX, tools::Long nEndY, tools::Long nWaveHeight,
+                                   double fOrientation, tools::Long nLineWidth);
     static void DrawStrikeoutLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo,
                                   tools::Long nY, Color aColor);
     static void DrawStrikeoutChar(OutputDevice& rOutDev, const TextLineGeometry& rGeo,
