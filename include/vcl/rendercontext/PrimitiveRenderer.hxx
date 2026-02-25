@@ -46,7 +46,7 @@ namespace tools
 class Rectangle;
 }
 
-struct TextLineGeometry;
+#include <vcl/rendercontext/TextLineGeometry.hxx>
 
 namespace vcl::rendercontext
 {

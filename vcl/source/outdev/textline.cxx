@@ -35,6 +35,7 @@
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/rendercontext/PrimitiveRenderer.hxx>
 #include <vcl/rendercontext/WaveLineGeometry.hxx>
+#include <vcl/rendercontext/TextLineGeometry.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/text/TextDecorator.hxx>
 #include <vcl/text/TextLineGeometry.hxx>
@@ -172,27 +173,7 @@ Size OutputDevice::GetWaveLineSize(tools::Long nLineWidth) const
     return Size(1, 1);
 }
 
-struct TextLineGeometry
-{
-    Point maOrigin;
-    tools::Long mnDistX;
-    double mfWidth;
-    FontStrikeout meStrikeout;
-    FontLineStyle meUnderline;
-    FontLineStyle meOverline;
-    bool mbUnderlineAbove;
-    Color maUnderlineColor;
-    Color maOverlineColor;
-    Color maStrikeoutColor;
 
-    TextLineGeometry(Point aOrigin, tools::Long nDistX, double fWidth,
-                     FontStrikeout eStrikeout, FontLineStyle eUnderline,
-                     FontLineStyle eOverline, bool bUnderlineAbove)
-        : maOrigin(aOrigin), mnDistX(nDistX), mfWidth(fWidth)
-        , meStrikeout(eStrikeout), meUnderline(eUnderline)
-        , meOverline(eOverline), mbUnderlineAbove(bUnderlineAbove)
-    {}
-};
 
 void vcl::rendercontext::PrimitiveRenderer::DrawWaveLineHairline(OutputDevice& rOutDev, const WaveLineGeometry& rGeo, const Color& rColor)
 {
@@ -239,7 +220,7 @@ void vcl::rendercontext::PrimitiveRenderer::DrawWaveLine(OutputDevice& rOutDev, 
     vcl::rendercontext::PrimitiveRenderer::DrawWaveLineRasterized(rOutDev, rGeo, rColor);
 }
 
-void vcl::rendercontext::PrimitiveRenderer::DrawWaveTextLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo, tools::Long nY, Color aColor, bool bIsAbove)
+void vcl::rendercontext::PrimitiveRenderer::DrawWaveTextLine(OutputDevice& rOutDev, const vcl::rendercontext::TextLineGeometry& rGeo, tools::Long nY, Color aColor, bool bIsAbove)
 {
     vcl::text::WaveLineGeometry aWaveStyle = vcl::text::TextDecorator::CalculateWaveLineGeometry(
         *rOutDev.mpFontInstance->mxFontMetric, rGeo.meUnderline, bIsAbove, nY, rOutDev.GetDPIX(), rOutDev.GetDPIY());
@@ -259,7 +240,7 @@ void vcl::rendercontext::PrimitiveRenderer::DrawWaveTextLine(OutputDevice& rOutD
     }
 }
 
-void vcl::rendercontext::PrimitiveRenderer::DrawStraightTextLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo, tools::Long nY, Color aColor, bool bIsAbove)
+void vcl::rendercontext::PrimitiveRenderer::DrawStraightTextLine(OutputDevice& rOutDev, const vcl::rendercontext::TextLineGeometry& rGeo, tools::Long nY, Color aColor, bool bIsAbove)
 {
     static bool bFuzzing = comphelper::IsFuzzing();
     if (bFuzzing && rGeo.mfWidth > 25000)
@@ -312,7 +293,7 @@ void vcl::rendercontext::PrimitiveRenderer::DrawStraightTextLine(OutputDevice& r
     }
 }
 
-void vcl::rendercontext::PrimitiveRenderer::DrawStrikeoutLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo, tools::Long nY, Color aColor)
+void vcl::rendercontext::PrimitiveRenderer::DrawStrikeoutLine(OutputDevice& rOutDev, const vcl::rendercontext::TextLineGeometry& rGeo, tools::Long nY, Color aColor)
 {
     if (!rGeo.mfWidth)
         return;
@@ -338,7 +319,7 @@ void vcl::rendercontext::PrimitiveRenderer::DrawStrikeoutLine(OutputDevice& rOut
     }
 }
 
-void vcl::rendercontext::PrimitiveRenderer::DrawStrikeoutChar(OutputDevice& rOutDev, const TextLineGeometry& rGeo, tools::Long nY, Color aColor)
+void vcl::rendercontext::PrimitiveRenderer::DrawStrikeoutChar(OutputDevice& rOutDev, const vcl::rendercontext::TextLineGeometry& rGeo, tools::Long nY, Color aColor)
 {
     if (!rGeo.mfWidth)
         return;
@@ -406,7 +387,7 @@ void vcl::rendercontext::PrimitiveRenderer::DrawStrikeoutChar(OutputDevice& rOut
     rOutDev.ImplInitTextColor();
 }
 
-void vcl::rendercontext::PrimitiveRenderer::DrawTextLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo)
+void vcl::rendercontext::PrimitiveRenderer::DrawTextLine(OutputDevice& rOutDev, const vcl::rendercontext::TextLineGeometry& rGeo)
 {
     // Ask TextDecorator to calculate the vertical offsets based on the font data
     vcl::text::TextLineOffsetInfo aInfo(*rOutDev.mpFontInstance->mxFontMetric, rGeo.meUnderline, rGeo.meOverline, rGeo.mbUnderlineAbove);
@@ -421,7 +402,7 @@ void vcl::rendercontext::PrimitiveRenderer::DrawTextLine(OutputDevice& rOutDev, 
     if (!rOutDev.IsOverlineColor())
         aOverlineColor = rOutDev.GetTextColor();
 
-    TextLineGeometry aDrawGeo = rGeo;
+    vcl::rendercontext::TextLineGeometry aDrawGeo = rGeo;
     if (rOutDev.IsRTLEnabled())
     {
         tools::Long nXAdd = aDrawGeo.mfWidth - aDrawGeo.mnDistX;
@@ -442,7 +423,7 @@ void vcl::rendercontext::PrimitiveRenderer::DrawTextLine(OutputDevice& rOutDev, 
     if (aDrawGeo.meOverline != LINESTYLE_NONE)
     {
         // Trick the sub-routines into rendering the overline
-        TextLineGeometry aOverlineGeo = aDrawGeo;
+        vcl::rendercontext::TextLineGeometry aOverlineGeo = aDrawGeo;
         aOverlineGeo.meUnderline = aDrawGeo.meOverline;
 
         if (aInfo.bOverlineIsWave)
@@ -473,7 +454,7 @@ void vcl::rendercontext::PrimitiveRenderer::DrawTextLines(OutputDevice& rOutDev,
         for (const auto& rSeg : aSegments)
         {
             {
-                TextLineGeometry aLineGeo(Point(aStartPt.getX(), aStartPt.getY()), static_cast<tools::Long>(rSeg.first), rSeg.second, eStrikeout, eUnderline, eOverline, bUnderlineAbove);
+                vcl::rendercontext::TextLineGeometry aLineGeo(Point(aStartPt.getX(), aStartPt.getY()), static_cast<tools::Long>(rSeg.first), rSeg.second, eStrikeout, eUnderline, eOverline, bUnderlineAbove);
                 aLineGeo.maUnderlineColor = rOutDev.GetTextLineColor();
                 vcl::rendercontext::PrimitiveRenderer::DrawTextLine(rOutDev, aLineGeo);
             }
@@ -483,7 +464,7 @@ void vcl::rendercontext::PrimitiveRenderer::DrawTextLines(OutputDevice& rOutDev,
     {
         basegfx::B2DPoint aStartPt = rSalLayout.GetDrawPosition();
         {
-            TextLineGeometry aLineGeo(Point(aStartPt.getX(), aStartPt.getY()), 0, rSalLayout.GetTextWidth(), eStrikeout, eUnderline, eOverline, bUnderlineAbove);
+            vcl::rendercontext::TextLineGeometry aLineGeo(Point(aStartPt.getX(), aStartPt.getY()), 0, rSalLayout.GetTextWidth(), eStrikeout, eUnderline, eOverline, bUnderlineAbove);
             aLineGeo.maUnderlineColor = rOutDev.GetTextLineColor();
             vcl::rendercontext::PrimitiveRenderer::DrawTextLine(rOutDev, aLineGeo);
         }
@@ -500,7 +481,7 @@ void vcl::rendercontext::PrimitiveRenderer::DrawMnemonicLine(OutputDevice& rOutD
     }
 
     {
-        TextLineGeometry aLineGeo(Point(nX, nY), 0, nWidth, STRIKEOUT_NONE, LINESTYLE_SINGLE, LINESTYLE_NONE, false);
+        vcl::rendercontext::TextLineGeometry aLineGeo(Point(nX, nY), 0, nWidth, STRIKEOUT_NONE, LINESTYLE_SINGLE, LINESTYLE_NONE, false);
         aLineGeo.maUnderlineColor = rOutDev.GetTextLineColor();
         vcl::rendercontext::PrimitiveRenderer::DrawTextLine(rOutDev, aLineGeo);
     }
@@ -584,7 +565,7 @@ void OutputDevice::DrawTextLine( const Point& rPos, tools::Long nWidth,
     double fWidth = LogicWidthToDeviceSubPixel(nWidth);
     aPos += Point( mpFontRealization->nXOffset, mpFontRealization->nYOffset );
 
-    TextLineGeometry aLineGeo(aPos, 0, fWidth, eStrikeout, eUnderline, eOverline, false);
+    vcl::rendercontext::TextLineGeometry aLineGeo(aPos, 0, fWidth, eStrikeout, eUnderline, eOverline, false);
     aLineGeo.maUnderlineColor = GetTextLineColor();
 
     vcl::rendercontext::PrimitiveRenderer::DrawTextLine(*this, aLineGeo);

@@ -230,10 +230,9 @@ namespace vcl
 namespace vcl::rendercontext
 {
 class PrimitiveRenderer;
-}
-
-struct WaveLineGeometry;
 struct TextLineGeometry;
+struct WaveLineGeometry;
+}
 
 class SAL_WARN_UNUSED VCL_DLLPUBLIC OutputDevice : public virtual VclReferenceBase
 {
