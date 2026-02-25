@@ -46,12 +46,12 @@ namespace tools
 class Rectangle;
 }
 
-struct WaveLineGeometry;
 struct TextLineGeometry;
 
 namespace vcl::rendercontext
 {
 struct StrokeAttributes;
+struct WaveLineGeometry;
 
 class VCL_DLLPUBLIC PrimitiveRenderer
 {
