@@ -27,6 +27,7 @@
 #include <vcl/rendercontext/PrimitiveRenderer.hxx>
 
 #include <salgdi.hxx>
+#include <text/TextLayoutEngine.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
 
@@ -1087,6 +1088,18 @@ void PrimitiveRenderer::DrawGridOfCrosses(SalGraphics& rGraphics, const Coordina
     }
 }
 
+void PrimitiveRenderer::DrawTextRect(SalGraphics& rGraphics, OutputDevice* pOutDev,
+                                     const Point& rBasePt, const tools::Rectangle& rRect,
+                                     Degree10 nOrientation)
+{
+    auto aGeo = vcl::text::TextGeometry::GetRotatedGeometry(rBasePt, rRect, nOrientation);
+
+    if (aGeo.mbIsPolygon)
+        vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*pOutDev, aGeo.maPoly);
+    else
+        rGraphics.DrawRect(aGeo.maRect.Left(), aGeo.maRect.Top(), aGeo.maRect.GetWidth(),
+                           aGeo.maRect.GetHeight(), *pOutDev);
+}
 } // namespace vcl::rendercontext
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

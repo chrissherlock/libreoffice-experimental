@@ -1209,7 +1209,6 @@ private:
     SAL_DLLPRIVATE void         ImplDrawShadowText(SalLayout& rSalLayout);
     SAL_DLLPRIVATE void         ImplDrawOutlineText(SalLayout& rSalLayout);
 
-    SAL_DLLPRIVATE void         ImplDrawTextRect( tools::Long nBaseX, tools::Long nBaseY, tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight );
 
     SAL_DLLPRIVATE void ImplDrawWaveLine(const WaveLineGeometry& rGeo, const Color& rColor);
     SAL_DLLPRIVATE void ImplDrawWaveLineHairline(const WaveLineGeometry& rGeo, const Color& rColor);

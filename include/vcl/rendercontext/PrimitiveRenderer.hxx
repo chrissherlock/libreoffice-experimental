@@ -10,6 +10,7 @@
 #pragma once
 
 #include <tools/solar.h>
+#include <tools/degree.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
@@ -143,6 +144,9 @@ public:
     static void DrawGridOfCrosses(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                                   const OutputDevice* pOutDev, const tools::Rectangle& rGridArea,
                                   const Size& rGridDistance, const tools::Rectangle& rDrawingArea);
+
+    static void DrawTextRect(SalGraphics& rGraphics, OutputDevice* pOutDev, const Point& rBasePt,
+                             const tools::Rectangle& rRect, Degree10 nOrientation);
 
 private:
     static void DrawSinglePolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly);

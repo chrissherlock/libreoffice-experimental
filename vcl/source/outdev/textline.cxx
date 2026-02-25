@@ -33,6 +33,7 @@
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
+#include <vcl/rendercontext/PrimitiveRenderer.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/text/TextDecorator.hxx>
 #include <vcl/virdev.hxx>
@@ -432,11 +433,11 @@ void OutputDevice::ImplDrawStraightTextLine(const TextLineGeometry& rGeo, tools:
     {
     case LINESTYLE_SINGLE:
     case LINESTYLE_BOLD:
-        ImplDrawTextRect(rGeo.maOrigin.X(), rGeo.maOrigin.Y(), nLeft, aMetrics.nLinePos, rGeo.mfWidth, aMetrics.nLineHeight);
+        vcl::rendercontext::PrimitiveRenderer::DrawTextRect(*mpGraphics, this, rGeo.maOrigin, tools::Rectangle(Point(nLeft, aMetrics.nLinePos), Size(rGeo.mfWidth, aMetrics.nLineHeight)), mpFontRealization->mxFont->mnOrientation);
         break;
     case LINESTYLE_DOUBLE:
-        ImplDrawTextRect(rGeo.maOrigin.X(), rGeo.maOrigin.Y(), nLeft, aMetrics.nLinePos,  rGeo.mfWidth, aMetrics.nLineHeight);
-        ImplDrawTextRect(rGeo.maOrigin.X(), rGeo.maOrigin.Y(), nLeft, aMetrics.nLinePos2, rGeo.mfWidth, aMetrics.nLineHeight);
+        vcl::rendercontext::PrimitiveRenderer::DrawTextRect(*mpGraphics, this, rGeo.maOrigin, tools::Rectangle(Point(nLeft, aMetrics.nLinePos), Size(rGeo.mfWidth, aMetrics.nLineHeight)), mpFontRealization->mxFont->mnOrientation);
+        vcl::rendercontext::PrimitiveRenderer::DrawTextRect(*mpGraphics, this, rGeo.maOrigin, tools::Rectangle(Point(nLeft, aMetrics.nLinePos2), Size(rGeo.mfWidth, aMetrics.nLineHeight)), mpFontRealization->mxFont->mnOrientation);
         break;
     default:
         {
@@ -445,7 +446,8 @@ void OutputDevice::ImplDrawStraightTextLine(const TextLineGeometry& rGeo, tools:
 
             for (const auto& rSeg : aSegments)
             {
-                ImplDrawTextRect(rGeo.maOrigin.X(), rGeo.maOrigin.Y(), nLeft + rSeg.nX, aMetrics.nLinePos, rSeg.nWidth, aMetrics.nLineHeight);
+                vcl::rendercontext::PrimitiveRenderer::DrawTextRect(*mpGraphics, this, rGeo.maOrigin, tools::Rectangle(Point(nLeft + rSeg.nX, aMetrics.nLinePos), Size(rSeg.nWidth, aMetrics.nLineHeight)), mpFontRealization->mxFont->mnOrientation);
+
             }
         }
         break;
@@ -474,7 +476,7 @@ void OutputDevice::ImplDrawStrikeoutLine(const TextLineGeometry& rGeo, tools::Lo
 
     for (const auto& rSeg : aGeo.aSegments)
     {
-        ImplDrawTextRect(rGeo.maOrigin.X(), rGeo.maOrigin.Y(), rGeo.mnDistX, rSeg.nYOffset, rGeo.mfWidth, rSeg.nHeight);
+        vcl::rendercontext::PrimitiveRenderer::DrawTextRect(*mpGraphics, this, rGeo.maOrigin, tools::Rectangle(Point(rGeo.mnDistX, rSeg.nYOffset), Size(rGeo.mfWidth, rSeg.nHeight)), mpFontRealization->mxFont->mnOrientation);
     }
 }
 

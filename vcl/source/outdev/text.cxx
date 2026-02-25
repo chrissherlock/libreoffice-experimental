@@ -102,21 +102,6 @@ OUString OutputDevice::GetEllipsisString(const OUString& rStr, tools::Long nMaxW
         rStr, nMaxWidth, nStyle, [this](const OUString& s) { return GetTextWidth(s); });
 }
 
-void OutputDevice::ImplDrawTextRect(tools::Long nBaseX, tools::Long nBaseY, tools::Long nDistX,
-                                    tools::Long nDistY, tools::Long nWidth, tools::Long nHeight)
-{
-    tools::Rectangle aLocalRect(Point(nDistX, nDistY), Size(nWidth, nHeight));
-
-    auto aGeo = vcl::text::TextGeometry::GetRotatedGeometry(
-        Point(nBaseX, nBaseY), aLocalRect, mpFontRealization->mxFont->mnOrientation);
-
-    if (aGeo.mbIsPolygon)
-        vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*this, aGeo.maPoly);
-    else
-        mpGraphics->DrawRect(aGeo.maRect.Left(), aGeo.maRect.Top(), aGeo.maRect.GetWidth(),
-                             aGeo.maRect.GetHeight(), *this);
-}
-
 void OutputDevice::ImplDrawTextBackground(const SalLayout& rSalLayout)
 {
     tools::Rectangle aRect
@@ -131,7 +116,7 @@ void OutputDevice::ImplDrawTextBackground(const SalLayout& rSalLayout)
     mpGraphics->SetFillColor(GetTextFillColor());
     mbFillColorDirty = true;
 
-    ImplDrawTextRect(aRect.Left(), aRect.Top(), 0, 0, aRect.GetWidth(), aRect.GetHeight());
+    vcl::rendercontext::PrimitiveRenderer::DrawTextRect(*mpGraphics, this, Point(aRect.Left(), aRect.Top()), tools::Rectangle(Point(0, 0), Size(aRect.GetWidth(), aRect.GetHeight())), mpFontRealization->mxFont->mnOrientation);
 }
 
 bool OutputDevice::ImplDrawRotateText(SalLayout& rSalLayout)
