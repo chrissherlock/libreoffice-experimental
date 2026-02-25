@@ -253,7 +253,7 @@ void OutputDevice::ImplRenderLayout(SalLayout& rSalLayout, bool bTextLines)
     if (bTextLines)
     {
         const vcl::Font& rFont = mpGraphicsState->maFont;
-        ImplDrawTextLines(rSalLayout, rFont.GetStrikeout(), rFont.GetUnderline(),
+        vcl::rendercontext::PrimitiveRenderer::DrawTextLines(*this, rSalLayout, rFont.GetStrikeout(), rFont.GetUnderline(),
                           rFont.GetOverline(), rFont.IsWordLineMode(), rFont.IsUnderlineAbove());
     }
 
@@ -977,7 +977,7 @@ void OutputDevice::ImplDrawMnemonic(vcl::TextLayoutCommon& rLayout, const OUStri
         [&](tools::Long w) { return LogicWidthToDevicePixel(w); },
         [&](const Point& p) { return LogicToPixel(p); }, aParams, aDXArray, nRelMnemonicPos, rPos);
 
-    ImplDrawMnemonicLine(aGeo.nX, aGeo.nY, static_cast<double>(aGeo.nWidth));
+    vcl::rendercontext::PrimitiveRenderer::DrawMnemonicLine(*this, aGeo.nX, aGeo.nY, static_cast<double>(aGeo.nWidth));
 }
 
 void OutputDevice::ImplDrawText(OutputDevice& rTargetDevice, const tools::Rectangle& rRect,
@@ -1420,7 +1420,7 @@ void OutputDevice::DrawCtrlText(const Point& rPos, const OUString& rStr, const s
     DrawText(rPos, aStr, nCorrectedIndex, nCorrectedLen, pVector, pDisplayText, pGlyphs);
 
     if (nMnemonicPos != -1)
-        ImplDrawMnemonicLine(nMnemonicX, nMnemonicY, nMnemonicWidth);
+        vcl::rendercontext::PrimitiveRenderer::DrawMnemonicLine(*this, nMnemonicX, nMnemonicY, nMnemonicWidth);
 
     if (oOldTextColor)
         SetTextColor(*oOldTextColor);

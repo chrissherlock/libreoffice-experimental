@@ -549,37 +549,37 @@ void vcl::rendercontext::PrimitiveRenderer::DrawStrikeoutChar(OutputDevice& rOut
     rOutDev.ImplInitTextColor();
 }
 
-void OutputDevice::ImplDrawTextLine(const TextLineGeometry& rGeo)
+void vcl::rendercontext::PrimitiveRenderer::DrawTextLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo)
 {
     // Ask TextDecorator to calculate the vertical offsets based on the font data
-    vcl::text::TextLineOffsetInfo aInfo(*mpFontInstance->mxFontMetric, rGeo.meUnderline, rGeo.meOverline, rGeo.mbUnderlineAbove);
+    vcl::text::TextLineOffsetInfo aInfo(*rOutDev.mpFontInstance->mxFontMetric, rGeo.meUnderline, rGeo.meOverline, rGeo.mbUnderlineAbove);
 
-    Color aStrikeoutColor = GetTextColor();
-    Color aUnderlineColor = GetTextLineColor();
-    Color aOverlineColor  = GetOverlineColor();
+    Color aStrikeoutColor = rOutDev.GetTextColor();
+    Color aUnderlineColor = rOutDev.GetTextLineColor();
+    Color aOverlineColor  = rOutDev.GetOverlineColor();
 
-    if (!IsTextLineColor())
-        aUnderlineColor = GetTextColor();
+    if (!rOutDev.IsTextLineColor())
+        aUnderlineColor = rOutDev.GetTextColor();
 
-    if (!IsOverlineColor())
-        aOverlineColor = GetTextColor();
+    if (!rOutDev.IsOverlineColor())
+        aOverlineColor = rOutDev.GetTextColor();
 
     TextLineGeometry aDrawGeo = rGeo;
-    if (IsRTLEnabled())
+    if (rOutDev.IsRTLEnabled())
     {
         tools::Long nXAdd = aDrawGeo.mfWidth - aDrawGeo.mnDistX;
-        if (mpFontInstance->mnOrientation)
-            nXAdd = basegfx::fround<tools::Long>(nXAdd * cos(toRadians(mpFontInstance->mnOrientation)));
+        if (rOutDev.mpFontInstance->mnOrientation)
+            nXAdd = basegfx::fround<tools::Long>(nXAdd * cos(toRadians(rOutDev.mpFontInstance->mnOrientation)));
         aDrawGeo.maOrigin.AdjustX(nXAdd - 1);
     }
 
     if (aDrawGeo.meUnderline != LINESTYLE_NONE)
     {
         if (aInfo.bUnderlineIsWave)
-            vcl::rendercontext::PrimitiveRenderer::DrawWaveTextLine(*this, aDrawGeo, aInfo.nUnderlineOffset, aUnderlineColor, aDrawGeo.mbUnderlineAbove);
+            vcl::rendercontext::PrimitiveRenderer::DrawWaveTextLine(rOutDev, aDrawGeo, aInfo.nUnderlineOffset, aUnderlineColor, aDrawGeo.mbUnderlineAbove);
         else
             // Straight lines manage their own offsets mathematically; pass 0
-            vcl::rendercontext::PrimitiveRenderer::DrawStraightTextLine(*this, aDrawGeo, 0, aUnderlineColor, aDrawGeo.mbUnderlineAbove);
+            vcl::rendercontext::PrimitiveRenderer::DrawStraightTextLine(rOutDev, aDrawGeo, 0, aUnderlineColor, aDrawGeo.mbUnderlineAbove);
     }
 
     if (aDrawGeo.meOverline != LINESTYLE_NONE)
@@ -589,22 +589,22 @@ void OutputDevice::ImplDrawTextLine(const TextLineGeometry& rGeo)
         aOverlineGeo.meUnderline = aDrawGeo.meOverline;
 
         if (aInfo.bOverlineIsWave)
-            vcl::rendercontext::PrimitiveRenderer::DrawWaveTextLine(*this, aOverlineGeo, aInfo.nOverlineOffset, aOverlineColor, true);
+            vcl::rendercontext::PrimitiveRenderer::DrawWaveTextLine(rOutDev, aOverlineGeo, aInfo.nOverlineOffset, aOverlineColor, true);
         else
             // Straight lines manage their own offsets mathematically; pass 0
-            vcl::rendercontext::PrimitiveRenderer::DrawStraightTextLine(*this, aOverlineGeo, 0, aOverlineColor, true);
+            vcl::rendercontext::PrimitiveRenderer::DrawStraightTextLine(rOutDev, aOverlineGeo, 0, aOverlineColor, true);
     }
 
     if (aDrawGeo.meStrikeout != STRIKEOUT_NONE)
     {
         if (aDrawGeo.meStrikeout == STRIKEOUT_SLASH || aDrawGeo.meStrikeout == STRIKEOUT_X)
-            vcl::rendercontext::PrimitiveRenderer::DrawStrikeoutChar(*this, aDrawGeo, 0, aStrikeoutColor);
+            vcl::rendercontext::PrimitiveRenderer::DrawStrikeoutChar(rOutDev, aDrawGeo, 0, aStrikeoutColor);
         else
-            vcl::rendercontext::PrimitiveRenderer::DrawStrikeoutLine(*this, aDrawGeo, aInfo.nStrikeoutOffset, aStrikeoutColor);
+            vcl::rendercontext::PrimitiveRenderer::DrawStrikeoutLine(rOutDev, aDrawGeo, aInfo.nStrikeoutOffset, aStrikeoutColor);
     }
 }
 
-void OutputDevice::ImplDrawTextLines( SalLayout& rSalLayout, FontStrikeout eStrikeout,
+void vcl::rendercontext::PrimitiveRenderer::DrawTextLines(OutputDevice& rOutDev, SalLayout& rSalLayout, FontStrikeout eStrikeout,
                                       FontLineStyle eUnderline, FontLineStyle eOverline,
                                       bool bWordLine, bool bUnderlineAbove )
 {
@@ -612,13 +612,13 @@ void OutputDevice::ImplDrawTextLines( SalLayout& rSalLayout, FontStrikeout eStri
     {
         const basegfx::B2DPoint aStartPt = rSalLayout.DrawBase();
         std::vector<std::pair<double, double>> aSegments;
-        vcl::text::TextGeometry::GetWordLineSegments(rSalLayout, *mpFontRealization, aSegments);
+        vcl::text::TextGeometry::GetWordLineSegments(rSalLayout, *rOutDev.mpFontRealization, aSegments);
         for (const auto& rSeg : aSegments)
         {
             {
                 TextLineGeometry aLineGeo(Point(aStartPt.getX(), aStartPt.getY()), static_cast<tools::Long>(rSeg.first), rSeg.second, eStrikeout, eUnderline, eOverline, bUnderlineAbove);
-                aLineGeo.maUnderlineColor = GetTextLineColor();
-                ImplDrawTextLine(aLineGeo);
+                aLineGeo.maUnderlineColor = rOutDev.GetTextLineColor();
+                vcl::rendercontext::PrimitiveRenderer::DrawTextLine(rOutDev, aLineGeo);
             }
         }
     }
@@ -627,16 +627,16 @@ void OutputDevice::ImplDrawTextLines( SalLayout& rSalLayout, FontStrikeout eStri
         basegfx::B2DPoint aStartPt = rSalLayout.GetDrawPosition();
         {
             TextLineGeometry aLineGeo(Point(aStartPt.getX(), aStartPt.getY()), 0, rSalLayout.GetTextWidth(), eStrikeout, eUnderline, eOverline, bUnderlineAbove);
-            aLineGeo.maUnderlineColor = GetTextLineColor();
-            ImplDrawTextLine(aLineGeo);
+            aLineGeo.maUnderlineColor = rOutDev.GetTextLineColor();
+            vcl::rendercontext::PrimitiveRenderer::DrawTextLine(rOutDev, aLineGeo);
         }
     }
 }
 
-void OutputDevice::ImplDrawMnemonicLine( tools::Long nX, tools::Long nY, tools::Long nWidth )
+void vcl::rendercontext::PrimitiveRenderer::DrawMnemonicLine(OutputDevice& rOutDev, tools::Long nX, tools::Long nY, tools::Long nWidth )
 {
     tools::Long nBaseX = nX;
-    if( /*HasMirroredGraphics() &&*/ IsRTLEnabled() )
+    if( /*HasMirroredGraphics() &&*/ rOutDev.IsRTLEnabled() )
     {
         // revert the hack that will be done later in ImplDrawTextLine
         nX = nBaseX - nWidth - (nX - nBaseX - 1);
@@ -644,8 +644,8 @@ void OutputDevice::ImplDrawMnemonicLine( tools::Long nX, tools::Long nY, tools::
 
     {
         TextLineGeometry aLineGeo(Point(nX, nY), 0, nWidth, STRIKEOUT_NONE, LINESTYLE_SINGLE, LINESTYLE_NONE, false);
-        aLineGeo.maUnderlineColor = GetTextLineColor();
-        ImplDrawTextLine(aLineGeo);
+        aLineGeo.maUnderlineColor = rOutDev.GetTextLineColor();
+        vcl::rendercontext::PrimitiveRenderer::DrawTextLine(rOutDev, aLineGeo);
     }
 }
 
@@ -740,7 +740,7 @@ void OutputDevice::DrawTextLine( const Point& rPos, tools::Long nWidth,
     {
         TextLineGeometry aLineGeo(aPos, 0, fWidth, eStrikeout, eUnderline, eOverline, false);
         aLineGeo.maUnderlineColor = GetTextLineColor();
-        ImplDrawTextLine(aLineGeo);
+        vcl::rendercontext::PrimitiveRenderer::DrawTextLine(*this, aLineGeo);
     }
 }
 

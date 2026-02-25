@@ -11,6 +11,7 @@
 
 #include <tools/solar.h>
 #include <tools/degree.hxx>
+#include <tools/fontenum.hxx>
 #include <tools/long.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
@@ -32,6 +33,7 @@ class Point;
 class Size;
 class Color;
 class OutputDevice;
+class SalLayout;
 class LineInfo;
 namespace tools
 {
@@ -151,6 +153,12 @@ public:
 
     static void DrawTextRect(SalGraphics& rGraphics, OutputDevice* pOutDev, const Point& rBasePt,
                              const tools::Rectangle& rRect, Degree10 nOrientation);
+    static void DrawTextLines(OutputDevice& rOutDev, SalLayout& rSalLayout,
+                              FontStrikeout eStrikeout, FontLineStyle eUnderline,
+                              FontLineStyle eOverline, bool bWordLine, bool bUnderlineAbove);
+    static void DrawTextLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo);
+    static void DrawMnemonicLine(OutputDevice& rOutDev, tools::Long nX, tools::Long nY,
+                                 tools::Long nWidth);
 
     // change to private after full migration
     static void DrawStraightTextLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo,

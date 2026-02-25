@@ -984,10 +984,7 @@ public:
                                               FontLineStyle eUnderline,
                                               FontLineStyle eOverline );
 
-    SAL_DLLPRIVATE void ImplDrawTextLine(const TextLineGeometry& rGeo);
 
-    SAL_DLLPRIVATE void         ImplDrawTextLines( SalLayout&, FontStrikeout eStrikeout, FontLineStyle eUnderline,
-                                                   FontLineStyle eOverline, bool bWordLine, bool bUnderlineAbove );
 
     void                        DrawWaveLine( const Point& rStartPos, const Point& rEndPos, tools::Long nLineWidth = 1, tools::Long nWaveHeight = 3);
 
@@ -1210,7 +1207,6 @@ private:
 
 
 
-    SAL_DLLPRIVATE void         ImplDrawMnemonicLine( tools::Long nX, tools::Long nY, tools::Long nWidth );
     SAL_DLLPRIVATE void         ImplDrawMnemonic( vcl::TextLayoutCommon& rLayout, const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen, sal_Int32 nRelMnemonicPos, const Point& rPos );
     ///@}
 
