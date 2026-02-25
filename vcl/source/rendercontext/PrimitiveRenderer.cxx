@@ -1467,9 +1467,9 @@ void PrimitiveRenderer::DrawMnemonicLine(OutputDevice& rOutDev, tools::Long nX, 
                                          tools::Long nWidth)
 {
     tools::Long nBaseX = nX;
-    if (/*HasMirroredGraphics() &&*/ rOutDev.IsRTLEnabled())
+    if (rOutDev.IsRTLEnabled())
     {
-        // revert the hack that will be done later in ImplDrawTextLine
+        // FIXME we need to resolve this, but this reverts the hack that will be done later in DrawTextLine
         nX = nBaseX - nWidth - (nX - nBaseX - 1);
     }
 
