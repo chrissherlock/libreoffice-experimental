@@ -36,6 +36,7 @@
 #include <vcl/rendercontext/PrimitiveRenderer.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/text/TextDecorator.hxx>
+#include <vcl/text/TextLineGeometry.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/skia/SkiaHelper.hxx>
 
@@ -454,29 +455,29 @@ void OutputDevice::ImplDrawStraightTextLine(const TextLineGeometry& rGeo, tools:
     }
 }
 
-void OutputDevice::ImplDrawStrikeoutLine(const TextLineGeometry& rGeo, tools::Long nY, Color aColor)
+void vcl::rendercontext::PrimitiveRenderer::DrawStrikeoutLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo, tools::Long nY, Color aColor)
 {
     if (!rGeo.mfWidth)
         return;
 
     vcl::text::StrikeoutGeometry aGeo = vcl::text::TextDecorator::CalculateStrikeoutGeometry(
-        *mpFontInstance->mxFontMetric, rGeo.meStrikeout, nY);
+        *rOutDev.mpFontInstance->mxFontMetric, rGeo.meStrikeout, nY);
 
     if (aGeo.aSegments.empty())
         return;
 
-    if (mpGraphicsState->mbLineColor || mbLineColorDirty)
+    if (rOutDev.mpGraphicsState->mbLineColor || rOutDev.mbLineColorDirty)
     {
-        mpGraphics->SetLineColor();
-        mbLineColorDirty = true;
+        rOutDev.mpGraphics->SetLineColor();
+        rOutDev.mbLineColorDirty = true;
     }
 
-    mpGraphics->SetFillColor(aColor);
-    mbFillColorDirty = true;
+    rOutDev.mpGraphics->SetFillColor(aColor);
+    rOutDev.mbFillColorDirty = true;
 
     for (const auto& rSeg : aGeo.aSegments)
     {
-        vcl::rendercontext::PrimitiveRenderer::DrawTextRect(*mpGraphics, this, rGeo.maOrigin, tools::Rectangle(Point(rGeo.mnDistX, rSeg.nYOffset), Size(rGeo.mfWidth, rSeg.nHeight)), mpFontRealization->mxFont->mnOrientation);
+        vcl::rendercontext::PrimitiveRenderer::DrawTextRect(*rOutDev.mpGraphics, &rOutDev, rGeo.maOrigin, tools::Rectangle(Point(rGeo.mnDistX, rSeg.nYOffset), Size(rGeo.mfWidth, rSeg.nHeight)), rOutDev.mpFontRealization->mxFont->mnOrientation);
     }
 }
 
@@ -599,7 +600,7 @@ void OutputDevice::ImplDrawTextLine(const TextLineGeometry& rGeo)
         if (aDrawGeo.meStrikeout == STRIKEOUT_SLASH || aDrawGeo.meStrikeout == STRIKEOUT_X)
             ImplDrawStrikeoutChar(aDrawGeo, 0, aStrikeoutColor);
         else
-            ImplDrawStrikeoutLine(aDrawGeo, aInfo.nStrikeoutOffset, aStrikeoutColor);
+            vcl::rendercontext::PrimitiveRenderer::DrawStrikeoutLine(*this, aDrawGeo, aInfo.nStrikeoutOffset, aStrikeoutColor);
     }
 }
 

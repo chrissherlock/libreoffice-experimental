@@ -11,6 +11,7 @@
 
 #include <tools/solar.h>
 #include <tools/degree.hxx>
+#include <tools/long.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
@@ -42,6 +43,8 @@ namespace tools
 {
 class Rectangle;
 }
+
+struct TextLineGeometry;
 
 namespace vcl::rendercontext
 {
@@ -147,6 +150,10 @@ public:
 
     static void DrawTextRect(SalGraphics& rGraphics, OutputDevice* pOutDev, const Point& rBasePt,
                              const tools::Rectangle& rRect, Degree10 nOrientation);
+
+    // change to private after full migration
+    static void DrawStrikeoutLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo,
+                                  tools::Long nY, Color aColor);
 
 private:
     static void DrawSinglePolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly);
