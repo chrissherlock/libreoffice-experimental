@@ -827,4 +827,17 @@ double TextGeometry::GetTextHeightPixel(const vcl::font::FontRealization& rReali
                                + rRealization.nEmphasisDescent);
 }
 
+double TextGeometry::CalculateWaveLineOrientation(const Point& rStartPt, const Point& rEndPt)
+{
+    tools::Long nStartX = rStartPt.X();
+    tools::Long nStartY = rStartPt.Y();
+    tools::Long nEndX = rEndPt.X();
+    tools::Long nEndY = rEndPt.Y();
+
+    if (nStartY != nEndY || nStartX > nEndX)
+        return basegfx::rad2deg(std::atan2(nStartY - nEndY, nEndX - nStartX));
+
+    return 0.0;
+}
+
 } // namespace vcl::text

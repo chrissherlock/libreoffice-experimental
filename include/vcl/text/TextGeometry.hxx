@@ -103,6 +103,8 @@ public:
                                                    tools::Long nContentHeight, DrawTextFlags nStyle,
                                                    Degree10 nOrientation);
 
+    static double CalculateWaveLineOrientation(const Point& rStartPt, const Point& rEndPt);
+
     static Point GetRotationOrigin(const Point& rPos, const Size& rTextSize, Degree10 nOrientation,
                                    TextAlign eAlign);
 

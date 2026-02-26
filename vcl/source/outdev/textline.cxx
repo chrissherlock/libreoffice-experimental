@@ -38,6 +38,7 @@
 #include <vcl/rendercontext/TextLineGeometry.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/text/TextDecorator.hxx>
+#include <vcl/text/TextGeometry.hxx>
 #include <vcl/text/TextLineGeometry.hxx>
 #include <vcl/virdev.hxx>
 
@@ -270,15 +271,7 @@ void OutputDevice::DrawWaveLine(const Point& rStartPos, const Point& rEndPos, to
     tools::Long nStartY = aStartPt.Y();
     tools::Long nEndX = aEndPt.X();
     tools::Long nEndY = aEndPt.Y();
-    double fOrientation = 0.0;
-
-    // handle rotation
-    if (nStartY != nEndY || nStartX > nEndX)
-    {
-        fOrientation = basegfx::rad2deg(std::atan2(nStartY - nEndY, nEndX - nStartX));
-        // un-rotate the end point
-        aStartPt.RotateAround(nEndX, nEndY, Degree10(static_cast<sal_Int16>(-fOrientation * 10.0)));
-    }
+    double fOrientation = vcl::text::TextGeometry::CalculateWaveLineOrientation(aStartPt, aEndPt);
 
     // Handle HiDPI
     float fScaleFactor = GetDPIScaleFactor();
