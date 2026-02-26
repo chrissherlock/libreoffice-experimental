@@ -257,6 +257,47 @@ void OutputDevice::DrawTextLine( const Point& rPos, tools::Long nWidth,
     vcl::rendercontext::PrimitiveRenderer::DrawTextLine(*this, aLineGeo);
 }
 
+static void lcl_DrawCachedHorizontalWaveLine(OutputDevice& rOutDev, const Point& rStartPos,
+                                             tools::Long nStartX, tools::Long nEndX,
+                                             tools::Long nWaveHeight, tools::Long nLineWidth)
+{
+    static tools::DeleteOnDeinit< WavyLineCache > snLineCache {};
+    if (!snLineCache.get())
+        return;
+
+    WavyLineCache& rLineCache = *snLineCache.get();
+    Bitmap aWavylinebmp;
+    Color aLineColor = rOutDev.GetLineColor();
+
+    if (!rLineCache.find(aLineColor, nLineWidth, nWaveHeight, nEndX - nStartX, aWavylinebmp))
+    {
+        size_t nWordLength = nEndX - nStartX;
+
+        // start with something big to avoid updating it frequently
+        nWordLength = nWordLength < 1024 ? 1024 : nWordLength;
+
+        ScopedVclPtrInstance<VirtualDevice> pVirtDev(rOutDev, DeviceFormat::WITH_ALPHA);
+        pVirtDev->SetOutputSizePixel(Size(nWordLength, nWaveHeight * 2), false);
+        pVirtDev->SetLineColor(aLineColor);
+        pVirtDev->SetBackground( Wallpaper(COL_TRANSPARENT));
+        pVirtDev->Erase();
+        pVirtDev->SetAntialiasing( AntialiasingFlags::Enable );
+
+        // Render the vector to the virtual canvas
+        vcl::rendercontext::PrimitiveRenderer::DrawWaveLineBezier(*pVirtDev, *pVirtDev->GetGraphics(),
+                                                                  0, 0, nWordLength, 0, nWaveHeight, 0.0, nLineWidth);
+
+        Bitmap aBitmap(pVirtDev->GetBitmap(Point(0, 0), pVirtDev->GetOutputSize()));
+        rLineCache.insert(aBitmap, aLineColor, nLineWidth, nWaveHeight, nWordLength, aWavylinebmp);
+    }
+
+    if (aWavylinebmp.ImplGetSalBitmap() != nullptr)
+    {
+        Size aSize(nEndX - nStartX, aWavylinebmp.GetSizePixel().Height());
+        rOutDev.DrawBitmap(Point(rStartPos.X(), rStartPos.Y()), rOutDev.PixelToLogic(aSize), Point(), aSize, aWavylinebmp);
+    }
+}
+
 void OutputDevice::DrawWaveLine(const Point& rStartPos, const Point& rEndPos, tools::Long nLineWidth, tools::Long nWaveHeight)
 {
     assert(!is_double_buffered_window());
@@ -283,42 +324,15 @@ void OutputDevice::DrawWaveLine(const Point& rStartPos, const Point& rEndPos, to
 
         // odd heights look better than even
         if (nWaveHeight % 2 == 0)
-        {
             nWaveHeight--;
-        }
     }
 
     LogicalFontInstance* pFontInstance = mpFontInstance.get();
     vcl::text::TextDecorator::SanitizeWaveLineHeight(nWaveHeight, nLineWidth, *pFontInstance->mxFontMetric);
 
-    if ( fOrientation == 0.0 )
+    if (fOrientation == 0.0)
     {
-        static tools::DeleteOnDeinit< WavyLineCache > snLineCache {};
-        if ( !snLineCache.get() )
-            return;
-        WavyLineCache& rLineCache = *snLineCache.get();
-        Bitmap aWavylinebmp;
-        if ( !rLineCache.find( GetLineColor(), nLineWidth, nWaveHeight, nEndX - nStartX, aWavylinebmp ) )
-        {
-            size_t nWordLength = nEndX - nStartX;
-            // start with something big to avoid updating it frequently
-            nWordLength = nWordLength < 1024 ? 1024 : nWordLength;
-            ScopedVclPtrInstance< VirtualDevice > pVirtDev( *this, DeviceFormat::WITH_ALPHA );
-            pVirtDev->SetOutputSizePixel( Size( nWordLength, nWaveHeight * 2 ), false );
-            pVirtDev->SetLineColor( GetLineColor() );
-            pVirtDev->SetBackground( Wallpaper( COL_TRANSPARENT ) );
-            pVirtDev->Erase();
-            pVirtDev->SetAntialiasing( AntialiasingFlags::Enable );
-            vcl::rendercontext::PrimitiveRenderer::DrawWaveLineBezier(*pVirtDev, *pVirtDev->GetGraphics(), 0, 0, nWordLength, 0, nWaveHeight, fOrientation, nLineWidth);
-            Bitmap aBitmap(pVirtDev->GetBitmap(Point(0, 0), pVirtDev->GetOutputSize()));
-
-            rLineCache.insert( aBitmap, GetLineColor(), nLineWidth, nWaveHeight, nWordLength, aWavylinebmp );
-        }
-        if ( aWavylinebmp.ImplGetSalBitmap() != nullptr )
-        {
-            Size _size( nEndX - nStartX, aWavylinebmp.GetSizePixel().Height() );
-            DrawBitmap(Point( rStartPos.X(), rStartPos.Y() ), PixelToLogic( _size ), Point(), _size, aWavylinebmp);
-        }
+        lcl_DrawCachedHorizontalWaveLine(*this, rStartPos, nStartX, nEndX, nWaveHeight, nLineWidth);
         return;
     }
 
