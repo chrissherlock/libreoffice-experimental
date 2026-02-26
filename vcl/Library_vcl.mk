@@ -331,6 +331,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/text/FontMappingTracker \
     vcl/source/text/TextLayoutRequest \
     vcl/source/text/TextRecordingDispatcher \
+    vcl/source/text/TextEffects \
     vcl/source/text/TextGeometry \
     vcl/source/text/TextDecorator \
     vcl/source/text/TextJustifier \

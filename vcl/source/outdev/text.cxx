@@ -32,6 +32,7 @@
 #include <vcl/mnemonic.hxx>
 #include <vcl/rendercontext/SystemTextColorFlags.hxx>
 #include <vcl/rendercontext/PrimitiveRenderer.hxx>
+#include <vcl/text/TextEffects.hxx>
 #include <vcl/text/TextGeometry.hxx>
 #include <vcl/text/TextSpan.hxx>
 #include <vcl/text/TextLayoutData.hxx>
@@ -300,25 +301,12 @@ void OutputDevice::ImplDrawReliefText(SalLayout& rSalLayout)
         ImplInitTextColor();
     });
 
-    Color aReliefColor(COL_LIGHTGRAY);
-    Color aTextColor(aOldColor);
-
-    // Black text is always drawn on white in VCL logic
-    if (aTextColor == COL_BLACK)
-        aTextColor = COL_WHITE;
-
-    Color aEffectiveLineColor = (aOldTextLineColor == COL_BLACK) ? COL_WHITE : aOldTextLineColor;
-    Color aEffectiveOverlineColor
-        = (aOldOverlineColor == COL_BLACK) ? COL_WHITE : aOldOverlineColor;
-
-    // Relief color is black for white text
-    if (aTextColor == COL_WHITE)
-        aReliefColor = COL_BLACK;
+    vcl::text::ReliefColors aColors = vcl::text::TextEffects::GetReliefColors(aOldColor, aOldTextLineColor, aOldOverlineColor);
 
     // Draw Relief Shadow
-    SetTextColor(aReliefColor);
-    SetTextLineColor(aReliefColor);
-    SetOverlineColor(aReliefColor);
+    SetTextColor(aColors.maReliefColor);
+    SetTextLineColor(aColors.maReliefColor);
+    SetOverlineColor(aColors.maReliefColor);
     ImplInitTextColor();
 
     tools::Long nOff = vcl::text::TextGeometry::GetReliefOffset(
@@ -330,9 +318,9 @@ void OutputDevice::ImplDrawReliefText(SalLayout& rSalLayout)
     // Draw Main Text
     rSalLayout.DrawOffset() = aOrigOffset; // Reset offset for main draw
 
-    SetTextColor(aTextColor);
-    SetTextLineColor(aEffectiveLineColor);
-    SetOverlineColor(aEffectiveOverlineColor);
+    SetTextColor(aColors.maTextColor);
+    SetTextLineColor(aColors.maLineColor);
+    SetOverlineColor(aColors.maOverlineColor);
     ImplInitTextColor();
 
     ImplRenderLayout(rSalLayout, mpFontRealization->bHasLineDecorations);
@@ -357,10 +345,7 @@ void OutputDevice::ImplDrawShadowText(SalLayout& rSalLayout)
     SetTextLineColor();
     SetOverlineColor();
 
-    if ((GetTextColor() == COL_BLACK) || (GetTextColor().GetLuminance() < 8))
-        SetTextColor(COL_LIGHTGRAY);
-    else
-        SetTextColor(COL_BLACK);
+    SetTextColor(vcl::text::TextEffects::GetShadowColor(aOldColor));
     ImplInitTextColor();
 
     // Draw Shadow
