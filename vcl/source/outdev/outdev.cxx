@@ -92,14 +92,10 @@ OutputDevice::OutputDevice(OutDevType eOutDevType)
     mbDevOutput                     = false;
     mpGraphicsState->meTextLanguage                  = LANGUAGE_SYSTEM;  // TODO: get default from configuration?
     mbLineColorDirty                 = true;
-// mbFontDirty                      = true; // Removed
     mbInitTextColor                 = true;
     mpClippingController->SetNoClipRegion();
     mbEnableRTL                     = false;    // mirroring must be explicitly allowed (typically for windows only)
     mbSubpixelPositioning           = false; // tdf#168002 allow SubpixelPositioning (default: false)
-
-    // struct ImplOutDevData- see #i82615#
-    mpRotateDev       = nullptr;
 
     mpClippingController->SetDirty(true);
 }
@@ -120,11 +116,8 @@ void OutputDevice::dispose()
         mpUnoGraphicsList = nullptr;
     }
 
-    mpRotateDev.disposeAndClear();
-
     // #i75163#
     mpMapper->InvalidateViewTransform();
-
 
     // for some reason, we haven't removed state from the stack properly
     if ( !maOutDevStateStack.empty() )

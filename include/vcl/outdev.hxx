@@ -257,7 +257,6 @@ private:
     rtl::Reference<LogicalFontInstance> mpForcedFallbackInstance;
     mutable std::unique_ptr<vcl::font::PhysicalFontFaceCollection>  mpFontFaceCollection;
     std::vector<vcl::State>        maOutDevStateStack;
-    VclPtr<VirtualDevice> mpRotateDev;
     std::optional<vcl::text::TextRecordingState> moRecordingState;
     std::vector< VCLXGraphics* >*   mpUnoGraphicsList;
     vcl::ExtOutDevData*             mpExtOutDevData;
@@ -989,9 +988,6 @@ public:
     void                        DrawWaveLine( const Point& rStartPos, const Point& rEndPos, tools::Long nLineWidth = 1, tools::Long nWaveHeight = 3);
 
     SAL_DLLPRIVATE bool ImplDrawRotateText(SalLayout&);
-    SAL_DLLPRIVATE VirtualDevice* ImplPrepareRotateDevice(const Size& rSize);
-    SAL_DLLPRIVATE void ImplDrawRotatedTextMask(const Point& rPoint, const Bitmap& rBmp);
-    SAL_DLLPRIVATE Bitmap ImplCreateRotatedTextBitmap(SalLayout& rSalLayout, const tools::Rectangle& rBoundRect);
 
     tools::Rectangle                   GetTextRect( const tools::Rectangle& rRect,
                                              const OUString& rStr, DrawTextFlags nStyle = DrawTextFlags::WordBreak,

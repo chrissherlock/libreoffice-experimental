@@ -129,58 +129,18 @@ bool OutputDevice::ImplDrawRotateText(SalLayout& rSalLayout)
         rSalLayout.DrawOffset() = aOrigOffset;
     });
 
-    tools::Long nX = aOrigBase.getX();
-    tools::Long nY = aOrigBase.getY();
-
     tools::Rectangle aBoundRect
         = vcl::text::TextGeometry::GetTextInkBounds(rSalLayout, *mpFontRealization, false);
 
-    Bitmap aBmp = ImplCreateRotatedTextBitmap(rSalLayout, aBoundRect);
-
-    if (aBmp.IsEmpty())
+    if (aBoundRect.IsEmpty())
         return false;
 
-    Point aPoint = vcl::text::TextGeometry::GetRotatedImageOrigin(
-        Point(nX, nY), aBoundRect, mpFontRealization->mxFont->mnOwnOrientation);
+    // 1. Prepare the Off-Screen Canvas (VirtualDevice)
+    ScopedVclPtrInstance<VirtualDevice> pVDev(*this);
+    if (!pVDev->SetOutputSizePixel(aBoundRect.GetSize()))
+        return false;
 
-    ImplDrawRotatedTextMask(aPoint, aBmp);
-
-    return true;
-}
-
-Bitmap OutputDevice::ImplCreateRotatedTextBitmap(SalLayout& rSalLayout,
-                                                 const tools::Rectangle& rBoundRect)
-{
-    VirtualDevice* pVDev = ImplPrepareRotateDevice(rBoundRect.GetSize());
-
-    if (!pVDev)
-        return Bitmap();
-
-    // Adjust layout to draw into the buffer's upper-left corner
-    rSalLayout.DrawBase() = basegfx::B2DPoint(-rBoundRect.Left(), -rBoundRect.Top());
-    rSalLayout.DrawOffset() = basegfx::B2DPoint(0, 0);
-    rSalLayout.DrawText(*pVDev->mpGraphics);
-
-    // Extract the buffer and apply the rotation
-    Bitmap aBmp = pVDev->GetBitmap(Point(), rBoundRect.GetSize());
-
-    if (!aBmp.IsEmpty())
-        aBmp.Rotate(mpFontRealization->mxFont->mnOwnOrientation, COL_WHITE);
-
-    return aBmp;
-}
-
-VirtualDevice* OutputDevice::ImplPrepareRotateDevice(const Size& rSize)
-{
-    if (!mpRotateDev)
-        mpRotateDev = VclPtr<VirtualDevice>::Create(*this);
-
-    VirtualDevice* pVDev = mpRotateDev;
-    if (!pVDev->SetOutputSizePixel(rSize))
-        return nullptr;
-
-    const vcl::font::FontSelectPattern& rPattern
-        = mpFontRealization->mxFont->GetFontSelectPattern();
+    const vcl::font::FontSelectPattern& rPattern = mpFontRealization->mxFont->GetFontSelectPattern();
     vcl::Font aFont(GetFont());
     aFont.SetOrientation(0_deg10); // Draw horizontal first
     aFont.SetFontSize(Size(rPattern.mnWidth, rPattern.mnHeight));
@@ -190,14 +150,26 @@ VirtualDevice* OutputDevice::ImplPrepareRotateDevice(const Size& rSize)
     pVDev->SetTextFillColor();
 
     if (!pVDev->InitFont())
-        return nullptr;
+        return false;
 
     pVDev->ImplInitTextColor();
-    return pVDev;
-}
 
-void OutputDevice::ImplDrawRotatedTextMask(const Point& rPoint, const Bitmap& rBmp)
-{
+    // 2. Draw text onto the canvas
+    rSalLayout.DrawBase() = basegfx::B2DPoint(-aBoundRect.Left(), -aBoundRect.Top());
+    rSalLayout.DrawOffset() = basegfx::B2DPoint(0, 0);
+    rSalLayout.DrawText(*pVDev->mpGraphics);
+
+    // 3. Extract and rotate the bitmap
+    Bitmap aBmp = pVDev->GetBitmap(Point(), aBoundRect.GetSize());
+    if (aBmp.IsEmpty())
+        return false;
+
+    aBmp.Rotate(mpFontRealization->mxFont->mnOwnOrientation, COL_WHITE);
+
+    // 4. Stamp the bitmap back to the screen
+    Point aPoint = vcl::text::TextGeometry::GetRotatedImageOrigin(
+        Point(aOrigBase.getX(), aOrigBase.getY()), aBoundRect, mpFontRealization->mxFont->mnOwnOrientation);
+
     tools::Long nOldOffX = GetOutOffXPixel();
     tools::Long nOldOffY = GetOutOffYPixel();
     bool bOldMap = mpMapper->IsMapModeEnabled();
@@ -205,7 +177,7 @@ void OutputDevice::ImplDrawRotatedTextMask(const Point& rPoint, const Bitmap& rB
     // Suspend recording for mask drawing
     vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
 
-    comphelper::ScopeGuard aRestoreGuard([&]() {
+    comphelper::ScopeGuard aStateRestoreGuard([&]() {
         mpMapper->EnableMapMode(bOldMap);
         SetDeviceOriginX(nOldOffX);
         SetDeviceOriginY(nOldOffY);
@@ -215,7 +187,9 @@ void OutputDevice::ImplDrawRotatedTextMask(const Point& rPoint, const Bitmap& rB
     SetDeviceOriginY(0);
     mpMapper->EnableMapMode(false);
 
-    DrawMask(rPoint, rBmp, GetTextColor());
+    DrawMask(aPoint, aBmp, GetTextColor());
+
+    return true;
 }
 
 void OutputDevice::ImplRenderLayout(SalLayout& rSalLayout, bool bTextLines)
