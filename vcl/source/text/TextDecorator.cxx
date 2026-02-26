@@ -10,6 +10,7 @@
 #include <o3tl/unit_conversion.hxx>
 
 #include <vcl/font.hxx>
+#include <vcl/skia/SkiaHelper.hxx>
 #include <vcl/text/TextDecorator.hxx>
 #include <vcl/vcllayout.hxx>
 
@@ -485,6 +486,21 @@ void TextDecorator::GetEmphasisMarkPositions(const SalLayout& rSalLayout,
                       nAnchorY + nShapeAdj - nYCenterOff);
 
         rPoints.push_back(aMarkPt);
+    }
+}
+
+// #109280# make sure the waveline does not exceed the descent to avoid paint problems
+void TextDecorator::SanitizeWaveLineHeight(tools::Long& rWaveHeight, tools::Long& rLineWidth,
+                                           const FontMetricData& rFontMetric)
+{
+    if (rWaveHeight > rFontMetric.GetWavelineUnderlineSize()
+#ifdef MACOSX
+        || !SkiaHelper::isVCLSkiaEnabled()
+#endif
+    )
+    {
+        rWaveHeight = rFontMetric.GetWavelineUnderlineSize();
+        rLineWidth = 0; // tdf#124848 hairline
     }
 }
 

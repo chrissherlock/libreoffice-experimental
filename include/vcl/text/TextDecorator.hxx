@@ -97,6 +97,9 @@ public:
 
     static TextLineGeometry GetTextLineGeometry(const TextLineRequest& rReq,
                                                 const FontMetricData& rMetric);
+
+    static void SanitizeWaveLineHeight(tools::Long& rWaveHeight, tools::Long& rLineWidth,
+                                       const FontMetricData& rFontMetric);
 };
 
 } // namespace vcl::text

@@ -40,7 +40,6 @@
 #include <vcl/text/TextDecorator.hxx>
 #include <vcl/text/TextLineGeometry.hxx>
 #include <vcl/virdev.hxx>
-#include <vcl/skia/SkiaHelper.hxx>
 
 #include <CoordinateMapper.hxx>
 #include <ClippingController.hxx>
@@ -296,19 +295,8 @@ void OutputDevice::DrawWaveLine(const Point& rStartPos, const Point& rEndPos, to
         }
     }
 
-    // #109280# make sure the waveline does not exceed the descent to avoid paint problems
     LogicalFontInstance* pFontInstance = mpFontInstance.get();
-    if (nWaveHeight > pFontInstance->mxFontMetric->GetWavelineUnderlineSize()
-    // tdf#153223 polyline with lineheight >0 not drawn when skia is off
-#ifdef MACOSX
-        || !SkiaHelper::isVCLSkiaEnabled()
-#endif
-       )
-    {
-        nWaveHeight = pFontInstance->mxFontMetric->GetWavelineUnderlineSize();
-        // tdf#124848 hairline
-        nLineWidth = 0;
-    }
+    vcl::text::TextDecorator::SanitizeWaveLineHeight(nWaveHeight, nLineWidth, *pFontInstance->mxFontMetric);
 
     if ( fOrientation == 0.0 )
     {
