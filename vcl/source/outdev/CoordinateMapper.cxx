@@ -1826,3 +1826,47 @@ void CoordinateMapper::MirrorDevicePixelRect(tools::Rectangle& rRect, tools::Lon
 
     rRect.Move(x - rRect.Left(), 0);
 }
+
+void CoordinateMapper::MirrorDevicePixelPolygon(tools::Polygon& rPoly, tools::Long nFrameWidth,
+                                                bool bRTL, bool bAntiparallel) const
+{
+    if (!bRTL && !bAntiparallel)
+        return;
+
+    const sal_uInt16 nPoints = rPoly.GetSize();
+
+    if (!nPoints || !nFrameWidth)
+        return;
+
+    // We must mirror the points AND reverse the array to preserve correct polygon winding order
+    tools::Polygon aMirrored(nPoints);
+
+    for (sal_uInt16 i = 0, j = nPoints - 1; i < nPoints; ++i, --j)
+    {
+        Point aPt = rPoly[i];
+        MirrorDevicePixelPoint(aPt, nFrameWidth, bRTL, bAntiparallel);
+        aMirrored[j] = aPt;
+
+        if (rPoly.HasFlags())
+            aMirrored.SetFlags(j, rPoly.GetFlags(i));
+    }
+
+    rPoly = aMirrored;
+}
+
+void CoordinateMapper::MirrorDevicePixelPolyPolygon(tools::PolyPolygon& rPolyPoly,
+                                                    tools::Long nFrameWidth, bool bRTL,
+                                                    bool bAntiparallel) const
+{
+    if (!bRTL && !bAntiparallel)
+        return;
+
+    const sal_uInt16 nPoly = rPolyPoly.Count();
+
+    for (sal_uInt16 i = 0; i < nPoly; i++)
+    {
+        tools::Polygon aPoly = rPolyPoly[i];
+        MirrorDevicePixelPolygon(aPoly, nFrameWidth, bRTL, bAntiparallel);
+        rPolyPoly[i] = aPoly;
+    }
+}

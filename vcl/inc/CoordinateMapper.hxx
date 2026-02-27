@@ -262,6 +262,11 @@ public:
     basegfx::B2DPolyPolygon PixelToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly,
                                          const MapMode& rMapMode) const;
     tools::Long LogicWidthToDevicePixel(tools::Long nWidth) const;
+    void MirrorDevicePixelPolygon(tools::Polygon& rPoly, tools::Long nFrameWidth, bool bRTL,
+                                  bool bAntiparallel) const;
+    void MirrorDevicePixelPolyPolygon(tools::PolyPolygon& rPolyPoly, tools::Long nFrameWidth,
+                                      bool bRTL, bool bAntiparallel) const;
+
     /** Mirrors a device pixel rectangle into physical frame coordinates based on RTL/Antiparallel rules */
     void MirrorDevicePixelRect(tools::Rectangle& rRect, tools::Long nFrameWidth, bool bRTL,
                                bool bAntiparallel) const;

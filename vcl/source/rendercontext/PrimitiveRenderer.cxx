@@ -606,71 +606,96 @@ struct PolyPolyBuffer
 
 } // end anonymous namespace
 
-void PrimitiveRenderer::DrawPolyPolygonGeometry(OutputDevice& rOutDev,
-                                                const tools::PolyPolygon& rPolyPoly)
+void PrimitiveRenderer::DrawDevicePolyPolygonGeometry(SalGraphics& rGraphics,
+                                                      const tools::PolyPolygon& rDevicePolyPoly)
 {
-    if (!rPolyPoly.Count())
+    if (!rDevicePolyPoly.Count())
         return;
 
-    SalGraphics* pGraphics = rOutDev.GetGraphics();
-    if (!pGraphics && !rOutDev.AcquireGraphics())
-        return;
-    pGraphics = rOutDev.GetGraphics();
-
-    PolyPolyBuffer aBuffer(rPolyPoly);
+    PolyPolyBuffer aBuffer(rDevicePolyPoly);
     if (aBuffer.mnValidCount == 0)
         return;
 
-    // Single polygon optimization
     if (aBuffer.mnValidCount == 1)
     {
-        const tools::Polygon& rPoly = rPolyPoly.GetObject(aBuffer.mnLastIndex);
-        DrawPolygonGeometry(rOutDev, rPoly);
+        DrawDevicePolygonGeometry(rGraphics, rDevicePolyPoly.GetObject(aBuffer.mnLastIndex));
         return;
     }
 
-    // Hardware dispatch with Bézier support check
     if (aBuffer.mbHaveBezier)
     {
-        if (!pGraphics->DrawPolyPolygonBezier(aBuffer.mnValidCount, aBuffer.pPointAry,
-                                              aBuffer.pPointAryAry, aBuffer.pFlagAryAry, rOutDev))
+        if (!rGraphics.drawPolyPolygonBezier(aBuffer.mnValidCount, aBuffer.pPointAry,
+                                             aBuffer.pPointAryAry, aBuffer.pFlagAryAry))
         {
-            tools::PolyPolygon aSub = tools::PolyPolygon::SubdivideBezier(rPolyPoly);
-            DrawPolyPolygonGeometry(rOutDev, aSub);
+            tools::PolyPolygon aSub = tools::PolyPolygon::SubdivideBezier(rDevicePolyPoly);
+            DrawDevicePolyPolygonGeometry(rGraphics, aSub);
         }
         return;
     }
 
-    pGraphics->DrawPolyPolygon(aBuffer.mnValidCount, aBuffer.pPointAry, aBuffer.pPointAryAry,
-                               rOutDev);
+    // Naked pure virtual backend call!
+    rGraphics.drawPolyPolygon(aBuffer.mnValidCount, aBuffer.pPointAry, aBuffer.pPointAryAry);
 }
 
-void PrimitiveRenderer::DrawPolygonGeometry(OutputDevice& rOutDev, const tools::Polygon& rPoly)
+void PrimitiveRenderer::DrawPolyPolygonGeometry(OutputDevice& rOutDev,
+                                                const tools::PolyPolygon& rPolyPoly)
 {
-    sal_uInt16 nPoints = rPoly.GetSize();
-    if (nPoints < 2)
-        return;
-
     SalGraphics* pGraphics = rOutDev.GetGraphics();
     if (!pGraphics && !rOutDev.AcquireGraphics())
         return;
     pGraphics = rOutDev.GetGraphics();
 
-    const Point* pPtAry = rPoly.GetConstPointAry();
+    tools::PolyPolygon aDevicePolyPoly = rPolyPoly;
+    bool bRTL = rOutDev.IsRTLEnabled() || (pGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+    bool bAntiparallel = rOutDev.ImplIsAntiparallel();
+    tools::Long nFrameWidth
+        = rOutDev.IsVirtual() ? rOutDev.GetOutputWidthPixel() : pGraphics->GetGraphicsWidth();
 
-    if (rPoly.HasFlags())
+    rOutDev.mpMapper->MirrorDevicePixelPolyPolygon(aDevicePolyPoly, nFrameWidth, bRTL,
+                                                   bAntiparallel);
+    DrawDevicePolyPolygonGeometry(*pGraphics, aDevicePolyPoly);
+}
+
+void PrimitiveRenderer::DrawDevicePolygonGeometry(SalGraphics& rGraphics,
+                                                  const tools::Polygon& rDevicePoly)
+{
+    sal_uInt16 nPoints = rDevicePoly.GetSize();
+    if (nPoints < 2)
+        return;
+
+    const Point* pPtAry = rDevicePoly.GetConstPointAry();
+
+    if (rDevicePoly.HasFlags())
     {
-        const PolyFlags* pFlgAry = rPoly.GetConstFlagAry();
-        if (!pGraphics->DrawPolygonBezier(nPoints, pPtAry, pFlgAry, rOutDev))
+        const PolyFlags* pFlgAry = rDevicePoly.GetConstFlagAry();
+        if (!rGraphics.drawPolygonBezier(nPoints, pPtAry, pFlgAry))
         {
-            tools::Polygon aSub = tools::Polygon::SubdivideBezier(rPoly);
-            pGraphics->DrawPolygon(aSub.GetSize(), aSub.GetConstPointAry(), rOutDev);
+            tools::Polygon aSub = tools::Polygon::SubdivideBezier(rDevicePoly);
+            rGraphics.drawPolygon(aSub.GetSize(), aSub.GetConstPointAry());
         }
     }
     else
     {
-        pGraphics->DrawPolygon(nPoints, pPtAry, rOutDev);
+        // Naked pure virtual backend call!
+        rGraphics.drawPolygon(nPoints, pPtAry);
     }
+}
+
+void PrimitiveRenderer::DrawPolygonGeometry(OutputDevice& rOutDev, const tools::Polygon& rPoly)
+{
+    SalGraphics* pGraphics = rOutDev.GetGraphics();
+    if (!pGraphics && !rOutDev.AcquireGraphics())
+        return;
+    pGraphics = rOutDev.GetGraphics();
+
+    tools::Polygon aDevicePoly = rPoly;
+    bool bRTL = rOutDev.IsRTLEnabled() || (pGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+    bool bAntiparallel = rOutDev.ImplIsAntiparallel();
+    tools::Long nFrameWidth
+        = rOutDev.IsVirtual() ? rOutDev.GetOutputWidthPixel() : pGraphics->GetGraphicsWidth();
+
+    rOutDev.mpMapper->MirrorDevicePixelPolygon(aDevicePoly, nFrameWidth, bRTL, bAntiparallel);
+    DrawDevicePolygonGeometry(*pGraphics, aDevicePoly);
 }
 
 namespace

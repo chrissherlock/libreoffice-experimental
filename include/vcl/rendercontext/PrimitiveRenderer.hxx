@@ -104,6 +104,11 @@ public:
 
     static void DrawPolyPolygonFallback(OutputDevice& rOutDev, const tools::PolyPolygon& rPolyPoly);
 
+    static void DrawDevicePolygonGeometry(SalGraphics& rGraphics,
+                                          const tools::Polygon& rDevicePoly);
+    static void DrawDevicePolyPolygonGeometry(SalGraphics& rGraphics,
+                                              const tools::PolyPolygon& rDevicePolyPoly);
+
     static void DrawPolyPolygonGeometry(OutputDevice& rOutDev,
                                         const tools::PolyPolygon& rPolyPolygon);
 
