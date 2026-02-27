@@ -35,6 +35,11 @@
 
 #include <vector>
 
+namespace vcl::rendercontext
+{
+    class PrimitiveRenderer;
+}
+
 class SalBitmap;
 namespace vcl::font {
     class PhysicalFontCollection;
@@ -66,6 +71,8 @@ typedef sal_Unicode sal_Ucs; // TODO: use sal_UCS4 instead of sal_Unicode
 
 class VCL_PLUGIN_PUBLIC SalGraphics : protected vcl::WidgetDrawInterface
 {
+    friend class vcl::rendercontext::PrimitiveRenderer;
+
 public:
     SalGraphics();
     ~SalGraphics() override;

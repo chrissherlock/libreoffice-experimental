@@ -69,15 +69,17 @@ public:
     static Color GetPixel(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                           const OutputDevice* pOutDev, const Point& rLogicalPt);
 
-    /** Renders a line between two logical points, with optional Anti-Aliasing. */
     static void DrawLine(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                         const OutputDevice* pOutDev, const Point& rLogicalStart,
-                         const Point& rLogicalEnd, bool bTryAA = false,
-                         bool bPixelSnapHairline = false);
+                         const Point& rStart, const Point& rEnd, bool bTryAA,
+                         bool bPixelSnapHairline);
+
+    /** Renders a line between two logical points, with optional Anti-Aliasing. */
+    static void DrawDeviceLine(SalGraphics& rGraphics, const Point& rDeviceStart,
+                               const Point& rDeviceEnd, bool bTryAA = false,
+                               bool bPixelSnapHairline = false);
 
     /** Renders a rectangle using the current line and fill colors. */
-    static void DrawRect(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                         const OutputDevice* pOutDev, const tools::Rectangle& rLogicalRect);
+    static void DrawDeviceRect(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect);
 
     static void DrawRoundedRect(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                                 const OutputDevice* pOutDev, const tools::Rectangle& rLogicalRect,

@@ -1763,3 +1763,66 @@ double CoordinateMapper::GetLayoutPixelWidth(const CoordinateMapper& rMapper,
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
+
+void CoordinateMapper::MirrorDevicePixelPoint(Point& rPt, tools::Long nFrameWidth, bool bRTL,
+                                              bool bAntiparallel) const
+{
+    if (!bRTL && !bAntiparallel)
+        return;
+
+    tools::Long x = rPt.X();
+    if (!nFrameWidth)
+        return;
+
+    if (bAntiparallel)
+    {
+        if (bRTL)
+        {
+            tools::Long devX = nFrameWidth - GetOutputWidthPixel() - GetOutOffXPixel();
+            x = devX + (x - GetOutOffXPixel());
+        }
+        else
+        {
+            tools::Long devX = GetOutOffXPixel();
+            x = GetOutputWidthPixel() - (x - devX) + GetOutOffXPixel() - 1;
+        }
+    }
+    else if (bRTL)
+    {
+        x = nFrameWidth - 1 - x;
+    }
+
+    rPt.setX(x);
+}
+
+void CoordinateMapper::MirrorDevicePixelRect(tools::Rectangle& rRect, tools::Long nFrameWidth,
+                                             bool bRTL, bool bAntiparallel) const
+{
+    if (!bRTL && !bAntiparallel)
+        return;
+
+    tools::Long nWidth = rRect.GetWidth();
+    tools::Long x = rRect.Left();
+    if (!nFrameWidth)
+        return;
+
+    if (bAntiparallel)
+    {
+        if (bRTL)
+        {
+            tools::Long devX = nFrameWidth - GetOutputWidthPixel() - GetOutOffXPixel();
+            x = devX + (x - GetOutOffXPixel());
+        }
+        else
+        {
+            tools::Long devX = GetOutOffXPixel();
+            x = GetOutputWidthPixel() - (x - devX) + GetOutOffXPixel() - nWidth;
+        }
+    }
+    else if (bRTL)
+    {
+        x = nFrameWidth - nWidth - x;
+    }
+
+    rRect.Move(x - rRect.Left(), 0);
+}

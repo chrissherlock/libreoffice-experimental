@@ -64,57 +64,38 @@ Color PrimitiveRenderer::GetPixel(SalGraphics& rGraphics, const CoordinateMapper
     return rGraphics.GetPixel(aDevicePt.X(), aDevicePt.Y(), *pOutDev);
 }
 
-void PrimitiveRenderer::DrawLine(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                                 const OutputDevice* pOutDev, const Point& rLogicalStart,
-                                 const Point& rLogicalEnd, bool bTryAA, bool bPixelSnapHairline)
+void PrimitiveRenderer::DrawDeviceLine(SalGraphics& rGraphics, const Point& rDeviceStart,
+                                       const Point& rDeviceEnd, bool bTryAA,
+                                       bool bPixelSnapHairline)
 {
-    std::cerr << "\n=== FACADE TRACE ===\n";
-    std::cerr << "[DrawLine] Logical: " << rLogicalStart.X() << "," << rLogicalStart.Y() << " to "
-              << rLogicalEnd.X() << "," << rLogicalEnd.Y() << "\n";
-    std::cerr << "[DrawLine] Device: " << rMapper.LogicToDevicePixel(rLogicalStart).X() << ","
-              << rMapper.LogicToDevicePixel(rLogicalStart).Y() << " to "
-              << rMapper.LogicToDevicePixel(rLogicalEnd).X() << ","
-              << rMapper.LogicToDevicePixel(rLogicalEnd).Y() << "\n";
-    std::cerr << "[DrawLine] bTryAA: " << bTryAA << ", bPixelSnap: " << bPixelSnapHairline << "\n";
-
     bool bDrawn = false;
 
     if (bTryAA)
     {
-        const basegfx::B2DHomMatrix aTransform(rMapper.GetDeviceTransformation());
         basegfx::B2DPolygon aB2DPolyLine;
+        aB2DPolyLine.append(basegfx::B2DPoint(rDeviceStart.X(), rDeviceStart.Y()));
+        aB2DPolyLine.append(basegfx::B2DPoint(rDeviceEnd.X(), rDeviceEnd.Y()));
 
-        aB2DPolyLine.append(basegfx::B2DPoint(rLogicalStart.X(), rLogicalStart.Y()));
-        aB2DPolyLine.append(basegfx::B2DPoint(rLogicalEnd.X(), rLogicalEnd.Y()));
-        aB2DPolyLine.transform(aTransform);
-
-        bDrawn = rGraphics.DrawPolyLine(basegfx::B2DHomMatrix(), aB2DPolyLine, 0.0,
-                                        0.0, // tdf#124848 hairline
-                                        nullptr, // MM01
+        // Call the pure virtual backend directly, bypassing the SalGraphics wrapper
+        bDrawn = rGraphics.drawPolyLine(basegfx::B2DHomMatrix(), aB2DPolyLine, 0.0, 0.0, nullptr,
                                         basegfx::B2DLineJoin::NONE, css::drawing::LineCap_BUTT,
-                                        basegfx::deg2rad(15.0), // default MiterMinimumAngle
-                                        bPixelSnapHairline, *pOutDev);
+                                        basegfx::deg2rad(15.0), bPixelSnapHairline);
     }
 
-    if (bDrawn)
-        return;
-
-    const Point aStartDevicePt(rMapper.LogicToDevicePixel(rLogicalStart));
-    const Point aEndDevicePt(rMapper.LogicToDevicePixel(rLogicalEnd));
-
-    rGraphics.DrawLine(aStartDevicePt.X(), aStartDevicePt.Y(), aEndDevicePt.X(), aEndDevicePt.Y(),
-                       *pOutDev);
+    if (!bDrawn)
+    {
+        // Call the pure virtual backend directly!
+        rGraphics.drawLine(rDeviceStart.X(), rDeviceStart.Y(), rDeviceEnd.X(), rDeviceEnd.Y());
+    }
 }
 
-void PrimitiveRenderer::DrawRect(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                                 const OutputDevice* pOutDev, const tools::Rectangle& rLogicalRect)
+void PrimitiveRenderer::DrawDeviceRect(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect)
 {
-    const tools::Rectangle aDeviceRect(rMapper.LogicToDevicePixel(rLogicalRect));
-
-    if (!aDeviceRect.IsEmpty())
+    if (!rDeviceRect.IsEmpty())
     {
-        rGraphics.DrawRect(aDeviceRect.Left(), aDeviceRect.Top(), aDeviceRect.GetWidth(),
-                           aDeviceRect.GetHeight(), *pOutDev);
+        // Naked pure virtual backend call!
+        rGraphics.drawRect(rDeviceRect.Left(), rDeviceRect.Top(), rDeviceRect.GetWidth(),
+                           rDeviceRect.GetHeight());
     }
 }
 
@@ -1104,8 +1085,17 @@ void PrimitiveRenderer::DrawTextRect(SalGraphics& rGraphics, OutputDevice* pOutD
     if (aGeo.mbIsPolygon)
         PrimitiveRenderer::DrawPolygonGeometry(*pOutDev, aGeo.maPoly);
     else
-        rGraphics.DrawRect(aGeo.maRect.Left(), aGeo.maRect.Top(), aGeo.maRect.GetWidth(),
-                           aGeo.maRect.GetHeight(), *pOutDev);
+    {
+        tools::Rectangle aDeviceRect(aGeo.maRect);
+        bool bRTL = pOutDev->IsRTLEnabled()
+                    || (pOutDev->GetGraphics()
+                        && (pOutDev->GetGraphics()->GetLayout() & SalLayoutFlags::BiDiRtl));
+        bool bAntiparallel = pOutDev->ImplIsAntiparallel();
+        tools::Long nFrameWidth = pOutDev->IsVirtual() ? pOutDev->GetOutputWidthPixel()
+                                                       : pOutDev->GetGraphics()->GetGraphicsWidth();
+        pOutDev->mpMapper->MirrorDevicePixelRect(aDeviceRect, nFrameWidth, bRTL, bAntiparallel);
+        PrimitiveRenderer::DrawDeviceRect(rGraphics, aDeviceRect);
+    }
 }
 
 void PrimitiveRenderer::DrawWaveLineBezier(OutputDevice& rOutDev, SalGraphics& rGraphics,
@@ -1515,13 +1505,33 @@ void PrimitiveRenderer::DrawEmphasisMark(OutputDevice& rOutDev, SalGraphics& rGr
     if (!rRect1.IsEmpty())
     {
         tools::Rectangle aRect(Point(nX + rRect1.Left(), nY + rRect1.Top()), rRect1.GetSize());
-        PrimitiveRenderer::DrawRect(rGraphics, *rOutDev.mpMapper, &rOutDev, aRect);
+        {
+            tools::Rectangle aDeviceRect = rOutDev.mpMapper->LogicToDevicePixel(aRect);
+            bool bRTL = rOutDev.IsRTLEnabled()
+                        || (rOutDev.mpGraphics
+                            && (rOutDev.mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
+            bool bAntiparallel = rOutDev.ImplIsAntiparallel();
+            tools::Long nFrameWidth = rOutDev.IsVirtual() ? rOutDev.GetOutputWidthPixel()
+                                                          : rOutDev.mpGraphics->GetGraphicsWidth();
+            rOutDev.mpMapper->MirrorDevicePixelRect(aDeviceRect, nFrameWidth, bRTL, bAntiparallel);
+            PrimitiveRenderer::DrawDeviceRect(rGraphics, aDeviceRect);
+        }
     }
 
     if (!rRect2.IsEmpty())
     {
         tools::Rectangle aRect(Point(nX + rRect2.Left(), nY + rRect2.Top()), rRect2.GetSize());
-        PrimitiveRenderer::DrawRect(rGraphics, *rOutDev.mpMapper, &rOutDev, aRect);
+        {
+            tools::Rectangle aDeviceRect = rOutDev.mpMapper->LogicToDevicePixel(aRect);
+            bool bRTL = rOutDev.IsRTLEnabled()
+                        || (rOutDev.mpGraphics
+                            && (rOutDev.mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
+            bool bAntiparallel = rOutDev.ImplIsAntiparallel();
+            tools::Long nFrameWidth = rOutDev.IsVirtual() ? rOutDev.GetOutputWidthPixel()
+                                                          : rOutDev.mpGraphics->GetGraphicsWidth();
+            rOutDev.mpMapper->MirrorDevicePixelRect(aDeviceRect, nFrameWidth, bRTL, bAntiparallel);
+            PrimitiveRenderer::DrawDeviceRect(rGraphics, aDeviceRect);
+        }
     }
 }
 
@@ -1568,6 +1578,15 @@ void PrimitiveRenderer::DrawEmphasisMarks(OutputDevice& rOutDev, SalLayout& rSal
             aEmphasisMark.GetShape(), aEmphasisMark.IsShapePolyLine(), aEmphasisMark.GetRect1(),
             aEmphasisMark.GetRect2());
     }
+}
+
+void PrimitiveRenderer::DrawLine(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+                                 const Point& rStart, const Point& rEnd, bool bTryAA,
+                                 bool bPixelSnapHairline)
+{
+    Point aDeviceStart = rMapper.LogicToDevicePixel(rStart);
+    Point aDeviceEnd = rMapper.LogicToDevicePixel(rEnd);
+    DrawDeviceLine(rGraphics, aDeviceStart, aDeviceEnd, bTryAA, bPixelSnapHairline);
 }
 
 } // namespace vcl::rendercontext

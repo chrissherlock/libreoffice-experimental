@@ -109,7 +109,9 @@ CPPUNIT_TEST_FIXTURE(PrimitiveRendererTest, testDrawLine)
     // Print X-axis header
     std::cerr << "   ";
     for (int x = 0; x < 15; ++x)
+    {
         std::cerr << std::hex << (x % 16) << " ";
+    }
     std::cerr << "\n";
 
     // Print the grid
