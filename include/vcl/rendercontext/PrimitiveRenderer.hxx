@@ -81,8 +81,8 @@ public:
     static void DrawDeviceRect(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect);
 
     static void DrawRoundedRect(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                                const OutputDevice* pOutDev, const tools::Rectangle& rLogicalRect,
-                                sal_uLong nHorzRound, sal_uLong nVertRound, bool bFillColor);
+                                const tools::Rectangle& rLogicalRect, sal_uLong nHorzRound,
+                                sal_uLong nVertRound, bool bFillColor);
 
     static void DrawPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly);
 

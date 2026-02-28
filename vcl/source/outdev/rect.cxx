@@ -88,7 +88,7 @@ void OutputDevice::DrawRoundedRect(const tools::Rectangle& rRect,
     maRecorder.RecordRoundRect(rRect, nHorzRound, nVertRound);
 
     if (PrepareGraphicsOutput() && mpGraphics)
-        vcl::rendercontext::PrimitiveRenderer::DrawRoundedRect(*mpGraphics, *mpMapper, this, rRect,
+        vcl::rendercontext::PrimitiveRenderer::DrawRoundedRect(*mpGraphics, *mpMapper, rRect,
                                                                nHorzRound, nVertRound, mpGraphicsState->mbFillColor);
 }
 

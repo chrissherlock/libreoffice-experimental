@@ -99,7 +99,6 @@ void PrimitiveRenderer::DrawDeviceRect(SalGraphics& rGraphics, const tools::Rect
 }
 
 void PrimitiveRenderer::DrawRoundedRect(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                                        const OutputDevice* pOutDev,
                                         const tools::Rectangle& rLogicalRect, sal_uLong nHorzRound,
                                         sal_uLong nVertRound, bool bFillColor)
 {
@@ -110,8 +109,8 @@ void PrimitiveRenderer::DrawRoundedRect(SalGraphics& rGraphics, const Coordinate
 
     if (!nHorzRound && !nVertRound)
     {
-        rGraphics.DrawRect(aDeviceRect.Left(), aDeviceRect.Top(), aDeviceRect.GetWidth(),
-                           aDeviceRect.GetHeight(), *pOutDev);
+        rGraphics.drawRect(aDeviceRect.Left(), aDeviceRect.Top(), aDeviceRect.GetWidth(),
+                           aDeviceRect.GetHeight());
         return;
     }
 
@@ -123,9 +122,9 @@ void PrimitiveRenderer::DrawRoundedRect(SalGraphics& rGraphics, const Coordinate
     Point* pPtAry = aRoundRectPoly.GetPointAry();
 
     if (!bFillColor)
-        rGraphics.DrawPolyLine(aRoundRectPoly.GetSize(), pPtAry, *pOutDev);
+        rGraphics.drawPolyLine(aRoundRectPoly.GetSize(), pPtAry);
     else
-        rGraphics.DrawPolygon(aRoundRectPoly.GetSize(), pPtAry, *pOutDev);
+        rGraphics.drawPolygon(aRoundRectPoly.GetSize(), pPtAry);
 }
 
 namespace
