@@ -111,9 +111,9 @@ public:
     static void Invert(SalGraphics& rGraphics, const tools::Polygon& rDevicePoly,
                        InvertFlags nFlags);
 
-    static void DrawGrid(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                         const tools::Rectangle& rRect, const tools::Rectangle& rDstRect,
-                         const Size& rDist, DrawGridFlags nFlags);
+    static void DrawGrid(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect,
+                         const tools::Rectangle& rDeviceDstRect, const Size& rDeviceDist,
+                         DrawGridFlags nFlags);
 
     static void DrawGridOfCrosses(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                                   const tools::Rectangle& rGridArea, const Size& rGridDistance,
@@ -123,33 +123,44 @@ public:
                              const Point& rBasePt, const tools::Rectangle& rRect,
                              Degree10 nOrientation, tools::Long nFrameWidth, bool bRTL,
                              bool bAntiparallel);
+
     static void DrawTextLines(OutputDevice& rOutDev, SalLayout& rSalLayout,
                               FontStrikeout eStrikeout, FontLineStyle eUnderline,
                               FontLineStyle eOverline, bool bWordLine, bool bUnderlineAbove);
+
     static void DrawTextLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo);
+
     static void DrawEmphasisMark(OutputDevice& rOutDev, SalGraphics& rGraphics, tools::Long nBaseX,
                                  tools::Long nX, tools::Long nY,
                                  const tools::PolyPolygon& rPolyPoly, bool bPolyLine,
                                  const tools::Rectangle& rRect1, const tools::Rectangle& rRect2);
+
     static void DrawEmphasisMarks(OutputDevice& rOutDev, SalLayout& rSalLayout);
+
     static void DrawMnemonicLine(OutputDevice& rOutDev, tools::Long nX, tools::Long nY,
                                  tools::Long nWidth);
 
     // change to private after full migration
     static void DrawStraightTextLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo,
                                      tools::Long nY, Color aColor, bool bIsAbove);
+
     static void DrawWaveLine(OutputDevice& rOutDev, const WaveLineGeometry& rGeo,
                              const Color& rColor);
+
     static void DrawWaveTextLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo,
                                  tools::Long nDistY, Color aColor, bool bIsAbove);
+
     static void DrawWaveLineHairline(OutputDevice& rOutDev, const WaveLineGeometry& rGeo,
                                      const Color& rColor);
+
     static void DrawWaveLineRasterized(OutputDevice& rOutDev, const WaveLineGeometry& rGeo,
                                        const Color& rColor);
+
     static void DrawWaveLineBezier(OutputDevice& rOutDev, SalGraphics& rGraphics,
                                    tools::Long nStartX, tools::Long nStartY, tools::Long nEndX,
                                    tools::Long nEndY, tools::Long nWaveHeight, double fOrientation,
                                    tools::Long nLineWidth);
+
     static void DrawStrikeoutLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo,
                                   tools::Long nY, Color aColor);
     static void DrawStrikeoutChar(OutputDevice& rOutDev, const TextLineGeometry& rGeo,

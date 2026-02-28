@@ -180,10 +180,22 @@ void OutputDevice::DrawGrid(const tools::Rectangle& rRect, const Size& rDist, Dr
     const bool bOldMap = mpMapper->IsMapModeEnabled();
     comphelper::ScopeGuard aMapGuard([this, bOldMap]() { this->EnableMapMode(bOldMap); });
 
-    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::All, vcl::MapModePolicy::ForcePixel))
-        return;
+    if (PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line) && mpGraphics)
+    {
+        tools::Rectangle aDeviceRect = mpMapper->LogicToDevicePixel(rRect);
+        tools::Rectangle aDeviceDstRect = mpMapper->LogicToDevicePixel(aDstRect);
+        Size aDeviceDist = mpMapper->LogicToDevicePixel(rDist);
 
-    vcl::rendercontext::PrimitiveRenderer::DrawGrid(*mpGraphics, *mpMapper, rRect, aDstRect, rDist, nFlags);
+        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+        if (bRTL)
+        {
+            tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+            mpMapper->MirrorDevicePixelRect(aDeviceRect, nFrameWidth, bRTL, ImplIsAntiparallel());
+            mpMapper->MirrorDevicePixelRect(aDeviceDstRect, nFrameWidth, bRTL, ImplIsAntiparallel());
+        }
+
+        vcl::rendercontext::PrimitiveRenderer::DrawGrid(*mpGraphics, aDeviceRect, aDeviceDstRect, aDeviceDist, nFlags);
+    }
 }
 
 void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea,

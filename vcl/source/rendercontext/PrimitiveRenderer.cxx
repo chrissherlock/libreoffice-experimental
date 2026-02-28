@@ -588,10 +588,6 @@ struct GridGeometry
 {
     tools::Long nDistX;
     tools::Long nDistY;
-    tools::Long nLogStartX;
-    tools::Long nLogStartY;
-    tools::Long nLogRight;
-    tools::Long nLogBottom;
 
     // Device Pixel boundaries for the lines
     tools::Long nPixStartX;
@@ -599,68 +595,60 @@ struct GridGeometry
     tools::Long nPixRight;
     tools::Long nPixBottom;
 
-    GridGeometry(const CoordinateMapper& rMapper, const tools::Rectangle& rRect,
-                 const tools::Rectangle& aDstRect, const Size& rDist)
+    GridGeometry(const tools::Rectangle& rDeviceRect, const tools::Rectangle& rDeviceDstRect,
+                 const Size& rDeviceDist)
     {
-        nDistX = std::max(rDist.Width(), tools::Long(1));
-        nDistY = std::max(rDist.Height(), tools::Long(1));
+        nDistX = std::max(rDeviceDist.Width(), tools::Long(1));
+        nDistY = std::max(rDeviceDist.Height(), tools::Long(1));
 
-        // Logical alignment logic
-        nLogStartX = (rRect.Left() >= aDstRect.Left())
-                         ? rRect.Left()
-                         : (rRect.Left() + ((aDstRect.Left() - rRect.Left()) / nDistX) * nDistX);
-        nLogStartY = (rRect.Top() >= aDstRect.Top())
-                         ? rRect.Top()
-                         : (rRect.Top() + ((aDstRect.Top() - rRect.Top()) / nDistY) * nDistY);
+        // Logical alignment logic calculated purely in device space
+        nPixStartX = (rDeviceRect.Left() >= rDeviceDstRect.Left())
+                         ? rDeviceRect.Left()
+                         : (rDeviceRect.Left()
+                            + ((rDeviceDstRect.Left() - rDeviceRect.Left()) / nDistX) * nDistX);
+        nPixStartY = (rDeviceRect.Top() >= rDeviceDstRect.Top())
+                         ? rDeviceRect.Top()
+                         : (rDeviceRect.Top()
+                            + ((rDeviceDstRect.Top() - rDeviceRect.Top()) / nDistY) * nDistY);
 
-        nLogRight = aDstRect.Right();
-        nLogBottom = aDstRect.Bottom();
-
-        // Pre-cache the device pixel boundaries
-        nPixStartX = rMapper.LogicXToDevicePixel(nLogStartX);
-        nPixStartY = rMapper.LogicYToDevicePixel(nLogStartY);
-        nPixRight = rMapper.LogicXToDevicePixel(nLogRight);
-        nPixBottom = rMapper.LogicYToDevicePixel(nLogBottom);
+        nPixRight = rDeviceDstRect.Right();
+        nPixBottom = rDeviceDstRect.Bottom();
     }
 
-    std::vector<sal_Int32> CalculateOffsets(const CoordinateMapper& rMapper, bool bIsVertical) const
+    std::vector<sal_Int32> CalculateOffsets(bool bIsVertical) const
     {
         std::vector<sal_Int32> aBuf;
-        const tools::Long nStart = bIsVertical ? nLogStartY : nLogStartX;
-        const tools::Long nEnd = bIsVertical ? nLogBottom : nLogRight;
+        const tools::Long nStart = bIsVertical ? nPixStartY : nPixStartX;
+        const tools::Long nEnd = bIsVertical ? nPixBottom : nPixRight;
         const tools::Long nDist = bIsVertical ? nDistY : nDistX;
 
         // reserve capacity: (distance / step) + 2 for safety
         aBuf.reserve(((nEnd - nStart) / nDist) + 2);
 
         tools::Long nPos = nStart;
-        auto fnMap = [&rMapper, bIsVertical](tools::Long v) {
-            return bIsVertical ? rMapper.LogicYToDevicePixel(v) : rMapper.LogicXToDevicePixel(v);
-        };
-
-        aBuf.push_back(fnMap(nPos));
+        aBuf.push_back(nPos);
         while ((nPos += nDist) <= nEnd)
         {
-            aBuf.push_back(fnMap(nPos));
+            aBuf.push_back(nPos);
         }
         return aBuf;
     }
 };
 }
 
-void PrimitiveRenderer::DrawGrid(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                                 const tools::Rectangle& rRect, const tools::Rectangle& rDstRect,
-                                 const Size& rDist, DrawGridFlags nFlags)
+void PrimitiveRenderer::DrawGrid(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect,
+                                 const tools::Rectangle& rDeviceDstRect, const Size& rDeviceDist,
+                                 DrawGridFlags nFlags)
 {
-    const GridGeometry aGrid(rMapper, rRect, rDstRect, rDist);
+    const GridGeometry aGrid(rDeviceRect, rDeviceDstRect, rDeviceDist);
 
     std::vector<sal_Int32> aVertBuf;
     if (nFlags & (DrawGridFlags::Dots | DrawGridFlags::HorzLines))
-        aVertBuf = aGrid.CalculateOffsets(rMapper, true);
+        aVertBuf = aGrid.CalculateOffsets(true);
 
     std::vector<sal_Int32> aHorzBuf;
     if (nFlags & (DrawGridFlags::Dots | DrawGridFlags::VertLines))
-        aHorzBuf = aGrid.CalculateOffsets(rMapper, false);
+        aHorzBuf = aGrid.CalculateOffsets(false);
 
     if (nFlags & DrawGridFlags::Dots)
     {
