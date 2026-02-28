@@ -77,12 +77,12 @@ public:
                                 sal_uLong nHorzRoundPixel, sal_uLong nVertRoundPixel,
                                 bool bFillColor);
 
-    static bool DrawPolyLine(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                             const basegfx::B2DPolygon& rPoly, const StrokeAttributes& rStroke,
+    static bool DrawPolyLine(SalGraphics& rGraphics, const basegfx::B2DPolygon& rPoly,
+                             const StrokeAttributes& rStroke,
                              const basegfx::B2DHomMatrix& rObjectTransform, AntialiasingFlags nAA,
                              RasterOp eROP);
 
-    static void DrawPolyLineGeometry(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+    static void DrawPolyLineGeometry(SalGraphics& rGraphics,
                                      const basegfx::B2DPolyPolygon& rPolyPolygon,
                                      const LineInfo& rLineInfo);
 

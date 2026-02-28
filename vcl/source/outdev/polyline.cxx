@@ -40,8 +40,9 @@ void OutputDevice::DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
                                                   0.0 };
 
     if (vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-            *GetGraphics(), *mpMapper, rPoly.getB2DPolygon(), aStroke, basegfx::B2DHomMatrix(),
-            GetAntialiasing(), GetRasterOp()))
+            *GetGraphics(), rPoly.getB2DPolygon(), aStroke,
+            mpMapper->GetViewTransformation() * basegfx::B2DHomMatrix(), GetAntialiasing(),
+            GetRasterOp()))
     {
         return;
     }
@@ -50,7 +51,7 @@ void OutputDevice::DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
     {
         basegfx::B2DPolygon aPoly = mpMapper->LogicToDevicePixel(rPoly.getB2DPolygon());
         vcl::rendercontext::PrimitiveRenderer::DrawPolyLineGeometry(
-            *GetGraphics(), *mpMapper, basegfx::B2DPolyPolygon(aPoly), rLineInfo);
+            *GetGraphics(), basegfx::B2DPolyPolygon(aPoly), rLineInfo);
     }
     else
     {
@@ -72,9 +73,9 @@ bool OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2D,
     if (!FlushGraphicsState(vcl::PrepareOutputFlags::Line))
         return true;
 
-    return vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*GetGraphics(), *mpMapper, rB2D,
-                                                               rStroke, rObjectTransform,
-                                                               GetAntialiasing(), GetRasterOp());
+    return vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+        *GetGraphics(), rB2D, rStroke, mpMapper->GetViewTransformation() * rObjectTransform,
+        GetAntialiasing(), GetRasterOp());
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

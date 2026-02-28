@@ -265,11 +265,9 @@ void PrimitiveRenderer::DrawPolyPolygonFallback(OutputDevice& rOutDev,
 }
 
 void PrimitiveRenderer::DrawPolyLineGeometry(SalGraphics& rGraphics,
-                                             const CoordinateMapper& rMapper,
                                              const basegfx::B2DPolyPolygon& rPolyPolygon,
                                              const LineInfo& rLineInfo)
 {
-    (void)rMapper;
     auto[aHairlines, aFillGeometry] = lcl_ProcessLineGeometry(rPolyPolygon, rLineInfo);
 
     const bool bTryB2d = true;
@@ -283,16 +281,15 @@ void PrimitiveRenderer::DrawPolyLineGeometry(SalGraphics& rGraphics,
         lcl_DrawAreaGeometry(rGraphics, aFillGeometry, bFuzzing, bTryB2d);
 }
 
-bool PrimitiveRenderer::DrawPolyLine(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                                     const basegfx::B2DPolygon& rPoly,
+bool PrimitiveRenderer::DrawPolyLine(SalGraphics& rGraphics, const basegfx::B2DPolygon& rPoly,
                                      const StrokeAttributes& rStroke,
-                                     const basegfx::B2DHomMatrix& rObjectTransform,
+                                     const basegfx::B2DHomMatrix& rFullTransform,
                                      AntialiasingFlags nAA, RasterOp eROP)
 {
     if (rPoly.count() == 0)
         return true;
 
-    const basegfx::B2DHomMatrix aTransform(rMapper.GetViewTransformation() * rObjectTransform);
+    const basegfx::B2DHomMatrix& aTransform = rFullTransform;
     const bool bPixelSnapHairline
         = (nAA & AntialiasingFlags::PixelSnapHairline) && rPoly.count() < 1000;
 
@@ -321,7 +318,7 @@ bool PrimitiveRenderer::DrawPolyLine(SalGraphics& rGraphics, const CoordinateMap
     aInfo.SetLineJoin(rStroke.eJoin);
     aInfo.SetLineCap(rStroke.eCap);
 
-    DrawPolyLineGeometry(rGraphics, rMapper, aPolyPolygon, aInfo);
+    DrawPolyLineGeometry(rGraphics, aPolyPolygon, aInfo);
     return true;
 }
 
