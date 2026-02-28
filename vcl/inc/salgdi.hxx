@@ -234,8 +234,6 @@ public:
 
     // draw --> LineColor and FillColor and RasterOp and ClipRegion
 
-    SAL_DLLPRIVATE void                        DrawRect( tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight, const OutputDevice& rOutDev );
-
     SAL_DLLPRIVATE void                        DrawPolygon( sal_uInt32 nPoints, const Point* pPtAry, const OutputDevice& rOutDev );
 
     SAL_DLLPRIVATE void                        DrawPolyPolygon(

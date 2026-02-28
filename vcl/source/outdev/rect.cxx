@@ -64,16 +64,16 @@ void OutputDevice::DrawRect(const tools::Rectangle& rRect)
     maRecorder.RecordRect(rRect);
 
     if (PrepareGraphicsOutput() && mpGraphics)
-        {
+    {
         tools::Rectangle aDeviceRect = mpMapper->LogicToDevicePixel(rRect);
 
-    bool bRTL = IsRTLEnabled() || (mpGraphics && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
-    bool bAntiparallel = ImplIsAntiparallel();
-    tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+        bool bRTL = IsRTLEnabled() || (mpGraphics && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
+        bool bAntiparallel = ImplIsAntiparallel();
+        tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
 
-    mpMapper->MirrorDevicePixelRect(aDeviceRect, nFrameWidth, bRTL, bAntiparallel);
+        mpMapper->MirrorDevicePixelRect(aDeviceRect, nFrameWidth, bRTL, bAntiparallel);
 
-    vcl::rendercontext::PrimitiveRenderer::DrawDeviceRect(*mpGraphics, aDeviceRect);
+        vcl::rendercontext::PrimitiveRenderer::DrawDeviceRect(*mpGraphics, aDeviceRect);
     }
 }
 

@@ -1107,8 +1107,13 @@ void PrimitiveRenderer::DrawWaveLineRasterized(OutputDevice& rOutDev, const Wave
 
         if (rGeo.mbDrawAsRect)
         {
-            rOutDev.mpGraphics->DrawRect(aDrawPt.X(), aDrawPt.Y(), rGeo.maWavePixelSize.Width(),
-                                         rGeo.maWavePixelSize.Height(), rOutDev);
+            tools::Long nX = aDrawPt.X();
+
+            if (rOutDev.IsRTLEnabled())
+                nX = rOutDev.GetOutputWidthPixel() - nX - rGeo.maWavePixelSize.Width();
+
+            rOutDev.mpGraphics->drawRect(nX, aDrawPt.Y(), rGeo.maWavePixelSize.Width(),
+                                         rGeo.maWavePixelSize.Height());
         }
         else
         {
