@@ -105,8 +105,6 @@ public:
     static void DrawPolyPolygon(SalGraphics& rGraphics, const tools::PolyPolygon& rPolyPoly,
                                 const tools::PolyPolygon* pClipPolyPoly = nullptr);
 
-    static void DrawPolyPolygonFallback(OutputDevice& rOutDev, const tools::PolyPolygon& rPolyPoly);
-
     static void DrawDevicePolygonGeometry(SalGraphics& rGraphics,
                                           const tools::Polygon& rDevicePoly);
 
