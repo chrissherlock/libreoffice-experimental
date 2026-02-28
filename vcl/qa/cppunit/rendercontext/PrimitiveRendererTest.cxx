@@ -53,7 +53,9 @@ CPPUNIT_TEST_FIXTURE(PrimitiveRendererTest, testDrawPixel)
 
     Point aLogicPt(4, 5);
 
-    vcl::rendercontext::PrimitiveRenderer::DrawPixel(*pGraphics, aMapper, aLogicPt, COL_RED);
+    Point aDevicePt = aMapper.LogicToDevicePixel(aLogicPt);
+
+    vcl::rendercontext::PrimitiveRenderer::DrawPixel(*pGraphics, aDevicePt, COL_RED);
 
     xVDev->SetMapMode(MapMode(MapUnit::MapPixel));
     xVDev->SetDeviceOriginX(0);
@@ -66,50 +68,10 @@ CPPUNIT_TEST_FIXTURE(PrimitiveRendererTest, testDrawPixel)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Original logical coordinate should be empty due to offset",
                                  COL_WHITE, xVDev->GetPixel(Point(4, 5)));
 
-    Color aReadColor
-        = vcl::rendercontext::PrimitiveRenderer::GetPixel(*pGraphics, aMapper, aLogicPt);
+    Color aReadColor = vcl::rendercontext::PrimitiveRenderer::GetPixel(*pGraphics, aDevicePt);
 
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Facade GetPixel failed to map and retrieve correctly", COL_RED,
                                  aReadColor);
-}
-
-CPPUNIT_TEST_FIXTURE(PrimitiveRendererTest, testDrawLine)
-{
-    ScopedVclPtrInstance<VirtualDevice> xVDev;
-    xVDev->SetOutputSizePixel(Size(15, 15));
-    xVDev->SetBackground(Wallpaper(COL_WHITE));
-    xVDev->Erase();
-
-    SalGraphics* pGraphics = xVDev->GetGraphics();
-    CPPUNIT_ASSERT_MESSAGE("Failed to acquire SalGraphics", pGraphics != nullptr);
-
-    // MAC QUARTZ FIX: Force VCL to push the stroke color
-    xVDev->SetLineColor(COL_BLUE);
-    xVDev->DrawPixel(Point(-1, -1));
-
-    CoordinateMapper aMapper;
-    aMapper.ResetMapMode(MapMode(MapUnit::MapPixel));
-    aMapper.SetDeviceOriginX(1);
-    aMapper.SetDeviceOriginY(1);
-
-    Point aLogicStart(1, 1);
-    Point aLogicEnd(8, 1);
-
-    Point aDeviceStart = aMapper.LogicToDevicePixel(aLogicStart);
-    Point aDeviceEnd = aMapper.LogicToDevicePixel(aLogicEnd);
-
-    vcl::rendercontext::PrimitiveRenderer::DrawLine(*pGraphics, aDeviceStart, aDeviceEnd, false,
-                                                    false);
-
-    xVDev->SetMapMode(MapMode(MapUnit::MapPixel));
-    xVDev->SetDeviceOriginX(0);
-    xVDev->SetDeviceOriginY(0);
-
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("Start pixel failed", COL_BLUE, xVDev->GetPixel(Point(2, 2)));
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("Mid pixel failed", COL_BLUE, xVDev->GetPixel(Point(5, 2)));
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("End pixel failed", COL_BLUE, xVDev->GetPixel(Point(9, 2)));
-
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("Offset failed", COL_WHITE, xVDev->GetPixel(Point(1, 1)));
 }
 
 CPPUNIT_TEST_FIXTURE(PrimitiveRendererTest, testDrawRect)

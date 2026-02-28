@@ -22,6 +22,7 @@
 #include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/rendercontext/PrimitiveRenderer.hxx>
 
+#include <CoordinateMapper.hxx>
 #include <ClippingController.hxx>
 #include <GraphicsState.hxx>
 #include <drawmode.hxx>
@@ -53,15 +54,21 @@ void OutputDevice::DrawPixel(const Point& rPt)
     maRecorder.RecordPixel(rPt);
 
     if (PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line) && mpGraphics)
-        vcl::rendercontext::PrimitiveRenderer::DrawPixel(*mpGraphics, *mpMapper, rPt);
+    {
+        Point aDevicePt = mpMapper->LogicToDevicePixel(rPt);
+        vcl::rendercontext::PrimitiveRenderer::DrawPixel(*mpGraphics, aDevicePt);
+    }
 }
 
 void OutputDevice::DrawPixel(const Point& rPt, const Color& rColor)
 {
-    maRecorder.RecordPixel( rPt, rColor );
+    maRecorder.RecordPixel(rPt, rColor);
 
     if (PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line) && mpGraphics)
-        vcl::rendercontext::PrimitiveRenderer::DrawPixel(*mpGraphics, *mpMapper, rPt, rColor);
+    {
+        Point aDevicePt = mpMapper->LogicToDevicePixel(rPt);
+        vcl::rendercontext::PrimitiveRenderer::DrawPixel(*mpGraphics, aDevicePt, rColor);
+    }
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

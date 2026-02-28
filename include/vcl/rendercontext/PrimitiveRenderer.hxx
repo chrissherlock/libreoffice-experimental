@@ -54,17 +54,14 @@ struct WaveLineGeometry;
 class VCL_DLLPUBLIC PrimitiveRenderer
 {
 public:
-    /** Renders a single pixel at the specified logical coordinates using the current line color. */
-    static void DrawPixel(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                          const Point& rLogicalPt);
+    /** Renders a single pixel at the specified device coordinates using the current line color. */
+    static void DrawPixel(SalGraphics& rGraphics, const Point& rDevicePt);
 
-    /** Renders a single pixel at the specified logical coordinates with a specific color. */
-    static void DrawPixel(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                          const Point& rLogicalPt, const Color& rColor);
+    /** Renders a single pixel at the specified device coordinates with a specific color. */
+    static void DrawPixel(SalGraphics& rGraphics, const Point& rDevicePt, const Color& rColor);
 
-    /** Retrieves a single pixel color at the specified logical coordinates. */
-    static Color GetPixel(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                          const Point& rLogicalPt);
+    /** Retrieves a single pixel color at the specified device coordinates. */
+    static Color GetPixel(SalGraphics& rGraphics, const Point& rDevicePt);
 
     /** Renders a line between two logical points, with optional Anti-Aliasing. */
     static void DrawLine(SalGraphics& rGraphics, const Point& rDeviceStart, const Point& rDeviceEnd,
@@ -87,8 +84,7 @@ public:
                                      const LineInfo& rLineInfo);
 
     static void DrawPolygon(SalGraphics& rGraphics, const basegfx::B2DHomMatrix& rTransform,
-                            const basegfx::B2DPolygon& rDevicePoly, bool bFill,
-                            const StrokeAttributes* pStroke);
+                            const basegfx::B2DPolygon& rDevicePoly, bool bFill);
 
     static void DrawPolygon(SalGraphics& rGraphics, const tools::Polygon& rDevicePoly, bool bFill);
 
@@ -98,11 +94,10 @@ public:
                                    const tools::PolyPolygon& rDeviceClipPolyPoly);
 
     static void DrawPolyPolygon(SalGraphics& rGraphics, const basegfx::B2DHomMatrix& rTransform,
-                                const basegfx::B2DPolyPolygon& rDevicePolyPoly, bool bFill,
-                                const StrokeAttributes* pStroke);
+                                const basegfx::B2DPolyPolygon& rDevicePolyPoly, bool bFill);
 
     static void DrawPolyPolygon(SalGraphics& rGraphics, const tools::PolyPolygon& rDevicePolyPoly,
-                                bool bFill, const StrokeAttributes* pStroke);
+                                bool bFill);
 
     static void DrawPolyPolygon(SalGraphics& rGraphics, const tools::PolyPolygon& rPolyPoly,
                                 const tools::PolyPolygon* pClipPolyPoly = nullptr);

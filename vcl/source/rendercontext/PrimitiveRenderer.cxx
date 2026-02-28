@@ -42,25 +42,20 @@
 
 namespace vcl::rendercontext
 {
-void PrimitiveRenderer::DrawPixel(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                                  const Point& rLogicalPt)
+void PrimitiveRenderer::DrawPixel(SalGraphics& rGraphics, const Point& rDevicePt)
 {
-    Point aDevicePt = rMapper.LogicToDevicePixel(rLogicalPt);
-    rGraphics.drawPixel(aDevicePt.X(), aDevicePt.Y());
+    rGraphics.drawPixel(rDevicePt.X(), rDevicePt.Y());
 }
 
-void PrimitiveRenderer::DrawPixel(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                                  const Point& rLogicalPt, const Color& rColor)
+void PrimitiveRenderer::DrawPixel(SalGraphics& rGraphics, const Point& rDevicePt,
+                                  const Color& rColor)
 {
-    Point aDevicePt = rMapper.LogicToDevicePixel(rLogicalPt);
-    rGraphics.drawPixel(aDevicePt.X(), aDevicePt.Y(), rColor);
+    rGraphics.drawPixel(rDevicePt.X(), rDevicePt.Y(), rColor);
 }
 
-Color PrimitiveRenderer::GetPixel(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                                  const Point& rLogicalPt)
+Color PrimitiveRenderer::GetPixel(SalGraphics& rGraphics, const Point& rDevicePt)
 {
-    Point aDevicePt = rMapper.LogicToDevicePixel(rLogicalPt);
-    return Color(rGraphics.getPixel(aDevicePt.X(), aDevicePt.Y()));
+    return Color(rGraphics.getPixel(rDevicePt.X(), rDevicePt.Y()));
 }
 
 void PrimitiveRenderer::DrawLine(SalGraphics& rGraphics, const Point& rDeviceStart,
@@ -1331,8 +1326,7 @@ void PrimitiveRenderer::DrawPolygon(SalGraphics& rGraphics, const tools::Polygon
 }
 
 void PrimitiveRenderer::DrawPolyPolygon(SalGraphics& rGraphics,
-                                        const tools::PolyPolygon& rDevicePolyPoly, bool bFill,
-                                        const StrokeAttributes* /*pStroke*/)
+                                        const tools::PolyPolygon& rDevicePolyPoly, bool bFill)
 {
     sal_uInt16 nPoly = rDevicePolyPoly.Count();
     if (nPoly == 0)
@@ -1352,17 +1346,15 @@ void PrimitiveRenderer::DrawPolyPolygon(SalGraphics& rGraphics,
 }
 
 void PrimitiveRenderer::DrawPolygon(SalGraphics& rGraphics, const basegfx::B2DHomMatrix& rTransform,
-                                    const basegfx::B2DPolygon& rDevicePoly, bool bFill,
-                                    const StrokeAttributes* pStroke)
+                                    const basegfx::B2DPolygon& rDevicePoly, bool bFill)
 {
     basegfx::B2DPolyPolygon aPP(rDevicePoly);
-    DrawPolyPolygon(rGraphics, rTransform, aPP, bFill, pStroke);
+    DrawPolyPolygon(rGraphics, rTransform, aPP, bFill);
 }
 
 void PrimitiveRenderer::DrawPolyPolygon(SalGraphics& rGraphics,
                                         const basegfx::B2DHomMatrix& rTransform,
-                                        const basegfx::B2DPolyPolygon& rDevicePolyPoly, bool bFill,
-                                        const StrokeAttributes* /*pStroke*/)
+                                        const basegfx::B2DPolyPolygon& rDevicePolyPoly, bool bFill)
 {
     if (rDevicePolyPoly.count() == 0)
         return;

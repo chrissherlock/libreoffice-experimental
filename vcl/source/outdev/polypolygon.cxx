@@ -68,8 +68,8 @@ void OutputDevice::DrawPolyPolygon(const tools::PolyPolygon& rPolyPoly)
 
     mpMapper->MirrorDevicePixelPolyPolygon(aDevicePolyPoly, nFrameWidth, bRTL, bAntiparallel);
 
-    vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygon(*mpGraphics, aDevicePolyPoly, bFill,
-                                                           nullptr);
+    vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygon(*mpGraphics, aDevicePolyPoly, bFill);
+
     if (pStroke)
     {
         for (sal_uInt16 i = 0; i < rPolyPoly.Count(); ++i)
@@ -103,7 +103,8 @@ void OutputDevice::DrawPolyPolygon(const basegfx::B2DPolyPolygon& rB2DPolyPoly)
 
     basegfx::B2DHomMatrix aTransform = GetViewTransformation();
     vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygon(*mpGraphics, aTransform, rB2DPolyPoly,
-                                                           bFill, nullptr);
+                                                           bFill);
+
     if (pStroke)
     {
         for (sal_uInt32 i = 0; i < rB2DPolyPoly.count(); ++i)
