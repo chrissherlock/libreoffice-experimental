@@ -56,8 +56,25 @@ void OutputDevice::DrawPolyPolygon(const tools::PolyPolygon& rPolyPoly)
         pStroke = &aStroke;
     }
 
-    if (!vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygon(*this, rPolyPoly, bFill, pStroke))
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygonFallback(*this, rPolyPoly);
+    if (!mpGraphics && !AcquireGraphics())
+        return;
+    FlushGraphicsState();
+
+    tools::PolyPolygon aDevicePolyPoly = mpMapper->LogicToDevicePixel(rPolyPoly);
+    const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+    const bool bAntiparallel = ImplIsAntiparallel();
+    const tools::Long nFrameWidth
+        = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+
+    mpMapper->MirrorDevicePixelPolyPolygon(aDevicePolyPoly, nFrameWidth, bRTL, bAntiparallel);
+
+    vcl::rendercontext::PrimitiveRenderer::DrawDevicePolyPolygon(*mpGraphics, aDevicePolyPoly,
+                                                                 bFill, nullptr);
+    if (pStroke)
+    {
+        for (sal_uInt16 i = 0; i < rPolyPoly.Count(); ++i)
+            DrawPolyLine(rPolyPoly[i].getB2DPolygon(), *pStroke);
+    }
 }
 
 void OutputDevice::DrawPolyPolygon(const basegfx::B2DPolyPolygon& rB2DPolyPoly)

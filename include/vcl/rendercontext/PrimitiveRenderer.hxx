@@ -86,9 +86,6 @@ public:
                                      const basegfx::B2DPolyPolygon& rPolyPolygon,
                                      const LineInfo& rLineInfo);
 
-    static bool DrawPolygon(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
-                            bool bFill, const StrokeAttributes* pStroke);
-
     static void DrawDevicePolygon(SalGraphics& rGraphics, const basegfx::B2DHomMatrix& rTransform,
                                   const basegfx::B2DPolygon& rDevicePoly, bool bFill,
                                   const StrokeAttributes* pStroke);
@@ -104,15 +101,6 @@ public:
     static void DrawDevicePolyPolygon(SalGraphics& rGraphics,
                                       const tools::PolyPolygon& rDevicePolyPoly, bool bFill,
                                       const StrokeAttributes* pStroke);
-
-    static bool DrawPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly, bool bFill,
-                            const StrokeAttributes* pStroke);
-
-    static bool DrawPolyPolygon(OutputDevice& rOutDev, const basegfx::B2DPolyPolygon& rB2DPolyPoly,
-                                bool bFill, const StrokeAttributes* pStroke);
-
-    static bool DrawPolyPolygon(OutputDevice& rOutDev, const tools::PolyPolygon& rPolyPoly,
-                                bool bFill, const StrokeAttributes* pStroke);
 
     static void DrawPolyPolygon(OutputDevice& rOutDev, const tools::PolyPolygon& rPolyPoly,
                                 const tools::PolyPolygon* pClipPolyPoly = nullptr);

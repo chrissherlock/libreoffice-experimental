@@ -246,52 +246,6 @@ static void lcl_DrawAreaGeometry(SalGraphics& rGraphics,
     lcl_DrawSubdividedAreaGeometry(rGraphics, rFillPolyPolygon);
 }
 
-bool PrimitiveRenderer::DrawPolyPolygon(OutputDevice& rOutDev,
-                                        const basegfx::B2DPolyPolygon& rB2DPolyPoly, bool bFill,
-                                        const StrokeAttributes* pStroke)
-{
-    if (!rB2DPolyPoly.count() || !rOutDev.CanDrawPolygon())
-        return true;
-
-    if (!rOutDev.GetGraphics() && !rOutDev.AcquireGraphics())
-        return false;
-
-    rOutDev.FlushGraphicsState();
-
-    const basegfx::B2DHomMatrix aTransform(rOutDev.GetViewTransformation());
-    basegfx::B2DPolyPolygon aB2DPolyPolygon(rB2DPolyPoly);
-
-    if (!aB2DPolyPolygon.isClosed())
-        aB2DPolyPolygon.setClosed(true);
-
-    if (bFill)
-        rOutDev.GetGraphics()->drawPolyPolygon(aTransform, aB2DPolyPolygon, 0.0);
-
-    bool bSuccess = true;
-
-    if (pStroke)
-    {
-        for (auto const& rPolygon : std::as_const(aB2DPolyPolygon))
-        {
-            if (!rOutDev.DrawPolyLine(rPolygon, *pStroke))
-            {
-                bSuccess = false;
-                break;
-            }
-        }
-    }
-
-    if (!bSuccess)
-    {
-        const tools::PolyPolygon aToolsPolyPolygon(rB2DPolyPoly);
-        const tools::PolyPolygon aPixelPolyPolygon
-            = rOutDev.mpMapper->LogicToDevicePixel(aToolsPolyPolygon);
-        PrimitiveRenderer::DrawPolyPolygonGeometry(rOutDev, aPixelPolyPolygon);
-    }
-
-    return true;
-}
-
 void PrimitiveRenderer::DrawPolyPolygonFallback(OutputDevice& rOutDev,
                                                 const tools::PolyPolygon& rPolyPoly)
 {
@@ -313,28 +267,6 @@ void PrimitiveRenderer::DrawPolyPolygonFallback(OutputDevice& rOutDev,
         PrimitiveRenderer::DrawPolyPolygonGeometry(rOutDev,
                                                    rOutDev.mpMapper->LogicToDevicePixel(rPolyPoly));
     }
-}
-
-bool PrimitiveRenderer::DrawPolyPolygon(OutputDevice& rOutDev, const tools::PolyPolygon& rPolyPoly,
-                                        bool bFill, const StrokeAttributes* pStroke)
-{
-    if (!rOutDev.CanDrawPolygon())
-        return false;
-    return DrawPolyPolygon(rOutDev, rPolyPoly.getB2DPolyPolygon(), bFill, pStroke);
-}
-
-bool PrimitiveRenderer::DrawPolygon(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
-                                    bool bFill, const StrokeAttributes* pStroke)
-{
-    basegfx::B2DPolyPolygon aPP(rB2DPolygon);
-    return DrawPolyPolygon(rOutDev, aPP, bFill, pStroke);
-}
-
-bool PrimitiveRenderer::DrawPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly, bool bFill,
-                                    const StrokeAttributes* pStroke)
-{
-    basegfx::B2DPolygon aB2D(rPoly.getB2DPolygon());
-    return DrawPolygon(rOutDev, aB2D, bFill, pStroke);
 }
 
 void PrimitiveRenderer::DrawPolyLineGeometry(SalGraphics& rGraphics,
