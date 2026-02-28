@@ -1457,13 +1457,13 @@ void PrimitiveRenderer::DrawPolygon(SalGraphics& rGraphics, const basegfx::B2DHo
                                     const StrokeAttributes* pStroke)
 {
     basegfx::B2DPolyPolygon aPP(rDevicePoly);
-    DrawDevicePolyPolygon(rGraphics, rTransform, aPP, bFill, pStroke);
+    DrawPolyPolygon(rGraphics, rTransform, aPP, bFill, pStroke);
 }
 
-void PrimitiveRenderer::DrawDevicePolyPolygon(SalGraphics& rGraphics,
-                                              const basegfx::B2DHomMatrix& rTransform,
-                                              const basegfx::B2DPolyPolygon& rDevicePolyPoly,
-                                              bool bFill, const StrokeAttributes* /*pStroke*/)
+void PrimitiveRenderer::DrawPolyPolygon(SalGraphics& rGraphics,
+                                        const basegfx::B2DHomMatrix& rTransform,
+                                        const basegfx::B2DPolyPolygon& rDevicePolyPoly, bool bFill,
+                                        const StrokeAttributes* /*pStroke*/)
 {
     if (rDevicePolyPoly.count() == 0)
         return;

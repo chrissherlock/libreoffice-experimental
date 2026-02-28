@@ -102,8 +102,8 @@ void OutputDevice::DrawPolyPolygon(const basegfx::B2DPolyPolygon& rB2DPolyPoly)
     FlushGraphicsState();
 
     basegfx::B2DHomMatrix aTransform = GetViewTransformation();
-    vcl::rendercontext::PrimitiveRenderer::DrawDevicePolyPolygon(*mpGraphics, aTransform,
-                                                                 rB2DPolyPoly, bFill, nullptr);
+    vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygon(*mpGraphics, aTransform, rB2DPolyPoly,
+                                                           bFill, nullptr);
     if (pStroke)
     {
         for (sal_uInt32 i = 0; i < rB2DPolyPoly.count(); ++i)

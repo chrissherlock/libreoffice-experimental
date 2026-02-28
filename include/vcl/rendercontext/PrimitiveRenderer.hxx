@@ -97,10 +97,9 @@ public:
     static void DrawClippedPolygon(SalGraphics& rGraphics, const tools::Polygon& rDevicePoly,
                                    const tools::PolyPolygon& rDeviceClipPolyPoly);
 
-    static void DrawDevicePolyPolygon(SalGraphics& rGraphics,
-                                      const basegfx::B2DHomMatrix& rTransform,
-                                      const basegfx::B2DPolyPolygon& rDevicePolyPoly, bool bFill,
-                                      const StrokeAttributes* pStroke);
+    static void DrawPolyPolygon(SalGraphics& rGraphics, const basegfx::B2DHomMatrix& rTransform,
+                                const basegfx::B2DPolyPolygon& rDevicePolyPoly, bool bFill,
+                                const StrokeAttributes* pStroke);
 
     static void DrawDevicePolyPolygon(SalGraphics& rGraphics,
                                       const tools::PolyPolygon& rDevicePolyPoly, bool bFill,
