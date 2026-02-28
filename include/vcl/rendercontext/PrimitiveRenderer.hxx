@@ -69,8 +69,8 @@ public:
                           const Point& rLogicalPt);
 
     static void DrawLine(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                         const Point& rStart, const Point& rEnd, bool bTryAA,
-                         bool bPixelSnapHairline);
+                         const Point& rStart, const Point& rEnd, bool bTryAA = false,
+                         bool bPixelSnapHairline = false);
 
     /** Renders a line between two logical points, with optional Anti-Aliasing. */
     static void DrawDeviceLine(SalGraphics& rGraphics, const Point& rDeviceStart,
