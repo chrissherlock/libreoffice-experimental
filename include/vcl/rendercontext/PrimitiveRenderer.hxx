@@ -28,6 +28,7 @@
 
 #include <com/sun/star/drawing/LineCap.hpp>
 
+#include <span>
 #include <vector>
 
 class SalGraphics;
@@ -127,9 +128,9 @@ public:
     static void DrawTextDecoration(SalGraphics& rGraphics,
                                    const vcl::text::RotatedGeometry& rDeviceGeo);
 
-    static void DrawTextLines(OutputDevice& rOutDev, SalLayout& rSalLayout,
-                              FontStrikeout eStrikeout, FontLineStyle eUnderline,
-                              FontLineStyle eOverline, bool bWordLine, bool bUnderlineAbove);
+    static void DrawTextLines(SalGraphics& rGraphics,
+                              std::span<const vcl::text::RotatedGeometry> rSegments,
+                              const Color& rColor);
 
     static void DrawTextLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo);
 

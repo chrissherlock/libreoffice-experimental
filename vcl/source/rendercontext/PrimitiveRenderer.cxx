@@ -1152,37 +1152,16 @@ void PrimitiveRenderer::DrawTextLine(OutputDevice& rOutDev,
     }
 }
 
-void PrimitiveRenderer::DrawTextLines(OutputDevice& rOutDev, SalLayout& rSalLayout,
-                                      FontStrikeout eStrikeout, FontLineStyle eUnderline,
-                                      FontLineStyle eOverline, bool bWordLine, bool bUnderlineAbove)
+void PrimitiveRenderer::DrawTextLines(SalGraphics& rGraphics,
+                                      std::span<const vcl::text::RotatedGeometry> rSegments,
+                                      const Color& rColor)
 {
-    if (bWordLine)
+    // Purely device-pixel based; no layout logic allowed here.
+    rGraphics.SetFillColor(rColor);
+
+    for (const auto& rGeo : rSegments)
     {
-        const basegfx::B2DPoint aStartPt = rSalLayout.DrawBase();
-        std::vector<std::pair<double, double>> aSegments;
-        vcl::text::TextGeometry::GetWordLineSegments(rSalLayout, *rOutDev.mpFontRealization,
-                                                     aSegments);
-        for (const auto& rSeg : aSegments)
-        {
-            {
-                vcl::rendercontext::TextLineGeometry aLineGeo(
-                    Point(aStartPt.getX(), aStartPt.getY()), static_cast<tools::Long>(rSeg.first),
-                    rSeg.second, eStrikeout, eUnderline, eOverline, bUnderlineAbove);
-                aLineGeo.maUnderlineColor = rOutDev.GetTextLineColor();
-                PrimitiveRenderer::DrawTextLine(rOutDev, aLineGeo);
-            }
-        }
-    }
-    else
-    {
-        basegfx::B2DPoint aStartPt = rSalLayout.GetDrawPosition();
-        {
-            vcl::rendercontext::TextLineGeometry aLineGeo(Point(aStartPt.getX(), aStartPt.getY()),
-                                                          0, rSalLayout.GetTextWidth(), eStrikeout,
-                                                          eUnderline, eOverline, bUnderlineAbove);
-            aLineGeo.maUnderlineColor = rOutDev.GetTextLineColor();
-            PrimitiveRenderer::DrawTextLine(rOutDev, aLineGeo);
-        }
+        PrimitiveRenderer::DrawTextDecoration(rGraphics, rGeo);
     }
 }
 

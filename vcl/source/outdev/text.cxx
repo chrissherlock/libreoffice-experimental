@@ -217,21 +217,22 @@ void OutputDevice::ImplRenderLayout(SalLayout& rSalLayout, bool bTextLines)
     }
 
     // Render Glyphs (with potential Mirroring/RTL)
-    // We wrap this in a scope. The ScopeGuard ensures that when we leave this block
-    // (and move to drawing lines), the X coordinate is restored to its original value.
     {
         tools::Long nOldX = rSalLayout.DrawBase().getX();
+
+        // Ensure X is restored for decoration calculations after glyph drawing
         comphelper::ScopeGuard aRestoreGuard([&]() { rSalLayout.DrawBase().setX(nOldX); });
 
         if (HasMirroredGraphics() || IsRTLEnabled())
         {
-            vcl::text::MirroringContext aCtx{ nOldX,
-                                              IsVirtual() ? GetOutputWidthPixel()
-                                                          : mpGraphics->GetGraphicsWidth(),
-                                              GetOutputWidthPixel(),
-                                              GetOutOffXPixel(),
-                                              HasMirroredGraphics(),
-                                              IsRTLEnabled() };
+            vcl::text::MirroringContext aCtx{
+                nOldX,
+                IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth(),
+                GetOutputWidthPixel(),
+                GetOutOffXPixel(),
+                HasMirroredGraphics(),
+                IsRTLEnabled()
+            };
 
             rSalLayout.DrawBase().setX(vcl::text::TextGeometry::GetMirroredX(aCtx));
         }
@@ -239,17 +240,26 @@ void OutputDevice::ImplRenderLayout(SalLayout& rSalLayout, bool bTextLines)
         rSalLayout.DrawText(*mpGraphics);
     }
 
-    // Render Decorations
-    // X is now restored, so lines are drawn in the correct logical position.
+    // Render Decorations (Underlines, Strikeouts, Overlines)
     if (bTextLines)
     {
         const vcl::Font& rFont = mpGraphicsState->maFont;
-        vcl::rendercontext::PrimitiveRenderer::DrawTextLines(*this, rSalLayout, rFont.GetStrikeout(), rFont.GetUnderline(),
-                          rFont.GetOverline(), rFont.IsWordLineMode(), rFont.IsUnderlineAbove());
+
+        // Call the new internal orchestrator to handle rotation and mirroring
+        DrawTextLines(rSalLayout,
+                      rFont.GetStrikeout(),
+                      rFont.GetUnderline(),
+                      rFont.GetOverline(),
+                      rFont.IsWordLineMode(),
+                      rFont.IsUnderlineAbove());
     }
 
     if (mpGraphicsState->maFont.GetEmphasisMark() & FontEmphasisMark::Style)
+    {
+        // TODO This should eventually be refactored to a similar local DrawEmphasisMarks
+        // to fully remove the 'OutputDevice&' dependency from PrimitiveRenderer.
         vcl::rendercontext::PrimitiveRenderer::DrawEmphasisMarks(*this, rSalLayout);
+    }
 }
 
 void OutputDevice::ImplDrawSpecialText(SalLayout& rSalLayout)
@@ -571,6 +581,120 @@ void OutputDevice::DrawText(const Point& rStartPt, const OUString& rStr, sal_Int
     }
 }
 
+void OutputDevice::DrawTextLines(SalLayout& rSalLayout, FontStrikeout eStrikeout,
+                                 FontLineStyle eUnderline, FontLineStyle eOverline,
+                                 bool bWordLine, bool bUnderlineAbove)
+{
+    if (!mpGraphics && !AcquireGraphics())
+        return;
+
+    const vcl::font::FontRealization& rFontRealization = *mpFontRealization;
+    const Degree10 nOrientation = rFontRealization.mxFont->mnOrientation;
+    const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+    const tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+    const bool bAntiparallel = ImplIsAntiparallel();
+
+    // Identify logical segments (WordLine vs Full Line)
+    std::vector<std::pair<double, double>> aLogicalSegments;
+    if (bWordLine)
+        vcl::text::TextGeometry::GetWordLineSegments(rSalLayout, rFontRealization, aLogicalSegments);
+    else
+        aLogicalSegments.push_back({ 0.0, rSalLayout.GetTextWidth() });
+
+    basegfx::B2DPoint aDrawBase = rSalLayout.DrawBase();
+    Point aOrigin(aDrawBase.getX(), aDrawBase.getY());
+
+    // Transforms logical offsets into rotated/mirrored device geometry
+    auto fnCollectDeviceGeometry = [&](std::vector<vcl::text::RotatedGeometry>& rVector,
+                            tools::Long nX, tools::Long nWidth, tools::Long nY, tools::Long nHeight) {
+        auto aGeo = vcl::text::TextGeometry::GetRotatedGeometry(
+            aOrigin, tools::Rectangle(Point(nX, nY), Size(nWidth, nHeight)), nOrientation);
+
+        if (bRTL)
+        {
+            if (aGeo.mbIsPolygon)
+                mpMapper->MirrorDevicePixelPolygon(aGeo.maPoly, nFrameWidth, bRTL, bAntiparallel);
+            else
+                mpMapper->MirrorDevicePixelRect(aGeo.maRect, nFrameWidth, bRTL, bAntiparallel);
+        }
+        rVector.push_back(aGeo);
+    };
+
+    if (eUnderline != LINESTYLE_NONE || eOverline != LINESTYLE_NONE)
+    {
+        std::vector<vcl::text::RotatedGeometry> aLineGeos;
+
+        // Resolve metrics for both decorations
+        vcl::text::StraightLineMetrics aUnderMetrics(*mpFontInstance->mxFontMetric, eUnderline, 0, bUnderlineAbove);
+        vcl::text::StraightLineMetrics aOverMetrics(*mpFontInstance->mxFontMetric, eOverline, 0, false);
+
+        for (const auto& rSeg : aLogicalSegments)
+        {
+            tools::Long nX = static_cast<tools::Long>(rSeg.first);
+            tools::Long nWidth = static_cast<tools::Long>(rSeg.second);
+
+            if (eUnderline != LINESTYLE_NONE)
+            {
+                fnCollectDeviceGeometry(aLineGeos, nX, nWidth, aUnderMetrics.nLinePos, aUnderMetrics.nLineHeight);
+                if (eUnderline == LINESTYLE_DOUBLE)
+                    fnCollectDeviceGeometry(aLineGeos, nX, nWidth, aUnderMetrics.nLinePos2, aUnderMetrics.nLineHeight);
+            }
+
+            if (eOverline != LINESTYLE_NONE)
+            {
+                fnCollectDeviceGeometry(aLineGeos, nX, nWidth, aOverMetrics.nLinePos, aOverMetrics.nLineHeight);
+                if (eOverline == LINESTYLE_DOUBLE)
+                    fnCollectDeviceGeometry(aLineGeos, nX, nWidth, aOverMetrics.nLinePos2, aOverMetrics.nLineHeight);
+            }
+        }
+
+        if (!aLineGeos.empty())
+        {
+            Color aColor = IsTextLineColor() ? GetTextLineColor() : GetTextColor();
+            vcl::rendercontext::PrimitiveRenderer::DrawTextLines(*mpGraphics, aLineGeos, aColor);
+        }
+    }
+
+    if (eStrikeout != STRIKEOUT_NONE)
+    {
+        // Character-based strikeouts (Slash/X) still need to go through the legacy path
+        // until DrawStrikeoutChar is fully stateless.
+        if (eStrikeout == STRIKEOUT_SLASH || eStrikeout == STRIKEOUT_X)
+        {
+             for (const auto& rSeg : aLogicalSegments)
+             {
+                 vcl::rendercontext::TextLineGeometry aCharGeo(
+                     aOrigin, static_cast<tools::Long>(rSeg.first), rSeg.second,
+                     eStrikeout, LINESTYLE_NONE, LINESTYLE_NONE, false);
+
+                 vcl::rendercontext::PrimitiveRenderer::DrawStrikeoutChar(*this, aCharGeo, 0, GetTextColor());
+             }
+        }
+        else // Line-based strikeouts (Single, Bold, Double)
+        {
+            std::vector<vcl::text::RotatedGeometry> aStrikeGeos;
+            vcl::text::StrikeoutGeometry aStrikeMetrics = vcl::text::TextDecorator::CalculateStrikeoutGeometry(
+                *mpFontInstance->mxFontMetric, eStrikeout, 0);
+
+            for (const auto& rSeg : aLogicalSegments)
+            {
+                tools::Long nX = static_cast<tools::Long>(rSeg.first);
+                tools::Long nWidth = static_cast<tools::Long>(rSeg.second);
+
+                for (const auto& rLine : aStrikeMetrics.aSegments)
+                {
+                    fnCollectDeviceGeometry(aStrikeGeos, nX, nWidth, rLine.nYOffset, rLine.nHeight);
+                }
+            }
+
+            if (!aStrikeGeos.empty())
+            {
+                Color aColor = IsTextLineColor() ? GetTextLineColor() : GetTextColor();
+                vcl::rendercontext::PrimitiveRenderer::DrawTextLines(*mpGraphics, aStrikeGeos, aColor);
+            }
+        }
+    }
+}
 tools::Long OutputDevice::GetTextWidth(const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen,
                                        vcl::text::TextLayoutCache const* const pLayoutCache,
                                        SalLayoutGlyphs const* const pSalLayoutCache) const
