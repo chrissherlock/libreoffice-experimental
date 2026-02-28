@@ -107,9 +107,6 @@ public:
     static void DrawPolyPolygon(SalGraphics& rGraphics, const tools::PolyPolygon& rPolyPoly,
                                 const tools::PolyPolygon* pClipPolyPoly = nullptr);
 
-    static void DrawDevicePolyPolygonGeometry(SalGraphics& rGraphics,
-                                              const tools::PolyPolygon& rDevicePolyPoly);
-
     static void DrawPolyPolygonGeometry(SalGraphics& rGraphics,
                                         const tools::PolyPolygon& rPolyPolygon);
 

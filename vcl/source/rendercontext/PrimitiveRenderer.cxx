@@ -376,8 +376,8 @@ struct PolyPolyBuffer
 
 } // end anonymous namespace
 
-void PrimitiveRenderer::DrawDevicePolyPolygonGeometry(SalGraphics& rGraphics,
-                                                      const tools::PolyPolygon& rDevicePolyPoly)
+void PrimitiveRenderer::DrawPolyPolygonGeometry(SalGraphics& rGraphics,
+                                                const tools::PolyPolygon& rDevicePolyPoly)
 {
     if (!rDevicePolyPoly.Count())
         return;
@@ -398,7 +398,7 @@ void PrimitiveRenderer::DrawDevicePolyPolygonGeometry(SalGraphics& rGraphics,
                                              aBuffer.pPointAryAry, aBuffer.pFlagAryAry))
         {
             tools::PolyPolygon aSub = tools::PolyPolygon::SubdivideBezier(rDevicePolyPoly);
-            DrawDevicePolyPolygonGeometry(rGraphics, aSub);
+            DrawPolyPolygonGeometry(rGraphics, aSub);
         }
         return;
     }
@@ -437,28 +437,6 @@ struct PolygonRenderBuffer
         }
     }
 };
-}
-
-void PrimitiveRenderer::DrawPolyPolygonGeometry(SalGraphics& rGraphics,
-                                                const tools::PolyPolygon& rPolyPoly)
-{
-    if (!rPolyPoly.Count())
-        return;
-
-    PolygonRenderBuffer aBuffer(rPolyPoly);
-
-    if (aBuffer.nValidCount == 0)
-        return;
-
-    if (aBuffer.nValidCount == 1)
-    {
-        // Use the existing single polygon worker
-        DrawPolygonGeometry(rGraphics, rPolyPoly.GetObject(aBuffer.nFirstValidIndex));
-        return;
-    }
-
-    rGraphics.drawPolyPolygon(aBuffer.nValidCount, aBuffer.pPointAry.get(),
-                              aBuffer.pPointAryAry.get());
 }
 
 namespace
