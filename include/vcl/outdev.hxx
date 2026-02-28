@@ -42,6 +42,7 @@
 #include <vcl/rendercontext/InvertFlags.hxx>
 #include <vcl/rendercontext/SalLayoutFlags.hxx>
 #include <vcl/rendercontext/State.hxx>
+#include <vcl/lineinfo.hxx>
 #include <vcl/mapmod.hxx>
 #include <vcl/wall.hxx>
 #include <vcl/settings.hxx>
@@ -84,7 +85,6 @@ class GfxLink;
 namespace tools {
     class Line;
 }
-class LineInfo;
 class AlphaMask;
 class FontCharMap;
 class SalLayout;
@@ -774,18 +774,6 @@ protected:
     ///@{
 
 public:
-
-    /** Render the given polygon as a line stroke
-
-        The given polygon is stroked with the current LineColor, start
-        and end point are not automatically connected
-
-        @see DrawPolygon
-        @see DrawPolyPolygon
-     */
-    void                        DrawPolyLine( const tools::Polygon& rPoly );
-
-
     /** Render the given polygon as a line stroke
 
         The given polygon is stroked with the current LineColor, start
@@ -796,8 +784,7 @@ public:
         @see DrawPolygon
         @see DrawPolyPolygon
      */
-    void                        DrawPolyLine( const tools::Polygon& rPoly,
-                                              const LineInfo& rLineInfo );
+    void DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLineInfo=LineInfo());
 
     ///@}
 

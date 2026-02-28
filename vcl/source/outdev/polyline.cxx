@@ -16,25 +16,18 @@
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
 
-void OutputDevice::DrawPolyLine(const tools::Polygon& rPoly)
-{
-    if (maRecorder.IsActive())
-        maRecorder.RecordPolyLine(rPoly);
-
-    if (IsDeviceOutputNecessary())
-    {
-        vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
-        DrawPolyLine(rPoly, LineInfo());
-    }
-}
-
 void OutputDevice::DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLineInfo)
 {
     if (rPoly.GetSize() < 2 || !CanDrawPolyline())
         return;
 
     if (maRecorder.IsActive())
-        maRecorder.RecordPolyLine(rPoly, rLineInfo);
+    {
+        if (rLineInfo == LineInfo())
+            maRecorder.RecordPolyLine(rPoly);
+        else
+            maRecorder.RecordPolyLine(rPoly, rLineInfo);
+    }
 
     if (!FlushGraphicsState(vcl::PrepareOutputFlags::Line))
         return;
