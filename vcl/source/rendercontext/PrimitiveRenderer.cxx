@@ -43,25 +43,24 @@
 namespace vcl::rendercontext
 {
 void PrimitiveRenderer::DrawPixel(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                                  const OutputDevice* pOutDev, const Point& rLogicalPt)
+                                  const Point& rLogicalPt)
 {
     Point aDevicePt = rMapper.LogicToDevicePixel(rLogicalPt);
-    rGraphics.DrawPixel(aDevicePt.X(), aDevicePt.Y(), *pOutDev);
+    rGraphics.drawPixel(aDevicePt.X(), aDevicePt.Y());
 }
 
 void PrimitiveRenderer::DrawPixel(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                                  const OutputDevice* pOutDev, const Point& rLogicalPt,
-                                  const Color& rColor)
+                                  const Point& rLogicalPt, const Color& rColor)
 {
     Point aDevicePt = rMapper.LogicToDevicePixel(rLogicalPt);
-    rGraphics.DrawPixel(aDevicePt.X(), aDevicePt.Y(), rColor, *pOutDev);
+    rGraphics.drawPixel(aDevicePt.X(), aDevicePt.Y(), rColor);
 }
 
 Color PrimitiveRenderer::GetPixel(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                                  const OutputDevice* pOutDev, const Point& rLogicalPt)
+                                  const Point& rLogicalPt)
 {
     Point aDevicePt = rMapper.LogicToDevicePixel(rLogicalPt);
-    return rGraphics.GetPixel(aDevicePt.X(), aDevicePt.Y(), *pOutDev);
+    return Color(rGraphics.getPixel(aDevicePt.X(), aDevicePt.Y()));
 }
 
 void PrimitiveRenderer::DrawDeviceLine(SalGraphics& rGraphics, const Point& rDeviceStart,

@@ -58,16 +58,15 @@ class VCL_DLLPUBLIC PrimitiveRenderer
 public:
     /** Renders a single pixel at the specified logical coordinates using the current line color. */
     static void DrawPixel(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                          const OutputDevice* pOutDev, const Point& rLogicalPt);
+                          const Point& rLogicalPt);
 
     /** Renders a single pixel at the specified logical coordinates with a specific color. */
     static void DrawPixel(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                          const OutputDevice* pOutDev, const Point& rLogicalPt,
-                          const Color& rColor);
+                          const Point& rLogicalPt, const Color& rColor);
 
     /** Retrieves a single pixel color at the specified logical coordinates. */
     static Color GetPixel(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                          const OutputDevice* pOutDev, const Point& rLogicalPt);
+                          const Point& rLogicalPt);
 
     static void DrawLine(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                          const Point& rStart, const Point& rEnd, bool bTryAA,

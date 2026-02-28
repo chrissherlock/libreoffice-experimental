@@ -53,7 +53,7 @@ void OutputDevice::DrawPixel(const Point& rPt)
     maRecorder.RecordPixel(rPt);
 
     if (PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line) && mpGraphics)
-        vcl::rendercontext::PrimitiveRenderer::DrawPixel(*mpGraphics, *mpMapper, this, rPt);
+        vcl::rendercontext::PrimitiveRenderer::DrawPixel(*mpGraphics, *mpMapper, rPt);
 }
 
 void OutputDevice::DrawPixel(const Point& rPt, const Color& rColor)
@@ -61,7 +61,7 @@ void OutputDevice::DrawPixel(const Point& rPt, const Color& rColor)
     maRecorder.RecordPixel( rPt, rColor );
 
     if (PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line) && mpGraphics)
-        vcl::rendercontext::PrimitiveRenderer::DrawPixel(*mpGraphics, *mpMapper, this, rPt, rColor);
+        vcl::rendercontext::PrimitiveRenderer::DrawPixel(*mpGraphics, *mpMapper, rPt, rColor);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
