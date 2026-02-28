@@ -283,34 +283,6 @@ lcl_SetupStrokeAndLineInfo(const basegfx::B2DPolygon& rDevicePoly,
 }
 }
 
-void PrimitiveRenderer::DrawPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly)
-{
-    if (!rOutDev.CanDrawPolygon())
-        PrimitiveRenderer::DrawPolygonGeometry(rOutDev, rPoly);
-
-    rOutDev.FlushGraphicsState();
-
-    // Now it is safe to ask for the transformation
-    const basegfx::B2DHomMatrix aTransform(rOutDev.GetViewTransformation());
-    basegfx::B2DPolygon aB2DPolygon(rPoly.getB2DPolygon());
-
-    if (!aB2DPolygon.isClosed())
-        aB2DPolygon.setClosed(true);
-
-    if (rOutDev.IsFillColor())
-    {
-        rOutDev.GetGraphics()->DrawPolyPolygon(aTransform, basegfx::B2DPolyPolygon(aB2DPolygon),
-                                               0.0, rOutDev);
-    }
-
-    if (rOutDev.IsLineColor())
-    {
-        vcl::rendercontext::StrokeAttributes aStroke;
-        aStroke.eJoin = basegfx::B2DLineJoin::NONE;
-        PrimitiveRenderer::DrawPolyLine(rOutDev, aB2DPolygon, aStroke, basegfx::B2DHomMatrix());
-    }
-}
-
 bool PrimitiveRenderer::DrawPolyPolygon(OutputDevice& rOutDev,
                                         const basegfx::B2DPolyPolygon& rB2DPolyPoly, bool bFill,
                                         const StrokeAttributes* pStroke)

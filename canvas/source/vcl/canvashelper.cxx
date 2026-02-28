@@ -404,9 +404,9 @@ namespace vclcanvas
             {
                 const basegfx::B2DPolygon& polygon = aStrokedPolyPoly.getB2DPolygon( i );
                 if( polygon.isClosed()) {
-                    vcl::rendercontext::PrimitiveRenderer::DrawPolygon( mpOutDevProvider->getOutDev(), tools::Polygon(polygon) );
+                    mpOutDevProvider->getOutDev().DrawPolygon( tools::Polygon(polygon) );
                     if( mp2ndOutDevProvider )
-                        vcl::rendercontext::PrimitiveRenderer::DrawPolygon( mp2ndOutDevProvider->getOutDev(), tools::Polygon(polygon) );
+                        mp2ndOutDevProvider->getOutDev().DrawPolygon( tools::Polygon(polygon) );
                 } else {
                     vcl::rendercontext::StrokeAttributes aStroke;
                     aStroke.fWidth = 0.0;

@@ -84,8 +84,6 @@ public:
                                 const tools::Rectangle& rLogicalRect, sal_uLong nHorzRound,
                                 sal_uLong nVertRound, bool bFillColor);
 
-    static void DrawPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly);
-
     static bool DrawPolygon(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
                             bool bFill, const StrokeAttributes* pStroke);
 
