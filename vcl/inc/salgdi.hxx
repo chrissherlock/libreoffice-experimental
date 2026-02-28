@@ -72,24 +72,17 @@ typedef sal_Unicode sal_Ucs; // TODO: use sal_UCS4 instead of sal_Unicode
 class VCL_PLUGIN_PUBLIC SalGraphics : protected vcl::WidgetDrawInterface
 {
 public:
-    virtual void                drawPolygon( sal_uInt32 nPoints, const Point* pPtAry ) = 0;
-
-    virtual void                drawPolyLine( sal_uInt32 nPoints, const Point* pPtAry ) = 0;
-
-    virtual void                drawLine( tools::Long nX1, tools::Long nY1, tools::Long nX2, tools::Long nY2 ) = 0;
+    virtual Color               getPixel( tools::Long nX, tools::Long nY ) = 0;
 
     virtual void                drawPixel( tools::Long nX, tools::Long nY ) = 0;
 
     virtual void                drawPixel( tools::Long nX, tools::Long nY, Color nColor ) = 0;
 
-    virtual void                drawRect( tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight ) = 0;
+    virtual void                drawLine( tools::Long nX1, tools::Long nY1, tools::Long nX2, tools::Long nY2 ) = 0;
 
-    virtual void                drawPolyPolygon( sal_uInt32 nPoly, const sal_uInt32* pPoints, const Point** pPtAry ) = 0;
+    virtual void                drawPolygon( sal_uInt32 nPoints, const Point* pPtAry ) = 0;
 
-    virtual void                drawPolyPolygon(
-                                    const basegfx::B2DHomMatrix& rObjectToDevice,
-                                    const basegfx::B2DPolyPolygon&,
-                                    double fTransparency) = 0;
+    virtual void                drawPolyLine( sal_uInt32 nPoints, const Point* pPtAry ) = 0;
 
     virtual bool                drawPolyLine(
                                     const basegfx::B2DHomMatrix& rObjectToDevice,
@@ -107,6 +100,15 @@ public:
                                     const Point* pPtAry,
                                     const PolyFlags* pFlgAry ) = 0;
 
+    virtual void                drawRect( tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight ) = 0;
+
+    virtual void                drawPolyPolygon( sal_uInt32 nPoly, const sal_uInt32* pPoints, const Point** pPtAry ) = 0;
+
+    virtual void                drawPolyPolygon(
+                                    const basegfx::B2DHomMatrix& rObjectToDevice,
+                                    const basegfx::B2DPolyPolygon&,
+                                    double fTransparency) = 0;
+
     virtual bool                drawPolygonBezier(
                                     sal_uInt32 nPoints,
                                     const Point* pPtAry,
@@ -118,7 +120,13 @@ public:
                                     const Point* const* pPtAry,
                                     const PolyFlags* const* pFlgAry ) = 0;
 
-    virtual Color               getPixel( tools::Long nX, tools::Long nY ) = 0;
+    // invert --> ClipRegion (only Windows or VirDevs)
+    virtual void                invert(
+                                    tools::Long nX, tools::Long nY,
+                                    tools::Long nWidth, tools::Long nHeight,
+                                    SalInvert nFlags) = 0;
+
+    virtual void                invert( sal_uInt32 nPoints, const Point* pPtAry, SalInvert nFlags ) = 0;
 
     SalGraphics();
     ~SalGraphics() override;
@@ -317,19 +325,6 @@ public:
                                     tools::Long nX, tools::Long nY,
                                     const OutputDevice& rOutDev );
 
-    // invert --> ClipRegion (only Windows)
-    SAL_DLLPRIVATE void                        Invert(
-                                    tools::Long nX, tools::Long nY,
-                                    tools::Long nWidth, tools::Long nHeight,
-                                    SalInvert nFlags,
-                                    const OutputDevice& rOutDev );
-
-    SAL_DLLPRIVATE void                        Invert(
-                                    sal_uInt32 nPoints,
-                                    const Point* pPtAry,
-                                    SalInvert nFlags,
-                                    const OutputDevice& rOutDev );
-
     SAL_DLLPRIVATE bool                        DrawEPS(
                                     tools::Long nX, tools::Long nY,
                                     tools::Long nWidth, tools::Long nHeight,
@@ -478,14 +473,6 @@ protected:
                                     Color nMaskColor ) = 0;
 
     virtual std::shared_ptr<SalBitmap> getBitmap( tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight, bool bWithoutAlpha ) = 0;
-
-    // invert --> ClipRegion (only Windows or VirDevs)
-    virtual void                invert(
-                                    tools::Long nX, tools::Long nY,
-                                    tools::Long nWidth, tools::Long nHeight,
-                                    SalInvert nFlags) = 0;
-
-    virtual void                invert( sal_uInt32 nPoints, const Point* pPtAry, SalInvert nFlags ) = 0;
 
     /// Only implemented by the macOS Quartz backend and the MS-Windows GDI backend.
     virtual bool                drawEPS(

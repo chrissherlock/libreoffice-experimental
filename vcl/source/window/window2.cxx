@@ -38,6 +38,7 @@
 #include <vcl/builder.hxx>
 #include <o3tl/string_view.hxx>
 
+#include <CoordinateMapper.hxx>
 #include <ClippingController.hxx>
 #include <window.h>
 #include <svdata.hxx>
@@ -204,20 +205,27 @@ void Window::InvertTracking( const tools::Rectangle& rRect, ShowTrackFlags nFlag
         }
     }
 
+    bool bRTL = pOutDev->IsRTLEnabled() || (pGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+    if (bRTL)
+    {
+        tools::Long nFrameWidth = pOutDev->IsVirtual() ? pOutDev->GetOutputWidthPixel() : pGraphics->GetGraphicsWidth();
+        pOutDev->mpMapper->MirrorDevicePixelRect(aRect, nFrameWidth, bRTL, pOutDev->ImplIsAntiparallel());
+    }
+
     ShowTrackFlags nStyle = nFlags & ShowTrackFlags::StyleMask;
     if ( nStyle == ShowTrackFlags::Object )
-        pGraphics->Invert( aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(), SalInvert::TrackFrame, *GetOutDev() );
+        pGraphics->invert( aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(), SalInvert::TrackFrame );
     else if ( nStyle == ShowTrackFlags::Split )
-        pGraphics->Invert( aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(), SalInvert::N50, *GetOutDev() );
+        pGraphics->invert( aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(), SalInvert::N50 );
     else
     {
         tools::Long nBorder = 1;
         if ( nStyle == ShowTrackFlags::Big )
             nBorder = 5;
-        pGraphics->Invert( aRect.Left(), aRect.Top(), aRect.GetWidth(), nBorder, SalInvert::N50, *GetOutDev() );
-        pGraphics->Invert( aRect.Left(), aRect.Bottom()-nBorder+1, aRect.GetWidth(), nBorder, SalInvert::N50, *GetOutDev() );
-        pGraphics->Invert( aRect.Left(), aRect.Top()+nBorder, nBorder, aRect.GetHeight()-(nBorder*2), SalInvert::N50, *GetOutDev() );
-        pGraphics->Invert( aRect.Right()-nBorder+1, aRect.Top()+nBorder, nBorder, aRect.GetHeight()-(nBorder*2), SalInvert::N50, *GetOutDev() );
+        pGraphics->invert( aRect.Left(), aRect.Top(), aRect.GetWidth(), nBorder, SalInvert::N50 );
+        pGraphics->invert( aRect.Left(), aRect.Bottom()-nBorder+1, aRect.GetWidth(), nBorder, SalInvert::N50 );
+        pGraphics->invert( aRect.Left(), aRect.Top()+nBorder, nBorder, aRect.GetHeight()-(nBorder*2), SalInvert::N50 );
+        pGraphics->invert( aRect.Right()-nBorder+1, aRect.Top()+nBorder, nBorder, aRect.GetHeight()-(nBorder*2), SalInvert::N50 );
     }
 }
 

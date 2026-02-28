@@ -104,26 +104,40 @@ void OutputDevice::DrawRoundedRect(const tools::Rectangle& rRect,
     }
 }
 
-void OutputDevice::Invert(const tools::Rectangle& rRect, InvertFlags nFlags)
-{
-    assert(!is_double_buffered_window());
-
-    if (rRect.IsEmpty())
-        return;
-
-    if (PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip) && mpGraphics)
-        vcl::rendercontext::PrimitiveRenderer::Invert(*mpGraphics, *mpMapper, this, rRect, nFlags);
-}
-
 void OutputDevice::Invert(const tools::Polygon& rPoly, InvertFlags nFlags)
 {
-    assert(!is_double_buffered_window());
-
-    if (!rPoly.GetSize())
-        return;
-
     if (PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip) && mpGraphics)
-        vcl::rendercontext::PrimitiveRenderer::Invert(*mpGraphics, *mpMapper, this, rPoly, nFlags);
+    {
+        tools::Polygon aDevicePoly = mpMapper->LogicToDevicePixel(rPoly);
+
+        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+
+        if (bRTL)
+        {
+            tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+            mpMapper->MirrorDevicePixelPolygon(aDevicePoly, nFrameWidth, bRTL, ImplIsAntiparallel());
+        }
+
+        vcl::rendercontext::PrimitiveRenderer::Invert(*mpGraphics, aDevicePoly, nFlags);
+    }
+}
+
+void OutputDevice::Invert(const tools::Rectangle& rRect, InvertFlags nFlags)
+{
+    if (PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip) && mpGraphics)
+    {
+        tools::Rectangle aDeviceRect = mpMapper->LogicToDevicePixel(rRect);
+
+        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+
+        if (bRTL)
+        {
+            tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+            mpMapper->MirrorDevicePixelRect(aDeviceRect, nFrameWidth, bRTL, ImplIsAntiparallel());
+        }
+
+        vcl::rendercontext::PrimitiveRenderer::Invert(*mpGraphics, aDeviceRect, nFlags);
+    }
 }
 
 void OutputDevice::DrawCheckered(const Point& rPos, const Size& rSize, sal_uInt32 nLen, Color aStart, Color aEnd)

@@ -105,12 +105,10 @@ public:
     static void DrawPolyPolygonGeometry(SalGraphics& rGraphics,
                                         const tools::PolyPolygon& rPolyPolygon);
 
-    static void Invert(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                       const OutputDevice* pOutDev, const tools::Rectangle& rLogicalRect,
+    static void Invert(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect,
                        InvertFlags nFlags);
 
-    static void Invert(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                       const OutputDevice* pOutDev, const tools::Polygon& rLogicalPoly,
+    static void Invert(SalGraphics& rGraphics, const tools::Polygon& rDevicePoly,
                        InvertFlags nFlags);
 
     static void DrawGrid(SalGraphics& rGraphics, const CoordinateMapper& rMapper,

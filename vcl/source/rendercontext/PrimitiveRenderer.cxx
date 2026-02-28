@@ -539,11 +539,10 @@ void PrimitiveRenderer::DrawClippedPolygon(SalGraphics& rGraphics,
     PrimitiveRenderer::DrawPolyPolygonGeometry(rGraphics, aClipped);
 }
 
-void PrimitiveRenderer::Invert(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                               const OutputDevice* pOutDev, const tools::Rectangle& rLogicalRect,
+void PrimitiveRenderer::Invert(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect,
                                InvertFlags nFlags)
 {
-    tools::Rectangle aDeviceRect(rMapper.LogicToDevicePixel(rLogicalRect));
+    tools::Rectangle aDeviceRect(rDeviceRect);
 
     if (aDeviceRect.IsEmpty())
         return;
@@ -558,19 +557,18 @@ void PrimitiveRenderer::Invert(SalGraphics& rGraphics, const CoordinateMapper& r
     if (nFlags & InvertFlags::TrackFrame)
         nSalFlags |= SalInvert::TrackFrame;
 
-    rGraphics.Invert(aDeviceRect.Left(), aDeviceRect.Top(), aDeviceRect.GetWidth(),
-                     aDeviceRect.GetHeight(), nSalFlags, *pOutDev);
+    rGraphics.invert(aDeviceRect.Left(), aDeviceRect.Top(), aDeviceRect.GetWidth(),
+                     aDeviceRect.GetHeight(), nSalFlags);
 }
 
-void PrimitiveRenderer::Invert(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                               const OutputDevice* pOutDev, const tools::Polygon& rLogicalPoly,
+void PrimitiveRenderer::Invert(SalGraphics& rGraphics, const tools::Polygon& rDevicePoly,
                                InvertFlags nFlags)
 {
-    sal_uInt16 nPoints = rLogicalPoly.GetSize();
+    sal_uInt16 nPoints = rDevicePoly.GetSize();
     if (nPoints < 2)
         return;
 
-    tools::Polygon aDevicePoly(rMapper.LogicToDevicePixel(rLogicalPoly));
+    tools::Polygon aDevicePoly(rDevicePoly);
 
     SalInvert nSalFlags = SalInvert::NONE;
 
@@ -581,7 +579,7 @@ void PrimitiveRenderer::Invert(SalGraphics& rGraphics, const CoordinateMapper& r
         nSalFlags |= SalInvert::TrackFrame;
 
     const Point* pPtAry = aDevicePoly.GetConstPointAry();
-    rGraphics.Invert(nPoints, pPtAry, nSalFlags, *pOutDev);
+    rGraphics.invert(nPoints, pPtAry, nSalFlags);
 }
 
 namespace

@@ -596,25 +596,6 @@ Color SalGraphics::GetPixel( tools::Long nX, tools::Long nY, const OutputDevice&
     return getPixel( nX, nY );
 }
 
-void SalGraphics::Invert( tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight, SalInvert nFlags, const OutputDevice& rOutDev )
-{
-    if( (m_nLayout & SalLayoutFlags::BiDiRtl) || rOutDev.IsRTLEnabled() )
-        mirror( nX, nWidth, rOutDev );
-    invert( nX, nY, nWidth, nHeight, nFlags );
-}
-
-void SalGraphics::Invert( sal_uInt32 nPoints, const Point* pPtAry, SalInvert nFlags, const OutputDevice& rOutDev )
-{
-    if( (m_nLayout & SalLayoutFlags::BiDiRtl) || rOutDev.IsRTLEnabled() )
-    {
-        std::unique_ptr<Point[]> pPtAry2(new Point[nPoints]);
-        bool bCopied = mirror( nPoints, pPtAry, pPtAry2.get(), rOutDev );
-        invert( nPoints, bCopied ? pPtAry2.get() : pPtAry, nFlags );
-    }
-    else
-        invert( nPoints, pPtAry, nFlags );
-}
-
 bool SalGraphics::DrawEPS( tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight, void* pPtr, sal_uInt32 nSize, const OutputDevice& rOutDev )
 {
     if( (m_nLayout & SalLayoutFlags::BiDiRtl) || rOutDev.IsRTLEnabled() )
