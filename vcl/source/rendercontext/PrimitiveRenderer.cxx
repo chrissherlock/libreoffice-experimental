@@ -388,7 +388,7 @@ void PrimitiveRenderer::DrawDevicePolyPolygonGeometry(SalGraphics& rGraphics,
 
     if (aBuffer.mnValidCount == 1)
     {
-        DrawDevicePolygonGeometry(rGraphics, rDevicePolyPoly.GetObject(aBuffer.mnLastIndex));
+        DrawPolygonGeometry(rGraphics, rDevicePolyPoly.GetObject(aBuffer.mnLastIndex));
         return;
     }
 
@@ -453,7 +453,7 @@ void PrimitiveRenderer::DrawPolyPolygonGeometry(SalGraphics& rGraphics,
     if (aBuffer.nValidCount == 1)
     {
         // Use the existing single polygon worker
-        DrawDevicePolygonGeometry(rGraphics, rPolyPoly.GetObject(aBuffer.nFirstValidIndex));
+        DrawPolygonGeometry(rGraphics, rPolyPoly.GetObject(aBuffer.nFirstValidIndex));
         return;
     }
 
@@ -461,8 +461,8 @@ void PrimitiveRenderer::DrawPolyPolygonGeometry(SalGraphics& rGraphics,
                               aBuffer.pPointAryAry.get());
 }
 
-void PrimitiveRenderer::DrawDevicePolygonGeometry(SalGraphics& rGraphics,
-                                                  const tools::Polygon& rDevicePoly)
+void PrimitiveRenderer::DrawPolygonGeometry(SalGraphics& rGraphics,
+                                            const tools::Polygon& rDevicePoly)
 {
     sal_uInt16 nPoints = rDevicePoly.GetSize();
     if (nPoints < 2)
@@ -492,7 +492,7 @@ void PrimitiveRenderer::DrawPolygonGeometry(SalGraphics& rGraphics, const Coordi
 {
     tools::Polygon aDevicePoly = rPoly;
     rMapper.MirrorDevicePixelPolygon(aDevicePoly, nFrameWidth, bRTL, bAntiparallel);
-    DrawDevicePolygonGeometry(rGraphics, aDevicePoly);
+    DrawPolygonGeometry(rGraphics, aDevicePoly);
 }
 
 namespace

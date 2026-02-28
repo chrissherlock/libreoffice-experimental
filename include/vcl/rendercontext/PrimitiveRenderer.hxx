@@ -92,8 +92,7 @@ public:
 
     static void DrawPolygon(SalGraphics& rGraphics, const tools::Polygon& rDevicePoly, bool bFill);
 
-    static void DrawDevicePolygonGeometry(SalGraphics& rGraphics,
-                                          const tools::Polygon& rDevicePoly);
+    static void DrawPolygonGeometry(SalGraphics& rGraphics, const tools::Polygon& rDevicePoly);
 
     static void DrawPolygonGeometry(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                                     const tools::Polygon& rPoly, tools::Long nFrameWidth, bool bRTL,
