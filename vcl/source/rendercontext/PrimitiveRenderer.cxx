@@ -511,8 +511,7 @@ static ClippedPolygonData lcl_GetClippedPolyPolygon(const tools::PolyPolygon& rP
     return aData;
 }
 
-void PrimitiveRenderer::DrawPolyPolygon(SalGraphics& rGraphics, const CoordinateMapper& /*rMapper*/,
-                                        const tools::PolyPolygon& rPolyPoly,
+void PrimitiveRenderer::DrawPolyPolygon(SalGraphics& rGraphics, const tools::PolyPolygon& rPolyPoly,
                                         const tools::PolyPolygon* pClipPolyPoly)
 {
     auto aClippedData = lcl_GetClippedPolyPolygon(rPolyPoly, pClipPolyPoly);
@@ -1351,7 +1350,7 @@ void PrimitiveRenderer::DrawEmphasisMark(OutputDevice& rOutDev, SalGraphics& rGr
         {
             tools::PolyPolygon aPolyPoly = rPolyPoly;
             aPolyPoly.Move(nX, nY);
-            PrimitiveRenderer::DrawPolyPolygon(rGraphics, *rOutDev.mpMapper, aPolyPoly);
+            PrimitiveRenderer::DrawPolyPolygon(rGraphics, aPolyPoly);
         }
     }
 

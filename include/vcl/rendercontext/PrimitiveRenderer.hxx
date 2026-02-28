@@ -102,14 +102,14 @@ public:
                                       const tools::PolyPolygon& rDevicePolyPoly, bool bFill,
                                       const StrokeAttributes* pStroke);
 
-    static void DrawPolyPolygon(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                                const tools::PolyPolygon& rPolyPoly,
+    static void DrawPolyPolygon(SalGraphics& rGraphics, const tools::PolyPolygon& rPolyPoly,
                                 const tools::PolyPolygon* pClipPolyPoly = nullptr);
 
     static void DrawPolyPolygonFallback(OutputDevice& rOutDev, const tools::PolyPolygon& rPolyPoly);
 
     static void DrawDevicePolygonGeometry(SalGraphics& rGraphics,
                                           const tools::Polygon& rDevicePoly);
+
     static void DrawDevicePolyPolygonGeometry(SalGraphics& rGraphics,
                                               const tools::PolyPolygon& rDevicePolyPoly);
 
