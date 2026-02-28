@@ -83,7 +83,22 @@ void OutputDevice::DrawPolygon(const tools::Polygon& rPoly)
     auto oStroke = lcl_CreateDefaultHairline(IsLineColor(), GetLineColor());
     vcl::rendercontext::StrokeAttributes* pStroke = oStroke ? &*oStroke : nullptr;
 
-    vcl::rendercontext::PrimitiveRenderer::DrawPolygon(*this, rPoly, IsFillColor(), pStroke);
+    if (!mpGraphics && !AcquireGraphics())
+        return;
+    FlushGraphicsState();
+
+    tools::Polygon aDevicePoly = mpMapper->LogicToDevicePixel(rPoly);
+    const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+    const bool bAntiparallel = ImplIsAntiparallel();
+    const tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+
+    mpMapper->MirrorDevicePixelPolygon(aDevicePoly, nFrameWidth, bRTL, bAntiparallel);
+
+    vcl::rendercontext::PrimitiveRenderer::DrawDevicePolygon(*mpGraphics, aDevicePoly, IsFillColor(), nullptr);
+    if (pStroke)
+    {
+        DrawPolyLine(rPoly.getB2DPolygon(), *pStroke);
+    }
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

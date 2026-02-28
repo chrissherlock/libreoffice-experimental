@@ -46,7 +46,6 @@ CPPUNIT_TEST_FIXTURE(PrimitiveRendererTest, testDrawPixel)
     SalGraphics* pGraphics = xVDev->GetGraphics();
     CPPUNIT_ASSERT_MESSAGE("Failed to acquire SalGraphics", pGraphics != nullptr);
 
-    // MEMORY FIX: Give the mapper a MapMode so scaling fractions are initialized!
     CoordinateMapper aMapper;
     aMapper.ResetMapMode(MapMode(MapUnit::MapPixel));
     aMapper.SetDeviceOriginX(2);
@@ -54,7 +53,6 @@ CPPUNIT_TEST_FIXTURE(PrimitiveRendererTest, testDrawPixel)
 
     Point aLogicPt(4, 5);
 
-    // NEW SIGNATURE: No OutputDevice* passed to the facade
     vcl::rendercontext::PrimitiveRenderer::DrawPixel(*pGraphics, aMapper, aLogicPt, COL_RED);
 
     xVDev->SetMapMode(MapMode(MapUnit::MapPixel));
@@ -67,6 +65,12 @@ CPPUNIT_TEST_FIXTURE(PrimitiveRendererTest, testDrawPixel)
 
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Original logical coordinate should be empty due to offset",
                                  COL_WHITE, xVDev->GetPixel(Point(4, 5)));
+
+    Color aReadColor
+        = vcl::rendercontext::PrimitiveRenderer::GetPixel(*pGraphics, aMapper, aLogicPt);
+
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Facade GetPixel failed to map and retrieve correctly", COL_RED,
+                                 aReadColor);
 }
 
 CPPUNIT_TEST_FIXTURE(PrimitiveRendererTest, testDrawLine)
@@ -79,11 +83,10 @@ CPPUNIT_TEST_FIXTURE(PrimitiveRendererTest, testDrawLine)
     SalGraphics* pGraphics = xVDev->GetGraphics();
     CPPUNIT_ASSERT_MESSAGE("Failed to acquire SalGraphics", pGraphics != nullptr);
 
-    // MAC QUARTZ FIX: Force VCL to push the blue stroke color down into the hardware CGContext
+    // MAC QUARTZ FIX: Force VCL to push the stroke color
     xVDev->SetLineColor(COL_BLUE);
     xVDev->DrawPixel(Point(-1, -1));
 
-    // MEMORY FIX: Give the mapper a MapMode so scaling fractions are initialized!
     CoordinateMapper aMapper;
     aMapper.ResetMapMode(MapMode(MapUnit::MapPixel));
     aMapper.SetDeviceOriginX(1);
@@ -92,21 +95,20 @@ CPPUNIT_TEST_FIXTURE(PrimitiveRendererTest, testDrawLine)
     Point aLogicStart(1, 1);
     Point aLogicEnd(8, 1);
 
-    // NEW SIGNATURE: No OutputDevice* passed to the facade
-    vcl::rendercontext::PrimitiveRenderer::DrawLine(*pGraphics, aMapper, aLogicStart, aLogicEnd,
-                                                    false, false);
+    Point aDeviceStart = aMapper.LogicToDevicePixel(aLogicStart);
+    Point aDeviceEnd = aMapper.LogicToDevicePixel(aLogicEnd);
 
-    // Read exact device pixels
+    vcl::rendercontext::PrimitiveRenderer::DrawLine(*pGraphics, aDeviceStart, aDeviceEnd, false,
+                                                    false);
+
     xVDev->SetMapMode(MapMode(MapUnit::MapPixel));
     xVDev->SetDeviceOriginX(0);
     xVDev->SetDeviceOriginY(0);
 
-    // Expected Device coordinates: Start (2, 2) to End (9, 2)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Start pixel failed", COL_BLUE, xVDev->GetPixel(Point(2, 2)));
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Mid pixel failed", COL_BLUE, xVDev->GetPixel(Point(5, 2)));
     CPPUNIT_ASSERT_EQUAL_MESSAGE("End pixel failed", COL_BLUE, xVDev->GetPixel(Point(9, 2)));
 
-    // Ensure the offset worked and the original logical coordinate is empty
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Offset failed", COL_WHITE, xVDev->GetPixel(Point(1, 1)));
 }
 

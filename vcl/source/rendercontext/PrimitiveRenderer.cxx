@@ -63,9 +63,8 @@ Color PrimitiveRenderer::GetPixel(SalGraphics& rGraphics, const CoordinateMapper
     return Color(rGraphics.getPixel(aDevicePt.X(), aDevicePt.Y()));
 }
 
-void PrimitiveRenderer::DrawDeviceLine(SalGraphics& rGraphics, const Point& rDeviceStart,
-                                       const Point& rDeviceEnd, bool bTryAA,
-                                       bool bPixelSnapHairline)
+void PrimitiveRenderer::DrawLine(SalGraphics& rGraphics, const Point& rDeviceStart,
+                                 const Point& rDeviceEnd, bool bTryAA, bool bPixelSnapHairline)
 {
     bool bDrawn = false;
 
@@ -88,7 +87,7 @@ void PrimitiveRenderer::DrawDeviceLine(SalGraphics& rGraphics, const Point& rDev
     }
 }
 
-void PrimitiveRenderer::DrawDeviceRect(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect)
+void PrimitiveRenderer::DrawRect(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect)
 {
     if (!rDeviceRect.IsEmpty())
     {
@@ -266,7 +265,7 @@ bool PrimitiveRenderer::DrawPolyPolygon(OutputDevice& rOutDev,
         aB2DPolyPolygon.setClosed(true);
 
     if (bFill)
-        rOutDev.GetGraphics()->DrawPolyPolygon(aTransform, aB2DPolyPolygon, 0.0, rOutDev);
+        rOutDev.GetGraphics()->drawPolyPolygon(aTransform, aB2DPolyPolygon, 0.0);
 
     bool bSuccess = true;
 
@@ -607,7 +606,7 @@ void PrimitiveRenderer::DrawSinglePolygon(OutputDevice& rOutDev, const tools::Po
     if (nSize >= 2)
     {
         const Point* pPtAry = rPoly.GetConstPointAry();
-        rOutDev.mpGraphics->DrawPolygon(nSize, pPtAry, rOutDev);
+        rOutDev.mpGraphics->drawPolygon(nSize, pPtAry);
     }
 }
 
@@ -652,12 +651,12 @@ void PrimitiveRenderer::DrawMultiplePolygons(OutputDevice& rOutDev,
 
     if (aBuffer.nValidCount == 1)
     {
-        rOutDev.mpGraphics->DrawPolygon(aBuffer.pPointAry[0], aBuffer.pPointAryAry[0], rOutDev);
+        rOutDev.mpGraphics->drawPolygon(aBuffer.pPointAry[0], aBuffer.pPointAryAry[0]);
     }
     else if (aBuffer.nValidCount > 1)
     {
-        rOutDev.mpGraphics->DrawPolyPolygon(aBuffer.nValidCount, aBuffer.pPointAry.get(),
-                                            aBuffer.pPointAryAry.get(), rOutDev);
+        rOutDev.mpGraphics->drawPolyPolygon(aBuffer.nValidCount, aBuffer.pPointAry.get(),
+                                            aBuffer.pPointAryAry.get());
     }
 }
 
@@ -702,7 +701,7 @@ void PrimitiveRenderer::DrawEllipse(OutputDevice& rOutDev, const tools::Rectangl
         }
         else
         {
-            rOutDev.mpGraphics->DrawPolygon(nSize, pPtAry, rOutDev);
+            rOutDev.mpGraphics->drawPolygon(nSize, pPtAry);
         }
     }
 }
@@ -750,7 +749,7 @@ void PrimitiveRenderer::DrawPie(OutputDevice& rOutDev, const tools::Rectangle& r
         }
         else
         {
-            rOutDev.mpGraphics->DrawPolygon(nSize, pPtAry, rOutDev);
+            rOutDev.mpGraphics->drawPolygon(nSize, pPtAry);
         }
     }
 }
@@ -785,7 +784,7 @@ void PrimitiveRenderer::DrawChord(OutputDevice& rOutDev, const tools::Rectangle&
         }
         else
         {
-            rOutDev.mpGraphics->DrawPolygon(nSize, pPtAry, rOutDev);
+            rOutDev.mpGraphics->drawPolygon(nSize, pPtAry);
         }
     }
 }
@@ -1050,7 +1049,7 @@ void PrimitiveRenderer::DrawTextRect(SalGraphics& rGraphics, OutputDevice* pOutD
         tools::Long nFrameWidth = pOutDev->IsVirtual() ? pOutDev->GetOutputWidthPixel()
                                                        : pOutDev->GetGraphics()->GetGraphicsWidth();
         pOutDev->mpMapper->MirrorDevicePixelRect(aDeviceRect, nFrameWidth, bRTL, bAntiparallel);
-        PrimitiveRenderer::DrawDeviceRect(rGraphics, aDeviceRect);
+        PrimitiveRenderer::DrawRect(rGraphics, aDeviceRect);
     }
 }
 
@@ -1483,7 +1482,7 @@ void PrimitiveRenderer::DrawEmphasisMark(OutputDevice& rOutDev, SalGraphics& rGr
             tools::Long nFrameWidth = rOutDev.IsVirtual() ? rOutDev.GetOutputWidthPixel()
                                                           : rOutDev.mpGraphics->GetGraphicsWidth();
             rOutDev.mpMapper->MirrorDevicePixelRect(aDeviceRect, nFrameWidth, bRTL, bAntiparallel);
-            PrimitiveRenderer::DrawDeviceRect(rGraphics, aDeviceRect);
+            PrimitiveRenderer::DrawRect(rGraphics, aDeviceRect);
         }
     }
 
@@ -1499,7 +1498,7 @@ void PrimitiveRenderer::DrawEmphasisMark(OutputDevice& rOutDev, SalGraphics& rGr
             tools::Long nFrameWidth = rOutDev.IsVirtual() ? rOutDev.GetOutputWidthPixel()
                                                           : rOutDev.mpGraphics->GetGraphicsWidth();
             rOutDev.mpMapper->MirrorDevicePixelRect(aDeviceRect, nFrameWidth, bRTL, bAntiparallel);
-            PrimitiveRenderer::DrawDeviceRect(rGraphics, aDeviceRect);
+            PrimitiveRenderer::DrawRect(rGraphics, aDeviceRect);
         }
     }
 }
@@ -1549,13 +1548,64 @@ void PrimitiveRenderer::DrawEmphasisMarks(OutputDevice& rOutDev, SalLayout& rSal
     }
 }
 
-void PrimitiveRenderer::DrawLine(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                                 const Point& rStart, const Point& rEnd, bool bTryAA,
-                                 bool bPixelSnapHairline)
+void PrimitiveRenderer::DrawDevicePolygon(SalGraphics& rGraphics, const tools::Polygon& rDevicePoly,
+                                          bool bFill, const StrokeAttributes* /*pStroke*/)
 {
-    Point aDeviceStart = rMapper.LogicToDevicePixel(rStart);
-    Point aDeviceEnd = rMapper.LogicToDevicePixel(rEnd);
-    DrawDeviceLine(rGraphics, aDeviceStart, aDeviceEnd, bTryAA, bPixelSnapHairline);
+    sal_uInt16 nSize = rDevicePoly.GetSize();
+    if (nSize == 0)
+        return;
+
+    const Point* pPtAry = rDevicePoly.GetConstPointAry();
+
+    if (bFill)
+        rGraphics.drawPolygon(nSize, pPtAry);
+    else
+        rGraphics.drawPolyLine(nSize, pPtAry);
+}
+
+void PrimitiveRenderer::DrawDevicePolyPolygon(SalGraphics& rGraphics,
+                                              const tools::PolyPolygon& rDevicePolyPoly, bool bFill,
+                                              const StrokeAttributes* /*pStroke*/)
+{
+    sal_uInt16 nPoly = rDevicePolyPoly.Count();
+    if (nPoly == 0)
+        return;
+
+    if (bFill)
+    {
+        std::unique_ptr<sal_uInt32[]> pPoints(new sal_uInt32[nPoly]);
+        std::unique_ptr<const Point* []> pPtAry(new const Point*[nPoly]);
+        for (sal_uInt16 i = 0; i < nPoly; i++)
+        {
+            pPoints[i] = rDevicePolyPoly[i].GetSize();
+            pPtAry[i] = rDevicePolyPoly[i].GetConstPointAry();
+        }
+        rGraphics.drawPolyPolygon(nPoly, pPoints.get(), pPtAry.get());
+    }
+}
+
+void PrimitiveRenderer::DrawDevicePolygon(SalGraphics& rGraphics,
+                                          const basegfx::B2DHomMatrix& rTransform,
+                                          const basegfx::B2DPolygon& rDevicePoly, bool bFill,
+                                          const StrokeAttributes* pStroke)
+{
+    basegfx::B2DPolyPolygon aPP(rDevicePoly);
+    DrawDevicePolyPolygon(rGraphics, rTransform, aPP, bFill, pStroke);
+}
+
+void PrimitiveRenderer::DrawDevicePolyPolygon(SalGraphics& rGraphics,
+                                              const basegfx::B2DHomMatrix& rTransform,
+                                              const basegfx::B2DPolyPolygon& rDevicePolyPoly,
+                                              bool bFill, const StrokeAttributes* /*pStroke*/)
+{
+    if (rDevicePolyPoly.count() == 0)
+        return;
+
+    if (bFill)
+    {
+        // Direct floating-point dispatch to the backend
+        rGraphics.drawPolyPolygon(rTransform, rDevicePolyPoly, 0.0);
+    }
 }
 
 } // namespace vcl::rendercontext

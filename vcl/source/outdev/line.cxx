@@ -124,8 +124,8 @@ void OutputDevice::DrawLine(const Point& rStartPt, const Point& rEndPt)
     mpMapper->MirrorDevicePixelPoint(aDeviceStart, nFrameWidth, bRTL, bAntiparallel);
     mpMapper->MirrorDevicePixelPoint(aDeviceEnd, nFrameWidth, bRTL, bAntiparallel);
 
-    vcl::rendercontext::PrimitiveRenderer::DrawDeviceLine(*mpGraphics, aDeviceStart, aDeviceEnd,
-                                                          bTryAA, bPixelSnapHairline);
+    vcl::rendercontext::PrimitiveRenderer::DrawLine(*mpGraphics, aDeviceStart, aDeviceEnd,
+                                                    bTryAA, bPixelSnapHairline);
 }
 
 void OutputDevice::DrawLine(const Point& rStartPt, const Point& rEndPt, const LineInfo& rLineInfo)
@@ -159,7 +159,7 @@ void OutputDevice::DrawLine(const Point& rStartPt, const Point& rEndPt, const Li
         mpMapper->MirrorDevicePixelPoint(aDeviceStart, nFrameWidth, bRTL, bAntiparallel);
         mpMapper->MirrorDevicePixelPoint(aDeviceEnd, nFrameWidth, bRTL, bAntiparallel);
 
-        vcl::rendercontext::PrimitiveRenderer::DrawDeviceLine(*mpGraphics, aDeviceStart, aDeviceEnd);
+        vcl::rendercontext::PrimitiveRenderer::DrawLine(*mpGraphics, aDeviceStart, aDeviceEnd);
         return;
     }
 

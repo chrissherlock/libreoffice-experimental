@@ -73,7 +73,7 @@ void OutputDevice::DrawRect(const tools::Rectangle& rRect)
 
         mpMapper->MirrorDevicePixelRect(aDeviceRect, nFrameWidth, bRTL, bAntiparallel);
 
-        vcl::rendercontext::PrimitiveRenderer::DrawDeviceRect(*mpGraphics, aDeviceRect);
+        vcl::rendercontext::PrimitiveRenderer::DrawRect(*mpGraphics, aDeviceRect);
     }
 }
 

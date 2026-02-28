@@ -71,16 +71,19 @@ typedef sal_Unicode sal_Ucs; // TODO: use sal_UCS4 instead of sal_Unicode
 
 class VCL_PLUGIN_PUBLIC SalGraphics : protected vcl::WidgetDrawInterface
 {
-
 public:
     virtual void                drawPolygon( sal_uInt32 nPoints, const Point* pPtAry ) = 0;
 
     virtual void                drawPolyLine( sal_uInt32 nPoints, const Point* pPtAry ) = 0;
 
     virtual void                drawLine( tools::Long nX1, tools::Long nY1, tools::Long nX2, tools::Long nY2 ) = 0;
+
     virtual void                drawPixel( tools::Long nX, tools::Long nY ) = 0;
+
     virtual void                drawPixel( tools::Long nX, tools::Long nY, Color nColor ) = 0;
+
     virtual void                drawRect( tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight ) = 0;
+
     virtual void                drawPolyPolygon( sal_uInt32 nPoly, const sal_uInt32* pPoints, const Point** pPtAry ) = 0;
 
     virtual void                drawPolyPolygon(
@@ -234,7 +237,6 @@ public:
 
     // draw --> LineColor and FillColor and RasterOp and ClipRegion
 
-    SAL_DLLPRIVATE void                        DrawPolygon( sal_uInt32 nPoints, const Point* pPtAry, const OutputDevice& rOutDev );
 
     SAL_DLLPRIVATE void                        DrawPolyPolygon(
                                     sal_uInt32 nPoly,

@@ -388,17 +388,6 @@ void SalGraphics::SetClipRegion( const vcl::Region& i_rClip, const OutputDevice&
     }
 }
 
-void SalGraphics::DrawPolygon( sal_uInt32 nPoints, const Point* pPtAry, const OutputDevice& rOutDev )
-{
-    if( (m_nLayout & SalLayoutFlags::BiDiRtl) || rOutDev.IsRTLEnabled() )
-    {
-        std::unique_ptr<Point[]> pPtAry2(new Point[nPoints]);
-        bool bCopied = mirror( nPoints, pPtAry, pPtAry2.get(), rOutDev );
-        drawPolygon( nPoints, bCopied ? pPtAry2.get() : pPtAry );
-    }
-    else
-        drawPolygon( nPoints, pPtAry );
-}
 
 void SalGraphics::DrawPolyPolygon( sal_uInt32 nPoly, const sal_uInt32* pPoints, const Point** pPtAry, const OutputDevice& rOutDev )
 {

@@ -80,7 +80,18 @@ void OutputDevice::DrawPolyPolygon(const basegfx::B2DPolyPolygon& rB2DPolyPoly)
         pStroke = &aStroke;
     }
 
-    vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygon(*this, rB2DPolyPoly, bFill, pStroke);
+    if (!mpGraphics && !AcquireGraphics())
+        return;
+    FlushGraphicsState();
+
+    basegfx::B2DHomMatrix aTransform = GetViewTransformation();
+    vcl::rendercontext::PrimitiveRenderer::DrawDevicePolyPolygon(*mpGraphics, aTransform,
+                                                                 rB2DPolyPoly, bFill, nullptr);
+    if (pStroke)
+    {
+        for (sal_uInt32 i = 0; i < rB2DPolyPoly.count(); ++i)
+            DrawPolyLine(rB2DPolyPoly.getB2DPolygon(i), *pStroke);
+    }
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

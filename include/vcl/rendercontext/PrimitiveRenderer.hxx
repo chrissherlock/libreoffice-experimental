@@ -66,17 +66,12 @@ public:
     static Color GetPixel(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                           const Point& rLogicalPt);
 
-    static void DrawLine(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                         const Point& rStart, const Point& rEnd, bool bTryAA = false,
-                         bool bPixelSnapHairline = false);
-
     /** Renders a line between two logical points, with optional Anti-Aliasing. */
-    static void DrawDeviceLine(SalGraphics& rGraphics, const Point& rDeviceStart,
-                               const Point& rDeviceEnd, bool bTryAA = false,
-                               bool bPixelSnapHairline = false);
+    static void DrawLine(SalGraphics& rGraphics, const Point& rDeviceStart, const Point& rDeviceEnd,
+                         bool bTryAA = false, bool bPixelSnapHairline = false);
 
     /** Renders a rectangle using the current line and fill colors. */
-    static void DrawDeviceRect(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect);
+    static void DrawRect(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect);
 
     static void DrawRoundedRect(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                                 const tools::Rectangle& rLogicalRect, sal_uLong nHorzRound,
@@ -93,6 +88,22 @@ public:
 
     static bool DrawPolygon(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
                             bool bFill, const StrokeAttributes* pStroke);
+
+    static void DrawDevicePolygon(SalGraphics& rGraphics, const basegfx::B2DHomMatrix& rTransform,
+                                  const basegfx::B2DPolygon& rDevicePoly, bool bFill,
+                                  const StrokeAttributes* pStroke);
+
+    static void DrawDevicePolyPolygon(SalGraphics& rGraphics,
+                                      const basegfx::B2DHomMatrix& rTransform,
+                                      const basegfx::B2DPolyPolygon& rDevicePolyPoly, bool bFill,
+                                      const StrokeAttributes* pStroke);
+
+    static void DrawDevicePolygon(SalGraphics& rGraphics, const tools::Polygon& rDevicePoly,
+                                  bool bFill, const StrokeAttributes* pStroke);
+
+    static void DrawDevicePolyPolygon(SalGraphics& rGraphics,
+                                      const tools::PolyPolygon& rDevicePolyPoly, bool bFill,
+                                      const StrokeAttributes* pStroke);
 
     static bool DrawPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly, bool bFill,
                             const StrokeAttributes* pStroke);
