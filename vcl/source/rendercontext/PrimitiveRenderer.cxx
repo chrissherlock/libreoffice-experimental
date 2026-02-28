@@ -965,7 +965,7 @@ void PrimitiveRenderer::DrawGrid(SalGraphics& rGraphics, const CoordinateMapper&
         {
             for (const auto& rX : aHorzBuf)
             {
-                rGraphics.DrawPixel(rX, rY, *pOutDev);
+                rGraphics.drawPixel(rX, rY);
             }
         }
     }
@@ -1034,7 +1034,6 @@ struct CrossGridGeometry
 }
 
 void PrimitiveRenderer::DrawGridOfCrosses(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                                          const OutputDevice* pOutDev,
                                           const tools::Rectangle& rGridArea,
                                           const Size& rGridDistance,
                                           const tools::Rectangle& rDrawingArea)
@@ -1054,11 +1053,11 @@ void PrimitiveRenderer::DrawGridOfCrosses(SalGraphics& rGraphics, const Coordina
                 continue;
 
             // Draw a 3x3 cross centered at (nX, nY)
-            rGraphics.DrawPixel(nX, nY, *pOutDev);
-            rGraphics.DrawPixel(nX - 1, nY, *pOutDev);
-            rGraphics.DrawPixel(nX + 1, nY, *pOutDev);
-            rGraphics.DrawPixel(nX, nY - 1, *pOutDev);
-            rGraphics.DrawPixel(nX, nY + 1, *pOutDev);
+            rGraphics.drawPixel(nX, nY);
+            rGraphics.drawPixel(nX - 1, nY);
+            rGraphics.drawPixel(nX + 1, nY);
+            rGraphics.drawPixel(nX, nY - 1);
+            rGraphics.drawPixel(nX, nY + 1);
         }
     }
 }
@@ -1146,7 +1145,7 @@ void PrimitiveRenderer::DrawWaveLineRasterized(OutputDevice& rOutDev, const Wave
         }
         else
         {
-            rOutDev.mpGraphics->DrawPixel(aDrawPt.X(), aDrawPt.Y(), rOutDev);
+            rOutDev.mpGraphics->drawPixel(aDrawPt.X(), aDrawPt.Y());
         }
     }
 }

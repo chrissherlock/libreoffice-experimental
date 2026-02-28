@@ -173,7 +173,7 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea,
         return;
 
     vcl::rendercontext::PrimitiveRenderer::DrawGridOfCrosses(
-        *mpGraphics, *mpMapper, this, rGridArea, rGridDistance, rDrawingArea);
+        *mpGraphics, *mpMapper, rGridArea, rGridDistance, rDrawingArea);
 }
 
 Color OutputDevice::DrawSelectionBackground(const tools::Rectangle& rRect,
