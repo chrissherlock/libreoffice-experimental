@@ -41,25 +41,17 @@ void OutputDevice::DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
 
     FlushGraphicsState();
 
-    if (RasterOp::OverPaint == GetRasterOp() && IsLineColor())
-    {
-        const bool bPixelSnapHairline
-            = (mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline)
-              && rPoly.GetSize() < 1000;
+    vcl::rendercontext::StrokeAttributes aStroke{rLineInfo.GetWidth(), rLineInfo.GetLineJoin(), rLineInfo.GetLineCap(), basegfx::deg2rad(15.0), nullptr, 0.0};
 
-        if (mpGraphics->DrawPolyLine(basegfx::B2DHomMatrix(), rPoly.getB2DPolygon(), 0.0,
-                                     rLineInfo.GetWidth(), nullptr, rLineInfo.GetLineJoin(),
-                                     rLineInfo.GetLineCap(), basegfx::deg2rad(15.0),
-                                     bPixelSnapHairline, *this))
-        {
-            return;
-        }
+    if (vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*GetGraphics(), *mpMapper, rPoly.getB2DPolygon(), aStroke, basegfx::B2DHomMatrix(), GetAntialiasing(), GetRasterOp(), IsLineColor()))
+    {
+        return;
     }
 
     if (rLineInfo.GetStyle() == LineStyle::Dash || rLineInfo.GetWidth() > 1)
     {
         basegfx::B2DPolygon aPoly = mpMapper->LogicToDevicePixel(rPoly.getB2DPolygon());
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyLineGeometry(*this, basegfx::B2DPolyPolygon(aPoly), rLineInfo);
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLineGeometry(*GetGraphics(), *mpMapper, basegfx::B2DPolyPolygon(aPoly), rLineInfo);
     }
     else
     {
@@ -89,50 +81,7 @@ bool OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2D, const vcl::rend
 
     FlushGraphicsState();
 
-    const basegfx::B2DHomMatrix aTransform(GetViewTransformation() * rObjectTransform);
-    bool bSuccess = false;
-
-    if (GetRasterOp() == RasterOp::OverPaint && IsLineColor())
-    {
-        const bool bPixelSnapHairline
-            = (mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline)
-              && rB2D.count() < 1000;
-
-        SalGraphics* pGraphics = GetGraphics();
-        if (pGraphics
-            && pGraphics->DrawPolyLine(aTransform, rB2D, rStroke.fTransparency,
-                                       rStroke.fWidth, rStroke.pDashArray, rStroke.eJoin,
-                                       rStroke.eCap, rStroke.fMiterMinimumAngle, bPixelSnapHairline,
-                                       *this))
-        {
-            bSuccess = true;
-        }
-    }
-
-    if (!bSuccess)
-    {
-        basegfx::B2DPolygon aDevicePoly(rB2D);
-        aDevicePoly.transform(aTransform);
-
-        basegfx::B2DPolyPolygon aPolyPolygon(aDevicePoly);
-        if (rStroke.pDashArray && !rStroke.pDashArray->empty())
-        {
-            basegfx::B2DPolyPolygon aDashedPolyPoly;
-            basegfx::utils::applyLineDashing(basegfx::B2DPolyPolygon(aDevicePoly), *rStroke.pDashArray,
-                                             &aDashedPolyPoly);
-            aPolyPolygon = aDashedPolyPoly;
-        }
-
-        LineInfo aInfo;
-        aInfo.SetWidth(std::round(rStroke.fWidth));
-        aInfo.SetLineJoin(rStroke.eJoin);
-        aInfo.SetLineCap(rStroke.eCap);
-
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyLineGeometry(*this, aPolyPolygon, aInfo);
-        bSuccess = true;
-    }
-
-    return bSuccess;
+        return vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*GetGraphics(), *mpMapper, rB2D, rStroke, rObjectTransform, GetAntialiasing(), GetRasterOp(), IsLineColor());
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

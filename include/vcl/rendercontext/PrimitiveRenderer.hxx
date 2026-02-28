@@ -20,8 +20,11 @@
 #include <basegfx/numeric/ftools.hxx>
 
 #include <vcl/dllapi.h>
+#include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/rendercontext/InvertFlags.hxx>
+#include <vcl/rendercontext/RasterOp.hxx>
 #include <vcl/rendercontext/DrawGridFlags.hxx>
+#include <vcl/rendercontext/TextLineGeometry.hxx>
 
 #include <com/sun/star/drawing/LineCap.hpp>
 
@@ -35,18 +38,13 @@ class Color;
 class OutputDevice;
 class SalLayout;
 class LineInfo;
+
 namespace tools
 {
 class Polygon;
 class PolyPolygon;
-}
-
-namespace tools
-{
 class Rectangle;
 }
-
-#include <vcl/rendercontext/TextLineGeometry.hxx>
 
 namespace vcl::rendercontext
 {
@@ -84,7 +82,12 @@ public:
                                 const tools::Rectangle& rLogicalRect, sal_uLong nHorzRound,
                                 sal_uLong nVertRound, bool bFillColor);
 
-    static void DrawPolyLineGeometry(OutputDevice& rOutDev,
+    static bool DrawPolyLine(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+                             const basegfx::B2DPolygon& rPoly, const StrokeAttributes& rStroke,
+                             const basegfx::B2DHomMatrix& rObjectTransform, AntialiasingFlags nAA,
+                             RasterOp eROP, bool bIsLineColor);
+
+    static void DrawPolyLineGeometry(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                                      const basegfx::B2DPolyPolygon& rPolyPolygon,
                                      const LineInfo& rLineInfo);
 

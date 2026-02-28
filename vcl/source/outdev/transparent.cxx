@@ -210,7 +210,7 @@ void OutputDevice::DrawTransparent(
 
         for(auto const& rPolygon : std::as_const(aB2DPolyPolygon))
         {
-            mpGraphics->DrawPolyLine(
+            mpGraphics->drawPolyLine(
                 aFullTransform,
                 rPolygon,
                 fTransparency,
@@ -219,8 +219,7 @@ void OutputDevice::DrawTransparent(
                 basegfx::B2DLineJoin::NONE,
                 css::drawing::LineCap_BUTT,
                 basegfx::deg2rad(15.0), // not used with B2DLineJoin::NONE, but the correct default
-                bPixelSnapHairline,
-                *this );
+                bPixelSnapHairline);
         }
     }
 
@@ -296,7 +295,7 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
 
             for(auto const& rPolygon : std::as_const(aB2DPolyPolygon))
             {
-                bDrawn = mpGraphics->DrawPolyLine(
+                bDrawn = mpGraphics->drawPolyLine(
                     aTransform,
                     rPolygon,
                     fTransparency,
@@ -305,8 +304,7 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
                     basegfx::B2DLineJoin::NONE,
                     css::drawing::LineCap_BUTT,
                     basegfx::deg2rad(15.0), // not used with B2DLineJoin::NONE, but the correct default
-                    bPixelSnapHairline,
-                    *this );
+                    bPixelSnapHairline);
             }
 
             // prepare to restore the fill color

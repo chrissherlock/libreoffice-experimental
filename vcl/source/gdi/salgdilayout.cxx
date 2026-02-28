@@ -524,49 +524,7 @@ bool SalGraphics::DrawPolyPolygonBezier( sal_uInt32 i_nPoly, const sal_uInt32* i
     return bRet;
 }
 
-bool SalGraphics::DrawPolyLine(
-    const basegfx::B2DHomMatrix& rObjectToDevice,
-    const basegfx::B2DPolygon& i_rPolygon,
-    double i_fTransparency,
-    double i_rLineWidth,
-    const std::vector< double >* i_pStroke, // MM01
-    basegfx::B2DLineJoin i_eLineJoin,
-    css::drawing::LineCap i_eLineCap,
-    double i_fMiterMinimumAngle,
-    bool bPixelSnapHairline,
-    const OutputDevice& i_rOutDev)
-{
-    if( (m_nLayout & SalLayoutFlags::BiDiRtl) || i_rOutDev.IsRTLEnabled() )
-    {
-        // mirroring set
-        const basegfx::B2DHomMatrix& rMirror(getMirror(i_rOutDev));
-        if(!rMirror.isIdentity())
-        {
-            return drawPolyLine(
-                rMirror * rObjectToDevice,
-                i_rPolygon,
-                i_fTransparency,
-                i_rLineWidth,
-                i_pStroke, // MM01
-                i_eLineJoin,
-                i_eLineCap,
-                i_fMiterMinimumAngle,
-                bPixelSnapHairline);
-        }
-    }
 
-    // no mirroring set (or identity), use standard call
-    return drawPolyLine(
-        rObjectToDevice,
-        i_rPolygon,
-        i_fTransparency,
-        i_rLineWidth,
-        i_pStroke, // MM01
-        i_eLineJoin,
-        i_eLineCap,
-        i_fMiterMinimumAngle,
-        bPixelSnapHairline);
-}
 
 bool SalGraphics::DrawGradient(const tools::PolyPolygon& rPolyPoly, const Gradient& rGradient, const OutputDevice& rOutDev)
 {

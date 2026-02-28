@@ -181,7 +181,7 @@ lcl_ProcessLineGeometry(basegfx::B2DPolyPolygon aLinePolyPolygon, const LineInfo
     return { std::move(aLinePolyPolygon), std::move(aFillPolyPolygon) };
 }
 
-static void lcl_DrawHairlinePolyPolygon(SalGraphics& rGraphics, OutputDevice& rOutDev,
+static void lcl_DrawHairlinePolyPolygon(SalGraphics& rGraphics,
                                         const basegfx::B2DPolyPolygon& rLinePolyPolygon,
                                         bool bTryB2d, bool bPixelSnapHairline)
 {
@@ -192,9 +192,9 @@ static void lcl_DrawHairlinePolyPolygon(SalGraphics& rGraphics, OutputDevice& rO
         bool bDone = false;
         if (bTryB2d)
         {
-            bDone = rGraphics.DrawPolyLine(basegfx::B2DHomMatrix(), rB2DPolygon, 0.0, 0.0, nullptr,
+            bDone = rGraphics.drawPolyLine(basegfx::B2DHomMatrix(), rB2DPolygon, 0.0, 0.0, nullptr,
                                            basegfx::B2DLineJoin::NONE, css::drawing::LineCap_BUTT,
-                                           basegfx::deg2rad(15.0), bPixelSnapHairline, rOutDev);
+                                           basegfx::deg2rad(15.0), bPixelSnapHairline);
         }
         if (!bDone)
         {
@@ -204,7 +204,7 @@ static void lcl_DrawHairlinePolyPolygon(SalGraphics& rGraphics, OutputDevice& rO
     }
 }
 
-static bool lcl_TryDrawB2DAreaGeometry(SalGraphics& rGraphics, OutputDevice& rOutDev,
+static bool lcl_TryDrawB2DAreaGeometry(SalGraphics& rGraphics,
                                        const basegfx::B2DPolyPolygon& rFillPolyPolygon,
                                        bool bFuzzing, bool bTryB2d)
 {
@@ -220,39 +220,31 @@ static bool lcl_TryDrawB2DAreaGeometry(SalGraphics& rGraphics, OutputDevice& rOu
     }
     if (!bTryB2d)
         return false;
-    rGraphics.DrawPolyPolygon(basegfx::B2DHomMatrix(), rFillPolyPolygon, 0.0, rOutDev);
+    rGraphics.drawPolyPolygon(basegfx::B2DHomMatrix(), rFillPolyPolygon, 0.0);
     return true;
 }
 
-static void lcl_DrawSubdividedAreaGeometry(SalGraphics& rGraphics, OutputDevice& rOutDev,
+static void lcl_DrawSubdividedAreaGeometry(SalGraphics& rGraphics,
                                            const basegfx::B2DPolyPolygon& rFillPolyPolygon)
 {
     for (auto const& rB2DPolygon : rFillPolyPolygon)
     {
         tools::Polygon aPolygon(rB2DPolygon);
         aPolygon.AdaptiveSubdivide(aPolygon);
-        rGraphics.DrawPolygon(aPolygon.GetSize(), aPolygon.GetConstPointAry(), rOutDev);
+        rGraphics.drawPolygon(aPolygon.GetSize(), aPolygon.GetConstPointAry());
     }
 }
 
-static void lcl_DrawAreaGeometry(SalGraphics& rGraphics, OutputDevice& rOutDev,
+static void lcl_DrawAreaGeometry(SalGraphics& rGraphics,
                                  const basegfx::B2DPolyPolygon& rFillPolyPolygon, bool bFuzzing,
                                  bool bTryB2d)
 {
     if (!rFillPolyPolygon.count())
         return;
-    const Color aOldLineColor(rOutDev.GetLineColor());
-    const Color aOldFillColor(rOutDev.GetFillColor());
-    comphelper::ScopeGuard aColorGuard([&rOutDev, aOldLineColor, aOldFillColor]() {
-        rOutDev.SetFillColor(aOldFillColor);
-        rOutDev.SetLineColor(aOldLineColor);
-    });
-    rOutDev.SetLineColor();
-    rOutDev.SetFillColor(aOldLineColor);
-    rOutDev.FlushGraphicsState();
-    if (lcl_TryDrawB2DAreaGeometry(rGraphics, rOutDev, rFillPolyPolygon, bFuzzing, bTryB2d))
+    // Color state is managed by the orchestrator
+    if (lcl_TryDrawB2DAreaGeometry(rGraphics, rFillPolyPolygon, bFuzzing, bTryB2d))
         return;
-    lcl_DrawSubdividedAreaGeometry(rGraphics, rOutDev, rFillPolyPolygon);
+    lcl_DrawSubdividedAreaGeometry(rGraphics, rFillPolyPolygon);
 }
 
 bool PrimitiveRenderer::DrawPolyPolygon(OutputDevice& rOutDev,
@@ -346,27 +338,64 @@ bool PrimitiveRenderer::DrawPolygon(OutputDevice& rOutDev, const tools::Polygon&
     return DrawPolygon(rOutDev, aB2D, bFill, pStroke);
 }
 
-void PrimitiveRenderer::DrawPolyLineGeometry(OutputDevice& rOutDev,
+void PrimitiveRenderer::DrawPolyLineGeometry(SalGraphics& rGraphics,
+                                             const CoordinateMapper& rMapper,
                                              const basegfx::B2DPolyPolygon& rPolyPolygon,
                                              const LineInfo& rLineInfo)
 {
-    if (!rOutDev.mpGraphics && !rOutDev.AcquireGraphics())
-        return;
-
+    (void)rMapper;
     auto[aHairlines, aFillGeometry] = lcl_ProcessLineGeometry(rPolyPolygon, rLineInfo);
 
-    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(rOutDev.maRecorder);
-
-    const bool bTryB2d = (rOutDev.GetRasterOp() == RasterOp::OverPaint && rOutDev.IsLineColor());
-    const bool bPixelSnapHairline
-        = bool(rOutDev.mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+    const bool bTryB2d = true;
+    const bool bPixelSnapHairline = false;
     static const bool bFuzzing = comphelper::IsFuzzing();
 
-    rOutDev.FlushGraphicsState();
+    if (aHairlines.count())
+        lcl_DrawHairlinePolyPolygon(rGraphics, aHairlines, bTryB2d, bPixelSnapHairline);
 
-    lcl_DrawHairlinePolyPolygon(*rOutDev.mpGraphics, rOutDev, aHairlines, bTryB2d,
-                                bPixelSnapHairline);
-    lcl_DrawAreaGeometry(*rOutDev.mpGraphics, rOutDev, aFillGeometry, bFuzzing, bTryB2d);
+    if (aFillGeometry.count())
+        lcl_DrawAreaGeometry(rGraphics, aFillGeometry, bFuzzing, bTryB2d);
+}
+
+bool PrimitiveRenderer::DrawPolyLine(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+                                     const basegfx::B2DPolygon& rPoly,
+                                     const StrokeAttributes& rStroke,
+                                     const basegfx::B2DHomMatrix& rObjectTransform,
+                                     AntialiasingFlags nAA, RasterOp eROP, bool bIsLineColor)
+{
+    if (rPoly.count() == 0)
+        return true;
+
+    const basegfx::B2DHomMatrix aTransform(rMapper.GetViewTransformation() * rObjectTransform);
+    const bool bPixelSnapHairline
+        = (nAA & AntialiasingFlags::PixelSnapHairline) && rPoly.count() < 1000;
+
+    if (eROP == RasterOp::OverPaint && bIsLineColor)
+    {
+        if (rGraphics.drawPolyLine(aTransform, rPoly, rStroke.fTransparency, rStroke.fWidth,
+                                   rStroke.pDashArray, rStroke.eJoin, rStroke.eCap,
+                                   rStroke.fMiterMinimumAngle, bPixelSnapHairline))
+            return true;
+    }
+
+    basegfx::B2DPolygon aDevicePoly(rPoly);
+    aDevicePoly.transform(aTransform);
+    basegfx::B2DPolyPolygon aPolyPolygon(aDevicePoly);
+    if (rStroke.pDashArray && !rStroke.pDashArray->empty())
+    {
+        basegfx::B2DPolyPolygon aDashedPolyPoly;
+        basegfx::utils::applyLineDashing(basegfx::B2DPolyPolygon(aDevicePoly), *rStroke.pDashArray,
+                                         &aDashedPolyPoly);
+        aPolyPolygon = aDashedPolyPoly;
+    }
+
+    LineInfo aInfo;
+    aInfo.SetWidth(std::round(rStroke.fWidth));
+    aInfo.SetLineJoin(rStroke.eJoin);
+    aInfo.SetLineCap(rStroke.eCap);
+
+    DrawPolyLineGeometry(rGraphics, rMapper, aPolyPolygon, aInfo);
+    return true;
 }
 
 namespace
@@ -1038,10 +1067,10 @@ void PrimitiveRenderer::DrawWaveLineBezier(OutputDevice& rOutDev, SalGraphics& r
                                   & AntialiasingFlags::PixelSnapHairline);
 
     rGraphics.SetLineColor(rOutDev.GetLineColor());
-    rGraphics.DrawPolyLine(aRotationMatrix, aWaveLinePolygon, 0.0, nLineWidth,
+    rGraphics.drawPolyLine(aRotationMatrix, aWaveLinePolygon, 0.0, nLineWidth,
                            nullptr, // MM01
                            basegfx::B2DLineJoin::NONE, css::drawing::LineCap_BUTT,
-                           basegfx::deg2rad(15.0), bPixelSnapHairline, rOutDev);
+                           basegfx::deg2rad(15.0), bPixelSnapHairline);
 }
 
 void PrimitiveRenderer::DrawWaveLineHairline(OutputDevice& rOutDev, const WaveLineGeometry& rGeo,

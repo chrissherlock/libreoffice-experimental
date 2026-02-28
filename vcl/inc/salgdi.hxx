@@ -73,14 +73,9 @@ class VCL_PLUGIN_PUBLIC SalGraphics : protected vcl::WidgetDrawInterface
 {
 
 public:
-    // --- Liberated Raw Drawing Primitives ---
-
-
     virtual void                drawPolygon( sal_uInt32 nPoints, const Point* pPtAry ) = 0;
 
-
     virtual void                drawPolyLine( sal_uInt32 nPoints, const Point* pPtAry ) = 0;
-
 
     virtual void                drawLine( tools::Long nX1, tools::Long nY1, tools::Long nX2, tools::Long nY2 ) = 0;
     virtual void                drawPixel( tools::Long nX, tools::Long nY ) = 0;
@@ -253,18 +248,6 @@ public:
                                     const basegfx::B2DHomMatrix& rObjectToDevice,
                                     const basegfx::B2DPolyPolygon &i_rPolyPolygon,
                                     double i_fTransparency,
-                                    const OutputDevice& i_rOutDev);
-
-    SAL_DLLPRIVATE bool                        DrawPolyLine(
-                                    const basegfx::B2DHomMatrix& rObjectToDevice,
-                                    const basegfx::B2DPolygon& i_rPolygon,
-                                    double i_fTransparency,
-                                    double i_fLineWidth,
-                                    const std::vector< double >* i_pStroke, // MM01
-                                    basegfx::B2DLineJoin i_eLineJoin,
-                                    css::drawing::LineCap i_eLineCap,
-                                    double i_fMiterMinimumAngle,
-                                    bool bPixelSnapHairline,
                                     const OutputDevice& i_rOutDev);
 
     SAL_DLLPRIVATE bool                        DrawPolyLineBezier(
