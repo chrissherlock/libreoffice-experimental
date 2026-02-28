@@ -511,26 +511,27 @@ static ClippedPolygonData lcl_GetClippedPolyPolygon(const tools::PolyPolygon& rP
     return aData;
 }
 
-void PrimitiveRenderer::DrawPolyPolygon(OutputDevice& rOutDev, const tools::PolyPolygon& rPolyPoly,
+void PrimitiveRenderer::DrawPolyPolygon(SalGraphics& rGraphics, const CoordinateMapper& /*rMapper*/,
+                                        const tools::PolyPolygon& rPolyPoly,
                                         const tools::PolyPolygon* pClipPolyPoly)
 {
     auto aClippedData = lcl_GetClippedPolyPolygon(rPolyPoly, pClipPolyPoly);
     tools::PolyPolygon* pPolyPoly = aClippedData.pActive;
 
     if (pPolyPoly->Count() == 1)
-        PrimitiveRenderer::DrawSinglePolygon(rOutDev, pPolyPoly->GetObject(0));
+        PrimitiveRenderer::DrawSinglePolygon(rGraphics, pPolyPoly->GetObject(0));
     else if (pPolyPoly->Count())
-        PrimitiveRenderer::DrawMultiplePolygons(rOutDev, *pPolyPoly);
+        PrimitiveRenderer::DrawMultiplePolygons(rGraphics, *pPolyPoly);
 }
 
-void PrimitiveRenderer::DrawSinglePolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly)
+void PrimitiveRenderer::DrawSinglePolygon(SalGraphics& rGraphics, const tools::Polygon& rPoly)
 {
     const sal_uInt16 nSize = rPoly.GetSize();
 
     if (nSize >= 2)
     {
         const Point* pPtAry = rPoly.GetConstPointAry();
-        rOutDev.mpGraphics->drawPolygon(nSize, pPtAry);
+        rGraphics.drawPolygon(nSize, pPtAry);
     }
 }
 
@@ -565,7 +566,7 @@ struct PolygonRenderBuffer
 };
 }
 
-void PrimitiveRenderer::DrawMultiplePolygons(OutputDevice& rOutDev,
+void PrimitiveRenderer::DrawMultiplePolygons(SalGraphics& rGraphics,
                                              const tools::PolyPolygon& rPolyPoly)
 {
     if (!rPolyPoly.Count())
@@ -575,12 +576,12 @@ void PrimitiveRenderer::DrawMultiplePolygons(OutputDevice& rOutDev,
 
     if (aBuffer.nValidCount == 1)
     {
-        rOutDev.mpGraphics->drawPolygon(aBuffer.pPointAry[0], aBuffer.pPointAryAry[0]);
+        rGraphics.drawPolygon(aBuffer.pPointAry[0], aBuffer.pPointAryAry[0]);
     }
     else if (aBuffer.nValidCount > 1)
     {
-        rOutDev.mpGraphics->drawPolyPolygon(aBuffer.nValidCount, aBuffer.pPointAry.get(),
-                                            aBuffer.pPointAryAry.get());
+        rGraphics.drawPolyPolygon(aBuffer.nValidCount, aBuffer.pPointAry.get(),
+                                  aBuffer.pPointAryAry.get());
     }
 }
 
@@ -594,122 +595,82 @@ void PrimitiveRenderer::DrawClippedPolygon(OutputDevice& rOutDev, const tools::P
     PrimitiveRenderer::DrawPolyPolygonGeometry(rOutDev, aClipped);
 }
 
-void PrimitiveRenderer::DrawEllipse(OutputDevice& rOutDev, const tools::Rectangle& rPixelRect,
-                                    bool bFill)
+void PrimitiveRenderer::DrawEllipse(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+                                    const tools::Rectangle& rPixelRect, bool bFill,
+                                    tools::Long nFrameWidth, bool bRTL)
 {
     tools::Polygon aRectPoly(rPixelRect.Center(), rPixelRect.GetWidth() >> 1,
                              rPixelRect.GetHeight() >> 1);
-    const sal_uInt16 nSize = aRectPoly.GetSize();
 
+    if (bRTL)
+    {
+        rMapper.MirrorDevicePixelPolygon(aRectPoly, nFrameWidth, bRTL, false);
+    }
+
+    const sal_uInt16 nSize = aRectPoly.GetSize();
     if (nSize >= 2)
     {
         const Point* pPtAry = aRectPoly.GetConstPointAry();
         if (!bFill)
-        {
-            if (rOutDev.IsRTLEnabled())
-            {
-                tools::Polygon aMirrored(aRectPoly);
-                tools::Long nWidth = rOutDev.GetOutputWidthPixel();
-
-                for (sal_uInt16 i = 0; i < aMirrored.GetSize(); ++i)
-                {
-                    aMirrored[i].setX(nWidth - 1 - aMirrored[i].X());
-                }
-
-                rOutDev.mpGraphics->drawPolyLine(nSize, aMirrored.GetConstPointAry());
-            }
-            else
-            {
-                rOutDev.mpGraphics->drawPolyLine(nSize, pPtAry);
-            }
-        }
+            rGraphics.drawPolyLine(nSize, pPtAry);
         else
-        {
-            rOutDev.mpGraphics->drawPolygon(nSize, pPtAry);
-        }
+            rGraphics.drawPolygon(nSize, pPtAry);
     }
 }
 
-void PrimitiveRenderer::DrawArc(OutputDevice& rOutDev, const tools::Rectangle& rPixelRect,
-                                const Point& rPixelStart, const Point& rPixelEnd)
+void PrimitiveRenderer::DrawArc(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+                                const tools::Rectangle& rPixelRect, const Point& rPixelStart,
+                                const Point& rPixelEnd, tools::Long nFrameWidth, bool bRTL)
 {
-    tools::Polygon aArcPoly(rPixelRect, rPixelStart, rPixelEnd, PolyStyle::Arc);
-    const sal_uInt16 nSize = aArcPoly.GetSize();
+    tools::Polygon aPoly(rPixelRect, rPixelStart, rPixelEnd, PolyStyle::Arc);
+    if (bRTL)
+        rMapper.MirrorDevicePixelPolygon(aPoly, nFrameWidth, bRTL, false);
 
+    const sal_uInt16 nSize = aPoly.GetSize();
     if (nSize >= 2)
     {
-        // Arcs are never filled
-        rOutDev.mpGraphics->drawPolyLine(nSize, aArcPoly.GetConstPointAry());
+        const Point* pPtAry = aPoly.GetConstPointAry();
+        rGraphics.drawPolyLine(nSize, pPtAry);
     }
 }
 
-void PrimitiveRenderer::DrawPie(OutputDevice& rOutDev, const tools::Rectangle& rPixelRect,
-                                const Point& rPixelStart, const Point& rPixelEnd, bool bFill)
+void PrimitiveRenderer::DrawPie(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+                                const tools::Rectangle& rPixelRect, const Point& rPixelStart,
+                                const Point& rPixelEnd, bool bFill, tools::Long nFrameWidth,
+                                bool bRTL)
 {
-    tools::Polygon aPiePoly(rPixelRect, rPixelStart, rPixelEnd, PolyStyle::Pie);
-    const sal_uInt16 nSize = aPiePoly.GetSize();
+    tools::Polygon aPoly(rPixelRect, rPixelStart, rPixelEnd, PolyStyle::Pie);
+    if (bRTL)
+        rMapper.MirrorDevicePixelPolygon(aPoly, nFrameWidth, bRTL, false);
 
+    const sal_uInt16 nSize = aPoly.GetSize();
     if (nSize >= 2)
     {
-        const Point* pPtAry = aPiePoly.GetConstPointAry();
+        const Point* pPtAry = aPoly.GetConstPointAry();
         if (!bFill)
-        {
-            if (rOutDev.IsRTLEnabled())
-            {
-                tools::Polygon aMirrored(aPiePoly);
-                tools::Long nWidth = rOutDev.GetOutputWidthPixel();
-
-                for (sal_uInt16 i = 0; i < aMirrored.GetSize(); ++i)
-                {
-                    aMirrored[i].setX(nWidth - 1 - aMirrored[i].X());
-                }
-
-                rOutDev.mpGraphics->drawPolyLine(nSize, aMirrored.GetConstPointAry());
-            }
-            else
-            {
-                rOutDev.mpGraphics->drawPolyLine(nSize, pPtAry);
-            }
-        }
+            rGraphics.drawPolyLine(nSize, pPtAry);
         else
-        {
-            rOutDev.mpGraphics->drawPolygon(nSize, pPtAry);
-        }
+            rGraphics.drawPolygon(nSize, pPtAry);
     }
 }
 
-void PrimitiveRenderer::DrawChord(OutputDevice& rOutDev, const tools::Rectangle& rPixelRect,
-                                  const Point& rPixelStart, const Point& rPixelEnd, bool bFill)
+void PrimitiveRenderer::DrawChord(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+                                  const tools::Rectangle& rPixelRect, const Point& rPixelStart,
+                                  const Point& rPixelEnd, bool bFill, tools::Long nFrameWidth,
+                                  bool bRTL)
 {
-    tools::Polygon aChordPoly(rPixelRect, rPixelStart, rPixelEnd, PolyStyle::Chord);
-    const sal_uInt16 nSize = aChordPoly.GetSize();
+    tools::Polygon aPoly(rPixelRect, rPixelStart, rPixelEnd, PolyStyle::Chord);
+    if (bRTL)
+        rMapper.MirrorDevicePixelPolygon(aPoly, nFrameWidth, bRTL, false);
 
+    const sal_uInt16 nSize = aPoly.GetSize();
     if (nSize >= 2)
     {
-        const Point* pPtAry = aChordPoly.GetConstPointAry();
+        const Point* pPtAry = aPoly.GetConstPointAry();
         if (!bFill)
-        {
-            if (rOutDev.IsRTLEnabled())
-            {
-                tools::Polygon aMirrored(aChordPoly);
-                tools::Long nWidth = rOutDev.GetOutputWidthPixel();
-
-                for (sal_uInt16 i = 0; i < aMirrored.GetSize(); ++i)
-                {
-                    aMirrored[i].setX(nWidth - 1 - aMirrored[i].X());
-                }
-
-                rOutDev.mpGraphics->drawPolyLine(nSize, aMirrored.GetConstPointAry());
-            }
-            else
-            {
-                rOutDev.mpGraphics->drawPolyLine(nSize, pPtAry);
-            }
-        }
+            rGraphics.drawPolyLine(nSize, pPtAry);
         else
-        {
-            rOutDev.mpGraphics->drawPolygon(nSize, pPtAry);
-        }
+            rGraphics.drawPolygon(nSize, pPtAry);
     }
 }
 
@@ -1390,7 +1351,7 @@ void PrimitiveRenderer::DrawEmphasisMark(OutputDevice& rOutDev, SalGraphics& rGr
         {
             tools::PolyPolygon aPolyPoly = rPolyPoly;
             aPolyPoly.Move(nX, nY);
-            PrimitiveRenderer::DrawPolyPolygon(rOutDev, aPolyPoly);
+            PrimitiveRenderer::DrawPolyPolygon(rGraphics, *rOutDev.mpMapper, aPolyPoly);
         }
     }
 

@@ -102,7 +102,8 @@ public:
                                       const tools::PolyPolygon& rDevicePolyPoly, bool bFill,
                                       const StrokeAttributes* pStroke);
 
-    static void DrawPolyPolygon(OutputDevice& rOutDev, const tools::PolyPolygon& rPolyPoly,
+    static void DrawPolyPolygon(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+                                const tools::PolyPolygon& rPolyPoly,
                                 const tools::PolyPolygon* pClipPolyPoly = nullptr);
 
     static void DrawPolyPolygonFallback(OutputDevice& rOutDev, const tools::PolyPolygon& rPolyPoly);
@@ -122,16 +123,21 @@ public:
     static void DrawClippedPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly,
                                    const tools::PolyPolygon& rClipPolyPoly);
 
-    static void DrawEllipse(OutputDevice& rOutDev, const tools::Rectangle& rPixelRect, bool bFill);
+    static void DrawEllipse(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+                            const tools::Rectangle& rPixelRect, bool bFill, tools::Long nFrameWidth,
+                            bool bRTL);
 
-    static void DrawArc(OutputDevice& rOutDev, const tools::Rectangle& rPixelRect,
-                        const Point& rPixelStart, const Point& rPixelEnd);
+    static void DrawArc(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+                        const tools::Rectangle& rPixelRect, const Point& rPixelStart,
+                        const Point& rPixelEnd, tools::Long nFrameWidth, bool bRTL);
 
-    static void DrawPie(OutputDevice& rOutDev, const tools::Rectangle& rPixelRect,
-                        const Point& rPixelStart, const Point& rPixelEnd, bool bFill);
+    static void DrawPie(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+                        const tools::Rectangle& rPixelRect, const Point& rPixelStart,
+                        const Point& rPixelEnd, bool bFill, tools::Long nFrameWidth, bool bRTL);
 
-    static void DrawChord(OutputDevice& rOutDev, const tools::Rectangle& rPixelRect,
-                          const Point& rPixelStart, const Point& rPixelEnd, bool bFill);
+    static void DrawChord(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+                          const tools::Rectangle& rPixelRect, const Point& rPixelStart,
+                          const Point& rPixelEnd, bool bFill, tools::Long nFrameWidth, bool bRTL);
 
     static void Invert(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                        const OutputDevice* pOutDev, const tools::Rectangle& rLogicalRect,
@@ -184,9 +190,9 @@ public:
                                   tools::Long nY, Color aColor);
 
 private:
-    static void DrawSinglePolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly);
+    static void DrawSinglePolygon(SalGraphics& rGraphics, const tools::Polygon& rPoly);
 
-    static void DrawMultiplePolygons(OutputDevice& rOutDev, const tools::PolyPolygon& rPolyPoly);
+    static void DrawMultiplePolygons(SalGraphics& rGraphics, const tools::PolyPolygon& rPolyPoly);
 };
 
 } // namespace vcl::rendercontext

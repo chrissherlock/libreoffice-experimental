@@ -39,7 +39,13 @@ void OutputDevice::DrawEllipse(const tools::Rectangle& rRect)
     if (aRect.IsEmpty())
         return;
 
-    vcl::rendercontext::PrimitiveRenderer::DrawEllipse(*this, aRect, mpGraphicsState->mbFillColor);
+    {
+        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+        const tools::Long nFrameWidth
+            = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+        vcl::rendercontext::PrimitiveRenderer::DrawEllipse(
+            *mpGraphics, *mpMapper, aRect, mpGraphicsState->mbFillColor, nFrameWidth, bRTL);
+    }
 }
 
 void OutputDevice::DrawArc(const tools::Rectangle& rRect, const Point& rStartPt,
@@ -58,7 +64,13 @@ void OutputDevice::DrawArc(const tools::Rectangle& rRect, const Point& rStartPt,
     const Point aStart(LogicToDevicePixel(rStartPt));
     const Point aEnd(LogicToDevicePixel(rEndPt));
 
-    vcl::rendercontext::PrimitiveRenderer::DrawArc(*this, aRect, aStart, aEnd);
+    {
+        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+        const tools::Long nFrameWidth
+            = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+        vcl::rendercontext::PrimitiveRenderer::DrawArc(*mpGraphics, *mpMapper, aRect, aStart, aEnd,
+                                                       nFrameWidth, bRTL);
+    }
 }
 
 void OutputDevice::DrawPie(const tools::Rectangle& rRect, const Point& rStartPt,
@@ -77,8 +89,14 @@ void OutputDevice::DrawPie(const tools::Rectangle& rRect, const Point& rStartPt,
     const Point aStart(LogicToDevicePixel(rStartPt));
     const Point aEnd(LogicToDevicePixel(rEndPt));
 
-    vcl::rendercontext::PrimitiveRenderer::DrawPie(*this, aRect, aStart, aEnd,
-                                                   mpGraphicsState->mbFillColor);
+    {
+        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+        const tools::Long nFrameWidth
+            = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+        vcl::rendercontext::PrimitiveRenderer::DrawPie(*mpGraphics, *mpMapper, aRect, aStart, aEnd,
+                                                       mpGraphicsState->mbFillColor, nFrameWidth,
+                                                       bRTL);
+    }
 }
 
 void OutputDevice::DrawChord(const tools::Rectangle& rRect, const Point& rStartPt,
@@ -97,8 +115,14 @@ void OutputDevice::DrawChord(const tools::Rectangle& rRect, const Point& rStartP
     const Point aStart(LogicToDevicePixel(rStartPt));
     const Point aEnd(LogicToDevicePixel(rEndPt));
 
-    vcl::rendercontext::PrimitiveRenderer::DrawChord(*this, aRect, aStart, aEnd,
-                                                     mpGraphicsState->mbFillColor);
+    {
+        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+        const tools::Long nFrameWidth
+            = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+        vcl::rendercontext::PrimitiveRenderer::DrawChord(*mpGraphics, *mpMapper, aRect, aStart,
+                                                         aEnd, mpGraphicsState->mbFillColor,
+                                                         nFrameWidth, bRTL);
+    }
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
