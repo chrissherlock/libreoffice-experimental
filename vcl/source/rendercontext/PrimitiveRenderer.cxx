@@ -407,23 +407,58 @@ void PrimitiveRenderer::DrawDevicePolyPolygonGeometry(SalGraphics& rGraphics,
     rGraphics.drawPolyPolygon(aBuffer.mnValidCount, aBuffer.pPointAry, aBuffer.pPointAryAry);
 }
 
-void PrimitiveRenderer::DrawPolyPolygonGeometry(OutputDevice& rOutDev,
+namespace
+{
+struct PolygonRenderBuffer
+{
+    std::unique_ptr<sal_uInt32[]> pPointAry;
+    std::unique_ptr<const Point* []> pPointAryAry;
+    sal_uInt16 nValidCount = 0;
+    sal_uInt16 nFirstValidIndex = 0;
+
+    explicit PolygonRenderBuffer(const tools::PolyPolygon& rPolyPoly)
+    {
+        sal_uInt16 nTotalCount = rPolyPoly.Count();
+        pPointAry.reset(new sal_uInt32[nTotalCount]);
+        pPointAryAry.reset(new const Point*[nTotalCount]);
+
+        for (sal_uInt16 i = 0; i < nTotalCount; ++i)
+        {
+            const tools::Polygon& rPoly = rPolyPoly.GetObject(i);
+            sal_uInt16 nSize = rPoly.GetSize();
+            if (nSize >= 2)
+            {
+                if (nValidCount == 0)
+                    nFirstValidIndex = i;
+                pPointAry[nValidCount] = nSize;
+                pPointAryAry[nValidCount] = rPoly.GetConstPointAry();
+                nValidCount++;
+            }
+        }
+    }
+};
+}
+
+void PrimitiveRenderer::DrawPolyPolygonGeometry(SalGraphics& rGraphics,
                                                 const tools::PolyPolygon& rPolyPoly)
 {
-    SalGraphics* pGraphics = rOutDev.GetGraphics();
-    if (!pGraphics && !rOutDev.AcquireGraphics())
+    if (!rPolyPoly.Count())
         return;
-    pGraphics = rOutDev.GetGraphics();
 
-    tools::PolyPolygon aDevicePolyPoly = rPolyPoly;
-    bool bRTL = rOutDev.IsRTLEnabled() || (pGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
-    bool bAntiparallel = rOutDev.ImplIsAntiparallel();
-    tools::Long nFrameWidth
-        = rOutDev.IsVirtual() ? rOutDev.GetOutputWidthPixel() : pGraphics->GetGraphicsWidth();
+    PolygonRenderBuffer aBuffer(rPolyPoly);
 
-    rOutDev.mpMapper->MirrorDevicePixelPolyPolygon(aDevicePolyPoly, nFrameWidth, bRTL,
-                                                   bAntiparallel);
-    DrawDevicePolyPolygonGeometry(*pGraphics, aDevicePolyPoly);
+    if (aBuffer.nValidCount == 0)
+        return;
+
+    if (aBuffer.nValidCount == 1)
+    {
+        // Use the existing single polygon worker
+        DrawDevicePolygonGeometry(rGraphics, rPolyPoly.GetObject(aBuffer.nFirstValidIndex));
+        return;
+    }
+
+    rGraphics.drawPolyPolygon(aBuffer.nValidCount, aBuffer.pPointAry.get(),
+                              aBuffer.pPointAryAry.get());
 }
 
 void PrimitiveRenderer::DrawDevicePolygonGeometry(SalGraphics& rGraphics,
@@ -511,37 +546,6 @@ void PrimitiveRenderer::DrawSinglePolygon(SalGraphics& rGraphics, const tools::P
     }
 }
 
-namespace
-{
-struct PolygonRenderBuffer
-{
-    std::unique_ptr<sal_uInt32[]> pPointAry;
-    std::unique_ptr<const Point* []> pPointAryAry;
-    sal_uInt16 nValidCount = 0;
-
-    explicit PolygonRenderBuffer(const tools::PolyPolygon& rPolyPoly)
-    {
-        sal_uInt16 nTotalCount = rPolyPoly.Count();
-
-        pPointAry.reset(new sal_uInt32[nTotalCount]);
-        pPointAryAry.reset(new const Point*[nTotalCount]);
-
-        for (sal_uInt16 i = 0; i < nTotalCount; ++i)
-        {
-            const tools::Polygon& rPoly = rPolyPoly.GetObject(i);
-            sal_uInt16 nSize = rPoly.GetSize();
-
-            if (nSize >= 2)
-            {
-                pPointAry[nValidCount] = nSize;
-                pPointAryAry[nValidCount] = rPoly.GetConstPointAry();
-                nValidCount++;
-            }
-        }
-    }
-};
-}
-
 void PrimitiveRenderer::DrawMultiplePolygons(SalGraphics& rGraphics,
                                              const tools::PolyPolygon& rPolyPoly)
 {
@@ -561,14 +565,15 @@ void PrimitiveRenderer::DrawMultiplePolygons(SalGraphics& rGraphics,
     }
 }
 
-void PrimitiveRenderer::DrawClippedPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly,
-                                           const tools::PolyPolygon& rClipPolyPoly)
+void PrimitiveRenderer::DrawClippedPolygon(SalGraphics& rGraphics,
+                                           const tools::Polygon& rDevicePoly,
+                                           const tools::PolyPolygon& rDeviceClipPolyPoly)
 {
-    // Handle clipping via intersection then dispatch
     tools::PolyPolygon aClipped;
-    tools::PolyPolygon(rPoly).GetIntersection(rClipPolyPoly, aClipped);
+    tools::PolyPolygon aTmp(rDevicePoly);
+    aTmp.GetIntersection(rDeviceClipPolyPoly, aClipped);
 
-    PrimitiveRenderer::DrawPolyPolygonGeometry(rOutDev, aClipped);
+    PrimitiveRenderer::DrawPolyPolygonGeometry(rGraphics, aClipped);
 }
 
 void PrimitiveRenderer::DrawEllipse(SalGraphics& rGraphics, const CoordinateMapper& rMapper,

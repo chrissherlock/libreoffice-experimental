@@ -249,7 +249,7 @@ void OutputDevice::DrawLinearGradient( const tools::Rectangle& rRect,
         aPoly.Rotate( aCenter, nAngle );
 
         if (pClixPolyPoly)
-            vcl::rendercontext::PrimitiveRenderer::DrawClippedPolygon(*this, aPoly, *pClixPolyPoly);
+            vcl::rendercontext::PrimitiveRenderer::DrawClippedPolygon(*mpGraphics, aPoly, *pClixPolyPoly);
         else
             {
             bool bRTL = IsRTLEnabled() || (mpGraphics && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
@@ -270,7 +270,7 @@ void OutputDevice::DrawLinearGradient( const tools::Rectangle& rRect,
             aPoly.Rotate( aCenter, nAngle );
 
             if (pClixPolyPoly)
-                vcl::rendercontext::PrimitiveRenderer::DrawClippedPolygon(*this, aPoly, *pClixPolyPoly);
+                vcl::rendercontext::PrimitiveRenderer::DrawClippedPolygon(*mpGraphics, aPoly, *pClixPolyPoly);
             else
                 {
             bool bRTL = IsRTLEnabled() || (mpGraphics && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
@@ -329,7 +329,7 @@ void OutputDevice::DrawLinearGradient( const tools::Rectangle& rRect,
         aPoly.Rotate( aCenter, nAngle );
 
         if (pClixPolyPoly)
-            vcl::rendercontext::PrimitiveRenderer::DrawClippedPolygon(*this, aPoly, *pClixPolyPoly);
+            vcl::rendercontext::PrimitiveRenderer::DrawClippedPolygon(*mpGraphics, aPoly, *pClixPolyPoly);
         else
             {
             bool bRTL = IsRTLEnabled() || (mpGraphics && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
@@ -349,7 +349,7 @@ void OutputDevice::DrawLinearGradient( const tools::Rectangle& rRect,
             aPoly.Rotate( aCenter, nAngle );
 
             if (pClixPolyPoly)
-                vcl::rendercontext::PrimitiveRenderer::DrawClippedPolygon(*this, aPoly, *pClixPolyPoly);
+                vcl::rendercontext::PrimitiveRenderer::DrawClippedPolygon(*mpGraphics, aPoly, *pClixPolyPoly);
             else
                 {
             bool bRTL = IsRTLEnabled() || (mpGraphics && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
@@ -378,7 +378,7 @@ void OutputDevice::DrawLinearGradient( const tools::Rectangle& rRect,
     aPoly.Rotate( aCenter, nAngle );
 
     if (pClixPolyPoly)
-        vcl::rendercontext::PrimitiveRenderer::DrawClippedPolygon(*this, aPoly, *pClixPolyPoly);
+        vcl::rendercontext::PrimitiveRenderer::DrawClippedPolygon(*mpGraphics, aPoly, *pClixPolyPoly);
     else
         {
             bool bRTL = IsRTLEnabled() || (mpGraphics && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
@@ -484,7 +484,7 @@ void OutputDevice::DrawComplexGradient( const tools::Rectangle& rRect,
 
         aPoly = tools::Polygon(aExtRect);
         if (pClixPolyPoly)
-            vcl::rendercontext::PrimitiveRenderer::DrawClippedPolygon(*this, aPoly, *pClixPolyPoly);
+            vcl::rendercontext::PrimitiveRenderer::DrawClippedPolygon(*mpGraphics, aPoly, *pClixPolyPoly);
         else
             {
             bool bRTL = IsRTLEnabled() || (mpGraphics && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
@@ -548,7 +548,7 @@ void OutputDevice::DrawComplexGradient( const tools::Rectangle& rRect,
             mpGraphics->SetFillColor( Color( nRed, nGreen, nBlue ) );
 
             if (pClixPolyPoly)
-                vcl::rendercontext::PrimitiveRenderer::DrawClippedPolygon(*this, aPoly, *pClixPolyPoly);
+                vcl::rendercontext::PrimitiveRenderer::DrawClippedPolygon(*mpGraphics, aPoly, *pClixPolyPoly);
             else
                 {
             bool bRTL = IsRTLEnabled() || (mpGraphics && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
@@ -581,7 +581,7 @@ void OutputDevice::DrawComplexGradient( const tools::Rectangle& rRect,
     mpGraphics->SetFillColor( Color( nRed, nGreen, nBlue ) );
 
     if (pClixPolyPoly)
-        vcl::rendercontext::PrimitiveRenderer::DrawClippedPolygon(*this, aPoly, *pClixPolyPoly);
+        vcl::rendercontext::PrimitiveRenderer::DrawClippedPolygon(*mpGraphics, aPoly, *pClixPolyPoly);
     else
         {
             bool bRTL = IsRTLEnabled() || (mpGraphics && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));

@@ -111,15 +111,15 @@ public:
     static void DrawDevicePolyPolygonGeometry(SalGraphics& rGraphics,
                                               const tools::PolyPolygon& rDevicePolyPoly);
 
-    static void DrawPolyPolygonGeometry(OutputDevice& rOutDev,
+    static void DrawPolyPolygonGeometry(SalGraphics& rGraphics,
                                         const tools::PolyPolygon& rPolyPolygon);
 
     static void DrawPolygonGeometry(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                                     const tools::Polygon& rPoly, tools::Long nFrameWidth, bool bRTL,
                                     bool bAntiparallel);
 
-    static void DrawClippedPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly,
-                                   const tools::PolyPolygon& rClipPolyPoly);
+    static void DrawClippedPolygon(SalGraphics& rGraphics, const tools::Polygon& rDevicePoly,
+                                   const tools::PolyPolygon& rDeviceClipPolyPoly);
 
     static void DrawEllipse(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                             const tools::Rectangle& rPixelRect, bool bFill, tools::Long nFrameWidth,
