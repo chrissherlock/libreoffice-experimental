@@ -18,6 +18,7 @@
  */
 
 #include <vcl/metafile/MetafileRecorder.hxx>
+#include <CoordinateMapper.hxx>
 #include <vcl/rendercontext/PrimitiveRenderer.hxx>
 #include <vcl/virdev.hxx>
 
@@ -43,8 +44,11 @@ void OutputDevice::DrawEllipse(const tools::Rectangle& rRect)
         const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
         const tools::Long nFrameWidth
             = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
-        vcl::rendercontext::PrimitiveRenderer::DrawEllipse(
-            *mpGraphics, *mpMapper, aRect, mpGraphicsState->mbFillColor, nFrameWidth, bRTL);
+        tools::Polygon aPoly(aRect.Center(), aRect.GetWidth() >> 1, aRect.GetHeight() >> 1);
+        if (bRTL)
+            mpMapper->MirrorDevicePixelPolygon(aPoly, nFrameWidth, bRTL, ImplIsAntiparallel());
+        vcl::rendercontext::PrimitiveRenderer::DrawPolygon(*mpGraphics, aPoly,
+                                                           mpGraphicsState->mbFillColor);
     }
 }
 
@@ -68,8 +72,10 @@ void OutputDevice::DrawArc(const tools::Rectangle& rRect, const Point& rStartPt,
         const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
         const tools::Long nFrameWidth
             = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
-        vcl::rendercontext::PrimitiveRenderer::DrawArc(*mpGraphics, *mpMapper, aRect, aStart, aEnd,
-                                                       nFrameWidth, bRTL);
+        tools::Polygon aPoly(aRect, aStart, aEnd, PolyStyle::Arc);
+        if (bRTL)
+            mpMapper->MirrorDevicePixelPolygon(aPoly, nFrameWidth, bRTL, ImplIsAntiparallel());
+        vcl::rendercontext::PrimitiveRenderer::DrawPolygon(*mpGraphics, aPoly, false);
     }
 }
 
@@ -93,9 +99,11 @@ void OutputDevice::DrawPie(const tools::Rectangle& rRect, const Point& rStartPt,
         const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
         const tools::Long nFrameWidth
             = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
-        vcl::rendercontext::PrimitiveRenderer::DrawPie(*mpGraphics, *mpMapper, aRect, aStart, aEnd,
-                                                       mpGraphicsState->mbFillColor, nFrameWidth,
-                                                       bRTL);
+        tools::Polygon aPoly(aRect, aStart, aEnd, PolyStyle::Pie);
+        if (bRTL)
+            mpMapper->MirrorDevicePixelPolygon(aPoly, nFrameWidth, bRTL, ImplIsAntiparallel());
+        vcl::rendercontext::PrimitiveRenderer::DrawPolygon(*mpGraphics, aPoly,
+                                                           mpGraphicsState->mbFillColor);
     }
 }
 
@@ -119,9 +127,11 @@ void OutputDevice::DrawChord(const tools::Rectangle& rRect, const Point& rStartP
         const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
         const tools::Long nFrameWidth
             = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
-        vcl::rendercontext::PrimitiveRenderer::DrawChord(*mpGraphics, *mpMapper, aRect, aStart,
-                                                         aEnd, mpGraphicsState->mbFillColor,
-                                                         nFrameWidth, bRTL);
+        tools::Polygon aPoly(aRect, aStart, aEnd, PolyStyle::Chord);
+        if (bRTL)
+            mpMapper->MirrorDevicePixelPolygon(aPoly, nFrameWidth, bRTL, ImplIsAntiparallel());
+        vcl::rendercontext::PrimitiveRenderer::DrawPolygon(*mpGraphics, aPoly,
+                                                           mpGraphicsState->mbFillColor);
     }
 }
 

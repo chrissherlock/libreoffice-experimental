@@ -110,22 +110,6 @@ public:
     static void DrawPolyPolygonGeometry(SalGraphics& rGraphics,
                                         const tools::PolyPolygon& rPolyPolygon);
 
-    static void DrawEllipse(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                            const tools::Rectangle& rPixelRect, bool bFill, tools::Long nFrameWidth,
-                            bool bRTL);
-
-    static void DrawArc(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                        const tools::Rectangle& rPixelRect, const Point& rPixelStart,
-                        const Point& rPixelEnd, tools::Long nFrameWidth, bool bRTL);
-
-    static void DrawPie(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                        const tools::Rectangle& rPixelRect, const Point& rPixelStart,
-                        const Point& rPixelEnd, bool bFill, tools::Long nFrameWidth, bool bRTL);
-
-    static void DrawChord(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                          const tools::Rectangle& rPixelRect, const Point& rPixelStart,
-                          const Point& rPixelEnd, bool bFill, tools::Long nFrameWidth, bool bRTL);
-
     static void Invert(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                        const OutputDevice* pOutDev, const tools::Rectangle& rLogicalRect,
                        InvertFlags nFlags);
