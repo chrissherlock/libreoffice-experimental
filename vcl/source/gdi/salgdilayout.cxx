@@ -388,19 +388,7 @@ void SalGraphics::SetClipRegion( const vcl::Region& i_rClip, const OutputDevice&
     }
 }
 
-void SalGraphics::DrawPixel( tools::Long nX, tools::Long nY, const OutputDevice& rOutDev )
-{
-    if( (m_nLayout & SalLayoutFlags::BiDiRtl) || rOutDev.IsRTLEnabled() )
-        mirror( nX, rOutDev );
-    drawPixel( nX, nY );
-}
 
-void SalGraphics::DrawPixel( tools::Long nX, tools::Long nY, Color nColor, const OutputDevice& rOutDev )
-{
-    if( (m_nLayout & SalLayoutFlags::BiDiRtl) || rOutDev.IsRTLEnabled() )
-        mirror( nX, rOutDev );
-    drawPixel( nX, nY, nColor );
-}
 
 void SalGraphics::DrawLine( tools::Long nX1, tools::Long nY1, tools::Long nX2, tools::Long nY2, const OutputDevice& rOutDev )
 {

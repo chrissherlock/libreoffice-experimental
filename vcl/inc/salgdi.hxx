@@ -190,8 +190,6 @@ public:
     SAL_DLLPRIVATE void                        SetClipRegion( const vcl::Region&, const OutputDevice& rOutDev );
 
     // draw --> LineColor and FillColor and RasterOp and ClipRegion
-    SAL_DLLPRIVATE void                        DrawPixel( tools::Long nX, tools::Long nY, const OutputDevice& rOutDev );
-    SAL_DLLPRIVATE void                        DrawPixel( tools::Long nX, tools::Long nY, Color nColor, const OutputDevice& rOutDev );
 
     SAL_DLLPRIVATE void                        DrawLine( tools::Long nX1, tools::Long nY1, tools::Long nX2, tools::Long nY2, const OutputDevice& rOutDev );
 
