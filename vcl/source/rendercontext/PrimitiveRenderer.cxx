@@ -97,23 +97,18 @@ void PrimitiveRenderer::DrawRect(SalGraphics& rGraphics, const tools::Rectangle&
     }
 }
 
-void PrimitiveRenderer::DrawRoundedRect(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                                        const tools::Rectangle& rLogicalRect, sal_uLong nHorzRound,
-                                        sal_uLong nVertRound, bool bFillColor)
+void PrimitiveRenderer::DrawRoundedRect(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect,
+                                        sal_uLong nHorzRoundPixel, sal_uLong nVertRoundPixel,
+                                        bool bFillColor)
 {
-    const tools::Rectangle aDeviceRect(rMapper.LogicToDevicePixel(rLogicalRect));
-
-    nHorzRound = rMapper.LogicWidthToDevicePixel(nHorzRound);
-    nVertRound = rMapper.LogicHeightToDevicePixel(nVertRound);
-
-    if (!nHorzRound && !nVertRound)
+    if (!nHorzRoundPixel && !nVertRoundPixel)
     {
-        rGraphics.drawRect(aDeviceRect.Left(), aDeviceRect.Top(), aDeviceRect.GetWidth(),
-                           aDeviceRect.GetHeight());
+        rGraphics.drawRect(rDeviceRect.Left(), rDeviceRect.Top(), rDeviceRect.GetWidth(),
+                           rDeviceRect.GetHeight());
         return;
     }
 
-    tools::Polygon aRoundRectPoly(aDeviceRect, nHorzRound, nVertRound);
+    tools::Polygon aRoundRectPoly(rDeviceRect, nHorzRoundPixel, nVertRoundPixel);
 
     if (aRoundRectPoly.GetSize() < 2)
         return;

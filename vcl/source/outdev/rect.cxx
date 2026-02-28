@@ -88,8 +88,20 @@ void OutputDevice::DrawRoundedRect(const tools::Rectangle& rRect,
     maRecorder.RecordRoundRect(rRect, nHorzRound, nVertRound);
 
     if (PrepareGraphicsOutput() && mpGraphics)
-        vcl::rendercontext::PrimitiveRenderer::DrawRoundedRect(*mpGraphics, *mpMapper, rRect,
-                                                               nHorzRound, nVertRound, mpGraphicsState->mbFillColor);
+    {
+        tools::Rectangle aDeviceRect = mpMapper->LogicToDevicePixel(rRect);
+        sal_uLong nHorzRoundPixel = mpMapper->LogicWidthToDevicePixel(nHorzRound);
+        sal_uLong nVertRoundPixel = mpMapper->LogicHeightToDevicePixel(nVertRound);
+
+        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+        const bool bAntiparallel = ImplIsAntiparallel();
+        const tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+
+        mpMapper->MirrorDevicePixelRect(aDeviceRect, nFrameWidth, bRTL, bAntiparallel);
+
+        vcl::rendercontext::PrimitiveRenderer::DrawRoundedRect(*mpGraphics, aDeviceRect,
+                                                               nHorzRoundPixel, nVertRoundPixel, mpGraphicsState->mbFillColor);
+    }
 }
 
 void OutputDevice::Invert(const tools::Rectangle& rRect, InvertFlags nFlags)

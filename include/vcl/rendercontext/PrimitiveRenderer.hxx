@@ -73,9 +73,9 @@ public:
     /** Renders a rectangle using the current line and fill colors. */
     static void DrawRect(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect);
 
-    static void DrawRoundedRect(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                                const tools::Rectangle& rLogicalRect, sal_uLong nHorzRound,
-                                sal_uLong nVertRound, bool bFillColor);
+    static void DrawRoundedRect(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect,
+                                sal_uLong nHorzRoundPixel, sal_uLong nVertRoundPixel,
+                                bool bFillColor);
 
     static bool DrawPolyLine(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                              const basegfx::B2DPolygon& rPoly, const StrokeAttributes& rStroke,
