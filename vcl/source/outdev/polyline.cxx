@@ -22,7 +22,7 @@ void OutputDevice::DrawPolyLine(const tools::Polygon& rPoly)
         maRecorder.RecordPolyLine(rPoly);
 
     if (IsDeviceOutputNecessary())
-        {
+    {
         vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
         DrawPolyLine(rPoly, LineInfo());
     }
@@ -30,41 +30,41 @@ void OutputDevice::DrawPolyLine(const tools::Polygon& rPoly)
 
 void OutputDevice::DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLineInfo)
 {
+    if (rPoly.GetSize() < 2 || !CanDrawPolyline())
+        return;
+
     if (maRecorder.IsActive())
         maRecorder.RecordPolyLine(rPoly, rLineInfo);
 
-    if (IsDeviceOutputNecessary())
+    if (!IsDeviceOutputNecessary())
+        return;
+
+    FlushGraphicsState();
+
+    if (RasterOp::OverPaint == GetRasterOp() && IsLineColor())
     {
-        if (rPoly.GetSize() < 2 || !CanDrawPolyline())
+        const bool bPixelSnapHairline
+            = (mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline)
+              && rPoly.GetSize() < 1000;
+
+        if (mpGraphics->DrawPolyLine(basegfx::B2DHomMatrix(), rPoly.getB2DPolygon(), 0.0,
+                                     rLineInfo.GetWidth(), nullptr, rLineInfo.GetLineJoin(),
+                                     rLineInfo.GetLineCap(), basegfx::deg2rad(15.0),
+                                     bPixelSnapHairline, *this))
+        {
             return;
-
-        FlushGraphicsState();
-
-        if (RasterOp::OverPaint == GetRasterOp() && IsLineColor())
-        {
-            const bool bPixelSnapHairline
-                = (mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline)
-                  && rPoly.GetSize() < 1000;
-
-            if (mpGraphics->DrawPolyLine(basegfx::B2DHomMatrix(), rPoly.getB2DPolygon(), 0.0,
-                                         rLineInfo.GetWidth(), nullptr, rLineInfo.GetLineJoin(),
-                                         rLineInfo.GetLineCap(), basegfx::deg2rad(15.0),
-                                         bPixelSnapHairline, *this))
-            {
-                return;
-            }
         }
+    }
 
-        if (rLineInfo.GetStyle() == LineStyle::Dash || rLineInfo.GetWidth() > 1)
-        {
-            basegfx::B2DPolygon aPoly = mpMapper->LogicToDevicePixel(rPoly.getB2DPolygon());
-            vcl::rendercontext::PrimitiveRenderer::DrawPolyLineGeometry(*this, basegfx::B2DPolyPolygon(aPoly), rLineInfo);
-        }
-        else
-        {
-            vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
-            DrawPolygon(rPoly);
-        }
+    if (rLineInfo.GetStyle() == LineStyle::Dash || rLineInfo.GetWidth() > 1)
+    {
+        basegfx::B2DPolygon aPoly = mpMapper->LogicToDevicePixel(rPoly.getB2DPolygon());
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLineGeometry(*this, basegfx::B2DPolyPolygon(aPoly), rLineInfo);
+    }
+    else
+    {
+        vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
+        DrawPolygon(rPoly);
     }
 }
 
