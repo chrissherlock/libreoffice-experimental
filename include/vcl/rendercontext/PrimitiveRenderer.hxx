@@ -90,8 +90,7 @@ public:
                             const basegfx::B2DPolygon& rDevicePoly, bool bFill,
                             const StrokeAttributes* pStroke);
 
-    static void DrawDevicePolygon(SalGraphics& rGraphics, const tools::Polygon& rDevicePoly,
-                                  bool bFill, const StrokeAttributes* pStroke);
+    static void DrawPolygon(SalGraphics& rGraphics, const tools::Polygon& rDevicePoly, bool bFill);
 
     static void DrawDevicePolygonGeometry(SalGraphics& rGraphics,
                                           const tools::Polygon& rDevicePoly);

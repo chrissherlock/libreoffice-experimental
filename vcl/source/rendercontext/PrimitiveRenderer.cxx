@@ -1414,8 +1414,8 @@ void PrimitiveRenderer::DrawEmphasisMarks(OutputDevice& rOutDev, SalLayout& rSal
     }
 }
 
-void PrimitiveRenderer::DrawDevicePolygon(SalGraphics& rGraphics, const tools::Polygon& rDevicePoly,
-                                          bool bFill, const StrokeAttributes* /*pStroke*/)
+void PrimitiveRenderer::DrawPolygon(SalGraphics& rGraphics, const tools::Polygon& rDevicePoly,
+                                    bool bFill)
 {
     sal_uInt16 nSize = rDevicePoly.GetSize();
     if (nSize == 0)

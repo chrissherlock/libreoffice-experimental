@@ -94,11 +94,10 @@ void OutputDevice::DrawPolygon(const tools::Polygon& rPoly)
 
     mpMapper->MirrorDevicePixelPolygon(aDevicePoly, nFrameWidth, bRTL, bAntiparallel);
 
-    vcl::rendercontext::PrimitiveRenderer::DrawDevicePolygon(*mpGraphics, aDevicePoly, IsFillColor(), nullptr);
+    vcl::rendercontext::PrimitiveRenderer::DrawPolygon(*mpGraphics, aDevicePoly, IsFillColor());
+
     if (pStroke)
-    {
         DrawPolyLine(rPoly.getB2DPolygon(), *pStroke);
-    }
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
