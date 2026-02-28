@@ -103,10 +103,11 @@ OUString OutputDevice::GetEllipsisString(const OUString& rStr, tools::Long nMaxW
         rStr, nMaxWidth, nStyle, [this](const OUString& s) { return GetTextWidth(s); });
 }
 
-void OutputDevice::ImplDrawTextBackground(const SalLayout& rSalLayout)
+void OutputDevice::ImplDrawTextDecoration(const SalLayout& rSalLayout)
 {
-    tools::Rectangle aRect
-        = vcl::text::TextGeometry::GetTextInkBounds(rSalLayout, *mpFontRealization);
+    tools::Rectangle InkRect = vcl::text::TextGeometry::GetTextInkBounds(rSalLayout, *mpFontRealization);
+    Point aBasePt(InkRect.Left(), InkRect.Top());
+    tools::Rectangle aLogicalRect(Point(0, 0), InkRect.GetSize());
 
     if (mpGraphicsState->mbLineColor || mbLineColorDirty)
     {
@@ -117,11 +118,22 @@ void OutputDevice::ImplDrawTextBackground(const SalLayout& rSalLayout)
     mpGraphics->SetFillColor(GetTextFillColor());
     mbFillColorDirty = true;
 
-    vcl::rendercontext::PrimitiveRenderer::DrawTextRect(
-        *mpGraphics, *mpMapper, Point(aRect.Left(), aRect.Top()), tools::Rectangle(Point(0, 0), Size(aRect.GetWidth(), aRect.GetHeight())), mpFontRealization->mxFont->mnOrientation,
-        IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth(),
-        IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl),
-        ImplIsAntiparallel());
+    Degree10 nOrientation = mpFontRealization->mxFont->mnOrientation;
+    auto aGeo = vcl::text::TextGeometry::GetRotatedGeometry(aBasePt, aLogicalRect, nOrientation);
+
+    const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+    if (bRTL)
+    {
+        tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+        bool bAntiparallel = ImplIsAntiparallel();
+
+        if (aGeo.mbIsPolygon)
+            mpMapper->MirrorDevicePixelPolygon(aGeo.maPoly, nFrameWidth, bRTL, bAntiparallel);
+        else
+            mpMapper->MirrorDevicePixelRect(aGeo.maRect, nFrameWidth, bRTL, bAntiparallel);
+    }
+
+    vcl::rendercontext::PrimitiveRenderer::DrawTextDecoration(*mpGraphics, aGeo);
 }
 
 bool OutputDevice::ImplDrawRotateText(SalLayout& rSalLayout)
@@ -392,7 +404,7 @@ void OutputDevice::ImplDrawText(SalLayout& rSalLayout)
         += basegfx::B2DPoint(mpFontRealization->nXOffset, mpFontRealization->nYOffset);
 
     if (IsTextFillColor())
-        ImplDrawTextBackground(rSalLayout);
+        ImplDrawTextDecoration(rSalLayout);
 
     if (mpFontRealization->bHasSpecialEffects)
         ImplDrawSpecialText(rSalLayout);
@@ -1168,7 +1180,7 @@ void OutputDevice::AddTextRectActions(const tools::Rectangle& rRect, const OUStr
 
     EnableOutput(false);
 
-    // #i47157# Factored out to ImplDrawTextRect(), to be shared
+    // #i47157# Factored out to ImplDrawTextDecoration(), to be shared
     // between us and DrawText()
     vcl::DefaultTextLayout aLayout(*this);
     ImplDrawText(*this, rRect, rOrigStr, nStyle, nullptr, nullptr, aLayout);
@@ -1195,7 +1207,7 @@ void OutputDevice::DrawText(const tools::Rectangle& rRect, const OUString& rOrig
     // Semantic Tagging: Group decomposed actions or record atomic action
     std::unique_ptr<vcl::ScopedMetaGroup> oMetaGroup;
     if (bDecomposeTextRectAction)
-        oMetaGroup = maRecorder.CreateScopedGroup("DrawTextRect Decomposed");
+        oMetaGroup = maRecorder.CreateScopedGroup("DrawTextDecoration Decomposed");
     if (!bDecomposeTextRectAction)
         maRecorder.RecordDrawTextRect(rRect, rOrigStr, nStyle);
 

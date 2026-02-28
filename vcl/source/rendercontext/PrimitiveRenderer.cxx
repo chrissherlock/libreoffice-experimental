@@ -28,6 +28,7 @@
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/rendercontext/PrimitiveRenderer.hxx>
 #include <vcl/text/TextDecorator.hxx>
+#include <vcl/text/TextGeometry.hxx>
 
 #include <vcl/rendercontext/WaveLineGeometry.hxx>
 
@@ -754,25 +755,13 @@ void PrimitiveRenderer::DrawGridOfCrosses(SalGraphics& rGraphics,
     }
 }
 
-void PrimitiveRenderer::DrawTextRect(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                                     const Point& rBasePt, const tools::Rectangle& rRect,
-                                     Degree10 nOrientation, tools::Long nFrameWidth, bool bRTL,
-                                     bool bAntiparallel)
+void PrimitiveRenderer::DrawTextDecoration(SalGraphics& rGraphics,
+                                           const vcl::text::RotatedGeometry& rDeviceGeo)
 {
-    auto aGeo = vcl::text::TextGeometry::GetRotatedGeometry(rBasePt, rRect, nOrientation);
-
-    if (aGeo.mbIsPolygon)
-    {
-        tools::Polygon aDevicePoly = aGeo.maPoly;
-        rMapper.MirrorDevicePixelPolygon(aDevicePoly, nFrameWidth, bRTL, bAntiparallel);
-        PrimitiveRenderer::DrawPolygonGeometry(rGraphics, aDevicePoly);
-    }
+    if (rDeviceGeo.mbIsPolygon)
+        PrimitiveRenderer::DrawPolygonGeometry(rGraphics, rDeviceGeo.maPoly);
     else
-    {
-        tools::Rectangle aDeviceRect = aGeo.maRect;
-        rMapper.MirrorDevicePixelRect(aDeviceRect, nFrameWidth, bRTL, bAntiparallel);
-        PrimitiveRenderer::DrawRect(rGraphics, aDeviceRect);
-    }
+        PrimitiveRenderer::DrawRect(rGraphics, rDeviceGeo.maRect);
 }
 
 void PrimitiveRenderer::DrawWaveLineBezier(OutputDevice& rOutDev, SalGraphics& rGraphics,
@@ -890,7 +879,6 @@ void PrimitiveRenderer::DrawStraightTextLine(OutputDevice& rOutDev,
         return;
     }
 
-    // Ask TextDecorator to calculate the metrics based on the font data
     vcl::text::StraightLineMetrics aMetrics(*rOutDev.mpFontInstance->mxFontMetric, rGeo.meUnderline,
                                             nY, bIsAbove);
 
@@ -906,48 +894,49 @@ void PrimitiveRenderer::DrawStraightTextLine(OutputDevice& rOutDev,
     rOutDev.mpGraphics->SetFillColor(aColor);
     rOutDev.mbFillColorDirty = true;
 
-    tools::Long nLeft = rGeo.mnDistX;
+    const Degree10 nOrientation = rOutDev.mpFontRealization->mxFont->mnOrientation;
+    const bool bRTL
+        = rOutDev.IsRTLEnabled() || (rOutDev.mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+    const tools::Long nFrameWidth = rOutDev.IsVirtual() ? rOutDev.GetOutputWidthPixel()
+                                                        : rOutDev.mpGraphics->GetGraphicsWidth();
+    const bool bAntiparallel = rOutDev.ImplIsAntiparallel();
+    const tools::Long nLeft = rGeo.mnDistX;
 
-    // Dispatch to the actual rendering calls using the sanitized metrics
+    // Lambda to handle the boilerplate of Rotate -> Mirror -> Draw
+    auto fnDrawDecoration = [&](tools::Long nPos, tools::Long nHeight) {
+        auto aTextGeo = vcl::text::TextGeometry::GetRotatedGeometry(
+            rGeo.maOrigin, tools::Rectangle(Point(nLeft, nPos), Size(rGeo.mfWidth, nHeight)),
+            nOrientation);
+
+        if (bRTL)
+        {
+            if (aTextGeo.mbIsPolygon)
+                rOutDev.mpMapper->MirrorDevicePixelPolygon(aTextGeo.maPoly, nFrameWidth, bRTL,
+                                                           bAntiparallel);
+            else
+                rOutDev.mpMapper->MirrorDevicePixelRect(aTextGeo.maRect, nFrameWidth, bRTL,
+                                                        bAntiparallel);
+        }
+
+        // Dispatch to optimized stateless renderer
+        PrimitiveRenderer::DrawTextDecoration(*rOutDev.mpGraphics, aTextGeo);
+    };
+
     switch (aMetrics.eUnderline)
     {
         case LINESTYLE_SINGLE:
         case LINESTYLE_BOLD:
-            PrimitiveRenderer::DrawTextRect(
-                *rOutDev.mpGraphics, *rOutDev.mpMapper, rGeo.maOrigin,
-                tools::Rectangle(Point(nLeft, aMetrics.nLinePos),
-                                 Size(rGeo.mfWidth, aMetrics.nLineHeight)),
-                rOutDev.mpFontRealization->mxFont->mnOrientation,
-                rOutDev.IsVirtual() ? rOutDev.GetOutputWidthPixel()
-                                    : rOutDev.mpGraphics->GetGraphicsWidth(),
-                rOutDev.IsRTLEnabled()
-                    || (rOutDev.mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl),
-                rOutDev.ImplIsAntiparallel());
+            fnDrawDecoration(aMetrics.nLinePos, aMetrics.nLineHeight);
             break;
+
         case LINESTYLE_DOUBLE:
-            PrimitiveRenderer::DrawTextRect(
-                *rOutDev.mpGraphics, *rOutDev.mpMapper, rGeo.maOrigin,
-                tools::Rectangle(Point(nLeft, aMetrics.nLinePos),
-                                 Size(rGeo.mfWidth, aMetrics.nLineHeight)),
-                rOutDev.mpFontRealization->mxFont->mnOrientation,
-                rOutDev.IsVirtual() ? rOutDev.GetOutputWidthPixel()
-                                    : rOutDev.mpGraphics->GetGraphicsWidth(),
-                rOutDev.IsRTLEnabled()
-                    || (rOutDev.mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl),
-                rOutDev.ImplIsAntiparallel());
-            PrimitiveRenderer::DrawTextRect(
-                *rOutDev.mpGraphics, *rOutDev.mpMapper, rGeo.maOrigin,
-                tools::Rectangle(Point(nLeft, aMetrics.nLinePos2),
-                                 Size(rGeo.mfWidth, aMetrics.nLineHeight)),
-                rOutDev.mpFontRealization->mxFont->mnOrientation,
-                rOutDev.IsVirtual() ? rOutDev.GetOutputWidthPixel()
-                                    : rOutDev.mpGraphics->GetGraphicsWidth(),
-                rOutDev.IsRTLEnabled()
-                    || (rOutDev.mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl),
-                rOutDev.ImplIsAntiparallel());
+            fnDrawDecoration(aMetrics.nLinePos, aMetrics.nLineHeight);
+            fnDrawDecoration(aMetrics.nLinePos2, aMetrics.nLineHeight);
             break;
+
         default:
         {
+            // Handle dashed/dotted lines
             std::vector<vcl::text::TextDashSegment> aSegments
                 = vcl::text::TextDecorator::CalculateTextLineSegments(
                     rGeo.mfWidth, aMetrics.eUnderline, aMetrics.nLineHeight, rOutDev.GetDPIX(),
@@ -955,16 +944,23 @@ void PrimitiveRenderer::DrawStraightTextLine(OutputDevice& rOutDev,
 
             for (const auto& rSeg : aSegments)
             {
-                PrimitiveRenderer::DrawTextRect(
-                    *rOutDev.mpGraphics, *rOutDev.mpMapper, rGeo.maOrigin,
+                auto aTextGeo = vcl::text::TextGeometry::GetRotatedGeometry(
+                    rGeo.maOrigin,
                     tools::Rectangle(Point(nLeft + rSeg.nX, aMetrics.nLinePos),
                                      Size(rSeg.nWidth, aMetrics.nLineHeight)),
-                    rOutDev.mpFontRealization->mxFont->mnOrientation,
-                    rOutDev.IsVirtual() ? rOutDev.GetOutputWidthPixel()
-                                        : rOutDev.mpGraphics->GetGraphicsWidth(),
-                    rOutDev.IsRTLEnabled()
-                        || (rOutDev.mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl),
-                    rOutDev.ImplIsAntiparallel());
+                    nOrientation);
+
+                if (bRTL)
+                {
+                    if (aTextGeo.mbIsPolygon)
+                        rOutDev.mpMapper->MirrorDevicePixelPolygon(aTextGeo.maPoly, nFrameWidth,
+                                                                   bRTL, bAntiparallel);
+                    else
+                        rOutDev.mpMapper->MirrorDevicePixelRect(aTextGeo.maRect, nFrameWidth, bRTL,
+                                                                bAntiparallel);
+                }
+
+                PrimitiveRenderer::DrawTextDecoration(*rOutDev.mpGraphics, aTextGeo);
             }
         }
         break;
@@ -978,10 +974,11 @@ void PrimitiveRenderer::DrawStrikeoutLine(OutputDevice& rOutDev,
     if (!rGeo.mfWidth)
         return;
 
-    vcl::text::StrikeoutGeometry aGeo = vcl::text::TextDecorator::CalculateStrikeoutGeometry(
-        *rOutDev.mpFontInstance->mxFontMetric, rGeo.meStrikeout, nY);
+    vcl::text::StrikeoutGeometry aStrikeoutGeo
+        = vcl::text::TextDecorator::CalculateStrikeoutGeometry(
+            *rOutDev.mpFontInstance->mxFontMetric, rGeo.meStrikeout, nY);
 
-    if (aGeo.aSegments.empty())
+    if (aStrikeoutGeo.aSegments.empty())
         return;
 
     if (rOutDev.mpGraphicsState->mbLineColor || rOutDev.mbLineColorDirty)
@@ -993,16 +990,35 @@ void PrimitiveRenderer::DrawStrikeoutLine(OutputDevice& rOutDev,
     rOutDev.mpGraphics->SetFillColor(aColor);
     rOutDev.mbFillColorDirty = true;
 
-    for (const auto& rSeg : aGeo.aSegments)
+    // Cache layout state for the loop
+    const Degree10 nOrientation = rOutDev.mpFontRealization->mxFont->mnOrientation;
+    const bool bRTL
+        = rOutDev.IsRTLEnabled() || (rOutDev.mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+    const tools::Long nFrameWidth = rOutDev.IsVirtual() ? rOutDev.GetOutputWidthPixel()
+                                                        : rOutDev.mpGraphics->GetGraphicsWidth();
+    const bool bAntiparallel = rOutDev.ImplIsAntiparallel();
+
+    for (const auto& rSeg : aStrikeoutGeo.aSegments)
     {
-        PrimitiveRenderer::DrawTextRect(
-            *rOutDev.mpGraphics, *rOutDev.mpMapper, rGeo.maOrigin,
+        // 1. Calculate Rotated Geometry (Device Rect or Polygon)
+        auto aTextGeo = vcl::text::TextGeometry::GetRotatedGeometry(
+            rGeo.maOrigin,
             tools::Rectangle(Point(rGeo.mnDistX, rSeg.nYOffset), Size(rGeo.mfWidth, rSeg.nHeight)),
-            rOutDev.mpFontRealization->mxFont->mnOrientation,
-            rOutDev.IsVirtual() ? rOutDev.GetOutputWidthPixel()
-                                : rOutDev.mpGraphics->GetGraphicsWidth(),
-            rOutDev.IsRTLEnabled() || (rOutDev.mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl),
-            rOutDev.ImplIsAntiparallel());
+            nOrientation);
+
+        // 2. Apply RTL Mirroring locally
+        if (bRTL)
+        {
+            if (aTextGeo.mbIsPolygon)
+                rOutDev.mpMapper->MirrorDevicePixelPolygon(aTextGeo.maPoly, nFrameWidth, bRTL,
+                                                           bAntiparallel);
+            else
+                rOutDev.mpMapper->MirrorDevicePixelRect(aTextGeo.maRect, nFrameWidth, bRTL,
+                                                        bAntiparallel);
+        }
+
+        // 3. Dispatch to the stateless renderer
+        PrimitiveRenderer::DrawTextDecoration(*rOutDev.mpGraphics, aTextGeo);
     }
 }
 

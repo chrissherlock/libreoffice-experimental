@@ -46,6 +46,11 @@ class PolyPolygon;
 class Rectangle;
 }
 
+namespace vcl::text
+{
+struct RotatedGeometry;
+}
+
 namespace vcl::rendercontext
 {
 struct StrokeAttributes;
@@ -119,10 +124,8 @@ public:
                                   const Size& rDeviceGridDistance,
                                   const tools::Rectangle& rDeviceDrawingArea);
 
-    static void DrawTextRect(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                             const Point& rBasePt, const tools::Rectangle& rRect,
-                             Degree10 nOrientation, tools::Long nFrameWidth, bool bRTL,
-                             bool bAntiparallel);
+    static void DrawTextDecoration(SalGraphics& rGraphics,
+                                   const vcl::text::RotatedGeometry& rDeviceGeo);
 
     static void DrawTextLines(OutputDevice& rOutDev, SalLayout& rSalLayout,
                               FontStrikeout eStrikeout, FontLineStyle eUnderline,

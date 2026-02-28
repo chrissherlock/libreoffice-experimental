@@ -958,7 +958,7 @@ public:
 
     SAL_DLLPRIVATE void ImplRenderTextLayout(SalLayout& rSalLayout);
 
-    SAL_DLLPRIVATE void         ImplDrawTextBackground( const SalLayout& );
+    SAL_DLLPRIVATE void         ImplDrawTextDecoration( const SalLayout& );
 
     void                        DrawCtrlText( const Point& rPos, const OUString& rStr,
                                               sal_Int32 nIndex = 0, sal_Int32 nLen = -1,
