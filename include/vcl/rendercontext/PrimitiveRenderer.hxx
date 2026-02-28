@@ -85,7 +85,7 @@ public:
     static bool DrawPolyLine(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                              const basegfx::B2DPolygon& rPoly, const StrokeAttributes& rStroke,
                              const basegfx::B2DHomMatrix& rObjectTransform, AntialiasingFlags nAA,
-                             RasterOp eROP, bool bIsLineColor);
+                             RasterOp eROP);
 
     static void DrawPolyLineGeometry(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                                      const basegfx::B2DPolyPolygon& rPolyPolygon,

@@ -361,7 +361,7 @@ bool PrimitiveRenderer::DrawPolyLine(SalGraphics& rGraphics, const CoordinateMap
                                      const basegfx::B2DPolygon& rPoly,
                                      const StrokeAttributes& rStroke,
                                      const basegfx::B2DHomMatrix& rObjectTransform,
-                                     AntialiasingFlags nAA, RasterOp eROP, bool bIsLineColor)
+                                     AntialiasingFlags nAA, RasterOp eROP)
 {
     if (rPoly.count() == 0)
         return true;
@@ -370,7 +370,7 @@ bool PrimitiveRenderer::DrawPolyLine(SalGraphics& rGraphics, const CoordinateMap
     const bool bPixelSnapHairline
         = (nAA & AntialiasingFlags::PixelSnapHairline) && rPoly.count() < 1000;
 
-    if (eROP == RasterOp::OverPaint && bIsLineColor)
+    if (eROP == RasterOp::OverPaint)
     {
         if (rGraphics.drawPolyLine(aTransform, rPoly, rStroke.fTransparency, rStroke.fWidth,
                                    rStroke.pDashArray, rStroke.eJoin, rStroke.eCap,
@@ -381,6 +381,7 @@ bool PrimitiveRenderer::DrawPolyLine(SalGraphics& rGraphics, const CoordinateMap
     basegfx::B2DPolygon aDevicePoly(rPoly);
     aDevicePoly.transform(aTransform);
     basegfx::B2DPolyPolygon aPolyPolygon(aDevicePoly);
+
     if (rStroke.pDashArray && !rStroke.pDashArray->empty())
     {
         basegfx::B2DPolyPolygon aDashedPolyPoly;

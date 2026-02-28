@@ -41,9 +41,19 @@ void OutputDevice::DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
 
     FlushGraphicsState();
 
-    vcl::rendercontext::StrokeAttributes aStroke{rLineInfo.GetWidth(), rLineInfo.GetLineJoin(), rLineInfo.GetLineCap(), basegfx::deg2rad(15.0), nullptr, 0.0};
+    if (!IsLineColor())
+        return;
 
-    if (vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*GetGraphics(), *mpMapper, rPoly.getB2DPolygon(), aStroke, basegfx::B2DHomMatrix(), GetAntialiasing(), GetRasterOp(), IsLineColor()))
+    vcl::rendercontext::StrokeAttributes aStroke{ rLineInfo.GetWidth(),
+                                                  rLineInfo.GetLineJoin(),
+                                                  rLineInfo.GetLineCap(),
+                                                  basegfx::deg2rad(15.0),
+                                                  nullptr,
+                                                  0.0 };
+
+    if (vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+            *GetGraphics(), *mpMapper, rPoly.getB2DPolygon(), aStroke, basegfx::B2DHomMatrix(),
+            GetAntialiasing(), GetRasterOp()))
     {
         return;
     }
@@ -51,7 +61,8 @@ void OutputDevice::DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
     if (rLineInfo.GetStyle() == LineStyle::Dash || rLineInfo.GetWidth() > 1)
     {
         basegfx::B2DPolygon aPoly = mpMapper->LogicToDevicePixel(rPoly.getB2DPolygon());
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyLineGeometry(*GetGraphics(), *mpMapper, basegfx::B2DPolyPolygon(aPoly), rLineInfo);
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLineGeometry(
+            *GetGraphics(), *mpMapper, basegfx::B2DPolyPolygon(aPoly), rLineInfo);
     }
     else
     {
@@ -60,7 +71,9 @@ void OutputDevice::DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
     }
 }
 
-bool OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2D, const vcl::rendercontext::StrokeAttributes& rStroke, const basegfx::B2DHomMatrix& rObjectTransform)
+bool OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2D,
+                                const vcl::rendercontext::StrokeAttributes& rStroke,
+                                const basegfx::B2DHomMatrix& rObjectTransform)
 {
     if (rB2D.count() == 0 || !CanDrawPolyline())
         return true;
@@ -81,7 +94,12 @@ bool OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2D, const vcl::rend
 
     FlushGraphicsState();
 
-        return vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*GetGraphics(), *mpMapper, rB2D, rStroke, rObjectTransform, GetAntialiasing(), GetRasterOp(), IsLineColor());
+    if (!IsLineColor())
+        return true;
+
+    return vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*GetGraphics(), *mpMapper, rB2D,
+                                                               rStroke, rObjectTransform,
+                                                               GetAntialiasing(), GetRasterOp());
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
