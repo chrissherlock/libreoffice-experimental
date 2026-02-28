@@ -117,7 +117,11 @@ void OutputDevice::ImplDrawTextBackground(const SalLayout& rSalLayout)
     mpGraphics->SetFillColor(GetTextFillColor());
     mbFillColorDirty = true;
 
-    vcl::rendercontext::PrimitiveRenderer::DrawTextRect(*mpGraphics, this, Point(aRect.Left(), aRect.Top()), tools::Rectangle(Point(0, 0), Size(aRect.GetWidth(), aRect.GetHeight())), mpFontRealization->mxFont->mnOrientation);
+    vcl::rendercontext::PrimitiveRenderer::DrawTextRect(
+        *mpGraphics, *mpMapper, Point(aRect.Left(), aRect.Top()), tools::Rectangle(Point(0, 0), Size(aRect.GetWidth(), aRect.GetHeight())), mpFontRealization->mxFont->mnOrientation,
+        IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth(),
+        IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl),
+        ImplIsAntiparallel());
 }
 
 bool OutputDevice::ImplDrawRotateText(SalLayout& rSalLayout)

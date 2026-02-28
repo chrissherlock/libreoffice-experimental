@@ -151,8 +151,10 @@ public:
                                   const tools::Rectangle& rGridArea, const Size& rGridDistance,
                                   const tools::Rectangle& rDrawingArea);
 
-    static void DrawTextRect(SalGraphics& rGraphics, OutputDevice* pOutDev, const Point& rBasePt,
-                             const tools::Rectangle& rRect, Degree10 nOrientation);
+    static void DrawTextRect(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+                             const Point& rBasePt, const tools::Rectangle& rRect,
+                             Degree10 nOrientation, tools::Long nFrameWidth, bool bRTL,
+                             bool bAntiparallel);
     static void DrawTextLines(OutputDevice& rOutDev, SalLayout& rSalLayout,
                               FontStrikeout eStrikeout, FontLineStyle eUnderline,
                               FontLineStyle eOverline, bool bWordLine, bool bUnderlineAbove);

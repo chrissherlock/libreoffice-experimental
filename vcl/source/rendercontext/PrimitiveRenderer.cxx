@@ -886,35 +886,23 @@ void PrimitiveRenderer::DrawGridOfCrosses(SalGraphics& rGraphics, const Coordina
     }
 }
 
-void PrimitiveRenderer::DrawTextRect(SalGraphics& rGraphics, OutputDevice* pOutDev,
+void PrimitiveRenderer::DrawTextRect(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                                      const Point& rBasePt, const tools::Rectangle& rRect,
-                                     Degree10 nOrientation)
+                                     Degree10 nOrientation, tools::Long nFrameWidth, bool bRTL,
+                                     bool bAntiparallel)
 {
     auto aGeo = vcl::text::TextGeometry::GetRotatedGeometry(rBasePt, rRect, nOrientation);
 
     if (aGeo.mbIsPolygon)
     {
-        bool bRTL = pOutDev->IsRTLEnabled()
-                    || (pOutDev->GetGraphics()
-                        && (pOutDev->GetGraphics()->GetLayout() & SalLayoutFlags::BiDiRtl));
-        bool bAntiparallel = pOutDev->ImplIsAntiparallel();
-        tools::Long nFrameWidth
-            = pOutDev->IsVirtual()
-                  ? pOutDev->GetOutputWidthPixel()
-                  : (pOutDev->GetGraphics() ? pOutDev->GetGraphics()->GetGraphicsWidth() : 0);
-        PrimitiveRenderer::DrawPolygonGeometry(*pOutDev->GetGraphics(), *pOutDev->mpMapper,
-                                               aGeo.maPoly, nFrameWidth, bRTL, bAntiparallel);
+        tools::Polygon aDevicePoly = aGeo.maPoly;
+        rMapper.MirrorDevicePixelPolygon(aDevicePoly, nFrameWidth, bRTL, bAntiparallel);
+        PrimitiveRenderer::DrawPolygonGeometry(rGraphics, aDevicePoly);
     }
     else
     {
-        tools::Rectangle aDeviceRect(aGeo.maRect);
-        bool bRTL = pOutDev->IsRTLEnabled()
-                    || (pOutDev->GetGraphics()
-                        && (pOutDev->GetGraphics()->GetLayout() & SalLayoutFlags::BiDiRtl));
-        bool bAntiparallel = pOutDev->ImplIsAntiparallel();
-        tools::Long nFrameWidth = pOutDev->IsVirtual() ? pOutDev->GetOutputWidthPixel()
-                                                       : pOutDev->GetGraphics()->GetGraphicsWidth();
-        pOutDev->mpMapper->MirrorDevicePixelRect(aDeviceRect, nFrameWidth, bRTL, bAntiparallel);
+        tools::Rectangle aDeviceRect = aGeo.maRect;
+        rMapper.MirrorDevicePixelRect(aDeviceRect, nFrameWidth, bRTL, bAntiparallel);
         PrimitiveRenderer::DrawRect(rGraphics, aDeviceRect);
     }
 }
@@ -1058,22 +1046,37 @@ void PrimitiveRenderer::DrawStraightTextLine(OutputDevice& rOutDev,
         case LINESTYLE_SINGLE:
         case LINESTYLE_BOLD:
             PrimitiveRenderer::DrawTextRect(
-                *rOutDev.mpGraphics, &rOutDev, rGeo.maOrigin,
+                *rOutDev.mpGraphics, *rOutDev.mpMapper, rGeo.maOrigin,
                 tools::Rectangle(Point(nLeft, aMetrics.nLinePos),
                                  Size(rGeo.mfWidth, aMetrics.nLineHeight)),
-                rOutDev.mpFontRealization->mxFont->mnOrientation);
+                rOutDev.mpFontRealization->mxFont->mnOrientation,
+                rOutDev.IsVirtual() ? rOutDev.GetOutputWidthPixel()
+                                    : rOutDev.mpGraphics->GetGraphicsWidth(),
+                rOutDev.IsRTLEnabled()
+                    || (rOutDev.mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl),
+                rOutDev.ImplIsAntiparallel());
             break;
         case LINESTYLE_DOUBLE:
             PrimitiveRenderer::DrawTextRect(
-                *rOutDev.mpGraphics, &rOutDev, rGeo.maOrigin,
+                *rOutDev.mpGraphics, *rOutDev.mpMapper, rGeo.maOrigin,
                 tools::Rectangle(Point(nLeft, aMetrics.nLinePos),
                                  Size(rGeo.mfWidth, aMetrics.nLineHeight)),
-                rOutDev.mpFontRealization->mxFont->mnOrientation);
+                rOutDev.mpFontRealization->mxFont->mnOrientation,
+                rOutDev.IsVirtual() ? rOutDev.GetOutputWidthPixel()
+                                    : rOutDev.mpGraphics->GetGraphicsWidth(),
+                rOutDev.IsRTLEnabled()
+                    || (rOutDev.mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl),
+                rOutDev.ImplIsAntiparallel());
             PrimitiveRenderer::DrawTextRect(
-                *rOutDev.mpGraphics, &rOutDev, rGeo.maOrigin,
+                *rOutDev.mpGraphics, *rOutDev.mpMapper, rGeo.maOrigin,
                 tools::Rectangle(Point(nLeft, aMetrics.nLinePos2),
                                  Size(rGeo.mfWidth, aMetrics.nLineHeight)),
-                rOutDev.mpFontRealization->mxFont->mnOrientation);
+                rOutDev.mpFontRealization->mxFont->mnOrientation,
+                rOutDev.IsVirtual() ? rOutDev.GetOutputWidthPixel()
+                                    : rOutDev.mpGraphics->GetGraphicsWidth(),
+                rOutDev.IsRTLEnabled()
+                    || (rOutDev.mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl),
+                rOutDev.ImplIsAntiparallel());
             break;
         default:
         {
@@ -1085,10 +1088,15 @@ void PrimitiveRenderer::DrawStraightTextLine(OutputDevice& rOutDev,
             for (const auto& rSeg : aSegments)
             {
                 PrimitiveRenderer::DrawTextRect(
-                    *rOutDev.mpGraphics, &rOutDev, rGeo.maOrigin,
+                    *rOutDev.mpGraphics, *rOutDev.mpMapper, rGeo.maOrigin,
                     tools::Rectangle(Point(nLeft + rSeg.nX, aMetrics.nLinePos),
                                      Size(rSeg.nWidth, aMetrics.nLineHeight)),
-                    rOutDev.mpFontRealization->mxFont->mnOrientation);
+                    rOutDev.mpFontRealization->mxFont->mnOrientation,
+                    rOutDev.IsVirtual() ? rOutDev.GetOutputWidthPixel()
+                                        : rOutDev.mpGraphics->GetGraphicsWidth(),
+                    rOutDev.IsRTLEnabled()
+                        || (rOutDev.mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl),
+                    rOutDev.ImplIsAntiparallel());
             }
         }
         break;
@@ -1120,9 +1128,13 @@ void PrimitiveRenderer::DrawStrikeoutLine(OutputDevice& rOutDev,
     for (const auto& rSeg : aGeo.aSegments)
     {
         PrimitiveRenderer::DrawTextRect(
-            *rOutDev.mpGraphics, &rOutDev, rGeo.maOrigin,
+            *rOutDev.mpGraphics, *rOutDev.mpMapper, rGeo.maOrigin,
             tools::Rectangle(Point(rGeo.mnDistX, rSeg.nYOffset), Size(rGeo.mfWidth, rSeg.nHeight)),
-            rOutDev.mpFontRealization->mxFont->mnOrientation);
+            rOutDev.mpFontRealization->mxFont->mnOrientation,
+            rOutDev.IsVirtual() ? rOutDev.GetOutputWidthPixel()
+                                : rOutDev.mpGraphics->GetGraphicsWidth(),
+            rOutDev.IsRTLEnabled() || (rOutDev.mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl),
+            rOutDev.ImplIsAntiparallel());
     }
 }
 
