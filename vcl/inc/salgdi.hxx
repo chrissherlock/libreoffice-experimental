@@ -71,9 +71,10 @@ typedef sal_Unicode sal_Ucs; // TODO: use sal_UCS4 instead of sal_Unicode
 
 class VCL_PLUGIN_PUBLIC SalGraphics : protected vcl::WidgetDrawInterface
 {
-    friend class vcl::rendercontext::PrimitiveRenderer;
 
 public:
+    // --- Liberated Raw Drawing Primitives ---
+
 
     virtual void                drawPolygon( sal_uInt32 nPoints, const Point* pPtAry ) = 0;
 
@@ -82,6 +83,45 @@ public:
 
 
     virtual void                drawLine( tools::Long nX1, tools::Long nY1, tools::Long nX2, tools::Long nY2 ) = 0;
+    virtual void                drawPixel( tools::Long nX, tools::Long nY ) = 0;
+    virtual void                drawPixel( tools::Long nX, tools::Long nY, Color nColor ) = 0;
+    virtual void                drawRect( tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight ) = 0;
+    virtual void                drawPolyPolygon( sal_uInt32 nPoly, const sal_uInt32* pPoints, const Point** pPtAry ) = 0;
+
+    virtual void                drawPolyPolygon(
+                                    const basegfx::B2DHomMatrix& rObjectToDevice,
+                                    const basegfx::B2DPolyPolygon&,
+                                    double fTransparency) = 0;
+
+    virtual bool                drawPolyLine(
+                                    const basegfx::B2DHomMatrix& rObjectToDevice,
+                                    const basegfx::B2DPolygon&,
+                                    double fTransparency,
+                                    double fLineWidth,
+                                    const std::vector< double >* pStroke, // MM01
+                                    basegfx::B2DLineJoin,
+                                    css::drawing::LineCap,
+                                    double fMiterMinimumAngle,
+                                    bool bPixelSnapHairline) = 0;
+
+    virtual bool                drawPolyLineBezier(
+                                    sal_uInt32 nPoints,
+                                    const Point* pPtAry,
+                                    const PolyFlags* pFlgAry ) = 0;
+
+    virtual bool                drawPolygonBezier(
+                                    sal_uInt32 nPoints,
+                                    const Point* pPtAry,
+                                    const PolyFlags* pFlgAry ) = 0;
+
+    virtual bool                drawPolyPolygonBezier(
+                                    sal_uInt32 nPoly,
+                                    const sal_uInt32* pPoints,
+                                    const Point* const* pPtAry,
+                                    const PolyFlags* const* pFlgAry ) = 0;
+
+    virtual Color               getPixel( tools::Long nX, tools::Long nY ) = 0;
+
     SalGraphics();
     ~SalGraphics() override;
 
@@ -425,42 +465,6 @@ protected:
     virtual void                setClipRegion( const vcl::Region& ) = 0;
 
     // draw --> LineColor and FillColor and RasterOp and ClipRegion
-    virtual void                drawPixel( tools::Long nX, tools::Long nY ) = 0;
-    virtual void                drawPixel( tools::Long nX, tools::Long nY, Color nColor ) = 0;
-    virtual void                drawRect( tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight ) = 0;
-    virtual void                drawPolyPolygon( sal_uInt32 nPoly, const sal_uInt32* pPoints, const Point** pPtAry ) = 0;
-
-    virtual void                drawPolyPolygon(
-                                    const basegfx::B2DHomMatrix& rObjectToDevice,
-                                    const basegfx::B2DPolyPolygon&,
-                                    double fTransparency) = 0;
-
-    virtual bool                drawPolyLine(
-                                    const basegfx::B2DHomMatrix& rObjectToDevice,
-                                    const basegfx::B2DPolygon&,
-                                    double fTransparency,
-                                    double fLineWidth,
-                                    const std::vector< double >* pStroke, // MM01
-                                    basegfx::B2DLineJoin,
-                                    css::drawing::LineCap,
-                                    double fMiterMinimumAngle,
-                                    bool bPixelSnapHairline) = 0;
-
-    virtual bool                drawPolyLineBezier(
-                                    sal_uInt32 nPoints,
-                                    const Point* pPtAry,
-                                    const PolyFlags* pFlgAry ) = 0;
-
-    virtual bool                drawPolygonBezier(
-                                    sal_uInt32 nPoints,
-                                    const Point* pPtAry,
-                                    const PolyFlags* pFlgAry ) = 0;
-
-    virtual bool                drawPolyPolygonBezier(
-                                    sal_uInt32 nPoly,
-                                    const sal_uInt32* pPoints,
-                                    const Point* const* pPtAry,
-                                    const PolyFlags* const* pFlgAry ) = 0;
 
     virtual bool                drawGradient(
                                     const tools::PolyPolygon& rPolyPoly,
@@ -491,8 +495,6 @@ protected:
                                     Color nMaskColor ) = 0;
 
     virtual std::shared_ptr<SalBitmap> getBitmap( tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight, bool bWithoutAlpha ) = 0;
-
-    virtual Color               getPixel( tools::Long nX, tools::Long nY ) = 0;
 
     // invert --> ClipRegion (only Windows or VirDevs)
     virtual void                invert(
