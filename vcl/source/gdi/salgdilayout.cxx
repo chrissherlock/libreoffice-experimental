@@ -398,17 +398,6 @@ void SalGraphics::DrawRect( tools::Long nX, tools::Long nY, tools::Long nWidth, 
     drawRect( nX, nY, nWidth, nHeight );
 }
 
-void SalGraphics::DrawPolyLine( sal_uInt32 nPoints, Point const * pPtAry, const OutputDevice& rOutDev )
-{
-    if( (m_nLayout & SalLayoutFlags::BiDiRtl) || rOutDev.IsRTLEnabled() )
-    {
-        std::unique_ptr<Point[]> pPtAry2(new Point[nPoints]);
-        bool bCopied = mirror( nPoints, pPtAry, pPtAry2.get(), rOutDev );
-        drawPolyLine( nPoints, bCopied ? pPtAry2.get() : pPtAry );
-    }
-    else
-        drawPolyLine( nPoints, pPtAry );
-}
 
 void SalGraphics::DrawPolygon( sal_uInt32 nPoints, const Point* pPtAry, const OutputDevice& rOutDev )
 {
