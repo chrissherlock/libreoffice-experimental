@@ -106,8 +106,17 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
 
 void OutputDevice::DrawHatchLine(const Point& rStartPoint, const Point& rEndPoint)
 {
-    Point aPt1{LogicToDevicePixel(rStartPoint)}, aPt2{LogicToDevicePixel(rEndPoint)};
-    mpGraphics->DrawLine(aPt1.X(), aPt1.Y(), aPt2.X(), aPt2.Y(), *this);
+    Point aPt1{ LogicToDevicePixel(rStartPoint) };
+    Point aPt2{ LogicToDevicePixel(rEndPoint) };
+
+    const bool bRTL = IsRTLEnabled() || (mpGraphics && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
+    const bool bAntiparallel = ImplIsAntiparallel();
+    const tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+
+    mpMapper->MirrorDevicePixelPoint(aPt1, nFrameWidth, bRTL, bAntiparallel);
+    mpMapper->MirrorDevicePixelPoint(aPt2, nFrameWidth, bRTL, bAntiparallel);
+
+    mpGraphics->drawLine(aPt1.X(), aPt1.Y(), aPt2.X(), aPt2.Y());
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -150,8 +150,8 @@ public:
                        InvertFlags nFlags);
 
     static void DrawGrid(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                         const OutputDevice* pOutDev, const tools::Rectangle& rRect,
-                         const tools::Rectangle& rDstRect, const Size& rDist, DrawGridFlags nFlags);
+                         const tools::Rectangle& rRect, const tools::Rectangle& rDstRect,
+                         const Size& rDist, DrawGridFlags nFlags);
 
     static void DrawGridOfCrosses(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                                   const tools::Rectangle& rGridArea, const Size& rGridDistance,

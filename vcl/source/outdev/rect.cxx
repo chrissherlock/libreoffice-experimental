@@ -157,7 +157,7 @@ void OutputDevice::DrawGrid(const tools::Rectangle& rRect, const Size& rDist, Dr
     if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::All, vcl::MapModePolicy::ForcePixel))
         return;
 
-    vcl::rendercontext::PrimitiveRenderer::DrawGrid(*mpGraphics, *mpMapper, this, rRect, aDstRect, rDist, nFlags);
+    vcl::rendercontext::PrimitiveRenderer::DrawGrid(*mpGraphics, *mpMapper, rRect, aDstRect, rDist, nFlags);
 }
 
 void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea,

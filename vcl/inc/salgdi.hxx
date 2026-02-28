@@ -74,6 +74,9 @@ class VCL_PLUGIN_PUBLIC SalGraphics : protected vcl::WidgetDrawInterface
     friend class vcl::rendercontext::PrimitiveRenderer;
 
 public:
+
+
+    virtual void                drawLine( tools::Long nX1, tools::Long nY1, tools::Long nX2, tools::Long nY2 ) = 0;
     SalGraphics();
     ~SalGraphics() override;
 
@@ -190,8 +193,6 @@ public:
     SAL_DLLPRIVATE void                        SetClipRegion( const vcl::Region&, const OutputDevice& rOutDev );
 
     // draw --> LineColor and FillColor and RasterOp and ClipRegion
-
-    SAL_DLLPRIVATE void                        DrawLine( tools::Long nX1, tools::Long nY1, tools::Long nX2, tools::Long nY2, const OutputDevice& rOutDev );
 
     SAL_DLLPRIVATE void                        DrawRect( tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight, const OutputDevice& rOutDev );
 
@@ -423,9 +424,6 @@ protected:
     // draw --> LineColor and FillColor and RasterOp and ClipRegion
     virtual void                drawPixel( tools::Long nX, tools::Long nY ) = 0;
     virtual void                drawPixel( tools::Long nX, tools::Long nY, Color nColor ) = 0;
-
-    virtual void                drawLine( tools::Long nX1, tools::Long nY1, tools::Long nX2, tools::Long nY2 ) = 0;
-
     virtual void                drawRect( tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight ) = 0;
 
     virtual void                drawPolyLine( sal_uInt32 nPoints, const Point* pPtAry ) = 0;

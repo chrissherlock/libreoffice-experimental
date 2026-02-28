@@ -390,15 +390,6 @@ void SalGraphics::SetClipRegion( const vcl::Region& i_rClip, const OutputDevice&
 
 
 
-void SalGraphics::DrawLine( tools::Long nX1, tools::Long nY1, tools::Long nX2, tools::Long nY2, const OutputDevice& rOutDev )
-{
-    if( (m_nLayout & SalLayoutFlags::BiDiRtl) || rOutDev.IsRTLEnabled() )
-    {
-        mirror( nX1, rOutDev );
-        mirror( nX2, rOutDev );
-    }
-    drawLine( nX1, nY1, nX2, nY2 );
-}
 
 void SalGraphics::DrawRect( tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight, const OutputDevice& rOutDev )
 {

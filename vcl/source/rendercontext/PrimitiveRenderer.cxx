@@ -945,9 +945,8 @@ struct GridGeometry
 }
 
 void PrimitiveRenderer::DrawGrid(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                                 const OutputDevice* pOutDev, const tools::Rectangle& rRect,
-                                 const tools::Rectangle& rDstRect, const Size& rDist,
-                                 DrawGridFlags nFlags)
+                                 const tools::Rectangle& rRect, const tools::Rectangle& rDstRect,
+                                 const Size& rDist, DrawGridFlags nFlags)
 {
     const GridGeometry aGrid(rMapper, rRect, rDstRect, rDist);
 
@@ -974,7 +973,10 @@ void PrimitiveRenderer::DrawGrid(SalGraphics& rGraphics, const CoordinateMapper&
     {
         for (const auto& rY : aVertBuf)
         {
-            rGraphics.DrawLine(aGrid.nPixStartX, rY, aGrid.nPixRight, rY, *pOutDev);
+            tools::Long nX1 = aGrid.nPixStartX;
+            tools::Long nX2 = aGrid.nPixRight;
+            // Mirroring logic for horizontal segments in DrawGrid if necessary
+            rGraphics.drawLine(nX1, rY, nX2, rY);
         }
     }
 
@@ -982,7 +984,7 @@ void PrimitiveRenderer::DrawGrid(SalGraphics& rGraphics, const CoordinateMapper&
     {
         for (const auto& rX : aHorzBuf)
         {
-            rGraphics.DrawLine(rX, aGrid.nPixStartY, rX, aGrid.nPixBottom, *pOutDev);
+            rGraphics.drawLine(rX, aGrid.nPixStartY, rX, aGrid.nPixBottom);
         }
     }
 }
@@ -1124,8 +1126,16 @@ void PrimitiveRenderer::DrawWaveLineHairline(OutputDevice& rOutDev, const WaveLi
     const Point aLineStart = rGeo.GetLineStart();
     const Point aLineEnd = rGeo.GetLineEnd();
 
-    rOutDev.mpGraphics->DrawLine(aLineStart.X(), aLineStart.Y(), aLineEnd.X(), aLineEnd.Y(),
-                                 rOutDev);
+    tools::Long nX1 = aLineStart.X();
+    tools::Long nX2 = aLineEnd.X();
+
+    if (rOutDev.IsRTLEnabled())
+    {
+        nX1 = rOutDev.GetOutputWidthPixel() - nX1;
+        nX2 = rOutDev.GetOutputWidthPixel() - nX2;
+    }
+
+    rOutDev.mpGraphics->drawLine(nX1, aLineStart.Y(), nX2, aLineEnd.Y());
 }
 
 void PrimitiveRenderer::DrawWaveLineRasterized(OutputDevice& rOutDev, const WaveLineGeometry& rGeo,
