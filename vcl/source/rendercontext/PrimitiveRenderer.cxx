@@ -461,40 +461,6 @@ void PrimitiveRenderer::DrawPolyPolygonGeometry(SalGraphics& rGraphics,
                               aBuffer.pPointAryAry.get());
 }
 
-void PrimitiveRenderer::DrawPolygonGeometry(SalGraphics& rGraphics,
-                                            const tools::Polygon& rDevicePoly)
-{
-    sal_uInt16 nPoints = rDevicePoly.GetSize();
-    if (nPoints < 2)
-        return;
-
-    const Point* pPtAry = rDevicePoly.GetConstPointAry();
-
-    if (rDevicePoly.HasFlags())
-    {
-        const PolyFlags* pFlgAry = rDevicePoly.GetConstFlagAry();
-        if (!rGraphics.drawPolygonBezier(nPoints, pPtAry, pFlgAry))
-        {
-            tools::Polygon aSub = tools::Polygon::SubdivideBezier(rDevicePoly);
-            rGraphics.drawPolygon(aSub.GetSize(), aSub.GetConstPointAry());
-        }
-    }
-    else
-    {
-        // Naked pure virtual backend call!
-        rGraphics.drawPolygon(nPoints, pPtAry);
-    }
-}
-
-void PrimitiveRenderer::DrawPolygonGeometry(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                                            const tools::Polygon& rPoly, tools::Long nFrameWidth,
-                                            bool bRTL, bool bAntiparallel)
-{
-    tools::Polygon aDevicePoly = rPoly;
-    rMapper.MirrorDevicePixelPolygon(aDevicePoly, nFrameWidth, bRTL, bAntiparallel);
-    DrawPolygonGeometry(rGraphics, aDevicePoly);
-}
-
 namespace
 {
 struct ClippedPolygonData
@@ -521,6 +487,30 @@ static ClippedPolygonData lcl_GetClippedPolyPolygon(const tools::PolyPolygon& rP
     }
 
     return aData;
+}
+
+void PrimitiveRenderer::DrawPolygonGeometry(SalGraphics& rGraphics,
+                                            const tools::Polygon& rDevicePoly)
+{
+    sal_uInt16 nPoints = rDevicePoly.GetSize();
+    if (nPoints < 2)
+        return;
+
+    const Point* pPtAry = rDevicePoly.GetConstPointAry();
+
+    if (rDevicePoly.HasFlags())
+    {
+        const PolyFlags* pFlgAry = rDevicePoly.GetConstFlagAry();
+        if (!rGraphics.drawPolygonBezier(nPoints, pPtAry, pFlgAry))
+        {
+            tools::Polygon aSub = tools::Polygon::SubdivideBezier(rDevicePoly);
+            rGraphics.drawPolygon(aSub.GetSize(), aSub.GetConstPointAry());
+        }
+    }
+    else
+    {
+        rGraphics.drawPolygon(nPoints, pPtAry);
+    }
 }
 
 void PrimitiveRenderer::DrawPolyPolygon(SalGraphics& rGraphics, const tools::PolyPolygon& rPolyPoly,

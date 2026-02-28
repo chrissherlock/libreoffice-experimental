@@ -94,10 +94,6 @@ public:
 
     static void DrawPolygonGeometry(SalGraphics& rGraphics, const tools::Polygon& rDevicePoly);
 
-    static void DrawPolygonGeometry(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                                    const tools::Polygon& rPoly, tools::Long nFrameWidth, bool bRTL,
-                                    bool bAntiparallel);
-
     static void DrawClippedPolygon(SalGraphics& rGraphics, const tools::Polygon& rDevicePoly,
                                    const tools::PolyPolygon& rDeviceClipPolyPoly);
 

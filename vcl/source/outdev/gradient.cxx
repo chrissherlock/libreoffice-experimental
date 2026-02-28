@@ -255,7 +255,8 @@ void OutputDevice::DrawLinearGradient( const tools::Rectangle& rRect,
             bool bRTL = IsRTLEnabled() || (mpGraphics && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
             bool bAntiparallel = ImplIsAntiparallel();
             tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : (mpGraphics ? mpGraphics->GetGraphicsWidth() : 0);
-            vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*mpGraphics, *mpMapper, aPoly, nFrameWidth, bRTL, bAntiparallel);
+            mpMapper->MirrorDevicePixelPolygon(aPoly, nFrameWidth, bRTL, bAntiparallel);
+            vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*mpGraphics, aPoly);
         }
 
         if ( !bLinear)
@@ -276,7 +277,8 @@ void OutputDevice::DrawLinearGradient( const tools::Rectangle& rRect,
             bool bRTL = IsRTLEnabled() || (mpGraphics && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
             bool bAntiparallel = ImplIsAntiparallel();
             tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : (mpGraphics ? mpGraphics->GetGraphicsWidth() : 0);
-            vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*mpGraphics, *mpMapper, aPoly, nFrameWidth, bRTL, bAntiparallel);
+            mpMapper->MirrorDevicePixelPolygon(aPoly, nFrameWidth, bRTL, bAntiparallel);
+            vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*mpGraphics, aPoly);
         }
         }
     }
@@ -335,7 +337,8 @@ void OutputDevice::DrawLinearGradient( const tools::Rectangle& rRect,
             bool bRTL = IsRTLEnabled() || (mpGraphics && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
             bool bAntiparallel = ImplIsAntiparallel();
             tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : (mpGraphics ? mpGraphics->GetGraphicsWidth() : 0);
-            vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*mpGraphics, *mpMapper, aPoly, nFrameWidth, bRTL, bAntiparallel);
+            mpMapper->MirrorDevicePixelPolygon(aPoly, nFrameWidth, bRTL, bAntiparallel);
+            vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*mpGraphics, aPoly);
         }
 
         if ( !bLinear )
@@ -355,7 +358,8 @@ void OutputDevice::DrawLinearGradient( const tools::Rectangle& rRect,
             bool bRTL = IsRTLEnabled() || (mpGraphics && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
             bool bAntiparallel = ImplIsAntiparallel();
             tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : (mpGraphics ? mpGraphics->GetGraphicsWidth() : 0);
-            vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*mpGraphics, *mpMapper, aPoly, nFrameWidth, bRTL, bAntiparallel);
+            mpMapper->MirrorDevicePixelPolygon(aPoly, nFrameWidth, bRTL, bAntiparallel);
+            vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*mpGraphics, aPoly);
         }
         }
     }
@@ -384,7 +388,8 @@ void OutputDevice::DrawLinearGradient( const tools::Rectangle& rRect,
             bool bRTL = IsRTLEnabled() || (mpGraphics && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
             bool bAntiparallel = ImplIsAntiparallel();
             tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : (mpGraphics ? mpGraphics->GetGraphicsWidth() : 0);
-            vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*mpGraphics, *mpMapper, aPoly, nFrameWidth, bRTL, bAntiparallel);
+            mpMapper->MirrorDevicePixelPolygon(aPoly, nFrameWidth, bRTL, bAntiparallel);
+            vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*mpGraphics, aPoly);
         }
 
 }
@@ -490,7 +495,8 @@ void OutputDevice::DrawComplexGradient( const tools::Rectangle& rRect,
             bool bRTL = IsRTLEnabled() || (mpGraphics && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
             bool bAntiparallel = ImplIsAntiparallel();
             tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : (mpGraphics ? mpGraphics->GetGraphicsWidth() : 0);
-            vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*mpGraphics, *mpMapper, aPoly, nFrameWidth, bRTL, bAntiparallel);
+            mpMapper->MirrorDevicePixelPolygon(aPoly, nFrameWidth, bRTL, bAntiparallel);
+            vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*mpGraphics, aPoly);
         }
     }
 
@@ -554,7 +560,8 @@ void OutputDevice::DrawComplexGradient( const tools::Rectangle& rRect,
             bool bRTL = IsRTLEnabled() || (mpGraphics && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
             bool bAntiparallel = ImplIsAntiparallel();
             tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : (mpGraphics ? mpGraphics->GetGraphicsWidth() : 0);
-            vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*mpGraphics, *mpMapper, aPoly, nFrameWidth, bRTL, bAntiparallel);
+            mpMapper->MirrorDevicePixelPolygon(aPoly, nFrameWidth, bRTL, bAntiparallel);
+            vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*mpGraphics, aPoly);
         }
         }
     }
@@ -587,7 +594,8 @@ void OutputDevice::DrawComplexGradient( const tools::Rectangle& rRect,
             bool bRTL = IsRTLEnabled() || (mpGraphics && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
             bool bAntiparallel = ImplIsAntiparallel();
             tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : (mpGraphics ? mpGraphics->GetGraphicsWidth() : 0);
-            vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*mpGraphics, *mpMapper, aPoly, nFrameWidth, bRTL, bAntiparallel);
+            mpMapper->MirrorDevicePixelPolygon(aPoly, nFrameWidth, bRTL, bAntiparallel);
+            vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(*mpGraphics, aPoly);
         }
 }
 
