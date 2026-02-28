@@ -437,45 +437,6 @@ bool PrimitiveRenderer::DrawPolyLine(OutputDevice& rOutDev, const basegfx::B2DPo
     return bSuccess;
 }
 
-void PrimitiveRenderer::DrawPolyLine(OutputDevice& rOutDev, const tools::Polygon& rPoly)
-{
-    PrimitiveRenderer::DrawPolyLine(rOutDev, rPoly, LineInfo());
-}
-
-void PrimitiveRenderer::DrawPolyLine(OutputDevice& rOutDev, const tools::Polygon& rPoly,
-                                     const LineInfo& rLineInfo)
-{
-    if (rPoly.GetSize() < 2 || !rOutDev.CanDrawPolyline())
-        return;
-
-    rOutDev.FlushGraphicsState();
-
-    if (RasterOp::OverPaint == rOutDev.GetRasterOp() && rOutDev.IsLineColor())
-    {
-        const bool bPixelSnapHairline
-            = (rOutDev.mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline)
-              && rPoly.GetSize() < 1000;
-
-        if (rOutDev.mpGraphics->DrawPolyLine(basegfx::B2DHomMatrix(), rPoly.getB2DPolygon(), 0.0,
-                                             rLineInfo.GetWidth(), nullptr, rLineInfo.GetLineJoin(),
-                                             rLineInfo.GetLineCap(), basegfx::deg2rad(15.0),
-                                             bPixelSnapHairline, rOutDev))
-        {
-            return;
-        }
-    }
-
-    if (rLineInfo.GetStyle() == LineStyle::Dash || rLineInfo.GetWidth() > 1)
-    {
-        basegfx::B2DPolygon aPoly = rOutDev.mpMapper->LogicToDevicePixel(rPoly.getB2DPolygon());
-        PrimitiveRenderer::DrawPolyLineGeometry(rOutDev, basegfx::B2DPolyPolygon(aPoly), rLineInfo);
-    }
-    else
-    {
-        rOutDev.DrawPolygon(rPoly);
-    }
-}
-
 void PrimitiveRenderer::DrawPolyLineGeometry(OutputDevice& rOutDev,
                                              const basegfx::B2DPolyPolygon& rPolyPolygon,
                                              const LineInfo& rLineInfo)
@@ -1499,7 +1460,7 @@ void PrimitiveRenderer::DrawEmphasisMark(OutputDevice& rOutDev, SalGraphics& rGr
         {
             tools::Polygon aPoly = rPolyPoly.GetObject(0);
             aPoly.Move(nX, nY);
-            PrimitiveRenderer::DrawPolyLine(rOutDev, aPoly);
+            rOutDev.DrawPolyLine(aPoly);
         }
         else
         {

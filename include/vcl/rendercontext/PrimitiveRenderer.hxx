@@ -84,6 +84,14 @@ public:
                                 const tools::Rectangle& rLogicalRect, sal_uLong nHorzRound,
                                 sal_uLong nVertRound, bool bFillColor);
 
+    static bool DrawPolyLine(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
+                             const StrokeAttributes& rStroke,
+                             const basegfx::B2DHomMatrix& rObjectTransform
+                             = basegfx::B2DHomMatrix());
+
+    static void DrawPolyLineGeometry(OutputDevice& rOutDev,
+                                     const basegfx::B2DPolyPolygon& rPolyPolygon,
+                                     const LineInfo& rLineInfo);
     static bool DrawPolygon(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
                             bool bFill, const StrokeAttributes* pStroke);
 
@@ -112,20 +120,6 @@ public:
     static void DrawPolygonGeometry(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                                     const tools::Polygon& rPoly, tools::Long nFrameWidth, bool bRTL,
                                     bool bAntiparallel);
-
-    static void DrawPolyLine(OutputDevice& rOutDev, const tools::Polygon& rPoly);
-
-    static void DrawPolyLine(OutputDevice& rOutDev, const tools::Polygon& rPoly,
-                             const LineInfo& rLineInfo);
-
-    static bool DrawPolyLine(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
-                             const StrokeAttributes& rStroke,
-                             const basegfx::B2DHomMatrix& rObjectTransform
-                             = basegfx::B2DHomMatrix());
-
-    static void DrawPolyLineGeometry(OutputDevice& rOutDev,
-                                     const basegfx::B2DPolyPolygon& rPolyPolygon,
-                                     const LineInfo& rLineInfo);
 
     static void DrawClippedPolygon(OutputDevice& rOutDev, const tools::Polygon& rPoly,
                                    const tools::PolyPolygon& rClipPolyPoly);
