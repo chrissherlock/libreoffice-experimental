@@ -207,11 +207,25 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea,
     if (rDrawingArea.IsEmpty() || rGridArea.IsEmpty())
         return;
 
-    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line))
-        return;
+    if (PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line) && mpGraphics)
+    {
+        tools::Rectangle aDeviceGridArea = mpMapper->LogicToDevicePixel(rGridArea);
+        tools::Rectangle aDeviceDrawingArea = mpMapper->LogicToDevicePixel(rDrawingArea);
+        Size aDeviceGridDistance = mpMapper->LogicToDevicePixel(rGridDistance);
 
-    vcl::rendercontext::PrimitiveRenderer::DrawGridOfCrosses(
-        *mpGraphics, *mpMapper, rGridArea, rGridDistance, rDrawingArea);
+        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+        if (bRTL)
+        {
+            tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+
+            // Mirror both the boundary and the active drawing area
+            mpMapper->MirrorDevicePixelRect(aDeviceGridArea, nFrameWidth, bRTL, ImplIsAntiparallel());
+            mpMapper->MirrorDevicePixelRect(aDeviceDrawingArea, nFrameWidth, bRTL, ImplIsAntiparallel());
+        }
+
+        vcl::rendercontext::PrimitiveRenderer::DrawGridOfCrosses(
+            *mpGraphics, aDeviceGridArea, aDeviceGridDistance, aDeviceDrawingArea);
+    }
 }
 
 Color OutputDevice::DrawSelectionBackground(const tools::Rectangle& rRect,

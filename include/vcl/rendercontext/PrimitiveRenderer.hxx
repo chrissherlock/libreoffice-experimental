@@ -115,9 +115,9 @@ public:
                          const tools::Rectangle& rDeviceDstRect, const Size& rDeviceDist,
                          DrawGridFlags nFlags);
 
-    static void DrawGridOfCrosses(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                                  const tools::Rectangle& rGridArea, const Size& rGridDistance,
-                                  const tools::Rectangle& rDrawingArea);
+    static void DrawGridOfCrosses(SalGraphics& rGraphics, const tools::Rectangle& rDeviceGridArea,
+                                  const Size& rDeviceGridDistance,
+                                  const tools::Rectangle& rDeviceDrawingArea);
 
     static void DrawTextRect(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                              const Point& rBasePt, const tools::Rectangle& rRect,

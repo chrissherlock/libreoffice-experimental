@@ -694,59 +694,57 @@ struct CrossGridGeometry
     tools::Long nPixLeft;
     tools::Long nPixRight;
 
-    CrossGridGeometry(const CoordinateMapper& rMapper, const tools::Rectangle& rGridArea,
-                      const Size& rGridDistance, const tools::Rectangle& rDrawingArea)
+    CrossGridGeometry(const tools::Rectangle& rDeviceGridArea, const Size& rDeviceGridDistance,
+                      const tools::Rectangle& rDeviceDrawingArea)
     {
-        const tools::Long nDistanceX = std::max(rGridDistance.Width(), tools::Long(1));
-        const tools::Long nDistanceY = std::max(rGridDistance.Height(), tools::Long(1));
+        const tools::Long nDistanceX = std::max(rDeviceGridDistance.Width(), tools::Long(1));
+        const tools::Long nDistanceY = std::max(rDeviceGridDistance.Height(), tools::Long(1));
 
-        // Generate logical horizontal positions
-        aHorzBuffer.reserve(rGridArea.GetWidth() / nDistanceX + 1);
-        tools::Long nX = rGridArea.Left();
-        while (nX <= rGridArea.Right())
+        // Generate device horizontal positions
+        aHorzBuffer.reserve(rDeviceGridArea.GetWidth() / nDistanceX + 1);
+        tools::Long nX = rDeviceGridArea.Left();
+        while (nX <= rDeviceGridArea.Right())
         {
             aHorzBuffer.push_back(nX);
             nX += nDistanceX;
         }
 
-        // Generate logical vertical positions
-        aVertBuffer.reserve(rGridArea.GetHeight() / nDistanceY + 1);
-        tools::Long nY = rGridArea.Top();
-        while (nY <= rGridArea.Bottom())
+        // Generate device vertical positions
+        aVertBuffer.reserve(rDeviceGridArea.GetHeight() / nDistanceY + 1);
+        tools::Long nY = rDeviceGridArea.Top();
+        while (nY <= rDeviceGridArea.Bottom())
         {
             aVertBuffer.push_back(nY);
             nY += nDistanceY;
         }
 
-        // Map drawing area to device pixels
-        nPixTop = rMapper.LogicYToDevicePixel(rDrawingArea.Top());
-        nPixBottom = rMapper.LogicYToDevicePixel(rDrawingArea.Bottom());
-        nPixLeft = rMapper.LogicXToDevicePixel(rDrawingArea.Left());
-        nPixRight = rMapper.LogicXToDevicePixel(rDrawingArea.Right());
+        // Store device pixel bounds
+        nPixTop = rDeviceDrawingArea.Top();
+        nPixBottom = rDeviceDrawingArea.Bottom();
+        nPixLeft = rDeviceDrawingArea.Left();
+        nPixRight = rDeviceDrawingArea.Right();
     }
 };
 }
 
-void PrimitiveRenderer::DrawGridOfCrosses(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                                          const tools::Rectangle& rGridArea,
-                                          const Size& rGridDistance,
-                                          const tools::Rectangle& rDrawingArea)
+void PrimitiveRenderer::DrawGridOfCrosses(SalGraphics& rGraphics,
+                                          const tools::Rectangle& rDeviceGridArea,
+                                          const Size& rDeviceGridDistance,
+                                          const tools::Rectangle& rDeviceDrawingArea)
 {
-    const CrossGridGeometry aGrid(rMapper, rGridArea, rGridDistance, rDrawingArea);
+    const CrossGridGeometry aGrid(rDeviceGridArea, rDeviceGridDistance, rDeviceDrawingArea);
 
-    for (const auto& rLogY : aGrid.aVertBuffer)
+    for (const auto& nY : aGrid.aVertBuffer)
     {
-        const tools::Long nY = rMapper.LogicYToDevicePixel(rLogY);
         if (nY < aGrid.nPixTop || nY > aGrid.nPixBottom)
             continue;
 
-        for (const auto& rLogX : aGrid.aHorzBuffer)
+        for (const auto& nX : aGrid.aHorzBuffer)
         {
-            const tools::Long nX = rMapper.LogicXToDevicePixel(rLogX);
             if (nX < aGrid.nPixLeft || nX > aGrid.nPixRight)
                 continue;
 
-            // Draw a 3x3 cross centered at (nX, nY)
+            // Draw a 3x3 cross centered at (nX, nY) using purely pre-calculated device coords
             rGraphics.drawPixel(nX, nY);
             rGraphics.drawPixel(nX - 1, nY);
             rGraphics.drawPixel(nX + 1, nY);
