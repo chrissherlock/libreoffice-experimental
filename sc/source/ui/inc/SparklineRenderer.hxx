@@ -352,8 +352,7 @@ private:
                     aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0); // Use a double here
 
                     // Pass aMatrix as the 4th argument (rObjectTransform)
-                    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-                        rRenderContext, aAxisPolygon, aStroke, aMatrix);
+                    rRenderContext.DrawPolyLine(aAxisPolygon, aStroke, aMatrix);
                 }
             }
         }
@@ -370,8 +369,7 @@ private:
                 aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0); // Set to default double value
 
                 // Pass aMatrix as the 4th argument (rObjectTransform)
-                vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, rPolygon,
-                                                                    aStroke, aMatrix);
+                rRenderContext.DrawPolyLine(rPolygon, aStroke, aMatrix);
             }
         }
 
@@ -471,8 +469,7 @@ private:
                     aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
 
                     // Fix: Pass aMatrix as the 4th argument (rObjectTransform)
-                    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-                        rRenderContext, aAxisPolygon, aStroke, aMatrix);
+                    rRenderContext.DrawPolyLine(aAxisPolygon, aStroke, aMatrix);
                 }
             }
         }

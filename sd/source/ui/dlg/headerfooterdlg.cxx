@@ -704,7 +704,7 @@ void PresLayoutPreview::Paint(vcl::RenderContext& rRenderContext, SdrTextObj con
         {
             vcl::rendercontext::StrokeAttributes aStroke;
             aStroke.fWidth = 0.0; // Default hairline for dialog preview
-            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, aGeometry.getB2DPolygon(a), aStroke);
+            rRenderContext.DrawPolyLine( aGeometry.getB2DPolygon(a), aStroke);
         }
     }
 }

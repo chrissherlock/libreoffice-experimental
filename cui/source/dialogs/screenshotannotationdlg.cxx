@@ -480,16 +480,14 @@ void ScreenshotAnnotationDlg_Impl::PaintScreenShotEntry(
 
     // try to use transparency
     aStroke.fTransparency = fTransparency;
-    if (!vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-            *mxVirtualBufferDevice,
+    if (!mxVirtualBufferDevice->DrawPolyLine(
             aPolygon,
             aStroke,
             basegfx::B2DHomMatrix()))
     {
         // no transparency, draw without (fTransparency = 0.0)
         aStroke.fTransparency = 0.0;
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-            *mxVirtualBufferDevice,
+        mxVirtualBufferDevice->DrawPolyLine(
             aPolygon,
             aStroke,
             basegfx::B2DHomMatrix());

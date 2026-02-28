@@ -126,7 +126,7 @@ namespace PictReaderShape {
         vcl::rendercontext::StrokeAttributes aStroke;
         aStroke.fWidth = double(penSize);
         aStroke.eJoin = basegfx::B2DLineJoin::NONE;
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*dev, poly, aStroke);
+        dev->DrawPolyLine(poly, aStroke);
     }
   }
 
@@ -151,7 +151,7 @@ namespace PictReaderShape {
         vcl::rendercontext::StrokeAttributes aStroke;
         aStroke.fWidth = double(penSize);
         aStroke.eJoin = basegfx::B2DLineJoin::NONE;
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*dev, poly, aStroke);
+        dev->DrawPolyLine(poly, aStroke);
     }
     else
       dev->DrawPolygon(poly);
@@ -171,7 +171,7 @@ namespace PictReaderShape {
         vcl::rendercontext::StrokeAttributes aStroke;
         aStroke.fWidth = double(penSize);
         aStroke.eJoin = basegfx::B2DLineJoin::NONE;
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*dev, poly, aStroke);
+        dev->DrawPolyLine(poly, aStroke);
     }
     else
       dev->DrawPolygon(poly);
@@ -208,7 +208,7 @@ namespace PictReaderShape {
         vcl::rendercontext::StrokeAttributes aStroke;
         aStroke.fWidth = double(penSize);
         aStroke.eJoin = basegfx::B2DLineJoin::NONE;
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*dev, poly, aStroke);
+        dev->DrawPolyLine(poly, aStroke);
     }
     else {
       // adds circle's center
@@ -237,7 +237,7 @@ namespace PictReaderShape {
         vcl::rendercontext::StrokeAttributes aStroke;
         aStroke.fWidth = double(penSize);
         aStroke.eJoin = basegfx::B2DLineJoin::NONE;
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*dev, poly, aStroke);
+        dev->DrawPolyLine(poly, aStroke);
     }
     else
       dev->DrawPolygon(poly);
@@ -281,7 +281,7 @@ void drawPolygon(VirtualDevice *dev, bool drawFrame, tools::Polygon const &orig,
         vcl::rendercontext::StrokeAttributes aStroke;
         aStroke.fWidth = double(penSize);
         aStroke.eJoin = basegfx::B2DLineJoin::NONE;
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*dev, poly, aStroke);
+        dev->DrawPolyLine(poly, aStroke);
     }
     else
       dev->DrawPolygon(poly);

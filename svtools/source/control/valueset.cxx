@@ -1350,13 +1350,13 @@ void ValueSet::ImplDrawSelect(vcl::RenderContext& rRenderContext,
                 aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
                 aStroke.fTransparency = nTransparencePercent / 100.0;
 
-                if (!vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, aRectPoly, aStroke))
+                if (!rRenderContext.DrawPolyLine(aRectPoly, aStroke))
                 {
                     SAL_WARN("svtools", "presumably impossible in practice, but fallback to see something");
                     {
                         aStroke.fWidth = nThickness;
                         aStroke.eJoin = basegfx::B2DLineJoin::Miter;
-                        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(rRenderContext, aRectPoly, aStroke);
+                        rRenderContext.DrawPolyLine(aRectPoly, aStroke);
                     }
                 }
             }

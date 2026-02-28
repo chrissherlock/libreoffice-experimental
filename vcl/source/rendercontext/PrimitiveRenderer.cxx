@@ -127,8 +127,6 @@ void PrimitiveRenderer::DrawRoundedRect(SalGraphics& rGraphics, const Coordinate
         rGraphics.drawPolygon(aRoundRectPoly.GetSize(), pPtAry);
 }
 
-namespace
-{
 static basegfx::B2DPolyPolygon lcl_ApplyLineDashing(const basegfx::B2DPolyPolygon& rLinePolyPolygon,
                                                     const LineInfo& rInfo)
 {
@@ -257,32 +255,6 @@ static void lcl_DrawAreaGeometry(SalGraphics& rGraphics, OutputDevice& rOutDev,
     lcl_DrawSubdividedAreaGeometry(rGraphics, rOutDev, rFillPolyPolygon);
 }
 
-static std::pair<basegfx::B2DPolyPolygon, LineInfo>
-lcl_SetupStrokeAndLineInfo(const basegfx::B2DPolygon& rDevicePoly,
-                           const std::vector<double>* pStroke, double fLineWidth,
-                           basegfx::B2DLineJoin eLineJoin, css::drawing::LineCap eLineCap)
-{
-    basegfx::B2DPolyPolygon aPolyPolygon(rDevicePoly);
-
-    // Handle Custom Dashing directly using basegfx
-    if (pStroke && !pStroke->empty())
-    {
-        basegfx::B2DPolyPolygon aDashedPolyPoly;
-        basegfx::utils::applyLineDashing(basegfx::B2DPolyPolygon(rDevicePoly), *pStroke,
-                                         &aDashedPolyPoly);
-        aPolyPolygon = aDashedPolyPoly;
-    }
-
-    // Package the remaining attributes into VCL's legacy struct
-    LineInfo aInfo;
-    aInfo.SetWidth(std::round(fLineWidth));
-    aInfo.SetLineJoin(eLineJoin);
-    aInfo.SetLineCap(eLineCap);
-
-    return { std::move(aPolyPolygon), aInfo };
-}
-}
-
 bool PrimitiveRenderer::DrawPolyPolygon(OutputDevice& rOutDev,
                                         const basegfx::B2DPolyPolygon& rB2DPolyPoly, bool bFill,
                                         const StrokeAttributes* pStroke)
@@ -310,7 +282,7 @@ bool PrimitiveRenderer::DrawPolyPolygon(OutputDevice& rOutDev,
     {
         for (auto const& rPolygon : std::as_const(aB2DPolyPolygon))
         {
-            if (!PrimitiveRenderer::DrawPolyLine(rOutDev, rPolygon, *pStroke))
+            if (!rOutDev.DrawPolyLine(rPolygon, *pStroke))
             {
                 bSuccess = false;
                 break;
@@ -372,69 +344,6 @@ bool PrimitiveRenderer::DrawPolygon(OutputDevice& rOutDev, const tools::Polygon&
 {
     basegfx::B2DPolygon aB2D(rPoly.getB2DPolygon());
     return DrawPolygon(rOutDev, aB2D, bFill, pStroke);
-}
-
-bool PrimitiveRenderer::DrawPolyLine(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
-                                     const StrokeAttributes& rStroke,
-                                     const basegfx::B2DHomMatrix& rObjectTransform)
-{
-    if (rB2DPolygon.count() == 0 || !rOutDev.CanDrawPolyline())
-        return true;
-
-    // 1. Handle Metafile Recording
-    if (rOutDev.maRecorder.IsActive())
-    {
-        basegfx::B2DPolygon aRecordPoly(rB2DPolygon);
-        if (!rObjectTransform.isIdentity())
-            aRecordPoly.transform(rObjectTransform);
-
-        rOutDev.maRecorder.RecordB2DPolyLine(aRecordPoly, rStroke);
-    }
-
-    if (!rOutDev.IsDeviceOutputNecessary())
-        return true;
-
-    // 2. Prepare Graphics
-    if (!rOutDev.GetGraphics() && !rOutDev.AcquireGraphics())
-        return false;
-
-    rOutDev.FlushGraphicsState();
-
-    const basegfx::B2DHomMatrix aTransform(rOutDev.GetViewTransformation() * rObjectTransform);
-    bool bSuccess = false;
-
-    // 3. Attempt direct SalGraphics rendering
-    if (rOutDev.GetRasterOp() == RasterOp::OverPaint && rOutDev.IsLineColor())
-    {
-        const bool bPixelSnapHairline
-            = (rOutDev.GetAntialiasing() & AntialiasingFlags::PixelSnapHairline)
-              && rB2DPolygon.count() < 1000;
-
-        SalGraphics* pGraphics = rOutDev.GetGraphics();
-        if (pGraphics
-            && pGraphics->DrawPolyLine(aTransform, rB2DPolygon, rStroke.fTransparency,
-                                       rStroke.fWidth, rStroke.pDashArray, rStroke.eJoin,
-                                       rStroke.eCap, rStroke.fMiterMinimumAngle, bPixelSnapHairline,
-                                       rOutDev))
-        {
-            bSuccess = true;
-        }
-    }
-
-    // 4. Fallback to geometry decomposition if direct rendering fails
-    if (!bSuccess)
-    {
-        basegfx::B2DPolygon aDevicePoly(rB2DPolygon);
-        aDevicePoly.transform(aTransform);
-
-        auto[aFallbackPolyPoly, aInfo] = lcl_SetupStrokeAndLineInfo(
-            aDevicePoly, rStroke.pDashArray, rStroke.fWidth, rStroke.eJoin, rStroke.eCap);
-
-        PrimitiveRenderer::DrawPolyLineGeometry(rOutDev, aFallbackPolyPoly, aInfo);
-        bSuccess = true;
-    }
-
-    return bSuccess;
 }
 
 void PrimitiveRenderer::DrawPolyLineGeometry(OutputDevice& rOutDev,

@@ -822,7 +822,7 @@ public:
     // NEW WRAPPER API: Encapsulated stroke attributes
     bool DrawPolyLine(const basegfx::B2DPolygon& rB2D,
                       const vcl::rendercontext::StrokeAttributes& rStroke,
-                      const basegfx::B2DHomMatrix& rObjectTransform);
+                      const basegfx::B2DHomMatrix& rObjectTransform = basegfx::B2DHomMatrix());
 
     void                        DrawPolygon( const tools::Polygon& rPoly );
     void                        DrawPolygon( const basegfx::B2DPolygon& );

@@ -75,6 +75,8 @@ class VCL_PLUGIN_PUBLIC SalGraphics : protected vcl::WidgetDrawInterface
 
 public:
 
+    virtual void                drawPolygon( sal_uInt32 nPoints, const Point* pPtAry ) = 0;
+
 
     virtual void                drawPolyLine( sal_uInt32 nPoints, const Point* pPtAry ) = 0;
 
@@ -426,8 +428,6 @@ protected:
     virtual void                drawPixel( tools::Long nX, tools::Long nY ) = 0;
     virtual void                drawPixel( tools::Long nX, tools::Long nY, Color nColor ) = 0;
     virtual void                drawRect( tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight ) = 0;
-    virtual void                drawPolygon( sal_uInt32 nPoints, const Point* pPtAry ) = 0;
-
     virtual void                drawPolyPolygon( sal_uInt32 nPoly, const sal_uInt32* pPoints, const Point** pPtAry ) = 0;
 
     virtual void                drawPolyPolygon(

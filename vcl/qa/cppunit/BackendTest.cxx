@@ -1362,8 +1362,8 @@ public:
             aStroke.eCap = css::drawing::LineCap_BUTT;
             aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
 
-            bool bSuccess = vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-                *device, basegfx::B2DPolygon{ { 50, 50 }, { 50, 100 } }, aStroke, matrix, 0.0);
+            bool bSuccess = device->DrawPolyLine(basegfx::B2DPolygon{ { 50, 50 }, { 50, 100 } },
+                                                 aStroke, matrix, 0.0);
             CPPUNIT_ASSERT(bSuccess);
         }
 
@@ -1381,8 +1381,8 @@ public:
             aStroke.eCap = css::drawing::LineCap_BUTT;
             aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
 
-            bool bSuccess = vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-                *device, basegfx::B2DPolygon{ { 50, 50 }, { 50, 100 } }, aStroke, matrix, 0.0);
+            bool bSuccess = device->DrawPolyLine(basegfx::B2DPolygon{ { 50, 50 }, { 50, 100 } },
+                                                 aStroke, matrix, 0.0);
             CPPUNIT_ASSERT(bSuccess);
         }
 

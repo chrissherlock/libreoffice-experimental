@@ -84,14 +84,10 @@ public:
                                 const tools::Rectangle& rLogicalRect, sal_uLong nHorzRound,
                                 sal_uLong nVertRound, bool bFillColor);
 
-    static bool DrawPolyLine(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
-                             const StrokeAttributes& rStroke,
-                             const basegfx::B2DHomMatrix& rObjectTransform
-                             = basegfx::B2DHomMatrix());
-
     static void DrawPolyLineGeometry(OutputDevice& rOutDev,
                                      const basegfx::B2DPolyPolygon& rPolyPolygon,
                                      const LineInfo& rLineInfo);
+
     static bool DrawPolygon(OutputDevice& rOutDev, const basegfx::B2DPolygon& rB2DPolygon,
                             bool bFill, const StrokeAttributes* pStroke);
 

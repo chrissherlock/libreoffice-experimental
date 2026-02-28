@@ -150,8 +150,7 @@ bool VclPixelProcessor2D::tryDrawPolygonHairlinePrimitive2DDirect(
     aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
 
     aStroke.fTransparency = fTransparency;
-    return vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpOutputDevice, rLocalPolygon,
-                                                               aStroke, maCurrentTransformation);
+    return mpOutputDevice->DrawPolyLine(rLocalPolygon, aStroke, maCurrentTransformation);
 }
 
 bool VclPixelProcessor2D::tryDrawPolygonStrokePrimitive2DDirect(
@@ -195,8 +194,7 @@ bool VclPixelProcessor2D::tryDrawPolygonStrokePrimitive2DDirect(
 
     // Call the updated DrawPolyLine API
     aStroke.fTransparency = fTransparency;
-    return vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpOutputDevice, rLocalPolygon,
-                                                               aStroke, maCurrentTransformation);
+    return mpOutputDevice->DrawPolyLine(rLocalPolygon, aStroke, maCurrentTransformation);
 }
 
 void VclPixelProcessor2D::processBasePrimitive2D(const primitive2d::BasePrimitive2D& rCandidate)
@@ -543,8 +541,8 @@ void VclPixelProcessor2D::processPolyPolygonColorPrimitive2D(
     for (sal_uInt32 a(0); a < nCount; a++)
     {
         // Align with the new 5-parameter PrimitiveRenderer API
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-            *mpOutputDevice, aLocalPolyPolygon.getB2DPolygon(a), aStroke, basegfx::B2DHomMatrix());
+        mpOutputDevice->DrawPolyLine(aLocalPolyPolygon.getB2DPolygon(a), aStroke,
+                                     basegfx::B2DHomMatrix());
     }
 }
 

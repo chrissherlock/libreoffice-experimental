@@ -164,8 +164,7 @@ Bitmap OutputDeviceTestLine::setupDashedLine()
     aStroke.fMiterMinimumAngle = basegfx::deg2rad(15.0);
     aStroke.pDashArray = &stroke;
 
-    vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-        *mpVirtualDevice,
+    mpVirtualDevice->DrawPolyLine(
         basegfx::B2DPolygon{
             basegfx::B2DPoint(rectangle.Left(), rectangle.Top()),
             basegfx::B2DPoint(rectangle.Left(), rectangle.Bottom()),
@@ -253,13 +252,13 @@ Bitmap OutputDeviceTestLine::setupLineCap( css::drawing::LineCap lineCap )
 
     {
         vcl::rendercontext::StrokeAttributes aStroke; aStroke.fWidth = CAPWIDTH; aStroke.eCap = lineCap; aStroke.eJoin = basegfx::B2DLineJoin::NONE;
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpVirtualDevice, poly, aStroke);
+        mpVirtualDevice->DrawPolyLine(poly, aStroke);
     }
 
     mpVirtualDevice->SetLineColor(constFillColor);
     {
         vcl::rendercontext::StrokeAttributes aStroke; aStroke.fWidth = 0.0; aStroke.eJoin = basegfx::B2DLineJoin::NONE;
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpVirtualDevice, poly, aStroke);
+        mpVirtualDevice->DrawPolyLine(poly, aStroke);
     }
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
@@ -282,13 +281,13 @@ Bitmap OutputDeviceTestLine::setupLineJoin( basegfx::B2DLineJoin lineJoin )
 
     {
         vcl::rendercontext::StrokeAttributes aStroke; aStroke.fWidth = CAPWIDTH; aStroke.eJoin = lineJoin;
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpVirtualDevice, poly, aStroke);
+        mpVirtualDevice->DrawPolyLine(poly, aStroke);
     }
 
     mpVirtualDevice->SetLineColor(constFillColor);
     {
         vcl::rendercontext::StrokeAttributes aStroke; aStroke.fWidth = 0; aStroke.eJoin = lineJoin;
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*mpVirtualDevice, poly, aStroke);
+        mpVirtualDevice->DrawPolyLine(poly, aStroke);
     }
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
