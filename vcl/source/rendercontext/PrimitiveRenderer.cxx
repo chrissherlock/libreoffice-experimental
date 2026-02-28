@@ -651,21 +651,13 @@ void PrimitiveRenderer::DrawDevicePolygonGeometry(SalGraphics& rGraphics,
     }
 }
 
-void PrimitiveRenderer::DrawPolygonGeometry(OutputDevice& rOutDev, const tools::Polygon& rPoly)
+void PrimitiveRenderer::DrawPolygonGeometry(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+                                            const tools::Polygon& rPoly, tools::Long nFrameWidth,
+                                            bool bRTL, bool bAntiparallel)
 {
-    SalGraphics* pGraphics = rOutDev.GetGraphics();
-    if (!pGraphics && !rOutDev.AcquireGraphics())
-        return;
-    pGraphics = rOutDev.GetGraphics();
-
     tools::Polygon aDevicePoly = rPoly;
-    bool bRTL = rOutDev.IsRTLEnabled() || (pGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
-    bool bAntiparallel = rOutDev.ImplIsAntiparallel();
-    tools::Long nFrameWidth
-        = rOutDev.IsVirtual() ? rOutDev.GetOutputWidthPixel() : pGraphics->GetGraphicsWidth();
-
-    rOutDev.mpMapper->MirrorDevicePixelPolygon(aDevicePoly, nFrameWidth, bRTL, bAntiparallel);
-    DrawDevicePolygonGeometry(*pGraphics, aDevicePoly);
+    rMapper.MirrorDevicePixelPolygon(aDevicePoly, nFrameWidth, bRTL, bAntiparallel);
+    DrawDevicePolygonGeometry(rGraphics, aDevicePoly);
 }
 
 namespace
@@ -1078,7 +1070,18 @@ void PrimitiveRenderer::DrawTextRect(SalGraphics& rGraphics, OutputDevice* pOutD
     auto aGeo = vcl::text::TextGeometry::GetRotatedGeometry(rBasePt, rRect, nOrientation);
 
     if (aGeo.mbIsPolygon)
-        PrimitiveRenderer::DrawPolygonGeometry(*pOutDev, aGeo.maPoly);
+    {
+        bool bRTL = pOutDev->IsRTLEnabled()
+                    || (pOutDev->GetGraphics()
+                        && (pOutDev->GetGraphics()->GetLayout() & SalLayoutFlags::BiDiRtl));
+        bool bAntiparallel = pOutDev->ImplIsAntiparallel();
+        tools::Long nFrameWidth
+            = pOutDev->IsVirtual()
+                  ? pOutDev->GetOutputWidthPixel()
+                  : (pOutDev->GetGraphics() ? pOutDev->GetGraphics()->GetGraphicsWidth() : 0);
+        PrimitiveRenderer::DrawPolygonGeometry(*pOutDev->GetGraphics(), *pOutDev->mpMapper,
+                                               aGeo.maPoly, nFrameWidth, bRTL, bAntiparallel);
+    }
     else
     {
         tools::Rectangle aDeviceRect(aGeo.maRect);

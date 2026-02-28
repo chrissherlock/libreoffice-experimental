@@ -109,7 +109,9 @@ public:
     static void DrawPolyPolygonGeometry(OutputDevice& rOutDev,
                                         const tools::PolyPolygon& rPolyPolygon);
 
-    static void DrawPolygonGeometry(OutputDevice& rOutDev, const tools::Polygon& rPoly);
+    static void DrawPolygonGeometry(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+                                    const tools::Polygon& rPoly, tools::Long nFrameWidth, bool bRTL,
+                                    bool bAntiparallel);
 
     static void DrawPolyLine(OutputDevice& rOutDev, const tools::Polygon& rPoly);
 
