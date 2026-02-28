@@ -86,17 +86,27 @@ public:
                                      const basegfx::B2DPolyPolygon& rPolyPolygon,
                                      const LineInfo& rLineInfo);
 
-    static void DrawDevicePolygon(SalGraphics& rGraphics, const basegfx::B2DHomMatrix& rTransform,
-                                  const basegfx::B2DPolygon& rDevicePoly, bool bFill,
-                                  const StrokeAttributes* pStroke);
+    static void DrawPolygon(SalGraphics& rGraphics, const basegfx::B2DHomMatrix& rTransform,
+                            const basegfx::B2DPolygon& rDevicePoly, bool bFill,
+                            const StrokeAttributes* pStroke);
+
+    static void DrawDevicePolygon(SalGraphics& rGraphics, const tools::Polygon& rDevicePoly,
+                                  bool bFill, const StrokeAttributes* pStroke);
+
+    static void DrawDevicePolygonGeometry(SalGraphics& rGraphics,
+                                          const tools::Polygon& rDevicePoly);
+
+    static void DrawPolygonGeometry(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
+                                    const tools::Polygon& rPoly, tools::Long nFrameWidth, bool bRTL,
+                                    bool bAntiparallel);
+
+    static void DrawClippedPolygon(SalGraphics& rGraphics, const tools::Polygon& rDevicePoly,
+                                   const tools::PolyPolygon& rDeviceClipPolyPoly);
 
     static void DrawDevicePolyPolygon(SalGraphics& rGraphics,
                                       const basegfx::B2DHomMatrix& rTransform,
                                       const basegfx::B2DPolyPolygon& rDevicePolyPoly, bool bFill,
                                       const StrokeAttributes* pStroke);
-
-    static void DrawDevicePolygon(SalGraphics& rGraphics, const tools::Polygon& rDevicePoly,
-                                  bool bFill, const StrokeAttributes* pStroke);
 
     static void DrawDevicePolyPolygon(SalGraphics& rGraphics,
                                       const tools::PolyPolygon& rDevicePolyPoly, bool bFill,
@@ -105,21 +115,11 @@ public:
     static void DrawPolyPolygon(SalGraphics& rGraphics, const tools::PolyPolygon& rPolyPoly,
                                 const tools::PolyPolygon* pClipPolyPoly = nullptr);
 
-    static void DrawDevicePolygonGeometry(SalGraphics& rGraphics,
-                                          const tools::Polygon& rDevicePoly);
-
     static void DrawDevicePolyPolygonGeometry(SalGraphics& rGraphics,
                                               const tools::PolyPolygon& rDevicePolyPoly);
 
     static void DrawPolyPolygonGeometry(SalGraphics& rGraphics,
                                         const tools::PolyPolygon& rPolyPolygon);
-
-    static void DrawPolygonGeometry(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
-                                    const tools::Polygon& rPoly, tools::Long nFrameWidth, bool bRTL,
-                                    bool bAntiparallel);
-
-    static void DrawClippedPolygon(SalGraphics& rGraphics, const tools::Polygon& rDevicePoly,
-                                   const tools::PolyPolygon& rDeviceClipPolyPoly);
 
     static void DrawEllipse(SalGraphics& rGraphics, const CoordinateMapper& rMapper,
                             const tools::Rectangle& rPixelRect, bool bFill, tools::Long nFrameWidth,

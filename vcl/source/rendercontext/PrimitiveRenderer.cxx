@@ -1450,10 +1450,9 @@ void PrimitiveRenderer::DrawDevicePolyPolygon(SalGraphics& rGraphics,
     }
 }
 
-void PrimitiveRenderer::DrawDevicePolygon(SalGraphics& rGraphics,
-                                          const basegfx::B2DHomMatrix& rTransform,
-                                          const basegfx::B2DPolygon& rDevicePoly, bool bFill,
-                                          const StrokeAttributes* pStroke)
+void PrimitiveRenderer::DrawPolygon(SalGraphics& rGraphics, const basegfx::B2DHomMatrix& rTransform,
+                                    const basegfx::B2DPolygon& rDevicePoly, bool bFill,
+                                    const StrokeAttributes* pStroke)
 {
     basegfx::B2DPolyPolygon aPP(rDevicePoly);
     DrawDevicePolyPolygon(rGraphics, rTransform, aPP, bFill, pStroke);
