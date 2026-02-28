@@ -36,12 +36,7 @@ void OutputDevice::DrawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
     if (maRecorder.IsActive())
         maRecorder.RecordPolyLine(rPoly, rLineInfo);
 
-    if (!IsDeviceOutputNecessary())
-        return;
-
-    FlushGraphicsState();
-
-    if (!IsLineColor())
+    if (!FlushGraphicsState(vcl::PrepareOutputFlags::Line))
         return;
 
     vcl::rendercontext::StrokeAttributes aStroke{ rLineInfo.GetWidth(),
@@ -81,20 +76,14 @@ bool OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2D,
     if (maRecorder.IsActive())
     {
         basegfx::B2DPolygon aRecordPoly(rB2D);
+
         if (!rObjectTransform.isIdentity())
             aRecordPoly.transform(rObjectTransform);
+
         maRecorder.RecordB2DPolyLine(aRecordPoly, rStroke);
     }
 
-    if (!IsDeviceOutputNecessary())
-        return true;
-
-    if (!GetGraphics() && !AcquireGraphics())
-        return false;
-
-    FlushGraphicsState();
-
-    if (!IsLineColor())
+    if (!FlushGraphicsState(vcl::PrepareOutputFlags::Line))
         return true;
 
     return vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(*GetGraphics(), *mpMapper, rB2D,
