@@ -1431,9 +1431,9 @@ void PrimitiveRenderer::DrawPolygon(SalGraphics& rGraphics, const tools::Polygon
         rGraphics.drawPolyLine(nSize, pPtAry);
 }
 
-void PrimitiveRenderer::DrawDevicePolyPolygon(SalGraphics& rGraphics,
-                                              const tools::PolyPolygon& rDevicePolyPoly, bool bFill,
-                                              const StrokeAttributes* /*pStroke*/)
+void PrimitiveRenderer::DrawPolyPolygon(SalGraphics& rGraphics,
+                                        const tools::PolyPolygon& rDevicePolyPoly, bool bFill,
+                                        const StrokeAttributes* /*pStroke*/)
 {
     sal_uInt16 nPoly = rDevicePolyPoly.Count();
     if (nPoly == 0)

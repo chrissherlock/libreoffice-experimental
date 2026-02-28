@@ -68,8 +68,8 @@ void OutputDevice::DrawPolyPolygon(const tools::PolyPolygon& rPolyPoly)
 
     mpMapper->MirrorDevicePixelPolyPolygon(aDevicePolyPoly, nFrameWidth, bRTL, bAntiparallel);
 
-    vcl::rendercontext::PrimitiveRenderer::DrawDevicePolyPolygon(*mpGraphics, aDevicePolyPoly,
-                                                                 bFill, nullptr);
+    vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygon(*mpGraphics, aDevicePolyPoly, bFill,
+                                                           nullptr);
     if (pStroke)
     {
         for (sal_uInt16 i = 0; i < rPolyPoly.Count(); ++i)
