@@ -74,14 +74,7 @@ bool OutputDevice::DrawPolyLine(const basegfx::B2DPolygon& rB2D,
         return true;
 
     if (maRecorder.IsActive())
-    {
-        basegfx::B2DPolygon aRecordPoly(rB2D);
-
-        if (!rObjectTransform.isIdentity())
-            aRecordPoly.transform(rObjectTransform);
-
-        maRecorder.RecordB2DPolyLine(aRecordPoly, rStroke);
-    }
+        maRecorder.RecordB2DPolyLine(rB2D, rStroke, rObjectTransform);
 
     if (!FlushGraphicsState(vcl::PrepareOutputFlags::Line))
         return true;

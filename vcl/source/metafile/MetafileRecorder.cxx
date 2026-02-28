@@ -533,7 +533,8 @@ MetafileRecorder::ScopedSwitch::ScopedSwitch(MetafileRecorder& rRecorder, GDIMet
 }
 
 void vcl::MetafileRecorder::RecordB2DPolyLine(const basegfx::B2DPolygon& rB2D,
-                                              const vcl::rendercontext::StrokeAttributes& rStroke)
+                                              const vcl::rendercontext::StrokeAttributes& rStroke,
+                                              const basegfx::B2DHomMatrix& rTransform)
 {
     SvMemoryStream aStream;
     aStream.WriteUInt16(1); // Format Version
@@ -554,12 +555,19 @@ void vcl::MetafileRecorder::RecordB2DPolyLine(const basegfx::B2DPolygon& rB2D,
     RecordComment("XB2DPOLYLINE_SEQ_BEGIN", static_cast<sal_uInt32>(aStream.Tell()),
                   reinterpret_cast<const sal_uInt8*>(aStream.GetData()));
 
+    // Handle transformation logic internally
+    basegfx::B2DPolygon aPoly(rB2D);
+    if (!rTransform.isIdentity())
+        aPoly.transform(rTransform);
+
     LineInfo aLineInfo;
     if (rStroke.fWidth != 0.0)
         aLineInfo.SetWidth(std::round(rStroke.fWidth));
     aLineInfo.SetLineJoin(rStroke.eJoin);
     aLineInfo.SetLineCap(rStroke.eCap);
-    RecordPolyLine(tools::Polygon(rB2D), aLineInfo);
+
+    // Pass the (potentially transformed) polygon to the fallback record
+    RecordPolyLine(tools::Polygon(aPoly), aLineInfo);
 
     RecordComment("XB2DPOLYLINE_SEQ_END", 0, nullptr);
 }
