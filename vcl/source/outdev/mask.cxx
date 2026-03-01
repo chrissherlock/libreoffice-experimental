@@ -20,9 +20,11 @@
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/metafile/MetaActionType.hxx>
+#include <vcl/rendercontext/BitmapRenderer.hxx>
 #include <vcl/virdev.hxx>
 
 #include <ClippingController.hxx>
+#include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
 #include <salgdi.hxx>
 #include <salbmp.hxx>
@@ -59,11 +61,11 @@ void OutputDevice::DrawMask( const Point& rDestPt, const Size& rDestSize,
 void OutputDevice::DrawMask( const Point& rDestPt, const Size& rDestSize,
                              const Point& rSrcPtPixel, const Size& rSrcSizePixel,
                              const Bitmap& rBitmap, const Color& rMaskColor,
-                             const MetaActionType nAction )
+                             MetaActionType nAction )
 {
     assert(!is_double_buffered_window());
 
-    if( IsLayoutCalculationNecessary() )
+    if (rBitmap.IsEmpty() || IsLayoutCalculationNecessary())
         return;
 
     if( RasterOp::Invert == mpGraphicsState->meRasterOp )
@@ -72,71 +74,66 @@ void OutputDevice::DrawMask( const Point& rDestPt, const Size& rDestSize,
         return;
     }
 
-    switch( nAction )
-    {
-        case MetaActionType::MASK:
-            maRecorder.RecordMask(rDestPt, rBitmap, rMaskColor);
-        break;
+    if (maRecorder.IsRecording())
+        maRecorder.RecordMaskAction(nAction, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmap, rMaskColor);
 
-        case MetaActionType::MASKSCALE:
-            maRecorder.RecordMaskScale(rDestPt, rDestSize, rBitmap, rMaskColor);
-        break;
-
-        case MetaActionType::MASKSCALEPART:
-            maRecorder.RecordMaskScalePart(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmap, rMaskColor);
-        break;
-
-        default: break;
-    }
-
-    if ( !IsDeviceOutputNecessary() )
+    if (!IsDeviceOutputNecessary())
         return;
 
-    if ( !mpGraphics && !AcquireGraphics() )
+    if (!mpGraphics && !AcquireGraphics())
         return;
+    assert(mpGraphics);
 
-    if ( mpClippingController->IsDirty() )
+    if (mpClippingController->IsDirty())
         InitClipRegion();
 
-    if ( IsOutputCulled() )
+    if (IsOutputCulled())
         return;
 
-    DrawDeviceMask( rBitmap, rMaskColor, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel );
-
+    DrawDeviceMask(rBitmap, rMaskColor, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
 }
 
 void OutputDevice::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
-                              const Point& rDestPt, const Size& rDestSize,
-                              const Point& rSrcPtPixel, const Size& rSrcSizePixel )
+                                   const Point& rDestPt, const Size& rDestSize,
+                                   const Point& rSrcPtPixel, const Size& rSrcSizePixel )
 {
-    assert(!is_double_buffered_window());
+    if (rMask.IsEmpty())
+        return;
 
-    const std::shared_ptr<SalBitmap>& xImpBmp = rMask.ImplGetSalBitmap();
-    if (xImpBmp)
+    SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(), rSrcSizePixel.Height(),
+                       mpMapper->LogicXToDevicePixel(rDestPt.X()), mpMapper->LogicYToDevicePixel(rDestPt.Y()),
+                       mpMapper->LogicWidthToDevicePixel(rDestSize.Width()),
+                       mpMapper->LogicHeightToDevicePixel(rDestSize.Height()));
+
+    if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
+        return;
+
+    // Normalize Coordinates and Handle Flipped Payloads
+    Bitmap aBmp(rMask);
+    const BmpMirrorFlags nMirrFlags = AdjustTwoRect(aPosAry, aBmp.GetSizePixel());
+
+    if (nMirrFlags != BmpMirrorFlags::NONE)
+        aBmp.Mirror(nMirrFlags);
+
+    if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
+        return;
+
+    if (mpGraphics)
     {
-        SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(), rSrcSizePixel.Height(),
-                           LogicXToDevicePixel(rDestPt.X()), LogicYToDevicePixel(rDestPt.Y()),
-                           LogicWidthToDevicePixel(rDestSize.Width()),
-                           LogicHeightToDevicePixel(rDestSize.Height()));
-
-        // we don't want to mirror via coordinates
-        const BmpMirrorFlags nMirrFlags = AdjustTwoRect( aPosAry, xImpBmp->GetSize() );
-
-        // check if output is necessary
-        if( aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth && aPosAry.mnDestHeight )
+        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+        if (bRTL)
         {
+            tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+            tools::Rectangle aDestRect(Point(aPosAry.mnDestX, aPosAry.mnDestY),
+                                       Size(aPosAry.mnDestWidth, aPosAry.mnDestHeight));
 
-            if( nMirrFlags != BmpMirrorFlags::NONE )
-            {
-                Bitmap aTmp( rMask );
-                aTmp.Mirror( nMirrFlags );
-                mpGraphics->DrawMask( aPosAry, *aTmp.ImplGetSalBitmap(),
-                                      rMaskColor, *this);
-            }
-            else
-                mpGraphics->DrawMask( aPosAry, *xImpBmp, rMaskColor, *this );
+            mpMapper->MirrorDevicePixelRect(aDestRect, nFrameWidth, bRTL, ImplIsAntiparallel());
 
+            aPosAry.mnDestX = aDestRect.Left();
+            aPosAry.mnDestY = aDestRect.Top();
         }
+
+        vcl::rendercontext::BitmapRenderer::DrawMask(*mpGraphics, aPosAry, aBmp, rMaskColor);
     }
 }
 

@@ -132,6 +132,20 @@ public:
                                     const tools::PolyPolygon& rPolyPoly,
                                     const Gradient& rGradient ) = 0;
 
+    virtual void                drawBitmap( const SalTwoRect& rPosAry, const SalBitmap& rSalBitmap ) = 0;
+
+    /** Render bitmap with alpha channel
+
+        @param rSourceBitmap
+        Source bitmap to blit
+     */
+    virtual void                drawAlphaBitmap( const SalTwoRect&, const SalBitmap& rSourceBitmap ) = 0;
+
+    virtual void                drawMask(
+                                    const SalTwoRect& rPosAry,
+                                    const SalBitmap& rSalBitmap,
+                                    Color nMaskColor ) = 0;
+
     SalGraphics();
     ~SalGraphics() override;
 
@@ -303,11 +317,6 @@ public:
                                     const OutputDevice& rSrcOutDev );
 
 
-    SAL_DLLPRIVATE void                        DrawBitmap(
-                                    const SalTwoRect& rPosAry,
-                                    const SalBitmap& rSalBitmap,
-                                    const OutputDevice& rOutDev );
-
     SAL_DLLPRIVATE void                        DrawMask(
                                     const SalTwoRect& rPosAry,
                                     const SalBitmap& rSalBitmap,
@@ -378,11 +387,6 @@ public:
      * @see WidgetDrawInterface::updateSettings
      */
     inline bool UpdateSettings(AllSettings&);
-
-    SAL_DLLPRIVATE void                        DrawAlphaBitmap(
-                                    const SalTwoRect&,
-                                    const SalBitmap& rSourceBitmap,
-                                    const OutputDevice& rOutDev );
 
     SAL_DLLPRIVATE bool                        DrawTransformedBitmap(
                                     const basegfx::B2DPoint& rNull,
@@ -460,13 +464,6 @@ protected:
     // CopyBits() --> pSrcGraphics == NULL, then CopyBits on same Graphics
     virtual void                copyBits( const SalTwoRect& rPosAry, SalGraphics* pSrcGraphics ) = 0;
 
-    virtual void                drawBitmap( const SalTwoRect& rPosAry, const SalBitmap& rSalBitmap ) = 0;
-
-    virtual void                drawMask(
-                                    const SalTwoRect& rPosAry,
-                                    const SalBitmap& rSalBitmap,
-                                    Color nMaskColor ) = 0;
-
     virtual std::shared_ptr<SalBitmap> getBitmap( tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight, bool bWithoutAlpha ) = 0;
 
     /// Only implemented by the macOS Quartz backend and the MS-Windows GDI backend.
@@ -475,15 +472,6 @@ protected:
                                     tools::Long /*nWidth*/, tools::Long /*nHeight*/,
                                     void* /*pPtr*/,
                                     sal_uInt32 /*nSize*/ ) { return false; }
-
-    /** Render bitmap with alpha channel
-
-        @param rSourceBitmap
-        Source bitmap to blit
-     */
-    virtual void                drawAlphaBitmap(
-                                    const SalTwoRect&,
-                                    const SalBitmap& rSourceBitmap ) = 0;
 
     /** draw transformed bitmap (maybe with alpha) where Null, X, Y define the coordinate system
 

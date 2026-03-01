@@ -23,6 +23,7 @@
 #include <tools/debug.hxx>
 #include <tools/helpers.hxx>
 
+#include <vcl/rendercontext/BitmapRenderer.hxx>
 #include <vcl/image.hxx>
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/metafile/MetafileRecorder.hxx>
@@ -32,6 +33,7 @@
 #include <vcl/BitmapWriteAccess.hxx>
 
 #include <ClippingController.hxx>
+#include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
 #include <bitmap/bmpfast.hxx>
 #include <drawmode.hxx>
@@ -82,8 +84,8 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
 }
 
 void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
-                                   const Point& rSrcPtPixel, const Size& rSrcSizePixel,
-                                   const Bitmap& rBitmap, const MetaActionType nAction )
+                               const Point& rSrcPtPixel, const Size& rSrcSizePixel,
+                               const Bitmap& rBitmap, const MetaActionType nAction )
 {
     assert(!is_double_buffered_window());
 
@@ -99,7 +101,6 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
     if (mpGraphicsState->mnDrawMode & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap))
     {
         sal_uInt8 cCmpVal;
-
         if (mpGraphicsState->mnDrawMode & DrawModeFlags::BlackBitmap)
             cCmpVal = 0;
         else
@@ -134,16 +135,17 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
         return;
 
     if (aBmp.IsEmpty())
-        return;
+      return;
 
     SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(), rSrcSizePixel.Height(),
-                       LogicXToDevicePixel(rDestPt.X()), LogicYToDevicePixel(rDestPt.Y()),
-                       LogicWidthToDevicePixel(rDestSize.Width()),
-                       LogicHeightToDevicePixel(rDestSize.Height()));
+                       mpMapper->LogicXToDevicePixel(rDestPt.X()), mpMapper->LogicYToDevicePixel(rDestPt.Y()),
+                       mpMapper->LogicWidthToDevicePixel(rDestSize.Width()),
+                       mpMapper->LogicHeightToDevicePixel(rDestSize.Height()));
 
     if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
         return;
 
+    // Normalize coordinates and flip bitmap payload if logical size was negative
     const BmpMirrorFlags nMirrFlags = AdjustTwoRect( aPosAry, aBmp.GetSizePixel() );
 
     if ( nMirrFlags != BmpMirrorFlags::NONE )
@@ -152,14 +154,13 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
     if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
         return;
 
+    // Subsampling (High-quality downscale)
     if (nAction == MetaActionType::BMPSCALE && CanSubsampleBitmap())
     {
         double nScaleX = aPosAry.mnDestWidth  / static_cast<double>(aPosAry.mnSrcWidth);
         double nScaleY = aPosAry.mnDestHeight / static_cast<double>(aPosAry.mnSrcHeight);
 
-        // If subsampling, use Bitmap::Scale() for subsampling of better quality.
-
-        // but hidpi surfaces like the cairo one have their own scale, so don't downscale
+        // hidpi surfaces like cairo have their own scale, so don't downscale
         // past the surface scaling which can retain the extra detail
         double fScale(1.0);
         if (mpGraphics->ShouldDownscaleIconsAtSurface(fScale))
@@ -176,7 +177,24 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
         }
     }
 
-    mpGraphics->DrawBitmap( aPosAry, *aBmp.ImplGetSalBitmap(), *this );
+    const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+    if (bRTL)
+    {
+        tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+        tools::Rectangle aDestRect(Point(aPosAry.mnDestX, aPosAry.mnDestY), Size(aPosAry.mnDestWidth, aPosAry.mnDestHeight));
+        mpMapper->MirrorDevicePixelRect(aDestRect, nFrameWidth, bRTL, ImplIsAntiparallel());
+        aPosAry.mnDestX = aDestRect.Left();
+        aPosAry.mnDestY = aDestRect.Top();
+    }
+
+    if (aBmp.HasAlpha())
+    {
+        vcl::rendercontext::BitmapRenderer::DrawAlphaBitmap(*mpGraphics, aPosAry, aBmp);
+    }
+    else
+    {
+        vcl::rendercontext::BitmapRenderer::DrawBitmap(*mpGraphics, aPosAry, aBmp);
+    }
 }
 
 void OutputDevice::DrawAlphaBitmap( const Point& rDestPt, const Size& rDestSize,
@@ -220,36 +238,50 @@ void OutputDevice::DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize
 {
     assert(!is_double_buffered_window());
 
+    // Route alpha bitmaps to the dedicated alpha handler so subclasses
+    // like Printer can intercept them via virtual overrides.
     if (rBitmap.HasAlpha())
     {
-        DrawDeviceAlphaBitmap(rBitmap,
-                              rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
+        DrawDeviceAlphaBitmap(rBitmap, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
         return;
     }
 
     if (rBitmap.IsEmpty())
         return;
 
-    SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(),
-                       rSrcSizePixel.Height(), LogicXToDevicePixel(rDestPt.X()),
-                       LogicYToDevicePixel(rDestPt.Y()),
-                       LogicWidthToDevicePixel(rDestSize.Width()),
-                       LogicHeightToDevicePixel(rDestSize.Height()));
+    SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(), rSrcSizePixel.Height(),
+                       mpMapper->LogicXToDevicePixel(rDestPt.X()), mpMapper->LogicYToDevicePixel(rDestPt.Y()),
+                       mpMapper->LogicWidthToDevicePixel(rDestSize.Width()),
+                       mpMapper->LogicHeightToDevicePixel(rDestSize.Height()));
+
+    if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
+        return;
 
     const BmpMirrorFlags nMirrFlags = AdjustTwoRect(aPosAry, rBitmap.GetSizePixel());
-
-    if (!(aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth && aPosAry.mnDestHeight))
-        return;
 
     if (nMirrFlags != BmpMirrorFlags::NONE)
         rBitmap.Mirror(nMirrFlags);
 
-    const SalBitmap* pSalSrcBmp = rBitmap.ImplGetSalBitmap().get();
+    if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
+        return;
 
-    assert(!rBitmap.HasAlpha()
-            && "I removed some code here that will need to be restored");
+    if (mpGraphics)
+    {
+        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+        if (bRTL)
+        {
+            tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+            tools::Rectangle aDestRect(Point(aPosAry.mnDestX, aPosAry.mnDestY),
+                                       Size(aPosAry.mnDestWidth, aPosAry.mnDestHeight));
 
-    mpGraphics->DrawBitmap(aPosAry, *pSalSrcBmp, *this);
+            mpMapper->MirrorDevicePixelRect(aDestRect, nFrameWidth, bRTL, ImplIsAntiparallel());
+
+            aPosAry.mnDestX = aDestRect.Left();
+            aPosAry.mnDestY = aDestRect.Top();
+        }
+
+        vcl::rendercontext::BitmapRenderer::DrawBitmap(*mpGraphics, aPosAry, rBitmap);
+    }
 }
 
 Bitmap OutputDevice::GetBitmap( const Point& rSrcPt, const Size& rSize ) const
@@ -345,52 +377,50 @@ Bitmap OutputDevice::GetBitmap( const Point& rSrcPt, const Size& rSize ) const
 }
 
 void OutputDevice::DrawDeviceAlphaBitmap( const Bitmap& rBmp,
-                                    const Point& rDestPt, const Size& rDestSize,
-                                    const Point& rSrcPtPixel, const Size& rSrcSizePixel )
+                                          const Point& rDestPt, const Size& rDestSize,
+                                          const Point& rSrcPtPixel, const Size& rSrcSizePixel )
 {
     assert(!is_double_buffered_window());
 
-    Point     aOutPt(LogicToPixel(rDestPt));
-    Size      aOutSz(LogicToPixel(rDestSize));
-    tools::Rectangle aDstRect(Point(), GetOutputSizePixel());
-
-    const bool bHMirr = aOutSz.Width() < 0;
-    const bool bVMirr = aOutSz.Height() < 0;
-
-    ClipToPaintRegion(aDstRect);
-
-    BmpMirrorFlags mirrorFlags = BmpMirrorFlags::NONE;
-    if (bHMirr)
-    {
-        aOutSz.setWidth( -aOutSz.Width() );
-        aOutPt.AdjustX( -(aOutSz.Width() - 1) );
-        mirrorFlags |= BmpMirrorFlags::Horizontal;
-    }
-
-    if (bVMirr)
-    {
-        aOutSz.setHeight( -aOutSz.Height() );
-        aOutPt.AdjustY( -(aOutSz.Height() - 1) );
-        mirrorFlags |= BmpMirrorFlags::Vertical;
-    }
-
-    if (aDstRect.Intersection(tools::Rectangle(aOutPt, aOutSz)).IsEmpty())
+    if( rBmp.IsEmpty() )
         return;
 
-    Point aRelPt = aOutPt + Point(GetOutOffXPixel(), GetOutOffYPixel());
-    SalTwoRect aTR(
-        rSrcPtPixel.X(), rSrcPtPixel.Y(),
-        rSrcSizePixel.Width(), rSrcSizePixel.Height(),
-        aRelPt.X(), aRelPt.Y(),
-        aOutSz.Width(), aOutSz.Height());
+    SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(), rSrcSizePixel.Height(),
+                       mpMapper->LogicXToDevicePixel(rDestPt.X()), mpMapper->LogicYToDevicePixel(rDestPt.Y()),
+                       mpMapper->LogicWidthToDevicePixel(rDestSize.Width()),
+                       mpMapper->LogicHeightToDevicePixel(rDestSize.Height()));
 
-    Bitmap bitmap(rBmp);
-    if(bHMirr || bVMirr)
+    if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
+        return;
+
+    // Normalize coordinates and flip payload if necessary
+    // Because we receive a const reference, we must copy it to mirror the bits safely
+    Bitmap aWorkingBmp(rBmp);
+    const BmpMirrorFlags nMirrFlags = AdjustTwoRect(aPosAry, aWorkingBmp.GetSizePixel());
+
+    if (nMirrFlags != BmpMirrorFlags::NONE)
+        aWorkingBmp.Mirror(nMirrFlags);
+
+    if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
+        return;
+
+    if( mpGraphics )
     {
-        bitmap.Mirror(mirrorFlags);
+        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+        if (bRTL)
+        {
+            tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+            tools::Rectangle aDestRect(Point(aPosAry.mnDestX, aPosAry.mnDestY),
+                                       Size(aPosAry.mnDestWidth, aPosAry.mnDestHeight));
+
+            mpMapper->MirrorDevicePixelRect(aDestRect, nFrameWidth, bRTL, ImplIsAntiparallel());
+
+            aPosAry.mnDestX = aDestRect.Left();
+            aPosAry.mnDestY = aDestRect.Top();
+        }
+
+        vcl::rendercontext::BitmapRenderer::DrawAlphaBitmap(*mpGraphics, aPosAry, aWorkingBmp);
     }
-    SalBitmap* pSalSrcBmp = bitmap.ImplGetSalBitmap().get();
-    mpGraphics->DrawAlphaBitmap(aTR, *pSalSrcBmp, *this);
 }
 
 bool OutputDevice::HasFastDrawTransformedBitmap() const

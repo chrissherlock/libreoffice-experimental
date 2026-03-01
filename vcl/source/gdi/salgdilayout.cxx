@@ -544,19 +544,6 @@ void SalGraphics::CopyBits(const SalTwoRect& rPosAry, SalGraphics& rSrcGraphics,
         copyBits( rPosAry, &rSrcGraphics );
 }
 
-void SalGraphics::DrawBitmap( const SalTwoRect& rPosAry,
-                              const SalBitmap& rSalBitmap, const OutputDevice& rOutDev )
-{
-    if( (m_nLayout & SalLayoutFlags::BiDiRtl) || rOutDev.IsRTLEnabled() )
-    {
-        SalTwoRect aPosAry2 = rPosAry;
-        mirror( aPosAry2.mnDestX, aPosAry2.mnDestWidth, rOutDev );
-        drawBitmap( aPosAry2, rSalBitmap );
-    }
-    else
-        drawBitmap( rPosAry, rSalBitmap );
-}
-
 void SalGraphics::DrawMask( const SalTwoRect& rPosAry,
                             const SalBitmap& rSalBitmap,
                             Color nMaskColor, const OutputDevice& rOutDev )
@@ -691,20 +678,6 @@ bool SalGraphics::GetNativeControlRegion( ControlType nType, ControlPart nPart, 
     }
     else
         return forWidget()->getNativeControlRegion(nType, nPart, rControlRegion, nState, aValue, OUString(), rNativeBoundingRegion, rNativeContentRegion);
-}
-
-void SalGraphics::DrawAlphaBitmap( const SalTwoRect& rPosAry,
-                                   const SalBitmap& rSourceBitmap,
-                                   const OutputDevice& rOutDev )
-{
-    if( (m_nLayout & SalLayoutFlags::BiDiRtl) || rOutDev.IsRTLEnabled() )
-    {
-        SalTwoRect aPosAry2 = rPosAry;
-        mirror( aPosAry2.mnDestX, aPosAry2.mnDestWidth, rOutDev );
-        drawAlphaBitmap( aPosAry2, rSourceBitmap );
-    }
-    else
-        drawAlphaBitmap( rPosAry, rSourceBitmap );
 }
 
 bool SalGraphics::DrawTransformedBitmap(

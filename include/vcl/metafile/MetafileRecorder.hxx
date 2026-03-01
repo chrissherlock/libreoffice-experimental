@@ -218,8 +218,13 @@ public:
     void RecordComment(const rtl::OString& rComment, sal_uInt32 nVal, const sal_uInt8* pData);
 
     std::unique_ptr<ScopedMetaGroup> CreateScopedGroup(const OString& rName);
+
     void RecordBitmapAction(MetaActionType nAction, const Point& rDestPt, const Size& rDestSize,
                             const Point& rSrcPt, const Size& rSrcSize, const Bitmap& rBitmap);
+
+    void RecordMaskAction(MetaActionType nAction, const Point& rDestPt, const Size& rDestSize,
+                          const Point& rSrcPtPixel, const Size& rSrcSizePixel,
+                          const Bitmap& rBitmap, const Color& rColor);
 
     void RecordTextLineColor(const Color& rColor, bool bSet);
     void RecordOverlineColor(const Color& rColor, bool bSet);

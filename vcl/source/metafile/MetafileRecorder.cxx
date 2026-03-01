@@ -490,6 +490,31 @@ void MetafileRecorder::RecordBitmapAction(MetaActionType nAction, const Point& r
     }
 }
 
+void MetafileRecorder::RecordMaskAction(MetaActionType nAction, const Point& rDestPt,
+                                        const Size& rDestSize, const Point& rSrcPtPixel,
+                                        const Size& rSrcSizePixel, const Bitmap& rBitmap,
+                                        const Color& rColor)
+{
+    if (!IsRecording())
+        return;
+
+    switch (nAction)
+    {
+        case MetaActionType::MASK:
+            mpMetaFile->AddAction(new MetaMaskAction(rDestPt, rBitmap, rColor));
+            break;
+        case MetaActionType::MASKSCALE:
+            mpMetaFile->AddAction(new MetaMaskScaleAction(rDestPt, rDestSize, rBitmap, rColor));
+            break;
+        case MetaActionType::MASKSCALEPART:
+            mpMetaFile->AddAction(new MetaMaskScalePartAction(rDestPt, rDestSize, rSrcPtPixel,
+                                                              rSrcSizePixel, rBitmap, rColor));
+            break;
+        default:
+            break;
+    }
+}
+
 void MetafileRecorder::RecordTextLineColor(const Color& rColor, bool bSet)
 {
     if (IsActive())

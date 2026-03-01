@@ -109,6 +109,7 @@ $(eval $(call gb_Library_use_externals,vcl,\
 $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/rendercontext/drawmode \
     vcl/source/rendercontext/PrimitiveRenderer \
+	vcl/source/rendercontext/BitmapRenderer \
     vcl/skia/SkiaHelper \
     vcl/source/accessibility/AccessibleBrowseBox \
     vcl/source/accessibility/AccessibleBrowseBoxBase \
