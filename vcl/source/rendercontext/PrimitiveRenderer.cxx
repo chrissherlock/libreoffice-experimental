@@ -1056,6 +1056,35 @@ static Point lcl_GetDecorationOrigin(const Point& rOrigin, Degree10 nOrientation
     return aOriginPt;
 }
 
+[[nodiscard]] static auto lcl_BeginDecorationClipping(OutputDevice& rOutDev, const Point& rOrigin,
+                                                      double fWidth, tools::Long nAscent,
+                                                      tools::Long nDescent)
+{
+    tools::Rectangle aPixelRect;
+    aPixelRect.SetLeft(rOrigin.X());
+    aPixelRect.SetRight(aPixelRect.Left() + static_cast<tools::Long>(fWidth));
+    aPixelRect.SetBottom(rOrigin.Y() + nDescent);
+    aPixelRect.SetTop(rOrigin.Y() - nAscent);
+
+    const LogicalFontInstance& rFontInst = *rOutDev.GetFontInstance();
+
+    const Degree10 nOrientation = rFontInst.mnOrientation;
+
+    if (nOrientation)
+    {
+        tools::Polygon aPoly(aPixelRect);
+        aPoly.Rotate(rOrigin, nOrientation);
+        aPixelRect = aPoly.GetBoundRect();
+    }
+
+    aPixelRect.Normalize();
+
+    rOutDev.Push(vcl::PushFlags::CLIPREGION);
+    rOutDev.IntersectClipRegion(aPixelRect);
+
+    return comphelper::ScopeGuard([&rOutDev]() { rOutDev.Pop(); });
+}
+
 void PrimitiveRenderer::DrawStrikeoutChar(OutputDevice& rOutDev,
                                           const vcl::rendercontext::TextLineGeometry& rGeo,
                                           tools::Long nY, Color aColor)
@@ -1092,30 +1121,20 @@ void PrimitiveRenderer::DrawStrikeoutChar(OutputDevice& rOutDev,
         rOutDev.ImplInitTextColor();
     });
 
-    // CRITICAL FIX: rGeo.maOrigin already contains rOutDev.mpFontRealization offsets!
-    // Do not add them again here, otherwise strikeout characters render completely out of bounds.
-    pLayout->DrawBase() = basegfx::B2DPoint(aOriginPt.X(), aOriginPt.Y());
-
-    // Fix the clipping rectangle to also use the un-shifted origin
-    tools::Rectangle aPixelRect;
-    aPixelRect.SetLeft(aOriginPt.X());
-    aPixelRect.SetRight(aPixelRect.Left() + rGeo.mfWidth);
-    aPixelRect.SetBottom(aOriginPt.Y() + rOutDev.mpFontInstance->mxFontMetric->GetDescent());
-    aPixelRect.SetTop(aOriginPt.Y() - rOutDev.mpFontInstance->mxFontMetric->GetAscent());
-
-    if (rOutDev.mpFontInstance->mnOrientation)
     {
-        tools::Polygon aPoly(aPixelRect);
-        aPoly.Rotate(aOriginPt, rOutDev.mpFontInstance->mnOrientation);
-        aPixelRect = aPoly.GetBoundRect();
+        // CRITICAL FIX: rGeo.maOrigin already contains rOutDev.mpFontRealization offsets!
+        // Do not add them again here, otherwise strikeout characters render completely out of bounds.
+        pLayout->DrawBase() = basegfx::B2DPoint(aOriginPt.X(), aOriginPt.Y());
+
+        const LogicalFontInstance& rFontInst = *rOutDev.GetFontInstance();
+
+        // One call handles calculation, rotation, normalization, and pushing the clip stack
+        auto aClipGuard = lcl_BeginDecorationClipping(rOutDev, aOriginPt, rGeo.mfWidth,
+                                                      rFontInst.mxFontMetric->GetAscent(),
+                                                      rFontInst.mxFontMetric->GetDescent());
+
+        pLayout->DrawText(*rOutDev.mpGraphics);
     }
-
-    aPixelRect.Normalize();
-
-    auto guard = rOutDev.ScopedPush(vcl::PushFlags::CLIPREGION);
-    rOutDev.IntersectClipRegion(aPixelRect);
-
-    pLayout->DrawText(*rOutDev.mpGraphics);
 }
 
 void PrimitiveRenderer::DrawTextLine(OutputDevice& rOutDev,
