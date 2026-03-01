@@ -42,11 +42,18 @@ void BitmapRenderer::DrawAlphaBitmap(SalGraphics& rGraphics, const SalTwoRect& r
     rGraphics.drawAlphaBitmap(rPosAry, *pSalBitmap);
 }
 
-void BitmapRenderer::DrawTransformedBitmap(SalGraphics& /*rGraphics*/,
-                                           const basegfx::B2DHomMatrix& /*rTransformation*/,
-                                           const Bitmap& /*rBitmap*/, double /*fAlpha*/)
+bool BitmapRenderer::DrawTransformedBitmap(SalGraphics& rGraphics, const basegfx::B2DPoint& rNull,
+                                           const basegfx::B2DPoint& rX, const basegfx::B2DPoint& rY,
+                                           const Bitmap& rBitmap, double fAlpha)
 {
-    // Stub: To be implemented when migrating DrawTransformedBitmapEx
+    if (rBitmap.IsEmpty())
+        return true;
+
+    std::shared_ptr<SalBitmap> pSalBitmap = rBitmap.ImplGetSalBitmap();
+    if (!pSalBitmap)
+        return false;
+
+    return rGraphics.drawTransformedBitmap(rNull, rX, rY, *pSalBitmap, fAlpha);
 }
 
 void BitmapRenderer::DrawMask(SalGraphics& rGraphics, const SalTwoRect& rPosAry,

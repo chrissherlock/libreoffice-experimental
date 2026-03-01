@@ -442,20 +442,30 @@ bool OutputDevice::DrawTransformedBitmap(
 {
     assert(!is_double_buffered_window());
 
-    // try to paint directly
-    const basegfx::B2DPoint aNull(aFullTransform * basegfx::B2DPoint(0.0, 0.0));
-    const basegfx::B2DPoint aTopX(aFullTransform * basegfx::B2DPoint(1.0, 0.0));
-    const basegfx::B2DPoint aTopY(aFullTransform * basegfx::B2DPoint(0.0, 1.0));
-    SalBitmap* pSalSrcBmp = rBitmap.ImplGetSalBitmap().get();
+    if (rBitmap.IsEmpty())
+        return true;
 
-    return mpGraphics->DrawTransformedBitmap(
-        aNull,
-        aTopX,
-        aTopY,
-        *pSalSrcBmp,
-        fAlpha,
-        *this);
-};
+    if (!mpGraphics && !AcquireGraphics())
+        return false;
+
+    basegfx::B2DPoint aNull(aFullTransform * basegfx::B2DPoint(0.0, 0.0));
+    basegfx::B2DPoint aTopX(aFullTransform * basegfx::B2DPoint(1.0, 0.0));
+    basegfx::B2DPoint aTopY(aFullTransform * basegfx::B2DPoint(0.0, 1.0));
+
+    const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+    if (bRTL)
+    {
+        tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+        double fMirrorOrigin = static_cast<double>(nFrameWidth - 1);
+
+        aNull.setX(fMirrorOrigin - aNull.getX());
+        aTopX.setX(fMirrorOrigin - aTopX.getX());
+        aTopY.setX(fMirrorOrigin - aTopY.getX());
+    }
+
+    return vcl::rendercontext::BitmapRenderer::DrawTransformedBitmap(
+        *mpGraphics, aNull, aTopX, aTopY, rBitmap, fAlpha);
+}
 
 void OutputDevice::DrawImage( const Point& rPos, const Image& rImage, DrawImageFlags nStyle )
 {

@@ -146,6 +146,17 @@ public:
                                     const SalBitmap& rSalBitmap,
                                     Color nMaskColor ) = 0;
 
+    /** draw transformed bitmap (maybe with alpha) where Null, X, Y define the coordinate system
+
+      @param fAlpha additional alpha (0 to 1) to apply while drawing
+    */
+    virtual bool                drawTransformedBitmap(
+                                    const basegfx::B2DPoint& rNull,
+                                    const basegfx::B2DPoint& rX,
+                                    const basegfx::B2DPoint& rY,
+                                    const SalBitmap& rSourceBitmap,
+                                    double fAlpha) = 0;
+
     SalGraphics();
     ~SalGraphics() override;
 
@@ -388,14 +399,6 @@ public:
      */
     inline bool UpdateSettings(AllSettings&);
 
-    SAL_DLLPRIVATE bool                        DrawTransformedBitmap(
-                                    const basegfx::B2DPoint& rNull,
-                                    const basegfx::B2DPoint& rX,
-                                    const basegfx::B2DPoint& rY,
-                                    const SalBitmap& rSourceBitmap,
-                                    double fAlpha,
-                                    const OutputDevice& rOutDev );
-
     SAL_DLLPRIVATE bool                        HasFastDrawTransformedBitmap() const;
 
     SAL_DLLPRIVATE bool                        DrawAlphaRect(
@@ -472,17 +475,6 @@ protected:
                                     tools::Long /*nWidth*/, tools::Long /*nHeight*/,
                                     void* /*pPtr*/,
                                     sal_uInt32 /*nSize*/ ) { return false; }
-
-    /** draw transformed bitmap (maybe with alpha) where Null, X, Y define the coordinate system
-
-      @param fAlpha additional alpha (0 to 1) to apply while drawing
-    */
-    virtual bool                drawTransformedBitmap(
-                                    const basegfx::B2DPoint& rNull,
-                                    const basegfx::B2DPoint& rX,
-                                    const basegfx::B2DPoint& rY,
-                                    const SalBitmap& rSourceBitmap,
-                                    double fAlpha) = 0;
 
     /// Returns true if the drawTransformedBitmap() call is fast, and so it should
     /// be used directly without trying to optimize some calls e.g. by calling drawBitmap()

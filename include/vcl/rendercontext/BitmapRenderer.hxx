@@ -19,6 +19,7 @@ struct SalTwoRect;
 namespace basegfx
 {
 class B2DHomMatrix;
+class B2DPoint;
 }
 
 namespace vcl::rendercontext
@@ -41,8 +42,8 @@ public:
     static void DrawAlphaBitmap(SalGraphics& rGraphics, const SalTwoRect& rPosAry,
                                 const Bitmap& rBitmap);
 
-    static void DrawTransformedBitmap(SalGraphics& rGraphics,
-                                      const basegfx::B2DHomMatrix& rTransformation,
+    static bool DrawTransformedBitmap(SalGraphics& rGraphics, const basegfx::B2DPoint& rNull,
+                                      const basegfx::B2DPoint& rX, const basegfx::B2DPoint& rY,
                                       const Bitmap& rBitmap, double fAlpha = 1.0);
 
     static void DrawMask(SalGraphics& rGraphics, const SalTwoRect& rPosAry, const Bitmap& rBitmap,

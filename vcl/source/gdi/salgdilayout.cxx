@@ -412,16 +412,6 @@ void SalGraphics::DrawPolyPolygon( sal_uInt32 nPoly, const sal_uInt32* pPoints, 
         drawPolyPolygon( nPoly, pPoints, pPtAry );
 }
 
-namespace
-{
-    basegfx::B2DHomMatrix createTranslateToMirroredBounds(const basegfx::B2DRange &rBoundingBox, const basegfx::B2DHomMatrix& rMirror)
-    {
-        basegfx::B2DRange aRTLBoundingBox(rBoundingBox);
-        aRTLBoundingBox *= rMirror;
-        return basegfx::utils::createTranslateB2DHomMatrix(aRTLBoundingBox.getMinX() - rBoundingBox.getMinX(), 0);
-    }
-}
-
 void SalGraphics::DrawPolyPolygon(
     const basegfx::B2DHomMatrix& rObjectToDevice,
     const basegfx::B2DPolyPolygon& i_rPolyPolygon,
@@ -678,35 +668,6 @@ bool SalGraphics::GetNativeControlRegion( ControlType nType, ControlPart nPart, 
     }
     else
         return forWidget()->getNativeControlRegion(nType, nPart, rControlRegion, nState, aValue, OUString(), rNativeBoundingRegion, rNativeContentRegion);
-}
-
-bool SalGraphics::DrawTransformedBitmap(
-    const basegfx::B2DPoint& rNull,
-    const basegfx::B2DPoint& rX,
-    const basegfx::B2DPoint& rY,
-    const SalBitmap& rSourceBitmap,
-    double fAlpha,
-    const OutputDevice& rOutDev)
-{
-    if( (m_nLayout & SalLayoutFlags::BiDiRtl) || rOutDev.IsRTLEnabled() )
-    {
-        // mirroring set
-        const basegfx::B2DHomMatrix& rMirror(getMirror(rOutDev));
-        if (!rMirror.isIdentity())
-        {
-            basegfx::B2DPolygon aPoints({rNull, rX, rY});
-            basegfx::B2DRange aBoundingBox(aPoints.getB2DRange());
-            auto aTranslateToMirroredBounds = createTranslateToMirroredBounds(aBoundingBox, rMirror);
-
-            basegfx::B2DPoint aNull = aTranslateToMirroredBounds * rNull;
-            basegfx::B2DPoint aX = aTranslateToMirroredBounds * rX;
-            basegfx::B2DPoint aY = aTranslateToMirroredBounds * rY;
-
-            return drawTransformedBitmap(aNull, aX, aY, rSourceBitmap, fAlpha);
-        }
-    }
-
-    return drawTransformedBitmap(rNull, rX, rY, rSourceBitmap, fAlpha);
 }
 
 bool SalGraphics::HasFastDrawTransformedBitmap() const
