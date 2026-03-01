@@ -104,10 +104,6 @@ bool OutputDevice::TransformAndReduceBitmapExToTargetRange(
         aVisibleRange.transform(aMakeVisibleRangeRelative);
     }
 
-    // for pixel devices, do *not* limit size, else OutputDevice::DrawDeviceAlphaBitmap
-    // will create another, badly scaled bitmap to do the job. Nonetheless, do a
-    // maximum clipping of something big (1600x1280x2). Add 1.0 to avoid rounding
-    // errors in rough estimations
     const double fNewMaxArea(aVisiblePixelRange.getWidth() * aVisiblePixelRange.getHeight());
 
     fMaximumArea = std::min(4096000.0, fNewMaxArea + 1.0);

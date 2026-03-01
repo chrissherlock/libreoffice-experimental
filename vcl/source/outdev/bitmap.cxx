@@ -40,47 +40,37 @@
 #include <salbmp.hxx>
 #include <salgdi.hxx>
 
-void OutputDevice::DrawBitmap( const Point& rDestPt, const Bitmap& rBitmap )
+void OutputDevice::DrawBitmap(const Point& rDestPt, const Bitmap& rBitmap)
 {
     assert(!is_double_buffered_window());
 
     const Size aSizePix(rBitmap.GetSizePixel());
+    MetaActionType nAction = rBitmap.HasAlpha() ? MetaActionType::BMPEX : MetaActionType::BMP;
 
-    if (!rBitmap.HasAlpha())
-    {
-        DrawBitmap(rDestPt, PixelToLogic(aSizePix), Point(), aSizePix, rBitmap, MetaActionType::BMP);
-        return;
-    }
-
-    DrawAlphaBitmap(rDestPt, PixelToLogic(aSizePix), Point(), aSizePix, rBitmap, MetaActionType::BMPEX);
+    DrawBitmap(rDestPt, PixelToLogic(aSizePix), Point(), aSizePix, rBitmap, nAction);
 }
 
-void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize, const Bitmap& rBitmap )
+void OutputDevice::DrawBitmap(const Point& rDestPt, const Size& rDestSize, const Bitmap& rBitmap)
 {
     assert(!is_double_buffered_window());
 
-    if (!rBitmap.HasAlpha())
-    {
-        DrawBitmap(rDestPt, rDestSize, Point(), rBitmap.GetSizePixel(), rBitmap, MetaActionType::BMPSCALE);
-        return;
-    }
+    MetaActionType nAction = rBitmap.HasAlpha() ? MetaActionType::BMPEXSCALE : MetaActionType::BMPSCALE;
 
-    DrawAlphaBitmap(rDestPt, rDestSize, Point(), rBitmap.GetSizePixel(), rBitmap, MetaActionType::BMPEXSCALE);
+    DrawBitmap(rDestPt, rDestSize, Point(), rBitmap.GetSizePixel(), rBitmap, nAction);
 }
 
 void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
-                                   const Point& rSrcPtPixel, const Size& rSrcSizePixel,
-                                   const Bitmap& rBitmap)
+                               const Point& rSrcPtPixel, const Size& rSrcSizePixel,
+                               const Bitmap& rBitmap)
 {
     assert(!is_double_buffered_window());
 
-    if (!rBitmap.HasAlpha())
-    {
-        DrawBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmap, MetaActionType::BMPSCALEPART);
-        return;
-    }
+    // Preserve the legacy Metafile action type difference, but route
+    // everything into the unified master dispatcher.
+    MetaActionType nAction = rBitmap.HasAlpha() ? MetaActionType::BMPEXSCALEPART
+                                                : MetaActionType::BMPSCALEPART;
 
-    DrawAlphaBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmap, MetaActionType::BMPEXSCALEPART);
+    DrawBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmap, nAction);
 }
 
 void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
@@ -187,49 +177,7 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
         aPosAry.mnDestY = aDestRect.Top();
     }
 
-    if (aBmp.HasAlpha())
-    {
-        vcl::rendercontext::BitmapRenderer::DrawAlphaBitmap(*mpGraphics, aPosAry, aBmp);
-    }
-    else
-    {
-        vcl::rendercontext::BitmapRenderer::DrawBitmap(*mpGraphics, aPosAry, aBmp);
-    }
-}
-
-void OutputDevice::DrawAlphaBitmap( const Point& rDestPt, const Size& rDestSize,
-                                 const Point& rSrcPtPixel, const Size& rSrcSizePixel,
-                                 const Bitmap& rBitmap, const MetaActionType nAction )
-{
-    assert(!is_double_buffered_window());
-    assert(rBitmap.HasAlpha());
-
-    if( IsLayoutCalculationNecessary() )
-        return;
-
-    if (RasterOp::Invert == mpGraphicsState->meRasterOp)
-    {
-        DrawRect(tools::Rectangle(rDestPt, rDestSize));
-        return;
-    }
-
-    Bitmap aBmp(vcl::drawmode::GetBitmap(rBitmap, GetDrawMode()));
-
-    maRecorder.RecordBitmapAction(nAction, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp);
-
-    if (!IsDeviceOutputNecessary())
-        return;
-
-    if (!mpGraphics && !AcquireGraphics())
-        return;
-
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
-
-    if ( IsOutputCulled() )
-        return;
-
-    DrawDeviceBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp);
+    vcl::rendercontext::BitmapRenderer::DrawBitmap(*mpGraphics, aPosAry, aBmp);
 }
 
 void OutputDevice::DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize,
@@ -237,14 +185,6 @@ void OutputDevice::DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize
                                      Bitmap& rBitmap )
 {
     assert(!is_double_buffered_window());
-
-    // Route alpha bitmaps to the dedicated alpha handler so subclasses
-    // like Printer can intercept them via virtual overrides.
-    if (rBitmap.HasAlpha())
-    {
-        DrawDeviceAlphaBitmap(rBitmap, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
-        return;
-    }
 
     if (rBitmap.IsEmpty())
         return;
@@ -257,8 +197,8 @@ void OutputDevice::DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize
     if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
         return;
 
+    // Mutates the referenced bitmap (which is safely a local copy from the orchestrator)
     const BmpMirrorFlags nMirrFlags = AdjustTwoRect(aPosAry, rBitmap.GetSizePixel());
-
     if (nMirrFlags != BmpMirrorFlags::NONE)
         rBitmap.Mirror(nMirrFlags);
 
@@ -374,53 +314,6 @@ Bitmap OutputDevice::GetBitmap( const Point& rSrcPt, const Size& rSize ) const
         aBmp.ImplSetSalBitmap(pSalBmp);
 
     return aBmp;
-}
-
-void OutputDevice::DrawDeviceAlphaBitmap( const Bitmap& rBmp,
-                                          const Point& rDestPt, const Size& rDestSize,
-                                          const Point& rSrcPtPixel, const Size& rSrcSizePixel )
-{
-    assert(!is_double_buffered_window());
-
-    if( rBmp.IsEmpty() )
-        return;
-
-    SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(), rSrcSizePixel.Height(),
-                       mpMapper->LogicXToDevicePixel(rDestPt.X()), mpMapper->LogicYToDevicePixel(rDestPt.Y()),
-                       mpMapper->LogicWidthToDevicePixel(rDestSize.Width()),
-                       mpMapper->LogicHeightToDevicePixel(rDestSize.Height()));
-
-    if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
-        return;
-
-    // Normalize coordinates and flip payload if necessary
-    // Because we receive a const reference, we must copy it to mirror the bits safely
-    Bitmap aWorkingBmp(rBmp);
-    const BmpMirrorFlags nMirrFlags = AdjustTwoRect(aPosAry, aWorkingBmp.GetSizePixel());
-
-    if (nMirrFlags != BmpMirrorFlags::NONE)
-        aWorkingBmp.Mirror(nMirrFlags);
-
-    if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
-        return;
-
-    if( mpGraphics )
-    {
-        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
-        if (bRTL)
-        {
-            tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
-            tools::Rectangle aDestRect(Point(aPosAry.mnDestX, aPosAry.mnDestY),
-                                       Size(aPosAry.mnDestWidth, aPosAry.mnDestHeight));
-
-            mpMapper->MirrorDevicePixelRect(aDestRect, nFrameWidth, bRTL, ImplIsAntiparallel());
-
-            aPosAry.mnDestX = aDestRect.Left();
-            aPosAry.mnDestY = aDestRect.Top();
-        }
-
-        vcl::rendercontext::BitmapRenderer::DrawAlphaBitmap(*mpGraphics, aPosAry, aWorkingBmp);
-    }
 }
 
 bool OutputDevice::HasFastDrawTransformedBitmap() const

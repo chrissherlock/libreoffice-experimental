@@ -24,22 +24,10 @@ void BitmapRenderer::DrawBitmap(SalGraphics& rGraphics, const SalTwoRect& rPosAr
     if (!pSalBitmap)
         return;
 
-    rGraphics.drawBitmap(rPosAry, *pSalBitmap);
-}
-
-void BitmapRenderer::DrawAlphaBitmap(SalGraphics& rGraphics, const SalTwoRect& rPosAry,
-                                     const Bitmap& rBitmap)
-{
-    if (rBitmap.IsEmpty())
-        return;
-
-    std::shared_ptr<SalBitmap> pSalBitmap = rBitmap.ImplGetSalBitmap();
-    if (!pSalBitmap)
-        return;
-
-    // Bitmap now natively holds its own alpha format internally, so we
-    // just pass the SalBitmap directly to the alpha sink.
-    rGraphics.drawAlphaBitmap(rPosAry, *pSalBitmap);
+    if (rBitmap.HasAlpha())
+        rGraphics.drawAlphaBitmap(rPosAry, *pSalBitmap);
+    else
+        rGraphics.drawBitmap(rPosAry, *pSalBitmap);
 }
 
 bool BitmapRenderer::DrawTransformedBitmap(SalGraphics& rGraphics, const basegfx::B2DPoint& rNull,

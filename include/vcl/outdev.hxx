@@ -1483,22 +1483,6 @@ private:
                                     const basegfx::B2DVector& rScale,
                                     const basegfx::B2DVector& rTranslate,
                                     const Bitmap& rBitmap);
-
-    SAL_DLLPRIVATE void         DrawAlphaBitmap(
-                                    const Point& rDestPt,
-                                    const Size& rDestSize,
-                                    const Point& rSrcPtPixel,
-                                    const Size& rSrcSizePixel,
-                                    const Bitmap& rBitmap,
-                                    MetaActionType nAction );
-
-    SAL_DLLPRIVATE void         DrawDeviceAlphaBitmap(
-                                    const Bitmap& rBmp,
-                                    const Point& rDestPt,
-                                    const Size& rDestSize,
-                                    const Point& rSrcPtPixel,
-                                    const Size& rSrcSizePixel );
-
     ///@}
 
 

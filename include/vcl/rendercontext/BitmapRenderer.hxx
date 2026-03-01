@@ -39,9 +39,6 @@ public:
     static void DrawBitmap(SalGraphics& rGraphics, const SalTwoRect& rPosAry,
                            const Bitmap& rBitmap);
 
-    static void DrawAlphaBitmap(SalGraphics& rGraphics, const SalTwoRect& rPosAry,
-                                const Bitmap& rBitmap);
-
     static bool DrawTransformedBitmap(SalGraphics& rGraphics, const basegfx::B2DPoint& rNull,
                                       const basegfx::B2DPoint& rX, const basegfx::B2DPoint& rY,
                                       const Bitmap& rBitmap, double fAlpha = 1.0);
