@@ -39,6 +39,7 @@ class Color;
 class OutputDevice;
 class SalLayout;
 class LineInfo;
+class Gradient;
 
 namespace tools
 {
@@ -170,10 +171,42 @@ public:
     static void DrawStrikeoutChar(OutputDevice& rOutDev, const TextLineGeometry& rGeo,
                                   tools::Long nY, Color aColor);
 
+    /**
+     * Attempts to draw a gradient natively via SalGraphics.
+     * @return true if the hardware handled the gradient, false if fallback is needed.
+     */
+    static bool DrawGradient(SalGraphics& rGraphics, const tools::PolyPolygon& rDevicePolyPoly,
+                             const Gradient& rGradient);
+
+    /**
+     * Composes a gradient by decomposing it into individual color-step polygons.
+     * This is the software fallback for linear and axial gradients.
+     */
+    static void DrawGradient(SalGraphics& rGraphics, const tools::Rectangle& rRect,
+                             const Gradient& rGradient, tools::Long nStepCount,
+                             bool bAvoidVectorOverdraw,
+                             const tools::PolyPolygon* pClipPolyPoly = nullptr);
+
 private:
     static void DrawSinglePolygon(SalGraphics& rGraphics, const tools::Polygon& rPoly);
 
     static void DrawMultiplePolygons(SalGraphics& rGraphics, const tools::PolyPolygon& rPolyPoly);
+
+    static sal_uInt8 GetGradientColorValue(tools::Long nValue);
+
+    /**
+     * Composes complex gradient styles (Radial, Elliptical, Square) by decomposing
+     * them into nested shrinking polygons.
+     * @param rGraphics      The hardware graphics device.
+     * @param rRect          The destination rectangle in device pixels.
+     * @param rGradient      The logical gradient description.
+     * @param nStepCount     The pre-calculated number of steps (respects Printer polymorphism).
+     * @param pClipPolyPoly  Optional complex clipping mask for software intersection.
+     */
+    static void DrawComplexGradient(SalGraphics& rGraphics, const tools::Rectangle& rRect,
+                                    const Gradient& rGradient, tools::Long nStepCount,
+                                    bool bAvoidVectorOverdraw,
+                                    const tools::PolyPolygon* pClipPolyPoly = nullptr);
 };
 
 } // namespace vcl::rendercontext

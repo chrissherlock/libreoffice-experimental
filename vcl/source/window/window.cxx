@@ -3820,11 +3820,6 @@ bool Window::DeleteSurroundingText(const Selection& rSelection)
     return false;
 }
 
-bool WindowOutputDevice::UsePolyPolygonForComplexGradient()
-{
-    return GetRasterOp() != RasterOp::OverPaint;
-}
-
 void Window::ApplySettings(vcl::RenderContext& /*rRenderContext*/)
 {
 }

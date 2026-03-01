@@ -502,17 +502,6 @@ bool SalGraphics::DrawPolyPolygonBezier( sal_uInt32 i_nPoly, const sal_uInt32* i
     return bRet;
 }
 
-bool SalGraphics::DrawGradient(const tools::PolyPolygon& rPolyPoly, const Gradient& rGradient, const OutputDevice& rOutDev)
-{
-    if( (m_nLayout & SalLayoutFlags::BiDiRtl) || rOutDev.IsRTLEnabled() )
-    {
-        tools::PolyPolygon aMirrored(mirror(rPolyPoly.getB2DPolyPolygon(), rOutDev));
-        return drawGradient(aMirrored, rGradient);
-    }
-
-    return drawGradient( rPolyPoly, rGradient );
-}
-
 void SalGraphics::CopyArea( tools::Long nDestX, tools::Long nDestY,
                             tools::Long nSrcX, tools::Long nSrcY,
                             tools::Long nSrcWidth, tools::Long nSrcHeight,

@@ -18,6 +18,7 @@
 #include <basegfx/polygon/b2dlinegeometry.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <basegfx/polygon/b2dpolypolygontools.hxx>
+#include <basegfx/polygon/b2dpolypolygoncutter.hxx>
 #include <basegfx/polygon/WaveLine.hxx>
 #include <comphelper/configuration.hxx>
 #include <comphelper/scopeguard.hxx>
@@ -27,10 +28,9 @@
 #include <vcl/outdev.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/rendercontext/PrimitiveRenderer.hxx>
+#include <vcl/rendercontext/WaveLineGeometry.hxx>
 #include <vcl/text/TextDecorator.hxx>
 #include <vcl/text/TextGeometry.hxx>
-
-#include <vcl/rendercontext/WaveLineGeometry.hxx>
 
 #include <font/EmphasisMark.hxx>
 #include <font/FontController.hxx>
@@ -40,6 +40,7 @@
 #include <GraphicsState.hxx>
 
 #include <com/sun/star/drawing/LineCap.hpp>
+#include <com/sun/star/awt/GradientStyle.hpp>
 
 namespace vcl::rendercontext
 {
@@ -1433,6 +1434,331 @@ void PrimitiveRenderer::DrawPolyPolygon(SalGraphics& rGraphics,
         // Direct floating-point dispatch to the backend
         rGraphics.drawPolyPolygon(rTransform, rDevicePolyPoly, 0.0);
     }
+}
+
+sal_uInt8 PrimitiveRenderer::GetGradientColorValue(tools::Long nValue)
+{
+    return static_cast<sal_uInt8>(std::clamp<tools::Long>(nValue, 0, 255));
+}
+
+bool PrimitiveRenderer::DrawGradient(SalGraphics& rGraphics,
+                                     const tools::PolyPolygon& rDevicePolyPoly,
+                                     const Gradient& rGradient)
+{
+    // Pure hardware dispatch
+    return rGraphics.drawGradient(rDevicePolyPoly, rGradient);
+}
+
+void PrimitiveRenderer::DrawGradient(SalGraphics& rGraphics, const tools::Rectangle& rRect,
+                                     const Gradient& rGradient, tools::Long nStepCount,
+                                     bool bAvoidVectorOverdraw,
+                                     const tools::PolyPolygon* pClipPolyPoly)
+{
+    // 1. Setup basic geometry and rotation
+    tools::Rectangle aRect;
+    Point aCenter;
+    Degree10 nAngle = rGradient.GetAngle() % 3600_deg10;
+    rGradient.GetBoundRect(rRect, aRect, aCenter);
+
+    const css::awt::GradientStyle eStyle = rGradient.GetStyle();
+    const bool bLinear = (eStyle == css::awt::GradientStyle_LINEAR);
+    const bool bAxial = (eStyle == css::awt::GradientStyle_AXIAL);
+
+    // Prepare Colors
+    Color aStartCol = rGradient.GetStartColor();
+    Color aEndCol = rGradient.GetEndColor();
+    tools::Long nStartRed = (aStartCol.GetRed() * rGradient.GetStartIntensity()) / 100;
+    tools::Long nStartGreen = (aStartCol.GetGreen() * rGradient.GetStartIntensity()) / 100;
+    tools::Long nStartBlue = (aStartCol.GetBlue() * rGradient.GetStartIntensity()) / 100;
+    tools::Long nEndRed = (aEndCol.GetRed() * rGradient.GetEndIntensity()) / 100;
+    tools::Long nEndGreen = (aEndCol.GetGreen() * rGradient.GetEndIntensity()) / 100;
+    tools::Long nEndBlue = (aEndCol.GetBlue() * rGradient.GetEndIntensity()) / 100;
+
+    // Handle Linear/Axial Composition
+    if (bLinear || bAxial)
+    {
+        double fBorder = rGradient.GetBorder() * aRect.GetHeight() / 100.0;
+        if (bAxial)
+        {
+            fBorder /= 2.0;
+            std::swap(nStartRed, nEndRed);
+            std::swap(nStartGreen, nEndGreen);
+            std::swap(nStartBlue, nEndBlue);
+        }
+
+        tools::Rectangle aMirrorRect = aRect;
+        aMirrorRect.SetTop((aRect.Top() + aRect.Bottom()) / 2);
+
+        // Border Logic: Compose the solid border if necessary
+        if (fBorder > 0.0)
+        {
+            rGraphics.SetFillColor(Color(static_cast<sal_uInt8>(nStartRed),
+                                         static_cast<sal_uInt8>(nStartGreen),
+                                         static_cast<sal_uInt8>(nStartBlue)));
+
+            tools::Rectangle aBorderRect = aRect;
+            aBorderRect.SetBottom(static_cast<tools::Long>(aBorderRect.Top() + fBorder));
+            tools::Polygon aBorderPoly(aBorderRect);
+            aBorderPoly.Rotate(aCenter, nAngle);
+
+            if (pClipPolyPoly)
+                DrawClippedPolygon(rGraphics, aBorderPoly, *pClipPolyPoly);
+            else
+                DrawPolygonGeometry(rGraphics, aBorderPoly);
+
+            aRect.SetTop(aBorderRect.Bottom());
+
+            if (bAxial)
+            {
+                aBorderRect = aMirrorRect;
+                aBorderRect.SetTop(static_cast<tools::Long>(aBorderRect.Bottom() - fBorder));
+                aBorderPoly = tools::Polygon(aBorderRect);
+                aBorderPoly.Rotate(aCenter, nAngle);
+
+                if (pClipPolyPoly)
+                    DrawClippedPolygon(rGraphics, aBorderPoly, *pClipPolyPoly);
+                else
+                    DrawPolygonGeometry(rGraphics, aBorderPoly);
+
+                aMirrorRect.SetBottom(aBorderRect.Top());
+            }
+        }
+
+        if (bAxial)
+            aRect.SetBottom(aMirrorRect.Top());
+
+        // Compose Gradient Steps (Clamped)
+        tools::Long nAbsRedSteps = std::abs(nEndRed - nStartRed);
+        tools::Long nAbsGreenSteps = std::abs(nEndGreen - nStartGreen);
+        tools::Long nAbsBlueSteps = std::abs(nEndBlue - nStartBlue);
+        tools::Long nMaxColorSteps = std::max({ nAbsRedSteps, nAbsGreenSteps, nAbsBlueSteps });
+
+        tools::Long nSteps = std::min(nStepCount, nMaxColorSteps);
+        nSteps = std::max<tools::Long>(nSteps, 3);
+
+        double fScanInc = static_cast<double>(aRect.GetHeight()) / nSteps;
+
+        // FIX: Cache the static starting lines so iteration doesn't exponentially compound!
+        double fGradientLine = static_cast<double>(aRect.Top());
+        double fMirrorGradientLine = static_cast<double>(aMirrorRect.Bottom());
+
+        const double fStepsMinus1 = static_cast<double>(nSteps) - 1.0;
+
+        // Axial draws one less step in the loop to handle the middle gap
+        if (!bLinear)
+            nSteps -= 1;
+
+        tools::Polygon aPoly(4);
+        for (tools::Long i = 0; i < nSteps; i++)
+        {
+            const double fAlpha = static_cast<double>(i) / fStepsMinus1;
+            rGraphics.SetFillColor(
+                Color(GetGradientColorValue(nStartRed * (1.0 - fAlpha) + nEndRed * fAlpha),
+                      GetGradientColorValue(nStartGreen * (1.0 - fAlpha) + nEndGreen * fAlpha),
+                      GetGradientColorValue(nStartBlue * (1.0 - fAlpha) + nEndBlue * fAlpha)));
+
+            // Use the static fGradientLine base
+            aRect.SetTop(static_cast<tools::Long>(fGradientLine + i * fScanInc));
+            aRect.SetBottom(static_cast<tools::Long>(fGradientLine + (i + 1) * fScanInc));
+            aPoly = tools::Polygon(aRect);
+            aPoly.Rotate(aCenter, nAngle);
+
+            if (pClipPolyPoly)
+                DrawClippedPolygon(rGraphics, aPoly, *pClipPolyPoly);
+            else
+                DrawPolygonGeometry(rGraphics, aPoly);
+
+            if (bAxial)
+            {
+                // Use the static fMirrorGradientLine base
+                aMirrorRect.SetBottom(static_cast<tools::Long>(fMirrorGradientLine - i * fScanInc));
+                aMirrorRect.SetTop(
+                    static_cast<tools::Long>(fMirrorGradientLine - (i + 1) * fScanInc));
+                aPoly = tools::Polygon(aMirrorRect);
+                aPoly.Rotate(aCenter, nAngle);
+
+                if (pClipPolyPoly)
+                    DrawClippedPolygon(rGraphics, aPoly, *pClipPolyPoly);
+                else
+                    DrawPolygonGeometry(rGraphics, aPoly);
+            }
+        }
+
+        // Draw the middle capstone polygon for Axial to prevent rendering gaps
+        if (!bLinear)
+        {
+            rGraphics.SetFillColor(Color(GetGradientColorValue(nEndRed),
+                                         GetGradientColorValue(nEndGreen),
+                                         GetGradientColorValue(nEndBlue)));
+
+            aRect.SetTop(static_cast<tools::Long>(fGradientLine + nSteps * fScanInc));
+            aRect.SetBottom(static_cast<tools::Long>(fMirrorGradientLine - nSteps * fScanInc));
+            aPoly = tools::Polygon(aRect);
+            aPoly.Rotate(aCenter, nAngle);
+
+            if (pClipPolyPoly)
+                DrawClippedPolygon(rGraphics, aPoly, *pClipPolyPoly);
+            else
+                DrawPolygonGeometry(rGraphics, aPoly);
+        }
+    }
+    else // Complex Styles: Radial, Elliptical, Square
+    {
+        DrawComplexGradient(rGraphics, rRect, rGradient, nStepCount, bAvoidVectorOverdraw,
+                            pClipPolyPoly);
+    }
+}
+
+void PrimitiveRenderer::DrawComplexGradient(SalGraphics& rGraphics, const tools::Rectangle& rRect,
+                                            const Gradient& rGradient, tools::Long nStepCount,
+                                            bool bAvoidVectorOverdraw,
+                                            const tools::PolyPolygon* pClipPolyPoly)
+{
+    tools::Rectangle aRect;
+    Point aCenter;
+    Degree10 nAngle = rGradient.GetAngle() % 3600_deg10;
+    rGradient.GetBoundRect(rRect, aRect, aCenter);
+
+    const css::awt::GradientStyle eStyle = rGradient.GetStyle();
+
+    Color aStartCol = rGradient.GetStartColor();
+    Color aEndCol = rGradient.GetEndColor();
+    tools::Long nStartRed = (aStartCol.GetRed() * rGradient.GetStartIntensity()) / 100;
+    tools::Long nStartGreen = (aStartCol.GetGreen() * rGradient.GetStartIntensity()) / 100;
+    tools::Long nStartBlue = (aStartCol.GetBlue() * rGradient.GetStartIntensity()) / 100;
+    tools::Long nEndRed = (aEndCol.GetRed() * rGradient.GetEndIntensity()) / 100;
+    tools::Long nEndGreen = (aEndCol.GetGreen() * rGradient.GetEndIntensity()) / 100;
+    tools::Long nEndBlue = (aEndCol.GetBlue() * rGradient.GetEndIntensity()) / 100;
+
+    tools::Long nRedSteps = nEndRed - nStartRed;
+    tools::Long nGreenSteps = nEndGreen - nStartGreen;
+    tools::Long nBlueSteps = nEndBlue - nStartBlue;
+
+    tools::Long nSteps = std::max<tools::Long>(nStepCount, 2);
+
+    tools::Long nMaxColorDiff
+        = std::max({ std::abs(nRedSteps), std::abs(nGreenSteps), std::abs(nBlueSteps) });
+
+    if (nMaxColorDiff < nSteps && nMaxColorDiff > 0)
+        nSteps = nMaxColorDiff;
+
+    // Calculate Step Increments
+    // Complex gradients shrink from the outer boundary toward the center point
+    double fScanLeft = aRect.Left();
+    double fScanTop = aRect.Top();
+    double fScanRight = aRect.Right();
+    double fScanBottom = aRect.Bottom();
+
+    double fScanIncX = static_cast<double>(aRect.GetWidth()) / nSteps * 0.5;
+    double fScanIncY = static_cast<double>(aRect.GetHeight()) / nSteps * 0.5;
+
+    // Radial and Elliptical styles require proportional shrinking
+    if (eStyle != css::awt::GradientStyle_SQUARE)
+    {
+        fScanIncY = std::min(fScanIncY, fScanIncX);
+        fScanIncX = fScanIncY;
+    }
+
+    std::optional<tools::PolyPolygon> xPolyPoly;
+    if (bAvoidVectorOverdraw)
+        xPolyPoly = tools::PolyPolygon(2);
+
+    rGraphics.SetFillColor(Color(static_cast<sal_uInt8>(nStartRed),
+                                 static_cast<sal_uInt8>(nStartGreen),
+                                 static_cast<sal_uInt8>(nStartBlue)));
+
+    tools::Polygon aPoly;
+    if (xPolyPoly)
+    {
+        aPoly = tools::Polygon(rRect);
+        xPolyPoly->Insert(aPoly);
+        xPolyPoly->Insert(aPoly);
+    }
+    else
+    {
+        tools::Rectangle aExtRect(rRect);
+        aExtRect.AdjustLeft(-1);
+        aExtRect.AdjustTop(-1);
+        aExtRect.AdjustRight(1);
+        aExtRect.AdjustBottom(1);
+
+        aPoly = tools::Polygon(aExtRect);
+        if (pClipPolyPoly)
+            DrawClippedPolygon(rGraphics, aPoly, *pClipPolyPoly);
+        else
+            DrawPolygonGeometry(rGraphics, aPoly);
+    }
+
+    bool bPaintLastPolygon = false;
+
+    for (tools::Long i = 1; i < nSteps; i++)
+    {
+        fScanLeft += fScanIncX;
+        fScanTop += fScanIncY;
+        fScanRight -= fScanIncX;
+        fScanBottom -= fScanIncY;
+
+        if ((fScanRight - fScanLeft) < 1.0 || (fScanBottom - fScanTop) < 1.0)
+            break;
+
+        tools::Rectangle aStepRect(
+            static_cast<tools::Long>(fScanLeft), static_cast<tools::Long>(fScanTop),
+            static_cast<tools::Long>(fScanRight), static_cast<tools::Long>(fScanBottom));
+
+        // Compose shape geometry based on style
+        if (eStyle == css::awt::GradientStyle_RADIAL
+            || eStyle == css::awt::GradientStyle_ELLIPTICAL)
+            aPoly = tools::Polygon(aStepRect.Center(), aStepRect.GetWidth() >> 1,
+                                   aStepRect.GetHeight() >> 1);
+        else
+            aPoly = tools::Polygon(aStepRect);
+
+        aPoly.Rotate(aCenter, nAngle);
+
+        tools::Long nStepIndex = (xPolyPoly ? i : (i + 1));
+        sal_uInt8 nRed = GetGradientColorValue(nStartRed + ((nRedSteps * nStepIndex) / nSteps));
+        sal_uInt8 nGreen
+            = GetGradientColorValue(nStartGreen + ((nGreenSteps * nStepIndex) / nSteps));
+        sal_uInt8 nBlue = GetGradientColorValue(nStartBlue + ((nBlueSteps * nStepIndex) / nSteps));
+
+        if (xPolyPoly)
+        {
+            bPaintLastPolygon = true;
+            xPolyPoly->Replace(xPolyPoly->GetObject(1), 0);
+            xPolyPoly->Replace(aPoly, 1);
+
+            DrawPolyPolygon(rGraphics, *xPolyPoly, pClipPolyPoly);
+            rGraphics.SetFillColor(Color(nRed, nGreen, nBlue));
+        }
+        else
+        {
+            rGraphics.SetFillColor(Color(nRed, nGreen, nBlue));
+            if (pClipPolyPoly)
+                DrawClippedPolygon(rGraphics, aPoly, *pClipPolyPoly);
+            else
+                DrawPolygonGeometry(rGraphics, aPoly);
+        }
+    }
+
+    if (!xPolyPoly)
+        return;
+
+    const tools::Polygon& rLastPoly = xPolyPoly->GetObject(1);
+    if (rLastPoly.GetBoundRect().IsEmpty())
+        return;
+
+    if (bPaintLastPolygon)
+    {
+        sal_uInt8 nFinalRed = GetGradientColorValue(nEndRed);
+        sal_uInt8 nFinalGreen = GetGradientColorValue(nEndGreen);
+        sal_uInt8 nFinalBlue = GetGradientColorValue(nEndBlue);
+        rGraphics.SetFillColor(Color(nFinalRed, nFinalGreen, nFinalBlue));
+    }
+
+    if (pClipPolyPoly)
+        DrawClippedPolygon(rGraphics, aPoly, *pClipPolyPoly);
+    else
+        DrawPolygonGeometry(rGraphics, aPoly);
 }
 
 } // namespace vcl::rendercontext

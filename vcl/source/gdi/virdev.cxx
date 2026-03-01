@@ -465,11 +465,6 @@ sal_uInt16 VirtualDevice::GetBitCount() const
     return mnBitCount;
 }
 
-bool VirtualDevice::UsePolyPolygonForComplexGradient()
-{
-    return true;
-}
-
 void VirtualDevice::Compat_ZeroExtleadBug()
 {
     mbForceZeroExtleadBug = true;

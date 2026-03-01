@@ -128,6 +128,10 @@ public:
 
     virtual void                invert( sal_uInt32 nPoints, const Point* pPtAry, SalInvert nFlags ) = 0;
 
+    virtual bool                drawGradient(
+                                    const tools::PolyPolygon& rPolyPoly,
+                                    const Gradient& rGradient ) = 0;
+
     SalGraphics();
     ~SalGraphics() override;
 
@@ -276,11 +280,6 @@ public:
                                     const Point* const* pPtAry,
                                     const PolyFlags* const* pFlgAry,
                                     const OutputDevice& rOutDev );
-
-    SAL_DLLPRIVATE bool                        DrawGradient(
-                                    const tools::PolyPolygon& rPolyPoly,
-                                    const Gradient& rGradient,
-                                    const OutputDevice& rOutDev);
 
     // CopyArea --> No RasterOp, but ClipRegion
     void                        CopyArea(
@@ -443,10 +442,6 @@ protected:
     virtual void                setClipRegion( const vcl::Region& ) = 0;
 
     // draw --> LineColor and FillColor and RasterOp and ClipRegion
-
-    virtual bool                drawGradient(
-                                    const tools::PolyPolygon& rPolyPoly,
-                                    const Gradient& rGradient ) = 0;
 
     virtual bool implDrawGradient(basegfx::B2DPolyPolygon const & /*rPolyPolygon*/,
                                   SalGradient const & /*rGradient*/)

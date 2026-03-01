@@ -76,7 +76,6 @@ private:
     virtual void DrawOutDevDirectProcess(const OutputDevice& rSrcDev, SalTwoRect& rPosAry,
                                          SalGraphics* pSrcGraphics) override;
     virtual void ClipToPaintRegion(tools::Rectangle& rDstRect) override;
-    virtual bool UsePolyPolygonForComplexGradient() override;
 
     VclPtr<vcl::Window> mxOwnerWindow;
 };

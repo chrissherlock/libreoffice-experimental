@@ -864,14 +864,9 @@ public:
 
 protected:
 
-    virtual bool                UsePolyPolygonForComplexGradient() = 0;
-
     virtual tools::Long                GetGradientStepCount( tools::Long nMinRect );
 
 private:
-
-    SAL_DLLPRIVATE void         DrawLinearGradient( const tools::Rectangle& rRect, const Gradient& rGradient, const tools::PolyPolygon* pClipPolyPoly );
-    SAL_DLLPRIVATE void         DrawComplexGradient( const tools::Rectangle& rRect, const Gradient& rGradient, const tools::PolyPolygon* pClipPolyPoly );
     SAL_DLLPRIVATE tools::Long  GetGradientSteps(Gradient const& rGradient, tools::Rectangle const& rRect);
     SAL_DLLPRIVATE Color        GetSingleColorGradientFill();
     ///@}

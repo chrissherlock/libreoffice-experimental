@@ -1624,11 +1624,6 @@ void Printer::updatePrinters()
     }
 }
 
-bool Printer::UsePolyPolygonForComplexGradient()
-{
-    return true;
-}
-
 void Printer::SetFontOrientation( LogicalFontInstance* const pFontEntry ) const
 {
     pFontEntry->mnOrientation = pFontEntry->mxFontMetric->GetOrientation();

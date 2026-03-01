@@ -26,6 +26,8 @@
 
 #include <test/outputdevice.hxx>
 
+#include <com/sun/star/awt/GradientStyle.hpp>
+
 // Run tests from visualbackendtest ('bin/run visualbackendtest').
 class BackendTest : public test::BootstrapFixture
 {
@@ -923,6 +925,58 @@ public:
             CPPUNIT_ASSERT(eResult != vcl::test::TestResult::Failed);
     }
 
+    void testVectorOverdrawPolyPolygon()
+    {
+        if (getDefaultDeviceBitCount() < 24)
+            return;
+
+        // Use a standard VirtualDevice; no spoofing/subclassing required
+        ScopedVclPtrInstance<VirtualDevice> aVDev;
+        aVDev->SetOutputSizePixel(Size(100, 100));
+
+        // Force exactly 10 steps so the XOR math is strictly deterministic
+        Gradient aGradient(com::sun::star::awt::GradientStyle_RADIAL, COL_WHITE, COL_WHITE);
+        aGradient.SetSteps(10);
+        tools::Rectangle aRect(0, 0, 100, 100);
+        Point aCenter(50, 50);
+
+        // Raster/Screen Behavior (Overlapping Polygons)
+        aVDev->SetBackground(Wallpaper(COL_BLACK));
+        aVDev->Erase();
+        aVDev->SetRasterOp(RasterOp::Xor);
+
+        // Sync the RasterOp state down to the hardware layer
+        aVDev->DrawPixel(Point(-1, -1), COL_BLACK);
+        SalGraphics* pGraphics = aVDev->GetGraphics();
+        CPPUNIT_ASSERT(pGraphics);
+
+        // Call the stateless renderer with bAvoidVectorOverdraw = false
+        vcl::rendercontext::PrimitiveRenderer::DrawGradient(*pGraphics, aRect, aGradient, 10,
+                                                            false);
+
+        // 10 overlapping nested polygons XOR'd onto each other (even toggle) = Black
+        exportDevice(u"13-09_vector_overdraw_screen.png"_ustr, aVDev);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(
+            "Screen pipeline failed XOR test (expected black due to overlapping overdraw)",
+            COL_BLACK, aVDev->GetPixel(aCenter));
+
+        // Vector/Printer Behavior (Donut PolyPolygons)
+        aVDev->SetRasterOp(RasterOp::OverPaint); // Reset
+        aVDev->SetBackground(Wallpaper(COL_BLACK));
+        aVDev->Erase();
+        aVDev->SetRasterOp(RasterOp::Xor);
+        aVDev->DrawPixel(Point(-1, -1), COL_BLACK); // Sync state
+
+        // Call the stateless renderer with bAvoidVectorOverdraw = true
+        vcl::rendercontext::PrimitiveRenderer::DrawGradient(*pGraphics, aRect, aGradient, 10, true);
+
+        // Single-pass donut clipping ensures the center is drawn ONCE = White
+        exportDevice(u"13-10_vector_overdraw_printer.png"_ustr, aVDev);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(
+            "Printer pipeline failed XOR test (expected white due to donut clipping)", COL_WHITE,
+            aVDev->GetPixel(aCenter));
+    }
+
     void testLineJoinBevel()
     {
         vcl::test::OutputDeviceTestLine aOutDevTest;
@@ -1612,6 +1666,7 @@ public:
     CPPUNIT_TEST(testAxialGradient);
     CPPUNIT_TEST(testRadialGradient);
     CPPUNIT_TEST(testRadialGradientOfs);
+    CPPUNIT_TEST(testVectorOverdrawPolyPolygon);
 
     CPPUNIT_TEST(testLineCapRound);
     CPPUNIT_TEST(testLineCapSquare);

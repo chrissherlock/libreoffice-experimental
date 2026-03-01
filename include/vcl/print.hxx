@@ -129,7 +129,6 @@ protected:
     virtual void                ImplReleaseFonts() override;
 
     virtual tools::Long                GetGradientStepCount( tools::Long nMinRect ) override;
-    virtual bool                UsePolyPolygonForComplexGradient() override;
 
     bool                        CanSubsampleBitmap() const override { return false; }
     vcl::Region                 ClipToDeviceBounds(vcl::Region aRegion) const override;

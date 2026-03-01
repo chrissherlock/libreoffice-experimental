@@ -29,7 +29,6 @@ public:
     void SaveBackground(VirtualDevice&, const Point&, const Size&, const Size&) const override {}
     bool AcquireGraphics() const override { return true; }
     void ReleaseGraphics(bool) override {}
-    bool UsePolyPolygonForComplexGradient() override { return false; }
     bool CanAnimate() const override { return false; }
     virtual bool HasAlpha() const override { return false; }
 };
