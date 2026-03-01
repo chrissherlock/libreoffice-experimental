@@ -1087,6 +1087,11 @@ void PrimitiveRenderer::DrawStrikeoutChar(OutputDevice& rOutDev,
     rOutDev.SetTextColor(aColor);
     rOutDev.ImplInitTextColor();
 
+    comphelper::ScopeGuard aColorGuard([&rOutDev, aOldColor]() {
+        rOutDev.SetTextColor(aOldColor);
+        rOutDev.ImplInitTextColor();
+    });
+
     // CRITICAL FIX: rGeo.maOrigin already contains rOutDev.mpFontRealization offsets!
     // Do not add them again here, otherwise strikeout characters render completely out of bounds.
     pLayout->DrawBase() = basegfx::B2DPoint(aOriginPt.X(), aOriginPt.Y());
@@ -1106,9 +1111,6 @@ void PrimitiveRenderer::DrawStrikeoutChar(OutputDevice& rOutDev,
     }
 
     pLayout->DrawText(*rOutDev.mpGraphics);
-
-    rOutDev.SetTextColor(aOldColor);
-    rOutDev.ImplInitTextColor();
 }
 
 void PrimitiveRenderer::DrawTextLine(OutputDevice& rOutDev,
