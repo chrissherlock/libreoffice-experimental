@@ -1056,6 +1056,10 @@ static Point lcl_GetDecorationOrigin(const Point& rOrigin, Degree10 nOrientation
     return aOriginPt;
 }
 
+/**
+ * Pushes a clipping region to the OutputDevice for a text decoration.
+ * Uses RAII to ensure the clip is popped.
+ */
 [[nodiscard]] static auto lcl_BeginDecorationClipping(OutputDevice& rOutDev, const Point& rOrigin,
                                                       double fWidth, tools::Long nAscent,
                                                       tools::Long nDescent)
@@ -1067,7 +1071,6 @@ static Point lcl_GetDecorationOrigin(const Point& rOrigin, Degree10 nOrientation
     aPixelRect.SetTop(rOrigin.Y() - nAscent);
 
     const LogicalFontInstance& rFontInst = *rOutDev.GetFontInstance();
-
     const Degree10 nOrientation = rFontInst.mnOrientation;
 
     if (nOrientation)
@@ -1077,6 +1080,7 @@ static Point lcl_GetDecorationOrigin(const Point& rOrigin, Degree10 nOrientation
         aPixelRect = aPoly.GetBoundRect();
     }
 
+    // Crucial for overlines and rotated text to prevent "inside-out" empty rects
     aPixelRect.Normalize();
 
     rOutDev.Push(vcl::PushFlags::CLIPREGION);
@@ -1164,15 +1168,30 @@ void PrimitiveRenderer::DrawTextLine(OutputDevice& rOutDev,
         aDrawGeo.maOrigin.AdjustX(nXAdd - 1);
     }
 
+    const LogicalFontInstance& rFontInst = *rOutDev.GetFontInstance();
+    const tools::Long nAscent = rFontInst.mxFontMetric->GetAscent();
+    const tools::Long nDescent = rFontInst.mxFontMetric->GetDescent();
+
     if (aDrawGeo.meUnderline != LINESTYLE_NONE)
     {
         if (aInfo.bUnderlineIsWave)
+        {
             PrimitiveRenderer::DrawWaveTextLine(rOutDev, aDrawGeo, aInfo.nUnderlineOffset,
                                                 aUnderlineColor, aDrawGeo.mbUnderlineAbove);
+        }
         else
-            // Straight lines manage their own offsets mathematically; pass 0
+        {
+            // Protect the straight line with a clipped region
+            Point aUnderlineOrigin
+                = lcl_GetDecorationOrigin(aDrawGeo.maOrigin, rFontInst.mnOrientation,
+                                          aDrawGeo.mnDistX, aInfo.nUnderlineOffset);
+
+            auto aClipGuard = lcl_BeginDecorationClipping(rOutDev, aUnderlineOrigin,
+                                                          aDrawGeo.mfWidth, nAscent, nDescent);
+
             PrimitiveRenderer::DrawStraightTextLine(rOutDev, aDrawGeo, 0, aUnderlineColor,
                                                     aDrawGeo.mbUnderlineAbove);
+        }
     }
 
     if (aDrawGeo.meOverline != LINESTYLE_NONE)
@@ -1182,20 +1201,44 @@ void PrimitiveRenderer::DrawTextLine(OutputDevice& rOutDev,
         aOverlineGeo.meUnderline = aDrawGeo.meOverline;
 
         if (aInfo.bOverlineIsWave)
+        {
             PrimitiveRenderer::DrawWaveTextLine(rOutDev, aOverlineGeo, aInfo.nOverlineOffset,
                                                 aOverlineColor, true);
+        }
         else
-            // Straight lines manage their own offsets mathematically; pass 0
+        {
+            // The Normalize() fix inside lcl_BeginDecorationClipping prevents the overline
+            // from vanishing when positioned at negative offsets.
+            Point aOverlineOrigin
+                = lcl_GetDecorationOrigin(aDrawGeo.maOrigin, rFontInst.mnOrientation,
+                                          aDrawGeo.mnDistX, aInfo.nOverlineOffset);
+
+            auto aClipGuard = lcl_BeginDecorationClipping(rOutDev, aOverlineOrigin,
+                                                          aDrawGeo.mfWidth, nAscent, nDescent);
+
             PrimitiveRenderer::DrawStraightTextLine(rOutDev, aOverlineGeo, 0, aOverlineColor, true);
+        }
     }
 
     if (aDrawGeo.meStrikeout != STRIKEOUT_NONE)
     {
         if (aDrawGeo.meStrikeout == STRIKEOUT_SLASH || aDrawGeo.meStrikeout == STRIKEOUT_X)
+        {
             PrimitiveRenderer::DrawStrikeoutChar(rOutDev, aDrawGeo, 0, aStrikeoutColor);
+        }
         else
+        {
+            // Line-based strikeouts
+            Point aStrikeoutOrigin
+                = lcl_GetDecorationOrigin(aDrawGeo.maOrigin, rFontInst.mnOrientation,
+                                          aDrawGeo.mnDistX, aInfo.nStrikeoutOffset);
+
+            auto aClipGuard = lcl_BeginDecorationClipping(rOutDev, aStrikeoutOrigin,
+                                                          aDrawGeo.mfWidth, nAscent, nDescent);
+
             PrimitiveRenderer::DrawStrikeoutLine(rOutDev, aDrawGeo, aInfo.nStrikeoutOffset,
                                                  aStrikeoutColor);
+        }
     }
 }
 
