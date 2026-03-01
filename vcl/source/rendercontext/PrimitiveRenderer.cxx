@@ -1022,6 +1022,40 @@ void PrimitiveRenderer::DrawStrikeoutLine(OutputDevice& rOutDev,
     }
 }
 
+/**
+ * Calculates the rotated and offset origin point for text decorations.
+ *
+ * @param rOrigin      The base origin of the text (the baseline start).
+ * @param nOrientation The font rotation in Degree10 (0.1 degree units).
+ * @param nDistX       The horizontal offset along the baseline.
+ * @param nY           The vertical offset relative to the baseline.
+ * @return             The final Point in logical coordinates.
+ */
+static Point lcl_GetDecorationOrigin(const Point& rOrigin, Degree10 nOrientation,
+                                     tools::Long nDistX, tools::Long nY)
+{
+    Point aOriginPt = rOrigin;
+
+    if (nDistX || nY)
+    {
+        tools::Long nTmpX = nDistX;
+        tools::Long nTmpY = nY;
+
+        if (nOrientation)
+        {
+            // Rotate the relative offsets around the (0,0) pivot
+            // before applying them to the absolute origin.
+            Point aOffset(0, 0);
+            aOffset.RotateAround(nTmpX, nTmpY, nOrientation);
+        }
+
+        aOriginPt.AdjustX(nTmpX);
+        aOriginPt.AdjustY(nTmpY);
+    }
+
+    return aOriginPt;
+}
+
 void PrimitiveRenderer::DrawStrikeoutChar(OutputDevice& rOutDev,
                                           const vcl::rendercontext::TextLineGeometry& rGeo,
                                           tools::Long nY, Color aColor)
@@ -1046,21 +1080,8 @@ void PrimitiveRenderer::DrawStrikeoutChar(OutputDevice& rOutDev,
     if (!pLayout)
         return;
 
-    Point aOriginPt = rGeo.maOrigin;
-    if (rGeo.mnDistX || nY)
-    {
-        tools::Long nTmpX = rGeo.mnDistX;
-        tools::Long nTmpY = nY;
-
-        if (rOutDev.mpFontInstance->mnOrientation)
-        {
-            Point aPivot(0, 0);
-            aPivot.RotateAround(nTmpX, nTmpY, rOutDev.mpFontInstance->mnOrientation);
-        }
-
-        aOriginPt.AdjustX(nTmpX);
-        aOriginPt.AdjustY(nTmpY);
-    }
+    Point aOriginPt = lcl_GetDecorationOrigin(rGeo.maOrigin, rOutDev.mpFontInstance->mnOrientation,
+                                              rGeo.mnDistX, nY);
 
     const Color aOldColor = rOutDev.GetTextColor();
     rOutDev.SetTextColor(aColor);
