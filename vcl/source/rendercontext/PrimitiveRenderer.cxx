@@ -1110,6 +1110,11 @@ void PrimitiveRenderer::DrawStrikeoutChar(OutputDevice& rOutDev,
         aPixelRect = aPoly.GetBoundRect();
     }
 
+    aPixelRect.Normalize();
+
+    auto guard = rOutDev.ScopedPush(vcl::PushFlags::CLIPREGION);
+    rOutDev.IntersectClipRegion(aPixelRect);
+
     pLayout->DrawText(*rOutDev.mpGraphics);
 }
 
