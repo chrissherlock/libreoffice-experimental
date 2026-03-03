@@ -23,6 +23,7 @@
 #include <tools/debug.hxx>
 #include <tools/helpers.hxx>
 
+#include <vcl/deviceconcepts.hxx>
 #include <vcl/rendercontext/BitmapRenderer.hxx>
 #include <vcl/image.hxx>
 #include <vcl/metafile/MetaAction.hxx>
@@ -36,6 +37,7 @@
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
 #include <bitmap/bmpfast.hxx>
+#include <devicedispatcher.hxx>
 #include <drawmode.hxx>
 #include <salbmp.hxx>
 #include <salgdi.hxx>
@@ -329,9 +331,9 @@ bool OutputDevice::HasFastDrawTransformedBitmap() const
 }
 
 bool OutputDevice::DrawTransformedBitmap(
-        const basegfx::B2DHomMatrix& aFullTransform,
-        const Bitmap& rBitmap,
-        double fAlpha)
+    const basegfx::B2DHomMatrix& aFullTransform,
+    const Bitmap& rBitmap,
+    double fAlpha)
 {
     assert(!is_double_buffered_window());
 
@@ -341,23 +343,43 @@ bool OutputDevice::DrawTransformedBitmap(
     if (!mpGraphics && !AcquireGraphics())
         return false;
 
-    basegfx::B2DPoint aNull(aFullTransform * basegfx::B2DPoint(0.0, 0.0));
-    basegfx::B2DPoint aTopX(aFullTransform * basegfx::B2DPoint(1.0, 0.0));
-    basegfx::B2DPoint aTopY(aFullTransform * basegfx::B2DPoint(0.0, 1.0));
+    return vcl::DispatchDevice(*this, [&](auto& rConcreteDevice) -> bool {
 
-    const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
-    if (bRTL)
-    {
-        tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
-        double fMirrorOrigin = static_cast<double>(nFrameWidth - 1);
+        using DeviceType = std::decay_t<decltype(rConcreteDevice)>;
 
-        aNull.setX(fMirrorOrigin - aNull.getX());
-        aTopX.setX(fMirrorOrigin - aTopX.getX());
-        aTopY.setX(fMirrorOrigin - aTopY.getX());
-    }
+        // Logical records don't have "Fast" hardware paths; they record the matrix directly.
+        if constexpr (vcl::LogicalRecorder<DeviceType>)
+        {
+            // PDFWriterImpl overrides the drawing methods to record the
+            // transformation matrix as a vector object.
+            return false; // Fall back to standard recording machinery
+        }
 
-    return vcl::rendercontext::BitmapRenderer::DrawTransformedBitmap(
-        *mpGraphics, aNull, aTopX, aTopY, rBitmap, fAlpha);
+        if constexpr (vcl::HWAccelerated<DeviceType>)
+        {
+            // Calculate the three points defining the transformed parallelogram
+            basegfx::B2DPoint aNull(aFullTransform * basegfx::B2DPoint(0.0, 0.0));
+            basegfx::B2DPoint aTopX(aFullTransform * basegfx::B2DPoint(1.0, 0.0));
+            basegfx::B2DPoint aTopY(aFullTransform * basegfx::B2DPoint(0.0, 1.0));
+
+            const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+            if (bRTL)
+            {
+                tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+                double fMirrorOrigin = static_cast<double>(nFrameWidth - 1);
+
+                aNull.setX(fMirrorOrigin - aNull.getX());
+                aTopX.setX(fMirrorOrigin - aTopX.getX());
+                aTopY.setX(fMirrorOrigin - aTopY.getX());
+            }
+
+            return vcl::rendercontext::BitmapRenderer::DrawTransformedBitmap(
+                *mpGraphics, aNull, aTopX, aTopY, rBitmap, fAlpha);
+        }
+
+        // fallback (Printers, etc.)
+        return false;
+    });
 }
 
 void OutputDevice::DrawImage( const Point& rPos, const Image& rImage, DrawImageFlags nStyle )
