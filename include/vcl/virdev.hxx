@@ -17,17 +17,33 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#ifndef INCLUDED_VCL_VIRDEV_HXX
-#define INCLUDED_VCL_VIRDEV_HXX
+#pragma once
 
 #include <vcl/dllapi.h>
 #include <vcl/outdev.hxx>
+#include <vcl/deviceconcepts.hxx>
 #include <vcl/salgtype.hxx>
+
 #include <memory>
 
+class VirtualDevice;
 class SalVirtualDevice;
 struct SystemGraphicsData;
 typedef struct _cairo_surface cairo_surface_t;
+
+namespace vcl
+{
+
+/**
+ * Opt the VirtualDevice class into hardware acceleration paths.
+ * This satisfies the HWAccelerated<T> concept, allowing generic rendering
+ * algorithms to compile fast-paths for Skia/OpenGL rendering directly to
+ * the off-screen memory buffers, bypassing slow software math.
+ */
+template <>
+struct supports_hw_acceleration<VirtualDevice> : std::true_type {};
+
+}
 
 class SAL_WARN_UNUSED VCL_DLLPUBLIC VirtualDevice : public OutputDevice
 {
@@ -148,7 +164,5 @@ protected:
     virtual tools::Long        GetFontExtLeading() const override;
 
 };
-
-#endif // INCLUDED_VCL_VIRDEV_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

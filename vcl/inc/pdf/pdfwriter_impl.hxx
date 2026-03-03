@@ -21,6 +21,40 @@
 
 #include <sal/config.h>
 
+#include <osl/file.hxx>
+#include <rtl/strbuf.hxx>
+#include <rtl/ustring.hxx>
+#include <tools/gen.hxx>
+#include <tools/stream.hxx>
+#include <comphelper/hash.hxx>
+#include <o3tl/safeint.hxx>
+#include <o3tl/typed_flags_set.hxx>
+#include <o3tl/lru_map.hxx>
+
+#include <vcl/alpha.hxx>
+#include <vcl/bitmap.hxx>
+#include <vcl/gradient.hxx>
+#include <vcl/graphictools.hxx>
+#include <vcl/hatch.hxx>
+#include <vcl/virdev.hxx>
+#include <vcl/pdfwriter.hxx>
+#include <vcl/wall.hxx>
+#include <vcl/BinaryDataContainer.hxx>
+#include <vcl/pdf/PDFNote.hxx>
+#include <vcl/deviceconcepts.hxx>
+#include <vcl/filter/pdfobjectcontainer.hxx>
+#include <vcl/settings.hxx>
+
+#include <pdf/ResourceDict.hxx>
+#include <pdf/BitmapID.hxx>
+#include <pdf/Matrix3.hxx>
+#include <pdf/ExternalPDFStreams.hxx>
+#include <pdf/pdfbuildin_fonts.hxx>
+#include <salgdi.hxx>
+
+#include <com/sun/star/lang/Locale.hpp>
+#include <com/sun/star/util/XURLTransformer.hpp>
+
 #include <map>
 #include <list>
 #include <unordered_map>
@@ -30,38 +64,6 @@
 #include <vector>
 #include <stack>
 #include <variant>
-
-#include <pdf/ResourceDict.hxx>
-#include <pdf/BitmapID.hxx>
-#include <pdf/Matrix3.hxx>
-
-#include <com/sun/star/lang/Locale.hpp>
-#include <com/sun/star/util/XURLTransformer.hpp>
-#include <osl/file.hxx>
-#include <rtl/strbuf.hxx>
-#include <rtl/ustring.hxx>
-#include <tools/gen.hxx>
-#include <vcl/alpha.hxx>
-#include <vcl/bitmap.hxx>
-#include <vcl/gradient.hxx>
-#include <vcl/graphictools.hxx>
-#include <vcl/hatch.hxx>
-#include <vcl/virdev.hxx>
-#include <vcl/pdfwriter.hxx>
-#include <vcl/wall.hxx>
-#include <o3tl/safeint.hxx>
-#include <o3tl/typed_flags_set.hxx>
-#include <o3tl/lru_map.hxx>
-#include <comphelper/hash.hxx>
-#include <tools/stream.hxx>
-#include <vcl/BinaryDataContainer.hxx>
-#include <vcl/pdf/PDFNote.hxx>
-
-#include <vcl/filter/pdfobjectcontainer.hxx>
-#include <vcl/settings.hxx>
-#include <pdf/ExternalPDFStreams.hxx>
-#include <pdf/pdfbuildin_fonts.hxx>
-#include <salgdi.hxx>
 
 class FontSubsetInfo;
 class ZCodec;
@@ -708,6 +710,27 @@ struct PDFDocumentAttachedFile
 class IPDFEncryptor;
 
 } // end pdf namespace
+
+class PDFWriterImpl;
+
+/**
+ * Opt the PDFWriterImpl class into the LogicalRecorder concept.
+ * Despite inheriting from VirtualDevice, the PDF writer intercepts draw operations
+ * to record them as vector PDF commands. This trait ensures generic rendering
+ * algorithms preserve high-fidelity logical coordinates instead of prematurely
+ * downscaling them to device pixels.
+ */
+template <>
+struct is_logical_recorder<PDFWriterImpl> : std::true_type {};
+
+/**
+ * Explicitly opt-out of hardware acceleration.
+ * Because VirtualDevice is opted IN to HW acceleration, and PDFWriterImpl
+ * inherits from VirtualDevice, we must explicitly tell the compiler that
+ * the PDF backend cannot use Skia/OpenGL fast-paths.
+ */
+template <>
+struct supports_hw_acceleration<PDFWriterImpl> : std::false_type {};
 
 class PDFWriterImpl final : public VirtualDevice, public PDFObjectContainer
 {

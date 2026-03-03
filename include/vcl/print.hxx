@@ -17,8 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#ifndef INCLUDED_VCL_PRINT_HXX
-#define INCLUDED_VCL_PRINT_HXX
+#pragma once
 
 #include <sal/config.h>
 
@@ -26,11 +25,11 @@
 #include <rtl/ustring.hxx>
 #include <tools/gen.hxx>
 #include <tools/long.hxx>
+#include <comphelper/errcode.hxx>
 
 #include <vcl/dllapi.h>
-#include <utility>
-#include <comphelper/errcode.hxx>
 #include <vcl/outdev.hxx>
+#include <vcl/deviceconcepts.hxx>
 #include <vcl/prntypes.hxx>
 #include <vcl/jobset.hxx>
 
@@ -39,7 +38,9 @@
 
 #include <memory>
 #include <unordered_map>
+#include <utility>
 
+class Printer;
 class GDIMetaFile;
 class SalInfoPrinter;
 struct SalPrinterQueueInfo;
@@ -51,13 +52,24 @@ enum class SalPrinterError;
 enum class PrinterSupport;
 enum Paper : unsigned int;
 
-namespace vcl {
-    class PrinterController;
+namespace vcl
+{
+class PrinterController;
 
-    namespace printer {
-        class Options;
-    }
+namespace printer {
+    class Options;
 }
+
+/**
+ * Opt the Printer class into strict geometric culling.
+ * This satisfies the StrictlyCulled<T> concept, ensuring that any generic
+ * rendering algorithms know to intersect draw operations with the physical
+ * page margins to prevent memory exhaustion on high-DPI prints.
+ */
+template <>
+struct needs_strict_culling<Printer> : std::true_type {};
+
+} // namespace vcl
 
 namespace weld { class Window; }
 namespace com::sun::star::view { enum class PrintableState; }
@@ -623,8 +635,5 @@ public:
 }; // class PrinterOptionsHelper
 
 } // namespace vcl
-
-
-#endif // INCLUDED_VCL_PRINT_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

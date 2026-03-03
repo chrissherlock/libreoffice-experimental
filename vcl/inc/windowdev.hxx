@@ -20,9 +20,21 @@
 #pragma once
 
 #include <vcl/outdev.hxx>
+#include <vcl/deviceconcepts.hxx>
 
 namespace vcl
 {
+class WindowOutputDevice;
+
+/**
+ * Opt the WindowOutputDevice class into hardware acceleration paths.
+ * This satisfies the HWAccelerated<T> concept, allowing generic algorithms
+ * to compile Skia/OpenGL fast-paths that draw directly to the window surface.
+ */
+template <> struct supports_hw_acceleration<WindowOutputDevice> : std::true_type
+{
+};
+
 class WindowOutputDevice final : public ::OutputDevice
 {
 public:
