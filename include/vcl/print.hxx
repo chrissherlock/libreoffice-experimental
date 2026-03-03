@@ -175,9 +175,6 @@ protected:
     bool                        DrawTransformedBitmap(const basegfx::B2DHomMatrix& aFullTransform,
                                     const Bitmap& rBitmap, double fAlpha = 1.0) override;
 
-    bool                        TransformAndReduceBitmapExToTargetRange( const basegfx::B2DHomMatrix& aFullTransform,
-                                    basegfx::B2DRange &aVisibleRange, double &fMaximumArea) override;
-
     void                        DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize,
                                     const Point& rSrcPtPixel, const Size& rSrcSizePixel,
                                     Bitmap& rBitmap ) override;

@@ -181,16 +181,6 @@ bool Printer::DrawTransformedBitmap(
     return false;
 }
 
-bool Printer::TransformAndReduceBitmapExToTargetRange(
-    const basegfx::B2DHomMatrix& /*aFullTransform*/,
-    basegfx::B2DRange& /*aVisibleRange*/,
-    double& /*fMaximumArea*/)
-{
-    // deliberately do nothing - you can't reduce the
-    // target range for a printer at all
-    return true;
-}
-
 void Printer::DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize,
                                 const Point& rSrcPtPixel, const Size& rSrcSizePixel,
                                 Bitmap& rBmp )

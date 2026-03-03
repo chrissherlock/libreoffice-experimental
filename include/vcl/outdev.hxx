@@ -1467,7 +1467,7 @@ protected:
       @returns true if there is an area to be drawn, otherwise nothing is left to be drawn
         so return false
       */
-    virtual bool                TransformAndReduceBitmapExToTargetRange(
+    bool                       GetVisibleDeviceRange(
                                     const basegfx::B2DHomMatrix& aFullTransform,
                                     basegfx::B2DRange &aVisibleRange,
                                     double &fMaximumArea);

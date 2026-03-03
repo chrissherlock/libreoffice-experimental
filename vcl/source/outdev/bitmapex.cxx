@@ -8,13 +8,13 @@
  *
  * This file incorporates work covered by the following license notice:
  *
- *   Licensed to the Apache Software Foundation (ASF) under one or more
- *   contributor license agreements. See the NOTICE file distributed
- *   with this work for additional information regarding copyright
- *   ownership. The ASF licenses this file to you under the Apache
- *   License, Version 2.0 (the "License"); you may not use this file
- *   except in compliance with the License. You may obtain a copy of
- *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed
+ * with this work for additional information regarding copyright
+ * ownership. The ASF licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of
+ * the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
 #include <config_features.h>
@@ -33,83 +33,6 @@
 #include <GraphicsState.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
-
-bool OutputDevice::TransformAndReduceBitmapExToTargetRange(
-        const basegfx::B2DHomMatrix& aFullTransform,
-        basegfx::B2DRange &aVisibleRange,
-        double &fMaximumArea)
-{
-    // limit TargetRange to existing pixels (if pixel device)
-    // first get discrete range of object
-    basegfx::B2DRange aFullPixelRange(aVisibleRange);
-
-    aFullPixelRange.transform(aFullTransform);
-
-    if(basegfx::fTools::equalZero(aFullPixelRange.getWidth()) || basegfx::fTools::equalZero(aFullPixelRange.getHeight()))
-    {
-        // object is outside of visible area
-        return false;
-    }
-
-    // now get discrete target pixels; start with OutDev pixel size and evtl.
-    // intersect with active clipping area
-    basegfx::B2DRange aOutPixel(
-        0.0,
-        0.0,
-        GetOutputSizePixel().Width(),
-        GetOutputSizePixel().Height());
-
-    if(HasClipRegion())
-    {
-        tools::Rectangle aRegionRectangle(GetActiveClipRegion().GetBoundRect());
-
-        // caution! Range from rectangle, one too much (!)
-        aRegionRectangle.AdjustRight(-1);
-        aRegionRectangle.AdjustBottom(-1);
-        aOutPixel.intersect( vcl::unotools::b2DRectangleFromRectangle(aRegionRectangle) );
-    }
-
-    if(aOutPixel.isEmpty())
-    {
-        // no active output area
-        return false;
-    }
-
-    // if aFullPixelRange is not completely inside of aOutPixel,
-    // reduction of target pixels is possible
-    basegfx::B2DRange aVisiblePixelRange(aFullPixelRange);
-
-    if(!aOutPixel.isInside(aFullPixelRange))
-    {
-        aVisiblePixelRange.intersect(aOutPixel);
-
-        if(aVisiblePixelRange.isEmpty())
-        {
-            // nothing in visible part, reduces to nothing
-            return false;
-        }
-
-        // aVisiblePixelRange contains the reduced output area in
-        // discrete coordinates. To make it useful everywhere, make it relative to
-        // the object range
-        basegfx::B2DHomMatrix aMakeVisibleRangeRelative;
-
-        aVisibleRange = aVisiblePixelRange;
-        aMakeVisibleRangeRelative.translate(
-            -aFullPixelRange.getMinX(),
-            -aFullPixelRange.getMinY());
-        aMakeVisibleRangeRelative.scale(
-            1.0 / aFullPixelRange.getWidth(),
-            1.0 / aFullPixelRange.getHeight());
-        aVisibleRange.transform(aMakeVisibleRangeRelative);
-    }
-
-    const double fNewMaxArea(aVisiblePixelRange.getWidth() * aVisiblePixelRange.getHeight());
-
-    fMaximumArea = std::min(4096000.0, fNewMaxArea + 1.0);
-
-    return true;
-}
 
 // MM02 add some test class to get a simple timer-based output to be able
 // to check if it gets faster - and how much. Uncomment next line or set
@@ -305,11 +228,10 @@ void OutputDevice::DrawTransformedBitmapEx(
     const double fOrigAreaScaled(fOrigArea * 1.44);
     double fMaximumArea(std::clamp(fOrigAreaScaled, 1000000.0, 4500000.0));
 
-    if(!GetConnectMetaFile())
-    {
-        if ( !TransformAndReduceBitmapExToTargetRange( aFullTransform, aVisibleRange, fMaximumArea ) )
-            return;
-    }
+    // Notice we no longer need the `if(!GetConnectMetaFile())` wrapper here!
+    // The inner function now safely handles logical skipping internally.
+    if ( !GetVisibleDeviceRange( aFullTransform, aVisibleRange, fMaximumArea ) )
+        return;
 
     if(aVisibleRange.isEmpty())
         return;

@@ -21,9 +21,12 @@
 #include <osl/diagnose.h>
 #include <tools/debug.hxx>
 
+#include <vcl/canvastools.hxx>
+#include <vcl/deviceconcepts.hxx>
 #include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/virdev.hxx>
 
+#include <devicedispatcher.hxx>
 #include <ClippingController.hxx>
 #include <GraphicsState.hxx>
 #include <salgdi.hxx>
@@ -52,6 +55,100 @@ void OutputDevice::SaveBackground(VirtualDevice& rSaveDevice,
                                   const Point& rPos, const Size& rSize, const Size& rBackgroundSize) const
 {
    rSaveDevice.DrawOutDev(Point(), rBackgroundSize, rPos, rSize, *this);
+}
+
+bool OutputDevice::GetVisibleDeviceRange(
+        const basegfx::B2DHomMatrix& aFullTransform,
+        basegfx::B2DRange &aVisibleRange,
+        double &fMaximumArea)
+{
+    return vcl::DispatchDevice(*this, [&](auto& rConcreteDevice) -> bool {
+
+        using DeviceType = std::decay_t<decltype(rConcreteDevice)>;
+
+        // Logical recorders (Metafiles/PDFs) have infinite canvases.
+        // We MUST NOT cull them against physical pixel bounds, or we risk
+        // cropping vector data permanently.
+        const bool bIsLogical = vcl::LogicalRecorder<DeviceType> || GetConnectMetaFile();
+        if (bIsLogical)
+            return true;
+
+        // For non-strictly-culled physical devices (like VirtualDevice memory buffers),
+        // we might eventually want to bypass this too, but historically VCL culls
+        // all non-metafile outputs to save RAM during the software transform.
+        // We leave the culling intact for all physical paths for now.
+
+        // limit TargetRange to existing pixels (if pixel device)
+        // first get discrete range of object
+        basegfx::B2DRange aFullPixelRange(aVisibleRange);
+
+        aFullPixelRange.transform(aFullTransform);
+
+        if(basegfx::fTools::equalZero(aFullPixelRange.getWidth()) || basegfx::fTools::equalZero(aFullPixelRange.getHeight()))
+        {
+            // object is outside of visible area
+            return false;
+        }
+
+        // now get discrete target pixels; start with OutDev pixel size and evtl.
+        // intersect with active clipping area
+        basegfx::B2DRange aOutPixel(
+            0.0,
+            0.0,
+            GetOutputSizePixel().Width(),
+            GetOutputSizePixel().Height());
+
+        if(HasClipRegion())
+        {
+            tools::Rectangle aRegionRectangle(GetActiveClipRegion().GetBoundRect());
+
+            // caution! Range from rectangle, one too much (!)
+            aRegionRectangle.AdjustRight(-1);
+            aRegionRectangle.AdjustBottom(-1);
+            aOutPixel.intersect( vcl::unotools::b2DRectangleFromRectangle(aRegionRectangle) );
+        }
+
+        if(aOutPixel.isEmpty())
+        {
+            // no active output area
+            return false;
+        }
+
+        // if aFullPixelRange is not completely inside of aOutPixel,
+        // reduction of target pixels is possible
+        basegfx::B2DRange aVisiblePixelRange(aFullPixelRange);
+
+        if(!aOutPixel.isInside(aFullPixelRange))
+        {
+            aVisiblePixelRange.intersect(aOutPixel);
+
+            if(aVisiblePixelRange.isEmpty())
+            {
+                // nothing in visible part, reduces to nothing
+                return false;
+            }
+
+            // aVisiblePixelRange contains the reduced output area in
+            // discrete coordinates. To make it useful everywhere, make it relative to
+            // the object range
+            basegfx::B2DHomMatrix aMakeVisibleRangeRelative;
+
+            aVisibleRange = aVisiblePixelRange;
+            aMakeVisibleRangeRelative.translate(
+                -aFullPixelRange.getMinX(),
+                -aFullPixelRange.getMinY());
+            aMakeVisibleRangeRelative.scale(
+                1.0 / aFullPixelRange.getWidth(),
+                1.0 / aFullPixelRange.getHeight());
+            aVisibleRange.transform(aMakeVisibleRangeRelative);
+        }
+
+        const double fNewMaxArea(aVisiblePixelRange.getWidth() * aVisiblePixelRange.getHeight());
+
+        fMaximumArea = std::min(4096000.0, fNewMaxArea + 1.0);
+
+        return true;
+    });
 }
 
 vcl::Region OutputDevice::GetClipRegion() const
