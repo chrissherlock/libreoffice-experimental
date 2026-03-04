@@ -325,11 +325,11 @@ void doSpeedCompare(double fTrans, const Bitmap& rContent, const tools::Rectangl
     // loop nRepeat times
     for (a = 0; a < nRepeat; a++)
     {
-        // New method using DrawTransformedBitmapEx & fTrans directly
-        rOutDev.DrawTransformedBitmapEx(basegfx::utils::createScaleTranslateB2DHomMatrix(
-                                            aSizePixel.Width(), aSizePixel.Height(),
-                                            rDestPixel.TopLeft().X(), rDestPixel.TopLeft().Y()),
-                                        rContent, 1 - fTrans);
+        // New method using DrawTransformedBitmap & fTrans directly
+        rOutDev.DrawTransformedBitmap(basegfx::utils::createScaleTranslateB2DHomMatrix(
+                                          aSizePixel.Width(), aSizePixel.Height(),
+                                          rDestPixel.TopLeft().X(), rDestPixel.TopLeft().Y()),
+                                      rContent, 1 - fTrans);
     }
 
     // get end time
@@ -540,12 +540,12 @@ void impBufferDevice::paint(double fTrans)
 
             if (bUseNew)
             {
-                // New method using DrawTransformedBitmapEx & fTrans directly
-                mrOutDev.DrawTransformedBitmapEx(basegfx::utils::createScaleTranslateB2DHomMatrix(
-                                                     aSizePixel.Width(), aSizePixel.Height(),
-                                                     maDestPixel.TopLeft().X(),
-                                                     maDestPixel.TopLeft().Y()),
-                                                 aContent, 1 - fTrans);
+                // New method using DrawTransformedBitmap & fTrans directly
+                mrOutDev.DrawTransformedBitmap(basegfx::utils::createScaleTranslateB2DHomMatrix(
+                                                   aSizePixel.Width(), aSizePixel.Height(),
+                                                   maDestPixel.TopLeft().X(),
+                                                   maDestPixel.TopLeft().Y()),
+                                               aContent, 1 - fTrans);
             }
             else
             {

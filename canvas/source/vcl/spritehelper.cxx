@@ -182,7 +182,7 @@ namespace vclcanvas
         aMoveTransform.translate( aOutPos.X(), aOutPos.Y() );
         aTransform = aMoveTransform * aTransform * aSizeTransform;
 
-        rTargetSurface.DrawTransformedBitmapEx( aTransform, *maContent, fAlpha );
+        rTargetSurface.DrawTransformedBitmap( aTransform, *maContent, fAlpha );
 
         rTargetSurface.Pop();
 

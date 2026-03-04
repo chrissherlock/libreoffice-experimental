@@ -1247,7 +1247,7 @@ public:
                         break;
                     }
                     aTransform.translate(p.X(), p.Y());
-                    rDev.DrawTransformedBitmapEx(aTransform, maIcons[i]);
+                    rDev.DrawTransformedBitmap(aTransform, maIcons[i]);
                 }
 
                 // next position

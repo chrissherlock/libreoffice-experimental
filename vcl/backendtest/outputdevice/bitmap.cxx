@@ -38,7 +38,7 @@ Bitmap OutputDeviceTestBitmap::setupDrawTransformedBitmap(vcl::PixelFormat aBitm
     aTransform.translate((maVDRectangle.GetWidth()  / 2.0) - (aBitmapSize.Width() / 2.0),
                          (maVDRectangle.GetHeight() / 2.0) - (aBitmapSize.Height() / 2.0));
 
-    mpVirtualDevice->DrawTransformedBitmapEx(aTransform, aBitmap);
+    mpVirtualDevice->DrawTransformedBitmap(aTransform, aBitmap);
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
 }
@@ -60,7 +60,7 @@ Bitmap OutputDeviceTestBitmap::setupComplexDrawTransformedBitmap(vcl::PixelForma
     aTransform.scale(aBitmapSize.Width() * 2, aBitmapSize.Height() * 2);
     aTransform.translate(1, 1);
 
-    mpVirtualDevice->DrawTransformedBitmapEx(aTransform, aBitmap);
+    mpVirtualDevice->DrawTransformedBitmap(aTransform, aBitmap);
 
     return mpVirtualDevice->GetBitmap(maVDRectangle.TopLeft(), maVDRectangle.GetSize());
 }

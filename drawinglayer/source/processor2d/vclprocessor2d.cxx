@@ -610,10 +610,10 @@ void VclProcessor2D::RenderBitmapPrimitive2D(const primitive2d::BitmapPrimitive2
     }
 
     // #122923# do no longer add Alpha channel here; the right place to do this is when really
-    // the own transformer is used (see OutputDevice::DrawTransformedBitmapEx).
+    // the own transformer is used (see OutputDevice::DrawTransformedBitmap).
 
-    // draw using OutputDevice'sDrawTransformedBitmapEx
-    mpOutputDevice->DrawTransformedBitmapEx(aLocalTransform, aBitmap);
+    // draw using OutputDevice'sDrawTransformedBitmap
+    mpOutputDevice->DrawTransformedBitmap(aLocalTransform, aBitmap);
 }
 
 void VclProcessor2D::RenderFillGraphicPrimitive2D(

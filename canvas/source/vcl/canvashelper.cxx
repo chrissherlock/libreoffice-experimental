@@ -714,7 +714,7 @@ namespace vclcanvas
                 aMatrix = aMatrix * aSizeTransform;
                 const double fAlpha = bModulateColors ? renderState.DeviceColor[3] : 1.0;
 
-                mpOutDevProvider->getOutDev().DrawTransformedBitmapEx( aMatrix, aBmp, fAlpha );
+                mpOutDevProvider->getOutDev().DrawTransformedBitmap( aMatrix, aBmp, fAlpha );
                 if( mp2ndOutDevProvider )
                 {
                     if( aBmp.HasAlpha() )
@@ -738,7 +738,7 @@ namespace vclcanvas
                         }
                     }
 
-                    mp2ndOutDevProvider->getOutDev().DrawTransformedBitmapEx( aMatrix, aBmp );
+                    mp2ndOutDevProvider->getOutDev().DrawTransformedBitmap( aMatrix, aBmp );
                 }
                 return uno::Reference< rendering::XCachedPrimitive >(nullptr);
             }

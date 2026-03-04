@@ -22,6 +22,9 @@
 #include <osl/diagnose.h>
 #include <tools/debug.hxx>
 #include <tools/helpers.hxx>
+#include <tools/mapunit.hxx>
+#include <basegfx/matrix/b2dhommatrixtools.hxx>
+#include <comphelper/lok.hxx>
 
 #include <vcl/deviceconcepts.hxx>
 #include <vcl/rendercontext/BitmapRenderer.hxx>
@@ -401,6 +404,302 @@ void OutputDevice::DrawImage( const Point& rPos, const Size& rSize,
         else
             rImage.Draw(this, rPos, nStyle);
     }
+}
+
+// MM02 add some test class to get a simple timer-based output to be able
+// to check if it gets faster - and how much. Uncomment next line or set
+// DO_TIME_TEST for compile time if you want to use it
+// #define DO_TIME_TEST
+#ifdef DO_TIME_TEST
+#include <tools/time.hxx>
+struct LocalTimeTest
+{
+    const sal_uInt64 nStartTime;
+    LocalTimeTest() : nStartTime(tools::Time::GetSystemTicks()) {}
+    ~LocalTimeTest()
+    {
+        const sal_uInt64 nEndTime(tools::Time::GetSystemTicks());
+        const sal_uInt64 nDiffTime(nEndTime - nStartTime);
+
+        if(nDiffTime > 0)
+        {
+            OStringBuffer aOutput("Time: ");
+            OString aNumber(OString::number(nDiffTime));
+            aOutput.append(aNumber);
+            OSL_FAIL(aOutput.getStr());
+        }
+    }
+};
+#endif
+
+void OutputDevice::DrawScaledAndTranslatedBitmap(
+        const basegfx::B2DVector& rScale, const basegfx::B2DVector& rTranslate,
+        const Bitmap& rBitmap)
+{
+    // with no rotation, shear or mirroring it can be mapped to DrawBitmap
+    // do *not* execute the mirroring here, it's done in the fallback
+    // #i124580# the correct DestSize needs to be calculated based on MaxXY values
+    Point aDestPt(basegfx::fround<tools::Long>(rTranslate.getX()), basegfx::fround<tools::Long>(rTranslate.getY()));
+
+    const Size aDestSize(
+        basegfx::fround<tools::Long>(rScale.getX() + rTranslate.getX()) - aDestPt.X(),
+        basegfx::fround<tools::Long>(rScale.getY() + rTranslate.getY()) - aDestPt.Y());
+
+    const Point aOrigin = GetMapMode().GetOrigin();
+
+    if (!GetConnectMetaFile() && comphelper::LibreOfficeKit::isActive() && GetMapMode().GetMapUnit() != MapUnit::MapPixel)
+    {
+        aDestPt.Move(aOrigin.getX(), aOrigin.getY());
+        EnableMapMode(false);
+    }
+
+    DrawBitmap(aDestPt, aDestSize, rBitmap);
+    if (!GetConnectMetaFile() && comphelper::LibreOfficeKit::isActive() && GetMapMode().GetMapUnit() != MapUnit::MapPixel)
+    {
+        EnableMapMode();
+        aDestPt.Move(-aOrigin.getX(), -aOrigin.getY());
+    }
+    return;
+}
+
+void OutputDevice::DrawMirroredBitmap(
+        const basegfx::B2DVector& rScale, const basegfx::B2DVector& rTranslate,
+        const Bitmap& rBitmap)
+{
+    // with no rotation or shear it can be mapped to DrawBitmap
+    // do *not* execute the mirroring here, it's done in the fallback
+    // #i124580# the correct DestSize needs to be calculated based on MaxXY values
+    const Point aDestPt(basegfx::fround<tools::Long>(rTranslate.getX()), basegfx::fround<tools::Long>(rTranslate.getY()));
+    const Size aDestSize(
+        basegfx::fround<tools::Long>(rScale.getX() + rTranslate.getX()) - aDestPt.X(),
+        basegfx::fround<tools::Long>(rScale.getY() + rTranslate.getY()) - aDestPt.Y());
+
+    DrawBitmap(aDestPt, aDestSize, rBitmap);
+}
+
+/** * Calculates the maximum pixel area allowed for a transformed bitmap
+ * to balance memory usage and visual quality.
+ */
+static double lcl_CalculateMaximumArea(const Size& rOriginalSizePixel)
+{
+    // The heuristic: Start with 50% of the original area
+    const double fOrigArea = static_cast<double>(rOriginalSizePixel.Width()) * rOriginalSizePixel.Height() * 0.5;
+
+    // Scale by 1.44 (roughly 1.2x increase in each dimension) to allow
+    // for extra "gutter" space often needed during rotation/shearing.
+    const double fOrigAreaScaled = fOrigArea * 1.44;
+
+    // Clamp the result:
+    // Min: 1,000,000 pixels (approx 1000x1000)
+    // Max: 4,500,000 pixels (approx 2100x2100)
+    return std::clamp(fOrigAreaScaled, 1000000.0, 4500000.0);
+}
+
+void OutputDevice::DrawTransformedBitmap(
+    const basegfx::B2DHomMatrix& rTransformation,
+    const Bitmap& rBitmap,
+    double fAlpha)
+{
+    assert(!is_double_buffered_window());
+
+    if (rBitmap.IsEmpty())
+        return;
+
+    if( fAlpha == 0.0 )
+        return;
+
+    if( IsLayoutCalculationNecessary() )
+        return;
+
+    // MM02 compared to other public methods of OutputDevice
+    // this test was missing and led to zero-ptr-accesses
+    if ( !mpGraphics && !AcquireGraphics() )
+        return;
+
+    if ( mpClippingController->IsDirty() )
+        InitClipRegion();
+
+    /*
+       tdf#135325 typically in these OutputDevice methods, for the in
+       record-to-metafile case the  MetaFile is already written to before the
+       test against mbOutputClipped to determine that output to the current
+       device would result in no visual output. In this case the metafile is
+       written after the test, so we must continue past mbOutputClipped if
+       recording to a metafile. It's typical to record with a device of nominal
+       size and play back later against something of a totally different size.
+     */
+    if (IsOutputCulled() && !GetConnectMetaFile())
+        return;
+
+#ifdef DO_TIME_TEST
+    // MM02 start time test when some data (not for trivial stuff). Will
+    // trigger and show data when leaving this method by destructing helper
+    static const char* pEnableBitmapDrawTimerTimer(getenv("SAL_ENABLE_TIMER_BITMAPDRAW"));
+    static bool bUseTimer(nullptr != pEnableBitmapDrawTimerTimer);
+    std::unique_ptr<LocalTimeTest> aTimeTest(
+        bUseTimer && rBitmap.GetSizeBytes() > 10000
+        ? new LocalTimeTest()
+        : nullptr);
+#endif
+
+    Bitmap bitmap = rBitmap;
+
+    const bool bInvert(RasterOp::Invert == mpGraphicsState->meRasterOp);
+    const bool bBitmapChangedColor(mpGraphicsState->mnDrawMode & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap | DrawModeFlags::GrayBitmap ));
+    const bool bTryDirectPaint(!bInvert && !bBitmapChangedColor && !GetConnectMetaFile());
+    // tdf#130768 CAUTION(!) using GetViewTransformation() is *not* enough here, it may
+    // be that mnOutOffX/mnOutOffY is used - see AOO bug 75163, mentioned at
+    // GetDeviceTransformation declaration
+    basegfx::B2DHomMatrix aFullTransform(mpMapper->GetDeviceTransformation() * rTransformation);
+
+    // First try to handle additional alpha blending, either directly, or modify the bitmap.
+    if(!rtl::math::approxEqual( fAlpha, 1.0 ))
+    {
+        if(bTryDirectPaint)
+        {
+            if (DrawDeviceTransformedBitmap(aFullTransform, bitmap, fAlpha))
+            {
+                // we are done
+                return;
+            }
+        }
+        // Apply the alpha manually.
+        sal_uInt8 nTransparency( static_cast<sal_uInt8>( ::basegfx::fround( 255.0*(1.0 - fAlpha) + .5) ) );
+        AlphaMask aAlpha( bitmap.GetSizePixel(), &nTransparency );
+        if( bitmap.HasAlpha())
+            aAlpha.BlendWith( bitmap.CreateAlphaMask());
+        bitmap = Bitmap( bitmap.CreateColorBitmap(), aAlpha );
+    }
+
+    // If the backend's implementation is known to not need any optimizations here, pass to it directly.
+    // With most backends it's more performant to try to simplify to DrawBitmap() first.
+    if(bTryDirectPaint && mpGraphics->HasFastDrawTransformedBitmap() && DrawDeviceTransformedBitmap(aFullTransform, bitmap))
+        return;
+
+    // decompose matrix to check rotation and shear
+    basegfx::B2DVector aScale, aTranslate;
+    double fRotate, fShearX;
+    rTransformation.decompose(aScale, aTranslate, fRotate, fShearX);
+    const bool bRotated(!basegfx::fTools::equalZero(fRotate));
+    const bool bSheared(!basegfx::fTools::equalZero(fShearX));
+    const bool bMirroredX(aScale.getX() < 0.0);
+    const bool bMirroredY(aScale.getY() < 0.0);
+
+    if (!bRotated && !bSheared && !bMirroredX && !bMirroredY)
+    {
+        DrawScaledAndTranslatedBitmap(aScale, aTranslate, bitmap);
+        return;
+    }
+
+    // Try the backend's implementation before resorting to the slower fallback here.
+    if (bTryDirectPaint && DrawDeviceTransformedBitmap(aFullTransform, bitmap))
+        return;
+
+    // take the fallback when no rotate and shear, but mirror (else we would have done this above)
+    if(!bRotated && !bSheared)
+    {
+        DrawMirroredBitmap(aScale, aTranslate, bitmap);
+        return;
+    }
+
+    // at this point we are either sheared or rotated or both
+    assert(bSheared || bRotated);
+
+    // limit maximum area to something looking good for non-pixel-based targets (metafile, printer)
+    // by using a fixed minimum (allow at least, but no need to utilize) for good smoothing and an area
+    // dependent of original size for good quality when e.g. rotated/sheared. Still, limit to a maximum
+    // to avoid crashes/resource problems (ca. 1500x3000 here)
+    const Size aOriginalSizePixel(bitmap.GetSizePixel());
+    double fMaximumArea = lcl_CalculateMaximumArea(aOriginalSizePixel);
+
+    basegfx::B2DRange aVisibleRange(0.0, 0.0, 1.0, 1.0);
+
+    if (!GetVisibleDeviceRange(aFullTransform, aVisibleRange, fMaximumArea))
+        return;
+
+    if (aVisibleRange.isEmpty())
+        return;
+
+    Bitmap aTransformed(bitmap);
+
+    // #122923# when the result needs an alpha channel due to being rotated or sheared
+    // and thus uncovering areas, add these channels so that the own transformer (used
+    // in getTransformed) also creates a transformed alpha channel
+    if(!aTransformed.HasAlpha() && (bSheared || bRotated))
+    {
+        // parts will be uncovered, extend aTransformed with a mask bitmap
+        const Bitmap aContent(aTransformed.CreateColorBitmap());
+
+        AlphaMask aMaskBmp(aContent.GetSizePixel());
+        aMaskBmp.Erase(0);
+
+        aTransformed = Bitmap(aContent, aMaskBmp);
+    }
+
+    basegfx::B2DVector aFullScale, aFullTranslate;
+    double fFullRotate, fFullShearX;
+    aFullTransform.decompose(aFullScale, aFullTranslate, fFullRotate, fFullShearX);
+    if (aFullScale.getX() > 0 && aFullScale.getY() > 0
+        && aOriginalSizePixel.getWidth() > aFullScale.getX()
+        && aOriginalSizePixel.getHeight() > aFullScale.getY())
+    {
+        // aFullTransform would downscale the bitmap: avoid this, so the recorded metafile can be
+        // better upscaled later.
+        basegfx::B2DHomMatrix aTransform = basegfx::utils::createScaleB2DHomMatrix(
+                aOriginalSizePixel.getWidth() / aFullScale.getX(),
+                aOriginalSizePixel.getHeight() / aFullScale.getY());
+        aFullTransform *= aTransform;
+    }
+
+    double fSourceRatio = 1.0;
+    if (aOriginalSizePixel.getHeight() != 0)
+    {
+        fSourceRatio = aOriginalSizePixel.getWidth() / aOriginalSizePixel.getHeight();
+    }
+    double fTargetRatio = 1.0;
+    if (aFullScale.getY() != 0)
+    {
+        fTargetRatio = aFullScale.getX() / aFullScale.getY();
+    }
+    bool bAspectRatioKept = rtl::math::approxEqual(fSourceRatio, fTargetRatio);
+    if (bSheared || !bAspectRatioKept)
+    {
+        // Not only rotation, or scaling does not keep aspect ratio.
+        aTransformed = aTransformed.getTransformed(
+            aFullTransform,
+            aVisibleRange,
+            fMaximumArea);
+    }
+    else
+    {
+        // Just rotation, can do that directly.
+        fFullRotate = fmod(fFullRotate * -1, 2 * M_PI);
+        if (fFullRotate < 0)
+        {
+            fFullRotate += 2 * M_PI;
+        }
+        Degree10 nAngle10(basegfx::fround(basegfx::rad2deg<10>(fFullRotate)));
+        aTransformed.Rotate(nAngle10, COL_TRANSPARENT);
+    }
+    basegfx::B2DRange aTargetRange(0.0, 0.0, 1.0, 1.0);
+
+    // get logic object target range
+    aTargetRange.transform(rTransformation);
+
+    // get from unified/relative VisibleRange to logoc one
+    aVisibleRange.transform(
+        basegfx::utils::createScaleTranslateB2DHomMatrix(
+            aTargetRange.getRange(),
+            aTargetRange.getMinimum()));
+
+    // extract point and size; do not remove size, the bitmap may have been prepared reduced by purpose
+    // #i124580# the correct DestSize needs to be calculated based on MaxXY values
+    const Point aDestPt(basegfx::fround<tools::Long>(aVisibleRange.getMinX()), basegfx::fround<tools::Long>(aVisibleRange.getMinY()));
+    const Size aDestSize(
+        basegfx::fround<tools::Long>(aVisibleRange.getMaxX()) - aDestPt.X(),
+        basegfx::fround<tools::Long>(aVisibleRange.getMaxY()) - aDestPt.Y());
+
+    DrawBitmap(aDestPt, aDestSize, aTransformed);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

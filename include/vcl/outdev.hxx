@@ -1424,12 +1424,12 @@ public:
         @param fAlpha
         Optional additional alpha to use for drawing (0 to 1, 1 being no change).
     */
-    void                        DrawTransformedBitmapEx(
+    void                        DrawTransformedBitmap(
                                     const basegfx::B2DHomMatrix& rTransformation,
                                     const Bitmap& rBitmap,
                                     double fAlpha = 1.0);
 
-    /** Return true if DrawTransformedBitmapEx() is fast.
+    /** Return true if DrawTransformedBitmap() is fast.
 
         @since 7.2
     */
