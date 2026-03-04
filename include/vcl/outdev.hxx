@@ -1437,10 +1437,10 @@ public:
 
 protected:
 
-    virtual void                DrawDeviceBitmap(
+    void                        DrawDeviceBitmap(
                                     const Point& rDestPt, const Size& rDestSize,
                                     const Point& rSrcPtPixel, const Size& rSrcSizePixel,
-                                    Bitmap& rBitmap );
+                                    const Bitmap& rBitmap );
 
     virtual bool                CanSubsampleBitmap() const { return true; }
 

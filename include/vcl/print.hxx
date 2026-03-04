@@ -175,10 +175,6 @@ protected:
     bool                        DrawDeviceTransformedBitmap(const basegfx::B2DHomMatrix& aFullTransform,
                                     const Bitmap& rBitmap, double fAlpha = 1.0) override;
 
-    void                        DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize,
-                                    const Point& rSrcPtPixel, const Size& rSrcSizePixel,
-                                    Bitmap& rBitmap ) override;
-
     virtual void                EmulateDrawTransparent( const tools::PolyPolygon& rPolyPoly,
                                     sal_uInt16 nTransparencePercent ) override;
 

@@ -181,34 +181,6 @@ bool Printer::DrawDeviceTransformedBitmap(
     return false;
 }
 
-void Printer::DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize,
-                                const Point& rSrcPtPixel, const Size& rSrcSizePixel,
-                                Bitmap& rBmp )
-{
-    // Note: Assuming HasAlpha() or IsAlpha() is the current check in the unified Bitmap class
-    if( rBmp.HasAlpha() )
-    {
-        // #107169# Printers often lack native hardware alpha blending.
-        // For true alpha bitmaps, perform a software alpha blend against
-        // a white background before sending to the device.
-
-        // Extract the raw color and alpha data from the unified Bitmap
-        Bitmap aBlendedBmp( rBmp.CreateColorBitmap() );
-        aBlendedBmp.Blend( rBmp.CreateAlphaMask(), COL_WHITE );
-
-        // Route directly to the base class protected dispatcher, NOT the public
-        // DrawBitmap(). This prevents double-recording in metafiles and skips
-        // redundant subsampling passes. OutputDevice::DrawDeviceBitmap will
-        // map the coordinates, apply RTL, and send it to BitmapRenderer.
-        OutputDevice::DrawDeviceBitmap( rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBlendedBmp );
-    }
-    else
-    {
-        // Custom printer banding / transparency slicing logic
-        ImplPrintTransparent( rBmp, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel );
-    }
-}
-
 void Printer::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
                                        sal_uInt16 nTransparencePercent )
 {

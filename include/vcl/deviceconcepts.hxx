@@ -54,6 +54,36 @@ template <typename T> struct is_logical_recorder : std::false_type
 template <typename T> inline constexpr bool is_logical_recorder_v = is_logical_recorder<T>::value;
 
 /**
+ * Trait: supports_native_alpha
+ * Determines if the device can handle per-pixel alpha blending natively.
+ * Most raster devices do; high-level vector devices (Printers) often do not.
+ */
+template <typename T> struct supports_native_alpha : std::true_type
+{
+};
+// Specialization for Printer (or any other non-alpha-capable device)
+template <> struct supports_native_alpha<Printer> : std::false_type
+{
+};
+
+template <typename T>
+inline constexpr bool supports_native_alpha_v = supports_native_alpha<T>::value;
+
+/**
+ * Trait: requires_banding
+ * Determines if the device requires transparency to be handled via
+ * banding or slicing (typical for Printer/PostScript paths).
+ */
+template <typename T> struct requires_banding : std::false_type
+{
+};
+template <> struct requires_banding<Printer> : std::true_type
+{
+};
+
+template <typename T> inline constexpr bool requires_banding_v = requires_banding<T>::value;
+
+/**
  * Concept: HWAccelerated
  * Satisfied by devices that provide hardware-accelerated rendering paths.
  */
@@ -78,6 +108,18 @@ template <typename T> concept LogicalRecorder = is_logical_recorder_v<T>;
  * Satisfied by devices that rasterize directly to physical pixels.
  */
 template <typename T> concept PhysicalDevice = !is_logical_recorder_v<T>;
+
+/**
+ * Concept: AlphaCapable
+ * Satisfied by devices that can handle DrawDeviceBitmap with Alpha.
+ */
+template <typename T> concept AlphaCapable = supports_native_alpha_v<T>;
+
+/**
+ * Concept: BandedPrinting
+ * Satisfied by devices requiring ImplPrintTransparent.
+ */
+template <typename T> concept BandedPrinting = requires_banding_v<T>;
 
 } // namespace vcl
 

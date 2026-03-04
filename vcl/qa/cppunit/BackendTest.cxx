@@ -628,7 +628,7 @@ public:
             CPPUNIT_ASSERT(eResult != vcl::test::TestResult::Failed);
     }
 
-    void testDrawTransformedBitmapExAlpha()
+    void testDrawTransformedBitmapAlpha()
     {
         if (getDefaultDeviceBitCount() < 24)
             return;
@@ -653,7 +653,7 @@ public:
         basegfx::B2DHomMatrix aMatrix;
         // Draw with no transformation, only alpha change.
         aMatrix.scale(16, 16);
-        device->DrawTransformedBitmapEx(aMatrix, aBitmap, 0.5);
+        device->DrawTransformedBitmap(aMatrix, aBitmap, 0.5);
         Bitmap result(device->GetBitmap(Point(0, 0), Size(16, 16)));
         CPPUNIT_ASSERT_EQUAL(COL_GRAY, result.GetPixelColor(0, 0));
         CPPUNIT_ASSERT_EQUAL(COL_WHITE, result.GetPixelColor(15, 15));
@@ -663,7 +663,7 @@ public:
         aMatrix.scale(16, 16);
         aMatrix.rotate(M_PI / 2);
         aMatrix.translate(8, 8);
-        device->DrawTransformedBitmapEx(aMatrix, aBitmap, 0.5);
+        device->DrawTransformedBitmap(aMatrix, aBitmap, 0.5);
         result = device->GetBitmap(Point(0, 0), Size(16, 16));
         CPPUNIT_ASSERT_EQUAL(COL_WHITE, result.GetPixelColor(0, 0));
         CPPUNIT_ASSERT_EQUAL(COL_GRAY, result.GetPixelColor(0, 15));
@@ -1463,7 +1463,7 @@ public:
                      bitmap.GetSizePixel().Height()); // draw as 10x10
         // Draw a blue bitmap to the device. The bug was that there was no alpha, but OutputDevice::DrawTransformBitmapExDirect()
         // supplied a fully opaque alpha done with Erase() on the alpha bitmap, and Skia backend didn't handle such alpha correctly.
-        device->DrawTransformedBitmapEx(matrix, bitmap);
+        device->DrawTransformedBitmap(matrix, bitmap);
         exportDevice(u"tdf136171.png"_ustr, device);
         // The whole virtual device content now should be blue.
         CPPUNIT_ASSERT_EQUAL(COL_BLUE, device->GetPixel(Point(0, 0)));
@@ -1643,7 +1643,7 @@ public:
     CPPUNIT_TEST(testDrawTransformedBitmap8bppGreyScale);
     CPPUNIT_TEST(testDrawBitmap8bppGreyScale);
 
-    CPPUNIT_TEST(testDrawTransformedBitmapExAlpha);
+    CPPUNIT_TEST(testDrawTransformedBitmapAlpha);
 
     CPPUNIT_TEST(testClipRectangle);
     CPPUNIT_TEST(testClipPolygon);

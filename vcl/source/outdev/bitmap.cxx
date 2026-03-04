@@ -187,46 +187,74 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
 
 void OutputDevice::DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize,
                                      const Point& rSrcPtPixel, const Size& rSrcSizePixel,
-                                     Bitmap& rBitmap )
+                                     const Bitmap& rBitmap ) // Keep const, but we will make a local copy if needed
 {
-    assert(!is_double_buffered_window());
+    if (!FlushGraphicsState())
+        return;
 
     if (rBitmap.IsEmpty())
         return;
 
-    SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(), rSrcSizePixel.Height(),
-                       mpMapper->LogicXToDevicePixel(rDestPt.X()), mpMapper->LogicYToDevicePixel(rDestPt.Y()),
-                       mpMapper->LogicWidthToDevicePixel(rDestSize.Width()),
-                       mpMapper->LogicHeightToDevicePixel(rDestSize.Height()));
+    vcl::DispatchDevice(*this, [&](auto& rConcreteDevice) {
+        using DeviceType = std::decay_t<decltype(rConcreteDevice)>;
 
-    if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
-        return;
-
-    // Mutates the referenced bitmap (which is safely a local copy from the orchestrator)
-    const BmpMirrorFlags nMirrFlags = AdjustTwoRect(aPosAry, rBitmap.GetSizePixel());
-    if (nMirrFlags != BmpMirrorFlags::NONE)
-        rBitmap.Mirror(nMirrFlags);
-
-    if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
-        return;
-
-    if (mpGraphics)
-    {
-        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
-        if (bRTL)
+        if constexpr (!vcl::AlphaCapable<DeviceType>)
         {
-            tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
-            tools::Rectangle aDestRect(Point(aPosAry.mnDestX, aPosAry.mnDestY),
-                                       Size(aPosAry.mnDestWidth, aPosAry.mnDestHeight));
-
-            mpMapper->MirrorDevicePixelRect(aDestRect, nFrameWidth, bRTL, ImplIsAntiparallel());
-
-            aPosAry.mnDestX = aDestRect.Left();
-            aPosAry.mnDestY = aDestRect.Top();
+            if (rBitmap.HasAlpha())
+            {
+                Bitmap aBlendedBmp(rBitmap.CreateColorBitmap());
+                aBlendedBmp.Blend(rBitmap.CreateAlphaMask(), COL_WHITE);
+                DrawDeviceBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBlendedBmp);
+                return;
+            }
         }
 
-        vcl::rendercontext::BitmapRenderer::DrawBitmap(*mpGraphics, aPosAry, rBitmap);
-    }
+        if constexpr (vcl::BandedPrinting<DeviceType>)
+        {
+             rConcreteDevice.ImplPrintTransparent(rBitmap, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
+             return;
+        }
+
+        if constexpr (vcl::PhysicalDevice<DeviceType>)
+        {
+            SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(), rSrcSizePixel.Height(),
+                               mpMapper->LogicXToDevicePixel(rDestPt.X()), mpMapper->LogicYToDevicePixel(rDestPt.Y()),
+                               mpMapper->LogicWidthToDevicePixel(rDestSize.Width()),
+                               mpMapper->LogicHeightToDevicePixel(rDestSize.Height()));
+
+            if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
+                return;
+
+            // Handle inverted coordinate systems (Negative scaling)
+            Bitmap aLocalBmp(rBitmap);
+            const BmpMirrorFlags nMirrFlags = AdjustTwoRect(aPosAry, aLocalBmp.GetSizePixel());
+            if (nMirrFlags != BmpMirrorFlags::NONE)
+                aLocalBmp.Mirror(nMirrFlags);
+
+            if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
+                return;
+
+            if (mpGraphics)
+            {
+                const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+                if (bRTL)
+                {
+                    tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+                    tools::Rectangle aDestRect(Point(aPosAry.mnDestX, aPosAry.mnDestY),
+                                               Size(aPosAry.mnDestWidth, aPosAry.mnDestHeight));
+
+                    mpMapper->MirrorDevicePixelRect(aDestRect, nFrameWidth, bRTL, ImplIsAntiparallel());
+
+                    aPosAry.mnDestX = aDestRect.Left();
+                    aPosAry.mnDestY = aDestRect.Top();
+                }
+
+                vcl::rendercontext::BitmapRenderer::DrawBitmap(*mpGraphics, aPosAry, aLocalBmp);
+            }
+
+            return;
+        }
+    });
 }
 
 Bitmap OutputDevice::GetBitmap( const Point& rSrcPt, const Size& rSize ) const

@@ -335,7 +335,7 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawGrayBitmap)
     }
 }
 
-CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawTransformedBitmapExScale)
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawTransformedBitmapScale)
 {
     // Given a 100x100 bitmap:
     ScopedVclPtrInstance<VirtualDevice> pVDev;
@@ -350,7 +350,7 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawTransformedBitmapExScale)
     aMtf.Record(pVDev.get());
 
     // When drawing that with a transform:
-    pVDev->DrawTransformedBitmapEx(aMatrix, aBitmap);
+    pVDev->DrawTransformedBitmap(aMatrix, aBitmap);
 
     // Then make sure the bitmap recorded in the metafile doesn't get a scaled down width:
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), aMtf.GetActionSize());
@@ -366,7 +366,7 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawTransformedBitmapExScale)
     CPPUNIT_ASSERT_GREATEREQUAL(static_cast<tools::Long>(100), aTransformedSize.getWidth());
 }
 
-CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawTransformedBitmapEx)
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawTransformedBitmap)
 {
     // Create a virtual device, and connect a metafile to it.
     // Also create a 16x16 bitmap.
@@ -392,7 +392,7 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawTransformedBitmapEx)
     aMtf.Record(pVDev.get());
 
     // Draw the rotated bitmap on the vdev.
-    pVDev->DrawTransformedBitmapEx(aMatrix, aBitmap);
+    pVDev->DrawTransformedBitmap(aMatrix, aBitmap);
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), aMtf.GetActionSize());
     MetaAction* pAction = aMtf.GetAction(0);
     CPPUNIT_ASSERT_EQUAL(MetaActionType::BMPEXSCALE, pAction->GetType());
@@ -429,7 +429,7 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawTransformedBitmapEx)
     }
 }
 
-CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawTransformedBitmapExFlip)
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawTransformedBitmapFlip)
 {
     // Create a virtual device, and connect a metafile to it.
     // Also create a 16x16 bitmap.
@@ -456,7 +456,7 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawTransformedBitmapExFlip)
     aMtf.Record(pVDev.get());
 
     // Draw the scaled and rotated bitmap on the vdev.
-    pVDev->DrawTransformedBitmapEx(aMatrix, aBitmap);
+    pVDev->DrawTransformedBitmap(aMatrix, aBitmap);
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), aMtf.GetActionSize());
     MetaAction* pAction = aMtf.GetAction(0);
     CPPUNIT_ASSERT_EQUAL(MetaActionType::BMPEXSCALE, pAction->GetType());
