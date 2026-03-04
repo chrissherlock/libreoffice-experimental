@@ -105,6 +105,24 @@ void OutputDevice::DrawMirroredBitmap(
     DrawBitmap(aDestPt, aDestSize, rBitmap);
 }
 
+/** * Calculates the maximum pixel area allowed for a transformed bitmap
+ * to balance memory usage and visual quality.
+ */
+static double lcl_CalculateMaximumArea(const Size& rOriginalSizePixel)
+{
+    // The heuristic: Start with 50% of the original area
+    const double fOrigArea = static_cast<double>(rOriginalSizePixel.Width()) * rOriginalSizePixel.Height() * 0.5;
+
+    // Scale by 1.44 (roughly 1.2x increase in each dimension) to allow
+    // for extra "gutter" space often needed during rotation/shearing.
+    const double fOrigAreaScaled = fOrigArea * 1.44;
+
+    // Clamp the result:
+    // Min: 1,000,000 pixels (approx 1000x1000)
+    // Max: 4,500,000 pixels (approx 2100x2100)
+    return std::clamp(fOrigAreaScaled, 1000000.0, 4500000.0);
+}
+
 void OutputDevice::DrawTransformedBitmapEx(
     const basegfx::B2DHomMatrix& rTransformation,
     const Bitmap& rBitmap,
@@ -112,13 +130,13 @@ void OutputDevice::DrawTransformedBitmapEx(
 {
     assert(!is_double_buffered_window());
 
-    if( IsLayoutCalculationNecessary() )
-        return;
-
-    if(rBitmap.IsEmpty())
+    if (rBitmap.IsEmpty())
         return;
 
     if( fAlpha == 0.0 )
+        return;
+
+    if( IsLayoutCalculationNecessary() )
         return;
 
     // MM02 compared to other public methods of OutputDevice
@@ -215,25 +233,19 @@ void OutputDevice::DrawTransformedBitmapEx(
     // at this point we are either sheared or rotated or both
     assert(bSheared || bRotated);
 
-    // fallback; create transformed bitmap the hard way (back-transform
-    // the pixels) and paint
-    basegfx::B2DRange aVisibleRange(0.0, 0.0, 1.0, 1.0);
-
     // limit maximum area to something looking good for non-pixel-based targets (metafile, printer)
     // by using a fixed minimum (allow at least, but no need to utilize) for good smoothing and an area
     // dependent of original size for good quality when e.g. rotated/sheared. Still, limit to a maximum
     // to avoid crashes/resource problems (ca. 1500x3000 here)
     const Size aOriginalSizePixel(bitmap.GetSizePixel());
-    const double fOrigArea(aOriginalSizePixel.Width() * aOriginalSizePixel.Height() * 0.5);
-    const double fOrigAreaScaled(fOrigArea * 1.44);
-    double fMaximumArea(std::clamp(fOrigAreaScaled, 1000000.0, 4500000.0));
+    double fMaximumArea = lcl_CalculateMaximumArea(aOriginalSizePixel);
 
-    // Notice we no longer need the `if(!GetConnectMetaFile())` wrapper here!
-    // The inner function now safely handles logical skipping internally.
-    if ( !GetVisibleDeviceRange( aFullTransform, aVisibleRange, fMaximumArea ) )
+    basegfx::B2DRange aVisibleRange(0.0, 0.0, 1.0, 1.0);
+
+    if (!GetVisibleDeviceRange(aFullTransform, aVisibleRange, fMaximumArea))
         return;
 
-    if(aVisibleRange.isEmpty())
+    if (aVisibleRange.isEmpty())
         return;
 
     Bitmap aTransformed(bitmap);
