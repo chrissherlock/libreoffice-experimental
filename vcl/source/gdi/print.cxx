@@ -172,7 +172,7 @@ void Printer::ImplPrintTransparent( const Bitmap& rBmp,
     mpMapper->EnableMapMode(bOldMap);
 }
 
-bool Printer::DrawTransformedBitmap(
+bool Printer::DrawDeviceTransformedBitmap(
     const basegfx::B2DHomMatrix& /*aFullTransform*/,
     const Bitmap& /*rBitmap*/,
     double /*fAlpha*/)

@@ -330,7 +330,7 @@ bool OutputDevice::HasFastDrawTransformedBitmap() const
     return mpGraphics->HasFastDrawTransformedBitmap();
 }
 
-bool OutputDevice::DrawTransformedBitmap(
+bool OutputDevice::DrawDeviceTransformedBitmap(
     const basegfx::B2DHomMatrix& aFullTransform,
     const Bitmap& rBitmap,
     double fAlpha)

@@ -172,7 +172,7 @@ protected:
                                     const Point& rDestPt, const Size& rDestSize,
                                     const Point& rSrcPtPixel, const Size& rSrcSizePixel) override;
 
-    bool                        DrawTransformedBitmap(const basegfx::B2DHomMatrix& aFullTransform,
+    bool                        DrawDeviceTransformedBitmap(const basegfx::B2DHomMatrix& aFullTransform,
                                     const Bitmap& rBitmap, double fAlpha = 1.0) override;
 
     void                        DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize,
