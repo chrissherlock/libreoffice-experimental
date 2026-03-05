@@ -216,11 +216,12 @@ Bitmap OutputDevice::GetBitmap( const Point& rSrcPt, const Size& rSize ) const
 
     assert(mpGraphics);
 
-    tools::Long    nX = LogicXToDevicePixel( rSrcPt.X() );
-    tools::Long    nY = LogicYToDevicePixel( rSrcPt.Y() );
+    tools::Long nX = LogicXToDevicePixel(rSrcPt.X());
+    tools::Long nY = LogicYToDevicePixel(rSrcPt.Y());
     tools::Long nWidth = LogicWidthToDevicePixel(rSize.Width());
     tools::Long nHeight = LogicHeightToDevicePixel(rSize.Height());
-    if ( nWidth <= 0 || nHeight <= 0 || nX > (GetOutputWidthPixel() + GetOutOffXPixel()) || nY > (GetOutputHeightPixel() + GetOutOffYPixel()))
+
+    if (IsPixelAreaOutOfBounds(nX, nY, nWidth, nHeight))
         return Bitmap();
 
     tools::Rectangle   aRect( Point( nX, nY ), Size( nWidth, nHeight ) );

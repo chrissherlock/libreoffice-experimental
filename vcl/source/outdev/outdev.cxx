@@ -758,4 +758,19 @@ tools::Long OutputDevice::GetRTLFrameWidth() const
     return mpGraphics ? mpGraphics->GetGraphicsWidth() : 0;
 }
 
+bool OutputDevice::IsPixelAreaOutOfBounds(tools::Long nX, tools::Long nY,
+                                          tools::Long nWidth, tools::Long nHeight) const
+{
+    if (nWidth <= 0 || nHeight <= 0)
+        return true;
+
+    if (nX > (GetOutputWidthPixel() + GetOutOffXPixel()))
+        return true;
+
+    if (nY > (GetOutputHeightPixel() + GetOutOffYPixel()))
+        return true;
+
+    return false;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

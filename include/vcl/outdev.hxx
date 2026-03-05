@@ -446,6 +446,13 @@ protected:
                                 physically released graphics device.
      */
     virtual void                ReleaseGraphics( bool bRelease = true ) = 0;
+
+private:
+
+    /// Checks if a requested pixel area is invalid or completely outside the device bounds
+    bool IsPixelAreaOutOfBounds(tools::Long nX, tools::Long nY,
+                                tools::Long nWidth, tools::Long nHeight) const;
+
     ///@}
 
 
