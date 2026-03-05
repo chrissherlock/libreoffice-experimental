@@ -8,6 +8,7 @@
  */
 
 #include <vcl/rendercontext/BitmapRenderer.hxx>
+#include <vcl/alpha.hxx>
 #include <vcl/bitmap.hxx>
 
 #include <salgdi.hxx>
@@ -25,17 +26,34 @@ Bitmap BitmapRenderer::CaptureBitmap(SalGraphics& rGraphics, tools::Long nX, too
     return Bitmap(xSalBmp);
 }
 
-void BitmapRenderer::DrawBitmap(SalGraphics& rGraphics, const SalTwoRect& rPosAry,
-                                const Bitmap& rBitmap)
+void BitmapRenderer::MirrorRTLRect(SalTwoRect& rPosAry, tools::Long nFrameWidth)
+{
+    rPosAry.mnDestX = nFrameWidth - rPosAry.mnDestWidth - rPosAry.mnDestX;
+}
+
+void BitmapRenderer::DrawBitmap(SalGraphics& rGraphics, SalTwoRect& rPosAry, const Bitmap& rBitmap,
+                                tools::Long nFrameWidth, bool bRTL, bool bAlphaCapable)
 {
     if (rBitmap.IsEmpty())
         return;
 
-    std::shared_ptr<SalBitmap> pSalBitmap = rBitmap.ImplGetSalBitmap();
+    if (bRTL)
+        MirrorRTLRect(rPosAry, nFrameWidth);
+
+    Bitmap aTargetBmp(rBitmap);
+
+    if (!bAlphaCapable && aTargetBmp.HasAlpha())
+    {
+        Bitmap aColorBmp = aTargetBmp.CreateColorBitmap();
+        aColorBmp.Blend(aTargetBmp.CreateAlphaMask(), COL_WHITE);
+        aTargetBmp = aColorBmp;
+    }
+
+    std::shared_ptr<SalBitmap> pSalBitmap = aTargetBmp.ImplGetSalBitmap();
     if (!pSalBitmap)
         return;
 
-    if (rBitmap.HasAlpha())
+    if (aTargetBmp.HasAlpha())
         rGraphics.drawAlphaBitmap(rPosAry, *pSalBitmap);
     else
         rGraphics.drawBitmap(rPosAry, *pSalBitmap);

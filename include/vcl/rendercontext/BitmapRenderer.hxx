@@ -41,8 +41,10 @@ public:
     static Bitmap CaptureBitmap(SalGraphics& rGraphics, tools::Long nX, tools::Long nY,
                                 tools::Long nWidth, tools::Long nHeight);
 
-    static void DrawBitmap(SalGraphics& rGraphics, const SalTwoRect& rPosAry,
-                           const Bitmap& rBitmap);
+    static void MirrorRTLRect(SalTwoRect& rPosAry, tools::Long nFrameWidth);
+
+    static void DrawBitmap(SalGraphics& rGraphics, SalTwoRect& rPosAry, const Bitmap& rBitmap,
+                           tools::Long nFrameWidth, bool bRTL, bool bAlphaCapable = true);
 
     static bool DrawTransformedBitmap(SalGraphics& rGraphics, const basegfx::B2DPoint& rNull,
                                       const basegfx::B2DPoint& rX, const basegfx::B2DPoint& rY,

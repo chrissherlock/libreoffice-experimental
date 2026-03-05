@@ -200,8 +200,17 @@ void OutputDevice::DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize
 
             if (mpGraphics)
             {
-                ImplMirrorIfRTL(aPosAry);
-                vcl::rendercontext::BitmapRenderer::DrawBitmap(*mpGraphics, aPosAry, aLocalBmp);
+                const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+                const bool bAlphaCapable = vcl::AlphaCapable<DeviceType>;
+
+                vcl::rendercontext::BitmapRenderer::DrawBitmap(
+                    *mpGraphics,
+                    aPosAry,
+                    aLocalBmp,
+                    GetRTLFrameWidth(),
+                    bRTL,
+                    bAlphaCapable
+                );
             }
 
             return;
@@ -595,27 +604,6 @@ void OutputDevice::DrawTransformedBitmapSoftwareFallback(
         basegfx::fround<tools::Long>(aVisibleRange.getMaxY()) - aDestPt.Y());
 
     DrawBitmap(aDestPt, aDestSize, aTransformed);
-}
-
-void OutputDevice::ImplMirrorIfRTL(SalTwoRect& rPosAry) const
-{
-    if (!mpGraphics)
-        return;
-
-    const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
-    if (!bRTL)
-        return;
-
-    // Polymorphic fetch of the mirroring axis (No more IsVirtual!)
-    tools::Long nFrameWidth = GetRTLFrameWidth();
-
-    tools::Rectangle aDestRect(Point(rPosAry.mnDestX, rPosAry.mnDestY),
-                               Size(rPosAry.mnDestWidth, rPosAry.mnDestHeight));
-
-    mpMapper->MirrorDevicePixelRect(aDestRect, nFrameWidth, bRTL, ImplIsAntiparallel());
-
-    rPosAry.mnDestX = aDestRect.Left();
-    rPosAry.mnDestY = aDestRect.Top();
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
