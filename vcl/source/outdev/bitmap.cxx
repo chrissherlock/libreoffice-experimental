@@ -232,12 +232,12 @@ static Bitmap lcl_PadClippedBitmap(const Bitmap& rClippedBmp,
     return aFullBmp;
 }
 
-Bitmap OutputDevice::GetBitmap( const Point& rSrcPt, const Size& rSize ) const
+Bitmap OutputDevice::GetBitmap(const Point& rSrcPt, const Size& rSize) const
 {
-    if( IsLayoutCalculationNecessary() )
+    if (IsLayoutCalculationNecessary())
         return Bitmap();
 
-    if( !mpGraphics && !AcquireGraphics() )
+    if (!mpGraphics && !AcquireGraphics())
         return Bitmap();
 
     assert(mpGraphics);
@@ -261,15 +261,16 @@ Bitmap OutputDevice::GetBitmap( const Point& rSrcPt, const Size& rSize ) const
 
     const bool bClipped = (aRequestedRect != aClippedRect);
 
-    std::shared_ptr<SalBitmap> xSalBmp = mpGraphics->GetBitmap(
-        aClippedRect.Left(), aClippedRect.Top(),
-        aClippedRect.GetWidth(), aClippedRect.GetHeight(),
-        *this, false);
+    tools::Long nFinalX = aClippedRect.Left();
+    if (IsRTLEnabled())
+        nFinalX = GetOutputWidthPixel() - aClippedRect.GetWidth() - (nFinalX - GetOutOffXPixel()) + GetOutOffXPixel();
 
-    if (!xSalBmp)
-        return Bitmap();
+    Bitmap aBmp = vcl::rendercontext::BitmapRenderer::CaptureBitmap(
+        *mpGraphics, nFinalX, aClippedRect.Top(),
+        aClippedRect.GetWidth(), aClippedRect.GetHeight());
 
-    Bitmap aBmp(xSalBmp);
+    if (aBmp.IsEmpty())
+        return aBmp;
 
     if (bClipped)
         aBmp = lcl_PadClippedBitmap(aBmp, aRequestedRect, aClippedRect);

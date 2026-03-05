@@ -9,8 +9,10 @@
 
 #pragma once
 
-#include <vcl/dllapi.h>
 #include <tools/color.hxx>
+#include <tools/long.hxx>
+
+#include <vcl/dllapi.h>
 
 class SalGraphics;
 class Bitmap;
@@ -36,6 +38,9 @@ namespace vcl::rendercontext
 class VCL_DLLPUBLIC BitmapRenderer
 {
 public:
+    static Bitmap CaptureBitmap(SalGraphics& rGraphics, tools::Long nX, tools::Long nY,
+                                tools::Long nWidth, tools::Long nHeight);
+
     static void DrawBitmap(SalGraphics& rGraphics, const SalTwoRect& rPosAry,
                            const Bitmap& rBitmap);
 

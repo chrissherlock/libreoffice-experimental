@@ -132,6 +132,8 @@ public:
                                     const tools::PolyPolygon& rPolyPoly,
                                     const Gradient& rGradient ) = 0;
 
+    virtual std::shared_ptr<SalBitmap> getBitmap(tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight, bool bWithoutAlpha = false) = 0;
+
     virtual void                drawBitmap( const SalTwoRect& rPosAry, const SalBitmap& rSalBitmap ) = 0;
 
     /** Render bitmap with alpha channel
@@ -334,12 +336,6 @@ public:
                                     Color nMaskColor,
                                     const OutputDevice& rOutDev );
 
-    SAL_DLLPRIVATE std::shared_ptr<SalBitmap>  GetBitmap(
-                                    tools::Long nX, tools::Long nY,
-                                    tools::Long nWidth, tools::Long nHeight,
-                                    const OutputDevice& rOutDev,
-                                    bool bWithoutAlpha );
-
     SAL_DLLPRIVATE Color                       GetPixel(
                                     tools::Long nX, tools::Long nY,
                                     const OutputDevice& rOutDev );
@@ -466,8 +462,6 @@ protected:
     // CopyBits and DrawBitmap --> RasterOp and ClipRegion
     // CopyBits() --> pSrcGraphics == NULL, then CopyBits on same Graphics
     virtual void                copyBits( const SalTwoRect& rPosAry, SalGraphics* pSrcGraphics ) = 0;
-
-    virtual std::shared_ptr<SalBitmap> getBitmap( tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight, bool bWithoutAlpha ) = 0;
 
     /// Only implemented by the macOS Quartz backend and the MS-Windows GDI backend.
     virtual bool                drawEPS(

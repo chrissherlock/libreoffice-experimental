@@ -14,6 +14,17 @@
 
 namespace vcl::rendercontext
 {
+Bitmap BitmapRenderer::CaptureBitmap(SalGraphics& rGraphics, tools::Long nX, tools::Long nY,
+                                     tools::Long nWidth, tools::Long nHeight)
+{
+    std::shared_ptr<SalBitmap> xSalBmp = rGraphics.getBitmap(nX, nY, nWidth, nHeight);
+
+    if (!xSalBmp)
+        return Bitmap();
+
+    return Bitmap(xSalBmp);
+}
+
 void BitmapRenderer::DrawBitmap(SalGraphics& rGraphics, const SalTwoRect& rPosAry,
                                 const Bitmap& rBitmap)
 {
