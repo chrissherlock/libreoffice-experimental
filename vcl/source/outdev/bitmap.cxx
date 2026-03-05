@@ -413,32 +413,6 @@ bool OutputDevice::DrawDeviceTransformedBitmap(
     });
 }
 
-// MM02 add some test class to get a simple timer-based output to be able
-// to check if it gets faster - and how much. Uncomment next line or set
-// DO_TIME_TEST for compile time if you want to use it
-// #define DO_TIME_TEST
-#ifdef DO_TIME_TEST
-#include <tools/time.hxx>
-struct LocalTimeTest
-{
-    const sal_uInt64 nStartTime;
-    LocalTimeTest() : nStartTime(tools::Time::GetSystemTicks()) {}
-    ~LocalTimeTest()
-    {
-        const sal_uInt64 nEndTime(tools::Time::GetSystemTicks());
-        const sal_uInt64 nDiffTime(nEndTime - nStartTime);
-
-        if(nDiffTime > 0)
-        {
-            OStringBuffer aOutput("Time: ");
-            OString aNumber(OString::number(nDiffTime));
-            aOutput.append(aNumber);
-            OSL_FAIL(aOutput.getStr());
-        }
-    }
-};
-#endif
-
 void OutputDevice::DrawScaledAndTranslatedBitmap(
         const basegfx::B2DVector& rScale, const basegfx::B2DVector& rTranslate,
         const Bitmap& rBitmap)
@@ -537,17 +511,6 @@ void OutputDevice::DrawTransformedBitmap(
      */
     if (IsOutputCulled() && !GetConnectMetaFile())
         return;
-
-#ifdef DO_TIME_TEST
-    // MM02 start time test when some data (not for trivial stuff). Will
-    // trigger and show data when leaving this method by destructing helper
-    static const char* pEnableBitmapDrawTimerTimer(getenv("SAL_ENABLE_TIMER_BITMAPDRAW"));
-    static bool bUseTimer(nullptr != pEnableBitmapDrawTimerTimer);
-    std::unique_ptr<LocalTimeTest> aTimeTest(
-        bUseTimer && rBitmap.GetSizeBytes() > 10000
-        ? new LocalTimeTest()
-        : nullptr);
-#endif
 
     Bitmap bitmap = rBitmap;
 
