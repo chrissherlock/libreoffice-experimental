@@ -413,27 +413,6 @@ bool OutputDevice::DrawDeviceTransformedBitmap(
     });
 }
 
-void OutputDevice::DrawImage( const Point& rPos, const Image& rImage, DrawImageFlags nStyle )
-{
-    assert(!is_double_buffered_window());
-
-    DrawImage( rPos, Size(), rImage, nStyle );
-}
-
-void OutputDevice::DrawImage( const Point& rPos, const Size& rSize,
-                              const Image& rImage, DrawImageFlags nStyle )
-{
-    assert(!is_double_buffered_window());
-
-    if (!IsLayoutCalculationNecessary())
-    {
-        if (!rSize.IsEmpty())
-            rImage.Draw(this, rPos, nStyle, &rSize);
-        else
-            rImage.Draw(this, rPos, nStyle);
-    }
-}
-
 // MM02 add some test class to get a simple timer-based output to be able
 // to check if it gets faster - and how much. Uncomment next line or set
 // DO_TIME_TEST for compile time if you want to use it
