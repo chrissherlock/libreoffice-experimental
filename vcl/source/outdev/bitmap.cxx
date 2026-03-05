@@ -114,23 +114,13 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
     if (mpGraphicsState->mnDrawMode & DrawModeFlags::GrayBitmap && !aBmp.IsEmpty())
         aBmp.Convert(BmpConversion::N8BitGreys);
 
+    if (aBmp.IsEmpty())
+        return;
+
     maRecorder.RecordBitmapAction(nAction, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp);
 
-    if ( !IsDeviceOutputNecessary() )
+    if (!IsDeviceOutputNecessary())
         return;
-
-    if (!mpGraphics && !AcquireGraphics())
-        return;
-    assert(mpGraphics);
-
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
-
-    if ( IsOutputCulled() )
-        return;
-
-    if (aBmp.IsEmpty())
-      return;
 
     // Route directly into the hardware dispatcher!
     DrawDeviceBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp);
