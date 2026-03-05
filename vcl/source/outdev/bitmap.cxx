@@ -132,51 +132,8 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
     if (aBmp.IsEmpty())
       return;
 
-    SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(), rSrcSizePixel.Height(),
-                       mpMapper->LogicXToDevicePixel(rDestPt.X()), mpMapper->LogicYToDevicePixel(rDestPt.Y()),
-                       mpMapper->LogicWidthToDevicePixel(rDestSize.Width()),
-                       mpMapper->LogicHeightToDevicePixel(rDestSize.Height()));
-
-    if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
-        return;
-
-    // Normalize coordinates and flip bitmap payload if logical size was negative
-    const BmpMirrorFlags nMirrFlags = AdjustTwoRect( aPosAry, aBmp.GetSizePixel() );
-
-    if ( nMirrFlags != BmpMirrorFlags::NONE )
-        aBmp.Mirror( nMirrFlags );
-
-    if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
-        return;
-
-    // Subsampling (High-quality downscale)
-    if (nAction == MetaActionType::BMPSCALE && CanSubsampleBitmap())
-    {
-        double nScaleX = aPosAry.mnDestWidth  / static_cast<double>(aPosAry.mnSrcWidth);
-        double nScaleY = aPosAry.mnDestHeight / static_cast<double>(aPosAry.mnSrcHeight);
-
-        // hidpi surfaces like cairo have their own scale, so don't downscale
-        // past the surface scaling which can retain the extra detail
-        double fScale(1.0);
-        if (mpGraphics->ShouldDownscaleIconsAtSurface(fScale))
-        {
-            nScaleX *= fScale;
-            nScaleY *= fScale;
-        }
-
-        if ( nScaleX < 1.0 || nScaleY < 1.0 )
-        {
-            aBmp.Scale(nScaleX, nScaleY);
-            aPosAry.mnSrcWidth = aPosAry.mnDestWidth * fScale;
-            aPosAry.mnSrcHeight = aPosAry.mnDestHeight * fScale;
-        }
-    }
-
-    if (mpGraphics)
-    {
-        ImplMirrorIfRTL(aPosAry);
-        vcl::rendercontext::BitmapRenderer::DrawBitmap(*mpGraphics, aPosAry, aBmp);
-    }
+    // Route directly into the hardware dispatcher!
+    DrawDeviceBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp);
 }
 
 void OutputDevice::DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize,
@@ -227,6 +184,29 @@ void OutputDevice::DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize
 
             if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
                 return;
+
+            // Subsampling (High-quality downscale)
+            if (CanSubsampleBitmap())
+            {
+                double nScaleX = aPosAry.mnDestWidth  / static_cast<double>(aPosAry.mnSrcWidth);
+                double nScaleY = aPosAry.mnDestHeight / static_cast<double>(aPosAry.mnSrcHeight);
+
+                // hidpi surfaces like cairo have their own scale, so don't downscale
+                // past the surface scaling which can retain the extra detail
+                double fScale(1.0);
+                if (mpGraphics && mpGraphics->ShouldDownscaleIconsAtSurface(fScale))
+                {
+                    nScaleX *= fScale;
+                    nScaleY *= fScale;
+                }
+
+                if ( nScaleX < 1.0 || nScaleY < 1.0 )
+                {
+                    aLocalBmp.Scale(nScaleX, nScaleY);
+                    aPosAry.mnSrcWidth = aPosAry.mnDestWidth * fScale;
+                    aPosAry.mnSrcHeight = aPosAry.mnDestHeight * fScale;
+                }
+            }
 
             if (mpGraphics)
             {
