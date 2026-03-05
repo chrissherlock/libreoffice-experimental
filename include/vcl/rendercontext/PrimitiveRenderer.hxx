@@ -61,6 +61,8 @@ struct WaveLineGeometry;
 class VCL_DLLPUBLIC PrimitiveRenderer
 {
 public:
+    static Color GetPixel(SalGraphics& rGraphics, tools::Long nX, tools::Long nY);
+
     /** Renders a single pixel at the specified device coordinates using the current line color. */
     static void DrawPixel(SalGraphics& rGraphics, const Point& rDevicePt);
 

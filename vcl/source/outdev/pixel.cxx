@@ -63,7 +63,7 @@ Color OutputDevice::GetPixel(const Point& rPoint) const
     if (IsRTLEnabled())
         nX = MirrorX(nX, 1);
 
-    return mpGraphics->getPixel(nX, nY);
+    return vcl::rendercontext::PrimitiveRenderer::GetPixel(*mpGraphics, nX, nY);
 }
 
 void OutputDevice::DrawPixel(const Point& rPt)

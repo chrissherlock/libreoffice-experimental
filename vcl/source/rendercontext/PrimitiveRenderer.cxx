@@ -44,6 +44,11 @@
 
 namespace vcl::rendercontext
 {
+Color PrimitiveRenderer::GetPixel(SalGraphics& rGraphics, tools::Long nX, tools::Long nY)
+{
+    return rGraphics.getPixel(nX, nY);
+}
+
 void PrimitiveRenderer::DrawPixel(SalGraphics& rGraphics, const Point& rDevicePt)
 {
     rGraphics.drawPixel(rDevicePt.X(), rDevicePt.Y());
