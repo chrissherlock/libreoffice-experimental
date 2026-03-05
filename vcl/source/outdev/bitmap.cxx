@@ -126,94 +126,69 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
     DrawDeviceBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp);
 }
 
-void OutputDevice::DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize,
-                                     const Point& rSrcPtPixel, const Size& rSrcSizePixel,
-                                     const Bitmap& rBitmap ) // Keep const, but we will make a local copy if needed
+void OutputDevice::DrawDeviceBitmap(const Point& rDestPt, const Size& rDestSize,
+                                    const Point& rSrcPtPixel, const Size& rSrcSizePixel,
+                                    const Bitmap& rBitmap)
 {
-    if (!FlushGraphicsState())
-        return;
-
-    if (rBitmap.IsEmpty())
+    if (!FlushGraphicsState() || rBitmap.IsEmpty())
         return;
 
     vcl::DispatchDevice(*this, [&](auto& rConcreteDevice) {
         using DeviceType = std::decay_t<decltype(rConcreteDevice)>;
 
-        if constexpr (!vcl::AlphaCapable<DeviceType>)
+        SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(),
+                           rSrcSizePixel.Width(), rSrcSizePixel.Height(),
+                           mpMapper->LogicXToDevicePixel(rDestPt.X()),
+                           mpMapper->LogicYToDevicePixel(rDestPt.Y()),
+                           mpMapper->LogicWidthToDevicePixel(rDestSize.Width()),
+                           mpMapper->LogicHeightToDevicePixel(rDestSize.Height()));
+
+        if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
+            return;
+
+        Bitmap aLocalBmp(rBitmap);
+        const BmpMirrorFlags nMirrFlags = AdjustTwoRect(aPosAry, aLocalBmp.GetSizePixel());
+        if (nMirrFlags != BmpMirrorFlags::NONE)
+            aLocalBmp.Mirror(nMirrFlags);
+
+        if (CanSubsampleBitmap())
         {
-            if (rBitmap.HasAlpha())
+            double nScaleX = aPosAry.mnDestWidth  / static_cast<double>(aPosAry.mnSrcWidth);
+            double nScaleY = aPosAry.mnDestHeight / static_cast<double>(aPosAry.mnSrcHeight);
+
+            double fScale(1.0);
+            if (mpGraphics && mpGraphics->ShouldDownscaleIconsAtSurface(fScale))
             {
-                Bitmap aBlendedBmp(rBitmap.CreateColorBitmap());
-                aBlendedBmp.Blend(rBitmap.CreateAlphaMask(), COL_WHITE);
-                DrawDeviceBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBlendedBmp);
-                return;
+                nScaleX *= fScale;
+                nScaleY *= fScale;
+            }
+
+            if (nScaleX < 1.0 || nScaleY < 1.0)
+            {
+                aLocalBmp.Scale(nScaleX, nScaleY);
+                aPosAry.mnSrcWidth = aPosAry.mnDestWidth * fScale;
+                aPosAry.mnSrcHeight = aPosAry.mnDestHeight * fScale;
             }
         }
 
         if constexpr (vcl::BandedPrinting<DeviceType>)
         {
-             rConcreteDevice.ImplPrintTransparent(rBitmap, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
+             rConcreteDevice.ImplPrintTransparent(aLocalBmp, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
              return;
         }
 
-        if constexpr (vcl::PhysicalDevice<DeviceType>)
+        if (mpGraphics)
         {
-            SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(), rSrcSizePixel.Height(),
-                               mpMapper->LogicXToDevicePixel(rDestPt.X()), mpMapper->LogicYToDevicePixel(rDestPt.Y()),
-                               mpMapper->LogicWidthToDevicePixel(rDestSize.Width()),
-                               mpMapper->LogicHeightToDevicePixel(rDestSize.Height()));
+            const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
 
-            if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
-                return;
-
-            // Handle inverted coordinate systems (Negative scaling)
-            Bitmap aLocalBmp(rBitmap);
-            const BmpMirrorFlags nMirrFlags = AdjustTwoRect(aPosAry, aLocalBmp.GetSizePixel());
-            if (nMirrFlags != BmpMirrorFlags::NONE)
-                aLocalBmp.Mirror(nMirrFlags);
-
-            if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
-                return;
-
-            // Subsampling (High-quality downscale)
-            if (CanSubsampleBitmap())
-            {
-                double nScaleX = aPosAry.mnDestWidth  / static_cast<double>(aPosAry.mnSrcWidth);
-                double nScaleY = aPosAry.mnDestHeight / static_cast<double>(aPosAry.mnSrcHeight);
-
-                // hidpi surfaces like cairo have their own scale, so don't downscale
-                // past the surface scaling which can retain the extra detail
-                double fScale(1.0);
-                if (mpGraphics && mpGraphics->ShouldDownscaleIconsAtSurface(fScale))
-                {
-                    nScaleX *= fScale;
-                    nScaleY *= fScale;
-                }
-
-                if ( nScaleX < 1.0 || nScaleY < 1.0 )
-                {
-                    aLocalBmp.Scale(nScaleX, nScaleY);
-                    aPosAry.mnSrcWidth = aPosAry.mnDestWidth * fScale;
-                    aPosAry.mnSrcHeight = aPosAry.mnDestHeight * fScale;
-                }
-            }
-
-            if (mpGraphics)
-            {
-                const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
-                const bool bAlphaCapable = vcl::AlphaCapable<DeviceType>;
-
-                vcl::rendercontext::BitmapRenderer::DrawBitmap(
-                    *mpGraphics,
-                    aPosAry,
-                    aLocalBmp,
-                    GetRTLFrameWidth(),
-                    bRTL,
-                    bAlphaCapable
-                );
-            }
-
-            return;
+            vcl::rendercontext::BitmapRenderer::DrawBitmap(
+                *mpGraphics,
+                aPosAry,
+                aLocalBmp,
+                GetRTLFrameWidth(),
+                bRTL,
+                vcl::AlphaCapable<DeviceType>
+            );
         }
     });
 }
