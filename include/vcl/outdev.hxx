@@ -1358,6 +1358,8 @@ public:
 
     bool                        GetTextIsRTL( const OUString&, sal_Int32 nIndex, sal_Int32 nLen ) const;
 
+protected:
+    tools::Long MirrorX(tools::Long nX, tools::Long nWidth) const;
     ///@}
 
 

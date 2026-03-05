@@ -773,4 +773,10 @@ bool OutputDevice::IsPixelAreaOutOfBounds(tools::Long nX, tools::Long nY,
     return false;
 }
 
+tools::Long OutputDevice::MirrorX(tools::Long nX, tools::Long nWidth) const
+{
+    // The logic: (OutputWidth - Width) - (RelativeX) + OffsetX
+    return GetOutputWidthPixel() - nWidth - (nX - GetOutOffXPixel()) + GetOutOffXPixel();
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

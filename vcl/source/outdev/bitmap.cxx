@@ -263,7 +263,7 @@ Bitmap OutputDevice::GetBitmap(const Point& rSrcPt, const Size& rSize) const
 
     tools::Long nFinalX = aClippedRect.Left();
     if (IsRTLEnabled())
-        nFinalX = GetOutputWidthPixel() - aClippedRect.GetWidth() - (nFinalX - GetOutOffXPixel()) + GetOutOffXPixel();
+        nFinalX = MirrorX(nFinalX, aClippedRect.GetWidth());
 
     Bitmap aBmp = vcl::rendercontext::BitmapRenderer::CaptureBitmap(
         *mpGraphics, nFinalX, aClippedRect.Top(),
