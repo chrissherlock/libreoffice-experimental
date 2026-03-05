@@ -209,6 +209,29 @@ void OutputDevice::DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize
     });
 }
 
+static Bitmap lcl_PadClippedBitmap(const Bitmap& rClippedBmp,
+                                   const tools::Rectangle& rRequestedRect,
+                                   const tools::Rectangle& rClippedRect)
+{
+    // Create the full-sized canvas the caller originally expected
+    Bitmap aFullBmp(rRequestedRect.GetSize(), rClippedBmp.getPixelFormat());
+
+    // Standard VCL behavior: fill background with white
+    aFullBmp.Erase(COL_WHITE);
+
+    // Calculate the destination position within the full canvas
+    const Point aDestPos(rClippedRect.Left() - rRequestedRect.Left(),
+                         rClippedRect.Top() - rRequestedRect.Top());
+
+    const tools::Rectangle aSrcRect(Point(0,0), rClippedBmp.GetSizePixel());
+    const tools::Rectangle aDestRect(aDestPos, rClippedBmp.GetSizePixel());
+
+    // Restore the clipped pixels into the padded canvas
+    aFullBmp.CopyPixel(aDestRect, aSrcRect, rClippedBmp);
+
+    return aFullBmp;
+}
+
 Bitmap OutputDevice::GetBitmap( const Point& rSrcPt, const Size& rSize ) const
 {
     if( IsLayoutCalculationNecessary() )
@@ -249,19 +272,7 @@ Bitmap OutputDevice::GetBitmap( const Point& rSrcPt, const Size& rSize ) const
     Bitmap aBmp(xSalBmp);
 
     if (bClipped)
-    {
-        Bitmap aFullBmp(Size(aRequestedRect.GetWidth(), aRequestedRect.GetHeight()), aBmp.getPixelFormat());
-        aFullBmp.Erase(COL_WHITE);
-
-        const Point aDestPos(aClippedRect.Left() - aRequestedRect.Left(),
-                             aClippedRect.Top() - aRequestedRect.Top());
-
-        tools::Rectangle aSrcRect(Point(0,0), aBmp.GetSizePixel());
-        tools::Rectangle aDestRect(aDestPos, aBmp.GetSizePixel());
-
-        aFullBmp.CopyPixel(aDestRect, aSrcRect, aBmp);
-        aBmp = aFullBmp;
-    }
+        aBmp = lcl_PadClippedBitmap(aBmp, aRequestedRect, aClippedRect);
 
     return aBmp;
 }
