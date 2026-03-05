@@ -211,7 +211,10 @@ void OutputDevice::DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize
 
 Bitmap OutputDevice::GetBitmap( const Point& rSrcPt, const Size& rSize ) const
 {
-    if ( !mpGraphics && !AcquireGraphics() )
+    if( IsLayoutCalculationNecessary() )
+        return Bitmap();
+
+    if( !mpGraphics && !AcquireGraphics() )
         return Bitmap();
 
     assert(mpGraphics);
@@ -224,80 +227,41 @@ Bitmap OutputDevice::GetBitmap( const Point& rSrcPt, const Size& rSize ) const
     if (IsPixelAreaOutOfBounds(nX, nY, nWidth, nHeight))
         return Bitmap();
 
-    tools::Rectangle   aRect( Point( nX, nY ), Size( nWidth, nHeight ) );
-    bool bClipped = false;
+    tools::Rectangle aRequestedRect(Point(nX, nY), Size(nWidth, nHeight));
+    tools::Rectangle aDeviceBounds(Point(GetOutOffXPixel(), GetOutOffYPixel()),
+                                   Size(GetOutputWidthPixel(), GetOutputHeightPixel()));
 
-    // X-Coordinate outside of draw area?
-    if ( nX < GetOutOffXPixel() )
-    {
-        nWidth -= ( GetOutOffXPixel() - nX );
-        nX = GetOutOffXPixel();
-        bClipped = true;
-    }
+    tools::Rectangle aClippedRect = aRequestedRect.Intersection(aDeviceBounds);
 
-    // Y-Coordinate outside of draw area?
-    if ( nY < GetOutOffYPixel() )
-    {
-        nHeight -= ( GetOutOffYPixel() - nY );
-        nY = GetOutOffYPixel();
-        bClipped = true;
-    }
+    if (aClippedRect.IsEmpty())
+        return Bitmap();
 
-    // Width outside of draw area?
-    if ( (nWidth + nX) > (GetOutputWidthPixel() + GetOutOffXPixel()) )
-    {
-        nWidth  = GetOutOffXPixel() + GetOutputWidthPixel() - nX;
-        bClipped = true;
-    }
+    const bool bClipped = (aRequestedRect != aClippedRect);
 
-    // Height outside of draw area?
-    if ( (nHeight + nY) > (GetOutputHeightPixel() + GetOutOffYPixel()) )
-    {
-        nHeight = GetOutOffYPixel() + GetOutputHeightPixel() - nY;
-        bClipped = true;
-    }
+    std::shared_ptr<SalBitmap> xSalBmp = mpGraphics->GetBitmap(
+        aClippedRect.Left(), aClippedRect.Top(),
+        aClippedRect.GetWidth(), aClippedRect.GetHeight(),
+        *this, false);
+
+    if (!xSalBmp)
+        return Bitmap();
+
+    Bitmap aBmp(xSalBmp);
 
     if (bClipped)
     {
-        // If the visible part has been clipped, we have to create a
-        // Bitmap with the correct size in which we copy the clipped
-        // Bitmap to the correct position.
-        ScopedVclPtrInstance< VirtualDevice > aVDev(  *this  );
+        Bitmap aFullBmp(Size(aRequestedRect.GetWidth(), aRequestedRect.GetHeight()), aBmp.getPixelFormat());
+        aFullBmp.Erase(COL_WHITE);
 
-        if ( aVDev->SetOutputSizePixel( aRect.GetSize() ) )
-        {
-            if ( aVDev->mpGraphics || aVDev->AcquireGraphics() )
-            {
-                if ( (nWidth > 0) && (nHeight > 0) )
-                {
-                    SalTwoRect aPosAry(nX, nY, nWidth, nHeight,
-                                      (aRect.Left() < GetOutOffXPixel()) ? (GetOutOffXPixel() - aRect.Left()) : 0L,
-                                      (aRect.Top() < GetOutOffYPixel()) ? (GetOutOffYPixel() - aRect.Top()) : 0L,
-                                      nWidth, nHeight);
-                    aVDev->mpGraphics->CopyBits(aPosAry, *mpGraphics, *this, *this);
-                }
-                else
-                {
-                    OSL_ENSURE(false, "CopyBits with zero or negative width or height");
-                }
+        const Point aDestPos(aClippedRect.Left() - aRequestedRect.Left(),
+                             aClippedRect.Top() - aRequestedRect.Top());
 
-                return aVDev->GetBitmap( Point(), aVDev->GetOutputSizePixel() );
-            }
-        }
+        tools::Rectangle aSrcRect(Point(0,0), aBmp.GetSizePixel());
+        tools::Rectangle aDestRect(aDestPos, aBmp.GetSizePixel());
+
+        aFullBmp.CopyPixel(aDestRect, aSrcRect, aBmp);
+        aBmp = aFullBmp;
     }
-
-    std::shared_ptr<SalBitmap> pSalBmp;
-    // if we are a virtual device, we might need to remove the unused alpha channel
-    bool bWithoutAlpha = false;
-    if (OUTDEV_VIRDEV == GetOutDevType())
-        bWithoutAlpha = static_cast<const VirtualDevice*>(this)->IsWithoutAlpha();
-
-    pSalBmp = mpGraphics->GetBitmap( nX, nY, nWidth, nHeight, *this, bWithoutAlpha );
-
-    Bitmap aBmp;
-
-    if( pSalBmp )
-        aBmp.ImplSetSalBitmap(pSalBmp);
 
     return aBmp;
 }
