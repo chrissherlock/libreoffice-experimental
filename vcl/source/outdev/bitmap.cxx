@@ -469,13 +469,14 @@ void OutputDevice::DrawTransformedBitmap(
     const bool bInvert(RasterOp::Invert == mpGraphicsState->meRasterOp);
     const bool bBitmapChangedColor(mpGraphicsState->mnDrawMode & (DrawModeFlags::BlackBitmap | DrawModeFlags::WhiteBitmap | DrawModeFlags::GrayBitmap ));
     const bool bTryDirectPaint(!bInvert && !bBitmapChangedColor && !GetConnectMetaFile());
+
     // tdf#130768 CAUTION(!) using GetViewTransformation() is *not* enough here, it may
     // be that mnOutOffX/mnOutOffY is used - see AOO bug 75163, mentioned at
     // GetDeviceTransformation declaration
     basegfx::B2DHomMatrix aFullTransform(mpMapper->GetDeviceTransformation() * rTransformation);
 
     // First try to handle additional alpha blending, either directly, or modify the bitmap.
-    if(!rtl::math::approxEqual( fAlpha, 1.0 ))
+    if (!rtl::math::approxEqual( fAlpha, 1.0))
     {
         if(bTryDirectPaint)
         {
@@ -486,22 +487,23 @@ void OutputDevice::DrawTransformedBitmap(
             }
         }
         // Apply the alpha manually.
-        sal_uInt8 nTransparency( static_cast<sal_uInt8>( ::basegfx::fround( 255.0*(1.0 - fAlpha) + .5) ) );
+        sal_uInt8 nTransparency(static_cast<sal_uInt8>(basegfx::fround( 255.0*(1.0 - fAlpha) + .5)));
         AlphaMask aAlpha( bitmap.GetSizePixel(), &nTransparency );
-        if( bitmap.HasAlpha())
-            aAlpha.BlendWith( bitmap.CreateAlphaMask());
+
+        if (bitmap.HasAlpha())
+            aAlpha.BlendWith(bitmap.CreateAlphaMask());
+
         bitmap = Bitmap( bitmap.CreateColorBitmap(), aAlpha );
     }
 
-    // If the backend's implementation is known to not need any optimizations here, pass to it directly.
-    // With most backends it's more performant to try to simplify to DrawBitmap() first.
-    if(bTryDirectPaint && mpGraphics->HasFastDrawTransformedBitmap() && DrawDeviceTransformedBitmap(aFullTransform, bitmap))
+    if (bTryDirectPaint && mpGraphics->HasFastDrawTransformedBitmap() && DrawDeviceTransformedBitmap(aFullTransform, bitmap))
         return;
 
     // decompose matrix to check rotation and shear
     basegfx::B2DVector aScale, aTranslate;
     double fRotate, fShearX;
     rTransformation.decompose(aScale, aTranslate, fRotate, fShearX);
+
     const bool bRotated(!basegfx::fTools::equalZero(fRotate));
     const bool bSheared(!basegfx::fTools::equalZero(fShearX));
     const bool bMirroredX(aScale.getX() < 0.0);
@@ -513,110 +515,104 @@ void OutputDevice::DrawTransformedBitmap(
         return;
     }
 
-    // Try the backend's implementation before resorting to the slower fallback here.
     if (bTryDirectPaint && DrawDeviceTransformedBitmap(aFullTransform, bitmap))
         return;
 
-    // take the fallback when no rotate and shear, but mirror (else we would have done this above)
     if(!bRotated && !bSheared)
     {
         DrawMirroredBitmap(aScale, aTranslate, bitmap);
         return;
     }
 
-    // at this point we are either sheared or rotated or both
+    DrawTransformedBitmapSoftwareFallback(rTransformation, aFullTransform, bitmap, bSheared, bRotated);
+}
+
+void OutputDevice::DrawTransformedBitmapSoftwareFallback(
+    const basegfx::B2DHomMatrix& rLogicalTransform,
+    const basegfx::B2DHomMatrix& rDeviceTransform,
+    const Bitmap& rBitmap,
+    bool bSheared, bool bRotated)
+{
     assert(bSheared || bRotated);
 
-    // limit maximum area to something looking good for non-pixel-based targets (metafile, printer)
-    // by using a fixed minimum (allow at least, but no need to utilize) for good smoothing and an area
-    // dependent of original size for good quality when e.g. rotated/sheared. Still, limit to a maximum
-    // to avoid crashes/resource problems (ca. 1500x3000 here)
-    const Size aOriginalSizePixel(bitmap.GetSizePixel());
+    // limit maximum area to something looking good for non-pixel-based targets
+    const Size aOriginalSizePixel(rBitmap.GetSizePixel());
     double fMaximumArea = lcl_CalculateMaximumArea(aOriginalSizePixel);
 
     basegfx::B2DRange aVisibleRange(0.0, 0.0, 1.0, 1.0);
 
-    if (!GetVisibleDeviceRange(aFullTransform, aVisibleRange, fMaximumArea))
+    if (!GetVisibleDeviceRange(rDeviceTransform, aVisibleRange, fMaximumArea))
         return;
 
     if (aVisibleRange.isEmpty())
         return;
 
-    Bitmap aTransformed(bitmap);
+    Bitmap aTransformed(rBitmap);
 
-    // #122923# when the result needs an alpha channel due to being rotated or sheared
-    // and thus uncovering areas, add these channels so that the own transformer (used
-    // in getTransformed) also creates a transformed alpha channel
-    if(!aTransformed.HasAlpha() && (bSheared || bRotated))
+    // #122923# add alpha channels for uncovered areas if rotated/sheared
+    if(!aTransformed.HasAlpha())
     {
-        // parts will be uncovered, extend aTransformed with a mask bitmap
         const Bitmap aContent(aTransformed.CreateColorBitmap());
-
         AlphaMask aMaskBmp(aContent.GetSizePixel());
         aMaskBmp.Erase(0);
-
         aTransformed = Bitmap(aContent, aMaskBmp);
     }
 
     basegfx::B2DVector aFullScale, aFullTranslate;
     double fFullRotate, fFullShearX;
-    aFullTransform.decompose(aFullScale, aFullTranslate, fFullRotate, fFullShearX);
+
+    // We mutate the transform to avoid downscaling, so make a local copy
+    basegfx::B2DHomMatrix aDeviceTransform(rDeviceTransform);
+    aDeviceTransform.decompose(aFullScale, aFullTranslate, fFullRotate, fFullShearX);
+
     if (aFullScale.getX() > 0 && aFullScale.getY() > 0
         && aOriginalSizePixel.getWidth() > aFullScale.getX()
         && aOriginalSizePixel.getHeight() > aFullScale.getY())
     {
-        // aFullTransform would downscale the bitmap: avoid this, so the recorded metafile can be
-        // better upscaled later.
         basegfx::B2DHomMatrix aTransform = basegfx::utils::createScaleB2DHomMatrix(
                 aOriginalSizePixel.getWidth() / aFullScale.getX(),
                 aOriginalSizePixel.getHeight() / aFullScale.getY());
-        aFullTransform *= aTransform;
+        aDeviceTransform *= aTransform;
     }
 
     double fSourceRatio = 1.0;
     if (aOriginalSizePixel.getHeight() != 0)
-    {
-        fSourceRatio = aOriginalSizePixel.getWidth() / aOriginalSizePixel.getHeight();
-    }
+        fSourceRatio = aOriginalSizePixel.getWidth() / static_cast<double>(aOriginalSizePixel.getHeight());
+
     double fTargetRatio = 1.0;
     if (aFullScale.getY() != 0)
-    {
         fTargetRatio = aFullScale.getX() / aFullScale.getY();
-    }
+
     bool bAspectRatioKept = rtl::math::approxEqual(fSourceRatio, fTargetRatio);
     if (bSheared || !bAspectRatioKept)
     {
         // Not only rotation, or scaling does not keep aspect ratio.
-        aTransformed = aTransformed.getTransformed(
-            aFullTransform,
-            aVisibleRange,
-            fMaximumArea);
+        aTransformed = aTransformed.getTransformed(aDeviceTransform, aVisibleRange, fMaximumArea);
     }
     else
     {
         // Just rotation, can do that directly.
         fFullRotate = fmod(fFullRotate * -1, 2 * M_PI);
         if (fFullRotate < 0)
-        {
             fFullRotate += 2 * M_PI;
-        }
+
         Degree10 nAngle10(basegfx::fround(basegfx::rad2deg<10>(fFullRotate)));
         aTransformed.Rotate(nAngle10, COL_TRANSPARENT);
     }
+
     basegfx::B2DRange aTargetRange(0.0, 0.0, 1.0, 1.0);
 
     // get logic object target range
-    aTargetRange.transform(rTransformation);
+    aTargetRange.transform(rLogicalTransform);
 
-    // get from unified/relative VisibleRange to logoc one
+    // get from unified/relative VisibleRange to logic one
     aVisibleRange.transform(
         basegfx::utils::createScaleTranslateB2DHomMatrix(
             aTargetRange.getRange(),
             aTargetRange.getMinimum()));
 
-    // extract point and size; do not remove size, the bitmap may have been prepared reduced by purpose
-    // #i124580# the correct DestSize needs to be calculated based on MaxXY values
-    const Point aDestPt(basegfx::fround<tools::Long>(aVisibleRange.getMinX()), basegfx::fround<tools::Long>(aVisibleRange.getMinY()));
+    const Point aDestPt(basegfx::fround<tools::Long>(aVisibleRange.getMinX()),
+                        basegfx::fround<tools::Long>(aVisibleRange.getMinY()));
     const Size aDestSize(
         basegfx::fround<tools::Long>(aVisibleRange.getMaxX()) - aDestPt.X(),
         basegfx::fround<tools::Long>(aVisibleRange.getMaxY()) - aDestPt.Y());

@@ -1480,6 +1480,12 @@ protected:
 
 private:
 
+    SAL_DLLPRIVATE void         DrawTransformedBitmapSoftwareFallback(
+                                    const basegfx::B2DHomMatrix& rLogicalTransform,
+                                    const basegfx::B2DHomMatrix& rDeviceTransform,
+                                    const Bitmap& rBitmap,
+                                    bool bSheared, bool bRotated);
+
     SAL_DLLPRIVATE void         DrawScaledAndTranslatedBitmap(
                                     const basegfx::B2DVector& rScale,
                                     const basegfx::B2DVector& rTranslate,
