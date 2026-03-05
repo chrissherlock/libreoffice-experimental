@@ -678,6 +678,9 @@ public:
     void                        DrawPixel( const Point& rPt, const Color& rColor );
 
     Color                       GetPixel( const Point& rPt ) const;
+
+protected:
+    bool IsPixelPointOutOfBounds(tools::Long nX, tools::Long nY) const;
     ///@}
 
 

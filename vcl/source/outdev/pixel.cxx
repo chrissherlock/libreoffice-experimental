@@ -30,6 +30,17 @@
 
 #include <cassert>
 
+bool OutputDevice::IsPixelPointOutOfBounds(tools::Long nX, tools::Long nY) const
+{
+    if (nX < GetOutOffXPixel() || nX >= (GetOutOffXPixel() + GetOutputWidthPixel()))
+        return true;
+
+    if (nY < GetOutOffYPixel() || nY >= (GetOutOffYPixel() + GetOutputHeightPixel()))
+        return true;
+
+    return false;
+}
+
 Color OutputDevice::GetPixel(const Point& rPoint) const
 {
     if (!mpGraphics && !AcquireGraphics())
@@ -43,10 +54,16 @@ Color OutputDevice::GetPixel(const Point& rPoint) const
     if (IsOutputCulled())
         return Color();
 
-    const tools::Long nX = LogicXToDevicePixel(rPoint.X());
+    tools::Long nX = LogicXToDevicePixel(rPoint.X());
     const tools::Long nY = LogicYToDevicePixel(rPoint.Y());
 
-    return mpGraphics->GetPixel(nX, nY, *this);
+    if (IsPixelPointOutOfBounds(nX, nY))
+        return COL_TRANSPARENT;
+
+    if (IsRTLEnabled())
+        nX = MirrorX(nX, 1);
+
+    return mpGraphics->getPixel(nX, nY);
 }
 
 void OutputDevice::DrawPixel(const Point& rPt)

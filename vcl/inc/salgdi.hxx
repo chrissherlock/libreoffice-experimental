@@ -336,10 +336,6 @@ public:
                                     Color nMaskColor,
                                     const OutputDevice& rOutDev );
 
-    SAL_DLLPRIVATE Color                       GetPixel(
-                                    tools::Long nX, tools::Long nY,
-                                    const OutputDevice& rOutDev );
-
     SAL_DLLPRIVATE bool                        DrawEPS(
                                     tools::Long nX, tools::Long nY,
                                     tools::Long nWidth, tools::Long nHeight,
