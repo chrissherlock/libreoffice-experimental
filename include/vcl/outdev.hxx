@@ -1472,6 +1472,12 @@ protected:
                                     basegfx::B2DRange &aVisibleRange,
                                     double &fMaximumArea);
 
+    /// Returns the physical width used as the reference axis for RTL mirroring.
+    virtual tools::Long         GetRTLFrameWidth() const;
+
+    /// Helper to mirror a SalTwoRect coordinate array if RTL is active.
+    void                        ImplMirrorIfRTL(SalTwoRect& rPosAry) const;
+
 private:
 
     SAL_DLLPRIVATE void         DrawScaledAndTranslatedBitmap(

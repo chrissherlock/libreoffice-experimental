@@ -751,4 +751,11 @@ bool OutputDevice::CanDrawPolygon()
     return (GetRasterOp() == RasterOp::OverPaint && (IsLineColor() || IsFillColor()));
 }
 
+tools::Long OutputDevice::GetRTLFrameWidth() const
+{
+    // For standard physical devices (Windows/Printers), the RTL axis
+    // is defined by the underlying graphics backend.
+    return mpGraphics ? mpGraphics->GetGraphicsWidth() : 0;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

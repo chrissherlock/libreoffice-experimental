@@ -94,6 +94,8 @@ protected:
     explicit VirtualDevice(const OutputDevice* pCompDev, DeviceFormat eFormat,
                            OutDevType eOutDevType);
 
+    virtual tools::Long         GetRTLFrameWidth() const override;
+
 public:
 
     /** Create a virtual device of size 1x1

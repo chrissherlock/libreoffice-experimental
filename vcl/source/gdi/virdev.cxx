@@ -484,4 +484,11 @@ tools::Long VirtualDevice::GetFontExtLeading() const
     return 0;
 }
 
+tools::Long VirtualDevice::GetRTLFrameWidth() const
+{
+    // Virtual devices are self-contained offscreen buffers.
+    // Their RTL mirroring axis is strictly their own allocated width.
+    return GetOutputWidthPixel();
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
