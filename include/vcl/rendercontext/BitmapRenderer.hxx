@@ -22,6 +22,7 @@ namespace basegfx
 {
 class B2DHomMatrix;
 class B2DPoint;
+class B2DRange;
 }
 
 namespace vcl::rendercontext
@@ -58,6 +59,23 @@ public:
      * Updates both the bitmap and the SalTwoRect source dimensions.
      */
     static void ApplySubsampling(SalGraphics& rGraphics, SalTwoRect& rPosAry, Bitmap& rBitmap);
+
+    /**
+     * Generates a software-transformed version of a bitmap (rotated or sheared).
+     * Handles alpha channel preparation and chooses the optimal transformation
+     * method (Rotate vs. getTransformed).
+     *
+     * @param rBitmap       The original source bitmap.
+     * @param rDeviceTransform The full transformation matrix in device coordinates.
+     * @param rVisibleRange Input/Output: The visible sub-section of the bitmap.
+     * @param fMaximumArea  The maximum pixel area allowed for the result.
+     * @param bSheared      Hint: true if the transformation includes shearing.
+     * @return              The transformed bitmap.
+     */
+    static Bitmap GetTransformedBitmapFallback(const Bitmap& rBitmap,
+                                               const basegfx::B2DHomMatrix& rDeviceTransform,
+                                               basegfx::B2DRange& rVisibleRange,
+                                               double fMaximumArea, bool bSheared);
 
 private:
     BitmapRenderer() = delete;

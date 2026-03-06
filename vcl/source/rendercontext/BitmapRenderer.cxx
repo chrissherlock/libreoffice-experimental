@@ -7,6 +7,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include <basegfx/matrix/b2dhommatrixtools.hxx>
+
 #include <vcl/rendercontext/BitmapRenderer.hxx>
 #include <vcl/alpha.hxx>
 #include <vcl/bitmap.hxx>
@@ -108,6 +110,64 @@ void BitmapRenderer::ApplySubsampling(SalGraphics& rGraphics, SalTwoRect& rPosAr
         rPosAry.mnSrcWidth = rPosAry.mnDestWidth * fSurfaceScale;
         rPosAry.mnSrcHeight = rPosAry.mnDestHeight * fSurfaceScale;
     }
+}
+
+Bitmap BitmapRenderer::GetTransformedBitmapFallback(const Bitmap& rBitmap,
+                                                    const basegfx::B2DHomMatrix& rDeviceTransform,
+                                                    basegfx::B2DRange& rVisibleRange,
+                                                    double fMaximumArea, bool bSheared)
+{
+    Bitmap aTransformed(rBitmap);
+
+    // Ensure Alpha for "Gutter" pixels
+    if (!aTransformed.HasAlpha())
+    {
+        const Bitmap aContent(aTransformed.CreateColorBitmap());
+        AlphaMask aMaskBmp(aContent.GetSizePixel());
+        aMaskBmp.Erase(0);
+        aTransformed = Bitmap(aContent, aMaskBmp);
+    }
+
+    // Normalize and Decompose
+    basegfx::B2DVector aFullScale, aFullTranslate;
+    double fFullRotate, fFullShearX;
+    basegfx::B2DHomMatrix aDeviceTransform(rDeviceTransform);
+    aDeviceTransform.decompose(aFullScale, aFullTranslate, fFullRotate, fFullShearX);
+
+    const Size aOriginalSizePixel(rBitmap.GetSizePixel());
+    if (aFullScale.getX() > 0 && aFullScale.getY() > 0
+        && aOriginalSizePixel.getWidth() > aFullScale.getX()
+        && aOriginalSizePixel.getHeight() > aFullScale.getY())
+    {
+        basegfx::B2DHomMatrix aNormalize = basegfx::utils::createScaleB2DHomMatrix(
+            aOriginalSizePixel.getWidth() / aFullScale.getX(),
+            aOriginalSizePixel.getHeight() / aFullScale.getY());
+        aDeviceTransform *= aNormalize;
+    }
+
+    // Transformation Routing
+    double fSourceRatio
+        = aOriginalSizePixel.getHeight() != 0
+              ? aOriginalSizePixel.getWidth() / static_cast<double>(aOriginalSizePixel.getHeight())
+              : 1.0;
+    double fTargetRatio = aFullScale.getY() != 0 ? aFullScale.getX() / aFullScale.getY() : 1.0;
+
+    bool bAspectRatioKept = rtl::math::approxEqual(fSourceRatio, fTargetRatio);
+    if (bSheared || !bAspectRatioKept)
+    {
+        aTransformed = aTransformed.getTransformed(aDeviceTransform, rVisibleRange, fMaximumArea);
+    }
+    else
+    {
+        fFullRotate = fmod(fFullRotate * -1, 2 * M_PI);
+        if (fFullRotate < 0)
+            fFullRotate += 2 * M_PI;
+
+        Degree10 nAngle10(basegfx::fround(basegfx::rad2deg<10>(fFullRotate)));
+        aTransformed.Rotate(nAngle10, COL_TRANSPARENT);
+    }
+
+    return aTransformed;
 }
 
 } // namespace vcl::rendercontext

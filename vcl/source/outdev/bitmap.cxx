@@ -479,73 +479,31 @@ void OutputDevice::DrawTransformedBitmapSoftwareFallback(
     double fMaximumArea = lcl_CalculateMaximumArea(aOriginalSizePixel);
 
     basegfx::B2DRange aVisibleRange(0.0, 0.0, 1.0, 1.0);
-
     if (!GetVisibleDeviceRange(rDeviceTransform, aVisibleRange, fMaximumArea))
         return;
 
     if (aVisibleRange.isEmpty())
         return;
 
-    Bitmap aTransformed(rBitmap);
+    Bitmap aTransformed = vcl::rendercontext::BitmapRenderer::GetTransformedBitmapFallback(
+        rBitmap, rDeviceTransform, aVisibleRange, fMaximumArea, bSheared);
 
-    // Ensure we have an alpha channel. Rotation and shearing often leave
-    // "uncovered" corners that must be transparent.
-    if(!aTransformed.HasAlpha())
-    {
-        const Bitmap aContent(aTransformed.CreateColorBitmap());
-        AlphaMask aMaskBmp(aContent.GetSizePixel());
-        aMaskBmp.Erase(0); // Initialize as fully opaque
-        aTransformed = Bitmap(aContent, aMaskBmp);
-    }
+    if (aTransformed.IsEmpty())
+        return;
 
-    basegfx::B2DVector aFullScale, aFullTranslate;
-    double fFullRotate, fFullShearX;
-
-    basegfx::B2DHomMatrix aDeviceTransform(rDeviceTransform);
-    aDeviceTransform.decompose(aFullScale, aFullTranslate, fFullRotate, fFullShearX);
-
-    if (aFullScale.getX() > 0 && aFullScale.getY() > 0
-        && aOriginalSizePixel.getWidth() > aFullScale.getX()
-        && aOriginalSizePixel.getHeight() > aFullScale.getY())
-    {
-        basegfx::B2DHomMatrix aTransform = basegfx::utils::createScaleB2DHomMatrix(
-                aOriginalSizePixel.getWidth() / aFullScale.getX(),
-                aOriginalSizePixel.getHeight() / aFullScale.getY());
-        aDeviceTransform *= aTransform;
-    }
-
-    double fSourceRatio = 1.0;
-    if (aOriginalSizePixel.getHeight() != 0)
-        fSourceRatio = aOriginalSizePixel.getWidth() / static_cast<double>(aOriginalSizePixel.getHeight());
-
-    double fTargetRatio = 1.0;
-    if (aFullScale.getY() != 0)
-        fTargetRatio = aFullScale.getX() / aFullScale.getY();
-
-    bool bAspectRatioKept = rtl::math::approxEqual(fSourceRatio, fTargetRatio);
-    if (bSheared || !bAspectRatioKept)
-    {
-        aTransformed = aTransformed.getTransformed(aDeviceTransform, aVisibleRange, fMaximumArea);
-    }
-    else
-    {
-        fFullRotate = fmod(fFullRotate * -1, 2 * M_PI);
-        if (fFullRotate < 0)
-            fFullRotate += 2 * M_PI;
-
-        Degree10 nAngle10(basegfx::fround(basegfx::rad2deg<10>(fFullRotate)));
-        aTransformed.Rotate(nAngle10, COL_TRANSPARENT);
-    }
-
+    // Map the visible range back to the logical destination
+    // We calculate the target range by applying the logical transform to a unit square,
+    // then scale/translate the visible sub-section into that target.
     basegfx::B2DRange aTargetRange(0.0, 0.0, 1.0, 1.0);
     aTargetRange.transform(rLogicalTransform);
 
-    aVisibleRange.transform(
+    basegfx::B2DRange aFinalVisibleRange(aVisibleRange);
+    aFinalVisibleRange.transform(
         basegfx::utils::createScaleTranslateB2DHomMatrix(
             aTargetRange.getRange(),
             aTargetRange.getMinimum()));
 
-    const tools::Rectangle aDestRect = mpMapper->RoundDeviceRect(aVisibleRange);
+    const tools::Rectangle aDestRect = mpMapper->RoundDeviceRect(aFinalVisibleRange);
 
     DrawBitmap(aDestRect.TopLeft(), aDestRect.GetSize(), aTransformed);
 }
