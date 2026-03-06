@@ -86,6 +86,30 @@ void BitmapRenderer::DrawMask(SalGraphics& rGraphics, const SalTwoRect& rPosAry,
     rGraphics.drawMask(rPosAry, *pSalBitmap, rMaskColor);
 }
 
+void BitmapRenderer::ApplySubsampling(SalGraphics& rGraphics, SalTwoRect& rPosAry, Bitmap& rBitmap)
+{
+    double nScaleX = rPosAry.mnDestWidth / static_cast<double>(rPosAry.mnSrcWidth);
+    double nScaleY = rPosAry.mnDestHeight / static_cast<double>(rPosAry.mnSrcHeight);
+
+    // Handle Surface-specific scaling (e.g., HiDPI/Retina surfaces)
+    double fSurfaceScale(1.0);
+    if (rGraphics.ShouldDownscaleIconsAtSurface(fSurfaceScale))
+    {
+        nScaleX *= fSurfaceScale;
+        nScaleY *= fSurfaceScale;
+    }
+
+    // Only apply if we are shrinking the bitmap (downscaling)
+    if (nScaleX < 1.0 || nScaleY < 1.0)
+    {
+        rBitmap.Scale(nScaleX, nScaleY);
+
+        // Update the source rectangle dimensions to match the new bitmap size
+        rPosAry.mnSrcWidth = rPosAry.mnDestWidth * fSurfaceScale;
+        rPosAry.mnSrcHeight = rPosAry.mnDestHeight * fSurfaceScale;
+    }
+}
+
 } // namespace vcl::rendercontext
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -53,6 +53,12 @@ public:
     static void DrawMask(SalGraphics& rGraphics, const SalTwoRect& rPosAry, const Bitmap& rBitmap,
                          const Color& rMaskColor);
 
+    /**
+     * Performs high-quality subsampling for downscaling bitmaps.
+     * Updates both the bitmap and the SalTwoRect source dimensions.
+     */
+    static void ApplySubsampling(SalGraphics& rGraphics, SalTwoRect& rPosAry, Bitmap& rBitmap);
+
 private:
     BitmapRenderer() = delete;
     ~BitmapRenderer() = delete;

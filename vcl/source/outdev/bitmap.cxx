@@ -137,54 +137,35 @@ void OutputDevice::DrawDeviceBitmap(const Point& rDestPt, const Size& rDestSize,
         using DeviceType = std::decay_t<decltype(rConcreteDevice)>;
 
         SalTwoRect aPosAry = mpMapper->ToDeviceRect(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
-
         if (!aPosAry.HasArea())
             return;
 
-        Bitmap aLocalBmp(rBitmap);
-        const BmpMirrorFlags nMirrFlags = AdjustTwoRect(aPosAry, aLocalBmp.GetSizePixel());
-        if (nMirrFlags != BmpMirrorFlags::NONE)
-            aLocalBmp.Mirror(nMirrFlags);
-
-        if (CanSubsampleBitmap())
-        {
-            double nScaleX = aPosAry.mnDestWidth  / static_cast<double>(aPosAry.mnSrcWidth);
-            double nScaleY = aPosAry.mnDestHeight / static_cast<double>(aPosAry.mnSrcHeight);
-
-            double fScale(1.0);
-            if (mpGraphics && mpGraphics->ShouldDownscaleIconsAtSurface(fScale))
-            {
-                nScaleX *= fScale;
-                nScaleY *= fScale;
-            }
-
-            if (nScaleX < 1.0 || nScaleY < 1.0)
-            {
-                aLocalBmp.Scale(nScaleX, nScaleY);
-                aPosAry.mnSrcWidth = aPosAry.mnDestWidth * fScale;
-                aPosAry.mnSrcHeight = aPosAry.mnDestHeight * fScale;
-            }
-        }
-
         if constexpr (vcl::BandedPrinting<DeviceType>)
         {
-             rConcreteDevice.ImplPrintTransparent(aLocalBmp, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
+             // We pass the original rBitmap to ensure the printer gets max quality
+             rConcreteDevice.ImplPrintTransparent(rBitmap, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
              return;
         }
 
-        if (mpGraphics)
-        {
-            const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+        assert(mpGraphics && "Hardware device dispatched without valid SalGraphics!");
 
-            vcl::rendercontext::BitmapRenderer::DrawBitmap(
-                *mpGraphics,
-                aPosAry,
-                aLocalBmp,
-                GetRTLFrameWidth(),
-                bRTL,
-                vcl::AlphaCapable<DeviceType>
-            );
-        }
+        Bitmap aLocalBmp(rBitmap);
+
+        const BmpMirrorFlags nMirr = AdjustTwoRect(aPosAry, aLocalBmp.GetSizePixel());
+        if (nMirr != BmpMirrorFlags::NONE)
+            aLocalBmp.Mirror(nMirr);
+
+        if (CanSubsampleBitmap())
+            vcl::rendercontext::BitmapRenderer::ApplySubsampling(*mpGraphics, aPosAry, aLocalBmp);
+
+        vcl::rendercontext::BitmapRenderer::DrawBitmap(
+            *mpGraphics,
+            aPosAry,
+            aLocalBmp,
+            GetRTLFrameWidth(),
+            IsRTLEnabled(),
+            vcl::AlphaCapable<DeviceType>
+        );
     });
 }
 
