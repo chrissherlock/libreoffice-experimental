@@ -105,7 +105,7 @@ void OutputDevice::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
                        mpMapper->LogicWidthToDevicePixel(rDestSize.Width()),
                        mpMapper->LogicHeightToDevicePixel(rDestSize.Height()));
 
-    if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
+    if (!aPosAry.HasArea())
         return;
 
     // Normalize Coordinates and Handle Flipped Payloads
@@ -115,7 +115,7 @@ void OutputDevice::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
     if (nMirrFlags != BmpMirrorFlags::NONE)
         aBmp.Mirror(nMirrFlags);
 
-    if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
+    if (!aPosAry.HasArea())
         return;
 
     if (mpGraphics)

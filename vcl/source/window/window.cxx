@@ -1254,7 +1254,7 @@ ImplWinData* Window::ImplGetWinData() const
 
 void WindowOutputDevice::CopyDeviceArea( SalTwoRect& aPosAry )
 {
-    if (aPosAry.mnSrcWidth == 0 || aPosAry.mnSrcHeight == 0 || aPosAry.mnDestWidth == 0 || aPosAry.mnDestHeight == 0)
+    if (!aPosAry.HasArea())
         return;
 
     OutputDevice::CopyDeviceArea(aPosAry);

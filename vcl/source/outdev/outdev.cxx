@@ -413,7 +413,7 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
 
         AdjustTwoRect( aPosAry, GetOutputRectPixel() );
 
-        if ( aPosAry.mnSrcWidth && aPosAry.mnSrcHeight && aPosAry.mnDestWidth && aPosAry.mnDestHeight )
+        if (aPosAry.HasArea())
             mpGraphics->CopyBits(aPosAry, *this);
     }
 }
@@ -506,7 +506,7 @@ void OutputDevice::CopyArea( const Point& rDestPt,
 
 void OutputDevice::CopyDeviceArea( SalTwoRect& aPosAry )
 {
-    if (aPosAry.mnSrcWidth == 0 || aPosAry.mnSrcHeight == 0 || aPosAry.mnDestWidth == 0 || aPosAry.mnDestHeight == 0)
+    if (!aPosAry.HasArea())
         return;
 
     aPosAry.mnDestWidth  = aPosAry.mnSrcWidth;
@@ -535,7 +535,7 @@ void OutputDevice::drawOutDevDirect(const OutputDevice& rSrcDev, SalTwoRect& rPo
 
     AdjustTwoRect( rPosAry, rSrcDev.GetOutputRectPixel() );
 
-    if ( rPosAry.mnSrcWidth && rPosAry.mnSrcHeight && rPosAry.mnDestWidth && rPosAry.mnDestHeight )
+    if (rPosAry.HasArea())
     {
         // if this is no window, but rSrcDev is a window
         // mirroring may be required

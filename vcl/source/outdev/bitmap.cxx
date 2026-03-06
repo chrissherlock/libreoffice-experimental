@@ -138,7 +138,7 @@ void OutputDevice::DrawDeviceBitmap(const Point& rDestPt, const Size& rDestSize,
 
         SalTwoRect aPosAry = mpMapper->ToDeviceRect(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
 
-        if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
+        if (!aPosAry.HasArea())
             return;
 
         Bitmap aLocalBmp(rBitmap);

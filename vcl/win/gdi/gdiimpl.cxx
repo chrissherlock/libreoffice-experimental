@@ -2302,7 +2302,7 @@ static void setInterpolationMode(
 
 bool WinSalGraphicsImpl::TryDrawBitmapGDIPlus(const SalTwoRect& rTR, const SalBitmap& rSrcBitmap)
 {
-    if(!rTR.mnSrcWidth || !rTR.mnSrcHeight || !rTR.mnDestWidth || !rTR.mnDestHeight)
+    if(!rTR.HasArea())
         return false;
 
     assert(dynamic_cast<const WinSalBitmap*>(&rSrcBitmap));

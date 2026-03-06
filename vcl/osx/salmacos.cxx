@@ -109,7 +109,7 @@ void AquaGraphicsBackend::copyBits(const SalTwoRect &rPosAry, SalGraphics *pSrcG
     else
         pSrcShared = &mrShared;
 
-    if (rPosAry.mnSrcWidth <= 0 || rPosAry.mnSrcHeight <= 0 || rPosAry.mnDestWidth <= 0 || rPosAry.mnDestHeight <= 0)
+    if (!rPosAry.HasArea())
         return;
     if (!mrShared.maContextHolder.isSet())
         return;

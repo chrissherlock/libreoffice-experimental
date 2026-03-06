@@ -50,6 +50,11 @@ struct SalTwoRect
         , mnDestX(nDestX), mnDestY(nDestY), mnDestWidth(nDestWidth), mnDestHeight(nDestHeight)
     {
     }
+
+    bool HasArea() const
+    {
+        return mnSrcWidth != 0 && mnSrcHeight != 0 && mnDestWidth != 0 && mnDestHeight != 0;
+    }
 };
 
 template <typename charT, typename traits>
