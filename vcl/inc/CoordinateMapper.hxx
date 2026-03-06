@@ -366,6 +366,12 @@ public:
     /** Calculates the subpixel layout width from logical units. */
     static double CalculateLayoutWidth(const vcl::text::LayoutResources& rRes,
                                        tools::Long nLogicWidth);
+
+    /**
+     * Robustly rounds a floating-point range to integer device pixels.
+     * Uses endpoint-rounding to ensure gapless tiling between adjacent objects.
+     */
+    tools::Rectangle RoundDeviceRect(const basegfx::B2DRange& rRange) const;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

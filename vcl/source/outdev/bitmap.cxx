@@ -330,45 +330,49 @@ void OutputDevice::DrawScaledAndTranslatedBitmap(
         const basegfx::B2DVector& rScale, const basegfx::B2DVector& rTranslate,
         const Bitmap& rBitmap)
 {
-    // with no rotation, shear or mirroring it can be mapped to DrawBitmap
-    // do *not* execute the mirroring here, it's done in the fallback
-    // #i124580# the correct DestSize needs to be calculated based on MaxXY values
-    Point aDestPt(basegfx::fround<tools::Long>(rTranslate.getX()), basegfx::fround<tools::Long>(rTranslate.getY()));
+    const basegfx::B2DRange aRange(
+        rTranslate.getX(),
+        rTranslate.getY(),
+        rScale.getX() + rTranslate.getX(),
+        rScale.getY() + rTranslate.getY());
 
-    const Size aDestSize(
-        basegfx::fround<tools::Long>(rScale.getX() + rTranslate.getX()) - aDestPt.X(),
-        basegfx::fround<tools::Long>(rScale.getY() + rTranslate.getY()) - aDestPt.Y());
+    const tools::Rectangle aDestRect = mpMapper->RoundDeviceRect(aRange);
 
     const Point aOrigin = GetMapMode().GetOrigin();
+    const bool bIsLOK = !GetConnectMetaFile() && comphelper::LibreOfficeKit::isActive()
+                        && GetMapMode().GetMapUnit() != MapUnit::MapPixel;
 
-    if (!GetConnectMetaFile() && comphelper::LibreOfficeKit::isActive() && GetMapMode().GetMapUnit() != MapUnit::MapPixel)
+    Point aFinalDestPt = aDestRect.TopLeft();
+
+    if (bIsLOK)
     {
-        aDestPt.Move(aOrigin.getX(), aOrigin.getY());
+        aFinalDestPt.Move(aOrigin.getX(), aOrigin.getY());
         EnableMapMode(false);
     }
 
-    DrawBitmap(aDestPt, aDestSize, rBitmap);
-    if (!GetConnectMetaFile() && comphelper::LibreOfficeKit::isActive() && GetMapMode().GetMapUnit() != MapUnit::MapPixel)
-    {
+    DrawBitmap(aFinalDestPt, aDestRect.GetSize(), rBitmap);
+
+    if (bIsLOK)
         EnableMapMode();
-        aDestPt.Move(-aOrigin.getX(), -aOrigin.getY());
-    }
-    return;
 }
 
 void OutputDevice::DrawMirroredBitmap(
         const basegfx::B2DVector& rScale, const basegfx::B2DVector& rTranslate,
         const Bitmap& rBitmap)
 {
-    // with no rotation or shear it can be mapped to DrawBitmap
-    // do *not* execute the mirroring here, it's done in the fallback
-    // #i124580# the correct DestSize needs to be calculated based on MaxXY values
-    const Point aDestPt(basegfx::fround<tools::Long>(rTranslate.getX()), basegfx::fround<tools::Long>(rTranslate.getY()));
-    const Size aDestSize(
-        basegfx::fround<tools::Long>(rScale.getX() + rTranslate.getX()) - aDestPt.X(),
-        basegfx::fround<tools::Long>(rScale.getY() + rTranslate.getY()) - aDestPt.Y());
+    // Mirrored bitmaps often result from negative scales.
+    // We treat them as a transformed range and let RoundDeviceRect
+    // and DrawBitmap (via AdjustTwoRect) handle the coordinate flipping.
 
-    DrawBitmap(aDestPt, aDestSize, rBitmap);
+    const basegfx::B2DRange aRange(
+        rTranslate.getX(),
+        rTranslate.getY(),
+        rScale.getX() + rTranslate.getX(),
+        rScale.getY() + rTranslate.getY());
+
+    const tools::Rectangle aDestRect = mpMapper->RoundDeviceRect(aRange);
+
+    DrawBitmap(aDestRect.TopLeft(), aDestRect.GetSize(), rBitmap);
 }
 
 /** * Calculates the maximum pixel area allowed for a transformed bitmap
@@ -496,7 +500,6 @@ void OutputDevice::DrawTransformedBitmapSoftwareFallback(
 {
     assert(bSheared || bRotated);
 
-    // limit maximum area to something looking good for non-pixel-based targets
     const Size aOriginalSizePixel(rBitmap.GetSizePixel());
     double fMaximumArea = lcl_CalculateMaximumArea(aOriginalSizePixel);
 
@@ -510,19 +513,19 @@ void OutputDevice::DrawTransformedBitmapSoftwareFallback(
 
     Bitmap aTransformed(rBitmap);
 
-    // #122923# add alpha channels for uncovered areas if rotated/sheared
+    // Ensure we have an alpha channel. Rotation and shearing often leave
+    // "uncovered" corners that must be transparent.
     if(!aTransformed.HasAlpha())
     {
         const Bitmap aContent(aTransformed.CreateColorBitmap());
         AlphaMask aMaskBmp(aContent.GetSizePixel());
-        aMaskBmp.Erase(0);
+        aMaskBmp.Erase(0); // Initialize as fully opaque
         aTransformed = Bitmap(aContent, aMaskBmp);
     }
 
     basegfx::B2DVector aFullScale, aFullTranslate;
     double fFullRotate, fFullShearX;
 
-    // We mutate the transform to avoid downscaling, so make a local copy
     basegfx::B2DHomMatrix aDeviceTransform(rDeviceTransform);
     aDeviceTransform.decompose(aFullScale, aFullTranslate, fFullRotate, fFullShearX);
 
@@ -547,12 +550,10 @@ void OutputDevice::DrawTransformedBitmapSoftwareFallback(
     bool bAspectRatioKept = rtl::math::approxEqual(fSourceRatio, fTargetRatio);
     if (bSheared || !bAspectRatioKept)
     {
-        // Not only rotation, or scaling does not keep aspect ratio.
         aTransformed = aTransformed.getTransformed(aDeviceTransform, aVisibleRange, fMaximumArea);
     }
     else
     {
-        // Just rotation, can do that directly.
         fFullRotate = fmod(fFullRotate * -1, 2 * M_PI);
         if (fFullRotate < 0)
             fFullRotate += 2 * M_PI;
@@ -562,23 +563,16 @@ void OutputDevice::DrawTransformedBitmapSoftwareFallback(
     }
 
     basegfx::B2DRange aTargetRange(0.0, 0.0, 1.0, 1.0);
-
-    // get logic object target range
     aTargetRange.transform(rLogicalTransform);
 
-    // get from unified/relative VisibleRange to logic one
     aVisibleRange.transform(
         basegfx::utils::createScaleTranslateB2DHomMatrix(
             aTargetRange.getRange(),
             aTargetRange.getMinimum()));
 
-    const Point aDestPt(basegfx::fround<tools::Long>(aVisibleRange.getMinX()),
-                        basegfx::fround<tools::Long>(aVisibleRange.getMinY()));
-    const Size aDestSize(
-        basegfx::fround<tools::Long>(aVisibleRange.getMaxX()) - aDestPt.X(),
-        basegfx::fround<tools::Long>(aVisibleRange.getMaxY()) - aDestPt.Y());
+    const tools::Rectangle aDestRect = mpMapper->RoundDeviceRect(aVisibleRange);
 
-    DrawBitmap(aDestPt, aDestSize, aTransformed);
+    DrawBitmap(aDestRect.TopLeft(), aDestRect.GetSize(), aTransformed);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

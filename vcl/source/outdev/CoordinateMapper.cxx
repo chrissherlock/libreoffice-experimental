@@ -1870,3 +1870,20 @@ void CoordinateMapper::MirrorDevicePixelPolyPolygon(tools::PolyPolygon& rPolyPol
         rPolyPoly[i] = aPoly;
     }
 }
+
+tools::Rectangle CoordinateMapper::RoundDeviceRect(const basegfx::B2DRange& rRange) const
+{
+    // Round the origin (Top-Left)
+    const tools::Long nX = basegfx::fround<tools::Long>(rRange.getMinX());
+    const tools::Long nY = basegfx::fround<tools::Long>(rRange.getMinY());
+
+    // Round the endpoint (Bottom-Right) and subtract the rounded origin.
+    // This ensures the integer width/height exactly matches the pixel footprint
+    // without cumulative rounding errors causing gaps or overlaps.
+    const tools::Long nWidth = basegfx::fround<tools::Long>(rRange.getMaxX()) - nX;
+    const tools::Long nHeight = basegfx::fround<tools::Long>(rRange.getMaxY()) - nY;
+
+    return tools::Rectangle(Point(nX, nY), Size(nWidth, nHeight));
+}
+
+/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
