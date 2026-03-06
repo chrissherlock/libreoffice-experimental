@@ -304,8 +304,7 @@ bool OutputDevice::DrawDeviceTransformedBitmap(
             const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
             if (bRTL)
             {
-                tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
-                double fMirrorOrigin = static_cast<double>(nFrameWidth - 1);
+                double fMirrorOrigin = static_cast<double>(GetRTLFrameWidth() - 1);
 
                 aNull.setX(fMirrorOrigin - aNull.getX());
                 aTopX.setX(fMirrorOrigin - aTopX.getX());
