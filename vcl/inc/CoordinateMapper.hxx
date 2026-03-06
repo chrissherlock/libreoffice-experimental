@@ -29,6 +29,7 @@
 #include <basegfx/polygon/b2dpolygon.hxx>
 
 #include <vcl/dllapi.h>
+#include <vcl/salgtype.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/mapmod.hxx>
 #include <vcl/region.hxx>
@@ -372,6 +373,9 @@ public:
      * Uses endpoint-rounding to ensure gapless tiling between adjacent objects.
      */
     tools::Rectangle RoundDeviceRect(const basegfx::B2DRange& rRange) const;
+
+    SalTwoRect ToDeviceRect(const Point& rDestPt, const Size& rDestSize, const Point& rSrcPtPixel,
+                            const Size& rSrcSizePixel) const;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

@@ -136,12 +136,7 @@ void OutputDevice::DrawDeviceBitmap(const Point& rDestPt, const Size& rDestSize,
     vcl::DispatchDevice(*this, [&](auto& rConcreteDevice) {
         using DeviceType = std::decay_t<decltype(rConcreteDevice)>;
 
-        SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(),
-                           rSrcSizePixel.Width(), rSrcSizePixel.Height(),
-                           mpMapper->LogicXToDevicePixel(rDestPt.X()),
-                           mpMapper->LogicYToDevicePixel(rDestPt.Y()),
-                           mpMapper->LogicWidthToDevicePixel(rDestSize.Width()),
-                           mpMapper->LogicHeightToDevicePixel(rDestSize.Height()));
+        SalTwoRect aPosAry = mpMapper->ToDeviceRect(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
 
         if (!aPosAry.mnSrcWidth || !aPosAry.mnSrcHeight || !aPosAry.mnDestWidth || !aPosAry.mnDestHeight)
             return;

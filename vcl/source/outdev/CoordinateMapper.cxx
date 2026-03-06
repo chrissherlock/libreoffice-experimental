@@ -1886,4 +1886,13 @@ tools::Rectangle CoordinateMapper::RoundDeviceRect(const basegfx::B2DRange& rRan
     return tools::Rectangle(Point(nX, nY), Size(nWidth, nHeight));
 }
 
+SalTwoRect CoordinateMapper::ToDeviceRect(const Point& rDestPt, const Size& rDestSize,
+                                          const Point& rSrcPtPixel, const Size& rSrcSizePixel) const
+{
+    return SalTwoRect(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(),
+                      rSrcSizePixel.Height(), LogicXToDevicePixel(rDestPt.X()),
+                      LogicYToDevicePixel(rDestPt.Y()), LogicWidthToDevicePixel(rDestSize.Width()),
+                      LogicHeightToDevicePixel(rDestSize.Height()));
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
