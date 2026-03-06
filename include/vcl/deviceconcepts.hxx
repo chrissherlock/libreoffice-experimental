@@ -84,6 +84,23 @@ template <> struct requires_banding<Printer> : std::true_type
 template <typename T> inline constexpr bool requires_banding_v = requires_banding<T>::value;
 
 /**
+ * Trait: supports_subsampling
+ * Determines if the device benefits from high-quality software subsampling
+ * during bitmap downscaling. Typically true for screen/raster devices,
+ * false for printers which prefer raw high-res data.
+ */
+template <typename T> struct supports_subsampling : std::true_type
+{
+};
+
+// Specialization for Printer (Printers handle their own high-res scaling)
+template <> struct supports_subsampling<Printer> : std::false_type
+{
+};
+
+template <typename T> inline constexpr bool supports_subsampling_v = supports_subsampling<T>::value;
+
+/**
  * Concept: HWAccelerated
  * Satisfied by devices that provide hardware-accelerated rendering paths.
  */
@@ -120,6 +137,12 @@ template <typename T> concept AlphaCapable = supports_native_alpha_v<T>;
  * Satisfied by devices requiring ImplPrintTransparent.
  */
 template <typename T> concept BandedPrinting = requires_banding_v<T>;
+
+/**
+ * Concept: SubsamplingCapable
+ * Satisfied by devices that should utilize BitmapRenderer::ApplySubsampling.
+ */
+template <typename T> concept SubsamplingCapable = supports_subsampling_v<T>;
 
 } // namespace vcl
 

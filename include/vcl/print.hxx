@@ -142,7 +142,6 @@ protected:
 
     virtual tools::Long                GetGradientStepCount( tools::Long nMinRect ) override;
 
-    bool                        CanSubsampleBitmap() const override { return false; }
     vcl::Region                 ClipToDeviceBounds(vcl::Region aRegion) const override;
 
 public:

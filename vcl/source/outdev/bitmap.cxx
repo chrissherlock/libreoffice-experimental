@@ -155,7 +155,7 @@ void OutputDevice::DrawDeviceBitmap(const Point& rDestPt, const Size& rDestSize,
         if (nMirr != BmpMirrorFlags::NONE)
             aLocalBmp.Mirror(nMirr);
 
-        if (CanSubsampleBitmap())
+        if constexpr (vcl::SubsamplingCapable<DeviceType>)
             vcl::rendercontext::BitmapRenderer::ApplySubsampling(*mpGraphics, aPosAry, aLocalBmp);
 
         vcl::rendercontext::BitmapRenderer::DrawBitmap(
