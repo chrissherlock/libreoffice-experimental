@@ -112,60 +112,93 @@ void BitmapRenderer::ApplySubsampling(SalGraphics& rGraphics, SalTwoRect& rPosAr
     }
 }
 
+/**
+ * Ensures a bitmap has an alpha channel.
+ * If the bitmap is currently opaque, it is converted to a Bitmap with
+ * a fully opaque alpha mask. This is required for rotations/shears to
+ * allow for transparent "gutter" pixels.
+ */
+static void lcl_EnsureAlphaChannel(Bitmap& rBitmap)
+{
+    if (rBitmap.HasAlpha())
+        return;
+
+    const Bitmap aContent(rBitmap.CreateColorBitmap());
+    AlphaMask aMaskBmp(aContent.GetSizePixel());
+    aMaskBmp.Erase(0); // Initialize as fully opaque (0)
+    rBitmap = Bitmap(aContent, aMaskBmp);
+}
+
+/**
+ * Decomposes the device transform and normalizes it against the original bitmap size.
+ * This ensures the software transformation engine handles the coordinate mapping correctly
+ * when the target size differs from the source pixel dimensions.
+ */
+static void lcl_DecomposeAndNormalize(basegfx::B2DHomMatrix& rDeviceTransform,
+                                      const Size& rOriginalSizePixel, basegfx::B2DVector& rScale,
+                                      basegfx::B2DVector& rTranslate, double& rRotate,
+                                      double& rShearX)
+{
+    rDeviceTransform.decompose(rScale, rTranslate, rRotate, rShearX);
+
+    if (rScale.getX() > 0 && rScale.getY() > 0 && rOriginalSizePixel.getWidth() > rScale.getX()
+        && rOriginalSizePixel.getHeight() > rScale.getY())
+    {
+        const basegfx::B2DHomMatrix aNormalize = basegfx::utils::createScaleB2DHomMatrix(
+            rOriginalSizePixel.getWidth() / rScale.getX(),
+            rOriginalSizePixel.getHeight() / rScale.getY());
+        rDeviceTransform *= aNormalize;
+    }
+}
+
+/**
+ * Routes the transformation to either the generic getTransformed path (for shear
+ * or aspect ratio changes) or the optimized Rotate path (for simple rotations).
+ */
+static void lcl_TransformBitmap(Bitmap& rBitmap, const basegfx::B2DHomMatrix& rNormalizedTransform,
+                                basegfx::B2DRange& rVisibleRange, const basegfx::B2DVector& rScale,
+                                double fRotation, double fMaximumArea, bool bSheared)
+{
+    const Size aSize(rBitmap.GetSizePixel());
+    const double fSourceRatio
+        = aSize.Height() != 0 ? aSize.Width() / static_cast<double>(aSize.Height()) : 1.0;
+    const double fTargetRatio = rScale.getY() != 0 ? rScale.getX() / rScale.getY() : 1.0;
+
+    const bool bAspectRatioKept = rtl::math::approxEqual(fSourceRatio, fTargetRatio);
+
+    if (bSheared || !bAspectRatioKept)
+    {
+        rBitmap = rBitmap.getTransformed(rNormalizedTransform, rVisibleRange, fMaximumArea);
+    }
+    else
+    {
+        // Use the optimized Rotate path for simple rotations
+        double fAngle = fmod(fRotation * -1, 2 * M_PI);
+        if (fAngle < 0)
+            fAngle += 2 * M_PI;
+
+        const Degree10 nAngle10(basegfx::fround(basegfx::rad2deg<10>(fAngle)));
+        rBitmap.Rotate(nAngle10, COL_TRANSPARENT);
+    }
+}
+
 Bitmap BitmapRenderer::GetTransformedBitmapFallback(const Bitmap& rBitmap,
                                                     const basegfx::B2DHomMatrix& rDeviceTransform,
                                                     basegfx::B2DRange& rVisibleRange,
                                                     double fMaximumArea, bool bSheared)
 {
     Bitmap aTransformed(rBitmap);
+    lcl_EnsureAlphaChannel(aTransformed);
 
-    // Ensure Alpha for "Gutter" pixels
-    if (!aTransformed.HasAlpha())
-    {
-        const Bitmap aContent(aTransformed.CreateColorBitmap());
-        AlphaMask aMaskBmp(aContent.GetSizePixel());
-        aMaskBmp.Erase(0);
-        aTransformed = Bitmap(aContent, aMaskBmp);
-    }
+    basegfx::B2DVector aScale, aTranslate;
+    double fRotate, fShearX;
+    basegfx::B2DHomMatrix aNormalizedTransform(rDeviceTransform);
 
-    // Normalize and Decompose
-    basegfx::B2DVector aFullScale, aFullTranslate;
-    double fFullRotate, fFullShearX;
-    basegfx::B2DHomMatrix aDeviceTransform(rDeviceTransform);
-    aDeviceTransform.decompose(aFullScale, aFullTranslate, fFullRotate, fFullShearX);
+    lcl_DecomposeAndNormalize(aNormalizedTransform, rBitmap.GetSizePixel(), aScale, aTranslate,
+                              fRotate, fShearX);
 
-    const Size aOriginalSizePixel(rBitmap.GetSizePixel());
-    if (aFullScale.getX() > 0 && aFullScale.getY() > 0
-        && aOriginalSizePixel.getWidth() > aFullScale.getX()
-        && aOriginalSizePixel.getHeight() > aFullScale.getY())
-    {
-        basegfx::B2DHomMatrix aNormalize = basegfx::utils::createScaleB2DHomMatrix(
-            aOriginalSizePixel.getWidth() / aFullScale.getX(),
-            aOriginalSizePixel.getHeight() / aFullScale.getY());
-        aDeviceTransform *= aNormalize;
-    }
-
-    // Transformation Routing
-    double fSourceRatio
-        = aOriginalSizePixel.getHeight() != 0
-              ? aOriginalSizePixel.getWidth() / static_cast<double>(aOriginalSizePixel.getHeight())
-              : 1.0;
-    double fTargetRatio = aFullScale.getY() != 0 ? aFullScale.getX() / aFullScale.getY() : 1.0;
-
-    bool bAspectRatioKept = rtl::math::approxEqual(fSourceRatio, fTargetRatio);
-    if (bSheared || !bAspectRatioKept)
-    {
-        aTransformed = aTransformed.getTransformed(aDeviceTransform, rVisibleRange, fMaximumArea);
-    }
-    else
-    {
-        fFullRotate = fmod(fFullRotate * -1, 2 * M_PI);
-        if (fFullRotate < 0)
-            fFullRotate += 2 * M_PI;
-
-        Degree10 nAngle10(basegfx::fround(basegfx::rad2deg<10>(fFullRotate)));
-        aTransformed.Rotate(nAngle10, COL_TRANSPARENT);
-    }
+    lcl_TransformBitmap(aTransformed, aNormalizedTransform, rVisibleRange, aScale, fRotate,
+                        fMaximumArea, bSheared);
 
     return aTransformed;
 }
