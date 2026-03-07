@@ -326,7 +326,8 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
 
     aDstRect.Intersection( aPolyRect );
 
-    ClipToPaintRegion( aDstRect );
+    if (HasClipRegion())
+        aDstRect.Intersection( LogicToPixel( GetClipRegion().GetBoundRect() ) );
 
     if( !aDstRect.IsEmpty() )
     {
@@ -551,7 +552,8 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
         tools::Rectangle aDstRect( aPoint, GetOutputSizePixel() );
         aDstRect.Intersection( aOutRect );
 
-        ClipToPaintRegion( aDstRect );
+        if (HasClipRegion())
+            aDstRect.Intersection( LogicToPixel( GetClipRegion().GetBoundRect() ) );
 
         if( !aDstRect.IsEmpty() )
         {

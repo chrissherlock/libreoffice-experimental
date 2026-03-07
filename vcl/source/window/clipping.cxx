@@ -169,14 +169,6 @@ vcl::Region WindowOutputDevice::GetActiveClipRegion() const
     return aRegion;
 }
 
-void WindowOutputDevice::ClipToPaintRegion(tools::Rectangle& rDstRect)
-{
-    const vcl::Region aPaintRgn(mxOwnerWindow->GetPaintRegion());
-
-    if (!aPaintRgn.IsNull())
-        rDstRect.Intersection(LogicToPixel(aPaintRgn.GetBoundRect()));
-}
-
 void Window::EnableClipSiblings( bool bClipSiblings )
 {
     if ( mpWindowImpl->mpBorderWindow )

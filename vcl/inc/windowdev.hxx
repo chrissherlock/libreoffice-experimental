@@ -87,7 +87,6 @@ private:
     virtual const OutputDevice* DrawOutDevDirectCheck(const OutputDevice& rSrcDev) const override;
     virtual void DrawOutDevDirectProcess(const OutputDevice& rSrcDev, SalTwoRect& rPosAry,
                                          SalGraphics* pSrcGraphics) override;
-    virtual void ClipToPaintRegion(tools::Rectangle& rDstRect) override;
 
     VclPtr<vcl::Window> mxOwnerWindow;
 };

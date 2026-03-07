@@ -657,7 +657,6 @@ protected:
         @returns            region clipped to the device bounds
      **/
     virtual vcl::Region         ClipToDeviceBounds(vcl::Region aRegion) const;
-    virtual void                ClipToPaintRegion    ( tools::Rectangle& rDstRect );
 
 private:
 
