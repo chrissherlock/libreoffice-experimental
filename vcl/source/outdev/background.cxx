@@ -40,6 +40,154 @@ void OutputDevice::SetBackground( const Wallpaper& rBackground )
         mbBackground = true;
 }
 
+namespace
+{
+struct SelectionPaintStyle
+{
+    bool       bUseSolidFill;
+    sal_uInt16 nTransparencyPercent;
+};
+} // end anonymous namespace
+
+/**
+ * Determines HOW the selection background should be rendered (solid vs. transparent).
+ */
+static SelectionPaintStyle lcl_CalculateSelectionStyle(
+    const StyleSettings& rStyles,
+    sal_uInt16 nHighlight,
+    bool bChecked,
+    bool bRoundEdges)
+{
+    SelectionPaintStyle aStyle{ false, 0 };
+
+    bool bDark = rStyles.GetFaceColor().IsDark();
+    bool bBright = !bDark && rStyles.GetHighContrastMode();
+
+    aStyle.bUseSolidFill = bDark;
+
+    if (!nHighlight)
+    {
+        if (!bDark)
+            aStyle.nTransparencyPercent = 80;
+    }
+    else
+    {
+        if (bChecked && nHighlight == 2)
+        {
+            if (!bDark && !bBright)
+                aStyle.nTransparencyPercent = bRoundEdges ? 40 : 20;
+        }
+        else if (bChecked || nHighlight == 1)
+        {
+            if (!bDark && !bBright)
+                aStyle.nTransparencyPercent = bRoundEdges ? 60 : 35;
+        }
+        else
+        {
+            if (bBright)
+                aStyle.nTransparencyPercent = (nHighlight == 3) ? 80 : 0;
+            else if (!bDark)
+                aStyle.nTransparencyPercent = 70;
+        }
+    }
+
+    return aStyle;
+}
+
+/**
+ * Ensures the base highlight color has enough contrast against the window background.
+ */
+static Color lcl_GetBaseHighlightColor(const StyleSettings& rStyles, Color aWinBgColor, Color const * pPaintColor)
+{
+    Color aBaseColor(pPaintColor ? *pPaintColor : rStyles.GetHighlightColor());
+    bool bDark = rStyles.GetFaceColor().IsDark();
+    bool bBright = !bDark && rStyles.GetHighContrastMode();
+
+    if (!bDark && !bBright)
+    {
+        int c1 = aBaseColor.GetLuminance();
+        int c2 = aWinBgColor.GetLuminance();
+
+        if (std::abs(c2 - c1) < (pPaintColor ? 40 : 75))
+        {
+            sal_uInt16 h, s, b;
+            aBaseColor.RGBtoHSB(h, s, b);
+            b = (b > 50) ? b - 40 : b + 40;
+            return Color::HSBtoRGB(h, s, b);
+        }
+    }
+    return aBaseColor;
+}
+
+/**
+ * Returns the most legible text color (base vs highlight) over the given fill color.
+ */
+static Color lcl_GetContrastingTextColor(const StyleSettings& rStyles, const Color& rFillColor, Color const * pWinControlForeground)
+{
+    Color aBaseText = pWinControlForeground ? *pWinControlForeground : rStyles.GetButtonTextColor();
+    Color aHighlightText = rStyles.GetHighlightTextColor();
+
+    int nTextDiff = std::abs(rFillColor.GetLuminance() - aBaseText.GetLuminance());
+    int nHLDiff = std::abs(rFillColor.GetLuminance() - aHighlightText.GetLuminance());
+
+    return (nHLDiff >= nTextDiff) ? aHighlightText : aBaseText;
+}
+
+/**
+ * Evaluates widget state to determine the correct background fill color.
+ */
+static std::optional<Color> lcl_GetSelectionFillColor(
+    const StyleSettings& rStyles, Color aBaseColor,
+    sal_uInt16 nHighlight, bool bChecked, bool bDrawExtBorderOnly)
+{
+    bool bDark = rStyles.GetFaceColor().IsDark();
+    bool bBright = !bDark && rStyles.GetHighContrastMode();
+
+    if (bDark && bDrawExtBorderOnly)
+        return std::nullopt; // Signal to not fill, just draw outline
+
+    if (!nHighlight)
+        return bDark ? std::optional<Color>(COL_BLACK) : aBaseColor;
+
+    if (bChecked && nHighlight == 2)
+        return bDark ? COL_LIGHTGRAY : (bBright ? COL_BLACK : aBaseColor);
+
+    if (bChecked || nHighlight == 1)
+        return bDark ? COL_GRAY : (bBright ? COL_BLACK : aBaseColor);
+
+    return bDark ? COL_LIGHTGRAY : (bBright ? COL_BLACK : aBaseColor);
+}
+
+/**
+ * Evaluates widget state and geometry to determine the correct border color.
+ */
+static std::optional<Color> lcl_GetSelectionBorderColor(
+    const StyleSettings& rStyles, Color aBaseColor, bool bDrawBorder, bool bRoundEdges)
+{
+    if (!bDrawBorder)
+        return std::nullopt;
+
+    bool bDark = rStyles.GetFaceColor().IsDark();
+    bool bBright = !bDark && rStyles.GetHighContrastMode();
+
+    if (bDark)
+        return COL_WHITE;
+
+    if (bBright)
+        return COL_BLACK;
+
+    Color aBorderColor = aBaseColor;
+    if (bRoundEdges)
+    {
+        if (aBorderColor.IsDark())
+            aBorderColor.IncreaseLuminance(128);
+        else
+            aBorderColor.DecreaseLuminance(128);
+    }
+
+    return aBorderColor;
+}
+
 Color OutputDevice::DrawSelectionBackground(const tools::Rectangle& rRect,
                                             Color aWinBackgroundColor,
                                             sal_uInt16 nHighlight,
@@ -54,146 +202,62 @@ Color OutputDevice::DrawSelectionBackground(const tools::Rectangle& rRect,
         return COL_TRANSPARENT;
 
     bool bRoundEdges = nCornerRadius > 0;
-
     const StyleSettings& rStyles = GetSettings().GetStyleSettings();
 
-    // colors used for item highlighting
-    Color aSelectionBorderColor(pPaintColor ? *pPaintColor : rStyles.GetHighlightColor());
-    Color aSelectionFillColor(aSelectionBorderColor);
+    SelectionPaintStyle aStyle = lcl_CalculateSelectionStyle(
+        rStyles, nHighlight, bChecked, bRoundEdges);
 
-    bool bDark = rStyles.GetFaceColor().IsDark();
-    bool bBright = !bDark && rStyles.GetHighContrastMode();
+    Color aBaseColor = lcl_GetBaseHighlightColor(rStyles, aWinBackgroundColor, pPaintColor);
 
-    int c1 = aSelectionBorderColor.GetLuminance();
-    int c2 = aWinBackgroundColor.GetLuminance();
+    std::optional<Color> oFillColor = lcl_GetSelectionFillColor(
+        rStyles, aBaseColor, nHighlight, bChecked, bDrawExtBorderOnly);
 
-    if (!bDark && !bBright && std::abs(c2 - c1) < (pPaintColor ? 40 : 75))
+    std::optional<Color> oLineColor = lcl_GetSelectionBorderColor(
+        rStyles, aBaseColor, bDrawBorder, bRoundEdges);
+
+    Color aTextColor;
+    if (rStyles.GetFaceColor().IsDark() && bDrawExtBorderOnly)
     {
-        // contrast too low
-        sal_uInt16 h, s, b;
-        aSelectionFillColor.RGBtoHSB( h, s, b );
-        if( b > 50 )    b -= 40;
-        else            b += 40;
-        aSelectionFillColor = Color::HSBtoRGB( h, s, b );
-        aSelectionBorderColor = aSelectionFillColor;
+        aTextColor = rStyles.GetHighlightTextColor();
     }
-
-    if (bRoundEdges)
+    else
     {
-        if (aSelectionBorderColor.IsDark())
-            aSelectionBorderColor.IncreaseLuminance(128);
-        else
-            aSelectionBorderColor.DecreaseLuminance(128);
+        Color aPaintFill = oFillColor.value_or(aBaseColor);
+        aTextColor = lcl_GetContrastingTextColor(rStyles, aPaintFill, pWinControlForeground);
     }
 
     tools::Rectangle aRect(rRect);
     if (bDrawExtBorderOnly)
     {
-        aRect.AdjustLeft( -1 );
-        aRect.AdjustTop( -1 );
-        aRect.AdjustRight(1 );
-        aRect.AdjustBottom(1 );
+        aRect.AdjustLeft(-1);
+        aRect.AdjustTop(-1);
+        aRect.AdjustRight(1);
+        aRect.AdjustBottom(1);
     }
+
     auto popIt = ScopedPush(vcl::PushFlags::FILLCOLOR | vcl::PushFlags::LINECOLOR);
 
-    if (bDrawBorder)
-        SetLineColor(bDark ? COL_WHITE : (bBright ? COL_BLACK : aSelectionBorderColor));
+    if (oLineColor)
+        SetLineColor(*oLineColor);
     else
         SetLineColor();
 
-    sal_uInt16 nPercent = 0;
-    if (!nHighlight)
-    {
-        if (bDark)
-            aSelectionFillColor = COL_BLACK;
-        else
-            nPercent = 80;  // just checked (light)
-    }
+    if (oFillColor)
+        SetFillColor(*oFillColor);
     else
-    {
-        if (bChecked && nHighlight == 2)
-        {
-            if (bDark)
-                aSelectionFillColor = COL_LIGHTGRAY;
-            else if (bBright)
-            {
-                aSelectionFillColor = COL_BLACK;
-                SetLineColor(COL_BLACK);
-                nPercent = 0;
-            }
-            else
-                nPercent = bRoundEdges ? 40 : 20; // selected, pressed or checked ( very dark )
-        }
-        else if (bChecked || nHighlight == 1)
-        {
-            if (bDark)
-                aSelectionFillColor = COL_GRAY;
-            else if (bBright)
-            {
-                aSelectionFillColor = COL_BLACK;
-                SetLineColor(COL_BLACK);
-                nPercent = 0;
-            }
-            else
-                nPercent = bRoundEdges ? 60 : 35; // selected, pressed or checked ( very dark )
-        }
-        else
-        {
-            if (bDark)
-                aSelectionFillColor = COL_LIGHTGRAY;
-            else if (bBright)
-            {
-                aSelectionFillColor = COL_BLACK;
-                SetLineColor(COL_BLACK);
-                if (nHighlight == 3)
-                    nPercent = 80;
-                else
-                    nPercent = 0;
-            }
-            else
-                nPercent = 70; // selected ( dark )
-        }
-    }
-
-    Color aSelectionTextColor;
-
-    if (bDark && bDrawExtBorderOnly)
-    {
         SetFillColor();
-        aSelectionTextColor = rStyles.GetHighlightTextColor();
-    }
-    else
-    {
-        SetFillColor(aSelectionFillColor);
 
-        Color aTextColor = pWinControlForeground ? *pWinControlForeground : rStyles.GetButtonTextColor();
-        Color aHLTextColor = rStyles.GetHighlightTextColor();
-        int nTextDiff = std::abs(aSelectionFillColor.GetLuminance() - aTextColor.GetLuminance());
-        int nHLDiff = std::abs(aSelectionFillColor.GetLuminance() - aHLTextColor.GetLuminance());
-        aSelectionTextColor = (nHLDiff >= nTextDiff) ? aHLTextColor : aTextColor;
-    }
-
-    if (bDark)
+    if (aStyle.bUseSolidFill)
     {
         DrawRect(aRect);
     }
     else
     {
-        if (bRoundEdges)
-        {
-            tools::Polygon aPoly(aRect, nCornerRadius, nCornerRadius);
-            tools::PolyPolygon aPolyPoly(aPoly);
-            DrawTransparent(aPolyPoly, nPercent);
-        }
-        else
-        {
-            tools::Polygon aPoly(aRect);
-            tools::PolyPolygon aPolyPoly(aPoly);
-            DrawTransparent(aPolyPoly, nPercent);
-        }
+        tools::Polygon aPoly = bRoundEdges ? tools::Polygon(aRect, nCornerRadius, nCornerRadius) : tools::Polygon(aRect);
+        DrawTransparent(tools::PolyPolygon(aPoly), aStyle.nTransparencyPercent);
     }
 
-    return aSelectionTextColor;
+    return aTextColor;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
