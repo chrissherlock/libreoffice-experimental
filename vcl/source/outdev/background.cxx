@@ -47,6 +47,14 @@ struct SelectionPaintStyle
     bool       bUseSolidFill;
     sal_uInt16 nTransparencyPercent;
 };
+
+enum class SelectionHighlight : sal_uInt16
+{
+    None     = 0, // Light/passive state
+    Normal   = 1, // Hover or standard selection
+    Pressed  = 2, // Active/MouseDown (darkest)
+    Inactive = 3  // Unfocused selection
+};
 } // end anonymous namespace
 
 /**
@@ -54,7 +62,7 @@ struct SelectionPaintStyle
  */
 static SelectionPaintStyle lcl_CalculateSelectionStyle(
     const StyleSettings& rStyles,
-    sal_uInt16 nHighlight,
+    SelectionHighlight eHighlight,
     bool bChecked,
     bool bRoundEdges)
 {
@@ -65,27 +73,27 @@ static SelectionPaintStyle lcl_CalculateSelectionStyle(
 
     aStyle.bUseSolidFill = bDark;
 
-    if (!nHighlight)
+    if (eHighlight == SelectionHighlight::None)
     {
         if (!bDark)
             aStyle.nTransparencyPercent = 80;
     }
     else
     {
-        if (bChecked && nHighlight == 2)
+        if (bChecked && eHighlight == SelectionHighlight::Pressed)
         {
             if (!bDark && !bBright)
                 aStyle.nTransparencyPercent = bRoundEdges ? 40 : 20;
         }
-        else if (bChecked || nHighlight == 1)
+        else if (bChecked || eHighlight == SelectionHighlight::Normal)
         {
             if (!bDark && !bBright)
                 aStyle.nTransparencyPercent = bRoundEdges ? 60 : 35;
         }
-        else
+        else // Pressed (unchecked), Inactive, or other states
         {
             if (bBright)
-                aStyle.nTransparencyPercent = (nHighlight == 3) ? 80 : 0;
+                aStyle.nTransparencyPercent = (eHighlight == SelectionHighlight::Inactive) ? 80 : 0;
             else if (!bDark)
                 aStyle.nTransparencyPercent = 70;
         }
@@ -132,13 +140,12 @@ static Color lcl_GetContrastingTextColor(const StyleSettings& rStyles, const Col
 
     return (nHLDiff >= nTextDiff) ? aHighlightText : aBaseText;
 }
-
 /**
  * Evaluates widget state to determine the correct background fill color.
  */
 static std::optional<Color> lcl_GetSelectionFillColor(
     const StyleSettings& rStyles, Color aBaseColor,
-    sal_uInt16 nHighlight, bool bChecked, bool bDrawExtBorderOnly)
+    SelectionHighlight eHighlight, bool bChecked, bool bDrawExtBorderOnly)
 {
     bool bDark = rStyles.GetFaceColor().IsDark();
     bool bBright = !bDark && rStyles.GetHighContrastMode();
@@ -146,13 +153,13 @@ static std::optional<Color> lcl_GetSelectionFillColor(
     if (bDark && bDrawExtBorderOnly)
         return std::nullopt; // Signal to not fill, just draw outline
 
-    if (!nHighlight)
+    if (eHighlight == SelectionHighlight::None)
         return bDark ? std::optional<Color>(COL_BLACK) : aBaseColor;
 
-    if (bChecked && nHighlight == 2)
+    if (bChecked && eHighlight == SelectionHighlight::Pressed)
         return bDark ? COL_LIGHTGRAY : (bBright ? COL_BLACK : aBaseColor);
 
-    if (bChecked || nHighlight == 1)
+    if (bChecked || eHighlight == SelectionHighlight::Normal)
         return bDark ? COL_GRAY : (bBright ? COL_BLACK : aBaseColor);
 
     return bDark ? COL_LIGHTGRAY : (bBright ? COL_BLACK : aBaseColor);
@@ -201,16 +208,19 @@ Color OutputDevice::DrawSelectionBackground(const tools::Rectangle& rRect,
     if (rRect.IsEmpty())
         return COL_TRANSPARENT;
 
+    // Immediately cast the magic number to our semantic enum
+    auto eHighlight = static_cast<SelectionHighlight>(nHighlight);
+
     bool bRoundEdges = nCornerRadius > 0;
     const StyleSettings& rStyles = GetSettings().GetStyleSettings();
 
     SelectionPaintStyle aStyle = lcl_CalculateSelectionStyle(
-        rStyles, nHighlight, bChecked, bRoundEdges);
+        rStyles, eHighlight, bChecked, bRoundEdges);
 
     Color aBaseColor = lcl_GetBaseHighlightColor(rStyles, aWinBackgroundColor, pPaintColor);
 
     std::optional<Color> oFillColor = lcl_GetSelectionFillColor(
-        rStyles, aBaseColor, nHighlight, bChecked, bDrawExtBorderOnly);
+        rStyles, aBaseColor, eHighlight, bChecked, bDrawExtBorderOnly);
 
     std::optional<Color> oLineColor = lcl_GetSelectionBorderColor(
         rStyles, aBaseColor, bDrawBorder, bRoundEdges);
