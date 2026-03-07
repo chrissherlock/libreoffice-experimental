@@ -270,4 +270,10 @@ Color OutputDevice::DrawSelectionBackground(const tools::Rectangle& rRect,
     return aTextColor;
 }
 
+void OutputDevice::SaveBackground(VirtualDevice& rSaveDevice,
+                                  const Point& rPos, const Size& rSize, const Size& rBackgroundSize) const
+{
+   rSaveDevice.DrawOutDev(Point(), rBackgroundSize, rPos, rSize, *this);
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

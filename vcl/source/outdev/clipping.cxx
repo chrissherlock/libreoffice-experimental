@@ -51,12 +51,6 @@ bool OutputDevice::IsOutputCulled() const
         || mpClippingController->IsOutputClipped(*mpMapper, aBounds));
 }
 
-void OutputDevice::SaveBackground(VirtualDevice& rSaveDevice,
-                                  const Point& rPos, const Size& rSize, const Size& rBackgroundSize) const
-{
-   rSaveDevice.DrawOutDev(Point(), rBackgroundSize, rPos, rSize, *this);
-}
-
 bool OutputDevice::GetVisibleDeviceRange(
         const basegfx::B2DHomMatrix& aFullTransform,
         basegfx::B2DRange &aVisibleRange,
