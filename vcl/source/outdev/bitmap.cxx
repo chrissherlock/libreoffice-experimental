@@ -368,6 +368,26 @@ static double lcl_CalculateMaximumArea(const Size& rOriginalSizePixel)
     return std::clamp(fOrigAreaScaled, 1000000.0, 4500000.0);
 }
 
+/**
+ * Applies a uniform alpha (opacity) value to a bitmap.
+ * If the bitmap already has an alpha channel, the new alpha is blended
+ * with the existing mask.
+ */
+static void lcl_ApplyAlpha(Bitmap& rBitmap, double fAlpha)
+{
+    if (rtl::math::approxEqual(fAlpha, 1.0))
+        return;
+
+    // Convert opacity (0.0 to 1.0) to VCL transparency (255 to 0)
+    sal_uInt8 nTransparency(static_cast<sal_uInt8>(basegfx::fround(255.0 * (1.0 - fAlpha) + 0.5)));
+    AlphaMask aAlpha(rBitmap.GetSizePixel(), &nTransparency);
+
+    if (rBitmap.HasAlpha())
+        aAlpha.BlendWith(rBitmap.CreateAlphaMask());
+
+    rBitmap = Bitmap(rBitmap.CreateColorBitmap(), aAlpha);
+}
+
 void OutputDevice::DrawTransformedBitmap(
     const basegfx::B2DHomMatrix& rTransformation,
     const Bitmap& rBitmap,
@@ -416,25 +436,13 @@ void OutputDevice::DrawTransformedBitmap(
     basegfx::B2DHomMatrix aFullTransform(mpMapper->GetDeviceTransformation() * rTransformation);
 
     // First try to handle additional alpha blending, either directly, or modify the bitmap.
-    if (!rtl::math::approxEqual( fAlpha, 1.0))
+    if (!rtl::math::approxEqual(fAlpha, 1.0) && bTryDirectPaint)
     {
-        if(bTryDirectPaint)
-        {
-            if (DrawDeviceTransformedBitmap(aFullTransform, bitmap, fAlpha))
-            {
-                // we are done
-                return;
-            }
-        }
-        // Apply the alpha manually.
-        sal_uInt8 nTransparency(static_cast<sal_uInt8>(basegfx::fround( 255.0*(1.0 - fAlpha) + .5)));
-        AlphaMask aAlpha( bitmap.GetSizePixel(), &nTransparency );
-
-        if (bitmap.HasAlpha())
-            aAlpha.BlendWith(bitmap.CreateAlphaMask());
-
-        bitmap = Bitmap( bitmap.CreateColorBitmap(), aAlpha );
+        if (DrawDeviceTransformedBitmap(aFullTransform, bitmap, fAlpha))
+            return;
     }
+
+    lcl_ApplyAlpha(bitmap, fAlpha);
 
     if (bTryDirectPaint && mpGraphics->HasFastDrawTransformedBitmap() && DrawDeviceTransformedBitmap(aFullTransform, bitmap))
         return;
@@ -467,6 +475,29 @@ void OutputDevice::DrawTransformedBitmap(
     DrawTransformedBitmapSoftwareFallback(rTransformation, aFullTransform, bitmap, bSheared, bRotated);
 }
 
+/**
+ * Maps the visible sub-section of a transformed bitmap back to the logical
+ * destination, scales/translates it, and returns the final rounded device rectangle.
+ */
+static tools::Rectangle lcl_CalculateDestRect(
+    const basegfx::B2DRange& rVisibleRange,
+    const basegfx::B2DHomMatrix& rLogicalTransform,
+    const CoordinateMapper& rMapper)
+{
+    // Calculate the target range by applying the logical transform to a unit square
+    basegfx::B2DRange aTargetRange(0.0, 0.0, 1.0, 1.0);
+    aTargetRange.transform(rLogicalTransform);
+
+    // Scale/translate the visible sub-section into that target
+    basegfx::B2DRange aFinalVisibleRange(rVisibleRange);
+    aFinalVisibleRange.transform(
+        basegfx::utils::createScaleTranslateB2DHomMatrix(
+            aTargetRange.getRange(),
+            aTargetRange.getMinimum()));
+
+    return rMapper.RoundDeviceRect(aFinalVisibleRange);
+}
+
 void OutputDevice::DrawTransformedBitmapSoftwareFallback(
     const basegfx::B2DHomMatrix& rLogicalTransform,
     const basegfx::B2DHomMatrix& rDeviceTransform,
@@ -485,27 +516,15 @@ void OutputDevice::DrawTransformedBitmapSoftwareFallback(
     if (aVisibleRange.isEmpty())
         return;
 
-    Bitmap aTransformed = vcl::rendercontext::BitmapRenderer::GetTransformedBitmapFallback(
+    Bitmap aTransformedBmp = vcl::rendercontext::BitmapRenderer::GetTransformedBitmapFallback(
         rBitmap, rDeviceTransform, aVisibleRange, fMaximumArea, bSheared);
 
-    if (aTransformed.IsEmpty())
+    if (aTransformedBmp.IsEmpty())
         return;
 
-    // Map the visible range back to the logical destination
-    // We calculate the target range by applying the logical transform to a unit square,
-    // then scale/translate the visible sub-section into that target.
-    basegfx::B2DRange aTargetRange(0.0, 0.0, 1.0, 1.0);
-    aTargetRange.transform(rLogicalTransform);
+    const tools::Rectangle aDestRect = lcl_CalculateDestRect(aVisibleRange, rLogicalTransform, *mpMapper);
 
-    basegfx::B2DRange aFinalVisibleRange(aVisibleRange);
-    aFinalVisibleRange.transform(
-        basegfx::utils::createScaleTranslateB2DHomMatrix(
-            aTargetRange.getRange(),
-            aTargetRange.getMinimum()));
-
-    const tools::Rectangle aDestRect = mpMapper->RoundDeviceRect(aFinalVisibleRange);
-
-    DrawBitmap(aDestRect.TopLeft(), aDestRect.GetSize(), aTransformed);
+    DrawBitmap(aDestRect.TopLeft(), aDestRect.GetSize(), aTransformedBmp);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
