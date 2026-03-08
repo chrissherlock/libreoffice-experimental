@@ -47,6 +47,7 @@
 #include <vcl/wall.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/vclptr.hxx>
+#include <vcl/deviceconcepts.hxx>
 #include <vcl/vclreferencebase.hxx>
 #include <vcl/text/TextRecordingState.hxx>
 
@@ -1851,5 +1852,15 @@ SAL_WARN_UNUSED_RESULT VCL_DLLPUBLIC basegfx::B2DPolygon LogicToLogic(const base
 // create a mapping transformation from rMapModeSource to rMapModeDest (the above methods
 // for B2DPoly/Polygons use this internally anyway to transform the B2DPolygon)
 SAL_WARN_UNUSED_RESULT VCL_DLLPUBLIC basegfx::B2DHomMatrix LogicToLogic(const MapMode& rMapModeSource, const MapMode& rMapModeDest);
+
+namespace vcl
+{
+    /** Default implementation for standard physical devices (Windows/Printers) */
+    template <typename T>
+    inline tools::Long device_reference_width<T>::get(const T& rDevice)
+    {
+        return rDevice.GetGraphics() ? rDevice.GetGraphics()->GetGraphicsWidth() : 0;
+    }
+}
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

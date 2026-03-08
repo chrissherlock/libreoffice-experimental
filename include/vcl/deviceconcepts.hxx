@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <tools/long.hxx>
+
 #include <type_traits>
 #include <concepts>
 
@@ -231,6 +233,34 @@ template <> struct is_screen_compatible<Printer> : std::false_type
  * and settings synchronization loop.
  */
 template <typename T> concept ScreenCompatible = is_screen_compatible<T>::value;
+
+/**
+ * Trait: device_reference_width
+ * * STL-style trait to resolve the physical width of a device.
+ * * Implementation is provided in headers where the concrete types are complete.
+ */
+template <typename T> struct device_reference_width
+{
+    static tools::Long get(const T& rDevice);
+};
+
+/** Helper: get_reference_width_v */
+template <typename T> inline tools::Long get_reference_width_v(const T& rDevice)
+{
+    return device_reference_width<T>::get(rDevice);
+}
+
+/**
+ * Concept: ReferenceDevice
+ * * Constraints types to those that can provide physical dimensions.
+ */
+template <typename T> concept ReferenceDevice = requires(const T& rDevice)
+{
+    {
+        vcl::get_reference_width_v(rDevice)
+    }
+    ->std::convertible_to<tools::Long>;
+};
 
 } // namespace vcl
 

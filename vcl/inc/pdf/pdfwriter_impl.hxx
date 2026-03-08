@@ -1371,6 +1371,13 @@ public:
     void MARK( const char* pString );
 };
 
+/** Implement reference width for PDFWriterImpl where type is complete */
+template <>
+inline tools::Long device_reference_width<PDFWriterImpl>::get(const PDFWriterImpl& rDevice)
+{
+    return rDevice.GetOutputWidthPixel();
+}
+
 } // namespace vcl
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

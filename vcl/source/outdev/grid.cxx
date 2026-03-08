@@ -31,6 +31,7 @@
 #include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
+#include <devicedispatcher.hxx>
 #include <salgdi.hxx>
 
 #include <cassert>
@@ -45,16 +46,20 @@ void OutputDevice::DrawCheckered(const Point& rPos, const Size& rSize, sal_uInt3
 
     maRecorder.RecordCheckered(rPos, rSize, nLen, aStart, aEnd);
 
-    if (IsDeviceOutputNecessary() && PrepareGraphicsOutput() && mpGraphics)
-    {
+    if (!IsDeviceOutputNecessary())
+        return;
+
+    vcl::DispatchDevice(*this, [&](const auto& rConcrete) {
+        if (!FlushGraphicsState())
+            return;
+
         // Map the bounding box to device pixels once
         tools::Rectangle aDeviceRect = mpMapper->LogicToDevicePixel(tools::Rectangle(rPos, rSize));
 
         const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
         if (bRTL)
         {
-            tools::Long nFrameWidth
-                = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+            tools::Long nFrameWidth = vcl::get_reference_width_v(rConcrete);
             mpMapper->MirrorDevicePixelRect(aDeviceRect, nFrameWidth, bRTL, ImplIsAntiparallel());
         }
 
@@ -65,7 +70,7 @@ void OutputDevice::DrawCheckered(const Point& rPos, const Size& rSize, sal_uInt3
 
         vcl::rendercontext::PrimitiveRenderer::DrawCheckered(*mpGraphics, aDeviceRect, nLen, aStart,
                                                              aEnd);
-    }
+    });
 }
 
 void OutputDevice::DrawGrid(const tools::Rectangle& rRect, const Size& rDist, DrawGridFlags nFlags)
@@ -84,9 +89,17 @@ void OutputDevice::DrawGrid(const tools::Rectangle& rRect, const Size& rDist, Dr
     const bool bOldMap = mpMapper->IsMapModeEnabled();
     comphelper::ScopeGuard aMapGuard([this, bOldMap]() { this->EnableMapMode(bOldMap); });
 
-    if (PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line)
-        && mpGraphics)
-    {
+    if (!IsDeviceOutputNecessary())
+        return;
+
+    // Use the dispatcher to resolve the concrete device type for the trait
+    vcl::DispatchDevice(*this, [&](const auto& rConcrete) {
+        if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line)
+            || !mpGraphics)
+        {
+            return;
+        }
+
         tools::Rectangle aDeviceRect = mpMapper->LogicToDevicePixel(rRect);
         tools::Rectangle aDeviceDstRect = mpMapper->LogicToDevicePixel(aDstRect);
         Size aDeviceDist = mpMapper->LogicToDevicePixel(rDist);
@@ -94,8 +107,9 @@ void OutputDevice::DrawGrid(const tools::Rectangle& rRect, const Size& rDist, Dr
         const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
         if (bRTL)
         {
-            tools::Long nFrameWidth
-                = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+            // Resolve physical width via the STL-style trait
+            tools::Long nFrameWidth = vcl::get_reference_width_v(rConcrete);
+
             mpMapper->MirrorDevicePixelRect(aDeviceRect, nFrameWidth, bRTL, ImplIsAntiparallel());
             mpMapper->MirrorDevicePixelRect(aDeviceDstRect, nFrameWidth, bRTL,
                                             ImplIsAntiparallel());
@@ -103,7 +117,7 @@ void OutputDevice::DrawGrid(const tools::Rectangle& rRect, const Size& rDist, Dr
 
         vcl::rendercontext::PrimitiveRenderer::DrawGrid(*mpGraphics, aDeviceRect, aDeviceDstRect,
                                                         aDeviceDist, nFlags);
-    }
+    });
 }
 
 void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Size& rGridDistance,
@@ -114,9 +128,17 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
     if (rDrawingArea.IsEmpty() || rGridArea.IsEmpty())
         return;
 
-    if (PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line)
-        && mpGraphics)
-    {
+    if (!IsDeviceOutputNecessary())
+        return;
+
+    // Dispatch to the concrete type to resolve the frame width via trait
+    vcl::DispatchDevice(*this, [&](const auto& rConcrete) {
+        if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line)
+            || !mpGraphics)
+        {
+            return;
+        }
+
         tools::Rectangle aDeviceGridArea = mpMapper->LogicToDevicePixel(rGridArea);
         tools::Rectangle aDeviceDrawingArea = mpMapper->LogicToDevicePixel(rDrawingArea);
         Size aDeviceGridDistance = mpMapper->LogicToDevicePixel(rGridDistance);
@@ -124,8 +146,8 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
         const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
         if (bRTL)
         {
-            tools::Long nFrameWidth
-                = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+            // Use the STL-style trait to get the reference width
+            tools::Long nFrameWidth = vcl::get_reference_width_v(rConcrete);
 
             // Mirror both the boundary and the active drawing area
             mpMapper->MirrorDevicePixelRect(aDeviceGridArea, nFrameWidth, bRTL,
@@ -136,7 +158,7 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
 
         vcl::rendercontext::PrimitiveRenderer::DrawGridOfCrosses(
             *mpGraphics, aDeviceGridArea, aDeviceGridDistance, aDeviceDrawingArea);
-    }
+    });
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -163,4 +163,14 @@ protected:
 
 };
 
+namespace vcl
+{
+    /** Implement reference width for VirtualDevice where type is complete */
+    template <>
+    inline tools::Long device_reference_width<VirtualDevice>::get(const VirtualDevice& rDevice)
+    {
+        return rDevice.GetOutputWidthPixel();
+    }
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
