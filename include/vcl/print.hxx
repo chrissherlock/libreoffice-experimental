@@ -142,8 +142,6 @@ protected:
 
     virtual tools::Long                GetGradientStepCount( tools::Long nMinRect ) override;
 
-    vcl::Region                 ClipToDeviceBounds(vcl::Region aRegion) const override;
-
 public:
     void                        SetSystemTextColor(SystemTextColorFlags, bool) override;
     SAL_DLLPRIVATE void                        DrawGradientEx( OutputDevice* pOut, const tools::Rectangle& rRect,

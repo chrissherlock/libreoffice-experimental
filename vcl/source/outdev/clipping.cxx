@@ -228,16 +228,6 @@ void OutputDevice::InitClipRegion()
     });
 }
 
-vcl::Region OutputDevice::ClipToDeviceBounds(vcl::Region aRegion) const
-{
-    aRegion.Intersect(tools::Rectangle{GetOutOffXPixel(),
-                                       GetOutOffYPixel(),
-                                       GetOutOffXPixel() + GetOutputWidthPixel() - 1,
-                                       GetOutOffYPixel() + GetOutputHeightPixel() - 1
-                                      });
-    return aRegion;
-}
-
 vcl::Region OutputDevice::GetActiveClipRegion() const
 {
     return GetClipRegion();

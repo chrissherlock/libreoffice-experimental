@@ -1092,10 +1092,4 @@ void PDFWriterImpl::ImplRefreshFontData(bool bNewFontLists)
     }
 }
 
-vcl::Region PDFWriterImpl::ClipToDeviceBounds(vcl::Region aRegion) const
-{
-    return aRegion;
-}
-
-
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
