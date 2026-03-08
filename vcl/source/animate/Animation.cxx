@@ -27,10 +27,20 @@
 
 #include <vcl/animate/Animation.hxx>
 #include <vcl/bitmap/BitmapColorQuantizationFilter.hxx>
+#include <vcl/deviceconcepts.hxx>
 #include <vcl/dibtools.hxx>
 #include <vcl/outdev.hxx>
 
 #include <animate/AnimationRenderer.hxx>
+#include <devicedispatcher.hxx>
+
+namespace vcl
+{
+template <typename T> struct animation_dispatch_policy
+{
+    static bool should_animate(const OutputDevice& /*rOut*/) { return Animatable<T>; }
+};
+}
 
 sal_uLong Animation::gAnimationRendererCount = 0;
 
@@ -164,7 +174,14 @@ bool Animation::Start(OutputDevice& rOut, const Point& rDestPt, const Size& rDes
     if (maFrames.empty())
         return false;
 
-    if (rOut.CanAnimate() && !mbLoopTerminated
+    // Resolve if this concrete device type supports animation via policy
+    bool bCanAnimate = false;
+    vcl::DispatchDevice(rOut, [&bCanAnimate](const auto& rConcreteDev) {
+        using DeviceT = std::decay_t<decltype(rConcreteDev)>;
+        bCanAnimate = vcl::animation_dispatch_policy<DeviceT>::should_animate(rConcreteDev);
+    });
+
+    if (bCanAnimate && !mbLoopTerminated
         && (ANIMATION_TIMEOUT_ON_CLICK != maFrames[mnFrameIndex]->mnWait))
     {
         bool differs = true;
@@ -208,6 +225,7 @@ bool Animation::Start(OutputDevice& rOut, const Point& rDestPt, const Size& rDes
     }
     else
     {
+        // Device is a Printer or VirtualDevice: just draw the current static frame
         Draw(rOut, rDestPt, rDestSz);
     }
 

@@ -182,6 +182,27 @@ template <typename T> concept BandedPrinting = requires_banding_v<T>;
  */
 template <typename T> concept SubsamplingCapable = supports_subsampling_v<T>;
 
+/**
+ * Trait: supports_animation
+ * Interactive windows support VCL's internal timer-based animation loop.
+ * VirtualDevices and Printers are static and return false.
+ */
+template <typename T> struct supports_animation : std::false_type
+{
+};
+template <> struct supports_animation<vcl::WindowOutputDevice> : std::true_type
+{
+};
+
+/**
+ * Concept: Animatable
+ * * Constrains template logic and policy dispatch to device types capable
+ * of handling asynchronous frame updates and repaints.
+ * * This allows the Animation subsystem to bypass timer overhead on static
+ * devices at compile-time.
+ */
+template <typename T> concept Animatable = supports_animation<T>::value;
+
 } // namespace vcl
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

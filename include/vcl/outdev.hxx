@@ -400,8 +400,6 @@ public:
     /// request XSpriteCanvas render interface
     css::uno::Reference< css::rendering::XSpriteCanvas > GetSpriteCanvas() const;
 
-    virtual bool CanAnimate() const = 0;
-
     bool PrepareGraphicsOutput(vcl::PrepareOutputFlags nFlags = vcl::PrepareOutputFlags::All, vcl::MapModePolicy eMapPolicy = vcl::MapModePolicy::Keep);
     bool FlushGraphicsState(vcl::PrepareOutputFlags nFlags = vcl::PrepareOutputFlags::All);
 
