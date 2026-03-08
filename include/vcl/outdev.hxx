@@ -227,6 +227,11 @@ namespace vcl
     };
 }
 
+namespace vcl
+{
+template <typename T> struct font_resource_policy;
+}
+
 namespace vcl::rendercontext
 {
 class PrimitiveRenderer;
@@ -244,6 +249,7 @@ class SAL_WARN_UNUSED VCL_DLLPUBLIC OutputDevice : public virtual VclReferenceBa
     friend class vcl::WindowOutputDevice;
     friend class WorkWindow;
     friend void ImplHandleResize( vcl::Window* pWindow, tools::Long nNewWidth, tools::Long nNewHeight );
+    template <typename T> friend struct vcl::font_resource_policy;
 
 private:
     OutputDevice(const OutputDevice&) = delete;
@@ -609,15 +615,11 @@ public:
     void                        SetFont( const vcl::Font& rNewFont );
     const vcl::Font&            GetFont() const;
 
-protected:
-
-    virtual void                ImplReleaseFonts();
+    void ImplReleaseFonts();
 
 private:
-
-    SAL_DLLPRIVATE void         InitLineColor();
-
-    SAL_DLLPRIVATE void         InitFillColor();
+    SAL_DLLPRIVATE void InitLineColor();
+    SAL_DLLPRIVATE void InitFillColor();
 
     ///@}
 

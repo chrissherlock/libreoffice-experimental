@@ -138,7 +138,6 @@ protected:
     virtual bool                AcquireGraphics() const override;
     virtual void                ReleaseGraphics( bool bRelease = true ) override;
     SAL_DLLPRIVATE void ImplReleaseGraphics(bool bRelease = true);
-    virtual void                ImplReleaseFonts() override;
 
 public:
     void                        SetSystemTextColor(SystemTextColorFlags, bool) override;

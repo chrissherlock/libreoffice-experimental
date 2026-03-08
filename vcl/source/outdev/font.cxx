@@ -29,11 +29,13 @@
 #include <vcl/fontcapabilities.hxx>
 #include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/metafile/MetaAction.hxx>
+#include <vcl/print.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/rendercontext/GetDefaultFontFlags.hxx>
 #include <vcl/settings.hxx>
 
 #include <window.h>
+#include <devicedispatcher.hxx>
 #include <CoordinateMapper.hxx>
 #include <font/FontController.hxx>
 #include <GraphicsState.hxx>
@@ -578,23 +580,53 @@ void OutputDevice::ResetNewFontCache()
         mpFontController->mxFontCache = std::make_shared<ImplFontCache>();
 }
 
+namespace vcl
+{
+    template <typename T>
+    struct font_resource_policy
+    {
+        static void release(OutputDevice& rDev)
+        {
+            // Use if constexpr to resolve the policy branch at compile-time
+            if constexpr (ManagedFontCache<T>)
+            {
+                if (rDev.mpFontController)
+                {
+                    rDev.mpFontController->ClearFontResources(rDev.mpGraphics, true);
+
+                    // Clear the link to the physical font collection (the 232 fonts)
+                    // This prevents lazy-reloading during unit test assertions.
+                    rDev.mpFontController->SetFontCollection(nullptr);
+
+                    // Reset the internal graphics state and evict the cache
+                    rDev.mpFontController->ResetGraphicsState();
+                    rDev.mpFontController->mxFontCache.reset();
+                }
+                rDev.mpForcedFallbackInstance.clear();
+            }
+            else // This path is for Printer and non-managed devices
+            {
+                rDev.mpFontInstance.clear();
+            }
+        }
+    };
+}
+
 void OutputDevice::ImplReleaseFonts()
 {
-    // Delegate resource cleanup to controller
-    // Note: We pass nullptr for graphics because ReleaseGraphics calls this *after* // or *during* release, but mostly we want to clear the *cache* and *lists*.
-    // However, original code called mpGraphics->ReleaseFonts().
-    // If mpGraphics is valid here, we should pass it.
-    // Usually ImplReleaseFonts is called inside ReleaseGraphics(bool bRelease).
-
-    mpFontController->ClearFontResources(mpGraphics, true);
-
-    if (mpFontController)
-        mpFontController->ResetGraphicsState();
-
-    mpForcedFallbackInstance.clear();
-
+    // Clear the device's local metadata reference immediately
     mpFontFaceCollection.reset();
+
+    if (mpGraphics)
+        mpGraphics->ReleaseFonts();
+
+    // Resolve the concrete type (Printer&, VirtualDevice&, etc.) and execute policy
+    vcl::DispatchDevice(*this, [](auto& rConcreteDev) {
+        using DeviceT = std::decay_t<decltype(rConcreteDev)>;
+        vcl::font_resource_policy<DeviceT>::release(rConcreteDev);
+    });
 }
+
 tools::Long OutputDevice::GetEmphasisAscent() const
 {
     return mpFontRealization ? mpFontRealization->nEmphasisAscent : 0;

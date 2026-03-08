@@ -487,15 +487,6 @@ bool Printer::AcquireGraphics() const
     return mpGraphics != nullptr;
 }
 
-void Printer::ImplReleaseFonts()
-{
-    mpGraphics->ReleaseFonts();
-// mbFontDirty = true; // Removed
-
-    mpFontInstance.clear();
-    mpFontFaceCollection.reset();
-}
-
 void Printer::ImplReleaseGraphics(bool bRelease)
 {
     DBG_TESTSOLARMUTEX();

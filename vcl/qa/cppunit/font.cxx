@@ -40,6 +40,7 @@ public:
     void testEmphasisMarkInitAsStyle();
     void testFontMetricScaling();
     void testInitFontHardwareReadiness();
+    void testFontPolicyDispatch();
 
     CPPUNIT_TEST_SUITE(VclFontTest);
     CPPUNIT_TEST(testName);
@@ -58,6 +59,7 @@ public:
     CPPUNIT_TEST(testEmphasisMarkInitAsStyle);
     CPPUNIT_TEST(testFontMetricScaling);
     CPPUNIT_TEST(testInitFontHardwareReadiness);
+    CPPUNIT_TEST(testFontPolicyDispatch);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -273,6 +275,23 @@ void VclFontTest::testInitFontHardwareReadiness()
     pVDev->SetMapMode(MapMode(MapUnit::MapPoint));
 
     CPPUNIT_ASSERT_MESSAGE("InitFont after state change should re-sync hardware", pVDev->TestInitFont());
+}
+
+void VclFontTest::testFontPolicyDispatch()
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+
+    // Trigger lazy-loading of system fonts (the 232 fonts)
+    (void)pVDev->GetFontFaceCollectionCount();
+
+    // Execute our new non-virtual release logic
+    pVDev->ImplReleaseFonts();
+
+    // Now, asking for the count should return 0 because we
+    // evicted the mxFontCache in the policy.
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Font collection should be empty after policy dispatch",
+                                 static_cast<sal_uInt32>(0),
+                                 pVDev->GetFontFaceCollectionCount());
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(VclFontTest);

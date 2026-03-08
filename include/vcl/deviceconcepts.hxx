@@ -101,6 +101,44 @@ template <> struct supports_subsampling<Printer> : std::false_type
 template <typename T> inline constexpr bool supports_subsampling_v = supports_subsampling<T>::value;
 
 /**
+ * Trait: uses_managed_font_cache
+ * * Defines whether a device relies on the vcl::font::FontController
+ * for its resource lifecycle.
+ * * Most OutputDevice subclasses (VirtualDevice, Window) are 'true' by default.
+ * Printers are a known exception as they handle font instances manually
+ * during the print job lifecycle.
+ */
+template <typename T> struct uses_managed_font_cache : std::true_type
+{
+};
+
+/** Specialization: Printers do not use the managed FontController cache. */
+template <> struct uses_managed_font_cache<Printer> : std::false_type
+{
+};
+
+/**
+ * Concept: ManagedFontCache
+ * * Constrains templates to device types that support FontController-based
+ * resource management. This allows for compile-time branching in
+ * font release policies.
+ */
+template <typename T> concept ManagedFontCache = uses_managed_font_cache<T>::value;
+
+/** * Font Resource Policy
+ * * Forward declaration of the static policy used to clean up font resources.
+ * The implementation is isolated in vcl/source/outdev/font.cxx to keep
+ * internal font headers (like ImplFontCache) private.
+ */
+template <typename T> struct font_resource_policy;
+
+/**
+ * Font Resource Policy
+ * The static interface for resource cleanup.
+ */
+template <typename T> struct font_resource_policy;
+
+/**
  * Concept: HWAccelerated
  * Satisfied by devices that provide hardware-accelerated rendering paths.
  */
