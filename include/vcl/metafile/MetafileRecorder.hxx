@@ -24,6 +24,7 @@
 #include <vcl/metafile/MetaActionType.hxx>
 #include <vcl/region.hxx>
 #include <vcl/rendercontext/DrawTextFlags.hxx>
+#include <vcl/rendercontext/DrawGridFlags.hxx>
 #include <vcl/rendercontext/State.hxx>
 #include <vcl/vclenum.hxx>
 
@@ -234,6 +235,12 @@ public:
     void RecordCheckered(const Point& rPos, const Size& rSize, sal_uInt32 nLen, Color aStart,
                          Color aEnd);
 
+    void RecordGrid(const tools::Rectangle& rRect, const Size& rDist, DrawGridFlags nFlags,
+                    const Color& rColor);
+
+    void RecordGridOfCrosses(const tools::Rectangle& rGridArea, const Size& rGridDistance,
+                             const tools::Rectangle& rDrawingArea, const Color& rColor);
+
     // RAII helper to temporarily suspend recording on an OutputDevice
     class ScopedSuspend
     {
@@ -257,6 +264,30 @@ public:
         ScopedSwitch(MetafileRecorder& rRecorder, GDIMetaFile* pNewMetaFile);
         ~ScopedSwitch();
     };
+
+    // The RAII worker class to push state to the metafile stack
+    class[[nodiscard]] ScopedPush
+    {
+        MetafileRecorder& mrRecorder;
+        bool mbActive;
+
+    public:
+        ScopedPush(MetafileRecorder & rRecorder, vcl::PushFlags nFlags)
+            : mrRecorder(rRecorder)
+            , mbActive(rRecorder.IsActive())
+        {
+            if (mbActive)
+                mrRecorder.RecordPush(nFlags);
+        }
+        ~ScopedPush()
+        {
+            if (mbActive)
+                mrRecorder.RecordPop();
+        }
+    };
+
+    // The factory function
+    ScopedPush CreateScopedPush(vcl::PushFlags nFlags) { return ScopedPush(*this, nFlags); }
 };
 
 } // namespace vcl

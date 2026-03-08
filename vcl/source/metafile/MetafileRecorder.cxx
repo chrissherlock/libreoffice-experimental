@@ -189,13 +189,10 @@ void MetafileRecorder::RecordGradient(const tools::PolyPolygon& rPolyPoly,
     else
     {
         // Complex Gradient "Sandwich"
-        // 1. Start Tag
         ScopedMetaGroup aGroup(mpMetaFile, "XGRAD_SEQ_BEGIN"_ostr, "XGRAD_SEQ_END"_ostr);
 
-        // 2. The Modern Action
         mpMetaFile->AddAction(new MetaGradientExAction(rPolyPoly, aGradient));
 
-        // 3. The Fallback
         mpMetaFile->AddAction(new MetaPushAction(vcl::PushFlags::CLIPREGION));
 
         // UNIFIED BEHAVIOR:
@@ -628,6 +625,85 @@ void MetafileRecorder::RecordCheckered(const Point& rPos, const Size& rSize, sal
     }
 
     RecordPop();
+}
+
+void MetafileRecorder::RecordGrid(const tools::Rectangle& rRect, const Size& rDist,
+                                  DrawGridFlags nFlags, const Color& rColor)
+{
+    if (!IsActive())
+        return;
+
+    // Save the existing state to prevent color leakage
+    auto oGroup = CreateScopedGroup("DrawGrid");
+    auto oColorPush = CreateScopedPush(vcl::PushFlags::LINECOLOR);
+
+    // Set the color specifically for the grid instructions
+    RecordLineColor(rColor, true);
+
+    if (rDist.Width() <= 0 || rDist.Height() <= 0)
+        return;
+
+    if (nFlags & DrawGridFlags::Dots)
+    {
+        for (tools::Long nX = rRect.Left(); nX <= rRect.Right(); nX += rDist.Width())
+        {
+            for (tools::Long nY = rRect.Top(); nY <= rRect.Bottom(); nY += rDist.Height())
+            {
+                RecordPixel(Point(nX, nY), rColor);
+            }
+        }
+    }
+    else
+    {
+        if (nFlags & DrawGridFlags::VertLines)
+        {
+            for (tools::Long nX = rRect.Left(); nX <= rRect.Right(); nX += rDist.Width())
+            {
+                RecordLine(Point(nX, rRect.Top()), Point(nX, rRect.Bottom()));
+            }
+        }
+
+        if (nFlags & DrawGridFlags::HorzLines)
+        {
+            for (tools::Long nY = rRect.Top(); nY <= rRect.Bottom(); nY += rDist.Height())
+            {
+                RecordLine(Point(rRect.Left(), nY), Point(rRect.Right(), nY));
+            }
+        }
+    }
+}
+
+void MetafileRecorder::RecordGridOfCrosses(const tools::Rectangle& rGridArea,
+                                           const Size& rGridDistance,
+                                           const tools::Rectangle& rDrawingArea,
+                                           const Color& rColor)
+{
+    if (!IsActive())
+        return;
+
+    auto oGroup = CreateScopedGroup("DrawGridOfCrosses");
+    auto oColorPush = CreateScopedPush(vcl::PushFlags::LINECOLOR);
+
+    RecordLineColor(rColor, true);
+
+    if (rGridDistance.Width() <= 0 || rGridDistance.Height() <= 0)
+        return;
+
+    const tools::Long nCrossSize = 1;
+
+    for (tools::Long nX = rGridArea.Left(); nX <= rGridArea.Right(); nX += rGridDistance.Width())
+    {
+        for (tools::Long nY = rGridArea.Top(); nY <= rGridArea.Bottom();
+             nY += rGridDistance.Height())
+        {
+            Point aPt(nX, nY);
+            if (rDrawingArea.Contains(aPt))
+            {
+                RecordLine(Point(nX - nCrossSize, nY), Point(nX + nCrossSize, nY));
+                RecordLine(Point(nX, nY - nCrossSize), Point(nX, nY + nCrossSize));
+            }
+        }
+    }
 }
 
 } // namespace vcl

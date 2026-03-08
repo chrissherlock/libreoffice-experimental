@@ -80,6 +80,7 @@ void OutputDevice::DrawGrid(const tools::Rectangle& rRect, const Size& rDist, Dr
     if (rRect.IsEmpty())
         return;
 
+    // Calculate the actual area to be drawn based on output size
     tools::Rectangle aDstRect(PixelToLogic(Point()), GetOutputSize());
     aDstRect.Intersection(rRect);
 
@@ -89,10 +90,11 @@ void OutputDevice::DrawGrid(const tools::Rectangle& rRect, const Size& rDist, Dr
     const bool bOldMap = mpMapper->IsMapModeEnabled();
     comphelper::ScopeGuard aMapGuard([this, bOldMap]() { this->EnableMapMode(bOldMap); });
 
+    maRecorder.RecordGrid(rRect, rDist, nFlags, GetLineColor());
+
     if (!IsDeviceOutputNecessary())
         return;
 
-    // Use the dispatcher to resolve the concrete device type for the trait
     vcl::DispatchDevice(*this, [&](const auto& rConcrete) {
         if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line)
             || !mpGraphics)
@@ -107,7 +109,6 @@ void OutputDevice::DrawGrid(const tools::Rectangle& rRect, const Size& rDist, Dr
         const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
         if (bRTL)
         {
-            // Resolve physical width via the STL-style trait
             tools::Long nFrameWidth = vcl::get_reference_width_v(rConcrete);
 
             mpMapper->MirrorDevicePixelRect(aDeviceRect, nFrameWidth, bRTL, ImplIsAntiparallel());
@@ -128,10 +129,11 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
     if (rDrawingArea.IsEmpty() || rGridArea.IsEmpty())
         return;
 
+    maRecorder.RecordGridOfCrosses(rGridArea, rGridDistance, rDrawingArea, GetLineColor());
+
     if (!IsDeviceOutputNecessary())
         return;
 
-    // Dispatch to the concrete type to resolve the frame width via trait
     vcl::DispatchDevice(*this, [&](const auto& rConcrete) {
         if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line)
             || !mpGraphics)
@@ -146,10 +148,8 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
         const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
         if (bRTL)
         {
-            // Use the STL-style trait to get the reference width
             tools::Long nFrameWidth = vcl::get_reference_width_v(rConcrete);
 
-            // Mirror both the boundary and the active drawing area
             mpMapper->MirrorDevicePixelRect(aDeviceGridArea, nFrameWidth, bRTL,
                                             ImplIsAntiparallel());
             mpMapper->MirrorDevicePixelRect(aDeviceDrawingArea, nFrameWidth, bRTL,
