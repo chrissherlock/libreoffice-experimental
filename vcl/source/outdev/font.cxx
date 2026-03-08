@@ -427,15 +427,6 @@ bool OutputDevice::ImplUpdateFontInstance() const
     // Create the callback to handle the initialization step
     // This captures 'this' safely because ImplUpdateFontInstance is a member function
     auto fnInit = [this](LogicalFontInstance* pInstance) {
-        // Compute font size in points for optical sizing before HarfBuzz initialization
-        if (!pInstance->GetPointSize())
-        {
-            auto nHeight = mpGraphicsState->maFont.GetFontHeight();
-            auto eFrom = MapToO3tlLength(GetMapMode().GetMapUnit());
-            float fPointSize = o3tl::convert(float(nHeight), eFrom, o3tl::Length::pt);
-            pInstance->SetPointSize(fPointSize);
-        }
-
         this->ImplInitializeFontInstance(pInstance);
     };
 
@@ -462,6 +453,15 @@ void OutputDevice::ImplInitializeFontInstance(LogicalFontInstance* pFontInstance
 {
     if (!pFontInstance->mbInit && InitFont())
     {
+        // Compute font size in points for optical sizing before HarfBuzz initialization
+        if (!pFontInstance->GetPointSize())
+        {
+            auto nHeight = mpGraphicsState->maFont.GetFontHeight();
+            auto eFrom = MapToO3tlLength(GetMapMode().GetMapUnit());
+            float fPointSize = o3tl::convert(float(nHeight), eFrom, o3tl::Length::pt);
+            pFontInstance->SetPointSize(fPointSize);
+        }
+
         mpFontController->InitializeInstance(pFontInstance, mpGraphics);
         ImplInitFontMetrics(pFontInstance);
         SetFontOrientation(pFontInstance);
