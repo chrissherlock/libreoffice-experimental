@@ -53,6 +53,34 @@ decltype(auto) DispatchDevice(OutputDevice& rDevice, Callable&& func, Args&&... 
     return std::forward<Callable>(func)(rDevice, std::forward<Args>(args)...);
 }
 
+/**
+ * Const-overload for DispatchDevice.
+ * Maintains the same critical ordering as the non-const version to ensure
+ * PDFWriterImpl is correctly identified before falling back to VirtualDevice.
+ */
+template <typename Callable, typename... Args>
+decltype(auto) DispatchDevice(const OutputDevice& rDevice, Callable&& func, Args&&... args)
+{
+    if (auto* pPDF = dynamic_cast<const PDFWriterImpl*>(&rDevice))
+    {
+        return std::forward<Callable>(func)(*pPDF, std::forward<Args>(args)...);
+    }
+    else if (auto* pPrinter = dynamic_cast<const Printer*>(&rDevice))
+    {
+        return std::forward<Callable>(func)(*pPrinter, std::forward<Args>(args)...);
+    }
+    else if (auto* pWindow = dynamic_cast<const WindowOutputDevice*>(&rDevice))
+    {
+        return std::forward<Callable>(func)(*pWindow, std::forward<Args>(args)...);
+    }
+    else if (auto* pVirDev = dynamic_cast<const VirtualDevice*>(&rDevice))
+    {
+        return std::forward<Callable>(func)(*pVirDev, std::forward<Args>(args)...);
+    }
+
+    return std::forward<Callable>(func)(rDevice, std::forward<Args>(args)...);
+}
+
 } // namespace vcl
 //
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

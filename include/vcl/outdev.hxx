@@ -367,8 +367,6 @@ public:
     const Point&                GetRefPoint() const;
     bool                        IsRefPoint() const;
 
-    virtual bool                IsScreenComp() const { return true; }
-
     virtual sal_uInt16          GetBitCount() const;
 
     Size GetOutputSizePixel() const;

@@ -203,6 +203,35 @@ template <> struct supports_animation<vcl::WindowOutputDevice> : std::true_type
  */
 template <typename T> concept Animatable = supports_animation<T>::value;
 
+/**
+ * Trait: is_screen_compatible
+ * * * Indicates whether a device's logical coordinate system and resolution (DPI)
+ * should remain synchronized with the primary system display.
+ * * * Behavior:
+ * - When TRUE: The device is treated as a "Soft-copy" surface. It will inherit
+ * system-wide changes to DPI, font scaling, and UI settings (see svapp.cxx).
+ * This ensures VirtualDevices used for UI buffering match the Window they
+ * render into.
+ * - When FALSE: The device is a "Hard-copy" surface (like a Printer). Its
+ * metrics are governed by physical page characteristics or fixed document
+ * definitions, independent of the user's monitor resolution.
+ */
+template <typename T> struct is_screen_compatible : std::true_type
+{
+};
+
+/** Specialization: Printers operate on physical page metrics, not screen metrics. */
+template <> struct is_screen_compatible<Printer> : std::false_type
+{
+};
+
+/**
+ * Concept: ScreenCompatible
+ * * Constrains logic to device types that participate in the global UI scaling
+ * and settings synchronization loop.
+ */
+template <typename T> concept ScreenCompatible = is_screen_compatible<T>::value;
+
 } // namespace vcl
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -23,10 +23,12 @@
 #include <sal/log.hxx>
 #include <tools/debug.hxx>
 
+#include <vcl/deviceconcepts.hxx>
 #include <vcl/pdfextoutdevdata.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/virdev.hxx>
 
+#include <devicedispatcher.hxx>
 #include <font/FontController.hxx>
 #include <ClippingController.hxx>
 #include <GraphicsState.hxx>
@@ -177,7 +179,10 @@ void VirtualDevice::ImplInitVirDev( const OutputDevice* pOutDev,
     SetOutputWidthPixel(nDX);
     SetOutputHeightPixel(nDY);
 
-    mbScreenComp    = pOutDev->IsScreenComp();
+    vcl::DispatchDevice(*pOutDev, [this](const auto& rConcrete) {
+        using T = std::decay_t<decltype(rConcrete)>;
+        this->mbScreenComp = vcl::ScreenCompatible<T>;
+    });
 
     mbDevOutput     = true;
     SetFontCollection(pSVData->maGDIData.mxScreenFontList);

@@ -147,8 +147,6 @@ public:
     virtual Size                GetButtonBorderSize() override;
     virtual Color               GetMonochromeButtonColor() override { return COL_LIGHTGRAY; }
 
-    bool                        IsScreenComp() const override { return false; }
-
     void DrawBorder(tools::Rectangle aBorderRect) override
     {
         SetLineColor(COL_BLACK);

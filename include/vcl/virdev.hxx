@@ -151,8 +151,6 @@ public:
 
     bool IsVirtual() const override;
 
-    bool                IsScreenComp() const override { return mbScreenComp; }
-
     bool IsWithoutAlpha() const { return meFormatAndAlpha == DeviceFormat::WITHOUT_ALPHA; }
 
     virtual bool HasAlpha() const override { return meFormatAndAlpha != DeviceFormat::WITHOUT_ALPHA; }
