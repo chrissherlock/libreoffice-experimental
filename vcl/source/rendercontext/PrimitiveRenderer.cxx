@@ -123,6 +123,25 @@ void PrimitiveRenderer::DrawRoundedRect(SalGraphics& rGraphics, const tools::Rec
         rGraphics.drawPolygon(aRoundRectPoly.GetSize(), pPtAry);
 }
 
+void PrimitiveRenderer::DrawCheckered(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect,
+                                      sal_uInt32 nLen, Color aStart, Color aEnd)
+{
+    if (nLen == 0)
+        return;
+
+    for (tools::Long nY = rDeviceRect.Top(), y = 0; nY < rDeviceRect.Bottom(); nY += nLen, ++y)
+    {
+        tools::Long nHeight = std::min<tools::Long>(nLen, rDeviceRect.Bottom() - nY + 1);
+        for (tools::Long nX = rDeviceRect.Left(), x = 0; nX < rDeviceRect.Right(); nX += nLen, ++x)
+        {
+            tools::Long nWidth = std::min<tools::Long>(nLen, rDeviceRect.Right() - nX + 1);
+
+            rGraphics.SetFillColor(((x & 1) ^ (y & 1)) ? aStart : aEnd);
+            rGraphics.drawRect(nX, nY, nWidth, nHeight);
+        }
+    }
+}
+
 static basegfx::B2DPolyPolygon lcl_ApplyLineDashing(const basegfx::B2DPolyPolygon& rLinePolyPolygon,
                                                     const LineInfo& rInfo)
 {

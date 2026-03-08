@@ -231,6 +231,9 @@ public:
     void RecordTextLine(const Point& rPos, long nWidth, FontStrikeout eStrikeout,
                         FontLineStyle eUnderline, FontLineStyle eOverline);
 
+    void RecordCheckered(const Point& rPos, const Size& rSize, sal_uInt32 nLen, Color aStart,
+                         Color aEnd);
+
     // RAII helper to temporarily suspend recording on an OutputDevice
     class ScopedSuspend
     {

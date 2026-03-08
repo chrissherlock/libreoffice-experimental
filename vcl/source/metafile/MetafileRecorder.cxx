@@ -596,6 +596,40 @@ void vcl::MetafileRecorder::RecordB2DPolyLine(const basegfx::B2DPolygon& rB2D,
 
     RecordComment("XB2DPOLYLINE_SEQ_END", 0, nullptr);
 }
+
+void MetafileRecorder::RecordCheckered(const Point& rPos, const Size& rSize, sal_uInt32 nLen,
+                                       Color aStart, Color aEnd)
+{
+    if (!IsActive())
+        return;
+
+    // Use the ScopedMetaGroup for semantic tagging
+    auto oMetaGroup = CreateScopedGroup("DrawCheckered");
+
+    const tools::Long nMaxX = rPos.X() + rSize.Width();
+    const tools::Long nMaxY = rPos.Y() + rSize.Height();
+
+    RecordPush(vcl::PushFlags::LINECOLOR | vcl::PushFlags::FILLCOLOR);
+    RecordLineColor(Color(), false);
+
+    sal_uInt32 y_count = 0;
+    for (tools::Long nY = rPos.Y(); nY < nMaxY; nY += nLen, ++y_count)
+    {
+        tools::Long nHeight = std::min<tools::Long>(nLen, nMaxY - nY);
+        sal_uInt32 x_count = 0;
+        for (tools::Long nX = rPos.X(); nX < nMaxX; nX += nLen, ++x_count)
+        {
+            tools::Long nWidth = std::min<tools::Long>(nLen, nMaxX - nX);
+            Color aFillCol = ((x_count & 1) ^ (y_count & 1)) ? aStart : aEnd;
+
+            RecordFillColor(aFillCol, true);
+            RecordRect(tools::Rectangle(Point(nX, nY), Size(nWidth, nHeight)));
+        }
+    }
+
+    RecordPop();
+}
+
 } // namespace vcl
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

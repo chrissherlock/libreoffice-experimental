@@ -83,6 +83,9 @@ public:
                                 sal_uLong nHorzRoundPixel, sal_uLong nVertRoundPixel,
                                 bool bFillColor);
 
+    static void DrawCheckered(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect,
+                              sal_uInt32 nLen, Color aStart, Color aEnd);
+
     static bool DrawPolyLine(SalGraphics& rGraphics, const basegfx::B2DPolygon& rPoly,
                              const StrokeAttributes& rStroke,
                              const basegfx::B2DHomMatrix& rObjectTransform, AntialiasingFlags nAA,

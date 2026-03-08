@@ -40,23 +40,31 @@ void OutputDevice::DrawCheckered(const Point& rPos, const Size& rSize, sal_uInt3
 {
     assert(!is_double_buffered_window());
 
-    const sal_uInt32 nMaxX(rPos.X() + rSize.Width());
-    const sal_uInt32 nMaxY(rPos.Y() + rSize.Height());
+    if (rSize.IsEmpty() || nLen == 0)
+        return;
 
-    auto popIt = ScopedPush(vcl::PushFlags::LINECOLOR | vcl::PushFlags::FILLCOLOR);
-    SetLineColor();
+    maRecorder.RecordCheckered(rPos, rSize, nLen, aStart, aEnd);
 
-    for (sal_uInt32 x(0), nX(rPos.X()); nX < nMaxX; x++, nX += nLen)
+    if (IsDeviceOutputNecessary() && PrepareGraphicsOutput() && mpGraphics)
     {
-        const sal_uInt32 nRight(std::min(nMaxX, nX + nLen));
+        // Map the bounding box to device pixels once
+        tools::Rectangle aDeviceRect = mpMapper->LogicToDevicePixel(tools::Rectangle(rPos, rSize));
 
-        for (sal_uInt32 y(0), nY(rPos.Y()); nY < nMaxY; y++, nY += nLen)
+        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+        if (bRTL)
         {
-            const sal_uInt32 nBottom(std::min(nMaxY, nY + nLen));
-
-            SetFillColor(((x & 0x0001) ^ (y & 0x0001)) ? aStart : aEnd);
-            DrawRect(tools::Rectangle(nX, nY, nRight, nBottom));
+            tools::Long nFrameWidth
+                = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+            mpMapper->MirrorDevicePixelRect(aDeviceRect, nFrameWidth, bRTL, ImplIsAntiparallel());
         }
+
+        auto popIt = ScopedPush(vcl::PushFlags::LINECOLOR);
+        SetLineColor();
+        if (mbLineColorDirty)
+            InitLineColor();
+
+        vcl::rendercontext::PrimitiveRenderer::DrawCheckered(*mpGraphics, aDeviceRect, nLen, aStart,
+                                                             aEnd);
     }
 }
 
