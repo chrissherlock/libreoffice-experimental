@@ -213,6 +213,8 @@ public:
     static void RemoveFontsSubstitute();
     static vcl::Font GetDefaultFont(DefaultFontType nType, LanguageType eLang,
                                     GetDefaultFontFlags nFlags, const OutputDevice* pOutDev);
+
+    void ClearAllCache(SalGraphics* pGraphics);
 };
 
 } // namespace font

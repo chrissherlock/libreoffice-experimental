@@ -587,21 +587,11 @@ namespace vcl
     {
         static void release(OutputDevice& rDev)
         {
-            // Use if constexpr to resolve the policy branch at compile-time
             if constexpr (ManagedFontCache<T>)
             {
                 if (rDev.mpFontController)
-                {
-                    rDev.mpFontController->ClearFontResources(rDev.mpGraphics, true);
+                    rDev.mpFontController->ClearAllCache(rDev.mpGraphics);
 
-                    // Clear the link to the physical font collection (the 232 fonts)
-                    // This prevents lazy-reloading during unit test assertions.
-                    rDev.mpFontController->SetFontCollection(nullptr);
-
-                    // Reset the internal graphics state and evict the cache
-                    rDev.mpFontController->ResetGraphicsState();
-                    rDev.mpFontController->mxFontCache.reset();
-                }
                 rDev.mpForcedFallbackInstance.clear();
             }
             else // This path is for Printer and non-managed devices

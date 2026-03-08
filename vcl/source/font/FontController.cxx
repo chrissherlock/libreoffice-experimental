@@ -792,6 +792,30 @@ bool FontController::UpdateFontInstanceState(
     return true;
 }
 
+void FontController::ClearAllCache(SalGraphics* pGraphics)
+{
+    // TODO: Complete the migration of font data ownership.
+    // Currently, OutputDevice still maintains mpFontFaceCollection and
+    // mpFontInstance. These should be moved here into the FontController
+    // so that this method can clear them directly without relying on
+    // the OutputDevice policy to do half the work.
+    // See: OutputDevice::ImplReleaseFonts() and the associated policy.
+
+    ClearFontResources(pGraphics, true);
+    SetFontCollection(nullptr);
+
+    // Reset Optimization Bookkeeping
+    // This ensures NeedsUpdate() won't return false on the next call
+    mnLastMapperID = 0;
+    maLastRequestedFont = vcl::Font(); // Reset to default empty font state
+
+    mxFontInstance.clear();
+
+    ResetGraphicsState();
+
+    mxFontCache.reset();
+}
+
 } // end namespace vcl::font
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
