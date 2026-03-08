@@ -140,8 +140,6 @@ protected:
     SAL_DLLPRIVATE void ImplReleaseGraphics(bool bRelease = true);
     virtual void                ImplReleaseFonts() override;
 
-    virtual tools::Long                GetGradientStepCount( tools::Long nMinRect ) override;
-
 public:
     void                        SetSystemTextColor(SystemTextColorFlags, bool) override;
     SAL_DLLPRIVATE void                        DrawGradientEx( OutputDevice* pOut, const tools::Rectangle& rRect,

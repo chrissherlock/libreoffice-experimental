@@ -865,10 +865,7 @@ public:
 
 protected:
 
-    virtual tools::Long                GetGradientStepCount( tools::Long nMinRect );
-
 private:
-    SAL_DLLPRIVATE tools::Long  GetGradientSteps(Gradient const& rGradient, tools::Rectangle const& rRect);
     SAL_DLLPRIVATE Color        GetSingleColorGradientFill();
     ///@}
 

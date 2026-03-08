@@ -139,7 +139,7 @@ void OutputDevice::DrawGradient(const tools::PolyPolygon& rPolyPoly,
     Point aCenter;
     aEffectiveGradient.GetBoundRect(aDeviceRect, aGradientBoundRect, aCenter);
 
-    tools::Long nStepCount = GetGradientSteps(aEffectiveGradient, aGradientBoundRect);
+    tools::Long nStepCount = rGradient.GetCalculatedSteps(aGradientBoundRect, GetDPIY());
 
     vcl::rendercontext::PrimitiveRenderer::DrawGradient(
         *mpGraphics,
@@ -154,36 +154,6 @@ bool OutputDevice::is_double_buffered_window() const
 {
     auto pOwnerWindow = GetOwnerWindow();
     return pOwnerWindow && pOwnerWindow->SupportsDoubleBuffering();
-}
-
-tools::Long OutputDevice::GetGradientStepCount( tools::Long nMinRect )
-{
-    tools::Long nInc = (nMinRect < 50) ? 2 : 4;
-
-    return nInc;
-}
-
-tools::Long OutputDevice::GetGradientSteps(Gradient const& rGradient, tools::Rectangle const& rRect)
-{
-    // calculate step count
-    tools::Long nStepCount = rGradient.GetSteps();
-
-    if (nStepCount)
-        return nStepCount;
-
-    tools::Long nMinRect = 0;
-
-    if (rGradient.GetStyle() == css::awt::GradientStyle_LINEAR || rGradient.GetStyle() == css::awt::GradientStyle_AXIAL)
-        nMinRect = rRect.GetHeight();
-    else
-        nMinRect = std::min(rRect.GetWidth(), rRect.GetHeight());
-
-    tools::Long nInc = GetGradientStepCount(nMinRect);
-
-    if (!nInc)
-        nInc = 1;
-
-    return nMinRect / nInc;
 }
 
 Color OutputDevice::GetSingleColorGradientFill()

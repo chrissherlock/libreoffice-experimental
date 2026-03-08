@@ -673,4 +673,45 @@ void Gradient::DrawComplexGradientToMetafile(tools::Rectangle const& rRect, GDIM
     rMetaFile.AddAction( new MetaPolygonAction( rPoly ) );
 }
 
+tools::Long Gradient::GetCalculatedSteps(const tools::Rectangle& rRect, tools::Long nDPIY) const
+{
+    // If the user explicitly requested a specific step count, honor it immediately
+    tools::Long nStepCount = GetSteps();
+    if (nStepCount > 0)
+        return nStepCount;
+
+    tools::Long nMinRect = 0;
+
+    if (GetStyle() == css::awt::GradientStyle_LINEAR || GetStyle() == css::awt::GradientStyle_AXIAL)
+        nMinRect = rRect.GetHeight();
+    else
+        nMinRect = std::min(rRect.GetWidth(), rRect.GetHeight());
+
+    // --- Dynamic DPI Scaling ---
+
+    // Baseline constants designed for standard 96 DPI screens
+    constexpr tools::Long nBaselineDPI = 96;
+    constexpr tools::Long nBaseThreshold = 50;
+    constexpr tools::Long nBaseLowIncrement = 2;
+    constexpr tools::Long nBaseHighIncrement = 4;
+
+    // Fallback to baseline if the caller provides a 0 DPI
+    if (nDPIY == 0)
+        nDPIY = nBaselineDPI;
+
+    // Scale physically based on the device's actual resolution
+    tools::Long nThreshold = (nBaseThreshold * nDPIY) / nBaselineDPI;
+    tools::Long nLowInc = std::max<tools::Long>(1, (nBaseLowIncrement * nDPIY) / nBaselineDPI);
+    tools::Long nHighInc = std::max<tools::Long>(1, (nBaseHighIncrement * nDPIY) / nBaselineDPI);
+
+    // Evaluate step increment using the dynamically scaled traits
+    tools::Long nInc = (nMinRect < nThreshold) ? nLowInc : nHighInc;
+
+    // Final safety fallback to prevent divide-by-zero
+    if (!nInc)
+        nInc = 1;
+
+    return nMinRect / nInc;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

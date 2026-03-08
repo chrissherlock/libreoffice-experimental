@@ -80,6 +80,9 @@ public:
 
     void AddGradientActions(tools::Rectangle const& rRect, GDIMetaFile& rMetaFile);
 
+     /** Calculates the optimal number of rendering steps based on target geometry and device resolution. */
+     tools::Long GetCalculatedSteps(const tools::Rectangle& rRect, tools::Long nDPIY) const;
+
     Gradient&       operator=( const Gradient& rGradient );
     Gradient&       operator=( Gradient&& rGradient );
     bool            operator==( const Gradient& rGradient ) const;
