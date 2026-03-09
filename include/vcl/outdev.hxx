@@ -689,7 +689,7 @@ public:
                                     Color aStart = COL_WHITE,
                                     Color aEnd = COL_BLACK);
 
-    void                        DrawGrid( const tools::Rectangle& rRect, const Size& rDist, DrawGridFlags nFlags );
+    void                        DrawGrid(const tools::Rectangle& rRect, const Size& rStep, DrawGridFlags nFlags);
 
     /** Draw a grid of small crosses.
 

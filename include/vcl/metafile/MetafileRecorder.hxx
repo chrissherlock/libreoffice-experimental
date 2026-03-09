@@ -102,6 +102,7 @@ class VCL_DLLPUBLIC MetafileRecorder
 {
 private:
     GDIMetaFile* mpMetaFile;
+    void ImplRecordRect(const tools::Rectangle& Rect);
 
 public:
     explicit MetafileRecorder();
@@ -163,8 +164,10 @@ public:
                            const vcl::rendercontext::StrokeAttributes& rStroke,
                            const basegfx::B2DHomMatrix& rTransform = basegfx::B2DHomMatrix());
 
-    void RecordRect(const tools::Rectangle& rRect);
-    void RecordRoundRect(const tools::Rectangle& rRect, sal_uLong nHorzRound, sal_uLong nVertRound);
+    void RecordRect(const tools::Rectangle& rRect, const Color& rLineColor,
+                    const Color& rFillColor);
+    void RecordRoundedRect(const tools::Rectangle& rRect, sal_uLong nHorzRound,
+                           sal_uLong nVertRound, const Color& rLineColor, const Color& rFillColor);
     void RecordBorder(const tools::Rectangle& rRect, const Color& rColor);
 
     void RecordPolyLine(const tools::Polygon& rPoly, const LineInfo& rLineInfo);
@@ -236,8 +239,16 @@ public:
     void RecordCheckered(const Point& rPos, const Size& rSize, sal_uInt32 nLen, Color aStart,
                          Color aEnd);
 
-    void RecordGrid(const tools::Rectangle& rRect, const Size& rDist, DrawGridFlags nFlags,
-                    const Color& rColor);
+    /**
+     * Records a grid as a single PolyPolygon action to minimize metafile bloat.
+     * * @param rRect      The logical boundary of the grid.
+     * @param rStep      The logical width/height of each grid cell.
+     * @param nFlags     Styling flags (e.g., dotted or dashed lines).
+     * @param rLineColor The active stroke color.
+     * @param rFillColor The active interior color.
+     */
+    void RecordGrid(const tools::Rectangle& rRect, const Size& rStep, DrawGridFlags nFlags,
+                    const Color& rLineColor, const Color& rFillColor);
 
     void RecordGridOfCrosses(const tools::Rectangle& rGridArea, const Size& rGridDistance,
                              const tools::Rectangle& rDrawingArea, const Color& rColor);

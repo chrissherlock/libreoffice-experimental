@@ -73,51 +73,39 @@ void OutputDevice::DrawCheckered(const Point& rPos, const Size& rSize, sal_uInt3
     });
 }
 
-void OutputDevice::DrawGrid(const tools::Rectangle& rRect, const Size& rDist, DrawGridFlags nFlags)
+void OutputDevice::DrawGrid(const tools::Rectangle& rRect, const Size& rStep, DrawGridFlags nFlags)
 {
     assert(!is_double_buffered_window());
 
-    if (rRect.IsEmpty())
+    // avoid infinite loops or empty renders
+    if (rRect.IsEmpty() || rStep.Width() <= 0 || rStep.Height() <= 0)
         return;
 
-    // Calculate the actual area to be drawn based on output size
-    tools::Rectangle aDstRect(PixelToLogic(Point()), GetOutputSize());
-    aDstRect.Intersection(rRect);
-
-    if (aDstRect.IsEmpty())
-        return;
-
-    const bool bOldMap = mpMapper->IsMapModeEnabled();
-    comphelper::ScopeGuard aMapGuard([this, bOldMap]() { this->EnableMapMode(bOldMap); });
-
-    maRecorder.RecordGrid(rRect, rDist, nFlags, GetLineColor());
+    maRecorder.RecordGrid(rRect, rStep, nFlags, GetLineColor(), GetFillColor());
 
     if (!IsDeviceOutputNecessary())
         return;
 
     vcl::DispatchDevice(*this, [&](const auto& rConcrete) {
-        if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line)
+        if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line
+                                   | vcl::PrepareOutputFlags::Fill)
             || !mpGraphics)
         {
             return;
         }
 
         tools::Rectangle aDeviceRect = mpMapper->LogicToDevicePixel(rRect);
-        tools::Rectangle aDeviceDstRect = mpMapper->LogicToDevicePixel(aDstRect);
-        Size aDeviceDist = mpMapper->LogicToDevicePixel(rDist);
+        Size aDeviceStep = mpMapper->LogicToDevicePixel(rStep);
 
         const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
         if (bRTL)
         {
-            tools::Long nFrameWidth = vcl::get_reference_width_v(rConcrete);
-
-            mpMapper->MirrorDevicePixelRect(aDeviceRect, nFrameWidth, bRTL, ImplIsAntiparallel());
-            mpMapper->MirrorDevicePixelRect(aDeviceDstRect, nFrameWidth, bRTL,
-                                            ImplIsAntiparallel());
+            tools::Long nWidth = vcl::get_reference_width_v(rConcrete);
+            mpMapper->MirrorDevicePixelRect(aDeviceRect, nWidth, bRTL, ImplIsAntiparallel());
         }
 
-        vcl::rendercontext::PrimitiveRenderer::DrawGrid(*mpGraphics, aDeviceRect, aDeviceDstRect,
-                                                        aDeviceDist, nFlags);
+        vcl::rendercontext::PrimitiveRenderer::DrawGrid(*mpGraphics, aDeviceRect, aDeviceStep,
+                                                        nFlags);
     });
 }
 

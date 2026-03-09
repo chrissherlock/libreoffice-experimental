@@ -100,27 +100,24 @@ void PrimitiveRenderer::DrawRect(SalGraphics& rGraphics, const tools::Rectangle&
 }
 
 void PrimitiveRenderer::DrawRoundedRect(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect,
-                                        sal_uLong nHorzRoundPixel, sal_uLong nVertRoundPixel,
-                                        bool bFillColor)
+                                        tools::Long nHorzRoundPixel, tools::Long nVertRoundPixel,
+                                        bool bFill)
 {
-    if (!nHorzRoundPixel && !nVertRoundPixel)
-    {
-        rGraphics.drawRect(rDeviceRect.Left(), rDeviceRect.Top(), rDeviceRect.GetWidth(),
-                           rDeviceRect.GetHeight());
+    if (rDeviceRect.IsEmpty())
         return;
+
+    tools::Polygon aRoundRectPoly(rDeviceRect, static_cast<sal_uInt32>(nHorzRoundPixel),
+                                  static_cast<sal_uInt32>(nVertRoundPixel));
+
+    const Point* pPtAry = aRoundRectPoly.GetConstPointAry();
+    const sal_uInt32 nPointCount = aRoundRectPoly.GetSize();
+
+    if (bFill)
+    {
+        rGraphics.drawPolygon(nPointCount, pPtAry);
     }
 
-    tools::Polygon aRoundRectPoly(rDeviceRect, nHorzRoundPixel, nVertRoundPixel);
-
-    if (aRoundRectPoly.GetSize() < 2)
-        return;
-
-    Point* pPtAry = aRoundRectPoly.GetPointAry();
-
-    if (!bFillColor)
-        rGraphics.drawPolyLine(aRoundRectPoly.GetSize(), pPtAry);
-    else
-        rGraphics.drawPolygon(aRoundRectPoly.GetSize(), pPtAry);
+    rGraphics.drawPolyLine(nPointCount, pPtAry);
 }
 
 void PrimitiveRenderer::DrawBorder(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect)
@@ -687,47 +684,57 @@ struct GridGeometry
 }
 
 void PrimitiveRenderer::DrawGrid(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect,
-                                 const tools::Rectangle& rDeviceDstRect, const Size& rDeviceDist,
-                                 DrawGridFlags nFlags)
+                                 const Size& rStep, DrawGridFlags nFlags)
 {
-    const GridGeometry aGrid(rDeviceRect, rDeviceDstRect, rDeviceDist);
+    if (rDeviceRect.IsEmpty() || rStep.Width() <= 0 || rStep.Height() <= 0)
+        return;
 
-    std::vector<sal_Int32> aVertBuf;
-    if (nFlags & (DrawGridFlags::Dots | DrawGridFlags::HorzLines))
-        aVertBuf = aGrid.CalculateOffsets(true);
+    const bool bDots = bool(nFlags & DrawGridFlags::Dots);
+    const bool bHorz = bool(nFlags & DrawGridFlags::HorzLines);
+    const bool bVert = bool(nFlags & DrawGridFlags::VertLines);
 
-    std::vector<sal_Int32> aHorzBuf;
-    if (nFlags & (DrawGridFlags::Dots | DrawGridFlags::VertLines))
-        aHorzBuf = aGrid.CalculateOffsets(false);
-
-    if (nFlags & DrawGridFlags::Dots)
+    // We have 6 seperate cases we have to handle:
+    // 1. Point-based Grid (Intersections only)
+    if (bDots && bHorz && bVert)
     {
-        for (const auto& rY : aVertBuf)
-        {
-            for (const auto& rX : aHorzBuf)
-            {
-                rGraphics.drawPixel(rX, rY);
-            }
-        }
+        for (tools::Long nY = rDeviceRect.Top(); nY <= rDeviceRect.Bottom(); nY += rStep.Height())
+            for (tools::Long nX = rDeviceRect.Left(); nX <= rDeviceRect.Right();
+                 nX += rStep.Width())
+                rGraphics.drawRect(nX, nY, 1, 1);
     }
-
-    if (nFlags & DrawGridFlags::HorzLines)
+    // 2. Dotted Horizontal Rulings
+    else if (bDots && bHorz)
     {
-        for (const auto& rY : aVertBuf)
-        {
-            tools::Long nX1 = aGrid.nPixStartX;
-            tools::Long nX2 = aGrid.nPixRight;
-            // Mirroring logic for horizontal segments in DrawGrid if necessary
-            rGraphics.drawLine(nX1, rY, nX2, rY);
-        }
+        for (tools::Long nY = rDeviceRect.Top(); nY <= rDeviceRect.Bottom(); nY += rStep.Height())
+            for (tools::Long nX = rDeviceRect.Left(); nX <= rDeviceRect.Right();
+                 nX += 1) // Step of 1 for dots
+                rGraphics.drawRect(nX, nY, 1, 1);
     }
-
-    if (nFlags & DrawGridFlags::VertLines)
+    // 3. Dotted Vertical Rulings
+    else if (bDots && bVert)
     {
-        for (const auto& rX : aHorzBuf)
-        {
-            rGraphics.drawLine(rX, aGrid.nPixStartY, rX, aGrid.nPixBottom);
-        }
+        for (tools::Long nX = rDeviceRect.Left(); nX <= rDeviceRect.Right(); nX += rStep.Width())
+            for (tools::Long nY = rDeviceRect.Top(); nY <= rDeviceRect.Bottom(); nY += 1)
+                rGraphics.drawRect(nX, nY, 1, 1);
+    }
+    // 4. Solid Checkerboard
+    else if (bHorz && bVert)
+    {
+        for (tools::Long nY = rDeviceRect.Top(); nY < rDeviceRect.Bottom(); nY += rStep.Height())
+            for (tools::Long nX = rDeviceRect.Left(); nX < rDeviceRect.Right(); nX += rStep.Width())
+                rGraphics.drawRect(nX, nY, rStep.Width(), rStep.Height());
+    }
+    // 5. Solid Horizontal Lines
+    else if (bHorz)
+    {
+        for (tools::Long nY = rDeviceRect.Top(); nY <= rDeviceRect.Bottom(); nY += rStep.Height())
+            rGraphics.drawLine(rDeviceRect.Left(), nY, rDeviceRect.Right(), nY);
+    }
+    // 6. Solid Vertical Lines
+    else if (bVert)
+    {
+        for (tools::Long nX = rDeviceRect.Left(); nX <= rDeviceRect.Right(); nX += rStep.Width())
+            rGraphics.drawLine(nX, rDeviceRect.Top(), nX, rDeviceRect.Bottom());
     }
 }
 

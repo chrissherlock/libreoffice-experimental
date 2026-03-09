@@ -308,9 +308,9 @@ void TypeSerializerTest::testGraphic_GDIMetaFile()
         }
         aMemoryStream.Seek(STREAM_SEEK_TO_BEGIN);
 
-        CPPUNIT_ASSERT_EQUAL(sal_uInt64(229), aMemoryStream.remainingSize());
+        CPPUNIT_ASSERT_EQUAL(sal_uInt64(445), aMemoryStream.remainingSize());
         std::vector<unsigned char> aHash = calculateHash(aMemoryStream);
-        CPPUNIT_ASSERT_EQUAL(std::string("607b19f614387aba3fb9dca843962ecb173dca4e"),
+        CPPUNIT_ASSERT_EQUAL(std::string("423f06f6eece63eedf356be97c3957347a0e1f08"),
                              comphelper::hashToString(aHash));
 
         aMemoryStream.Seek(STREAM_SEEK_TO_BEGIN);

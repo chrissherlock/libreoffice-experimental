@@ -156,48 +156,62 @@ CPPUNIT_TEST_FIXTURE(MetafileRecorderTest, testSimpleWrappers)
     aRecorder.RecordLineColor(COL_RED, true);
     // 2. FillColor
     aRecorder.RecordFillColor(COL_GREEN, true);
-    // 3. Rect
+
+    // 3. Rect (Now generates 7 actions due to RAII ScopedGroup and ScopedPush)
     tools::Rectangle aRect(10, 10, 50, 60);
-    aRecorder.RecordRect(aRect);
+    aRecorder.RecordRect(aRect, COL_BLACK, COL_WHITE);
+
     // 4. Line
     Point aStart(1, 1);
     Point aEnd(5, 5);
     aRecorder.RecordLine(aStart, aEnd);
+
     // 5. Push
     aRecorder.RecordPush(vcl::PushFlags::ALL);
+
     // 6. Pop
     aRecorder.RecordPop();
 
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(6), aMtf.GetActionSize());
+    // Total actions: 2 (initial) + 7 (Rect block) + 3 (Line, Push, Pop) = 12
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(12), aMtf.GetActionSize());
 
-    // Verify LineColor
+    // Verify initial LineColor (Index 0)
     auto* pLineCol = static_cast<MetaLineColorAction*>(aMtf.GetAction(0));
     CPPUNIT_ASSERT_EQUAL(MetaActionType::LINECOLOR, pLineCol->GetType());
     CPPUNIT_ASSERT_EQUAL(COL_RED, pLineCol->GetColor());
 
-    // Verify FillColor
+    // Verify initial FillColor (Index 1)
     auto* pFillCol = static_cast<MetaFillColorAction*>(aMtf.GetAction(1));
     CPPUNIT_ASSERT_EQUAL(MetaActionType::FILLCOLOR, pFillCol->GetType());
     CPPUNIT_ASSERT_EQUAL(COL_GREEN, pFillCol->GetColor());
 
-    // Verify Rect
-    auto* pRectAct = static_cast<MetaRectAction*>(aMtf.GetAction(2));
+    // --- Inside the RecordRect block ---
+    // Index 2: Comment (Group start)
+    // Index 3: Push (State isolation)
+    // Index 4: LineColor (Black)
+    // Index 5: FillColor (White)
+
+    // Verify Rect (Now shifted to Index 6)
+    auto* pRectAct = static_cast<MetaRectAction*>(aMtf.GetAction(6));
     CPPUNIT_ASSERT_EQUAL(MetaActionType::RECT, pRectAct->GetType());
     CPPUNIT_ASSERT_EQUAL(aRect, pRectAct->GetRect());
 
-    // Verify Line
-    auto* pLineAct = static_cast<MetaLineAction*>(aMtf.GetAction(3));
+    // Index 7: Pop
+    // Index 8: Comment (Group end)
+
+    // Verify Line (Now shifted to Index 9)
+    auto* pLineAct = static_cast<MetaLineAction*>(aMtf.GetAction(9));
     CPPUNIT_ASSERT_EQUAL(MetaActionType::LINE, pLineAct->GetType());
     CPPUNIT_ASSERT_EQUAL(aStart, pLineAct->GetStartPoint());
     CPPUNIT_ASSERT_EQUAL(aEnd, pLineAct->GetEndPoint());
 
-    // Verify Push
-    auto* pPushAct = static_cast<MetaPushAction*>(aMtf.GetAction(4));
+    // Verify Push (Now shifted to Index 10)
+    auto* pPushAct = static_cast<MetaPushAction*>(aMtf.GetAction(10));
     CPPUNIT_ASSERT_EQUAL(MetaActionType::PUSH, pPushAct->GetType());
     CPPUNIT_ASSERT_EQUAL(vcl::PushFlags::ALL, pPushAct->GetFlags());
 
-    // Verify Pop
-    auto* pPopAct = static_cast<MetaPopAction*>(aMtf.GetAction(5));
+    // Verify Pop (Now shifted to Index 11)
+    auto* pPopAct = static_cast<MetaPopAction*>(aMtf.GetAction(11));
     CPPUNIT_ASSERT_EQUAL(MetaActionType::POP, pPopAct->GetType());
 }
 

@@ -340,17 +340,44 @@ void MetafileRecorder::RecordPolyLine(const tools::Polygon& rPoly, const LineInf
         mpMetaFile->AddAction(new MetaPolyLineAction(rPoly, rLineInfo));
 }
 
-void MetafileRecorder::RecordRect(const tools::Rectangle& rRect)
+// Internal helper that assumes state is already pushed/set
+void MetafileRecorder::ImplRecordRect(const tools::Rectangle& rRect)
 {
-    if (IsActive())
-        mpMetaFile->AddAction(new MetaRectAction(rRect));
+    mpMetaFile->AddAction(new MetaRectAction(rRect));
 }
 
-void MetafileRecorder::RecordRoundRect(const tools::Rectangle& rRect, sal_uLong nHorzRound,
-                                       sal_uLong nVertRound)
+void MetafileRecorder::RecordRect(const tools::Rectangle& rRect, const Color& rLineColor,
+                                  const Color& rFillColor)
 {
-    if (IsActive())
-        mpMetaFile->AddAction(new MetaRoundRectAction(rRect, nHorzRound, nVertRound));
+    if (!IsActive())
+        return;
+
+    auto oGroup = CreateScopedGroup("DrawRect");
+
+    // RAII: Isolate Line and Fill state in the metafile
+    auto oStatePush = CreateScopedPush(vcl::PushFlags::LINECOLOR | vcl::PushFlags::FILLCOLOR);
+
+    RecordLineColor(rLineColor, true);
+    RecordFillColor(rFillColor, true);
+
+    ImplRecordRect(rRect);
+}
+
+void MetafileRecorder::RecordRoundedRect(const tools::Rectangle& rRect, sal_uLong nHorzRound,
+                                         sal_uLong nVertRound, const Color& rLineColor,
+                                         const Color& rFillColor)
+{
+    if (!IsActive())
+        return;
+
+    auto oGroup = CreateScopedGroup("DrawRoundedRect");
+
+    auto oStatePush = CreateScopedPush(vcl::PushFlags::LINECOLOR | vcl::PushFlags::FILLCOLOR);
+
+    RecordLineColor(rLineColor, true);
+    RecordFillColor(rFillColor, true);
+
+    mpMetaFile->AddAction(new MetaRoundRectAction(rRect, nHorzRound, nVertRound));
 }
 
 void MetafileRecorder::RecordBorder(const tools::Rectangle& rRect, const Color& rColor)
@@ -359,13 +386,14 @@ void MetafileRecorder::RecordBorder(const tools::Rectangle& rRect, const Color& 
         return;
 
     auto oGroup = CreateScopedGroup("DrawBorder");
-    auto oColorPush = CreateScopedPush(vcl::PushFlags::LINECOLOR);
+
+    // We isolate the line color state for this border operation
+    auto oColorPush = CreateScopedPush(vcl::PushFlags::LINECOLOR | vcl::PushFlags::FILLCOLOR);
 
     RecordLineColor(rColor, true);
+    RecordFillColor(COL_TRANSPARENT, true);
 
-    // We record the rectangle as a simple geometric intent.
-    // Pixel-perfect adjustments happen later in the Renderer.
-    RecordRect(rRect);
+    ImplRecordRect(rRect); // Use the worker
 }
 
 void MetafileRecorder::RecordTransparent(const tools::PolyPolygon& rPolyPoly,
@@ -609,14 +637,34 @@ void vcl::MetafileRecorder::RecordB2DPolyLine(const basegfx::B2DPolygon& rB2D,
     RecordComment("XB2DPOLYLINE_SEQ_END", 0, nullptr);
 }
 
+/** Calculates the dimension of a checkerboard cell, ensuring it doesn't exceed the boundary. */
+static constexpr tools::Long lcl_GetCellDimension(tools::Long nPos, tools::Long nMax,
+                                                  sal_uInt32 nLen)
+{
+    return std::min<tools::Long>(nLen, nMax - nPos);
+}
+
+/** Determines the fill color for a cell based on its grid coordinates. */
+static constexpr Color lcl_GetCheckerboardColor(sal_uInt32 nXCount, sal_uInt32 nYCount,
+                                                const Color& rStart, const Color& rEnd)
+{
+    return ((nXCount & 1) ^ (nYCount & 1)) ? rStart : rEnd;
+}
+
 void MetafileRecorder::RecordCheckered(const Point& rPos, const Size& rSize, sal_uInt32 nLen,
                                        Color aStart, Color aEnd)
 {
-    if (!IsActive())
+    if (!IsActive() || nLen == 0)
         return;
 
     // Use the ScopedMetaGroup for semantic tagging
     auto oMetaGroup = CreateScopedGroup("DrawCheckered");
+
+    // RAII: Isolate the entire checkered operation
+    auto oStatePush = CreateScopedPush(vcl::PushFlags::LINECOLOR | vcl::PushFlags::FILLCOLOR);
+
+    // Checkerboards typically have no borders (hairlines) around individual cells
+    RecordLineColor(COL_TRANSPARENT, true);
 
     const tools::Long nMaxX = rPos.X() + rSize.Width();
     const tools::Long nMaxY = rPos.Y() + rSize.Height();
@@ -631,59 +679,59 @@ void MetafileRecorder::RecordCheckered(const Point& rPos, const Size& rSize, sal
         sal_uInt32 x_count = 0;
         for (tools::Long nX = rPos.X(); nX < nMaxX; nX += nLen, ++x_count)
         {
-            tools::Long nWidth = std::min<tools::Long>(nLen, nMaxX - nX);
-            Color aFillCol = ((x_count & 1) ^ (y_count & 1)) ? aStart : aEnd;
+            const tools::Long nWidth = lcl_GetCellDimension(nX, nMaxX, nLen);
+            const Color aFillCol = lcl_GetCheckerboardColor(x_count, y_count, aStart, aEnd);
 
+            // Only update the fill color in the metafile
             RecordFillColor(aFillCol, true);
-            RecordRect(tools::Rectangle(Point(nX, nY), Size(nWidth, nHeight)));
+
+            // Use the internal worker to add the geometry without nested Pushes
+            mpMetaFile->AddAction(
+                new MetaRectAction(tools::Rectangle(Point(nX, nY), Size(nWidth, nHeight))));
         }
     }
 
     RecordPop();
 }
 
-void MetafileRecorder::RecordGrid(const tools::Rectangle& rRect, const Size& rDist,
-                                  DrawGridFlags nFlags, const Color& rColor)
+void MetafileRecorder::RecordGrid(const tools::Rectangle& rRect, const Size& rStep,
+                                  DrawGridFlags nFlags, const Color& rLineColor,
+                                  const Color& rFillColor)
 {
-    if (!IsActive())
+    if (!IsActive() || rRect.IsEmpty() || rStep.Width() <= 0 || rStep.Height() <= 0)
         return;
 
-    // Save the existing state to prevent color leakage
     auto oGroup = CreateScopedGroup("DrawGrid");
-    auto oColorPush = CreateScopedPush(vcl::PushFlags::LINECOLOR);
+    auto oStatePush = CreateScopedPush(vcl::PushFlags::LINECOLOR | vcl::PushFlags::FILLCOLOR);
 
-    // Set the color specifically for the grid instructions
-    RecordLineColor(rColor, true);
+    RecordLineColor(rLineColor, true);
+    RecordFillColor(rFillColor, true);
 
-    if (rDist.Width() <= 0 || rDist.Height() <= 0)
-        return;
-
+    // Setup the LineInfo for the Dash/Dot style
+    LineInfo aLineInfo;
     if (nFlags & DrawGridFlags::Dots)
+        aLineInfo.SetStyle(LineStyle::Dash);
+
+    // We record the grid as a series of PolyLines to support the LineInfo style.
+    if (nFlags & DrawGridFlags::HorzLines)
     {
-        for (tools::Long nX = rRect.Left(); nX <= rRect.Right(); nX += rDist.Width())
+        for (tools::Long nY = rRect.Top(); nY <= rRect.Bottom(); nY += rStep.Height())
         {
-            for (tools::Long nY = rRect.Top(); nY <= rRect.Bottom(); nY += rDist.Height())
-            {
-                RecordPixel(Point(nX, nY), rColor);
-            }
+            tools::Polygon aPoly(2);
+            aPoly[0] = Point(rRect.Left(), nY);
+            aPoly[1] = Point(rRect.Right(), nY);
+            mpMetaFile->AddAction(new MetaPolyLineAction(aPoly, aLineInfo));
         }
     }
-    else
-    {
-        if (nFlags & DrawGridFlags::VertLines)
-        {
-            for (tools::Long nX = rRect.Left(); nX <= rRect.Right(); nX += rDist.Width())
-            {
-                RecordLine(Point(nX, rRect.Top()), Point(nX, rRect.Bottom()));
-            }
-        }
 
-        if (nFlags & DrawGridFlags::HorzLines)
+    if (nFlags & DrawGridFlags::VertLines)
+    {
+        for (tools::Long nX = rRect.Left(); nX <= rRect.Right(); nX += rStep.Width())
         {
-            for (tools::Long nY = rRect.Top(); nY <= rRect.Bottom(); nY += rDist.Height())
-            {
-                RecordLine(Point(rRect.Left(), nY), Point(rRect.Right(), nY));
-            }
+            tools::Polygon aPoly(2);
+            aPoly[0] = Point(nX, rRect.Top());
+            aPoly[1] = Point(nX, rRect.Bottom());
+            mpMetaFile->AddAction(new MetaPolyLineAction(aPoly, aLineInfo));
         }
     }
 }

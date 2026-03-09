@@ -92,20 +92,30 @@ void OutputDevice::DrawRect(const tools::Rectangle& rRect)
     if (rRect.IsEmpty())
         return;
 
-    maRecorder.RecordRect(rRect);
+    maRecorder.RecordRect(rRect, GetLineColor(), GetFillColor());
 
-    if (PrepareGraphicsOutput() && mpGraphics)
-    {
+    if (!IsDeviceOutputNecessary())
+        return;
+
+    vcl::DispatchDevice(*this, [&](const auto& rConcrete) {
+        if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip |
+                                   vcl::PrepareOutputFlags::Line |
+                                   vcl::PrepareOutputFlags::Fill) || !mpGraphics)
+        {
+            return;
+        }
+
         tools::Rectangle aDeviceRect = mpMapper->LogicToDevicePixel(rRect);
 
-        bool bRTL = IsRTLEnabled() || (mpGraphics && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
-        bool bAntiparallel = ImplIsAntiparallel();
-        tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
-
-        mpMapper->MirrorDevicePixelRect(aDeviceRect, nFrameWidth, bRTL, bAntiparallel);
+        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+        if (bRTL)
+        {
+            tools::Long nWidth = vcl::get_reference_width_v(rConcrete);
+            mpMapper->MirrorDevicePixelRect(aDeviceRect, nWidth, bRTL, ImplIsAntiparallel());
+        }
 
         vcl::rendercontext::PrimitiveRenderer::DrawRect(*mpGraphics, aDeviceRect);
-    }
+    });
 }
 
 void OutputDevice::DrawRoundedRect(const tools::Rectangle& rRect,
@@ -116,23 +126,37 @@ void OutputDevice::DrawRoundedRect(const tools::Rectangle& rRect,
     if (rRect.IsEmpty())
         return;
 
-    maRecorder.RecordRoundRect(rRect, nHorzRound, nVertRound);
+    maRecorder.RecordRoundedRect(rRect, nHorzRound, nVertRound, GetLineColor(), GetFillColor());
 
-    if (PrepareGraphicsOutput() && mpGraphics)
-    {
+    if (!IsDeviceOutputNecessary())
+        return;
+
+    vcl::DispatchDevice(*this, [&](const auto& rConcrete) {
+
+        if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip |
+                                   vcl::PrepareOutputFlags::Line |
+                                   vcl::PrepareOutputFlags::Fill) || !mpGraphics)
+        {
+            return;
+        }
+
         tools::Rectangle aDeviceRect = mpMapper->LogicToDevicePixel(rRect);
-        sal_uLong nHorzRoundPixel = mpMapper->LogicWidthToDevicePixel(nHorzRound);
-        sal_uLong nVertRoundPixel = mpMapper->LogicHeightToDevicePixel(nVertRound);
+        Size aPixelRound = mpMapper->LogicToDevicePixel(Size(nHorzRound, nVertRound));
 
         const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
-        const bool bAntiparallel = ImplIsAntiparallel();
-        const tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+        if (bRTL)
+        {
+            tools::Long nWidth = vcl::get_reference_width_v(rConcrete);
+            mpMapper->MirrorDevicePixelRect(aDeviceRect, nWidth, bRTL, ImplIsAntiparallel());
+        }
 
-        mpMapper->MirrorDevicePixelRect(aDeviceRect, nFrameWidth, bRTL, bAntiparallel);
-
-        vcl::rendercontext::PrimitiveRenderer::DrawRoundedRect(*mpGraphics, aDeviceRect,
-                                                               nHorzRoundPixel, nVertRoundPixel, mpGraphicsState->mbFillColor);
-    }
+        vcl::rendercontext::PrimitiveRenderer::DrawRoundedRect(
+            *mpGraphics,
+            aDeviceRect,
+            aPixelRound.Width(),
+            aPixelRound.Height(),
+            IsFillColor());
+    });
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

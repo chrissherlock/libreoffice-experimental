@@ -80,8 +80,8 @@ public:
     static void DrawRect(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect);
 
     static void DrawRoundedRect(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect,
-                                sal_uLong nHorzRoundPixel, sal_uLong nVertRoundPixel,
-                                bool bFillColor);
+                                tools::Long nHorzRoundPixel, tools::Long nVertRoundPixel,
+                                bool bFill);
 
     static void DrawBorder(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect);
 
@@ -125,9 +125,15 @@ public:
     static void Invert(SalGraphics& rGraphics, const tools::Polygon& rDevicePoly,
                        InvertFlags nFlags);
 
+    /**
+     * Renders a grid based on combinatorial styling flags.
+     * * @param rGraphics     The raw hardware graphics context.
+     * @param rDeviceRect   The grid boundary in device pixels.
+     * @param rStep         The distance between grid lines/points in device pixels.
+     * @param nFlags        Combinatorial flags (Dots, HorzLines, VertLines).
+     */
     static void DrawGrid(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect,
-                         const tools::Rectangle& rDeviceDstRect, const Size& rDeviceDist,
-                         DrawGridFlags nFlags);
+                         const Size& rStep, DrawGridFlags nFlags);
 
     static void DrawGridOfCrosses(SalGraphics& rGraphics, const tools::Rectangle& rDeviceGridArea,
                                   const Size& rDeviceGridDistance,

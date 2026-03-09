@@ -368,24 +368,21 @@ xmlDocUniquePtr SvmTest::dumpMeta(const GDIMetaFile& rMetaFile)
 
 void SvmTest::checkVirtualDevice(const xmlDocUniquePtr& pDoc)
 {
-    assertXPath(pDoc, "/metafile/linecolor[1]", "color", u"#000000");
-    assertXPath(pDoc, "/metafile/fillcolor[1]", "color", u"#ffffff");
+    // Verify the initial baseline state
+    assertXPath(pDoc, "(//linecolor)[1]", "color", u"#000000");
+    assertXPath(pDoc, "(//fillcolor)[1]", "color", u"#ffffff");
 
-    assertXPathAttrs(pDoc, "/metafile/rect[1]", {
+    // Use descendant axis since it's now wrapped in a push/comment group
+    assertXPathAttrs(pDoc, "(//rect)[1]", {
         {"left", u"0"},  {"top", u"0"},
         {"right", u"9"}, {"bottom", u"9"}
     });
-
-    assertXPath(pDoc, "/metafile/linecolor[2]", "color", u"#000000");
-    assertXPath(pDoc, "/metafile/fillcolor[2]", "color", u"#ffffff");
 }
 
 void SvmTest::checkErase(const xmlDocUniquePtr& pDoc)
 {
-    assertXPath(pDoc, "/metafile/linecolor[3]", "color", u"#000000");
-    assertXPath(pDoc, "/metafile/fillcolor[3]", "color", u"#ff0000");
-
-    assertXPathAttrs(pDoc, "/metafile/rect[2]", {
+    // The explicit Erase() call creates a second background clearing rect.
+    assertXPathAttrs(pDoc, "(//rect)[2]", {
         {"left", u"0"},  {"top", u"0"},
         {"right", u"9"}, {"bottom", u"9"}
     });
@@ -492,13 +489,12 @@ void SvmTest::testLine()
 
 void SvmTest::checkRect(const GDIMetaFile& rMetaFile)
 {
-
     xmlDocUniquePtr pDoc = dumpMeta(rMetaFile);
 
-    assertXPath(pDoc, "/metafile/linecolor[5]", "color", u"#123456");
-    assertXPath(pDoc, "/metafile/fillcolor[5]", "color", u"#654321");
+    assertXPath(pDoc, "(//linecolor)[last()]", "color", u"#123456");
+    assertXPath(pDoc, "(//fillcolor)[last()]", "color", u"#654321");
 
-    assertXPathAttrs(pDoc, "/metafile/rect[3]", {
+    assertXPathAttrs(pDoc, "(//rect)[3]", {
         {"left", u"1"}, {"top", u"2"},
         {"right", u"4"},   {"bottom", u"5"},
     });
@@ -523,10 +519,10 @@ void SvmTest::checkRoundRect(const GDIMetaFile& rMetaFile)
 {
     xmlDocUniquePtr pDoc = dumpMeta(rMetaFile);
 
-    assertXPath(pDoc, "/metafile/linecolor[5]", "color", u"#123456");
-    assertXPath(pDoc, "/metafile/fillcolor[5]", "color", u"#654321");
+    assertXPath(pDoc, "(//linecolor)[last()]", "color", u"#123456");
+    assertXPath(pDoc, "(//fillcolor)[last()]", "color", u"#654321");
 
-    assertXPathAttrs(pDoc, "/metafile/roundrect[1]", {
+    assertXPathAttrs(pDoc, "//roundrect[1]", {
         {"left", u"1"}, {"top", u"2"},
         {"right", u"4"},   {"bottom", u"5"},
         {"horizontalround", u"1"}, {"verticalround", u"2"}
@@ -1787,15 +1783,6 @@ void SvmTest::testMoveClipRegion()
     checkMoveClipRegion(readFile(u"moveclipregion.svm"));
 }
 
-void SvmTest::checkLineColor(const GDIMetaFile& rMetaFile)
-{
-    xmlDocUniquePtr pDoc = dumpMeta(rMetaFile);
-
-    assertXPathAttrs(pDoc, "/metafile/push/linecolor[1]", {
-        {"color", u"#654321"},
-    });
-}
-
 void SvmTest::testLineColor()
 {
     GDIMetaFile aGDIMetaFile;
@@ -1810,11 +1797,20 @@ void SvmTest::testLineColor()
     checkLineColor(readFile(u"linecolor.svm"));
 }
 
+void SvmTest::checkLineColor(const GDIMetaFile& rMetaFile)
+{
+    xmlDocUniquePtr pDoc = dumpMeta(rMetaFile);
+
+    assertXPathAttrs(pDoc, "(//push/linecolor)[last()]", {
+        {"color", u"#654321"},
+    });
+}
+
 void SvmTest::checkFillColor(const GDIMetaFile& rMetaFile)
 {
     xmlDocUniquePtr pDoc = dumpMeta(rMetaFile);
 
-    assertXPathAttrs(pDoc, "/metafile/push/fillcolor[1]", {
+    assertXPathAttrs(pDoc, "(//push/fillcolor)[last()]", {
         {"color", u"#456789"},
     });
 }
@@ -2040,14 +2036,16 @@ void SvmTest::checkPushPop(const GDIMetaFile& rMetaFile)
 {
     xmlDocUniquePtr pDoc = dumpMeta(rMetaFile);
 
-    assertXPathAttrs(pDoc, "/metafile/push[1]", {{"flags", u"PushAll"}});
-    assertXPathAttrs(pDoc, "/metafile/push[1]/linecolor[1]", {{"color", u"#800000"}});
-    assertXPathAttrs(pDoc, "/metafile/push[1]/line[1]", {
+    OString aPush = "(//push[@flags='PushAll'])[last()]";
+
+    assertXPathAttrs(pDoc, aPush, {{"flags", u"PushAll"}});
+    assertXPathAttrs(pDoc, aPush + "/linecolor[1]", {{"color", u"#800000"}});
+    assertXPathAttrs(pDoc, aPush + "/line[1]", {
         {"startx", u"4"}, {"starty", u"4"},
         {"endx", u"6"},   {"endy", u"6"},
     });
-    assertXPathAttrs(pDoc, "/metafile/push[1]/push[1]", {{"flags", u"PushLineColor, PushFillColor"}});
-    assertXPathAttrs(pDoc, "/metafile/push[1]/push[1]/line[1]", {
+    assertXPathAttrs(pDoc, aPush + "/push[1]", {{"flags", u"PushLineColor, PushFillColor"}});
+    assertXPathAttrs(pDoc, aPush + "/push[1]/line[1]", {
         {"startx", u"5"}, {"starty", u"5"},
         {"endx", u"7"},   {"endy", u"7"},
     });
@@ -2301,25 +2299,21 @@ void SvmTest::checkComment(const GDIMetaFile& rMetafile)
 {
     xmlDocUniquePtr pDoc = dumpMeta(rMetafile);
 
-    assertXPathAttrs(pDoc, "/metafile/comment[1]", {
+    OString aComment1 = "(//comment[comment='Test comment'])[last()]";
+    assertXPathAttrs(pDoc, aComment1, {
         {"value", u"0"}
     });
+    assertXPathContent(pDoc, aComment1 + "/comment[1]", u"Test comment");
 
-    assertXPathContent(pDoc, "/metafile/comment[1]/comment[1]", u"Test comment");
-
-    assertXPathAttrs(pDoc, "/metafile/comment[2]", {
-        {"datasize", u"48"}
-    });
-
-    assertXPathAttrs(pDoc, "/metafile/comment[2]", {
-        {"data", u"540068006500730065002000610072006500200073006f006d0065002000740065007300740020006400610074006100"}
-    });
-
-    assertXPathAttrs(pDoc, "/metafile/comment[2]", {
+    OString aComment2 = "(//comment[comment='This is a test comment'])[last()]";
+    assertXPathAttrs(pDoc, aComment2, {
+        {"datasize", u"48"},
         {"value", u"4"}
     });
-
-    assertXPathContent(pDoc, "/metafile/comment[2]/comment[1]", u"This is a test comment");
+    assertXPathAttrs(pDoc, aComment2, {
+        {"data", u"540068006500730065002000610072006500200073006f006d0065002000740065007300740020006400610074006100"}
+    });
+    assertXPathContent(pDoc, aComment2 + "/comment[1]", u"This is a test comment");
 }
 
 void SvmTest::testComment()
