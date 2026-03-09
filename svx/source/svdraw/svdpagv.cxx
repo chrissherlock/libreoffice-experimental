@@ -548,7 +548,7 @@ void SdrPageView::DrawPageViewGrid(OutputDevice& rOut, const tools::Rectangle& r
                                 rOut.DrawGridOfCrosses(
                                     tools::Rectangle( aSubGridPosition,
                                         Point(std::min(x2 + nx1, aGridBoundingBox.Right()), std::min(y2 + ny1, aGridBoundingBox.Bottom()))),
-                                    Size( nx1, ny1 ), aDrawingArea );
+                                    Size( nx1, ny1 ), aDrawingArea, rOut.GetLineColor() );
                             }
                             else // Subdivision points
                             {
@@ -615,7 +615,7 @@ void SdrPageView::DrawPageViewGrid(OutputDevice& rOut, const tools::Rectangle& r
                                 rOut.DrawGridOfCrosses(
                                     tools::Rectangle( aSubGridPosition,
                                         Point(std::min(x2 + nx1, aGridBoundingBox.Right()), std::min(y2 + ny1, aGridBoundingBox.Bottom()))),
-                                    Size( nx1, ny1 ), aDrawingArea );
+                                    Size( nx1, ny1 ), aDrawingArea, rOut.GetLineColor() );
                             }
                             else // Subdivision points
                             {

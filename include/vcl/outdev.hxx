@@ -694,14 +694,16 @@ public:
     /** Draw a grid of small crosses.
 
      @param     rGridArea       The area where grid points are positioned.
-     @param     rGridDistance   Distances of grid points horizontally and vertically.
-     @param     rDrawingArea    Whole drawing area, defining the visible area where crosses should be drawn.
+     @param     rStep           The horizontal and vertical distances (step size) between grid points.
+     @param     rDrawingArea    The whole drawing area, defining the visible area where crosses should be drawn.
+     @param     rColor          The color used to draw the crosses.
 
-     @note The rGridArea typically covers a larger area of the page, than the rDrawingArea, because some grid points might be outside
+     @note The rGridArea typically covers a larger area than the rDrawingArea because some grid points might be outside
            of the drawing area, but we still need to draw them partially. Even if the center of the cross is not visible, one edge
            of the cross can hang into the visible area.
      */
-    void                        DrawGridOfCrosses( const tools::Rectangle& rGridArea, const Size& rGridDistance, const tools::Rectangle& rDrawingArea );
+    void DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Size& rStep,
+                       const tools::Rectangle& rDrawingArea, const Color& rColor);
 
     /** Draw background for selected or checked items in toolboxes etc.
 

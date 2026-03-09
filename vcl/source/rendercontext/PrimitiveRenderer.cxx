@@ -738,75 +738,45 @@ void PrimitiveRenderer::DrawGrid(SalGraphics& rGraphics, const tools::Rectangle&
     }
 }
 
-namespace
-{
-struct CrossGridGeometry
-{
-    std::vector<tools::Long> aHorzBuffer;
-    std::vector<tools::Long> aVertBuffer;
-
-    // Drawing area boundaries in device pixels
-    tools::Long nPixTop;
-    tools::Long nPixBottom;
-    tools::Long nPixLeft;
-    tools::Long nPixRight;
-
-    CrossGridGeometry(const tools::Rectangle& rDeviceGridArea, const Size& rDeviceGridDistance,
-                      const tools::Rectangle& rDeviceDrawingArea)
-    {
-        const tools::Long nDistanceX = std::max(rDeviceGridDistance.Width(), tools::Long(1));
-        const tools::Long nDistanceY = std::max(rDeviceGridDistance.Height(), tools::Long(1));
-
-        // Generate device horizontal positions
-        aHorzBuffer.reserve(rDeviceGridArea.GetWidth() / nDistanceX + 1);
-        tools::Long nX = rDeviceGridArea.Left();
-        while (nX <= rDeviceGridArea.Right())
-        {
-            aHorzBuffer.push_back(nX);
-            nX += nDistanceX;
-        }
-
-        // Generate device vertical positions
-        aVertBuffer.reserve(rDeviceGridArea.GetHeight() / nDistanceY + 1);
-        tools::Long nY = rDeviceGridArea.Top();
-        while (nY <= rDeviceGridArea.Bottom())
-        {
-            aVertBuffer.push_back(nY);
-            nY += nDistanceY;
-        }
-
-        // Store device pixel bounds
-        nPixTop = rDeviceDrawingArea.Top();
-        nPixBottom = rDeviceDrawingArea.Bottom();
-        nPixLeft = rDeviceDrawingArea.Left();
-        nPixRight = rDeviceDrawingArea.Right();
-    }
-};
-}
-
 void PrimitiveRenderer::DrawGridOfCrosses(SalGraphics& rGraphics,
                                           const tools::Rectangle& rDeviceGridArea,
-                                          const Size& rDeviceGridDistance,
+                                          const Size& rDeviceStep,
                                           const tools::Rectangle& rDeviceDrawingArea)
 {
-    const CrossGridGeometry aGrid(rDeviceGridArea, rDeviceGridDistance, rDeviceDrawingArea);
+    if (rDeviceGridArea.IsEmpty() || rDeviceStep.Width() <= 0 || rDeviceStep.Height() <= 0)
+        return;
 
-    for (const auto& nY : aGrid.aVertBuffer)
+    // Radius/Extent of the crosshair arms.
+    // An extent of 1 results in a 3x3 pixel cross.
+    constexpr tools::Long nArmExtent = 1;
+
+    const tools::Long nLeft = rDeviceDrawingArea.Left();
+    const tools::Long nRight = rDeviceDrawingArea.Right();
+    const tools::Long nTop = rDeviceDrawingArea.Top();
+    const tools::Long nBottom = rDeviceDrawingArea.Bottom();
+
+    for (tools::Long nY = rDeviceGridArea.Top(); nY <= rDeviceGridArea.Bottom();
+         nY += rDeviceStep.Height())
     {
-        if (nY < aGrid.nPixTop || nY > aGrid.nPixBottom)
+        if (nY < nTop || nY > nBottom)
             continue;
 
-        for (const auto& nX : aGrid.aHorzBuffer)
+        for (tools::Long nX = rDeviceGridArea.Left(); nX <= rDeviceGridArea.Right();
+             nX += rDeviceStep.Width())
         {
-            if (nX < aGrid.nPixLeft || nX > aGrid.nPixRight)
-                continue;
+            if (nX >= nLeft && nX <= nRight)
+            {
+                // Center point
+                rGraphics.drawPixel(nX, nY);
 
-            // Draw a 3x3 cross centered at (nX, nY) using purely pre-calculated device coords
-            rGraphics.drawPixel(nX, nY);
-            rGraphics.drawPixel(nX - 1, nY);
-            rGraphics.drawPixel(nX + 1, nY);
-            rGraphics.drawPixel(nX, nY - 1);
-            rGraphics.drawPixel(nX, nY + 1);
+                // Horizontal arms
+                rGraphics.drawPixel(nX - nArmExtent, nY);
+                rGraphics.drawPixel(nX + nArmExtent, nY);
+
+                // Vertical arms
+                rGraphics.drawPixel(nX, nY - nArmExtent);
+                rGraphics.drawPixel(nX, nY + nArmExtent);
+            }
         }
     }
 }

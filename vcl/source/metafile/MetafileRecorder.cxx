@@ -736,34 +736,34 @@ void MetafileRecorder::RecordGrid(const tools::Rectangle& rRect, const Size& rSt
     }
 }
 
-void MetafileRecorder::RecordGridOfCrosses(const tools::Rectangle& rGridArea,
-                                           const Size& rGridDistance,
+void MetafileRecorder::RecordGridOfCrosses(const tools::Rectangle& rGridArea, const Size& rStep,
                                            const tools::Rectangle& rDrawingArea,
                                            const Color& rColor)
 {
-    if (!IsActive())
+    if (!IsActive() || rGridArea.IsEmpty() || rStep.Width() <= 0 || rStep.Height() <= 0)
         return;
 
     auto oGroup = CreateScopedGroup("DrawGridOfCrosses");
-    auto oColorPush = CreateScopedPush(vcl::PushFlags::LINECOLOR);
+    auto oStatePush = CreateScopedPush(vcl::PushFlags::LINECOLOR);
 
     RecordLineColor(rColor, true);
 
-    if (rGridDistance.Width() <= 0 || rGridDistance.Height() <= 0)
-        return;
+    // nArmExtent = 1 results in a crossarm that extends 1 pixel in each direction.
+    // Total span: (nX - 1) to (nX + 1), which is 3 pixels.
+    constexpr tools::Long nArmExtent = 1;
 
-    const tools::Long nCrossSize = 1;
-
-    for (tools::Long nX = rGridArea.Left(); nX <= rGridArea.Right(); nX += rGridDistance.Width())
+    for (tools::Long nY = rGridArea.Top(); nY <= rGridArea.Bottom(); nY += rStep.Height())
     {
-        for (tools::Long nY = rGridArea.Top(); nY <= rGridArea.Bottom();
-             nY += rGridDistance.Height())
+        for (tools::Long nX = rGridArea.Left(); nX <= rGridArea.Right(); nX += rStep.Width())
         {
-            Point aPt(nX, nY);
-            if (rDrawingArea.Contains(aPt))
+            if (rDrawingArea.Contains(Point(nX, nY)))
             {
-                RecordLine(Point(nX - nCrossSize, nY), Point(nX + nCrossSize, nY));
-                RecordLine(Point(nX, nY - nCrossSize), Point(nX, nY + nCrossSize));
+                // Horizontal arm
+                mpMetaFile->AddAction(
+                    new MetaLineAction(Point(nX - nArmExtent, nY), Point(nX + nArmExtent, nY)));
+                // Vertical arm
+                mpMetaFile->AddAction(
+                    new MetaLineAction(Point(nX, nY - nArmExtent), Point(nX, nY + nArmExtent)));
             }
         }
     }

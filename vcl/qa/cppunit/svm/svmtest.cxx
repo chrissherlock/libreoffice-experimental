@@ -368,20 +368,29 @@ xmlDocUniquePtr SvmTest::dumpMeta(const GDIMetaFile& rMetaFile)
 
 void SvmTest::checkVirtualDevice(const xmlDocUniquePtr& pDoc)
 {
-    // Verify the initial baseline state
-    assertXPath(pDoc, "(//linecolor)[1]", "color", u"#000000");
-    assertXPath(pDoc, "(//fillcolor)[1]", "color", u"#ffffff");
+    // Use absolute paths to hit the root setup state, completely ignoring
+    // any temporary colors nested inside the newly refactored DrawRect pushes.
+    assertXPath(pDoc, "/metafile/linecolor[1]", "color", u"#000000");
+    assertXPath(pDoc, "/metafile/fillcolor[1]", "color", u"#ffffff");
 
-    // Use descendant axis since it's now wrapped in a push/comment group
+    // Use descendant axis to find the rect, as it is now nested in a push block
     assertXPathAttrs(pDoc, "(//rect)[1]", {
         {"left", u"0"},  {"top", u"0"},
         {"right", u"9"}, {"bottom", u"9"}
     });
+
+    // Root-level setup state after first rect
+    assertXPath(pDoc, "/metafile/linecolor[2]", "color", u"#000000");
+    assertXPath(pDoc, "/metafile/fillcolor[2]", "color", u"#ffffff");
 }
 
 void SvmTest::checkErase(const xmlDocUniquePtr& pDoc)
 {
-    // The explicit Erase() call creates a second background clearing rect.
+    // Root-level setup state before erase rect
+    assertXPath(pDoc, "/metafile/linecolor[3]", "color", u"#000000");
+    assertXPath(pDoc, "/metafile/fillcolor[3]", "color", u"#ff0000");
+
+    // Descendant axis for the second setup rect
     assertXPathAttrs(pDoc, "(//rect)[2]", {
         {"left", u"0"},  {"top", u"0"},
         {"right", u"9"}, {"bottom", u"9"}
@@ -491,9 +500,11 @@ void SvmTest::checkRect(const GDIMetaFile& rMetaFile)
 {
     xmlDocUniquePtr pDoc = dumpMeta(rMetaFile);
 
+    // Grab the final applied color state
     assertXPath(pDoc, "(//linecolor)[last()]", "color", u"#123456");
     assertXPath(pDoc, "(//fillcolor)[last()]", "color", u"#654321");
 
+    // The setup draws 2 background rects, so the test's rect is the 3rd one.
     assertXPathAttrs(pDoc, "(//rect)[3]", {
         {"left", u"1"}, {"top", u"2"},
         {"right", u"4"},   {"bottom", u"5"},
@@ -519,9 +530,11 @@ void SvmTest::checkRoundRect(const GDIMetaFile& rMetaFile)
 {
     xmlDocUniquePtr pDoc = dumpMeta(rMetaFile);
 
+    // Grab the final applied color state
     assertXPath(pDoc, "(//linecolor)[last()]", "color", u"#123456");
     assertXPath(pDoc, "(//fillcolor)[last()]", "color", u"#654321");
 
+    // Descendant axis to find the shape regardless of nesting depth
     assertXPathAttrs(pDoc, "//roundrect[1]", {
         {"left", u"1"}, {"top", u"2"},
         {"right", u"4"},   {"bottom", u"5"},
@@ -1783,6 +1796,16 @@ void SvmTest::testMoveClipRegion()
     checkMoveClipRegion(readFile(u"moveclipregion.svm"));
 }
 
+void SvmTest::checkLineColor(const GDIMetaFile& rMetaFile)
+{
+    xmlDocUniquePtr pDoc = dumpMeta(rMetaFile);
+
+    // Grab the last pushed color, bypassing the setup rect's temporary push
+    assertXPathAttrs(pDoc, "(//push/linecolor)[last()]", {
+        {"color", u"#654321"},
+    });
+}
+
 void SvmTest::testLineColor()
 {
     GDIMetaFile aGDIMetaFile;
@@ -1797,19 +1820,11 @@ void SvmTest::testLineColor()
     checkLineColor(readFile(u"linecolor.svm"));
 }
 
-void SvmTest::checkLineColor(const GDIMetaFile& rMetaFile)
-{
-    xmlDocUniquePtr pDoc = dumpMeta(rMetaFile);
-
-    assertXPathAttrs(pDoc, "(//push/linecolor)[last()]", {
-        {"color", u"#654321"},
-    });
-}
-
 void SvmTest::checkFillColor(const GDIMetaFile& rMetaFile)
 {
     xmlDocUniquePtr pDoc = dumpMeta(rMetaFile);
 
+    // Grab the last pushed color, bypassing the setup rect's temporary push
     assertXPathAttrs(pDoc, "(//push/fillcolor)[last()]", {
         {"color", u"#456789"},
     });
@@ -2036,6 +2051,7 @@ void SvmTest::checkPushPop(const GDIMetaFile& rMetaFile)
 {
     xmlDocUniquePtr pDoc = dumpMeta(rMetaFile);
 
+    // Explicitly target the PushAll block to skip over the setup pushes
     OString aPush = "(//push[@flags='PushAll'])[last()]";
 
     assertXPathAttrs(pDoc, aPush, {{"flags", u"PushAll"}});
@@ -2299,6 +2315,7 @@ void SvmTest::checkComment(const GDIMetaFile& rMetafile)
 {
     xmlDocUniquePtr pDoc = dumpMeta(rMetafile);
 
+    // Explicitly target the node that actually contains 'Test comment'
     OString aComment1 = "(//comment[comment='Test comment'])[last()]";
     assertXPathAttrs(pDoc, aComment1, {
         {"value", u"0"}
@@ -2307,11 +2324,13 @@ void SvmTest::checkComment(const GDIMetaFile& rMetafile)
 
     OString aComment2 = "(//comment[comment='This is a test comment'])[last()]";
     assertXPathAttrs(pDoc, aComment2, {
-        {"datasize", u"48"},
-        {"value", u"4"}
+        {"datasize", u"48"}
     });
     assertXPathAttrs(pDoc, aComment2, {
         {"data", u"540068006500730065002000610072006500200073006f006d0065002000740065007300740020006400610074006100"}
+    });
+    assertXPathAttrs(pDoc, aComment2, {
+        {"value", u"4"}
     });
     assertXPathContent(pDoc, aComment2 + "/comment[1]", u"This is a test comment");
 }

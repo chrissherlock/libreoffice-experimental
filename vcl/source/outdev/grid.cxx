@@ -109,15 +109,15 @@ void OutputDevice::DrawGrid(const tools::Rectangle& rRect, const Size& rStep, Dr
     });
 }
 
-void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Size& rGridDistance,
-                                     const tools::Rectangle& rDrawingArea)
+void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Size& rStep,
+                                     const tools::Rectangle& rDrawingArea, const Color& rColor)
 {
     assert(!is_double_buffered_window());
 
-    if (rDrawingArea.IsEmpty() || rGridArea.IsEmpty())
+    if (rGridArea.IsEmpty() || rStep.Width() <= 0 || rStep.Height() <= 0)
         return;
 
-    maRecorder.RecordGridOfCrosses(rGridArea, rGridDistance, rDrawingArea, GetLineColor());
+    maRecorder.RecordGridOfCrosses(rGridArea, rStep, rDrawingArea, rColor);
 
     if (!IsDeviceOutputNecessary())
         return;
@@ -129,23 +129,20 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
             return;
         }
 
-        tools::Rectangle aDeviceGridArea = mpMapper->LogicToDevicePixel(rGridArea);
-        tools::Rectangle aDeviceDrawingArea = mpMapper->LogicToDevicePixel(rDrawingArea);
-        Size aDeviceGridDistance = mpMapper->LogicToDevicePixel(rGridDistance);
+        tools::Rectangle aDevGrid = mpMapper->LogicToDevicePixel(rGridArea);
+        tools::Rectangle aDevDraw = mpMapper->LogicToDevicePixel(rDrawingArea);
+        Size aDevStep = mpMapper->LogicToDevicePixel(rStep);
 
         const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
         if (bRTL)
         {
-            tools::Long nFrameWidth = vcl::get_reference_width_v(rConcrete);
-
-            mpMapper->MirrorDevicePixelRect(aDeviceGridArea, nFrameWidth, bRTL,
-                                            ImplIsAntiparallel());
-            mpMapper->MirrorDevicePixelRect(aDeviceDrawingArea, nFrameWidth, bRTL,
-                                            ImplIsAntiparallel());
+            tools::Long nWidth = vcl::get_reference_width_v(rConcrete);
+            mpMapper->MirrorDevicePixelRect(aDevGrid, nWidth, bRTL, ImplIsAntiparallel());
+            mpMapper->MirrorDevicePixelRect(aDevDraw, nWidth, bRTL, ImplIsAntiparallel());
         }
 
-        vcl::rendercontext::PrimitiveRenderer::DrawGridOfCrosses(
-            *mpGraphics, aDeviceGridArea, aDeviceGridDistance, aDeviceDrawingArea);
+        vcl::rendercontext::PrimitiveRenderer::DrawGridOfCrosses(*mpGraphics, aDevGrid, aDevStep,
+                                                                 aDevDraw);
     });
 }
 
