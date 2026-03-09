@@ -165,6 +165,7 @@ public:
 
     void RecordRect(const tools::Rectangle& rRect);
     void RecordRoundRect(const tools::Rectangle& rRect, sal_uLong nHorzRound, sal_uLong nVertRound);
+    void RecordBorder(const tools::Rectangle& rRect, const Color& rColor);
 
     void RecordPolyLine(const tools::Polygon& rPoly, const LineInfo& rLineInfo);
 

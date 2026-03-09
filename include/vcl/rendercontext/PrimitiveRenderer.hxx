@@ -83,6 +83,8 @@ public:
                                 sal_uLong nHorzRoundPixel, sal_uLong nVertRoundPixel,
                                 bool bFillColor);
 
+    static void DrawBorder(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect);
+
     static void DrawCheckered(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect,
                               sal_uInt32 nLen, Color aStart, Color aEnd);
 

@@ -28,6 +28,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/metafile/MetafileRecorder.hxx>
 
+#include <devicedispatcher.hxx>
 #include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
@@ -35,23 +36,53 @@
 
 #include <cassert>
 
-void OutputDevice::DrawBorder(tools::Rectangle aBorderRect)
+void OutputDevice::DrawBorder(const tools::Rectangle& rRect)
 {
-    sal_uInt16 nPixel = static_cast<sal_uInt16>(PixelToLogic(Size(1, 1)).Width());
+    assert(!is_double_buffered_window());
 
-    aBorderRect.AdjustLeft(nPixel);
-    aBorderRect.AdjustTop(nPixel);
+    if (rRect.IsEmpty())
+        return;
 
-    SetLineColor(COL_LIGHTGRAY);
-    DrawRect(aBorderRect);
+    maRecorder.RecordBorder(rRect, GetLineColor());
 
-    aBorderRect.AdjustLeft(-nPixel);
-    aBorderRect.AdjustTop(-nPixel);
-    aBorderRect.AdjustRight(-nPixel);
-    aBorderRect.AdjustBottom(-nPixel);
-    SetLineColor(COL_GRAY);
+    if (!IsDeviceOutputNecessary())
+        return;
 
-    DrawRect(aBorderRect);
+    vcl::DispatchDevice(*this, [&](auto& rConcrete) {
+        using DeviceType = std::remove_cvref_t<decltype(rConcrete)>;
+
+        if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line)
+            || !mpGraphics)
+        {
+            return;
+        }
+
+        if constexpr (vcl::HighContrastOutput<DeviceType>)
+        {
+            // High-contrast requirement: Force black and use a closed Rect path
+            const Color aOldColor = rConcrete.GetLineColor();
+            rConcrete.SetLineColor(COL_BLACK);
+
+            // Printers benefit from DrawRect as it's a single atomic vector action
+            rConcrete.DrawRect(rRect);
+
+            rConcrete.SetLineColor(aOldColor);
+        }
+        else
+        {
+            // Standard Visual path: 4-line primitive for screens/UI
+            tools::Rectangle aDeviceRect = mpMapper->LogicToDevicePixel(rRect);
+
+            const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+            if (bRTL)
+            {
+                tools::Long nWidth = vcl::get_reference_width_v(rConcrete);
+                mpMapper->MirrorDevicePixelRect(aDeviceRect, nWidth, bRTL, ImplIsAntiparallel());
+            }
+
+            vcl::rendercontext::PrimitiveRenderer::DrawBorder(*mpGraphics, aDeviceRect);
+        }
+    });
 }
 
 void OutputDevice::DrawRect(const tools::Rectangle& rRect)

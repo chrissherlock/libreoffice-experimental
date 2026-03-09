@@ -353,6 +353,21 @@ void MetafileRecorder::RecordRoundRect(const tools::Rectangle& rRect, sal_uLong 
         mpMetaFile->AddAction(new MetaRoundRectAction(rRect, nHorzRound, nVertRound));
 }
 
+void MetafileRecorder::RecordBorder(const tools::Rectangle& rRect, const Color& rColor)
+{
+    if (!IsActive())
+        return;
+
+    auto oGroup = CreateScopedGroup("DrawBorder");
+    auto oColorPush = CreateScopedPush(vcl::PushFlags::LINECOLOR);
+
+    RecordLineColor(rColor, true);
+
+    // We record the rectangle as a simple geometric intent.
+    // Pixel-perfect adjustments happen later in the Renderer.
+    RecordRect(rRect);
+}
+
 void MetafileRecorder::RecordTransparent(const tools::PolyPolygon& rPolyPoly,
                                          sal_uInt16 nTransparencePercent)
 {

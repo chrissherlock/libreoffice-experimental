@@ -654,10 +654,6 @@ private:
     SAL_DLLPRIVATE void         SetDeviceClipRegion( const vcl::Region* pRegion );
     ///@}
 
-public:
-    virtual void                DrawBorder(tools::Rectangle aBorderRect);
-
-
     /** @name Pixel functions
      */
     ///@{
@@ -683,6 +679,7 @@ public:
     void                        DrawRect( const tools::Rectangle& rRect );
     void                        DrawRoundedRect( const tools::Rectangle& rRect,
                                           sal_uLong nHorzRound, sal_uLong nVertRound );
+    void                        DrawBorder(const tools::Rectangle& rBorderRect);
 
     /// Fill the given rectangle with checkered rectangles of size nLen x nLen using the colors aStart and aEnd
     void                        DrawCheckered(

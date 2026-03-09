@@ -123,6 +123,30 @@ void PrimitiveRenderer::DrawRoundedRect(SalGraphics& rGraphics, const tools::Rec
         rGraphics.drawPolygon(aRoundRectPoly.GetSize(), pPtAry);
 }
 
+void PrimitiveRenderer::DrawBorder(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect)
+{
+    if (rDeviceRect.IsEmpty())
+        return;
+
+    // We work strictly in device pixels here.
+    // Note: VCL Rectangles are inclusive-inclusive.
+    const tools::Long nL = rDeviceRect.Left();
+    const tools::Long nT = rDeviceRect.Top();
+    const tools::Long nR = rDeviceRect.Right();
+    const tools::Long nB = rDeviceRect.Bottom();
+
+    // To prevent "bleeding" into the adjacent pixel on some backends,
+    // we draw the four distinct segments.
+    // Top
+    rGraphics.drawLine(nL, nT, nR, nT);
+    // Bottom
+    rGraphics.drawLine(nL, nB, nR, nB);
+    // Left
+    rGraphics.drawLine(nL, nT, nL, nB);
+    // Right
+    rGraphics.drawLine(nR, nT, nR, nB);
+}
+
 void PrimitiveRenderer::DrawCheckered(SalGraphics& rGraphics, const tools::Rectangle& rDeviceRect,
                                       sal_uInt32 nLen, Color aStart, Color aEnd)
 {

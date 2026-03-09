@@ -262,6 +262,31 @@ template <typename T> concept ReferenceDevice = requires(const T& rDevice)
     ->std::convertible_to<tools::Long>;
 };
 
+/**
+ * Trait: requires_high_contrast_borders
+ * Determines if a device requires borders to be rendered as solid,
+ * high-contrast closed paths (COL_BLACK) for legibility on physical media.
+ * Typically true for Printers, false for screen-based raster devices.
+ */
+template <typename T> struct requires_high_contrast_borders : std::false_type
+{
+};
+
+// Specialization: Printers require high-contrast boundaries on physical paper.
+template <> struct requires_high_contrast_borders<Printer> : std::true_type
+{
+};
+
+template <typename T>
+inline constexpr bool requires_high_contrast_borders_v = requires_high_contrast_borders<T>::value;
+
+/**
+ * Concept: HighContrastOutput
+ * Satisfied by devices that must prioritize visibility and stroke
+ * consistency over themed or decorative line styles.
+ */
+template <typename T> concept HighContrastOutput = requires_high_contrast_borders_v<T>;
+
 } // namespace vcl
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -1275,36 +1275,38 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawBorder)
 {
     ScopedVclPtrInstance<VirtualDevice> pVDev;
     GDIMetaFile aMtf;
-    aMtf.Record(pVDev.get());
+    pVDev->SetConnectMetaFile(&aMtf);
 
-    pVDev->SetOutputSizePixel(Size(100, 100));
-    pVDev->DrawBorder(tools::Rectangle(Point(0, 0), Size(50, 60)));
+    // Set a known color to verify the state gets correctly captured
+    pVDev->SetLineColor(COL_BLUE);
+    pVDev->DrawBorder(tools::Rectangle(10, 10, 20, 20));
 
-    MetaAction* pAction = aMtf.GetAction(INITIAL_SETUP_ACTION_COUNT);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("Not a line color action (light gray)", MetaActionType::LINECOLOR,
-                                 pAction->GetType());
-    MetaLineColorAction* pLineColorAction = dynamic_cast<MetaLineColorAction*>(pAction);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("Not light gray", COL_LIGHTGRAY, pLineColorAction->GetColor());
+    GDIMetaFile* pMtf = &aMtf;
+    CPPUNIT_ASSERT_MESSAGE("Metafile should not be empty", pMtf->GetActionSize() > 0);
 
-    pAction = aMtf.GetAction(INITIAL_SETUP_ACTION_COUNT + 1);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("Not a rect action (light gray border)", MetaActionType::RECT,
-                                 pAction->GetType());
-    MetaRectAction* pRectAction = dynamic_cast<MetaRectAction*>(pAction);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("Rectangle wrong", tools::Rectangle(Point(1, 1), Size(49, 59)),
-                                 pRectAction->GetRect());
+    // The action stream now contains Semantic Groups (Comment),
+    // State Pushes, Line Color, and the geometric intent (Rect).
+    auto findAct = [&](MetaActionType t) -> MetaAction* {
+        for (size_t i = 0; i < pMtf->GetActionSize(); ++i)
+        {
+            if (pMtf->GetAction(i)->GetType() == t)
+                return pMtf->GetAction(i);
+        }
 
-    pAction = aMtf.GetAction(INITIAL_SETUP_ACTION_COUNT + 2);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("Not a line color action (gray)", MetaActionType::LINECOLOR,
-                                 pAction->GetType());
-    pLineColorAction = dynamic_cast<MetaLineColorAction*>(pAction);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("Not gray", COL_GRAY, pLineColorAction->GetColor());
+        return nullptr;
+    };
 
-    pAction = aMtf.GetAction(INITIAL_SETUP_ACTION_COUNT + 3);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("Not a rect action (gray border)", MetaActionType::RECT,
-                                 pAction->GetType());
-    pRectAction = dynamic_cast<MetaRectAction*>(pAction);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("Rectangle wrong", tools::Rectangle(Point(0, 0), Size(49, 59)),
-                                 pRectAction->GetRect());
+    // Verify the structural grouping
+    CPPUNIT_ASSERT_MESSAGE("Missing Group Start (COMMENT)", findAct(MetaActionType::COMMENT));
+    CPPUNIT_ASSERT_MESSAGE("Missing State PUSH", findAct(MetaActionType::PUSH));
+
+    // Verify the active line color was successfully captured
+    auto pLineColorAct = static_cast<MetaLineColorAction*>(findAct(MetaActionType::LINECOLOR));
+    CPPUNIT_ASSERT_MESSAGE("Missing LINECOLOR action", pLineColorAct);
+    CPPUNIT_ASSERT_EQUAL(COL_BLUE, pLineColorAct->GetColor());
+
+    // Verify the geometric intent
+    CPPUNIT_ASSERT_MESSAGE("Missing Geometry (RECT)", findAct(MetaActionType::RECT));
 }
 
 CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawWaveLine)
