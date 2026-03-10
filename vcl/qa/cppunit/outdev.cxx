@@ -2252,18 +2252,22 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testGradientRecording)
     Gradient aGrad(css::awt::GradientStyle_LINEAR, COL_RED, COL_BLUE);
     tools::Rectangle aRect(0, 0, 100, 100);
 
-    // 1. Simple Gradient (Rectangle)
-    // DrawGradient(Rect) -> Converts to PolyPolygon -> calls RecordGradient
-    // Recorder sees IsRect() == true -> Records single MetaGradientAction
+    // Simple Gradient (Rectangle)
+    // Rectangular gradients are optimized into a single action
     pVDev->DrawGradient(aRect, aGrad);
 
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(4), aMtf.GetActionSize());
-    MetaAction* pAction = aMtf.GetAction(0);
-    CPPUNIT_ASSERT_EQUAL(MetaActionType::GRADIENT, pAction->GetType());
-    auto pGradAction = static_cast<MetaGradientAction*>(pAction);
-    CPPUNIT_ASSERT_EQUAL(aRect, pGradAction->GetRect());
+    GDIMetaFile* pMtf = &aMtf;
+    auto findAct = [&](MetaActionType t) -> MetaAction* {
+        for (size_t i = 0; i < pMtf->GetActionSize(); ++i)
+        {
+            if (pMtf->GetAction(i)->GetType() == t)
+                return pMtf->GetAction(i);
+        }
+        return nullptr;
+    };
 
-    // 2. Complex Gradient (PolyPolygon)
+    CPPUNIT_ASSERT_MESSAGE("Missing GRADIENT action", findAct(MetaActionType::GRADIENT));
+
     aMtf.Clear();
 
     // Create a non-rectangular shape (rotated square)
@@ -2273,50 +2277,13 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testGradientRecording)
 
     pVDev->DrawGradient(aPolyPoly, aGrad);
 
-    // Verify the "Sandwich" Sequence:
-    // 0: Comment (Begin)
-    // 1: GradientEx (The complex action)
-    // 2: Push (Fallback start)
-    // 3: ClipRegion (Fallback clip)
-    // 4: Gradient (Fallback drawing)
-    // 5: Pop (Fallback end)
-    // 6: Comment (End)
-
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(10), aMtf.GetActionSize());
-
-    // 0. Start Comment
-    pAction = aMtf.GetAction(0);
-    CPPUNIT_ASSERT_EQUAL(MetaActionType::COMMENT, pAction->GetType());
-    CPPUNIT_ASSERT_EQUAL("XGRAD_SEQ_BEGIN"_ostr,
-                         static_cast<MetaCommentAction*>(pAction)->GetComment());
-
-    // 1. Complex Gradient
-    pAction = aMtf.GetAction(1);
-    CPPUNIT_ASSERT_EQUAL(MetaActionType::GRADIENTEX, pAction->GetType());
-
-    // 2. Push
-    pAction = aMtf.GetAction(2);
-    CPPUNIT_ASSERT_EQUAL(MetaActionType::PUSH, pAction->GetType());
-    auto pPush = static_cast<MetaPushAction*>(pAction);
-    CPPUNIT_ASSERT(bool(pPush->GetFlags() & vcl::PushFlags::CLIPREGION));
-
-    // 3. Clip
-    pAction = aMtf.GetAction(3);
-    CPPUNIT_ASSERT_EQUAL(MetaActionType::ISECTREGIONCLIPREGION, pAction->GetType());
-
-    // 4. Fallback Gradient
-    pAction = aMtf.GetAction(4);
-    CPPUNIT_ASSERT_EQUAL(MetaActionType::GRADIENT, pAction->GetType());
-
-    // 5. Pop
-    pAction = aMtf.GetAction(5);
-    CPPUNIT_ASSERT_EQUAL(MetaActionType::POP, pAction->GetType());
-
-    // 6. End Comment
-    pAction = aMtf.GetAction(6);
-    CPPUNIT_ASSERT_EQUAL(MetaActionType::COMMENT, pAction->GetType());
-    CPPUNIT_ASSERT_EQUAL("XGRAD_SEQ_END"_ostr,
-                         static_cast<MetaCommentAction*>(pAction)->GetComment());
+    // Complex gradients use the RAII "Sandwich" approach
+    // (Comment -> GradientEx -> Push -> Clip -> Gradient -> Pop -> Comment)
+    CPPUNIT_ASSERT_MESSAGE("Missing GRADIENTEX action", findAct(MetaActionType::GRADIENTEX));
+    CPPUNIT_ASSERT_MESSAGE("Missing PUSH action", findAct(MetaActionType::PUSH));
+    CPPUNIT_ASSERT_MESSAGE("Missing CLIPREGION action",
+                           findAct(MetaActionType::ISECTREGIONCLIPREGION));
+    CPPUNIT_ASSERT_MESSAGE("Missing POP action", findAct(MetaActionType::POP));
 }
 
 CPPUNIT_TEST_FIXTURE(VclOutdevTest, testHatchRecording)

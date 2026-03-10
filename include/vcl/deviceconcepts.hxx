@@ -287,6 +287,32 @@ inline constexpr bool requires_high_contrast_borders_v = requires_high_contrast_
  */
 template <typename T> concept HighContrastOutput = requires_high_contrast_borders_v<T>;
 
+/**
+ * Trait: avoids_vector_overdraw
+ * Determines if the device penalizes overlapping vector operations (the "Painter's Algorithm").
+ * When true, gradient renderers must calculate exact, non-overlapping geometric bands
+ * to prevent physical ink saturation, spool file bloat, or RIP memory exhaustion.
+ * Typically false for screens, true for printers.
+ */
+template <typename T> struct avoids_vector_overdraw : std::false_type
+{
+};
+
+// Specialization: Printers require non-overlapping exact geometry.
+template <> struct avoids_vector_overdraw<Printer> : std::true_type
+{
+};
+
+template <typename T>
+inline constexpr bool avoids_vector_overdraw_v = avoids_vector_overdraw<T>::value;
+
+/**
+ * Concept: AvoidsOverdraw
+ * Satisfied by physical devices that require disjoint, non-overlapping
+ * geometry to function correctly and efficiently.
+ */
+template <typename T> concept AvoidsOverdraw = avoids_vector_overdraw_v<T>;
+
 } // namespace vcl
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

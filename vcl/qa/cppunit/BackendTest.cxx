@@ -951,8 +951,9 @@ public:
         CPPUNIT_ASSERT(pGraphics);
 
         // Call the stateless renderer with bAvoidVectorOverdraw = false
-        vcl::rendercontext::PrimitiveRenderer::DrawGradient(*pGraphics, aRect, aGradient, 10,
-                                                            false);
+        // Convert the Rectangle to a Polygon, then to a PolyPolygon to satisfy the strict public API
+        vcl::rendercontext::PrimitiveRenderer::DrawGradient(
+            *pGraphics, tools::PolyPolygon((tools::Polygon(aRect))), aGradient, 10, false);
 
         // 10 overlapping nested polygons XOR'd onto each other (even toggle) = Black
         exportDevice(u"13-09_vector_overdraw_screen.png"_ustr, aVDev);
@@ -968,8 +969,9 @@ public:
         aVDev->DrawPixel(Point(-1, -1), COL_BLACK); // Sync state
 
         // Call the stateless renderer with bAvoidVectorOverdraw = true
-        vcl::rendercontext::PrimitiveRenderer::DrawGradient(*pGraphics, aRect, aGradient, 10, true);
-
+        // Convert the Rectangle to a Polygon, then to a PolyPolygon to satisfy the strict public API
+        vcl::rendercontext::PrimitiveRenderer::DrawGradient(
+            *pGraphics, tools::PolyPolygon((tools::Polygon(aRect))), aGradient, 10, true);
         // Single-pass donut clipping ensures the center is drawn ONCE = White
         exportDevice(u"13-10_vector_overdraw_printer.png"_ustr, aVDev);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(

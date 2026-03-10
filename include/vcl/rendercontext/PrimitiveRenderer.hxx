@@ -192,34 +192,81 @@ public:
                              const Gradient& rGradient);
 
     /**
-     * Composes a gradient by decomposing it into individual color-step polygons.
-     * This is the software fallback for linear and axial gradients.
+     * Renders a gradient into a polygon using either hardware acceleration or a software stepped fallback.
+     * @param rGraphics            The raw hardware graphics context.
+     * @param rDevicePolyPoly      The bounding polygon in device pixels.
+     * @param rGradient            The gradient definition and colors.
+     * @param nStepCount           The pre-calculated number of color bands to render.
+     * @param bAvoidVectorOverdraw True if the renderer must generate disjoint geometric rings
+     * (typically required for Printers to avoid ink saturation).
      */
-    static void DrawGradient(SalGraphics& rGraphics, const tools::Rectangle& rRect,
+    static void DrawGradient(SalGraphics& rGraphics, const tools::PolyPolygon& rDevicePolyPoly,
                              const Gradient& rGradient, tools::Long nStepCount,
-                             bool bAvoidVectorOverdraw,
-                             const tools::PolyPolygon* pClipPolyPoly = nullptr);
+                             bool bAvoidVectorOverdraw);
 
 private:
     static void DrawSinglePolygon(SalGraphics& rGraphics, const tools::Polygon& rPoly);
 
     static void DrawMultiplePolygons(SalGraphics& rGraphics, const tools::PolyPolygon& rPolyPoly);
 
-    static sal_uInt8 GetGradientColorValue(tools::Long nValue);
+    /**
+     * Internal software fallback dispatcher. Routes the rendering instruction to the
+     * specific geometric math generator (Linear, Axial, Radial, etc.).
+     *
+     * @param rRect         The exact bounding rectangle of the gradient.
+     * @param pClipPolyPoly An optional complex polygon to clip the generated bounds against.
+     */
+    static void DrawGradient(SalGraphics& rGraphics, const tools::Rectangle& rRect,
+                             const Gradient& rGradient, tools::Long nStepCount,
+                             bool bAvoidVectorOverdraw, const tools::PolyPolygon* pClipPolyPoly);
 
     /**
-     * Composes complex gradient styles (Radial, Elliptical, Square) by decomposing
-     * them into nested shrinking polygons.
-     * @param rGraphics      The hardware graphics device.
-     * @param rRect          The destination rectangle in device pixels.
-     * @param rGradient      The logical gradient description.
-     * @param nStepCount     The pre-calculated number of steps (respects Printer polymorphism).
-     * @param pClipPolyPoly  Optional complex clipping mask for software intersection.
+     * Generates a linear gradient stepping from one side of the bounding box to the other.
      */
-    static void DrawComplexGradient(SalGraphics& rGraphics, const tools::Rectangle& rRect,
-                                    const Gradient& rGradient, tools::Long nStepCount,
-                                    bool bAvoidVectorOverdraw,
-                                    const tools::PolyPolygon* pClipPolyPoly = nullptr);
+    static void DrawLinearGradient(SalGraphics& rGraphics, const tools::Rectangle& rRect,
+                                   const Gradient& rGradient, tools::Long nStepCount,
+                                   bool bAvoidVectorOverdraw,
+                                   const tools::PolyPolygon* pClipPolyPoly);
+
+    /**
+     * Generates an axial gradient stepping from the outer edges toward a center horizontal/vertical axis.
+     */
+    static void DrawAxialGradient(SalGraphics& rGraphics, const tools::Rectangle& rRect,
+                                  const Gradient& rGradient, tools::Long nStepCount,
+                                  bool bAvoidVectorOverdraw,
+                                  const tools::PolyPolygon* pClipPolyPoly);
+
+    /**
+     * Generates a radial gradient expanding from a center point as concentric circles.
+     */
+    static void DrawRadialGradient(SalGraphics& rGraphics, const tools::Rectangle& rRect,
+                                   const Gradient& rGradient, tools::Long nStepCount,
+                                   bool bAvoidVectorOverdraw,
+                                   const tools::PolyPolygon* pClipPolyPoly);
+
+    /**
+     * Generates an elliptical gradient expanding from a center point as concentric ellipses.
+     */
+    static void DrawEllipticalGradient(SalGraphics& rGraphics, const tools::Rectangle& rRect,
+                                       const Gradient& rGradient, tools::Long nStepCount,
+                                       bool bAvoidVectorOverdraw,
+                                       const tools::PolyPolygon* pClipPolyPoly);
+
+    /**
+     * Generates a rectangular gradient expanding from a center point as concentric proportional rectangles.
+     */
+    static void DrawRectGradient(SalGraphics& rGraphics, const tools::Rectangle& rRect,
+                                 const Gradient& rGradient, tools::Long nStepCount,
+                                 bool bAvoidVectorOverdraw,
+                                 const tools::PolyPolygon* pClipPolyPoly);
+
+    /**
+     * Generates a square gradient expanding from a center point as concentric perfect squares.
+     */
+    static void DrawSquareGradient(SalGraphics& rGraphics, const tools::Rectangle& rRect,
+                                   const Gradient& rGradient, tools::Long nStepCount,
+                                   bool bAvoidVectorOverdraw,
+                                   const tools::PolyPolygon* pClipPolyPoly);
 };
 
 } // namespace vcl::rendercontext

@@ -21,6 +21,7 @@
 
 #include <vcl/gradient.hxx>
 #include <vcl/metafile/MetafileRecorder.hxx>
+#include <vcl/metafile/ScopedMetaGroup.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/rendercontext/PrimitiveRenderer.hxx>
 #include <vcl/settings.hxx>
@@ -30,6 +31,7 @@
 #include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
+#include <devicedispatcher.hxx>
 #include <salgdi.hxx>
 
 #include <com/sun/star/awt/GradientStyle.hpp>
@@ -49,21 +51,15 @@ void OutputDevice::DrawGradient( const tools::Rectangle& rRect,
     DrawGradient ( aPolyPoly, rGradient );
 }
 
-void OutputDevice::DrawGradient(const tools::PolyPolygon& rPolyPoly,
-                                const Gradient& rGradient)
+void OutputDevice::DrawGradient(const tools::PolyPolygon& rPolyPoly, const Gradient& rGradient)
 {
     assert(!is_double_buffered_window());
 
+    Gradient aEffectiveGradient(rGradient);
     if (GetDrawMode() & DrawModeFlags::GrayGradient)
-    {
-        Gradient aGrayGrad(rGradient);
-        aGrayGrad.MakeGrayscale();
-        maRecorder.RecordGradient(rPolyPoly, aGrayGrad);
-    }
-    else
-    {
-        maRecorder.RecordGradient(rPolyPoly, rGradient);
-    }
+        aEffectiveGradient.MakeGrayscale();
+
+    maRecorder.RecordGradient(rPolyPoly, aEffectiveGradient);
 
     if (!IsDeviceOutputNecessary() || IsLayoutCalculationNecessary())
         return;
@@ -73,81 +69,43 @@ void OutputDevice::DrawGradient(const tools::PolyPolygon& rPolyPoly,
 
     if (mpGraphicsState->mnDrawMode & (DrawModeFlags::WhiteGradient | DrawModeFlags::SettingsGradient))
     {
-        Color aColor = GetSingleColorGradientFill();
+        Color aSolidColor = GetSingleColorGradientFill();
+        auto oGroup = maRecorder.CreateScopedGroup("SolidGradientFallback");
         auto popIt = ScopedPush(vcl::PushFlags::LINECOLOR | vcl::PushFlags::FILLCOLOR);
-        SetLineColor(aColor);
-        SetFillColor(aColor);
+
+        SetLineColor(aSolidColor);
+        SetFillColor(aSolidColor);
         DrawPolyPolygon(rPolyPoly);
         return;
     }
 
-    Gradient aEffectiveGradient(rGradient);
-    if (mpGraphicsState->mnDrawMode & DrawModeFlags::GrayGradient)
-        aEffectiveGradient.MakeGrayscale();
+    vcl::DispatchDevice(*this, [&](const auto& rConcrete) {
+        // Gradients manage their own line colors internally, only Fill prep is strictly needed here
+        if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Fill) || !mpGraphics)
+            return;
 
-    const tools::Rectangle aBoundRect(rPolyPoly.GetBoundRect());
-    tools::Rectangle aDeviceRect(LogicToDevicePixel(aBoundRect));
-    aDeviceRect.Normalize();
+        tools::PolyPolygon aDevPolyPoly(mpMapper->LogicToDevicePixel(rPolyPoly));
+        tools::Rectangle aDevRect = aDevPolyPoly.GetBoundRect();
 
-    if (aDeviceRect.IsEmpty())
-        return;
+        if (aDevRect.IsEmpty())
+            return;
 
-    tools::PolyPolygon aDevicePolyPoly(mpMapper->LogicToDevicePixel(rPolyPoly));
+        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+        if (bRTL)
+        {
+            tools::Long nWidth = vcl::get_reference_width_v(rConcrete);
+            mpMapper->MirrorDevicePixelPolyPolygon(aDevPolyPoly, nWidth, true, ImplIsAntiparallel());
+            aDevRect = aDevPolyPoly.GetBoundRect(); // Update bounds after mirroring
+        }
 
-    if (!mpGraphics && !AcquireGraphics())
-        return;
+        tools::Long nStepCount = aEffectiveGradient.GetCalculatedSteps(aDevRect, GetDPIY());
 
-    if (IsRTLEnabled() || (mpGraphics && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl)))
-    {
-        bool bAntiparallel = ImplIsAntiparallel();
-        tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : (mpGraphics ? mpGraphics->GetGraphicsWidth() : 0);
+        using ConcreteType = std::decay_t<decltype(rConcrete)>;
+        const bool bAvoidOverdraw = vcl::avoids_vector_overdraw_v<ConcreteType>;
 
-        mpMapper->MirrorDevicePixelPolyPolygon(aDevicePolyPoly, nFrameWidth, true, bAntiparallel);
-        aDeviceRect = aDevicePolyPoly.GetBoundRect();
-    }
-
-    auto popIt = ScopedPush(vcl::PushFlags::CLIPREGION);
-    IntersectClipRegion(aBoundRect);
-
-    if (mpClippingController->IsDirty())
-        InitClipRegion();
-
-    if (IsOutputCulled())
-        return;
-
-    if (vcl::rendercontext::PrimitiveRenderer::DrawGradient(*mpGraphics, aDevicePolyPoly, aEffectiveGradient))
-        return;
-
-    if (mpGraphicsState->mbLineColor || mbLineColorDirty)
-    {
-        mpGraphics->SetLineColor();
-        mbLineColorDirty = true;
-    }
-    mbFillColorDirty = true;
-
-    // RESTORE HACK: Expand the rectangle to prevent antialiasing gaps
-    // and to align the integer math for the unit tests!
-    if (rPolyPoly.IsRect())
-    {
-        aDeviceRect.AdjustLeft(-1);
-        aDeviceRect.AdjustTop(-1);
-        aDeviceRect.AdjustRight(1);
-        aDeviceRect.AdjustBottom(1);
-    }
-
-    tools::Rectangle aGradientBoundRect;
-    Point aCenter;
-    aEffectiveGradient.GetBoundRect(aDeviceRect, aGradientBoundRect, aCenter);
-
-    tools::Long nStepCount = rGradient.GetCalculatedSteps(aGradientBoundRect, GetDPIY());
-
-    vcl::rendercontext::PrimitiveRenderer::DrawGradient(
-        *mpGraphics,
-        aDeviceRect,
-        aEffectiveGradient,
-        nStepCount,
-        (meOutDevType == OUTDEV_PRINTER), /* Avoid vector overdraw */
-        aDevicePolyPoly.IsRect() ? nullptr : &aDevicePolyPoly);
+        vcl::rendercontext::PrimitiveRenderer::DrawGradient(
+            *mpGraphics, aDevPolyPoly, aEffectiveGradient, nStepCount, bAvoidOverdraw);
+    });
 }
 
 bool OutputDevice::is_double_buffered_window() const
