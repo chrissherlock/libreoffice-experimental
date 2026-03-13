@@ -17,39 +17,59 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/deviceconcepts.hxx>
 #include <vcl/metafile/MetafileRecorder.hxx>
-#include <CoordinateMapper.hxx>
 #include <vcl/rendercontext/PrimitiveRenderer.hxx>
-#include <vcl/virdev.hxx>
 
 #include <ClippingController.hxx>
+#include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
+#include <devicedispatcher.hxx>
 #include <salgdi.hxx>
 
 #include <cassert>
+
+template <typename PolyGenerator>
+void OutputDevice::ImplDrawCurve(const tools::Rectangle& rRect, vcl::PrepareOutputFlags nFlags,
+                                 bool bFill, PolyGenerator&& rPolyGen)
+{
+    if (!IsDeviceOutputNecessary())
+        return;
+
+    vcl::DispatchDevice(*this, [&](const auto& rConcrete) {
+        if (!PrepareGraphicsOutput(nFlags) || !mpGraphics)
+            return;
+
+        tools::Rectangle aRect(LogicToDevicePixel(rRect));
+        if (aRect.IsEmpty())
+            return;
+
+        // Lazily invoke the specific geometry math from the caller's lambda
+        tools::Polygon aPoly = rPolyGen(aRect);
+
+        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+        if (bRTL)
+        {
+            const tools::Long nWidth = vcl::get_reference_width_v(rConcrete);
+            mpMapper->MirrorDevicePixelPolygon(aPoly, nWidth, bRTL, ImplIsAntiparallel());
+        }
+
+        vcl::rendercontext::PrimitiveRenderer::DrawPolygon(*mpGraphics, aPoly, bFill);
+    });
+}
 
 void OutputDevice::DrawEllipse(const tools::Rectangle& rRect)
 {
     assert(!is_double_buffered_window());
     maRecorder.RecordEllipse(rRect);
 
-    if (!PrepareGraphicsOutput())
-        return;
-
-    tools::Rectangle aRect(LogicToDevicePixel(rRect));
-    if (aRect.IsEmpty())
-        return;
-
-    {
-        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
-        const tools::Long nFrameWidth
-            = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
-        tools::Polygon aPoly(aRect.Center(), aRect.GetWidth() >> 1, aRect.GetHeight() >> 1);
-        if (bRTL)
-            mpMapper->MirrorDevicePixelPolygon(aPoly, nFrameWidth, bRTL, ImplIsAntiparallel());
-        vcl::rendercontext::PrimitiveRenderer::DrawPolygon(*mpGraphics, aPoly,
-                                                           mpGraphicsState->mbFillColor);
-    }
+    ImplDrawCurve(rRect,
+                  (vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line
+                   | vcl::PrepareOutputFlags::Fill),
+                  mpGraphicsState->mbFillColor, [](const tools::Rectangle& rDeviceRect) {
+                      return tools::Polygon(rDeviceRect.Center(), rDeviceRect.GetWidth() >> 1,
+                                            rDeviceRect.GetHeight() >> 1);
+                  });
 }
 
 void OutputDevice::DrawArc(const tools::Rectangle& rRect, const Point& rStartPt,
@@ -58,25 +78,11 @@ void OutputDevice::DrawArc(const tools::Rectangle& rRect, const Point& rStartPt,
     assert(!is_double_buffered_window());
     maRecorder.RecordArc(rRect, rStartPt, rEndPt);
 
-    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line))
-        return;
-
-    tools::Rectangle aRect(LogicToDevicePixel(rRect));
-    if (aRect.IsEmpty())
-        return;
-
-    const Point aStart(LogicToDevicePixel(rStartPt));
-    const Point aEnd(LogicToDevicePixel(rEndPt));
-
-    {
-        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
-        const tools::Long nFrameWidth
-            = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
-        tools::Polygon aPoly(aRect, aStart, aEnd, PolyStyle::Arc);
-        if (bRTL)
-            mpMapper->MirrorDevicePixelPolygon(aPoly, nFrameWidth, bRTL, ImplIsAntiparallel());
-        vcl::rendercontext::PrimitiveRenderer::DrawPolygon(*mpGraphics, aPoly, false);
-    }
+    ImplDrawCurve(rRect, (vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line), false,
+                  [&](const tools::Rectangle& rDeviceRect) {
+                      return tools::Polygon(rDeviceRect, LogicToDevicePixel(rStartPt),
+                                            LogicToDevicePixel(rEndPt), PolyStyle::Arc);
+                  });
 }
 
 void OutputDevice::DrawPie(const tools::Rectangle& rRect, const Point& rStartPt,
@@ -85,26 +91,13 @@ void OutputDevice::DrawPie(const tools::Rectangle& rRect, const Point& rStartPt,
     assert(!is_double_buffered_window());
     maRecorder.RecordPie(rRect, rStartPt, rEndPt);
 
-    if (!PrepareGraphicsOutput())
-        return;
-
-    tools::Rectangle aRect(LogicToDevicePixel(rRect));
-    if (aRect.IsEmpty())
-        return;
-
-    const Point aStart(LogicToDevicePixel(rStartPt));
-    const Point aEnd(LogicToDevicePixel(rEndPt));
-
-    {
-        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
-        const tools::Long nFrameWidth
-            = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
-        tools::Polygon aPoly(aRect, aStart, aEnd, PolyStyle::Pie);
-        if (bRTL)
-            mpMapper->MirrorDevicePixelPolygon(aPoly, nFrameWidth, bRTL, ImplIsAntiparallel());
-        vcl::rendercontext::PrimitiveRenderer::DrawPolygon(*mpGraphics, aPoly,
-                                                           mpGraphicsState->mbFillColor);
-    }
+    ImplDrawCurve(rRect,
+                  (vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line
+                   | vcl::PrepareOutputFlags::Fill),
+                  mpGraphicsState->mbFillColor, [&](const tools::Rectangle& rDeviceRect) {
+                      return tools::Polygon(rDeviceRect, LogicToDevicePixel(rStartPt),
+                                            LogicToDevicePixel(rEndPt), PolyStyle::Pie);
+                  });
 }
 
 void OutputDevice::DrawChord(const tools::Rectangle& rRect, const Point& rStartPt,
@@ -113,26 +106,13 @@ void OutputDevice::DrawChord(const tools::Rectangle& rRect, const Point& rStartP
     assert(!is_double_buffered_window());
     maRecorder.RecordChord(rRect, rStartPt, rEndPt);
 
-    if (!PrepareGraphicsOutput())
-        return;
-
-    tools::Rectangle aRect(LogicToDevicePixel(rRect));
-    if (aRect.IsEmpty())
-        return;
-
-    const Point aStart(LogicToDevicePixel(rStartPt));
-    const Point aEnd(LogicToDevicePixel(rEndPt));
-
-    {
-        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
-        const tools::Long nFrameWidth
-            = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
-        tools::Polygon aPoly(aRect, aStart, aEnd, PolyStyle::Chord);
-        if (bRTL)
-            mpMapper->MirrorDevicePixelPolygon(aPoly, nFrameWidth, bRTL, ImplIsAntiparallel());
-        vcl::rendercontext::PrimitiveRenderer::DrawPolygon(*mpGraphics, aPoly,
-                                                           mpGraphicsState->mbFillColor);
-    }
+    ImplDrawCurve(rRect,
+                  (vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line
+                   | vcl::PrepareOutputFlags::Fill),
+                  mpGraphicsState->mbFillColor, [&](const tools::Rectangle& rDeviceRect) {
+                      return tools::Polygon(rDeviceRect, LogicToDevicePixel(rStartPt),
+                                            LogicToDevicePixel(rEndPt), PolyStyle::Chord);
+                  });
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

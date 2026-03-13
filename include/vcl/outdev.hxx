@@ -823,8 +823,6 @@ public:
     void                        DrawPolyPolygon( const basegfx::B2DPolyPolygon& );
     ///@}
 
-private:
-
 
     /** @name Curved shape functions
      */
@@ -846,6 +844,12 @@ public:
                                     const tools::Rectangle& rRect,
                                     const Point& rStartPt, const Point& rEndPt );
 
+
+private:
+
+    template <typename PolyGenerator>
+    void ImplDrawCurve(const tools::Rectangle& rRect, vcl::PrepareOutputFlags nFlags,
+                       bool bFill, PolyGenerator&& rPolyGen);
     ///@}
 
 
