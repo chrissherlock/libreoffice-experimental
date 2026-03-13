@@ -163,25 +163,6 @@ bool OutputDevice::GetFontFeatures(std::vector<vcl::font::Feature>& rFontFeature
     return false;
 }
 
-
-void OutputDevice::ImplScaleFontMetric(FontMetric& rMetric) const
-{
-    rMetric.SetFontSize(PixelToLogic(rMetric.GetFontSize()));
-    rMetric.SetAscent(DevicePixelToLogicHeight(rMetric.GetAscent()));
-    rMetric.SetDescent(DevicePixelToLogicHeight(rMetric.GetDescent()));
-    rMetric.SetInternalLeading(DevicePixelToLogicHeight(rMetric.GetInternalLeading()));
-    rMetric.SetLineHeight(DevicePixelToLogicHeight(rMetric.GetLineHeight()));
-    rMetric.SetSlant(DevicePixelToLogicHeight(rMetric.GetSlant()));
-    rMetric.SetHangingBaseline(DevicePixelToLogicHeight(rMetric.GetHangingBaseline()));
-
-    rMetric.SetUnitEm(DevicePixelToLogicWidth(rMetric.GetUnitEm()));
-    rMetric.SetHorCJKAdvance(DevicePixelToLogicWidth(rMetric.GetHorCJKAdvance()));
-    rMetric.SetVertCJKAdvance(DevicePixelToLogicHeight(rMetric.GetVertCJKAdvance()));
-
-    // OutputDevice manages external leading separately due to legacy #i60945#
-    rMetric.SetExternalLeading(DevicePixelToLogicHeight(GetFontExtLeading()));
-}
-
 FontMetric OutputDevice::GetFontMetric() const
 {
     FontMetric aMetric;
@@ -196,7 +177,7 @@ FontMetric OutputDevice::GetFontMetric() const
         aMetric, mpGraphicsState->maFont, mpFontRealization->mxFont.get(),
         mpFontRealization->nEmphasisAscent, mpFontRealization->nEmphasisDescent);
 
-    ImplScaleFontMetric(aMetric);
+    mpMapper->PixelToLogic(aMetric, GetFontExtLeading());
 
     return aMetric;
 }

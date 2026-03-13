@@ -78,6 +78,7 @@ void OutputDevice::DrawArc(const tools::Rectangle& rRect, const Point& rStartPt,
     assert(!is_double_buffered_window());
     maRecorder.RecordArc(rRect, rStartPt, rEndPt);
 
+    // Arc is just a line, so it doesn't need the Fill flag
     ImplDrawCurve(rRect, (vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line), false,
                   [&](const tools::Rectangle& rDeviceRect) {
                       return tools::Polygon(rDeviceRect, LogicToDevicePixel(rStartPt),

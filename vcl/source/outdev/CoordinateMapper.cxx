@@ -26,6 +26,7 @@
 #include <vcl/rendercontext/ImplMapRes.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/mapmod.hxx>
+#include <vcl/metric.hxx>
 #include <vcl/region.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/text/LayoutResources.hxx>
@@ -1893,6 +1894,24 @@ SalTwoRect CoordinateMapper::ToDeviceRect(const Point& rDestPt, const Size& rDes
                       rSrcSizePixel.Height(), LogicXToDevicePixel(rDestPt.X()),
                       LogicYToDevicePixel(rDestPt.Y()), LogicWidthToDevicePixel(rDestSize.Width()),
                       LogicHeightToDevicePixel(rDestSize.Height()));
+}
+
+void CoordinateMapper::PixelToLogic(FontMetric& rMetric, tools::Long nExternalLeadingOverride) const
+{
+    rMetric.SetFontSize(PixelToLogic(rMetric.GetFontSize()));
+    rMetric.SetAscent(DevicePixelToLogicHeight(rMetric.GetAscent()));
+    rMetric.SetDescent(DevicePixelToLogicHeight(rMetric.GetDescent()));
+    rMetric.SetInternalLeading(DevicePixelToLogicHeight(rMetric.GetInternalLeading()));
+    rMetric.SetLineHeight(DevicePixelToLogicHeight(rMetric.GetLineHeight()));
+    rMetric.SetSlant(DevicePixelToLogicHeight(rMetric.GetSlant()));
+    rMetric.SetHangingBaseline(DevicePixelToLogicHeight(rMetric.GetHangingBaseline()));
+
+    rMetric.SetUnitEm(DevicePixelToLogicWidth(rMetric.GetUnitEm()));
+    rMetric.SetHorCJKAdvance(DevicePixelToLogicWidth(rMetric.GetHorCJKAdvance()));
+    rMetric.SetVertCJKAdvance(DevicePixelToLogicHeight(rMetric.GetVertCJKAdvance()));
+
+    // Override external leading due to legacy #i60945#
+    rMetric.SetExternalLeading(DevicePixelToLogicHeight(nExternalLeadingOverride));
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
