@@ -48,6 +48,7 @@
 #include <vcl/sysdata.hxx>
 #include <vcl/ptrstyle.hxx>
 #include <vcl/IDialogRenderable.hxx>
+#include <vcl/settings.hxx>
 
 #include <vcl/uitest/uiobject.hxx>
 

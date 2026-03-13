@@ -69,7 +69,7 @@ void OutputDevice::DrawGradient(const tools::PolyPolygon& rPolyPoly, const Gradi
 
     if (mpGraphicsState->mnDrawMode & (DrawModeFlags::WhiteGradient | DrawModeFlags::SettingsGradient))
     {
-        Color aSolidColor = GetSingleColorGradientFill();
+        Color aSolidColor = mpGraphicsState->GetSingleColorGradientFill(GetSettings().GetStyleSettings());
         auto oGroup = maRecorder.CreateScopedGroup("SolidGradientFallback");
         auto popIt = ScopedPush(vcl::PushFlags::LINECOLOR | vcl::PushFlags::FILLCOLOR);
 
@@ -106,26 +106,6 @@ void OutputDevice::DrawGradient(const tools::PolyPolygon& rPolyPoly, const Gradi
         vcl::rendercontext::PrimitiveRenderer::DrawGradient(
             *mpGraphics, aDevPolyPoly, aEffectiveGradient, nStepCount, bAvoidOverdraw);
     });
-}
-
-Color OutputDevice::GetSingleColorGradientFill()
-{
-    Color aColor;
-
-    // we should never call on this function if any of these aren't set!
-    assert( mpGraphicsState->mnDrawMode & ( DrawModeFlags::WhiteGradient | DrawModeFlags::SettingsGradient) );
-
-    if ( mpGraphicsState->mnDrawMode & DrawModeFlags::WhiteGradient )
-        aColor = COL_WHITE;
-    else if ( mpGraphicsState->mnDrawMode & DrawModeFlags::SettingsGradient )
-    {
-        if (mpGraphicsState->mnDrawMode & DrawModeFlags::SettingsForSelection)
-            aColor = GetSettings().GetStyleSettings().GetHighlightColor();
-        else
-            aColor = GetSettings().GetStyleSettings().GetWindowColor();
-    }
-
-    return aColor;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

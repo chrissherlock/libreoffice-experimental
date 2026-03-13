@@ -21,6 +21,8 @@
 #include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/rendercontext/RasterOp.hxx>
 
+class StyleSettings;
+
 namespace vcl
 {
 struct GraphicsState
@@ -69,6 +71,8 @@ struct GraphicsState
         , mnTextLayoutMode(vcl::text::ComplexTextLayoutFlags::Default)
     {
     }
+
+    Color GetSingleColorGradientFill(const StyleSettings& rStyleSettings) const;
 };
 
 } // namespace vcl

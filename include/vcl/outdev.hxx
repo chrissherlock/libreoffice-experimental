@@ -861,10 +861,6 @@ public:
     void                        DrawGradient( const tools::Rectangle& rRect, const Gradient& rGradient );
     void                        DrawGradient( const tools::PolyPolygon& rPolyPoly, const Gradient& rGradient );
 
-protected:
-
-private:
-    SAL_DLLPRIVATE Color        GetSingleColorGradientFill();
     ///@}
 
 
