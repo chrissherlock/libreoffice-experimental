@@ -108,12 +108,6 @@ void OutputDevice::DrawGradient(const tools::PolyPolygon& rPolyPoly, const Gradi
     });
 }
 
-bool OutputDevice::is_double_buffered_window() const
-{
-    auto pOwnerWindow = GetOwnerWindow();
-    return pOwnerWindow && pOwnerWindow->SupportsDoubleBuffering();
-}
-
 Color OutputDevice::GetSingleColorGradientFill()
 {
     Color aColor;

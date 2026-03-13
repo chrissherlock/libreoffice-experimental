@@ -779,4 +779,10 @@ tools::Long OutputDevice::MirrorX(tools::Long nX, tools::Long nWidth) const
     return GetOutputWidthPixel() - nWidth - (nX - GetOutOffXPixel()) + GetOutOffXPixel();
 }
 
+bool OutputDevice::is_double_buffered_window() const
+{
+    auto pOwnerWindow = GetOwnerWindow();
+    return pOwnerWindow && pOwnerWindow->SupportsDoubleBuffering();
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
