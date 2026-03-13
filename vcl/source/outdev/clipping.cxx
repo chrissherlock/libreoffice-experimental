@@ -230,7 +230,33 @@ void OutputDevice::InitClipRegion()
 
 vcl::Region OutputDevice::GetActiveClipRegion() const
 {
-    return GetClipRegion();
+    vcl::Region aActiveRegion;
+
+    vcl::DispatchDevice(*this, [&](const auto& rConcrete) {
+        using ConcreteType = std::decay_t<decltype(rConcrete)>;
+
+        // Compile-time branch: Only WindowOutputDevice compiles this path
+        if constexpr (vcl::PaintEventCapable<ConcreteType>)
+        {
+            aActiveRegion = vcl::Region(true);
+
+            if (rConcrete.IsInPaint())
+            {
+                aActiveRegion = rConcrete.GetPaintRegion();
+                aActiveRegion.Move(-rConcrete.GetOutOffXPixel(), -rConcrete.GetOutOffYPixel());
+            }
+
+            if (mpClippingController->HasClipRegion())
+                aActiveRegion.Intersect(GetClipRegion());
+        }
+        else
+        {
+            // Compile-time branch: VirtualDevice, Printer, etc.
+            aActiveRegion = GetClipRegion();
+        }
+    });
+
+    return aActiveRegion;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

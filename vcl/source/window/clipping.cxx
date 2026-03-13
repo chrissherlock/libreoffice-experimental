@@ -153,22 +153,6 @@ vcl::Region Window::GetWindowClipRegionPixel() const
     return aWinClipRegion;
 }
 
-vcl::Region WindowOutputDevice::GetActiveClipRegion() const
-{
-    vcl::Region aRegion(true);
-
-    if ( mxOwnerWindow->mpWindowImpl->mbInPaint )
-    {
-        aRegion = *(mxOwnerWindow->mpWindowImpl->mpPaintRegion);
-        aRegion.Move(-GetOutOffXPixel(), -GetOutOffYPixel());
-    }
-
-    if ( mpClippingController->HasClipRegion() )
-        aRegion.Intersect( GetClipRegion() );
-
-    return aRegion;
-}
-
 void Window::EnableClipSiblings( bool bClipSiblings )
 {
     if ( mpWindowImpl->mpBorderWindow )

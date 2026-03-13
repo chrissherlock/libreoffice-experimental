@@ -313,6 +313,29 @@ inline constexpr bool avoids_vector_overdraw_v = avoids_vector_overdraw<T>::valu
  */
 template <typename T> concept AvoidsOverdraw = avoids_vector_overdraw_v<T>;
 
+/**
+ * Trait: supports_paint_events
+ * Determines if the device type processes OS-level repaints and must
+ * restrict drawing to a specific dirty region.
+ */
+template <typename T> struct supports_paint_events : std::false_type
+{
+};
+
+// Specialization: WindowOutputDevice handles OS window paints.
+template <> struct supports_paint_events<vcl::WindowOutputDevice> : std::true_type
+{
+};
+
+template <typename T>
+inline constexpr bool supports_paint_events_v = supports_paint_events<T>::value;
+
+/**
+ * Concept: PaintEventCapable
+ * Satisfied by windowing devices that manage OS-level paint regions.
+ */
+template <typename T> concept PaintEventCapable = supports_paint_events_v<T>;
+
 } // namespace vcl
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

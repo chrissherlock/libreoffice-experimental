@@ -52,8 +52,10 @@ public:
 
     css::awt::DeviceInfo GetDeviceInfo() const override;
 
-    virtual vcl::Region GetActiveClipRegion() const override;
     virtual vcl::Region GetOutputBoundsClipRegion() const override;
+
+    bool IsInPaint() const;
+    vcl::Region GetPaintRegion() const;
 
     virtual bool AcquireGraphics() const override;
     virtual void ReleaseGraphics(bool bRelease = true) override;

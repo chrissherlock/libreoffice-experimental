@@ -642,7 +642,7 @@ public:
     void                        IntersectClipRegion( const tools::Rectangle& rRect );
     void                        IntersectClipRegion( const vcl::Region& rRegion );
 
-    virtual vcl::Region         GetActiveClipRegion() const;
+    vcl::Region                 GetActiveClipRegion() const;
     virtual vcl::Region         GetOutputBoundsClipRegion() const;
 
 protected:

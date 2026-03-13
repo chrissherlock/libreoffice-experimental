@@ -2974,6 +2974,19 @@ void Window::Scroll( tools::Long nHorzScroll, tools::Long nVertScroll,
         ImplScroll( aRect, nHorzScroll, nVertScroll, nFlags );
 }
 
+bool WindowOutputDevice::IsInPaint() const
+{
+    return mxOwnerWindow && mxOwnerWindow->mpWindowImpl->mbInPaint;
+}
+
+vcl::Region WindowOutputDevice::GetPaintRegion() const
+{
+    if (mxOwnerWindow && mxOwnerWindow->mpWindowImpl->mpPaintRegion)
+        return *(mxOwnerWindow->mpWindowImpl->mpPaintRegion);
+
+    return vcl::Region(true);
+}
+
 void WindowOutputDevice::Flush()
 {
     if (mxOwnerWindow->mpWindowImpl)
