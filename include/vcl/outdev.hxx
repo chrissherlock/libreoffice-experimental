@@ -646,12 +646,8 @@ public:
     virtual vcl::Region         GetOutputBoundsClipRegion() const;
 
 protected:
-
     virtual void                InitClipRegion();
 
-private:
-
-    SAL_DLLPRIVATE void         SetDeviceClipRegion( const vcl::Region* pRegion );
     ///@}
 
     /** @name Pixel functions

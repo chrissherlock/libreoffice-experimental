@@ -233,19 +233,4 @@ vcl::Region OutputDevice::GetActiveClipRegion() const
     return GetClipRegion();
 }
 
-void OutputDevice::SetDeviceClipRegion(const vcl::Region* pRegion)
-{
-    DBG_TESTSOLARMUTEX();
-
-    if (!pRegion)
-    {
-        if (mpClippingController->HasClipRegion())
-            mpClippingController->SetNoClipRegion();
-    }
-    else
-    {
-        mpClippingController->SetClipRegion(*pRegion);
-    }
-}
-
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

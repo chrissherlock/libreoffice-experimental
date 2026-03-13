@@ -19,6 +19,7 @@
 
 #include <sal/config.h>
 #include <sal/log.hxx>
+#include <osl/diagnose.h>
 #include <tools/debug.hxx>
 #include <comphelper/scopeguard.hxx>
 
@@ -146,10 +147,11 @@ void OutputDevice::Push(vcl::PushFlags nFlags)
 
 void OutputDevice::Pop()
 {
+    DBG_TESTSOLARMUTEX();
+
     maRecorder.RecordPop();
 
     vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
-
 
     if ( maOutDevStateStack.empty() )
     {
@@ -227,7 +229,18 @@ void OutputDevice::Pop()
     }
 
     if (rState.mnFlags & vcl::PushFlags::CLIPREGION)
-        SetDeviceClipRegion(rState.mpClipRegion.get());
+    {
+        if (!rState.mpClipRegion)
+        {
+            if (mpClippingController->HasClipRegion())
+                mpClippingController->SetNoClipRegion(); // or ClearClipRegion(), depending on your API
+        }
+        else
+        {
+            // Pass the saved device-pixel region directly to the controller
+            mpClippingController->SetClipRegion(*(rState.mpClipRegion));
+        }
+    }
 
     if ( rState.mnFlags & vcl::PushFlags::REFPOINT )
     {
