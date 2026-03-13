@@ -49,17 +49,7 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
 
     maRecorder.RecordHatch( rPolyPoly, aHatch );
 
-    if( !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary() )
-        return;
-
-    if( !mpGraphics && !AcquireGraphics() )
-        return;
-    assert(mpGraphics);
-
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
-
-    if ( IsOutputCulled() )
+    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip) || !mpGraphics)
         return;
 
     if( rPolyPoly.Count() )
@@ -69,7 +59,6 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
 
         // Guard MetaFile
         vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
-
 
         // Guard MapMode
         bool bOldMap = mpMapper->IsMapModeEnabled();
