@@ -22,6 +22,7 @@
 #include <tools/helpers.hxx>
 #include <comphelper/scopeguard.hxx>
 
+#include <vcl/deviceconcepts.hxx>
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/rendercontext/DrawGridFlags.hxx>
 #include <vcl/rendercontext/PrimitiveRenderer.hxx>
@@ -31,46 +32,52 @@
 #include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
+#include <devicedispatcher.hxx>
 #include <salgdi.hxx>
 
 #include <cassert>
 
 void OutputDevice::Invert(const tools::Polygon& rPoly, InvertFlags nFlags)
 {
-    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip) || !mpGraphics)
-        return;
+    vcl::DispatchDevice(*this, [&](const auto& rConcrete) {
+        if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip) || !mpGraphics)
 
-    tools::Polygon aDevicePoly = mpMapper->LogicToDevicePixel(rPoly);
+            return;
 
-    const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+        tools::Polygon aDevicePoly = mpMapper->LogicToDevicePixel(rPoly);
 
-    if (bRTL)
-    {
-        tools::Long nFrameWidth
-            = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
-        mpMapper->MirrorDevicePixelPolygon(aDevicePoly, nFrameWidth, bRTL, ImplIsAntiparallel());
-    }
+        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
 
-    vcl::rendercontext::PrimitiveRenderer::Invert(*mpGraphics, aDevicePoly, nFlags);
+        if (bRTL)
+        {
+            const tools::Long nFrameWidth = vcl::get_reference_width_v(rConcrete);
+            mpMapper->MirrorDevicePixelPolygon(aDevicePoly, nFrameWidth, bRTL,
+                                               ImplIsAntiparallel());
+        }
+
+        vcl::rendercontext::PrimitiveRenderer::Invert(*mpGraphics, aDevicePoly, nFlags);
+    });
 }
 
 void OutputDevice::Invert(const tools::Rectangle& rRect, InvertFlags nFlags)
 {
-    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip) || !mpGraphics)
-        return;
+    vcl::DispatchDevice(*this, [&](const auto& rConcrete) {
 
-    tools::Rectangle aDeviceRect = mpMapper->LogicToDevicePixel(rRect);
+        if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip) || !mpGraphics)
+            return;
 
-    const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+        tools::Rectangle aDeviceRect = mpMapper->LogicToDevicePixel(rRect);
 
-    if (bRTL)
-    {
-        tools::Long nFrameWidth
-            = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
-        mpMapper->MirrorDevicePixelRect(aDeviceRect, nFrameWidth, bRTL, ImplIsAntiparallel());
-    }
+        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
 
-    vcl::rendercontext::PrimitiveRenderer::Invert(*mpGraphics, aDeviceRect, nFlags);
+        if (bRTL)
+        {
+            const tools::Long nFrameWidth = vcl::get_reference_width_v(rConcrete);
+            mpMapper->MirrorDevicePixelRect(aDeviceRect, nFrameWidth, bRTL, ImplIsAntiparallel());
+        }
+
+        vcl::rendercontext::PrimitiveRenderer::Invert(*mpGraphics, aDeviceRect, nFlags);
+    });
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
