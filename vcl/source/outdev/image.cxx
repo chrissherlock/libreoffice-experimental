@@ -19,8 +19,11 @@
 
 #include <config_features.h>
 
+#include <vcl/alpha.hxx>
 #include <vcl/image.hxx>
 #include <vcl/outdev.hxx>
+
+#include <bitmap/BitmapColorizeFilter.hxx>
 
 void OutputDevice::DrawImage(const Point& rPos, const Image& rImage, DrawImageFlags nStyle)
 {
@@ -34,13 +37,66 @@ void OutputDevice::DrawImage(const Point& rPos, const Size& rSize, const Image& 
 {
     assert(!is_double_buffered_window());
 
-    if (!IsLayoutCalculationNecessary())
+    if (rImage.IsEmpty() || rSize.IsEmpty())
+        return;
+
+    // We need the SalGraphics context to ask the Image for the correct HiDPI variant.
+    // However, if we are purely recording a metafile, we won't have (or need) a hardware context.
+    SalGraphics* pGraphics = nullptr;
+
+    if (IsDeviceOutputNecessary())
     {
-        if (!rSize.IsEmpty())
-            rImage.Draw(this, rPos, nStyle, &rSize);
-        else
-            rImage.Draw(this, rPos, nStyle);
+        if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::None) || !mpGraphics)
+            return;
+
+        pGraphics = mpGraphics;
     }
+    else if (GetConnectMetaFile() == nullptr)
+    {
+        return;
+    }
+
+    // Extract the Bitmap (uses SalGraphics for HiDPI if available, otherwise falls back to standard)
+    Bitmap aRenderBmp = rImage.GetBitmapForHiDPI(bool(nStyle & DrawImageFlags::Disable), pGraphics);
+
+    if (aRenderBmp.IsEmpty())
+        return;
+
+    if (!(nStyle & DrawImageFlags::Disable)
+        && (nStyle
+            & (DrawImageFlags::Highlight | DrawImageFlags::Deactive
+               | DrawImageFlags::SemiTransparent | DrawImageFlags::Invert)))
+    {
+        if (nStyle & (DrawImageFlags::Highlight | DrawImageFlags::Deactive))
+        {
+            const StyleSettings& rSettings = GetSettings().GetStyleSettings();
+            Color aColor = (nStyle & DrawImageFlags::Highlight) ? rSettings.GetHighlightColor()
+                                                                : rSettings.GetDeactiveColor();
+            BitmapFilter::Filter(aRenderBmp, BitmapColorizeFilter(aColor));
+        }
+
+        if (nStyle & DrawImageFlags::SemiTransparent)
+        {
+            Bitmap aTempBitmap(aRenderBmp);
+            if (aTempBitmap.HasAlpha())
+            {
+                Bitmap aAlphaBmp(aTempBitmap.CreateAlphaMask().GetBitmap());
+                aAlphaBmp.Adjust(50);
+                aTempBitmap = Bitmap(aTempBitmap.CreateColorBitmap(), AlphaMask(aAlphaBmp));
+            }
+            else
+            {
+                sal_uInt8 cErase = 128;
+                aTempBitmap = Bitmap(aTempBitmap, AlphaMask(aTempBitmap.GetSizePixel(), &cErase));
+            }
+            aRenderBmp = std::move(aTempBitmap);
+        }
+
+        if (nStyle & DrawImageFlags::Invert)
+            aRenderBmp.Adjust(0, 0, 0, 0, 0, 0, true, false);
+    }
+
+    DrawBitmap(rPos, rSize, aRenderBmp);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

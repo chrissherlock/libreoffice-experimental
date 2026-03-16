@@ -26,7 +26,7 @@
 
 class ImplImage;
 class Bitmap;
-class OutputDevice;
+class SalGraphics;
 class Point;
 class Size;
 enum class DrawImageFlags;
@@ -40,7 +40,6 @@ enum class StockImage { Yes };
 
 class SAL_WARN_UNUSED VCL_DLLPUBLIC Image
 {
-    friend class ::OutputDevice;
 public:
     Image();
     explicit Image(Bitmap const & rBitmap);
@@ -48,8 +47,10 @@ public:
     explicit Image(OUString const & rPNGFileUrl);
     explicit Image(StockImage, OUString const & rPNGFilePath);
 
+    bool IsEmpty() const;
     Size GetSizePixel() const;
     Bitmap GetBitmap() const;
+    Bitmap GetBitmapForHiDPI(bool bDisable, SalGraphics* pGraphics) const;
     void SetOptional(bool bValue);
 
     bool operator!() const
@@ -63,8 +64,6 @@ public:
     }
 
     const OUString & GetStock() const;
-
-    void Draw(OutputDevice* pOutDev, const Point& rPos, DrawImageFlags nStyle, const Size* pSize = nullptr) const;
 
 private:
 
