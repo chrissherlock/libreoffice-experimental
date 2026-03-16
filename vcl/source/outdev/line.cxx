@@ -25,17 +25,19 @@
 #include <comphelper/configuration.hxx>
 #include <comphelper/scopeguard.hxx>
 
+#include <vcl/deviceconcepts.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/metafile/GDIMetaFile.hxx>
+#include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/rendercontext/PrimitiveRenderer.hxx>
 #include <vcl/virdev.hxx>
 
-#include <vcl/metafile/MetafileRecorder.hxx>
 #include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
+#include <devicedispatcher.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 
@@ -108,24 +110,31 @@ void OutputDevice::DrawLine(const Point& rStartPt, const Point& rEndPt)
 
     maRecorder.RecordLine(rStartPt, rEndPt);
 
-    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line) || !mpGraphics)
+    if (!IsDeviceOutputNecessary())
         return;
 
-    const bool bTryAA = (RasterOp::OverPaint == GetRasterOp() && IsLineColor());
-    const bool bPixelSnapHairline = bool(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+    vcl::DispatchDevice(*this, [&](const auto& rConcrete) {
 
-    Point aDeviceStart = mpMapper->LogicToDevicePixel(rStartPt);
-    Point aDeviceEnd = mpMapper->LogicToDevicePixel(rEndPt);
+        if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line) || !mpGraphics)
+            return;
 
-    bool bRTL = IsRTLEnabled() || (mpGraphics && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
-    bool bAntiparallel = ImplIsAntiparallel();
-    tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+        const bool bTryAA = (RasterOp::OverPaint == GetRasterOp() && IsLineColor());
+        const bool bPixelSnapHairline = bool(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
 
-    mpMapper->MirrorDevicePixelPoint(aDeviceStart, nFrameWidth, bRTL, bAntiparallel);
-    mpMapper->MirrorDevicePixelPoint(aDeviceEnd, nFrameWidth, bRTL, bAntiparallel);
+        Point aDeviceStart = mpMapper->LogicToDevicePixel(rStartPt);
+        Point aDeviceEnd = mpMapper->LogicToDevicePixel(rEndPt);
 
-    vcl::rendercontext::PrimitiveRenderer::DrawLine(*mpGraphics, aDeviceStart, aDeviceEnd,
-                                                    bTryAA, bPixelSnapHairline);
+        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+        const bool bAntiparallel = ImplIsAntiparallel();
+
+        const tools::Long nFrameWidth = vcl::get_reference_width_v(rConcrete);
+
+        mpMapper->MirrorDevicePixelPoint(aDeviceStart, nFrameWidth, bRTL, bAntiparallel);
+        mpMapper->MirrorDevicePixelPoint(aDeviceEnd, nFrameWidth, bRTL, bAntiparallel);
+
+        vcl::rendercontext::PrimitiveRenderer::DrawLine(*mpGraphics, aDeviceStart, aDeviceEnd,
+                                                        bTryAA, bPixelSnapHairline);
+    });
 }
 
 void OutputDevice::DrawLine(const Point& rStartPt, const Point& rEndPt, const LineInfo& rLineInfo)
@@ -135,35 +144,42 @@ void OutputDevice::DrawLine(const Point& rStartPt, const Point& rEndPt, const Li
     // Fallback for default lines
     if (rLineInfo.IsDefault())
     {
-        DrawLine( rStartPt, rEndPt );
+        DrawLine(rStartPt, rEndPt);
         return;
     }
 
     maRecorder.RecordLine(rStartPt, rEndPt, rLineInfo);
 
-    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line) || !mpGraphics || rLineInfo.GetStyle() == LineStyle::NONE)
+    if (!IsDeviceOutputNecessary() || rLineInfo.GetStyle() == LineStyle::NONE)
         return;
 
-    const LineInfo aInfo(mpMapper->LogicToDevicePixel(rLineInfo));
+    vcl::DispatchDevice(*this, [&](const auto& rConcrete) {
 
-    if (aInfo.GetStyle() != LineStyle::Dash && aInfo.GetWidth() <= 1)
-    {
-        // Simple solid hairline
-        Point aDeviceStart = mpMapper->LogicToDevicePixel(rStartPt);
-        Point aDeviceEnd = mpMapper->LogicToDevicePixel(rEndPt);
+        if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip | vcl::PrepareOutputFlags::Line) || !mpGraphics)
+            return;
 
-        bool bRTL = IsRTLEnabled() || (mpGraphics && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
-        bool bAntiparallel = ImplIsAntiparallel();
-        tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+        const LineInfo aInfo(mpMapper->LogicToDevicePixel(rLineInfo));
 
-        mpMapper->MirrorDevicePixelPoint(aDeviceStart, nFrameWidth, bRTL, bAntiparallel);
-        mpMapper->MirrorDevicePixelPoint(aDeviceEnd, nFrameWidth, bRTL, bAntiparallel);
+        if (aInfo.GetStyle() != LineStyle::Dash && aInfo.GetWidth() <= 1)
+        {
+            // Simple solid hairline
+            Point aDeviceStart = mpMapper->LogicToDevicePixel(rStartPt);
+            Point aDeviceEnd = mpMapper->LogicToDevicePixel(rEndPt);
 
-        vcl::rendercontext::PrimitiveRenderer::DrawLine(*mpGraphics, aDeviceStart, aDeviceEnd);
-        return;
-    }
+            const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+            const bool bAntiparallel = ImplIsAntiparallel();
 
-    DrawLineGeometry(rStartPt, rEndPt, rLineInfo);
+            const tools::Long nFrameWidth = vcl::get_reference_width_v(rConcrete);
+
+            mpMapper->MirrorDevicePixelPoint(aDeviceStart, nFrameWidth, bRTL, bAntiparallel);
+            mpMapper->MirrorDevicePixelPoint(aDeviceEnd, nFrameWidth, bRTL, bAntiparallel);
+
+            vcl::rendercontext::PrimitiveRenderer::DrawLine(*mpGraphics, aDeviceStart, aDeviceEnd);
+            return;
+        }
+
+        DrawLineGeometry(rStartPt, rEndPt, rLineInfo);
+    });
 }
 
 void OutputDevice::DrawLineGeometry(const Point& rStartPt, const Point& rEndPt,
