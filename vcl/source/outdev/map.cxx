@@ -93,7 +93,6 @@ void OutputDevice::SetMapMode()
     mpMapper->ResetMapMode();
 
     // create new objects (clip region are not re-scaled)
-// mbFontDirty = true; // Removed
     ImplInitMapModeObjects();
 
     // #106426# Adapt logical offset when changing mapmode
@@ -191,7 +190,6 @@ void OutputDevice::SetMapMode(const MapMode& rNewMapMode)
     }
 
     // create new objects (clip region are not re-scaled)
-// mbFontDirty = true; // Removed
     ImplInitMapModeObjects();
 
     // #106426# Adapt logical offset when changing mapmode
