@@ -26,6 +26,7 @@
 #include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
+#include <devicedispatcher.hxx>
 #include <salgdi.hxx>
 #include <salbmp.hxx>
 
@@ -113,7 +114,12 @@ void OutputDevice::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
         const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
         if (bRTL)
         {
-            tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+            tools::Long nFrameWidth = 0;
+
+            vcl::DispatchDevice(*this, [&](const auto& rConcrete) {
+                nFrameWidth = rConcrete.GetOutputWidthPixel();
+            });
+
             tools::Rectangle aDestRect(Point(aPosAry.mnDestX, aPosAry.mnDestY),
                                        Size(aPosAry.mnDestWidth, aPosAry.mnDestHeight));
 
