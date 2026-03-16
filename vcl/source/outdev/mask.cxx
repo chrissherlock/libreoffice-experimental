@@ -60,36 +60,18 @@ void OutputDevice::DrawMask( const Point& rDestPt, const Size& rDestSize,
     DrawMask( rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmap, rMaskColor, MetaActionType::MASKSCALEPART );
 }
 
-void OutputDevice::DrawMask( const Point& rDestPt, const Size& rDestSize,
-                             const Point& rSrcPtPixel, const Size& rSrcSizePixel,
-                             const Bitmap& rBitmap, const Color& rMaskColor,
-                             MetaActionType nAction )
-{
-    assert(!is_double_buffered_window());
-
-    if (rBitmap.IsEmpty() || IsLayoutCalculationNecessary())
-        return;
-
-    if( RasterOp::Invert == mpGraphicsState->meRasterOp )
-    {
-        DrawRect( tools::Rectangle( rDestPt, rDestSize ) );
-        return;
-    }
-
-    if (maRecorder.IsRecording())
-        maRecorder.RecordMaskAction(nAction, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmap, rMaskColor);
-
-    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip))
-        return;
-
-    DrawDeviceMask(rBitmap, rMaskColor, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
-}
-
-void OutputDevice::DrawDeviceMask(const Bitmap& rMask, const Color& rMaskColor,
-                                  const Point& rDestPt, const Size& rDestSize,
-                                  const Point& rSrcPtPixel, const Size& rSrcSizePixel)
+void OutputDevice::DrawMask(const Point& rDestPt, const Size& rDestSize,
+                            const Point& rSrcPtPixel, const Size& rSrcSizePixel,
+                            const Bitmap& rMask, const Color& rMaskColor,
+                            MetaActionType nAction)
 {
     if (rMask.IsEmpty())
+        return;
+
+    if (maRecorder.IsRecording())
+        maRecorder.RecordMaskAction(nAction, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rMask, rMaskColor);
+
+    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip))
         return;
 
     SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(),
@@ -104,7 +86,6 @@ void OutputDevice::DrawDeviceMask(const Bitmap& rMask, const Color& rMaskColor,
 
     Bitmap aMask(rMask);
     const BmpMirrorFlags nMirrFlags = AdjustTwoRect(aPosAry, aMask.GetSizePixel());
-
     if (nMirrFlags != BmpMirrorFlags::NONE)
         aMask.Mirror(nMirrFlags);
 
@@ -120,7 +101,6 @@ void OutputDevice::DrawDeviceMask(const Bitmap& rMask, const Color& rMaskColor,
             if (bRTL)
             {
                 tools::Long nFrameWidth = vcl::get_reference_width_v(rConcrete);
-
                 tools::Rectangle aDestRect(Point(aPosAry.mnDestX, aPosAry.mnDestY),
                                            Size(aPosAry.mnDestWidth, aPosAry.mnDestHeight));
 
