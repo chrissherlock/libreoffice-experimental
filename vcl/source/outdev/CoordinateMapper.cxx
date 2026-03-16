@@ -54,30 +54,27 @@ void CoordinateMapper::ResetMapMode(const MapMode& rMapMode)
     maMapMode = rMapMode;
 }
 
-sal_Int32 CoordinateMapper::GetDPIX() const { return mnDPIX; }
-
-sal_Int32 CoordinateMapper::GetDPIY() const { return mnDPIY; }
-
-void CoordinateMapper::SetDPIX(sal_Int32 nDPIX) { mnDPIX = nDPIX; }
-
-void CoordinateMapper::SetDPIY(sal_Int32 nDPIY) { mnDPIY = nDPIY; }
-
-sal_Int32 CoordinateMapper::GetDPIScalePercentage() const { return mnDPIScalePercentage; }
-
-void CoordinateMapper::SetDPIScalePercentage(sal_Int32 nPercent)
+bool CoordinateMapper::ResetToDefault()
 {
-    mnDPIScalePercentage = nPercent;
+    if (!mbMap && maMapMode.IsDefault())
+        return false;
+
+    mbMap = false;
+    maMapMode = MapMode();
+
+    maMapRes.mnMapScNumX = 1;
+    maMapRes.mnMapScNumY = 1;
+    maMapRes.mnMapScDenomX = 1;
+    maMapRes.mnMapScDenomY = 1;
+    maMapRes.mnMapOfsX = 0;
+    maMapRes.mnMapOfsY = 0;
+
+    mnOutOffLogicX = mnOutOffOrigX;
+    mnOutOffLogicY = mnOutOffOrigY;
+
+    InvalidateViewTransform();
+    return true;
 }
-
-float CoordinateMapper::GetDPIScaleFactor() const { return mnDPIScalePercentage / 100.0f; }
-
-tools::Long CoordinateMapper::GetOutputWidthPixel() const { return mnOutWidth; }
-
-tools::Long CoordinateMapper::GetOutputHeightPixel() const { return mnOutHeight; }
-
-void CoordinateMapper::SetOutputWidthPixel(tools::Long nWidth) { mnOutWidth = nWidth; }
-
-void CoordinateMapper::SetOutputHeightPixel(tools::Long nHeight) { mnOutHeight = nHeight; }
 
 static tools::Long lcl_pixelToLogic(tools::Long n, tools::Long nDPI, tools::Long nMapNum,
                                     tools::Long nMapDenom)
@@ -102,6 +99,96 @@ static tools::Long lcl_pixelToLogic(tools::Long n, tools::Long nDPI, tools::Long
 
     return static_cast<tools::Long>(n64 / 2);
 }
+
+bool CoordinateMapper::UpdateMapMode(const MapMode& rNewMapMode, sal_Int32 nDPIX, sal_Int32 nDPIY)
+{
+    if (maMapMode == rNewMapMode)
+        return false;
+
+    bool bRelMap = (rNewMapMode.GetMapUnit() == MapUnit::MapRelative);
+    bool bOldMap = mbMap;
+
+    EnableMapMode(!rNewMapMode.IsDefault());
+
+    if (mbMap)
+    {
+        if ((rNewMapMode.GetMapUnit() == maMapMode.GetMapUnit())
+            && (rNewMapMode.GetScaleX() == maMapMode.GetScaleX())
+            && (rNewMapMode.GetScaleY() == maMapMode.GetScaleY()) && (bOldMap == mbMap))
+        {
+            Point aOrigin = rNewMapMode.GetOrigin();
+            SetMappingXOffset(aOrigin.X());
+            SetMappingYOffset(aOrigin.Y());
+            ResetMapMode(rNewMapMode);
+            InvalidateViewTransform();
+            return true;
+        }
+
+        if (!bOldMap && bRelMap)
+        {
+            SetMappingXNumerator(1);
+            SetMappingYNumerator(1);
+            SetMappingXDenominator(nDPIX);
+            SetMappingYDenominator(nDPIY);
+            SetMappingXOffset(0);
+            SetMappingYOffset(0);
+        }
+
+        CalcMapResolution(rNewMapMode, nDPIX, nDPIY);
+    }
+
+    if (bRelMap)
+    {
+        SetScaleX(Fraction::MakeFraction(
+            maMapMode.GetScaleX().GetNumerator(), rNewMapMode.GetScaleX().GetNumerator(),
+            maMapMode.GetScaleX().GetDenominator(), rNewMapMode.GetScaleX().GetDenominator()));
+
+        SetScaleY(Fraction::MakeFraction(
+            maMapMode.GetScaleY().GetNumerator(), rNewMapMode.GetScaleY().GetNumerator(),
+            maMapMode.GetScaleY().GetDenominator(), rNewMapMode.GetScaleY().GetDenominator()));
+
+        SetOrigin(Point(GetMappingXOffset(), GetMappingYOffset()));
+    }
+    else
+    {
+        ResetMapMode(rNewMapMode);
+    }
+
+    // Adapt the logical offset used in PixelToLogic
+    // This is the #106426 fix moved into the mapper.
+    SetLogicalOffset(Size(
+        lcl_pixelToLogic(mnOutOffOrigX, nDPIX, GetMappingXNumerator(), GetMappingXDenominator()),
+        lcl_pixelToLogic(mnOutOffOrigY, nDPIY, GetMappingYNumerator(), GetMappingYDenominator())));
+
+    InvalidateViewTransform();
+
+    return true;
+}
+
+sal_Int32 CoordinateMapper::GetDPIX() const { return mnDPIX; }
+
+sal_Int32 CoordinateMapper::GetDPIY() const { return mnDPIY; }
+
+void CoordinateMapper::SetDPIX(sal_Int32 nDPIX) { mnDPIX = nDPIX; }
+
+void CoordinateMapper::SetDPIY(sal_Int32 nDPIY) { mnDPIY = nDPIY; }
+
+sal_Int32 CoordinateMapper::GetDPIScalePercentage() const { return mnDPIScalePercentage; }
+
+void CoordinateMapper::SetDPIScalePercentage(sal_Int32 nPercent)
+{
+    mnDPIScalePercentage = nPercent;
+}
+
+float CoordinateMapper::GetDPIScaleFactor() const { return mnDPIScalePercentage / 100.0f; }
+
+tools::Long CoordinateMapper::GetOutputWidthPixel() const { return mnOutWidth; }
+
+tools::Long CoordinateMapper::GetOutputHeightPixel() const { return mnOutHeight; }
+
+void CoordinateMapper::SetOutputWidthPixel(tools::Long nWidth) { mnOutWidth = nWidth; }
+
+void CoordinateMapper::SetOutputHeightPixel(tools::Long nHeight) { mnOutHeight = nHeight; }
 
 void CoordinateMapper::SetPixelOffset(const Size& rSize)
 {

@@ -87,20 +87,32 @@ void OutputDevice::SetMapMode()
 {
     maRecorder.RecordMapMode(MapMode());
 
-    if (!mpMapper->IsMapModeEnabled() && mpMapper->IsDefaultMapMode())
-        return;
+    // CoordinateMapper handles its own "is change necessary" logic
+    if (mpMapper->ResetToDefault())
+    {
+        // Only trigger side effects if the state actually changed
+        ImplInitMapModeObjects();
+    }
+}
 
-    mpMapper->EnableMapMode(false);
-    mpMapper->ResetMapMode();
+void OutputDevice::SetMapMode(const MapMode& rNewMapMode)
+{
+    maRecorder.RecordMapMode(rNewMapMode);
 
-    // create new objects (clip region are not re-scaled)
-    ImplInitMapModeObjects();
+    // One call to handle the math, scaling, and offset adaptation
+    if (mpMapper->UpdateMapMode(rNewMapMode, GetDPIX(), GetDPIY()))
+    {
+        // Create new objects/Update Cursor (The side effects)
+        ImplInitMapModeObjects();
+    }
+}
 
-    // #106426# Adapt logical offset when changing mapmode
-    mpMapper->SetLogicalOffset(mpMapper->GetPixelOffset());
-
-    // #i75163#
-    mpMapper->InvalidateViewTransform();
+void OutputDevice::SetMetafileMapMode(const MapMode& rNewMapMode, bool bIsRecord)
+{
+    if (bIsRecord)
+        SetRelativeMapMode(rNewMapMode);
+    else
+        SetMapMode(rNewMapMode);
 }
 
 static tools::Long lcl_pixelToLogic(tools::Long n, tools::Long nDPI, tools::Long nMapNum,
@@ -125,88 +137,6 @@ static tools::Long lcl_pixelToLogic(tools::Long n, tools::Long nDPI, tools::Long
         ++n64;
 
     return static_cast<tools::Long>(n64 / 2);
-}
-
-void OutputDevice::SetMapMode(const MapMode& rNewMapMode)
-{
-    maRecorder.RecordMapMode(rNewMapMode);
-
-    bool bRelMap = (rNewMapMode.GetMapUnit() == MapUnit::MapRelative);
-
-    // do nothing if MapMode was not changed
-    if (mpMapper->GetMapMode() == rNewMapMode)
-        return;
-
-    // if default MapMode calculate nothing
-    bool bOldMap = mpMapper->IsMapModeEnabled();
-    mpMapper->EnableMapMode(!rNewMapMode.IsDefault());
-    if (mpMapper->IsMapModeEnabled())
-    {
-        // if only the origin is converted, do not scale new
-        if ((rNewMapMode.GetMapUnit() == mpMapper->GetMapUnit())
-            && (rNewMapMode.GetScaleX() == mpMapper->GetScaleX())
-            && (rNewMapMode.GetScaleY() == mpMapper->GetScaleY()) && (bOldMap == mpMapper->IsMapModeEnabled()))
-        {
-            // set offset
-            Point aOrigin = rNewMapMode.GetOrigin();
-            mpMapper->SetMappingXOffset(aOrigin.X());
-            mpMapper->SetMappingYOffset(aOrigin.Y());
-            mpMapper->ResetMapMode(rNewMapMode);
-
-            // #i75163#
-            mpMapper->InvalidateViewTransform();
-
-            return;
-        }
-        if (!bOldMap && bRelMap)
-        {
-            mpMapper->SetMappingXNumerator(1);
-            mpMapper->SetMappingYNumerator(1);
-            mpMapper->SetMappingXDenominator(GetDPIX());
-            mpMapper->SetMappingYDenominator(GetDPIY());
-            mpMapper->SetMappingXOffset(0);
-            mpMapper->SetMappingYOffset(0);
-        }
-
-        // calculate new MapMode-resolution
-        mpMapper->CalcMapResolution(rNewMapMode, GetDPIX(), GetDPIY());
-    }
-
-    // set new MapMode
-    if (bRelMap)
-    {
-        mpMapper->SetScaleX(Fraction::MakeFraction(
-            mpMapper->GetScaleX().GetNumerator(), rNewMapMode.GetScaleX().GetNumerator(),
-            mpMapper->GetScaleX().GetDenominator(), rNewMapMode.GetScaleX().GetDenominator()));
-
-        mpMapper->SetScaleY(Fraction::MakeFraction(
-            mpMapper->GetScaleY().GetNumerator(), rNewMapMode.GetScaleY().GetNumerator(),
-            mpMapper->GetScaleY().GetDenominator(), rNewMapMode.GetScaleY().GetDenominator()));
-
-        mpMapper->SetOrigin(Point(mpMapper->GetMappingXOffset(), mpMapper->GetMappingYOffset()));
-    }
-    else
-    {
-        mpMapper->ResetMapMode(rNewMapMode);
-    }
-
-    // create new objects (clip region are not re-scaled)
-    ImplInitMapModeObjects();
-
-    // #106426# Adapt logical offset when changing mapmode
-    mpMapper->SetLogicalOffset(Size(lcl_pixelToLogic(mpMapper->GetPixelXOffset(), GetDPIX(), mpMapper->GetMappingXNumerator(), mpMapper->GetMappingXDenominator()),
-                                    lcl_pixelToLogic(mpMapper->GetPixelYOffset(), GetDPIY(), mpMapper->GetMappingYNumerator(), mpMapper->GetMappingYDenominator())));
-
-    // #i75163#
-    mpMapper->InvalidateViewTransform();
-}
-
-void OutputDevice::SetMetafileMapMode(const MapMode& rNewMapMode, bool bIsRecord)
-{
-    if (bIsRecord)
-        SetRelativeMapMode(rNewMapMode);
-    else
-        SetMapMode(rNewMapMode);
 }
 
 void OutputDevice::SetRelativeMapMode(const MapMode& rNewMapMode)
