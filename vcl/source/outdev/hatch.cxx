@@ -31,6 +31,7 @@
 
 #include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
+#include <devicedispatcher.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 #include <vcl/metafile/MetafileRecorder.hxx>
@@ -98,14 +99,20 @@ void OutputDevice::DrawHatchLine(const Point& rStartPoint, const Point& rEndPoin
     Point aPt1{ LogicToDevicePixel(rStartPoint) };
     Point aPt2{ LogicToDevicePixel(rEndPoint) };
 
-    const bool bRTL = IsRTLEnabled() || (mpGraphics && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
-    const bool bAntiparallel = ImplIsAntiparallel();
-    const tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+    vcl::DispatchDevice(*this, [&](const auto& rConcrete) {
+        if (!mpGraphics)
+            return;
 
-    mpMapper->MirrorDevicePixelPoint(aPt1, nFrameWidth, bRTL, bAntiparallel);
-    mpMapper->MirrorDevicePixelPoint(aPt2, nFrameWidth, bRTL, bAntiparallel);
+        const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+        const bool bAntiparallel = ImplIsAntiparallel();
 
-    mpGraphics->drawLine(aPt1.X(), aPt1.Y(), aPt2.X(), aPt2.Y());
+        const tools::Long nFrameWidth = vcl::get_reference_width_v(rConcrete);
+
+        mpMapper->MirrorDevicePixelPoint(aPt1, nFrameWidth, bRTL, bAntiparallel);
+        mpMapper->MirrorDevicePixelPoint(aPt2, nFrameWidth, bRTL, bAntiparallel);
+
+        mpGraphics->drawLine(aPt1.X(), aPt1.Y(), aPt2.X(), aPt2.Y());
+    });
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
