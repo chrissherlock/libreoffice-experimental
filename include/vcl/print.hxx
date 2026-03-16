@@ -152,10 +152,6 @@ public:
     virtual bool HasAlpha() const override { return false; }
 
 protected:
-    virtual void                DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
-                                    const Point& rDestPt, const Size& rDestSize,
-                                    const Point& rSrcPtPixel, const Size& rSrcSizePixel) override;
-
     bool                        DrawDeviceTransformedBitmap(const basegfx::B2DHomMatrix& aFullTransform,
                                     const Bitmap& rBitmap, double fAlpha = 1.0) override;
 

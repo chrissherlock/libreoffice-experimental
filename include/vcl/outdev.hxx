@@ -1561,10 +1561,14 @@ public:
 
 protected:
 
-    virtual void                DrawDeviceMask (
+    void                        DrawDeviceMask (
                                          const Bitmap& rMask, const Color& rMaskColor,
                                          const Point& rDestPt, const Size& rDestSize,
                                          const Point& rSrcPtPixel, const Size& rSrcSizePixel );
+
+private:
+    void DrawMaskEmulation(const Bitmap& rMask, const Color& rMaskColor, const SalTwoRect& rPosAry);
+
     ///@}
 
 
