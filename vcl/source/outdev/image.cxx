@@ -32,6 +32,54 @@ void OutputDevice::DrawImage(const Point& rPos, const Image& rImage, DrawImageFl
     DrawImage(rPos, Size(), rImage, nStyle);
 }
 
+namespace
+{
+constexpr DrawImageFlags UI_EFFECTS_MASK = DrawImageFlags::Highlight | DrawImageFlags::Deactive
+                                           | DrawImageFlags::SemiTransparent
+                                           | DrawImageFlags::Invert;
+
+constexpr DrawImageFlags UI_THEME_TINT_MASK = DrawImageFlags::Highlight | DrawImageFlags::Deactive;
+}
+
+static void lcl_ApplyUIStylesToBitmap(Bitmap& rBitmap, DrawImageFlags nStyle,
+                                      const StyleSettings& rSettings)
+{
+    if (nStyle & DrawImageFlags::Disable)
+        return;
+
+    if (!(nStyle & UI_EFFECTS_MASK))
+        return;
+
+    if (nStyle & UI_THEME_TINT_MASK)
+    {
+        Color aColor = (nStyle & DrawImageFlags::Highlight) ? rSettings.GetHighlightColor()
+                                                            : rSettings.GetDeactiveColor();
+        BitmapFilter::Filter(rBitmap, BitmapColorizeFilter(aColor));
+    }
+
+    if (nStyle & DrawImageFlags::SemiTransparent)
+    {
+        Bitmap aTempBitmap(rBitmap);
+
+        if (aTempBitmap.HasAlpha())
+        {
+            Bitmap aAlphaBmp(aTempBitmap.CreateAlphaMask().GetBitmap());
+            aAlphaBmp.Adjust(50);
+            aTempBitmap = Bitmap(aTempBitmap.CreateColorBitmap(), AlphaMask(aAlphaBmp));
+        }
+        else
+        {
+            sal_uInt8 cErase = 128;
+            aTempBitmap = Bitmap(aTempBitmap, AlphaMask(aTempBitmap.GetSizePixel(), &cErase));
+        }
+
+        rBitmap = std::move(aTempBitmap);
+    }
+
+    if (nStyle & DrawImageFlags::Invert)
+        rBitmap.Adjust(0, 0, 0, 0, 0, 0, true, false);
+}
+
 void OutputDevice::DrawImage(const Point& rPos, const Size& rSize, const Image& rImage,
                              DrawImageFlags nStyle)
 {
@@ -62,39 +110,7 @@ void OutputDevice::DrawImage(const Point& rPos, const Size& rSize, const Image& 
     if (aRenderBmp.IsEmpty())
         return;
 
-    if (!(nStyle & DrawImageFlags::Disable)
-        && (nStyle
-            & (DrawImageFlags::Highlight | DrawImageFlags::Deactive
-               | DrawImageFlags::SemiTransparent | DrawImageFlags::Invert)))
-    {
-        if (nStyle & (DrawImageFlags::Highlight | DrawImageFlags::Deactive))
-        {
-            const StyleSettings& rSettings = GetSettings().GetStyleSettings();
-            Color aColor = (nStyle & DrawImageFlags::Highlight) ? rSettings.GetHighlightColor()
-                                                                : rSettings.GetDeactiveColor();
-            BitmapFilter::Filter(aRenderBmp, BitmapColorizeFilter(aColor));
-        }
-
-        if (nStyle & DrawImageFlags::SemiTransparent)
-        {
-            Bitmap aTempBitmap(aRenderBmp);
-            if (aTempBitmap.HasAlpha())
-            {
-                Bitmap aAlphaBmp(aTempBitmap.CreateAlphaMask().GetBitmap());
-                aAlphaBmp.Adjust(50);
-                aTempBitmap = Bitmap(aTempBitmap.CreateColorBitmap(), AlphaMask(aAlphaBmp));
-            }
-            else
-            {
-                sal_uInt8 cErase = 128;
-                aTempBitmap = Bitmap(aTempBitmap, AlphaMask(aTempBitmap.GetSizePixel(), &cErase));
-            }
-            aRenderBmp = std::move(aTempBitmap);
-        }
-
-        if (nStyle & DrawImageFlags::Invert)
-            aRenderBmp.Adjust(0, 0, 0, 0, 0, 0, true, false);
-    }
+    lcl_ApplyUIStylesToBitmap(aRenderBmp, nStyle, GetSettings().GetStyleSettings());
 
     DrawBitmap(rPos, rSize, aRenderBmp);
 }
