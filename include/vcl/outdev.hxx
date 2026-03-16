@@ -1583,8 +1583,8 @@ public:
     virtual void                SetMetafileMapMode(const MapMode& rNewMapMode, bool bIsRecord);
     const MapMode&              GetMapMode() const;
 
-protected:
-    virtual void ImplInitMapModeObjects();
+private:
+    void ImplInitMapModeObjects();
 
 public:
     /** Set pixel and logical offset

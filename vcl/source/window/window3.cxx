@@ -49,9 +49,8 @@ void WindowOutputDevice::ImplRefreshFontData(bool bNewFontLists)
         pChild->GetOutDev()->ImplRefreshFontData(bNewFontLists);
 }
 
-void WindowOutputDevice::ImplInitMapModeObjects()
+void WindowOutputDevice::UpdateCursorOnMapModeChange()
 {
-    OutputDevice::ImplInitMapModeObjects();
     if (mxOwnerWindow->mpWindowImpl->mpCursor)
         mxOwnerWindow->mpWindowImpl->mpCursor->ImplNew();
 }

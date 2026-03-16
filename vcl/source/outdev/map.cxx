@@ -34,6 +34,7 @@
 
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
+#include <devicedispatcher.hxx>
 #include <svdata.hxx>
 #include <window.h>
 
@@ -502,7 +503,17 @@ Size OutputDevice::LogicToDevicePixel(const Size& rLogicSize) const
     return mpMapper->LogicToDevicePixel(rLogicSize);
 }
 
-void OutputDevice::ImplInitMapModeObjects() {}
+void OutputDevice::ImplInitMapModeObjects()
+{
+    vcl::DispatchDevice(*this, [](const auto& rConcrete) {
+        // Compile-time trait check!
+        // OutputDevice never needs to know what a Window or Cursor is.
+        if constexpr (requires { rConcrete.UpdateCursorOnMapModeChange(); })
+        {
+            rConcrete.UpdateCursorOnMapModeChange();
+        }
+    });
+}
 
 basegfx::B2DHomMatrix OutputDevice::GetViewTransformation() const
 {

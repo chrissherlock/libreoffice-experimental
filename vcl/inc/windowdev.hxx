@@ -75,13 +75,13 @@ public:
     ImplGetCanvas(bool bSpriteCanvas) const override;
 
     virtual bool HasAlpha() const override { return true; }
+    void UpdateCursorOnMapModeChange();
 
 private:
     virtual void InitClipRegion() override;
 
     void ImplClearFontData(bool bNewFontLists) override;
     void ImplRefreshFontData(bool bNewFontLists) override;
-    void ImplInitMapModeObjects() override;
 
     virtual void CopyDeviceArea(SalTwoRect& aPosAry) override;
     virtual const OutputDevice* DrawOutDevDirectCheck(const OutputDevice& rSrcDev) const override;
