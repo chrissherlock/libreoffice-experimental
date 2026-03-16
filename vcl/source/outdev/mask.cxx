@@ -77,17 +77,7 @@ void OutputDevice::DrawMask( const Point& rDestPt, const Size& rDestSize,
     if (maRecorder.IsRecording())
         maRecorder.RecordMaskAction(nAction, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, rBitmap, rMaskColor);
 
-    if (!IsDeviceOutputNecessary())
-        return;
-
-    if (!mpGraphics && !AcquireGraphics())
-        return;
-    assert(mpGraphics);
-
-    if (mpClippingController->IsDirty())
-        InitClipRegion();
-
-    if (IsOutputCulled())
+    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip))
         return;
 
     DrawDeviceMask(rBitmap, rMaskColor, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
