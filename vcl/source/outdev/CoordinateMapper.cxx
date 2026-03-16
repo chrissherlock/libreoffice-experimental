@@ -165,6 +165,53 @@ bool CoordinateMapper::UpdateMapMode(const MapMode& rNewMapMode, sal_Int32 nDPIX
     return true;
 }
 
+MapMode CoordinateMapper::GetRelativeMapMode(const MapMode& rNewMapMode) const
+{
+    if (maMapMode == rNewMapMode)
+        return maMapMode;
+
+    const MapUnit eOld = maMapMode.GetMapUnit();
+    const MapUnit eNew = rNewMapMode.GetMapUnit();
+
+    Fraction aXF = Fraction::MakeFraction(
+        rNewMapMode.GetScaleX().GetNumerator(), maMapMode.GetScaleX().GetDenominator(),
+        rNewMapMode.GetScaleX().GetDenominator(), maMapMode.GetScaleX().GetNumerator());
+    Fraction aYF = Fraction::MakeFraction(
+        rNewMapMode.GetScaleY().GetNumerator(), maMapMode.GetScaleY().GetDenominator(),
+        rNewMapMode.GetScaleY().GetDenominator(), maMapMode.GetScaleY().GetNumerator());
+
+    Point aPt = LogicToLogic(Point(), nullptr, &rNewMapMode);
+
+    if (eNew != eOld)
+    {
+        if (eOld <= MapUnit::MapPixel && eNew <= MapUnit::MapPixel)
+        {
+            const auto eFrom = MapToO3tlLength(eOld, o3tl::Length::in);
+            const auto eTo = MapToO3tlLength(eNew, o3tl::Length::in);
+            const auto[mul, div] = o3tl::getConversionMulDiv(eFrom, eTo);
+            Fraction aF(div, mul);
+
+            aXF = Fraction::MakeFraction(aXF.GetNumerator(), aF.GetNumerator(),
+                                         aXF.GetDenominator(), aF.GetDenominator());
+            aYF = Fraction::MakeFraction(aYF.GetNumerator(), aF.GetNumerator(),
+                                         aYF.GetDenominator(), aF.GetDenominator());
+
+            if (eOld == MapUnit::MapPixel)
+            {
+                aXF *= Fraction(mnDPIX, 1);
+                aYF *= Fraction(mnDPIY, 1);
+            }
+            else if (eNew == MapUnit::MapPixel)
+            {
+                aXF *= Fraction(1, mnDPIX);
+                aYF *= Fraction(1, mnDPIY);
+            }
+        }
+    }
+
+    return MapMode(MapUnit::MapRelative, Point(-aPt.X(), -aPt.Y()), aXF, aYF);
+}
+
 sal_Int32 CoordinateMapper::GetDPIX() const { return mnDPIX; }
 
 sal_Int32 CoordinateMapper::GetDPIY() const { return mnDPIY; }

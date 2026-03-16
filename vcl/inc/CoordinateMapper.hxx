@@ -91,6 +91,7 @@ public:
     bool IsMapModeEnabled() const { return mbMap; }
     void EnableMapMode(bool bEnable = true);
     bool UpdateMapMode(const MapMode& rNewMapMode, sal_Int32 nDPIX, sal_Int32 nDPIY);
+    MapMode GetRelativeMapMode(const MapMode& rNewMapMode) const;
     bool ResetToDefault();
     void SetOffset(const Size& rOffset);
 

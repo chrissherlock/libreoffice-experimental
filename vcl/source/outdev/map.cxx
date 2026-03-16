@@ -115,87 +115,19 @@ void OutputDevice::SetMetafileMapMode(const MapMode& rNewMapMode, bool bIsRecord
         SetMapMode(rNewMapMode);
 }
 
-static tools::Long lcl_pixelToLogic(tools::Long n, tools::Long nDPI, tools::Long nMapNum,
-                                    tools::Long nMapDenom)
-{
-    assert(nDPI > 0);
-
-    if (nMapNum == 0)
-        return 0;
-
-    sal_Int64 nDenom = nDPI * nMapNum;
-    sal_Int64 n64 = n * nMapDenom;
-
-    if (nDenom == 1)
-        return static_cast<tools::Long>(n64);
-
-    n64 = 2 * n64 / nDenom;
-
-    if (n64 < 0)
-        --n64;
-    else
-        ++n64;
-
-    return static_cast<tools::Long>(n64 / 2);
-}
-
 void OutputDevice::SetRelativeMapMode(const MapMode& rNewMapMode)
 {
-    // do nothing if MapMode did not change
     if (mpMapper->GetMapMode() == rNewMapMode)
         return;
 
-    MapUnit eOld = mpMapper->GetMapUnit();
-    MapUnit eNew = rNewMapMode.GetMapUnit();
+    MapMode aRelMode = mpMapper->GetRelativeMapMode(rNewMapMode);
 
-    // a?F = rNewMapMode.GetScale?() / mpMapper->GetMapMode().GetScale?()
-    Fraction aXF = Fraction::MakeFraction(
-        rNewMapMode.GetScaleX().GetNumerator(), mpMapper->GetScaleX().GetDenominator(),
-        rNewMapMode.GetScaleX().GetDenominator(), mpMapper->GetScaleX().GetNumerator());
-    Fraction aYF = Fraction::MakeFraction(
-        rNewMapMode.GetScaleY().GetNumerator(), mpMapper->GetScaleY().GetDenominator(),
-        rNewMapMode.GetScaleY().GetDenominator(), mpMapper->GetScaleY().GetNumerator());
+    SetMapMode(aRelMode);
 
-    Point aPt(mpMapper->LogicToLogic(Point(), nullptr, &rNewMapMode));
-    if (eNew != eOld)
-    {
-        SAL_WARN_IF(eOld > MapUnit::MapPixel, "vcl.gdi", "Not implemented MapUnit");
-        SAL_WARN_IF(eNew > MapUnit::MapPixel, "vcl.gdi", "Not implemented MapUnit");
-
-        if (eOld <= MapUnit::MapPixel && eNew <= MapUnit::MapPixel)
-        {
-            const auto eFrom = MapToO3tlLength(eOld, o3tl::Length::in);
-            const auto eTo = MapToO3tlLength(eNew, o3tl::Length::in);
-            const auto[mul, div] = o3tl::getConversionMulDiv(eFrom, eTo);
-            Fraction aF(div, mul);
-
-            // a?F =  a?F * aF
-            aXF = Fraction::MakeFraction(aXF.GetNumerator(), aF.GetNumerator(),
-                                         aXF.GetDenominator(), aF.GetDenominator());
-            aYF = Fraction::MakeFraction(aYF.GetNumerator(), aF.GetNumerator(),
-                                         aYF.GetDenominator(), aF.GetDenominator());
-            if (eOld == MapUnit::MapPixel)
-            {
-                aXF *= Fraction(GetDPIX(), 1);
-                aYF *= Fraction(GetDPIY(), 1);
-            }
-            else if (eNew == MapUnit::MapPixel)
-            {
-                aXF *= Fraction(1, GetDPIX());
-                aYF *= Fraction(1, GetDPIY());
-            }
-        }
-    }
-
-    MapMode aNewMapMode(MapUnit::MapRelative, Point(-aPt.X(), -aPt.Y()), aXF, aYF);
-    SetMapMode(aNewMapMode);
-
-    if (eNew != eOld)
+    if (rNewMapMode.GetMapUnit() != MapUnit::MapRelative)
         mpMapper->ResetMapMode(rNewMapMode);
 
-    // #106426# Adapt logical offset when changing MapMode
-    mpMapper->SetLogicalOffset(Size(lcl_pixelToLogic(mpMapper->GetPixelXOffset(), GetDPIX(), mpMapper->GetMappingXNumerator(), mpMapper->GetMappingXDenominator()),
-                                    lcl_pixelToLogic(mpMapper->GetPixelYOffset(), GetDPIY(), mpMapper->GetMappingYNumerator(), mpMapper->GetMappingYDenominator())));
+    ImplInitMapModeObjects();
 }
 
 tools::Long OutputDevice::LogicHeightToDevicePixel(tools::Long nHeight) const
