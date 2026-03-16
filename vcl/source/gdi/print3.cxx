@@ -31,6 +31,7 @@
 
 #include <utility>
 #include <vcl/metafile/MetaAction.hxx>
+#include <vcl/metafile/TransparencyFlattener.hxx>
 #include <vcl/print.hxx>
 #include <vcl/printer/Options.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
@@ -1330,8 +1331,7 @@ int PrinterController::getFilteredPageCount() const
     return (getPageCountProtected() + (nDiv-1)) / nDiv;
 }
 
-DrawModeFlags PrinterController::removeTransparencies( GDIMetaFile const & i_rIn, GDIMetaFile& o_rOut )
-{
+DrawModeFlags PrinterController::removeTransparencies( GDIMetaFile const & i_rIn, GDIMetaFile& o_rOut ){
     DrawModeFlags nRestoreDrawMode = mpImplData->mxPrinter->GetDrawMode();
     sal_Int32 nMaxBmpDPIX = mpImplData->mxPrinter->GetDPIX();
     sal_Int32 nMaxBmpDPIY = mpImplData->mxPrinter->GetDPIY();
@@ -1375,7 +1375,7 @@ DrawModeFlags PrinterController::removeTransparencies( GDIMetaFile const & i_rIn
         mpImplData->mxPrinter->SetDrawMode( mpImplData->mxPrinter->GetDrawMode() | DrawModeFlags::NoTransparency );
     }
 
-    Color aBg( COL_TRANSPARENT ); // default: let RemoveTransparenciesFromMetaFile do its own background logic
+    Color aBg( COL_TRANSPARENT ); // default: let TransparencyFlattener do its own background logic
     if( mpImplData->maMultiPage.nRows * mpImplData->maMultiPage.nColumns > 1 )
     {
         // in N-Up printing we have no "page" background operation
@@ -1383,12 +1383,22 @@ DrawModeFlags PrinterController::removeTransparencies( GDIMetaFile const & i_rIn
         // so let's go for white, which will kill 99.9% of the real cases
         aBg = COL_WHITE;
     }
-    mpImplData->mxPrinter->RemoveTransparenciesFromMetaFile( i_rIn, o_rOut, nMaxBmpDPIX, nMaxBmpDPIY,
-                                                             rPrinterOptions.IsReduceTransparency(),
-                                                             rPrinterOptions.GetReducedTransparencyMode() == vcl::printer::TransparencyMode::Auto,
-                                                             rPrinterOptions.IsReduceBitmaps() && rPrinterOptions.IsReducedBitmapIncludesTransparency(),
-                                                             aBg
-                                                             );
+
+    vcl::metafile::FlatteningOptions aOpts;
+    aOpts.nMaxBmpDPIX = nMaxBmpDPIX;
+    aOpts.nMaxBmpDPIY = nMaxBmpDPIY;
+    aOpts.bReduceTransparency = rPrinterOptions.IsReduceTransparency();
+    aOpts.bTransparencyAutoMode = (rPrinterOptions.GetReducedTransparencyMode() == vcl::printer::TransparencyMode::Auto);
+    aOpts.bDownsampleBitmaps = (rPrinterOptions.IsReduceBitmaps() && rPrinterOptions.IsReducedBitmapIncludesTransparency());
+    aOpts.aBackground = aBg;
+
+    vcl::metafile::TransparencyFlattener::Flatten(
+        i_rIn,
+        o_rOut,
+        *mpImplData->mxPrinter,
+        aOpts
+    );
+
     return nRestoreDrawMode;
 }
 

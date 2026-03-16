@@ -30,6 +30,7 @@
 #include <vcl/metafile/GDIMetaFile.hxx>
 #include <vcl/graph.hxx>
 #include <vcl/graphic/GraphicMetadata.hxx>
+#include <vcl/metafile/TransparencyFlattener.hxx>
 #include <vcl/pdf/PDFEncryptionInitialization.hxx>
 #include <rtl/ustring.hxx>
 #include <comphelper/propertyvalue.hxx>
@@ -1292,12 +1293,10 @@ void PDFExport::showErrors( const std::set< vcl::pdf::PDFWriter::ErrorCode >& rE
     }
 }
 
-
-void PDFExport::ImplExportPage( vcl::pdf::PDFWriter& rWriter, vcl::PDFExtOutDevData& rPDFExtOutDevData, const GDIMetaFile& rMtf )
-{
+void PDFExport::ImplExportPage( vcl::pdf::PDFWriter& rWriter, vcl::PDFExtOutDevData& rPDFExtOutDevData, const GDIMetaFile& rMtf ){
     //Rectangle(Point, Size) creates a rectangle off by 1, use Rectangle(long, long, long, long) instead
     basegfx::B2DPolygon aSize(tools::Polygon(tools::Rectangle(0, 0, rMtf.GetPrefSize().Width(), rMtf.GetPrefSize().Height())).getB2DPolygon());
-    basegfx::B2DPolygon aSizePDF(::LogicToLogic(aSize, rMtf.GetPrefMapMode(), MapMode(MapUnit::MapPoint)));
+    basegfx::B2DPolygon aSizePDF(LogicToLogic(aSize, rMtf.GetPrefMapMode(), MapMode(MapUnit::MapPoint)));
     basegfx::B2DRange aRangePDF(aSizePDF.getB2DRange());
     tools::Rectangle       aPageRect( Point(), rMtf.GetPrefSize() );
 
@@ -1308,9 +1307,21 @@ void PDFExport::ImplExportPage( vcl::pdf::PDFWriter& rWriter, vcl::PDFExtOutDevD
     GDIMetaFile aMtf;
     if( mbRemoveTransparencies )
     {
-        aCtx.m_bTransparenciesWereRemoved = rWriter.GetReferenceDevice()->
-            RemoveTransparenciesFromMetaFile( rMtf, aMtf, mnMaxImageResolution, mnMaxImageResolution,
-                                              false, true, mbReduceImageResolution );
+        vcl::metafile::FlatteningOptions aOpts;
+        aOpts.nMaxBmpDPIX = mnMaxImageResolution;
+        aOpts.nMaxBmpDPIY = mnMaxImageResolution;
+        aOpts.bReduceTransparency = false; // Mapped from the original call's 5th arg
+        aOpts.bTransparencyAutoMode = true; // Mapped from the original call's 6th arg
+        aOpts.bDownsampleBitmaps = mbReduceImageResolution;
+        aOpts.aBackground = COL_TRANSPARENT; // The old default since the 8th arg was omitted
+
+        aCtx.m_bTransparenciesWereRemoved = vcl::metafile::TransparencyFlattener::Flatten(
+            rMtf,
+            aMtf,
+            *rWriter.GetReferenceDevice(),
+            aOpts
+        );
+
         // tdf#134736 if the metafile was replaced then rPDFExtOutDevData's PageSyncData mActions
         // all still point to MetaAction indexes in the original metafile that are now invalid.
         // Throw them all away in the absence of a way to reposition them to new positions of
@@ -1343,7 +1354,6 @@ void PDFExport::ImplExportPage( vcl::pdf::PDFWriter& rWriter, vcl::PDFExtOutDevD
         ImplWriteTiledWatermark( rWriter, Size(aRangePDF.getWidth(), aRangePDF.getHeight()) );
     }
 }
-
 
 void PDFExport::ImplWriteWatermark( vcl::pdf::PDFWriter& rWriter, const Size& rPageSize )
 {

@@ -325,6 +325,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/metafile/GDIMetaFile \
     vcl/source/metafile/MetaAction \
     vcl/source/metafile/MetafileRecorder \
+    vcl/source/metafile/TransparencyFlattener \
     vcl/source/text/layoutrecording \
     vcl/source/text/AccessibilityRecorder \
     vcl/source/text/CaretManager \

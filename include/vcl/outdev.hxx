@@ -1492,24 +1492,6 @@ private:
 
 public:
 
-    /** helper method removing transparencies from a metafile (e.g. for printing)
-
-        @returns
-        true: transparencies were removed
-        false: output metafile is unchanged input metafile
-
-        @attention this is a member method, so current state can influence the result !
-        @attention the output metafile is prepared in pixel mode for the currentOutputDevice
-                   state. It can not be moved or rotated reliably anymore.
-    */
-    bool                        RemoveTransparenciesFromMetaFile(
-                                    const GDIMetaFile& rInMtf, GDIMetaFile& rOutMtf,
-                                    tools::Long nMaxBmpDPIX, tools::Long nMaxBmpDPIY,
-                                    bool bReduceTransparency,
-                                    bool bTransparencyAutoMode,
-                                    bool bDownsampleBitmaps,
-                                    const Color& rBackground = COL_TRANSPARENT );
-
     void                        DrawTransparent( const tools::PolyPolygon& rPolyPoly, sal_uInt16 nTransparencePercent );
     SAL_DLLPUBLIC void              DrawTransparentWithRasterOp( const tools::PolyPolygon& rPolyPoly, sal_uInt16 nTransparencePercent, RasterOp eRasterOp );
     SAL_DLLPUBLIC void              DrawTransparentWithRasterOp( const basegfx::B2DHomMatrix& rObjectTransform, const basegfx::B2DPolyPolygon& rB2DPolyPoly, double fTransparency, RasterOp eRasterOp );

@@ -48,6 +48,12 @@ class PaperInfo;
 class QueueInfo;
 class SalPrinter;
 class VirtualDevice;
+
+namespace vcl::metafile
+{
+class TransparencyFlattener;
+}
+
 enum class SalPrinterError;
 enum class PrinterSupport;
 enum Paper : unsigned int;
