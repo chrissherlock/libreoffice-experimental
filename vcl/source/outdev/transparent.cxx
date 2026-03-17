@@ -107,6 +107,90 @@ void OutputDevice::DrawTransparentWithRasterOp( const basegfx::B2DHomMatrix& rOb
                                 eRasterOp);
 }
 
+static void lcl_MaskedPaletteBlend(Bitmap& rPaint, const Bitmap& rPolyMask,
+                                   const Color& rFillColor, sal_uInt8 nAlpha)
+{
+    BitmapScopedWriteAccess pW(rPaint);
+    BitmapScopedReadAccess pR(rPolyMask);
+
+    if (!pW || !pR)
+        return;
+
+    const BitmapColor aFillCol(rFillColor);
+    const BitmapColor aBlack(pR->GetBestMatchingColor(COL_BLACK));
+    const tools::Long nWidth = pW->Width();
+    const tools::Long nHeight = pW->Height();
+
+    const BitmapPalette& rPal = pW->GetPalette();
+    const sal_uInt16 nCount = rPal.GetEntryCount();
+
+    // Pre-calculate the blended results for every palette entry
+    std::vector<BitmapColor> aMap(nCount);
+    for (sal_uInt16 i = 0; i < nCount; i++)
+    {
+        BitmapColor aCol(rPal[i]);
+        aCol.Merge(aFillCol, nAlpha);
+        // Store the index of the closest match in the existing palette
+        aMap[i] = BitmapColor(static_cast<sal_uInt8>(rPal.GetBestIndex(aCol)));
+    }
+
+    for (tools::Long nY = 0; nY < nHeight; nY++)
+    {
+        Scanline pScanline = pW->GetScanline(nY);
+        Scanline pScanlineRead = pR->GetScanline(nY);
+        for (tools::Long nX = 0; nX < nWidth; nX++)
+        {
+            if (pR->GetPixelFromData(pScanlineRead, nX) == aBlack)
+            {
+                // Fast index lookup from our pre-calculated map
+                pW->SetPixelOnData(pScanline, nX, aMap[pW->GetIndexFromData(pScanline, nX)]);
+            }
+        }
+    }
+}
+
+static void lcl_MaskedBlend(Bitmap& rPaint, const Bitmap& rPolyMask,
+                            const Color& rFillColor, sal_uInt8 nAlpha)
+{
+    BitmapScopedWriteAccess pW(rPaint);
+    BitmapScopedReadAccess pR(rPolyMask);
+
+    if (!pW || !pR)
+        return;
+
+    const BitmapColor aFillCol(rFillColor);
+    const BitmapColor aBlack(pR->GetBestMatchingColor(COL_BLACK));
+    const tools::Long nWidth = pW->Width();
+    const tools::Long nHeight = pW->Height();
+
+    for (tools::Long nY = 0; nY < nHeight; nY++)
+    {
+        Scanline pScanline = pW->GetScanline(nY);
+        Scanline pScanlineRead = pR->GetScanline(nY);
+        for (tools::Long nX = 0; nX < nWidth; nX++)
+        {
+            if (pR->GetPixelFromData(pScanlineRead, nX) == aBlack)
+            {
+                BitmapColor aPixCol = pW->GetColor(nY, nX);
+                aPixCol.Merge(aFillCol, nAlpha);
+                pW->SetPixelOnData(pScanline, nX, aPixCol);
+            }
+        }
+    }
+}
+
+/**
+ * Manually blends a fill color into a bitmap using a mask to define the
+ * area of effect and a transparency value for the blend strength.
+ */
+static void lcl_BlendAlphaBitmap(Bitmap& rPaint, const Bitmap& rPolyMask, const Color& rFillColor, sal_uInt8 nAlpha)
+{
+    if (vcl::isPalettePixelFormat(rPaint.getPixelFormat()))
+        lcl_MaskedPaletteBlend(rPaint, rPolyMask, rFillColor, nAlpha);
+    else
+        lcl_MaskedBlend(rPaint, rPolyMask, rFillColor, nAlpha);
+}
+
 void OutputDevice::DrawTransparentWithRasterOp( const tools::PolyPolygon& rPolyPoly,
                                                 sal_uInt16 nTransparencePercent,
                                                 RasterOp eRasterOp )
@@ -185,66 +269,7 @@ void OutputDevice::DrawTransparentWithRasterOp( const tools::PolyPolygon& rPolyP
     if (aPaint.IsEmpty() || aPolyMask.IsEmpty())
         return;
 
-    BitmapScopedWriteAccess pW(aPaint);
-    BitmapScopedReadAccess pR(aPolyMask);
-
-    if( pW && pR )
-    {
-        BitmapColor aPixCol;
-        const BitmapColor aFillCol( GetFillColor() );
-        const BitmapColor aBlack( pR->GetBestMatchingColor( COL_BLACK ) );
-        const tools::Long nWidth = pW->Width();
-        const tools::Long nHeight = pW->Height();
-        tools::Long nX, nY;
-
-        if (vcl::isPalettePixelFormat(aPaint.getPixelFormat()))
-        {
-            const BitmapPalette& rPal = pW->GetPalette();
-            const sal_uInt16 nCount = rPal.GetEntryCount();
-            std::unique_ptr<sal_uInt8[]> xMap(new sal_uInt8[ nCount * sizeof( BitmapColor )]);
-            BitmapColor* pMap = reinterpret_cast<BitmapColor*>(xMap.get());
-
-            for( sal_uInt16 i = 0; i < nCount; i++ )
-            {
-                BitmapColor aCol( rPal[ i ] );
-                aCol.Merge( aFillCol, cTrans );
-                pMap[ i ] = BitmapColor( static_cast<sal_uInt8>(rPal.GetBestIndex( aCol )) );
-            }
-
-            for( nY = 0; nY < nHeight; nY++ )
-            {
-                Scanline pScanline = pW->GetScanline(nY);
-                Scanline pScanlineRead = pR->GetScanline(nY);
-                for( nX = 0; nX < nWidth; nX++ )
-                {
-                    if( pR->GetPixelFromData( pScanlineRead, nX ) == aBlack )
-                    {
-                        pW->SetPixelOnData( pScanline, nX, pMap[ pW->GetIndexFromData( pScanline, nX ) ] );
-                    }
-                }
-            }
-        }
-        else
-        {
-            for( nY = 0; nY < nHeight; nY++ )
-            {
-                Scanline pScanline = pW->GetScanline(nY);
-                Scanline pScanlineRead = pR->GetScanline(nY);
-                for( nX = 0; nX < nWidth; nX++ )
-                {
-                    if( pR->GetPixelFromData( pScanlineRead, nX ) == aBlack )
-                    {
-                        aPixCol = pW->GetColor( nY, nX );
-                        aPixCol.Merge(aFillCol, cTrans);
-                        pW->SetPixelOnData(pScanline, nX, aPixCol);
-                    }
-                }
-            }
-        }
-    }
-
-    pR.reset();
-    pW.reset();
+    lcl_BlendAlphaBitmap(aPaint, aPolyMask, GetFillColor(), cTrans);
 
     DrawBitmap( aDstRect.TopLeft(), aPaint );
 
