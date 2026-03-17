@@ -49,6 +49,7 @@
 #include <comphelper/scopeguard.hxx>
 #include <list>
 #include <memory>
+#include <utility>
 
 namespace
 {
@@ -94,227 +95,39 @@ namespace
 // void OutputDevice::DrawPolyPolygon( const basegfx::B2DPolyPolygon& rB2DPolyPoly )
 // so when changes are made here do not forget to make changes there, too
 
-
-
 void OutputDevice::DrawTransparentWithRasterOp( const basegfx::B2DHomMatrix& rObjectTransform,
                                                 const basegfx::B2DPolyPolygon& rB2DPolyPoly,
                                                 double fTransparency,
                                                 RasterOp eRasterOp )
 {
-    // Convert B2D geometry to legacy tools::PolyPolygon and delegate
     basegfx::B2DPolyPolygon aTransformed(rB2DPolyPoly);
     aTransformed.transform(rObjectTransform);
     DrawTransparentWithRasterOp(toPolyPolygon(aTransformed),
                                 static_cast<sal_uInt16>(fTransparency * 100.0),
                                 eRasterOp);
 }
+
 void OutputDevice::DrawTransparentWithRasterOp( const tools::PolyPolygon& rPolyPoly,
                                                 sal_uInt16 nTransparencePercent,
                                                 RasterOp eRasterOp )
 {
-    // 1. Transaction Setup: Only change state if necessary
     RasterOp eOldRasterOp = GetRasterOp();
     bool bChanged = (eOldRasterOp != eRasterOp);
 
     if (bChanged)
         SetRasterOp(eRasterOp); // This also records the state change to the metafile
 
-    // 2. Transaction Teardown: Restore state automatically on exit
     comphelper::ScopeGuard aRasterOpGuard([this, bChanged, eOldRasterOp]() {
         if (bChanged)
             SetRasterOp(eOldRasterOp); // Restore previous op
     });
 
-    // 3. Record the Action
-    // We record *after* SetRasterOp so the playback sequence is correct:
-    // [SetRasterOp -> DrawTransparent -> RestoreRasterOp]
     maRecorder.RecordTransparent(rPolyPoly, nTransparencePercent);
 
-    // 4. Perform Drawing
-    // We use Emulate because hardware (B2D) paths generally don't support XOR/Invert combined with alpha
-    EmulateDrawTransparent(rPolyPoly, nTransparencePercent);
-}
-
-void OutputDevice::DrawTransparent(
-    const basegfx::B2DHomMatrix& rObjectTransform,
-    const basegfx::B2DPolyPolygon& rB2DPolyPoly,
-    double fTransparency)
-{
-    assert(!is_double_buffered_window());
-
-    // 1. Dispatch legacy/exotic RasterOps (The "Third Case")
-    if (GetRasterOp() != RasterOp::OverPaint)
-    {
-        // tdf#119843 need transformed Polygon here
-        basegfx::B2DPolyPolygon aTransformed(rB2DPolyPoly);
-        aTransformed.transform(rObjectTransform);
-        DrawTransparentWithRasterOp(toPolyPolygon(aTransformed),
-                                    static_cast<sal_uInt16>(fTransparency * 100.0),
-                                    GetRasterOp());
-        return;
-    }
-
-    // --- From here on, we assume RasterOp::OverPaint ---
-
-    // AW: Do NOT paint empty PolyPolygons
-    if(!rB2DPolyPoly.count())
+    if (!IsDeviceOutputNecessary() || IsLayoutCalculationNecessary())
         return;
 
-    // we need a graphics
-    if( !mpGraphics && !AcquireGraphics() )
-        return;
-    assert(mpGraphics);
-
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
-
-    if ( IsOutputCulled() )
-        return;
-
-    if( mbLineColorDirty )
-        InitLineColor();
-
-    if( mbFillColorDirty )
-        InitFillColor();
-
-    // b2dpolygon support not implemented yet on non-UNX platforms
-    basegfx::B2DPolyPolygon aB2DPolyPolygon(rB2DPolyPoly);
-
-    // ensure it is closed
-    if(!aB2DPolyPolygon.isClosed())
-    {
-        // maybe assert, prevents buffering due to making a copy
-        aB2DPolyPolygon.setClosed( true );
-    }
-
-    // create ObjectToDevice transformation
-    const basegfx::B2DHomMatrix aFullTransform(mpMapper->GetDeviceTransformation() * rObjectTransform);
-    // TODO: this must not drop transparency for mpAlphaVDev case, but instead use premultiplied
-    // alpha... but that requires using premultiplied alpha also for already drawn data
-
-    if (IsFillColor())
-    {
-        mpGraphics->DrawPolyPolygon(
-            aFullTransform,
-            aB2DPolyPolygon,
-            fTransparency,
-            *this);
-    }
-
-    if (IsLineColor())
-    {
-        const bool bPixelSnapHairline(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
-
-        for(auto const& rPolygon : std::as_const(aB2DPolyPolygon))
-        {
-            mpGraphics->drawPolyLine(
-                aFullTransform,
-                rPolygon,
-                fTransparency,
-                0.0, // tdf#124848 hairline
-                nullptr, // MM01
-                basegfx::B2DLineJoin::NONE,
-                css::drawing::LineCap_BUTT,
-                basegfx::deg2rad(15.0), // not used with B2DLineJoin::NONE, but the correct default
-                bPixelSnapHairline);
-        }
-    }
-
-    maRecorder.RecordTransparent(rObjectTransform, rB2DPolyPoly, fTransparency);
-}
-
-// fallback to old polygon drawing if needed
-// tdf#119843 need transformed Polygon here
-// [Note: This logic was moved inside the function in the refactor]
-// We remove the old fallback wrapper that used to be here.
-
-bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly,
-                                             sal_uInt16 nTransparencePercent )
-{
-    assert(!is_double_buffered_window());
-
-    bool bDrawn = false;
-
-    if (true
-#if defined UNX && ! defined MACOSX && ! defined IOS
-        && GetBitCount() > 8
-#endif
-#ifdef _WIN32
-        // workaround bad dithering on remote displaying when using GDI+ with toolbar button highlighting
-        && !rPolyPoly.IsRect()
-#endif
-        )
-    {
-        // prepare the graphics device
-        if ( mpClippingController->IsDirty() )
-            InitClipRegion();
-
-        if ( IsOutputCulled() )
-            return true;
-
-        if( mbLineColorDirty )
-            InitLineColor();
-
-        if( mbFillColorDirty )
-            InitFillColor();
-
-        // get the polygon in device coordinates
-        basegfx::B2DPolyPolygon aB2DPolyPolygon(rPolyPoly.getB2DPolyPolygon());
-        const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation());
-
-        const double fTransparency = 0.01 * nTransparencePercent;
-        if( mpGraphicsState->mbFillColor )
-        {
-            // #i121591#
-            // CAUTION: Only non printing (pixel-renderer) VCL commands from OutputDevices
-            // should be used when printing. Normally this is avoided by the printer being
-            // non-AAed and thus e.g. on WIN GdiPlus calls are not used. It may be necessary
-            // to figure out a way of moving this code to its own function that is
-            // overridden by the Print class, which will mean we deliberately override the
-            // functionality and we use the fallback some lines below (which is not very good,
-            // though. For now, WinSalGraphics::drawPolyPolygon will detect printer usage and
-            // correct the wrong mapping (see there for details)
-            mpGraphics->DrawPolyPolygon(
-                aTransform,
-                aB2DPolyPolygon,
-                fTransparency,
-                *this);
-            bDrawn = true;
-        }
-
-        if( mpGraphicsState->mbLineColor )
-        {
-            // disable the fill color for now
-            mpGraphics->SetFillColor();
-
-            // draw the border line
-            const bool bPixelSnapHairline(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
-
-            for(auto const& rPolygon : std::as_const(aB2DPolyPolygon))
-            {
-                bDrawn = mpGraphics->drawPolyLine(
-                    aTransform,
-                    rPolygon,
-                    fTransparency,
-                    0.0, // tdf#124848 hairline
-                    nullptr, // MM01
-                    basegfx::B2DLineJoin::NONE,
-                    css::drawing::LineCap_BUTT,
-                    basegfx::deg2rad(15.0), // not used with B2DLineJoin::NONE, but the correct default
-                    bPixelSnapHairline);
-            }
-
-            // prepare to restore the fill color
-            mbFillColorDirty = mpGraphicsState->mbFillColor;
-        }
-    }
-
-    return bDrawn;
-}
-
-void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
-                                            sal_uInt16 nTransparencePercent )
-{
+    // We use software emulation because hardware paths generally don't support XOR/Invert combined with alpha
     vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
 
     tools::PolyPolygon aPolyPoly( LogicToPixel( rPolyPoly ) );
@@ -330,12 +143,9 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
     {
         bool bDrawn = false;
 
-        // #i66849# Added fast path for exactly rectangular
-        // polygons
+        // #i66849# Added fast path for exactly rectangular polygons
         if( aPolyPoly.IsRect() )
         {
-            // setup Graphics only here (other cases delegate
-            // to basic OutDev methods)
             if ( mpClippingController->IsDirty() )
                 InitClipRegion();
 
@@ -469,7 +279,99 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
             }
         }
     }
+}
 
+void OutputDevice::DrawTransparent(
+    const basegfx::B2DHomMatrix& rObjectTransform,
+    const basegfx::B2DPolyPolygon& rB2DPolyPoly,
+    double fTransparency)
+{
+    assert(!is_double_buffered_window());
+
+    if (GetRasterOp() != RasterOp::OverPaint)
+    {
+        // tdf#119843 need transformed Polygon here
+        basegfx::B2DPolyPolygon aTransformed(rB2DPolyPoly);
+        aTransformed.transform(rObjectTransform);
+        DrawTransparentWithRasterOp(toPolyPolygon(aTransformed),
+                                    static_cast<sal_uInt16>(fTransparency * 100.0),
+                                    GetRasterOp());
+        return;
+    }
+
+    // AW: Do NOT paint empty PolyPolygons
+    if(!rB2DPolyPoly.count())
+        return;
+
+    if( !mpGraphics && !AcquireGraphics() )
+        return;
+    assert(mpGraphics);
+
+    if ( mpClippingController->IsDirty() )
+        InitClipRegion();
+
+    if ( IsOutputCulled() )
+        return;
+
+    if( mbLineColorDirty )
+        InitLineColor();
+
+    if( mbFillColorDirty )
+        InitFillColor();
+
+    // b2dpolygon support not implemented yet on non-UNX platforms
+    basegfx::B2DPolyPolygon aB2DPolyPolygon(rB2DPolyPoly);
+
+    // ensure it is closed
+    if(!aB2DPolyPolygon.isClosed())
+    {
+        // maybe assert, prevents buffering due to making a copy
+        aB2DPolyPolygon.setClosed( true );
+    }
+
+    // create ObjectToDevice transformation
+    const basegfx::B2DHomMatrix aFullTransform(mpMapper->GetDeviceTransformation() * rObjectTransform);
+    // TODO: this must not drop transparency for mpAlphaVDev case, but instead use premultiplied
+    // alpha... but that requires using premultiplied alpha also for already drawn data
+
+    if (IsFillColor())
+    {
+        // #i121591#
+        // CAUTION: Only non printing (pixel-renderer) VCL commands from OutputDevices
+        // should be used when printing. Normally this is avoided by the printer being
+        // non-AAed and thus e.g. on WIN GdiPlus calls are not used. It may be necessary
+        // to figure out a way of moving this code to its own function that is
+        // overridden by the Print class, which will mean we deliberately override the
+        // functionality and we use the fallback some lines below (which is not very good,
+        // though. For now, WinSalGraphics::drawPolyPolygon will detect printer usage and
+        // correct the wrong mapping (see there for details)
+        mpGraphics->DrawPolyPolygon(
+            aFullTransform,
+            aB2DPolyPolygon,
+            fTransparency,
+            *this);
+    }
+
+    if (IsLineColor())
+    {
+        const bool bPixelSnapHairline(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+
+        for(auto const& rPolygon : std::as_const(aB2DPolyPolygon))
+        {
+            mpGraphics->drawPolyLine(
+                aFullTransform,
+                rPolygon,
+                fTransparency,
+                0.0, // tdf#124848 hairline
+                nullptr, // MM01
+                basegfx::B2DLineJoin::NONE,
+                css::drawing::LineCap_BUTT,
+                basegfx::deg2rad(15.0), // not used with B2DLineJoin::NONE, but the correct default
+                bPixelSnapHairline);
+        }
+    }
+
+    maRecorder.RecordTransparent(rObjectTransform, rB2DPolyPoly, fTransparency);
 }
 
 void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
@@ -477,7 +379,6 @@ void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
 {
     assert(!is_double_buffered_window());
 
-    // 1. Dispatch legacy/exotic RasterOps (The "Third Case")
     if (GetRasterOp() != RasterOp::OverPaint)
     {
         DrawTransparentWithRasterOp(rPolyPoly, nTransparencePercent, GetRasterOp());
@@ -495,23 +396,65 @@ void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
     if( (!mpGraphicsState->mbFillColor && !mpGraphicsState->mbLineColor) || (nTransparencePercent >= 100) )
         return; // tdf#84294: do not record it in metafile
 
-    // handle metafile recording
     maRecorder.RecordTransparent(rPolyPoly, nTransparencePercent);
 
-    bool bDrawn = !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary();
-    if( bDrawn )
+    if( !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary() )
         return;
 
-    // get the device graphics as drawing target
     if( !mpGraphics && !AcquireGraphics() )
         return;
     assert(mpGraphics);
 
-    // try hard to draw it directly, because the emulation layers are slower
-    bDrawn = DrawTransparentNatively( rPolyPoly, nTransparencePercent );
+    if ( mpClippingController->IsDirty() )
+        InitClipRegion();
 
-    if (!bDrawn)
-        EmulateDrawTransparent( rPolyPoly, nTransparencePercent );
+    if ( IsOutputCulled() )
+        return;
+
+    if( mbLineColorDirty )
+        InitLineColor();
+
+    if( mbFillColorDirty )
+        InitFillColor();
+
+    basegfx::B2DPolyPolygon aB2DPolyPolygon(rPolyPoly.getB2DPolyPolygon());
+    const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation());
+    const double fTransparency = 0.01 * nTransparencePercent;
+
+    if( mpGraphicsState->mbFillColor )
+    {
+        mpGraphics->DrawPolyPolygon(
+            aTransform,
+            aB2DPolyPolygon,
+            fTransparency,
+            *this);
+    }
+
+    if( mpGraphicsState->mbLineColor )
+    {
+        // disable the fill color for now
+        mpGraphics->SetFillColor();
+
+        // draw the border line
+        const bool bPixelSnapHairline(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+
+        for(auto const& rPolygon : std::as_const(aB2DPolyPolygon))
+        {
+            mpGraphics->drawPolyLine(
+                aTransform,
+                rPolygon,
+                fTransparency,
+                0.0, // tdf#124848 hairline
+                nullptr, // MM01
+                basegfx::B2DLineJoin::NONE,
+                css::drawing::LineCap_BUTT,
+                basegfx::deg2rad(15.0), // not used with B2DLineJoin::NONE, but the correct default
+                bPixelSnapHairline);
+        }
+
+        // prepare to restore the fill color
+        mbFillColorDirty = mpGraphicsState->mbFillColor;
+    }
 }
 
 void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos,
