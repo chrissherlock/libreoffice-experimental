@@ -394,9 +394,77 @@ static bool lcl_ConfigureOffscreenBuffer(VirtualDevice& rBuffer,
     return true;
 }
 
-void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, const Size& rSize,
-                                    const Point& rMtfPos, const Size& rMtfSize,
-                                    const Gradient& rTransparenceGradient )
+namespace
+{
+struct Renderers
+{
+    const OutputDevice& rOutDev;
+    VirtualDevice& rBuffer;
+};
+
+struct RenderSource
+{
+    const GDIMetaFile& rMtf;
+    const tools::Rectangle aMtfRect;
+};
+
+struct RenderTarget
+{
+    const tools::Rectangle aLogicalRect;
+    const tools::Rectangle aPixelRect;
+};
+
+struct CompositionEffect
+{
+    const Gradient& rGradient;
+    bool bNeedsCopyCycle;
+};
+} // end anonymous namespace
+
+static std::pair<Bitmap, Bitmap> lcl_RenderTransparentComponents(const Renderers& rRenderers,
+                                                                 const RenderSource& rSource,
+                                                                 const RenderTarget& rTarget,
+                                                                 const CompositionEffect& rEffect)
+{
+    const Size aDstSzPixel = rTarget.aPixelRect.GetSize();
+    const bool bBufferMapModeEnabled = rRenderers.rBuffer.IsMapModeEnabled();
+
+    // Ensure the buffer's MapMode is restored if we return early
+    comphelper::ScopeGuard aBufferMapGuard([&rRenderers, bBufferMapModeEnabled]() {
+        rRenderers.rBuffer.EnableMapMode(bBufferMapModeEnabled);
+    });
+
+    // Phase 1: Render Content (Paint)
+    if (rEffect.bNeedsCopyCycle)
+    {
+        rRenderers.rBuffer.EnableMapMode(false);
+        rRenderers.rBuffer.DrawOutDev(Point(), aDstSzPixel, rTarget.aPixelRect.TopLeft(),
+                                      aDstSzPixel, rRenderers.rOutDev);
+    }
+
+    rRenderers.rBuffer.EnableMapMode(bBufferMapModeEnabled);
+    const_cast<GDIMetaFile&>(rSource.rMtf).WindStart();
+    const_cast<GDIMetaFile&>(rSource.rMtf).Play(rRenderers.rBuffer, rSource.aMtfRect.TopLeft(), rSource.aMtfRect.GetSize());
+    const_cast<GDIMetaFile&>(rSource.rMtf).WindStart();
+
+    rRenderers.rBuffer.EnableMapMode(false);
+    Bitmap aPaint = rRenderers.rBuffer.GetBitmap(Point(), aDstSzPixel);
+
+    // Phase 2: Render Gradient Mask
+    rRenderers.rBuffer.EnableMapMode(bBufferMapModeEnabled);
+    rRenderers.rBuffer.SetDrawMode(DrawModeFlags::GrayGradient);
+    rRenderers.rBuffer.DrawGradient(rTarget.aLogicalRect, rEffect.rGradient);
+    rRenderers.rBuffer.SetDrawMode(DrawModeFlags::Default);
+
+    rRenderers.rBuffer.EnableMapMode(false);
+    Bitmap aGradientMask = rRenderers.rBuffer.GetBitmap(Point(), aDstSzPixel);
+
+    return { aPaint, aGradientMask };
+}
+
+void OutputDevice::DrawTransparent(const GDIMetaFile& rMtf, const Point& rPos, const Size& rSize,
+                                   const Point& rMtfPos, const Size& rMtfSize,
+                                   const Gradient& rTransparenceGradient)
 {
     assert(!is_double_buffered_window());
 
@@ -415,60 +483,39 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
 
     vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
 
-    tools::Rectangle aOutRect( LogicToPixel( tools::Rectangle(rPos, rSize) ) );
-
-    // FIX: Wrap aOutRect in an explicit tools::PolyPolygon() call
-    tools::Rectangle aDstRect = GetVisibleDeviceRangePixel( tools::PolyPolygon(aOutRect) );
+    tools::Rectangle aOutRect(LogicToPixel(tools::Rectangle(rPos, rSize)));
+    tools::Rectangle aDstRect = GetVisibleDeviceRangePixel(tools::PolyPolygon(aOutRect));
 
     if (aDstRect.IsEmpty())
         return;
 
-    const Size aDstSzPixel = aDstRect.GetSize();
-
-    // FIX: Define bNeedsCopyCycle here so it's available for the buffer setup
-    const bool bNeedsCopyCycle = (GetAntialiasing() != AntialiasingFlags::NONE || rPos != rMtfPos || rSize != rMtfSize);
+    const bool bNeedsCopyCycle = (GetAntialiasing() != AntialiasingFlags::NONE || rPos != rMtfPos
+                                  || rSize != rMtfSize);
 
     ScopedVclPtrInstance<VirtualDevice> xOffscreenBuffer(DeviceFormat::WITH_ALPHA);
-
     if (!lcl_ConfigureOffscreenBuffer(*xOffscreenBuffer, *this, aDstRect, bNeedsCopyCycle))
         return;
 
-    const bool bOrigMapModeEnabled = mpMapper->IsMapModeEnabled();
-    const bool bBufferMapModeEnabled = xOffscreenBuffer->IsMapModeEnabled();
+    const Renderers aRenderers{ *this, *xOffscreenBuffer };
+    const RenderSource aSource{ rMtf, tools::Rectangle(rMtfPos, rMtfSize) };
+    const RenderTarget aTarget{ tools::Rectangle(rPos, rSize), aDstRect };
+    const CompositionEffect aEffect{ rTransparenceGradient, bNeedsCopyCycle };
 
-    // Render Content
-    mpMapper->EnableMapMode(false);
-
-    if (bNeedsCopyCycle)
-    {
-        xOffscreenBuffer->EnableMapMode(false);
-        xOffscreenBuffer->DrawOutDev( Point(), aDstSzPixel, aDstRect.TopLeft(), aDstSzPixel, *this);
-    }
-
-    xOffscreenBuffer->EnableMapMode(bBufferMapModeEnabled);
-    const_cast<GDIMetaFile&>(rMtf).WindStart();
-    const_cast<GDIMetaFile&>(rMtf).Play(*xOffscreenBuffer, rMtfPos, rMtfSize);
-    const_cast<GDIMetaFile&>(rMtf).WindStart();
-
-    xOffscreenBuffer->EnableMapMode(false);
-    const Bitmap aPaint(xOffscreenBuffer->GetBitmap(Point(), aDstSzPixel));
-
-    // Render Gradient Mask
-    xOffscreenBuffer->EnableMapMode(bBufferMapModeEnabled);
-    xOffscreenBuffer->SetDrawMode(DrawModeFlags::GrayGradient);
-    xOffscreenBuffer->DrawGradient(tools::Rectangle(rPos, rSize), rTransparenceGradient);
-    xOffscreenBuffer->SetDrawMode(DrawModeFlags::Default);
-
-    xOffscreenBuffer->EnableMapMode(false);
-    const Bitmap aGradientMask(xOffscreenBuffer->GetBitmap(Point(), aDstSzPixel));
+    auto [aPaint, aGradientMask] = lcl_RenderTransparentComponents(aRenderers, aSource, aTarget, aEffect);
 
     xOffscreenBuffer.disposeAndClear();
 
     Bitmap aResult = vcl::rendercontext::BitmapRenderer::ApplyGradientAlpha(aPaint, aGradientMask);
 
-    DrawBitmap(aDstRect.TopLeft(), aResult);
+    {
+        const bool bOrigMapModeEnabled = mpMapper->IsMapModeEnabled();
+        comphelper::ScopeGuard aMapperGuard([this, bOrigMapModeEnabled]() {
+            mpMapper->EnableMapMode(bOrigMapModeEnabled);
+        });
 
-    mpMapper->EnableMapMode(bOrigMapModeEnabled);
+        mpMapper->EnableMapMode(false);
+        DrawBitmap(aDstRect.TopLeft(), aResult);
+    }
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
