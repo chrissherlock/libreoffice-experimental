@@ -907,6 +907,7 @@ private:
     SAL_DLLPRIVATE void         DrawColorWallpaper( tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight, const Wallpaper& rWallpaper );
     SAL_DLLPRIVATE void         DrawBitmapWallpaper( tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight, const Wallpaper& rWallpaper );
     SAL_DLLPRIVATE void         DrawWallpaperNegativeSpace( const tools::Rectangle& rTargetRect, const Point& rBmpPos, const Size& rBmpSize, const Wallpaper& rWallpaper );
+    SAL_DLLPRIVATE bool         DrawBitmapWallpaperBackground( Bitmap& rBmp, const tools::Rectangle& rRect, const Wallpaper& rWallpaper, const Bitmap* pCached );
     ///@}
 
 

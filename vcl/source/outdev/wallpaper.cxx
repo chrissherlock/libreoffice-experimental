@@ -190,22 +190,136 @@ void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
                                         const Wallpaper& rWallpaper )
 {
     assert(!is_double_buffered_window());
-    if( IsLayoutCalculationNecessary() ) return;
+    if (IsLayoutCalculationNecessary())
+        return;
+
+    // Construct the target rectangle immediately
+    const tools::Rectangle aTargetRect(Point(nX, nY), Size(nWidth, nHeight));
+    if (aTargetRect.IsEmpty())
+        return;
 
     const Bitmap* pCached = rWallpaper.ImplGetCachedBitmap();
     const bool bOldMap = mpMapper->IsMapModeEnabled();
 
     Bitmap aBmp = pCached ? *pCached : rWallpaper.GetBitmap();
 
+    const bool bDrawColorBackground = DrawBitmapWallpaperBackground(aBmp, aTargetRect, rWallpaper, pCached);
+
+    // Extract attributes AFTER the background handler (in case aBmp was modified for transparency)
     const tools::Long nBmpWidth = aBmp.GetSizePixel().Width();
     const tools::Long nBmpHeight = aBmp.GetSizePixel().Height();
-    const bool bTransparent = aBmp.HasAlpha();
+    const WallpaperStyle eStyle = rWallpaper.GetStyle();
+
+    // Bounds Calculation
+    Point aBasePos;
+    Size aBoundingSize;
+
+    if (rWallpaper.IsRect())
+    {
+        const tools::Rectangle aBound(LogicToPixel(rWallpaper.GetRect()));
+        aBasePos = aBound.TopLeft();
+        aBoundingSize = aBound.GetSize();
+    }
+    else
+    {
+        aBasePos = Point(0, 0);
+        aBoundingSize = aTargetRect.GetSize();
+    }
+
+    // Hardware State setup via RAII Guards
+    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
+
+    comphelper::ScopeGuard aMapModeGuard([this, bOldMap]() {
+        mpMapper->EnableMapMode(bOldMap);
+    });
+    mpMapper->EnableMapMode(false);
+
+    auto aClipGuard = ScopedPush(vcl::PushFlags::CLIPREGION);
+    IntersectClipRegion(aTargetRect);
+
+    // Bitmap Placement & Scaling/Tiling
+    bool bDrawn = false;
+    Point aDrawPos = aBasePos;
+
+    if (eStyle == WallpaperStyle::Scale)
+    {
+        if (!pCached || (pCached->GetSizePixel() != aBoundingSize))
+        {
+            if (pCached)
+                rWallpaper.ImplReleaseCachedBitmap();
+
+            aBmp = rWallpaper.GetBitmap();
+            aBmp.Scale(aBoundingSize);
+            aBmp = aBmp.CreateDisplayBitmap(this);
+        }
+    }
+    else if (eStyle == WallpaperStyle::Tile || eStyle == WallpaperStyle::TopLeft)
+    {
+        if (eStyle == WallpaperStyle::Tile)
+        {
+            const tools::Long nFirstX = aBasePos.X();
+            const tools::Long nFirstY = aBasePos.Y();
+            const tools::Long nOffX = (nFirstX - nX) % nBmpWidth;
+            const tools::Long nOffY = (nFirstY - nY) % nBmpHeight;
+            tools::Long nStartX = nX + nOffX;
+            tools::Long nStartY = nY + nOffY;
+
+            if (nOffX > 0) nStartX -= nBmpWidth;
+            if (nOffY > 0) nStartY -= nBmpHeight;
+
+            // Hardware fast-path
+            if (mpGraphicsState->meRasterOp == RasterOp::OverPaint &&
+                mpGraphicsState->mnDrawMode == DrawModeFlags::Default &&
+                nWidth > 0 && nHeight > 0)
+            {
+                bDrawn = mpGraphics->DrawBitmapWallpaper(nStartX, nStartY, aTargetRect.Right(), aTargetRect.Bottom(), nBmpWidth, nBmpHeight, *aBmp.ImplGetSalBitmap());
+            }
+
+            // Software loop fallback
+            if (!bDrawn)
+            {
+                for (tools::Long nBmpY = nStartY; nBmpY <= aTargetRect.Bottom(); nBmpY += nBmpHeight)
+                {
+                    for (tools::Long nBmpX = nStartX; nBmpX <= aTargetRect.Right(); nBmpX += nBmpWidth)
+                    {
+                        DrawBitmap(Point(nBmpX, nBmpY), aBmp);
+                    }
+                }
+                bDrawn = true;
+            }
+        }
+    }
+    else
+    {
+        // Single Aligned Bitmap (delegated to static helper)
+        aDrawPos = lcl_CalculatePlacement(aBasePos, aBoundingSize, aBmp.GetSizePixel(), eStyle);
+    }
+
+    // Single Draw Execution and Negative Space Filling
+    if (!bDrawn)
+    {
+        if (bDrawColorBackground)
+            DrawWallpaperNegativeSpace(aTargetRect, aDrawPos, aBmp.GetSizePixel(), rWallpaper);
+
+        DrawBitmap(aDrawPos, aBmp);
+    }
+
+    rWallpaper.ImplSetCachedBitmap(aBmp);
+}
+
+bool OutputDevice::DrawBitmapWallpaperBackground( Bitmap& rBmp,
+                                                  const tools::Rectangle& rRect,
+                                                  const Wallpaper& rWallpaper,
+                                                  const Bitmap* pCached )
+{
+    const tools::Long nBmpWidth = rBmp.GetSizePixel().Width();
+    const tools::Long nBmpHeight = rBmp.GetSizePixel().Height();
+    const bool bTransparent = rBmp.HasAlpha();
     const WallpaperStyle eStyle = rWallpaper.GetStyle();
 
     bool bDrawGradientBackground = false;
     bool bDrawColorBackground = false;
 
-    // Background Handling
     if( bTransparent )
     {
         if( rWallpaper.IsGradient() )
@@ -219,8 +333,8 @@ void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
                 ScopedVclPtrInstance< VirtualDevice > aVDev( *this );
                 aVDev->SetBackground( rWallpaper.GetColor() );
                 aVDev->SetOutputSizePixel( Size( nBmpWidth, nBmpHeight ) );
-                aVDev->DrawBitmap( Point(), aBmp );
-                aBmp = aVDev->GetBitmap( Point(), aVDev->GetOutputSizePixel() );
+                aVDev->DrawBitmap( Point(), rBmp );
+                rBmp = aVDev->GetBitmap( Point(), aVDev->GetOutputSizePixel() );
             }
 
             bDrawColorBackground = true;
@@ -234,98 +348,15 @@ void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
 
     if( bDrawGradientBackground )
     {
-        DrawGradientWallpaper( nX, nY, nWidth, nHeight, rWallpaper );
+        DrawGradientWallpaper( rRect.Left(), rRect.Top(), rRect.GetWidth(), rRect.GetHeight(), rWallpaper );
     }
     else if( bDrawColorBackground && bTransparent )
     {
-        DrawColorWallpaper( nX, nY, nWidth, nHeight, rWallpaper );
+        DrawColorWallpaper( rRect.Left(), rRect.Top(), rRect.GetWidth(), rRect.GetHeight(), rWallpaper );
         bDrawColorBackground = false; // Already drawn
     }
 
-    // Bounds and Clipping
-    Point aBasePos;
-    Size aBoundingSize;
-
-    if( rWallpaper.IsRect() )
-    {
-        const tools::Rectangle aBound( LogicToPixel( rWallpaper.GetRect() ) );
-        aBasePos = aBound.TopLeft();
-        aBoundingSize = aBound.GetSize();
-    }
-    else
-    {
-        aBasePos = Point( 0, 0 );
-        aBoundingSize = Size( nWidth, nHeight );
-    }
-
-    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
-    mpMapper->EnableMapMode(false);
-
-    Push( vcl::PushFlags::CLIPREGION );
-    const tools::Rectangle aTargetRect(Point(nX, nY), Size(nWidth, nHeight));
-    IntersectClipRegion( aTargetRect );
-
-    bool bDrawn = false;
-    Point aDrawPos = aBasePos;
-
-    // Bitmap Placement & Rendering
-    if (eStyle == WallpaperStyle::Scale)
-    {
-        if( !pCached || ( pCached->GetSizePixel() != aBoundingSize ) )
-        {
-            if( pCached ) rWallpaper.ImplReleaseCachedBitmap();
-            aBmp = rWallpaper.GetBitmap();
-            aBmp.Scale( aBoundingSize );
-            aBmp = aBmp.CreateDisplayBitmap( this );
-        }
-    }
-    else if (eStyle == WallpaperStyle::Tile || eStyle == WallpaperStyle::TopLeft)
-    {
-        if (eStyle == WallpaperStyle::Tile)
-        {
-            const tools::Long nFirstX = aBasePos.X();
-            const tools::Long nFirstY = aBasePos.Y();
-            const tools::Long nOffX = ( nFirstX - nX ) % nBmpWidth;
-            const tools::Long nOffY = ( nFirstY - nY ) % nBmpHeight;
-            tools::Long nStartX = nX + nOffX;
-            tools::Long nStartY = nY + nOffY;
-
-            if( nOffX > 0 ) nStartX -= nBmpWidth;
-            if( nOffY > 0 ) nStartY -= nBmpHeight;
-
-            // Hardware fast-path
-            if( mpGraphicsState->meRasterOp == RasterOp::OverPaint && mpGraphicsState->mnDrawMode == DrawModeFlags::Default && nWidth > 0 && nHeight > 0 )
-                bDrawn = mpGraphics->DrawBitmapWallpaper(nStartX, nStartY, aTargetRect.Right(), aTargetRect.Bottom(), nBmpWidth, nBmpHeight, *aBmp.ImplGetSalBitmap());
-
-            // Software loop fallback
-            if (!bDrawn)
-            {
-                for( tools::Long nBmpY = nStartY; nBmpY <= aTargetRect.Bottom(); nBmpY += nBmpHeight )
-                    for( tools::Long nBmpX = nStartX; nBmpX <= aTargetRect.Right(); nBmpX += nBmpWidth )
-                        DrawBitmap(Point( nBmpX, nBmpY), aBmp);
-                bDrawn = true;
-            }
-        }
-    }
-    else
-    {
-        // Single Aligned Bitmap
-        aDrawPos = lcl_CalculatePlacement(aBasePos, aBoundingSize, aBmp.GetSizePixel(), eStyle);
-    }
-
-    // Single draw execution and negative space filling
-    if( !bDrawn )
-    {
-        if( bDrawColorBackground )
-            DrawWallpaperNegativeSpace(aTargetRect, aDrawPos, aBmp.GetSizePixel(), rWallpaper);
-
-        DrawBitmap( aDrawPos, aBmp );
-    }
-
-    rWallpaper.ImplSetCachedBitmap( aBmp );
-
-    Pop();
-    mpMapper->EnableMapMode(bOldMap);
+    return bDrawColorBackground;
 }
 
 void OutputDevice::DrawGradientWallpaper( tools::Long nX, tools::Long nY,
