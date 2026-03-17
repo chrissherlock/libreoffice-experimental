@@ -139,27 +139,21 @@ void OutputDevice::DrawTransparentWithRasterOp( const tools::PolyPolygon& rPolyP
     bool bDrawn = false;
 
     // #i66849# Added fast path for exactly rectangular polygons
-    if( aPolyPoly.IsRect() )
+    if (aPolyPoly.IsRect())
     {
         if (!FlushGraphicsState(vcl::PrepareOutputFlags::Line | vcl::PrepareOutputFlags::Fill | vcl::PrepareOutputFlags::Clip))
             return;
 
-        const tools::Rectangle aPixelRect(LogicToDevicePixel(rPolyPoly.GetBoundRect()));
+        bDrawn = IsOutputCulled();
 
-        if( !IsOutputCulled() )
+        if (!bDrawn)
         {
-            bDrawn = mpGraphics->DrawAlphaRect( aPixelRect.Left(), aPixelRect.Top(),
-                // #i98405# use methods with small g, else one pixel too much will be painted.
-                // This is because the source is a polygon which when painted would not paint
-                // the rightmost and lowest pixel line(s), so use one pixel less for the
-                // rectangle, too.
-                                                aPixelRect.getOpenWidth(), aPixelRect.getOpenHeight(),
-                                                sal::static_int_cast<sal_uInt8>(nTransparencePercent),
-                                                *this );
-        }
-        else
-        {
-            bDrawn = true;
+            const tools::Rectangle aPixelRect(LogicToDevicePixel(rPolyPoly.GetBoundRect()));
+            bDrawn = mpGraphics->DrawAlphaRect(
+                aPixelRect.Left(), aPixelRect.Top(),
+                aPixelRect.getOpenWidth(), aPixelRect.getOpenHeight(),
+                sal::static_int_cast<sal_uInt8>(nTransparencePercent),
+                *this);
         }
     }
 
