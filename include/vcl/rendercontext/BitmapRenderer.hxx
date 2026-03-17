@@ -77,6 +77,9 @@ public:
                                                basegfx::B2DRange& rVisibleRange,
                                                double fMaximumArea, bool bSheared);
 
+    static void BlendAlphaBitmap(Bitmap& rPaint, const Bitmap& rPolyMask, const Color& rFillColor,
+                                 sal_uInt8 nAlpha);
+
 private:
     BitmapRenderer() = delete;
     ~BitmapRenderer() = delete;
