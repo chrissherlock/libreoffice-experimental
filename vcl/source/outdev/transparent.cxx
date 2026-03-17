@@ -482,140 +482,139 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
         const_cast<GDIMetaFile&>(rMtf).WindStart();
         const_cast<GDIMetaFile&>(rMtf).Play(*this, rMtfPos, rMtfSize);
         const_cast<GDIMetaFile&>(rMtf).WindStart();
+
+        return;
     }
-    else
+
+    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
+
+    tools::Rectangle aOutRect( LogicToPixel( tools::Rectangle(rPos, rSize) ) );
+    Point aPoint;
+    tools::Rectangle aDstRect( aPoint, GetOutputSizePixel() );
+    aDstRect.Intersection( aOutRect );
+
+    if (HasClipRegion())
+        aDstRect.Intersection( LogicToPixel( GetClipRegion().GetBoundRect() ) );
+
+    if (aDstRect.IsEmpty())
+        return;
+
+    // Create transparent buffer
+    ScopedVclPtrInstance<VirtualDevice> xVDev(DeviceFormat::WITH_ALPHA);
+
+    xVDev->SetDPIX(GetDPIX());
+    xVDev->SetDPIY(GetDPIY());
+
+    if (!xVDev->SetOutputSizePixel(aDstRect.GetSize(), true, true))
+        return;
+
+    // tdf#150610 fix broken rendering of text meta actions
+    // Even when drawing to a VirtualDevice that has antialiasing
+    // disabled, text will still be drawn with some antialiased
+    // pixels on HiDPI displays. So, use the antialiasing enabled
+    // code to render if there are any text meta actions in the
+    // metafile.
+    if (GetAntialiasing() != AntialiasingFlags::NONE || rPos != rMtfPos || rSize != rMtfSize)
     {
-        vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
+        // #i102109#
+        // For MetaFile replay (see task) it may now be necessary to take
+        // into account that the content is AntiAlialiased and needs to be masked
+        // like that. Instead of masking, i will use a copy-modify-paste cycle
+        // here (as i already use in the VclPrimiziveRenderer with success)
+        xVDev->SetAntialiasing(GetAntialiasing());
 
-        tools::Rectangle aOutRect( LogicToPixel( tools::Rectangle(rPos, rSize) ) );
-        Point aPoint;
-        tools::Rectangle aDstRect( aPoint, GetOutputSizePixel() );
-        aDstRect.Intersection( aOutRect );
+        // create MapMode for buffer (offset needed) and set
+        MapMode aMap(GetMapMode());
+        const Point aOutPos(PixelToLogic(aDstRect.TopLeft()));
+        aMap.SetOrigin(Point(-aOutPos.X(), -aOutPos.Y()));
+        xVDev->SetMapMode(aMap);
 
-        if (HasClipRegion())
-            aDstRect.Intersection( LogicToPixel( GetClipRegion().GetBoundRect() ) );
+        // copy MapMode state and disable for target
+        const bool bOrigMapModeEnabled(mpMapper->IsMapModeEnabled());
+        mpMapper->EnableMapMode(false);
 
-        if( !aDstRect.IsEmpty() )
-        {
-            // Create transparent buffer
-            ScopedVclPtrInstance<VirtualDevice> xVDev(DeviceFormat::WITH_ALPHA);
+        // copy MapMode state and disable for buffer
+        const bool bBufferMapModeEnabled(xVDev->IsMapModeEnabled());
+        xVDev->EnableMapMode(false);
 
-            xVDev->SetDPIX(GetDPIX());
-            xVDev->SetDPIY(GetDPIY());
+        // copy content from original to buffer
+        xVDev->DrawOutDev( aPoint, xVDev->GetOutputSizePixel(), // dest
+                           aDstRect.TopLeft(), xVDev->GetOutputSizePixel(), // source
+                           *this);
 
-            if( xVDev->SetOutputSizePixel( aDstRect.GetSize(), true, true ) )
-            {
-                // tdf#150610 fix broken rendering of text meta actions
-                // Even when drawing to a VirtualDevice that has antialiasing
-                // disabled, text will still be drawn with some antialiased
-                // pixels on HiDPI displays. So, use the antialiasing enabled
-                // code to render if there are any text meta actions in the
-                // metafile.
-                if(GetAntialiasing() != AntialiasingFlags::NONE || rPos != rMtfPos || rSize != rMtfSize)
-                {
-                    // #i102109#
-                    // For MetaFile replay (see task) it may now be necessary to take
-                    // into account that the content is AntiAlialiased and needs to be masked
-                    // like that. Instead of masking, i will use a copy-modify-paste cycle
-                    // here (as i already use in the VclPrimiziveRenderer with success)
-                    xVDev->SetAntialiasing(GetAntialiasing());
+        // draw MetaFile to buffer
+        xVDev->EnableMapMode(bBufferMapModeEnabled);
+        const_cast<GDIMetaFile&>(rMtf).WindStart();
+        const_cast<GDIMetaFile&>(rMtf).Play(*xVDev, rMtfPos, rMtfSize);
+        const_cast<GDIMetaFile&>(rMtf).WindStart();
 
-                    // create MapMode for buffer (offset needed) and set
-                    MapMode aMap(GetMapMode());
-                    const Point aOutPos(PixelToLogic(aDstRect.TopLeft()));
-                    aMap.SetOrigin(Point(-aOutPos.X(), -aOutPos.Y()));
-                    xVDev->SetMapMode(aMap);
+        // get content bitmap from buffer
+        xVDev->EnableMapMode(false);
 
-                    // copy MapMode state and disable for target
-                    const bool bOrigMapModeEnabled(mpMapper->IsMapModeEnabled());
-                    mpMapper->EnableMapMode(false);
+        const Bitmap aPaint(xVDev->GetBitmap(aPoint, xVDev->GetOutputSizePixel()));
 
-                    // copy MapMode state and disable for buffer
-                    const bool bBufferMapModeEnabled(xVDev->IsMapModeEnabled());
-                    xVDev->EnableMapMode(false);
+        // create alpha mask from gradient and get as Bitmap
+        xVDev->EnableMapMode(bBufferMapModeEnabled);
+        xVDev->SetDrawMode(DrawModeFlags::GrayGradient);
+        // Related tdf#150610 draw gradient to VirtualDevice bounds
+        // If we are here and the metafile bounds differs from the
+        // VirtualDevice bounds so that we apply the transparency
+        // gradient to any pixels drawn outside of the metafile
+        // bounds.
+        xVDev->DrawGradient(tools::Rectangle(rPos, rSize), rTransparenceGradient);
+        xVDev->SetDrawMode(DrawModeFlags::Default);
+        xVDev->EnableMapMode(false);
 
-                    // copy content from original to buffer
-                    xVDev->DrawOutDev( aPoint, xVDev->GetOutputSizePixel(), // dest
-                                       aDstRect.TopLeft(), xVDev->GetOutputSizePixel(), // source
-                                       *this);
+        AlphaMask aAlpha(xVDev->GetBitmap(aPoint, xVDev->GetOutputSizePixel()));
+        const AlphaMask aPaintAlpha(aPaint.CreateAlphaMask());
+        // The alpha mask is inverted from what
+        // is expected so invert it again
+        aAlpha.Invert(); // convert to alpha
+        aAlpha.BlendWith(aPaintAlpha);
 
-                    // draw MetaFile to buffer
-                    xVDev->EnableMapMode(bBufferMapModeEnabled);
-                    const_cast<GDIMetaFile&>(rMtf).WindStart();
-                    const_cast<GDIMetaFile&>(rMtf).Play(*xVDev, rMtfPos, rMtfSize);
-                    const_cast<GDIMetaFile&>(rMtf).WindStart();
+        xVDev.disposeAndClear();
 
-                    // get content bitmap from buffer
-                    xVDev->EnableMapMode(false);
+        // draw masked content to target and restore MapMode
+        DrawBitmap(aDstRect.TopLeft(), Bitmap(aPaint.CreateColorBitmap(), aAlpha));
+        mpMapper->EnableMapMode(bOrigMapModeEnabled);
 
-                    const Bitmap aPaint(xVDev->GetBitmap(aPoint, xVDev->GetOutputSizePixel()));
-
-                    // create alpha mask from gradient and get as Bitmap
-                    xVDev->EnableMapMode(bBufferMapModeEnabled);
-                    xVDev->SetDrawMode(DrawModeFlags::GrayGradient);
-                    // Related tdf#150610 draw gradient to VirtualDevice bounds
-                    // If we are here and the metafile bounds differs from the
-                    // VirtualDevice bounds so that we apply the transparency
-                    // gradient to any pixels drawn outside of the metafile
-                    // bounds.
-                    xVDev->DrawGradient(tools::Rectangle(rPos, rSize), rTransparenceGradient);
-                    xVDev->SetDrawMode(DrawModeFlags::Default);
-                    xVDev->EnableMapMode(false);
-
-                    AlphaMask aAlpha(xVDev->GetBitmap(aPoint, xVDev->GetOutputSizePixel()));
-                    const AlphaMask aPaintAlpha(aPaint.CreateAlphaMask());
-                    // The alpha mask is inverted from what
-                    // is expected so invert it again
-                    aAlpha.Invert(); // convert to alpha
-                    aAlpha.BlendWith(aPaintAlpha);
-
-                    xVDev.disposeAndClear();
-
-                    // draw masked content to target and restore MapMode
-                    DrawBitmap(aDstRect.TopLeft(), Bitmap(aPaint.CreateColorBitmap(), aAlpha));
-                    mpMapper->EnableMapMode(bOrigMapModeEnabled);
-                }
-                else
-                {
-                    MapMode aMap( GetMapMode() );
-                    Point aOutPos( PixelToLogic( aDstRect.TopLeft() ) );
-                    const bool bOldMap = mpMapper->IsMapModeEnabled();
-
-                    aMap.SetOrigin( Point( -aOutPos.X(), -aOutPos.Y() ) );
-                    xVDev->SetMapMode( aMap );
-                    const bool bVDevOldMap = xVDev->IsMapModeEnabled();
-
-                    // create paint bitmap
-                    const_cast<GDIMetaFile&>(rMtf).WindStart();
-                    const_cast<GDIMetaFile&>(rMtf).Play(*xVDev, rMtfPos, rMtfSize);
-                    const_cast<GDIMetaFile&>(rMtf).WindStart();
-                    xVDev->EnableMapMode( false );
-                    Bitmap aPaint(xVDev->GetBitmap(Point(), xVDev->GetOutputSizePixel()));
-                    xVDev->EnableMapMode( bVDevOldMap ); // #i35331#: MUST NOT use EnableMapMode( sal_True ) here!
-
-                    // create alpha mask from gradient
-                    xVDev->SetDrawMode( DrawModeFlags::GrayGradient );
-                    xVDev->DrawGradient( tools::Rectangle( rMtfPos, rMtfSize ), rTransparenceGradient );
-                    xVDev->SetDrawMode( DrawModeFlags::Default );
-                    xVDev->EnableMapMode( false );
-
-                    AlphaMask aAlpha(xVDev->GetBitmap(Point(), xVDev->GetOutputSizePixel()));
-                    const AlphaMask aPaintAlpha(aPaint.CreateAlphaMask());
-                    // The alpha mask is inverted from what
-                    // is expected so invert it again
-                    aAlpha.Invert(); // convert to alpha
-                    aAlpha.BlendWith(aPaintAlpha);
-
-                    xVDev.disposeAndClear();
-
-                    mpMapper->EnableMapMode( false );
-                    DrawBitmap(aDstRect.TopLeft(), Bitmap(aPaint.CreateColorBitmap(), aAlpha));
-                    mpMapper->EnableMapMode( bOldMap );
-                }
-            }
-        }
-
+        return;
     }
+
+    MapMode aMap( GetMapMode() );
+    Point aOutPos( PixelToLogic( aDstRect.TopLeft() ) );
+    const bool bOldMap = mpMapper->IsMapModeEnabled();
+
+    aMap.SetOrigin( Point( -aOutPos.X(), -aOutPos.Y() ) );
+    xVDev->SetMapMode( aMap );
+    const bool bVDevOldMap = xVDev->IsMapModeEnabled();
+
+    // create paint bitmap
+    const_cast<GDIMetaFile&>(rMtf).WindStart();
+    const_cast<GDIMetaFile&>(rMtf).Play(*xVDev, rMtfPos, rMtfSize);
+    const_cast<GDIMetaFile&>(rMtf).WindStart();
+    xVDev->EnableMapMode( false );
+    Bitmap aPaint(xVDev->GetBitmap(Point(), xVDev->GetOutputSizePixel()));
+    xVDev->EnableMapMode( bVDevOldMap ); // #i35331#: MUST NOT use EnableMapMode( sal_True ) here!
+
+    // create alpha mask from gradient
+    xVDev->SetDrawMode( DrawModeFlags::GrayGradient );
+    xVDev->DrawGradient( tools::Rectangle( rMtfPos, rMtfSize ), rTransparenceGradient );
+    xVDev->SetDrawMode( DrawModeFlags::Default );
+    xVDev->EnableMapMode( false );
+
+    AlphaMask aAlpha(xVDev->GetBitmap(Point(), xVDev->GetOutputSizePixel()));
+    const AlphaMask aPaintAlpha(aPaint.CreateAlphaMask());
+    // The alpha mask is inverted from what
+    // is expected so invert it again
+    aAlpha.Invert(); // convert to alpha
+    aAlpha.BlendWith(aPaintAlpha);
+
+    xVDev.disposeAndClear();
+
+    mpMapper->EnableMapMode( false );
+    DrawBitmap(aDstRect.TopLeft(), Bitmap(aPaint.CreateColorBitmap(), aAlpha));
+    mpMapper->EnableMapMode( bOldMap );
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
