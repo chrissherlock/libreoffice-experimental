@@ -292,6 +292,14 @@ private:
     mutable bool                    mbEnableRTL : 1;
     mutable bool                    mbSubpixelPositioning : 1;
 
+    struct WallpaperLayout
+    {
+        Point maDrawPos;
+        bool  mbTiled = false;
+        tools::Long mnStartX = 0;
+        tools::Long mnStartY = 0;
+    };
+
 protected:
     std::unique_ptr<vcl::ClippingController> mpClippingController;
     mutable std::shared_ptr<vcl::font::PhysicalFontCollection> mxFontCollection;
@@ -903,12 +911,60 @@ protected:
     SAL_DLLPRIVATE void         DrawGradientWallpaper( tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight, const Wallpaper& rWallpaper );
 
 private:
-    SAL_DLLPRIVATE void         DrawWallpaper( tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight, const Wallpaper& rWallpaper );
-    SAL_DLLPRIVATE void         DrawColorWallpaper( tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight, const Wallpaper& rWallpaper );
-    SAL_DLLPRIVATE void         DrawBitmapWallpaper( tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight, const Wallpaper& rWallpaper );
-    SAL_DLLPRIVATE void         DrawWallpaperNegativeSpace( const tools::Rectangle& rTargetRect, const Point& rBmpPos, const Size& rBmpSize, const Wallpaper& rWallpaper );
-    SAL_DLLPRIVATE bool         DrawBitmapWallpaperBackground( Bitmap& rBmp, const tools::Rectangle& rRect, const Wallpaper& rWallpaper, const Bitmap* pCached );
-    ///@}
+    /** * Top-level internal entry point for wallpaper rendering.
+     * Dispatches to specific color, gradient, or bitmap handlers based on the Wallpaper style.
+     */
+    SAL_DLLPRIVATE void DrawWallpaper(
+        tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight,
+        const Wallpaper& rWallpaper);
+
+    /** Paints a solid color wallpaper over the specified area. */
+    SAL_DLLPRIVATE void DrawColorWallpaper(
+        tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight,
+        const Wallpaper& rWallpaper);
+
+    /** * Orchestrates the complex multi-phase process of bitmap wallpaper rendering.
+     * Manages background prep, layout calculation, hardware state (clipping/MapMode), and pixel pushing.
+     */
+    SAL_DLLPRIVATE void DrawBitmapWallpaper(
+        tools::Long nX, tools::Long nY, tools::Long nWidth, tools::Long nHeight,
+        const Wallpaper& rWallpaper);
+
+    /** * Fills the "negative space" gaps around a bitmap.
+     * Used when a bitmap does not cover the entire target area (e.g., Aligned or Centered styles).
+     * Uses vcl::Region math to efficiently paint only the area not covered by the bitmap.
+     */
+    SAL_DLLPRIVATE void DrawWallpaperNegativeSpace(
+        const tools::Rectangle& rTargetRect, const Point& rBmpPos, const Size& rBmpSize,
+        const Wallpaper& rWallpaper);
+
+    /** * Handles background requirements specific to bitmap wallpapers.
+     * This includes rendering gradients behind transparent bitmaps or pre-blending
+     * a background color into a VirtualDevice-backed bitmap.
+     * * @param rBmp The bitmap to be used (may be modified/reassigned by this function).
+     * @param rRect The target destination area.
+     * @param rWallpaper The wallpaper object containing background color/gradient data.
+     * @param pCached Pointer to a cached display bitmap, if available.
+     * @return true if a background color was filled and negative space may require painting.
+     */
+    SAL_DLLPRIVATE bool DrawBitmapWallpaperBackground(
+        Bitmap& rBmp, const tools::Rectangle& rRect, const Wallpaper& rWallpaper,
+        const Bitmap* pCached);
+
+    /** * Calculates the geometric placement of a bitmap based on WallpaperStyle.
+     * Logic-only: does not perform any drawing.
+     */
+    SAL_DLLPRIVATE WallpaperLayout GetBitmapWallpaperLayout(
+        const Bitmap& rBmp, const tools::Rectangle& rTargetRect,
+        const tools::Rectangle& rBoundingRect, const Wallpaper& rWallpaper);
+
+    /** * Executes the actual bitmap rendering (scaling or tiling).
+     * @return true if the bitmap was fully drawn (e.g. via tiling loops).
+     */
+    SAL_DLLPRIVATE bool DrawBitmapWallpaperContents(
+        Bitmap& rBmp, const tools::Rectangle& rTargetRect,
+        const tools::Rectangle& rBoundingRect, const Wallpaper& rWallpaper,
+        const Bitmap* pCached, const WallpaperLayout& rLayout);
 
 
     /** @name Text functions
