@@ -334,22 +334,21 @@ void OutputDevice::DrawGradientWallpaper( tools::Long nX, tools::Long nY,
 {
     assert(!is_double_buffered_window());
 
-    tools::Rectangle aBound;
-
     const bool bOldMap = mpMapper->IsMapModeEnabled();
 
-    aBound = tools::Rectangle( Point( nX, nY ), Size( nWidth, nHeight ) );
+    tools::Rectangle aBound(Point(nX, nY), Size(nWidth, nHeight));
 
     vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
+
+    comphelper::ScopeGuard aMapModeGuard([this, bOldMap]() {
+        mpMapper->EnableMapMode(bOldMap);
+    });
     mpMapper->EnableMapMode(false);
-    Push( vcl::PushFlags::CLIPREGION );
-    IntersectClipRegion( tools::Rectangle( Point( nX, nY ), Size( nWidth, nHeight ) ) );
 
-    DrawGradient( aBound, rWallpaper.GetGradient() );
+    auto aClipGuard = ScopedPush(vcl::PushFlags::CLIPREGION);
+    IntersectClipRegion(tools::Rectangle(Point(nX, nY), Size(nWidth, nHeight)));
 
-    Pop();
-    mpMapper->EnableMapMode(bOldMap);
-
+    DrawGradient(aBound, rWallpaper.GetGradient());
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
