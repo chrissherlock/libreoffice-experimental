@@ -1685,6 +1685,14 @@ void vcl::Region::GetRegionRectangles(RectangleVector& rTarget) const
     }
 }
 
+vcl::Region::Iterator::Iterator(const Region* pRegion)
+    : mpRects(std::make_shared<RectangleVector>())
+    , mnIndex(0)
+{
+    if (pRegion)
+        pRegion->GetRegionRectangles(*mpRects);
+}
+
 static bool ImplPolygonRectTest( const tools::Polygon& rPoly, tools::Rectangle* pRectOut = nullptr )
 {
     bool bIsRect = false;

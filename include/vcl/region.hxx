@@ -17,13 +17,15 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#ifndef INCLUDED_VCL_REGION_HXX
-#define INCLUDED_VCL_REGION_HXX
-
+#pragma once
 #include <tools/gen.hxx>
 #include <tools/poly.hxx>
-#include <vcl/dllapi.h>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
+
+#include <vcl/dllapi.h>
+
+#include <iterator>
+#include <cstddef>
 #include <memory>
 #include <optional>
 
@@ -107,6 +109,40 @@ public:
     bool HasPolyPolygonOrB2DPolyPolygon() const { return (getB2DPolyPolygon() || getPolyPolygon()); }
     void GetRegionRectangles(RectangleVector& rTarget) const;
 
+    class Iterator
+    {
+    private:
+        std::shared_ptr<RectangleVector> mpRects;
+        size_t mnIndex;
+    public:
+        using iterator_category = std::forward_iterator_tag;
+        using value_type = tools::Rectangle;
+        using difference_type = std::ptrdiff_t;
+        using pointer = const tools::Rectangle*;
+        using reference = const tools::Rectangle&;
+
+        Iterator() : mnIndex(0) {}
+        explicit Iterator(const Region* pRegion);
+
+        reference operator*() const { return (*mpRects)[mnIndex]; }
+        pointer operator->() const { return &(*mpRects)[mnIndex]; }
+
+        Iterator& operator++() { ++mnIndex; return *this; }
+        Iterator operator++(int) { Iterator tmp = *this; ++(*this); return tmp; }
+
+        bool operator==(const Iterator& rOther) const {
+            bool bThisEnd = !mpRects || mnIndex >= mpRects->size();
+            bool bOtherEnd = !rOther.mpRects || rOther.mnIndex >= rOther.mpRects->size();
+            if (bThisEnd && bOtherEnd) return true;
+            if (bThisEnd != bOtherEnd) return false;
+            return mpRects == rOther.mpRects && mnIndex == rOther.mnIndex;
+        }
+        bool operator!=(const Iterator& rOther) const { return !(*this == rOther); }
+    };
+
+    Iterator begin() const { return Iterator(this); }
+    Iterator end() const { return Iterator(); }
+
     bool Contains( const Point& rPoint ) const;
     bool Overlaps( const tools::Rectangle& rRect ) const;
 
@@ -161,7 +197,5 @@ inline std::basic_ostream<charT, traits> & operator <<(
 }
 
 } /* namespace vcl */
-
-#endif // INCLUDED_VCL_REGION_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
