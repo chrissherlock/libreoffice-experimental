@@ -23,6 +23,7 @@
 #include <basegfx/polygon/b2dpolygontools.hxx>
 #include <tools/helpers.hxx>
 #include <tools/mapunit.hxx>
+#include <comphelper/scopeguard.hxx>
 #include <officecfg/Office/Common.hxx>
 
 #include <vcl/BitmapTools.hxx>
@@ -47,7 +48,6 @@
 #include <text/TextLayoutEngine.hxx>
 #include <salgdi.hxx>
 
-#include <comphelper/scopeguard.hxx>
 #include <list>
 #include <memory>
 #include <utility>
@@ -421,43 +421,84 @@ struct CompositionEffect
 };
 } // end anonymous namespace
 
+static void lcl_CopyBackground(const Renderers& rRenderers,
+                               const RenderTarget& rTarget)
+{
+    const Size aDstSzPixel = rTarget.aPixelRect.GetSize();
+
+    // Copying the background must be done in pixel coordinates to
+    // ensure a 1:1 bitwise match with the screen content.
+    rRenderers.rBuffer.EnableMapMode(false);
+    rRenderers.rBuffer.DrawOutDev(Point(), aDstSzPixel,
+                                  rTarget.aPixelRect.TopLeft(), aDstSzPixel,
+                                  rRenderers.rOutDev);
+}
+
+static void lcl_PlayMetaFile(VirtualDevice& rBuffer,
+                             const RenderSource& rSource,
+                             bool bBufferMapModeEnabled)
+{
+    rBuffer.EnableMapMode(bBufferMapModeEnabled);
+
+    // GDIMetaFile::Play is not const-correct, and WindStart() is required
+    // to ensure we play from the beginning and leave it in a clean state.
+    GDIMetaFile& rMtf = const_cast<GDIMetaFile&>(rSource.rMtf);
+
+    rMtf.WindStart();
+    rMtf.Play(rBuffer, rSource.aMtfRect.TopLeft(), rSource.aMtfRect.GetSize());
+    rMtf.WindStart();
+}
+
+static Bitmap lcl_RenderContent(const Renderers& rRenderers,
+                                const RenderSource& rSource,
+                                const RenderTarget& rTarget,
+                                const CompositionEffect& rEffect,
+                                bool bBufferMapModeEnabled)
+{
+    if (rEffect.bNeedsCopyCycle)
+        lcl_CopyBackground(rRenderers, rTarget);
+
+    lcl_PlayMetaFile(rRenderers.rBuffer, rSource, bBufferMapModeEnabled);
+
+    rRenderers.rBuffer.EnableMapMode(false);
+    return rRenderers.rBuffer.GetBitmap(Point(), rTarget.aPixelRect.GetSize());
+}
+
+static Bitmap lcl_RenderGradientMask(const Renderers& rRenderers,
+                                     const RenderTarget& rTarget,
+                                     const CompositionEffect& rEffect,
+                                     bool bBufferMapModeEnabled)
+{
+    const Size aDstSzPixel = rTarget.aPixelRect.GetSize();
+
+    // Set up the device for grayscale gradient capture
+    rRenderers.rBuffer.EnableMapMode(bBufferMapModeEnabled);
+    rRenderers.rBuffer.SetDrawMode(DrawModeFlags::GrayGradient);
+
+    rRenderers.rBuffer.DrawGradient(rTarget.aLogicalRect, rEffect.rGradient);
+
+    // Restore default draw mode immediately after drawing
+    rRenderers.rBuffer.SetDrawMode(DrawModeFlags::Default);
+
+    // Capture the result as a pixel mask
+    rRenderers.rBuffer.EnableMapMode(false);
+    return rRenderers.rBuffer.GetBitmap(Point(), aDstSzPixel);
+}
+
 static std::pair<Bitmap, Bitmap> lcl_RenderTransparentComponents(const Renderers& rRenderers,
                                                                  const RenderSource& rSource,
                                                                  const RenderTarget& rTarget,
                                                                  const CompositionEffect& rEffect)
 {
-    const Size aDstSzPixel = rTarget.aPixelRect.GetSize();
     const bool bBufferMapModeEnabled = rRenderers.rBuffer.IsMapModeEnabled();
 
-    // Ensure the buffer's MapMode is restored if we return early
     comphelper::ScopeGuard aBufferMapGuard([&rRenderers, bBufferMapModeEnabled]() {
         rRenderers.rBuffer.EnableMapMode(bBufferMapModeEnabled);
     });
 
-    // Phase 1: Render Content (Paint)
-    if (rEffect.bNeedsCopyCycle)
-    {
-        rRenderers.rBuffer.EnableMapMode(false);
-        rRenderers.rBuffer.DrawOutDev(Point(), aDstSzPixel, rTarget.aPixelRect.TopLeft(),
-                                      aDstSzPixel, rRenderers.rOutDev);
-    }
+    Bitmap aPaint = lcl_RenderContent(rRenderers, rSource, rTarget, rEffect, bBufferMapModeEnabled);
 
-    rRenderers.rBuffer.EnableMapMode(bBufferMapModeEnabled);
-    const_cast<GDIMetaFile&>(rSource.rMtf).WindStart();
-    const_cast<GDIMetaFile&>(rSource.rMtf).Play(rRenderers.rBuffer, rSource.aMtfRect.TopLeft(), rSource.aMtfRect.GetSize());
-    const_cast<GDIMetaFile&>(rSource.rMtf).WindStart();
-
-    rRenderers.rBuffer.EnableMapMode(false);
-    Bitmap aPaint = rRenderers.rBuffer.GetBitmap(Point(), aDstSzPixel);
-
-    // Phase 2: Render Gradient Mask
-    rRenderers.rBuffer.EnableMapMode(bBufferMapModeEnabled);
-    rRenderers.rBuffer.SetDrawMode(DrawModeFlags::GrayGradient);
-    rRenderers.rBuffer.DrawGradient(rTarget.aLogicalRect, rEffect.rGradient);
-    rRenderers.rBuffer.SetDrawMode(DrawModeFlags::Default);
-
-    rRenderers.rBuffer.EnableMapMode(false);
-    Bitmap aGradientMask = rRenderers.rBuffer.GetBitmap(Point(), aDstSzPixel);
+    Bitmap aGradientMask = lcl_RenderGradientMask(rRenderers, rTarget, rEffect, bBufferMapModeEnabled);
 
     return { aPaint, aGradientMask };
 }
