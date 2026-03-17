@@ -130,14 +130,8 @@ void OutputDevice::DrawTransparentWithRasterOp( const tools::PolyPolygon& rPolyP
     // We use software emulation because hardware paths generally don't support XOR/Invert combined with alpha
     vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
 
-    tools::PolyPolygon aPolyPoly( LogicToPixel( rPolyPoly ) );
-    tools::Rectangle aPolyRect( aPolyPoly.GetBoundRect() );
-    tools::Rectangle aDstRect( Point(), GetOutputSizePixel() );
-
-    aDstRect.Intersection( aPolyRect );
-
-    if (HasClipRegion())
-        aDstRect.Intersection( LogicToPixel( GetClipRegion().GetBoundRect() ) );
+    tools::PolyPolygon aPolyPoly(LogicToPixel(rPolyPoly));
+    tools::Rectangle aDstRect = GetVisibleDeviceRangePixel(aPolyPoly);
 
     if (aDstRect.IsEmpty())
         return;
@@ -147,17 +141,10 @@ void OutputDevice::DrawTransparentWithRasterOp( const tools::PolyPolygon& rPolyP
     // #i66849# Added fast path for exactly rectangular polygons
     if( aPolyPoly.IsRect() )
     {
-        if ( mpClippingController->IsDirty() )
-            InitClipRegion();
+        if (!FlushGraphicsState(vcl::PrepareOutputFlags::Line | vcl::PrepareOutputFlags::Fill | vcl::PrepareOutputFlags::Clip))
+            return;
 
-        if ( mbLineColorDirty )
-            InitLineColor();
-
-        if ( mbFillColorDirty )
-            InitFillColor();
-
-        tools::Rectangle aLogicPolyRect( rPolyPoly.GetBoundRect() );
-        tools::Rectangle aPixelRect(LogicToDevicePixel(aLogicPolyRect));
+        const tools::Rectangle aPixelRect(LogicToDevicePixel(rPolyPoly.GetBoundRect()));
 
         if( !IsOutputCulled() )
         {

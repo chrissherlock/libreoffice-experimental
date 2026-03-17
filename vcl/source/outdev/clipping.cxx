@@ -51,6 +51,20 @@ bool OutputDevice::IsOutputCulled() const
         || mpClippingController->IsOutputClipped(*mpMapper, aBounds));
 }
 
+tools::Rectangle OutputDevice::GetVisibleDeviceRangePixel(const tools::PolyPolygon& rPixelPoly) const
+{
+    tools::Rectangle aVisibleRect = rPixelPoly.GetBoundRect();
+    aVisibleRect.Intersection(tools::Rectangle(Point(0, 0), GetOutputSizePixel()));
+
+    if (HasClipRegion())
+    {
+        // GetClipRegion() is logical, so we still need LogicToPixel here
+        aVisibleRect.Intersection(LogicToPixel(GetClipRegion().GetBoundRect()));
+    }
+
+    return aVisibleRect;
+}
+
 bool OutputDevice::GetVisibleDeviceRange(
         const basegfx::B2DHomMatrix& aFullTransform,
         basegfx::B2DRange &aVisibleRange,
