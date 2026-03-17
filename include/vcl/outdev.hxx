@@ -1511,6 +1511,13 @@ public:
                                         const GDIMetaFile& rMtf, const Point& rPos, const Size& rSize,
                                         const Point& rMtfPos, const Size& rMtfSize,
                                         const Gradient& rTransparenceGradient );
+
+private:
+
+    void DrawTransparentFallback(const tools::PolyPolygon& rLogicalPolyPoly,
+                                 tools::PolyPolygon aPixelPolyPoly,
+                                 const tools::Rectangle& rDstRect,
+                                 sal_uInt16 nTransparencePercent);
     ///@}
 
 

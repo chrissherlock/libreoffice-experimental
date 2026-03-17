@@ -158,15 +158,21 @@ void OutputDevice::DrawTransparentWithRasterOp( const tools::PolyPolygon& rPolyP
         }
     }
 
-    if (bDrawn)
-        return;
+    if (!bDrawn)
+        DrawTransparentFallback(rPolyPoly, aPolyPoly, aDstRect, nTransparencePercent);
+}
 
+void OutputDevice::DrawTransparentFallback(const tools::PolyPolygon& rLogicalPolyPoly,
+                                           tools::PolyPolygon aPixelPolyPoly,
+                                           const tools::Rectangle& rDstRect,
+                                           sal_uInt16 nTransparencePercent)
+{
     ScopedVclPtrInstance< VirtualDevice > aVDev(*this);
-    const Size aDstSz( aDstRect.GetSize() );
+    const Size aDstSz( rDstRect.GetSize() );
     const sal_uInt8 cTrans = basegfx::fround<sal_uInt8>(nTransparencePercent * 2.55);
 
-    if( aDstRect.Left() || aDstRect.Top() )
-        aPolyPoly.Move( -aDstRect.Left(), -aDstRect.Top() );
+    if( rDstRect.Left() || rDstRect.Top() )
+        aPixelPolyPoly.Move( -rDstRect.Left(), -rDstRect.Top() );
 
     if (!aVDev->SetOutputSizePixel(aDstSz))
         return;
@@ -177,9 +183,9 @@ void OutputDevice::DrawTransparentWithRasterOp( const tools::PolyPolygon& rPolyP
 
     aVDev->SetLineColor( COL_BLACK );
     aVDev->SetFillColor( COL_BLACK );
-    aVDev->DrawPolyPolygon( aPolyPoly );
+    aVDev->DrawPolyPolygon( aPixelPolyPoly );
 
-    Bitmap aPaint( GetBitmap( aDstRect.TopLeft(), aDstSz ) );
+    Bitmap aPaint( GetBitmap( rDstRect.TopLeft(), aDstSz ) );
     Bitmap aPolyMask( aVDev->GetBitmap( Point(), aDstSz ) );
 
     // #107766# check for non-empty bitmaps before accessing them
@@ -188,7 +194,7 @@ void OutputDevice::DrawTransparentWithRasterOp( const tools::PolyPolygon& rPolyP
 
     vcl::rendercontext::BitmapRenderer::BlendAlphaBitmap(aPaint, aPolyMask, GetFillColor(), cTrans);
 
-    DrawBitmap( aDstRect.TopLeft(), aPaint );
+    DrawBitmap( rDstRect.TopLeft(), aPaint );
 
     mpMapper->EnableMapMode( bOldMap );
 
@@ -196,7 +202,7 @@ void OutputDevice::DrawTransparentWithRasterOp( const tools::PolyPolygon& rPolyP
     {
         auto popIt = ScopedPush(vcl::PushFlags::FILLCOLOR);
         SetFillColor();
-        DrawPolyPolygon( rPolyPoly );
+        DrawPolyPolygon( rLogicalPolyPoly );
     }
 }
 
@@ -353,158 +359,116 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos,
     DrawTransparent( rMtf, rPos, rSize, rPos, rSize, rTransparenceGradient );
 }
 
+static bool lcl_IsEffectivelyOpaque(const Gradient& rTransparenceGradient, DrawModeFlags nDrawMode)
+{
+    // In VCL transparency masks, Black (0) means 100% opaque.
+    const bool bGradientIsOpaque = (rTransparenceGradient.GetStartColor() == COL_BLACK) &&
+                                   (rTransparenceGradient.GetEndColor() == COL_BLACK);
+
+    const bool bStateDisablesTransparency = (nDrawMode & DrawModeFlags::NoTransparency) != DrawModeFlags::Default;
+
+    return bGradientIsOpaque || bStateDisablesTransparency;
+}
+
+static bool lcl_ConfigureOffscreenBuffer(VirtualDevice& rBuffer,
+                                         const OutputDevice& rOutDev,
+                                         const tools::Rectangle& rDstRect,
+                                         bool bNeedsCopyCycle)
+{
+    rBuffer.SetDPIX(rOutDev.GetDPIX());
+    rBuffer.SetDPIY(rOutDev.GetDPIY());
+
+    // Allocate the pixel memory for the workspace
+    if (!rBuffer.SetOutputSizePixel(rDstRect.GetSize(), true, true))
+        return false;
+
+    if (bNeedsCopyCycle)
+        rBuffer.SetAntialiasing(rOutDev.GetAntialiasing());
+
+    // Align the buffer's logical coordinates with the cropped area on the screen
+    MapMode aMap(rOutDev.GetMapMode());
+    const Point aOutPos(rOutDev.PixelToLogic(rDstRect.TopLeft()));
+    aMap.SetOrigin(Point(-aOutPos.X(), -aOutPos.Y()));
+    rBuffer.SetMapMode(aMap);
+
+    return true;
+}
+
 void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, const Size& rSize,
                                     const Point& rMtfPos, const Size& rMtfSize,
                                     const Gradient& rTransparenceGradient )
 {
     assert(!is_double_buffered_window());
 
-    const Color aBlack( COL_BLACK );
-
     maRecorder.RecordFloatTransparent(rMtf, rPos, rSize, rTransparenceGradient);
 
-    if ( !IsDeviceOutputNecessary() )
+    if (!IsDeviceOutputNecessary())
         return;
 
-    if( ( rTransparenceGradient.GetStartColor() == aBlack && rTransparenceGradient.GetEndColor() == aBlack ) ||
-        ( mpGraphicsState->mnDrawMode & DrawModeFlags::NoTransparency ) )
+    if (lcl_IsEffectivelyOpaque(rTransparenceGradient, mpGraphicsState->mnDrawMode))
     {
         const_cast<GDIMetaFile&>(rMtf).WindStart();
         const_cast<GDIMetaFile&>(rMtf).Play(*this, rMtfPos, rMtfSize);
         const_cast<GDIMetaFile&>(rMtf).WindStart();
-
         return;
     }
 
     vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
 
     tools::Rectangle aOutRect( LogicToPixel( tools::Rectangle(rPos, rSize) ) );
-    Point aPoint;
-    tools::Rectangle aDstRect( aPoint, GetOutputSizePixel() );
-    aDstRect.Intersection( aOutRect );
 
-    if (HasClipRegion())
-        aDstRect.Intersection( LogicToPixel( GetClipRegion().GetBoundRect() ) );
+    // FIX: Wrap aOutRect in an explicit tools::PolyPolygon() call
+    tools::Rectangle aDstRect = GetVisibleDeviceRangePixel( tools::PolyPolygon(aOutRect) );
 
     if (aDstRect.IsEmpty())
         return;
 
-    // Create transparent buffer
-    ScopedVclPtrInstance<VirtualDevice> xVDev(DeviceFormat::WITH_ALPHA);
+    const Size aDstSzPixel = aDstRect.GetSize();
 
-    xVDev->SetDPIX(GetDPIX());
-    xVDev->SetDPIY(GetDPIY());
+    // FIX: Define bNeedsCopyCycle here so it's available for the buffer setup
+    const bool bNeedsCopyCycle = (GetAntialiasing() != AntialiasingFlags::NONE || rPos != rMtfPos || rSize != rMtfSize);
 
-    if (!xVDev->SetOutputSizePixel(aDstRect.GetSize(), true, true))
+    ScopedVclPtrInstance<VirtualDevice> xOffscreenBuffer(DeviceFormat::WITH_ALPHA);
+
+    if (!lcl_ConfigureOffscreenBuffer(*xOffscreenBuffer, *this, aDstRect, bNeedsCopyCycle))
         return;
 
-    // tdf#150610 fix broken rendering of text meta actions
-    // Even when drawing to a VirtualDevice that has antialiasing
-    // disabled, text will still be drawn with some antialiased
-    // pixels on HiDPI displays. So, use the antialiasing enabled
-    // code to render if there are any text meta actions in the
-    // metafile.
-    if (GetAntialiasing() != AntialiasingFlags::NONE || rPos != rMtfPos || rSize != rMtfSize)
+    const bool bOrigMapModeEnabled = mpMapper->IsMapModeEnabled();
+    const bool bBufferMapModeEnabled = xOffscreenBuffer->IsMapModeEnabled();
+
+    // Render Content
+    mpMapper->EnableMapMode(false);
+
+    if (bNeedsCopyCycle)
     {
-        // #i102109#
-        // For MetaFile replay (see task) it may now be necessary to take
-        // into account that the content is AntiAlialiased and needs to be masked
-        // like that. Instead of masking, i will use a copy-modify-paste cycle
-        // here (as i already use in the VclPrimiziveRenderer with success)
-        xVDev->SetAntialiasing(GetAntialiasing());
-
-        // create MapMode for buffer (offset needed) and set
-        MapMode aMap(GetMapMode());
-        const Point aOutPos(PixelToLogic(aDstRect.TopLeft()));
-        aMap.SetOrigin(Point(-aOutPos.X(), -aOutPos.Y()));
-        xVDev->SetMapMode(aMap);
-
-        // copy MapMode state and disable for target
-        const bool bOrigMapModeEnabled(mpMapper->IsMapModeEnabled());
-        mpMapper->EnableMapMode(false);
-
-        // copy MapMode state and disable for buffer
-        const bool bBufferMapModeEnabled(xVDev->IsMapModeEnabled());
-        xVDev->EnableMapMode(false);
-
-        // copy content from original to buffer
-        xVDev->DrawOutDev( aPoint, xVDev->GetOutputSizePixel(), // dest
-                           aDstRect.TopLeft(), xVDev->GetOutputSizePixel(), // source
-                           *this);
-
-        // draw MetaFile to buffer
-        xVDev->EnableMapMode(bBufferMapModeEnabled);
-        const_cast<GDIMetaFile&>(rMtf).WindStart();
-        const_cast<GDIMetaFile&>(rMtf).Play(*xVDev, rMtfPos, rMtfSize);
-        const_cast<GDIMetaFile&>(rMtf).WindStart();
-
-        // get content bitmap from buffer
-        xVDev->EnableMapMode(false);
-
-        const Bitmap aPaint(xVDev->GetBitmap(aPoint, xVDev->GetOutputSizePixel()));
-
-        // create alpha mask from gradient and get as Bitmap
-        xVDev->EnableMapMode(bBufferMapModeEnabled);
-        xVDev->SetDrawMode(DrawModeFlags::GrayGradient);
-        // Related tdf#150610 draw gradient to VirtualDevice bounds
-        // If we are here and the metafile bounds differs from the
-        // VirtualDevice bounds so that we apply the transparency
-        // gradient to any pixels drawn outside of the metafile
-        // bounds.
-        xVDev->DrawGradient(tools::Rectangle(rPos, rSize), rTransparenceGradient);
-        xVDev->SetDrawMode(DrawModeFlags::Default);
-        xVDev->EnableMapMode(false);
-
-        AlphaMask aAlpha(xVDev->GetBitmap(aPoint, xVDev->GetOutputSizePixel()));
-        const AlphaMask aPaintAlpha(aPaint.CreateAlphaMask());
-        // The alpha mask is inverted from what
-        // is expected so invert it again
-        aAlpha.Invert(); // convert to alpha
-        aAlpha.BlendWith(aPaintAlpha);
-
-        xVDev.disposeAndClear();
-
-        // draw masked content to target and restore MapMode
-        DrawBitmap(aDstRect.TopLeft(), Bitmap(aPaint.CreateColorBitmap(), aAlpha));
-        mpMapper->EnableMapMode(bOrigMapModeEnabled);
-
-        return;
+        xOffscreenBuffer->EnableMapMode(false);
+        xOffscreenBuffer->DrawOutDev( Point(), aDstSzPixel, aDstRect.TopLeft(), aDstSzPixel, *this);
     }
 
-    MapMode aMap( GetMapMode() );
-    Point aOutPos( PixelToLogic( aDstRect.TopLeft() ) );
-    const bool bOldMap = mpMapper->IsMapModeEnabled();
-
-    aMap.SetOrigin( Point( -aOutPos.X(), -aOutPos.Y() ) );
-    xVDev->SetMapMode( aMap );
-    const bool bVDevOldMap = xVDev->IsMapModeEnabled();
-
-    // create paint bitmap
+    xOffscreenBuffer->EnableMapMode(bBufferMapModeEnabled);
     const_cast<GDIMetaFile&>(rMtf).WindStart();
-    const_cast<GDIMetaFile&>(rMtf).Play(*xVDev, rMtfPos, rMtfSize);
+    const_cast<GDIMetaFile&>(rMtf).Play(*xOffscreenBuffer, rMtfPos, rMtfSize);
     const_cast<GDIMetaFile&>(rMtf).WindStart();
-    xVDev->EnableMapMode( false );
-    Bitmap aPaint(xVDev->GetBitmap(Point(), xVDev->GetOutputSizePixel()));
-    xVDev->EnableMapMode( bVDevOldMap ); // #i35331#: MUST NOT use EnableMapMode( sal_True ) here!
 
-    // create alpha mask from gradient
-    xVDev->SetDrawMode( DrawModeFlags::GrayGradient );
-    xVDev->DrawGradient( tools::Rectangle( rMtfPos, rMtfSize ), rTransparenceGradient );
-    xVDev->SetDrawMode( DrawModeFlags::Default );
-    xVDev->EnableMapMode( false );
+    xOffscreenBuffer->EnableMapMode(false);
+    const Bitmap aPaint(xOffscreenBuffer->GetBitmap(Point(), aDstSzPixel));
 
-    AlphaMask aAlpha(xVDev->GetBitmap(Point(), xVDev->GetOutputSizePixel()));
-    const AlphaMask aPaintAlpha(aPaint.CreateAlphaMask());
-    // The alpha mask is inverted from what
-    // is expected so invert it again
-    aAlpha.Invert(); // convert to alpha
-    aAlpha.BlendWith(aPaintAlpha);
+    // Render Gradient Mask
+    xOffscreenBuffer->EnableMapMode(bBufferMapModeEnabled);
+    xOffscreenBuffer->SetDrawMode(DrawModeFlags::GrayGradient);
+    xOffscreenBuffer->DrawGradient(tools::Rectangle(rPos, rSize), rTransparenceGradient);
+    xOffscreenBuffer->SetDrawMode(DrawModeFlags::Default);
 
-    xVDev.disposeAndClear();
+    xOffscreenBuffer->EnableMapMode(false);
+    const Bitmap aGradientMask(xOffscreenBuffer->GetBitmap(Point(), aDstSzPixel));
 
-    mpMapper->EnableMapMode( false );
-    DrawBitmap(aDstRect.TopLeft(), Bitmap(aPaint.CreateColorBitmap(), aAlpha));
-    mpMapper->EnableMapMode( bOldMap );
+    xOffscreenBuffer.disposeAndClear();
+
+    Bitmap aResult = vcl::rendercontext::BitmapRenderer::ApplyGradientAlpha(aPaint, aGradientMask);
+
+    DrawBitmap(aDstRect.TopLeft(), aResult);
+
+    mpMapper->EnableMapMode(bOrigMapModeEnabled);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

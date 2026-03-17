@@ -80,6 +80,12 @@ public:
     static void BlendAlphaBitmap(Bitmap& rPaint, const Bitmap& rPolyMask, const Color& rFillColor,
                                  sal_uInt8 nAlpha);
 
+    /**
+     * Converts a grayscale gradient mask into an AlphaMask, merges it with
+     * the content's existing alpha, and returns the final composited Bitmap.
+     */
+    static Bitmap ApplyGradientAlpha(const Bitmap& rContent, const Bitmap& rGradientMask);
+
 private:
     BitmapRenderer() = delete;
     ~BitmapRenderer() = delete;

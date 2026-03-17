@@ -288,6 +288,21 @@ void BitmapRenderer::BlendAlphaBitmap(Bitmap& rPaint, const Bitmap& rPolyMask,
     else
         lcl_MaskedBlend(rPaint, rPolyMask, rFillColor, nAlpha);
 }
+
+Bitmap BitmapRenderer::ApplyGradientAlpha(const Bitmap& rContent, const Bitmap& rGradientMask)
+{
+    AlphaMask aAlpha(rGradientMask);
+    const AlphaMask aContentAlpha(rContent.CreateAlphaMask());
+
+    // The metafile mask is drawn as a grayscale gradient (Black to White).
+    // VCL AlphaMasks expect the inverse, so we invert it before blending.
+    aAlpha.Invert();
+    aAlpha.BlendWith(aContentAlpha);
+
+    // Combine the original color channels with the newly calculated alpha
+    return Bitmap(rContent.CreateColorBitmap(), aAlpha);
+}
+
 } // namespace vcl::rendercontext
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
