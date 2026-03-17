@@ -303,21 +303,8 @@ void OutputDevice::DrawTransparent(
     if(!rB2DPolyPoly.count())
         return;
 
-    if( !mpGraphics && !AcquireGraphics() )
+    if (!FlushGraphicsState(vcl::PrepareOutputFlags::Line | vcl::PrepareOutputFlags::Fill | vcl::PrepareOutputFlags::Clip))
         return;
-    assert(mpGraphics);
-
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
-
-    if ( IsOutputCulled() )
-        return;
-
-    if( mbLineColorDirty )
-        InitLineColor();
-
-    if( mbFillColorDirty )
-        InitFillColor();
 
     // b2dpolygon support not implemented yet on non-UNX platforms
     basegfx::B2DPolyPolygon aB2DPolyPolygon(rB2DPolyPoly);
@@ -398,24 +385,8 @@ void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
 
     maRecorder.RecordTransparent(rPolyPoly, nTransparencePercent);
 
-    if( !IsDeviceOutputNecessary() || IsLayoutCalculationNecessary() )
+    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Line | vcl::PrepareOutputFlags::Fill | vcl::PrepareOutputFlags::Clip))
         return;
-
-    if( !mpGraphics && !AcquireGraphics() )
-        return;
-    assert(mpGraphics);
-
-    if ( mpClippingController->IsDirty() )
-        InitClipRegion();
-
-    if ( IsOutputCulled() )
-        return;
-
-    if( mbLineColorDirty )
-        InitLineColor();
-
-    if( mbFillColorDirty )
-        InitFillColor();
 
     basegfx::B2DPolyPolygon aB2DPolyPolygon(rPolyPoly.getB2DPolyPolygon());
     const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation());
