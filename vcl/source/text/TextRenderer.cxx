@@ -7,8 +7,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include <vcl/text/TextGeometry.hxx>
 #include <vcl/text/TextRenderer.hxx>
 #include <vcl/text/TextRenderContext.hxx>
+#include <vcl/rendercontext/PrimitiveRenderer.hxx>
 
 #include <salgdi.hxx>
 #include <sallayout.hxx>
@@ -30,6 +32,16 @@ void TextRenderer::DrawStrikeoutCharLayout(const TextRenderContext& rCtx, SalLay
     rLayout.DrawBase() = basegfx::B2DPoint(rOrigin.X(), rOrigin.Y());
 
     rLayout.DrawText(rCtx.rGraphics);
+}
+
+void TextRenderer::DrawTextDecoration(const TextRenderContext& rCtx,
+                                      const vcl::text::RotatedGeometry& rDeviceGeo)
+{
+    if (rDeviceGeo.mbIsPolygon)
+        vcl::rendercontext::PrimitiveRenderer::DrawPolygonGeometry(rCtx.rGraphics,
+                                                                   rDeviceGeo.maPoly);
+    else
+        vcl::rendercontext::PrimitiveRenderer::DrawRect(rCtx.rGraphics, rDeviceGeo.maRect);
 }
 
 } // namespace vcl::text

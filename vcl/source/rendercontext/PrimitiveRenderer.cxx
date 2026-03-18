@@ -781,15 +781,6 @@ void PrimitiveRenderer::DrawGridOfCrosses(SalGraphics& rGraphics,
     }
 }
 
-void PrimitiveRenderer::DrawTextDecoration(SalGraphics& rGraphics,
-                                           const vcl::text::RotatedGeometry& rDeviceGeo)
-{
-    if (rDeviceGeo.mbIsPolygon)
-        PrimitiveRenderer::DrawPolygonGeometry(rGraphics, rDeviceGeo.maPoly);
-    else
-        PrimitiveRenderer::DrawRect(rGraphics, rDeviceGeo.maRect);
-}
-
 void PrimitiveRenderer::DrawWaveLineBezier(OutputDevice& rOutDev, SalGraphics& rGraphics,
                                            tools::Long nStartX, tools::Long nStartY,
                                            tools::Long nEndX, tools::Long nEndY,
@@ -945,7 +936,10 @@ void PrimitiveRenderer::DrawStraightTextLine(OutputDevice& rOutDev,
         }
 
         // Dispatch to optimized stateless renderer
-        PrimitiveRenderer::DrawTextDecoration(*rOutDev.mpGraphics, aTextGeo);
+        if (aTextGeo.mbIsPolygon)
+            PrimitiveRenderer::DrawPolygonGeometry(*rOutDev.mpGraphics, aTextGeo.maPoly);
+        else
+            PrimitiveRenderer::DrawRect(*rOutDev.mpGraphics, aTextGeo.maRect);
     };
 
     switch (aMetrics.eUnderline)
@@ -986,7 +980,10 @@ void PrimitiveRenderer::DrawStraightTextLine(OutputDevice& rOutDev,
                                                                 bAntiparallel);
                 }
 
-                PrimitiveRenderer::DrawTextDecoration(*rOutDev.mpGraphics, aTextGeo);
+                if (aTextGeo.mbIsPolygon)
+                    PrimitiveRenderer::DrawPolygonGeometry(*rOutDev.mpGraphics, aTextGeo.maPoly);
+                else
+                    PrimitiveRenderer::DrawRect(*rOutDev.mpGraphics, aTextGeo.maRect);
             }
         }
         break;
@@ -1044,7 +1041,10 @@ void PrimitiveRenderer::DrawStrikeoutLine(OutputDevice& rOutDev,
         }
 
         // 3. Dispatch to the stateless renderer
-        PrimitiveRenderer::DrawTextDecoration(*rOutDev.mpGraphics, aTextGeo);
+        if (aTextGeo.mbIsPolygon)
+            PrimitiveRenderer::DrawPolygonGeometry(*rOutDev.mpGraphics, aTextGeo.maPoly);
+        else
+            PrimitiveRenderer::DrawRect(*rOutDev.mpGraphics, aTextGeo.maRect);
     }
 }
 
@@ -1222,7 +1222,10 @@ void PrimitiveRenderer::DrawTextLines(SalGraphics& rGraphics,
 
     for (const auto& rGeo : rSegments)
     {
-        PrimitiveRenderer::DrawTextDecoration(rGraphics, rGeo);
+        if (rGeo.mbIsPolygon)
+            PrimitiveRenderer::DrawPolygonGeometry(rGraphics, rGeo.maPoly);
+        else
+            PrimitiveRenderer::DrawRect(rGraphics, rGeo.maRect);
     }
 }
 

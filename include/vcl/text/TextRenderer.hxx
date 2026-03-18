@@ -9,15 +9,18 @@
 
 #pragma once
 
-#include <vcl/dllapi.h>
-#include <vcl/text/TextRenderContext.hxx>
 #include <tools/color.hxx>
 #include <tools/gen.hxx>
+
+#include <vcl/dllapi.h>
+#include <vcl/text/TextRenderContext.hxx>
 
 class SalLayout;
 
 namespace vcl::text
 {
+struct RotatedGeometry;
+
 /**
  * TextRenderer: A stateless processor for text decorations and auxiliary
  * text rendering elements.
@@ -35,6 +38,12 @@ public:
      */
     static void DrawStrikeoutCharLayout(const TextRenderContext& rCtx, SalLayout& rLayout,
                                         const Point& rOrigin, Color aColor);
+
+    /** * Renders a calculated text decoration geometry (either a rotated polygon
+     * or a straight rectangle) directly to the hardware graphics backend.
+     */
+    static void DrawTextDecoration(const TextRenderContext& rCtx,
+                                   const vcl::text::RotatedGeometry& rDeviceGeo);
 };
 
 } // namespace vcl::text

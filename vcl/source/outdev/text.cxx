@@ -162,7 +162,8 @@ void OutputDevice::ImplDrawTextDecoration(const SalLayout& rSalLayout)
             mpMapper->MirrorDevicePixelRect(aGeo.maRect, nFrameWidth, bRTL, bAntiparallel);
     }
 
-    vcl::rendercontext::PrimitiveRenderer::DrawTextDecoration(*mpGraphics, aGeo);
+    if (auto aCtx = CreateTextRenderContext())
+        vcl::text::TextRenderer::DrawTextDecoration(*aCtx, aGeo);
 }
 
 bool OutputDevice::ImplDrawRotateText(SalLayout& rSalLayout)

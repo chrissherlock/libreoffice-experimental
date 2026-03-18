@@ -139,9 +139,6 @@ public:
                                   const Size& rDeviceGridDistance,
                                   const tools::Rectangle& rDeviceDrawingArea);
 
-    static void DrawTextDecoration(SalGraphics& rGraphics,
-                                   const vcl::text::RotatedGeometry& rDeviceGeo);
-
     static void DrawTextLines(SalGraphics& rGraphics,
                               std::span<const vcl::text::RotatedGeometry> rSegments,
                               const Color& rColor);
