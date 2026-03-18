@@ -142,9 +142,6 @@ public:
     static void DrawTextLines(SalGraphics& rGraphics,
                               std::span<const vcl::text::RotatedGeometry> rSegments,
                               const Color& rColor);
-
-    static void DrawTextLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo);
-
     static void DrawEmphasisMark(OutputDevice& rOutDev, SalGraphics& rGraphics, tools::Long nBaseX,
                                  tools::Long nX, tools::Long nY,
                                  const tools::PolyPolygon& rPolyPoly, bool bPolyLine,

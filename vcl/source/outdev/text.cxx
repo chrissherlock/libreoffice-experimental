@@ -1862,6 +1862,86 @@ static Point lcl_GetDecorationOrigin(const Point& rOrigin, Degree10 nOrientation
     return aOriginPt;
 }
 
+void OutputDevice::ImplDrawTextLine(const vcl::rendercontext::TextLineGeometry& rGeo)
+{
+    vcl::text::TextLineOffsetInfo aInfo(*mpFontInstance->mxFontMetric, rGeo.meUnderline,
+                                        rGeo.meOverline, rGeo.mbUnderlineAbove);
+
+    Color aStrikeoutColor = GetTextColor();
+    Color aUnderlineColor = GetTextLineColor();
+    Color aOverlineColor = GetOverlineColor();
+
+    if (!IsTextLineColor())
+        aUnderlineColor = GetTextColor();
+
+    if (!IsOverlineColor())
+        aOverlineColor = GetTextColor();
+
+    vcl::rendercontext::TextLineGeometry aDrawGeo = rGeo;
+    if (IsRTLEnabled())
+    {
+        tools::Long nXAdd = aDrawGeo.mfWidth - aDrawGeo.mnDistX;
+        if (mpFontInstance->mnOrientation)
+            nXAdd = basegfx::fround<tools::Long>(
+                nXAdd * cos(toRadians(mpFontInstance->mnOrientation)));
+        aDrawGeo.maOrigin.AdjustX(nXAdd - 1);
+    }
+
+    const LogicalFontInstance& rFontInst = *GetFontInstance();
+    const tools::Long nAscent = rFontInst.mxFontMetric->GetAscent();
+    const tools::Long nDescent = rFontInst.mxFontMetric->GetDescent();
+
+    auto fnDrawLine = [&](FontLineStyle eLineStyle, bool bIsWave, tools::Long nOffset, Color aColor,
+                          bool bIsAbove = true) {
+        if (eLineStyle == LINESTYLE_NONE)
+            return;
+
+        vcl::rendercontext::TextLineGeometry aLineGeo = aDrawGeo;
+        aLineGeo.meUnderline = eLineStyle;
+
+        if (bIsWave)
+        {
+            ImplDrawWaveTextLine(aLineGeo, nOffset, aColor, bIsAbove);
+        }
+        else
+        {
+            Point aOrigin = lcl_GetDecorationOrigin(aLineGeo.maOrigin, rFontInst.mnOrientation,
+                                                    aLineGeo.mnDistX, nOffset);
+
+            auto aClipGuard = lcl_BeginDecorationClipping(*this, aOrigin, aLineGeo.mfWidth,
+                                                          nAscent, nDescent);
+
+            ImplDrawStraightTextLine(aLineGeo, 0, aColor, bIsAbove);
+        }
+    };
+
+    // Execute for Underline
+    fnDrawLine(aDrawGeo.meUnderline, aInfo.bUnderlineIsWave, aInfo.nUnderlineOffset,
+               aUnderlineColor, aDrawGeo.mbUnderlineAbove);
+
+    // Execute for Overline (Overlines are always "above" the baseline)
+    fnDrawLine(aDrawGeo.meOverline, aInfo.bOverlineIsWave, aInfo.nOverlineOffset, aOverlineColor);
+
+    if (aDrawGeo.meStrikeout != STRIKEOUT_NONE)
+    {
+        if (aDrawGeo.meStrikeout == STRIKEOUT_SLASH || aDrawGeo.meStrikeout == STRIKEOUT_X)
+        {
+            ImplDrawStrikeoutChar(aDrawGeo, 0, aStrikeoutColor);
+        }
+        else
+        {
+            Point aStrikeoutOrigin
+                = lcl_GetDecorationOrigin(aDrawGeo.maOrigin, rFontInst.mnOrientation,
+                                          aDrawGeo.mnDistX, aInfo.nStrikeoutOffset);
+
+            auto aClipGuard = lcl_BeginDecorationClipping(*this, aStrikeoutOrigin,
+                                                          aDrawGeo.mfWidth, nAscent, nDescent);
+
+            ImplDrawStrikeoutLine(aDrawGeo, aInfo.nStrikeoutOffset, aStrikeoutColor);
+        }
+    }
+}
+
 void OutputDevice::ImplDrawStrikeoutChar(const vcl::rendercontext::TextLineGeometry& rGeo,
                                          tools::Long nY, Color aColor)
 {

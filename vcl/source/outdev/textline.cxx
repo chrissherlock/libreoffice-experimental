@@ -253,7 +253,7 @@ void OutputDevice::DrawTextLine( const Point& rPos, tools::Long nWidth,
     vcl::rendercontext::TextLineGeometry aLineGeo(aPos, 0, fWidth, eStrikeout, eUnderline, eOverline, false);
     aLineGeo.maUnderlineColor = GetTextLineColor();
 
-    vcl::rendercontext::PrimitiveRenderer::DrawTextLine(*this, aLineGeo);
+    ImplDrawTextLine(aLineGeo);
 }
 
 static void lcl_DrawCachedHorizontalWaveLine(OutputDevice& rOutDev, const Point& rStartPos,

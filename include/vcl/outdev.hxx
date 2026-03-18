@@ -1224,6 +1224,8 @@ public:
                                                       const sal_Int32 nMinIndex,
                                                       const sal_Int32 nEndIndex ) const;
 
+    SAL_DLLPRIVATE void ImplDrawTextLine(const vcl::rendercontext::TextLineGeometry& rGeo);
+
     SAL_DLLPRIVATE void ImplDrawStrikeoutChar(const vcl::rendercontext::TextLineGeometry& rGeo,
                                               tools::Long nY, Color aColor);
 
