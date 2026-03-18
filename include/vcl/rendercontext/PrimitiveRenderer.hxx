@@ -181,8 +181,6 @@ public:
 
     static void DrawStrikeoutLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo,
                                   tools::Long nY, Color aColor);
-    static void DrawStrikeoutChar(OutputDevice& rOutDev, const TextLineGeometry& rGeo,
-                                  tools::Long nY, Color aColor);
 
     /**
      * Attempts to draw a gradient natively via SalGraphics.

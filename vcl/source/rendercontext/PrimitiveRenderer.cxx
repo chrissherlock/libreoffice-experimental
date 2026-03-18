@@ -1048,6 +1048,35 @@ void PrimitiveRenderer::DrawStrikeoutLine(OutputDevice& rOutDev,
     }
 }
 
+[[nodiscard]] static auto lcl_BeginDecorationClipping(OutputDevice& rOutDev, const Point& rOrigin,
+                                                      double fWidth, tools::Long nAscent,
+                                                      tools::Long nDescent)
+{
+    tools::Rectangle aPixelRect;
+    aPixelRect.SetLeft(rOrigin.X());
+    aPixelRect.SetRight(aPixelRect.Left() + static_cast<tools::Long>(fWidth));
+    aPixelRect.SetBottom(rOrigin.Y() + nDescent);
+    aPixelRect.SetTop(rOrigin.Y() - nAscent);
+
+    const LogicalFontInstance& rFontInst = *rOutDev.GetFontInstance();
+    const Degree10 nOrientation = rFontInst.mnOrientation;
+
+    if (nOrientation)
+    {
+        tools::Polygon aPoly(aPixelRect);
+        aPoly.Rotate(rOrigin, nOrientation);
+        aPixelRect = aPoly.GetBoundRect();
+    }
+
+    // Crucial for overlines and rotated text to prevent "inside-out" empty rects
+    aPixelRect.Normalize();
+
+    rOutDev.Push(vcl::PushFlags::CLIPREGION);
+    rOutDev.IntersectClipRegion(aPixelRect);
+
+    return comphelper::ScopeGuard([&rOutDev]() { rOutDev.Pop(); });
+}
+
 /**
  * Calculates the rotated and offset origin point for text decorations.
  *
@@ -1080,91 +1109,6 @@ static Point lcl_GetDecorationOrigin(const Point& rOrigin, Degree10 nOrientation
     }
 
     return aOriginPt;
-}
-
-/**
- * Pushes a clipping region to the OutputDevice for a text decoration.
- * Uses RAII to ensure the clip is popped.
- */
-[[nodiscard]] static auto lcl_BeginDecorationClipping(OutputDevice& rOutDev, const Point& rOrigin,
-                                                      double fWidth, tools::Long nAscent,
-                                                      tools::Long nDescent)
-{
-    tools::Rectangle aPixelRect;
-    aPixelRect.SetLeft(rOrigin.X());
-    aPixelRect.SetRight(aPixelRect.Left() + static_cast<tools::Long>(fWidth));
-    aPixelRect.SetBottom(rOrigin.Y() + nDescent);
-    aPixelRect.SetTop(rOrigin.Y() - nAscent);
-
-    const LogicalFontInstance& rFontInst = *rOutDev.GetFontInstance();
-    const Degree10 nOrientation = rFontInst.mnOrientation;
-
-    if (nOrientation)
-    {
-        tools::Polygon aPoly(aPixelRect);
-        aPoly.Rotate(rOrigin, nOrientation);
-        aPixelRect = aPoly.GetBoundRect();
-    }
-
-    // Crucial for overlines and rotated text to prevent "inside-out" empty rects
-    aPixelRect.Normalize();
-
-    rOutDev.Push(vcl::PushFlags::CLIPREGION);
-    rOutDev.IntersectClipRegion(aPixelRect);
-
-    return comphelper::ScopeGuard([&rOutDev]() { rOutDev.Pop(); });
-}
-
-void PrimitiveRenderer::DrawStrikeoutChar(OutputDevice& rOutDev,
-                                          const vcl::rendercontext::TextLineGeometry& rGeo,
-                                          tools::Long nY, Color aColor)
-{
-    if (!rGeo.mfWidth)
-        return;
-
-    vcl::text::LayoutResources aRes{ rOutDev.mpFontInstance.get(),
-                                     *rOutDev.mpMapper,
-                                     &rOutDev.GetFontCache(),
-                                     rOutDev.GetFontCollection(),
-                                     nullptr, // pForcedFallback
-                                     [&]() { return rOutDev.mpGraphics; },
-                                     rOutDev.IsRTLEnabled(),
-                                     false, // bSubpixelPositioning
-                                     *rOutDev.mpGraphicsState,
-                                     *rOutDev.mpFontRealization };
-
-    std::unique_ptr<SalLayout> pLayout
-        = vcl::text::TextGeometry::GetStrikeoutCharLayout(aRes, rGeo.mfWidth, rGeo.meStrikeout);
-
-    if (!pLayout)
-        return;
-
-    Point aOriginPt = lcl_GetDecorationOrigin(rGeo.maOrigin, rOutDev.mpFontInstance->mnOrientation,
-                                              rGeo.mnDistX, nY);
-
-    const Color aOldColor = rOutDev.GetTextColor();
-    rOutDev.SetTextColor(aColor);
-    rOutDev.ImplInitTextColor();
-
-    comphelper::ScopeGuard aColorGuard([&rOutDev, aOldColor]() {
-        rOutDev.SetTextColor(aOldColor);
-        rOutDev.ImplInitTextColor();
-    });
-
-    {
-        // CRITICAL FIX: rGeo.maOrigin already contains rOutDev.mpFontRealization offsets!
-        // Do not add them again here, otherwise strikeout characters render completely out of bounds.
-        pLayout->DrawBase() = basegfx::B2DPoint(aOriginPt.X(), aOriginPt.Y());
-
-        const LogicalFontInstance& rFontInst = *rOutDev.GetFontInstance();
-
-        // One call handles calculation, rotation, normalization, and pushing the clip stack
-        auto aClipGuard = lcl_BeginDecorationClipping(rOutDev, aOriginPt, rGeo.mfWidth,
-                                                      rFontInst.mxFontMetric->GetAscent(),
-                                                      rFontInst.mxFontMetric->GetDescent());
-
-        pLayout->DrawText(*rOutDev.mpGraphics);
-    }
 }
 
 void PrimitiveRenderer::DrawTextLine(OutputDevice& rOutDev,
@@ -1250,7 +1194,8 @@ void PrimitiveRenderer::DrawTextLine(OutputDevice& rOutDev,
     {
         if (aDrawGeo.meStrikeout == STRIKEOUT_SLASH || aDrawGeo.meStrikeout == STRIKEOUT_X)
         {
-            PrimitiveRenderer::DrawStrikeoutChar(rOutDev, aDrawGeo, 0, aStrikeoutColor);
+            // [CHANGED]: Route character-based layout generation back to OutputDevice
+            rOutDev.ImplDrawStrikeoutChar(aDrawGeo, 0, aStrikeoutColor);
         }
         else
         {

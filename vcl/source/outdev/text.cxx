@@ -24,6 +24,7 @@
 #include <comphelper/configuration.hxx>
 #include <comphelper/scopeguard.hxx>
 
+#include <vcl/deviceconcepts.hxx>
 #include <vcl/fntstyle.hxx>
 #include <vcl/glyphitem.hxx>
 #include <vcl/metafile/MetaAction.hxx>
@@ -37,6 +38,8 @@
 #include <vcl/text/TextSpan.hxx>
 #include <vcl/text/TextLayoutData.hxx>
 #include <vcl/text/TextRecordingDispatcher.hxx>
+#include <vcl/text/TextRenderContext.hxx>
+#include <vcl/text/TextRenderer.hxx>
 #include <vcl/text/LayoutCacheData.hxx>
 #include <vcl/text/MultiLineEngine.hxx>
 #include <vcl/text/MnemonicGeometry.hxx>
@@ -48,6 +51,7 @@
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
 #include <TextLayoutCache.hxx>
+#include <devicedispatcher.hxx>
 #include <drawmode.hxx>
 #include <font/FontController.hxx>
 #include <text/FontMappingTracker.hxx>
@@ -61,6 +65,31 @@
 
 #include <memory>
 #include <optional>
+
+std::optional<vcl::text::TextRenderContext> OutputDevice::CreateTextRenderContext()
+{
+    if (!mpGraphics && !AcquireGraphics())
+        return std::nullopt; // Safely bail out!
+
+    tools::Long nFrameWidth = vcl::DispatchDevice(*this, [](const auto& rDev) {
+        return vcl::get_reference_width_v(rDev);
+    });
+
+    const LogicalFontInstance& rFontInst = *GetFontInstance();
+
+    return vcl::text::TextRenderContext{
+        *mpGraphics,
+        *mpMapper,
+        rFontInst,
+        rFontInst.mnOrientation,
+        IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl),
+        nFrameWidth,
+        ImplIsAntiparallel(),
+        GetTextColor(),
+        GetTextLineColor(),
+        GetTextFillColor()
+    };
+}
 
 vcl::text::ComplexTextLayoutFlags OutputDevice::GetLayoutMode() const
 {
@@ -667,7 +696,7 @@ void OutputDevice::DrawTextLines(SalLayout& rSalLayout, FontStrikeout eStrikeout
                      aOrigin, static_cast<tools::Long>(rSeg.first), rSeg.second,
                      eStrikeout, LINESTYLE_NONE, LINESTYLE_NONE, false);
 
-                 vcl::rendercontext::PrimitiveRenderer::DrawStrikeoutChar(*this, aCharGeo, 0, GetTextColor());
+                 ImplDrawStrikeoutChar(aCharGeo, 0, GetTextColor());
              }
         }
         else // Line-based strikeouts (Single, Bold, Double)
@@ -1762,6 +1791,102 @@ void OutputDevice::ImplRenderTextLayout(SalLayout& rSalLayout)
         return;
 
     ImplDrawText(rSalLayout);
+}
+
+/**
+ * Pushes a clipping region to the OutputDevice for a text decoration.
+ * Uses RAII to ensure the clip is popped.
+ */
+[[nodiscard]] static auto lcl_BeginDecorationClipping(OutputDevice& rOutDev, const Point& rOrigin,
+                                                      double fWidth, tools::Long nAscent,
+                                                      tools::Long nDescent)
+{
+    tools::Rectangle aPixelRect;
+    aPixelRect.SetLeft(rOrigin.X());
+    aPixelRect.SetRight(aPixelRect.Left() + static_cast<tools::Long>(fWidth));
+    aPixelRect.SetBottom(rOrigin.Y() + nDescent);
+    aPixelRect.SetTop(rOrigin.Y() - nAscent);
+
+    const LogicalFontInstance& rFontInst = *rOutDev.GetFontInstance();
+    const Degree10 nOrientation = rFontInst.mnOrientation;
+
+    if (nOrientation)
+    {
+        tools::Polygon aPoly(aPixelRect);
+        aPoly.Rotate(rOrigin, nOrientation);
+        aPixelRect = aPoly.GetBoundRect();
+    }
+
+    // Crucial for overlines and rotated text to prevent "inside-out" empty rects
+    aPixelRect.Normalize();
+
+    rOutDev.Push(vcl::PushFlags::CLIPREGION);
+    rOutDev.IntersectClipRegion(aPixelRect);
+
+    return comphelper::ScopeGuard([&rOutDev]() { rOutDev.Pop(); });
+}
+
+/**
+ * Calculates the rotated and offset origin point for text decorations.
+ *
+ * @param rOrigin      The base origin of the text (the baseline start).
+ * @param nOrientation The font rotation in Degree10 (0.1 degree units).
+ * @param nDistX       The horizontal offset along the baseline.
+ * @param nY           The vertical offset relative to the baseline.
+ * @return             The final Point in logical coordinates.
+ */
+static Point lcl_GetDecorationOrigin(const Point& rOrigin, Degree10 nOrientation,
+                                     tools::Long nDistX, tools::Long nY)
+{
+    Point aOriginPt = rOrigin;
+
+    if (nDistX || nY)
+    {
+        tools::Long nTmpX = nDistX;
+        tools::Long nTmpY = nY;
+
+        if (nOrientation)
+        {
+            // Rotate the relative offsets around the (0,0) pivot
+            // before applying them to the absolute origin.
+            Point aOffset(0, 0);
+            aOffset.RotateAround(nTmpX, nTmpY, nOrientation);
+        }
+
+        aOriginPt.AdjustX(nTmpX);
+        aOriginPt.AdjustY(nTmpY);
+    }
+
+    return aOriginPt;
+}
+
+void OutputDevice::ImplDrawStrikeoutChar(const vcl::rendercontext::TextLineGeometry& rGeo,
+                                         tools::Long nY, Color aColor)
+{
+    if (rGeo.mfWidth <= 0)
+        return;
+
+    vcl::text::LayoutResources aRes{
+        mpFontInstance.get(), *mpMapper, &GetFontCache(), GetFontCollection(),
+        nullptr, [&]() { return mpGraphics; }, IsRTLEnabled(), false,
+        *mpGraphicsState, *mpFontRealization
+    };
+
+    std::unique_ptr<SalLayout> pLayout =
+        vcl::text::TextGeometry::GetStrikeoutCharLayout(aRes, rGeo.mfWidth, rGeo.meStrikeout);
+
+    if (!pLayout)
+        return;
+
+    Point aOriginPt = lcl_GetDecorationOrigin(rGeo.maOrigin, mpFontInstance->mnOrientation,
+                                              rGeo.mnDistX, nY);
+
+    auto aClipGuard = lcl_BeginDecorationClipping(*this, aOriginPt, rGeo.mfWidth,
+                                                  mpFontInstance->mxFontMetric->GetAscent(),
+                                                  mpFontInstance->mxFontMetric->GetDescent());
+
+    if (auto aCtx = CreateTextRenderContext())
+        vcl::text::TextRenderer::DrawStrikeoutCharLayout(*aCtx, *pLayout, aOriginPt, aColor);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

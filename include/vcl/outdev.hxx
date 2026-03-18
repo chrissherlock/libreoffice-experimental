@@ -50,6 +50,7 @@
 #include <vcl/deviceconcepts.hxx>
 #include <vcl/vclreferencebase.hxx>
 #include <vcl/text/TextRecordingState.hxx>
+#include <vcl/text/TextRenderContext.hxx>
 
 #include <basegfx/range/b2drectangle.hxx>
 #include <basegfx/numeric/ftools.hxx>
@@ -973,6 +974,8 @@ private:
 
 public:
 
+    std::optional<vcl::text::TextRenderContext> CreateTextRenderContext();
+
     void                        DrawText( const Point& rStartPt, const OUString& rStr,
                                           sal_Int32 nIndex = 0, sal_Int32 nLen = -1,
                                           std::vector< tools::Rectangle >* pVector = nullptr, OUString* pDisplayText = nullptr,
@@ -1220,6 +1223,9 @@ public:
     SAL_DLLPRIVATE SalLayoutFlags GetBiDiLayoutFlags( std::u16string_view rStr,
                                                       const sal_Int32 nMinIndex,
                                                       const sal_Int32 nEndIndex ) const;
+
+    void ImplDrawStrikeoutChar(const vcl::rendercontext::TextLineGeometry& rGeo,
+                               tools::Long nY, Color aColor);
 
 protected:
     SAL_DLLPRIVATE float        approximate_char_width() const;
