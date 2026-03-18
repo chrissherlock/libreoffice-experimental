@@ -17,9 +17,15 @@
 
 class SalLayout;
 
+namespace vcl::rendercontext
+{
+struct TextLineGeometry;
+}
+
 namespace vcl::text
 {
 struct RotatedGeometry;
+struct StrikeoutGeometry;
 
 /**
  * TextRenderer: A stateless processor for text decorations and auxiliary
@@ -44,6 +50,12 @@ public:
      */
     static void DrawTextDecoration(const TextRenderContext& rCtx,
                                    const vcl::text::RotatedGeometry& rDeviceGeo);
+
+    /** * Renders geometric strikeout decorations (e.g., single, double, bold lines).
+     */
+    static void DrawStrikeoutLine(const TextRenderContext& rCtx,
+                                  const vcl::rendercontext::TextLineGeometry& rGeo, // <-- FIXED
+                                  const vcl::text::StrikeoutGeometry& rStrikeoutGeo);
 };
 
 } // namespace vcl::text

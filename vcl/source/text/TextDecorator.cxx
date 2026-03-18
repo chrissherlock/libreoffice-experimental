@@ -368,62 +368,66 @@ StrikeoutGeometry TextDecorator::CalculateStrikeoutGeometry(const FontMetricData
     return aGeo;
 }
 
-TextLineGeometry TextDecorator::GetTextLineGeometry(const TextLineRequest& rReq,
-                                                    const FontMetricData& rMetric)
+TextDecorationMetrics TextDecorator::GetTextDecorationMetrics(const TextLineRequest& rReq,
+                                                              const FontMetricData& rMetric)
 {
-    TextLineGeometry aGeo;
+    TextDecorationMetrics aDecoratorMetrics;
 
     // Calculate Standard Pen Width (DPI / 300)
-    aGeo.nLineWidth = rReq.nDPIX / 300;
-    if (aGeo.nLineWidth < 1)
-        aGeo.nLineWidth = 1;
+    aDecoratorMetrics.nLineWidth = rReq.nDPIX / 300;
+    if (aDecoratorMetrics.nLineWidth < 1)
+        aDecoratorMetrics.nLineWidth = 1;
 
     if (rReq.eUnderline != LINESTYLE_NONE)
     {
         if (rReq.eUnderline == LINESTYLE_DOUBLE || rReq.eUnderline == LINESTYLE_DOUBLEWAVE)
         {
-            aGeo.nUnderlinePos1 = rReq.bUnderlineAbove ? rMetric.GetAboveDoubleUnderlineOffset1()
-                                                       : rMetric.GetDoubleUnderlineOffset1();
-            aGeo.nUnderlinePos2 = rReq.bUnderlineAbove ? rMetric.GetAboveDoubleUnderlineOffset2()
-                                                       : rMetric.GetDoubleUnderlineOffset2();
+            aDecoratorMetrics.nUnderlinePos1 = rReq.bUnderlineAbove
+                                                   ? rMetric.GetAboveDoubleUnderlineOffset1()
+                                                   : rMetric.GetDoubleUnderlineOffset1();
+            aDecoratorMetrics.nUnderlinePos2 = rReq.bUnderlineAbove
+                                                   ? rMetric.GetAboveDoubleUnderlineOffset2()
+                                                   : rMetric.GetDoubleUnderlineOffset2();
         }
         else if (rReq.eUnderline >= LINESTYLE_BOLD && rReq.eUnderline <= LINESTYLE_BOLDDASHDOTDOT)
         {
-            aGeo.nUnderlinePos1 = rReq.bUnderlineAbove ? rMetric.GetAboveBoldUnderlineOffset()
-                                                       : rMetric.GetBoldUnderlineOffset();
+            aDecoratorMetrics.nUnderlinePos1 = rReq.bUnderlineAbove
+                                                   ? rMetric.GetAboveBoldUnderlineOffset()
+                                                   : rMetric.GetBoldUnderlineOffset();
         }
         else
         {
-            aGeo.nUnderlinePos1 = rReq.bUnderlineAbove ? rMetric.GetAboveUnderlineOffset()
-                                                       : rMetric.GetUnderlineOffset();
+            aDecoratorMetrics.nUnderlinePos1 = rReq.bUnderlineAbove
+                                                   ? rMetric.GetAboveUnderlineOffset()
+                                                   : rMetric.GetUnderlineOffset();
         }
 
         if (rReq.eUnderline == LINESTYLE_WAVE || rReq.eUnderline == LINESTYLE_BOLDWAVE
             || rReq.eUnderline == LINESTYLE_SMALLWAVE || rReq.eUnderline == LINESTYLE_DOUBLEWAVE)
         {
-            aGeo.bUnderlineIsWave = true;
+            aDecoratorMetrics.bUnderlineIsWave = true;
             tools::Long nHeight = rReq.bUnderlineAbove ? rMetric.GetAboveWavelineUnderlineSize()
                                                        : rMetric.GetWavelineUnderlineSize();
 
             if (rReq.eUnderline == LINESTYLE_SMALLWAVE && nHeight > 3)
                 nHeight = 3;
 
-            aGeo.nUnderlineWaveHeight = nHeight;
+            aDecoratorMetrics.nUnderlineWaveHeight = nHeight;
 
             if (rReq.eUnderline == LINESTYLE_BOLDWAVE)
-                aGeo.nLineWidth *= 2;
+                aDecoratorMetrics.nLineWidth *= 2;
         }
     }
 
     if (rReq.eOverline != LINESTYLE_NONE)
     {
-        aGeo.nOverlinePos1 = rMetric.GetAboveUnderlineOffset();
+        aDecoratorMetrics.nOverlinePos1 = rMetric.GetAboveUnderlineOffset();
 
         if (rReq.eOverline == LINESTYLE_WAVE || rReq.eOverline == LINESTYLE_BOLDWAVE
             || rReq.eOverline == LINESTYLE_SMALLWAVE || rReq.eOverline == LINESTYLE_DOUBLEWAVE)
         {
-            aGeo.bOverlineIsWave = true;
-            aGeo.nOverlineWaveHeight = rMetric.GetAboveWavelineUnderlineSize();
+            aDecoratorMetrics.bOverlineIsWave = true;
+            aDecoratorMetrics.nOverlineWaveHeight = rMetric.GetAboveWavelineUnderlineSize();
         }
     }
 
@@ -431,24 +435,24 @@ TextLineGeometry TextDecorator::GetTextLineGeometry(const TextLineRequest& rReq,
     {
         if (rReq.eStrikeout == STRIKEOUT_SLASH || rReq.eStrikeout == STRIKEOUT_X)
         {
-            aGeo.bStrikeoutIsChar = true;
+            aDecoratorMetrics.bStrikeoutIsChar = true;
         }
         else if (rReq.eStrikeout == STRIKEOUT_DOUBLE)
         {
-            aGeo.nStrikeoutPos1 = rMetric.GetDoubleStrikeoutOffset1();
-            aGeo.nStrikeoutPos2 = rMetric.GetDoubleStrikeoutOffset2();
+            aDecoratorMetrics.nStrikeoutPos1 = rMetric.GetDoubleStrikeoutOffset1();
+            aDecoratorMetrics.nStrikeoutPos2 = rMetric.GetDoubleStrikeoutOffset2();
         }
         else if (rReq.eStrikeout == STRIKEOUT_BOLD)
         {
-            aGeo.nStrikeoutPos1 = rMetric.GetBoldStrikeoutOffset();
+            aDecoratorMetrics.nStrikeoutPos1 = rMetric.GetBoldStrikeoutOffset();
         }
         else
         {
-            aGeo.nStrikeoutPos1 = rMetric.GetStrikeoutOffset();
+            aDecoratorMetrics.nStrikeoutPos1 = rMetric.GetStrikeoutOffset();
         }
     }
 
-    return aGeo;
+    return aDecoratorMetrics;
 }
 
 void TextDecorator::GetEmphasisMarkPositions(const SalLayout& rSalLayout,

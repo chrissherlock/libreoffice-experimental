@@ -176,9 +176,6 @@ public:
                                    tools::Long nEndY, tools::Long nWaveHeight, double fOrientation,
                                    tools::Long nLineWidth);
 
-    static void DrawStrikeoutLine(OutputDevice& rOutDev, const TextLineGeometry& rGeo,
-                                  tools::Long nY, Color aColor);
-
     /**
      * Attempts to draw a gradient natively via SalGraphics.
      * @return true if the hardware handled the gradient, false if fallback is needed.

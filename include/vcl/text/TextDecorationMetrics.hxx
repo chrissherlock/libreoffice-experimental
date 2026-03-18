@@ -44,7 +44,7 @@ struct StrikeoutGeometry
     std::vector<TextDecorationSegment> aSegments;
 };
 
-struct TextLineGeometry
+struct TextDecorationMetrics
 {
     tools::Long nLineWidth = 0;
     tools::Long nUnderlinePos1 = 0;

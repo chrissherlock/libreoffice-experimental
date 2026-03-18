@@ -1224,8 +1224,11 @@ public:
                                                       const sal_Int32 nMinIndex,
                                                       const sal_Int32 nEndIndex ) const;
 
-    void ImplDrawStrikeoutChar(const vcl::rendercontext::TextLineGeometry& rGeo,
-                               tools::Long nY, Color aColor);
+    SAL_DLLPRIVATE void ImplDrawStrikeoutChar(const vcl::rendercontext::TextLineGeometry& rGeo,
+                                              tools::Long nY, Color aColor);
+
+    SAL_DLLPRIVATE void ImplDrawStrikeoutLine(const vcl::rendercontext::TextLineGeometry& rGeo,
+                                              tools::Long nY, Color aColor);
 
 protected:
     SAL_DLLPRIVATE float        approximate_char_width() const;

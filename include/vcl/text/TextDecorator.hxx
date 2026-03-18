@@ -16,7 +16,7 @@
 
 #include <vcl/dllapi.h>
 #include <vcl/fntstyle.hxx>
-#include <vcl/text/TextLineGeometry.hxx>
+#include <vcl/text/TextDecorationMetrics.hxx>
 
 #include <vector>
 
@@ -95,8 +95,8 @@ public:
     CalculateTextLineSegments(tools::Long nWidth, FontLineStyle eStyle, tools::Long nLineHeight,
                               tools::Long nDPIX, tools::Long nDPIY);
 
-    static TextLineGeometry GetTextLineGeometry(const TextLineRequest& rReq,
-                                                const FontMetricData& rMetric);
+    static TextDecorationMetrics GetTextDecorationMetrics(const TextLineRequest& rReq,
+                                                          const FontMetricData& rMetric);
 
     static void SanitizeWaveLineHeight(tools::Long& rWaveHeight, tools::Long& rLineWidth,
                                        const FontMetricData& rFontMetric);

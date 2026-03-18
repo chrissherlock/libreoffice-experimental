@@ -1890,4 +1890,30 @@ void OutputDevice::ImplDrawStrikeoutChar(const vcl::rendercontext::TextLineGeome
         vcl::text::TextRenderer::DrawStrikeoutCharLayout(*aCtx, *pLayout, aOriginPt, aColor);
 }
 
+void OutputDevice::ImplDrawStrikeoutLine(const vcl::rendercontext::TextLineGeometry& rGeo,
+                                         tools::Long nY, Color aColor)
+{
+    if (rGeo.mfWidth <= 0)
+        return;
+
+    vcl::text::StrikeoutGeometry aStrikeoutGeo
+        = vcl::text::TextDecorator::CalculateStrikeoutGeometry(
+            *mpFontInstance->mxFontMetric, rGeo.meStrikeout, nY);
+
+    if (aStrikeoutGeo.aSegments.empty())
+        return;
+
+    if (mpGraphicsState->mbLineColor || mbLineColorDirty)
+    {
+        mpGraphics->SetLineColor();
+        mbLineColorDirty = true;
+    }
+
+    mpGraphics->SetFillColor(aColor);
+    mbFillColorDirty = true;
+
+    if (auto aCtx = CreateTextRenderContext())
+        vcl::text::TextRenderer::DrawStrikeoutLine(*aCtx, rGeo, aStrikeoutGeo);
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

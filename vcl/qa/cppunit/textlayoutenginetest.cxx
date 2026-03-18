@@ -39,7 +39,7 @@
 #include <text/TextLayoutEngine.hxx>
 #include <text/TextLayoutPositioning.hxx>
 #include <vcl/text/MultiLineEngine.hxx>
-#include <vcl/text/TextLineGeometry.hxx>
+#include <vcl/text/TextDecorationMetrics.hxx>
 #include <text/TextLayoutRequest.hxx>
 
 #include <unicode/uchar.h>
@@ -240,7 +240,7 @@ public:
     void testCreateLayoutRequest_OutOfBounds();
     void testFindFallbackFont_ForcedFallbackPriority();
     void testEmphasisMarkPositions();
-    void testTextLineGeometry();
+    void testTextDecorationMetrics();
     void testCalculateWaveLineGeometry();
     void testCalculateStrikeoutGeometry();
     void testGetStrikeoutCharLayout();
@@ -253,7 +253,7 @@ public:
     CPPUNIT_TEST(testCreateLayoutRequest_OrientationAndWidth);
     CPPUNIT_TEST(testCreateLayoutRequest_OutOfBounds);
     CPPUNIT_TEST(testEmphasisMarkPositions);
-    CPPUNIT_TEST(testTextLineGeometry);
+    CPPUNIT_TEST(testTextDecorationMetrics);
     CPPUNIT_TEST(testCalculateWaveLineGeometry);
     CPPUNIT_TEST(testCalculateStrikeoutGeometry);
     CPPUNIT_TEST(testCalculateTextLineSegments);
@@ -384,7 +384,7 @@ void TextLayoutEngineTest::testEmphasisMarkPositions()
     }
 }
 
-void TextLayoutEngineTest::testTextLineGeometry()
+void TextLayoutEngineTest::testTextDecorationMetrics()
 {
     vcl::Font aFont;
     vcl::font::FontSelectPattern aSelPat(aFont, OUString(), Size(0, 20), 20.0);
@@ -408,7 +408,7 @@ void TextLayoutEngineTest::testTextLineGeometry()
     aMetric.SetDoubleStrikeoutOffset2(-9);
 
     vcl::text::TextLineRequest aReq;
-    vcl::text::TextLineGeometry aGeo;
+    vcl::text::TextDecorationMetrics aDecoratorMetrics;
     aReq.nDPIX = 96;
     aReq.nDPIY = 96;
     aReq.bUnderlineAbove = false;
@@ -416,62 +416,62 @@ void TextLayoutEngineTest::testTextLineGeometry()
     // Test Standard Underline Paths
     {
         aReq.eUnderline = LINESTYLE_SINGLE;
-        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
+        aDecoratorMetrics = vcl::text::TextDecorator::GetTextDecorationMetrics(aReq, aMetric);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Single underline offset mismatch", tools::Long(2),
-                                     aGeo.nUnderlinePos1);
+                                     aDecoratorMetrics.nUnderlinePos1);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Base line width (96 DPI) should be 1", tools::Long(1),
-                                     aGeo.nLineWidth);
+                                     aDecoratorMetrics.nLineWidth);
 
         aReq.eUnderline = LINESTYLE_BOLD;
-        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
+        aDecoratorMetrics = vcl::text::TextDecorator::GetTextDecorationMetrics(aReq, aMetric);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Bold underline offset mismatch", tools::Long(3),
-                                     aGeo.nUnderlinePos1);
+                                     aDecoratorMetrics.nUnderlinePos1);
 
         aReq.eUnderline = LINESTYLE_DOUBLE;
-        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
+        aDecoratorMetrics = vcl::text::TextDecorator::GetTextDecorationMetrics(aReq, aMetric);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Double underline offset 1 mismatch", tools::Long(1),
-                                     aGeo.nUnderlinePos1);
+                                     aDecoratorMetrics.nUnderlinePos1);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Double underline offset 2 mismatch", tools::Long(4),
-                                     aGeo.nUnderlinePos2);
+                                     aDecoratorMetrics.nUnderlinePos2);
     }
 
     // Test Underline Above (Vertical/Overline metrics)
     {
         aReq.bUnderlineAbove = true;
         aReq.eUnderline = LINESTYLE_SINGLE;
-        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
+        aDecoratorMetrics = vcl::text::TextDecorator::GetTextDecorationMetrics(aReq, aMetric);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Above underline offset mismatch", tools::Long(-10),
-                                     aGeo.nUnderlinePos1);
+                                     aDecoratorMetrics.nUnderlinePos1);
 
         aReq.eUnderline = LINESTYLE_DOUBLE;
-        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
+        aDecoratorMetrics = vcl::text::TextDecorator::GetTextDecorationMetrics(aReq, aMetric);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Above double underline offset 1 mismatch", tools::Long(-12),
-                                     aGeo.nUnderlinePos1);
+                                     aDecoratorMetrics.nUnderlinePos1);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Above double underline offset 2 mismatch", tools::Long(-15),
-                                     aGeo.nUnderlinePos2);
+                                     aDecoratorMetrics.nUnderlinePos2);
         aReq.bUnderlineAbove = false;
     }
 
     // Test Wave Line Logic & Constraints
     {
         aReq.eUnderline = LINESTYLE_WAVE;
-        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
+        aDecoratorMetrics = vcl::text::TextDecorator::GetTextDecorationMetrics(aReq, aMetric);
         CPPUNIT_ASSERT_MESSAGE("UnderlineIsWave flag not set for LINESTYLE_WAVE",
-                               aGeo.bUnderlineIsWave);
+                               aDecoratorMetrics.bUnderlineIsWave);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Standard wave height should return the full metric value",
-                                     tools::Long(5), aGeo.nUnderlineWaveHeight);
+                                     tools::Long(5), aDecoratorMetrics.nUnderlineWaveHeight);
 
         // Test SMALLWAVE 3px cap
         aReq.eUnderline = LINESTYLE_SMALLWAVE;
-        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
+        aDecoratorMetrics = vcl::text::TextDecorator::GetTextDecorationMetrics(aReq, aMetric);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Small wave height should be capped at 3px", tools::Long(3),
-                                     aGeo.nUnderlineWaveHeight);
+                                     aDecoratorMetrics.nUnderlineWaveHeight);
 
         // Test BOLDWAVE Width Doubling
         aReq.eUnderline = LINESTYLE_BOLDWAVE;
-        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
+        aDecoratorMetrics = vcl::text::TextDecorator::GetTextDecorationMetrics(aReq, aMetric);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Bold wave width should be double standard width",
-                                     tools::Long(2), aGeo.nLineWidth);
+                                     tools::Long(2), aDecoratorMetrics.nLineWidth);
     }
 
     // Test Overline Paths
@@ -480,64 +480,64 @@ void TextLayoutEngineTest::testTextLineGeometry()
         aReq.bUnderlineAbove = true;
         aReq.eUnderline = LINESTYLE_NONE;
         aReq.eOverline = LINESTYLE_SINGLE;
-        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
+        aDecoratorMetrics = vcl::text::TextDecorator::GetTextDecorationMetrics(aReq, aMetric);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Overline offset mismatch", tools::Long(-10),
-                                     aGeo.nOverlinePos1);
+                                     aDecoratorMetrics.nOverlinePos1);
 
         aReq.eOverline = LINESTYLE_WAVE;
-        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
+        aDecoratorMetrics = vcl::text::TextDecorator::GetTextDecorationMetrics(aReq, aMetric);
         CPPUNIT_ASSERT_MESSAGE("OverlineIsWave flag not set for LINESTYLE_WAVE",
-                               aGeo.bOverlineIsWave);
+                               aDecoratorMetrics.bOverlineIsWave);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Overline wave height mismatch", tools::Long(6),
-                                     aGeo.nOverlineWaveHeight);
+                                     aDecoratorMetrics.nOverlineWaveHeight);
     }
 
     // Test Strikeout Paths (Verifying independent dual-offset capture)
     {
         aReq.eStrikeout = STRIKEOUT_SINGLE;
-        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
+        aDecoratorMetrics = vcl::text::TextDecorator::GetTextDecorationMetrics(aReq, aMetric);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Single strikeout offset mismatch", tools::Long(-5),
-                                     aGeo.nStrikeoutPos1);
+                                     aDecoratorMetrics.nStrikeoutPos1);
 
         aReq.eStrikeout = STRIKEOUT_BOLD;
-        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
+        aDecoratorMetrics = vcl::text::TextDecorator::GetTextDecorationMetrics(aReq, aMetric);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Bold strikeout offset mismatch", tools::Long(-6),
-                                     aGeo.nStrikeoutPos1);
+                                     aDecoratorMetrics.nStrikeoutPos1);
 
         aReq.eStrikeout = STRIKEOUT_DOUBLE;
-        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
+        aDecoratorMetrics = vcl::text::TextDecorator::GetTextDecorationMetrics(aReq, aMetric);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Double strikeout offset 1 mismatch", tools::Long(-7),
-                                     aGeo.nStrikeoutPos1);
+                                     aDecoratorMetrics.nStrikeoutPos1);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("Double strikeout offset 2 mismatch", tools::Long(-9),
-                                     aGeo.nStrikeoutPos2);
+                                     aDecoratorMetrics.nStrikeoutPos2);
     }
 
     // Test DPI Scaling
     {
         aReq.nDPIX = 600; // 600 / 300 = 2
         aReq.eUnderline = LINESTYLE_SINGLE;
-        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
+        aDecoratorMetrics = vcl::text::TextDecorator::GetTextDecorationMetrics(aReq, aMetric);
         CPPUNIT_ASSERT_EQUAL_MESSAGE("High DPI (600) line width should be 2", tools::Long(2),
-                                     aGeo.nLineWidth);
+                                     aDecoratorMetrics.nLineWidth);
     }
 
     // Test Character-based Strikeout Styles
     {
         aReq.eStrikeout = STRIKEOUT_SLASH;
-        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
+        aDecoratorMetrics = vcl::text::TextDecorator::GetTextDecorationMetrics(aReq, aMetric);
         CPPUNIT_ASSERT_MESSAGE("bStrikeoutIsChar should be true for STRIKEOUT_SLASH",
-                               aGeo.bStrikeoutIsChar);
+                               aDecoratorMetrics.bStrikeoutIsChar);
 
         aReq.eStrikeout = STRIKEOUT_X;
-        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
+        aDecoratorMetrics = vcl::text::TextDecorator::GetTextDecorationMetrics(aReq, aMetric);
         CPPUNIT_ASSERT_MESSAGE("bStrikeoutIsChar should be true for STRIKEOUT_X",
-                               aGeo.bStrikeoutIsChar);
+                               aDecoratorMetrics.bStrikeoutIsChar);
 
         // Negative test: verify standard bold strikeout does NOT trigger the char flag
         aReq.eStrikeout = STRIKEOUT_BOLD;
-        aGeo = vcl::text::TextDecorator::GetTextLineGeometry(aReq, aMetric);
+        aDecoratorMetrics = vcl::text::TextDecorator::GetTextDecorationMetrics(aReq, aMetric);
         CPPUNIT_ASSERT_MESSAGE("bStrikeoutIsChar should be false for STRIKEOUT_BOLD",
-                               !aGeo.bStrikeoutIsChar);
+                               !aDecoratorMetrics.bStrikeoutIsChar);
     }
 }
 

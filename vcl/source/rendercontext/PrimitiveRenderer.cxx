@@ -990,64 +990,6 @@ void PrimitiveRenderer::DrawStraightTextLine(OutputDevice& rOutDev,
     }
 }
 
-void PrimitiveRenderer::DrawStrikeoutLine(OutputDevice& rOutDev,
-                                          const vcl::rendercontext::TextLineGeometry& rGeo,
-                                          tools::Long nY, Color aColor)
-{
-    if (!rGeo.mfWidth)
-        return;
-
-    vcl::text::StrikeoutGeometry aStrikeoutGeo
-        = vcl::text::TextDecorator::CalculateStrikeoutGeometry(
-            *rOutDev.mpFontInstance->mxFontMetric, rGeo.meStrikeout, nY);
-
-    if (aStrikeoutGeo.aSegments.empty())
-        return;
-
-    if (rOutDev.mpGraphicsState->mbLineColor || rOutDev.mbLineColorDirty)
-    {
-        rOutDev.mpGraphics->SetLineColor();
-        rOutDev.mbLineColorDirty = true;
-    }
-
-    rOutDev.mpGraphics->SetFillColor(aColor);
-    rOutDev.mbFillColorDirty = true;
-
-    // Cache layout state for the loop
-    const Degree10 nOrientation = rOutDev.mpFontRealization->mxFont->mnOrientation;
-    const bool bRTL
-        = rOutDev.IsRTLEnabled() || (rOutDev.mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
-    const tools::Long nFrameWidth = rOutDev.IsVirtual() ? rOutDev.GetOutputWidthPixel()
-                                                        : rOutDev.mpGraphics->GetGraphicsWidth();
-    const bool bAntiparallel = rOutDev.ImplIsAntiparallel();
-
-    for (const auto& rSeg : aStrikeoutGeo.aSegments)
-    {
-        // 1. Calculate Rotated Geometry (Device Rect or Polygon)
-        auto aTextGeo = vcl::text::TextGeometry::GetRotatedGeometry(
-            rGeo.maOrigin,
-            tools::Rectangle(Point(rGeo.mnDistX, rSeg.nYOffset), Size(rGeo.mfWidth, rSeg.nHeight)),
-            nOrientation);
-
-        // 2. Apply RTL Mirroring locally
-        if (bRTL)
-        {
-            if (aTextGeo.mbIsPolygon)
-                rOutDev.mpMapper->MirrorDevicePixelPolygon(aTextGeo.maPoly, nFrameWidth, bRTL,
-                                                           bAntiparallel);
-            else
-                rOutDev.mpMapper->MirrorDevicePixelRect(aTextGeo.maRect, nFrameWidth, bRTL,
-                                                        bAntiparallel);
-        }
-
-        // 3. Dispatch to the stateless renderer
-        if (aTextGeo.mbIsPolygon)
-            PrimitiveRenderer::DrawPolygonGeometry(*rOutDev.mpGraphics, aTextGeo.maPoly);
-        else
-            PrimitiveRenderer::DrawRect(*rOutDev.mpGraphics, aTextGeo.maRect);
-    }
-}
-
 [[nodiscard]] static auto lcl_BeginDecorationClipping(OutputDevice& rOutDev, const Point& rOrigin,
                                                       double fWidth, tools::Long nAscent,
                                                       tools::Long nDescent)
@@ -1207,8 +1149,7 @@ void PrimitiveRenderer::DrawTextLine(OutputDevice& rOutDev,
             auto aClipGuard = lcl_BeginDecorationClipping(rOutDev, aStrikeoutOrigin,
                                                           aDrawGeo.mfWidth, nAscent, nDescent);
 
-            PrimitiveRenderer::DrawStrikeoutLine(rOutDev, aDrawGeo, aInfo.nStrikeoutOffset,
-                                                 aStrikeoutColor);
+            rOutDev.ImplDrawStrikeoutLine(aDrawGeo, aInfo.nStrikeoutOffset, aStrikeoutColor);
         }
     }
 }

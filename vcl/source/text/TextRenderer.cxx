@@ -7,11 +7,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include <vcl/text/TextDecorationMetrics.hxx>
 #include <vcl/text/TextGeometry.hxx>
 #include <vcl/text/TextRenderer.hxx>
 #include <vcl/text/TextRenderContext.hxx>
 #include <vcl/rendercontext/PrimitiveRenderer.hxx>
+#include <vcl/rendercontext/TextLineGeometry.hxx>
 
+#include <CoordinateMapper.hxx>
 #include <salgdi.hxx>
 #include <sallayout.hxx>
 
@@ -42,6 +45,31 @@ void TextRenderer::DrawTextDecoration(const TextRenderContext& rCtx,
                                                                    rDeviceGeo.maPoly);
     else
         vcl::rendercontext::PrimitiveRenderer::DrawRect(rCtx.rGraphics, rDeviceGeo.maRect);
+}
+
+void TextRenderer::DrawStrikeoutLine(const TextRenderContext& rCtx,
+                                     const vcl::rendercontext::TextLineGeometry& rGeo, // <-- FIXED
+                                     const vcl::text::StrikeoutGeometry& rStrikeoutGeo)
+{
+    for (const auto& rSeg : rStrikeoutGeo.aSegments)
+    {
+        auto aTextGeo = vcl::text::TextGeometry::GetRotatedGeometry(
+            rGeo.maOrigin,
+            tools::Rectangle(Point(rGeo.mnDistX, rSeg.nYOffset), Size(rGeo.mfWidth, rSeg.nHeight)),
+            rCtx.nOrientation);
+
+        if (rCtx.bRTL)
+        {
+            if (aTextGeo.mbIsPolygon)
+                rCtx.rMapper.MirrorDevicePixelPolygon(aTextGeo.maPoly, rCtx.nFrameWidth, rCtx.bRTL,
+                                                      rCtx.bAntiparallel);
+            else
+                rCtx.rMapper.MirrorDevicePixelRect(aTextGeo.maRect, rCtx.nFrameWidth, rCtx.bRTL,
+                                                   rCtx.bAntiparallel);
+        }
+
+        DrawTextDecoration(rCtx, aTextGeo);
+    }
 }
 
 } // namespace vcl::text

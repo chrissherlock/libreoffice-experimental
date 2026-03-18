@@ -39,7 +39,6 @@
 #include <vcl/settings.hxx>
 #include <vcl/text/TextDecorator.hxx>
 #include <vcl/text/TextGeometry.hxx>
-#include <vcl/text/TextLineGeometry.hxx>
 #include <vcl/virdev.hxx>
 
 #include <CoordinateMapper.hxx>
