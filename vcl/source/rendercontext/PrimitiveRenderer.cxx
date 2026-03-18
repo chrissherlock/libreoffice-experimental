@@ -861,135 +861,6 @@ void PrimitiveRenderer::DrawWaveLine(OutputDevice& rOutDev, const WaveLineGeomet
     PrimitiveRenderer::DrawWaveLineRasterized(rOutDev, rGeo, rColor);
 }
 
-void PrimitiveRenderer::DrawWaveTextLine(OutputDevice& rOutDev,
-                                         const vcl::rendercontext::TextLineGeometry& rGeo,
-                                         tools::Long nY, Color aColor, bool bIsAbove)
-{
-    vcl::text::WaveLineGeometry aWaveStyle = vcl::text::TextDecorator::CalculateWaveLineGeometry(
-        *rOutDev.mpFontInstance->mxFontMetric, rGeo.meUnderline, bIsAbove, nY, rOutDev.GetDPIX(),
-        rOutDev.GetDPIY());
-
-    const Size aWavePixelSize = rOutDev.GetWaveLineSize(aWaveStyle.nLineWidth);
-    const bool bDrawAsRect = rOutDev.shouldDrawWavePixelAsRect(aWaveStyle.nLineWidth);
-
-    Degree10 nOrientation = rOutDev.mpFontInstance->mnOrientation;
-
-    for (const auto& rSeg : aWaveStyle.aSegments)
-    {
-        WaveLineGeometry aWaveGeo(rGeo.maOrigin.X(), rGeo.maOrigin.Y(), rGeo.mnDistX, rSeg.nYOffset,
-                                  rGeo.mfWidth, rSeg.nHeight, nOrientation, aWavePixelSize,
-                                  bDrawAsRect);
-
-        PrimitiveRenderer::DrawWaveLine(rOutDev, aWaveGeo, aColor);
-    }
-}
-
-void PrimitiveRenderer::DrawStraightTextLine(OutputDevice& rOutDev,
-                                             const vcl::rendercontext::TextLineGeometry& rGeo,
-                                             tools::Long nY, Color aColor, bool bIsAbove)
-{
-    static bool bFuzzing = comphelper::IsFuzzing();
-    if (bFuzzing && rGeo.mfWidth > 25000)
-    {
-        SAL_WARN("vcl.gdi", "drawLine, skipping suspicious TextLine of length: "
-                                << rGeo.mfWidth << " for fuzzing performance");
-        return;
-    }
-
-    vcl::text::StraightLineMetrics aMetrics(*rOutDev.mpFontInstance->mxFontMetric, rGeo.meUnderline,
-                                            nY, bIsAbove);
-
-    if (!aMetrics.nLineHeight)
-        return;
-
-    if (rOutDev.mpGraphicsState->mbLineColor || rOutDev.mbLineColorDirty)
-    {
-        rOutDev.mpGraphics->SetLineColor();
-        rOutDev.mbLineColorDirty = true;
-    }
-
-    rOutDev.mpGraphics->SetFillColor(aColor);
-    rOutDev.mbFillColorDirty = true;
-
-    const Degree10 nOrientation = rOutDev.mpFontRealization->mxFont->mnOrientation;
-    const bool bRTL
-        = rOutDev.IsRTLEnabled() || (rOutDev.mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
-    const tools::Long nFrameWidth = rOutDev.IsVirtual() ? rOutDev.GetOutputWidthPixel()
-                                                        : rOutDev.mpGraphics->GetGraphicsWidth();
-    const bool bAntiparallel = rOutDev.ImplIsAntiparallel();
-    const tools::Long nLeft = rGeo.mnDistX;
-
-    // Lambda to handle the boilerplate of Rotate -> Mirror -> Draw
-    auto fnDrawDecoration = [&](tools::Long nPos, tools::Long nHeight) {
-        auto aTextGeo = vcl::text::TextGeometry::GetRotatedGeometry(
-            rGeo.maOrigin, tools::Rectangle(Point(nLeft, nPos), Size(rGeo.mfWidth, nHeight)),
-            nOrientation);
-
-        if (bRTL)
-        {
-            if (aTextGeo.mbIsPolygon)
-                rOutDev.mpMapper->MirrorDevicePixelPolygon(aTextGeo.maPoly, nFrameWidth, bRTL,
-                                                           bAntiparallel);
-            else
-                rOutDev.mpMapper->MirrorDevicePixelRect(aTextGeo.maRect, nFrameWidth, bRTL,
-                                                        bAntiparallel);
-        }
-
-        // Dispatch to optimized stateless renderer
-        if (aTextGeo.mbIsPolygon)
-            PrimitiveRenderer::DrawPolygonGeometry(*rOutDev.mpGraphics, aTextGeo.maPoly);
-        else
-            PrimitiveRenderer::DrawRect(*rOutDev.mpGraphics, aTextGeo.maRect);
-    };
-
-    switch (aMetrics.eUnderline)
-    {
-        case LINESTYLE_SINGLE:
-        case LINESTYLE_BOLD:
-            fnDrawDecoration(aMetrics.nLinePos, aMetrics.nLineHeight);
-            break;
-
-        case LINESTYLE_DOUBLE:
-            fnDrawDecoration(aMetrics.nLinePos, aMetrics.nLineHeight);
-            fnDrawDecoration(aMetrics.nLinePos2, aMetrics.nLineHeight);
-            break;
-
-        default:
-        {
-            // Handle dashed/dotted lines
-            std::vector<vcl::text::TextDashSegment> aSegments
-                = vcl::text::TextDecorator::CalculateTextLineSegments(
-                    rGeo.mfWidth, aMetrics.eUnderline, aMetrics.nLineHeight, rOutDev.GetDPIX(),
-                    rOutDev.GetDPIY());
-
-            for (const auto& rSeg : aSegments)
-            {
-                auto aTextGeo = vcl::text::TextGeometry::GetRotatedGeometry(
-                    rGeo.maOrigin,
-                    tools::Rectangle(Point(nLeft + rSeg.nX, aMetrics.nLinePos),
-                                     Size(rSeg.nWidth, aMetrics.nLineHeight)),
-                    nOrientation);
-
-                if (bRTL)
-                {
-                    if (aTextGeo.mbIsPolygon)
-                        rOutDev.mpMapper->MirrorDevicePixelPolygon(aTextGeo.maPoly, nFrameWidth,
-                                                                   bRTL, bAntiparallel);
-                    else
-                        rOutDev.mpMapper->MirrorDevicePixelRect(aTextGeo.maRect, nFrameWidth, bRTL,
-                                                                bAntiparallel);
-                }
-
-                if (aTextGeo.mbIsPolygon)
-                    PrimitiveRenderer::DrawPolygonGeometry(*rOutDev.mpGraphics, aTextGeo.maPoly);
-                else
-                    PrimitiveRenderer::DrawRect(*rOutDev.mpGraphics, aTextGeo.maRect);
-            }
-        }
-        break;
-    }
-}
-
 [[nodiscard]] static auto lcl_BeginDecorationClipping(OutputDevice& rOutDev, const Point& rOrigin,
                                                       double fWidth, tools::Long nAscent,
                                                       tools::Long nDescent)
@@ -1095,7 +966,7 @@ void PrimitiveRenderer::DrawTextLine(OutputDevice& rOutDev,
 
         if (bIsWave)
         {
-            PrimitiveRenderer::DrawWaveTextLine(rOutDev, aLineGeo, nOffset, aColor, bIsAbove);
+            rOutDev.ImplDrawWaveTextLine(aLineGeo, nOffset, aColor, bIsAbove);
         }
         else
         {
@@ -1105,7 +976,7 @@ void PrimitiveRenderer::DrawTextLine(OutputDevice& rOutDev,
             auto aClipGuard = lcl_BeginDecorationClipping(rOutDev, aOrigin, aLineGeo.mfWidth,
                                                           nAscent, nDescent);
 
-            PrimitiveRenderer::DrawStraightTextLine(rOutDev, aLineGeo, 0, aColor, bIsAbove);
+            rOutDev.ImplDrawStraightTextLine(aLineGeo, 0, aColor, bIsAbove);
         }
     };
 

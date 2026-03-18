@@ -26,6 +26,8 @@ namespace vcl::text
 {
 struct RotatedGeometry;
 struct StrikeoutGeometry;
+struct StraightLineMetrics;
+struct TextDashSegment;
 
 /**
  * TextRenderer: A stateless processor for text decorations and auxiliary
@@ -54,8 +56,13 @@ public:
     /** * Renders geometric strikeout decorations (e.g., single, double, bold lines).
      */
     static void DrawStrikeoutLine(const TextRenderContext& rCtx,
-                                  const vcl::rendercontext::TextLineGeometry& rGeo, // <-- FIXED
+                                  const vcl::rendercontext::TextLineGeometry& rGeo,
                                   const vcl::text::StrikeoutGeometry& rStrikeoutGeo);
+
+    static void DrawStraightTextLine(const TextRenderContext& rCtx,
+                                     const vcl::rendercontext::TextLineGeometry& rGeo,
+                                     const vcl::text::StraightLineMetrics& rMetrics,
+                                     const std::vector<vcl::text::TextDashSegment>& rDashSegments);
 };
 
 } // namespace vcl::text

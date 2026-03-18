@@ -33,6 +33,7 @@
 #include <vcl/mnemonic.hxx>
 #include <vcl/rendercontext/SystemTextColorFlags.hxx>
 #include <vcl/rendercontext/PrimitiveRenderer.hxx>
+#include <vcl/rendercontext/WaveLineGeometry.hxx>
 #include <vcl/text/TextEffects.hxx>
 #include <vcl/text/TextGeometry.hxx>
 #include <vcl/text/TextSpan.hxx>
@@ -1914,6 +1915,61 @@ void OutputDevice::ImplDrawStrikeoutLine(const vcl::rendercontext::TextLineGeome
 
     if (auto aCtx = CreateTextRenderContext())
         vcl::text::TextRenderer::DrawStrikeoutLine(*aCtx, rGeo, aStrikeoutGeo);
+}
+
+void OutputDevice::ImplDrawWaveTextLine(const vcl::rendercontext::TextLineGeometry& rGeo,
+                                        tools::Long nY, Color aColor, bool bIsAbove)
+{
+    vcl::text::WaveLineGeometry aWaveStyle = vcl::text::TextDecorator::CalculateWaveLineGeometry(
+        *mpFontInstance->mxFontMetric, rGeo.meUnderline, bIsAbove, nY, GetDPIX(), GetDPIY());
+
+    const Size aWavePixelSize = GetWaveLineSize(aWaveStyle.nLineWidth);
+    const bool bDrawAsRect = shouldDrawWavePixelAsRect(aWaveStyle.nLineWidth);
+
+    Degree10 nOrientation = mpFontInstance->mnOrientation;
+
+    for (const auto& rSeg : aWaveStyle.aSegments)
+    {
+        vcl::rendercontext::WaveLineGeometry aWaveGeo(
+            rGeo.maOrigin.X(), rGeo.maOrigin.Y(), rGeo.mnDistX, rSeg.nYOffset,
+            rGeo.mfWidth, rSeg.nHeight, nOrientation, aWavePixelSize, bDrawAsRect);
+
+        vcl::rendercontext::PrimitiveRenderer::DrawWaveLine(*this, aWaveGeo, aColor);
+    }
+}
+
+void OutputDevice::ImplDrawStraightTextLine(const vcl::rendercontext::TextLineGeometry& rGeo,
+                                            tools::Long nY, Color aColor, bool bIsAbove)
+{
+    static bool bFuzzing = comphelper::IsFuzzing();
+    if (bFuzzing && rGeo.mfWidth > 25000)
+        return;
+
+    vcl::text::StraightLineMetrics aMetrics(*mpFontInstance->mxFontMetric, rGeo.meUnderline,
+                                            nY, bIsAbove);
+
+    if (!aMetrics.nLineHeight)
+        return;
+
+    if (mpGraphicsState->mbLineColor || mbLineColorDirty)
+    {
+        mpGraphics->SetLineColor();
+        mbLineColorDirty = true;
+    }
+
+    mpGraphics->SetFillColor(aColor);
+    mbFillColorDirty = true;
+
+    // Calculate dashed/dotted segments if necessary
+    std::vector<vcl::text::TextDashSegment> aDashSegments;
+    if (aMetrics.eUnderline != LINESTYLE_SINGLE && aMetrics.eUnderline != LINESTYLE_BOLD && aMetrics.eUnderline != LINESTYLE_DOUBLE)
+    {
+        aDashSegments = vcl::text::TextDecorator::CalculateTextLineSegments(
+            rGeo.mfWidth, aMetrics.eUnderline, aMetrics.nLineHeight, GetDPIX(), GetDPIY());
+    }
+
+    if (auto aCtx = CreateTextRenderContext())
+        vcl::text::TextRenderer::DrawStraightTextLine(*aCtx, rGeo, aMetrics, aDashSegments);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

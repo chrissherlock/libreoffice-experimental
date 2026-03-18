@@ -12,6 +12,7 @@
 #include <vcl/text/TextRenderer.hxx>
 #include <vcl/text/TextRenderContext.hxx>
 #include <vcl/rendercontext/PrimitiveRenderer.hxx>
+#include <vcl/text/TextDecorator.hxx>
 #include <vcl/rendercontext/TextLineGeometry.hxx>
 
 #include <CoordinateMapper.hxx>
@@ -69,6 +70,56 @@ void TextRenderer::DrawStrikeoutLine(const TextRenderContext& rCtx,
         }
 
         DrawTextDecoration(rCtx, aTextGeo);
+    }
+}
+
+void TextRenderer::DrawStraightTextLine(
+    const TextRenderContext& rCtx, const vcl::rendercontext::TextLineGeometry& rGeo,
+    const vcl::text::StraightLineMetrics& rMetrics,
+    const std::vector<vcl::text::TextDashSegment>& rDashSegments)
+{
+    const tools::Long nLeft = rGeo.mnDistX;
+
+    auto fnDrawDecoration
+        = [&](tools::Long nPos, tools::Long nHeight, tools::Long nSegLeft, tools::Long nSegWidth) {
+              auto aTextGeo = vcl::text::TextGeometry::GetRotatedGeometry(
+                  rGeo.maOrigin,
+                  tools::Rectangle(Point(nLeft + nSegLeft, nPos), Size(nSegWidth, nHeight)),
+                  rCtx.nOrientation);
+
+              if (rCtx.bRTL)
+              {
+                  if (aTextGeo.mbIsPolygon)
+                      rCtx.rMapper.MirrorDevicePixelPolygon(aTextGeo.maPoly, rCtx.nFrameWidth,
+                                                            rCtx.bRTL, rCtx.bAntiparallel);
+                  else
+                      rCtx.rMapper.MirrorDevicePixelRect(aTextGeo.maRect, rCtx.nFrameWidth,
+                                                         rCtx.bRTL, rCtx.bAntiparallel);
+              }
+
+              DrawTextDecoration(rCtx, aTextGeo);
+          };
+
+    switch (rMetrics.eUnderline)
+    {
+        case LINESTYLE_SINGLE:
+        case LINESTYLE_BOLD:
+            fnDrawDecoration(rMetrics.nLinePos, rMetrics.nLineHeight, 0, rGeo.mfWidth);
+            break;
+
+        case LINESTYLE_DOUBLE:
+            fnDrawDecoration(rMetrics.nLinePos, rMetrics.nLineHeight, 0, rGeo.mfWidth);
+            fnDrawDecoration(rMetrics.nLinePos2, rMetrics.nLineHeight, 0, rGeo.mfWidth);
+            break;
+
+        default:
+        {
+            for (const auto& rSeg : rDashSegments)
+            {
+                fnDrawDecoration(rMetrics.nLinePos, rMetrics.nLineHeight, rSeg.nX, rSeg.nWidth);
+            }
+        }
+        break;
     }
 }
 

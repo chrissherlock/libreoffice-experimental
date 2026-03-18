@@ -1230,6 +1230,12 @@ public:
     SAL_DLLPRIVATE void ImplDrawStrikeoutLine(const vcl::rendercontext::TextLineGeometry& rGeo,
                                               tools::Long nY, Color aColor);
 
+    SAL_DLLPRIVATE void ImplDrawStraightTextLine(const vcl::rendercontext::TextLineGeometry& rGeo,
+                                                 tools::Long nY, Color aColor, bool bIsAbove);
+
+    SAL_DLLPRIVATE void ImplDrawWaveTextLine(const vcl::rendercontext::TextLineGeometry& rGeo,
+                                             tools::Long nY, Color aColor, bool bIsAbove);
+
 protected:
     SAL_DLLPRIVATE float        approximate_char_width() const;
 
