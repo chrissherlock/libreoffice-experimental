@@ -1084,53 +1084,37 @@ void PrimitiveRenderer::DrawTextLine(OutputDevice& rOutDev,
     const tools::Long nAscent = rFontInst.mxFontMetric->GetAscent();
     const tools::Long nDescent = rFontInst.mxFontMetric->GetDescent();
 
-    if (aDrawGeo.meUnderline != LINESTYLE_NONE)
-    {
-        if (aInfo.bUnderlineIsWave)
+    auto fnDrawLine = [&](FontLineStyle eLineStyle, bool bIsWave, tools::Long nOffset, Color aColor,
+                          bool bIsAbove = true) {
+        if (eLineStyle == LINESTYLE_NONE)
+            return;
+
+        // Unify the "trick": Always pass the target style as the underline property
+        vcl::rendercontext::TextLineGeometry aLineGeo = aDrawGeo;
+        aLineGeo.meUnderline = eLineStyle;
+
+        if (bIsWave)
         {
-            PrimitiveRenderer::DrawWaveTextLine(rOutDev, aDrawGeo, aInfo.nUnderlineOffset,
-                                                aUnderlineColor, aDrawGeo.mbUnderlineAbove);
+            PrimitiveRenderer::DrawWaveTextLine(rOutDev, aLineGeo, nOffset, aColor, bIsAbove);
         }
         else
         {
-            // Protect the straight line with a clipped region
-            Point aUnderlineOrigin
-                = lcl_GetDecorationOrigin(aDrawGeo.maOrigin, rFontInst.mnOrientation,
-                                          aDrawGeo.mnDistX, aInfo.nUnderlineOffset);
+            Point aOrigin = lcl_GetDecorationOrigin(aLineGeo.maOrigin, rFontInst.mnOrientation,
+                                                    aLineGeo.mnDistX, nOffset);
 
-            auto aClipGuard = lcl_BeginDecorationClipping(rOutDev, aUnderlineOrigin,
-                                                          aDrawGeo.mfWidth, nAscent, nDescent);
+            auto aClipGuard = lcl_BeginDecorationClipping(rOutDev, aOrigin, aLineGeo.mfWidth,
+                                                          nAscent, nDescent);
 
-            PrimitiveRenderer::DrawStraightTextLine(rOutDev, aDrawGeo, 0, aUnderlineColor,
-                                                    aDrawGeo.mbUnderlineAbove);
+            PrimitiveRenderer::DrawStraightTextLine(rOutDev, aLineGeo, 0, aColor, bIsAbove);
         }
-    }
+    };
 
-    if (aDrawGeo.meOverline != LINESTYLE_NONE)
-    {
-        // Trick the sub-routines into rendering the overline
-        vcl::rendercontext::TextLineGeometry aOverlineGeo = aDrawGeo;
-        aOverlineGeo.meUnderline = aDrawGeo.meOverline;
+    // Execute for Underline
+    fnDrawLine(aDrawGeo.meUnderline, aInfo.bUnderlineIsWave, aInfo.nUnderlineOffset,
+               aUnderlineColor, aDrawGeo.mbUnderlineAbove);
 
-        if (aInfo.bOverlineIsWave)
-        {
-            PrimitiveRenderer::DrawWaveTextLine(rOutDev, aOverlineGeo, aInfo.nOverlineOffset,
-                                                aOverlineColor, true);
-        }
-        else
-        {
-            // The Normalize() fix inside lcl_BeginDecorationClipping prevents the overline
-            // from vanishing when positioned at negative offsets.
-            Point aOverlineOrigin
-                = lcl_GetDecorationOrigin(aDrawGeo.maOrigin, rFontInst.mnOrientation,
-                                          aDrawGeo.mnDistX, aInfo.nOverlineOffset);
-
-            auto aClipGuard = lcl_BeginDecorationClipping(rOutDev, aOverlineOrigin,
-                                                          aDrawGeo.mfWidth, nAscent, nDescent);
-
-            PrimitiveRenderer::DrawStraightTextLine(rOutDev, aOverlineGeo, 0, aOverlineColor, true);
-        }
-    }
+    // Execute for Overline (Overlines are always "above" the baseline)
+    fnDrawLine(aDrawGeo.meOverline, aInfo.bOverlineIsWave, aInfo.nOverlineOffset, aOverlineColor);
 
     if (aDrawGeo.meStrikeout != STRIKEOUT_NONE)
     {
