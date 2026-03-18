@@ -2014,7 +2014,19 @@ void OutputDevice::ImplDrawWaveTextLine(const vcl::rendercontext::TextLineGeomet
             rGeo.maOrigin.X(), rGeo.maOrigin.Y(), rGeo.mnDistX, rSeg.nYOffset,
             rGeo.mfWidth, rSeg.nHeight, nOrientation, aWavePixelSize, bDrawAsRect);
 
-        vcl::rendercontext::PrimitiveRenderer::DrawWaveLine(*this, aWaveGeo, aColor);
+        if (aWaveGeo.maWavePixelSize.Height() == 1 && aWaveGeo.maSize.Height() == 1)
+        {
+            // OutputDevice strictly manages the dirty flags
+            mpGraphics->SetLineColor(aColor);
+            mbLineColorDirty = true;
+
+            if (auto aCtx = CreateTextRenderContext())
+                vcl::text::TextRenderer::DrawWaveHairline(*aCtx, aWaveGeo, aColor);
+        }
+        else
+        {
+            vcl::rendercontext::PrimitiveRenderer::DrawWaveLine(*this, aWaveGeo, aColor);
+        }
     }
 }
 

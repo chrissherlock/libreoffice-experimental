@@ -20,6 +20,7 @@ class SalLayout;
 namespace vcl::rendercontext
 {
 struct TextLineGeometry;
+struct WaveLineGeometry;
 }
 
 namespace vcl::text
@@ -63,6 +64,9 @@ public:
                                      const vcl::rendercontext::TextLineGeometry& rGeo,
                                      const vcl::text::StraightLineMetrics& rMetrics,
                                      const std::vector<vcl::text::TextDashSegment>& rDashSegments);
+
+    static void DrawWaveHairline(const TextRenderContext& rCtx,
+                                 const vcl::rendercontext::WaveLineGeometry& rGeo, Color aColor);
 };
 
 } // namespace vcl::text

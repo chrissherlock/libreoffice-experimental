@@ -142,6 +142,7 @@ public:
     static void DrawTextLines(SalGraphics& rGraphics,
                               std::span<const vcl::text::RotatedGeometry> rSegments,
                               const Color& rColor);
+
     static void DrawEmphasisMark(OutputDevice& rOutDev, SalGraphics& rGraphics, tools::Long nBaseX,
                                  tools::Long nX, tools::Long nY,
                                  const tools::PolyPolygon& rPolyPoly, bool bPolyLine,
@@ -156,10 +157,6 @@ public:
 
     static void DrawWaveLine(OutputDevice& rOutDev, const WaveLineGeometry& rGeo,
                              const Color& rColor);
-
-    static void DrawWaveLineHairline(OutputDevice& rOutDev, const WaveLineGeometry& rGeo,
-                                     const Color& rColor);
-
     static void DrawWaveLineRasterized(OutputDevice& rOutDev, const WaveLineGeometry& rGeo,
                                        const Color& rColor);
 

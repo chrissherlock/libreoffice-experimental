@@ -801,27 +801,6 @@ void PrimitiveRenderer::DrawWaveLineBezier(OutputDevice& rOutDev, SalGraphics& r
                            basegfx::deg2rad(15.0), bPixelSnapHairline);
 }
 
-void PrimitiveRenderer::DrawWaveLineHairline(OutputDevice& rOutDev, const WaveLineGeometry& rGeo,
-                                             const Color& rColor)
-{
-    rOutDev.mpGraphics->SetLineColor(rColor);
-    rOutDev.mbLineColorDirty = true;
-
-    const Point aLineStart = rGeo.GetLineStart();
-    const Point aLineEnd = rGeo.GetLineEnd();
-
-    tools::Long nX1 = aLineStart.X();
-    tools::Long nX2 = aLineEnd.X();
-
-    if (rOutDev.IsRTLEnabled())
-    {
-        nX1 = rOutDev.GetOutputWidthPixel() - nX1;
-        nX2 = rOutDev.GetOutputWidthPixel() - nX2;
-    }
-
-    rOutDev.mpGraphics->drawLine(nX1, aLineStart.Y(), nX2, aLineEnd.Y());
-}
-
 void PrimitiveRenderer::DrawWaveLineRasterized(OutputDevice& rOutDev, const WaveLineGeometry& rGeo,
                                                const Color& rColor)
 {
@@ -852,12 +831,6 @@ void PrimitiveRenderer::DrawWaveLineRasterized(OutputDevice& rOutDev, const Wave
 void PrimitiveRenderer::DrawWaveLine(OutputDevice& rOutDev, const WaveLineGeometry& rGeo,
                                      const Color& rColor)
 {
-    if (rGeo.maWavePixelSize.Height() == 1 && rGeo.maSize.Height() == 1)
-    {
-        PrimitiveRenderer::DrawWaveLineHairline(rOutDev, rGeo, rColor);
-        return;
-    }
-
     PrimitiveRenderer::DrawWaveLineRasterized(rOutDev, rGeo, rColor);
 }
 

@@ -11,9 +11,10 @@
 #include <vcl/text/TextGeometry.hxx>
 #include <vcl/text/TextRenderer.hxx>
 #include <vcl/text/TextRenderContext.hxx>
-#include <vcl/rendercontext/PrimitiveRenderer.hxx>
 #include <vcl/text/TextDecorator.hxx>
+#include <vcl/rendercontext/PrimitiveRenderer.hxx>
 #include <vcl/rendercontext/TextLineGeometry.hxx>
+#include <vcl/rendercontext/WaveLineGeometry.hxx>
 
 #include <CoordinateMapper.hxx>
 #include <salgdi.hxx>
@@ -26,7 +27,7 @@ namespace vcl::text
 void TextRenderer::DrawStrikeoutCharLayout(const TextRenderContext& rCtx, SalLayout& rLayout,
                                            const Point& rOrigin, Color aColor)
 {
-    //. Stateless application of color to the graphics context.
+    // Stateless application of color to the graphics context.
     // We do not set "dirty" flags here; we just tell the hardware what to use.
     rCtx.rGraphics.SetTextColor(aColor);
 
@@ -121,6 +122,27 @@ void TextRenderer::DrawStraightTextLine(
         }
         break;
     }
+}
+
+void TextRenderer::DrawWaveHairline(const TextRenderContext& rCtx,
+                                    const vcl::rendercontext::WaveLineGeometry& rGeo, Color aColor)
+{
+    // Apply the stateless color directly to the hardware backend
+    rCtx.rGraphics.SetLineColor(aColor);
+
+    const Point aLineStart = rGeo.GetLineStart();
+    const Point aLineEnd = rGeo.GetLineEnd();
+
+    tools::Long nX1 = aLineStart.X();
+    tools::Long nX2 = aLineEnd.X();
+
+    if (rCtx.bRTL)
+    {
+        nX1 = rCtx.nFrameWidth - nX1;
+        nX2 = rCtx.nFrameWidth - nX2;
+    }
+
+    rCtx.rGraphics.drawLine(nX1, aLineStart.Y(), nX2, aLineEnd.Y());
 }
 
 } // namespace vcl::text
