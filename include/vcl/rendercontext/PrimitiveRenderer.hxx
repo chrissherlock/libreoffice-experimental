@@ -157,8 +157,6 @@ public:
 
     static void DrawWaveLine(OutputDevice& rOutDev, const WaveLineGeometry& rGeo,
                              const Color& rColor);
-    static void DrawWaveLineRasterized(OutputDevice& rOutDev, const WaveLineGeometry& rGeo,
-                                       const Color& rColor);
 
     static void DrawWaveLineBezier(OutputDevice& rOutDev, SalGraphics& rGraphics,
                                    tools::Long nStartX, tools::Long nStartY, tools::Long nEndX,
