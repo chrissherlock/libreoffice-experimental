@@ -2025,7 +2025,7 @@ void OutputDevice::ImplDrawWaveTextLine(const vcl::rendercontext::TextLineGeomet
         }
         else
         {
-            vcl::rendercontext::PrimitiveRenderer::DrawWaveLine(*this, aWaveGeo, aColor);
+            ImplDrawWaveLine(aWaveGeo, aColor);
         }
     }
 }
@@ -2062,6 +2062,25 @@ void OutputDevice::ImplDrawStraightTextLine(const vcl::rendercontext::TextLineGe
 
     if (auto aCtx = CreateTextRenderContext())
         vcl::text::TextRenderer::DrawStraightTextLine(*aCtx, rGeo, aMetrics, aDashSegments);
+}
+
+void OutputDevice::ImplDrawWaveLine(const vcl::rendercontext::WaveLineGeometry& rGeo, const Color& rColor)
+{
+    if (rGeo.maWavePixelSize.Height() == 1 && rGeo.maSize.Height() == 1)
+    {
+        mpGraphics->SetLineColor(rColor);
+        mbLineColorDirty = true;
+
+        if (auto aCtx = CreateTextRenderContext())
+            vcl::text::TextRenderer::DrawWaveHairline(*aCtx, rGeo, rColor);
+
+        return;
+    }
+
+    SetWaveLineColors(rColor, rGeo.maWavePixelSize.Height());
+
+    if (auto aCtx = CreateTextRenderContext())
+        vcl::text::TextRenderer::DrawWaveLine(*aCtx, rGeo);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -1238,6 +1238,8 @@ public:
     SAL_DLLPRIVATE void ImplDrawWaveTextLine(const vcl::rendercontext::TextLineGeometry& rGeo,
                                              tools::Long nY, Color aColor, bool bIsAbove);
 
+    SAL_DLLPRIVATE void ImplDrawWaveLine(const vcl::rendercontext::WaveLineGeometry& rGeo, const Color& rColor);
+
 protected:
     SAL_DLLPRIVATE float        approximate_char_width() const;
 

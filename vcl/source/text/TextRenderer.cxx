@@ -145,6 +145,31 @@ void TextRenderer::DrawWaveHairline(const TextRenderContext& rCtx,
     rCtx.rGraphics.drawLine(nX1, aLineStart.Y(), nX2, aLineEnd.Y());
 }
 
+void TextRenderer::DrawWaveLine(const TextRenderContext& rCtx,
+                                const vcl::rendercontext::WaveLineGeometry& rGeo)
+{
+    for (Point aDrawPt : rGeo.GetRegion())
+    {
+        if (rGeo.mnOrientation)
+            rGeo.maBase.RotateAround(aDrawPt, rGeo.mnOrientation);
+
+        if (rGeo.mbDrawAsRect)
+        {
+            tools::Long nX = aDrawPt.X();
+
+            if (rCtx.bRTL)
+                nX = rCtx.nFrameWidth - nX - rGeo.maWavePixelSize.Width();
+
+            rCtx.rGraphics.drawRect(nX, aDrawPt.Y(), rGeo.maWavePixelSize.Width(),
+                                    rGeo.maWavePixelSize.Height());
+        }
+        else
+        {
+            rCtx.rGraphics.drawPixel(aDrawPt.X(), aDrawPt.Y());
+        }
+    }
+}
+
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

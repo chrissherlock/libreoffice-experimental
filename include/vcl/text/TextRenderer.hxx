@@ -67,6 +67,9 @@ public:
 
     static void DrawWaveHairline(const TextRenderContext& rCtx,
                                  const vcl::rendercontext::WaveLineGeometry& rGeo, Color aColor);
+
+    static void DrawWaveLine(const TextRenderContext& rCtx,
+                             const vcl::rendercontext::WaveLineGeometry& rGeo);
 };
 
 } // namespace vcl::text

@@ -801,33 +801,6 @@ void PrimitiveRenderer::DrawWaveLineBezier(OutputDevice& rOutDev, SalGraphics& r
                            basegfx::deg2rad(15.0), bPixelSnapHairline);
 }
 
-void PrimitiveRenderer::DrawWaveLine(OutputDevice& rOutDev, const WaveLineGeometry& rGeo,
-                                     const Color& rColor)
-{
-    rOutDev.SetWaveLineColors(rColor, rGeo.maWavePixelSize.Height());
-
-    for (Point aDrawPt : rGeo.GetRegion())
-    {
-        if (rGeo.mnOrientation)
-            rGeo.maBase.RotateAround(aDrawPt, rGeo.mnOrientation);
-
-        if (rGeo.mbDrawAsRect)
-        {
-            tools::Long nX = aDrawPt.X();
-
-            if (rOutDev.IsRTLEnabled())
-                nX = rOutDev.GetOutputWidthPixel() - nX - rGeo.maWavePixelSize.Width();
-
-            rOutDev.mpGraphics->drawRect(nX, aDrawPt.Y(), rGeo.maWavePixelSize.Width(),
-                                         rGeo.maWavePixelSize.Height());
-        }
-        else
-        {
-            rOutDev.mpGraphics->drawPixel(aDrawPt.X(), aDrawPt.Y());
-        }
-    }
-}
-
 void PrimitiveRenderer::DrawTextLines(SalGraphics& rGraphics,
                                       std::span<const vcl::text::RotatedGeometry> rSegments,
                                       const Color& rColor)
