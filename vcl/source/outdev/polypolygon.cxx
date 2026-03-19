@@ -61,18 +61,26 @@ void OutputDevice::DrawPolyPolygon(const tools::PolyPolygon& rPolyPoly)
     tools::PolyPolygon aDevicePolyPoly = mpMapper->LogicToDevicePixel(rPolyPoly);
     const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
     const bool bAntiparallel = ImplIsAntiparallel();
-    const tools::Long nFrameWidth
-        = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
 
-    mpMapper->MirrorDevicePixelPolyPolygon(aDevicePolyPoly, nFrameWidth, bRTL, bAntiparallel);
+    if (bRTL)
+    {
+        tools::Long nFrameWidth
+            = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+        mpMapper->MirrorDevicePixelPolyPolygon(aDevicePolyPoly, nFrameWidth, bRTL, bAntiparallel);
+    }
 
     vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygon(*mpGraphics, aDevicePolyPoly, bFill);
 
     if (oStroke)
     {
-        for (const auto& rPoly : rPolyPoly)
+        for (const auto& rDevicePoly : aDevicePolyPoly)
         {
-            DrawPolyLine(rPoly.getB2DPolygon(), *oStroke);
+            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+                *mpGraphics, rDevicePoly.getB2DPolygon(), *oStroke,
+                basegfx::B2DHomMatrix(), // Identity matrix: no extra transform needed
+                GetAntialiasing(), // Current AA state
+                GetRasterOp() // Current RasterOp state
+            );
         }
     }
 }
