@@ -143,13 +143,6 @@ public:
                               std::span<const vcl::text::RotatedGeometry> rSegments,
                               const Color& rColor);
 
-    static void DrawEmphasisMark(OutputDevice& rOutDev, SalGraphics& rGraphics, tools::Long nBaseX,
-                                 tools::Long nX, tools::Long nY,
-                                 const tools::PolyPolygon& rPolyPoly, bool bPolyLine,
-                                 const tools::Rectangle& rRect1, const tools::Rectangle& rRect2);
-
-    static void DrawEmphasisMarks(OutputDevice& rOutDev, SalLayout& rSalLayout);
-
     static void DrawWaveLineBezier(SalGraphics& rGraphics, const Point& rStartPos,
                                    const Point& rEndPos, tools::Long nWaveHeight,
                                    double fOrientation, tools::Long nLineWidth,

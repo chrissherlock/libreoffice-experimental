@@ -286,11 +286,7 @@ void OutputDevice::ImplRenderLayout(SalLayout& rSalLayout, bool bTextLines)
     }
 
     if (mpGraphicsState->maFont.GetEmphasisMark() & FontEmphasisMark::Style)
-    {
-        // TODO This should eventually be refactored to a similar local DrawEmphasisMarks
-        // to fully remove the 'OutputDevice&' dependency from PrimitiveRenderer.
-        vcl::rendercontext::PrimitiveRenderer::DrawEmphasisMarks(*this, rSalLayout);
-    }
+        ImplDrawEmphasisMarks(rSalLayout);
 }
 
 void OutputDevice::ImplDrawSpecialText(SalLayout& rSalLayout)
@@ -2098,6 +2094,57 @@ void OutputDevice::ImplDrawWaveLine(const vcl::rendercontext::WaveLineGeometry& 
 
     if (auto aCtx = CreateTextRenderContext())
         vcl::text::TextRenderer::DrawWaveLine(*aCtx, rGeo);
+}
+
+void OutputDevice::ImplDrawEmphasisMarks(SalLayout& rSalLayout)
+{
+    vcl::font::FontRealization const* pRealization = mpFontRealization.get();
+    if (!pRealization || !pRealization->mxFont)
+        return;
+
+    auto popIt = ScopedPush(vcl::PushFlags::FILLCOLOR | vcl::PushFlags::LINECOLOR
+                            | vcl::PushFlags::MAPMODE);
+    vcl::MetafileRecorder::ScopedSuspend aMetaFileSuspend(maRecorder);
+    mpMapper->EnableMapMode(false);
+
+    FontEmphasisMark nEmphasisMark = mpGraphicsState->maFont.GetEmphasisMarkStyle();
+    const bool bBelow = bool(nEmphasisMark & FontEmphasisMark::PosBelow);
+
+    tools::Long nEmphasisHeight
+        = bBelow ? pRealization->nEmphasisDescent : pRealization->nEmphasisAscent;
+    vcl::font::EmphasisMark aEmphasisMark(nEmphasisMark, nEmphasisHeight, GetDPIY());
+
+    if (aEmphasisMark.IsShapePolyLine())
+    {
+        SetLineColor(GetTextColor());
+        SetFillColor();
+    }
+    else
+    {
+        SetLineColor();
+        SetFillColor(GetTextColor());
+    }
+
+    if (!mpGraphics && !AcquireGraphics())
+        return;
+
+    std::vector<Point> aPositions;
+    vcl::text::TextDecorator::GetEmphasisMarkPositions(rSalLayout, *pRealization, aEmphasisMark,
+                                                       bBelow, aPositions);
+
+    if (auto aCtx = CreateTextRenderContext())
+    {
+        tools::Long nOutOffX = GetOutOffXPixel();
+        tools::Long nOutOffY = GetOutOffYPixel();
+
+        for (const Point& rPos : aPositions)
+        {
+            vcl::text::TextRenderer::DrawEmphasisMark(
+                *aCtx, rSalLayout.DrawBase().getX(), rPos.X(), rPos.Y(), nOutOffX, nOutOffY,
+                aEmphasisMark.GetShape(), aEmphasisMark.IsShapePolyLine(),
+                aEmphasisMark.GetRect1(), aEmphasisMark.GetRect2());
+        }
+    }
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

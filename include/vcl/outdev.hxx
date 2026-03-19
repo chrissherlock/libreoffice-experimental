@@ -1242,6 +1242,8 @@ public:
 
     SAL_DLLPRIVATE void ImplDrawWaveLine(const vcl::rendercontext::WaveLineGeometry& rGeo, const Color& rColor);
 
+    SAL_DLLPRIVATE void ImplDrawEmphasisMarks(SalLayout& rSalLayout);
+
 protected:
     SAL_DLLPRIVATE float        approximate_char_width() const;
 

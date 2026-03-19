@@ -75,6 +75,11 @@ public:
                                    const Point& rEndPos, tools::Long nWaveHeight,
                                    double fOrientation, tools::Long nLineWidth,
                                    const Color& rLineColor, bool bPixelSnapHairline);
+
+    static void DrawEmphasisMark(const TextRenderContext& rCtx, tools::Long nBaseX, tools::Long nX,
+                                 tools::Long nY, tools::Long nOutOffX, tools::Long nOutOffY,
+                                 const tools::PolyPolygon& rPolyPoly, bool bPolyLine,
+                                 const tools::Rectangle& rRect1, const tools::Rectangle& rRect2);
 };
 
 } // namespace vcl::text

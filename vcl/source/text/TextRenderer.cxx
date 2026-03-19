@@ -170,6 +170,62 @@ void TextRenderer::DrawWaveLine(const TextRenderContext& rCtx,
     }
 }
 
+void TextRenderer::DrawEmphasisMark(const TextRenderContext& rCtx, tools::Long nBaseX,
+                                    tools::Long nX, tools::Long nY, tools::Long nOutOffX,
+                                    tools::Long nOutOffY, const tools::PolyPolygon& rPolyPoly,
+                                    bool bPolyLine, const tools::Rectangle& rRect1,
+                                    const tools::Rectangle& rRect2)
+{
+    if (rCtx.bRTL)
+        nX = nBaseX - (nX - nBaseX - 1);
+
+    nX -= nOutOffX;
+    nY -= nOutOffY;
+
+    if (rPolyPoly.Count())
+    {
+        if (bPolyLine)
+        {
+            tools::Polygon aPoly = rPolyPoly.GetObject(0);
+            aPoly.Move(nX, nY);
+
+            // Map strictly to device pixels statelessly
+            tools::Polygon aDevicePoly = rCtx.rMapper.LogicToDevicePixel(aPoly);
+            if (rCtx.bRTL)
+            {
+                rCtx.rMapper.MirrorDevicePixelPolygon(aDevicePoly, rCtx.nFrameWidth, rCtx.bRTL,
+                                                      rCtx.bAntiparallel);
+            }
+            vcl::rendercontext::PrimitiveRenderer::DrawPolygon(rCtx.rGraphics, aDevicePoly, false);
+        }
+        else
+        {
+            tools::PolyPolygon aPolyPoly = rPolyPoly;
+            aPolyPoly.Move(nX, nY);
+            vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygon(rCtx.rGraphics, aPolyPoly);
+        }
+    }
+
+    // Deduplicate the original repetitive Rect1/Rect2 rendering blocks
+    auto fnDrawRect = [&](const tools::Rectangle& rRect) {
+        if (rRect.IsEmpty())
+            return;
+
+        tools::Rectangle aRect(Point(nX + rRect.Left(), nY + rRect.Top()), rRect.GetSize());
+        tools::Rectangle aDeviceRect = rCtx.rMapper.LogicToDevicePixel(aRect);
+
+        if (rCtx.bRTL)
+        {
+            rCtx.rMapper.MirrorDevicePixelRect(aDeviceRect, rCtx.nFrameWidth, rCtx.bRTL,
+                                               rCtx.bAntiparallel);
+        }
+        vcl::rendercontext::PrimitiveRenderer::DrawRect(rCtx.rGraphics, aDeviceRect);
+    };
+
+    fnDrawRect(rRect1);
+    fnDrawRect(rRect2);
+}
+
 } // namespace vcl::text
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
