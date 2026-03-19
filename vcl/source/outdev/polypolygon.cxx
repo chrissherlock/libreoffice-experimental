@@ -72,20 +72,10 @@ void OutputDevice::DrawPolyPolygon(const tools::PolyPolygon& rPolyPoly)
         mpMapper->MirrorDevicePixelPolyPolygon(aDevicePolyPoly, nFrameWidth, bRTL, bAntiparallel);
     }
 
-    vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygon(*mpGraphics, aDevicePolyPoly, bFill);
-
-    if (oStroke)
-    {
-        for (const auto& rDevicePoly : aDevicePolyPoly)
-        {
-            vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-                *mpGraphics, rDevicePoly.getB2DPolygon(), *oStroke,
-                basegfx::B2DHomMatrix(), // Identity matrix: no extra transform needed
-                GetAntialiasing(), // Current AA state
-                GetRasterOp() // Current RasterOp state
-            );
-        }
-    }
+    vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygon(
+        *mpGraphics, aDevicePolyPoly, bFill, oStroke ? &*oStroke : nullptr,
+        basegfx::B2DHomMatrix(), // Identity matrix
+        GetAntialiasing(), GetRasterOp());
 }
 
 void OutputDevice::DrawPolyPolygon(const basegfx::B2DPolyPolygon& rB2DPolyPoly)

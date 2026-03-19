@@ -111,7 +111,11 @@ public:
                                 const basegfx::B2DPolyPolygon& rDevicePolyPoly, bool bFill);
 
     static void DrawPolyPolygon(SalGraphics& rGraphics, const tools::PolyPolygon& rDevicePolyPoly,
-                                bool bFill);
+                                bool bFill, const StrokeAttributes* pStroke = nullptr,
+                                const basegfx::B2DHomMatrix& rObjectTransform
+                                = basegfx::B2DHomMatrix(),
+                                AntialiasingFlags nAA = AntialiasingFlags::NONE,
+                                RasterOp eROP = RasterOp::OverPaint);
 
     static void DrawPolyPolygon(SalGraphics& rGraphics, const tools::PolyPolygon& rPolyPoly,
                                 const tools::PolyPolygon* pClipPolyPoly = nullptr);

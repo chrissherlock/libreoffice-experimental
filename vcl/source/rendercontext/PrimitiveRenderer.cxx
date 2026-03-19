@@ -831,12 +831,16 @@ void PrimitiveRenderer::DrawPolygon(SalGraphics& rGraphics, const tools::Polygon
 }
 
 void PrimitiveRenderer::DrawPolyPolygon(SalGraphics& rGraphics,
-                                        const tools::PolyPolygon& rDevicePolyPoly, bool bFill)
+                                        const tools::PolyPolygon& rDevicePolyPoly, bool bFill,
+                                        const StrokeAttributes* pStroke,
+                                        const basegfx::B2DHomMatrix& rObjectTransform,
+                                        AntialiasingFlags nAA, RasterOp eROP)
 {
     sal_uInt16 nPoly = rDevicePolyPoly.Count();
     if (nPoly == 0)
         return;
 
+    // Paint the Fill
     if (bFill)
     {
         std::unique_ptr<sal_uInt32[]> pPoints(new sal_uInt32[nPoly]);
@@ -847,6 +851,15 @@ void PrimitiveRenderer::DrawPolyPolygon(SalGraphics& rGraphics,
             pPtAry[i] = rDevicePolyPoly[i].GetConstPointAry();
         }
         rGraphics.drawPolyPolygon(nPoly, pPoints.get(), pPtAry.get());
+    }
+
+    // Paint the Strokes (Decomposed into PolyLines to avoid alpha-blending artifacts)
+    if (pStroke)
+    {
+        for (const auto& rPoly : rDevicePolyPoly)
+        {
+            DrawPolyLine(rGraphics, rPoly.getB2DPolygon(), *pStroke, rObjectTransform, nAA, eROP);
+        }
     }
 }
 
