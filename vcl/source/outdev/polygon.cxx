@@ -22,6 +22,7 @@
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <tools/poly.hxx>
 
+#include <vcl/deviceconcepts.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/metafile/MetafileRecorder.hxx>
@@ -30,6 +31,7 @@
 #include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
+#include <devicedispatcher.hxx>
 #include <salgdi.hxx>
 
 #include <cassert>
@@ -74,30 +76,43 @@ void OutputDevice::DrawPolygon(const tools::Polygon& rPoly)
 {
     assert(!is_double_buffered_window());
 
+    if (rPoly.GetSize() < 2)
+        return;
+
     if (maRecorder.IsActive())
         maRecorder.RecordPolygon(rPoly);
 
-    if (rPoly.GetSize() < 2 || !IsDeviceOutputNecessary())
+    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Line | vcl::PrepareOutputFlags::Fill))
         return;
 
     auto oStroke = lcl_CreateDefaultHairline(IsLineColor(), GetLineColor());
-    vcl::rendercontext::StrokeAttributes* pStroke = oStroke ? &*oStroke : nullptr;
-
-    if (!mpGraphics && !AcquireGraphics())
-        return;
-    FlushGraphicsState();
 
     tools::Polygon aDevicePoly = mpMapper->LogicToDevicePixel(rPoly);
-    const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
-    const bool bAntiparallel = ImplIsAntiparallel();
-    const tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
 
-    mpMapper->MirrorDevicePixelPolygon(aDevicePoly, nFrameWidth, bRTL, bAntiparallel);
+    const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
+    if (bRTL)
+    {
+        const bool bAntiparallel = ImplIsAntiparallel();
+        const tools::Long nFrameWidth = vcl::DispatchDevice(*this, [](const auto& rDev) {
+            return vcl::get_reference_width_v(rDev);
+        });
+
+        mpMapper->MirrorDevicePixelPolygon(aDevicePoly, nFrameWidth, bRTL, bAntiparallel);
+    }
 
     vcl::rendercontext::PrimitiveRenderer::DrawPolygon(*mpGraphics, aDevicePoly, IsFillColor());
 
-    if (pStroke)
-        DrawPolyLine(rPoly.getB2DPolygon(), *pStroke);
+    if (oStroke)
+    {
+        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
+            *mpGraphics,
+            aDevicePoly.getB2DPolygon(),
+            *oStroke,
+            basegfx::B2DHomMatrix(), // Identity: no extra transform needed
+            GetAntialiasing(),
+            GetRasterOp()
+        );
+    }
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
