@@ -22,6 +22,7 @@
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <tools/poly.hxx>
 
+#include <vcl/deviceconcepts.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/metafile/MetafileRecorder.hxx>
@@ -30,6 +31,7 @@
 #include <ClippingController.hxx>
 #include <CoordinateMapper.hxx>
 #include <GraphicsState.hxx>
+#include <devicedispatcher.hxx>
 #include <salgdi.hxx>
 
 #include <cassert>
@@ -64,8 +66,9 @@ void OutputDevice::DrawPolyPolygon(const tools::PolyPolygon& rPolyPoly)
 
     if (bRTL)
     {
-        tools::Long nFrameWidth
-            = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+        tools::Long nFrameWidth = vcl::DispatchDevice(
+            *this, [](const auto& rDev) { return vcl::get_reference_width_v(rDev); });
+
         mpMapper->MirrorDevicePixelPolyPolygon(aDevicePolyPoly, nFrameWidth, bRTL, bAntiparallel);
     }
 
