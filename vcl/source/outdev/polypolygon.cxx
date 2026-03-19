@@ -82,34 +82,32 @@ void OutputDevice::DrawPolyPolygon(const basegfx::B2DPolyPolygon& rB2DPolyPoly)
 {
     assert(!is_double_buffered_window());
 
+    if (!rB2DPolyPoly.count())
+        return;
+
     if (maRecorder.IsActive())
         maRecorder.RecordPolyPolygon(tools::PolyPolygon(rB2DPolyPoly));
 
-    if (!rB2DPolyPoly.count() || !IsDeviceOutputNecessary())
+    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Line | vcl::PrepareOutputFlags::Fill))
         return;
 
     bool bFill = IsFillColor();
-    vcl::rendercontext::StrokeAttributes aStroke;
-    vcl::rendercontext::StrokeAttributes* pStroke = nullptr;
+    std::optional<vcl::rendercontext::StrokeAttributes> oStroke;
 
     if (IsLineColor())
     {
-        aStroke.fTransparency = (255.0 - GetLineColor().GetAlpha()) / 255.0;
-        pStroke = &aStroke;
+        oStroke.emplace();
+        oStroke->fTransparency = (255.0 - GetLineColor().GetAlpha()) / 255.0;
     }
-
-    if (!mpGraphics && !AcquireGraphics())
-        return;
-    FlushGraphicsState();
 
     basegfx::B2DHomMatrix aTransform = GetViewTransformation();
     vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygon(*mpGraphics, aTransform, rB2DPolyPoly,
                                                            bFill);
 
-    if (pStroke)
+    if (oStroke)
     {
         for (sal_uInt32 i = 0; i < rB2DPolyPoly.count(); ++i)
-            DrawPolyLine(rB2DPolyPoly.getB2DPolygon(i), *pStroke);
+            DrawPolyLine(rB2DPolyPoly.getB2DPolygon(i), *oStroke);
     }
 }
 
