@@ -1874,14 +1874,6 @@ void OutputDevice::ImplDrawTextLine(const vcl::rendercontext::TextLineGeometry& 
         aOverlineColor = GetTextColor();
 
     vcl::rendercontext::TextLineGeometry aDrawGeo = rGeo;
-    if (IsRTLEnabled())
-    {
-        tools::Long nXAdd = aDrawGeo.mfWidth - aDrawGeo.mnDistX;
-        if (mpFontInstance->mnOrientation)
-            nXAdd = basegfx::fround<tools::Long>(
-                nXAdd * cos(toRadians(mpFontInstance->mnOrientation)));
-        aDrawGeo.maOrigin.AdjustX(nXAdd - 1);
-    }
 
     const LogicalFontInstance& rFontInst = *GetFontInstance();
     const tools::Long nAscent = rFontInst.mxFontMetric->GetAscent();
@@ -1940,14 +1932,6 @@ void OutputDevice::ImplDrawTextLine(const vcl::rendercontext::TextLineGeometry& 
 
 void OutputDevice::ImplDrawMnemonicLine(tools::Long nX, tools::Long nY, tools::Long nWidth)
 {
-    tools::Long nBaseX = nX;
-
-    if (IsRTLEnabled())
-    {
-        // FIXME we need to resolve this, but this reverts the hack that will be done later in DrawTextLine
-        nX = nBaseX - nWidth - (nX - nBaseX - 1);
-    }
-
     vcl::rendercontext::TextLineGeometry aLineGeo(Point(nX, nY), 0, nWidth, STRIKEOUT_NONE,
                                                   LINESTYLE_SINGLE, LINESTYLE_NONE, false);
     aLineGeo.maUnderlineColor = GetTextLineColor();
