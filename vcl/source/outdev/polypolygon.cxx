@@ -46,22 +46,17 @@ void OutputDevice::DrawPolyPolygon(const tools::PolyPolygon& rPolyPoly)
     if (maRecorder.IsActive())
         maRecorder.RecordPolyPolygon(rPolyPoly);
 
-    if (!IsDeviceOutputNecessary())
+    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Line | vcl::PrepareOutputFlags::Fill))
         return;
 
     bool bFill = IsFillColor();
-    vcl::rendercontext::StrokeAttributes aStroke;
-    vcl::rendercontext::StrokeAttributes* pStroke = nullptr;
+    std::optional<vcl::rendercontext::StrokeAttributes> oStroke;
 
     if (IsLineColor())
     {
-        aStroke.fTransparency = (255.0 - GetLineColor().GetAlpha()) / 255.0;
-        pStroke = &aStroke;
+        oStroke.emplace();
+        oStroke->fTransparency = (255.0 - GetLineColor().GetAlpha()) / 255.0;
     }
-
-    if (!mpGraphics && !AcquireGraphics())
-        return;
-    FlushGraphicsState();
 
     tools::PolyPolygon aDevicePolyPoly = mpMapper->LogicToDevicePixel(rPolyPoly);
     const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
@@ -73,10 +68,12 @@ void OutputDevice::DrawPolyPolygon(const tools::PolyPolygon& rPolyPoly)
 
     vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygon(*mpGraphics, aDevicePolyPoly, bFill);
 
-    if (pStroke)
+    if (oStroke)
     {
         for (sal_uInt16 i = 0; i < rPolyPoly.Count(); ++i)
-            DrawPolyLine(rPolyPoly[i].getB2DPolygon(), *pStroke);
+        {
+            DrawPolyLine(rPolyPoly[i].getB2DPolygon(), *oStroke);
+        }
     }
 }
 
