@@ -100,19 +100,15 @@ void OutputDevice::DrawPolygon(const tools::Polygon& rPoly)
         mpMapper->MirrorDevicePixelPolygon(aDevicePoly, nFrameWidth, bRTL, bAntiparallel);
     }
 
-    vcl::rendercontext::PrimitiveRenderer::DrawPolygon(*mpGraphics, aDevicePoly, IsFillColor());
-
-    if (oStroke)
-    {
-        vcl::rendercontext::PrimitiveRenderer::DrawPolyLine(
-            *mpGraphics,
-            aDevicePoly.getB2DPolygon(),
-            *oStroke,
-            basegfx::B2DHomMatrix(), // Identity: no extra transform needed
-            GetAntialiasing(),
-            GetRasterOp()
-        );
-    }
+    vcl::rendercontext::PrimitiveRenderer::DrawPolygon(
+        *mpGraphics,
+        aDevicePoly,
+        IsFillColor(),
+        oStroke ? &*oStroke : nullptr,
+        basegfx::B2DHomMatrix(),
+        GetAntialiasing(),
+        GetRasterOp()
+    );
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

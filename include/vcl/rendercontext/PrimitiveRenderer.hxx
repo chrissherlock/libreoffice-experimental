@@ -100,7 +100,11 @@ public:
     static void DrawPolygon(SalGraphics& rGraphics, const basegfx::B2DHomMatrix& rTransform,
                             const basegfx::B2DPolygon& rDevicePoly, bool bFill);
 
-    static void DrawPolygon(SalGraphics& rGraphics, const tools::Polygon& rDevicePoly, bool bFill);
+    static void DrawPolygon(SalGraphics& rGraphics, const tools::Polygon& rDevicePoly, bool bFill,
+                            const StrokeAttributes* pStroke = nullptr,
+                            const basegfx::B2DHomMatrix& rObjectTransform = basegfx::B2DHomMatrix(),
+                            AntialiasingFlags nAA = AntialiasingFlags::NONE,
+                            RasterOp eROP = RasterOp::OverPaint);
 
     static void DrawPolygonGeometry(SalGraphics& rGraphics, const tools::Polygon& rDevicePoly);
 

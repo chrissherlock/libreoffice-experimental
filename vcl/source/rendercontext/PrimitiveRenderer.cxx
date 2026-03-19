@@ -816,18 +816,30 @@ void PrimitiveRenderer::DrawTextLines(SalGraphics& rGraphics,
 }
 
 void PrimitiveRenderer::DrawPolygon(SalGraphics& rGraphics, const tools::Polygon& rDevicePoly,
-                                    bool bFill)
+                                    bool bFill, const StrokeAttributes* pStroke,
+                                    const basegfx::B2DHomMatrix& rObjectTransform,
+                                    AntialiasingFlags nAA, RasterOp eROP)
 {
-    sal_uInt16 nSize = rDevicePoly.GetSize();
-    if (nSize == 0)
+    const sal_uInt16 nSize = rDevicePoly.GetSize();
+    if (nSize < 2)
         return;
 
     const Point* pPtAry = rDevicePoly.GetConstPointAry();
 
+    // 1. Native Legacy Path MUST run exactly as it did before.
+    // If filled, the backend natively draws both fill and stroke.
+    // If unfilled, the backend draws just the hairline stroke.
     if (bFill)
         rGraphics.drawPolygon(nSize, pPtAry);
     else
         rGraphics.drawPolyLine(nSize, pPtAry);
+
+    // 2. Complex Stroke Path
+    // If there is a thick line or dash pattern, we draw the B2D representation on top.
+    if (pStroke)
+    {
+        DrawPolyLine(rGraphics, rDevicePoly.getB2DPolygon(), *pStroke, rObjectTransform, nAA, eROP);
+    }
 }
 
 void PrimitiveRenderer::DrawPolyPolygon(SalGraphics& rGraphics,
