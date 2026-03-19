@@ -39,11 +39,14 @@ void OutputDevice::DrawPolyPolygon(const tools::PolyPolygon& rPolyPoly)
 {
     assert(!is_double_buffered_window());
 
+    const sal_uInt16 nPoly = rPolyPoly.Count();
+    if (!nPoly)
+        return;
+
     if (maRecorder.IsActive())
         maRecorder.RecordPolyPolygon(rPolyPoly);
 
-    const sal_uInt16 nPoly = rPolyPoly.Count();
-    if (!nPoly || !IsDeviceOutputNecessary())
+    if (!IsDeviceOutputNecessary())
         return;
 
     bool bFill = IsFillColor();
