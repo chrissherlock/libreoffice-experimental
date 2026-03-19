@@ -150,11 +150,10 @@ public:
 
     static void DrawEmphasisMarks(OutputDevice& rOutDev, SalLayout& rSalLayout);
 
-    // change to private after full migration
-    static void DrawWaveLineBezier(OutputDevice& rOutDev, SalGraphics& rGraphics,
-                                   tools::Long nStartX, tools::Long nStartY, tools::Long nEndX,
-                                   tools::Long nEndY, tools::Long nWaveHeight, double fOrientation,
-                                   tools::Long nLineWidth);
+    static void DrawWaveLineBezier(SalGraphics& rGraphics, const Point& rStartPos,
+                                   const Point& rEndPos, tools::Long nWaveHeight,
+                                   double fOrientation, tools::Long nLineWidth,
+                                   const Color& rLineColor, bool bPixelSnapHairline);
 
     /**
      * Attempts to draw a gradient natively via SalGraphics.

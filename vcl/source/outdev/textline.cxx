@@ -260,40 +260,47 @@ static void lcl_DrawCachedHorizontalWaveLine(OutputDevice& rOutDev, const Point&
                                              tools::Long nStartX, tools::Long nEndX,
                                              tools::Long nWaveHeight, tools::Long nLineWidth)
 {
-    static tools::DeleteOnDeinit< WavyLineCache > snLineCache {};
+    static tools::DeleteOnDeinit<WavyLineCache> snLineCache{};
     if (!snLineCache.get())
         return;
 
     WavyLineCache& rLineCache = *snLineCache.get();
     Bitmap aWavylinebmp;
-    Color aLineColor = rOutDev.GetLineColor();
+    const Color aLineColor = rOutDev.GetLineColor();
 
-    if (!rLineCache.find(aLineColor, nLineWidth, nWaveHeight, nEndX - nStartX, aWavylinebmp))
+    const tools::Long nActualLength = nEndX - nStartX;
+
+    if (!rLineCache.find(aLineColor, nLineWidth, nWaveHeight, nActualLength, aWavylinebmp))
     {
-        size_t nWordLength = nEndX - nStartX;
-
-        // start with something big to avoid updating it frequently
-        nWordLength = nWordLength < 1024 ? 1024 : nWordLength;
+        // Start with something big to avoid updating the cache frequently
+        const tools::Long nWordLength = std::max<tools::Long>(nActualLength, 1024);
 
         ScopedVclPtrInstance<VirtualDevice> pVirtDev(rOutDev, DeviceFormat::WITH_ALPHA);
         pVirtDev->SetOutputSizePixel(Size(nWordLength, nWaveHeight * 2), false);
         pVirtDev->SetLineColor(aLineColor);
-        pVirtDev->SetBackground( Wallpaper(COL_TRANSPARENT));
+        pVirtDev->SetBackground(Wallpaper(COL_TRANSPARENT));
         pVirtDev->Erase();
-        pVirtDev->SetAntialiasing( AntialiasingFlags::Enable );
+        pVirtDev->SetAntialiasing(AntialiasingFlags::Enable);
 
-        // Render the vector to the virtual canvas
-        vcl::rendercontext::PrimitiveRenderer::DrawWaveLineBezier(*pVirtDev, *pVirtDev->GetGraphics(),
-                                                                  0, 0, nWordLength, 0, nWaveHeight, 0.0, nLineWidth);
+        SalGraphics* pGraphics = pVirtDev->GetGraphics();
+        if (pGraphics)
+        {
+            // Render the vector to the virtual canvas using our newly refactored stateless method
+            vcl::rendercontext::PrimitiveRenderer::DrawWaveLineBezier(
+                *pGraphics,
+                Point(0, 0), Point(nWordLength, 0),
+                nWaveHeight, 0.0, nLineWidth, aLineColor,
+                false /* bPixelSnapHairline */);
+        }
 
-        Bitmap aBitmap(pVirtDev->GetBitmap(Point(0, 0), pVirtDev->GetOutputSize()));
+        Bitmap aBitmap(pVirtDev->GetBitmap(Point(0, 0), pVirtDev->GetOutputSizePixel()));
         rLineCache.insert(aBitmap, aLineColor, nLineWidth, nWaveHeight, nWordLength, aWavylinebmp);
     }
 
     if (aWavylinebmp.ImplGetSalBitmap() != nullptr)
     {
-        Size aSize(nEndX - nStartX, aWavylinebmp.GetSizePixel().Height());
-        rOutDev.DrawBitmap(Point(rStartPos.X(), rStartPos.Y()), rOutDev.PixelToLogic(aSize), Point(), aSize, aWavylinebmp);
+        Size aSize(nActualLength, aWavylinebmp.GetSizePixel().Height());
+        rOutDev.DrawBitmap(rStartPos, rOutDev.PixelToLogic(aSize), Point(), aSize, aWavylinebmp);
     }
 }
 
@@ -307,10 +314,6 @@ void OutputDevice::DrawWaveLine(const Point& rStartPos, const Point& rEndPos, to
     Point aStartPt = LogicToDevicePixel(rStartPos);
     Point aEndPt = LogicToDevicePixel(rEndPos);
 
-    tools::Long nStartX = aStartPt.X();
-    tools::Long nStartY = aStartPt.Y();
-    tools::Long nEndX = aEndPt.X();
-    tools::Long nEndY = aEndPt.Y();
     double fOrientation = vcl::text::TextGeometry::CalculateWaveLineOrientation(aStartPt, aEndPt);
 
     // Handle HiDPI
@@ -319,7 +322,11 @@ void OutputDevice::DrawWaveLine(const Point& rStartPos, const Point& rEndPos, to
     {
         nWaveHeight *= fScaleFactor;
 
-        nStartY += fScaleFactor - 1; // Shift down additional pixel(s) to create more visual separation.
+        // Shift down additional pixel(s) to create more visual separation.
+        // Applied to both points so we don't accidentally tilt the line.
+        tools::Long nYShift = std::round(fScaleFactor - 1.0f);
+        aStartPt.AdjustY(nYShift);
+        aEndPt.AdjustY(nYShift);
 
         // odd heights look better than even
         if (nWaveHeight % 2 == 0)
@@ -331,11 +338,17 @@ void OutputDevice::DrawWaveLine(const Point& rStartPos, const Point& rEndPos, to
 
     if (fOrientation == 0.0)
     {
-        lcl_DrawCachedHorizontalWaveLine(*this, rStartPos, nStartX, nEndX, nWaveHeight, nLineWidth);
+        lcl_DrawCachedHorizontalWaveLine(*this, rStartPos, aStartPt.X(), aEndPt.X(), nWaveHeight, nLineWidth);
         return;
     }
 
-    vcl::rendercontext::PrimitiveRenderer::DrawWaveLineBezier(*this, *mpGraphics, nStartX, nStartY, nEndX, nEndY, nWaveHeight, fOrientation, nLineWidth);
+    // Evaluate state for the stateless renderer
+    const Color aLineColor = GetLineColor();
+    const bool bPixelSnapHairline = bool(mpGraphicsState->mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
+
+    vcl::rendercontext::PrimitiveRenderer::DrawWaveLineBezier(
+        *mpGraphics, aStartPt, aEndPt, nWaveHeight, fOrientation, nLineWidth,
+        aLineColor, bPixelSnapHairline);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

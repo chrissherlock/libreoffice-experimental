@@ -70,6 +70,11 @@ public:
 
     static void DrawWaveLine(const TextRenderContext& rCtx,
                              const vcl::rendercontext::WaveLineGeometry& rGeo);
+
+    static void DrawWaveLineBezier(SalGraphics& rGraphics, const Point& rStartPos,
+                                   const Point& rEndPos, tools::Long nWaveHeight,
+                                   double fOrientation, tools::Long nLineWidth,
+                                   const Color& rLineColor, bool bPixelSnapHairline);
 };
 
 } // namespace vcl::text

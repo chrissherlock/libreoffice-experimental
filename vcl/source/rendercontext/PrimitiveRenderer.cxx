@@ -781,20 +781,18 @@ void PrimitiveRenderer::DrawGridOfCrosses(SalGraphics& rGraphics,
     }
 }
 
-void PrimitiveRenderer::DrawWaveLineBezier(OutputDevice& rOutDev, SalGraphics& rGraphics,
-                                           tools::Long nStartX, tools::Long nStartY,
-                                           tools::Long nEndX, tools::Long nEndY,
-                                           tools::Long nWaveHeight, double fOrientation,
-                                           tools::Long nLineWidth)
+void PrimitiveRenderer::DrawWaveLineBezier(SalGraphics& rGraphics, const Point& rStartPos,
+                                           const Point& rEndPos, tools::Long nWaveHeight,
+                                           double fOrientation, tools::Long nLineWidth,
+                                           const Color& rLineColor, bool bPixelSnapHairline)
 {
-    const basegfx::B2DRectangle aWaveLineRectangle(nStartX, nStartY, nEndX, nEndY + nWaveHeight);
+    const basegfx::B2DRectangle aWaveLineRectangle(rStartPos.X(), rStartPos.Y(), rEndPos.X(),
+                                                   rEndPos.Y() + nWaveHeight);
     const basegfx::B2DPolygon aWaveLinePolygon = basegfx::createWaveLinePolygon(aWaveLineRectangle);
     const basegfx::B2DHomMatrix aRotationMatrix = basegfx::utils::createRotateAroundPoint(
-        nStartX, nStartY, basegfx::deg2rad(-fOrientation));
-    const bool bPixelSnapHairline(rOutDev.mpGraphicsState->mnAntialiasing
-                                  & AntialiasingFlags::PixelSnapHairline);
+        rStartPos.X(), rStartPos.Y(), basegfx::deg2rad(-fOrientation));
 
-    rGraphics.SetLineColor(rOutDev.GetLineColor());
+    rGraphics.SetLineColor(rLineColor);
     rGraphics.drawPolyLine(aRotationMatrix, aWaveLinePolygon, 0.0, nLineWidth,
                            nullptr, // MM01
                            basegfx::B2DLineJoin::NONE, css::drawing::LineCap_BUTT,
