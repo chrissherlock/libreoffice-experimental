@@ -150,9 +150,6 @@ public:
 
     static void DrawEmphasisMarks(OutputDevice& rOutDev, SalLayout& rSalLayout);
 
-    static void DrawMnemonicLine(OutputDevice& rOutDev, tools::Long nX, tools::Long nY,
-                                 tools::Long nWidth);
-
     // change to private after full migration
     static void DrawWaveLineBezier(OutputDevice& rOutDev, SalGraphics& rGraphics,
                                    tools::Long nStartX, tools::Long nStartY, tools::Long nEndX,

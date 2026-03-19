@@ -1107,7 +1107,7 @@ void OutputDevice::ImplDrawMnemonic(vcl::TextLayoutCommon& rLayout, const OUStri
         [&](tools::Long w) { return LogicWidthToDevicePixel(w); },
         [&](const Point& p) { return LogicToPixel(p); }, aParams, aDXArray, nRelMnemonicPos, rPos);
 
-    vcl::rendercontext::PrimitiveRenderer::DrawMnemonicLine(*this, aGeo.nX, aGeo.nY, static_cast<double>(aGeo.nWidth));
+    ImplDrawMnemonicLine(aGeo.nX, aGeo.nY, static_cast<double>(aGeo.nWidth));
 }
 
 void OutputDevice::ImplDrawText(OutputDevice& rTargetDevice, const tools::Rectangle& rRect,
@@ -1550,7 +1550,7 @@ void OutputDevice::DrawCtrlText(const Point& rPos, const OUString& rStr, const s
     DrawText(rPos, aStr, nCorrectedIndex, nCorrectedLen, pVector, pDisplayText, pGlyphs);
 
     if (nMnemonicPos != -1)
-        vcl::rendercontext::PrimitiveRenderer::DrawMnemonicLine(*this, nMnemonicX, nMnemonicY, nMnemonicWidth);
+        ImplDrawMnemonicLine(nMnemonicX, nMnemonicY, nMnemonicWidth);
 
     if (oOldTextColor)
         SetTextColor(*oOldTextColor);
@@ -1940,6 +1940,23 @@ void OutputDevice::ImplDrawTextLine(const vcl::rendercontext::TextLineGeometry& 
             ImplDrawStrikeoutLine(aDrawGeo, aInfo.nStrikeoutOffset, aStrikeoutColor);
         }
     }
+}
+
+void OutputDevice::ImplDrawMnemonicLine(tools::Long nX, tools::Long nY, tools::Long nWidth)
+{
+    tools::Long nBaseX = nX;
+
+    if (IsRTLEnabled())
+    {
+        // FIXME we need to resolve this, but this reverts the hack that will be done later in DrawTextLine
+        nX = nBaseX - nWidth - (nX - nBaseX - 1);
+    }
+
+    vcl::rendercontext::TextLineGeometry aLineGeo(Point(nX, nY), 0, nWidth, STRIKEOUT_NONE,
+                                                  LINESTYLE_SINGLE, LINESTYLE_NONE, false);
+    aLineGeo.maUnderlineColor = GetTextLineColor();
+
+    ImplDrawTextLine(aLineGeo);
 }
 
 void OutputDevice::ImplDrawStrikeoutChar(const vcl::rendercontext::TextLineGeometry& rGeo,

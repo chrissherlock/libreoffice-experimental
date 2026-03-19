@@ -817,24 +817,6 @@ void PrimitiveRenderer::DrawTextLines(SalGraphics& rGraphics,
     }
 }
 
-void PrimitiveRenderer::DrawMnemonicLine(OutputDevice& rOutDev, tools::Long nX, tools::Long nY,
-                                         tools::Long nWidth)
-{
-    tools::Long nBaseX = nX;
-    if (rOutDev.IsRTLEnabled())
-    {
-        // FIXME we need to resolve this, but this reverts the hack that will be done later in DrawTextLine
-        nX = nBaseX - nWidth - (nX - nBaseX - 1);
-    }
-
-    {
-        vcl::rendercontext::TextLineGeometry aLineGeo(Point(nX, nY), 0, nWidth, STRIKEOUT_NONE,
-                                                      LINESTYLE_SINGLE, LINESTYLE_NONE, false);
-        aLineGeo.maUnderlineColor = rOutDev.GetTextLineColor();
-        rOutDev.ImplDrawTextLine(aLineGeo);
-    }
-}
-
 void PrimitiveRenderer::DrawEmphasisMark(OutputDevice& rOutDev, SalGraphics& rGraphics,
                                          tools::Long nBaseX, tools::Long nX, tools::Long nY,
                                          const tools::PolyPolygon& rPolyPoly, bool bPolyLine,

@@ -1226,6 +1226,8 @@ public:
 
     SAL_DLLPRIVATE void ImplDrawTextLine(const vcl::rendercontext::TextLineGeometry& rGeo);
 
+    SAL_DLLPRIVATE void ImplDrawMnemonicLine(tools::Long nX, tools::Long nY, tools::Long nWidth);
+
     SAL_DLLPRIVATE void ImplDrawStrikeoutChar(const vcl::rendercontext::TextLineGeometry& rGeo,
                                               tools::Long nY, Color aColor);
 
