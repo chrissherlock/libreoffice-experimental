@@ -70,9 +70,9 @@ void OutputDevice::DrawPolyPolygon(const tools::PolyPolygon& rPolyPoly)
 
     if (oStroke)
     {
-        for (sal_uInt16 i = 0; i < rPolyPoly.Count(); ++i)
+        for (const auto& rPoly : rPolyPoly)
         {
-            DrawPolyLine(rPolyPoly[i].getB2DPolygon(), *oStroke);
+            DrawPolyLine(rPoly.getB2DPolygon(), *oStroke);
         }
     }
 }
