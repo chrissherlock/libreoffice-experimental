@@ -108,7 +108,10 @@ public:
                                    const tools::PolyPolygon& rDeviceClipPolyPoly);
 
     static void DrawPolyPolygon(SalGraphics& rGraphics, const basegfx::B2DHomMatrix& rTransform,
-                                const basegfx::B2DPolyPolygon& rDevicePolyPoly, bool bFill);
+                                const basegfx::B2DPolyPolygon& rPolyPoly, bool bFill,
+                                const StrokeAttributes* pStroke = nullptr,
+                                AntialiasingFlags nAA = AntialiasingFlags::NONE,
+                                RasterOp eROP = RasterOp::OverPaint);
 
     static void DrawPolyPolygon(SalGraphics& rGraphics, const tools::PolyPolygon& rDevicePolyPoly,
                                 bool bFill, const StrokeAttributes* pStroke = nullptr,

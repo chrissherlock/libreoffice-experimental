@@ -101,14 +101,10 @@ void OutputDevice::DrawPolyPolygon(const basegfx::B2DPolyPolygon& rB2DPolyPoly)
     }
 
     basegfx::B2DHomMatrix aTransform = GetViewTransformation();
-    vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygon(*mpGraphics, aTransform, rB2DPolyPoly,
-                                                           bFill);
 
-    if (oStroke)
-    {
-        for (sal_uInt32 i = 0; i < rB2DPolyPoly.count(); ++i)
-            DrawPolyLine(rB2DPolyPoly.getB2DPolygon(i), *oStroke);
-    }
+    vcl::rendercontext::PrimitiveRenderer::DrawPolyPolygon(*mpGraphics, aTransform, rB2DPolyPoly,
+                                                           bFill, oStroke ? &*oStroke : nullptr,
+                                                           GetAntialiasing(), GetRasterOp());
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -872,7 +872,9 @@ void PrimitiveRenderer::DrawPolygon(SalGraphics& rGraphics, const basegfx::B2DHo
 
 void PrimitiveRenderer::DrawPolyPolygon(SalGraphics& rGraphics,
                                         const basegfx::B2DHomMatrix& rTransform,
-                                        const basegfx::B2DPolyPolygon& rDevicePolyPoly, bool bFill)
+                                        const basegfx::B2DPolyPolygon& rDevicePolyPoly, bool bFill,
+                                        const StrokeAttributes* pStroke, AntialiasingFlags nAA,
+                                        RasterOp eROP)
 {
     if (rDevicePolyPoly.count() == 0)
         return;
@@ -881,6 +883,17 @@ void PrimitiveRenderer::DrawPolyPolygon(SalGraphics& rGraphics,
     {
         // Direct floating-point dispatch to the backend
         rGraphics.drawPolyPolygon(rTransform, rDevicePolyPoly, 0.0);
+    }
+
+    // Paint the Strokes (Decomposed into PolyLines to avoid alpha-blending artifacts)
+    if (pStroke)
+    {
+        for (sal_uInt32 i = 0; i < rDevicePolyPoly.count(); ++i)
+        {
+            // Crucial: Pass rTransform down so the RTL flip/scaling matrix is applied to the lines!
+            DrawPolyLine(rGraphics, rDevicePolyPoly.getB2DPolygon(i), *pStroke, rTransform, nAA,
+                         eROP);
+        }
     }
 }
 
