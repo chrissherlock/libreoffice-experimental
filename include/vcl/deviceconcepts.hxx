@@ -356,6 +356,25 @@ template <typename T> concept PageDevice = has_page_offset_v<T>&& requires(const
     { rDev.GetPageOffset() }; // The compiler will fail if this method doesn't exist
 };
 
+/**
+ * Trait: supports_glyph_synthesis
+ * Determines if the device rendering engine can synthetically manipulate
+ * glyphs (e.g., arbitrary rotation, faux bold, faux italic, scaling)
+ * when the native font metric lacks hardware support.
+ * Defaults to true, as most VCL devices are raster-backed.
+ */
+template <typename T> struct supports_glyph_synthesis : std::true_type
+{
+};
+
+template <typename T>
+inline constexpr bool supports_glyph_synthesis_v = supports_glyph_synthesis<T>::value;
+
+/**
+ * Concept: GlyphSynthesisCapable
+ */
+template <typename T> concept GlyphSynthesisCapable = supports_glyph_synthesis_v<T>;
+
 } // namespace vcl
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

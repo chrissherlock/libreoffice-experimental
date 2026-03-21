@@ -95,8 +95,6 @@ public:
     SAL_DLLPRIVATE void         ImplStartPage();
     SAL_DLLPRIVATE void         ImplEndPage();
 
-    virtual void                SetFontOrientation( LogicalFontInstance* const pFontInstance ) const override;
-
     bool                        shouldDrawWavePixelAsRect(tools::Long) const override { return true; }
     void                        SetWaveLineColors(Color const& rColor, tools::Long) override;
     Size                        GetWaveLineSize(tools::Long nLineWidth) const override;
@@ -600,6 +598,9 @@ public:
 }; // class PrinterOptionsHelper
 
 template <> struct has_page_offset<Printer> : std::true_type {};
+
+// Printers rely on hardware fonts or strict spoolers; they cannot safely synthesize glyphs.
+template <> struct supports_glyph_synthesis<Printer> : std::false_type {};
 
 } // namespace vcl
 

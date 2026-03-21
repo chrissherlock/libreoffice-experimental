@@ -431,7 +431,6 @@ bool OutputDevice::ImplUpdateFontInstance() const
     return bRet;
 }
 
-
 void OutputDevice::ImplInitializeFontInstance(LogicalFontInstance* pFontInstance) const
 {
     if (!pFontInstance->mbInit && InitFont())
@@ -447,7 +446,29 @@ void OutputDevice::ImplInitializeFontInstance(LogicalFontInstance* pFontInstance
 
         mpFontController->InitializeInstance(pFontInstance, mpGraphics);
         ImplInitFontMetrics(pFontInstance);
-        SetFontOrientation(pFontInstance);
+
+        vcl::DispatchDevice(*this, [pFontInstance](auto& rDev) {
+            using DevType = std::decay_t<decltype(rDev)>;
+
+            if constexpr (vcl::GlyphSynthesisCapable<DevType>)
+            {
+                if (pFontInstance->GetFontSelectPattern().mnOrientation &&
+                    !pFontInstance->mxFontMetric->GetOrientation())
+                {
+                    pFontInstance->mnOwnOrientation = pFontInstance->GetFontSelectPattern().mnOrientation;
+                    pFontInstance->mnOrientation = pFontInstance->mnOwnOrientation;
+                }
+                else
+                {
+                    pFontInstance->mnOrientation = pFontInstance->mxFontMetric->GetOrientation();
+                }
+            }
+            else
+            {
+                // Strict hardware fonts: blindly trust the native metric
+                pFontInstance->mnOrientation = pFontInstance->mxFontMetric->GetOrientation();
+            }
+        });
     }
 }
 
@@ -469,21 +490,6 @@ void OutputDevice::ImplInitFontMetrics(LogicalFontInstance* pFontInstance) const
 
     pFontInstance->mnLineHeight
         = pFontInstance->mxFontMetric->GetAscent() + pFontInstance->mxFontMetric->GetDescent();
-}
-
-
-void OutputDevice::SetFontOrientation(LogicalFontInstance* const pFontInstance) const
-{
-    if (pFontInstance->GetFontSelectPattern().mnOrientation
-        && !pFontInstance->mxFontMetric->GetOrientation())
-    {
-        pFontInstance->mnOwnOrientation = pFontInstance->GetFontSelectPattern().mnOrientation;
-        pFontInstance->mnOrientation = pFontInstance->mnOwnOrientation;
-    }
-    else
-    {
-        pFontInstance->mnOrientation = pFontInstance->mxFontMetric->GetOrientation();
-    }
 }
 
 bool OutputDevice::ForceFallbackFont(vcl::Font const& rFallbackFont)
