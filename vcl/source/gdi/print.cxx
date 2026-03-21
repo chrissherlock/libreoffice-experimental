@@ -172,15 +172,6 @@ void Printer::ImplPrintTransparent( const Bitmap& rBmp,
     mpMapper->EnableMapMode(bOldMap);
 }
 
-bool Printer::DrawDeviceTransformedBitmap(
-    const basegfx::B2DHomMatrix& /*aFullTransform*/,
-    const Bitmap& /*rBitmap*/,
-    double /*fAlpha*/)
-{
-    // printers can't draw bitmaps directly
-    return false;
-}
-
 void Printer::DrawOutDev( const Point& /*rDestPt*/, const Size& /*rDestSize*/,
                                const Point& /*rSrcPt*/,  const Size& /*rSrcSize*/ )
 {

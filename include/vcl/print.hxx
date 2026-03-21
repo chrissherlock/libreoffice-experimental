@@ -95,9 +95,6 @@ public:
     SAL_DLLPRIVATE void         ImplStartPage();
     SAL_DLLPRIVATE void         ImplEndPage();
 
-    bool                        DrawDeviceTransformedBitmap(const basegfx::B2DHomMatrix& aFullTransform,
-                                    const Bitmap& rBitmap, double fAlpha = 1.0) override;
-
     virtual void                SetFontOrientation( LogicalFontInstance* const pFontInstance ) const override;
 
     bool                        shouldDrawWavePixelAsRect(tools::Long) const override { return true; }
