@@ -26,6 +26,7 @@
 #include <unotools/fontdefs.hxx>
 #include <o3tl/unit_conversion.hxx>
 
+#include <vcl/deviceconcepts.hxx>
 #include <vcl/fontcapabilities.hxx>
 #include <vcl/metafile/MetafileRecorder.hxx>
 #include <vcl/metafile/MetaAction.hxx>
@@ -36,11 +37,10 @@
 
 #include <window.h>
 #include <devicedispatcher.hxx>
-#include <CoordinateMapper.hxx>
-#include <font/FontController.hxx>
-#include <GraphicsState.hxx>
 #include <drawmode.hxx>
 #include <font/EmphasisMark.hxx>
+#include <font/FontController.hxx>
+#include <font/FontMetricResolver.hxx>
 #include <font/LogicalFontInstance.hxx>
 #include <font/PhysicalFontCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
@@ -49,6 +49,8 @@
 #include <svdata.hxx>
 #include <text/FontMetricEngine.hxx>
 #include <text/TextLayoutEngine.hxx>
+#include <CoordinateMapper.hxx>
+#include <GraphicsState.hxx>
 
 #include <unicode/uchar.h>
 
@@ -445,36 +447,22 @@ void OutputDevice::ImplInitializeFontInstance(LogicalFontInstance* pFontInstance
         }
 
         mpFontController->InitializeInstance(pFontInstance, mpGraphics);
+
         ImplInitFontMetrics(pFontInstance);
 
-        vcl::DispatchDevice(*this, [pFontInstance](auto& rDev) {
+        vcl::font::DeviceFontCapabilities aCaps;
+        vcl::DispatchDevice(*this, [&aCaps](auto& rDev) {
             using DevType = std::decay_t<decltype(rDev)>;
-
-            if constexpr (vcl::GlyphSynthesisCapable<DevType>)
-            {
-                if (pFontInstance->GetFontSelectPattern().mnOrientation &&
-                    !pFontInstance->mxFontMetric->GetOrientation())
-                {
-                    pFontInstance->mnOwnOrientation = pFontInstance->GetFontSelectPattern().mnOrientation;
-                    pFontInstance->mnOrientation = pFontInstance->mnOwnOrientation;
-                }
-                else
-                {
-                    pFontInstance->mnOrientation = pFontInstance->mxFontMetric->GetOrientation();
-                }
-            }
-            else
-            {
-                // Strict hardware fonts: blindly trust the native metric
-                pFontInstance->mnOrientation = pFontInstance->mxFontMetric->GetOrientation();
-            }
+            aCaps.bSupportsGlyphSynthesis = vcl::GlyphSynthesisCapable<DevType>;
         });
+
+        vcl::font::FontMetricResolver::ResolveMetrics(aCaps, pFontInstance);
     }
 }
 
 void OutputDevice::ImplInitFontMetrics(LogicalFontInstance* pFontInstance) const
 {
-    auto fnMeasureWidth = [this](const OUString& rStr) -> long {
+    auto fnMeasureWidth = [this](const OUString& rStr) -> tools::Long {
         return GetTextWidth(rStr);
     };
 
@@ -482,14 +470,16 @@ void OutputDevice::ImplInitFontMetrics(LogicalFontInstance* pFontInstance) const
         GetLogicalTextBoundRect(rRect, rStr);
     };
 
-    long nDPIY = GetDPIY();
-    long nPixelWidth = LogicToPixel(Size(1, 0)).Width();
+    tools::Long nDPIY = GetDPIY();
+    tools::Long nPixelWidth = LogicToPixel(Size(1, 0)).Width();
 
     vcl::text::FontMetricEngine::InitializeFontMetrics(
         pFontInstance, GetFont(), nDPIY, nPixelWidth, fnMeasureWidth, fnMeasureRect);
 
     pFontInstance->mnLineHeight
         = pFontInstance->mxFontMetric->GetAscent() + pFontInstance->mxFontMetric->GetDescent();
+
+    pFontInstance->mbInit = true;
 }
 
 bool OutputDevice::ForceFallbackFont(vcl::Font const& rFallbackFont)

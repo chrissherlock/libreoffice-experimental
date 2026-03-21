@@ -2612,6 +2612,41 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testHardwareOffsetTraitRouting)
     }
 }
 
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testOpticalSizingPointConversion)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+
+    // We use a long string to amplify any tracking/kerning differences
+    // caused by loading the wrong optical size variant.
+    OUString aTestStr(u"The quick brown fox jumps over the lazy dog."_ustr);
+
+    // Case 1: The Control Case (Explicit Points)
+    pVDev->SetMapMode(MapMode(MapUnit::MapPoint));
+
+    // 36 points is exactly 0.5 inches.
+    // (We use Fraunces because it is a bundled LO test font with an opsz axis).
+    vcl::Font aFontPt(u"Fraunces"_ustr, Size(0, 36));
+    pVDev->SetFont(aFontPt);
+
+    tools::Long nWidthPt = pVDev->GetTextWidth(aTestStr);
+    tools::Long nWidthPtPx = pVDev->LogicToPixel(Size(nWidthPt, 0)).Width();
+
+    // Case 2: The Test Case (1/100th Millimeters)
+    pVDev->SetMapMode(MapMode(MapUnit::Map100thMM));
+
+    // 1270 100thMM is exactly 12.7mm, which is exactly 0.5 inches.
+    // If o3tl::convert is working, this resolves to exactly 36.0f points.
+    vcl::Font aFontMM(u"Fraunces"_ustr, Size(0, 1270));
+    pVDev->SetFont(aFontMM);
+
+    tools::Long nWidthMM = pVDev->GetTextWidth(aTestStr);
+    tools::Long nWidthMMPx = pVDev->LogicToPixel(Size(nWidthMM, 0)).Width();
+
+    CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(
+        "Optical sizing failed: MapMode units were not correctly converted to typographic points!",
+        static_cast<double>(nWidthPtPx), static_cast<double>(nWidthMMPx), 2.0);
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
