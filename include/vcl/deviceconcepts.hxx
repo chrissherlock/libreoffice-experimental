@@ -336,6 +336,26 @@ inline constexpr bool supports_paint_events_v = supports_paint_events<T>::value;
  */
 template <typename T> concept PaintEventCapable = supports_paint_events_v<T>;
 
+/**
+ * Trait: has_page_offset
+ * Explicitly marks a device as having a physical page offset (Hard Margins).
+ */
+template <typename T> struct has_page_offset : std::false_type
+{
+};
+
+template <typename T> inline constexpr bool has_page_offset_v = has_page_offset<T>::value;
+
+/**
+ * Concept: PageDevice
+ * Enforces that any device opting into has_page_offset MUST implement
+ * a GetPageOffset() method.
+ */
+template <typename T> concept PageDevice = has_page_offset_v<T>&& requires(const T& rDev)
+{
+    { rDev.GetPageOffset() }; // The compiler will fail if this method doesn't exist
+};
+
 } // namespace vcl
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

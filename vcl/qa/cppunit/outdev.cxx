@@ -2572,6 +2572,46 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDrawPolyLineStrokeAttributes)
     CPPUNIT_ASSERT_EQUAL(OString("XB2DPOLYLINE_SEQ_END"), pCommentAction->GetComment());
 }
 
+CPPUNIT_TEST_FIXTURE(VclOutdevTest, testHardwareOffsetTraitRouting)
+{
+    // Our baseline MapMode with an arbitrary origin of (50, 50)
+    MapMode aTestMapMode(MapUnit::Map100thMM, Point(50, 50), Fraction(1, 1), Fraction(1, 1));
+
+    // Scenario 1: Non-PageDevice (VirtualDevice)
+    // Verify that the compiler evaluated `vcl::PageDevice<VirtualDevice>` as false.
+    CPPUNIT_ASSERT_MESSAGE("VirtualDevice should NOT satisfy the PageDevice concept",
+                           !vcl::PageDevice<VirtualDevice>);
+
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+
+    // Apply the map mode as if we were recording/playing a metafile (bIsRecord = false)
+    pVDev->SetMetafileMapMode(aTestMapMode, false);
+
+    // The origin should remain completely untouched.
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("VirtualDevice MapMode origin should not be offset", Point(50, 50),
+                                 pVDev->GetMapMode().GetOrigin());
+
+    // Scenario 2: PageDevice (Printer)
+    // Verify that the compiler evaluated `vcl::PageDevice<Printer>` as true.
+    CPPUNIT_ASSERT_MESSAGE("Printer MUST satisfy the PageDevice concept", vcl::PageDevice<Printer>);
+
+    // In headless unit tests, a printer might not be configured on the CI runner.
+    // We only test the offset math if a valid printer backend is available.
+    if (!Printer::GetPrinterQueues().empty())
+    {
+        ScopedVclPtrInstance<Printer> pPrinter;
+        Point aHardwareOffset = pPrinter->GetPageOffset();
+
+        pPrinter->SetMetafileMapMode(aTestMapMode, false);
+
+        // The new origin should have the physical hardware offset baked in.
+        Point aExpectedOrigin(50 + aHardwareOffset.X(), 50 + aHardwareOffset.Y());
+
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("Printer MapMode origin must include GetPageOffset()",
+                                     aExpectedOrigin, pPrinter->GetMapMode().GetOrigin());
+    }
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

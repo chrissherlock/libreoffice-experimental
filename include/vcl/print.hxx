@@ -175,8 +175,6 @@ public:
     virtual                     ~Printer() override;
     virtual void                dispose() override;
 
-    virtual void SetMetafileMapMode(const MapMode& rNewMapMode, bool) override { SetMapMode(rNewMapMode); }
-
     static const std::vector< OUString >&
                                 GetPrinterQueues();
     static const QueueInfo*     GetQueueInfo( const OUString& rPrinterName, bool bStatusUpdate );
@@ -247,7 +245,7 @@ public:
     Size                        GetPaperSize() const { return PixelToLogic( maPaperSize ); }
     SAL_DLLPRIVATE Size                        GetPaperSize( int nPaper ) const;
     const Point&                GetPageOffsetPixel() const { return maPageOffset; }
-    Point                       GetPageOffset() const { return PixelToLogic( maPageOffset ); }
+    Point                       GetPageOffset() const { return PixelToLogic(maPageOffset); }
 
     SAL_DLLPRIVATE void                        SetCopyCount( sal_uInt16 nCopy, bool bCollate );
     sal_uInt16                  GetCopyCount() const { return mnCopyCount; }
@@ -609,6 +607,8 @@ public:
                              const OUString&  i_rProperty, const OUString& i_rValue,
                              const UIControlOptions& i_rControlOptions);
 }; // class PrinterOptionsHelper
+
+template <> struct has_page_offset<Printer> : std::true_type {};
 
 } // namespace vcl
 

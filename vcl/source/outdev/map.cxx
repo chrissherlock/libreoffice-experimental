@@ -25,10 +25,12 @@
 #include <tools/debug.hxx>
 #include <tools/mapunit.hxx>
 
+#include <vcl/deviceconcepts.hxx>
 #include <vcl/cursor.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/metafile/MetafileRecorder.hxx>
+#include <vcl/print.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/wrkwin.hxx>
 
@@ -109,10 +111,31 @@ void OutputDevice::SetMapMode(const MapMode& rNewMapMode)
 
 void OutputDevice::SetMetafileMapMode(const MapMode& rNewMapMode, bool bIsRecord)
 {
+    MapMode aFinalMap = rNewMapMode;
+
+    Point aHWOffset;
+    vcl::DispatchDevice(*this, [&aHWOffset](auto& rDev) {
+        using DevType = std::decay_t<decltype(rDev)>;
+
+        // We evaluate against the C++20 Concept.
+        // This guarantees both the intent (Trait) and the capability (GetPageOffset).
+        if constexpr (vcl::PageDevice<DevType>)
+        {
+            aHWOffset = rDev.GetPageOffset();
+        }
+    });
+
+    if (aHWOffset != Point())
+    {
+        Point aOrigin = aFinalMap.GetOrigin();
+        aOrigin += aHWOffset;
+        aFinalMap.SetOrigin(aOrigin);
+    }
+
     if (bIsRecord)
-        SetRelativeMapMode(rNewMapMode);
+        SetRelativeMapMode(aFinalMap);
     else
-        SetMapMode(rNewMapMode);
+        SetMapMode(aFinalMap);
 }
 
 void OutputDevice::SetRelativeMapMode(const MapMode& rNewMapMode)

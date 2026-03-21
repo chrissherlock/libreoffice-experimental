@@ -1641,7 +1641,7 @@ public:
     void                        SetMapMode();
     void                        SetMapMode( const MapMode& rNewMapMode );
     void                        SetRelativeMapMode( const MapMode& rNewMapMode );
-    virtual void                SetMetafileMapMode(const MapMode& rNewMapMode, bool bIsRecord);
+    void                        SetMetafileMapMode(const MapMode& rNewMapMode, bool bIsRecord);
     const MapMode&              GetMapMode() const;
 
 private:
