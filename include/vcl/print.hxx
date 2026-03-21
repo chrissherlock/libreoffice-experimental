@@ -84,68 +84,25 @@ class VCL_DLLPUBLIC Printer : public OutputDevice
 {
     friend class                ::OutputDevice;
 
-private:
-    SalInfoPrinter*             mpInfoPrinter;
-    std::unique_ptr<SalPrinter> mpPrinter;
-    SalGraphics*                mpJobGraphics;
-    VclPtr<Printer>             mpPrev;
-    VclPtr<Printer>             mpNext;
-    VclPtr<VirtualDevice>       mpDisplayDev;
-    std::unique_ptr<vcl::printer::Options> mpPrinterOptions;
-    OUString                    maPrinterName;
-    OUString                    maDriver;
-    OUString                    maPrintFile;
-    JobSetup                    maJobSetup;
-    Point                       maPageOffset;
-    Size                        maPaperSize;
-    Size                        maPrintPageSize;
-    ErrCode                     mnError;
-    sal_uInt16                  mnPageQueueSize;
-    sal_uInt16                  mnCopyCount;
-    bool                        mbDefPrinter;
-    bool                        mbPrinting;
-    bool                        mbJobActive;
-    bool                        mbCollateCopy;
-    bool                        mbPrintFile;
-    bool                        mbInPrintPage;
-    bool                        mbNewJobSetup;
-    bool                        mbSinglePrintJobs;
-    bool                        mbUsePrintSetting;
-
-    SAL_DLLPRIVATE void         ImplInitData();
-    SAL_DLLPRIVATE void         ImplInit( SalPrinterQueueInfo* pInfo );
-    SAL_DLLPRIVATE void         ImplInitDisplay();
-    SAL_DLLPRIVATE static SalPrinterQueueInfo*
-                                ImplGetQueueInfo( const OUString& rPrinterName, const OUString* pDriver );
-    SAL_DLLPRIVATE void         ImplUpdatePageData();
-    SAL_DLLPRIVATE void         ImplUpdateFontList();
-    SAL_DLLPRIVATE void         ImplFindPaperFormatForUserSize( JobSetup& );
-
-    SAL_DLLPRIVATE bool         StartJob( const OUString& rJobName, std::shared_ptr<vcl::PrinterController> const & );
-
-    static SAL_DLLPRIVATE ErrCode
-                                ImplSalPrinterErrorCodeToVCL( SalPrinterError nError );
-
-    SAL_DLLPRIVATE void         ImplPrintTransparent (
-                                    const Bitmap& rBmp,
-                                    const Point& rDestPt, const Size& rDestSize,
-                                    const Point& rSrcPtPixel, const Size& rSrcSizePixel );
-
-private:
-    SAL_DLLPRIVATE void         EndJob();
-                                Printer( const Printer& rPrinter )    = delete;
-    Printer&                    operator =( const Printer& rPrinter ) = delete;
-
 public:
+                                Printer();
+                                Printer( const JobSetup& rJobSetup );
+                                Printer( const QueueInfo& rQueueInfo );
+                                Printer( const OUString& rPrinterName );
+    virtual                     ~Printer() override;
+    virtual void                dispose() override;
+
     SAL_DLLPRIVATE void         ImplStartPage();
     SAL_DLLPRIVATE void         ImplEndPage();
 
-protected:
-    virtual bool                AcquireGraphics() const override;
-    virtual void                ReleaseGraphics( bool bRelease = true ) override;
-    SAL_DLLPRIVATE void ImplReleaseGraphics(bool bRelease = true);
+    bool                        DrawDeviceTransformedBitmap(const basegfx::B2DHomMatrix& aFullTransform,
+                                    const Bitmap& rBitmap, double fAlpha = 1.0) override;
 
-public:
+    virtual void                SetFontOrientation( LogicalFontInstance* const pFontInstance ) const override;
+
+    bool                        shouldDrawWavePixelAsRect(tools::Long) const override { return true; }
+    void                        SetWaveLineColors(Color const& rColor, tools::Long) override;
+    Size                        GetWaveLineSize(tools::Long nLineWidth) const override;
     void                        SetSystemTextColor(SystemTextColorFlags, bool) override;
     SAL_DLLPRIVATE void                        DrawGradientEx( OutputDevice* pOut, const tools::Rectangle& rRect,
                                     const Gradient& rGradient );
@@ -156,25 +113,6 @@ public:
     css::awt::DeviceInfo GetDeviceInfo() const override;
 
     virtual bool HasAlpha() const override { return false; }
-
-protected:
-    bool                        DrawDeviceTransformedBitmap(const basegfx::B2DHomMatrix& aFullTransform,
-                                    const Bitmap& rBitmap, double fAlpha = 1.0) override;
-
-    virtual void                SetFontOrientation( LogicalFontInstance* const pFontInstance ) const override;
-
-    bool                        shouldDrawWavePixelAsRect(tools::Long) const override { return true; }
-    void                        SetWaveLineColors(Color const& rColor, tools::Long) override;
-    Size                        GetWaveLineSize(tools::Long nLineWidth) const override;
-
-public:
-                                Printer();
-                                Printer( const JobSetup& rJobSetup );
-                                Printer( const QueueInfo& rQueueInfo );
-                                Printer( const OUString& rPrinterName );
-    virtual                     ~Printer() override;
-    virtual void                dispose() override;
-
     static const std::vector< OUString >&
                                 GetPrinterQueues();
     static const QueueInfo*     GetQueueInfo( const OUString& rPrinterName, bool bStatusUpdate );
@@ -297,6 +235,62 @@ public:
     */
     static void SAL_DLLPRIVATE  ImplPrintJob( const std::shared_ptr<vcl::PrinterController>& i_pController,
                                     const JobSetup& i_rInitSetup );
+protected:
+    virtual bool                AcquireGraphics() const override;
+    virtual void                ReleaseGraphics( bool bRelease = true ) override;
+    SAL_DLLPRIVATE void ImplReleaseGraphics(bool bRelease = true);
+
+private:
+    SalInfoPrinter*             mpInfoPrinter;
+    std::unique_ptr<SalPrinter> mpPrinter;
+    SalGraphics*                mpJobGraphics;
+    VclPtr<Printer>             mpPrev;
+    VclPtr<Printer>             mpNext;
+    VclPtr<VirtualDevice>       mpDisplayDev;
+    std::unique_ptr<vcl::printer::Options> mpPrinterOptions;
+    OUString                    maPrinterName;
+    OUString                    maDriver;
+    OUString                    maPrintFile;
+    JobSetup                    maJobSetup;
+    Point                       maPageOffset;
+    Size                        maPaperSize;
+    Size                        maPrintPageSize;
+    ErrCode                     mnError;
+    sal_uInt16                  mnPageQueueSize;
+    sal_uInt16                  mnCopyCount;
+    bool                        mbDefPrinter;
+    bool                        mbPrinting;
+    bool                        mbJobActive;
+    bool                        mbCollateCopy;
+    bool                        mbPrintFile;
+    bool                        mbInPrintPage;
+    bool                        mbNewJobSetup;
+    bool                        mbSinglePrintJobs;
+    bool                        mbUsePrintSetting;
+
+    SAL_DLLPRIVATE void         ImplInitData();
+    SAL_DLLPRIVATE void         ImplInit( SalPrinterQueueInfo* pInfo );
+    SAL_DLLPRIVATE void         ImplInitDisplay();
+    SAL_DLLPRIVATE static SalPrinterQueueInfo*
+                                ImplGetQueueInfo( const OUString& rPrinterName, const OUString* pDriver );
+    SAL_DLLPRIVATE void         ImplUpdatePageData();
+    SAL_DLLPRIVATE void         ImplUpdateFontList();
+    SAL_DLLPRIVATE void         ImplFindPaperFormatForUserSize( JobSetup& );
+
+    SAL_DLLPRIVATE bool         StartJob( const OUString& rJobName, std::shared_ptr<vcl::PrinterController> const & );
+
+    static SAL_DLLPRIVATE ErrCode
+                                ImplSalPrinterErrorCodeToVCL( SalPrinterError nError );
+
+    SAL_DLLPRIVATE void         ImplPrintTransparent (
+                                    const Bitmap& rBmp,
+                                    const Point& rDestPt, const Size& rDestSize,
+                                    const Point& rSrcPtPixel, const Size& rSrcSizePixel );
+
+    SAL_DLLPRIVATE void         EndJob();
+                                Printer( const Printer& rPrinter )    = delete;
+    Printer&                    operator =( const Printer& rPrinter ) = delete;
+
 };
 
 namespace vcl
@@ -314,6 +308,7 @@ class VCL_DLLPUBLIC PrinterController
                                         mpImplData;
 protected:
     PrinterController(const VclPtr<Printer>&, weld::Window* pDialogParent);
+
 public:
     struct MultiPageSetup
     {
@@ -495,7 +490,6 @@ protected:
                          m_aUIProperties;
 
 public:
-
                          /// Create without ui properties
                          PrinterOptionsHelper() {}
 
