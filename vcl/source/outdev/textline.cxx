@@ -135,17 +135,8 @@ namespace {
     };
 }
 
-bool OutputDevice::shouldDrawWavePixelAsRect(tools::Long nLineWidth) const
-{
-    if (nLineWidth > 1)
-        return true;
-
-    return false;
-}
-
 void OutputDevice::SetWaveLineColors(Color const& rColor, tools::Long nLineWidth)
 {
-    // On printers that output pixel via DrawRect()
     if (nLineWidth > 1)
     {
         if (mpGraphicsState->mbLineColor || mbLineColorDirty)

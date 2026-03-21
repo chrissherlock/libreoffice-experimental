@@ -2001,7 +2001,25 @@ void OutputDevice::ImplDrawWaveTextLine(const vcl::rendercontext::TextLineGeomet
         *mpFontInstance->mxFontMetric, rGeo.meUnderline, bIsAbove, nY, GetDPIX(), GetDPIY());
 
     const Size aWavePixelSize = GetWaveLineSize(aWaveStyle.nLineWidth);
-    const bool bDrawAsRect = shouldDrawWavePixelAsRect(aWaveStyle.nLineWidth);
+
+    // Evaluate hardware constraints for wave pixel plotting
+    bool bDrawAsRect = false;
+    vcl::DispatchDevice(*this, [&bDrawAsRect, nLineWidth = aWaveStyle.nLineWidth](auto& rDev) {
+        using DevType = std::decay_t<decltype(rDev)>;
+
+        // Devices prioritizing high-contrast/physical legibility cannot safely plot
+        // single device pixels (which are invisible at high DPI). They must promote
+        // dots to scalable geometric rectangles to ensure visibility.
+        if constexpr (vcl::HighContrastOutput<DevType>)
+        {
+            bDrawAsRect = true;
+        }
+        else
+        {
+            // Standard raster fallback: thin lines can use individual pixels
+            bDrawAsRect = (nLineWidth > 1);
+        }
+    });
 
     Degree10 nOrientation = mpFontInstance->mnOrientation;
 

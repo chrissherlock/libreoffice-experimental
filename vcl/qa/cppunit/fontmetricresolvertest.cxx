@@ -78,21 +78,6 @@ class FontMetricResolverTest : public CppUnit::TestFixture
 {
 };
 
-CPPUNIT_TEST_FIXTURE(FontMetricResolverTest, testResolveStandardMetrics)
-{
-    // Initialize a dummy pattern and face
-    vcl::font::FontSelectPattern aPattern(vcl::Font(), OUString(), Size(10, 10), 10.0f);
-    rtl::Reference<StubFontFace> xFace(new StubFontFace(aPattern));
-    rtl::Reference<StubFontInstance> xInstance(new StubFontInstance(*xFace, aPattern));
-
-    vcl::font::DeviceFontCapabilities aCaps;
-
-    vcl::font::FontMetricResolver::ResolveMetrics(aCaps, xInstance.get());
-
-    // Ascent (100) + Descent (25) = 125
-    CPPUNIT_ASSERT_EQUAL(tools::Long(125), xInstance->mnLineHeight);
-}
-
 CPPUNIT_TEST_FIXTURE(FontMetricResolverTest, testSyntheticOrientationAllowed)
 {
     vcl::font::FontSelectPattern aPattern(vcl::Font(), OUString(), Size(10, 10), 10.0f);

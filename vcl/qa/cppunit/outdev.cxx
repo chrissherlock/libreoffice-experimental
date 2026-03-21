@@ -957,11 +957,6 @@ public:
     void ReleaseGraphics(bool) override {}
     virtual bool HasAlpha() const override { return false; }
 
-    bool testShouldDrawWavePixelAsRect(tools::Long nLineWidth)
-    {
-        return shouldDrawWavePixelAsRect(nLineWidth);
-    }
-
     Size testGetWaveLineSize(tools::Long nLineWidth) { return GetWaveLineSize(nLineWidth); }
 };
 
@@ -976,16 +971,6 @@ public:
 
     Size testGetWaveLineSize(tools::Long nLineWidth) { return GetWaveLineSize(nLineWidth); }
 };
-}
-
-CPPUNIT_TEST_FIXTURE(VclOutdevTest, testShouldDrawWavePixelAsRect)
-{
-    ScopedVclPtrInstance<WaveLineTester> pTestOutDev;
-
-    CPPUNIT_ASSERT(!pTestOutDev->testShouldDrawWavePixelAsRect(0));
-    CPPUNIT_ASSERT(!pTestOutDev->testShouldDrawWavePixelAsRect(1));
-
-    CPPUNIT_ASSERT(pTestOutDev->testShouldDrawWavePixelAsRect(10));
 }
 
 CPPUNIT_TEST_FIXTURE(VclOutdevTest, testGetWaveLineSize)

@@ -95,7 +95,6 @@ public:
     SAL_DLLPRIVATE void         ImplStartPage();
     SAL_DLLPRIVATE void         ImplEndPage();
 
-    bool                        shouldDrawWavePixelAsRect(tools::Long) const override { return true; }
     void                        SetWaveLineColors(Color const& rColor, tools::Long) override;
     Size                        GetWaveLineSize(tools::Long nLineWidth) const override;
     void                        SetSystemTextColor(SystemTextColorFlags, bool) override;

@@ -1247,7 +1247,6 @@ public:
 protected:
     SAL_DLLPRIVATE float        approximate_char_width() const;
 
-    virtual bool shouldDrawWavePixelAsRect(tools::Long nLineWidth) const;
     virtual void SetWaveLineColors(Color const& rColor, tools::Long nLineWidth);
     virtual Size GetWaveLineSize(tools::Long nLineWidth) const;
 
