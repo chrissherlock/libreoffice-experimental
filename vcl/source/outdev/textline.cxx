@@ -29,6 +29,7 @@
 #include <comphelper/configuration.hxx>
 #include <tools/lazydelete.hxx>
 
+#include <vcl/deviceconcepts.hxx>
 #include <vcl/dropcache.hxx>
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/metafile/MetafileRecorder.hxx>
@@ -44,6 +45,7 @@
 #include <CoordinateMapper.hxx>
 #include <ClippingController.hxx>
 #include <GraphicsState.hxx>
+#include <devicedispatcher.hxx>
 #include <drawmode.hxx>
 #include <font/EmphasisMark.hxx>
 #include <font/FontController.hxx>
@@ -137,20 +139,34 @@ namespace {
 
 void OutputDevice::SetWaveLineColors(Color const& rColor, tools::Long nLineWidth)
 {
-    if (nLineWidth > 1)
+    bool bDrawAsRect = false;
+    vcl::DispatchDevice(*this, [&bDrawAsRect, nLineWidth](auto& rDev) {
+        using DevType = std::decay_t<decltype(rDev)>;
+
+        // Printers (PageDevices) must always draw wave pixels as scalable
+        // rectangles to ensure physical legibility at high DPIs.
+        if constexpr (vcl::PageDevice<DevType>)
+            bDrawAsRect = true;
+        else
+            bDrawAsRect = (nLineWidth > 1);
+    });
+
+    if (bDrawAsRect)
     {
+        // Draw as Rectangle: Transparent Line, Solid Fill
         if (mpGraphicsState->mbLineColor || mbLineColorDirty)
         {
             mpGraphics->SetLineColor();
             mbLineColorDirty = true;
         }
 
-        mpGraphics->SetFillColor( rColor );
+        mpGraphics->SetFillColor(rColor);
         mbFillColorDirty = true;
     }
     else
     {
-        mpGraphics->SetLineColor( rColor );
+        // Draw as Bitmap/Pixel: Solid Line, No Fill needed
+        mpGraphics->SetLineColor(rColor);
         mbLineColorDirty = true;
     }
 }

@@ -1447,18 +1447,6 @@ css::awt::DeviceInfo Printer::GetDeviceInfo() const
     return aInfo;
 }
 
-void Printer::SetWaveLineColors(Color const& rColor, tools::Long)
-{
-    if (mpGraphicsState->mbLineColor || mbLineColorDirty)
-    {
-        mpGraphics->SetLineColor();
-        mbLineColorDirty = true;
-    }
-
-    mpGraphics->SetFillColor(rColor);
-    mbFillColorDirty = true;
-}
-
 Size Printer::GetWaveLineSize(tools::Long nLineWidth) const
 {
     // FIXME - do we have a bug here? If the linewidth is 0, then we will return
