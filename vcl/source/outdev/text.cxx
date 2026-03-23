@@ -1697,17 +1697,24 @@ bool OutputDevice::GetTextOutline(tools::PolyPolygon& rPolyPoly, const OUString&
 
 void OutputDevice::SetSystemTextColor(SystemTextColorFlags nFlags, bool bEnabled)
 {
-    if (nFlags & SystemTextColorFlags::Mono)
+    bool bForceBlack = false;
+    vcl::DispatchDevice(*this, [&bForceBlack](auto& rDev) {
+        using DevType = std::decay_t<decltype(rDev)>;
+
+        // Printers (PageDevices) ignore GUI states like "Disabled"
+        // and always print system text in high-contrast black.
+        if constexpr (vcl::PageDevice<DevType>)
+            bForceBlack = true;
+    });
+
+    if (bForceBlack || (nFlags & SystemTextColorFlags::Mono))
     {
         SetTextColor(COL_BLACK);
     }
-    else
+    else if (!bEnabled)
     {
-        if (!bEnabled)
-        {
-            const StyleSettings& rStyleSettings = GetSettings().GetStyleSettings();
-            SetTextColor(rStyleSettings.GetDisableColor());
-        }
+        const StyleSettings& rStyleSettings = GetSettings().GetStyleSettings();
+        SetTextColor(rStyleSettings.GetDisableColor());
     }
 }
 
