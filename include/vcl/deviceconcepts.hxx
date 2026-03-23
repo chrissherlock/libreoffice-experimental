@@ -403,6 +403,27 @@ inline constexpr bool is_readable_raster_device_v
  */
 template <typename T> concept ReadableRasterDevice = is_readable_raster_device_v<T>;
 
+/**
+ * @brief Type trait: is_subtractive_color_device_v
+ *
+ * Determines if a given OutputDevice relies on a subtractive color model
+ * (e.g., CMYK on printers).
+ *
+ * In a subtractive model, "white" is the absence of ink (the raw canvas),
+ * meaning white UI elements cannot be painted over a white background and
+ * must be shaded to remain visible.
+ */
+template <typename T>
+inline constexpr bool is_subtractive_color_device_v = std::is_base_of_v<Printer, T>;
+
+/**
+ * @brief Concept: SubtractiveColorDevice
+ *
+ * Satisfied by devices that use subtractive rendering. This concept is
+ * used to trigger necessary UI shading adjustments when rendering elements
+ * that would otherwise rely on additive white pixel emission.
+ */
+template <typename T> concept SubtractiveColorDevice = is_subtractive_color_device_v<T>;
 } // namespace vcl
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -17,12 +17,17 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <tools/mapunit.hxx>
+
+#include <vcl/deviceconcepts.hxx>
 #include <vcl/salnativewidgets.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/decoview.hxx>
 #include <vcl/window.hxx>
 #include <vcl/ctrl.hxx>
+
+#include <devicedispatcher.hxx>
 
 namespace {
 
@@ -433,7 +438,19 @@ void ImplDrawButton( OutputDevice *const pDev, tools::Rectangle aFillRect,
 
         ImplDrawDPILineRect( pDev, aFillRect, &aBlackColor );
 
-        Size aBrdSize(pDev->GetButtonBorderSize());
+        Size aBrdSize(1, 1);
+        vcl::DispatchDevice(*pDev, [&aBrdSize](auto& rDev) {
+            using DevType = std::decay_t<decltype(rDev)>;
+            if constexpr (vcl::PageDevice<DevType>)
+            {
+                // Page devices scale borders based on physical dimensions (0.2mm)
+                aBrdSize = rDev.LogicToPixel(Size(20, 20), MapMode(MapUnit::Map100thMM));
+                if (!aBrdSize.Width())
+                    aBrdSize.setWidth(1);
+                if (!aBrdSize.Height())
+                    aBrdSize.setHeight(1);
+            }
+        });
 
         pDev->SetLineColor();
         pDev->SetFillColor( aBlackColor );
@@ -461,8 +478,19 @@ void ImplDrawButton( OutputDevice *const pDev, tools::Rectangle aFillRect,
                                        aOrigFillRect.Right(), aOrigFillRect.Bottom() ) );
         }
 
-        // Hack: in monochrome mode on printers we like to have grey buttons
-        pDev->SetFillColor(pDev->GetMonochromeButtonColor());
+        // In a subtractive color model, white is the absence of ink.
+        // A white button on a white paper background would be invisible.
+        // We use a gray fill to give it volume. Additive color devices
+        // (screens) emit white pixels and default to COL_WHITE.
+        Color aMonoButtonColor = COL_WHITE;
+
+        vcl::DispatchDevice(*pDev, [&aMonoButtonColor](auto& rDev) {
+            using DevType = std::decay_t<decltype(rDev)>;
+            if constexpr (vcl::SubtractiveColorDevice<DevType>)
+                aMonoButtonColor = COL_LIGHTGRAY;
+        });
+
+        pDev->SetFillColor(aMonoButtonColor);
         pDev->DrawRect( aFillRect );
     }
     else
