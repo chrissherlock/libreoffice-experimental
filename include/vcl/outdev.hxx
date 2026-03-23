@@ -1248,7 +1248,7 @@ protected:
     SAL_DLLPRIVATE float        approximate_char_width() const;
 
     void SetWaveLineColors(Color const& rColor, tools::Long nLineWidth);
-    virtual Size GetWaveLineSize(tools::Long nLineWidth) const;
+    Size GetWaveLineSize(tools::Long nLineWidth) const;
 
 private:
     SAL_DLLPRIVATE void         ImplInitTextColor();

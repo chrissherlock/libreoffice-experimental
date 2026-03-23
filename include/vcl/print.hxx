@@ -95,7 +95,6 @@ public:
     SAL_DLLPRIVATE void         ImplStartPage();
     SAL_DLLPRIVATE void         ImplEndPage();
 
-    Size                        GetWaveLineSize(tools::Long nLineWidth) const override;
     void                        SetSystemTextColor(SystemTextColorFlags, bool) override;
     SAL_DLLPRIVATE void                        DrawGradientEx( OutputDevice* pOut, const tools::Rectangle& rRect,
                                     const Gradient& rGradient );

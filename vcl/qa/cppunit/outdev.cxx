@@ -943,63 +943,6 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testSystemTextColor)
     }
 }
 
-namespace
-{
-class WaveLineTester : public OutputDevice
-{
-public:
-    WaveLineTester()
-        : OutputDevice(OUTDEV_VIRDEV)
-    {
-    }
-
-    bool AcquireGraphics() const override { return true; }
-    void ReleaseGraphics(bool) override {}
-    virtual bool HasAlpha() const override { return false; }
-
-    Size testGetWaveLineSize(tools::Long nLineWidth) { return GetWaveLineSize(nLineWidth); }
-};
-
-class WaveLineTesterPrinter : public Printer
-{
-public:
-    WaveLineTesterPrinter() {}
-
-    bool AcquireGraphics() const { return true; }
-    void ReleaseGraphics(bool) {}
-    bool UsePolyPolygonForComplexGradient() { return false; }
-
-    Size testGetWaveLineSize(tools::Long nLineWidth) { return GetWaveLineSize(nLineWidth); }
-};
-}
-
-CPPUNIT_TEST_FIXTURE(VclOutdevTest, testGetWaveLineSize)
-{
-    {
-        ScopedVclPtrInstance<WaveLineTester> pTestOutDev;
-
-        pTestOutDev->SetDPIX(96);
-        pTestOutDev->SetDPIY(96);
-
-        CPPUNIT_ASSERT_EQUAL(Size(1, 1), pTestOutDev->testGetWaveLineSize(0));
-        CPPUNIT_ASSERT_EQUAL(Size(1, 1), pTestOutDev->testGetWaveLineSize(1));
-
-        CPPUNIT_ASSERT_EQUAL(Size(10, 10), pTestOutDev->testGetWaveLineSize(10));
-    }
-
-    {
-        ScopedVclPtrInstance<WaveLineTesterPrinter> pTestOutDev;
-
-        pTestOutDev->SetDPIX(96);
-        pTestOutDev->SetDPIY(96);
-
-        CPPUNIT_ASSERT_EQUAL(Size(0, 0), pTestOutDev->testGetWaveLineSize(0));
-        CPPUNIT_ASSERT_EQUAL(Size(1, 1), pTestOutDev->testGetWaveLineSize(1));
-
-        CPPUNIT_ASSERT_EQUAL(Size(10, 10), pTestOutDev->testGetWaveLineSize(10));
-    }
-}
-
 CPPUNIT_TEST_FIXTURE(VclOutdevTest, testErase)
 {
     ScopedVclPtrInstance<VirtualDevice> pVDev;

@@ -173,8 +173,24 @@ void OutputDevice::SetWaveLineColors(Color const& rColor, tools::Long nLineWidth
 
 Size OutputDevice::GetWaveLineSize(tools::Long nLineWidth) const
 {
-    if (nLineWidth > 1)
-        return Size(nLineWidth, ((nLineWidth*GetDPIX())+(GetDPIY()/2))/GetDPIY());
+    bool bDrawAsRect = false;
+    vcl::DispatchDevice(*this, [&bDrawAsRect, nLineWidth](auto& rDev) {
+        using DevType = std::decay_t<decltype(rDev)>;
+
+        // Printers (PageDevices) must always scale wave geometries
+        if constexpr (vcl::PageDevice<DevType>)
+            bDrawAsRect = true;
+        else
+            bDrawAsRect = (nLineWidth > 1);
+    });
+
+    if (bDrawAsRect)
+    {
+        // A line width of 0 (hairline) must not return Size(0, 0) as it
+        // causes geometric collapse. Enforce a minimum of 1.
+        tools::Long nW = std::max<tools::Long>(nLineWidth, 1);
+        return Size(nW, ((nW * GetDPIX()) + (GetDPIY() / 2)) / GetDPIY());
+    }
 
     return Size(1, 1);
 }

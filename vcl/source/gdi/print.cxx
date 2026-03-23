@@ -1447,13 +1447,6 @@ css::awt::DeviceInfo Printer::GetDeviceInfo() const
     return aInfo;
 }
 
-Size Printer::GetWaveLineSize(tools::Long nLineWidth) const
-{
-    // FIXME - do we have a bug here? If the linewidth is 0, then we will return
-    // Size(0, 0) - is this correct?
-    return Size(nLineWidth, ((nLineWidth*GetDPIX())+(GetDPIY()/2))/GetDPIY());
-}
-
 void Printer::SetSystemTextColor(SystemTextColorFlags, bool)
 {
     SetTextColor(COL_BLACK);
