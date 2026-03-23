@@ -375,6 +375,34 @@ inline constexpr bool supports_glyph_synthesis_v = supports_glyph_synthesis<T>::
  */
 template <typename T> concept GlyphSynthesisCapable = supports_glyph_synthesis_v<T>;
 
+/**
+ * @brief Type trait: is_readable_raster_device_v
+ *
+ * Determines if a given OutputDevice type inherently possesses a two-way,
+ * readable pixel backing store in memory.
+ *
+ * By default, this evaluates to `false` (Fail-Safe). It strictly whitelists
+ * VirtualDevice and Window, automatically covering any of their derived
+ * classes (e.g., SystemWindow, WorkWindow) via std::is_base_of_v.
+ *
+ * Write-only output mediums like Printer and PDFWriter will correctly
+ * evaluate to false.
+ */
+template <typename T>
+inline constexpr bool is_readable_raster_device_v
+    = std::is_base_of_v<VirtualDevice, T> || std::is_base_of_v<WindowOutputDevice, T>;
+
+/**
+ * @brief Concept: ReadableRasterDevice
+ *
+ * Satisfied exclusively by devices that can safely execute pixel-read
+ * operations, such as GetBitmap() or GetPixel().
+ *
+ * Prevents write-only devices (like Printers or PDF exporters) from
+ * executing structurally impossible raster readbacks.
+ */
+template <typename T> concept ReadableRasterDevice = is_readable_raster_device_v<T>;
+
 } // namespace vcl
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

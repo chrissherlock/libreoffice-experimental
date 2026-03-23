@@ -45,6 +45,8 @@
 #include <salbmp.hxx>
 #include <salgdi.hxx>
 
+#include <cstdlib>
+
 void OutputDevice::DrawBitmap(const Point& rDestPt, const Bitmap& rBitmap)
 {
     assert(!is_double_buffered_window());
@@ -194,6 +196,20 @@ static Bitmap lcl_PadClippedBitmap(const Bitmap& rClippedBmp,
 
 Bitmap OutputDevice::GetBitmap(const Point& rSrcPt, const Size& rSize) const
 {
+    bool bCanReadPixels = false;
+    vcl::DispatchDevice(*this, [&bCanReadPixels](auto& rDev) {
+        using DevType = std::decay_t<decltype(rDev)>;
+
+        if constexpr (vcl::ReadableRasterDevice<DevType>)
+            bCanReadPixels = true;
+    });
+
+    if (!bCanReadPixels)
+    {
+        SAL_WARN("vcl.gdi", "FATAL LOGIC ERROR: Attempted to read a Bitmap from a device without a readable raster buffer. Halting execution.");
+        std::abort();
+    }
+
     if (IsLayoutCalculationNecessary())
         return Bitmap();
 

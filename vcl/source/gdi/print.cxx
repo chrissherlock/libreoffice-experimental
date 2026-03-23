@@ -1425,13 +1425,6 @@ void Printer::updatePrinters()
     }
 }
 
-Bitmap Printer::GetBitmap( const Point& rSrcPt, const Size& rSize ) const
-{
-    SAL_WARN("vcl.gdi", "GetBitmap(): This should never be called on by a Printer instance");
-
-    return OutputDevice::GetBitmap( rSrcPt, rSize );
-}
-
 css::awt::DeviceInfo Printer::GetDeviceInfo() const
 {
     Size aDevSz = GetPaperSizePixel();

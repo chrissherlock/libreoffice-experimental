@@ -1476,7 +1476,7 @@ public:
 
     /** Query bitmap (with alpha channel, if available).
      */
-    virtual Bitmap              GetBitmap( const Point& rSrcPt, const Size& rSize ) const;
+    Bitmap                      GetBitmap(const Point& rSrcPt, const Size& rSize) const;
 
     /**
      * Does this device support alpha?
