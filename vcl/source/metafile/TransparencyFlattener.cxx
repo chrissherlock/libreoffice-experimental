@@ -885,15 +885,9 @@ bool TransparencyFlattener::Flatten(const GDIMetaFile& rInput, GDIMetaFile& rOut
                                         {
                                             MetaGradientAction* pGradientAction
                                                 = static_cast<MetaGradientAction*>(pCurrAct);
-                                            if (const Printer* pPrinter
-                                                = dynamic_cast<const Printer*>(&rRefDevice))
-                                                const_cast<Printer*>(pPrinter)->DrawGradientEx(
-                                                    aPaintVDev.get(), pGradientAction->GetRect(),
-                                                    pGradientAction->GetGradient());
-                                            else
-                                                const_cast<OutputDevice&>(rRefDevice)
-                                                    .DrawGradient(pGradientAction->GetRect(),
-                                                                  pGradientAction->GetGradient());
+                                            aPaintVDev->DrawGradient(
+                                                pGradientAction->GetRect(),
+                                                pGradientAction->GetGradient());
                                         }
                                         else
                                         {

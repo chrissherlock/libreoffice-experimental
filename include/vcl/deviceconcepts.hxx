@@ -424,6 +424,24 @@ inline constexpr bool is_subtractive_color_device_v = std::is_base_of_v<Printer,
  * that would otherwise rely on additive white pixel emission.
  */
 template <typename T> concept SubtractiveColorDevice = is_subtractive_color_device_v<T>;
+
+/**
+ * @brief Type trait: reduces_gradients_v
+ *
+ * Determines if a given OutputDevice inherently requires high-resolution
+ * gradients to be downgraded (banded or flattened) to conserve memory
+ * or spool size on physical media.
+ */
+template <typename T> inline constexpr bool reduces_gradients_v = std::is_base_of_v<Printer, T>;
+
+/**
+ * @brief Concept: GradientReductionCapable
+ *
+ * Satisfied by devices that intercept and simplify gradient rendering
+ * based on hardware or user-configured constraints.
+ */
+template <typename T> concept GradientReductionCapable = reduces_gradients_v<T>;
+
 } // namespace vcl
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

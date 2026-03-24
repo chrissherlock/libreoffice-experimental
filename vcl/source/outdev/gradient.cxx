@@ -56,6 +56,50 @@ void OutputDevice::DrawGradient(const tools::PolyPolygon& rPolyPoly, const Gradi
     assert(!is_double_buffered_window());
 
     Gradient aEffectiveGradient(rGradient);
+    bool bReducedToSolid = false;
+
+    // Apply Optimization Intent from GraphicsState
+    if (mpGraphicsState->mbReduceGradients)
+    {
+        if (mpGraphicsState->meReducedGradientMode == vcl::printer::GradientMode::Stripes)
+        {
+            sal_uInt16 nLimit = mpGraphicsState->mnReducedGradientStepCount;
+            // Only reduce if a limit is set AND the gradient exceeds it (or is smooth/0)
+            if (nLimit > 0 && (!aEffectiveGradient.GetSteps() || aEffectiveGradient.GetSteps() > nLimit))
+            {
+                aEffectiveGradient.SetSteps(nLimit);
+            }
+        }
+        else // vcl::printer::GradientMode::Color
+        {
+            bReducedToSolid = true;
+        }
+    }
+
+    // Handle Solid Fallback
+    if (bReducedToSolid)
+    {
+        const Color& rStart = aEffectiveGradient.GetStartColor();
+        const Color& rEnd = aEffectiveGradient.GetEndColor();
+
+        // Average the colors weighted by intensity using bitwise shift for division
+        const tools::Long nR = ((static_cast<tools::Long>(rStart.GetRed()) * aEffectiveGradient.GetStartIntensity()) / 100 +
+                                (static_cast<tools::Long>(rEnd.GetRed()) * aEffectiveGradient.GetEndIntensity()) / 100) >> 1;
+        const tools::Long nG = ((static_cast<tools::Long>(rStart.GetGreen()) * aEffectiveGradient.GetStartIntensity()) / 100 +
+                                (static_cast<tools::Long>(rEnd.GetGreen()) * aEffectiveGradient.GetEndIntensity()) / 100) >> 1;
+        const tools::Long nB = ((static_cast<tools::Long>(rStart.GetBlue()) * aEffectiveGradient.GetStartIntensity()) / 100 +
+                                (static_cast<tools::Long>(rEnd.GetBlue()) * aEffectiveGradient.GetEndIntensity()) / 100) >> 1;
+
+        Color aSolidColor(static_cast<sal_uInt8>(nR), static_cast<sal_uInt8>(nG), static_cast<sal_uInt8>(nB));
+
+        auto oGroup = maRecorder.CreateScopedGroup("ReducedSolidGradient");
+        auto popIt = ScopedPush(vcl::PushFlags::LINECOLOR | vcl::PushFlags::FILLCOLOR);
+        SetLineColor(aSolidColor);
+        SetFillColor(aSolidColor);
+        DrawPolyPolygon(rPolyPoly);
+        return;
+    }
+
     if (GetDrawMode() & DrawModeFlags::GrayGradient)
         aEffectiveGradient.MakeGrayscale();
 

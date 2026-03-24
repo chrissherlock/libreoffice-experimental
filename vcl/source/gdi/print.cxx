@@ -198,9 +198,14 @@ tools::Rectangle Printer::GetBackgroundComponentBounds() const
     return tools::Rectangle( aPageOffset, aSize );
 }
 
-void Printer::SetPrinterOptions( const vcl::printer::Options& i_rOptions )
+void Printer::SetPrinterOptions(const vcl::printer::Options& rOptions)
 {
-    *mpPrinterOptions = i_rOptions;
+    *mpPrinterOptions = rOptions;
+
+    // Sync to GraphicsState
+    mpGraphicsState->mbReduceGradients = rOptions.IsReduceGradients();
+    mpGraphicsState->meReducedGradientMode = rOptions.GetReducedGradientMode();
+    mpGraphicsState->mnReducedGradientStepCount = rOptions.GetReducedGradientStepCount();
 }
 
 bool Printer::HasMirroredGraphics() const

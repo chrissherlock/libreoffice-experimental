@@ -11,15 +11,16 @@
 
 #include <tools/color.hxx>
 #include <tools/gen.hxx>
+#include <i18nlangtag/lang.h>
 
 #include <vcl/font.hxx>
+#include <vcl/printer/Options.hxx>
 #include <vcl/region.hxx>
-#include <vcl/wall.hxx>
-#include <i18nlangtag/lang.h>
 #include <vcl/rendercontext/State.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/rendercontext/RasterOp.hxx>
+#include <vcl/wall.hxx>
 
 class StyleSettings;
 
@@ -52,6 +53,16 @@ struct GraphicsState
     LanguageType meTextLanguage;
     vcl::text::ComplexTextLayoutFlags mnTextLayoutMode;
 
+    /** * @name Optimization Intent
+     * Properties traditionally managed by Printers to throttle
+     * complex rendering on physical media.
+     */
+    ///@{
+    bool mbReduceGradients;
+    vcl::printer::GradientMode meReducedGradientMode;
+    sal_uInt16 mnReducedGradientStepCount;
+    ///@}
+
     GraphicsState()
         : maLineColor(COL_BLACK)
         , mbLineColor(true)
@@ -69,6 +80,9 @@ struct GraphicsState
         , mbBackground(false)
         , meTextLanguage(LANGUAGE_NONE)
         , mnTextLayoutMode(vcl::text::ComplexTextLayoutFlags::Default)
+        , mbReduceGradients(false)
+        , meReducedGradientMode(vcl::printer::GradientMode::Stripes)
+        , mnReducedGradientStepCount(0)
     {
     }
 

@@ -95,8 +95,6 @@ public:
     SAL_DLLPRIVATE void         ImplStartPage();
     SAL_DLLPRIVATE void         ImplEndPage();
 
-    SAL_DLLPRIVATE void                        DrawGradientEx( OutputDevice* pOut, const tools::Rectangle& rRect,
-                                    const Gradient& rGradient );
     Bitmap                      GetBitmap(const Point& rSrcPt, const Size& rSize) const = delete;
 
     css::awt::DeviceInfo GetDeviceInfo() const override;
