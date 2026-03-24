@@ -653,4 +653,32 @@ bool OutputDevice::IsScreenFontCache() const
     return &GetFontCache() == ImplGetSVData()->maGDIData.mxScreenFontCache.get();
 }
 
+Color OutputDevice::GetReadableFontColor(const Color& rFontColor, const Color& rBgColor) const
+{
+    Color aColor = rFontColor;
+
+    vcl::DispatchDevice(*this, [&aColor, &rFontColor, &rBgColor](auto& rDev) {
+        using DevType = std::decay_t<decltype(rDev)>;
+
+        if constexpr (vcl::SubtractiveColorDevice<DevType>)
+        {
+            // In a subtractive model (Ink on Paper), we force black to
+            // ensure the sharpest contrast against the reflective canvas.
+            aColor = COL_BLACK;
+        }
+        else
+        {
+            // Standard additive heuristic for emissive screens:
+            if (rBgColor.IsDark() && rFontColor.IsDark())
+                aColor = COL_WHITE;
+            else if (rBgColor.IsBright() && rFontColor.IsBright())
+                aColor = COL_BLACK;
+            else
+                aColor = rFontColor;
+        }
+    });
+
+    return aColor;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

@@ -611,7 +611,7 @@ public:
 
     const Wallpaper&            GetBackground() const { return maBackground; }
     Color                       GetBackgroundColor() const;
-    virtual Color               GetReadableFontColor(const Color& rFontColor, const Color& rBgColor) const;
+    Color                       GetReadableFontColor(const Color& rFontColor, const Color& rBgColor) const;
     bool                        IsBackground() const { return mbBackground; }
 
     void                        SetFont( const vcl::Font& rNewFont );

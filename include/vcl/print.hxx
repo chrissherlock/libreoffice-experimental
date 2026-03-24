@@ -132,8 +132,6 @@ public:
                                       PrinterSetupMode eMode = PrinterSetupMode::DocumentGlobal);
     bool                        SetPrinterProps( const Printer* pPrinter );
 
-    Color                       GetReadableFontColor(const Color&, const Color&) const override { return COL_BLACK; }
-
     /** SetPrinterOptions is used internally only now
 
         in earlier times it was used only to set the options loaded directly from the configuration

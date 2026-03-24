@@ -29,16 +29,6 @@
 
 #include <cassert>
 
-Color OutputDevice::GetReadableFontColor(const Color& rFontColor, const Color& rBgColor) const
-{
-    if (rBgColor.IsDark() && rFontColor.IsDark())
-        return COL_WHITE;
-    else if (rBgColor.IsBright() && rFontColor.IsBright())
-        return COL_BLACK;
-    else
-        return rFontColor;
-}
-
 void OutputDevice::DrawWallpaper( const tools::Rectangle& rRect,
                                   const Wallpaper& rWallpaper )
 {
