@@ -52,6 +52,8 @@ class SAL_WARN_UNUSED VCL_DLLPUBLIC VirtualDevice : public OutputDevice
     friend class Printer;
     friend VCL_DLLPUBLIC cairo_surface_t* get_underlying_cairo_surface(const VirtualDevice&);
 public:
+    static constexpr bool is_readable_raster_v = true;
+
     // reference device modes for different compatibility levels
     enum class RefDevMode { NONE = 0,
                             Dpi600 = 1,      // 600 dpi

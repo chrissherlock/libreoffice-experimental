@@ -145,7 +145,7 @@ void OutputDevice::DrawGradient(const tools::PolyPolygon& rPolyPoly, const Gradi
         tools::Long nStepCount = aEffectiveGradient.GetCalculatedSteps(aDevRect, GetDPIY());
 
         using ConcreteType = std::decay_t<decltype(rConcrete)>;
-        const bool bAvoidOverdraw = vcl::avoids_vector_overdraw_v<ConcreteType>;
+        const bool bAvoidOverdraw = vcl::AvoidsOverdraw<ConcreteType>;
 
         vcl::rendercontext::PrimitiveRenderer::DrawGradient(
             *mpGraphics, aDevPolyPoly, aEffectiveGradient, nStepCount, bAvoidOverdraw);

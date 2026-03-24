@@ -38,6 +38,11 @@ template <> struct supports_hw_acceleration<WindowOutputDevice> : std::true_type
 class WindowOutputDevice final : public ::OutputDevice
 {
 public:
+    static constexpr bool is_animatable_v = true;
+    static constexpr bool is_paint_event_capable_v = true;
+    static constexpr bool is_readable_raster_v = true;
+    static constexpr bool is_framed_v = true;
+
     WindowOutputDevice(vcl::Window& rOwnerWindow);
     virtual ~WindowOutputDevice() override;
     virtual void dispose() override;

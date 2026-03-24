@@ -85,6 +85,17 @@ class VCL_DLLPUBLIC Printer : public OutputDevice
     friend class                ::OutputDevice;
 
 public:
+    static constexpr bool is_page_device_v = true;
+    static constexpr bool is_subtractive_v = true;
+    static constexpr bool is_managed_font_cache_v = false;
+    static constexpr bool is_alpha_capable_v = false;
+    static constexpr bool is_subsampling_capable_v = false;
+    static constexpr bool is_screen_compatible_v = false;
+    static constexpr bool is_high_contrast_v = true;
+    static constexpr bool is_overdraw_avoided_v = true;
+    static constexpr bool is_banded_printing_v = true;
+    static constexpr bool is_glyph_synthesis_capable_v = false;
+
                                 Printer();
                                 Printer( const JobSetup& rJobSetup );
                                 Printer( const QueueInfo& rQueueInfo );
