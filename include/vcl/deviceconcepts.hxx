@@ -458,6 +458,21 @@ inline constexpr bool is_framed_device_v = std::is_base_of_v<WindowOutputDevice,
  * when calculating their total device area.
  */
 template <typename T> concept FramedDevice = is_framed_device_v<T>;
+
+// A trait that checks if a class defines a 'static constexpr bool is_themed_v = true;'
+template <typename T, typename = void> struct is_themed : std::false_type
+{
+};
+
+template <typename T>
+struct is_themed<T, std::void_t<decltype(T::is_themed_v)>> : std::bool_constant<T::is_themed_v>
+{
+};
+
+template <typename T> inline constexpr bool is_themed_v = is_themed<T>::value;
+
+template <typename T> concept ThemedDevice = is_themed_v<T>;
+
 } // namespace vcl
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -39,6 +39,11 @@ Color OutputDevice::GetBackgroundColor() const
             // Windows get their background from the System Theme / Display settings
             aColor = rDev.GetOwnerWindow()->GetDisplayBackground().GetColor();
         }
+        else if constexpr (vcl::ThemedDevice<DevType>)
+        {
+            // DialControlBmp logic: query the UI StyleSettings
+            aColor = GetSettings().GetStyleSettings().GetDialogColor();
+        }
         else
         {
             // Standard VirtualDevices/Metafiles use the locally set background state

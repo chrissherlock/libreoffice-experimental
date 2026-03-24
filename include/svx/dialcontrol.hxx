@@ -32,6 +32,8 @@ namespace svx {
 class SAL_WARN_UNUSED DialControlBmp final : public VirtualDevice
 {
 public:
+    static constexpr bool is_themed_v = true;
+
     explicit            DialControlBmp(OutputDevice& rReference);
 
     void                InitBitmap(const vcl::Font& rFont);
@@ -40,7 +42,6 @@ public:
     void                DrawBackground( const Size& rSize, bool bEnabled );
     void                DrawBackground();
     void                DrawElements( const OUString& rText, Degree100 nAngle );
-    Color               GetBackgroundColor() const override;
 
 private:
     const Color&        GetTextColor() const;

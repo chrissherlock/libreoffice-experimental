@@ -112,11 +112,6 @@ void DialControlBmp::DrawElements( const OUString& rText, Degree100 nAngle )
     DrawEllipse( tools::Rectangle( nX - nSize, nY - nSize, nX + nSize, nY + nSize ) );
 }
 
-Color DialControlBmp::GetBackgroundColor() const
-{
-    return GetSettings().GetStyleSettings().GetDialogColor();
-}
-
 const Color& DialControlBmp::GetTextColor() const
 {
     return GetSettings().GetStyleSettings().GetLabelTextColor();
