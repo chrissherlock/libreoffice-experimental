@@ -540,6 +540,7 @@ protected:
 
     SAL_DLLPRIVATE void         drawOutDevDirect(const OutputDevice& rSrcDev, SalTwoRect& rPosAry);
 
+    bool                        IsDoubleBuffered() const;
     SAL_DLLPRIVATE bool         is_double_buffered_window() const;
 
     virtual css::uno::Reference< css::rendering::XCanvas > ImplGetCanvas( bool bSpriteCanvas ) const;

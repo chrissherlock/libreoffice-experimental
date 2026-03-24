@@ -208,6 +208,16 @@ struct allows_auto_mirroring<T, std::void_t<decltype(T::allows_auto_mirroring_v)
 {
 };
 
+// Double Buffering Support
+template <typename T, typename = void> struct supports_double_buffering : std::false_type
+{
+};
+template <typename T>
+struct supports_double_buffering<T, std::void_t<decltype(T::is_double_buffered_v)>>
+    : std::bool_constant<T::is_double_buffered_v>
+{
+};
+
 template <typename T> concept ManagedFontCache = uses_managed_cache<T>::value;
 template <typename T> concept HWAccelerated = supports_hw_acceleration<T>::value;
 template <typename T> concept StrictlyCulled = needs_strict_culling<T>::value;
@@ -227,6 +237,7 @@ template <typename T> concept ThemedDevice = is_themed<T>::value;
 template <typename T> concept FramedDevice = is_framed<T>::value;
 template <typename T> concept GlyphSynthesisCapable = supports_glyph_synthesis<T>::value;
 template <typename T> concept AutoMirroringCapable = allows_auto_mirroring<T>::value;
+template <typename T> concept DoubleBuffered = supports_double_buffering<T>::value;
 
 /**
  * @brief PageDevice

@@ -42,10 +42,13 @@ public:
     static constexpr bool is_paint_event_capable_v = true;
     static constexpr bool is_readable_raster_v = true;
     static constexpr bool is_framed_v = true;
+    static constexpr bool is_double_buffered_v = true;
 
     WindowOutputDevice(vcl::Window& rOwnerWindow);
     virtual ~WindowOutputDevice() override;
     virtual void dispose() override;
+
+    bool IsDoubleBufferedWindow() const;
 
     size_t GetSyncCount() const override { return 0x000000ff; }
     virtual void EnableRTL(bool bEnable = true) override;

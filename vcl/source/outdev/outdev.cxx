@@ -793,10 +793,30 @@ tools::Long OutputDevice::MirrorX(tools::Long nX, tools::Long nWidth) const
     return GetOutputWidthPixel() - nWidth - (nX - GetOutOffXPixel()) + GetOutOffXPixel();
 }
 
+bool OutputDevice::IsDoubleBuffered() const
+{
+    bool bRet = false;
+
+    // Remove 'this' from the capture list []
+    vcl::DispatchDevice(*this, [&bRet](auto& rDev) {
+        using DevType = std::decay_t<decltype(rDev)>;
+
+        if constexpr (vcl::DoubleBuffered<DevType>)
+        {
+            bRet = rDev.IsDoubleBufferedWindow();
+        }
+        else
+        {
+            bRet = false;
+        }
+    });
+
+    return bRet;
+}
+
 bool OutputDevice::is_double_buffered_window() const
 {
-    auto pOwnerWindow = GetOwnerWindow();
-    return pOwnerWindow && pOwnerWindow->SupportsDoubleBuffering();
+    return IsDoubleBuffered();
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

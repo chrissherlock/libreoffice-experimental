@@ -586,6 +586,12 @@ bool WindowOutputDevice::CanEnableNativeWidget() const
     return mxOwnerWindow->IsNativeWidgetEnabled();
 }
 
+bool WindowOutputDevice::IsDoubleBufferedWindow() const
+{
+    auto pOwnerWindow = GetOwnerWindow();
+    return pOwnerWindow && pOwnerWindow->SupportsDoubleBuffering();
+}
+
 } /* namespace vcl */
 
 WindowImpl::WindowImpl( vcl::Window& rWindow, WindowType eType )
