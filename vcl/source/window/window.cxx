@@ -581,11 +581,6 @@ Window::~Window()
     return mpWindowImpl ? mpWindowImpl->mxOutDev.get() : nullptr;
 }
 
-Color WindowOutputDevice::GetBackgroundColor() const
-{
-    return mxOwnerWindow->GetDisplayBackground().GetColor();
-}
-
 bool WindowOutputDevice::CanEnableNativeWidget() const
 {
     return mxOwnerWindow->IsNativeWidgetEnabled();

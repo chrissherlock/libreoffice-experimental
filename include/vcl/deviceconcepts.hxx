@@ -442,6 +442,22 @@ template <typename T> inline constexpr bool reduces_gradients_v = std::is_base_o
  */
 template <typename T> concept GradientReductionCapable = reduces_gradients_v<T>;
 
+/**
+ * @brief Type trait: is_framed_device_v
+ *
+ * Determines if the device has physical or logical boundaries (frames/insets)
+ * managed by an external entity (like a Window Manager).
+ */
+template <typename T>
+inline constexpr bool is_framed_device_v = std::is_base_of_v<WindowOutputDevice, T>;
+
+/**
+ * @brief Concept: FramedDevice
+ *
+ * Satisfied by devices that must account for external border insets
+ * when calculating their total device area.
+ */
+template <typename T> concept FramedDevice = is_framed_device_v<T>;
 } // namespace vcl
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

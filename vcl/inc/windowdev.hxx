@@ -60,8 +60,6 @@ public:
     virtual bool AcquireGraphics() const override;
     virtual void ReleaseGraphics(bool bRelease = true) override;
 
-    Color GetBackgroundColor() const override;
-
     using ::OutputDevice::SetSettings;
     virtual void SetSettings(const AllSettings& rSettings) override;
     void SetSettings(const AllSettings& rSettings, bool bChild);

@@ -17,11 +17,36 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <vcl/virdev.hxx>
+#include <vcl/deviceconcepts.hxx>
+#include <vcl/window.hxx>
+
+#include <devicedispatcher.hxx>
 
 Color OutputDevice::GetBackgroundColor() const
 {
-    return GetBackground().GetColor();
+    Color aColor = COL_TRANSPARENT;
+
+    vcl::DispatchDevice(*this, [this, &aColor](auto& rDev) {
+        using DevType = std::decay_t<decltype(rDev)>;
+
+        if constexpr (vcl::PageDevice<DevType>)
+        {
+            // Printers always treat the physical medium as white for UI/Logic
+            aColor = COL_WHITE;
+        }
+        else if constexpr (vcl::FramedDevice<DevType>)
+        {
+            // Windows get their background from the System Theme / Display settings
+            aColor = rDev.GetOwnerWindow()->GetDisplayBackground().GetColor();
+        }
+        else
+        {
+            // Standard VirtualDevices/Metafiles use the locally set background state
+            aColor = GetBackground().GetColor();
+        }
+    });
+
+    return aColor;
 }
 
 void OutputDevice::SetBackground()
