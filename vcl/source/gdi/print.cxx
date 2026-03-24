@@ -191,13 +191,6 @@ void Printer::CopyArea( const Point& /*rDestPt*/,
     SAL_WARN( "vcl.gdi", "Don't use OutputDevice::CopyArea(...) with printer devices!" );
 }
 
-tools::Rectangle Printer::GetBackgroundComponentBounds() const
-{
-    Point aPageOffset = Point( 0, 0 ) - this->GetPageOffsetPixel();
-    Size aSize  = this->GetPaperSizePixel();
-    return tools::Rectangle( aPageOffset, aSize );
-}
-
 void Printer::SetPrinterOptions(const vcl::printer::Options& rOptions)
 {
     *mpPrinterOptions = rOptions;

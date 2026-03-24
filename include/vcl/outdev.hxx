@@ -528,11 +528,11 @@ public:
                                     const Point& rDestPt,
                                     const Point& rSrcPt,  const Size& rSrcSize );
 
+    tools::Rectangle            GetBackgroundComponentBounds() const;
+
 protected:
 
     virtual void                CopyDeviceArea( SalTwoRect& aPosAry );
-
-    virtual tools::Rectangle    GetBackgroundComponentBounds() const;
 
     virtual const OutputDevice* DrawOutDevDirectCheck(const OutputDevice& rSrcDev) const;
 

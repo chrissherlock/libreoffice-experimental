@@ -574,8 +574,7 @@ bool TransparencyFlattener::Flatten(const GDIMetaFile& rInput, GDIMetaFile& rOut
         if (rOptions.aBackground != COL_TRANSPARENT)
         {
             aBackgroundComponent.aBgColor = rOptions.aBackground;
-            if (const Printer* pPrinter = dynamic_cast<const Printer*>(&rRefDevice))
-                aBackgroundComponent.aBounds = pPrinter->GetBackgroundComponentBounds();
+            aBackgroundComponent.aBounds = rRefDevice.GetBackgroundComponentBounds();
         }
 
         while (pCurrAct && bStillBackground)

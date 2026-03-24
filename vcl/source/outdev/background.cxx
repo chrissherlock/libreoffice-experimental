@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <tools/gen.hxx>
+
 #include <vcl/deviceconcepts.hxx>
 #include <vcl/window.hxx>
 
@@ -304,6 +306,32 @@ void OutputDevice::SaveBackground(VirtualDevice& rSaveDevice,
                                   const Point& rPos, const Size& rSize, const Size& rBackgroundSize) const
 {
    rSaveDevice.DrawOutDev(Point(), rBackgroundSize, rPos, rSize, *this);
+}
+
+tools::Rectangle OutputDevice::GetBackgroundComponentBounds() const
+{
+    tools::Rectangle aRect;
+
+    vcl::DispatchDevice(*this, [this, &aRect](auto& rDev) {
+        using DevType = std::decay_t<decltype(rDev)>;
+
+        if constexpr (vcl::PageDevice<DevType>)
+        {
+            // For physical paper, the 'background' must start at the physical
+            // edge (0,0 in paper space), which is -Offset in device space.
+            Point aPageOffset = Point(0, 0) - rDev.GetPageOffsetPixel();
+            Size aSize = rDev.GetPaperSizePixel();
+            aRect = tools::Rectangle(aPageOffset, aSize);
+        }
+        else
+        {
+            // For screens/buffers, the background is simply the
+            // visible output area.
+            aRect = tools::Rectangle(Point(0, 0), GetOutputSizePixel());
+        }
+    });
+
+    return aRect;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

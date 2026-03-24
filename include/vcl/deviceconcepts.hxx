@@ -230,7 +230,8 @@ template <typename T> concept AutoMirroringCapable = allows_auto_mirroring<T>::v
 
 /**
  * @brief PageDevice
- * Combines the tag detection with a method requirement.
+ * Combines the tag detection with both logical and physical
+ * coordinate method requirements.
  */
 template <typename T> concept PageDevice = has_page_offset<T>::value&& requires(const T& rDev)
 {
@@ -238,6 +239,14 @@ template <typename T> concept PageDevice = has_page_offset<T>::value&& requires(
         rDev.GetPageOffset()
     }
     ->std::convertible_to<Point>;
+    {
+        rDev.GetPageOffsetPixel()
+    }
+    ->std::convertible_to<Point>;
+    {
+        rDev.GetPaperSizePixel()
+    }
+    ->std::convertible_to<Size>;
 };
 
 // --- Reference Dimensions ---
