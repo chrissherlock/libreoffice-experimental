@@ -208,12 +208,6 @@ void Printer::SetPrinterOptions(const vcl::printer::Options& rOptions)
     mpGraphicsState->mnReducedGradientStepCount = rOptions.GetReducedGradientStepCount();
 }
 
-bool Printer::HasMirroredGraphics() const
-{
-    // due to a "hotfix" for AOO bug i55719, this needs to return false
-    return false;
-}
-
 SalPrinterQueueInfo::SalPrinterQueueInfo()
 {
     mnStatus    = PrintQueueFlags::NONE;

@@ -95,6 +95,8 @@ public:
     static constexpr bool is_overdraw_avoided_v = true;
     static constexpr bool is_banded_printing_v = true;
     static constexpr bool is_glyph_synthesis_capable_v = false;
+    // due to a "hotfix" for AOO bug i55719, this must be false
+    static constexpr bool allows_auto_mirroring_v = false;
 
                                 Printer();
                                 Printer( const JobSetup& rJobSetup );
@@ -202,8 +204,6 @@ public:
     */
     static void                 PrintJob( const std::shared_ptr<vcl::PrinterController>& i_pController,
                                     const JobSetup& i_rInitSetup );
-
-    virtual bool                HasMirroredGraphics() const override;
 
     virtual void                DrawOutDev( const Point& rDestPt, const Size& rDestSize,
                                     const Point& rSrcPt,  const Size& rSrcSize ) override;

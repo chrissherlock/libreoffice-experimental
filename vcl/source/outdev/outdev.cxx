@@ -23,22 +23,24 @@
 #include <comphelper/processfactory.hxx>
 #include <tools/debug.hxx>
 #include <tools/mapunit.hxx>
-
-#include <vcl/graph.hxx>
 #include <tools/lazydelete.hxx>
+
+#include <vcl/deviceconcepts.hxx>
+#include <vcl/graph.hxx>
 #include <vcl/metafile/MetaAction.hxx>
 #include <vcl/metafile/MetafileRecorder.hxx>
-#include <vcl/toolkit/unowrap.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/sysdata.hxx>
+#include <vcl/text/TextRecordingState.hxx>
+#include <vcl/toolkit/unowrap.hxx>
 #include <vcl/virdev.hxx>
 
 #include <CoordinateMapper.hxx>
 #include <ClippingController.hxx>
+#include <devicedispatcher.hxx>
 #include <font/FontController.hxx>
-#include <vcl/text/TextRecordingState.hxx>
 #include <GraphicsState.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <salgdi.hxx>
@@ -627,9 +629,26 @@ void OutputDevice::ReMirror( vcl::Region &rRegion ) const
 
 bool OutputDevice::HasMirroredGraphics() const
 {
-   return ( AcquireGraphics() && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl) );
-}
+    bool bRet = false;
 
+    vcl::DispatchDevice(*this, [this, &bRet](auto& rDev) {
+        using DevType = std::decay_t<decltype(rDev)>;
+
+        if constexpr (vcl::AutoMirroringCapable<DevType>)
+        {
+            // Standard behavior: check if graphics are RTL
+            bRet = (AcquireGraphics() && (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl));
+        }
+        else
+        {
+            // Suppressed behavior (Printers): ignore graphics layout to prevent
+            // text disappearance in RTL environments (AOO bug i55719).
+            bRet = false;
+        }
+    });
+
+    return bRet;
+}
 
 css::awt::DeviceInfo OutputDevice::GetCommonDeviceInfo(Size const& rDevSz) const
 {

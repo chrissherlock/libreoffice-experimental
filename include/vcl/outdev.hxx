@@ -1374,7 +1374,7 @@ public:
                    void         ReMirror( Point &rPoint ) const;
                    void         ReMirror( tools::Rectangle &rRect ) const;
     SAL_DLLPRIVATE void         ReMirror( vcl::Region &rRegion ) const;
-    virtual bool                HasMirroredGraphics() const;
+    bool                        HasMirroredGraphics() const;
 
     std::unique_ptr<SalLayout> LayoutText(
         const vcl::text::TextSpan& rSpan,
