@@ -62,22 +62,20 @@
 
 int nImplSysDialog = 0;
 
-namespace
+static Paper lcl_GetPaperFormat( tools::Long nWidth100thMM, tools::Long nHeight100thMM, bool bAlsoTryRotated = false )
 {
-    Paper ImplGetPaperFormat( tools::Long nWidth100thMM, tools::Long nHeight100thMM, bool bAlsoTryRotated = false )
-    {
-        PaperInfo aInfo(nWidth100thMM, nHeight100thMM);
-        aInfo.doSloppyFit(bAlsoTryRotated);
-        return aInfo.getPaper();
-    }
+    PaperInfo aInfo(nWidth100thMM, nHeight100thMM);
+    aInfo.doSloppyFit(bAlsoTryRotated);
+    return aInfo.getPaper();
+}
 
-    const PaperInfo& ImplGetEmptyPaper()
-    {
-        static PaperInfo aInfo(PAPER_USER);
-        return aInfo;
-    }
+static const PaperInfo& lcl_GetEmptyPaper()
+{
+    static PaperInfo aInfo(PAPER_USER);
+    return aInfo;
+}
 
-void ImplUpdateJobSetupPaper( JobSetup& rJobSetup )
+static void lcl_UpdateJobSetupPaper( JobSetup& rJobSetup )
 {
     const ImplJobSetup& rConstData = rJobSetup.ImplGetConstData();
 
@@ -94,11 +92,10 @@ void ImplUpdateJobSetupPaper( JobSetup& rJobSetup )
     }
     else if ( rConstData.GetPaperFormat() == PAPER_USER )
     {
-        Paper ePaper = ImplGetPaperFormat( rConstData.GetPaperWidth(), rConstData.GetPaperHeight() );
+        Paper ePaper = lcl_GetPaperFormat( rConstData.GetPaperWidth(), rConstData.GetPaperHeight() );
         if ( ePaper != PAPER_USER )
             rJobSetup.ImplGetData().SetPaperFormat(ePaper);
     }
-}
 }
 
 void Printer::ImplPrintTransparent( const Bitmap& rBmp,
@@ -497,7 +494,7 @@ void Printer::ImplInit( SalPrinterQueueInfo* pInfo )
     mpInfoPrinter = pSalInstance->CreateInfoPrinter(pInfo, &rData);
     mpPrinter       = nullptr;
     mpJobGraphics   = nullptr;
-    ImplUpdateJobSetupPaper( maJobSetup );
+    lcl_UpdateJobSetupPaper( maJobSetup );
 
     if ( !mpInfoPrinter )
     {
@@ -757,7 +754,7 @@ bool Printer::SetJobSetup( const JobSetup& rSetup )
     ReleaseGraphics();
     if ( mpInfoPrinter->SetPrinterData( &aJobSetup.ImplGetData() ) )
     {
-        ImplUpdateJobSetupPaper( aJobSetup );
+        lcl_UpdateJobSetupPaper( aJobSetup );
         mbNewJobSetup = true;
         maJobSetup = std::move(aJobSetup);
         ImplUpdatePageData();
@@ -798,7 +795,7 @@ bool Printer::Setup(weld::Window* pWindow, PrinterSetupMode eMode)
     nImplSysDialog--;
     if ( bSetup )
     {
-        ImplUpdateJobSetupPaper( aJobSetup );
+        lcl_UpdateJobSetupPaper( aJobSetup );
         mbNewJobSetup = true;
         maJobSetup = std::move(aJobSetup);
         ImplUpdatePageData();
@@ -902,7 +899,7 @@ bool Printer::SetOrientation( Orientation eOrientation )
         ReleaseGraphics();
         if ( mpInfoPrinter->SetData( JobSetFlags::ORIENTATION, &rData ) )
         {
-            ImplUpdateJobSetupPaper( aJobSetup );
+            lcl_UpdateJobSetupPaper( aJobSetup );
             mbNewJobSetup = true;
             maJobSetup = std::move(aJobSetup);
             ImplUpdatePageData();
@@ -943,7 +940,7 @@ bool Printer::SetPaperBin( sal_uInt16 nPaperBin )
         ReleaseGraphics();
         if ( mpInfoPrinter->SetData( JobSetFlags::PAPERBIN, &rData ) )
         {
-            ImplUpdateJobSetupPaper( aJobSetup );
+            lcl_UpdateJobSetupPaper( aJobSetup );
             mbNewJobSetup = true;
             maJobSetup = std::move(aJobSetup);
             ImplUpdatePageData();
@@ -1000,7 +997,7 @@ void Printer::ImplFindPaperFormatForUserSize( JobSetup& aJobSetup )
         if ( aInfo.sloppyEqual(rPaperInfo) )
         {
             rData.SetPaperFormat(
-                ImplGetPaperFormat(rPaperInfo.getWidth(), rPaperInfo.getHeight(), true));
+                lcl_GetPaperFormat(rPaperInfo.getWidth(), rPaperInfo.getHeight(), true));
             rData.SetOrientation(rPaperInfo.getWidth() <= rPaperInfo.getHeight()
                                      ? Orientation::Portrait
                                      : Orientation::Landscape);
@@ -1027,7 +1024,7 @@ void Printer::ImplFindPaperFormatForUserSize( JobSetup& aJobSetup )
         if ( aRotatedInfo.sloppyEqual( rPaperInfo ) )
         {
             rData.SetPaperFormat(
-                ImplGetPaperFormat(rPaperInfo.getWidth(), rPaperInfo.getHeight(), true));
+                lcl_GetPaperFormat(rPaperInfo.getWidth(), rPaperInfo.getHeight(), true));
             rData.SetOrientation(rPaperInfo.getWidth() < rPaperInfo.getHeight()
                                      ? Orientation::Landscape
                                      : Orientation::Portrait);
@@ -1067,7 +1064,7 @@ void Printer::SetPaper( Paper ePaper )
         ImplFindPaperFormatForUserSize( aJobSetup );
     if ( mpInfoPrinter->SetData( JobSetFlags::PAPERSIZE | JobSetFlags::ORIENTATION, &rData ))
     {
-        ImplUpdateJobSetupPaper( aJobSetup );
+        lcl_UpdateJobSetupPaper( aJobSetup );
         mbNewJobSetup = true;
         maJobSetup = std::move(aJobSetup);
         ImplUpdatePageData();
@@ -1092,7 +1089,7 @@ bool Printer::SetPaperSizeUser( const Size& rSize )
         // and will replace maJobSetup.ImplGetConstData()->GetPaperFormat(). This leads to
         // unnecessary JobSetups, e.g. when printing a multi-page fax, but also with
         // normal print
-        const Paper aPaper = ImplGetPaperFormat(aPageSize.Width(), aPageSize.Height());
+        const Paper aPaper = lcl_GetPaperFormat(aPageSize.Width(), aPageSize.Height());
 
         bNeedToChange = maJobSetup.ImplGetConstData().GetPaperFormat() != PAPER_USER &&
             maJobSetup.ImplGetConstData().GetPaperFormat() != aPaper;
@@ -1129,7 +1126,7 @@ bool Printer::SetPaperSizeUser( const Size& rSize )
         // Changing the paper size can also change the orientation!
         if ( mpInfoPrinter->SetData( JobSetFlags::PAPERSIZE | JobSetFlags::ORIENTATION, &rData ))
         {
-            ImplUpdateJobSetupPaper( aJobSetup );
+            lcl_UpdateJobSetupPaper( aJobSetup );
             mbNewJobSetup = true;
             maJobSetup = std::move(aJobSetup);
             ImplUpdatePageData();
@@ -1186,11 +1183,11 @@ OUString Printer::GetPaperName( Paper ePaper )
 const PaperInfo& Printer::GetPaperInfo( int nPaper ) const
 {
     if( ! mpInfoPrinter )
-        return ImplGetEmptyPaper();
+        return lcl_GetEmptyPaper();
     if( ! mpInfoPrinter->m_bPapersInit )
         mpInfoPrinter->InitPaperFormats( &maJobSetup.ImplGetConstData() );
     if( mpInfoPrinter->m_aPaperFormats.empty() || nPaper < 0 || o3tl::make_unsigned(nPaper) >= mpInfoPrinter->m_aPaperFormats.size() )
-        return ImplGetEmptyPaper();
+        return lcl_GetEmptyPaper();
     return mpInfoPrinter->m_aPaperFormats[nPaper];
 }
 
@@ -1223,7 +1220,7 @@ void Printer::SetDuplexMode( DuplexMode eDuplex )
     ReleaseGraphics();
     if ( mpInfoPrinter->SetData( JobSetFlags::DUPLEXMODE, &rData ) )
     {
-        ImplUpdateJobSetupPaper( aJobSetup );
+        lcl_UpdateJobSetupPaper( aJobSetup );
         mbNewJobSetup = true;
         maJobSetup = std::move(aJobSetup);
         ImplUpdatePageData();
