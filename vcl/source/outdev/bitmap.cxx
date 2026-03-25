@@ -145,7 +145,7 @@ void OutputDevice::DrawDeviceBitmap(const Point& rDestPt, const Size& rDestSize,
         if constexpr (vcl::BandedPrinting<DeviceType>)
         {
              // We pass the original rBitmap to ensure the printer gets max quality
-             rConcreteDevice.ImplScaleAndBandBitmap(rBitmap, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
+             rConcreteDevice.DrawMappedBitmap(rBitmap, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
              return;
         }
 

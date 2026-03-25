@@ -112,23 +112,28 @@ struct PrintGeometry
     BmpMirrorFlags     nMirrorFlags = BmpMirrorFlags::NONE;
     bool               bValid = false;
 };
+
+struct PhysicalPrintLayout
+{
+    Bitmap aProcessedBitmap;
+    Point  aPhysicalPos;
+    Size   aPhysicalSize;
+    bool   bIsValid = false;
+};
 }
 
-// --- PHASE 1: Geometry Prep ---
 static PrintGeometry lcl_PreparePrintGeometry(const OutputDevice& rDev,
                                               const Point& rDestPt, const Size& rDestSize,
                                               const Point& rSrcPtPixel, const Size& rSrcSizePixel)
 {
     PrintGeometry aPrep;
 
-    // Explicit extraction to avoid implicit conversion errors with basegfx
     Point aPixelDestPt = rDev.LogicToPixel(rDestPt);
     aPrep.aDestPt = basegfx::B2DPoint(aPixelDestPt.X(), aPixelDestPt.Y());
 
     Size aPixelDestSz = rDev.LogicToPixel(rDestSize);
     aPrep.aDestSz = basegfx::B2DVector(aPixelDestSz.Width(), aPixelDestSz.Height());
 
-    // Normalize Source
     aPrep.aSourceRect = tools::Rectangle(rSrcPtPixel, rSrcSizePixel);
     aPrep.aSourceRect.Normalize();
 
@@ -157,8 +162,14 @@ static PrintGeometry lcl_PreparePrintGeometry(const OutputDevice& rDev,
 static std::unique_ptr<tools::Long[]> lcl_GenerateMappingTable(double fStartCoord, double fTargetSize, tools::Long nSrcSize)
 {
     auto pMap = std::make_unique<tools::Long[]>(nSrcSize + 1);
+
+    // step size — how many physical printer dots it takes to draw one single pixel of the source image
+    // example: source image is 100px, printer needs to stretch it to 350 physical dots on the paper
+    // fStep = 350.0 / 100 = 3.5
+    // so every 1 pixel of the image stretches to 3.5 dots on the printer
     const double fStep = fTargetSize / static_cast<double>(nSrcSize);
 
+    // fill the mapping table - maps pixel -> dot offset
     for (tools::Long i = 0; i <= nSrcSize; ++i)
     {
         pMap[i] = basegfx::fround<tools::Long>(fStartCoord + (fStep * i));
@@ -167,56 +178,63 @@ static std::unique_ptr<tools::Long[]> lcl_GenerateMappingTable(double fStartCoor
     return pMap;
 }
 
-void Printer::ImplScaleAndBandBitmap(const Bitmap& rBmp, const Point& rDestPt, const Size& rDestSize,
-                                     const Point& rSrcPtPixel, const Size& rSrcSizePixel)
-
+static PhysicalPrintLayout lcl_CalculatePhysicalLayout(const OutputDevice& rDev, const Bitmap& rBmp,
+                                                       const Point& rDestPt, const Size& rDestSize,
+                                                       const Point& rSrcPtPixel, const Size& rSrcSizePixel)
 {
-    PrintGeometry aGeom = lcl_PreparePrintGeometry(*this, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
+    PhysicalPrintLayout aLayout;
 
+    PrintGeometry aGeom = lcl_PreparePrintGeometry(rDev, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
     if (!aGeom.bValid || rBmp.IsEmpty())
-        return;
+        return aLayout;
 
-    Bitmap aPaint(rBmp);
+    aLayout.aProcessedBitmap = rBmp;
 
-    // Transformation (Crop & Mirror)
-    if (aGeom.aSourceRect != tools::Rectangle(Point(), aPaint.GetSizePixel()))
-        aPaint.Crop(aGeom.aSourceRect);
+    if (aGeom.aSourceRect != tools::Rectangle(Point(), aLayout.aProcessedBitmap.GetSizePixel()))
+        aLayout.aProcessedBitmap.Crop(aGeom.aSourceRect);
 
     if (aGeom.nMirrorFlags != BmpMirrorFlags::NONE)
     {
-        // Trait Integration: We only manually flip bits if the device cannot handle it natively.
-        // For physical printers, this evaluates to 'true' at compile-time.
         if constexpr (!vcl::AutoMirroringCapable<Printer>)
         {
-            aPaint.Mirror(aGeom.nMirrorFlags);
+            aLayout.aProcessedBitmap.Mirror(aGeom.nMirrorFlags);
         }
     }
 
-    // Mapping Engine & Render
     const tools::Long nSrcWidth = aGeom.aSourceRect.GetWidth();
     const tools::Long nSrcHeight = aGeom.aSourceRect.GetHeight();
+
+    auto pMapX = lcl_GenerateMappingTable(aGeom.aDestPt.getX(), aGeom.aDestSz.getX(), nSrcWidth);
+    auto pMapY = lcl_GenerateMappingTable(aGeom.aDestPt.getY(), aGeom.aDestSz.getY(), nSrcHeight);
+
+    tools::Rectangle aBandRect { Point(0,0), aGeom.aSourceRect.GetSize() };
+
+    aLayout.aPhysicalPos = Point(pMapX[aBandRect.Left()], pMapY[aBandRect.Top()]);
+    aLayout.aPhysicalSize = Size(pMapX[aBandRect.Right() + 1] - aLayout.aPhysicalPos.X(),
+                                 pMapY[aBandRect.Bottom() + 1] - aLayout.aPhysicalPos.Y());
+
+    aLayout.bIsValid = true;
+    return aLayout;
+}
+
+void Printer::DrawMappedBitmap(const Bitmap& rBmp,
+                               const Point& rDestPt, const Size& rDestSize,
+                               const Point& rSrcPtPixel, const Size& rSrcSizePixel)
+{
+    PhysicalPrintLayout aLayout = lcl_CalculatePhysicalLayout(*this, rBmp, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
+
+    if (!aLayout.bIsValid)
+        return;
 
     const bool bOldMap = mpMapper->IsMapModeEnabled();
     mpMapper->EnableMapMode(false);
 
-    // RAII Guard: Guarantee MapMode is restored when this function exits or throws
     comphelper::ScopeGuard aMapGuard([this, bOldMap]() {
         mpMapper->EnableMapMode(bOldMap);
     });
 
-    // Generate SIMD-friendly forward lookup tables
-    auto pMapX = lcl_GenerateMappingTable(aGeom.aDestPt.getX(), aGeom.aDestSz.getX(), nSrcWidth);
-    auto pMapY = lcl_GenerateMappingTable(aGeom.aDestPt.getY(), aGeom.aDestSz.getY(), nSrcHeight);
-
-    // Extract precise bounds from the tables
-    tools::Rectangle aBandRect { Point(0,0), aGeom.aSourceRect.GetSize() };
-    const Point aMapPt(pMapX[aBandRect.Left()], pMapY[aBandRect.Top()]);
-    const Size  aMapSz(pMapX[aBandRect.Right() + 1] - aMapPt.X(),
-                       pMapY[aBandRect.Bottom() + 1] - aMapPt.Y());
-
-    Bitmap aBandBmp(aPaint);
-
-    DrawBitmap(aMapPt, aMapSz, Point(), aBandBmp.GetSizePixel(), aBandBmp);
+    DrawBitmap(aLayout.aPhysicalPos, aLayout.aPhysicalSize, Point(),
+               aLayout.aProcessedBitmap.GetSizePixel(), aLayout.aProcessedBitmap);
 }
 
 void Printer::DrawOutDev( const Point& /*rDestPt*/, const Size& /*rDestSize*/,
