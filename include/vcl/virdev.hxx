@@ -132,8 +132,6 @@ public:
 
     bool                CanEnableNativeWidget() const override;
 
-    virtual void        EnableRTL( bool bEnable = true ) override;
-
     bool                SetOutputSizePixel( const Size& rNewSize, bool bErase = true, bool bAlphaMaskTransparent = false );
     bool                SetOutputSizePixelScaleOffsetAndLOKBuffer( const Size& rNewSize,
                                                                    const Fraction& rScale,
@@ -159,6 +157,7 @@ public:
 
 private:
     SAL_DLLPRIVATE void ImplSetReferenceDevice( RefDevMode, sal_Int32 i_nDPIX, sal_Int32 i_nDPIY );
+    SAL_DLLPRIVATE void ImplUpdateDeviceRTLState(bool bEnable);
 
 protected:
     virtual tools::Long        GetFontExtLeading() const override;

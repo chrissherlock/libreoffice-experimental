@@ -1554,8 +1554,6 @@ public:
                                     tools::Rectangle &rNativeContentRegion ) const;
 protected:
     SAL_DLLPRIVATE float        approximate_char_width() const;
-private:
-    SAL_DLLPRIVATE void         ImplEnableRTL(bool bEnable);
 };
 
 }

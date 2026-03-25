@@ -22,21 +22,17 @@
 #include <windowdev.hxx>
 #include <window.h>
 
-namespace vcl {
-
-void WindowOutputDevice::EnableRTL ( bool bEnable )
+namespace vcl
 {
-    if (mbEnableRTL != bEnable)
-        mxOwnerWindow->ImplEnableRTL(bEnable);
-}
 
-void Window::ImplEnableRTL( bool bEnable )
+void Window::EnableRTL(bool bEnable)
 {
-    if (mpWindowImpl->mxOutDev->mbEnableRTL != bEnable)
-    {
-        CompatStateChanged( StateChangedType::Mirroring );
-        mpWindowImpl->mxOutDev->OutputDevice::EnableRTL(bEnable);
-    }
+    if (mpWindowImpl->mxOutDev->IsRTLEnabled() == bEnable)
+        return;
+
+    CompatStateChanged(StateChangedType::Mirroring);
+
+    GetOutDev()->EnableRTL(bEnable);
 }
 
 } /* namespace vcl */

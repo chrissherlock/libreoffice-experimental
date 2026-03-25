@@ -50,8 +50,6 @@ public:
 
     bool IsDoubleBufferedWindow() const;
 
-    virtual void EnableRTL(bool bEnable = true) override;
-
     void Flush() override;
 
     void SaveBackground(VirtualDevice& rSaveDevice, const Point& rPos, const Size& rSize,

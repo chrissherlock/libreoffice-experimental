@@ -569,9 +569,21 @@ void OutputDevice::DrawOutDevDirectProcess(const OutputDevice& rSrcDev, SalTwoRe
 
 // Layout public functions
 
-void OutputDevice::EnableRTL( bool bEnable )
+void OutputDevice::EnableRTL(bool bEnable)
 {
+    if (mbEnableRTL == bEnable)
+        return;
+
     mbEnableRTL = bEnable;
+
+    vcl::DispatchDevice(*this, [bEnable](auto& rConcreteDevice) {
+        // If the device has the hook (VirtualDevice), call it.
+        // If not (Printer, Window), the compiler optimizes this away.
+        if constexpr (requires { rConcreteDevice.ImplUpdateDeviceRTLState(bEnable); })
+        {
+            rConcreteDevice.ImplUpdateDeviceRTLState(bEnable);
+        }
+    });
 }
 
 bool OutputDevice::ImplIsAntiparallel() const

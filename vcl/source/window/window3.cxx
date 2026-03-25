@@ -221,8 +221,6 @@ void Window::SetSettings(const AllSettings& rSettings, bool bChild)
 
 Color Window::GetBackgroundColor() const { return GetOutDev()->GetBackgroundColor(); }
 
-void Window::EnableRTL(bool bEnable) { GetOutDev()->EnableRTL(bEnable); }
-
 void Window::FlashWindow() const
 {
     vcl::Window* pMyParent = ImplGetTopmostFrameWindow();

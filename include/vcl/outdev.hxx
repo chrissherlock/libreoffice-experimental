@@ -1407,7 +1407,7 @@ public:
     static FontMappingUseData FinishTrackingFontMappingUse();
 
     // Enabling/disabling RTL only makes sense for OutputDevices that use a mirroring SalGraphicsLayout
-    virtual void                EnableRTL( bool bEnable = true);
+    void                        EnableRTL( bool bEnable = true);
     bool                        IsRTLEnabled() const { return mbEnableRTL; }
 
     // tdf#168002 allow SubpixelPositioning for this device (default: false)
