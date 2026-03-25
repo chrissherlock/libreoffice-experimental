@@ -26,8 +26,12 @@
 #include <tools/debug.hxx>
 #include <tools/helpers.hxx>
 #include <tools/mapunit.hxx>
+#include <basegfx/point/b2dpoint.hxx>
+#include <basegfx/vector/b2dvector.hxx>
+#include <basegfx/numeric/ftools.hxx>
 
 #include <vcl/alpha.hxx>
+#include <vcl/deviceconcepts.hxx>
 #include <vcl/QueueInfo.hxx>
 #include <vcl/event.hxx>
 #include <vcl/virdev.hxx>
@@ -98,70 +102,115 @@ static void lcl_UpdateJobSetupPaper( JobSetup& rJobSetup )
     }
 }
 
-void Printer::ImplPrintTransparent( const Bitmap& rBmp,
-                                         const Point& rDestPt, const Size& rDestSize,
-                                         const Point& rSrcPtPixel, const Size& rSrcSizePixel )
+namespace
 {
-    Point       aDestPt( LogicToPixel( rDestPt ) );
-    Size        aDestSz( LogicToPixel( rDestSize ) );
-    tools::Rectangle   aSrcRect( rSrcPtPixel, rSrcSizePixel );
+struct PrintGeometry
+{
+    basegfx::B2DPoint aDestPt;
+    basegfx::B2DVector aDestSz; // basegfx uses Vector for size/dimensions
+    tools::Rectangle   aSourceRect;
+    BmpMirrorFlags     nMirrorFlags = BmpMirrorFlags::NONE;
+    bool               bValid = false;
+};
+}
 
-    aSrcRect.Normalize();
+// --- PHASE 1: Geometry Prep ---
+static PrintGeometry lcl_PreparePrintGeometry(const OutputDevice& rDev,
+                                              const Point& rDestPt, const Size& rDestSize,
+                                              const Point& rSrcPtPixel, const Size& rSrcSizePixel)
+{
+    PrintGeometry aPrep;
 
-    if( rBmp.IsEmpty() || !aSrcRect.GetWidth() || !aSrcRect.GetHeight() || !aDestSz.Width() || !aDestSz.Height() )
+    // Explicit extraction to avoid implicit conversion errors with basegfx
+    Point aPixelDestPt = rDev.LogicToPixel(rDestPt);
+    aPrep.aDestPt = basegfx::B2DPoint(aPixelDestPt.X(), aPixelDestPt.Y());
+
+    Size aPixelDestSz = rDev.LogicToPixel(rDestSize);
+    aPrep.aDestSz = basegfx::B2DVector(aPixelDestSz.Width(), aPixelDestSz.Height());
+
+    // Normalize Source
+    aPrep.aSourceRect = tools::Rectangle(rSrcPtPixel, rSrcSizePixel);
+    aPrep.aSourceRect.Normalize();
+
+    if (aPrep.aSourceRect.IsEmpty() || aPrep.aDestSz.getX() == 0 || aPrep.aDestSz.getY() == 0)
+        return aPrep;
+
+    // Handle Mirroring coordinate shifts
+    if (aPrep.aDestSz.getX() < 0)
+    {
+        aPrep.aDestSz.setX(-aPrep.aDestSz.getX());
+        aPrep.aDestPt.setX(aPrep.aDestPt.getX() - (aPrep.aDestSz.getX() - 1.0));
+        aPrep.nMirrorFlags |= BmpMirrorFlags::Horizontal;
+    }
+
+    if (aPrep.aDestSz.getY() < 0)
+    {
+        aPrep.aDestSz.setY(-aPrep.aDestSz.getY());
+        aPrep.aDestPt.setY(aPrep.aDestPt.getY() - (aPrep.aDestSz.getY() - 1.0));
+        aPrep.nMirrorFlags |= BmpMirrorFlags::Vertical;
+    }
+
+    aPrep.bValid = true;
+    return aPrep;
+}
+
+static std::unique_ptr<tools::Long[]> lcl_GenerateMappingTable(double fStartCoord, double fTargetSize, tools::Long nSrcSize)
+{
+    auto pMap = std::make_unique<tools::Long[]>(nSrcSize + 1);
+    const double fStep = fTargetSize / static_cast<double>(nSrcSize);
+
+    for (tools::Long i = 0; i <= nSrcSize; ++i)
+    {
+        pMap[i] = basegfx::fround<tools::Long>(fStartCoord + (fStep * i));
+    }
+
+    return pMap;
+}
+
+void Printer::ImplPrintTransparent( const Bitmap& rBmp,
+                                    const Point& rDestPt, const Size& rDestSize,
+                                    const Point& rSrcPtPixel, const Size& rSrcSizePixel )
+{
+    PrintGeometry aGeom = lcl_PreparePrintGeometry(*this, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
+
+    if (!aGeom.bValid || rBmp.IsEmpty())
         return;
 
-    Bitmap  aPaint( rBmp );
-    BmpMirrorFlags nMirrFlags = BmpMirrorFlags::NONE;
+    Bitmap aPaint(rBmp);
 
-    // mirrored horizontally
-    if( aDestSz.Width() < 0 )
+    // Transformation (Crop & Mirror)
+    if (aGeom.aSourceRect != tools::Rectangle(Point(), aPaint.GetSizePixel()))
     {
-        aDestSz.setWidth( -aDestSz.Width() );
-        aDestPt.AdjustX( -( aDestSz.Width() - 1 ) );
-        nMirrFlags |= BmpMirrorFlags::Horizontal;
+        aPaint.Crop(aGeom.aSourceRect);
     }
 
-    // mirrored vertically
-    if( aDestSz.Height() < 0 )
+    if (aGeom.nMirrorFlags != BmpMirrorFlags::NONE)
     {
-        aDestSz.setHeight( -aDestSz.Height() );
-        aDestPt.AdjustY( -( aDestSz.Height() - 1 ) );
-        nMirrFlags |= BmpMirrorFlags::Vertical;
+        // Trait Integration: We only manually flip bits if the device cannot handle it natively.
+        // For physical printers, this evaluates to 'true' at compile-time.
+        if constexpr (!vcl::AutoMirroringCapable<Printer>)
+        {
+            aPaint.Mirror(aGeom.nMirrorFlags);
+        }
     }
 
-    // source cropped?
-    if( aSrcRect != tools::Rectangle( Point(), aPaint.GetSizePixel() ) )
-    {
-        aPaint.Crop( aSrcRect );
-    }
+    // Mapping Engine & Render
+    const tools::Long nSrcWidth = aGeom.aSourceRect.GetWidth();
+    const tools::Long nSrcHeight = aGeom.aSourceRect.GetHeight();
 
-    // destination mirrored
-    if( nMirrFlags != BmpMirrorFlags::NONE )
-    {
-        aPaint.Mirror( nMirrFlags );
-    }
-
-    // do painting
-    const tools::Long nSrcWidth = aSrcRect.GetWidth(), nSrcHeight = aSrcRect.GetHeight();
-    tools::Long nX, nY; // , nWorkX, nWorkY, nWorkWidth, nWorkHeight;
-    std::unique_ptr<tools::Long[]> pMapX(new tools::Long[ nSrcWidth + 1 ]);
-    std::unique_ptr<tools::Long[]> pMapY(new tools::Long[ nSrcHeight + 1 ]);
     const bool bOldMap = mpMapper->IsMapModeEnabled();
-
     mpMapper->EnableMapMode(false);
 
-    // create forward mapping tables
-    for( nX = 0; nX <= nSrcWidth; nX++ )
-        pMapX[ nX ] = aDestPt.X() + basegfx::fround<tools::Long>( static_cast<double>(aDestSz.Width()) * nX / nSrcWidth );
+    // Generate SIMD-friendly forward lookup tables
+    auto pMapX = lcl_GenerateMappingTable(aGeom.aDestPt.getX(), aGeom.aDestSz.getX(), nSrcWidth);
+    auto pMapY = lcl_GenerateMappingTable(aGeom.aDestPt.getY(), aGeom.aDestSz.getY(), nSrcHeight);
 
-    for( nY = 0; nY <= nSrcHeight; nY++ )
-        pMapY[ nY ] = aDestPt.Y() + basegfx::fround<tools::Long>( static_cast<double>(aDestSz.Height()) * nY / nSrcHeight );
+    // Extract precise bounds from the tables
+    tools::Rectangle aBandRect { Point(0,0), aGeom.aSourceRect.GetSize() };
+    const Point aMapPt(pMapX[aBandRect.Left()], pMapY[aBandRect.Top()]);
+    const Size  aMapSz(pMapX[aBandRect.Right() + 1] - aMapPt.X(),
+                       pMapY[aBandRect.Bottom() + 1] - aMapPt.Y());
 
-    tools::Rectangle rectangle { Point(0,0), aSrcRect.GetSize() };
-    const Point aMapPt(pMapX[rectangle.Left()], pMapY[rectangle.Top()]);
-    const Size aMapSz( pMapX[rectangle.Right() + 1] - aMapPt.X(),      // pMapX[L + W] -> L + ((R - L) + 1) -> R + 1
-                       pMapY[rectangle.Bottom() + 1] - aMapPt.Y());    // same for Y
     Bitmap aBandBmp(aPaint);
 
     DrawBitmap(aMapPt, aMapSz, Point(), aBandBmp.GetSizePixel(), aBandBmp);
