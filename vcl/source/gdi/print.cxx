@@ -159,25 +159,6 @@ static PrintGeometry lcl_PreparePrintGeometry(const OutputDevice& rDev,
     return aPrep;
 }
 
-static std::unique_ptr<tools::Long[]> lcl_GenerateMappingTable(double fStartCoord, double fTargetSize, tools::Long nSrcSize)
-{
-    auto pMap = std::make_unique<tools::Long[]>(nSrcSize + 1);
-
-    // step size — how many physical printer dots it takes to draw one single pixel of the source image
-    // example: source image is 100px, printer needs to stretch it to 350 physical dots on the paper
-    // fStep = 350.0 / 100 = 3.5
-    // so every 1 pixel of the image stretches to 3.5 dots on the printer
-    const double fStep = fTargetSize / static_cast<double>(nSrcSize);
-
-    // fill the mapping table - maps pixel -> dot offset
-    for (tools::Long i = 0; i <= nSrcSize; ++i)
-    {
-        pMap[i] = basegfx::fround<tools::Long>(fStartCoord + (fStep * i));
-    }
-
-    return pMap;
-}
-
 static PhysicalPrintLayout lcl_CalculatePhysicalLayout(const OutputDevice& rDev, const Bitmap& rBmp,
                                                        const Point& rDestPt, const Size& rDestSize,
                                                        const Point& rSrcPtPixel, const Size& rSrcSizePixel)
@@ -196,30 +177,33 @@ static PhysicalPrintLayout lcl_CalculatePhysicalLayout(const OutputDevice& rDev,
     if (aGeom.nMirrorFlags != BmpMirrorFlags::NONE)
     {
         if constexpr (!vcl::AutoMirroringCapable<Printer>)
-        {
             aLayout.aProcessedBitmap.Mirror(aGeom.nMirrorFlags);
-        }
     }
 
-    const tools::Long nSrcWidth = aGeom.aSourceRect.GetWidth();
-    const tools::Long nSrcHeight = aGeom.aSourceRect.GetHeight();
+    // Boundary calculation...
 
-    auto pMapX = lcl_GenerateMappingTable(aGeom.aDestPt.getX(), aGeom.aDestSz.getX(), nSrcWidth);
-    auto pMapY = lcl_GenerateMappingTable(aGeom.aDestPt.getY(), aGeom.aDestSz.getY(), nSrcHeight);
+    // Index 0 (Left/Top) is just the rounded starting point
+    aLayout.aPhysicalPos = Point(
+        basegfx::fround<tools::Long>(aGeom.aDestPt.getX()),
+        basegfx::fround<tools::Long>(aGeom.aDestPt.getY())
+    );
 
-    tools::Rectangle aBandRect { Point(0,0), aGeom.aSourceRect.GetSize() };
+    // Index N (Right+1/Bottom+1) is just the start point + the scaled destination size
+    tools::Long nEndX = basegfx::fround<tools::Long>(aGeom.aDestPt.getX() + aGeom.aDestSz.getX());
+    tools::Long nEndY = basegfx::fround<tools::Long>(aGeom.aDestPt.getY() + aGeom.aDestSz.getY());
 
-    aLayout.aPhysicalPos = Point(pMapX[aBandRect.Left()], pMapY[aBandRect.Top()]);
-    aLayout.aPhysicalSize = Size(pMapX[aBandRect.Right() + 1] - aLayout.aPhysicalPos.X(),
-                                 pMapY[aBandRect.Bottom() + 1] - aLayout.aPhysicalPos.Y());
+    aLayout.aPhysicalSize = Size(
+        nEndX - aLayout.aPhysicalPos.X(),
+        nEndY - aLayout.aPhysicalPos.Y()
+    );
 
     aLayout.bIsValid = true;
     return aLayout;
 }
 
-void Printer::DrawMappedBitmap(const Bitmap& rBmp,
-                               const Point& rDestPt, const Size& rDestSize,
-                               const Point& rSrcPtPixel, const Size& rSrcSizePixel)
+void Printer::DrawScaledDeviceBitmap(const Bitmap& rBmp,
+                                     const Point& rDestPt, const Size& rDestSize,
+                                     const Point& rSrcPtPixel, const Size& rSrcSizePixel)
 {
     PhysicalPrintLayout aLayout = lcl_CalculatePhysicalLayout(*this, rBmp, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
 
