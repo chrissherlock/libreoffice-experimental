@@ -17,6 +17,9 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <iostream>
+#include <iomanip>
+
 #include <config_features.h>
 
 #include <osl/diagnose.h>
@@ -132,41 +135,52 @@ void OutputDevice::DrawDeviceBitmap(const Point& rDestPt, const Size& rDestSize,
                                     const Point& rSrcPtPixel, const Size& rSrcSizePixel,
                                     const Bitmap& rBitmap)
 {
-    if (!FlushGraphicsState() || rBitmap.IsEmpty())
+    if (rBitmap.IsEmpty())
+        return;
+
+    if (!PrepareGraphicsOutput(vcl::PrepareOutputFlags::Clip) || !mpGraphics)
         return;
 
     vcl::DispatchDevice(*this, [&](auto& rConcreteDevice) {
         using DeviceType = std::decay_t<decltype(rConcreteDevice)>;
 
-        SalTwoRect aPosAry = mpMapper->ToDeviceRect(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
-        if (!aPosAry.HasArea())
-            return;
-
-        if constexpr (vcl::BandedPrinting<DeviceType>)
-        {
-             rConcreteDevice.DrawScaledDeviceBitmap(rBitmap, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
-             return;
-        }
-
-        assert(mpGraphics && "Hardware device dispatched without valid SalGraphics!");
+        SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(), rSrcSizePixel.Height(),
+                           rDestPt.X(), rDestPt.Y(), rDestSize.Width(), rDestSize.Height());
 
         Bitmap aLocalBmp(rBitmap);
-
         const BmpMirrorFlags nMirr = AdjustTwoRect(aPosAry, aLocalBmp.GetSizePixel());
-        if (nMirr != BmpMirrorFlags::NONE)
-            aLocalBmp.Mirror(nMirr);
+        BmpMirrorFlags nHardwareMirr = BmpMirrorFlags::NONE;
 
-        if constexpr (vcl::SubsamplingCapable<DeviceType>)
-            vcl::rendercontext::BitmapRenderer::ApplySubsampling(*mpGraphics, aPosAry, aLocalBmp);
+        bool bHardwareCanMirror = false;
+
+        OUString aBackend = mpGraphics->getRenderBackendName();
+        if (aBackend == "skia")
+        {
+#if HAVE_FEATURE_SKIA
+            // Only offload to hardware if we are NOT in Raster (Software) mode
+            bHardwareCanMirror = (SkiaHelper::renderMethodToUse() != SkiaHelper::RenderRaster);
+#endif
+        }
+        else if (aBackend == "opengl")
+        {
+            bHardwareCanMirror = true; // OpenGL backends almost always handle negative UVs
+        }
+
+        if (nMirr != BmpMirrorFlags::NONE)
+        {
+            if (bHardwareCanMirror)
+            {
+                nHardwareMirr = nMirr; // Zero-cost GPU flip
+            }
+            else
+            {
+                aLocalBmp.Mirror(nMirr); // CPU flip so Software Skia sees positive width
+            }
+        }
 
         vcl::rendercontext::BitmapRenderer::DrawBitmap(
-            *mpGraphics,
-            aPosAry,
-            aLocalBmp,
-            GetRTLFrameWidth(),
-            IsRTLEnabled(),
-            vcl::AlphaCapable<DeviceType>
-        );
+            *mpGraphics, aPosAry, aLocalBmp, GetRTLFrameWidth(), IsRTLEnabled(),
+            vcl::AlphaCapable<DeviceType>, nHardwareMirr);
     });
 }
 

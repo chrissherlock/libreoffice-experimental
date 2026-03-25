@@ -12,10 +12,10 @@
 #include <tools/color.hxx>
 #include <tools/long.hxx>
 
+#include <vcl/bitmap.hxx>
 #include <vcl/dllapi.h>
 
 class SalGraphics;
-class Bitmap;
 struct SalTwoRect;
 
 namespace basegfx
@@ -45,7 +45,8 @@ public:
     static void MirrorRTLRect(SalTwoRect& rPosAry, tools::Long nFrameWidth);
 
     static void DrawBitmap(SalGraphics& rGraphics, SalTwoRect& rPosAry, const Bitmap& rBitmap,
-                           tools::Long nFrameWidth, bool bRTL, bool bAlphaCapable = true);
+                           tools::Long nFrameWidth, bool bRTL, bool bAlphaCapable,
+                           BmpMirrorFlags nMirr = BmpMirrorFlags::NONE);
 
     static bool DrawTransformedBitmap(SalGraphics& rGraphics, const basegfx::B2DPoint& rNull,
                                       const basegfx::B2DPoint& rX, const basegfx::B2DPoint& rY,

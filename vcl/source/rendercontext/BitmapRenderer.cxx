@@ -7,6 +7,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include <iostream>
+#include <iomanip>
+
 #include <basegfx/matrix/b2dhommatrixtools.hxx>
 
 #include <vcl/rendercontext/BitmapRenderer.hxx>
@@ -35,31 +38,69 @@ void BitmapRenderer::MirrorRTLRect(SalTwoRect& rPosAry, tools::Long nFrameWidth)
 }
 
 void BitmapRenderer::DrawBitmap(SalGraphics& rGraphics, SalTwoRect& rPosAry, const Bitmap& rBitmap,
-                                tools::Long nFrameWidth, bool bRTL, bool bAlphaCapable)
+                                tools::Long nFrameWidth, bool bRTL, bool bAlphaCapable,
+                                BmpMirrorFlags nMirr)
 {
     if (rBitmap.IsEmpty())
         return;
 
+    std::cerr << "\n[Trace: BitmapRenderer::DrawBitmap]\n";
+    std::cerr << "  In-Flags: " << static_cast<int>(nMirr)
+              << "  AlphaCap: " << (bAlphaCapable ? "Y" : "N") << "\n";
+
     if (bRTL)
-        MirrorRTLRect(rPosAry, nFrameWidth);
-
-    Bitmap aTargetBmp(rBitmap);
-
-    if (!bAlphaCapable && aTargetBmp.HasAlpha())
     {
-        Bitmap aColorBmp = aTargetBmp.CreateColorBitmap();
-        aColorBmp.Blend(aTargetBmp.CreateAlphaMask(), COL_WHITE);
-        aTargetBmp = aColorBmp;
+        std::cerr << "  RTL Mirroring applied to Dest\n";
+        MirrorRTLRect(rPosAry, nFrameWidth);
     }
 
-    std::shared_ptr<SalBitmap> pSalBitmap = aTargetBmp.ImplGetSalBitmap();
+    // Capture the flip math
+    if (nMirr & BmpMirrorFlags::Horizontal)
+    {
+        std::cerr << "  Horizontal UV Flip: mnSrcX (" << rPosAry.mnSrcX << ") += mnSrcWidth ("
+                  << rPosAry.mnSrcWidth << ") - 1\n";
+        rPosAry.mnSrcX += rPosAry.mnSrcWidth - 1;
+        rPosAry.mnSrcWidth = -rPosAry.mnSrcWidth;
+    }
+
+    if (nMirr & BmpMirrorFlags::Vertical)
+    {
+        std::cerr << "  Vertical UV Flip: mnSrcY (" << rPosAry.mnSrcY << ") += mnSrcHeight ("
+                  << rPosAry.mnSrcHeight << ") - 1\n";
+        rPosAry.mnSrcY += rPosAry.mnSrcHeight - 1;
+        rPosAry.mnSrcHeight = -rPosAry.mnSrcHeight;
+    }
+
+    std::cerr << "  Final SalTwoRect Payload:\n";
+    std::cerr << "    SRC : [" << rPosAry.mnSrcX << "," << rPosAry.mnSrcY << "] "
+              << rPosAry.mnSrcWidth << "x" << rPosAry.mnSrcHeight << "\n";
+    std::cerr << "    DEST: [" << rPosAry.mnDestX << "," << rPosAry.mnDestY << "] "
+              << rPosAry.mnDestWidth << "x" << rPosAry.mnDestHeight << "\n";
+
+    Bitmap aTargetBmp(rBitmap);
+    if (!bAlphaCapable && aTargetBmp.HasAlpha())
+    {
+        std::cerr << "  Action: Flattening Alpha to White (CPU)\n";
+        aTargetBmp.ReplaceTransparency(COL_WHITE);
+    }
+
+    SalBitmap* pSalBitmap = aTargetBmp.ImplGetSalBitmap().get();
     if (!pSalBitmap)
+    {
+        std::cerr << "  ERROR: SalBitmap is NULL\n";
         return;
+    }
 
     if (aTargetBmp.HasAlpha())
+    {
+        std::cerr << "  Executing: rGraphics.drawAlphaBitmap\n";
         rGraphics.drawAlphaBitmap(rPosAry, *pSalBitmap);
+    }
     else
+    {
+        std::cerr << "  Executing: rGraphics.drawBitmap\n";
         rGraphics.drawBitmap(rPosAry, *pSalBitmap);
+    }
 }
 
 bool BitmapRenderer::DrawTransformedBitmap(SalGraphics& rGraphics, const basegfx::B2DPoint& rNull,

@@ -28,6 +28,10 @@
 
 #include <com/sun/star/awt/GradientStyle.hpp>
 
+#include <iostream>
+#include <iomanip>
+#include <vcl/skia/SkiaHelper.hxx>
+
 // Run tests from visualbackendtest ('bin/run visualbackendtest').
 class BackendTest : public test::BootstrapFixture
 {
@@ -1241,61 +1245,69 @@ public:
     {
         if (getDefaultDeviceBitCount() < 24)
             return;
+
         // Normal virtual device.
         ScopedVclPtr<VirtualDevice> device
             = VclPtr<VirtualDevice>::Create(DeviceFormat::WITHOUT_ALPHA);
-#ifdef MACOSX
-        // TODO: This unit test is not executed for macOS unless bitmap scaling is implemented
-        if (getRenderBackendName(device) == "aqua")
-            return;
-#endif
+
         // Virtual device with alpha.
         ScopedVclPtr<VirtualDevice> alphaDevice
             = VclPtr<VirtualDevice>::Create(DeviceFormat::WITH_ALPHA);
+
         device->SetOutputSizePixel(Size(20, 20));
         device->SetBackground(Wallpaper(COL_BLACK));
         device->Erase();
+
         alphaDevice->SetOutputSizePixel(Size(20, 20));
         alphaDevice->SetBackground(Wallpaper(COL_BLACK));
         alphaDevice->Erase();
+
         Bitmap bitmap(Size(4, 4), vcl::PixelFormat::N24_BPP);
         AlphaMask alpha(Size(4, 4));
         bitmap.Erase(COL_LIGHTBLUE);
+
         {
             BitmapScopedWriteAccess writeAccess(bitmap);
             writeAccess->SetPixel(3, 3, COL_LIGHTRED);
         }
+
         // alpha 127 will make COL_LIGHTRED -> COL_RED and the same for blue
         alpha.Erase(127);
-        // Normal device.
+
+        // Phase 1: Normal Device Mirroring
         device->DrawBitmap(Point(5, 5), Size(-4, -4), bitmap);
         device->DrawBitmap(Point(15, 15), Size(4, 4), bitmap);
-        exportDevice(u"draw_alpha_bitmap_mirrored_01.png"_ustr, device);
+
         CPPUNIT_ASSERT_EQUAL(COL_LIGHTRED, device->GetPixel(Point(18, 18)));
         CPPUNIT_ASSERT_EQUAL(COL_LIGHTBLUE, device->GetPixel(Point(17, 18)));
         CPPUNIT_ASSERT_EQUAL(COL_LIGHTRED, device->GetPixel(Point(2, 2)));
         CPPUNIT_ASSERT_EQUAL(COL_LIGHTBLUE, device->GetPixel(Point(3, 2)));
         device->Erase();
+
+        // Phase 2: Normal Device + Alpha Mask
         device->DrawBitmap(Point(5, 5), Size(-4, -4), Bitmap(bitmap, alpha));
         device->DrawBitmap(Point(15, 15), Size(4, 4), Bitmap(bitmap, alpha));
-        exportDevice(u"draw_alpha_bitmap_mirrored_02.png"_ustr, device);
+
         CPPUNIT_ASSERT_EQUAL(COL_RED, device->GetPixel(Point(18, 18)));
         CPPUNIT_ASSERT_EQUAL(COL_BLUE, device->GetPixel(Point(17, 18)));
         CPPUNIT_ASSERT_EQUAL(COL_RED, device->GetPixel(Point(2, 2)));
         CPPUNIT_ASSERT_EQUAL(COL_BLUE, device->GetPixel(Point(3, 2)));
         device->Erase();
-        // Now with alpha device.
+
+        // Phase 3: Alpha Device
         alphaDevice->DrawBitmap(Point(5, 5), Size(-4, -4), bitmap);
         alphaDevice->DrawBitmap(Point(15, 15), Size(4, 4), bitmap);
-        exportDevice(u"draw_alpha_bitmap_mirrored_03.png"_ustr, alphaDevice);
+
         CPPUNIT_ASSERT_EQUAL(COL_LIGHTRED, alphaDevice->GetPixel(Point(18, 18)));
         CPPUNIT_ASSERT_EQUAL(COL_LIGHTBLUE, alphaDevice->GetPixel(Point(17, 18)));
         CPPUNIT_ASSERT_EQUAL(COL_LIGHTRED, alphaDevice->GetPixel(Point(2, 2)));
         CPPUNIT_ASSERT_EQUAL(COL_LIGHTBLUE, alphaDevice->GetPixel(Point(3, 2)));
         alphaDevice->Erase();
+
+        // Phase 4: Alpha Device + Alpha Mask
         alphaDevice->DrawBitmap(Point(5, 5), Size(-4, -4), Bitmap(bitmap, alpha));
         alphaDevice->DrawBitmap(Point(15, 15), Size(4, 4), Bitmap(bitmap, alpha));
-        exportDevice(u"draw_alpha_bitmap_mirrored_04.png"_ustr, alphaDevice);
+
         CPPUNIT_ASSERT_EQUAL(COL_RED, alphaDevice->GetPixel(Point(18, 18)));
         CPPUNIT_ASSERT_EQUAL(COL_BLUE, alphaDevice->GetPixel(Point(17, 18)));
         CPPUNIT_ASSERT_EQUAL(COL_RED, alphaDevice->GetPixel(Point(2, 2)));
