@@ -624,38 +624,39 @@ void Window::ImplCalcOverlapRegion( const tools::Rectangle& rSourceRect, vcl::Re
     }
 }
 
-void WindowOutputDevice::SaveBackground(VirtualDevice& rSaveDevice, const Point& rPos, const Size& rSize, const Size&) const
+void WindowOutputDevice::ImplSaveWindowBackground(VirtualDevice& rSaveDevice, const Point& rPos, const Size& rSize) const
 {
     MapMode aTempMap(GetMapMode());
     aTempMap.SetOrigin(Point());
     rSaveDevice.SetMapMode(aTempMap);
 
-    if ( mxOwnerWindow->mpWindowImpl->mpPaintRegion )
+    // This is the Window-specific secret sauce
+    if (mxOwnerWindow->mpWindowImpl->mpPaintRegion)
     {
-        vcl::Region aClip( *mxOwnerWindow->mpWindowImpl->mpPaintRegion );
-        const Point aPixPos( LogicToPixel( rPos ) );
+        vcl::Region aClip(*mxOwnerWindow->mpWindowImpl->mpPaintRegion);
+        const Point aPixPos(LogicToPixel(rPos));
 
         aClip.Move(-GetOutOffXPixel(), -GetOutOffYPixel());
-        aClip.Intersect( tools::Rectangle( aPixPos, LogicToPixel( rSize ) ) );
+        aClip.Intersect(tools::Rectangle(aPixPos, LogicToPixel(rSize)));
 
-        if ( !aClip.IsEmpty() )
+        if (!aClip.IsEmpty())
         {
-            const vcl::Region aOldClip( rSaveDevice.GetClipRegion() );
-            const Point aPixOffset( rSaveDevice.LogicToPixel( Point() ) );
+            const vcl::Region aOldClip(rSaveDevice.GetClipRegion());
+            const Point aPixOffset(rSaveDevice.LogicToPixel(Point()));
             const bool bMap = rSaveDevice.IsMapModeEnabled();
 
-            aClip.Move( aPixOffset.X() - aPixPos.X(), aPixOffset.Y() - aPixPos.Y() );
+            aClip.Move(aPixOffset.X() - aPixPos.X(), aPixOffset.Y() - aPixPos.Y());
 
-            rSaveDevice.EnableMapMode( false );
-            rSaveDevice.SetClipRegion( aClip );
-            rSaveDevice.EnableMapMode( bMap );
-            rSaveDevice.DrawOutDev( Point(), rSize, rPos, rSize, *this );
-            rSaveDevice.SetClipRegion( aOldClip );
+            rSaveDevice.EnableMapMode(false);
+            rSaveDevice.SetClipRegion(aClip);
+            rSaveDevice.EnableMapMode(bMap);
+            rSaveDevice.DrawOutDev(Point(), rSize, rPos, rSize, *this);
+            rSaveDevice.SetClipRegion(aOldClip);
         }
     }
     else
     {
-        rSaveDevice.DrawOutDev( Point(), rSize, rPos, rSize, *this );
+        rSaveDevice.DrawOutDev(Point(), rSize, rPos, rSize, *this);
     }
 
     rSaveDevice.SetMapMode(MapMode());

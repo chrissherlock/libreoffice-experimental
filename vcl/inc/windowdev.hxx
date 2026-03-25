@@ -52,9 +52,6 @@ public:
 
     void Flush() override;
 
-    void SaveBackground(VirtualDevice& rSaveDevice, const Point& rPos, const Size& rSize,
-                        const Size&) const override;
-
     css::awt::DeviceInfo GetDeviceInfo() const override;
 
     virtual vcl::Region GetOutputBoundsClipRegion() const override;
@@ -82,6 +79,8 @@ public:
 
 private:
     virtual void InitClipRegion() override;
+    void ImplSaveWindowBackground(VirtualDevice& rSaveDevice, const Point& rPos,
+                                  const Size& rSize) const;
 
     void ImplClearFontData(bool bNewFontLists) override;
     void ImplRefreshFontData(bool bNewFontLists) override;

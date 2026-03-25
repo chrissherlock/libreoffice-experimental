@@ -303,9 +303,23 @@ Color OutputDevice::DrawSelectionBackground(const tools::Rectangle& rRect,
 }
 
 void OutputDevice::SaveBackground(VirtualDevice& rSaveDevice,
-                                  const Point& rPos, const Size& rSize, const Size& rBackgroundSize) const
+                                   const Point& rPos, const Size& rSize, const Size& rBackgroundSize) const
 {
-   rSaveDevice.DrawOutDev(Point(), rBackgroundSize, rPos, rSize, *this);
+    bool bHandled = false;
+
+    vcl::DispatchDevice(*this, [&](auto& rConcreteDevice) {
+        if constexpr (requires { rConcreteDevice.ImplSaveWindowBackground(rSaveDevice, rPos, rSize); })
+        {
+            rConcreteDevice.ImplSaveWindowBackground(rSaveDevice, rPos, rSize);
+            bHandled = true;
+        }
+    });
+
+    if (!bHandled)
+    {
+        // For Printer/VirDev, we still use the background-specific size parameter
+        rSaveDevice.DrawOutDev(Point(), rBackgroundSize, rPos, rSize, *this);
+    }
 }
 
 tools::Rectangle OutputDevice::GetBackgroundComponentBounds() const

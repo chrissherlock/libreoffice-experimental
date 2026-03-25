@@ -26,7 +26,6 @@ public:
     {
     }
 
-    void SaveBackground(VirtualDevice&, const Point&, const Size&, const Size&) const override {}
     bool AcquireGraphics() const override { return true; }
     void ReleaseGraphics(bool) override {}
     virtual bool HasAlpha() const override { return false; }

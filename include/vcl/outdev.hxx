@@ -605,8 +605,8 @@ public:
 
     void                        SetBackground();
     void                        SetBackground( const Wallpaper& rBackground );
-    virtual void                SaveBackground(VirtualDevice& rSaveDevice,
-                                               const Point& rPos, const Size& rSize, const Size& rBackgroundSize) const;
+    void                        SaveBackground(VirtualDevice& rSaveDevice, const Point& rPos, const Size& rSize,
+                                               const Size& rBackgroundSize) const;
 
     const Wallpaper&            GetBackground() const { return maBackground; }
     Color                       GetBackgroundColor() const;
