@@ -342,7 +342,6 @@ void GDIMetaFile::Play(OutputDevice& rOut, size_t nPos)
 
     MetaAction* pAction = GetCurAction();
     const size_t nObjCount = m_aList.size();
-    size_t  nSyncCount = rOut.GetSyncCount();
 
     if( nPos > nObjCount )
         nPos = nObjCount;
@@ -357,21 +356,12 @@ void GDIMetaFile::Play(OutputDevice& rOut, size_t nPos)
 
     SAL_INFO( "vcl.gdi", "GDIMetaFile::Play on device of size: " << rOut.GetOutputSizePixel().Width() << " " << rOut.GetOutputSizePixel().Height());
 
-    if (!ImplPlayWithRenderer(rOut, Point(0,0), rOut.GetOutputSize())) {
-        size_t  i  = 0;
-        for( size_t nCurPos = m_nCurrentActionElement; nCurPos < nPos; nCurPos++ )
+    if (!ImplPlayWithRenderer(rOut, Point(0,0), rOut.GetOutputSize()))
+    {
+        for (size_t nCurPos = m_nCurrentActionElement; nCurPos < nPos; nCurPos++)
         {
-            if( pAction )
-            {
+            if (pAction)
                 pAction->Execute(&rOut);
-
-                // flush output from time to time
-                if( i++ > nSyncCount )
-                {
-                    rOut.Flush();
-                    i = 0;
-                }
-            }
 
             pAction = NextAction();
         }

@@ -50,7 +50,6 @@ public:
 
     bool IsDoubleBufferedWindow() const;
 
-    size_t GetSyncCount() const override { return 0x000000ff; }
     virtual void EnableRTL(bool bEnable = true) override;
 
     void Flush() override;

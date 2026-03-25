@@ -401,8 +401,6 @@ public:
     std::vector< VCLXGraphics* > *GetUnoGraphicsList() const  { return mpUnoGraphicsList; }
     std::vector< VCLXGraphics* > *CreateUnoGraphicsList();
 
-    virtual size_t               GetSyncCount() const { return 0xffffffff; }
-
     /// request XCanvas render interface
     css::uno::Reference< css::rendering::XCanvas > GetCanvas() const;
     /// request XSpriteCanvas render interface
