@@ -167,9 +167,9 @@ static std::unique_ptr<tools::Long[]> lcl_GenerateMappingTable(double fStartCoor
     return pMap;
 }
 
-void Printer::ImplPrintTransparent( const Bitmap& rBmp,
-                                    const Point& rDestPt, const Size& rDestSize,
-                                    const Point& rSrcPtPixel, const Size& rSrcSizePixel )
+void Printer::ImplScaleAndBandBitmap(const Bitmap& rBmp, const Point& rDestPt, const Size& rDestSize,
+                                     const Point& rSrcPtPixel, const Size& rSrcSizePixel)
+
 {
     PrintGeometry aGeom = lcl_PreparePrintGeometry(*this, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
 
@@ -180,9 +180,7 @@ void Printer::ImplPrintTransparent( const Bitmap& rBmp,
 
     // Transformation (Crop & Mirror)
     if (aGeom.aSourceRect != tools::Rectangle(Point(), aPaint.GetSizePixel()))
-    {
         aPaint.Crop(aGeom.aSourceRect);
-    }
 
     if (aGeom.nMirrorFlags != BmpMirrorFlags::NONE)
     {
@@ -201,6 +199,11 @@ void Printer::ImplPrintTransparent( const Bitmap& rBmp,
     const bool bOldMap = mpMapper->IsMapModeEnabled();
     mpMapper->EnableMapMode(false);
 
+    // RAII Guard: Guarantee MapMode is restored when this function exits or throws
+    comphelper::ScopeGuard aMapGuard([this, bOldMap]() {
+        mpMapper->EnableMapMode(bOldMap);
+    });
+
     // Generate SIMD-friendly forward lookup tables
     auto pMapX = lcl_GenerateMappingTable(aGeom.aDestPt.getX(), aGeom.aDestSz.getX(), nSrcWidth);
     auto pMapY = lcl_GenerateMappingTable(aGeom.aDestPt.getY(), aGeom.aDestSz.getY(), nSrcHeight);
@@ -214,8 +217,6 @@ void Printer::ImplPrintTransparent( const Bitmap& rBmp,
     Bitmap aBandBmp(aPaint);
 
     DrawBitmap(aMapPt, aMapSz, Point(), aBandBmp.GetSizePixel(), aBandBmp);
-
-    mpMapper->EnableMapMode(bOldMap);
 }
 
 void Printer::DrawOutDev( const Point& /*rDestPt*/, const Size& /*rDestSize*/,
