@@ -843,4 +843,20 @@ bool OutputDevice::is_double_buffered_window() const
     return IsDoubleBuffered();
 }
 
+bool OutputDevice::CanEnableNativeWidget() const
+{
+    return vcl::DispatchDevice(*this, [](auto& rConcreteDevice) -> bool {
+        using DeviceType = std::decay_t<decltype(rConcreteDevice)>;
+
+        if constexpr (vcl::NativeWidgetCapable<DeviceType>)
+        {
+            // Only Window and VirtualDevice reach here.
+            // Printers are compiled as 'return false'.
+            return rConcreteDevice.ImplCanEnableNativeWidget();
+        }
+
+        return false;
+    });
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

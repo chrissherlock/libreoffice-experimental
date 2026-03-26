@@ -228,6 +228,16 @@ struct requires_viewport_clipping<T, std::void_t<decltype(T::is_viewport_clippin
 {
 };
 
+// Native Widget Support (OS Theming)
+template <typename T, typename = void> struct supports_native_widgets : std::false_type
+{
+};
+template <typename T>
+struct supports_native_widgets<T, std::void_t<decltype(T::is_native_widget_capable_v)>>
+    : std::bool_constant<T::is_native_widget_capable_v>
+{
+};
+
 template <typename T> concept ManagedFontCache = uses_managed_cache<T>::value;
 template <typename T> concept HWAccelerated = supports_hw_acceleration<T>::value;
 template <typename T> concept StrictlyCulled = needs_strict_culling<T>::value;
@@ -249,6 +259,7 @@ template <typename T> concept GlyphSynthesisCapable = supports_glyph_synthesis<T
 template <typename T> concept AutoMirroringCapable = allows_auto_mirroring<T>::value;
 template <typename T> concept DoubleBuffered = supports_double_buffering<T>::value;
 template <typename T> concept ViewportClamped = requires_viewport_clipping<T>::value;
+template <typename T> concept NativeWidgetCapable = supports_native_widgets<T>::value;
 
 /**
  * @brief PageDevice

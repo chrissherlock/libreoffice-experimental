@@ -739,6 +739,11 @@ class PDFWriterImpl final : public VirtualDevice, public PDFObjectContainer
 public:
     friend struct vcl::pdf::PDFPage;
 
+    static constexpr bool is_native_widget_capable_v = true;
+
+    // It always returns false because PDF never supports native OS widgets
+    bool ImplCanEnableNativeWidget() const { return false; }
+
     const char* getStructureTag(vcl::pdf::StructElement eElement);
     static const char* getAttributeTag(PDFWriter::StructAttribute eAtr );
     static const char* getAttributeValueTag( PDFWriter::StructAttributeValue eVal );

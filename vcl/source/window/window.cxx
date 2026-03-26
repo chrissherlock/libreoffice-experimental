@@ -581,11 +581,6 @@ Window::~Window()
     return mpWindowImpl ? mpWindowImpl->mxOutDev.get() : nullptr;
 }
 
-bool WindowOutputDevice::CanEnableNativeWidget() const
-{
-    return mxOwnerWindow->IsNativeWidgetEnabled();
-}
-
 bool WindowOutputDevice::IsDoubleBufferedWindow() const
 {
     auto pOwnerWindow = GetOwnerWindow();

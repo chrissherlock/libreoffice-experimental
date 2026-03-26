@@ -53,6 +53,7 @@ class SAL_WARN_UNUSED VCL_DLLPUBLIC VirtualDevice : public OutputDevice
     friend VCL_DLLPUBLIC cairo_surface_t* get_underlying_cairo_surface(const VirtualDevice&);
 public:
     static constexpr bool is_readable_raster_v = true;
+    static constexpr bool is_native_widget_capable_v = true;
 
     // reference device modes for different compatibility levels
     enum class RefDevMode { NONE = 0,
@@ -130,8 +131,6 @@ public:
     virtual             ~VirtualDevice() override;
     virtual void        dispose() override;
 
-    bool                CanEnableNativeWidget() const override;
-
     bool                SetOutputSizePixel( const Size& rNewSize, bool bErase = true, bool bAlphaMaskTransparent = false );
     bool                SetOutputSizePixelScaleOffsetAndLOKBuffer( const Size& rNewSize,
                                                                    const Fraction& rScale,
@@ -154,6 +153,8 @@ public:
     bool IsWithoutAlpha() const { return meFormatAndAlpha == DeviceFormat::WITHOUT_ALPHA; }
 
     virtual bool HasAlpha() const override { return meFormatAndAlpha != DeviceFormat::WITHOUT_ALPHA; }
+
+    bool ImplCanEnableNativeWidget() const;
 
 private:
     SAL_DLLPRIVATE void ImplSetReferenceDevice( RefDevMode, sal_Int32 i_nDPIX, sal_Int32 i_nDPIY );

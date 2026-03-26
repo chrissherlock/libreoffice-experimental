@@ -1817,7 +1817,7 @@ public:
 
     /** Determine if native widgets can be enabled
      */
-    virtual bool                CanEnableNativeWidget() const { return false; }
+    bool                        CanEnableNativeWidget() const;
 
     /** Query the platform layer for control support
      */

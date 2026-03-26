@@ -42,11 +42,11 @@
 
 using namespace ::com::sun::star::uno;
 
-bool VirtualDevice::CanEnableNativeWidget() const
+bool VirtualDevice::ImplCanEnableNativeWidget() const
 {
-    const vcl::ExtOutDevData* pOutDevData(GetExtOutDevData());
-    const vcl::PDFExtOutDevData* pPDFData(dynamic_cast<const vcl::PDFExtOutDevData*>(pOutDevData));
-    return pPDFData == nullptr;
+    // If we have extended data (PDF recording), we MUST disable native
+    // widgets to ensure vector/text output instead of a "black box" bitmap.
+    return GetExtOutDevData() == nullptr;
 }
 
 bool VirtualDevice::AcquireGraphics() const

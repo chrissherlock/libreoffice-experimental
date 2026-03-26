@@ -45,6 +45,7 @@ public:
     static constexpr bool is_framed_v = true;
     static constexpr bool is_double_buffered_v = true;
     static constexpr bool is_viewport_clipping_required_v = true;
+    static constexpr bool is_native_widget_capable_v = true;
 
     WindowOutputDevice(vcl::Window& rOwnerWindow);
     virtual ~WindowOutputDevice() override;
@@ -62,8 +63,6 @@ public:
     virtual bool AcquireGraphics() const override;
     virtual void ReleaseGraphics(bool bRelease = true) override;
 
-    bool CanEnableNativeWidget() const override;
-
     /** Get the vcl::Window that this OutputDevice belongs to, if any */
     virtual vcl::Window* GetOwnerWindow() const override { return mxOwnerWindow.get(); }
 
@@ -72,6 +71,8 @@ public:
 
     virtual bool HasAlpha() const override { return true; }
     void UpdateCursorOnMapModeChange();
+
+    bool ImplCanEnableNativeWidget() const { return mxOwnerWindow->IsNativeWidgetEnabled(); }
 
 private:
     virtual void InitClipRegion() override;
