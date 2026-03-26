@@ -377,7 +377,7 @@ public:
     const Point&                GetRefPoint() const;
     bool                        IsRefPoint() const;
 
-    virtual sal_uInt16          GetBitCount() const;
+    sal_uInt16                  GetBitCount() const;
 
     Size GetOutputSizePixel() const;
     tools::Long GetOutputWidthPixel() const;

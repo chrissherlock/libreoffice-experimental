@@ -147,8 +147,6 @@ public:
 
     void                SetReferenceDevice( sal_Int32 i_nDPIX, sal_Int32 i_nDPIY );
 
-    virtual sal_uInt16  GetBitCount() const override;
-
     bool IsVirtual() const override;
 
     bool IsWithoutAlpha() const { return meFormatAndAlpha == DeviceFormat::WITHOUT_ALPHA; }

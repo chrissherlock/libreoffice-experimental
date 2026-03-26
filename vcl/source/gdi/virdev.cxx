@@ -462,11 +462,6 @@ void VirtualDevice::ImplSetReferenceDevice( RefDevMode i_eRefDevMode, sal_Int32 
     ResetFontCache();
 }
 
-sal_uInt16 VirtualDevice::GetBitCount() const
-{
-    return mnBitCount;
-}
-
 void VirtualDevice::Compat_ZeroExtleadBug()
 {
     mbForceZeroExtleadBug = true;

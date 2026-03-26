@@ -349,12 +349,23 @@ void OutputDevice::SetDrawMode(DrawModeFlags nDrawMode)
 
 sal_uInt16 OutputDevice::GetBitCount() const
 {
-    // we need a graphics instance
-    if ( !mpGraphics && !AcquireGraphics() )
-        return 0;
-    assert(mpGraphics);
+    return vcl::DispatchDevice(*this, [this](auto& rConcreteDevice) -> sal_uInt16 {
+        using DeviceType = std::decay_t<decltype(rConcreteDevice)>;
 
-    return mpGraphics->GetBitCount();
+        if constexpr (vcl::StoredBitDepthDevice<DeviceType>)
+        {
+            // VirtualDevice / PDFWriterImpl path
+            return rConcreteDevice.ImplGetBitCount();
+        }
+        else
+        {
+            // Window / Printer path: requires hardware access
+            if (!mpGraphics && !AcquireGraphics())
+                return 0;
+
+            return mpGraphics->GetBitCount();
+        }
+    });
 }
 
 css::uno::Reference< css::awt::XGraphics > OutputDevice::CreateUnoGraphics()
