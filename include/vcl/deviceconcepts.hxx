@@ -268,6 +268,16 @@ struct has_stored_bit_depth<T, std::void_t<decltype(T::is_bit_depth_stored_v)>>
 {
 };
 
+// Legacy Font Metric Compatibility (Unix Lead Bug)
+template <typename T, typename = void> struct has_legacy_font_metrics : std::false_type
+{
+};
+template <typename T>
+struct has_legacy_font_metrics<T, std::void_t<decltype(T::is_legacy_metrics_v)>>
+    : std::bool_constant<T::is_legacy_metrics_v>
+{
+};
+
 template <typename T> concept ManagedFontCache = uses_managed_cache<T>::value;
 template <typename T> concept HWAccelerated = supports_hw_acceleration<T>::value;
 template <typename T> concept StrictlyCulled = needs_strict_culling<T>::value;
@@ -293,6 +303,7 @@ template <typename T> concept NativeWidgetCapable = supports_native_widgets<T>::
 template <typename T> concept FlushableDevice = supports_flush<T>::value;
 template <typename T> concept RTLCapableDevice = has_rtl_frame_width<T>::value;
 template <typename T> concept StoredBitDepthDevice = has_stored_bit_depth<T>::value;
+template <typename T> concept LegacyMetricDevice = has_legacy_font_metrics<T>::value;
 
 /**
  * @brief PageDevice

@@ -158,10 +158,6 @@ public:
 private:
     SAL_DLLPRIVATE void ImplSetReferenceDevice( RefDevMode, sal_Int32 i_nDPIX, sal_Int32 i_nDPIY );
     SAL_DLLPRIVATE void ImplUpdateDeviceRTLState(bool bEnable);
-
-protected:
-    virtual tools::Long        GetFontExtLeading() const override;
-
 };
 
 namespace vcl

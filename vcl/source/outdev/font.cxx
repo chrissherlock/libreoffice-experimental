@@ -211,12 +211,42 @@ bool OutputDevice::GetFontCapabilities(vcl::FontCapabilities& rFontCapabilities)
     return mpFontController && mpFontController->GetFontCapabilities(mpGraphics, rFontCapabilities);
 }
 
+/**
+ * TODO: Architectural Refactor - Legacy Metric Compatibility
+ *
+ * Currently, VirtualDevice carries the 'mbForceZeroExtleadBug' flag to maintain
+ * line-spacing compatibility for legacy Unix documents (#i60945#).
+ *
+ * This represents a leaky abstraction where a low-level GDI class is
+ * coupled to high-level Document Settings.
+ *
+ * Future Direction:
+ * 1. Move this state into vcl::font::FontController or the
+ * DocumentDeviceManager's ReferenceDevice logic.
+ * 2. Remove the 'Compat_ZeroExtleadBug' hook from the VirtualDevice
+ * public interface entirely.
+ * 3. Use the StoredBitDepthDevice or a new FontMetricPolicy concept
+ * to handle this in the dispatcher without VirtualDevice-specific flags.
+ */
+
 tools::Long OutputDevice::GetFontExtLeading() const
 {
-    if (mpFontRealization && mpFontRealization->mxFont)
-        return mpFontRealization->mxFont->mxFontMetric->GetExternalLeading();
+    return vcl::DispatchDevice(*this, [this](auto& rConcreteDevice) -> tools::Long {
+        using DeviceType = std::decay_t<decltype(rConcreteDevice)>;
 
-    return 0;
+        if constexpr (vcl::LegacyMetricDevice<DeviceType>)
+        {
+#ifdef UNX
+            if (rConcreteDevice.IsForceZeroExtleadBug())
+                return 0;
+#endif
+        }
+
+        if (mpFontRealization && mpFontRealization->mxFont)
+            return mpFontRealization->mxFont->mxFontMetric->GetExternalLeading();
+
+        return 0;
+    });
 }
 
 void OutputDevice::ImplClearFontData(const bool bNewFontLists)

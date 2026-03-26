@@ -467,20 +467,6 @@ void VirtualDevice::Compat_ZeroExtleadBug()
     mbForceZeroExtleadBug = true;
 }
 
-tools::Long VirtualDevice::GetFontExtLeading() const
-{
-#ifdef UNX
-    // backwards compatible line metrics after fixing #i60945#
-    if ( mbForceZeroExtleadBug )
-        return 0;
-#endif
-
-    // [Refactor] Use FontRealization
-    if (mpFontRealization && mpFontRealization->mxFont)
-        return mpFontRealization->mxFont->mxFontMetric->GetExternalLeading();
-    return 0;
-}
-
 tools::Long VirtualDevice::ImplGetRTLFrameWidth() const
 {
     // Virtual devices are self-contained offscreen buffers.
