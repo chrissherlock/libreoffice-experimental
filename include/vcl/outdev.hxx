@@ -351,7 +351,7 @@ public:
     GDIMetaFile*                GetConnectMetaFile() const { return maRecorder.GetConnectMetaFile(); }
 
 
-    virtual void                SetSettings( const AllSettings& rSettings );
+    void                        SetSettings(const AllSettings& rSettings);
 
     /* tdf#74702: Query device capability instead of checking GetOutDevType() */
     virtual bool                SupportsSubpixelPositioning() const { return false; }

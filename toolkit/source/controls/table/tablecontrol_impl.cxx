@@ -592,7 +592,7 @@ namespace svt::table
             aMouseSettings.SetButtonRepeat( 0 );
             aSettings.SetMouseSettings( aMouseSettings );
 
-            _rWindow.SetSettings( aSettings, true );
+            _rWindow.SetSettings( aSettings );
         }
 
 

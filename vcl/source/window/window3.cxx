@@ -213,12 +213,6 @@ tools::Rectangle Window::GetTextRect(const tools::Rectangle& rRect, const OUStri
     return GetOutDev()->GetTextRect(rRect, rStr, nStyle, pInfo, _pTextLayout);
 }
 
-void Window::SetSettings(const AllSettings& rSettings) { GetOutDev()->SetSettings(rSettings); }
-void Window::SetSettings(const AllSettings& rSettings, bool bChild)
-{
-    static_cast<vcl::WindowOutputDevice*>(GetOutDev())->SetSettings(rSettings, bChild);
-}
-
 Color Window::GetBackgroundColor() const { return GetOutDev()->GetBackgroundColor(); }
 
 void Window::FlashWindow() const

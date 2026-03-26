@@ -193,7 +193,7 @@ SvxFmTbxNextRec::SvxFmTbxNextRec( sal_uInt16 nSlotId, ToolBoxItemId nId, ToolBox
     MouseSettings aMouseSettings = aSettings.GetMouseSettings();
     aMouseSettings.SetButtonRepeat(aMouseSettings.GetButtonRepeat() / 4);
     aSettings.SetMouseSettings(aMouseSettings);
-    rTbx.SetSettings(aSettings, true);
+    rTbx.SetSettings(aSettings);
 }
 
 SFX_IMPL_TOOLBOX_CONTROL( SvxFmTbxPrevRec, SfxBoolItem );

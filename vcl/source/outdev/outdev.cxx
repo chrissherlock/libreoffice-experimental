@@ -182,9 +182,21 @@ void OutputDevice::SetConnectMetaFile( GDIMetaFile* pMtf )
     maRecorder.SetConnectMetaFile(pMtf);
 }
 
-void OutputDevice::SetSettings( const AllSettings& rSettings )
+void OutputDevice::SetSettings(const AllSettings& rSettings)
 {
+    if (*moSettings == rSettings)
+        return;
+
     *moSettings = rSettings;
+
+    // Use our dispatch pattern to notify concrete devices
+    // if they have specific resolution/DPI logic to run.
+    vcl::DispatchDevice(*this, [](auto& rConcreteDevice) {
+        if constexpr (requires { rConcreteDevice.ImplUpdateResolutionSettings(); })
+        {
+            rConcreteDevice.ImplUpdateResolutionSettings();
+        }
+    });
 }
 
 SystemGraphicsData OutputDevice::GetSystemGfxData() const

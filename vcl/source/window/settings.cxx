@@ -40,55 +40,19 @@
 
 namespace vcl {
 
-void WindowOutputDevice::SetSettings( const AllSettings& rSettings )
+void Window::SetSettings(const AllSettings& rSettings)
 {
-    SetSettings( rSettings, false );
+    UpdateSettings(rSettings, false);
 }
 
-void WindowOutputDevice::SetSettings( const AllSettings& rSettings, bool bChild )
+void Window::UpdateSettings(const AllSettings& rSettings, bool bChild)
 {
-
-    if ( auto pBorderWindow = mxOwnerWindow->mpWindowImpl->mpBorderWindow.get() )
+    if (mpWindowImpl->mpBorderWindow)
     {
-        static_cast<vcl::WindowOutputDevice*>(pBorderWindow->GetOutDev())->SetSettings( rSettings, false );
-        if ( (pBorderWindow->GetType() == WindowType::BORDERWINDOW) &&
-             static_cast<ImplBorderWindow*>(pBorderWindow)->mpMenuBarWindow )
-            static_cast<vcl::WindowOutputDevice*>(static_cast<ImplBorderWindow*>(pBorderWindow)->mpMenuBarWindow->GetOutDev())->SetSettings( rSettings, true );
-    }
-
-    AllSettings aOldSettings(*moSettings);
-    OutputDevice::SetSettings( rSettings );
-    AllSettingsFlags nChangeFlags = aOldSettings.GetChangeFlags( rSettings );
-
-    // recalculate AppFont-resolution and DPI-resolution
-    mxOwnerWindow->ImplInitResolutionSettings();
-
-    if ( bool(nChangeFlags) )
-    {
-        DataChangedEvent aDCEvt( DataChangedEventType::SETTINGS, &aOldSettings, nChangeFlags );
-        mxOwnerWindow->DataChanged( aDCEvt );
-    }
-
-    if ( bChild )
-    {
-        vcl::Window* pChild = mxOwnerWindow->mpWindowImpl->mpFirstChild;
-        while ( pChild )
-        {
-            static_cast<vcl::WindowOutputDevice*>(pChild->GetOutDev())->SetSettings( rSettings, bChild );
-            pChild = pChild->mpWindowImpl->mpNext;
-        }
-    }
-}
-
-void Window::UpdateSettings( const AllSettings& rSettings, bool bChild )
-{
-
-    if ( mpWindowImpl->mpBorderWindow )
-    {
-        mpWindowImpl->mpBorderWindow->UpdateSettings( rSettings );
+        mpWindowImpl->mpBorderWindow->UpdateSettings(rSettings);
         if (mpWindowImpl->mpBorderWindow->GetType() == WindowType::BORDERWINDOW)
         {
-            ImplBorderWindow* pImpl = static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get());
+            auto* pImpl = static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get());
             if (pImpl->mpMenuBarWindow)
                 pImpl->mpMenuBarWindow->UpdateSettings(rSettings, true);
             if (pImpl->mpNotebookBar)
@@ -96,55 +60,50 @@ void Window::UpdateSettings( const AllSettings& rSettings, bool bChild )
         }
     }
 
-    AllSettings aOldSettings(*mpWindowImpl->mxOutDev->moSettings);
-    AllSettingsFlags nChangeFlags = mpWindowImpl->mxOutDev->moSettings->Update( AllSettings::GetWindowUpdate(), rSettings );
+    AllSettings aOldSettings(mpWindowImpl->mxOutDev->GetSettings());
+    mpWindowImpl->mxOutDev->OutputDevice::SetSettings(rSettings);
 
-    // recalculate AppFont-resolution and DPI-resolution
     ImplInitResolutionSettings();
 
-    /* #i73785#
-    *  do not overwrite a WheelBehavior with false
-    *  this looks kind of a hack, but WheelBehavior
-    *  is always a local change, not a system property,
-    *  so we can spare all our users the hassle of reacting on
-    *  this in their respective DataChanged.
-    */
-    MouseSettings aSet( mpWindowImpl->mxOutDev->moSettings->GetMouseSettings() );
-    aSet.SetWheelBehavior( aOldSettings.GetMouseSettings().GetWheelBehavior() );
-    mpWindowImpl->mxOutDev->moSettings->SetMouseSettings( aSet );
+    MouseSettings aMouseSet(mpWindowImpl->mxOutDev->GetSettings().GetMouseSettings());
+    aMouseSet.SetWheelBehavior(aOldSettings.GetMouseSettings().GetWheelBehavior());
 
-    if( (nChangeFlags & AllSettingsFlags::STYLE) && IsBackground() )
+    const_cast<AllSettings&>(mpWindowImpl->mxOutDev->GetSettings()).SetMouseSettings(aMouseSet);
+
+    AllSettingsFlags nChangeFlags = aOldSettings.GetChangeFlags(rSettings);
+    if ((nChangeFlags & AllSettingsFlags::STYLE) && IsBackground())
     {
         Wallpaper aWallpaper = GetBackground();
-        if( !aWallpaper.IsBitmap() && !aWallpaper.IsGradient() )
+        if (!aWallpaper.IsBitmap() && !aWallpaper.IsGradient())
         {
-            if ( mpWindowImpl->mnStyle & WB_3DLOOK )
+            const StyleSettings& rStyle = rSettings.GetStyleSettings();
+            if (mpWindowImpl->mnStyle & WB_3DLOOK)
             {
-                if (aOldSettings.GetStyleSettings().GetFaceColor() != rSettings.GetStyleSettings().GetFaceColor())
-                    SetBackground( Wallpaper( rSettings.GetStyleSettings().GetFaceColor() ) );
+                if (aOldSettings.GetStyleSettings().GetFaceColor() != rStyle.GetFaceColor())
+                    SetBackground(Wallpaper(rStyle.GetFaceColor()));
             }
             else
             {
-                if (aOldSettings.GetStyleSettings().GetWindowColor() != rSettings.GetStyleSettings().GetWindowColor())
-                    SetBackground( Wallpaper( rSettings.GetStyleSettings().GetWindowColor() ) );
+                if (aOldSettings.GetStyleSettings().GetWindowColor() != rStyle.GetWindowColor())
+                    SetBackground(Wallpaper(rStyle.GetWindowColor()));
             }
         }
     }
 
-    if ( bool(nChangeFlags) )
+    if (bool(nChangeFlags))
     {
-        DataChangedEvent aDCEvt( DataChangedEventType::SETTINGS, &aOldSettings, nChangeFlags );
-        DataChanged( aDCEvt );
-        // notify data change handler
-        CallEventListeners( VclEventId::WindowDataChanged, &aDCEvt);
+        DataChangedEvent aDCEvt(DataChangedEventType::SETTINGS, &aOldSettings, nChangeFlags);
+        DataChanged(aDCEvt);
+
+        CallEventListeners(VclEventId::WindowDataChanged, &aDCEvt);
     }
 
-    if ( bChild )
+    if (bChild)
     {
         vcl::Window* pChild = mpWindowImpl->mpFirstChild;
-        while ( pChild )
+        while (pChild)
         {
-            pChild->UpdateSettings( rSettings, bChild );
+            pChild->UpdateSettings(rSettings, bChild);
             pChild = pChild->mpWindowImpl->mpNext;
         }
     }

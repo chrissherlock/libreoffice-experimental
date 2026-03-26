@@ -809,7 +809,7 @@ public:
 
     void                                SetCompositionCharRect( const tools::Rectangle* pRect, tools::Long nCompositionLength, bool bVertical = false );
 
-    SAL_DLLPRIVATE void                 UpdateSettings( const AllSettings& rSettings, bool bChild = false );
+    void                                UpdateSettings(const AllSettings& rSettings, bool bChild = false);
     SAL_DLLPRIVATE void                 NotifyAllChildren( DataChangedEvent& rDCEvt );
 
     void                                SetPointFont(vcl::RenderContext& rRenderContext, const vcl::Font& rFont, bool bUseRenderContextDPI = false);
@@ -1479,8 +1479,7 @@ public:
                                               const MapMode*    pMapModeDest ) const;
 
     const AllSettings&          GetSettings() const;
-    void SetSettings( const AllSettings& rSettings );
-    void SetSettings( const AllSettings& rSettings, bool bChild );
+    void SetSettings(const AllSettings& rSettings);
 
     tools::Rectangle            GetTextRect( const tools::Rectangle& rRect,
                                              const OUString& rStr, DrawTextFlags nStyle = DrawTextFlags::WordBreak,

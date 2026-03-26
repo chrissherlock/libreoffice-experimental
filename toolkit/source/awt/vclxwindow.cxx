@@ -1256,7 +1256,7 @@ namespace toolkit
         (aStyleSettings.*pSetter)( Color( ColorTransparency, nColor ) );
 
         aSettings.SetStyleSettings( aStyleSettings );
-        _pWindow->SetSettings( aSettings, true );
+        _pWindow->SetSettings( aSettings );
     }
 }
 
@@ -1424,7 +1424,7 @@ void VCLXWindow::setProperty( const OUString& PropertyName, const css::uno::Any&
 
             aMouseSettings.SetWheelBehavior( nVclBehavior );
             aSettings.SetMouseSettings( aMouseSettings );
-            pWindow->SetSettings( aSettings, true );
+            pWindow->SetSettings( aSettings );
         }
         break;
 
@@ -1896,7 +1896,7 @@ void VCLXWindow::setProperty( const OUString& PropertyName, const css::uno::Any&
                 aMouseSettings.SetButtonRepeat( nRepeatDelay );
                 aSettings.SetMouseSettings( aMouseSettings );
 
-                pWindow->SetSettings( aSettings, true );
+                pWindow->SetSettings( aSettings );
             }
         }
         break;

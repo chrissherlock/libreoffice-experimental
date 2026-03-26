@@ -228,7 +228,7 @@ namespace frm
         MouseSettings aMouseSettings = aSettings.GetMouseSettings();
         aMouseSettings.SetButtonRepeat( 10 );
         aSettings.SetMouseSettings( aMouseSettings );
-        pNavBar->SetSettings( aSettings, true );
+        pNavBar->SetSettings( aSettings );
 
         // outta here
         return pPeer;

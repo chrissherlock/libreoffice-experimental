@@ -21,6 +21,7 @@
 
 #include <vcl/outdev.hxx>
 #include <vcl/deviceconcepts.hxx>
+#include <vcl/window.hxx>
 
 namespace vcl
 {
@@ -61,10 +62,6 @@ public:
     virtual bool AcquireGraphics() const override;
     virtual void ReleaseGraphics(bool bRelease = true) override;
 
-    using ::OutputDevice::SetSettings;
-    virtual void SetSettings(const AllSettings& rSettings) override;
-    void SetSettings(const AllSettings& rSettings, bool bChild);
-
     bool CanEnableNativeWidget() const override;
 
     /** Get the vcl::Window that this OutputDevice belongs to, if any */
@@ -83,6 +80,8 @@ private:
 
     void ImplClearFontData(bool bNewFontLists) override;
     void ImplRefreshFontData(bool bNewFontLists) override;
+
+    void ImplUpdateResolutionSettings() { mxOwnerWindow->ImplInitResolutionSettings(); }
 
     virtual void CopyDeviceArea(SalTwoRect& aPosAry) override;
     virtual const OutputDevice* DrawOutDevDirectCheck(const OutputDevice& rSrcDev) const override;
