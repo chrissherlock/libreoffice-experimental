@@ -57,6 +57,7 @@
 
 #include "X11CairoSalGraphicsImpl.hxx"
 
+#include <devicedispatcher.hxx>
 
 // X11Common
 
@@ -238,34 +239,42 @@ namespace
     }
 }
 
-cairo::SurfaceSharedPtr X11SalGraphics::CreateSurface( const OutputDevice& rRefDevice,
-                                int x, int y, int width, int height ) const
+cairo::SurfaceSharedPtr X11SalGraphics::CreateSurface(const OutputDevice& rRefDevice,
+                                int x, int y, int width, int height) const
 {
-    if( rRefDevice.GetOutDevType() == OUTDEV_WINDOW )
-        return std::make_shared<cairo::X11Surface>(getSysData(*rRefDevice.GetOwnerWindow()),
-                                               x,y,width,height);
-    if( rRefDevice.IsVirtual() )
-        return std::make_shared<cairo::X11Surface>(getSysData(static_cast<const VirtualDevice&>(rRefDevice)),
-                                               x,y,width,height);
-    return cairo::SurfaceSharedPtr();
+    return vcl::DispatchDevice(rRefDevice, [&](auto& rConcreteDevice) {
+        using DeviceType = std::decay_t<decltype(rConcreteDevice)>;
+
+        // We only care about devices that can actually provide X11 System Data
+        if constexpr (std::is_base_of_v<vcl::WindowOutputDevice, DeviceType> ||
+                      std::is_base_of_v<VirtualDevice, DeviceType>)
+        {
+            return std::make_shared<cairo::X11Surface>(getSysData(rConcreteDevice),
+                                                       x, y, width, height);
+        }
+
+        return cairo::SurfaceSharedPtr();
+    });
 }
 
-cairo::SurfaceSharedPtr X11SalGraphics::CreateBitmapSurface( const OutputDevice&     rRefDevice,
+cairo::SurfaceSharedPtr X11SalGraphics::CreateBitmapSurface(const OutputDevice& rRefDevice,
                                       const BitmapSystemData& rData,
-                                      const Size&             rSize ) const
+                                      const Size& rSize) const
 {
-    SAL_INFO("vcl", "requested size: " << rSize.Width() << " x " << rSize.Height()
-              << " available size: " << rData.mnWidth << " x "
-              << rData.mnHeight);
-    if ( rData.mnWidth == rSize.Width() && rData.mnHeight == rSize.Height() )
-    {
-        if( rRefDevice.GetOutDevType() == OUTDEV_WINDOW )
-            return std::make_shared<cairo::X11Surface>(getSysData(*rRefDevice.GetOwnerWindow()), rData );
-        else if( rRefDevice.IsVirtual() )
-            return std::make_shared<cairo::X11Surface>(getSysData(static_cast<const VirtualDevice&>(rRefDevice)), rData );
-    }
+    if (rData.mnWidth != rSize.Width() || rData.mnHeight != rSize.Height())
+        return cairo::SurfaceSharedPtr();
 
-    return cairo::SurfaceSharedPtr();
+    return vcl::DispatchDevice(rRefDevice, [&](auto& rConcreteDevice) {
+        using DeviceType = std::decay_t<decltype(rConcreteDevice)>;
+
+        if constexpr (std::is_base_of_v<vcl::WindowOutputDevice, DeviceType> ||
+                      std::is_base_of_v<VirtualDevice, DeviceType>)
+        {
+            return std::make_shared<cairo::X11Surface>(getSysData(rConcreteDevice), rData);
+        }
+
+        return cairo::SurfaceSharedPtr();
+    });
 }
 
 css::uno::Any X11SalGraphics::GetNativeSurfaceHandle(cairo::SurfaceSharedPtr& rSurface, const basegfx::B2ISize& /*rSize*/) const
