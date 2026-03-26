@@ -284,7 +284,7 @@ void SdrPaintWindow::PreparePreRenderDevice()
     const bool bPrepareBufferedOutput(
         mrPaintView.IsBufferedOutputAllowed()
         && !OutputToPrinter()
-        && !mpOutputDevice->IsVirtual()
+        && !mpOutputDevice->HasMemoryBackend()
         && !OutputToRecordingMetaFile());
 
     if(bPrepareBufferedOutput)
