@@ -154,7 +154,7 @@ void OutputDevice::ImplDrawTextDecoration(const SalLayout& rSalLayout)
     const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
     if (bRTL)
     {
-        tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+        tools::Long nFrameWidth = vcl::get_reference_width_v(*this);
         bool bAntiparallel = ImplIsAntiparallel();
 
         if (aGeo.mbIsPolygon)
@@ -258,7 +258,7 @@ void OutputDevice::ImplRenderLayout(SalLayout& rSalLayout, bool bTextLines)
         {
             vcl::text::MirroringContext aCtx{
                 nOldX,
-                IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth(),
+                vcl::get_reference_width_v(*this),
                 GetOutputWidthPixel(),
                 GetOutOffXPixel(),
                 HasMirroredGraphics(),
@@ -615,7 +615,7 @@ void OutputDevice::DrawTextLines(SalLayout& rSalLayout, FontStrikeout eStrikeout
     const vcl::font::FontRealization& rFontRealization = *mpFontRealization;
     const Degree10 nOrientation = rFontRealization.mxFont->mnOrientation;
     const bool bRTL = IsRTLEnabled() || (mpGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
-    const tools::Long nFrameWidth = IsVirtual() ? GetOutputWidthPixel() : mpGraphics->GetGraphicsWidth();
+    const tools::Long nFrameWidth = vcl::get_reference_width_v(*this);
     const bool bAntiparallel = ImplIsAntiparallel();
 
     // Identify logical segments (WordLine vs Full Line)

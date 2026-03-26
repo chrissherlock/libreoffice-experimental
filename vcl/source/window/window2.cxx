@@ -208,7 +208,7 @@ void Window::InvertTracking( const tools::Rectangle& rRect, ShowTrackFlags nFlag
     bool bRTL = pOutDev->IsRTLEnabled() || (pGraphics->GetLayout() & SalLayoutFlags::BiDiRtl);
     if (bRTL)
     {
-        tools::Long nFrameWidth = pOutDev->IsVirtual() ? pOutDev->GetOutputWidthPixel() : pGraphics->GetGraphicsWidth();
+        tools::Long nFrameWidth = vcl::get_reference_width_v(*pOutDev);
         pOutDev->mpMapper->MirrorDevicePixelRect(aRect, nFrameWidth, bRTL, pOutDev->ImplIsAntiparallel());
     }
 
