@@ -104,7 +104,7 @@ public:
 
     OutputDevice*       GetRefDevPtr() const        { return pRefDevPtr; }
     sal_uInt32          GetPaperWidth() const       { return nPaperWidth; }
-    bool                RefDevIsVirtual() const {return pRefDevPtr->IsVirtual();}
+    bool                UsesMemoryBackend() const {return pRefDevPtr->HasMemoryBackend();}
     const MapMode&  GetRefMapMode() const       { return pRefDevPtr->GetMapMode(); }
     double  getFontScaleX() const { return mfFontScaleX; }
     double  getFontScaleY() const { return mfFontScaleY; }

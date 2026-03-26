@@ -1363,26 +1363,37 @@ EditSelection ImpEditEngine::InsertText( const EditTextObject& rTextObject, Edit
     return aNewSel;
 }
 
-EditSelection ImpEditEngine::InsertTextObject( const EditTextObject& rTextObject, EditPaM aPaM )
+EditSelection ImpEditEngine::InsertTextObject(const EditTextObject& rTextObject, EditPaM aPaM)
 {
-    // Optimize: No getPos undFindParaportion, instead calculate index!
-    EditSelection aSel( aPaM, aPaM );
-    DBG_ASSERT( !aSel.DbgIsBuggy( maEditDoc ), "InsertBibTextObject: Selection broken!(1)" );
+    // Optimize: No getPos and FindParaPortion, instead calculate index!
+    EditSelection aSel(aPaM, aPaM);
+    DBG_ASSERT(!aSel.DbgIsBuggy(maEditDoc), "InsertTextObject: Selection broken!(1)");
 
     bool bUsePortionInfo = false;
     const EditTextObjectImpl& rTextObjectImpl = toImpl(rTextObject);
     XParaPortionList* pPortionInfo = rTextObjectImpl.GetPortionInfo();
 
-    if (pPortionInfo && ( static_cast<tools::Long>(pPortionInfo->GetPaperWidth()) == GetColumnWidth(maPaperSize))
-            && pPortionInfo->GetRefMapMode() == GetRefDevice()->GetMapMode()
+    if (pPortionInfo)
+    {
+        OutputDevice* pRefDev = GetRefDevice();
+
+        // Check if the source layout metrics match the current destination environment.
+        // This includes paper width, MapMode, and font/spacing scales.
+        if ((static_cast<tools::Long>(pPortionInfo->GetPaperWidth()) == GetColumnWidth(maPaperSize))
+            && pPortionInfo->GetRefMapMode() == pRefDev->GetMapMode()
             && pPortionInfo->getFontScaleX() == maScalingParameters.fFontX
             && pPortionInfo->getFontScaleY() == maScalingParameters.fFontY
             && pPortionInfo->getSpacingScaleX() == maScalingParameters.fSpacingX
             && pPortionInfo->getSpacingScaleY() == maScalingParameters.fSpacingY)
-    {
-        if ( (pPortionInfo->GetRefDevPtr() == GetRefDevice()) ||
-             (pPortionInfo->RefDevIsVirtual() && GetRefDevice()->IsVirtual()) )
-            bUsePortionInfo = true;
+        {
+            // IDENTITY CHECK: Re-use layout if it's the exact same device,
+            // or if both the source and destination are memory-backed buffers (Traits-based).
+            if (pPortionInfo->GetRefDevPtr() == pRefDev ||
+               (pPortionInfo->UsesMemoryBackend() && pRefDev->HasMemoryBackend()))
+            {
+                bUsePortionInfo = true;
+            }
+        }
     }
 
     bool bConvertMetricOfItems = false;
@@ -1390,17 +1401,14 @@ EditSelection ImpEditEngine::InsertTextObject( const EditTextObject& rTextObject
     if (rTextObjectImpl.HasMetric())
     {
         eSourceUnit = rTextObjectImpl.GetMetric();
-        eDestUnit = maEditDoc.GetItemPool().GetMetric( DEF_METRIC );
-        if ( eSourceUnit != eDestUnit )
+        eDestUnit = maEditDoc.GetItemPool().GetMetric(DEF_METRIC);
+        if (eSourceUnit != eDestUnit)
             bConvertMetricOfItems = true;
     }
 
-    // Before, paragraph count was of type sal_uInt16 so if nContents exceeded
-    // 0xFFFF this wouldn't have worked anyway, given that nPara is used to
-    // number paragraphs and is fearlessly incremented.
     sal_Int32 nContents = static_cast<sal_Int32>(rTextObjectImpl.GetContents().size());
-    SAL_WARN_IF( nContents < 0, "editeng", "ImpEditEngine::InsertTextObject - contents overflow " << nContents);
-    sal_Int32 nPara = maEditDoc.GetPos( aPaM.GetNode() );
+    SAL_WARN_IF(nContents < 0, "editeng", "ImpEditEngine::InsertTextObject - contents overflow " << nContents);
+    sal_Int32 nPara = maEditDoc.GetPos(aPaM.GetNode());
 
     for (sal_Int32 n = 0; n < nContents; ++n, ++nPara)
     {
@@ -1408,59 +1416,51 @@ EditSelection ImpEditEngine::InsertTextObject( const EditTextObject& rTextObject
         bool bNewContent = aPaM.GetNode()->Len() == 0;
         const sal_Int32 nStartPos = aPaM.GetIndex();
 
-        aPaM = ImpFastInsertText( aPaM, pC->GetText() );
+        aPaM = ImpFastInsertText(aPaM, pC->GetText());
 
-        ParaPortion* pPortion = FindParaPortion( aPaM.GetNode() );
-        DBG_ASSERT( pPortion, "Blind Portion in FastInsertText" );
-        pPortion->MarkInvalid( nStartPos, pC->GetText().getLength() );
+        ParaPortion* pPortion = FindParaPortion(aPaM.GetNode());
+        DBG_ASSERT(pPortion, "Blind Portion in FastInsertText");
+        pPortion->MarkInvalid(nStartPos, pC->GetText().getLength());
 
         // Character attributes ...
-        bool bAllreadyHasAttribs = aPaM.GetNode()->GetCharAttribs().Count() != 0;
+        bool bAlreadyHasAttribs = aPaM.GetNode()->GetCharAttribs().Count() != 0;
         size_t nNewAttribs = pC->GetCharAttribs().size();
-        if ( nNewAttribs )
+        if (nNewAttribs)
         {
             bool bUpdateFields = false;
             for (size_t nAttr = 0; nAttr < nNewAttribs; ++nAttr)
             {
                 const XEditAttribute& rX = pC->GetCharAttribs()[nAttr];
-                // Can happen when paragraphs > 16K, it is simply wrapped.
-                    //TODO! Still true, still needed?
-                if ( rX.GetEnd() <= aPaM.GetNode()->Len() )
+                if (rX.GetEnd() <= aPaM.GetNode()->Len())
                 {
-                    if ( !bAllreadyHasAttribs || rX.IsFeature() )
+                    if (!bAlreadyHasAttribs || rX.IsFeature())
                     {
-                        // Normal attributes then go faster ...
-                        // Features shall not be inserted through
-                        // EditDoc:: InsertAttrib, using FastInsertText they are
-                        // already in the flow
-                        DBG_ASSERT( rX.GetEnd() <= aPaM.GetNode()->Len(), "InsertBinTextObject: Attribute too large!" );
+                        DBG_ASSERT(rX.GetEnd() <= aPaM.GetNode()->Len(), "InsertTextObject: Attribute too large!");
                         EditCharAttrib* pAttr;
-                        if ( !bConvertMetricOfItems )
-                            pAttr = MakeCharAttrib( maEditDoc.GetItemPool(), *(rX.GetItem()), rX.GetStart()+nStartPos, rX.GetEnd()+nStartPos );
+                        if (!bConvertMetricOfItems)
+                            pAttr = MakeCharAttrib(maEditDoc.GetItemPool(), *(rX.GetItem()), rX.GetStart() + nStartPos, rX.GetEnd() + nStartPos);
                         else
                         {
                             std::unique_ptr<SfxPoolItem> pNew(rX.GetItem()->Clone());
-                            ConvertItem( pNew, eSourceUnit, eDestUnit );
-                            pAttr = MakeCharAttrib( maEditDoc.GetItemPool(), *pNew, rX.GetStart()+nStartPos, rX.GetEnd()+nStartPos );
+                            ConvertItem(pNew, eSourceUnit, eDestUnit);
+                            pAttr = MakeCharAttrib(maEditDoc.GetItemPool(), *pNew, rX.GetStart() + nStartPos, rX.GetEnd() + nStartPos);
                         }
-                        DBG_ASSERT( pAttr->GetEnd() <= aPaM.GetNode()->Len(), "InsertBinTextObject: Attribute does not fit! (1)" );
-                        aPaM.GetNode()->GetCharAttribs().InsertAttrib( pAttr );
-                        if ( pAttr->Which() == EE_FEATURE_FIELD )
+                        DBG_ASSERT(pAttr->GetEnd() <= aPaM.GetNode()->Len(), "InsertTextObject: Attribute does not fit! (1)");
+                        aPaM.GetNode()->GetCharAttribs().InsertAttrib(pAttr);
+                        if (pAttr->Which() == EE_FEATURE_FIELD)
                             bUpdateFields = true;
                     }
                     else
                     {
-                        DBG_ASSERT( rX.GetEnd()+nStartPos <= aPaM.GetNode()->Len(), "InsertBinTextObject: Attribute does not fit! (2)" );
-                        // Tabs and other Features can not be inserted through InsertAttrib:
-                        maEditDoc.InsertAttrib( aPaM.GetNode(), rX.GetStart()+nStartPos, rX.GetEnd()+nStartPos, *rX.GetItem() );
+                        DBG_ASSERT(rX.GetEnd() + nStartPos <= aPaM.GetNode()->Len(), "InsertTextObject: Attribute does not fit! (2)");
+                        maEditDoc.InsertAttrib(aPaM.GetNode(), rX.GetStart() + nStartPos, rX.GetEnd() + nStartPos, *rX.GetItem());
                     }
                 }
             }
-            if ( bUpdateFields )
+            if (bUpdateFields)
                 UpdateFields();
 
-            // Otherwise, quick format => no attributes!
-            pPortion->MarkSelectionInvalid( nStartPos );
+            pPortion->MarkSelectionInvalid(nStartPos);
         }
 
 #if OSL_DEBUG_LEVEL > 0 && !defined NDEBUG
@@ -1468,90 +1468,87 @@ EditSelection ImpEditEngine::InsertTextObject( const EditTextObject& rTextObject
 #endif
 
         bool bParaAttribs = false;
-        if ( bNewContent || ( ( n > 0 ) && ( n < (nContents-1) ) ) )
+        if (bNewContent || ((n > 0) && (n < (nContents - 1))))
         {
-            // only style and ParaAttribs when new paragraph, or
-            // completely internal ...
             bParaAttribs = pC->GetParaAttribs().Count() != 0;
-            if ( GetStyleSheetPool() && pC->GetStyle().getLength() )
+            if (GetStyleSheetPool() && pC->GetStyle().getLength())
             {
-                SfxStyleSheet* pStyle = static_cast<SfxStyleSheet*>(GetStyleSheetPool()->Find( pC->GetStyle(), pC->GetFamily() ));
-                DBG_ASSERT( pStyle, "InsertBinTextObject - Style not found!" );
-                SetStyleSheet( nPara, pStyle );
+                SfxStyleSheet* pStyle = static_cast<SfxStyleSheet*>(GetStyleSheetPool()->Find(pC->GetStyle(), pC->GetFamily()));
+                DBG_ASSERT(pStyle, "InsertTextObject - Style not found!");
+                SetStyleSheet(nPara, pStyle);
             }
-            if ( !bConvertMetricOfItems )
-                SetParaAttribs( maEditDoc.GetPos( aPaM.GetNode() ), pC->GetParaAttribs() );
+            if (!bConvertMetricOfItems)
+                SetParaAttribs(maEditDoc.GetPos(aPaM.GetNode()), pC->GetParaAttribs());
             else
             {
-                SfxItemSet aAttribs( GetEmptyItemSet() );
-                ConvertAndPutItems( aAttribs, pC->GetParaAttribs(), &eSourceUnit, &eDestUnit );
-                SetParaAttribs( maEditDoc.GetPos( aPaM.GetNode() ), aAttribs );
+                SfxItemSet aAttribs(GetEmptyItemSet());
+                ConvertAndPutItems(aAttribs, pC->GetParaAttribs(), &eSourceUnit, &eDestUnit);
+                SetParaAttribs(maEditDoc.GetPos(aPaM.GetNode()), aAttribs);
             }
-            if ( bNewContent && bUsePortionInfo )
+
+            // FAST PATH: Re-using existing Paragraph Portions if device environment is compatible
+            if (bNewContent && bUsePortionInfo)
             {
                 const XParaPortion& rXP = (*pPortionInfo)[n];
                 ParaPortion* pParaPortion = GetParaPortions().SafeGetObject(nPara);
-                DBG_ASSERT( pParaPortion, "InsertBinTextObject: ParaPortion?" );
+                DBG_ASSERT(pParaPortion, "InsertTextObject: ParaPortion missing?");
+
                 pParaPortion->mnHeight = rXP.nHeight;
                 pParaPortion->mnFirstLineOffset = rXP.nFirstLineOffset;
                 pParaPortion->mbForceRepaint = true;
-                pParaPortion->SetValid();   // Do not format
+                pParaPortion->SetValid();   // Skip re-formatting
 
-                // The Text Portions
+                // Re-populate Text Portions
                 pParaPortion->GetTextPortions().Reset();
-                sal_uInt16 nCount = rXP.aTextPortions.Count();
-                for ( sal_uInt16 _n = 0; _n < nCount; _n++ )
+                for (sal_uInt16 _n = 0; _n < rXP.aTextPortions.Count(); ++_n)
                 {
-                    const TextPortion& rTextPortion = rXP.aTextPortions[_n];
-                    TextPortion* pNew = new TextPortion( rTextPortion );
-                    pParaPortion->GetTextPortions().Append(pNew);
+                    pParaPortion->GetTextPortions().Append(new TextPortion(rXP.aTextPortions[_n]));
                 }
 
-                // The lines
+                // Re-populate Lines
                 pParaPortion->GetLines().Reset();
-                nCount = rXP.aLines.Count();
-                for ( sal_uInt16 m = 0; m < nCount; m++ )
+                for (sal_uInt16 m = 0; m < rXP.aLines.Count(); ++m)
                 {
-                    const EditLine& rLine = rXP.aLines[m];
-                    EditLine* pNew = rLine.Clone();
-                    pNew->SetInvalid(); // Paint again!
+                    EditLine* pNew = rXP.aLines[m].Clone();
+                    pNew->SetInvalid(); // Ensure repaint
                     pParaPortion->GetLines().Append(std::unique_ptr<EditLine>(pNew));
                 }
 #ifdef DBG_UTIL
                 sal_uInt16 nTest;
                 int nTPLen = 0, nTxtLen = 0;
-                for ( nTest = pParaPortion->GetTextPortions().Count(); nTest; )
+                for (nTest = pParaPortion->GetTextPortions().Count(); nTest;)
                     nTPLen += pParaPortion->GetTextPortions()[--nTest].GetLen();
-                for ( nTest = pParaPortion->GetLines().Count(); nTest; )
+                for (nTest = pParaPortion->GetLines().Count(); nTest;)
                     nTxtLen += pParaPortion->GetLines()[--nTest].GetLen();
-                DBG_ASSERT( ( nTPLen == pParaPortion->GetNode()->Len() ) && ( nTxtLen == pParaPortion->GetNode()->Len() ), "InsertTextObject: ParaPortion not completely formatted!" );
+                DBG_ASSERT((nTPLen == pParaPortion->GetNode()->Len()) && (nTxtLen == pParaPortion->GetNode()->Len()), "InsertTextObject: ParaPortion length mismatch!");
 #endif
             }
         }
-        if ( !bParaAttribs ) // DefFont is not calculated for FastInsertParagraph
+
+        if (!bParaAttribs)
         {
             aPaM.GetNode()->GetCharAttribs().GetDefFont() = maEditDoc.GetDefFont();
             if (maStatus.UseCharAttribs())
                 aPaM.GetNode()->CreateDefFont();
         }
 
-        if ( bNewContent && GetStatus().DoOnlineSpelling() && pC->GetWrongList() )
+        if (bNewContent && GetStatus().DoOnlineSpelling() && pC->GetWrongList())
         {
-            aPaM.GetNode()->SetWrongList( pC->GetWrongList()->Clone() );
+            aPaM.GetNode()->SetWrongList(pC->GetWrongList()->Clone());
         }
 
-        // Wrap when followed by other ...
-        if ( n < ( nContents-1) )
+        // Handle paragraph breaks if not the last item
+        if (n < (nContents - 1))
         {
-            if ( bNewContent )
-                aPaM = ImpFastInsertParagraph( nPara+1 );
+            if (bNewContent)
+                aPaM = ImpFastInsertParagraph(nPara + 1);
             else
-                aPaM = ImpInsertParaBreak( aPaM, false );
+                aPaM = ImpInsertParaBreak(aPaM, false);
         }
     }
 
     aSel.Max() = aPaM;
-    DBG_ASSERT( !aSel.DbgIsBuggy( maEditDoc ), "InsertBibTextObject: Selection broken!(1)" );
+    DBG_ASSERT(!aSel.DbgIsBuggy(maEditDoc), "InsertTextObject: Selection broken!(2)");
     return aSel;
 }
 

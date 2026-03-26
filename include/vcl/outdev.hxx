@@ -378,6 +378,12 @@ public:
     bool                        IsRefPoint() const;
 
     sal_uInt16                  GetBitCount() const;
+    /**
+     * @brief Determines if the device uses a stable memory-backed buffer.
+     * * This replaces legacy IsVirtual() checks by querying the underlying
+     * StoredBitDepthDevice concept at compile-time.
+     */
+    bool HasMemoryBackend() const;
 
     Size GetOutputSizePixel() const;
     tools::Long GetOutputWidthPixel() const;

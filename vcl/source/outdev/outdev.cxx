@@ -889,4 +889,13 @@ void OutputDevice::Flush(const tools::Rectangle& rRect)
     });
 }
 
+bool OutputDevice::HasMemoryBackend() const
+{
+    return vcl::DispatchDevice(*this, [](auto& rConcreteDevice) {
+        using DeviceType = std::decay_t<decltype(rConcreteDevice)>;
+
+        return vcl::StoredBitDepthDevice<DeviceType>;
+    });
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
