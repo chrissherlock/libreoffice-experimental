@@ -649,8 +649,7 @@ public:
     vcl::Region                 GetActiveClipRegion() const;
     vcl::Region                 GetOutputBoundsClipRegion() const;
 
-protected:
-    virtual void                InitClipRegion();
+    void                        InitClipRegion();
 
     ///@}
 

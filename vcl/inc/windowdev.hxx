@@ -73,9 +73,9 @@ public:
     void UpdateCursorOnMapModeChange();
 
     bool ImplCanEnableNativeWidget() const { return mxOwnerWindow->IsNativeWidgetEnabled(); }
+    void ImplCalculateAndApplyClip();
 
 private:
-    virtual void InitClipRegion() override;
     void ImplSaveWindowBackground(VirtualDevice& rSaveDevice, const Point& rPos,
                                   const Size& rSize) const;
 

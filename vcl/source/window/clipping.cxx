@@ -39,13 +39,14 @@
 
 namespace vcl {
 
-void WindowOutputDevice::InitClipRegion()
+void WindowOutputDevice::ImplCalculateAndApplyClip()
 {
-    DBG_TESTSOLARMUTEX();
-
     vcl::Region aRegion;
 
-    if ( mxOwnerWindow->mpWindowImpl->mbInPaint )
+    // Determine the Base Visibility Region
+    // If we are in a Paint event, we only care about the damaged area.
+    // Otherwise, we calculate what's visible relative to child windows.
+    if (mxOwnerWindow->mpWindowImpl->mbInPaint)
     {
         aRegion = *(mxOwnerWindow->mpWindowImpl->mpPaintRegion);
     }
@@ -53,31 +54,37 @@ void WindowOutputDevice::InitClipRegion()
     {
         aRegion = mxOwnerWindow->ImplGetWinChildClipRegion();
 
-        if( ImplIsAntiparallel() )
-            ReMirror ( aRegion );
+        // Handle RTL Mirroring
+        // If the window is 'Antiparallel' (RTL), we must re-mirror the
+        // calculated coordinates to match the physical screen space.
+        if (ImplIsAntiparallel())
+            ReMirror(aRegion);
     }
 
-    if ( mpClippingController->HasClipRegion() )
+    // Intersect with the User-Defined Clip
+    // This is the clip set by the programmer (e.g., SetClipRegion).
+    // We must move it to absolute coordinates to match the Window Region.
+    if (mpClippingController->HasClipRegion())
     {
-        // Convert User Clip from Relative to Absolute coordinates
-        // so it matches the coordinate space of the Window Region.
         vcl::Region aUserClip = mpClippingController->GetClipRegion();
-        aUserClip.Move( GetOutOffXPixel(), GetOutOffYPixel() );
+        aUserClip.Move(GetOutOffXPixel(), GetOutOffYPixel());
 
-        aRegion.Intersect( aUserClip );
+        aRegion.Intersect(aUserClip);
     }
 
-    if ( aRegion.IsEmpty() )
+    // Update the Clipping Controller and Graphics Backend
+    if (aRegion.IsEmpty())
     {
+        // Optimization: Tell the controller to skip drawing commands entirely.
         mpClippingController->SetOutputClipped(true);
     }
     else
     {
         mpClippingController->SetOutputClipped(false);
-        SetGraphicsClip( aRegion );
-    }
 
-    mpClippingController->SetDirty(false);
+        // Push the final calculated region to the SalGraphics driver.
+        SetGraphicsClip(aRegion);
+    }
 }
 
 void Window::SetParentClipMode( ParentClipMode nMode )

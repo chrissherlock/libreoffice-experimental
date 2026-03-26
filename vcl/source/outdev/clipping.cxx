@@ -255,9 +255,26 @@ void OutputDevice::InitClipRegion()
 {
     DBG_TESTSOLARMUTEX();
 
-    mpClippingController->Synchronize(*mpMapper, [this](const vcl::Region& rPixelRegion) {
-        this->SetGraphicsClip(rPixelRegion);
+    vcl::DispatchDevice(*this, [this](auto& rConcreteDevice) {
+        using DeviceType = std::decay_t<decltype(rConcreteDevice)>;
+
+        if constexpr (vcl::ViewportClamped<DeviceType>)
+        {
+            // Window Logic: We need to CALCULATE the region
+            // based on window hierarchy and paint state.
+            rConcreteDevice.ImplCalculateAndApplyClip();
+        }
+        else
+        {
+            // Standard Logic: Just synchronize the user's
+            // requested clip to the graphics backend.
+            mpClippingController->Synchronize(*mpMapper, [this](const vcl::Region& rPixelRegion) {
+                this->SetGraphicsClip(rPixelRegion);
+            });
+        }
     });
+
+    mpClippingController->SetDirty(false);
 }
 
 vcl::Region OutputDevice::GetActiveClipRegion() const
