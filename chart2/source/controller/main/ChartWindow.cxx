@@ -89,7 +89,9 @@ void ChartWindow::PrePaint(vcl::RenderContext& )
 
 void ChartWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle& rRect)
 {
-    if (comphelper::LibreOfficeKit::isActive() && !rRenderContext.IsVirtual())
+    // In LOK (LibreOffice Kit) mode, we ignore paint requests that
+    // aren't directed at a memory-backed buffer (the tile buffer).
+    if (comphelper::LibreOfficeKit::isActive() && !rRenderContext.HasMemoryBackend())
         return;
 
     m_bInPaint = true;
@@ -99,6 +101,7 @@ void ChartWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Rectang
     }
     else
     {
+        // Fallback to base Window paint
         Window::Paint(rRenderContext, rRect);
     }
     m_bInPaint = false;
