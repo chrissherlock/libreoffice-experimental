@@ -248,6 +248,16 @@ struct supports_flush<T, std::void_t<decltype(T::is_flushable_v)>>
 {
 };
 
+// RTL Mirroring Reference Support
+template <typename T, typename = void> struct has_rtl_frame_width : std::false_type
+{
+};
+template <typename T>
+struct has_rtl_frame_width<T, std::void_t<decltype(T::is_rtl_capable_v)>>
+    : std::bool_constant<T::is_rtl_capable_v>
+{
+};
+
 template <typename T> concept ManagedFontCache = uses_managed_cache<T>::value;
 template <typename T> concept HWAccelerated = supports_hw_acceleration<T>::value;
 template <typename T> concept StrictlyCulled = needs_strict_culling<T>::value;
@@ -271,6 +281,7 @@ template <typename T> concept DoubleBuffered = supports_double_buffering<T>::val
 template <typename T> concept ViewportClamped = requires_viewport_clipping<T>::value;
 template <typename T> concept NativeWidgetCapable = supports_native_widgets<T>::value;
 template <typename T> concept FlushableDevice = supports_flush<T>::value;
+template <typename T> concept RTLCapableDevice = has_rtl_frame_width<T>::value;
 
 /**
  * @brief PageDevice

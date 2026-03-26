@@ -486,7 +486,7 @@ tools::Long VirtualDevice::GetFontExtLeading() const
     return 0;
 }
 
-tools::Long VirtualDevice::GetRTLFrameWidth() const
+tools::Long VirtualDevice::ImplGetRTLFrameWidth() const
 {
     // Virtual devices are self-contained offscreen buffers.
     // Their RTL mirroring axis is strictly their own allocated width.

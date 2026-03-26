@@ -3954,6 +3954,13 @@ css::awt::DeviceInfo WindowOutputDevice::GetDeviceInfo() const
     return aInfo;
 }
 
+tools::Long WindowOutputDevice::ImplGetRTLFrameWidth() const
+{
+    if (SalFrame* pFrame = mxOwnerWindow->ImplGetFrame())
+        return pFrame->GetWidth();
+
+    return 0;
+}
 
 } /* namespace vcl */
 

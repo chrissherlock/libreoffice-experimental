@@ -791,9 +791,16 @@ bool OutputDevice::CanDrawPolygon()
 
 tools::Long OutputDevice::GetRTLFrameWidth() const
 {
-    // For standard physical devices (Windows/Printers), the RTL axis
-    // is defined by the underlying graphics backend.
-    return mpGraphics ? mpGraphics->GetGraphicsWidth() : 0;
+    return vcl::DispatchDevice(*this, [](auto& rConcreteDevice) -> tools::Long {
+        using DeviceType = std::decay_t<decltype(rConcreteDevice)>;
+
+        if constexpr (vcl::RTLCapableDevice<DeviceType>)
+        {
+            return rConcreteDevice.ImplGetRTLFrameWidth();
+        }
+
+        return 0; // Default for non-RTL-capable devices
+    });
 }
 
 bool OutputDevice::IsPixelAreaOutOfBounds(tools::Long nX, tools::Long nY,

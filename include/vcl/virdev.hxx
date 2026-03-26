@@ -54,6 +54,7 @@ class SAL_WARN_UNUSED VCL_DLLPUBLIC VirtualDevice : public OutputDevice
 public:
     static constexpr bool is_readable_raster_v = true;
     static constexpr bool is_native_widget_capable_v = true;
+    static constexpr bool is_rtl_capable_v = true;
 
     // reference device modes for different compatibility levels
     enum class RefDevMode { NONE = 0,
@@ -97,8 +98,6 @@ protected:
     explicit VirtualDevice(const OutputDevice* pCompDev, DeviceFormat eFormat,
                            OutDevType eOutDevType);
 
-    virtual tools::Long         GetRTLFrameWidth() const override;
-
 public:
 
     /** Create a virtual device of size 1x1
@@ -130,6 +129,8 @@ public:
 
     virtual             ~VirtualDevice() override;
     virtual void        dispose() override;
+
+    tools::Long         ImplGetRTLFrameWidth() const;
 
     bool                SetOutputSizePixel( const Size& rNewSize, bool bErase = true, bool bAlphaMaskTransparent = false );
     bool                SetOutputSizePixelScaleOffsetAndLOKBuffer( const Size& rNewSize,

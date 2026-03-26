@@ -47,6 +47,7 @@ public:
     static constexpr bool is_viewport_clipping_required_v = true;
     static constexpr bool is_native_widget_capable_v = true;
     static constexpr bool is_flushable_v = true;
+    static constexpr bool is_rtl_capable_v = true;
 
     WindowOutputDevice(vcl::Window& rOwnerWindow);
     virtual ~WindowOutputDevice() override;
@@ -75,6 +76,8 @@ public:
 
     bool ImplCanEnableNativeWidget() const { return mxOwnerWindow->IsNativeWidgetEnabled(); }
     void ImplCalculateAndApplyClip();
+
+    tools::Long ImplGetRTLFrameWidth() const;
 
 private:
     void ImplSaveWindowBackground(VirtualDevice& rSaveDevice, const Point& rPos,

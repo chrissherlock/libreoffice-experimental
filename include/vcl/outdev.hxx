@@ -1541,7 +1541,7 @@ protected:
     tools::Rectangle GetVisibleDeviceRangePixel(const tools::PolyPolygon& rPolyPoly) const;
 
     /// Returns the physical width used as the reference axis for RTL mirroring.
-    virtual tools::Long         GetRTLFrameWidth() const;
+    tools::Long                GetRTLFrameWidth() const;
 
 private:
 
