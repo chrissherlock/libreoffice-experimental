@@ -32,6 +32,7 @@
 #include <comphelper/lok.hxx>
 #include <toolbarvalue.hxx>
 #include <scrollbarvalue.hxx>
+#include <vcl/deviceconcepts.hxx>
 
 // The only common SalFrame method
 
@@ -104,7 +105,7 @@ tools::Long SalGraphics::mirror2( tools::Long x, const OutputDevice& rOutDev ) c
 
 inline tools::Long SalGraphics::GetDeviceWidth(const OutputDevice& rOutDev) const
 {
-    return rOutDev.IsVirtual() ? rOutDev.GetOutputWidthPixel() : GetGraphicsWidth();
+    return vcl::get_reference_width_v(rOutDev);
 }
 
 void SalGraphics::mirror( tools::Long& x, const OutputDevice& rOutDev ) const
