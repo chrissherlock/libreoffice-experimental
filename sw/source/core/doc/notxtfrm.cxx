@@ -1332,7 +1332,7 @@ void SwNoTextFrame::ImplPaintPictureAnimate(vcl::RenderContext* pOut, const SwVi
         pVout = pOut;
         pOut = pShell->GetOut();
     }
-    else if( pShell->GetWin() && pOut->IsVirtual() )
+    else if( pShell->GetWin() && pOut->HasMemoryBackend() )
     {
         pVout = pOut;
         pOut = pShell->GetWin()->GetOutDev();
@@ -1340,7 +1340,7 @@ void SwNoTextFrame::ImplPaintPictureAnimate(vcl::RenderContext* pOut, const SwVi
     else
         pVout = nullptr;
 
-    OSL_ENSURE( !pOut->IsVirtual() ||
+    OSL_ENSURE( !pOut->HasMemoryBackend() ||
             pShell->GetViewOptions()->IsPDFExport() || pShell->isOutputToWindow(),
             "pOut should not be a virtual device" );
 
