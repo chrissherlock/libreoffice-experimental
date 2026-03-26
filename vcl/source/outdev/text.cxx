@@ -512,10 +512,7 @@ void OutputDevice::SetTextAlign(TextAlign eAlign)
     }
 }
 
-vcl::Region OutputDevice::GetOutputBoundsClipRegion() const { return GetClipRegion(); }
-
 const SalLayoutFlags eDefaultLayout = SalLayoutFlags::NONE;
-
 
 bool OutputDevice::IsLayoutCalculationNecessary() const
 {

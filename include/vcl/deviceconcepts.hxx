@@ -218,6 +218,16 @@ struct supports_double_buffering<T, std::void_t<decltype(T::is_double_buffered_v
 {
 };
 
+// Viewport-based clipping requirements
+template <typename T, typename = void> struct requires_viewport_clipping : std::false_type
+{
+};
+template <typename T>
+struct requires_viewport_clipping<T, std::void_t<decltype(T::is_viewport_clipping_required_v)>>
+    : std::bool_constant<T::is_viewport_clipping_required_v>
+{
+};
+
 template <typename T> concept ManagedFontCache = uses_managed_cache<T>::value;
 template <typename T> concept HWAccelerated = supports_hw_acceleration<T>::value;
 template <typename T> concept StrictlyCulled = needs_strict_culling<T>::value;
@@ -238,6 +248,7 @@ template <typename T> concept FramedDevice = is_framed<T>::value;
 template <typename T> concept GlyphSynthesisCapable = supports_glyph_synthesis<T>::value;
 template <typename T> concept AutoMirroringCapable = allows_auto_mirroring<T>::value;
 template <typename T> concept DoubleBuffered = supports_double_buffering<T>::value;
+template <typename T> concept ViewportClamped = requires_viewport_clipping<T>::value;
 
 /**
  * @brief PageDevice

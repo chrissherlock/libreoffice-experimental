@@ -647,7 +647,7 @@ public:
     void                        IntersectClipRegion( const vcl::Region& rRegion );
 
     vcl::Region                 GetActiveClipRegion() const;
-    virtual vcl::Region         GetOutputBoundsClipRegion() const;
+    vcl::Region                 GetOutputBoundsClipRegion() const;
 
 protected:
     virtual void                InitClipRegion();

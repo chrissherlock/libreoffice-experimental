@@ -51,6 +51,24 @@ bool OutputDevice::IsOutputCulled() const
         || mpClippingController->IsOutputClipped(*mpMapper, aBounds));
 }
 
+vcl::Region OutputDevice::GetOutputBoundsClipRegion() const
+{
+    vcl::Region aClip(GetClipRegion());
+
+    vcl::DispatchDevice(*this, [&aClip](auto& rConcreteDevice) {
+        using DeviceType = std::decay_t<decltype(rConcreteDevice)>;
+
+        // Use the concept to determine if we need to clamp the clip
+        // to the physical output area.
+        if constexpr (vcl::ViewportClamped<DeviceType>)
+        {
+            aClip.Intersect(tools::Rectangle(Point(), rConcreteDevice.GetOutputSize()));
+        }
+    });
+
+    return aClip;
+}
+
 tools::Rectangle OutputDevice::GetVisibleDeviceRangePixel(const tools::PolyPolygon& rPixelPoly) const
 {
     tools::Rectangle aVisibleRect = rPixelPoly.GetBoundRect();

@@ -39,14 +39,6 @@
 
 namespace vcl {
 
-vcl::Region WindowOutputDevice::GetOutputBoundsClipRegion() const
-{
-    vcl::Region aClip(GetClipRegion());
-    aClip.Intersect(tools::Rectangle(Point(), GetOutputSize()));
-
-    return aClip;
-}
-
 void WindowOutputDevice::InitClipRegion()
 {
     DBG_TESTSOLARMUTEX();

@@ -43,6 +43,7 @@ public:
     static constexpr bool is_readable_raster_v = true;
     static constexpr bool is_framed_v = true;
     static constexpr bool is_double_buffered_v = true;
+    static constexpr bool is_viewport_clipping_required_v = true;
 
     WindowOutputDevice(vcl::Window& rOwnerWindow);
     virtual ~WindowOutputDevice() override;
@@ -53,8 +54,6 @@ public:
     void Flush() override;
 
     css::awt::DeviceInfo GetDeviceInfo() const override;
-
-    virtual vcl::Region GetOutputBoundsClipRegion() const override;
 
     bool IsInPaint() const;
     vcl::Region GetPaintRegion() const;
