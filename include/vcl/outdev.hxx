@@ -511,7 +511,9 @@ public:
     ///@{
 
 public:
-    virtual void                Flush() {}
+    void                        Flush(const tools::Rectangle& rRect);
+    void Flush()
+        { Flush(GetOutputRectPixel()); }
 
     virtual void                DrawOutDev(
                                     const Point& rDestPt, const Size& rDestSize,

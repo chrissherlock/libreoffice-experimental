@@ -2984,10 +2984,10 @@ vcl::Region WindowOutputDevice::GetPaintRegion() const
     return vcl::Region(true);
 }
 
-void WindowOutputDevice::Flush()
+void WindowOutputDevice::ImplFlush(const tools::Rectangle& rRect)
 {
-    if (mxOwnerWindow->mpWindowImpl)
-        mxOwnerWindow->mpWindowImpl->mpFrame->Flush( GetOutputRectPixel() );
+    if (auto pFrame = GetOwnerWindow()->ImplGetFrame())
+        pFrame->Flush(rRect);
 }
 
 void Window::SetUpdateMode( bool bUpdate )

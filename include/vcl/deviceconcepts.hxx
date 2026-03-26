@@ -238,6 +238,16 @@ struct supports_native_widgets<T, std::void_t<decltype(T::is_native_widget_capab
 {
 };
 
+// Flush Support (Hardware/OS Buffer Synchronization)
+template <typename T, typename = void> struct supports_flush : std::false_type
+{
+};
+template <typename T>
+struct supports_flush<T, std::void_t<decltype(T::is_flushable_v)>>
+    : std::bool_constant<T::is_flushable_v>
+{
+};
+
 template <typename T> concept ManagedFontCache = uses_managed_cache<T>::value;
 template <typename T> concept HWAccelerated = supports_hw_acceleration<T>::value;
 template <typename T> concept StrictlyCulled = needs_strict_culling<T>::value;
@@ -260,6 +270,7 @@ template <typename T> concept AutoMirroringCapable = allows_auto_mirroring<T>::v
 template <typename T> concept DoubleBuffered = supports_double_buffering<T>::value;
 template <typename T> concept ViewportClamped = requires_viewport_clipping<T>::value;
 template <typename T> concept NativeWidgetCapable = supports_native_widgets<T>::value;
+template <typename T> concept FlushableDevice = supports_flush<T>::value;
 
 /**
  * @brief PageDevice

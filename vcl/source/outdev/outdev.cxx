@@ -859,4 +859,16 @@ bool OutputDevice::CanEnableNativeWidget() const
     });
 }
 
+void OutputDevice::Flush(const tools::Rectangle& rRect)
+{
+    vcl::DispatchDevice(*this, [&rRect](auto& rConcreteDevice) {
+        using DeviceType = std::decay_t<decltype(rConcreteDevice)>;
+
+        if constexpr (vcl::FlushableDevice<DeviceType>)
+        {
+            rConcreteDevice.ImplFlush(rRect);
+        }
+    });
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
