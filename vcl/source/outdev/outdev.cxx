@@ -898,4 +898,12 @@ bool OutputDevice::HasMemoryBackend() const
     });
 }
 
+bool OutputDevice::UseGridFidelity() const
+{
+    return vcl::DispatchDevice(*this, [](auto& rConcreteDevice) {
+        using DeviceType = std::decay_t<decltype(rConcreteDevice)>;
+        return vcl::GridFidelityDevice<DeviceType>;
+    });
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

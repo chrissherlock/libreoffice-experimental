@@ -14,6 +14,8 @@
 #include <type_traits>
 #include <concepts>
 
+class VirtualDevice;
+
 namespace vcl
 {
 // Helper for Member Detection
@@ -278,6 +280,18 @@ struct has_legacy_font_metrics<T, std::void_t<decltype(T::is_legacy_metrics_v)>>
 {
 };
 
+/** * @brief Devices that prioritize Grid Fidelity align logical coordinates
+ * to physical pixels to prevent anti-aliasing blur on grids/borders.
+ */
+template <typename T, typename = void> struct grid_fidelity_intent : std::false_type
+{
+};
+
+// VirtualDevice defaults to true to ensure crisp UI/Tiled rendering
+template <> struct grid_fidelity_intent<VirtualDevice> : std::true_type
+{
+};
+
 template <typename T> concept ManagedFontCache = uses_managed_cache<T>::value;
 template <typename T> concept HWAccelerated = supports_hw_acceleration<T>::value;
 template <typename T> concept StrictlyCulled = needs_strict_culling<T>::value;
@@ -304,6 +318,7 @@ template <typename T> concept FlushableDevice = supports_flush<T>::value;
 template <typename T> concept RTLCapableDevice = has_rtl_frame_width<T>::value;
 template <typename T> concept StoredBitDepthDevice = has_stored_bit_depth<T>::value;
 template <typename T> concept LegacyMetricDevice = has_legacy_font_metrics<T>::value;
+template <typename T> concept GridFidelityDevice = grid_fidelity_intent<T>::value;
 
 /**
  * @brief PageDevice

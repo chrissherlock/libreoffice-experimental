@@ -402,6 +402,11 @@ public:
     Size                        GetOutputSize() const
                                     { return PixelToLogic( GetOutputSizePixel() ); }
 
+    /** * @brief Returns true if the device should prioritize grid fidelity
+     * by quantizing coordinates to the nearest physical pixel.
+     */
+    bool UseGridFidelity() const;
+
     css::uno::Reference< css::awt::XGraphics >
                                 CreateUnoGraphics();
     std::vector< VCLXGraphics* > *GetUnoGraphicsList() const  { return mpUnoGraphicsList; }
