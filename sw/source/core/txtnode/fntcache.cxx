@@ -956,7 +956,7 @@ void SwFntObj::DrawText( SwDrawTextInfo &rInf )
         {
             OSL_ENSURE( bNoAdjust && !bUseScrFont, "Outdev Check failed" );
         }
-        else if ( rRefDev.IsVirtual() )
+        else if ( rRefDev.HasMemoryBackend() )
         {
             OSL_ENSURE( !bNoAdjust && bUseScrFont, "Outdev Check failed" );
         }
@@ -965,14 +965,14 @@ void SwFntObj::DrawText( SwDrawTextInfo &rInf )
             OSL_FAIL( "Outdev Check failed" );
         }
     }
-    else if ( rInf.GetOut().IsVirtual() && ! pWin )
+    else if ( rInf.GetOut().HasMemoryBackend() && ! pWin )
     {
         // PDF export
         if ( OUTDEV_PRINTER == rRefDev.GetOutDevType() )
         {
             OSL_ENSURE( !bNoAdjust && bUseScrFont, "Outdev Check failed" );
         }
-        else if ( rRefDev.IsVirtual() )
+        else if ( rRefDev.HasMemoryBackend() )
         {
             OSL_ENSURE( !bNoAdjust && bUseScrFont, "Outdev Check failed" );
         }
@@ -982,14 +982,14 @@ void SwFntObj::DrawText( SwDrawTextInfo &rInf )
         }
     }
     else if ( OUTDEV_WINDOW == rInf.GetOut().GetOutDevType() ||
-               ( rInf.GetOut().IsVirtual() && pWin ) )
+               ( rInf.GetOut().HasMemoryBackend() && pWin ) )
     {
         // Window or virtual window
         if ( OUTDEV_PRINTER == rRefDev.GetOutDevType() )
         {
             OSL_ENSURE( !bNoAdjust && bUseScrFont, "Outdev Check failed" );
         }
-        else if ( rRefDev.IsVirtual() )
+        else if ( rRefDev.HasMemoryBackend() )
         {
             OSL_ENSURE( !bNoAdjust && bUseScrFont, "Outdev Check failed" );
         }
