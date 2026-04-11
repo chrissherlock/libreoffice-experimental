@@ -885,7 +885,7 @@ void OutputDevice::ImplDrawEmphasisMark( tools::Long nBaseX, tools::Long nX, too
         nX = nBaseX - (nX - nBaseX - 1);
 
     nX -= GetDeviceOriginX();
-    nY -= GetOutOffYPixel();
+    nY -= GetDeviceOriginY();
 
     if ( rPolyPoly.Count() )
     {

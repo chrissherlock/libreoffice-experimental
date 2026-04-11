@@ -142,7 +142,7 @@ void OutputDevice::dispose()
     mpOutDevData->mpRotateDev.disposeAndClear();
 
     // #i75163#
-    ImplInvalidateViewTransform();
+    mpMapper->InvalidateViewTransform();
 
     mpOutDevData.reset();
 
@@ -745,7 +745,7 @@ css::uno::Reference< css::rendering::XCanvas > OutputDevice::ImplGetCanvas( bool
      */
     Sequence< Any > aArg{
         Any(reinterpret_cast<sal_Int64>(this)),
-        Any(css::awt::Rectangle( GetDeviceOriginX(), GetOutOffYPixel(), GetOutputWidthPixel(), GetOutputHeightPixel() )),
+        Any(css::awt::Rectangle( GetDeviceOriginX(), GetDeviceOriginY(), GetOutputWidthPixel(), GetOutputHeightPixel() )),
         Any(false),
         Any(Reference< css::awt::XWindow >()),
         GetSystemGfxDataAny()

@@ -1241,7 +1241,7 @@ bool Window::IsDefaultSize() const
 
 Point Window::GetOffsetPixelFrom(const vcl::Window& rWindow) const
 {
-    return Point(GetDeviceOriginX() - rWindow.GetDeviceOriginX(), GetOutOffYPixel() - rWindow.GetOutOffYPixel());
+    return Point(GetDeviceOriginX() - rWindow.GetDeviceOriginX(), GetDeviceOriginY() - rWindow.GetDeviceOriginY());
 }
 
 void Window::EnablePaint( bool bEnable )

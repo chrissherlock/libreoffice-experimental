@@ -301,7 +301,7 @@ public:
     void                        SetOutputWidthPixel(tools::Long nWidth);
     void                        SetOutputHeightPixel(tools::Long nHeight);
     tools::Long                 GetDeviceOriginX() const;
-    tools::Long                 GetOutOffYPixel() const;
+    tools::Long                 GetDeviceOriginY() const;
     void                        SetDeviceOriginX(tools::Long nOutOffX);
     void                        SetDeviceOriginY(tools::Long nOutOffY);
     Point                       GetOutputOffPixel() const;
@@ -1577,18 +1577,15 @@ public:
     virtual void                SetMetafileMapMode(const MapMode& rNewMapMode, bool bIsRecord);
     const MapMode&              GetMapMode() const;
 
+    basegfx::B2DHomMatrix GetViewTransformation() const;
+    basegfx::B2DHomMatrix GetViewTransformation(const MapMode& rMapMode) const;
+    basegfx::B2DHomMatrix GetInverseViewTransformation() const;
+    basegfx::B2DHomMatrix GetInverseViewTransformation(const MapMode& rMapMode) const;
+
 protected:
     virtual void ImplInitMapModeObjects();
 
 public:
-     // #i75163#
-    basegfx::B2DHomMatrix       GetViewTransformation() const;
-    basegfx::B2DHomMatrix       GetInverseViewTransformation() const;
-
-    SAL_DLLPRIVATE basegfx::B2DHomMatrix GetViewTransformation( const MapMode& rMapMode ) const;
-    basegfx::B2DHomMatrix       GetInverseViewTransformation( const MapMode& rMapMode ) const;
-
-
     /** Set an offset in pixel
 
         This method offsets every drawing operation that converts its
@@ -1811,18 +1808,6 @@ private:
      @returns vcl::Region based on device pixel coordinates and units.
      */
     SAL_DLLPRIVATE vcl::Region       ImplPixelToDevicePixel( const vcl::Region& rRegion ) const;
-
-    /** Invalidate the view transformation.
-
-     @since AOO bug 75163 (OpenOffice.org 2.4.3 - OOH 680 milestone 212)
-     */
-    SAL_DLLPRIVATE void         ImplInvalidateViewTransform();
-
-    /** Get device transformation.
-
-     @since AOO bug 75163 (OpenOffice.org 2.4.3 - OOH 680 milestone 212)
-     */
-    SAL_DLLPRIVATE basegfx::B2DHomMatrix ImplGetDeviceTransformation() const;
 
     /** Convert a logical X coordinate to a device pixel's X coordinate.
 
