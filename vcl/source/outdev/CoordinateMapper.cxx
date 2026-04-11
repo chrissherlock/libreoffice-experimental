@@ -47,7 +47,7 @@ void CoordinateMapper::SetPixelOffset(const Size& rSize)
     mnOutOffOrigY = rSize.getHeight();
 }
 
-tools::Long CoordinateMapper::GetOutOffXPixel() const { return mnOutOffX; }
+tools::Long CoordinateMapper::GetDeviceOriginX() const { return mnOutOffX; }
 
 tools::Long CoordinateMapper::GetOutOffYPixel() const { return mnOutOffY; }
 

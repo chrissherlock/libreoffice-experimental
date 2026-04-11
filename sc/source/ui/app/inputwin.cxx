@@ -443,7 +443,7 @@ void ScInputWindow::PixelInvalidate(const tools::Rectangle* pRectangle)
     if (pRectangle)
     {
         tools::Rectangle aRect(*pRectangle);
-        aRect.Move(-GetOutOffXPixel(), -GetOutOffYPixel());
+        aRect.Move(-GetDeviceOriginX(), -GetOutOffYPixel());
         Window::PixelInvalidate(&aRect);
     }
     else

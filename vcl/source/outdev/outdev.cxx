@@ -637,17 +637,17 @@ bool OutputDevice::ImplIsAntiparallel() const
 
 void    OutputDevice::ReMirror( Point &rPoint ) const
 {
-    rPoint.setX( GetOutOffXPixel() + GetOutputWidthPixel() - 1 - rPoint.X() + GetOutOffXPixel() );
+    rPoint.setX( GetDeviceOriginX() + GetOutputWidthPixel() - 1 - rPoint.X() + GetDeviceOriginX() );
 }
 void    OutputDevice::ReMirror( tools::Rectangle &rRect ) const
 {
     tools::Long nWidth = rRect.Right() - rRect.Left();
 
-    //long lc_x = rRect.nLeft - GetOutOffXPixel();    // normalize
+    //long lc_x = rRect.nLeft - GetDeviceOriginX();    // normalize
     //lc_x = GetOutputWidthPixel() - nWidth - 1 - lc_x;  // mirror
-    //rRect.nLeft = lc_x + GetOutOffXPixel();         // re-normalize
+    //rRect.nLeft = lc_x + GetDeviceOriginX();         // re-normalize
 
-    rRect.SetLeft( GetOutOffXPixel() + GetOutputWidthPixel() - nWidth - 1 - rRect.Left() + GetOutOffXPixel() );
+    rRect.SetLeft( GetDeviceOriginX() + GetOutputWidthPixel() - nWidth - 1 - rRect.Left() + GetDeviceOriginX() );
     rRect.SetRight( rRect.Left() + nWidth );
 }
 
@@ -745,7 +745,7 @@ css::uno::Reference< css::rendering::XCanvas > OutputDevice::ImplGetCanvas( bool
      */
     Sequence< Any > aArg{
         Any(reinterpret_cast<sal_Int64>(this)),
-        Any(css::awt::Rectangle( GetOutOffXPixel(), GetOutOffYPixel(), GetOutputWidthPixel(), GetOutputHeightPixel() )),
+        Any(css::awt::Rectangle( GetDeviceOriginX(), GetOutOffYPixel(), GetOutputWidthPixel(), GetOutputHeightPixel() )),
         Any(false),
         Any(Reference< css::awt::XWindow >()),
         GetSystemGfxDataAny()
