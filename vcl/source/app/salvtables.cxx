@@ -1412,7 +1412,7 @@ void SalInstanceWidget::DoRecursivePaint(vcl::Window* pWindow, const Point& rRen
             continue;
 
         tools::Long nDeltaX
-            = pChild->GetOutDev()->GetOutOffXPixel() - pWindow->GetOutDev()->GetOutOffXPixel();
+            = pChild->GetOutDev()->GetDeviceOriginX() - pWindow->GetOutDev()->GetDeviceOriginX();
         if (bHasMirroredGraphics)
             nDeltaX = pWindow->GetOutDev()->GetOutputWidthPixel() - nDeltaX
                       - pChild->GetOutDev()->GetOutputWidthPixel();
