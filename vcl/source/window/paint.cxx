@@ -104,9 +104,9 @@ PaintBufferGuard::PaintBufferGuard(ImplFrameData* pFrameData, vcl::Window* pWind
     pFrameData->mpBuffer->SetDigitLanguage(rDev.GetDigitLanguage());
 
     mnOutOffX = pFrameData->mpBuffer->GetDeviceOriginX();
-    mnOutOffY = pFrameData->mpBuffer->GetOutOffYPixel();
+    mnOutOffY = pFrameData->mpBuffer->GetDeviceOriginY();
     pFrameData->mpBuffer->SetDeviceOriginX(pWindow->GetDeviceOriginX());
-    pFrameData->mpBuffer->SetDeviceOriginY(pWindow->GetOutOffYPixel());
+    pFrameData->mpBuffer->SetDeviceOriginY(pWindow->GetDeviceOriginY());
     pFrameData->mpBuffer->EnableRTL(pWindow->IsRTLEnabled());
 }
 
@@ -985,7 +985,7 @@ vcl::Region Window::GetPaintRegion() const
     if ( mpWindowImpl->mpPaintRegion )
     {
         vcl::Region aRegion = *mpWindowImpl->mpPaintRegion;
-        aRegion.Move( -GetOutDev()->GetDeviceOriginX(), -GetOutDev()->GetOutOffYPixel() );
+        aRegion.Move( -GetOutDev()->GetDeviceOriginX(), -GetOutDev()->GetDeviceOriginY() );
         return PixelToLogic( aRegion );
     }
     else
@@ -1097,7 +1097,7 @@ void Window::PixelInvalidate(const tools::Rectangle* pRectangle)
     // Added for dialog items. Pass invalidation to the parent window.
     else if (VclPtr<vcl::Window> pParent = GetParentWithLOKNotifier())
     {
-        const tools::Rectangle aRect(Point(GetDeviceOriginX(), GetOutOffYPixel()), GetSizePixel());
+        const tools::Rectangle aRect(Point(GetDeviceOriginX(), GetDeviceOriginY()), GetSizePixel());
         pParent->PixelInvalidate(&aRect);
     }
 }
@@ -1295,7 +1295,7 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
                 if( bHasMirroredGraphics )
                     nDeltaX = GetOutDev()->GetOutputWidthPixel() - nDeltaX - pChild->GetOutDev()->GetOutputWidthPixel();
 
-                tools::Long nDeltaY = pChild->GetOutOffYPixel() - GetOutOffYPixel();
+                tools::Long nDeltaY = pChild->GetDeviceOriginY() - GetDeviceOriginY();
 
                 Point aPos( i_rPos );
                 aPos += Point(nDeltaX, nDeltaY);
@@ -1415,7 +1415,7 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
 
             if( pOutDev->HasMirroredGraphics() )
                 nDeltaX = GetOutDev()->GetOutputWidthPixel() - nDeltaX - pChild->GetOutDev()->GetOutputWidthPixel();
-            tools::Long nDeltaY = pChild->GetOutOffYPixel() - GetOutOffYPixel();
+            tools::Long nDeltaY = pChild->GetDeviceOriginY() - GetDeviceOriginY();
             Point aPos( i_rPos );
             // tdf#165706 those delta values are in pixels, but aPos copied from
             // i_rPos *may* be in logical coordinates if a MapMode is set at

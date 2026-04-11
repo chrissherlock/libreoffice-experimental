@@ -843,7 +843,7 @@ ImplSVEvent* Application::PostGestureEvent(VclEventId nEvent, vcl::Window* pWin,
         Point aTransformedPosition(pGestureEvent->mnX, pGestureEvent->mnY);
 
         aTransformedPosition.AdjustX(pWin->GetDeviceOriginX());
-        aTransformedPosition.AdjustY(pWin->GetOutOffYPixel());
+        aTransformedPosition.AdjustY(pWin->GetDeviceOriginY());
 
         const GestureEventPan aGestureEvent(
             sal_Int32(aTransformedPosition.X()),
@@ -950,7 +950,7 @@ ImplSVEvent* Application::PostMouseEvent( VclEventId nEvent, vcl::Window *pWin, 
         if (!comphelper::LibreOfficeKit::isActive())
         {
             aTransformedPos.AdjustX(pWin->GetDeviceOriginX());
-            aTransformedPos.AdjustY(pWin->GetOutOffYPixel());
+            aTransformedPos.AdjustY(pWin->GetDeviceOriginY());
         }
 
         const MouseEvent aTransformedEvent( aTransformedPos, pMouseEvent->GetClicks(), pMouseEvent->GetMode(),

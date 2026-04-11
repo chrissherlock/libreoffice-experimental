@@ -25,6 +25,7 @@
 #include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
 
+#include <CoordinateMapper.hxx>
 #include <salgdi.hxx>
 
 #include <cassert>
@@ -64,7 +65,7 @@ void OutputDevice::DrawPolyLine( const tools::Polygon& rPoly )
     }
 
     const basegfx::B2DPolygon aB2DPolyLine(rPoly.getB2DPolygon());
-    const basegfx::B2DHomMatrix aTransform(ImplGetDeviceTransformation());
+    const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation());
     const bool bPixelSnapHairline(mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
 
     bool bDrawn = mpGraphics->DrawPolyLine(
@@ -366,7 +367,7 @@ bool OutputDevice::DrawPolyLineDirectInternal(
     if(bTryB2d)
     {
         // combine rObjectTransform with WorldToDevice
-        const basegfx::B2DHomMatrix aTransform(ImplGetDeviceTransformation() * rObjectTransform);
+        const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation() * rObjectTransform);
         const bool bPixelSnapHairline((mnAntialiasing & AntialiasingFlags::PixelSnapHairline) && rB2DPolygon.count() < 1000);
 
         // draw the polyline

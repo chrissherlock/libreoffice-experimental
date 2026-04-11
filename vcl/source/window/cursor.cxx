@@ -274,7 +274,7 @@ tools::Rectangle calcualteCursorRect(Point const& rPosition, Size const rSize, v
 {
     Point aPositionPixel = pWindow->LogicToPixel(rPosition);
     const tools::Long nX = pWindow->GetDeviceOriginX() + aPositionPixel.X() - pParent->GetDeviceOriginX();
-    const tools::Long nY = pWindow->GetOutOffYPixel() + aPositionPixel.Y() - pParent->GetOutOffYPixel();
+    const tools::Long nY = pWindow->GetDeviceOriginY() + aPositionPixel.Y() - pParent->GetDeviceOriginY();
 
     Size aSizePixel = pWindow->LogicToPixel(rSize);
     if (!aSizePixel.Width())
