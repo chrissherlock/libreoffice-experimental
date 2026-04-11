@@ -47,11 +47,11 @@ void CoordinateMapper::SetPixelOffset(const Size& rSize)
     mnOutOffOrigY = rSize.getHeight();
 }
 
-tools::Long CoordinateMapper::GetOutOffXPixel() const { return mnOutOffX; }
+tools::Long CoordinateMapper::GetDeviceOriginX() const { return mnOutOffX; }
 
 tools::Long CoordinateMapper::GetOutOffYPixel() const { return mnOutOffY; }
 
-void CoordinateMapper::SetOutOffXPixel(tools::Long nOutOffX) { mnOutOffX = nOutOffX; }
+void CoordinateMapper::SetDeviceOriginX(tools::Long nOutOffX) { mnOutOffX = nOutOffX; }
 
 void CoordinateMapper::SetOutOffYPixel(tools::Long nOutOffY) { mnOutOffY = nOutOffY; }
 

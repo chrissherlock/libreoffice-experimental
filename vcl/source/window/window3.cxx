@@ -129,7 +129,7 @@ bool Window::IsOverlineColor() const { return GetOutDev()->IsOverlineColor(); }
 void Window::SetTextAlign(TextAlign eAlign) { GetOutDev()->SetTextAlign(eAlign); }
 
 float Window::GetDPIScaleFactor() const { return GetOutDev()->GetDPIScaleFactor(); }
-tools::Long Window::GetOutOffXPixel() const { return GetOutDev()->GetOutOffXPixel(); }
+tools::Long Window::GetDeviceOriginX() const { return GetOutDev()->GetDeviceOriginX(); }
 tools::Long Window::GetOutOffYPixel() const { return GetOutDev()->GetOutOffYPixel(); }
 void Window::SetMapMode() { GetOutDev()->SetMapMode(); }
 void Window::SetMapMode(const MapMode& rNewMapMode) { GetOutDev()->SetMapMode(rNewMapMode); }

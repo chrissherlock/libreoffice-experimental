@@ -842,7 +842,7 @@ ImplSVEvent* Application::PostGestureEvent(VclEventId nEvent, vcl::Window* pWin,
     {
         Point aTransformedPosition(pGestureEvent->mnX, pGestureEvent->mnY);
 
-        aTransformedPosition.AdjustX(pWin->GetOutOffXPixel());
+        aTransformedPosition.AdjustX(pWin->GetDeviceOriginX());
         aTransformedPosition.AdjustY(pWin->GetOutOffYPixel());
 
         const GestureEventPan aGestureEvent(
@@ -949,7 +949,7 @@ ImplSVEvent* Application::PostMouseEvent( VclEventId nEvent, vcl::Window *pWin, 
         // LOK uses (0, 0) as the origin of all windows; don't offset.
         if (!comphelper::LibreOfficeKit::isActive())
         {
-            aTransformedPos.AdjustX(pWin->GetOutOffXPixel());
+            aTransformedPos.AdjustX(pWin->GetDeviceOriginX());
             aTransformedPos.AdjustY(pWin->GetOutOffYPixel());
         }
 

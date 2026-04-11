@@ -118,13 +118,13 @@ void SalGraphics::mirror( tools::Long& x, const OutputDevice& rOutDev ) const
         // mirror this window back
         if( m_nLayout & SalLayoutFlags::BiDiRtl )
         {
-            tools::Long devX = w - rOutDev.GetOutputWidthPixel() - rOutDev.GetOutOffXPixel();   // re-mirrored mnOutOffX
-            x = devX + (x - rOutDev.GetOutOffXPixel());
+            tools::Long devX = w - rOutDev.GetOutputWidthPixel() - rOutDev.GetDeviceOriginX();   // re-mirrored mnOutOffX
+            x = devX + (x - rOutDev.GetDeviceOriginX());
         }
         else
         {
-            tools::Long devX = rOutDev.GetOutOffXPixel();   // re-mirrored mnOutOffX
-            x = rOutDev.GetOutputWidthPixel() - (x - devX) + rOutDev.GetOutOffXPixel() - 1;
+            tools::Long devX = rOutDev.GetDeviceOriginX();   // re-mirrored mnOutOffX
+            x = rOutDev.GetOutputWidthPixel() - (x - devX) + rOutDev.GetDeviceOriginX() - 1;
         }
     }
     else if( m_nLayout & SalLayoutFlags::BiDiRtl )
@@ -142,19 +142,19 @@ void SalGraphics::mirror( tools::Long& x, tools::Long nWidth, const OutputDevice
         // mirror this window back
         if( m_nLayout & SalLayoutFlags::BiDiRtl )
         {
-            tools::Long devX = w - rOutDev.GetOutputWidthPixel() - rOutDev.GetOutOffXPixel();   // re-mirrored mnOutOffX
+            tools::Long devX = w - rOutDev.GetOutputWidthPixel() - rOutDev.GetDeviceOriginX();   // re-mirrored mnOutOffX
             if( bBack )
-                x = x - devX + rOutDev.GetOutOffXPixel();
+                x = x - devX + rOutDev.GetDeviceOriginX();
             else
-                x = devX + (x - rOutDev.GetOutOffXPixel());
+                x = devX + (x - rOutDev.GetDeviceOriginX());
         }
         else
         {
-            tools::Long devX = rOutDev.GetOutOffXPixel();   // re-mirrored mnOutOffX
+            tools::Long devX = rOutDev.GetDeviceOriginX();   // re-mirrored mnOutOffX
             if( bBack )
                 x = devX + (rOutDev.GetOutputWidthPixel() + devX) - (x + nWidth);
             else
-                x = rOutDev.GetOutputWidthPixel() - (x - devX) + rOutDev.GetOutOffXPixel() - nWidth;
+                x = rOutDev.GetOutputWidthPixel() - (x - devX) + rOutDev.GetDeviceOriginX() - nWidth;
         }
     }
     else if( m_nLayout & SalLayoutFlags::BiDiRtl )
@@ -173,19 +173,19 @@ bool SalGraphics::mirror( sal_uInt32 nPoints, const Point *pPtAry, Point *pPtAry
             // mirror this window back
             if( m_nLayout & SalLayoutFlags::BiDiRtl )
             {
-                tools::Long devX = w - rOutDev.GetOutputWidthPixel() - rOutDev.GetOutOffXPixel();   // re-mirrored mnOutOffX
+                tools::Long devX = w - rOutDev.GetOutputWidthPixel() - rOutDev.GetDeviceOriginX();   // re-mirrored mnOutOffX
                 for( i=0, j=nPoints-1; i<nPoints; i++,j-- )
                 {
-                    pPtAry2[j].setX( devX + (pPtAry[i].getX() - rOutDev.GetOutOffXPixel()) );
+                    pPtAry2[j].setX( devX + (pPtAry[i].getX() - rOutDev.GetDeviceOriginX()) );
                     pPtAry2[j].setY( pPtAry[i].getY() );
                 }
             }
             else
             {
-                tools::Long devX = rOutDev.GetOutOffXPixel();   // re-mirrored mnOutOffX
+                tools::Long devX = rOutDev.GetDeviceOriginX();   // re-mirrored mnOutOffX
                 for( i=0, j=nPoints-1; i<nPoints; i++,j-- )
                 {
-                    pPtAry2[j].setX( rOutDev.GetOutputWidthPixel() - (pPtAry[i].getX() - devX) + rOutDev.GetOutOffXPixel() - 1 );
+                    pPtAry2[j].setX( rOutDev.GetOutputWidthPixel() - (pPtAry[i].getX() - devX) + rOutDev.GetDeviceOriginX() - 1 );
                     pPtAry2[j].setY( pPtAry[i].getY() );
                 }
             }
@@ -294,12 +294,12 @@ const basegfx::B2DHomMatrix& SalGraphics::getMirror( const OutputDevice& i_rOutD
         {
             const tools::Long w = GetDeviceWidth(i_rOutDev);
             SAL_WARN_IF(!w, "vcl", "missing graphics width");
-            nTranslate = w - i_rOutDev.GetOutputWidthPixel() - (2 * i_rOutDev.GetOutOffXPixel());
+            nTranslate = w - i_rOutDev.GetOutputWidthPixel() - (2 * i_rOutDev.GetDeviceOriginX());
             break;
         }
         case MirrorMode::Antiparallel:
         {
-            nTranslate = i_rOutDev.GetOutputWidthPixel() + (2 * i_rOutDev.GetOutOffXPixel()) - 1;
+            nTranslate = i_rOutDev.GetOutputWidthPixel() + (2 * i_rOutDev.GetDeviceOriginX()) - 1;
             break;
         }
         case MirrorMode::BiDi:
@@ -329,8 +329,8 @@ const basegfx::B2DHomMatrix& SalGraphics::getMirror( const OutputDevice& i_rOutD
                    with its LTR horizontal scrollbar */
 
                 // Original code was:
-                //      double devX = w-i_rOutDev.GetOutputWidthPixel()-i_rOutDev.GetOutOffXPixel();   // re-mirrored mnOutOffX
-                //      aRet.setX( devX + (i_rPoint.getX() - i_rOutDev.GetOutOffXPixel()) );
+                //      double devX = w-i_rOutDev.GetOutputWidthPixel()-i_rOutDev.GetDeviceOriginX();   // re-mirrored mnOutOffX
+                //      aRet.setX( devX + (i_rPoint.getX() - i_rOutDev.GetDeviceOriginX()) );
                 const_cast<SalGraphics*>(this)->m_aLastMirror = basegfx::utils::createTranslateB2DHomMatrix(
                    nTranslate, 0.0);
                 break;
@@ -342,8 +342,8 @@ const basegfx::B2DHomMatrix& SalGraphics::getMirror( const OutputDevice& i_rOutD
                    RTL document tdf#131725 */
 
                 // Original code was;
-                //      tools::Long devX = rOutDev.GetOutOffXPixel();   // re-mirrored mnOutOffX
-                //      x = rOutDev.GetOutputWidthPixel() - (x - devX) + rOutDev.GetOutOffXPixel() - 1;
+                //      tools::Long devX = rOutDev.GetDeviceOriginX();   // re-mirrored mnOutOffX
+                //      x = rOutDev.GetOutputWidthPixel() - (x - devX) + rOutDev.GetDeviceOriginX() - 1;
                 const_cast<SalGraphics*>(this)->m_aLastMirror = basegfx::utils::createScaleTranslateB2DHomMatrix(
                     -1.0,
                     1.0,

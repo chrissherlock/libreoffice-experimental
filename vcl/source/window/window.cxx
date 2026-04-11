@@ -1414,15 +1414,15 @@ bool Window::ImplUpdatePos()
 
     if ( ImplIsOverlapWindow() )
     {
-        GetOutDev()->SetOutOffXPixel(mpWindowImpl->mnX);
-        GetOutDev()->SetOutOffYPixel(mpWindowImpl->mnY);
+        GetOutDev()->SetDeviceOriginX(mpWindowImpl->mnX);
+        GetOutDev()->SetDeviceOriginY(mpWindowImpl->mnY);
     }
     else
     {
         vcl::Window* pParent = ImplGetParent();
 
-        GetOutDev()->SetOutOffXPixel(mpWindowImpl->mnX + pParent->GetOutDev()->GetOutOffXPixel());
-        GetOutDev()->SetOutOffYPixel(mpWindowImpl->mnY + pParent->GetOutDev()->GetOutOffYPixel());
+        GetOutDev()->SetDeviceOriginX(mpWindowImpl->mnX + pParent->GetOutDev()->GetDeviceOriginX());
+        GetOutDev()->SetDeviceOriginY(mpWindowImpl->mnY + pParent->GetOutDev()->GetOutOffYPixel());
     }
 
     VclPtr< vcl::Window > pChild = mpWindowImpl->mpFirstChild;
@@ -1442,7 +1442,7 @@ bool Window::ImplUpdatePos()
 void Window::ImplUpdateSysObjPos()
 {
     if ( mpWindowImpl->mpSysObj )
-        mpWindowImpl->mpSysObj->SetPosSize( GetOutDev()->GetOutOffXPixel(), GetOutDev()->GetOutOffYPixel(), GetOutDev()->GetOutputWidthPixel(), GetOutDev()->GetOutputHeightPixel() );
+        mpWindowImpl->mpSysObj->SetPosSize( GetOutDev()->GetDeviceOriginX(), GetOutDev()->GetOutOffYPixel(), GetOutDev()->GetOutputWidthPixel(), GetOutDev()->GetOutputHeightPixel() );
 
     VclPtr< vcl::Window > pChild = mpWindowImpl->mpFirstChild;
     while ( pChild )
@@ -1458,7 +1458,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
     bool    bNewPos         = false;
     bool    bNewSize        = false;
     bool    bCopyBits       = false;
-    tools::Long    nOldOutOffX     = GetOutDev()->GetOutOffXPixel();
+    tools::Long    nOldOutOffX     = GetOutDev()->GetDeviceOriginX();
     tools::Long    nOldOutOffY     = GetOutDev()->GetOutOffYPixel();
     tools::Long    nOldOutWidth    = GetOutDev()->GetOutputWidthPixel();
     tools::Long    nOldOutHeight   = GetOutDev()->GetOutputHeightPixel();
@@ -1513,7 +1513,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
     if ( nFlags & PosSizeFlags::X )
     {
         tools::Long nOrgX = nX;
-        Point aPtDev( nX+GetOutDev()->GetOutOffXPixel(), 0 );
+        Point aPtDev( nX+GetOutDev()->GetDeviceOriginX(), 0 );
         OutputDevice *pOutDev = GetOutDev();
         if( pOutDev->HasMirroredGraphics() )
         {
@@ -1658,7 +1658,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
                     ImplClipBoundaries( aRegion, false, true );
                     if ( !pOverlapRegion->IsEmpty() )
                     {
-                        pOverlapRegion->Move( GetOutDev()->GetOutOffXPixel() - nOldOutOffX, GetOutDev()->GetOutOffYPixel() - nOldOutOffY );
+                        pOverlapRegion->Move( GetOutDev()->GetDeviceOriginX() - nOldOutOffX, GetOutDev()->GetOutOffYPixel() - nOldOutOffY );
                         aRegion.Exclude( *pOverlapRegion );
                     }
                     if ( !aRegion.IsEmpty() )
@@ -1666,7 +1666,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
                         // adapt Paint areas
                         ImplMoveAllInvalidateRegions( tools::Rectangle( Point( nOldOutOffX, nOldOutOffY ),
                                                                  Size( nOldOutWidth, nOldOutHeight ) ),
-                                                      GetOutDev()->GetOutOffXPixel() - nOldOutOffX, GetOutDev()->GetOutOffYPixel() - nOldOutOffY,
+                                                      GetOutDev()->GetDeviceOriginX() - nOldOutOffX, GetOutDev()->GetOutOffYPixel() - nOldOutOffY,
                                                       true );
                         SalGraphics* pGraphics = ImplGetFrameGraphics();
                         if ( pGraphics )
@@ -1676,7 +1676,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
                             const bool bSelectClipRegion = pOutDev->SelectClipRegion( aRegion, pGraphics );
                             if ( bSelectClipRegion )
                             {
-                                pGraphics->CopyArea( GetOutDev()->GetOutOffXPixel(), GetOutDev()->GetOutOffYPixel(),
+                                pGraphics->CopyArea( GetOutDev()->GetDeviceOriginX(), GetOutDev()->GetOutOffYPixel(),
                                                      nOldOutOffX, nOldOutOffY,
                                                      nOldOutWidth, nOldOutHeight,
                                                      *GetOutDev() );
@@ -1731,7 +1731,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
     if ( bUpdateSysObjPos )
         ImplUpdateSysObjPos();
     if ( bNewSize && mpWindowImpl->mpSysObj )
-        mpWindowImpl->mpSysObj->SetPosSize( GetOutDev()->GetOutOffXPixel(), GetOutDev()->GetOutOffYPixel(), GetOutDev()->GetOutputWidthPixel(), GetOutDev()->GetOutputHeightPixel() );
+        mpWindowImpl->mpSysObj->SetPosSize( GetOutDev()->GetDeviceOriginX(), GetOutDev()->GetOutOffYPixel(), GetOutDev()->GetOutputWidthPixel(), GetOutDev()->GetOutputHeightPixel() );
 }
 
 void Window::ImplNewInputContext()
@@ -2706,7 +2706,7 @@ void Window::setPosSizePixel( tools::Long nX, tools::Long nY,
             nSysFlags |= SAL_FRAME_POSSIZE_X;
             if( pWinParent && (pWindow->GetStyle() & WB_SYSTEMCHILDWINDOW) )
             {
-                nX += pWinParent->GetOutDev()->GetOutOffXPixel();
+                nX += pWinParent->GetOutDev()->GetDeviceOriginX();
             }
             if( pParent && pParent->GetOutDev()->ImplIsAntiparallel() )
             {
@@ -2809,31 +2809,31 @@ AbsoluteScreenPixelRectangle Window::GetDesktopRectPixel() const
 Point Window::OutputToScreenPixel( const Point& rPos ) const
 {
     // relative to top level parent
-    return Point( rPos.X() + GetOutDev()->GetOutOffXPixel(), rPos.Y() + GetOutDev()->GetOutOffYPixel() );
+    return Point( rPos.X() + GetOutDev()->GetDeviceOriginX(), rPos.Y() + GetOutDev()->GetOutOffYPixel() );
 }
 
 Point Window::ScreenToOutputPixel( const Point& rPos ) const
 {
     // relative to top level parent
-    return Point( rPos.X() - GetOutDev()->GetOutOffXPixel(), rPos.Y() - GetOutDev()->GetOutOffYPixel() );
+    return Point( rPos.X() - GetOutDev()->GetDeviceOriginX(), rPos.Y() - GetOutDev()->GetOutOffYPixel() );
 }
 
 tools::Long Window::ImplGetUnmirroredOutOffX() const
 {
-    // revert GetOutOffXPixel() changes that were potentially made in ImplPosSizeWindow
-    tools::Long offx = GetOutDev()->GetOutOffXPixel();
+    // revert GetDeviceOriginX() changes that were potentially made in ImplPosSizeWindow
+    tools::Long offx = GetOutDev()->GetDeviceOriginX();
     const OutputDevice *pOutDev = GetOutDev();
     if( pOutDev->HasMirroredGraphics() )
     {
         if( mpWindowImpl->mpParent && !mpWindowImpl->mpParent->mpWindowImpl->mbFrame && mpWindowImpl->mpParent->GetOutDev()->ImplIsAntiparallel() )
         {
             if ( !ImplIsOverlapWindow() )
-                offx -= mpWindowImpl->mpParent->GetOutDev()->GetOutOffXPixel();
+                offx -= mpWindowImpl->mpParent->GetOutDev()->GetDeviceOriginX();
 
             offx = mpWindowImpl->mpParent->GetOutDev()->GetOutputWidthPixel() - GetOutDev()->GetOutputWidthPixel() - offx;
 
             if ( !ImplIsOverlapWindow() )
-                offx += mpWindowImpl->mpParent->GetOutDev()->GetOutOffXPixel();
+                offx += mpWindowImpl->mpParent->GetOutDev()->GetDeviceOriginX();
 
         }
     }
@@ -3472,7 +3472,7 @@ Reference< css::rendering::XCanvas > WindowOutputDevice::ImplGetCanvas( bool bSp
     // common: first any is VCL pointer to window (for VCL canvas)
     Sequence< Any > aArg{
         Any(reinterpret_cast<sal_Int64>(this)),
-        Any(css::awt::Rectangle( GetOutOffXPixel(), GetOutOffYPixel(), GetOutputWidthPixel(), GetOutputHeightPixel() )),
+        Any(css::awt::Rectangle( GetDeviceOriginX(), GetOutOffYPixel(), GetOutputWidthPixel(), GetOutputHeightPixel() )),
         Any(mxOwnerWindow->mpWindowImpl->mbAlwaysOnTop),
         Any(Reference< css::awt::XWindow >(
                              mxOwnerWindow->GetComponentInterface(),

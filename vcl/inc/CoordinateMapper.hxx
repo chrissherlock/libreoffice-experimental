@@ -68,10 +68,10 @@ public:
     float GetDPIScaleFactor() const;
     void SetDPIScalePercentage(sal_Int32 nPercentage);
 
-    tools::Long GetOutOffXPixel() const;
+    tools::Long GetDeviceOriginX() const;
     tools::Long GetOutOffYPixel() const;
 
-    void SetOutOffXPixel(tools::Long nOutOffX);
+    void SetDeviceOriginX(tools::Long nOutOffX);
     void SetOutOffYPixel(tools::Long nOutOffY);
 
     Point GetOutputOffPixel() const;

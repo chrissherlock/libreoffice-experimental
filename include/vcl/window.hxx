@@ -1478,7 +1478,7 @@ public:
                                              TextRectInfo* pInfo = nullptr,
                                              const vcl::TextLayoutCommon* _pTextLayout = nullptr ) const;
     float                       GetDPIScaleFactor() const;
-    tools::Long                 GetOutOffXPixel() const;
+    tools::Long                 GetDeviceOriginX() const;
     tools::Long                 GetOutOffYPixel() const;
 
     void                        EnableMapMode( bool bEnable = true );
