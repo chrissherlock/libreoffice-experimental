@@ -49,7 +49,7 @@ void CoordinateMapper::SetPixelOffset(const Size& rSize)
 
 tools::Long CoordinateMapper::GetDeviceOriginX() const { return mnOutOffX; }
 
-tools::Long CoordinateMapper::GetOutOffYPixel() const { return mnOutOffY; }
+tools::Long CoordinateMapper::GetDeviceOriginY() const { return mnOutOffY; }
 
 void CoordinateMapper::SetDeviceOriginX(tools::Long nOutOffX) { mnOutOffX = nOutOffX; }
 
@@ -80,6 +80,114 @@ void CoordinateMapper::CalcMapResolution(const MapMode& rMapMode, tools::Long nD
 ImplMapRes CoordinateMapper::ResolveMapRes(const MapMode* pMode)
 {
     return maMapRes.ResolveMapRes(pMode, maMapMode, mbMap, mnDPIX, mnDPIY);
+}
+
+// #i75163#
+void CoordinateMapper::InvalidateViewTransform()
+{
+    if (mpViewTransform)
+    {
+        delete mpViewTransform;
+        mpViewTransform = nullptr;
+    }
+
+    if (mpInverseViewTransform)
+    {
+        delete mpInverseViewTransform;
+        mpInverseViewTransform = nullptr;
+    }
+}
+
+basegfx::B2DHomMatrix CoordinateMapper::GetDeviceTransformation() const
+{
+    basegfx::B2DHomMatrix aTransformation = GetViewTransformation();
+
+    // TODO: is it worth to cache the transformed result?
+    if (mnOutOffX || mnOutOffY)
+        aTransformation.translate(mnOutOffX, mnOutOffY);
+
+    return aTransformation;
+}
+
+basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation() const
+{
+    if (!IsMapModeEnabled())
+        return basegfx::B2DHomMatrix();
+
+    if (mpViewTransform)
+        return *mpViewTransform;
+
+    mpViewTransform = new basegfx::B2DHomMatrix;
+
+    const double fScaleFactorX(static_cast<double>(GetDPIX()) * maMapRes.mfMapScX);
+    const double fScaleFactorY(static_cast<double>(GetDPIY()) * maMapRes.mfMapScY);
+    const double fZeroPointX((static_cast<double>(maMapRes.mnMapOfsX) * fScaleFactorX)
+                             + static_cast<double>(GetPixelXOffset()));
+    const double fZeroPointY((static_cast<double>(maMapRes.mnMapOfsY) * fScaleFactorY)
+                             + static_cast<double>(GetPixelYOffset()));
+
+    mpViewTransform->set(0, 0, fScaleFactorX);
+    mpViewTransform->set(1, 1, fScaleFactorY);
+    mpViewTransform->set(0, 2, fZeroPointX);
+    mpViewTransform->set(1, 2, fZeroPointY);
+
+    return *mpViewTransform;
+}
+
+basegfx::B2DHomMatrix CoordinateMapper::GetInverseViewTransformation() const
+{
+    if (!IsMapModeEnabled())
+        return basegfx::B2DHomMatrix();
+
+    if (mpInverseViewTransform)
+        return *mpInverseViewTransform;
+
+    GetViewTransformation();
+
+    mpInverseViewTransform = new basegfx::B2DHomMatrix(*mpViewTransform);
+    mpInverseViewTransform->invert();
+
+    return *mpInverseViewTransform;
+}
+
+basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation(const MapMode& rMapMode) const
+{
+    // #i82615#
+    ImplMapRes aMapRes;
+    aMapRes.CalcMapResolution(rMapMode, GetDPIX(), GetDPIY());
+
+    basegfx::B2DHomMatrix aTransform;
+
+    const double fScaleFactorX(static_cast<double>(GetDPIX()) * aMapRes.mfMapScX);
+    const double fScaleFactorY(static_cast<double>(GetDPIY()) * aMapRes.mfMapScY);
+    const double fZeroPointX((static_cast<double>(aMapRes.mnMapOfsX) * fScaleFactorX)
+                             + static_cast<double>(GetPixelXOffset()));
+    const double fZeroPointY((static_cast<double>(aMapRes.mnMapOfsY) * fScaleFactorY)
+                             + static_cast<double>(GetPixelYOffset()));
+
+    aTransform.set(0, 0, fScaleFactorX);
+    aTransform.set(1, 1, fScaleFactorY);
+    aTransform.set(0, 2, fZeroPointX);
+    aTransform.set(1, 2, fZeroPointY);
+
+    return aTransform;
+}
+
+basegfx::B2DHomMatrix CoordinateMapper::GetInverseViewTransformation(const MapMode& rMapMode) const
+{
+    basegfx::B2DHomMatrix aMatrix(GetViewTransformation(rMapMode));
+    aMatrix.invert();
+    return aMatrix;
+}
+
+tools::Long CoordinateMapper::LogicToOffsetLogicX(tools::Long nX) const
+{
+    return nX + maMapRes.mnMapOfsX;
+}
+
+tools::Long CoordinateMapper::LogicToOffsetLogicY(tools::Long nY) const
+{
+    return nY + maMapRes.mnMapOfsY;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

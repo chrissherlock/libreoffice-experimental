@@ -1088,7 +1088,7 @@ CairoPixelProcessor2D::CairoPixelProcessor2D(OutputDevice& rOutputDevice,
     // get evtl. offsets if OutputDevice is e.g. a OUTDEV_WINDOW
     // to evaluate if initial clip is needed
     const tools::Long nOffsetPixelX(mpTargetOutputDevice->GetDeviceOriginX());
-    const tools::Long nOffsetPixelY(mpTargetOutputDevice->GetOutOffYPixel());
+    const tools::Long nOffsetPixelY(mpTargetOutputDevice->GetDeviceOriginY());
     const tools::Long nWidthPixel(mpTargetOutputDevice->GetOutputWidthPixel());
     const tools::Long nHeightPixel(mpTargetOutputDevice->GetOutputHeightPixel());
     bool bClipNeeded(false);

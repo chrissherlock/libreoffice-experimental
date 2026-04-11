@@ -25,6 +25,7 @@
 #include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
 
+#include <CoordinateMapper.hxx>
 #include <salgdi.hxx>
 
 #include <cassert>
@@ -64,7 +65,7 @@ void OutputDevice::DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly )
     // use b2dpolygon drawing if possible
     if (RasterOp::OverPaint == GetRasterOp() && (IsLineColor() || IsFillColor()))
     {
-        const basegfx::B2DHomMatrix aTransform(ImplGetDeviceTransformation());
+        const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation());
         basegfx::B2DPolyPolygon aB2DPolyPolygon(rPolyPoly.getB2DPolyPolygon());
 
         // ensure closed - may be asserted, will prevent buffering
@@ -176,7 +177,7 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
     // use b2dpolygon drawing if possible
     if (RasterOp::OverPaint == GetRasterOp() && (IsLineColor() || IsFillColor()))
     {
-        const basegfx::B2DHomMatrix aTransform(ImplGetDeviceTransformation());
+        const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation());
         basegfx::B2DPolygon aB2DPolygon(rPoly.getB2DPolygon());
 
         // ensure closed - maybe assert, hinders buffering
@@ -278,7 +279,7 @@ void OutputDevice::ImplDrawPolyPolygonWithB2DPolyPolygon(const basegfx::B2DPolyP
 
     if (RasterOp::OverPaint == GetRasterOp() && (IsLineColor() || IsFillColor()))
     {
-        const basegfx::B2DHomMatrix aTransform(ImplGetDeviceTransformation());
+        const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation());
         basegfx::B2DPolyPolygon aB2DPolyPolygon(rB2DPolyPoly);
         bSuccess = true;
 

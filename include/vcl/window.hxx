@@ -1479,7 +1479,7 @@ public:
                                              const vcl::TextLayoutCommon* _pTextLayout = nullptr ) const;
     float                       GetDPIScaleFactor() const;
     tools::Long                 GetDeviceOriginX() const;
-    tools::Long                 GetOutOffYPixel() const;
+    tools::Long                 GetDeviceOriginY() const;
 
     void                        EnableMapMode( bool bEnable = true );
     bool                        IsMapModeEnabled() const;

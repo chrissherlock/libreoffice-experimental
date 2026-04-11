@@ -265,7 +265,7 @@ bool OutputDevice::ImplDrawRotateText( SalLayout& rSalLayout )
     // mask output with text colored bitmap
     GDIMetaFile* pOldMetaFile = mpMetaFile;
     tools::Long nOldOffX = GetDeviceOriginX();
-    tools::Long nOldOffY = GetOutOffYPixel();
+    tools::Long nOldOffY = GetDeviceOriginY();
     bool bOldMap = mpMapper->IsMapModeEnabled();
 
     SetDeviceOriginX(0);
@@ -1594,7 +1594,7 @@ void OutputDevice::ImplDrawText( OutputDevice& rTargetDevice, const tools::Recta
 
                         Point       aTempPos = rTargetDevice.LogicToPixel( aPos );
                         nMnemonicX = rTargetDevice.GetDeviceOriginX() + aTempPos.X() + rTargetDevice.LogicWidthToDevicePixel(std::min(lc_x1, lc_x2));
-                        nMnemonicY = rTargetDevice.GetOutOffYPixel() + aTempPos.Y() + rTargetDevice.LogicWidthToDevicePixel(rTargetDevice.GetFontMetric().GetAscent());
+                        nMnemonicY = rTargetDevice.GetDeviceOriginY() + aTempPos.Y() + rTargetDevice.LogicWidthToDevicePixel(rTargetDevice.GetFontMetric().GetAscent());
                         rTargetDevice.ImplDrawMnemonicLine( nMnemonicX, nMnemonicY, nMnemonicWidth );
                     }
                 }
@@ -1662,7 +1662,7 @@ void OutputDevice::ImplDrawText( OutputDevice& rTargetDevice, const tools::Recta
 
             Point aTempPos = rTargetDevice.LogicToPixel( aPos );
             nMnemonicX = rTargetDevice.GetDeviceOriginX() + aTempPos.X() + rTargetDevice.LogicWidthToDevicePixel( std::min(lc_x1, lc_x2) );
-            nMnemonicY = rTargetDevice.GetOutOffYPixel() + aTempPos.Y() + rTargetDevice.LogicWidthToDevicePixel( rTargetDevice.GetFontMetric().GetAscent() );
+            nMnemonicY = rTargetDevice.GetDeviceOriginY() + aTempPos.Y() + rTargetDevice.LogicWidthToDevicePixel( rTargetDevice.GetFontMetric().GetAscent() );
         }
 
         if ( nStyle & DrawTextFlags::Clip )
@@ -1968,7 +1968,7 @@ void OutputDevice::DrawCtrlText( const Point& rPos, const OUString& rStr,
             aTempPos += rPos;
             aTempPos = LogicToPixel( aTempPos );
             nMnemonicX = GetDeviceOriginX() + aTempPos.X();
-            nMnemonicY = GetOutOffYPixel() + aTempPos.Y();
+            nMnemonicY = GetDeviceOriginY() + aTempPos.Y();
         }
         else
             nMnemonicPos = -1; // Reset - we don't show the mnemonic

@@ -117,10 +117,10 @@ std::unique_ptr<BaseProcessor2D> createPixelProcessor2DFromOutputDevice(
         // NOTE: This will also need to take extended size of target device into
         //       consideration, using D2DPixelProcessor2D *will* have to clip
         //       against that. Thus for now this is *not* sufficient (see tdf#163125)
-        if(0 != rTargetOutDev.GetDeviceOriginX() || 0 != rTargetOutDev.GetOutOffYPixel())
+        if(0 != rTargetOutDev.GetDeviceOriginX() || 0 != rTargetOutDev.GetDeviceOriginY())
         {
             basegfx::B2DHomMatrix aTransform(aViewInformation2D.getViewTransformation());
-            aTransform.translate(rTargetOutDev.GetDeviceOriginX(), rTargetOutDev.GetOutOffYPixel());
+            aTransform.translate(rTargetOutDev.GetDeviceOriginX(), rTargetOutDev.GetDeviceOriginY());
             aViewInformation2D.setViewTransformation(aTransform);
         }
 

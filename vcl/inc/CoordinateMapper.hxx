@@ -32,6 +32,10 @@ private:
     MapMode maMapMode;
     ImplMapRes maMapRes;
 
+    // #i75163#
+    mutable basegfx::B2DHomMatrix* mpViewTransform = nullptr;
+    mutable basegfx::B2DHomMatrix* mpInverseViewTransform = nullptr;
+
     sal_Int32 mnDPIX = 0;
     sal_Int32 mnDPIY = 0;
     sal_Int32 mnDPIScalePercentage = 100;
@@ -69,7 +73,7 @@ public:
     void SetDPIScalePercentage(sal_Int32 nPercentage);
 
     tools::Long GetDeviceOriginX() const;
-    tools::Long GetOutOffYPixel() const;
+    tools::Long GetDeviceOriginY() const;
 
     void SetDeviceOriginX(tools::Long nOutOffX);
     void SetOutOffYPixel(tools::Long nOutOffY);
@@ -82,12 +86,12 @@ public:
 
     Size GetPixelOffset() const { return Size(mnOutOffOrigX, mnOutOffOrigY); }
     void SetPixelOffset(const Size& rSize);
-    tools::Long GetPixelXOffset() { return mnOutOffOrigX; }
-    tools::Long GetPixelYOffset() { return mnOutOffOrigY; }
+    tools::Long GetPixelXOffset() const { return mnOutOffOrigX; }
+    tools::Long GetPixelYOffset() const { return mnOutOffOrigY; }
 
     void SetLogicalOffset(const Size& rSize);
-    tools::Long GetLogicalXOffset() { return mnOutOffLogicX; }
-    tools::Long GetLogicalYOffset() { return mnOutOffLogicY; }
+    tools::Long GetLogicalXOffset() const { return mnOutOffLogicX; }
+    tools::Long GetLogicalYOffset() const { return mnOutOffLogicY; }
 
     void SetOutputWidthPixel(tools::Long nWidth);
     void SetOutputHeightPixel(tools::Long nHeight);
@@ -118,6 +122,20 @@ public:
     void CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX, tools::Long nDPIY);
 
     ImplMapRes ResolveMapRes(const MapMode* pMode);
+
+    /** Invalidate the view transformation.
+
+     @since AOO bug 75163 (OpenOffice.org 2.4.3 - OOH 680 milestone 212)
+     */
+    void InvalidateViewTransform();
+    basegfx::B2DHomMatrix GetViewTransformation() const;
+    basegfx::B2DHomMatrix GetViewTransformation(const MapMode& rMapMode) const;
+    basegfx::B2DHomMatrix GetInverseViewTransformation() const;
+    basegfx::B2DHomMatrix GetInverseViewTransformation(const MapMode& rMapMode) const;
+    basegfx::B2DHomMatrix GetDeviceTransformation() const;
+
+    tools::Long LogicToOffsetLogicX(tools::Long nX) const;
+    tools::Long LogicToOffsetLogicY(tools::Long nY) const;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

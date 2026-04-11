@@ -1418,7 +1418,7 @@ void SalInstanceWidget::DoRecursivePaint(vcl::Window* pWindow, const Point& rRen
                       - pChild->GetOutDev()->GetOutputWidthPixel();
 
         tools::Long nDeltaY
-            = pChild->GetOutDev()->GetOutOffYPixel() - pWindow->GetOutDev()->GetOutOffYPixel();
+            = pChild->GetOutDev()->GetDeviceOriginY() - pWindow->GetOutDev()->GetDeviceOriginY();
 
         Point aPos(rRenderLogicPos);
         aPos += Point(nDeltaX, nDeltaY);

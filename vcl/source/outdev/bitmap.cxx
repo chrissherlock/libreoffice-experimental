@@ -299,7 +299,7 @@ Bitmap OutputDevice::GetBitmap( const Point& rSrcPt, const Size& rSize ) const
     tools::Long    nY = ImplLogicYToDevicePixel( rSrcPt.Y() );
     tools::Long    nWidth = LogicWidthToDevicePixel(rSize.Width());
     tools::Long    nHeight = LogicHeightToDevicePixel(rSize.Height());
-    if ( nWidth <= 0 || nHeight <= 0 || nX > (GetOutputWidthPixel() + GetDeviceOriginX()) || nY > (GetOutputHeightPixel() + GetOutOffYPixel()))
+    if ( nWidth <= 0 || nHeight <= 0 || nX > (GetOutputWidthPixel() + GetDeviceOriginX()) || nY > (GetOutputHeightPixel() + GetDeviceOriginY()))
         return Bitmap();
 
     tools::Rectangle   aRect( Point( nX, nY ), Size( nWidth, nHeight ) );
@@ -314,10 +314,10 @@ Bitmap OutputDevice::GetBitmap( const Point& rSrcPt, const Size& rSize ) const
     }
 
     // Y-Coordinate outside of draw area?
-    if ( nY < GetOutOffYPixel() )
+    if ( nY < GetDeviceOriginY() )
     {
-        nHeight -= ( GetOutOffYPixel() - nY );
-        nY = GetOutOffYPixel();
+        nHeight -= ( GetDeviceOriginY() - nY );
+        nY = GetDeviceOriginY();
         bClipped = true;
     }
 
@@ -329,9 +329,9 @@ Bitmap OutputDevice::GetBitmap( const Point& rSrcPt, const Size& rSize ) const
     }
 
     // Height outside of draw area?
-    if ( (nHeight + nY) > (GetOutputHeightPixel() + GetOutOffYPixel()) )
+    if ( (nHeight + nY) > (GetOutputHeightPixel() + GetDeviceOriginY()) )
     {
-        nHeight = GetOutOffYPixel() + GetOutputHeightPixel() - nY;
+        nHeight = GetDeviceOriginY() + GetOutputHeightPixel() - nY;
         bClipped = true;
     }
 
@@ -350,7 +350,7 @@ Bitmap OutputDevice::GetBitmap( const Point& rSrcPt, const Size& rSize ) const
                 {
                     SalTwoRect aPosAry(nX, nY, nWidth, nHeight,
                                       (aRect.Left() < GetDeviceOriginX()) ? (GetDeviceOriginX() - aRect.Left()) : 0L,
-                                      (aRect.Top() < GetOutOffYPixel()) ? (GetOutOffYPixel() - aRect.Top()) : 0L,
+                                      (aRect.Top() < GetDeviceOriginY()) ? (GetDeviceOriginY() - aRect.Top()) : 0L,
                                       nWidth, nHeight);
                     aVDev->mpGraphics->CopyBits(aPosAry, *mpGraphics, *this, *this);
                 }
@@ -413,7 +413,7 @@ void OutputDevice::DrawDeviceAlphaBitmap( const Bitmap& rBmp,
     if (aDstRect.Intersection(tools::Rectangle(aOutPt, aOutSz)).IsEmpty())
         return;
 
-    Point aRelPt = aOutPt + Point(GetDeviceOriginX(), GetOutOffYPixel());
+    Point aRelPt = aOutPt + Point(GetDeviceOriginX(), GetDeviceOriginY());
     SalTwoRect aTR(
         rSrcPtPixel.X(), rSrcPtPixel.Y(),
         rSrcSizePixel.Width(), rSrcSizePixel.Height(),
