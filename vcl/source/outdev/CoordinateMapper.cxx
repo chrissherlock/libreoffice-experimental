@@ -402,6 +402,18 @@ tools::Long CoordinateMapper::LogicUnitsToViewUnitsY(tools::Long nY) const
     return LogicToViewDistanceY(nY + maMapRes.mnMapOfsY);
 }
 
+tools::Long CoordinateMapper::LogicUnitsToViewUnitsX(tools::Long nX,
+                                                     const ImplMapRes& rMapRes) const
+{
+    return LogicToViewDistanceX(nX + rMapRes.mnMapOfsX, rMapRes.mfMapScX);
+}
+
+tools::Long CoordinateMapper::LogicUnitsToViewUnitsY(tools::Long nY,
+                                                     const ImplMapRes& rMapRes) const
+{
+    return LogicToViewDistanceY(nY + rMapRes.mnMapOfsY, rMapRes.mfMapScY);
+}
+
 tools::Long CoordinateMapper::DevicePixelToLogicX(tools::Long nX) const
 {
     // If MapMode is disabled, Logic Space and Window Space are identical
