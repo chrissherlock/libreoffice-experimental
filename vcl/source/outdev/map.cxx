@@ -608,8 +608,10 @@ Point OutputDevice::LogicToPixel( const Point& rLogicPt,
     ImplMapRes          aMapRes;
     aMapRes.CalcMapResolution(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
 
-    return Point(mpMapper->LogicToViewDistanceX(rLogicPt.X() + aMapRes.mnMapOfsX, aMapRes.mfMapScX) + mpMapper->GetPixelXOffset(),
-                 mpMapper->LogicToViewDistanceY(rLogicPt.Y() + aMapRes.mnMapOfsY, aMapRes.mfMapScY) + mpMapper->GetPixelYOffset());
+    return Point(
+        mpMapper->ViewToWindowUnitsX(mpMapper->LogicUnitsToViewUnitsX(rLogicPt.X(), aMapRes)),
+        mpMapper->ViewToWindowUnitsY(mpMapper->LogicUnitsToViewUnitsY(rLogicPt.Y(), aMapRes))
+    );
 }
 
 Size OutputDevice::LogicToPixel( const Size& rLogicSize,

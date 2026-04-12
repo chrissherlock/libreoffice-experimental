@@ -183,8 +183,8 @@ public:
     tools::Long DevicePixelToLogicY(tools::Long nY) const;
 
     // Logic -> Window units
-    SAL_DLLPRIVATE tools::Long LogicToWindowUnitsX(tools::Long nX) const;
-    SAL_DLLPRIVATE tools::Long LogicToWindowUnitsY(tools::Long nY) const;
+    tools::Long LogicToWindowUnitsX(tools::Long nX) const;
+    tools::Long LogicToWindowUnitsY(tools::Long nY) const;
 
     // Pipeline is: Device -> Window -> View -> LogicUnits
 
@@ -205,6 +205,10 @@ public:
     tools::Long ViewToLogicUnitsY(tools::Long nY) const;
     tools::Long LogicUnitsToViewUnitsX(tools::Long nX) const;
     tools::Long LogicUnitsToViewUnitsY(tools::Long nY) const;
+    tools::Long LogicUnitsToViewUnitsX(tools::Long nX,
+                                                      const ImplMapRes& rMapRes) const;
+    tools::Long LogicUnitsToViewUnitsY(tools::Long nY,
+                                                      const ImplMapRes& rMapRes) const;
 
 private:
     tools::Long ImplCalcDevicePixelX(tools::Long nX) const;
