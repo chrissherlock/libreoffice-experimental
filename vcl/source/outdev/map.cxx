@@ -160,81 +160,35 @@ tools::Polygon OutputDevice::ImplLogicToDevicePixel( const tools::Polygon& rLogi
 
 basegfx::B2DPolygon OutputDevice::ImplLogicToDevicePixel(const basegfx::B2DPolygon& rLogicPoly) const
 {
-    if (!mpMapper->IsMapModeEnabled() && !mpMapper->GetDeviceOriginX() && !mpMapper->GetDeviceOriginY())
-        return rLogicPoly;
-
     const sal_uInt32 nPoints = rLogicPoly.count();
     basegfx::B2DPolygon aPoly(rLogicPoly);
-
-    basegfx::B2DPoint aC1;
-    basegfx::B2DPoint aC2;
-
-    if (mpMapper->IsMapModeEnabled())
-    {
-        for (sal_uInt32 i = 0; i < nPoints; ++i)
-        {
-            const basegfx::B2DPoint& rPt = aPoly.getB2DPoint(i);
-            basegfx::B2DPoint aPt(mpMapper->LogicToViewX(mpMapper->LogicToOffsetLogicX(rPt.getX())) + mpMapper->GetDeviceOriginX() + mpMapper->GetPixelXOffset(),
-                                  mpMapper->LogicToViewY(mpMapper->LogicToOffsetLogicY(rPt.getY())) + mpMapper->GetDeviceOriginY() + mpMapper->GetPixelYOffset());
-
-            const bool bC1 = aPoly.isPrevControlPointUsed(i);
-            if (bC1)
-            {
-                const basegfx::B2DPoint aB2DC1(aPoly.getPrevControlPoint(i));
-
-                aC1 = basegfx::B2DPoint(mpMapper->LogicToViewX(mpMapper->LogicToOffsetLogicX(aB2DC1.getX())) + mpMapper->GetDeviceOriginX() + mpMapper->GetPixelXOffset(),
-                                        mpMapper->LogicToViewY(mpMapper->LogicToOffsetLogicY(aB2DC1.getY())) + mpMapper->GetDeviceOriginY() + mpMapper->GetPixelYOffset());
-            }
-
-            const bool bC2 = aPoly.isNextControlPointUsed(i);
-            if (bC2)
-            {
-                const basegfx::B2DPoint aB2DC2(aPoly.getNextControlPoint(i));
-
-                aC2 = basegfx::B2DPoint(mpMapper->LogicToViewX(mpMapper->LogicToOffsetLogicX(aB2DC2.getX())) + mpMapper->GetDeviceOriginX() + mpMapper->GetPixelXOffset(),
-                                        mpMapper->LogicToViewY(mpMapper->LogicToOffsetLogicY(aB2DC2.getY())) + mpMapper->GetDeviceOriginY() + mpMapper->GetPixelYOffset());
-            }
-
-            aPoly.setB2DPoint(i, aPt);
-
-            if (bC1)
-                aPoly.setPrevControlPoint(i, aC1);
-
-            if (bC2)
-                aPoly.setNextControlPoint(i, aC2);
-        }
-
-        return aPoly;
-    }
 
     for (sal_uInt32 i = 0; i < nPoints; ++i)
     {
         const basegfx::B2DPoint& rPt = aPoly.getB2DPoint(i);
-        basegfx::B2DPoint aPt(rPt.getX() + mpMapper->GetDeviceOriginX(), rPt.getY() + mpMapper->GetDeviceOriginY());
 
-        const bool bC1 = aPoly.isPrevControlPointUsed(i);
-        if (bC1)
+        aPoly.setB2DPoint(i, basegfx::B2DPoint(
+            mpMapper->LogicToDevicePixelX(rPt.getX()),
+            mpMapper->LogicToDevicePixelY(rPt.getY())
+        ));
+
+        if (aPoly.isPrevControlPointUsed(i))
         {
             const basegfx::B2DPoint aB2DC1(aPoly.getPrevControlPoint(i));
-
-            aC1 = basegfx::B2DPoint(aB2DC1.getX() + mpMapper->GetDeviceOriginX(), aB2DC1.getY() + mpMapper->GetDeviceOriginY());
+            aPoly.setPrevControlPoint(i, basegfx::B2DPoint(
+                mpMapper->LogicToDevicePixelX(aB2DC1.getX()),
+                mpMapper->LogicToDevicePixelY(aB2DC1.getY())
+            ));
         }
 
-        const bool bC2 = aPoly.isNextControlPointUsed(i);
-        if (bC2)
+        if (aPoly.isNextControlPointUsed(i))
         {
             const basegfx::B2DPoint aB2DC2(aPoly.getNextControlPoint(i));
-
-            aC2 = basegfx::B2DPoint(aB2DC2.getX() + mpMapper->GetDeviceOriginX(), aB2DC2.getY() + mpMapper->GetDeviceOriginY());
+            aPoly.setNextControlPoint(i, basegfx::B2DPoint(
+                mpMapper->LogicToDevicePixelX(aB2DC2.getX()),
+                mpMapper->LogicToDevicePixelY(aB2DC2.getY())
+            ));
         }
-
-        aPoly.setB2DPoint(i, aPt);
-
-        if (bC1)
-            aPoly.setPrevControlPoint(i, aC1);
-
-        if (bC2)
-            aPoly.setNextControlPoint(i, aC2);
     }
 
     return aPoly;
