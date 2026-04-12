@@ -190,6 +190,7 @@ tools::Long CoordinateMapper::LogicToOffsetLogicY(tools::Long nY) const
     return nY + maMapRes.mnMapOfsY;
 }
 
+// Viewport (view space)
 tools::Long CoordinateMapper::LogicToViewPixelX(tools::Long nX) const
 {
     const double nViewLogicX = nX + maMapRes.mnMapOfsX;
@@ -200,6 +201,17 @@ tools::Long CoordinateMapper::LogicToViewPixelY(tools::Long nY) const
 {
     const double nViewLogicY = nY + maMapRes.mnMapOfsY;
     return std::llround(nViewLogicY * maMapRes.mfMapScY * mnDPIY);
+}
+
+// Physical window (device space)
+tools::Long CoordinateMapper::LogicToDevicePixelX(tools::Long nX) const
+{
+    return LogicToViewPixelX(nX) + mnOutOffX + mnOutOffOrigX;
+}
+
+tools::Long CoordinateMapper::LogicToDevicePixelY(tools::Long nY) const
+{
+    return LogicToViewPixelY(nY) + mnOutOffY + mnOutOffOrigY;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

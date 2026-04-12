@@ -93,9 +93,6 @@ public:
     tools::Long GetLogicalXOffset() const { return mnOutOffLogicX; }
     tools::Long GetLogicalYOffset() const { return mnOutOffLogicY; }
 
-    tools::Long LogicToViewPixelX(tools::Long nX) const;
-    tools::Long LogicToViewPixelY(tools::Long nY) const;
-
     void SetOutputWidthPixel(tools::Long nWidth);
     void SetOutputHeightPixel(tools::Long nHeight);
 
@@ -139,6 +136,14 @@ public:
 
     tools::Long LogicToOffsetLogicX(tools::Long nX) const;
     tools::Long LogicToOffsetLogicY(tools::Long nY) const;
+
+    // Viewport (view space)
+    tools::Long LogicToViewPixelX(tools::Long nX) const;
+    tools::Long LogicToViewPixelY(tools::Long nY) const;
+
+    // Physical window (device space)
+    tools::Long LogicToDevicePixelX(tools::Long nX) const;
+    tools::Long LogicToDevicePixelY(tools::Long nY) const;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
