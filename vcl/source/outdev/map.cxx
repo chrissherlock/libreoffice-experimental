@@ -84,17 +84,17 @@ static double lcl_pixelToLogicDouble(double n, tools::Long nDPI, double fMap)
 tools::Long OutputDevice::ImplLogicXToDevicePixel(tools::Long nX) const
 {
     if (!mpMapper->IsMapModeEnabled())
-        return nX + GetDeviceOriginX();
+        return nX + mpMapper->GetDeviceOriginX();
 
-    return mpMapper->LogicToViewPixelX(nX) + mpMapper->GetDeviceOriginX() + mpMapper->GetPixelXOffset();
+    return mpMapper->LogicToDevicePixelX(nX);
 }
 
 tools::Long OutputDevice::ImplLogicYToDevicePixel(tools::Long nY) const
 {
     if (!mpMapper->IsMapModeEnabled())
-        return nY + GetDeviceOriginY();
+        return nY + mpMapper->GetDeviceOriginY();
 
-    return mpMapper->LogicToViewPixelY(nY) + mpMapper->GetDeviceOriginY() + mpMapper->GetPixelYOffset();
+    return mpMapper->LogicToDevicePixelY(nY);
 }
 
 tools::Long OutputDevice::LogicWidthToDevicePixel(tools::Long nWidth) const
