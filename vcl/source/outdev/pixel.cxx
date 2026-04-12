@@ -20,6 +20,7 @@
 #include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
 
+#include <CoordinateMapper.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 
@@ -37,8 +38,8 @@ Color OutputDevice::GetPixel(const Point& rPoint) const
 
         if (!mbOutputClipped)
         {
-            const tools::Long nX = ImplLogicXToDevicePixel(rPoint.X());
-            const tools::Long nY = ImplLogicYToDevicePixel(rPoint.Y());
+            const tools::Long nX = mpMapper->LogicToDevicePixelX(rPoint.X());
+            const tools::Long nY = mpMapper->LogicToDevicePixelY(rPoint.Y());
             aColor = mpGraphics->GetPixel(nX, nY, *this);
         }
     }
