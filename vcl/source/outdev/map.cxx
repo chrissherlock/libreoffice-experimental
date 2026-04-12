@@ -49,14 +49,14 @@ static tools::Long lcl_logicToPixel(tools::Long n, tools::Long nDPI, double fMap
     return std::llround(nRes);
 }
 
-static double ImplLogicToSubPixel(tools::Long n, tools::Long nDPI, double fMap)
+static double lcl_logicToSubPixel(tools::Long n, tools::Long nDPI, double fMap)
 {
     assert(nDPI > 0);
     assert(fMap != 0);
     return n * fMap * nDPI;
 }
 
-static tools::Long ImplSubPixelToLogic(double n, tools::Long nDPI, double fMap)
+static tools::Long lcl_subPixelToLogic(double n, tools::Long nDPI, double fMap)
 {
     assert(nDPI > 0);
     assert(fMap != 0);
@@ -839,8 +839,8 @@ Point OutputDevice::SubPixelToLogic(const basegfx::B2DPoint& rDevicePt) const
         return Point(rDevicePt.getX(), rDevicePt.getY());
     }
 
-    return Point(ImplSubPixelToLogic(rDevicePt.getX(), GetDPIX(), mpMapper->GetMapResolutionScaleX()) - mpMapper->GetMappingXOffset() - mpMapper->GetLogicalXOffset(),
-                 ImplSubPixelToLogic(rDevicePt.getY(), GetDPIY(), mpMapper->GetMapResolutionScaleY()) - mpMapper->GetMappingYOffset() - mpMapper->GetLogicalYOffset());
+    return Point(lcl_subPixelToLogic(rDevicePt.getX(), GetDPIX(), mpMapper->GetMapResolutionScaleX()) - mpMapper->GetMappingXOffset() - mpMapper->GetLogicalXOffset(),
+                 lcl_subPixelToLogic(rDevicePt.getY(), GetDPIY(), mpMapper->GetMapResolutionScaleY()) - mpMapper->GetMappingYOffset() - mpMapper->GetLogicalYOffset());
 }
 
 Size OutputDevice::PixelToLogic( const Size& rDeviceSize ) const
@@ -1379,7 +1379,7 @@ double OutputDevice::LogicWidthToDeviceSubPixel(tools::Long nWidth) const
     if (!mpMapper->IsMapModeEnabled())
         return nWidth;
 
-    return ImplLogicToSubPixel(nWidth, GetDPIX(), mpMapper->GetMapResolutionScaleX());
+    return lcl_logicToSubPixel(nWidth, GetDPIX(), mpMapper->GetMapResolutionScaleX());
 }
 
 double OutputDevice::LogicHeightToDeviceSubPixel(tools::Long nHeight) const
@@ -1387,7 +1387,7 @@ double OutputDevice::LogicHeightToDeviceSubPixel(tools::Long nHeight) const
     if (!mpMapper->IsMapModeEnabled())
         return nHeight;
 
-    return ImplLogicToSubPixel(nHeight, GetDPIY(), mpMapper->GetMapResolutionScaleY());
+    return lcl_logicToSubPixel(nHeight, GetDPIY(), mpMapper->GetMapResolutionScaleY());
 }
 
 basegfx::B2DPoint OutputDevice::LogicToDeviceSubPixel(const Point& rPoint) const
@@ -1395,8 +1395,8 @@ basegfx::B2DPoint OutputDevice::LogicToDeviceSubPixel(const Point& rPoint) const
     if (!mpMapper->IsMapModeEnabled())
         return basegfx::B2DPoint(rPoint.X() + GetDeviceOriginX(), rPoint.Y() + GetDeviceOriginY());
 
-    return basegfx::B2DPoint(ImplLogicToSubPixel(rPoint.X() + mpMapper->GetMappingXOffset(), GetDPIX(), mpMapper->GetMapResolutionScaleX()) + GetDeviceOriginX() + mpMapper->GetPixelXOffset(),
-                             ImplLogicToSubPixel(rPoint.Y() + mpMapper->GetMappingYOffset(), GetDPIY(), mpMapper->GetMapResolutionScaleY()) + GetDeviceOriginY() + mpMapper->GetPixelYOffset());
+    return basegfx::B2DPoint(lcl_logicToSubPixel(rPoint.X() + mpMapper->GetMappingXOffset(), GetDPIX(), mpMapper->GetMapResolutionScaleX()) + GetDeviceOriginX() + mpMapper->GetPixelXOffset(),
+                             lcl_logicToSubPixel(rPoint.Y() + mpMapper->GetMappingYOffset(), GetDPIY(), mpMapper->GetMapResolutionScaleY()) + GetDeviceOriginY() + mpMapper->GetPixelYOffset());
 }
 
 basegfx::B2DHomMatrix OutputDevice::GetViewTransformation() const
