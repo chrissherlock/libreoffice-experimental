@@ -39,46 +39,46 @@
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <tools/UnitConversion.hxx>
 
-static tools::Long lcl_logicToPixel(tools::Long n, tools::Long nDPI, double fMap)
+static tools::Long lcl_logicToPixel(tools::Long n, tools::Long nDPI, double fMapResolutionScale)
 {
     assert(nDPI > 0);
-    assert(fMap >= 0);
-    double nRes = n * fMap * nDPI;
+    assert(fMapResolutionScale >= 0);
+    double nRes = n * fMapResolutionScale * nDPI;
     //detect overflows
     assert(std::abs(nRes) < static_cast<double>(std::numeric_limits<tools::Long>::max()));
     return std::llround(nRes);
 }
 
-static double lcl_logicToSubPixel(tools::Long n, tools::Long nDPI, double fMap)
+static double lcl_logicToSubPixel(tools::Long n, tools::Long nDPI, double fMapResolutionScale)
 {
     assert(nDPI > 0);
-    assert(fMap != 0);
-    return n * fMap * nDPI;
+    assert(fMapResolutionScale != 0);
+    return n * fMapResolutionScale * nDPI;
 }
 
-static tools::Long lcl_subPixelToLogic(double n, tools::Long nDPI, double fMap)
+static tools::Long lcl_subPixelToLogic(double n, tools::Long nDPI, double fMapResolutionScale)
 {
     assert(nDPI > 0);
-    assert(fMap != 0);
+    assert(fMapResolutionScale != 0);
 
-    return std::llround(n / fMap / nDPI);
+    return std::llround(n / fMapResolutionScale / nDPI);
 }
 
-static tools::Long lcl_pixelToLogic(tools::Long n, tools::Long nDPI, double fMap)
+static tools::Long lcl_pixelToLogic(tools::Long n, tools::Long nDPI, double fMapResolutionScale)
 {
     assert(nDPI > 0);
-    if (fMap == 0)
+    if (fMapResolutionScale == 0)
         return 0;
 
-    return std::llround(n / fMap / nDPI);
+    return std::llround(n / fMapResolutionScale / nDPI);
 }
 
-static double lcl_pixelToLogicDouble(double n, tools::Long nDPI, double fMap)
+static double lcl_pixelToLogicDouble(double n, tools::Long nDPI, double fMapResolutionScale)
 {
     assert(nDPI > 0);
-    if (fMap == 0)
+    if (fMapResolutionScale == 0)
         return 0;
-    return n / fMap / nDPI;
+    return n / fMapResolutionScale / nDPI;
 }
 
 tools::Long OutputDevice::LogicWidthToDevicePixel(tools::Long nWidth) const
@@ -732,10 +732,8 @@ Size OutputDevice::LogicToPixel( const Size& rLogicSize,
     ImplMapRes          aMapRes;
     aMapRes.CalcMapResolution(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
 
-    return Size( lcl_logicToPixel( rLogicSize.Width(), mpMapper->GetDPIX(),
-                                   aMapRes.mfMapScX ),
-                 lcl_logicToPixel( rLogicSize.Height(), mpMapper->GetDPIY(),
-                                   aMapRes.mfMapScY ) );
+    return Size( lcl_logicToPixel( rLogicSize.Width(), mpMapper->GetDPIX(), aMapRes.mfMapScX ),
+                 lcl_logicToPixel( rLogicSize.Height(), mpMapper->GetDPIY(), aMapRes.mfMapScY ) );
 }
 
 tools::Rectangle OutputDevice::LogicToPixel( const tools::Rectangle& rLogicRect,
