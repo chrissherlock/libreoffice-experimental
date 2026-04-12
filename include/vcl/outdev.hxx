@@ -1623,7 +1623,7 @@ public:
     SAL_WARN_UNUSED_RESULT tools::Rectangle LogicToPixel(const tools::Rectangle& rLogicRect) const;
     SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE tools::Polygon LogicToPixel(const tools::Polygon& rLogicPoly) const;
     SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE tools::PolyPolygon LogicToPixel(const tools::PolyPolygon& rLogicPolyPoly) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE basegfx::B2DPolyPolygon LogicToPixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly) const;
+    SAL_WARN_UNUSED_RESULT basegfx::B2DPolyPolygon LogicToPixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly) const;
     SAL_WARN_UNUSED_RESULT vcl::Region LogicToPixel(const vcl::Region& rLogicRegion)const;
     SAL_WARN_UNUSED_RESULT Point LogicToPixel(const Point& rLogicPt, const MapMode& rMapMode) const;
     SAL_WARN_UNUSED_RESULT Size LogicToPixel(const Size& rLogicSize, const MapMode& rMapMode) const;
