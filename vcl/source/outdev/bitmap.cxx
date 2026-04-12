@@ -30,6 +30,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/BitmapWriteAccess.hxx>
 
+#include <CoordinateMapper.hxx>
 #include <bitmap/bmpfast.hxx>
 #include <drawmode.hxx>
 #include <salbmp.hxx>
@@ -153,7 +154,7 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
         return;
 
     SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(), rSrcSizePixel.Height(),
-                       ImplLogicXToDevicePixel(rDestPt.X()), ImplLogicYToDevicePixel(rDestPt.Y()),
+                       mpMapper->LogicToDevicePixelX(rDestPt.X()), mpMapper->LogicToDevicePixelY(rDestPt.Y()),
                        LogicWidthToDevicePixel(rDestSize.Width()),
                        LogicHeightToDevicePixel(rDestSize.Height()));
 
@@ -267,8 +268,8 @@ void OutputDevice::DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize
         return;
 
     SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(),
-                       rSrcSizePixel.Height(), ImplLogicXToDevicePixel(rDestPt.X()),
-                       ImplLogicYToDevicePixel(rDestPt.Y()),
+                       rSrcSizePixel.Height(), mpMapper->LogicToDevicePixelX(rDestPt.X()),
+                       mpMapper->LogicToDevicePixelY(rDestPt.Y()),
                        LogicWidthToDevicePixel(rDestSize.Width()),
                        LogicHeightToDevicePixel(rDestSize.Height()));
 
@@ -295,8 +296,8 @@ Bitmap OutputDevice::GetBitmap( const Point& rSrcPt, const Size& rSize ) const
 
     assert(mpGraphics);
 
-    tools::Long    nX = ImplLogicXToDevicePixel( rSrcPt.X() );
-    tools::Long    nY = ImplLogicYToDevicePixel( rSrcPt.Y() );
+    tools::Long    nX = mpMapper->LogicToDevicePixelX( rSrcPt.X() );
+    tools::Long    nY = mpMapper->LogicToDevicePixelY( rSrcPt.Y() );
     tools::Long    nWidth = LogicWidthToDevicePixel(rSize.Width());
     tools::Long    nHeight = LogicHeightToDevicePixel(rSize.Height());
     if ( nWidth <= 0 || nHeight <= 0 || nX > (GetOutputWidthPixel() + GetDeviceOriginX()) || nY > (GetOutputHeightPixel() + GetDeviceOriginY()))
