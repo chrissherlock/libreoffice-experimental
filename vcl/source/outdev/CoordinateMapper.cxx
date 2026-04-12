@@ -230,4 +230,136 @@ tools::Long CoordinateMapper::ImplCalcDevicePixelY(tools::Long nY) const
     return LogicToViewPixelY(nY) + mnOutOffY + mnOutOffOrigY;
 }
 
+tools::Long CoordinateMapper::LogicToViewX(tools::Long n, double fMapResolutionScale) const
+{
+    assert(GetDPIX() > 0);
+    assert(fMapResolutionScale >= 0);
+    double nRes = n * fMapResolutionScale * GetDPIX();
+    assert(std::abs(nRes) < static_cast<double>(std::numeric_limits<tools::Long>::max()));
+    return std::llround(nRes);
+}
+
+tools::Long CoordinateMapper::LogicToViewY(tools::Long n, double fMapResolutionScale) const
+{
+    assert(GetDPIY() > 0);
+    assert(fMapResolutionScale >= 0);
+    double nRes = n * fMapResolutionScale * GetDPIY();
+    assert(std::abs(nRes) < static_cast<double>(std::numeric_limits<tools::Long>::max()));
+    return std::llround(nRes);
+}
+
+double CoordinateMapper::LogicToViewDistanceSubPixelX(tools::Long n,
+                                                      double fMapResolutionScale) const
+{
+    assert(GetDPIX() > 0);
+    assert(fMapResolutionScale != 0);
+    return n * fMapResolutionScale * GetDPIX();
+}
+
+double CoordinateMapper::LogicToViewDistanceSubPixelY(tools::Long n,
+                                                      double fMapResolutionScale) const
+{
+    assert(GetDPIY() > 0);
+    assert(fMapResolutionScale != 0);
+    return n * fMapResolutionScale * GetDPIY();
+}
+
+tools::Long CoordinateMapper::ViewSubPixelToLogicDistanceX(double n,
+                                                           double fMapResolutionScale) const
+{
+    assert(GetDPIX() > 0);
+    assert(fMapResolutionScale != 0);
+    return std::llround(n / fMapResolutionScale / GetDPIX());
+}
+
+tools::Long CoordinateMapper::ViewSubPixelToLogicDistanceY(double n,
+                                                           double fMapResolutionScale) const
+{
+    assert(GetDPIY() > 0);
+    assert(fMapResolutionScale != 0);
+    return std::llround(n / fMapResolutionScale / GetDPIY());
+}
+
+tools::Long CoordinateMapper::ViewToLogicDistanceX(tools::Long n, double fMapResolutionScale) const
+{
+    assert(GetDPIX() > 0);
+    if (fMapResolutionScale == 0)
+        return 0;
+    return std::llround(n / fMapResolutionScale / GetDPIX());
+}
+
+tools::Long CoordinateMapper::ViewToLogicDistanceY(tools::Long n, double fMapResolutionScale) const
+{
+    assert(GetDPIY() > 0);
+    if (fMapResolutionScale == 0)
+        return 0;
+    return std::llround(n / fMapResolutionScale / GetDPIY());
+}
+
+double CoordinateMapper::ViewToLogicDistanceDoubleX(double n, double fMapResolutionScale) const
+{
+    assert(GetDPIX() > 0);
+    if (fMapResolutionScale == 0)
+        return 0;
+    return n / fMapResolutionScale / GetDPIX();
+}
+
+double CoordinateMapper::ViewToLogicDistanceDoubleY(double n, double fMapResolutionScale) const
+{
+    assert(GetDPIY() > 0);
+    if (fMapResolutionScale == 0)
+        return 0;
+    return n / fMapResolutionScale / GetDPIY();
+}
+
+tools::Long CoordinateMapper::LogicToViewX(tools::Long n) const
+{
+    return LogicToViewX(n, GetMapResolutionScaleX());
+}
+
+tools::Long CoordinateMapper::LogicToViewY(tools::Long n) const
+{
+    return LogicToViewY(n, GetMapResolutionScaleY());
+}
+
+double CoordinateMapper::LogicToViewDistanceSubPixelX(tools::Long n) const
+{
+    return LogicToViewDistanceSubPixelX(n, GetMapResolutionScaleX());
+}
+
+double CoordinateMapper::LogicToViewDistanceSubPixelY(tools::Long n) const
+{
+    return LogicToViewDistanceSubPixelY(n, GetMapResolutionScaleY());
+}
+
+tools::Long CoordinateMapper::ViewSubPixelToLogicDistanceX(double n) const
+{
+    return ViewSubPixelToLogicDistanceX(n, GetMapResolutionScaleX());
+}
+
+tools::Long CoordinateMapper::ViewSubPixelToLogicDistanceY(double n) const
+{
+    return ViewSubPixelToLogicDistanceY(n, GetMapResolutionScaleY());
+}
+
+tools::Long CoordinateMapper::ViewToLogicDistanceX(tools::Long n) const
+{
+    return ViewToLogicDistanceX(n, GetMapResolutionScaleX());
+}
+
+tools::Long CoordinateMapper::ViewToLogicDistanceY(tools::Long n) const
+{
+    return ViewToLogicDistanceY(n, GetMapResolutionScaleY());
+}
+
+double CoordinateMapper::ViewToLogicDistanceDoubleX(double n) const
+{
+    return ViewToLogicDistanceDoubleX(n, GetMapResolutionScaleX());
+}
+
+double CoordinateMapper::ViewToLogicDistanceDoubleY(double n) const
+{
+    return ViewToLogicDistanceDoubleY(n, GetMapResolutionScaleY());
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
