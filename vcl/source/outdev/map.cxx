@@ -131,11 +131,8 @@ double OutputDevice::ImplDevicePixelToLogicHeightDouble(double nHeight) const
 
 Point OutputDevice::LogicToDevicePixel(const Point& rLogicPt) const
 {
-    if ( !mpMapper->IsMapModeEnabled() )
-        return Point( rLogicPt.X()+GetDeviceOriginX(), rLogicPt.Y()+GetDeviceOriginY() );
-
-    return Point(lcl_logicToPixel(mpMapper->LogicToOffsetLogicX(rLogicPt.X()), GetDPIX(), mpMapper->GetMapResolutionScaleX()) + mpMapper->GetDeviceOriginX() + mpMapper->GetPixelXOffset(),
-                 lcl_logicToPixel(mpMapper->LogicToOffsetLogicY(rLogicPt.Y()), GetDPIY(), mpMapper->GetMapResolutionScaleY()) + mpMapper->GetDeviceOriginY() + mpMapper->GetPixelYOffset());
+    return Point(mpMapper->LogicXToDevicePixel(rLogicPt.X()),
+                 mpMapper->LogicYToDevicePixel(rLogicPt.Y()));
 }
 
 Size OutputDevice::ImplLogicToDevicePixel( const Size& rLogicSize ) const
