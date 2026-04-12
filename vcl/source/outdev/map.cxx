@@ -677,8 +677,8 @@ tools::Polygon OutputDevice::LogicToPixel( const tools::Polygon& rLogicPoly,
     {
         const Point* pPt = &(pPointAry[i]);
         Point aPt;
-        aPt.setX(mpMapper->LogicToViewDistanceX(pPt->X() + aMapRes.mnMapOfsX, aMapRes.mfMapScX) + mpMapper->GetPixelXOffset());
-        aPt.setY(mpMapper->LogicToViewDistanceY(pPt->Y() + aMapRes.mnMapOfsY, aMapRes.mfMapScY) + mpMapper->GetPixelYOffset());
+        aPt.setX(mpMapper->ViewToWindowUnitsX(mpMapper->LogicUnitsToViewUnitsX(pPt->X(), aMapRes)));
+        aPt.setY(mpMapper->ViewToWindowUnitsY(mpMapper->LogicUnitsToViewUnitsY(pPt->Y(), aMapRes)));
         aPoly[i] = aPt;
     }
 
@@ -700,8 +700,10 @@ Point OutputDevice::PixelToLogic( const Point& rDevicePt ) const
     if ( !mpMapper->IsMapModeEnabled() )
         return rDevicePt;
 
-    return Point(mpMapper->ViewToLogicDistanceX(rDevicePt.X()) - mpMapper->GetMappingXOffset() - mpMapper->GetLogicalXOffset(),
-                 mpMapper->ViewToLogicDistanceY(rDevicePt.Y()) - mpMapper->GetMappingYOffset() - mpMapper->GetLogicalYOffset());
+    return Point(
+        mpMapper->ViewToLogicUnitsX(rDevicePt.X()) - mpMapper->GetLogicalXOffset(),
+        mpMapper->ViewToLogicUnitsY(rDevicePt.Y()) - mpMapper->GetLogicalYOffset()
+    );
 }
 
 Point OutputDevice::SubPixelToLogic(const basegfx::B2DPoint& rDevicePt) const
