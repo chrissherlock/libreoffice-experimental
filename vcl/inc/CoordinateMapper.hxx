@@ -134,44 +134,6 @@ public:
     basegfx::B2DHomMatrix GetInverseViewTransformation(const MapMode& rMapMode) const;
     basegfx::B2DHomMatrix GetDeviceTransformation() const;
 
-    tools::Long LogicToViewDistanceX(tools::Long n,
-                                                    double fMapResolutionScale) const;
-    tools::Long LogicToViewDistanceY(tools::Long n,
-                                                    double fMapResolutionScale) const;
-
-    double LogicToViewDistanceSubPixelX(tools::Long n,
-                                                       double fMapResolutionScale) const;
-    double LogicToViewDistanceSubPixelY(tools::Long n,
-                                                       double fMapResolutionScale) const;
-
-    tools::Long ViewSubPixelToLogicDistanceX(double n,
-                                                            double fMapResolutionScale) const;
-    tools::Long ViewSubPixelToLogicDistanceY(double n,
-                                                            double fMapResolutionScale) const;
-
-    tools::Long ViewToLogicDistanceX(tools::Long n,
-                                                    double fMapResolutionScale) const;
-    tools::Long ViewToLogicDistanceY(tools::Long n,
-                                                    double fMapResolutionScale) const;
-
-    double ViewToLogicDistanceDoubleX(double n, double fMapResolutionScale) const;
-    double ViewToLogicDistanceDoubleY(double n, double fMapResolutionScale) const;
-
-    tools::Long LogicToViewDistanceX(tools::Long n) const;
-    tools::Long LogicToViewDistanceY(tools::Long n) const;
-
-    double LogicToViewDistanceSubPixelX(tools::Long n) const;
-    double LogicToViewDistanceSubPixelY(tools::Long n) const;
-
-    tools::Long ViewSubPixelToLogicDistanceX(double n) const;
-    tools::Long ViewSubPixelToLogicDistanceY(double n) const;
-
-    tools::Long ViewToLogicDistanceX(tools::Long n) const;
-    tools::Long ViewToLogicDistanceY(tools::Long n) const;
-
-    double ViewToLogicDistanceDoubleX(double n) const;
-    double ViewToLogicDistanceDoubleY(double n) const;
-
     // Document model coordinates (logical space)
     tools::Long LogicToOffsetLogicX(tools::Long nX) const;
     tools::Long LogicToOffsetLogicY(tools::Long nY) const;
@@ -209,6 +171,39 @@ public:
                                                       const ImplMapRes& rMapRes) const;
     tools::Long LogicUnitsToViewUnitsY(tools::Long nY,
                                                       const ImplMapRes& rMapRes) const;
+
+    tools::Long LogicToViewDistanceX(tools::Long n) const;
+    tools::Long LogicToViewDistanceY(tools::Long n) const;
+    tools::Long LogicToViewDistanceX(tools::Long n,
+                                                    double fMapResolutionScale) const;
+    tools::Long LogicToViewDistanceY(tools::Long n,
+                                                    double fMapResolutionScale) const;
+
+    double ViewToLogicDistanceDoubleX(double n) const;
+    double ViewToLogicDistanceDoubleY(double n) const;
+    double ViewToLogicDistanceDoubleX(double n, double fMapResolutionScale) const;
+    double ViewToLogicDistanceDoubleY(double n, double fMapResolutionScale) const;
+
+    tools::Long ViewToLogicDistanceX(tools::Long n,
+                                                    double fMapResolutionScale) const;
+    tools::Long ViewToLogicDistanceY(tools::Long n,
+                                                    double fMapResolutionScale) const;
+    tools::Long ViewToLogicDistanceX(tools::Long n) const;
+    tools::Long ViewToLogicDistanceY(tools::Long n) const;
+
+    double LogicToViewDistanceSubPixelX(tools::Long n) const;
+    double LogicToViewDistanceSubPixelY(tools::Long n) const;
+    double LogicToViewDistanceSubPixelX(tools::Long n,
+                                                       double fMapResolutionScale) const;
+    double LogicToViewDistanceSubPixelY(tools::Long n,
+                                                       double fMapResolutionScale) const;
+
+    tools::Long ViewSubPixelToLogicDistanceX(double n) const;
+    tools::Long ViewSubPixelToLogicDistanceY(double n) const;
+    tools::Long ViewSubPixelToLogicDistanceX(double n,
+                                                            double fMapResolutionScale) const;
+    tools::Long ViewSubPixelToLogicDistanceY(double n,
+                                                            double fMapResolutionScale) const;
 
 private:
     tools::Long ImplCalcDevicePixelX(tools::Long nX) const;
