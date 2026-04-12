@@ -186,6 +186,10 @@ public:
     tools::Long DevicePixelToLogicX(tools::Long nX) const;
     tools::Long DevicePixelToLogicY(tools::Long nY) const;
 
+    // Logic -> Window units
+    SAL_DLLPRIVATE tools::Long LogicToWindowUnitsX(tools::Long nX) const;
+    SAL_DLLPRIVATE tools::Long LogicToWindowUnitsY(tools::Long nY) const;
+
     // Pipeline is: Device -> Window -> View -> LogicUnits
 
     // Device <-> Window (Strip/Apply OutputDevice screen origin)
