@@ -254,16 +254,17 @@ tools::Rectangle OutputDevice::ImplDevicePixelToLogic( const tools::Rectangle& r
     else
     {
         aRetval = tools::Rectangle(
-            mpMapper->ViewToLogicDistanceX(rPixelRect.Left() - mpMapper->GetDeviceOriginX() - mpMapper->GetPixelXOffset()) - mpMapper->GetMappingXOffset(),
-            mpMapper->ViewToLogicDistanceY(rPixelRect.Top() - mpMapper->GetDeviceOriginY() - mpMapper->GetPixelYOffset()) - mpMapper->GetMappingYOffset(),
-            rPixelRect.IsWidthEmpty() ? 0 : mpMapper->ViewToLogicDistanceX(rPixelRect.Right() - mpMapper->GetDeviceOriginX() - mpMapper->GetPixelXOffset()) - mpMapper->GetMappingXOffset(),
-            rPixelRect.IsHeightEmpty() ? 0 : mpMapper->ViewToLogicDistanceY(rPixelRect.Bottom() - mpMapper->GetDeviceOriginY() - mpMapper->GetPixelYOffset()) - mpMapper->GetMappingYOffset());
+            mpMapper->DevicePixelToLogicX(rPixelRect.Left()),
+            mpMapper->DevicePixelToLogicY(rPixelRect.Top()),
+            rPixelRect.IsWidthEmpty() ? 0 : mpMapper->DevicePixelToLogicX(rPixelRect.Right()),
+            rPixelRect.IsHeightEmpty() ? 0 : mpMapper->DevicePixelToLogicY(rPixelRect.Bottom())
+        );
     }
 
-    if(rPixelRect.IsWidthEmpty())
+    if (rPixelRect.IsWidthEmpty())
         aRetval.SetWidthEmpty();
 
-    if(rPixelRect.IsHeightEmpty())
+    if (rPixelRect.IsHeightEmpty())
         aRetval.SetHeightEmpty();
 
     return aRetval;
