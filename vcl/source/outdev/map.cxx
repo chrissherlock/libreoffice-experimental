@@ -81,20 +81,20 @@ static double lcl_pixelToLogicDouble(double n, tools::Long nDPI, double fMap)
     return n / fMap / nDPI;
 }
 
-tools::Long OutputDevice::ImplLogicXToDevicePixel( tools::Long nX ) const
+tools::Long OutputDevice::ImplLogicXToDevicePixel(tools::Long nX) const
 {
-    if ( !mpMapper->IsMapModeEnabled() )
-        return nX+GetDeviceOriginX();
+    if (!mpMapper->IsMapModeEnabled())
+        return nX + GetDeviceOriginX();
 
-    return lcl_logicToPixel(mpMapper->LogicToOffsetLogicX(nX), GetDPIX(), mpMapper->GetMapResolutionScaleX()) + GetDeviceOriginX() + mpMapper->GetPixelXOffset();
+    return mpMapper->LogicToViewPixelX(nX) + mpMapper->GetDeviceOriginX() + mpMapper->GetPixelXOffset();
 }
 
-tools::Long OutputDevice::ImplLogicYToDevicePixel( tools::Long nY ) const
+tools::Long OutputDevice::ImplLogicYToDevicePixel(tools::Long nY) const
 {
-    if ( !mpMapper->IsMapModeEnabled() )
-        return nY+GetDeviceOriginY();
+    if (!mpMapper->IsMapModeEnabled())
+        return nY + GetDeviceOriginY();
 
-    return lcl_logicToPixel(mpMapper->LogicToOffsetLogicY(nY), GetDPIY(), mpMapper->GetMapResolutionScaleY()) + GetDeviceOriginY() + mpMapper->GetPixelYOffset();
+    return mpMapper->LogicToViewPixelY(nY) + mpMapper->GetDeviceOriginY() + mpMapper->GetPixelYOffset();
 }
 
 tools::Long OutputDevice::LogicWidthToDevicePixel(tools::Long nWidth) const
@@ -1244,10 +1244,8 @@ Size OutputDevice::LogicToLogic( const Size& rSzSource,
 
     const auto [aMapResSource, aMapResDest] = lcl_calcConversionMapRes( rMapModeSource, rMapModeDest );
 
-    return Size( lcl_scaleLogicValue( rSzSource.Width(),
-                      aMapResSource.mfMapScX, aMapResDest.mfMapScX ),
-                 lcl_scaleLogicValue( rSzSource.Height(),
-                      aMapResSource.mfMapScY, aMapResDest.mfMapScY ) );
+    return Size(lcl_scaleLogicValue(rSzSource.Width(), aMapResSource.mfMapScX, aMapResDest.mfMapScX),
+                lcl_scaleLogicValue(rSzSource.Height(), aMapResSource.mfMapScY, aMapResDest.mfMapScY));
 }
 
 basegfx::B2DPolygon OutputDevice::LogicToLogic( const basegfx::B2DPolygon& rPolySource,

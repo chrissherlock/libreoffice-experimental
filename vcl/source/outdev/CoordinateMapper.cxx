@@ -190,4 +190,16 @@ tools::Long CoordinateMapper::LogicToOffsetLogicY(tools::Long nY) const
     return nY + maMapRes.mnMapOfsY;
 }
 
+tools::Long CoordinateMapper::LogicToViewPixelX(tools::Long nX) const
+{
+    const double nViewLogicX = nX + maMapRes.mnMapOfsX;
+    return std::llround(nViewLogicX * maMapRes.mfMapScX * mnDPIX);
+}
+
+tools::Long CoordinateMapper::LogicToViewPixelY(tools::Long nY) const
+{
+    const double nViewLogicY = nY + maMapRes.mnMapOfsY;
+    return std::llround(nViewLogicY * maMapRes.mfMapScY * mnDPIY);
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

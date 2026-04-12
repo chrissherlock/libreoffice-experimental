@@ -93,6 +93,9 @@ public:
     tools::Long GetLogicalXOffset() const { return mnOutOffLogicX; }
     tools::Long GetLogicalYOffset() const { return mnOutOffLogicY; }
 
+    tools::Long LogicToViewPixelX(tools::Long nX) const;
+    tools::Long LogicToViewPixelY(tools::Long nY) const;
+
     void SetOutputWidthPixel(tools::Long nWidth);
     void SetOutputHeightPixel(tools::Long nHeight);
 
