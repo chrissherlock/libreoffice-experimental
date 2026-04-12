@@ -448,9 +448,9 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
 
     if (nSrcWidth && nSrcHeight && nDestWidth && nDestHeight)
     {
-        SalTwoRect aPosAry(ImplLogicXToDevicePixel(rSrcPt.X()), ImplLogicYToDevicePixel(rSrcPt.Y()),
+        SalTwoRect aPosAry(mpMapper->LogicToDevicePixelX(rSrcPt.X()), mpMapper->LogicToDevicePixelY(rSrcPt.Y()),
                            nSrcWidth, nSrcHeight,
-                           ImplLogicXToDevicePixel(rDestPt.X()), ImplLogicYToDevicePixel(rDestPt.Y()),
+                           mpMapper->LogicToDevicePixelX(rDestPt.X()), mpMapper->LogicToDevicePixelY(rDestPt.Y()),
                            nDestWidth, nDestHeight);
 
         AdjustTwoRect( aPosAry, GetOutputRectPixel() );
@@ -492,12 +492,12 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
     if ( mbOutputClipped )
         return;
 
-    SalTwoRect aPosAry(rOutDev.ImplLogicXToDevicePixel(rSrcPt.X()),
-                             rOutDev.ImplLogicYToDevicePixel(rSrcPt.Y()),
+    SalTwoRect aPosAry(rOutDev.mpMapper->LogicToDevicePixelX(rSrcPt.X()),
+                             rOutDev.mpMapper->LogicToDevicePixelY(rSrcPt.Y()),
                              rOutDev.LogicWidthToDevicePixel(rSrcSize.Width()),
                              rOutDev.LogicHeightToDevicePixel(rSrcSize.Height()),
-                             ImplLogicXToDevicePixel(rDestPt.X()),
-                             ImplLogicYToDevicePixel(rDestPt.Y()),
+                             mpMapper->LogicToDevicePixelX(rDestPt.X()),
+                             mpMapper->LogicToDevicePixelY(rDestPt.Y()),
                              LogicWidthToDevicePixel(rDestSize.Width()),
                              LogicHeightToDevicePixel(rDestSize.Height()));
 
@@ -531,9 +531,9 @@ void OutputDevice::CopyArea( const Point& rDestPt,
     tools::Long nSrcHeight = LogicHeightToDevicePixel(rSrcSize.Height());
     if (nSrcWidth && nSrcHeight)
     {
-        SalTwoRect aPosAry(ImplLogicXToDevicePixel(rSrcPt.X()), ImplLogicYToDevicePixel(rSrcPt.Y()),
+        SalTwoRect aPosAry(mpMapper->LogicToDevicePixelX(rSrcPt.X()), mpMapper->LogicToDevicePixelY(rSrcPt.Y()),
                            nSrcWidth, nSrcHeight,
-                           ImplLogicXToDevicePixel(rDestPt.X()), ImplLogicYToDevicePixel(rDestPt.Y()),
+                           mpMapper->LogicToDevicePixelX(rDestPt.X()), mpMapper->LogicToDevicePixelY(rDestPt.Y()),
                            nSrcWidth, nSrcHeight);
 
         AdjustTwoRect( aPosAry, GetOutputRectPixel() );

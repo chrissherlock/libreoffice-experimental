@@ -206,10 +206,26 @@ tools::Long CoordinateMapper::LogicToViewPixelY(tools::Long nY) const
 // Physical window (device space)
 tools::Long CoordinateMapper::LogicToDevicePixelX(tools::Long nX) const
 {
-    return LogicToViewPixelX(nX) + mnOutOffX + mnOutOffOrigX;
+    if (!IsMapModeEnabled())
+        return nX + GetDeviceOriginX();
+
+    return ImplCalcDevicePixelX(nX);
 }
 
 tools::Long CoordinateMapper::LogicToDevicePixelY(tools::Long nY) const
+{
+    if (!IsMapModeEnabled())
+        return nY + GetDeviceOriginY();
+
+    return ImplCalcDevicePixelY(nY);
+}
+
+tools::Long CoordinateMapper::ImplCalcDevicePixelX(tools::Long nX) const
+{
+    return LogicToViewPixelX(nX) + mnOutOffX + mnOutOffOrigX;
+}
+
+tools::Long CoordinateMapper::ImplCalcDevicePixelY(tools::Long nY) const
 {
     return LogicToViewPixelY(nY) + mnOutOffY + mnOutOffOrigY;
 }

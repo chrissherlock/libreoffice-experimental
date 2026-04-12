@@ -21,6 +21,7 @@
 #include <vcl/metaactiontypes.hxx>
 #include <vcl/virdev.hxx>
 
+#include <CoordinateMapper.hxx>
 #include <salgdi.hxx>
 #include <salbmp.hxx>
 
@@ -118,7 +119,7 @@ void OutputDevice::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
     if (xImpBmp)
     {
         SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(), rSrcSizePixel.Height(),
-                           ImplLogicXToDevicePixel(rDestPt.X()), ImplLogicYToDevicePixel(rDestPt.Y()),
+                           mpMapper->LogicToDevicePixelX(rDestPt.X()), mpMapper->LogicToDevicePixelY(rDestPt.Y()),
                            LogicWidthToDevicePixel(rDestSize.Width()),
                            LogicHeightToDevicePixel(rDestSize.Height()));
 
