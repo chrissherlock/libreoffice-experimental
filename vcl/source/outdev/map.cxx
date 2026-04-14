@@ -608,8 +608,7 @@ Point OutputDevice::LogicToPixel( const Point& rLogicPt,
         return rLogicPt;
 
     // convert MapMode resolution and convert
-    ImplMapRes          aMapRes;
-    aMapRes.CalcMapResolution(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
+    ImplMapRes aMapRes(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
 
     return Point(
         mpMapper->ViewToWindowUnitsX(mpMapper->LogicUnitsToViewUnitsX(rLogicPt.X(), aMapRes)),
@@ -625,8 +624,7 @@ Size OutputDevice::LogicToPixel( const Size& rLogicSize,
         return rLogicSize;
 
     // convert MapMode resolution and convert
-    ImplMapRes          aMapRes;
-    aMapRes.CalcMapResolution(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
+    ImplMapRes aMapRes(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
 
     return Size(mpMapper->LogicToViewDistanceX(rLogicSize.Width(), aMapRes.mfMapScX),
                 mpMapper->LogicToViewDistanceY(rLogicSize.Height(), aMapRes.mfMapScY));
@@ -640,8 +638,7 @@ tools::Rectangle OutputDevice::LogicToPixel( const tools::Rectangle& rLogicRect,
         return rLogicRect;
 
     // convert MapMode resolution
-    ImplMapRes aMapRes;
-    aMapRes.CalcMapResolution(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
+    ImplMapRes aMapRes(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
 
     tools::Rectangle aRetval(
         mpMapper->LogicToWindowUnitsX(rLogicRect.Left(), aMapRes),
@@ -665,8 +662,7 @@ tools::Polygon OutputDevice::LogicToPixel( const tools::Polygon& rLogicPoly,
     if ( rMapMode.IsDefault() )
         return rLogicPoly;
 
-    ImplMapRes aMapRes;
-    aMapRes.CalcMapResolution(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
+    ImplMapRes aMapRes(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
 
     const sal_uInt16 nPoints = rLogicPoly.GetSize();
     tools::Polygon aPoly( rLogicPoly );
@@ -840,8 +836,7 @@ Point OutputDevice::PixelToLogic( const Point& rDevicePt,
         return rDevicePt;
 
     // calculate MapMode-resolution
-    ImplMapRes aMapRes;
-    aMapRes.CalcMapResolution(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
+    ImplMapRes aMapRes(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
 
     return Point(
         mpMapper->ViewSubPixelToLogicIntX(rDevicePt.X(), aMapRes),
@@ -858,8 +853,7 @@ Size OutputDevice::PixelToLogic( const Size& rDeviceSize,
         return rDeviceSize;
 
     // calculate MapMode-resolution and convert
-    ImplMapRes          aMapRes;
-    aMapRes.CalcMapResolution(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
+    ImplMapRes aMapRes(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
 
     return Size(mpMapper->ViewToLogicDistanceX(rDeviceSize.Width(), aMapRes.mfMapScX),
                 mpMapper->ViewToLogicDistanceY(rDeviceSize.Height(), aMapRes.mfMapScY));
@@ -874,8 +868,7 @@ tools::Rectangle OutputDevice::PixelToLogic( const tools::Rectangle& rDeviceRect
         return rDeviceRect;
 
     // calculate MapMode-resolution
-    ImplMapRes aMapRes;
-    aMapRes.CalcMapResolution(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
+    ImplMapRes aMapRes(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
 
     tools::Rectangle aRetval(
         mpMapper->ViewSubPixelToLogicIntX(rDeviceRect.Left(), aMapRes),
@@ -901,8 +894,7 @@ tools::Polygon OutputDevice::PixelToLogic( const tools::Polygon& rDevicePoly,
         return rDevicePoly;
 
     // calculate MapMode-resolution
-    ImplMapRes aMapRes;
-    aMapRes.CalcMapResolution(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
+    ImplMapRes aMapRes(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
 
     const sal_uInt16 nPoints = rDevicePoly.GetSize();
     tools::Polygon aPoly( rDevicePoly );
