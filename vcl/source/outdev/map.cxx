@@ -195,14 +195,13 @@ tools::PolyPolygon OutputDevice::ImplLogicToDevicePixel( const tools::PolyPolygo
     if ( !mpMapper->IsMapModeEnabled() && !mpMapper->GetDeviceOriginX() && !mpMapper->GetDeviceOriginY() )
         return rLogicPolyPoly;
 
-    tools::PolyPolygon aPolyPoly( rLogicPolyPoly );
-    const sal_uInt16 nPoly = aPolyPoly.Count();
+    tools::PolyPolygon aPolyPoly(rLogicPolyPoly);
 
-    for( sal_uInt16 i = 0; i < nPoly; i++ )
+    for (auto& rPoly : aPolyPoly)
     {
-        tools::Polygon& rPoly = aPolyPoly[i];
-        rPoly = ImplLogicToDevicePixel( rPoly );
+        rPoly = ImplLogicToDevicePixel(rPoly);
     }
+
     return aPolyPoly;
 }
 
@@ -532,18 +531,16 @@ tools::Polygon OutputDevice::LogicToPixel( const tools::Polygon& rLogicPoly ) co
 
 tools::PolyPolygon OutputDevice::LogicToPixel( const tools::PolyPolygon& rLogicPolyPoly ) const
 {
-
     if ( !mpMapper->IsMapModeEnabled() )
         return rLogicPolyPoly;
 
     tools::PolyPolygon aPolyPoly( rLogicPolyPoly );
-    const sal_uInt16 nPoly = aPolyPoly.Count();
 
-    for( sal_uInt16 i = 0; i < nPoly; i++ )
+    for (auto& rPoly : aPolyPoly)
     {
-        tools::Polygon& rPoly = aPolyPoly[i];
         rPoly = LogicToPixel( rPoly );
     }
+
     return aPolyPoly;
 }
 
@@ -753,14 +750,13 @@ tools::PolyPolygon OutputDevice::PixelToLogic( const tools::PolyPolygon& rDevice
     if ( !mpMapper->IsMapModeEnabled() )
         return rDevicePolyPoly;
 
-    tools::PolyPolygon aPolyPoly( rDevicePolyPoly );
-    const sal_uInt16 nPoly = aPolyPoly.Count();
+    tools::PolyPolygon aPolyPoly(rDevicePolyPoly);
 
-    for( sal_uInt16 i = 0; i < nPoly; i++ )
+    for (auto& rPoly : aPolyPoly)
     {
-        tools::Polygon& rPoly = aPolyPoly[i];
-        rPoly = PixelToLogic( rPoly );
+        rPoly = PixelToLogic(rPoly);
     }
+
     return aPolyPoly;
 }
 
