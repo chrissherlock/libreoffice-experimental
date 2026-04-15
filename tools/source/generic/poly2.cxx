@@ -543,3 +543,8 @@ ImplPolyPolygon::ImplPolyPolygon(const basegfx::B2DPolyPolygon& rPolyPolygon)
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
+
+namespace tools {
+PolyPolygon::const_iterator PolyPolygon::cbegin() const { return begin(); }
+PolyPolygon::const_iterator PolyPolygon::cend() const { return end(); }
+} // namespace tools
