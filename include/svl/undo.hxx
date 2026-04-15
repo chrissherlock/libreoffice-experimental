@@ -67,6 +67,7 @@ public:
     virtual bool            Merge( SfxUndoAction *pNextAction );
 
     virtual OUString    GetComment() const;
+    virtual OUString    GetObjDescription() const;
     virtual void SetComment(const OUString& rStr);
     virtual void SetObjDescription(const OUString& rStr);
 
