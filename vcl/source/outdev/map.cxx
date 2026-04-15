@@ -141,17 +141,13 @@ tools::Polygon OutputDevice::ImplLogicToDevicePixel( const tools::Polygon& rLogi
     if ( !mpMapper->IsMapModeEnabled() && !mpMapper->GetDeviceOriginX() && !mpMapper->GetDeviceOriginY() )
         return rLogicPoly;
 
-    const sal_uInt16 nPoints = rLogicPoly.GetSize();
-    tools::Polygon aPoly( rLogicPoly );
+    tools::Polygon aPoly(rLogicPoly);
 
-    // get pointer to Point-array (copy data)
-    const Point* pPointAry = aPoly.GetConstPointAry();
-
-    for (sal_uInt16 i = 0; i < nPoints; i++)
+    for (auto& rPoint : aPoly)
     {
-        aPoly[i] = Point(
-            mpMapper->LogicToDevicePixelX(pPointAry[i].X()),
-            mpMapper->LogicToDevicePixelY(pPointAry[i].Y())
+        rPoint = Point(
+            mpMapper->LogicToDevicePixelX(rPoint.X()),
+            mpMapper->LogicToDevicePixelY(rPoint.Y())
         );
     }
 
@@ -523,19 +519,12 @@ tools::Polygon OutputDevice::LogicToPixel( const tools::Polygon& rLogicPoly ) co
     if ( !mpMapper->IsMapModeEnabled() )
         return rLogicPoly;
 
-    const sal_uInt16 nPoints = rLogicPoly.GetSize();
-    tools::Polygon aPoly( rLogicPoly );
+    tools::Polygon aPoly(rLogicPoly);
 
-    // get pointer to Point-array (copy data)
-    const Point* pPointAry = aPoly.GetConstPointAry();
-
-    for (sal_uInt16 i = 0; i < nPoints; i++)
+    for (auto& rPoint : aPoly)
     {
-        const Point* pPt = &(pPointAry[i]);
-        Point aPt;
-        aPt.setX(mpMapper->LogicToWindowUnitsX(pPt->X()));
-        aPt.setY(mpMapper->LogicToWindowUnitsY(pPt->Y()));
-        aPoly[i] = aPt;
+        rPoint.setX(mpMapper->LogicToWindowUnitsX(rPoint.X()));
+        rPoint.setY(mpMapper->LogicToWindowUnitsY(rPoint.Y()));
     }
 
     return aPoly;
@@ -664,15 +653,13 @@ tools::Polygon OutputDevice::LogicToPixel( const tools::Polygon& rLogicPoly,
 
     ImplMapRes aMapRes(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
 
-    const sal_uInt16 nPoints = rLogicPoly.GetSize();
-    tools::Polygon aPoly( rLogicPoly );
+    tools::Polygon aPoly(rLogicPoly);
 
-    // Apply the custom mapping resolution to each point in the polygon
-    for (sal_uInt16 i = 0; i < nPoints; ++i)
+    for (auto& rPoint : aPoly)
     {
-        aPoly[i] = Point(
-            mpMapper->LogicToWindowUnitsX(aPoly[i].X(), aMapRes),
-            mpMapper->LogicToWindowUnitsY(aPoly[i].Y(), aMapRes)
+        rPoint = Point(
+            mpMapper->LogicToWindowUnitsX(rPoint.X(), aMapRes),
+            mpMapper->LogicToWindowUnitsY(rPoint.Y(), aMapRes)
         );
     }
 
@@ -747,14 +734,13 @@ tools::Polygon OutputDevice::PixelToLogic( const tools::Polygon& rDevicePoly ) c
     if ( !mpMapper->IsMapModeEnabled() )
         return rDevicePoly;
 
-    const sal_uInt16 nPoints = rDevicePoly.GetSize();
-    tools::Polygon aPoly( rDevicePoly );
+    tools::Polygon aPoly(rDevicePoly);
 
-    for (sal_uInt16 i = 0; i < nPoints; ++i)
+    for (auto& rPoint : aPoly)
     {
-        aPoly[i] = Point(
-            mpMapper->ViewSubPixelToLogicIntX(aPoly[i].X()),
-            mpMapper->ViewSubPixelToLogicIntY(aPoly[i].Y())
+        rPoint = Point(
+            mpMapper->ViewSubPixelToLogicIntX(rPoint.X()),
+            mpMapper->ViewSubPixelToLogicIntY(rPoint.Y())
         );
     }
 
@@ -896,14 +882,13 @@ tools::Polygon OutputDevice::PixelToLogic( const tools::Polygon& rDevicePoly,
     // calculate MapMode-resolution
     ImplMapRes aMapRes(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
 
-    const sal_uInt16 nPoints = rDevicePoly.GetSize();
-    tools::Polygon aPoly( rDevicePoly );
+    tools::Polygon aPoly(rDevicePoly);
 
-    for (sal_uInt16 i = 0; i < nPoints; ++i)
+    for (auto& rPoint : aPoly)
     {
-        aPoly[i] = Point(
-            mpMapper->ViewSubPixelToLogicIntX(aPoly[i].X(), aMapRes),
-            mpMapper->ViewSubPixelToLogicIntY(aPoly[i].Y(), aMapRes)
+        rPoint = Point(
+            mpMapper->ViewSubPixelToLogicIntX(rPoint.X(), aMapRes),
+            mpMapper->ViewSubPixelToLogicIntY(rPoint.Y(), aMapRes)
         );
     }
 
