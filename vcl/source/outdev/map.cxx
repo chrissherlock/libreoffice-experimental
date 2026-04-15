@@ -101,6 +101,15 @@ Size OutputDevice::ImplLogicToDevicePixel( const Size& rLogicSize ) const
     return Size(mpMapper->LogicToViewDistanceX(rLogicSize.Width()), mpMapper->LogicToViewDistanceY(rLogicSize.Height()));
 }
 
+static void lcl_ApplyEmptyState(tools::Rectangle& rDest, const tools::Rectangle& rSrc)
+{
+    if (rSrc.IsWidthEmpty())
+        rDest.SetWidthEmpty();
+
+    if (rSrc.IsHeightEmpty())
+        rDest.SetHeightEmpty();
+}
+
 tools::Rectangle OutputDevice::LogicToDevicePixel(const tools::Rectangle& rLogicRect) const
 {
     // tdf#141761 IsEmpty() removed
@@ -127,11 +136,7 @@ tools::Rectangle OutputDevice::LogicToDevicePixel(const tools::Rectangle& rLogic
         rLogicRect.IsHeightEmpty() ? 0 : mpMapper->LogicToDevicePixelY(rLogicRect.Bottom())
     );
 
-    if (rLogicRect.IsWidthEmpty())
-        aRetval.SetWidthEmpty();
-
-    if (rLogicRect.IsHeightEmpty())
-        aRetval.SetHeightEmpty();
+    lcl_ApplyEmptyState(aRetval, rLogicRect);
 
     return aRetval;
 }
@@ -141,17 +146,13 @@ tools::Polygon OutputDevice::ImplLogicToDevicePixel( const tools::Polygon& rLogi
     if ( !mpMapper->IsMapModeEnabled() && !mpMapper->GetDeviceOriginX() && !mpMapper->GetDeviceOriginY() )
         return rLogicPoly;
 
-    const sal_uInt16 nPoints = rLogicPoly.GetSize();
-    tools::Polygon aPoly( rLogicPoly );
+    tools::Polygon aPoly(rLogicPoly);
 
-    // get pointer to Point-array (copy data)
-    const Point* pPointAry = aPoly.GetConstPointAry();
-
-    for (sal_uInt16 i = 0; i < nPoints; i++)
+    for (auto& rPoint : aPoly)
     {
-        aPoly[i] = Point(
-            mpMapper->LogicToDevicePixelX(pPointAry[i].X()),
-            mpMapper->LogicToDevicePixelY(pPointAry[i].Y())
+        rPoint = Point(
+            mpMapper->LogicToDevicePixelX(rPoint.X()),
+            mpMapper->LogicToDevicePixelY(rPoint.Y())
         );
     }
 
@@ -199,14 +200,13 @@ tools::PolyPolygon OutputDevice::ImplLogicToDevicePixel( const tools::PolyPolygo
     if ( !mpMapper->IsMapModeEnabled() && !mpMapper->GetDeviceOriginX() && !mpMapper->GetDeviceOriginY() )
         return rLogicPolyPoly;
 
-    tools::PolyPolygon aPolyPoly( rLogicPolyPoly );
-    const sal_uInt16 nPoly = aPolyPoly.Count();
+    tools::PolyPolygon aPolyPoly(rLogicPolyPoly);
 
-    for( sal_uInt16 i = 0; i < nPoly; i++ )
+    for (auto& rPoly : aPolyPoly)
     {
-        tools::Polygon& rPoly = aPolyPoly[i];
-        rPoly = ImplLogicToDevicePixel( rPoly );
+        rPoly = ImplLogicToDevicePixel(rPoly);
     }
+
     return aPolyPoly;
 }
 
@@ -493,11 +493,7 @@ tools::Rectangle OutputDevice::LogicToPixel( const tools::Rectangle& rLogicRect 
         rLogicRect.IsHeightEmpty() ? 0 : mpMapper->LogicToWindowUnitsY(rLogicRect.Bottom())
     );
 
-    if(rLogicRect.IsWidthEmpty())
-        aRetval.SetWidthEmpty();
-
-    if(rLogicRect.IsHeightEmpty())
-        aRetval.SetHeightEmpty();
+    lcl_ApplyEmptyState(aRetval, rLogicRect);
 
     return aRetval;
 }
@@ -508,19 +504,12 @@ tools::Polygon OutputDevice::LogicToPixel( const tools::Polygon& rLogicPoly ) co
     if ( !mpMapper->IsMapModeEnabled() )
         return rLogicPoly;
 
-    const sal_uInt16 nPoints = rLogicPoly.GetSize();
-    tools::Polygon aPoly( rLogicPoly );
+    tools::Polygon aPoly(rLogicPoly);
 
-    // get pointer to Point-array (copy data)
-    const Point* pPointAry = aPoly.GetConstPointAry();
-
-    for (sal_uInt16 i = 0; i < nPoints; i++)
+    for (auto& rPoint : aPoly)
     {
-        const Point* pPt = &(pPointAry[i]);
-        Point aPt;
-        aPt.setX(mpMapper->LogicToWindowUnitsX(pPt->X()));
-        aPt.setY(mpMapper->LogicToWindowUnitsY(pPt->Y()));
-        aPoly[i] = aPt;
+        rPoint.setX(mpMapper->LogicToWindowUnitsX(rPoint.X()));
+        rPoint.setY(mpMapper->LogicToWindowUnitsY(rPoint.Y()));
     }
 
     return aPoly;
@@ -528,18 +517,16 @@ tools::Polygon OutputDevice::LogicToPixel( const tools::Polygon& rLogicPoly ) co
 
 tools::PolyPolygon OutputDevice::LogicToPixel( const tools::PolyPolygon& rLogicPolyPoly ) const
 {
-
     if ( !mpMapper->IsMapModeEnabled() )
         return rLogicPolyPoly;
 
     tools::PolyPolygon aPolyPoly( rLogicPolyPoly );
-    const sal_uInt16 nPoly = aPolyPoly.Count();
 
-    for( sal_uInt16 i = 0; i < nPoly; i++ )
+    for (auto& rPoly : aPolyPoly)
     {
-        tools::Polygon& rPoly = aPolyPoly[i];
         rPoly = LogicToPixel( rPoly );
     }
+
     return aPolyPoly;
 }
 
@@ -632,11 +619,7 @@ tools::Rectangle OutputDevice::LogicToPixel( const tools::Rectangle& rLogicRect,
         rLogicRect.IsHeightEmpty() ? 0 : mpMapper->LogicToWindowUnitsY(rLogicRect.Bottom(), aMapRes)
     );
 
-    if (rLogicRect.IsWidthEmpty())
-        aRetval.SetWidthEmpty();
-
-    if (rLogicRect.IsHeightEmpty())
-        aRetval.SetHeightEmpty();
+    lcl_ApplyEmptyState(aRetval, rLogicRect);
 
     return aRetval;
 }
@@ -649,15 +632,13 @@ tools::Polygon OutputDevice::LogicToPixel( const tools::Polygon& rLogicPoly,
 
     ImplMapRes aMapRes(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
 
-    const sal_uInt16 nPoints = rLogicPoly.GetSize();
-    tools::Polygon aPoly( rLogicPoly );
+    tools::Polygon aPoly(rLogicPoly);
 
-    // Apply the custom mapping resolution to each point in the polygon
-    for (sal_uInt16 i = 0; i < nPoints; ++i)
+    for (auto& rPoint : aPoly)
     {
-        aPoly[i] = Point(
-            mpMapper->LogicToWindowUnitsX(aPoly[i].X(), aMapRes),
-            mpMapper->LogicToWindowUnitsY(aPoly[i].Y(), aMapRes)
+        rPoint = Point(
+            mpMapper->LogicToWindowUnitsX(rPoint.X(), aMapRes),
+            mpMapper->LogicToWindowUnitsY(rPoint.Y(), aMapRes)
         );
     }
 
@@ -718,11 +699,7 @@ tools::Rectangle OutputDevice::PixelToLogic( const tools::Rectangle& rDeviceRect
         rDeviceRect.IsHeightEmpty() ? 0 : mpMapper->ViewSubPixelToLogicIntY(rDeviceRect.Bottom())
     );
 
-    if (rDeviceRect.IsWidthEmpty())
-        aRetval.SetWidthEmpty();
-
-    if (rDeviceRect.IsHeightEmpty())
-        aRetval.SetHeightEmpty();
+    lcl_ApplyEmptyState(aRetval, rDeviceRect);
 
     return aRetval;
 }
@@ -732,14 +709,13 @@ tools::Polygon OutputDevice::PixelToLogic( const tools::Polygon& rDevicePoly ) c
     if ( !mpMapper->IsMapModeEnabled() )
         return rDevicePoly;
 
-    const sal_uInt16 nPoints = rDevicePoly.GetSize();
-    tools::Polygon aPoly( rDevicePoly );
+    tools::Polygon aPoly(rDevicePoly);
 
-    for (sal_uInt16 i = 0; i < nPoints; ++i)
+    for (auto& rPoint : aPoly)
     {
-        aPoly[i] = Point(
-            mpMapper->ViewSubPixelToLogicIntX(aPoly[i].X()),
-            mpMapper->ViewSubPixelToLogicIntY(aPoly[i].Y())
+        rPoint = Point(
+            mpMapper->ViewSubPixelToLogicIntX(rPoint.X()),
+            mpMapper->ViewSubPixelToLogicIntY(rPoint.Y())
         );
     }
 
@@ -752,14 +728,13 @@ tools::PolyPolygon OutputDevice::PixelToLogic( const tools::PolyPolygon& rDevice
     if ( !mpMapper->IsMapModeEnabled() )
         return rDevicePolyPoly;
 
-    tools::PolyPolygon aPolyPoly( rDevicePolyPoly );
-    const sal_uInt16 nPoly = aPolyPoly.Count();
+    tools::PolyPolygon aPolyPoly(rDevicePolyPoly);
 
-    for( sal_uInt16 i = 0; i < nPoly; i++ )
+    for (auto& rPoly : aPolyPoly)
     {
-        tools::Polygon& rPoly = aPolyPoly[i];
-        rPoly = PixelToLogic( rPoly );
+        rPoly = PixelToLogic(rPoly);
     }
+
     return aPolyPoly;
 }
 
@@ -862,11 +837,7 @@ tools::Rectangle OutputDevice::PixelToLogic( const tools::Rectangle& rDeviceRect
         rDeviceRect.IsHeightEmpty() ? 0 : mpMapper->ViewSubPixelToLogicIntY(rDeviceRect.Bottom(), aMapRes)
     );
 
-    if (rDeviceRect.IsWidthEmpty())
-        aRetval.SetWidthEmpty();
-
-    if (rDeviceRect.IsHeightEmpty())
-        aRetval.SetHeightEmpty();
+    lcl_ApplyEmptyState(aRetval, rDeviceRect);
 
     return aRetval;
 }
@@ -881,14 +852,13 @@ tools::Polygon OutputDevice::PixelToLogic( const tools::Polygon& rDevicePoly,
     // calculate MapMode-resolution
     ImplMapRes aMapRes(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
 
-    const sal_uInt16 nPoints = rDevicePoly.GetSize();
-    tools::Polygon aPoly( rDevicePoly );
+    tools::Polygon aPoly(rDevicePoly);
 
-    for (sal_uInt16 i = 0; i < nPoints; ++i)
+    for (auto& rPoint : aPoly)
     {
-        aPoly[i] = Point(
-            mpMapper->ViewSubPixelToLogicIntX(aPoly[i].X(), aMapRes),
-            mpMapper->ViewSubPixelToLogicIntY(aPoly[i].Y(), aMapRes)
+        rPoint = Point(
+            mpMapper->ViewSubPixelToLogicIntX(rPoint.X(), aMapRes),
+            mpMapper->ViewSubPixelToLogicIntY(rPoint.Y(), aMapRes)
         );
     }
 
@@ -1174,11 +1144,7 @@ tools::Rectangle OutputDevice::LogicToLogic( const tools::Rectangle& rRectSource
         aRetval = tools::Rectangle(left, top, right, bottom);
     }
 
-    if(rRectSource.IsWidthEmpty())
-        aRetval.SetWidthEmpty();
-
-    if(rRectSource.IsHeightEmpty())
-        aRetval.SetHeightEmpty();
+    lcl_ApplyEmptyState(aRetval, rRectSource);
 
     return aRetval;
 }
