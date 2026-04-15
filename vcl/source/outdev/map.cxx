@@ -553,38 +553,49 @@ basegfx::B2DPolyPolygon OutputDevice::LogicToPixel( const basegfx::B2DPolyPolygo
     return aTransformedPoly;
 }
 
-vcl::Region OutputDevice::LogicToPixel( const vcl::Region& rLogicRegion ) const
+template<typename TransformFunc>
+static vcl::Region lcl_TransformRegion(const vcl::Region& rRegion, TransformFunc&& func)
 {
-
-    if(!mpMapper->IsMapModeEnabled() || rLogicRegion.IsNull() || rLogicRegion.IsEmpty())
-    {
-        return rLogicRegion;
-    }
+    if (rRegion.IsNull() || rRegion.IsEmpty())
+        return rRegion;
 
     vcl::Region aRegion;
-
-    if(rLogicRegion.getB2DPolyPolygon())
+    if (rRegion.getB2DPolyPolygon())
     {
-        aRegion = vcl::Region(LogicToPixel(*rLogicRegion.getB2DPolyPolygon()));
+        aRegion = vcl::Region(func(*rRegion.getB2DPolyPolygon()));
     }
-    else if(rLogicRegion.getPolyPolygon())
+    else if (rRegion.getPolyPolygon())
     {
-        aRegion = vcl::Region(LogicToPixel(*rLogicRegion.getPolyPolygon()));
+        aRegion = vcl::Region(func(*rRegion.getPolyPolygon()));
     }
-    else if(rLogicRegion.getRegionBand())
+    else if (rRegion.getRegionBand())
     {
         RectangleVector aRectangles;
-        rLogicRegion.GetRegionRectangles(aRectangles);
-        const RectangleVector& rRectangles(aRectangles); // needed to make the '!=' work
+        rRegion.GetRegionRectangles(aRectangles);
 
-        // make reverse run to fill new region bottom-up, this will speed it up due to the used data structuring
-        for(RectangleVector::const_reverse_iterator aRectIter(rRectangles.rbegin()); aRectIter != rRectangles.rend(); ++aRectIter)
+        // Reverse run to fill new region bottom-up for speed
+        for (auto aRectIter = aRectangles.rbegin(); aRectIter != aRectangles.rend(); ++aRectIter)
         {
-            aRegion.Union(LogicToPixel(*aRectIter));
+            aRegion.Union(func(*aRectIter));
         }
     }
-
     return aRegion;
+}
+
+vcl::Region OutputDevice::LogicToPixel(const vcl::Region& rLogicRegion) const
+{
+    if (!mpMapper->IsMapModeEnabled())
+        return rLogicRegion;
+
+    return lcl_TransformRegion(rLogicRegion, [this](const auto& obj) { return LogicToPixel(obj); });
+}
+
+vcl::Region OutputDevice::PixelToLogic(const vcl::Region& rDeviceRegion) const
+{
+    if (!mpMapper->IsMapModeEnabled())
+        return rDeviceRegion;
+
+    return lcl_TransformRegion(rDeviceRegion, [this](const auto& obj) { return PixelToLogic(obj); });
 }
 
 Point OutputDevice::LogicToPixel( const Point& rLogicPt,
@@ -767,40 +778,6 @@ basegfx::B2DRectangle OutputDevice::PixelToLogic(const basegfx::B2DRectangle& rD
     const basegfx::B2DHomMatrix aTransformationMatrix = mpMapper->GetInverseViewTransformation();
     aTransformedRect.transform(aTransformationMatrix);
     return aTransformedRect;
-}
-
-vcl::Region OutputDevice::PixelToLogic( const vcl::Region& rDeviceRegion ) const
-{
-
-    if(!mpMapper->IsMapModeEnabled() || rDeviceRegion.IsNull() || rDeviceRegion.IsEmpty())
-    {
-        return rDeviceRegion;
-    }
-
-    vcl::Region aRegion;
-
-    if(rDeviceRegion.getB2DPolyPolygon())
-    {
-        aRegion = vcl::Region(PixelToLogic(*rDeviceRegion.getB2DPolyPolygon()));
-    }
-    else if(rDeviceRegion.getPolyPolygon())
-    {
-        aRegion = vcl::Region(PixelToLogic(*rDeviceRegion.getPolyPolygon()));
-    }
-    else if(rDeviceRegion.getRegionBand())
-    {
-        RectangleVector aRectangles;
-        rDeviceRegion.GetRegionRectangles(aRectangles);
-        const RectangleVector& rRectangles(aRectangles); // needed to make the '!=' work
-
-        // make reverse run to fill new region bottom-up, this will speed it up due to the used data structuring
-        for(RectangleVector::const_reverse_iterator aRectIter(rRectangles.rbegin()); aRectIter != rRectangles.rend(); ++aRectIter)
-        {
-            aRegion.Union(PixelToLogic(*aRectIter));
-        }
-    }
-
-    return aRegion;
 }
 
 Point OutputDevice::PixelToLogic( const Point& rDevicePt,
