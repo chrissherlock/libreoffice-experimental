@@ -476,13 +476,12 @@ void OutputDevice::SetRelativeMapMode( const MapMode& rNewMapMode )
 
 Point OutputDevice::LogicToPixel( const Point& rLogicPt ) const
 {
-
     if ( !mpMapper->IsMapModeEnabled() )
         return rLogicPt;
 
     return Point(
-        mpMapper->ViewToWindowUnitsX(mpMapper->LogicUnitsToViewUnitsX(rLogicPt.X())),
-        mpMapper->ViewToWindowUnitsY(mpMapper->LogicUnitsToViewUnitsY(rLogicPt.Y()))
+        mpMapper->LogicToWindowUnitsX(rLogicPt.X()),
+        mpMapper->LogicToWindowUnitsY(rLogicPt.Y())
     );
 }
 
