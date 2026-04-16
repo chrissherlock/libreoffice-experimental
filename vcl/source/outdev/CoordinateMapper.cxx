@@ -43,19 +43,34 @@ float CoordinateMapper::GetDPIScaleFactor() const { return mnDPIScalePercentage 
 
 void CoordinateMapper::SetPixelOffset(const Size& rSize)
 {
-    mnOutOffOrigX = rSize.getWidth();
-    mnOutOffOrigY = rSize.getHeight();
+    mnLogicToAbsoluteOffsetX = rSize.getWidth();
+    mnLogicToAbsoluteOffsetY = rSize.getHeight();
 }
 
-tools::Long CoordinateMapper::GetDeviceOriginX() const { return mnOutOffX; }
+void CoordinateMapper::SetWindowToViewOffset(const Size& rSize)
+{
+    mnWindowToViewOffsetX = rSize.getWidth();
+    mnWindowToViewOffsetY = rSize.getHeight();
+}
 
-tools::Long CoordinateMapper::GetDeviceOriginY() const { return mnOutOffY; }
+tools::Long CoordinateMapper::GetDeviceToWindowOffsetX() const { return mnDeviceToWindowOffsetX; }
 
-void CoordinateMapper::SetOutOffXPixel(tools::Long nOutOffX) { mnOutOffX = nOutOffX; }
+tools::Long CoordinateMapper::GetDeviceToWindowOffsetY() const { return mnDeviceToWindowOffsetY; }
 
-void CoordinateMapper::SetOutOffYPixel(tools::Long nOutOffY) { mnOutOffY = nOutOffY; }
+void CoordinateMapper::SetDeviceToWindowOffsetX(tools::Long nDeviceToWindowOffsetX)
+{
+    mnDeviceToWindowOffsetX = nDeviceToWindowOffsetX;
+}
 
-Point CoordinateMapper::GetOutputOffPixel() const { return Point(mnOutOffX, mnOutOffY); }
+void CoordinateMapper::SetDeviceToWindowOffsetY(tools::Long nDeviceToWindowOffsetY)
+{
+    mnDeviceToWindowOffsetY = nDeviceToWindowOffsetY;
+}
+
+Point CoordinateMapper::GetDeviceToWindowOffset() const
+{
+    return Point(mnDeviceToWindowOffsetX, mnDeviceToWindowOffsetY);
+}
 
 tools::Long CoordinateMapper::GetOutputWidthPixel() const { return mnOutWidth; }
 
@@ -65,10 +80,10 @@ void CoordinateMapper::SetOutputWidthPixel(tools::Long nWidth) { mnOutWidth = nW
 
 void CoordinateMapper::SetOutputHeightPixel(tools::Long nHeight) { mnOutHeight = nHeight; }
 
-void CoordinateMapper::SetLogicalOffset(Size const& rOffset)
+void CoordinateMapper::SetLogicToAbsoluteOffset(Size const& rOffset)
 {
-    mnOutOffLogicX = rOffset.getWidth();
-    mnOutOffLogicY = rOffset.getHeight();
+    mnLogicToAbsoluteOffsetX = rOffset.getWidth();
+    mnLogicToAbsoluteOffsetY = rOffset.getHeight();
 }
 
 void CoordinateMapper::CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX,
@@ -103,8 +118,8 @@ basegfx::B2DHomMatrix CoordinateMapper::GetDeviceTransformation() const
     basegfx::B2DHomMatrix aTransformation = GetViewTransformation();
 
     // TODO: is it worth to cache the transformed result?
-    if (mnOutOffX || mnOutOffY)
-        aTransformation.translate(mnOutOffX, mnOutOffY);
+    if (mnDeviceToWindowOffsetX || mnDeviceToWindowOffsetY)
+        aTransformation.translate(mnDeviceToWindowOffsetX, mnDeviceToWindowOffsetY);
 
     return aTransformation;
 }
@@ -124,9 +139,9 @@ basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation() const
     const double fScaleFactorY(static_cast<double>(GetDPIY())
                                * static_cast<double>(maMapRes.mfMapScY));
     const double fZeroPointX((static_cast<double>(maMapRes.mnMapOfsX) * fScaleFactorX)
-                             + static_cast<double>(GetPixelXOffset()));
+                             + static_cast<double>(GetWindowToViewOffsetX()));
     const double fZeroPointY((static_cast<double>(maMapRes.mnMapOfsY) * fScaleFactorY)
-                             + static_cast<double>(GetPixelYOffset()));
+                             + static_cast<double>(GetWindowToViewOffsetY()));
 
     mpViewTransform->set(0, 0, fScaleFactorX);
     mpViewTransform->set(1, 1, fScaleFactorY);
@@ -164,9 +179,9 @@ basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation(const MapMode& rMa
     const double fScaleFactorY(static_cast<double>(GetDPIY())
                                * static_cast<double>(aMapRes.mfMapScY));
     const double fZeroPointX((static_cast<double>(aMapRes.mnMapOfsX) * fScaleFactorX)
-                             + static_cast<double>(GetPixelXOffset()));
+                             + static_cast<double>(GetWindowToViewOffsetX()));
     const double fZeroPointY((static_cast<double>(aMapRes.mnMapOfsY) * fScaleFactorY)
-                             + static_cast<double>(GetPixelYOffset()));
+                             + static_cast<double>(GetWindowToViewOffsetY()));
 
     aTransform.set(0, 0, fScaleFactorX);
     aTransform.set(1, 1, fScaleFactorY);
@@ -185,40 +200,52 @@ basegfx::B2DHomMatrix CoordinateMapper::GetInverseViewTransformation(const MapMo
 
 tools::Long CoordinateMapper::ImplCalcDevicePixelX(tools::Long nX) const
 {
-    return LogicUnitsToViewUnitsX(nX) + mnOutOffX + mnOutOffOrigX;
+    return LogicUnitsToViewUnitsX(nX) + mnDeviceToWindowOffsetX + mnWindowToViewOffsetX;
 }
 
 tools::Long CoordinateMapper::ImplCalcDevicePixelY(tools::Long nY) const
 {
-    return LogicUnitsToViewUnitsY(nY) + mnOutOffY + mnOutOffOrigY;
+    return LogicUnitsToViewUnitsY(nY) + mnDeviceToWindowOffsetY + mnWindowToViewOffsetY;
 }
 
 // ========================================================================
 // PIPELINE STAGES (Coordinate Transitions)
 // ========================================================================
 
-// Device <-> Window (Apply/Strip Screen Origin: mnOutOffX/Y)
-tools::Long CoordinateMapper::DeviceToWindowUnitsX(tools::Long nX) const { return nX - mnOutOffX; }
-tools::Long CoordinateMapper::DeviceToWindowUnitsY(tools::Long nY) const { return nY - mnOutOffY; }
-tools::Long CoordinateMapper::WindowToDeviceUnitsX(tools::Long nX) const { return nX + mnOutOffX; }
-tools::Long CoordinateMapper::WindowToDeviceUnitsY(tools::Long nY) const { return nY + mnOutOffY; }
+// Device <-> Window (Apply/Strip Screen Origin: mnDeviceToWindowOffsetX/Y)
+tools::Long CoordinateMapper::DeviceToWindowUnitsX(tools::Long nX) const
+{
+    return nX - mnDeviceToWindowOffsetX;
+}
+tools::Long CoordinateMapper::DeviceToWindowUnitsY(tools::Long nY) const
+{
+    return nY - mnDeviceToWindowOffsetY;
+}
+tools::Long CoordinateMapper::WindowToDeviceUnitsX(tools::Long nX) const
+{
+    return nX + mnDeviceToWindowOffsetX;
+}
+tools::Long CoordinateMapper::WindowToDeviceUnitsY(tools::Long nY) const
+{
+    return nY + mnDeviceToWindowOffsetY;
+}
 
-// Window <-> View (Apply/Strip Internal Pixel Offset: mnOutOffOrigX/Y)
+// Window <-> View (Apply/Strip Internal Pixel Offset: mnWindowToViewOffsetX/Y)
 tools::Long CoordinateMapper::WindowToViewUnitsX(tools::Long nX) const
 {
-    return nX - mnOutOffOrigX;
+    return nX - mnWindowToViewOffsetX;
 }
 tools::Long CoordinateMapper::WindowToViewUnitsY(tools::Long nY) const
 {
-    return nY - mnOutOffOrigY;
+    return nY - mnWindowToViewOffsetY;
 }
 tools::Long CoordinateMapper::ViewToWindowUnitsX(tools::Long nX) const
 {
-    return nX + mnOutOffOrigX;
+    return nX + mnWindowToViewOffsetX;
 }
 tools::Long CoordinateMapper::ViewToWindowUnitsY(tools::Long nY) const
 {
-    return nY + mnOutOffOrigY;
+    return nY + mnWindowToViewOffsetY;
 }
 
 // View <-> LogicUnits (Scale and Mapping Offset: mnMapOfsX/Y)
@@ -278,12 +305,14 @@ tools::Long CoordinateMapper::ViewSubPixelToLogicUnitsIntY(double fY) const
 tools::Long CoordinateMapper::ViewSubPixelToLogicIntX(double fX, const ImplMapRes& rRes) const
 {
     // Round distance (using custom scale), strip custom MapOfs, then strip internal OutOffLogic
-    return ViewToLogicDistanceX(std::llround(fX), rRes.mfMapScX) - rRes.mnMapOfsX - mnOutOffLogicX;
+    return ViewToLogicDistanceX(std::llround(fX), rRes.mfMapScX) - rRes.mnMapOfsX
+           - mnLogicToAbsoluteOffsetX;
 }
 
 tools::Long CoordinateMapper::ViewSubPixelToLogicIntY(double fY, const ImplMapRes& rRes) const
 {
-    return ViewToLogicDistanceY(std::llround(fY), rRes.mfMapScY) - rRes.mnMapOfsY - mnOutOffLogicY;
+    return ViewToLogicDistanceY(std::llround(fY), rRes.mfMapScY) - rRes.mnMapOfsY
+           - mnLogicToAbsoluteOffsetY;
 }
 
 double CoordinateMapper::LogicUnitsToViewSubPixelX(double fX) const
@@ -319,17 +348,19 @@ tools::Long CoordinateMapper::DevicePixelToLogicY(tools::Long nY) const
 tools::Long CoordinateMapper::LogicToDevicePixelX(tools::Long nX) const
 {
     if (!IsMapModeEnabled())
-        return nX + mnOutOffX;
+        return nX + mnDeviceToWindowOffsetX;
 
-    return WindowToDeviceUnitsX(ViewToWindowUnitsX(LogicUnitsToViewUnitsX(nX + mnOutOffLogicX)));
+    return WindowToDeviceUnitsX(
+        ViewToWindowUnitsX(LogicUnitsToViewUnitsX(nX + mnLogicToAbsoluteOffsetX)));
 }
 
 tools::Long CoordinateMapper::LogicToDevicePixelY(tools::Long nY) const
 {
     if (!IsMapModeEnabled())
-        return nY + mnOutOffY;
+        return nY + mnDeviceToWindowOffsetY;
 
-    return WindowToDeviceUnitsY(ViewToWindowUnitsY(LogicUnitsToViewUnitsY(nY + mnOutOffLogicY)));
+    return WindowToDeviceUnitsY(
+        ViewToWindowUnitsY(LogicUnitsToViewUnitsY(nY + mnLogicToAbsoluteOffsetY)));
 }
 
 tools::Long CoordinateMapper::WindowToLogicX(tools::Long nX) const
@@ -353,7 +384,7 @@ tools::Long CoordinateMapper::LogicToWindowX(tools::Long nX) const
     if (!IsMapModeEnabled())
         return nX;
 
-    return ViewToWindowUnitsX(LogicUnitsToViewUnitsX(nX + mnOutOffLogicX));
+    return ViewToWindowUnitsX(LogicUnitsToViewUnitsX(nX + mnLogicToAbsoluteOffsetX));
 }
 
 tools::Long CoordinateMapper::LogicToWindowY(tools::Long nY) const
@@ -361,17 +392,17 @@ tools::Long CoordinateMapper::LogicToWindowY(tools::Long nY) const
     if (!IsMapModeEnabled())
         return nY;
 
-    return ViewToWindowUnitsY(LogicUnitsToViewUnitsY(nY + mnOutOffLogicY));
+    return ViewToWindowUnitsY(LogicUnitsToViewUnitsY(nY + mnLogicToAbsoluteOffsetY));
 }
 
 tools::Long CoordinateMapper::ViewToLogicX(tools::Long nX) const
 {
-    return ViewToLogicUnitsX(nX) - mnOutOffLogicX;
+    return ViewToLogicUnitsX(nX) - mnLogicToAbsoluteOffsetX;
 }
 
 tools::Long CoordinateMapper::ViewToLogicY(tools::Long nY) const
 {
-    return ViewToLogicUnitsY(nY) - mnOutOffLogicY;
+    return ViewToLogicUnitsY(nY) - mnLogicToAbsoluteOffsetY;
 }
 
 tools::Long CoordinateMapper::LogicToWindowUnitsX(tools::Long nX) const
@@ -509,76 +540,77 @@ tools::Long CoordinateMapper::ViewSubPixelToLogicDistanceY(double n, double fSca
 
 double CoordinateMapper::DeviceToWindowSubPixelX(double fX) const
 {
-    return fX - static_cast<double>(mnOutOffX);
+    return fX - static_cast<double>(mnDeviceToWindowOffsetX);
 }
 
 double CoordinateMapper::DeviceToWindowSubPixelY(double fY) const
 {
-    return fY - static_cast<double>(mnOutOffY);
+    return fY - static_cast<double>(mnDeviceToWindowOffsetY);
 }
 
 double CoordinateMapper::WindowToDeviceSubPixelX(double fX) const
 {
-    return fX + static_cast<double>(mnOutOffX);
+    return fX + static_cast<double>(mnDeviceToWindowOffsetX);
 }
 
 double CoordinateMapper::WindowToDeviceSubPixelY(double fY) const
 {
-    return fY + static_cast<double>(mnOutOffY);
+    return fY + static_cast<double>(mnDeviceToWindowOffsetY);
 }
 
 double CoordinateMapper::WindowToViewSubPixelX(double fX) const
 {
-    return fX - static_cast<double>(mnOutOffOrigX);
+    return fX - static_cast<double>(mnWindowToViewOffsetX);
 }
 
 double CoordinateMapper::WindowToViewSubPixelY(double fY) const
 {
-    return fY - static_cast<double>(mnOutOffOrigY);
+    return fY - static_cast<double>(mnWindowToViewOffsetY);
 }
 
 double CoordinateMapper::ViewToWindowSubPixelX(double fX) const
 {
-    return fX + static_cast<double>(mnOutOffOrigX);
+    return fX + static_cast<double>(mnWindowToViewOffsetX);
 }
 
 double CoordinateMapper::ViewToWindowSubPixelY(double fY) const
 {
-    return fY + static_cast<double>(mnOutOffOrigY);
+    return fY + static_cast<double>(mnWindowToViewOffsetY);
 }
 
 // Device -> Logic (Inverse Path: Strip Screen -> Strip Pixel -> Strip Mapping -> Strip Logical)
 double CoordinateMapper::DevicePixelToLogicSubPixelX(double fX) const
 {
     if (!IsMapModeEnabled())
-        return fX - static_cast<double>(mnOutOffX);
+        return fX - static_cast<double>(mnDeviceToWindowOffsetX);
 
     const double fWindowX = DeviceToWindowSubPixelX(fX);
     const double fViewX = WindowToViewSubPixelX(fWindowX);
     const double fLogicU = ViewSubPixelToLogicUnitsX(fViewX);
 
-    return fLogicU - static_cast<double>(mnOutOffLogicX);
+    return fLogicU - static_cast<double>(mnLogicToAbsoluteOffsetX);
 }
 
 double CoordinateMapper::DevicePixelToLogicSubPixelY(double fY) const
 {
     if (!IsMapModeEnabled())
-        return fY - static_cast<double>(mnOutOffY);
+        return fY - static_cast<double>(mnDeviceToWindowOffsetY);
 
     const double fWindowY = DeviceToWindowSubPixelY(fY);
     const double fViewY = WindowToViewSubPixelY(fWindowY);
     const double fLogicU = ViewSubPixelToLogicUnitsY(fViewY);
 
-    return fLogicU - static_cast<double>(mnOutOffLogicY);
+    return fLogicU - static_cast<double>(mnLogicToAbsoluteOffsetY);
 }
 
 // Logic -> Device (Forward Path: Add Logical -> Add Mapping/Scale -> Add Pixel -> Add Screen)
 double CoordinateMapper::LogicToDeviceSubPixelX(double fX) const
 {
     if (!IsMapModeEnabled())
-        return fX + static_cast<double>(mnOutOffX);
+        return fX + static_cast<double>(mnDeviceToWindowOffsetX);
 
-    const double fViewX = LogicUnitsToViewSubPixelX(fX + static_cast<double>(mnOutOffLogicX));
+    const double fViewX
+        = LogicUnitsToViewSubPixelX(fX + static_cast<double>(mnLogicToAbsoluteOffsetX));
     const double fWindowX = ViewToWindowSubPixelX(fViewX);
 
     return WindowToDeviceSubPixelX(fWindowX);
@@ -587,9 +619,10 @@ double CoordinateMapper::LogicToDeviceSubPixelX(double fX) const
 double CoordinateMapper::LogicToDeviceSubPixelY(double fY) const
 {
     if (!IsMapModeEnabled())
-        return fY + static_cast<double>(mnOutOffY);
+        return fY + static_cast<double>(mnDeviceToWindowOffsetY);
 
-    const double fViewY = LogicUnitsToViewSubPixelY(fY + static_cast<double>(mnOutOffLogicY));
+    const double fViewY
+        = LogicUnitsToViewSubPixelY(fY + static_cast<double>(mnLogicToAbsoluteOffsetY));
     const double fWindowY = ViewToWindowSubPixelY(fViewY);
 
     return WindowToDeviceSubPixelY(fWindowY);
@@ -602,7 +635,7 @@ double CoordinateMapper::WindowToLogicSubPixelX(double fX) const
         return fX;
 
     const double fViewX = WindowToViewSubPixelX(fX);
-    return ViewSubPixelToLogicUnitsX(fViewX) - static_cast<double>(mnOutOffLogicX);
+    return ViewSubPixelToLogicUnitsX(fViewX) - static_cast<double>(mnLogicToAbsoluteOffsetX);
 }
 
 double CoordinateMapper::WindowToLogicSubPixelY(double fY) const
@@ -611,7 +644,7 @@ double CoordinateMapper::WindowToLogicSubPixelY(double fY) const
         return fY;
 
     const double fViewY = WindowToViewSubPixelY(fY);
-    return ViewSubPixelToLogicUnitsY(fViewY) - static_cast<double>(mnOutOffLogicY);
+    return ViewSubPixelToLogicUnitsY(fViewY) - static_cast<double>(mnLogicToAbsoluteOffsetY);
 }
 
 // Logic -> Window (Forward Path)
@@ -620,7 +653,8 @@ double CoordinateMapper::LogicToWindowSubPixelX(double fX) const
     if (!IsMapModeEnabled())
         return fX;
 
-    const double fViewX = LogicUnitsToViewSubPixelX(fX + static_cast<double>(mnOutOffLogicX));
+    const double fViewX
+        = LogicUnitsToViewSubPixelX(fX + static_cast<double>(mnLogicToAbsoluteOffsetX));
     return ViewToWindowSubPixelX(fViewX);
 }
 
@@ -629,7 +663,8 @@ double CoordinateMapper::LogicToWindowSubPixelY(double fY) const
     if (!IsMapModeEnabled())
         return fY;
 
-    const double fViewY = LogicUnitsToViewSubPixelY(fY + static_cast<double>(mnOutOffLogicY));
+    const double fViewY
+        = LogicUnitsToViewSubPixelY(fY + static_cast<double>(mnLogicToAbsoluteOffsetY));
     return ViewToWindowSubPixelY(fViewY);
 }
 
@@ -637,13 +672,13 @@ double CoordinateMapper::LogicToWindowSubPixelY(double fY) const
 double CoordinateMapper::ViewSubPixelToLogicX(double fX) const
 {
     const double fLogicUnits = ViewSubPixelToLogicUnitsX(fX);
-    return fLogicUnits - static_cast<double>(mnOutOffLogicX);
+    return fLogicUnits - static_cast<double>(mnLogicToAbsoluteOffsetX);
 }
 
 double CoordinateMapper::ViewSubPixelToLogicY(double fY) const
 {
     const double fLogicUnits = ViewSubPixelToLogicUnitsY(fY);
-    return fLogicUnits - static_cast<double>(mnOutOffLogicY);
+    return fLogicUnits - static_cast<double>(mnLogicToAbsoluteOffsetY);
 }
 
 tools::Long CoordinateMapper::ViewSubPixelToLogicIntX(double fX) const
@@ -651,7 +686,7 @@ tools::Long CoordinateMapper::ViewSubPixelToLogicIntX(double fX) const
     // Move from View to Logic Units (Rounds distance, then strips mnMapOfs)
     const tools::Long nLogicUnits = ViewSubPixelToLogicUnitsIntX(fX);
 
-    return nLogicUnits - mnOutOffLogicX;
+    return nLogicUnits - mnLogicToAbsoluteOffsetX;
 }
 
 tools::Long CoordinateMapper::ViewSubPixelToLogicIntY(double fY) const
@@ -659,19 +694,19 @@ tools::Long CoordinateMapper::ViewSubPixelToLogicIntY(double fY) const
     // Move from View to Logic Units (Rounds distance, then strips mnMapOfs)
     const tools::Long nLogicUnits = ViewSubPixelToLogicUnitsIntY(fY);
 
-    return nLogicUnits - mnOutOffLogicY;
+    return nLogicUnits - mnLogicToAbsoluteOffsetY;
 }
 
 // Absolute Logic -> View (Forward: Add Logical -> Add Mapping/Scale)
 double CoordinateMapper::LogicToViewSubPixelX(double fX) const
 {
-    const double fLogicUnits = fX + static_cast<double>(mnOutOffLogicX);
+    const double fLogicUnits = fX + static_cast<double>(mnLogicToAbsoluteOffsetX);
     return LogicUnitsToViewSubPixelX(fLogicUnits);
 }
 
 double CoordinateMapper::LogicToViewSubPixelY(double fY) const
 {
-    const double fLogicUnits = fY + static_cast<double>(mnOutOffLogicY);
+    const double fLogicUnits = fY + static_cast<double>(mnLogicToAbsoluteOffsetY);
     return LogicUnitsToViewSubPixelY(fLogicUnits);
 }
 
