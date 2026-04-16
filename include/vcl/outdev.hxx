@@ -1597,6 +1597,9 @@ public:
 protected:
     virtual void ImplInitMapModeObjects();
 
+    /** Get the internal coordinate mapper (VCL-internal only) */
+    SAL_DLLPRIVATE const CoordinateMapper& GetMapper() const;
+
 public:
     /** Set an offset in pixel
 
@@ -1812,14 +1815,6 @@ private:
      @returns Line based on physical device pixel coordinates and units.
      */
     SAL_DLLPRIVATE LineInfo     ImplLogicToDevicePixel( const LineInfo& rLineInfo ) const;
-
-    /** Convert a region in pixel units to a region in device pixel units and coords.
-
-     @param         rRegion  Const reference to region.
-
-     @returns vcl::Region based on device pixel coordinates and units.
-     */
-    SAL_DLLPRIVATE vcl::Region       ImplPixelToDevicePixel( const vcl::Region& rRegion ) const;
 
     /** @name Native Widget Rendering functions
 

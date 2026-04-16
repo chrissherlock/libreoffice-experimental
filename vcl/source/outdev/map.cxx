@@ -39,6 +39,8 @@
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <tools/UnitConversion.hxx>
 
+const CoordinateMapper& OutputDevice::GetMapper() const { return *mpMapper; }
+
 tools::Long OutputDevice::LogicWidthToDevicePixel(tools::Long nWidth) const
 {
     if ( !mpMapper->IsMapModeEnabled() )
@@ -237,19 +239,6 @@ tools::Rectangle OutputDevice::ImplDevicePixelToLogic( const tools::Rectangle& r
         aRetval.SetHeightEmpty();
 
     return aRetval;
-}
-
-vcl::Region OutputDevice::ImplPixelToDevicePixel( const vcl::Region& rRegion ) const
-{
-    tools::Long nDeltaX = mpMapper->GetDeviceToViewOffsetX();
-    tools::Long nDeltaY = mpMapper->GetDeviceToViewOffsetY();
-
-    if (nDeltaX == 0 && nDeltaY == 0)
-        return rRegion;
-
-    vcl::Region aRegion( rRegion );
-    aRegion.Move(nDeltaX, nDeltaY);
-    return aRegion;
 }
 
 tools::Long OutputDevice::GetOutputWidthPixel() const { return mpMapper->GetOutputWidthPixel(); }
