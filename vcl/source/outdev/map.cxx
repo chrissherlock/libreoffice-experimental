@@ -600,7 +600,6 @@ vcl::Region OutputDevice::PixelToLogic(const vcl::Region& rDeviceRegion) const
 Point OutputDevice::LogicToPixel( const Point& rLogicPt,
                                   const MapMode& rMapMode ) const
 {
-
     if ( rMapMode.IsDefault() )
         return rLogicPt;
 
@@ -608,8 +607,8 @@ Point OutputDevice::LogicToPixel( const Point& rLogicPt,
     ImplMapRes aMapRes(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
 
     return Point(
-        mpMapper->ViewToWindowUnitsX(mpMapper->LogicUnitsToViewUnitsX(rLogicPt.X(), aMapRes)),
-        mpMapper->ViewToWindowUnitsY(mpMapper->LogicUnitsToViewUnitsY(rLogicPt.Y(), aMapRes))
+        mpMapper->LogicToWindowUnitsX(rLogicPt.X(), aMapRes),
+        mpMapper->LogicToWindowUnitsY(rLogicPt.Y(), aMapRes)
     );
 }
 
