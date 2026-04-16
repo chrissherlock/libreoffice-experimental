@@ -256,8 +256,8 @@ tools::Rectangle OutputDevice::ImplDevicePixelToLogic( const tools::Rectangle& r
 
 vcl::Region OutputDevice::ImplPixelToDevicePixel( const vcl::Region& rRegion ) const
 {
-    tools::Long nDeltaX = mpMapper->WindowToDeviceUnitsX(mpMapper->ViewToWindowUnitsX(0));
-    tools::Long nDeltaY = mpMapper->WindowToDeviceUnitsY(mpMapper->ViewToWindowUnitsY(0));
+    tools::Long nDeltaX = mpMapper->GetDeviceToViewOffsetX();
+    tools::Long nDeltaY = mpMapper->GetDeviceToViewOffsetY();
 
     if (nDeltaX == 0 && nDeltaY == 0)
         return rRegion;
