@@ -143,7 +143,7 @@ tools::Rectangle OutputDevice::LogicToDevicePixel(const tools::Rectangle& rLogic
 
 tools::Polygon OutputDevice::ImplLogicToDevicePixel( const tools::Polygon& rLogicPoly ) const
 {
-    if ( !mpMapper->IsMapModeEnabled() && !mpMapper->GetDeviceOriginX() && !mpMapper->GetDeviceOriginY() )
+    if (!mpMapper->IsMapModeEnabled() && !mpMapper->GetDeviceToWindowOffsetX() && !mpMapper->GetDeviceToWindowOffsetY())
         return rLogicPoly;
 
     tools::Polygon aPoly(rLogicPoly);
@@ -197,7 +197,7 @@ basegfx::B2DPolygon OutputDevice::ImplLogicToDevicePixel(const basegfx::B2DPolyg
 
 tools::PolyPolygon OutputDevice::ImplLogicToDevicePixel( const tools::PolyPolygon& rLogicPolyPoly ) const
 {
-    if ( !mpMapper->IsMapModeEnabled() && !mpMapper->GetDeviceOriginX() && !mpMapper->GetDeviceOriginY() )
+    if (!mpMapper->IsMapModeEnabled() && !mpMapper->GetDeviceToWindowOffsetX() && !mpMapper->GetDeviceToWindowOffsetY())
         return rLogicPolyPoly;
 
     tools::PolyPolygon aPolyPoly(rLogicPolyPoly);
@@ -293,17 +293,17 @@ void OutputDevice::SetOutputHeightPixel(tools::Long nHeight) { mpMapper->SetOutp
 
 Size OutputDevice::GetOutputSizePixel() const { return Size(GetOutputWidthPixel(), GetOutputHeightPixel()); }
 
-tools::Long OutputDevice::GetDeviceOriginX() const { return mpMapper->GetDeviceOriginX(); }
+tools::Long OutputDevice::GetDeviceOriginX() const { return mpMapper->GetDeviceToWindowOffsetX(); }
 
-tools::Long OutputDevice::GetDeviceOriginY() const { return mpMapper->GetDeviceOriginY(); }
+tools::Long OutputDevice::GetDeviceOriginY() const { return mpMapper->GetDeviceToWindowOffsetY(); }
 
-void OutputDevice::SetDeviceOriginX(tools::Long nOutOffX) { return mpMapper->SetDeviceOriginX(nOutOffX); }
+void OutputDevice::SetDeviceOriginX(tools::Long nOutOffX) { return mpMapper->SetDeviceToWindowOffsetX(nOutOffX); }
 
-void OutputDevice::SetDeviceOriginY(tools::Long nOutOffY) { return mpMapper->SetOutOffYPixel(nOutOffY); }
+void OutputDevice::SetDeviceOriginY(tools::Long nOutOffY) { return mpMapper->SetDeviceToWindowOffsetY(nOutOffY); }
 
-Point OutputDevice::GetOutputOffPixel() const { return mpMapper->GetOutputOffPixel(); }
+Point OutputDevice::GetOutputOffPixel() const { return mpMapper->GetDeviceToWindowOffset(); }
 
-Size OutputDevice::GetPixelOffset() const { return mpMapper->GetPixelOffset(); }
+Size OutputDevice::GetPixelOffset() const { return mpMapper->GetWindowToViewOffset(); }
 
 bool OutputDevice::IsMapModeEnabled() const { return mpMapper->IsMapModeEnabled(); }
 
@@ -328,7 +328,7 @@ void OutputDevice::SetMapMode()
     ImplInitMapModeObjects();
 
     // #106426# Adapt logical offset when changing mapmode
-    mpMapper->SetLogicalOffset(Size(mpMapper->GetPixelXOffset(), mpMapper->GetPixelYOffset()));
+    mpMapper->SetLogicToAbsoluteOffset(mpMapper->GetWindowToViewOffset());
 
     // #i75163#
     mpMapper->InvalidateViewTransform();
@@ -400,8 +400,8 @@ void OutputDevice::SetMapMode( const MapMode& rNewMapMode )
     ImplInitMapModeObjects();
 
     // #106426# Adapt logical offset when changing mapmode
-    mpMapper->SetLogicalOffset(Size(mpMapper->ViewToLogicDistanceX(mpMapper->GetPixelXOffset()),
-                                    mpMapper->ViewToLogicDistanceY(mpMapper->GetPixelYOffset())));
+    mpMapper->SetLogicToAbsoluteOffset(Size(mpMapper->ViewToLogicDistanceX(mpMapper->GetWindowToViewOffsetX()),
+                                    mpMapper->ViewToLogicDistanceY(mpMapper->GetWindowToViewOffsetY())));
 
     // #i75163#
     mpMapper->InvalidateViewTransform();
@@ -470,19 +470,18 @@ void OutputDevice::SetRelativeMapMode( const MapMode& rNewMapMode )
         mpMapper->ResetMapMode(rNewMapMode);
 
     // #106426# Adapt logical offset when changing MapMode
-    mpMapper->SetLogicalOffset(Size(mpMapper->ViewToLogicDistanceX(mpMapper->GetPixelXOffset()),
-                                    mpMapper->ViewToLogicDistanceY(mpMapper->GetPixelYOffset())));
+    mpMapper->SetLogicToAbsoluteOffset(Size(mpMapper->ViewToLogicDistanceX(mpMapper->GetWindowToViewOffsetX()),
+                                    mpMapper->ViewToLogicDistanceY(mpMapper->GetWindowToViewOffsetY())));
 }
 
 Point OutputDevice::LogicToPixel( const Point& rLogicPt ) const
 {
-
     if ( !mpMapper->IsMapModeEnabled() )
         return rLogicPt;
 
     return Point(
-        mpMapper->ViewToWindowUnitsX(mpMapper->LogicUnitsToViewUnitsX(rLogicPt.X())),
-        mpMapper->ViewToWindowUnitsY(mpMapper->LogicUnitsToViewUnitsY(rLogicPt.Y()))
+        mpMapper->LogicToWindowUnitsX(rLogicPt.X()),
+        mpMapper->LogicToWindowUnitsY(rLogicPt.Y())
     );
 }
 
@@ -601,7 +600,6 @@ vcl::Region OutputDevice::PixelToLogic(const vcl::Region& rDeviceRegion) const
 Point OutputDevice::LogicToPixel( const Point& rLogicPt,
                                   const MapMode& rMapMode ) const
 {
-
     if ( rMapMode.IsDefault() )
         return rLogicPt;
 
@@ -609,8 +607,8 @@ Point OutputDevice::LogicToPixel( const Point& rLogicPt,
     ImplMapRes aMapRes(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
 
     return Point(
-        mpMapper->ViewToWindowUnitsX(mpMapper->LogicUnitsToViewUnitsX(rLogicPt.X(), aMapRes)),
-        mpMapper->ViewToWindowUnitsY(mpMapper->LogicUnitsToViewUnitsY(rLogicPt.Y(), aMapRes))
+        mpMapper->LogicToWindowUnitsX(rLogicPt.X(), aMapRes),
+        mpMapper->LogicToWindowUnitsY(rLogicPt.Y(), aMapRes)
     );
 }
 
@@ -1154,10 +1152,10 @@ tools::Long OutputDevice::LogicToLogic( tools::Long nLongSource,
 
 void OutputDevice::SetPixelOffset( const Size& rOffset )
 {
-    mpMapper->SetPixelOffset(rOffset);
+    mpMapper->SetWindowToViewOffset(Size(rOffset.Width(), rOffset.Height()));
 
-    mpMapper->SetLogicalOffset(Size(mpMapper->ViewToLogicDistanceX(mpMapper->GetPixelXOffset()),
-                                    mpMapper->ViewToLogicDistanceY(mpMapper->GetPixelYOffset())));
+    mpMapper->SetLogicToAbsoluteOffset(Size(mpMapper->ViewToLogicDistanceX(mpMapper->GetWindowToViewOffsetX()),
+                                    mpMapper->ViewToLogicDistanceY(mpMapper->GetWindowToViewOffsetY())));
 }
 
 double OutputDevice::LogicWidthToDeviceSubPixel(tools::Long nWidth) const
