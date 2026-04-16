@@ -72,6 +72,19 @@ Point CoordinateMapper::GetDeviceToWindowOffset() const
     return Point(mnDeviceToWindowOffsetX, mnDeviceToWindowOffsetY);
 }
 
+vcl::Region CoordinateMapper::ViewToDevice(const vcl::Region& rRegion) const
+{
+    tools::Long nDeltaX = GetDeviceToViewOffsetX();
+    tools::Long nDeltaY = GetDeviceToViewOffsetY();
+
+    if (nDeltaX == 0 && nDeltaY == 0)
+        return rRegion;
+
+    vcl::Region aRegion(rRegion);
+    aRegion.Move(nDeltaX, nDeltaY);
+    return aRegion;
+}
+
 tools::Long CoordinateMapper::GetOutputWidthPixel() const { return mnOutWidth; }
 
 tools::Long CoordinateMapper::GetOutputHeightPixel() const { return mnOutHeight; }
