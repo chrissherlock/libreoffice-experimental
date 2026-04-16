@@ -24,6 +24,7 @@
 
 #include <vcl/dllapi.h>
 #include <vcl/mapmod.hxx>
+#include <vcl/region.hxx>
 
 class CoordinateMapper
 {
@@ -115,6 +116,8 @@ public:
     void SetDeviceToWindowOffsetY(tools::Long nDeviceToWindowOffsetY);
     void SetWindowToViewOffset(const Size& rSize);
     void SetLogicToAbsoluteOffset(const Size& rSize);
+
+    vcl::Region ViewToDevice(const vcl::Region& rRegion) const;
 
     tools::Long GetOutputWidthPixel() const;
     tools::Long GetOutputHeightPixel() const;
