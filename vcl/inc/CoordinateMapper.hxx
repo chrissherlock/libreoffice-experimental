@@ -74,27 +74,49 @@ public:
 
     tools::Long GetDeviceToWindowOffsetX() const;
     tools::Long GetDeviceToWindowOffsetY() const;
-
-    void SetDeviceToWindowOffsetX(tools::Long nDeviceToWindowOffsetX);
-    void SetDeviceToWindowOffsetY(tools::Long nDeviceToWindowOffsetY);
-
     Point GetDeviceToWindowOffset() const;
 
-    tools::Long GetOutputWidthPixel() const;
-    tools::Long GetOutputHeightPixel() const;
-    Size GetOutputSizePixel() const;
-
+    tools::Long GetWindowToViewOffsetX() const { return mnWindowToViewOffsetX; }
+    tools::Long GetWindowToViewOffsetY() const { return mnWindowToViewOffsetY; }
     Size GetWindowToViewOffset() const
     {
         return Size(mnWindowToViewOffsetX, mnWindowToViewOffsetY);
     }
-    void SetWindowToViewOffset(const Size& rSize);
-    tools::Long GetWindowToViewOffsetX() const { return mnWindowToViewOffsetX; }
-    tools::Long GetWindowToViewOffsetY() const { return mnWindowToViewOffsetY; }
 
+    tools::Long GetLogicToAbsoluteOffsetX() const
+    {
+        return mnLogicToAbsoluteOffsetX;
+    }
+    tools::Long GetLogicToAbsoluteOffsetY() const
+    {
+        return mnLogicToAbsoluteOffsetY;
+    }
+    Size GetLogicToAbsoluteOffset() const
+    {
+        return Size(mnLogicToAbsoluteOffsetX, mnLogicToAbsoluteOffsetY);
+    }
+
+    tools::Long GetDeviceToViewOffsetX() const
+    {
+        return mnDeviceToWindowOffsetX + mnWindowToViewOffsetX;
+    }
+    tools::Long GetDeviceToViewOffsetY() const
+    {
+        return mnDeviceToWindowOffsetY + mnWindowToViewOffsetY;
+    }
+    Size GetDeviceToViewOffset() const
+    {
+        return Size(GetDeviceToViewOffsetX(), GetDeviceToViewOffsetY());
+    }
+
+    void SetDeviceToWindowOffsetX(tools::Long nDeviceToWindowOffsetX);
+    void SetDeviceToWindowOffsetY(tools::Long nDeviceToWindowOffsetY);
+    void SetWindowToViewOffset(const Size& rSize);
     void SetLogicToAbsoluteOffset(const Size& rSize);
-    tools::Long GetLogicToAbsoluteOffsetX() const { return mnLogicToAbsoluteOffsetX; }
-    tools::Long GetLogicToAbsoluteOffsetY() const { return mnLogicToAbsoluteOffsetY; }
+
+    tools::Long GetOutputWidthPixel() const;
+    tools::Long GetOutputHeightPixel() const;
+    Size GetOutputSizePixel() const;
 
     void SetOutputWidthPixel(tools::Long nWidth);
     void SetOutputHeightPixel(tools::Long nHeight);
@@ -122,7 +144,8 @@ public:
     void SetMapResolutionScaleX(double fX) { maMapRes.mfMapScX = fX; }
     void SetMapResolutionScaleY(double fY) { maMapRes.mfMapScY = fY; }
 
-    void CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX, tools::Long nDPIY);
+    void CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX,
+                                          tools::Long nDPIY);
 
     ImplMapRes ResolveMapRes(const MapMode* pMode);
 
@@ -134,7 +157,8 @@ public:
     basegfx::B2DHomMatrix GetViewTransformation() const;
     basegfx::B2DHomMatrix GetViewTransformation(const MapMode& rMapMode) const;
     basegfx::B2DHomMatrix GetInverseViewTransformation() const;
-    basegfx::B2DHomMatrix GetInverseViewTransformation(const MapMode& rMapMode) const;
+    basegfx::B2DHomMatrix
+    GetInverseViewTransformation(const MapMode& rMapMode) const;
     basegfx::B2DHomMatrix GetDeviceTransformation() const;
 
     // ========================================================================
