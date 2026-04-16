@@ -29,6 +29,7 @@
 #include <sal/types.h>
 #include <sal/log.hxx>
 
+#include <CoordinateMapper.hxx>
 #include <window.h>
 #include <salgdi.hxx>
 #include <salframe.hxx>
@@ -1038,7 +1039,7 @@ void Window::Invalidate( const vcl::Region& rRegion, InvalidateFlags nFlags )
     }
     else
     {
-        vcl::Region aRegion = GetOutDev()->ImplPixelToDevicePixel( LogicToPixel( rRegion ) );
+        vcl::Region aRegion = GetOutDev()->GetMapper().ViewToDevice( LogicToPixel( rRegion ) );
         if ( !aRegion.IsEmpty() )
         {
             ImplInvalidate( &aRegion, nFlags );
@@ -1581,7 +1582,7 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
     if ( nFlags & ScrollFlags::Clip )
         aRegion.Intersect( rRect );
     if ( mpWindowImpl->mbWinRegion )
-        aRegion.Intersect( GetOutDev()->ImplPixelToDevicePixel( mpWindowImpl->maWinRegion ) );
+        aRegion.Intersect( GetOutDev()->GetMapper().ViewToDevice( mpWindowImpl->maWinRegion ) );
 
     aRegion.Exclude( aInvalidateRegion );
 

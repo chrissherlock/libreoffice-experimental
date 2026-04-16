@@ -24,6 +24,7 @@
 #include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
 
+#include <CoordinateMapper.hxx>
 #include <salgdi.hxx>
 
 void OutputDevice::SaveBackground(VirtualDevice& rSaveDevice,
@@ -131,7 +132,7 @@ void OutputDevice::InitClipRegion()
             mbOutputClipped = false;
 
             // #102532# Respect output offset also for clip region
-            vcl::Region aRegion = ClipToDeviceBounds(ImplPixelToDevicePixel(maRegion));
+            vcl::Region aRegion = ClipToDeviceBounds(mpMapper->ViewToDevice(maRegion));
 
             if ( aRegion.IsEmpty() )
             {
