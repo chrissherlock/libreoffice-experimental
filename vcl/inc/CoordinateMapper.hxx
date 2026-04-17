@@ -116,6 +116,7 @@ public:
     void SetWindowToViewOffset(const Size& rSize);
     void SetLogicToAbsoluteOffset(const Size& rSize);
 
+    Size LogicToViewDistance(const Size& rLogicSize) const;
     vcl::Region ViewToDevice(const vcl::Region& rRegion) const;
 
     tools::Long GetOutputWidthPixel() const;
