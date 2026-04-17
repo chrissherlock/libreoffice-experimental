@@ -881,7 +881,7 @@ OutputDevice::GetPartialTextArray(const OUString& rStr, KernArray* pKernArray, s
         if (pSalLayout->GetBoundRect(stRect))
         {
             auto stRect2 = SalLayout::BoundRect2Rectangle(stRect);
-            *pBounds = ImplDevicePixelToLogic(stRect2);
+            *pBounds = mpMapper->DevicePixelToLogic(stRect2);
         }
     }
 
