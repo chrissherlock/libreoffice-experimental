@@ -116,7 +116,6 @@ public:
     void SetLogicToAbsoluteOffset(const Size& rSize);
 
     Size LogicToViewDistance(const Size& rLogicSize) const;
-    vcl::Region ViewToDevice(const vcl::Region& rRegion) const;
 
     tools::Long GetOutputWidthPixel() const;
     tools::Long GetOutputHeightPixel() const;
@@ -190,6 +189,8 @@ public:
     // View <-> LogicUnits (Scale and apply Logical Mapping Offset)
     tools::Long ViewToLogicUnitsX(tools::Long nX) const;
     tools::Long ViewToLogicUnitsY(tools::Long nY) const;
+    vcl::Region ViewToDevice(const vcl::Region& rRegion) const;
+
     tools::Long LogicUnitsToViewUnitsX(tools::Long nX) const;
     tools::Long LogicUnitsToViewUnitsY(tools::Long nY) const;
     tools::Long LogicUnitsToViewUnitsX(tools::Long nX, const ImplMapRes& rRes) const;
@@ -217,6 +218,8 @@ public:
     double DevicePixelToLogicSubPixelY(double fY) const;
     double LogicToDeviceSubPixelX(double fX) const;
     double LogicToDeviceSubPixelY(double fY) const;
+
+    tools::Rectangle DevicePixelToLogic(const tools::Rectangle& rPixelRect) const;
 
     // Window <-> Logic
     tools::Long WindowToLogicX(tools::Long nX) const;
