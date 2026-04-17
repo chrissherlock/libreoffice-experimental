@@ -79,14 +79,6 @@ Point OutputDevice::LogicToDevicePixel(const Point& rLogicPt) const
                  mpMapper->LogicToDevicePixelY(rLogicPt.Y()));
 }
 
-Size OutputDevice::ImplLogicToDevicePixel( const Size& rLogicSize ) const
-{
-    if ( !mpMapper->IsMapModeEnabled() )
-        return rLogicSize;
-
-    return Size(mpMapper->LogicToViewDistanceX(rLogicSize.Width()), mpMapper->LogicToViewDistanceY(rLogicSize.Height()));
-}
-
 static void lcl_ApplyEmptyState(tools::Rectangle& rDest, const tools::Rectangle& rSrc)
 {
     if (rSrc.IsWidthEmpty())

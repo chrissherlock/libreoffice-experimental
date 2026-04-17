@@ -72,6 +72,15 @@ Point CoordinateMapper::GetDeviceToWindowOffset() const
     return Point(mnDeviceToWindowOffsetX, mnDeviceToWindowOffsetY);
 }
 
+Size CoordinateMapper::LogicToViewDistance(const Size& rLogicSize) const
+{
+    if (!IsMapModeEnabled())
+        return rLogicSize;
+
+    return Size(LogicToViewDistanceX(rLogicSize.Width()),
+                LogicToViewDistanceY(rLogicSize.Height()));
+}
+
 vcl::Region CoordinateMapper::ViewToDevice(const vcl::Region& rRegion) const
 {
     tools::Long nDeltaX = GetDeviceToViewOffsetX();

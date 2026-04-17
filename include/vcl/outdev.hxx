@@ -1767,14 +1767,6 @@ protected:
     SAL_DLLPRIVATE tools::Long DevicePixelToLogicHeight(tools::Long nHeight) const;
 
 private:
-    /** Convert a logical size to the size on the physical device.
-
-     @param         rLogicSize  Const reference to a size in logical units
-
-     @returns Physical size on the device.
-     */
-    SAL_DLLPRIVATE Size         ImplLogicToDevicePixel( const Size& rLogicSize ) const;
-
     /** Convert a rectangle in physical pixel units to a rectangle in physical pixel units and coords.
 
      @param         rPixelRect  Const reference to rectangle in logical units and coords.
