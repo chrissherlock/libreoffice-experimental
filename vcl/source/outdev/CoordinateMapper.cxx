@@ -367,6 +367,34 @@ tools::Long CoordinateMapper::DevicePixelToLogicY(tools::Long nY) const
     return ViewToLogicY(WindowToViewUnitsY(DeviceToWindowUnitsY(nY)));
 }
 
+tools::Rectangle CoordinateMapper::DevicePixelToLogic(const tools::Rectangle& rPixelRect) const
+{
+    tools::Rectangle aRetval;
+
+    if (!IsMapModeEnabled())
+    {
+        aRetval = tools::Rectangle(
+            DeviceToWindowUnitsX(rPixelRect.Left()), DeviceToWindowUnitsY(rPixelRect.Top()),
+            rPixelRect.IsWidthEmpty() ? 0 : DeviceToWindowUnitsX(rPixelRect.Right()),
+            rPixelRect.IsHeightEmpty() ? 0 : DeviceToWindowUnitsY(rPixelRect.Bottom()));
+    }
+    else
+    {
+        aRetval = tools::Rectangle(
+            DevicePixelToLogicX(rPixelRect.Left()), DevicePixelToLogicY(rPixelRect.Top()),
+            rPixelRect.IsWidthEmpty() ? 0 : DevicePixelToLogicX(rPixelRect.Right()),
+            rPixelRect.IsHeightEmpty() ? 0 : DevicePixelToLogicY(rPixelRect.Bottom()));
+    }
+
+    if (rPixelRect.IsWidthEmpty())
+        aRetval.SetWidthEmpty();
+
+    if (rPixelRect.IsHeightEmpty())
+        aRetval.SetHeightEmpty();
+
+    return aRetval;
+}
+
 tools::Long CoordinateMapper::LogicToDevicePixelX(tools::Long nX) const
 {
     if (!IsMapModeEnabled())
