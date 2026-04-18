@@ -71,17 +71,16 @@ namespace oglcanvas
         if( aPolyPoly.areControlPointsUsed() )
             aPolyPoly = rPolyPoly.getDefaultAdaptiveSubdivision();
 
-        for( sal_uInt32 i=0; i<aPolyPoly.count(); i++ )
+        for (const auto& rPolygon : aPolyPoly)
         {
-            glBegin(GL_LINE_STRIP);
+            if (rPolygon.count() == 0)
+                continue;
 
-            const ::basegfx::B2DPolygon& rPolygon( aPolyPoly.getB2DPolygon(i) );
+            // Let OpenGL natively handle the closing segment!
+            glBegin(rPolygon.isClosed() ? GL_LINE_LOOP : GL_LINE_STRIP);
 
-            const sal_uInt32 nPts=rPolygon.count();
-            const sal_uInt32 nExtPts=nPts + int(rPolygon.isClosed());
-            for( sal_uInt32 j=0; j<nExtPts; j++ )
+            for (const auto& rPt : rPolygon)
             {
-                const ::basegfx::B2DPoint& rPt( rPolygon.getB2DPoint( j % nPts ) );
                 glVertex2d(rPt.getX(), rPt.getY());
             }
 
