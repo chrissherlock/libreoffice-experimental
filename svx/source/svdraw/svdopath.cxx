@@ -1753,21 +1753,29 @@ void SdrPathObj::ImpForceKind()
 
     // #i75974# adapt polygon state to object type. This may include a reinterpretation
     // of a closed geometry as open one, but with identical first and last point
-    for(auto& rPolygon : maPathPolygon)
+    for (sal_uInt32 i = 0; i < maPathPolygon.count(); ++i)
     {
-        if(IsClosed() != rPolygon.isClosed())
+        // Check the condition against the const reference first to avoid
+        // unnecessary COW allocations if the polygon doesn't need changing.
+        if (IsClosed() != maPathPolygon.getB2DPolygon(i).isClosed())
         {
+            // Extract a mutable COW copy
+            basegfx::B2DPolygon aPolygon(maPathPolygon.getB2DPolygon(i));
+
             // #i80213# really change polygon geometry; else e.g. the last point which
             // needs to be identical with the first one will be missing when opening
             // due to OBJ_PATH type
-            if(rPolygon.isClosed())
+            if (aPolygon.isClosed())
             {
-                basegfx::utils::openWithGeometryChange(rPolygon);
+                basegfx::utils::openWithGeometryChange(aPolygon);
             }
             else
             {
-                basegfx::utils::closeWithGeometryChange(rPolygon);
+                basegfx::utils::closeWithGeometryChange(aPolygon);
             }
+
+            // Safely write the modified polygon back
+            maPathPolygon.setB2DPolygon(i, std::move(aPolygon));
         }
     }
 }
