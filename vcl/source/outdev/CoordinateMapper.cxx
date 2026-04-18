@@ -822,6 +822,16 @@ tools::PolyPolygon CoordinateMapper::LogicToWindowUnits(const tools::PolyPolygon
     return aPolyPoly;
 }
 
+basegfx::B2DPolyPolygon
+CoordinateMapper::LogicToWindowUnits(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
+                                     const MapMode& rMapMode) const
+{
+    basegfx::B2DPolyPolygon aTransformedPoly = rLogicPolyPoly;
+    const basegfx::B2DHomMatrix aTransformationMatrix = GetViewTransformation(rMapMode);
+    aTransformedPoly.transform(aTransformationMatrix);
+    return aTransformedPoly;
+}
+
 // ========================================================================
 // DISTANCE SCALING (Raw Scalar Conversion)
 // ========================================================================
