@@ -269,6 +269,7 @@ public:
     tools::Long LogicToWindowUnitsY(tools::Long nY) const;
     tools::Long LogicToWindowUnitsX(tools::Long nX, const ImplMapRes& rRes) const;
     tools::Long LogicToWindowUnitsY(tools::Long nY, const ImplMapRes& rRes) const;
+    tools::Rectangle LogicToWindowUnits(const tools::Rectangle& rRect) const;
 
     // Window <-> View subpixel
     double WindowToViewSubPixelX(double fX) const;
