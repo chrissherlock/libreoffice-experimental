@@ -979,14 +979,18 @@ double CoordinateMapper::ViewToWindowSubPixelY(double fY) const
 
 tools::Long CoordinateMapper::DevicePixelToLogicWidth(tools::Long nWidth) const
 {
-    // Determine the logical distance by mapping pixel 0 and pixel nWidth
-    return std::abs(DevicePixelToLogicX(nWidth) - DevicePixelToLogicX(0));
+    if (!IsMapModeEnabled())
+        return nWidth;
+
+    return ViewToLogicDistanceX(nWidth);
 }
 
 tools::Long CoordinateMapper::DevicePixelToLogicHeight(tools::Long nHeight) const
 {
-    // Determine the logical distance by mapping pixel 0 and pixel nHeight
-    return std::abs(DevicePixelToLogicY(nHeight) - DevicePixelToLogicY(0));
+    if (!IsMapModeEnabled())
+        return nHeight;
+
+    return ViewToLogicDistanceY(nHeight);
 }
 
 Point CoordinateMapper::DevicePixelToLogic(const Point& rDevicePt) const
