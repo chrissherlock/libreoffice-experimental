@@ -1767,14 +1767,6 @@ protected:
     SAL_DLLPRIVATE tools::Long DevicePixelToLogicHeight(tools::Long nHeight) const;
 
 private:
-    /** Convert a logical polypolygon to a polypolygon in physical device pixel units.
-
-     @param         rLogicPolyPoly  Const reference to a polypolygon in logical units
-
-     @returns Polypolygon based on physical device pixel coordinates and units.
-     */
-    SAL_DLLPRIVATE tools::PolyPolygon  ImplLogicToDevicePixel( const tools::PolyPolygon& rLogicPolyPoly ) const;
-
     /** Convert a line in logical units to a line in physical device pixel units.
 
      @param         rLineInfo   Const reference to a line in logical units
