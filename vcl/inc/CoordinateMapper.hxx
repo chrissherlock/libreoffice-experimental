@@ -213,6 +213,7 @@ public:
     tools::Long DevicePixelToLogicY(tools::Long nY) const;
     tools::Long LogicToDevicePixelX(tools::Long nX) const;
     tools::Long LogicToDevicePixelY(tools::Long nY) const;
+    tools::Polygon LogicToDevicePixel(const tools::Polygon& rLogicPoly) const;
 
     double DevicePixelToLogicSubPixelX(double fX) const;
     double DevicePixelToLogicSubPixelY(double fY) const;

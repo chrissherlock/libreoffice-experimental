@@ -119,24 +119,6 @@ tools::Rectangle OutputDevice::LogicToDevicePixel(const tools::Rectangle& rLogic
     return aRetval;
 }
 
-tools::Polygon OutputDevice::ImplLogicToDevicePixel( const tools::Polygon& rLogicPoly ) const
-{
-    if (!mpMapper->IsMapModeEnabled() && !mpMapper->GetDeviceToWindowOffsetX() && !mpMapper->GetDeviceToWindowOffsetY())
-        return rLogicPoly;
-
-    tools::Polygon aPoly(rLogicPoly);
-
-    for (auto& rPoint : aPoly)
-    {
-        rPoint = Point(
-            mpMapper->LogicToDevicePixelX(rPoint.X()),
-            mpMapper->LogicToDevicePixelY(rPoint.Y())
-        );
-    }
-
-    return aPoly;
-}
-
 basegfx::B2DPolygon OutputDevice::ImplLogicToDevicePixel(const basegfx::B2DPolygon& rLogicPoly) const
 {
     const sal_uInt32 nPoints = rLogicPoly.count();
@@ -182,7 +164,7 @@ tools::PolyPolygon OutputDevice::ImplLogicToDevicePixel( const tools::PolyPolygo
 
     for (auto& rPoly : aPolyPoly)
     {
-        rPoly = ImplLogicToDevicePixel(rPoly);
+        rPoly = mpMapper->LogicToDevicePixel(rPoly);
     }
 
     return aPolyPoly;
