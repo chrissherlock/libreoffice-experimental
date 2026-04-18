@@ -30,6 +30,9 @@
 #include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <rtl/math.hxx>
 
+#include <algorithm>
+#include <iterator>
+
 using namespace ::basegfx;
 
 namespace basegfx2d
@@ -156,34 +159,42 @@ public:
     B2DPolyPolygon normalizePoly( const B2DPolyPolygon& rPoly ) const
     {
         B2DPolyPolygon aRes;
-        for( sal_uInt32 i=0; i<rPoly.count(); ++i )
+
+        // B2DPolyPolygon has iterators, so we can use a range-based loop!
+        for (B2DPolygon aTmp : rPoly)
         {
-            B2DPolygon aTmp=rPoly.getB2DPolygon(i);
-            if( utils::getOrientation(aTmp) == B2VectorOrientation::Negative )
+            if (utils::getOrientation(aTmp) == B2VectorOrientation::Negative)
                 aTmp.flip();
 
-            aTmp=utils::removeNeutralPoints(aTmp);
-            std::vector<B2DPoint> aTmp2(aTmp.count());
-            for(sal_uInt32 j=0; j<aTmp.count(); ++j)
-                aTmp2[j] = aTmp.getB2DPoint(j);
+            aTmp = utils::removeNeutralPoints(aTmp);
 
-            std::vector<B2DPoint>::iterator pSmallest=aTmp2.end();
-            for(std::vector<B2DPoint>::iterator pCurr=aTmp2.begin(); pCurr!=aTmp2.end(); ++pCurr)
+            if (aTmp.count() > 0)
             {
-                if( pSmallest == aTmp2.end() || compare(*pCurr, *pSmallest) )
+                // 1. Find the smallest point natively using our new const_iterator
+                auto pSmallest = std::min_element(aTmp.begin(), aTmp.end(),
+                    [&](const basegfx::B2DPoint& a, const basegfx::B2DPoint& b) {
+                        return compare(a, b);
+                    });
+
+                // 2. Calculate the exact index using std::distance
+                sal_uInt32 nMinIndex = std::distance(aTmp.begin(), pSmallest);
+
+                // 3. "Rotate" the polygon by appending slices natively.
+                // This avoids std::vector entirely and preserves bezier control points!
+                if (nMinIndex > 0)
                 {
-                    pSmallest=pCurr;
+                    B2DPolygon aRotated;
+                    // Append from the smallest point to the end
+                    aRotated.append(aTmp, nMinIndex, aTmp.count() - nMinIndex);
+                    // Append from the start up to the smallest point
+                    aRotated.append(aTmp, 0, nMinIndex);
+                    aRotated.setClosed(aTmp.isClosed());
+
+                    aTmp = std::move(aRotated);
                 }
             }
 
-            if( pSmallest != aTmp2.end() )
-                std::rotate(aTmp2.begin(),pSmallest,aTmp2.end());
-
-            aTmp.clear();
-            for(const auto& rCurr : aTmp2)
-                aTmp.append(rCurr);
-
-            aRes.append(aTmp);
+            aRes.append(std::move(aTmp));
         }
 
         // boxclipper & generic clipper disagree slightly on area-less
@@ -193,9 +204,10 @@ public:
         // now, sort all polygons with increasing 0th point
         std::sort(aRes.begin(),
                   aRes.end(),
-                  [](const B2DPolygon& aPolygon1, const B2DPolygon& aPolygon2) {
+                  [&](const B2DPolygon& aPolygon1, const B2DPolygon& aPolygon2) {
                       return compare(aPolygon1.getB2DPoint(0),
-                          aPolygon2.getB2DPoint(0)); } );
+                                     aPolygon2.getB2DPoint(0));
+                  });
 
         return aRes;
     }
