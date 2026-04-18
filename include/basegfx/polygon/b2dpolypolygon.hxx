@@ -122,11 +122,56 @@ namespace basegfx
             translate(rTranslate.getX(), rTranslate.getY());
         }
 
-        // polygon iterators (same iterator validity conditions as for vector)
-        const B2DPolygon* begin() const;
-        const B2DPolygon* end() const;
-        B2DPolygon* begin();
-        B2DPolygon* end();
+        class const_iterator
+        {
+        public:
+            using iterator_category = std::random_access_iterator_tag;
+            using value_type        = basegfx::B2DPolygon;
+            using difference_type   = std::ptrdiff_t;
+            using pointer           = const basegfx::B2DPolygon*;
+            using reference         = const basegfx::B2DPolygon&;
+
+        private:
+            const B2DPolyPolygon* mpPolyPolygon;
+            sal_uInt32            mnIndex;
+
+        public:
+            const_iterator() : mpPolyPolygon(nullptr), mnIndex(0) {}
+            const_iterator(const B2DPolyPolygon* pPolyPolygon, sal_uInt32 nIndex)
+                : mpPolyPolygon(pPolyPolygon), mnIndex(nIndex) {}
+
+            reference operator*() const { return mpPolyPolygon->getB2DPolygon(mnIndex); }
+            pointer operator->() const { return &mpPolyPolygon->getB2DPolygon(mnIndex); }
+
+            const_iterator& operator++() { ++mnIndex; return *this; }
+            const_iterator operator++(int) { const_iterator tmp(*this); ++mnIndex; return tmp; }
+
+            const_iterator& operator--() { --mnIndex; return *this; }
+            const_iterator operator--(int) { const_iterator tmp(*this); --mnIndex; return tmp; }
+
+            const_iterator& operator+=(difference_type n) { mnIndex += n; return *this; }
+            const_iterator& operator-=(difference_type n) { mnIndex -= n; return *this; }
+
+            const_iterator operator+(difference_type n) const { return const_iterator(mpPolyPolygon, mnIndex + n); }
+            const_iterator operator-(difference_type n) const { return const_iterator(mpPolyPolygon, mnIndex - n); }
+            difference_type operator-(const const_iterator& rOther) const { return mnIndex - rOther.mnIndex; }
+
+            bool operator==(const const_iterator& rOther) const { return mnIndex == rOther.mnIndex && mpPolyPolygon == rOther.mpPolyPolygon; }
+            bool operator!=(const const_iterator& rOther) const { return !(*this == rOther); }
+
+            bool operator<(const const_iterator& rOther) const { return mnIndex < rOther.mnIndex; }
+            bool operator>(const const_iterator& rOther) const { return mnIndex > rOther.mnIndex; }
+            bool operator<=(const const_iterator& rOther) const { return mnIndex <= rOther.mnIndex; }
+            bool operator>=(const const_iterator& rOther) const { return mnIndex >= rOther.mnIndex; }
+
+            reference operator[](difference_type n) const { return mpPolyPolygon->getB2DPolygon(mnIndex + n); }
+        };
+
+        /// Iterator interface
+        const_iterator begin() const { return const_iterator(this, 0); }
+        const_iterator end() const { return const_iterator(this, count()); }
+        const_iterator cbegin() const { return const_iterator(this, 0); }
+        const_iterator cend() const { return const_iterator(this, count()); }
 
         // exclusive management op's for SystemDependentData at B2DPolygon
         template<class T>

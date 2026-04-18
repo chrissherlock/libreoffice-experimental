@@ -2053,29 +2053,23 @@ namespace cppcanvas::internal
                 for( const auto& rVCLPolyPolygon : aVCLPolyPolyVector )
                 {
                     ::basegfx::B2DPolyPolygon aPolyPolygon = rVCLPolyPolygon.getB2DPolyPolygon();
-                    aPolyPolygon.transform( aMapModeTransform );
+                    aPolyPolygon.transform(aMapModeTransform);
 
                     // append result to collecting polypoly
-                    for( sal_uInt32 i=0; i<aPolyPolygon.count(); ++i )
+                    for (const auto& rPoly : aPolyPolygon)
                     {
                         // #i47795# Ensure closed polygons (since
-                        // FreeType returns the glyph outlines
-                        // open)
-                        const ::basegfx::B2DPolygon& rPoly( aPolyPolygon.getB2DPolygon( i ) );
-                        const sal_uInt32 nCount( rPoly.count() );
-                        if( nCount<3 ||
-                            rPoly.isClosed() )
+                        // FreeType returns the glyph outlines open)
+                        if (rPoly.count() < 3 || rPoly.isClosed())
                         {
-                            // polygon either degenerate, or
-                            // already closed.
-                            aResultingPolyPolygon.append( rPoly );
+                            // polygon either degenerate, or already closed.
+                            aResultingPolyPolygon.append(rPoly);
                         }
                         else
                         {
                             ::basegfx::B2DPolygon aPoly(rPoly);
                             aPoly.setClosed(true);
-
-                            aResultingPolyPolygon.append( aPoly );
+                            aResultingPolyPolygon.append(std::move(aPoly));
                         }
                     }
                 }
