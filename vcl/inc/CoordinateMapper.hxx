@@ -300,6 +300,13 @@ public:
     LogicToWindowUnits(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
                        const MapMode& rMapMode) const;
 
+    SAL_DLLPRIVATE vcl::Region WindowToLogicUnits(const vcl::Region& rWindowRegion) const;
+    SAL_DLLPRIVATE tools::Polygon WindowToLogicUnits(const tools::Polygon& rWindowPoly) const;
+    SAL_DLLPRIVATE tools::Rectangle WindowToLogicUnits(const tools::Rectangle& rRect) const;
+    SAL_DLLPRIVATE tools::PolyPolygon WindowToLogicUnits(const tools::PolyPolygon& rPolyPoly) const;
+    SAL_DLLPRIVATE basegfx::B2DPolyPolygon
+    WindowToLogicUnits(const basegfx::B2DPolyPolygon& rPolyPoly) const;
+
     // ========================================================================
     // DISTANCE SCALING (Raw Scalar Conversion, NO offsets applied)
     // ========================================================================
