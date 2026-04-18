@@ -1073,15 +1073,31 @@ bool SkiaSalGraphicsImpl::delayDrawPolyPolygon(const basegfx::B2DPolyPolygon& aP
 
 // Tdf#140848 - basegfx::utils::mergeToSinglePolyPolygon() seems to have rounding
 // errors that sometimes cause it to merge incorrectly.
-static void roundPolygonPoints(basegfx::B2DPolyPolygon& polyPolygon)
+static void roundPolygonPoints(basegfx::B2DPolyPolygon& rPolyPolygon)
 {
-    for (basegfx::B2DPolygon& polygon : polyPolygon)
+    for (sal_uInt32 i = 0; i < rPolyPolygon.count(); ++i)
     {
-        polygon.makeUnique();
-        for (sal_uInt32 i = 0; i < polygon.count(); ++i)
-            polygon.setB2DPoint(i, basegfx::B2DPoint(basegfx::fround(polygon.getB2DPoint(i))));
-        // Control points are saved as vectors relative to points, so hopefully
-        // there's no need to round those.
+        // Extract a mutable COW copy
+        basegfx::B2DPolygon aPolygon(rPolyPolygon.getB2DPolygon(i));
+
+        for (sal_uInt32 j = 0; j < aPolygon.count(); ++j)
+        {
+            aPolygon.setB2DPoint(j, basegfx::B2DPoint(basegfx::fround(aPolygon.getB2DPoint(j))));
+
+            if (aPolygon.isPrevControlPointUsed(j))
+            {
+                aPolygon.setPrevControlPoint(
+                    j, basegfx::B2DPoint(basegfx::fround(aPolygon.getPrevControlPoint(j))));
+            }
+
+            if (aPolygon.isNextControlPointUsed(j))
+            {
+                aPolygon.setNextControlPoint(
+                    j, basegfx::B2DPoint(basegfx::fround(aPolygon.getNextControlPoint(j))));
+            }
+        }
+
+        rPolyPolygon.setB2DPolygon(i, std::move(aPolygon));
     }
 }
 

@@ -54,6 +54,7 @@
 #include "impltools.hxx"
 #include "textlayout.hxx"
 
+
 using namespace ::com::sun::star;
 
 namespace vclcanvas
