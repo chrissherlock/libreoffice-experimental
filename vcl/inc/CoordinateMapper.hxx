@@ -282,6 +282,10 @@ public:
     tools::Rectangle LogicToWindowUnits(const tools::Rectangle& rRect) const;
     vcl::Region LogicToWindowUnits(const vcl::Region& rRegion) const;
     tools::Polygon LogicToWindowUnits(const tools::Polygon& rPoly) const;
+    tools::Polygon LogicToWindowUnits(const tools::Polygon& rPoly,
+                                                     const MapMode& rMapMode) const;
+    tools::Polygon LogicToWindowUnits(const tools::Polygon& rPoly,
+                                                     const ImplMapRes& rRes) const;
     tools::PolyPolygon LogicToWindowUnits(const tools::PolyPolygon& rPoly) const;
     basegfx::B2DPolyPolygon
     LogicToWindowUnits(const basegfx::B2DPolyPolygon& rLogicPolyPoly) const;
