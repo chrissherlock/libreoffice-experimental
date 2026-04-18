@@ -41,48 +41,6 @@
 
 const CoordinateMapper& OutputDevice::GetMapper() const { return *mpMapper; }
 
-tools::Long OutputDevice::LogicWidthToDevicePixel(tools::Long nWidth) const
-{
-    if ( !mpMapper->IsMapModeEnabled() )
-        return nWidth;
-
-    return mpMapper->LogicToViewDistanceX(nWidth);
-}
-
-tools::Long OutputDevice::LogicHeightToDevicePixel( tools::Long nHeight ) const
-{
-    if ( !mpMapper->IsMapModeEnabled() )
-        return nHeight;
-
-    return mpMapper->LogicToViewDistanceY(nHeight);
-}
-
-tools::Long OutputDevice::DevicePixelToLogicWidth( tools::Long nWidth ) const
-{
-    if ( !mpMapper->IsMapModeEnabled() )
-        return nWidth;
-
-    return mpMapper->ViewToLogicDistanceX(nWidth);
-}
-
-tools::Long OutputDevice::DevicePixelToLogicHeight( tools::Long nHeight ) const
-{
-    if ( !mpMapper->IsMapModeEnabled() )
-        return nHeight;
-
-    return mpMapper->ViewToLogicDistanceY(nHeight);
-}
-
-Point OutputDevice::LogicToDevicePixel(const Point& rLogicPt) const
-{
-    return mpMapper->LogicToDevicePixel(rLogicPt);
-}
-
-tools::Rectangle OutputDevice::LogicToDevicePixel(const tools::Rectangle& rLogicRect) const
-{
-    return mpMapper->LogicToDevicePixel(rLogicRect);
-}
-
 tools::Long OutputDevice::GetOutputWidthPixel() const { return mpMapper->GetOutputWidthPixel(); }
 
 tools::Long OutputDevice::GetOutputHeightPixel() const { return mpMapper->GetOutputHeightPixel(); }
@@ -274,6 +232,22 @@ void OutputDevice::SetRelativeMapMode( const MapMode& rNewMapMode )
                                     mpMapper->ViewToLogicDistanceY(mpMapper->GetWindowToViewOffsetY())));
 }
 
+tools::Long OutputDevice::LogicWidthToDevicePixel(tools::Long nWidth) const
+{
+    if ( !mpMapper->IsMapModeEnabled() )
+        return nWidth;
+
+    return mpMapper->LogicToViewDistanceX(nWidth);
+}
+
+tools::Long OutputDevice::LogicHeightToDevicePixel( tools::Long nHeight ) const
+{
+    if ( !mpMapper->IsMapModeEnabled() )
+        return nHeight;
+
+    return mpMapper->LogicToViewDistanceY(nHeight);
+}
+
 Point OutputDevice::LogicToPixel( const Point& rLogicPt ) const
 {
     if ( !mpMapper->IsMapModeEnabled() )
@@ -316,6 +290,16 @@ basegfx::B2DPolyPolygon OutputDevice::LogicToPixel( const basegfx::B2DPolyPolygo
     return aTransformedPoly;
 }
 
+Point OutputDevice::LogicToDevicePixel(const Point& rLogicPt) const
+{
+    return mpMapper->LogicToDevicePixel(rLogicPt);
+}
+
+tools::Rectangle OutputDevice::LogicToDevicePixel(const tools::Rectangle& rLogicRect) const
+{
+    return mpMapper->LogicToDevicePixel(rLogicRect);
+}
+
 template<typename TransformFunc>
 static vcl::Region lcl_TransformRegion(const vcl::Region& rRegion, TransformFunc&& func)
 {
@@ -351,14 +335,6 @@ vcl::Region OutputDevice::LogicToPixel(const vcl::Region& rLogicRegion) const
         return rLogicRegion;
 
     return lcl_TransformRegion(rLogicRegion, [this](const auto& obj) { return LogicToPixel(obj); });
-}
-
-vcl::Region OutputDevice::PixelToLogic(const vcl::Region& rDeviceRegion) const
-{
-    if (!mpMapper->IsMapModeEnabled())
-        return rDeviceRegion;
-
-    return lcl_TransformRegion(rDeviceRegion, [this](const auto& obj) { return PixelToLogic(obj); });
 }
 
 Point OutputDevice::LogicToPixel( const Point& rLogicPt,
@@ -466,6 +442,30 @@ basegfx::B2DPolyPolygon OutputDevice::LogicToPixel( const basegfx::B2DPolyPolygo
     const basegfx::B2DHomMatrix aTransformationMatrix = mpMapper->GetViewTransformation( rMapMode );
     aTransformedPoly.transform( aTransformationMatrix );
     return aTransformedPoly;
+}
+
+tools::Long OutputDevice::DevicePixelToLogicWidth( tools::Long nWidth ) const
+{
+    if ( !mpMapper->IsMapModeEnabled() )
+        return nWidth;
+
+    return mpMapper->ViewToLogicDistanceX(nWidth);
+}
+
+tools::Long OutputDevice::DevicePixelToLogicHeight( tools::Long nHeight ) const
+{
+    if ( !mpMapper->IsMapModeEnabled() )
+        return nHeight;
+
+    return mpMapper->ViewToLogicDistanceY(nHeight);
+}
+
+vcl::Region OutputDevice::PixelToLogic(const vcl::Region& rDeviceRegion) const
+{
+    if (!mpMapper->IsMapModeEnabled())
+        return rDeviceRegion;
+
+    return lcl_TransformRegion(rDeviceRegion, [this](const auto& obj) { return PixelToLogic(obj); });
 }
 
 Point OutputDevice::PixelToLogic( const Point& rDevicePt ) const
