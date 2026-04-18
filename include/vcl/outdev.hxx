@@ -1767,14 +1767,6 @@ protected:
     SAL_DLLPRIVATE tools::Long DevicePixelToLogicHeight(tools::Long nHeight) const;
 
 private:
-    /** Convert a logical B2DPolygon to a B2DPolygon in physical device pixel units.
-
-     @param         rLogicSize  Const reference to a B2DPolygon in logical units
-
-     @returns B2DPolyPolygon based on physical device pixel coordinates and units.
-     */
-    SAL_DLLPRIVATE ::basegfx::B2DPolygon ImplLogicToDevicePixel( const ::basegfx::B2DPolygon& rLogicPoly ) const;
-
     /** Convert a logical polypolygon to a polypolygon in physical device pixel units.
 
      @param         rLogicPolyPoly  Const reference to a polypolygon in logical units

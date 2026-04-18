@@ -119,42 +119,6 @@ tools::Rectangle OutputDevice::LogicToDevicePixel(const tools::Rectangle& rLogic
     return aRetval;
 }
 
-basegfx::B2DPolygon OutputDevice::ImplLogicToDevicePixel(const basegfx::B2DPolygon& rLogicPoly) const
-{
-    const sal_uInt32 nPoints = rLogicPoly.count();
-    basegfx::B2DPolygon aPoly(rLogicPoly);
-
-    for (sal_uInt32 i = 0; i < nPoints; ++i)
-    {
-        const basegfx::B2DPoint& rPt = aPoly.getB2DPoint(i);
-
-        aPoly.setB2DPoint(i, basegfx::B2DPoint(
-            mpMapper->LogicToDevicePixelX(rPt.getX()),
-            mpMapper->LogicToDevicePixelY(rPt.getY())
-        ));
-
-        if (aPoly.isPrevControlPointUsed(i))
-        {
-            const basegfx::B2DPoint aB2DC1(aPoly.getPrevControlPoint(i));
-            aPoly.setPrevControlPoint(i, basegfx::B2DPoint(
-                mpMapper->LogicToDevicePixelX(aB2DC1.getX()),
-                mpMapper->LogicToDevicePixelY(aB2DC1.getY())
-            ));
-        }
-
-        if (aPoly.isNextControlPointUsed(i))
-        {
-            const basegfx::B2DPoint aB2DC2(aPoly.getNextControlPoint(i));
-            aPoly.setNextControlPoint(i, basegfx::B2DPoint(
-                mpMapper->LogicToDevicePixelX(aB2DC2.getX()),
-                mpMapper->LogicToDevicePixelY(aB2DC2.getY())
-            ));
-        }
-    }
-
-    return aPoly;
-}
-
 tools::PolyPolygon OutputDevice::ImplLogicToDevicePixel( const tools::PolyPolygon& rLogicPolyPoly ) const
 {
     if (!mpMapper->IsMapModeEnabled() && !mpMapper->GetDeviceToWindowOffsetX() && !mpMapper->GetDeviceToWindowOffsetY())
