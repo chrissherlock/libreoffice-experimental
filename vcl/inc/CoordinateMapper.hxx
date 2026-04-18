@@ -272,6 +272,8 @@ public:
     tools::Rectangle LogicToWindowUnits(const tools::Rectangle& rRect) const;
     tools::Polygon LogicToWindowUnits(const tools::Polygon& rPoly) const;
     tools::PolyPolygon LogicToWindowUnits(const tools::PolyPolygon& rPoly) const;
+    basegfx::B2DPolyPolygon
+    LogicToWindowUnits(const basegfx::B2DPolyPolygon& rLogicPolyPoly) const;
 
     // Window <-> View subpixel
     double WindowToViewSubPixelX(double fX) const;
