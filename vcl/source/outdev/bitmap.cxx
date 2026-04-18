@@ -387,8 +387,8 @@ void OutputDevice::DrawDeviceAlphaBitmap( const Bitmap& rBmp,
 {
     assert(!is_double_buffered_window());
 
-    Point     aOutPt(LogicToPixel(rDestPt));
-    Size      aOutSz(LogicToPixel(rDestSize));
+    Point     aOutPt(mpMapper->LogicToWindowUnits(rDestPt));
+    Size      aOutSz(mpMapper->LogicToWindowUnits(rDestSize));
     tools::Rectangle aDstRect(Point(), GetOutputSizePixel());
 
     const bool bHMirr = aOutSz.Width() < 0;

@@ -1972,7 +1972,7 @@ void OutputDevice::DrawCtrlText( const Point& rPos, const OUString& rStr,
                 aTempPos = Point( std::max(lc_x1,lc_x2), GetFontMetric().GetAscent() );
 
             aTempPos += rPos;
-            aTempPos = LogicToPixel( aTempPos );
+            aTempPos = mpMapper->LogicToWindowUnits( aTempPos );
             nMnemonicX = GetDeviceOriginX() + aTempPos.X();
             nMnemonicY = GetDeviceOriginY() + aTempPos.Y();
         }
