@@ -219,26 +219,31 @@ public:
     // ========================================================================
 
     // Device <-> Logic (Full journey)
-    tools::Long LogicWidthToDevicePixel(tools::Long nWidth) const;
-    tools::Long LogicHeightToDevicePixel(tools::Long nHeight) const;
-
-    tools::Long DevicePixelToLogicX(tools::Long nX) const;
-    tools::Long DevicePixelToLogicY(tools::Long nY) const;
     tools::Long LogicToDevicePixelX(tools::Long nX) const;
     tools::Long LogicToDevicePixelY(tools::Long nY) const;
+    tools::Long LogicWidthToDevicePixel(tools::Long nWidth) const;
+    tools::Long LogicHeightToDevicePixel(tools::Long nHeight) const;
+    Point LogicToDevicePixel(const Point& rLogicPt) const;
+    Size LogicToDevicePixel(const Size& rLogicSize) const;
+    tools::Rectangle LogicToDevicePixel(const tools::Rectangle& rLogicRect) const;
     tools::Polygon LogicToDevicePixel(const tools::Polygon& rLogicPoly) const;
     tools::PolyPolygon
     LogicToDevicePixel(const tools::PolyPolygon& rLogicPolyPoly) const;
     LineInfo LogicToDevicePixel(const LineInfo& rLineInfo) const;
     basegfx::B2DPolygon
     LogicToDevicePixel(const basegfx::B2DPolygon& rLogicPoly) const;
-
-    double DevicePixelToLogicSubPixelX(double fX) const;
-    double DevicePixelToLogicSubPixelY(double fY) const;
     double LogicToDeviceSubPixelX(double fX) const;
     double LogicToDeviceSubPixelY(double fY) const;
 
+    tools::Long DevicePixelToLogicX(tools::Long nX) const;
+    tools::Long DevicePixelToLogicY(tools::Long nY) const;
+    tools::Long DevicePixelToLogicWidth(tools::Long nWidth) const;
+    tools::Long DevicePixelToLogicHeight(tools::Long nHeight) const;
+    Point DevicePixelToLogic(const Point& rDevicePt) const;
+    Size DevicePixelToLogic(const Size& rDeviceSize) const;
     tools::Rectangle DevicePixelToLogic(const tools::Rectangle& rPixelRect) const;
+    double DevicePixelToLogicSubPixelX(double fX) const;
+    double DevicePixelToLogicSubPixelY(double fY) const;
 
     // Window <-> Logic
     tools::Long WindowToLogicX(tools::Long nX) const;
