@@ -119,33 +119,6 @@ tools::Rectangle OutputDevice::LogicToDevicePixel(const tools::Rectangle& rLogic
     return aRetval;
 }
 
-LineInfo OutputDevice::ImplLogicToDevicePixel( const LineInfo& rLineInfo ) const
-{
-    LineInfo aInfo( rLineInfo );
-
-    if( aInfo.GetStyle() == LineStyle::Dash )
-    {
-        if( aInfo.GetDotCount() && aInfo.GetDotLen() )
-            aInfo.SetDotLen(std::max(LogicWidthToDevicePixel(aInfo.GetDotLen()), tools::Long(1)));
-        else
-            aInfo.SetDotCount( 0 );
-
-        if( aInfo.GetDashCount() && aInfo.GetDashLen() )
-            aInfo.SetDashLen(std::max(LogicWidthToDevicePixel(aInfo.GetDashLen()), tools::Long(1)));
-        else
-            aInfo.SetDashCount( 0 );
-
-        aInfo.SetDistance(LogicWidthToDevicePixel(aInfo.GetDistance()));
-
-        if( ( !aInfo.GetDashCount() && !aInfo.GetDotCount() ) || !aInfo.GetDistance() )
-            aInfo.SetStyle( LineStyle::Solid );
-    }
-
-    aInfo.SetWidth(LogicWidthToDevicePixel(aInfo.GetWidth()));
-
-    return aInfo;
-}
-
 tools::Long OutputDevice::GetOutputWidthPixel() const { return mpMapper->GetOutputWidthPixel(); }
 
 tools::Long OutputDevice::GetOutputHeightPixel() const { return mpMapper->GetOutputHeightPixel(); }

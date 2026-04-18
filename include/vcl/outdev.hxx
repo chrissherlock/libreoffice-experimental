@@ -1766,15 +1766,6 @@ protected:
      */
     SAL_DLLPRIVATE tools::Long DevicePixelToLogicHeight(tools::Long nHeight) const;
 
-private:
-    /** Convert a line in logical units to a line in physical device pixel units.
-
-     @param         rLineInfo   Const reference to a line in logical units
-
-     @returns Line based on physical device pixel coordinates and units.
-     */
-    SAL_DLLPRIVATE LineInfo     ImplLogicToDevicePixel( const LineInfo& rLineInfo ) const;
-
     /** @name Native Widget Rendering functions
 
         These all just call through to the private mpGraphics functions of the same name.
