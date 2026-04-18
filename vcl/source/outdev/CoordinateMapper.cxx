@@ -570,6 +570,15 @@ tools::Long CoordinateMapper::LogicToWindowY(tools::Long nY) const
     return ViewToWindowUnitsY(LogicUnitsToViewUnitsY(nY + mnLogicToAbsoluteOffsetY));
 }
 
+basegfx::B2DPolyPolygon
+CoordinateMapper::LogicToWindowUnits(const basegfx::B2DPolyPolygon& rLogicPolyPoly) const
+{
+    basegfx::B2DPolyPolygon aTransformedPoly = rLogicPolyPoly;
+    // This encapsulates the GetViewTransformation() logic inside the mapper
+    aTransformedPoly.transform(GetViewTransformation());
+    return aTransformedPoly;
+}
+
 tools::Long CoordinateMapper::ViewToLogicX(tools::Long nX) const
 {
     return ViewToLogicUnitsX(nX) - mnLogicToAbsoluteOffsetX;
