@@ -278,6 +278,8 @@ public:
     tools::Long LogicToWindowUnitsX(tools::Long nX, const ImplMapRes& rRes) const;
     tools::Long LogicToWindowUnitsY(tools::Long nY, const ImplMapRes& rRes) const;
     tools::Rectangle LogicToWindowUnits(const tools::Rectangle& rRect) const;
+    tools::Polygon LogicToWindowUnits(const tools::Polygon& rPoly) const;
+    tools::PolyPolygon LogicToWindowUnits(const tools::PolyPolygon& rPoly) const;
 
     // ========================================================================
     // DISTANCE SCALING (Raw Scalar Conversion, NO offsets applied)
