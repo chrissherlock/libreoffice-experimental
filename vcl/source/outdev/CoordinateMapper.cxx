@@ -647,6 +647,21 @@ Point CoordinateMapper::LogicToWindowUnits(const Point& rLogicPt, const ImplMapR
     return Point(LogicToWindowUnitsX(rLogicPt.X(), rRes), LogicToWindowUnitsY(rLogicPt.Y(), rRes));
 }
 
+Size CoordinateMapper::LogicToWindowUnits(const Size& rLogicSize, const MapMode& rMapMode) const
+{
+    if (rMapMode.IsDefault())
+        return rLogicSize;
+
+    ImplMapRes aMapRes(rMapMode, GetDPIX(), GetDPIY());
+    return LogicToWindowUnits(rLogicSize, aMapRes);
+}
+
+Size CoordinateMapper::LogicToWindowUnits(const Size& rLogicSize, const ImplMapRes& rRes) const
+{
+    return Size(LogicToViewDistanceX(rLogicSize.Width(), rRes.mfMapScX),
+                LogicToViewDistanceY(rLogicSize.Height(), rRes.mfMapScY));
+}
+
 static void lcl_ApplyEmptyState(tools::Rectangle& rDest, const tools::Rectangle& rSrc)
 {
     // tdf#141761 IsEmpty() removed

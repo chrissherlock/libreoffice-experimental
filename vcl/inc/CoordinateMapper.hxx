@@ -279,6 +279,8 @@ public:
     Point LogicToWindowUnits(const Point& rLogicPt) const;
     Point LogicToWindowUnits(const Point& rLogicPt, const MapMode& rMapMode) const;
     Point LogicToWindowUnits(const Point& rLogicPt, const ImplMapRes& rRes) const;
+    Size LogicToWindowUnits(const Size& rLogicSize, const MapMode& rMapMode) const;
+    Size LogicToWindowUnits(const Size& rLogicSize, const ImplMapRes& rRes) const;
     tools::Rectangle LogicToWindowUnits(const tools::Rectangle& rRect) const;
     vcl::Region LogicToWindowUnits(const vcl::Region& rRegion) const;
     tools::Polygon LogicToWindowUnits(const tools::Polygon& rPoly) const;
