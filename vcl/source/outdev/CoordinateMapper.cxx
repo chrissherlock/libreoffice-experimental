@@ -410,6 +410,22 @@ tools::Polygon CoordinateMapper::LogicToDevicePixel(const tools::Polygon& rLogic
     return aPoly;
 }
 
+tools::PolyPolygon
+CoordinateMapper::LogicToDevicePixel(const tools::PolyPolygon& rLogicPolyPoly) const
+{
+    if (!IsMapModeEnabled() && !GetDeviceToWindowOffsetX() && !GetDeviceToWindowOffsetY())
+        return rLogicPolyPoly;
+
+    tools::PolyPolygon aPolyPoly(rLogicPolyPoly);
+
+    for (auto& rPoly : aPolyPoly)
+    {
+        rPoly = LogicToDevicePixel(rPoly);
+    }
+
+    return aPolyPoly;
+}
+
 basegfx::B2DPolygon
 CoordinateMapper::LogicToDevicePixel(const basegfx::B2DPolygon& rLogicPoly) const
 {

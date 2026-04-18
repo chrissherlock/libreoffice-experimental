@@ -222,6 +222,8 @@ public:
     tools::Long LogicToDevicePixelX(tools::Long nX) const;
     tools::Long LogicToDevicePixelY(tools::Long nY) const;
     tools::Polygon LogicToDevicePixel(const tools::Polygon& rLogicPoly) const;
+    tools::PolyPolygon
+    LogicToDevicePixel(const tools::PolyPolygon& rLogicPolyPoly) const;
     basegfx::B2DPolygon
     LogicToDevicePixel(const basegfx::B2DPolygon& rLogicPoly) const;
 
