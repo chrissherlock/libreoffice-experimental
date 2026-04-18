@@ -61,6 +61,57 @@ namespace basegfx
 
         ~B2DPolygon();
 
+        class const_iterator
+        {
+        public:
+            using iterator_category = std::random_access_iterator_tag;
+            using value_type        = basegfx::B2DPoint;
+            using difference_type   = std::ptrdiff_t;
+            using pointer           = const basegfx::B2DPoint*;
+            using reference         = const basegfx::B2DPoint&;
+
+        private:
+            const B2DPolygon* mpPolygon;
+            sal_uInt32        mnIndex;
+
+        public:
+            const_iterator() : mpPolygon(nullptr), mnIndex(0) {}
+            const_iterator(const B2DPolygon* pPolygon, sal_uInt32 nIndex)
+                : mpPolygon(pPolygon), mnIndex(nIndex) {}
+
+            reference operator*() const { return mpPolygon->getB2DPoint(mnIndex); }
+            pointer operator->() const { return &mpPolygon->getB2DPoint(mnIndex); }
+
+            const_iterator& operator++() { ++mnIndex; return *this; }
+            const_iterator operator++(int) { const_iterator tmp(*this); ++mnIndex; return tmp; }
+
+            const_iterator& operator--() { --mnIndex; return *this; }
+            const_iterator operator--(int) { const_iterator tmp(*this); --mnIndex; return tmp; }
+
+            const_iterator& operator+=(difference_type n) { mnIndex += n; return *this; }
+            const_iterator& operator-=(difference_type n) { mnIndex -= n; return *this; }
+
+            const_iterator operator+(difference_type n) const { return const_iterator(mpPolygon, mnIndex + n); }
+            const_iterator operator-(difference_type n) const { return const_iterator(mpPolygon, mnIndex - n); }
+            difference_type operator-(const const_iterator& rOther) const { return mnIndex - rOther.mnIndex; }
+
+            bool operator==(const const_iterator& rOther) const { return mnIndex == rOther.mnIndex && mpPolygon == rOther.mpPolygon; }
+            bool operator!=(const const_iterator& rOther) const { return !(*this == rOther); }
+
+            bool operator<(const const_iterator& rOther) const { return mnIndex < rOther.mnIndex; }
+            bool operator>(const const_iterator& rOther) const { return mnIndex > rOther.mnIndex; }
+            bool operator<=(const const_iterator& rOther) const { return mnIndex <= rOther.mnIndex; }
+            bool operator>=(const const_iterator& rOther) const { return mnIndex >= rOther.mnIndex; }
+
+            reference operator[](difference_type n) const { return mpPolygon->getB2DPoint(mnIndex + n); }
+        };
+
+        /// Iterator interface
+        const_iterator begin() const { return const_iterator(this, 0); }
+        const_iterator end() const { return const_iterator(this, count()); }
+        const_iterator cbegin() const { return const_iterator(this, 0); }
+        const_iterator cend() const { return const_iterator(this, count()); }
+
         /// assignment operator
         B2DPolygon& operator=(const B2DPolygon& rPolygon);
         B2DPolygon& operator=(B2DPolygon&& rPolygon);
