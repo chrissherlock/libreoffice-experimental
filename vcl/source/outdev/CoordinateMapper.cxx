@@ -832,6 +832,77 @@ CoordinateMapper::LogicToWindowUnits(const basegfx::B2DPolyPolygon& rLogicPolyPo
     return aTransformedPoly;
 }
 
+vcl::Region CoordinateMapper::WindowToLogicUnits(const vcl::Region& rWindowRegion) const
+{
+    if (!IsMapModeEnabled())
+        return rWindowRegion;
+
+    return lcl_TransformRegion(rWindowRegion,
+                               [this](const auto& obj) { return WindowToLogicUnits(obj); });
+}
+
+tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rWindowRect) const
+{
+    if (!IsMapModeEnabled())
+        return rWindowRect;
+
+    tools::Rectangle aRetval(WindowToLogicX(rWindowRect.Left()), WindowToLogicY(rWindowRect.Top()),
+                             rWindowRect.IsWidthEmpty() ? 0 : WindowToLogicX(rWindowRect.Right()),
+                             rWindowRect.IsHeightEmpty() ? 0
+                                                         : WindowToLogicY(rWindowRect.Bottom()));
+
+    lcl_ApplyEmptyState(aRetval, rWindowRect);
+
+    return aRetval;
+}
+
+tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rWindowPoly) const
+{
+    if (!IsMapModeEnabled())
+        return rWindowPoly;
+
+    tools::Polygon aPoly(rWindowPoly);
+
+    for (auto& rPoint : aPoly)
+    {
+        rPoint.setX(WindowToLogicX(rPoint.X()));
+        rPoint.setY(WindowToLogicY(rPoint.Y()));
+    }
+
+    return aPoly;
+}
+
+tools::PolyPolygon
+CoordinateMapper::WindowToLogicUnits(const tools::PolyPolygon& rWindowPolyPoly) const
+{
+    if (!IsMapModeEnabled())
+        return rWindowPolyPoly;
+
+    tools::PolyPolygon aPolyPoly;
+
+    // PolyPolygon is just a collection of Polygons,
+    // so we iterate and pass each one to our new Polygon overload.
+    for (sal_uInt16 i = 0; i < rWindowPolyPoly.Count(); ++i)
+    {
+        aPolyPoly.Insert(WindowToLogicUnits(rWindowPolyPoly[i]));
+    }
+
+    return aPolyPoly;
+}
+
+basegfx::B2DPolyPolygon
+CoordinateMapper::WindowToLogicUnits(const basegfx::B2DPolyPolygon& rWindowPolyPoly) const
+{
+    if (!IsMapModeEnabled())
+        return rWindowPolyPoly;
+
+    basegfx::B2DPolyPolygon aTransformedPoly = rWindowPolyPoly;
+    const basegfx::B2DHomMatrix aTransformationMatrix
+        = GetInverseViewTransformation(); // Or however you grab the inverse matrix
+    aTransformedPoly.transform(aTransformationMatrix);
+    return aTransformedPoly;
+}
+
 // ========================================================================
 // DISTANCE SCALING (Raw Scalar Conversion)
 // ========================================================================

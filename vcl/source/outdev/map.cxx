@@ -282,35 +282,6 @@ tools::Rectangle OutputDevice::LogicToDevicePixel(const tools::Rectangle& rLogic
     return mpMapper->LogicToDevicePixel(rLogicRect);
 }
 
-template<typename TransformFunc>
-static vcl::Region lcl_TransformRegion(const vcl::Region& rRegion, TransformFunc&& func)
-{
-    if (rRegion.IsNull() || rRegion.IsEmpty())
-        return rRegion;
-
-    vcl::Region aRegion;
-    if (rRegion.getB2DPolyPolygon())
-    {
-        aRegion = vcl::Region(func(*rRegion.getB2DPolyPolygon()));
-    }
-    else if (rRegion.getPolyPolygon())
-    {
-        aRegion = vcl::Region(func(*rRegion.getPolyPolygon()));
-    }
-    else if (rRegion.getRegionBand())
-    {
-        RectangleVector aRectangles;
-        rRegion.GetRegionRectangles(aRectangles);
-
-        // Reverse run to fill new region bottom-up for speed
-        for (auto aRectIter = aRectangles.rbegin(); aRectIter != aRectangles.rend(); ++aRectIter)
-        {
-            aRegion.Union(func(*aRectIter));
-        }
-    }
-    return aRegion;
-}
-
 vcl::Region OutputDevice::LogicToPixel(const vcl::Region& rLogicRegion) const
 {
     return mpMapper->LogicToWindowUnits(rLogicRegion);
@@ -354,10 +325,7 @@ tools::Long OutputDevice::DevicePixelToLogicHeight(tools::Long nHeight) const
 
 vcl::Region OutputDevice::PixelToLogic(const vcl::Region& rDeviceRegion) const
 {
-    if (!mpMapper->IsMapModeEnabled())
-        return rDeviceRegion;
-
-    return lcl_TransformRegion(rDeviceRegion, [this](const auto& obj) { return PixelToLogic(obj); });
+    return mpMapper->WindowToLogicUnits(rDeviceRegion);
 }
 
 Point OutputDevice::PixelToLogic( const Point& rDevicePt ) const
