@@ -116,7 +116,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
 
     const Point aStartPt(LogicToDevicePixel(rStartPt));
     const Point aEndPt(LogicToDevicePixel(rEndPt));
-    const LineInfo aInfo(ImplLogicToDevicePixel(rLineInfo));
+    const LineInfo aInfo(mpMapper->LogicToDevicePixel(rLineInfo));
     const bool bDashUsed(LineStyle::Dash == aInfo.GetStyle());
     const bool bLineWidthUsed(aInfo.GetWidth() > 1);
 
