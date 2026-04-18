@@ -316,19 +316,9 @@ vcl::Region OutputDevice::LogicToPixel(const vcl::Region& rLogicRegion) const
     return mpMapper->LogicToWindowUnits(rLogicRegion);
 }
 
-Point OutputDevice::LogicToPixel( const Point& rLogicPt,
-                                  const MapMode& rMapMode ) const
+Point OutputDevice::LogicToPixel(const Point& rLogicPt, const MapMode& rMapMode) const
 {
-    if ( rMapMode.IsDefault() )
-        return rLogicPt;
-
-    // convert MapMode resolution and convert
-    ImplMapRes aMapRes(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
-
-    return Point(
-        mpMapper->LogicToWindowUnitsX(rLogicPt.X(), aMapRes),
-        mpMapper->LogicToWindowUnitsY(rLogicPt.Y(), aMapRes)
-    );
+    return mpMapper->LogicToWindowUnits(rLogicPt, rMapMode);
 }
 
 Size OutputDevice::LogicToPixel( const Size& rLogicSize,
