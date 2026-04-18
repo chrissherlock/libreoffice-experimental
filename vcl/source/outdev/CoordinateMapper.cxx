@@ -608,6 +608,46 @@ tools::Long CoordinateMapper::LogicToWindowUnitsY(tools::Long nY, const ImplMapR
     return ViewToWindowUnitsY(LogicUnitsToViewUnitsY(nY, rRes));
 }
 
+static void lcl_ApplyEmptyState(tools::Rectangle& rDest, const tools::Rectangle& rSrc)
+{
+    // tdf#141761 IsEmpty() removed
+    // Even if rLogicRect.IsEmpty(), transform of the Position contained
+    // in the Rectangle is necessary. Due to Rectangle::Right() returning
+    // Left() when IsEmpty(), the code *could* stay unchanged (same for Bottom),
+    // but:
+    // The Rectangle constructor used with the four tools::Long values does not
+    // check for IsEmpty(), so to keep that state correct there are two possibilities:
+    // (1) Add a test to the Rectangle constructor in question
+    // (2) Do it by hand here
+    // I have tried (1) first, but test Test::test_rectangle() claims that for
+    //  tools::Rectangle aRect(1, 1, 1, 1);
+    //    tools::Long(1) == aRect.GetWidth()
+    //    tools::Long(0) == aRect.getWidth()
+    // (remember: this means Left == Right == 1 -> GetWidth => 1, getWidth == 0)
+    // so indeed the 1's have to go uncommented/unchecked into the data body
+    // of rectangle. Switching to (2) *is* needed, doing so
+
+    if (rSrc.IsWidthEmpty())
+        rDest.SetWidthEmpty();
+
+    if (rSrc.IsHeightEmpty())
+        rDest.SetHeightEmpty();
+}
+
+tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rRect) const
+{
+    if (!IsMapModeEnabled())
+        return rRect;
+
+    tools::Rectangle aRetval(LogicToWindowUnitsX(rRect.Left()), LogicToWindowUnitsY(rRect.Top()),
+                             rRect.IsWidthEmpty() ? 0 : LogicToWindowUnitsX(rRect.Right()),
+                             rRect.IsHeightEmpty() ? 0 : LogicToWindowUnitsY(rRect.Bottom()));
+
+    lcl_ApplyEmptyState(aRetval, rRect);
+
+    return aRetval;
+}
+
 // ========================================================================
 // DISTANCE SCALING (Raw Scalar Conversion)
 // ========================================================================
