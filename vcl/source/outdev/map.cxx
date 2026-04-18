@@ -282,35 +282,6 @@ tools::Rectangle OutputDevice::LogicToDevicePixel(const tools::Rectangle& rLogic
     return mpMapper->LogicToDevicePixel(rLogicRect);
 }
 
-template<typename TransformFunc>
-static vcl::Region lcl_TransformRegion(const vcl::Region& rRegion, TransformFunc&& func)
-{
-    if (rRegion.IsNull() || rRegion.IsEmpty())
-        return rRegion;
-
-    vcl::Region aRegion;
-    if (rRegion.getB2DPolyPolygon())
-    {
-        aRegion = vcl::Region(func(*rRegion.getB2DPolyPolygon()));
-    }
-    else if (rRegion.getPolyPolygon())
-    {
-        aRegion = vcl::Region(func(*rRegion.getPolyPolygon()));
-    }
-    else if (rRegion.getRegionBand())
-    {
-        RectangleVector aRectangles;
-        rRegion.GetRegionRectangles(aRectangles);
-
-        // Reverse run to fill new region bottom-up for speed
-        for (auto aRectIter = aRectangles.rbegin(); aRectIter != aRectangles.rend(); ++aRectIter)
-        {
-            aRegion.Union(func(*aRectIter));
-        }
-    }
-    return aRegion;
-}
-
 vcl::Region OutputDevice::LogicToPixel(const vcl::Region& rLogicRegion) const
 {
     return mpMapper->LogicToWindowUnits(rLogicRegion);
@@ -342,28 +313,19 @@ basegfx::B2DPolyPolygon OutputDevice::LogicToPixel(const basegfx::B2DPolyPolygon
     return mpMapper->LogicToWindowUnits(rLogicPolyPoly, rMapMode);
 }
 
-tools::Long OutputDevice::DevicePixelToLogicWidth( tools::Long nWidth ) const
+tools::Long OutputDevice::DevicePixelToLogicWidth(tools::Long nWidth) const
 {
-    if ( !mpMapper->IsMapModeEnabled() )
-        return nWidth;
-
-    return mpMapper->ViewToLogicDistanceX(nWidth);
+    return mpMapper->DevicePixelToLogicWidth(nWidth);
 }
 
-tools::Long OutputDevice::DevicePixelToLogicHeight( tools::Long nHeight ) const
+tools::Long OutputDevice::DevicePixelToLogicHeight(tools::Long nHeight) const
 {
-    if ( !mpMapper->IsMapModeEnabled() )
-        return nHeight;
-
-    return mpMapper->ViewToLogicDistanceY(nHeight);
+    return mpMapper->DevicePixelToLogicHeight(nHeight);
 }
 
 vcl::Region OutputDevice::PixelToLogic(const vcl::Region& rDeviceRegion) const
 {
-    if (!mpMapper->IsMapModeEnabled())
-        return rDeviceRegion;
-
-    return lcl_TransformRegion(rDeviceRegion, [this](const auto& obj) { return PixelToLogic(obj); });
+    return mpMapper->WindowToLogicUnits(rDeviceRegion);
 }
 
 Point OutputDevice::PixelToLogic( const Point& rDevicePt ) const
