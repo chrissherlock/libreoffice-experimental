@@ -409,6 +409,28 @@ tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight) cons
     return std::abs(LogicToDevicePixelY(nHeight) - LogicToDevicePixelY(0));
 }
 
+Point CoordinateMapper::LogicToDevicePixel(const Point& rLogicPt) const
+{
+    return Point(LogicToDevicePixelX(rLogicPt.X()), LogicToDevicePixelY(rLogicPt.Y()));
+}
+
+Size CoordinateMapper::LogicToDevicePixel(const Size& rLogicSize) const
+{
+    return Size(LogicWidthToDevicePixel(rLogicSize.Width()),
+                LogicHeightToDevicePixel(rLogicSize.Height()));
+}
+
+tools::Rectangle CoordinateMapper::LogicToDevicePixel(const tools::Rectangle& rLogicRect) const
+{
+    if (rLogicRect.IsEmpty())
+        return rLogicRect;
+
+    Point aTopLeft = LogicToDevicePixel(rLogicRect.TopLeft());
+    Size aSize = LogicToDevicePixel(rLogicRect.GetSize());
+
+    return tools::Rectangle(aTopLeft, aSize);
+}
+
 tools::Polygon CoordinateMapper::LogicToDevicePixel(const tools::Polygon& rLogicPoly) const
 {
     if (!IsMapModeEnabled() && !GetDeviceToWindowOffsetX() && !GetDeviceToWindowOffsetY())
@@ -733,6 +755,29 @@ double CoordinateMapper::ViewToWindowSubPixelX(double fX) const
 double CoordinateMapper::ViewToWindowSubPixelY(double fY) const
 {
     return fY + static_cast<double>(mnWindowToViewOffsetY);
+}
+
+tools::Long CoordinateMapper::DevicePixelToLogicWidth(tools::Long nWidth) const
+{
+    // Determine the logical distance by mapping pixel 0 and pixel nWidth
+    return std::abs(DevicePixelToLogicX(nWidth) - DevicePixelToLogicX(0));
+}
+
+tools::Long CoordinateMapper::DevicePixelToLogicHeight(tools::Long nHeight) const
+{
+    // Determine the logical distance by mapping pixel 0 and pixel nHeight
+    return std::abs(DevicePixelToLogicY(nHeight) - DevicePixelToLogicY(0));
+}
+
+Point CoordinateMapper::DevicePixelToLogic(const Point& rDevicePt) const
+{
+    return Point(DevicePixelToLogicX(rDevicePt.X()), DevicePixelToLogicY(rDevicePt.Y()));
+}
+
+Size CoordinateMapper::DevicePixelToLogic(const Size& rDeviceSize) const
+{
+    return Size(DevicePixelToLogicWidth(rDeviceSize.Width()),
+                DevicePixelToLogicHeight(rDeviceSize.Height()));
 }
 
 // Device -> Logic (Inverse Path: Strip Screen -> Strip Pixel -> Strip Mapping -> Strip Logical)
