@@ -394,15 +394,27 @@ tools::Rectangle CoordinateMapper::DevicePixelToLogic(const tools::Rectangle& rP
 
 tools::Long CoordinateMapper::LogicWidthToDevicePixel(tools::Long nWidth) const
 {
-    // A width is the distance between two X-coordinates.
-    // We calculate it by mapping 0 and nWidth and taking the difference.
-    return std::abs(LogicToDevicePixelX(nWidth) - LogicToDevicePixelX(0));
+    if (!IsMapModeEnabled())
+        return nWidth;
+
+    return LogicToViewDistanceX(nWidth);
 }
 
 tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight) const
 {
-    // Similarly for height and Y-coordinates.
-    return std::abs(LogicToDevicePixelY(nHeight) - LogicToDevicePixelY(0));
+    if (!IsMapModeEnabled())
+        return nHeight;
+
+    return LogicToViewDistanceY(nHeight);
+}
+
+Size CoordinateMapper::LogicToWindowUnits(const Size& rLogicSize) const
+{
+    if (!IsMapModeEnabled())
+        return rLogicSize;
+
+    return Size(LogicToViewDistanceX(rLogicSize.Width()),
+                LogicToViewDistanceY(rLogicSize.Height()));
 }
 
 Point CoordinateMapper::LogicToDevicePixel(const Point& rLogicPt) const

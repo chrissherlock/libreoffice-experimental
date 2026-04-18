@@ -234,37 +234,25 @@ void OutputDevice::SetRelativeMapMode( const MapMode& rNewMapMode )
 
 tools::Long OutputDevice::LogicWidthToDevicePixel(tools::Long nWidth) const
 {
-    if ( !mpMapper->IsMapModeEnabled() )
-        return nWidth;
-
-    return mpMapper->LogicToViewDistanceX(nWidth);
+    return mpMapper->LogicWidthToDevicePixel(nWidth);
 }
 
-tools::Long OutputDevice::LogicHeightToDevicePixel( tools::Long nHeight ) const
+tools::Long OutputDevice::LogicHeightToDevicePixel(tools::Long nHeight) const
 {
-    if ( !mpMapper->IsMapModeEnabled() )
-        return nHeight;
-
-    return mpMapper->LogicToViewDistanceY(nHeight);
+    return mpMapper->LogicHeightToDevicePixel(nHeight);
 }
 
-Point OutputDevice::LogicToPixel( const Point& rLogicPt ) const
+Point OutputDevice::LogicToPixel(const Point& rLogicPt) const
 {
-    if ( !mpMapper->IsMapModeEnabled() )
-        return rLogicPt;
-
     return mpMapper->LogicToWindowUnits(rLogicPt);
 }
 
-Size OutputDevice::LogicToPixel( const Size& rLogicSize ) const
+Size OutputDevice::LogicToPixel(const Size& rLogicSize) const
 {
-    if ( !mpMapper->IsMapModeEnabled() )
-        return rLogicSize;
-
-    return Size(mpMapper->LogicToViewDistanceX(rLogicSize.Width()), mpMapper->LogicToViewDistanceY(rLogicSize.Height()));
+    return mpMapper->LogicToWindowUnits(rLogicSize);
 }
 
-tools::Rectangle OutputDevice::LogicToPixel( const tools::Rectangle& rLogicRect ) const
+tools::Rectangle OutputDevice::LogicToPixel(const tools::Rectangle& rLogicRect) const
 {
     return mpMapper->LogicToWindowUnits(rLogicRect);
 }
@@ -279,7 +267,7 @@ tools::PolyPolygon OutputDevice::LogicToPixel(const tools::PolyPolygon& rLogicPo
     return mpMapper->LogicToWindowUnits(rLogicPolyPoly);
 }
 
-basegfx::B2DPolyPolygon OutputDevice::LogicToPixel( const basegfx::B2DPolyPolygon& rLogicPolyPoly ) const
+basegfx::B2DPolyPolygon OutputDevice::LogicToPixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly) const
 {
     return mpMapper->LogicToWindowUnits(rLogicPolyPoly);
 }
