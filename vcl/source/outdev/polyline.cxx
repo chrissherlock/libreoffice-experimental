@@ -279,7 +279,7 @@ void OutputDevice::drawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
 
     if (bDashUsed || bLineWidthUsed)
     {
-        basegfx::B2DPolygon aPoly = ImplLogicToDevicePixel(rPoly.getB2DPolygon());
+        basegfx::B2DPolygon aPoly = mpMapper->LogicToDevicePixel(rPoly.getB2DPolygon());
         drawLine(basegfx::B2DPolyPolygon(aPoly), aInfo);
     }
     else
