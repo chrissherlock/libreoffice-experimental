@@ -289,6 +289,9 @@ public:
     tools::PolyPolygon LogicToWindowUnits(const tools::PolyPolygon& rPoly) const;
     basegfx::B2DPolyPolygon
     LogicToWindowUnits(const basegfx::B2DPolyPolygon& rLogicPolyPoly) const;
+    SAL_DLLPRIVATE basegfx::B2DPolyPolygon
+    LogicToWindowUnits(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
+                       const MapMode& rMapMode) const;
 
     // Window <-> View subpixel
     double WindowToViewSubPixelX(double fX) const;
