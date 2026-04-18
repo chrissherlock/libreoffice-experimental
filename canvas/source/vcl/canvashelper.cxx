@@ -326,13 +326,10 @@ namespace vclcanvas
 
                 ::basegfx::B2DPolyPolygon aDashedPolyPoly;
 
-                for( sal_uInt32 i=0; i<aPolyPoly.count(); ++i )
+                for (const auto& rPolygon : aPolyPoly)
                 {
                     // AW: new interface; You may also get gaps in the same run now
-                    basegfx::utils::applyLineDashing(aPolyPoly.getB2DPolygon(i), aDashArray, &aDashedPolyPoly);
-                    //aDashedPolyPoly.append(
-                    //    ::basegfx::utils::applyLineDashing( aPolyPoly.getB2DPolygon(i),
-                    //                                        aDashArray ) );
+                    basegfx::utils::applyLineDashing(rPolygon, aDashArray, &aDashedPolyPoly);
                 }
 
                 aPolyPoly = std::move(aDashedPolyPoly);
@@ -400,17 +397,16 @@ namespace vclcanvas
             // self-intersections. Therefore, if we would render it
             // via OutDev::DrawPolyPolygon(), on/off fill would
             // generate off areas on those self-intersections.
-            for( sal_uInt32 i=0; i<aStrokedPolyPoly.count(); ++i )
+            for (const auto& rPolygon : aStrokedPolyPoly)
             {
-                const basegfx::B2DPolygon& polygon = aStrokedPolyPoly.getB2DPolygon( i );
-                if( polygon.isClosed()) {
-                    mpOutDevProvider->getOutDev().DrawPolygon( polygon );
-                    if( mp2ndOutDevProvider )
-                        mp2ndOutDevProvider->getOutDev().DrawPolygon( polygon );
+                if (rPolygon.isClosed()) {
+                    mpOutDevProvider->getOutDev().DrawPolygon(rPolygon);
+                    if (mp2ndOutDevProvider)
+                        mp2ndOutDevProvider->getOutDev().DrawPolygon(rPolygon);
                 } else {
-                    mpOutDevProvider->getOutDev().DrawPolyLine( polygon );
-                    if( mp2ndOutDevProvider )
-                        mp2ndOutDevProvider->getOutDev().DrawPolyLine( polygon );
+                    mpOutDevProvider->getOutDev().DrawPolyLine(rPolygon);
+                    if (mp2ndOutDevProvider)
+                        mp2ndOutDevProvider->getOutDev().DrawPolyLine(rPolygon);
                 }
             }
         }
