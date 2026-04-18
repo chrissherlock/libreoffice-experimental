@@ -729,6 +729,30 @@ tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rL
     return aRetval;
 }
 
+tools::Polygon CoordinateMapper::LogicToWindowUnits(const tools::Polygon& rLogicPoly,
+                                                    const MapMode& rMapMode) const
+{
+    if (rMapMode.IsDefault())
+        return rLogicPoly;
+
+    ImplMapRes aMapRes(rMapMode, GetDPIX(), GetDPIY());
+    return LogicToWindowUnits(rLogicPoly, aMapRes);
+}
+
+tools::Polygon CoordinateMapper::LogicToWindowUnits(const tools::Polygon& rLogicPoly,
+                                                    const ImplMapRes& rRes) const
+{
+    tools::Polygon aPoly(rLogicPoly);
+
+    for (auto& rPoint : aPoly)
+    {
+        rPoint.setX(LogicToWindowUnitsX(rPoint.X(), rRes));
+        rPoint.setY(LogicToWindowUnitsY(rPoint.Y(), rRes));
+    }
+
+    return aPoly;
+}
+
 template <typename TransformFunc>
 static vcl::Region lcl_TransformRegion(const vcl::Region& rRegion, TransformFunc&& func)
 {
