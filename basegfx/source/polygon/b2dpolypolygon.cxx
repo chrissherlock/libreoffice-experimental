@@ -411,26 +411,6 @@ public:
         }
     }
 
-    const B2DPolygon* B2DPolyPolygon::begin() const
-    {
-        return mpPolyPolygon->begin();
-    }
-
-    const B2DPolygon* B2DPolyPolygon::end() const
-    {
-        return mpPolyPolygon->end();
-    }
-
-    B2DPolygon* B2DPolyPolygon::begin()
-    {
-        return mpPolyPolygon->begin();
-    }
-
-    B2DPolygon* B2DPolyPolygon::end()
-    {
-        return mpPolyPolygon->end();
-    }
-
     void B2DPolyPolygon::addOrReplaceSystemDependentDataInternal(SystemDependentData_SharedPtr& rData) const
     {
         mpPolyPolygon->addOrReplaceSystemDependentData(rData);

@@ -170,16 +170,14 @@ public:
 
             if (aTmp.count() > 0)
             {
-                // 1. Find the smallest point natively using our new const_iterator
                 auto pSmallest = std::min_element(aTmp.begin(), aTmp.end(),
                     [&](const basegfx::B2DPoint& a, const basegfx::B2DPoint& b) {
                         return compare(a, b);
                     });
 
-                // 2. Calculate the exact index using std::distance
                 sal_uInt32 nMinIndex = std::distance(aTmp.begin(), pSmallest);
 
-                // 3. "Rotate" the polygon by appending slices natively.
+                // "Rotate" the polygon by appending slices natively.
                 // This avoids std::vector entirely and preserves bezier control points!
                 if (nMinIndex > 0)
                 {
@@ -201,13 +199,24 @@ public:
         // polygons (one or two points only)
         aRes = utils::stripNeutralPolygons(aRes);
 
+        // Extract to a std::vector for sorting.
+        // std::sort needs mutable iterators, and sorting lightweight COW wrappers
+        // inside a std::vector is vastly faster than mutating a B2DPolyPolygon directly.
+        std::vector<B2DPolygon> aSortVec(aRes.begin(), aRes.end());
+
         // now, sort all polygons with increasing 0th point
-        std::sort(aRes.begin(),
-                  aRes.end(),
+        std::sort(aSortVec.begin(),
+                  aSortVec.end(),
                   [&](const B2DPolygon& aPolygon1, const B2DPolygon& aPolygon2) {
                       return compare(aPolygon1.getB2DPoint(0),
                                      aPolygon2.getB2DPoint(0));
                   });
+
+        aRes.clear();
+        for (const auto& rSortedPoly : aSortVec)
+        {
+            aRes.append(rSortedPoly);
+        }
 
         return aRes;
     }

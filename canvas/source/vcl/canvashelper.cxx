@@ -352,18 +352,14 @@ namespace vclcanvas
                 // render as a 'thick' line
                 setupOutDevState( viewState, renderState, FILL_COLOR );
 
-                for( sal_uInt32 i=0; i<aPolyPoly.count(); ++i )
-                {
-                    double fMiterMinimumAngle;
-                    if (strokeAttributes.MiterLimit <= 1.0)
-                    {
-                        fMiterMinimumAngle = M_PI_2;
-                    }
-                    else
-                    {
-                        fMiterMinimumAngle = 2.0 * asin(1.0/strokeAttributes.MiterLimit);
-                    }
+                double fMiterMinimumAngle;
+                if (strokeAttributes.MiterLimit <= 1.0)
+                    fMiterMinimumAngle = M_PI_2;
+                else
+                    fMiterMinimumAngle = 2.0 * asin(1.0 / strokeAttributes.MiterLimit);
 
+                for (const auto& rPolygon : aPolyPoly)
+                {
                     // TODO(F2): Also use Cap settings from
                     // StrokeAttributes, the
                     // createAreaGeometryForLineStartEnd() method does not
@@ -371,18 +367,14 @@ namespace vclcanvas
 
                     // AW: New interface, will create bezier polygons now
                     aStrokedPolyPoly.append(basegfx::utils::createAreaGeometry(
-                        aPolyPoly.getB2DPolygon(i),
-                        strokeAttributes.StrokeWidth*0.5,
+                        rPolygon,
+                        strokeAttributes.StrokeWidth * 0.5,
                         b2DJoineFromJoin(strokeAttributes.JoinType),
                         unoCapeFromCap(strokeAttributes.StartCapType),
-                        basegfx::deg2rad(12.5) /* default fMaxAllowedAngle*/ ,
-                        0.4 /* default fMaxPartOfEdge*/ ,
+                        basegfx::deg2rad(12.5) /* default fMaxAllowedAngle*/,
+                        0.4 /* default fMaxPartOfEdge*/,
                         fMiterMinimumAngle
-                        ));
-                    //aStrokedPolyPoly.append(
-                    //    ::basegfx::utils::createAreaGeometryForPolygon( aPolyPoly.getB2DPolygon(i),
-                    //                                                    strokeAttributes.StrokeWidth*0.5,
-                    //                                                    b2DJoineFromJoin(strokeAttributes.JoinType) ) );
+                    ));
                 }
             }
 
