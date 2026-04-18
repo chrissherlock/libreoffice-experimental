@@ -316,7 +316,7 @@ vcl::Region OutputDevice::LogicToPixel(const vcl::Region& rLogicRegion) const
     if (!mpMapper->IsMapModeEnabled())
         return rLogicRegion;
 
-    return lcl_TransformRegion(rLogicRegion, [this](const auto& obj) { return LogicToPixel(obj); });
+    return lcl_TransformRegion(rLogicRegion, [this](const auto& obj) { return mpMapper->LogicToWindowUnits(obj); });
 }
 
 Point OutputDevice::LogicToPixel( const Point& rLogicPt,
