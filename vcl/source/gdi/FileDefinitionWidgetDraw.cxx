@@ -344,22 +344,64 @@ void drawFromDrawCommands(gfx::DrawRoot const& rDrawRoot, SalGraphics& rGraphics
                 double fDeltaX = aTargetSurface.getWidth() - aSVGRect.getWidth();
                 double fDeltaY = aTargetSurface.getHeight() - aSVGRect.getHeight();
 
-                basegfx::B2DPolyPolygon aPolyPolygon(rPath.maPolyPolygon);
-                for (auto& rPolygon : aPolyPolygon)
+                basegfx::B2DPolyPolygon aPolyPolygon;
+
+                // Iterate read-only over the source polygons
+                for (const auto& rSourcePolygon : rPath.maPolyPolygon)
                 {
-                    for (size_t i = 0; i < rPolygon.count(); ++i)
+                    // Create a mutable COW copy for this iteration
+                    basegfx::B2DPolygon aPolygon(rSourcePolygon);
+
+                    for (sal_uInt32 i = 0; i < aPolygon.count(); ++i)
                     {
-                        auto& rPoint = rPolygon.getB2DPoint(i);
+                        const basegfx::B2DPoint& rPoint = aPolygon.getB2DPoint(i);
                         double x = rPoint.getX();
                         double y = rPoint.getY();
 
                         if (x > aSVGRect.getCenterX())
-                            x = x + fDeltaX;
+                            x += fDeltaX;
+
                         if (y > aSVGRect.getCenterY())
-                            y = y + fDeltaY;
-                        rPolygon.setB2DPoint(i, basegfx::B2DPoint(x, y));
+                            y += fDeltaY;
+
+                        aPolygon.setB2DPoint(i, basegfx::B2DPoint(x, y));
+
+                        // FIX: Ensure Bezier control points are translated identically!
+                        if (aPolygon.isPrevControlPointUsed(i))
+                        {
+                            const basegfx::B2DPoint& rPrev = aPolygon.getPrevControlPoint(i);
+                            double px = rPrev.getX();
+                            double py = rPrev.getY();
+
+                            if (px > aSVGRect.getCenterX())
+                                px += fDeltaX;
+
+                            if (py > aSVGRect.getCenterY())
+                                py += fDeltaY;
+
+                            aPolygon.setPrevControlPoint(i, basegfx::B2DPoint(px, py));
+                        }
+
+                        if (aPolygon.isNextControlPointUsed(i))
+                        {
+                            const basegfx::B2DPoint& rNext = aPolygon.getNextControlPoint(i);
+                            double nx = rNext.getX();
+                            double ny = rNext.getY();
+
+                            if (nx > aSVGRect.getCenterX())
+                                nx += fDeltaX;
+
+                            if (ny > aSVGRect.getCenterY())
+                                ny += fDeltaY;
+
+                            aPolygon.setNextControlPoint(i, basegfx::B2DPoint(nx, ny));
+                        }
                     }
+
+                    // Append the mutated polygon into our new collection
+                    aPolyPolygon.append(std::move(aPolygon));
                 }
+
                 aPolyPolygon.translate(aTargetSurface.getMinX() - 0.5,
                                        aTargetSurface.getMinY() - 0.5);
 
