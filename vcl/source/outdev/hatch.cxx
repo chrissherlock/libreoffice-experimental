@@ -76,7 +76,7 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
 
     if( rPolyPoly.Count() )
     {
-        tools::PolyPolygon     aPolyPoly( LogicToPixel( rPolyPoly ) );
+        tools::PolyPolygon     aPolyPoly( mpMapper->LogicToWindowUnits( rPolyPoly ) );
         GDIMetaFile*    pOldMetaFile = mpMetaFile;
         bool bOldMap = mpMapper->IsMapModeEnabled();
 

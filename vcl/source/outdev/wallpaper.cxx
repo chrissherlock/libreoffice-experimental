@@ -49,7 +49,7 @@ void OutputDevice::DrawWallpaper( const tools::Rectangle& rRect,
 
     if ( rWallpaper.GetStyle() != WallpaperStyle::NONE )
     {
-        tools::Rectangle aRect = LogicToPixel( rRect );
+        tools::Rectangle aRect = mpMapper->LogicToWindowUnits( rRect );
         aRect.Normalize();
 
         if ( !aRect.IsEmpty() )
@@ -203,7 +203,7 @@ void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
     // calc pos and size
     if( rWallpaper.IsRect() )
     {
-        const tools::Rectangle aBound( LogicToPixel( rWallpaper.GetRect() ) );
+        const tools::Rectangle aBound( mpMapper->LogicToWindowUnits( rWallpaper.GetRect() ) );
         aPos = aBound.TopLeft();
         aSize = aBound.GetSize();
     }
