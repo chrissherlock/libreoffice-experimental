@@ -75,48 +75,12 @@ tools::Long OutputDevice::DevicePixelToLogicHeight( tools::Long nHeight ) const
 
 Point OutputDevice::LogicToDevicePixel(const Point& rLogicPt) const
 {
-    return Point(mpMapper->LogicToDevicePixelX(rLogicPt.X()),
-                 mpMapper->LogicToDevicePixelY(rLogicPt.Y()));
-}
-
-static void lcl_ApplyEmptyState(tools::Rectangle& rDest, const tools::Rectangle& rSrc)
-{
-    if (rSrc.IsWidthEmpty())
-        rDest.SetWidthEmpty();
-
-    if (rSrc.IsHeightEmpty())
-        rDest.SetHeightEmpty();
+    return mpMapper->LogicToDevicePixel(rLogicPt);
 }
 
 tools::Rectangle OutputDevice::LogicToDevicePixel(const tools::Rectangle& rLogicRect) const
 {
-    // tdf#141761 IsEmpty() removed
-    // Even if rLogicRect.IsEmpty(), transform of the Position contained
-    // in the Rectangle is necessary. Due to Rectangle::Right() returning
-    // Left() when IsEmpty(), the code *could* stay unchanged (same for Bottom),
-    // but:
-    // The Rectangle constructor used with the four tools::Long values does not
-    // check for IsEmpty(), so to keep that state correct there are two possibilities:
-    // (1) Add a test to the Rectangle constructor in question
-    // (2) Do it by hand here
-    // I have tried (1) first, but test Test::test_rectangle() claims that for
-    //  tools::Rectangle aRect(1, 1, 1, 1);
-    //    tools::Long(1) == aRect.GetWidth()
-    //    tools::Long(0) == aRect.getWidth()
-    // (remember: this means Left == Right == 1 -> GetWidth => 1, getWidth == 0)
-    // so indeed the 1's have to go uncommented/unchecked into the data body
-    // of rectangle. Switching to (2) *is* needed, doing so
-
-    tools::Rectangle aRetval(
-        mpMapper->LogicToDevicePixelX(rLogicRect.Left()),
-        mpMapper->LogicToDevicePixelY(rLogicRect.Top()),
-        rLogicRect.IsWidthEmpty() ? 0 : mpMapper->LogicToDevicePixelX(rLogicRect.Right()),
-        rLogicRect.IsHeightEmpty() ? 0 : mpMapper->LogicToDevicePixelY(rLogicRect.Bottom())
-    );
-
-    lcl_ApplyEmptyState(aRetval, rLogicRect);
-
-    return aRetval;
+    return mpMapper->LogicToDevicePixel(rLogicRect);
 }
 
 tools::Long OutputDevice::GetOutputWidthPixel() const { return mpMapper->GetOutputWidthPixel(); }
@@ -328,6 +292,32 @@ Size OutputDevice::LogicToPixel( const Size& rLogicSize ) const
         return rLogicSize;
 
     return Size(mpMapper->LogicToViewDistanceX(rLogicSize.Width()), mpMapper->LogicToViewDistanceY(rLogicSize.Height()));
+}
+
+static void lcl_ApplyEmptyState(tools::Rectangle& rDest, const tools::Rectangle& rSrc)
+{
+    // tdf#141761 IsEmpty() removed
+    // Even if rLogicRect.IsEmpty(), transform of the Position contained
+    // in the Rectangle is necessary. Due to Rectangle::Right() returning
+    // Left() when IsEmpty(), the code *could* stay unchanged (same for Bottom),
+    // but:
+    // The Rectangle constructor used with the four tools::Long values does not
+    // check for IsEmpty(), so to keep that state correct there are two possibilities:
+    // (1) Add a test to the Rectangle constructor in question
+    // (2) Do it by hand here
+    // I have tried (1) first, but test Test::test_rectangle() claims that for
+    //  tools::Rectangle aRect(1, 1, 1, 1);
+    //    tools::Long(1) == aRect.GetWidth()
+    //    tools::Long(0) == aRect.getWidth()
+    // (remember: this means Left == Right == 1 -> GetWidth => 1, getWidth == 0)
+    // so indeed the 1's have to go uncommented/unchecked into the data body
+    // of rectangle. Switching to (2) *is* needed, doing so
+
+    if (rSrc.IsWidthEmpty())
+        rDest.SetWidthEmpty();
+
+    if (rSrc.IsHeightEmpty())
+        rDest.SetHeightEmpty();
 }
 
 tools::Rectangle OutputDevice::LogicToPixel( const tools::Rectangle& rLogicRect ) const
