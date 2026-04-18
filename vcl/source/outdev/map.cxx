@@ -119,21 +119,6 @@ tools::Rectangle OutputDevice::LogicToDevicePixel(const tools::Rectangle& rLogic
     return aRetval;
 }
 
-tools::PolyPolygon OutputDevice::ImplLogicToDevicePixel( const tools::PolyPolygon& rLogicPolyPoly ) const
-{
-    if (!mpMapper->IsMapModeEnabled() && !mpMapper->GetDeviceToWindowOffsetX() && !mpMapper->GetDeviceToWindowOffsetY())
-        return rLogicPolyPoly;
-
-    tools::PolyPolygon aPolyPoly(rLogicPolyPoly);
-
-    for (auto& rPoly : aPolyPoly)
-    {
-        rPoly = mpMapper->LogicToDevicePixel(rPoly);
-    }
-
-    return aPolyPoly;
-}
-
 LineInfo OutputDevice::ImplLogicToDevicePixel( const LineInfo& rLineInfo ) const
 {
     LineInfo aInfo( rLineInfo );
