@@ -617,6 +617,14 @@ tools::Long CoordinateMapper::LogicToWindowUnitsY(tools::Long nY, const ImplMapR
     return ViewToWindowUnitsY(LogicUnitsToViewUnitsY(nY, rRes));
 }
 
+Point CoordinateMapper::LogicToWindowUnits(const Point& rLogicPt) const
+{
+    if (!IsMapModeEnabled())
+        return rLogicPt;
+
+    return Point(LogicToWindowUnitsX(rLogicPt.X()), LogicToWindowUnitsY(rLogicPt.Y()));
+}
+
 static void lcl_ApplyEmptyState(tools::Rectangle& rDest, const tools::Rectangle& rSrc)
 {
     // tdf#141761 IsEmpty() removed
