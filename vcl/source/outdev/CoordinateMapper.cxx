@@ -648,6 +648,37 @@ tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rR
     return aRetval;
 }
 
+tools::Polygon CoordinateMapper::LogicToWindowUnits(const tools::Polygon& rPoly) const
+{
+    if (!IsMapModeEnabled())
+        return rPoly;
+
+    tools::Polygon aPoly(rPoly);
+
+    for (auto& rPoint : aPoly)
+    {
+        rPoint.setX(LogicToWindowUnitsX(rPoint.X()));
+        rPoint.setY(LogicToWindowUnitsY(rPoint.Y()));
+    }
+
+    return aPoly;
+}
+
+tools::PolyPolygon CoordinateMapper::LogicToWindowUnits(const tools::PolyPolygon& rPolyPoly) const
+{
+    if (!IsMapModeEnabled())
+        return rPolyPoly;
+
+    tools::PolyPolygon aPolyPoly(rPolyPoly);
+
+    for (auto& rPoly : aPolyPoly)
+    {
+        rPoly = LogicToWindowUnits(rPoly);
+    }
+
+    return aPolyPoly;
+}
+
 // ========================================================================
 // DISTANCE SCALING (Raw Scalar Conversion)
 // ========================================================================
