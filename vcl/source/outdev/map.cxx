@@ -342,20 +342,14 @@ basegfx::B2DPolyPolygon OutputDevice::LogicToPixel(const basegfx::B2DPolyPolygon
     return mpMapper->LogicToWindowUnits(rLogicPolyPoly, rMapMode);
 }
 
-tools::Long OutputDevice::DevicePixelToLogicWidth( tools::Long nWidth ) const
+tools::Long OutputDevice::DevicePixelToLogicWidth(tools::Long nWidth) const
 {
-    if ( !mpMapper->IsMapModeEnabled() )
-        return nWidth;
-
-    return mpMapper->ViewToLogicDistanceX(nWidth);
+    return mpMapper->DevicePixelToLogicWidth(nWidth);
 }
 
-tools::Long OutputDevice::DevicePixelToLogicHeight( tools::Long nHeight ) const
+tools::Long OutputDevice::DevicePixelToLogicHeight(tools::Long nHeight) const
 {
-    if ( !mpMapper->IsMapModeEnabled() )
-        return nHeight;
-
-    return mpMapper->ViewToLogicDistanceY(nHeight);
+    return mpMapper->DevicePixelToLogicHeight(nHeight);
 }
 
 vcl::Region OutputDevice::PixelToLogic(const vcl::Region& rDeviceRegion) const
