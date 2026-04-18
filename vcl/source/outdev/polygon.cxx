@@ -129,7 +129,7 @@ void OutputDevice::DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly )
         // #100127# moved real tools::PolyPolygon draw to separate method,
         // have to call recursively, avoiding duplicate
         // CoordinateMapper::LogicToDevicePixel calls
-        ImplDrawPolyPolygon( nPoly, ImplLogicToDevicePixel( rPolyPoly ) );
+        ImplDrawPolyPolygon(nPoly, mpMapper->LogicToDevicePixel(rPolyPoly));
     }
 }
 
@@ -325,7 +325,7 @@ void OutputDevice::ImplDrawPolyPolygonWithB2DPolyPolygon(const basegfx::B2DPolyP
     {
         // fallback to old polygon drawing if needed
         const tools::PolyPolygon aToolsPolyPolygon(rB2DPolyPoly);
-        const tools::PolyPolygon aPixelPolyPolygon = ImplLogicToDevicePixel(aToolsPolyPolygon);
+        const tools::PolyPolygon aPixelPolyPolygon = mpMapper->LogicToDevicePixel(aToolsPolyPolygon);
         ImplDrawPolyPolygon(aPixelPolyPolygon.Count(), aPixelPolyPolygon);
     }
 }
