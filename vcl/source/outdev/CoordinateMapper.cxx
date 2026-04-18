@@ -20,6 +20,7 @@
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <tools/gen.hxx>
 
+#include <vcl/lineinfo.hxx>
 #include <vcl/rendercontext/ImplMapRes.hxx>
 
 #include <CoordinateMapper.hxx>
@@ -391,6 +392,19 @@ tools::Rectangle CoordinateMapper::DevicePixelToLogic(const tools::Rectangle& rP
     return aRetval;
 }
 
+tools::Long CoordinateMapper::LogicWidthToDevicePixel(tools::Long nWidth) const
+{
+    // A width is the distance between two X-coordinates.
+    // We calculate it by mapping 0 and nWidth and taking the difference.
+    return std::abs(LogicToDevicePixelX(nWidth) - LogicToDevicePixelX(0));
+}
+
+tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight) const
+{
+    // Similarly for height and Y-coordinates.
+    return std::abs(LogicToDevicePixelY(nHeight) - LogicToDevicePixelY(0));
+}
+
 tools::Polygon CoordinateMapper::LogicToDevicePixel(const tools::Polygon& rLogicPoly) const
 {
     if (!IsMapModeEnabled() && !GetDeviceToWindowOffsetX() && !GetDeviceToWindowOffsetY())
@@ -420,6 +434,33 @@ CoordinateMapper::LogicToDevicePixel(const tools::PolyPolygon& rLogicPolyPoly) c
     }
 
     return aPolyPoly;
+}
+
+LineInfo CoordinateMapper::LogicToDevicePixel(const LineInfo& rLineInfo) const
+{
+    LineInfo aInfo(rLineInfo);
+
+    if (aInfo.GetStyle() == LineStyle::Dash)
+    {
+        if (aInfo.GetDotCount() && aInfo.GetDotLen())
+            aInfo.SetDotLen(std::max(LogicWidthToDevicePixel(aInfo.GetDotLen()), tools::Long(1)));
+        else
+            aInfo.SetDotCount(0);
+
+        if (aInfo.GetDashCount() && aInfo.GetDashLen())
+            aInfo.SetDashLen(std::max(LogicWidthToDevicePixel(aInfo.GetDashLen()), tools::Long(1)));
+        else
+            aInfo.SetDashCount(0);
+
+        aInfo.SetDistance(LogicWidthToDevicePixel(aInfo.GetDistance()));
+
+        if ((!aInfo.GetDashCount() && !aInfo.GetDotCount()) || !aInfo.GetDistance())
+            aInfo.SetStyle(LineStyle::Solid);
+    }
+
+    aInfo.SetWidth(LogicWidthToDevicePixel(aInfo.GetWidth()));
+
+    return aInfo;
 }
 
 basegfx::B2DPolygon

@@ -26,6 +26,8 @@
 #include <vcl/mapmod.hxx>
 #include <vcl/region.hxx>
 
+class LineInfo;
+
 class CoordinateMapper
 {
 private:
@@ -215,6 +217,9 @@ public:
     // ========================================================================
 
     // Device <-> Logic (Full journey)
+    tools::Long LogicWidthToDevicePixel(tools::Long nWidth) const;
+    tools::Long LogicHeightToDevicePixel(tools::Long nHeight) const;
+
     tools::Long DevicePixelToLogicX(tools::Long nX) const;
     tools::Long DevicePixelToLogicY(tools::Long nY) const;
     tools::Long LogicToDevicePixelX(tools::Long nX) const;
@@ -222,6 +227,7 @@ public:
     tools::Polygon LogicToDevicePixel(const tools::Polygon& rLogicPoly) const;
     tools::PolyPolygon
     LogicToDevicePixel(const tools::PolyPolygon& rLogicPolyPoly) const;
+    LineInfo LogicToDevicePixel(const LineInfo& rLineInfo) const;
     basegfx::B2DPolygon
     LogicToDevicePixel(const basegfx::B2DPolygon& rLogicPoly) const;
 
