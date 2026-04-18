@@ -183,7 +183,7 @@ void OutputDevice::Invert( const tools::Polygon& rPoly, InvertFlags nFlags )
     if ( nPoints < 2 )
         return;
 
-    tools::Polygon aPoly( ImplLogicToDevicePixel( rPoly ) );
+    tools::Polygon aPoly(mpMapper->LogicToDevicePixel(rPoly));
 
     // we need a graphics
     if ( !mpGraphics && !AcquireGraphics() )

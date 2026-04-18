@@ -391,6 +391,21 @@ tools::Rectangle CoordinateMapper::DevicePixelToLogic(const tools::Rectangle& rP
     return aRetval;
 }
 
+tools::Polygon CoordinateMapper::LogicToDevicePixel(const tools::Polygon& rLogicPoly) const
+{
+    if (!IsMapModeEnabled() && !GetDeviceToWindowOffsetX() && !GetDeviceToWindowOffsetY())
+        return rLogicPoly;
+
+    tools::Polygon aPoly(rLogicPoly);
+
+    for (auto& rPoint : aPoly)
+    {
+        rPoint = Point(LogicToDevicePixelX(rPoint.X()), LogicToDevicePixelY(rPoint.Y()));
+    }
+
+    return aPoly;
+}
+
 tools::Long CoordinateMapper::LogicToDevicePixelX(tools::Long nX) const
 {
     if (!IsMapModeEnabled())
