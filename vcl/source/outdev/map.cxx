@@ -284,10 +284,7 @@ tools::PolyPolygon OutputDevice::LogicToPixel(const tools::PolyPolygon& rLogicPo
 
 basegfx::B2DPolyPolygon OutputDevice::LogicToPixel( const basegfx::B2DPolyPolygon& rLogicPolyPoly ) const
 {
-    basegfx::B2DPolyPolygon aTransformedPoly = rLogicPolyPoly;
-    const basegfx::B2DHomMatrix aTransformationMatrix = mpMapper->GetViewTransformation();
-    aTransformedPoly.transform( aTransformationMatrix );
-    return aTransformedPoly;
+    return mpMapper->LogicToWindowUnits(rLogicPolyPoly);
 }
 
 Point OutputDevice::LogicToDevicePixel(const Point& rLogicPt) const
