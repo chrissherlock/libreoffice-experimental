@@ -248,13 +248,14 @@ public:
     // Window <-> Logic
     tools::Long WindowToLogicX(tools::Long nX) const;
     tools::Long WindowToLogicY(tools::Long nY) const;
-    tools::Long LogicToWindowX(tools::Long nX) const;
-    tools::Long LogicToWindowY(tools::Long nY) const;
-
     double WindowToLogicSubPixelX(double fX) const;
     double WindowToLogicSubPixelY(double fY) const;
+
     double LogicToWindowSubPixelX(double fX) const;
     double LogicToWindowSubPixelY(double fY) const;
+    tools::Long LogicToWindowX(tools::Long nX) const;
+    tools::Long LogicToWindowY(tools::Long nY) const;
+    Size LogicToWindowUnits(const Size& rLogicSize) const;
 
     // View <-> Absolute Logic (Includes mnLogicToAbsoluteOffsetX/Y)
     tools::Long ViewToLogicX(tools::Long nX) const;
