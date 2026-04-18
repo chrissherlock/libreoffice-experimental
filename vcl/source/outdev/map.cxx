@@ -326,31 +326,14 @@ Size OutputDevice::LogicToPixel(const Size& rLogicSize, const MapMode& rMapMode)
     return mpMapper->LogicToWindowUnits(rLogicSize, rMapMode);
 }
 
-tools::Rectangle OutputDevice::LogicToPixel( const tools::Rectangle& rLogicRect,
-                                             const MapMode& rMapMode ) const
+tools::Rectangle OutputDevice::LogicToPixel(const tools::Rectangle& rLogicRect, const MapMode& rMapMode) const
 {
     return mpMapper->LogicToWindowUnits(rLogicRect, rMapMode);
 }
 
-tools::Polygon OutputDevice::LogicToPixel( const tools::Polygon& rLogicPoly,
-                                           const MapMode& rMapMode ) const
+tools::Polygon OutputDevice::LogicToPixel(const tools::Polygon& rLogicPoly, const MapMode& rMapMode) const
 {
-    if ( rMapMode.IsDefault() )
-        return rLogicPoly;
-
-    ImplMapRes aMapRes(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
-
-    tools::Polygon aPoly(rLogicPoly);
-
-    for (auto& rPoint : aPoly)
-    {
-        rPoint = Point(
-            mpMapper->LogicToWindowUnitsX(rPoint.X(), aMapRes),
-            mpMapper->LogicToWindowUnitsY(rPoint.Y(), aMapRes)
-        );
-    }
-
-    return aPoly;
+    return mpMapper->LogicToWindowUnits(rLogicPoly, rMapMode);
 }
 
 basegfx::B2DPolyPolygon OutputDevice::LogicToPixel( const basegfx::B2DPolyPolygon& rLogicPolyPoly,
