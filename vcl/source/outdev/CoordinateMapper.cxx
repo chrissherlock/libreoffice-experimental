@@ -406,6 +406,41 @@ tools::Polygon CoordinateMapper::LogicToDevicePixel(const tools::Polygon& rLogic
     return aPoly;
 }
 
+basegfx::B2DPolygon
+CoordinateMapper::LogicToDevicePixel(const basegfx::B2DPolygon& rLogicPoly) const
+{
+    if (!IsMapModeEnabled() && !GetDeviceToWindowOffsetX() && !GetDeviceToWindowOffsetY())
+        return rLogicPoly;
+
+    const sal_uInt32 nPoints = rLogicPoly.count();
+    basegfx::B2DPolygon aPoly(rLogicPoly);
+
+    for (sal_uInt32 i = 0; i < nPoints; ++i)
+    {
+        const basegfx::B2DPoint& rPt = aPoly.getB2DPoint(i);
+
+        // FIX: Use SubPixel methods to prevent double -> Long -> double truncation!
+        aPoly.setB2DPoint(i, basegfx::B2DPoint(LogicToDeviceSubPixelX(rPt.getX()),
+                                               LogicToDeviceSubPixelY(rPt.getY())));
+
+        if (aPoly.isPrevControlPointUsed(i))
+        {
+            const basegfx::B2DPoint aB2DC1(aPoly.getPrevControlPoint(i));
+            aPoly.setPrevControlPoint(i, basegfx::B2DPoint(LogicToDeviceSubPixelX(aB2DC1.getX()),
+                                                           LogicToDeviceSubPixelY(aB2DC1.getY())));
+        }
+
+        if (aPoly.isNextControlPointUsed(i))
+        {
+            const basegfx::B2DPoint aB2DC2(aPoly.getNextControlPoint(i));
+            aPoly.setNextControlPoint(i, basegfx::B2DPoint(LogicToDeviceSubPixelX(aB2DC2.getX()),
+                                                           LogicToDeviceSubPixelY(aB2DC2.getY())));
+        }
+    }
+
+    return aPoly;
+}
+
 tools::Long CoordinateMapper::LogicToDevicePixelX(tools::Long nX) const
 {
     if (!IsMapModeEnabled())
