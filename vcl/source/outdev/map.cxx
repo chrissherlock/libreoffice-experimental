@@ -321,18 +321,9 @@ Point OutputDevice::LogicToPixel(const Point& rLogicPt, const MapMode& rMapMode)
     return mpMapper->LogicToWindowUnits(rLogicPt, rMapMode);
 }
 
-Size OutputDevice::LogicToPixel( const Size& rLogicSize,
-                                 const MapMode& rMapMode ) const
+Size OutputDevice::LogicToPixel(const Size& rLogicSize, const MapMode& rMapMode) const
 {
-
-    if ( rMapMode.IsDefault() )
-        return rLogicSize;
-
-    // convert MapMode resolution and convert
-    ImplMapRes aMapRes(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
-
-    return Size(mpMapper->LogicToViewDistanceX(rLogicSize.Width(), aMapRes.mfMapScX),
-                mpMapper->LogicToViewDistanceY(rLogicSize.Height(), aMapRes.mfMapScY));
+    return mpMapper->LogicToWindowUnits(rLogicSize, rMapMode);
 }
 
 static void lcl_ApplyEmptyState(tools::Rectangle& rDest, const tools::Rectangle& rSrc)
