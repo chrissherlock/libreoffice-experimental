@@ -128,7 +128,7 @@ void OutputDevice::DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly )
     {
         // #100127# moved real tools::PolyPolygon draw to separate method,
         // have to call recursively, avoiding duplicate
-        // ImplLogicToDevicePixel calls
+        // CoordinateMapper::LogicToDevicePixel calls
         ImplDrawPolyPolygon( nPoly, ImplLogicToDevicePixel( rPolyPoly ) );
     }
 }
@@ -217,7 +217,7 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
             return;
     }
 
-    tools::Polygon aPoly = ImplLogicToDevicePixel( rPoly );
+    tools::Polygon aPoly = mpMapper->LogicToDevicePixel(rPoly);
     const Point* pPtAry = aPoly.GetConstPointAry();
 
     // #100127# Forward beziers to sal, if any

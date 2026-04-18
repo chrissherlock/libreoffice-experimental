@@ -82,7 +82,7 @@ void OutputDevice::DrawPolyLine( const tools::Polygon& rPoly )
 
     if(!bDrawn)
     {
-        tools::Polygon aPoly = ImplLogicToDevicePixel( rPoly );
+        tools::Polygon aPoly = mpMapper->LogicToDevicePixel(rPoly);
         Point* pPtAry = aPoly.GetPointAry();
 
         // #100127# Forward beziers to sal, if any
@@ -284,7 +284,7 @@ void OutputDevice::drawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
     }
     else
     {
-        tools::Polygon aPoly = ImplLogicToDevicePixel(rPoly);
+        tools::Polygon aPoly = mpMapper->LogicToDevicePixel(rPoly);
 
         // #100127# the subdivision HAS to be done here since only a pointer
         // to an array of points is given to the DrawPolyLine method, there is
