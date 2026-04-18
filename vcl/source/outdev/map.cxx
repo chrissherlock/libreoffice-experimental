@@ -253,10 +253,7 @@ Point OutputDevice::LogicToPixel( const Point& rLogicPt ) const
     if ( !mpMapper->IsMapModeEnabled() )
         return rLogicPt;
 
-    return Point(
-        mpMapper->LogicToWindowUnitsX(rLogicPt.X()),
-        mpMapper->LogicToWindowUnitsY(rLogicPt.Y())
-    );
+    return mpMapper->LogicToWindowUnits(rLogicPt);
 }
 
 Size OutputDevice::LogicToPixel( const Size& rLogicSize ) const
