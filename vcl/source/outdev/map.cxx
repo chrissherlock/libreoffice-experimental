@@ -336,13 +336,10 @@ tools::Polygon OutputDevice::LogicToPixel(const tools::Polygon& rLogicPoly, cons
     return mpMapper->LogicToWindowUnits(rLogicPoly, rMapMode);
 }
 
-basegfx::B2DPolyPolygon OutputDevice::LogicToPixel( const basegfx::B2DPolyPolygon& rLogicPolyPoly,
-                                                    const MapMode& rMapMode ) const
+basegfx::B2DPolyPolygon OutputDevice::LogicToPixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
+                                                   const MapMode& rMapMode) const
 {
-    basegfx::B2DPolyPolygon aTransformedPoly = rLogicPolyPoly;
-    const basegfx::B2DHomMatrix aTransformationMatrix = mpMapper->GetViewTransformation( rMapMode );
-    aTransformedPoly.transform( aTransformationMatrix );
-    return aTransformedPoly;
+    return mpMapper->LogicToWindowUnits(rLogicPolyPoly, rMapMode);
 }
 
 tools::Long OutputDevice::DevicePixelToLogicWidth( tools::Long nWidth ) const
