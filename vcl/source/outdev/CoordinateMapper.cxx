@@ -706,6 +706,29 @@ tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rR
     return aRetval;
 }
 
+tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rLogicRect,
+                                                      const MapMode& rMapMode) const
+{
+    if (rMapMode.IsDefault())
+        return rLogicRect;
+
+    ImplMapRes aMapRes(rMapMode, GetDPIX(), GetDPIY());
+    return LogicToWindowUnits(rLogicRect, aMapRes);
+}
+
+tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rLogicRect,
+                                                      const ImplMapRes& rRes) const
+{
+    tools::Rectangle aRetval(
+        LogicToWindowUnitsX(rLogicRect.Left(), rRes), LogicToWindowUnitsY(rLogicRect.Top(), rRes),
+        rLogicRect.IsWidthEmpty() ? 0 : LogicToWindowUnitsX(rLogicRect.Right(), rRes),
+        rLogicRect.IsHeightEmpty() ? 0 : LogicToWindowUnitsY(rLogicRect.Bottom(), rRes));
+
+    lcl_ApplyEmptyState(aRetval, rLogicRect);
+
+    return aRetval;
+}
+
 template <typename TransformFunc>
 static vcl::Region lcl_TransformRegion(const vcl::Region& rRegion, TransformFunc&& func)
 {
