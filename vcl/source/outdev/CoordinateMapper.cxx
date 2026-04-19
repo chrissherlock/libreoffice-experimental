@@ -912,6 +912,30 @@ tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rWindo
     return aPoly;
 }
 
+tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rWindowPoly,
+                                                    const ImplMapRes& rMapRes) const
+{
+    tools::Polygon aPoly(rWindowPoly);
+
+    for (auto& rPoint : aPoly)
+    {
+        rPoint = WindowToLogicUnits(rPoint, rMapRes);
+    }
+
+    return aPoly;
+}
+
+tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rWindowPoly,
+                                                    const MapMode& rMapMode) const
+{
+    if (rMapMode.IsDefault())
+        return rWindowPoly;
+
+    ImplMapRes aMapRes(rMapMode, GetDPIX(), GetDPIY());
+
+    return WindowToLogicUnits(rWindowPoly, aMapRes);
+}
+
 tools::PolyPolygon
 CoordinateMapper::WindowToLogicUnits(const tools::PolyPolygon& rWindowPolyPoly) const
 {
@@ -990,6 +1014,36 @@ Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize, const ImplMap
     // Therefore, Window Distance == View Distance.
     return Size(ViewToLogicDistanceX(rWindowSize.Width(), rMapRes.mfMapScX),
                 ViewToLogicDistanceY(rWindowSize.Height(), rMapRes.mfMapScY));
+}
+
+tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rWindowRect,
+                                                      const ImplMapRes& rMapRes) const
+{
+    tools::Rectangle aRetval(
+        // Fix: Use the new Window-level scalar wrappers to ensure WindowToView offsets are applied!
+        WindowSubPixelToLogicIntX(rWindowRect.Left(), rMapRes),
+        WindowSubPixelToLogicIntY(rWindowRect.Top(), rMapRes),
+        rWindowRect.IsWidthEmpty() ? 0 : WindowSubPixelToLogicIntX(rWindowRect.Right(), rMapRes),
+        rWindowRect.IsHeightEmpty() ? 0 : WindowSubPixelToLogicIntY(rWindowRect.Bottom(), rMapRes));
+
+    lcl_ApplyEmptyState(aRetval, rWindowRect);
+
+    return aRetval;
+}
+
+tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rWindowRect,
+                                                      const MapMode& rMapMode) const
+{
+    // calculate nothing if default-MapMode
+    // tdf#141761 see comments above, IsEmpty() removed
+    if (rMapMode.IsDefault())
+        return rWindowRect;
+
+    // Calculate MapMode-resolution once
+    ImplMapRes aMapRes(rMapMode, GetDPIX(), GetDPIY());
+
+    // Pass the pre-calculated resolution down the chain
+    return WindowToLogicUnits(rWindowRect, aMapRes);
 }
 
 // ========================================================================
