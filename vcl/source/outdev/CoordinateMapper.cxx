@@ -858,6 +858,16 @@ tools::Long CoordinateMapper::WindowSubPixelToLogicIntY(double fY) const
     return std::round(WindowToLogicSubPixelY(fY));
 }
 
+tools::Long CoordinateMapper::WindowSubPixelToLogicIntX(double fX, const ImplMapRes& rMapRes) const
+{
+    return ViewSubPixelToLogicIntX(WindowToViewSubPixelX(fX), rMapRes);
+}
+
+tools::Long CoordinateMapper::WindowSubPixelToLogicIntY(double fY, const ImplMapRes& rMapRes) const
+{
+    return ViewSubPixelToLogicIntY(WindowToViewSubPixelY(fY), rMapRes);
+}
+
 Point CoordinateMapper::WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWindowPt) const
 {
     if (!IsMapModeEnabled())
@@ -942,6 +952,24 @@ Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize) const
 
     return Size(ViewToLogicDistanceX(rWindowSize.Width()),
                 ViewToLogicDistanceY(rWindowSize.Height()));
+}
+
+Point CoordinateMapper::WindowToLogicUnits(const Point& rWindowPt, const ImplMapRes& rMapRes) const
+{
+    return Point(WindowSubPixelToLogicIntX(rWindowPt.X(), rMapRes),
+                 WindowSubPixelToLogicIntY(rWindowPt.Y(), rMapRes));
+}
+
+Point CoordinateMapper::WindowToLogicUnits(const Point& rWindowPt, const MapMode& rMapMode) const
+{
+    if (rMapMode.IsDefault())
+        return rWindowPt;
+
+    // Calculate MapMode-resolution once
+    ImplMapRes aMapRes(rMapMode, GetDPIX(), GetDPIY());
+
+    // Pass the pre-calculated resolution down the chain
+    return WindowToLogicUnits(rWindowPt, aMapRes);
 }
 
 // ========================================================================
