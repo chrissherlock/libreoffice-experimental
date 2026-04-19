@@ -69,6 +69,11 @@ void OutputDevice::EnableMapMode(bool bEnabled) { mpMapper->EnableMapMode(bEnabl
 
 const MapMode& OutputDevice::GetMapMode() const { return mpMapper->GetMapMode(); }
 
+void OutputDevice::SetPixelOffset(const Size& rOffset)
+{
+    mpMapper->SetWindowToViewOffset(rOffset);
+}
+
 void OutputDevice::SetMapMode()
 {
     if ( mpMetaFile )
@@ -689,14 +694,6 @@ tools::Long OutputDevice::LogicToLogic( tools::Long nLongSource,
     lcl_verifyUnitSourceDest( eUnitSource, eUnitDest );
     const auto [eFrom, eTo] = lcl_getCorrectedUnit(eUnitSource, eUnitDest);
     return lcl_convertLogicValue(nLongSource, eFrom, eTo);
-}
-
-void OutputDevice::SetPixelOffset( const Size& rOffset )
-{
-    mpMapper->SetWindowToViewOffset(Size(rOffset.Width(), rOffset.Height()));
-
-    mpMapper->SetLogicToAbsoluteOffset(Size(mpMapper->ViewToLogicDistanceX(mpMapper->GetWindowToViewOffsetX()),
-                                    mpMapper->ViewToLogicDistanceY(mpMapper->GetWindowToViewOffsetY())));
 }
 
 double OutputDevice::LogicWidthToDeviceSubPixel(tools::Long nWidth) const
