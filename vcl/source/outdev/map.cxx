@@ -358,20 +358,9 @@ basegfx::B2DPolyPolygon OutputDevice::PixelToLogic( const basegfx::B2DPolyPolygo
     return mpMapper->WindowToLogicUnits(rPixelPolyPoly);
 }
 
-Point OutputDevice::PixelToLogic( const Point& rDevicePt,
-                                  const MapMode& rMapMode ) const
+Point OutputDevice::PixelToLogic(const Point& rDevicePt, const MapMode& rMapMode) const
 {
-    // calculate nothing if default-MapMode
-    if ( rMapMode.IsDefault() )
-        return rDevicePt;
-
-    // calculate MapMode-resolution
-    ImplMapRes aMapRes(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
-
-    return Point(
-        mpMapper->ViewSubPixelToLogicIntX(rDevicePt.X(), aMapRes),
-        mpMapper->ViewSubPixelToLogicIntY(rDevicePt.Y(), aMapRes)
-    );
+    return mpMapper->WindowToLogicUnits(rDevicePt, rMapMode);
 }
 
 Size OutputDevice::PixelToLogic( const Size& rDeviceSize,

@@ -309,6 +309,12 @@ public:
     LogicToWindowUnits(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
                        const MapMode& rMapMode) const;
 
+    tools::Long WindowSubPixelToLogicIntX(double fX) const;
+    tools::Long WindowSubPixelToLogicIntY(double fY) const;
+    tools::Long WindowSubPixelToLogicIntX(double fX,
+                                                         const ImplMapRes& rMapRes) const;
+    tools::Long WindowSubPixelToLogicIntY(double fY,
+                                                         const ImplMapRes& rMapRes) const;
     vcl::Region WindowToLogicUnits(const vcl::Region& rWindowRegion) const;
     Point WindowToLogicUnits(const Point& rWindowPt) const;
     tools::Rectangle WindowToLogicUnits(const tools::Rectangle& rWindowRect) const;
@@ -317,10 +323,12 @@ public:
     WindowToLogicUnits(const tools::PolyPolygon& rWindowPolyPoly) const;
     Point WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWindowPt) const;
     Size WindowToLogicUnits(const Size& rWindowSize) const;
-    tools::Long WindowSubPixelToLogicIntX(double fX) const;
-    tools::Long WindowSubPixelToLogicIntY(double fY) const;
     template <TransformableB2DGeometry T>
     T WindowToLogicUnits(const T& rWindowGeometry) const;
+
+    Point WindowToLogicUnits(const Point& rWindowPt,
+                                            const ImplMapRes& rMapRes) const;
+    Point WindowToLogicUnits(const Point& rWindowPt, const MapMode& rMapMode) const;
 
     // ========================================================================
     // DISTANCE SCALING (Raw Scalar Conversion, NO offsets applied)
