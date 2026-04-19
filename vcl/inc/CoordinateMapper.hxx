@@ -303,7 +303,17 @@ public:
     double ViewToWindowSubPixelY(double fY) const;
 
     tools::Rectangle WindowToLogicUnits(const tools::Rectangle& rWindowRect) const;
+    tools::Rectangle WindowToLogicUnits(const tools::Rectangle& rWindowRect,
+                                        const ImplMapRes& rMapRes) const;
+    tools::Rectangle WindowToLogicUnits(const tools::Rectangle& rWindowRect,
+                                        const MapMode& rMapMode) const;
+
     tools::Polygon WindowToLogicUnits(const tools::Polygon& rWindowPoly) const;
+    tools::Polygon WindowToLogicUnits(const tools::Polygon& rWindowPoly,
+                                      const ImplMapRes& rMapRes) const;
+    tools::Polygon WindowToLogicUnits(const tools::Polygon& rWindowPoly,
+                                      const MapMode& rMapMode) const;
+
     tools::PolyPolygon WindowToLogicUnits(const tools::PolyPolygon& rWindowPolyPoly) const;
     Point WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWindowPt) const;
 

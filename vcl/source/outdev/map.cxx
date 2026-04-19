@@ -333,7 +333,7 @@ Size OutputDevice::PixelToLogic(const Size& rDeviceSize) const
     return mpMapper->WindowToLogicUnits(rDeviceSize);
 }
 
-tools::Rectangle OutputDevice::PixelToLogic( const tools::Rectangle& rDeviceRect ) const
+tools::Rectangle OutputDevice::PixelToLogic(const tools::Rectangle& rDeviceRect) const
 {
     return mpMapper->WindowToLogicUnits(rDeviceRect);
 }
@@ -353,7 +353,7 @@ basegfx::B2DRectangle OutputDevice::PixelToLogic(const basegfx::B2DRectangle& rD
     return mpMapper->WindowToLogicUnits(rDeviceRect);
 }
 
-basegfx::B2DPolyPolygon OutputDevice::PixelToLogic( const basegfx::B2DPolyPolygon& rPixelPolyPoly ) const
+basegfx::B2DPolyPolygon OutputDevice::PixelToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly) const
 {
     return mpMapper->WindowToLogicUnits(rPixelPolyPoly);
 }
@@ -368,76 +368,14 @@ Size OutputDevice::PixelToLogic(const Size& rDeviceSize, const MapMode& rMapMode
     return mpMapper->WindowToLogicUnits(rDeviceSize, rMapMode);
 }
 
-static void lcl_ApplyEmptyState(tools::Rectangle& rDest, const tools::Rectangle& rSrc)
+tools::Rectangle OutputDevice::PixelToLogic(const tools::Rectangle& rDeviceRect, const MapMode& rMapMode) const
 {
-    // tdf#141761 IsEmpty() removed
-    // Even if rLogicRect.IsEmpty(), transform of the Position contained
-    // in the Rectangle is necessary. Due to Rectangle::Right() returning
-    // Left() when IsEmpty(), the code *could* stay unchanged (same for Bottom),
-    // but:
-    // The Rectangle constructor used with the four tools::Long values does not
-    // check for IsEmpty(), so to keep that state correct there are two possibilities:
-    // (1) Add a test to the Rectangle constructor in question
-    // (2) Do it by hand here
-    // I have tried (1) first, but test Test::test_rectangle() claims that for
-    //  tools::Rectangle aRect(1, 1, 1, 1);
-    //    tools::Long(1) == aRect.GetWidth()
-    //    tools::Long(0) == aRect.getWidth()
-    // (remember: this means Left == Right == 1 -> GetWidth => 1, getWidth == 0)
-    // so indeed the 1's have to go uncommented/unchecked into the data body
-    // of rectangle. Switching to (2) *is* needed, doing so
-
-    if (rSrc.IsWidthEmpty())
-        rDest.SetWidthEmpty();
-
-    if (rSrc.IsHeightEmpty())
-        rDest.SetHeightEmpty();
+    return mpMapper->WindowToLogicUnits(rDeviceRect, rMapMode);
 }
 
-tools::Rectangle OutputDevice::PixelToLogic( const tools::Rectangle& rDeviceRect,
-                                             const MapMode& rMapMode ) const
+tools::Polygon OutputDevice::PixelToLogic(const tools::Polygon& rDevicePoly, const MapMode& rMapMode) const
 {
-    // calculate nothing if default-MapMode
-    // tdf#141761 see comments above, IsEmpty() removed
-    if ( rMapMode.IsDefault() )
-        return rDeviceRect;
-
-    // calculate MapMode-resolution
-    ImplMapRes aMapRes(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
-
-    tools::Rectangle aRetval(
-        mpMapper->ViewSubPixelToLogicIntX(rDeviceRect.Left(), aMapRes),
-        mpMapper->ViewSubPixelToLogicIntY(rDeviceRect.Top(), aMapRes),
-        rDeviceRect.IsWidthEmpty()  ? 0 : mpMapper->ViewSubPixelToLogicIntX(rDeviceRect.Right(), aMapRes),
-        rDeviceRect.IsHeightEmpty() ? 0 : mpMapper->ViewSubPixelToLogicIntY(rDeviceRect.Bottom(), aMapRes)
-    );
-
-    lcl_ApplyEmptyState(aRetval, rDeviceRect);
-
-    return aRetval;
-}
-
-tools::Polygon OutputDevice::PixelToLogic( const tools::Polygon& rDevicePoly,
-                                           const MapMode& rMapMode ) const
-{
-    // calculate nothing if default-MapMode
-    if ( rMapMode.IsDefault() )
-        return rDevicePoly;
-
-    // calculate MapMode-resolution
-    ImplMapRes aMapRes(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
-
-    tools::Polygon aPoly(rDevicePoly);
-
-    for (auto& rPoint : aPoly)
-    {
-        rPoint = Point(
-            mpMapper->ViewSubPixelToLogicIntX(rPoint.X(), aMapRes),
-            mpMapper->ViewSubPixelToLogicIntY(rPoint.Y(), aMapRes)
-        );
-    }
-
-    return aPoly;
+    return mpMapper->WindowToLogicUnits(rDevicePoly, rMapMode);
 }
 
 basegfx::B2DPolygon OutputDevice::PixelToLogic( const basegfx::B2DPolygon& rPixelPoly,
@@ -677,6 +615,32 @@ basegfx::B2DHomMatrix OutputDevice::LogicToLogic(const MapMode& rMapModeSource, 
     aTransform.set(1, 2, fZeroPointY);
 
     return aTransform;
+}
+
+static void lcl_ApplyEmptyState(tools::Rectangle& rDest, const tools::Rectangle& rSrc)
+{
+    // tdf#141761 IsEmpty() removed
+    // Even if rLogicRect.IsEmpty(), transform of the Position contained
+    // in the Rectangle is necessary. Due to Rectangle::Right() returning
+    // Left() when IsEmpty(), the code *could* stay unchanged (same for Bottom),
+    // but:
+    // The Rectangle constructor used with the four tools::Long values does not
+    // check for IsEmpty(), so to keep that state correct there are two possibilities:
+    // (1) Add a test to the Rectangle constructor in question
+    // (2) Do it by hand here
+    // I have tried (1) first, but test Test::test_rectangle() claims that for
+    //  tools::Rectangle aRect(1, 1, 1, 1);
+    //    tools::Long(1) == aRect.GetWidth()
+    //    tools::Long(0) == aRect.getWidth()
+    // (remember: this means Left == Right == 1 -> GetWidth => 1, getWidth == 0)
+    // so indeed the 1's have to go uncommented/unchecked into the data body
+    // of rectangle. Switching to (2) *is* needed, doing so
+
+    if (rSrc.IsWidthEmpty())
+        rDest.SetWidthEmpty();
+
+    if (rSrc.IsHeightEmpty())
+        rDest.SetHeightEmpty();
 }
 
 tools::Rectangle OutputDevice::LogicToLogic( const tools::Rectangle& rRectSource,
