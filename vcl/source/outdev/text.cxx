@@ -1296,10 +1296,10 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
     // default to on for pdf export, which uses SubPixelToLogic to convert back to
     // the logical coord space, of if we are scaling/mapping
     if (mpMapper->IsMapModeEnabled() || meOutDevType == OUTDEV_PDF)
-        pSalLayout->DrawBase() = LogicToDeviceSubPixel(rLogicalPos);
+        pSalLayout->DrawBase() = mpMapper->LogicToDeviceSubPixel(rLogicalPos);
     else
     {
-        Point aDevicePos = LogicToDevicePixel(rLogicalPos);
+        Point aDevicePos = mpMapper->LogicToDevicePixel(rLogicalPos);
         pSalLayout->DrawBase() = basegfx::B2DPoint(aDevicePos.X(), aDevicePos.Y());
     }
 

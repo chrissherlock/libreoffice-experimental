@@ -1582,11 +1582,11 @@ public:
     basegfx::B2DHomMatrix GetInverseViewTransformation() const;
     basegfx::B2DHomMatrix GetInverseViewTransformation(const MapMode& rMapMode) const;
 
-protected:
-    virtual void ImplInitMapModeObjects();
-
     /** Get the internal coordinate mapper (VCL-internal only) */
     SAL_DLLPRIVATE const CoordinateMapper& GetMapper() const;
+
+protected:
+    virtual void ImplInitMapModeObjects();
 
 public:
     /** Set an offset in pixel
@@ -1687,21 +1687,6 @@ public:
     SAL_WARN_UNUSED_RESULT static basegfx::B2DHomMatrix LogicToLogic(const MapMode& rMapModeSource,
                                                                      const MapMode& rMapModeDest);
 
-    /** Convert a logical rectangle to a rectangle in physical device pixel units.
-
-     @param         rLogicRect  Const reference to a rectangle in logical units
-
-     @returns Rectangle based on physical device pixel coordinates and units.
-     */
-    SAL_DLLPRIVATE tools::Rectangle LogicToDevicePixel(const tools::Rectangle& rLogicRect) const;
-
-    /** Convert a logical point to a physical point on the device.
-
-     @param         rLogicPt    Const reference to a point in logical units.
-
-     @returns Physical point on the device.
-     */
-    SAL_DLLPRIVATE Point LogicToDevicePixel(const Point& rLogicPt) const;
     SAL_DLLPRIVATE basegfx::B2DPoint LogicToDeviceSubPixel(const Point& rLogicPt) const;
 
     /** Convert a logical width to a width in units of device pixels.
