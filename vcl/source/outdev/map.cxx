@@ -335,23 +335,12 @@ Point OutputDevice::PixelToLogic(const Point& rDevicePt) const
 
 Point OutputDevice::SubPixelToLogic(const basegfx::B2DPoint& rDevicePt) const
 {
-    if (!mpMapper->IsMapModeEnabled())
-    {
-        assert(floor(rDevicePt.getX() == rDevicePt.getX()) && floor(rDevicePt.getY() == rDevicePt.getY()));
-        return Point(rDevicePt.getX(), rDevicePt.getY());
-    }
-
-    return Point(mpMapper->ViewSubPixelToLogicIntX(rDevicePt.getX()),
-                 mpMapper->ViewSubPixelToLogicIntY(rDevicePt.getY()));
+    return mpMapper->WindowSubPixelToLogicUnits(rDevicePt);
 }
 
-Size OutputDevice::PixelToLogic( const Size& rDeviceSize ) const
+Size OutputDevice::PixelToLogic(const Size& rDeviceSize) const
 {
-
-    if ( !mpMapper->IsMapModeEnabled() )
-        return rDeviceSize;
-
-    return Size(mpMapper->ViewToLogicDistanceX(rDeviceSize.Width()), mpMapper->ViewToLogicDistanceY(rDeviceSize.Height()));
+    return mpMapper->WindowToLogicUnits(rDeviceSize);
 }
 
 static void lcl_ApplyEmptyState(tools::Rectangle& rDest, const tools::Rectangle& rSrc)
