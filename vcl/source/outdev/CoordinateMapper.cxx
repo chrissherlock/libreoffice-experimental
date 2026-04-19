@@ -992,6 +992,36 @@ Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize, const ImplMap
                 ViewToLogicDistanceY(rWindowSize.Height(), rMapRes.mfMapScY));
 }
 
+tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rWindowRect,
+                                                      const ImplMapRes& rMapRes) const
+{
+    tools::Rectangle aRetval(
+        // Fix: Use the new Window-level scalar wrappers to ensure WindowToView offsets are applied!
+        WindowSubPixelToLogicIntX(rWindowRect.Left(), rMapRes),
+        WindowSubPixelToLogicIntY(rWindowRect.Top(), rMapRes),
+        rWindowRect.IsWidthEmpty() ? 0 : WindowSubPixelToLogicIntX(rWindowRect.Right(), rMapRes),
+        rWindowRect.IsHeightEmpty() ? 0 : WindowSubPixelToLogicIntY(rWindowRect.Bottom(), rMapRes));
+
+    lcl_ApplyEmptyState(aRetval, rWindowRect);
+
+    return aRetval;
+}
+
+tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rWindowRect,
+                                                      const MapMode& rMapMode) const
+{
+    // calculate nothing if default-MapMode
+    // tdf#141761 see comments above, IsEmpty() removed
+    if (rMapMode.IsDefault())
+        return rWindowRect;
+
+    // Calculate MapMode-resolution once
+    ImplMapRes aMapRes(rMapMode, GetDPIX(), GetDPIY());
+
+    // Pass the pre-calculated resolution down the chain
+    return WindowToLogicUnits(rWindowRect, aMapRes);
+}
+
 // ========================================================================
 // DISTANCE SCALING (Raw Scalar Conversion)
 // ========================================================================
