@@ -122,7 +122,7 @@ public:
 
     void SetDeviceToWindowOffsetX(tools::Long nDeviceToWindowOffsetX);
     void SetDeviceToWindowOffsetY(tools::Long nDeviceToWindowOffsetY);
-    void SetWindowToViewOffset(const Size& rSize);
+    void SetWindowToViewOffset(const Size& rWindowPixelOffset);
     void SetLogicToAbsoluteOffset(const Size& rSize);
 
     Size LogicToViewDistance(const Size& rLogicSize) const;
@@ -345,7 +345,7 @@ public:
     T WindowToLogicUnits(const T& rWindowGeometry) const;
 
     template <TransformableB2DGeometry T>
-    SAL_DLLPRIVATE T WindowToLogicUnits(const T& rWindowGeometry, const MapMode& rMapMode) const;
+    T WindowToLogicUnits(const T& rWindowGeometry, const MapMode& rMapMode) const;
 
     // ========================================================================
     // DISTANCE SCALING (Raw Scalar Conversion, NO offsets applied)
