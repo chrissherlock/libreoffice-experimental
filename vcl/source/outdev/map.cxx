@@ -343,20 +343,9 @@ tools::Polygon OutputDevice::PixelToLogic(const tools::Polygon& rDevicePoly) con
     return mpMapper->WindowToLogicUnits(rDevicePoly);
 }
 
-tools::PolyPolygon OutputDevice::PixelToLogic( const tools::PolyPolygon& rDevicePolyPoly ) const
+tools::PolyPolygon OutputDevice::PixelToLogic(const tools::PolyPolygon& rDevicePolyPoly) const
 {
-
-    if ( !mpMapper->IsMapModeEnabled() )
-        return rDevicePolyPoly;
-
-    tools::PolyPolygon aPolyPoly(rDevicePolyPoly);
-
-    for (auto& rPoly : aPolyPoly)
-    {
-        rPoly = PixelToLogic(rPoly);
-    }
-
-    return aPolyPoly;
+    return mpMapper->WindowToLogicUnits(rDevicePolyPoly);
 }
 
 basegfx::B2DPolyPolygon OutputDevice::PixelToLogic( const basegfx::B2DPolyPolygon& rPixelPolyPoly ) const
