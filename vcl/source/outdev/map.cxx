@@ -328,15 +328,9 @@ vcl::Region OutputDevice::PixelToLogic(const vcl::Region& rDeviceRegion) const
     return mpMapper->WindowToLogicUnits(rDeviceRegion);
 }
 
-Point OutputDevice::PixelToLogic( const Point& rDevicePt ) const
+Point OutputDevice::PixelToLogic(const Point& rDevicePt) const
 {
-    if ( !mpMapper->IsMapModeEnabled() )
-        return rDevicePt;
-
-    return Point(
-        mpMapper->ViewToLogicX(rDevicePt.X()),
-        mpMapper->ViewToLogicY(rDevicePt.Y())
-    );
+    return mpMapper->WindowToLogicUnits(rDevicePt);
 }
 
 Point OutputDevice::SubPixelToLogic(const basegfx::B2DPoint& rDevicePt) const
