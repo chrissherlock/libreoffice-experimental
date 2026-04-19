@@ -1412,4 +1412,20 @@ Point CoordinateMapper::LogicToLogic(const Point& rPtSource, const MapMode* pMap
                  aMapResSource.TransformPointY(rPtSource.Y(), aMapResDest));
 }
 
+Size CoordinateMapper::LogicToLogic(const Size& rSzSource, const MapMode* pMapModeSource,
+                                    const MapMode* pMapModeDest) const
+{
+    const MapMode* pSrc = pMapModeSource ? pMapModeSource : &GetMapMode();
+    const MapMode* pDst = pMapModeDest ? pMapModeDest : &GetMapMode();
+
+    if (*pSrc == *pDst)
+        return rSzSource;
+
+    ImplMapRes aMapResSource = ResolveMapRes(pMapModeSource);
+    ImplMapRes aMapResDest = ResolveMapRes(pMapModeDest);
+
+    return Size(aMapResSource.ScaleDistanceX(rSzSource.Width(), aMapResDest),
+                aMapResSource.ScaleDistanceY(rSzSource.Height(), aMapResDest));
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
