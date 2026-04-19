@@ -18,6 +18,9 @@
  */
 
 #include <basegfx/matrix/b2dhommatrix.hxx>
+#include <basegfx/range/b2drectangle.hxx>
+#include <basegfx/polygon/b2dpolygon.hxx>
+#include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <tools/gen.hxx>
 
 #include <vcl/lineinfo.hxx>
@@ -855,6 +858,16 @@ tools::Long CoordinateMapper::WindowSubPixelToLogicIntY(double fY) const
     return std::round(WindowToLogicSubPixelY(fY));
 }
 
+tools::Long CoordinateMapper::WindowSubPixelToLogicIntX(double fX, const ImplMapRes& rMapRes) const
+{
+    return ViewSubPixelToLogicIntX(WindowToViewSubPixelX(fX), rMapRes);
+}
+
+tools::Long CoordinateMapper::WindowSubPixelToLogicIntY(double fY, const ImplMapRes& rMapRes) const
+{
+    return ViewSubPixelToLogicIntY(WindowToViewSubPixelY(fY), rMapRes);
+}
+
 Point CoordinateMapper::WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWindowPt) const
 {
     if (!IsMapModeEnabled())
@@ -915,18 +928,22 @@ CoordinateMapper::WindowToLogicUnits(const tools::PolyPolygon& rWindowPolyPoly) 
     return aPolyPoly;
 }
 
-basegfx::B2DPolyPolygon
-CoordinateMapper::WindowToLogicUnits(const basegfx::B2DPolyPolygon& rWindowPolyPoly) const
+template <TransformableB2DGeometry T>
+T CoordinateMapper::WindowToLogicUnits(const T& rWindowGeometry) const
 {
     if (!IsMapModeEnabled())
-        return rWindowPolyPoly;
+        return rWindowGeometry;
 
-    basegfx::B2DPolyPolygon aTransformedPoly = rWindowPolyPoly;
-    const basegfx::B2DHomMatrix aTransformationMatrix
-        = GetInverseViewTransformation(); // Or however you grab the inverse matrix
-    aTransformedPoly.transform(aTransformationMatrix);
-    return aTransformedPoly;
+    T aTransformedGeometry = rWindowGeometry;
+    aTransformedGeometry.transform(GetInverseViewTransformation());
+    return aTransformedGeometry;
 }
+
+template SAL_DLLPRIVATE basegfx::B2DRectangle
+CoordinateMapper::WindowToLogicUnits<basegfx::B2DRectangle>(const basegfx::B2DRectangle&) const;
+
+template SAL_DLLPRIVATE basegfx::B2DPolyPolygon
+CoordinateMapper::WindowToLogicUnits<basegfx::B2DPolyPolygon>(const basegfx::B2DPolyPolygon&) const;
 
 Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize) const
 {
@@ -935,6 +952,44 @@ Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize) const
 
     return Size(ViewToLogicDistanceX(rWindowSize.Width()),
                 ViewToLogicDistanceY(rWindowSize.Height()));
+}
+
+Point CoordinateMapper::WindowToLogicUnits(const Point& rWindowPt, const ImplMapRes& rMapRes) const
+{
+    return Point(WindowSubPixelToLogicIntX(rWindowPt.X(), rMapRes),
+                 WindowSubPixelToLogicIntY(rWindowPt.Y(), rMapRes));
+}
+
+Point CoordinateMapper::WindowToLogicUnits(const Point& rWindowPt, const MapMode& rMapMode) const
+{
+    if (rMapMode.IsDefault())
+        return rWindowPt;
+
+    // Calculate MapMode-resolution once
+    ImplMapRes aMapRes(rMapMode, GetDPIX(), GetDPIY());
+
+    // Pass the pre-calculated resolution down the chain
+    return WindowToLogicUnits(rWindowPt, aMapRes);
+}
+
+Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize, const MapMode& rMapMode) const
+{
+    if (rMapMode.IsDefault())
+        return rWindowSize;
+
+    // Calculate MapMode-resolution once
+    ImplMapRes aMapRes(rMapMode, GetDPIX(), GetDPIY());
+
+    // Pass the pre-calculated resolution down the chain
+    return WindowToLogicUnits(rWindowSize, aMapRes);
+}
+
+Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize, const ImplMapRes& rMapRes) const
+{
+    // Note: Sizes (Distances) ignore translational offsets.
+    // Therefore, Window Distance == View Distance.
+    return Size(ViewToLogicDistanceX(rWindowSize.Width(), rMapRes.mfMapScX),
+                ViewToLogicDistanceY(rWindowSize.Height(), rMapRes.mfMapScY));
 }
 
 // ========================================================================
