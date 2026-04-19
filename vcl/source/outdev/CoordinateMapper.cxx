@@ -976,6 +976,26 @@ Point CoordinateMapper::WindowToLogicUnits(const Point& rWindowPt, const MapMode
     return WindowToLogicUnits(rWindowPt, aMapRes);
 }
 
+Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize, const MapMode& rMapMode) const
+{
+    if (rMapMode.IsDefault())
+        return rWindowSize;
+
+    // Calculate MapMode-resolution once
+    ImplMapRes aMapRes(rMapMode, GetDPIX(), GetDPIY());
+
+    // Pass the pre-calculated resolution down the chain
+    return WindowToLogicUnits(rWindowSize, aMapRes);
+}
+
+Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize, const ImplMapRes& rMapRes) const
+{
+    // Note: Sizes (Distances) ignore translational offsets.
+    // Therefore, Window Distance == View Distance.
+    return Size(ViewToLogicDistanceX(rWindowSize.Width(), rMapRes.mfMapScX),
+                ViewToLogicDistanceY(rWindowSize.Height(), rMapRes.mfMapScY));
+}
+
 // ========================================================================
 // DISTANCE SCALING (Raw Scalar Conversion)
 // ========================================================================
