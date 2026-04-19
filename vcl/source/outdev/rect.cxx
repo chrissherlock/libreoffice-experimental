@@ -59,7 +59,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect )
     if ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
         return;
 
-    tools::Rectangle aRect(LogicToDevicePixel(rRect));
+    tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect));
 
     if ( aRect.IsEmpty() )
         return;
@@ -96,7 +96,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
     if ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
         return;
 
-    const tools::Rectangle aRect(LogicToDevicePixel(rRect));
+    const tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect));
 
     if ( aRect.IsEmpty() )
         return;
@@ -147,7 +147,7 @@ void OutputDevice::Invert( const tools::Rectangle& rRect, InvertFlags nFlags )
     if ( !IsDeviceOutputNecessary() )
         return;
 
-    tools::Rectangle aRect(LogicToDevicePixel(rRect));
+    tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect));
 
     if ( aRect.IsEmpty() )
         return;

@@ -232,6 +232,7 @@ public:
     LogicToDevicePixel(const basegfx::B2DPolygon& rLogicPoly) const;
     double LogicToDeviceSubPixelX(double fX) const;
     double LogicToDeviceSubPixelY(double fY) const;
+    basegfx::B2DPoint LogicToDeviceSubPixel(const Point& rPoint) const;
 
     tools::Long DevicePixelToLogicX(tools::Long nX) const;
     tools::Long DevicePixelToLogicY(tools::Long nY) const;
@@ -295,21 +296,21 @@ public:
     tools::PolyPolygon LogicToWindowUnits(const tools::PolyPolygon& rPoly) const;
     basegfx::B2DPolyPolygon
     LogicToWindowUnits(const basegfx::B2DPolyPolygon& rLogicPolyPoly) const;
-    SAL_DLLPRIVATE basegfx::B2DPolyPolygon
+    basegfx::B2DPolyPolygon
     LogicToWindowUnits(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
                        const MapMode& rMapMode) const;
 
-    SAL_DLLPRIVATE vcl::Region WindowToLogicUnits(const vcl::Region& rWindowRegion) const;
-    SAL_DLLPRIVATE Point WindowToLogicUnits(const Point& rWindowPt) const;
-    SAL_DLLPRIVATE tools::Polygon WindowToLogicUnits(const tools::Polygon& rWindowPoly) const;
-    SAL_DLLPRIVATE tools::Rectangle WindowToLogicUnits(const tools::Rectangle& rRect) const;
-    SAL_DLLPRIVATE tools::PolyPolygon WindowToLogicUnits(const tools::PolyPolygon& rPolyPoly) const;
-    SAL_DLLPRIVATE basegfx::B2DPolyPolygon
+    vcl::Region WindowToLogicUnits(const vcl::Region& rWindowRegion) const;
+    Point WindowToLogicUnits(const Point& rWindowPt) const;
+    tools::Polygon WindowToLogicUnits(const tools::Polygon& rWindowPoly) const;
+    tools::Rectangle WindowToLogicUnits(const tools::Rectangle& rRect) const;
+    tools::PolyPolygon WindowToLogicUnits(const tools::PolyPolygon& rPolyPoly) const;
+    basegfx::B2DPolyPolygon
     WindowToLogicUnits(const basegfx::B2DPolyPolygon& rPolyPoly) const;
-    SAL_DLLPRIVATE Point WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWindowPt) const;
-    SAL_DLLPRIVATE Size WindowToLogicUnits(const Size& rWindowSize) const;
-    SAL_DLLPRIVATE tools::Long WindowSubPixelToLogicIntX(double fX) const;
-    SAL_DLLPRIVATE tools::Long WindowSubPixelToLogicIntY(double fY) const;
+    Point WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWindowPt) const;
+    Size WindowToLogicUnits(const Size& rWindowSize) const;
+    tools::Long WindowSubPixelToLogicIntX(double fX) const;
+    tools::Long WindowSubPixelToLogicIntY(double fY) const;
 
     // ========================================================================
     // DISTANCE SCALING (Raw Scalar Conversion, NO offsets applied)
