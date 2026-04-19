@@ -348,51 +348,24 @@ tools::PolyPolygon OutputDevice::PixelToLogic(const tools::PolyPolygon& rDeviceP
     return mpMapper->WindowToLogicUnits(rDevicePolyPoly);
 }
 
-basegfx::B2DPolyPolygon OutputDevice::PixelToLogic( const basegfx::B2DPolyPolygon& rPixelPolyPoly ) const
-{
-    basegfx::B2DPolyPolygon aTransformedPoly = rPixelPolyPoly;
-    const basegfx::B2DHomMatrix aTransformationMatrix = mpMapper->GetInverseViewTransformation();
-    aTransformedPoly.transform( aTransformationMatrix );
-    return aTransformedPoly;
-}
-
 basegfx::B2DRectangle OutputDevice::PixelToLogic(const basegfx::B2DRectangle& rDeviceRect) const
 {
-    basegfx::B2DRectangle aTransformedRect = rDeviceRect;
-    const basegfx::B2DHomMatrix aTransformationMatrix = mpMapper->GetInverseViewTransformation();
-    aTransformedRect.transform(aTransformationMatrix);
-    return aTransformedRect;
+    return mpMapper->WindowToLogicUnits(rDeviceRect);
 }
 
-Point OutputDevice::PixelToLogic( const Point& rDevicePt,
-                                  const MapMode& rMapMode ) const
+basegfx::B2DPolyPolygon OutputDevice::PixelToLogic( const basegfx::B2DPolyPolygon& rPixelPolyPoly ) const
 {
-    // calculate nothing if default-MapMode
-    if ( rMapMode.IsDefault() )
-        return rDevicePt;
-
-    // calculate MapMode-resolution
-    ImplMapRes aMapRes(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
-
-    return Point(
-        mpMapper->ViewSubPixelToLogicIntX(rDevicePt.X(), aMapRes),
-        mpMapper->ViewSubPixelToLogicIntY(rDevicePt.Y(), aMapRes)
-    );
+    return mpMapper->WindowToLogicUnits(rPixelPolyPoly);
 }
 
-Size OutputDevice::PixelToLogic( const Size& rDeviceSize,
-                                 const MapMode& rMapMode ) const
+Point OutputDevice::PixelToLogic(const Point& rDevicePt, const MapMode& rMapMode) const
 {
+    return mpMapper->WindowToLogicUnits(rDevicePt, rMapMode);
+}
 
-    // calculate nothing if default-MapMode
-    if ( rMapMode.IsDefault() )
-        return rDeviceSize;
-
-    // calculate MapMode-resolution and convert
-    ImplMapRes aMapRes(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
-
-    return Size(mpMapper->ViewToLogicDistanceX(rDeviceSize.Width(), aMapRes.mfMapScX),
-                mpMapper->ViewToLogicDistanceY(rDeviceSize.Height(), aMapRes.mfMapScY));
+Size OutputDevice::PixelToLogic(const Size& rDeviceSize, const MapMode& rMapMode) const
+{
+    return mpMapper->WindowToLogicUnits(rDeviceSize, rMapMode);
 }
 
 static void lcl_ApplyEmptyState(tools::Rectangle& rDest, const tools::Rectangle& rSrc)
