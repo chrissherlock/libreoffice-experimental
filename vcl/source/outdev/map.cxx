@@ -338,22 +338,9 @@ tools::Rectangle OutputDevice::PixelToLogic( const tools::Rectangle& rDeviceRect
     return mpMapper->WindowToLogicUnits(rDeviceRect);
 }
 
-tools::Polygon OutputDevice::PixelToLogic( const tools::Polygon& rDevicePoly ) const
+tools::Polygon OutputDevice::PixelToLogic(const tools::Polygon& rDevicePoly) const
 {
-    if ( !mpMapper->IsMapModeEnabled() )
-        return rDevicePoly;
-
-    tools::Polygon aPoly(rDevicePoly);
-
-    for (auto& rPoint : aPoly)
-    {
-        rPoint = Point(
-            mpMapper->ViewSubPixelToLogicIntX(rPoint.X()),
-            mpMapper->ViewSubPixelToLogicIntY(rPoint.Y())
-        );
-    }
-
-    return aPoly;
+    return mpMapper->WindowToLogicUnits(rDevicePoly);
 }
 
 tools::PolyPolygon OutputDevice::PixelToLogic( const tools::PolyPolygon& rDevicePolyPoly ) const

@@ -896,8 +896,8 @@ tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rWindo
 
     for (auto& rPoint : aPoly)
     {
-        rPoint.setX(WindowToLogicX(rPoint.X()));
-        rPoint.setY(WindowToLogicY(rPoint.Y()));
+        rPoint
+            = Point(WindowSubPixelToLogicIntX(rPoint.X()), WindowSubPixelToLogicIntY(rPoint.Y()));
     }
 
     return aPoly;
