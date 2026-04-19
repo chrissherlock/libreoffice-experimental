@@ -21,6 +21,7 @@
 #include <editeng/eeitem.hxx>
 
 #include <memory>
+#include <vcl/mapconvert.hxx>
 #include <AccessibleText.hxx>
 #include <AccessibleCell.hxx>
 #include <attrib.hxx>
@@ -212,7 +213,7 @@ Point ScPreviewViewForwarder::LogicToPixel( const Point& rPoint, const MapMode& 
         if (pWindow)
         {
             MapMode aMapMode(pWindow->GetMapMode().GetMapUnit());
-            Point aPoint2( OutputDevice::LogicToLogic( rPoint, rMapMode, aMapMode) );
+            Point aPoint2( ::LogicToLogic( rPoint, rMapMode, aMapMode) );
             return pWindow->LogicToPixel(aPoint2);
         }
     }
@@ -233,7 +234,7 @@ Point ScPreviewViewForwarder::PixelToLogic( const Point& rPoint, const MapMode& 
             MapMode aMapMode(pWindow->GetMapMode());
             aMapMode.SetOrigin(Point());
             Point aPoint1( pWindow->PixelToLogic( rPoint ) );
-            Point aPoint2( OutputDevice::LogicToLogic( aPoint1,
+            Point aPoint2( ::LogicToLogic( aPoint1,
                                                        MapMode(aMapMode.GetMapUnit()),
                                                        rMapMode ) );
             return aPoint2;

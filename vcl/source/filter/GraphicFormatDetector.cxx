@@ -31,6 +31,7 @@
 #include <filter/JxlReader.hxx>
 #include <filter/WebpReader.hxx>
 #include "igif/gifread.hxx"
+#include <vcl/mapconvert.hxx>
 #include <vcl/TypeSerializer.hxx>
 #include <vcl/outdev.hxx>
 #include <utility>
@@ -685,8 +686,8 @@ bool GraphicFormatDetector::checkPCX()
             if (nDPIx && nDPIy)
             {
                 MapMode aMap(MapUnit::MapInch, Point(), 1.0 / nDPIx, 1.0 / nDPIy);
-                maMetadata.maLogSize = OutputDevice::LogicToLogic(maMetadata.maPixSize, aMap,
-                                                                  MapMode(MapUnit::Map100thMM));
+                maMetadata.maLogSize
+                    = ::LogicToLogic(maMetadata.maPixSize, aMap, MapMode(MapUnit::Map100thMM));
             }
 
             // number of color planes
@@ -1041,9 +1042,9 @@ bool GraphicFormatDetector::checkSVM()
                 // read MapUnit and determine PrefSize
                 nTemp16 = 0;
                 mrStream.ReadUInt16(nTemp16);
-                maMetadata.maLogSize = OutputDevice::LogicToLogic(
-                    maMetadata.maLogSize, MapMode(static_cast<MapUnit>(nTemp16)),
-                    MapMode(MapUnit::Map100thMM));
+                maMetadata.maLogSize
+                    = ::LogicToLogic(maMetadata.maLogSize, MapMode(static_cast<MapUnit>(nTemp16)),
+                                     MapMode(MapUnit::Map100thMM));
             }
         }
     }
@@ -1071,8 +1072,8 @@ bool GraphicFormatDetector::checkSVM()
                     TypeSerializer aSerializer(mrStream);
                     aSerializer.readMapMode(aMapMode);
                     aSerializer.readSize(maMetadata.maLogSize);
-                    maMetadata.maLogSize = OutputDevice::LogicToLogic(
-                        maMetadata.maLogSize, aMapMode, MapMode(MapUnit::Map100thMM));
+                    maMetadata.maLogSize = ::LogicToLogic(maMetadata.maLogSize, aMapMode,
+                                                          MapMode(MapUnit::Map100thMM));
                 }
             }
         }

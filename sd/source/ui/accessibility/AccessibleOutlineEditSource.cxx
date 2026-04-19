@@ -22,6 +22,7 @@
 #include <svx/svdoutl.hxx>
 #include <svx/svdview.hxx>
 #include <vcl/window.hxx>
+#include <vcl/mapconvert.hxx>
 #include <AccessibleOutlineEditSource.hxx>
 
 namespace accessibility
@@ -124,7 +125,7 @@ namespace accessibility
     {
         if (IsValid())
         {
-            Point aPoint( OutputDevice::LogicToLogic( rPoint, rMapMode,
+            Point aPoint( ::LogicToLogic( rPoint, rMapMode,
                                                       MapMode(mrView.GetModel().GetScaleUnit()) ) );
             MapMode aMapMode(mrWindow.GetMapMode());
             aMapMode.SetOrigin(Point());
@@ -141,7 +142,7 @@ namespace accessibility
             MapMode aMapMode(mrWindow.GetMapMode());
             aMapMode.SetOrigin(Point());
             Point aPoint( mrWindow.PixelToLogic( rPoint, aMapMode ) );
-            return OutputDevice::LogicToLogic( aPoint,
+            return ::LogicToLogic( aPoint,
                                                MapMode(mrView.GetModel().GetScaleUnit()),
                                                rMapMode );
         }

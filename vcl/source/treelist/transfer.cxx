@@ -32,6 +32,7 @@
 #include <unotools/ucbstreamhelper.hxx>
 #include <sot/exchange.hxx>
 #include <sot/storage.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/alpha.hxx>
 #include <vcl/bitmap.hxx>
 #include <vcl/filter/SvmReader.hxx>
@@ -1636,7 +1637,7 @@ bool TransferableDataHelper::GetBitmap(const DataFlavor& rFlavor, Bitmap& rBmp) 
 
             if(MapUnit::MapPixel != aMapMode.GetMapUnit())
             {
-                const Size aSize(OutputDevice::LogicToLogic(rBmp.GetPrefSize(), aMapMode, MapMode(MapUnit::Map100thMM)));
+                const Size aSize(::LogicToLogic(rBmp.GetPrefSize(), aMapMode, MapMode(MapUnit::Map100thMM)));
 
                 // #i122388# This wrongly corrects in the given case; changing from 5000 100th mm to
                 // the described 50 cm (which is 50000 100th mm)

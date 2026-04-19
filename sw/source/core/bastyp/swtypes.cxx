@@ -23,6 +23,7 @@
 #include <tools/mapunit.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/graph.hxx>
+#include <vcl/mapconvert.hxx>
 
 using namespace com::sun::star;
 
@@ -45,7 +46,7 @@ Size GetGraphicSizeTwip(const Graphic& rGraphic, vcl::RenderContext* pOutDev)
     }
     else
     {
-        aSize = OutputDevice::LogicToLogic(aSize, rGraphic.GetPrefMapMode(), aMapTwip);
+        aSize = ::LogicToLogic(aSize, rGraphic.GetPrefMapMode(), aMapTwip);
     }
     return aSize;
 }

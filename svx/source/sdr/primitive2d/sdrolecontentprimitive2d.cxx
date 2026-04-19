@@ -22,6 +22,7 @@
 #include <svx/svdoole2.hxx>
 #include <utility>
 #include <vcl/svapp.hxx>
+#include <vcl/mapconvert.hxx>
 #include <drawinglayer/primitive2d/graphicprimitive2d.hxx>
 #include <drawinglayer/primitive2d/groupprimitive2d.hxx>
 #include <drawinglayer/primitive2d/PolygonHairlinePrimitive2D.hxx>
@@ -79,7 +80,7 @@ namespace drawinglayer::primitive2d
                 }
                 else
                 {
-                    aPrefSize = OutputDevice::LogicToLogic(aPrefSize, aGraphic.GetPrefMapMode(), MapMode(MapUnit::Map100thMM));
+                    aPrefSize = ::LogicToLogic(aPrefSize, aGraphic.GetPrefMapMode(), MapMode(MapUnit::Map100thMM));
                 }
 
                 const double fOffsetX((aScale.getX() - aPrefSize.getWidth()) / 2.0);

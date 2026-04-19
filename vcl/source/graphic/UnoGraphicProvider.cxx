@@ -19,6 +19,7 @@
 
 #include <o3tl/string_view.hxx>
 #include <o3tl/temporary.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/image.hxx>
 #include <vcl/metaact.hxx>
@@ -465,7 +466,7 @@ void ImplCalculateCropRect( ::Graphic const & rGraphic, const text::GraphicCrop&
     Size aSize100thMM( 0, 0 );
     if( rGraphic.GetPrefMapMode().GetMapUnit() != MapUnit::MapPixel )
     {
-        aSize100thMM = OutputDevice::LogicToLogic(rGraphic.GetPrefSize(), rGraphic.GetPrefMapMode(), MapMode(MapUnit::Map100thMM));
+        aSize100thMM = ::LogicToLogic(rGraphic.GetPrefSize(), rGraphic.GetPrefMapMode(), MapMode(MapUnit::Map100thMM));
     }
     else
     {
@@ -586,7 +587,7 @@ void ImplApplyFilterData( ::Graphic& rGraphic, const uno::Sequence< beans::Prope
     {
         ScopedVclPtrInstance< VirtualDevice > aDummyVDev;
         GDIMetaFile aMtf( rGraphic.GetGDIMetaFile() );
-        Size aMtfSize( OutputDevice::LogicToLogic(aMtf.GetPrefSize(), aMtf.GetPrefMapMode(), MapMode(MapUnit::Map100thMM)) );
+        Size aMtfSize( ::LogicToLogic(aMtf.GetPrefSize(), aMtf.GetPrefMapMode(), MapMode(MapUnit::Map100thMM)) );
         if ( aMtfSize.Width() && aMtfSize.Height() )
         {
             MapMode aNewMapMode( MapUnit::Map100thMM );

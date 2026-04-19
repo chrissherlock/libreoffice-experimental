@@ -19,6 +19,7 @@
 #include <pdf/pdfwriter_impl.hxx>
 #include <pdf/EncryptionHashTransporter.hxx>
 
+#include <vcl/mapconvert.hxx>
 #include <vcl/dibtools.hxx>
 #include <vcl/pdfextoutdevdata.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
@@ -542,10 +543,10 @@ void PDFWriterImpl::playMetafile( const GDIMetaFile& i_rMtf, vcl::PDFExtOutDevDa
                     pDummyVDev->Push();
 
                     MapMode aMapMode( aSubstitute.GetPrefMapMode() );
-                    Size aOutSize( OutputDevice::LogicToLogic( pA->GetSize(), pDummyVDev->GetMapMode(), aMapMode ) );
+                    Size aOutSize( ::LogicToLogic( pA->GetSize(), pDummyVDev->GetMapMode(), aMapMode ) );
                     aMapMode.SetScaleX( double(aOutSize.Width()) / aSubstitute.GetPrefSize().Width() );
                     aMapMode.SetScaleY( double(aOutSize.Height()) / aSubstitute.GetPrefSize().Height() );
-                    aMapMode.SetOrigin( OutputDevice::LogicToLogic( pA->GetPoint(), pDummyVDev->GetMapMode(), aMapMode ) );
+                    aMapMode.SetOrigin( ::LogicToLogic( pA->GetPoint(), pDummyVDev->GetMapMode(), aMapMode ) );
 
                     m_rOuterFace.SetMapMode( aMapMode );
                     pDummyVDev->SetMapMode( aMapMode );
@@ -739,7 +740,7 @@ void PDFWriterImpl::playMetafile( const GDIMetaFile& i_rMtf, vcl::PDFExtOutDevDa
                 {
                     const MetaBmpAction* pA = static_cast<const MetaBmpAction*>(pAction);
                     Bitmap aBitmap( pA->GetBitmap() );
-                    Size aSize( OutputDevice::LogicToLogic( aBitmap.GetPrefSize(),
+                    Size aSize( ::LogicToLogic( aBitmap.GetPrefSize(),
                                                             aBitmap.GetPrefMapMode(), pDummyVDev->GetMapMode() ) );
                     if( ! ( aSize.Width() && aSize.Height() ) )
                         aSize = pDummyVDev->PixelToLogic( aBitmap.GetSizePixel() );
@@ -771,7 +772,7 @@ void PDFWriterImpl::playMetafile( const GDIMetaFile& i_rMtf, vcl::PDFExtOutDevDa
                 {
                     const MetaBmpExAction*  pA = static_cast<const MetaBmpExAction*>(pAction);
                     Bitmap aBitmap( pA->GetBitmap() );
-                    Size aSize( OutputDevice::LogicToLogic( aBitmap.GetPrefSize(),
+                    Size aSize( ::LogicToLogic( aBitmap.GetPrefSize(),
                             aBitmap.GetPrefMapMode(), pDummyVDev->GetMapMode() ) );
                     Graphic aGraphic = i_pOutDevData ? i_pOutDevData->GetCurrentGraphic() : Graphic();
                     implWriteBitmapEx( pA->GetPoint(), aSize, aBitmap, aGraphic, pDummyVDev, i_rContext );

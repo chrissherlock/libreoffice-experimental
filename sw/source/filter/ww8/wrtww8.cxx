@@ -83,6 +83,7 @@
 #include <fmturl.hxx>
 #include <vcl/imap.hxx>
 #include <vcl/imapobj.hxx>
+#include <vcl/mapconvert.hxx>
 #include <mdiexp.hxx>
 #include <strings.hrc>
 #include <fmtline.hxx>
@@ -1603,7 +1604,7 @@ void MSWordExportBase::BulletDefinitions()
         if (MapUnit::MapPixel == rGraphic.GetPrefMapMode().GetMapUnit())
             aSize = Application::GetDefaultDevice()->PixelToLogic(aSize, aMapMode);
         else
-            aSize = OutputDevice::LogicToLogic(aSize,rGraphic.GetPrefMapMode(), aMapMode);
+            aSize = ::LogicToLogic(aSize,rGraphic.GetPrefMapMode(), aMapMode);
 
         if (0 != aSize.Height() && 0 != aSize.Width())
             AttrOutput().BulletDefinition(i, rGraphic, aSize);

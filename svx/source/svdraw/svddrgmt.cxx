@@ -27,6 +27,7 @@
 #include <vcl/svapp.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/ptrstyle.hxx>
+#include <vcl/mapconvert.hxx>
 #include <svx/xpoly.hxx>
 #include <svx/svdtrans.hxx>
 #include <svx/svdundo.hxx>
@@ -3832,7 +3833,7 @@ bool SdrDragCrop::EndSdrDrag(bool /*bCopy*/)
         }
         else
         {
-            aGraphicSize = OutputDevice::LogicToLogic(aGraphicSize, rGraphicObject.GetPrefMapMode(), aMapModePool);
+            aGraphicSize = ::LogicToLogic(aGraphicSize, rGraphicObject.GetPrefMapMode(), aMapModePool);
         }
 
         if(0 == aGraphicSize.Width() || 0 == aGraphicSize.Height())

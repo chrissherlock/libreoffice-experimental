@@ -21,6 +21,7 @@
 
 #include <toolkit/helper/vclunohelper.hxx>
 #include <comphelper/diagnose_ex.hxx>
+#include <vcl/mapconvert.hxx>
 #include <sfx2/objsh.hxx>
 #include <svx/svditer.hxx>
 #include <svx/svdobj.hxx>
@@ -197,7 +198,7 @@ void ScClient::ViewChanged()
     }
 
     MapUnit aMapUnit = VCLUnoHelper::UnoEmbed2VCLMapUnit( xObj->getMapUnit( GetAspect() ) );
-    Size aVisSize = OutputDevice::LogicToLogic(Size(aSz.Width, aSz.Height), MapMode(aMapUnit), MapMode(MapUnit::Map100thMM));
+    Size aVisSize = ::LogicToLogic(Size(aSz.Width, aSz.Height), MapMode(aMapUnit), MapMode(MapUnit::Map100thMM));
 
     // Take over position and size into document
     SdrOle2Obj* pDrawObj = GetDrawObj();

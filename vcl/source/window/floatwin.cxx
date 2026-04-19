@@ -26,6 +26,8 @@
 #include <comphelper/lok.hxx>
 #include <sal/log.hxx>
 #include <tools/mapunit.hxx>
+
+#include <vcl/mapconvert.hxx>
 #include <vcl/layout.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/wrkwin.hxx>
@@ -470,7 +472,7 @@ Point FloatingWindow::ImplCalcPos(vcl::Window* pWindow,
         }
         else
         {
-            *pLOKTwipsPos = OutputDevice::LogicToLogic(aPosOut, pW->GetMapMode(), MapMode(MapUnit::MapTwip));
+            *pLOKTwipsPos = ::LogicToLogic(aPosOut, pW->GetMapMode(), MapMode(MapUnit::MapTwip));
         }
     }
 

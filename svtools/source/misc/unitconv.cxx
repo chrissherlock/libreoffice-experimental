@@ -23,6 +23,7 @@
 #include <tools/fldunit.hxx>
 #include <tools/mapunit.hxx>
 #include <tools/UnitConversion.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/weld/MetricSpinButton.hxx>
 
@@ -90,7 +91,7 @@ void SetFieldUnit(weld::MetricSpinButton& rField, FieldUnit eUnit, bool bAll)
 
 void SetMetricValue(weld::MetricSpinButton& rField, sal_Int64 nCoreValue, MapUnit eUnit)
 {
-    sal_Int64 nVal = OutputDevice::LogicToLogic(nCoreValue, eUnit, MapUnit::Map100thMM);
+    sal_Int64 nVal = ::LogicToLogic(nCoreValue, eUnit, MapUnit::Map100thMM);
     nVal = rField.normalize(nVal);
     rField.set_value(nVal, FieldUnit::MM_100TH);
 }
@@ -103,7 +104,7 @@ sal_Int64 GetCoreValue(const weld::MetricSpinButton& rField, MapUnit eUnit)
     const bool bRoundBefore = (std::abs(nVal) & nSizeMask) != 0;
     if( bRoundBefore )
         nVal = rField.denormalize( nVal );
-    sal_Int64 nUnitVal = OutputDevice::LogicToLogic(nVal, MapUnit::Map100thMM, eUnit);
+    sal_Int64 nUnitVal = ::LogicToLogic(nVal, MapUnit::Map100thMM, eUnit);
     if (!bRoundBefore)
         nUnitVal = rField.denormalize(nUnitVal);
     return nUnitVal;

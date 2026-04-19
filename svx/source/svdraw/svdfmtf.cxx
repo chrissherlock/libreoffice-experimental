@@ -37,6 +37,7 @@
 #include <editeng/wrlmitem.hxx>
 #include <editeng/contouritem.hxx>
 #include <editeng/colritem.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/alpha.hxx>
 #include <vcl/canvastools.hxx>
 #include <vcl/metaactiontypes.hxx>
@@ -1002,17 +1003,17 @@ void ImpSdrGDIMetaFileImport::DoAction(MetaPolyPolygonAction const & rAct)
 
 Size ImpSdrGDIMetaFileImport::implMap(const Size& rSz) const
 {
-    return OutputDevice::LogicToLogic(rSz, mpVD->GetMapMode(), maPrefMapMode);
+    return ::LogicToLogic(rSz, mpVD->GetMapMode(), maPrefMapMode);
 }
 
 Point ImpSdrGDIMetaFileImport::implMap(const Point& rPt) const
 {
-    return OutputDevice::LogicToLogic(rPt, mpVD->GetMapMode(), maPrefMapMode);
+    return ::LogicToLogic(rPt, mpVD->GetMapMode(), maPrefMapMode);
 }
 
 basegfx::B2DHomMatrix ImpSdrGDIMetaFileImport::implMapMatrix() const
 {
-    return OutputDevice::LogicToLogic(mpVD->GetMapMode(), maPrefMapMode);
+    return ::LogicToLogic(mpVD->GetMapMode(), maPrefMapMode);
 }
 
 void ImpSdrGDIMetaFileImport::ImportText( const Point& rPos, const OUString& rStr, const MetaAction& rAct )

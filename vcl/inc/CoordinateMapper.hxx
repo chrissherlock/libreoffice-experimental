@@ -23,6 +23,7 @@
 #include <tools/long.hxx>
 
 #include <vcl/dllapi.h>
+#include <vcl/mapconvert.hxx>
 #include <vcl/mapmod.hxx>
 #include <vcl/region.hxx>
 
@@ -333,9 +334,12 @@ public:
     // These do not traverse the VCL device pipeline.
 
     Point LogicToLogic(const Point& rPtSource, const MapMode* pMapModeSource,
-                                      const MapMode* pMapModeDest) const;
+                       const MapMode* pMapModeDest) const;
     SAL_DLLPRIVATE Size LogicToLogic(const Size& rSzSource, const MapMode* pMapModeSource,
                                      const MapMode* pMapModeDest) const;
+    SAL_DLLPRIVATE tools::Rectangle LogicToLogic(const tools::Rectangle& rRectSource,
+                                                 const MapMode* pMapModeSource,
+                                                 const MapMode* pMapModeDest) const;
 
     // ========================================================================
     // DISTANCE SCALING (Raw Scalar Conversion, NO offsets applied)

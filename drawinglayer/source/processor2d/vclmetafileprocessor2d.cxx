@@ -31,6 +31,7 @@
 #include <basegfx/polygon/b2dpolypolygontools.hxx>
 #include <basegfx/polygon/b2dpolygontools.hxx>
 #include <basegfx/polygon/b2dlinegeometry.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/gradient.hxx>
@@ -1167,7 +1168,7 @@ void VclMetafileProcessor2D::processGraphicPrimitive2D(
 
         {
             const MapMode aMapMode100thmm(MapUnit::Map100thMM);
-            const Size aBitmapSize(OutputDevice::LogicToLogic(
+            const Size aBitmapSize(::LogicToLogic(
                 rGraphicPrimitive.getGraphicObject().GetPrefSize(),
                 rGraphicPrimitive.getGraphicObject().GetPrefMapMode(), aMapMode100thmm));
             const double fDivX(aBitmapSize.Width() - rAttr.GetLeftCrop() - rAttr.GetRightCrop());
@@ -1273,8 +1274,8 @@ void VclMetafileProcessor2D::processControlPrimitive2D(
             pPDFControl->Location = aRectLogic;
 
             Size aFontSize(pPDFControl->TextFont.GetFontSize());
-            aFontSize = OutputDevice::LogicToLogic(aFontSize, MapMode(MapUnit::MapPoint),
-                                                   mpOutputDevice->GetMapMode());
+            aFontSize = ::LogicToLogic(aFontSize, MapMode(MapUnit::MapPoint),
+                                       mpOutputDevice->GetMapMode());
             pPDFControl->TextFont.SetFontSize(aFontSize);
 
             mpPDFExtOutDevData->WrapBeginStructureElement(vcl::pdf::StructElement::Form);

@@ -22,6 +22,7 @@
 #include <basegfx/matrix/b2dhommatrixtools.hxx>
 #include <basegfx/vector/b2dsize.hxx>
 #include <tools/fract.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/gfxlink.hxx>
@@ -387,7 +388,7 @@ basegfx::B2DSize Graphic::GetPPUnit(const MapMode& unit) const
     basegfx::B2DHomMatrix toPixels = basegfx::utils::createScaleB2DHomMatrix(
         double(aGrfPixelSize.Width()) / aGrfPrefMapModeSize.Width(),
         double(aGrfPixelSize.Height()) / aGrfPrefMapModeSize.Height());
-    toPixels *= OutputDevice::LogicToLogic(unit, GetPrefMapMode());
+    toPixels *= ::LogicToLogic(unit, GetPrefMapMode());
     return toPixels * basegfx::B2DSize(1, 1);
 }
 

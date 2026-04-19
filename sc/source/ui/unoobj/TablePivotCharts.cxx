@@ -27,6 +27,7 @@
 #include <svtools/embedhlp.hxx>
 #include <comphelper/sequence.hxx>
 #include <vcl/svapp.hxx>
+#include <vcl/mapconvert.hxx>
 
 #include <TablePivotChart.hxx>
 #include <TablePivotCharts.hxx>
@@ -120,7 +121,7 @@ void SAL_CALL TablePivotCharts::addNewByName(OUString const & rName,
     sal_Int64 nAspect(embed::Aspects::MSOLE_CONTENT);
     MapUnit aMapUnit(VCLUnoHelper::UnoEmbed2VCLMapUnit(xObject->getMapUnit(nAspect)));
     Size aSize(aInsRect.GetSize());
-    aSize = OutputDevice::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(aMapUnit));
+    aSize = ::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(aMapUnit));
     awt::Size aAwtSize;
     aAwtSize.Width = aSize.Width();
     aAwtSize.Height = aSize.Height();

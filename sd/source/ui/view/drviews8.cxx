@@ -31,6 +31,7 @@
 #include <drawview.hxx>
 #include <tools/helpers.hxx>
 #include <vcl/svapp.hxx>
+#include <vcl/mapconvert.hxx>
 
 namespace sd {
 
@@ -62,7 +63,7 @@ void DrawViewShell::ScannerEvent()
                     if( aScanBmp.GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel )
                         aBmpSize = GetActiveWindow()->PixelToLogic( aBmpSize, aMap100 );
                     else
-                        aBmpSize = OutputDevice::LogicToLogic( aBmpSize, aScanBmp.GetPrefMapMode(), aMap100 );
+                        aBmpSize = ::LogicToLogic( aBmpSize, aScanBmp.GetPrefMapMode(), aMap100 );
 
                     aPageSize.AdjustWidth( -(pPage->GetLeftBorder() + pPage->GetRightBorder()) );
                     aPageSize.AdjustHeight( -(pPage->GetUpperBorder() + pPage->GetLowerBorder()) );

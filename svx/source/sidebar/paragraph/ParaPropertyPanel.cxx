@@ -16,6 +16,8 @@
  *   except in compliance with the License. You may obtain a copy of
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
+
+#include <vcl/mapconvert.hxx>
 #include "ParaPropertyPanel.hxx"
 #include <sfx2/dispatch.hxx>
 #include <sfx2/module.hxx>
@@ -406,13 +408,13 @@ void ParaPropertyPanel::StateChangedIndentImpl( SfxItemState eState, const SfxPo
         const SvxLRSpaceItem* pSpace = static_cast<const SvxLRSpaceItem*>(pState);
 
         maTxtLeft = pSpace->ResolveTextLeft({});
-        maTxtLeft = OutputDevice::LogicToLogic(maTxtLeft, m_eLRSpaceUnit, MapUnit::MapTwip);
+        maTxtLeft = ::LogicToLogic(maTxtLeft, m_eLRSpaceUnit, MapUnit::MapTwip);
 
         tools::Long aTxtRight = pSpace->ResolveRight({});
-        aTxtRight = OutputDevice::LogicToLogic(aTxtRight, m_eLRSpaceUnit, MapUnit::MapTwip);
+        aTxtRight = ::LogicToLogic(aTxtRight, m_eLRSpaceUnit, MapUnit::MapTwip);
 
         tools::Long aTxtFirstLineOfst = pSpace->ResolveTextFirstLineOffset({});
-        aTxtFirstLineOfst = OutputDevice::LogicToLogic( aTxtFirstLineOfst, m_eLRSpaceUnit, MapUnit::MapTwip );
+        aTxtFirstLineOfst = ::LogicToLogic( aTxtFirstLineOfst, m_eLRSpaceUnit, MapUnit::MapTwip );
 
         tools::Long nVal = o3tl::convert(maTxtLeft, o3tl::Length::twip, o3tl::Length::mm100);
         nVal = static_cast<tools::Long>(mxLeftIndent->normalize( nVal ));
@@ -483,10 +485,10 @@ void ParaPropertyPanel::StateChangedULImpl( SfxItemState eState, const SfxPoolIt
         const SvxULSpaceItem* pOldItem = static_cast<const SvxULSpaceItem*>(pState);
 
         maUpper = pOldItem->GetUpper();
-        maUpper = OutputDevice::LogicToLogic(maUpper, m_eULSpaceUnit, MapUnit::MapTwip);
+        maUpper = ::LogicToLogic(maUpper, m_eULSpaceUnit, MapUnit::MapTwip);
 
         maLower = pOldItem->GetLower();
-        maLower = OutputDevice::LogicToLogic(maLower, m_eULSpaceUnit, MapUnit::MapTwip);
+        maLower = ::LogicToLogic(maLower, m_eULSpaceUnit, MapUnit::MapTwip);
 
         sal_Int64 nVal = o3tl::convert(maUpper, o3tl::Length::twip, o3tl::Length::mm100);
         nVal = mxTopDist->normalize( nVal );
@@ -512,7 +514,7 @@ void ParaPropertyPanel::StateChangedHyphenationImpl( SfxItemState eState, const 
     {
         const SvxHyphenZoneItem* pOldItem = static_cast<const SvxHyphenZoneItem*>(pState);
         maZone = pOldItem->GetTextHyphenZone();
-        maZone = OutputDevice::LogicToLogic(maZone, m_eHyphenZoneUnit, MapUnit::MapTwip);
+        maZone = ::LogicToLogic(maZone, m_eHyphenZoneUnit, MapUnit::MapTwip);
         sal_Int64 nVal = o3tl::convert(maZone, o3tl::Length::twip, o3tl::Length::cm);
         nVal = mxZone->normalize( nVal );
         mxZone->set_value( nVal, FieldUnit::CM );

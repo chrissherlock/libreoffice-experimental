@@ -21,6 +21,7 @@
 #include <tools/mapunit.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/svapp.hxx>
+#include <vcl/mapconvert.hxx>
 
 #include <vcl/virdev.hxx>
 #include <vcl/settings.hxx>
@@ -114,7 +115,7 @@ Bitmap XHatchList::CreateBitmap( tools::Long nIndex, const Size& rSize) const
             }
         }
 
-        const basegfx::B2DHomMatrix aScaleMatrix(OutputDevice::LogicToLogic(MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapPixel)));
+        const basegfx::B2DHomMatrix aScaleMatrix(::LogicToLogic(MapMode(MapUnit::Map100thMM), MapMode(MapUnit::MapPixel)));
         const basegfx::B2DVector aScaleVector(aScaleMatrix * basegfx::B2DVector(1.0, 0.0));
         const double fScaleValue(aScaleVector.getLength());
 

@@ -27,6 +27,7 @@
 
 #include <o3tl/any.hxx>
 #include <vcl/outdev.hxx>
+#include <vcl/mapconvert.hxx>
 #include <rtl/ustring.hxx>
 #include <rtl/strbuf.hxx>
 #include <rtl/ustrbuf.hxx>
@@ -655,7 +656,7 @@ bool PPTWriterBase::CreateMainNotes()
 
 awt::Size PPTWriterBase::MapSize( const awt::Size& rSize )
 {
-    Size aRetSize( OutputDevice::LogicToLogic( Size( rSize.Width, rSize.Height ), maMapModeSrc, maMapModeDest ) );
+    Size aRetSize( ::LogicToLogic( Size( rSize.Width, rSize.Height ), maMapModeSrc, maMapModeDest ) );
 
     if ( !aRetSize.Width() )
         aRetSize.AdjustWidth( 1 );
@@ -666,7 +667,7 @@ awt::Size PPTWriterBase::MapSize( const awt::Size& rSize )
 
 awt::Point PPTWriterBase::MapPoint( const awt::Point& rPoint )
 {
-    Point aRet( OutputDevice::LogicToLogic( Point( rPoint.X, rPoint.Y ), maMapModeSrc, maMapModeDest ) );
+    Point aRet( ::LogicToLogic( Point( rPoint.X, rPoint.Y ), maMapModeSrc, maMapModeDest ) );
     return awt::Point( aRet.X(), aRet.Y() );
 }
 

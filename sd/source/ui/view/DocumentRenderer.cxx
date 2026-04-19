@@ -58,6 +58,7 @@
 #include <toolkit/awt/vclxdevice.hxx>
 #include <unotools/localedatawrapper.hxx>
 #include <utility>
+#include <vcl/mapconvert.hxx>
 #include <vcl/print.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/weld/MessageDialog.hxx>
@@ -2322,7 +2323,7 @@ private:
         aMap.SetScaleY( double(aPageSize_2.Height()) / rInfo.maPageSize.Height() );
 
         // calculate adjusted print size
-        const Size aAdjustedPrintSize (OutputDevice::LogicToLogic(
+        const Size aAdjustedPrintSize (::LogicToLogic(
             rInfo.maPrintSize,
             aStdMap,
             aMap));

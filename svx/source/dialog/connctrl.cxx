@@ -18,6 +18,7 @@
  */
 
 #include <vcl/svapp.hxx>
+#include <vcl/mapconvert.hxx>
 
 #include <svx/connctrl.hxx>
 #include <svx/dlgutil.hxx>
@@ -113,7 +114,7 @@ void SvxXConnectionPreview::AdaptSize()
     aNewPos.setX( ( nWidth - aNewSize.Width() )  >> 1 );
     aNewPos.setY( ( nHeight - aNewSize.Height() ) >> 1 );
 
-    aDisplayMap.SetOrigin(OutputDevice::LogicToLogic(aNewPos, aMapMode, aDisplayMap));
+    aDisplayMap.SetOrigin(::LogicToLogic(aNewPos, aMapMode, aDisplayMap));
     SetMapMode( aDisplayMap );
 
     // Origin

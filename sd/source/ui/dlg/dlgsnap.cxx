@@ -24,6 +24,7 @@
 #include <svl/itempool.hxx>
 #include <svtools/unitconv.hxx>
 #include <tools/debug.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/weld/Builder.hxx>
 #include <vcl/weld/Dialog.hxx>
 
@@ -77,7 +78,7 @@ SdSnapLineDlg::SdSnapLineDlg(weld::Window* pWindow, const SfxItemSet& rInAttrs, 
     // determine max and min values depending on
     // WorkArea, PoolUnit and FieldUnit:
     auto const map = [ePoolUnit](std::unique_ptr<weld::MetricSpinButton> const & msb, tools::Long value) {
-            auto const n1 = OutputDevice::LogicToLogic(value, ePoolUnit, MapUnit::Map100thMM);
+            auto const n1 = ::LogicToLogic(value, ePoolUnit, MapUnit::Map100thMM);
             auto const n2 = msb->normalize(n1);
             auto const n3 = msb->convert_value_from(n2, FieldUnit::MM_100TH);
             auto const n4 = msb->convert_value_to(n3, FieldUnit::NONE);

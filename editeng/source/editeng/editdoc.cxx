@@ -19,6 +19,7 @@
 
 #include <editdoc.hxx>
 
+#include <vcl/mapconvert.hxx>
 #include <editeng/autodiritem.hxx>
 #include <editeng/tstpitem.hxx>
 #include <editeng/colritem.hxx>
@@ -627,15 +628,15 @@ void ConvertItem( std::unique_ptr<SfxPoolItem>& rPoolItem, MapUnit eSourceUnit, 
             if (rItem.GetTextFirstLineOffset().m_nUnit == css::util::MeasureUnit::TWIP)
             {
                 rItem.SetTextFirstLineOffset(
-                    SvxIndentValue::twips(sal::static_int_cast<short>(OutputDevice::LogicToLogic(
+                    SvxIndentValue::twips(sal::static_int_cast<short>(::LogicToLogic(
                         rItem.ResolveTextFirstLineOffset({}), eSourceUnit, eDestUnit))));
             }
             rItem.SetTextLeft(SvxIndentValue::twips(
-                OutputDevice::LogicToLogic(rItem.ResolveTextLeft({}), eSourceUnit, eDestUnit)));
+                ::LogicToLogic(rItem.ResolveTextLeft({}), eSourceUnit, eDestUnit)));
             if (rItem.GetRight().m_nUnit == css::util::MeasureUnit::TWIP)
             {
                 rItem.SetRight(SvxIndentValue::twips(
-                    OutputDevice::LogicToLogic(rItem.ResolveRight({}), eSourceUnit, eDestUnit)));
+                    ::LogicToLogic(rItem.ResolveRight({}), eSourceUnit, eDestUnit)));
             }
         }
         break;
@@ -643,8 +644,8 @@ void ConvertItem( std::unique_ptr<SfxPoolItem>& rPoolItem, MapUnit eSourceUnit, 
         {
             assert(dynamic_cast<const SvxULSpaceItem *>(rPoolItem.get()) != nullptr);
             SvxULSpaceItem& rItem = rPoolItem->StaticWhichCast(EE_PARA_ULSPACE);
-            rItem.SetUpper( sal::static_int_cast< sal_uInt16 >( OutputDevice::LogicToLogic( rItem.GetUpper(), eSourceUnit, eDestUnit ) ) );
-            rItem.SetLower( sal::static_int_cast< sal_uInt16 >( OutputDevice::LogicToLogic( rItem.GetLower(), eSourceUnit, eDestUnit ) ) );
+            rItem.SetUpper( sal::static_int_cast< sal_uInt16 >( ::LogicToLogic( rItem.GetUpper(), eSourceUnit, eDestUnit ) ) );
+            rItem.SetLower( sal::static_int_cast< sal_uInt16 >( ::LogicToLogic( rItem.GetLower(), eSourceUnit, eDestUnit ) ) );
         }
         break;
         case EE_PARA_SBL:
@@ -653,7 +654,7 @@ void ConvertItem( std::unique_ptr<SfxPoolItem>& rPoolItem, MapUnit eSourceUnit, 
             SvxLineSpacingItem& rItem = rPoolItem->StaticWhichCast(EE_PARA_SBL);
             // SetLineHeight changes also eLineSpace!
             if ( rItem.GetLineSpaceRule() == SvxLineSpaceRule::Min )
-                rItem.SetLineHeight( sal::static_int_cast< sal_uInt16 >( OutputDevice::LogicToLogic( rItem.GetLineHeight(), eSourceUnit, eDestUnit ) ) );
+                rItem.SetLineHeight( sal::static_int_cast< sal_uInt16 >( ::LogicToLogic( rItem.GetLineHeight(), eSourceUnit, eDestUnit ) ) );
         }
         break;
         case EE_PARA_TABS:
@@ -665,13 +666,13 @@ void ConvertItem( std::unique_ptr<SfxPoolItem>& rPoolItem, MapUnit eSourceUnit, 
             if (sal_Int32 nDefTabDistance = rItem.GetDefaultDistance())
             {
                 pNewItem->SetDefaultDistance(
-                    OutputDevice::LogicToLogic(nDefTabDistance, eSourceUnit, eDestUnit));
+                    ::LogicToLogic(nDefTabDistance, eSourceUnit, eDestUnit));
             }
 
             for ( sal_uInt16 i = 0; i < rItem.Count(); i++ )
             {
                 const SvxTabStop& rTab = rItem[i];
-                SvxTabStop aNewStop( OutputDevice::LogicToLogic( rTab.GetTabPos(), eSourceUnit, eDestUnit ), rTab.GetAdjustment(), rTab.GetDecimal(), rTab.GetFill() );
+                SvxTabStop aNewStop( ::LogicToLogic( rTab.GetTabPos(), eSourceUnit, eDestUnit ), rTab.GetAdjustment(), rTab.GetDecimal(), rTab.GetFill() );
                 pNewItem->Insert( aNewStop );
             }
             rPoolItem.reset(pNewItem);
@@ -683,7 +684,7 @@ void ConvertItem( std::unique_ptr<SfxPoolItem>& rPoolItem, MapUnit eSourceUnit, 
         {
             assert(dynamic_cast<const SvxFontHeightItem *>(rPoolItem.get()) != nullptr);
             SvxFontHeightItem& rItem = static_cast<SvxFontHeightItem&>(*rPoolItem);
-            rItem.SetHeight( OutputDevice::LogicToLogic( rItem.GetHeight(), eSourceUnit, eDestUnit ) );
+            rItem.SetHeight( ::LogicToLogic( rItem.GetHeight(), eSourceUnit, eDestUnit ) );
         }
         break;
     }

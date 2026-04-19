@@ -42,6 +42,7 @@
 #include <com/sun/star/geometry/AffineMatrix2D.hpp>
 #include <com/sun/star/io/XStream.hpp>
 #include <unotools/streamwrap.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/graph.hxx>
@@ -915,7 +916,7 @@ void ExportDialog::updateControls()
     if ( !mbIsPixelFormat )
     {
         awt::Size aSize100thmm( maSize );
-        Size aSize( OutputDevice::LogicToLogic( Size(aSize100thmm.Width * 100, aSize100thmm.Height * 100),
+        Size aSize( ::LogicToLogic( Size(aSize100thmm.Width * 100, aSize100thmm.Height * 100),
             MapMode(MapUnit::Map100thMM),
             MapMode( GetMapUnit( mxLbSizeX->get_active() ) ) ) );
         mxMfSizeX->set_value( aSize.Width() );
@@ -1077,7 +1078,7 @@ IMPL_LINK_NOARG(ExportDialog, UpdateHdlMtfSizeX, weld::SpinButton&, void)
         sal_Int32 nHeight= static_cast< sal_Int32 >( nWidth * fRatio );
         const Size aSource( nWidth, nHeight );
         MapMode aSourceMapMode( GetMapUnit( mxLbSizeX->get_active() ),Point(), fFract, fFract );
-        Size aDest(OutputDevice::LogicToLogic(aSource, aSourceMapMode, MapMode(MapUnit::Map100thMM)));
+        Size aDest(::LogicToLogic(aSource, aSourceMapMode, MapMode(MapUnit::Map100thMM)));
 
         maSize.Width = aDest.Width();
         maSize.Height = aDest.Height();
@@ -1113,7 +1114,7 @@ IMPL_LINK_NOARG(ExportDialog, UpdateHdlMtfSizeY, weld::SpinButton&, void)
         sal_Int32 nWidth = static_cast< sal_Int32 >( nHeight * fRatio );
         const Size aSource( nWidth, nHeight );
         MapMode aSourceMapMode( GetMapUnit( mxLbSizeX->get_active() ),Point(), fFract, fFract );
-        Size aDest( OutputDevice::LogicToLogic(aSource, aSourceMapMode, MapMode(MapUnit::Map100thMM)) );
+        Size aDest( ::LogicToLogic(aSource, aSourceMapMode, MapMode(MapUnit::Map100thMM)) );
 
         maSize.Height = aDest.Height();
         maSize.Width = aDest.Width();

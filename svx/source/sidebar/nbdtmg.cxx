@@ -16,6 +16,8 @@
  *   except in compliance with the License. You may obtain a copy of
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
+
+#include <vcl/mapconvert.hxx>
 #include <svx/nbdtmg.hxx>
 #include <svx/svxids.hrc>
 #include <tools/stream.hxx>
@@ -870,7 +872,7 @@ void OutlineTypeMgr::ApplyNumRule(SvxNumRule& aNum, sal_uInt16 nIndex, sal_uInt1
                         aSize = aFmt.GetGraphicSize();
                     else if (aSize.IsEmpty() && pGrf)
                         aSize = SvxNumberFormat::GetGraphicSizeMM100( pGrf );
-                    aSize = OutputDevice::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(GetMapUnit()));
+                    aSize = ::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(GetMapUnit()));
                     aFmt.SetGraphicBrush( pLevelSettings->pBrushItem, &aSize, &eOrient );
             }
         } else
