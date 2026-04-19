@@ -909,13 +909,11 @@ CoordinateMapper::WindowToLogicUnits(const tools::PolyPolygon& rWindowPolyPoly) 
     if (!IsMapModeEnabled())
         return rWindowPolyPoly;
 
-    tools::PolyPolygon aPolyPoly;
+    tools::PolyPolygon aPolyPoly(rWindowPolyPoly);
 
-    // PolyPolygon is just a collection of Polygons,
-    // so we iterate and pass each one to our new Polygon overload.
-    for (sal_uInt16 i = 0; i < rWindowPolyPoly.Count(); ++i)
+    for (auto& rPoly : aPolyPoly)
     {
-        aPolyPoly.Insert(WindowToLogicUnits(rWindowPolyPoly[i]));
+        rPoly = WindowToLogicUnits(rPoly);
     }
 
     return aPolyPoly;
