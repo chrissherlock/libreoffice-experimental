@@ -306,7 +306,7 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
                 InitFillColor();
 
             tools::Rectangle aLogicPolyRect( rPolyPoly.GetBoundRect() );
-            tools::Rectangle aPixelRect(LogicToDevicePixel(aLogicPolyRect));
+            tools::Rectangle aPixelRect(mpMapper->LogicToDevicePixel(aLogicPolyRect));
 
             if( !mbOutputClipped )
             {

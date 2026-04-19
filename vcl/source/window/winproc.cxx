@@ -49,6 +49,7 @@
 #include <vcl/uitest/logger.hxx>
 #include <vcl/ptrstyle.hxx>
 
+#include <CoordinateMapper.hxx>
 #include <svdata.hxx>
 #include <salwtype.hxx>
 #include <salframe.hxx>
@@ -1492,13 +1493,13 @@ static void ImplHandleExtTextInputPos( vcl::Window* pWindow,
         ImplCallCommand( pChild, CommandEventId::CursorPos );
         const tools::Rectangle* pRect = pChild->GetCursorRect();
         if ( pRect )
-            rRect = pChildOutDev->LogicToDevicePixel(*pRect);
+            rRect = pChildOutDev->GetMapper().LogicToDevicePixel(*pRect);
         else
         {
             vcl::Cursor* pCursor = pChild->GetCursor();
             if ( pCursor )
             {
-                Point aPos = pChildOutDev->LogicToDevicePixel(pCursor->GetPos());
+                Point aPos = pChildOutDev->GetMapper().LogicToDevicePixel(pCursor->GetPos());
                 Size aSize = pChild->LogicToPixel( pCursor->GetSize() );
                 if ( !aSize.Width() )
                     aSize.setWidth( pChild->GetSettings().GetStyleSettings().GetCursorSize() );
@@ -2657,7 +2658,7 @@ static void ImplHandleSalQueryCharPosition( vcl::Window *pWindow,
 
     const OutputDevice *pChildOutDev = pChild->GetOutDev();
     const tools::Rectangle& aRect = pWinData->mpCompositionCharRects[ pEvt->mnCharPos ];
-    tools::Rectangle aDeviceRect = pChildOutDev->LogicToDevicePixel(aRect);
+    tools::Rectangle aDeviceRect = pChildOutDev->GetMapper().LogicToDevicePixel(aRect);
     AbsoluteScreenPixelPoint aAbsScreenPos = pChild->OutputToAbsoluteScreenPixel( pChild->ScreenToOutputPixel(aDeviceRect.TopLeft()) );
     pEvt->maCursorBound = AbsoluteScreenPixelRectangle(aAbsScreenPos, aDeviceRect.GetSize());
     pEvt->mbVertical = pWinData->mbVertical;
