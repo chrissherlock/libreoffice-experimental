@@ -272,16 +272,6 @@ basegfx::B2DPolyPolygon OutputDevice::LogicToPixel(const basegfx::B2DPolyPolygon
     return mpMapper->LogicToWindowUnits(rLogicPolyPoly);
 }
 
-Point OutputDevice::LogicToDevicePixel(const Point& rLogicPt) const
-{
-    return mpMapper->LogicToDevicePixel(rLogicPt);
-}
-
-tools::Rectangle OutputDevice::LogicToDevicePixel(const tools::Rectangle& rLogicRect) const
-{
-    return mpMapper->LogicToDevicePixel(rLogicRect);
-}
-
 vcl::Region OutputDevice::LogicToPixel(const vcl::Region& rLogicRegion) const
 {
     return mpMapper->LogicToWindowUnits(rLogicRegion);
@@ -818,19 +808,6 @@ double OutputDevice::LogicHeightToDeviceSubPixel(tools::Long nHeight) const
         return nHeight;
 
     return mpMapper->LogicToViewDistanceSubPixelY(nHeight);
-}
-
-basegfx::B2DPoint OutputDevice::LogicToDeviceSubPixel(const Point& rPoint) const
-{
-    if (!mpMapper->IsMapModeEnabled())
-        return basegfx::B2DPoint(rPoint.X() + GetDeviceOriginX(), rPoint.Y() + GetDeviceOriginY());
-
-    // Use the master wrapper that handles the full transformation chain:
-    // Logic -> Window -> Device (with all offsets applied)
-    return basegfx::B2DPoint(
-        mpMapper->LogicToDeviceSubPixelX(rPoint.X()),
-        mpMapper->LogicToDeviceSubPixelY(rPoint.Y())
-    );
 }
 
 basegfx::B2DHomMatrix OutputDevice::GetViewTransformation() const

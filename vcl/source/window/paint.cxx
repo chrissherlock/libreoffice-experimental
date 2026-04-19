@@ -1017,7 +1017,7 @@ void Window::Invalidate( const tools::Rectangle& rRect, InvalidateFlags nFlags )
         return;
 
     OutputDevice *pOutDev = GetOutDev();
-    tools::Rectangle aRect = pOutDev->LogicToDevicePixel(rRect);
+    tools::Rectangle aRect = pOutDev->GetMapper().LogicToDevicePixel(rRect);
     if ( !aRect.IsEmpty() )
     {
         vcl::Region aRegion( aRect );
@@ -1053,7 +1053,7 @@ void Window::LogicInvalidate(const tools::Rectangle* pRectangle)
 {
     if(pRectangle)
     {
-        tools::Rectangle aRect = GetOutDev()->LogicToDevicePixel(*pRectangle);
+        tools::Rectangle aRect = GetOutDev()->GetMapper().LogicToDevicePixel(*pRectangle);
         PixelInvalidate(&aRect);
     }
     else

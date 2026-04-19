@@ -56,7 +56,7 @@ void OutputDevice::DrawPixel( const Point& rPt )
     if ( !IsDeviceOutputNecessary() || !mbLineColor || ImplIsRecordLayout() )
         return;
 
-    Point aPt = LogicToDevicePixel(rPt);
+    Point aPt = mpMapper->LogicToDevicePixel(rPt);
 
     if ( !mpGraphics && !AcquireGraphics() )
         return;
@@ -86,7 +86,7 @@ void OutputDevice::DrawPixel( const Point& rPt, const Color& rColor )
     if ( !IsDeviceOutputNecessary() || ImplIsRecordLayout() )
         return;
 
-    Point aPt = LogicToDevicePixel(rPt);
+    Point aPt = mpMapper->LogicToDevicePixel(rPt);
 
     if ( !mpGraphics && !AcquireGraphics() )
         return;

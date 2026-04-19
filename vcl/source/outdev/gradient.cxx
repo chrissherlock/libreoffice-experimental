@@ -86,7 +86,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
     const tools::Rectangle aBoundRect( rPolyPoly.GetBoundRect() );
 
     // convert rectangle to pixels
-    tools::Rectangle aRect(LogicToDevicePixel(aBoundRect));
+    tools::Rectangle aRect(mpMapper->LogicToDevicePixel(aBoundRect));
     aRect.Normalize();
 
     // do nothing if the rectangle is empty

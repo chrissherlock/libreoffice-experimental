@@ -431,7 +431,7 @@ void OutputDevice::DrawHatchLine( const tools::Line& rLine, const tools::PolyPol
 
 void OutputDevice::DrawHatchLine_DrawLine(const Point& rStartPoint, const Point& rEndPoint)
 {
-    Point aPt1{LogicToDevicePixel(rStartPoint)}, aPt2{LogicToDevicePixel(rEndPoint)};
+    Point aPt1{mpMapper->LogicToDevicePixel(rStartPoint)}, aPt2{mpMapper->LogicToDevicePixel(rEndPoint)};
     mpGraphics->DrawLine(aPt1.X(), aPt1.Y(), aPt2.X(), aPt2.Y(), *this);
 }
 

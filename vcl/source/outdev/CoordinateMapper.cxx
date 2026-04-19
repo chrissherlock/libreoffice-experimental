@@ -1165,6 +1165,19 @@ double CoordinateMapper::LogicToDeviceSubPixelY(double fY) const
     return WindowToDeviceSubPixelY(fWindowY);
 }
 
+basegfx::B2DPoint CoordinateMapper::LogicToDeviceSubPixel(const Point& rPoint) const
+{
+    if (!IsMapModeEnabled())
+    {
+        // Using your explicit pipeline offsets instead of legacy VCL names
+        return basegfx::B2DPoint(rPoint.X() + GetDeviceToViewOffsetX(),
+                                 rPoint.Y() + GetDeviceToViewOffsetY());
+    }
+
+    return basegfx::B2DPoint(LogicToDeviceSubPixelX(rPoint.X()),
+                             LogicToDeviceSubPixelY(rPoint.Y()));
+}
+
 // Window -> Logic (Inverse Path)
 double CoordinateMapper::WindowToLogicSubPixelX(double fX) const
 {
