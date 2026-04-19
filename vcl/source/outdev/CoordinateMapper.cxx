@@ -1424,4 +1424,23 @@ Size CoordinateMapper::LogicToLogic(const Size& rSzSource, const MapMode* pMapMo
                 aMapResSource.ScaleDistanceY(rSzSource.Height(), aMapResDest));
 }
 
+tools::Rectangle CoordinateMapper::LogicToLogic(const tools::Rectangle& rRectSource,
+                                                const MapMode* pMapModeSource,
+                                                const MapMode* pMapModeDest) const
+{
+    const MapMode* pSrc = pMapModeSource ? pMapModeSource : &GetMapMode();
+    const MapMode* pDst = pMapModeDest ? pMapModeDest : &GetMapMode();
+
+    if (*pSrc == *pDst)
+        return rRectSource;
+
+    ImplMapRes aMapResSource = ResolveMapRes(pMapModeSource);
+    ImplMapRes aMapResDest = ResolveMapRes(pMapModeDest);
+
+    return tools::Rectangle(aMapResSource.TransformPointX(rRectSource.Left(), aMapResDest),
+                            aMapResSource.TransformPointY(rRectSource.Top(), aMapResDest),
+                            aMapResSource.TransformPointX(rRectSource.Right(), aMapResDest),
+                            aMapResSource.TransformPointY(rRectSource.Bottom(), aMapResDest));
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

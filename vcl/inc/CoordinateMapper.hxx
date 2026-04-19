@@ -357,6 +357,9 @@ public:
                                       const MapMode* pMapModeDest) const;
     SAL_DLLPRIVATE Size LogicToLogic(const Size& rSzSource, const MapMode* pMapModeSource,
                                      const MapMode* pMapModeDest) const;
+    SAL_DLLPRIVATE tools::Rectangle LogicToLogic(const tools::Rectangle& rRectSource,
+                                                 const MapMode* pMapModeSource,
+                                                 const MapMode* pMapModeDest) const;
 
     // ========================================================================
     // DISTANCE SCALING (Raw Scalar Conversion, NO offsets applied)
