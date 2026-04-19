@@ -301,6 +301,7 @@ public:
                        const MapMode& rMapMode) const;
 
     SAL_DLLPRIVATE vcl::Region WindowToLogicUnits(const vcl::Region& rWindowRegion) const;
+    SAL_DLLPRIVATE Point WindowToLogicUnits(const Point& rWindowPt) const;
     SAL_DLLPRIVATE tools::Polygon WindowToLogicUnits(const tools::Polygon& rWindowPoly) const;
     SAL_DLLPRIVATE tools::Rectangle WindowToLogicUnits(const tools::Rectangle& rRect) const;
     SAL_DLLPRIVATE tools::PolyPolygon WindowToLogicUnits(const tools::PolyPolygon& rPolyPoly) const;

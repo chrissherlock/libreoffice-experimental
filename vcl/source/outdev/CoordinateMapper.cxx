@@ -841,6 +841,14 @@ vcl::Region CoordinateMapper::WindowToLogicUnits(const vcl::Region& rWindowRegio
                                [this](const auto& obj) { return WindowToLogicUnits(obj); });
 }
 
+Point CoordinateMapper::WindowToLogicUnits(const Point& rWindowPt) const
+{
+    if (!IsMapModeEnabled())
+        return rWindowPt;
+
+    return Point(WindowToLogicX(rWindowPt.X()), WindowToLogicY(rWindowPt.Y()));
+}
+
 tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rWindowRect) const
 {
     if (!IsMapModeEnabled())
