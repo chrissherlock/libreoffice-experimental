@@ -51,10 +51,15 @@ void CoordinateMapper::SetPixelOffset(const Size& rSize)
     mnLogicToAbsoluteOffsetY = rSize.getHeight();
 }
 
-void CoordinateMapper::SetWindowToViewOffset(const Size& rSize)
+void CoordinateMapper::SetWindowToViewOffset(const Size& rWindowPixelOffset)
 {
-    mnWindowToViewOffsetX = rSize.getWidth();
-    mnWindowToViewOffsetY = rSize.getHeight();
+    // Store the physical scroll offset
+    mnWindowToViewOffsetX = rWindowPixelOffset.Width();
+    mnWindowToViewOffsetY = rWindowPixelOffset.Height();
+
+    // Safely auto-sync the logical document origin
+    SetLogicToAbsoluteOffset(Size(ViewToLogicDistanceX(mnWindowToViewOffsetX),
+                                  ViewToLogicDistanceY(mnWindowToViewOffsetY)));
 }
 
 tools::Long CoordinateMapper::GetDeviceToWindowOffsetX() const { return mnDeviceToWindowOffsetX; }
