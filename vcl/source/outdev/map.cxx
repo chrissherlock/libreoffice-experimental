@@ -652,12 +652,12 @@ tools::Rectangle OutputDevice::LogicToLogic( const tools::Rectangle& rRectSource
     {
         const auto [eFrom, eTo] = lcl_getCorrectedUnit(eUnitSource, eUnitDest);
 
-        auto left = lcl_convertLogicValue(rRectSource.Left(), eFrom, eTo);
-        auto top = lcl_convertLogicValue(rRectSource.Top(), eFrom, eTo);
+        const auto left = lcl_convertLogicValue(rRectSource.Left(), eFrom, eTo);
+        const auto top = lcl_convertLogicValue(rRectSource.Top(), eFrom, eTo);
 
         // tdf#141761 see comments above, IsEmpty() removed
-        auto right = rRectSource.IsWidthEmpty() ? 0 : lcl_convertLogicValue(rRectSource.Right(), eFrom, eTo);
-        auto bottom = rRectSource.IsHeightEmpty() ? 0 : lcl_convertLogicValue(rRectSource.Bottom(), eFrom, eTo);
+        const auto right = rRectSource.IsWidthEmpty() ? 0 : lcl_convertLogicValue(rRectSource.Right(), eFrom, eTo);
+        const auto bottom = rRectSource.IsHeightEmpty() ? 0 : lcl_convertLogicValue(rRectSource.Bottom(), eFrom, eTo);
 
         aRetval = tools::Rectangle(left, top, right, bottom);
     }
@@ -665,12 +665,12 @@ tools::Rectangle OutputDevice::LogicToLogic( const tools::Rectangle& rRectSource
     {
         const auto [aMapResSource, aMapResDest] = lcl_calcConversionMapRes( rMapModeSource, rMapModeDest );
 
-        auto left = aMapResSource.TransformPointX(rRectSource.Left(), aMapResDest);
-        auto top = aMapResSource.TransformPointY(rRectSource.Top(), aMapResDest);
+        const auto left = aMapResSource.TransformPointX(rRectSource.Left(), aMapResDest);
+        const auto top = aMapResSource.TransformPointY(rRectSource.Top(), aMapResDest);
 
         // tdf#141761 see comments above, IsEmpty() removed
-        auto right = rRectSource.IsWidthEmpty() ? 0 : aMapResSource.TransformPointX(rRectSource.Right(), aMapResDest);
-        auto bottom = rRectSource.IsHeightEmpty() ? 0 : aMapResSource.TransformPointY(rRectSource.Bottom(), aMapResDest);
+        const auto right = rRectSource.IsWidthEmpty() ? 0 : aMapResSource.TransformPointX(rRectSource.Right(), aMapResDest);
+        const auto bottom = rRectSource.IsHeightEmpty() ? 0 : aMapResSource.TransformPointY(rRectSource.Bottom(), aMapResDest);
 
         aRetval = tools::Rectangle(left, top, right, bottom);
     }
