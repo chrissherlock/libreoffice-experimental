@@ -32,7 +32,7 @@ struct ImplMapRes
     void SetMapRes(const o3tl::Length eUnit);
     void CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX, tools::Long nDPIY);
     ImplMapRes ResolveMapRes(const MapMode* pMode, const MapMode& rDefaultMapMode, bool bMap,
-                             tools::Long nDPIX, tools::Long nDPIY);
+                             tools::Long nDPIX, tools::Long nDPIY) const;
 
     tools::Long ScaleDistanceX(const tools::Long nDistance, const ImplMapRes& rDestRes) const;
     tools::Long ScaleDistanceY(const tools::Long nDistance, const ImplMapRes& rDestRes) const;

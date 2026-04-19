@@ -459,21 +459,11 @@ static tools::Long lcl_convertLogicValue(const tools::Long nSourceValue, const o
     return static_cast<tools::Long>(aBigValue);
 }
 
-Point OutputDevice::LogicToLogic( const Point& rPtSource,
-                                  const MapMode* pMapModeSource,
-                                  const MapMode* pMapModeDest ) const
+Point OutputDevice::LogicToLogic(const Point& rPtSource,
+                                 const MapMode* pMapModeSource,
+                                 const MapMode* pMapModeDest) const
 {
-    const MapMode* pSrc = pMapModeSource ? pMapModeSource : &mpMapper->GetMapMode();
-    const MapMode* pDst = pMapModeDest ? pMapModeDest : &mpMapper->GetMapMode();
-
-    if (*pSrc == *pDst)
-        return rPtSource;
-
-    ImplMapRes aMapResSource = mpMapper->ResolveMapRes(pMapModeSource);
-    ImplMapRes aMapResDest   = mpMapper->ResolveMapRes(pMapModeDest);
-
-    return Point(aMapResSource.TransformPointX(rPtSource.X(), aMapResDest),
-                 aMapResSource.TransformPointY(rPtSource.Y(), aMapResDest));
+    return mpMapper->LogicToLogic(rPtSource, pMapModeSource, pMapModeDest);
 }
 
 Size OutputDevice::LogicToLogic( const Size& rSzSource,
