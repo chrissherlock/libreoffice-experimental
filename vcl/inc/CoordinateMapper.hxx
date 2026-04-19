@@ -307,6 +307,8 @@ public:
     SAL_DLLPRIVATE tools::PolyPolygon WindowToLogicUnits(const tools::PolyPolygon& rPolyPoly) const;
     SAL_DLLPRIVATE basegfx::B2DPolyPolygon
     WindowToLogicUnits(const basegfx::B2DPolyPolygon& rPolyPoly) const;
+    SAL_DLLPRIVATE Point WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWindowPt) const;
+    SAL_DLLPRIVATE Size WindowToLogicUnits(const Size& rWindowSize) const;
 
     // ========================================================================
     // DISTANCE SCALING (Raw Scalar Conversion, NO offsets applied)

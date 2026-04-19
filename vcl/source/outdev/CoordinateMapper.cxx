@@ -911,6 +911,15 @@ CoordinateMapper::WindowToLogicUnits(const basegfx::B2DPolyPolygon& rWindowPolyP
     return aTransformedPoly;
 }
 
+Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize) const
+{
+    if (!IsMapModeEnabled())
+        return rWindowSize;
+
+    return Size(ViewToLogicDistanceX(rWindowSize.Width()),
+                ViewToLogicDistanceY(rWindowSize.Height()));
+}
+
 // ========================================================================
 // DISTANCE SCALING (Raw Scalar Conversion)
 // ========================================================================
